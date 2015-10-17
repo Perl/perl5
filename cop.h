@@ -572,7 +572,7 @@ struct block_format {
 
 /* free all savestack items back to the watermark of the specified context */
 
-#define CX_LEAVE_SCOPE(cx) LEAVE_SCOPE(cx->cx_old_savestack_ix)
+#define CX_LEAVE_SCOPE(cx) LEAVE_SCOPE(cx->blk_oldsaveix)
 
 #ifdef DEBUGGING
 /* on debugging builds, poison cx afterwards so we know no code
@@ -637,7 +637,7 @@ struct block_format {
 	cx->blk_format.dfoutgv = PL_defoutgv;				\
 	cx->blk_format.prevcomppad = PL_comppad;			\
 	cx->blk_u16 = 0;                                                \
-        cx->cx_old_savestack_ix = PL_savestack_ix;                      \
+        cx->blk_oldsaveix = PL_savestack_ix;                            \
 	SvREFCNT_inc_simple_void_NN(cv);		                \
 	CvDEPTH(cv)++;							\
 	SvREFCNT_inc_void(cx->blk_format.dfoutgv)
@@ -809,7 +809,7 @@ struct block_loop {
 
 #define PUSHLOOP_PLAIN(cx)						\
 	cx->blk_loop.my_op = cLOOP;					\
-        cx->cx_old_savestack_ix = PL_savestack_ix;
+        cx->blk_oldsaveix = PL_savestack_ix;
 
 #ifdef USE_ITHREADS
 #  define PUSHLOOP_FOR_setpad(c) (c)->blk_loop.oldcomppad = PL_comppad
@@ -820,7 +820,7 @@ struct block_loop {
 #define PUSHLOOP_FOR(cx, ivar, isave)   				\
 	cx->blk_loop.my_op = cLOOP;					\
 	cx->blk_loop.itervar_u.svp = (SV**)(ivar);                      \
-        cx->cx_old_savestack_ix = PL_savestack_ix;                      \
+        cx->blk_oldsaveix = PL_savestack_ix;                                \
         cx->blk_loop.itersave = isave;                                  \
         PUSHLOOP_FOR_setpad(cx);
 
@@ -848,7 +848,7 @@ struct block_givwhen {
 };
 
 #define PUSHWHEN(cx)    						\
-        cx->cx_old_savestack_ix = PL_savestack_ix;                      \
+        cx->blk_oldsaveix = PL_savestack_ix;                            \
 	cx->blk_givwhen.leave_op = cLOGOP->op_other;
 
 #define PUSHGIVEN(cx, orig_var)                                         \
@@ -866,7 +866,7 @@ struct block_givwhen {
 /* basic block, i.e. pp_enter/leave */
 
 #define PUSHBASICBLK(cx)                                                \
-        cx->cx_old_savestack_ix = PL_savestack_ix;
+        cx->blk_oldsaveix = PL_savestack_ix;
 
 #define POPBASICBLK(cx)                                                 \
 	NOOP;
@@ -877,6 +877,8 @@ struct block {
     U8		blku_type;	/* what kind of context this is */
     U8		blku_gimme;	/* is this block running in list context? */
     U16		blku_u16;	/* used by block_sub and block_eval (so far) */
+    I32		blku_oldsaveix; /* saved PL_savestack_ix */
+    /* all the fields above must be aligned with same-sized fields as sbu */
     I32		blku_oldsp;	/* current sp floor: where nextstate pops to */
     COP *	blku_oldcop;	/* old curcop pointer */
     I32		blku_oldmarksp;	/* mark stack index */
@@ -899,6 +901,7 @@ struct block {
 #define blk_oldpm	cx_u.cx_blk.blku_oldpm
 #define blk_gimme	cx_u.cx_blk.blku_gimme
 #define blk_u16		cx_u.cx_blk.blku_u16
+#define blk_oldsaveix   cx_u.cx_blk.blku_oldsaveix
 #define blk_sub		cx_u.cx_blk.blk_u.blku_sub
 #define blk_format	cx_u.cx_blk.blk_u.blku_format
 #define blk_eval	cx_u.cx_blk.blk_u.blku_eval
@@ -914,7 +917,7 @@ struct block {
 		    (long)PL_scopestack_ix,				\
 		    (long)(cxstack[cxstack_ix].blk_oldscopesp),		\
 		    (long)PL_savestack_ix,				\
-		    (long)(cxstack[cxstack_ix].cx_old_savestack_ix),    \
+		    (long)(cxstack[cxstack_ix].blk_oldsaveix),          \
 		    __FILE__, __LINE__));
 
 /* Enter a block. */
@@ -940,7 +943,7 @@ struct block {
          * and leaves a CX entry lying around for repeated use, so
          * skip for multicall */                  \
         assert(   (CxTYPE(cx) == CXt_SUB && CxMULTICALL(cx))            \
-                || PL_savestack_ix == cx->cx_old_savestack_ix);         \
+                || PL_savestack_ix == cx->blk_oldsaveix);               \
         PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;             \
 	PL_curpm	 = cx->blk_oldpm;
 
@@ -955,9 +958,11 @@ struct block {
 
 /* substitution context */
 struct subst {
-    U8		sbu_type;	/* what kind of context this is */
+    U8		sbu_type;	/* same as blku_type */
     U8		sbu_rflags;
-    U16		sbu_rxtainted;	/* matches struct block */
+    U16		sbu_rxtainted;
+    I32		sbu_oldsaveix; /* same as blku_oldsaveix */
+    /* all the fields above must be aligned with same-sized fields as blku * */
     SSize_t	sbu_iters;
     SSize_t	sbu_maxiters;
     char *	sbu_orig;
@@ -984,7 +989,7 @@ struct subst {
 
 #ifdef PERL_CORE
 #  define PUSHSUBST(cx) CXINC, cx = &cxstack[cxstack_ix],		\
-	cx->cx_old_savestack_ix = oldsave,				\
+	cx->blk_oldsaveix = oldsave,				        \
 	cx->sb_iters		= iters,				\
 	cx->sb_maxiters		= maxiters,				\
 	cx->sb_rflags		= r_flags,				\
@@ -1011,7 +1016,6 @@ struct subst {
 #define CxONCE(cx)		((cx)->cx_type & CXp_ONCE)
 
 struct context {
-    I32		        cx_old_savestack_ix;   /* saved PL_savestack_ix */
     union {
 	struct block	cx_blk;
 	struct subst	cx_subst;
@@ -1284,7 +1288,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	PUSHSTACKi(PERLSI_MULTICALL);					\
 	PUSHBLOCK(cx, (CXt_SUB|CXp_MULTICALL|flags), PL_stack_sp);	\
 	PUSHSUB(cx);							\
-        cx->cx_old_savestack_ix = PL_savestack_ix;                      \
+        cx->blk_oldsaveix = PL_savestack_ix;                            \
 	SAVEVPTR(PL_op);					        \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\

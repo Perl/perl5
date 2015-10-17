@@ -3569,7 +3569,7 @@ PP(pp_entersub)
         hasargs = cBOOL(PL_op->op_flags & OPf_STACKED);
 	PUSHSUB(cx);
 	cx->blk_sub.retop = PL_op->op_next;
-        cx->cx_old_savestack_ix = old_savestack_ix;
+        cx->blk_oldsaveix = old_savestack_ix;
 
 	padlist = CvPADLIST(cv);
 	if (UNLIKELY((depth = ++CvDEPTH(cv)) >= 2)) {

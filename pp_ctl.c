@@ -2005,7 +2005,7 @@ PP(pp_dbstate)
 	    PUSHBLOCK(cx, CXt_SUB, SP);
 	    PUSHSUB_DB(cx);
 	    cx->blk_sub.retop = PL_op->op_next;
-            cx->cx_old_savestack_ix = PL_savestack_ix;
+            cx->blk_oldsaveix = PL_savestack_ix;
 
             SAVEI32(PL_debug);
             PL_debug = 0;
@@ -4097,7 +4097,7 @@ PP(pp_require)
     /* switch to eval mode */
     PUSHBLOCK(cx, CXt_EVAL, SP);
     PUSHEVAL(cx, name);
-    cx->cx_old_savestack_ix = old_savestack_ix;
+    cx->blk_oldsaveix = old_savestack_ix;
     cx->blk_eval.retop = PL_op->op_next;
 
     SAVECOPLINE(&PL_compiling);
@@ -4213,7 +4213,7 @@ PP(pp_entereval)
 
     PUSHBLOCK(cx, (CXt_EVAL|CXp_REAL), SP);
     PUSHEVAL(cx, 0);
-    cx->cx_old_savestack_ix = old_savestack_ix;
+    cx->blk_oldsaveix = old_savestack_ix;
     cx->blk_eval.retop = PL_op->op_next;
 
     /* prepare to compile string */
@@ -4345,7 +4345,7 @@ Perl_create_eval_scope(pTHX_ U32 flags)
 	
     PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), PL_stack_sp);
     PUSHEVAL(cx, 0);
-    cx->cx_old_savestack_ix = PL_savestack_ix;
+    cx->blk_oldsaveix = PL_savestack_ix;
 
     PL_in_eval = EVAL_INEVAL;
     if (flags & G_KEEPERR)
