@@ -319,7 +319,7 @@ pod/perltru64.pod	Verbatim line length including indents exceeds 79 by	5
 pod/perlwin32.pod	Verbatim line length including indents exceeds 79 by	12
 porting/epigraphs.pod	Verbatim line length including indents exceeds 79 by	16
 porting/expand-macro.pl	Verbatim line length including indents exceeds 79 by	2
-porting/release_managers_guide.pod	Verbatim line length including indents exceeds 79 by	7
+porting/release_managers_guide.pod	Verbatim line length including indents exceeds 79 by	1
 porting/todo.pod	Verbatim line length including indents exceeds 79 by	7
 utils/c2ph	Verbatim line length including indents exceeds 79 by	44
 utils/encguess	Apparent broken link	1
