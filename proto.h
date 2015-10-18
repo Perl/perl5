@@ -5047,7 +5047,7 @@ STATIC I32	S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p, r
 #define PERL_ARGS_ASSERT_REGREPEAT	\
 	assert(prog); assert(startposp); assert(p); assert(reginfo)
 
-STATIC I32	S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
+STATIC bool	S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_REGTRY	\
 	assert(reginfo); assert(startposp)

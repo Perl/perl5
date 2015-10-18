@@ -3478,7 +3478,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 /*
  - regtry - try match at specific point
  */
-STATIC I32			/* 0 failure, 1 success */
+STATIC bool			/* 0 failure, 1 success */
 S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
 {
     CHECKPOINT lastcp;

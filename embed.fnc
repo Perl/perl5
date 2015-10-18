@@ -2260,7 +2260,7 @@ ERs	|I32	|regrepeat	|NN regexp *prog|NN char **startposp \
 				|NN regmatch_info *const reginfo \
 				|I32 max \
 				|int depth
-ERs	|I32	|regtry		|NN regmatch_info *reginfo|NN char **startposp
+ERs	|bool	|regtry		|NN regmatch_info *reginfo|NN char **startposp
 ERs	|bool	|reginclass	|NULLOK regexp * const prog  \
 				|NN const regnode * const n  \
 				|NN const U8 * const p       \
