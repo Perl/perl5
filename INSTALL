@@ -89,8 +89,9 @@ potential incompatibilities introduced with this release.  A few of
 the most important issues are listed below, but you should refer
 to pod/perldelta.pod for more detailed information.
 
-B<WARNING:> This version is not binary compatible with earlier versions
-of Perl.  If you have built extensions (i.e. modules that include C code)
+B<WARNING:> This version is not binary compatible with versions of Perl
+earlier than 5.22.0.
+If you have built extensions (i.e. modules that include C code)
 using an earlier version of Perl, you will need to rebuild and reinstall
 those extensions.
 
@@ -2440,7 +2441,8 @@ http://www.chiark.greenend.org.uk/~sgtatham/bugs.html
 
 =head1 Coexistence with earlier versions of perl 5
 
-Perl 5.22.1 is not binary compatible with earlier versions of Perl.
+Perl 5.22.1 is not binary compatible with versions of Perl earlier than
+5.22.0.
 In other words, you will have to recompile your XS modules.
 
 In general, you can usually safely upgrade from one version of Perl
