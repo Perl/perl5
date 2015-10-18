@@ -53,8 +53,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Build and Installation Fixes</h3>
 
-(steveh: Does this need the update to Win32-0.52 (083231ea891c049b70ef28512bfc9e68c3e5d595) too?:)
-<commit votes="steveh, khw" id="9964c51f9e78a456ae7b7b5d79c43bd63a114f99" ticket="" desc="Declare compatibility with newer released versions of Windows"/>
+<commit votes="steveh, khw, jdb" id="9964c51f9e78a456ae7b7b5d79c43bd63a114f99" ticket="" desc="Declare compatibility with newer released versions of Windows"/>
+<commit votes="steveh, jdb" id="083231ea891c049b70ef28512bfc9e68c3e5d595" ticket="" desc="Update Win32 to CPAN version 0.52"/>
 
 </div>
 
