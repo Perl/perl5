@@ -379,6 +379,29 @@ C<sv_setsv(sv, &PL_sv_undef)>, or quasi-public C<SvOOK_off>, or non-public
 C<SvOK_off> calls, and the return value of C<sv_backoff> was previously a
 meaningless constant that can be rewritten as C<(sv_backoff(sv),0)>.
 
+=item *
+
+The C<EXTEND> and C<MEXTEND> macros have been improved to avoid various
+issues with integer truncation and wrapping. In particular, some casts
+formerly used within the macros have been removed. This means for example
+that passing an unsigned nitems arg is likely to raise a compiler warning
+now (it's always been documented to require a signed value; formerly int,
+lately SSize_t).
+
+=item *
+
+(This was actually done in v5.23.2, but the perldelta entry got missed.)
+The way that C<OP_AASSIGN> handles assignment with potentially common
+values (e.g. C<($a,$b) = ($b, $a)> has changed. In particular the
+C<OPpASSIGN_COMMON> flag has been replaced with three more specific flags:
+
+    OPpASSIGN_COMMON_AGG
+    OPpASSIGN_COMMON_RC1
+    OPpASSIGN_COMMON_SCALAR
+
+and the runtime now sometimes does a mark and sweep using the C<SVf_BREAK>
+to detect common elements.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -402,6 +425,19 @@ A regression from perl v5.20 has been fixed, in which some syntax errors
 in L<C<(?[...])>|perlrecharclass/Extended Bracketed Character Classes>
 constructs within regular expression patterns could cause a segfault
 instead of a proper error message.  [perl #126180]
+
+=item *
+
+Some problems with attempting to extend the perl stack to around 2G or 4G
+entries have been fixed. This was particularly an issue on 32-bit perls
+built to use 64-bit integers, and was easily noticeable with the list
+repetition operator, e.g.
+
+    @a = (1) x $big_number
+
+Formerly perl may have crashed, depending on the exact value of
+$big_number; now it will typically raise an exception.
+[perl #125937]
 
 =back
 
