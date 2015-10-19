@@ -577,6 +577,7 @@ is $o::count,    0, 'sprintf %d string overload count is 0';
 is $o::numcount, 1, 'sprintf %d number overload count is 1';
 
 my $ppc64_linux = $Config{archname} =~ /^ppc64-linux/;
+my $irix_ld     = $Config{archname} =~ /^IP\d+-irix-ld$/;
 
 for my $t (@hexfloat) {
     my ($format, $arg, $expected) = @$t;
@@ -586,6 +587,15 @@ for my $t (@hexfloat) {
     if ($doubledouble && $ppc64_linux && $arg =~ /^2.71828/) {
         # ppc64-linux has buggy exp(1).
         local $::TODO = "$Config{archname} exp(1)";
+        ok($ok, "'$format' '$arg' -> '$result' cf '$expected'");
+        next;
+    }
+    if ($doubledouble && $irix_ld && $arg =~ /^1.41421/) {
+        # irix has buggy sqrt(2),
+        # last hexdigit one bit error:
+        # gets  '0x1.6a09e667f3bcc908b2fb1366eacp+0'
+        # wants '0x1.6a09e667f3bcc908b2fb1366ea8p+0'
+        local $::TODO = "$Config{archname} sqrt(2)";
         ok($ok, "'$format' '$arg' -> '$result' cf '$expected'");
         next;
     }
