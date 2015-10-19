@@ -755,12 +755,17 @@ struct block_eval {
 
 #define POPEVAL(cx)							\
     STMT_START {							\
+        SV *sv;                                                         \
 	PL_in_eval = CxOLD_IN_EVAL(cx);					\
 	PL_eval_root = cx->blk_eval.old_eval_root;			\
-	if (cx->blk_eval.cur_text && SvSCREAM(cx->blk_eval.cur_text))	\
-	    SvREFCNT_dec_NN(cx->blk_eval.cur_text);			\
-	if (cx->blk_eval.old_namesv)					\
-	    sv_2mortal(cx->blk_eval.old_namesv);			\
+	sv = cx->blk_eval.cur_text;                                     \
+	if (sv && SvSCREAM(sv)) {                                       \
+	    cx->blk_eval.cur_text = NULL;			        \
+	    SvREFCNT_dec_NN(sv);			                \
+        }                                                               \
+	sv = cx->blk_eval.old_namesv;					\
+	if (sv && !SvTEMP(sv))/* TEMP => POPEVAL re-entrantly called */	\
+	    sv_2mortal(sv);			                        \
     } STMT_END
 
 /* loop context */
