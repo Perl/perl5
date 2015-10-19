@@ -2106,6 +2106,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     }
                 }
 
+                /* And, since this is a bound, it can match after the final
+                 * character in the string */
                 if (to_complement ^ cBOOL(reginfo->intuit || regtry(reginfo, &s))) {
                     goto got_it;
                 }
