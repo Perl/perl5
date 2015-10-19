@@ -4743,10 +4743,24 @@ S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos,
         * to look it up */
     if (*previous != WB_UNKNOWN) {
         wb = *previous;
-        *previous = WB_UNKNOWN;
-        /* XXX Note that doesn't change curpos, and maybe should */
 
-        /* But we always back up over these two types */
+        /* But we need to move backwards by one */
+        if (utf8_target) {
+            *curpos = reghopmaybe3(*curpos, -1, strbeg);
+            if (! *curpos) {
+                *previous = WB_EDGE;
+                *curpos = (U8 *) strbeg;
+            }
+            else {
+                *previous = WB_UNKNOWN;
+            }
+        }
+        else {
+            (*curpos)--;
+            *previous = (*curpos <= strbeg) ? WB_EDGE : WB_UNKNOWN;
+        }
+
+        /* And we always back up over these two types */
         if (wb != WB_Extend && wb != WB_Format) {
             return wb;
         }
