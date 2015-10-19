@@ -19662,6 +19662,7 @@ sub _test_break($$) {
                 my $B_pattern = "$1$2";
                 $matched = $string =~ qr/$B_pattern/;
                 print "not " unless $matched;
+                $matched = ($matched) ? "matched" : "failed to match";
                 print "ok ", ++$Tests, " - \"$display_string\" $matched /$B_pattern/$display_upgrade; line $line $display_locale\n";
             }
         }
