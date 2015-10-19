@@ -2249,8 +2249,6 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 {
                     goto got_it;
                 }
-
-                break;
         }
         break;
 
