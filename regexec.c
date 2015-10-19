@@ -2087,8 +2087,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                             if (reginfo->intuit || regtry(reginfo, &s)) {
                                 goto got_it;
                             }
-                            before = after;
                         }
+                        before = after;
                         s += UTF8SKIP(s);
                     }
                 }
@@ -2101,8 +2101,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                             if (reginfo->intuit || regtry(reginfo, &s)) {
                                 goto got_it;
                             }
-                            s++;
                         }
+                        s++;
                     }
                 }
 
@@ -2143,8 +2143,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                             if (reginfo->intuit || regtry(reginfo, &s)) {
                                 goto got_it;
                             }
-                            before = after;
                         }
+                        before = after;
                         s += UTF8SKIP(s);
                     }
                 }
@@ -2162,8 +2162,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                             if (reginfo->intuit || regtry(reginfo, &s)) {
                                 goto got_it;
                             }
-                            before = after;
                         }
+                        before = after;
                         s++;
                     }
                 }
@@ -2215,9 +2215,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                             if (reginfo->intuit || regtry(reginfo, &s)) {
                                 goto got_it;
                             }
-                            previous = before;
-                            before = after;
                         }
+                        previous = before;
+                        before = after;
                         s += UTF8SKIP(s);
                     }
                 }
@@ -2237,9 +2237,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                             if (reginfo->intuit || regtry(reginfo, &s)) {
                                 goto got_it;
                             }
-                            previous = before;
-                            before = after;
                         }
+                        previous = before;
+                        before = after;
                         s++;
                     }
                 }
