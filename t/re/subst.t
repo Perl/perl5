@@ -6,6 +6,7 @@ BEGIN {
     set_up_inc('../lib');
     require Config; import Config;
     require './charset_tools.pl';
+    require './loc_tools.pl';
 }
 
 plan( tests => 261 );
@@ -1035,8 +1036,7 @@ SKIP: {
     is("\x{2028}\x{2028}\x{2028}" =~ s/\B/!/ugr, "!\x{2028}!\x{2028}!\x{2028}!", '\\B matches above-Latin1 before string, mid, and end, /u');
 
 SKIP: {
-    eval { require POSIX; POSIX->import("locale_h"); };
-    if ($@ || !eval { &POSIX::LC_ALL; 1 }) {
+    if (! locales_enabled('LC_ALL')) {
         skip "Can't test locale (maybe you are missing POSIX)", 6;
     }
 
