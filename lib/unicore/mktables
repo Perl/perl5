@@ -19546,16 +19546,19 @@ eval { require "./loc_tools.pl" };
 $utf8_locale = &find_utf8_ctype_locale if defined &find_utf8_ctype_locale;
 
 sub _test_break($$) {
-    # Test qr/\X/ matches.  The input is a line from auxiliary/GCBTest.txt
-    # Each such line is a sequence of code points given by their hex numbers,
-    # separated by the two characters defined just before this subroutine that
-    # indicate that either there can or cannot be a break between the adjacent
-    # code points.  If there isn't a break, that means the sequence forms an
-    # extended grapheme cluster, which means that \X should match the whole
-    # thing.  If there is a break, \X should stop there.  This is all
-    # converted by this routine into a match:
-    #   $string =~ /(\X)/,
-    # Each \X should match the next cluster; and that is what is checked.
+    # Test various break property matches.  The 2nd parameter gives the
+    # property name.  The input is a line from auxiliary/*Test.txt for the
+    # given property.  Each such line is a sequence of code points given by
+    # their hex numbers, separated by the two characters defined just before
+    # this subroutine that indicate that either there can or cannot be a break
+    # between the adjacent code points.  All these are tested.
+    #
+    # For the gcb property extra tests are made.  if there isn't a break, that
+    # means the sequence forms an extended grapheme cluster, which means that
+    # \X should match the whole thing.  If there is a break, \X should stop
+    # there.  This is all converted by this routine into a match: $string =~
+    # /(\X)/, Each \X should match the next cluster; and that is what is
+    # checked.
 
     my $template = shift;
     my $break_type = shift;
