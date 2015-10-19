@@ -825,6 +825,9 @@ use File::Glob qw(:case);
             qr{weaver.ini},
             qr{^xt},
         ],
+        # Already merged upstream:
+        # https://github.com/Perl-Toolchain-Gang/Module-Metadata/commit/9658697
+        'CUSTOMIZED'   => [ qw[ t/lib/GeneratePackage.pm ] ],
     },
 
     'Net::Ping' => {

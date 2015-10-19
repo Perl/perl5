@@ -15,7 +15,7 @@ use IO::File;
 sub tmpdir {
   File::Temp::tempdir(
     'MMD-XXXXXXXX',
-    CLEANUP => 0,
+    CLEANUP => 1,
     DIR => ($ENV{PERL_CORE} ? File::Spec->rel2abs(Cwd::cwd) : File::Spec->tmpdir),
   );
 }
