@@ -329,7 +329,7 @@ PerlMemIsLocked(struct IPerlMem* piPerl)
     return IPERL2HOST(piPerl)->IsLocked();
 }
 
-struct IPerlMem perlMem =
+const struct IPerlMem perlMem =
 {
     PerlMemMalloc,
     PerlMemRealloc,
@@ -383,7 +383,7 @@ PerlMemSharedIsLocked(struct IPerlMem* piPerl)
     return IPERL2HOST(piPerl)->IsLockedShared();
 }
 
-struct IPerlMem perlMemShared =
+const struct IPerlMem perlMemShared =
 {
     PerlMemSharedMalloc,
     PerlMemSharedRealloc,
@@ -437,7 +437,7 @@ PerlMemParseIsLocked(struct IPerlMem* piPerl)
     return IPERL2HOST(piPerl)->IsLockedParse();
 }
 
-struct IPerlMem perlMemParse =
+const struct IPerlMem perlMemParse =
 {
     PerlMemParseMalloc,
     PerlMemParseRealloc,
@@ -538,7 +538,7 @@ PerlEnvGetChildIO(struct IPerlEnv* piPerl, child_IO_table* ptr)
     win32_get_child_IO(ptr);
 }
 
-struct IPerlEnv perlEnv =
+const struct IPerlEnv perlEnv =
 {
     PerlEnvGetenv,
     PerlEnvPutenv,
@@ -866,7 +866,7 @@ PerlStdIOFdupopen(struct IPerlStdIO* piPerl, FILE* pf)
 #endif
 }
 
-struct IPerlStdIO perlStdIO =
+const struct IPerlStdIO perlStdIO =
 {
     PerlStdIOStdin,
     PerlStdIOStdout,
@@ -1077,7 +1077,7 @@ PerlLIOWrite(struct IPerlLIO* piPerl, int handle, const void *buffer, unsigned i
     return win32_write(handle, buffer, count);
 }
 
-struct IPerlLIO perlLIO =
+const struct IPerlLIO perlLIO =
 {
     PerlLIOAccess,
     PerlLIOChmod,
@@ -1178,7 +1178,7 @@ PerlDirMapPathW(struct IPerlDir* piPerl, const WCHAR* path)
     return IPERL2HOST(piPerl)->MapPathW(path);
 }
 
-struct IPerlDir perlDir =
+const struct IPerlDir perlDir =
 {
     PerlDirMakedir,
     PerlDirChdir,
@@ -1464,7 +1464,7 @@ PerlSockIoctlsocket(struct IPerlSock* piPerl, SOCKET s, long cmd, u_long *argp)
     return win32_ioctlsocket(s, cmd, argp);
 }
 
-struct IPerlSock perlSock =
+const struct IPerlSock perlSock =
 {
     PerlSockHtonl,
     PerlSockHtons,
@@ -1898,7 +1898,7 @@ PerlProcLastHost(struct IPerlProc* piPerl)
  return h->LastHost();
 }
 
-struct IPerlProc perlProc =
+const struct IPerlProc perlProc =
 {
     PerlProcAbort,
     PerlProcCrypt,
