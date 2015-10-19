@@ -1026,9 +1026,14 @@ struct subst {
         SvREFCNT_inc_void_NN(targ)
 
 #  define POPSUBST(cx) \
+    STMT_START {							\
+        REGEXP *re;                                                     \
 	rxres_free(&cx->sb_rxres);					\
-	ReREFCNT_dec(cx->sb_rx);					\
-        SvREFCNT_dec_NN(cx->sb_targ)
+	re = cx->sb_rx;                                                 \
+	cx->sb_rx = NULL;                                               \
+	ReREFCNT_dec(re);                                               \
+        SvREFCNT_dec_NN(cx->sb_targ);                                   \
+    } STMT_END
 #endif
 
 #define CxONCE(cx)		((cx)->cx_type & CXp_ONCE)
