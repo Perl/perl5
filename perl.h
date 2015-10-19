@@ -6489,14 +6489,6 @@ extern void moncontrol(int);
 /* See http://www.unicode.org/unicode/reports/tr13/ */
 #define NEXT_LINE_CHAR	NEXT_LINE_NATIVE
 
-/* The UTF-8 bytes of the Unicode LS and PS, U+2028 and U+2029 */
-#define UNICODE_LINE_SEPA_0	0xE2
-#define UNICODE_LINE_SEPA_1	0x80
-#define UNICODE_LINE_SEPA_2	0xA8
-#define UNICODE_PARA_SEPA_0	0xE2
-#define UNICODE_PARA_SEPA_1	0x80
-#define UNICODE_PARA_SEPA_2	0xA9
-
 #ifndef PIPESOCK_MODE
 #  define PIPESOCK_MODE
 #endif
