@@ -448,6 +448,15 @@ The special backtracking control verbs C<(*VERB:ARG)> now all allow an optional
 argument and set C<REGERROR>/C<REGMARK> appropriately as well.
 L<[perl #126186]|https://rt.perl.org/Ticket/Display.html?id=126186>
 
+=item *
+
+Several bugs, including a segmentation fault, have been fixed with the
+bounds checking constructs (introduced in Perl v5.22) C<\b{gcb}>,
+C<\b{sb}>, C<\b{wb}>, C<\B{gcb}>, C<\B{sb}>, and C<\B{wb}>.
+L<[perl #126319]|https://rt.perl.org/Ticket/Display.html?id=126319>.
+All the C<\B{}> ones now match an empty string; none of the C<\b{}> ones
+do.
+
 =back
 
 =head1 Errata From Previous Releases
