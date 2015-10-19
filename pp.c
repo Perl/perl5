@@ -1392,7 +1392,17 @@ PP(pp_multiply)
       NV right = SvNV_nomg(svr);
       NV left  = SvNV_nomg(svl);
       (void)POPs;
+#if defined(__sgi) && defined(USE_LONG_DOUBLE) && LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN && NVSIZE == 16
+      {
+          NV result = left * right;
+          if (Perl_isinf(result)) {
+              Zero((U8*)&result + 8, 8, U8);
+          }
+          SETn( result );
+      }
+#else
       SETn( left * right );
+#endif
       RETURN;
     }
 }
