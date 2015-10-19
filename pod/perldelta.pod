@@ -114,7 +114,7 @@ L<[cpan #25049]|https://rt.cpan.org/Ticket/Display.html?id=25049>
 
 =item *
 
-L<IO-Compress> has been upgraded from version 2.068 to 2.069.
+The IO-Compress modules have been upgraded from version 2.068 to 2.069.
 
 =item *
 
