@@ -98,7 +98,19 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+C</fixed-substr/> has been made much faster.
+
+On platforms with a libc memchr() implementation which makes good use of
+underlying hardware support, patterns which include fixed substrings will now
+often be much faster; for example with glibc on on a recent x86_64 CPU, this:
+
+    $s = "a" x 1000 . "wxyz";
+    $s =~ /wxyz/ for 1..30000
+
+is now about 7 times faster.  On systems with slow memchr(), e.g. 32-bit ARM
+Raspberry Pi, there will be a small or little speedup.  Conversely, some
+pathological cases, such as C<"ab" x 1000 =~ /aa/> will be slower now; up to 3
+times slower on the rPi, 1.5x slower on x86_64.
 
 =back
 
@@ -128,7 +140,113 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<B> has been upgraded from version 1.59 to 1.60.
+
+=item *
+
+L<bignum> has been upgraded from version 0.40 to 0.41.
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.068 to 2.069.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.068_01 to 2.069.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.31 to 3.32.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.34 to 1.35.
+
+=item *
+
+L<Encode> has been upgraded from version 2.77 to 2.78.
+
+=item *
+
+L<experimental> has been upgraded from version 0.014 to 0.016.
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280223 to 0.280224.
+
+=item *
+
+L<File::Path> has been upgraded from version 2.11 to 2.12.
+
+=item *
+
+L<if> has been upgraded from version 0.0605 to 0.0606.
+
+=item *
+
+L<IO> has been upgraded from version 1.35 to 1.36.
+
+For an IO::Poll object C<$poll> with no file handles yet in it,
+C<$poll->poll(10)> now sleeps for up to 10 seconds anyway instead of returning
+0 immediately.
+L<[cpan #25049]|https://rt.cpan.org/Ticket/Display.html?id=25049>
+
+=item *
+
+L<IO-Compress> has been upgraded from version 2.068 to 2.069.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999701 to 1.999704.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.31 to 0.34.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20150920 to 5.20151020.
+
+=item *
+
+L<Module::Metadata> has been upgraded from version 1.000027 to 1.000029.
+
+=item *
+
+L<Perl::OSType> has been upgraded from version 1.008 to 1.009.
+
+=item *
+
+L<PerlIO::encoding> has been upgraded from version 0.21 to 0.22.
+
+PerlIO::encoding objects are now properly duplicated.
+L<[perl #31923]|https://rt.perl.org/Ticket/Display.html?id=31923>
+
+=item *
+
+L<POSIX> has been upgraded from version 1.57 to 1.58.
+
+If C<POSIX::strerror> was passed C<$!> as its argument then it accidentally
+cleared C<$!>.  This has been fixed.
+L<[perl #126229]|https://rt.perl.org/Ticket/Display.html?id=126229>
+
+=item *
+
+L<Socket> has been upgraded from version 2.020_01 to 2.020_02.
+
+Various fixes have been applied to inet_pton for the benefit of MS VC++ builds
+on Windows.  In particular, this restores the build with MS VC++ 6.0.
+
+=item *
+
+L<Unicode::Normalize> has been upgraded from version 1.19 to 1.21.
+
+=item *
+
+L<warnings> has been upgraded from version 1.33 to 1.35.
+
+The C<warnings::enabled> example now actually uses C<warnings::enabled>.
+L<[perl #126051]|https://rt.perl.org/Ticket/Display.html?id=126051>
 
 =back
 
@@ -161,13 +279,47 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlapi>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+The process of using undocumented globals has been documented, namely, that one
+should send email to L<perl5-porters@perl.org|mailto:perl5-porters@perl.org>
+first to get the go-ahead for documenting and using an undocumented function or
+global variable.
+
+=back
+
+=head3 L<perlsub>
+
+=over 4
+
+=item *
+
+Updated to note that anonymous subroutines can have signatures.
+
+=back
+
+=head3 L<perltie>
+
+=over 4
+
+=item *
+
+The usage of C<FIRSTKEY> and C<NEXTKEY> has been clarified.
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+The specific true value of C<$!{E...}> is now documented, noting that it is
+subject to change and not guaranteed.
 
 =back
 
@@ -258,7 +410,10 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+If you had F<Configure> hints for C<d_procselfexe> or C<procselfexe>, they were
+probably broken by the AmigaOS changes in Perl 5.23.3.  This has been now
+fixed.
+L<[perl #126152]|https://rt.perl.org/Ticket/Display.html?id=126152>
 
 =back
 
@@ -323,9 +478,62 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item IRIX
 
-XXX
+=over
+
+=item *
+
+Under some circumstances IRIX stdio fgetc() and fread() set the errno to
+C<ENOENT>, which made no sense according to either IRIX or POSIX docs.  Errno
+is now cleared in such cases.
+L<[perl #123977]|https://rt.perl.org/Ticket/Display.html?id=123977>
+
+=item *
+
+Problems when multiplying long doubles by infinity have been fixed.
+L<[perl #126396]|https://rt.perl.org/Ticket/Display.html?id=126396>
+
+=back
+
+=item MacOS X
+
+=over
+
+=item *
+
+Until now OS X builds of perl have specified a link target of 10.3 (Panther,
+2003) but have not specified a compiler target.  From now on, builds of perl on
+OS X 10.6 or later (Snow Leopard, 2008) by default capture the current OS X
+version and specify that as the explicit build target in both compiler and
+linker flags, thus preserving binary compatibility for extensions built later
+regardless of changes in OS X, SDK, or compiler and linker versions.  To
+override the default value used in the build and preserved in the flags,
+specify C<export MACOSX_DEPLOYMENT_TARGET=10.N> before configuring and building
+perl, where 10.N is the version of OS X you wish to target.  In OS X 10.5 or
+earlier there is no change to the behavior present when those systems were
+current; the link target is still OS X 10.3 and there is no explicit compiler
+target.
+
+=back
+
+=item VMS
+
+=over
+
+=item *
+
+Perl now implements its own C<killpg> by scanning for processes in the
+specified process group, which may not mean exactly the same thing as a Unix
+process group, but allows us to send a signal to a parent (or master) process
+and all of its sub-processes.  At the perl level, this means we can now send a
+negative pid like so:
+
+    kill SIGKILL, -$pid;
+
+to signal all processes in the same group as C<$pid>.
+
+=back
 
 =item Win32
 
@@ -436,6 +644,19 @@ operator, e.g.
 Formerly perl may have crashed, depending on the exact value of C<$big_number>;
 now it will typically raise an exception.
 L<[perl #125937]|https://rt.perl.org/Ticket/Display.html?id=125937>
+
+=item *
+
+In a regex conditional expression C<(?(condition)yes-pattern|no-pattern)>, if
+the condition is C<(?!)> then perl failed the match outright instead of
+matching the no-pattern.  This has been fixed.
+L<[perl #126222]|https://rt.perl.org/Ticket/Display.html?id=126222>
+
+=item *
+
+The special backtracking control verbs C<(*VERB:ARG)> now all allow an optional
+argument and set C<REGERROR/REGMARK> appropriately as well.
+L<[perl #126186]|https://rt.perl.org/Ticket/Display.html?id=126186>
 
 =back
 
