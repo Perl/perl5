@@ -445,7 +445,7 @@ L<[perl #126222]|https://rt.perl.org/Ticket/Display.html?id=126222>
 =item *
 
 The special backtracking control verbs C<(*VERB:ARG)> now all allow an optional
-argument and set C<REGERROR/REGMARK> appropriately as well.
+argument and set C<REGERROR>/C<REGMARK> appropriately as well.
 L<[perl #126186]|https://rt.perl.org/Ticket/Display.html?id=126186>
 
 =back
