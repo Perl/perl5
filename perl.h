@@ -1965,11 +1965,15 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #   ifndef Perl_isnan
 #       if defined(HAS_ISNANL) && !(defined(isnan) && defined(HAS_C99))
 #           define Perl_isnan(x) isnanl(x)
+#       elif defined(__sgi) && defined(__c99)  /* XXX Configure test needed */
+#           define Perl_isnan(x) isnan(x)
 #       endif
 #   endif
 #   ifndef Perl_isinf
 #       if defined(HAS_ISINFL) && !(defined(isinf) && defined(HAS_C99))
 #           define Perl_isinf(x) isinfl(x)
+#       elif defined(__sgi) && defined(__c99)  /* XXX Configure test needed */
+#           define Perl_isinf(x) isinf(x)
 #       elif defined(LDBL_MAX) && !defined(NAN_COMPARE_BROKEN)
 #           define Perl_isinf(x) ((x) > LDBL_MAX || (x) < -LDBL_MAX)
 #       endif
