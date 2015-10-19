@@ -1292,10 +1292,13 @@ of the typeglob that C<PL_defoutgv> points to is decreased by one.
 void
 Perl_setdefout(pTHX_ GV *gv)
 {
+    GV *oldgv = PL_defoutgv;
+
     PERL_ARGS_ASSERT_SETDEFOUT;
+
     SvREFCNT_inc_simple_void_NN(gv);
-    SvREFCNT_dec(PL_defoutgv);
     PL_defoutgv = gv;
+    SvREFCNT_dec(oldgv);
 }
 
 PP(pp_select)

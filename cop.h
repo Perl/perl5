@@ -647,6 +647,7 @@ struct block_format {
     STMT_START {							\
         AV *av = GvAV(PL_defgv);                                        \
 	GvAV(PL_defgv) = cx->blk_sub.savearray;				\
+        cx->blk_sub.savearray = NULL;                                   \
         SvREFCNT_dec(av);	        				\
     } STMT_END
 
@@ -663,10 +664,15 @@ struct block_format {
 /* subsets of POPSUB */
 
 #define POPSUB_COMMON(cx) \
-    PL_comppad = cx->blk_sub.prevcomppad;                               \
-    PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;        \
-    CvDEPTH((const CV*)cx->blk_sub.cv) = cx->blk_sub.olddepth;          \
-    SvREFCNT_dec_NN(cx->blk_sub.cv);
+    STMT_START {							\
+        CV *cv;                                                         \
+        PL_comppad = cx->blk_sub.prevcomppad;                           \
+        PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
+        cv = cx->blk_sub.cv;                                            \
+        CvDEPTH(cv) = cx->blk_sub.olddepth;                             \
+        cx->blk_sub.cv = NULL;                                          \
+        SvREFCNT_dec(cv);                                               \
+    } STMT_END
 
 /* handle the @_ part of leaving a sub */
 
@@ -688,8 +694,6 @@ struct block_format {
 
 #define POPSUB(cx)							\
     STMT_START {							\
-        if (!(cx->blk_u16 & CxPOPSUB_DONE)) {                           \
-        cx->blk_u16 |= CxPOPSUB_DONE;                                   \
 	RETURN_PROBE(CvNAMED(cx->blk_sub.cv)				\
 			? HEK_KEY(CvNAME_HEK(cx->blk_sub.cv))		\
 			: GvENAME(CvGV(cx->blk_sub.cv)),		\
@@ -700,23 +704,22 @@ struct block_format {
 	if (CxHASARGS(cx)) {						\
             POPSUB_ARGS(cx);                                            \
 	}								\
-        }                                                               \
         POPSUB_COMMON(cx);                                              \
     } STMT_END
 
 #define POPFORMAT(cx)							\
     STMT_START {							\
-        if (!(cx->blk_u16 & CxPOPSUB_DONE)) {                           \
-	CV * const cv = cx->blk_format.cv;				\
-	GV * const dfuot = cx->blk_format.dfoutgv;			\
-        cx->blk_u16 |= CxPOPSUB_DONE;                                   \
-	setdefout(dfuot);						\
+	CV *cv;				                                \
+	GV * const dfout = cx->blk_format.dfoutgv;			\
+	setdefout(dfout);						\
+        cx->blk_format.dfoutgv = NULL;                                  \
+	SvREFCNT_dec_NN(dfout); /* the cx->defoutgv ref */              \
         PL_comppad = cx->blk_format.prevcomppad;                        \
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
+        cv = cx->blk_format.cv;				                \
+	cx->blk_format.cv = NULL;;				        \
 	--CvDEPTH(cv);                                                  \
-	SvREFCNT_dec_NN(cx->blk_format.cv);				\
-	SvREFCNT_dec_NN(dfuot);						\
-        }                                                               \
+	SvREFCNT_dec_NN(cv);				                \
     } STMT_END
 
 /* eval context */
@@ -803,8 +806,6 @@ struct block_loop {
 #define CxLABEL_len_flags(c,len,flags)	(0 + CopLABEL_len_flags((c)->blk_oldcop, len, flags))
 #define CxHASARGS(c)	(((c)->cx_type & CXp_HASARGS) == CXp_HASARGS)
 #define CxLVAL(c)	(0 + ((c)->blk_u16 & 0xff))
-/* POPSUB has already been performed on this context frame */
-#define CxPOPSUB_DONE 0x100
 
 
 #define PUSHLOOP_PLAIN(cx)						\

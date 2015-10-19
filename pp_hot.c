@@ -3373,15 +3373,17 @@ Perl_clear_defarray(pTHX_ AV* av, bool abandon)
 
     PERL_ARGS_ASSERT_CLEAR_DEFARRAY;
 
-    if (LIKELY(!abandon && SvREFCNT(av) == 1 && !SvMAGICAL(av)))
+    if (LIKELY(!abandon && SvREFCNT(av) == 1 && !SvMAGICAL(av))) {
         av_clear(av);
-    else {
-        SvREFCNT_dec_NN(av);
-        av = newAV();
-        PAD_SVl(0) = MUTABLE_SV(av);
-        av_extend(av, fill);
+        AvREIFY_only(av);
     }
-    AvREIFY_only(av);
+    else {
+        AV *newav = newAV();
+        av_extend(newav, fill);
+        AvREIFY_only(newav);
+        PAD_SVl(0) = MUTABLE_SV(newav);
+        SvREFCNT_dec_NN(av);
+    }
 }
 
 
