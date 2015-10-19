@@ -2083,10 +2083,10 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     while (s < strend) {
                         GCB_enum after = getGCB_VAL_UTF8((U8*) s,
                                                         (U8*) reginfo->strend);
-                        if (to_complement ^ isGCB(before, after)) {
-                            if (reginfo->intuit || regtry(reginfo, &s)) {
-                                goto got_it;
-                            }
+                        if (   (to_complement ^ isGCB(before, after))
+                            && (reginfo->intuit || regtry(reginfo, &s)))
+                        {
+                            goto got_it;
                         }
                         before = after;
                         s += UTF8SKIP(s);
@@ -2095,12 +2095,11 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 else {  /* Not utf8.  Everything is a GCB except between CR and
                            LF */
                     while (s < strend) {
-                        if (to_complement ^ (UCHARAT(s - 1) != '\r'
-                                             || UCHARAT(s) != '\n'))
+                        if ((to_complement ^ (   UCHARAT(s - 1) != '\r'
+                                              || UCHARAT(s) != '\n'))
+                            && (reginfo->intuit || regtry(reginfo, &s)))
                         {
-                            if (reginfo->intuit || regtry(reginfo, &s)) {
-                                goto got_it;
-                            }
+                            goto got_it;
                         }
                         s++;
                     }
@@ -2133,16 +2132,15 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     while (s < strend) {
                         SB_enum after = getSB_VAL_UTF8((U8*) s,
                                                          (U8*) reginfo->strend);
-                        if (to_complement ^ isSB(before,
-                                                 after,
-                                                 (U8*) reginfo->strbeg,
-                                                 (U8*) s,
-                                                 (U8*) reginfo->strend,
-                                                 utf8_target))
+                        if ((to_complement ^ isSB(before,
+                                                  after,
+                                                  (U8*) reginfo->strbeg,
+                                                  (U8*) s,
+                                                  (U8*) reginfo->strend,
+                                                  utf8_target))
+                            && (reginfo->intuit || regtry(reginfo, &s)))
                         {
-                            if (reginfo->intuit || regtry(reginfo, &s)) {
-                                goto got_it;
-                            }
+                            goto got_it;
                         }
                         before = after;
                         s += UTF8SKIP(s);
@@ -2152,16 +2150,15 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     SB_enum before = getSB_VAL_CP((U8) *(s -1));
                     while (s < strend) {
                         SB_enum after = getSB_VAL_CP((U8) *s);
-                        if (to_complement ^ isSB(before,
-                                                 after,
-                                                 (U8*) reginfo->strbeg,
-                                                 (U8*) s,
-                                                 (U8*) reginfo->strend,
-                                                 utf8_target))
+                        if ((to_complement ^ isSB(before,
+                                                  after,
+                                                  (U8*) reginfo->strbeg,
+                                                  (U8*) s,
+                                                  (U8*) reginfo->strend,
+                                                  utf8_target))
+                            && (reginfo->intuit || regtry(reginfo, &s)))
                         {
-                            if (reginfo->intuit || regtry(reginfo, &s)) {
-                                goto got_it;
-                            }
+                            goto got_it;
                         }
                         before = after;
                         s++;
@@ -2204,17 +2201,16 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     while (s < strend) {
                         WB_enum after = getWB_VAL_UTF8((U8*) s,
                                                         (U8*) reginfo->strend);
-                        if (to_complement ^ isWB(previous,
-                                                 before,
-                                                 after,
-                                                 (U8*) reginfo->strbeg,
-                                                 (U8*) s,
-                                                 (U8*) reginfo->strend,
-                                                 utf8_target))
+                        if ((to_complement ^ isWB(previous,
+                                                  before,
+                                                  after,
+                                                  (U8*) reginfo->strbeg,
+                                                  (U8*) s,
+                                                  (U8*) reginfo->strend,
+                                                  utf8_target))
+                            && (reginfo->intuit || regtry(reginfo, &s)))
                         {
-                            if (reginfo->intuit || regtry(reginfo, &s)) {
-                                goto got_it;
-                            }
+                            goto got_it;
                         }
                         previous = before;
                         before = after;
@@ -2226,17 +2222,16 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     WB_enum before = getWB_VAL_CP((U8) *(s -1));
                     while (s < strend) {
                         WB_enum after = getWB_VAL_CP((U8) *s);
-                        if (to_complement ^ isWB(previous,
-                                                 before,
-                                                 after,
-                                                 (U8*) reginfo->strbeg,
-                                                 (U8*) s,
-                                                 (U8*) reginfo->strend,
-                                                 utf8_target))
+                        if ((to_complement ^ isWB(previous,
+                                                  before,
+                                                  after,
+                                                  (U8*) reginfo->strbeg,
+                                                  (U8*) s,
+                                                  (U8*) reginfo->strend,
+                                                  utf8_target))
+                            && (reginfo->intuit || regtry(reginfo, &s)))
                         {
-                            if (reginfo->intuit || regtry(reginfo, &s)) {
-                                goto got_it;
-                            }
+                            goto got_it;
                         }
                         previous = before;
                         before = after;
