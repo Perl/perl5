@@ -134,7 +134,14 @@ a[^]b]c	adc	y	$&	adc
 \By\b	xy	y	-	-
 \by\B	yz	y	-	-
 \By\B	xyz	y	-	-
+\b		n	-	-
+\b{gcb}		n	-	-
+\b{sb}		n	-	-
+\b{wb}		n	-	-
 \B		y	-	-
+\B{gcb}		y	-	-
+\B{sb}		y	-	-
+\B{wb}		y	-	-
 \w	a	y	-	-
 \w	-	n	-	-
 \W	a	n	-	-
