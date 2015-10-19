@@ -2073,13 +2073,17 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 FBC_BOUND(isWORDCHAR_L1, isWORDCHAR_uni, isWORDCHAR_utf8);
                 break;
             case GCB_BOUND:
-                if (s == reginfo->strbeg) { /* GCB always matches at begin and
-                                               end */
+                if (s == reginfo->strbeg) {
                     if (reginfo->intuit || regtry(reginfo, &s))
                     {
                         goto got_it;
                     }
+
+                    /* Didn't match.  Try at the next position (if there is one) */
                     s += (utf8_target) ? UTF8SKIP(s) : 1;
+                    if (UNLIKELY(s >= reginfo->strend)) {
+                        break;
+                    }
                 }
 
                 if (utf8_target) {
@@ -2118,13 +2122,14 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 break;
 
             case SB_BOUND:
-                if (s == reginfo->strbeg) { /* SB always matches at beginning */
+                if (s == reginfo->strbeg) {
                     if (reginfo->intuit || regtry(reginfo, &s)) {
                         goto got_it;
                     }
-
-                    /* Didn't match.  Go try at the next position */
                     s += (utf8_target) ? UTF8SKIP(s) : 1;
+                    if (UNLIKELY(s >= reginfo->strend)) {
+                        break;
+                    }
                 }
 
                 if (utf8_target) {
@@ -2183,6 +2188,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                         goto got_it;
                     }
                     s += (utf8_target) ? UTF8SKIP(s) : 1;
+                    if (UNLIKELY(s >= reginfo->strend)) {
+                        break;
+                    }
                 }
 
                 if (utf8_target) {
@@ -5617,8 +5625,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	case BOUNDU:  /*  /\b/u  */
 
           boundu:
-	    if (utf8_target) {
-
+            if (UNLIKELY(reginfo->strbeg >= reginfo->strend)) {
+                match = FALSE;
+            }
+            else if (utf8_target) {
               bound_utf8:
                 switch((bound_type) FLAGS(scan)) {
                     case TRADITIONAL_BOUND:
