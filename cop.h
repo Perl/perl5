@@ -832,11 +832,18 @@ struct block_loop {
 
 #define POPLOOP(cx)							\
 	if (CxTYPE(cx) == CXt_LOOP_LAZYSV) {				\
-	    SvREFCNT_dec_NN(cx->blk_loop.state_u.lazysv.cur);		\
-	    SvREFCNT_dec_NN(cx->blk_loop.state_u.lazysv.end);		\
+            SV *sv = cx->blk_loop.state_u.lazysv.cur;                   \
+            cx->blk_loop.state_u.lazysv.cur = NULL;                     \
+	    SvREFCNT_dec_NN(sv);	                                \
+            sv = cx->blk_loop.state_u.lazysv.end;                       \
+            cx->blk_loop.state_u.lazysv.end = NULL;                     \
+	    SvREFCNT_dec_NN(sv);		                        \
 	}								\
-	else if (CxTYPE(cx) == CXt_LOOP_ARY)  				\
-	    SvREFCNT_dec(cx->blk_loop.state_u.ary.ary);                 \
+	else if (CxTYPE(cx) == CXt_LOOP_ARY) { 				\
+            AV *av = cx->blk_loop.state_u.ary.ary;                      \
+            cx->blk_loop.state_u.ary.ary = NULL;                        \
+	    SvREFCNT_dec(av);                                           \
+        }                                                               \
         if (cx->cx_type & (CXp_FOR_PAD|CXp_FOR_GV)) {                   \
             SV *cursv;                                                  \
             SV **svp = (cx)->blk_loop.itervar_u.svp;                    \
@@ -844,6 +851,7 @@ struct block_loop {
                 svp = &GvSV((GV*)svp);                                  \
             cursv = *svp;                                               \
             *svp = cx->blk_loop.itersave;                               \
+            cx->blk_loop.itersave = NULL;                               \
             SvREFCNT_dec(cursv);                                        \
         }
 
