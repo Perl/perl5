@@ -8,7 +8,7 @@ BEGIN {
     require './charset_tools.pl';
 }
 
-plan( tests => 261 );
+plan( tests => 267 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -1033,6 +1033,28 @@ SKIP: {
     is("..." =~ s/\B/!/ugr, "!.!.!.!", '\\B matches ASCII before string, mid, and end, /u');
     is("$division$division$division" =~ s/\B/!/ugr, "!$division!$division!$division!", '\\B matches Latin1 before string, mid, and end, /u');
     is("\x{2028}\x{2028}\x{2028}" =~ s/\B/!/ugr, "!\x{2028}!\x{2028}!\x{2028}!", '\\B matches above-Latin1 before string, mid, and end, /u');
+
+    {
+    local $TODO = 1;
+    fresh_perl_like( '$_=""; /\b{gcb}/;  s///g', qr/^$/, {},
+        '[perl #126319: Segmentation fault in Perl_sv_catpvn_flags with \b{gcb}'
+    );
+    fresh_perl_like( '$_=""; /\B{gcb}/;  s///g', qr/^$/, {},
+        '[perl #126319: Segmentation fault in Perl_sv_catpvn_flags with \b{gcb}'
+    );
+    fresh_perl_like( '$_=""; /\b{wb}/;  s///g', qr/^$/, {},
+        '[perl #126319: Segmentation fault in Perl_sv_catpvn_flags with \b{wb}'
+    );
+    fresh_perl_like( '$_=""; /\B{wb}/;  s///g', qr/^$/, {},
+        '[perl #126319: Segmentation fault in Perl_sv_catpvn_flags with \b{wb}'
+    );
+    fresh_perl_like( '$_=""; /\b{sb}/;  s///g', qr/^$/, {},
+        '[perl #126319: Segmentation fault in Perl_sv_catpvn_flags with \b{sb}'
+    );
+    fresh_perl_like( '$_=""; /\B{sb}/;  s///g', qr/^$/, {},
+        '[perl #126319: Segmentation fault in Perl_sv_catpvn_flags with \b{sb}'
+    );
+    }
 
 SKIP: {
     eval { require POSIX; POSIX->import("locale_h"); };
