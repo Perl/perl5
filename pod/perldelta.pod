@@ -41,7 +41,7 @@ C</fixed-substr/> has been made much faster.
 
 On platforms with a libc memchr() implementation which makes good use of
 underlying hardware support, patterns which include fixed substrings will now
-often be much faster; for example with glibc on on a recent x86_64 CPU, this:
+often be much faster; for example with glibc on a recent x86_64 CPU, this:
 
     $s = "a" x 1000 . "wxyz";
     $s =~ /wxyz/ for 1..30000
@@ -108,8 +108,8 @@ L<if> has been upgraded from version 0.0605 to 0.0606.
 L<IO> has been upgraded from version 1.35 to 1.36.
 
 For an IO::Poll object C<$poll> with no file handles yet in it,
-C<$poll->poll(10)> now sleeps for up to 10 seconds anyway instead of returning
-0 immediately.
+C<$poll-E<gt>poll(10)> now sleeps for up to 10 seconds anyway instead of
+returning 0 immediately.
 L<[cpan #25049]|https://rt.cpan.org/Ticket/Display.html?id=25049>
 
 =item *
@@ -233,11 +233,15 @@ diagnostic messages, see L<perldiag>.
 
 =item *
 
+L<Can't find Unicode property definition "%s" in regex;|perldiag/"Can't find Unicode property definition "%s" in regex; marked by <-- HERE in m/%s/">
+
+=item *
+
 L<Character following \p must be '{' or a single-character Unicode property name in regex;|perldiag/"Character following \%c must be '{' or a single-character Unicode property name in regex; marked by <-- HERE in m/%s/">
 
 =item *
 
-L<perldiag/"Illegal user-defined property name">
+L<Illegal user-defined property name|perldiag/"Illegal user-defined property name">
 
 =back
 
@@ -247,7 +251,7 @@ L<perldiag/"Illegal user-defined property name">
 
 =item *
 
-L<"Can't modify non-lvalue subroutine call of &%s"|perldiag/"Can't modify non-lvalue subroutine call of &%s">
+L<Can't modify non-lvalue subroutine call of &%s|perldiag/"Can't modify non-lvalue subroutine call of &%s">
 
 This error now reports the name of the non-lvalue subroutine you attempted to
 use as an lvalue.
@@ -360,7 +364,7 @@ not exist at process start time, it will not be checked again for C<%ENV>
 override entries for the remainder of the Perl processes life.  This more
 closely matches Unix behaviour in that the environment is copied or inherited
 on startup and changing the variable in the parent process or another process
-or editing <.bashrc> will not change the environmental variable in other
+or editing F<.bashrc> will not change the environmental variable in other
 existing, running, processes.
 
 =item *
@@ -399,8 +403,8 @@ meaningless constant that can be rewritten as C<(sv_backoff(sv),0)>.
 The C<EXTEND> and C<MEXTEND> macros have been improved to avoid various issues
 with integer truncation and wrapping.  In particular, some casts formerly used
 within the macros have been removed.  This means for example that passing an
-unsigned nitems arg is likely to raise a compiler warning now (it's always been
-documented to require a signed value; formerly int, lately SSize_t).
+unsigned nitems argument is likely to raise a compiler warning now (it's always
+been documented to require a signed value; formerly int, lately SSize_t).
 
 =back
 
@@ -416,7 +420,7 @@ L<[perl #116639]|https://rt.perl.org/Ticket/Display.html?id=116639>
 
 =item *
 
-A regression from perl Perl 5.20 has been fixed, in which some syntax errors in
+A regression from Perl 5.20 has been fixed, in which some syntax errors in
 L<C<(?[...])>|perlrecharclass/Extended Bracketed Character Classes> constructs
 within regular expression patterns could cause a segfault instead of a proper
 error message.
@@ -450,12 +454,11 @@ L<[perl #126186]|https://rt.perl.org/Ticket/Display.html?id=126186>
 
 =item *
 
-Several bugs, including a segmentation fault, have been fixed with the
-bounds checking constructs (introduced in Perl v5.22) C<\b{gcb}>,
-C<\b{sb}>, C<\b{wb}>, C<\B{gcb}>, C<\B{sb}>, and C<\B{wb}>.
-L<[perl #126319]|https://rt.perl.org/Ticket/Display.html?id=126319>.
-All the C<\B{}> ones now match an empty string; none of the C<\b{}> ones
-do.
+Several bugs, including a segmentation fault, have been fixed with the bounds
+checking constructs (introduced in Perl 5.22) C<\b{gcb}>, C<\b{sb}>, C<\b{wb}>,
+C<\B{gcb}>, C<\B{sb}>, and C<\B{wb}>.  All the C<\B{}> ones now match an empty
+string; none of the C<\b{}> ones do.
+L<[perl #126319]|https://rt.perl.org/Ticket/Display.html?id=126319>
 
 =back
 
