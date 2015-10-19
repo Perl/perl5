@@ -35,7 +35,7 @@
  * NOTE 2: headers lie.  Do not expect that if HAS_C99 gets to be true,
  * all the C99 features are there and are correct. */
 #if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || \
-     defined(_STDC_C99)
+    defined(_STDC_C99) || defined(__c99)
 #  define HAS_C99 1
 #endif
 
