@@ -873,8 +873,12 @@ struct block_givwhen {
 	NOOP;
 
 #define POPGIVEN(cx)                                                    \
-        SvREFCNT_dec(GvSV(PL_defgv));                                   \
-        GvSV(PL_defgv) = cx->blk_givwhen.defsv_save;
+    STMT_START {							\
+        SV *sv = GvSV(PL_defgv);                                        \
+        GvSV(PL_defgv) = cx->blk_givwhen.defsv_save;                    \
+        cx->blk_givwhen.defsv_save = NULL;                              \
+        SvREFCNT_dec(sv);                                               \
+    } STMT_END
 
 
 /* basic block, i.e. pp_enter/leave */
