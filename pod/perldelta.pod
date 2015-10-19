@@ -39,20 +39,19 @@ L</Selected Bug Fixes> section.
 
 =head2 Lexical $_ has been removed
 
-C<my $_> was introduced in Perl v5.10, and subsequently caused much confusion
-with no obvious solution.  In Perl v5.18.0, it was made experimental on the
+C<my $_> was introduced in Perl 5.10, and subsequently caused much confusion
+with no obvious solution.  In Perl 5.18.0, it was made experimental on the
 theory that it would either be removed or redesigned in a less confusing (but
 backward-incompatible) way.  Over the following years, no alternatives were
 proposed.  The feature has now been removed and will fail to compile.
 
 =head2 Only blanks and tabs are now allowed within C<[...]> within C<(?[...])>.
 
-The experimental Extended Bracketed Character Classes can contain
-regular bracketed character classes within them.  These differ from
-regular ones in that white space is generally ignored, unless escaped by
-preceding it with a backslash.  The white space that is ignored is now
-limited to just tab C<\t> and SPACE characters.  Previously, it was any
-white space.  See
+The experimental Extended Bracketed Character Classes can contain regular
+bracketed character classes within them.  These differ from regular ones in
+that white space is generally ignored, unless escaped by preceding it with a
+backslash.  The white space that is ignored is now limited to just tab C<\t>
+and SPACE characters.  Previously, it was any white space.  See
 L<perlrecharclass/Extended Bracketed Character Classes>.
 
 =head1 Deprecations
@@ -220,8 +219,8 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 L<"Can't modify non-lvalue subroutine call of &%s"|perldiag/"Can't modify non-lvalue subroutine call of &%s">
 
-This error now reports the name of the non-lvalue subroutine you
-attempted to use as an lvalue.
+This error now reports the name of the non-lvalue subroutine you attempted to
+use as an lvalue.
 
 =back
 
@@ -242,7 +241,7 @@ Use L<XXX> with program names to get proper documentation linking. ]
 
 Using the C<NO_HASH_SEED> define in combination with the default hash algorithm
 C<PERL_HASH_FUNC_ONE_AT_A_TIME_HARD> resulted in a fatal error while compiling
-the interpreter, since 5.17.10. This has been fixed.
+the interpreter, since Perl 5.17.10.  This has been fixed.
 
 =back
 
@@ -335,38 +334,38 @@ XXX
 =item *
 
 A new build option C<USE_NO_REGISTRY> has been added to the makefiles.  This
-option is off by default, meaning the default is to do Windows registry lookups.
-This option stops Perl from looking inside the registry for anything.  For what
-values are looked up in the registry see L<perlwin32>.  Internally, in C, the
-name of this option is C<WIN32_NO_REGISTRY>.
+option is off by default, meaning the default is to do Windows registry
+lookups.  This option stops Perl from looking inside the registry for anything.
+For what values are looked up in the registry see L<perlwin32>.  Internally, in
+C, the name of this option is C<WIN32_NO_REGISTRY>.
 
 =item *
 
 The behavior of Perl using C<HKEY_CURRENT_USER\Software\Perl> and
-C<HKEY_LOCAL_MACHINE\Software\Perl> to lookup certain values, including
-C<%ENV> vars starting with C<PERL> has changed.  Previously, the 2 keys were
-checked for entries at all times through Perl processes life time even if they
-did not exist.  For performance reasons, now, if the root key (i.e.
+C<HKEY_LOCAL_MACHINE\Software\Perl> to lookup certain values, including C<%ENV>
+vars starting with C<PERL> has changed.  Previously, the 2 keys were checked
+for entries at all times through Perl processes life time even if they did not
+exist.  For performance reasons, now, if the root key (i.e.
 C<HKEY_CURRENT_USER\Software\Perl> or C<HKEY_LOCAL_MACHINE\Software\Perl>) does
 not exist at process start time, it will not be checked again for C<%ENV>
 override entries for the remainder of the Perl processes life.  This more
-closely matches Unix behaviour in that the enviroment is copied or inherited on
-startup and changing the variable in the parent process or another process or
-editing <.bashrc> will not change the enviromental variable in other existing,
-running, processes.
+closely matches Unix behaviour in that the environment is copied or inherited
+on startup and changing the variable in the parent process or another process
+or editing <.bashrc> will not change the environmental variable in other
+existing, running, processes.
 
 =item *
 
 One glob fetch was removed for each C<-X> or C<stat> call whether done from
-Perl code or internally from Perl's C code. The glob being looked up was
-C<${^WIN32_SLOPPY_STAT}> which is a special variable. This makes C<-X> and
+Perl code or internally from Perl's C code.  The glob being looked up was
+C<${^WIN32_SLOPPY_STAT}> which is a special variable.  This makes C<-X> and
 C<stat> slightly faster.
 
 =item *
 
-During Miniperl's process startup, during the build process, 4 to 8 IO calls
-related to the process starting C<.pl> and the C<buildcustomize.pl> file were
-removed from the code opening and executing the first 1 or 2 C<.pl> files.
+During miniperl's process startup, during the build process, 4 to 8 IO calls
+related to the process starting F<.pl> and the F<buildcustomize.pl> file were
+removed from the code opening and executing the first 1 or 2 F<.pl> files.
 
 =back
 
@@ -384,8 +383,8 @@ well.
 
 =item *
 
-L<perlapi/sv_backoff> had its return type changed fron C<int> to C<void>.  It
-previously has always returned C<0> since 5.000 stable but that was
+L<perlapi/sv_backoff> had its return type changed from C<int> to C<void>.  It
+previously has always returned C<0> since Perl 5.000 stable but that was
 undocumented.  Although C<sv_backoff> is marked as public API, XS code is not
 expected to be impacted since the proper API call would be through public API
 C<sv_setsv(sv, &PL_sv_undef)>, or quasi-public C<SvOOK_off>, or non-public
@@ -394,26 +393,11 @@ meaningless constant that can be rewritten as C<(sv_backoff(sv),0)>.
 
 =item *
 
-The C<EXTEND> and C<MEXTEND> macros have been improved to avoid various
-issues with integer truncation and wrapping. In particular, some casts
-formerly used within the macros have been removed. This means for example
-that passing an unsigned nitems arg is likely to raise a compiler warning
-now (it's always been documented to require a signed value; formerly int,
-lately SSize_t).
-
-=item *
-
-(This was actually done in v5.23.2, but the perldelta entry got missed.)
-The way that C<OP_AASSIGN> handles assignment with potentially common
-values (e.g. C<($a,$b) = ($b, $a)> has changed. In particular the
-C<OPpASSIGN_COMMON> flag has been replaced with three more specific flags:
-
-    OPpASSIGN_COMMON_AGG
-    OPpASSIGN_COMMON_RC1
-    OPpASSIGN_COMMON_SCALAR
-
-and the runtime now sometimes does a mark and sweep using the C<SVf_BREAK>
-to detect common elements.
+The C<EXTEND> and C<MEXTEND> macros have been improved to avoid various issues
+with integer truncation and wrapping.  In particular, some casts formerly used
+within the macros have been removed.  This means for example that passing an
+unsigned nitems arg is likely to raise a compiler warning now (it's always been
+documented to require a signed value; formerly int, lately SSize_t).
 
 =back
 
@@ -428,29 +412,30 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-There were places in regular expression patterns where comments
-(C<(?#...)>) weren't allowed, but should have been.  This is now fixed.
-[perl #116639]
+There were places in regular expression patterns where comments (C<(?#...)>)
+weren't allowed, but should have been.  This is now fixed.
+L<[perl #116639]|https://rt.perl.org/Ticket/Display.html?id=116639>
 
 =item *
 
-A regression from perl v5.20 has been fixed, in which some syntax errors
-in L<C<(?[...])>|perlrecharclass/Extended Bracketed Character Classes>
-constructs within regular expression patterns could cause a segfault
-instead of a proper error message.  [perl #126180]
+A regression from perl Perl 5.20 has been fixed, in which some syntax errors in
+L<C<(?[...])>|perlrecharclass/Extended Bracketed Character Classes> constructs
+within regular expression patterns could cause a segfault instead of a proper
+error message.
+L<[perl #126180]|https://rt.perl.org/Ticket/Display.html?id=126180>
 
 =item *
 
 Some problems with attempting to extend the perl stack to around 2G or 4G
-entries have been fixed. This was particularly an issue on 32-bit perls
-built to use 64-bit integers, and was easily noticeable with the list
-repetition operator, e.g.
+entries have been fixed.  This was particularly an issue on 32-bit perls built
+to use 64-bit integers, and was easily noticeable with the list repetition
+operator, e.g.
 
     @a = (1) x $big_number
 
-Formerly perl may have crashed, depending on the exact value of
-$big_number; now it will typically raise an exception.
-[perl #125937]
+Formerly perl may have crashed, depending on the exact value of C<$big_number>;
+now it will typically raise an exception.
+L<[perl #125937]|https://rt.perl.org/Ticket/Display.html?id=125937>
 
 =back
 
@@ -476,8 +461,17 @@ XXX
 
 =item *
 
-XXX Add anything here that we forgot to add, or were mistaken about, in
-the perldelta of a previous release.
+(This was actually done in Perl 5.23.2, but the perldelta entry got missed.)
+The way that C<OP_AASSIGN> handles assignment with potentially common values
+(e.g. C<($a,$b) = ($b, $a)> has changed.  In particular the C<OPpASSIGN_COMMON>
+flag has been replaced with three more specific flags:
+
+    OPpASSIGN_COMMON_AGG
+    OPpASSIGN_COMMON_RC1
+    OPpASSIGN_COMMON_SCALAR
+
+and the runtime now sometimes does a mark and sweep using the C<SVf_BREAK> to
+detect common elements.
 
 =back
 
