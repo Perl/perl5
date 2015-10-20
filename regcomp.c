@@ -13446,7 +13446,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                     RExC_parse++;
                     if (*RExC_parse == 'c') {
                             /* Skip the \cX notation for control characters */
-                            RExC_parse++;
+                            RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
                     }
                     break;
                 case '[':
