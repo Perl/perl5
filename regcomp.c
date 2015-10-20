@@ -10940,7 +10940,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                      * enough space for all the things we are about to throw
                      * away, but we can shrink it by the ammount we are about
                      * to re-use here */
-                    RExC_size = PREVOPER(RExC_size) - regarglen[(U8)OPFAIL];
+                    RExC_size += PREVOPER(RExC_size) - regarglen[(U8)OPFAIL];
                 }
                 else {
                     ckWARNreg(RExC_parse, "Quantifier {n,m} with n > m can't match");

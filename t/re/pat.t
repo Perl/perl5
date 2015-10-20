@@ -23,7 +23,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 775;  # Update this when adding/deleting tests.
+plan tests => 776;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1710,6 +1710,16 @@ EOP
 		ok(1, "qr{()(?1)}n didn't crash");
 		like($error, qr{Reference to nonexistent group},
 				'gave appropriate error for qr{()(?1)}n');
+	}
+
+	{
+            # [perl #126406] panic with unmatchable quantifier
+            my $code='
+                no warnings "regexp";
+                "" =~ m/(.0\N{6,0}0\N{6,0}000000000000000000000000000000000)/;
+            ';
+            fresh_perl_is($code, "", {},
+                            "perl [#126406] panic");
 	}
 } # End of sub run_tests
 
