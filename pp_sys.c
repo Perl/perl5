@@ -545,9 +545,17 @@ Perl_tied_method(pTHX_ SV *methname, SV **sp, SV *const sv,
     PUTBACK; /* sp is at *foot* of args, so this pops args from old stack */
     PUSHSTACKi(PERLSI_MAGIC);
     /* extend for object + args. If argc might wrap/truncate when cast
-     * to SSize_t, set to -1 which will trigger a panic in EXTEND() */
+     * to SSize_t and incremented, set to -1, which will trigger a panic in
+     * EXTEND().
+     * The weird way this is written is because g++ is dumb enough to
+     * warn "comparison is always false" on something like:
+     *
+     * sizeof(a) >= sizeof(b) && a >= B_t_MAX -1
+     *
+     * (where the LH condition is false)
+     */
     extend_size =
-        sizeof(argc) >= sizeof(SSize_t) && argc > SSize_t_MAX - 1
+        (argc > (sizeof(argc) >= sizeof(SSize_t) ? SSize_t_MAX - 1 : argc))
             ? -1 : (SSize_t)argc + 1;
     EXTEND(SP, extend_size);
     PUSHMARK(sp);
