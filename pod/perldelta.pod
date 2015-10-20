@@ -429,6 +429,13 @@ L<[perl #126404]|https://rt.perl.org/Ticket/Display.html?id=126404>
 
 =item *
 
+Another problem with
+L<C<(?[...])>|perlrecharclass/Extended Bracketed Character Classes>
+constructs has been fixed wherein things like C<\c]> could cause panics.
+L<[perl #126181]|https://rt.perl.org/Ticket/Display.html?id=126181>
+
+=item *
+
 Some problems with attempting to extend the perl stack to around 2G or 4G
 entries have been fixed.  This was particularly an issue on 32-bit perls built
 to use 64-bit integers, and was easily noticeable with the list repetition
