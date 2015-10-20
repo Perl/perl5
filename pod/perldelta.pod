@@ -420,7 +420,7 @@ L<[perl #116639]|https://rt.perl.org/Ticket/Display.html?id=116639>
 
 =item *
 
-Some regressions from Perl 5.20 has been fixed, in which some syntax errors in
+Some regressions from Perl 5.20 have been fixed, in which some syntax errors in
 L<C<(?[...])>|perlrecharclass/Extended Bracketed Character Classes> constructs
 within regular expression patterns could cause a segfault instead of a proper
 error message.
