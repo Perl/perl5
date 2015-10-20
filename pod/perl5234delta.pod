@@ -1,0 +1,557 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5234delta - what is new for perl v5.23.4
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.23.3 release and the 5.23.4
+release.
+
+If you are upgrading from an earlier release such as 5.23.2, first read
+L<perl5233delta>, which describes differences between 5.23.2 and 5.23.3.
+
+=head1 Incompatible Changes
+
+=head2 Lexical $_ has been removed
+
+C<my $_> was introduced in Perl 5.10, and subsequently caused much confusion
+with no obvious solution.  In Perl 5.18.0, it was made experimental on the
+theory that it would either be removed or redesigned in a less confusing (but
+backward-incompatible) way.  Over the following years, no alternatives were
+proposed.  The feature has now been removed and will fail to compile.
+
+=head2 Only blanks and tabs are now allowed within C<[...]> within C<(?[...])>.
+
+The experimental Extended Bracketed Character Classes can contain regular
+bracketed character classes within them.  These differ from regular ones in
+that white space is generally ignored, unless escaped by preceding it with a
+backslash.  The white space that is ignored is now limited to just tab C<\t>
+and SPACE characters.  Previously, it was any white space.  See
+L<perlrecharclass/Extended Bracketed Character Classes>.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+C</fixed-substr/> has been made much faster.
+
+On platforms with a libc memchr() implementation which makes good use of
+underlying hardware support, patterns which include fixed substrings will now
+often be much faster; for example with glibc on a recent x86_64 CPU, this:
+
+    $s = "a" x 1000 . "wxyz";
+    $s =~ /wxyz/ for 1..30000
+
+is now about 7 times faster.  On systems with slow memchr(), e.g. 32-bit ARM
+Raspberry Pi, there will be a small or little speedup.  Conversely, some
+pathological cases, such as C<"ab" x 1000 =~ /aa/> will be slower now; up to 3
+times slower on the rPi, 1.5x slower on x86_64.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B> has been upgraded from version 1.59 to 1.60.
+
+=item *
+
+L<bignum> has been upgraded from version 0.40 to 0.41.
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.068 to 2.069.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.068_01 to 2.069.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.31 to 3.32.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.34 to 1.35.
+
+=item *
+
+L<Encode> has been upgraded from version 2.77 to 2.78.
+
+=item *
+
+L<experimental> has been upgraded from version 0.014 to 0.016.
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280223 to 0.280224.
+
+=item *
+
+L<File::Path> has been upgraded from version 2.11 to 2.12.
+
+=item *
+
+L<if> has been upgraded from version 0.0605 to 0.0606.
+
+=item *
+
+L<IO> has been upgraded from version 1.35 to 1.36.
+
+For an IO::Poll object C<$poll> with no file handles yet in it,
+C<$poll-E<gt>poll(10)> now sleeps for up to 10 seconds anyway instead of
+returning 0 immediately.
+L<[cpan #25049]|https://rt.cpan.org/Ticket/Display.html?id=25049>
+
+=item *
+
+The IO-Compress modules have been upgraded from version 2.068 to 2.069.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999701 to 1.999704.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.31 to 0.34.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20150920 to 5.20151020.
+
+=item *
+
+L<Module::Metadata> has been upgraded from version 1.000027 to 1.000029.
+
+=item *
+
+L<Perl::OSType> has been upgraded from version 1.008 to 1.009.
+
+=item *
+
+L<PerlIO::encoding> has been upgraded from version 0.21 to 0.22.
+
+PerlIO::encoding objects are now properly duplicated.
+L<[perl #31923]|https://rt.perl.org/Ticket/Display.html?id=31923>
+
+=item *
+
+L<POSIX> has been upgraded from version 1.57 to 1.58.
+
+If C<POSIX::strerror> was passed C<$!> as its argument then it accidentally
+cleared C<$!>.  This has been fixed.
+L<[perl #126229]|https://rt.perl.org/Ticket/Display.html?id=126229>
+
+=item *
+
+L<Socket> has been upgraded from version 2.020_01 to 2.020_02.
+
+Various fixes have been applied to inet_pton for the benefit of MS VC++ builds
+on Windows.  In particular, this restores the build with MS VC++ 6.0.
+
+=item *
+
+L<Unicode::Normalize> has been upgraded from version 1.19 to 1.21.
+
+=item *
+
+L<warnings> has been upgraded from version 1.33 to 1.35.
+
+The C<warnings::enabled> example now actually uses C<warnings::enabled>.
+L<[perl #126051]|https://rt.perl.org/Ticket/Display.html?id=126051>
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+=head3 L<perlapi>
+
+=over 4
+
+=item *
+
+The process of using undocumented globals has been documented, namely, that one
+should send email to L<perl5-porters@perl.org|mailto:perl5-porters@perl.org>
+first to get the go-ahead for documenting and using an undocumented function or
+global variable.
+
+=back
+
+=head3 L<perlsub>
+
+=over 4
+
+=item *
+
+Updated to note that anonymous subroutines can have signatures.
+
+=back
+
+=head3 L<perltie>
+
+=over 4
+
+=item *
+
+The usage of C<FIRSTKEY> and C<NEXTKEY> has been clarified.
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+The specific true value of C<$!{E...}> is now documented, noting that it is
+subject to change and not guaranteed.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<Can't find Unicode property definition "%s" in regex;|perldiag/"Can't find Unicode property definition "%s" in regex; marked by <-- HERE in m/%s/">
+
+=item *
+
+L<Character following \p must be '{' or a single-character Unicode property name in regex;|perldiag/"Character following \%c must be '{' or a single-character Unicode property name in regex; marked by <-- HERE in m/%s/">
+
+=item *
+
+L<Illegal user-defined property name|perldiag/"Illegal user-defined property name">
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+L<Can't modify non-lvalue subroutine call of &%s|perldiag/"Can't modify non-lvalue subroutine call of &%s">
+
+This error now reports the name of the non-lvalue subroutine you attempted to
+use as an lvalue.
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+Using the C<NO_HASH_SEED> define in combination with the default hash algorithm
+C<PERL_HASH_FUNC_ONE_AT_A_TIME_HARD> resulted in a fatal error while compiling
+the interpreter, since Perl 5.17.10.  This has been fixed.
+
+=item *
+
+If you had F<Configure> hints for C<d_procselfexe> or C<procselfexe>, they were
+probably broken by the AmigaOS changes in Perl 5.23.3.  This has been now
+fixed.
+L<[perl #126152]|https://rt.perl.org/Ticket/Display.html?id=126152>
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item IRIX
+
+=over
+
+=item *
+
+Under some circumstances IRIX stdio fgetc() and fread() set the errno to
+C<ENOENT>, which made no sense according to either IRIX or POSIX docs.  Errno
+is now cleared in such cases.
+L<[perl #123977]|https://rt.perl.org/Ticket/Display.html?id=123977>
+
+=item *
+
+Problems when multiplying long doubles by infinity have been fixed.
+L<[perl #126396]|https://rt.perl.org/Ticket/Display.html?id=126396>
+
+=back
+
+=item MacOS X
+
+=over
+
+=item *
+
+Until now OS X builds of perl have specified a link target of 10.3 (Panther,
+2003) but have not specified a compiler target.  From now on, builds of perl on
+OS X 10.6 or later (Snow Leopard, 2008) by default capture the current OS X
+version and specify that as the explicit build target in both compiler and
+linker flags, thus preserving binary compatibility for extensions built later
+regardless of changes in OS X, SDK, or compiler and linker versions.  To
+override the default value used in the build and preserved in the flags,
+specify C<export MACOSX_DEPLOYMENT_TARGET=10.N> before configuring and building
+perl, where 10.N is the version of OS X you wish to target.  In OS X 10.5 or
+earlier there is no change to the behavior present when those systems were
+current; the link target is still OS X 10.3 and there is no explicit compiler
+target.
+
+=back
+
+=item VMS
+
+=over
+
+=item *
+
+Perl now implements its own C<killpg> by scanning for processes in the
+specified process group, which may not mean exactly the same thing as a Unix
+process group, but allows us to send a signal to a parent (or master) process
+and all of its sub-processes.  At the perl level, this means we can now send a
+negative pid like so:
+
+    kill SIGKILL, -$pid;
+
+to signal all processes in the same group as C<$pid>.
+
+=back
+
+=item Win32
+
+=over
+
+=item *
+
+A new build option C<USE_NO_REGISTRY> has been added to the makefiles.  This
+option is off by default, meaning the default is to do Windows registry
+lookups.  This option stops Perl from looking inside the registry for anything.
+For what values are looked up in the registry see L<perlwin32>.  Internally, in
+C, the name of this option is C<WIN32_NO_REGISTRY>.
+
+=item *
+
+The behavior of Perl using C<HKEY_CURRENT_USER\Software\Perl> and
+C<HKEY_LOCAL_MACHINE\Software\Perl> to lookup certain values, including C<%ENV>
+vars starting with C<PERL> has changed.  Previously, the 2 keys were checked
+for entries at all times through Perl processes life time even if they did not
+exist.  For performance reasons, now, if the root key (i.e.
+C<HKEY_CURRENT_USER\Software\Perl> or C<HKEY_LOCAL_MACHINE\Software\Perl>) does
+not exist at process start time, it will not be checked again for C<%ENV>
+override entries for the remainder of the Perl processes life.  This more
+closely matches Unix behaviour in that the environment is copied or inherited
+on startup and changing the variable in the parent process or another process
+or editing F<.bashrc> will not change the environmental variable in other
+existing, running, processes.
+
+=item *
+
+One glob fetch was removed for each C<-X> or C<stat> call whether done from
+Perl code or internally from Perl's C code.  The glob being looked up was
+C<${^WIN32_SLOPPY_STAT}> which is a special variable.  This makes C<-X> and
+C<stat> slightly faster.
+
+=item *
+
+During miniperl's process startup, during the build process, 4 to 8 IO calls
+related to the process starting F<.pl> and the F<buildcustomize.pl> file were
+removed from the code opening and executing the first 1 or 2 F<.pl> files.
+
+=back
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+L<perlapi/sv_backoff> had its return type changed from C<int> to C<void>.  It
+previously has always returned C<0> since Perl 5.000 stable but that was
+undocumented.  Although C<sv_backoff> is marked as public API, XS code is not
+expected to be impacted since the proper API call would be through public API
+C<sv_setsv(sv, &PL_sv_undef)>, or quasi-public C<SvOOK_off>, or non-public
+C<SvOK_off> calls, and the return value of C<sv_backoff> was previously a
+meaningless constant that can be rewritten as C<(sv_backoff(sv),0)>.
+
+=item *
+
+The C<EXTEND> and C<MEXTEND> macros have been improved to avoid various issues
+with integer truncation and wrapping.  In particular, some casts formerly used
+within the macros have been removed.  This means for example that passing an
+unsigned nitems argument is likely to raise a compiler warning now (it's always
+been documented to require a signed value; formerly int, lately SSize_t).
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+There were places in regular expression patterns where comments (C<(?#...)>)
+weren't allowed, but should have been.  This is now fixed.
+L<[perl #116639]|https://rt.perl.org/Ticket/Display.html?id=116639>
+
+=item *
+
+Some regressions from Perl 5.20 have been fixed, in which some syntax errors in
+L<C<(?[...])>|perlrecharclass/Extended Bracketed Character Classes> constructs
+within regular expression patterns could cause a segfault instead of a proper
+error message.
+L<[perl #126180]|https://rt.perl.org/Ticket/Display.html?id=126180>
+L<[perl #126404]|https://rt.perl.org/Ticket/Display.html?id=126404>
+
+=item *
+
+Another problem with
+L<C<(?[...])>|perlrecharclass/Extended Bracketed Character Classes>
+constructs has been fixed wherein things like C<\c]> could cause panics.
+L<[perl #126181]|https://rt.perl.org/Ticket/Display.html?id=126181>
+
+=item *
+
+Some problems with attempting to extend the perl stack to around 2G or 4G
+entries have been fixed.  This was particularly an issue on 32-bit perls built
+to use 64-bit integers, and was easily noticeable with the list repetition
+operator, e.g.
+
+    @a = (1) x $big_number
+
+Formerly perl may have crashed, depending on the exact value of C<$big_number>;
+now it will typically raise an exception.
+L<[perl #125937]|https://rt.perl.org/Ticket/Display.html?id=125937>
+
+=item *
+
+In a regex conditional expression C<(?(condition)yes-pattern|no-pattern)>, if
+the condition is C<(?!)> then perl failed the match outright instead of
+matching the no-pattern.  This has been fixed.
+L<[perl #126222]|https://rt.perl.org/Ticket/Display.html?id=126222>
+
+=item *
+
+The special backtracking control verbs C<(*VERB:ARG)> now all allow an optional
+argument and set C<REGERROR>/C<REGMARK> appropriately as well.
+L<[perl #126186]|https://rt.perl.org/Ticket/Display.html?id=126186>
+
+=item *
+
+Several bugs, including a segmentation fault, have been fixed with the bounds
+checking constructs (introduced in Perl 5.22) C<\b{gcb}>, C<\b{sb}>, C<\b{wb}>,
+C<\B{gcb}>, C<\B{sb}>, and C<\B{wb}>.  All the C<\B{}> ones now match an empty
+string; none of the C<\b{}> ones do.
+L<[perl #126319]|https://rt.perl.org/Ticket/Display.html?id=126319>
+
+=back
+
+=head1 Errata From Previous Releases
+
+=over 4
+
+=item *
+
+(This was actually done in Perl 5.23.2, but the perldelta entry got missed.)
+The way that C<OP_AASSIGN> handles assignment with potentially common values
+(e.g. C<($a,$b) = ($b, $a)> has changed.  In particular the C<OPpASSIGN_COMMON>
+flag has been replaced with three more specific flags:
+
+    OPpASSIGN_COMMON_AGG
+    OPpASSIGN_COMMON_RC1
+    OPpASSIGN_COMMON_SCALAR
+
+and the runtime now sometimes does a mark and sweep using the C<SVf_BREAK> to
+detect common elements.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.23.4 represents approximately 4 weeks of development since Perl 5.23.3
+and contains approximately 21,000 lines of changes across 360 files from 21
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 15,000 lines of changes to 250 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers.  The following people are known to have contributed
+the improvements that became Perl 5.23.4:
+
+Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn Ilmari Mannsåker, Daniel
+Dragan, David Mitchell, Doug Bell, Father Chrysostomos, H.Merijn Brand, Jarkko
+Hietaniemi, Karen Etheridge, Karl Williamson, Nicholas Clark, Peter Martini,
+Rafael Garcia-Suarez, Reini Urban, Ricardo Signes, Steve Hay, Tony Cook, Victor
+Adam, Vincent Pit, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history.  In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core.  We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles recently
+posted to the comp.lang.perl.misc newsgroup and the perl bug database at
+L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send it
+to perl5-security-report@perl.org.  This points to a closed subscription
+unarchived mailing list, which includes all the core committers, who will be
+able to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported.  Please only use this address for
+security issues in the Perl core, not for modules independently distributed on
+CPAN.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
