@@ -29,18 +29,32 @@
 SV**
 Perl_stack_grow(pTHX_ SV **sp, SV **p, SSize_t n)
 {
+    SSize_t extra;
+    SSize_t current = (p - PL_stack_base);
+
     PERL_ARGS_ASSERT_STACK_GROW;
 
-    if (n < 0)
+    if (UNLIKELY(n < 0))
         Perl_croak(aTHX_
             "panic: stack_grow() negative count (%"IVdf")", (IV)n);
 
     PL_stack_sp = sp;
-#ifndef STRESS_REALLOC
-    av_extend(PL_curstack, (p - PL_stack_base) + (n) + 128);
+    extra =
+#ifdef STRESS_REALLOC
+        1;
 #else
-    av_extend(PL_curstack, (p - PL_stack_base) + (n) + 1);
+        128;
 #endif
+    /* If the total might wrap, panic instead. This is really testing
+     * that (current + n + extra < SSize_t_MAX), but done in a way that
+     * can't wrap */
+    if (UNLIKELY(   current         > SSize_t_MAX - extra
+                 || current + extra > SSize_t_MAX - n
+    ))
+        /* diag_listed_as: Out of memory during %s extend */
+        Perl_croak(aTHX_ "Out of memory during stack extend");
+
+    av_extend(PL_curstack, current + n + extra);
     return PL_stack_sp;
 }
 

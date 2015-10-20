@@ -6,7 +6,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan(tests => 47);
+plan(tests => 48);
 
 # compile time
 
@@ -173,3 +173,13 @@ for(($#that_array)x2) {
     $_ *= 2;
 }
 is($#that_array, 28, 'list repetition propagates lvalue cx to its lhs');
+
+# [perl #126309] huge list counts should give an error
+
+
+fresh_perl_like(
+ '@a = (1) x ~1',
+  qr/Out of memory/,
+  {  },
+ '(1) x ~1',
+);
