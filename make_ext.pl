@@ -520,7 +520,11 @@ EOM
 	   local $ENV{PERL_MM_USE_DEFAULT} = 1;
 	    system $perl, @args;
 	};
-	warn "$code from $ext_dir\'s Makefile.PL" if $code;
+	if($code != 0){
+	    #make sure next build attempt/run of make_ext.pl doesn't succeed
+	    _unlink($makefile);
+	    die "Unsuccessful Makefile.PL($ext_dir): code=$code";
+	}
 
 	# Right. The reason for this little hack is that we're sitting inside
 	# a program run by ./miniperl, but there are tasks we need to perform
