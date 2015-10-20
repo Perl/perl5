@@ -1044,6 +1044,9 @@ a testbed for their product they periodically check several open source
 projects, and they give out accounts to open source developers to the
 defect databases.
 
+There is Coverity setup for the perl5 project:
+L<https://scan.coverity.com/projects/perl5>
+
 =head2 cpd (cut-and-paste detector)
 
 The cpd tool detects cut-and-paste coding.  If one instance of the
