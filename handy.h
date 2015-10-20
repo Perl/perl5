@@ -280,8 +280,13 @@ typedef U64TYPE U64;
 /* This is a helper macro to avoid preprocessor issues, replaced by nothing
  * unless under DEBUGGING, where it expands to an assert of its argument,
  * followed by a comma (hence the comma operator).  If we just used a straight
- * assert(), we would get a comma with nothing before it when not DEBUGGING */
-#ifdef DEBUGGING
+ * assert(), we would get a comma with nothing before it when not DEBUGGING.
+ *
+ * We also use empty definition under Coverity since the __ASSERT__
+ * checks often check for things that Really Cannot Happen, and Coverity
+ * detects that and gets all excited. */
+
+#if defined(DEBUGGING) && !defined(__COVERITY__)
 #   define __ASSERT_(statement)  assert(statement),
 #else
 #   define __ASSERT_(statement)
