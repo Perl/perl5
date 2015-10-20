@@ -17,6 +17,20 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.23.4 - Denis Diderot, trans. David Coward, "Jacques the Fatalist"
+
+L<Announced on 2015-10-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/10/msg232040.html>
+
+Well, everybody's got a dog.  The prime minister is the king's dog.  The
+first secretary is the prime minister's dog.  A wife is a husband's dog,
+or a husband is a wife's dog.  Favourite is Madame So-and-so's dog and
+Thibaut is the man on the corner's dog.  When my Master tells me to talk
+when I'd prefer not to, which to be honest doesn't happen very often,
+when he tells me to shut up when I feel like talking, which I find very
+difficult, when he asks me to tell the story of my love-life and then
+keeps interrupting, what am I if not his dog?  Weak men are the dogs of
+strong men.
+
 =head2 v5.23.3 - Oliver Wendell Holmes, "The Deacon’s Masterpiece or The Wonderful 'One-Hoss Shay': A Logical Story"
 
 L<Announced on 2015-09-20 by Peter Martini|http://www.nntp.perl.org/group/perl.perl5.porters/2015/09/msg231173.html>
