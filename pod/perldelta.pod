@@ -492,9 +492,34 @@ detect common elements.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.23.4 represents approximately 4 weeks of development since Perl 5.23.3
+and contains approximately 21,000 lines of changes across 360 files from 21
+authors.
 
-  perl Porting/acknowledgements.pl v5.23.3..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 15,000 lines of changes to 250 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers.  The following people are known to have contributed
+the improvements that became Perl 5.23.4:
+
+Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn Ilmari Mannsåker, Daniel
+Dragan, David Mitchell, Doug Bell, Father Chrysostomos, H.Merijn Brand, Jarkko
+Hietaniemi, Karen Etheridge, Karl Williamson, Nicholas Clark, Peter Martini,
+Rafael Garcia-Suarez, Reini Urban, Ricardo Signes, Steve Hay, Tony Cook, Victor
+Adam, Vincent Pit, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history.  In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core.  We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
