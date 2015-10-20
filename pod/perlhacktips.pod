@@ -601,6 +601,10 @@ temporarily try the following:
 But in any case, try to keep the features and operating systems
 separate.
 
+A good resource on the predefined macros for various operating
+systems, compilers, and so forth is
+L<http://sourceforge.net/p/predef/wiki/Home/>
+
 =item *
 
 Assuming the contents of static memory pointed to by the return values
