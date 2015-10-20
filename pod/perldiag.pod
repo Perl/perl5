@@ -6580,6 +6580,17 @@ since they are often used in statements like
 String constants that would normally evaluate to 0 or 1 are warned
 about.
 
+=item Unusual use of %s in void context
+
+(W void_unusual) Similar to the "Useless use of %s in void context"
+warning, but only turned on by the top-level "pedantic" warning
+category, used for e.g. C<grep> in void context, which may indicate a
+bug, but could also just be someone using C<grep> for its side-effects
+as a loop.
+
+Enabled as part of "extra" warnings, not in the "all" category. See
+L<warnings> for details
+
 =item Useless use of (?-p) in regex; marked by S<<-- HERE> in m/%s/
 
 (W regexp) The C<p> modifier cannot be turned off once set.  Trying to do

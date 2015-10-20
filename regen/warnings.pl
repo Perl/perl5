@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.35';
+$VERSION = '1.36';
 
 BEGIN {
     require 'regen/regen_lib.pl';
@@ -28,90 +28,100 @@ sub DEFAULT_ON  () { 1 }
 sub DEFAULT_OFF () { 2 }
 
 my $tree = {
-'all' => [ 5.008, {
-        'io'            => [ 5.008, {
-                                'pipe'          => [ 5.008, DEFAULT_OFF],
-                                'unopened'      => [ 5.008, DEFAULT_OFF],
-                                'closed'        => [ 5.008, DEFAULT_OFF],
-                                'newline'       => [ 5.008, DEFAULT_OFF],
-                                'exec'          => [ 5.008, DEFAULT_OFF],
-                                'layer'         => [ 5.008, DEFAULT_OFF],
-                                'syscalls'      => [ 5.019, DEFAULT_OFF],
-                           }],
-        'syntax'        => [ 5.008, {
-                                'ambiguous'     => [ 5.008, DEFAULT_OFF],
-                                'semicolon'     => [ 5.008, DEFAULT_OFF],
-                                'precedence'    => [ 5.008, DEFAULT_OFF],
-                                'bareword'      => [ 5.008, DEFAULT_OFF],
-                                'reserved'      => [ 5.008, DEFAULT_OFF],
-                                'digit'         => [ 5.008, DEFAULT_OFF],
-                                'parenthesis'   => [ 5.008, DEFAULT_OFF],
-                                'printf'        => [ 5.008, DEFAULT_OFF],
-                                'prototype'     => [ 5.008, DEFAULT_OFF],
-                                'qw'            => [ 5.008, DEFAULT_OFF],
-                                'illegalproto'  => [ 5.011, DEFAULT_OFF],
-                           }],
-        'severe'        => [ 5.008, {
-                                'inplace'       => [ 5.008, DEFAULT_ON],
-                                'internal'      => [ 5.008, DEFAULT_OFF],
-                                'debugging'     => [ 5.008, DEFAULT_ON],
-                                'malloc'        => [ 5.008, DEFAULT_ON],
-                           }],
-        'deprecated'    => [ 5.008, DEFAULT_ON],
-        'void'          => [ 5.008, DEFAULT_OFF],
-        'recursion'     => [ 5.008, DEFAULT_OFF],
-        'redefine'      => [ 5.008, DEFAULT_OFF],
-        'numeric'       => [ 5.008, DEFAULT_OFF],
-        'uninitialized' => [ 5.008, DEFAULT_OFF],
-        'once'          => [ 5.008, DEFAULT_OFF],
-        'misc'          => [ 5.008, DEFAULT_OFF],
-        'regexp'        => [ 5.008, DEFAULT_OFF],
-        'glob'          => [ 5.008, DEFAULT_ON],
-        'untie'         => [ 5.008, DEFAULT_OFF],
-        'substr'        => [ 5.008, DEFAULT_OFF],
-        'taint'         => [ 5.008, DEFAULT_OFF],
-        'signal'        => [ 5.008, DEFAULT_OFF],
-        'closure'       => [ 5.008, DEFAULT_OFF],
-        'overflow'      => [ 5.008, DEFAULT_OFF],
-        'portable'      => [ 5.008, DEFAULT_OFF],
-        'utf8'          => [ 5.008, {
-                                'surrogate' => [ 5.013, DEFAULT_OFF],
-                                'nonchar' => [ 5.013, DEFAULT_OFF],
-                                'non_unicode' => [ 5.013, DEFAULT_OFF],
-                        }],
-        'exiting'       => [ 5.008, DEFAULT_OFF],
-        'pack'          => [ 5.008, DEFAULT_OFF],
-        'unpack'        => [ 5.008, DEFAULT_OFF],
-        'threads'       => [ 5.008, DEFAULT_OFF],
-        'imprecision'   => [ 5.011, DEFAULT_OFF],
-        'experimental'  => [ 5.017, {
-                                'experimental::lexical_subs' =>
-                                    [ 5.017, DEFAULT_ON ],
-                                'experimental::regex_sets' =>
-                                    [ 5.017, DEFAULT_ON ],
-                                'experimental::smartmatch' =>
-                                    [ 5.017, DEFAULT_ON ],
-                                'experimental::postderef' =>
-                                    [ 5.019, DEFAULT_ON ],
-                                'experimental::signatures' =>
-                                    [ 5.019, DEFAULT_ON ],
-                                'experimental::win32_perlio' =>
-                                    [ 5.021, DEFAULT_ON ],
-                                'experimental::refaliasing' =>
-                                    [ 5.021, DEFAULT_ON ],
-                                'experimental::re_strict' =>
-                                    [ 5.021, DEFAULT_ON ],
-                                'experimental::const_attr' =>
-                                    [ 5.021, DEFAULT_ON ],
-                                'experimental::bitwise' =>
-                                    [ 5.021, DEFAULT_ON ],
-                        }],
+'everything' => [ 5.023, {
+        'all' => [ 5.008, {
+                'io'            => [ 5.008, {
+                                        'pipe'          => [ 5.008, DEFAULT_OFF],
+                                        'unopened'      => [ 5.008, DEFAULT_OFF],
+                                        'closed'        => [ 5.008, DEFAULT_OFF],
+                                        'newline'       => [ 5.008, DEFAULT_OFF],
+                                        'exec'          => [ 5.008, DEFAULT_OFF],
+                                        'layer'         => [ 5.008, DEFAULT_OFF],
+                                        'syscalls'      => [ 5.019, DEFAULT_OFF],
+                                   }],
+                'syntax'        => [ 5.008, {
+                                        'ambiguous'     => [ 5.008, DEFAULT_OFF],
+                                        'semicolon'     => [ 5.008, DEFAULT_OFF],
+                                        'precedence'    => [ 5.008, DEFAULT_OFF],
+                                        'bareword'      => [ 5.008, DEFAULT_OFF],
+                                        'reserved'      => [ 5.008, DEFAULT_OFF],
+                                        'digit'         => [ 5.008, DEFAULT_OFF],
+                                        'parenthesis'   => [ 5.008, DEFAULT_OFF],
+                                        'printf'        => [ 5.008, DEFAULT_OFF],
+                                        'prototype'     => [ 5.008, DEFAULT_OFF],
+                                        'qw'            => [ 5.008, DEFAULT_OFF],
+                                        'illegalproto'  => [ 5.011, DEFAULT_OFF],
+                                   }],
+                'severe'        => [ 5.008, {
+                                        'inplace'       => [ 5.008, DEFAULT_ON],
+                                        'internal'      => [ 5.008, DEFAULT_OFF],
+                                        'debugging'     => [ 5.008, DEFAULT_ON],
+                                        'malloc'        => [ 5.008, DEFAULT_ON],
+                                   }],
+                'deprecated'    => [ 5.008, DEFAULT_ON],
+                'void'          => [ 5.008, DEFAULT_OFF],
+                'recursion'     => [ 5.008, DEFAULT_OFF],
+                'redefine'      => [ 5.008, DEFAULT_OFF],
+                'numeric'       => [ 5.008, DEFAULT_OFF],
+                'uninitialized' => [ 5.008, DEFAULT_OFF],
+                'once'          => [ 5.008, DEFAULT_OFF],
+                'misc'          => [ 5.008, DEFAULT_OFF],
+                'regexp'        => [ 5.008, DEFAULT_OFF],
+                'glob'          => [ 5.008, DEFAULT_ON],
+                'untie'         => [ 5.008, DEFAULT_OFF],
+                'substr'        => [ 5.008, DEFAULT_OFF],
+                'taint'         => [ 5.008, DEFAULT_OFF],
+                'signal'        => [ 5.008, DEFAULT_OFF],
+                'closure'       => [ 5.008, DEFAULT_OFF],
+                'overflow'      => [ 5.008, DEFAULT_OFF],
+                'portable'      => [ 5.008, DEFAULT_OFF],
+                'utf8'          => [ 5.008, {
+                                        'surrogate' => [ 5.013, DEFAULT_OFF],
+                                        'nonchar' => [ 5.013, DEFAULT_OFF],
+                                        'non_unicode' => [ 5.013, DEFAULT_OFF],
+                                }],
+                'exiting'       => [ 5.008, DEFAULT_OFF],
+                'pack'          => [ 5.008, DEFAULT_OFF],
+                'unpack'        => [ 5.008, DEFAULT_OFF],
+                'threads'       => [ 5.008, DEFAULT_OFF],
+                'imprecision'   => [ 5.011, DEFAULT_OFF],
+                'experimental'  => [ 5.017, {
+                                        'experimental::lexical_subs' =>
+                                            [ 5.017, DEFAULT_ON ],
+                                        'experimental::regex_sets' =>
+                                            [ 5.017, DEFAULT_ON ],
+                                        'experimental::smartmatch' =>
+                                            [ 5.017, DEFAULT_ON ],
+                                        'experimental::postderef' =>
+                                            [ 5.019, DEFAULT_ON ],
+                                        'experimental::signatures' =>
+                                            [ 5.019, DEFAULT_ON ],
+                                        'experimental::win32_perlio' =>
+                                            [ 5.021, DEFAULT_ON ],
+                                        'experimental::refaliasing' =>
+                                            [ 5.021, DEFAULT_ON ],
+                                        'experimental::re_strict' =>
+                                            [ 5.021, DEFAULT_ON ],
+                                        'experimental::const_attr' =>
+                                            [ 5.021, DEFAULT_ON ],
+                                        'experimental::bitwise' =>
+                                            [ 5.021, DEFAULT_ON ],
+                                }],
 
-        'missing'       => [ 5.021, DEFAULT_OFF],
-        'redundant'     => [ 5.021, DEFAULT_OFF],
-        'locale'        => [ 5.021, DEFAULT_ON],
+                'missing'       => [ 5.021, DEFAULT_OFF],
+                'redundant'     => [ 5.021, DEFAULT_OFF],
+                'locale'        => [ 5.021, DEFAULT_ON],
 
-         #'default'     => [ 5.008, DEFAULT_ON ],
+                #'default'     => [ 5.008, DEFAULT_ON ],
+        }],
+
+        # When adding new warnings outside of "all" make sure to
+        # either patch util.c to ignore them under -w and -W, or to
+        # generalize the facility for adding them so that it knows
+        # about warnings outside of "all".
+        'extra' => [ 5.023, {
+                'void_unusual'     => [ 5.023, DEFAULT_OFF],
+        }],
 }]};
 
 my @def ;
@@ -287,7 +297,7 @@ sub mkOct
 
 if (@ARGV && $ARGV[0] eq "tree")
 {
-    print warningsTree($tree, "    ") ;
+    print warningsTree($tree, " ") ;
     exit ;
 }
 
@@ -352,9 +362,9 @@ EOM
   }
   print $warn "\n" ;
 
-  print $warn tab(6, '#define WARNsize'),	" $warn_size\n" ;
-  print $warn tab(6, '#define WARN_ALLstring'), ' "', ('\125' x $warn_size) , "\"\n" ;
-  print $warn tab(6, '#define WARN_NONEstring'), ' "', ('\0' x $warn_size) , "\"\n" ;
+  print $warn tab(6, '#define WARNsize'),	"$warn_size\n" ;
+  print $warn tab(6, '#define WARN_ALLstring'), '"', ('\125' x $warn_size) , "\"\n" ;
+  print $warn tab(6, '#define WARN_NONEstring'), '"', ('\0' x $warn_size) , "\"\n" ;
 
   print $warn <<'EOM';
 
@@ -440,7 +450,7 @@ foreach my $k (sort { $a <=> $b } keys %ValueToName) {
     $last_ver = $version;
 }
 
-print $pm ");\n\n" ;
+print $pm "  );\n\n" ;
 
 print $pm "our %Bits = (\n" ;
 foreach my $k (sort keys  %list) {
@@ -453,7 +463,7 @@ foreach my $k (sort keys  %list) {
 		'", # [', mkRange(@list), "]\n" ;
 }
 
-print $pm ");\n\n" ;
+print $pm "  );\n\n" ;
 
 print $pm "our %DeadBits = (\n" ;
 foreach my $k (sort keys  %list) {
@@ -466,7 +476,7 @@ foreach my $k (sort keys  %list) {
 		'", # [', mkRange(@list), "]\n" ;
 }
 
-print $pm ");\n\n" ;
+print $pm "  );\n\n" ;
 print $pm "# These are used by various things, including our own tests\n";
 print $pm tab(6, 'our $NONE'), '=  "', ('\0' x $warn_size) , "\";\n" ;
 print $pm tab(6, 'our $DEFAULT'), '=  "', mkHex($warn_size, map $_ * 2, @def),
@@ -475,7 +485,7 @@ print $pm tab(6, 'our $LAST_BIT'), '=  ' . "$index ;\n" ;
 print $pm tab(6, 'our $BYTES'),    '=  ' . "$warn_size ;\n" ;
 while (<DATA>) {
     if ($_ eq "=for warnings.pl tree-goes-here\n") {
-      print $pm warningsTree($tree, "    ");
+      print $pm warningsTree($tree, " ");
       next;
     }
     print $pm $_ ;
@@ -776,12 +786,17 @@ be applied to their module.
 By default, optional warnings are disabled, so any legacy code that
 doesn't attempt to control the warnings will work unchanged.
 
-All warnings are enabled in a block by either of these:
+When we talk about "all" warnings we don't actually mean "all the
+warnings we support". See L</Top-level warning categories & associated
+confusion> for details. The "all" category should really be called the
+"default" category, if not for backwards-compatibility concerns.
+
+"All" warnings are enabled in a block by either of these:
 
     use warnings;
     use warnings 'all';
 
-Similarly all warnings are disabled in a block by either of these:
+Similarly "all" warnings are disabled in a block by either of these:
 
     no warnings;
     no warnings 'all';
@@ -899,7 +914,7 @@ details of how this flag interacts with lexical warnings.
 =item B<-W>
 X<-W>
 
-If the B<-W> flag is used on the command line, it will enable all warnings
+If the B<-W> flag is used on the command line, it will enable "all" warnings
 throughout the program regardless of whether warnings were disabled
 locally using C<no warnings> or C<$^W =0>.
 This includes all files that get
@@ -909,9 +924,79 @@ Think of it as the Perl equivalent of the "lint" command.
 =item B<-X>
 X<-X>
 
-Does the exact opposite to the B<-W> flag, i.e. it disables all warnings.
+Does the exact opposite to the B<-W> flag, i.e. it disables "all" warnings.
 
 =back
+
+=head2 Top-level warning categories & associated confusion
+
+The lexical warning pragma was introduced in v5.6.0 of perl, and from
+the very beginning doing C<use warnings> would enable the "all"
+category of warnings, which were all the warnings we support.
+
+This led to arguments whenever someone suggested a new warning be
+added to perl, since that implicitly meant that existing programs that
+used the warnings pragma would be retroactively subjected to them when
+perl was upgraded.
+
+So similarly to how most C compilers support C<-Wall> to mean "not
+quite all warnings" along with extra options like C<-Wextra>, we
+support warnings outside of the "all" category. Think of the "all"
+category as "default", that's what we'd call it we were starting out
+today and didn't have a bunch of programs doing C<use warnings "all">
+in the wild already.
+
+The categories we support are:
+
+=over
+
+=item * all
+
+This is the "default" category for warnings that we've supported ever
+since v5.6.0. We have and might occasionally add new warnings here if
+they're deemed to be similar in nature to our existing warnings, but
+mostly these are things we're pretty sure are a logic error, but
+aren't irrecoverable, so they're not a runtime error.
+
+When you upgrade perl you might find that we've added some new
+warnings here, but they won't be anything wildly different from the
+current set of warnings, so the burden of going through your existing
+code and auditing the new parts that are warning should be fairly
+light.
+
+=item * everything
+
+This is what "all" would be if the world made any sense, but since we
+started out with "all" you need to enable "everything" to really
+enable "all the warnings".
+
+You almost definitely don't want to enable "everything", unless you're
+willing to potentially get a flood of new warnings with every perl
+upgrade, and those warnings may be entirely different in spirit to
+existing warnings shipped with previous releases.
+
+Maybe we'll start introducing really pedantic warnings that aren't
+useful for most cases, maybe we'll start warning about inconsistent
+indentation, who knows? If you really want ALL the warnings perl has
+to offer enable these, otherwise stick with some more sane category.
+
+=item * extra
+
+These are warnings that we might have put into "all"
+(a.k.a. "default") if we had a time machine and were starting out with
+perl today, but they'd probably cause too much of a disruption today
+so we're not doing that.
+
+As of writing this the sole warning in this category is a warning
+about useless use of grep in void context, but unlike for the "all"
+category we reserve the right to freely add things to this category in
+the future.
+
+=back
+
+In the future we might add any number of other top-level
+categories. The backwards-compatibility promises of those categories
+(if any) will be documented here.
 
 =head2 Backward Compatibility
 
