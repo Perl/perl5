@@ -13807,8 +13807,12 @@ redo_curchar:
                 /* Having gotten rid of the fence, we pop the operand at the
                  * stack top and process it as a newly encountered operand */
                 current = av_pop(stack);
-                assert(IS_OPERAND(current));
-                goto handle_operand;
+                if (IS_OPERAND(current)) {
+                    goto handle_operand;
+                }
+
+                RExC_parse++;
+                goto bad_syntax;
 
             case '&':
             case '|':
