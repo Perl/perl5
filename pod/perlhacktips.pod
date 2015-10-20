@@ -1047,7 +1047,7 @@ defect databases.
 There is Coverity setup for the perl5 project:
 L<https://scan.coverity.com/projects/perl5>
 
-=head HP-UX cadvise (Code Advisor)
+=head2 HP-UX cadvise (Code Advisor)
 
 HP has a C/C++ static analyzer product for HP-UX caller Code Advisor.
 (Link not given here because the URL is horribly long and seems horribly
