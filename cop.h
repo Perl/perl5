@@ -971,7 +971,6 @@ struct block {
 
 /* Continue a block elsewhere (NEXT and REDO). */
 #define TOPBLOCK(cx)							\
-	cx = CX_CUR();					                \
 	CX_DEBUG(cx, "TOP");						\
 	PL_stack_sp	 = PL_stack_base + cx->blk_oldsp,		\
 	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
