@@ -280,4 +280,17 @@ SKIP: {
     }
 }
 
+{
+    # follow-up to [perl #91844]: a do should always return a copy,
+    # not the original
+
+    my %foo;
+    $foo{bar} = 7;
+    my $r = \$foo{bar};
+    sub {
+        $$r++;
+        isnt($_[0], $$r, "result of delete(helem) is copied: practical test");
+    }->(do { 1; delete $foo{bar} });
+}
+
 done_testing();

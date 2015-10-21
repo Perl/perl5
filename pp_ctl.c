@@ -2047,12 +2047,15 @@ S_leave_common(pTHX_ SV **newsp, SV **mark, I32 gimme,
 
     TAINT_NOT;
     if (gimme == G_SCALAR) {
-	if (MARK < SP)
-	    *++newsp = (SvFLAGS(*SP) & flags)
-			    ? *SP
+	if (MARK < SP) {
+            SV *sv = *SP;
+
+	    *++newsp = ((SvFLAGS(sv) & flags) && SvREFCNT(sv) == 1)
+			    ? sv 
 			    : lvalue
-				? sv_2mortal(SvREFCNT_inc_simple_NN(*SP))
-				: sv_mortalcopy(*SP);
+				? sv_2mortal(SvREFCNT_inc_simple_NN(sv))
+				: sv_mortalcopy(sv);
+        }
 	else {
 	    EXTEND(newsp, 1);
 	    *++newsp = &PL_sv_undef;
@@ -2061,12 +2064,13 @@ S_leave_common(pTHX_ SV **newsp, SV **mark, I32 gimme,
     else if (gimme == G_ARRAY) {
 	/* in case LEAVE wipes old return values */
 	while (++MARK <= SP) {
-	    if (SvFLAGS(*MARK) & flags)
-		*++newsp = *MARK;
+            SV *sv = *MARK;
+	    if ((SvFLAGS(sv) & flags) && SvREFCNT(sv) == 1)
+		*++newsp = sv;
 	    else {
 		*++newsp = lvalue
-			    ? sv_2mortal(SvREFCNT_inc_simple_NN(*MARK))
-			    : sv_mortalcopy(*MARK);
+			    ? sv_2mortal(SvREFCNT_inc_simple_NN(sv))
+			    : sv_mortalcopy(sv);
 		TAINT_NOT;	/* Each item is independent */
 	    }
 	}

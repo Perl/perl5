@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 59);
+plan(tests => 60);
 
 sub empty_sub {}
 
@@ -63,6 +63,13 @@ is(scalar(@test), 0, 'Didnt return anything');
       'result of shift is copied when returned';
     isnt \sub { ()=\@_; return shift }->($x), \$x,
       'result of shift is copied when explicitly returned';
+
+    $foo{bar} = 7;
+    my $r = \$foo{bar};
+    sub {
+        $$r++;
+        isnt($_[0], $$r, "result of delete(helem) is copied: practical test");
+    }->(sub { delete $foo{bar} }->());
 }
 
 fresh_perl_is
