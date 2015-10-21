@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 60);
+plan(tests => 61);
 
 sub empty_sub {}
 
@@ -382,4 +382,12 @@ is(join('-', 10, check_ret(-1,5)),      "10",  "check_ret(-1,5) list");
         1;
     }->('a','b');
     is(join('-', @res), "a-b", "unnested rubbish");
+}
+
+# a sub should copy returned PADTMPs
+
+{
+    sub f99 { $_[0] . "x" };
+    my $a = [ f99(1), f99(2) ];
+    is("@$a", "1x 2x", "PADTMPs copied on return");
 }
