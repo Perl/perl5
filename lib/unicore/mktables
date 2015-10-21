@@ -8,6 +8,11 @@
 # compatible, but that has now been abandoned, and newer constructs are used
 # as convenient.
 
+# NOTE: this script can run quite slowly in older/slower systems.
+# It can also consume a lot of memory (128 MB or more), you may need
+# to raise your process resource limits (e.g. in bash, "ulimit -a"
+# to inspect, and "ulimit -d ..." or "ulimit -m ..." to set)
+
 my $start_time;
 BEGIN { # Get the time the script started running; do it at compilation to
         # get it as close as possible
