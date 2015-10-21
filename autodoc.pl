@@ -396,6 +396,11 @@ not part of the public API, and should not be used by extension writers at
 all.  For these reasons, blindly using functions listed in proto.h is to be
 avoided when writing extensions.
 
+In Perl, unlike C, a string of characters may generally contain embedded
+C<NUL> characters.  Sometimes in the documentation a Perl string is referred
+to as a "buffer" to distinguish it from a C string, but sometimes they are
+both just referred to as strings.
+
 Note that all Perl API global variables must be referenced with the C<PL_>
 prefix.  Again, those not listed here are not to be used by extension writers,
 and can be changed or removed without notice; same with macros.

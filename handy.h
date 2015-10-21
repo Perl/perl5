@@ -421,37 +421,38 @@ string/length pair.
 =head1 Miscellaneous Functions
 
 =for apidoc Am|bool|strNE|char* s1|char* s2
-Test two strings to see if they are different.  Returns true or
-false.
+Test two C<NUL>-terminated strings to see if they are different.  Returns true
+or false.
 
 =for apidoc Am|bool|strEQ|char* s1|char* s2
-Test two strings to see if they are equal.  Returns true or false.
+Test two C<NUL>-terminated strings to see if they are equal.  Returns true or
+false.
 
 =for apidoc Am|bool|strLT|char* s1|char* s2
-Test two strings to see if the first, C<s1>, is less than the second,
-C<s2>.  Returns true or false.
-
-=for apidoc Am|bool|strLE|char* s1|char* s2
-Test two strings to see if the first, C<s1>, is less than or equal to the
+Test two C<NUL>-terminated strings to see if the first, C<s1>, is less than the
 second, C<s2>.  Returns true or false.
 
-=for apidoc Am|bool|strGT|char* s1|char* s2
-Test two strings to see if the first, C<s1>, is greater than the second,
-C<s2>.  Returns true or false.
+=for apidoc Am|bool|strLE|char* s1|char* s2
+Test two C<NUL>-terminated strings to see if the first, C<s1>, is less than or
+equal to the second, C<s2>.  Returns true or false.
 
-=for apidoc Am|bool|strGE|char* s1|char* s2
-Test two strings to see if the first, C<s1>, is greater than or equal to
+=for apidoc Am|bool|strGT|char* s1|char* s2
+Test two C<NUL>-terminated strings to see if the first, C<s1>, is greater than
 the second, C<s2>.  Returns true or false.
 
+=for apidoc Am|bool|strGE|char* s1|char* s2
+Test two C<NUL>-terminated strings to see if the first, C<s1>, is greater than
+or equal to the second, C<s2>.  Returns true or false.
+
 =for apidoc Am|bool|strnNE|char* s1|char* s2|STRLEN len
-Test two strings to see if they are different.  The C<len> parameter
-indicates the number of bytes to compare.  Returns true or false.  (A
+Test two C<NUL>-terminated strings to see if they are different.  The C<len>
+parameter indicates the number of bytes to compare.  Returns true or false.  (A
 wrapper for C<strncmp>).
 
 =for apidoc Am|bool|strnEQ|char* s1|char* s2|STRLEN len
-Test two strings to see if they are equal.  The C<len> parameter indicates
-the number of bytes to compare.  Returns true or false.  (A wrapper for
-C<strncmp>).
+Test two C<NUL>-terminated strings to see if they are equal.  The C<len>
+parameter indicates the number of bytes to compare.  Returns true or false.  (A
+wrapper for C<strncmp>).
 
 =for apidoc Am|bool|memEQ|char* s1|char* s2|STRLEN len
 Test two buffers (which may contain embedded C<NUL> characters, to see if they
@@ -540,9 +541,9 @@ C<isWORDCHAR_uni(0x100)> returns TRUE, since 0x100 is LATIN CAPITAL LETTER A
 WITH MACRON in Unicode, and is a word character.
 
 Variant C<isFOO_utf8> is like C<isFOO_uni>, but the input is a pointer to a
-(known to be well-formed) UTF-8 encoded string (C<U8*> or C<char*>).  The
-classification of just the first (possibly multi-byte) character in the string
-is tested.
+(known to be well-formed) UTF-8 encoded string (C<U8*> or C<char*>, and
+possibly containing embedded C<NUL> characters).  The classification of just
+the first (possibly multi-byte) character in the string is tested.
 
 Variant C<isFOO_LC> is like the C<isFOO_A> and C<isFOO_L1> variants, but the
 result is based on the current locale, which is what C<LC> in the name stands
@@ -559,9 +560,9 @@ returns the same as C<isFOO_LC> for input code points less than 256, and
 returns the hard-coded, not-affected-by-locale, Unicode results for larger ones.
 
 Variant C<isFOO_LC_utf8> is like C<isFOO_LC_uvchr>, but the input is a pointer
-to a (known to be well-formed) UTF-8 encoded string (C<U8*> or C<char*>).  The
-classification of just the first (possibly multi-byte) character in the string
-is tested.
+to a (known to be well-formed) UTF-8 encoded string (C<U8*> or C<char*>, and
+possibly containing embedded C<NUL> characters).  The classification of just
+the first (possibly multi-byte) character in the string is tested.
 
 =for apidoc Am|bool|isALPHA|char ch
 Returns a boolean indicating whether the specified character is an
