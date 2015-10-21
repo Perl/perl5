@@ -11927,6 +11927,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'POSIX'                 => '1.53_01',
             'PerlIO::scalar'        => '0.23',
             'Storable'              => '2.53_01',
+            'warnings'              => '1.34',
         },
         removed => {
         }
