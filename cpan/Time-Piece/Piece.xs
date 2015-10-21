@@ -153,8 +153,22 @@ fix_win32_tzenv(void)
     if (crt_tz_env == NULL)
         crt_tz_env = "";
     if (strcmp(perl_tz_env, crt_tz_env) != 0) {
-        newenv = (char*)malloc((strlen(perl_tz_env) + 4) * sizeof(char));
+        STRLEN perl_tz_env_len = strlen(perl_tz_env);
+        newenv = (char*)malloc((perl_tz_env_len + 4) * sizeof(char));
         if (newenv != NULL) {
+/* putenv with old MS CRTs will cause a double free internally if you delete
+   an env var with the CRT env that doesn't exist in Win32 env (perl %ENV only
+   modifies the Win32 env, not CRT env), so always create the env var in Win32
+   env before deleting it with CRT env api, so the error branch never executes
+   in __crtsetenv after SetEnvironmentVariableA executes inside __crtsetenv.
+
+   VC 9/2008 and up dont have this bug, older VC (msvcrt80.dll and older) and
+   mingw (msvcrt.dll) have it see [perl #125529]
+*/
+#if !(_MSC_VER >= 1500)
+            if(!perl_tz_env_len)
+                SetEnvironmentVariableA("TZ", "");
+#endif
             sprintf(newenv, "TZ=%s", perl_tz_env);
             putenv(newenv);
             if (oldenv != NULL)
@@ -1012,7 +1026,7 @@ _strftime(fmt, epoch, islocal = 1)
     {
         char tmpbuf[128];
         struct tm mytm;
-        int len;
+        size_t len;
 
         if(islocal == 1)
             mytm = *localtime(&epoch);

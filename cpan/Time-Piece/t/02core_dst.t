@@ -3,11 +3,16 @@ use Test::More tests => 60;
 my $is_win32 = ($^O =~ /Win32/);
 my $is_qnx = ($^O eq 'qnx');
 my $is_vos = ($^O eq 'vos');
+my $is_linux = ($^O =~ /linux/);
+my $is_bsd = ($^O =~ /bsd/);
+my $is_mac = ($^O =~ /darwin/);
 
 use Time::Piece;
 use Time::Seconds;
 
 #test using an epoch that can be DST
+#because sometimes funny stuff can occur [cpan #93095]
+#https://rt.cpan.org/Ticket/Display.html?id=93095#txn-1482590
 
 my $t = gmtime(1373371631); # 2013-07-09T12:07:11
 
@@ -119,7 +124,9 @@ ok(not $t->is_leap_year); # should test more with different dates
 cmp_ok($t->month_last_day, '==', 31); # test more
 
 
-{
+SKIP: {
+	skip "Extra tests for Linux, BSD only.", 6 unless $is_linux or $is_mac or $is_bsd;
+
     local $ENV{TZ} = "EST5EDT4";
     Time::Piece::_tzset();
     my $lt = localtime(1373371631); #2013-07-09T12:07:11

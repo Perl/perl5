@@ -2,10 +2,13 @@ package Time::Piece;
 
 use strict;
 
+require DynaLoader;
 use Time::Seconds;
 use Carp;
 use Time::Local;
 
+our @ISA = qw(DynaLoader);
+ 
 use Exporter ();
 
 our @EXPORT = qw(
@@ -17,13 +20,9 @@ our %EXPORT_TAGS = (
     ':override' => 'internal',
     );
 
-our $VERSION = '1.30';
+our $VERSION = '1.31';
 
-require DynaLoader;
-{
-    local *dl_load_flags = \&DynaLoader::dl_load_flags;
-    __PACKAGE__->DynaLoader::bootstrap($VERSION);
-}
+bootstrap Time::Piece $VERSION;
 
 my $DATE_SEP = '-';
 my $TIME_SEP = ':';
@@ -714,7 +713,7 @@ following methods are available on the object:
 
     $t->week                # week number (ISO 8601)
 
-    $t->is_leap_year        # true if it its
+    $t->is_leap_year        # true if it's a leap year
     $t->month_last_day      # 28-31
 
     $t->time_separator($s)  # set the default separator (default ":")
