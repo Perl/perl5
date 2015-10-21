@@ -57,17 +57,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
-<commit votes="steveh, khw, jhi" id="c0bf9074e4a1b56f9afe46591417297e6613d5ea" ticket="125924" desc="[perl #125924] allow op/infnan.t to pass on Win32 gcc"/>
-
-(steveh: Only the autodie part of this is applicable; win32/GNUmakefile isn't in maint-5.22)
-<commit votes="steveh, arc, khw" id="e120c24fe257993e9cbf4c567194bec2792f3ccc" ticket="126133" desc="[perl #126133] autodie touches its touch_me, make it writable"/>
-
 </div>
 
 <div><h3>Documentation Fixes</h3>
-
-<commit votes="steveh, khw, jhi" id="3d8ff82557d67bc81d10600b537a57f90f401a4f" ticket="126051" desc="sync regen/warnings.pl and warnings.pm $VERSION"/>
-<commit votes="steveh, khw, jhi" id="4a21999a595cf89f78d57aa5b3fdf3fbfa638fb1" ticket="126051" desc="[perl #126051] make the warnings::enabled example use warnings::enabled"/>
 
 </div>
 
