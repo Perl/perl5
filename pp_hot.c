@@ -3130,6 +3130,7 @@ PP(pp_subst)
                              s == m,    /* Yields minend of 0 or 1 */
 			     TARG, NULL,
                     REXEC_NOT_FIRST|REXEC_IGNOREPOS|REXEC_FAIL_ON_UNDERFLOW));
+        assert(strend >= s);
 	sv_catpvn_nomg_maybeutf8(dstr, s, strend - s, DO_UTF8(TARG));
 
 	if (rpm->op_pmflags & PMf_NONDESTRUCT) {
