@@ -3055,7 +3055,8 @@ PP(pp_subst)
 	    }
 	    if (once)
 		break;
-	} while (CALLREGEXEC(rx, s, strend, orig, s == m,
+	} while (CALLREGEXEC(rx, s, strend, orig,
+                             s == m,    /* Yields minend of 0 or 1 */
 			     TARG, NULL,
                     REXEC_NOT_FIRST|REXEC_IGNOREPOS|REXEC_FAIL_ON_UNDERFLOW));
 	sv_catpvn_nomg_maybeutf8(dstr, s, strend - s, DO_UTF8(TARG));
