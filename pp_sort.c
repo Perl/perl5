@@ -1699,7 +1699,7 @@ PP(pp_sort)
 		    sort_flags);
 
             /* Reset cx, in case the context stack has been reallocated. */
-            cx = &cxstack[cxstack_ix];
+            cx = CX_CUR();
 
 	    PL_stack_sp = PL_stack_base + cx->blk_oldsp;
 

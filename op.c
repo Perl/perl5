@@ -4056,7 +4056,7 @@ Perl_newPROG(pTHX_ OP *o)
 			       ((PL_in_eval & EVAL_KEEPERR)
 				? OPf_SPECIAL : 0), o);
 
-	cx = &cxstack[cxstack_ix];
+	cx = CX_CUR();
 	assert(CxTYPE(cx) == CXt_EVAL);
 
 	if ((cx->blk_gimme & G_WANT) == G_VOID)
@@ -4400,7 +4400,7 @@ S_fold_constants(pTHX_ OP *o)
      * may or may not have already been popped */
     if (cxstack_ix > old_cxix) {
         assert(cxstack_ix == old_cxix + 1);
-        assert(CxTYPE(&cxstack[cxstack_ix]) == CXt_EVAL);
+        assert(CxTYPE(CX_CUR()) == CXt_EVAL);
         delete_eval_scope();
     }
     if (ret)

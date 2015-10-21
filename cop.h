@@ -570,6 +570,10 @@ struct block_format {
     GV *	dfoutgv;
 };
 
+/* return a pointer to the current context */
+
+#define CX_CUR() (&cxstack[cxstack_ix])
+
 /* free all savestack items back to the watermark of the specified context */
 
 #define CX_LEAVE_SCOPE(cx) LEAVE_SCOPE(cx->blk_oldsaveix)
@@ -579,7 +583,7 @@ struct block_format {
  * uses it - because after doing cxstack_ix--, any ties, exceptions etc
  * may overwrite the current stack frame */
 #  define CX_POP(cx)                                                   \
-        assert(&cxstack[cxstack_ix] == cx);                            \
+        assert(CX_CUR() == cx);                                        \
         cxstack_ix--;                                                  \
         cx = NULL;
 #else
@@ -931,15 +935,15 @@ struct block {
 	Perl_deb(aTHX_ "CX %ld %s %s (scope %ld,%ld) (save %ld,%ld) at %s:%d\n",\
 		    (long)cxstack_ix,					\
 		    action,						\
-		    PL_block_type[CxTYPE(&cxstack[cxstack_ix])],	\
+		    PL_block_type[CxTYPE(CX_CUR())],	                \
 		    (long)PL_scopestack_ix,				\
-		    (long)(cxstack[cxstack_ix].blk_oldscopesp),		\
+		    (long)(CX_CUR()->blk_oldscopesp),		        \
 		    (long)PL_savestack_ix,				\
-		    (long)(cxstack[cxstack_ix].blk_oldsaveix),          \
+		    (long)(CX_CUR()->blk_oldsaveix),                    \
 		    __FILE__, __LINE__));
 
 /* Enter a block. */
-#define PUSHBLOCK(cx,t,sp) CXINC, cx = &cxstack[cxstack_ix],		\
+#define PUSHBLOCK(cx,t,sp) CXINC, cx = CX_CUR(),		        \
 	cx->cx_type		= t,					\
 	cx->blk_oldsp		= sp - PL_stack_base,			\
 	cx->blk_oldcop		= PL_curcop,				\
@@ -968,7 +972,7 @@ struct block {
 /* Continue a block elsewhere (NEXT and REDO). */
 #define TOPBLOCK(cx)							\
 	DEBUG_CX("TOP");						\
-	cx  = &cxstack[cxstack_ix],					\
+	cx = CX_CUR(),					                \
 	PL_stack_sp	 = PL_stack_base + cx->blk_oldsp,		\
 	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
 	PL_scopestack_ix = cx->blk_oldscopesp,				\
@@ -1006,7 +1010,7 @@ struct subst {
 #define sb_rx		cx_u.cx_subst.sbu_rx
 
 #ifdef PERL_CORE
-#  define PUSHSUBST(cx) CXINC, cx = &cxstack[cxstack_ix],		\
+#  define PUSHSUBST(cx) CXINC, cx = CX_CUR(),		                \
 	cx->blk_oldsaveix = oldsave,				        \
 	cx->sb_iters		= iters,				\
 	cx->sb_maxiters		= maxiters,				\
@@ -1333,7 +1337,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 
 #define POP_MULTICALL \
     STMT_START {							\
-	cx = &cxstack[cxstack_ix];					\
+	cx = CX_CUR();					                \
 	CX_LEAVE_SCOPE(cx);                                             \
         POPSUB_COMMON(cx);                                              \
         newsp = PL_stack_base + cx->blk_oldsp;                          \
@@ -1355,7 +1359,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	CV * const _nOnclAshIngNamE_ = the_cv;				\
 	CV * const cv = _nOnclAshIngNamE_;				\
 	PADLIST * const padlist = CvPADLIST(cv);			\
-	cx = &cxstack[cxstack_ix];					\
+	cx = CX_CUR();					                \
 	assert(CxMULTICALL(cx));                                        \
         POPSUB_COMMON(cx);                                              \
 	cx->cx_type = (CXt_SUB|CXp_MULTICALL|flags);                    \

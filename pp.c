@@ -6354,7 +6354,7 @@ PP(pp_coreargs)
        to return.  nextstate usually does this on sub entry, but we need
        to run the next op with the caller's hints, so we cannot have a
        nextstate. */
-    SP = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
+    SP = PL_stack_base + CX_CUR()->blk_oldsp;
 
     if(!maxargs) RETURN;
 
@@ -6438,10 +6438,10 @@ PP(pp_coreargs)
 		);
 	    PUSHs(SvRV(*svp));
 	    if (opnum == OP_UNDEF && SvRV(*svp) == (SV *)PL_defgv
-	     && cxstack[cxstack_ix].cx_type & CXp_HASARGS) {
+	     && CX_CUR()->cx_type & CXp_HASARGS) {
 		/* Undo @_ localisation, so that sub exit does not undo
 		   part of our undeffing. */
-		PERL_CONTEXT *cx = &cxstack[cxstack_ix];
+		PERL_CONTEXT *cx = CX_CUR();
 
                 assert(CxHASARGS(cx));
                 POPSUB_ARGS(cx);;

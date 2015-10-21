@@ -48,7 +48,7 @@ PP(pp_nextstate)
 {
     PL_curcop = (COP*)PL_op;
     TAINT_NOT;		/* Each statement is presumed innocent */
-    PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
+    PL_stack_sp = PL_stack_base + CX_CUR()->blk_oldsp;
     FREETMPS;
     PERL_ASYNC_CHECK();
     return NORMAL;
@@ -243,7 +243,7 @@ PP(pp_unstack)
     PERL_CONTEXT *cx;
     PERL_ASYNC_CHECK();
     TAINT_NOT;		/* Each statement is presumed innocent */
-    cx  = &cxstack[cxstack_ix];
+    cx  = CX_CUR();
     PL_stack_sp = PL_stack_base + cx->blk_oldsp;
     FREETMPS;
     if (!(PL_op->op_flags & OPf_SPECIAL)) {
@@ -2630,7 +2630,7 @@ PP(pp_iter)
     SV **itersvp;
     SV *retsv;
 
-    cx = &cxstack[cxstack_ix];
+    cx = CX_CUR();
     itersvp = CxITERVAR(cx);
 
     switch (CxTYPE(cx)) {
@@ -3291,7 +3291,7 @@ PP(pp_leavesub)
     PERL_CONTEXT *cx;
     OP *retop;
 
-    cx = &cxstack[cxstack_ix];
+    cx = CX_CUR();
     assert(CxTYPE(cx) == CXt_SUB);
 
     if (CxMULTICALL(cx)) {

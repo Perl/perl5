@@ -2824,7 +2824,7 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
          * may or may not have already been popped */
 	if (cxstack_ix > old_cxix) {
             assert(cxstack_ix == old_cxix + 1);
-            assert(CxTYPE(&cxstack[cxstack_ix]) == CXt_EVAL);
+            assert(CxTYPE(CX_CUR()) == CXt_EVAL);
 	    delete_eval_scope();
         }
 	JMPENV_POP;

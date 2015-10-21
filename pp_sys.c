@@ -1443,7 +1443,7 @@ PP(pp_enterwrite)
 PP(pp_leavewrite)
 {
     dSP;
-    GV * const gv = cxstack[cxstack_ix].blk_format.gv;
+    GV * const gv = CX_CUR()->blk_format.gv;
     IO * const io = GvIOp(gv);
     PerlIO *ofp;
     PerlIO *fp;
@@ -1523,7 +1523,7 @@ PP(pp_leavewrite)
     }
 
   forget_top:
-    cx = &cxstack[cxstack_ix];
+    cx = CX_CUR();
     assert(CxTYPE(cx) == CXt_FORMAT);
     SP = PL_stack_base + cx->blk_oldsp; /* ignore retval of formline */
     CX_LEAVE_SCOPE(cx);
