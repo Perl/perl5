@@ -338,7 +338,12 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+C<\b{sb}> works much better.  In Perl v5.22.0, this new construct didn't
+seem to give the expected results, yet passed all the tests in the
+extensive suite furnished by Unicode.  It turns out that it was because
+these were short input strings, and the failures had to do with longer
+inputs.  This was fixed in Perl 5.23.4, but the improvement was not
+noticed until after that was released, so is included here now.
 
 =back
 

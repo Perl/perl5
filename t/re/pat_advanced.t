@@ -2316,6 +2316,9 @@ EOF
         is "$1" || $@, "at", 'empty \N{...} stringified and retoked';
     }
 
+    is (scalar split(/\b{sb}/, "Don't think twice.  It's all right."),
+        2, '\b{wb} splits sentences correctly');
+
 
     # !!! NOTE!  Keep the following tests last -- they may crash perl
 
