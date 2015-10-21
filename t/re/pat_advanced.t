@@ -2317,9 +2317,8 @@ EOF
     }
 
 
-    #
-    # Keep the following tests last -- they may crash perl
-    #
+    # !!! NOTE!  Keep the following tests last -- they may crash perl
+
     print "# Tests that follow may crash perl\n";
     {
         eval '/\k/';
@@ -2451,9 +2450,9 @@ EOF
 		      "buffer overflow in TRIE_STORE_REVCHAR");
     }
 
-
     # !!! NOTE that tests that aren't at all likely to crash perl should go
-    # a ways above, above these last ones.
+    # a ways above, above these last ones.  There's a comment there that, like
+    # this comment, contains the word 'NOTE'
 
     done_testing();
 } # End of sub run_tests
