@@ -31,9 +31,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="" id="" ticket="123878" desc=""/>
 
-(khw: The following isn't necessary, but is a trivial improvement on 22b43)
-<commit votes="steveh, arc" id="d820a0ff34c7df39297a54193fd756bb42c5c06e" ticket="123562" desc="regexec.c: Use Perl_croak_nocontext()"/>
-
 </div>
 
 <div><h3>Regression Fixes</h3>
