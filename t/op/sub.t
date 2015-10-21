@@ -41,7 +41,7 @@ is(scalar(@test), 0, 'Didnt return anything');
     ok(eq_array(\@a, [34,35]), "yes without args");
 }
 
-# [perl #81944] return should always copy
+# [perl #91844] return should always copy
 {
     $foo{bar} = 7;
     for my $x ($foo{bar}) {
