@@ -197,7 +197,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 /* Is the representation of the code point 'cp' the same regardless of
  * being encoded in UTF-8 or not?  'cp' is native if < 256; Unicode otherwise
  * */
-#define UVCHR_IS_INVARIANT(uv)      OFFUNI_IS_INVARIANT(uv)
+#define UVCHR_IS_INVARIANT(cp)      OFFUNI_IS_INVARIANT(cp)
 
 /* Misleadingly named: is the UTF8-encoded byte 'c' part of a variant sequence
  * in UTF-8?  This is the inverse of UTF8_IS_INVARIANT */
