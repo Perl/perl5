@@ -465,11 +465,13 @@ only) byte is pointed to by C<s>.
  * (which works for code points up through 0xFF) or NATIVE_TO_UNI which works
  * for any code point */
 #define __BASE_TWO_BYTE_HI(c, translate_function)                               \
+           (__ASSERT_(! UVCHR_IS_INVARIANT(c))                                  \
             I8_TO_NATIVE_UTF8((translate_function(c) >> UTF_ACCUMULATION_SHIFT) \
-                              | UTF_START_MARK(2))
+                              | UTF_START_MARK(2)))
 #define __BASE_TWO_BYTE_LO(c, translate_function)                               \
+             (__ASSERT_(! UVCHR_IS_INVARIANT(c))                                \
               I8_TO_NATIVE_UTF8((translate_function(c) & UTF_CONTINUATION_MASK) \
-                                 | UTF_CONTINUATION_MARK)
+                                 | UTF_CONTINUATION_MARK))
 
 /* The next two macros should not be used.  They were designed to be usable as
  * the case label of a switch statement, but this doesn't work for EBCDIC.  Use
