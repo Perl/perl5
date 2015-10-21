@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.03';
+$VERSION = '1.34';
 
 BEGIN {
     require 'regen/regen_lib.pl';
@@ -418,6 +418,13 @@ EOM
 }
 
 while (<DATA>) {
+    last if /^VERSION$/ ;
+    print $pm $_ ;
+}
+
+print $pm qq(our \$VERSION = "$::VERSION";\n);
+
+while (<DATA>) {
     last if /^KEYWORDS$/ ;
     print $pm $_ ;
 }
@@ -483,7 +490,7 @@ read_only_bottom_close_and_rename($pm);
 __END__
 package warnings;
 
-our $VERSION = '1.32';
+VERSION
 
 # Verify that we're called correctly so that warnings will work.
 # see also strict.pm.
