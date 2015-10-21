@@ -2050,7 +2050,8 @@ S_leave_common(pTHX_ SV **newsp, SV **mark, I32 gimme,
 	if (MARK < SP) {
             SV *sv = *SP;
 
-	    *++newsp = ((SvFLAGS(sv) & flags) && SvREFCNT(sv) == 1)
+	    *++newsp = ((SvFLAGS(sv) & flags) && SvREFCNT(sv) == 1
+                         && !SvMAGICAL(sv))
 			    ? sv 
 			    : lvalue
 				? sv_2mortal(SvREFCNT_inc_simple_NN(sv))
@@ -2065,7 +2066,8 @@ S_leave_common(pTHX_ SV **newsp, SV **mark, I32 gimme,
 	/* in case LEAVE wipes old return values */
 	while (++MARK <= SP) {
             SV *sv = *MARK;
-	    if ((SvFLAGS(sv) & flags) && SvREFCNT(sv) == 1)
+	    if ((SvFLAGS(sv) & flags) && SvREFCNT(sv) == 1
+                         && !SvMAGICAL(sv))
 		*++newsp = sv;
 	    else {
 		*++newsp = lvalue
