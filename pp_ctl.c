@@ -1513,7 +1513,8 @@ Perl_dounwind(pTHX_ I32 cxix)
 
     while (cxstack_ix > cxix) {
         PERL_CONTEXT *cx = CX_CUR();
-	DEBUG_CX("UNWIND");
+
+	CX_DEBUG(cx, "UNWIND");
 	/* Note: we don't need to restore the base context info till the end. */
 
         CX_LEAVE_SCOPE(cx);
@@ -1811,7 +1812,7 @@ PP(pp_caller)
 	RETURN;
     }
 
-    DEBUG_CX("CALLER");
+    CX_DEBUG(cx, "CALLER");
     assert(CopSTASH(cx->blk_oldcop));
     stash_hek = SvTYPE(CopSTASH(cx->blk_oldcop)) == SVt_PVHV
       ? HvNAME_HEK((HV*)CopSTASH(cx->blk_oldcop))

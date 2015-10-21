@@ -930,16 +930,16 @@ struct block {
 #define blk_loop	cx_u.cx_blk.blk_u.blku_loop
 #define blk_givwhen	cx_u.cx_blk.blk_u.blku_givwhen
 
-#define DEBUG_CX(action)						\
+#define CX_DEBUG(cx, action)						\
     DEBUG_l(								\
 	Perl_deb(aTHX_ "CX %ld %s %s (scope %ld,%ld) (save %ld,%ld) at %s:%d\n",\
 		    (long)cxstack_ix,					\
 		    action,						\
-		    PL_block_type[CxTYPE(CX_CUR())],	                \
+		    PL_block_type[CxTYPE(cx)],	                        \
 		    (long)PL_scopestack_ix,				\
-		    (long)(CX_CUR()->blk_oldscopesp),		        \
+		    (long)(cx->blk_oldscopesp),		                \
 		    (long)PL_savestack_ix,				\
-		    (long)(CX_CUR()->blk_oldsaveix),                    \
+		    (long)(cx->blk_oldsaveix),                          \
 		    __FILE__, __LINE__));
 
 /* Enter a block. */
@@ -953,11 +953,11 @@ struct block {
 	cx->blk_gimme		= (U8)gimme;				\
         cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;             \
         PL_tmps_floor           = PL_tmps_ix;                           \
-	DEBUG_CX("PUSH");
+	CX_DEBUG(cx, "PUSH");
 
 /* Exit a block (RETURN and LAST). */
 #define POPBLOCK(cx)							\
-	DEBUG_CX("POP");						\
+	CX_DEBUG(cx, "POP");						\
 	PL_curcop	 = cx->blk_oldcop,				\
 	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
 	PL_scopestack_ix = cx->blk_oldscopesp,				\
@@ -971,8 +971,8 @@ struct block {
 
 /* Continue a block elsewhere (NEXT and REDO). */
 #define TOPBLOCK(cx)							\
-	DEBUG_CX("TOP");						\
-	cx = CX_CUR(),					                \
+	cx = CX_CUR();					                \
+	CX_DEBUG(cx, "TOP");						\
 	PL_stack_sp	 = PL_stack_base + cx->blk_oldsp,		\
 	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
 	PL_scopestack_ix = cx->blk_oldscopesp,				\
