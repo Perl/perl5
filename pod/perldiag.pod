@@ -5262,6 +5262,13 @@ missing the final closing quote or angle bracket after the name.  The
 S<<-- HERE> shows whereabouts in the regular expression the problem was
 discovered.
 
+=item Sequence (?... not terminated in regex; marked by S<<-- HERE> in
+m/%s/
+
+(F) There was no matching closing parenthesis for the '('.  The
+S<<-- HERE> shows whereabouts in the regular expression the problem was
+discovered.
+
 =item Sequence \%s... not terminated in regex; marked by S<<-- HERE> in
 m/%s/
 
