@@ -8,13 +8,15 @@ BEGIN {
     plan(skip_all => "\$^O eq '$^O'") if $^O eq 'VMS';
     plan(skip_all => "POSIX is unavailable")
 	unless $Config{extensions} =~ /\bPOSIX\b/;
+    unshift @INC, "../../t";
+    require 'loc_tools.pl';
 }
 
 use POSIX;
 
 # E.g. \t might or might not be isprint() depending on the locale,
 # so let's reset to the default.
-setlocale(LC_ALL, 'C') if $Config{d_setlocale};
+setlocale(LC_ALL, 'C') if locales_enabled('LC_ALL');
 
 $| = 1;
 

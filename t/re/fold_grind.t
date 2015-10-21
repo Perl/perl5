@@ -425,7 +425,7 @@ sub pairs (@) {
 my $utf8_locale;
 
 my @charsets = qw(d u a aa);
-if($Config{d_setlocale}) {
+if (locales_enabled('LC_CTYPE')) {
     my $current_locale = POSIX::setlocale( &POSIX::LC_CTYPE, "C") // "";
     if ($current_locale eq 'C') {
         use locale;

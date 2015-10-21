@@ -23,7 +23,7 @@ my $temp_file = $temp_fh->filename;
 # exit, fork, waitpid, sleep in waitpid.t
 # errno in posix.t
 
-if ($Config{d_setlocale} && defined &POSIX::LC_MESSAGES) {
+if (locales_enabled('LC_MESSAGES')) {
     my $non_english_locale;
     local $! = 1;
     my $english_message = "$!"; # Should be C locale since not in scope of

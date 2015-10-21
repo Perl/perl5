@@ -4,7 +4,9 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require Config; import Config;
-    require './test.pl'; require './charset_tools.pl';
+    require './test.pl';
+    require './charset_tools.pl';
+    require './loc_tools.pl';
 }
 
 plan(tests => 215);
@@ -95,14 +97,7 @@ $uc = ucfirst $u;
 is (length $uc, 1);
 is ($uc, $e_acute, "e acute -> E acute");
 
-my $have_setlocale = 0;
-eval {
-    require POSIX;
-    if($Config{d_setlocale}) {
-        import POSIX ':locale_h';
-        $have_setlocale++;
-    }
-};
+my $have_setlocale = locales_enabled('LC_ALL');
 
 SKIP: {
     if (!$have_setlocale) {

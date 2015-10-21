@@ -19544,7 +19544,6 @@ utf8::upgrade($breakable_utf8);
 my $nobreak_utf8 = my $nobreak = chr(utf8::unicode_to_native(0xD7));
 utf8::upgrade($nobreak_utf8);
 
-use Config;
 my $utf8_locale;
 chdir 't' if -d 't';
 eval { require "./loc_tools.pl" };
@@ -19640,13 +19639,7 @@ sub _test_break($$) {
             if ($modifier =~ / ^ l (.*) /x) {
                 my $locale = $1;
                 $display_locale = "(locale = $locale)";
-                use Config;
-                if (defined $Config{d_setlocale}) {
-                    eval { require POSIX; import POSIX 'locale_h'; };
-                    if (defined &POSIX::LC_CTYPE) {
-                        POSIX::setlocale(&POSIX::LC_CTYPE, $locale);
-                    }
-                }
+                POSIX::setlocale(&POSIX::LC_CTYPE, $locale);
                 $modifier = 'l';
             }
 

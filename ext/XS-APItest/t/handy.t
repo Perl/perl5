@@ -1,7 +1,8 @@
 #!perl -w
 
 BEGIN {
-    require 'loc_tools.pl';   # Contains find_utf8_ctype_locale()
+    require 'loc_tools.pl';   # Contains locales_enabled() and
+                              # find_utf8_ctype_locale()
 }
 
 use strict;
@@ -18,7 +19,7 @@ sub truth($) {  # Converts values so is() works
 
 my $locale;
 my $utf8_locale;
-if($Config{d_setlocale}) {
+if(locales_enabled('LC_ALL')) {
     require POSIX;
     $locale = POSIX::setlocale( &POSIX::LC_ALL, "C");
     if (defined $locale && $locale eq 'C') {

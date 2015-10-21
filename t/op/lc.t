@@ -323,11 +323,6 @@ my $utf8_locale = find_utf8_ctype_locale();
 SKIP: {
     skip 'Can\'t find a UTF-8 locale', 4*256 unless defined $utf8_locale;
 
-    eval { require POSIX; import POSIX 'locale_h'; };
-    unless (defined &POSIX::LC_CTYPE) {
-        skip "no POSIX (maybe no Fcntl, or no dynamic loading)", 4*256;
-    }
-
     use feature qw( unicode_strings );
 
     no locale;

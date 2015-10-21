@@ -164,7 +164,7 @@ like( getcwd(), qr/$pat/, 'getcwd' );
 SKIP: { 
     skip("strtod() not present", 2) unless $Config{d_strtod};
 
-    if ($Config{d_setlocale}) {
+    if (locales_enabled('LC_NUMERIC')) {
         $lc = &POSIX::setlocale(&POSIX::LC_NUMERIC);
         &POSIX::setlocale(&POSIX::LC_NUMERIC, 'C');
     }
@@ -174,13 +174,13 @@ SKIP: {
     cmp_ok(abs("3.14159" - $n), '<', 1e-6, 'strtod works');
     is($x, 6, 'strtod works');
 
-    &POSIX::setlocale(&POSIX::LC_NUMERIC, $lc) if $Config{d_setlocale};
+    &POSIX::setlocale(&POSIX::LC_NUMERIC, $lc) if locales_enabled('LC_NUMERIC');
 }
 
 SKIP: {
     skip("strtold() not present", 2) unless $Config{d_strtold};
 
-    if ($Config{d_setlocale}) {
+    if (locales_enabled('LC_NUMERIC')) {
         $lc = &POSIX::setlocale(&POSIX::LC_NUMERIC);
         &POSIX::setlocale(&POSIX::LC_NUMERIC, 'C');
     }
@@ -190,7 +190,7 @@ SKIP: {
     cmp_ok(abs("2.718" - $n), '<', 1e-6, 'strtold works');
     is($x, 4, 'strtold works');
 
-    &POSIX::setlocale(&POSIX::LC_NUMERIC, $lc) if $Config{d_setlocale};
+    &POSIX::setlocale(&POSIX::LC_NUMERIC, $lc) if locales_enabled('LC_NUMERIC');
 }
 
 SKIP: {
@@ -227,7 +227,7 @@ sub try_strftime {
     is($got, $expect, "validating mini_mktime() and strftime(): $expect");
 }
 
-if ($Config{d_setlocale}) {
+if (locales_enabled('LC_TIME')) {
     $lc = &POSIX::setlocale(&POSIX::LC_TIME);
     &POSIX::setlocale(&POSIX::LC_TIME, 'C');
 }
@@ -266,7 +266,7 @@ try_strftime("Fri Mar 31 00:00:00 2000 091", 0,0,0, 31,2,100);
   try_strftime("Thu Dec 30 00:00:00 1999 364", 0,0,0, -1,0,100,0,10);
 }
 
-&POSIX::setlocale(&POSIX::LC_TIME, $lc) if $Config{d_setlocale};
+&POSIX::setlocale(&POSIX::LC_TIME, $lc) if locales_enabled('LC_TIME');
 
 {
     for my $test (0, 1) {

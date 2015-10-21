@@ -6,15 +6,10 @@ BEGIN {
 use XS::APItest;
 use Config;
 
-BEGIN {
-    eval { require POSIX; POSIX->import("locale_h") };
-    if ($@) {
-	skip_all("could not load the POSIX module"); # running minitest?
-    }
-}
+skip_all("locales not available") unless locales_enabled('LC_NUMERIC');
 
 my @locales = eval { find_locales( &LC_NUMERIC ) };
-skip_all("no locales available") unless @locales;
+skip_all("no LC_NUMERIC locales available") unless @locales;
 
 my $non_dot_locale;
 for (@locales) {
