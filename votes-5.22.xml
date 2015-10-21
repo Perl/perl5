@@ -34,8 +34,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 (khw: The following isn't necessary, but is a trivial improvement on 22b43)
 <commit votes="steveh, arc" id="d820a0ff34c7df39297a54193fd756bb42c5c06e" ticket="123562" desc="regexec.c: Use Perl_croak_nocontext()"/>
 
-<commit votes="steveh, arc, khw" id="7f399b4008958590740e5bcb61cf22e2cfe5395b" ticket="126064" desc="[perl #126064] Apply scalar context to stat args"/>
-
 </div>
 
 <div><h3>Regression Fixes</h3>
