@@ -12,7 +12,7 @@ my $no_endianness = $] > 5.009 ? '' :
 my $no_signedness = $] > 5.009 ? '' :
   "Signed/unsigned pack modifiers not available on this perl";
 
-plan tests => 14708;
+plan tests => 14712;
 
 use strict;
 use warnings qw(FATAL all);
@@ -2020,3 +2020,23 @@ is $o::num, 1,     'pack "c" does call num overloading';
 #[perl #123874]: argument underflow leads to corrupt length
 eval q{ pack "pi/x" };
 ok(1, "argument underflow did not crash");
+
+{
+    # [perl #126325] pack [hH] with a unicode string
+    # the hex encoders would read past the end of the string, using
+    # invalid source bytes
+    my $twenty_nuls = "\0" x 20;
+    # This is the case that failed
+    is(pack("WH40", 0x100, ""), "\x{100}$twenty_nuls",
+       "check pack H zero fills (utf8 target)");
+    my $up_nul = "\0";
+
+    utf8::upgrade($up_nul);
+    # check the other combinations too
+    is(pack("WH40", 0x100, $up_nul), "\x{100}$twenty_nuls",
+       "check pack H zero fills (utf8 target/source)");
+    is(pack("H40", ""), $twenty_nuls,
+       "check pack H zero fills (utf8 none)");
+    is(pack("H40", $up_nul), $twenty_nuls,
+       "check pack H zero fills (utf8 source)");
+}
