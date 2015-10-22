@@ -53,9 +53,14 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Portability Fixes</h3>
 
+<commit votes="jhi, steveh" id="bdae4172ce49ee233037d3e6af7dbeea521d0562" ticket="123977" desc="rt.perl.org #123977 - clear errno in IRIX PERLIO=stdio"/>
+<commit votes="jhi, steveh" id="3ec400f5ce53ea1a56d283bc6bf59e75762df058" ticket="126396" desc="perl #126396 IRIX longdouble infinity issues"/>
+
 </div>
 
 <div><h3>Platform-Specific Test Fixes</h3>
+
+<commit votes="jhi, steveh" id="ced634a413de975cd30ac5f5d08a1c43d2b402b3" ticket="" desc="IRIX long-double sqrt(2) one bit error in the least significant end."/>
 
 </div>
 
