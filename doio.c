@@ -772,7 +772,7 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
 	fd = PerlIO_fileno(fp);
     }
 #if defined(HAS_FCNTL) && defined(F_SETFD) && defined(FD_CLOEXEC)
-    if (fd > PL_maxsysfd && fcntl(fd, F_SETFD, FD_CLOEXEC) < 0) {
+    if (fd >= 0 && fd > PL_maxsysfd && fcntl(fd, F_SETFD, FD_CLOEXEC) < 0) {
         PerlLIO_close(fd);
         goto say_false;
     }
