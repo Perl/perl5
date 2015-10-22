@@ -371,19 +371,85 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
                          } } STMT_END
 #endif
 
+/* set TARG to the IV value i. If do_taint is false,
+ * assume that PL_tainted can never be true */
+#define TARGi(i, do_taint) \
+    STMT_START {                                                        \
+        IV TARGi_iv = i;                                                \
+        if (LIKELY(                                                     \
+              ((SvFLAGS(TARG) & (SVTYPEMASK|SVf_THINKFIRST)) == SVt_IV) \
+            & (do_taint ? !TAINT_get : 1)))                             \
+        {                                                               \
+            /* Cheap SvIOK_only().                                      \
+             * Assert that flags which SvIOK_only() would test or       \
+             * clear can't be set, because we're SVt_IV */              \
+            assert(!(SvFLAGS(TARG) &                                    \
+                (SVf_OOK|SVf_UTF8|(SVf_OK & ~(SVf_IOK|SVp_IOK)))));     \
+            SvFLAGS(TARG) |= (SVf_IOK|SVp_IOK);                         \
+            /* SvIV_set() where sv_any points to head */                \
+            TARG->sv_u.svu_iv = TARGi_iv;                               \
+        }                                                               \
+        else                                                            \
+            sv_setiv_mg(targ, TARGi_iv);                                \
+    } STMT_END
+
+/* set TARG to the UV value u. If do_taint is false,
+ * assume that PL_tainted can never be true */
+#define TARGu(u, do_taint) \
+    STMT_START {                                                        \
+        UV TARGu_uv = u;                                                \
+        if (LIKELY(                                                     \
+              ((SvFLAGS(TARG) & (SVTYPEMASK|SVf_THINKFIRST)) == SVt_IV) \
+            & (do_taint ? !TAINT_get : 1)                               \
+            & (TARGu_uv <= (UV)IV_MAX)))                                \
+        {                                                               \
+            /* Cheap SvIOK_only().                                      \
+             * Assert that flags which SvIOK_only() would test or       \
+             * clear can't be set, because we're SVt_IV */              \
+            assert(!(SvFLAGS(TARG) &                                    \
+                (SVf_OOK|SVf_UTF8|(SVf_OK & ~(SVf_IOK|SVp_IOK)))));     \
+            SvFLAGS(TARG) |= (SVf_IOK|SVp_IOK);                         \
+            /* SvIV_set() where sv_any points to head */                \
+            TARG->sv_u.svu_iv = TARGu_uv;                               \
+        }                                                               \
+        else                                                            \
+            sv_setuv_mg(targ, TARGu_uv);                                \
+    } STMT_END
+
+/* set TARG to the NV value n. If do_taint is false,
+ * assume that PL_tainted can never be true */
+#define TARGn(n, do_taint) \
+    STMT_START {                                                        \
+        NV TARGn_nv = n;                                                \
+        if (LIKELY(                                                     \
+              ((SvFLAGS(TARG) & (SVTYPEMASK|SVf_THINKFIRST)) == SVt_NV) \
+            & (do_taint ? !TAINT_get : 1)))                             \
+        {                                                               \
+            /* Cheap SvNOK_only().                                      \
+             * Assert that flags which SvNOK_only() would test or       \
+             * clear can't be set, because we're SVt_NV */              \
+            assert(!(SvFLAGS(TARG) &                                    \
+                (SVf_OOK|SVf_UTF8|(SVf_OK & ~(SVf_NOK|SVp_NOK)))));     \
+            SvFLAGS(TARG) |= (SVf_NOK|SVp_NOK);                         \
+            SvNV_set(TARG, TARGn_nv);                                   \
+        }                                                               \
+        else                                                            \
+            sv_setnv_mg(targ, TARGn_nv);                                \
+    } STMT_END
+
 #define PUSHs(s)	(*++sp = (s))
 #define PUSHTARG	STMT_START { SvSETMAGIC(TARG); PUSHs(TARG); } STMT_END
 #define PUSHp(p,l)	STMT_START { sv_setpvn(TARG, (p), (l)); PUSHTARG; } STMT_END
-#define PUSHn(n)	STMT_START { sv_setnv(TARG, (NV)(n)); PUSHTARG; } STMT_END
-#define PUSHi(i)	STMT_START { sv_setiv(TARG, (IV)(i)); PUSHTARG; } STMT_END
-#define PUSHu(u)	STMT_START { sv_setuv(TARG, (UV)(u)); PUSHTARG; } STMT_END
+#define PUSHn(n)	STMT_START { TARGn(n,1); PUSHs(TARG); } STMT_END
+#define PUSHi(i)	STMT_START { TARGi(i,1); PUSHs(TARG); } STMT_END
+#define PUSHu(u)	STMT_START { TARGu(u,1); PUSHs(TARG); } STMT_END
 
 #define XPUSHs(s)	STMT_START { EXTEND(sp,1); *++sp = (s); } STMT_END
 #define XPUSHTARG	STMT_START { SvSETMAGIC(TARG); XPUSHs(TARG); } STMT_END
 #define XPUSHp(p,l)	STMT_START { sv_setpvn(TARG, (p), (l)); XPUSHTARG; } STMT_END
-#define XPUSHn(n)	STMT_START { sv_setnv(TARG, (NV)(n)); XPUSHTARG; } STMT_END
-#define XPUSHi(i)	STMT_START { sv_setiv(TARG, (IV)(i)); XPUSHTARG; } STMT_END
-#define XPUSHu(u)	STMT_START { sv_setuv(TARG, (UV)(u)); XPUSHTARG; } STMT_END
+#define XPUSHn(n)	STMT_START { TARGn(n,1); XPUSHs(TARG); } STMT_END
+#define XPUSHi(i)	STMT_START { TARGi(i,1); XPUSHs(TARG); } STMT_END
+#define XPUSHu(u)	STMT_START { TARGu(u,1); XPUSHs(TARG); } STMT_END
 #define XPUSHundef	STMT_START { SvOK_off(TARG); XPUSHs(TARG); } STMT_END
 
 #define mPUSHs(s)	PUSHs(sv_2mortal(s))
@@ -403,9 +469,9 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 #define SETs(s)		(*sp = s)
 #define SETTARG		STMT_START { SvSETMAGIC(TARG); SETs(TARG); } STMT_END
 #define SETp(p,l)	STMT_START { sv_setpvn(TARG, (p), (l)); SETTARG; } STMT_END
-#define SETn(n)		STMT_START { sv_setnv(TARG, (NV)(n)); SETTARG; } STMT_END
-#define SETi(i)		STMT_START { sv_setiv(TARG, (IV)(i)); SETTARG; } STMT_END
-#define SETu(u)		STMT_START { sv_setuv(TARG, (UV)(u)); SETTARG; } STMT_END
+#define SETn(n)		STMT_START { TARGn(n,1); SETs(TARG); } STMT_END
+#define SETi(i)		STMT_START { TARGi(i,1); SETs(TARG); } STMT_END
+#define SETu(u)		STMT_START { TARGu(u,1); SETs(TARG); } STMT_END
 
 #define dTOPss		SV *sv = TOPs
 #define dPOPss		SV *sv = POPs
