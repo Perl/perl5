@@ -8,7 +8,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including 00ebc5bdc54d3943d2470f1053942f5849ab1a9d (Replace 2 strcat()s with strlen() and memcpy() in dl_dlopen.xs.)
+Blead changes have been examined up to and including 7195e5da55a40d15e29ad80562668bdd6895441f (Add test for \b{sb})
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -33,6 +33,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="khw, steveh" id="f0bd363c36d925d8d3dfe3b68715763c850b171a" ticket="126319" desc="PATCH: [perl #126319] Seg fault"/>
 
+<commit votes="steveh" id="4a84d6e89d52b8921090805085871e6cca66924d" ticket="126181" desc="PATCH: [perl #126181] regex: handle \cX inside (?[])"/>
+<commit votes="steveh" id="e011baf6f8ae4d213edb446fd811f9509b7abbb8" ticket="126181" desc="AUTHORS: Add Victor Adam"/>
+
 </div>
 
 <div><h3>Regression Fixes</h3>
@@ -43,6 +46,11 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 (steveh: The POSIX $VERSION bump will need to be different in maint:)
 <commit votes="steveh, arc" id="068e3fb46a24909060201961a41f2ab7fb778caf" ticket="126229" desc="[perl #126229] POSIX::strerror() clears $!"/>
+
+<commit votes="steveh" id="174c9902b4705cef6307f83a226a0cb315b09ea7" ticket="126404" desc="PATCH: [perl #126404] Assertion fail in (?[...])"/>
+
+<commit votes="steveh" id="5b9ce45660f01f87f17ed2211a1c01540d903a41" ticket="126178" desc="PATCH: [perl # 126178] Unterminated /(?i/"/>
+<commit votes="steveh" id="d54288eb977c475e5eb044373c07e7873a1d90e7" ticket="126253" desc="PATCH: [perl #126253] Nested quantifiers not caught"/>
 
 </div>
 
@@ -67,6 +75,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 </div>
 
 <div><h3>Documentation Fixes</h3>
+
+<commit votes="steveh" id="4cb6b3953a136d0cfac658452fec430c24730042" ticket="126177" desc="PATCH: [perl #126177] Document /(?n)/"/>
+<commit votes="steveh" id="a4395ebabc865511588235b5953dce6cc458ed3c" ticket="117341" desc="Improve pod for [ah]v_(clear|undef)"/>
 
 </div>
 
