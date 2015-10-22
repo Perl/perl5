@@ -894,8 +894,16 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
  * compiler to optimize it out if possible.  This is because Configure makes
  * sure that the machine has an 8-bit byte, so if c is stored in a byte, the
  * sizeof() guarantees that this evaluates to a constant true at compile time.
+ *
+ * For Coverity, be always true, because otherwise Coverity thinks
+ * it finds several expressions that are always true, independent
+ * of operands.  Well, they are, but that is kind of the point.
  */
+#ifndef __COVERITY__
 #define FITS_IN_8_BITS(c) ((sizeof(c) == 1) || !(((WIDEST_UTYPE)(c)) & ~0xFF))
+#else
+#define FITS_IN_8_BITS(c) (1)
+#endif
 
 #ifdef EBCDIC
 #   ifndef _ALL_SOURCE
