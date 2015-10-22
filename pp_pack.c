@@ -2488,7 +2488,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    if (howlen == e_star) len = fromlen;
 	    field_len = (len+1)/2;
 	    GROWING(utf8, cat, start, cur, field_len);
-	    if (!utf8 && len > (I32)fromlen) len = fromlen;
+	    if (!utf8_source && len > (I32)fromlen) len = fromlen;
 	    bits = 0;
 	    l = 0;
 	    if (datumtype == 'H')
