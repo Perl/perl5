@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 801;
+plan tests => 807;
 
 $| = 1;
 
@@ -2348,6 +2348,29 @@ is eval { eval $::x.1 }, 1, 'reset does not taint undef';
      ), "122669\n",
         'tainted constant as logop condition should not prevent "use"';
 }
+
+# optimised SETi etc need to handle tainting
+
+{
+    my ($i1, $i2, $i3) = (1, 1, 1);
+    my ($n1, $n2, $n3) = (1.1, 1.1, 1.1);
+    my $tn = $TAINT0 + 1.1;
+
+    $i1 = $TAINT0 + 2;
+    is_tainted $i1, "+ SETi";
+    $i2 = $TAINT0 - 2;
+    is_tainted $i2, "- SETi";
+    $i3 = $TAINT0 * 2;
+    is_tainted $i3, "* SETi";
+
+    $n1 = $tn + 2.2;
+    is_tainted $n1, "+ SETn";
+    $n2 = $tn - 2.2;
+    is_tainted $n2, "- SETn";
+    $n3 = $tn * 2.2;
+    is_tainted $n3, "* SETn";
+}
+
 
 # This may bomb out with the alarm signal so keep it last
 SKIP: {

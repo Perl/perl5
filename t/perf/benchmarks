@@ -715,4 +715,97 @@
     },
 
 
+    'expr::arith::add_lex_ii' => {
+        desc    => 'add two integers and assign to a lexical var',
+        setup   => 'my ($x,$y,$z) = 1..3;',
+        code    => '$z = $x + $y',
+    },
+    'expr::arith::add_pkg_ii' => {
+        desc    => 'add two integers and assign to a package var',
+        setup   => 'my ($x,$y) = 1..2; $z = 3;',
+        code    => '$z = $x + $y',
+    },
+    'expr::arith::add_lex_nn' => {
+        desc    => 'add two NVs and assign to a lexical var',
+        setup   => 'my ($x,$y,$z) = (1.1, 2.2, 3.3);',
+        code    => '$z = $x + $y',
+    },
+    'expr::arith::add_pkg_nn' => {
+        desc    => 'add two NVs and assign to a package var',
+        setup   => 'my ($x,$y); ($x,$y,$z) = (1.1, 2.2, 3.3);',
+        code    => '$z = $x + $y',
+    },
+    'expr::arith::add_lex_ni' => {
+        desc    => 'add an int and an NV and assign to a lexical var',
+        setup   => 'my ($x,$y,$z) = (1, 2.2, 3.3);',
+        code    => '$z = $x + $y',
+    },
+    'expr::arith::add_pkg_ni' => {
+        desc    => 'add an int and an NV and assign to a package var',
+        setup   => 'my ($x,$y); ($x,$y,$z) = (1, 2.2, 3.3);',
+        code    => '$z = $x + $y',
+    },
+
+    'expr::arith::sub_lex_ii' => {
+        desc    => 'subtract two integers and assign to a lexical var',
+        setup   => 'my ($x,$y,$z) = 1..3;',
+        code    => '$z = $x - $y',
+    },
+    'expr::arith::sub_pkg_ii' => {
+        desc    => 'subtract two integers and assign to a package var',
+        setup   => 'my ($x,$y) = 1..2; $z = 3;',
+        code    => '$z = $x - $y',
+    },
+    'expr::arith::sub_lex_nn' => {
+        desc    => 'subtract two NVs and assign to a lexical var',
+        setup   => 'my ($x,$y,$z) = (1.1, 2.2, 3.3);',
+        code    => '$z = $x - $y',
+    },
+    'expr::arith::sub_pkg_nn' => {
+        desc    => 'subtract two NVs and assign to a package var',
+        setup   => 'my ($x,$y); ($x,$y,$z) = (1.1, 2.2, 3.3);',
+        code    => '$z = $x - $y',
+    },
+    'expr::arith::sub_lex_ni' => {
+        desc    => 'subtract an int and an NV and assign to a lexical var',
+        setup   => 'my ($x,$y,$z) = (1, 2.2, 3.3);',
+        code    => '$z = $x - $y',
+    },
+    'expr::arith::sub_pkg_ni' => {
+        desc    => 'subtract an int and an NV and assign to a package var',
+        setup   => 'my ($x,$y); ($x,$y,$z) = (1, 2.2, 3.3);',
+        code    => '$z = $x - $y',
+    },
+
+    'expr::arith::mult_lex_ii' => {
+        desc    => 'multiply two integers and assign to a lexical var',
+        setup   => 'my ($x,$y,$z) = 1..3;',
+        code    => '$z = $x * $y',
+    },
+    'expr::arith::mult_pkg_ii' => {
+        desc    => 'multiply two integers and assign to a package var',
+        setup   => 'my ($x,$y) = 1..2; $z = 3;',
+        code    => '$z = $x * $y',
+    },
+    'expr::arith::mult_lex_nn' => {
+        desc    => 'multiply two NVs and assign to a lexical var',
+        setup   => 'my ($x,$y,$z) = (1.1, 2.2, 3.3);',
+        code    => '$z = $x * $y',
+    },
+    'expr::arith::mult_pkg_nn' => {
+        desc    => 'multiply two NVs and assign to a package var',
+        setup   => 'my ($x,$y); ($x,$y,$z) = (1.1, 2.2, 3.3);',
+        code    => '$z = $x * $y',
+    },
+    'expr::arith::mult_lex_ni' => {
+        desc    => 'multiply an int and an NV and assign to a lexical var',
+        setup   => 'my ($x,$y,$z) = (1, 2.2, 3.3);',
+        code    => '$z = $x * $y',
+    },
+    'expr::arith::mult_pkg_ni' => {
+        desc    => 'multiply an int and an NV and assign to a package var',
+        setup   => 'my ($x,$y); ($x,$y,$z) = (1, 2.2, 3.3);',
+        code    => '$z = $x * $y',
+    },
+
 ];

@@ -564,15 +564,62 @@ PP(pp_defined)
     RETPUSHNO;
 }
 
+
+
 PP(pp_add)
 {
     dSP; dATARGET; bool useleft; SV *svl, *svr;
+
     tryAMAGICbin_MG(add_amg, AMGf_assign|AMGf_numeric);
     svr = TOPs;
     svl = TOPm1s;
 
-    useleft = USE_LEFT(svl);
 #ifdef PERL_PRESERVE_IVUV
+
+    /* special-case some simple common cases */
+    if (!((svl->sv_flags|svr->sv_flags) & (SVf_IVisUV|SVs_GMG))) {
+        IV il, ir;
+        U32 flags = (svl->sv_flags & svr->sv_flags);
+        if (flags & SVf_IOK) {
+            /* both args are simple IVs */
+            UV topl, topr;
+            il = SvIVX(svl);
+            ir = SvIVX(svr);
+          do_iv:
+            topl = ((UV)il) >> (UVSIZE * 8 - 2);
+            topr = ((UV)ir) >> (UVSIZE * 8 - 2);
+
+            /* if both are in a range that can't under/overflow, do a
+             * simple integer add: if the top of both numbers
+             * are 00  or 11, then it's safe */
+            if (!( ((topl+1) | (topr+1)) & 2)) {
+                SP--;
+                TARGi(il + ir, 0); /* args not GMG, so can't be tainted */
+                SETs(TARG);
+                RETURN;
+            }
+            goto generic;
+        }
+        else if (flags & SVf_NOK) {
+            /* both args are NVs */
+            NV nl = SvNVX(svl);
+            NV nr = SvNVX(svr);
+
+            il = (IV)nl;
+            ir = (IV)nr;
+            if (nl == (NV)il && nr == (NV)ir)
+                /* nothing was lost by converting to IVs */
+                goto do_iv;
+            SP--;
+            TARGn(nl + nr, 0); /* args not GMG, so can't be tainted */
+            SETs(TARG);
+            RETURN;
+        }
+    }
+
+  generic:
+
+    useleft = USE_LEFT(svl);
     /* We must see if we can perform the addition with integers if possible,
        as the integer code detects overflow while the NV code doesn't.
        If either argument hasn't had a numeric conversion yet attempt to get
@@ -716,7 +763,11 @@ PP(pp_add)
 	    } /* Overflow, drop through to NVs.  */
 	}
     }
+
+#else
+    useleft = USE_LEFT(svl);
 #endif
+
     {
 	NV value = SvNV_nomg(svr);
 	(void)POPs;

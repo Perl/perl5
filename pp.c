@@ -1276,7 +1276,64 @@ PP(pp_multiply)
     tryAMAGICbin_MG(mult_amg, AMGf_assign|AMGf_numeric);
     svr = TOPs;
     svl = TOPm1s;
+
 #ifdef PERL_PRESERVE_IVUV
+
+    /* special-case some simple common cases */
+    if (!((svl->sv_flags|svr->sv_flags) & (SVf_IVisUV|SVs_GMG))) {
+        IV il, ir;
+        U32 flags = (svl->sv_flags & svr->sv_flags);
+        if (flags & SVf_IOK) {
+            /* both args are simple IVs */
+            UV topl, topr;
+            il = SvIVX(svl);
+            ir = SvIVX(svr);
+          do_iv:
+            topl = ((UV)il) >> (UVSIZE * 4 - 1);
+            topr = ((UV)ir) >> (UVSIZE * 4 - 1);
+
+            /* if both are in a range that can't under/overflow, do a
+             * simple integer multiply: if the top halves(*) of both numbers
+             * are 00...00  or 11...11, then it's safe.
+             * (*) for 32-bits, the "top half" is the top 17 bits,
+             *     for 64-bits, its 33 bits */
+            if (!(
+                      ((topl+1) | (topr+1))
+                    & ( (((UV)1) << (UVSIZE * 4 + 1)) - 2) /* 11..110 */
+            )) {
+                SP--;
+                TARGi(il * ir, 0); /* args not GMG, so can't be tainted */
+                SETs(TARG);
+                RETURN;
+            }
+            goto generic;
+        }
+        else if (flags & SVf_NOK) {
+            /* both args are NVs */
+            NV nl = SvNVX(svl);
+            NV nr = SvNVX(svr);
+            NV result;
+
+            il = (IV)nl;
+            ir = (IV)nr;
+            if (nl == (NV)il && nr == (NV)ir)
+                /* nothing was lost by converting to IVs */
+                goto do_iv;
+            SP--;
+            result = nl * nr;
+#  if defined(__sgi) && defined(USE_LONG_DOUBLE) && LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN && NVSIZE == 16
+            if (Perl_isinf(result)) {
+                Zero((U8*)&result + 8, 8, U8);
+            }
+#  endif
+            TARGn(result, 0); /* args not GMG, so can't be tainted */
+            SETs(TARG);
+            RETURN;
+        }
+    }
+
+  generic:
+
     if (SvIV_please_nomg(svr)) {
 	/* Unless the left argument is integer in range we are going to have to
 	   use NV maths. Hence only attempt to coerce the right argument if
@@ -1393,18 +1450,15 @@ PP(pp_multiply)
     {
       NV right = SvNV_nomg(svr);
       NV left  = SvNV_nomg(svl);
+      NV result = left * right;
+
       (void)POPs;
 #if defined(__sgi) && defined(USE_LONG_DOUBLE) && LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN && NVSIZE == 16
-      {
-          NV result = left * right;
-          if (Perl_isinf(result)) {
-              Zero((U8*)&result + 8, 8, U8);
-          }
-          SETn( result );
+      if (Perl_isinf(result)) {
+          Zero((U8*)&result + 8, 8, U8);
       }
-#else
-      SETn( left * right );
 #endif
+      SETn(result);
       RETURN;
     }
 }
@@ -1804,8 +1858,53 @@ PP(pp_subtract)
     tryAMAGICbin_MG(subtr_amg, AMGf_assign|AMGf_numeric);
     svr = TOPs;
     svl = TOPm1s;
-    useleft = USE_LEFT(svl);
+
 #ifdef PERL_PRESERVE_IVUV
+
+    /* special-case some simple common cases */
+    if (!((svl->sv_flags|svr->sv_flags) & (SVf_IVisUV|SVs_GMG))) {
+        IV il, ir;
+        U32 flags = (svl->sv_flags & svr->sv_flags);
+        if (flags & SVf_IOK) {
+            /* both args are simple IVs */
+            UV topl, topr;
+            il = SvIVX(svl);
+            ir = SvIVX(svr);
+          do_iv:
+            topl = ((UV)il) >> (UVSIZE * 8 - 2);
+            topr = ((UV)ir) >> (UVSIZE * 8 - 2);
+
+            /* if both are in a range that can't under/overflow, do a
+             * simple integer subtract: if the top of both numbers
+             * are 00  or 11, then it's safe */
+            if (!( ((topl+1) | (topr+1)) & 2)) {
+                SP--;
+                TARGi(il - ir, 0); /* args not GMG, so can't be tainted */
+                SETs(TARG);
+                RETURN;
+            }
+            goto generic;
+        }
+        else if (flags & SVf_NOK) {
+            /* both args are NVs */
+            NV nl = SvNVX(svl);
+            NV nr = SvNVX(svr);
+
+            il = (IV)nl;
+            ir = (IV)nr;
+            if (nl == (NV)il && nr == (NV)ir)
+                /* nothing was lost by converting to IVs */
+                goto do_iv;
+            SP--;
+            TARGn(nl - nr, 0); /* args not GMG, so can't be tainted */
+            SETs(TARG);
+            RETURN;
+        }
+    }
+
+  generic:
+
+    useleft = USE_LEFT(svl);
     /* See comments in pp_add (in pp_hot.c) about Overflow, and how
        "bad things" happen if you rely on signed integers wrapping.  */
     if (SvIV_please_nomg(svr)) {
@@ -1903,6 +2002,8 @@ PP(pp_subtract)
 	    } /* Overflow, drop through to NVs.  */
 	}
     }
+#else
+    useleft = USE_LEFT(svl);
 #endif
     {
 	NV value = SvNV_nomg(svr);
