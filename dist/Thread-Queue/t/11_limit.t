@@ -44,10 +44,6 @@ my $th = threads->create( sub {
     # (6) Get reports from main
     my @items = $rpt->dequeue(5);
     is_deeply(\@items, [4, 3, 4, 3, 'go'], 'Queue reports');
-
-    # Dequeue all items
-    @items = $q->dequeue_nb(99);
-    is_deeply(\@items, [5, 'foo', 6, 7], 'Queue items');
 });
 
 # (2) Read queue limit from thread
@@ -80,16 +76,20 @@ $rpt->enqueue($q->pending);
 # Read an item from queue
 $item = $q->dequeue();
 is($item, 3, 'Dequeued item 3');
-# q = (3, 4, 5); r = (4)
+# q = (4, 5, 'foo'); r = (4, 3, 4)
 # Report back the queue count
 $rpt->enqueue($q->pending);
 # q = (4, 5, 'foo'); r = (4, 3, 4, 3)
 
-# Read an item from queue
-$item = $q->dequeue();
-is($item, 4, 'Dequeued item 4');
+# Read all items from queue
+my @item = $q->dequeue(3);
+is_deeply(\@item, [4, 5, 'foo'], 'Dequeued 3 items');
 # Thread is now unblocked
 
+@item = $q->dequeue(2);
+is_deeply(\@item, [6, 7], 'Dequeued 2 items');
+
+# Thread is now unblocked
 # Handshake with thread
 $rpt->enqueue('go');
 

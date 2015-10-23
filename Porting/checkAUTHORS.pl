@@ -663,6 +663,7 @@ jdhedden\100cpan.org                    jerry\100hedden.us
 +                                       jdhedden\100gmail.com
 +                                       jdhedden\100yahoo.com
 +                                       jhedden\100pn100-02-2-356p.corp.bloomberg.com
++                                       jdhedden\100solydxk
 jeremy\100zawodny.com                   jzawodn\100wcnet.org
 jesse\100sig.bsh.com                    jesse\100ginger
 jfriedl\100yahoo.com                    jfriedl\100yahoo-inc.com
