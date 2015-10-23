@@ -49,6 +49,7 @@ push @toolchain, qw(
 	cpan/Getopt-Long/lib
 	cpan/parent/lib
 	cpan/ExtUtils-Constant/lib
+	cpan/version/lib
 ) if $^O eq 'MSWin32';
 push @toolchain, 'ext/VMS-Filespec/lib' if $^O eq 'VMS';
 
