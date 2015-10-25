@@ -4,7 +4,9 @@ use Encode ();
 
 use Test::More;
 if (ord("A") != 65) {
-    plan skip_all => "Painful to port to non-ASCII";
+    # pad_scalar() requires constant input.  To port this to EBCDIC would
+    # require copy, paste,  and changing all the values for each code page.
+    plan skip_all => "ASCII-centric tests";
 }
 else {
     plan tests => 77;
