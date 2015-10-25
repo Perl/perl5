@@ -1066,7 +1066,6 @@ cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm		Write Makefiles for extension
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/Tutorial.pod	Writing a module with MakeMaker
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/version.pm
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/version/regex.pm
-cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/version/vpp.pm
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/Mkbootstrap.pm		Writes a bootstrap file (see MakeMaker)
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/Mksymlists.pm		Writes a linker options file for extensions
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_AIX.pm			MakeMaker methods for AIX
@@ -2927,8 +2926,6 @@ cpan/version/lib/version/Internals.pod	Description of the internals of version o
 cpan/version/lib/version.pm		Support for version objects
 cpan/version/lib/version.pod		Documentation of the version module
 cpan/version/lib/version/regex.pm	Regex for matching version objects
-cpan/version/lib/version/vpp.pm		Pure Perl implementation of XS code
-cpan/version/t/00impl-pp.t		Tests for version objects
 cpan/version/t/01base.t			Tests for version objects
 cpan/version/t/02derived.t		Tests for version objects
 cpan/version/t/03require.t		Tests for version objects

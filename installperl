@@ -715,6 +715,9 @@ sub installlib {
 
     return if $name eq 'ExtUtils/XSSymSet.pm' and !$Is_VMS;
 
+    #blead comes with version, blead isn't 5.8/5.6
+    return if $name eq 'ExtUtils/MakeMaker/version/regex.pm';
+
     my $installlib = $installprivlib;
     if ($dir =~ /^auto\// ||
 	  ($name =~ /^(.*)\.(?:pm|pod)$/ && $archpms{$1}) ||

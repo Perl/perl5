@@ -476,6 +476,7 @@ use File::Glob qw(:case);
             qr{^\.perlcriticrc},
             'PATCHING',
             'README.packaging',
+            'lib/ExtUtils/MakeMaker/version/vpp.pm',
         ],
         # Upstreamed as https://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker/commit/ede9ea4a
         'CUSTOMIZED'   => [
@@ -1255,7 +1256,9 @@ use File::Glob qw(:case);
             'vutil/Makefile.PL',
             'vutil/ppport.h',
             'vutil/vxs.xs',
+            't/00impl-pp.t',
             't/survey_locales',
+            'lib/version/vpp.pm',
         ],
 
         # When adding the CPAN-distributed files for version.pm, it is necessary
