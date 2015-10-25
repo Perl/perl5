@@ -215,13 +215,16 @@ sub run_tests {
         ## Should probably put in tests for all the POSIX stuff,
         ## but not sure how to guarantee a specific locale......
 
-        skip "Not an ASCII platform", 2 unless $::IS_ASCII;
         my $message = 'Test [[:cntrl:]]';
         my $AllBytes = join "" => map {chr} 0 .. 255;
         (my $x = $AllBytes) =~ s/[[:cntrl:]]//g;
+        $x = join "", sort { $a cmp $b }
+                      map { chr utf8::native_to_unicode(ord $_) } split "", $x;
         is($x, join("", map {chr} 0x20 .. 0x7E, 0x80 .. 0xFF), $message);
 
         ($x = $AllBytes) =~ s/[^[:cntrl:]]//g;
+        $x = join "", sort { $a cmp $b }
+                       map { chr utf8::native_to_unicode(ord $_) } split "", $x;
         is($x, (join "", map {chr} 0x00 .. 0x1F, 0x7F), $message);
     }
 
