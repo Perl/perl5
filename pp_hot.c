@@ -465,25 +465,44 @@ PP(pp_eq)
 }
 
 
-/* also used for: pp_i_predec() pp_i_preinc() pp_predec() */
+/* also used for: pp_i_preinc() */
 
 PP(pp_preinc)
 {
-    dSP;
-    const bool inc =
-	PL_op->op_type == OP_PREINC || PL_op->op_type == OP_I_PREINC;
-    if (UNLIKELY(SvTYPE(TOPs) >= SVt_PVAV || (isGV_with_GP(TOPs) && !SvFAKE(TOPs))))
-	Perl_croak_no_modify();
-    if (LIKELY(!SvREADONLY(TOPs) && !SvGMAGICAL(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs))
-        && SvIVX(TOPs) != (inc ? IV_MAX : IV_MIN))
+    SV *sv = *PL_stack_sp;
+
+    if (LIKELY(((sv->sv_flags &
+                        (SVf_THINKFIRST|SVs_GMG|SVf_IVisUV|
+                         SVf_IOK|SVf_NOK|SVf_POK|SVp_NOK|SVp_POK|SVf_ROK))
+                == SVf_IOK))
+        && SvIVX(sv) != IV_MAX)
     {
-	SvIV_set(TOPs, SvIVX(TOPs) + (inc ? 1 : -1));
-	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);
+	SvIV_set(sv, SvIVX(sv) + 1);
     }
-    else /* Do all the PERL_PRESERVE_IVUV conditionals in sv_inc */
-	if (inc) sv_inc(TOPs);
-	else sv_dec(TOPs);
-    SvSETMAGIC(TOPs);
+    else /* Do all the PERL_PRESERVE_IVUV and hard cases in sv_inc */
+	sv_inc(sv);
+    SvSETMAGIC(sv);
+    return NORMAL;
+}
+
+
+/* also used for: pp_i_predec() */
+
+PP(pp_predec)
+{
+    SV *sv = *PL_stack_sp;
+
+    if (LIKELY(((sv->sv_flags &
+                        (SVf_THINKFIRST|SVs_GMG|SVf_IVisUV|
+                         SVf_IOK|SVf_NOK|SVf_POK|SVp_NOK|SVp_POK|SVf_ROK))
+                == SVf_IOK))
+        && SvIVX(sv) != IV_MIN)
+    {
+	SvIV_set(sv, SvIVX(sv) - 1);
+    }
+    else /* Do all the PERL_PRESERVE_IVUV and hard cases  in sv_dec */
+	sv_dec(sv);
+    SvSETMAGIC(sv);
     return NORMAL;
 }
 

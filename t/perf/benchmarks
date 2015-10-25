@@ -808,4 +808,26 @@
         code    => '$z = $x * $y',
     },
 
+    'expr::arith::preinc' => {
+        desc    => '++$x',
+        setup   => 'my $x = 1;',
+        code    => '++$x',
+    },
+    'expr::arith::predec' => {
+        desc    => '--$x',
+        setup   => 'my $x = 1;',
+        code    => '--$x',
+    },
+    'expr::arith::postinc' => {
+        desc    => '$x++',
+        setup   => 'my $x = 1; my $y',
+        code    => '$y = $x++', # scalar context so not optimised to ++$x
+    },
+    'expr::arith::postdec' => {
+        desc    => '$x--',
+        setup   => 'my $x = 1; my $y',
+        code    => '$y = $x--', # scalar context so not optimised to --$x
+
+    },
+
 ];
