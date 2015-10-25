@@ -265,10 +265,10 @@ if (defined $Config{ebcdic} && $Config{ebcdic} eq 'define') {	# EBCDIC.
 ok( $_ eq 'abcdefghijklmnopqrstuvwxyz0123456789' );
 
 SKIP: {
-    skip("not ASCII",1) unless (ord("+") == ord(",") - 1
-			     && ord(",") == ord("-") - 1
-			     && ord("a") == ord("b") - 1
-			     && ord("b") == ord("c") - 1);
+    skip("ASCII-centric test",1) unless (ord("+") == ord(",") - 1
+			              && ord(",") == ord("-") - 1
+			              && ord("a") == ord("b") - 1
+			              && ord("b") == ord("c") - 1);
     $_ = '+,-';
     tr/+--/a-c/;
     ok( $_ eq 'abc' );
