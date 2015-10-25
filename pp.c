@@ -1072,34 +1072,80 @@ PP(pp_undef)
 }
 
 
-/* also used for: pp_i_postdec() pp_i_postinc() pp_postdec() */
+/* common "slow" code for pp_postinc and pp_postdec */
 
-PP(pp_postinc)
+static OP *
+S_postincdec_common(pTHX_ SV *sv, SV *targ)
 {
-    dSP; dTARGET;
+    dSP;
     const bool inc =
 	PL_op->op_type == OP_POSTINC || PL_op->op_type == OP_I_POSTINC;
-    if (SvTYPE(TOPs) >= SVt_PVAV || (isGV_with_GP(TOPs) && !SvFAKE(TOPs)))
-	Perl_croak_no_modify();
-    if (SvROK(TOPs))
+
+    if (SvROK(sv))
 	TARG = sv_newmortal();
-    sv_setsv(TARG, TOPs);
-    if (!SvREADONLY(TOPs) && !SvGMAGICAL(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
-        && SvIVX(TOPs) != (inc ? IV_MAX : IV_MIN))
-    {
-	SvIV_set(TOPs, SvIVX(TOPs) + (inc ? 1 : -1));
-	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);
-    }
-    else if (inc)
-	sv_inc_nomg(TOPs);
-    else sv_dec_nomg(TOPs);
-    SvSETMAGIC(TOPs);
+    sv_setsv(TARG, sv);
+    if (inc)
+	sv_inc_nomg(sv);
+    else
+        sv_dec_nomg(sv);
+    SvSETMAGIC(sv);
     /* special case for undef: see thread at 2003-03/msg00536.html in archive */
     if (inc && !SvOK(TARG))
 	sv_setiv(TARG, 0);
     SETTARG;
     return NORMAL;
 }
+
+
+/* also used for: pp_i_postinc() */
+
+PP(pp_postinc)
+{
+    dSP; dTARGET;
+    SV *sv = TOPs;
+
+    /* special-case sv being a simple integer */
+    if (LIKELY(((sv->sv_flags &
+                        (SVf_THINKFIRST|SVs_GMG|SVf_IVisUV|
+                         SVf_IOK|SVf_NOK|SVf_POK|SVp_NOK|SVp_POK|SVf_ROK))
+                == SVf_IOK))
+        && SvIVX(sv) != IV_MAX)
+    {
+        IV iv = SvIVX(sv);
+	SvIV_set(sv,  iv + 1);
+        TARGi(iv, 0); /* arg not GMG, so can't be tainted */
+        SETs(TARG);
+        return NORMAL;
+    }
+
+    return S_postincdec_common(aTHX_ sv, TARG);
+}
+
+
+/* also used for: pp_i_postdec() */
+
+PP(pp_postdec)
+{
+    dSP; dTARGET;
+    SV *sv = TOPs;
+
+    /* special-case sv being a simple integer */
+    if (LIKELY(((sv->sv_flags &
+                        (SVf_THINKFIRST|SVs_GMG|SVf_IVisUV|
+                         SVf_IOK|SVf_NOK|SVf_POK|SVp_NOK|SVp_POK|SVf_ROK))
+                == SVf_IOK))
+        && SvIVX(sv) != IV_MIN)
+    {
+        IV iv = SvIVX(sv);
+	SvIV_set(sv,  iv - 1);
+        TARGi(iv, 0); /* arg not GMG, so can't be tainted */
+        SETs(TARG);
+        return NORMAL;
+    }
+
+    return S_postincdec_common(aTHX_ sv, TARG);
+}
+
 
 /* Ordinary operators. */
 

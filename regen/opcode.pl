@@ -132,7 +132,8 @@ my @raw_alias = (
 		 Perl_pp_bind => {connect => '#ifdef HAS_SOCKET'},
 		 Perl_pp_preinc => ['i_preinc'],
 		 Perl_pp_predec => ['i_predec'],
-		 Perl_pp_postinc => ['i_postinc', 'postdec', 'i_postdec'],
+		 Perl_pp_postinc => ['i_postinc'],
+		 Perl_pp_postdec => ['i_postdec'],
 		 Perl_pp_ehostent => [qw(enetent eprotoent eservent
 					 spwent epwent sgrent egrent)],
 		 Perl_pp_shostent => [qw(snetent sprotoent sservent)],
