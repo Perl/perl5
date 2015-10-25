@@ -671,8 +671,8 @@ sub installlib {
     return if $name =~ /^(?:cpan|instmodsh|prove|corelist|ptar|ptardiff|ptargrep|zipdetails)\z/;
     # ignore the Makefiles
     return if $name =~ /^makefile$/i;
-    # ignore the test extensions
-    return if $dir =~ m{\bXS/(?:APItest|Typemap)\b};
+    # ignore the test extensions, dont install PPPort.so/.dll
+    return if $dir =~ m{\b(?:XS/(?:APItest|Typemap)|Devel/PPPort)\b};
     return if $name =~ m{\b(?:APItest|Typemap)\.pm$};
     # ignore the build support code
     return if $name =~ /\bbuildcustomize\.pl$/;
