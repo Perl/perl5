@@ -666,7 +666,7 @@ static XSPROTO(intrpvar_sv_common)
 
 /* table that drives most of the B::*OP methods */
 
-const struct OP_methods {
+static const struct OP_methods {
     const char *name;
     U8 namelen;
     U8    type; /* if op_offset_special, access is handled on a case-by-case basis */

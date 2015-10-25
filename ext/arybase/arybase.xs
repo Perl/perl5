@@ -195,7 +195,7 @@ STATIC OP *ab_ck_aassign(pTHX_ OP *o) {
  return o;
 }
 
-void
+STATIC void
 tie(pTHX_ SV * const sv, SV * const obj, HV *const stash)
 {
     SV *rv = newSV_type(SVt_RV);

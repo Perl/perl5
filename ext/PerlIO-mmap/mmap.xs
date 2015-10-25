@@ -23,7 +23,7 @@ typedef struct {
     STDCHAR *bbuf;              /* malloced buffer if map fails */
 } PerlIOMmap;
 
-IV
+static IV
 PerlIOMmap_map(pTHX_ PerlIO *f)
 {
     dVAR;
@@ -88,7 +88,7 @@ PerlIOMmap_map(pTHX_ PerlIO *f)
     return code;
 }
 
-IV
+static IV
 PerlIOMmap_unmap(pTHX_ PerlIO *f)
 {
     PerlIOMmap * const m = PerlIOSelf(f, PerlIOMmap);
@@ -116,7 +116,7 @@ PerlIOMmap_unmap(pTHX_ PerlIO *f)
     return code;
 }
 
-STDCHAR *
+static STDCHAR *
 PerlIOMmap_get_base(pTHX_ PerlIO *f)
 {
     PerlIOMmap * const m = PerlIOSelf(f, PerlIOMmap);
@@ -149,7 +149,7 @@ PerlIOMmap_get_base(pTHX_ PerlIO *f)
     return PerlIOBuf_get_base(aTHX_ f);
 }
 
-SSize_t
+static SSize_t
 PerlIOMmap_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
     PerlIOMmap * const m = PerlIOSelf(f, PerlIOMmap);
@@ -180,7 +180,7 @@ PerlIOMmap_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     return PerlIOBuf_unread(aTHX_ f, vbuf, count);
 }
 
-SSize_t
+static SSize_t
 PerlIOMmap_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
     PerlIOMmap * const m = PerlIOSelf(f, PerlIOMmap);
@@ -207,7 +207,7 @@ PerlIOMmap_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     return PerlIOBuf_write(aTHX_ f, vbuf, count);
 }
 
-IV
+static IV
 PerlIOMmap_flush(pTHX_ PerlIO *f)
 {
     PerlIOMmap * const m = PerlIOSelf(f, PerlIOMmap);
@@ -235,7 +235,7 @@ PerlIOMmap_flush(pTHX_ PerlIO *f)
     return code;
 }
 
-IV
+static IV
 PerlIOMmap_fill(pTHX_ PerlIO *f)
 {
     PerlIOBuf * const b = PerlIOSelf(f, PerlIOBuf);
@@ -249,7 +249,7 @@ PerlIOMmap_fill(pTHX_ PerlIO *f)
     return code;
 }
 
-IV
+static IV
 PerlIOMmap_close(pTHX_ PerlIO *f)
 {
     PerlIOMmap * const m = PerlIOSelf(f, PerlIOMmap);
@@ -265,14 +265,14 @@ PerlIOMmap_close(pTHX_ PerlIO *f)
     return code;
 }
 
-PerlIO *
+static PerlIO *
 PerlIOMmap_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 {
  return PerlIOBase_dup(aTHX_ f, o, param, flags);
 }
 
 
-PERLIO_FUNCS_DECL(PerlIO_mmap) = {
+static PERLIO_FUNCS_DECL(PerlIO_mmap) = {
     sizeof(PerlIO_funcs),
     "mmap",
     sizeof(PerlIOMmap),

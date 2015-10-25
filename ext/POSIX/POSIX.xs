@@ -1528,7 +1528,7 @@ struct lconv_offset {
     size_t offset;
 };
 
-const struct lconv_offset lconv_strings[] = {
+static const struct lconv_offset lconv_strings[] = {
 #ifdef USE_LOCALE_NUMERIC
     {"decimal_point",     STRUCT_OFFSET(struct lconv, decimal_point)},
     {"thousands_sep",     STRUCT_OFFSET(struct lconv, thousands_sep)},
@@ -1567,7 +1567,7 @@ const struct lconv_offset lconv_strings[] = {
 #   define isLC_NUMERIC_STRING(name) (0)
 #endif
 
-const struct lconv_offset lconv_integers[] = {
+static const struct lconv_offset lconv_integers[] = {
 #ifdef USE_LOCALE_MONETARY
     {"int_frac_digits",   STRUCT_OFFSET(struct lconv, int_frac_digits)},
     {"frac_digits",       STRUCT_OFFSET(struct lconv, frac_digits)},

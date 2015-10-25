@@ -51,7 +51,7 @@ typedef struct {
 
 static const MGVTBL PerlIOEncode_tag = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
-SV *
+static SV *
 PerlIOEncode_getarg(pTHX_ PerlIO * f, CLONE_PARAMS * param, int flags)
 {
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
@@ -87,7 +87,7 @@ PerlIOEncode_getarg(pTHX_ PerlIO * f, CLONE_PARAMS * param, int flags)
     return sv;
 }
 
-IV
+static IV
 PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg, PerlIO_funcs *tab)
 {
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
@@ -172,7 +172,7 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg, PerlIO_funcs *
     return code;
 }
 
-IV
+static IV
 PerlIOEncode_popped(pTHX_ PerlIO * f)
 {
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
@@ -195,7 +195,7 @@ PerlIOEncode_popped(pTHX_ PerlIO * f)
     return 0;
 }
 
-STDCHAR *
+static STDCHAR *
 PerlIOEncode_get_base(pTHX_ PerlIO * f)
 {
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
@@ -232,7 +232,7 @@ PerlIOEncode_get_base(pTHX_ PerlIO * f)
     return e->base.buf;
 }
 
-IV
+static IV
 PerlIOEncode_fill(pTHX_ PerlIO * f)
 {
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
@@ -414,7 +414,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
     return code;
 }
 
-IV
+static IV
 PerlIOEncode_flush(pTHX_ PerlIO * f)
 {
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
@@ -531,7 +531,7 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
     return code;
 }
 
-IV
+static IV
 PerlIOEncode_close(pTHX_ PerlIO * f)
 {
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
@@ -560,7 +560,7 @@ PerlIOEncode_close(pTHX_ PerlIO * f)
     return code;
 }
 
-Off_t
+static Off_t
 PerlIOEncode_tell(pTHX_ PerlIO * f)
 {
     PerlIOBuf *b = PerlIOSelf(f, PerlIOBuf);
@@ -574,7 +574,7 @@ PerlIOEncode_tell(pTHX_ PerlIO * f)
     return PerlIO_tell(PerlIONext(f));
 }
 
-PerlIO *
+static PerlIO *
 PerlIOEncode_dup(pTHX_ PerlIO * f, PerlIO * o,
 		 CLONE_PARAMS * params, int flags)
 {
@@ -591,7 +591,7 @@ PerlIOEncode_dup(pTHX_ PerlIO * f, PerlIO * o,
     return f;
 }
 
-SSize_t
+static SSize_t
 PerlIOEncode_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
@@ -623,7 +623,7 @@ PerlIOEncode_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     }
 }
 
-PERLIO_FUNCS_DECL(PerlIO_encode) = {
+static PERLIO_FUNCS_DECL(PerlIO_encode) = {
     sizeof(PerlIO_funcs),
     "encoding",
     sizeof(PerlIOEncode),

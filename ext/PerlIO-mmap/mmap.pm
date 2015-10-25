@@ -1,7 +1,7 @@
 package PerlIO::mmap;
 use strict;
 use warnings;
-our $VERSION = '0.014';
+our $VERSION = '0.015';
 
 use XSLoader;
 XSLoader::load(__PACKAGE__, __PACKAGE__->VERSION);
