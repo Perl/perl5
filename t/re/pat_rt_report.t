@@ -509,7 +509,7 @@ sub run_tests {
 
   SKIP:
     {
-        skip "In EBCDIC" if $::IS_EBCDIC;
+        skip "In EBCDIC and unclear what would trigger this bug there" if $::IS_EBCDIC;
         no warnings 'utf8';
         $_ = pack 'U0C2', 0xa2, 0xf8;  # Ill-formed UTF-8
         my $ret = 0;
