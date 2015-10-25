@@ -386,15 +386,14 @@ print "ok $test - call a function in package v10::foo\n"; $test++;
 
 print "not " unless (1?v65:"bar") eq chr(65);
 print "ok $test - colon detection after vstring does not break ? vstring :\n"; $test++;
-if (ord("A") == 65) {
-    print v35;
-    print "not ";
-    print v10;
+
+print ((ord("A") == 65) ? v35 : v123);  # NUMBER SIGN is the same for all
+                                        # supported EBCDIC platforms
+print "not ";
+print ((ord("A") == 65) ? v10 : "\n");  # LF varies on EBCDIC, if the v123 for
+                                        # '#' works above, consider it good
+                                        # enough.
     print "ok $test - print vstring prints the vstring\n";
-}
-else {
-    print "ok $test # skipped on EBCDIC\n";
-}
 $test++;
 
 # Test pyoq ops with comments before the first delim
