@@ -4287,7 +4287,67 @@ PerlIOBuf_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
  return PerlIOBase_dup(aTHX_ f, o, param, flags);
 }
 
+static SSize_t
+PerlIOPerlIO_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
+{
+    STDCHAR *buf = (STDCHAR *) vbuf;
+    if (f) {
+        PerlIOBuf * const b = PerlIOSelf(f, PerlIOBuf);
+        if (!(PerlIOBase(f)->flags & PERLIO_F_CANREAD)) {
+	    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+	    SETERRNO(EBADF, SS_IVCHAN);
+	    PerlIO_save_errno(f);
+	    return 0;
+	}
+        PerlIO_debug("flags %x\n", PerlIOBase(f)->flags);
+	while (count > 0) {
+	 get_cnt:
+	  {
+	    SSize_t avail = PerlIO_get_cnt(f);
+	    SSize_t take = 0;
+	    if (avail > 0)
+		take = (((SSize_t) count >= 0) && ((SSize_t)count < avail)) ? (SSize_t)count : avail;
+	    if (take > 0) {
+		STDCHAR *ptr = PerlIO_get_ptr(f);
+		Copy(ptr, buf, take, STDCHAR);
+		PerlIO_set_ptrcnt(f, ptr + take, (avail -= take));
+		count -= take;
+		buf += take;
+		if (avail == 0)		/* set_ptrcnt could have reset avail */
+		    goto get_cnt;
+	    }
+            /* if the caller wants more than we can fit in the buffer,
+               avoid looping around filling the buffer and copying it
+               out */
+            if (count > b->bufsiz) {
+                PerlIO *n = PerlIONext(f);
 
+                SSize_t got = PerlIO_read(n, buf, count);
+                if (got <= 0) {
+                    if (got == 0) {
+                        PerlIOBase(f)->flags |= PERLIO_F_EOF;
+                        break;
+                    }
+                    else if (got < 0) {
+                        PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+                        PerlIO_save_errno(f);
+                        break;
+                    }
+                }
+                count -= got;
+                buf += got;
+            }
+
+	    if (count > 0 && avail <= 0) {
+		if (PerlIO_fill(f) != 0)
+		    break;
+	    }
+	  }
+	}
+	return (buf - (STDCHAR *) vbuf);
+    }
+    return 0;
+}
 
 PERLIO_FUNCS_DECL(PerlIO_perlio) = {
     sizeof(PerlIO_funcs),
@@ -4301,7 +4361,7 @@ PERLIO_FUNCS_DECL(PerlIO_perlio) = {
     NULL,
     PerlIOBase_fileno,
     PerlIOBuf_dup,
-    PerlIOBuf_read,
+    PerlIOPerlIO_read,
     PerlIOBuf_unread,
     PerlIOBuf_write,
     PerlIOBuf_seek,
