@@ -878,7 +878,7 @@ sharedsv_scalar_mg_local(pTHX_ SV* nsv, MAGIC *mg)
 }
 #endif
 
-static const MGVTBL sharedsv_scalar_vtbl = {
+const MGVTBL sharedsv_scalar_vtbl = {
     sharedsv_scalar_mg_get,     /* get */
     sharedsv_scalar_mg_set,     /* set */
     0,                          /* len */
@@ -1039,7 +1039,7 @@ sharedsv_elem_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
     return (0);
 }
 
-static const MGVTBL sharedsv_elem_vtbl = {
+const MGVTBL sharedsv_elem_vtbl = {
     sharedsv_elem_mg_FETCH,     /* get */
     sharedsv_elem_mg_STORE,     /* set */
     0,                          /* len */
@@ -1152,7 +1152,7 @@ sharedsv_array_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
     return (0);
 }
 
-static const MGVTBL sharedsv_array_vtbl = {
+const MGVTBL sharedsv_array_vtbl = {
     0,                          /* get */
     0,                          /* set */
     sharedsv_array_mg_FETCHSIZE,/* len */
