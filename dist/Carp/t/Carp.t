@@ -9,7 +9,6 @@ sub runperl {
     my(%args) = @_;
     my($w, $r);
 
-    # may need special handling under VMS?
     local $ENV{PERL5LIB} = join ($Config::Config{path_sep}, @INC);
 
     my $pid = open3($w, $r, undef, $^X, "-e", $args{prog});
