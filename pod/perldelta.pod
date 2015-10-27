@@ -77,7 +77,7 @@ diagnostic messages, see L<perldiag>.
 The C<printf> and C<sprintf> builtins are now more careful about the
 warnings they emit: argument reordering now disables the "redundant
 argument" warning in all cases.
-[perl #125469]
+L<[perl #125469]|https://rt.perl.org/Ticket/Display.html?id=125469>
 
 =back
 
@@ -126,38 +126,43 @@ L<[perl #126396]|https://rt.perl.org/Ticket/Display.html?id=126396>
 =item *
 
 C<qr/(?[ () ])/> no longer segfaults, giving a syntax error message instead.
-[perl #125805]
+L<[perl #125805]|https://rt.perl.org/Ticket/Display.html?id=125805>
 
 =item *
 
 Regular expression possessive quantifier v5.20 regression now fixed.
 C<qr/>I<PAT>C<{>I<min>,I<max>C<}+>C</> is supposed to behave identically
 to C<qr/(?E<gt>>I<PAT>C<{>I<min>,I<max>C<})/>.  Since v5.20, this didn't
-work if I<min> and I<max> were equal.  [perl #125825]
+work if I<min> and I<max> were equal.
+L<[perl #125825]|https://rt.perl.org/Ticket/Display.html?id=125825>
 
 =item *
 
 C<< BEGIN <> >> no longer segfaults and properly produces an error
-message.  [perl #125341]
+message.
+L<[perl #125341]|https://rt.perl.org/Ticket/Display.html?id=125341>
 
 =item *
 
 A regression from perl v5.20 has been fixed, in which some syntax errors
 in L<C<(?[...])>|perlrecharclass/Extended Bracketed Character Classes>
 constructs within regular expression patterns could cause a segfault
-instead of a proper error message.  [perl #126180]
+instead of a proper error message.
+L<[perl #126180]|https://rt.perl.org/Ticket/Display.html?id=126180>
 
 =item *
 
 In perl v5.22.0, the logic changed when parsing a numeric parameter to the -C
 option, such that the successfully parsed number was not saved as the option
-value if it parsed to the end of the argument.  [perl #125381]
+value if it parsed to the end of the argument.
+L<[perl #125381]|https://rt.perl.org/Ticket/Display.html?id=125381>
 
 =item *
 
 Warning fatality is now ignored when rewinding the stack.  This
 prevents infinite recursion when the now fatal error also causes
-rewinding of the stack.  [perl #123398]
+rewinding of the stack.
+L<[perl #123398]|https://rt.perl.org/Ticket/Display.html?id=123398>
 
 =item *
 
