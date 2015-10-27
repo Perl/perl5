@@ -377,6 +377,11 @@ Warning fatality is now ignored when rewinding the stack.  This
 prevents infinite recursion when the now fatal error also causes
 rewinding of the stack.  [perl #123398]
 
+=item *
+
+A crash with C<< %::=(); J->${\"::"} >> has been fixed.
+L<[perl #125541]|https://rt.perl.org/Ticket/Display.html?id=125541>
+
 =back
 
 =head1 Known Problems
