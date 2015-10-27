@@ -1243,7 +1243,7 @@ use File::Glob qw(:case);
     },
 
     'Unicode::Normalize' => {
-        'DISTRIBUTION' => 'KHW/Unicode-Normalize-1.21.tar.gz',
+        'DISTRIBUTION' => 'KHW/Unicode-Normalize-1.23.tar.gz',
         'FILES'        => q[cpan/Unicode-Normalize],
     },
 

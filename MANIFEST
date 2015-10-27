@@ -2908,7 +2908,9 @@ cpan/Unicode-Collate/t/variable.t		Unicode::Collate
 cpan/Unicode-Collate/t/version.t		Unicode::Collate
 cpan/Unicode-Collate/t/view.t			Unicode::Collate
 cpan/Unicode-Normalize/Makefile.PL	Unicode::Normalize
+cpan/Unicode-Normalize/mkheader		Unicode::Normalize
 cpan/Unicode-Normalize/Normalize.pm	Unicode::Normalize
+cpan/Unicode-Normalize/Normalize.xs	Unicode::Normalize
 cpan/Unicode-Normalize/t/fcdc.t		Unicode::Normalize
 cpan/Unicode-Normalize/t/form.t		Unicode::Normalize
 cpan/Unicode-Normalize/t/func.t		Unicode::Normalize
