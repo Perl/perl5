@@ -11423,10 +11423,10 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
  * it returns U+FFFD (Replacement character) and sets *encp to NULL.
  */
 STATIC UV
-S_reg_recode(pTHX_ const char value, SV **encp)
+S_reg_recode(pTHX_ const U8 value, SV **encp)
 {
     STRLEN numlen = 1;
-    SV * const sv = newSVpvn_flags(&value, numlen, SVs_TEMP);
+    SV * const sv = newSVpvn_flags((const char *) &value, numlen, SVs_TEMP);
     const char * const s = *encp ? sv_recode_to_utf8(sv, *encp) : SvPVX(sv);
     const STRLEN newlen = SvCUR(sv);
     UV uv = UNICODE_REPLACEMENT;
@@ -12617,7 +12617,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		      recode_encoding:
 			if (! RExC_override_recoding) {
 			    SV* enc = _get_encoding();
-			    ender = reg_recode((const char)(U8)ender, &enc);
+			    ender = reg_recode((U8)ender, &enc);
 			    if (!enc && PASS2)
 				ckWARNreg(p, "Invalid escape in the specified encoding");
 			    REQUIRE_UTF8(flagp);
@@ -14905,7 +14905,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	      recode_encoding:
 		if (! RExC_override_recoding) {
 		    SV* enc = _get_encoding();
-		    value = reg_recode((const char)(U8)value, &enc);
+		    value = reg_recode((U8)value, &enc);
 		    if (!enc) {
                         if (strict) {
                             vFAIL("Invalid escape in the specified encoding");
