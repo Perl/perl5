@@ -1874,6 +1874,9 @@ typedef NVTYPE NV;
 /* Also Tru64 cc has broken NaN comparisons. */
 #  define NAN_COMPARE_BROKEN
 #endif
+#if defined(__sgi)
+#  define NAN_COMPARE_BROKEN
+#endif
 
 #ifdef USE_LONG_DOUBLE
 #   ifdef I_SUNMATH
