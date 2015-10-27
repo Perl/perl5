@@ -365,6 +365,12 @@ in L<C<(?[...])>|perlrecharclass/Extended Bracketed Character Classes>
 constructs within regular expression patterns could cause a segfault
 instead of a proper error message.  [perl #126180]
 
+=item *
+
+In perl v5.22.0, the logic changed when parsing a numeric parameter to the -C
+option, such that the successfully parsed number was not saved as the option
+value if it parsed to the end of the argument.  [perl #125381]
+
 =back
 
 =head1 Known Problems
