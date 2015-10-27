@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.999704';
+$VERSION = '1.999705';
 require 5.006002;
 
 require Exporter;
@@ -1302,7 +1302,7 @@ sub _log
   $over->bmul($u);
   $factor = $self->new(3); $f = $self->new(2);
 
-  my $steps = 0 if DEBUG;  
+  my $steps = 0;
   $limit = $self->new("1E-". ($scale-1));
   while (3 < 5)
     {
@@ -2811,48 +2811,77 @@ sub bpi
   my $fallback = defined $n ? 0 : 1;
   $n = 40 if !defined $n || $n < 1;
 
-  # after 黃見利 (Hwang Chien-Lih) (1997)
-  # pi/4 = 183 * atan(1/239) + 32 * atan(1/1023) – 68 * atan(1/5832)
-  #	 + 12 * atan(1/110443) - 12 * atan(1/4841182) - 100 * atan(1/6826318)
+  if ($n < 1000) {
 
-  # a few more to prevent rounding errors
-  $n += 4;
+      # after 黃見利 (Hwang Chien-Lih) (1997)
+      # pi/4 = 183 * atan(1/239) + 32 * atan(1/1023) – 68 * atan(1/5832)
+      #	 + 12 * atan(1/110443) - 12 * atan(1/4841182) - 100 * atan(1/6826318)
 
-  my ($a,$b) = $self->_atan_inv( $MBI->_new(239),$n);
-  my ($c,$d) = $self->_atan_inv( $MBI->_new(1023),$n);
-  my ($e,$f) = $self->_atan_inv( $MBI->_new(5832),$n);
-  my ($g,$h) = $self->_atan_inv( $MBI->_new(110443),$n);
-  my ($i,$j) = $self->_atan_inv( $MBI->_new(4841182),$n);
-  my ($k,$l) = $self->_atan_inv( $MBI->_new(6826318),$n);
+      # Use a few more digits in the intermediate computations.
 
-  $MBI->_mul($a, $MBI->_new(732));
-  $MBI->_mul($c, $MBI->_new(128));
-  $MBI->_mul($e, $MBI->_new(272));
-  $MBI->_mul($g, $MBI->_new(48));
-  $MBI->_mul($i, $MBI->_new(48));
-  $MBI->_mul($k, $MBI->_new(400));
+      my $nextra = $n < 800 ? 4 : 5;
+      $n += $nextra;
 
-  my $x = $self->bone(); $x->{_m} = $a; my $x_d = $self->bone(); $x_d->{_m} = $b;
-  my $y = $self->bone(); $y->{_m} = $c; my $y_d = $self->bone(); $y_d->{_m} = $d;
-  my $z = $self->bone(); $z->{_m} = $e; my $z_d = $self->bone(); $z_d->{_m} = $f;
-  my $u = $self->bone(); $u->{_m} = $g; my $u_d = $self->bone(); $u_d->{_m} = $h;
-  my $v = $self->bone(); $v->{_m} = $i; my $v_d = $self->bone(); $v_d->{_m} = $j;
-  my $w = $self->bone(); $w->{_m} = $k; my $w_d = $self->bone(); $w_d->{_m} = $l;
-  $x->bdiv($x_d, $n);
-  $y->bdiv($y_d, $n);
-  $z->bdiv($z_d, $n);
-  $u->bdiv($u_d, $n);
-  $v->bdiv($v_d, $n);
-  $w->bdiv($w_d, $n);
+      my ($a,$b) = $self->_atan_inv( $MBI->_new(239),$n);
+      my ($c,$d) = $self->_atan_inv( $MBI->_new(1023),$n);
+      my ($e,$f) = $self->_atan_inv( $MBI->_new(5832),$n);
+      my ($g,$h) = $self->_atan_inv( $MBI->_new(110443),$n);
+      my ($i,$j) = $self->_atan_inv( $MBI->_new(4841182),$n);
+      my ($k,$l) = $self->_atan_inv( $MBI->_new(6826318),$n);
 
-  delete $x->{_a}; delete $y->{_a}; delete $z->{_a};
-  delete $u->{_a}; delete $v->{_a}; delete $w->{_a};
-  $x->badd($y)->bsub($z)->badd($u)->bsub($v)->bsub($w);
+      $MBI->_mul($a, $MBI->_new(732));
+      $MBI->_mul($c, $MBI->_new(128));
+      $MBI->_mul($e, $MBI->_new(272));
+      $MBI->_mul($g, $MBI->_new(48));
+      $MBI->_mul($i, $MBI->_new(48));
+      $MBI->_mul($k, $MBI->_new(400));
 
-  $x->bround($n-4);
-  delete $x->{_a} if $fallback == 1;
-  $x;
+      my $x = $self->bone(); $x->{_m} = $a; my $x_d = $self->bone(); $x_d->{_m} = $b;
+      my $y = $self->bone(); $y->{_m} = $c; my $y_d = $self->bone(); $y_d->{_m} = $d;
+      my $z = $self->bone(); $z->{_m} = $e; my $z_d = $self->bone(); $z_d->{_m} = $f;
+      my $u = $self->bone(); $u->{_m} = $g; my $u_d = $self->bone(); $u_d->{_m} = $h;
+      my $v = $self->bone(); $v->{_m} = $i; my $v_d = $self->bone(); $v_d->{_m} = $j;
+      my $w = $self->bone(); $w->{_m} = $k; my $w_d = $self->bone(); $w_d->{_m} = $l;
+      $x->bdiv($x_d, $n);
+      $y->bdiv($y_d, $n);
+      $z->bdiv($z_d, $n);
+      $u->bdiv($u_d, $n);
+      $v->bdiv($v_d, $n);
+      $w->bdiv($w_d, $n);
+
+      delete $x->{_a}; delete $y->{_a}; delete $z->{_a};
+      delete $u->{_a}; delete $v->{_a}; delete $w->{_a};
+      $x->badd($y)->bsub($z)->badd($u)->bsub($v)->bsub($w);
+
+      $x->bround($n-$nextra);
+      delete $x->{_a} if $fallback == 1;
+      $x;
+
+  } else {
+
+      # For large accuracy, the arctan formulas become very inefficient with
+      # Math::BigFloat. Switch to Brent-Salamin (aka AGM or Gauss-Legendre).
+
+      # Use a few more digits in the intermediate computations.
+      my $nextra = 8;
+
+      $HALF = $self -> new($HALF) unless ref($HALF);
+      my ($an, $bn, $tn, $pn) = ($self -> bone, $HALF -> copy -> bsqrt($n),
+                                 $HALF -> copy -> bmul($HALF), $self -> bone);
+      while ($pn < $n) {
+          my $prev_an = $an -> copy;
+          $an -> badd($bn) -> bmul($HALF, $n);
+          $bn -> bmul($prev_an) -> bsqrt($n);
+          $prev_an -> bsub($an);
+          $tn -> bsub($pn * $prev_an * $prev_an);
+          $pn -> badd($pn);
+      }
+      $an -> badd($bn);
+      $an -> bmul($an, $n) -> bdiv(4 * $tn, $n - $nextra);
+      delete $an -> {_a} if $fallback == 1;
+      return $an;
   }
+}
 
 sub bcos
   {
