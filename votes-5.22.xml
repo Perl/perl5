@@ -8,7 +8,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including 7195e5da55a40d15e29ad80562668bdd6895441f (Add test for \b{sb})
+Blead changes have been examined up to and including 66d33016a779b6b40236863ff1e749b3a1757c31 (dist/ExtUtils-CBuilder/t/02-link.t: Skip on os390)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -31,6 +31,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="" id="" ticket="123878" desc=""/>
 
+(steveh: Will probably cherry-pick this, but see discussion here: http://www.nntp.perl.org/group/perl.perl5.porters/2015/10/msg232151.html)
 <commit votes="khw, steveh, arc" id="f0bd363c36d925d8d3dfe3b68715763c850b171a" ticket="126319" desc="PATCH: [perl #126319] Seg fault"/>
 
 <commit votes="steveh, arc" id="4a84d6e89d52b8921090805085871e6cca66924d" ticket="126181" desc="PATCH: [perl #126181] regex: handle \cX inside (?[])"/>
@@ -41,6 +42,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 <div><h3>Regression Fixes</h3>
 
 (arc: This regression was introduced in 5.10.0. Yow!)
+(steveh: May not cherry-pick this yet since demerphq had hoped to investigate any possible performance issues with the fix first)
 <commit votes="steveh, arc, khw" id="0f8d761c4673440b49eeb491136a67dcf3da7400" ticket="126222" desc="Add a todo test for perl-126222"/>
 <commit votes="steveh, arc, khw" id="6625d92602279361acd0c6185b78c6d201fd81e0" ticket="126222" desc="fix perl-126222 - (?!) OPFAIL optimization does work in (?(?!)yes|no)"/>
 
@@ -56,7 +58,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Build and Installation Fixes</h3>
 
+(steveh: Will cherry-pick this if another vote is forthcoming for 083231e, which jdb says this really needs as well)
 <commit votes="steveh, khw, jdb" id="9964c51f9e78a456ae7b7b5d79c43bd63a114f99" ticket="" desc="Declare compatibility with newer released versions of Windows"/>
+
 <commit votes="steveh, jdb" id="083231ea891c049b70ef28512bfc9e68c3e5d595" ticket="" desc="Update Win32 to CPAN version 0.52"/>
 
 </div>
