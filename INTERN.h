@@ -35,7 +35,7 @@
 #    ifdef __cplusplus
 #      define EXT
 #      define dEXT
-#      define EXTCONST extern const
+#      define EXTCONST EXTERN_C const
 #      define dEXTCONST const
 #    else
 #      define EXT
