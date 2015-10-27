@@ -207,6 +207,7 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 The C<printf> and C<sprintf> builtins are now more careful about the
 warnings they emit: argument reordering now disables the "redundant
 argument" warning in all cases.
+[perl #125469]
 
 =back
 
