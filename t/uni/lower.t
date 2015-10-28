@@ -1,5 +1,9 @@
 BEGIN {
     chdir 't' if -d 't';
+    unless (defined &DynaLoader::boot_DynaLoader) {
+      print("1..0 # miniperl: no Unicode::Normalize");
+      exit(0);
+    }
     require "uni/case.pl";
 }
 
