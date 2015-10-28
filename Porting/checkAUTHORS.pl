@@ -858,6 +858,7 @@ rootbeer\100teleport.com                rootbeer\100redcat.com
 +                                       tomphoenix\100unknown
 rurban\100x-ray.at                      rurban\100cpan.org
 +                                       rurban\100cpanel.net
+rvtol+news\100isolution.nl              rvtol\100isolution.nl
 sartak\100bestpractical.com             sartak\100gmail.com
 +                                       code\100sartak.org
 sadinoff\100olf.com                     danny-cpan\100sadinoff.com
