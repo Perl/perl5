@@ -3725,11 +3725,10 @@ CODE:
     PERL_SET_CONTEXT(interp);
 
     POPSTACK_TO(PL_mainstack);
+    assert(cxstack_ix >= 0);
     dounwind(-1);
+    POPBLOCK(cxstack);
     LEAVE_SCOPE(0);
-
-    while (interp->Iscopestack_ix > 1)
-        LEAVE;
     FREETMPS;
 
     perl_destruct(interp);
