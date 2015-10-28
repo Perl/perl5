@@ -8,7 +8,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including 66d33016a779b6b40236863ff1e749b3a1757c31 (dist/ExtUtils-CBuilder/t/02-link.t: Skip on os390)
+Blead changes have been examined up to and including 0c7fc6418c524329d47034aa2f4bec4f288095e2 (fix the non-Win32 build breakage introduced in ce9582af)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -70,6 +70,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 </div>
 
 <div><h3>Platform-Specific Test Fixes</h3>
+
+<commit votes="jhi, steveh" id="6504068eb895d4fb6161ddbb0249e59c19afa707" ticket="" desc="Also IRIX seems to have NaN comparison issues."/>
 
 </div>
 
