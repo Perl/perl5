@@ -240,7 +240,10 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+C<Configure> now acts as if the C<-O> option is always passed, allowing command
+line options to override saved configuration.  This should eliminate confusion
+when command line options are ignored for no obvious reason.  C<-O> is now
+permitted, but ignored.
 
 =back
 
