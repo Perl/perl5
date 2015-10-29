@@ -254,13 +254,6 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 /* 2**UTF_ACCUMULATION_SHIFT - 1 */
 #define UTF_CONTINUATION_MASK		((U8)0x3f)
 
-/* If a value is anded with this, and the result is non-zero, then using the
- * original value in UTF8_ACCUMULATE will overflow, shifting bits off the left
- * */
-#define UTF_ACCUMULATION_OVERFLOW_MASK					\
-    (((UV) UTF_CONTINUATION_MASK) << ((sizeof(UV) * CHARBITS)           \
-           - UTF_ACCUMULATION_SHIFT))
-
 #if UVSIZE >= 8
 #  define UTF8_QUAD_MAX UINT64_C(0x1000000000)
 
@@ -345,6 +338,13 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 #define UTF8_ACCUMULATE(old, new) (((old) << UTF_ACCUMULATION_SHIFT)           \
                                    | ((NATIVE_UTF8_TO_I8((U8)new))             \
                                        & UTF_CONTINUATION_MASK))
+
+/* If a value is anded with this, and the result is non-zero, then using the
+ * original value in UTF8_ACCUMULATE will overflow, shifting bits off the left
+ * */
+#define UTF_ACCUMULATION_OVERFLOW_MASK					\
+    (((UV) UTF_CONTINUATION_MASK) << ((sizeof(UV) * CHARBITS)           \
+           - UTF_ACCUMULATION_SHIFT))
 
 /* This works in the face of malformed UTF-8. */
 #define UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, e) (UTF8_IS_DOWNGRADEABLE_START(*s) \
