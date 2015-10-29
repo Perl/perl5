@@ -53,7 +53,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="steveh, arc" id="5b9ce45660f01f87f17ed2211a1c01540d903a41" ticket="126178" desc="PATCH: [perl # 126178] Unterminated /(?i/"/>
 <commit votes="steveh, arc" id="d54288eb977c475e5eb044373c07e7873a1d90e7" ticket="126253" desc="PATCH: [perl #126253] Nested quantifiers not caught"/>
-<commit votes="jhi, steveh" id="7bd819935395fd684e09e3c97918ba0ad387288a" ticket="125314" desc="For perl #126468: protect quotes in myccflags."/>
+<commit votes="jhi, steveh, alh" id="7bd819935395fd684e09e3c97918ba0ad387288a" ticket="125314" desc="For perl #126468: protect quotes in myccflags."/>
 
 </div>
 
