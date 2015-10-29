@@ -9933,6 +9933,9 @@ Perl_sv_pvutf8n_force(pTHX_ SV *const sv, STRLEN *const lp)
 
 Returns a string describing what the SV is a reference to.
 
+If ob is true and the SV is blessed, the string is the class name,
+otherwise it is the type of the SV, "SCALAR", "ARRAY" etc.
+
 =cut
 */
 
