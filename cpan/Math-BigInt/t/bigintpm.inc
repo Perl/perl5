@@ -520,6 +520,17 @@ is ($x,-3);
 is (ref($x),'Math::Foo');
 
 ###############################################################################
+# Check numify on non-finite objects.
+
+{
+    my $inf = 1e99 ** 1e99;
+    my $nan = $inf - $inf;
+    is($class -> binf("+") -> numify(),  $inf, "numify of +Inf");
+    is($class -> binf("-") -> numify(), -$inf, "numify of -Inf");
+    is($class -> bnan()    -> numify(),  $nan, "numify of NaN");
+}
+
+###############################################################################
 # Test whether +inf eq inf
 # This tried to test whether BigInt inf equals Perl inf. Unfortunately, Perl
 # hasn't (before 5.7.3 at least) a consistent way to say inf, and some things
@@ -1227,9 +1238,6 @@ bsstrabc:NaN
 -5:-5e+0
 -100:-1e+2
 &numify
-numifyabc:NaN
-+inf:inf
--inf:-inf
 5:5
 -5:-5
 100:100

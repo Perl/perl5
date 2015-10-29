@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.999705';
+$VERSION = '1.999706';
 require 5.006002;
 
 require Exporter;
@@ -437,10 +437,23 @@ sub bsstr
     
 sub numify 
   {
-  # Convert a Perl scalar number from a BigFloat object.
-  # Create a string and let Perl's atoi()/atof() handle the rest.
+  # Make a Perl scalar number from a Math::BigFloat object.
   my ($self,$x) = ref($_[0]) ? (undef,$_[0]) : objectify(1,@_);
-  return 0 + $x->bsstr(); 
+
+  if ($x -> is_nan()) {
+      require Math::Complex;
+      my $inf = Math::Complex::Inf();
+      return $inf - $inf;
+  }
+
+  if ($x -> is_inf()) {
+      require Math::Complex;
+      my $inf = Math::Complex::Inf();
+      return $x -> is_negative() ? -$inf : $inf;
+  }
+
+  # Create a string and let Perl's atoi()/atof() handle the rest.
+  return 0 + $x -> bsstr();
   }
 
 ##############################################################################

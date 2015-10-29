@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 use 5.006002;
 
-$VERSION = '1.999705';
+$VERSION = '1.999706';
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(objectify bgcd blcm); 
@@ -846,13 +846,23 @@ sub bstr
 
 sub numify 
   {
-  # Make a "normal" scalar from a BigInt object
+  # Make a Perl scalar number from a Math::BigInt object.
   my $x = shift; $x = $class->new($x) unless ref $x;
 
-  return $x->bstr() if $x->{sign} !~ /^[+-]$/;
-  my $num = $CALC->_num($x->{value});
-  return -$num if $x->{sign} eq '-';
-  $num;
+  if ($x -> is_nan()) {
+      require Math::Complex;
+      my $inf = Math::Complex::Inf();
+      return $inf - $inf;
+  }
+
+  if ($x -> is_inf()) {
+      require Math::Complex;
+      my $inf = Math::Complex::Inf();
+      return $x -> is_negative() ? -$inf : $inf;
+  }
+
+  my $num = 0 + $CALC->_num($x->{value});
+  return $x->{sign} eq '-' ? -$num : $num;
   }
 
 ##############################################################################
@@ -5182,13 +5192,20 @@ is in effect, they will always hand up their work:
 
 =item bexp()
 
+=item bpi()
+
+=item bcos()
+
+=item bsin()
+
+=item batan2()
+
+=item batan()
+
 =back
 
-Beware: This list is not complete.
-
 All other methods upgrade themselves only when one (or all) of their
-arguments are of the class mentioned in $upgrade (This might change in later
-versions to a more sophisticated scheme):
+arguments are of the class mentioned in $upgrade.
 
 =head1 EXPORTS
 

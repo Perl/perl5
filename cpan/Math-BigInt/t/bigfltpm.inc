@@ -269,6 +269,17 @@ like($class->new("1e-9999")->numify(), qr/^\+?0$/);              # underflow
 unlike($class->new("1e9999")->numify(), qr/^1(\.0*)?e\+?9+$/);   # overflow
 
 ###############################################################################
+# Check numify on non-finite objects.
+
+{
+    my $inf = 1e99 ** 1e99;
+    my $nan = $inf - $inf;
+    is($class -> binf("+") -> numify(),  $inf, "numify of +Inf");
+    is($class -> binf("-") -> numify(), -$inf, "numify of -Inf");
+    is($class -> bnan()    -> numify(),  $nan, "numify of NaN");
+}
+
+###############################################################################
 # fsqrt() with set global A/P or A/P enabled on $x, also a test whether fsqrt()
 # correctly modifies $x
 
