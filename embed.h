@@ -644,6 +644,7 @@
 #define sv_pvutf8n(a,b)		Perl_sv_pvutf8n(aTHX_ a,b)
 #define sv_pvutf8n_force(a,b)	Perl_sv_pvutf8n_force(aTHX_ a,b)
 #define sv_recode_to_utf8(a,b)	Perl_sv_recode_to_utf8(aTHX_ a,b)
+#define sv_ref(a,b,c)		Perl_sv_ref(aTHX_ a,b,c)
 #define sv_reftype(a,b)		Perl_sv_reftype(aTHX_ a,b)
 #define sv_replace(a,b)		Perl_sv_replace(aTHX_ a,b)
 #define sv_report_used()	Perl_sv_report_used(aTHX)
@@ -1323,7 +1324,6 @@
 #define sv_free_arenas()	Perl_sv_free_arenas(aTHX)
 #define sv_len_utf8_nomg(a)	Perl_sv_len_utf8_nomg(aTHX_ a)
 #define sv_mortalcopy_flags(a,b)	Perl_sv_mortalcopy_flags(aTHX_ a,b)
-#define sv_ref(a,b,c)		Perl_sv_ref(aTHX_ a,b,c)
 #define sv_resetpvn(a,b,c)	Perl_sv_resetpvn(aTHX_ a,b,c)
 #define sv_sethek(a,b)		Perl_sv_sethek(aTHX_ a,b)
 #ifndef PERL_IMPLICIT_CONTEXT

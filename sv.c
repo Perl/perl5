@@ -9991,6 +9991,12 @@ Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
 
 Returns a SV describing what the SV passed in is a reference to.
 
+dst can be a SV to be set to the description or NULL, in which case a
+mortal SV is returned.
+
+If ob is true and the SV is blessed, the description is the class
+name, otherwise it is the type of the SV, "SCALAR", "ARRAY" etc.
+
 =cut
 */
 

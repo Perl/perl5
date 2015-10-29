@@ -1473,7 +1473,7 @@ Apd	|char*	|sv_recode_to_utf8	|NN SV* sv|NN SV *encoding
 Apd	|bool	|sv_cat_decode	|NN SV* dsv|NN SV *encoding|NN SV *ssv|NN int *offset \
 				|NN char* tstr|int tlen
 ApdR	|const char*	|sv_reftype	|NN const SV *const sv|const int ob
-pd	|SV*	|sv_ref	|NULLOK SV *dst|NN const SV *const sv|const int ob
+Apd	|SV*	|sv_ref	|NULLOK SV *dst|NN const SV *const sv|const int ob
 Apd	|void	|sv_replace	|NN SV *const sv|NN SV *const nsv
 Apd	|void	|sv_report_used
 Apd	|void	|sv_reset	|NN const char* s|NULLOK HV *const stash
