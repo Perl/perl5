@@ -254,8 +254,9 @@ sub find_locales ($;$) {  # Returns an array of all the locales we found on the
         close(LOCALES);
     } elsif (($^O eq 'openbsd' || $^O eq 'bitrig' ) && -e '/usr/share/locale') {
 
-    # OpenBSD doesn't have a locale executable, so reading /usr/share/locale
-    # is much easier and faster than the last resort method.
+        # OpenBSD doesn't have a locale executable, so reading
+        # /usr/share/locale is much easier and faster than the last resort
+        # method.
 
         opendir(LOCALES, '/usr/share/locale');
         while ($_ = readdir(LOCALES)) {
