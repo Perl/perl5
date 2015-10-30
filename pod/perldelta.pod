@@ -138,6 +138,13 @@ L<[perl #125825]|https://rt.perl.org/Ticket/Display.html?id=125825>
 
 =item *
 
+Certain syntax errors in
+L<perlrecharclass/Extended Bracketed Character Classes> caused panics
+instead of the proper error message.  This has now been fixed. [perl
+#126481]
+
+=item *
+
 C<< BEGIN <> >> no longer segfaults and properly produces an error message.
 L<[perl #125341]|https://rt.perl.org/Ticket/Display.html?id=125341>
 

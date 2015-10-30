@@ -118,6 +118,18 @@ like("B", qr/(?[ [B] | ! ( [^B] ) ])/, "[perl #125892]");
 	like("\c]", qr/(?[\c]])/, '\c] should match itself');
 }
 
+# RT #126481 !! with syntax error panics
+{
+    fresh_perl_like('no warnings "experimental::regex_sets"; qr/(?[ ! ! (\w])/',
+                    qr/^Unmatched \(/, {},
+                    'qr/(?[ ! ! (\w])/ doesnt panic');
+    # The following didn't panic before, but easy to add this here with a
+    # paren between the !!
+    fresh_perl_like('no warnings "experimental::regex_sets";qr/(?[ ! ( ! (\w)])/',
+                    qr/^Unmatched \(/, {},
+                    'qr/qr/(?[ ! ( ! (\w)])/');
+}
+
 done_testing();
 
 1;
