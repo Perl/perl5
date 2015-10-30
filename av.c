@@ -432,11 +432,15 @@ Perl_av_make(pTHX_ SSize_t size, SV **strp)
 /*
 =for apidoc av_clear
 
-Clears an array, making it empty.  Does not free the memory the av uses to
-store its list of scalars.  If any destructors are triggered as a result,
-the av itself may be freed when this function returns.
+Frees the all the elements of an array, leaving it empty.
+The XS equivalent of C<@array = ()>.  See also L</av_undef>.
 
-Perl equivalent: C<@myarray = ();>.
+Note that it is possible that the actions of a destructor called directly
+or indirectly by freeing an element of the array could cause the reference
+count of the array itself to be reduced (e.g. by deleting an entry in the
+symbol table). So it is a possibility that the AV could have been freed
+(or even reallocated) on return from the call unless you hold a reference
+to it.
 
 =cut
 */
@@ -496,9 +500,13 @@ Perl_av_clear(pTHX_ AV *av)
 /*
 =for apidoc av_undef
 
-Undefines the array.  Frees the memory used by the av to store its list of
-scalars.  If any destructors are triggered as a result, the av itself may
-be freed.
+Undefines the array. The XS equivalent of C<undef(@array)>.
+
+As well as freeing all the elements of the array (like C<av_clear()>), this
+also frees the memory used by the av to store its list of scalars.
+
+See L</av_clear> for a note about the array possibly being invalid on
+return.
 
 =cut
 */
