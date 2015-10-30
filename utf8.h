@@ -265,23 +265,11 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 		      (uv) < 0x80000000     ? 6 : 7 )
 #endif
 
-/* The maximum number of UTF-8 bytes a single Unicode character can
- * uppercase/lowercase/fold into.  Unicode guarantees that the maximum
- * expansion is 3 characters.  On ASCIIish platforms, the highest Unicode
- * character occupies 4 bytes, therefore this number would be 12, but this is
- * smaller than the maximum width a single above-Unicode character can occupy,
- * so use that instead */
-#if UTF8_MAXBYTES < 12
-#error UTF8_MAXBYTES must be at least 12
-#endif
-
 /* ^? is defined to be DEL on ASCII systems.  See the definition of toCTRL()
  * for more */
 #define QUESTION_MARK_CTRL  DEL_NATIVE
 
 #define MAX_UTF8_TWO_BYTE 0x7FF
-
-#define UTF8_MAXBYTES_CASE	UTF8_MAXBYTES
 
 /*
 
@@ -301,6 +289,19 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 #define isUTF8_POSSIBLY_PROBLEMATIC(c) ((U8) c >= 0xED)
 
 #endif /* EBCDIC vs ASCII */
+
+/* The maximum number of UTF-8 bytes a single Unicode character can
+ * uppercase/lowercase/fold into.  Unicode guarantees that the maximum
+ * expansion is UTF8_MAX_FOLD_CHAR_EXPAND characters, but any above-Unicode
+ * code point will fold to itself, so we only have to look at the expansion of
+ * the maximum Unicode code point.  But this number may be less than the space
+ * occupied by a very large code point under Perl's extended UTF-8.  We have to
+ * make it large enough to fit any single character.  (It turns out that ASCII
+ * and EBCDIC differ in which is larger) */
+#define UTF8_MAXBYTES_CASE	                                                \
+        (UTF8_MAXBYTES >= (UTF8_MAX_FOLD_CHAR_EXPAND * OFFUNISKIP(0x10FFFF))    \
+                           ? UTF8_MAXBYTES                                      \
+                           : (UTF8_MAX_FOLD_CHAR_EXPAND * OFFUNISKIP(0x10FFFF)))
 
 /* Rest of these are attributes of Unicode and perl's internals rather than the
  * encoding, or happen to be the same in both ASCII and EBCDIC (at least at
