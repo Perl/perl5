@@ -1,4 +1,7 @@
 
+version 1.37_02; 2015-10-30
+  * bugfix: remove unused parent.pm from prereqs
+
 version 1.37_01; 2015-10-25
   * improvements for working on older perls
   * bugfix: $Carp::MaxArgNums is no longer treated as if it was one larger
