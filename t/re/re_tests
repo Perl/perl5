@@ -1929,6 +1929,8 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 
 (?i	-	c	-	Sequence (?... not terminated
 (?a-x	-	c	-	Sequence (?... not terminated
+.{1}??	-	c	-	Nested quantifiers
+.{1}?+	-	c	-	Nested quantifiers
 
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab
