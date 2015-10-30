@@ -98,6 +98,26 @@ is($@, "", 'qr/(?[ [a] ])/ can be interpolated');
 
 like("B", qr/(?[ [B] | ! ( [^B] ) ])/, "[perl #125892]");
 
+# RT #126181: \cX behaves strangely inside (?[])
+{
+	no warnings qw(syntax regexp);
+
+	eval { $_ = '/(?[(\c]) /'; qr/$_/ };
+	like($@, qr/^Syntax error/, '/(?[(\c]) / should not panic');
+	eval { $_ = '(?[\c#]' . "\n])"; qr/$_/ };
+	like($@, qr/^Syntax error/, '/(?[(\c]) / should not panic');
+	eval { $_ = '(?[(\c])'; qr/$_/ };
+	like($@, qr/^Syntax error/, '/(?[(\c])/ should be a syntax error');
+	eval { $_ = '(?[(\c]) ]\b'; qr/$_/ };
+	like($@, qr/^Syntax error/, '/(?[(\c]) ]\b/ should be a syntax error');
+	eval { $_ = '(?[\c[]](])'; qr/$_/ };
+	like($@, qr/^Syntax error/, '/(?[\c[]](])/ should be a syntax error');
+	like("\c#", qr/(?[\c#])/, '\c# should match itself');
+	like("\c[", qr/(?[\c[])/, '\c[ should match itself');
+	like("\c\ ", qr/(?[\c\])/, '\c\ should match itself');
+	like("\c]", qr/(?[\c]])/, '\c] should match itself');
+}
+
 done_testing();
 
 1;
