@@ -97,6 +97,13 @@ than just the ASCII characters, so C<is_invariant_string> is preferred.
 #else	/* ! EBCDIC */
 START_EXTERN_C
 
+/* How wide can a single UTF-8 encoded character become in bytes. */
+/* NOTE: Strictly speaking Perl's UTF-8 should not be called UTF-8 since UTF-8
+ * is an encoding of Unicode, and Unicode's upper limit, 0x10FFFF, can be
+ * expressed with 4 bytes.  However, Perl thinks of UTF-8 as a way to encode
+ * non-negative integers in a binary format, even those above Unicode */
+#define UTF8_MAXBYTES 13
+
 #ifdef DOINIT
 EXTCONST unsigned char PL_utf8skip[] = {
 /* 0x00 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* ascii */
@@ -119,7 +126,7 @@ EXTCONST unsigned char PL_utf8skip[] = {
            /* Perl extended (never was official UTF-8).  Up to 36 bit */
 /* 0xFE */                             7,
            /* More extended, Up to 72 bits (64-bit + reserved) */
-/* 0xFF */                               13
+/* 0xFF */                               UTF8_MAXBYTES
 };
 #else
 EXTCONST unsigned char PL_utf8skip[];
@@ -264,7 +271,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 		      (uv) < 0x200000       ? 4 : \
 		      (uv) < 0x4000000      ? 5 : \
 		      (uv) < 0x80000000     ? 6 : \
-                      (uv) < UTF8_QUAD_MAX ? 7 : 13 )
+                      (uv) < UTF8_QUAD_MAX ? 7 : UTF8_MAXBYTES )
 #else
 /* No, I'm not even going to *TRY* putting #ifdef inside a #define */
 #define OFFUNISKIP(uv) ( (uv) < 0x80        ? 1 : \
@@ -274,13 +281,6 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 		      (uv) < 0x4000000      ? 5 : \
 		      (uv) < 0x80000000     ? 6 : 7 )
 #endif
-
-/* How wide can a single UTF-8 encoded character become in bytes. */
-/* NOTE: Strictly speaking Perl's UTF-8 should not be called UTF-8 since UTF-8
- * is an encoding of Unicode, and Unicode's upper limit, 0x10FFFF, can be
- * expressed with 4 bytes.  However, Perl thinks of UTF-8 as a way to encode
- * non-negative integers in a binary format, even those above Unicode */
-#define UTF8_MAXBYTES 13
 
 /* The maximum number of UTF-8 bytes a single Unicode character can
  * uppercase/lowercase/fold into.  Unicode guarantees that the maximum
