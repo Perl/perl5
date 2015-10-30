@@ -36,7 +36,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="steveh, arc, khw" id="4a84d6e89d52b8921090805085871e6cca66924d" ticket="126181" desc="PATCH: [perl #126181] regex: handle \cX inside (?[])"/>
 <commit votes="steveh, arc, khw" id="e011baf6f8ae4d213edb446fd811f9509b7abbb8" ticket="126181" desc="AUTHORS: Add Victor Adam"/>
-<commit votes="khw, tux" id="a82f4918f5debccfb7e9a7047d2c2e558df538cd" ticket="126481" desc="PATCH: [perl #126481] panic for !! with syntax error in /(?[...])/"/>
+<commit votes="khw, tux, arc" id="a82f4918f5debccfb7e9a7047d2c2e558df538cd" ticket="126481" desc="PATCH: [perl #126481] panic for !! with syntax error in /(?[...])/"/>
 
 </div>
 
