@@ -9726,9 +9726,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
         ++RExC_parse;
     }
 
-    if (PASS2) {
-        STD_PMMOD_FLAGS_PARSE_X_WARN(x_mod_count);
-    }
+    vFAIL("Sequence (?... not terminated");
 }
 
 /*

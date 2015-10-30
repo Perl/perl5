@@ -1927,5 +1927,8 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 
 /(a+){1}+a/	aaa	n	-	-		# [perl #125825]
 
+(?i	-	c	-	Sequence (?... not terminated
+(?a-x	-	c	-	Sequence (?... not terminated
+
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab
