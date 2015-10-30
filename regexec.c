@@ -2075,8 +2075,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             case GCB_BOUND:
                 if (s == reginfo->strbeg) { /* GCB always matches at begin and
                                                end */
-                    if (to_complement ^ cBOOL(reginfo->intuit
-                                                      || regtry(reginfo, &s)))
+                    if (reginfo->intuit || regtry(reginfo, &s))
                     {
                         goto got_it;
                     }
@@ -2113,16 +2112,14 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     }
                 }
 
-                if (to_complement ^ cBOOL(reginfo->intuit || regtry(reginfo, &s))) {
+                if ((reginfo->intuit || regtry(reginfo, &s))) {
                     goto got_it;
                 }
                 break;
 
             case SB_BOUND:
                 if (s == reginfo->strbeg) { /* SB always matches at beginning */
-                    if (to_complement
-                                ^ cBOOL(reginfo->intuit || regtry(reginfo, &s)))
-                    {
+                    if (reginfo->intuit || regtry(reginfo, &s)) {
                         goto got_it;
                     }
 
@@ -2174,9 +2171,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 /* Here are at the final position in the target string.  The SB
                  * value is always true here, so matches, depending on other
                  * constraints */
-                if (to_complement ^ cBOOL(reginfo->intuit
-                                                      || regtry(reginfo, &s)))
-                {
+                if (reginfo->intuit || regtry(reginfo, &s)) {
                     goto got_it;
                 }
 
@@ -2184,9 +2179,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
             case WB_BOUND:
                 if (s == reginfo->strbeg) {
-                    if (to_complement ^ cBOOL(reginfo->intuit
-                                              || regtry(reginfo, &s)))
-                    {
+                    if (reginfo->intuit || regtry(reginfo, &s)) {
                         goto got_it;
                     }
                     s += (utf8_target) ? UTF8SKIP(s) : 1;
@@ -2245,9 +2238,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     }
                 }
 
-                if (to_complement ^ cBOOL(reginfo->intuit
-                                          || regtry(reginfo, &s)))
-                {
+                if (reginfo->intuit || regtry(reginfo, &s)) {
                     goto got_it;
                 }
 
