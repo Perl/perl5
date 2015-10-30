@@ -6679,7 +6679,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_pm_flags = pm_flags;
 
     if (runtime_code) {
-	if (TAINTING_get && TAINT_get)
+        assert(TAINTING_get || !TAINT_get);
+	if (TAINT_get)
 	    Perl_croak(aTHX_ "Eval-group in insecure regular expression");
 
 	if (!S_compile_runtime_code(aTHX_ pRExC_state, exp, plen)) {

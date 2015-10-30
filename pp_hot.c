@@ -134,7 +134,8 @@ PP(pp_sassign)
 	SV * const temp = left;
 	left = right; right = temp;
     }
-    if (TAINTING_get && UNLIKELY(TAINT_get) && !SvTAINTED(right))
+    assert(TAINTING_get || !TAINT_get);
+    if (UNLIKELY(TAINT_get) && !SvTAINTED(right))
 	TAINT_NOT;
     if (UNLIKELY(PL_op->op_private & OPpASSIGN_CV_TO_GV)) {
         /* *foo =\&bar */

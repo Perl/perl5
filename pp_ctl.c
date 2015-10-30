@@ -165,7 +165,8 @@ PP(pp_regcomp)
     }
 
 
-    if (TAINTING_get && TAINT_get) {
+    assert(TAINTING_get || !TAINT_get);
+    if (TAINT_get) {
 	SvTAINTED_on((SV*)new_re);
         RX_TAINT_on(new_re);
     }
