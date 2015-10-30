@@ -147,9 +147,6 @@ $do_expand = <<$^O-eq-VMS>>1<<|$^O-eq-VMS>>0<</$^O-eq-VMS>>;
 #@dl_librefs         = ();       # things we have loaded
 #@dl_modules         = ();       # Modules we have loaded
 
-# This is a fix to support DLD's unfortunate desire to relink -lc
-@dl_resolve_using = dl_findfile('-lc') if $dlsrc eq "dl_dld.xs";
-
 EOT
 
 my $cfg_dl_library_path = <<'EOT';
@@ -478,7 +475,6 @@ sub dl_findfile {
             push(@names,"cyg$_.$dl_so")  unless m:/:;
 	    <</$^O-eq-cygwin>>
             push(@names,"lib$_.$dl_so")  unless m:/:;
-            push(@names,"$_.a")          if !m/\.a$/ and $dlsrc eq "dl_dld.xs";
             push(@names, $_);
         }
 	my $dirsep = '/';
