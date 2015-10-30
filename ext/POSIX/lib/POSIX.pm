@@ -151,7 +151,7 @@ my %reimpl = (
     exit      => 'status => CORE::exit($_[0])',
     getenv    => 'name => $ENV{$_[0]}',
     system    => 'command => CORE::system($_[0])',
-    strerror  => 'errno => BEGIN { local $!; require locale; locale->import} local $! = $_[0]; "$!"',
+    strerror  => 'errno => BEGIN { local $!; require locale; locale->import} my $e = $_[0] + 0; local $!; $! = $e; "$!"',
     strstr    => 'big, little => CORE::index($_[0], $_[1])',
     chmod     => 'mode, filename => CORE::chmod($_[0], $_[1])',
     fstat     => 'fd => CORE::open my $dup, "<&", $_[0]; CORE::stat($dup)', # Gross.
