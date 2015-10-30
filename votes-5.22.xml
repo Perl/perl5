@@ -31,13 +31,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="" id="" ticket="123878" desc=""/>
 
-(steveh: Will probably cherry-pick this, but see discussion here: http://www.nntp.perl.org/group/perl.perl5.porters/2015/10/msg232151.html)
-<commit votes="khw, steveh, arc" id="f0bd363c36d925d8d3dfe3b68715763c850b171a" ticket="126319" desc="PATCH: [perl #126319] Seg fault"/>
-
-<commit votes="steveh, arc, khw" id="4a84d6e89d52b8921090805085871e6cca66924d" ticket="126181" desc="PATCH: [perl #126181] regex: handle \cX inside (?[])"/>
-<commit votes="steveh, arc, khw" id="e011baf6f8ae4d213edb446fd811f9509b7abbb8" ticket="126181" desc="AUTHORS: Add Victor Adam"/>
-<commit votes="khw, tux, arc" id="a82f4918f5debccfb7e9a7047d2c2e558df538cd" ticket="126481" desc="PATCH: [perl #126481] panic for !! with syntax error in /(?[...])/"/>
-
 </div>
 
 <div><h3>Regression Fixes</h3>
@@ -47,26 +40,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 <commit votes="steveh, arc, khw" id="0f8d761c4673440b49eeb491136a67dcf3da7400" ticket="126222" desc="Add a todo test for perl-126222"/>
 <commit votes="steveh, arc, khw" id="6625d92602279361acd0c6185b78c6d201fd81e0" ticket="126222" desc="fix perl-126222 - (?!) OPFAIL optimization does work in (?(?!)yes|no)"/>
 
-(steveh: The POSIX $VERSION bump will need to be different in maint:)
-<commit votes="steveh, arc, khw" id="068e3fb46a24909060201961a41f2ab7fb778caf" ticket="126229" desc="[perl #126229] POSIX::strerror() clears $!"/>
-
-<commit votes="steveh, arc, khw" id="174c9902b4705cef6307f83a226a0cb315b09ea7" ticket="126404" desc="PATCH: [perl #126404] Assertion fail in (?[...])"/>
-
-<commit votes="steveh, arc, khw" id="5b9ce45660f01f87f17ed2211a1c01540d903a41" ticket="126178" desc="PATCH: [perl # 126178] Unterminated /(?i/"/>
-<commit votes="steveh, arc, khw" id="d54288eb977c475e5eb044373c07e7873a1d90e7" ticket="126253" desc="PATCH: [perl #126253] Nested quantifiers not caught"/>
-<commit votes="jhi, steveh, alh, khw" id="7bd819935395fd684e09e3c97918ba0ad387288a" ticket="125314" desc="For perl #126468: protect quotes in myccflags."/>
-
 </div>
 
 <div><h3>Build and Installation Fixes</h3>
-
-(steveh: Will cherry-pick this if another vote is forthcoming for 083231e, which jdb says this really needs as well)
-<commit votes="steveh, khw, jdb" id="9964c51f9e78a456ae7b7b5d79c43bd63a114f99" ticket="" desc="Declare compatibility with newer released versions of Windows"/>
-
-<commit votes="steveh, jdb, khw" id="083231ea891c049b70ef28512bfc9e68c3e5d595" ticket="" desc="Update Win32 to CPAN version 0.52"/>
-
-<commit votes="jhi, steveh, khw" id="9438e34a18209b9d8c49e08487ada02053c754dd" ticket="" desc="Add minitest-notty to run minitest as batch."/>
-<commit votes="jhi, steveh, khw" id="a274778c55a0011ece54485245cd8622d8f34570" ticket="" desc="Check for POSIX locales once."/>
 
 </div>
 
@@ -76,14 +52,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
-<commit votes="jhi, steveh, khw" id="6504068eb895d4fb6161ddbb0249e59c19afa707" ticket="" desc="Also IRIX seems to have NaN comparison issues."/>
-
 </div>
 
 <div><h3>Documentation Fixes</h3>
-
-<commit votes="steveh, arc, khw" id="4cb6b3953a136d0cfac658452fec430c24730042" ticket="126177" desc="PATCH: [perl #126177] Document /(?n)/"/>
-<commit votes="steveh, arc, khw" id="a4395ebabc865511588235b5953dce6cc458ed3c" ticket="117341" desc="Improve pod for [ah]v_(clear|undef)"/>
 
 </div>
 
