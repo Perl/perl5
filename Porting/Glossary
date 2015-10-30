@@ -932,6 +932,10 @@ d_frexpl (d_frexpl.U):
 	This variable conditionally defines the HAS_FREXPL symbol, which
 	indicates to the C program that the frexpl() routine is available.
 
+d_fs_data_s (d_fs_data_s.U):
+	This variable conditionally defines the HAS_STRUCT_FS_DATA symbol,
+	which indicates that the struct fs_data is supported.
+
 d_fseeko (d_fseeko.U):
 	This variable conditionally defines the HAS_FSEEKO symbol, which
 	indicates to the C program that the fseeko() routine is available.
@@ -939,6 +943,14 @@ d_fseeko (d_fseeko.U):
 d_fsetpos (d_fsetpos.U):
 	This variable conditionally defines HAS_FSETPOS if fsetpos() is
 	available to set the file position indicator.
+
+d_fstatfs (d_fstatfs.U):
+	This variable conditionally defines the HAS_FSTATFS symbol, which
+	indicates to the C program that the fstatfs() routine is available.
+
+d_fstatvfs (d_statvfs.U):
+	This variable conditionally defines the HAS_FSTATVFS symbol, which
+	indicates to the C program that the fstatvfs() routine is available.
 
 d_fsync (d_fsync.U):
 	This variable conditionally defines the HAS_FSYNC symbol, which
@@ -1009,6 +1021,10 @@ d_getcwd (d_getcwd.U):
 d_getespwnam (d_getespwnam.U):
 	This variable conditionally defines HAS_GETESPWNAM if getespwnam() is
 	available to retrieve enhanced (shadow) password entries by name.
+
+d_getfsstat (d_getfsstat.U):
+	This variable conditionally defines the HAS_GETFSSTAT symbol, which
+	indicates to the C program that the getfsstat() routine is available.
 
 d_getgrent (d_getgrent.U):
 	This variable conditionally defines the HAS_GETGRENT symbol, which
@@ -1088,6 +1104,16 @@ d_getlogin_r (d_getlogin_r.U):
 	This variable conditionally defines the HAS_GETLOGIN_R symbol,
 	which indicates to the C program that the getlogin_r()
 	routine is available.
+
+d_getmnt (d_getmnt.U):
+	This variable conditionally defines the HAS_GETMNT symbol, which
+	indicates to the C program that the getmnt() routine is available
+	to retrieve one or more mount info blocks by filename.
+
+d_getmntent (d_getmntent.U):
+	This variable conditionally defines the HAS_GETMNTENT symbol, which
+	indicates to the C program that the getmntent() routine is available
+	to iterate through mounted files to get their mount info.
 
 d_getnameinfo (d_getnameinfo.U):
 	This variable conditionally defines the HAS_GETNAMEINFO symbol,
@@ -1283,6 +1309,11 @@ d_gnulibc (d_gnulibc.U):
 d_grpasswd (i_grp.U):
 	This variable conditionally defines GRPASSWD, which indicates
 	that struct group in <grp.h> contains gr_passwd.
+
+d_hasmntopt (d_hasmntopt.U):
+	This variable conditionally defines the HAS_HASMNTOPT symbol, which
+	indicates to the C program that the hasmntopt() routine is available
+	to query the mount options of file systems.
 
 d_htonl (d_htonl.U):
 	This variable conditionally defines HAS_HTONL if htonl() and its
@@ -2362,11 +2393,25 @@ d_statblks (d_statblks.U):
 	if this system has a stat structure declaring
 	st_blksize and st_blocks.
 
+d_statfs_f_flags (d_statfs_f_flags.U):
+	This variable conditionally defines the HAS_STRUCT_STATFS_F_FLAGS
+	symbol, which indicates to struct statfs from has f_flags member.
+	This kind of struct statfs is coming from sys/mount.h (BSD),
+	not from sys/statfs.h (SYSV).
+
+d_statfs_s (d_statfs_s.U):
+	This variable conditionally defines the HAS_STRUCT_STATFS symbol,
+	which indicates that the struct statfs is supported.
+
 d_static_inline (d_static_inline.U):
 	This variable conditionally defines the HAS_STATIC_INLINE symbol,
 	which indicates that the C compiler supports C99-style static
 	inline.  That is, the function can't be called from another
 	translation unit.
+
+d_statvfs (d_statvfs.U):
+	This variable conditionally defines the HAS_STATVFS symbol, which
+	indicates to the C program that the statvfs() routine is available.
 
 d_stdio_cnt_lval (d_stdstdio.U):
 	This variable conditionally defines STDIO_CNT_LVALUE if the
@@ -2629,6 +2674,10 @@ d_usleepproto (d_usleepproto.U):
 	which indicates to the C program that the system provides
 	a prototype for the usleep() function.  Otherwise, it is
 	up to the program to supply one.
+
+d_ustat (d_ustat.U):
+	This variable conditionally defines HAS_USTAT if ustat() is
+	available to query file system statistics by dev_t.
 
 d_vendorarch (vendorarch.U):
 	This variable conditionally defined PERL_VENDORARCH.
@@ -3361,6 +3410,10 @@ i_memory (i_memory.U):
 	This variable conditionally defines the I_MEMORY symbol, and indicates
 	whether a C program should include <memory.h>.
 
+i_mntent (i_mntent.U):
+	This variable conditionally defines the I_MNTENT symbol, and indicates
+	whether a C program should include <mntent.h>.
+
 i_ndbm (i_ndbm.U):
 	This variable conditionally defines the I_NDBM symbol, which
 	indicates to the C program that <ndbm.h> exists and should
@@ -3494,6 +3547,10 @@ i_sysmode (i_sysmode.U):
 	This variable conditionally defines the I_SYSMODE symbol,
 	and indicates whether a C program should include <sys/mode.h>.
 
+i_sysmount (i_sysmount.U):
+	This variable conditionally defines the I_SYSMOUNT symbol,
+	and indicates whether a C program should include <sys/mount.h>.
+
 i_sysndir (i_sysndir.U):
 	This variable conditionally defines the I_SYS_NDIR symbol, and indicates
 	whether a C program should include <sys/ndir.h>.
@@ -3528,6 +3585,14 @@ i_sysstat (i_sysstat.U):
 	This variable conditionally defines the I_SYS_STAT symbol,
 	and indicates whether a C program should include <sys/stat.h>.
 
+i_sysstatfs (i_sysstatfs.U):
+	This variable conditionally defines the I_SYSSTATFS symbol,
+	and indicates whether a C program should include <sys/statfs.h>.
+
+i_sysstatvfs (i_sysstatvfs.U):
+	This variable conditionally defines the I_SYSSTATVFS symbol,
+	and indicates whether a C program should include <sys/statvfs.h>.
+
 i_systime (i_time.U):
 	This variable conditionally defines I_SYS_TIME, which indicates
 	to the C program that it should include <sys/time.h>.
@@ -3558,6 +3623,10 @@ i_sysutsname (i_sysutsname.U):
 	This variable conditionally defines the I_SYSUTSNAME symbol,
 	and indicates whether a C program should include <sys/utsname.h>.
 
+i_sysvfs (i_sysvfs.U):
+	This variable conditionally defines the I_SYSVFS symbol,
+	and indicates whether a C program should include <sys/vfs.h>.
+
 i_syswait (i_syswait.U):
 	This variable conditionally defines I_SYS_WAIT, which indicates
 	to the C program that it should include <sys/wait.h>.
@@ -3579,6 +3648,10 @@ i_time (i_time.U):
 i_unistd (i_unistd.U):
 	This variable conditionally defines the I_UNISTD symbol, and indicates
 	whether a C program should include <unistd.h>.
+
+i_ustat (i_ustat.U):
+	This variable conditionally defines the I_USTAT symbol, and indicates
+	whether a C program should include <ustat.h>.
 
 i_utime (i_utime.U):
 	This variable conditionally defines the I_UTIME symbol, and indicates

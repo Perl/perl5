@@ -3676,11 +3676,23 @@
  */
 /*#define HAS_FREXPL		/ **/
 
+/* HAS_STRUCT_FS_DATA:
+ *	This symbol, if defined, indicates that the struct fs_data
+ *	to do statfs() is supported.
+ */
+/*#define HAS_STRUCT_FS_DATA	/ **/
+
 /* HAS_FSEEKO:
  *	This symbol, if defined, indicates that the fseeko routine is
  *	available to fseek beyond 32 bits (useful for ILP32 hosts).
  */
 /*#define HAS_FSEEKO		/ **/
+
+/* HAS_FSTATFS:
+ *	This symbol, if defined, indicates that the fstatfs routine is
+ *	available to stat filesystems by file descriptors.
+ */
+/*#define HAS_FSTATFS		/ **/
 
 /* HAS_FSYNC:
  *	This symbol, if defined, indicates that the fsync routine is
@@ -3719,11 +3731,29 @@
  */
 /*#define HAS_GETESPWNAM		/ **/
 
+/* HAS_GETFSSTAT:
+ *	This symbol, if defined, indicates that the getfsstat routine is
+ *	available to stat filesystems in bulk.
+ */
+/*#define HAS_GETFSSTAT		/ **/
+
 /* HAS_GETITIMER:
  *	This symbol, if defined, indicates that the getitimer routine is
  *	available to return interval timers.
  */
 /*#define HAS_GETITIMER		/ **/
+
+/* HAS_GETMNT:
+ *	This symbol, if defined, indicates that the getmnt routine is
+ *	available to get filesystem mount info by filename.
+ */
+/*#define HAS_GETMNT		/ **/
+
+/* HAS_GETMNTENT:
+ *	This symbol, if defined, indicates that the getmntent routine is
+ *	available to iterate through mounted file systems to get their info.
+ */
+/*#define HAS_GETMNTENT		/ **/
 
 /* HAS_GETNAMEINFO:
  *	This symbol, if defined, indicates that the getnameinfo() function
@@ -3742,6 +3772,12 @@
  *	available to retrieve SysV shadow password entries by name.
  */
 /*#define HAS_GETSPNAM		/ **/
+
+/* HAS_HASMNTOPT:
+ *	This symbol, if defined, indicates that the hasmntopt routine is
+ *	available to query the mount options of file systems.
+ */
+/*#define HAS_HASMNTOPT		/ **/
 
 /* HAS_HYPOT:
  *	This symbol, if defined, indicates that the hypot routine is
@@ -4252,6 +4288,29 @@
  */
 /*#define	HAS_SETRESUID_PROTO	/ **/
 
+/* HAS_STRUCT_STATFS_F_FLAGS:
+ *	This symbol, if defined, indicates that the struct statfs
+ *	does have the f_flags member containing the mount flags of
+ *	the filesystem containing the file.
+ *	This kind of struct statfs is coming from <sys/mount.h> (BSD 4.3),
+ *	not from <sys/statfs.h> (SYSV).  Older BSDs (like Ultrix) do not
+ *	have statfs() and struct statfs, they have ustat() and getmnt()
+ *	with struct ustat and struct fs_data.
+ */
+/*#define HAS_STRUCT_STATFS_F_FLAGS		/ **/
+
+/* HAS_STRUCT_STATFS:
+ *	This symbol, if defined, indicates that the struct statfs
+ *	to do statfs() is supported.
+ */
+/*#define HAS_STRUCT_STATFS	/ **/
+
+/* HAS_FSTATVFS:
+ *	This symbol, if defined, indicates that the fstatvfs routine is
+ *	available to stat filesystems by file descriptors.
+ */
+/*#define HAS_FSTATVFS		/ **/
+
 /* HAS_STRFTIME:
  *	This symbol, if defined, indicates that the strftime routine is
  *	available to do time formatting.
@@ -4407,6 +4466,12 @@
  */
 /*#define	HAS_USLEEP_PROTO	/ **/
 
+/* HAS_USTAT:
+ *	This symbol, if defined, indicates that the ustat system call is
+ *	available to query file system statistics by dev_t.
+ */
+/*#define HAS_USTAT		/ **/
+
 /* HAS_WCSCMP:
  *	This symbol, if defined, indicates that the wcscmp routine is
  *	available to compare two wide character strings.
@@ -4543,6 +4608,12 @@
  */
 /*#define I_MALLOCMALLOC		/ **/
 
+/* I_MNTENT:
+ *	This symbol, if defined, indicates that <mntent.h> exists and
+ *	should be included.
+ */
+/*#define	I_MNTENT		/ **/
+
 /* I_NETINET_TCP:
  *     This symbol, if defined, indicates to the C program that it should
  *     include <netinet/tcp.h>.
@@ -4609,11 +4680,40 @@
  */
 /*#define	I_SYSMODE		/ **/
 
+/* I_SYS_MOUNT:
+ *	This symbol, if defined, indicates that <sys/mount.h> exists and
+ *	should be included.
+ */
+/*#define	I_SYS_MOUNT		/ **/
+
+/* I_SYS_STATFS:
+ *	This symbol, if defined, indicates that <sys/statfs.h> exists.
+ */
+/*#define	I_SYS_STATFS		/ **/
+
+/* I_SYS_STATVFS:
+ *	This symbol, if defined, indicates that <sys/statvfs.h> exists and
+ *	should be included.
+ */
+/*#define	I_SYS_STATVFS		/ **/
+
 /* I_SYSUTSNAME:
  *	This symbol, if defined, indicates that <sys/utsname.h> exists and
  *	should be included.
  */
 /*#define	I_SYSUTSNAME		/ **/
+
+/* I_SYS_VFS:
+ *	This symbol, if defined, indicates that <sys/vfs.h> exists and
+ *	should be included.
+ */
+/*#define	I_SYS_VFS		/ **/
+
+/* I_USTAT:
+ *	This symbol, if defined, indicates that <ustat.h> exists and
+ *	should be included.
+ */
+/*#define	I_USTAT		/ **/
 
 /* DOUBLEINFBYTES:
  *	This symbol, if defined, is a comma-separated list of

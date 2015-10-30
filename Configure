@@ -496,8 +496,10 @@ d_fpclassl=''
 d_fpgetround=''
 d_fpos64_t=''
 d_frexpl=''
+d_fs_data_s=''
 d_fseeko=''
 d_fsetpos=''
+d_fstatfs=''
 d_fsync=''
 d_ftello=''
 d_ftime=''
@@ -507,6 +509,7 @@ d_Gconvert=''
 d_getaddrinfo=''
 d_getcwd=''
 d_getespwnam=''
+d_getfsstat=''
 d_getgrent=''
 d_getgrent_r=''
 getgrent_r_proto=''
@@ -533,6 +536,8 @@ d_getitimer=''
 d_getlogin=''
 d_getlogin_r=''
 getlogin_r_proto=''
+d_getmnt=''
+d_getmntent=''
 d_getnameinfo=''
 d_getnbyaddr=''
 d_getnbyname=''
@@ -586,6 +591,7 @@ d_gmtime_r=''
 gmtime_r_proto=''
 d_gnulibc=''
 gnulibc_version=''
+d_hasmntopt=''
 d_htonl=''
 d_hypot=''
 d_ilogb=''
@@ -816,8 +822,12 @@ d_sresgproto=''
 d_sresuproto=''
 d_stat=''
 d_statblks=''
+d_statfs_f_flags=''
+d_statfs_s=''
 d_static_inline=''
 perl_static_inline=''
+d_fstatvfs=''
+d_statvfs=''
 d_stdio_cnt_lval=''
 d_stdio_ptr_lval=''
 d_stdio_ptr_lval_nochange_cnt=''
@@ -889,6 +899,7 @@ d_unordered=''
 d_unsetenv=''
 d_usleep=''
 d_usleepproto=''
+d_ustat=''
 d_pseudofork=''
 d_vfork=''
 usevfork=''
@@ -971,6 +982,7 @@ i_malloc=''
 i_mallocmalloc=''
 i_math=''
 i_memory=''
+i_mntent=''
 d_gdbm_ndbm_h_uses_prototypes=''
 d_gdbmndbm_h_uses_prototypes=''
 d_ndbm=''
@@ -1016,6 +1028,7 @@ i_syssockio=''
 i_syslog=''
 i_sysmman=''
 i_sysmode=''
+i_sysmount=''
 i_sysndir=''
 i_sysparam=''
 i_syspoll=''
@@ -1023,11 +1036,14 @@ i_sysresrc=''
 i_syssecrt=''
 i_sysselct=''
 i_sysstat=''
+i_sysstatfs=''
+i_sysstatvfs=''
 i_systimes=''
 i_systypes=''
 i_sysuio=''
 i_sysun=''
 i_sysutsname=''
+i_sysvfs=''
 i_syswait=''
 i_sgtty=''
 i_termio=''
@@ -1039,6 +1055,7 @@ i_systimek=''
 i_time=''
 timeincl=''
 i_unistd=''
+i_ustat=''
 i_utime=''
 i_values=''
 i_stdarg=''
@@ -14073,6 +14090,20 @@ eval $inlibc
 set sys/param.h i_sysparam
 eval $inhdr
 
+: see if this is a sys/mount.h system
+set sys/mount.h i_sysmount
+eval $inhdr
+
+: Check for fs_data_s
+echo " "
+echo "Checking to see if your system supports struct fs_data..." >&4
+set d_fs_data_s fs_data $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h
+eval $hasstruct
+case "$d_fs_data_s" in
+"$define")      echo "Yes, it does."   ;;
+*)              echo "No, it doesn't." ;;
+esac
+
 : see if fseeko exists
 set fseeko d_fseeko
 eval $inlibc
@@ -14083,6 +14114,19 @@ esac
 : see if fsetpos exists
 set fsetpos d_fsetpos
 eval $inlibc
+
+: see if fstatfs exists
+set fstatfs d_fstatfs
+eval $inlibc
+
+: see if statvfs exists
+set statvfs d_statvfs
+eval $inlibc
+
+: see if fstatvfs exists
+set fstatvfs d_fstatvfs
+eval $inlibc
+
 
 : see if fsync exists
 set fsync d_fsync
@@ -14194,6 +14238,10 @@ eval $inlibc
 
 : see if getespwnam exists
 set getespwnam d_getespwnam
+eval $inlibc
+
+: see if getfsstat exists
+set getfsstat d_getfsstat
 eval $inlibc
 
 : see if getgrent exists
@@ -14724,6 +14772,14 @@ case "$d_getlogin_r" in
 *)	getlogin_r_proto=0
 	;;
 esac
+
+: see if getmnt exists
+set getmnt d_getmnt
+eval $inlibc
+
+: see if getmntent exists
+set getmntent d_getmntent
+eval $inlibc
 
 : see if getnameinfo exists
 set getnameinfo d_getnameinfo
@@ -15580,6 +15636,10 @@ case "$d_gmtime_r" in
 *)	gmtime_r_proto=0
 	;;
 esac
+
+: see if hasmntopt exists
+set hasmntopt d_hasmntopt
+eval $inlibc
 
 : see if this is a netinet/in.h or sys/in.h system
 set netinet/in.h i_niin sys/in.h i_sysin
@@ -18865,6 +18925,43 @@ echo "Checking to see if your struct stat has st_blocks field..." >&4
 set d_statblks stat st_blocks $i_sysstat sys/stat.h
 eval $hasfield
 
+: see if this is a sys/vfs.h system
+set sys/vfs.h i_sysvfs
+eval $inhdr
+
+: see if this is a sys/statfs.h system
+set sys/statfs.h i_sysstatfs
+eval $inhdr
+
+: Check for statfs_s
+echo " "
+echo "Checking to see if your system supports struct statfs..." >&4
+set d_statfs_s statfs $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h $i_sysvfs sys/vfs.h $i_sysstatfs sys/statfs.h
+eval $hasstruct
+case "$d_statfs_s" in
+"$define")      echo "Yes, it does."   ;;
+*)              echo "No, it doesn't." ;;
+esac
+
+
+: see if struct statfs knows about f_flags
+case "$d_statfs_s" in
+define)
+	echo " "
+	echo "Checking to see if your struct statfs has f_flags field..." >&4
+	set d_statfs_f_flags statfs f_flags $i_systypes sys/types.h $i_sysparam sys/param.h $i_sysmount sys/mount.h $i_sysvfs sys/vfs.h $i_sysstatfs sys/statfs.h
+	eval $hasfield
+	;;
+*)	val="$undef"
+	set d_statfs_f_flags
+	eval $setvar
+	;;
+esac
+case "$d_statfs_f_flags" in
+"$define")      echo "Yes, it does."   ;;
+*)              echo "No, it doesn't." ;;
+esac
+
 : see what flavor, if any, of static inline is supported
 echo " "
 echo "Checking to see if your system supports static inline..."
@@ -19817,6 +19914,10 @@ eval $inlibc
 echo " "
 set d_usleepproto usleep $i_unistd unistd.h
 eval $hasproto
+
+: see if ustat exists
+set ustat d_ustat
+eval $inlibc
 
 : see if closedir exists
 set closedir d_closedir
@@ -22888,6 +22989,10 @@ else
 	i_machcthr="$undef"
 fi
 
+: see if this is a mntent.h system
+set mntent.h i_mntent
+eval $inhdr
+
 : see if net/errno.h is available
 val=''
 set net/errno.h val
@@ -23328,6 +23433,10 @@ eval $inhdr
 set sys/security.h i_syssecrt
 eval $inhdr
 
+: see if this is a sys/statvfs.h system
+set sys/statvfs.h i_sysstatvfs
+eval $inhdr
+
 : see if this is a sys/un.h system
 set sys/un.h i_sysun
 eval $inhdr
@@ -23338,6 +23447,10 @@ eval $inhdr
 
 : see if this is a syswait system
 set sys/wait.h i_syswait
+eval $inhdr
+
+: see if this is a ustat.h system
+set ustat.h i_ustat
 eval $inhdr
 
 : see if this is an utime system
@@ -24089,6 +24202,8 @@ d_frexpl='$d_frexpl'
 d_fs_data_s='$d_fs_data_s'
 d_fseeko='$d_fseeko'
 d_fsetpos='$d_fsetpos'
+d_fstatfs='$d_fstatfs'
+d_fstatvfs='$d_fstatvfs'
 d_fsync='$d_fsync'
 d_ftello='$d_ftello'
 d_ftime='$d_ftime'
@@ -24098,6 +24213,7 @@ d_gdbmndbm_h_uses_prototypes='$d_gdbmndbm_h_uses_prototypes'
 d_getaddrinfo='$d_getaddrinfo'
 d_getcwd='$d_getcwd'
 d_getespwnam='$d_getespwnam'
+d_getfsstat='$d_getfsstat'
 d_getgrent='$d_getgrent'
 d_getgrent_r='$d_getgrent_r'
 d_getgrgid_r='$d_getgrgid_r'
@@ -24114,6 +24230,8 @@ d_gethostprotos='$d_gethostprotos'
 d_getitimer='$d_getitimer'
 d_getlogin='$d_getlogin'
 d_getlogin_r='$d_getlogin_r'
+d_getmnt='$d_getmnt'
+d_getmntent='$d_getmntent'
 d_getnameinfo='$d_getnameinfo'
 d_getnbyaddr='$d_getnbyaddr'
 d_getnbyname='$d_getnbyname'
@@ -24154,6 +24272,7 @@ d_gmtime64='$d_gmtime64'
 d_gmtime_r='$d_gmtime_r'
 d_gnulibc='$d_gnulibc'
 d_grpasswd='$d_grpasswd'
+d_hasmntopt='$d_hasmntopt'
 d_htonl='$d_htonl'
 d_hypot='$d_hypot'
 d_ilogb='$d_ilogb'
@@ -24383,7 +24502,10 @@ d_sresgproto='$d_sresgproto'
 d_sresuproto='$d_sresuproto'
 d_stat='$d_stat'
 d_statblks='$d_statblks'
+d_statfs_f_flags='$d_statfs_f_flags'
+d_statfs_s='$d_statfs_s'
 d_static_inline='$d_static_inline'
+d_statvfs='$d_statvfs'
 d_stdio_cnt_lval='$d_stdio_cnt_lval'
 d_stdio_ptr_lval='$d_stdio_ptr_lval'
 d_stdio_ptr_lval_nochange_cnt='$d_stdio_ptr_lval_nochange_cnt'
@@ -24442,6 +24564,7 @@ d_unordered='$d_unordered'
 d_unsetenv='$d_unsetenv'
 d_usleep='$d_usleep'
 d_usleepproto='$d_usleepproto'
+d_ustat='$d_ustat'
 d_vendorarch='$d_vendorarch'
 d_vendorbin='$d_vendorbin'
 d_vendorlib='$d_vendorlib'
@@ -24592,6 +24715,7 @@ i_malloc='$i_malloc'
 i_mallocmalloc='$i_mallocmalloc'
 i_math='$i_math'
 i_memory='$i_memory'
+i_mntent='$i_mntent'
 i_ndbm='$i_ndbm'
 i_netdb='$i_netdb'
 i_neterrno='$i_neterrno'
@@ -24622,6 +24746,7 @@ i_sysioctl='$i_sysioctl'
 i_syslog='$i_syslog'
 i_sysmman='$i_sysmman'
 i_sysmode='$i_sysmode'
+i_sysmount='$i_sysmount'
 i_sysndir='$i_sysndir'
 i_sysparam='$i_sysparam'
 i_syspoll='$i_syspoll'
@@ -24630,6 +24755,8 @@ i_syssecrt='$i_syssecrt'
 i_sysselct='$i_sysselct'
 i_syssockio='$i_syssockio'
 i_sysstat='$i_sysstat'
+i_sysstatfs='$i_sysstatfs'
+i_sysstatvfs='$i_sysstatvfs'
 i_systime='$i_systime'
 i_systimek='$i_systimek'
 i_systimes='$i_systimes'
@@ -24637,11 +24764,13 @@ i_systypes='$i_systypes'
 i_sysuio='$i_sysuio'
 i_sysun='$i_sysun'
 i_sysutsname='$i_sysutsname'
+i_sysvfs='$i_sysvfs'
 i_syswait='$i_syswait'
 i_termio='$i_termio'
 i_termios='$i_termios'
 i_time='$i_time'
 i_unistd='$i_unistd'
+i_ustat='$i_ustat'
 i_utime='$i_utime'
 i_values='$i_values'
 i_varargs='$i_varargs'
