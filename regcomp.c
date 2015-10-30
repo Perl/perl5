@@ -13944,9 +13944,20 @@ redo_curchar:
                 av_push(stack, rhs);
                 goto redo_curchar;
 
-            case '!':   /* Highest priority, right associative, so just push
-                           onto stack */
-                av_push(stack, newSVuv(curchar));
+            case '!':   /* Highest priority, right associative */
+
+                /* If what's already at the top of the stack is another '!",
+                 * they just cancel each other out */
+                if (   (top_ptr = av_fetch(stack, top_index, FALSE))
+                    && (IS_OPERATOR(*top_ptr) && SvUV(*top_ptr) == '!'))
+                {
+                    only_to_avoid_leaks = av_pop(stack);
+                    SvREFCNT_dec(only_to_avoid_leaks);
+                }
+                else { /* Otherwise, since it's right associative, just push
+                          onto the stack */
+                    av_push(stack, newSVuv(curchar));
+                }
                 break;
 
             default:

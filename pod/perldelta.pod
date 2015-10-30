@@ -348,6 +348,13 @@ these were short input strings, and the failures had to do with longer
 inputs.  This was fixed in Perl 5.23.4, but the improvement was not
 noticed until after that was released, so is included here now.
 
+=item *
+
+Certain syntax errors in
+L<perlrecharclass/Extended Bracketed Character Classes> caused panics
+instead of the proper error message.  This has now been fixed. [perl
+#126481]
+
 =back
 
 =head1 Known Problems
