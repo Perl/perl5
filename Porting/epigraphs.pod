@@ -154,6 +154,25 @@ L<Announced on 2015-06-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   They sing while you slave and I just get bored
   I ain't gonna work on Maggie's farm no more
 
+=head2 v5.22.1-RC1 - Wilhelm Müller, trans. Anon., "Will-o'-the Wisp" (No. 9 in Schubert's song-cycle, "Winterreise")
+
+L<Announced on 2015-10-31 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/10/msg232321.html>
+
+  In the deepest rocky crevice
+  A will-o'-the wisp lured me;
+  How I could find my way from here,
+  For me it's easy memory!
+
+  For I am used to straying ways,
+  Every path to th'end a way,
+  All our joys and all our suffering,--
+  To a will-o'-the wisp it 's all play!
+
+  Through the dried-up bed of torrents
+  I quite calmly downward stroll;
+  Every stream its sea will enter,
+  Every suffering finds its goal!
+
 =head2 v5.22.0 - Gene Wolfe, The Citadel of the Autarch
 
 L<Announced on 2015-06-01 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2015/06/msg228300.html>
