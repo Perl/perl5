@@ -14,13 +14,21 @@ L<perl5220delta>, which describes differences between 5.20.0 and 5.22.0.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
+There are no changes intentionally incompatible with 5.20.0 other than the
+following single exception, which we deemed to be a sensible change to make in
+order to get the new C<\b{wb}> and (in particular) C<\b{sb}> features sane
+before people decided they're worthless because of bugs in their Perl 5.22.0
+implementation and avoided them in the future.
+If any others exist, they are bugs, and we request that you submit a report.
+See L</Reporting Bugs> below.
 
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
+=head2
 
-[ List each incompatible change as a =head2 entry ]
+Several bugs, including a segmentation fault, have been fixed with the bounds
+checking constructs (introduced in Perl 5.22) C<\b{gcb}>, C<\b{sb}>, C<\b{wb}>,
+C<\B{gcb}>, C<\B{sb}>, and C<\B{wb}>.  All the C<\B{}> ones now match an empty
+string; none of the C<\b{}> ones do.
+L<[perl #126319]|https://rt.perl.org/Ticket/Display.html?id=126319>
 
 =head1 Modules and Pragmata
 
