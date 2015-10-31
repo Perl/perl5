@@ -7,10 +7,11 @@ eval { require DynaLoader };
 open OUT, ">XSLoader.pm" or die $!;
 print OUT <<'EOT';
 # Generated from XSLoader.pm.PL (resolved %Config::Config value)
+# This file is unique for every OS
 
 package XSLoader;
 
-$VERSION = "0.20";
+$VERSION = "0.21";
 
 #use strict;
 
@@ -144,12 +145,20 @@ print OUT <<'EOT';
     };
     push(@DynaLoader::dl_librefs,$libref);  # record loaded object
 
+EOT
+my $dlsrc = $Config{dlsrc};
+if ($dlsrc eq 'dl_freemint.xs' || $dlsrc eq 'dl_dld.xs') {
+    print OUT <<'EOT';
     my @unresolved = dl_undef_symbols();
     if (@unresolved) {
         require Carp;
         Carp::carp("Undefined symbols present after loading $file: @unresolved\n");
     }
 
+EOT
+}
+
+print OUT <<'EOT';
     $boot_symbol_ref = dl_find_symbol($libref, $bootname) or do {
         require Carp;
         Carp::croak("Can't find '$bootname' symbol in $file\n");

@@ -68,7 +68,7 @@ unlink "DynaLoader.pm" if -f "DynaLoader.pm";
 open OUT, ">DynaLoader.pm" or die $!;
 print OUT <<'EOT';
 
-# Generated from DynaLoader_pm.PL
+# Generated from DynaLoader_pm.PL, this file is unique for every OS
 
 package DynaLoader;
 
@@ -85,7 +85,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.35';
+    $VERSION = '1.36';
 }
 
 EOT
@@ -138,8 +138,9 @@ $Is_VMS    = $^O eq 'VMS';
 <</$^O-eq-VMS>>
 $do_expand = <<$^O-eq-VMS>>1<<|$^O-eq-VMS>>0<</$^O-eq-VMS>>;
 
-@dl_require_symbols = ();       # names of symbols we need
-@dl_resolve_using   = ();       # names of files to link with
+@dl_require_symbols = ();       # names of symbols we need<<$^O-eq-freemint>>
+@dl_resolve_using   = ();       # names of files to link with<</$^O-eq-freemint>><<$^O-eq-hpux>>
+@dl_resolve_using   = ();       # names of files to link with<</$^O-eq-hpux>>
 @dl_library_path    = ();       # path to look for files
 
 #XSLoader.pm may have added elements before we were required
@@ -396,13 +397,13 @@ sub bootstrap {
 	croak("Can't load '$file' for module $module: ".dl_error());
 
     push(@dl_librefs,$libref);  # record loaded object
-
+<<$^O-eq-freemint>>
     my @unresolved = dl_undef_symbols();
     if (@unresolved) {
 	require Carp;
 	Carp::carp("Undefined symbols present after loading $file: @unresolved\n");
     }
-
+<</$^O-eq-freemint>>
     $boot_symbol_ref = dl_find_symbol($libref, $bootname) or
          croak("Can't find '$bootname' symbol in $file\n");
 
