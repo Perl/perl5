@@ -30,6 +30,14 @@ XXX For a release on a stable branch, this section aspires to be:
 
 =item *
 
+L<POSIX> has been upgraded from version 1.53 to 1.53_01.
+
+If C<POSIX::strerror> was passed C<$!> as its argument then it accidentally
+cleared C<$!>.  This has been fixed.
+L<[perl #126229]|https://rt.perl.org/Ticket/Display.html?id=126229>
+
+=item *
+
 L<warnings> has been upgraded from version 1.33 to 1.34.
 
 The C<warnings::enabled> example now actually uses C<warnings::enabled>.
