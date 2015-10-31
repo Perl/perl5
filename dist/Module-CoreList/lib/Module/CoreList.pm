@@ -11917,7 +11917,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         }
     },
     5.022001 => {
-        delta_from => 5.022000,
+        delta_from => 5.022,
         changed => {
             'B::Op_private'         => '5.022001',
             'Config'                => '5.022001',
@@ -11927,6 +11927,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'POSIX'                 => '1.53_01',
             'PerlIO::scalar'        => '0.23',
             'Storable'              => '2.53_01',
+            'Win32'                 => '0.52',
             'warnings'              => '1.34',
         },
         removed => {
@@ -12531,7 +12532,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
         }
     },
     5.022001 => {
-        delta_from => 5.022000,
+        delta_from => 5.022,
         changed => {
         },
         removed => {
@@ -13328,7 +13329,7 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'Unicode::Collate::CJK::Stroke'=> undef,
     'Unicode::Collate::CJK::Zhuyin'=> undef,
     'Unicode::Collate::Locale'=> undef,
-    'Unicode::Normalize'    => undef,
+    'Unicode::Normalize'    => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Unicode-Normalize',
     'Win32'                 => undef,
     'Win32API::File'        => undef,
     'Win32API::File::ExtUtils::Myconst2perl'=> undef,
