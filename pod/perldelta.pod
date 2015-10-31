@@ -233,9 +233,35 @@ L<[perl #126178]|https://rt.perl.org/Ticket/Display.html?id=126178>
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.22.1 represents approximately 5 months of development since Perl 5.22.0
+and contains approximately 18,000 lines of changes across 130 files from 26
+authors.
 
-  perl Porting/acknowledgements.pl v5.22.0..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 1,500 lines of changes to 42 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers.  The following people are known to have contributed
+the improvements that became Perl 5.22.1:
+
+Aaron Crane, Andy Broad, Aristotle Pagaltzis, Chase Whitener, Chris 'BinGOs'
+Williams, Craig A. Berry, Daniel Dragan, David Mitchell, Father Chrysostomos,
+Herbert Breunung, Hugo van der Sanden, James E Keenan, Jan Dubois, Jarkko
+Hietaniemi, Karen Etheridge, Karl Williamson, Lukas Mai, Matthew Horsfall,
+Peter Martini, Rafael Garcia-Suarez, Ricardo Signes, Shlomi Fish, Sisyphus,
+Steve Hay, Tony Cook, Victor Adam.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history.  In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core.  We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
