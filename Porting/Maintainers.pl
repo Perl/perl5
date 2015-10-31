@@ -276,6 +276,9 @@ use File::Glob qw(:case);
                 t/yaml_code.yml
                 ),
         ],
+        'CUSTOMIZED'   => [
+            qw( lib/CPAN.pm ),
+        ],
     },
 
     # Note: When updating CPAN-Meta the META.* files will need to be regenerated
