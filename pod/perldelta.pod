@@ -158,6 +158,13 @@ L<[perl #126180]|https://rt.perl.org/Ticket/Display.html?id=126180>
 
 =item *
 
+Another problem with
+L<C<(?[...])>|perlrecharclass/Extended Bracketed Character Classes>
+constructs has been fixed wherein things like C<\c]> could cause panics.
+L<[perl #126181]|https://rt.perl.org/Ticket/Display.html?id=126181>
+
+=item *
+
 In Perl 5.22.0, the logic changed when parsing a numeric parameter to the -C
 option, such that the successfully parsed number was not saved as the option
 value if it parsed to the end of the argument.
