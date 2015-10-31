@@ -22,7 +22,7 @@ implementation and avoided them in the future.
 If any others exist, they are bugs, and we request that you submit a report.
 See L</Reporting Bugs> below.
 
-=head2
+=head2 Bounds Checking Constructs
 
 Several bugs, including a segmentation fault, have been fixed with the bounds
 checking constructs (introduced in Perl 5.22) C<\b{gcb}>, C<\b{sb}>, C<\b{wb}>,
@@ -216,10 +216,18 @@ L<[perl #125541]|https://rt.perl.org/Ticket/Display.html?id=125541>
 
 =item *
 
-Nested quantifiers such as C<< /.{1}??/ >> should cause perl to throw a fatal
+Nested quantifiers such as C</.{1}??/> should cause perl to throw a fatal
 error, but were being silently accepted since Perl 5.20.0.  This has been
 fixed.
 L<[perl #126253]|https://rt.perl.org/Ticket/Display.html?id=126253>
+
+=item *
+
+Regular expression sequences such as C</(?i/> (and similarly with other
+recognized flags or combination of flags) should cause perl to throw a fatal
+error, but were being silently accepted since Perl 5.18.0.  This has been
+fixed.
+L<[perl #126178]|https://rt.perl.org/Ticket/Display.html?id=126178>
 
 =back
 
