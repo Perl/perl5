@@ -560,6 +560,7 @@ the strings?).
  Ricardo   5.22.0-RC1   2015-May-19     The 5.22 maintenance track
  Ricardo   5.22.0-RC2   2015-May-21
  Ricardo   5.22.0       2015-Jun-01
+ Steve     5.22.1-RC1   2015-Oct-31
 
  Ricardo   5.23.0       2015-Jun-20     The 5.23 development track
  Matthew   5.23.1       2015-Jul-20
