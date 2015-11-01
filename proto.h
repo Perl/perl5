@@ -56,11 +56,6 @@ PERL_CALLCONV bool	Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p)
 #define PERL_ARGS_ASSERT__IS_UTF8_FOO	\
 	assert(p)
 
-PERL_STATIC_INLINE STRLEN	S__is_utf8_char_slow(const U8 *s, const U8 *e)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__IS_UTF8_CHAR_SLOW	\
-	assert(s); assert(e)
-
 PERL_CALLCONV bool	Perl__is_utf8_idcont(pTHX_ const U8 *p)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT__IS_UTF8_IDCONT	\
@@ -122,9 +117,6 @@ PERL_CALLCONV SV *	Perl_amagic_deref_call(pTHX_ SV *ref, int method);
 #define PERL_ARGS_ASSERT_AMAGIC_DEREF_CALL	\
 	assert(ref)
 PERL_CALLCONV bool	Perl_amagic_is_enabled(pTHX_ int method);
-PERL_STATIC_INLINE void	S_append_utf8_from_native_byte(const U8 byte, U8** dest);
-#define PERL_ARGS_ASSERT_APPEND_UTF8_FROM_NATIVE_BYTE	\
-	assert(dest)
 PERL_CALLCONV I32	Perl_apply(pTHX_ I32 type, SV** mark, SV** sp);
 #define PERL_ARGS_ASSERT_APPLY	\
 	assert(mark); assert(sp)
@@ -199,11 +191,6 @@ PERL_CALLCONV SV**	Perl_av_store(pTHX_ AV *av, SSize_t key, SV *val);
 	assert(av)
 /* PERL_CALLCONV SSize_t	Perl_av_tindex(pTHX_ AV *av)
 			__attribute__warn_unused_result__; */
-
-PERL_STATIC_INLINE SSize_t	S_av_top_index(pTHX_ AV *av)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_AV_TOP_INDEX	\
-	assert(av)
 
 PERL_CALLCONV void	Perl_av_undef(pTHX_ AV *av);
 #define PERL_ARGS_ASSERT_AV_UNDEF	\
@@ -1305,11 +1292,6 @@ PERL_CALLCONV bool	Perl_is_invariant_string(const U8 *s, STRLEN len)
 
 PERL_CALLCONV I32	Perl_is_lvalue_sub(pTHX)
 			__attribute__warn_unused_result__;
-
-PERL_STATIC_INLINE bool	S_is_safe_syscall(pTHX_ const char *pv, STRLEN len, const char *what, const char *op_name)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_IS_SAFE_SYSCALL	\
-	assert(pv); assert(what); assert(op_name)
 
 PERL_CALLCONV bool	Perl_is_uni_alnum(pTHX_ UV c)
 			__attribute__deprecated__
@@ -3081,9 +3063,6 @@ PERL_CALLCONV void	Perl_sv_nosharing(pTHX_ SV *sv);
 PERL_CALLCONV NV	Perl_sv_nv(pTHX_ SV* sv);
 #define PERL_ARGS_ASSERT_SV_NV	\
 	assert(sv)
-PERL_STATIC_INLINE bool	S_sv_only_taint_gmagic(SV *sv);
-#define PERL_ARGS_ASSERT_SV_ONLY_TAINT_GMAGIC	\
-	assert(sv)
 PERL_CALLCONV char*	Perl_sv_peek(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_sv_pos_b2u(pTHX_ SV *const sv, I32 *const offsetp);
 #define PERL_ARGS_ASSERT_SV_POS_B2U	\
@@ -3715,6 +3694,29 @@ STATIC SV *	S_incpush_if_exists(pTHX_ AV *const av, SV *dir, SV *const stem);
 #define PERL_ARGS_ASSERT_INCPUSH_IF_EXISTS	\
 	assert(av); assert(dir); assert(stem)
 #  endif
+#endif
+#if !defined(PERL_NO_INLINE_FUNCTIONS)
+PERL_STATIC_INLINE STRLEN	S__is_utf8_char_slow(const U8 *s, const U8 *e)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT__IS_UTF8_CHAR_SLOW	\
+	assert(s); assert(e)
+
+PERL_STATIC_INLINE void	S_append_utf8_from_native_byte(const U8 byte, U8** dest);
+#define PERL_ARGS_ASSERT_APPEND_UTF8_FROM_NATIVE_BYTE	\
+	assert(dest)
+PERL_STATIC_INLINE SSize_t	S_av_top_index(pTHX_ AV *av)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_AV_TOP_INDEX	\
+	assert(av)
+
+PERL_STATIC_INLINE bool	S_is_safe_syscall(pTHX_ const char *pv, STRLEN len, const char *what, const char *op_name)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_IS_SAFE_SYSCALL	\
+	assert(pv); assert(what); assert(op_name)
+
+PERL_STATIC_INLINE bool	S_sv_only_taint_gmagic(SV *sv);
+#define PERL_ARGS_ASSERT_SV_ONLY_TAINT_GMAGIC	\
+	assert(sv)
 #endif
 #if !defined(PERL_NO_UTF16_FILTER)
 #  if defined(PERL_IN_TOKE_C)
