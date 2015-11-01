@@ -93,7 +93,7 @@ getting whatever version is first in the user's path.  If you want
 a specific version of Perl, say, perl5.14.1, you should place
 that directly in the C<#!> line's path.
 
-If the C<#!> line does not contain the word "perl" nor the word "indir"
+If the C<#!> line does not contain the word "perl" nor the word "indir",
 the program named after the C<#!> is executed instead of the Perl
 interpreter.  This is slightly bizarre, but it helps people on machines
 that don't do C<#!>, because they can tell a program that their SHELL is
