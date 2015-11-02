@@ -208,7 +208,7 @@ PP(pp_sassign)
 		assert(source);
 		assert(CvFLAGS(source) & CVf_CONST);
 
-		SvREFCNT_inc_void(source);
+		SvREFCNT_inc_simple_void_NN(source);
 		SvREFCNT_dec_NN(upgraded);
 		SvRV_set(right, MUTABLE_SV(source));
 	    }
@@ -1311,11 +1311,11 @@ PP(pp_aassign)
 		    if (lval && !already_copied)
 			*relem = sv_mortalcopy(*relem);
 		    /* XXX else check for weak refs?  */
-		    sv = SvREFCNT_inc_simple_NN(SvRV(*relem));
+		    sv = SvREFCNT_inc_NN(SvRV(*relem));
 		}
 		relem++;
                 if (already_copied)
-                    SvREFCNT_inc_simple_NN(sv); /* undo mortal free */
+                    SvREFCNT_inc_simple_void_NN(sv); /* undo mortal free */
 		didstore = av_store(ary,i++,sv);
 		if (magic) {
 		    if (!didstore)
@@ -1410,7 +1410,7 @@ PP(pp_aassign)
 			}
 		    }
                     if (already_copied)
-                        SvREFCNT_inc_simple_NN(tmpstr); /* undo mortal free */
+                        SvREFCNT_inc_simple_void_NN(tmpstr); /* undo mortal free */
 		    didstore = hv_store_ent(hash,sv,tmpstr,0);
 		    if (magic) {
 			if (!didstore) sv_2mortal(tmpstr);
@@ -2059,7 +2059,7 @@ PP(pp_helem)
 	    LvTYPE(lv) = 'y';
 	    sv_magic(lv, key2 = newSVsv(keysv), PERL_MAGIC_defelem, NULL, 0);
 	    SvREFCNT_dec_NN(key2);	/* sv_magic() increments refcount */
-	    LvTARG(lv) = SvREFCNT_inc_simple(hv);
+	    LvTARG(lv) = SvREFCNT_inc_simple_NN(hv);
 	    LvTARGLEN(lv) = 1;
 	    PUSHs(lv);
 	    RETURN;
@@ -2495,7 +2495,7 @@ PP(pp_multideref)
                                                 PERL_MAGIC_defelem, NULL, 0);
                             /* sv_magic() increments refcount */
                             SvREFCNT_dec_NN(key2);
-                            LvTARG(lv) = SvREFCNT_inc_simple(hv);
+                            LvTARG(lv) = SvREFCNT_inc_simple_NN(hv);
                             LvTARGLEN(lv) = 1;
                             sv = lv;
                         }
