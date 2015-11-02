@@ -15,19 +15,21 @@ package Math::BigInt;
 # Remember not to take shortcuts ala $xs = $x->{value}; $CALC->foo($xs); since
 # underlying lib might change the reference!
 
-my $class = "Math::BigInt";
 use 5.006002;
+use strict;
+use warnings;
 
-$VERSION = '1.999706';
+our $VERSION = '1.999707';
 
-@ISA = qw(Exporter);
-@EXPORT_OK = qw(objectify bgcd blcm); 
+our @ISA = qw(Exporter);
+our @EXPORT_OK = qw(objectify bgcd blcm);
 
 # _trap_inf and _trap_nan are internal and should never be accessed from the
 # outside
-use vars qw/$round_mode $accuracy $precision $div_scale $rnd_mode 
-	    $upgrade $downgrade $_trap_nan $_trap_inf/;
-use strict;
+our ($round_mode, $accuracy, $precision, $div_scale, $rnd_mode,
+     $upgrade, $downgrade, $_trap_nan, $_trap_inf);
+
+my $class = "Math::BigInt";
 
 # Inside overload, the first arg is always an object. If the original code had
 # it reversed (like $x = 2 * $y), then the third parameter is true.
@@ -3641,7 +3643,7 @@ Math::BigInt - Arbitrary size integer/float math package
 All operators (including basic math operations) are overloaded if you
 declare your big integers as
 
-  $i = new Math::BigInt '123_456_789_123_456_789';
+  $i = Math::BigInt -> new('123_456_789_123_456_789');
 
 Operations with overloaded operators preserve the arguments which is
 exactly what you expect.
@@ -5242,8 +5244,8 @@ So, the following examples will now work all as expected:
 	use Test::More tests => 1;
 	use Math::BigInt;
 
-	my $x = new Math::BigInt 3*3;
-	my $y = new Math::BigInt 3*3;
+	my $x = Math::BigInt -> new(3*3);
+	my $y = Math::BigInt -> new(3*3);
 
 	is ($x,3*3, 'multiplication');
 	print "$x eq 9" if $x eq $y;
@@ -5607,9 +5609,25 @@ because they solve the autoupgrading/downgrading issue, at least partly.
 
 =head1 AUTHORS
 
-Original code by Mark Biggar, overloaded interface by Ilya Zakharevich.
-Completely rewritten by Tels http://bloodgate.com in late 2000, 2001 - 2006
-and still at it in 2007.
+=over 4
+
+=item *
+
+Mark Biggar, overloaded interface by Ilya Zakharevich, 1996-2001.
+
+=item *
+
+Completely rewritten by Tels L<http://bloodgate.com> in 2001-2008.
+
+=item *
+
+Florian Ragwitz L<flora@cpan.org>, 2010.
+
+=item *
+
+Peter John Acklam, L<pjacklam@online.no>, 2011-.
+
+=back
 
 Many people contributed in one or more ways to the final beast, see the file
 CREDITS for an (incomplete) list. If you miss your name, please drop me a

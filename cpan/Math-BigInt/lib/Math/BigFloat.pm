@@ -12,17 +12,20 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.999706';
-require 5.006002;
+use 5.006002;
+use strict;
+use warnings;
+
+our $VERSION = '1.999707';
 
 require Exporter;
-@ISA		= qw/Math::BigInt/;
-@EXPORT_OK	= qw/bpi/;
+our @ISA	= qw/Math::BigInt/;
+our @EXPORT_OK	= qw/bpi/;
 
-use strict;
 # $_trap_inf/$_trap_nan are internal and should never be accessed from outside
-use vars qw/$AUTOLOAD $accuracy $precision $div_scale $round_mode $rnd_mode
-	    $upgrade $downgrade $_trap_nan $_trap_inf/;
+our ($AUTOLOAD, $accuracy, $precision, $div_scale, $round_mode, $rnd_mode,
+     $upgrade, $downgrade, $_trap_nan, $_trap_inf);
+
 my $class = "Math::BigFloat";
 
 use overload
@@ -4139,7 +4142,7 @@ Math::BigFloat - Arbitrary size floating point math package
 All operators (including basic math operations) are overloaded if you
 declare your big floating point numbers as
 
-  $i = new Math::BigFloat '12_3.456_789_123_456_789E-2';
+  $i = Math::BigFloat -> new('12_3.456_789_123_456_789E-2');
 
 Operations with overloaded operators preserve the arguments, which is
 exactly what you expect.
@@ -4784,8 +4787,24 @@ because they solve the autoupgrading/downgrading issue, at least partly.
 
 =head1 AUTHORS
 
-Mark Biggar, overloaded interface by Ilya Zakharevich.
-Completely rewritten by Tels L<http://bloodgate.com> in 2001 - 2006, and still
-at it in 2007.
+=over 4
+
+=item *
+
+Mark Biggar, overloaded interface by Ilya Zakharevich, 1996-2001.
+
+=item *
+
+Completely rewritten by Tels L<http://bloodgate.com> in 2001-2008.
+
+=item *
+
+Florian Ragwitz L<flora@cpan.org>, 2010.
+
+=item *
+
+Peter John Acklam, L<pjacklam@online.no>, 2011-.
+
+=back
 
 =cut

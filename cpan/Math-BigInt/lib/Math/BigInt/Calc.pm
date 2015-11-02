@@ -2,9 +2,9 @@ package Math::BigInt::Calc;
 
 use 5.006002;
 use strict;
-# use warnings;	# do not use warnings for older Perls
+use warnings;
 
-our $VERSION = '1.999706';
+our $VERSION = '1.999707';
 
 # Package to store unsigned big integers in decimal and do math with them
 
