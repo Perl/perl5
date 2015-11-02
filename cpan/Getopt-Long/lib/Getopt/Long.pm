@@ -4,8 +4,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Jun 16 15:28:03 2015
-# Update Count    : 1695
+# Last Modified On: Thu Oct  8 14:57:49 2015
+# Update Count    : 1697
 # Status          : Released
 
 ################ Module Preamble ################
@@ -17,10 +17,10 @@ use 5.004;
 use strict;
 
 use vars qw($VERSION);
-$VERSION        =  2.47;
+$VERSION        =  2.48;
 # For testing versions only.
 use vars qw($VERSION_STRING);
-$VERSION_STRING = "2.47";
+$VERSION_STRING = "2.48";
 
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK);
@@ -1109,9 +1109,13 @@ sub FindOption ($$$$$) {
     my $mand = $ctl->[CTL_AMIN];
 
     # Check if there is an option argument available.
-    if ( $gnu_compat && defined $optarg && $optarg eq '' ) {
-	return (1, $opt, $ctl, $type eq 's' ? '' : 0) ;#unless $mand;
-	$optarg = 0 unless $type eq 's';
+    if ( $gnu_compat ) {
+	my $optargtype = 0; # 0 = none, 1 = empty, 2 = nonempty
+	$optargtype = ( !defined($optarg) ? 0 : ( (length($optarg) == 0) ? 1 : 2 ) );
+	return (1, $opt, $ctl, undef)
+	  if (($optargtype == 0) && !$mand);
+	return (1, $opt, $ctl, $type eq 's' ? '' : 0)
+	  if $optargtype == 1;  # --foo=  -> return nothing
     }
 
     # Check if there is an option argument available.
@@ -1359,6 +1363,8 @@ sub Configure (@) {
 	}
 	elsif ( $try eq 'gnu_compat' ) {
 	    $gnu_compat = $action;
+	    $bundling = 0;
+	    $bundling_values = 1;
 	}
 	elsif ( $try =~ /^(auto_?)?version$/ ) {
 	    $auto_version = $action;
