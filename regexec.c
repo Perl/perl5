@@ -263,6 +263,44 @@ static void S_setup_eval_state(pTHX_ regmatch_info *const reginfo);
 static void S_cleanup_regmatch_info_aux(pTHX_ void *arg);
 static regmatch_state * S_push_slab(pTHX);
 
+/* this needs to check the correct version number for MSVC 2003 */
+#ifdef _MSC_VER
+
+PERL_STATIC_INLINE bool
+S_isWORDCHAR_uni(pTHX_ UV c) {
+    /* macro already does cBOOL() */
+    return isWORDCHAR_uni(c);
+}
+
+PERL_STATIC_INLINE bool
+S_isWORDCHAR_LC_uvchr(pTHX_ UV c) {
+    return isWORDCHAR_LC_uvchr(c);
+}
+
+PERL_STATIC_INLINE bool
+S_isWORDCHAR_utf8(pTHX_ const U8 *p) {
+    return isWORDCHAR_utf8(p);
+}
+
+PERL_STATIC_INLINE bool
+S_isWORDCHAR_LC_utf8(pTHX_ const U8 *p) {
+    return isWORDCHAR_LC_utf8(p);
+}
+
+#define isWORDCHAR_uni_x(c) (S_isWORDCHAR_uni(aTHX_ (c)))
+#define isWORDCHAR_LC_uvchr_x(c) (S_isWORDCHAR_LC_uvchr(aTHX_ (c)))
+#define isWORDCHAR_utf8_x(p) (S_isWORDCHAR_utf8(aTHX_ (p)))
+#define isWORDCHAR_LC_utf8_x(p) (S_isWORDCHAR_LC_utf8(aTHX_ (p)))
+
+#else
+
+#define isWORDCHAR_uni_x isWORDCHAR_uni
+#define isWORDCHAR_LC_uvchr_x isWORDCHAR_LC_uvchr
+#define isWORDCHAR_utf8_x isWORDCHAR_utf8
+#define isWORDCHAR_LC_utf8_x isWORDCHAR_LC_utf8
+
+#endif
+
 #define REGCP_PAREN_ELEMS 3
 #define REGCP_OTHER_ELEMS 3
 #define REGCP_FRAME_ELEMS 1
@@ -2003,7 +2041,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             goto do_boundu;
         }
 
-        FBC_BOUND(isWORDCHAR_LC, isWORDCHAR_LC_uvchr, isWORDCHAR_LC_utf8);
+        FBC_BOUND(isWORDCHAR_LC, isWORDCHAR_LC_uvchr_x, isWORDCHAR_LC_utf8_x);
         break;
 
     case NBOUNDL:
@@ -2016,14 +2054,14 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             goto do_nboundu;
         }
 
-        FBC_NBOUND(isWORDCHAR_LC, isWORDCHAR_LC_uvchr, isWORDCHAR_LC_utf8);
+        FBC_NBOUND(isWORDCHAR_LC, isWORDCHAR_LC_uvchr_x, isWORDCHAR_LC_utf8_x);
         break;
 
     case BOUND: /* regcomp.c makes sure that this only has the traditional \b
                    meaning */
         assert(FLAGS(c) == TRADITIONAL_BOUND);
 
-        FBC_BOUND(isWORDCHAR, isWORDCHAR_uni, isWORDCHAR_utf8);
+        FBC_BOUND(isWORDCHAR, isWORDCHAR_uni_x, isWORDCHAR_utf8_x);
         break;
 
     case BOUNDA: /* regcomp.c makes sure that this only has the traditional \b
@@ -2037,7 +2075,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                    meaning */
         assert(FLAGS(c) == TRADITIONAL_BOUND);
 
-        FBC_NBOUND(isWORDCHAR, isWORDCHAR_uni, isWORDCHAR_utf8);
+        FBC_NBOUND(isWORDCHAR, isWORDCHAR_uni_x, isWORDCHAR_utf8_x);
         break;
 
     case NBOUNDA: /* regcomp.c makes sure that this only has the traditional \b
@@ -2049,7 +2087,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
     case NBOUNDU:
         if ((bound_type) FLAGS(c) == TRADITIONAL_BOUND) {
-            FBC_NBOUND(isWORDCHAR_L1, isWORDCHAR_uni, isWORDCHAR_utf8);
+            FBC_NBOUND(isWORDCHAR_L1, isWORDCHAR_uni_x, isWORDCHAR_utf8_x);
             break;
         }
 
