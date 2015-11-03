@@ -3,7 +3,7 @@ package Pod::Simple::Search;
 use strict;
 
 use vars qw($VERSION $MAX_VERSION_WITHIN $SLEEPY);
-$VERSION = '3.30';   ## Current version of this package
+$VERSION = '3.32';   ## Current version of this package
 
 BEGIN { *DEBUG = sub () {0} unless defined &DEBUG; }   # set DEBUG level
 use Carp ();
@@ -12,6 +12,7 @@ $SLEEPY = 1 if !defined $SLEEPY and $^O =~ /mswin|mac/i;
   # flag to occasionally sleep for $SLEEPY - 1 seconds.
 
 $MAX_VERSION_WITHIN ||= 60;
+my $IS_CASE_INSENSITIVE = -e uc __FILE__ && -e lc __FILE__;
 
 #############################################################################
 
@@ -123,19 +124,6 @@ sub survey {
   return $self->name2path, $self->path2name; # list
 }
 
-my $IS_CASE_INSENSITIVE;
-sub _is_case_insensitive {
-    unless (defined $IS_CASE_INSENSITIVE) {
-        $IS_CASE_INSENSITIVE = 0;
-        my ($uc) = glob uc __FILE__;
-        if ($uc) {
-            my ($lc) = glob lc __FILE__;
-            $IS_CASE_INSENSITIVE = 1 if $lc;
-        }
-    }
-    return $IS_CASE_INSENSITIVE;
-}
-
 #==========================================================================
 sub _make_search_callback {
   my $self = $_[0];
@@ -147,7 +135,7 @@ sub _make_search_callback {
      qw(laborious verbose shadows limit_re callback progress
         path2name name2path recurse ciseen);
   my ($seen, $remember, $files_for);
-  if (_is_case_insensitive) {
+  if ($IS_CASE_INSENSITIVE) {
       $seen      = sub { $ciseen->{ lc $_[0] } };
       $remember  = sub { $name2path->{ $_[0] } = $ciseen->{ lc $_[0] } = $_[1]; };
       $files_for = sub { my $n = lc $_[0]; grep { lc $path2name->{$_} eq $n } %{ $path2name } };
@@ -494,13 +482,15 @@ sub _expand_inc {
   my($self, $search_dirs) = @_;
   
   return unless $self->{'inc'};
+  my %seen = map { File::Spec->rel2abs($_) => 1 } @{ $search_dirs };
 
   if ($^O eq 'MacOS') {
     push @$search_dirs,
-      grep $_ ne File::Spec->curdir, $self->_mac_whammy(@INC);
+      grep { !$seen{ File::Spec->rel2abs($_) }++ } $self->_mac_whammy(@INC);
   # Any other OSs need custom handling here?
   } else {
-    push @$search_dirs, grep $_ ne File::Spec->curdir,  @INC;
+    push @$search_dirs,
+      grep { !$seen{ File::Spec->rel2abs($_) }++ } @INC;
   }
 
   $self->{'laborious'} = 0;   # Since inc said to use INC
@@ -598,7 +588,7 @@ sub find {
       my $fullext = $fullname . $ext;
       if ( -f $fullext and $self->contains_pod($fullext) ) {
         print "FOUND: $fullext\n" if $verbose;
-        if (@parts > 1 && lc $parts[0] eq 'pod' && _is_case_insensitive && $ext eq '.pod') {
+        if (@parts > 1 && lc $parts[0] eq 'pod' && $IS_CASE_INSENSITIVE && $ext eq '.pod') {
           # Well, this file could be for a program (perldoc) but we actually
           # want a module (Pod::Perldoc). So see if there is a .pm with the
           # proper casing.
@@ -1049,8 +1039,8 @@ pod-people@perl.org mail list. Send an empty email to
 pod-people-subscribe@perl.org to subscribe.
 
 This module is managed in an open GitHub repository,
-L<https://github.com/theory/pod-simple/>. Feel free to fork and contribute, or
-to clone L<git://github.com/theory/pod-simple.git> and send patches!
+L<https://github.com/perl-pod/pod-simple/>. Feel free to fork and contribute, or
+to clone L<git://github.com/perl-pod/pod-simple.git> and send patches!
 
 Patches against Pod::Simple are welcome. Please send bug reports to
 <bug-pod-simple@rt.cpan.org>.

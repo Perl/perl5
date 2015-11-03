@@ -926,22 +926,8 @@ use File::Glob qw(:case);
     },
 
     'Pod::Simple' => {
-        'DISTRIBUTION' => 'DWHEELER/Pod-Simple-3.30.tar.gz',
+        'DISTRIBUTION' => 'MARCGREEN/Pod-Simple-3.32.tar.gz',
         'FILES'        => q[cpan/Pod-Simple],
-        # https://rt.cpan.org/Public/Bug/Display.html?id=103439
-        # https://rt.cpan.org/Public/Bug/Display.html?id=105192
-        # https://rt.cpan.org/Public/Bug/Display.html?id=105511
-        'CUSTOMIZED'   => [
-            qw( lib/Pod/Simple/Search.pm
-                lib/Pod/Simple/BlackBox.pm
-                t/search10.t
-                t/search12.t
-                t/search20.t
-                t/search22.t
-                t/search26.t
-                t/search28.t
-            ),
-        ],
     },
 
     'Pod::Usage' => {

@@ -62,15 +62,15 @@ if( $guess ) {
       ok 1;
     } else {
       ok 0;
-      print "# failed to find expected control character in output\n"
+      print STDERR "# failed to find expected control character in output\n"
     }
   } else {
     ok 0;
-    print "# parser guessed wrong encoding expected 'CP1252' got '$guess'\n";
+    print STDERR "# parser guessed wrong encoding expected 'CP1252' got '$guess'\n";
   }
 } else {
   ok 0;
-  print "# parser failed to detect non-ASCII bytes in input\n";
+  print STDERR "# parser failed to detect non-ASCII bytes in input\n";
 }
 
 
@@ -96,11 +96,11 @@ else {
             ok 1;
         } else {
             ok 0;
-            print "# parser guessed wrong encoding expected 'CP1252' got '$guess'\n";
+            print STDERR "# parser guessed wrong encoding expected 'CP1252' got '$guess'\n";
         }
     } else {
         ok 0;
-        print "# parser failed to detect non-ASCII bytes in input\n";
+        print STDERR "# parser failed to detect non-ASCII bytes in input\n";
     }
 }
 
@@ -128,11 +128,11 @@ else {
             ok 1;
         } else {
             ok 0;
-            print "# parser guessed wrong encoding expected 'CP1252' got '$guess'\n";
+            print STDERR "# parser guessed wrong encoding expected 'CP1252' got '$guess'\n";
         }
     } else {
         ok 0;
-        print "# parser failed to detect non-ASCII bytes in input\n";
+        print STDERR "# parser failed to detect non-ASCII bytes in input\n";
     }
 }
 
@@ -161,11 +161,11 @@ else {
             ok 1;
         } else {
             ok 0;
-            print "# parser guessed wrong encoding expected 'CP1252' got '$guess'\n";
+            print STDERR "# parser guessed wrong encoding expected 'CP1252' got '$guess'\n";
         }
     } else {
         ok 0;
-        print "# parser failed to detect non-ASCII bytes in input\n";
+        print STDERR "# parser failed to detect non-ASCII bytes in input\n";
     }
 }
 

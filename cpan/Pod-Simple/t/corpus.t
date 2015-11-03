@@ -171,7 +171,7 @@ foreach my $f (@testfiles) {
   if($skippy) {
     skip $skippy, 0;
   } else {
-    print "#  $outfilename and $xml don't match!\n";
+    print STDERR "#  $outfilename and $xml don't match!\n";
     print STDERR `diff $xml $outfilename`;
     ok 0;
   }

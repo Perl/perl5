@@ -8,7 +8,7 @@ package Pod::Simple::RTF;
 
 use strict;
 use vars qw($VERSION @ISA %Escape $WRAP %Tagmap);
-$VERSION = '3.30';
+$VERSION = '3.32';
 use Pod::Simple::PullParser ();
 BEGIN {@ISA = ('Pod::Simple::PullParser')}
 
@@ -111,7 +111,7 @@ sub new {
 
   $new->accept_codes(@_to_accept);
   $new->accept_codes('VerbatimFormatted');
-  DEBUG > 2 and print "To accept: ", join(' ',@_to_accept), "\n";
+  DEBUG > 2 and print STDERR "To accept: ", join(' ',@_to_accept), "\n";
   $new->doc_lang(
     (  $ENV{'RTFDEFLANG'} || '') =~ m/^(\d{1,10})$/s ? $1
     : ($ENV{'RTFDEFLANG'} || '') =~ m/^0?x([a-fA-F0-9]{1,10})$/s ? hex($1)
@@ -171,13 +171,13 @@ sub do_middle {      # the main work
   
     if( ($type = $token->type) eq 'text' ) {
       if( $self->{'rtfverbatim'} ) {
-        DEBUG > 1 and print "  $type " , $token->text, " in verbatim!\n";
+        DEBUG > 1 and print STDERR "  $type " , $token->text, " in verbatim!\n";
         rtf_esc_codely($scratch = $token->text);
         print $fh $scratch;
         next;
       }
 
-      DEBUG > 1 and print "  $type " , $token->text, "\n";
+      DEBUG > 1 and print STDERR "  $type " , $token->text, "\n";
       
       $scratch = $token->text;
       $scratch =~ tr/\t\cb\cc/ /d;
@@ -215,7 +215,7 @@ sub do_middle {      # the main work
       print $fh $scratch;
 
     } elsif( $type eq 'start' ) {
-      DEBUG > 1 and print "  +$type ",$token->tagname,
+      DEBUG > 1 and print STDERR "  +$type ",$token->tagname,
         " (", map("<$_> ", %{$token->attr_hash}), ")\n";
 
       if( ($tagname = $token->tagname) eq 'Verbatim'
@@ -230,7 +230,7 @@ sub do_middle {      # the main work
           while( $$t =~ m/$/mg ) {
             last if  ++$line_count  > 15; # no point in counting further
           }
-          DEBUG > 3 and print "    verbatim line count: $line_count\n";
+          DEBUG > 3 and print STDERR "    verbatim line count: $line_count\n";
         }
         $self->unget_token($next);
         $self->{'rtfkeep'} = ($line_count > 15) ? '' : '\keepn' ;     
@@ -252,7 +252,7 @@ sub do_middle {      # the main work
           
           if($to_unget[-1]->type eq 'text') {
             if( ($text_count_here += length ${$to_unget[-1]->text_r}) > 150 ){
-              DEBUG > 1 and print "    item-* is too long to be keepn'd.\n";
+              DEBUG > 1 and print STDERR "    item-* is too long to be keepn'd.\n";
               last;
             }
           } elsif (@to_unget > 1 and
@@ -264,13 +264,13 @@ sub do_middle {      # the main work
               $to_unget[-1]->type eq 'start' and
               $to_unget[-1]->tagname eq 'Para';
 
-            DEBUG > 1 and printf "    item-* before %s(%s) %s keepn'd.\n",
+            DEBUG > 1 and printf STDERR "    item-* before %s(%s) %s keepn'd.\n",
               $to_unget[-1]->type,
               $to_unget[-1]->can('tagname') ? $to_unget[-1]->tagname : '',
               $self->{'rtfitemkeepn'} ? "gets" : "doesn't get";
             last;
           } elsif (@to_unget > 40) {
-            DEBUG > 1 and print "    item-* now has too many tokens (",
+            DEBUG > 1 and print STDERR "    item-* now has too many tokens (",
               scalar(@to_unget),
               (DEBUG > 4) ? (q<: >, map($_->dump, @to_unget)) : (),
               ") to be keepn'd.\n";
@@ -285,7 +285,7 @@ sub do_middle {      # the main work
         push @stack, $1;
         push @indent_stack,
          int($token->attr('indent') * 4 * $self->normal_halfpoint_size);
-        DEBUG and print "Indenting over $indent_stack[-1] twips.\n";
+        DEBUG and print STDERR "Indenting over $indent_stack[-1] twips.\n";
         $self->{'rtfindent'} += $indent_stack[-1];
         
       } elsif ($tagname eq 'L') {
@@ -298,7 +298,7 @@ sub do_middle {      # the main work
           $self->unget_token($next);
           next;
         }
-        DEBUG and print "    raw text ", $next->text, "\n";
+        DEBUG and print STDERR "    raw text ", $next->text, "\n";
         printf $fh "\n" . $next->text . "\n";
         next;
       }
@@ -315,9 +315,9 @@ sub do_middle {      # the main work
       }
 
     } elsif( $type eq 'end' ) {
-      DEBUG > 1 and print "  -$type ",$token->tagname,"\n";
+      DEBUG > 1 and print STDERR "  -$type ",$token->tagname,"\n";
       if( ($tagname = $token->tagname) =~ m/^over-/s ) {
-        DEBUG and print "Indenting back $indent_stack[-1] twips.\n";
+        DEBUG and print STDERR "Indenting back $indent_stack[-1] twips.\n";
         $self->{'rtfindent'} -= pop @indent_stack;
         pop @stack;
       } elsif( $tagname eq 'Verbatim' or $tagname eq 'VerbatimFormatted') {
@@ -451,7 +451,7 @@ END
 sub doc_start {
   my $self = $_[0];
   my $title = $self->get_short_title();
-  DEBUG and print "Short Title: <$title>\n";
+  DEBUG and print STDERR "Short Title: <$title>\n";
   $title .= ' ' if length $title;
   
   $title =~ s/ *$/ /s;
@@ -464,9 +464,9 @@ sub doc_start {
    if $title =~ m/^\S+$/s and $title =~ m/::/s;
     # catches the most common case, at least
 
-  DEBUG and print "Title0: <$title>\n";
+  DEBUG and print STDERR "Title0: <$title>\n";
   $title = rtf_esc($title);
-  DEBUG and print "Title1: <$title>\n";
+  DEBUG and print STDERR "Title1: <$title>\n";
   $title = '\lang1024\noproof ' . $title
    if $is_obviously_module_name;
 
@@ -677,8 +677,8 @@ pod-people@perl.org mail list. Send an empty email to
 pod-people-subscribe@perl.org to subscribe.
 
 This module is managed in an open GitHub repository,
-L<https://github.com/theory/pod-simple/>. Feel free to fork and contribute, or
-to clone L<git://github.com/theory/pod-simple.git> and send patches!
+L<https://github.com/perl-pod/pod-simple/>. Feel free to fork and contribute, or
+to clone L<git://github.com/perl-pod/pod-simple.git> and send patches!
 
 Patches against Pod::Simple are welcome. Please send bug reports to
 <bug-pod-simple@rt.cpan.org>.

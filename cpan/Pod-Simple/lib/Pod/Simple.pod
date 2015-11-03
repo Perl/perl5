@@ -12,7 +12,7 @@ Pod::Simple - framework for parsing Pod
 Pod::Simple is a Perl library for parsing text in the Pod ("plain old
 documentation") markup language that is typically used for writing
 documentation for Perl and for Perl modules. The Pod format is explained
-L<perlpod>; the most common formatter is called C<perldoc>.
+in L<perlpod>; the most common formatter is called C<perldoc>.
 
 Be sure to read L</ENCODING> if your Pod contains non-ASCII characters.
 
@@ -289,6 +289,16 @@ I<Example:>
 
   die "too many errors\n" if $parser->any_errata_seen();
 
+=item C<< $parser->errata_seen() >>X<errata_seen>
+
+Returns a hash reference of all errata seen, both whines and screams. The hash reference's keys are the line number and the value is an array reference of the errors for that line.
+
+I<Example:>
+
+  if ( $parser->any_errata_seen() ) {
+     $logger->log( $parser->errata_seen() );
+  }
+
 =item C<< $parser->detected_encoding() >>X<detected_encoding>
 
 Return the encoding corresponding to C<< =encoding >>, but only if the
@@ -351,7 +361,7 @@ the C<=encoding> declaration in the POD source.
 If the POD source does not include an C<=encoding> declaration, the parser will
 attempt to guess the encoding (selecting one of UTF-8 or CP 1252) by examining
 the first non-ASCII bytes and applying the heuristic described in
-L<perlpodspec>.  (It the POD source contains only ASCII bytes, the
+L<perlpodspec>.  (If the POD source contains only ASCII bytes, the
 encoding is assumed to be ASCII.)
 
 If you set the C<parse_characters> option to a true value the parser will
@@ -377,8 +387,8 @@ pod-people@perl.org mail list. Send an empty email to
 pod-people-subscribe@perl.org to subscribe.
 
 This module is managed in an open GitHub repository,
-L<https://github.com/theory/pod-simple/>. Feel free to fork and contribute, or
-to clone L<git://github.com/theory/pod-simple.git> and send patches!
+L<https://github.com/perl-pod/pod-simple/>. Feel free to fork and contribute, or
+to clone L<git://github.com/perl-pod/pod-simple.git> and send patches!
 
 Patches against Pod::Simple are welcome. Please send bug reports to
 <bug-pod-simple@rt.cpan.org>.

@@ -5,7 +5,7 @@ use strict;
 use Carp ();
 use Pod::Simple ();
 use vars qw( $ATTR_PAD @ISA $VERSION $SORT_ATTRS);
-$VERSION = '3.30';
+$VERSION = '3.32';
 BEGIN {
   @ISA = ('Pod::Simple');
   *DEBUG = \&Pod::Simple::DEBUG unless defined &DEBUG;
@@ -31,7 +31,7 @@ sub _handle_element_start {
   # ($self, $element_name, $attr_hash_r)
   my $fh = $_[0]{'output_fh'};
   my($key, $value);
-  DEBUG and print "++ $_[1]\n";
+  DEBUG and print STDERR "++ $_[1]\n";
   print $fh "<", $_[1];
   if($SORT_ATTRS) {
     foreach my $key (sort keys %{$_[2]}) {
@@ -55,7 +55,7 @@ sub _handle_element_start {
 }
 
 sub _handle_text {
-  DEBUG and print "== \"$_[1]\"\n";
+  DEBUG and print STDERR "== \"$_[1]\"\n";
   if(length $_[1]) {
     my $text = $_[1];
     _xml_escape($text);
@@ -65,7 +65,7 @@ sub _handle_text {
 }
 
 sub _handle_element_end {
-  DEBUG and print "-- $_[1]\n";
+  DEBUG and print STDERR "-- $_[1]\n";
   print {$_[0]{'output_fh'}} "</", $_[1], ">";
   return;
 }
@@ -138,8 +138,8 @@ pod-people@perl.org mail list. Send an empty email to
 pod-people-subscribe@perl.org to subscribe.
 
 This module is managed in an open GitHub repository,
-L<https://github.com/theory/pod-simple/>. Feel free to fork and contribute, or
-to clone L<git://github.com/theory/pod-simple.git> and send patches!
+L<https://github.com/perl-pod/pod-simple/>. Feel free to fork and contribute, or
+to clone L<git://github.com/perl-pod/pod-simple.git> and send patches!
 
 Patches against Pod::Simple are welcome. Please send bug reports to
 <bug-pod-simple@rt.cpan.org>.

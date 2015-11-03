@@ -38,14 +38,14 @@ you can prevent high-bit characters from being encoded as HTML entities and
 declare the output character set as UTF-8 before parsing, like so:
 
   $psx->html_charset('UTF-8');
-  $psx->html_encode_chars('&<>">');
+  $psx->html_encode_chars(q{&<>'"});
 
 =cut
 
 package Pod::Simple::XHTML;
 use strict;
 use vars qw( $VERSION @ISA $HAS_HTML_ENTITIES );
-$VERSION = '3.30';
+$VERSION = '3.32';
 use Pod::Simple::Methody ();
 @ISA = ('Pod::Simple::Methody');
 
@@ -832,8 +832,8 @@ pod-people@perl.org mail list. Send an empty email to
 pod-people-subscribe@perl.org to subscribe.
 
 This module is managed in an open GitHub repository,
-L<https://github.com/theory/pod-simple/>. Feel free to fork and contribute, or
-to clone L<git://github.com/theory/pod-simple.git> and send patches!
+L<https://github.com/perl-pod/pod-simple/>. Feel free to fork and contribute, or
+to clone L<git://github.com/perl-pod/pod-simple.git> and send patches!
 
 Patches against Pod::Simple are welcome. Please send bug reports to
 <bug-pod-simple@rt.cpan.org>.
