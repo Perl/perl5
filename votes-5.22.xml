@@ -58,6 +58,12 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 </div>
 
+<div><h3>Other</h3>
+
+<commit votes="jhi, steveh" id="a78418585926648a4adf8e68eb5faee232e3eff9" ticket="" desc="fix typo in error message"/>
+
+</div>
+
 </data>
 
 <xsl:stylesheet version="1.0" id="stylesheet" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"><xsl:template match="xsl:stylesheet"/>
