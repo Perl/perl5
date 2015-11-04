@@ -585,6 +585,19 @@ perl_destruct(pTHXx)
     assert(PL_scopestack_ix == 0);
 
     /* Need to flush since END blocks can produce output */
+    /* flush stdout separately, since we can identify it */
+#ifdef USE_PERLIO
+    {
+        PerlIO *stdo = PerlIO_stdout();
+        if (*stdo && PerlIO_flush(stdo)) {
+            PerlIO_restore_errno(stdo);
+            PerlIO_printf(PerlIO_stderr(), "Unable to flush stdout: %s",
+                          Strerror(errno));
+            if (!STATUS_UNIX)
+                STATUS_ALL_FAILURE;
+        }
+    }
+#endif
     my_fflush_all();
 
 #ifdef PERL_TRACE_OPS
