@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 147);
+plan(tests => 148);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -655,6 +655,23 @@ SKIP: {
     sub RT123619::f { chop $_[0] }
     eval { 'RT123619'->f(); };
     like ($@, qr/Modification of a read-only value attempted/, 'RT #123619');
+}
+
+{
+    # RT #126042 &{1==1} * &{1==1} would crash
+
+    # pp_entersub and pp_method_named cooperate to prevent calls to an
+    # undefined import() or unimport() method from croaking.
+    # If pp_method_named can't find the method it pushes &PL_sv_yes, and
+    # pp_entersub checks for that specific SV to avoid croaking.
+    # Ideally they wouldn't use that hack but...
+    # Unfortunately pp_entersub's handling of that case is broken in scalar context.
+
+    # Rather than using the test case from the ticket, since &{1==1}
+    # isn't documented (and may not be supported in future perls) test
+    # calls to undefined import method, which also crashes.
+    fresh_perl_is('Unknown->import() * Unknown->unimport(); print "ok\n"', "ok\n", {},
+                  "check unknown import() methods don't corrupt the stack");
 }
 
 __END__

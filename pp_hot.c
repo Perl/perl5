@@ -3347,6 +3347,8 @@ PP(pp_entersub)
                     SP = PL_stack_base + POPMARK;
                 else
                     (void)POPMARK;
+                if (GIMME_V == G_SCALAR)
+                    PUSHs(&PL_sv_undef);
                 RETURN;
             }
             SvGETMAGIC(sv);
