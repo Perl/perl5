@@ -1093,8 +1093,6 @@ $(GLOBEXE) : perlglob.c
 	$(LIBFILES) && $(EMBED_EXE_MANI)
 .ENDIF
 
-config.w32 : $(CFGSH_TMPL)
-	copy $(CFGSH_TMPL) config.w32
 
 ..\git_version.h : $(HAVEMINIPERL) ..\make_patchnum.pl
 	cd .. && miniperl -Ilib make_patchnum.pl
@@ -1102,9 +1100,9 @@ config.w32 : $(CFGSH_TMPL)
 # make sure that we recompile perl.c if the git version changes
 ..\perl$(o) : ..\git_version.h
 
-..\config.sh : config.w32 $(HAVEMINIPERL) config_sh.PL FindExt.pm
+..\config.sh : $(CFGSH_TMPL) config_sh.PL FindExt.pm $(HAVEMINIPERL)
 	$(MINIPERL) -I..\lib config_sh.PL --cfgsh-option-file \
-	    $(mktmp $(CFG_VARS)) config.w32 > ..\config.sh
+	    $(mktmp $(CFG_VARS)) $(CFGSH_TMPL) > ..\config.sh
 
 # This target is for when changes to the main config.sh happen.
 # Edit config.gc, then make perl using GCC in a minimal configuration (i.e.
@@ -1754,7 +1752,6 @@ _clean :
 	-@erase perlglob$(o)
 	-@erase perlmain$(o)
 	-@erase perlmainst$(o)
-	-@erase config.w32
 	-@erase /f config.h
 	-@erase /f ..\git_version.h
 	-@erase $(GLOBEXE)
