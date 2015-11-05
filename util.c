@@ -2714,6 +2714,15 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 /* this is called in parent before the fork() */
 void
 Perl_atfork_lock(void)
+#if defined(USE_ITHREADS)
+#  ifdef USE_PERLIO
+  PERL_TSA_ACQUIRE(PL_perlio_mutex)
+#  endif
+#  ifdef MYMALLOC
+  PERL_TSA_ACQUIRE(PL_malloc_mutex)
+#  endif
+  PERL_TSA_ACQUIRE(PL_op_mutex)
+#endif
 {
 #if defined(USE_ITHREADS)
     dVAR;
@@ -2731,6 +2740,15 @@ Perl_atfork_lock(void)
 /* this is called in both parent and child after the fork() */
 void
 Perl_atfork_unlock(void)
+#if defined(USE_ITHREADS)
+#  ifdef USE_PERLIO
+  PERL_TSA_RELEASE(PL_perlio_mutex)
+#  endif
+#  ifdef MYMALLOC
+  PERL_TSA_RELEASE(PL_malloc_mutex)
+#  endif
+  PERL_TSA_RELEASE(PL_op_mutex)
+#endif
 {
 #if defined(USE_ITHREADS)
     dVAR;
