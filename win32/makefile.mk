@@ -1064,7 +1064,7 @@ CFG_VARS	=					\
 # Top targets
 #
 
-all : CHECKDMAKE  rebasePE $(UNIDATAFILES) Extensions_nonxs $(PERLSTATIC)
+all : CHECKDMAKE  rebasePE Extensions_nonxs $(PERLSTATIC)
 
 ..\regcomp$(o) : ..\regnodes.h ..\regcharclass.h
 
@@ -1457,8 +1457,11 @@ $(PERLEXESTATIC): $(PERLSTATICLIB) $(CONFIGPM) $(PERLEXEST_OBJ) $(PERLEXE_RES)
 # DynaLoader.pm, so this will have to do
 
 #most of deps of this target are in DYNALOADER and therefore omitted here
-Extensions : $(PERLDEP) $(DYNALOADER) $(GLOBEXE) $(UNIDATAFILES)
-	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --dynamic
+Extensions : $(PERLDEP) $(DYNALOADER) $(GLOBEXE)
+	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --dynamic !Unicode/Normalize
+
+Extensions_normalize : $(PERLDEP) $(DYNALOADER) $(GLOBEXE) $(UNIDATAFILES)
+	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --dynamic +Unicode/Normalize
 
 Extensions_reonly : $(PERLDEP) $(DYNALOADER)
 	$(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --dynamic +re
@@ -1484,9 +1487,9 @@ Extensions_realclean :
 # be running in parallel like UNIDATAFILES, this target a placeholder for the
 # future
 .IF "$(BUILD_STATIC)"=="define"
-rebasePE : Extensions $(PERLDLL) $(PERLEXE) $(GLOBEXE) $(PERLEXESTATIC)
+rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE) $(GLOBEXE) $(PERLEXESTATIC)
 .ELSE
-rebasePE : Extensions $(PERLDLL) $(PERLEXE) $(GLOBEXE)
+rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE) $(GLOBEXE)
 .ENDIF
 	$(NOOP)
 
