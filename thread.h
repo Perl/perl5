@@ -208,10 +208,18 @@
     } STMT_END
 #  endif
 
+#  ifdef PERL_TSA_ACTIVE
+#    define perl_pthread_mutex_lock(m) perl_tsa_mutex_lock(m)
+#    define perl_pthread_mutex_unlock(m) perl_tsa_mutex_unlock(m)
+#  else
+#    define perl_pthread_mutex_lock(m) pthread_mutex_lock(m)
+#    define perl_pthread_mutex_unlock(m) pthread_mutex_unlock(m)
+#  endif
+
 #  define MUTEX_LOCK(m) \
     STMT_START {						\
 	int _eC_;						\
-	if ((_eC_ = pthread_mutex_lock((m))))			\
+	if ((_eC_ = perl_pthread_mutex_lock((m))))			\
 	    Perl_croak_nocontext("panic: MUTEX_LOCK (%d) [%s:%d]",	\
 				 _eC_, __FILE__, __LINE__);	\
     } STMT_END
@@ -219,7 +227,7 @@
 #  define MUTEX_UNLOCK(m) \
     STMT_START {						\
 	int _eC_;						\
-	if ((_eC_ = pthread_mutex_unlock((m))))			\
+	if ((_eC_ = perl_pthread_mutex_unlock((m))))			\
 	    Perl_croak_nocontext("panic: MUTEX_UNLOCK (%d) [%s:%d]",	\
 				 _eC_, __FILE__, __LINE__);	\
     } STMT_END
