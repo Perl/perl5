@@ -808,8 +808,12 @@ PerlIO *
 Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 {
     IO * const io = GvIOp(gv);
+    SV *const old_out_name = PL_inplace ? newSVsv(GvSV(gv)) : NULL;
 
     PERL_ARGS_ASSERT_NEXTARGV;
+
+    if (old_out_name)
+        SAVEFREESV(old_out_name);
 
     if (!PL_argvoutgv)
 	PL_argvoutgv = gv_fetchpvs("ARGVOUT", GV_ADD|GV_NOTQUAL, SVt_PVIO);
@@ -852,6 +856,13 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
             }
         }
         else {
+            {
+                IO * const io = GvIOp(PL_argvoutgv);
+                if (io && IoIFP(io) && old_out_name && !io_close(io, PL_argvoutgv, FALSE, FALSE)) {
+                    Perl_croak(aTHX_ "Failed to close in-place edit file %"SVf": %s\n",
+                               old_out_name, Strerror(errno));
+                }
+            }
             /* This very long block ends with return IoIFP(GvIOp(gv));
                Both this block and the block above fall through on open
                failure to the warning code, and then the while loop above tries
@@ -1015,7 +1026,17 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
     if (io && (IoFLAGS(io) & IOf_ARGV))
 	IoFLAGS(io) |= IOf_START;
     if (PL_inplace) {
-	(void)do_close(PL_argvoutgv,FALSE);
+        if (old_out_name) {
+            IO * const io = GvIOp(PL_argvoutgv);
+            if (io && IoIFP(io) && !io_close(io, PL_argvoutgv, FALSE, FALSE)) {
+                Perl_croak(aTHX_ "Failed to close in-place edit file %"SVf": %s\n",
+                           old_out_name, Strerror(errno));
+            }
+        }
+        else {
+            /* maybe this is no longer wanted */
+            (void)do_close(PL_argvoutgv,FALSE);
+        }
 	if (io && (IoFLAGS(io) & IOf_ARGV)
 	    && PL_argvout_stack && AvFILLp(PL_argvout_stack) >= 0)
 	{

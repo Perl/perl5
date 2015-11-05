@@ -2220,6 +2220,11 @@ Check the #! line, or manually feed your script into Perl yourself.
 CHECK, INIT, or END subroutine.  Processing of the remainder of the
 queue of such routines has been prematurely ended.
 
+=item Failed to close in-place edit file %s: %s
+
+(F) Closing an output file from in-place editing, as with the C<-i>
+command-line switch, failed.
+
 =item False [] range "%s" in regex; marked by S<<-- HERE> in m/%s/
 
 (W regexp)(F) A character class range must start and end at a literal
