@@ -2568,6 +2568,86 @@ Perl_magic_setlvref(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
+static void
+S_set_dollarzero(pTHX_ SV *sv)
+    PERL_TSA_REQUIRES(PL_dollarzero_mutex)
+{
+#ifdef USE_ITHREADS
+    dVAR;
+#endif
+    const char *s;
+    STRLEN len;
+    I32 i;
+#ifdef HAS_SETPROCTITLE
+    /* The BSDs don't show the argv[] in ps(1) output, they
+     * show a string from the process struct and provide
+     * the setproctitle() routine to manipulate that. */
+    if (PL_origalen != 1) {
+        s = SvPV_const(sv, len);
+#   if __FreeBSD_version > 410001
+        /* The leading "-" removes the "perl: " prefix,
+         * but not the "(perl) suffix from the ps(1)
+         * output, because that's what ps(1) shows if the
+         * argv[] is modified. */
+        setproctitle("-%s", s);
+#   else	/* old FreeBSDs, NetBSD, OpenBSD, anyBSD */
+        /* This doesn't really work if you assume that
+         * $0 = 'foobar'; will wipe out 'perl' from the $0
+         * because in ps(1) output the result will be like
+         * sprintf("perl: %s (perl)", s)
+         * I guess this is a security feature:
+         * one (a user process) cannot get rid of the original name.
+         * --jhi */
+        setproctitle("%s", s);
+#   endif
+    }
+#elif defined(__hpux) && defined(PSTAT_SETCMD)
+    if (PL_origalen != 1) {
+        union pstun un;
+        s = SvPV_const(sv, len);
+        un.pst_command = (char *)s;
+        pstat(PSTAT_SETCMD, un, len, 0, 0);
+    }
+#else
+    if (PL_origalen > 1) {
+        /* PL_origalen is set in perl_parse(). */
+        s = SvPV_force(sv,len);
+        if (len >= (STRLEN)PL_origalen-1) {
+            /* Longer than original, will be truncated. We assume that
+             * PL_origalen bytes are available. */
+            Copy(s, PL_origargv[0], PL_origalen-1, char);
+        }
+        else {
+            /* Shorter than original, will be padded. */
+#ifdef PERL_DARWIN
+            /* Special case for Mac OS X: see [perl #38868] */
+            const int pad = 0;
+#else
+            /* Is the space counterintuitive?  Yes.
+             * (You were expecting \0?)
+             * Does it work?  Seems to.  (In Linux 2.4.20 at least.)
+             * --jhi */
+            const int pad = ' ';
+#endif
+            Copy(s, PL_origargv[0], len, char);
+            PL_origargv[0][len] = 0;
+            memset(PL_origargv[0] + len + 1,
+                   pad,  PL_origalen - len - 1);
+        }
+        PL_origargv[0][PL_origalen-1] = 0;
+        for (i = 1; i < PL_origargc; i++)
+            PL_origargv[i] = 0;
+#ifdef HAS_PRCTL_SET_NAME
+        /* Set the legacy process name in addition to the POSIX name on Linux */
+        if (prctl(PR_SET_NAME, (unsigned long)s, 0, 0, 0) != 0) {
+            /* diag_listed_as: SKIPME */
+            Perl_croak(aTHX_ "Can't set $0 with prctl(): %s", Strerror(errno));
+        }
+#endif
+    }
+#endif
+}
+
 int
 Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 {
@@ -3123,74 +3203,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '0':
 	LOCK_DOLLARZERO_MUTEX;
-#ifdef HAS_SETPROCTITLE
-	/* The BSDs don't show the argv[] in ps(1) output, they
-	 * show a string from the process struct and provide
-	 * the setproctitle() routine to manipulate that. */
-	if (PL_origalen != 1) {
-	    s = SvPV_const(sv, len);
-#   if __FreeBSD_version > 410001
-	    /* The leading "-" removes the "perl: " prefix,
-	     * but not the "(perl) suffix from the ps(1)
-	     * output, because that's what ps(1) shows if the
-	     * argv[] is modified. */
-	    setproctitle("-%s", s);
-#   else	/* old FreeBSDs, NetBSD, OpenBSD, anyBSD */
-	    /* This doesn't really work if you assume that
-	     * $0 = 'foobar'; will wipe out 'perl' from the $0
-	     * because in ps(1) output the result will be like
-	     * sprintf("perl: %s (perl)", s)
-	     * I guess this is a security feature:
-	     * one (a user process) cannot get rid of the original name.
-	     * --jhi */
-	    setproctitle("%s", s);
-#   endif
-	}
-#elif defined(__hpux) && defined(PSTAT_SETCMD)
-	if (PL_origalen != 1) {
-	     union pstun un;
-	     s = SvPV_const(sv, len);
-	     un.pst_command = (char *)s;
-	     pstat(PSTAT_SETCMD, un, len, 0, 0);
-	}
-#else
-	if (PL_origalen > 1) {
-	    /* PL_origalen is set in perl_parse(). */
-	    s = SvPV_force(sv,len);
-	    if (len >= (STRLEN)PL_origalen-1) {
-		/* Longer than original, will be truncated. We assume that
-		 * PL_origalen bytes are available. */
-		Copy(s, PL_origargv[0], PL_origalen-1, char);
-	    }
-	    else {
-		/* Shorter than original, will be padded. */
-#ifdef PERL_DARWIN
-		/* Special case for Mac OS X: see [perl #38868] */
-		const int pad = 0;
-#else
-		/* Is the space counterintuitive?  Yes.
-		 * (You were expecting \0?)
-		 * Does it work?  Seems to.  (In Linux 2.4.20 at least.)
-		 * --jhi */
-		const int pad = ' ';
-#endif
-		Copy(s, PL_origargv[0], len, char);
-		PL_origargv[0][len] = 0;
-		memset(PL_origargv[0] + len + 1,
-		       pad,  PL_origalen - len - 1);
-	    }
-	    PL_origargv[0][PL_origalen-1] = 0;
-	    for (i = 1; i < PL_origargc; i++)
-		PL_origargv[i] = 0;
-#ifdef HAS_PRCTL_SET_NAME
-	    /* Set the legacy process name in addition to the POSIX name on Linux */
-	    if (prctl(PR_SET_NAME, (unsigned long)s, 0, 0, 0) != 0) {
-		/* diag_listed_as: SKIPME */
-		Perl_croak(aTHX_ "Can't set $0 with prctl(): %s", Strerror(errno));
-	    }
-#endif
-	}
-#endif
+        S_set_dollarzero(aTHX_ sv);
 	UNLOCK_DOLLARZERO_MUTEX;
 	break;
     }
