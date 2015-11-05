@@ -2204,7 +2204,9 @@ PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 
 /* Must be called with PL_perlio_mutex locked. */
 static void
-S_more_refcounted_fds(pTHX_ const int new_fd) {
+S_more_refcounted_fds(pTHX_ const int new_fd)
+  PERL_TSA_REQUIRES(PL_perlio_mutex)
+{
     dVAR;
     const int old_max = PL_perlio_fd_refcnt_size;
     const int new_max = 16 + (new_fd & ~15);
