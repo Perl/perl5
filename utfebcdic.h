@@ -233,7 +233,6 @@ above what a 64 bit word can hold */
                 _generic_isCC(c, _CC_UTF8_START_BYTE_IS_FOR_AT_LEAST_SURROGATE)
 
 #define UTF_CONTINUATION_MARK		0xA0
-#define UTF_CONTINUATION_MASK		((U8)0x1f)
 #define UTF_ACCUMULATION_SHIFT		5
 
 /* ^? is defined to be APC on EBCDIC systems.  See the definition of toCTRL()

@@ -241,9 +241,6 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * real information */
 #define UTF_ACCUMULATION_SHIFT		6
 
-/* 2**UTF_ACCUMULATION_SHIFT - 1 */
-#define UTF_CONTINUATION_MASK		((U8)0x3f)
-
 #if UVSIZE >= 8
 #  define UTF8_QUAD_MAX UINT64_C(0x1000000000)
 
@@ -289,6 +286,9 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 #define isUTF8_POSSIBLY_PROBLEMATIC(c) ((U8) c >= 0xED)
 
 #endif /* EBCDIC vs ASCII */
+
+/* 2**UTF_ACCUMULATION_SHIFT - 1 */
+#define UTF_CONTINUATION_MASK  ((U8) ((1U << UTF_ACCUMULATION_SHIFT) - 1))
 
 /* The maximum number of UTF-8 bytes a single Unicode character can
  * uppercase/lowercase/fold into.  Unicode guarantees that the maximum
