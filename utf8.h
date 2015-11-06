@@ -265,6 +265,15 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #   define __BASE_UNI_SKIP(uv) (__COMMON_UNI_SKIP(uv) 7)
 #endif
 
+/* ^? is defined to be DEL on ASCII systems.  See the definition of toCTRL()
+ * for more */
+#define QUESTION_MARK_CTRL  DEL_NATIVE
+
+/* Surrogates, non-character code points and above-Unicode code points are
+ * problematic in some contexts.  This allows code that needs to check for
+ * those to to quickly exclude the vast majority of code points it will
+ * encounter */
+#define isUTF8_POSSIBLY_PROBLEMATIC(c) ((U8) c >= 0xED)
 #define OFFUNISKIP(uv) ( OFFUNI_IS_INVARIANT(uv) ? 1 : __BASE_UNI_SKIP(uv))
 /*
 
@@ -277,15 +286,6 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
  */
 #define UVCHR_SKIP(uv) ( UVCHR_IS_INVARIANT(uv) ? 1 : __BASE_UNI_SKIP(uv))
 
-/* ^? is defined to be DEL on ASCII systems.  See the definition of toCTRL()
- * for more */
-#define QUESTION_MARK_CTRL  DEL_NATIVE
-
-/* Surrogates, non-character code points and above-Unicode code points are
- * problematic in some contexts.  This allows code that needs to check for
- * those to to quickly exclude the vast majority of code points it will
- * encounter */
-#define isUTF8_POSSIBLY_PROBLEMATIC(c) ((U8) c >= 0xED)
 
 #endif /* EBCDIC vs ASCII */
 

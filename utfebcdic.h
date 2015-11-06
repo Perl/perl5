@@ -201,11 +201,6 @@ above what a 64 bit word can hold */
 		             (uv) < 0x4000000   ? 6 :                  \
 		             (uv) < 0x40000000  ? 7 : UTF8_MAXBYTES )
 
-/* Input is a true Unicode (not-native) code point */
-#define OFFUNISKIP(uv) ( OFFUNI_IS_INVARIANT(uv) ? 1 : __BASE_UNI_SKIP(uv))
-
-#define UVCHR_SKIP(uv) ( UVCHR_IS_INVARIANT(uv) ? 1 : _BASE_UNI_SKIP(uv))
-
 /* UTF-EBCDIC semantic macros - We used to transform back into I8 and then
  * compare, but now only have to do a single lookup by using a bit in
  * l1_char_class_tab.h.
