@@ -243,25 +243,29 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 #if UVSIZE >= 8
 #  define UTF8_QUAD_MAX UINT64_C(0x1000000000)
-
-/* Input is a true Unicode (not-native) code point */
-#define OFFUNISKIP(uv) ( (uv) < 0x80        ? 1 : \
-		      (uv) < 0x800          ? 2 : \
-		      (uv) < 0x10000        ? 3 : \
-		      (uv) < 0x200000       ? 4 : \
-		      (uv) < 0x4000000      ? 5 : \
-		      (uv) < 0x80000000     ? 6 : \
-                      (uv) < UTF8_QUAD_MAX ? 7 : UTF8_MAXBYTES )
-#else
-/* No, I'm not even going to *TRY* putting #ifdef inside a #define */
-#define OFFUNISKIP(uv) ( (uv) < 0x80        ? 1 : \
-		      (uv) < 0x800          ? 2 : \
-		      (uv) < 0x10000        ? 3 : \
-		      (uv) < 0x200000       ? 4 : \
-		      (uv) < 0x4000000      ? 5 : \
-		      (uv) < 0x80000000     ? 6 : 7 )
 #endif
 
+/* Input is a true Unicode (not-native) code point */
+#define __COMMON_UNI_SKIP(uv)                                               \
+		      (uv) < 0x800          ? 2 : \
+		      (uv) < 0x10000        ? 3 : \
+		      (uv) < 0x200000       ? 4 : \
+		      (uv) < 0x4000000      ? 5 : \
+		      (uv) < 0x80000000     ? 6 :
+
+/* Internal macro to be used only in this file.
+ * This adds to __COMMON_UNI_SKIP the details at this platform's upper range.
+ * For 64-bit ASCII platforms, we need one more test
+ * to see if just 7 bytes is needed, or if the maximum is needed.  For 32-bit
+ * ASCII platforms, everything is representable by 7 bytes */
+#ifdef UV_IS_QUAD
+#   define __BASE_UNI_SKIP(uv) (__COMMON_UNI_SKIP(uv)                       \
+     (uv) < UTF8_QUAD_MAX ? 7 : UTF8_MAXBYTES )
+#else
+#   define __BASE_UNI_SKIP(uv) (__COMMON_UNI_SKIP(uv) 7)
+#endif
+
+#define OFFUNISKIP(uv) ( OFFUNI_IS_INVARIANT(uv) ? 1 : __BASE_UNI_SKIP(uv))
 /*
 
 =for apidoc Am|STRLEN|UVCHR_SKIP|UV cp
