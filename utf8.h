@@ -266,8 +266,6 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * for more */
 #define QUESTION_MARK_CTRL  DEL_NATIVE
 
-#define MAX_UTF8_TWO_BYTE 0x7FF
-
 /*
 
 =for apidoc Am|STRLEN|UVCHR_SKIP|UV cp
@@ -289,6 +287,12 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 
 /* 2**UTF_ACCUMULATION_SHIFT - 1 */
 #define UTF_CONTINUATION_MASK  ((U8) ((1U << UTF_ACCUMULATION_SHIFT) - 1))
+
+/* 32 start bytes with UTF_ACCUMULATION_SHIFT bits of information each */
+#define MAX_UTF8_TWO_BYTE (32 * (1U << UTF_ACCUMULATION_SHIFT) - 1)
+
+/* constrained by EBCDIC which has 5 bits per continuation byte */
+#define MAX_PORTABLE_UTF8_TWO_BYTE (32 * (1U << 5) - 1)
 
 /* The maximum number of UTF-8 bytes a single Unicode character can
  * uppercase/lowercase/fold into.  Unicode guarantees that the maximum
@@ -419,8 +423,6 @@ only) byte is pointed to by C<s>.
 /* Like the above, but its name implies a non-UTF8 input, which as the comments
  * above show, doesn't matter as to its implementation */
 #define NATIVE_BYTE_IS_INVARIANT(c)	UVCHR_IS_INVARIANT(c)
-
-#define MAX_PORTABLE_UTF8_TWO_BYTE 0x3FF    /* constrained by EBCDIC */
 
 /* The macros in the next 4 sets are used to generate the two utf8 or utfebcdic
  * bytes from an ordinal that is known to fit into exactly two (not one) bytes;

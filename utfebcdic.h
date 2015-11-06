@@ -239,8 +239,6 @@ above what a 64 bit word can hold */
  * for more */
 #define QUESTION_MARK_CTRL   LATIN1_TO_NATIVE(0x9F)
 
-#define MAX_UTF8_TWO_BYTE 0x3FF
-
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */
