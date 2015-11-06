@@ -8,28 +8,42 @@ package IO::Socket::INET;
 
 use strict;
 our(@ISA, $VERSION);
-use IO::Socket;
-use Socket;
-use Carp;
-use Exporter;
-use Errno;
+use IO::Socket  ();
+use Socket      ();
+use Exporter    ();
+use Errno       ();
+BEGIN { sub croak($) { require Carp; Carp::croak(@_) } }
 
 @ISA = qw(IO::Socket);
 $VERSION = "1.35";
 
 my $EINVAL = exists(&Errno::EINVAL) ? Errno::EINVAL() : 1;
 
-IO::Socket::INET->register_domain( AF_INET );
+IO::Socket::INET->register_domain( &Socket::AF_INET );
 
-my %socket_type = ( tcp  => SOCK_STREAM,
-		    udp  => SOCK_DGRAM,
-		    icmp => SOCK_RAW
-		  );
+my %socket_type = ( tcp  => &Socket::SOCK_STREAM,
+                   udp  => &Socket::SOCK_DGRAM,
+                   icmp => &Socket::SOCK_RAW
+                  );
 my %proto_number;
 $proto_number{tcp}  = Socket::IPPROTO_TCP()  if defined &Socket::IPPROTO_TCP;
 $proto_number{udp}  = Socket::IPPROTO_UDP()  if defined &Socket::IPPROTO_UDP;
 $proto_number{icmp} = Socket::IPPROTO_ICMP() if defined &Socket::IPPROTO_ICMP;
 my %proto_name = reverse %proto_number;
+
+#
+# For compatibilty, if we ask to import this module we need to give them
+# all the Socket symbols that are no longer imported in order to reduce memory usage
+#
+sub import {
+    my $pkg = shift;
+    if (@_ && $_[0] eq 'sockatmark') { # not very extensible but for now, fast
+        Exporter::export_to_level('IO::Socket', 1, $pkg, 'sockatmark');
+    } else {
+        my $callpkg = caller;
+        Exporter::export 'Socket', $callpkg, @_;
+    }
+}
 
 sub new {
     my $class = shift;
@@ -128,7 +142,7 @@ sub _get_addr {
     if ($multi && $addr_str !~ /^\d+(?:\.\d+){3}$/) {
 	(undef, undef, undef, undef, @addr) = gethostbyname($addr_str);
     } else {
-	my $h = inet_aton($addr_str);
+	my $h = Socket::inet_aton($addr_str);
 	push(@addr, $h) if defined $h;
     }
     @addr;
@@ -147,8 +161,8 @@ sub configure {
 					$arg->{Proto})
 			or return _error($sock, $!, $@);
 
-    $laddr = defined $laddr ? inet_aton($laddr)
-			    : INADDR_ANY;
+    $laddr = defined $laddr ? Socket::inet_aton($laddr)
+			    : Socket::INADDR_ANY();
 
     return _error($sock, $EINVAL, "Bad hostname '",$arg->{LocalAddr},"'")
 	unless(defined $laddr);
@@ -177,7 +191,7 @@ sub configure {
 
     while(1) {
 
-	$sock->socket(AF_INET, $type, $proto) or
+	$sock->socket(&Socket::AF_INET, $type, $proto) or
 	    return _error($sock, $!, "$!");
 
         if (defined $arg->{Blocking}) {
@@ -186,21 +200,21 @@ sub configure {
 	}
 
 	if ($arg->{Reuse} || $arg->{ReuseAddr}) {
-	    $sock->sockopt(SO_REUSEADDR,1) or
+	    $sock->sockopt(&Socket::SO_REUSEADDR,1) or
 		    return _error($sock, $!, "$!");
 	}
 
 	if ($arg->{ReusePort}) {
-	    $sock->sockopt(SO_REUSEPORT,1) or
+	    $sock->sockopt(&Socket::SO_REUSEPORT,1) or
 		    return _error($sock, $!, "$!");
 	}
 
 	if ($arg->{Broadcast}) {
-		$sock->sockopt(SO_BROADCAST,1) or
+		$sock->sockopt(&Socket::SO_BROADCAST,1) or
 		    return _error($sock, $!, "$!");
 	}
 
-	if($lport || ($laddr ne INADDR_ANY) || exists $arg->{Listen}) {
+	if($lport || ($laddr ne Socket::INADDR_ANY()) || exists $arg->{Listen}) {
 	    $sock->bind($lport || 0, $laddr) or
 		    return _error($sock, $!, "$!");
 	}
@@ -217,10 +231,10 @@ sub configure {
         $raddr = shift @raddr;
 
 	return _error($sock, $EINVAL, 'Cannot determine remote port')
-		unless($rport || $type == SOCK_DGRAM || $type == SOCK_RAW);
+		unless($rport || $type == &Socket::SOCK_DGRAM || $type == &Socket::SOCK_RAW);
 
 	last
-	    unless($type == SOCK_STREAM || defined $raddr);
+	    unless($type == &Socket::SOCK_STREAM || defined $raddr);
 
 	return _error($sock, $EINVAL, "Bad hostname '",$arg->{PeerAddr},"'")
 	    unless defined $raddr;
@@ -229,7 +243,7 @@ sub configure {
 #        my $before = time() if $timeout;
 
 	undef $@;
-        if ($sock->connect(pack_sockaddr_in($rport, $raddr))) {
+        if ($sock->connect(Socket::pack_sockaddr_in($rport, $raddr))) {
 #            ${*$sock}{'io_socket_timeout'} = $timeout;
             return $sock;
         }
@@ -254,56 +268,56 @@ sub connect {
     @_ == 2 || @_ == 3 or
        croak 'usage: $sock->connect(NAME) or $sock->connect(PORT, ADDR)';
     my $sock = shift;
-    return $sock->SUPER::connect(@_ == 1 ? shift : pack_sockaddr_in(@_));
+    return $sock->SUPER::connect(@_ == 1 ? shift : Socket::pack_sockaddr_in(@_));
 }
 
 sub bind {
     @_ == 2 || @_ == 3 or
        croak 'usage: $sock->bind(NAME) or $sock->bind(PORT, ADDR)';
     my $sock = shift;
-    return $sock->SUPER::bind(@_ == 1 ? shift : pack_sockaddr_in(@_))
+    return $sock->SUPER::bind(@_ == 1 ? shift : Socket::pack_sockaddr_in(@_))
 }
 
 sub sockaddr {
     @_ == 1 or croak 'usage: $sock->sockaddr()';
     my($sock) = @_;
     my $name = $sock->sockname;
-    $name ? (sockaddr_in($name))[1] : undef;
+    $name ? (Socket::sockaddr_in($name))[1] : undef;
 }
 
 sub sockport {
     @_ == 1 or croak 'usage: $sock->sockport()';
     my($sock) = @_;
     my $name = $sock->sockname;
-    $name ? (sockaddr_in($name))[0] : undef;
+    $name ? (Socket::sockaddr_in($name))[0] : undef;
 }
 
 sub sockhost {
     @_ == 1 or croak 'usage: $sock->sockhost()';
     my($sock) = @_;
     my $addr = $sock->sockaddr;
-    $addr ? inet_ntoa($addr) : undef;
+    $addr ? Socket::inet_ntoa($addr) : undef;
 }
 
 sub peeraddr {
     @_ == 1 or croak 'usage: $sock->peeraddr()';
     my($sock) = @_;
     my $name = $sock->peername;
-    $name ? (sockaddr_in($name))[1] : undef;
+    $name ? (Socket::sockaddr_in($name))[1] : undef;
 }
 
 sub peerport {
     @_ == 1 or croak 'usage: $sock->peerport()';
     my($sock) = @_;
     my $name = $sock->peername;
-    $name ? (sockaddr_in($name))[0] : undef;
+    $name ? (Socket::sockaddr_in($name))[0] : undef;
 }
 
 sub peerhost {
     @_ == 1 or croak 'usage: $sock->peerhost()';
     my($sock) = @_;
     my $addr = $sock->peeraddr;
-    $addr ? inet_ntoa($addr) : undef;
+    $addr ? Socket::inet_ntoa($addr) : undef;
 }
 
 1;

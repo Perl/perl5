@@ -35,8 +35,8 @@ that was selected when it was created.
 =cut
 
 require 5.000;
-use Carp;
 use Symbol;
+BEGIN { sub croak($) { require Carp; Carp::croak(@_) } }
 
 sub new {
     @_ >= 1 && @_ <= 2 or croak 'usage: SelectSaver->new( [FILEHANDLE] )';

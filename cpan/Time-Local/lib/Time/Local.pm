@@ -2,7 +2,6 @@ package Time::Local;
 
 use strict;
 
-use Carp ();
 use Exporter;
 
 our $VERSION = '1.25';
@@ -113,7 +112,7 @@ sub timegm {
     }
 
     unless ( $Options{no_range_check} ) {
-        Carp::croak("Month '$month' out of range 0..11")
+        _croak("Month '$month' out of range 0..11")
             if $month > 11
             or $month < 0;
 
@@ -121,13 +120,13 @@ sub timegm {
         ++$md
             if $month == 1 && _is_leap_year( $year + 1900 );
 
-        Carp::croak("Day '$mday' out of range 1..$md")
+        _croak("Day '$mday' out of range 1..$md")
             if $mday > $md or $mday < 1;
-        Carp::croak("Hour '$hour' out of range 0..23")
+        _croak("Hour '$hour' out of range 0..23")
             if $hour > 23 or $hour < 0;
-        Carp::croak("Minute '$min' out of range 0..59")
+        _croak("Minute '$min' out of range 0..59")
             if $min > 59 or $min < 0;
-        Carp::croak("Second '$sec' out of range 0..59")
+        _croak("Second '$sec' out of range 0..59")
             if $sec >= 60 or $sec < 0;
     }
 
@@ -141,7 +140,7 @@ sub timegm {
         $msg
             .= "Cannot handle date ($sec, $min, $hour, $mday, $month, $year)";
 
-        Carp::croak($msg);
+        _croak($msg);
     }
 
     return
@@ -204,6 +203,11 @@ sub timelocal {
 sub timelocal_nocheck {
     local $Options{no_range_check} = 1;
     return &timelocal;
+}
+
+sub _croak {
+    require Carp;
+    return Carp::croak(@_);
 }
 
 1;

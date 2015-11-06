@@ -9,7 +9,7 @@ package IO::Dir;
 use 5.006;
 
 use strict;
-use Carp;
+BEGIN { sub croak($) { require Carp; Carp::croak(@_) } }
 use Symbol;
 use Exporter;
 use IO::File;

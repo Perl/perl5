@@ -11,8 +11,8 @@ use 5.006_001;
 use IO::Handle;
 use strict;
 our($VERSION);
-use Carp;
 use Symbol;
+BEGIN { sub croak($) { require Carp; Carp::croak(@_) } }
 
 $VERSION = "1.15";
 

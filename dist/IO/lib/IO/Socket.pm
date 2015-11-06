@@ -9,14 +9,15 @@ package IO::Socket;
 
 require 5.006;
 
-use IO::Handle;
-use Socket 1.3;
-use Carp;
+use IO::Handle ();
+use Socket 1.3    ();
 use strict;
-our(@ISA, $VERSION, @EXPORT_OK);
-use Exporter;
-use Errno;
 
+our(@ISA, $VERSION, @EXPORT_OK);
+
+use Exporter   ();  # not a require because we want it to happen before INIT
+use Errno      ();
+BEGIN { sub croak($) { require Carp; Carp::croak(@_) } }
 # legacy
 
 require IO::Socket::INET;
@@ -33,7 +34,12 @@ sub import {
     if (@_ && $_[0] eq 'sockatmark') { # not very extensible but for now, fast
 	Exporter::export_to_level('IO::Socket', 1, $pkg, 'sockatmark');
     } else {
-	my $callpkg = caller;
+
+#
+# For compatibilty, if we ask to import this module we need to give them
+# all the IO::Handle and Socket symbols that are no longer imported in order to reduce memory usage
+#
+    my $callpkg = caller;
 	Exporter::export 'Socket', $callpkg, @_;
     }
 }
@@ -127,7 +133,7 @@ sub connect {
 		# Using the exception
 		# set we now emulate the behavior in Linux
 		#    - Karthik Rajagopalan
-		$err = $sock->getsockopt(SOL_SOCKET,SO_ERROR);
+		$err = $sock->getsockopt(&Socket::SOL_SOCKET, &Socket::SO_ERROR);
 		$@ = "connect: $err";
 	    }
 	    elsif(!@$w[0]) {
@@ -158,7 +164,6 @@ sub connect {
 
     $err ? undef : $sock;
 }
-
 # Enable/disable blocking IO on sockets.
 # Without args return the current status of blocking,
 # with args change the mode as appropriate, returning the
@@ -329,8 +334,8 @@ sub getsockopt {
 
 sub sockopt {
     my $sock = shift;
-    @_ == 1 ? $sock->getsockopt(SOL_SOCKET,@_)
-	    : $sock->setsockopt(SOL_SOCKET,@_);
+    @_ == 1 ? $sock->getsockopt(&Socket::SOL_SOCKET,@_)
+	    : $sock->setsockopt(&Socket::SOL_SOCKET,@_);
 }
 
 sub atmark {
@@ -355,7 +360,7 @@ sub sockdomain {
     my $sock = shift;
     if (!defined(${*$sock}{'io_socket_domain'})) {
 	my $addr = $sock->sockname();
-	${*$sock}{'io_socket_domain'} = sockaddr_family($addr)
+	${*$sock}{'io_socket_domain'} = Socket::sockaddr_family($addr)
 	    if (defined($addr));
     }
     ${*$sock}{'io_socket_domain'};

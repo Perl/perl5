@@ -14,8 +14,6 @@ use strict;
 use warnings;
 use base qw( IO::Socket );
 
-use Carp;
-
 use Socket 1.97 qw(
    getaddrinfo getnameinfo
    sockaddr_family
@@ -37,6 +35,8 @@ use constant HAVE_MSWIN32 => ( $^O eq "MSWin32" );
 
 # At least one OS (Android) is known not to have getprotobyname()
 use constant HAVE_GETPROTOBYNAME => defined eval { getprotobyname( "tcp" ) };
+
+sub croak($) { require Carp; Carp::croak(@_) }
 
 my $IPv6_re = do {
    # translation of RFC 3986 3.2.2 ABNF to re
@@ -955,7 +955,7 @@ sub socket :method
 # Versions of IO::Socket before 1.35 may leave socktype undef if from, say, an
 #   ->fdopen call. In this case we'll apply a fix
 BEGIN {
-   if( eval($IO::Socket::VERSION) < 1.35 ) {
+    if( eval($IO::Socket::VERSION) < 1.35 ) {
       *socktype = sub {
          my $self = shift;
          my $type = $self->SUPER::socktype;
