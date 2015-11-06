@@ -1,9 +1,7 @@
-
 package Compress::Raw::Zlib;
 
 require 5.006 ;
 require Exporter;
-use Carp ;
 
 use strict ;
 use warnings ;
@@ -109,7 +107,7 @@ sub AUTOLOAD {
     my($constname);
     ($constname = $AUTOLOAD) =~ s/.*:://;
     my ($error, $val) = constant($constname);
-    Carp::croak $error if $error;
+    _croak($error) if $error;
     no strict 'refs';
     *{$AUTOLOAD} = sub { $val };
     goto &{$AUTOLOAD};
@@ -149,7 +147,10 @@ use constant OFF_FIXED      => 3 ;
 use constant OFF_FIRST_ONLY => 4 ;
 use constant OFF_STICKY     => 5 ;
 
-
+sub _croak {
+  require Carp;
+  goto \&Carp::croak;
+}
 
 sub ParseParameters
 {
@@ -159,7 +160,7 @@ sub ParseParameters
     #local $Carp::CarpLevel = 1 ;
     my $p = new Compress::Raw::Zlib::Parameters() ;
     $p->parse(@_)
-        or croak "$sub: $p->{Error}" ;
+        or _croak("$sub: $p->{Error}");
 
     return $p;
 }
@@ -234,7 +235,7 @@ sub Compress::Raw::Zlib::Parameters::parse
 
     while (my ($key, $v) = each %$default)
     {
-        croak "need 4 params [@$v]"
+        _croak("need 4 params [@$v]")
             if @$v != 4 ;
 
         my ($first_only, $sticky, $type, $value) = @$v ;
@@ -394,8 +395,8 @@ sub Compress::Raw::Zlib::Deflate::new
     my $pkg = shift ;
     my ($got) = ParseParameters(0, $OPTIONS_deflate, @_);
 
-    croak "Compress::Raw::Zlib::Deflate::new: Bufsize must be >= 1, you specified " . 
-            $got->value('Bufsize')
+    _croak("Compress::Raw::Zlib::Deflate::new: Bufsize must be >= 1, you specified " . 
+            $got->value('Bufsize'))
         unless $got->value('Bufsize') >= 1;
 
     my $flags = 0 ;
@@ -421,13 +422,13 @@ sub Compress::Raw::Zlib::Deflate::new
 sub Compress::Raw::Zlib::deflateStream::STORABLE_freeze
 {
     my $type = ref shift;
-    croak "Cannot freeze $type object\n";
+    _croak("Cannot freeze $type object\n");
 }
 
 sub Compress::Raw::Zlib::deflateStream::STORABLE_thaw
 {
     my $type = ref shift;
-    croak "Cannot thaw $type object\n";
+    _croak("Cannot thaw $type object\n");
 }
 
 
@@ -449,8 +450,8 @@ sub Compress::Raw::Zlib::Inflate::new
     my $pkg = shift ;
     my ($got) = ParseParameters(0, $OPTIONS_inflate, @_);
 
-    croak "Compress::Raw::Zlib::Inflate::new: Bufsize must be >= 1, you specified " . 
-            $got->value('Bufsize')
+    _croak("Compress::Raw::Zlib::Inflate::new: Bufsize must be >= 1, you specified " . 
+            $got->value('Bufsize'))
         unless $got->value('Bufsize') >= 1;
 
     my $flags = 0 ;
@@ -472,13 +473,13 @@ sub Compress::Raw::Zlib::Inflate::new
 sub Compress::Raw::Zlib::inflateStream::STORABLE_freeze
 {
     my $type = ref shift;
-    croak "Cannot freeze $type object\n";
+    _croak("Cannot freeze $type object\n");
 }
 
 sub Compress::Raw::Zlib::inflateStream::STORABLE_thaw
 {
     my $type = ref shift;
-    croak "Cannot thaw $type object\n";
+    _croak("Cannot thaw $type object\n");
 }
 
 sub Compress::Raw::Zlib::InflateScan::new
@@ -495,8 +496,8 @@ sub Compress::Raw::Zlib::InflateScan::new
             }, @_) ;
 
 
-    croak "Compress::Raw::Zlib::InflateScan::new: Bufsize must be >= 1, you specified " . 
-            $got->value('Bufsize')
+    _croak("Compress::Raw::Zlib::InflateScan::new: Bufsize must be >= 1, you specified " . 
+            $got->value('Bufsize'))
         unless $got->value('Bufsize') >= 1;
 
     my $flags = 0 ;
@@ -526,8 +527,8 @@ sub Compress::Raw::Zlib::inflateScanStream::createDeflateStream
                 'Strategy'      => [1, 1, Parse_unsigned, Z_DEFAULT_STRATEGY()],
             }, @_) ;
 
-    croak "Compress::Raw::Zlib::InflateScan::createDeflateStream: Bufsize must be >= 1, you specified " . 
-            $got->value('Bufsize')
+    _croak("Compress::Raw::Zlib::InflateScan::createDeflateStream: Bufsize must be >= 1, you specified " . 
+            $got->value('Bufsize'))
         unless $got->value('Bufsize') >= 1;
 
     my $flags = 0 ;
@@ -573,12 +574,12 @@ sub Compress::Raw::Zlib::deflateStream::deflateParams
                 }, 
                 @_) ;
 
-    croak "Compress::Raw::Zlib::deflateParams needs Level and/or Strategy"
+    _croak("Compress::Raw::Zlib::deflateParams needs Level and/or Strategy")
         unless $got->parsed('Level') + $got->parsed('Strategy') +
             $got->parsed('Bufsize');
 
-    croak "Compress::Raw::Zlib::Inflate::deflateParams: Bufsize must be >= 1, you specified " . 
-            $got->value('Bufsize')
+    _croak("Compress::Raw::Zlib::Inflate::deflateParams: Bufsize must be >= 1, you specified " . 
+            $got->value('Bufsize'))
         if $got->parsed('Bufsize') && $got->value('Bufsize') <= 1;
 
     my $flags = 0;

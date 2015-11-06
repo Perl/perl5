@@ -127,7 +127,6 @@ Derived from FileHandle.pm by Graham Barr E<lt>F<gbarr@pobox.com>E<gt>.
 use 5.006_001;
 use strict;
 our($VERSION, @EXPORT, @EXPORT_OK, @ISA);
-use Carp;
 use Symbol;
 use SelectSaver;
 use IO::Seekable;
@@ -151,6 +150,7 @@ eval {
 ################################################
 ## Constructor
 ##
+BEGIN { sub croak($) { require Carp; Carp::croak(@_) } }
 
 sub new {
     my $type = shift;

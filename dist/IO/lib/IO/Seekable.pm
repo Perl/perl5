@@ -95,7 +95,7 @@ Derived from FileHandle.pm by Graham Barr E<lt>gbarr@pobox.comE<gt>
 =cut
 
 use 5.006_001;
-use Carp;
+BEGIN { sub croak($) { require Carp; Carp::croak(@_) } }
 use strict;
 our($VERSION, @EXPORT, @ISA);
 use IO::Handle ();

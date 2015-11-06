@@ -3,7 +3,6 @@
 package IO;
 
 use XSLoader ();
-use Carp;
 use strict;
 use warnings;
 
@@ -21,7 +20,7 @@ sub import {
     local @INC = @INC;
     pop @INC if $INC[-1] eq '.';
     eval join("", map { "require IO::" . (/(\w+)/)[0] . ";\n" } @l)
-	or croak $@;
+        or do { require Carp; Carp::croak($@) };
 }
 
 1;
