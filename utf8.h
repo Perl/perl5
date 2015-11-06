@@ -245,13 +245,33 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #  define UTF8_QUAD_MAX UINT64_C(0x1000000000)
 #endif
 
-/* Input is a true Unicode (not-native) code point */
+/* Internal macro to be used only in this file to aid in constructing other
+ * publicly accessible macros.
+ * The number of bytes required to express this uv in UTF-8, for just those
+ * uv's requiring 2 through 6 bytes, as these are common to all platforms and
+ * word sizes.  The number of bytes needed is given by the number of leading 1
+ * bits in the start byte.  There are 32 start bytes that have 2 initial 1 bits
+ * (C0-DF); there are 16 that have 3 initial 1 bits (E0-EF); 8 that have 4
+ * initial 1 bits (F0-F8); 4 that have 5 initial 1 bits (F9-FB), and 2 that
+ * have 6 initial 1 bits (FC-FD).  The largest number a string of n bytes can
+ * represent is       (the number of possible start bytes for 'n')
+ *                  * (the number of possiblities for each start byte
+ * The latter in turn is
+ *                  2  ** (  (how many continuation bytes there are)
+ *                         * (the number of bits of information each
+ *                            continuation byte holds))
+ *
+ * If we were on a platform where we could use a fast find first set bit
+ * instruction (or count leading zeros instruction) this could be replaced by
+ * using that to find the log2 of the uv, and divide that by the number of bits
+ * of information in each continuation byte, adjusting for large cases and how
+ * much information is in a start byte for that length */
 #define __COMMON_UNI_SKIP(uv)                                               \
-		      (uv) < 0x800          ? 2 : \
-		      (uv) < 0x10000        ? 3 : \
-		      (uv) < 0x200000       ? 4 : \
-		      (uv) < 0x4000000      ? 5 : \
-		      (uv) < 0x80000000     ? 6 :
+          (UV) (uv) < (32 * (1U << (    UTF_ACCUMULATION_SHIFT))) ? 2 :     \
+          (UV) (uv) < (16 * (1U << (2 * UTF_ACCUMULATION_SHIFT))) ? 3 :     \
+          (UV) (uv) < ( 8 * (1U << (3 * UTF_ACCUMULATION_SHIFT))) ? 4 :     \
+          (UV) (uv) < ( 4 * (1U << (4 * UTF_ACCUMULATION_SHIFT))) ? 5 :     \
+          (UV) (uv) < ( 2 * (1U << (5 * UTF_ACCUMULATION_SHIFT))) ? 6 :
 
 /* Internal macro to be used only in this file.
  * This adds to __COMMON_UNI_SKIP the details at this platform's upper range.
@@ -260,7 +280,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * ASCII platforms, everything is representable by 7 bytes */
 #ifdef UV_IS_QUAD
 #   define __BASE_UNI_SKIP(uv) (__COMMON_UNI_SKIP(uv)                       \
-     (uv) < UTF8_QUAD_MAX ? 7 : UTF8_MAXBYTES )
+     (UV) (uv) < ((UV) 1U << (6 * UTF_ACCUMULATION_SHIFT)) ? 7 : UTF8_MAXBYTES)
 #else
 #   define __BASE_UNI_SKIP(uv) (__COMMON_UNI_SKIP(uv) 7)
 #endif
