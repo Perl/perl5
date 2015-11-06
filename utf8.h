@@ -275,7 +275,7 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 
 =cut
  */
-#define UVCHR_SKIP(uv) OFFUNISKIP(uv)
+#define UVCHR_SKIP(uv) ( UVCHR_IS_INVARIANT(uv) ? 1 : __BASE_UNI_SKIP(uv))
 
 /* ^? is defined to be DEL on ASCII systems.  See the definition of toCTRL()
  * for more */
