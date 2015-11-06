@@ -264,6 +264,7 @@ S_ithread_clear(pTHX_ ithread *thread)
  */
 STATIC void
 S_ithread_free(pTHX_ ithread *thread)
+  PERL_TSA_RELEASE(thread->mutex)
 {
 #ifdef WIN32
     HANDLE handle;
