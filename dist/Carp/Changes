@@ -1,4 +1,7 @@
 
+version 1.38; 2015-11-06
+  * stable release of changes since v1.36
+
 version 1.37_02; 2015-10-30
   * bugfix: remove unused parent.pm from prereqs
 

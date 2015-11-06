@@ -87,7 +87,7 @@ BEGIN {
     }
 }
 
-our $VERSION = '1.37_02';
+our $VERSION = '1.38';
 $VERSION =~ tr/_//d;
 
 our $MaxEvalLen = 0;
