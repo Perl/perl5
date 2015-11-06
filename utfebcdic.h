@@ -41,7 +41,11 @@
  *	PL_utf2e, with its inverse being PL_e2utf.  They are constructed so that
  *	all EBCDIC invariants remain invariant, but no others do, and the first
  *	byte of a variant will always have its upper bit set.  But note that
- *	the upper bit of some invariants is also 1.
+ *	the upper bit of some invariants is also 1.  The table also is designed
+ *	so that lexically comparing two UTF-EBCDIC-variant characters yields
+ *	the Unicode code point order.  (To get native code point order, one has
+ *	to convert the latin1-range characters to their native code point
+ *	value.)
  *
  *  For example, the ordinal value of 'A' is 193 in EBCDIC, and also is 193 in
  *  UTF-EBCDIC.  Step 1) converts it to 65, Step 2 leaves it at 65, and Step 3
@@ -184,6 +188,7 @@ information, so that with 13 continuation bytes, we can handle 65 bits, just
 above what a 64 bit word can hold */
 
 
+/* This is a fundamental property of UTF-EBCDIC */
 #define OFFUNI_IS_INVARIANT(c) (((UV)(c)) <  0xA0)
 
 /* It turns out that on EBCDIC platforms, the invariants are the characters

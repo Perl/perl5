@@ -356,8 +356,9 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 #define NATIVE8_TO_UNI(ch)       NATIVE_TO_LATIN1(ch)
 
 /* This defines the 1-bits that are to be in the first byte of a multi-byte
- * UTF-8 encoded character that give the number of bytes that comprise the
- * character. 'len' is the number of bytes in the multi-byte sequence. */
+ * UTF-8 encoded character that mark it as a start byte and give the number of
+ * bytes that comprise the character. 'len' is the number of bytes in the
+ * multi-byte sequence. */
 #define UTF_START_MARK(len) (((len) >  7) ? 0xFF : (0xFF & (0xFE << (7-(len)))))
 
 /* Masks out the initial one bits in a start byte, leaving the real data ones.
@@ -509,11 +510,11 @@ only) byte is pointed to by C<s>.
  * beginning of a utf8 character.  Now that foo_utf8() determines that itself,
  * no need to do it again here
  */
-#define isIDFIRST_lazy_if(p,UTF) ((IN_BYTES || !UTF ) \
-				 ? isIDFIRST(*(p)) \
+#define isIDFIRST_lazy_if(p,UTF) ((IN_BYTES || !UTF)                \
+				 ? isIDFIRST(*(p))                  \
 				 : isIDFIRST_utf8((const U8*)p))
-#define isWORDCHAR_lazy_if(p,UTF)   ((IN_BYTES || (!UTF )) \
-				 ? isWORDCHAR(*(p)) \
+#define isWORDCHAR_lazy_if(p,UTF)   ((IN_BYTES || (!UTF))           \
+				 ? isWORDCHAR(*(p))                 \
 				 : isWORDCHAR_utf8((const U8*)p))
 #define isALNUM_lazy_if(p,UTF)   isWORDCHAR_lazy_if(p,UTF)
 
