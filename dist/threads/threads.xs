@@ -499,7 +499,26 @@ S_ithread_run(void * arg)
 
     dMY_POOL;
 
-    /* Blocked until ->create() call finishes */
+    /* The following mutex lock + mutex unlock pair explained.
+     *
+     * parent:
+     * - calls ithread_create (and S_ithread_create), which:
+     *   - creates the new thread
+     *   - does MUTEX_LOCK(&thread->mutex)
+     *   - calls pthread_create(..., S_ithread_run,...)
+     * child:
+     * - starts the S_ithread_run (where we are now), which:
+     *   - tries to MUTEX_LOCK(&thread->mutex)
+     *   - blocks
+     * parent:
+     *   - continues doing more createy stuff
+     *   - does MUTEX_UNLOCK(&thread->mutex)
+     *   - continues
+     * child:
+     *   - finishes MUTEX_LOCK(&thread->mutex)
+     *   - does MUTEX_UNLOCK(&thread->mutex)
+     *   - continues
+     */
     MUTEX_LOCK(&thread->mutex);
     MUTEX_UNLOCK(&thread->mutex);
 
@@ -762,7 +781,7 @@ S_ithread_create(
 
     /* Block new thread until ->create() call finishes */
     MUTEX_INIT(&thread->mutex);
-    MUTEX_LOCK(&thread->mutex);
+    MUTEX_LOCK(&thread->mutex); /* See S_ithread_run() for more detail. */
 
     thread->tid = MY_POOL.tid_counter++;
     thread->stack_size = S_good_stack_size(aTHX_ stack_size);
@@ -1125,7 +1144,8 @@ ithread_create(...)
         ST(0) = sv_2mortal(S_ithread_to_SV(aTHX_ Nullsv, thread, classname, FALSE));
         MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 
-        /* Let thread run */
+        /* Let thread run. */
+        /* See S_ithread_run() for more detail. */
         MUTEX_UNLOCK(&thread->mutex);
 
         /* XSRETURN(1); - implied */
