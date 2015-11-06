@@ -136,8 +136,8 @@ END_EXTERN_C
 
 /* Native character to/from iso-8859-1.  Are the identity functions on ASCII
  * platforms */
-#define NATIVE_TO_LATIN1(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) (ch))
-#define LATIN1_TO_NATIVE(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) (ch))
+#define NATIVE_TO_LATIN1(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
+#define LATIN1_TO_NATIVE(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
 
 /* I8 is an intermediate version of UTF-8 used only in UTF-EBCDIC.  We thus
  * consider it to be identical to UTF-8 on ASCII platforms.  Strictly speaking
@@ -145,12 +145,12 @@ END_EXTERN_C
  * because they are 8-bit encodings that serve the same purpose in Perl, and
  * rarely do we need to distinguish them.  The term "NATIVE_UTF8" applies to
  * whichever one is applicable on the current platform */
-#define NATIVE_UTF8_TO_I8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) (ch))
-#define I8_TO_NATIVE_UTF8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) (ch))
+#define NATIVE_UTF8_TO_I8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
+#define I8_TO_NATIVE_UTF8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
 
 /* Transforms in wide UV chars */
-#define UNI_TO_NATIVE(ch)        (ch)
-#define NATIVE_TO_UNI(ch)        (ch)
+#define UNI_TO_NATIVE(ch)        ((UV) (ch))
+#define NATIVE_TO_UNI(ch)        ((UV) (ch))
 
 /*
 
@@ -446,9 +446,9 @@ only) byte is pointed to by C<s>.
 /* The next two macros are used when the source should be a single byte
  * character; checked for under DEBUGGING */
 #define UTF8_EIGHT_BIT_HI(c) (__ASSERT_(FITS_IN_8_BITS(c))                    \
-                             ((U8) __BASE_TWO_BYTE_HI(c, NATIVE_TO_LATIN1)))
+                             ( __BASE_TWO_BYTE_HI(c, NATIVE_TO_LATIN1)))
 #define UTF8_EIGHT_BIT_LO(c) (__ASSERT_(FITS_IN_8_BITS(c))                    \
-                             ((U8) __BASE_TWO_BYTE_LO(c, NATIVE_TO_LATIN1)))
+                             (__BASE_TWO_BYTE_LO(c, NATIVE_TO_LATIN1)))
 
 /* These final two macros in the series are used when the source can be any
  * code point whose UTF-8 is known to occupy 2 bytes; they are less efficient
@@ -459,11 +459,11 @@ only) byte is pointed to by C<s>.
 #define UTF8_TWO_BYTE_HI(c)                                                    \
        (__ASSERT_((sizeof(c) ==  1)                                            \
                   || !(((WIDEST_UTYPE)(c)) & ~MAX_UTF8_TWO_BYTE))              \
-        ((U8) __BASE_TWO_BYTE_HI(c, NATIVE_TO_UNI)))
+        (__BASE_TWO_BYTE_HI(c, NATIVE_TO_UNI)))
 #define UTF8_TWO_BYTE_LO(c)                                                    \
        (__ASSERT_((sizeof(c) ==  1)                                            \
                   || !(((WIDEST_UTYPE)(c)) & ~MAX_UTF8_TWO_BYTE))              \
-        ((U8) __BASE_TWO_BYTE_LO(c, NATIVE_TO_UNI)))
+        (__BASE_TWO_BYTE_LO(c, NATIVE_TO_UNI)))
 
 /* This is illegal in any well-formed UTF-8 in both EBCDIC and ASCII
  * as it is only in overlongs. */

@@ -5810,8 +5810,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
             else if (UTF8_IS_DOWNGRADEABLE_START(nextchr)) {
                 if (! (to_complement ^ cBOOL(isFOO_lc(FLAGS(scan),
-                                           (U8) EIGHT_BIT_UTF8_TO_NATIVE(nextchr,
-                                                            *(locinput + 1))))))
+                                               EIGHT_BIT_UTF8_TO_NATIVE(nextchr,
+                                               *(locinput + 1))))))
                 {
                     sayNO;
                 }
