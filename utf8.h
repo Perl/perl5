@@ -208,9 +208,13 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * */
 #define UVCHR_IS_INVARIANT(cp)      OFFUNI_IS_INVARIANT(cp)
 
+/* This defines the bits that are to be in the continuation bytes of a multi-byte
+ * UTF-8 encoded character that mark it is a continuation byte. */
+#define UTF_CONTINUATION_MARK		0x80
+
 /* Misleadingly named: is the UTF8-encoded byte 'c' part of a variant sequence
  * in UTF-8?  This is the inverse of UTF8_IS_INVARIANT */
-#define UTF8_IS_CONTINUED(c)        (((U8)c) &  0x80)
+#define UTF8_IS_CONTINUED(c)        (((U8)c) &  UTF_CONTINUATION_MARK)
 
 /* Is the byte 'c' the first byte of a multi-byte UTF8-8 encoded sequence?
  * This doesn't catch invariants (they are single-byte).  It also excludes the
@@ -219,7 +223,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 /* Is the byte 'c' part of a multi-byte UTF8-8 encoded sequence, and not the
  * first byte thereof?  */
-#define UTF8_IS_CONTINUATION(c)     ((((U8)c) & 0xC0) == 0x80)
+#define UTF8_IS_CONTINUATION(c)     ((((U8)c) & 0xC0) == UTF_CONTINUATION_MARK)
 
 /* Is the UTF8-encoded byte 'c' the first byte of a two byte sequence?  Use
  * UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to
@@ -230,10 +234,6 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 /* Is the UTF8-encoded byte 'c' the first byte of a sequence of bytes that
  * represent a code point > 255? */
 #define UTF8_IS_ABOVE_LATIN1(c)     ((U8)(c) >= 0xc4)
-
-/* This defines the bits that are to be in the continuation bytes of a multi-byte
- * UTF-8 encoded character that indicate it is a continuation byte. */
-#define UTF_CONTINUATION_MARK		0x80
 
 /* This is the number of low-order bits a continuation byte in a UTF-8 encoded
  * sequence contributes to the specification of the code point.  In the bit
