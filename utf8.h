@@ -262,10 +262,6 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 		      (uv) < 0x80000000     ? 6 : 7 )
 #endif
 
-/* ^? is defined to be DEL on ASCII systems.  See the definition of toCTRL()
- * for more */
-#define QUESTION_MARK_CTRL  DEL_NATIVE
-
 /*
 
 =for apidoc Am|STRLEN|UVCHR_SKIP|UV cp
@@ -276,6 +272,10 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 =cut
  */
 #define UVCHR_SKIP(uv) OFFUNISKIP(uv)
+
+/* ^? is defined to be DEL on ASCII systems.  See the definition of toCTRL()
+ * for more */
+#define QUESTION_MARK_CTRL  DEL_NATIVE
 
 /* Surrogates, non-character code points and above-Unicode code points are
  * problematic in some contexts.  This allows code that needs to check for
