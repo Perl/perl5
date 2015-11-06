@@ -10232,21 +10232,21 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 #ifdef HEXFP_NV
                     NV mult = 1 / 16.0;
 #endif
-                    h++;
-                    while (isXDIGIT(*h) || *h == '_') {
+                    for (h++; (isXDIGIT(*h) || *h == '_'); h++) {
                         if (isXDIGIT(*h)) {
                             U8 b = XDIGIT_VALUE(*h);
                             total_bits += shift;
+                            if (total_bits < NV_MANT_DIG) {
 #ifdef HEXFP_UQUAD
-                            hexfp_uquad <<= shift;
-                            hexfp_uquad |= b;
-                            hexfp_frac_bits += shift;
+                                hexfp_uquad <<= shift;
+                                hexfp_uquad |= b;
+                                hexfp_frac_bits += shift;
 #else /* HEXFP_NV */
-                            hexfp_nv += b * mult;
-                            mult /= 16.0;
+                                hexfp_nv += b * mult;
+                                mult /= 16.0;
 #endif
+                            }
                         }
-                        h++;
                     }
                 }
 
