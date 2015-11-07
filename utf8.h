@@ -662,8 +662,11 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UNICODE_ALLOW_SUPER	0
 #define UNICODE_ALLOW_ANY	0
 
-#define UNICODE_IS_SURROGATE(uv)        ((UV) (uv) >= UNICODE_SURROGATE_FIRST && \
-                                         (UV) (uv) <= UNICODE_SURROGATE_LAST)
+/* This matches the 2048 code points between UNICODE_SURROGATE_FIRST (0xD800) and
+ * UNICODE_SURROGATE_LAST (0xDFFF) */
+#define UNICODE_IS_SURROGATE(uv)        (((UV) (uv) & (~0xFFFF | 0xF800))       \
+                                                                    == 0xD800)
+
 #define UNICODE_IS_REPLACEMENT(uv)	((UV) (uv) == UNICODE_REPLACEMENT)
 #define UNICODE_IS_BYTE_ORDER_MARK(uv)	((UV) (uv) == UNICODE_BYTE_ORDER_MARK)
 #define UNICODE_IS_NONCHAR(uv)         (((UV) (uv) >= 0xFDD0 && (UV) (uv) <= 0xFDEF) \
