@@ -241,10 +241,6 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * real information */
 #define UTF_ACCUMULATION_SHIFT		6
 
-#if UVSIZE >= 8
-#  define UTF8_QUAD_MAX UINT64_C(0x1000000000)
-#endif
-
 /* ^? is defined to be DEL on ASCII systems.  See the definition of toCTRL()
  * for more */
 #define QUESTION_MARK_CTRL  DEL_NATIVE
