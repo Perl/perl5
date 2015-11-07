@@ -670,14 +670,23 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 
 #define UNICODE_IS_REPLACEMENT(uv)	((UV) (uv) == UNICODE_REPLACEMENT)
 #define UNICODE_IS_BYTE_ORDER_MARK(uv)	((UV) (uv) == UNICODE_BYTE_ORDER_MARK)
-#define UNICODE_IS_NONCHAR(uv)         (((UV) (uv) >= 0xFDD0 && (UV) (uv) <= 0xFDEF) \
-			/* The other noncharacters end in FFFE or FFFF, which  \
-			 * the mask below catches both of, but beyond the last \
-			 * official unicode code point, they aren't            \
-			 * noncharacters, since those aren't Unicode           \
-			 * characters at all */                                \
-            || (((((UV) (uv) & 0xFFFE) == 0xFFFE)) && ! UNICODE_IS_SUPER(uv)))
-#define UNICODE_IS_SUPER(uv)           ((UV) (uv) > PERL_UNICODE_MAX)
+
+/* Is 'uv' one of the 32 contiguous-range noncharacters? */
+#define UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv)      ((UV) (uv) >= 0xFDD0         \
+                                                 && (UV) (uv) <= 0xFDEF)
+
+/* Is 'uv' one of the 34 plane-ending noncharacters 0xFFFE, 0xFFFF, 0x1FFFE,
+ * 0x1FFFF, ... 0x10FFFE, 0x10FFFF, given that we know that 'uv' is not above
+ * the Unicode legal max */
+#define UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv)                        \
+                                              (((UV) (uv) & 0xFFFE) == 0xFFFE)
+
+#define UNICODE_IS_NONCHAR(uv)                                                  \
+    (   UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv)                                   \
+     || (   LIKELY( ! UNICODE_IS_SUPER(uv))                                     \
+         && UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv)))
+
+#define UNICODE_IS_SUPER(uv)    ((UV) (uv) > PERL_UNICODE_MAX)
 #define UNICODE_IS_ABOVE_31_BIT(uv)    ((UV) (uv) > 0x7FFFFFFF)
 
 #define LATIN_SMALL_LETTER_SHARP_S      LATIN_SMALL_LETTER_SHARP_S_NATIVE
