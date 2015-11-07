@@ -10483,6 +10483,31 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                                 hexfp_nv += b * mult;
                                 mult /= 16.0;
 #endif
+                            } else if (total_bits - shift < NV_MANT_DIG) {
+                                /* A hexdigit straddling the edge of
+                                 * mantissa.  We can try grabbing as
+                                 * many as possible bits. */
+                                int shift2 = 0;
+                                if (b & 1) {
+                                    shift2 = 4;
+                                } else if (b & 2) {
+                                    shift2 = 3;
+                                    total_bits--;
+                                } else if (b & 4) {
+                                    shift2 = 2;
+                                    total_bits -= 2;
+                                } else if (b & 8) {
+                                    shift2 = 1;
+                                    total_bits -= 3;
+                                }
+#ifdef HEXFP_UQUAD
+                                hexfp_uquad <<= shift2;
+                                hexfp_uquad |= b;
+                                hexfp_frac_bits += shift2;
+#else /* HEXFP_NV */
+                                hexfp_nv += b * mult;
+                                mult /= 16.0;
+#endif
                             }
                         }
                     }
