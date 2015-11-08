@@ -56,8 +56,8 @@ sub Foo::d {
 
 for my $test (
     # flags      args           expected         description
-    [ G_VOID,    [ ],           [ qw(z 1) ],     '0 args, G_VOID' ],
-    [ G_VOID,    [ qw(a p q) ], [ qw(z 1) ],     '3 args, G_VOID' ],
+    [ G_VOID,    [ ],           [ 0 ],           '0 args, G_VOID' ],
+    [ G_VOID,    [ qw(a p q) ], [ 0 ],           '3 args, G_VOID' ],
     [ G_SCALAR,  [ ],           [ qw(y 1) ],     '0 args, G_SCALAR' ],
     [ G_SCALAR,  [ qw(a p q) ], [ qw(y 1) ],     '3 args, G_SCALAR' ],
     [ G_ARRAY,   [ ],           [ qw(x 1) ],     '0 args, G_ARRAY' ],
@@ -81,9 +81,7 @@ for my $test (
 	"$description call_pv('f')");
 
     ok(eq_array( [ eval_sv('f(' . join(',',map"'$_'",@$args) . ')', $flags) ],
-                 $flags == G_VOID ? [ 0 ] : $expected
-               ),
-        "$description eval_sv('f(args)')");
+        $expected), "$description eval_sv('f(args)')");
 
     ok(eq_array( [ call_method('meth', $flags, $obj, @$args) ], $expected),
 	"$description call_method('meth')");
@@ -137,9 +135,7 @@ for my $test (
 	$expected), "$description G_NOARGS call_pv('f')");
 
     ok(eq_array( [ sub { eval_sv('f(@_)', $flags|G_NOARGS) }->(@$args) ],
-                  $flags == G_VOID ? [ 0 ] :  $expected
-               ),
-        "$description G_NOARGS eval_sv('f(@_)')");
+        $expected), "$description G_NOARGS eval_sv('f(@_)')");
 
     # XXX call_method(G_NOARGS) isn't tested: I'm assuming
     # it's not a sensible combination. DAPM.
