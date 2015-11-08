@@ -194,7 +194,7 @@ Perl_free_tmps(pTHX)
 #ifdef PERL_POISON
 	PoisonWith(PL_tmps_stack + PL_tmps_ix + 1, 1, SV *, 0xAB);
 #endif
-	if (LIKELY(sv && sv != &PL_sv_undef)) {
+	if (LIKELY(sv)) {
 	    SvTEMP_off(sv);
 	    SvREFCNT_dec_NN(sv);		/* note, can modify tmps_ix!!! */
 	}
