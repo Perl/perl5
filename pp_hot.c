@@ -3282,13 +3282,255 @@ PP(pp_grepwhile)
     }
 }
 
-PP(pp_leavesub)
+/* leavesub_adjust_stacks():
+ *
+ * Process the sub's return args (in the range base_sp+1 .. PL_stack_sp),
+ * and do the equivalent of a FREEMPS (and TAINT_NOT).
+ * Not intended to be called in void context.
+ *
+ * The main things done to process the return args are:
+ *    * in scalar context, only return the last arg (or PL_sv_undef if none);
+ *    * make a TEMP copy of every return arg, except where we can optimise
+ *      the copy away without it being semantically visible;
+ *    * make sure the arg isn't prematurely freed; in the case of an arg
+ *      not copied, this may involve mortalising it. For example, in
+ *      C<sub f { my $x = ...; $x }>, $x would be freed when we do
+ *      CX_LEAVE_SCOPE(cx) unless it's protected or copied.
+ *
+ * There is a big issue with doing a FREETMPS. We would like to free any
+ * temps created by the last statement the sub executed, rather than
+ * leaving them for the caller. In a situation where a sub call isn't
+ * soon followed by a nextstate (e.g. nested recursive calls, a la
+ * fibonacci()), temps can accumulate, causing memory and performance
+ * issues.
+ *
+ * On the other hand, we don't want to free any TEMPs which are keeping
+ * alive any return args that we skip copying; nor do we wish to undo any
+ * mortalising or mortal copying we do here.
+ *
+ * The solution is to split the temps stack frame into two, with a cut
+ * point delineating the two halves. We arrange that by the end of this
+ * function, all the temps stack frame entries we wish to keep are in the
+ * range  PL_tmps_floor+1.. tmps_base-1, while the ones we free now are in
+ * the range  tmps_base .. PL_tmps_ix.  During the course of this
+ * function, tmps_base starts off as PL_tmps_floor+1, then increases
+ * whenever we find or create a temp that we know should be kept. In
+ * general the stuff above tmps_base is undecided until we reach the end,
+ * and we may need a sort stage for that.
+ *
+ * To determine whether a TEMP is keeping a return arg alive, every
+ * arg that is kept rather than copied and which has the SvTEMP flag
+ * set, has the flag temporarily unset, to mark it. At the end we scan
+ * stack temps stack frame above the cut for entries without SvTEMP and
+ * keep them, while turning SvTEMP on again. Note that if we die before
+ * the SvTEMPs are enabled again, its safe: at worst, subsequent use of
+ * those SVs may be slightly less efficient.
+ *
+ * In practice various optimisations for some common cases mean we can
+ * avoid most of the scanning and swapping about with the temps stack.
+ */
+
+STATIC void
+S_leavesub_adjust_stacks(pTHX_ SV **base_sp, I32 gimme)
 {
     dSP;
-    SV **mark;
-    SV **newsp;
+    SV    **from_sp;   /* where we're copying args from */
+    SSize_t tmps_base; /* lowest index into tmps stack that needs freeing now */
+    SSize_t nargs;
+
+    TAINT_NOT;
+
+    if (gimme == G_ARRAY) {
+        from_sp = base_sp + 1;
+        nargs   = SP - base_sp;
+    }
+    else {
+        assert(gimme == G_SCALAR);
+        if (UNLIKELY(base_sp >= SP)) {
+            /* no return args */
+            assert(base_sp == SP);
+            EXTEND(SP, 1);
+            *++SP = &PL_sv_undef;
+            base_sp = SP;
+            nargs   = 0;
+        }
+        else {
+            from_sp = SP;
+            nargs   = 1;
+        }
+    }
+
+    /* common code for G_SCALAR and G_ARRAY */
+
+    tmps_base = PL_tmps_floor + 1;
+
+    assert(nargs >= 0);
+    if (nargs) {
+        /* pointer version of tmps_base. Not safe across temp stack
+         * reallocs. */
+        SV **tmps_basep;
+
+        EXTEND_MORTAL(nargs); /* one big extend for worst-case scenario */
+        tmps_basep = PL_tmps_stack + tmps_base;
+        /* whether any SVs have have SvTEMP temporarily turned off,
+         * indicating that they need saving below the cut */
+
+        /* process each return arg */
+
+        do {
+            SV *sv = *from_sp++;
+
+            assert(PL_tmps_ix + nargs < PL_tmps_max);
+
+            if (SvTEMP(sv) && !SvMAGICAL(sv) && SvREFCNT(sv) == 1) {
+                /* can optimise away the copy */
+                *++base_sp = sv;
+
+                /* Since this SV is an SvTEMP with a ref count of 1, we
+                 * don't need to re-mortalise it; instead we just need to
+                 * ensure that its existing entry in the temps stack frame
+                 * ends up below the cut and so avoids being freed this
+                 * time round. We mark it as needing to be kept by
+                 * temporarily unsetting SvTEMP; then at the end, we
+                 * shuffle any !SvTEMP entries on the tmps stack back
+                 * below the cut.
+                 * However, there's a significant chance that there's a
+                 * 1:1 correspondence between the first few (or all)
+                 * elements in the return args stack frame and those in
+                 * the temps stack frame;
+                 * e,g.  sub f { ....; map {...} .... },
+                 * or e.g. if we're exiting multiple scopes and one of the
+                 * inner scopes has already made mortal copies of each
+                 * return arg.
+                 *
+                 * If so, this arg sv will correspond to the next item
+                 * above the cut, and so can be kept merely by moving the
+                 * cut boundary up one, rather than messing with SvTEMP.
+                 * If all args arre 1:1 then we can avoid the sorting
+                 * stage below completely.
+                 */
+                if (sv == *tmps_basep)
+                    tmps_basep++;
+                else
+                    SvTEMP_off(sv);
+            }
+            else {
+                /* Make a mortal copy of the SV.
+                 * The following code is the equivalent of sv_mortalcopy()
+                 * except that:
+                 *  * it assumes the temps stack has already been extended;
+                 *  * it optimises the copying for some simple SV types;
+                 *  * it puts the new item at the cut rather than at
+                 *    ++PL_tmps_ix, moving the previous occupant there
+                 *    instead.
+                 */
+                SV *newsv = newSV(0);
+
+                PL_tmps_stack[++PL_tmps_ix] = *tmps_basep;
+                /* put it on the tmps stack early so it gets freed if we die */
+                *tmps_basep++ = newsv;
+                *++base_sp = newsv;
+
+                if (SvTYPE(sv) <= SVt_IV) {
+                    /* arg must be one of undef, IV/UV, or RV: skip
+                     * sv_setsv_flags() and do the copy directly */
+                    U32 dstflags;
+                    U32 srcflags = SvFLAGS(sv);
+
+                    assert(!SvGMAGICAL(sv));
+                    if (srcflags & (SVf_IOK|SVf_ROK)) {
+                        SET_SVANY_FOR_BODYLESS_IV(newsv);
+
+                        if (srcflags & SVf_ROK) {
+                            newsv->sv_u.svu_rv = SvREFCNT_inc(SvRV(sv));
+                            /* SV type plus flags */
+                            dstflags = (SVt_IV|SVf_ROK|SVs_TEMP);
+                        }
+                        else {
+                            /* both src and dst are <= SVt_IV, so sv_any
+                             * points to the head; so access the heads
+                             * directly rather than going via sv_any.
+                             */
+                            assert(    &(sv->sv_u.svu_iv)
+                                    == &(((XPVIV*) SvANY(sv))->xiv_iv));
+                            assert(    &(newsv->sv_u.svu_iv)
+                                    == &(((XPVIV*) SvANY(newsv))->xiv_iv));
+                            newsv->sv_u.svu_iv = sv->sv_u.svu_iv;
+                            /* SV type plus flags */
+                            dstflags = (SVt_IV|SVf_IOK|SVp_IOK|SVs_TEMP
+                                            |(srcflags & SVf_IVisUV));
+                        }
+                    }
+                    else {
+                        assert(!(srcflags & SVf_OK));
+                        dstflags = (SVt_NULL|SVs_TEMP); /* SV type plus flags */
+                    }
+                    SvFLAGS(newsv) = dstflags;
+
+                }
+                else {
+                    /* do the full sv_setsv() */
+                    SSize_t old_base;
+
+                    SvTEMP_on(newsv);
+                    old_base = tmps_basep - PL_tmps_stack;
+                    SvGETMAGIC(sv);
+                    sv_setsv_flags(newsv, sv, SV_DO_COW_SVSETSV);
+                    /* the mg_get or sv_setv might have created new temps
+                     * or realloced the tmps stack; regrow and reload */
+                    EXTEND_MORTAL(nargs);
+                    tmps_basep = PL_tmps_stack + old_base;
+                    TAINT_NOT;	/* Each item is independent */
+                }
+
+            }
+        } while (--nargs);
+
+        /* If there are any temps left above the cut, we need to sort
+         * them into those to keep and those to free. The only ones to
+         * keep are those for which we've temporarily unset SvTEMP.
+         * Work inwards from the two ends at tmps_basep .. PL_tmps_ix,
+         * swapping pairs as necessary. Stop when we meet in the middle.
+         */
+        {
+            SV **top = PL_tmps_stack + PL_tmps_ix;
+            while (tmps_basep <= top) {
+                SV *sv = *top;
+                if (SvTEMP(sv))
+                    top--;
+                else {
+                    SvTEMP_on(sv);
+                    *top = *tmps_basep;
+                    *tmps_basep = sv;
+                    tmps_basep++;
+                }
+            }
+        }
+
+        tmps_base = tmps_basep - PL_tmps_stack;
+    }
+
+    PL_stack_sp = base_sp;
+
+    /* unrolled FREETMPS() but using tmps_base-1 rather than PL_tmps_floor */
+    while (PL_tmps_ix >= tmps_base) {
+        SV* const sv = PL_tmps_stack[PL_tmps_ix--];
+#ifdef PERL_POISON
+        PoisonWith(PL_tmps_stack + PL_tmps_ix + 1, 1, SV *, 0xAB);
+#endif
+        if (LIKELY(sv)) {
+            SvTEMP_off(sv);
+            SvREFCNT_dec_NN(sv); /* note, can modify tmps_ix!!! */
+        }
+    }
+}
+
+
+PP(pp_leavesub)
+{
     I32 gimme;
     PERL_CONTEXT *cx;
+    SV **oldsp;
     OP *retop;
 
     cx = CX_CUR();
@@ -3301,62 +3543,13 @@ PP(pp_leavesub)
 	return 0;
     }
 
-    newsp = PL_stack_base + cx->blk_oldsp;
     gimme = cx->blk_gimme;
+    oldsp = PL_stack_base + cx->blk_oldsp; /* last arg of previous frame */
 
-    TAINT_NOT;
-    if (gimme == G_SCALAR) {
-	MARK = newsp + 1;
-	if (LIKELY(MARK <= SP)) {
-            /* if we are recursing, then free the current tmps.
-             * Normally we don't bother and rely on the caller to do this,
-             * because early tmp freeing tends to free the args we're
-             * returning.
-             * Doing it for recursion ensures the things like the
-             * fibonacci benchmark don't fill up the tmps stack because
-             * it never reaches an outer nextstate */
-	    if (cx->blk_sub.olddepth) {
-		if (SvTEMP(TOPs) && SvREFCNT(TOPs) == 1
-		     && !SvMAGICAL(TOPs)) {
-		    *MARK = SvREFCNT_inc(TOPs);
-		    FREETMPS;
-		    sv_2mortal(*MARK);
-		}
-		else {
-                    SV *sv = SvREFCNT_inc(TOPs); /* FREETMPS could clobber it */
-		    FREETMPS;
-		    *MARK = sv_mortalcopy(sv);
-		    SvREFCNT_dec_NN(sv);
-		}
-	    }
-	    else if (SvTEMP(TOPs) && SvREFCNT(TOPs) == 1
-		     && !SvMAGICAL(TOPs)) {
-		*MARK = TOPs;
-	    }
-	    else
-		*MARK = sv_mortalcopy(TOPs);
-	}
-	else {
-	    MEXTEND(MARK, 0);
-	    *MARK = &PL_sv_undef;
-	}
-	SP = MARK;
-    }
-    else if (gimme == G_ARRAY) {
-	for (MARK = newsp + 1; MARK <= SP; MARK++) {
-	    if (!SvTEMP(*MARK) || SvREFCNT(*MARK) != 1
-		 || SvMAGICAL(*MARK)) {
-		*MARK = sv_mortalcopy(*MARK);
-		TAINT_NOT;	/* Each item is independent */
-	    }
-	}
-    }
-    else {
-        /* G_VOID */
-        SP = newsp;
-    }
-
-    PUTBACK;
+    if (gimme == G_VOID)
+        PL_stack_sp = oldsp;
+    else
+        S_leavesub_adjust_stacks(aTHX_ oldsp, gimme);
 
     CX_LEAVE_SCOPE(cx);
     POPSUB(cx);	/* Stack values are safe: release CV and @_ ... */

@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 61);
+plan(tests => 62);
 
 sub empty_sub {}
 
@@ -390,4 +390,16 @@ is(join('-', 10, check_ret(-1,5)),      "10",  "check_ret(-1,5) list");
     sub f99 { $_[0] . "x" };
     my $a = [ f99(1), f99(2) ];
     is("@$a", "1x 2x", "PADTMPs copied on return");
+}
+
+# A sub should FREETMPS on exit
+# RT #124248
+
+{
+    package p124248;
+    my $d = 0;
+    sub DESTROY { $d++ }
+    sub f { ::is($d, 1, "RT 124248"); }
+    sub g { !!(my $x = bless []); }
+    f(g());
 }

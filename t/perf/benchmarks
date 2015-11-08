@@ -58,15 +58,45 @@
         setup   => 'sub f { }',
         code    => 'f()',
     },
+    'call::sub::amp_empty' => {
+        desc    => '&foo function call with no args or body',
+        setup   => 'sub f { }; @_ = ();',
+        code    => '&f',
+    },
     'call::sub::args3' => {
         desc    => 'function call with 3 local lexical vars',
         setup   => 'sub f { my ($a, $b, $c) = @_; 1 }',
         code    => 'f(1,2,3)',
     },
+    'call::sub::args2_ret1' => {
+        desc    => 'function call with 2 local lex vars and 1 return value',
+        setup   => 'my $x; sub f { my ($a, $b) = @_; $a+$b }',
+        code    => '$x = f(1,2)',
+    },
+    'call::sub::args2_ret1temp' => {
+        desc    => 'function call with 2 local lex vars and 1 return TEMP value',
+        setup   => 'my $x; sub f { my ($a, $b) = @_; \$a }',
+        code    => '$x = f(1,2)',
+    },
     'call::sub::args3_ret3' => {
         desc    => 'function call with 3 local lex vars and 3 return values',
         setup   => 'my @a; sub f { my ($a, $b, $c) = @_; $a+$b, $c, 1 }',
         code    => '@a = f(1,2,3)',
+    },
+    'call::sub::args3_ret3str' => {
+        desc    => 'function call with 3 local lex vars and 3 string return values',
+        setup   => 'my @a; sub f { my ($a, $b, $c) = @_; my @s = ("aa","bb","cc"); @s }',
+        code    => '@a = f(1,2,3)',
+    },
+    'call::sub::args3_ret3temp' => {
+        desc    => 'function call with 3 local lex vars and 3 TEMP return values',
+        setup   => 'my @a; sub f { my ($a, $b, $c) = @_; 1..3 }',
+        code    => '@a = f(1,2,3)',
+    },
+    'call::sub::recursive' => {
+        desc    => 'basic recursive function call',
+        setup   => 'my $x; sub f { my ($i) = @_; $i > 0 ? $i + f($i-1) : 0 }',
+        code    => '$x = f(1)',
     },
 
     'call::goto::empty' => {
