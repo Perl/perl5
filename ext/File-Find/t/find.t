@@ -24,7 +24,7 @@ BEGIN {
 }
 
 my $symlink_exists = eval { symlink("",""); 1 };
-my $test_count = 109;
+my $test_count = 111;
 $test_count += 127 if $symlink_exists;
 $test_count += 26 if $^O eq 'MSWin32';
 $test_count += 2 if $^O eq 'MSWin32' and $symlink_exists;
@@ -66,6 +66,16 @@ my $orig_dir = cwd();
 cleanup();
 
 ##### Sanity checks #####
+# Do find() and finddepth() work correctly with an empty list of
+# directories?
+{
+    ok(eval { find(\&noop_wanted); 1 },
+       "'find' successfully returned for an empty list of directories");
+
+    ok(eval { finddepth(\&noop_wanted); 1 },
+       "'finddepth' successfully returned for an empty list of directories");
+}
+
 # Do find() and finddepth() work correctly in the directory
 # from which we start?  (Test presumes the presence of 'taint.t' in same
 # directory as this test file.)

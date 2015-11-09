@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.31';
+our $VERSION = '1.32';
 require Exporter;
 require Cwd;
 
@@ -126,6 +126,7 @@ sub is_tainted_pp {
 
 sub _find_opt {
     my $wanted = shift;
+    return unless @_;
     die "invalid top directory" unless defined $_[0];
 
     # This function must local()ize everything because callbacks may
