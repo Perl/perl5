@@ -221,9 +221,13 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * illegal overlong sequences that begin with C0 and C1. */
 #define UTF8_IS_START(c)            (((U8)c) >= 0xc2)
 
+/* For use in UTF8_IS_CONTINUATION() below */
+#define UTF_IS_CONTINUATION_MASK    0xC0
+
 /* Is the byte 'c' part of a multi-byte UTF8-8 encoded sequence, and not the
  * first byte thereof?  */
-#define UTF8_IS_CONTINUATION(c)     ((((U8)c) & 0xC0) == UTF_CONTINUATION_MARK)
+#define UTF8_IS_CONTINUATION(c)                                             \
+            ((((U8)c) & UTF_IS_CONTINUATION_MASK) == UTF_CONTINUATION_MARK)
 
 /* Is the UTF8-encoded byte 'c' the first byte of a two byte sequence?  Use
  * UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to

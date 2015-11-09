@@ -205,7 +205,16 @@ above what a 64 bit word can hold */
  * definitions. */
 
 #define UTF8_IS_START(c)		_generic_isCC(c, _CC_UTF8_IS_START)
+
+#define UTF_IS_CONTINUATION_MASK    0xE0
+
 #define UTF8_IS_CONTINUATION(c)		_generic_isCC(c, _CC_UTF8_IS_CONTINUATION)
+
+/* The above instead could be written as this:
+#define UTF8_IS_CONTINUATION(c)                                                 \
+            (((NATIVE_UTF8_TO_I8(c) & UTF_IS_CONTINUATION_MASK)                 \
+                                                == UTF_CONTINUATION_MARK)
+ */
 
 /* Equivalent to ! UVCHR_IS_INVARIANT(c) */
 #define UTF8_IS_CONTINUED(c) 		cBOOL(FITS_IN_8_BITS(c)                 \
