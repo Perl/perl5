@@ -169,10 +169,25 @@
     },
 
 
-    'expr::assign::scalar_lex' => {
+    'expr::assign::scalar_lex_int' => {
         desc    => 'lexical $x = 1',
         setup   => 'my $x',
         code    => '$x = 1',
+    },
+    'expr::assign::scalar_lex_str' => {
+        desc    => 'lexical $x = "abc"',
+        setup   => 'my $x',
+        code    => '$x = "abc"',
+    },
+    'expr::assign::scalar_lex_strint' => {
+        desc    => 'lexical $x = 1 where $x was previously a string',
+        setup   => 'my $x = "abc"',
+        code    => '$x = 1',
+    },
+    'expr::assign::scalar_lex_intstr' => {
+        desc    => 'lexical $x = "abc" where $x was previously an int',
+        setup   => 'my $x = 1;',
+        code    => '$x = "abc"',
     },
     'expr::assign::2list_lex' => {
         desc    => 'lexical ($x, $y) = (1, 2)',

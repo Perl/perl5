@@ -4272,25 +4272,83 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
     U32 sflags;
     int dtype;
     svtype stype;
+    unsigned int both_type;
 
     PERL_ARGS_ASSERT_SV_SETSV_FLAGS;
 
     if (UNLIKELY( sstr == dstr ))
 	return;
 
-    if (SvIS_FREED(dstr)) {
-	Perl_croak(aTHX_ "panic: attempt to copy value %" SVf
-		   " to a freed scalar %p", SVfARG(sstr), (void *)dstr);
-    }
-    SV_CHECK_THINKFIRST_COW_DROP(dstr);
     if (UNLIKELY( !sstr ))
 	sstr = &PL_sv_undef;
-    if (SvIS_FREED(sstr)) {
-	Perl_croak(aTHX_ "panic: attempt to copy freed scalar %p to %p",
-		   (void*)sstr, (void*)dstr);
-    }
+
     stype = SvTYPE(sstr);
     dtype = SvTYPE(dstr);
+    both_type = (stype | dtype);
+
+    /* with these values, we can check that both SVs are NULL/IV (and not
+     * freed) just by testing the or'ed types */
+    STATIC_ASSERT_STMT(SVt_NULL == 0);
+    STATIC_ASSERT_STMT(SVt_IV   == 1);
+    if (both_type <= 1) {
+        /* both src and dst are UNDEF/IV/RV, so we can do a lot of
+         * special-casing */
+        U32 sflags;
+        U32 new_dflags;
+
+        /* minimal subset of SV_CHECK_THINKFIRST_COW_DROP(dstr) */
+        if (SvREADONLY(dstr))
+            Perl_croak_no_modify();
+        if (SvROK(dstr))
+            sv_unref_flags(dstr, 0);
+
+        assert(!SvGMAGICAL(sstr));
+        assert(!SvGMAGICAL(dstr));
+
+        sflags = SvFLAGS(sstr);
+        if (sflags & (SVf_IOK|SVf_ROK)) {
+            SET_SVANY_FOR_BODYLESS_IV(dstr);
+            new_dflags = SVt_IV;
+
+            if (sflags & SVf_ROK) {
+                dstr->sv_u.svu_rv = SvREFCNT_inc(SvRV(sstr));
+                new_dflags |= SVf_ROK;
+            }
+            else {
+                /* both src and dst are <= SVt_IV, so sv_any points to the
+                 * head; so access the head directly
+                 */
+                assert(    &(sstr->sv_u.svu_iv)
+                        == &(((XPVIV*) SvANY(sstr))->xiv_iv));
+                assert(    &(dstr->sv_u.svu_iv)
+                        == &(((XPVIV*) SvANY(dstr))->xiv_iv));
+                dstr->sv_u.svu_iv = sstr->sv_u.svu_iv;
+                new_dflags |= (SVf_IOK|SVp_IOK|(sflags & SVf_IVisUV));
+            }
+        }
+        else {
+            new_dflags = dtype; /* turn off everything except the type */
+        }
+        SvFLAGS(dstr) = new_dflags;
+
+        return;
+    }
+
+    if (UNLIKELY(both_type == SVTYPEMASK)) {
+        if (SvIS_FREED(dstr)) {
+            Perl_croak(aTHX_ "panic: attempt to copy value %" SVf
+                       " to a freed scalar %p", SVfARG(sstr), (void *)dstr);
+        }
+        if (SvIS_FREED(sstr)) {
+            Perl_croak(aTHX_ "panic: attempt to copy freed scalar %p to %p",
+                       (void*)sstr, (void*)dstr);
+        }
+    }
+
+
+
+    SV_CHECK_THINKFIRST_COW_DROP(dstr);
+    dtype = SvTYPE(dstr); /* THINKFIRST may have changed type */
 
     /* There's a lot of redundancy below but we're going for speed here */
 
