@@ -6,6 +6,8 @@ BEGIN {
     require './test.pl';
 }
 
+$|=1;
+
 {
     my $wide = v256;
     use bytes;
@@ -68,7 +70,10 @@ foreach (<DATA>) {
 		$expect = -$expect;
 		$::TODO = "Markus Kuhn states that $expect invalid sequences should be signalled";
 	    }
-	    is(scalar @warnings, $expect, "Expected number of warnings for $id seen");
+	    unless (is(scalar @warnings, $expect, "Expected number of warnings for $id seen")) {
+                note(join "", "Got:\n", @warnings);
+            }
+
 	}
     } else {
 	fail("unknown format '$_'");
