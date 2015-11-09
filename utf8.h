@@ -417,7 +417,7 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
  * Note that the result can be larger than 255 if the input character is not
  * downgradable */
 #define TWO_BYTE_UTF8_TO_NATIVE(HI, LO) \
-    ( __ASSERT_(UTF8SKIP(HI) == 2)                                              \
+    ( __ASSERT_(PL_utf8skip[HI] == 2)                                           \
       __ASSERT_(UTF8_IS_CONTINUATION(LO))                                       \
      UNI_TO_NATIVE(UTF8_ACCUMULATE((NATIVE_UTF8_TO_I8(HI) & UTF_START_MASK(2)), \
                                    (LO))))
