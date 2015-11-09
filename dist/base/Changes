@@ -1,3 +1,7 @@
+2.22
+    - Better handling of attempts to load non-existent modules
+    - Improvements to fields.pm documentation
+
 2.18
     - Backport from bleadperl before 5.16.0 release
     - base no longer sets a module's $VERSION to "-1" when a module it

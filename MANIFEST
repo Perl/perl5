@@ -3010,8 +3010,7 @@ dist/autouse/t/lib/MyTestModule.pm	Test module for autouse
 dist/base/Changes		base.pm changelog
 dist/base/lib/base.pm		Establish IS-A relationship at compile time
 dist/base/lib/fields.pm		Set up object field names for pseudo-hash-using classes
-dist/base/MANIFEST		base.pm manifest
-dist/base/META.yml		base.pm META.yml file
+dist/base/Makefile.PL	base.pm Makefile.PL
 dist/base/t/base-open-chunk.t	See if base works
 dist/base/t/base-open-line.t	See if base works
 dist/base/t/base.t		See if base works
