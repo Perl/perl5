@@ -37,16 +37,6 @@ C<experimental::smartmatch>.
 The ticket for this feature is
 L<[perl #119317]|https://rt.perl.org/rt3/Ticket/Display.html?id=119317>.
 
-=item Lexical C<$_>
-
-Introduced in Perl 5.10.0
-
-Using this feature triggers warnings in the category
-C<experimental::lexical_topic>.
-
-The ticket for this feature is
-L<[perl #119315]|https://rt.perl.org/rt3/Ticket/Display.html?id=119315>.
-
 =item Pluggable keywords
 
 The ticket for this feature is
@@ -55,13 +45,6 @@ L<[perl #119455]|https://rt.perl.org/rt3/Ticket/Display.html?id=119455>.
 See L<perlapi/PL_keyword_plugin> for the mechanism.
 
 Introduced in: Perl 5.11.2
-
-=item Array and hash container functions accept references
-
-Introduced in Perl 5.14.0
-
-The ticket for this feature is
-L<[perl #119437]|https://rt.perl.org/rt3/Ticket/Display.html?id=119437>.
 
 =item Lexical subroutines
 
@@ -319,6 +302,20 @@ The experimental C<legacy> pragma was swallowed by the C<feature> pragma.
 Introduced in: 5.11.2
 
 Removed in: 5.11.3
+
+=item Lexical C<$_>
+
+Introduced in Perl 5.10.0
+
+Removed in Perl 5.24.0
+
+=item Array and hash container functions accept references
+
+Superseded by L</Postfix dereference syntax>.
+
+Introduced in Perl 5.14.0
+
+Removed in Perl 5.24.0
 
 =back
 
