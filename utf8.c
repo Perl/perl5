@@ -128,11 +128,16 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	    }
 	}
 	else if (UNICODE_IS_SUPER(uv)) {
-	    if (flags & UNICODE_WARN_SUPER
+	    if (   (flags & UNICODE_WARN_SUPER)
 		|| (UNICODE_IS_FE_FF(uv) && (flags & UNICODE_WARN_FE_FF)))
-	    {
-		Perl_ck_warner_d(aTHX_ packWARN(WARN_NON_UNICODE),
-			  "Code point 0x%04"UVXf" is not Unicode, may not be portable", uv);
+            {
+                Perl_ck_warner_d(aTHX_ packWARN(WARN_NON_UNICODE),
+
+                  /* Choose the more dire applicable warning */
+                  (UNICODE_IS_FE_FF(uv))
+                  ? "Code point 0x%"UVXf" is not Unicode, and not portable"
+                  : "Code point 0x%"UVXf" is not Unicode, may not be portable",
+                 uv);
 	    }
 	    if (flags & UNICODE_DISALLOW_SUPER
 		|| (UNICODE_IS_FE_FF(uv) && (flags & UNICODE_DISALLOW_FE_FF)))
@@ -710,7 +715,9 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	    if ((flags & (UTF8_WARN_SUPER|UTF8_CHECK_ONLY)) == UTF8_WARN_SUPER
                 && ckWARN_d(WARN_NON_UNICODE))
 	    {
-		sv = sv_2mortal(Perl_newSVpvf(aTHX_ "Code point 0x%04"UVXf" is not Unicode, may not be portable", uv));
+		sv = sv_2mortal(Perl_newSVpvf(aTHX_
+                   "Code point 0x%04"UVXf" is not Unicode, may not be portable",
+                   uv));
 		pack_warn = packWARN(WARN_NON_UNICODE);
 	    }
 #ifndef EBCDIC	/* Can never have the equivalent of FE nor FF on EBCDIC, since
@@ -721,13 +728,15 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
              * before possibly bailing out, so that the more dire warning
              * overrides the regular one, if applicable */
             if ((*s0 & 0xFE) == 0xFE	/* matches both FE, FF */
-                && (flags & (UTF8_WARN_FE_FF|UTF8_DISALLOW_FE_FF)))
+                && (flags & (UTF8_WARN_FE_FF|UTF8_WARN_SUPER|UTF8_DISALLOW_FE_FF)))
             {
-                if ((flags & (UTF8_WARN_FE_FF|UTF8_CHECK_ONLY))
-                                                            == UTF8_WARN_FE_FF
-                    && ckWARN_d(WARN_UTF8))
+                if (  ! (flags & UTF8_CHECK_ONLY)
+                    &&  (flags & (UTF8_WARN_FE_FF|UTF8_WARN_SUPER))
+                    &&  ckWARN_d(WARN_UTF8))
                 {
-                    sv = sv_2mortal(Perl_newSVpvf(aTHX_ "Code point 0x%"UVXf" is not Unicode, and not portable", uv));
+                    sv = sv_2mortal(Perl_newSVpvf(aTHX_
+                        "Code point 0x%"UVXf" is not Unicode, and not portable",
+                        uv));
                     pack_warn = packWARN(WARN_UTF8);
                 }
                 if (flags & UTF8_DISALLOW_FE_FF) {

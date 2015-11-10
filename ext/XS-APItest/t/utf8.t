@@ -985,13 +985,10 @@ foreach my $test (@tests) {
                         if (is(scalar @warnings, 1,
                                "$this_name: Got a single warning "))
                         {
-                        TODO: {
-                            local $TODO = "Doesn't give dire warning for code points 2**31" if $allowed_uv >= 2**31 && $warnings[0] =~ /may not be portable/;
                             unless (like($warnings[0], $message,
                                         "$this_name: Got expected warning"))
                             {
                                 diag $call;
-                            }
                             }
                         }
                         else {
@@ -1126,13 +1123,10 @@ foreach my $test (@tests) {
                         if (is(scalar @warnings, 1,
                                "$this_name: Got a single warning "))
                         {
-                            TODO: {
-                                local $TODO = "Doesn't give dire warning for code points 2**31" if $allowed_uv >= 2**31 && $warnings[0] =~ /may not be portable/;
                             unless (like($warnings[0], $message,
                                             "$this_name: Got expected warning"))
                             {
                                 diag $call;
-                            }
                             }
                         }
                         else {
