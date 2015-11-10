@@ -178,7 +178,7 @@ dl_unload_file(libhandle)
 
 
 void
-    dl_find_symbol(libhandle, symbolname, ign_err=0)
+dl_find_symbol(libhandle, symbolname, ign_err=0)
     void *	libhandle
     char *	symbolname
     int	        ign_err
