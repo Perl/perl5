@@ -44,11 +44,11 @@ L<[perl #119455]|https://rt.perl.org/rt3/Ticket/Display.html?id=119455>.
 
 See L<perlapi/PL_keyword_plugin> for the mechanism.
 
-Introduced in: Perl 5.11.2
+Introduced in Perl 5.11.2
 
 =item Lexical subroutines
 
-Introduced in: Perl 5.18
+Introduced in Perl 5.18
 
 See also: L<perlsub/Lexical Subroutines>
 
@@ -60,7 +60,7 @@ L<[perl #120085]|https://rt.perl.org/rt3/Ticket/Display.html?id=120085>.
 
 =item Regular Expression Set Operations
 
-Introduced in: Perl 5.18
+Introduced in Perl 5.18
 
 The ticket for this feature is
 L<[perl #119451]|https://rt.perl.org/rt3/Ticket/Display.html?id=119451>.
@@ -115,7 +115,7 @@ See L<re/'strict' mode>
 
 =item String- and number-specific bitwise operators
 
-Introduced in: Perl 5.22.0
+Introduced in Perl 5.22.0
 
 See also: L<perlop/Bitwise String Operators>
 
@@ -229,7 +229,7 @@ See also L<perlsub>
 
 C<(*ACCEPT)>
 
-Introduced in: Perl 5.10
+Introduced in Perl 5.10
 
 Accepted in Perl 5.20.0
 
@@ -299,9 +299,9 @@ Moved from Perl 5.10.1 to CPAN
 
 The experimental C<legacy> pragma was swallowed by the C<feature> pragma.
 
-Introduced in: 5.11.2
+Introduced in Perl 5.11.2
 
-Removed in: 5.11.3
+Removed in Perl 5.11.3
 
 =item Lexical C<$_>
 
