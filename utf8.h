@@ -662,18 +662,18 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UNICODE_ALLOW_SUPER	0
 #define UNICODE_ALLOW_ANY	0
 
-#define UNICODE_IS_SURROGATE(c)		((c) >= UNICODE_SURROGATE_FIRST && \
-					 (c) <= UNICODE_SURROGATE_LAST)
-#define UNICODE_IS_REPLACEMENT(c)	((c) == UNICODE_REPLACEMENT)
-#define UNICODE_IS_BYTE_ORDER_MARK(c)	((c) == UNICODE_BYTE_ORDER_MARK)
-#define UNICODE_IS_NONCHAR(c)		((c >= 0xFDD0 && c <= 0xFDEF) \
+#define UNICODE_IS_SURROGATE(uv)        ((UV) (uv) >= UNICODE_SURROGATE_FIRST && \
+                                         (UV) (uv) <= UNICODE_SURROGATE_LAST)
+#define UNICODE_IS_REPLACEMENT(uv)	((UV) (uv) == UNICODE_REPLACEMENT)
+#define UNICODE_IS_BYTE_ORDER_MARK(uv)	((UV) (uv) == UNICODE_BYTE_ORDER_MARK)
+#define UNICODE_IS_NONCHAR(uv)         (((UV) (uv) >= 0xFDD0 && (UV) (uv) <= 0xFDEF) \
 			/* The other noncharacters end in FFFE or FFFF, which  \
 			 * the mask below catches both of, but beyond the last \
 			 * official unicode code point, they aren't            \
 			 * noncharacters, since those aren't Unicode           \
 			 * characters at all */                                \
-			|| ((((c & 0xFFFE) == 0xFFFE)) && ! UNICODE_IS_SUPER(c)))
-#define UNICODE_IS_SUPER(c)		((c) > PERL_UNICODE_MAX)
+            || (((((UV) (uv) & 0xFFFE) == 0xFFFE)) && ! UNICODE_IS_SUPER(uv)))
+#define UNICODE_IS_SUPER(uv)           ((UV) (uv) > PERL_UNICODE_MAX)
 #define UNICODE_IS_ABOVE_31_BIT(uv)    ((UV) (uv) > 0x7FFFFFFF)
 
 #define LATIN_SMALL_LETTER_SHARP_S      LATIN_SMALL_LETTER_SHARP_S_NATIVE
