@@ -67,7 +67,18 @@ my $UTF8_DISALLOW_FE_FF         = 0x0800;
 my $UTF8_WARN_FE_FF             = 0x1000;
 my $UTF8_CHECK_ONLY             = 0x2000;
 
-my $look_for_everything = $UTF8_DISALLOW_SURROGATE
+# Test uvchr_to_utf8().
+my $UNICODE_WARN_SURROGATE        = 0x0001;
+my $UNICODE_WARN_NONCHAR          = 0x0002;
+my $UNICODE_WARN_SUPER            = 0x0004;
+my $UNICODE_WARN_ABOVE_31_BIT     = 0x0008;
+my $UNICODE_DISALLOW_SURROGATE    = 0x0010;
+my $UNICODE_DISALLOW_NONCHAR      = 0x0020;
+my $UNICODE_DISALLOW_SUPER        = 0x0040;
+my $UNICODE_DISALLOW_ABOVE_31_BIT = 0x0080;
+
+my $look_for_everything_utf8n_to
+                        = $UTF8_DISALLOW_SURROGATE
 			| $UTF8_WARN_SURROGATE
 			| $UTF8_DISALLOW_NONCHAR
 			| $UTF8_WARN_NONCHAR
@@ -75,6 +86,15 @@ my $look_for_everything = $UTF8_DISALLOW_SURROGATE
 			| $UTF8_WARN_SUPER
 			| $UTF8_DISALLOW_FE_FF
 			| $UTF8_WARN_FE_FF;
+my $look_for_everything_uvchr_to
+                        = $UNICODE_DISALLOW_SURROGATE
+			| $UNICODE_WARN_SURROGATE
+			| $UNICODE_DISALLOW_NONCHAR
+			| $UNICODE_WARN_NONCHAR
+			| $UNICODE_DISALLOW_SUPER
+			| $UNICODE_WARN_SUPER
+			| $UNICODE_DISALLOW_ABOVE_31_BIT
+			| $UNICODE_WARN_ABOVE_31_BIT;
 
 foreach ([0, '', '', 'empty'],
 	 [0, 'N', 'N', '1 char'],
@@ -355,7 +375,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     # is an error.  But some of the code points here do cause warnings, so we
     # check here and turn off the ones that apply to such code points.  A
     # later section of the code tests for these kinds of things.
-    my $this_utf8_flags = $look_for_everything;
+    my $this_utf8_flags = $look_for_everything_utf8n_to;
     my $len = length $bytes;
     if ($n > 2 ** 31 - 1) {
         $this_utf8_flags &= ~($UTF8_DISALLOW_FE_FF|$UTF8_WARN_FE_FF);
@@ -377,6 +397,32 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
 
     unless (is(scalar @warnings, 0,
                "Verify utf8n_to_uvchr() for $hex_n generated no warnings"))
+    {
+        diag "The warnings were: " . join(", ", @warnings);
+    }
+
+    # Similarly for uvchr_to_utf8
+    my $this_uvchr_flags = $look_for_everything_uvchr_to;
+    if ($n > 2 ** 31 - 1) {
+        $this_uvchr_flags &=
+                ~($UNICODE_DISALLOW_ABOVE_31_BIT|$UNICODE_WARN_ABOVE_31_BIT);
+    }
+    if ($n > 0x10FFFF) {
+        $this_uvchr_flags &= ~($UNICODE_DISALLOW_SUPER|$UNICODE_WARN_SUPER);
+    }
+    elsif (($n & 0xFFFE) == 0xFFFE) {
+        $this_uvchr_flags &= ~($UNICODE_DISALLOW_NONCHAR|$UNICODE_WARN_NONCHAR);
+    }
+    $display_flags = sprintf "0x%x", $this_uvchr_flags;
+
+    undef @warnings;
+
+    my $ret = test_uvchr_to_utf8_flags($n, $this_uvchr_flags);
+    ok(defined $ret, "Verify uvchr_to_utf8_flags($hex_n, $display_flags) returned success");
+    is($ret, $bytes, "Verify uvchr_to_utf8_flags($hex_n, $display_flags) returns correct bytes");
+
+    unless (is(scalar @warnings, 0,
+        "Verify uvchr_to_utf8_flags($hex_n, $display_flags) for $hex_n generated no warnings"))
     {
         diag "The warnings were: " . join(", ", @warnings);
     }
@@ -858,7 +904,7 @@ foreach my $test (@tests) {
                     # indicate this as well
                     my $disallowed = $disallow_flag || $will_overflow;
 
-                    my $this_name = "$testname: " . (($disallow_flag)
+                    my $this_name = "utf8n_to_uvchr() $testname: " . (($disallow_flag)
                                                     ? 'disallowed'
                                                     : ($disallowed)
                                                         ? 'FE_FF allowed'
@@ -977,6 +1023,124 @@ foreach my $test (@tests) {
                         {
                             diag $call;
                             diag "The warnings were: " . join(", ", @warnings);
+                        }
+                    }
+
+                    # Now repeat some of the above, but for
+                    # uvchr_to_utf8_flags().  Since this comes from an
+                    # existing code point, it hasn't overflowed.
+                    next if $will_overflow;
+
+                    # The warning and disallow flags passed in are for
+                    # utf8n_to_uvchr().  Convert them for
+                    # uvchr_to_utf8_flags().
+                    my $uvchr_warn_flag = 0;
+                    my $uvchr_disallow_flag = 0;
+                    if ($warn_flag) {
+                        if ($warn_flag == $UTF8_WARN_SURROGATE) {
+                            $uvchr_warn_flag = $UNICODE_WARN_SURROGATE
+                        }
+                        elsif ($warn_flag == $UTF8_WARN_NONCHAR) {
+                            $uvchr_warn_flag = $UNICODE_WARN_NONCHAR
+                        }
+                        elsif ($warn_flag == $UTF8_WARN_SUPER) {
+                            $uvchr_warn_flag = $UNICODE_WARN_SUPER
+                        }
+                        elsif ($warn_flag == $UTF8_WARN_FE_FF) {
+                            $uvchr_warn_flag = $UNICODE_WARN_ABOVE_31_BIT;
+                        }
+                        else {
+                            fail(sprintf "Unexpected warn flag: %x",
+                                 $warn_flag);
+                            next;
+                        }
+                    }
+                    if ($disallow_flag) {
+                        if ($disallow_flag == $UTF8_DISALLOW_SURROGATE) {
+                            $uvchr_disallow_flag = $UNICODE_DISALLOW_SURROGATE
+                        }
+                        elsif ($disallow_flag == $UTF8_DISALLOW_NONCHAR) {
+                            $uvchr_disallow_flag = $UNICODE_DISALLOW_NONCHAR
+                        }
+                        elsif ($disallow_flag == $UTF8_DISALLOW_SUPER) {
+                            $uvchr_disallow_flag = $UNICODE_DISALLOW_SUPER
+                        }
+                        elsif ($disallow_flag == $UTF8_DISALLOW_FE_FF) {
+                            $uvchr_disallow_flag =
+                            $UNICODE_DISALLOW_ABOVE_31_BIT;
+                        }
+                        else {
+                            fail(sprintf "Unexpected disallow flag: %x",
+                                 $disallow_flag);
+                            next;
+                        }
+                    }
+
+                    $disallowed = $uvchr_disallow_flag;
+
+                    $this_name = "uvchr_to_utf8_flags() $testname: "
+                                                  . (($uvchr_disallow_flag)
+                                                    ? 'disallowed'
+                                                    : ($disallowed)
+                                                      ? 'ABOVE_31_BIT allowed'
+                                                      : 'allowed');
+                    $this_name .= ", $eval_warn";
+                    $this_name .= ", " . (($uvchr_warn_flag)
+                                          ? 'with warning flag'
+                                          : 'no warning flag');
+
+                    undef @warnings;
+                    my $ret;
+                    my $warn_flag = sprintf "0x%x", $uvchr_warn_flag;
+                    my $disallow_flag = sprintf "0x%x", $uvchr_disallow_flag;
+                    $call = sprintf "call was: $eval_warn; \$ret = test_uvchr_to_utf8_flags(0x%x, $warn_flag|$disallow_flag)", $allowed_uv;
+                    $eval_text = "$eval_warn; \$ret = test_uvchr_to_utf8_flags($allowed_uv, $warn_flag|$disallow_flag)";
+                    eval "$eval_text";
+                    if (! ok ("$@ eq ''", "$this_name: eval succeeded")) {
+                        diag "\$!='$!'; eval'd=\"$eval_text\"";
+                        next;
+                    }
+                    if ($disallowed) {
+                        unless (is($ret, undef, "$this_name: Returns undef")) {
+                            diag $call;
+                        }
+                    }
+                    else {
+                        unless (is($ret, $bytes, "$this_name: Returns expected string")) {
+                            diag $call;
+                        }
+                    }
+                    if (! $do_warning
+                        && ($warning eq 'utf8' || $warning eq $category))
+                    {
+                        if (!is(scalar @warnings, 0,
+                                            "$this_name: No warnings generated"))
+                        {
+                            diag $call;
+                            diag "The warnings were: " . join(", ", @warnings);
+                        }
+                    }
+                    elsif ($uvchr_warn_flag
+                           && ($warning eq 'utf8' || $warning eq $category))
+                    {
+                        if (is(scalar @warnings, 1,
+                               "$this_name: Got a single warning "))
+                        {
+                            TODO: {
+                                local $TODO = "Doesn't give dire warning for code points 2**31" if $allowed_uv >= 2**31 && $warnings[0] =~ /may not be portable/;
+                            unless (like($warnings[0], $message,
+                                            "$this_name: Got expected warning"))
+                            {
+                                diag $call;
+                            }
+                            }
+                        }
+                        else {
+                            diag $call;
+                            if (scalar @warnings) {
+                                diag "The warnings were: "
+                                                        . join(", ", @warnings);
+                            }
                         }
                     }
                 }

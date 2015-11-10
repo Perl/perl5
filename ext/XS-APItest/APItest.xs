@@ -1393,6 +1393,26 @@ test_utf8n_to_uvchr(s, len, flags)
     OUTPUT:
         RETVAL
 
+SV *
+test_uvchr_to_utf8_flags(uv, flags)
+
+        SV *uv
+        SV *flags
+    PREINIT:
+        U8 dest[UTF8_MAXBYTES];
+        U8 *ret;
+
+    CODE:
+        /* Call uvchr_to_utf8_flags() with the inputs.  */
+        ret = uvchr_to_utf8_flags(dest, SvUV(uv), SvUV(flags));
+        if (! ret) {
+            XSRETURN_UNDEF;
+        }
+        RETVAL = newSVpvn((char *) dest, ret - dest);
+
+    OUTPUT:
+        RETVAL
+
 MODULE = XS::APItest:Overload	PACKAGE = XS::APItest::Overload
 
 void
