@@ -6,7 +6,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan( tests => 69 );
+plan( tests => 70 );
 
 @foo = (1, 2, 3, 4);
 cmp_ok($foo[0], '==', 1, 'first elem');
@@ -217,3 +217,6 @@ sub empty {}
 tie $t, "";
 () = (empty(), ($t)x10); # empty() since sub calls usually result in copies
 is(tied($t)->{fetched}, undef, 'assignment to empty list makes no copies');
+
+# this was passing a trash SV at the top of the stack to SvIV()
+ok(($0[()[()]],1), "[perl #126193] list slice with zero indexes");
