@@ -8,7 +8,7 @@ BEGIN {
     require './charset_tools.pl';
 }
 
-plan( tests => 267 );
+plan( tests => 268 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -1079,4 +1079,9 @@ SKIP: {
     my $s1 = 0;
     $s1 =~ s/.?/$s1++/ge;
     is($s1, "01","RT #123954 s1");
+}
+{
+    # RT #126602 double free if the value being modified is freed in the replacement
+    fresh_perl_is('s//*_=0;s|0||;00.y0/e; print qq(ok\n)', "ok\n", { stderr => 1 },
+                  "[perl #126602] s//*_=0;s|0||/e crashes");
 }

@@ -935,11 +935,13 @@ struct subst {
 	cx->sb_rx		= rx,					\
 	cx->cx_type		= CXt_SUBST | (once ? CXp_ONCE : 0);	\
 	rxres_save(&cx->sb_rxres, rx);					\
-	(void)ReREFCNT_inc(rx)
+	(void)ReREFCNT_inc(rx);						\
+        SvREFCNT_inc_void_NN(targ)
 
 #  define POPSUBST(cx) cx = &cxstack[cxstack_ix--];			\
 	rxres_free(&cx->sb_rxres);					\
-	ReREFCNT_dec(cx->sb_rx)
+	ReREFCNT_dec(cx->sb_rx);					\
+        SvREFCNT_dec_NN(cx->sb_targ)
 #endif
 
 #define CxONCE(cx)		((cx)->cx_type & CXp_ONCE)
