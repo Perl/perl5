@@ -116,8 +116,7 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 
     /* The first problematic code point is the first surrogate */
     if (   flags    /* It's common to turn off all these */
-        && uv >= UNICODE_SURROGATE_FIRST
-        && ckWARN3_d(WARN_SURROGATE, WARN_NON_UNICODE, WARN_NONCHAR))
+        && uv >= UNICODE_SURROGATE_FIRST)
     {
 	if (UNICODE_IS_SURROGATE(uv)) {
 	    if (flags & UNICODE_WARN_SURROGATE) {
