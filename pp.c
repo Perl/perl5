@@ -5268,15 +5268,20 @@ PP(pp_lslice)
     SV **lelem;
 
     if (GIMME_V != G_ARRAY) {
-	I32 ix = SvIV(*lastlelem);
-	if (ix < 0)
-	    ix += max;
-	if (ix < 0 || ix >= max)
-	    *firstlelem = &PL_sv_undef;
-	else
-	    *firstlelem = firstrelem[ix];
-	SP = firstlelem;
-	RETURN;
+        if (lastlelem < firstlelem) {
+            *firstlelem = &PL_sv_undef;
+        }
+        else {
+            I32 ix = SvIV(*lastlelem);
+            if (ix < 0)
+                ix += max;
+            if (ix < 0 || ix >= max)
+                *firstlelem = &PL_sv_undef;
+            else
+                *firstlelem = firstrelem[ix];
+        }
+        SP = firstlelem;
+        RETURN;
     }
 
     if (max == 0) {
