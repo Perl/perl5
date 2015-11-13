@@ -402,6 +402,18 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
         diag "The warnings were: " . join(", ", @warnings);
     }
 
+    undef @warnings;
+
+    $ret_ref = test_valid_utf8_to_uvchr($bytes);
+    is($ret_ref->[0], $n, "Verify valid_utf8_to_uvchr($display_bytes) returns $hex_n");
+    is($ret_ref->[1], $len, "Verify valid_utf8_to_uvchr() for $hex_n returns expected length");
+
+    unless (is(scalar @warnings, 0,
+               "Verify valid_utf8_to_uvchr() for $hex_n generated no warnings"))
+    {
+        diag "The warnings were: " . join(", ", @warnings);
+    }
+
     # Similarly for uvchr_to_utf8
     my $this_uvchr_flags = $look_for_everything_uvchr_to;
     if ($n > 2 ** 31 - 1) {
