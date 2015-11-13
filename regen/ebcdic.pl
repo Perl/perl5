@@ -10,31 +10,34 @@ require 'regen/charset_translations.pl';
 my $out_fh = open_new('ebcdic_tables.h', '>',
         {style => '*', by => $0, });
 
-sub output_table ($$) {
+sub output_table ($$;$) {
     my $table_ref = shift;
     my $name = shift;
 
     # Tables in hex easier to debug, but don't fit into 80 columns
-    my $print_in_hex = 0;
+    my $print_in_hex = shift // 1;
 
     die "Requres 256 entries in table $name, got @$table_ref" if @$table_ref != 256;
 
     print $out_fh "EXTCONST U8 $name\[\] = {\n";
 
-    print $out_fh "/*          _0    _1    _2    _3    _4    _5    _6    _7    _8    _9    _A    _B    _C    _D    _E    _F        */\n" if $print_in_hex;
+    my $column_numbers= "/*_0   _1   _2   _3   _4   _5   _6   _7   _8   _9   _A   _B   _C   _D   _E  _F*/\n";
+    print $out_fh $column_numbers if $print_in_hex;
     for my $i (0 .. 255) {
         if ($print_in_hex) {
-            printf $out_fh "/* %X_ */ ", $i / 16 if $i % 16 == 0;
-            printf $out_fh " 0x%02X", $table_ref->[$i];
+            # No row headings, so will fit in 80 cols.
+            #printf $out_fh "/* %X_ */ ", $i / 16 if $i % 16 == 0;
+            printf $out_fh "0x%02X", $table_ref->[$i];
         }
         else {
             printf $out_fh "%4d", $table_ref->[$i];
         }
-        printf $out_fh "  /* %X_ */", $i / 16 if $print_in_hex && $i % 16 == 15;
         print $out_fh ",", if $i < 255;
+        #print $out_fh ($i < 255) ? "," : " ";
+        #printf $out_fh " /* %X_ */", $i / 16 if $print_in_hex && $i % 16 == 15;
         print $out_fh "\n" if $i % 16 == 15;
     }
-    print $out_fh "/*          _0    _1    _2    _3    _4    _5    _6    _7    _8    _9    _A    _B    _C    _D    _E    _F        */\n" if $print_in_hex;
+    print $out_fh $column_numbers if $print_in_hex;
     print $out_fh "};\n\n";
 }
 
@@ -129,7 +132,8 @@ END
  * entries marked 9 in tr16 are continuation bytes and are marked as length 1
  * here so that we can recover. */
 END
-        output_table(\@utf8skip, "PL_utf8skip");
+        output_table(\@utf8skip, "PL_utf8skip", 0);  # The 0 means don't print
+                                                     # in hex
     }
 
     use feature 'unicode_strings';
