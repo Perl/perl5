@@ -1,3 +1,8 @@
+2.22_01
+    - require perl v5.8.0; tests for [perl #121196] break on 5.6.1, and
+      I (rjbs) am not comfortable spending time determining whether the fault
+      lies for a 15 year old version of perl
+
 2.22
     - Better handling of attempts to load non-existent modules
     - Improvements to fields.pm documentation

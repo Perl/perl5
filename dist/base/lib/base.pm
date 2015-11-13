@@ -1,9 +1,10 @@
+use 5.008;
 package base;
 
 use strict 'vars';
 use vars qw($VERSION);
-$VERSION = '2.22';
-$VERSION = eval $VERSION;
+$VERSION = '2.22_01';
+$VERSION =~ tr/_//d;
 
 # constant.pm is slow
 sub SUCCESS () { 1 }
