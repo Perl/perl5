@@ -327,6 +327,7 @@ S_ithread_free(pTHX_ ithread *thread)
 
 static void
 S_ithread_count_inc(pTHX_ ithread *thread)
+  PERL_TSA_EXCLUDES(thread->mutex)
 {
     MUTEX_LOCK(&thread->mutex);
     thread->count++;
