@@ -197,7 +197,7 @@ use File::Glob qw(:case);
     },
 
     'Carp' => {
-        'DISTRIBUTION' => 'RJBS/Carp-1.36.tar.gz',
+        'DISTRIBUTION' => 'RJBS/Carp-1.38.tar.gz',
         'FILES'        => q[dist/Carp],
     },
 
@@ -863,7 +863,7 @@ use File::Glob qw(:case);
     },
 
     'PathTools' => {
-        'DISTRIBUTION' => 'SMUELLER/PathTools-3.47.tar.gz',
+        'DISTRIBUTION' => 'RJBS/PathTools-3.59.tar.gz',
         'FILES'        => q[dist/PathTools],
         'EXCLUDED'     => [
             qr{^t/lib/Test/},
