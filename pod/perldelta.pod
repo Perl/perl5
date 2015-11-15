@@ -241,6 +241,20 @@ error, but were being silently accepted since Perl 5.18.0.  This has been
 fixed.
 L<[perl #126178]|https://rt.perl.org/Ticket/Display.html?id=126178>
 
+=item *
+
+A bug in hexadecimal floating point literal support meant that high-order bits
+could be lost in cases where mantissa overflow was caused by too many trailing
+zeros in the fractional part.  This has been fixed.
+L<[perl #126582]|https://rt.perl.org/Ticket/Display.html?id=126582>
+
+=item *
+
+Another hexadecimal floating point bug, causing low-order bits to be lost in
+cases where the last hexadecimal digit of the mantissa has bits straddling the
+limit of the number of bits allowed for the mantissa, has also been fixed.
+L<[perl #126586]|https://rt.perl.org/Ticket/Display.html?id=126586>
+
 =back
 
 =head1 Acknowledgements
