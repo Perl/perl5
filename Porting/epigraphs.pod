@@ -154,6 +154,25 @@ L<Announced on 2015-06-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   They sing while you slave and I just get bored
   I ain't gonna work on Maggie's farm no more
 
+=head2 v5.22.1-RC2 - Wilhelm Müller, trans. Anon., "The Old Head" (No. 14 in Schubert's song-cycle, "Winterreise")
+
+L<Announced on 2015-11-15 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/11/msg232632.html>
+
+  The hoary frost has a white sheen
+  Strewn all over my hair,
+  So I thought I was an old man
+  And thought life dealt me fair.
+
+  Yet soon was thawed my old white mane,
+  And I have my black hair again.
+  How I abhor my young fair years,
+  How long to wait for death and biers?
+
+  From setting sun to morning's hue
+  Many a head turns white.
+  Who'll credit it? My hair did not
+  In all this lifelong plight!
+
 =head2 v5.22.1-RC1 - Wilhelm Müller, trans. Anon., "Will-o'-the Wisp" (No. 9 in Schubert's song-cycle, "Winterreise")
 
 L<Announced on 2015-10-31 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/10/msg232321.html>
