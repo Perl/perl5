@@ -60,9 +60,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Other</h3>
 
-<commit votes="jhi, steveh" id="a78418585926648a4adf8e68eb5faee232e3eff9" ticket="" desc="fix typo in error message"/>
-<commit votes="jhi, steveh" id="0c8adad77d308bd7d386922521a57b894a2bf959" ticket="126582" desc="perl #126582 hexfp overflow drops hi-order bits"/>
-<commit votes="jhi, steveh" id="96524c28e76cdc1099eebc2832aef5b789ebbc11" ticket="126586" desc="perl #126586 hexfp may lose 1-3 low order bits (most often, 1)"/>
+<commit votes="jhi, steveh, khw" id="a78418585926648a4adf8e68eb5faee232e3eff9" ticket="" desc="fix typo in error message"/>
+<commit votes="jhi, steveh, khw" id="0c8adad77d308bd7d386922521a57b894a2bf959" ticket="126582" desc="perl #126582 hexfp overflow drops hi-order bits"/>
+<commit votes="jhi, steveh, khw" id="96524c28e76cdc1099eebc2832aef5b789ebbc11" ticket="126586" desc="perl #126586 hexfp may lose 1-3 low order bits (most often, 1)"/>
 
 </div>
 
