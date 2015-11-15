@@ -291,6 +291,11 @@ upgrade from very old versions of perl to the latest version.
 
 =item *
 
+Patches that fix bugs in features that were new in the corresponding 5.x.0
+stable release.
+
+=item *
+
 Patches that fix anything which prevents or seriously impacts the build
 or installation of perl.
 
