@@ -26,13 +26,16 @@ of the op/regexp and op/pat, or ext/Storable tests dumping core
 (the exact pattern of failures depending on the GCC release and
 optimization flags).
 
-gcc 3.2.1 is known to work okay with Perl 5.8.0.  However, when
-optimizing the toke.c gcc likes to have a lot of memory, 256 megabytes
-seems to be enough.  The default setting of the process data section
-in Tru64 should be one gigabyte, but some sites/setups might have
-lowered that.  The configuration process of Perl checks for too low
-process limits, and lowers the optimization for the toke.c if
-necessary, and also gives advice on how to raise the process limits.
+Both the native cc and gcc seem to consume lots of memory when
+building Perl.  toke.c is a known trouble spot when optimizing:
+256 megabytes of data section seems to be enough.  Another known
+trouble spot is the mktables script which builds the Unicode support
+tables.  The default setting of the process data section in Tru64
+should be one gigabyte, but some sites/setups might have lowered that.
+The configuration process of Perl checks for too low process limits,
+and lowers the optimization for the toke.c if necessary, and also
+gives advice on how to raise the process limits
+(for example: C<ulimit -d 262144>)
 
 Also, Configure might abort with
 
