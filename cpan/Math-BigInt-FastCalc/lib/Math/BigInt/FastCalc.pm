@@ -4,9 +4,9 @@ use 5.006;
 use strict;
 use warnings;
 
-use Math::BigInt::Calc 1.997;
+use Math::BigInt::Calc 1.999706;
 
-our $VERSION = '0.35';
+our $VERSION = '0.37';
 
 ##############################################################################
 # global constants, flags and accessory
