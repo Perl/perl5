@@ -19,7 +19,7 @@ use 5.006002;
 use strict;
 use warnings;
 
-our $VERSION = '1.999707';
+our $VERSION = '1.999710';
 
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(objectify bgcd blcm);
@@ -887,7 +887,7 @@ sub _find_round_parameters
 
   # This procedure finds the round parameters, but it is for speed reasons
   # duplicated in round. Otherwise, it is tested by the testsuite and used
-  # by fdiv().
+  # by bdiv().
 
   # returns ($self) or ($self,$a,$p,$r) - sets $self to NaN of both A and P
   # were requested/defined (locally or globally or both)
@@ -1003,7 +1003,7 @@ sub round
     require Carp; Carp::croak ("Unknown round mode '$r'");
     }
 
-  # now round, by calling either fround or ffround:
+  # now round, by calling either bround or bfround:
   if (defined $a)
     {
     $self->bround(int($a),$r) if !defined $self->{_a} || $self->{_a} >= $a;
@@ -2510,7 +2510,7 @@ sub exponent
     my $s = $x->{sign}; $s =~ s/^[+-]//;  # NaN, -inf,+inf => NaN or inf
     return $self->new($s);
     }
-  return $self->bone() if $x->is_zero();
+  return $self->bzero() if $x->is_zero();
 
   # 12300 => 2 trailing zeros => exponent is 2
   $self->new( $CALC->_zeros($x->{value}) );
@@ -3505,6 +3505,8 @@ Math::BigInt - Arbitrary size integer/float math package
   $h = Math::BigInt->new('0x123');	# from hexadecimal
   $b = Math::BigInt->new('0b101');	# from binary
   $o = Math::BigInt->from_oct('0101');	# from octal
+  $h = Math::BigInt->from_hex('cafe');	# from hexadecimal
+  $b = Math::BigInt->from_bin('0101');	# from binary
 
   # Testing (don't modify their arguments)
   # (return true if the condition is met, otherwise false)
@@ -4605,21 +4607,21 @@ versions <= 5.7.2) is like this:
 
 =item Precision
 
-  * ffround($p) is able to round to $p number of digits after the decimal
+  * bfround($p) is able to round to $p number of digits after the decimal
     point
   * otherwise P is unused
 
 =item Accuracy (significant digits)
 
-  * fround($a) rounds to $a significant digits
-  * only fdiv() and fsqrt() take A as (optional) parameter
-    + other operations simply create the same number (fneg etc), or
-      more (fmul) of digits
+  * bround($a) rounds to $a significant digits
+  * only bdiv() and bsqrt() take A as (optional) parameter
+    + other operations simply create the same number (bneg etc), or
+      more (bmul) of digits
     + rounding/truncating is only done when explicitly calling one
-      of fround or ffround, and never for BigInt (not implemented)
-  * fsqrt() simply hands its accuracy argument over to fdiv.
+      of bround or bfround, and never for BigInt (not implemented)
+  * bsqrt() simply hands its accuracy argument over to bdiv.
   * the documentation and the comment in the code indicate two
-    different ways on how fdiv() determines the maximum number
+    different ways on how bdiv() determines the maximum number
     of digits it should calculate, and the actual code does yet
     another thing
     POD:
@@ -4717,22 +4719,22 @@ This is how it works now:
     effect, and the other P, this results in an error (NaN).
   * A takes precedence over P (Hint: A comes before P).
     If neither of them is defined, nothing is used, i.e. the result will have
-    as many digits as it can (with an exception for fdiv/fsqrt) and will not
+    as many digits as it can (with an exception for bdiv/bsqrt) and will not
     be rounded.
-  * There is another setting for fdiv() (and thus for fsqrt()). If neither of
-    A or P is defined, fdiv() will use a fallback (F) of $div_scale digits.
+  * There is another setting for bdiv() (and thus for bsqrt()). If neither of
+    A or P is defined, bdiv() will use a fallback (F) of $div_scale digits.
     If either the dividend's or the divisor's mantissa has more digits than
     the value of F, the higher value will be used instead of F.
     This is to limit the digits (A) of the result (just consider what would
     happen with unlimited A and P in the case of 1/3 :-)
-  * fdiv will calculate (at least) 4 more digits than required (determined by
+  * bdiv will calculate (at least) 4 more digits than required (determined by
     A, P or F), and, if F is not used, round the result
     (this will still fail in the case of a result like 0.12345000000001 with A
     or P of 5, but this can not be helped - or can it?)
   * Thus you can have the math done by on Math::Big* class in two modi:
     + never round (this is the default):
       This is done by setting A and P to undef. No math operation
-      will round the result, with fdiv() and fsqrt() as exceptions to guard
+      will round the result, with bdiv() and bsqrt() as exceptions to guard
       against overflows. You must explicitly call bround(), bfround() or
       round() (the latter with parameters).
       Note: Once you have rounded a number, the settings will 'stick' on it
@@ -4743,7 +4745,7 @@ This is how it works now:
         $x = Math::BigFloat->new(12.34);
         $y = Math::BigFloat->new(98.76);
         $z = $x * $y;                           # 1218.6984
-        print $x->copy()->fround(3);            # 12.3 (but A is now 3!)
+        print $x->copy()->bround(3);            # 12.3 (but A is now 3!)
         $z = $x * $y;                           # still 1218.6984, without
                                                 # copy would have been 1210!
 
@@ -4773,7 +4775,7 @@ This is how it works now:
       + global A
       + global P
       + global F
-  * fsqrt() will hand its arguments to fdiv(), as it used to, only now for two
+  * bsqrt() will hand its arguments to bdiv(), as it used to, only now for two
     arguments (A and P) instead of one
 
 =item Local settings
@@ -4787,8 +4789,7 @@ This is how it works now:
 =item Rounding
 
   * the rounding routines will use the respective global or local settings.
-    fround()/bround() is for accuracy rounding, while ffround()/bfround()
-    is for precision
+    bround() is for accuracy rounding, while bfround() is for precision
   * the two rounding functions take as the second parameter one of the
     following rounding modes (R):
     'even', 'odd', '+inf', '-inf', 'zero', 'trunc', 'common'
@@ -4819,7 +4820,7 @@ This is how it works now:
 =item Remarks
 
   * The defaults are set up so that the new code gives the same results as
-    the old code (except in a few cases on fdiv):
+    the old code (except in a few cases on bdiv):
     + Both A and P are undefined and thus will not be used for rounding
       after each operation.
     + round() is thus a no-op, unless given extra parameters A and P
@@ -4990,20 +4991,20 @@ Examples for rounding:
   $y = Math::BigFloat->new(123.456789);
   Math::BigFloat->accuracy(4);		# no more A than 4
 
-  is ($x->copy()->fround(),123.4);	# even rounding
-  print $x->copy()->fround(),"\n";	# 123.4
+  is ($x->copy()->bround(),123.4);	# even rounding
+  print $x->copy()->bround(),"\n";	# 123.4
   Math::BigFloat->round_mode('odd');	# round to odd
-  print $x->copy()->fround(),"\n";	# 123.5
+  print $x->copy()->bround(),"\n";	# 123.5
   Math::BigFloat->accuracy(5);		# no more A than 5
   Math::BigFloat->round_mode('odd');	# round to odd
-  print $x->copy()->fround(),"\n";	# 123.46
-  $y = $x->copy()->fround(4),"\n";	# A = 4: 123.4
+  print $x->copy()->bround(),"\n";	# 123.46
+  $y = $x->copy()->bround(4),"\n";	# A = 4: 123.4
   print "$y, ",$y->accuracy(),"\n";	# 123.4, 4
 
   Math::BigFloat->accuracy(undef);	# A not important now
   Math::BigFloat->precision(2); 	# P important
   print $x->copy()->bnorm(),"\n";	# 123.46
-  print $x->copy()->fround(),"\n";	# 123.46
+  print $x->copy()->bround(),"\n";	# 123.46
 
 Examples for converting:
 
@@ -5617,15 +5618,15 @@ Mark Biggar, overloaded interface by Ilya Zakharevich, 1996-2001.
 
 =item *
 
-Completely rewritten by Tels L<http://bloodgate.com> in 2001-2008.
+Completely rewritten by Tels L<http://bloodgate.com>, 2001-2008.
 
 =item *
 
-Florian Ragwitz L<flora@cpan.org>, 2010.
+Florian Ragwitz E<lt>flora@cpan.orgE<gt>, 2010.
 
 =item *
 
-Peter John Acklam, L<pjacklam@online.no>, 2011-.
+Peter John Acklam E<lt>pjacklam@online.noE<gt>, 2011-.
 
 =back
 

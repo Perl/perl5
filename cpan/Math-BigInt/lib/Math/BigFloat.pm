@@ -16,7 +16,7 @@ use 5.006002;
 use strict;
 use warnings;
 
-our $VERSION = '1.999707';
+our $VERSION = '1.999710';
 
 require Exporter;
 our @ISA	= qw/Math::BigInt/;
@@ -223,10 +223,10 @@ sub new
       }
     $self->{sign} = $$mis;
 
-    # for something like 0Ey, set y to 1, and -0 => +0
+    # for something like 0Ey, set y to 0, and -0 => +0
     # Check $$miv for being '0' and $$mfv eq '', because otherwise _m could not
     # have become 0. That's faster than to call $MBI->_is_zero().
-    $self->{sign} = '+', $self->{_e} = $MBI->_one()
+    $self->{sign} = '+', $self->{_e} = $MBI->_zero()
      if $$miv eq '0' and $$mfv eq '';
 
     return $self->round(@r) if !$downgrade;
@@ -321,11 +321,11 @@ sub _bone
 
 sub _bzero
   {
-  # used by parent class bone() to initialize number to 0
+  # used by parent class bzero() to initialize number to 0
   my $self = shift;
   $IMPORT=1;					# call our import only once
   $self->{_m} = $MBI->_zero();
-  $self->{_e} = $MBI->_one();
+  $self->{_e} = $MBI->_zero();
   $self->{_es} = '+';
   }
 
@@ -4007,6 +4007,89 @@ sub length
   $len;
   }
 
+sub from_hex {
+    my $self    = shift;
+    my $selfref = ref $self;
+    my $class   = $selfref || $self;
+
+    my $str = shift;
+
+    $self = $class -> bzero() unless $selfref;
+
+    if ($str =~ s/
+                     ^
+
+                     # sign
+                     ( [+-]? )
+
+                     # optional "hex marker"
+                     (?: 0? x )?
+
+                     # significand using the hex digits 0..9 and a..f
+                     (
+                         [0-9a-fA-F]+ (?: _ [0-9a-fA-F]+ )*
+                         (?:
+                             \.
+                             (?: [0-9a-fA-F]+ (?: _ [0-9a-fA-F]+ )* )?
+                         )?
+                     |
+                         \.
+                         [0-9a-fA-F]+ (?: _ [0-9a-fA-F]+ )*
+                     )
+
+                     # exponent (power of 2) using decimal digits
+                     (?:
+                         [Pp]
+                         ( [+-]? )
+                         ( \d+ (?: _ \d+ )* )
+                     )?
+
+                     $
+                 //x)
+    {
+        my $s_sign  = $1 || '+';
+        my $s_value = $2;
+        my $e_sign  = $3 || '+';
+        my $e_value = $4 || '0';
+        $s_value =~ tr/_//d;
+        $e_value =~ tr/_//d;
+
+        # The significand must be multiplied by 2 raised to this exponent.
+
+        my $two_expon = $class -> new($e_value);
+        $two_expon -> bneg() if $e_sign eq '-';
+
+        # If there is a dot in the significand, remove it and adjust the
+        # exponent according to the number of digits in the fraction part of
+        # the significand. Multiply the exponent adjustment value by 4 since
+        # the digits in the significand are in base 16, but the exponent is
+        # only in base 2.
+
+        my $idx = index($s_value, '.');
+        if ($idx >= 0) {
+            substr($s_value, $idx, 1) = '';
+            $two_expon -= $class -> new(CORE::length($s_value))
+                                 -> bsub($idx)
+                                 -> bmul("4");
+        }
+
+        $self -> {sign} = $s_sign;
+        $self -> {_m}   = $MBI -> _from_hex('0x' . $s_value);
+
+        if ($two_expon > 0) {
+            my $factor = $class -> new("2") -> bpow($two_expon);
+            $self -> bmul($factor);
+        } elsif ($two_expon < 0) {
+            my $factor = $class -> new("0.5") -> bpow(-$two_expon);
+            $self -> bmul($factor);
+        }
+
+        return $self;
+    }
+
+    return $self->bnan();
+}
+
 1;
 
 __END__
@@ -4030,6 +4113,9 @@ Math::BigFloat - Arbitrary size floating point math package
  my $inf = Math::BigFloat->binf('-');	# create a -inf
  my $one = Math::BigFloat->bone();	# create a +1
  my $mone = Math::BigFloat->bone('-');	# create a -1
+ my $x = Math::BigFloat->bone('-');	#
+
+ my $h = Math::BigFloat->from_hex('0xc.afep+3');    # from hexadecimal
 
  my $pi = Math::BigFloat->bpi(100);	# PI to 100 digits
 
@@ -4219,8 +4305,6 @@ as BigInts such that:
 
 C<< ($m,$e) = $x->parts(); >> is just a shortcut giving you both of them.
 
-A zero is represented and returned as C<0E1>, B<not> C<0E0> (after Knuth).
-
 Currently the mantissa is reduced as much as possible, favouring higher
 exponents over lower ones (e.g. returning 1e7 instead of 10e6 or 10000000e0).
 This might change in the future, so do not depend on it.
@@ -4286,26 +4370,26 @@ functions like so:
 
 =over
 
-=item ffround ( +$scale )
+=item bfround ( +$scale )
 
 Rounds to the $scale'th place left from the '.', counting from the dot.
 The first digit is numbered 1. 
 
-=item ffround ( -$scale )
+=item bfround ( -$scale )
 
 Rounds to the $scale'th place right from the '.', counting from the dot.
 
-=item ffround ( 0 )
+=item bfround ( 0 )
 
 Rounds to an integer.
 
-=item fround  ( +$scale )
+=item bround  ( +$scale )
 
 Preserves accuracy to $scale digits from the left (aka significant digits)
 and pads the rest with zeros. If the number is between 1 and -1, the
 significant digits count from the first non-zero after the '.'
 
-=item fround  ( -$scale ) and fround ( 0 )
+=item bround  ( -$scale ) and bround ( 0 )
 
 These are effectively no-ops.
 
@@ -4497,6 +4581,17 @@ object that has the same class as $x, a subclass thereof, or a string that
 C<ref($x)-E<gt>new()> can parse to create an object.
 
 In Math::BigFloat, C<as_float()> has the same effect as C<copy()>.
+
+=item from_hex()
+
+    $x -> from_hex("0x1.921fb54442d18p+1");
+    $x = Math::BigFloat -> from_hex("0x1.921fb54442d18p+1");
+
+Interpret input as a hexadecimal string. A "0x" or "x" prefix is optional. A
+single underscore character may be placed between any two digits. If the input
+is invalid, a NaN is returned. The exponent is in base 2 using decimal digits.
+
+If called as an instance method, the value is assigned to the invocand.
 
 =back
 

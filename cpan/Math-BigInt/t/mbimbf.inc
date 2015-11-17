@@ -316,9 +316,9 @@ is ($x->bnot(),-123400);			# not -1234001
 $x = $mbi->new(-123401); $x->{_a} = 4; is ($x->babs(),123401);
 $x = $mbi->new(-123401); $x->{_a} = 4; is ($x->bneg(),123401);
 
-# test fdiv rounding to A and R (bug in v1.48 and maybe earlier versions)
+# test bdiv rounding to A and R (bug in v1.48 and maybe earlier versions)
 $mbf->round_mode('even');
-$x = $mbf->new('740.7')->fdiv('6',4,undef,'zero'); is ($x,'123.4');
+$x = $mbf->new('740.7')->bdiv('6',4,undef,'zero'); is ($x,'123.4');
 
 $x = $mbi->new('123456'); $y = $mbi->new('123456'); $y->{_a} = 6;
 is ($x->bdiv($y),1); is ($x->{_a},6);			# carried over

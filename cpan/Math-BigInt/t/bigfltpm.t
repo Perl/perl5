@@ -17,7 +17,7 @@ is ($class->config()->{with}, $CL);
 
 # bug #17447: Can't call method Math::BigFloat->bsub, not a valid method
 my $c = Math::BigFloat->new( '123.3' );
-is ($c->fsub(123), '0.3'); # calling fsub on a BigFloat works
+is ($c->bsub(123), '0.3'); # calling bsub on a BigFloat works
 
 # Bug until BigInt v1.86, the scale wasn't treated as a scalar:
 $c = Math::BigFloat->new('0.008'); my $d = Math::BigFloat->new(3);

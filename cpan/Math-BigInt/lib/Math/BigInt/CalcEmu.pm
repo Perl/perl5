@@ -4,7 +4,7 @@ use 5.006002;
 use strict;
 use warnings;
 
-our $VERSION = '1.999707';
+our $VERSION = '1.999710';
 
 package Math::BigInt;
 
