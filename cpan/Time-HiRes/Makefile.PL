@@ -805,6 +805,14 @@ sub doMakefile {
 	push @makefileopts, MAN3PODS => {};
     }
 
+    if ($ExtUtils::MakeMaker::VERSION >= 6.48) {
+	push @makefileopts, (MIN_PERL_VERSION => '5.008',);
+    }
+
+    if ($ExtUtils::MakeMaker::VERSION >= 6.31) {
+	push @makefileopts, (LICENSE => 'perl_5');
+    }
+
     WriteMakefile(@makefileopts);
 }
 

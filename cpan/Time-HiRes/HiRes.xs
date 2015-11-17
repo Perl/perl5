@@ -858,6 +858,7 @@ NV
 nanosleep(nsec)
         NV nsec
     CODE:
+	PERL_UNUSED_ARG(nsec);
         croak("Time::HiRes::nanosleep(): unimplemented in this platform");
         RETVAL = 0.0;
     OUTPUT:
@@ -908,6 +909,7 @@ NV
 usleep(useconds)
         NV useconds
     CODE:
+	PERL_UNUSED_ARG(useconds);
         croak("Time::HiRes::usleep(): unimplemented in this platform");
         RETVAL = 0.0;
     OUTPUT:
@@ -993,6 +995,8 @@ ualarm(useconds,interval=0)
 	int useconds
 	int interval
     CODE:
+	PERL_UNUSED_ARG(useconds);
+	PERL_UNUSED_ARG(interval);
         croak("Time::HiRes::ualarm(): unimplemented in this platform");
 	RETVAL = -1;
     OUTPUT:
@@ -1003,6 +1007,8 @@ alarm(seconds,interval=0)
 	NV seconds
 	NV interval
     CODE:
+	PERL_UNUSED_ARG(seconds);
+	PERL_UNUSED_ARG(interval);
         croak("Time::HiRes::alarm(): unimplemented in this platform");
 	RETVAL = 0.0;
     OUTPUT:
@@ -1178,6 +1184,7 @@ NV
 clock_gettime(clock_id = 0)
 	int clock_id
     CODE:
+	PERL_UNUSED_ARG(clock_id);
         croak("Time::HiRes::clock_gettime(): unimplemented in this platform");
         RETVAL = 0.0;
     OUTPUT:
@@ -1210,6 +1217,7 @@ NV
 clock_getres(clock_id = 0)
 	int clock_id
     CODE:
+	PERL_UNUSED_ARG(clock_id);
         croak("Time::HiRes::clock_getres(): unimplemented in this platform");
         RETVAL = 0.0;
     OUTPUT:
@@ -1249,7 +1257,13 @@ clock_nanosleep(clock_id, nsec, flags = 0)
 
 NV
 clock_nanosleep(clock_id, nsec, flags = 0)
+	int clock_id
+	NV  nsec
+	int flags
     CODE:
+	PERL_UNUSED_ARG(clock_id);
+	PERL_UNUSED_ARG(nsec);
+	PERL_UNUSED_ARG(flags);
         croak("Time::HiRes::clock_nanosleep(): unimplemented in this platform");
         RETVAL = 0.0;
     OUTPUT:
