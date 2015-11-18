@@ -377,7 +377,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
     STMT_START {                                                        \
         IV TARGi_iv = i;                                                \
         if (LIKELY(                                                     \
-              ((SvFLAGS(TARG) & (SVTYPEMASK|SVf_THINKFIRST)) == SVt_IV) \
+              ((SvFLAGS(TARG) & (SVTYPEMASK|SVf_THINKFIRST|SVf_IVisUV)) == SVt_IV) \
             & (do_taint ? !TAINT_get : 1)))                             \
         {                                                               \
             /* Cheap SvIOK_only().                                      \
@@ -399,7 +399,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
     STMT_START {                                                        \
         UV TARGu_uv = u;                                                \
         if (LIKELY(                                                     \
-              ((SvFLAGS(TARG) & (SVTYPEMASK|SVf_THINKFIRST)) == SVt_IV) \
+              ((SvFLAGS(TARG) & (SVTYPEMASK|SVf_THINKFIRST|SVf_IVisUV)) == SVt_IV) \
             & (do_taint ? !TAINT_get : 1)                               \
             & (TARGu_uv <= (UV)IV_MAX)))                                \
         {                                                               \
