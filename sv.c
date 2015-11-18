@@ -8773,6 +8773,10 @@ Perl_sv_inc_nomg(pTHX_ SV *const sv)
 	return;
     }
 
+    /* treat AV/HV/CV/FM/IO and non-fake GVs as immutable */
+    if (SvTYPE(sv) >= SVt_PVAV || (isGV_with_GP(sv) && !SvFAKE(sv)))
+        Perl_croak_no_modify();
+
     if (!(flags & SVp_POK) || !*SvPVX_const(sv)) {
 	if ((flags & SVTYPEMASK) < SVt_PVIV)
 	    sv_upgrade(sv, ((flags & SVTYPEMASK) > SVt_IV ? SVt_PVIV : SVt_IV));
@@ -8952,6 +8956,11 @@ Perl_sv_dec_nomg(pTHX_ SV *const sv)
 	    return;
 	}
     }
+
+    /* treat AV/HV/CV/FM/IO and non-fake GVs as immutable */
+    if (SvTYPE(sv) >= SVt_PVAV || (isGV_with_GP(sv) && !SvFAKE(sv)))
+        Perl_croak_no_modify();
+
     if (!(flags & SVp_POK)) {
 	if ((flags & SVTYPEMASK) < SVt_PVIV)
 	    sv_upgrade(sv, ((flags & SVTYPEMASK) > SVt_IV) ? SVt_PVIV : SVt_IV);

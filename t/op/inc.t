@@ -356,4 +356,29 @@ is $store::called, 4, 'STORE called on "my" target';
     is $x, 7, '$lex = $lex++ under use integer';
 }
 
+{
+    # RT #126637 - it should refuse to modify globs
+    *GLOB126637 = [];
+
+    eval 'my $y = ++$_ for *GLOB126637';
+    like $@, qr/Modification of a read-only value/, '++*GLOB126637';
+    eval 'my $y = --$_ for *GLOB126637';
+    like $@, qr/Modification of a read-only value/, '--*GLOB126637';
+    eval 'my $y = $_++ for *GLOB126637';
+    like $@, qr/Modification of a read-only value/, '*GLOB126637++';
+    eval 'my $y = $_-- for *GLOB126637';
+    like $@, qr/Modification of a read-only value/, '*GLOB126637--';
+
+    use integer;
+
+    eval 'my $y = ++$_ for *GLOB126637';
+    like $@, qr/Modification of a read-only value/, 'use int; ++*GLOB126637';
+    eval 'my $y = --$_ for *GLOB126637';
+    like $@, qr/Modification of a read-only value/, 'use int; --*GLOB126637';
+    eval 'my $y = $_++ for *GLOB126637';
+    like $@, qr/Modification of a read-only value/, 'use int; *GLOB126637++';
+    eval 'my $y = $_-- for *GLOB126637';
+    like $@, qr/Modification of a read-only value/, 'use int; *GLOB126637--';
+}
+
 done_testing();
