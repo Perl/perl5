@@ -358,6 +358,7 @@ is $store::called, 4, 'STORE called on "my" target';
 
 {
     # RT #126637 - it should refuse to modify globs
+    no warnings 'once';
     *GLOB126637 = [];
 
     eval 'my $y = ++$_ for *GLOB126637';
