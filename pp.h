@@ -56,7 +56,7 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 #define TARG targ
 
 #if defined(DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
-#define PUSHMARK(p)                                                   \
+#  define PUSHMARK(p)                                                   \
     STMT_START {                                                      \
         I32 * mark_stack_entry;                                       \
         if (UNLIKELY((mark_stack_entry = ++PL_markstack_ptr) == PL_markstack_max)) \
@@ -65,36 +65,36 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
         DEBUG_s(PerlIO_printf(Perl_debug_log, "MARK push %p %d\n",    \
                 PL_markstack_ptr, *mark_stack_entry));                \
     } STMT_END
-#define TOPMARK                                                       \
+#  define TOPMARK                                                       \
     ({                                                                \
         DEBUG_s(PerlIO_printf(Perl_debug_log, "MARK top  %p %d\n",    \
                 PL_markstack_ptr, *PL_markstack_ptr));                \
         *PL_markstack_ptr;                                            \
     })
-#define POPMARK                                                       \
+#  define POPMARK                                                       \
     ({                                                                \
         DEBUG_s(PerlIO_printf(Perl_debug_log, "MARK pop  %p %d\n",    \
                 (PL_markstack_ptr-1), *(PL_markstack_ptr-1)));        \
         assert((PL_markstack_ptr > PL_markstack) || !"MARK underflow");\
         *PL_markstack_ptr--;                                          \
     })
-#define INCMARK                                                       \
+#  define INCMARK                                                       \
     ({                                                                \
         DEBUG_s(PerlIO_printf(Perl_debug_log, "MARK inc  %p %d\n",    \
                 (PL_markstack_ptr+1), *(PL_markstack_ptr+1)));        \
         *PL_markstack_ptr++;                                          \
     })
 #else
-#define PUSHMARK(p)                                                   \
+#  define PUSHMARK(p)                                                   \
     STMT_START {					              \
         I32 * mark_stack_entry;                                       \
         if (UNLIKELY((mark_stack_entry = ++PL_markstack_ptr) == PL_markstack_max)) \
 	    mark_stack_entry = markstack_grow();                      \
         *mark_stack_entry  = (I32)((p) - PL_stack_base);              \
     } STMT_END
-#define TOPMARK                (*PL_markstack_ptr)
-#define POPMARK                (*PL_markstack_ptr--)
-#define INCMARK                (*PL_markstack_ptr++)
+#  define TOPMARK                (*PL_markstack_ptr)
+#  define POPMARK                (*PL_markstack_ptr--)
+#  define INCMARK                (*PL_markstack_ptr++)
 #endif
 
 #define dSP		SV **sp = PL_stack_sp
@@ -603,7 +603,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 		while (jump_o->op_type == OP_NULL)		\
 		    jump_o = jump_o->op_next;			\
 		assert(jump_o->op_type == OP_ENTERSUB);		\
-		POPMARK;                                        \
+		(void)POPMARK;                                        \
 		return jump_o->op_next;				\
 	    }							\
 	    return NORMAL;					\
