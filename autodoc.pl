@@ -417,8 +417,8 @@ whenever this documentation refers to C<utf8>
 (and variants of that name, including in function names),
 it also (essentially transparently) means C<UTF-EBCDIC>.
 But the ordinals of characters differ between ASCII, EBCDIC, and
-the UTF- encodings, and a string encoded in UTF-EBCDIC may occupy more bytes
-than in UTF-8.
+the UTF- encodings, and a string encoded in UTF-EBCDIC may occupy a different
+number of bytes than in UTF-8.
 
 The listing below is alphabetical, case insensitive.
 

@@ -109,11 +109,6 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	return d;
     }
 
-#ifdef EBCDIC
-    /* Not representable in UTF-EBCDIC */
-    flags |= UNICODE_DISALLOW_FE_FF;
-#endif
-
     /* The first problematic code point is the first surrogate */
     if (   flags    /* It's common to turn off all these */
         && uv >= UNICODE_SURROGATE_FIRST)
@@ -142,10 +137,6 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	    if (flags & UNICODE_DISALLOW_SUPER
 		|| (UNICODE_IS_FE_FF(uv) && (flags & UNICODE_DISALLOW_FE_FF)))
 	    {
-#ifdef EBCDIC
-                Perl_die(aTHX_ "Can't represent character for Ox%"UVXf" on this platform", uv);
-                NOT_REACHED; /* NOTREACHED */
-#endif
 		return NULL;
 	    }
 	}
@@ -591,7 +582,6 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 
     for (s = s0 + 1; s < send; s++) {
 	if (LIKELY(UTF8_IS_CONTINUATION(*s))) {
-#ifndef EBCDIC	/* Can't overflow in EBCDIC */
 	    if (uv & UTF_ACCUMULATION_OVERFLOW_MASK) {
 
 		/* The original implementors viewed this malformation as more
@@ -603,7 +593,6 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 		overflowed = TRUE;
 		overflow_byte = *s; /* Save for warning message's use */
 	    }
-#endif
 	    uv = UTF8_ACCUMULATE(uv, *s);
 	}
 	else {
@@ -670,12 +659,10 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	}
     }
 
-#ifndef EBCDIC	/* EBCDIC can't overflow */
     if (UNLIKELY(overflowed)) {
 	sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s (overflow at byte 0x%02x, after start byte 0x%02x)", malformed_text, overflow_byte, *s0));
 	goto malformed;
     }
-#endif
 
     if (do_overlong_test
 	&& expectlen > (STRLEN) OFFUNISKIP(uv)
@@ -720,14 +707,39 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
                    uv));
 		pack_warn = packWARN(WARN_NON_UNICODE);
 	    }
-#ifndef EBCDIC	/* Can never have the equivalent of FE nor FF on EBCDIC, since
-                   not representable in UTF-EBCDIC */
 
-            /* The first byte being 0xFE or 0xFF is a subset of the SUPER code
-             * points.  We test for these after the regular SUPER ones, and
-             * before possibly bailing out, so that the more dire warning
-             * overrides the regular one, if applicable */
-            if ((*s0 & 0xFE) == 0xFE	/* matches both FE, FF */
+            /* The maximum code point ever specified by a standard was
+             * 2**31 - 1.  Anything larger than that is a Perl extension that
+             * very well may not be understood by other applications (including
+             * earlier perl versions on EBCDIC platforms).  On ASCII platforms,
+             * these code points are indicated by the first UTF-8 byte being
+             * 0xFE or 0xFF, hence names like 'UTF8_WARN_FE_FF'.  These names
+             * are ASCII-centric, because the criteria is different On EBCDIC
+             * platforms.  We test for these after the regular SUPER ones, and
+             * before possibly bailing out, so that the slightly more dire
+             * warning will override the regular one. */
+            if (
+#ifndef EBCDIC
+                (*s0 & 0xFE) == 0xFE	/* matches both FE, FF */
+#else
+                 /* The I8 for 2**31 (U+80000000) is
+                  *   \xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA2\xA0\xA0\xA0\xA0\xA0\xA0
+                  * and it turns out that on all EBCDIC pages recognized that
+                  * the UTF-EBCDIC for that code point is
+                  *   \xFE\x41\x41\x41\x41\x41\x41\x43\x41\x41\x41\x41\x41\x41
+                  * For the next lower code point, the 1047 UTF-EBCDIC is
+                  *   \xFE\x41\x41\x41\x41\x41\x41\x42\x73\x73\x73\x73\x73\x73
+                  * The other code pages differ only in the bytes following
+                  * \x42.  Thus the following works (the minimum continuation
+                  * byte is \x41). */
+                *s0 == 0xFE && send - s0 > 7 && (   s0[1] > 0x41
+                                                 || s0[2] > 0x41
+                                                 || s0[3] > 0x41
+                                                 || s0[4] > 0x41
+                                                 || s0[5] > 0x41
+                                                 || s0[6] > 0x41
+                                                 || s0[7] > 0x42)
+#endif
                 && (flags & (UTF8_WARN_FE_FF|UTF8_WARN_SUPER|UTF8_DISALLOW_FE_FF)))
             {
                 if (  ! (flags & UTF8_CHECK_ONLY)
@@ -743,7 +755,7 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
                     goto disallowed;
                 }
             }
-#endif
+
 	    if (flags & UTF8_DISALLOW_SUPER) {
 		goto disallowed;
 	    }

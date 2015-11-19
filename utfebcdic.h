@@ -27,10 +27,14 @@
  *	invariant byte	    starts with 0	starts with 0 or 100
  *	continuation byte   starts with 10	starts with 101
  *	start byte	    same in both: if the code point requires N bytes,
- *			    then the leading N bits are 1, followed by a 0.  (No
- *			    trailing 0 for the very largest possible allocation
- *			    in I8, far beyond the current Unicode standard's
- *			    max, as shown in the comment later in this file.)
+ *			    then the leading N bits are 1, followed by a 0.  If
+ *			    all 8 bits in the first byte are 1, the code point
+ *			    will occupy 14 bytes (compared to 13 in Perl's
+ *			    extended UTF-8).  This is incompatible with what
+ *			    tr16 implies should be the representation of code
+ *			    points 2**30 and above, but allows Perl to be able
+ *			    to represent all code points that fit in a 64-bit
+ *			    word in either our extended UTF-EBCDIC or UTF-8.
  *  3)	Use the algorithm in tr16 to convert each byte from step 2 into
  *	final UTF-EBCDIC.  This is done by table lookup from a table
  *	constructed from the algorithm, reproduced in ebcdic_tables.h as
@@ -149,13 +153,17 @@ END_EXTERN_C
 /* NOTE: Strictly speaking Perl's UTF-8 should not be called UTF-8 since UTF-8
  * is an encoding of Unicode, and Unicode's upper limit, 0x10FFFF, can be
  * expressed with 5 bytes.  However, Perl thinks of UTF-8 as a way to encode
- * non-negative integers in a binary format, even those above Unicode. */
-#define UTF8_MAXBYTES 7
+ * non-negative integers in a binary format, even those above Unicode.  14 is
+ * the smallest number that covers 2**64
+ *
+ * WARNING: This number must be in sync with the value in
+ * regen/charset_translations.pl. */
+#define UTF8_MAXBYTES 14
 
 /*
-  The following table is adapted from tr16, it shows I8 encoding of Unicode code points.
+  The following table is adapted from tr16, it shows the I8 encoding of Unicode code points.
 
-        Unicode                         U32 Bit pattern 1st Byte 2nd Byte 3rd Byte 4th Byte 5th Byte 6th Byte 7th byte
+        Unicode                         U32 Bit pattern 1st Byte 2nd Byte 3rd Byte 4th Byte 5th Byte 6th Byte 7th Byte
     U+0000..U+007F                     000000000xxxxxxx 0xxxxxxx
     U+0080..U+009F                     00000000100xxxxx 100xxxxx
     U+00A0..U+03FF                     000000yyyyyxxxxx 110yyyyy 101xxxxx
@@ -163,12 +171,17 @@ END_EXTERN_C
     U+4000..U+3FFFF                 0wwwzzzzzyyyyyxxxxx 11110www 101zzzzz 101yyyyy 101xxxxx
    U+40000..U+3FFFFF            0vvwwwwwzzzzzyyyyyxxxxx 111110vv 101wwwww 101zzzzz 101yyyyy 101xxxxx
   U+400000..U+3FFFFFF       0uvvvvvwwwwwzzzzzyyyyyxxxxx 1111110u 101vvvvv 101wwwww 101zzzzz 101yyyyy 101xxxxx
- U+4000000..U+7FFFFFFF 0tuuuuuvvvvvwwwwwzzzzzyyyyyxxxxx 1111111t 101uuuuu 101vvvvv 101wwwww 101zzzzz 101yyyyy 101xxxxx
+ U+4000000..U+3FFFFFFF 00uuuuuvvvvvwwwwwzzzzzyyyyyxxxxx 11111110 101uuuuu 101vvvvv 101wwwww 101zzzzz 101yyyyy 101xxxxx
 
-  Note: The I8 transformation is valid for UCS-4 values X'0' to
-  X'7FFFFFFF' (the full extent of ISO/IEC 10646 coding space).
+Beyond this, Perl uses an incompatible extension, similar to the one used in
+regular UTF-8.  There are now 14 bytes.  A full 32 bits of information thus looks like this:
+                                                        1st Byte  2nd-7th 8th Byte 9th Byte 10th B   11th B   12th B   13th B   14th B
+U+40000000..U+FFFFFFFF ttuuuuuvvvvvwwwwwzzzzzyyyyyxxxxx 11111111 10100000 101000tt 101uuuuu 101vvvvv 101wwwww 101zzzzz 101yyyyy 101xxxxx
 
- */
+For 32-bit words, the 2nd through 7th bytes effectively function as leading
+zeros.  Above 32 bits, these fill up, with each byte yielding 5 bits of
+information, so that with 13 continuation bytes, we can handle 65 bits, just
+above what a 64 bit word can hold */
 
 /* Input is a true Unicode (not-native) code point */
 #define OFFUNISKIP(uv) ( (uv) < 0xA0        ? 1 :                   \
@@ -193,7 +206,8 @@ END_EXTERN_C
 		        (uv) < 0x4000           ? 3 :                       \
 		        (uv) < 0x40000          ? 4 :                       \
 		        (uv) < 0x400000         ? 5 :                       \
-		        (uv) < 0x4000000        ? 6 : UTF8_MAXBYTES )
+		        (uv) < 0x4000000        ? 6 :                       \
+		        (uv) < 0x40000000       ? 7 : UTF8_MAXBYTES )
 
 /* UTF-EBCDIC semantic macros - We used to transform back into I8 and then
  * compare, but now only have to do a single lookup by using a bit in
@@ -221,10 +235,6 @@ END_EXTERN_C
 #define isUTF8_POSSIBLY_PROBLEMATIC(c)                                          \
                 _generic_isCC(c, _CC_UTF8_START_BYTE_IS_FOR_AT_LEAST_SURROGATE)
 
-/* Can't exceed 7 on EBCDIC platforms */
-#define UTF_START_MARK(len) (0xFF & (0xFE << (7-(len))))
-
-#define UTF_START_MASK(len) (((len) >= 6) ? 0x01 : (0x1F >> ((len)-2)))
 #define UTF_CONTINUATION_MARK		0xA0
 #define UTF_CONTINUATION_MASK		((U8)0x1f)
 #define UTF_ACCUMULATION_SHIFT		5

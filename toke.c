@@ -11393,10 +11393,7 @@ Perl_scan_vstring(pTHX_ const char *s, const char *const e, SV *sv)
 					 "Integer overflow in decimal number");
 		}
 	    }
-#ifdef EBCDIC
-	    if (rev > 0x7FFFFFFF)
-		 Perl_croak(aTHX_ "In EBCDIC the v-string components cannot exceed 2147483647");
-#endif
+
 	    /* Append native character for the rev point */
 	    tmpend = uvchr_to_utf8(tmpbuf, rev);
 	    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);

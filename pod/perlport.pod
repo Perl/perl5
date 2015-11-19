@@ -242,9 +242,6 @@ C<Storable>
 (included as of Perl 5.8).  Keeping all data as text significantly
 simplifies matters.
 
-The v-strings are portable only up to v2147483647 (0x7FFF_FFFF), that's
-how far EBCDIC, or more precisely UTF-EBCDIC will go.
-
 =head2 Files and Filesystems
 
 Most platforms these days structure files in a hierarchical fashion.

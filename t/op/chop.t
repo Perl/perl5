@@ -7,7 +7,6 @@ BEGIN {
 }
 
 my $tests_count = 148;
-$tests_count -= 2 if $::IS_EBCDIC;
 plan tests => $tests_count;
 
 $_ = 'abc';
@@ -249,31 +248,24 @@ foreach my $start (@chars) {
     ok(1, "extend sp in pp_chomp");
 }
 
-SKIP: {
+{
     # [perl #73246] chop doesn't support utf8
     # the problem was UTF8_IS_START() didn't handle perl's extended UTF8
-    skip("Not representable in EBCDIC", 2) if $::IS_EBCDIC;
 
-    # We use hex constants instead of literal chars to avoid compilation
-    # errors in EBCDIC.
-    my $first_char =  0x80000001;
-    my $second_char = 0x80000000;
-    my $utf = chr($first_char) . chr($second_char);
+    my $utf = "\x{80000001}\x{80000000}";
     my $result = chop($utf);
-    is($utf, chr $first_char, "chopping high 'unicode'- remnant");
-    is($result, chr $second_char, "chopping high 'unicode' - result");
+    is($utf, "\x{80000001}", "chopping high 'unicode'- remnant");
+    is($result, "\x{80000000}", "chopping high 'unicode' - result");
 
     SKIP: {
         no warnings 'overflow'; # avoid compile-time warnings below on 32-bit architectures
         use Config;
         $Config{ivsize} >= 8
 	  or skip("this build can't handle very large characters", 2);
-        my $first_char =  0xffffffffffffffff;
-        my $second_char = 0xfffffffffffffffe;
-        my $utf = chr($first_char) . chr($second_char);
+        my $utf = "\x{ffffffffffffffff}\x{fffffffffffffffe}";
         my $result = chop $utf;
-        is($utf, chr $first_char, "chop even higher 'unicode' - remnant");
-        is($result, chr $second_char, "chop even higher 'unicode' - result");
+        is($utf, "\x{ffffffffffffffff}", "chop even higher 'unicode' - remnant");
+        is($result, "\x{fffffffffffffffe}", "chop even higher 'unicode' - result");
     }
 }
 

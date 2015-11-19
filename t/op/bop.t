@@ -136,9 +136,7 @@ is (sprintf("%vd", v120.300 ^ v200.400), '176.188');
 # UTF8 ~ behaviour
 #
 
-SKIP: {
-    skip "Complements exceed maximum representable on EBCDIC ", 5 if $::IS_EBCDIC;
-
+{
     my @not36;
 
     for (0x100...0xFFF) {

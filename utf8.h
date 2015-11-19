@@ -231,16 +231,6 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * represent a code point > 255? */
 #define UTF8_IS_ABOVE_LATIN1(c)     ((U8)(c) >= 0xc4)
 
-/* This defines the 1-bits that are to be in the first byte of a multi-byte
- * UTF-8 encoded character that give the number of bytes that comprise the
- * character. 'len' is the number of bytes in the multi-byte sequence. */
-#define UTF_START_MARK(len) (((len) >  7) ? 0xFF : (0xFF & (0xFE << (7-(len)))))
-
-/* Masks out the initial one bits in a start byte, leaving the real data ones.
- * Doesn't work on an invariant byte.  'len' is the number of bytes in the
- * multi-byte sequence that comprises the character. */
-#define UTF_START_MASK(len) (((len) >= 7) ? 0x00 : (0x1F >> ((len)-2)))
-
 /* This defines the bits that are to be in the continuation bytes of a multi-byte
  * UTF-8 encoded character that indicate it is a continuation byte. */
 #define UTF_CONTINUATION_MARK		0x80
@@ -328,6 +318,16 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 #define UTF_TO_NATIVE(ch)        I8_TO_NATIVE_UTF8(ch)
 #define I8_TO_NATIVE(ch)         I8_TO_NATIVE_UTF8(ch)
 #define NATIVE8_TO_UNI(ch)       NATIVE_TO_LATIN1(ch)
+
+/* This defines the 1-bits that are to be in the first byte of a multi-byte
+ * UTF-8 encoded character that give the number of bytes that comprise the
+ * character. 'len' is the number of bytes in the multi-byte sequence. */
+#define UTF_START_MARK(len) (((len) >  7) ? 0xFF : (0xFF & (0xFE << (7-(len)))))
+
+/* Masks out the initial one bits in a start byte, leaving the real data ones.
+ * Doesn't work on an invariant byte.  'len' is the number of bytes in the
+ * multi-byte sequence that comprises the character. */
+#define UTF_START_MASK(len) (((len) >= 7) ? 0x00 : (0x1F >> ((len)-2)))
 
 /* Adds a UTF8 continuation byte 'new' of information to a running total code
  * point 'old' of all the continuation bytes so far.  This is designed to be

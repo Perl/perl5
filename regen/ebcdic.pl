@@ -102,7 +102,11 @@ END
         # order 1-bits (up to 7)
         for my $i (0xC0 .. 255) {
             my $count;
-            if (($i & 0b11111110) == 0b11111110) {
+            if ($i == 0b11111111) {
+                no warnings 'once';
+                $count = $CHARSET_TRANSLATIONS::UTF_EBCDIC_MAXBYTES;
+            }
+            elsif (($i & 0b11111110) == 0b11111110) {
                 $count= 7;
             }
             elsif (($i & 0b11111100) == 0b11111100) {

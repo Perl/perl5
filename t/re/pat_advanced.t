@@ -2372,15 +2372,13 @@ EOF
     sub Is_32_Bit_Super { return "110000\tFFFFFFFF\n" }
     sub Is_Portable_Super { return '!utf8::Any' }   # Matches beyond 32 bits
 
-  SKIP:
     {   # Assertion was failing on on 64-bit platforms; just didn't work on 32.
-        skip("EBCDIC only goes to 31 bits", 4) if $::IS_EBCDIC;
         no warnings qw(non_unicode portable);
         use Config;
 
         # We use 'ok' instead of 'like' because the warnings are lexically
         # scoped, and want to turn them off, so have to do the match in this
-        # scope.   (EBCDIC platforms can't handle above 2**32 - 1
+        # scope.
         if ($Config{uvsize} < 8) {
             ok(chr(0xFFFF_FFFE) =~ /\p{Is_32_Bit_Super}/,
                             "chr(0xFFFF_FFFE) can match a Unicode property");

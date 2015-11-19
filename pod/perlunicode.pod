@@ -1300,10 +1300,11 @@ This means that all the basic characters (which includes all
 those that have ASCII equivalents (like C<"A">, C<"0">, C<"%">, I<etc.>)
 are the same in both EBCDIC and UTF-EBCDIC.)
 
-UTF-EBCDIC is used on EBCDIC platforms.  The largest Unicode code points
-take 5 bytes to represent (instead of 4 in UTF-8), and Perl extends it
-to a maximum of 7 bytes to encode pode points up to what can fit in a
-32-bit word (instead of 13 bytes and a 64-bit word in UTF-8).
+UTF-EBCDIC is used on EBCDIC platforms.  It generally requires more
+bytes to represent a given code point than UTF-8 does; the largest
+Unicode code points take 5 bytes to represent (instead of 4 in UTF-8),
+and, extended for 64-bit words, it uses 14 bytes instead of 13 bytes in
+UTF-8.
 
 =item *
 

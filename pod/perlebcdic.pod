@@ -243,15 +243,15 @@ In UTF-EBCDIC, there are 160 invariant characters.
 which have ASCII equivalents, plus those that correspond to
 the C1 controls (128 - 159 on ASCII platforms).)
 
-A string encoded in UTF-EBCDIC may be longer (but never shorter) than
-one encoded in UTF-8.  Perl extends UTF-8 so that it can encode code
-points above the Unicode maximum of U+10FFFF.  It extends UTF-EBCDIC as
-well, but due to the inherent limitations in UTF-EBCDIC, the maximum
-code point expressible is U+7FFF_FFFF, even if the word size is more
-than 32 bits.
+A string encoded in UTF-EBCDIC may be longer (very rarely shorter) than
+one encoded in UTF-8.  Perl extends both UTF-8 and UTF-EBCDIC so that
+they can encode code points above the Unicode maximum of U+10FFFF.  Both
+extensions are constructed to allow encoding of any code point that fits
+in a 64-bit word.
 
 UTF-EBCDIC is defined by
-L<Unicode Technical Report #16|http://www.unicode.org/reports/tr16>.
+L<Unicode Technical Report #16|http://www.unicode.org/reports/tr16>
+(often referred to as just TR16).
 It is defined based on CCSID 1047, not allowing for the differences for
 other code pages.  This allows for easy interchange of text between
 computers running different code pages, but makes it unusable, without
@@ -267,6 +267,11 @@ that all characters it expects to be UTF-8 invariant are in fact UTF-8
 invariant.  This means that text generated on a computer running one
 version of Perl's UTF-EBCDIC has to be translated to be intelligible to
 a computer running another.
+
+TR16 implies a method to extend UTF-EBCDIC to encode points up through
+S<C<2 ** 31 - 1>>.  Perl uses this method for code points up through
+S<C<2 ** 30 - 1>>, but uses an incompatible method for larger ones, to
+enable it to handle much larger code points than otherwise.
 
 =head2 Using Encode
 
@@ -1226,10 +1231,6 @@ character return value on an EBCDIC platform.  For example:
 
     $CAPITAL_LETTER_A = chr(193);
 
-The largest code point that is representable in UTF-EBCDIC is
-U+7FFF_FFFF.  If you do C<chr()> on a larger value, a runtime error
-(similar to division by 0) will happen.
-
 =item C<ord()>
 
 C<ord()> will return EBCDIC code number values on an EBCDIC platform.
@@ -1263,10 +1264,6 @@ is true on all platforms.  If you want native code points for the low
     unpack("W", $character) == ord $character
 
 will hold.
-
-The largest code point that is representable in UTF-EBCDIC is
-U+7FFF_FFFF.  If you try to pack a larger value into a character, a
-runtime error (similar to division by 0) will happen.
 
 =item C<print()>
 

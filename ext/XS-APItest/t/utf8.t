@@ -206,12 +206,9 @@ my %code_points = (
     0x40000000 - 1 => (isASCII) ? "\xfc\xbf\xbf\xbf\xbf\xbf" : I8_to_native("\xfe\xbf\xbf\xbf\xbf\xbf\xbf"),
     0x40000000     => (isASCII) ? "\xfd\x80\x80\x80\x80\x80" : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0"),
     0x80000000 - 1 => (isASCII) ? "\xfd\xbf\xbf\xbf\xbf\xbf" : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa1\xbf\xbf\xbf\xbf\xbf\xbf"),
+    0x80000000     => (isASCII) ? "\xfe\x82\x80\x80\x80\x80\x80" : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
+    0xFFFFFFFF     => (isASCII) ? "\xfe\x83\xbf\xbf\xbf\xbf\xbf" : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa3\xbf\xbf\xbf\xbf\xbf\xbf"),
 );
-
-if (isASCII) {
-    $code_points{0x80000000} = "\xfe\x82\x80\x80\x80\x80\x80";
-    $code_points{0xFFFFFFFF} = "\xfe\x83\xbf\xbf\xbf\xbf\xbf";
-}
 
 if ($is64bit) {
     no warnings qw(overflow portable);
@@ -292,8 +289,8 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
                $u < 0x4000      ? 3 :
                $u < 0x40000     ? 4 :
                $u < 0x400000    ? 5 :
-               $u < 0x4000000   ? 6 : 7
-            );
+               $u < 0x4000000   ? 6 :
+               $u < 0x40000000  ? 7 : 14 );
     }
 
     # If this test fails, subsequent ones are meaningless.
@@ -466,22 +463,19 @@ my @malformations = (
         0,   # NUL
         2,
         qr/2 bytes, need 1/
-    ]
-);
-
-if (isASCII) {
-    push @malformations,
+    ],
     [ "overflow malformation",
                     # These are the smallest overflowing on 64 byte machines:
                     # 2**64
-        "\xff\x80\x90\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0",
-        13,
+        (isASCII) ? "\xff\x80\x90\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"
+                  : I8_to_native("\xff\xB0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+        (isASCII) ? 13 : 14,
         0,  # There is no way to allow this malformation
         $REPLACEMENT,
-        13,
+        (isASCII) ? 13 : 14,
         qr/overflow/
-    ];
-}
+    ],
+);
 
 foreach my $test (@malformations) {
     my ($testname, $bytes, $length, $allow_flags, $allowed_uv, $expected_len, $message ) = @$test;
@@ -533,16 +527,6 @@ foreach my $test (@malformations) {
     {
         diag "The warnings were: " . join(", ", @warnings);
     }
-}
-
-my $FF_ret;
-
-if ($is64bit) {
-    no warnings qw{portable overflow};
-    $FF_ret = 0x1000000000;
-}
-else {  # The above overflows unless a quad platform
-    $FF_ret = 0;
 }
 
 # Now test the cases where a legal code point is generated, but may or may not
@@ -829,54 +813,60 @@ my @tests = (
         (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
-);
-
-
-if (isASCII) {
-    push @tests,
     [ "requires at least 32 bits",
-         "\xfe\x82\x80\x80\x80\x80\x80",
-
+        (isASCII)
+         ? "\xfe\x82\x80\x80\x80\x80\x80"
+         : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
         # This code point is chosen so that it is representable in a UV on
         # 32-bit machines
         $UTF8_WARN_ABOVE_31_BIT, $UTF8_DISALLOW_ABOVE_31_BIT,
-        'utf8', 0x80000000, 7,
+        'utf8', 0x80000000, (isASCII) ? 7 :14,
         qr/Code point 0x80000000 is not Unicode, and not portable/
     ],
     [ "requires at least 32 bits, and use SUPER-type flags, instead of ABOVE_31_BIT",
-         "\xfe\x82\x80\x80\x80\x80\x80",
+        (isASCII)
+         ? "\xfe\x82\x80\x80\x80\x80\x80"
+         : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
         $UTF8_WARN_SUPER, $UTF8_DISALLOW_SUPER,
-        'utf8', 0x80000000, 7,
+        'utf8', 0x80000000, (isASCII) ? 7 :14,
         qr/Code point 0x80000000 is not Unicode, and not portable/
     ],
     [ "overflow with warnings/disallow for more than 31 bits",
         # This tests the interaction of WARN_ABOVE_31_BIT/DISALLOW_ABOVE_31_BIT
         # with overflow.  The overflow malformation is never allowed, so
         # preventing it takes precedence if the ABOVE_31_BIT options would
-        # otherwise allow in an overflowing value.  These two code points (1
+        # otherwise allow in an overflowing value.  The ASCII code points (1
         # for 32-bits; 1 for 64) were chosen because the old overflow
         # detection algorithm did not catch them; this means this test also
-        # checks for that fix.
-        ($is64bit)
-            ? "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
-            : "\xfe\x86\x80\x80\x80\x80\x80",
+        # checks for that fix.  The EBCDIC are arbitrary overflowing ones
+        # since we have no reports of failures with it.
+       (($is64bit)
+        ? ((isASCII)
+           ? "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
+           : I8_to_native("\xff\xB0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"))
+        : ((isASCII)
+           ? "\xfe\x86\x80\x80\x80\x80\x80"
+           : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0"))),
 
         # We include both warning categories to make sure the ABOVE_31_BIT one
         # has precedence
         "$UTF8_WARN_ABOVE_31_BIT|$UTF8_WARN_SUPER",
         "$UTF8_DISALLOW_ABOVE_31_BIT",
         'utf8', 0,
-        ($is64bit) ? 13 : 7,
+        (! isASCII) ? 14 : ($is64bit) ? 13 : 7,
         qr/overflow at byte .*, after start byte 0xf/
     ],
-    ;
-}
+);
 
-if ($is64bit) {    # All FF's will overflow on 32 bit
+if ($is64bit) {
+    no warnings qw{portable overflow};
     push @tests,
-        [ "More than 32 bits", "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80",
+        [ "More than 32 bits",
+            (isASCII)
+            ? "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80"
+            : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
             $UTF8_WARN_ABOVE_31_BIT, $UTF8_DISALLOW_ABOVE_31_BIT,
-            'utf8', $FF_ret, 13,
+            'utf8', 0x1000000000, (isASCII) ? 13 : 14,
             qr/Code point 0x.* is not Unicode, and not portable/
         ];
 }

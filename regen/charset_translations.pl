@@ -2,6 +2,10 @@
 use strict;
 use warnings;
 
+# WARNING: This must be kept in sync with the UTF8_MAXBYTES value in
+# utfebcdic.h
+$CHARSET_TRANSLATIONS::UTF_EBCDIC_MAXBYTES = 14;
+
 # Utilities for various character set issues.  Currently handles ASCII and
 # EBCDIC only.  It is trivial to add support for new EBCDIC code pages (unless
 # they have identical variant character signatures as existing ones, and there
@@ -234,12 +238,13 @@ sub get_I8_2_utf($) {
 sub _UTF_START_MASK($) {
     # Internal
     my $len = shift;
-    return ((($len) >= 6) ? 0x01 : (0x1F >> (($len)-2)));
+    return (($len >= 7) ? 0x00 : (0x1F >> ($len - 2)));
 }
 
 sub _UTF_START_MARK($) {
     # Internal
-    return (0xFF & (0xFE << (7-(shift))));
+    my $len = shift;
+    return (($len >  7) ? 0xFF : (0xFF & (0xFE << (7- $len))));
 }
 
 sub cp_2_utfbytes($$) {
@@ -269,7 +274,9 @@ sub cp_2_utfbytes($$) {
 		  $ucp < 0x4000    ? 3 :
 		  $ucp < 0x40000   ? 4 :
 		  $ucp < 0x400000  ? 5 :
-		  $ucp < 0x4000000 ? 6 : 7;
+		  $ucp < 0x4000000 ? 6 :
+		  $ucp < 0x40000000? 7 :
+                                    $CHARSET_TRANSLATIONS::UTF_EBCDIC_MAXBYTES;
 
         my @str;
 	for (1 .. $len - 1) {
