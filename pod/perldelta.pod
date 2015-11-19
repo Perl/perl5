@@ -89,7 +89,7 @@ diagnostic messages, see L<perldiag>.
 
 =item *
 
-Sequence (?... not terminated in regex; marked by S<<-- HERE> in m/%s/
+L<<< Sequence (?... not terminated in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>|perldiag/"Sequence (?... not terminated in regex; marked by <-- HERE in mE<sol>%sE<sol>" >>>
 
 =back
 
