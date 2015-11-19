@@ -1017,7 +1017,10 @@ S_ithread_create(
     my_pool->running_threads++;
     MUTEX_UNLOCK(&my_pool->create_destruct_mutex);
     return (thread);
+CLANG_DIAG_IGNORE(-Wthread-safety);
+/* warning: mutex 'thread->mutex' is not held on every path through here [-Wthread-safety-analysis] */
 }
+CLANG_DIAG_RESTORE;
 
 #endif /* USE_ITHREADS */
 
