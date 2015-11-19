@@ -712,10 +712,23 @@ Perl_op_free(pTHX_ OP *o)
         type = o->op_type;
 
         /* an op should only ever acquire op_private flags that we know about.
-         * If this fails, you may need to fix something in regen/op_private */
-        if (o->op_ppaddr == PL_ppaddr[o->op_type]) {
+         * If this fails, you may need to fix something in regen/op_private.
+         * Don't bother testing if:
+         *   * the op_ppaddr doesn't match the op; someone may have
+         *     overridden the op and be doing strange things with it;
+         *   * we've errored, as op flags are often left in an
+         *     inconsistent state then. Note that an error when
+         *     compiling the main program leaves PL_parser NULL, so
+         *     we can't spot faults in the main code, onoly
+         *     evaled/required code */
+#ifdef DEBUGGING
+        if (   o->op_ppaddr == PL_ppaddr[o->op_type]
+            && PL_parser
+            && !PL_parser->error_count)
+        {
             assert(!(o->op_private & ~PL_op_private_valid[type]));
         }
+#endif
 
         if (o->op_private & OPpREFCOUNTED) {
             switch (type) {
