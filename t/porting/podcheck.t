@@ -1131,8 +1131,8 @@ package Tie_Array_to_FH {  # So printing actually goes to an array
 }
 
 
-my %filename_to_checker; # Map a filename to it's pod checker object
-my %id_to_checker;      # Map a checksum to it's pod checker object
+my %filename_to_checker; # Map a filename to its pod checker object
+my %id_to_checker;      # Map a checksum to its pod checker object
 my %nodes;              # key is filename, values are nodes in that file.
 my %nodes_first_word;   # same, but value is first word of each node
 my %valid_modules;      # List of modules known to exist outside us.
