@@ -1158,7 +1158,10 @@ ithread_create(...)
 
         /* Let thread run. */
         /* See S_ithread_run() for more detail. */
+	CLANG_DIAG_IGNORE(-Wthread-safety);
+	/* warning: releasing mutex 'thread->mutex' that was not held [-Wthread-safety-analysis] */
         MUTEX_UNLOCK(&thread->mutex);
+	CLANG_DIAG_RESTORE;
 
         /* XSRETURN(1); - implied */
 
