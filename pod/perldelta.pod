@@ -190,7 +190,7 @@ instead of the proper error message.  This has now been fixed. [perl
 An earlier commit added a message when a quantifier in a regular
 expression was useless, but then caused the parser to skip it;
 this caused the surplus quantifier to be silently ignored, instead
-of throwing an error. This is now fixed [perl #126253]
+of throwing an error. This is now fixed. [perl #126253]
 
 =item *
 
