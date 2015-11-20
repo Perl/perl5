@@ -12,7 +12,7 @@
 # for this file, and are not to be used by outside callers.
 
 eval { require POSIX; import POSIX 'locale_h'; };
-my $has_posix_locales = defined &POSIX::LC_CTYPE;
+$has_locale_h = ! $@;
 
 sub _trylocale ($$$$) { # For use only by other functions in this file!
 
@@ -92,7 +92,6 @@ my $max_bad_category_number = -1000000;
 #   6 => 'CTYPE',
 # where 6 is the value of &POSIX::LC_CTYPE
 my %category_name;
-eval { require POSIX; import POSIX 'locale_h'; };
 unless ($@) {
     my $number_for_missing_category = $max_bad_category_number;
     foreach my $name (qw(ALL COLLATE CTYPE MESSAGES MONETARY NUMERIC TIME)) {
@@ -140,7 +139,7 @@ sub locales_enabled(;$) {
                         # I (khw) cargo-culted the '?' in the pattern on the
                         # next line.
                     && $Config{ccflags} !~ /\bD?NO_LOCALE\b/
-                    && $has_posix_locales;
+                    && $has_locale_h;
 
     # Done with the global possibilities.  Now check if any passed in category
     # is disabled.
@@ -172,6 +171,9 @@ sub locales_enabled(;$) {
 
             return 0 if    $number <= $max_bad_category_number
                         || $Config{ccflags} =~ /\bD?NO_LOCALE_$name\b/;
+
+            eval "defined &POSIX::LC_$name";
+            return 0 if $@;
         }
     }
 
@@ -203,10 +205,6 @@ sub find_locales ($;$) {  # Returns an array of all the locales we found on the
 
     # UWIN seems to loop after taint tests, just skip for now
     return if ($^O =~ /^uwin/);
-
-    # Done this way in case this is 'required' in the caller before seeing if
-    # this is miniperl.
-    return unless $has_posix_locales;
 
     _trylocale("C", $categories, \@Locale, $only_plays_well);
     _trylocale("POSIX", $categories, \@Locale, $only_plays_well);
@@ -328,8 +326,7 @@ sub is_locale_utf8 ($) { # Return a boolean as to if core Perl thinks the input
     # On z/OS, even locales marked as UTF-8 aren't.
     return 0 if ord "A" != 65;
 
-    return 0 if ! $has_posix_locales;
-    return 0 if ! locales_enabled('LC_CTYPE');
+    return 0 unless locales_enabled('LC_CTYPE');
 
     my $locale = shift;
 
@@ -375,10 +372,11 @@ sub find_utf8_ctype_locale (;$) { # Return the name of a locale that core Perl
                                   # list of locales to try; if omitted, this
                                   # tries all locales it can find on the
                                   # platform
+    return unless locales_enabled('LC_CTYPE');
+
     my $locales_ref = shift;
 
     if (! defined $locales_ref) {
-        return if ! $has_posix_locales;
 
         my @locales = find_locales(&POSIX::LC_CTYPE(),
                                    1 # Reject iffy locales.
