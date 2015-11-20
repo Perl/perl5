@@ -10279,6 +10279,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                                 hexfp_uquad |= b;
                                 hexfp_frac_bits += shift2;
 #else /* HEXFP_NV */
+                                PERL_UNUSED_VAR(shift2);
                                 hexfp_nv += b * mult;
                                 mult /= 16.0;
 #endif
