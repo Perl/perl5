@@ -17,6 +17,55 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.23.5 - utastro!nather (Ed Nather), "The Story of Mel", in net.jokes, May 21, 1983.
+
+L<Announced on 2015-11-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2015/11/msg232758.html>
+
+After Mel had left the company for greener pa$ture$, the Big Boss asked
+me to look at the code and see if I could find the test and reverse it.
+Somewhat reluctantly, I agreed to look. Tracking Mel's code was a real
+adventure.
+
+I have often felt that programming is an art form, whose real value can
+only be appreciated by another versed in the same arcane art; there are
+lovely gems and brilliant coups hidden from human view and admiration,
+sometimes forever, by the very nature of the process. You can learn a
+lot about an individual just by reading through his code, even in
+hexadecimal. Mel was, I think, an unsung genius.
+
+Perhaps my greatest shock came when I found an innocent loop that had
+no test in it. No test. None. Common sense said it had to be a closed
+loop, where the program would circle, forever, endlessly. Program
+control passed right through it, however, and safely out the other side.
+It took me two weeks to figure it out.
+
+The RPC-4000 computer had a really modern facility called an index
+register. It allowed the programmer to write a program loop that used
+an indexed instruction inside; each time through, the number in the
+index register was added to the address of that instruction, so it
+would refer to the next datum in a series. He had only to increment
+the index register each time through. Mel never used it.
+
+Instead, he would pull the instruction into a machine register, add one
+to its address, and store it back. He would then execute the modified
+instruction right from the register. The loop was written so this
+additional execution time was taken into account -- just as this
+instruction finished, the next one was right under the drum's read head,
+ready to go. But the loop had no test in it.
+
+The vital clue came when I noticed the index register bit, the bit that
+lay between the address and the operation code in the instruction word,
+was turned on -- yet Mel never used the index register, leaving it zero
+all the time. When the light went on it nearly blinded me.
+
+He had located the data he was working on near the top of memory -- the
+largest locations the instructions could address -- so, after the last
+datum was handled, incrementing the instruction address would make it
+overflow. The carry would add one to the operation code, changing it to
+the next one in the instruction set: a jump instruction. Sure enough,
+the next program instruction was in address location zero, and the
+program went happily on its way.
+
 =head2 v5.23.4 - Denis Diderot, trans. David Coward, "Jacques the Fatalist"
 
 L<Announced on 2015-10-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/10/msg232040.html>
