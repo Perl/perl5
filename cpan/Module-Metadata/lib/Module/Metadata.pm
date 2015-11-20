@@ -1,6 +1,6 @@
 # -*- mode: cperl; tab-width: 8; indent-tabs-mode: nil; basic-offset: 2 -*-
 # vim:ts=8:sw=2:et:sta:sts=2
-package Module::Metadata; # git description: v1.000028-4-gb283720
+package Module::Metadata; # git description: v1.000029-6-gae0d3b6
 # ABSTRACT: Gather package and POD information from perl module files
 
 # Adapted from Perl-licensed code originally distributed with
@@ -14,7 +14,7 @@ sub __clean_eval { eval $_[0] }
 use strict;
 use warnings;
 
-our $VERSION = '1.000029'; # TRIAL
+our $VERSION = '1.000030'; # TRIAL
 
 use Carp qw/croak/;
 use File::Spec;
@@ -820,7 +820,7 @@ Module::Metadata - Gather package and POD information from perl module files
 
 =head1 VERSION
 
-version 1.000029
+version 1.000030
 
 =head1 SYNOPSIS
 
@@ -1034,10 +1034,10 @@ Bugs may be submitted through L<the RT bug tracker|https://rt.cpan.org/Public/Di
 (or L<bug-Module-Metadata@rt.cpan.org|mailto:bug-Module-Metadata@rt.cpan.org>).
 
 There is also a mailing list available for users of this distribution, at
-http://lists.perl.org/list/cpan-workers.html.
+L<http://lists.perl.org/list/cpan-workers.html>.
 
 There is also an irc channel available for users of this distribution, at
-irc://irc.perl.org/#toolchain.
+L<irc://irc.perl.org/#toolchain>.
 
 =head1 AUTHOR
 
@@ -1049,7 +1049,7 @@ assistance from David Golden (xdg) <dagolden@cpan.org>.
 
 =head1 CONTRIBUTORS
 
-=for stopwords Karen Etheridge David Golden Vincent Pit Matt S Trout Chris Nehren Graham Knop Olivier Mengué Tomas Doran Tatsuhiko Miyagawa tokuhirom Peter Rabbitson Jerry D. Hedden Craig A. Berry Mitchell Steinbrunner Edward Zborowski Gareth Harper James Raspass 'BinGOs' Williams Josh Jore Kent Fredric
+=for stopwords Karen Etheridge David Golden Vincent Pit Matt S Trout Chris Nehren Graham Knop Olivier Mengué Tomas Doran Tatsuhiko Miyagawa tokuhirom Peter Rabbitson Steve Hay Josh Jore Craig A. Berry Mitchell Steinbrunner Edward Zborowski Gareth Harper James Raspass Jerry D. Hedden 'BinGOs' Williams Kent Fredric
 
 =over 4
 
@@ -1099,7 +1099,11 @@ Peter Rabbitson <ribasushi@cpan.org>
 
 =item *
 
-Jerry D. Hedden <jdhedden@cpan.org>
+Steve Hay <steve.m.hay@googlemail.com>
+
+=item *
+
+Josh Jore <jjore@cpan.org>
 
 =item *
 
@@ -1127,11 +1131,11 @@ James Raspass <jraspass@gmail.com>
 
 =item *
 
-Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
+Jerry D. Hedden <jdhedden@cpan.org>
 
 =item *
 
-Josh Jore <jjore@cpan.org>
+Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
 
 =item *
 

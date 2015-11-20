@@ -543,7 +543,8 @@ package Simple;
 ---
   vers => '1.23',
   all_versions => { Simple => '1.23' },
-  TODO => 'apply fix from ExtUtils-MakeMaker PR#135',
+  TODO_scalar => 'apply fix from ExtUtils-MakeMaker PR#135',
+  TODO_all_versions => 'apply fix from ExtUtils-MakeMaker PR#135',
 },
 {
   name => 'our $VERSION inside BEGIN block',
@@ -555,7 +556,8 @@ package Simple;
 ---
   vers => '1.23',
   all_versions => { Simple => '1.23' },
-  TODO => 'apply fix from ExtUtils-MakeMaker PR#135',
+  TODO_scalar => 'apply fix from ExtUtils-MakeMaker PR#135',
+  TODO_all_versions => 'apply fix from ExtUtils-MakeMaker PR#135',
 },
 {
   name => 'no assumption of primary version merely if a package\'s $VERSION is referenced',
@@ -573,7 +575,7 @@ $VERSION = '1.23';
 ---
   vers => undef,
   all_versions => { '____caller' => '1.23' },
-  TODO => 'FIXME! RT#74741',
+  TODO_all_versions => 'FIXME! RT#74741',
 },
 {
   name => 'no package statement; bare $VERSION with our',
@@ -582,7 +584,7 @@ our $VERSION = '1.23';
 ---
   vers => undef,
   all_versions => { '____caller' => '1.23' },
-  TODO => 'FIXME! RT#74741',
+  TODO_all_versions => 'FIXME! RT#74741',
 },
 {
   name => 'no package statement; fully-qualified $VERSION for main',
@@ -612,7 +614,7 @@ foreach my $test_case (@modules) {
   note $test_case->{name};
   my $code = $test_case->{code};
   my $expected_version = $test_case->{vers};
-  local $TODO = $test_case->{TODO};
+
   SKIP: {
     skip( "No our() support until perl 5.6", (defined $expected_version ? 3 : 2) )
         if $] < 5.006 && $code =~ /\bour\b/;
@@ -636,9 +638,13 @@ foreach my $test_case (@modules) {
     # from 0.95_01 and later, it just lets the objects figure out how to handle 'eq'
     # We want to ensure we preserve the original, as long as it's legal, so we
     # explicitly check the stringified form.
-    isa_ok($got, 'version') if defined $expected_version;
+    {
+      local $TODO = $test_case->{TODO_got_version};
+      isa_ok($got, 'version') if defined $expected_version;
+    }
 
     if (ref($expected_version) eq 'CODE') {
+      local $TODO = $test_case->{TODO_code_sub};
       ok(
         $expected_version->($got),
         "case '$test_case->{name}': module version passes match sub"
@@ -646,6 +652,7 @@ foreach my $test_case (@modules) {
       or $errs++;
     }
     else {
+      local $TODO = $test_case->{TODO_scalar};
       is(
         (defined $got ? "$got" : $got),
         $expected_version,
@@ -657,6 +664,7 @@ foreach my $test_case (@modules) {
     }
 
     if (exists $test_case->{all_versions}) {
+      local $TODO = $test_case->{TODO_all_versions};
       if (ref($expected_version) eq 'CODE') {
         ok(
           $test_case->{all_versions}->($pm_info->{versions}),
