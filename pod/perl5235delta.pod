@@ -1,0 +1,420 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5235delta - what is new for perl v5.23.5
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.23.4 release and the 5.23.5
+release.
+
+If you are upgrading from an earlier release such as 5.23.3, first read
+L<perl5234delta>, which describes differences between 5.23.3 and 5.23.4.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+Faster addition, subtraction and multiplication.
+
+Since 5.8.0, arithmetic became slower due to the need to support
+64-bit integers. To deal with 64-bit integers, a lot more corner
+cases need to be checked, which adds time. We now detect common
+cases where there is no need to check for those corner cases,
+and special-case them.
+
+=item *
+
+Faster preincrement, predecrement, postincrement, postdecrement.
+
+By internally splitting the functions which handled multiple
+cases into different functions.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<arybase> has been upgraded from version 0.10 to 0.11.
+
+=item *
+
+L<B> has been upgraded from version 1.60 to 1.61.
+
+=item *
+
+L<base> has been upgraded from version 2.22 to 2.22_01.
+
+Better handling of attempts to load non-existent modules. 
+Improvements to fields.pm documentation. L<base> now requires v5.8.0.
+
+=item *
+
+L<Carp> has been upgraded from version 1.37 to 1.38.
+
+Improvements when working with older perls.
+
+=item *
+
+L<Config::Perl::V> has been upgraded from version 0.24 to 0.25.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.22 to 1.23.
+
+=item *
+
+L<Dumpvalue> has been upgraded from version 1.17 to 1.18.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.35 to 1.36.
+
+=item *
+
+L<fields> has been upgraded from version 2.17 to 2.22_01.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.31 to 1.32.
+
+Handles empty directory lists.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.58 to 3.59.
+
+=item *
+
+L<Getopt::Long> has been upgraded from version 2.47 to 2.48.
+
+Fixes an issue with C<< gnu_compat >>
+
+=item *
+
+L<Hash::Util::FieldHash> has been upgraded from version 1.17 to 1.18.
+
+=item *
+
+L<IPC::Open3> has been upgraded from version 1.19 to 1.20.
+
+Include the error message on C<< exec() >> failure.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999704 to 1.999710.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.34 to 0.37.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20151020 to 5.20151120.
+
+=item *
+
+L<Module::Metadata> has been upgraded from version 1.000029 to 1.000030.
+
+Temp dirs cleaned up during tests. More accurately mark tests as TODO, so as to have a quieter and less confusing test run without passing TODO tests.
+
+=item *
+
+L<PerlIO::encoding> has been upgraded from version 0.22 to 0.23.
+
+=item *
+
+L<PerlIO::mmap> has been upgraded from version 0.014 to 0.015.
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.23 to 0.24.
+
+=item *
+
+L<PerlIO::via> has been upgraded from version 0.15 to 0.16.
+
+=item *
+
+L<Pod::Simple> has been upgraded from version 3.30 to 3.32.
+
+Switched debugging output from C<< STDOUT >> to C<< STDERR >>.
+
+Added C<< errata_seen() >> to make POD errors easily accessible.
+
+Simplified the detection of case-insensitivity in Pod::Simple::Search.
+
+Fixed C<< Use of uninitialized value $1 in lc >> warning in
+Pod::Simple::Search.
+
+If C<< @INC >> includes the current directory symbol, C<.>, the
+C<< survey() >> method of C<< Pod::Simple::Search >> no longer excludes
+it from its list of directories to search. Instead, The C<< survey() >> and
+C<< find() >> methods now both exclude duplicate directories from C<< @INC >>
+(RT #102344).
+
+Moved source repository and updated links to new perl-pod GitHub
+organization: L<https://github.com/perl-pod/pod-simple>.
+
+Improved repository links and added GitHub issue tracking link to
+the distribution metadata.
+
+Switched from C<< File::Spec >>'s C<< catdir >> to C<< catfile >>
+for path names, to fix failures on VMS. Also now use Unix path semantics
+where they're not required to be platform-specific. (RT #105511).
+
+Improved the example use of the C<< html_encode_chars() >> method in
+the C<< Pod::Simple::XHTML >> documentation.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.58 to 1.59.
+
+=item *
+
+L<Thread::Queue> has been upgraded from version 3.06 to 3.07.
+
+=item *
+
+L<threads> has been upgraded from version 2.03 to 2.04.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.48 to 1.49.
+
+=item *
+
+L<Tie::Scalar> has been upgraded from version 1.03 to 1.04.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9727_02 to 1.9728.
+
+=item *
+
+L<Time::Piece> has been upgraded from version 1.30 to 1.31.
+
+=item *
+
+L<Unicode::Normalize> has been upgraded from version 1.21 to 1.23.
+
+=item *
+
+L<XSLoader> has been upgraded from version 0.20 to 0.21.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<<< Sequence (?... not terminated in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>|perldiag/"Sequence (?... not terminated in regex; marked by <-- HERE in mE<sol>%sE<sol>" >>>
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+When running out of memory during an attempt the increase the stack
+size, previously, perl would die using the cryptic message 
+C<< panic: av_extend_guts() negative count (-9223372036854775681) >>.
+This has been fixed to show the prettier message:
+L<< Out of memory during stack extend|perldiag/"Out of memory during %s extend" >>
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+C<Configure> now acts as if the C<-O> option is always passed, allowing command
+line options to override saved configuration.  This should eliminate confusion
+when command line options are ignored for no obvious reason.  C<-O> is now
+permitted, but ignored.
+
+=item *
+
+Some filesystem stat symbols which were not used by the Perl core 
+were removed in an earlier commit. However, since these symbols
+turned out to be used by at least one CPAN module, these symbols
+have been restored.
+
+=item *
+
+C<< PPPort.so/PPPort.dll >> no longer get installed, as they are
+not used by C<< PPPort.pm >>, only by its test files.
+
+=item *
+
+It is now possible to specify which compilation date to show on
+C<< perl -V >> output, by setting the macro C<< PERL_BUILD_DATE >>.
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Win32
+
+Win32 does now a parallel build with C++.
+
+=item Tru64
+
+Workaround where Tru64 balks when prototypes are listed as
+C<< PERL_STATIC_INLINE >>, but where the test is build with
+C<< -DPERL_NO_INLINE_FUNCTIONS >>.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+C<< sv_ref() >> is now part of the API.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+C<\b{sb}> works much better.  In Perl v5.22.0, this new construct didn't
+seem to give the expected results, yet passed all the tests in the
+extensive suite furnished by Unicode.  It turns out that it was because
+these were short input strings, and the failures had to do with longer
+inputs.  This was fixed in Perl 5.23.4, but the improvement was not
+noticed until after that was released, so is included here now.
+
+=item *
+
+Certain syntax errors in
+L<perlrecharclass/Extended Bracketed Character Classes> caused panics
+instead of the proper error message.  This has now been fixed. [perl
+#126481]
+
+=item *
+
+An earlier commit added a message when a quantifier in a regular
+expression was useless, but then caused the parser to skip it;
+this caused the surplus quantifier to be silently ignored, instead
+of throwing an error. This is now fixed. [perl #126253]
+
+=item *
+
+The switch to building non-XS modules last in win32/makefile.mk (introduced
+by design as part of the changes to enable parallel building) caused the
+build of POSIX to break due to problems with the version module. This
+is now fixed.
+
+=item *
+
+Improved parsing of hex float constants.
+
+=item *
+
+Fixed an issue with C<< pack >> where C<< pack "H" >> (and C<< pack "h" >>)
+could read past the source when given a non-utf8 source, and a utf8 target.
+[perl #126325]
+
+=item *
+
+Fixed several cases where perl would abort due to a segmentation fault,
+or a C-level assert. [perl #126615], [perl #126602], [perl #126193].
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.23.5 represents approximately 4 weeks of development since Perl 5.23.4
+and contains approximately 12,000 lines of changes across 290 files from 23
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 6,400 lines of changes to 180 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.23.5:
+
+Aaron Crane, Abigail, Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn Ilmari
+Mannsåker, Daniel Dragan, David Mitchell, Dr.Ruud, H.Merijn Brand, Ivan
+Pozdeev, James E Keenan, Jarkko Hietaniemi, Jerry D. Hedden, Karen Etheridge,
+Karl Williamson, Lukas Mai, Mohammed El-Afifi, Niko Tyni, Peter Rabbitson,
+Reini Urban, Ricardo Signes, Steve Hay, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles recently
+posted to the comp.lang.perl.misc newsgroup and the perl bug database at
+L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send it
+to perl5-security-report@perl.org.  This points to a closed subscription
+unarchived mailing list, which includes all the core committers, who will be
+able to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported.  Please only use this address for
+security issues in the Perl core, not for modules independently distributed on
+CPAN.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
