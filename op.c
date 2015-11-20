@@ -719,7 +719,7 @@ Perl_op_free(pTHX_ OP *o)
          *   * we've errored, as op flags are often left in an
          *     inconsistent state then. Note that an error when
          *     compiling the main program leaves PL_parser NULL, so
-         *     we can't spot faults in the main code, onoly
+         *     we can't spot faults in the main code, only
          *     evaled/required code */
 #ifdef DEBUGGING
         if (   o->op_ppaddr == PL_ppaddr[o->op_type]
