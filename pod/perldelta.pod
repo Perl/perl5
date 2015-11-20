@@ -355,9 +355,34 @@ or a C-level assert. [perl #126615], [perl #126602], [perl #126193].
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.23.5 represents approximately 4 weeks of development since Perl 5.23.4
+and contains approximately 12,000 lines of changes across 290 files from 23
+authors.
 
-  perl Porting/acknowledgements.pl v5.23.4..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 6,400 lines of changes to 180 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.23.5:
+
+Aaron Crane, Abigail, Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn Ilmari
+Mannsåker, Daniel Dragan, David Mitchell, Dr.Ruud, H.Merijn Brand, Ivan
+Pozdeev, James E Keenan, Jarkko Hietaniemi, Jerry D. Hedden, Karen Etheridge,
+Karl Williamson, Lukas Mai, Mohammed El-Afifi, Niko Tyni, Peter Rabbitson,
+Reini Urban, Ricardo Signes, Steve Hay, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
