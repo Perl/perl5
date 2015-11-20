@@ -824,6 +824,7 @@ use warnings 'parenthesis' ;
 my $a, $b = (1,2);
 my @foo,%bar,	$quux; # there's a TAB here
 my $x, $y or print;
+my $p, *q;
 no warnings 'parenthesis' ;
 my $c, $d = (1,2);
 EXPECT
@@ -833,6 +834,7 @@ Parentheses missing around "my" list at - line 4.
 # op.c
 use warnings 'parenthesis' ;
 our $a, $b = (1,2);
+our $p, *q;
 no warnings 'parenthesis' ;
 our $c, $d = (1,2);
 EXPECT
@@ -842,11 +844,13 @@ Parentheses missing around "our" list at - line 3.
 use warnings 'parenthesis' ;
 local $a, $b = (1,2);
 local *f, *g;
+local $p, *q;
 no warnings 'parenthesis' ;
 local $c, $d = (1,2);
 EXPECT
 Parentheses missing around "local" list at - line 3.
 Parentheses missing around "local" list at - line 4.
+Parentheses missing around "local" list at - line 5.
 ########
 # op.c
 use warnings 'bareword' ;

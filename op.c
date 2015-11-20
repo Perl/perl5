@@ -4154,7 +4154,8 @@ Perl_localize(pTHX_ OP *o, I32 lex)
 		s++;
 
 	    while (1) {
-		if (*s && strchr("@$%*", *s) && *++s
+		if (*s && (strchr("@$%", *s) || (!lex && *s == '*'))
+		       && *++s
 		       && (isWORDCHAR(*s) || UTF8_IS_CONTINUED(*s))) {
 		    s++;
 		    sigil = TRUE;
