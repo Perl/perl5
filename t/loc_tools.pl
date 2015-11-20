@@ -128,10 +128,11 @@ sub locales_enabled(;$) {
     # denoting a single category.
     #
     # If any of the individual categories specified by the optional parameter
-    # is all digits, it is taken to be the C enum for the category (e.g.,
-    # &POSIX::LC_CTYPE).  Otherwise it should be a string name of the
-    # category, like 'LC_TIME'.  The initial 'LC_' is optional.  It is a fatal
-    # error to call this with something that isn't a known category
+    # is all digits (and an optional leading minus), it is taken to be the C
+    # enum for the category (e.g., &POSIX::LC_CTYPE).  Otherwise it should be
+    # a string name of the category, like 'LC_TIME'.  The initial 'LC_' is
+    # optional.  It is a fatal error to call this with something that isn't a
+    # known category
 
     use Config;
 
