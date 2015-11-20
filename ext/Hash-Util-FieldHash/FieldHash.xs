@@ -178,15 +178,6 @@ HUF_ask_trigger(pTHX_ SV *ob_id) {
     return NULL;
 }
 
-/* get the trigger for an object, creating it if necessary */
-static SV *
-HUF_get_trigger0(pTHX_ SV *obj, SV *ob_id) {
-    SV* trigger;
-    if (!(trigger = HUF_ask_trigger(aTHX_ ob_id)))
-        trigger = HUF_new_trigger(aTHX_ obj, ob_id);
-    return trigger;
-}
-
 static SV *
 HUF_get_trigger(pTHX_ SV *obj, SV *ob_id) {
     SV* trigger = HUF_ask_trigger(aTHX_ ob_id);
