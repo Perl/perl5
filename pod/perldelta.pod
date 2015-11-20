@@ -37,41 +37,178 @@ cases into different functions.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
+L<arybase> has been upgraded from version 0.10 to 0.11.
 
 =item *
 
-XXX
+L<B> has been upgraded from version 1.60 to 1.61.
+
+=item *
+
+L<base> has been upgraded from version 2.22 to 2.22_01.
+
+Better handling of attempts to load non-existent modules. 
+Improvements to fields.pm documentation. L<base> now requires v5.8.0.
+
+=item *
+
+L<Carp> has been upgraded from version 1.37 to 1.38.
+
+Improvements when working with older perls.
+
+=item *
+
+L<Config::Perl::V> has been upgraded from version 0.24 to 0.25.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.22 to 1.23.
+
+=item *
+
+L<Dumpvalue> has been upgraded from version 1.17 to 1.18.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.35 to 1.36.
+
+=item *
+
+L<fields> has been upgraded from version 2.17 to 2.22_01.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.31 to 1.32.
+
+Handles empty directory lists.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.58 to 3.59.
+
+=item *
+
+L<Getopt::Long> has been upgraded from version 2.47 to 2.48.
+
+Fixes an issue with C<< gnu_compat >>
+
+=item *
+
+L<Hash::Util::FieldHash> has been upgraded from version 1.17 to 1.18.
+
+=item *
+
+L<IPC::Open3> has been upgraded from version 1.19 to 1.20.
+
+Include the error message on C<< exec() >> failure.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999704 to 1.999710.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.34 to 0.37.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20151020 to 5.20151120.
+
+=item *
+
+L<Module::Metadata> has been upgraded from version 1.000029 to 1.000030.
+
+Temp dirs cleaned up during tests. More accurately mark tests as TODO, so as to have a quieter and less confusing test run without passing TODO tests.
+
+=item *
+
+L<PerlIO::encoding> has been upgraded from version 0.22 to 0.23.
+
+=item *
+
+L<PerlIO::mmap> has been upgraded from version 0.014 to 0.015.
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.23 to 0.24.
+
+=item *
+
+L<PerlIO::via> has been upgraded from version 0.15 to 0.16.
+
+=item *
+
+L<Pod::Simple> has been upgraded from version 3.30 to 3.32.
+
+Switched debugging output from C<< STDOUT >> to C<< STDERR >>.
+
+Added C<< errata_seen() >> to make POD errors easily accessible.
+
+Simplified the detection of case-insensitivity in Pod::Simple::Search.
+
+Fixed C<< Use of uninitialized value $1 in lc >> warning in
+Pod::Simple::Search.
+
+If C<< @INC >> includes the current directory symbol, C<.>, the
+C<< survey() >> method of C<< Pod::Simple::Search >> no longer excludes
+it from its list of directories to search. Instead, The C<< survey() >> and
+C<< find() >> methods now both exclude duplicate directories from C<< @INC >>
+(RT #102344).
+
+Moved source repository and updated links to new perl-pod GitHub
+organization: L<https://github.com/perl-pod/pod-simple>.
+
+Improved repository links and added GitHub issue tracking link to
+the distribution metadata.
+
+Switched from C<< File::Spec >>'s C<< catdir >> to C<< catfile >>
+for path names, to fix failures on VMS. Also now use Unix path semantics
+where they're not required to be platform-specific. (RT #105511).
+
+Improved the example use of the C<< html_encode_chars() >> method in
+the C<< Pod::Simple::XHTML >> documentation.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.58 to 1.59.
+
+=item *
+
+L<Thread::Queue> has been upgraded from version 3.06 to 3.07.
+
+=item *
+
+L<threads> has been upgraded from version 2.03 to 2.04.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.48 to 1.49.
+
+=item *
+
+L<Tie::Scalar> has been upgraded from version 1.03 to 1.04.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9727_02 to 1.9728.
+
+=item *
+
+L<Time::Piece> has been upgraded from version 1.30 to 1.31.
+
+=item *
+
+L<Unicode::Normalize> has been upgraded from version 1.21 to 1.23.
+
+=item *
+
+L<XSLoader> has been upgraded from version 0.20 to 0.21.
 
 =back
 
