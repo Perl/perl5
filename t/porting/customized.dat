@@ -7,7 +7,6 @@ ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_VMS.pm 0c78ba02d6249
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/prereq.t 53bda2c549fd13a6b6c13a070ca6bc79883081c0
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/vstrings.t 90035a2bdbf45f15b9c3196d072d7cba7e662871
 Math::BigRat cpan/Math-BigRat/lib/Math/BigRat.pm 682352dde33638125ce12ca44990bd1cd44af4f8
-Module::Metadata cpan/Module-Metadata/t/lib/GeneratePackage.pm 502ffbe2609947430e6aa1a3df8064b3fef3e086
 Pod::Perldoc cpan/Pod-Perldoc/lib/Pod/Perldoc.pm dcd53fba13060dbb71b1b5861fbc5c0881c8625a
 Scalar-List-Utils cpan/Scalar-List-Utils/lib/List/Util.pm 62d2a82a811b531a3fd25cb60c4c2ef943858892
 Scalar-List-Utils cpan/Scalar-List-Utils/lib/List/Util/XS.pm 08abbe1a707927cee53e85ba85d6bd35c1c2ae50

@@ -818,7 +818,7 @@ use File::Glob qw(:case);
     },
 
     'Module::Metadata' => {
-        'DISTRIBUTION' => 'ETHER/Module-Metadata-1.000029-TRIAL.tar.gz',
+        'DISTRIBUTION' => 'ETHER/Module-Metadata-1.000030-TRIAL.tar.gz',
         'FILES'        => q[cpan/Module-Metadata],
         'EXCLUDED'     => [
             qw(t/00-report-prereqs.t),
@@ -826,9 +826,6 @@ use File::Glob qw(:case);
             qr{weaver.ini},
             qr{^xt},
         ],
-        # Already merged upstream:
-        # https://github.com/Perl-Toolchain-Gang/Module-Metadata/commit/9658697
-        'CUSTOMIZED'   => [ qw[ t/lib/GeneratePackage.pm ] ],
     },
 
     'Net::Ping' => {
