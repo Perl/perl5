@@ -1,6 +1,6 @@
 package locale;
 
-our $VERSION = '1.07';
+our $VERSION = '1.08';
 use Config;
 
 $Carp::Internal{ (__PACKAGE__) } = 1;
@@ -97,15 +97,14 @@ sub import {
             $arg =~ s/^://;
 
             eval { require POSIX; import POSIX 'locale_h'; };
-            unless (defined &POSIX::LC_CTYPE) {
-              return;
-            }
 
             # Map our names to the ones defined by POSIX
             my $LC = "LC_" . uc($arg);
 
             my $bit = eval "&POSIX::$LC";
-            if (defined $bit) {
+            if (defined $bit) { # XXX Should we warn that this category isn't
+                                # supported on this platform, or make it
+                                # always be the C locale?
 
                 # Verify our assumption.
                 if (! ($bit >= 0 && $bit < 31)) {
