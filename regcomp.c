@@ -6740,6 +6740,15 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_recurse_count = 0;
     pRExC_state->code_index = 0;
 
+    /* This NUL is guaranteed because the pattern comes from an SV*, and the sv
+     * code makes sure the final byte is an uncounted NUL.  But should this
+     * ever not be the case, lots of things could read beyond the end of the
+     * buffer: loops like
+     *      while(isFOO(*RExC_parse)) RExC_parse++;
+     *      strchr(RExC_parse, "foo");
+     * etc.  So it is worth noting. */
+    assert(*RExC_end == '\0');
+
     DEBUG_PARSE_r(
 	PerlIO_printf(Perl_debug_log, "Starting first pass (sizing)\n");
         RExC_lastnum=0;
@@ -9863,6 +9872,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 
     *flagp = 0;				/* Tentatively. */
 
+    /* Having this true makes it feasible to have a lot fewer tests for the
+     * parse pointer being in scope.  For example, we can write
+     *      while(isFOO(*RExC_parse)) RExC_parse++;
+     * instead of
+     *      while(RExC_parse < RExC_end && isFOO(*RExC_parse)) RExC_parse++;
+     */
+    assert(*RExC_end == '\0');
 
     /* Make an OPEN node, if parenthesized. */
     if (paren) {
