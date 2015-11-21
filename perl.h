@@ -421,6 +421,16 @@
 #  define GCC_DIAG_IGNORE(w)
 #  define GCC_DIAG_RESTORE
 #endif
+/* for clang specific pragmas */
+#if defined(__clang__) || defined(__clang)
+#  define CLANG_DIAG_PRAGMA(x) _Pragma (#x)
+#  define CLANG_DIAG_IGNORE(x) _Pragma("clang diagnostic push") \
+                               CLANG_DIAG_PRAGMA(clang diagnostic ignored #x)
+#  define CLANG_DIAG_RESTORE   _Pragma("clang diagnostic pop")
+#else
+#  define CLANG_DIAG_IGNORE(w)
+#  define CLANG_DIAG_RESTORE
+#endif
 
 #define NOOP /*EMPTY*/(void)0
 /* cea2e8a9dd23747f accidentally lost the comment originally from the first
