@@ -128,7 +128,7 @@ $b = quotemeta <<'EOF';
 BEGIN { $^I = ".bak"; }
 BEGIN { $^W = 1; }
 BEGIN { $/ = "\n"; $\ = "\n"; }
-LINE: while (defined($_ = <ARGV>)) {
+LINE: while (defined($_ = readline ARGV)) {
     chomp $_;
     our(@F) = split(' ', $_, 0);
     '???';
@@ -628,12 +628,27 @@ local our($rhu, $barb);
 ####
 # <>
 my $foo;
-$_ .= <ARGV> . <$foo>;
+$_ .= <> . <ARGV> . <$foo>;
+<$foo>;
+<${foo}>;
+<$ foo>;
+>>>>
+my $foo;
+$_ .= readline(ARGV) . readline(ARGV) . readline($foo);
+readline $foo;
+glob $foo;
+glob $foo;
 ####
 # readline
 readline 'FH';
 readline *$_;
+readline *{$_};
+readline ${"a"};
+>>>>
+readline 'FH';
+readline *$_;
 readline *{$_;};
+readline ${'a';};
 ####
 # <<>>
 $_ = <<>>;
@@ -1363,6 +1378,10 @@ tr/a/b/r + $a =~ tr/p/q/r;
 ####
 # [perl #90898]
 <a,>;
+glob 'a,';
+>>>>
+glob 'a,';
+glob 'a,';
 ####
 # [perl #91008]
 # SKIP ?$] >= 5.023 && "autoderef deleted in this Perl version"
