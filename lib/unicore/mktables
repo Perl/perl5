@@ -19544,10 +19544,16 @@ utf8::upgrade($breakable_utf8);
 my $nobreak_utf8 = my $nobreak = chr(utf8::unicode_to_native(0xD7));
 utf8::upgrade($nobreak_utf8);
 
+my $are_ctype_locales_available;
 my $utf8_locale;
 chdir 't' if -d 't';
 eval { require "./loc_tools.pl" };
-$utf8_locale = &find_utf8_ctype_locale if defined &find_utf8_ctype_locale;
+if (defined &locales_enabled) {
+    $are_ctype_locales_available = locales_enabled('LC_CTYPE');
+    if ($are_ctype_locales_available) {
+        $utf8_locale = &find_utf8_ctype_locale;
+    }
+}
 
 sub _test_break($$) {
     # Test various break property matches.  The 2nd parameter gives the
@@ -19627,9 +19633,13 @@ sub _test_break($$) {
             $display_upgrade = " (utf8-upgraded)";
         }
 
-        # The /l modifier has C after it to indicate the locale to try
-        my @modifiers = qw(a aa d lC u i);
-        push @modifiers, "l$utf8_locale" if defined $utf8_locale;
+        my @modifiers = qw(a aa d u i);
+        if ($are_ctype_locales_available) {
+            push @modifiers, "l" if defined &find_utf8_ctype_locale;
+
+            # The /l modifier has C after it to indicate the locale to try
+            push @modifiers, "lC";
+        }
 
         # Test for each of the regex modifiers.
         for my $modifier (@modifiers) {
