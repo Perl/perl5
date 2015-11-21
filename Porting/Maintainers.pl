@@ -179,7 +179,7 @@ use File::Glob qw(:case);
     },
 
     'base' => {
-        'DISTRIBUTION' => 'RGARCIA/base-2.18.tar.gz',
+        'DISTRIBUTION' => 'RJBS/base-2.23.tar.gz',
         'FILES'        => q[dist/base],
     },
 
