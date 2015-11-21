@@ -71,30 +71,30 @@ and can't find a substitute amongst this list, mail p5p.
 (Please do not add any names to this list without prior
 consent of the Pumpking.)
 
-Abigail <abigail@abigail.be>
-Aristotle Pagaltzis <pagaltzis@gmx.de>
-Ask Bjørn Hansen <ask@perl.org>
-Chris Williams <bingos@cpan.org>
-Dave Cross <dave@perlhacks.com>
-Dave Rolsky <autarch@urth.org>
-David Golden <dagolden@cpan.org>
-Florian Ragwitz <rafl@debian.org>
-Jesse Luehrs <doy@cpan.org>
-Jesse Vincent <jesse@cpan.org>
-Leon Brocard <acme@astray.com>
-Matt Trout <mst@shadowcat.co.uk>
-Matthew Horsfall <wolfsage@gmail.com>
-Max Maischein <corion@cpan.org>
-Peter Martini <petercmartini@gmail.com>
-Philippe Bruhat <book@cpan.org>
-Ricardo Signes <rjbs@cpan.org>
-Stevan Little <stevan.little@iinteractive.com>
-Steve Hay <steve.m.hay@googlemail.com>
-Tatsuhiko Miyagawa <miyagawa@bulknews.net>
-Tony Cook <tony@develop-help.com>
-Yves Orton <demerphq@gmail.com>
-Zefram <zefram@fysh.org>
-Ævar Arnfjörð Bjarmason <avar@cpan.org>
+  Abigail <abigail@abigail.be>
+  Aristotle Pagaltzis <pagaltzis@gmx.de>
+  Ask Bjørn Hansen <ask@perl.org>
+  Chris Williams <bingos@cpan.org>
+  Dave Cross <dave@perlhacks.com>
+  Dave Rolsky <autarch@urth.org>
+  David Golden <dagolden@cpan.org>
+  Florian Ragwitz <rafl@debian.org>
+  Jesse Luehrs <doy@cpan.org>
+  Jesse Vincent <jesse@cpan.org>
+  Leon Brocard <acme@astray.com>
+  Matt Trout <mst@shadowcat.co.uk>
+  Matthew Horsfall <wolfsage@gmail.com>
+  Max Maischein <corion@cpan.org>
+  Peter Martini <petercmartini@gmail.com>
+  Philippe Bruhat <book@cpan.org>
+  Ricardo Signes <rjbs@cpan.org>
+  Stevan Little <stevan.little@iinteractive.com>
+  Steve Hay <steve.m.hay@googlemail.com>
+  Tatsuhiko Miyagawa <miyagawa@bulknews.net>
+  Tony Cook <tony@develop-help.com>
+  Yves Orton <demerphq@gmail.com>
+  Zefram <zefram@fysh.org>
+  Ævar Arnfjörð Bjarmason <avar@cpan.org>
 
 =head1 AUTHOR
 
