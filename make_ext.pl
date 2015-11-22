@@ -616,7 +616,7 @@ sub just_pm_to_blib {
     my ($first) = $mname =~ /^([^:]+)/;
 
     my $pm_to_blib = IS_VMS ? 'pm_to_blib.ts' : 'pm_to_blib';
-    my $silent = defined $ENV{MAKEFLAGS} and $ENV{MAKEFLAGS} =~ /\b(s|silent|quiet)\b/;
+    my $silent = defined $ENV{MAKEFLAGS} && $ENV{MAKEFLAGS} =~ /\b(s|silent|quiet)\b/;
 
     foreach my $leaf (<*>) {
         if (-d $leaf) {
