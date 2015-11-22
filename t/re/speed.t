@@ -125,11 +125,15 @@ sub run_tests {
                     for my $s ('', 's') {
                         my $XBOL = $s ? 'SBOL' : 'MBOL';
                         my $text = "anchored($XBOL) implicit";
-                        fresh_perl_like(<<"PROG", qr/\b\Q$text\E\b/, {}, "/.${star}${greedy}X/${flags}${s} anchors implicitly");
+TODO:
+                        {
+                            local $main::TODO = 'regdump gets mangled by the VMS pipe implementation' if $^O eq 'VMS';
+                            fresh_perl_like(<<"PROG", qr/\b\Q$text\E\b/, {}, "/.${star}${greedy}X/${flags}${s} anchors implicitly");
 BEGIN { \@INC = ('../lib', '.', '../ext/re'); }
 use re 'debug';
 qr/.${star}${greedy}:::\\s*ab/${flags}${s}
 PROG
+                        }
                     }
                 }
             }
