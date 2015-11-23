@@ -20,7 +20,7 @@ sub _reset_globals {
     $planned    = 0;
 }
 
-$VERSION = '1.27';
+$VERSION = '1.28';
 require Exporter;
 @ISA=('Exporter');
 
@@ -461,23 +461,24 @@ sub _complain {
     my $diag = $$detail{diagnostic};
     $diag =~ s/\n/\n#/g if defined $diag;
 
+    my $out = $$detail{todo} ? $TESTOUT : $TESTERR;
     $$detail{context} .= ' *TODO*' if $$detail{todo};
     if (!$$detail{compare}) {
         if (!$diag) {
-            print $TESTERR "# Failed test $ntest in $$detail{context}\n";
+            print $out "# Failed test $ntest in $$detail{context}\n";
         } else {
-            print $TESTERR "# Failed test $ntest in $$detail{context}: $diag\n";
+            print $out "# Failed test $ntest in $$detail{context}: $diag\n";
         }
     } else {
         my $prefix = "Test $ntest";
 
-        print $TESTERR "# $prefix got: " . _quote($result) .
+        print $out "# $prefix got: " . _quote($result) .
                        " ($$detail{context})\n";
         $prefix = ' ' x (length($prefix) - 5);
         my $expected_quoted = (defined $$detail{regex})
          ?  'qr{'.($$detail{regex}).'}'  :  _quote($expected);
 
-        print $TESTERR "# $prefix Expected: $expected_quoted",
+        print $out "# $prefix Expected: $expected_quoted",
            $diag ? " ($diag)" : (), "\n";
 
         _diff_complain( $result, $expected, $detail, $prefix )
@@ -485,7 +486,7 @@ sub _complain {
     }
 
     if(defined $Program_Lines{ $$detail{file} }[ $$detail{line} ]) {
-        print $TESTERR
+        print $out
           "#  $$detail{file} line $$detail{line} is: $Program_Lines{ $$detail{file} }[ $$detail{line} ]\n"
          if $Program_Lines{ $$detail{file} }[ $$detail{line} ]
           =~ m/[^\s\#\(\)\{\}\[\]\;]/;  # Otherwise it's uninformative
