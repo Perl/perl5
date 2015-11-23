@@ -3040,18 +3040,23 @@ X<hex> X<hexadecimal>
 
 =item hex
 
-=for Pod::Functions convert a string to a hexadecimal number
+=for Pod::Functions convert a hexadecimal string to a number
 
-Interprets EXPR as a hex string and returns the corresponding value.
-(To convert strings that might start with either C<0>, C<0x>, or C<0b>, see
-L</oct>.)  If EXPR is omitted, uses C<$_>.
+Interprets EXPR as a hex string and returns the corresponding numeric value.
+If EXPR is omitted, uses C<$_>.
 
     print hex '0xAf'; # prints '175'
     print hex 'aF';   # same
+    $valid_input =~ /\A(?:0?[xX])?(?:_?[0-9a-fA-F])*\z/
 
-Hex strings may only represent integers.  Strings that would cause
-integer overflow trigger a warning.  Leading whitespace is not stripped,
-unlike oct().  To present something as hex, look into L</printf>,
+A hex string consists of hex digits and an optional C<0x> or C<x> prefix.
+Each hex digit may be preceded by a single underscore, which will be ignored.
+Any other character triggers a warning and causes the rest of the string
+to be ignored (even leading whitespace, unlike L</oct>).
+Only integers can be represented, and integer overflow triggers a warning.
+
+To convert strings that might start with any of C<0>, C<0x>, or C<0b>, see L</oct>.
+To present something as hex, look into L</printf>,
 L</sprintf>, and L</unpack>.
 
 =item import LIST
