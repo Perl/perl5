@@ -378,6 +378,29 @@ do
   esac
 done
 
+# If usethreads and clang, add -Wthread-safety for clang 3.5 or later.
+# gccversion is defined also for clang, because compat, use that for matching.
+# Apple overwrites clang version with XCode version.
+# Aggressively forward-proofing.
+case "$usethreads" in
+define)
+case "$gccversion" in
+*" Clang 3."[56789]*|*" Clang "[456]*|*"Apple LLVM "[6789]*)
+  for f in -Wthread-safety
+  do
+    case " $warn " in
+    *" $f "*) ;; # Skip if already there.
+    *)
+      echo "cflags.SH: Adding $f because usethreads and clang and gccversion '$gccversion'"
+      warn="$warn $f"
+      ;;
+    esac
+  done
+;;
+esac
+;;
+esac
+
 echo "cflags.SH: cc       = $cc"
 echo "cflags.SH: ccflags  = $ccflags"
 echo "cflags.SH: stdflags = $stdflags"

@@ -264,6 +264,7 @@ S_ithread_clear(pTHX_ ithread *thread)
  */
 STATIC void
 S_ithread_free(pTHX_ ithread *thread)
+  PERL_TSA_RELEASE(thread->mutex)
 {
 #ifdef WIN32
     HANDLE handle;
@@ -326,6 +327,7 @@ S_ithread_free(pTHX_ ithread *thread)
 
 static void
 S_ithread_count_inc(pTHX_ ithread *thread)
+  PERL_TSA_EXCLUDES(thread->mutex)
 {
     MUTEX_LOCK(&thread->mutex);
     thread->count++;
@@ -715,17 +717,20 @@ S_SV_to_ithread(pTHX_ SV *sv)
 
 /* threads->create()
  * Called in context of parent thread.
- * Called with MY_POOL.create_destruct_mutex locked.  (Unlocked on error.)
+ * Called with my_pool->create_destruct_mutex locked.
+ * (Unlocked both on error and on success.)
  */
 STATIC ithread *
 S_ithread_create(
         PerlInterpreter *parent_perl,
+        my_pool_t *my_pool,
         SV       *init_function,
         IV        stack_size,
         int       gimme,
         int       exit_opt,
         int       params_start,
         int       num_params)
+  PERL_TSA_RELEASE(my_pool->create_destruct_mutex)
 {
     dTHXa(parent_perl);
     ithread     *thread;
@@ -741,18 +746,17 @@ S_ithread_create(
     int          rc_stack_size = 0;
     int          rc_thread_create = 0;
 #endif
-    dMY_POOL;
 
     /* Allocate thread structure in context of the main thread's interpreter */
     {
-        PERL_SET_CONTEXT(MY_POOL.main_thread.interp);
+        PERL_SET_CONTEXT(my_pool->main_thread.interp);
         thread = (ithread *)PerlMemShared_malloc(sizeof(ithread));
     }
     PERL_SET_CONTEXT(aTHX);
     if (!thread) {
         /* This lock was acquired in ithread_create()
          * prior to calling S_ithread_create(). */
-        MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
+        MUTEX_UNLOCK(&my_pool->create_destruct_mutex);
         {
           int fd = PerlIO_fileno(Perl_error_log);
           if (fd >= 0) {
@@ -765,11 +769,11 @@ S_ithread_create(
     Zero(thread, 1, ithread);
 
     /* Add to threads list */
-    thread->next = &MY_POOL.main_thread;
-    thread->prev = MY_POOL.main_thread.prev;
-    MY_POOL.main_thread.prev = thread;
+    thread->next = &my_pool->main_thread;
+    thread->prev = my_pool->main_thread.prev;
+    my_pool->main_thread.prev = thread;
     thread->prev->next = thread;
-    MY_POOL.total_threads++;
+    my_pool->total_threads++;
 
     /* 1 ref to be held by the local var 'thread' in S_ithread_run().
      * 1 ref to be held by the threads object that we assume we will
@@ -785,7 +789,7 @@ S_ithread_create(
     MUTEX_INIT(&thread->mutex);
     MUTEX_LOCK(&thread->mutex); /* See S_ithread_run() for more detail. */
 
-    thread->tid = MY_POOL.tid_counter++;
+    thread->tid = my_pool->tid_counter++;
     thread->stack_size = S_good_stack_size(aTHX_ stack_size);
     thread->gimme = gimme;
     thread->state = exit_opt;
@@ -995,7 +999,7 @@ S_ithread_create(
         /* Must unlock mutex for destruct call */
         /* This lock was acquired in ithread_create()
          * prior to calling S_ithread_create(). */
-        MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
+        MUTEX_UNLOCK(&my_pool->create_destruct_mutex);
         thread->state |= PERL_ITHR_NONVIABLE;
         S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
 #ifndef WIN32
@@ -1010,9 +1014,13 @@ S_ithread_create(
         return (NULL);
     }
 
-    MY_POOL.running_threads++;
+    my_pool->running_threads++;
+    MUTEX_UNLOCK(&my_pool->create_destruct_mutex);
     return (thread);
+CLANG_DIAG_IGNORE(-Wthread-safety);
+/* warning: mutex 'thread->mutex' is not held on every path through here [-Wthread-safety-analysis] */
 }
+CLANG_DIAG_RESTORE;
 
 #endif /* USE_ITHREADS */
 
@@ -1136,7 +1144,8 @@ ithread_create(...)
 
         /* Create thread */
         MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
-        thread = S_ithread_create(aTHX_ function_to_call,
+        thread = S_ithread_create(aTHX_ &MY_POOL,
+                                        function_to_call,
                                         stack_size,
                                         context,
                                         exit_opt,
@@ -1146,11 +1155,13 @@ ithread_create(...)
             XSRETURN_UNDEF;     /* Mutex already unlocked */
         }
         ST(0) = sv_2mortal(S_ithread_to_SV(aTHX_ Nullsv, thread, classname, FALSE));
-        MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 
         /* Let thread run. */
         /* See S_ithread_run() for more detail. */
+	CLANG_DIAG_IGNORE(-Wthread-safety);
+	/* warning: releasing mutex 'thread->mutex' that was not held [-Wthread-safety-analysis] */
         MUTEX_UNLOCK(&thread->mutex);
+	CLANG_DIAG_RESTORE;
 
         /* XSRETURN(1); - implied */
 
