@@ -1,5 +1,5 @@
 package encoding::warnings;
-$encoding::warnings::VERSION = '0.11';
+$encoding::warnings::VERSION = '0.12';
 
 use strict;
 use 5.007;
@@ -170,7 +170,9 @@ sub import {
 	], $class,
     );
 
+    no warnings 'deprecated';
     ${^ENCODING} = $decoder;
+    use warnings 'deprecated';
     $^H{$class} = 1;
 }
 
