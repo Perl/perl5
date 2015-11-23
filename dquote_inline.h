@@ -101,7 +101,7 @@ S_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
             }
             return FALSE;
         }
-	goto ok;
+	return TRUE;
     }
 
     e = strchr(*s, '}');
@@ -128,7 +128,7 @@ S_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
         }
         *s = e + 1;
         *uv = 0;
-        goto ok;
+        return TRUE;
     }
 
     flags |= PERL_SCAN_ALLOW_UNDERSCORES;
@@ -150,10 +150,6 @@ S_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
     /* Return past the '}' */
     *s = e + 1;
 
-  ok:
-    /* guarantee replacing "\x{...}" with utf8 bytes fits within
-     * existing space */
-    assert(UVCHR_SKIP(*uv) < *s - start);
     return TRUE;
 }
 

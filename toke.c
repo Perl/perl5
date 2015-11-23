@@ -3357,10 +3357,7 @@ S_scan_const(pTHX_ char *start)
 		}
 
 	      NUM_ESCAPE_INSERT:
-		/* Insert oct or hex escaped character.  There will always be
-		 * enough room in sv since such escapes will be longer than any
-		 * UTF-8 sequence they can end up as, except if they force us
-		 * to recode the rest of the string into utf8 */
+		/* Insert oct or hex escaped character. */
 		
 		/* Here uv is the ordinal of the next character being added */
 		if (UVCHR_IS_INVARIANT(uv)) {
@@ -3388,6 +3385,20 @@ S_scan_const(pTHX_ char *start)
                     }
 
                     if (has_utf8) {
+                       /* Usually, there will already be enough room in 'sv'
+                        * since such escapes are likely longer than any UTF-8
+                        * sequence they can end up as.  This isn't the case on
+                        * EBCDIC where \x{40000000} contains 12 bytes, and the
+                        * UTF-8 for it contains 14.  And, we have to allow for
+                        * a trailing NUL.  It probably can't happen on ASCII
+                        * platforms, but be safe */
+                        const STRLEN needed = d - SvPVX(sv) + UVCHR_SKIP(uv)
+                                            + 1;
+                        if (UNLIKELY(needed > SvLEN(sv))) {
+                            SvCUR_set(sv, d - SvPVX_const(sv));
+                            d = sv_grow(sv, needed) + SvCUR(sv);
+                        }
+
 		        d = (char*)uvchr_to_utf8((U8*)d, uv);
 			if (PL_lex_inwhat == OP_TRANS
                             && PL_sublex_info.sub_op)

@@ -158,10 +158,6 @@ Perl_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
     /* Return past the '}' */
     *s = e + 1;
 
-    /* guarantee replacing "\o{...}" with utf8 bytes fits within
-     * existing space */
-    assert(UVCHR_SKIP(*uv) < *s - start);
-
     return TRUE;
 }
 
