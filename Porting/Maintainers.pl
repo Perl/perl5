@@ -445,10 +445,9 @@ use File::Glob qw(:case);
                 examples/perl_keyword.pl
                 examples/perl_regcomp_posix_keyword.pl
                 ),
+        ],
         # cc37ebcee3 to fix VMS failure
         'CUSTOMIZED'   => [ qw(t/Constant.t) ],
-
-        ],
     },
 
     'ExtUtils::Install' => {
