@@ -1835,7 +1835,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 
 	$e = '"abc" ~~ (%s)';
 	$subs{'~~'} = $e;
-	push @tests, [ "abc", $e, '(~~)', '(NM:~~)', [ 1, 1, 0 ], 0 ];
+	push @tests, [ qr/abc/, $e, '(~~)', '(NM:~~)', [ 1, 1, 0 ], 0 ];
 
 	$subs{'-X'} = 'do { my $f = (%s);'
 		    . '$_[1] eq "r" ? (-r ($f)) :'
@@ -2009,6 +2009,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 		    # ref rather than a copy, so stringify it to
 		    # find out if its tainted
 		    $res = "$res" if $res_term =~ /\+\+|--/;
+                    $exp = !!$exp if $sub_term =~ /~~/; # ~~ is forced to yes/no
 		    is(tainted($res), $exp_taint,
 			    "$desc taint of result return");
 		    is($res, $exp, "$desc return value");

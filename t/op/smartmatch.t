@@ -179,6 +179,19 @@ sub NOT_DEF() { undef }
     sub blergh_true { 42 }
     is(1 ~~ \&blergh_false, "", "false return is a no");
     is(1 ~~ \&blergh_true,  "1", "true return is a yes");
+
+    # similarly for overloading
+    package Test::Object::StrangeOverload {
+        use overload '~~' => sub { $_[1] };
+        use overload '""' => sub { "stringified" };
+        use overload 'eq' => sub {"$_[0]" eq "$_[1]"};
+        sub new { bless +{} };
+    };
+    my $ov_strange = Test::Object::StrangeOverload->new;
+    is(42 ~~ $ov_strange, "1", "overload true return is a yes");
+    is("0" ~~ $ov_strange, "", "overload false return is a no");
+    is($ov_strange ~~ 44, "1", "reversed overload true return is a yes");
+    is($ov_strange ~~ "0", "", "reversed overload false return is a no");
 }
 
 done_testing();
