@@ -23,6 +23,7 @@
          "dist/Data-Dumper",
          "dist/Devel-SelfStubber",
          "dist/Dumpvalue",
+         "dist/encoding-warnings",
          "dist/Env",
          "dist/Exporter",
          "dist/ExtUtils-CBuilder",

@@ -261,7 +261,7 @@ __DEPARSE_FAILURES__
 ../cpan/autodie/t/utf8_open.t
 ../cpan/autodie/t/utime.t
 ../cpan/autodie/t/version_tag.t
-../cpan/encoding-warnings/t/4-lexical.t
+../dist/encoding-warnings/t/4-lexical.t
 ../cpan/podlators/t/basic.t
 ../cpan/version/t/09_list_util.t
 ../dist/Attribute-Handlers/t/constants.t

@@ -1032,11 +1032,6 @@ cpan/Encode/ucm/viscii.ucm		Unicode Character Map
 cpan/Encode/Unicode/Makefile.PL		Encode extension
 cpan/Encode/Unicode/Unicode.pm		Encode extension
 cpan/Encode/Unicode/Unicode.xs		Encode extension
-cpan/encoding-warnings/lib/encoding/warnings.pm	warn on implicit encoding conversions
-cpan/encoding-warnings/t/1-warning.t	tests for encoding::warnings
-cpan/encoding-warnings/t/2-fatal.t	tests for encoding::warnings
-cpan/encoding-warnings/t/3-normal.t	tests for encoding::warnings
-cpan/encoding-warnings/t/4-lexical.t	tests for encoding::warnings
 cpan/experimental/lib/experimental.pm
 cpan/experimental/t/basic.t
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm		generate XS code to import C header constants
@@ -3086,6 +3081,11 @@ dist/Devel-SelfStubber/lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 dist/Devel-SelfStubber/t/Devel-SelfStubber.t	See if Devel::SelfStubber works
 dist/Dumpvalue/lib/Dumpvalue.pm	Screen dump of perl values
 dist/Dumpvalue/t/Dumpvalue.t	See if Dumpvalue works
+dist/encoding-warnings/lib/encoding/warnings.pm	warn on implicit encoding conversions
+dist/encoding-warnings/t/1-warning.t	tests for encoding::warnings
+dist/encoding-warnings/t/2-fatal.t	tests for encoding::warnings
+dist/encoding-warnings/t/3-normal.t	tests for encoding::warnings
+dist/encoding-warnings/t/4-lexical.t	tests for encoding::warnings
 dist/Env/lib/Env.pm		Map environment into ordinary variables
 dist/Env/t/array.t		See if Env works for arrays
 dist/Env/t/env.t		See if Env works

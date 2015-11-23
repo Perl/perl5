@@ -398,7 +398,7 @@ use File::Glob qw(:case);
 
     'encoding::warnings' => {
         'DISTRIBUTION' => 'AUDREYT/encoding-warnings-0.11.tar.gz',
-        'FILES'        => q[cpan/encoding-warnings],
+        'FILES'        => q[dist/encoding-warnings],
         'EXCLUDED'     => [
             qr{^inc/Module/},
             qw(t/0-signature.t),
