@@ -1477,7 +1477,7 @@ Perl_io_close(pTHX_ IO *io, GV *gv, bool not_implicit, bool warn_on_fail)
 	}
 	IoOFP(io) = IoIFP(io) = NULL;
 
-	if (warn_on_fail && !retval) {
+	if (0 && warn_on_fail && !retval) {
 	    if (gv)
 		Perl_ck_warner_d(aTHX_ packWARN(WARN_IO),
 				"Warning: unable to close filehandle %"
