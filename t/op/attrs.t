@@ -428,4 +428,23 @@ package _123817 {
     eval 'return my $x : m';
 }
 
+# [perl #126257]
+# attributed lex var as function arg caused assertion failure
+
+package P126257 {
+    sub MODIFY_SCALAR_ATTRIBUTES {}
+    sub MODIFY_ARRAY_ATTRIBUTES  {}
+    sub MODIFY_HASH_ATTRIBUTES   {}
+    sub MODIFY_CODE_ATTRIBUTES   {}
+    sub foo {}
+    eval { foo(my $x : bar); };
+    ::is $@, "", "RT 126257 scalar";
+    eval { foo(my @x : bar); };
+    ::is $@, "", "RT 126257 array";
+    eval { foo(my %x : bar); };
+    ::is $@, "", "RT 126257 hash";
+    eval { foo(sub : bar {}); };
+    ::is $@, "", "RT 126257 sub";
+}
+
 done_testing();

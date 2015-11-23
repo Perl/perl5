@@ -11329,11 +11329,20 @@ OP *
 Perl_ck_entersub_args_list(pTHX_ OP *entersubop)
 {
     OP *aop;
+
     PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_LIST;
+
     aop = cUNOPx(entersubop)->op_first;
     if (!OpHAS_SIBLING(aop))
 	aop = cUNOPx(aop)->op_first;
     for (aop = OpSIBLING(aop); OpHAS_SIBLING(aop); aop = OpSIBLING(aop)) {
+        /* skip the extra attributes->import() call implicitly added in
+         * something like foo(my $x : bar)
+         */
+        if (   aop->op_type == OP_ENTERSUB
+            && (aop->op_flags & OPf_WANT) == OPf_WANT_VOID
+        )
+            continue;
         list(aop);
         op_lvalue(aop, OP_ENTERSUB);
     }
