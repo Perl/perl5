@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-plan(tests => 39);
+plan(tests => 40);
 
 
 # heredoc without newline (#65838)
@@ -88,5 +88,14 @@ HEREDOC
         qr/find string terminator/,
         {},
         "long terminator fails correctly"
+    );
+
+    # this would read freed memory
+    fresh_perl_like(
+        qq(0<<<<""0\n\n),
+        # valgrind and asan reports an error between these two lines
+        qr/^Number found where operator expected at - line 1, near "<<""0"\s+\(Missing operator/,
+        {},
+        "don't use an invalid oldoldbufptr"
     );
 }
