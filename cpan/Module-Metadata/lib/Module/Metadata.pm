@@ -1,6 +1,6 @@
 # -*- mode: cperl; tab-width: 8; indent-tabs-mode: nil; basic-offset: 2 -*-
 # vim:ts=8:sw=2:et:sta:sts=2
-package Module::Metadata; # git description: v1.000029-6-gae0d3b6
+package Module::Metadata; # git description: v1.000030-2-g52f466c
 # ABSTRACT: Gather package and POD information from perl module files
 
 # Adapted from Perl-licensed code originally distributed with
@@ -14,7 +14,7 @@ sub __clean_eval { eval $_[0] }
 use strict;
 use warnings;
 
-our $VERSION = '1.000030'; # TRIAL
+our $VERSION = '1.000031'; # TRIAL
 
 use Carp qw/croak/;
 use File::Spec;
@@ -820,7 +820,7 @@ Module::Metadata - Gather package and POD information from perl module files
 
 =head1 VERSION
 
-version 1.000030
+version 1.000031
 
 =head1 SYNOPSIS
 

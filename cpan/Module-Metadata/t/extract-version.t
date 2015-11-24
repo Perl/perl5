@@ -669,19 +669,19 @@ foreach my $test_case (@modules) {
         ok(
           $test_case->{all_versions}->($pm_info->{versions}),
           "case '$test_case->{name}': all extracted versions passes match sub"
-        ) or diag 'found versions: ', explain $pm_info->{versions};
+        );
       }
       else {
         is_deeply(
           $pm_info->{versions},
           $test_case->{all_versions},
           'correctly found all $VERSIONs',
-        ) or diag 'found versions: ', explain $pm_info->{versions};
+        );
       }
     }
 
     is( $warnings, '', "case '$test_case->{name}': no warnings from parsing" ) or $errs++;
-    diag Dumper({ got => $pm_info->version, module_contents => $code }) if $errs;
+    diag 'extracted versions: ', explain({ got => $pm_info->{versions}, module_contents => $code }) if !$ENV{PERL_CORE} && $errs;
   }
 }
 continue {
