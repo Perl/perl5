@@ -678,8 +678,6 @@ PP(pp_pipe_op)
     GV * const wgv = MUTABLE_GV(POPs);
     GV * const rgv = MUTABLE_GV(POPs);
 
-    assert (isGV_with_GP(rgv));
-    assert (isGV_with_GP(wgv));
     rstio = GvIOn(rgv);
     if (IoIFP(rstio))
 	do_close(rgv, FALSE);
