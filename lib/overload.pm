@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.26';
+our $VERSION = '1.28';
 
 %ops = (
     with_assign         => "+ - * / % ** << >> x .",
@@ -16,7 +16,7 @@ our $VERSION = '1.26';
     iterators           => '<>',
     filetest            => "-X",
     dereferencing       => '${} @{} %{} &{} *{}',
-    matching            => '~~',
+    matching            => '~~ x~~ ~~x',
     special             => 'nomethod fallback =',
 );
 
@@ -41,6 +41,8 @@ sub OVERLOAD {
     } else {
       warnings::warnif("overload arg '$_' is invalid")
         unless $ops_seen{$_};
+      warnings::warnif("deprecated", "Overloading ~~ is deprecated, use ~~x or x~~ overloading")
+        if $_ eq "~~";
       $sub = $arg{$_};
       if (not ref $sub) {
 	$ {$package . "::(" . $_} = $sub;

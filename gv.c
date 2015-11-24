@@ -3001,7 +3001,8 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
   dVAR;
   MAGIC *mg;
   CV *cv=NULL;
-  CV **cvp=NULL, **ocvp=NULL;
+  CV **cvp=NULL; /* right (and at least initially) left side over loading table */
+  CV **ocvp=NULL; /* left side overloading table */
   AMT *amtp=NULL, *oamtp=NULL;
   int off = 0, off1, lr = 0, notfound = 0;
   int postpr = 0, force_cpy = 0;
@@ -3152,6 +3153,15 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	       && (cv = cvp[off=method])) { /* Method for right
 					     * argument found */
       lr=1;
+    } else if ((method == smartleft_amg
+                && ocvp
+                && (cv = ocvp[smart_amg]))
+               ||
+               (method == smartright_amg
+                && cvp
+                && (cv = cvp[smart_amg]))) {
+        lr = method == smartleft_amg ? -1 : 1;
+        off = smart_amg;
     } else if (((cvp && amtp->fallback > AMGfallNEVER)
                 || (ocvp && oamtp->fallback > AMGfallNEVER))
 	       && !(flags & AMGf_unary)) {

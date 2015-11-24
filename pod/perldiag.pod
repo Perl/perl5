@@ -4252,6 +4252,12 @@ L<overload>.
 (F) An object with a C<qr> overload was used as part of a match, but the
 overloaded operation didn't return a compiled regexp.  See L<overload>.
 
+=item Overloading ~~ is deprecated, use ~~x or x~~ overloading
+
+(W deprecated) The C<~~> overload has been split into separate
+overloadings for the overloaded value on the left, C<x~~>), or on the
+right, C<~~x>.  The older C<~~> overload is now deprecated.
+
 =item %s package attribute may clash with future reserved word: %s
 
 (W reserved) A lowercase attribute name was used that had a
