@@ -12746,14 +12746,14 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     goto not_fold_common;
                 }
                 else /* A regular FOLD code point */
-                    if (! ( UTF
+                    if (! (   UTF
 #if    UNICODE_MAJOR_VERSION > 3 /* no multifolds in early Unicode */   \
    || (UNICODE_MAJOR_VERSION == 3 && (   UNICODE_DOT_VERSION > 0)       \
                                       || UNICODE_DOT_DOT_VERSION > 0)
-                        /* See comments for join_exact() as to why we fold this
-                         * non-UTF at compile time */
-                        || (node_type == EXACTFU
-                            && ender == LATIN_SMALL_LETTER_SHARP_S)
+                            /* See comments for join_exact() as to why we fold
+                             * this non-UTF at compile time */
+                            || (   node_type == EXACTFU
+                                && ender == LATIN_SMALL_LETTER_SHARP_S)
 #endif
                 )) {
                     /* Here, are folding and are not UTF-8 encoded; therefore
