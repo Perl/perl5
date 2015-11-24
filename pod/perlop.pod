@@ -2309,6 +2309,21 @@ when they're the right way to get something done.  Perl was made to be
 a glue language, and one of the things it glues together is commands.
 Just understand what you're getting yourself into.
 
+Like C<system>, backticks put the child process exit code in C<$?>.
+If you'd like to manually inspect failure, you can check all possible
+failure modes by inspecting C<$?> like this:
+
+    if ($? == -1) {
+        print "failed to execute: $!\n";
+    }
+    elsif ($? & 127) {
+        printf "child died with signal %d, %s coredump\n",
+            ($? & 127),  ($? & 128) ? 'with' : 'without';
+    }
+    else {
+        printf "child exited with value %d\n", $? >> 8;
+    }
+
 See L</"I/O Operators"> for more discussion.
 
 =item C<qw/I<STRING>/>
