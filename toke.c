@@ -9379,12 +9379,14 @@ S_scan_heredoc(pTHX_ char *s)
     else
     {
       SV *linestr_save;
+      char *oldbufptr_save;
      streaming:
       sv_setpvs(tmpstr,"");   /* avoid "uninitialized" warning */
       term = PL_tokenbuf[1];
       len--;
       linestr_save = PL_linestr; /* must restore this afterwards */
       d = s;			 /* and this */
+      oldbufptr_save = PL_oldbufptr;
       PL_linestr = newSVpvs("");
       PL_bufend = SvPVX(PL_linestr);
       while (1) {
@@ -9401,6 +9403,7 @@ S_scan_heredoc(pTHX_ char *s)
 	       restore PL_linestr. */
 	    SvREFCNT_dec_NN(PL_linestr);
 	    PL_linestr = linestr_save;
+            PL_oldbufptr = oldbufptr_save;
 	    goto interminable;
 	}
 	CopLINE_set(PL_curcop, origline);
@@ -9435,6 +9438,7 @@ S_scan_heredoc(pTHX_ char *s)
 	    PL_linestr = linestr_save;
 	    PL_linestart = SvPVX(linestr_save);
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
+            PL_oldbufptr = oldbufptr_save;
 	    s = d;
 	    break;
 	}
