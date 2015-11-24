@@ -13,7 +13,7 @@ typedef struct {
     HV *	x_op_named_bits;	/* cache shared for whole process */
     SV *	x_opset_all;		/* mask with all bits set	*/
     IV		x_opset_len;		/* length of opmasks in bytes	*/
-#if 0
+#ifdef OPCODE_DEBUG
     int		x_opcode_debug;		/* unused warn() emitting debugging code */
 #endif
 } my_cxt_t;
@@ -23,7 +23,7 @@ START_MY_CXT
 #define op_named_bits		(MY_CXT.x_op_named_bits)
 #define opset_all		(MY_CXT.x_opset_all)
 #define opset_len		(MY_CXT.x_opset_len)
-#if 0
+#ifdef OPCODE_DEBUG
 #  define opcode_debug		(MY_CXT.x_opcode_debug)
 #else
  /* no API to turn this on at runtime, so constant fold the code away */
@@ -227,7 +227,9 @@ static void
 opmask_addlocal(pTHX_ SV *opset, char *op_mask_buf) /* Localise PL_op_mask then opmask_add() */
 {
     char *orig_op_mask = PL_op_mask;
+#ifdef OPCODE_DEBUG
     dMY_CXT;
+#endif
 
     SAVEVPTR(PL_op_mask);
     /* XXX casting to an ordinary function ptr from a member function ptr
