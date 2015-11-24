@@ -29,6 +29,8 @@ typedef datum datum_value ;
 
 MODULE = SDBM_File	PACKAGE = SDBM_File	PREFIX = sdbm_
 
+PROTOTYPES: DISABLE
+
 SDBM_File
 sdbm_TIEHASH(dbtype, filename, flags, mode, pagname=NULL)
 	char *		dbtype
