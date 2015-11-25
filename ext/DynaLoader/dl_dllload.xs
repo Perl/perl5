@@ -157,8 +157,9 @@ dl_find_symbol(libhandle, symbolname, ign_err=0)
     DLDEBUG(2, PerlIO_printf(Perl_debug_log,
 			     "  symbolref = %lx\n", (unsigned long) retv));
     ST(0) = sv_newmortal();
-    if (retv == NULL)
+    if (retv == NULL) {
 	if (!ign_err) SaveError(aTHX_ "%s", strerror(errno));
+    }
     else
 	sv_setiv( ST(0), PTR2IV(retv));
     XSRETURN(1);

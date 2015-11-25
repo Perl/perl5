@@ -85,7 +85,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.36';
+    $VERSION = '1.37';
 }
 
 EOT
