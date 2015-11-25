@@ -63,8 +63,8 @@ my $UTF8_DISALLOW_NONCHAR       = 0x0080;
 my $UTF8_WARN_NONCHAR           = 0x0100;
 my $UTF8_DISALLOW_SUPER         = 0x0200;
 my $UTF8_WARN_SUPER             = 0x0400;
-my $UTF8_DISALLOW_FE_FF         = 0x0800;
-my $UTF8_WARN_FE_FF             = 0x1000;
+my $UTF8_DISALLOW_ABOVE_31_BIT  = 0x0800;
+my $UTF8_WARN_ABOVE_31_BIT      = 0x1000;
 my $UTF8_CHECK_ONLY             = 0x2000;
 
 # Test uvchr_to_utf8().
@@ -84,8 +84,8 @@ my $look_for_everything_utf8n_to
 			| $UTF8_WARN_NONCHAR
 			| $UTF8_DISALLOW_SUPER
 			| $UTF8_WARN_SUPER
-			| $UTF8_DISALLOW_FE_FF
-			| $UTF8_WARN_FE_FF;
+			| $UTF8_DISALLOW_ABOVE_31_BIT
+			| $UTF8_WARN_ABOVE_31_BIT;
 my $look_for_everything_uvchr_to
                         = $UNICODE_DISALLOW_SURROGATE
 			| $UNICODE_WARN_SURROGATE
@@ -378,7 +378,8 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     my $this_utf8_flags = $look_for_everything_utf8n_to;
     my $len = length $bytes;
     if ($n > 2 ** 31 - 1) {
-        $this_utf8_flags &= ~($UTF8_DISALLOW_FE_FF|$UTF8_WARN_FE_FF);
+        $this_utf8_flags &=
+                        ~($UTF8_DISALLOW_ABOVE_31_BIT|$UTF8_WARN_ABOVE_31_BIT);
     }
     if ($n > 0x10FFFF) {
         $this_utf8_flags &= ~($UTF8_DISALLOW_SUPER|$UTF8_WARN_SUPER);
@@ -833,35 +834,37 @@ my @tests = (
 
 if (isASCII) {
     push @tests,
-    [ "is at least 2*31",
+    [ "requires at least 32 bits",
          "\xfe\x82\x80\x80\x80\x80\x80",
 
         # This code point is chosen so that it is representable in a UV on
         # 32-bit machines
-        $UTF8_WARN_FE_FF, $UTF8_DISALLOW_FE_FF,
+        $UTF8_WARN_ABOVE_31_BIT, $UTF8_DISALLOW_ABOVE_31_BIT,
         'utf8', 0x80000000, 7,
         qr/Code point 0x80000000 is not Unicode, and not portable/
     ],
-    [ "is at least 2*31, and use SUPER-type flags, instead of FE_FF",
+    [ "requires at least 32 bits, and use SUPER-type flags, instead of ABOVE_31_BIT",
          "\xfe\x82\x80\x80\x80\x80\x80",
         $UTF8_WARN_SUPER, $UTF8_DISALLOW_SUPER,
         'utf8', 0x80000000, 7,
         qr/Code point 0x80000000 is not Unicode, and not portable/
     ],
-    [ "overflow with FE/FF",
-        # This tests the interaction of WARN_FE_FF/DISALLOW_FE_FF with
-        # overflow.  The overflow malformation is never allowed, so preventing
-        # it takes precedence if the FE_FF options would otherwise allow in an
-        # overflowing value.  These two code points (1 for 32-bits; 1 for 64)
-        # were chosen because the old overflow detection algorithm did not
-        # catch them; this means this test also checks for that fix.
+    [ "overflow with warnings/disallow for more than 31 bits",
+        # This tests the interaction of WARN_ABOVE_31_BIT/DISALLOW_ABOVE_31_BIT
+        # with overflow.  The overflow malformation is never allowed, so
+        # preventing it takes precedence if the ABOVE_31_BIT options would
+        # otherwise allow in an overflowing value.  These two code points (1
+        # for 32-bits; 1 for 64) were chosen because the old overflow
+        # detection algorithm did not catch them; this means this test also
+        # checks for that fix.
         ($is64bit)
             ? "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
             : "\xfe\x86\x80\x80\x80\x80\x80",
 
-        # We include both warning categories to make sure the FE_FF one has
-        # precedence
-        "$UTF8_WARN_FE_FF|$UTF8_WARN_SUPER", "$UTF8_DISALLOW_FE_FF",
+        # We include both warning categories to make sure the ABOVE_31_BIT one
+        # has precedence
+        "$UTF8_WARN_ABOVE_31_BIT|$UTF8_WARN_SUPER",
+        "$UTF8_DISALLOW_ABOVE_31_BIT",
         'utf8', 0,
         ($is64bit) ? 13 : 7,
         qr/overflow at byte .*, after start byte 0xf/
@@ -871,8 +874,8 @@ if (isASCII) {
 
 if ($is64bit) {    # All FF's will overflow on 32 bit
     push @tests,
-        [ "begins with FF", "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80",
-            $UTF8_WARN_FE_FF, $UTF8_DISALLOW_FE_FF,
+        [ "More than 32 bits", "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80",
+            $UTF8_WARN_ABOVE_31_BIT, $UTF8_DISALLOW_ABOVE_31_BIT,
             'utf8', $FF_ret, 13,
             qr/Code point 0x.* is not Unicode, and not portable/
         ];
@@ -907,7 +910,7 @@ foreach my $test (@tests) {
                     my $this_name = "utf8n_to_uvchr() $testname: " . (($disallow_flag)
                                                     ? 'disallowed'
                                                     : ($disallowed)
-                                                        ? 'FE_FF allowed'
+                                                        ? 'ABOVE_31_BIT allowed'
                                                         : 'allowed');
                     $this_name .= ", $eval_warn";
                     $this_name .= ", " . (($warn_flag)
@@ -1043,7 +1046,7 @@ foreach my $test (@tests) {
                         elsif ($warn_flag == $UTF8_WARN_SUPER) {
                             $uvchr_warn_flag = $UNICODE_WARN_SUPER
                         }
-                        elsif ($warn_flag == $UTF8_WARN_FE_FF) {
+                        elsif ($warn_flag == $UTF8_WARN_ABOVE_31_BIT) {
                             $uvchr_warn_flag = $UNICODE_WARN_ABOVE_31_BIT;
                         }
                         else {
@@ -1062,7 +1065,7 @@ foreach my $test (@tests) {
                         elsif ($disallow_flag == $UTF8_DISALLOW_SUPER) {
                             $uvchr_disallow_flag = $UNICODE_DISALLOW_SUPER
                         }
-                        elsif ($disallow_flag == $UTF8_DISALLOW_FE_FF) {
+                        elsif ($disallow_flag == $UTF8_DISALLOW_ABOVE_31_BIT) {
                             $uvchr_disallow_flag =
                             $UNICODE_DISALLOW_ABOVE_31_BIT;
                         }
