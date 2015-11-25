@@ -8,7 +8,7 @@ BEGIN {
 use warnings;
 use strict;
 use vars qw($foo $bar $baz $ballast);
-use Test::More tests => 195;
+use Test::More tests => 213;
 
 use Benchmark qw(:all);
 
@@ -482,6 +482,29 @@ sub check_graph {
     # a big clue as to why, from the previous test's diagnostic
     is (ref $chart->[0], 'ARRAY', "output should be an array of arrays");
     check_graph (@$chart);
+}
+
+{
+    $foo = $bar = 0;
+    select(OUT);
+    my $res = timethese( 10, $code_to_test, 'none' ) ;
+    my $chart = cmpthese($res, 'none' ) ;
+    select(STDOUT);
+    ok ($foo > 0, "Foo code was run");
+    ok ($bar > 0, "Bar code was run");
+
+    $got = $out->read();
+    # Remove any warnings about having too few iterations.
+    $got =~ s/\(warning:[^\)]+\)//gs;
+    $got =~ s/^[ \t\n]+//s; # Remove all the whitespace from the beginning
+    is ($got, '', "format 'none' should suppress output");
+    is (ref $chart, 'ARRAY', "output should be an array ref");
+    # Some of these will go bang if the preceding test fails. There will be
+    # a big clue as to why, from the previous test's diagnostic
+    is (ref $chart->[0], 'ARRAY', "output should be an array of arrays");
+    use Data::Dumper;
+    check_graph(@$chart)
+        or diag(Data::Dumper->Dump([$res, $chart], ['$res', '$chart']));
 }
 
 {
