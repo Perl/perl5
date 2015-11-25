@@ -8398,7 +8398,8 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	block->op_next = 0;
         if (ps && !*ps && !attrs && !CvLVALUE(PL_compcv))
             const_sv =
-                S_op_const_sv(aTHX_ start, PL_compcv, CvCLONE(PL_compcv));
+                S_op_const_sv(aTHX_ start, PL_compcv,
+                                        cBOOL(CvCLONE(PL_compcv)));
         else
             const_sv = NULL;
     }
