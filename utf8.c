@@ -292,14 +292,17 @@ The C<UNICODE_WARN_NONCHAR> and C<UNICODE_DISALLOW_NONCHAR> flags
 affect how the function handles a Unicode non-character.  And likewise, the
 C<UNICODE_WARN_SUPER> and C<UNICODE_DISALLOW_SUPER> flags affect the handling of
 code points that are
-above the Unicode maximum of 0x10FFFF.  Code points above 0x7FFF_FFFF (which are
+above the Unicode maximum of 0x10FFFF.
+
+
+The flag C<UNICODE_WARN_ILLEGAL_INTERCHANGE> selects all three of
+the above WARN flags; and C<UNICODE_DISALLOW_ILLEGAL_INTERCHANGE> selects all
+three DISALLOW flags.
+
+Code points above 0x7FFF_FFFF (which are
 even less portable) can be warned and/or disallowed even if other above-Unicode
 code points are accepted, by the C<UNICODE_WARN_ABOVE_31_BIT> and
 C<UNICODE_DISALLOW_ABOVE_31_BIT> flags.
-
-And finally, the flag C<UNICODE_WARN_ILLEGAL_INTERCHANGE> selects all four of
-the above WARN flags; and C<UNICODE_DISALLOW_ILLEGAL_INTERCHANGE> selects all
-four DISALLOW flags.
 
 =cut
 */
@@ -682,8 +685,14 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     /* Here, the input is considered to be well-formed, but it still could be a
      * problematic code point that is not allowed by the input parameters. */
     if (uv >= UNICODE_SURROGATE_FIRST /* isn't problematic if < this */
-	&& (flags & (UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-		     |UTF8_WARN_ILLEGAL_INTERCHANGE)))
+	&& (flags & ( UTF8_DISALLOW_NONCHAR
+                     |UTF8_DISALLOW_SURROGATE
+                     |UTF8_DISALLOW_SUPER
+                     |UTF8_DISALLOW_ABOVE_31_BIT
+	             |UTF8_WARN_NONCHAR
+                     |UTF8_WARN_SURROGATE
+                     |UTF8_WARN_SUPER
+                     |UTF8_WARN_ABOVE_31_BIT)))
     {
 	if (UNICODE_IS_SURROGATE(uv)) {
 

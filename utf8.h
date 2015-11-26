@@ -558,12 +558,13 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UTF8_ALLOW_SURROGATE 0
 
 #define UTF8_DISALLOW_ILLEGAL_INTERCHANGE                                       \
-                       (UTF8_DISALLOW_SUPER|UTF8_DISALLOW_NONCHAR               \
-                        |UTF8_DISALLOW_SURROGATE|UTF8_DISALLOW_ABOVE_31_BIT)
+                       ( UTF8_DISALLOW_SUPER|UTF8_DISALLOW_NONCHAR              \
+                        |UTF8_DISALLOW_SURROGATE)
 #define UTF8_WARN_ILLEGAL_INTERCHANGE \
-  (UTF8_WARN_SUPER|UTF8_WARN_NONCHAR|UTF8_WARN_SURROGATE|UTF8_WARN_ABOVE_31_BIT)
-#define UTF8_ALLOW_ANY \
-	    (~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE|UTF8_WARN_ILLEGAL_INTERCHANGE))
+                         (UTF8_WARN_SUPER|UTF8_WARN_NONCHAR|UTF8_WARN_SURROGATE)
+#define UTF8_ALLOW_ANY                                                          \
+	    (~( UTF8_DISALLOW_ILLEGAL_INTERCHANGE|UTF8_DISALLOW_ABOVE_31_BIT    \
+               |UTF8_WARN_ILLEGAL_INTERCHANGE|UTF8_WARN_ABOVE_31_BIT))
 #define UTF8_ALLOW_ANYUV                                                        \
          (UTF8_ALLOW_EMPTY                                                      \
 	  & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE|UTF8_WARN_ILLEGAL_INTERCHANGE))
