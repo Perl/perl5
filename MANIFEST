@@ -5550,6 +5550,7 @@ t/uni/fold.t			See if Unicode folding works
 t/uni/goto.t			See if Unicode goto &sub works
 t/uni/greek.t			See if Unicode in greek works
 t/uni/gv.t			See if Unicode GVs work.
+t/uni/heavy.t			See if utf8_heavy.pl uses perl that depends on it
 t/uni/labels.t			See if Unicode labels work
 t/uni/latin2.t			See if Unicode in latin2 works
 t/uni/lex_utf8.t		See if Unicode in lexer works

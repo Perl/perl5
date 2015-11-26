@@ -20,7 +20,7 @@ sub _loose_name ($) {
     # out blanks, underscores and dashes.  The complication stems from the
     # grandfathered-in 'L_', which retains a single trailing underscore.
 
-    (my $loose = $_[0]) =~ tr/-_ \t//d;
+    (my $loose = $_[0]) =~ s/[-_ \t]//g;
 
     return $loose if $loose !~ / ^ (?: is | to )? l $/x;
     return 'l_' if $_[0] =~ / l .* _ /x;    # If original had a trailing '_'
