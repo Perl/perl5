@@ -2657,6 +2657,11 @@ provides a list context to its subscript, which can do weird things
 if you're expecting only one subscript.  When called in list context,
 it also returns the key in addition to the value.
 
+=item Invalid number '%s' for -C option.
+
+(F) You supplied number to the -C option that either has extra leading
+zeroes or overflows perl's unsigned integer representation.
+
 =item %s() is deprecated on :utf8 handles
 
 (W deprecated) The sysread(), recv(), syswrite() and send() operators

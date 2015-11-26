@@ -4538,6 +4538,9 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
                         Perl_croak(aTHX_ "Unknown Unicode option letter '%c'", *p);
                 }
             }
+            else {
+                Perl_croak(aTHX_ "Invalid number '%s' for -C option.\n", p);
+            }
         }
         else {
 	    for (; *p; p++) {
