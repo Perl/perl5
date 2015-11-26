@@ -904,6 +904,16 @@ sub timethis{
 
     $n = $forn if defined $forn;
 
+    if ($t->elapsed($style) < 0) {
+        # due to clock granularity and variable CPU speed and load,
+        # on quick code with a small number of loops, it's possible for
+        # the empty loop to appear to take longer than the real loop
+        # (e.g. 1 tick verses 0 ticks). This leads to a negative elapsed
+        # time. In this case, floor it at zero, to stop bizarre results.
+        print "            (warning: too few iterations for a reliable count)\n";
+        $t->[$_] = 0 for 1..4;
+    }
+
     # A conservative warning to spot very silly tests.
     # Don't assume that your benchmark is ok simply because
     # you don't get this warning!

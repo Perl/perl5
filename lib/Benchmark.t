@@ -144,7 +144,7 @@ is ($auto, $default, 'timestr ($diff, "auto") matches timestr ($diff)');
 
 my $out = tie *OUT, 'TieOut';
 
-my $iterations = 3;
+my $iterations = 100;
 
 $foo = 0;
 select(OUT);
@@ -447,7 +447,7 @@ sub check_graph {
 {
     $foo = $bar = 0;
     select(OUT);
-    my $chart = cmpthese( 10, $code_to_test, 'nop' ) ;
+    my $chart = cmpthese($iterations, $code_to_test, 'nop' ) ;
     select(STDOUT);
     ok ($foo > 0, "Foo code was run");
     ok ($bar > 0, "Bar code was run");
@@ -455,7 +455,7 @@ sub check_graph {
     $got = $out->read();
     # Remove any warnings about having too few iterations.
     $got =~ s/\(warning:[^\)]+\)//gs;
-    like ($got, qr/timing 10 iterations of\s+Bar\W+Foo\W*?\.\.\./s,
+    like ($got, qr/timing $iterations iterations of\s+Bar\W+Foo\W*?\.\.\./s,
       'check title');
     # Remove the title
     $got =~ s/.*\.\.\.//s;
@@ -467,7 +467,7 @@ sub check_graph {
 {
     $foo = $bar = 0;
     select(OUT);
-    my $chart = cmpthese( 10, $code_to_test, 'none' ) ;
+    my $chart = cmpthese($iterations, $code_to_test, 'none' ) ;
     select(STDOUT);
     ok ($foo > 0, "Foo code was run");
     ok ($bar > 0, "Bar code was run");
@@ -484,10 +484,13 @@ sub check_graph {
     check_graph (@$chart);
 }
 
+# this is a repeat of the above test, but with the timing and charting
+# steps split.
+
 {
     $foo = $bar = 0;
     select(OUT);
-    my $res = timethese( 10, $code_to_test, 'none' ) ;
+    my $res = timethese($iterations, $code_to_test, 'none' ) ;
     my $chart = cmpthese($res, 'none' ) ;
     select(STDOUT);
     ok ($foo > 0, "Foo code was run");
