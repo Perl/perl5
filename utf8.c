@@ -124,18 +124,18 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	}
 	else if (UNICODE_IS_SUPER(uv)) {
 	    if (   (flags & UNICODE_WARN_SUPER)
-		|| (UNICODE_IS_FE_FF(uv) && (flags & UNICODE_WARN_FE_FF)))
+		|| (UNICODE_IS_ABOVE_31_BIT(uv) && (flags & UNICODE_WARN_ABOVE_31_BIT)))
             {
                 Perl_ck_warner_d(aTHX_ packWARN(WARN_NON_UNICODE),
 
                   /* Choose the more dire applicable warning */
-                  (UNICODE_IS_FE_FF(uv))
+                  (UNICODE_IS_ABOVE_31_BIT(uv))
                   ? "Code point 0x%"UVXf" is not Unicode, and not portable"
                   : "Code point 0x%"UVXf" is not Unicode, may not be portable",
                  uv);
 	    }
 	    if (flags & UNICODE_DISALLOW_SUPER
-		|| (UNICODE_IS_FE_FF(uv) && (flags & UNICODE_DISALLOW_FE_FF)))
+		|| (UNICODE_IS_ABOVE_31_BIT(uv) && (flags & UNICODE_DISALLOW_ABOVE_31_BIT)))
 	    {
 		return NULL;
 	    }
@@ -294,8 +294,8 @@ C<UNICODE_WARN_SUPER> and C<UNICODE_DISALLOW_SUPER> flags affect the handling of
 code points that are
 above the Unicode maximum of 0x10FFFF.  Code points above 0x7FFF_FFFF (which are
 even less portable) can be warned and/or disallowed even if other above-Unicode
-code points are accepted, by the C<UNICODE_WARN_FE_FF> and
-C<UNICODE_DISALLOW_FE_FF> flags.
+code points are accepted, by the C<UNICODE_WARN_ABOVE_31_BIT> and
+C<UNICODE_DISALLOW_ABOVE_31_BIT> flags.
 
 And finally, the flag C<UNICODE_WARN_ILLEGAL_INTERCHANGE> selects all four of
 the above WARN flags; and C<UNICODE_DISALLOW_ILLEGAL_INTERCHANGE> selects all
@@ -463,11 +463,12 @@ imposed later).  (The smaller ones, those that fit into 32 bits, are
 representable by a UV on ASCII platforms, but not by an IV, which means that
 the number of operations that can be performed on them is quite restricted.)
 The UTF-8 encoding on ASCII platforms for these large code points begins with a
-byte containing 0xFE or 0xFF.  The C<UTF8_DISALLOW_FE_FF> flag will cause them to
-be treated as malformations, while allowing smaller above-Unicode code points.
+byte containing 0xFE or 0xFF.  The C<UTF8_DISALLOW_ABOVE_31_BIT> flag will
+cause them to be treated as malformations, while allowing smaller above-Unicode
+code points.
 (Of course C<UTF8_DISALLOW_SUPER> will treat all above-Unicode code points,
 including these, as malformations.)
-Similarly, C<UTF8_WARN_FE_FF> acts just like
+Similarly, C<UTF8_WARN_ABOVE_31_BIT> acts just like
 the other WARN flags, but applies just to these code points.
 
 All other code points corresponding to Unicode characters, including private
@@ -713,10 +714,8 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
              * very well may not be understood by other applications (including
              * earlier perl versions on EBCDIC platforms).  On ASCII platforms,
              * these code points are indicated by the first UTF-8 byte being
-             * 0xFE or 0xFF, hence names like 'UTF8_WARN_FE_FF'.  These names
-             * are ASCII-centric, because the criteria is different On EBCDIC
-             * platforms.  We test for these after the regular SUPER ones, and
-             * before possibly bailing out, so that the slightly more dire
+             * 0xFE or 0xFF.  We test for these after the regular SUPER ones,
+             * and before possibly bailing out, so that the slightly more dire
              * warning will override the regular one. */
             if (
 #ifndef EBCDIC
@@ -740,10 +739,11 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
                                                  || s0[6] > 0x41
                                                  || s0[7] > 0x42)
 #endif
-                && (flags & (UTF8_WARN_FE_FF|UTF8_WARN_SUPER|UTF8_DISALLOW_FE_FF)))
+                && (flags & (UTF8_WARN_ABOVE_31_BIT|UTF8_WARN_SUPER
+                            |UTF8_DISALLOW_ABOVE_31_BIT)))
             {
                 if (  ! (flags & UTF8_CHECK_ONLY)
-                    &&  (flags & (UTF8_WARN_FE_FF|UTF8_WARN_SUPER))
+                    &&  (flags & (UTF8_WARN_ABOVE_31_BIT|UTF8_WARN_SUPER))
                     &&  ckWARN_d(WARN_UTF8))
                 {
                     sv = sv_2mortal(Perl_newSVpvf(aTHX_
@@ -751,7 +751,7 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
                         uv));
                     pack_warn = packWARN(WARN_UTF8);
                 }
-                if (flags & UTF8_DISALLOW_FE_FF) {
+                if (flags & UTF8_DISALLOW_ABOVE_31_BIT) {
                     goto disallowed;
                 }
             }
