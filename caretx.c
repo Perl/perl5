@@ -126,6 +126,14 @@ Perl_set_caret_X(pTHX) {
         sv_setpvn(caret_x, buf, len);
         return;
     }
+#  elif defined(WIN32)
+    char *ansi;
+    WCHAR widename[MAX_PATH];
+    GetModuleFileNameW(NULL, widename, sizeof(widename)/sizeof(WCHAR));
+    ansi = win32_ansipath(widename);
+    sv_setpv(caret_x, ansi);
+    win32_free(ansi);
+    return;
 #  endif
     /* Fallback to this:  */
     sv_setpv(caret_x, PL_origargv[0]);
