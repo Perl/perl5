@@ -299,9 +299,9 @@ Specifying C<flags> can further restrict what is allowed and not warned on, as
 follows:
 
 If C<uv> is a Unicode surrogate code point and C<UNICODE_WARN_SURROGATE> is set,
-the function will raise a warning, provided UTF8 warnings are enabled.  If instead
-C<UNICODE_DISALLOW_SURROGATE> is set, the function will fail and return NULL.
-If both flags are set, the function will both warn and return NULL.
+the function will raise a warning, provided UTF8 warnings are enabled.  If
+instead C<UNICODE_DISALLOW_SURROGATE> is set, the function will fail and return
+NULL.  If both flags are set, the function will both warn and return NULL.
 
 Similarly, the C<UNICODE_WARN_NONCHAR> and C<UNICODE_DISALLOW_NONCHAR> flags
 affect how the function handles a Unicode non-character.
@@ -3426,7 +3426,7 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
     * Code could be written to automatically figure this out, similar to the
     * code that does this for multi-character folds, but this is the only case
     * where something like this is ever likely to happen, as all the single
-    * char folds to The 0-255 range are now quite settled.  Instead there is a
+    * char folds to the 0-255 range are now quite settled.  Instead there is a
     * little special code that is compiled only for this Unicode version.  This
     * is smaller and didn't require much coding time to do.  But this makes
     * this routine strongly tied to being used just for CaseFolding.  If ever
@@ -3976,8 +3976,8 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
                 )) {
                     /* A side effect of this function will be to warn */
                     (void) utf8n_to_uvchr(s, e - s, &char_len, UTF8_WARN_SUPER);
-		    ok = FALSE;
-		}
+                    ok = FALSE;
+                }
 	    }
 	    else if (UTF8_IS_SURROGATE(s, e)) {
 		if (ckWARN_d(WARN_SURROGATE)) {
