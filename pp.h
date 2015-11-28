@@ -56,24 +56,28 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 #define TARG targ
 
 #if defined(DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
-#  define PUSHMARK(p)                                                   \
+
+#  define PUSHMARK(p) \
     STMT_START {                                                      \
         I32 * mark_stack_entry;                                       \
-        if (UNLIKELY((mark_stack_entry = ++PL_markstack_ptr) == PL_markstack_max)) \
+        if (UNLIKELY((mark_stack_entry = ++PL_markstack_ptr)          \
+                                           == PL_markstack_max))      \
 	    mark_stack_entry = markstack_grow();                      \
         *mark_stack_entry  = (I32)((p) - PL_stack_base);              \
         DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,                 \
                 "MARK push %p %"IVdf"\n",                             \
                 PL_markstack_ptr, (IV)*mark_stack_entry)));           \
     } STMT_END
-#  define TOPMARK                                                       \
+
+#  define TOPMARK \
     ({                                                                \
         DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,                 \
                 "MARK top  %p %"IVdf"\n",                             \
                 PL_markstack_ptr, (IV)*PL_markstack_ptr)));           \
         *PL_markstack_ptr;                                            \
     })
-#  define POPMARK                                                       \
+
+#  define POPMARK \
     ({                                                                \
         DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,                 \
                 "MARK pop  %p %"IVdf"\n",                             \
@@ -81,14 +85,17 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
         assert((PL_markstack_ptr > PL_markstack) || !"MARK underflow");\
         *PL_markstack_ptr--;                                          \
     })
-#  define INCMARK                                                       \
+
+#  define INCMARK \
     ({                                                                \
         DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,                 \
                 "MARK inc  %p %"IVdf"\n",                             \
                 (PL_markstack_ptr+1), (IV)*(PL_markstack_ptr+1))));   \
         *PL_markstack_ptr++;                                          \
     })
+
 #else
+
 #  define PUSHMARK(p)                                                   \
     STMT_START {					              \
         I32 * mark_stack_entry;                                       \
