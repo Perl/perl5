@@ -299,10 +299,26 @@ The flag C<UNICODE_WARN_ILLEGAL_INTERCHANGE> selects all three of
 the above WARN flags; and C<UNICODE_DISALLOW_ILLEGAL_INTERCHANGE> selects all
 three DISALLOW flags.
 
-Code points above 0x7FFF_FFFF (which are
-even less portable) can be warned and/or disallowed even if other above-Unicode
-code points are accepted, by the C<UNICODE_WARN_ABOVE_31_BIT> and
-C<UNICODE_DISALLOW_ABOVE_31_BIT> flags.
+Code points above 0x7FFF_FFFF (2**31 - 1) were never specified in any standard,
+so using them is more problematic than other above-Unicode code points.  Perl
+invented an extension to UTF-8 to represent the ones above 2**36-1, so it is
+likely that non-Perl languages will not be able to read files that contain
+these that written by the perl interpreter; nor would Perl understand files
+written by something that uses a different extension.  For these reasons, there
+is a separate set of flags that can warn and/or disallow these extremely high
+code points, even if other above-Unicode ones are accepted.  These are the
+C<UNICODE_WARN_ABOVE_31_BIT> and C<UNICODE_DISALLOW_ABOVE_31_BIT> flags.
+(Of course C<UNICODE_DISALLOW_SUPER> will treat all
+above-Unicode code points, including these, as malformations; and
+C<UNICODE_WARN_SUPER> warns on these.)
+
+On EBCDIC platforms starting in Perl v5.24, the Perl extension for representing
+extremely high code points kicks in at 0x3FFF_FFFF (2**30 -1), which is lower
+than on ASCII.  Prior to that, code points 2**31 and higher were simply
+unrepresentable, and a different, incompatible method was used to represent
+code points between 2**30 and 2**31 - 1.  The flags C<UNICODE_WARN_ABOVE_31_BIT>
+and C<UNICODE_DISALLOW_ABOVE_31_BIT> have the same function as on ASCII
+platforms, warning and disallowing 2**31 and higher.
 
 =cut
 */
@@ -457,22 +473,27 @@ a malformation and raise a warning, specify both the WARN and DISALLOW flags.
 (But note that warnings are not raised if lexically disabled nor if
 C<UTF8_CHECK_ONLY> is also specified.)
 
-Very large code points (above 0x7FFF_FFFF) are considered more problematic than
-the others that are above the Unicode legal maximum.  There are several
-reasons: they requre at least 32 bits to represent them on ASCII platforms, are
-not representable at all on EBCDIC platforms, and the original UTF-8
-specification never went above this number (the current 0x10FFFF limit was
-imposed later).  (The smaller ones, those that fit into 32 bits, are
-representable by a UV on ASCII platforms, but not by an IV, which means that
-the number of operations that can be performed on them is quite restricted.)
-The UTF-8 encoding on ASCII platforms for these large code points begins with a
-byte containing 0xFE or 0xFF.  The C<UTF8_DISALLOW_ABOVE_31_BIT> flag will
-cause them to be treated as malformations, while allowing smaller above-Unicode
-code points.
-(Of course C<UTF8_DISALLOW_SUPER> will treat all above-Unicode code points,
-including these, as malformations.)
-Similarly, C<UTF8_WARN_ABOVE_31_BIT> acts just like
-the other WARN flags, but applies just to these code points.
+
+Code points above 0x7FFF_FFFF (2**31 - 1) were never specified in any standard,
+so using them is more problematic than other above-Unicode code points.  Perl
+invented an extension to UTF-8 to represent the ones above 2**36-1, so it is
+likely that non-Perl languages will not be able to read files that contain
+these that written by the perl interpreter; nor would Perl understand files
+written by something that uses a different extension.  For these reasons, there
+is a separate set of flags that can warn and/or disallow these extremely high
+code points, even if other above-Unicode ones are accepted.  These are the
+C<UTF8_WARN_ABOVE_31_BIT> and C<UTF8_DISALLOW_ABOVE_31_BIT> flags.
+(Of course C<UTF8_DISALLOW_SUPER> will treat all
+above-Unicode code points, including these, as malformations; and
+C<UTF8_WARN_SUPER> warns on these.)
+
+On EBCDIC platforms starting in Perl v5.24, the Perl extension for representing
+extremely high code points kicks in at 0x3FFF_FFFF (2**30 -1), which is lower
+than on ASCII.  Prior to that, code points 2**31 and higher were simply
+unrepresentable, and a different, incompatible method was used to represent
+code points between 2**30 and 2**31 - 1.  The flags C<UTF8_WARN_ABOVE_31_BIT>
+and C<UTF8_DISALLOW_ABOVE_31_BIT> have the same function as on ASCII
+platforms, warning and disallowing 2**31 and higher.
 
 All other code points corresponding to Unicode characters, including private
 use and those yet to be assigned, are never considered malformed and never
