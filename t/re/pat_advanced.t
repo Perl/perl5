@@ -2374,6 +2374,7 @@ EOF
 
     {   # Assertion was failing on on 64-bit platforms; just didn't work on 32.
         no warnings qw(non_unicode portable);
+        no warnings 'deprecated'; # These are above IV_MAX
         use Config;
 
         # We use 'ok' instead of 'like' because the warnings are lexically
@@ -2450,7 +2451,9 @@ EOF
         # (during compilation, so use a fresh perl)
         $Config{uvsize} == 8
 	  or skip("need large code-points for this test", 1);
-	fresh_perl_is('/\x{E000000000}|/ and print qq(ok\n)', "ok\n", {},
+
+        # This is above IV_MAX on 32 bit machines, so turn off those warnings
+	fresh_perl_is('no warnings "deprecated"; /\x{E000000000}|/ and print qq(ok\n)', "ok\n", {},
 		      "buffer overflow in TRIE_STORE_REVCHAR");
     }
 

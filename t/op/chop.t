@@ -252,6 +252,7 @@ foreach my $start (@chars) {
     # [perl #73246] chop doesn't support utf8
     # the problem was UTF8_IS_START() didn't handle perl's extended UTF8
 
+    no warnings 'deprecated'; # This is above IV_MAX on 32 bit machines
     my $utf = "\x{80000001}\x{80000000}";
     my $result = chop($utf);
     is($utf, "\x{80000001}", "chopping high 'unicode'- remnant");

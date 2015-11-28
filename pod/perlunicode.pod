@@ -1289,7 +1289,10 @@ encoding of numbers up to C<0x7FFF_FFFF>.  Perl continues to allow those,
 and has extended that up to 13 bytes to encode code points up to what
 can fit in a 64-bit word.  However, Perl will warn if you output any of
 these as being non-portable; and under strict UTF-8 input protocols,
-they are forbidden.
+they are forbidden.  In addition, it is deprecated to use a code point
+larger than what a signed integer variable on your system can hold.  On
+32-bit ASCII systems, this means C<0x7FFF_FFFF> is the legal maximum
+going forward (much higher on 64-bit systems).
 
 =item *
 

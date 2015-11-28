@@ -3013,6 +3013,20 @@ an anonymous subroutine, or a reference to a subroutine.
 (W overload) You tried to overload a constant type the overload package is
 unaware of.
 
+=item It is deprecated to use code point 0x%s; the permissible max is 0x%s
+
+(D deprecated) You used a code point that will not be allowed in a
+future perl version, because it is too large.  Unicode only allows code
+points up to 0x10FFFF, but Perl allows much larger ones.  However, the
+largest possible ones break the perl interpreter in some constructs,
+including causing it to hang in a few cases.  The known problem areas
+are in C<tr///>, regular expression pattern matching using quantifiers,
+and as the upper limits in loops.
+
+If your code is to run on various platforms, keep in mind that the upper
+limit depends on the platform.  It is much larger on 64-bit word sizes
+than 32-bit ones.
+
 =item -i used with no filenames on the command line, reading from STDIN
 
 (S inplace) The C<-i> option was passed on the command line, indicating

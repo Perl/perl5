@@ -4,6 +4,9 @@ use strict;
 use Test::More;
 $|=1;
 
+no warnings 'deprecated'; # Some of the below are above IV_MAX on 32 bit
+                          # machines, and that is tested elsewhere
+
 use XS::APItest;
 
 my $pound_sign = chr utf8::unicode_to_native(163);

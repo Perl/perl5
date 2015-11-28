@@ -4,6 +4,9 @@
 # test the bit operators '&', '|', '^', '~', '<<', and '>>'
 #
 
+use warnings;
+no warnings 'deprecated';
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
