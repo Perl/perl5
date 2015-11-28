@@ -12363,7 +12363,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #  endif
 #endif
 
-                if (fv < 0)
+                if (fv < 0
+                    || Perl_signbit(fv)
+                  )
                     *p++ = '-';
                 else if (plus)
                     *p++ = plus;

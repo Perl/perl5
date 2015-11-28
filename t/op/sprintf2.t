@@ -243,7 +243,7 @@ if ($Config{nvsize} == 8 &&
     print "# no hexfloat tests\n";
 }
 
-plan tests => 1408 + ($Q ? 0 : 12) + @hexfloat + 6;
+plan tests => 1408 + ($Q ? 0 : 12) + @hexfloat + 8;
 
 use strict;
 use Config;
@@ -676,4 +676,11 @@ SKIP: {
          qr/^0x1.0{523}1p\+1023$/);
     like(sprintf("%La\n", (2**1023) + (2**-1074)),
          qr/^0x1.0{524}8p\+1023$/);
+}
+
+SKIP: {
+    skip("negative zero not available\n", 2)
+        unless sprintf('%+f', -0.0) =~ /^-0/;
+    is(sprintf("%a", -0.0), "-0x0p+0", "negative zero");
+    is(sprintf("%+a", -0.0), "-0x0p+0", "negative zero");
 }
