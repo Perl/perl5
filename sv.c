@@ -12332,6 +12332,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 U8* v = vhex; /* working pointer to vhex */
                 U8* vend; /* pointer to one beyond last digit of vhex */
                 U8* vfnz = NULL; /* first non-zero */
+                U8* vlnz = NULL; /* last non-zero */
                 const bool lower = (c == 'a');
                 /* At output the values of vhex (up to vend) will
                  * be mapped through the xdig to get the actual
@@ -12339,6 +12340,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 const char* xdig = PL_hexdigit;
                 int zerotail = 0; /* how many extra zeros to append */
                 int exponent = 0; /* exponent of the floating point input */
+                bool hexradix = FALSE; /* should we output the radix */
 
                 /* XXX: denormals, NaN, Inf.
                  *
@@ -12387,8 +12389,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 }
 
                 if (vfnz) {
-                    U8* vlnz = NULL; /* The last non-zero. */
-
                     /* Find the last non-zero xdigit. */
                     for (v = vend - 1; v >= vhex; v--) {
                         if (*v) {
@@ -12448,9 +12448,24 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     v = vhex;
                     *p++ = xdig[*v++];
 
-                    /* The radix is always output after the first
-                     * non-zero xdigit, or if precis, or if alt.  */
-                    if (vfnz < vlnz || precis > 0 || alt) {
+                    /* If there are non-zero xdigits, the radix
+                     * is output after the first one. */
+                    if (vfnz < vlnz) {
+                      hexradix = TRUE;
+                    }
+                }
+                else {
+                    *p++ = '0';
+                    exponent = 0;
+                    zerotail = precis;
+                }
+
+                /* The radix is always output if precis, or if alt. */
+                if (precis > 0 || alt) {
+                  hexradix = TRUE;
+                }
+
+                if (hexradix) {
 #ifndef USE_LOCALE_NUMERIC
                         *p++ = '.';
 #else
@@ -12466,17 +12481,17 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         }
                         RESTORE_LC_NUMERIC();
 #endif
-                    }
+                }
 
+                if (vlnz) {
                     while (v <= vlnz)
                         *p++ = xdig[*v++];
-
-                    while (zerotail--)
-                        *p++ = '0';
                 }
-                else {
+
+                if (zerotail > 0) {
+                  while (zerotail--) {
                     *p++ = '0';
-                    exponent = 0;
+                  }
                 }
 
                 elen = p - PL_efloatbuf;
