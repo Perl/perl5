@@ -82,7 +82,7 @@ sub casetest {
 
     my $test = $already_run + 1;
 
-    for my $ord (sort keys %simple) {
+    for my $ord (sort { $a <=> $b } keys %simple) {
 	my $char = pack "W", $ord;
         my $disp_input = unidump($char);
 
@@ -96,7 +96,7 @@ sub casetest {
 	}
     }
 
-    for my $ord (sort keys %spec) {
+    for my $ord (sort { $a <=> $b } keys %spec) {
 	my $char = pack "W", $ord;
         my $disp_input = unidump($char);
 
