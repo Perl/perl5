@@ -3,6 +3,10 @@
 # $Revision: #5 $ $Change: 6145 $ $DateTime: 2004-07-16T03:49:06.717424Z $
 
 BEGIN {
+    if (ord("A") != 65) {
+      print "1..0 # Skip: Encode not working on EBCDIC\n";
+      exit 0;
+    }
     unless (eval { require Encode } ) {
 	print "1..0 # Skip: no Encode\n";
 	exit 0;

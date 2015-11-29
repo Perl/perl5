@@ -1,6 +1,10 @@
 use strict;
 use Test;
 BEGIN {
+    if (ord("A") != 65) {
+      print "1..0 # Skip: Encode not working on EBCDIC\n";
+      exit 0;
+    }
     use Config;
     if ($Config::Config{'extensions'} !~ /\bEncode\b/) {
       print "1..0 # Skip: Encode was not built\n";
