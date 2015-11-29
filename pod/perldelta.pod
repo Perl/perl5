@@ -78,6 +78,20 @@ as an updated module in the L</Modules and Pragmata> section.
 
 [ List each other deprecation as a =head2 entry ]
 
+=head2 Using code points above the platform's C<IV_MAX> is now
+deprecated
+
+Unicode defines code points in the range C<0..0x10FFFF>.  Some standards
+at one time defined them up to 2**31 - 1, but Perl has allowed them to
+be as high as anything that will fit in a word on the platform being
+used.  However, use of those above the platform's C<IV_MAX> is broken in
+some constructs, notably C<tr///>, regular expression patterns involving
+quantifiers, and in some arithmetic and comparison operations, such as
+being the upper limit of a loop.  Now the use of such code points raises
+a deprecation warning, unless that warning category is turned off.
+C<IV_MAX> is typically 2**31 -1 on 32-bit platforms, and 2**63-1 on
+64-bit ones.
+
 =head1 Performance Enhancements
 
 XXX Changes which enhance performance without changing behaviour go here.
