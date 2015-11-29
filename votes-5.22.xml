@@ -44,6 +44,10 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>New Feature Fixes</h3>
 
+<commit votes="jhi, steveh" id="4755cf0153b43de3331f3442033278c6151cb5e8" ticket="" desc="hexfp: printf %a for negative zero."/>
+<commit votes="jhi, steveh" id="454ce668d507a01bfb2497b01aa728006848b750" ticket="" desc="hexfp: printf %.13a 1.0"/>
+<commit votes="jhi, steveh" id="798a7a50ba821b0294cbf03dc1e274fa128084db" ticket="" desc="hexfp: printf %.13a 0.0"/>
+
 </div>
 
 <div><h3>Build and Installation Fixes</h3>
