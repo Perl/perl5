@@ -12415,8 +12415,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     *p++ = xdig[*v++];
 
                     /* The radix is always output after the first
-                     * non-zero xdigit, or if alt.  */
-                    if (vfnz < vlnz || alt) {
+                     * non-zero xdigit, or if precis, or if alt.  */
+                    if (vfnz < vlnz || precis > 0 || alt) {
 #ifndef USE_LOCALE_NUMERIC
                         *p++ = '.';
 #else
