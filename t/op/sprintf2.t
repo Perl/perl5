@@ -69,6 +69,7 @@ if ($Config{nvsize} == 8 &&
 
         [ '%.13a',    '1',   '0x1.0000000000000p+0' ],
         [ '%.13a',    '-1',  '-0x1.0000000000000p+0' ],
+        [ '%.13a',    '0',   '0x0.0000000000000p+0' ],
 
         [ '%30a',  '3.14',   '          0x1.91eb851eb851fp+1' ],
         [ '%-30a', '3.14',   '0x1.91eb851eb851fp+1          ' ],
@@ -246,7 +247,7 @@ if ($Config{nvsize} == 8 &&
     print "# no hexfloat tests\n";
 }
 
-plan tests => 1408 + ($Q ? 0 : 12) + @hexfloat + 8;
+plan tests => 1408 + ($Q ? 0 : 12) + @hexfloat + 9;
 
 use strict;
 use Config;
@@ -682,8 +683,9 @@ SKIP: {
 }
 
 SKIP: {
-    skip("negative zero not available\n", 2)
+    skip("negative zero not available\n", 3)
         unless sprintf('%+f', -0.0) =~ /^-0/;
     is(sprintf("%a", -0.0), "-0x0p+0", "negative zero");
     is(sprintf("%+a", -0.0), "-0x0p+0", "negative zero");
+    is(sprintf("%.13a", -0.0), "-0x0.0000000000000p+0", "negative zero");
 }
