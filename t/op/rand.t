@@ -24,7 +24,7 @@ use strict;
 use Config;
 
 require "./test.pl";
-plan(tests => 10);
+plan(tests => 7);
 
 
 my $reps = 15000;	# How many times to try rand each time.
@@ -47,17 +47,18 @@ sub bits ($) {
     my($off, $shouldbe);	# Problems with randbits
     my($dev, $bits);		# Number of one bits
     my $randbits = $Config{randbits};
-    $max = $min = rand(1);
+    $max = -1;
+    $min = 2;
     for (1..$reps) {
 	my $n = rand(1);
 	if ($n < 0.0 or $n >= 1.0) {
-	    print <<EOM;
-# WHOA THERE!  \$Config{drand01} is set to '$Config{drand01}',
-# but that apparently produces values < 0.0 or >= 1.0.
-# Make sure \$Config{drand01} is a valid expression in the
-# C-language, and produces values in the range [0.0,1.0).
-#
-# I give up.
+	    diag(<<EOM);
+WHOA THERE!  \$Config{drand01} is set to '$Config{drand01}',
+but that apparently produces values ($n) < 0.0 or >= 1.0.
+Make sure \$Config{drand01} is a valid expression in the
+C-language, and produces values in the range [0.0,1.0).
+
+I give up.
 EOM
 	    exit;
 	}
@@ -71,55 +72,6 @@ EOM
 	$min = $n if $n < $min;
     }
 
-
-    # This test checks for one of Perl's most frequent
-    # mis-configurations. Your system's documentation
-    # for rand(2) should tell you what value you need
-    # for randbits. Usually the diagnostic message
-    # has the right value as well. Just fix it and
-    # recompile, and you'll usually be fine. (The main 
-    # reason that the diagnostic message might get the
-    # wrong value is that Config.pm is incorrect.)
-    #
-    unless (ok( !$max <= 0 or $max >= (2 ** $randbits))) {# Just in case...
-	print <<DIAG;
-# max=[$max] min=[$min]
-# This perl was compiled with randbits=$randbits
-# which is _way_ off. Or maybe your system rand is broken,
-# or your C compiler can't multiply, or maybe Martians
-# have taken over your computer. For starters, see about
-# trying a better value for randbits, probably smaller.
-DIAG
-
-	# If that isn't the problem, we'll have
-	# to put d_martians into Config.pm 
-	print "# Skipping remaining tests until randbits is fixed.\n";
-	exit;
-    }
-
-    $off = log($max) / log(2);			# log2
-    $off = int($off) + ($off > 0);		# Next more positive int
-    unless (is( $off, 0 )) {
-	$shouldbe = $Config{randbits} + $off;
-	print "# max=[$max] min=[$min]\n";
-	print "# This perl was compiled with randbits=$randbits on $^O.\n";
-	print "# Consider using randbits=$shouldbe instead.\n";
-	# And skip the remaining tests; they would be pointless now.
-	print "# Skipping remaining tests until randbits is fixed.\n";
-	exit;
-    }
-
-
-    # This should always be true: 0 <= rand(1) < 1
-    # If this test is failing, something is seriously wrong,
-    # either in perl or your system's rand function.
-    #
-    unless (ok( !($min < 0 or $max >= 1) )) {	# Slightly redundant...
-	print "# min too low\n" if $min < 0;
-	print "# max too high\n" if $max >= 1;
-    }
-
-
     # This is just a crude test. The average number produced
     # by rand should be about one-half. But once in a while
     # it will be relatively far away. Note: This test will
@@ -127,9 +79,8 @@ DIAG
     # See the hints for test 4 to see why.
     #
     $sum /= $reps;
-    unless (ok( !($sum < 0.4 or $sum > 0.6) )) {
-	print "# Average random number is far from 0.5\n";
-    }
+    ok($sum >= 0.4 && $sum <= 0.6)
+	or diag("Average random number ($sum) is far from 0.5");
 
 
     #   NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
