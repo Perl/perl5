@@ -249,22 +249,6 @@ PerlIOMmap_fill(pTHX_ PerlIO *f)
     return code;
 }
 
-static IV
-PerlIOMmap_close(pTHX_ PerlIO *f)
-{
-    PerlIOMmap * const m = PerlIOSelf(f, PerlIOMmap);
-    PerlIOBuf * const b = &m->base;
-    IV code = PerlIO_flush(f);
-    if (m->bbuf) {
-	b->buf = m->bbuf;
-	m->bbuf = NULL;
-	b->ptr = b->end = b->buf;
-    }
-    if (PerlIOBuf_close(aTHX_ f) != 0)
-	code = -1;
-    return code;
-}
-
 static PerlIO *
 PerlIOMmap_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 {
