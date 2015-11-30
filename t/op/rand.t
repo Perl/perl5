@@ -24,7 +24,7 @@ use strict;
 use Config;
 
 require "./test.pl";
-plan(tests => 7);
+plan(tests => 9);
 
 
 my $reps = 15000;	# How many times to try rand each time.
@@ -79,7 +79,7 @@ EOM
     # See the hints for test 4 to see why.
     #
     $sum /= $reps;
-    ok($sum >= 0.4 && $sum <= 0.6)
+    ok($sum >= 0.4 && $sum <= 0.6, "average is 0.5")
 	or diag("Average random number ($sum) is far from 0.5");
 
 
@@ -129,7 +129,7 @@ EOM
     # (eight bits per rep)
     $dev = abs ($bits - $reps * 4) / sqrt($reps * 2);
 
-    ok( $dev < 4.0 );
+    cmp_ok($dev,  '<',  4.0, "standard deviation");
 
     if ($dev < 1.96) {
 	print "# Your rand seems fine. If this test failed\n";
@@ -170,11 +170,9 @@ EOM
     # within the range 0 - 100, and that the numbers produced
     # have a reasonably-large range among them.
     #
-    unless ( ok( !($min < 0 or $max >= 100 or ($max - $min) < 65) ) ) {
-	print "# min too low\n" if $min < 0;
-	print "# max too high\n" if $max >= 100;
-	print "# range too narrow\n" if ($max - $min) < 65;
-    }
+    cmp_ok($min,        '>=',  0, "rand(100) >= 0");
+    cmp_ok($max,        '<', 100, "rand(100) < 100");
+    cmp_ok($max - $min, '>=', 65, "rand(100) in 65 range");
 
 
     # This test checks that rand without an argument
@@ -190,7 +188,7 @@ EOM
     # This checks that rand without an argument is not
     # rand($_). (In case somebody got overzealous.)
     # 
-    ok($r < 1,        'rand() without args is under 1');
+    cmp_ok($r, '<', 1,   'rand() without args is under 1');
 }
 
 { # [perl #115928] use a standard rand() implementation
