@@ -24,31 +24,54 @@ use strict;
 use Config;
 
 require "./test.pl";
-plan(tests => 9);
 
 
-my $reps = 15000;	# How many times to try rand each time.
+my $reps = 100_000;	# How many times to try rand each time.
 			# May be changed, but should be over 500.
 			# The more the better! (But slower.)
 
-sub bits ($) {
-    # Takes a small integer and returns the number of one-bits in it.
-    my $total;
-    my $bits = sprintf "%o", $_[0];
-    while (length $bits) {
-	$total += (0,1,1,2,1,2,2,3)[chop $bits];	# Oct to bits
-    }
-    $total;
-}
+my $bits = 8;  # how many significant bits we check on each random number
+my $nslots = (1<< $bits); # how many different numbers
 
-# First, let's see whether randbits is set right
+plan(tests => 7 + $nslots);
+
+# First, let's see whether randbits is set right and that rand() returns
+# an even distribution of values
 {
-    my($max, $min, $sum);	# Characteristics of rand
-    my($off, $shouldbe);	# Problems with randbits
-    my($dev, $bits);		# Number of one bits
-    my $randbits = $Config{randbits};
-    $max = -1;
-    $min = 2;
+    my $sum;
+    my @slots = (0) x $nslots;
+    my $prob = 1/$nslots;     # probability of a particular slot being
+                              # on a particular iteration
+
+    # We are going to generate $reps random numbers, each in the range
+    # 0..$nslots-1. They should be evenly distributed. We use @slots to
+    # count the number of occurrences of each number. For each count, we
+    # check that it is in the range we expect. For example for reps =
+    # 100_000 and using 8 bits, we expect each count to be around
+    # 100_000/256 = 390. How much around it we tolerate depends on the
+    # standard deviation, and how many deviations we allow. If we allow
+    # 6-sigmas, then that means that in only 1 run in 506e6 will be get a
+    # failure by chance, assuming a fair random number generator. Given
+    # that we test each slot, the overall chance of a false negative in
+    # this test script is about 1 in 2e6, assuming 256 slots.
+    #
+    # the actual count in a slot should follow a binomial distribution
+    # (e.g. rolling 18 dice, we 'expect' to see 3 sixes, but there's
+    # actually a 24% chance of 3, a 20% change of 2 or 4, a 12%
+    # chance of 1 or 5, and a 4% chance of 0 or 6 of them).
+    #
+    # This makes it easy to calculate the expected mean a standard
+    # deviation; see
+    #     https://en.wikipedia.org/wiki/Binomial_distribution#Variance
+
+    my $mean   = $reps * $prob;
+    my $stddev = sqrt($reps * $prob * (1 - $prob));
+    my $sigma6 = $stddev * 6.0; # very unlikely to be outside that range
+    my $min = $mean - $sigma6;
+    my $max = $mean + $sigma6;
+
+    note("reps=$reps; slots=$nslots; min=$min mean=$mean max=$max");
+
     for (1..$reps) {
 	my $n = rand(1);
 	if ($n < 0.0 or $n >= 1.0) {
@@ -62,97 +85,18 @@ I give up.
 EOM
 	    exit;
 	}
-	$sum += $n;
-	$bits += bits($n * 256);	# Don't be greedy; 8 is enough
-		    # It's too many if randbits is less than 8!
-		    # But that should never be the case... I hope.
-		    # Note: If you change this, you must adapt the
-		    # formula for absolute standard deviation, below.
-	$max = $n if $n > $max;
-	$min = $n if $n < $min;
+        $slots[int($n * $nslots)]++;
     }
 
-    # This is just a crude test. The average number produced
-    # by rand should be about one-half. But once in a while
-    # it will be relatively far away. Note: This test will
-    # occasionally fail on a perfectly good system!
-    # See the hints for test 4 to see why.
-    #
-    $sum /= $reps;
-    ok($sum >= 0.4 && $sum <= 0.6, "average is 0.5")
-	or diag("Average random number ($sum) is far from 0.5");
-
-
-    #   NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
-    # This test will fail .006% of the time on a normal system.
-    #				also
-    # This test asks you to see these hints 100% of the time!
-    #   NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
-    #
-    # There is probably no reason to be alarmed that
-    # something is wrong with your rand function. But,
-    # if you're curious or if you can't help being 
-    # alarmed, keep reading.
-    #
-    # This is a less-crude test than test 3. But it has
-    # the same basic flaw: Unusually distributed random
-    # values should occasionally appear in every good
-    # random number sequence. (If you flip a fair coin
-    # twenty times every day, you'll see it land all
-    # heads about one time in a million days, on the
-    # average. That might alarm you if you saw it happen
-    # on the first day!)
-    #
-    # So, if this test failed on you once, run it a dozen
-    # times. If it keeps failing, it's likely that your
-    # rand is bogus. If it keeps passing, it's likely
-    # that the one failure was bogus. If it's a mix,
-    # read on to see about how to interpret the tests.
-    #
-    # The number printed in square brackets is the
-    # standard deviation, a statistical measure
-    # of how unusual rand's behavior seemed. It should
-    # fall in these ranges with these *approximate*
-    # probabilities:
-    #
-    #		under 1		68.26% of the time
-    #		1-2		27.18% of the time
-    #		2-3		 4.30% of the time
-    #		over 3		 0.26% of the time
-    #
-    # If the numbers you see are not scattered approximately
-    # (not exactly!) like that table, check with your vendor
-    # to find out what's wrong with your rand. Or with this
-    # algorithm. :-)
-    #
-    # Calculating absolute standard deviation for number of bits set
-    # (eight bits per rep)
-    $dev = abs ($bits - $reps * 4) / sqrt($reps * 2);
-
-    cmp_ok($dev,  '<',  4.0, "standard deviation");
-
-    if ($dev < 1.96) {
-	print "# Your rand seems fine. If this test failed\n";
-	print "# previously, you may want to run it again.\n";
-    } elsif ($dev < 2.575) {
-	print "# This is ok, but suspicious. But it will happen\n";
-	print "# one time out of 25, more or less.\n";
-	print "# You should run this test again to be sure.\n";
-    } elsif ($dev < 3.3) {
-	print "# This is very suspicious. It will happen only\n";
-	print "# about one time out of 100, more or less.\n";
-	print "# You should run this test again to be sure.\n";
-    } elsif ($dev < 3.9) {
-	print "# This is VERY suspicious. It will happen only\n";
-	print "# about one time out of 1000, more or less.\n";
-	print "# You should run this test again to be sure.\n";
-    } else {
-	print "# This is VERY VERY suspicious.\n";
-	print "# Your rand seems to be bogus.\n";
+    for my $i (0..$nslots - 1) {
+        # this test should randomly fail very rarely. If it fails
+        # for you, try re-running this test script a few more times;
+        # if it goes away, it was likely a random (ha ha!) glitch.
+        # If you keep seeing failures, it means your random number
+        # generator is producing a very uneven spread of values.
+        ok($slots[$i] >= $min && $slots[$i] <= $max, "checking slot $i")
+            or diag("slot $i; count $slots[$i] outside expected range $min..$max");
     }
-    print "#\n# If you are having random number troubles,\n";
-    print "# see the hints within the test script for more\n";
-    printf "# information on why this might fail. [ %.3f ]\n", $dev;
 }
 
 
