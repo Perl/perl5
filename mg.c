@@ -2654,7 +2654,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #ifdef USE_ITHREADS
     dVAR;
 #endif
-    const char *s;
     I32 paren;
     const REGEXP * rx;
     I32 i;
@@ -2706,10 +2705,12 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 
     case '\004':	/* ^D */
 #ifdef DEBUGGING
-	s = SvPV_nolen_const(sv);
-	PL_debug = get_debug_opts(&s, 0) | DEBUG_TOP_FLAG;
-	if (DEBUG_x_TEST || DEBUG_B_TEST)
-	    dump_all_perl(!DEBUG_B_TEST);
+        {
+            const char *s = SvPV_nolen_const(sv);
+            PL_debug = get_debug_opts(&s, 0) | DEBUG_TOP_FLAG;
+            if (DEBUG_x_TEST || DEBUG_B_TEST)
+                dump_all_perl(!DEBUG_B_TEST);
+        }
 #else
 	PL_debug = (SvIV(sv)) | DEBUG_TOP_FLAG;
 #endif
@@ -2903,12 +2904,12 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '^':
 	Safefree(IoTOP_NAME(GvIOp(PL_defoutgv)));
-	s = IoTOP_NAME(GvIOp(PL_defoutgv)) = savesvpv(sv);
+	IoTOP_NAME(GvIOp(PL_defoutgv)) = savesvpv(sv);
 	IoTOP_GV(GvIOp(PL_defoutgv)) =  gv_fetchsv(sv, GV_ADD, SVt_PVIO);
 	break;
     case '~':
 	Safefree(IoFMT_NAME(GvIOp(PL_defoutgv)));
-	s = IoFMT_NAME(GvIOp(PL_defoutgv)) = savesvpv(sv);
+	IoFMT_NAME(GvIOp(PL_defoutgv)) = savesvpv(sv);
 	IoFMT_GV(GvIOp(PL_defoutgv)) =  gv_fetchsv(sv, GV_ADD, SVt_PVIO);
 	break;
     case '=':
