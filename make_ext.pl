@@ -699,20 +699,37 @@ sub just_pm_to_blib {
     }
     # This is running under miniperl, so no autodie
     if ($target eq 'all') {
-        local $ENV{PERL_INSTALL_QUIET} = 1;
-        require ExtUtils::Install;
-        ExtUtils::Install::pm_to_blib(\%pm, '../../lib/auto');
-        open my $fh, '>', $pm_to_blib
-            or die "Can't open '$pm_to_blib': $!";
-        print $fh "$0 has handled pm_to_blib directly\n";
-        close $fh
-            or die "Can't close '$pm_to_blib': $!";
-	if (IS_UNIX) {
-            # Fake the fallback cleanup
-            my $fallback
-                = join '', map {s!^\.\./\.\./!!; "rm -f $_\n"} sort values %pm;
-            foreach my $clean_target ('realclean', 'veryclean') {
-                fallback_cleanup($return_dir, $clean_target, $fallback);
+        my $need_update = 1;
+        if (-f $pm_to_blib) {
+            # avoid touching pm_to_blib unless there's something that
+            # needs updating, see #126710
+            $need_update = 0;
+            my $test_at = -M _;
+            while (my $from = each(%pm)) {
+                if (-M $from < $test_at) {
+                    ++$need_update;
+                    last;
+                }
+            }
+            keys %pm; # reset iterator
+        }
+
+        if ($need_update) {
+            local $ENV{PERL_INSTALL_QUIET} = 1;
+            require ExtUtils::Install;
+            ExtUtils::Install::pm_to_blib(\%pm, '../../lib/auto');
+            open my $fh, '>', $pm_to_blib
+                or die "Can't open '$pm_to_blib': $!";
+            print $fh "$0 has handled pm_to_blib directly\n";
+            close $fh
+                or die "Can't close '$pm_to_blib': $!";
+            if (IS_UNIX) {
+                # Fake the fallback cleanup
+                my $fallback
+                    = join '', map {s!^\.\./\.\./!!; "rm -f $_\n"} sort values %pm;
+                foreach my $clean_target ('realclean', 'veryclean') {
+                    fallback_cleanup($return_dir, $clean_target, $fallback);
+                }
             }
         }
     } else {
