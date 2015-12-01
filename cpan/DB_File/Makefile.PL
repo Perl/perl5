@@ -147,9 +147,6 @@ else {
       or die "Can't copy fallback.xs to constants.xs: $!";
 }
 
-exit;
-
-
 sub MY::libscan
 {
     my $self = shift ;
