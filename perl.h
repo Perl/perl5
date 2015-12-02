@@ -3074,7 +3074,7 @@ freeing any remaining Perl interpreters.
     !defined(SWIG) && \
   ((!defined(__apple_build_version__) &&               \
     ((__clang_major__ == 3 && __clang_minor__ >= 5) || \
-     (__clang_major__ > 4))) || \
+     (__clang_major__ >= 4))) || \
    (defined(__apple_build_version__) &&                \
     ((__clang_major__ >= 6))))
 #  define PERL_TSA__(x)   __attribute__((x))
