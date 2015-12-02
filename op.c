@@ -13662,9 +13662,17 @@ Perl_rpeep(pTHX_ OP *o)
                     break;
 
                 /* there's a biggest base we can fit into a
-                 * SAVEt_CLEARPADRANGE in pp_padrange */
-                if (intro && base >
-                        (UV_MAX >> (OPpPADRANGE_COUNTSHIFT+SAVE_TIGHT_SHIFT)))
+                 * SAVEt_CLEARPADRANGE in pp_padrange.
+                 * (The sizeof() stuff will be constant-folded, and is
+                 * intended to avoid getting "comparison is always false"
+                 * compiler warnings)
+                 */
+                if (   intro
+                    && (8*sizeof(base) >
+                        8*sizeof(UV)-OPpPADRANGE_COUNTSHIFT-SAVE_TIGHT_SHIFT
+                        ? base : 0) >
+                        (UV_MAX >> (OPpPADRANGE_COUNTSHIFT+SAVE_TIGHT_SHIFT))
+                )
                     break;
 
                 /* Success! We've got another valid pad op to optimise away */
