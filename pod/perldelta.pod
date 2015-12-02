@@ -266,23 +266,23 @@ even lose the radix point after the leftmost hexadecimal digit completely.
 
 =head1 Acknowledgements
 
-Perl 5.22.1 represents approximately 5 months of development since Perl 5.22.0
-and contains approximately 18,000 lines of changes across 130 files from 26
+Perl 5.22.1 represents approximately 6 months of development since Perl 5.22.0
+and contains approximately 19,000 lines of changes across 130 files from 27
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
-approximately 1,600 lines of changes to 43 .pm, .t, .c and .h files.
+approximately 1,700 lines of changes to 43 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its third decade thanks to a vibrant community
 of users and developers.  The following people are known to have contributed
 the improvements that became Perl 5.22.1:
 
-Aaron Crane, Andy Broad, Aristotle Pagaltzis, Chase Whitener, Chris 'BinGOs'
-Williams, Craig A. Berry, Daniel Dragan, David Mitchell, Father Chrysostomos,
-Herbert Breunung, Hugo van der Sanden, James E Keenan, Jan Dubois, Jarkko
-Hietaniemi, Karen Etheridge, Karl Williamson, Lukas Mai, Matthew Horsfall,
-Peter Martini, Rafael Garcia-Suarez, Ricardo Signes, Shlomi Fish, Sisyphus,
-Steve Hay, Tony Cook, Victor Adam.
+Aaron Crane, Abigail, Andy Broad, Aristotle Pagaltzis, Chase Whitener, Chris
+'BinGOs' Williams, Craig A. Berry, Daniel Dragan, David Mitchell, Father
+Chrysostomos, Herbert Breunung, Hugo van der Sanden, James E Keenan, Jan
+Dubois, Jarkko Hietaniemi, Karen Etheridge, Karl Williamson, Lukas Mai, Matthew
+Horsfall, Peter Martini, Rafael Garcia-Suarez, Ricardo Signes, Shlomi Fish,
+Sisyphus, Steve Hay, Tony Cook, Victor Adam.
 
 The list above is almost certainly incomplete as it is automatically generated
 from version control history.  In particular, it does not include the names of
