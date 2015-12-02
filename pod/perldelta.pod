@@ -255,6 +255,13 @@ cases where the last hexadecimal digit of the mantissa has bits straddling the
 limit of the number of bits allowed for the mantissa, has also been fixed.
 L<[perl #126586]|https://rt.perl.org/Ticket/Display.html?id=126586>
 
+=item *
+
+Further hexadecimal floating point bugs have been fixed: In some circumstances,
+the C<%a> format specifier could variously lose the sign of the negative zero,
+fail to display zeros after the radix point with the requested precision, or
+even lose the radix point after the leftmost hexadecimal digit completely.
+
 =back
 
 =head1 Acknowledgements
