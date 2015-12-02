@@ -131,8 +131,9 @@ Perl_markstack_grow(pTHX)
     Renew(PL_markstack, newmax, I32);
     PL_markstack_max = PL_markstack + newmax;
     PL_markstack_ptr = PL_markstack + oldmax;
-    DEBUG_s(PerlIO_printf(Perl_debug_log, "MARK grow %p %d by %d\n",
-            PL_markstack_ptr, *PL_markstack_ptr, oldmax));
+    DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,
+            "MARK grow %p %"IVdf" by %"IVdf"\n",
+            PL_markstack_ptr, (IV)*PL_markstack_ptr, (IV)oldmax)));
     return PL_markstack_ptr;
 }
 
