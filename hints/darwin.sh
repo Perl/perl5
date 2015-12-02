@@ -187,26 +187,57 @@ case "$ld" in
 esac
 
 # From http://ftp.netbsd.org/pub/pkgsrc/current/pkgsrc/mk/platform/Darwin.mk
+# and https://trac.macports.org/wiki/XcodeVersionInfo
+# and https://trac.macports.org/wiki/UsingTheRightCompiler
 #
 # OS, Kernel, Xcode Version
 # Note that Xcode gets updates on older systems sometimes.
 # pkgsrc generally expects that the most up-to-date xcode available for
 # an OS version is installed
 #
+# Note that Apple hijacks the clang preprocessor symbols __clang_major__
+# and __clang_minor__ so they cannot be used (easily) to detect the
+# actual clang release.  For example:
+#
+# "Yosemite 10.10.x 14.x.y 6.3 (clang 3.6 as 6.1/602.0.49)"
+#
+# means that the Xcode 6.3 provided the clang 6.3 but called it 6.1
+# (__clang_major__, __clang_minor__) and in addition the preprocessor
+# symbol __apple_build_version__ was 6020049.
+#
 # Codename        OS      Kernel  Xcode
+#
 # Cheetah         10.0.x  1.3.1
 # Puma            10.1    1.4.1
 #                 10.1.x  5.x.y
 # Jaguar          10.2.x  6.x.y
 # Panther         10.3.x  7.x.y
-# Tiger           10.4.x  8.x.y   2.x (gcc 4.0, 4.0.1 from 2.2)
-# Leopard         10.5.x  9.x.y   3.x (gcc 4.0.1, 4.0.1 and 4.2.1 from 3.1)
-# Snow Leopard    10.6.x  10.x.y  3.2+ (gcc 4.0.1 and 4.2.1)
-# Lion            10.7.x  11.x.y  4.1 (llvm gcc 4.2.1)
-# Mountain Lion   10.8.x  12.x.y  4.5 (llvm gcc 4.2.1)
-# Mavericks       10.9.x  13.x.y  6 (llvm clang 6.0)
-# Yosemite        10.10.x 14.x.y  6 (llvm clang 6.0)
-# El Capitan      10.11.x 15.x.y  7 (llvm clang 7.0)
+# Tiger           10.4.x  8.x.y   2.0 (gcc4 4.0.0)
+#                                 2.2 (gcc4 4.0.1)
+#                                 2.2.1 (gcc 3.3)
+#                                 2.5 ?
+# Leopard         10.5.x  9.x.y   3.0 (gcc 4.0.1 default)
+#                                 3.1 (gcc 4.2.1)
+# Snow Leopard    10.6.x  10.x.y  3.2 (llvm gcc 4.2, clang 2.3 as 1.0)
+#                                 3.2.1 (clang 1.0.1 as 1.0.1/24)
+#                                 3.2.2 (clang 1.0.2 as 1.0.2/32)
+#                                 3.2.3 (clang 1.5 as 1.5/60)
+#                                 4.0.1 (clang 2.9 as 2.0/138)
+# Lion            10.7.x  11.x.y  4.1 (llvm gcc 4.2.1, clang 3.0 as 2.1/163.7.1)
+#                                 4.2 (clang 3.0 as 3.0/211.10.1)
+#                                 4.3.3 (clang 3.1 as 3.1/318.0.61)
+#                                 4.4 (clang 3.1 as 4.0/421.0.57)
+# Mountain Lion   10.8.x  12.x.y  4.5 (clang 3.1 as 4.1/421.11.65, real gcc removed, there is gcc but it's really clang)
+#                                 4.6 (clang 3.2 as 4.2/425.0.24)
+#                                 5.0 (clang 3.3 as 5.0/500.2.75)
+#                                 5.1 (clang 3.4 as 5.1/503.0.38)
+# Mavericks       10.9.x  13.x.y  6.0.1 (clang 3.5 as 6.0/600.0.51)
+#                                 6.1 (clang 3.5 as 6.0/600.0.54)
+#                                 6.2 (clang 3.5 as 6.0/600.0.57)
+# Yosemite        10.10.x 14.x.y  6.3 (clang 3.6 as 6.1/602.0.49)
+# El Capitan      10.11.x 15.x.y  7.0 (clang 3.7 as 7.0/700.0.72)
+#                                 7.1 (clang 3.7 as 7.0/700.1.76)
+#
 
 # Processors Supported
 #
