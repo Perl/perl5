@@ -203,6 +203,25 @@ L<Announced on 2015-06-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   They sing while you slave and I just get bored
   I ain't gonna work on Maggie's farm no more
 
+=head2 v5.22.1-RC3 - Wilhelm Müller, trans. Anon., "Stormy Morning" (No. 18 in Schubert's song-cycle, "Winterreise")
+
+L<Announced on 2015-12-02 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/12/msg233032.html>
+
+  How the storm tore rents
+  In heavens gray attired!
+  The rags of cloud are flying
+  Around, of combat tired.
+
+  And flames of fire lambent,
+  Fly between them and part,
+  That 's what I call a morning,
+  A morning after my heart!
+
+  My heart sees in the heavens
+  Its own picture unspoilt--
+  It's nothing but the Winter,
+  The Winter, cold and wild.
+
 =head2 v5.22.1-RC2 - Wilhelm Müller, trans. Anon., "The Old Head" (No. 14 in Schubert's song-cycle, "Winterreise")
 
 L<Announced on 2015-11-15 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/11/msg232632.html>
