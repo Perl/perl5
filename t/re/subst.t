@@ -9,7 +9,7 @@ BEGIN {
     require './loc_tools.pl';
 }
 
-plan( tests => 268 );
+plan( tests => 269 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -1082,4 +1082,16 @@ SKIP: {
     # RT #126602 double free if the value being modified is freed in the replacement
     fresh_perl_is('s//*_=0;s|0||;00.y0/e; print qq(ok\n)', "ok\n", { stderr => 1 },
                   "[perl #126602] s//*_=0;s|0||/e crashes");
+}
+
+{
+    #RT 126260 gofs is in chars, not bytes
+
+    # in something like /..\G/, the engine should start matching two
+    # chars before pos(). At one point it was matching two bytes before.
+
+    my $s = "\x{121}\x{122}\x{123}";
+    pos($s) = 2;
+    $s =~ s/..\G//g;
+    is($s, "\x{123}", "#RT 126260 gofs");
 }

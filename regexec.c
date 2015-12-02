@@ -2820,6 +2820,11 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     startpos = stringarg;
 
+    /* set these early as they may be used by the HOP macros below */
+    reginfo->strbeg = strbeg;
+    reginfo->strend = strend;
+    reginfo->is_utf8_target = cBOOL(utf8_target);
+
     if (prog->intflags & PREGf_GPOS_SEEN) {
         MAGIC *mg;
 
@@ -2847,20 +2852,23 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
          */
 
         if (prog->intflags & PREGf_ANCH_GPOS) {
-            startpos  = reginfo->ganch - prog->gofs;
-            if (startpos <
-                ((flags & REXEC_FAIL_ON_UNDERFLOW) ? stringarg : strbeg))
-            {
-                DEBUG_r(PerlIO_printf(Perl_debug_log,
-                        "fail: ganch-gofs before earliest possible start\n"));
-                return 0;
+            if (prog->gofs) {
+                startpos = HOPBACKc(reginfo->ganch, prog->gofs);
+                if (!startpos ||
+                    ((flags & REXEC_FAIL_ON_UNDERFLOW) && startpos < stringarg))
+                {
+                    DEBUG_r(PerlIO_printf(Perl_debug_log,
+                            "fail: ganch-gofs before earliest possible start\n"));
+                    return 0;
+                }
             }
+            else
+                startpos = reginfo->ganch;
         }
         else if (prog->gofs) {
-            if (startpos - prog->gofs < strbeg)
+            startpos = HOPBACKc(startpos, prog->gofs);
+            if (!startpos)
                 startpos = strbeg;
-            else
-                startpos -= prog->gofs;
         }
         else if (prog->intflags & PREGf_GPOS_FLOAT)
             startpos = strbeg;
@@ -2943,13 +2951,10 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     reginfo->prog = rx;	 /* Yes, sorry that this is confusing.  */
     reginfo->intuit = 0;
-    reginfo->is_utf8_target = cBOOL(utf8_target);
     reginfo->is_utf8_pat = cBOOL(RX_UTF8(rx));
     reginfo->warned = FALSE;
-    reginfo->strbeg  = strbeg;
     reginfo->sv = sv;
     reginfo->poscache_maxiter = 0; /* not yet started a countdown */
-    reginfo->strend = strend;
     /* see how far we have to get to not match where we matched before */
     reginfo->till = stringarg + minend;
 
@@ -3088,7 +3093,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         /* For anchored \G, the only position it can match from is
          * (ganch-gofs); we already set startpos to this above; if intuit
          * moved us on from there, we can't possibly succeed */
-        assert(startpos == reginfo->ganch - prog->gofs);
+        assert(startpos == HOPBACKc(reginfo->ganch, prog->gofs));
 	if (s == startpos && regtry(reginfo, &s))
 	    goto got_it;
 	goto phooey;
