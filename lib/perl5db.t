@@ -29,7 +29,7 @@ BEGIN {
     $ENV{PERL_RL} = 'Perl'; # Suppress system Term::ReadLine::Gnu
 }
 
-plan(121);
+plan(123);
 
 my $rc_filename = '.perldb';
 
@@ -2796,6 +2796,22 @@ SKIP:
         Use\ of\ uninitialized\ value\ \$arg\ in\ concatenation\ [\S ]+\ or\ string\ at
         /msx,
         'Test that the a command does not emit warnings on program exit.',
+    );
+}
+
+{
+    # perl 5 RT #126735 regression bug.
+    local $ENV{PERLDB_OPTS} = "NonStop=0 RemotePort=non-existent-host.tld:9001";
+    my $output = runperl( stdin => "q\n", stderr => 1, switches => [ '-d' ], prog => '../lib/perl5db/t/fact' );
+    like(
+        $output,
+        qr/^Unable to connect to remote host:/ms,
+        'Tried to connect.',
+    );
+    unlike(
+        $output,
+        qr/syntax error/,
+        'Can quit from the debugger after a wrong RemotePort',
     );
 }
 

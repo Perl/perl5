@@ -528,7 +528,7 @@ BEGIN {
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 use vars qw($VERSION $header);
 
-$VERSION = '1.49_01';
+$VERSION = '1.49_02';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -2490,7 +2490,11 @@ EOP
 # 'm' is method.
 # 'v' is the value (i.e: method name or subroutine ref).
 # 's' is subroutine.
-my %cmd_lookup =
+my %cmd_lookup;
+
+BEGIN
+{
+    %cmd_lookup =
 (
     '-' => { t => 'm', v => '_handle_dash_command', },
     '.' => { t => 's', v => \&_DB__handle_dot_command, },
@@ -2523,6 +2527,7 @@ my %cmd_lookup =
     (map { $_ => {t => 'm', v => '_handle_cmd_wrapper_commands' }, }
         qw(a A b B e E h i l L M o O v w W)),
 );
+};
 
 sub DB {
 
