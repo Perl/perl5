@@ -2039,7 +2039,7 @@ true)
 	echo "Fetching answers from $config_sh..."
 	cd ..
 	. $config_sh
-	. ./optdef.sh
+	. UU/optdef.sh
 	echo " "
 	. UU/extract
 	rm -rf UU
