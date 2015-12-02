@@ -3065,18 +3065,20 @@ freeing any remaining Perl interpreters.
 /* clang Thread Safety Analysis/Annotations/Attributes
  * http://clang.llvm.org/docs/ThreadSafetyAnalysis.html
  *
- * Available since clang 3.5-ish (appeared in 3.4, but shaky).
+ * Available since clang 3.6-ish (appeared in 3.4, but shaky still in 3.5).
  * Apple XCode hijacks __clang_major__ and __clang_minor__
- * (6.0 means really clang 3.5), so needs extra hijinks.
+ * (6.1 means really clang 3.6), so needs extra hijinks
+ * (could probably also test the contents of __apple_build_version__).
  */
 #if defined(USE_ITHREADS) && defined(I_PTHREAD) && \
     defined(__clang__) && \
     !defined(SWIG) && \
   ((!defined(__apple_build_version__) &&               \
-    ((__clang_major__ == 3 && __clang_minor__ >= 5) || \
+    ((__clang_major__ == 3 && __clang_minor__ >= 6) || \
      (__clang_major__ >= 4))) || \
    (defined(__apple_build_version__) &&                \
-    ((__clang_major__ >= 6))))
+    ((__clang_major__ == 6 && __clang_minor__ >= 1) || \
+     (__clang_major__ >= 7))))
 #  define PERL_TSA__(x)   __attribute__((x))
 #  define PERL_TSA_ACTIVE
 #else
