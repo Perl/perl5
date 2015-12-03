@@ -1257,9 +1257,13 @@ to make it a string is recommended if long version numbers are used.
 
 The PROTOTYPES: keyword corresponds to B<xsubpp>'s C<-prototypes> and
 C<-noprototypes> options.  This keyword overrides the command line options.
-Prototypes are enabled by default.  When prototypes are enabled XSUBs will
+Prototypes are disabled by default.  When prototypes are enabled, XSUBs will
 be given Perl prototypes.  This keyword may be used multiple times in an XS
 module to enable and disable prototypes for different parts of the module.
+Note that B<xsubpp> will nag you if you don't explicitly enable or disable
+prototypes, with:
+
+    Please specify prototyping behavior for Foo.xs (see perlxs manual)
 
 To enable prototypes:
 
