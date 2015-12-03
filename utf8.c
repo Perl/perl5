@@ -1921,32 +1921,32 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp,
 
     /* Note that swash_fetch() doesn't output warnings for these because it
      * assumes we will */
-    if (uv1 >= UNICODE_SURROGATE_FIRST) {
-	if (UNLIKELY(uv1 <= UNICODE_SURROGATE_LAST)) {
-	    if (ckWARN_d(WARN_SURROGATE)) {
-		const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
-		Perl_warner(aTHX_ packWARN(WARN_SURROGATE),
-		    "Operation \"%s\" returns its argument for UTF-16 surrogate U+%04"UVXf"", desc, uv1);
-	    }
-            goto cases_to_self;
-	}
-	if (UNLIKELY(UNICODE_IS_SUPER(uv1))) {
-            if (   UNLIKELY(uv1 > MAX_NON_DEPRECATED_CP)
-                && ckWARN_d(WARN_DEPRECATED))
-            {
-		Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-                            cp_above_legal_max, uv1, MAX_NON_DEPRECATED_CP);
-            }
-	    if (ckWARN_d(WARN_NON_UNICODE)) {
-		const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
-		Perl_warner(aTHX_ packWARN(WARN_NON_UNICODE),
-		    "Operation \"%s\" returns its argument for non-Unicode code point 0x%04"UVXf"", desc, uv1);
-	    }
-            goto cases_to_self;
-	}
+            if (uv1 >= UNICODE_SURROGATE_FIRST) {
+                if (UNLIKELY(uv1 <= UNICODE_SURROGATE_LAST)) {
+                    if (ckWARN_d(WARN_SURROGATE)) {
+                        const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
+                        Perl_warner(aTHX_ packWARN(WARN_SURROGATE),
+                            "Operation \"%s\" returns its argument for UTF-16 surrogate U+%04"UVXf"", desc, uv1);
+                    }
+                    goto cases_to_self;
+                }
+                if (UNLIKELY(UNICODE_IS_SUPER(uv1))) {
+                    if (   UNLIKELY(uv1 > MAX_NON_DEPRECATED_CP)
+                        && ckWARN_d(WARN_DEPRECATED))
+                    {
+                        Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+                                cp_above_legal_max, uv1, MAX_NON_DEPRECATED_CP);
+                    }
+                    if (ckWARN_d(WARN_NON_UNICODE)) {
+                        const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
+                        Perl_warner(aTHX_ packWARN(WARN_NON_UNICODE),
+                            "Operation \"%s\" returns its argument for non-Unicode code point 0x%04"UVXf"", desc, uv1);
+                    }
+                    goto cases_to_self;
+                }
 
-	/* Note that non-characters are perfectly legal, so no warning should
-	 * be given */
+        /* Note that non-characters are perfectly legal, so no warning should
+         * be given */
     }
 
     if (!*swashp) /* load on-demand */
