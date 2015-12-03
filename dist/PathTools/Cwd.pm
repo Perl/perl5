@@ -3,7 +3,7 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.59';
+$VERSION = '3.60';
 my $xs_version = $VERSION;
 $VERSION =~ tr/_//d;
 
