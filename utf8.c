@@ -1919,10 +1919,55 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp,
 
     PERL_ARGS_ASSERT__TO_UTF8_CASE;
 
-    /* Note that swash_fetch() doesn't output warnings for these because it
-     * assumes we will */
-            if (uv1 >= UNICODE_SURROGATE_FIRST) {
-                if (UNLIKELY(uv1 <= UNICODE_SURROGATE_LAST)) {
+    /* For code points that don't change case, we already know that the output
+     * of this function is the unchanged input, so we can skip doing look-ups
+     * for them.  Unfortunately the case-changing code points are scattered
+     * around.  But there are some long consecutive ranges where there are no
+     * case changing code points.  By adding tests, we can eliminate the lookup
+     * for all the ones in such ranges.  This is currently done here only for
+     * just a few cases where the scripts are in common use in modern commerce
+     * (and scripts adjacent to those which can be included without additional
+     * tests). */
+
+    if (uv1 >= 0x0590) {
+        /* This keeps from needing further processing the code points most
+         * likely to be used in the following non-cased scripts: Hebrew,
+         * Arabic, Syriac, Thaana, NKo, Samaritan, Mandaic, Devanagari,
+         * Bengali, Gurmukhi, Gujarati, Oriya, Tamil, Telugu, Kannada,
+         * Malayalam, Sinhala, Thai, Lao, Tibetan, Myanmar */
+        if (uv1 < 0x10A0) {
+            goto cases_to_self;
+        }
+
+        /* The following largish code point ranges also don't have case
+         * changes, but khw didn't think they warranted extra tests to speed
+         * them up (which would slightly slow down everything else above them):
+         * 1100..139F   Hangul Jamo, Ethiopic
+         * 1400..1CFF   Unified Canadian Aboriginal Syllabics, Ogham, Runic,
+         *              Tagalog, Hanunoo, Buhid, Tagbanwa, Khmer, Mongolian,
+         *              Limbu, Tai Le, New Tai Lue, Buginese, Tai Tham,
+         *              Combining Diacritical Marks Extended, Balinese,
+         *              Sundanese, Batak, Lepcha, Ol Chiki
+         * 2000..206F   General Punctuation
+         */
+
+        if (uv1 >= 0x2D30) {
+
+            /* This keeps the from needing further processing the code points
+             * most likely to be used in the following non-cased major scripts:
+             * CJK, Katakana, Hiragana, plus some less-likely scripts.
+             *
+             * (0x2D30 above might have to be changed to 2F00 in the unlikely
+             * event that Unicode eventually allocates the unused block as of
+             * v8.0 2FE0..2FEF to code points that are cased.  khw has verified
+             * that the test suite will start having failures to alert you
+             * should that happen) */
+            if (uv1 < 0xA640) {
+                goto cases_to_self;
+            }
+
+            if (uv1 >= 0xAC00) {
+                if (UNLIKELY(UNICODE_IS_SURROGATE(uv1))) {
                     if (ckWARN_d(WARN_SURROGATE)) {
                         const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
                         Perl_warner(aTHX_ packWARN(WARN_SURROGATE),
@@ -1930,6 +1975,14 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp,
                     }
                     goto cases_to_self;
                 }
+
+                /* AC00..FAFF Catches Hangul syllables and private use, plus
+                 * some others */
+                if (uv1 < 0xFB00) {
+                    goto cases_to_self;
+
+                }
+
                 if (UNLIKELY(UNICODE_IS_SUPER(uv1))) {
                     if (   UNLIKELY(uv1 > MAX_NON_DEPRECATED_CP)
                         && ckWARN_d(WARN_DEPRECATED))
@@ -1944,9 +1997,12 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp,
                     }
                     goto cases_to_self;
                 }
+            }
+        }
 
-        /* Note that non-characters are perfectly legal, so no warning should
-         * be given */
+	/* Note that non-characters are perfectly legal, so no warning should
+         * be given.  There are so few of them, that it isn't worth the extra
+         * tests to avoid swash creation */
     }
 
     if (!*swashp) /* load on-demand */
