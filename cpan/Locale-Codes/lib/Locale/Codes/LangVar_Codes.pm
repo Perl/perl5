@@ -3,7 +3,7 @@ Locale::Codes::LangVar_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'harvest_data' is run.
-#    Generated on: Tue Sep  1 09:17:43 EDT 2015
+#    Generated on: Tue Dec  1 14:44:22 EST 2015
 
 use strict;
 require 5.006;
@@ -11,9 +11,9 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.36';
+$VERSION='3.37';
 
-$Locale::Codes::Data{'langvar'}{'id'} = '0072';
+$Locale::Codes::Data{'langvar'}{'id'} = '0073';
 
 $Locale::Codes::Data{'langvar'}{'id2names'} = {
    q(0001) => [
@@ -152,10 +152,13 @@ $Locale::Codes::Data{'langvar'}{'id2names'} = {
       q(Nadiza dialect),
       ],
    q(0044) => [
+      q(Newfoundland English),
+      ],
+   q(0045) => [
       q(The Gniva dialect of Resian),
       q(The Njiva dialect of Resian),
       ],
-   q(0045) => [
+   q(0046) => [
       q(Volapuk nulik),
       q(Volapuk perevidol),
       q(Volapuk nuladik),
@@ -164,89 +167,89 @@ $Locale::Codes::Data{'langvar'}{'id2names'} = {
       q(Revised Volapuk),
       q(Modern Volapuk),
       ],
-   q(0046) => [
+   q(0047) => [
       q(The Oseacco dialect of Resian),
       q(The Osojane dialect of Resian),
       ],
-   q(0047) => [
+   q(0048) => [
       q(Oxford English Dictionary spelling),
       ],
-   q(0048) => [
+   q(0049) => [
       q(Pamaka dialect),
       ],
-   q(0049) => [
+   q(0050) => [
       q(Petrine orthography),
       ],
-   q(0050) => [
+   q(0051) => [
       q(Pinyin romanization),
       ],
-   q(0051) => [
+   q(0052) => [
       q(Polytonic Greek),
       ],
-   q(0052) => [
+   q(0053) => [
       q(Puter idiom of Romansh),
       ],
-   q(0053) => [
+   q(0054) => [
       q(Volapuk rigik),
       q(Schleyer's Volapuk),
       q(Original Volapuk),
       q(Classic Volapuk),
       ],
-   q(0054) => [
+   q(0055) => [
       q(Resian),
       q(Resianic),
       q(Rezijan),
       ],
-   q(0055) => [
+   q(0056) => [
       q(Rumantsch Grischun),
       ],
-   q(0056) => [
+   q(0057) => [
       q(Scottish Standard English),
       ],
-   q(0057) => [
+   q(0058) => [
       q(Scouse),
       ],
-   q(0058) => [
+   q(0059) => [
       q(The Stolvizza dialect of Resian),
       q(The Solbica dialect of Resian),
       ],
-   q(0059) => [
+   q(0060) => [
       q(The Sotavento dialect group of Kabuverdianu),
       ],
-   q(0060) => [
+   q(0061) => [
       q(Surmiran idiom of Romansh),
       ],
-   q(0061) => [
+   q(0062) => [
       q(Sursilvan idiom of Romansh),
       ],
-   q(0062) => [
+   q(0063) => [
       q(Sutsilvan idiom of Romansh),
       ],
-   q(0063) => [
+   q(0064) => [
       q(Belarusian in Taraskievica orthography),
       ],
-   q(0064) => [
+   q(0065) => [
       q(Unified Cornish orthography of Revived Cornish),
       ],
-   q(0065) => [
+   q(0066) => [
       q(Unified Cornish Revised orthography of Revived Cornish),
       ],
-   q(0066) => [
+   q(0067) => [
       q(Ulster dialect of Scots),
       ],
-   q(0067) => [
+   q(0068) => [
       q(Unifon phonetic alphabet),
       ],
-   q(0068) => [
+   q(0069) => [
       q(Vedic Sanskrit),
       ],
-   q(0069) => [
+   q(0070) => [
       q(Valencian),
       ],
-   q(0070) => [
+   q(0071) => [
       q(Vallader idiom of Romansh),
       ],
-   q(0071) => [
+   q(0072) => [
       q(Wade-Giles romanization),
       ],
 };
@@ -269,7 +272,7 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(1),
       ],
    q(belarusian in taraskievica orthography) => [
-      q(0063),
+      q(0064),
       q(0),
       ],
    q(biscayan dialect of basque) => [
@@ -289,7 +292,7 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0),
       ],
    q(classic volapuk) => [
-      q(0053),
+      q(0054),
       q(3),
       ],
    q(classical sanskrit) => [
@@ -301,7 +304,7 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0),
       ],
    q(de jong's volapuk) => [
-      q(0045),
+      q(0046),
       q(3),
       ],
    q(early modern english (1500-1700)) => [
@@ -349,7 +352,7 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0),
       ],
    q(modern volapuk) => [
-      q(0045),
+      q(0046),
       q(6),
       ],
    q(monotonic greek) => [
@@ -369,15 +372,19 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0),
       ],
    q(new volapuk) => [
-      q(0045),
+      q(0046),
       q(4),
+      ],
+   q(newfoundland english) => [
+      q(0044),
+      q(0),
       ],
    q(norwegian in hognorsk (high norwegian) orthography) => [
       q(0029),
       q(0),
       ],
    q(original volapuk) => [
-      q(0053),
+      q(0054),
       q(2),
       ],
    q(orthographic formulation of 1943 - official in brazil (formulario ortografico de 1943 - oficial no brasil)) => [
@@ -385,23 +392,23 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0),
       ],
    q(oxford english dictionary spelling) => [
-      q(0047),
-      q(0),
-      ],
-   q(pamaka dialect) => [
       q(0048),
       q(0),
       ],
-   q(petrine orthography) => [
+   q(pamaka dialect) => [
       q(0049),
       q(0),
       ],
-   q(pinyin romanization) => [
+   q(petrine orthography) => [
       q(0050),
       q(0),
       ],
-   q(polytonic greek) => [
+   q(pinyin romanization) => [
       q(0051),
+      q(0),
+      ],
+   q(polytonic greek) => [
+      q(0052),
       q(0),
       ],
    q(portuguese language orthographic agreement of 1990 (acordo ortografico da lingua portuguesa de 1990)) => [
@@ -417,39 +424,39 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0),
       ],
    q(puter idiom of romansh) => [
-      q(0052),
+      q(0053),
       q(0),
       ],
    q(resian) => [
-      q(0054),
-      q(0),
-      ],
-   q(resianic) => [
-      q(0054),
-      q(1),
-      ],
-   q(revised volapuk) => [
-      q(0045),
-      q(5),
-      ],
-   q(rezijan) => [
-      q(0054),
-      q(2),
-      ],
-   q(rumantsch grischun) => [
       q(0055),
       q(0),
       ],
-   q(schleyer's volapuk) => [
-      q(0053),
+   q(resianic) => [
+      q(0055),
       q(1),
       ],
-   q(scottish standard english) => [
+   q(revised volapuk) => [
+      q(0046),
+      q(5),
+      ],
+   q(rezijan) => [
+      q(0055),
+      q(2),
+      ],
+   q(rumantsch grischun) => [
       q(0056),
       q(0),
       ],
-   q(scouse) => [
+   q(schleyer's volapuk) => [
+      q(0054),
+      q(1),
+      ],
+   q(scottish standard english) => [
       q(0057),
+      q(0),
+      ],
+   q(scouse) => [
+      q(0058),
       q(0),
       ],
    q(serbian with ekavian pronunciation) => [
@@ -481,15 +488,15 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0),
       ],
    q(surmiran idiom of romansh) => [
-      q(0060),
-      q(0),
-      ],
-   q(sursilvan idiom of romansh) => [
       q(0061),
       q(0),
       ],
-   q(sutsilvan idiom of romansh) => [
+   q(sursilvan idiom of romansh) => [
       q(0062),
+      q(0),
+      ],
+   q(sutsilvan idiom of romansh) => [
+      q(0063),
       q(0),
       ],
    q(the balanka dialect of anii) => [
@@ -505,7 +512,7 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(1),
       ],
    q(the gniva dialect of resian) => [
-      q(0044),
+      q(0045),
       q(0),
       ],
    q(the kociewie dialect of polish) => [
@@ -521,15 +528,15 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(1),
       ],
    q(the njiva dialect of resian) => [
-      q(0044),
+      q(0045),
       q(1),
       ],
    q(the oseacco dialect of resian) => [
-      q(0046),
+      q(0047),
       q(0),
       ],
    q(the osojane dialect of resian) => [
-      q(0046),
+      q(0047),
       q(1),
       ],
    q(the san giorgio dialect of resian) => [
@@ -537,15 +544,15 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0),
       ],
    q(the solbica dialect of resian) => [
-      q(0058),
+      q(0059),
       q(1),
       ],
    q(the sotavento dialect group of kabuverdianu) => [
-      q(0059),
+      q(0060),
       q(0),
       ],
    q(the stolvizza dialect of resian) => [
-      q(0058),
+      q(0059),
       q(0),
       ],
    q(traditional german orthography) => [
@@ -553,15 +560,15 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0),
       ],
    q(ulster dialect of scots) => [
-      q(0066),
+      q(0067),
       q(0),
       ],
    q(unified cornish orthography of revived cornish) => [
-      q(0064),
+      q(0065),
       q(0),
       ],
    q(unified cornish revised orthography of revived cornish) => [
-      q(0065),
+      q(0066),
       q(0),
       ],
    q(unified turkic latin alphabet (historical)) => [
@@ -569,7 +576,7 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0),
       ],
    q(unifon phonetic alphabet) => [
-      q(0067),
+      q(0068),
       q(0),
       ],
    q(uralic phonetic alphabet) => [
@@ -577,35 +584,35 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0),
       ],
    q(valencian) => [
-      q(0069),
-      q(0),
-      ],
-   q(vallader idiom of romansh) => [
       q(0070),
       q(0),
       ],
+   q(vallader idiom of romansh) => [
+      q(0071),
+      q(0),
+      ],
    q(vedic sanskrit) => [
-      q(0068),
+      q(0069),
       q(0),
       ],
    q(volapuk nuladik) => [
-      q(0045),
+      q(0046),
       q(2),
       ],
    q(volapuk nulik) => [
-      q(0045),
+      q(0046),
       q(0),
       ],
    q(volapuk perevidol) => [
-      q(0045),
+      q(0046),
       q(1),
       ],
    q(volapuk rigik) => [
-      q(0053),
+      q(0054),
       q(0),
       ],
    q(wade-giles romanization) => [
-      q(0071),
+      q(0072),
       q(0),
       ],
    q(western armenian) => [
@@ -792,116 +799,120 @@ $Locale::Codes::Data{'langvar'}{'code2id'} = {
          q(0043),
          q(0),
          ],
-      q(njiva) => [
+      q(newfound) => [
          q(0044),
          q(0),
          ],
-      q(nulik) => [
+      q(njiva) => [
          q(0045),
          q(0),
          ],
-      q(osojs) => [
+      q(nulik) => [
          q(0046),
          q(0),
          ],
-      q(oxendict) => [
+      q(osojs) => [
          q(0047),
          q(0),
          ],
-      q(pamaka) => [
+      q(oxendict) => [
          q(0048),
          q(0),
          ],
-      q(petr1708) => [
+      q(pamaka) => [
          q(0049),
          q(0),
          ],
-      q(pinyin) => [
+      q(petr1708) => [
          q(0050),
          q(0),
          ],
-      q(polyton) => [
+      q(pinyin) => [
          q(0051),
          q(0),
          ],
-      q(puter) => [
+      q(polyton) => [
          q(0052),
          q(0),
          ],
-      q(rigik) => [
+      q(puter) => [
          q(0053),
          q(0),
          ],
-      q(rozaj) => [
+      q(rigik) => [
          q(0054),
          q(0),
          ],
-      q(rumgr) => [
+      q(rozaj) => [
          q(0055),
          q(0),
          ],
-      q(scotland) => [
+      q(rumgr) => [
          q(0056),
          q(0),
          ],
-      q(scouse) => [
+      q(scotland) => [
          q(0057),
          q(0),
          ],
-      q(solba) => [
+      q(scouse) => [
          q(0058),
          q(0),
          ],
-      q(sotav) => [
+      q(solba) => [
          q(0059),
          q(0),
          ],
-      q(surmiran) => [
+      q(sotav) => [
          q(0060),
          q(0),
          ],
-      q(sursilv) => [
+      q(surmiran) => [
          q(0061),
          q(0),
          ],
-      q(sutsilv) => [
+      q(sursilv) => [
          q(0062),
          q(0),
          ],
-      q(tarask) => [
+      q(sutsilv) => [
          q(0063),
          q(0),
          ],
-      q(uccor) => [
+      q(tarask) => [
          q(0064),
          q(0),
          ],
-      q(ucrcor) => [
+      q(uccor) => [
          q(0065),
          q(0),
          ],
-      q(ulster) => [
+      q(ucrcor) => [
          q(0066),
          q(0),
          ],
-      q(unifon) => [
+      q(ulster) => [
          q(0067),
          q(0),
          ],
-      q(vaidika) => [
+      q(unifon) => [
          q(0068),
          q(0),
          ],
-      q(valencia) => [
+      q(vaidika) => [
          q(0069),
          q(0),
          ],
-      q(vallader) => [
+      q(valencia) => [
          q(0070),
          q(0),
          ],
-      q(wadegile) => [
+      q(vallader) => [
          q(0071),
+         q(0),
+         ],
+      q(wadegile) => [
+         q(0072),
          q(0),
          ],
       },
@@ -952,34 +963,35 @@ $Locale::Codes::Data{'langvar'}{'id2code'} = {
       q(0041) => q(monoton),
       q(0042) => q(ndyuka),
       q(0043) => q(nedis),
-      q(0044) => q(njiva),
-      q(0045) => q(nulik),
-      q(0046) => q(osojs),
-      q(0047) => q(oxendict),
-      q(0048) => q(pamaka),
-      q(0049) => q(petr1708),
-      q(0050) => q(pinyin),
-      q(0051) => q(polyton),
-      q(0052) => q(puter),
-      q(0053) => q(rigik),
-      q(0054) => q(rozaj),
-      q(0055) => q(rumgr),
-      q(0056) => q(scotland),
-      q(0057) => q(scouse),
-      q(0058) => q(solba),
-      q(0059) => q(sotav),
-      q(0060) => q(surmiran),
-      q(0061) => q(sursilv),
-      q(0062) => q(sutsilv),
-      q(0063) => q(tarask),
-      q(0064) => q(uccor),
-      q(0065) => q(ucrcor),
-      q(0066) => q(ulster),
-      q(0067) => q(unifon),
-      q(0068) => q(vaidika),
-      q(0069) => q(valencia),
-      q(0070) => q(vallader),
-      q(0071) => q(wadegile),
+      q(0044) => q(newfound),
+      q(0045) => q(njiva),
+      q(0046) => q(nulik),
+      q(0047) => q(osojs),
+      q(0048) => q(oxendict),
+      q(0049) => q(pamaka),
+      q(0050) => q(petr1708),
+      q(0051) => q(pinyin),
+      q(0052) => q(polyton),
+      q(0053) => q(puter),
+      q(0054) => q(rigik),
+      q(0055) => q(rozaj),
+      q(0056) => q(rumgr),
+      q(0057) => q(scotland),
+      q(0058) => q(scouse),
+      q(0059) => q(solba),
+      q(0060) => q(sotav),
+      q(0061) => q(surmiran),
+      q(0062) => q(sursilv),
+      q(0063) => q(sutsilv),
+      q(0064) => q(tarask),
+      q(0065) => q(uccor),
+      q(0066) => q(ucrcor),
+      q(0067) => q(ulster),
+      q(0068) => q(unifon),
+      q(0069) => q(vaidika),
+      q(0070) => q(valencia),
+      q(0071) => q(vallader),
+      q(0072) => q(wadegile),
       },
 };
 

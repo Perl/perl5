@@ -129,6 +129,14 @@ zr  ~ _undef_
 
 zr retired  ~ Zaire
 
+jp alpha-2 not_retired other_arg ~ _undef_
+
+jp _blank_ ~ Japan
+
+jp alpha-15 ~ _undef_
+
+jp alpha-2 retired ~ Japan
+
 ";
 
 print "code2country...\n";
