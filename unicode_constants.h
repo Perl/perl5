@@ -182,6 +182,9 @@
 /* The number of code points not matching \pC */
 #define NON_OTHER_COUNT_FOR_USE_ONLY_BY_REGCOMP_DOT_C  120522
 
+/* The highest code point that has any type of case change */
+#define HIGHEST_CASE_CHANGING_CP_FOR_USE_ONLY_BY_UTF8_DOT_C  0x118DF
+
 #endif /* H_UNICODE_CONSTANTS */
 
 /* ex: set ro: */

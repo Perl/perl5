@@ -1997,6 +1997,16 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp,
                     }
                     goto cases_to_self;
                 }
+#ifdef HIGHEST_CASE_CHANGING_CP_FOR_USE_ONLY_BY_UTF8_DOT_C
+                if (UNLIKELY(uv1
+                    > HIGHEST_CASE_CHANGING_CP_FOR_USE_ONLY_BY_UTF8_DOT_C))
+                {
+
+                    /* As of this writing, this means we avoid swash creation
+                     * for anything beyond low Plane 1 */
+                    goto cases_to_self;
+                }
+#endif
             }
         }
 

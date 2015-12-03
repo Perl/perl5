@@ -158,6 +158,22 @@ printf $out_fh "\n/* The number of code points not matching \\pC */\n"
              . "#define NON_OTHER_COUNT_FOR_USE_ONLY_BY_REGCOMP_DOT_C  %d\n",
             0x110000 - $count;
 
+# If this release has both the CWCM and CWCF properties, find the highest code
+# point which changes under any case change.  We can use this to short-circuit
+# code
+my @cwcm = prop_invlist('CWCM');
+if (@cwcm) {
+    my @cwcf = prop_invlist('CWCF');
+    if (@cwcf) {
+        my $max = ($cwcm[-1] < $cwcf[-1])
+                  ? $cwcf[-1]
+                  : $cwcm[-1];
+        printf $out_fh "\n/* The highest code point that has any type of case change */\n"
+             . "#define HIGHEST_CASE_CHANGING_CP_FOR_USE_ONLY_BY_UTF8_DOT_C  0x%X\n",
+            $max - 1;
+    }
+}
+
 print $out_fh "\n#endif /* H_UNICODE_CONSTANTS */\n";
 
 read_only_bottom_close_and_rename($out_fh);
