@@ -1869,6 +1869,11 @@ Perl__is_utf8_mark(pTHX_ const U8 *p)
 /*
 =for apidoc to_utf8_case
 
+Instead use the appropriate one of L</toUPPER_utf8>,
+L</toTITLE_utf8>,
+L</toLOWER_utf8>,
+or L</toFOLD_utf8>.
+
 C<p> contains the pointer to the UTF-8 string encoding
 the character that is being converted.  This routine assumes that the character
 at C<p> is well-formed.
