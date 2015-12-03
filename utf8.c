@@ -1557,14 +1557,14 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const char S_
  * LENP will be set to the length in bytes of the string of changed characters
  *
  * The functions return the ordinal of the first character in the string of OUTP */
-#define CALL_UPPER_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_toupper, "ToUc", "")
-#define CALL_TITLE_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_totitle, "ToTc", "")
-#define CALL_LOWER_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_tolower, "ToLc", "")
+#define CALL_UPPER_CASE(uv, s, d, lenp) _to_utf8_case(uv, s, d, lenp, &PL_utf8_toupper, "ToUc", "")
+#define CALL_TITLE_CASE(uv, s, d, lenp) _to_utf8_case(uv, s, d, lenp, &PL_utf8_totitle, "ToTc", "")
+#define CALL_LOWER_CASE(uv, s, d, lenp) _to_utf8_case(uv, s, d, lenp, &PL_utf8_tolower, "ToLc", "")
 
-/* This additionally has the input parameter SPECIALS, which if non-zero will
- * cause this to use the SPECIALS hash for folding (meaning get full case
+/* This additionally has the input parameter 'specials', which if non-zero will
+ * cause this to use the specials hash for folding (meaning get full case
  * folding); otherwise, when zero, this implies a simple case fold */
-#define CALL_FOLD_CASE(INP, OUTP, LENP, SPECIALS) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_tofold, "ToCf", (SPECIALS) ? "" : NULL)
+#define CALL_FOLD_CASE(uv, s, d, lenp, specials) _to_utf8_case(uv, s, d, lenp, &PL_utf8_tofold, "ToCf", (specials) ? "" : NULL)
 
 UV
 Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
@@ -1584,7 +1584,7 @@ Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
     }
 
     uvchr_to_utf8(p, c);
-    return CALL_UPPER_CASE(p, p, lenp);
+    return CALL_UPPER_CASE(c, p, p, lenp);
 }
 
 UV
@@ -1597,7 +1597,7 @@ Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
     }
 
     uvchr_to_utf8(p, c);
-    return CALL_TITLE_CASE(p, p, lenp);
+    return CALL_TITLE_CASE(c, p, p, lenp);
 }
 
 STATIC U8
@@ -1635,7 +1635,7 @@ Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
     }
 
     uvchr_to_utf8(p, c);
-    return CALL_LOWER_CASE(p, p, lenp);
+    return CALL_LOWER_CASE(c, p, p, lenp);
 }
 
 UV
@@ -1732,7 +1732,7 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
     /* Here, above 255.  If no special needs, just use the macro */
     if ( ! (flags & (FOLD_FLAGS_LOCALE|FOLD_FLAGS_NOMIX_ASCII))) {
 	uvchr_to_utf8(p, c);
-	return CALL_FOLD_CASE(p, p, lenp, flags & FOLD_FLAGS_FULL);
+	return CALL_FOLD_CASE(c, p, p, lenp, flags & FOLD_FLAGS_FULL);
     }
     else {  /* Otherwise, _to_utf8_fold_flags has the intelligence to deal with
 	       the special flags. */
@@ -1905,10 +1905,19 @@ UV
 Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 			SV **swashp, const char *normal, const char *special)
 {
-    STRLEN len = 0;
-    const UV uv1 = valid_utf8_to_uvchr(p, NULL);
-
     PERL_ARGS_ASSERT_TO_UTF8_CASE;
+
+    return _to_utf8_case(valid_utf8_to_uvchr(p, NULL), p, ustrp, lenp, swashp, normal, special);
+}
+
+    /* change namve uv1 to 'from' */
+UV
+S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp,
+		SV **swashp, const char *normal, const char *special)
+{
+    STRLEN len = 0;
+
+    PERL_ARGS_ASSERT__TO_UTF8_CASE;
 
     /* Note that swash_fetch() doesn't output warnings for these because it
      * assumes we will */
@@ -2109,7 +2118,7 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
 	}
     }
     else {  /* UTF-8, ord above 255 */
-	result = CALL_UPPER_CASE(p, ustrp, lenp);
+	result = CALL_UPPER_CASE(valid_utf8_to_uvchr(p, NULL), p, ustrp, lenp);
 
 	if (flags) {
 	    result = check_locale_boundary_crossing(p, result, ustrp, lenp);
@@ -2180,7 +2189,7 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
 	}
     }
     else {  /* UTF-8, ord above 255 */
-	result = CALL_TITLE_CASE(p, ustrp, lenp);
+	result = CALL_TITLE_CASE(valid_utf8_to_uvchr(p, NULL), p, ustrp, lenp);
 
 	if (flags) {
 	    result = check_locale_boundary_crossing(p, result, ustrp, lenp);
@@ -2250,7 +2259,7 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
 	}
     }
     else {  /* UTF-8, ord above 255 */
-	result = CALL_LOWER_CASE(p, ustrp, lenp);
+	result = CALL_LOWER_CASE(valid_utf8_to_uvchr(p, NULL), p, ustrp, lenp);
 
 	if (flags) {
 	    result = check_locale_boundary_crossing(p, result, ustrp, lenp);
@@ -2333,7 +2342,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
 	}
     }
     else {  /* UTF-8, ord above 255 */
-	result = CALL_FOLD_CASE(p, ustrp, lenp, flags & FOLD_FLAGS_FULL);
+	result = CALL_FOLD_CASE(valid_utf8_to_uvchr(p, NULL), p, ustrp, lenp, flags & FOLD_FLAGS_FULL);
 
 	if (flags & FOLD_FLAGS_LOCALE) {
 
@@ -2777,7 +2786,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
  * (see lib/unicore/SpecCase.txt) The SWASHGET in lib/utf8_heavy.pl is
  * the lower-level routine, and it is similarly broken for returning
  * multiple values.  --jhi
- * For those, you should use to_utf8_case() instead */
+ * For those, you should use S__to_utf8_case() instead */
 /* Now SWASHGET is recasted into S_swatch_get in this file. */
 
 /* Note:

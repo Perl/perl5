@@ -1597,6 +1597,15 @@ Apd	|UV	|to_utf8_case	|NN const U8 *p					\
 				|NN SV **swashp					\
 				|NN const char *normal|				\
 				NULLOK const char *special
+#if defined(PERL_IN_UTF8_C)
+s	|UV	|_to_utf8_case  |const UV uv1					\
+				|NN const U8 *p					\
+				|NN U8* ustrp					\
+				|NULLOK STRLEN *lenp				\
+				|NN SV **swashp					\
+				|NN const char *normal 				\
+				|NULLOK const char *special
+#endif
 Abmd	|UV	|to_utf8_lower	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
 AMp	|UV	|_to_utf8_lower_flags	|NN const U8 *p|NN U8* ustrp  \
 				|NULLOK STRLEN *lenp|bool flags
