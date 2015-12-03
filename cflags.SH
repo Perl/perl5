@@ -378,14 +378,14 @@ do
   esac
 done
 
-# If usethreads and clang, add -Wthread-safety for clang 3.5 or later.
+# If usethreads and clang, add -Wthread-safety for clang 3.6 or later.
 # gccversion is defined also for clang, because compat, use that for matching.
-# Apple overwrites clang version with XCode version.
-# Aggressively forward-proofing.
+# Apple overwrites clang version with XCode version, see hints/darwin.sh
+# for the gory details.  Aggressively forward-proofing.
 case "$usethreads" in
 define)
 case "$gccversion" in
-*" Clang 3."[56789]*|*" Clang "[456]*|*"Apple LLVM "[6789]*)
+*" Clang 3."[56789]*|*" Clang "[456]*|*"Apple LLVM 6.1"*|*"Apple LLVM "[789]*)
   for f in -Wthread-safety
   do
     case " $warn " in
