@@ -1655,14 +1655,15 @@ Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const unsigned int f
 
     assert (! (flags & FOLD_FLAGS_LOCALE));
 
-    if (c == MICRO_SIGN) {
+    if (UNLIKELY(c == MICRO_SIGN)) {
 	converted = GREEK_SMALL_LETTER_MU;
     }
 #if    UNICODE_MAJOR_VERSION > 3 /* no multifolds in early Unicode */   \
    || (UNICODE_MAJOR_VERSION == 3 && (   UNICODE_DOT_VERSION > 0)       \
                                       || UNICODE_DOT_DOT_VERSION > 0)
-    else if ((flags & FOLD_FLAGS_FULL) && c == LATIN_SMALL_LETTER_SHARP_S) {
-
+    else if (   (flags & FOLD_FLAGS_FULL)
+             && UNLIKELY(c == LATIN_SMALL_LETTER_SHARP_S))
+    {
         /* If can't cross 127/128 boundary, can't return "ss"; instead return
          * two U+017F characters, as fc("\df") should eq fc("\x{17f}\x{17f}")
          * under those circumstances. */
@@ -1907,14 +1908,14 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
     /* Note that swash_fetch() doesn't output warnings for these because it
      * assumes we will */
     if (uv1 >= UNICODE_SURROGATE_FIRST) {
-	if (uv1 <= UNICODE_SURROGATE_LAST) {
+	if (UNLIKELY(uv1 <= UNICODE_SURROGATE_LAST)) {
 	    if (ckWARN_d(WARN_SURROGATE)) {
 		const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
 		Perl_warner(aTHX_ packWARN(WARN_SURROGATE),
 		    "Operation \"%s\" returns its argument for UTF-16 surrogate U+%04"UVXf"", desc, uv1);
 	    }
 	}
-	else if (UNICODE_IS_SUPER(uv1)) {
+	else if (UNLIKELY(UNICODE_IS_SUPER(uv1))) {
             if (   UNLIKELY(uv1 > MAX_NON_DEPRECATED_CP)
                 && ckWARN_d(WARN_DEPRECATED))
             {
