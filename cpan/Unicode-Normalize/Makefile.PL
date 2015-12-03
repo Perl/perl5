@@ -38,6 +38,7 @@ WriteMakefile(
         warnings        => 0,
         SelectSaver     => 0,
     },
+    ($mm_ver < 6.48 ? () : MIN_PERL_VERSION => 5.6.0),
     ($mm_ver < 6.46 ? () : (META_MERGE => {
         'meta-spec' => { version => 2 },
         resources       => {

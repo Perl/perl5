@@ -810,8 +810,8 @@ isComp2nd(uv)
   ALIAS:
     isNFC_MAYBE  = 1
     isNFKC_MAYBE = 2
-
-
+  INIT:
+    PERL_UNUSED_VAR(ix);
 
 SV*
 isNFD_NO(uv)
