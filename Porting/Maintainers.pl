@@ -1108,13 +1108,6 @@ use File::Glob qw(:case);
     'Text::ParseWords' => {
         'DISTRIBUTION' => 'CHORNY/Text-ParseWords-3.30.tar.gz',
         'FILES'        => q[cpan/Text-ParseWords],
-
-        # Waiting to be merged upstream:
-        # see https://github.com/chorny/Text-ParseWords/pull/6
-        'CUSTOMIZED'   => [
-            qw( t/ParseWords.t
-                ),
-        ],
     },
 
     'Text-Tabs+Wrap' => {
