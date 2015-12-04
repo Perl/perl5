@@ -666,7 +666,9 @@ for my $t (@hexfloat) {
 # double-double long double %a special testing.
 SKIP: {
     skip("$^O doublekind=$Config{doublekind}", 6)
-        unless ($Config{doublekind} == 4 && $^O eq 'linux');
+        unless ($Config{doublekind} == 4 &&
+                $^O eq 'linux' &&
+                $Config{uselongdouble});
     # [rt.perl.org 125633]
     like(sprintf("%La\n", (2**1020) + (2**-1072)),
          qr/^0x1.0{522}1p\+1020$/);
