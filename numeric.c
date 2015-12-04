@@ -1630,11 +1630,9 @@ Users should just always call Perl_signbit().
 int
 Perl_signbit(NV x) {
 #  ifdef Perl_fp_class_nzero
-    if (x == 0)
-        return Perl_fp_class_nzero(x);
-    /* Try finding the high byte, and assume it's highest
-     * bit is the sign.  This assumption is probably wrong
-     * somewhere. */
+    return Perl_fp_class_nzero(x);
+    /* Try finding the high byte, and assume it's highest bit
+     * is the sign.  This assumption is probably wrong somewhere. */
 #  elif defined(USE_LONG_DOUBLE) && LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN
     return (((unsigned char *)&x)[9] & 0x80);
 #  elif defined(NV_LITTLE_ENDIAN)
@@ -1645,7 +1643,7 @@ Perl_signbit(NV x) {
 #  elif defined(NV_BIG_ENDIAN)
     return (((unsigned char *)&x)[0] & 0x80);
 #  else
-    /* This last fallback will fail for the negative zero. */
+    /* This last resort fallback is wrong for the negative zero. */
     return (x < 0.0) ? 1 : 0;
 #  endif
 }
