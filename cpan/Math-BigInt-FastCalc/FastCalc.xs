@@ -14,8 +14,8 @@
 # define croak_xs_usage croak
 #endif
 
-double XS_BASE = 0;
-double XS_BASE_LEN = 0;
+static double XS_BASE = 0;
+static double XS_BASE_LEN = 0;
 
 MODULE = Math::BigInt::FastCalc		PACKAGE = Math::BigInt::FastCalc
 
