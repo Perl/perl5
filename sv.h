@@ -2260,5 +2260,39 @@ Evaluates C<sv> more than once.  Sets C<len> to 0 if C<SvOOK(sv)> is false.
 #define SV_CONSTS_COUNT 35
 
 /*
+ * Bodyless IVs and NVs!
+ *
+ * Since 5.9.2, we can avoid allocating a body for SVt_IV-type SVs.
+ * Since the larger IV-holding variants of SVs store their integer
+ * values in their respective bodies, the family of SvIV() accessor
+ * macros would  naively have to branch on the SV type to find the
+ * integer value either in the HEAD or BODY. In order to avoid this
+ * expensive branch, a clever soul has deployed a great hack:
+ * We set up the SvANY pointer such that instead of pointing to a
+ * real body, it points into the memory before the location of the
+ * head. We compute this pointer such that the location of
+ * the integer member of the hypothetical body struct happens to
+ * be the same as the location of the integer member of the bodyless
+ * SV head. This now means that the SvIV() family of accessors can
+ * always read from the (hypothetical or real) body via SvANY.
+ *
+ * Since the 5.21 dev series, we employ the same trick for NVs
+ * if the architecture can support it (NVSIZE <= IVSIZE).
+ */
+
+/* The following two macros compute the necessary offsets for the above
+ * trick and store them in SvANY for SvIV() (and friends) to use. */
+
+#ifdef PERL_CORE
+#  define SET_SVANY_FOR_BODYLESS_IV(sv) \
+	SvANY(sv) =   (XPVIV*)((char*)&(sv->sv_u.svu_iv) \
+                    - STRUCT_OFFSET(XPVIV, xiv_iv))
+
+#  define SET_SVANY_FOR_BODYLESS_NV(sv) \
+	SvANY(sv) =   (XPVNV*)((char*)&(sv->sv_u.svu_nv) \
+                    - STRUCT_OFFSET(XPVNV, xnv_u.xnv_nv))
+#endif
+
+/*
  * ex: set ts=8 sts=4 sw=4 et:
  */
