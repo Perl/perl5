@@ -1632,8 +1632,22 @@ Perl_signbit(NV x) {
 #  ifdef Perl_fp_class_nzero
     if (x == 0)
         return Perl_fp_class_nzero(x);
-#  endif
+    /* Try finding the high byte, and assume it's highest
+     * bit is the sign.  This assumption is probably wrong
+     * somewhere. */
+#  elif defined(USE_LONG_DOUBLE) && LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN
+    return (((unsigned char *)&x)[9] & 0x80);
+#  elif defined(NV_LITTLE_ENDIAN)
+    /* Note that NVSIZE is sizeof(NV), which would make the below be
+     * wrong if the end bytes are unused, which happens with the x86
+     * 80-bit long doubles, which is why take care of that above. */
+    return (((unsigned char *)&x)[NVSIZE - 1] & 0x80);
+#  elif defined(NV_BIG_ENDIAN)
+    return (((unsigned char *)&x)[0] & 0x80);
+#  else
+    /* This last fallback will fail for the negative zero. */
     return (x < 0.0) ? 1 : 0;
+#  endif
 }
 #endif
 
