@@ -164,6 +164,7 @@ struct child_arg
 int amigaos_kill(Pid_t pid, int signal)
 {
 	int i;
+	BOOL thistask = FALSE;
 	Pid_t realpid = pid; // Perhaps we have a real pid from else where?
 	/* Look for our DOS pid */
 	IExec->ObtainSemaphore(&fork_array_sema);
@@ -172,12 +173,24 @@ int amigaos_kill(Pid_t pid, int signal)
 		if (pseudo_children[i].ti_pid == pid)
 		{
 			realpid = (Pid_t)IDOS->GetPID(pseudo_children[i].ti_Process,GPID_PROCESS);
+			if(pseudo_children[i].ti_Process == IExec->FindTask(NULL))
+			{
+				thistask = TRUE;
+			}
 			break;
 		}
 	}
 	IExec->ReleaseSemaphore(&fork_array_sema);
 	/* Allow the C library to work out which signals are realy valid */
-	return kill(realpid,signal);
+	if(thistask)
+	{
+		/* A quirk in newlib kill handling means it's better to call raise() rather than kill on out own task. */
+		return raise(signal);
+	}
+	else
+	{
+		return kill(realpid,signal);
+	}
 }
 
 static THREAD_RET_TYPE amigaos4_start_child(void *arg)
