@@ -56,6 +56,17 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
+This one disables new tests that only ever should've been run on Linux + BE fp + longdoubles not to run on Linux + BE fp + plain doubles;
+fixes Debian powerpc/ppc64 failures reported here: http://www.nntp.perl.org/group/perl.perl5.porters/2015/12/msg233075.html
+and Debian s390x failures reported here: http://www.nntp.perl.org/group/perl.perl5.porters/2015/12/msg233111.html
+<commit votes="jhi, steveh" id="df3d8cc3eeca597a21c2d7ad7686adbef4df784b" ticket="" desc="hexfp: these should be tested only with uselongdouble."/>
+
+These two robustify the numeric.c:Perl_signbit() emulation (which kicks in if someone goes to the trouble of -Ud_signbit,
+and on really old systems that do not have signbit);
+fixes ActiveState Solaris 10 failures reported here: http://www.nntp.perl.org/group/perl.perl5.porters/2015/12/msg233054.html
+<commit votes="jhi, steveh" id="572cd85091706ffa2e19db60c41c6bb106297e3a" ticket="" desc="Have more fallbacks for our signbit() emulation."/>
+<commit votes="jhi, steveh" id="406d5545e79665094180534380eba323110f99bc" ticket="" desc="hexfp: Use Perl_fp_class_nzero unconditionally."/>
+
 </div>
 
 <div><h3>Documentation Fixes</h3>
