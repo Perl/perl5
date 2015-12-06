@@ -665,10 +665,16 @@ for my $t (@hexfloat) {
 
 # double-double long double %a special testing.
 SKIP: {
-    skip("$^O doublekind=$Config{doublekind}", 6)
-        unless ($Config{doublekind} == 4 &&
-                $^O eq 'linux' &&
-                $Config{uselongdouble});
+    skip("uselongdouble=$Config{uselongdouble} longdblkind=$Config{longdblkind} os=$^O", 6)
+        unless ($Config{uselongdouble} &&
+                ($Config{longdblkind} == 5 ||
+                 $Config{longdblkind} == 6)
+                # TODO: gating on 'linux' here is only due to lack of
+                # testing in other big-endian platforms (e.g. AIX or IRIX),
+                # with more evidence this subtest could be either relaxed
+                # or removed.
+                && $^O eq 'linux'
+                );
     # [rt.perl.org 125633]
     like(sprintf("%La\n", (2**1020) + (2**-1072)),
          qr/^0x1.0{522}1p\+1020$/);
