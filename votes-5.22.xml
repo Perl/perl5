@@ -56,10 +56,11 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
-This one disables new tests that only ever should've been run on Linux + BE fp + longdoubles not to run on Linux + BE fp + plain doubles;
+These two disable new tests that only ever should've been run on Linux + BE fp + longdoubles not to run on Linux + BE fp + plain doubles;
 fixes Debian powerpc/ppc64 failures reported here: http://www.nntp.perl.org/group/perl.perl5.porters/2015/12/msg233075.html
 and Debian s390x failures reported here: http://www.nntp.perl.org/group/perl.perl5.porters/2015/12/msg233111.html
 <commit votes="jhi, steveh, khw, arc" id="df3d8cc3eeca597a21c2d7ad7686adbef4df784b" ticket="" desc="hexfp: these should be tested only with uselongdouble."/>
+<commit votes="jhi, steveh, arc" id="796fb084743bf6c50eb8862031573a2e2b9a303e" ticket="" desc="hexfp: test longdblkind directly, instead of doublekind"/>
 
 These two robustify the numeric.c:Perl_signbit() emulation (which kicks in if someone goes to the trouble of -Ud_signbit,
 and on really old systems that do not have signbit);
