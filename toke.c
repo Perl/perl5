@@ -3593,7 +3593,7 @@ S_scan_const(pTHX_ char *start)
                                                   /* The regex compiler is
                                                    * expecting Unicode, not
                                                    * native */
-                                                  (U8) NATIVE_TO_LATIN1(*str));
+                                                  NATIVE_TO_LATIN1(*str));
                                     PERL_MY_SNPRINTF_POST_GUARD(len,
                                                            sizeof(hex_string));
                                     Copy(hex_string, d, 3, char);

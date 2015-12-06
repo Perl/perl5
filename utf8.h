@@ -136,8 +136,8 @@ END_EXTERN_C
 
 /* Native character to/from iso-8859-1.  Are the identity functions on ASCII
  * platforms */
-#define NATIVE_TO_LATIN1(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) (ch))
-#define LATIN1_TO_NATIVE(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) (ch))
+#define NATIVE_TO_LATIN1(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
+#define LATIN1_TO_NATIVE(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
 
 /* I8 is an intermediate version of UTF-8 used only in UTF-EBCDIC.  We thus
  * consider it to be identical to UTF-8 on ASCII platforms.  Strictly speaking
@@ -145,12 +145,12 @@ END_EXTERN_C
  * because they are 8-bit encodings that serve the same purpose in Perl, and
  * rarely do we need to distinguish them.  The term "NATIVE_UTF8" applies to
  * whichever one is applicable on the current platform */
-#define NATIVE_UTF8_TO_I8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) (ch))
-#define I8_TO_NATIVE_UTF8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) (ch))
+#define NATIVE_UTF8_TO_I8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
+#define I8_TO_NATIVE_UTF8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
 
 /* Transforms in wide UV chars */
-#define UNI_TO_NATIVE(ch)        (ch)
-#define NATIVE_TO_UNI(ch)        (ch)
+#define UNI_TO_NATIVE(ch)        ((UV) (ch))
+#define NATIVE_TO_UNI(ch)        ((UV) (ch))
 
 /*
 
@@ -208,9 +208,13 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * */
 #define UVCHR_IS_INVARIANT(cp)      OFFUNI_IS_INVARIANT(cp)
 
+/* This defines the bits that are to be in the continuation bytes of a multi-byte
+ * UTF-8 encoded character that mark it is a continuation byte. */
+#define UTF_CONTINUATION_MARK		0x80
+
 /* Misleadingly named: is the UTF8-encoded byte 'c' part of a variant sequence
  * in UTF-8?  This is the inverse of UTF8_IS_INVARIANT */
-#define UTF8_IS_CONTINUED(c)        (((U8)c) &  0x80)
+#define UTF8_IS_CONTINUED(c)        (((U8)c) &  UTF_CONTINUATION_MARK)
 
 /* Is the byte 'c' the first byte of a multi-byte UTF8-8 encoded sequence?
  * This doesn't catch invariants (they are single-byte).  It also excludes the
@@ -219,7 +223,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 /* Is the byte 'c' part of a multi-byte UTF8-8 encoded sequence, and not the
  * first byte thereof?  */
-#define UTF8_IS_CONTINUATION(c)     ((((U8)c) & 0xC0) == 0x80)
+#define UTF8_IS_CONTINUATION(c)     ((((U8)c) & 0xC0) == UTF_CONTINUATION_MARK)
 
 /* Is the UTF8-encoded byte 'c' the first byte of a two byte sequence?  Use
  * UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to
@@ -231,57 +235,77 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * represent a code point > 255? */
 #define UTF8_IS_ABOVE_LATIN1(c)     ((U8)(c) >= 0xc4)
 
-/* This defines the bits that are to be in the continuation bytes of a multi-byte
- * UTF-8 encoded character that indicate it is a continuation byte. */
-#define UTF_CONTINUATION_MARK		0x80
-
 /* This is the number of low-order bits a continuation byte in a UTF-8 encoded
  * sequence contributes to the specification of the code point.  In the bit
  * maps above, you see that the first 2 bits are a constant '10', leaving 6 of
  * real information */
 #define UTF_ACCUMULATION_SHIFT		6
 
-/* 2**UTF_ACCUMULATION_SHIFT - 1 */
-#define UTF_CONTINUATION_MASK		((U8)0x3f)
-
 #if UVSIZE >= 8
 #  define UTF8_QUAD_MAX UINT64_C(0x1000000000)
-
-/* Input is a true Unicode (not-native) code point */
-#define OFFUNISKIP(uv) ( (uv) < 0x80        ? 1 : \
-		      (uv) < 0x800          ? 2 : \
-		      (uv) < 0x10000        ? 3 : \
-		      (uv) < 0x200000       ? 4 : \
-		      (uv) < 0x4000000      ? 5 : \
-		      (uv) < 0x80000000     ? 6 : \
-                      (uv) < UTF8_QUAD_MAX ? 7 : UTF8_MAXBYTES )
-#else
-/* No, I'm not even going to *TRY* putting #ifdef inside a #define */
-#define OFFUNISKIP(uv) ( (uv) < 0x80        ? 1 : \
-		      (uv) < 0x800          ? 2 : \
-		      (uv) < 0x10000        ? 3 : \
-		      (uv) < 0x200000       ? 4 : \
-		      (uv) < 0x4000000      ? 5 : \
-		      (uv) < 0x80000000     ? 6 : 7 )
-#endif
-
-/* The maximum number of UTF-8 bytes a single Unicode character can
- * uppercase/lowercase/fold into.  Unicode guarantees that the maximum
- * expansion is 3 characters.  On ASCIIish platforms, the highest Unicode
- * character occupies 4 bytes, therefore this number would be 12, but this is
- * smaller than the maximum width a single above-Unicode character can occupy,
- * so use that instead */
-#if UTF8_MAXBYTES < 12
-#error UTF8_MAXBYTES must be at least 12
 #endif
 
 /* ^? is defined to be DEL on ASCII systems.  See the definition of toCTRL()
  * for more */
 #define QUESTION_MARK_CTRL  DEL_NATIVE
 
-#define MAX_UTF8_TWO_BYTE 0x7FF
+/* Surrogates, non-character code points and above-Unicode code points are
+ * problematic in some contexts.  This allows code that needs to check for
+ * those to to quickly exclude the vast majority of code points it will
+ * encounter */
+#define isUTF8_POSSIBLY_PROBLEMATIC(c) ((U8) c >= 0xED)
 
-#define UTF8_MAXBYTES_CASE	UTF8_MAXBYTES
+#endif /* EBCDIC vs ASCII */
+
+/* 2**UTF_ACCUMULATION_SHIFT - 1 */
+#define UTF_CONTINUATION_MASK  ((U8) ((1U << UTF_ACCUMULATION_SHIFT) - 1))
+
+/* Internal macro to be used only in this file to aid in constructing other
+ * publicly accessible macros.
+ * The number of bytes required to express this uv in UTF-8, for just those
+ * uv's requiring 2 through 6 bytes, as these are common to all platforms and
+ * word sizes.  The number of bytes needed is given by the number of leading 1
+ * bits in the start byte.  There are 32 start bytes that have 2 initial 1 bits
+ * (C0-DF); there are 16 that have 3 initial 1 bits (E0-EF); 8 that have 4
+ * initial 1 bits (F0-F8); 4 that have 5 initial 1 bits (F9-FB), and 2 that
+ * have 6 initial 1 bits (FC-FD).  The largest number a string of n bytes can
+ * represent is       (the number of possible start bytes for 'n')
+ *                  * (the number of possiblities for each start byte
+ * The latter in turn is
+ *                  2  ** (  (how many continuation bytes there are)
+ *                         * (the number of bits of information each
+ *                            continuation byte holds))
+ *
+ * If we were on a platform where we could use a fast find first set bit
+ * instruction (or count leading zeros instruction) this could be replaced by
+ * using that to find the log2 of the uv, and divide that by the number of bits
+ * of information in each continuation byte, adjusting for large cases and how
+ * much information is in a start byte for that length */
+#define __COMMON_UNI_SKIP(uv)                                               \
+          (UV) (uv) < (32 * (1U << (    UTF_ACCUMULATION_SHIFT))) ? 2 :     \
+          (UV) (uv) < (16 * (1U << (2 * UTF_ACCUMULATION_SHIFT))) ? 3 :     \
+          (UV) (uv) < ( 8 * (1U << (3 * UTF_ACCUMULATION_SHIFT))) ? 4 :     \
+          (UV) (uv) < ( 4 * (1U << (4 * UTF_ACCUMULATION_SHIFT))) ? 5 :     \
+          (UV) (uv) < ( 2 * (1U << (5 * UTF_ACCUMULATION_SHIFT))) ? 6 :
+
+/* Internal macro to be used only in this file.
+ * This adds to __COMMON_UNI_SKIP the details at this platform's upper range.
+ * For any-sized EBCDIC platforms, or 64-bit ASCII ones, we need one more test
+ * to see if just 7 bytes is needed, or if the maximum is needed.  For 32-bit
+ * ASCII platforms, everything is representable by 7 bytes */
+#if defined(UV_IS_QUAD) || defined(EBCDIC)
+#   define __BASE_UNI_SKIP(uv) (__COMMON_UNI_SKIP(uv)                       \
+     (UV) (uv) < ((UV) 1U << (6 * UTF_ACCUMULATION_SHIFT)) ? 7 : UTF8_MAXBYTES)
+#else
+#   define __BASE_UNI_SKIP(uv) (__COMMON_UNI_SKIP(uv) 7)
+#endif
+
+/* The next two macros use the base macro defined above, and add in the tests
+ * at the low-end of the range, for just 1 byte, yielding complete macros,
+ * publicly accessible. */
+
+/* Input is a true Unicode (not-native) code point */
+#define OFFUNISKIP(uv) (OFFUNI_IS_INVARIANT(uv) ? 1 : __BASE_UNI_SKIP(uv))
 
 /*
 
@@ -292,15 +316,27 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 
 =cut
  */
-#define UVCHR_SKIP(uv) OFFUNISKIP(uv)
+#define UVCHR_SKIP(uv) ( UVCHR_IS_INVARIANT(uv) ? 1 : __BASE_UNI_SKIP(uv))
 
-/* Surrogates, non-character code points and above-Unicode code points are
- * problematic in some contexts.  This allows code that needs to check for
- * those to to quickly exclude the vast majority of code points it will
- * encounter */
-#define isUTF8_POSSIBLY_PROBLEMATIC(c) ((U8) c >= 0xED)
+/* As explained in the comments for __COMMON_UNI_SKIP, 32 start bytes with
+ * UTF_ACCUMULATION_SHIFT bits of information each */
+#define MAX_UTF8_TWO_BYTE (32 * (1U << UTF_ACCUMULATION_SHIFT) - 1)
 
-#endif /* EBCDIC vs ASCII */
+/* constrained by EBCDIC which has 5 bits per continuation byte */
+#define MAX_PORTABLE_UTF8_TWO_BYTE (32 * (1U << 5) - 1)
+
+/* The maximum number of UTF-8 bytes a single Unicode character can
+ * uppercase/lowercase/fold into.  Unicode guarantees that the maximum
+ * expansion is UTF8_MAX_FOLD_CHAR_EXPAND characters, but any above-Unicode
+ * code point will fold to itself, so we only have to look at the expansion of
+ * the maximum Unicode code point.  But this number may be less than the space
+ * occupied by a very large code point under Perl's extended UTF-8.  We have to
+ * make it large enough to fit any single character.  (It turns out that ASCII
+ * and EBCDIC differ in which is larger) */
+#define UTF8_MAXBYTES_CASE	                                                \
+        (UTF8_MAXBYTES >= (UTF8_MAX_FOLD_CHAR_EXPAND * OFFUNISKIP(0x10FFFF))    \
+                           ? UTF8_MAXBYTES                                      \
+                           : (UTF8_MAX_FOLD_CHAR_EXPAND * OFFUNISKIP(0x10FFFF)))
 
 /* Rest of these are attributes of Unicode and perl's internals rather than the
  * encoding, or happen to be the same in both ASCII and EBCDIC (at least at
@@ -419,8 +455,6 @@ only) byte is pointed to by C<s>.
  * above show, doesn't matter as to its implementation */
 #define NATIVE_BYTE_IS_INVARIANT(c)	UVCHR_IS_INVARIANT(c)
 
-#define MAX_PORTABLE_UTF8_TWO_BYTE 0x3FF    /* constrained by EBCDIC */
-
 /* The macros in the next 4 sets are used to generate the two utf8 or utfebcdic
  * bytes from an ordinal that is known to fit into exactly two (not one) bytes;
  * it must be less than 0x3FF to work across both encodings. */
@@ -445,9 +479,9 @@ only) byte is pointed to by C<s>.
 /* The next two macros are used when the source should be a single byte
  * character; checked for under DEBUGGING */
 #define UTF8_EIGHT_BIT_HI(c) (__ASSERT_(FITS_IN_8_BITS(c))                    \
-                             ((U8) __BASE_TWO_BYTE_HI(c, NATIVE_TO_LATIN1)))
+                             ( __BASE_TWO_BYTE_HI(c, NATIVE_TO_LATIN1)))
 #define UTF8_EIGHT_BIT_LO(c) (__ASSERT_(FITS_IN_8_BITS(c))                    \
-                             ((U8) __BASE_TWO_BYTE_LO(c, NATIVE_TO_LATIN1)))
+                             (__BASE_TWO_BYTE_LO(c, NATIVE_TO_LATIN1)))
 
 /* These final two macros in the series are used when the source can be any
  * code point whose UTF-8 is known to occupy 2 bytes; they are less efficient
@@ -458,11 +492,11 @@ only) byte is pointed to by C<s>.
 #define UTF8_TWO_BYTE_HI(c)                                                    \
        (__ASSERT_((sizeof(c) ==  1)                                            \
                   || !(((WIDEST_UTYPE)(c)) & ~MAX_UTF8_TWO_BYTE))              \
-        ((U8) __BASE_TWO_BYTE_HI(c, NATIVE_TO_UNI)))
+        (__BASE_TWO_BYTE_HI(c, NATIVE_TO_UNI)))
 #define UTF8_TWO_BYTE_LO(c)                                                    \
        (__ASSERT_((sizeof(c) ==  1)                                            \
                   || !(((WIDEST_UTYPE)(c)) & ~MAX_UTF8_TWO_BYTE))              \
-        ((U8) __BASE_TWO_BYTE_LO(c, NATIVE_TO_UNI)))
+        (__BASE_TWO_BYTE_LO(c, NATIVE_TO_UNI)))
 
 /* This is illegal in any well-formed UTF-8 in both EBCDIC and ASCII
  * as it is only in overlongs. */

@@ -146,8 +146,8 @@ END_EXTERN_C
 #define I8_TO_NATIVE_UTF8(b)           (__ASSERT_(FITS_IN_8_BITS(b)) PL_utf2e[(U8)(b)])
 
 /* Transforms in wide UV chars */
-#define NATIVE_TO_UNI(ch)    (FITS_IN_8_BITS(ch) ? NATIVE_TO_LATIN1(ch) : (ch))
-#define UNI_TO_NATIVE(ch)    (FITS_IN_8_BITS(ch) ? LATIN1_TO_NATIVE(ch) : (ch))
+#define NATIVE_TO_UNI(ch)    (FITS_IN_8_BITS(ch) ? NATIVE_TO_LATIN1(ch) : (UV) (ch))
+#define UNI_TO_NATIVE(ch)    (FITS_IN_8_BITS(ch) ? LATIN1_TO_NATIVE(ch) : (UV) (ch))
 
 /* How wide can a single UTF-8 encoded character become in bytes. */
 /* NOTE: Strictly speaking Perl's UTF-8 should not be called UTF-8 since UTF-8
@@ -183,14 +183,6 @@ zeros.  Above 32 bits, these fill up, with each byte yielding 5 bits of
 information, so that with 13 continuation bytes, we can handle 65 bits, just
 above what a 64 bit word can hold */
 
-/* Input is a true Unicode (not-native) code point */
-#define OFFUNISKIP(uv) ( (uv) < 0xA0        ? 1 :                   \
-		         (uv) < 0x400       ? 2 :                   \
-		         (uv) < 0x4000      ? 3 :                   \
-		         (uv) < 0x40000     ? 4 :                   \
-		         (uv) < 0x400000    ? 5 :                   \
-		         (uv) < 0x4000000   ? 6 :                   \
-		         (uv) < 0x40000000  ? 7 : UTF8_MAXBYTES )
 
 #define OFFUNI_IS_INVARIANT(c) (((UV)(c)) <  0xA0)
 
@@ -200,14 +192,6 @@ above what a 64 bit word can hold */
  * */
 #define UVCHR_IS_INVARIANT(uv) cBOOL(FITS_IN_8_BITS(uv)                        \
    && (PL_charclass[(U8) (uv)] & (_CC_mask(_CC_ASCII) | _CC_mask(_CC_CNTRL))))
-
-#define UVCHR_SKIP(uv) (UVCHR_IS_INVARIANT(uv)  ? 1 :                       \
-                        (uv) < 0x400            ? 2 :                       \
-		        (uv) < 0x4000           ? 3 :                       \
-		        (uv) < 0x40000          ? 4 :                       \
-		        (uv) < 0x400000         ? 5 :                       \
-		        (uv) < 0x4000000        ? 6 :                       \
-		        (uv) < 0x40000000       ? 7 : UTF8_MAXBYTES )
 
 /* UTF-EBCDIC semantic macros - We used to transform back into I8 and then
  * compare, but now only have to do a single lookup by using a bit in
@@ -236,20 +220,11 @@ above what a 64 bit word can hold */
                 _generic_isCC(c, _CC_UTF8_START_BYTE_IS_FOR_AT_LEAST_SURROGATE)
 
 #define UTF_CONTINUATION_MARK		0xA0
-#define UTF_CONTINUATION_MASK		((U8)0x1f)
 #define UTF_ACCUMULATION_SHIFT		5
-
-/* The maximum number of UTF-8 bytes a single Unicode character can
- * uppercase/lowercase/fold into.  Unicode guarantees that the maximum
- * expansion is 3 characters.  On EBCDIC platforms, the highest Unicode
- * character occupies 5 bytes, therefore this number is 15 */
-#define UTF8_MAXBYTES_CASE	15
 
 /* ^? is defined to be APC on EBCDIC systems.  See the definition of toCTRL()
  * for more */
 #define QUESTION_MARK_CTRL   LATIN1_TO_NATIVE(0x9F)
-
-#define MAX_UTF8_TWO_BYTE 0x3FF
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
