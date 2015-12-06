@@ -37,13 +37,19 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
+=head2 Some regular expression patterns that had runtime errors now
+don't compile at all
 
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
+This should have been in the perldelta for 5.23.4, but was omitted.
 
-[ List each incompatible change as a =head2 entry ]
+Almost all Unicode properties using the C<\p{}> and C<\P{}> regular
+expression pattern constructs are now checked for validity at pattern
+compilation time, and invalid ones will cause the program to not
+compile.  In earlier releases, this check was often deferred until run
+time.  Whenever an error check is moved from run- to compile time,
+erroneous code is caught 100% of the time, whereas before it would only
+get caught if and when the offending portion actually gets executed,
+which for unreachable code might be never.
 
 =head1 Deprecations
 
