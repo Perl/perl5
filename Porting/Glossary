@@ -2842,14 +2842,14 @@ dlsrc (dlsrc.U):
 
 doublekind (longdblfio.U):
 	This variable, if defined, encodes the type of a double:
-	1 = IEEE 754 32-bit big little endian,
-	2 = IEEE 754 32-bit big big endian,
-	3 = IEEE 754 64-bit big little endian,
-	4 = IEEE 754 64-bit big big endian,
-	5 = IEEE 754 128-bit big little endian,
-	6 = IEEE 754 128-bit big big endian,
-	7 = IEEE 754 64-bit big mixed endian le-be,
-	8 = IEEE 754 64-bit big mixed endian be-le,
+	1 = IEEE 754 32-bit little endian,
+	2 = IEEE 754 32-bit big endian,
+	3 = IEEE 754 64-bit little endian,
+	4 = IEEE 754 64-bit big endian,
+	5 = IEEE 754 128-bit little endian,
+	6 = IEEE 754 128-bit big endian,
+	7 = IEEE 754 64-bit mixed endian le-be,
+	8 = IEEE 754 64-bit mixed endian be-le,
 	-1 = unknown format.
 
 doublesize (doublesize.U):
@@ -4081,8 +4081,8 @@ loclibpth (libpth.U):
 
 longdblkind (d_longdbl.U):
 	This variable, if defined, encodes the type of a long double:
-	0 = double, 1 = IEEE 754 128-bit big little endian,
-	2 = IEEE 754 128-bit big big endian, 3 = x86 80-bit little endian,
+	0 = double, 1 = IEEE 754 128-bit little endian,
+	2 = IEEE 754 128-bit big endian, 3 = x86 80-bit little endian,
 	4 = x86 80-bit big endian, 5 = double-double 128-bit little endian,
 	6 = double-double 128-bit big endian, -1 = unknown format.
 
