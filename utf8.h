@@ -245,6 +245,21 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #  define UTF8_QUAD_MAX UINT64_C(0x1000000000)
 #endif
 
+/* ^? is defined to be DEL on ASCII systems.  See the definition of toCTRL()
+ * for more */
+#define QUESTION_MARK_CTRL  DEL_NATIVE
+
+/* Surrogates, non-character code points and above-Unicode code points are
+ * problematic in some contexts.  This allows code that needs to check for
+ * those to to quickly exclude the vast majority of code points it will
+ * encounter */
+#define isUTF8_POSSIBLY_PROBLEMATIC(c) ((U8) c >= 0xED)
+
+#endif /* EBCDIC vs ASCII */
+
+/* 2**UTF_ACCUMULATION_SHIFT - 1 */
+#define UTF_CONTINUATION_MASK  ((U8) ((1U << UTF_ACCUMULATION_SHIFT) - 1))
+
 /* Internal macro to be used only in this file to aid in constructing other
  * publicly accessible macros.
  * The number of bytes required to express this uv in UTF-8, for just those
@@ -275,26 +290,23 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 /* Internal macro to be used only in this file.
  * This adds to __COMMON_UNI_SKIP the details at this platform's upper range.
- * For 64-bit ASCII platforms, we need one more test
+ * For any-sized EBCDIC platforms, or 64-bit ASCII ones, we need one more test
  * to see if just 7 bytes is needed, or if the maximum is needed.  For 32-bit
  * ASCII platforms, everything is representable by 7 bytes */
-#ifdef UV_IS_QUAD
+#if defined(UV_IS_QUAD) || defined(EBCDIC)
 #   define __BASE_UNI_SKIP(uv) (__COMMON_UNI_SKIP(uv)                       \
      (UV) (uv) < ((UV) 1U << (6 * UTF_ACCUMULATION_SHIFT)) ? 7 : UTF8_MAXBYTES)
 #else
 #   define __BASE_UNI_SKIP(uv) (__COMMON_UNI_SKIP(uv) 7)
 #endif
 
-/* ^? is defined to be DEL on ASCII systems.  See the definition of toCTRL()
- * for more */
-#define QUESTION_MARK_CTRL  DEL_NATIVE
+/* The next two macros use the base macro defined above, and add in the tests
+ * at the low-end of the range, for just 1 byte, yielding complete macros,
+ * publicly accessible. */
 
-/* Surrogates, non-character code points and above-Unicode code points are
- * problematic in some contexts.  This allows code that needs to check for
- * those to to quickly exclude the vast majority of code points it will
- * encounter */
-#define isUTF8_POSSIBLY_PROBLEMATIC(c) ((U8) c >= 0xED)
-#define OFFUNISKIP(uv) ( OFFUNI_IS_INVARIANT(uv) ? 1 : __BASE_UNI_SKIP(uv))
+/* Input is a true Unicode (not-native) code point */
+#define OFFUNISKIP(uv) (OFFUNI_IS_INVARIANT(uv) ? 1 : __BASE_UNI_SKIP(uv))
+
 /*
 
 =for apidoc Am|STRLEN|UVCHR_SKIP|UV cp
@@ -306,13 +318,8 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
  */
 #define UVCHR_SKIP(uv) ( UVCHR_IS_INVARIANT(uv) ? 1 : __BASE_UNI_SKIP(uv))
 
-
-#endif /* EBCDIC vs ASCII */
-
-/* 2**UTF_ACCUMULATION_SHIFT - 1 */
-#define UTF_CONTINUATION_MASK  ((U8) ((1U << UTF_ACCUMULATION_SHIFT) - 1))
-
-/* 32 start bytes with UTF_ACCUMULATION_SHIFT bits of information each */
+/* As explained in the comments for __COMMON_UNI_SKIP, 32 start bytes with
+ * UTF_ACCUMULATION_SHIFT bits of information each */
 #define MAX_UTF8_TWO_BYTE (32 * (1U << UTF_ACCUMULATION_SHIFT) - 1)
 
 /* constrained by EBCDIC which has 5 bits per continuation byte */

@@ -193,14 +193,6 @@ above what a 64 bit word can hold */
 #define UVCHR_IS_INVARIANT(uv) cBOOL(FITS_IN_8_BITS(uv)                        \
    && (PL_charclass[(U8) (uv)] & (_CC_mask(_CC_ASCII) | _CC_mask(_CC_CNTRL))))
 
-/* Internal macro to be used only in the definitions of the next two */
-#define __BASE_UNI_SKIP(uv) ((uv) < 0x400       ? 2 :                  \
-		             (uv) < 0x4000      ? 3 :                  \
-		             (uv) < 0x40000     ? 4 :                  \
-		             (uv) < 0x400000    ? 5 :                  \
-		             (uv) < 0x4000000   ? 6 :                  \
-		             (uv) < 0x40000000  ? 7 : UTF8_MAXBYTES )
-
 /* UTF-EBCDIC semantic macros - We used to transform back into I8 and then
  * compare, but now only have to do a single lookup by using a bit in
  * l1_char_class_tab.h.
