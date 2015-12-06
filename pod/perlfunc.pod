@@ -6157,7 +6157,7 @@ use a real filehandle like C<FH>, not an indirect one like C<$fh>.
 
 This keyword is available only when the C<"say"> feature
 is enabled, or when prefixed with C<CORE::>; see
-L<feature>.  Alternately, include a C<use v5.10> or later to the current
+L<feature>.  Alternately, add a C<use v5.10> or later to the current
 scope.
 
 =item scalar EXPR
