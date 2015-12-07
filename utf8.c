@@ -112,6 +112,11 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	*d++ = LATIN1_TO_NATIVE(uv);
 	return d;
     }
+    if (uv <= MAX_UTF8_TWO_BYTE) {
+        *d++ = UTF8_TWO_BYTE_HI(uv);
+        *d++ = UTF8_TWO_BYTE_LO(uv);
+        return d;
+    }
 
     /* The first problematic code point is the first surrogate */
     if (uv >= UNICODE_SURROGATE_FIRST) {
@@ -172,11 +177,6 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	return d+len;
     }
 #else /* Non loop style */
-    if (uv < 0x800) {
-	*d++ = (U8)(( uv >>  6)         | 0xc0);
-	*d++ = (U8)(( uv        & 0x3f) | 0x80);
-	return d;
-    }
     if (uv < 0x10000) {
 	*d++ = (U8)(( uv >> 12)         | 0xe0);
 	*d++ = (U8)(((uv >>  6) & 0x3f) | 0x80);
