@@ -9979,7 +9979,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 
 	    RExC_parse++;
 	    paren = *RExC_parse++;
-	    ret = NULL;			/* For look-ahead/behind. */
+	    ret = NULL;			/* For lookahead/behind. */
 	    switch (paren) {
 
 	    case 'P':	/* (?P...) variants for those used to PCRE/Python */

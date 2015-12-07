@@ -1242,48 +1242,48 @@ Not doing so may lead to surprises:
 The problem here is that both the group named C<< a >> and the group
 named C<< b >> are aliases for the group belonging to C<< $1 >>.
 
-=item Look-Around Assertions
+=item Lookaround Assertions
 X<look-around assertion> X<lookaround assertion> X<look-around> X<lookaround>
 
-Look-around assertions are zero-width patterns which match a specific
+Lookaround assertions are zero-width patterns which match a specific
 pattern without including it in C<$&>. Positive assertions match when
 their subpattern matches, negative assertions match when their subpattern
-fails. Look-behind matches text up to the current match position,
-look-ahead matches text following the current match position.
+fails. Lookbehind matches text up to the current match position,
+lookahead matches text following the current match position.
 
 =over 4
 
 =item C<(?=pattern)>
 X<(?=)> X<look-ahead, positive> X<lookahead, positive>
 
-A zero-width positive look-ahead assertion.  For example, C</\w+(?=\t)/>
+A zero-width positive lookahead assertion.  For example, C</\w+(?=\t)/>
 matches a word followed by a tab, without including the tab in C<$&>.
 
 =item C<(?!pattern)>
 X<(?!)> X<look-ahead, negative> X<lookahead, negative>
 
-A zero-width negative look-ahead assertion.  For example C</foo(?!bar)/>
+A zero-width negative lookahead assertion.  For example C</foo(?!bar)/>
 matches any occurrence of "foo" that isn't followed by "bar".  Note
-however that look-ahead and look-behind are NOT the same thing.  You cannot
-use this for look-behind.
+however that lookahead and lookbehind are NOT the same thing.  You cannot
+use this for lookbehind.
 
 If you are looking for a "bar" that isn't preceded by a "foo", C</(?!foo)bar/>
 will not do what you want.  That's because the C<(?!foo)> is just saying that
 the next thing cannot be "foo"--and it's not, it's a "bar", so "foobar" will
-match.  Use look-behind instead (see below).
+match.  Use lookbehind instead (see below).
 
 =item C<(?<=pattern)> C<\K>
 X<(?<=)> X<look-behind, positive> X<lookbehind, positive> X<\K>
 
-A zero-width positive look-behind assertion.  For example, C</(?<=\t)\w+/>
+A zero-width positive lookbehind assertion.  For example, C</(?<=\t)\w+/>
 matches a word that follows a tab, without including the tab in C<$&>.
-Works only for fixed-width look-behind.
+Works only for fixed-width lookbehind.
 
 There is a special form of this construct, called C<\K> (available since
 Perl 5.10.0), which causes the
 regex engine to "keep" everything it had matched prior to the C<\K> and
 not include it in C<$&>. This effectively provides variable-length
-look-behind. The use of C<\K> inside of another look-around assertion
+lookbehind. The use of C<\K> inside of another lookaround assertion
 is allowed, but the behaviour is currently not well defined.
 
 For various reasons C<\K> may be significantly more efficient than the
@@ -1300,9 +1300,9 @@ can be rewritten as the much more efficient
 =item C<(?<!pattern)>
 X<(?<!)> X<look-behind, negative> X<lookbehind, negative>
 
-A zero-width negative look-behind assertion.  For example C</(?<!bar)foo/>
+A zero-width negative lookbehind assertion.  For example C</(?<!bar)foo/>
 matches any occurrence of "foo" that does not follow "bar".  Works
-only for fixed-width look-behind.
+only for fixed-width lookbehind.
 
 =back
 
@@ -1653,7 +1653,7 @@ C<(condition)> should be one of:
 (which is valid if the corresponding pair of parentheses
 matched);
 
-=item a look-ahead/look-behind/evaluate zero-width assertion;
+=item a lookahead/lookbehind/evaluate zero-width assertion;
 
 =item a name in angle brackets or single quotes
 
@@ -1839,7 +1839,7 @@ the C<use warnings> pragma or B<-w> switch saying it
 C<"matches null string many times in regex">.
 
 On simple groups, such as the pattern C<< (?> [^()]+ ) >>, a comparable
-effect may be achieved by negative look-ahead, as in C<[^()]+ (?! [^()] )>.
+effect may be achieved by negative lookahead, as in C<[^()]+ (?! [^()] )>.
 This was only 4 times slower on a string with 1000000 C<a>s.
 
 The "grab all you can, and do not give anything back" semantic is desirable
@@ -2242,7 +2242,7 @@ definition might succeed against a particular string.  And if there are
 multiple ways it might succeed, you need to understand backtracking to
 know which variety of success you will achieve.
 
-When using look-ahead assertions and negations, this can all get even
+When using lookahead assertions and negations, this can all get even
 trickier.  Imagine you'd like to find a sequence of non-digits not
 followed by "123".  You might try to write that as
 
@@ -2292,7 +2292,7 @@ time.  Now there's indeed something following "AB" that is not
 
 We can deal with this by using both an assertion and a negation.
 We'll say that the first part in C<$1> must be followed both by a digit
-and by something that's not "123".  Remember that the look-aheads
+and by something that's not "123".  Remember that the lookaheads
 are zero-width expressions--they only look, but don't consume any
 of the string in their match.  So rewriting this way produces what
 you'd expect; that is, case 5 will fail, but case 6 succeeds:
@@ -2329,10 +2329,10 @@ match takes a long time to finish.
 A powerful tool for optimizing such beasts is what is known as an
 "independent group",
 which does not backtrack (see L</C<< (?>pattern) >>>).  Note also that
-zero-length look-ahead/look-behind assertions will not backtrack to make
+zero-length lookahead/lookbehind assertions will not backtrack to make
 the tail match, since they are in "logical" context: only
 whether they match is considered relevant.  For an example
-where side-effects of look-ahead I<might> have influenced the
+where side-effects of lookahead I<might> have influenced the
 following match, see L</C<< (?>pattern) >>>.
 
 =head2 Version 8 Regular Expressions

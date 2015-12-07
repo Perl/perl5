@@ -1110,7 +1110,7 @@ feature, you can use one of the following:
 
 =item *
 
-Regular expression look-ahead
+Regular expression lookahead
 
 You can mimic class subtraction using lookahead.
 For example, what UTS#18 might write as
@@ -1223,7 +1223,7 @@ Level 3 - Tailored Support
 
  [17] see UAX#10 "Unicode Collation Algorithms"
  [18] have Unicode::Collate but not integrated to regexes
- [19] have (?<=x) and (?=x), but look-aheads or look-behinds
+ [19] have (?<=x) and (?=x), but lookaheads or lookbehinds
       should see outside of the target substring
  [20] need insensitive matching for linguistic features other
       than case; for example, hiragana to katakana, wide and

@@ -3100,7 +3100,7 @@ END
 
 #   Not currently used, not fully tested.
 #    sub peek {
-#        # Non-destructive look-ahead one non-adjusted, non-comment, non-blank
+#        # Non-destructive lookahead one non-adjusted, non-comment, non-blank
 #        # record.  Not callable from an each_line_handler(), nor does it call
 #        # an each_line_handler() on the line.
 #

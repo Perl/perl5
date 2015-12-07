@@ -654,7 +654,7 @@ Perl_re_intuit_start(pTHX_
                 "Intuit: trying to determine minimum start position...\n"));
 
     /* for now, assume that all substr offsets are positive. If at some point
-     * in the future someone wants to do clever things with look-behind and
+     * in the future someone wants to do clever things with lookbehind and
      * -ve offsets, they'll need to fix up any code in this function
      * which uses these offsets. See the thread beginning
      * <20140113145929.GF27210@iabyn.com>
@@ -2683,7 +2683,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
                 U32 n = 0;
                 max = -1;
                 /* calculate the right-most part of the string covered
-                 * by a capture. Due to look-ahead, this may be to
+                 * by a capture. Due to lookahead, this may be to
                  * the right of $&, so we have to scan all captures */
                 while (n <= prog->lastparen) {
                     if (prog->offs[n].end > max)
@@ -2704,7 +2704,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
                 U32 n = 0;
                 min = max;
                 /* calculate the left-most part of the string covered
-                 * by a capture. Due to look-behind, this may be to
+                 * by a capture. Due to lookbehind, this may be to
                  * the left of $&, so we have to scan all captures */
                 while (min && n <= prog->lastparen) {
                     if (   prog->offs[n].start != -1
