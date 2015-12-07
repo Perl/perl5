@@ -13804,7 +13804,13 @@ redo_curchar:
                 }
 
                 lhs = av_pop(stack);
-                assert(IS_OPERAND(lhs));
+
+                if (! IS_OPERAND(lhs)) {
+
+                    /* This can happen when there is an empty (), like in
+                     * /(?[[0]+()+])/ */
+                    goto bad_syntax;
+                }
 
                 switch (stacked_operator) {
                     case '&':
