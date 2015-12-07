@@ -359,9 +359,7 @@ SKIP: {
     tie @proxy, "ArrayProxy", \@real;
     @proxy[0, 1] = @real[1, 0];
     is($real[0], "b", "tied left first");
-    { local $::TODO = "#126633";
     is($real[1], "a", "tied left second");
-    }
     @real = @base;
     @real[0, 1] = @proxy[1, 0];
     is($real[0], "b", "tied right first");
@@ -371,9 +369,7 @@ SKIP: {
     @real = @base;
     @proxy[0, 1] = @proxy[1, 0];
     is($real[0], "b", "tied both first");
-    { local $::TODO = "#126633";
-    is($real[1], "a", "tied both b");
-    }
+    is($real[1], "a", "tied both second");
     @real = @base;
     ($temp, @real) = @proxy[1, 0];
     is($real[0], "a", "scalar/array tied right");

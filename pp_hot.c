@@ -1110,6 +1110,7 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
     SSize_t lcount = lastlelem - firstlelem + 1;
     bool marked = FALSE; /* have we marked any LHS with SVf_BREAK ? */
     bool const do_rc1 = cBOOL(PL_op->op_private & OPpASSIGN_COMMON_RC1);
+    bool copy_all = FALSE;
 
     assert(!PL_in_clean_all); /* SVf_BREAK not already in use */
     assert(firstlelem < lastlelem); /* at least 2 LH elements */
@@ -1138,6 +1139,9 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
             }
 
             assert(svl);
+            if (SvSMAGICAL(svl)) {
+                copy_all = TRUE;
+            }
             if (SvTYPE(svl) == SVt_PVAV || SvTYPE(svl) == SVt_PVHV) {
                 if (!marked)
                     return;
@@ -1169,7 +1173,7 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
         svr = *relem;
         assert(svr);
 
-        if (UNLIKELY(SvFLAGS(svr) & SVf_BREAK)) {
+        if (UNLIKELY(SvFLAGS(svr) & SVf_BREAK || copy_all)) {
 
 #ifdef DEBUGGING
             if (fake) {
@@ -1259,29 +1263,33 @@ PP(pp_aassign)
      * clobber a value on the right that's used later in the list.
      */
 
-    if ( (PL_op->op_private & (OPpASSIGN_COMMON_SCALAR|OPpASSIGN_COMMON_RC1))
-        /* at least 2 LH and RH elements, or commonality isn't an issue */
-        && (firstlelem < lastlelem && firstrelem < lastrelem)
-    ) {
-        if (PL_op->op_private & OPpASSIGN_COMMON_RC1) {
-            /* skip the scan if all scalars have a ref count of 1 */
-            for (lelem = firstlelem; lelem <= lastlelem; lelem++) {
-                sv = *lelem;
-                if (!sv || SvREFCNT(sv) == 1)
-                    continue;
-                if (SvTYPE(sv) != SVt_PVAV && SvTYPE(sv) != SVt_PVAV)
-                    goto do_scan;
-                break;
-            }
+    /* at least 2 LH and RH elements, or commonality isn't an issue */
+    if (firstlelem < lastlelem && firstrelem < lastrelem) {
+        for (lelem = firstlelem; lelem <= lastlelem; lelem++) {
+            if (*lelem && SvSMAGICAL(*lelem))
+                goto do_scan;
         }
-        else {
-          do_scan:
-            S_aassign_copy_common(aTHX_
-                        firstlelem, lastlelem, firstrelem, lastrelem
+        if ( PL_op->op_private & (OPpASSIGN_COMMON_SCALAR|OPpASSIGN_COMMON_RC1) ) {
+            if (PL_op->op_private & OPpASSIGN_COMMON_RC1) {
+                /* skip the scan if all scalars have a ref count of 1 */
+                for (lelem = firstlelem; lelem <= lastlelem; lelem++) {
+                    sv = *lelem;
+                    if (!sv || SvREFCNT(sv) == 1)
+                        continue;
+                    if (SvTYPE(sv) != SVt_PVAV && SvTYPE(sv) != SVt_PVAV)
+                        goto do_scan;
+                    break;
+                }
+            }
+            else {
+            do_scan:
+                S_aassign_copy_common(aTHX_
+                                      firstlelem, lastlelem, firstrelem, lastrelem
 #ifdef DEBUGGING
-                        , fake
+                    , fake
 #endif
-            );
+                );
+            }
         }
     }
 #ifdef DEBUGGING
