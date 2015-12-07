@@ -202,7 +202,11 @@ and New Warnings
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<message|perldiag/"Invalid number '%s' for -C option.">
+
+(F) You supplied a number to the -C option that either has extra leading
+zeroes or overflows perl's unsigned integer representation.
+
 
 =back
 

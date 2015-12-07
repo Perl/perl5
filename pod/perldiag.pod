@@ -2659,7 +2659,7 @@ it also returns the key in addition to the value.
 
 =item Invalid number '%s' for -C option.
 
-(F) You supplied number to the -C option that either has extra leading
+(F) You supplied a number to the -C option that either has extra leading
 zeroes or overflows perl's unsigned integer representation.
 
 =item %s() is deprecated on :utf8 handles
