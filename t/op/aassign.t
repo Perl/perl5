@@ -343,5 +343,46 @@ SKIP: {
     is($y, 1, 'single scalar on RHS, but two on LHS: y');
 }
 
+{ # magic handling, see #126633
+    use v5.22;
+    package ArrayProxy {
+        sub TIEARRAY { bless [ $_[1] ] }
+        sub STORE { $_[0][0]->[$_[1]] = $_[2] }
+        sub FETCH { $_[0][0]->[$_[1]] }
+        sub CLEAR { @{$_[0][0]} = () }
+        sub EXTEND {}
+    };
+    my @base = ( "a", "b" );
+    my @real = @base;
+    my @proxy;
+    my $temp;
+    tie @proxy, "ArrayProxy", \@real;
+    @proxy[0, 1] = @real[1, 0];
+    is($real[0], "b", "tied left first");
+    { local $::TODO = "#126633";
+    is($real[1], "a", "tied left second");
+    }
+    @real = @base;
+    @real[0, 1] = @proxy[1, 0];
+    is($real[0], "b", "tied right first");
+    { local $::TODO = "#126633";
+    is($real[1], "a", "tied right second");
+    }
+    @real = @base;
+    @proxy[0, 1] = @proxy[1, 0];
+    is($real[0], "b", "tied both first");
+    { local $::TODO = "#126633";
+    is($real[1], "a", "tied both b");
+    }
+    @real = @base;
+    ($temp, @real) = @proxy[1, 0];
+    is($real[0], "a", "scalar/array tied right");
+    @real = @base;
+    ($temp, @proxy) = @real[1, 0];
+    is($real[0], "a", "scalar/array tied left");
+    @real = @base;
+    ($temp, @proxy) = @proxy[1, 0];
+    is($real[0], "a", "scalar/array tied both");
+}
 
 done_testing();
