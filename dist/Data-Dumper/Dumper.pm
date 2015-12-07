@@ -41,6 +41,7 @@ my $IS_ASCII  = ord 'A' ==  65;
 
 # module vars and their defaults
 $Indent     = 2         unless defined $Indent;
+$Trailingcomma = 0      unless defined $Trailingcomma;
 $Purity     = 0         unless defined $Purity;
 $Pad        = ""        unless defined $Pad;
 $Varname    = "VAR"     unless defined $Varname;
@@ -76,6 +77,7 @@ sub new {
   my($s) = {
         level      => 0,           # current recursive depth
         indent     => $Indent,     # various styles of indenting
+        trailingcomma => $Trailingcomma, # whether to add comma after last elem
         pad        => $Pad,        # all lines prefixed by this string
         xpad       => "",          # padding-per-level
         apad       => "",          # added padding for hash keys n such
@@ -413,7 +415,9 @@ sub _dump {
         $out .= $pad . $ipad . '#' . $i
           if $s->{indent} >= 3;
         $out .= $pad . $ipad . $s->_dump($v, $sname);
-        $out .= "," if $i++ < $#$val;
+        $out .= ","
+            if $i++ < $#$val
+            || ($s->{trailingcomma} && $s->{indent} >= 1);
       }
       $out .= $pad . ($s->{xpad} x ($s->{level} - 1)) if $i;
       $out .= ($name =~ /^\@/) ? ')' : ']';
@@ -473,7 +477,7 @@ sub _dump {
           if $s->{indent} >= 2;
       }
       if (substr($out, -1) eq ',') {
-        chop $out;
+        chop $out if !$s->{trailingcomma} || !$s->{indent};
         $out .= $pad . ($s->{xpad} x ($s->{level} - 1));
       }
       $out .= ($name =~ /^\%/) ? ')' : '}';
@@ -631,6 +635,11 @@ sub Indent {
   else {
     return $s->{indent};
   }
+}
+
+sub Trailingcomma {
+  my($s, $v) = @_;
+  defined($v) ? (($s->{trailingcomma} = $v), return $s) : $s->{trailingcomma};
 }
 
 sub Pair {
@@ -1029,6 +1038,15 @@ which takes into account the length of hash keys (so the hash value lines
 up).  Style 3 is like style 2, but also annotates the elements of arrays
 with their index (but the comment is on its own line, so array output
 consumes twice the number of lines).  Style 2 is the default.
+
+=item *
+
+$Data::Dumper::Trailingcomma  I<or>  I<$OBJ>->Trailingcomma(I<[NEWVAL]>)
+
+Controls whether a comma is added after the last element of an array or
+hash. Even when true, no comma is added between the last element of an array
+or hash and a closing bracket when they appear on the same line. The default
+is false.
 
 =item *
 

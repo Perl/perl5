@@ -62,6 +62,7 @@ typedef struct {
     I32 maxdepth;
     I32 useqq;
     int use_sparse_seen_hash;
+    int trailingcomma;
 } Style;
 
 static I32 num_q (const char *s, STRLEN slen);
@@ -863,7 +864,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		sv_catsv(retval, ipad);
 		DD_dump(aTHX_ elem, iname, ilen, retval, seenhv, postav,
 			level+1, apad, style);
-		if (ix < ixmax)
+		if (ix < ixmax || (style->trailingcomma && style->indent >= 1))
 		    sv_catpvs(retval, ",");
 	    }
 	    if (ixmax >= 0) {
@@ -1080,6 +1081,8 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    if (i) {
                 SV *opad = sv_x(aTHX_ Nullsv, SvPVX_const(style->xpad),
                                 SvCUR(style->xpad), level);
+                if (style->trailingcomma && style->indent >= 1)
+                    sv_catpvs(retval, ",");
 		sv_catsv(retval, totpad);
 		sv_catsv(retval, opad);
 		SvREFCNT_dec(opad);
@@ -1399,7 +1402,7 @@ Data_Dumper_Dumpxs(href, ...)
             style.quotekeys = 1;
             style.maxrecurse = 1000;
             style.purity = style.deepcopy = style.useqq = style.maxdepth
-                = style.use_sparse_seen_hash = 0;
+                = style.use_sparse_seen_hash = style.trailingcomma = 0;
             style.pad = style.xpad = style.sep = style.pair = style.sortkeys
                 = style.freezer = style.toaster = style.bless = &PL_sv_undef;
 	    seenhv = NULL;
@@ -1448,6 +1451,8 @@ Data_Dumper_Dumpxs(href, ...)
                     style.deepcopy = SvTRUE(*svp);
 		if ((svp = hv_fetch(hv, "quotekeys", 9, FALSE)))
                     style.quotekeys = SvTRUE(*svp);
+                if ((svp = hv_fetch(hv, "trailingcomma", 13, FALSE)))
+                    style.trailingcomma = SvTRUE(*svp);
 		if ((svp = hv_fetch(hv, "bless", 5, FALSE)))
                     style.bless = *svp;
 		if ((svp = hv_fetch(hv, "maxdepth", 8, FALSE)))
