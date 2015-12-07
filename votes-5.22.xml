@@ -31,9 +31,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="" id="" ticket="123878" desc=""/>
 
-<commit votes="khw, steveh, arc" id="2985caa9ee0029932680fc8f354a35492d18fe9a" ticket="126615" desc="PATCH: [perl #126615] Segfault/assert fail with regex_sets"/>
-<commit votes="steveh, arc" id="9da07e0d80c9175fef799a588589c7f5a1e90d18" ticket="126615" desc="Remove duplicate line from test"/>
-
 </div>
 
 <div><h3>Regression Fixes</h3>
