@@ -126,6 +126,12 @@ For details, see the description for L</uvchr_to_utf8_flags>.
         }                                                           \
     } STMT_END;
 
+/*  Use shorter names internally in this file */
+#define SHIFT   UTF_ACCUMULATION_SHIFT
+#undef  MARK
+#define MARK    UTF_CONTINUATION_MARK
+#define MASK    UTF_CONTINUATION_MASK
+
 U8 *
 Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 {
@@ -141,15 +147,43 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
         return d;
     }
 
-    /* The first problematic code point is the first surrogate */
-        if (uv >= UNICODE_SURROGATE_FIRST) {
-            if (UNLIKELY(UNICODE_IS_NONCHAR(uv))) {
+    /* Not 2-byte; test for and handle 3-byte result.   In the test immediately
+     * below, the 16 is for start bytes E0-EF (which are all the possible ones
+     * for 3 byte characters).  The 2 is for 2 continuation bytes; these each
+     * contribute SHIFT bits.  This yields 0x4000 on EBCDIC platforms, 0x1_0000
+     * on ASCII; so 3 bytes covers the range 0x400-0x3FFF on EBCDIC;
+     * 0x800-0xFFFF on ASCII */
+    if (uv < (16 * (1U << (2 * SHIFT)))) {
+	*d++ = I8_TO_NATIVE_UTF8(( uv >> ((3 - 1) * SHIFT)) | UTF_START_MARK(3));
+	*d++ = I8_TO_NATIVE_UTF8(((uv >> ((2 - 1) * SHIFT)) & MASK) |   MARK);
+	*d++ = I8_TO_NATIVE_UTF8(( uv  /* (1 - 1) */        & MASK) |   MARK);
+
+#ifndef EBCDIC  /* These problematic code points are 4 bytes on EBCDIC, so
+                   aren't tested here */
+        /* The most likely code points in this range are below the surrogates.
+         * Do an extra test to quickly exclude those. */
+        if (UNLIKELY(uv >= UNICODE_SURROGATE_FIRST)) {
+            if (UNLIKELY(   UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv)
+                         || UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv)))
+            {
                 HANDLE_UNICODE_NONCHAR(uv, flags);
             }
             else if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
                 HANDLE_UNICODE_SURROGATE(uv, flags);
             }
-    else if (UNLIKELY(UNICODE_IS_SUPER(uv))) {
+        }
+#endif
+	return d;
+    }
+
+    /* Not 3-byte; that means the code point is at least 0x1_0000 on ASCII
+     * platforms, and 0x4000 on EBCDIC.  There are problematic cases that can
+     * happen starting with 4-byte characters on ASCII platforms.  We unify the
+     * code for these with EBCDIC, even though some of them require 5-bytes on
+     * those, because khw believes the code saving is worth the very slight
+     * performance hit on these high EBCDIC code points. */
+
+    if (UNLIKELY(UNICODE_IS_SUPER(uv))) {
         if (   UNLIKELY(uv > MAX_NON_DEPRECATED_CP)
             && ckWARN_d(WARN_DEPRECATED))
         {
@@ -175,9 +209,42 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
             return NULL;
         }
     }
+    else if (UNLIKELY(UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv))) {
+        HANDLE_UNICODE_NONCHAR(uv, flags);
     }
 
-#if defined(EBCDIC)
+    /* Test for and handle 4-byte result.   In the test immediately below, the
+     * 8 is for start bytes F0-F7 (which are all the possible ones for 4 byte
+     * characters).  The 3 is for 3 continuation bytes; these each contribute
+     * SHIFT bits.  This yields 0x4_0000 on EBCDIC platforms, 0x20_0000 on
+     * ASCII, so 4 bytes covers the range 0x4000-0x3_FFFF on EBCDIC;
+     * 0x1_0000-0x1F_FFFF on ASCII */
+    if (uv < (8 * (1U << (3 * SHIFT)))) {
+	*d++ = I8_TO_NATIVE_UTF8(( uv >> ((4 - 1) * SHIFT)) | UTF_START_MARK(4));
+	*d++ = I8_TO_NATIVE_UTF8(((uv >> ((3 - 1) * SHIFT)) & MASK) |   MARK);
+	*d++ = I8_TO_NATIVE_UTF8(((uv >> ((2 - 1) * SHIFT)) & MASK) |   MARK);
+	*d++ = I8_TO_NATIVE_UTF8(( uv  /* (1 - 1) */        & MASK) |   MARK);
+
+#ifdef EBCDIC   /* These were handled on ASCII platforms in the code for 3-byte
+                   characters.  The end-plane non-characters for EBCDIC were
+                   handled just above */
+        if (UNLIKELY(UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv))) {
+            HANDLE_UNICODE_NONCHAR(uv, flags);
+        else if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
+            HANDLE_UNICODE_SURROGATE(uv, flags);
+        }
+#endif
+
+	return d;
+    }
+
+    /* Not 4-byte; that means the code point is at least 0x20_0000 on ASCII
+     * platforms, and 0x4000 on EBCDIC.  At this point we switch to a loop
+     * format.  The unrolled version above turns out to not save all that much
+     * time, and at these high code points (well above the legal Unicode range
+     * on ASCII platforms, and well above anything in common use in EBCDIC),
+     * khw believes that less code outweighs slight performance gains. */
+
     {
 	STRLEN len  = OFFUNISKIP(uv);
 	U8 *p = d+len-1;
@@ -188,69 +255,6 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	*p = I8_TO_NATIVE_UTF8((uv & UTF_START_MASK(len)) | UTF_START_MARK(len));
 	return d+len;
     }
-#else /* Non loop style */
-    if (uv < 0x10000) {
-	*d++ = (U8)(( uv >> 12)         | 0xe0);
-	*d++ = (U8)(((uv >>  6) & 0x3f) | 0x80);
-	*d++ = (U8)(( uv        & 0x3f) | 0x80);
-	return d;
-    }
-    if (uv < 0x200000) {
-	*d++ = (U8)(( uv >> 18)         | 0xf0);
-	*d++ = (U8)(((uv >> 12) & 0x3f) | 0x80);
-	*d++ = (U8)(((uv >>  6) & 0x3f) | 0x80);
-	*d++ = (U8)(( uv        & 0x3f) | 0x80);
-	return d;
-    }
-    if (uv < 0x4000000) {
-	*d++ = (U8)(( uv >> 24)         | 0xf8);
-	*d++ = (U8)(((uv >> 18) & 0x3f) | 0x80);
-	*d++ = (U8)(((uv >> 12) & 0x3f) | 0x80);
-	*d++ = (U8)(((uv >>  6) & 0x3f) | 0x80);
-	*d++ = (U8)(( uv        & 0x3f) | 0x80);
-	return d;
-    }
-    if (uv < 0x80000000) {
-	*d++ = (U8)(( uv >> 30)         | 0xfc);
-	*d++ = (U8)(((uv >> 24) & 0x3f) | 0x80);
-	*d++ = (U8)(((uv >> 18) & 0x3f) | 0x80);
-	*d++ = (U8)(((uv >> 12) & 0x3f) | 0x80);
-	*d++ = (U8)(((uv >>  6) & 0x3f) | 0x80);
-	*d++ = (U8)(( uv        & 0x3f) | 0x80);
-	return d;
-    }
-#ifdef UTF8_QUAD_MAX
-    if (uv < UTF8_QUAD_MAX)
-#endif
-    {
-	*d++ =                            0xfe;	/* Can't match U+FEFF! */
-	*d++ = (U8)(((uv >> 30) & 0x3f) | 0x80);
-	*d++ = (U8)(((uv >> 24) & 0x3f) | 0x80);
-	*d++ = (U8)(((uv >> 18) & 0x3f) | 0x80);
-	*d++ = (U8)(((uv >> 12) & 0x3f) | 0x80);
-	*d++ = (U8)(((uv >>  6) & 0x3f) | 0x80);
-	*d++ = (U8)(( uv        & 0x3f) | 0x80);
-	return d;
-    }
-#ifdef UTF8_QUAD_MAX
-    {
-	*d++ =                            0xff;		/* Can't match U+FFFE! */
-	*d++ =                            0x80;		/* 6 Reserved bits */
-	*d++ = (U8)(((uv >> 60) & 0x0f) | 0x80);	/* 2 Reserved bits */
-	*d++ = (U8)(((uv >> 54) & 0x3f) | 0x80);
-	*d++ = (U8)(((uv >> 48) & 0x3f) | 0x80);
-	*d++ = (U8)(((uv >> 42) & 0x3f) | 0x80);
-	*d++ = (U8)(((uv >> 36) & 0x3f) | 0x80);
-	*d++ = (U8)(((uv >> 30) & 0x3f) | 0x80);
-	*d++ = (U8)(((uv >> 24) & 0x3f) | 0x80);
-	*d++ = (U8)(((uv >> 18) & 0x3f) | 0x80);
-	*d++ = (U8)(((uv >> 12) & 0x3f) | 0x80);
-	*d++ = (U8)(((uv >>  6) & 0x3f) | 0x80);
-	*d++ = (U8)(( uv        & 0x3f) | 0x80);
-	return d;
-    }
-#endif
-#endif /* Non loop style */
 }
 
 /*
