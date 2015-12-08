@@ -6976,15 +6976,33 @@ int main() {
   /* software "double double", the 106 is 53+53.
    * but irix thinks it is 107. */
   if (b[0] == 0x9A && b[7] == 0x3C && b[8] == 0x9A && b[15] == 0xBF) {
-    /* double double 128-bit little-endian,
+    /* double double 128-bit fully little-endian,
+     * little-endian doubles in little-endian order,
      * 9a 99 99 99 99 99 59 3c 9a 99 99 99 99 99 b9 bf */
     printf("5\n");
     exit(0);
   }
   if (b[0] == 0xBF && b[7] == 0x9A && b[8] == 0x3C && b[15] == 0x9A) {
-    /* double double 128-bit big-endian, e.g. PPC/Power and MIPS:
+    /* double double 128-bit fully big-endian,
+     * big-endian doubles in big-endian order,
+     * e.g. PPC/Power and MIPS:
      * bf b9 99 99 99 99 99 9a 3c 59 99 99 99 99 99 9a */
     printf("6\n");
+    exit(0);
+  }
+  if (b[0] == 0x9A && b[7] == 0xBF && b[8] == 0x9A && b[15] == 0x3C) {
+    /* double double 128-bit mixed endian.
+     * little-endian doubles in big-endian order,
+     * e.g. ppc64el,
+     * 9a 99 99 99 99 99 b9 bf 9a 99 99 99 99 99 59 3c */
+    printf("7\n");
+    exit(0);
+  }
+  if (b[0] == 0x3C && b[7] == 0x9A && b[8] == 0xBF && b[15] == 0x9A) {
+    /* double double 128-bit mixed endian,
+     * big-endian doubles in little-endian order,
+     * 3c 59 99 99 99 99 99 9a bf b9 99 99 99 99 99 9a */
+    printf("8\n");
     exit(0);
   }
 #endif
@@ -7007,8 +7025,10 @@ case "$longdblkind" in
 2) echo "You have IEEE 754 128-bit big endian long doubles." >&4 ;;
 3) echo "You have x86 80-bit little endian long doubles." >& 4 ;;
 4) echo "You have x86 80-bit big endian long doubles." >& 4 ;;
-5) echo "You have 128-bit little-endian double-double long doubles." >& 4 ;;
-6) echo "You have 128-bit big-endian double-double long doubles." >& 4 ;;
+5) echo "You have 128-bit fully little-endian double-double long doubles (64-bit LEs in LE)." >& 4 ;;
+6) echo "You have 128-bit fully big-endian double-double long doubles (64-bit BEs in BE)." >& 4 ;;
+7) echo "You have 128-bit mixed double-double long doubles (64-bit LEs in BE)." >& 4 ;;
+8) echo "You have 128-bit mixed double-double long doubles (64-bit BEs in LE)." >& 4 ;;
 *) echo "Cannot figure out your long double." >&4 ;;
 esac
 $rm_try
