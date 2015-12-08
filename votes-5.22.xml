@@ -56,6 +56,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
+<commit votes="steveh" id="0b367b79db425c558522753a6cd4607fb16b5797" ticket="" desc="Fix t/op/sprintf2.t on VMS"/>
+
 </div>
 
 <div><h3>Documentation Fixes</h3>
