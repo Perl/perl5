@@ -47,21 +47,21 @@
  * stack all the time (as was the case in an earlier implementation). But
  * this means that, for example, "sortkeys" is a separate parameter. */
 typedef struct {
-    I32 indent;
     SV *pad;
     SV *xpad;
     SV *sep;
     SV *pair;
     SV *freezer;
     SV *toaster;
+    SV *bless;
+    IV maxrecurse;
+    I32 indent;
     I32 purity;
     I32 deepcopy;
     I32 quotekeys;
-    SV *bless;
     I32 maxdepth;
-    int use_sparse_seen_hash;
     I32 useqq;
-    IV maxrecurse;
+    int use_sparse_seen_hash;
 } Style;
 
 static I32 num_q (const char *s, STRLEN slen);
