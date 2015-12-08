@@ -372,7 +372,11 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+C</...\G/> no longer crashes on utf8 strings. When C<\G> is a fixed number
+of characters from the start of the regex, perl needs to count back that
+many characters from the current C<pos()> position and start matching from
+there. However, it was counting back bytes rather than characters, which
+could lead to panics on utf8 strings.
 
 =back
 
