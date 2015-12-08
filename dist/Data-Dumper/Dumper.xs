@@ -44,13 +44,13 @@
 /* This struct contains almost all the user's desired configuration, and it
  * is treated as constant by the recursive function. This arrangement has
  * the advantage of needing less memory than passing all of them on the
- * stack all the time (as was the case in an earlier implementation). But
- * this means that, for example, "sortkeys" is a separate parameter. */
+ * stack all the time (as was the case in an earlier implementation). */
 typedef struct {
     SV *pad;
     SV *xpad;
     SV *sep;
     SV *pair;
+    SV *sortkeys;
     SV *freezer;
     SV *toaster;
     SV *bless;
@@ -72,7 +72,7 @@ static bool key_needs_quote(const char *s, STRLEN len);
 static bool safe_decimal_number(const char *p, STRLEN len);
 static SV *sv_x (pTHX_ SV *sv, const char *str, STRLEN len, I32 n);
 static I32 DD_dump (pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval,
-                    HV *seenhv, AV *postav, I32 *levelp, SV *apad, SV *sortkeys,
+                    HV *seenhv, AV *postav, I32 *levelp, SV *apad,
                     const Style *style);
 
 #ifndef HvNAME_get
@@ -511,7 +511,7 @@ sv_x(pTHX_ SV *sv, const char *str, STRLEN len, I32 n)
  */
 static I32
 DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
-	AV *postav, I32 *levelp, SV *apad, SV *sortkeys, const Style *style)
+	AV *postav, I32 *levelp, SV *apad, const Style *style)
 {
     char tmpbuf[128];
     Size_t i;
@@ -776,13 +776,13 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    if (realpack) {				     /* blessed */
 		sv_catpvs(retval, "do{\\(my $o = ");
 		DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
-			postav, levelp,	apad, sortkeys, style);
+			postav, levelp,	apad, style);
 		sv_catpvs(retval, ")}");
 	    }						     /* plain */
 	    else {
 		sv_catpvs(retval, "\\");
 		DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
-			postav, levelp,	apad, sortkeys, style);
+			postav, levelp,	apad, style);
 	    }
 	    SvREFCNT_dec(namesv);
 	}
@@ -792,7 +792,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    sv_catpvs(namesv, "}");
 	    sv_catpvs(retval, "\\");
 	    DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
-		    postav, levelp, apad, sortkeys, style);
+		    postav, levelp, apad, style);
 	    SvREFCNT_dec(namesv);
 	}
 	else if (realtype == SVt_PVAV) {
@@ -863,7 +863,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		sv_catsv(retval, totpad);
 		sv_catsv(retval, ipad);
 		DD_dump(aTHX_ elem, iname, ilen, retval, seenhv, postav,
-			levelp,	apad, sortkeys, style);
+			levelp,	apad, style);
 		if (ix < ixmax)
 		    sv_catpvs(retval, ",");
 	    }
@@ -919,11 +919,9 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    sv_catsv(totpad, apad);
 	
 	    /* If requested, get a sorted/filtered array of hash keys */
-	    if (sortkeys) {
-		if (sortkeys == &PL_sv_yes) {
-#if PERL_VERSION < 8
-                    sortkeys = sv_2mortal(newSVpvs("Data::Dumper::_sortkeys"));
-#else
+	    if (style->sortkeys) {
+#if PERL_VERSION >= 8
+		if (style->sortkeys == &PL_sv_yes) {
 		    keys = newAV();
 		    (void)hv_iterinit((HV*)ival);
 		    while ((entry = hv_iternext((HV*)ival))) {
@@ -944,17 +942,18 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
                     }
                     else
 # endif
-#endif
                     {
                         sortsv(AvARRAY(keys),
 			   av_len(keys)+1,
                            Perl_sv_cmp);
                     }
 		}
-		if (sortkeys != &PL_sv_yes) {
+                else
+#endif
+		{
 		    dSP; ENTER; SAVETMPS; PUSHMARK(sp);
 		    XPUSHs(sv_2mortal(newRV_inc(ival))); PUTBACK;
-		    i = perl_call_sv(sortkeys, G_SCALAR | G_EVAL);
+		    i = perl_call_sv(style->sortkeys, G_SCALAR | G_EVAL);
 		    SPAGAIN;
 		    if (i) {
 			sv = POPs;
@@ -981,7 +980,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
                 I32 nlen;
 		bool do_utf8 = FALSE;
 
-               if (sortkeys) {
+               if (style->sortkeys) {
                    if (!(keys && (SSize_t)i <= av_len(keys))) break;
                } else {
                    if (!(entry = hv_iternext((HV *)ival))) break;
@@ -990,7 +989,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		if (i)
 		    sv_catpvs(retval, ",");
 
-		if (sortkeys) {
+		if (style->sortkeys) {
 		    char *key;
 		    svp = av_fetch(keys, i, FALSE);
 		    keysv = svp ? *svp : sv_newmortal();
@@ -1073,7 +1072,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    newapad = apad;
 
 		DD_dump(aTHX_ hval, SvPVX_const(sname), SvCUR(sname), retval, seenhv,
-			postav, levelp, newapad, sortkeys, style);
+			postav, levelp, newapad, style);
 		SvREFCNT_dec(sname);
 		Safefree(nkey_buffer);
                 if (style->indent >= 2)
@@ -1279,7 +1278,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			    (void)sv_x(aTHX_ newapad, " ", 1, SvCUR(postentry));
 			
 			DD_dump(aTHX_ e, SvPVX_const(nname), SvCUR(nname), postentry,
-				seenhv, postav, &nlevel, newapad, sortkeys, style);
+				seenhv, postav, &nlevel, newapad, style);
 			SvREFCNT_dec(e);
 		    }
 		}
@@ -1367,7 +1366,6 @@ Data_Dumper_Dumpxs(href, ...)
 	    SSize_t i, imax, postlen;
 	    SV **svp;
             SV *apad = &PL_sv_undef;
-            SV *sortkeys = &PL_sv_undef;
             Style style;
 
             SV *name, *val = &PL_sv_undef, *varname = &PL_sv_undef;
@@ -1406,7 +1404,7 @@ Data_Dumper_Dumpxs(href, ...)
             style.maxrecurse = 1000;
             style.purity = style.deepcopy = style.useqq = style.maxdepth
                 = style.use_sparse_seen_hash = 0;
-            style.pad = style.xpad = style.sep = style.pair
+            style.pad = style.xpad = style.sep = style.pair = style.sortkeys
                 = style.freezer = style.toaster = style.bless = &PL_sv_undef;
 	    seenhv = NULL;
 	    name = sv_newmortal();
@@ -1461,15 +1459,22 @@ Data_Dumper_Dumpxs(href, ...)
 		if ((svp = hv_fetch(hv, "maxrecurse", 10, FALSE)))
                     style.maxrecurse = SvIV(*svp);
 		if ((svp = hv_fetch(hv, "sortkeys", 8, FALSE))) {
-		    sortkeys = *svp;
-		    if (! SvTRUE(sortkeys))
-			sortkeys = NULL;
-		    else if (! (SvROK(sortkeys) &&
-				SvTYPE(SvRV(sortkeys)) == SVt_PVCV) )
-		    {
-			/* flag to use qsortsv() for sorting hash keys */	
-			sortkeys = &PL_sv_yes; 
-		    }
+                    SV *sv = *svp;
+                    if (! SvTRUE(sv))
+                        style.sortkeys = NULL;
+                    else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVCV)
+                        style.sortkeys = sv;
+                    else if (PERL_VERSION < 8)
+                        /* 5.6 doesn't make sortsv() available to XS code,
+                         * so we must use this helper instead. Note that we
+                         * always allocate this mortal SV, but it will be
+                         * used only if at least one hash is encountered
+                         * while dumping recursively; an older version
+                         * allocated it lazily as needed. */
+                        style.sortkeys = sv_2mortal(newSVpvs("Data::Dumper::_sortkeys"));
+                    else
+                        /* flag to use sortsv() for sorting hash keys */
+                        style.sortkeys = &PL_sv_yes;
 		}
 		postav = newAV();
 
@@ -1537,7 +1542,7 @@ Data_Dumper_Dumpxs(href, ...)
 		
 		    PUTBACK;
 		    DD_dump(aTHX_ val, SvPVX_const(name), SvCUR(name), valstr, seenhv,
-                            postav, &level, newapad, sortkeys, &style);
+                            postav, &level, newapad, &style);
 		    SPAGAIN;
 		
                     if (style.indent >= 2 && !terse)
