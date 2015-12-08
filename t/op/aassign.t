@@ -345,9 +345,10 @@ SKIP: {
 
 { # magic handling, see #126633
     use v5.22;
+    my $set;
     package ArrayProxy {
         sub TIEARRAY { bless [ $_[1] ] }
-        sub STORE { $_[0][0]->[$_[1]] = $_[2] }
+        sub STORE { $_[0][0]->[$_[1]] = $_[2]; $set = 1 }
         sub FETCH { $_[0][0]->[$_[1]] }
         sub CLEAR { @{$_[0][0]} = () }
         sub EXTEND {}
@@ -363,9 +364,7 @@ SKIP: {
     @real = @base;
     @real[0, 1] = @proxy[1, 0];
     is($real[0], "b", "tied right first");
-    { local $::TODO = "#126633";
     is($real[1], "a", "tied right second");
-    }
     @real = @base;
     @proxy[0, 1] = @proxy[1, 0];
     is($real[0], "b", "tied both first");
@@ -379,6 +378,10 @@ SKIP: {
     @real = @base;
     ($temp, @proxy) = @proxy[1, 0];
     is($real[0], "a", "scalar/array tied both");
+    $set = 0;
+    my $orig;
+    ($proxy[0], $orig) = (1, $set);
+    is($orig, 0, 'previous value of $set');
 }
 
 done_testing();

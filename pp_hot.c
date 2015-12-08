@@ -1173,7 +1173,7 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
         svr = *relem;
         assert(svr);
 
-        if (UNLIKELY(SvFLAGS(svr) & SVf_BREAK || copy_all)) {
+        if (UNLIKELY(SvFLAGS(svr) & (SVf_BREAK|SVs_GMG) || copy_all)) {
 
 #ifdef DEBUGGING
             if (fake) {
@@ -1265,6 +1265,10 @@ PP(pp_aassign)
 
     /* at least 2 LH and RH elements, or commonality isn't an issue */
     if (firstlelem < lastlelem && firstrelem < lastrelem) {
+        for (relem = firstrelem+1; relem <= lastrelem; relem++) {
+            if (SvGMAGICAL(*relem))
+                goto do_scan;
+        }
         for (lelem = firstlelem; lelem <= lastlelem; lelem++) {
             if (*lelem && SvSMAGICAL(*lelem))
                 goto do_scan;
