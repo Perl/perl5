@@ -6925,16 +6925,17 @@ int main() {
   }
 #endif
 /* For alignment 32-bit platforms have the 80 bits in 12 bytes,
- * while 64-bits platforms have it in 16 bytes. */
+ * while 64-bits platforms have it in 16 bytes.  The trailing bytes
+ * cannot be trusted. */
 #if LDBL_MANT_DIG == 64 && (LONGDBLSIZE == 16 || LONGDBLSIZE == 12)
-  if (b[0] == 0xCD && b[9] == 0xBF && b[10] == 0x00) {
+  if (b[0] == 0xCD && b[9] == 0xBF) {
     /* x86 80-bit little-endian, sizeof 12 (ILP32, Solaris x86)
      * or 16 (LP64, Linux and OS X), 4 or 6 bytes of padding.
      * Also known as "extended precision". */
     printf("3\n");
     exit(0);
   }
-  if (b[0] == 0xBF && b[9] == 0xCD && b[10] == 0x00) {
+  if (b[0] == 0xBF && b[9] == 0xCD) {
     /* is there ever big-endian 80-bit, really? */
     printf("4\n");
     exit(0);
