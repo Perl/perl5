@@ -563,6 +563,7 @@ the strings?).
  Steve     5.22.1-RC1   2015-Oct-31
  Steve     5.22.1-RC2   2015-Nov-15
  Steve     5.22.1-RC3   2015-Dec-02
+ Steve     5.22.1-RC4   2015-Dec-08
 
  Ricardo   5.23.0       2015-Jun-20     The 5.23 development track
  Matthew   5.23.1       2015-Jul-20
