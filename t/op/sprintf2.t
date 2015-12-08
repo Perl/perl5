@@ -665,7 +665,8 @@ for my $t (@hexfloat) {
 
 # double-double long double %a special testing.
 SKIP: {
-    skip("uselongdouble=$Config{uselongdouble} longdblkind=$Config{longdblkind} os=$^O", 6)
+    skip("uselongdouble=" . ($Config{uselongdouble} ? 'define' : 'undef')
+         . " longdblkind=$Config{longdblkind} os=$^O", 6)
         unless ($Config{uselongdouble} &&
                 ($Config{longdblkind} == 5 ||
                  $Config{longdblkind} == 6)
