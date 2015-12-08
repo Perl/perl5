@@ -277,7 +277,7 @@ and contains approximately 19,000 lines of changes across 130 files from 27
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
-approximately 1,700 lines of changes to 43 .pm, .t, .c and .h files.
+approximately 1,700 lines of changes to 44 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its third decade thanks to a vibrant community
 of users and developers.  The following people are known to have contributed
