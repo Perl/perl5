@@ -203,6 +203,30 @@ L<Announced on 2015-06-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   They sing while you slave and I just get bored
   I ain't gonna work on Maggie's farm no more
 
+=head2 v5.22.1-RC4 - Wilhelm Müller, trans. Anon., "The Signpost" (No. 20 in Schubert's song-cycle, "Winterreise")
+
+L<Announced on 2015-12-08 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/12/msg233215.html>
+
+  Why do I shun all those highways
+  Which the other wanderer seeks?
+  Why do I find bridged by-ways
+  Through snow-covered deep creeks?
+
+  For I have no crime committed,
+  Why I should now run from men,--
+  What demented heart's desire
+  Drives me to a desert glen?
+
+  Signposts on all highways stationed
+  Point their signs toward the towns,
+  Whilst I wonder 'yond moderation,
+  Without rest, yet seeking rest!
+
+  One such signpost I see planted
+  Of my question unconcerned,
+  One road must my choice be granted,
+  Whence no man has yet returned!
+
 =head2 v5.22.1-RC3 - Wilhelm Müller, trans. Anon., "Stormy Morning" (No. 18 in Schubert's song-cycle, "Winterreise")
 
 L<Announced on 2015-12-02 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/12/msg233032.html>
