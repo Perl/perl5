@@ -262,6 +262,12 @@ the C<%a> format specifier could variously lose the sign of the negative zero,
 fail to display zeros after the radix point with the requested precision, or
 even lose the radix point after the leftmost hexadecimal digit completely.
 
+=item *
+
+A crash caused by incomplete expressions within C<< /(?[ ])/ >> (e.g.
+C<< /(?[[0]+()+])/ >>) has been fixed.
+L<[perl #126615]|https://rt.perl.org/Ticket/Display.html?id=126615>
+
 =back
 
 =head1 Acknowledgements
