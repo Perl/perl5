@@ -72,7 +72,7 @@ static bool key_needs_quote(const char *s, STRLEN len);
 static bool safe_decimal_number(const char *p, STRLEN len);
 static SV *sv_x (pTHX_ SV *sv, const char *str, STRLEN len, I32 n);
 static I32 DD_dump (pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval,
-                    HV *seenhv, AV *postav, I32 *levelp, SV *apad,
+                    HV *seenhv, AV *postav, const I32 level, SV *apad,
                     const Style *style);
 
 #ifndef HvNAME_get
@@ -511,7 +511,7 @@ sv_x(pTHX_ SV *sv, const char *str, STRLEN len, I32 n)
  */
 static I32
 DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
-	AV *postav, I32 *levelp, SV *apad, const Style *style)
+	AV *postav, const I32 level, SV *apad, const Style *style)
 {
     char tmpbuf[128];
     Size_t i;
@@ -592,7 +592,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		if ((svp = av_fetch(seenentry, 0, FALSE))
 		    && (othername = *svp))
 		{
-		    if (style->purity && *levelp > 0) {
+		    if (style->purity && level > 0) {
 			SV *postentry;
 			
 			if (realtype == SVt_PVHV)
@@ -679,7 +679,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	 * representation of the thing we are currently examining
 	 * at this depth (i.e., 'Foo=ARRAY(0xdeadbeef)').
 	 */
-        if (!style->purity && style->maxdepth > 0 && *levelp >= style->maxdepth) {
+        if (!style->purity && style->maxdepth > 0 && level >= style->maxdepth) {
 	    STRLEN vallen;
 	    const char * const valstr = SvPV(val,vallen);
 	    sv_catpvs(retval, "'");
@@ -688,7 +688,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    return 1;
 	}
 
-        if (style->maxrecurse > 0 && *levelp >= style->maxrecurse) {
+        if (style->maxrecurse > 0 && level >= style->maxrecurse) {
             croak("Recursion limit of %" IVdf " exceeded", style->maxrecurse);
 	}
 
@@ -704,8 +704,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    }
 	}
 
-	(*levelp)++;
-        ipad = sv_x(aTHX_ Nullsv, SvPVX_const(style->xpad), SvCUR(style->xpad), *levelp);
+        ipad = sv_x(aTHX_ Nullsv, SvPVX_const(style->xpad), SvCUR(style->xpad), level+1);
 
         if (is_regex) 
         {
@@ -776,13 +775,13 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    if (realpack) {				     /* blessed */
 		sv_catpvs(retval, "do{\\(my $o = ");
 		DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
-			postav, levelp,	apad, style);
+			postav, level+1, apad, style);
 		sv_catpvs(retval, ")}");
 	    }						     /* plain */
 	    else {
 		sv_catpvs(retval, "\\");
 		DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
-			postav, levelp,	apad, style);
+			postav, level+1, apad, style);
 	    }
 	    SvREFCNT_dec(namesv);
 	}
@@ -792,7 +791,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    sv_catpvs(namesv, "}");
 	    sv_catpvs(retval, "\\");
 	    DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
-		    postav, levelp, apad, style);
+		    postav, level+1, apad, style);
 	    SvREFCNT_dec(namesv);
 	}
 	else if (realtype == SVt_PVAV) {
@@ -863,12 +862,12 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		sv_catsv(retval, totpad);
 		sv_catsv(retval, ipad);
 		DD_dump(aTHX_ elem, iname, ilen, retval, seenhv, postav,
-			levelp,	apad, style);
+			level+1, apad, style);
 		if (ix < ixmax)
 		    sv_catpvs(retval, ",");
 	    }
 	    if (ixmax >= 0) {
-                SV * const opad = sv_x(aTHX_ Nullsv, SvPVX_const(style->xpad), SvCUR(style->xpad), (*levelp)-1);
+                SV * const opad = sv_x(aTHX_ Nullsv, SvPVX_const(style->xpad), SvCUR(style->xpad), level);
 		sv_catsv(retval, totpad);
 		sv_catsv(retval, opad);
 		SvREFCNT_dec(opad);
@@ -1072,7 +1071,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    newapad = apad;
 
 		DD_dump(aTHX_ hval, SvPVX_const(sname), SvCUR(sname), retval, seenhv,
-			postav, levelp, newapad, style);
+			postav, level+1, newapad, style);
 		SvREFCNT_dec(sname);
 		Safefree(nkey_buffer);
                 if (style->indent >= 2)
@@ -1080,7 +1079,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    }
 	    if (i) {
                 SV *opad = sv_x(aTHX_ Nullsv, SvPVX_const(style->xpad),
-                                SvCUR(style->xpad), *levelp-1);
+                                SvCUR(style->xpad), level);
 		sv_catsv(retval, totpad);
 		sv_catsv(retval, opad);
 		SvREFCNT_dec(opad);
@@ -1136,7 +1135,6 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    }
 	}
 	SvREFCNT_dec(ipad);
-	(*levelp)--;
     }
     else {
 	STRLEN i;
@@ -1264,7 +1262,6 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			continue;
 
 		    {
-			I32 nlevel = 0;
 			SV *postentry = newSVpvn(r,i);
 			
 			sv_setsv(nname, postentry);
@@ -1278,7 +1275,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			    (void)sv_x(aTHX_ newapad, " ", 1, SvCUR(postentry));
 			
 			DD_dump(aTHX_ e, SvPVX_const(nname), SvCUR(nname), postentry,
-				seenhv, postav, &nlevel, newapad, style);
+				seenhv, postav, 0, newapad, style);
 			SvREFCNT_dec(e);
 		    }
 		}
@@ -1361,7 +1358,6 @@ Data_Dumper_Dumpxs(href, ...)
 	    SV *retval, *valstr;
 	    HV *seenhv = NULL;
 	    AV *postav, *todumpav, *namesav;
-	    I32 level = 0;
 	    I32 terse = 0;
 	    SSize_t i, imax, postlen;
 	    SV **svp;
@@ -1542,7 +1538,7 @@ Data_Dumper_Dumpxs(href, ...)
 		
 		    PUTBACK;
 		    DD_dump(aTHX_ val, SvPVX_const(name), SvCUR(name), valstr, seenhv,
-                            postav, &level, newapad, &style);
+                            postav, 0, newapad, &style);
 		    SPAGAIN;
 		
                     if (style.indent >= 2 && !terse)
