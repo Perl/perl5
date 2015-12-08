@@ -490,3 +490,13 @@ esac
 # makefile in the same place.  Since Darwin uses GNU make, this dodges
 # the problem.
 firstmakefile=GNUmakefile;
+
+# Parts of the system call setenv(), in particular in an atfork handler.
+# This causes problems when the child tries to clean up environ[], so
+# let libc manage environ[].
+cat >> config.over <<'EOOVER'
+if test "$d_unsetenv" = "$define" -a \
+    `expr "$ccflags" : '.*-DPERL_USE_SAFE_PUTENV'` -eq 0; then
+        ccflags="$ccflags -DPERL_USE_SAFE_PUTENV"
+fi
+EOOVER
