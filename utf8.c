@@ -103,6 +103,29 @@ For details, see the description for L</uvchr_to_utf8_flags>.
 =cut
 */
 
+#define HANDLE_UNICODE_SURROGATE(uv, flags)                         \
+    STMT_START {                                                    \
+        if (flags & UNICODE_WARN_SURROGATE) {                       \
+            Perl_ck_warner_d(aTHX_ packWARN(WARN_SURROGATE),        \
+                                "UTF-16 surrogate U+%04"UVXf, uv);  \
+        }                                                           \
+        if (flags & UNICODE_DISALLOW_SURROGATE) {                   \
+            return NULL;                                            \
+        }                                                           \
+    } STMT_END;
+
+#define HANDLE_UNICODE_NONCHAR(uv, flags)                           \
+    STMT_START {                                                    \
+        if (flags & UNICODE_WARN_NONCHAR) {                         \
+            Perl_ck_warner_d(aTHX_ packWARN(WARN_NONCHAR),          \
+		 "Unicode non-character U+%04"UVXf" is not "        \
+                 "recommended for open interchange", uv);           \
+        }                                                           \
+        if (flags & UNICODE_DISALLOW_NONCHAR) {                     \
+            return NULL;                                            \
+        }                                                           \
+    } STMT_END;
+
 U8 *
 Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 {
@@ -120,14 +143,11 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 
     /* The first problematic code point is the first surrogate */
         if (uv >= UNICODE_SURROGATE_FIRST) {
-            if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
-                if (flags & UNICODE_WARN_SURROGATE) {
-                    Perl_ck_warner_d(aTHX_ packWARN(WARN_SURROGATE),
-                                                "UTF-16 surrogate U+%04"UVXf, uv);
-                }
-                if (flags & UNICODE_DISALLOW_SURROGATE) {
-                    return NULL;
-                }
+            if (UNLIKELY(UNICODE_IS_NONCHAR(uv))) {
+                HANDLE_UNICODE_NONCHAR(uv, flags);
+            }
+            else if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
+                HANDLE_UNICODE_SURROGATE(uv, flags);
             }
     else if (UNLIKELY(UNICODE_IS_SUPER(uv))) {
         if (   UNLIKELY(uv > MAX_NON_DEPRECATED_CP)
@@ -152,16 +172,6 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
             || (   UNICODE_IS_ABOVE_31_BIT(uv)
                 && (flags & UNICODE_DISALLOW_ABOVE_31_BIT)))
         {
-            return NULL;
-        }
-    }
-    else if (UNLIKELY(UNICODE_IS_NONCHAR(uv))) {
-        if (flags & UNICODE_WARN_NONCHAR) {
-            Perl_ck_warner_d(aTHX_ packWARN(WARN_NONCHAR),
-             "Unicode non-character U+%04"UVXf" is not recommended for open interchange",
-             uv);
-        }
-        if (flags & UNICODE_DISALLOW_NONCHAR) {
             return NULL;
         }
     }
