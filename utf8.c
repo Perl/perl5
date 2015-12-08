@@ -119,50 +119,52 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
     }
 
     /* The first problematic code point is the first surrogate */
-    if (uv >= UNICODE_SURROGATE_FIRST) {
-	if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
-	    if (flags & UNICODE_WARN_SURROGATE) {
-		Perl_ck_warner_d(aTHX_ packWARN(WARN_SURROGATE),
-					    "UTF-16 surrogate U+%04"UVXf, uv);
-	    }
-	    if (flags & UNICODE_DISALLOW_SURROGATE) {
-		return NULL;
-	    }
-	}
-	else if (UNLIKELY(UNICODE_IS_SUPER(uv))) {
-            if (   UNLIKELY(uv > MAX_NON_DEPRECATED_CP)
-                && ckWARN_d(WARN_DEPRECATED))
-            {
-		Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-                            cp_above_legal_max, uv, MAX_NON_DEPRECATED_CP);
+        if (uv >= UNICODE_SURROGATE_FIRST) {
+            if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
+                if (flags & UNICODE_WARN_SURROGATE) {
+                    Perl_ck_warner_d(aTHX_ packWARN(WARN_SURROGATE),
+                                                "UTF-16 surrogate U+%04"UVXf, uv);
+                }
+                if (flags & UNICODE_DISALLOW_SURROGATE) {
+                    return NULL;
+                }
             }
-	    if (   (flags & UNICODE_WARN_SUPER)
-		|| (UNICODE_IS_ABOVE_31_BIT(uv) && (flags & UNICODE_WARN_ABOVE_31_BIT)))
-            {
-                Perl_ck_warner_d(aTHX_ packWARN(WARN_NON_UNICODE),
+    else if (UNLIKELY(UNICODE_IS_SUPER(uv))) {
+        if (   UNLIKELY(uv > MAX_NON_DEPRECATED_CP)
+            && ckWARN_d(WARN_DEPRECATED))
+        {
+            Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+                        cp_above_legal_max, uv, MAX_NON_DEPRECATED_CP);
+        }
+        if (   (flags & UNICODE_WARN_SUPER)
+            || (   UNICODE_IS_ABOVE_31_BIT(uv)
+                && (flags & UNICODE_WARN_ABOVE_31_BIT)))
+        {
+            Perl_ck_warner_d(aTHX_ packWARN(WARN_NON_UNICODE),
 
-                  /* Choose the more dire applicable warning */
-                  (UNICODE_IS_ABOVE_31_BIT(uv))
-                  ? "Code point 0x%"UVXf" is not Unicode, and not portable"
-                  : "Code point 0x%"UVXf" is not Unicode, may not be portable",
-                 uv);
-	    }
-	    if (flags & UNICODE_DISALLOW_SUPER
-		|| (UNICODE_IS_ABOVE_31_BIT(uv) && (flags & UNICODE_DISALLOW_ABOVE_31_BIT)))
-	    {
-		return NULL;
-	    }
-	}
-	else if (UNLIKELY(UNICODE_IS_NONCHAR(uv))) {
-	    if (flags & UNICODE_WARN_NONCHAR) {
-		Perl_ck_warner_d(aTHX_ packWARN(WARN_NONCHAR),
-		 "Unicode non-character U+%04"UVXf" is not recommended for open interchange",
-		 uv);
-	    }
-	    if (flags & UNICODE_DISALLOW_NONCHAR) {
-		return NULL;
-	    }
-	}
+              /* Choose the more dire applicable warning */
+              (UNICODE_IS_ABOVE_31_BIT(uv))
+              ? "Code point 0x%"UVXf" is not Unicode, and not portable"
+              : "Code point 0x%"UVXf" is not Unicode, may not be portable",
+             uv);
+        }
+        if (flags & UNICODE_DISALLOW_SUPER
+            || (   UNICODE_IS_ABOVE_31_BIT(uv)
+                && (flags & UNICODE_DISALLOW_ABOVE_31_BIT)))
+        {
+            return NULL;
+        }
+    }
+    else if (UNLIKELY(UNICODE_IS_NONCHAR(uv))) {
+        if (flags & UNICODE_WARN_NONCHAR) {
+            Perl_ck_warner_d(aTHX_ packWARN(WARN_NONCHAR),
+             "Unicode non-character U+%04"UVXf" is not recommended for open interchange",
+             uv);
+        }
+        if (flags & UNICODE_DISALLOW_NONCHAR) {
+            return NULL;
+        }
+    }
     }
 
 #if defined(EBCDIC)
@@ -240,6 +242,7 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 #endif
 #endif /* Non loop style */
 }
+
 /*
 =for apidoc uvchr_to_utf8
 
