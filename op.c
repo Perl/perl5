@@ -13127,6 +13127,11 @@ Perl_rpeep(pTHX_ OP *o)
 	}
 
       redo:
+
+        /* oldoldop -> oldop -> o should be a chain of 3 adjacent ops */
+        assert(!oldoldop || oldoldop->op_next == oldop);
+        assert(!oldop    || oldop->op_next    == o);
+
 	/* By default, this op has now been optimised. A couple of cases below
 	   clear this again.  */
 	o->op_opt = 1;
