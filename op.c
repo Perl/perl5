@@ -13127,6 +13127,11 @@ Perl_rpeep(pTHX_ OP *o)
 	}
 
       redo:
+
+        /* oldoldop -> oldop -> o should be a chain of 3 adjacent ops */
+        assert(!oldoldop || oldoldop->op_next == oldop);
+        assert(!oldop    || oldop->op_next    == o);
+
 	/* By default, this op has now been optimised. A couple of cases below
 	   clear this again.  */
 	o->op_opt = 1;
@@ -13448,9 +13453,10 @@ Perl_rpeep(pTHX_ OP *o)
 		    op_null(o);
 		    if (oldop)
 			oldop->op_next = nextop;
+                    o = nextop;
 		    /* Skip (old)oldop assignment since the current oldop's
 		       op_next already points to the next op.  */
-		    continue;
+		    goto redo;
 		}
 	    }
 	    break;
@@ -13855,7 +13861,8 @@ Perl_rpeep(pTHX_ OP *o)
 		    oldoldop = NULL;
 		    goto redo;
 		}
-		o = oldop;
+		o = oldop->op_next;
+                goto redo;
 	    }
 	    else if (o->op_next->op_type == OP_RV2SV) {
 		if (!(o->op_next->op_private & OPpDEREF)) {
@@ -14152,6 +14159,11 @@ Perl_rpeep(pTHX_ OP *o)
 	    op_null(o);
 	    enter->op_private |= OPpITER_REVERSED;
 	    iter->op_private |= OPpITER_REVERSED;
+
+            oldoldop = NULL;
+            oldop    = ourlast;
+            o        = oldop->op_next;
+            goto redo;
 	    
 	    break;
 	}
