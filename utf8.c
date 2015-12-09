@@ -230,6 +230,7 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
                    handled just above */
         if (UNLIKELY(UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv))) {
             HANDLE_UNICODE_NONCHAR(uv, flags);
+        }
         else if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
             HANDLE_UNICODE_SURROGATE(uv, flags);
         }
