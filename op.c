@@ -13855,7 +13855,8 @@ Perl_rpeep(pTHX_ OP *o)
 		    oldoldop = NULL;
 		    goto redo;
 		}
-		o = oldop;
+		o = oldop->op_next;
+                goto redo;
 	    }
 	    else if (o->op_next->op_type == OP_RV2SV) {
 		if (!(o->op_next->op_private & OPpDEREF)) {
