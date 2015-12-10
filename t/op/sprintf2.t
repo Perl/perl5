@@ -580,23 +580,27 @@ $o::count = 0;
 is $o::count,    0, 'sprintf %d string overload count is 0';
 is $o::numcount, 1, 'sprintf %d number overload count is 1';
 
-my $ppc64_linux = $Config{archname} =~ /^ppc64-linux/;
-my $irix_ld     = $Config{archname} =~ /^IP\d+-irix-ld$/;
+my $ppc_linux = $Config{archname} =~ /^(?:ppc|power(?:pc)?)(?:64)?-linux/;
+my $irix_ld   = $Config{archname} =~ /^IP\d+-irix-ld$/;
 
 for my $t (@hexfloat) {
     my ($format, $arg, $expected) = @$t;
     $arg = eval $arg;
     my $result = sprintf($format, $arg);
     my $ok = $result eq $expected;
-    if ($doubledouble && $ppc64_linux && $arg =~ /^2.71828/) {
-        # ppc64-linux has buggy exp(1).
+    # For certain platforms (all of which are currently double-double,
+    # but different implementations, GNU vs vendor, two different archs
+    # (ppc and mips), and two different libm interfaces) we have some
+    # bits-in-the-last-hexdigit differences.
+    # Patch them up as TODOs instead of deadly errors.
+    if ($doubledouble && $ppc_linux && $arg =~ /^2.71828/) {
+        # gets  '0x1.5bf0a8b1457695355fb8ac404ecp+1'
+        # wants '0x1.5bf0a8b1457695355fb8ac404e8p+1'
         local $::TODO = "$Config{archname} exp(1)";
         ok($ok, "'$format' '$arg' -> '$result' cf '$expected'");
         next;
     }
     if ($doubledouble && $irix_ld && $arg =~ /^1.41421/) {
-        # irix has buggy sqrt(2),
-        # last hexdigit one bit error:
         # gets  '0x1.6a09e667f3bcc908b2fb1366eacp+0'
         # wants '0x1.6a09e667f3bcc908b2fb1366ea8p+0'
         local $::TODO = "$Config{archname} sqrt(2)";
