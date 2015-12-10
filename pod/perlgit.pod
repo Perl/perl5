@@ -107,24 +107,25 @@ files, and in addition it will show things like what files have been
 staged for the next commit, and usually some useful information about
 how to change things. For instance the following:
 
-  $ git status
-  # On branch blead
-  # Your branch is ahead of 'origin/blead' by 1 commit.
-  #
-  # Changes to be committed:
-  #   (use "git reset HEAD <file>..." to unstage)
-  #
-  #       modified:   pod/perlgit.pod
-  #
-  # Changed but not updated:
-  #   (use "git add <file>..." to update what will be committed)
-  #
-  #       modified:   pod/perlgit.pod
-  #
-  # Untracked files:
-  #   (use "git add <file>..." to include in what will be committed)
-  #
-  #       deliberate.untracked
+  % git status
+  On branch blead
+  Your branch is ahead of 'origin/blead' by 1 commit.
+
+  Changes to be committed:
+    (use "git reset HEAD <file>..." to unstage)
+
+        modified:   pod/perlgit.pod
+
+  Changes not staged for commit:
+    (use "git add <file>..." to update what will be committed)
+    (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   pod/perlgit.pod
+
+  Untracked files:
+    (use "git add <file>..." to include in what will be committed)
+
+        deliberate.untracked
 
 This shows that there were changes to this document staged for commit,
 and that there were further changes in the working directory not yet
@@ -177,12 +178,11 @@ to Orange Brocard, we should change his name in the AUTHORS file:
 You can see what files are changed:
 
   % git status
-  # On branch orange
-  # Changes to be committed:
-  #   (use "git reset HEAD <file>..." to unstage)
-  #
-  #    modified:   AUTHORS
-  #
+  On branch orange
+  Changes to be committed:
+    (use "git reset HEAD <file>..." to unstage)
+
+     modified:   AUTHORS
 
 And you can see the changes:
 
@@ -231,13 +231,12 @@ this:
 If you re-run C<git status>, you should see something like this:
 
   % git status
-  # On branch blead
-  # Your branch is ahead of 'origin/blead' by 2 commits.
-  #
-  # Untracked files:
-  #   (use "git add <file>..." to include in what will be committed)
-  #
-  #       deliberate.untracked
+  On branch orange
+  Untracked files:
+    (use "git add <file>..." to include in what will be committed)
+
+        deliberate.untracked
+
   nothing added to commit but untracked files present (use "git add" to track)
 
 When in doubt, before you do anything else, check your status and read
@@ -309,13 +308,14 @@ this:
 If you re-run C<git status>, you should see something like this:
 
   % git status
-  # On branch blead
-  # Your branch is ahead of 'origin/blead' by 2 commits.
-  #
-  # Untracked files:
-  #   (use "git add <file>..." to include in what will be committed)
-  #
-  #       deliberate.untracked
+  On branch blead
+  Your branch is ahead of 'origin/blead' by 2 commits.
+    (use "git push" to publish your local commits)
+  Untracked files:
+    (use "git add <file>..." to include in what will be committed)
+
+        deliberate.untracked
+
   nothing added to commit but untracked files present (use "git add" to track)
 
 When in doubt, before you do anything else, check your status and read
