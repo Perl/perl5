@@ -131,7 +131,7 @@ and that there were further changes in the working directory not yet
 staged. It also shows that there was an untracked file in the working
 directory, and as you can see shows how to change all of this. It also
 shows that there is one commit on the working branch C<blead> which has
-not been pushed to the C<origin> remote yet. B<NOTE>: that this output
+not been pushed to the C<origin> remote yet. B<NOTE>: This output
 is also what you see as a template if you do not provide a message to
 C<git commit>.
 
@@ -479,18 +479,18 @@ binary searches.
 Individual committers should create topic branches under
 B<yourname>/B<some_descriptive_name>:
 
-  $ branch="$yourname/$some_descriptive_name"
-  $ git checkout -b $branch
+  % branch="$yourname/$some_descriptive_name"
+  % git checkout -b $branch
   ... do local edits, commits etc ...
-  $ git push origin -u $branch
+  % git push origin -u $branch
 
 Should you be stuck with an ancient version of git (prior to 1.7), then
 C<git push> will not have the C<-u> switch, and you have to replace the
 last step with the following sequence:
 
-  $ git push origin $branch:refs/heads/$branch
-  $ git config branch.$branch.remote origin
-  $ git config branch.$branch.merge refs/heads/$branch
+  % git push origin $branch:refs/heads/$branch
+  % git config branch.$branch.remote origin
+  % git config branch.$branch.merge refs/heads/$branch
 
 If you want to make changes to someone else's topic branch, you should
 check with its creator before making any change to it.
@@ -520,20 +520,20 @@ in the git push documentation for details) after you have rebased your
 branch:
 
   # first rebase
-  $ git checkout $user/$topic
-  $ git fetch
-  $ git rebase origin/blead
+  % git checkout $user/$topic
+  % git fetch
+  % git rebase origin/blead
 
   # then "delete-and-push"
-  $ git push origin :$user/$topic
-  $ git push origin $user/$topic
+  % git push origin :$user/$topic
+  % git push origin $user/$topic
 
 B<NOTE:> it is forbidden at the repository level to delete any of the
 "primary" branches. That is any branch matching
 C<m!^(blead|maint|perl)!>. Any attempt to do so will result in git
 producing an error like this:
 
-  $ git push origin :blead
+  % git push origin :blead
   *** It is forbidden to delete blead/maint branches in this repository
   error: hooks/update exited with error code 1
   error: hook declined to update refs/heads/blead
@@ -580,7 +580,7 @@ this once globally in their F<~/.gitconfig> by doing something like:
   % git config --global user.name "Ævar Arnfjörð Bjarmason"
   % git config --global user.email avarab@gmail.com
 
-However, if you'd like to override that just for perl, 
+However, if you'd like to override that just for perl,
 execute something like the following in F<perl>:
 
   % git config user.email avar@cpan.org
@@ -729,8 +729,8 @@ When this happens, you can just I<rebase> your work against the new
 position of blead, like this (assuming your remote for the master
 repository is "p5p"):
 
-  $ git fetch p5p
-  $ git rebase p5p/blead
+  % git fetch p5p
+  % git rebase p5p/blead
 
 You will see your commits being re-applied, and you will then be able to
 push safely.  More information about rebasing can be found in the
@@ -748,14 +748,14 @@ again, making it easier for future maintainers to see what has
 happened.  Rebase as follows (assuming your work was on the
 branch C<< committer/somework >>):
 
-  $ git checkout committer/somework
-  $ git rebase blead
+  % git checkout committer/somework
+  % git rebase blead
 
 Then you can merge it into master like this:
 
-  $ git checkout blead
-  $ git merge --no-ff --no-commit committer/somework
-  $ git commit -a
+  % git checkout blead
+  % git merge --no-ff --no-commit committer/somework
+  % git commit -a
 
 The switches above deserve explanation.  C<--no-ff> indicates that even
 if all your work can be applied linearly against blead, a merge commit
