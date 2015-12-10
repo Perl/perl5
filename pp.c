@@ -1373,7 +1373,7 @@ PP(pp_multiply)
                 goto do_iv;
             SP--;
             result = nl * nr;
-#  if defined(__sgi) && defined(USE_LONG_DOUBLE) && LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN && NVSIZE == 16
+#  if defined(__sgi) && defined(USE_LONG_DOUBLE) && LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_BE && NVSIZE == 16
             if (Perl_isinf(result)) {
                 Zero((U8*)&result + 8, 8, U8);
             }
@@ -1505,7 +1505,7 @@ PP(pp_multiply)
       NV result = left * right;
 
       (void)POPs;
-#if defined(__sgi) && defined(USE_LONG_DOUBLE) && LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN && NVSIZE == 16
+#if defined(__sgi) && defined(USE_LONG_DOUBLE) && LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_BE && NVSIZE == 16
       if (Perl_isinf(result)) {
           Zero((U8*)&result + 8, 8, U8);
       }
