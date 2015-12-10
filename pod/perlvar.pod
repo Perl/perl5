@@ -1667,12 +1667,12 @@ Under a few operating systems, C<$^E> may contain a more verbose error
 indicator, such as in this case, "CDROM tray not closed."  Systems that
 do not support extended error messages leave C<$^E> the same as C<$!>.
 
-Finally, C<$?> may be set to non-0 value if the external program
+Finally, C<$?> may be set to a non-0 value if the external program
 F</cdrom/install> fails.  The upper eight bits reflect specific error
 conditions encountered by the program (the program's C<exit()> value).
 The lower eight bits reflect mode of failure, like signal death and
 core dump information.  See L<wait(2)> for details.  In contrast to
-C<$!> and C<$^E>, which are set only if error condition is detected,
+C<$!> and C<$^E>, which are set only if an error condition is detected,
 the variable C<$?> is set on each C<wait> or pipe C<close>,
 overwriting the old value.  This is more like C<$@>, which on every
 C<eval()> is always set on failure and cleared on success.
@@ -1867,17 +1867,18 @@ Mnemonic: similar to B<sh> and B<ksh>.
 =item $@
 X<$@> X<$EVAL_ERROR>
 
-The Perl syntax error message from the
-last C<eval()> operator.  If C<$@> is
-the null string, the last C<eval()> parsed and executed correctly
-(although the operations you invoked may have failed in the normal
-fashion).
+The Perl error from the last C<eval> operator, i.e. the last exception that
+was caught.  For C<eval BLOCK>, this is either a runtime error message or the
+string or reference C<die> was called with.  The C<eval STRING> form also
+catches syntax errors and other compile time exceptions.
+
+If no error occurs, C<eval> sets C<$@> to the empty string.
 
 Warning messages are not collected in this variable.  You can, however,
 set up a routine to process warnings by setting C<$SIG{__WARN__}> as
 described in L</%SIG>.
 
-Mnemonic: Where was the syntax error "at"?
+Mnemonic: Where was the error "at"?
 
 =back
 
