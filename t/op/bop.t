@@ -622,6 +622,7 @@ is $^A, "123", '~v0 clears vstring magic on retval';
     # not necessarily the ideal behavior, but that is what is happening.
     if ($w == 64) {
         no warnings "portable";
+        no warnings "overflow"; # prevent compile-time warning for ivsize=4
         is(-1 << 1, 0xFFFF_FFFF_FFFF_FFFE,
            "neg UV (sic) left shift  = 0xFF..E");
         is(-1 >> 1, 0x7FFF_FFFF_FFFF_FFFF,
