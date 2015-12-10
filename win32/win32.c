@@ -4232,6 +4232,35 @@ XS(w32_SetChildShowWindow)
     XSRETURN(1);
 }
 
+
+#ifdef PERL_IS_MINIPERL
+/* shelling out is much slower, full perl uses Win32.pm */
+XS(w32_GetCwd)
+{
+    dXSARGS;
+    /* Make the host for current directory */
+    char* ptr = PerlEnv_get_childdir();
+    /*
+     * If ptr != Nullch
+     *   then it worked, set PV valid,
+     *   else return 'undef'
+     */
+    if (ptr) {
+	SV *sv = sv_newmortal();
+	sv_setpv(sv, ptr);
+	PerlEnv_free_childdir(ptr);
+
+#ifndef INCOMPLETE_TAINTS
+	SvTAINTED_on(sv);
+#endif
+
+	ST(0) = sv;
+	XSRETURN(1);
+    }
+    XSRETURN_UNDEF;
+}
+#endif
+
 void
 Perl_init_os_extras(void)
 {
@@ -4253,6 +4282,9 @@ Perl_init_os_extras(void)
 #endif
 
     newXS("Win32::SetChildShowWindow", w32_SetChildShowWindow, file);
+#ifdef PERL_IS_MINIPERL
+    newXS("Win32::GetCwd", w32_GetCwd, file);
+#endif
 }
 
 void *

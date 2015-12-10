@@ -485,6 +485,8 @@ use File::Glob qw(:case);
             qq[t/vstrings.t],
         # Upstreamed as https://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker/commit/dd1e236ab
             qq[lib/ExtUtils/MM_VMS.pm],
+        # Not yet submitted
+            qq[t/lib/MakeMaker/Test/NoXS.pm],
         ],
     },
 
