@@ -141,9 +141,10 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	*d++ = LATIN1_TO_NATIVE(uv);
 	return d;
     }
+
     if (uv <= MAX_UTF8_TWO_BYTE) {
-        *d++ = UTF8_TWO_BYTE_HI(uv);
-        *d++ = UTF8_TWO_BYTE_LO(uv);
+        *d++ = I8_TO_NATIVE_UTF8(( uv >> SHIFT) | UTF_START_MARK(2));
+        *d++ = I8_TO_NATIVE_UTF8(( uv           & MASK) |   MARK);
         return d;
     }
 
