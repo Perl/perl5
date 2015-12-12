@@ -72,19 +72,22 @@ PP(pp_padav)
 	if (LIKELY( !(PL_op->op_private & OPpPAD_STATE) ))
 	    SAVECLEARSV(PAD_SVl(PL_op->op_targ));
     EXTEND(SP, 1);
+
     if (PL_op->op_flags & OPf_REF) {
 	PUSHs(TARG);
 	RETURN;
-    } else if (PL_op->op_private & OPpMAYBE_LVSUB) {
-       const I32 flags = is_lvalue_sub();
-       if (flags && !(flags & OPpENTERSUB_INARGS)) {
-	if (GIMME_V == G_SCALAR)
-	    /* diag_listed_as: Can't return %s to lvalue scalar context */
-	    Perl_croak(aTHX_ "Can't return array to lvalue scalar context");
-	PUSHs(TARG);
-	RETURN;
+    }
+    else if (PL_op->op_private & OPpMAYBE_LVSUB) {
+        const I32 flags = is_lvalue_sub();
+        if (flags && !(flags & OPpENTERSUB_INARGS)) {
+	    if (GIMME_V == G_SCALAR)
+                /* diag_listed_as: Can't return %s to lvalue scalar context */
+                Perl_croak(aTHX_ "Can't return array to lvalue scalar context");
+            PUSHs(TARG);
+            RETURN;
        }
     }
+
     gimme = GIMME_V;
     if (gimme == G_ARRAY) {
         /* XXX see also S_pushav in pp_hot.c */
@@ -125,17 +128,19 @@ PP(pp_padhv)
     if (UNLIKELY( PL_op->op_private & OPpLVAL_INTRO ))
 	if (LIKELY( !(PL_op->op_private & OPpPAD_STATE) ))
 	    SAVECLEARSV(PAD_SVl(PL_op->op_targ));
+
     if (PL_op->op_flags & OPf_REF)
 	RETURN;
     else if (PL_op->op_private & OPpMAYBE_LVSUB) {
-      const I32 flags = is_lvalue_sub();
-      if (flags && !(flags & OPpENTERSUB_INARGS)) {
-	if (GIMME_V == G_SCALAR)
-	    /* diag_listed_as: Can't return %s to lvalue scalar context */
-	    Perl_croak(aTHX_ "Can't return hash to lvalue scalar context");
-	RETURN;
-      }
+        const I32 flags = is_lvalue_sub();
+        if (flags && !(flags & OPpENTERSUB_INARGS)) {
+            if (GIMME_V == G_SCALAR)
+                /* diag_listed_as: Can't return %s to lvalue scalar context */
+                Perl_croak(aTHX_ "Can't return hash to lvalue scalar context");
+            RETURN;
+        }
     }
+
     gimme = GIMME_V;
     if (gimme == G_ARRAY) {
 	RETURNOP(Perl_do_kv(aTHX));
@@ -143,7 +148,8 @@ PP(pp_padhv)
     else if ((PL_op->op_private & OPpTRUEBOOL
 	  || (  PL_op->op_private & OPpMAYBE_TRUEBOOL
 	     && block_gimme() == G_VOID  ))
-	  && (!SvRMAGICAL(TARG) || !mg_find(TARG, PERL_MAGIC_tied)))
+	  && (!SvRMAGICAL(TARG) || !mg_find(TARG, PERL_MAGIC_tied))
+    )
 	SETs(HvUSEDKEYS(TARG) ? &PL_sv_yes : sv_2mortal(newSViv(0)));
     else if (gimme == G_SCALAR) {
 	SV* const sv = Perl_hv_scalar(aTHX_ MUTABLE_HV(TARG));
