@@ -144,6 +144,14 @@ L<DynaLoader> has been upgraded from version 1.36 to 1.37.
 Fixed an else nesting issue in dynamic loading support for OS/390 (and
 similar systems) that was introduced in 1.36.
 
+=item *
+
+L<utf8> has been upgraded from 1.17 to 1.18.
+
+Partly reverted a micro-optimization to F<lib/utf_heavy.pl> that
+caused self-recursion when it was loaded with C<${^ENCODING}> set.
+[perl #126593]
+
 =back
 
 =head2 Removed Modules and Pragmata
