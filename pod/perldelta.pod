@@ -391,6 +391,12 @@ producing the correct error message.  The condition asserted on is
 detected and reported on correctly without the assertions, so the
 assertions were removed.  [perl #126480]
 
+=item *
+
+In some cases, failing to parse a here-doc would attempt to use freed
+memory.  This was caused by a pointer not being restored correctly.
+[perl #126443]
+
 =back
 
 =head1 Known Problems
