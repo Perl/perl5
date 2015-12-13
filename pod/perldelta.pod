@@ -264,7 +264,8 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+F<make_ext.pl> is no longer inappropriately silent.  This was caused
+by an operator precedence error introduced in 5.23.4.
 
 =back
 
