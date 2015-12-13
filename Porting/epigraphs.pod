@@ -203,6 +203,25 @@ L<Announced on 2015-06-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   They sing while you slave and I just get bored
   I ain't gonna work on Maggie's farm no more
 
+=head2 v5.22.1 - Wilhelm Müller, trans. Anon., "Courage" (No. 22 in Schubert's song-cycle, "Winterreise")
+
+L<Announced on 2015-12-13 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/12/msg233318.html>
+
+  If the snow flies in my face,
+  Let me shake it off me!
+  If my heart within me speaks,
+  I'll sing bright and gaily!
+
+  Will not listen what it says,
+  Have no ears for moaning.
+  Do not feel what it complains,--
+  Only fools like groaning!
+
+  Jolly brave into the world,
+  'Gainst all wind and weather,--
+  If there is no God on earth,
+  Let 's be gods down nether!
+
 =head2 v5.22.1-RC4 - Wilhelm Müller, trans. Anon., "The Signpost" (No. 20 in Schubert's song-cycle, "Winterreise")
 
 L<Announced on 2015-12-08 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/12/msg233215.html>
