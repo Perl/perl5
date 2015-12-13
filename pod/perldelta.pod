@@ -139,7 +139,10 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<DynaLoader> has been upgraded from version 1.36 to 1.37.
+
+Fixed an else nesting issue in dynamic loading support for OS/390 (and
+similar systems) that was introduced in 1.36.
 
 =back
 
