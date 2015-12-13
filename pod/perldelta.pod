@@ -384,6 +384,13 @@ could lead to panics on utf8 strings.
 In some cases operators that return integers would return negative
 integers as large positive integers.  [perl #126635]
 
+=item *
+
+The pipe() operator would assert for DEBUGGING builds instead of
+producing the correct error message.  The condition asserted on is
+detected and reported on correctly without the assertions, so the
+assertions were removed.  [perl #126480]
+
 =back
 
 =head1 Known Problems
