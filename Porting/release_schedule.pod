@@ -23,7 +23,7 @@ Code freezes (which happen in the 5.23.X series)
 =head2 Perl 5.22
 
   2015-06-01  5.22.0 ✓        Ricardo Signes
-  2015-10-??  5.22.1          Steve Hay
+  2015-12-13  5.22.1 ✓        Steve Hay
   2016-??-??  5.22.2          Steve Hay
   2016-??-??  5.22.3          ??
 
