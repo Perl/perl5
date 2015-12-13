@@ -379,6 +379,11 @@ many characters from the current C<pos()> position and start matching from
 there. However, it was counting back bytes rather than characters, which
 could lead to panics on utf8 strings.
 
+=item *
+
+In some cases operators that return integers would return negative
+integers as large positive integers.  [perl #126635]
+
 =back
 
 =head1 Known Problems
