@@ -344,6 +344,13 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 XXX
 
+=item *
+
+The pipe() operator would assert for DEBUGGING builds instead of
+producing the correct error message.  The condition asserted on is
+detected and reported on correctly without the assertions, so the
+assertions were removed.  [perl #126480]
+
 =back
 
 =head1 Known Problems
