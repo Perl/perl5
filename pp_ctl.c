@@ -2337,8 +2337,7 @@ PP(pp_leavesublv)
     if (gimme == G_SCALAR) {
 	if (CxLVAL(cx) && !ref) {     /* Leave it as it is if we can. */
 	    if (MARK <= SP) {
-		if ((SvPADTMP(TOPs) || SvREADONLY(TOPs)) &&
-		    !SvSMAGICAL(TOPs)) {
+		if ((SvPADTMP(TOPs) || SvREADONLY(TOPs))) {
 		    what =
 			SvREADONLY(TOPs) ? (TOPs == &PL_sv_undef) ? "undef"
 			: "a readonly value" : "a temporary";

@@ -3381,6 +3381,35 @@ S_leavesub_adjust_stacks(pTHX_ SV **base_sp, I32 gimme)
             SV *sv = *from_sp++;
 
             assert(PL_tmps_ix + nargs < PL_tmps_max);
+#ifdef DEBUGGING
+            /* PADTMPs with container set magic shouldn't appear in the
+             * wild. This assert is more important for pp_leavesublv(),
+             * but by testing for it here, we're more likely to catch
+             * bad cases (what with :lvalue subs not being widely
+             * deployed). The two issues are that for something like
+             *     sub :lvalue { $tied{foo} }
+             * or
+             *     sub :lvalue { substr($foo,1,2) }
+             * pp_leavesublv() will croak if the sub returns a PADTMP,
+             * and currently functions like pp_substr() return a mortal
+             * rather than using their PADTMP when returning a PVLV.
+             * This is because the PVLV will hold a ref to $foo,
+             * so $foo would get delayed in being freed while
+             * the PADTMP SV remained in the PAD.
+             * So if this assert fails it means either:
+             *  1) there is pp code similar to pp_substr that is
+             *     returning a PADTMP instead of a mortal, and probably
+             *     needs fixing, or
+             *  2) pp_leavesub is making unwarranted assumptions
+             *     about always croaking on a PADTMP
+             */
+            if (SvPADTMP(sv) && SvSMAGICAL(sv)) {
+                MAGIC *mg;
+                for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
+                    assert(PERL_MAGIC_TYPE_IS_VALUE_MAGIC(mg->mg_type));
+                }
+            }
+#endif
 
             if (SvTEMP(sv) && !SvMAGICAL(sv) && SvREFCNT(sv) == 1) {
                 /* can optimise away the copy */
