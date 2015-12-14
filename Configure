@@ -6956,16 +6956,17 @@ int main() {
   }
 #endif
 /* For alignment 32-bit platforms have the 80 bits in 12 bytes,
- * while 64-bits platforms have it in 16 bytes. */
+ * while 64-bits platforms have it in 16 bytes.  The trailing bytes
+ * cannot be trusted. */
 #if LDBL_MANT_DIG == 64 && (LONGDBLSIZE == 16 || LONGDBLSIZE == 12)
-  if (b[0] == 0xCD && b[9] == 0xBF && b[10] == 0x00) {
+  if (b[0] == 0xCD && b[9] == 0xBF) {
     /* x86 80-bit little-endian, sizeof 12 (ILP32, Solaris x86)
      * or 16 (LP64, Linux and OS X), 4 or 6 bytes of padding.
      * Also known as "extended precision". */
     printf("3\n");
     exit(0);
   }
-  if (b[0] == 0xBF && b[9] == 0xCD && b[10] == 0x00) {
+  if (b[0] == 0xBF && b[9] == 0xCD) {
     /* is there ever big-endian 80-bit, really? */
     printf("4\n");
     exit(0);
@@ -6975,15 +6976,33 @@ int main() {
   /* software "double double", the 106 is 53+53.
    * but irix thinks it is 107. */
   if (b[0] == 0x9A && b[7] == 0x3C && b[8] == 0x9A && b[15] == 0xBF) {
-    /* double double 128-bit little-endian,
+    /* double double 128-bit fully little-endian,
+     * little-endian doubles in little-endian order,
      * 9a 99 99 99 99 99 59 3c 9a 99 99 99 99 99 b9 bf */
     printf("5\n");
     exit(0);
   }
   if (b[0] == 0xBF && b[7] == 0x9A && b[8] == 0x3C && b[15] == 0x9A) {
-    /* double double 128-bit big-endian, e.g. PPC/Power and MIPS:
+    /* double double 128-bit fully big-endian,
+     * big-endian doubles in big-endian order,
+     * e.g. PPC/Power and MIPS:
      * bf b9 99 99 99 99 99 9a 3c 59 99 99 99 99 99 9a */
     printf("6\n");
+    exit(0);
+  }
+  if (b[0] == 0x9A && b[7] == 0xBF && b[8] == 0x9A && b[15] == 0x3C) {
+    /* double double 128-bit mixed endian.
+     * little-endian doubles in big-endian order,
+     * e.g. ppc64el,
+     * 9a 99 99 99 99 99 b9 bf 9a 99 99 99 99 99 59 3c */
+    printf("7\n");
+    exit(0);
+  }
+  if (b[0] == 0x3C && b[7] == 0x9A && b[8] == 0xBF && b[15] == 0x9A) {
+    /* double double 128-bit mixed endian,
+     * big-endian doubles in little-endian order,
+     * 3c 59 99 99 99 99 99 9a bf b9 99 99 99 99 99 9a */
+    printf("8\n");
     exit(0);
   }
 #endif
@@ -7006,8 +7025,10 @@ case "$longdblkind" in
 2) echo "You have IEEE 754 128-bit big endian long doubles." >&4 ;;
 3) echo "You have x86 80-bit little endian long doubles." >& 4 ;;
 4) echo "You have x86 80-bit big endian long doubles." >& 4 ;;
-5) echo "You have 128-bit little-endian double-double long doubles." >& 4 ;;
-6) echo "You have 128-bit big-endian double-double long doubles." >& 4 ;;
+5) echo "You have 128-bit fully little-endian double-double long doubles (64-bit LEs in LE)." >& 4 ;;
+6) echo "You have 128-bit fully big-endian double-double long doubles (64-bit BEs in BE)." >& 4 ;;
+7) echo "You have 128-bit mixed double-double long doubles (64-bit LEs in BE)." >& 4 ;;
+8) echo "You have 128-bit mixed double-double long doubles (64-bit BEs in LE)." >& 4 ;;
 *) echo "Cannot figure out your long double." >&4 ;;
 esac
 $rm_try
@@ -20518,13 +20539,21 @@ else
        ;;
        esac
        ;;
-    5) # 128-bit LE "double double"
+    5) # 128-bit LE-LE "double double"
        longdblinfbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x7f'
        longdblnanbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x7f'
        ;;
-    6) # 128-bit BE "double double"
+    6) # 128-bit BE-BE "double double"
        longdblinfbytes='0x7f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
        longdblnanbytes='0x7f, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
+       ;;
+    7) # 128-bit LE-BE "double double"
+       longdblinfbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
+       longdblnanbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
+       ;;
+    8) # 128-bit BE-LE "double double"
+       longdblinfbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
+       longdblnanbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7f, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
        ;;
     *) # No idea.
        longdblinfbytes=$undef
@@ -20584,7 +20613,7 @@ $cat >try.c <<EOP
  * and the top bit must have been one since 387, zero is plain invalid.
  * For normal fp values, the LDBL_MANT_DIG is fine, though. */
 #  define BITS LDBL_MANT_DIG
-# elif ($longdblkind == 5 || $longdblkind == 6) /* double double */
+# elif ($longdblkind == 5 || $longdblkind == 6 || $longdblkind == 7 || $longdblkind == 8) /* double double */
 /* LDBL_MANT_DIG of 106 (twice 53) would be logical, but for some
  * reason e.g. Irix thinks 107.  But in any case, we want only
  * the number of real bits, the implicit bits are of no interest.  */
