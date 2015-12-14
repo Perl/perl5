@@ -2401,6 +2401,12 @@ PP(pp_leavesublv)
 		           ? *MARK
 		           : sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
 	else for (; MARK <= SP; MARK++) {
+            /* the PL_sv_undef exception is to allow things like this to
+             * work, where PL_sv_undef acts as 'skip' placeholder on the
+             * LHS of list assigns:
+             *    sub foo :lvalue { undef }
+             *    ($a, undef, foo(), $b) = 1..4;
+             */
 	    if (*MARK != &PL_sv_undef
 		    && (SvPADTMP(*MARK) || SvREADONLY(*MARK))
 	    ) {
