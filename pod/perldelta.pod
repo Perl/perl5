@@ -152,6 +152,12 @@ Partly reverted a micro-optimization to F<lib/utf_heavy.pl> that
 caused self-recursion when it was loaded with C<${^ENCODING}> set.
 [perl #126593]
 
+=item *
+
+The modules L<sigtrap>, L<DB>, and the perl debugger could have under
+rare circumstances, without you expecting it, output containing raw
+control characters.  This has been fixed.
+
 =back
 
 =head2 Removed Modules and Pragmata
