@@ -2,13 +2,16 @@
 
 <data>
 
-<div><h2>Tickets Listed in #125394: 5.22.1 blockers</h2>
+<div><h2>Tickets Listed in #126920: 5.22.2 blockers</h2>
 
 </div>
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including 7bd819935395fd684e09e3c97918ba0ad387288a (For perl #126468: protect quotes in myccflags.)
+Blead changes have been examined up to and including 2985caa9ee0029932680fc8f354a35492d18fe9a (PATCH: [perl #126615] Segfault/assert fail with regex_sets)
+
+<!-- Not sure about this one. jhi would like it, but it doesn't really fall into any permitted categories...
+<commit votes="steveh" id="dde155d03acf6c9ecbaf478c3dd7ed9d4fb6e930" ticket="" desc="hexfp: if HEXFP_NV the shift2 is unused"/> -->
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -31,6 +34,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="" id="" ticket="123878" desc=""/>
 
+<commit votes="steveh" id="0403a1ad8ff01aaac2d09a986ea6bb5210472459" ticket="126325" desc="[perl #126325] don't read past the end of the source for pack [Hh]"/>
+
 </div>
 
 <div><h3>Regression Fixes</h3>
@@ -40,6 +45,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 <commit votes="steveh, arc, khw" id="0f8d761c4673440b49eeb491136a67dcf3da7400" ticket="126222" desc="Add a todo test for perl-126222"/>
 <commit votes="steveh, arc, khw" id="6625d92602279361acd0c6185b78c6d201fd81e0" ticket="126222" desc="fix perl-126222 - (?!) OPFAIL optimization does work in (?(?!)yes|no)"/>
 
+<commit votes="steveh" id="a82f4918f5debccfb7e9a7047d2c2e558df538cd" ticket="126481" desc="PATCH: [perl #126481] panic for !! with syntax error in /(?[...])/"/>
+
 </div>
 
 <div><h3>New Feature Fixes</h3>
@@ -48,6 +55,11 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Build and Installation Fixes</h3>
 
+<commit votes="jhi" id="b5897239a0c3c2f5ec699690086b30e7db4305d4" ticket="" desc="Configure: cannot trust the bytes after the 80-bit fp"/>
+<commit votes="jhi" id="3118d7d684b56cbeb702af874f4326683c45f045" ticket="" desc="Configure: mixed-endian double-doubles"/>
+<commit votes="jhi" id="74c6ce8743ba719b8416ce00933e19104484b949" ticket="" desc="Configure: infnan for mixed-endian double-double"/>
+<commit votes="jhi" id="1f02ab1d906235f4e471be89230a7ddc630298a8" ticket="" desc="infnan: NaN payload for mixed endian double-doubles"/>
+
 </div>
 
 <div><h3>Portability Fixes</h3>
@@ -55,6 +67,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 </div>
 
 <div><h3>Platform-Specific Test Fixes</h3>
+
+<commit votes="jhi, steveh" id="a4570f51dba109184d92dcbb0612242d942856fc" ticket="124212" desc="Workaround for perl #124212: these functions are not true static inline"/>
 
 </div>
 
