@@ -4,7 +4,7 @@ use warnings;
 # A tiny private library routine which is a helper to several Perl core
 # modules, to allow a paradigm to be implemented in a single place.  The name,
 # contents, or even the existence of this file may be changed at any time and
-# are NOT to be used by anthing outside the Perl core.
+# are NOT to be used by anything outside the Perl core.
 
 sub _meta_notation ($) {
 
