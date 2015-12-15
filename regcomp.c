@@ -18249,23 +18249,21 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv, char *bitmap, SV** bitmap_invlist)
     int i;
     UV start, end;
     unsigned int punct_count = 0;
-    SV* invlist = NULL;
-    SV** invlist_ptr;   /* Temporary, in case bitmap_invlist is NULL */
+    SV* invlist;
     bool allow_literals = TRUE;
+    bool inverted_for_output = FALSE;
 
     PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS;
 
-    invlist_ptr = (bitmap_invlist) ? bitmap_invlist : &invlist;
-
     /* Worst case is exactly every-other code point is in the list */
-    *invlist_ptr = _new_invlist(NUM_ANYOF_CODE_POINTS / 2);
+    invlist = _new_invlist(NUM_ANYOF_CODE_POINTS / 2);
 
     /* Convert the bit map to an inversion list, keeping track of how many
      * ASCII puncts are set, including an extra amount for the backslashed
      * ones.  */
     for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
         if (BITMAP_TEST(bitmap, i)) {
-            *invlist_ptr = add_cp_to_invlist(*invlist_ptr, i);
+            invlist = add_cp_to_invlist(invlist, i);
             if (isPUNCT_A(i)) {
                 punct_count++;
                 if isBACKSLASHED_PUNCT(i) {
@@ -18276,8 +18274,8 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv, char *bitmap, SV** bitmap_invlist)
     }
 
     /* Nothing to output */
-    if (_invlist_len(*invlist_ptr) == 0) {
-        SvREFCNT_dec(invlist);
+    if (_invlist_len(invlist) == 0) {
+        SvREFCNT_dec_NN(invlist);
         return FALSE;
     }
 
@@ -18285,8 +18283,8 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv, char *bitmap, SV** bitmap_invlist)
      * literals, but if a range (nearly) spans all of them, it's best to output
      * it as a single range.  This code will use a single range if all but 2
      * printables are in it */
-    invlist_iterinit(*invlist_ptr);
-    while (invlist_iternext(*invlist_ptr, &start, &end)) {
+    invlist_iterinit(invlist);
+    while (invlist_iternext(invlist, &start, &end)) {
 
         /* If range starts beyond final printable, it doesn't have any in it */
         if (start > MAX_PRINT_A) {
@@ -18309,7 +18307,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv, char *bitmap, SV** bitmap_invlist)
             break;
         }
     }
-    invlist_iterfinish(*invlist_ptr);
+    invlist_iterfinish(invlist);
 
     /* The legibility of the output depends mostly on how many punctuation
      * characters are output.  There are 32 possible ASCII ones, and some have
@@ -18324,19 +18322,35 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv, char *bitmap, SV** bitmap_invlist)
 
         /* Add everything remaining to the list, so when we invert it just
          * below, it will be excluded */
-        _invlist_union_complement_2nd(*invlist_ptr, PL_InBitmap, invlist_ptr);
-        _invlist_invert(*invlist_ptr);
+        _invlist_union_complement_2nd(invlist, PL_InBitmap, &invlist);
+        _invlist_invert(invlist);
+        inverted_for_output = TRUE;
     }
 
     /* Here we have figured things out.  Output each range */
-    invlist_iterinit(*invlist_ptr);
-    while (invlist_iternext(*invlist_ptr, &start, &end)) {
+    invlist_iterinit(invlist);
+    while (invlist_iternext(invlist, &start, &end)) {
         if (start >= NUM_ANYOF_CODE_POINTS) {
             break;
         }
         put_range(sv, start, end, allow_literals);
     }
-    invlist_iterfinish(*invlist_ptr);
+    invlist_iterfinish(invlist);
+
+    if (bitmap_invlist) {
+
+        /* Here, wants the inversion list returned.  If we inverted it, we have
+         * to restore it to the original */
+        if (inverted_for_output) {
+            _invlist_invert(invlist);
+            _invlist_intersection(invlist, PL_InBitmap, &invlist);
+        }
+
+        *bitmap_invlist = invlist;
+    }
+    else {
+        SvREFCNT_dec_NN(invlist);
+    }
 
     return TRUE;
 }
