@@ -107,25 +107,26 @@ files, and in addition it will show things like what files have been
 staged for the next commit, and usually some useful information about
 how to change things. For instance the following:
 
-  % git status
-  On branch blead
-  Your branch is ahead of 'origin/blead' by 1 commit.
+ % git status
+ On branch blead
+ Your branch is ahead of 'origin/blead' by 1 commit.
 
-  Changes to be committed:
-    (use "git reset HEAD <file>..." to unstage)
+ Changes to be committed:
+   (use "git reset HEAD <file>..." to unstage)
 
-        modified:   pod/perlgit.pod
+       modified:   pod/perlgit.pod
 
-  Changes not staged for commit:
-    (use "git add <file>..." to update what will be committed)
-    (use "git checkout -- <file>..." to discard changes in working directory)
+ Changes not staged for commit:
+   (use "git add <file>..." to update what will be committed)
+   (use "git checkout -- <file>..." to discard changes in working
+                                                              directory)
 
-        modified:   pod/perlgit.pod
+       modified:   pod/perlgit.pod
 
-  Untracked files:
-    (use "git add <file>..." to include in what will be committed)
+ Untracked files:
+   (use "git add <file>..." to include in what will be committed)
 
-        deliberate.untracked
+       deliberate.untracked
 
 This shows that there were changes to this document staged for commit,
 and that there were further changes in the working directory not yet
@@ -186,26 +187,26 @@ You can see what files are changed:
 
 And you can see the changes:
 
-  % git diff
-  diff --git a/AUTHORS b/AUTHORS
-  index 293dd70..722c93e 100644
-  --- a/AUTHORS
-  +++ b/AUTHORS
-  @@ -541,7 +541,7 @@    Lars Hecking                   <lhecking@nmrc.ucc.ie>
-   Laszlo Molnar                  <laszlo.molnar@eth.ericsson.se>
-   Leif Huhn                      <leif@hale.dkstat.com>
-   Len Johnson                    <lenjay@ibm.net>
-  -Leon Brocard                   <acme@astray.com>
-  +Orange Brocard                 <acme@astray.com>
-   Les Peters                     <lpeters@aol.net>
-   Lesley Binks                   <lesley.binks@gmail.com>
-   Lincoln D. Stein               <lstein@cshl.org>
+ % git diff
+ diff --git a/AUTHORS b/AUTHORS
+ index 293dd70..722c93e 100644
+ --- a/AUTHORS
+ +++ b/AUTHORS
+ @@ -541,7 +541,7 @@    Lars Hecking              <lhecking@nmrc.ucc.ie>
+  Laszlo Molnar                  <laszlo.molnar@eth.ericsson.se>
+  Leif Huhn                      <leif@hale.dkstat.com>
+  Len Johnson                    <lenjay@ibm.net>
+ -Leon Brocard                   <acme@astray.com>
+ +Orange Brocard                 <acme@astray.com>
+  Les Peters                     <lpeters@aol.net>
+  Lesley Binks                   <lesley.binks@gmail.com>
+  Lincoln D. Stein               <lstein@cshl.org>
 
 Now commit your change locally:
 
-  % git commit -a -m 'Rename Leon Brocard to Orange Brocard'
-  Created commit 6196c1d: Rename Leon Brocard to Orange Brocard
-   1 files changed, 1 insertions(+), 1 deletions(-)
+ % git commit -a -m 'Rename Leon Brocard to Orange Brocard'
+ Created commit 6196c1d: Rename Leon Brocard to Orange Brocard
+  1 files changed, 1 insertions(+), 1 deletions(-)
 
 The C<-a> option is used to include all files that git tracks that you
 have changed. If at this time, you only want to commit some of the
@@ -225,19 +226,20 @@ Once you've finished writing your commit message and exited your
 editor, git will write your change to disk and tell you something like
 this:
 
-  Created commit daf8e63: explain git status and stuff about remotes
-   1 files changed, 83 insertions(+), 3 deletions(-)
+ Created commit daf8e63: explain git status and stuff about remotes
+  1 files changed, 83 insertions(+), 3 deletions(-)
 
 If you re-run C<git status>, you should see something like this:
 
-  % git status
-  On branch orange
-  Untracked files:
-    (use "git add <file>..." to include in what will be committed)
+ % git status
+ On branch orange
+ Untracked files:
+   (use "git add <file>..." to include in what will be committed)
 
-        deliberate.untracked
+       deliberate.untracked
 
-  nothing added to commit but untracked files present (use "git add" to track)
+ nothing added to commit but untracked files present (use "git add" to
+                                                                  track)
 
 When in doubt, before you do anything else, check your status and read
 it carefully, many questions are answered directly by the git status
@@ -275,12 +277,12 @@ patch emails|/Sending patch emails> for more information.
 
 If you want to delete your temporary branch, you may do so with:
 
-  % git checkout blead
-  % git branch -d orange
-  error: The branch 'orange' is not an ancestor of your current HEAD.
-  If you are sure you want to delete it, run 'git branch -D orange'.
-  % git branch -D orange
-  Deleted branch orange.
+ % git checkout blead
+ % git branch -d orange
+ error: The branch 'orange' is not an ancestor of your current HEAD.
+ If you are sure you want to delete it, run 'git branch -D orange'.
+ % git branch -D orange
+ Deleted branch orange.
 
 =head2 Committing your changes
 
@@ -302,21 +304,22 @@ Once you've finished writing your commit message and exited your
 editor, git will write your change to disk and tell you something like
 this:
 
-  Created commit daf8e63: explain git status and stuff about remotes
-   1 files changed, 83 insertions(+), 3 deletions(-)
+ Created commit daf8e63: explain git status and stuff about remotes
+  1 files changed, 83 insertions(+), 3 deletions(-)
 
 If you re-run C<git status>, you should see something like this:
 
-  % git status
-  On branch blead
-  Your branch is ahead of 'origin/blead' by 2 commits.
-    (use "git push" to publish your local commits)
-  Untracked files:
-    (use "git add <file>..." to include in what will be committed)
+ % git status
+ On branch blead
+ Your branch is ahead of 'origin/blead' by 2 commits.
+   (use "git push" to publish your local commits)
+ Untracked files:
+   (use "git add <file>..." to include in what will be committed)
 
-        deliberate.untracked
+       deliberate.untracked
 
-  nothing added to commit but untracked files present (use "git add" to track)
+ nothing added to commit but untracked files present (use "git add" to
+                                                                  track)
 
 When in doubt, before you do anything else, check your status and read
 it carefully, many questions are answered directly by the git status
@@ -561,7 +564,7 @@ this is now impossible to fix in the public repository. You can remove
 this mis-merge locally by adding the following line to your
 C<.git/info/grafts> file:
 
-  296f12bbbbaa06de9be9d09d3dcf8f4528898a49 434946e0cb7a32589ed92d18008aaa1d88515930
+ 296f12bbbbaa06de9be9d09d3dcf8f4528898a49 434946e0cb7a32589ed92d18008aaa1d88515930
 
 It is particularly important to have this graft line if any bisecting
 is done in the area of the "merge" in question.
@@ -608,47 +611,48 @@ you should try out the patch.
 First we need to create a temporary new branch for these changes and
 switch into it:
 
-  % git checkout -b experimental
+ % git checkout -b experimental
 
 Patches that were formatted by C<git format-patch> are applied with
 C<git am>:
 
-  % git am 0001-Rename-Leon-Brocard-to-Orange-Brocard.patch
-  Applying Rename Leon Brocard to Orange Brocard
+ % git am 0001-Rename-Leon-Brocard-to-Orange-Brocard.patch
+ Applying Rename Leon Brocard to Orange Brocard
 
 Note that some UNIX mail systems can mess with text attachments containing
 'From '. This will fix them up:
 
-  % perl -pi -e's/^>From /From /' 0001-Rename-Leon-Brocard-to-Orange-Brocard.patch
+ % perl -pi -e's/^>From /From /' \
+                        0001-Rename-Leon-Brocard-to-Orange-Brocard.patch
 
 If just a raw diff is provided, it is also possible use this two-step
 process:
 
-  % git apply bugfix.diff
-  % git commit -a -m "Some fixing" --author="That Guy <that.guy@internets.com>"
+% git apply bugfix.diff
+% git commit -a -m "Some fixing" --author="That Guy <that.guy@internets.com>"
 
 Now we can inspect the change:
 
-  % git show HEAD
-  commit b1b3dab48344cff6de4087efca3dbd63548ab5e2
-  Author: Leon Brocard <acme@astray.com>
-  Date:   Fri Dec 19 17:02:59 2008 +0000
+ % git show HEAD
+ commit b1b3dab48344cff6de4087efca3dbd63548ab5e2
+ Author: Leon Brocard <acme@astray.com>
+ Date:   Fri Dec 19 17:02:59 2008 +0000
 
-    Rename Leon Brocard to Orange Brocard
+   Rename Leon Brocard to Orange Brocard
 
-  diff --git a/AUTHORS b/AUTHORS
-  index 293dd70..722c93e 100644
-  --- a/AUTHORS
-  +++ b/AUTHORS
-  @@ -541,7 +541,7 @@ Lars Hecking                        <lhecking@nmrc.ucc.ie>
-   Laszlo Molnar                  <laszlo.molnar@eth.ericsson.se>
-   Leif Huhn                      <leif@hale.dkstat.com>
-   Len Johnson                    <lenjay@ibm.net>
-  -Leon Brocard                   <acme@astray.com>
-  +Orange Brocard                 <acme@astray.com>
-   Les Peters                     <lpeters@aol.net>
-   Lesley Binks                   <lesley.binks@gmail.com>
-   Lincoln D. Stein               <lstein@cshl.org>
+ diff --git a/AUTHORS b/AUTHORS
+ index 293dd70..722c93e 100644
+ --- a/AUTHORS
+ +++ b/AUTHORS
+ @@ -541,7 +541,7 @@ Lars Hecking                 <lhecking@nmrc.ucc.ie>
+  Laszlo Molnar                  <laszlo.molnar@eth.ericsson.se>
+  Leif Huhn                      <leif@hale.dkstat.com>
+  Len Johnson                    <lenjay@ibm.net>
+ -Leon Brocard                   <acme@astray.com>
+ +Orange Brocard                 <acme@astray.com>
+  Les Peters                     <lpeters@aol.net>
+  Lesley Binks                   <lesley.binks@gmail.com>
+  Lincoln D. Stein               <lstein@cshl.org>
 
 If you are a committer to Perl and you think the patch is good, you can
 then merge it into blead then push it out to the main repository:
@@ -659,12 +663,13 @@ then merge it into blead then push it out to the main repository:
 
 If you want to delete your temporary branch, you may do so with:
 
-  % git checkout blead
-  % git branch -d experimental
-  error: The branch 'experimental' is not an ancestor of your current HEAD.
-  If you are sure you want to delete it, run 'git branch -D experimental'.
-  % git branch -D experimental
-  Deleted branch experimental.
+ % git checkout blead
+ % git branch -d experimental
+ error: The branch 'experimental' is not an ancestor of your current
+ HEAD.  If you are sure you want to delete it, run 'git branch -D
+ experimental'.
+ % git branch -D experimental
+ Deleted branch experimental.
 
 =head2 Committing to blead
 
@@ -718,12 +723,13 @@ Sometimes, blead will move while you're building or testing your
 changes.  When this happens, your push will be rejected with a message
 like this:
 
-  To ssh://perl5.git.perl.org/perl.git
-   ! [rejected]        blead -> blead (non-fast-forward)
-  error: failed to push some refs to 'ssh://perl5.git.perl.org/perl.git'
-  To prevent you from losing history, non-fast-forward updates were rejected
-  Merge the remote changes (e.g. 'git pull') before pushing again.  See the
-  'Note about fast-forwards' section of 'git push --help' for details.
+ To ssh://perl5.git.perl.org/perl.git
+  ! [rejected]        blead -> blead (non-fast-forward)
+ error: failed to push some refs to 'ssh://perl5.git.perl.org/perl.git'
+ To prevent you from losing history, non-fast-forward updates were
+ rejected Merge the remote changes (e.g. 'git pull') before pushing
+ again.  See the 'Note about fast-forwards' section of 'git push --help'
+ for details.
 
 When this happens, you can just I<rebase> your work against the new
 position of blead, like this (assuming your remote for the master
@@ -888,9 +894,10 @@ Finally, you should then delete the remote smoke-me branch:
 
 (which is likely to produce a warning like this, which can be ignored:
 
-  remote: fatal: ambiguous argument 'refs/heads/smoke-me/tonyc/win32stat':
-  unknown revision or path not in the working tree.
-  remote: Use '--' to separate paths from revisions
+ remote: fatal: ambiguous argument
+                                  'refs/heads/smoke-me/tonyc/win32stat':
+ unknown revision or path not in the working tree.
+ remote: Use '--' to separate paths from revisions
 
 ) and then delete your local branch:
 
