@@ -887,7 +887,7 @@ for obfuscated code:
     # @harry is (1,2,3)
 
     my $type = ref $thingy;
-    ($type ? $type == 'ARRAY' ? \@foo : \$bar : $baz) = $thingy;
+    ($type ? $type eq 'ARRAY' ? \@foo : \$bar : $baz) = $thingy;
 
 The C<foreach> loop can also take a reference constructor for its loop
 variable, though the syntax is limited to one of the following, with an
@@ -906,7 +906,7 @@ arrays-of-arrays, or arrays-of-hashes:
     }
 
     foreach \my %h (@array_of_hashes) {
-        $h{gelastic}++ if $h{type} == 'funny';
+        $h{gelastic}++ if $h{type} eq 'funny';
     }
 
 B<CAVEAT:> Aliasing does not work correctly with closures.  If you try to
