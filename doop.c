@@ -1017,7 +1017,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     }
     rsave = rc = SvPV_nomg_const(right, rightlen);
 
-    /* This need to come after SvPV to ensure that string overloading has
+    /* This needs to come after SvPV to ensure that string overloading has
        fired off.  */
 
     left_utf = DO_UTF8(left);
