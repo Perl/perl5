@@ -6819,6 +6819,14 @@ operators and then you presumably know what you are doing.
 its behavior may change or even be removed in any future release of perl.
 See the explanation under L<perlvar/$_>.
 
+=item Use of strings with code points over 0xFF as arguments to %s
+operator is deprecated
+
+(D deprecated) You tried to use one of the string bitwise operators
+(C<&> or C<|> or C<^> or C<~>) on a string containing a code point over
+0xFF.  The string bitwise operators treat their operands as strings of
+bytes, and values beyond 0xFF are nonsensical in this context.
+
 =item Use of tainted arguments in %s is deprecated
 
 (W taint, deprecated) You have supplied C<system()> or C<exec()> with multiple

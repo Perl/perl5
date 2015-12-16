@@ -714,6 +714,7 @@ is($x, "\x{100}\x{200}\xFFb");
 # [perl #23765]
 {
     my $a = pack("C", 0xbf);
+    no warnings 'deprecated';
     substr($a, -1) &= chr(0xfeff);
     is($a, "\xbf");
 }

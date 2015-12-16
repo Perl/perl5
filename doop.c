@@ -1002,6 +1002,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     const char *rsave;
     bool left_utf;
     bool right_utf;
+    bool do_warn_above_ff = ckWARN_d(WARN_DEPRECATED);
     STRLEN needlen = 0;
 
     PERL_ARGS_ASSERT_DO_VOP;
@@ -1082,6 +1083,12 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 		rulen -= ulen;
 		duc = luc & ruc;
 		dc = (char*)uvchr_to_utf8((U8*)dc, duc);
+                if (do_warn_above_ff && (luc > 0xff || ruc > 0xff)) {
+                    Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+                                deprecated_above_ff_msg, PL_op_desc[optype]);
+                    /* Warn only once per operation */
+                    do_warn_above_ff = FALSE;
+                }
 	    }
 	    if (sv == left || sv == right)
 		(void)sv_usepvn(sv, dcorig, needlen);
@@ -1097,6 +1104,11 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 		rulen -= ulen;
 		duc = luc ^ ruc;
 		dc = (char*)uvchr_to_utf8((U8*)dc, duc);
+                if (do_warn_above_ff && (luc > 0xff || ruc > 0xff)) {
+                    Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+                                deprecated_above_ff_msg, PL_op_desc[optype]);
+                    do_warn_above_ff = FALSE;
+                }
 	    }
 	    goto mop_up_utf;
 	case OP_BIT_OR:
@@ -1109,6 +1121,11 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 		rulen -= ulen;
 		duc = luc | ruc;
 		dc = (char*)uvchr_to_utf8((U8*)dc, duc);
+                if (do_warn_above_ff && (luc > 0xff || ruc > 0xff)) {
+                    Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+                                deprecated_above_ff_msg, PL_op_desc[optype]);
+                    do_warn_above_ff = FALSE;
+                }
 	    }
 	  mop_up_utf:
 	    if (rulen)

@@ -98,6 +98,15 @@ a deprecation warning, unless that warning category is turned off.
 C<IV_MAX> is typically 2**31 -1 on 32-bit platforms, and 2**63-1 on
 64-bit ones.
 
+=head2 Doing bitwise operations on strings containing code points above
+0xFF is deprecated
+
+The string bitwise operators treat their operands as strings of bytes,
+and values beyond 0xFF are nonsensical in this context.  To operate on
+encoded bytes, first encode the strings.  To operate on code points'
+numeric values, use C<split> and C<map ord>.  In the future, this
+warning will be replaced by an exception.
+
 =head1 Performance Enhancements
 
 XXX Changes which enhance performance without changing behaviour go here.

@@ -1075,6 +1075,12 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 #define MDEREF_MASK         0x7F
 #define MDEREF_SHIFT           7
 
+#if defined(PERL_IN_DOOP_C) || defined(PERL_IN_PP_C)
+static const char * const deprecated_above_ff_msg
+    = "Use of strings with code points over 0xFF as arguments to "
+      "%s operator is deprecated";
+#endif
+
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
