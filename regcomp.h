@@ -373,51 +373,130 @@ struct regnode_ssc {
 #define PASS1 SIZE_ONLY
 #define PASS2 (! SIZE_ONLY)
 
-/* If the bitmap fully represents what this ANYOF node can match, the
- * ARG is set to this special value (since 0, 1, ... are legal, but will never
- * reach this high). */
+/* An ANYOF node is basically a bitmap with the index being a code point.  If
+ * the bit for that code point is 1, the code point matches;  if 0, it doesn't
+ * match (complemented if inverted).  There is an additional mechanism to deal
+ * with cases where the bitmap is insufficient in and of itself.  This #define
+ * indicates if the bitmap does fully represent what this ANYOF node can match.
+ * The ARG is set to this special value (since 0, 1, ... are legal, but will
+ * never reach this high). */
 #define ANYOF_ONLY_HAS_BITMAP	((U32) -1)
 
-/* Below are the flags for node->flags of ANYOF.  These are in short supply,
- * with none currently available.  The ABOVE_BITMAP_ALL bit could be freed up
- * by resorting to creating a swash containing everything above 255.  This
- * seems likely to introduce a performance penalty (but actual numbers haven't
- * been done), so its probably better do some of the other possibilities below
- * in preference to this.
+/* When the bimap isn't completely sufficient for handling the ANYOF node,
+ * flags (in node->flags of the ANYOF node) get set to indicate this.  These
+ * are perennially in short supply.  Beyond several cases where warnings need
+ * to be raised under certain circumstances, currently, there are six cases
+ * where the bitmap alone isn't sufficient.  We could use six flags to
+ * represent the 6 cases, but to save flags bits, we play some games.  The
+ * cases are:
  *
- * If just one bit is required, it seems to me (khw) that the best option would
- * be to turn the ANYOF_LOC_REQ_UTF8 bit into a separate node type: a
- * specialization of the ANYOFL type, freeing up the currently occupied bit.
- * When turning a bit into a node type, one has to take into consideration that
- * a SSC may use that bit -- not just a regular ANYOF[DL]?.  In the case of
- * ANYOF_LOC_REQ_UTF8, the only likely problem is accurately settting the SSC
- * node-type to the new one, which would likely involve S_ssc_or and S_ssc_and,
- * and not how the SSC currently gets set to ANYOFL.  This bit is a natural
- * candidate for being a separate node type because it is a specialization of
- * the current ANYOFL, and because no other ANYOFL-only bits are set when it
- * is; also most of its uses are actually outside the reginclass() function, so
- * this could be done with no performance penalty.  The other potential bits
- * seem to me to have a potential issue with a combinatorial explosion of node
- * types, because of not having that mutual exclusivity, where you may end up
- * having to have a node type for bitX being set, one for bitY, and one for
- * both bitXY.
+ *  1)  The bitmap has a compiled-in very finite size.  So something else needs
+ *      to be used to specify if a code point that is too large for the bitmap
+ *      actually matches.  The mechanism currently is a swash or inversion
+ *      list.  ANYOF_ONLY_HAS_BITMAP, described above, being TRUE indicates
+ *      there are no matches of too-large code points.  But if it is FALSE,
+ *      then almost certainly there are matches too large for the bitmap.  (The
+ *      other cases, described below, either imply this one or are extremely
+ *      rare in practice.)  So we can just assume that a too-large code point
+ *      will need something beyond the bitmap if ANYOF_ONLY_HAS_BITMAP is
+ *      FALSE, instead of having a separate flag for this.
+ *  2)  A subset of item 1) is if all possible code points outside the bitmap
+ *      match.  This is a common occurrence when the class is complemented,
+ *      like /[^ij]/.  Therefore a bit is reserved to indicate this,
+ *      ANYOF_MATCHES_ALL_ABOVE_BITMAP.  If it became necessary, this bit could
+ *      be replaced by using the normal swash mechanism, but with a performance
+ *      penalty.
+ *  3)  Under /d rules, it can happen that code points that are in the upper
+ *      latin1 range (\x80-\xFF or their equivalents on EBCDIC platforms) match
+ *      only if the runtime target string being matched against is UTF-8.  For
+ *      example /[\w[:punct:]]/d.  This happens only for posix classes (with a
+ *      couple of exceptions, like \d), and all such ones also have
+ *      above-bitmap matches.  Thus, 3) implies 1) as well.  Note that /d rules
+ *      are no longer encouraged; 'use 5.14' or higher deselects them.  But a
+ *      flag is required so that they can be properly handled.  But it can be a
+ *      shared flag: see 5) below.
+ *  4)  Also under /d rules, something like /[\Wfoo] will match everything in
+ *      the \x80-\xFF range, unless the string being matched against is UTF-8.
+ *      A swash could be created for this case, but this is relatively common,
+ *      and it turns out that it's all or nothing:  if any one of these code
+ *      points matches, they all do.  Hence a single bit suffices.  We use a
+ *      shared bit that doesn't take up space by itself:
+ *      ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER.
+ *      This also implies 1), with one exception: [:^cntrl:].
+ *  5)  A user-defined \p{} property may not have been defined by the time the
+ *      regex is compiled.  In this case, we don't know until runtime what it
+ *      will match, so we have to assume it could match anything, including
+ *      code points that ordinarily would be in the bitmap.  A flag bit is
+ *      necessary to indicate this , though it can be shared with the item 3)
+ *      flag, as that only occurs under /d, and this only occurs under non-d.
+ *      This case is quite uncommon in the field, and the /(?[ ...])/ construct
+ *      is a better way to accomplish what this feature does.  This case also
+ *      implies 1).
+ *      ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP
+ *      is the shared bit.
+ *  6)  /[foo]/il may have folds that are only valid if the runtime locale is a
+ *      UTF-8 one.  These are quite rare, so it would be good to avoid the
+ *      expense of looking for them.  But /l matching is slow anyway, and we've
+ *      traditionally not worried to much about its performance.  And this
+ *      condition requires the ANYOF_LOC_FOLD flag to be set, so testing for
+ *      that flag would be sufficient to rule out most cases of this.  So it is
+ *      unclear if this should have a flag or not.  But, one is currently
+ *      allocated for this purpose, ANYOF_ONLY_UTF8_LOC_FOLD_MATCHES (and the
+ *      text below indicates how to share it, should another bit be needed).
  *
- * If you don't want to do this, or two bits are required, one could instead
- * rename the ANYOF_POSIXL bit to be ANYOFL_LARGE, to mean that the ANYOF node
- * has an extra 32 bits beyond what a regular one does.  That's what it
- * effectively means now, with the extra space all for the POSIX class bits.
- * But those classes actually only occupy 30 bits, so the ANYOF_LOC_REQ_BIT (if
- * an extra node type for it hasn't been created) and/or the ANYOF_LOC_FOLD
- * bits could be moved there.  The downside of this is that ANYOFL nodes with
- * whichever of the bits get moved would have to have the extra space always
- * allocated.
+ * At the moment, there are no spare bits, but this could be changed by various
+ * tricks.  Notice that item 6) is not independent of the ANYOF_LOC_FOLD flag
+ * below.  Also, the ANYOF_LOC_REQ_UTF8 flag is set only if both these aren't.
+ * We can therefore use a 2-bit field to represent these 3 flags, as follows:
+ *      00  => ANYOF_LOC_REQ_UTF8
+ *      01  => no folding
+ *      10  => ANYOF_LOC_FOLD alone
+ *      11  => ANYOF_ONLY_UTF8_LOC_FOLD_MATCHES
  *
- * If three bits are required, one could additionally make a node type for
- * ANYOFL_LARGE, removing that as a bit, and move both the above bits to that
- * extra word.  There isn't an SSC problem as all SSCs are this large anyway,
- * and the SSC could be set to this node type.   REGINCLASS would have to be
- * modified so that if the node type were this, it would call reginclass().
- * as the flag bit that does this now would be gone.
+ * Beyond that, note that the information may be conveyed by creating new
+ * regnode types.  This is not the best solution, as shown later in this
+ * paragraph, but it is something that is feasible.  We could have a regnode
+ * for ANYOF_INVERT, for example.  A complication of this is that the regexec.c
+ * REGINCLASS macro assumes that it can just use the bitmap if no flags are
+ * set.  This would have to be changed to add extra tests for the node type, or
+ * a special bit reserved that means unspecified special handling, and then the
+ * node-type would be used internally to sort that out.  So we could gain a bit
+ * by having an ANYOF_SPECIAL bit, and a node type for INVERT, and another for
+ * POSIXL, and still another for INVERT_POSIXL.  This example illustrates one
+ * problem with this, a combinatorial explosion of node types.  The one node
+ * type khw can think of that doesn't have this explosion issue is
+ * ANYOF_LOC_REQ_UTF8, but you'd do this only if you haven't done the 2-bit
+ * field trick above.  This bit is a natural candidate for being a separate
+ * node type because it is a specialization of the current ANYOFL, and because
+ * no other ANYOFL-only bits are set when it is; also most of its uses are
+ * actually outside the reginclass() function, so this could be done with no
+ * performance penalty.  But again, the 2-bit field trick combines this bit so
+ * it doesn't take up space anyway.  Another issue when turning a bit into a
+ * node type, is that a SSC may use that bit -- not just a regular ANYOF[DL]?.
+ * In the case of ANYOF_LOC_REQ_UTF8, the only likely problem is accurately
+ * settting the SSC node-type to the new one, which would likely involve
+ * S_ssc_or and S_ssc_and, and not how the SSC currently gets set to ANYOFL.
+ *
+ * Another possibility is to instead rename the ANYOF_POSIXL bit to be
+ * ANYOFL_LARGE, to mean that the ANYOF node has an extra 32 bits beyond what a
+ * regular one does.  That's what it effectively means now, with the extra
+ * space all for the POSIX class bits.  But those classes actually only occupy
+ * 30 bits, so the 2-bit field or 2 of the locale bits could be moved to that
+ * extra space.  The downside of this is that ANYOFL nodes with whichever of
+ * the bits get moved would have to have the extra space always allocated.
+ *
+ * One could completely remove ANYOFL_LARGE and make all ANYOFL nodes large.
+ * The 30 bits in the extra word would indicate if a posix class should be
+ * looked up or not.  There isn't an SSC problem as all SSCs are this large
+ * anyway, and the SSC could be set to this node type.   REGINCLASS would have
+ * to be modified so that if the node type were this, it would call
+ * reginclass(), as the flag bit that indicates to do this now would be gone.
+ * If the 2-bit field is used and moved to the larger structure, this would
+ * free up a total of 4 bits.  If this were done, we could create an
+ * ANYOF_INVERT node-type without a combinatorial explosion, getting us to 5
+ * bits.  And, keep in mind that ANYOF_MATCHES_ALL_ABOVE_BITMAP is solely for
+ * performance, so could be removed.  The other performance-related bits are
+ * shareable with bits that are required.
  *
  * Several flags are not used in synthetic start class (SSC) nodes, so could be
  * shared should new flags be needed for SSCs, like SSC_MATCHES_EMPTY_STRING
