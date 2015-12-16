@@ -906,7 +906,7 @@ character 34 (doublequote, "), "EE<lt>amp>" for character 38
 
 Note that in all cases of "EE<lt>whateverE<gt>", I<whatever> (whether
 an htmlname, or a number in any base) must consist only of
-alphanumeric characters -- that is, I<whatever> must watch
+alphanumeric characters -- that is, I<whatever> must match
 C<m/\A\w+\z/>.  So S<"EE<lt> 0 1 2 3 E<gt>"> is invalid, because
 it contains spaces, which aren't alphanumeric characters.  This
 presumably does not I<need> special treatment by a Pod processor;
