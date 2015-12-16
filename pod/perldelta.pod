@@ -139,6 +139,14 @@ XXX
 
 =item *
 
+L<Daa::Dumper> has been upgraded from version 2.158 to 2.159.
+
+This adds a "Trailingcomma" option, which when enabled adds a trailing comma
+after the last element of dumped arrays and hashes that would otherwise be
+followed immediately by a line break.  [perl #126813]
+
+=item *
+
 L<DynaLoader> has been upgraded from version 1.36 to 1.37.
 
 Fixed an else nesting issue in dynamic loading support for OS/390 (and
