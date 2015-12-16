@@ -87,6 +87,14 @@ esac
 
 !NO!SUBS!
 
+case "$ldlibpthname" in
+    '') ;;
+    *) $spitshell >>runtests <<!GROK!THIS ;;
+$ldlibpthname=$PWD
+export $ldlibpthname
+!GROK!THIS
+esac
+
 ## In the following, dollars and backticks do need the extra backslash.
 $spitshell >>runtests <<!GROK!THIS!
 # The second branch is for testing without a tty or controlling terminal,

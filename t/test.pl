@@ -651,6 +651,14 @@ sub _create_runperl { # Create the string to qx in runperl().
     if ($ENV{PERL_RUNPERL_DEBUG}) {
 	$runperl = "$ENV{PERL_RUNPERL_DEBUG} $runperl";
     }
+    if ($^O eq 'darwin') {
+	# OS X 10.10 drops DYLD_LIBRARY_PATH when inherited by system
+	# processes, including the shell, make sure the child perl
+	# still sees it
+	if (eval { require Config; 1 } && (my $ldlibpthname = $Config::Config{ldlibpthname})) {
+	    $runperl="$ldlibpthname=$ENV{PWD}/.. $runperl";
+	}
+    }
     unless ($args{nolib}) {
 	$runperl = $runperl . ' "-I../lib" "-I." '; # doublequotes because of VMS
     }
