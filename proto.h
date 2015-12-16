@@ -1610,9 +1610,9 @@ PERL_CALLCONV I32	Perl_keyword(pTHX_ const char *name, I32 len, bool all_keyword
 PERL_CALLCONV int	Perl_keyword_plugin_standard(pTHX_ char* keyword_ptr, STRLEN keyword_len, OP** op_ptr);
 #define PERL_ARGS_ASSERT_KEYWORD_PLUGIN_STANDARD	\
 	assert(keyword_ptr); assert(op_ptr)
-PERL_CALLCONV void	Perl_leave_adjust_stacks(pTHX_ SV **base_sp, I32 gimme, int filter);
+PERL_CALLCONV void	Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, I32 gimme, int filter);
 #define PERL_ARGS_ASSERT_LEAVE_ADJUST_STACKS	\
-	assert(base_sp)
+	assert(from_sp); assert(to_sp)
 PERL_CALLCONV void	Perl_leave_scope(pTHX_ I32 base);
 PERL_CALLCONV bool	Perl_lex_bufutf8(pTHX);
 PERL_CALLCONV void	Perl_lex_discard_to(pTHX_ char* ptr);

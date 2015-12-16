@@ -2878,6 +2878,7 @@ Ei	|STRLEN	|sv_or_pv_pos_u2b|NN SV *sv|NN const char *pv|STRLEN pos \
 EMpPX	|SV*	|_get_encoding
 Xp	|void	|clear_defarray	|NN AV* av|bool abandon
 
-ApM	|void	|leave_adjust_stacks|NN SV **base_sp|I32 gimme|int filter
+ApM	|void	|leave_adjust_stacks|NN SV **from_sp|NN SV **to_sp \
+                |I32 gimme|int filter
 
 : ex: set ts=8 sts=4 sw=4 noet:

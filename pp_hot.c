@@ -3284,8 +3284,10 @@ PP(pp_grepwhile)
 
 /* leave_adjust_stacks():
  *
- * Process a scope's return args (in the range base_sp+1 .. PL_stack_sp),
- * and do the equivalent of a FREEMPS and TAINT_NOT.
+ * Process a scope's return args (in the range from_sp+1 .. PL_stack_sp),
+ * positioning them at to_sp+1 onwards, and do the equivalent of a
+ * FREEMPS and TAINT_NOT.
+ *
  * Not intended to be called in void context.
  *
  * When leaving a sub, eval, do{} or other scope, the things that need
@@ -3341,10 +3343,9 @@ PP(pp_grepwhile)
  */
 
 void
-Perl_leave_adjust_stacks(pTHX_ SV **base_sp, I32 gimme, int pass)
+Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, I32 gimme, int pass)
 {
     dSP;
-    SV    **from_sp;   /* where we're copying args from */
     SSize_t tmps_base; /* lowest index into tmps stack that needs freeing now */
     SSize_t nargs;
 
@@ -3353,17 +3354,17 @@ Perl_leave_adjust_stacks(pTHX_ SV **base_sp, I32 gimme, int pass)
     TAINT_NOT;
 
     if (gimme == G_ARRAY) {
-        from_sp = base_sp + 1;
-        nargs   = SP - base_sp;
+        nargs = SP - from_sp;
+        from_sp++;
     }
     else {
         assert(gimme == G_SCALAR);
-        if (UNLIKELY(base_sp >= SP)) {
+        if (UNLIKELY(from_sp >= SP)) {
             /* no return args */
-            assert(base_sp == SP);
+            assert(from_sp == SP);
             EXTEND(SP, 1);
             *++SP = &PL_sv_undef;
-            base_sp = SP;
+            to_sp = SP;
             nargs   = 0;
         }
         else {
@@ -3431,7 +3432,7 @@ Perl_leave_adjust_stacks(pTHX_ SV **base_sp, I32 gimme, int pass)
             {
                 /* pass through: skip copy for logic or optimisation
                  * reasons; instead mortalise it, except that ... */
-                *++base_sp = sv;
+                *++to_sp = sv;
 
                 if (SvTEMP(sv)) {
                     /* ... since this SV is an SvTEMP , we don't need to
@@ -3495,7 +3496,7 @@ Perl_leave_adjust_stacks(pTHX_ SV **base_sp, I32 gimme, int pass)
                 PL_tmps_stack[++PL_tmps_ix] = *tmps_basep;
                 /* put it on the tmps stack early so it gets freed if we die */
                 *tmps_basep++ = newsv;
-                *++base_sp = newsv;
+                *++to_sp = newsv;
 
                 if (SvTYPE(sv) <= SVt_IV) {
                     /* arg must be one of undef, IV/UV, or RV: skip
@@ -3576,7 +3577,7 @@ Perl_leave_adjust_stacks(pTHX_ SV **base_sp, I32 gimme, int pass)
         tmps_base = tmps_basep - PL_tmps_stack;
     }
 
-    PL_stack_sp = base_sp;
+    PL_stack_sp = to_sp;
 
     /* unrolled FREETMPS() but using tmps_base-1 rather than PL_tmps_floor */
     while (PL_tmps_ix >= tmps_base) {
@@ -3615,7 +3616,7 @@ PP(pp_leavesub)
     if (gimme == G_VOID)
         PL_stack_sp = oldsp;
     else
-        leave_adjust_stacks(oldsp, gimme, 0);
+        leave_adjust_stacks(oldsp, oldsp, gimme, 0);
 
     CX_LEAVE_SCOPE(cx);
     POPSUB(cx);	/* Stack values are safe: release CV and @_ ... */

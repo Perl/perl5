@@ -2355,7 +2355,7 @@ PP(pp_leavesublv)
             }
 
           ok:
-            leave_adjust_stacks(oldsp, gimme, is_lval ? 3 : 2);
+            leave_adjust_stacks(oldsp, oldsp, gimme, is_lval ? 3 : 2);
 
             if (lval & OPpDEREF) {
                 /* lval_sub()->{...} and similar */
@@ -2392,7 +2392,7 @@ PP(pp_leavesublv)
                 }
             }
 
-            leave_adjust_stacks(oldsp, gimme, is_lval ? 3 : 2);
+            leave_adjust_stacks(oldsp, oldsp, gimme, is_lval ? 3 : 2);
         }
     }
 
@@ -2451,19 +2451,20 @@ PP(pp_return)
          * We may also need to shift the args down; for example,
          *    for (1,2) { return 3,4 }
          * leaves 1,2,3,4 on the stack. Both these actions can be done by
-         * leave_common().  By calling it with lvalue=TRUE, we just bump
-         * the ref count and mortalise the args that need it.  The "scan
-         * the args and maybe copy them" process will be repeated by
-         * whoever we tail-call (e.g. pp_leaveeval), where any copying etc
-         * will be done. That is to say, in this code path two scans of
-         * the args will be done; the first just shifts and preserves; the
-         * second is the "real" arg processing, based on the type of
-         * return.
+         * leave_adjust_stacks().  By calling it with and lvalue "pass
+         * all" action, we just bump the ref count and mortalise the args
+         * that need it, do a FREETMPS.  The "scan the args and maybe copy
+         * them" process will be repeated by whoever we tail-call (e.g.
+         * pp_leaveeval), where any copying etc will be done. That is to
+         * say, in this code path two scans of the args will be done; the
+         * first just shifts and preserves; the second is the "real" arg
+         * processing, based on the type of return.
          */
         cx = &cxstack[cxix];
         PUTBACK;
-        leave_common(PL_stack_base + cx->blk_oldsp, MARK,
-                            cx->blk_gimme, SVs_TEMP|SVs_PADTMP, TRUE);
+        if (cx->blk_gimme != G_VOID)
+            leave_adjust_stacks(MARK, PL_stack_base + cx->blk_oldsp,
+                                cx->blk_gimme, 3);
         SPAGAIN;
 	dounwind(cxix);
         cx = &cxstack[cxix]; /* CX stack may have been realloced */
