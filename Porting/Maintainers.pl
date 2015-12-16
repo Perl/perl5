@@ -918,6 +918,7 @@ use File::Glob qw(:case);
         'EXCLUDED' => ['perldoc'],
 
         # https://rt.cpan.org/Ticket/Display.html?id=106798
+        # https://rt.cpan.org/Ticket/Display.html?id=110368
         'CUSTOMIZED'   => [ qw[ lib/Pod/Perldoc.pm ] ],
     },
 
