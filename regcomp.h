@@ -444,7 +444,8 @@ struct regnode_ssc {
 #define ANYOF_LOC_FOLD                          0x04
 
 /* If set, means to warn if runtime locale isn't a UTF-8 one.  Only under /l.
- * If set, none of INVERT, LOC_FOLD, POSIXL, HAS_NONBITMAP_NON_UTF8_MATCHES can
+ * If set, none of INVERT, LOC_FOLD, POSIXL,
+ * ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP can
  * be set.  Can be in an SSC */
 #define ANYOF_LOC_REQ_UTF8                      0x08
 
@@ -452,14 +453,20 @@ struct regnode_ssc {
  * Can be in an SSC */
 #define ANYOF_MATCHES_ALL_ABOVE_BITMAP          0x10
 
-/* If set, the node can match something outside the bitmap that isn't in utf8;
- * never set under /d nor in an SSC */
-#define ANYOF_HAS_NONBITMAP_NON_UTF8_MATCHES    0x20
+/* Spare: 0x20 */
 
-/* Are there things outside the bitmap that will match only if the target
- * string is encoded in UTF-8?  (This is not set if ANYOF_ABOVE_BITMAP_ALL is
- * set).  Can be in SSC */
-#define ANYOF_HAS_UTF8_NONBITMAP_MATCHES        0x40
+/* Shared bit:
+ *      Under /d it means the ANYOFD node matches more things if the target
+ *          string is encoded in UTF-8; any such things will be non-ASCII,
+ *          characters that are < 256, and can be accessed via the swash.
+ *      When not under /d, it means the ANYOF node contains a user-defined
+ *      property that wasn't yet defined at the time the regex was compiled,
+ *      and so must be looked up at runtime, by creating a swash
+ * (These uses are mutually exclusive because a user-defined property is
+ * specified by \p{}, and \p{} implies /u which deselects /d).  The long macro
+ * name is to make sure that you are cautioned about its shared nature.  Only
+ * the non-/d meaning can be in an SSC */
+#define ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP  0x40
 
 /* Shared bit:
  *      Under /d it means the ANYOFD node matches all non-ASCII Latin1
@@ -479,8 +486,7 @@ struct regnode_ssc {
 /* These are the flags that apply to both regular ANYOF nodes and synthetic
  * start class nodes during construction of the SSC.  During finalization of
  * the SSC, other of the flags may get added to it */
-#define ANYOF_COMMON_FLAGS    ( ANYOF_HAS_UTF8_NONBITMAP_MATCHES    \
-                               |ANYOF_LOC_REQ_UTF8)
+#define ANYOF_COMMON_FLAGS      ANYOF_LOC_REQ_UTF8
 
 /* Character classes for node->classflags of ANYOF */
 /* Should be synchronized with a table in regprop() */

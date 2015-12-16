@@ -1308,7 +1308,8 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
         else {
             anded_flags = ANYOF_FLAGS(and_with)
             &( ANYOF_COMMON_FLAGS
-              |ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER);
+              |ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER
+              |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP);
         }
     }
 
@@ -1463,7 +1464,8 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
         if (OP(or_with) != ANYOFD) {
             ored_flags
             |= ANYOF_FLAGS(or_with)
-             & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
+             & ( ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER
+                |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP);
         }
     }
 
@@ -1665,7 +1667,8 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
      * by the time we reach here */
     assert(! (ANYOF_FLAGS(ssc)
         & ~( ANYOF_COMMON_FLAGS
-            |ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)));
+            |ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER
+            |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP)));
 
     populate_ANYOF_from_invlist( (regnode *) ssc, &invlist);
 
@@ -13096,9 +13099,6 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
             if (end == UV_MAX && start <= NUM_ANYOF_CODE_POINTS) {
                 ANYOF_FLAGS(node) |= ANYOF_MATCHES_ALL_ABOVE_BITMAP;
             }
-            else if (end >= NUM_ANYOF_CODE_POINTS) {
-                ANYOF_FLAGS(node) |= ANYOF_HAS_UTF8_NONBITMAP_MATCHES;
-            }
 
 	    /* Quit if are above what we should change */
 	    if (start >= NUM_ANYOF_CODE_POINTS) {
@@ -14778,15 +14778,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         optimizable = FALSE;    /* Will have to leave this an
                                                    ANYOF node */
 
-                        /* We don't know yet, so have to assume that the
-                         * property could match something in the upper Latin1
-                         * range, hence something that isn't utf8.  Note that
-                         * this would cause things in <depends_list> to match
-                         * inappropriately, except that any \p{}, including
-                         * this one forces Unicode semantics, which means there
-                         * is no <depends_list> */
-                        ANYOF_FLAGS(ret)
-                                      |= ANYOF_HAS_NONBITMAP_NON_UTF8_MATCHES;
+                        /* We don't know yet what this matches, so have to flag
+                         * it */
+                        ANYOF_FLAGS(ret) |= ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP;
                     }
                     else {
 
@@ -16273,7 +16267,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	else {
 	    cp_list = has_upper_latin1_only_utf8_matches;
 	}
-        ANYOF_FLAGS(ret) |= ANYOF_HAS_UTF8_NONBITMAP_MATCHES;
+        ANYOF_FLAGS(ret) |= ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP;
     }
 
     /* If there is a swash and more than one element, we can't use the swash in
@@ -16341,17 +16335,12 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 
     if (! cp_list && ! runtime_defns && ! only_utf8_locale_list) {
         assert(! (ANYOF_FLAGS(node)
-                  & (ANYOF_HAS_UTF8_NONBITMAP_MATCHES
-                     |ANYOF_HAS_NONBITMAP_NON_UTF8_MATCHES)));
+                & ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP));
 	ARG_SET(node, ANYOF_ONLY_HAS_BITMAP);
     }
     else {
 	AV * const av = newAV();
 	SV *rv;
-
-        assert(ANYOF_FLAGS(node)
-               & (ANYOF_HAS_UTF8_NONBITMAP_MATCHES
-                  |ANYOF_HAS_NONBITMAP_NON_UTF8_MATCHES|ANYOF_LOC_FOLD));
 
 	av_store(av, 0, (runtime_defns)
 			? SvREFCNT_inc(runtime_defns) : &PL_sv_undef);
@@ -16415,10 +16404,6 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
     const struct reg_data * const data = prog ? progi->data : NULL;
 
     PERL_ARGS_ASSERT__GET_REGCLASS_NONBITMAP_DATA;
-
-    assert(ANYOF_FLAGS(node)
-        & (ANYOF_HAS_UTF8_NONBITMAP_MATCHES
-           |ANYOF_HAS_NONBITMAP_NON_UTF8_MATCHES|ANYOF_LOC_FOLD));
 
     if (data && data->count) {
 	const U32 n = ARG(node);
@@ -17365,10 +17350,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             }
         }
 
-	if ((flags & (ANYOF_MATCHES_ALL_ABOVE_BITMAP
-                      |ANYOF_HAS_UTF8_NONBITMAP_MATCHES
-                      |ANYOF_HAS_NONBITMAP_NON_UTF8_MATCHES
-                      |ANYOF_LOC_FOLD)))
+	if ((flags
+                & ( ANYOF_MATCHES_ALL_ABOVE_BITMAP
+                   |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP
+                   |ANYOF_LOC_FOLD)))
         {
             if (do_sep) {
                 Perl_sv_catpvf(aTHX_ sv,"%s][%s",PL_colors[1],PL_colors[0]);
@@ -17407,11 +17392,13 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                     if (*s == '\n') {
                         const char * const t = ++s;
 
-                        if (flags & ANYOF_HAS_NONBITMAP_NON_UTF8_MATCHES) {
-                            sv_catpvs(sv, "{outside bitmap}");
-                        }
-                        else {
-                            sv_catpvs(sv, "{utf8}");
+                        if (flags & ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP) {
+                            if (OP(o) == ANYOFD) {
+                                sv_catpvs(sv, "{utf8}");
+                            }
+                            else {
+                                sv_catpvs(sv, "{outside bitmap}");
+                            }
                         }
 
                         if (byte_output) {

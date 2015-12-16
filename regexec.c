@@ -8732,11 +8732,27 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
         {
 	    match = TRUE;	/* Everything above the bitmap matches */
 	}
-	else if ((flags & ANYOF_HAS_NONBITMAP_NON_UTF8_MATCHES)
-		  || (utf8_target && (flags & ANYOF_HAS_UTF8_NONBITMAP_MATCHES))
-                  || ((flags & ANYOF_LOC_FOLD)
-                       && IN_UTF8_CTYPE_LOCALE
-                       && ARG(n) != ANYOF_ONLY_HAS_BITMAP))
+            /* Here doesn't match everything above the bitmap.  If there is
+             * some information available beyond the bitmap, we may find a
+             * match in it.  If so, this is most likely because the code point
+             * is outside the bitmap range.  But rarely, it could be because of
+             * some other reason.  If so, various flags are set to indicate
+             * this possibility.  On ANYOFD nodes, there may be matches that
+             * happen only when the target string is UTF-8; or for other node
+             * types, because runtime lookup is needed, regardless of the
+             * UTF-8ness of the target string.  Finally, under /il, there may
+             * be some matches only possible if the locale is a UTF-8 one. */
+	else if (    ARG(n) != ANYOF_ONLY_HAS_BITMAP
+                 && (   c >= NUM_ANYOF_CODE_POINTS
+                     || (   (flags & ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP)
+                         && (   UNLIKELY(OP(n) != ANYOFD)
+                             || (utf8_target && ! isASCII_uni(c)
+#                               if NUM_ANYOF_CODE_POINTS > 256
+                                                                 && c < 256
+#                               endif
+                                )))
+                     || ((   flags & ANYOF_LOC_FOLD)
+                          && IN_UTF8_CTYPE_LOCALE)))
         {
             SV* only_utf8_locale = NULL;
 	    SV * const sw = _get_regclass_nonbitmap_data(prog, n, TRUE, 0,
