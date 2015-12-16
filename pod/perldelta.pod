@@ -139,7 +139,7 @@ XXX
 
 =item *
 
-L<Daa::Dumper> has been upgraded from version 2.158 to 2.159.
+L<Data::Dumper> has been upgraded from version 2.158 to 2.159.
 
 This adds a "Trailingcomma" option, which when enabled adds a trailing comma
 after the last element of dumped arrays and hashes that would otherwise be
