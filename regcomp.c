@@ -16431,9 +16431,6 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 
 	    si = *ary;	/* ary[0] = the string to initialize the swash with */
 
-	    /* Elements 3 and 4 are either both present or both absent. [3] is
-	     * any inversion list generated at compile time; [4] indicates if
-	     * that inversion list has any user-defined properties in it. */
             if (av_tindex(av) >= 2) {
                 if (only_utf8_locale_ptr
                     && ary[2]
@@ -16446,6 +16443,10 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                     *only_utf8_locale_ptr = NULL;
                 }
 
+                /* Elements 3 and 4 are either both present or both absent. [3]
+                 * is any inversion list generated at compile time; [4]
+                 * indicates if that inversion list has any user-defined
+                 * properties in it. */
                 if (av_tindex(av) >= 3) {
                     invlist = ary[3];
                     if (SvUV(ary[4])) {
