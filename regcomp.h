@@ -443,7 +443,9 @@ struct regnode_ssc {
  * then.  Only set under /l; never in an SSC  */
 #define ANYOF_LOC_FOLD                          0x04
 
-/* Spare: 0x08 */
+/* If set, ANYOF_LOC_FOLD is also set, and there are potential matches that
+ * will be valid only if the locale is a UTF-8 one. */
+#define ANYOF_ONLY_UTF8_LOC_FOLD_MATCHES        0x08
 
 /* If set, means to warn if runtime locale isn't a UTF-8 one.  Only under /l.
  * If set, none of INVERT, LOC_FOLD, POSIXL,

@@ -15996,7 +15996,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * locales, or the class matches at least one 0-255 range code point */
     if (LOC && FOLD) {
         if (only_utf8_locale_list) {
-            ANYOF_FLAGS(ret) |= ANYOF_LOC_FOLD;
+            ANYOF_FLAGS(ret) |=  ANYOF_LOC_FOLD
+                                |ANYOF_ONLY_UTF8_LOC_FOLD_MATCHES;
         }
         else if (cp_list) { /* Look to see if a 0-255 code point is in list */
             UV start, end;

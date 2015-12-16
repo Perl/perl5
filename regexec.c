@@ -8751,7 +8751,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                                                                  && c < 256
 #                               endif
                                 )))
-                     || ((   flags & ANYOF_LOC_FOLD)
+                     || ((   flags & ANYOF_ONLY_UTF8_LOC_FOLD_MATCHES)
                           && IN_UTF8_CTYPE_LOCALE)))
         {
             SV* only_utf8_locale = NULL;
