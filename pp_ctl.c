@@ -2308,13 +2308,9 @@ PP(pp_leaveloop)
 
 PP(pp_leavesublv)
 {
-    dSP;
-    SV **newsp;
-    SV **mark;
     I32 gimme;
     PERL_CONTEXT *cx;
-    bool ref;
-    const char *what = NULL;
+    SV **oldsp;
     OP *retop;
 
     cx = CX_CUR();
@@ -2327,99 +2323,78 @@ PP(pp_leavesublv)
 	return 0;
     }
 
-    newsp = PL_stack_base + cx->blk_oldsp;
     gimme = cx->blk_gimme;
-    TAINT_NOT;
+    oldsp = PL_stack_base + cx->blk_oldsp; /* last arg of previous frame */
 
-    mark = newsp + 1;
+    if (gimme == G_VOID)
+        PL_stack_sp = oldsp;
+    else {
+        U8   lval    = CxLVAL(cx);
+        bool is_lval = (lval && !(lval & OPpENTERSUB_INARGS));
+        const char *what = NULL;
 
-    ref = !!(CxLVAL(cx) & OPpENTERSUB_INARGS);
-    if (gimme == G_SCALAR) {
-	if (CxLVAL(cx) && !ref) {     /* Leave it as it is if we can. */
-	    if (MARK <= SP) {
-		if ((SvPADTMP(TOPs) || SvREADONLY(TOPs))) {
-		    what =
-			SvREADONLY(TOPs) ? (TOPs == &PL_sv_undef) ? "undef"
-			: "a readonly value" : "a temporary";
-		}
-		else goto copy_sv;
-	    }
-	    else {
-		/* sub:lvalue{} will take us here. */
-		what = "undef";
-	    }
-          croak:
-	    Perl_croak(aTHX_
-	              "Can't return %s from lvalue subroutine", what
-	    );
-	}
-	if (MARK <= SP) {
-	      copy_sv:
-		if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
-		    if (!SvPADTMP(*SP)) {
-			*MARK = SvREFCNT_inc(*SP);
-			FREETMPS;
-			sv_2mortal(*MARK);
-		    }
-		    else {
-			/* FREETMPS could clobber it */
-			SV *sv = SvREFCNT_inc(*SP);
-			FREETMPS;
-			*MARK = sv_mortalcopy(sv);
-			SvREFCNT_dec(sv);
-		    }
-		}
-		else
-		    *MARK =
-		      SvPADTMP(*SP)
-		       ? sv_mortalcopy(*SP)
-		       : !SvTEMP(*SP)
-		          ? sv_2mortal(SvREFCNT_inc_simple_NN(*SP))
-		          : *SP;
-	}
-	else {
-	    MEXTEND(MARK, 0);
-	    *MARK = &PL_sv_undef;
-	}
-        SP = MARK;
+        if (gimme == G_SCALAR) {
+            if (is_lval) {
+                /* check for bad return arg */
+                if (oldsp < PL_stack_sp) {
+                    SV *sv = *PL_stack_sp;
+                    if ((SvPADTMP(sv) || SvREADONLY(sv))) {
+                        what =
+                            SvREADONLY(sv) ? (sv == &PL_sv_undef) ? "undef"
+                            : "a readonly value" : "a temporary";
+                    }
+                    else goto ok;
+                }
+                else {
+                    /* sub:lvalue{} will take us here. */
+                    what = "undef";
+                }
+              croak:
+                Perl_croak(aTHX_
+                          "Can't return %s from lvalue subroutine", what);
+            }
 
-	if (CxLVAL(cx) & OPpDEREF) {
-	    SvGETMAGIC(TOPs);
-	    if (!SvOK(TOPs)) {
-		TOPs = vivify_ref(TOPs, CxLVAL(cx) & OPpDEREF);
-	    }
-	}
+          ok:
+            leave_adjust_stacks(oldsp, gimme, is_lval ? 3 : 2);
+
+            if (lval & OPpDEREF) {
+                /* lval_sub()->{...} and similar */
+                dSP;
+                SvGETMAGIC(TOPs);
+                if (!SvOK(TOPs)) {
+                    TOPs = vivify_ref(TOPs, CxLVAL(cx) & OPpDEREF);
+                }
+                PUTBACK;
+            }
+        }
+        else {
+            assert(gimme == G_ARRAY);
+            assert (!(lval & OPpDEREF));
+
+            if (is_lval) {
+                /* scan for bad return args */
+                SV **p;
+                for (p = PL_stack_sp; p > oldsp; p--) {
+                    SV *sv = *p;
+                    /* the PL_sv_undef exception is to allow things like
+                     * this to work, where PL_sv_undef acts as 'skip'
+                     * placeholder on the LHS of list assigns:
+                     *    sub foo :lvalue { undef }
+                     *    ($a, undef, foo(), $b) = 1..4;
+                     */
+                    if (sv != &PL_sv_undef && (SvPADTMP(sv) || SvREADONLY(sv)))
+                    {
+                        /* Might be flattened array after $#array =  */
+                        what = SvREADONLY(sv)
+                                ? "a readonly value" : "a temporary";
+                        goto croak;
+                    }
+                }
+            }
+
+            leave_adjust_stacks(oldsp, gimme, is_lval ? 3 : 2);
+        }
     }
-    else if (gimme == G_ARRAY) {
-	assert (!(CxLVAL(cx) & OPpDEREF));
-	if (ref || !CxLVAL(cx))
-	    for (; MARK <= SP; MARK++)
-		*MARK =
-		       SvFLAGS(*MARK) & SVs_PADTMP
-		           ? sv_mortalcopy(*MARK)
-		     : SvTEMP(*MARK)
-		           ? *MARK
-		           : sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
-	else for (; MARK <= SP; MARK++) {
-            /* the PL_sv_undef exception is to allow things like this to
-             * work, where PL_sv_undef acts as 'skip' placeholder on the
-             * LHS of list assigns:
-             *    sub foo :lvalue { undef }
-             *    ($a, undef, foo(), $b) = 1..4;
-             */
-	    if (*MARK != &PL_sv_undef
-		    && (SvPADTMP(*MARK) || SvREADONLY(*MARK))
-	    ) {
-		    /* Might be flattened array after $#array =  */
-                    what = SvREADONLY(*MARK)
-                            ? "a readonly value" : "a temporary";
-                    goto croak;
-	    }
-	    else if (!SvTEMP(*MARK))
-		*MARK = sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
-	}
-    }
-    PUTBACK;
 
     CX_LEAVE_SCOPE(cx);
     POPSUB(cx);	/* Stack values are safe: release CV and @_ ... */

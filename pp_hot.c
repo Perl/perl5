@@ -3282,36 +3282,46 @@ PP(pp_grepwhile)
     }
 }
 
-/* leavesub_adjust_stacks():
+/* leave_adjust_stacks():
  *
- * Process the sub's return args (in the range base_sp+1 .. PL_stack_sp),
- * and do the equivalent of a FREEMPS (and TAINT_NOT).
+ * Process a scope's return args (in the range base_sp+1 .. PL_stack_sp),
+ * and do the equivalent of a FREEMPS and TAINT_NOT.
  * Not intended to be called in void context.
  *
- * The main things done to process the return args are:
+ * When leaving a sub, eval, do{} or other scope, the things that need
+ * doing to process the return args are:
  *    * in scalar context, only return the last arg (or PL_sv_undef if none);
- *    * make a TEMP copy of every return arg, except where we can optimise
- *      the copy away without it being semantically visible;
- *    * make sure the arg isn't prematurely freed; in the case of an arg
- *      not copied, this may involve mortalising it. For example, in
+ *    * for the types of return that return copies of their args (such
+ *      as rvalue sub return), make a mortal copy of every return arg,
+ *      except where we can optimise the copy away without it being
+ *      semantically visible;
+ *    * make sure that the arg isn't prematurely freed; in the case of an
+ *      arg not copied, this may involve mortalising it. For example, in
  *      C<sub f { my $x = ...; $x }>, $x would be freed when we do
  *      CX_LEAVE_SCOPE(cx) unless it's protected or copied.
  *
+ * What condition to use when deciding whether to pass the arg through
+ * or make a copy, is determined by the 'pass' arg; its valid values are:
+ *   0: rvalue sub/eval exit
+ *   1: other rvalue scope exit
+ *   2: :lvalue sub exit in rvalue context
+ *   3: :lvalue sub exit in lvalue context and other lvalue scope exits
+ *
  * There is a big issue with doing a FREETMPS. We would like to free any
- * temps created by the last statement the sub executed, rather than
+ * temps created by the last statement which the sub executed, rather than
  * leaving them for the caller. In a situation where a sub call isn't
  * soon followed by a nextstate (e.g. nested recursive calls, a la
  * fibonacci()), temps can accumulate, causing memory and performance
  * issues.
  *
  * On the other hand, we don't want to free any TEMPs which are keeping
- * alive any return args that we skip copying; nor do we wish to undo any
- * mortalising or mortal copying we do here.
+ * alive any return args that we skipped copying; nor do we wish to undo
+ * any mortalising done here.
  *
  * The solution is to split the temps stack frame into two, with a cut
  * point delineating the two halves. We arrange that by the end of this
  * function, all the temps stack frame entries we wish to keep are in the
- * range  PL_tmps_floor+1.. tmps_base-1, while the ones we free now are in
+ * range  PL_tmps_floor+1.. tmps_base-1, while the ones to free now are in
  * the range  tmps_base .. PL_tmps_ix.  During the course of this
  * function, tmps_base starts off as PL_tmps_floor+1, then increases
  * whenever we find or create a temp that we know should be kept. In
@@ -3321,22 +3331,24 @@ PP(pp_grepwhile)
  * To determine whether a TEMP is keeping a return arg alive, every
  * arg that is kept rather than copied and which has the SvTEMP flag
  * set, has the flag temporarily unset, to mark it. At the end we scan
- * stack temps stack frame above the cut for entries without SvTEMP and
+ * the temps stack frame above the cut for entries without SvTEMP and
  * keep them, while turning SvTEMP on again. Note that if we die before
- * the SvTEMPs are enabled again, its safe: at worst, subsequent use of
+ * the SvTEMPs flags are set again, its safe: at worst, subsequent use of
  * those SVs may be slightly less efficient.
  *
  * In practice various optimisations for some common cases mean we can
  * avoid most of the scanning and swapping about with the temps stack.
  */
 
-STATIC void
-S_leavesub_adjust_stacks(pTHX_ SV **base_sp, I32 gimme)
+void
+Perl_leave_adjust_stacks(pTHX_ SV **base_sp, I32 gimme, int pass)
 {
     dSP;
     SV    **from_sp;   /* where we're copying args from */
     SSize_t tmps_base; /* lowest index into tmps stack that needs freeing now */
     SSize_t nargs;
+
+    PERL_ARGS_ASSERT_LEAVE_ADJUST_STACKS;
 
     TAINT_NOT;
 
@@ -3411,37 +3423,62 @@ S_leavesub_adjust_stacks(pTHX_ SV **base_sp, I32 gimme)
             }
 #endif
 
-            if (SvTEMP(sv) && !SvMAGICAL(sv) && SvREFCNT(sv) == 1) {
-                /* can optimise away the copy */
+            if (
+               pass == 0 ? (SvTEMP(sv) && !SvMAGICAL(sv) && SvREFCNT(sv) == 1)
+             : pass == 1 ? ((SvTEMP(sv) || SvPADTMP(sv)) && !SvMAGICAL(sv) && SvREFCNT(sv) == 1)
+             : pass == 2 ? (!SvPADTMP(sv))
+             : 1)
+            {
+                /* pass through: skip copy for logic or optimisation
+                 * reasons; instead mortalise it, except that ... */
                 *++base_sp = sv;
 
-                /* Since this SV is an SvTEMP with a ref count of 1, we
-                 * don't need to re-mortalise it; instead we just need to
-                 * ensure that its existing entry in the temps stack frame
-                 * ends up below the cut and so avoids being freed this
-                 * time round. We mark it as needing to be kept by
-                 * temporarily unsetting SvTEMP; then at the end, we
-                 * shuffle any !SvTEMP entries on the tmps stack back
-                 * below the cut.
-                 * However, there's a significant chance that there's a
-                 * 1:1 correspondence between the first few (or all)
-                 * elements in the return args stack frame and those in
-                 * the temps stack frame;
-                 * e,g.  sub f { ....; map {...} .... },
-                 * or e.g. if we're exiting multiple scopes and one of the
-                 * inner scopes has already made mortal copies of each
-                 * return arg.
-                 *
-                 * If so, this arg sv will correspond to the next item
-                 * above the cut, and so can be kept merely by moving the
-                 * cut boundary up one, rather than messing with SvTEMP.
-                 * If all args arre 1:1 then we can avoid the sorting
-                 * stage below completely.
-                 */
-                if (sv == *tmps_basep)
-                    tmps_basep++;
-                else
-                    SvTEMP_off(sv);
+                if (SvTEMP(sv)) {
+                    /* ... since this SV is an SvTEMP , we don't need to
+                     * re-mortalise it; instead we just need to ensure
+                     * that its existing entry in the temps stack frame
+                     * ends up below the cut and so avoids being freed
+                     * this time round. We mark it as needing to be kept
+                     * by temporarily unsetting SvTEMP; then at the end,
+                     * we shuffle any !SvTEMP entries on the tmps stack
+                     * back below the cut.
+                     * However, there's a significant chance that there's
+                     * a 1:1 correspondence between the first few (or all)
+                     * elements in the return args stack frame and those
+                     * in the temps stack frame; e,g.:
+                     *      sub f { ....; map {...} .... },
+                     * or if we're exiting multiple scopes and one of the
+                     * inner scopes has already made mortal copies of each
+                     * return arg.
+                     *
+                     * If so, this arg sv will correspond to the next item
+                     * on the tmps stack above the cut, and so can be kept
+                     * merely by moving the cut boundary up one, rather
+                     * than messing with SvTEMP.  If all args are 1:1 then
+                     * we can avoid the sorting stage below completely.
+                     */
+                    if (sv == *tmps_basep)
+                        tmps_basep++;
+                    else
+                        SvTEMP_off(sv);
+                }
+                else {
+                    /* mortalise arg to avoid it being freed during save
+                     * stack unwinding */
+                    SvREFCNT_inc_simple_void_NN(sv);
+                    /* equivalent of sv_2mortal(), except that:
+                     *  * it assumes that the temps stack has already been
+                     *    extended;
+                     *  * it puts the new item at the cut rather than at
+                     *    ++PL_tmps_ix, moving the previous occupant there
+                     *    instead.
+                     */
+                    if (!SvIMMORTAL(sv)) {
+                        SvTEMP_on(sv);
+                        PL_tmps_stack[++PL_tmps_ix] = *tmps_basep;
+                        *tmps_basep++ = sv;
+                    }
+                }
             }
             else {
                 /* Make a mortal copy of the SV.
@@ -3505,7 +3542,7 @@ S_leavesub_adjust_stacks(pTHX_ SV **base_sp, I32 gimme)
                     old_base = tmps_basep - PL_tmps_stack;
                     SvGETMAGIC(sv);
                     sv_setsv_flags(newsv, sv, SV_DO_COW_SVSETSV);
-                    /* the mg_get or sv_setv might have created new temps
+                    /* the mg_get or sv_setsv might have created new temps
                      * or realloced the tmps stack; regrow and reload */
                     EXTEND_MORTAL(nargs);
                     tmps_basep = PL_tmps_stack + old_base;
@@ -3578,7 +3615,7 @@ PP(pp_leavesub)
     if (gimme == G_VOID)
         PL_stack_sp = oldsp;
     else
-        S_leavesub_adjust_stacks(aTHX_ oldsp, gimme);
+        leave_adjust_stacks(oldsp, gimme, 0);
 
     CX_LEAVE_SCOPE(cx);
     POPSUB(cx);	/* Stack values are safe: release CV and @_ ... */
