@@ -41,6 +41,30 @@
                           || (((UV) (c)) >= '0' && ((UV) (c)) <= '9'))
 #endif
 
+/* This struct contains almost all the user's desired configuration, and it
+ * is treated as constant by the recursive function. This arrangement has
+ * the advantage of needing less memory than passing all of them on the
+ * stack all the time (as was the case in an earlier implementation). */
+typedef struct {
+    SV *pad;
+    SV *xpad;
+    SV *sep;
+    SV *pair;
+    SV *sortkeys;
+    SV *freezer;
+    SV *toaster;
+    SV *bless;
+    IV maxrecurse;
+    I32 indent;
+    I32 purity;
+    I32 deepcopy;
+    I32 quotekeys;
+    I32 maxdepth;
+    I32 useqq;
+    int use_sparse_seen_hash;
+    int trailingcomma;
+} Style;
+
 static I32 num_q (const char *s, STRLEN slen);
 static I32 esc_q (char *dest, const char *src, STRLEN slen);
 static I32 esc_q_utf8 (pTHX_ SV *sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq);
@@ -49,11 +73,8 @@ static bool key_needs_quote(const char *s, STRLEN len);
 static bool safe_decimal_number(const char *p, STRLEN len);
 static SV *sv_x (pTHX_ SV *sv, const char *str, STRLEN len, I32 n);
 static I32 DD_dump (pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval,
-		    HV *seenhv, AV *postav, I32 *levelp, I32 indent,
-		    SV *pad, SV *xpad, SV *apad, SV *sep, SV *pair,
-		    SV *freezer, SV *toaster,
-		    I32 purity, I32 deepcopy, I32 quotekeys, SV *bless,
-		    I32 maxdepth, SV *sortkeys, int use_sparse_seen_hash, I32 useqq, IV maxrecurse);
+                    HV *seenhv, AV *postav, const I32 level, SV *apad,
+                    const Style *style);
 
 #ifndef HvNAME_get
 #define HvNAME_get HvNAME
@@ -491,10 +512,7 @@ sv_x(pTHX_ SV *sv, const char *str, STRLEN len, I32 n)
  */
 static I32
 DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
-	AV *postav, I32 *levelp, I32 indent, SV *pad, SV *xpad,
-	SV *apad, SV *sep, SV *pair, SV *freezer, SV *toaster, I32 purity,
-	I32 deepcopy, I32 quotekeys, SV *bless, I32 maxdepth, SV *sortkeys,
-        int use_sparse_seen_hash, I32 useqq, IV maxrecurse)
+	AV *postav, const I32 level, SV *apad, const Style *style)
 {
     char tmpbuf[128];
     Size_t i;
@@ -537,14 +555,14 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 
         /* If a freeze method is provided and the object has it, call
            it.  Warn on errors. */
-	if (SvOBJECT(SvRV(val)) && freezer &&
-	    SvPOK(freezer) && SvCUR(freezer) &&
-            gv_fetchmeth(SvSTASH(SvRV(val)), SvPVX_const(freezer), 
-                         SvCUR(freezer), -1) != NULL)
+        if (SvOBJECT(SvRV(val)) && style->freezer &&
+            SvPOK(style->freezer) && SvCUR(style->freezer) &&
+            gv_fetchmeth(SvSTASH(SvRV(val)), SvPVX_const(style->freezer),
+                         SvCUR(style->freezer), -1) != NULL)
 	{
 	    dSP; ENTER; SAVETMPS; PUSHMARK(sp);
 	    XPUSHs(val); PUTBACK;
-	    i = perl_call_method(SvPVX_const(freezer), G_EVAL|G_VOID|G_DISCARD);
+            i = perl_call_method(SvPVX_const(style->freezer), G_EVAL|G_VOID|G_DISCARD);
 	    SPAGAIN;
 	    if (SvTRUE(ERRSV))
 		warn("WARNING(Freezer method call failed): %"SVf"", ERRSV);
@@ -575,7 +593,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		if ((svp = av_fetch(seenentry, 0, FALSE))
 		    && (othername = *svp))
 		{
-		    if (purity && *levelp > 0) {
+		    if (style->purity && level > 0) {
 			SV *postentry;
 			
 			if (realtype == SVt_PVHV)
@@ -662,7 +680,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	 * representation of the thing we are currently examining
 	 * at this depth (i.e., 'Foo=ARRAY(0xdeadbeef)').
 	 */
-	if (!purity && maxdepth > 0 && *levelp >= maxdepth) {
+        if (!style->purity && style->maxdepth > 0 && level >= style->maxdepth) {
 	    STRLEN vallen;
 	    const char * const valstr = SvPV(val,vallen);
 	    sv_catpvs(retval, "'");
@@ -671,24 +689,23 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    return 1;
 	}
 
-	if (maxrecurse > 0 && *levelp >= maxrecurse) {
-	    croak("Recursion limit of %" IVdf " exceeded", maxrecurse);
+        if (style->maxrecurse > 0 && level >= style->maxrecurse) {
+            croak("Recursion limit of %" IVdf " exceeded", style->maxrecurse);
 	}
 
 	if (realpack && !no_bless) {				/* we have a blessed ref */
 	    STRLEN blesslen;
-	    const char * const blessstr = SvPV(bless, blesslen);
+            const char * const blessstr = SvPV(style->bless, blesslen);
 	    sv_catpvn(retval, blessstr, blesslen);
 	    sv_catpvs(retval, "( ");
-	    if (indent >= 2) {
+            if (style->indent >= 2) {
 		blesspad = apad;
 		apad = newSVsv(apad);
 		sv_x(aTHX_ apad, " ", 1, blesslen+2);
 	    }
 	}
 
-	(*levelp)++;
-	ipad = sv_x(aTHX_ Nullsv, SvPVX_const(xpad), SvCUR(xpad), *levelp);
+        ipad = sv_x(aTHX_ Nullsv, SvPVX_const(style->xpad), SvCUR(style->xpad), level+1);
 
         if (is_regex) 
         {
@@ -759,19 +776,13 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    if (realpack) {				     /* blessed */
 		sv_catpvs(retval, "do{\\(my $o = ");
 		DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
-			postav, levelp,	indent, pad, xpad, apad, sep, pair,
-			freezer, toaster, purity, deepcopy, quotekeys, bless,
-			maxdepth, sortkeys, use_sparse_seen_hash, useqq,
-			maxrecurse);
+			postav, level+1, apad, style);
 		sv_catpvs(retval, ")}");
 	    }						     /* plain */
 	    else {
 		sv_catpvs(retval, "\\");
 		DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
-			postav, levelp,	indent, pad, xpad, apad, sep, pair,
-			freezer, toaster, purity, deepcopy, quotekeys, bless,
-			maxdepth, sortkeys, use_sparse_seen_hash, useqq,
-			maxrecurse);
+			postav, level+1, apad, style);
 	    }
 	    SvREFCNT_dec(namesv);
 	}
@@ -781,10 +792,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    sv_catpvs(namesv, "}");
 	    sv_catpvs(retval, "\\");
 	    DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
-		    postav, levelp,	indent, pad, xpad, apad, sep, pair,
-		    freezer, toaster, purity, deepcopy, quotekeys, bless,
-		    maxdepth, sortkeys, use_sparse_seen_hash, useqq,
-		    maxrecurse);
+		    postav, level+1, apad, style);
 	    SvREFCNT_dec(namesv);
 	}
 	else if (realtype == SVt_PVAV) {
@@ -824,8 +832,8 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		iname[inamelen++] = '-'; iname[inamelen++] = '>';
 	    }
 	    iname[inamelen++] = '['; iname[inamelen] = '\0';
-	    totpad = newSVsv(sep);
-	    sv_catsv(totpad, pad);
+            totpad = newSVsv(style->sep);
+            sv_catsv(totpad, style->pad);
 	    sv_catsv(totpad, apad);
 
 	    for (ix = 0; ix <= ixmax; ++ix) {
@@ -846,7 +854,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
                 ilen = ilen + my_sprintf(iname+ilen, "%"IVdf, (IV)ix);
 #endif
 		iname[ilen++] = ']'; iname[ilen] = '\0';
-		if (indent >= 3) {
+                if (style->indent >= 3) {
 		    sv_catsv(retval, totpad);
 		    sv_catsv(retval, ipad);
 		    sv_catpvs(retval, "#");
@@ -855,15 +863,12 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		sv_catsv(retval, totpad);
 		sv_catsv(retval, ipad);
 		DD_dump(aTHX_ elem, iname, ilen, retval, seenhv, postav,
-			levelp,	indent, pad, xpad, apad, sep, pair,
-			freezer, toaster, purity, deepcopy, quotekeys, bless,
-			maxdepth, sortkeys, use_sparse_seen_hash,
-			useqq, maxrecurse);
-		if (ix < ixmax)
+			level+1, apad, style);
+		if (ix < ixmax || (style->trailingcomma && style->indent >= 1))
 		    sv_catpvs(retval, ",");
 	    }
 	    if (ixmax >= 0) {
-		SV * const opad = sv_x(aTHX_ Nullsv, SvPVX_const(xpad), SvCUR(xpad), (*levelp)-1);
+                SV * const opad = sv_x(aTHX_ Nullsv, SvPVX_const(style->xpad), SvCUR(style->xpad), level);
 		sv_catsv(retval, totpad);
 		sv_catsv(retval, opad);
 		SvREFCNT_dec(opad);
@@ -909,16 +914,14 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		sv_catpvs(iname, "->");
 	    }
 	    sv_catpvs(iname, "{");
-	    totpad = newSVsv(sep);
-	    sv_catsv(totpad, pad);
+            totpad = newSVsv(style->sep);
+            sv_catsv(totpad, style->pad);
 	    sv_catsv(totpad, apad);
 	
 	    /* If requested, get a sorted/filtered array of hash keys */
-	    if (sortkeys) {
-		if (sortkeys == &PL_sv_yes) {
-#if PERL_VERSION < 8
-                    sortkeys = sv_2mortal(newSVpvs("Data::Dumper::_sortkeys"));
-#else
+	    if (style->sortkeys) {
+#if PERL_VERSION >= 8
+		if (style->sortkeys == &PL_sv_yes) {
 		    keys = newAV();
 		    (void)hv_iterinit((HV*)ival);
 		    while ((entry = hv_iternext((HV*)ival))) {
@@ -939,17 +942,18 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
                     }
                     else
 # endif
-#endif
                     {
                         sortsv(AvARRAY(keys),
 			   av_len(keys)+1,
                            Perl_sv_cmp);
                     }
 		}
-		if (sortkeys != &PL_sv_yes) {
+                else
+#endif
+		{
 		    dSP; ENTER; SAVETMPS; PUSHMARK(sp);
 		    XPUSHs(sv_2mortal(newRV_inc(ival))); PUTBACK;
-		    i = perl_call_sv(sortkeys, G_SCALAR | G_EVAL);
+		    i = perl_call_sv(style->sortkeys, G_SCALAR | G_EVAL);
 		    SPAGAIN;
 		    if (i) {
 			sv = POPs;
@@ -976,7 +980,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
                 I32 nlen;
 		bool do_utf8 = FALSE;
 
-               if (sortkeys) {
+               if (style->sortkeys) {
                    if (!(keys && (SSize_t)i <= av_len(keys))) break;
                } else {
                    if (!(entry = hv_iternext((HV *)ival))) break;
@@ -985,7 +989,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		if (i)
 		    sv_catpvs(retval, ",");
 
-		if (sortkeys) {
+		if (style->sortkeys) {
 		    char *key;
 		    svp = av_fetch(keys, i, FALSE);
 		    keysv = svp ? *svp : sv_newmortal();
@@ -1022,10 +1026,10 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
                    their handling of key quoting compatible between XS
                    and perl.
                  */
-                if (quotekeys || key_needs_quote(key,keylen)) {
-                    if (do_utf8 || useqq) {
+                if (style->quotekeys || key_needs_quote(key,keylen)) {
+                    if (do_utf8 || style->useqq) {
                         STRLEN ocur = SvCUR(retval);
-                        nlen = esc_q_utf8(aTHX_ retval, key, klen, do_utf8, useqq);
+                        nlen = esc_q_utf8(aTHX_ retval, key, klen, do_utf8, style->useqq);
                         nkey = SvPVX(retval) + ocur;
                     }
                     else {
@@ -1052,8 +1056,8 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
                 sv_catpvn(sname, nkey, nlen);
                 sv_catpvs(sname, "}");
 
-		sv_catsv(retval, pair);
-		if (indent >= 2) {
+                sv_catsv(retval, style->pair);
+                if (style->indent >= 2) {
 		    char *extra;
 		    I32 elen = 0;
 		    newapad = newSVsv(apad);
@@ -1068,17 +1072,17 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    newapad = apad;
 
 		DD_dump(aTHX_ hval, SvPVX_const(sname), SvCUR(sname), retval, seenhv,
-			postav, levelp,	indent, pad, xpad, newapad, sep, pair,
-			freezer, toaster, purity, deepcopy, quotekeys, bless,
-			maxdepth, sortkeys, use_sparse_seen_hash, useqq,
-			maxrecurse);
+			postav, level+1, newapad, style);
 		SvREFCNT_dec(sname);
 		Safefree(nkey_buffer);
-		if (indent >= 2)
+                if (style->indent >= 2)
 		    SvREFCNT_dec(newapad);
 	    }
 	    if (i) {
-		SV *opad = sv_x(aTHX_ Nullsv, SvPVX_const(xpad), SvCUR(xpad), *levelp-1);
+                SV *opad = sv_x(aTHX_ Nullsv, SvPVX_const(style->xpad),
+                                SvCUR(style->xpad), level);
+                if (style->trailingcomma && style->indent >= 1)
+                    sv_catpvs(retval, ",");
 		sv_catsv(retval, totpad);
 		sv_catsv(retval, opad);
 		SvREFCNT_dec(opad);
@@ -1092,7 +1096,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	}
 	else if (realtype == SVt_PVCV) {
 	    sv_catpvs(retval, "sub { \"DUMMY\" }");
-	    if (purity)
+            if (style->purity)
 		warn("Encountered CODE ref, using dummy placeholder");
 	}
 	else {
@@ -1103,7 +1107,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    I32 plen;
 	    I32 pticks;
 
-	    if (indent >= 2) {
+            if (style->indent >= 2) {
 		SvREFCNT_dec(apad);
 		apad = blesspad;
 	    }
@@ -1127,14 +1131,13 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	        sv_catpvn(retval, realpack, strlen(realpack));
 	    }
 	    sv_catpvs(retval, "' )");
-	    if (toaster && SvPOK(toaster) && SvCUR(toaster)) {
+            if (style->toaster && SvPOK(style->toaster) && SvCUR(style->toaster)) {
 		sv_catpvs(retval, "->");
-		sv_catsv(retval, toaster);
+                sv_catsv(retval, style->toaster);
 		sv_catpvs(retval, "()");
 	    }
 	}
 	SvREFCNT_dec(ipad);
-	(*levelp)--;
     }
     else {
 	STRLEN i;
@@ -1168,7 +1171,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
              * there is no other reference, duh. This is an optimization.
              * Note that we'd have to check for weak-refs, too, but this is
              * already the branch for non-refs only. */
-	    else if (val != &PL_sv_undef && (!use_sparse_seen_hash || SvREFCNT(val) > 1)) {
+            else if (val != &PL_sv_undef && (!style->use_sparse_seen_hash || SvREFCNT(val) > 1)) {
 		SV * const namesv = newSVpvs("\\");
 		sv_catpvn(namesv, name, namelen);
 		seenentry = newAV();
@@ -1219,7 +1222,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		r = SvPVX(retval)+SvCUR(retval);
 		r[0] = '*'; r[1] = '{';
 		SvCUR_set(retval, SvCUR(retval)+2);
-		esc_q_utf8(aTHX_ retval, c, i, 1, useqq);
+                esc_q_utf8(aTHX_ retval, c, i, 1, style->useqq);
 		sv_grow(retval, SvCUR(retval)+2);
 		r = SvPVX(retval)+SvCUR(retval);
 		r[0] = '}'; r[1] = '\0';
@@ -1245,7 +1248,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    }
 	    SvCUR_set(retval, SvCUR(retval)+i);
 
-	    if (purity) {
+            if (style->purity) {
 		static const char* const entries[] = { "{SCALAR}", "{ARRAY}", "{HASH}" };
 		static const STRLEN sizes[] = { 8, 7, 6 };
 		SV *e;
@@ -1262,7 +1265,6 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			continue;
 
 		    {
-			I32 nlevel = 0;
 			SV *postentry = newSVpvn(r,i);
 			
 			sv_setsv(nname, postentry);
@@ -1272,15 +1274,11 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			e = newRV_inc(e);
 			
 			SvCUR_set(newapad, 0);
-			if (indent >= 2)
+                        if (style->indent >= 2)
 			    (void)sv_x(aTHX_ newapad, " ", 1, SvCUR(postentry));
 			
 			DD_dump(aTHX_ e, SvPVX_const(nname), SvCUR(nname), postentry,
-				seenhv, postav, &nlevel, indent, pad, xpad,
-				newapad, sep, pair, freezer, toaster, purity,
-				deepcopy, quotekeys, bless, maxdepth, 
-				sortkeys, use_sparse_seen_hash, useqq,
-				maxrecurse);
+				seenhv, postav, 0, newapad, style);
 			SvREFCNT_dec(e);
 		    }
 		}
@@ -1315,11 +1313,11 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
              * the pure perl code.
              * see [perl #74798]
              */
-            if (useqq && safe_decimal_number(c, i)) {
+            if (style->useqq && safe_decimal_number(c, i)) {
                 sv_catsv(retval, val);
             }
-	    else if (DO_UTF8(val) || useqq)
-	        i += esc_q_utf8(aTHX_ retval, c, i, DO_UTF8(val), useqq);
+            else if (DO_UTF8(val) || style->useqq)
+                i += esc_q_utf8(aTHX_ retval, c, i, DO_UTF8(val), style->useqq);
 	    else {
 		sv_grow(retval, SvCUR(retval)+3+2*i); /* 3: ""\0 */
 		r = SvPVX(retval) + SvCUR(retval);
@@ -1334,7 +1332,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
     }
 
     if (idlen) {
-	if (deepcopy)
+        if (style->deepcopy)
 	    (void)hv_delete(seenhv, id, idlen, G_DISCARD);
 	else if (namelen && seenentry) {
 	    SV *mark = *av_fetch(seenentry, 2, TRUE);
@@ -1363,17 +1361,15 @@ Data_Dumper_Dumpxs(href, ...)
 	    SV *retval, *valstr;
 	    HV *seenhv = NULL;
 	    AV *postav, *todumpav, *namesav;
-	    I32 level = 0;
-	    I32 indent, terse, useqq;
+	    I32 terse = 0;
 	    SSize_t i, imax, postlen;
 	    SV **svp;
-	    SV *val, *name, *pad, *xpad, *apad, *sep, *pair, *varname;
-	    SV *freezer, *toaster, *bless, *sortkeys;
-	    I32 purity, deepcopy, quotekeys, maxdepth = 0;
-	    IV maxrecurse = 1000;
+            SV *apad = &PL_sv_undef;
+            Style style;
+
+            SV *name, *val = &PL_sv_undef, *varname = &PL_sv_undef;
 	    char tmpbuf[1024];
 	    I32 gimme = GIMME_V;
-            int use_sparse_seen_hash = 0;
 
 	    if (!SvROK(href)) {		/* call new to get an object first */
 		if (items < 2)
@@ -1402,13 +1398,15 @@ Data_Dumper_Dumpxs(href, ...)
 	    }
 
 	    todumpav = namesav = NULL;
+            style.indent = 2;
+            style.quotekeys = 1;
+            style.maxrecurse = 1000;
+            style.purity = style.deepcopy = style.useqq = style.maxdepth
+                = style.use_sparse_seen_hash = style.trailingcomma = 0;
+            style.pad = style.xpad = style.sep = style.pair = style.sortkeys
+                = style.freezer = style.toaster = style.bless = &PL_sv_undef;
 	    seenhv = NULL;
-	    val = pad = xpad = apad = sep = pair = varname
-		= freezer = toaster = bless = sortkeys = &PL_sv_undef;
 	    name = sv_newmortal();
-	    indent = 2;
-	    terse = purity = deepcopy = useqq = 0;
-	    quotekeys = 1;
 	
 	    retval = newSVpvs("");
 	    if (SvROK(href)
@@ -1418,57 +1416,66 @@ Data_Dumper_Dumpxs(href, ...)
 		if ((svp = hv_fetch(hv, "seen", 4, FALSE)) && SvROK(*svp))
 		    seenhv = (HV*)SvRV(*svp);
                 else
-                    use_sparse_seen_hash = 1;
+                    style.use_sparse_seen_hash = 1;
 		if ((svp = hv_fetch(hv, "noseen", 6, FALSE)))
-		    use_sparse_seen_hash = (SvOK(*svp) && SvIV(*svp) != 0);
+                    style.use_sparse_seen_hash = (SvOK(*svp) && SvIV(*svp) != 0);
 		if ((svp = hv_fetch(hv, "todump", 6, FALSE)) && SvROK(*svp))
 		    todumpav = (AV*)SvRV(*svp);
 		if ((svp = hv_fetch(hv, "names", 5, FALSE)) && SvROK(*svp))
 		    namesav = (AV*)SvRV(*svp);
 		if ((svp = hv_fetch(hv, "indent", 6, FALSE)))
-		    indent = SvIV(*svp);
+                    style.indent = SvIV(*svp);
 		if ((svp = hv_fetch(hv, "purity", 6, FALSE)))
-		    purity = SvIV(*svp);
+                    style.purity = SvIV(*svp);
 		if ((svp = hv_fetch(hv, "terse", 5, FALSE)))
 		    terse = SvTRUE(*svp);
 		if ((svp = hv_fetch(hv, "useqq", 5, FALSE)))
-		    useqq = SvTRUE(*svp);
+                    style.useqq = SvTRUE(*svp);
 		if ((svp = hv_fetch(hv, "pad", 3, FALSE)))
-		    pad = *svp;
+                    style.pad = *svp;
 		if ((svp = hv_fetch(hv, "xpad", 4, FALSE)))
-		    xpad = *svp;
+                    style.xpad = *svp;
 		if ((svp = hv_fetch(hv, "apad", 4, FALSE)))
 		    apad = *svp;
 		if ((svp = hv_fetch(hv, "sep", 3, FALSE)))
-		    sep = *svp;
+                    style.sep = *svp;
 		if ((svp = hv_fetch(hv, "pair", 4, FALSE)))
-		    pair = *svp;
+                    style.pair = *svp;
 		if ((svp = hv_fetch(hv, "varname", 7, FALSE)))
 		    varname = *svp;
 		if ((svp = hv_fetch(hv, "freezer", 7, FALSE)))
-		    freezer = *svp;
+                    style.freezer = *svp;
 		if ((svp = hv_fetch(hv, "toaster", 7, FALSE)))
-		    toaster = *svp;
+                    style.toaster = *svp;
 		if ((svp = hv_fetch(hv, "deepcopy", 8, FALSE)))
-		    deepcopy = SvTRUE(*svp);
+                    style.deepcopy = SvTRUE(*svp);
 		if ((svp = hv_fetch(hv, "quotekeys", 9, FALSE)))
-		    quotekeys = SvTRUE(*svp);
+                    style.quotekeys = SvTRUE(*svp);
+                if ((svp = hv_fetch(hv, "trailingcomma", 13, FALSE)))
+                    style.trailingcomma = SvTRUE(*svp);
 		if ((svp = hv_fetch(hv, "bless", 5, FALSE)))
-		    bless = *svp;
+                    style.bless = *svp;
 		if ((svp = hv_fetch(hv, "maxdepth", 8, FALSE)))
-		    maxdepth = SvIV(*svp);
+                    style.maxdepth = SvIV(*svp);
 		if ((svp = hv_fetch(hv, "maxrecurse", 10, FALSE)))
-		    maxrecurse = SvIV(*svp);
+                    style.maxrecurse = SvIV(*svp);
 		if ((svp = hv_fetch(hv, "sortkeys", 8, FALSE))) {
-		    sortkeys = *svp;
-		    if (! SvTRUE(sortkeys))
-			sortkeys = NULL;
-		    else if (! (SvROK(sortkeys) &&
-				SvTYPE(SvRV(sortkeys)) == SVt_PVCV) )
-		    {
-			/* flag to use qsortsv() for sorting hash keys */	
-			sortkeys = &PL_sv_yes; 
-		    }
+                    SV *sv = *svp;
+                    if (! SvTRUE(sv))
+                        style.sortkeys = NULL;
+                    else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVCV)
+                        style.sortkeys = sv;
+                    else if (PERL_VERSION < 8)
+                        /* 5.6 doesn't make sortsv() available to XS code,
+                         * so we must use this helper instead. Note that we
+                         * always allocate this mortal SV, but it will be
+                         * used only if at least one hash is encountered
+                         * while dumping recursively; an older version
+                         * allocated it lazily as needed. */
+                        style.sortkeys = sv_2mortal(newSVpvs("Data::Dumper::_sortkeys"));
+                    else
+                        /* flag to use sortsv() for sorting hash keys */
+                        style.sortkeys = &PL_sv_yes;
 		}
 		postav = newAV();
 
@@ -1525,7 +1532,7 @@ Data_Dumper_Dumpxs(href, ...)
 			sv_catpvn(name, tmpbuf, nchars);
 		    }
 		
-		    if (indent >= 2 && !terse) {
+                    if (style.indent >= 2 && !terse) {
 			SV * const tmpsv = sv_x(aTHX_ NULL, " ", 1, SvCUR(name)+3);
 			newapad = newSVsv(apad);
 			sv_catsv(newapad, tmpsv);
@@ -1536,13 +1543,10 @@ Data_Dumper_Dumpxs(href, ...)
 		
 		    PUTBACK;
 		    DD_dump(aTHX_ val, SvPVX_const(name), SvCUR(name), valstr, seenhv,
-			    postav, &level, indent, pad, xpad, newapad, sep, pair,
-			    freezer, toaster, purity, deepcopy, quotekeys,
-			    bless, maxdepth, sortkeys, use_sparse_seen_hash,
-			    useqq, maxrecurse);
+                            postav, 0, newapad, &style);
 		    SPAGAIN;
 		
-		    if (indent >= 2 && !terse)
+                    if (style.indent >= 2 && !terse)
 			SvREFCNT_dec(newapad);
 
 		    postlen = av_len(postav);
@@ -1551,12 +1555,12 @@ Data_Dumper_Dumpxs(href, ...)
 			sv_insert(valstr, 0, 0, SvPVX_const(name), SvCUR(name));
 			sv_catpvs(valstr, ";");
 		    }
-		    sv_catsv(retval, pad);
+                    sv_catsv(retval, style.pad);
 		    sv_catsv(retval, valstr);
-		    sv_catsv(retval, sep);
+                    sv_catsv(retval, style.sep);
 		    if (postlen >= 0) {
 			SSize_t i;
-			sv_catsv(retval, pad);
+                        sv_catsv(retval, style.pad);
 			for (i = 0; i <= postlen; ++i) {
 			    SV *elem;
 			    svp = av_fetch(postav, i, FALSE);
@@ -1564,13 +1568,13 @@ Data_Dumper_Dumpxs(href, ...)
 				sv_catsv(retval, elem);
 				if (i < postlen) {
 				    sv_catpvs(retval, ";");
-				    sv_catsv(retval, sep);
-				    sv_catsv(retval, pad);
+                                    sv_catsv(retval, style.sep);
+                                    sv_catsv(retval, style.pad);
 				}
 			    }
 			}
 			sv_catpvs(retval, ";");
-			    sv_catsv(retval, sep);
+                        sv_catsv(retval, style.sep);
 		    }
 		    sv_setpvn(valstr, "", 0);
 		    if (gimme == G_ARRAY) {
