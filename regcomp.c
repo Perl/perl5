@@ -14424,9 +14424,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     ret = reganode(pRExC_state,
                    (LOC)
                     ? ANYOFL
-                    : (DEPENDS_SEMANTICS)
-                      ? ANYOFD
-                      : ANYOF,
+                    : ANYOF,
                    0);
 
     if (SIZE_ONLY) {
@@ -16016,14 +16014,83 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         }
     }
 
+#define MATCHES_ALL_NON_UTF8_NON_ASCII(ret)                                 \
+    (   DEPENDS_SEMANTICS                                                   \
+     && ANYOF_FLAGS(ret)                                                    \
+        & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)
+
+    /* See if we can simplify things under /d */
+    if (   has_upper_latin1_only_utf8_matches
+        || MATCHES_ALL_NON_UTF8_NON_ASCII(ret))
+    {
+        if (has_upper_latin1_only_utf8_matches) {
+            if (MATCHES_ALL_NON_UTF8_NON_ASCII(ret)) {
+
+                /* Here, we have two, almost opposite, constraints in effect
+                 * for upper latin1 characters.  The macro means they all match
+                 * when the target string ISN'T in UTF-8.
+                 * 'has_upper_latin1_only_utf8_matches' contains the chars that
+                 * match only if the target string IS UTF-8.  Therefore the
+                 * ones in 'has_upper_latin1_only_utf8_matches' match
+                 * regardless of UTF-8, so can be added to the regular list,
+                 * and 'has_upper_latin1_only_utf8_matches' cleared */
+                _invlist_union(cp_list,
+                               has_upper_latin1_only_utf8_matches,
+                               &cp_list);
+                SvREFCNT_dec_NN(has_upper_latin1_only_utf8_matches);
+                has_upper_latin1_only_utf8_matches = NULL;
+            }
+            else if (cp_list) {
+
+                /* Here, 'cp_list' gives chars that always match, and
+                 * 'has_upper_latin1_only_utf8_matches' gives chars that were
+                 * specified to match only if the target string is in UTF-8.
+                 * It may be that these overlap, so we can subtract the
+                 * unconditionally matching from the conditional ones, to make
+                 * the conditional list as small as possible, perhaps even
+                 * clearing it, in which case more optimizations are possible
+                 * later */
+                _invlist_subtract(has_upper_latin1_only_utf8_matches,
+                                  cp_list,
+                                  &has_upper_latin1_only_utf8_matches);
+                if (_invlist_len(has_upper_latin1_only_utf8_matches) == 0) {
+                    SvREFCNT_dec_NN(has_upper_latin1_only_utf8_matches);
+                    has_upper_latin1_only_utf8_matches = NULL;
+                }
+            }
+        }
+
+        /* Similarly, if the unconditional matches include every upper latin1
+         * character, we can clear that flag to permit later optimizations */
+        if (cp_list && MATCHES_ALL_NON_UTF8_NON_ASCII(ret)) {
+            SV* only_non_utf8_list = invlist_clone(PL_UpperLatin1);
+            _invlist_subtract(only_non_utf8_list, cp_list, &only_non_utf8_list);
+            if (_invlist_len(only_non_utf8_list) == 0) {
+                ANYOF_FLAGS(ret) &= ~ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
+            }
+            SvREFCNT_dec_NN(only_non_utf8_list);
+            only_non_utf8_list = NULL;;
+        }
+
+        /* If we haven't gotten rid of all conditional matching, we change the
+         * regnode type to indicate that */
+        if (   has_upper_latin1_only_utf8_matches
+            || MATCHES_ALL_NON_UTF8_NON_ASCII(ret))
+        {
+            OP(ret) = ANYOFD;
+            optimizable = FALSE;
+        }
+    }
+#undef MATCHES_ALL_NON_UTF8_NON_ASCII
+
     /* Optimize inverted simple patterns (e.g. [^a-z]) when everything is known
      * at compile time.  Besides not inverting folded locale now, we can't
      * invert if there are things such as \w, which aren't known until runtime
      * */
     if (cp_list
         && invert
+        && OP(ret) != ANYOFD
         && ! (ANYOF_FLAGS(ret) & (ANYOF_LOCALE_FLAGS))
-	&& ! has_upper_latin1_only_utf8_matches
 	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
     {
         _invlist_invert(cp_list);
@@ -16072,7 +16139,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * space).  _invlistEQ() could be used if one ever wanted to do something
      * like this at this point in the code */
 
-    if (optimizable && cp_list && ! invert && ! has_upper_latin1_only_utf8_matches) {
+    if (optimizable && cp_list && ! invert) {
         UV start, end;
         U8 op = END;  /* The optimzation node-type */
         const char * cur_parse= RExC_parse;
