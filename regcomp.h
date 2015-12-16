@@ -443,17 +443,17 @@ struct regnode_ssc {
  * then.  Only set under /l; never in an SSC  */
 #define ANYOF_LOC_FOLD                          0x04
 
+/* Spare: 0x08 */
+
 /* If set, means to warn if runtime locale isn't a UTF-8 one.  Only under /l.
  * If set, none of INVERT, LOC_FOLD, POSIXL,
  * ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP can
  * be set.  Can be in an SSC */
-#define ANYOF_LOC_REQ_UTF8                      0x08
+#define ANYOF_LOC_REQ_UTF8                      0x10
 
 /* If set, the node matches every code point NUM_ANYOF_CODE_POINTS and above.
  * Can be in an SSC */
-#define ANYOF_MATCHES_ALL_ABOVE_BITMAP          0x10
-
-/* Spare: 0x20 */
+#define ANYOF_MATCHES_ALL_ABOVE_BITMAP          0x20
 
 /* Shared bit:
  *      Under /d it means the ANYOFD node matches more things if the target
