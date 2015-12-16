@@ -746,14 +746,14 @@ print $fh $to_warn_char, "\n";
 close $fh;
 EXPECT
 OPTION regex
-It is deprecated to use code point 0x80+; the permissible max is 0x7F+ at - line \d+.
-It is deprecated to use code point 0x80+; the permissible max is 0x7F+ in pattern match \(m//\) at - line \d+.
-It is deprecated to use code point 0x80+; the permissible max is 0x7F+ in regexp compilation at - line \d+.
-It is deprecated to use code point 0x80+; the permissible max is 0x7F+ in regexp compilation at - line \d+.
-It is deprecated to use code point 0x80+; the permissible max is 0x7F+ at - line \d+.
-It is deprecated to use code point 0x80+; the permissible max is 0x7F+ in regexp compilation at - line \d+.
+Use of code point 0x80+ is deprecated; the permissible max is 0x7F+ at - line \d+.
+Use of code point 0x80+ is deprecated; the permissible max is 0x7F+ in pattern match \(m//\) at - line \d+.
+Use of code point 0x80+ is deprecated; the permissible max is 0x7F+ in regexp compilation at - line \d+.
+Use of code point 0x80+ is deprecated; the permissible max is 0x7F+ in regexp compilation at - line \d+.
+Use of code point 0x80+ is deprecated; the permissible max is 0x7F+ at - line \d+.
+Use of code point 0x80+ is deprecated; the permissible max is 0x7F+ in regexp compilation at - line \d+.
 Operation "uc" returns its argument for non-Unicode code point 0x7F+ at - line \d+.
-It is deprecated to use code point 0x80+; the permissible max is 0x7F+ at - line \d+.
+Use of code point 0x80+ is deprecated; the permissible max is 0x7F+ at - line \d+.
 Operation "uc" returns its argument for non-Unicode code point 0x80+ at - line \d+.
 Code point 0x7F+ is not Unicode, may not be portable in print at - line \d+.
-It is deprecated to use code point 0x80+; the permissible max is 0x7F+ in print at - line \d+.
+Use of code point 0x80+ is deprecated; the permissible max is 0x7F+ in print at - line \d+.
