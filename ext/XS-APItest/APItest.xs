@@ -5067,3 +5067,12 @@ has_backrefs(SV *sv)
     OUTPUT:
         RETVAL
 
+#if defined(WIN32) && defined(PERL_IMPLICIT_SYS)
+
+const char *
+PerlDir_mapA(const char *path)
+
+const WCHAR *
+PerlDir_mapW(const WCHAR *wpath)
+
+#endif
