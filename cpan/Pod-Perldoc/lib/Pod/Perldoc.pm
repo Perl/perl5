@@ -1664,6 +1664,10 @@ sub pagers_guessing {
         push @pagers, qw( less.exe more.com< );
         unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
     }
+    elsif ( $self->is_amigaos) {
+        push @pagers, qw( /SYS/Utilities/MultiView /SYS/Utilities/More /C/TYPE );
+        unshift @pagers, "$ENV{PAGER}"  if $ENV{PAGER};
+    }
     else {
         if ($self->is_os2) {
           unshift @pagers, 'less', 'cmd /c more <';
