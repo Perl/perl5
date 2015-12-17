@@ -8,6 +8,8 @@ use Test::More 0.88;
 sub dies_ok (&@) {
   my ($code, $qr, $comment) = @_;
 
+  no warnings 'redefine';
+  local *Regexp::CARP_TRACE  = sub { "<regexp>" };
   my $lived = eval { $code->(); 1 };
 
   if ($lived) {
@@ -33,7 +35,9 @@ sub dies_ok (&@) {
   );
 }
 
-{
+SKIP: {
+  skip "Can't tell v-strings from strings until 5.8.1", 1
+    unless $] gt '5.008';
   my $string_hash = {
     Left   => 10,
     Shared => '= 2',
@@ -64,7 +68,9 @@ sub dies_ok (&@) {
   );
 }
 
-{
+SKIP: {
+  skip "Can't tell v-strings from strings until 5.8.1", 2
+    unless $] gt '5.008';
   my $string_hash = {
     Left   => 10,
     Shared => v50.44.60,
@@ -74,7 +80,8 @@ sub dies_ok (&@) {
   my $warning;
   local $SIG{__WARN__} = sub { $warning = join("\n",@_) };
 
-  my $req = CPAN::Meta::Requirements->from_string_hash($string_hash);
+  my $req = eval { CPAN::Meta::Requirements->from_string_hash($string_hash); };
+  is( $@, '', "vstring in string hash lives" );
 
   ok(
     $req->accepts_module(Shared => 'v50.44.60'),

@@ -1,9 +1,10 @@
+use 5.006; # keep at v5.6 for CPAN.pm
 use strict;
 use warnings;
 package CPAN::Meta::Requirements;
 # ABSTRACT: a set of version requirements for a CPAN dist
 
-our $VERSION = '2.133';
+our $VERSION = '2.140';
 
 #pod =head1 SYNOPSIS
 #pod
@@ -115,7 +116,7 @@ sub _version_object {
   if (not defined $version or (!ref($version) && $version eq '0')) {
     return $V0;
   }
-  elsif ( ref($version) eq 'version' || _isa_version($version) ) {
+  elsif ( ref($version) eq 'version' || ( ref($version) && _isa_version($version) ) ) {
     $vobj = $version;
   }
   else {
@@ -124,8 +125,14 @@ sub _version_object {
       my $magic = _find_magic_vstring( $version );
       $version = $magic if length $magic;
     }
+    # pad to 3 characters if before 5.8.1 and appears to be a v-string
+    if ( $] < 5.008001 && $version !~ /\A[0-9]/ && substr($version,0,1) ne 'v' && length($version) < 3 ) {
+      $version .= "\0" x (3 - length($version));
+    }
     eval {
       local $SIG{__WARN__} = sub { die "Invalid version: $_[0]" };
+      # avoid specific segfault on some older version.pm versions
+      die "Invalid version: $version" if $version eq 'version';
       $vobj = version->new($version);
     };
     if ( my $err = $@ ) {
@@ -218,7 +225,7 @@ BEGIN {
 
       return $self;
     };
-    
+
     no strict 'refs';
     *$to_add = $code;
   }
@@ -237,7 +244,7 @@ sub add_minimum {
       if $self->is_finalized;
 
     $self->{requirements}{ $name } =
-      CPAN::Meta::Requirements::_Range::Range->with_minimum($V0);
+      CPAN::Meta::Requirements::_Range::Range->with_minimum($V0, $name);
   }
   else {
     $version = $self->_version_object( $name, $version );
@@ -251,9 +258,9 @@ sub add_minimum {
 #pod
 #pod   $req->add_requirements( $another_req_object );
 #pod
-#pod This method adds all the requirements in the given CPAN::Meta::Requirements object
-#pod to the requirements object on which it was called.  If there are any conflicts,
-#pod an exception is thrown.
+#pod This method adds all the requirements in the given CPAN::Meta::Requirements
+#pod object to the requirements object on which it was called.  If there are any
+#pod conflicts, an exception is thrown.
 #pod
 #pod This method returns the requirements object.
 #pod
@@ -330,7 +337,7 @@ sub clear_requirement {
 #pod the format described in L<CPAN::Meta::Spec> or undef if the given module has no
 #pod requirements. This should only be used for informational purposes such as error
 #pod messages and should not be interpreted or used for comparison (see
-#pod L</accepts_module> instead.)
+#pod L</accepts_module> instead).
 #pod
 #pod =cut
 
@@ -339,6 +346,25 @@ sub requirements_for_module {
   my $entry = $self->__entry_for($module);
   return unless $entry;
   return $entry->as_string;
+}
+
+#pod =method structured_requirements_for_module
+#pod
+#pod   $req->structured_requirements_for_module( $module );
+#pod
+#pod This returns a data structure containing the version requirements for a given
+#pod module or undef if the given module has no requirements.  This should
+#pod not be used for version checks (see L</accepts_module> instead).
+#pod
+#pod Added in version 2.134.
+#pod
+#pod =cut
+
+sub structured_requirements_for_module {
+  my ($self, $module) = @_;
+  my $entry = $self->__entry_for($module);
+  return unless $entry;
+  return $entry->as_struct;
 }
 
 #pod =method required_modules
@@ -378,7 +404,7 @@ sub __modify_entry_for {
     if $fin and not $old;
 
   my $new = ($old || 'CPAN::Meta::Requirements::_Range::Range')
-          ->$method($version);
+          ->$method($version, $name);
 
   Carp::confess("can't modify finalized requirements")
     if $fin and $old->as_string ne $new->as_string;
@@ -589,36 +615,62 @@ sub from_string_hash {
 
   sub as_string { return "== $_[0]{version}" }
 
+  sub as_struct { return [ [ '==', "$_[0]{version}" ] ] }
+
   sub as_modifiers { return [ [ exact_version => $_[0]{version} ] ] }
+
+  sub _reject_requirements {
+    my ($self, $module, $error) = @_;
+    Carp::confess("illegal requirements for $module: $error")
+  }
 
   sub _clone {
     (ref $_[0])->_new( version->new( $_[0]{version} ) )
   }
 
   sub with_exact_version {
-    my ($self, $version) = @_;
+    my ($self, $version, $module) = @_;
+    $module = 'module' unless defined $module;
 
     return $self->_clone if $self->_accepts($version);
 
-    Carp::confess("illegal requirements: unequal exact version specified");
+    $self->_reject_requirements(
+      $module,
+      "can't be exactly $version when exact requirement is already $self->{version}",
+    );
   }
 
   sub with_minimum {
-    my ($self, $minimum) = @_;
+    my ($self, $minimum, $module) = @_;
+    $module = 'module' unless defined $module;
+
     return $self->_clone if $self->{version} >= $minimum;
-    Carp::confess("illegal requirements: minimum above exact specification");
+    $self->_reject_requirements(
+      $module,
+      "minimum $minimum exceeds exact specification $self->{version}",
+    );
   }
 
   sub with_maximum {
-    my ($self, $maximum) = @_;
+    my ($self, $maximum, $module) = @_;
+    $module = 'module' unless defined $module;
+
     return $self->_clone if $self->{version} <= $maximum;
-    Carp::confess("illegal requirements: maximum below exact specification");
+    $self->_reject_requirements(
+      $module,
+      "maximum $maximum below exact specification $self->{version}",
+    );
   }
 
   sub with_exclusion {
-    my ($self, $exclusion) = @_;
+    my ($self, $exclusion, $module) = @_;
+    $module = 'module' unless defined $module;
+
     return $self->_clone unless $exclusion == $self->{version};
-    Carp::confess("illegal requirements: excluded exact specification");
+    $self->_reject_requirements(
+      $module,
+      "tried to exclude $exclusion, which is already exactly specified",
+    );
   }
 }
 
@@ -655,61 +707,87 @@ sub from_string_hash {
     return \@mods;
   }
 
-  sub as_string {
+  sub as_struct {
     my ($self) = @_;
 
     return 0 if ! keys %$self;
-
-    return "$self->{minimum}" if (keys %$self) == 1 and exists $self->{minimum};
 
     my @exclusions = @{ $self->{exclusions} || [] };
 
     my @parts;
 
-    for my $pair (
+    for my $tuple (
       [ qw( >= > minimum ) ],
       [ qw( <= < maximum ) ],
     ) {
-      my ($op, $e_op, $k) = @$pair;
+      my ($op, $e_op, $k) = @$tuple;
       if (exists $self->{$k}) {
         my @new_exclusions = grep { $_ != $self->{ $k } } @exclusions;
         if (@new_exclusions == @exclusions) {
-          push @parts, "$op $self->{ $k }";
+          push @parts, [ $op, "$self->{ $k }" ];
         } else {
-          push @parts, "$e_op $self->{ $k }";
+          push @parts, [ $e_op, "$self->{ $k }" ];
           @exclusions = @new_exclusions;
         }
       }
     }
 
-    push @parts, map {; "!= $_" } @exclusions;
+    push @parts, map {; [ "!=", "$_" ] } @exclusions;
 
-    return join q{, }, @parts;
+    return \@parts;
+  }
+
+  sub as_string {
+    my ($self) = @_;
+
+    my @parts = @{ $self->as_struct };
+
+    return $parts[0][1] if @parts == 1 and $parts[0][0] eq '>=';
+
+    return join q{, }, map {; join q{ }, @$_ } @parts;
+  }
+
+  sub _reject_requirements {
+    my ($self, $module, $error) = @_;
+    Carp::confess("illegal requirements for $module: $error")
   }
 
   sub with_exact_version {
-    my ($self, $version) = @_;
+    my ($self, $version, $module) = @_;
+    $module = 'module' unless defined $module;
     $self = $self->_clone;
 
-    Carp::confess("illegal requirements: exact specification outside of range")
-      unless $self->_accepts($version);
+    unless ($self->_accepts($version)) {
+      $self->_reject_requirements(
+        $module,
+        "exact specification $version outside of range " . $self->as_string
+      );
+    }
 
     return CPAN::Meta::Requirements::_Range::Exact->_new($version);
   }
 
   sub _simplify {
-    my ($self) = @_;
+    my ($self, $module) = @_;
 
     if (defined $self->{minimum} and defined $self->{maximum}) {
       if ($self->{minimum} == $self->{maximum}) {
-        Carp::confess("illegal requirements: excluded all values")
-          if grep { $_ == $self->{minimum} } @{ $self->{exclusions} || [] };
+        if (grep { $_ == $self->{minimum} } @{ $self->{exclusions} || [] }) {
+          $self->_reject_requirements(
+            $module,
+            "minimum and maximum are both $self->{minimum}, which is excluded",
+          );
+        }
 
         return CPAN::Meta::Requirements::_Range::Exact->_new($self->{minimum})
       }
 
-      Carp::confess("illegal requirements: minimum exceeds maximum")
-        if $self->{minimum} > $self->{maximum};
+      if ($self->{minimum} > $self->{maximum}) {
+        $self->_reject_requirements(
+          $module,
+          "minimum $self->{minimum} exceeds maximum $self->{maximum}",
+        );
+      }
     }
 
     # eliminate irrelevant exclusions
@@ -728,7 +806,8 @@ sub from_string_hash {
   }
 
   sub with_minimum {
-    my ($self, $minimum) = @_;
+    my ($self, $minimum, $module) = @_;
+    $module = 'module' unless defined $module;
     $self = $self->_clone;
 
     if (defined (my $old_min = $self->{minimum})) {
@@ -737,11 +816,12 @@ sub from_string_hash {
       $self->{minimum} = $minimum;
     }
 
-    return $self->_simplify;
+    return $self->_simplify($module);
   }
 
   sub with_maximum {
-    my ($self, $maximum) = @_;
+    my ($self, $maximum, $module) = @_;
+    $module = 'module' unless defined $module;
     $self = $self->_clone;
 
     if (defined (my $old_max = $self->{maximum})) {
@@ -750,16 +830,17 @@ sub from_string_hash {
       $self->{maximum} = $maximum;
     }
 
-    return $self->_simplify;
+    return $self->_simplify($module);
   }
 
   sub with_exclusion {
-    my ($self, $exclusion) = @_;
+    my ($self, $exclusion, $module) = @_;
+    $module = 'module' unless defined $module;
     $self = $self->_clone;
 
     push @{ $self->{exclusions} ||= [] }, $exclusion;
 
-    return $self->_simplify;
+    return $self->_simplify($module);
   }
 
   sub _accepts {
@@ -789,7 +870,7 @@ CPAN::Meta::Requirements - a set of version requirements for a CPAN dist
 
 =head1 VERSION
 
-version 2.133
+version 2.140
 
 =head1 SYNOPSIS
 
@@ -889,9 +970,9 @@ This method returns the requirements object.
 
   $req->add_requirements( $another_req_object );
 
-This method adds all the requirements in the given CPAN::Meta::Requirements object
-to the requirements object on which it was called.  If there are any conflicts,
-an exception is thrown.
+This method adds all the requirements in the given CPAN::Meta::Requirements
+object to the requirements object on which it was called.  If there are any
+conflicts, an exception is thrown.
 
 This method returns the requirements object.
 
@@ -926,7 +1007,17 @@ This returns a string containing the version requirements for a given module in
 the format described in L<CPAN::Meta::Spec> or undef if the given module has no
 requirements. This should only be used for informational purposes such as error
 messages and should not be interpreted or used for comparison (see
-L</accepts_module> instead.)
+L</accepts_module> instead).
+
+=head2 structured_requirements_for_module
+
+  $req->structured_requirements_for_module( $module );
+
+This returns a data structure containing the version requirements for a given
+module or undef if the given module has no requirements.  This should
+not be used for version checks (see L</accepts_module> instead).
+
+Added in version 2.134.
 
 =head2 required_modules
 
@@ -1043,7 +1134,7 @@ method.
 =head2 Bugs / Feature Requests
 
 Please report any bugs or feature requests through the issue tracker
-at L<https://github.com/dagolden/CPAN-Meta-Requirements/issues>.
+at L<https://github.com/Perl-Toolchain-Gang/CPAN-Meta-Requirements/issues>.
 You will be notified automatically of any progress on your issue.
 
 =head2 Source Code
@@ -1051,9 +1142,9 @@ You will be notified automatically of any progress on your issue.
 This is open source software.  The code repository is available for
 public review and contribution under the terms of the license.
 
-L<https://github.com/dagolden/CPAN-Meta-Requirements>
+L<https://github.com/Perl-Toolchain-Gang/CPAN-Meta-Requirements>
 
-  git clone https://github.com/dagolden/CPAN-Meta-Requirements.git
+  git clone https://github.com/Perl-Toolchain-Gang/CPAN-Meta-Requirements.git
 
 =head1 AUTHORS
 
