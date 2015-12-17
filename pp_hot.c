@@ -3463,9 +3463,10 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, I32 gimme, int pass)
                     else
                         SvTEMP_off(sv);
                 }
-                else {
+                else if (!SvPADTMP(sv)) {
                     /* mortalise arg to avoid it being freed during save
-                     * stack unwinding */
+                     * stack unwinding. Pad tmps don't need mortalising as
+                     * they're never freed */
                     SvREFCNT_inc_simple_void_NN(sv);
                     /* equivalent of sv_2mortal(), except that:
                      *  * it assumes that the temps stack has already been

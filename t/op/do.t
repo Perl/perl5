@@ -293,4 +293,16 @@ SKIP: {
     }->(do { 1; delete $foo{bar} });
 }
 
+# A do block should FREETMPS on exit
+# RT #124248
+
+{
+    package p124248;
+    my $d = 0;
+    sub DESTROY { $d++ }
+    sub f { ::is($d, 1, "RT 124248"); }
+    f(do { 1; !!(my $x = bless []); });
+}
+
+
 done_testing();

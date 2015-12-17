@@ -2024,65 +2024,6 @@ PP(pp_dbstate)
 	return NORMAL;
 }
 
-/* S_leave_common: Common code that many functions in this file use on
-		   scope exit.
-
-   Process the return args on the stack in the range (mark+1..PL_stack_sp)
-   based on context, with any final args starting at newsp+1.
-   Args are mortal copied (or mortalied if lvalue) unless its safe to use
-   as-is, based on whether it has the specified flags. Note that most
-   callers specify flags as (SVs_PADTMP|SVs_TEMP), while leaveeval skips
-   SVs_PADTMP since its optree gets immediately freed, freeing its padtmps
-   at the same time.
-
-   Also, taintedness is cleared.
-*/
-
-STATIC void
-S_leave_common(pTHX_ SV **newsp, SV **mark, I32 gimme,
-			      U32 flags, bool lvalue)
-{
-    dSP;
-    PERL_ARGS_ASSERT_LEAVE_COMMON;
-
-    TAINT_NOT;
-    if (gimme == G_SCALAR) {
-	if (MARK < SP) {
-            SV *sv = *SP;
-
-	    *++newsp = ((SvFLAGS(sv) & flags) && SvREFCNT(sv) == 1
-                         && !SvMAGICAL(sv))
-			    ? sv 
-			    : lvalue
-				? sv_2mortal(SvREFCNT_inc_simple_NN(sv))
-				: sv_mortalcopy(sv);
-        }
-	else {
-	    EXTEND(newsp, 1);
-	    *++newsp = &PL_sv_undef;
-	}
-    }
-    else if (gimme == G_ARRAY) {
-	/* in case LEAVE wipes old return values */
-	while (++MARK <= SP) {
-            SV *sv = *MARK;
-	    if ((SvFLAGS(sv) & flags) && SvREFCNT(sv) == 1
-                         && !SvMAGICAL(sv))
-		*++newsp = sv;
-	    else {
-		*++newsp = lvalue
-			    ? sv_2mortal(SvREFCNT_inc_simple_NN(sv))
-			    : sv_mortalcopy(sv);
-		TAINT_NOT;	/* Each item is independent */
-	    }
-	}
-	/* When this function was called with MARK == newsp, we reach this
-	 * point with SP == newsp. */
-    }
-
-    PL_stack_sp = newsp;
-}
-
 
 PP(pp_enter)
 {
@@ -2114,8 +2055,8 @@ PP(pp_leave)
     if (gimme == G_VOID)
         PL_stack_sp = newsp;
     else
-        leave_common(newsp, newsp, gimme, SVs_PADTMP|SVs_TEMP,
-                               PL_op->op_private & OPpLVALUE);
+        leave_adjust_stacks(newsp, newsp, gimme,
+                                PL_op->op_private & OPpLVALUE ? 3 : 1);
 
     CX_LEAVE_SCOPE(cx);
     POPBASICBLK(cx);
@@ -2286,8 +2227,8 @@ PP(pp_leaveloop)
     if (gimme == G_VOID)
         PL_stack_sp = newsp;
     else
-        leave_common(newsp, MARK, gimme, SVs_PADTMP|SVs_TEMP,
-			       PL_op->op_private & OPpLVALUE);
+        leave_adjust_stacks(MARK, newsp, gimme,
+                                PL_op->op_private & OPpLVALUE ? 3 : 1);
 
     CX_LEAVE_SCOPE(cx);
     POPLOOP(cx);	/* Stack values are safe: release loop vars ... */
@@ -4279,7 +4220,7 @@ PP(pp_leaveeval)
     if (gimme == G_VOID)
         PL_stack_sp = newsp;
     else
-        leave_common(newsp, newsp, gimme, SVs_TEMP, FALSE);
+        leave_adjust_stacks(newsp, newsp, gimme, 0);
 
     /* the POPEVAL does a leavescope, which frees the optree associated
      * with eval, which if it frees the nextstate associated with
@@ -4374,7 +4315,7 @@ PP(pp_leavetry)
     if (gimme == G_VOID)
         PL_stack_sp = newsp;
     else
-        leave_common(newsp, newsp, gimme, SVs_PADTMP|SVs_TEMP, FALSE);
+        leave_adjust_stacks(newsp, newsp, gimme, 1);
     CX_LEAVE_SCOPE(cx);
     POPEVAL(cx);
     POPBLOCK(cx);
@@ -4417,7 +4358,7 @@ PP(pp_leavegiven)
     if (gimme == G_VOID)
         PL_stack_sp = newsp;
     else
-        leave_common(newsp, newsp, gimme, SVs_PADTMP|SVs_TEMP, FALSE);
+        leave_adjust_stacks(newsp, newsp, gimme, 1);
 
     CX_LEAVE_SCOPE(cx);
     POPGIVEN(cx);
@@ -5003,7 +4944,8 @@ PP(pp_leavewhen)
     if (gimme == G_VOID)
         PL_stack_sp = newsp;
     else
-        leave_common(newsp, newsp, gimme, SVs_PADTMP|SVs_TEMP, FALSE);
+        leave_adjust_stacks(newsp, newsp, gimme, 1);
+
     /* pop the WHEN, BLOCK and anything else before the GIVEN/FOR */
     assert(cxix < cxstack_ix);
     dounwind(cxix);

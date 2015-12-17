@@ -1631,7 +1631,6 @@
 #define dopoptoloop(a)		S_dopoptoloop(aTHX_ a)
 #define dopoptosub_at(a,b)	S_dopoptosub_at(aTHX_ a,b)
 #define dopoptowhen(a)		S_dopoptowhen(aTHX_ a)
-#define leave_common(a,b,c,d,e)	S_leave_common(aTHX_ a,b,c,d,e)
 #define make_matcher(a)		S_make_matcher(aTHX_ a)
 #define matcher_matches_sv(a,b)	S_matcher_matches_sv(aTHX_ a,b)
 #define num_overflow		S_num_overflow
