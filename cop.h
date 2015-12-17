@@ -687,9 +687,9 @@ struct block_format {
             PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[                    \
                     CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);           \
         POP_SAVEARRAY();						\
-        /* abandon @_ if it got reified */				\
         av = MUTABLE_AV(PAD_SVl(0));                                    \
         if (UNLIKELY(AvREAL(av))) 			                \
+            /* abandon @_ if it got reified */				\
             clear_defarray(av, 0);                                      \
         else {							        \
             CLEAR_ARGARRAY(av);			                        \
