@@ -1864,7 +1864,7 @@ esac
 
 : run the defines and the undefines, if any, but leave the file out there...
 touch optdef.sh
-grep -q '\\' optdef.sh
+grep '\\' optdef.sh >/dev/null 2>&1
 if test $? = 0; then
     echo "Configure does not support \\ in -D arguments"
     exit 1
