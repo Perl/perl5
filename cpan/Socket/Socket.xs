@@ -473,6 +473,65 @@ not_here(const char *s)
 
 #include "const-c.inc"
 
+#if defined(HAS_GETADDRINFO) && !defined(HAS_GAI_STRERROR)
+static const char *gai_strerror(int err)
+{
+  switch (err)
+  {
+#ifdef EAI_ADDRFAMILY
+  case EAI_ADDRFAMILY:
+    return "Address family for hostname is not supported.";
+#endif
+#ifdef EAI_AGAIN
+  case EAI_AGAIN:
+    return "The name could not be resolved at this time.";
+#endif
+#ifdef EAI_BADFLAGS
+  case EAI_BADFLAGS:
+    return "The flags parameter has an invalid value.";
+#endif
+#ifdef EAI_FAIL
+  case EAI_FAIL:
+    return "A non-recoverable error occurred while resolving the name.";
+#endif
+#ifdef EAI_FAMILY
+  case EAI_FAMILY:
+    return "The address family was not recognized or length is invalid.";
+#endif
+#ifdef EAI_MEMORY
+  case EAI_MEMORY:
+    return "A memory allocation failure occurred.";
+#endif
+#ifdef EAI_NODATA
+  case EAI_NODATA:
+    return "No address is associated with the hostname.";
+#endif
+#ifdef EAI_NONAME
+  case EAI_NONAME:
+    return "The name does not resolve for the supplied parameters.";
+#endif
+#ifdef EAI_OVERFLOW
+  case EAI_OVERFLOW:
+    return "An argument buffer overflowed.";
+#endif
+#ifdef EAI_SERVICE
+  case EAI_SERVICE:
+    return "The service parameter was not recognized for the specified socket type.";
+#endif
+#ifdef EAI_SOCKTYPE
+  case EAI_SOCKTYPE:
+    return "The specified socket type was not recognized.";
+#endif
+#ifdef EAI_SYSTEM
+  case EAI_SYSTEM:
+    return "A system error occurred - see errno.";
+#endif
+  default:
+    return "Unknown error in getaddrinfo().";
+  }
+}
+#endif
+
 #ifdef HAS_GETADDRINFO
 static SV *err_to_SV(pTHX_ int err)
 {
@@ -693,13 +752,13 @@ inet_aton(host)
 		ST(0) = sv_2mortal(newSVpvn((char *)&ip_address, sizeof(ip_address)));
 		XSRETURN(1);
 	}
-
+#ifdef HAS_GETHOSTBYNAME
 	phe = gethostbyname(host);
 	if (phe && phe->h_addrtype == AF_INET && phe->h_length == 4) {
 		ST(0) = sv_2mortal(newSVpvn((char *)phe->h_addr, phe->h_length));
 		XSRETURN(1);
 	}
-
+#endif
 	XSRETURN_UNDEF;
 	}
 

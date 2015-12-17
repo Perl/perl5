@@ -987,12 +987,8 @@ use File::Glob qw(:case);
     },
 
     'Socket' => {
-        'DISTRIBUTION' => 'PEVANS/Socket-2.020.tar.gz',
+        'DISTRIBUTION' => 'PEVANS/Socket-2.021.tar.gz',
         'FILES'        => q[cpan/Socket],
-
-        # https://rt.cpan.org/Ticket/Display.html?id=106797
-        # https://rt.cpan.org/Ticket/Display.html?id=107058
-        'CUSTOMIZED'   => [ qw[ Socket.pm Socket.xs ] ],
     },
 
     'Storable' => {
