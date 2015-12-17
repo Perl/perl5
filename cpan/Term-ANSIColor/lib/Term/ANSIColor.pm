@@ -1,7 +1,7 @@
 # Term::ANSIColor -- Color screen output using ANSI escape sequences.
 #
 # Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2005, 2006, 2008, 2009, 2010,
-#     2011, 2012, 2013, 2014 Russ Allbery <rra@cpan.org>
+#     2011, 2012, 2013, 2014, 2015 Russ Allbery <rra@cpan.org>
 # Copyright 1996 Zenin
 # Copyright 2012 Kurt Starsinic <kstarsinic@gmail.com>
 #
@@ -40,7 +40,7 @@ our $AUTOLOAD;
 # against circular module loading (not that we load any modules, but
 # consistency is good).
 BEGIN {
-    $VERSION = '4.03';
+    $VERSION = '4.04';
 
     # All of the basic supported constants, used in %EXPORT_TAGS.
     my @colorlist = qw(
@@ -475,7 +475,7 @@ sub colored {
     # empty segments, and then colorize each of the line sections.
     if (defined($EACHLINE)) {
         my @text = map { ($_ ne $EACHLINE) ? $attr . $_ . "\e[0m" : $_ }
-          grep { length($_) > 0 }
+          grep { length > 0 }
           split(m{ (\Q$EACHLINE\E) }xms, $string);
         return join(q{}, @text);
     } else {
@@ -536,9 +536,9 @@ sub colorstrip {
 # Returns: True if all the attributes are valid, false otherwise.
 sub colorvalid {
     my (@codes) = @_;
-    @codes = map { split(q{ }, lc($_)) } @codes;
+    @codes = map { split(q{ }, lc) } @codes;
     for my $code (@codes) {
-        if (!defined($ATTRIBUTES{$code}) && !defined($ALIASES{$code})) {
+        if (!(defined($ATTRIBUTES{$code}) || defined($ALIASES{$code}))) {
             return;
         }
     }
@@ -635,9 +635,9 @@ particular features and the versions of Perl that included them.
 
 =head2 Supported Colors
 
-Terminal emulators that support color divide into two types: ones that
+Terminal emulators that support color divide into three types: ones that
 support only eight colors, ones that support sixteen, and ones that
-support 256.  This module provides the ANSI escape codes all of them.
+support 256.  This module provides the ANSI escape codes for all of them.
 These colors are referred to as ANSI colors 0 through 7 (normal), 8
 through 15 (16-color), and 16 through 255 (256-color).
 
@@ -1190,9 +1190,13 @@ voice solutions.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1996 Zenin.  Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2005,
-2006, 2008, 2009, 2010, 2011, 2012, 2013, 2014 Russ Allbery
-<rra@cpan.org>.  Copyright 2012 Kurt Starsinic <kstarsinic@gmail.com>.
+Copyright 1996 Zenin
+
+Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2005, 2006, 2008, 2009, 2010,
+2011, 2012, 2013, 2014, 2015 Russ Allbery <rra@cpan.org>
+
+Copyright 2012 Kurt Starsinic <kstarsinic@gmail.com>
+
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.
 
