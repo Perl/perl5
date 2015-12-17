@@ -969,7 +969,7 @@ struct block {
         PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;             \
 	PL_curpm	 = cx->blk_oldpm;
 
-/* Continue a block elsewhere (NEXT and REDO). */
+/* Continue a block elsewhere (e.g. NEXT, REDO, GOTO). */
 #define TOPBLOCK(cx)							\
 	CX_DEBUG(cx, "TOP");						\
 	PL_stack_sp	 = PL_stack_base + cx->blk_oldsp,		\
