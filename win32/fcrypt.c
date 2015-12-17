@@ -1,6 +1,7 @@
 /* fcrypt.c */
 /* Copyright (C) 1993 Eric Young - see README for more details */
 #include <stdio.h>
+#include <errno.h>
 
 /* Eric Young.
  * This version of crypt has been developed from my MIT compatable
@@ -464,6 +465,14 @@ unsigned const char cov_2char[64]={
 0x73,0x74,0x75,0x76,0x77,0x78,0x79,0x7A
 };
 
+/* the salt for classic DES crypt (which is all we implement here)
+   permits [./0-9A-Za-z], since '.' and '/' immediately preceed
+   '0' we don't need individual checks for '.' and '/' 
+*/
+#define good_for_salt(c) \
+    ((c) >= '.' && (c) <= '9' || (c) >= 'A' && (c) <= 'Z' ||  \
+     (c) >= 'a' && (c) <= 'z')
+
 char *
 des_fcrypt(const char *buf, const char *salt, char *buff)
 	{
@@ -475,6 +484,11 @@ des_fcrypt(const char *buf, const char *salt, char *buff)
 	unsigned char bb[9];
 	unsigned char *b=bb;
 	unsigned char c,u;
+
+        if (!good_for_salt(salt[0]) || !good_for_salt(salt[1])) {
+            errno = EINVAL;
+            return NULL;
+        }
 
 	/* eay 25/08/92
 	 * If you call crypt("pwd","*") as often happens when you
