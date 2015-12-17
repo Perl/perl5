@@ -5,7 +5,7 @@ package CPAN::Meta::YAML; # git description: v1.68-2-gcc5324e
 # XXX-INGY is 5.8.1 too old/broken for utf8?
 # XXX-XDG Lancaster consensus was that it was sufficient until
 # proven otherwise
-$CPAN::Meta::YAML::VERSION = '0.017'; # TRIAL
+$CPAN::Meta::YAML::VERSION = '0.018';
 ; # original $VERSION removed by Doppelgaenger
 
 #####################################################################
@@ -878,7 +878,7 @@ CPAN::Meta::YAML - Read and write a subset of YAML for CPAN Meta files
 
 =head1 VERSION
 
-version 0.017
+version 0.018
 
 =head1 SYNOPSIS
 
