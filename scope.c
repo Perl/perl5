@@ -298,6 +298,19 @@ Perl_save_set_svflags(pTHX_ SV* sv, U32 mask, U32 val)
     SS_ADD_END(4);
 }
 
+/*
+=for apidoc save_gp
+
+Saves the current GP of gv on the save stack to be restored on scope exit.
+
+If empty is true, replace the GP with a new GP.
+
+If empty is false, mark gv with GVf_INTRO so the next reference
+assigned is localized, which is how C< local *foo = $someref; > works.
+
+=cut
+*/
+
 void
 Perl_save_gp(pTHX_ GV *gv, I32 empty)
 {

@@ -151,6 +151,10 @@ Return the CV from the GV.
 #define GvENAME_HEK(gv) GvNAME_HEK(GvEGV(gv) ? GvEGV(gv) : gv)
 #define GvESTASH(gv)	GvSTASH(GvEGV(gv) ? GvEGV(gv) : gv)
 
+/* GVf_INTRO is one-shot flag which indicates that the next assignment
+   of a reference to the glob is to be localised; it distinguishes
+   'local *g = $ref' from '*g = $ref'.
+*/
 #define GVf_INTRO	0x01
 #define GVf_MULTI	0x02
 #define GVf_ASSUMECV	0x04
