@@ -1505,6 +1505,15 @@ S_dopoptowhen(pTHX_ I32 startingblock)
     return i;
 }
 
+/* dounwind(): pop all contexts above (but not including) cxix.
+ * Leaves cxstack_ix equal to cxix. Note that for efficiency, it doesn't
+ * call POPBLOCK at all; the caller should do
+ *     CX_LEAVE_SCOPE; POPFOO; POPBLOCK
+ * or
+ *     TOPBLOCK
+ * as appropriate.
+ */
+
 void
 Perl_dounwind(pTHX_ I32 cxix)
 {
