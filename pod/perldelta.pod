@@ -378,6 +378,17 @@ change.  We do not believe any such files are in existence, but if you
 do have one, submit a ticket at L<mailto:perlbug@perl.org>, and we will
 write a conversion script for you.
 
+=item OS X/Darwin
+
+Builds with both -DDEBUGGING and threading enabled would fail with a
+"panic: free from wrong pool" error when built or tested from Terminal
+on OS X.  This was caused by perl's internal management of the
+environment conflicting with an atfork handler using the libc
+setenv() function to update the environment.
+
+Perl now uses setenv()/unsetenv() to update the environment on OS X.
+[perl #126240]
+
 =back
 
 =head1 Internal Changes
