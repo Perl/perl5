@@ -14,6 +14,8 @@ Scalar-List-Utils cpan/Scalar-List-Utils/lib/List/Util/XS.pm 08abbe1a707927cee53
 Scalar-List-Utils cpan/Scalar-List-Utils/lib/Scalar/Util.pm 7f1e6eb11105623200ef9cdcb881545ccb769ded
 Scalar-List-Utils cpan/Scalar-List-Utils/lib/Sub/Util.pm d87811528ae3587f04e2f09894b8c88471754386
 Scalar-List-Utils cpan/Scalar-List-Utils/ListUtil.xs ed25abc419771d6f3f12323f1f0a372f043d51b2
+Socket cpan/Socket/Socket.pm bdc42a2bd5cb560ed1120a3e6f408ed7ece14dce
+Socket cpan/Socket/Socket.xs 6102315291684e56e360ff5e0dd237c9394c49b8
 Win32API::File cpan/Win32API-File/buffers.h 02d230ac9ac7091365128161a0ed671898baefae
 Win32API::File cpan/Win32API-File/cFile.h fca7e383e76979c3ac3adf12d11d1bcd2618e489
 Win32API::File cpan/Win32API-File/cFile.pc 992421eea7782a5957b64f66764f6ffb5093bee4
