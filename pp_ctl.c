@@ -1664,7 +1664,7 @@ Perl_die_unwind(pTHX_ SV *msv)
 	if (cxix >= 0) {
             SV *namesv = NULL;
 	    PERL_CONTEXT *cx;
-	    SV **newsp;
+	    SV **oldsp;
             I32 gimme;
 	    JMPENV *restartjmpenv;
 	    OP *restartop;
@@ -1676,11 +1676,11 @@ Perl_die_unwind(pTHX_ SV *msv)
             assert(CxTYPE(cx) == CXt_EVAL);
 
             /* return false to the caller of eval */
-            newsp = PL_stack_base + cx->blk_oldsp;
+            oldsp = PL_stack_base + cx->blk_oldsp;
             gimme = cx->blk_gimme;
 	    if (gimme == G_SCALAR)
-		*++newsp = &PL_sv_undef;
-	    PL_stack_sp = newsp;
+		*++oldsp = &PL_sv_undef;
+	    PL_stack_sp = oldsp;
 
             CX_LEAVE_SCOPE(cx);
 	    POPEVAL(cx);
@@ -2040,7 +2040,7 @@ PP(pp_enter)
 PP(pp_leave)
 {
     PERL_CONTEXT *cx;
-    SV **newsp;
+    SV **oldsp;
     I32 gimme;
 
     cx = CX_CUR();
@@ -2049,13 +2049,13 @@ PP(pp_leave)
     if (PL_op->op_flags & OPf_SPECIAL)
 	cx->blk_oldpm = PL_curpm; /* fake block should preserve $1 et al */
 
-    newsp = PL_stack_base + cx->blk_oldsp;
+    oldsp = PL_stack_base + cx->blk_oldsp;
     gimme = cx->blk_gimme;
 
     if (gimme == G_VOID)
-        PL_stack_sp = newsp;
+        PL_stack_sp = oldsp;
     else
-        leave_adjust_stacks(newsp, newsp, gimme,
+        leave_adjust_stacks(oldsp, oldsp, gimme,
                                 PL_op->op_private & OPpLVALUE ? 3 : 1);
 
     CX_LEAVE_SCOPE(cx);
@@ -2213,21 +2213,21 @@ PP(pp_leaveloop)
 {
     PERL_CONTEXT *cx;
     I32 gimme;
-    SV **newsp;
+    SV **oldsp;
     SV **mark;
 
     cx = CX_CUR();
     assert(CxTYPE_is_LOOP(cx));
     mark = PL_stack_base + cx->blk_oldsp;
-    newsp = CxTYPE(cx) == CXt_LOOP_LIST
+    oldsp = CxTYPE(cx) == CXt_LOOP_LIST
                 ? PL_stack_base + cx->blk_loop.state_u.stack.basesp
                 : mark;
     gimme = cx->blk_gimme;
 
     if (gimme == G_VOID)
-        PL_stack_sp = newsp;
+        PL_stack_sp = oldsp;
     else
-        leave_adjust_stacks(MARK, newsp, gimme,
+        leave_adjust_stacks(MARK, oldsp, gimme,
                                 PL_op->op_private & OPpLVALUE ? 3 : 1);
 
     CX_LEAVE_SCOPE(cx);
@@ -4192,7 +4192,7 @@ PP(pp_entereval)
 
 PP(pp_leaveeval)
 {
-    SV **newsp;
+    SV **oldsp;
     I32 gimme;
     PERL_CONTEXT *cx;
     OP *retop;
@@ -4206,21 +4206,21 @@ PP(pp_leaveeval)
     cx = CX_CUR();
     assert(CxTYPE(cx) == CXt_EVAL);
 
-    newsp = PL_stack_base + cx->blk_oldsp;
+    oldsp = PL_stack_base + cx->blk_oldsp;
     gimme = cx->blk_gimme;
 
     /* did require return a false value? */
     if (       CxOLD_OP_TYPE(cx) == OP_REQUIRE
             && !(gimme == G_SCALAR
                     ? SvTRUE(*PL_stack_sp)
-                : PL_stack_sp > newsp)
+                : PL_stack_sp > oldsp)
     )
         namesv = cx->blk_eval.old_namesv;
 
     if (gimme == G_VOID)
-        PL_stack_sp = newsp;
+        PL_stack_sp = oldsp;
     else
-        leave_adjust_stacks(newsp, newsp, gimme, 0);
+        leave_adjust_stacks(oldsp, oldsp, gimme, 0);
 
     /* the POPEVAL does a leavescope, which frees the optree associated
      * with eval, which if it frees the nextstate associated with
@@ -4300,7 +4300,7 @@ PP(pp_entertry)
 
 PP(pp_leavetry)
 {
-    SV **newsp;
+    SV **oldsp;
     I32 gimme;
     PERL_CONTEXT *cx;
     OP *retop;
@@ -4309,13 +4309,13 @@ PP(pp_leavetry)
 
     cx = CX_CUR();
     assert(CxTYPE(cx) == CXt_EVAL);
-    newsp = PL_stack_base + cx->blk_oldsp;
+    oldsp = PL_stack_base + cx->blk_oldsp;
     gimme = cx->blk_gimme;
 
     if (gimme == G_VOID)
-        PL_stack_sp = newsp;
+        PL_stack_sp = oldsp;
     else
-        leave_adjust_stacks(newsp, newsp, gimme, 1);
+        leave_adjust_stacks(oldsp, oldsp, gimme, 1);
     CX_LEAVE_SCOPE(cx);
     POPEVAL(cx);
     POPBLOCK(cx);
@@ -4347,18 +4347,18 @@ PP(pp_leavegiven)
 {
     PERL_CONTEXT *cx;
     I32 gimme;
-    SV **newsp;
+    SV **oldsp;
     PERL_UNUSED_CONTEXT;
 
     cx = CX_CUR();
     assert(CxTYPE(cx) == CXt_GIVEN);
-    newsp = PL_stack_base + cx->blk_oldsp;
+    oldsp = PL_stack_base + cx->blk_oldsp;
     gimme = cx->blk_gimme;
 
     if (gimme == G_VOID)
-        PL_stack_sp = newsp;
+        PL_stack_sp = oldsp;
     else
-        leave_adjust_stacks(newsp, newsp, gimme, 1);
+        leave_adjust_stacks(oldsp, oldsp, gimme, 1);
 
     CX_LEAVE_SCOPE(cx);
     POPGIVEN(cx);
@@ -4928,7 +4928,7 @@ PP(pp_leavewhen)
     I32 cxix;
     PERL_CONTEXT *cx;
     I32 gimme;
-    SV **newsp;
+    SV **oldsp;
 
     cx = CX_CUR();
     assert(CxTYPE(cx) == CXt_WHEN);
@@ -4940,11 +4940,11 @@ PP(pp_leavewhen)
 	DIE(aTHX_ "Can't \"%s\" outside a topicalizer",
 	           PL_op->op_flags & OPf_SPECIAL ? "default" : "when");
 
-    newsp = PL_stack_base + cx->blk_oldsp;
+    oldsp = PL_stack_base + cx->blk_oldsp;
     if (gimme == G_VOID)
-        PL_stack_sp = newsp;
+        PL_stack_sp = oldsp;
     else
-        leave_adjust_stacks(newsp, newsp, gimme, 1);
+        leave_adjust_stacks(oldsp, oldsp, gimme, 1);
 
     /* pop the WHEN, BLOCK and anything else before the GIVEN/FOR */
     assert(cxix < cxstack_ix);
