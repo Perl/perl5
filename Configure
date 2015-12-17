@@ -6967,7 +6967,15 @@ int main() {
     exit(0);
   }
   if (b[0] == 0xBF && b[9] == 0xCD) {
-    /* is there ever big-endian 80-bit, really? */
+    /* Is there ever big-endian 80-bit, really?
+     *
+     * The Motorola 68881 had another "extended precision" format:
+     * sign:1 exp:15 zero:16 integer:1 mantissa:63
+     * for total of 96 bits of bytes.  The zero bits were unused.
+     * See "M68000 FAMILY PROGRAMMER’S REFERENCE MANUAL" for more details.
+     * If it ever becomes relevant, this format should be allocated
+     * a new doublekind code since it's quite different from the Intel x87.
+     */
     printf("4\n");
     exit(0);
   }
