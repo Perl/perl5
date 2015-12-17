@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 use warnings;
-plan(tests => 193);
+plan(tests => 195);
 
 # these shouldn't hang
 {
@@ -1126,4 +1126,15 @@ pass "no crash when sort block deletes *a and *b";
     ::is (join('-', sort f1 3,1,2,4), '1-2-3-4', "Ret: f1");
     ::is (join('-', sort f2 3,1,2,4), '1-2-3-4', "Ret: f2");
     ::is (join('-', sort f3 3,1,2,4), '1-2-3-4', "Ret: f3");
+}
+
+{
+    @a = sort{ *a=0; 1} 0..1;
+    pass "No crash when GP deleted out from under us [perl 124097]";
+
+    no warnings 'redefine';
+    # some alternative non-solutions localized modifications to *a and *b
+    sub a { 0 };
+    @a = sort { *a = sub { 1 }; $a <=> $b } 0 .. 1;
+    ok(a(), "*a wasn't localized inadvertantly");
 }

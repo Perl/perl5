@@ -1657,6 +1657,13 @@ PP(pp_sort)
 		PL_secondgv = MUTABLE_GV(SvREFCNT_inc(
 		    gv_fetchpvs("b", GV_ADD|GV_NOTQUAL, SVt_PV)
 		));
+                /* make sure the GP isn't removed out from under us for
+                 * the SAVESPTR() */
+                save_gp(PL_firstgv, 0);
+                save_gp(PL_secondgv, 0);
+                /* we don't want modifications localized */
+                GvINTRO_off(PL_firstgv);
+                GvINTRO_off(PL_secondgv);
 		SAVESPTR(GvSV(PL_firstgv));
 		SAVESPTR(GvSV(PL_secondgv));
 	    }
