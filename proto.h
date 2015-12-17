@@ -4853,6 +4853,9 @@ PERL_CALLCONV void	Perl__invlist_dump(pTHX_ PerlIO *file, I32 level, const char*
 	assert(file); assert(indent); assert(invlist)
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
+PERL_CALLCONV bool	Perl__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b);
+#define PERL_ARGS_ASSERT__INVLISTEQ	\
+	assert(a); assert(b)
 PERL_CALLCONV SV*	Perl__new_invlist_C_array(pTHX_ const UV* const list)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT__NEW_INVLIST_C_ARRAY	\

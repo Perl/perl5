@@ -1170,7 +1170,7 @@ Ap	|SV*	|regclass_swash	|NULLOK const regexp *prog \
 				|NULLOK SV **listsvp|NULLOK SV **altsvp
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
 AMpR	|SV*	|_new_invlist_C_array|NN const UV* const list
-: Not used currently: EXMs	|bool	|_invlistEQ	|NN SV* const a|NN SV* const b|const bool complement_b
+EXMp	|bool	|_invlistEQ	|NN SV* const a|NN SV* const b|const bool complement_b
 #endif
 Ap	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg \

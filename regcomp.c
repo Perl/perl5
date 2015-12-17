@@ -9383,7 +9383,7 @@ Perl__load_PL_utf8_foldclosures (pTHX)
 
 #ifdef PERL_ARGS_ASSERT__INVLISTEQ
 bool
-S__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b)
+Perl__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b)
 {
     /* Return a boolean as to if the two passed in inversion lists are
      * identical.  The final argument, if TRUE, says to take the complement of
@@ -16137,6 +16137,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     if (optimizable && cp_list && ! invert) {
         UV start, end;
         U8 op = END;  /* The optimzation node-type */
+        int posix_class;
         const char * cur_parse= RExC_parse;
 
         invlist_iterinit(cp_list);
@@ -16219,6 +16220,37 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         }
         invlist_iterfinish(cp_list);
 
+        if (op == END) {
+
+            /* Here, didn't find an optimization.  See if this matches any of
+             * the POSIX classes.  These run slightly faster for above-Unicode
+             * code points, so don't bother with POSIXA ones nor the 2 that
+             * have no above-Unicode matches */
+            for (posix_class = 0;
+                 posix_class <= _HIGHEST_REGCOMP_DOT_H_SYNC;
+                 posix_class++)
+            {
+                int try_inverted;
+                if (posix_class == _CC_ASCII || posix_class == _CC_CNTRL) {
+                    continue;
+                }
+                for (try_inverted = 0; try_inverted < 2; try_inverted++) {
+
+                    /* Check if matches normal or inverted */
+                    if (_invlistEQ(cp_list,
+                                   PL_XPosix_ptrs[posix_class],
+                                   try_inverted))
+                    {
+                        op = (try_inverted)
+                             ? NPOSIXU
+                             : POSIXU;
+                        *flagp |= HASWIDTH|SIMPLE;
+                        goto found_posix;
+                    }
+                }
+            }
+          found_posix: ;
+        }
         if (op != END) {
             RExC_parse = (char *)orig_parse;
             RExC_emit = (regnode *)orig_emit;
@@ -16235,6 +16267,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, 0, value,
                                            TRUE /* downgradable to EXACT */
                                           );
+            }
+            else if (PL_regkind[op] == POSIXD || PL_regkind[op] == NPOSIXD) {
+                FLAGS(ret) = posix_class;
             }
 
             SvREFCNT_dec_NN(cp_list);
