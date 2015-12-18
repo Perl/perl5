@@ -326,6 +326,11 @@ L</Modules and Pragmata> section.
 
 XXX
 
+=item ppc64el floating point
+
+The floating point format of ppc64el (Debian naming for little-endian
+PowerPC) is now detected correctly.
+
 =back
 
 =head1 Internal Changes
