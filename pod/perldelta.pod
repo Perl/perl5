@@ -469,6 +469,14 @@ memory.  This was caused by a pointer not being restored correctly.
 C<< @x = sort { *a = 0; $a <=> $b } 0 .. 1 >> no longer frees the GP
 for *a before restoring its SV slot.  [perl #124097]
 
+=item *
+
+Multiple problems with the new hexadecimal floating point printf
+format C<%a> were fixed:
+L<[perl #126582]|https://rt.perl.org/Ticket/Display.html?id=126582>,
+L<[perl #126586]|https://rt.perl.org/Ticket/Display.html?id=126586>,
+L<[perl #126822]|https://rt.perl.org/Ticket/Display.html?id=126822>
+
 =back
 
 =head1 Known Problems
