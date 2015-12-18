@@ -2796,7 +2796,7 @@ PP(pp_goto)
 		SP += items;
 		if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
 		    /* Restore old @_ */
-                    POP_SAVEARRAY();
+                    POP_SAVEARRAY(cx);
 		}
 
 		retop = cx->blk_sub.retop;

@@ -647,7 +647,7 @@ struct block_format {
 	SvREFCNT_inc_void(cx->blk_format.dfoutgv)
 
 /* Restore old @_ */
-#define POP_SAVEARRAY()						\
+#define POP_SAVEARRAY(cx)						\
     STMT_START {							\
         AV *av = GvAV(PL_defgv);                                        \
 	GvAV(PL_defgv) = cx->blk_sub.savearray;				\
@@ -686,7 +686,7 @@ struct block_format {
         assert(AvARRAY(MUTABLE_AV(                                      \
             PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[                    \
                     CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);           \
-        POP_SAVEARRAY();						\
+        POP_SAVEARRAY(cx);						\
         av = MUTABLE_AV(PAD_SVl(0));                                    \
         if (UNLIKELY(AvREAL(av))) 			                \
             /* abandon @_ if it got reified */				\
