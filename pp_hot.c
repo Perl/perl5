@@ -2647,7 +2647,11 @@ PP(pp_iter)
             goto retno;
 
         oldsv = *itersvp;
-        if (LIKELY(SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv))) {
+        /* NB: on the first iteration, oldsv will have a ref count of at
+         * least 2 (one extra from blk_loop.itersave), so the GV or pad
+         * slot will get localised; on subsequent iterations the RC==1
+         * optimisation may kick in and the SV will be reused. */
+         if (oldsv && LIKELY(SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv))) {
             /* safe to reuse old SV */
             sv_setsv(oldsv, cur);
         }
@@ -2657,7 +2661,7 @@ PP(pp_iter)
              * completely new SV for closures/references to work as
              * they used to */
             *itersvp = newSVsv(cur);
-            SvREFCNT_dec_NN(oldsv);
+            SvREFCNT_dec(oldsv);
         }
         if (strEQ(SvPVX_const(cur), max))
             sv_setiv(cur, 0); /* terminate next time */
@@ -2673,8 +2677,8 @@ PP(pp_iter)
 	    goto retno;
 
         oldsv = *itersvp;
-	/* don't risk potential race */
-	if (LIKELY(SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv))) {
+	/* see NB comment above */
+	if (oldsv && LIKELY(SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv))) {
 	    /* safe to reuse old SV */
 	    sv_setiv(oldsv, cur);
 	}
@@ -2684,7 +2688,7 @@ PP(pp_iter)
 	     * completely new SV for closures/references to work as they
 	     * used to */
 	    *itersvp = newSViv(cur);
-	    SvREFCNT_dec_NN(oldsv);
+	    SvREFCNT_dec(oldsv);
 	}
 
 	if (UNLIKELY(cur == IV_MAX)) {

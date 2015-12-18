@@ -2123,12 +2123,8 @@ PP(pp_enteriter)
 	SV * const sv = POPs;
 	itervarp = (void *)sv;
         if (LIKELY(isGV(sv))) {		/* symbol table variable */
-            SV** svp = &GvSV(sv);
-            itersave = *svp;
-            if (LIKELY(itersave))
-                SvREFCNT_inc_simple_void_NN(itersave);
-            else
-                *svp = newSV(0);
+            itersave = GvSV(sv);
+            SvREFCNT_inc_simple_void(itersave);
             cxflags = CXp_FOR_GV;
         }
         else {                          /* LV ref: for \$foo (...) */

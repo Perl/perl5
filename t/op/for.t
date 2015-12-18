@@ -5,7 +5,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan(112);
+plan(124);
 
 # A lot of tests to check that reversed for works.
 
@@ -630,4 +630,44 @@ is(fscope(), 1, 'return via loop in sub');
         for $foo (1..2) {}
         ok(!defined $foo, "NULL GvSV int iterator");
     }
+}
+
+# RT #123994 - handle a null GVSV within a loop
+
+{
+    local *foo;
+    local $foo = "outside";
+
+    my $i = 0;
+    for $foo (0..1) {
+        is($foo, $i, "RT #123994 int range $i");
+        *foo = "";
+        $i++;
+    }
+    is($foo, "outside", "RT #123994 int range outside");
+
+    $i = 0;
+    for $foo ('0'..'1') {
+        is($foo, $i, "RT #123994 str range $i");
+        *foo = "";
+        $i++;
+    }
+    is($foo, "outside", "RT #123994 str range outside");
+
+    $i = 0;
+    for $foo (0, 1) {
+        is($foo, $i, "RT #123994 list $i");
+        *foo = "";
+        $i++;
+    }
+    is($foo, "outside", "RT #123994 list outside");
+
+    my @a = (0,1);
+    $i = 0;
+    for $foo (@a) {
+        is($foo, $i, "RT #123994 array $i");
+        *foo = "";
+        $i++;
+    }
+    is($foo, "outside", "RT #123994 array outside");
 }
