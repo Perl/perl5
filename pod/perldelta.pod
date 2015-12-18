@@ -402,6 +402,11 @@ setenv() function to update the environment.
 Perl now uses setenv()/unsetenv() to update the environment on OS X.
 [perl #126240]
 
+=item ppc64el floating point
+
+The floating point format of ppc64el (Debian naming for little-endian
+PowerPC) is now detected correctly.
+
 =back
 
 =head1 Internal Changes
