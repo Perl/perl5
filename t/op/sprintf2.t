@@ -674,10 +674,10 @@ SKIP: {
         unless ($Config{uselongdouble} &&
                 ($Config{longdblkind} == 5 ||
                  $Config{longdblkind} == 6)
-                # TODO: gating on 'linux' here is only due to lack of
-                # testing in other big-endian platforms (e.g. AIX or IRIX),
-                # with more evidence this subtest could be either relaxed
-                # or removed.
+                # Gating on 'linux' (ppc) here is due to the differing
+                # double-double implementations: other (also big-endian)
+                # double-double platforms (e.g. AIX on ppc or IRIX on mips)
+                # do not behave similarly.
                 && $^O eq 'linux'
                 );
     # [rt.perl.org 125633]
