@@ -2680,7 +2680,22 @@ PP(pp_iter)
 	/* see NB comment above */
 	if (oldsv && LIKELY(SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv))) {
 	    /* safe to reuse old SV */
-	    sv_setiv(oldsv, cur);
+
+            if (    (SvFLAGS(oldsv) & (SVTYPEMASK|SVf_THINKFIRST|SVf_IVisUV))
+                 == SVt_IV)
+            {
+                /* Cheap SvIOK_only().
+                 * Assert that flags which SvIOK_only() would test or
+                 * clear can't be set, because we're SVt_IV */
+                assert(!(SvFLAGS(oldsv) &
+                    (SVf_OOK|SVf_UTF8|(SVf_OK & ~(SVf_IOK|SVp_IOK)))));
+                SvFLAGS(oldsv) |= (SVf_IOK|SVp_IOK);
+                /* SvIV_set() where sv_any points to head */
+                oldsv->sv_u.svu_iv = cur;
+
+            }
+            else
+                sv_setiv(oldsv, cur);
 	}
 	else
 	{
