@@ -328,6 +328,17 @@ XXX Any changes to platform support should be listed in the sections below.
 [ Within the sections, list each platform as a =item entry with specific
 changes as paragraphs below it. ]
 
+=over 4
+
+=item All Solaris now builds shared libperl
+
+Solaris and variants like OpenIndiana now always build with the shared
+Perl library (Configure -Duseshrplib).  This was required for the
+OpenIndiana builds, but this has also been the setting for Oracle/Sun
+Perl builds for several years.
+
+=back
+
 =head2 New Platforms
 
 XXX List any platforms that this version of perl compiles on, that previous
@@ -337,9 +348,11 @@ source tree.
 
 =over 4
 
-=item XXX-some-platform
+=item OpenIndiana
 
-XXX
+OpenIndiana (continuation of OpenSolaris) builds were not working due
+to problems with the Perl shared library.  This should be working now.
+L<[perl #126958]|https://rt.perl.org/Ticket/Display.html?id=126958>
 
 =back
 
