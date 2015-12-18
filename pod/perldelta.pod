@@ -427,6 +427,11 @@ or later) will warn about suspicious uses of mutexes.
 See L<http://clang.llvm.org/docs/ThreadSafetyAnalysis.html> for more
 information.
 
+=item *
+
+The signbit() emulation has been enhanced.  This will help older
+and/or more exotic platforms or configurations.
+
 =back
 
 =head1 Selected Bug Fixes
