@@ -2145,9 +2145,14 @@ PP(pp_enteriter)
 
     PUSHBLOCK(cx, cxflags, MARK);
     PUSHLOOP_FOR(cx, itervarp, itersave);
+
     if (PL_op->op_flags & OPf_STACKED) {
+        /* OPf_STACKED implies either a single array: for(@), with a
+         * single AV on the stack, or a range: for (1..5), with 1 and 5 on
+         * the stack */
 	SV *maybe_ary = POPs;
 	if (SvTYPE(maybe_ary) != SVt_PVAV) {
+            /* range */
 	    dPOPss;
 	    SV * const right = maybe_ary;
 	    if (UNLIKELY(cxflags & CXp_FOR_LVREF))
@@ -2166,7 +2171,7 @@ PP(pp_enteriter)
 		cx->cx_type |= CXt_LOOP_LAZYSV;
 		cx->blk_loop.state_u.lazysv.cur = newSVsv(sv);
 		cx->blk_loop.state_u.lazysv.end = right;
-		SvREFCNT_inc(right);
+		SvREFCNT_inc_simple_void_NN(right);
 		(void) SvPV_force_nolen(cx->blk_loop.state_u.lazysv.cur);
 		/* This will do the upgrade to SVt_PV, and warn if the value
 		   is uninitialised.  */
@@ -2180,9 +2185,10 @@ PP(pp_enteriter)
 	    }
 	}
 	else /* SvTYPE(maybe_ary) == SVt_PVAV */ {
+            /* for (@array) {} */
             cx->cx_type |= CXt_LOOP_ARY;
 	    cx->blk_loop.state_u.ary.ary = MUTABLE_AV(maybe_ary);
-	    SvREFCNT_inc(maybe_ary);
+	    SvREFCNT_inc_simple_void_NN(maybe_ary);
 	    cx->blk_loop.state_u.ary.ix =
 		(PL_op->op_private & OPpITER_REVERSED) ?
 		AvFILL(cx->blk_loop.state_u.ary.ary) + 1 :
