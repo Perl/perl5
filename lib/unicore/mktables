@@ -19332,10 +19332,10 @@ if (! $rebuild) {
     }
 }
 if (! $rebuild) {
-    print "Files seem to be ok, not bothering to rebuild.  Add '-w' option to force build\n";
+    print "$0: Files seem to be ok, not bothering to rebuild.  Add '-w' option to force build\n";
     exit(0);
 }
-print "Must rebuild tables.\n" if $verbosity >= $VERBOSE;
+print "$0: Must rebuild tables.\n" if $verbosity >= $VERBOSE;
 
 # Ready to do the major processing.  First create the perl pseudo-property.
 $perl = Property->new('perl', Type => $NON_STRING, Perl_Extension => 1);
