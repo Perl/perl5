@@ -16241,31 +16241,32 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              * the POSIX classes.  These run slightly faster for above-Unicode
              * code points, so don't bother with POSIXA ones nor the 2 that
              * have no above-Unicode matches */
-            for (posix_class = 0;
-                 posix_class <= _HIGHEST_REGCOMP_DOT_H_SYNC;
-                 posix_class++)
-            {
-                int try_inverted;
-                if (posix_class == _CC_ASCII || posix_class == _CC_CNTRL) {
-                    continue;
-                }
-                for (try_inverted = 0; try_inverted < 2; try_inverted++) {
+                for (posix_class = 0;
+                     posix_class <= _HIGHEST_REGCOMP_DOT_H_SYNC;
+                     posix_class++)
+                {
+                    int try_inverted;
+                    if (posix_class == _CC_ASCII || posix_class == _CC_CNTRL) {
+                        continue;
+                    }
+                    for (try_inverted = 0; try_inverted < 2; try_inverted++) {
 
-                    /* Check if matches normal or inverted */
-                    if (_invlistEQ(cp_list,
-                                   PL_XPosix_ptrs[posix_class],
-                                   try_inverted))
-                    {
-                        op = (try_inverted)
-                             ? NPOSIXU
-                             : POSIXU;
-                        *flagp |= HASWIDTH|SIMPLE;
-                        goto found_posix;
+                        /* Check if matches normal or inverted */
+                        if (_invlistEQ(cp_list,
+                                       PL_XPosix_ptrs[posix_class],
+                                       try_inverted))
+                        {
+                            op = (try_inverted)
+                                 ? NPOSIXU
+                                 : POSIXU;
+                            *flagp |= HASWIDTH|SIMPLE;
+                            goto found_posix;
+                        }
                     }
                 }
-            }
-          found_posix: ;
+              found_posix: ;
         }
+
         if (op != END) {
             RExC_parse = (char *)orig_parse;
             RExC_emit = (regnode *)orig_emit;
