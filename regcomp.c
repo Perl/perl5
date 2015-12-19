@@ -17352,7 +17352,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     else if (k == ANYOF) {
 	const U8 flags = ANYOF_FLAGS(o);
 	int do_sep = 0;
-        SV* bitmap_invlist;  /* Will hold what the bit map contains */
+        SV* bitmap_invlist = NULL;  /* Will hold what the bit map contains */
 
 
 	if (OP(o) == ANYOFL) {
@@ -17386,7 +17386,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             }
         }
 
-	if ((flags
+        if (    ARG(o) != ANYOF_ONLY_HAS_BITMAP
+	    || (flags
                 & ( ANYOF_MATCHES_ALL_ABOVE_BITMAP
                    |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP
                    |ANYOF_LOC_FOLD)))
