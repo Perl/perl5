@@ -16127,12 +16127,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * adjacent such nodes.  And if the class is equivalent to things like /./,
      * expensive run-time swashes can be avoided.  Now that we have more
      * complete information, we can find things necessarily missed by the
-     * earlier code.  I (khw) did some benchmarks and found essentially no
-     * speed difference between using a POSIXA node versus an ANYOF node, so
-     * there is no reason to optimize, for example [A-Za-z0-9_] into
-     * [[:word:]]/a (although if we did it in the sizing pass it would save
-     * space).  _invlistEQ() could be used if one ever wanted to do something
-     * like this at this point in the code */
+     * earlier code. */
 
     if (optimizable && cp_list && ! invert) {
         UV start, end;
