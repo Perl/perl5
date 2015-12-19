@@ -16236,11 +16236,21 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         invlist_iterfinish(cp_list);
 
         if (op == END) {
+            const UV cp_list_len = _invlist_len(cp_list);
+            const UV* cp_list_array = invlist_array(cp_list);
 
             /* Here, didn't find an optimization.  See if this matches any of
              * the POSIX classes.  These run slightly faster for above-Unicode
              * code points, so don't bother with POSIXA ones nor the 2 that
-             * have no above-Unicode matches */
+             * have no above-Unicode matches.  We can avoid these checks unless
+             * the ANYOF matches at least as high as the lowest POSIX one
+             * (which was manually found to be \v.  The actual code point may
+             * increase in later Unicode releases, if a higher code point is
+             * assigned to be \v, but this code will never break.  It would
+             * just mean we could execute the checks for posix optimizations
+             * unnecessarily) */
+
+            if (cp_list_array[cp_list_len-1] > 0x2029) {
                 for (posix_class = 0;
                      posix_class <= _HIGHEST_REGCOMP_DOT_H_SYNC;
                      posix_class++)
@@ -16265,6 +16275,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     }
                 }
               found_posix: ;
+            }
         }
 
         if (op != END) {
