@@ -16132,7 +16132,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     if (optimizable && cp_list && ! invert) {
         UV start, end;
         U8 op = END;  /* The optimzation node-type */
-        int posix_class;
+        int posix_class = -1;   /* Illegal value */
         const char * cur_parse= RExC_parse;
 
         invlist_iterinit(cp_list);
