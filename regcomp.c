@@ -3367,6 +3367,14 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
  * The adjacent nodes actually may be separated by NOTHING-kind nodes, and
  * these get optimized out
  *
+ * XXX khw thinks this should be enhanced to fill EXACT (at least) nodes as full
+ * as possible, even if that means splitting an existing node so that its first
+ * part is moved to the preceeding node.  This would maximise the efficiency of
+ * memEQ during matching.  Elsewhere in this file, khw proposes splitting
+ * EXACTFish nodes into portions that don't change under folding vs those that
+ * do.  Those portions that don't change may be the only things in the pattern that
+ * could be used to find fixed and floating strings.
+ *
  * If a node is to match under /i (folded), the number of characters it matches
  * can be different than its character length if it contains a multi-character
  * fold.  *min_subtract is set to the total delta number of characters of the
@@ -12360,7 +12368,12 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	  reparse:
 
             /* We look for the EXACTFish to EXACT node optimizaton only if
-             * folding.  (And we don't need to figure this out until pass 2) */
+             * folding.  (And we don't need to figure this out until pass 2).
+             * XXX It might actually make sense to split the node into portions
+             * that are exact and ones that aren't, so that we could later use
+             * the exact ones to find the longest fixed and floating strings.
+             * One would want to join them back into a larger node.  One could
+             * use a pseudo regnode like 'EXACT_ORIG_FOLD' */
             maybe_exact = FOLD && PASS2;
 
 	    /* XXX The node can hold up to 255 bytes, yet this only goes to
@@ -16127,7 +16140,14 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * adjacent such nodes.  And if the class is equivalent to things like /./,
      * expensive run-time swashes can be avoided.  Now that we have more
      * complete information, we can find things necessarily missed by the
-     * earlier code. */
+     * earlier code.  Another possible "optimization" that isn't done is that
+     * something like [Ee] could be changed into an EXACTFU.  khw tried this
+     * and found that the ANYOF is faster, including for code points not in the
+     * bitmap.  This still might make sense to do, provided it got joined with
+     * an adjacent node(s) to create a longer EXACTFU one.  This could be
+     * accomplished by creating a pseudo ANYOF_EXACTFU node type that the join
+     * routine would know is joinable.  If that didn't happen, the node type
+     * could then be made a straight ANYOF */
 
     if (optimizable && cp_list && ! invert) {
         UV start, end;
