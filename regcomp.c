@@ -9389,7 +9389,7 @@ Perl__load_PL_utf8_foldclosures (pTHX)
 }
 #endif
 
-#ifdef PERL_ARGS_ASSERT__INVLISTEQ
+#if defined(PERL_ARGS_ASSERT__INVLISTEQ) && !defined(PERL_IN_XSUB_RE)
 bool
 Perl__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b)
 {
