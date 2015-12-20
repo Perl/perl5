@@ -1,0 +1,945 @@
+                      User-Visible podlators Changes
+
+podlators 4.03 (2015-12-06)
+
+    Fix tests when POD_MAN_DATE or SOURCE_DATE_EPOCH are already set in
+    the environment.  Thanks, Niko Tyni.  (Debian Bug#807086)
+
+    Continue general improvements and refactoring of the test suite to
+    make it more maintainable and clean out duplicate or unnecessary code.
+
+podlators 4.02 (2015-12-02)
+
+    For versions of Perl prior to 5.11, install the modules into the Perl
+    core module directories, since in those versions site modules did not
+    take precedence over Perl core modules.  Thanks, Peter Rabbitson.
+    (#110024)
+
+podlators 4.01 (2015-12-01)
+
+    [Pod::Text::Termcap] Do not override the TERMPATH environment variable
+    if it's already set.  This should fix the test suite with Term::Cap
+    1.16 (which has a bug in termcap handling if TERMPATH doesn't point to
+    a valid file).  Also document the manipulation of TERMPATH.
+
+    Revert the switch to Module::Build as the build system.  This creates
+    a circular dependency with Module::Build, since it wants a newer
+    version of Pod::Man than in Perl versions prior to 5.10.1.  Instead,
+    add the new metadata to Makefile.PL and stick with a single build
+    system that will also work inside Perl core.
+
+podlators 4.00 (2015-11-28)
+
+    Increase the version number of the package to be larger than any of
+    the previous version numbers of any of the modules, and change all
+    modules to use the same version as the overall podlators package.
+    Switch to a simple decimal version number to avoid complexity with
+    v-strings and portability to old versions of Perl.
+
+    podlators now requires Perl 5.006 or later.  All modules enable
+    warnings.  Please report any unexpected or confusing warnings as bugs
+    in the bug tracker.
+
+    [pod2man] In previous versions, the -r or --release option could be
+    specified without an argument and was interpreted as setting that
+    value to the empty string.  That never made a great deal of sense, and
+    the original change to Perl was apparently because no one realized one
+    could pass the empty string as the argument value.  The argument is
+    now mandatory, but may be the empty string, which will cause some
+    *roff implementations to use the system default.
+
+    Allow any even number of characters to be specified as the quote marks
+    for Pod::Text and Pod::Man (and the corresponding --quotes options of
+    pod2text and pod2man), rather than being artificially limited to one-
+    or two-character quotes.  The first half of the string will be used as
+    the left quote and the second half as the right quote.  This allows
+    Unicode characters or groff escapes like \(lq and \(rq to be used.
+    (Partly addresses #103298)
+
+    [Pod::Man] Attempt to detect if the input came from a pipe and
+    therefore has a completely unhelpful (and nonreproducible) source file
+    name, and diagnose this as an error.  Document that the name option
+    (--name to pod2man) is required when processing POD source from
+    standard input.  (Debian Bug#777405)
+
+    [Pod::Man] Honor the environment variable SOURCE_DATE_EPOCH and use it
+    as the timestamp from which to derive the left-hand footer if the date
+    option is not set, overriding the timestamp of the input file.  This
+    is primarily useful to ensure reproducible builds of the same output
+    file given the same souce and Pod::Man version, even when file
+    timestamps may not be consistent.  Thanks, Niko Tyni.  (Debian
+    Bug#801621)
+
+    [Pod::Man] Honor the environment variable POD_MAN_DATE and use its
+    contents, if set, as the value of the left-hand footer if the date
+    option is not set, overriding the timestamp of the input file.  This
+    was an earlier version of SOURCE_DATE_EPOCH, but has been supported in
+    Debian for a while and doesn't serve exactly the same purpose, so both
+    continue to be supported.  Thanks, Niko Tyni.
+
+    [Pod::Man] The default left-hand footer date is now based on UTC
+    rather than the local time zone to make the output more reproducible.
+    Thanks, Chris Lamb.  (Debian Bug#780259)
+
+    [Pod::Man] Simplify the preamble code for handling the F register and
+    index entries, and add backslashes after the braces in the preamble
+    code for handling the F register to avoid introducing a spurious page
+    break before at the first page with AT&T *roff.  Thanks, Carsten
+    Kunze and Daphne Pfister.  (#92979)
+
+    [Pod::Man] Support setting the left-hand footer to the empty string.
+
+    Fix documentation of the utf8 option to Pod::Man and Pod::Text, and
+    the corresponding -u option to pod2man and pod2text, to reflect that
+    Pod::Simple now autodetects Latin-1 and UTF-8 but warns.
+
+    More clearly document the options that set values in the .TH header in
+    the pod2man and Pod::Man documentation.  Thanks, Guillem Jover.
+    (#103297)
+
+    [Pod::Text] Fix encoding handling in documents that start without an
+    encoding declaration and then declare an encoding partway through.
+    Previously, this would result in attempts to print wide characters if
+    there were non-ASCII characters in the document.  Thanks, Magnolia K.
+    (#101722)
+
+    [Pod::Text] Change the documentation to not say Pod::Text only
+    generates ASCII text.  (#89355)
+
+    Switch the preferred module build system to Module::Build, but still
+    provide a Makefile.PL file for backward compatibility and for the use
+    of Perl core.  (#108714)
+
+    Installation of this package no longer tries to overwrite the Pod::Man
+    and Pod::Text modules that come with Perl core, and instead relies on
+    the normal precedence rules in Perl's module search path that prefer
+    locally-installed modules over core modules.
+
+    Rename NEWS to Changes to match the normal Perl convention.
+
+    Work around a bug in Term::Cap 1.16 that caused the test suite to fail
+    by forcing a setting of TERMPATH to a termcap file provided by the
+    test suite while running tests.  (#98272)
+
+podlators 2.5.3 (2013-10-05)
+
+    Fix documentation of the default for the errors constructor parameter.
+
+    Skip the empty text and man page errors tests if Pod::Simple didn't
+    produce any errors, which happens with the version shipped with Perl
+    versions prior to 5.18.  Catch warnings as well as exceptions in these
+    tests.
+
+podlators 2.5.2 (2013-09-22)
+
+    The parse_lines and parse_string_document methods in Pod::Man and
+    Pod::Text now set a default output file handle of STDOUT if none was
+    set.
+
+    Perform document initialization even if the document is contentless.
+    Documents with only errors are shown as contentless but then have a
+    POD ERRORS section, and previously this led to internal errors because
+    state variables weren't properly initialized.  Thanks, Andreas Koenig.
+    (#88724)
+
+    Apply various optimization improvements from Dagfinn Ilmari Mannsåker.
+    There should be no changes in the output.  (#83253)
+
+    Fix an erroneous output_fh reference in the Pod::Man documentation.
+    Thanks, Andreas Koenig.  (#88723)
+
+    Fix various comment typos.  Thanks, David Steinbrunner.  (#85683)
+
+    In perlpodstyle, wrap verbatim license line in POD that was over 79
+    characters after the man page indentation.  Thanks, Brian Gottreu and
+    Steve Hay.  (#87440)
+
+podlators 2.5.1 (2013-02-27)
+
+    Adjust the tag width tests and the list handling tests to avoid
+    spurious warnings from Pod::Simple about mismatched =item types.
+
+podlators 2.5.0 (2013-01-02)
+
+    Support a new errors option in Pod::Man and Pod::Text.  Valid values
+    are die, stderr, pod, and none.  Convert the stderr option to the
+    errors option with value stderr.  Add the corresponding --errors
+    option to pod2man and pod2text.  (#39007)
+
+    Add a new nourls option to Pod::Man and Pod::Text to suppress the URL
+    from L<> formatting codes that contain anchor text, and add the
+    corresponding --nourls option to pod2man and pod2text.  (#62210)
+
+    [Pod::Man] Extend a small-caps section through the punctuation that
+    commonly appears in license disclaimers so that small caps isn't
+    turned on and off at the boundaries of every word, producing
+    unreadable *roff.
+
+    [Pod::Man] Collapse consecutive whitespace and remove newlines in
+    index term text.  Thanks, Kevin Ryde.  (#82332)
+
+podlators 2.4.2 (2012-06-01)
+
+    Remove the test of a POD document without an encoding.  We previously
+    tested that this interpreted the document as ISO 8859-1, but
+    Pod::Simple behavior has changed so that the test started failing,
+    plus Pod::Simple now warns about a missing =encoding.  (#77553)
+
+podlators 2.4.1 (2012-05-30)
+
+    Fix detection of PerlIO UTF-8 handling by requesting details on PerlIO
+    layers to look for the UTF8 flag, which is not a layer in its own
+    right.  Thanks, Leon Timmermans.  (#76440)
+
+    [Pod::Man] Fix handling of the F register when processing multiple
+    documents at once.  .IX will now continue to be defined for documents
+    after the first, and the page number will not be reset at the start of
+    each document.  Thanks to Nicholas Clark for the analysis.  (perl
+    #103202)
+
+    In the pod2man and pod2text driver scripts, report an error and remove
+    the empty output file if the input file had no content (if it did not
+    exist, for example).  Exit with non-zero status if there were any
+    errors.  Track contentless status inside Pod::Man and Pod::Text.
+    Thanks, Dmitry Smirnov.  (#75099)
+
+    Override parse_file in Pod::Man and Pod::Text to set output_fh to
+    STDOUT if it is not already set.  (#77530)
+
+    [Pod::Man] Format the URL text before comparing it to the anchor when
+    deciding whether to show separate anchor text.  This avoids spurious
+    mismatches between the URL target and anchor text because the anchor
+    text was already formatted and has (for example) hyphens escaped.
+    (#76396)
+
+    [Pod::Man] Define \*(C` and \*(C' to the empty string when processed
+    through troff to avoid groff warnings.  Avoid warnings from checking
+    the F register (used to enable index output) when running under groff.
+    Patch from Bjarni Ingi Gislason.  (#75434)
+
+    [Pod::Man] Fix the ASCII fallback string for the AE ligature to use
+    the string that was actually defined.
+
+    Stop removing pod2man and pod2text on make realclean, left over from
+    when they were generated from *.PL scripts.  (#74848)
+
+    Embed the PID in file names generated by the test suite to avoid
+    conflicts when running the test suite in parallel.  (#62083)
+
+podlators 2.4.0 (2010-10-10)
+
+    Switch UTF-8 output encoding to use Encode directly instead of adding
+    a PerlIO layer.  Probe the PerlIO layers with protection for Perl
+    versions without PerlIO and set a flag indicating whether we also need
+    to encode, to avoid double-encoding when writing to a file handle that
+    is already doing UTF-8 encoding via PerlIO.
+
+    [Pod::Man] Do not strip escaped trailing whitespace such as that
+    created by S<> at the end of a line, since the backslash is then taken
+    by *roff as escaping the newline.  Thanks, Kevin Ryde.  (#61781)
+
+    Add perlpodstyle, a new style guide for POD documentation, split
+    mostly from the NOTES section of the pod2man man page.  Remove the
+    NOTES section of pod2man's documentation.
+
+    Convert pod2man and pod2text from scripts generated from *.PL files to
+    simple scripts, relying on ExtUtils::MakeMaker to handle replacing the
+    #! path during the package build.
+
+podlators 2.3.1 (2010-02-17)
+
+    Increase $VERSION in Pod::Text::Color and Pod::Text::Termcap, missed
+    in the previous release.
+
+podlators 2.3.0 (2009-12-28)
+
+    Support anchor text for L<> links of type URL by rendering the anchor
+    text and then the URL in angle brackets.  Now requires Pod::Simple
+    3.06 or later.
+
+    [Pod::Text] When formatting item tags, use the width of the tag
+    without formatting codes.  This fixes formatting issues with
+    Pod::Text::Color, Pod::Text::Termcap, and Pod::Text::Overstrike.
+
+    [Pod::Man] Suppress all formatting in the NAME section to avoid
+    confusing lexgrog and fix mishandling of C<> markup in NAME.  Clarify
+    in the pod2man documentation that no markup should be used in the NAME
+    section of a manual page.  Thanks, Niko Tyni.
+
+    [Pod::Man] Escape backslashes in the quoted text of .IX macros
+    generated from X<> formatting code.
+
+    [Pod::Man] Avoid using POSIX::strftime because POSIX requires Fcntl,
+    which is an XS module, and hence can't build in miniperl.  This allows
+    ExtUtils::MakeMaker to build as a normal module in Perl core.  Thanks,
+    Michael G Schwern.
+
+    [Pod::ParseLink] Allow anchor text for URLs.  Fix the check of the
+    anchor text to not think no text was provided when the text was "0".
+
+    Remove the temporary files created by the test suite in a loop to
+    ensure that all versions are deleted on VMS.  Thanks, John
+    E. Malmberg.
+
+    Convert the test suite to Test::More.
+
+podlators 2.2.2 (2009-01-17)
+
+    [Pod::Text] Correctly handle indentation of verbatim paragraphs that
+    contain lines with only whitespace.  Thanks, Renee Baecker.
+
+podlators 2.2.1 (2008-12-19)
+
+    [Pod::Text] In the legacy pod2text method, properly initialize the
+    output file handle when called with only one argument.  Thanks,
+    Michael G Schwern.
+
+    Fix the t/text-encoding.t test on Windows by setting raw encoding on
+    the output file handle.  Thanks, Steve Hay.
+
+podlators 2.2.0 (2008-10-05)
+
+    [Pod::Text] Try to preserve the previous behavior of setting the
+    output encoding to match the input encoding if utf8 is not set, but
+    support forcing an output encoding of utf8 with the utf8 option.  Add
+    a corresponding --utf8 option to pod2text.  Document the PerlIO
+    limitations of the current utf8 support.
+
+    Quote all module version numbers to preserve any trailing zeroes.
+
+    Skip spelling tests unless RRA_MAINTAINER_TESTS is set in the
+    environment.  Spelling dictionaries are too different between systems.
+
+podlators 2.1.4 (2008-09-21)
+
+    Support aspell as a spell checker for spelling tests.
+
+    Skip UTF-8 tests for versions of Perl prior to 5.8.
+
+podlators 2.1.3 (2008-09-14)
+
+    Add a stderr option to Pod::Man and Pod::Text that sends POD errors to
+    standard error instead of adding a POD ERRORS section to the generated
+    documentation.  Add a corresponding --stderr option to pod2man and
+    pod2text.
+
+    [Pod::Man] Stop remapping the code point for non-breaking space.  This
+    should not be necessary and was wrong when the string from Pod::Simple
+    was a character string and not a byte string.  It was papering over a
+    bug in setting the encoding of an input POD file.
+
+    In the test suite, properly set encoding on file descriptors so that
+    the UTF-8 tests are handled with the correct encoding.  Test that
+    non-breaking spaces don't interfere with hyphen detection.
+
+podlators 2.1.2 (2008-07-20)
+
+    [Pod::Man] Use .SS instead of a local .Sh macro for subheadings, and
+    stop defining .Sh.
+
+    [Pod::Man] Remap ISO 8850-1 non-breaking spaces produced by
+    Pod::Simple to the corresponding UTF-8 code point for UTF-8 output.
+
+    Add a test for spelling and fix multiple spelling and markup errors.
+
+podlators 2.1.1 (2008-07-03)
+
+    [Pod::Man] Do not include the accent mark definitions in generated
+    *roff if the output is in UTF-8.
+
+    Fix the test for S<> handling with all whitespace to not give a
+    spurious failure with Pod::Simple 3.06.
+
+podlators 2.1.0 (2008-06-01)
+
+    Add a new utf8 option to Pod::Man.  If set, do not convert non-ASCII
+    characters to *roff escapes or X, and instead output literal UTF-8
+    characters.  Add a new --utf8 option to pod2man.
+
+    [Pod::Man] Match text between \f(CW and \fP or \fR in headings
+    non-greedily to get the fonts right with multiple C<> formatting
+    codes.
+
+    [Pod::Man] Protect .Sh text against leading *roff control characters
+    since some *roff implementations apparently "look through" font
+    escapes at the beginning of lines.
+
+    [Pod::Man] Escape backslashes separately from processing non-ASCII
+    characters and do that, dash escaping, and underscore adjustment
+    before processing non-ASCII characters.  Otherwise, we escape the
+    hyphen in eth characters.
+
+podlators 2.0.6 (2007-11-28)
+
+    [Pod::Man] Escape apostrophes and backquotes in verbatim and C<> text.
+
+    [Pod::Man] Define the IX macro to empty rather than leaving it
+    undefined when indexing is not requested to eliminate warnings when
+    groff warnings are enabled.
+
+    [Pod::Man] Simplify the logic to skip lib directories to avoid Perl
+    warnings and unnecessary checks.
+
+podlators 2.0.5 (2006-09-16)
+
+    Accept and mostly ignore a hash of options as the first option to
+    parse_from_file.  Support an option of -cutting and configure
+    Pod::Simple to assume the POD has already started.  This is for
+    backward compatibility with Pod::Parser.
+
+    [Pod::Man] Recognize more uses of hyphens in regular English text and
+    allow them to be regular hyphens.
+
+    [Pod::Man] Turn off hyphenation and, for nroff, justification after
+    the .TH macro since that's where groff turns them on.
+
+    [Pod::Man] Stop mapping vertical bar to \(bv, since it produces
+    Unicode characters where they aren't desirable.  Remove the preamble
+    reference to the Tr string, which was never defined.
+
+podlators 2.0.4 (2006-02-19)
+
+    [Pod::Man] Pod::Simple's source_filename method returns garbage if
+    we're parsing from a file handle, so use the current time if stating
+    the returned input file fails.
+
+    Add parse_from_filehandle methods to Pod::Man and Pod::Text for
+    backward compatibility with the earlier versions based on Pod::Parser.
+
+podlators 2.0.3 (2006-01-28)
+
+    In the test suite, pass in a file handle for Pod::Simple output and
+    then close it afterwards.  This works around Pod::Simple leaving file
+    handles open and preventing removal of temporary files on Windows.
+    This is temporary until a new Pod::Simple release offers a better
+    approach.
+
+podlators 2.0.2 (2006-01-25)
+
+    In the parse_from_file method, flush the output file handle rather
+    than closing it.  Closing it is unexpected and could break callers.
+
+    In Pod::Text::Termcap and Pod::Text::Color, Use additional temporary
+    variables to avoid ${char}{0,$width}, which only works in very recent
+    Perls.
+
+    Fix man test that needs an ISO 8859-1 encoding.
+
+podlators 2.0.1 (2006-01-20)
+
+    Call reinit before calling the Pod::Simple parse_from_file method to
+    preserve the previous capability of reusing the same Pod::Man object
+    for multiple documents.  Close the output file handle after
+    Pod::Simple returns to force the output to flush.
+
+    [Pod::Text] The legacy pod2text method was broken because
+    Pod::Simple's parse_file method only takes one argument.  Pass the
+    second argument to output_fh instead.
+
+    Fix portability issues with Perl 5.005.
+
+    Use a single object for all conversions in pod2man and pod2text for a
+    minor speedup.
+
+podlators 2.00 (2005-11-28)
+
+    Rewrite all modules and driver scripts to use Pod::Simple instead of
+    Pod::Parser.  The output should be identical except that C<> with no
+    content outputs quotes for Pod::Text-based parsers, E<> handling is
+    improved, and various small bugs have been fixed.  Thanks, Sean Burke.
+
+    [pod2man] Create a new parser for each file since Pod::Simple parsers
+    are not reusable.
+
+    [pod2text] Add support for multiple pairs of input and output files,
+    similar to pod2man.
+
+    [Pod::Man] Strip vendor_perl as well as site_perl when determining the
+    man page title.  Thanks, Alexey Tourbin.
+
+    Fall back on fullstop_space_harden if preserve_whitespace is not
+    available, for compatibility with older Pod::Simple.
+
+    Count text lengths correctly when wrapping in Pod::Text::Color and
+    Pod::Text::Termcap when there are multiple adjacent escape sequences.
+    Use a temporary variable to make the regex clearer.
+
+    Change section ordering in some documentation following perl5-porters
+    discussion.
+
+    Remove obsolete documentation caution against enclosing URLs in L<>.
+
+    Force a particular terminal configuration to get reliable results in
+    the Pod::Text::Termcap test suite.
+
+    Enhance the test suite substantially with additional tests from Sean
+    Burke.
+
+podlators 1.27 (2003-07-09)
+
+    [Pod::Text::Termcap] Handle the case where the HOME environment
+    variable isn't set, mostly for Windows.
+
+podlators 1.26 (2003-03-30)
+
+    [Pod::Man] Make sure the module returns 1 to keep Perl 5.8.0 happy.
+
+podlators 1.25 (2003-01-04)
+
+    [Pod::Man] Track the type of items in an =over list and only map
+    asterisk to a real bullet if the item type is bullet.  Fix a bug where
+    =item 0 was treated the same as =item with no tag.
+
+podlators 1.24 (2002-08-03)
+
+    Support a margin option in Pod::Text and use it to set the initial
+    indentation level.  Fix handling of the colon in the margin when the
+    alt format is enabled.  Add a new -m option to pod2text to set the
+    margin.
+
+podlators 1.23 (2002-07-14)
+
+    Clean up some old-style L<> links in pod2text that were workarounds
+    for fixed bugs in Pod::Man and Pod::Text.
+
+    Add a pointer to the module web site in the documentation.
+
+podlators 1.22 (2002-06-23)
+
+    Tweak the regex for matching numbers in C<> to not consider a single
+    period to be a number, which affects whether surrounding quotes are
+    added.
+
+podlators 1.21 (2002-02-16)
+
+    [Pod::Text::Overstrike] Fix the regex for wrapping lines to use a
+    non-backtracking section for each character to avoid exponential
+    backtracking on lines with a lot of markup.
+
+podlators 1.20 (2002-01-27)
+
+    [Pod::Text::Overstrike] Use [\b] instead of \cH in regexes to match
+    backspaces, for platforms that use EBCDIC where \b and \cH aren't the
+    same character.
+
+podlators 1.19 (2002-01-02)
+
+    [Pod::Man] Do not apply guesswork to the text inside the NAME section,
+    since it may confuse programs like catman.  Do not output .UC after
+    the .TH macro.  catman doesn't like anything between the NAME section
+    and .TH, and .UC doesn't appear to actually do anything on any modern
+    platform.
+
+    [Pod::Man] Correctly handle a verbatim paragraph right before a
+    heading.
+
+    [Pod::Text] Fix error reporting for unknown sequences and unknown
+    commands to be more consistent and update the documentation to match.
+
+    [Pod::Text::Termcap] Terminal speed should be a number, not a string.
+    Also fall back on a hard-coded terminal speed if getospeed doesn't
+    work.
+
+podlators 1.18 (2001-11-30)
+
+    [Pod::Text::Termcap] Fall back on a hard-coded terminal speed if
+    POSIX::Termios doesn't work, such as on VMS.
+
+    [Pod::ParseLink] Escape L<> in the NAME section of the documentation.
+
+podlators 1.17 (2001-11-27)
+
+    [Pod::Man] Return references to arrays rather than references to
+    scalars for already-formatted text.  There are too many odd bugs with
+    scalar references in older versions of Perl.  No longer bless
+    references since the current Pod::Parser doesn't require it.  Now
+    requires Pod::Parser 1.13 or later.
+
+    Change all documentation references from interior sequences to
+    formatting codes to match the terminology of perlpodspec.
+
+    [Pod::Text::Termcap] Fix an incorrect heading in the documentation.
+
+podlators 1.16 (2001-11-26)
+
+    Use an @INC path of ../lib and a new function to find source files for
+    when the module test suite is being run as part of the Perl core
+    tests.
+
+podlators 1.15 (2001-11-26)
+
+    [Pod::Text::Termcap] Wrap the call to Term::Cap with eval because it
+    throws exceptions if the terminal can't be found.  Fall back on the
+    ANSI escape sequences rather than dying if the termcap entry is
+    incomplete.  Note the fallback in the documentation.
+
+    Delete the lax option in pod2man before calling Pod::Man and document
+    that it is obsolete and podchecker should be used instead.
+
+    Improve the pod2man and Pod::Man documentation to refer to podchecker,
+    add discussion of guesswork and 8-bit character handling, and mention
+    the fragility of the heuristics.
+
+podlators 1.14 (2001-11-23)
+
+    [Pod::Text::Overstrike] Interpolate before formatting to prevent the
+    formatting codes from ending up in the output, and strip any existing
+    formatting before applying new formatting.
+
+    [Pod::Man] Use font escapes rather than .I to avoid strange problems
+    with quoting, at least for =head3.  =head1 and =head2 likely still
+    have troubles with repeated double-quotes.  Fix all fixed-width font
+    changes for nroff, not just the simple ones, and don't hard-code the
+    value of any fixed-width font.
+
+    [Pod::Man] Improve and simplify the handling of indentation shifts.
+
+    [Pod::Man] When intuiting the man page name for a module, also strip
+    $^O by itself as a directory component even when not preceeded or
+    followed by a dash and other text.
+
+    [Pod::Text] Fix handling of =for or =begin/=end in =item paragraphs.
+    Default to a tag of "*" if none is given.  Insert some whitespace for
+    empty item paragraphs to keep them from blending into subsequent text.
+
+    [Pod::ParseLink] Fix a bug in the handling of link text that's
+    entirely in quotes.  Double quotes are now only removed around
+    sections, not names.  Text enclosed entirely in double quotes is
+    interpreted as a link to a section.
+
+    Fix various -w warnings.
+
+podlators 1.13 (2001-11-15)
+
+    Fix -w warnings with hyphen handling.
+
+podlators 1.12 (2001-11-15)
+
+    Add a new module, Pod::ParseLink, to parse the contents of an L<>
+    sequence.  Use it everywhere.  Defer expansion of formatting escapes
+    inside L<> until after L<> is processed.  Surround URLs with angle
+    brackets in the output.
+
+    Remove the special handling of consecutive L</section> links.
+
+    Support E<apos>, E<nbsp>, and E<shy>.
+
+    [Pod::Man] Completely rewrite the name parsing code for modules to use
+    File::Spec.  In the process, fix a bug in dealing with the new
+    three-component version number directories.  Swap the order of date
+    and release in the .TH line to better comply with the man macro
+    documentation.
+
+    [Pod::Man] Rewrite the handling of dashes and hyphens.  Be much more
+    conservative about which hyphens are turned into dashes, and make all
+    hyphens non-breaking unless we can be fairly sure that they're inside
+    normal words.
+
+    [Pod::Man] Handle indentation of =item-less =over/=back blocks.
+
+    [Pod::Man] Include the version of Pod::Parser in the header.
+
+    [Pod::Man] Only try to determine a module name from the path for the
+    man page name if the man page we're generating is in section 3.
+
+    [Pod::Man] No longer insert a timestamp into the generated man page;
+    it just causes unnecessary differences and merge conflicts.
+
+    [Pod::Text] Inside S<>, convert all whitespace to non-breaking spaces,
+    not just spaces.
+
+    Add the --name option to pod2man and document the name option in
+    Pod::Man.
+
+    [Pod::Man] Use L<> for all man page references in the documentation
+    that should be highlighted.  Switch the rest to bold versions of the
+    program name.  Change func(n) to func(3) in the example of things that
+    are automatically formatted so that it will be formatted.  Remove from
+    BUGS the note that some of the path mangling assumes Unix directory
+    separators.  Don't give anchor text for L<> links that no longer
+    require it.
+
+    Update the documentation in Pod::Text and subclasses to use
+    now-allowable POD constructs like C<< >>.  Don't escape angle brackets
+    that don't require escaping.  Don't give anchor text for L<> links
+    that no longer require it.
+
+podlators 1.11 (2001-10-20)
+
+    Add the code option to Pod::Text to include the non-POD text of the
+    input file and document it.  Add the corresponding --code flag to
+    pod2text.
+
+    Converted warnings for unknown escapes, unknown sequences, and
+    unmatched =back into warnings from carps and include the file and line
+    number of the POD data instead of the Perl code.
+
+    [Pod::Text::Overstrike] Better handle the case where a highlighted
+    portion of text ends a line.
+
+    Add --verbose flag to pod2man to print out each output file as it is
+    generated.
+
+    [Pod::Man] Fix *roff syntax error from using .if with .el during quote
+    handling.
+
+    [Pod::Man] Fix output for X<> sequences.
+
+podlators 1.10 (2001-07-10)
+
+    Add heuristics to decide whether to quote the argument of C<>.
+
+    [Pod::Man] Remove font changes for nroff with C<> to work around a bug
+    in the Solaris 2.6 version of nroff's handling of \fP in headings.  No
+    longer add an extra level of quoting for =item; it isn't necessary.
+
+    [Pod::Man] Remove the logic turning PI into a pretty pi character.  It
+    produces too many false positives.
+
+    [Pod::Man] Remove the definition .Ip from the preamble.  Remove .bd B
+    3 from the preamble; this isn't part of the accent mark definitions
+    but instead changes the way bolding is done, confusing some other
+    translators.  Use .IP instead of .Ip everywhere.
+
+    In the POD style section of pod2man, add a description of the
+    COPYRIGHT AND LICENSE section, add a mention of a mailing list in SEE
+    ALSO, and mention that large logs are better kept separate from
+    HISTORY in the description of a standard manual page.
+
+    Standardize on COPYRIGHT AND LICENSE for licensing information across
+    all of the package documentation.
+
+podlators 1.09 (2001-04-09)
+
+    [Pod::Man] Fine-tune formatting guesswork.  Don't allow colons after
+    sequences to put in small caps since they're already handled by being
+    rolled into the sequence and were causing weird things to happen in
+    references to functions.  Allow small caps before an open paren.
+    Teach the handling of functions and manual page references about small
+    caps escapes, and be pickier about what constitutes a manual page
+    reference.
+
+    [Pod::Text] Fix again the incorrect mappings for E<Iacute> and
+    E<iacute>, and this time for E<Igrave> and E<igrave> too.  Thanks,
+    Sean Burke.
+
+podlators 1.08 (2001-02-09)
+
+    Output anything that looks like a URL verbatim rather than
+    interpreting it as a manual page reference.
+
+podlators 1.07 (2001-01-16)
+
+    [Pod::Man] Remove newlines from heading contents.
+
+    [Pod::Man] Quote the file name in the man page header if it contains
+    spaces.
+
+podlators 1.06 (2000-12-25)
+
+    New Pod::Text::Overstrike contributed by Joe Smith.  Add -o or
+    --overstrike to pod2text to use it for formatting.
+
+    [Pod::Man] =item text requires another level of quoting of double
+    quotes, which was already present but not working for C<> text because
+    it was in the wrong order.  Fix.
+
+podlators 1.05 (2000-11-18)
+
+    Change the default quote character for C<> to be double quotes rather
+    than matched left/right single quotes.
+
+    Add support for =head3 and =head4.
+
+    Allow pod2man to take multiple pairs of input and output files on the
+    command line to decrease the time that it takes to process all of
+    Perl's documentation.
+
+    [Pod::Man] Switch \*C` and \*C' sequences from C<> as well as literal
+    double-quotes if the quote character contains double quotes.  Not
+    doing this was causing weird output on some systems in some
+    circumstances.  Use a separate quote mapping function for text blocks
+    to work around a Solaris 2.6 nroff bug.
+
+    [Pod::Man] Use \fP to switch back to the default font rather than
+    changing back to \fR so that font changes work correctly in headings
+    using a different font.  Sprinkle \fP through all font changes so that
+    the default font is always the "previous" font so that the above
+    works.
+
+podlators 1.04 (2000-10-09)
+
+    [Pod::Man] Output .PD 0 and .PD around repeated =item tags so that
+    they're formatted without intervening blank lines, improving
+    formatting of, e.g., perlfunc.pod.
+
+    [Pod::Text] Fix incorrect mappings for E<Iacute> and E<iacute>.
+    Thanks, Sean Burke.
+
+podlators 1.03 (2000-09-03)
+
+    Support configuration of what quote characters to use around C<>
+    text.  Add a new --quotes option to pod2man and pod2text.
+
+    Report nicer errors when encountering an unknown paragraph command.
+
+    Add support for E<sol> and E<verbar>.
+
+    [Pod::Man] Fix the regex for stripping bullets from index entries so
+    that it doesn't strip a leading "o".
+
+    [Pod::Man] In the prelude, terminate the .IX definition with ".."
+    instead of ".    ." for groff.
+
+    [Pod::Text] The pod2text method, when given two arguments, was
+    incorrectly assigning to $_[0], causing other sane problems.  Fix.
+
+podlators 1.02 (2000-04-25)
+
+    [Pod::Man] Fix hyphens and underscores only in literal C<> content,
+    fixing mangling of hyphens and underscores that are the result of
+    other sequence processing.
+
+podlators 1.01 (2000-03-30)
+
+    Install the modules in the Perl core area if the Perl version is 5.6.0
+    or higher.
+
+    [Pod::Man] Strip a leading lib/ from a file name for module man pages,
+    needed for ExtUtils::MakeMaker.
+
+podlators 1.00 (2000-03-16)
+
+    This has now been incorporated into Perl core as pod2man and pod2text.
+    Rename pod2roff to pod2man accordingly.
+
+    Hide "-" arguments to the driver scripts from Getopt::Long so that
+    Pod::Parser will interpret them as STDIN or STDOUT.
+
+    [Pod::Man] Protect any line that starts with a backlash and leading
+    periods following font escapes.  Replace embedded newlines in titles
+    with spaces.
+
+    [Pod::Man] Use "perl v5.6.0" instead of "perl 5.6, patch 0" for the
+    default release string, handle both pre-5.6 and post-5.6 version
+    numbering schemes.  Zero-pad the month and day in the modification
+    date.  Avoid warnings when center, date, or release aren't set.
+
+    [Pod::Man] Allow for two-character fonts.
+
+    [Pod::Man] Work around a Perl 5.6 bug affecting L<> text generation.
+    Fix Z<> handling with current Perl.
+
+    [Pod::Man] Make filename munging safe even when $* is set and the
+    filenames contain embedded newlines.
+
+    [Pod::Man] Fix the regex to concatenate multiple L<> section links and
+    fix whitespace handling for it around "and".
+
+    [Pod::Text] Add the remaining ISO 8859-1 HTML entities.  Thanks, Tim
+    Jenness.
+
+    [pod2man] Change Getopt::Long config from bundling to
+    bundling_override so that options like -center work for backwards
+    compatibility.
+
+    [pod2text] Don't default to Pod::Text::Termcap even if STDOUT is a tty
+    until it works right on Windows, VMS, etc.
+
+podlators 0.08 (1999-10-07)
+
+    Add support for numeric E<> escapes.
+
+    [Pod::Man] Fix doubled quotes in links to sections.
+
+    [Pod::Text] Export pod2text for backwards compatibility.
+
+    [pod2roff] Fix argument passing to Pod::Parser to use an expanded hash
+    instead of a hash reference.
+
+podlators 0.07 (1999-09-25)
+
+    [Pod::Man] Change the parsing model so that, rather than deferring E<>
+    escapes until just before output, *roff output is generated by the
+    interior sequence parsing and the result is passed up the parse trees
+    as Pod::Man::String objects instead of scalars to mark the output as
+    already processed.  In the process, clean up what *roff escaping and
+    guesswork is applied where, and clean up the whole process of applying
+    guesswork.  Improve the escaping of dashes and hyphens to use a single
+    pass.
+
+    [Pod::Man] Improve the small caps guesswork to allow for more cases,
+    including several adjacent all caps words.
+
+    [Pod::Man] Fix some bugs with the link text generation for man page
+    references.
+
+    [Pod::Man] Improve the index generation slightly.
+
+    [Pod::Man] Fix several places that were clobbering the caller's $_.
+
+podlators 0.06 (1999-09-20)
+
+    Add pod2roff and Pod::Man, which convert POD to man pages.
+
+    Rename pod2txt to pod2text and Pod::PlainText to Pod::Text.
+
+    [Pod::Text] =begin text blocks are now output verbatim rather than
+    interpreted as POD.
+
+    [Pod::Text] Document the oddity with Ctrl-As as a restriction.
+
+    [Pod::Text] Always treat =for paragraphs as verbatim text.
+
+    [Pod::Text::Color] Add a BUGS note that the implementation is rather
+    incomplete, and document the reliance on Term::ANSIColor.
+
+    [pod2text] Add an explicit check for Term::ANSIColor if -c was given.
+
+    [Pod::Man] Add a BUGS entry for index entries for stuff in NAME.
+
+    [Pod::Text] Document two more diagnostics and a cross-reference to
+    pod2text.
+
+    [pod2text] Add documentation of -h and expand the DIAGNOSTICS section
+    to include directly-generated error messages and the most common
+    Getopt::Long message.
+
+podlators 0.05 (1999-09-18)
+
+    [Pod::Text::Color] Rename Pod::SimpleText to Pod::PlainText in one
+    more place in the documentation.
+
+podlators 0.04 (1999-08-30)
+
+    Use File::Spec during the build to build file paths for portability,
+    and remove the dist setting since current Perls get this right.
+
+    Fix the #! line in pod2txt during the build.
+
+podlators 0.03 (1999-08-30)
+
+    Rename Pod::SimpleText to Pod::PlainText.
+
+    [pod2txt] Document that Pod::Text::Termcap is used by default if
+    STDOUT is a tty.  Clarify the documentation of --loose.
+
+podlators 0.02 (1999-07-29)
+
+    Rename the package itself from Pod::SimpleText to podlators.
+
+    [Pod::SimpleText] Add a pod2text function for backwards compatibility.
+
+    [Pod::SimpleText] Properly wrap multiline =item tags.
+
+    [Pod::SimpleText] Fix a spurious space with =for text commands.
+
+    [Pod::SimpleText] Check the content of sequences against the empty
+    string specifically rather than testing truth so that it does the
+    right thing with 0.
+
+    [Pod::SimpleText] Process sequences for =head headings.
+
+podlators 0.01 (1999-06-12)
+
+    Initial release with pod2txt and Pod::SimpleText.

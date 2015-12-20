@@ -11,9 +11,10 @@
 # me any patches at the address above in addition to sending them to the
 # standard Perl mailing lists.
 #
-# Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-#     2010, 2012, 2013 Russ Allbery <rra@stanford.edu>
+# Written by Russ Allbery <rra@cpan.org>
 # Substantial contributions by Sean Burke <sburke@cpan.org>
+# Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
+#     2010, 2012, 2013, 2014, 2015 Russ Allbery <rra@cpan.org>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -24,9 +25,10 @@
 
 package Pod::Man;
 
-require 5.005;
-
+use 5.006;
 use strict;
+use warnings;
+
 use subs qw(makespace);
 use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 
@@ -36,7 +38,7 @@ use Pod::Simple ();
 
 @ISA = qw(Pod::Simple);
 
-$VERSION = '2.28';
+$VERSION = '4.03';
 
 # Set the debugging level.  If someone has inserted a debug function into this
 # class already, use that.  Otherwise, use any Pod::Simple debug function
@@ -204,10 +206,10 @@ sub init_quotes {
         $$self{LQUOTE} = $$self{RQUOTE} = '';
     } elsif (length ($$self{quotes}) == 1) {
         $$self{LQUOTE} = $$self{RQUOTE} = $$self{quotes};
-    } elsif ($$self{quotes} =~ /^(.)(.)$/
-             || $$self{quotes} =~ /^(..)(..)$/) {
-        $$self{LQUOTE} = $1;
-        $$self{RQUOTE} = $2;
+    } elsif (length ($$self{quotes}) % 2 == 0) {
+        my $length = length ($$self{quotes}) / 2;
+        $$self{LQUOTE} = substr ($$self{quotes}, 0, $length);
+        $$self{RQUOTE} = substr ($$self{quotes}, $length);
     } else {
         croak(qq(Invalid quote specification "$$self{quotes}"))
     }
@@ -788,7 +790,7 @@ sub start_document {
         } else {
             ($name, $section) = $self->devise_title;
         }
-        my $date = $$self{date} || $self->devise_date;
+        my $date = defined($$self{date}) ? $$self{date} : $self->devise_date;
         $self->preamble ($name, $section, $date)
             unless $self->bare_output or DEBUG > 9;
     }
@@ -827,6 +829,17 @@ sub devise_title {
     my $section = $$self{section} || 1;
     $section = 3 if (!$$self{section} && $name =~ /\.pm\z/i);
     $name =~ s/\.p(od|[lm])\z//i;
+
+    # If Pod::Parser gave us an IO::File reference as the source file name,
+    # convert that to the empty string as well.  Then, if we don't have a
+    # valid name, emit a warning and convert it to STDIN.
+    if ($name =~ /^IO::File(?:=\w+)\(0x[\da-f]+\)$/i) {
+        $name = '';
+    }
+    if ($name eq '') {
+        $self->whine (1, 'No name given for document');
+        $name = 'STDIN';
+    }
 
     # If the section isn't 3, then the name defaults to just the basename of
     # the file.  Otherwise, assume we're dealing with a module.  We want to
@@ -876,25 +889,55 @@ sub devise_title {
 }
 
 # Determine the modification date and return that, properly formatted in ISO
-# format.  If we can't get the modification date of the input, instead use the
-# current time.  Pod::Simple returns a completely unuseful stringified file
-# handle as the source_filename for input from a file handle, so we have to
-# deal with that as well.
+# format.
+#
+# If POD_MAN_DATE is set, that overrides anything else.  This can be used for
+# reproducible generation of the same file even if the input file timestamps
+# are unpredictable or the POD coms from standard input.
+#
+# Otherwise, if SOURCE_DATE_EPOCH is set and can be parsed as seconds since
+# the UNIX epoch, base the timestamp on that.  See
+# <https://reproducible-builds.org/specs/source-date-epoch/>
+#
+# Otherwise, use the modification date of the input if we can stat it.  Be
+# aware that Pod::Simple returns the stringification of the file handle as
+# source_filename for input from a file handle, so we'll stat some random ref
+# string in that case.  If that fails, instead use the current time.
+#
+# $self - Pod::Man object, used to get the source file
+#
+# Returns: YYYY-MM-DD date suitable for the left-hand footer
 sub devise_date {
     my ($self) = @_;
-    my $input = $self->source_filename;
-    my $time;
-    if ($input) {
-        $time = (stat $input)[9] || time;
-    } else {
-        $time = time;
+
+    # If POD_MAN_DATE is set, always use it.
+    if (defined($ENV{POD_MAN_DATE})) {
+        return $ENV{POD_MAN_DATE};
     }
 
-    # Can't use POSIX::strftime(), which uses Fcntl, because MakeMaker
-    # uses this and it has to work in the core which can't load dynamic
-    # libraries.
-    my ($year, $month, $day) = (localtime $time)[5,4,3];
-    return sprintf ("%04d-%02d-%02d", $year + 1900, $month + 1, $day);
+    # If SOURCE_DATE_EPOCH is set and can be parsed, use that.
+    my $time;
+    if (defined($ENV{SOURCE_DATE_EPOCH}) && $ENV{SOURCE_DATE_EPOCH} !~ /\D/) {
+        $time = $ENV{SOURCE_DATE_EPOCH};
+    }
+
+    # Otherwise, get the input filename and try to stat it.  If that fails,
+    # use the current time.
+    if (!defined $time) {
+        my $input = $self->source_filename;
+        if ($input) {
+            $time = (stat($input))[9] || time();
+        } else {
+            $time = time();
+        }
+    }
+
+    # Can't use POSIX::strftime(), which uses Fcntl, because MakeMaker uses
+    # this and it has to work in the core which can't load dynamic libraries.
+    # Use gmtime instead of localtime so that the generated man page does not
+    # depend on the local time zone setting and is more reproducible
+    my ($year, $month, $day) = (gmtime($time))[5,4,3];
+    return sprintf("%04d-%02d-%02d", $year + 1900, $month + 1, $day);
 }
 
 # Print out the preamble and the title.  The meaning of the arguments to .TH
@@ -1461,7 +1504,7 @@ sub preamble_template {
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .\"
-.\" If the F register is turned on, we'll generate index entries on stderr for
+.\" If the F register is >0, we'll generate index entries on stderr for
 .\" titles (.TH), headers (.SH), subsections (.SS), items (.Ip), and index
 .\" entries marked with X<> in POD.  Of course, you'll have to process the
 .\" output yourself in some meaningful fashion.
@@ -1469,20 +1512,16 @@ sub preamble_template {
 .\" Avoid warning from groff about undefined register 'F'.
 .de IX
 ..
-.nr rF 0
-.if \n(.g .if rF .nr rF 1
-.if (\n(rF:(\n(.g==0)) \{
-.    if \nF \{
-.        de IX
-.        tm Index:\\$1\t\\n%\t"\\$2"
+.if !\nF .nr F 0
+.if \nF>0 \{\
+.    de IX
+.    tm Index:\\$1\t\\n%\t"\\$2"
 ..
-.        if !\nF==2 \{
-.            nr % 0
-.            nr F 2
-.        \}
+.    if !\nF==2 \{\
+.        nr % 0
+.        nr F 2
 .    \}
 .\}
-.rr rF
 ----END OF PREAMBLE----
 #'# for cperl-mode
 
@@ -1566,7 +1605,7 @@ __END__
 =for stopwords
 en em ALLCAPS teeny fixedbold fixeditalic fixedbolditalic stderr utf8
 UTF-8 Allbery Sean Burke Ossanna Solaris formatters troff uppercased
-Christiansen nourls parsers
+Christiansen nourls parsers Kernighan
 
 =head1 NAME
 
@@ -1629,8 +1668,19 @@ argument.
 
 =item center
 
-Sets the centered page header to use instead of "User Contributed Perl
-Documentation".
+Sets the centered page header for the C<.TH> macro.  The default, if this
+option is not specified, is "User Contributed Perl Documentation".
+
+=item date
+
+Sets the left-hand footer for the C<.TH> macro.  If this option is not set,
+the contents of the environment variable POD_MAN_DATE, if set, will be used.
+Failing that, the value of SOURCE_DATE_EPOCH, the modification date of the
+input file, or the current time if stat() can't find that file (which will be
+the case if the input is from C<STDIN>) will be used.  If obtained from the
+file modification date or the current time, the date will be formatted as
+C<YYYY-MM-DD> and will be based on UTC (so that the output will be
+reproducible regardless of local time zone).
 
 =item errors
 
@@ -1641,13 +1691,6 @@ in the resulting documentation summarizing the errors.  C<none> ignores
 POD errors entirely, as much as possible.
 
 The default is C<pod>.
-
-=item date
-
-Sets the left-hand footer.  By default, the modification date of the input
-file will be used, or the current date if stat() can't find that file (the
-case if the input is from C<STDIN>), and the date will be formatted as
-C<YYYY-MM-DD>.
 
 =item fixed
 
@@ -1675,12 +1718,16 @@ for B<troff> output.
 
 =item name
 
-Set the name of the manual page.  Without this option, the manual name is
-set to the uppercased base name of the file being converted unless the
-manual section is 3, in which case the path is parsed to see if it is a Perl
-module path.  If it is, a path like C<.../lib/Pod/Man.pm> is converted into
-a name like C<Pod::Man>.  This option, if given, overrides any automatic
-determination of the name.
+Set the name of the manual page for the C<.TH> macro.  Without this
+option, the manual name is set to the uppercased base name of the file
+being converted unless the manual section is 3, in which case the path is
+parsed to see if it is a Perl module path.  If it is, a path like
+C<.../lib/Pod/Man.pm> is converted into a name like C<Pod::Man>.  This
+option, if given, overrides any automatic determination of the name.
+
+If generating a manual page from standard input, this option is required,
+since there's otherwise no way for Pod::Man to know what to use for the
+manual page name.
 
 =item nourls
 
@@ -1701,10 +1748,9 @@ important.
 =item quotes
 
 Sets the quote marks used to surround CE<lt>> text.  If the value is a
-single character, it is used as both the left and right quote; if it is two
-characters, the first character is used as the left quote and the second as
-the right quoted; and if it is four characters, the first two are used as
-the left quote and the second two as the right quote.
+single character, it is used as both the left and right quote.  Otherwise,
+it is split in half, and the first half of the string is used as the left
+quote and the second is used as the right quote.
 
 This may also be set to the special value C<none>, in which case no quote
 marks are added around CE<lt>> text (but the font is still changed for troff
@@ -1712,11 +1758,16 @@ output).
 
 =item release
 
-Set the centered footer.  By default, this is the version of Perl you run
-Pod::Man under.  Note that some system an macro sets assume that the
-centered footer will be a modification date and will prepend something like
-"Last modified: "; if this is the case, you may want to set C<release> to
-the last modified date and C<date> to the version number.
+Set the centered footer for the C<.TH> macro.  By default, this is set to
+the version of Perl you run Pod::Man under.  Setting this to the empty
+string will cause some *roff implementations to use the system default
+value.
+
+Note that some system C<an> macro sets assume that the centered footer
+will be a modification date and will prepend something like "Last
+modified: ".  If this is the case for your target system, you may want to
+set C<release> to the last modified date and C<date> to the version
+number.
 
 =item section
 
@@ -1756,10 +1807,10 @@ by many implementations and may even result in segfaults and other bad
 behavior.
 
 Be aware that, when using this option, the input encoding of your POD
-source must be properly declared unless it is US-ASCII or Latin-1.  POD
-input without an C<=encoding> command will be assumed to be in Latin-1,
-and if it's actually in UTF-8, the output will be double-encoded.  See
-L<perlpod(1)> for more information on the C<=encoding> command.
+source should be properly declared unless it's US-ASCII.  Pod::Simple will
+attempt to guess the encoding and may be successful if it's Latin-1 or
+UTF-8, but it will produce warnings.  Use the C<=encoding> command to
+declare the encoding.  See L<perlpod(1)> for more information.
 
 =back
 
@@ -1800,13 +1851,43 @@ canonical versions of B<nroff> and B<troff> don't either).
 =item Invalid quote specification "%s"
 
 (F) The quote specification given (the C<quotes> option to the
-constructor) was invalid.  A quote specification must be one, two, or four
-characters long.
+constructor) was invalid.  A quote specification must be either one
+character long or an even number (greater than one) characters long.
 
 =item POD document had syntax errors
 
 (F) The POD document being formatted had syntax errors and the C<errors>
 option was set to C<die>.
+
+=back
+
+=head1 ENVIRONMENT
+
+=over 4
+
+=item POD_MAN_DATE
+
+If set, this will be used as the value of the left-hand footer unless the
+C<date> option is explicitly set, overriding the timestamp of the input
+file or the current time.  This is primarily useful to ensure reproducible
+builds of the same output file given the same source and Pod::Man version,
+even when file timestamps may not be consistent.
+
+=item SOURCE_DATE_EPOCH
+
+If set, and POD_MAN_DATE and the C<date> options are not set, this will be
+used as the modification time of the source file, overriding the timestamp of
+the input file or the current time.  It should be set to the desired time in
+seconds since UNIX epoch.  This is primarily useful to ensure reproducible
+builds of the same output file given the same source and Pod::Man version,
+even when file timestamps may not be consistent.  See
+L<https://reproducible-builds.org/specs/source-date-epoch/> for the full
+specification.
+
+(Arguably, according to the specification, this variable should be used only
+if the timestamp of the input file is not available and Pod::Man uses the
+current time.  However, for reproducible builds in Debian, results were more
+reliable if this variable overrode the timestamp of the input file.)
 
 =back
 
@@ -1860,7 +1941,7 @@ only matters for troff output.
 
 =head1 AUTHOR
 
-Russ Allbery <rra@stanford.edu>, based I<very> heavily on the original
+Russ Allbery <rra@cpan.org>, based I<very> heavily on the original
 B<pod2man> by Tom Christiansen <tchrist@mox.perl.com>.  The modifications to
 work with Pod::Simple instead of Pod::Parser were originally contributed by
 Sean Burke (but I've since hacked them beyond recognition and all bugs are
@@ -1869,7 +1950,7 @@ mine).
 =head1 COPYRIGHT AND LICENSE
 
 Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
-2009, 2010, 2012, 2013 Russ Allbery <rra@stanford.edu>.
+2009, 2010, 2012, 2013, 2014, 2015 Russ Allbery <rra@cpan.org>
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.

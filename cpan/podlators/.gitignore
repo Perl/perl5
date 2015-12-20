@@ -1,2 +1,12 @@
 /pod2man*
 /pod2text*
+/.travis.yml
+/LICENSE
+/MANIFEST
+/MANIFEST.SKIP
+/META.yml
+/META.json
+/NOTES
+/README
+/THANKS
+/TODO
