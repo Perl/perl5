@@ -172,7 +172,7 @@ similar systems) that was introduced in 1.36.
 
 =item *
 
-L<utf8> has been upgraded from 1.17 to 1.18.
+L<utf8> has been upgraded from version 1.17 to 1.18.
 
 Partly reverted a micro-optimization to F<lib/utf_heavy.pl> that
 caused self-recursion when it was loaded with C<${^ENCODING}> set.
