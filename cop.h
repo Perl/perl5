@@ -1087,10 +1087,14 @@ struct context {
 #define CXp_TRYBLOCK	0x40	/* eval{}, not eval'' or similar */
 
 /* private flags for CXt_LOOP */
+
+/* this is only set in conjunction with CXp_FOR_GV */
 #define CXp_FOR_DEF	0x10	/* foreach using $_ */
+/* these 3 are mutually exclusive */
 #define CXp_FOR_LVREF	0x20	/* foreach using \$var */
 #define CXp_FOR_GV	0x40	/* foreach using package var */
 #define CXp_FOR_PAD	0x80	/* foreach using lexical var */
+
 #define CxPADLOOP(c)	((c)->cx_type & CXp_FOR_PAD)
 
 /* private flags for CXt_SUBST */
