@@ -262,7 +262,7 @@ C<git checkout .gitignore> in the F<cpan/Distro> directory.
 =item *
 
 Remove files we do not need. That is, remove any files that match the
-entries in C<@IGNORABLE> in F<Porting/Maintainer.pl>, and anything that
+entries in C<@IGNORABLE> in F<Porting/Maintainers.pl>, and anything that
 matches the C<EXCLUDED> section of the distro's entry in the C<%Modules>
 hash.
 
@@ -305,7 +305,7 @@ Run the tests for the package.
 
 =item *
 
-Run the tests in F<t/porting>.
+Run the tests in F<t/porting> (C<make test_porting>).
 
 =item *
 
