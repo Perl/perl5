@@ -2175,8 +2175,10 @@ Es	|bool	|grok_bslash_N	|NN RExC_state_t *pRExC_state		    \
 				|const U32 depth
 Es	|void	|reginsert	|NN RExC_state_t *pRExC_state \
 				|U8 op|NN regnode *opnd|U32 depth
-Es	|void	|regtail	|NN RExC_state_t *pRExC_state \
-				|NN regnode *p|NN const regnode *val|U32 depth
+Es	|void	|regtail	|NN RExC_state_t * pRExC_state		    \
+				|NN const regnode * const p		    \
+				|NN const regnode * const val		    \
+				|const U32 depth
 Es	|SV *	|reg_scan_name	|NN RExC_state_t *pRExC_state \
 				|U32 flags
 Es	|U32	|join_exact	|NN RExC_state_t *pRExC_state \

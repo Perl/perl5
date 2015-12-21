@@ -16887,10 +16887,11 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
 - regtail - set the next-pointer at the end of a node chain of p to val.
 - SEE ALSO: regtail_study
 */
-/* TODO: All three parms should be const */
 STATIC void
-S_regtail(pTHX_ RExC_state_t *pRExC_state, regnode *p,
-                const regnode *val,U32 depth)
+S_regtail(pTHX_ RExC_state_t * pRExC_state,
+                const regnode * const p,
+                const regnode * const val,
+                const U32 depth)
 {
     regnode *scan;
     GET_RE_DEBUG_FLAGS_DECL;
@@ -16904,7 +16905,7 @@ S_regtail(pTHX_ RExC_state_t *pRExC_state, regnode *p,
 	return;
 
     /* Find last node. */
-    scan = p;
+    scan = (regnode *) p;
     for (;;) {
 	regnode * const temp = regnext(scan);
         DEBUG_PARSE_r({
