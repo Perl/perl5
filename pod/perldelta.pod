@@ -603,6 +603,13 @@ L<[perl #126822]|https://rt.perl.org/Ticket/Display.html?id=126822>
 
 Calling mg_set() in leave_scope() no longer leaks.
 
+=item *
+
+A regression from Perl v5.20 in which what a regular expression pattern
+gets compiled into was wrong in the debugging output has been fixed.
+(The pattern was correctly compiled, but what got displayed for it was
+wrong.)
+
 =back
 
 =head1 Known Problems
