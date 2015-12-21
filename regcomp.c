@@ -554,9 +554,19 @@ static const scan_data_t zero_scan_data =
 #define REPORT_LOCATION " in regex; marked by " MARKER1    \
                         " in m/%"UTF8f MARKER2 "%"UTF8f"/"
 
-#define REPORT_LOCATION_ARGS(offset)            \
-                UTF8fARG(UTF, offset, RExC_precomp), \
-                UTF8fARG(UTF, RExC_end - RExC_precomp - offset, RExC_precomp + offset)
+#define REPORT_LOCATION_ARGS(loc)                                           \
+                UTF8fARG(UTF,                                               \
+                         ((loc) > RExC_end)                                 \
+                          ? RExC_end - RExC_precomp                         \
+                          : (loc) - RExC_precomp,                           \
+                         RExC_precomp),                                     \
+                UTF8fARG(UTF,                                               \
+                         ((loc) > RExC_end)                                 \
+                          ? 0                                               \
+                          : RExC_end - (loc),                               \
+                         ((loc) > RExC_end)                                 \
+                          ? RExC_end                                        \
+                          : (loc))
 
 /* Used to point after bad bytes for an error message, but avoid skipping
  * past a nul byte. */
@@ -593,10 +603,8 @@ static const scan_data_t zero_scan_data =
  * Simple_vFAIL -- like FAIL, but marks the current location in the scan
  */
 #define	Simple_vFAIL(m) STMT_START {					\
-    const IV offset =                                                   \
-        (RExC_parse > RExC_end ? RExC_end : RExC_parse) - RExC_precomp; \
     Perl_croak(aTHX_ "%s" REPORT_LOCATION,				\
-	    m, REPORT_LOCATION_ARGS(offset));	\
+	    m, REPORT_LOCATION_ARGS(RExC_parse));	                \
 } STMT_END
 
 /*
@@ -612,9 +620,8 @@ static const scan_data_t zero_scan_data =
  * Like Simple_vFAIL(), but accepts two arguments.
  */
 #define	Simple_vFAIL2(m,a1) STMT_START {			\
-    const IV offset = RExC_parse - RExC_precomp;			\
-    S_re_croak2(aTHX_ UTF, m, REPORT_LOCATION, a1,			\
-                      REPORT_LOCATION_ARGS(offset));	\
+    S_re_croak2(aTHX_ UTF, m, REPORT_LOCATION, a1,		\
+                      REPORT_LOCATION_ARGS(RExC_parse));	\
 } STMT_END
 
 /*
@@ -631,9 +638,8 @@ static const scan_data_t zero_scan_data =
  * Like Simple_vFAIL(), but accepts three arguments.
  */
 #define	Simple_vFAIL3(m, a1, a2) STMT_START {			\
-    const IV offset = RExC_parse - RExC_precomp;		\
     S_re_croak2(aTHX_ UTF, m, REPORT_LOCATION, a1, a2,		\
-	    REPORT_LOCATION_ARGS(offset));	\
+	    REPORT_LOCATION_ARGS(RExC_parse));	                \
 } STMT_END
 
 /*
@@ -649,9 +655,8 @@ static const scan_data_t zero_scan_data =
  * Like Simple_vFAIL(), but accepts four arguments.
  */
 #define	Simple_vFAIL4(m, a1, a2, a3) STMT_START {		\
-    const IV offset = RExC_parse - RExC_precomp;		\
-    S_re_croak2(aTHX_ UTF, m, REPORT_LOCATION, a1, a2, a3,		\
-	    REPORT_LOCATION_ARGS(offset));	\
+    S_re_croak2(aTHX_ UTF, m, REPORT_LOCATION, a1, a2, a3,	\
+	    REPORT_LOCATION_ARGS(RExC_parse));	                \
 } STMT_END
 
 #define	vFAIL4(m,a1,a2,a3) STMT_START {			\
@@ -661,20 +666,18 @@ static const scan_data_t zero_scan_data =
 } STMT_END
 
 /* A specialized version of vFAIL2 that works with UTF8f */
-#define vFAIL2utf8f(m, a1) STMT_START {            \
-    const IV offset = RExC_parse - RExC_precomp;   \
-    if (!SIZE_ONLY)                                \
-        SAVEFREESV(RExC_rx_sv);                    \
-    S_re_croak2(aTHX_ UTF, m, REPORT_LOCATION, a1, \
-            REPORT_LOCATION_ARGS(offset));         \
+#define vFAIL2utf8f(m, a1) STMT_START {             \
+    if (!SIZE_ONLY)                                 \
+        SAVEFREESV(RExC_rx_sv);                     \
+    S_re_croak2(aTHX_ UTF, m, REPORT_LOCATION, a1,  \
+            REPORT_LOCATION_ARGS(RExC_parse));      \
 } STMT_END
 
 #define vFAIL3utf8f(m, a1, a2) STMT_START {             \
-    const IV offset = RExC_parse - RExC_precomp;        \
     if (!SIZE_ONLY)                                     \
         SAVEFREESV(RExC_rx_sv);                         \
     S_re_croak2(aTHX_ UTF, m, REPORT_LOCATION, a1, a2,  \
-            REPORT_LOCATION_ARGS(offset));              \
+            REPORT_LOCATION_ARGS(RExC_parse));          \
 } STMT_END
 
 /* These have asserts in them because of [perl #122671] Many warnings in
@@ -685,84 +688,86 @@ static const scan_data_t zero_scan_data =
 
 /* m is not necessarily a "literal string", in this macro */
 #define reg_warn_non_literal_string(loc, m) STMT_START {                \
-    const IV offset = loc - RExC_precomp;                               \
-    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s" REPORT_LOCATION,      \
-            m, REPORT_LOCATION_ARGS(offset));       \
+    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP),           \
+                                       "%s" REPORT_LOCATION,            \
+                                  m, REPORT_LOCATION_ARGS(loc));        \
 } STMT_END
 
 #define	ckWARNreg(loc,m) STMT_START {					\
-    const IV offset = loc - RExC_precomp;				\
-    __ASSERT_(PASS2) Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
-	    REPORT_LOCATION_ARGS(offset));		\
+    __ASSERT_(PASS2) Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),        \
+                                          m REPORT_LOCATION,	        \
+	                                  REPORT_LOCATION_ARGS(loc));   \
 } STMT_END
 
 #define	vWARN(loc, m) STMT_START {				        \
-    const IV offset = loc - RExC_precomp;				\
-    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
-	    REPORT_LOCATION_ARGS(offset));	        \
+    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP),           \
+                                       m REPORT_LOCATION,               \
+                                       REPORT_LOCATION_ARGS(loc));      \
 } STMT_END
 
 #define	vWARN_dep(loc, m) STMT_START {				        \
-    const IV offset = loc - RExC_precomp;				\
-    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_DEPRECATED), m REPORT_LOCATION,	\
-	    REPORT_LOCATION_ARGS(offset));	        \
+    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),       \
+                                       m REPORT_LOCATION,               \
+	                               REPORT_LOCATION_ARGS(loc));      \
 } STMT_END
 
 #define	ckWARNdep(loc,m) STMT_START {				        \
-    const IV offset = loc - RExC_precomp;				\
-    __ASSERT_(PASS2) Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),	                \
-	    m REPORT_LOCATION,						\
-	    REPORT_LOCATION_ARGS(offset));		\
+    __ASSERT_(PASS2) Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),  \
+	                                    m REPORT_LOCATION,          \
+	                                    REPORT_LOCATION_ARGS(loc)); \
 } STMT_END
 
-#define	ckWARNregdep(loc,m) STMT_START {				\
-    const IV offset = loc - RExC_precomp;				\
-    __ASSERT_(PASS2) Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_REGEXP),	\
-	    m REPORT_LOCATION,						\
-	    REPORT_LOCATION_ARGS(offset));		\
+#define	ckWARNregdep(loc,m) STMT_START {				    \
+    __ASSERT_(PASS2) Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED,      \
+                                                      WARN_REGEXP),         \
+	                                     m REPORT_LOCATION,             \
+	                                     REPORT_LOCATION_ARGS(loc));    \
 } STMT_END
 
-#define	ckWARN2reg_d(loc,m, a1) STMT_START {				\
-    const IV offset = loc - RExC_precomp;				\
-    __ASSERT_(PASS2) Perl_ck_warner_d(aTHX_ packWARN(WARN_REGEXP),			\
-	    m REPORT_LOCATION,						\
-	    a1, REPORT_LOCATION_ARGS(offset));	\
+#define	ckWARN2reg_d(loc,m, a1) STMT_START {				    \
+    __ASSERT_(PASS2) Perl_ck_warner_d(aTHX_ packWARN(WARN_REGEXP),          \
+	                                    m REPORT_LOCATION,              \
+	                                    a1, REPORT_LOCATION_ARGS(loc)); \
 } STMT_END
 
-#define	ckWARN2reg(loc, m, a1) STMT_START {				\
-    const IV offset = loc - RExC_precomp;				\
-    __ASSERT_(PASS2) Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
-	    a1, REPORT_LOCATION_ARGS(offset));	\
+#define	ckWARN2reg(loc, m, a1) STMT_START {                                 \
+    __ASSERT_(PASS2) Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),            \
+                                          m REPORT_LOCATION,	            \
+                                          a1, REPORT_LOCATION_ARGS(loc));   \
 } STMT_END
 
-#define	vWARN3(loc, m, a1, a2) STMT_START {				\
-    const IV offset = loc - RExC_precomp;				\
-    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,		\
-	    a1, a2, REPORT_LOCATION_ARGS(offset));	\
+#define	vWARN3(loc, m, a1, a2) STMT_START {				    \
+    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP),               \
+                                       m REPORT_LOCATION,                   \
+	                               a1, a2, REPORT_LOCATION_ARGS(loc));  \
 } STMT_END
 
-#define	ckWARN3reg(loc, m, a1, a2) STMT_START {				\
-    const IV offset = loc - RExC_precomp;				\
-    __ASSERT_(PASS2) Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
-	    a1, a2, REPORT_LOCATION_ARGS(offset));	\
+#define	ckWARN3reg(loc, m, a1, a2) STMT_START {				    \
+    __ASSERT_(PASS2) Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),            \
+                                          m REPORT_LOCATION,                \
+	                                  a1, a2,                           \
+                                          REPORT_LOCATION_ARGS(loc));       \
 } STMT_END
 
 #define	vWARN4(loc, m, a1, a2, a3) STMT_START {				\
-    const IV offset = loc - RExC_precomp;				\
-    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,		\
-	    a1, a2, a3, REPORT_LOCATION_ARGS(offset)); \
+    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP),           \
+                                       m REPORT_LOCATION,               \
+	                               a1, a2, a3,                      \
+                                       REPORT_LOCATION_ARGS(loc));      \
 } STMT_END
 
 #define	ckWARN4reg(loc, m, a1, a2, a3) STMT_START {			\
-    const IV offset = loc - RExC_precomp;				\
-    __ASSERT_(PASS2) Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
-	    a1, a2, a3, REPORT_LOCATION_ARGS(offset)); \
+    __ASSERT_(PASS2) Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),        \
+                                          m REPORT_LOCATION,            \
+	                                  a1, a2, a3,                   \
+                                          REPORT_LOCATION_ARGS(loc));   \
 } STMT_END
 
 #define	vWARN5(loc, m, a1, a2, a3, a4) STMT_START {			\
-    const IV offset = loc - RExC_precomp;				\
-    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,		\
-	    a1, a2, a3, a4, REPORT_LOCATION_ARGS(offset)); \
+    __ASSERT_(PASS2) Perl_warner(aTHX_ packWARN(WARN_REGEXP),           \
+                                       m REPORT_LOCATION,		\
+	                               a1, a2, a3, a4,                  \
+                                       REPORT_LOCATION_ARGS(loc));      \
 } STMT_END
 
 /* Macros for recording node offsets.   20001227 mjd@plover.com
