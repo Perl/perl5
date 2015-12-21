@@ -5022,7 +5022,7 @@ PP(pp_break)
 
     /* Restore the sp at the time we entered the given block */
     cx = CX_CUR();
-    TOPBLOCK(cx);
+    PL_stack_sp = PL_stack_base + cx->blk_oldsp;
 
     return cx->blk_givwhen.leave_op;
 }
