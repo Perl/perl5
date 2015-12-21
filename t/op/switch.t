@@ -10,7 +10,7 @@ use strict;
 use warnings;
 no warnings 'experimental::smartmatch';
 
-plan tests => 189;
+plan tests => 193;
 
 # The behaviour of the feature pragma should be tested by lib/feature.t
 # using the tests in t/lib/feature/*. This file tests the behaviour of
@@ -1305,6 +1305,48 @@ unreified_check(undef,"");
     f2();
 }
 
+# check that 'when' handles all 'for' loop types
+
+{
+    my $i;
+
+    $i = 0;
+    for (1..3) {
+        when (1) {$i +=    1 }
+        when (2) {$i +=   10 }
+        when (3) {$i +=  100 }
+        default { $i += 1000 }
+    }
+    is($i, 111, "when in for 1..3");
+
+    $i = 0;
+    for ('a'..'c') {
+        when ('a') {$i +=    1 }
+        when ('b') {$i +=   10 }
+        when ('c') {$i +=  100 }
+        default { $i += 1000 }
+    }
+    is($i, 111, "when in for a..c");
+
+    $i = 0;
+    for (1,2,3) {
+        when (1) {$i +=    1 }
+        when (2) {$i +=   10 }
+        when (3) {$i +=  100 }
+        default { $i += 1000 }
+    }
+    is($i, 111, "when in for 1,2,3");
+
+    $i = 0;
+    my @a = (1,2,3);
+    for (@a) {
+        when (1) {$i +=    1 }
+        when (2) {$i +=   10 }
+        when (3) {$i +=  100 }
+        default { $i += 1000 }
+    }
+    is($i, 111, 'when in for @a');
+}
 
 
 # Okay, that'll do for now. The intricacies of the smartmatch

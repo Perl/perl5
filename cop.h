@@ -983,7 +983,7 @@ struct subst {
     U8		sbu_rflags;
     U16		sbu_rxtainted;
     I32		sbu_oldsaveix; /* same as blku_oldsaveix */
-    /* all the fields above must be aligned with same-sized fields as blku * */
+    /* all the fields above must be aligned with same-sized fields as blk_u */
     SSize_t	sbu_iters;
     SSize_t	sbu_maxiters;
     char *	sbu_orig;
@@ -1108,7 +1108,7 @@ struct context {
 			 == (CXt_EVAL|CXp_REAL))
 #define CxTRYBLOCK(c)	(((c)->cx_type & (CXTYPEMASK|CXp_TRYBLOCK))	\
 			 == (CXt_EVAL|CXp_TRYBLOCK))
-#define CxFOREACH(c)	(   CxTYPE(cx) >= CXt_LOOP_LAZYSV               \
+#define CxFOREACH(c)	(   CxTYPE(cx) >= CXt_LOOP_LAZYIV               \
                          && CxTYPE(cx) <= CXt_LOOP_ARY)
 
 #define CXINC (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
