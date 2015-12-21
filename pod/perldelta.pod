@@ -157,11 +157,26 @@ C<< < > >>. This fixes the deparsing of C<readline ${"a"}>.
 
 =item *
 
+L<CPAN::Meta::YAML> has been upgraded from version 0.017-TRIAL to 0.018,
+with no change since 0.017.
+
+=item *
+
+L<CPAN::Meta::Requirements> has been upgraded from version 2.133 to 2.140.
+
+Adds a method for getting structured requirements and adds better error
+messages.
+
+=item *
+
 L<Data::Dumper> has been upgraded from version 2.158 to 2.159.
 
 This adds a "Trailingcomma" option, which when enabled adds a trailing comma
 after the last element of dumped arrays and hashes that would otherwise be
 followed immediately by a line break.  [perl #126813]
+
+The internals have also been substantially refactored and cleaned up.  It
+may be more efficient on some platforms.
 
 =item *
 
@@ -169,6 +184,47 @@ L<DynaLoader> has been upgraded from version 1.36 to 1.37.
 
 Fixed an else nesting issue in dynamic loading support for OS/390 (and
 similar systems) that was introduced in 1.36.
+
+=item *
+
+L<File::Spec> and L<Cwd> have been upgraded from version 3.59 to 3.60,
+adding L<File::Spec::AmigaOS>.
+
+=item *
+
+L<Hash::Util::FieldHash> has been upgraded from version 1.18 to 1.19.
+
+=item *
+
+L<Locale::Codes> has been upgraded from version 3.36 to 3.37.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been updated from version 0.37 to 0.38.
+
+=item *
+
+L<Module::Metadata> has been updated from version 1.000030-TRIAL to
+1.000031-TRIAL, with no functional changes.
+
+=item *
+
+L<Term::ANSIColor> has been upgraded from version 4.03 to 4.04, with no
+functional changes.
+
+=item *
+
+L<Unicode::Normalize> has been updated from version 1.23 to 1.24, with
+no functional changes.
+
+=item *
+
+L<strict> has been upgraded from version 1.09 to 1.10, with only a
+documentation change.
+
+=item *
+
+L<threads> has been upgraded from version 2.04 to 2.05.
 
 =item *
 
@@ -215,13 +271,46 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlfunc>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+The documentation of C<hex> has been revised to clarify valid inputs.
+
+=back
+
+=head3 L<perlop>
+
+=over 4
+
+=item *
+
+The documentation of C<qx//> now describes how C<$?> is affected.
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+The documentation of C<$@> was reworded to clarify that it is not just for
+syntax errors in C<eval>.
+L<[perl #124034]|https://rt.perl.org/Ticket/Display.html?id=124034>
+
+=back
+
+=head3 L<perlxs>
+
+=over 4
+
+=item *
+
+The documentation of C<PROTOTYPES> has been clarified; they are I<disabled>
+by default, not I<enabled>.
 
 =back
 
@@ -411,6 +500,11 @@ setenv() function to update the environment.
 Perl now uses setenv()/unsetenv() to update the environment on OS X.
 [perl #126240]
 
+=item Cygwin
+
+Tests are more robust against unusual cygdrive prefixes.
+L<[perl #126834]|https://rt.perl.org/Ticket/Display.html?id=126834>
+
 =item ppc64el floating point
 
 The floating point format of ppc64el (Debian naming for little-endian
@@ -440,6 +534,20 @@ information.
 
 The signbit() emulation has been enhanced.  This will help older
 and/or more exotic platforms or configurations.
+
+=item *
+
+The C<to_utf8_case> function is discouraged in favor of C<toUPPER_utf8>,
+C<toTITLE_utf8>, C<toLOWER_utf8>, and C<toFOLD_utf8>.
+
+=item *
+
+EBCDIC code paths have largely been unified to avoid repetition.
+
+=item *
+
+MSWin32 code for C<$^X> has been moved out of the F<win32> directory to
+where other operating systems set that variable.
 
 =back
 
@@ -490,6 +598,10 @@ format C<%a> were fixed:
 L<[perl #126582]|https://rt.perl.org/Ticket/Display.html?id=126582>,
 L<[perl #126586]|https://rt.perl.org/Ticket/Display.html?id=126586>,
 L<[perl #126822]|https://rt.perl.org/Ticket/Display.html?id=126822>
+
+=item *
+
+Calling mg_set() in leave_scope() no longer leaks.
 
 =back
 
