@@ -2343,6 +2343,13 @@ S_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op)
             continue;
         svp = cSVOPx_svp(key_op);
 
+        /* make sure it's not a bareword under strict subs */
+        if (key_op->op_private & OPpCONST_BARE &&
+            key_op->op_private & OPpCONST_STRICT)
+        {
+            no_bareword_allowed((OP*)key_op);
+        }
+
         /* Make the CONST have a shared SV */
         if (   !SvIsCOW_shared_hash(sv = *svp)
             && SvTYPE(sv) < SVt_PVMG
