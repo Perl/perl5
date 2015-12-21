@@ -148,6 +148,15 @@ XXX
 
 =item *
 
+L<B::Deparse> has been upgraded from version 1.35 to 1.36.
+
+Uses of C<< < > >> are now always deparsed as either C<glob()> or
+C<readline()>, and uses of C<glob()> or C<readline()> are never deparsed as
+C<< < > >>. This fixes the deparsing of C<readline ${"a"}>.
+[perl #116677]
+
+=item *
+
 L<Data::Dumper> has been upgraded from version 2.158 to 2.159.
 
 This adds a "Trailingcomma" option, which when enabled adds a trailing comma
