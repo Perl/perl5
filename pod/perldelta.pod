@@ -135,6 +135,11 @@ L<Math::BigInt::FastCalc> has been updated from version 0.37 to 0.38.
 
 =item *
 
+L<Module::CoreList> has been updated from version 5.20151120 to
+5.20151220.
+
+=item *
+
 L<Module::Metadata> has been updated from version 1.000030-TRIAL to
 1.000031-TRIAL, with no functional changes.
 
