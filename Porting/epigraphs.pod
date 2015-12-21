@@ -17,6 +17,31 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.23.6 - 5.23 Episode VII
+
+  A long time ago in microseconds, in a galaxy not very far away...
+
+                   5.23 Episode VII
+                   THE FUZZ AWAKENS
+
+                  It is a period of
+                unrest as separatists
+               announce their intentions
+              to fork PERL and return the
+             galaxy to speed and stability.
+
+            Chancellor Rik Hoolian struggles
+          to hold together the remains of the
+         once mighty Republic against a tide of
+        incivility and the depredations of a new
+       foe, the FUZZ RAIDERS.
+
+      Meanwhile, after 15 years of preparation and
+     high expectations, Supreme Leader Toady prepares
+    to unleash a devastating new weapon, PERL SIXDOTOH,
+   that could splinter the Republic forever and usher in
+  a new Empire of gradual typing....
+
 =head2 v5.23.5 - utastro!nather (Ed Nather), "The Story of Mel", in net.jokes, May 21, 1983.
 
 L<Announced on 2015-11-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2015/11/msg232758.html>
