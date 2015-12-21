@@ -78,6 +78,11 @@ caseless one.
 
 =item *
 
+The modules L<sigtrap>, L<DB>, and the perl debugger could have, under
+rare circumstances, output raw control characters.  This has been fixed.
+
+=item *
+
 L<B::Deparse> has been upgraded from version 1.35 to 1.36.
 
 Uses of C<< < > >> are now always deparsed as either C<glob()> or
@@ -87,8 +92,11 @@ L<[perl #116677]|https://rt.perl.org/Ticket/Display.html?id=116677>
 
 =item *
 
-L<CPAN::Meta::YAML> has been upgraded from version 0.017-TRIAL to 0.018,
-with no change since 0.017.
+L<base> has been upgraded from version 2.22_01 to 2.23.
+
+=item *
+
+L<Benchmark> has been upgraded from version 1.2 to 1.21.
 
 =item *
 
@@ -96,6 +104,11 @@ L<CPAN::Meta::Requirements> has been upgraded from version 2.133 to 2.140.
 
 Adds a method for getting structured requirements and adds better error
 messages.
+
+=item *
+
+L<CPAN::Meta::YAML> has been upgraded from version 0.017 to 0.018,
+with no change since 0.017.
 
 =item *
 
@@ -118,12 +131,24 @@ similar systems) that was introduced in 1.36.
 
 =item *
 
+L<encoding::warnings> has been upgraded from version 0.11 to 0.12.
+
+=item *
+
+L<fields> has been upgraded from version 2.22_01 to 2.23.
+
+=item *
+
 L<File::Spec> and L<Cwd> have been upgraded from version 3.59 to 3.60,
 adding L<File::Spec::AmigaOS>.
 
 =item *
 
 L<Hash::Util::FieldHash> has been upgraded from version 1.18 to 1.19.
+
+=item *
+
+L<locale> has been upgraded from version 1.07 to 1.08.
 
 =item *
 
@@ -140,18 +165,24 @@ L<Module::CoreList> has been updated from version 5.20151120 to
 
 =item *
 
-L<Module::Metadata> has been updated from version 1.000030-TRIAL to
-1.000031-TRIAL, with no functional changes.
+L<Module::Metadata> has been updated from version 1.000030 to
+1.000031, with no functional changes.
 
 =item *
 
-L<Term::ANSIColor> has been upgraded from version 4.03 to 4.04, with no
-functional changes.
+L<Opcode> has been upgraded from version 1.33 to 1.34.
 
 =item *
 
-L<Unicode::Normalize> has been updated from version 1.23 to 1.24, with
-no functional changes.
+L<PerlIO::mmap> has been upgraded from version 0.015 to 0.016.
+
+=item *
+
+L<Pod::Perldoc> has been upgraded from version 3.25_01 to 3.25_02.
+
+=item *
+
+L<SDBM_File> has been upgraded from version 1.13 to 1.14.
 
 =item *
 
@@ -160,7 +191,25 @@ documentation change.
 
 =item *
 
+L<Term::ANSIColor> has been upgraded from version 4.03 to 4.04, with no
+functional changes.
+
+=item *
+
+L<Test> has been upgraded from version 1.27 to 1.28.
+
+=item *
+
 L<threads> has been upgraded from version 2.04 to 2.05.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.49 to 1.50.
+
+=item *
+
+L<Unicode::Normalize> has been updated from version 1.23 to 1.24, with
+no functional changes.
 
 =item *
 
@@ -169,11 +218,6 @@ L<utf8> has been upgraded from version 1.17 to 1.18.
 Partly reverted a micro-optimization to F<lib/utf_heavy.pl> that
 caused self-recursion when it was loaded with C<${^ENCODING}> set.
 L<[perl #126593]|https://rt.perl.org/Ticket/Display.html?id=126593>
-
-=item *
-
-The modules L<sigtrap>, L<DB>, and the perl debugger could have, under
-rare circumstances, output raw control characters.  This has been fixed.
 
 =back
 
