@@ -835,19 +835,20 @@ struct block_loop {
         PUSHLOOP_FOR_setpad(cx);
 
 #define POPLOOP(cx)							\
-	if (CxTYPE(cx) == CXt_LOOP_LAZYSV) {				\
+	if (  CxTYPE(cx) == CXt_LOOP_ARY                                \
+           || CxTYPE(cx) == CXt_LOOP_LAZYSV)                            \
+        {			                                        \
+            /* Free ary or cur. This assumes that state_u.ary.ary       \
+             * aligns with state_u.lazysv.cur. See cx_dup() */          \
             SV *sv = cx->blk_loop.state_u.lazysv.cur;                   \
             cx->blk_loop.state_u.lazysv.cur = NULL;                     \
 	    SvREFCNT_dec_NN(sv);	                                \
-            sv = cx->blk_loop.state_u.lazysv.end;                       \
-            cx->blk_loop.state_u.lazysv.end = NULL;                     \
-	    SvREFCNT_dec_NN(sv);		                        \
+            if (CxTYPE(cx) == CXt_LOOP_LAZYSV) {                        \
+                sv = cx->blk_loop.state_u.lazysv.end;                   \
+                cx->blk_loop.state_u.lazysv.end = NULL;                 \
+                SvREFCNT_dec_NN(sv);		                        \
+            }                                                           \
 	}								\
-	else if (CxTYPE(cx) == CXt_LOOP_ARY) { 				\
-            AV *av = cx->blk_loop.state_u.ary.ary;                      \
-            cx->blk_loop.state_u.ary.ary = NULL;                        \
-	    SvREFCNT_dec(av);                                           \
-        }                                                               \
         if (cx->cx_type & (CXp_FOR_PAD|CXp_FOR_GV)) {                   \
             SV *cursv;                                                  \
             SV **svp = (cx)->blk_loop.itervar_u.svp;                    \
@@ -1063,11 +1064,11 @@ struct context {
 
 /* be careful of the ordering of these five. Macros like CxTYPE_is_LOOP,
  * CxFOREACH compare ranges */
-#define CXt_LOOP_PLAIN	4 /*                {} */
-#define CXt_LOOP_LAZYIV	5 /* for (1..9)     {} */
-#define CXt_LOOP_LAZYSV	6 /* for ('a'..'z') {} */
+#define CXt_LOOP_ARY	4 /* for (@ary)     {} */
+#define CXt_LOOP_LAZYSV	5 /* for ('a'..'z') {} */
+#define CXt_LOOP_LAZYIV	6 /* for (1..9)     {} */
 #define CXt_LOOP_LIST	7 /* for (1,2,3)    {} */
-#define CXt_LOOP_ARY	8 /* for (@ary)     {} */
+#define CXt_LOOP_PLAIN	8 /*                {} */
 
 #define CXt_SUB		9
 #define CXt_FORMAT     10
@@ -1101,15 +1102,15 @@ struct context {
 #define CXp_ONCE	0x10	/* What was sbu_once in struct subst */
 
 #define CxTYPE(c)	((c)->cx_type & CXTYPEMASK)
-#define CxTYPE_is_LOOP(c) (   CxTYPE(cx) >= CXt_LOOP_PLAIN              \
-                           && CxTYPE(cx) <= CXt_LOOP_ARY)
+#define CxTYPE_is_LOOP(c) (   CxTYPE(cx) >= CXt_LOOP_ARY                \
+                           && CxTYPE(cx) <= CXt_LOOP_PLAIN)
 #define CxMULTICALL(c)	((c)->cx_type & CXp_MULTICALL)
 #define CxREALEVAL(c)	(((c)->cx_type & (CXTYPEMASK|CXp_REAL))		\
 			 == (CXt_EVAL|CXp_REAL))
 #define CxTRYBLOCK(c)	(((c)->cx_type & (CXTYPEMASK|CXp_TRYBLOCK))	\
 			 == (CXt_EVAL|CXp_TRYBLOCK))
-#define CxFOREACH(c)	(   CxTYPE(cx) >= CXt_LOOP_LAZYIV               \
-                         && CxTYPE(cx) <= CXt_LOOP_ARY)
+#define CxFOREACH(c)	(   CxTYPE(cx) >= CXt_LOOP_ARY                  \
+                         && CxTYPE(cx) <= CXt_LOOP_LIST)
 
 #define CXINC (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
 
