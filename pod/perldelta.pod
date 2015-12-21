@@ -118,7 +118,12 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Many languages, such as Chinese, are caseless.  Perl now knows about
+most modern commercially important ones, and skips much of the work when
+a program tries to change case in them (like C<ucfirst()>) or match
+caselessly (C<qr//i>).  This will speed up a program, such as a web
+server, that can operate on multiple languages, while operating on a
+caseless one.
 
 =back
 
