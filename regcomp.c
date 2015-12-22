@@ -131,6 +131,7 @@ struct RExC_state_t {
     U32		flags;			/* RXf_* are we folding, multilining? */
     U32		pm_flags;		/* PMf_* stuff from the calling PMOP */
     char	*precomp;		/* uncompiled string. */
+    char	*precomp_end;		/* pointer to end of uncompiled string. */
     REGEXP	*rx_sv;			/* The SV that is the regexp. */
     regexp	*rx;                    /* perl core regexp structure */
     regexp_internal	*rxi;           /* internal data for regexp object
@@ -220,6 +221,7 @@ struct RExC_state_t {
 #define RExC_flags	(pRExC_state->flags)
 #define RExC_pm_flags	(pRExC_state->pm_flags)
 #define RExC_precomp	(pRExC_state->precomp)
+#define RExC_precomp_end (pRExC_state->precomp_end)
 #define RExC_rx_sv	(pRExC_state->rx_sv)
 #define RExC_rx		(pRExC_state->rx)
 #define RExC_rxi	(pRExC_state->rxi)
@@ -557,15 +559,15 @@ static const scan_data_t zero_scan_data =
 #define REPORT_LOCATION_ARGS(loc)                                           \
                 UTF8fARG(UTF,                                               \
                          ((loc) > RExC_end)                                 \
-                          ? RExC_end - RExC_precomp                         \
+                          ? RExC_precomp_end - RExC_precomp                 \
                           : (loc) - RExC_precomp,                           \
                          RExC_precomp),                                     \
                 UTF8fARG(UTF,                                               \
                          ((loc) > RExC_end)                                 \
                           ? 0                                               \
-                          : RExC_end - (loc),                               \
+                          : RExC_precomp_end - (loc),                       \
                          ((loc) > RExC_end)                                 \
-                          ? RExC_end                                        \
+                          ? RExC_precomp_end                                \
                           : (loc))
 
 /* Used to point after bad bytes for an error message, but avoid skipping
@@ -579,7 +581,7 @@ static const scan_data_t zero_scan_data =
  */
 #define _FAIL(code) STMT_START {					\
     const char *ellipses = "";						\
-    IV len = RExC_end - RExC_precomp;					\
+    IV len = RExC_precomp_end - RExC_precomp;					\
 									\
     if (!SIZE_ONLY)							\
 	SAVEFREESV(RExC_rx_sv);						\
@@ -4818,7 +4820,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),
 			"Quantifier unexpected on zero-length expression "
 			"in regex m/%"UTF8f"/",
-			 UTF8fARG(UTF, RExC_end - RExC_precomp,
+			 UTF8fARG(UTF, RExC_precomp_end - RExC_precomp,
 				  RExC_precomp));
 		    (void)ReREFCNT_inc(RExC_rx_sv);
 		}
@@ -6726,6 +6728,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_parse = exp;
     RExC_start = exp;
     RExC_end = exp + plen;
+    RExC_precomp_end = RExC_end;
     RExC_naughty = 0;
     RExC_npar = 1;
     RExC_nestroot = 0;
