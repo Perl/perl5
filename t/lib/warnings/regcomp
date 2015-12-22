@@ -20,7 +20,7 @@ EXPECT
 Non-octal character '8'.  Resolved as "\o{123}" at - line 3.
 Non-octal character '8'.  Resolved as "\o{654}" at - line 4.
 ########
-# regcomp.c.c
+# regcomp.c
 BEGIN {
     if (ord('A') == 193) {
         print "SKIPPED\n# Different results on EBCDIC";
