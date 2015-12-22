@@ -13549,10 +13549,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
     Perl_ck_warner_d(aTHX_
         packWARN(WARN_EXPERIMENTAL__REGEX_SETS),
         "The regex_sets feature is experimental" REPORT_LOCATION,
-            UTF8fARG(UTF, (RExC_parse - RExC_precomp), RExC_precomp),
-            UTF8fARG(UTF,
-                     RExC_end - RExC_start - (RExC_parse - RExC_precomp),
-                     RExC_precomp + (RExC_parse - RExC_precomp)));
+        REPORT_LOCATION_ARGS(RExC_parse));
 
     /* Everything in this construct is a metacharacter.  Operands begin with
      * either a '\' (for an escape sequence), or a '[' for a bracketed
