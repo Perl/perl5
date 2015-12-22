@@ -165,6 +165,19 @@ release.  Have a chat with whichever evil perl porter tried to talk
 you into the idea in the first place to figure out the best way to
 resolve the issue.
 
+=head3 web-based file share
+
+You will need to be able to share tarballs with #p5p members for
+pre-release testing, and you may wish to upload to PAUSE via URL.
+Make sure you have a way of sharing files, such as a web server or
+file-sharing service.
+
+Porters have access to the "dromedary" server (users.perl5.git.perl.org),
+but as of Dec. 2015 the F<public_html> directories are not working.
+
+If you use Dropbox, you can append "raw=1" as a parameter to their usual
+sharing link to allow direct download (albeit with redirects).
+
 =head3 git clone of https://github.com/perlorg/perlweb
 
 For updating the L<http://dev.perl.org> web pages, either a Github account or
@@ -465,7 +478,9 @@ release in the previous development cycle (so for example, for a 5.14.x
 release, this would be 5.13.11).
 
 For BLEAD-POINT releases, it needs to refer to the previous BLEAD-POINT
-release (so for 5.15.3 this would be 5.15.2).
+release (so for 5.15.3 this would be 5.15.2).  If the last release manager
+followed instructions, this should have already been done after the last
+blead release, so you may find nothing to do here.
 
 =head3 Check copyright years
 
@@ -882,6 +897,11 @@ utility is included with most modern UNIX-type operating systems and
 is available for Cygwin. A Windows port is available from
 L<http://tukaani.org/xz/>.
 
+B<IMPORTANT>: if you are on OS X, you must export C<COPYFILE_DISABLE=1>
+to prevent OS X resource files from being included in your tarball. After
+creating the tarball following the instructions below, inspect it to ensure
+you don't have files like F<._foobar>.
+
 Create a tarball. Use the C<-s> option to specify a suitable suffix for
 the tarball and directory name:
 
@@ -920,12 +940,20 @@ Once you have a tarball it's time to test the tarball (not the repository).
 Copy the tarballs (.gz and possibly .bz2 and .xz) to a web server somewhere you
 have access to.
 
-=head4 Download the tarball to another machine
+=head4 Download the tarball to another machine and unpack it
 
 Download the tarball to some other machine. For a release candidate,
 you really want to test your tarball on two or more different platforms
-and architectures. The #p5p IRC channel on irc.perl.org is a good place
-to find willing victims.
+and architectures.
+
+=head4 Ask #p5p to test the tarball on different platforms
+
+Once you've verified the tarball can be downloaded and unpacked,
+ask the #p5p IRC channel on irc.perl.org for volunteers to test the
+tarballs on whatever platforms they can.
+
+If you're not confident in the tarball, you can defer this step until after
+your own tarball testing, below.
 
 =head4 Check that F<Configure> works
 
@@ -1056,10 +1084,17 @@ high-reliability connection to the Internet, you should probably use the
 new release from wherever you put it for testers to find it.  This will
 eliminate anxious gnashing of teeth while you wait to see if your
 15 megabyte HTTP upload successfully completes across your slow, twitchy
-cable modem.  You can make use of your home directory on dromedary for
+cable modem.
+
+B<Note:> as of Dec 2015, dromedary F<public_html> is not working so
+ignore the following paragraph until it is fixed.
+
+You can make use of your home directory on dromedary for
 this purpose: F<http://users.perl5.git.perl.org/~USERNAME> maps to
 F</home/USERNAME/public_html>, where F<USERNAME> is your login account
-on dromedary.  I<Remember>: if your upload is partially successful, you
+on dromedary.
+
+I<Remember>: if your upload is partially successful, you
 may need to contact a PAUSE administrator or even bump the version of perl.
 
 Upload the .gz, .xz, and .bz2 versions of the tarball.
