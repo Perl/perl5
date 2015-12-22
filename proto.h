@@ -3341,9 +3341,11 @@ PERL_CALLCONV U32	Perl_to_uni_upper_lc(pTHX_ U32 c)
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
-PERL_CALLCONV UV	Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, const char *normal, const char *special);
+PERL_CALLCONV UV	Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, const char *normal, const char *special)
+			__attribute__deprecated__;
 #define PERL_ARGS_ASSERT_TO_UTF8_CASE	\
 	assert(p); assert(ustrp); assert(swashp); assert(normal)
+
 /* PERL_CALLCONV UV	Perl_to_utf8_fold(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp); */
 #define PERL_ARGS_ASSERT_TO_UTF8_FOLD	\
 	assert(p); assert(ustrp)
