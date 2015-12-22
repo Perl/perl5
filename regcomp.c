@@ -11358,6 +11358,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 	SV * substitute_parse;
 	STRLEN len;
 	char *orig_end = RExC_end;
+	char *save_start = RExC_start;
         I32 flags;
 
         /* Count the code points, if desired, in the sequence */
@@ -11403,7 +11404,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 	}
         sv_catpv(substitute_parse, ")");
 
-	RExC_parse = SvPV(substitute_parse, len);
+        RExC_parse = RExC_start = SvPV(substitute_parse, len);
 
 	/* Don't allow empty number */
 	if (len < (STRLEN) 8) {
@@ -11433,6 +11434,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
         }
 
         /* Restore the saved values */
+	RExC_start = save_start;
 	RExC_parse = endbrace;
 	RExC_end = orig_end;
 	RExC_override_recoding = 0;
@@ -15470,6 +15472,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	STRLEN len;
 	char *save_end = RExC_end;
 	char *save_parse = RExC_parse;
+	char *save_start = RExC_start;
         bool first_time = TRUE;     /* First multi-char occurrence doesn't get
                                        a "|" */
         I32 reg_flags;
@@ -15522,7 +15525,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         }
 #endif
 
-	RExC_parse = SvPV(substitute_parse, len);
+	RExC_start =  RExC_parse = SvPV(substitute_parse, len);
 	RExC_end = RExC_parse + len;
         RExC_in_multi_char_class = 1;
 	RExC_override_recoding = 1;
@@ -15533,6 +15536,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	*flagp |= reg_flags&(HASWIDTH|SIMPLE|SPSTART|POSTPONED|RESTART_PASS1|NEED_UTF8);
 
 	RExC_parse = save_parse;
+	RExC_start = save_start;
 	RExC_end = save_end;
 	RExC_in_multi_char_class = 0;
 	RExC_override_recoding = 0;
