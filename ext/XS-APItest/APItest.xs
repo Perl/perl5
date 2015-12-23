@@ -4792,3 +4792,13 @@ test_toTITLE_utf8(SV * p)
         RETVAL = av;
     OUTPUT:
         RETVAL
+
+#if defined(WIN32) && defined(PERL_IMPLICIT_SYS)
+
+const char *
+PerlDir_mapA(const char *path)
+
+const WCHAR *
+PerlDir_mapW(const WCHAR *wpath)
+
+#endif
