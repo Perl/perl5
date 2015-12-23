@@ -1521,7 +1521,7 @@ xsreturn_iv()
 void
 xsreturn_uv()
     PPCODE:
-        XSRETURN_UV( (U32)((1<<31) + 1) );
+        XSRETURN_UV( (U32)((1U<<31) + 1) );
 
 void
 xsreturn_nv()
