@@ -438,20 +438,21 @@ struct regnode_ssc {
  *      UTF-8 one.  These are quite rare, so it would be good to avoid the
  *      expense of looking for them.  But /l matching is slow anyway, and we've
  *      traditionally not worried too much about its performance.  And this
- *      condition requires the ANYOF_LOC_FOLD flag to be set, so testing for
+ *      condition requires the ANYOFL_FOLD flag to be set, so testing for
  *      that flag would be sufficient to rule out most cases of this.  So it is
  *      unclear if this should have a flag or not.  But, one is currently
- *      allocated for this purpose, ANYOF_ONLY_UTF8_LOC_FOLD_MATCHES (and the
- *      text below indicates how to share it, should another bit be needed).
+ *      allocated for this purpose, ANYOFL_SOME_FOLDS_ONLY_IN_UTF8_LOCALE (and
+ *      the text below indicates how to share it, should another bit be
+ *      needed).
  *
  * At the moment, there are no spare bits, but this could be changed by various
  * tricks.
  *
- * Note that item ANYOF_ONLY_UTF8_LOC_FOLD_MATCHES is not independent of the
- * ANYOF_LOC_FOLD flag below.  Also, the ANYOF_LOC_REQ_UTF8 flag is set only if
- * both these aren't.  We can therefore share ANYOF_ONLY_UTF8_LOC_FOLD_MATCHES
- * with ANYOF_LOC_REQ_UTF8, so what the shared flag means depends on the
- * ANYOF_LOC_FOLD flag.
+ * Note that item ANYOFL_SOME_FOLDS_ONLY_IN_UTF8_LOCALE is not independent of
+ * the ANYOFL_FOLD flag below.  Also, the ANYOFL_UTF8_LOCALE_REQD flag is set
+ * only if both these aren't.  We can therefore share
+ * ANYOFL_SOME_FOLDS_ONLY_IN_UTF8_LOCALE with ANYOFL_UTF8_LOCALE_REQD, so what
+ * the shared flag means depends on the ANYOFL_FOLD flag.
  *
  * Beyond that, note that the information may be conveyed by creating new
  * regnode types.  This is not the best solution, as shown later in this
@@ -465,14 +466,14 @@ struct regnode_ssc {
  * POSIXL, and still another for INVERT_POSIXL.  This example illustrates one
  * problem with this, a combinatorial explosion of node types.  The one node
  * type khw can think of that doesn't have this explosion issue is
- * ANYOF_LOC_REQ_UTF8.  This flag is a natural candidate for being a separate
+ * ANYOFL_UTF8_LOCALE_REQD.  This flag is a natural candidate for being a separate
  * node type because it is a specialization of the current ANYOFL, and because
  * no other ANYOFL-only flags are set when it is; also most of its uses are
  * actually outside the reginclass() function, so this could be done with no
  * performance penalty.  But since it can be shared, as noted above, it doesn't
  * take up space anyway.  Another issue when turning a flag into a node type, is
  * that a SSC may use that flag -- not just a regular ANYOF[DL]?.  In the case
- * of ANYOF_LOC_REQ_UTF8, the only likely problem is accurately settting the
+ * of ANYOFL_UTF8_LOCALE_REQD, the only likely problem is accurately settting the
  * SSC node-type to the new one, which would likely involve S_ssc_or and
  * S_ssc_and, and not how the SSC currently gets set to ANYOFL.
  *
@@ -519,17 +520,17 @@ struct regnode_ssc {
  * time.  However under locale, the actual folding varies depending on
  * what the locale is at the time of execution, so it has to be deferred until
  * then.  Only set under /l; never in an SSC  */
-#define ANYOF_LOC_FOLD                          0x04
+#define ANYOFL_FOLD                             0x04
 
-/* If set, ANYOF_LOC_FOLD is also set, and there are potential matches that
+/* If set, ANYOFL_FOLD is also set, and there are potential matches that
  * will be valid only if the locale is a UTF-8 one. */
-#define ANYOF_ONLY_UTF8_LOC_FOLD_MATCHES        0x08
+#define ANYOFL_SOME_FOLDS_ONLY_IN_UTF8_LOCALE  0x08
 
 /* If set, means to warn if runtime locale isn't a UTF-8 one.  Only under /l.
  * If set, none of INVERT, LOC_FOLD, POSIXL,
  * ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP can
  * be set.  Can be in an SSC */
-#define ANYOF_LOC_REQ_UTF8                      0x10
+#define ANYOFL_UTF8_LOCALE_REQD                         0x10
 
 /* If set, the node matches every code point NUM_ANYOF_CODE_POINTS and above.
  * Can be in an SSC */
@@ -561,12 +562,12 @@ struct regnode_ssc {
 
 #define ANYOF_FLAGS_ALL		(0xff)
 
-#define ANYOF_LOCALE_FLAGS (ANYOF_LOC_FOLD | ANYOF_MATCHES_POSIXL)
+#define ANYOF_LOCALE_FLAGS (ANYOFL_FOLD | ANYOF_MATCHES_POSIXL)
 
 /* These are the flags that apply to both regular ANYOF nodes and synthetic
  * start class nodes during construction of the SSC.  During finalization of
  * the SSC, other of the flags may get added to it */
-#define ANYOF_COMMON_FLAGS      ANYOF_LOC_REQ_UTF8
+#define ANYOF_COMMON_FLAGS      ANYOFL_UTF8_LOCALE_REQD
 
 /* Character classes for node->classflags of ANYOF */
 /* Should be synchronized with a table in regprop() */

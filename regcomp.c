@@ -1240,7 +1240,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
         }
 
         /* Get the code points valid only under UTF-8 locales */
-        if ((ANYOF_FLAGS(node) & ANYOF_LOC_FOLD)
+        if ((ANYOF_FLAGS(node) & ANYOFL_FOLD)
             && ary[2] && ary[2] != &PL_sv_undef)
         {
             only_utf8_locale_invlist = ary[2];
@@ -1287,7 +1287,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     if (ANYOF_FLAGS(node) & ANYOF_INVERT) {
         _invlist_invert(invlist);
     }
-    else if (new_node_has_latin1 && ANYOF_FLAGS(node) & ANYOF_LOC_FOLD) {
+    else if (new_node_has_latin1 && ANYOF_FLAGS(node) & ANYOFL_FOLD) {
 
         /* Under /li, any 0-255 could fold to any other 0-255, depending on the
          * locale.  We can skip this if there are no 0-255 at all. */
@@ -14201,7 +14201,7 @@ redo_curchar:
         assert(OP(node) == ANYOF);
 
         OP(node) = ANYOFL;
-        ANYOF_FLAGS(node) |= ANYOF_LOC_REQ_UTF8;
+        ANYOF_FLAGS(node) |= ANYOFL_UTF8_LOCALE_REQD;
     }
 
     if (save_fold) {
@@ -16098,14 +16098,14 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * locales, or the class matches at least one 0-255 range code point */
     if (LOC && FOLD) {
         if (only_utf8_locale_list) {
-            ANYOF_FLAGS(ret) |=  ANYOF_LOC_FOLD
-                                |ANYOF_ONLY_UTF8_LOC_FOLD_MATCHES;
+            ANYOF_FLAGS(ret) |=  ANYOFL_FOLD
+                                |ANYOFL_SOME_FOLDS_ONLY_IN_UTF8_LOCALE;
         }
         else if (cp_list) { /* Look to see if a 0-255 code point is in list */
             UV start, end;
             invlist_iterinit(cp_list);
             if (invlist_iternext(cp_list, &start, &end) && start < 256) {
-                ANYOF_FLAGS(ret) |= ANYOF_LOC_FOLD;
+                ANYOF_FLAGS(ret) |= ANYOFL_FOLD;
             }
             invlist_iterfinish(cp_list);
         }
@@ -17473,14 +17473,14 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
 
 	if (OP(o) == ANYOFL) {
-            if (flags & ANYOF_LOC_REQ_UTF8) {
+            if (flags & ANYOFL_UTF8_LOCALE_REQD) {
                 sv_catpvs(sv, "{utf8-loc}");
             }
             else {
                 sv_catpvs(sv, "{loc}");
             }
         }
-	if (flags & ANYOF_LOC_FOLD)
+	if (flags & ANYOFL_FOLD)
 	    sv_catpvs(sv, "{i}");
 	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
 	if (flags & ANYOF_INVERT)
@@ -17507,7 +17507,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 	    || (flags
                 & ( ANYOF_MATCHES_ALL_ABOVE_BITMAP
                    |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP
-                   |ANYOF_LOC_FOLD)))
+                   |ANYOFL_FOLD)))
         {
             if (do_sep) {
                 Perl_sv_catpvf(aTHX_ sv,"%s][%s",PL_colors[1],PL_colors[0]);
@@ -17589,7 +17589,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                     SvREFCNT_dec_NN(lv);
                 }
 
-                if ((flags & ANYOF_LOC_FOLD)
+                if ((flags & ANYOFL_FOLD)
                      && only_utf8_locale
                      && only_utf8_locale != &PL_sv_undef)
                 {
