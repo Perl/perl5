@@ -18517,7 +18517,9 @@ sub make_property_test_script() {
                     }
                 }
             }
+            $table->DESTROY();
         }
+        $property->DESTROY();
     }
 
     &write($t_path,
