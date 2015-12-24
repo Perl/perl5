@@ -2570,9 +2570,9 @@ PP(pp_redo)
 	redo_op = redo_op->op_next;
     }
 
-    TOPBLOCK(cx);
-    CX_LEAVE_SCOPE(cx);
     FREETMPS;
+    CX_LEAVE_SCOPE(cx);
+    TOPBLOCK(cx);
     PL_curcop = cx->blk_oldcop;
     PERL_ASYNC_CHECK();
     return redo_op;
