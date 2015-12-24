@@ -956,27 +956,31 @@ struct block {
         PL_tmps_floor           = PL_tmps_ix;                           \
 	CX_DEBUG(cx, "PUSH");
 
+#define _POPBLOCK_COMMON(cx)						\
+	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
+	PL_scopestack_ix = cx->blk_oldscopesp,				\
+	PL_curpm	 = cx->blk_oldpm,
+
 /* Exit a block (RETURN and LAST). */
 #define POPBLOCK(cx)							\
 	CX_DEBUG(cx, "POP");						\
-	PL_curcop	 = cx->blk_oldcop,				\
-	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
-	PL_scopestack_ix = cx->blk_oldscopesp,				\
+        _POPBLOCK_COMMON(cx)                                            \
         /* LEAVE_SCOPE() should have made this true. /(?{})/ cheats
          * and leaves a CX entry lying around for repeated use, so
          * skip for multicall */                  \
         assert(   (CxTYPE(cx) == CXt_SUB && CxMULTICALL(cx))            \
                 || PL_savestack_ix == cx->blk_oldsaveix);               \
+	PL_curcop     = cx->blk_oldcop,				        \
         PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;             \
-	PL_curpm	 = cx->blk_oldpm;
 
-/* Continue a block elsewhere (e.g. NEXT, REDO, GOTO). */
+/* Continue a block elsewhere (e.g. NEXT, REDO, GOTO).
+ * Whereas POPBLOCK restores the state to the point just before PUSHBLOCK
+ * was called,  TOPBLOCK restores it to the point just *after* PUSHBLOCK
+ * was called. */
 #define TOPBLOCK(cx)							\
 	CX_DEBUG(cx, "TOP");						\
-	PL_stack_sp	 = PL_stack_base + cx->blk_oldsp,		\
-	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
-	PL_scopestack_ix = cx->blk_oldscopesp,				\
-	PL_curpm         = cx->blk_oldpm;
+        _POPBLOCK_COMMON(cx)                                            \
+	PL_stack_sp	 = PL_stack_base + cx->blk_oldsp;
 
 /* substitution context */
 struct subst {
