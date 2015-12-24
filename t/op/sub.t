@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 62);
+plan(tests => 63);
 
 sub empty_sub {}
 
@@ -403,3 +403,15 @@ is(join('-', 10, check_ret(-1,5)),      "10",  "check_ret(-1,5) list");
     sub g { !!(my $x = bless []); }
     f(g());
 }
+
+# return should have the right PL_curpm while copying its return args
+
+sub curpm {
+    "b" =~ /(.)/;
+    {
+        "c" =~ /(.)/;
+        return $1;
+    }
+}
+"a" =~ /(.)/;
+is(curpm(), 'c', 'return and PL_curpm');
