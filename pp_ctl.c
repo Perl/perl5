@@ -2546,7 +2546,10 @@ PP(pp_next)
 {
     PERL_CONTEXT *cx;
 
-    cx = S_unwind_loop(aTHX);
+    /* if not a bare 'next' in the main scope, search for it */
+    cx = CX_CUR();
+    if (!((PL_op->op_flags & OPf_SPECIAL) && CxTYPE_is_LOOP(cx)))
+        cx = S_unwind_loop(aTHX);
 
     TOPBLOCK(cx);
     PL_curcop = cx->blk_oldcop;

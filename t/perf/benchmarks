@@ -1030,6 +1030,12 @@
         code    => 'for (@a) {}',
     },
 
+    'loop::for::next4' => {
+        desc    => 'for loop containing only next with my var and integer 4 array',
+        setup   => 'my @a = (1..4);',
+        code    => 'for my $x (@a) {next}',
+    },
+
     'loop::while::i1' => {
         desc    => 'empty while loop 1 iteration',
         setup   => 'my $i = 0;',
