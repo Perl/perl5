@@ -2473,18 +2473,18 @@ PP(pp_return)
     }
 }
 
-/* find the enclosing loop or labelled loop and dounwind() back to it.
- * opname is for errors */
+/* find the enclosing loop or labelled loop and dounwind() back to it. */
 
 PERL_CONTEXT *
-S_unwind_loop(pTHX_ const char * const opname)
+S_unwind_loop(pTHX)
 {
     I32 cxix;
     if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
 	if (cxix < 0)
 	    /* diag_listed_as: Can't "last" outside a loop block */
-	    Perl_croak(aTHX_ "Can't \"%s\" outside a loop block", opname);
+	    Perl_croak(aTHX_ "Can't \"%s\" outside a loop block",
+                OP_NAME(PL_op));
     }
     else {
 	dSP;
@@ -2502,7 +2502,7 @@ S_unwind_loop(pTHX_ const char * const opname)
 	if (cxix < 0)
 	    /* diag_listed_as: Label not found for "last %s" */
 	    Perl_croak(aTHX_ "Label not found for \"%s %"SVf"\"",
-				       opname,
+				       OP_NAME(PL_op),
                                        SVfARG(PL_op->op_flags & OPf_STACKED
                                               && !SvGMAGICAL(TOPp1s)
                                               ? TOPp1s
@@ -2521,7 +2521,7 @@ PP(pp_last)
     PERL_CONTEXT *cx;
     OP* nextop;
 
-    cx = S_unwind_loop(aTHX_ "last");
+    cx = S_unwind_loop(aTHX);
 
     assert(CxTYPE_is_LOOP(cx));
     PL_stack_sp = PL_stack_base
@@ -2546,7 +2546,7 @@ PP(pp_next)
 {
     PERL_CONTEXT *cx;
 
-    cx = S_unwind_loop(aTHX_ "next");
+    cx = S_unwind_loop(aTHX);
 
     TOPBLOCK(cx);
     PL_curcop = cx->blk_oldcop;
@@ -2556,7 +2556,7 @@ PP(pp_next)
 
 PP(pp_redo)
 {
-    PERL_CONTEXT *cx = S_unwind_loop(aTHX_ "redo");
+    PERL_CONTEXT *cx = S_unwind_loop(aTHX);
     OP* redo_op = cx->blk_loop.my_op->op_redoop;
 
     if (redo_op->op_type == OP_ENTER) {
