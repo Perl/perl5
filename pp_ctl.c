@@ -2476,7 +2476,7 @@ PP(pp_return)
 /* find the enclosing loop or labelled loop and dounwind() back to it.
  * opname is for errors */
 
-static I32
+PERL_CONTEXT *
 S_unwind_loop(pTHX_ const char * const opname)
 {
     I32 cxix;
@@ -2512,17 +2512,16 @@ S_unwind_loop(pTHX_ const char * const opname)
     }
     if (cxix < cxstack_ix)
 	dounwind(cxix);
-    return cxix;
+    return &cxstack[cxix];
 }
+
 
 PP(pp_last)
 {
     PERL_CONTEXT *cx;
     OP* nextop;
 
-    S_unwind_loop(aTHX_ "last");
-
-    cx = CX_CUR();
+    cx = S_unwind_loop(aTHX_ "last");
 
     assert(CxTYPE_is_LOOP(cx));
     PL_stack_sp = PL_stack_base
@@ -2547,9 +2546,8 @@ PP(pp_next)
 {
     PERL_CONTEXT *cx;
 
-    S_unwind_loop(aTHX_ "next");
+    cx = S_unwind_loop(aTHX_ "next");
 
-    cx = CX_CUR();
     TOPBLOCK(cx);
     PL_curcop = cx->blk_oldcop;
     PERL_ASYNC_CHECK();
@@ -2558,18 +2556,17 @@ PP(pp_next)
 
 PP(pp_redo)
 {
-    const I32 cxix = S_unwind_loop(aTHX_ "redo");
-    PERL_CONTEXT *cx;
-    OP* redo_op = cxstack[cxix].blk_loop.my_op->op_redoop;
+    PERL_CONTEXT *cx = S_unwind_loop(aTHX_ "redo");
+    OP* redo_op = cx->blk_loop.my_op->op_redoop;
 
     if (redo_op->op_type == OP_ENTER) {
 	/* pop one less context to avoid $x being freed in while (my $x..) */
 	cxstack_ix++;
-	assert(CxTYPE(CX_CUR()) == CXt_BLOCK);
+        cx = CX_CUR();
+	assert(CxTYPE(cx) == CXt_BLOCK);
 	redo_op = redo_op->op_next;
     }
 
-    cx = CX_CUR();
     TOPBLOCK(cx);
     CX_LEAVE_SCOPE(cx);
     FREETMPS;
