@@ -819,6 +819,18 @@ struct block_loop {
 #define CxLABEL_len(c,len)	(0 + CopLABEL_len((c)->blk_oldcop, len))
 #define CxLABEL_len_flags(c,len,flags)	(0 + CopLABEL_len_flags((c)->blk_oldcop, len, flags))
 #define CxHASARGS(c)	(((c)->cx_type & CXp_HASARGS) == CXp_HASARGS)
+
+/* CxLVAL(): the lval flags of the call site: the relevant flag bits from
+ * the op_private field of the calling pp_entersub (or its caller's caller
+ * if the caller's lvalue context isn't known):
+ *  OPpLVAL_INTRO:  sub used in lvalue context, e.g. f() = 1;
+ *  OPpENTERSUB_INARGS (in conjunction with OPpLVAL_INTRO): the
+ *      function is being used as a sub arg or as a referent, e.g.
+ *      g(...,f(),...)  or $r = \f()
+ *  OPpDEREF: 2-bit mask indicating e.g. f()->[0].
+ *  Note the contrast with CvLVALUE(), which is a property of the sub
+ *  rather than the call site.
+ */
 #define CxLVAL(c)	(0 + ((c)->blk_u16 & 0xff))
 
 
