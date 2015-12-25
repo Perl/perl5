@@ -1347,7 +1347,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	PUSHBLOCK(cx, (CXt_SUB|CXp_MULTICALL|flags), PL_stack_sp);	\
 	PUSHSUB(cx);							\
         cx->blk_oldsaveix = PL_savestack_ix;                            \
-	SAVEVPTR(PL_op);					        \
+	SAVEOP();					                \
         saveix_floor = PL_savestack_ix;                                 \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
