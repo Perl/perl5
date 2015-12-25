@@ -287,7 +287,7 @@ PP(pp_substcont)
 	    TAINT_NOT;
 
 	    CX_LEAVE_SCOPE(cx);
-	    POPSUBST(cx);
+	    CX_POPSUBST(cx);
             CX_POP(cx);
 
 	    PERL_ASYNC_CHECK();
@@ -1508,7 +1508,7 @@ S_dopoptowhen(pTHX_ I32 startingblock)
 /* dounwind(): pop all contexts above (but not including) cxix.
  * Note that it clears the savestack frame associated with each popped
  * context entry, but doesn't free any temps.
- * It does a POPBLOCK of the last frame that it pops, and leaves
+ * It does a CX_POPBLOCK of the last frame that it pops, and leaves
  * cxstack_ix equal to cxix.
  */
 
@@ -1528,39 +1528,39 @@ Perl_dounwind(pTHX_ I32 cxix)
 
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
-	    POPSUBST(cx);
+	    CX_POPSUBST(cx);
 	    break;
 	case CXt_SUB:
-	    POPSUB(cx);
+	    CX_POPSUB(cx);
 	    break;
 	case CXt_EVAL:
-	    POPEVAL(cx);
+	    CX_POPEVAL(cx);
 	    break;
 	case CXt_BLOCK:
-            POPBASICBLK(cx);
+            CX_POPBASICBLK(cx);
 	    break;
 	case CXt_LOOP_PLAIN:
 	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_LAZYSV:
 	case CXt_LOOP_LIST:
 	case CXt_LOOP_ARY:
-	    POPLOOP(cx);
+	    CX_POPLOOP(cx);
 	    break;
 	case CXt_WHEN:
-	    POPWHEN(cx);
+	    CX_POPWHEN(cx);
 	    break;
 	case CXt_GIVEN:
-	    POPGIVEN(cx);
+	    CX_POPGIVEN(cx);
 	    break;
 	case CXt_NULL:
-            /* there isn't a POPNULL ! */
+            /* there isn't a CX_POPNULL ! */
 	    break;
 	case CXt_FORMAT:
-	    POPFORMAT(cx);
+	    CX_POPFORMAT(cx);
 	    break;
 	}
         if (cxstack_ix == cxix + 1) {
-            POPBLOCK(cx);
+            CX_POPBLOCK(cx);
         }
 	cxstack_ix--;
     }
@@ -1694,8 +1694,8 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    PL_stack_sp = oldsp;
 
             CX_LEAVE_SCOPE(cx);
-	    POPEVAL(cx);
-	    POPBLOCK(cx);
+	    CX_POPEVAL(cx);
+	    CX_POPBLOCK(cx);
 	    restartjmpenv = cx->blk_eval.cur_top_env;
 	    restartop = cx->blk_eval.retop;
             if (CxOLD_OP_TYPE(cx) == OP_REQUIRE)
@@ -2070,8 +2070,8 @@ PP(pp_leave)
                                 PL_op->op_private & OPpLVALUE ? 3 : 1);
 
     CX_LEAVE_SCOPE(cx);
-    POPBASICBLK(cx);
-    POPBLOCK(cx);
+    CX_POPBASICBLK(cx);
+    CX_POPBLOCK(cx);
     CX_POP(cx);
 
     return NORMAL;
@@ -2245,8 +2245,8 @@ PP(pp_leaveloop)
                                 PL_op->op_private & OPpLVALUE ? 3 : 1);
 
     CX_LEAVE_SCOPE(cx);
-    POPLOOP(cx);	/* Stack values are safe: release loop vars ... */
-    POPBLOCK(cx);
+    CX_POPLOOP(cx);	/* Stack values are safe: release loop vars ... */
+    CX_POPBLOCK(cx);
     CX_POP(cx);
 
     return NORMAL;
@@ -2352,8 +2352,8 @@ PP(pp_leavesublv)
     }
 
     CX_LEAVE_SCOPE(cx);
-    POPSUB(cx);	/* Stack values are safe: release CV and @_ ... */
-    POPBLOCK(cx);
+    CX_POPSUB(cx);	/* Stack values are safe: release CV and @_ ... */
+    CX_POPBLOCK(cx);
     retop =  cx->blk_sub.retop;
     CX_POP(cx);
 
@@ -2534,8 +2534,8 @@ PP(pp_last)
 
     /* Stack values are safe: */
     CX_LEAVE_SCOPE(cx);
-    POPLOOP(cx);	/* release loop vars ... */
-    POPBLOCK(cx);
+    CX_POPLOOP(cx);	/* release loop vars ... */
+    CX_POPBLOCK(cx);
     nextop = cx->blk_loop.my_op->op_lastop->op_next;
     CX_POP(cx);
 
@@ -2551,7 +2551,7 @@ PP(pp_next)
     if (!((PL_op->op_flags & OPf_SPECIAL) && CxTYPE_is_LOOP(cx)))
         cx = S_unwind_loop(aTHX);
 
-    TOPBLOCK(cx);
+    CX_TOPBLOCK(cx);
     PL_curcop = cx->blk_oldcop;
     PERL_ASYNC_CHECK();
     return (cx)->blk_loop.my_op->op_nextop;
@@ -2572,7 +2572,7 @@ PP(pp_redo)
 
     FREETMPS;
     CX_LEAVE_SCOPE(cx);
-    TOPBLOCK(cx);
+    CX_TOPBLOCK(cx);
     PL_curcop = cx->blk_oldcop;
     PERL_ASYNC_CHECK();
     return redo_op;
@@ -2717,7 +2717,7 @@ PP(pp_goto)
 		dounwind(cxix);
             }
             cx = CX_CUR();
-	    TOPBLOCK(cx);
+	    CX_TOPBLOCK(cx);
 	    SPAGAIN;
 
             /* protect @_ during save stack unwind. */
@@ -2728,7 +2728,7 @@ PP(pp_goto)
             CX_LEAVE_SCOPE(cx);
 
 	    if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
-                /* this is part of POPSUB_ARGS() */
+                /* this is part of CX_POPSUB_ARGS() */
 		AV* av = MUTABLE_AV(PAD_SVl(0));
                 assert(AvARRAY(MUTABLE_AV(
                     PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[
@@ -2803,7 +2803,7 @@ PP(pp_goto)
 		SP += items;
 		if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
 		    /* Restore old @_ */
-                    POP_SAVEARRAY(cx);
+                    CX_POP_SAVEARRAY(cx);
 		}
 
 		retop = cx->blk_sub.retop;
@@ -2811,8 +2811,8 @@ PP(pp_goto)
                 PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;
 
 		/* XS subs don't have a CXt_SUB, so pop it;
-                 * this is a POPBLOCK(), less all the stuff we already did
-                 * for TOPBLOCK() earlier */
+                 * this is a CX_POPBLOCK(), less all the stuff we already did
+                 * for CX_TOPBLOCK() earlier */
                 PL_curcop = cx->blk_oldcop;
                 CX_POP(cx);
 
@@ -3000,7 +3000,7 @@ PP(pp_goto)
 		DIE(aTHX_ "panic: docatch: illegal ix=%ld", (long)ix);
 	    dounwind(ix);
             cx = CX_CUR();
-	    TOPBLOCK(cx);
+	    CX_TOPBLOCK(cx);
 	}
 
 	/* push wanted frames */
@@ -3401,8 +3401,8 @@ S_doeval_compile(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 	    SP = PL_stack_base + POPMARK;	/* pop original mark */
             cx = CX_CUR();
             CX_LEAVE_SCOPE(cx);
-	    POPEVAL(cx);
-	    POPBLOCK(cx);
+	    CX_POPEVAL(cx);
+	    CX_POPBLOCK(cx);
             if (in_require)
                 namesv = cx->blk_eval.old_namesv;
             CX_POP(cx);
@@ -4216,7 +4216,7 @@ PP(pp_leaveeval)
     OP *retop;
     SV *namesv = NULL;
     CV *evalcv;
-    /* grab this value before POPEVAL restores old PL_in_eval */
+    /* grab this value before CX_POPEVAL restores old PL_in_eval */
     bool keep = cBOOL(PL_in_eval & EVAL_KEEPERR);
 
     PERL_ASYNC_CHECK();
@@ -4240,7 +4240,7 @@ PP(pp_leaveeval)
     else
         leave_adjust_stacks(oldsp, oldsp, gimme, 0);
 
-    /* the POPEVAL does a leavescope, which frees the optree associated
+    /* the CX_POPEVAL does a leavescope, which frees the optree associated
      * with eval, which if it frees the nextstate associated with
      * PL_curcop, sets PL_curcop to NULL. Which can mess up freeing a
      * regex when running under 'use re Debug' because it needs PL_curcop
@@ -4249,8 +4249,8 @@ PP(pp_leaveeval)
     PL_curcop = cx->blk_oldcop;
 
     CX_LEAVE_SCOPE(cx);
-    POPEVAL(cx);
-    POPBLOCK(cx);
+    CX_POPEVAL(cx);
+    CX_POPBLOCK(cx);
     retop = cx->blk_eval.retop;
     evalcv = cx->blk_eval.cv;
     CX_POP(cx);
@@ -4281,8 +4281,8 @@ Perl_delete_eval_scope(pTHX)
 	
     cx = CX_CUR();
     CX_LEAVE_SCOPE(cx);
-    POPEVAL(cx);
-    POPBLOCK(cx);
+    CX_POPEVAL(cx);
+    CX_POPBLOCK(cx);
     CX_POP(cx);
 }
 
@@ -4335,8 +4335,8 @@ PP(pp_leavetry)
     else
         leave_adjust_stacks(oldsp, oldsp, gimme, 1);
     CX_LEAVE_SCOPE(cx);
-    POPEVAL(cx);
-    POPBLOCK(cx);
+    CX_POPEVAL(cx);
+    CX_POPBLOCK(cx);
     retop = cx->blk_eval.retop;
     CX_POP(cx);
 
@@ -4379,8 +4379,8 @@ PP(pp_leavegiven)
         leave_adjust_stacks(oldsp, oldsp, gimme, 1);
 
     CX_LEAVE_SCOPE(cx);
-    POPGIVEN(cx);
-    POPBLOCK(cx);
+    CX_POPGIVEN(cx);
+    CX_POPBLOCK(cx);
     CX_POP(cx);
 
     return NORMAL;
@@ -4974,7 +4974,7 @@ PP(pp_leavewhen)
         /* emulate pp_next. Note that any stack(s) cleanup will be
          * done by the pp_unstack which op_nextop should point to */
         cx = CX_CUR();
-	TOPBLOCK(cx);
+	CX_TOPBLOCK(cx);
 	PL_curcop = cx->blk_oldcop;
 	return cx->blk_loop.my_op->op_nextop;
     }
@@ -5002,8 +5002,8 @@ PP(pp_continue)
     assert(CxTYPE(cx) == CXt_WHEN);
     PL_stack_sp = PL_stack_base + cx->blk_oldsp;
     CX_LEAVE_SCOPE(cx);
-    POPWHEN(cx);
-    POPBLOCK(cx);
+    CX_POPWHEN(cx);
+    CX_POPBLOCK(cx);
     nextop = cx->blk_givwhen.leave_op->op_next;
     CX_POP(cx);
 

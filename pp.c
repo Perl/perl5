@@ -6444,7 +6444,7 @@ PP(pp_coreargs)
 		PERL_CONTEXT *cx = CX_CUR();
 
                 assert(CxHASARGS(cx));
-                POPSUB_ARGS(cx);;
+                CX_POPSUB_ARGS(cx);;
 		cx->cx_type &= ~CXp_HASARGS;
 	    }
 	  }

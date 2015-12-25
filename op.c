@@ -7105,7 +7105,7 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
 
     o->op_flags |= flags;
     o = op_scope(o);
-    o->op_flags |= OPf_SPECIAL;	/* suppress POPBLOCK curpm restoration*/
+    o->op_flags |= OPf_SPECIAL;	/* suppress CX_POPBLOCK curpm restoration*/
     return o;
 }
 

@@ -1706,13 +1706,13 @@ PP(pp_sort)
             CX_LEAVE_SCOPE(cx);
 	    if (!(flags & OPf_SPECIAL)) {
                 assert(CxTYPE(cx) == CXt_SUB);
-                POPSUB(cx);
+                CX_POPSUB(cx);
 	    }
             else
                 assert(CxTYPE(cx) == CXt_NULL);
                 /* there isn't a POPNULL ! */
 
-	    POPBLOCK(cx);
+	    CX_POPBLOCK(cx);
             CX_POP(cx);
 	    POPSTACK;
 	    CATCH_SET(oldcatch);

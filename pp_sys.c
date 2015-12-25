@@ -1527,8 +1527,8 @@ PP(pp_leavewrite)
     assert(CxTYPE(cx) == CXt_FORMAT);
     SP = PL_stack_base + cx->blk_oldsp; /* ignore retval of formline */
     CX_LEAVE_SCOPE(cx);
-    POPFORMAT(cx);
-    POPBLOCK(cx);
+    CX_POPFORMAT(cx);
+    CX_POPBLOCK(cx);
     retop = cx->blk_sub.retop;
     CX_POP(cx);
 

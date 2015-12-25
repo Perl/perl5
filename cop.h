@@ -647,7 +647,7 @@ struct block_format {
 	SvREFCNT_inc_void(cx->blk_format.dfoutgv)
 
 /* Restore old @_ */
-#define POP_SAVEARRAY(cx)						\
+#define CX_POP_SAVEARRAY(cx)						\
     STMT_START {							\
         AV *av = GvAV(PL_defgv);                                        \
 	GvAV(PL_defgv) = cx->blk_sub.savearray;				\
@@ -665,9 +665,9 @@ struct block_format {
     } STMT_END
 
 
-/* subsets of POPSUB */
+/* subsets of CX_POPSUB */
 
-#define POPSUB_COMMON(cx) \
+#define CX_POPSUB_COMMON(cx) \
     STMT_START {							\
         CV *cv;                                                         \
         PL_comppad = cx->blk_sub.prevcomppad;                           \
@@ -680,13 +680,13 @@ struct block_format {
 
 /* handle the @_ part of leaving a sub */
 
-#define POPSUB_ARGS(cx) \
+#define CX_POPSUB_ARGS(cx) \
     STMT_START {							\
         AV *av;                                                         \
         assert(AvARRAY(MUTABLE_AV(                                      \
             PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[                    \
                     CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);           \
-        POP_SAVEARRAY(cx);						\
+        CX_POP_SAVEARRAY(cx);						\
         av = MUTABLE_AV(PAD_SVl(0));                                    \
         if (UNLIKELY(AvREAL(av))) 			                \
             /* abandon @_ if it got reified */				\
@@ -696,7 +696,7 @@ struct block_format {
         }								\
     } STMT_END
 
-#define POPSUB(cx)							\
+#define CX_POPSUB(cx)							\
     STMT_START {							\
 	RETURN_PROBE(CvNAMED(cx->blk_sub.cv)				\
 			? HEK_KEY(CvNAME_HEK(cx->blk_sub.cv))		\
@@ -706,12 +706,12 @@ struct block_format {
 		CopSTASHPV((COP*)CvSTART((const CV*)cx->blk_sub.cv)));	\
 									\
 	if (CxHASARGS(cx)) {						\
-            POPSUB_ARGS(cx);                                            \
+            CX_POPSUB_ARGS(cx);                                         \
 	}								\
-        POPSUB_COMMON(cx);                                              \
+        CX_POPSUB_COMMON(cx);                                           \
     } STMT_END
 
-#define POPFORMAT(cx)							\
+#define CX_POPFORMAT(cx)						\
     STMT_START {							\
 	CV *cv;				                                \
 	GV * const dfout = cx->blk_format.dfoutgv;			\
@@ -757,7 +757,7 @@ struct block_eval {
 	cx->blk_eval.cur_top_env = PL_top_env; 				\
     } STMT_END
 
-#define POPEVAL(cx)							\
+#define CX_POPEVAL(cx)							\
     STMT_START {							\
         SV *sv;                                                         \
 	PL_in_eval = CxOLD_IN_EVAL(cx);					\
@@ -768,7 +768,7 @@ struct block_eval {
 	    SvREFCNT_dec_NN(sv);			                \
         }                                                               \
 	sv = cx->blk_eval.old_namesv;					\
-	if (sv && !SvTEMP(sv))/* TEMP => POPEVAL re-entrantly called */	\
+	if (sv && !SvTEMP(sv))/* TEMP implies CX_POPEVAL re-entrantly called */ \
 	    sv_2mortal(sv);			                        \
     } STMT_END
 
@@ -834,7 +834,7 @@ struct block_loop {
         cx->blk_loop.itersave = isave;                                  \
         PUSHLOOP_FOR_setpad(cx);
 
-#define POPLOOP(cx)							\
+#define CX_POPLOOP(cx)							\
 	if (  CxTYPE(cx) == CXt_LOOP_ARY                                \
            || CxTYPE(cx) == CXt_LOOP_LAZYSV)                            \
         {			                                        \
@@ -874,10 +874,10 @@ struct block_givwhen {
         PUSHWHEN(cx);                                                   \
         cx->blk_givwhen.defsv_save = orig_var;
 
-#define POPWHEN(cx)                                                     \
+#define CX_POPWHEN(cx)                                                  \
 	NOOP;
 
-#define POPGIVEN(cx)                                                    \
+#define CX_POPGIVEN(cx)                                                 \
     STMT_START {							\
         SV *sv = GvSV(PL_defgv);                                        \
         GvSV(PL_defgv) = cx->blk_givwhen.defsv_save;                    \
@@ -891,7 +891,7 @@ struct block_givwhen {
 #define PUSHBASICBLK(cx)                                                \
         cx->blk_oldsaveix = PL_savestack_ix;
 
-#define POPBASICBLK(cx)                                                 \
+#define CX_POPBASICBLK(cx)                                              \
 	NOOP;
 
 
@@ -956,15 +956,15 @@ struct block {
         PL_tmps_floor           = PL_tmps_ix;                           \
 	CX_DEBUG(cx, "PUSH");
 
-#define _POPBLOCK_COMMON(cx)						\
+#define _CX_POPBLOCK_COMMON(cx)						\
 	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
 	PL_scopestack_ix = cx->blk_oldscopesp,				\
 	PL_curpm	 = cx->blk_oldpm,
 
 /* Exit a block (RETURN and LAST). */
-#define POPBLOCK(cx)							\
+#define CX_POPBLOCK(cx)							\
 	CX_DEBUG(cx, "POP");						\
-        _POPBLOCK_COMMON(cx)                                            \
+        _CX_POPBLOCK_COMMON(cx)                                         \
         /* LEAVE_SCOPE() should have made this true. /(?{})/ cheats
          * and leaves a CX entry lying around for repeated use, so
          * skip for multicall */                  \
@@ -974,12 +974,12 @@ struct block {
         PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;             \
 
 /* Continue a block elsewhere (e.g. NEXT, REDO, GOTO).
- * Whereas POPBLOCK restores the state to the point just before PUSHBLOCK
- * was called,  TOPBLOCK restores it to the point just *after* PUSHBLOCK
+ * Whereas CX_POPBLOCK restores the state to the point just before PUSHBLOCK
+ * was called,  CX_TOPBLOCK restores it to the point just *after* PUSHBLOCK
  * was called. */
-#define TOPBLOCK(cx)							\
+#define CX_TOPBLOCK(cx)							\
 	CX_DEBUG(cx, "TOP");						\
-        _POPBLOCK_COMMON(cx)                                            \
+        _CX_POPBLOCK_COMMON(cx)                                         \
 	PL_stack_sp	 = PL_stack_base + cx->blk_oldsp;
 
 /* substitution context */
@@ -1033,7 +1033,7 @@ struct subst {
 	(void)ReREFCNT_inc(rx);						\
         SvREFCNT_inc_void_NN(targ)
 
-#  define POPSUBST(cx) \
+#  define CX_POPSUBST(cx) \
     STMT_START {							\
         REGEXP *re;                                                     \
 	rxres_free(&cx->sb_rxres);					\
@@ -1300,7 +1300,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 */
 
 #define dMULTICALL \
-    SV **newsp;			/* set by POPBLOCK */			\
+    SV **newsp;			/* set by CX_POPBLOCK */		\
     PERL_CONTEXT *cx;							\
     CV *multicall_cv;							\
     OP *multicall_cop;							\
@@ -1347,12 +1347,12 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
     STMT_START {							\
 	cx = CX_CUR();					                \
 	CX_LEAVE_SCOPE(cx);                                             \
-        POPSUB_COMMON(cx);                                              \
+        CX_POPSUB_COMMON(cx);                                           \
         newsp = PL_stack_base + cx->blk_oldsp;                          \
         gimme = cx->blk_gimme;                                          \
         PERL_UNUSED_VAR(newsp); /* for API */                           \
         PERL_UNUSED_VAR(gimme); /* for API */                           \
-	POPBLOCK(cx);				   		        \
+	CX_POPBLOCK(cx);				   		\
 	CX_POP(cx);                                                     \
 	POPSTACK;							\
 	CATCH_SET(multicall_oldcatch);					\
@@ -1369,7 +1369,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	PADLIST * const padlist = CvPADLIST(cv);			\
 	cx = CX_CUR();					                \
 	assert(CxMULTICALL(cx));                                        \
-        POPSUB_COMMON(cx);                                              \
+        CX_POPSUB_COMMON(cx);                                           \
 	cx->cx_type = (CXt_SUB|CXp_MULTICALL|flags);                    \
         PUSHSUB(cx);						        \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \

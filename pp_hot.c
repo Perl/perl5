@@ -3639,8 +3639,8 @@ PP(pp_leavesub)
         leave_adjust_stacks(oldsp, oldsp, gimme, 0);
 
     CX_LEAVE_SCOPE(cx);
-    POPSUB(cx);	/* Stack values are safe: release CV and @_ ... */
-    POPBLOCK(cx);
+    CX_POPSUB(cx);	/* Stack values are safe: release CV and @_ ... */
+    CX_POPBLOCK(cx);
     retop = cx->blk_sub.retop;
     CX_POP(cx);
 
@@ -3875,7 +3875,7 @@ PP(pp_entersub)
 
             /* it's the responsibility of whoever leaves a sub to ensure
              * that a clean, empty AV is left in pad[0]. This is normally
-             * done by POPSUB() */
+             * done by CX_POPSUB() */
             assert(!AvREAL(av) && AvFILLp(av) == -1);
 
             items = SP - MARK;

@@ -1233,9 +1233,11 @@ Perl_leave_scope(pTHX_ I32 base)
 		SV **svp;
 		assert (ARG1_PTR);
 		svp = AvARRAY((PAD*)ARG1_PTR) + (PADOFFSET)arg0.any_uv;
-		/* This mortalizing used to be done by POPLOOP() via itersave.
-		   But as we have all the information here, we can do it here,
-		   save even having to have itersave in the struct.  */
+                /* This mortalizing used to be done by CX_POOPLOOP() via
+                   itersave.  But as we have all the information here, we
+                   can do it here, save even having to have itersave in
+                   the struct.
+                   */
 		sv_2mortal(*svp);
 		*svp = ARG2_SV;
 	    }
