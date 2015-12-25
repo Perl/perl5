@@ -670,6 +670,7 @@ struct block_format {
 #define CX_POPSUB_COMMON(cx) \
     STMT_START {							\
         CV *cv;                                                         \
+        assert(CxTYPE(cx) == CXt_SUB);                                  \
         PL_comppad = cx->blk_sub.prevcomppad;                           \
         PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
         cv = cx->blk_sub.cv;                                            \
@@ -683,6 +684,7 @@ struct block_format {
 #define CX_POPSUB_ARGS(cx) \
     STMT_START {							\
         AV *av;                                                         \
+        assert(CxTYPE(cx) == CXt_SUB);                                  \
         assert(AvARRAY(MUTABLE_AV(                                      \
             PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[                    \
                     CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);           \
@@ -698,6 +700,7 @@ struct block_format {
 
 #define CX_POPSUB(cx)							\
     STMT_START {							\
+        assert(CxTYPE(cx) == CXt_SUB);                                  \
 	RETURN_PROBE(CvNAMED(cx->blk_sub.cv)				\
 			? HEK_KEY(CvNAME_HEK(cx->blk_sub.cv))		\
 			: GvENAME(CvGV(cx->blk_sub.cv)),		\
@@ -715,6 +718,7 @@ struct block_format {
     STMT_START {							\
 	CV *cv;				                                \
 	GV * const dfout = cx->blk_format.dfoutgv;			\
+        assert(CxTYPE(cx) == CXt_FORMAT);                               \
 	setdefout(dfout);						\
         cx->blk_format.dfoutgv = NULL;                                  \
 	SvREFCNT_dec_NN(dfout); /* the cx->defoutgv ref */              \
@@ -760,6 +764,7 @@ struct block_eval {
 #define CX_POPEVAL(cx)							\
     STMT_START {							\
         SV *sv;                                                         \
+        assert(CxTYPE(cx) == CXt_EVAL);                                 \
 	PL_in_eval = CxOLD_IN_EVAL(cx);					\
 	PL_eval_root = cx->blk_eval.old_eval_root;			\
 	sv = cx->blk_eval.cur_text;                                     \
@@ -835,6 +840,7 @@ struct block_loop {
         PUSHLOOP_FOR_setpad(cx);
 
 #define CX_POPLOOP(cx)							\
+        assert(CxTYPE_is_LOOP(cx));                                     \
 	if (  CxTYPE(cx) == CXt_LOOP_ARY                                \
            || CxTYPE(cx) == CXt_LOOP_LAZYSV)                            \
         {			                                        \
@@ -875,11 +881,13 @@ struct block_givwhen {
         cx->blk_givwhen.defsv_save = orig_var;
 
 #define CX_POPWHEN(cx)                                                  \
+        assert(CxTYPE(cx) == CXt_WHEN);                                 \
 	NOOP;
 
 #define CX_POPGIVEN(cx)                                                 \
     STMT_START {							\
         SV *sv = GvSV(PL_defgv);                                        \
+        assert(CxTYPE(cx) == CXt_GIVEN);                                \
         GvSV(PL_defgv) = cx->blk_givwhen.defsv_save;                    \
         cx->blk_givwhen.defsv_save = NULL;                              \
         SvREFCNT_dec(sv);                                               \
@@ -892,6 +900,7 @@ struct block_givwhen {
         cx->blk_oldsaveix = PL_savestack_ix;
 
 #define CX_POPBASICBLK(cx)                                              \
+        assert(CxTYPE(cx) == CXt_BLOCK);                                \
 	NOOP;
 
 
@@ -1036,6 +1045,7 @@ struct subst {
 #  define CX_POPSUBST(cx) \
     STMT_START {							\
         REGEXP *re;                                                     \
+        assert(CxTYPE(cx) == CXt_SUBST);                                \
 	rxres_free(&cx->sb_rxres);					\
 	re = cx->sb_rx;                                                 \
 	cx->sb_rx = NULL;                                               \
