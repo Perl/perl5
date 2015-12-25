@@ -1668,7 +1668,7 @@ PP(pp_sort)
 	    }
 
             gimme = G_SCALAR;
-	    PUSHBLOCK(cx, CXt_NULL, PL_stack_base);
+	    PUSHBLOCK(cx, CXt_NULL, PL_stack_base, old_savestack_ix);
 	    if (!(flags & OPf_SPECIAL)) {
 		cx->cx_type = CXt_SUB|CXp_MULTICALL;
 		PUSHSUB(cx);
@@ -1689,7 +1689,6 @@ PP(pp_sort)
 
 		}
 	    }
-            cx->blk_oldsaveix = old_savestack_ix;
 
 	    start = p1 - max;
 	    sortsvp(aTHX_ start, max,

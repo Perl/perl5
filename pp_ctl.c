@@ -2014,10 +2014,9 @@ PP(pp_dbstate)
 	}
 	else {
             U8 hasargs = 0;
-	    PUSHBLOCK(cx, CXt_SUB, SP);
+	    PUSHBLOCK(cx, CXt_SUB, SP, PL_savestack_ix);
 	    PUSHSUB_DB(cx);
 	    cx->blk_sub.retop = PL_op->op_next;
-            cx->blk_oldsaveix = PL_savestack_ix;
 
             SAVEI32(PL_debug);
             PL_debug = 0;
@@ -2040,7 +2039,7 @@ PP(pp_enter)
     PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
 
-    PUSHBLOCK(cx, CXt_BLOCK, SP);
+    PUSHBLOCK(cx, CXt_BLOCK, SP, PL_savestack_ix);
     PUSHBASICBLK(cx);
 
     RETURN;
@@ -2140,7 +2139,7 @@ PP(pp_enteriter)
     /* OPpITER_DEF (implicit $_) should only occur with a GV iter var */
     assert((cxflags & CXp_FOR_GV) || !(PL_op->op_private & OPpITER_DEF));
 
-    PUSHBLOCK(cx, cxflags, MARK);
+    PUSHBLOCK(cx, cxflags, MARK, PL_savestack_ix);
     PUSHLOOP_FOR(cx, itervarp, itersave);
 
     if (PL_op->op_flags & OPf_STACKED) {
@@ -2215,7 +2214,7 @@ PP(pp_enterloop)
     PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
 
-    PUSHBLOCK(cx, CXt_LOOP_PLAIN, SP);
+    PUSHBLOCK(cx, CXt_LOOP_PLAIN, SP, PL_savestack_ix);
     PUSHLOOP_PLAIN(cx);
 
     RETURN;
@@ -4044,9 +4043,8 @@ PP(pp_require)
     }
 
     /* switch to eval mode */
-    PUSHBLOCK(cx, CXt_EVAL, SP);
+    PUSHBLOCK(cx, CXt_EVAL, SP, old_savestack_ix);
     PUSHEVAL(cx, name);
-    cx->blk_oldsaveix = old_savestack_ix;
     cx->blk_eval.retop = PL_op->op_next;
 
     SAVECOPLINE(&PL_compiling);
@@ -4160,9 +4158,8 @@ PP(pp_entereval)
      * to do the dirty work for us */
     runcv = find_runcv(&seq);
 
-    PUSHBLOCK(cx, (CXt_EVAL|CXp_REAL), SP);
+    PUSHBLOCK(cx, (CXt_EVAL|CXp_REAL), SP, old_savestack_ix);
     PUSHEVAL(cx, 0);
-    cx->blk_oldsaveix = old_savestack_ix;
     cx->blk_eval.retop = PL_op->op_next;
 
     /* prepare to compile string */
@@ -4292,9 +4289,8 @@ Perl_create_eval_scope(pTHX_ U32 flags)
     PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
 	
-    PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), PL_stack_sp);
+    PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), PL_stack_sp, PL_savestack_ix);
     PUSHEVAL(cx, 0);
-    cx->blk_oldsaveix = PL_savestack_ix;
 
     PL_in_eval = EVAL_INEVAL;
     if (flags & G_KEEPERR)
@@ -4353,7 +4349,7 @@ PP(pp_entergiven)
     assert(!PL_op->op_targ); /* used to be set for lexical $_ */
     GvSV(PL_defgv) = SvREFCNT_inc(newsv);
 
-    PUSHBLOCK(cx, CXt_GIVEN, SP);
+    PUSHBLOCK(cx, CXt_GIVEN, SP, PL_savestack_ix);
     PUSHGIVEN(cx, origsv);
 
     RETURN;
@@ -4933,7 +4929,7 @@ PP(pp_enterwhen)
     if ((0 == (PL_op->op_flags & OPf_SPECIAL)) && !SvTRUEx(POPs))
 	RETURNOP(cLOGOP->op_other->op_next);
 
-    PUSHBLOCK(cx, CXt_WHEN, SP);
+    PUSHBLOCK(cx, CXt_WHEN, SP, PL_savestack_ix);
     PUSHWHEN(cx);
 
     RETURN;

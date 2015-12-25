@@ -641,7 +641,6 @@ struct block_format {
 	cx->blk_format.dfoutgv = PL_defoutgv;				\
 	cx->blk_format.prevcomppad = PL_comppad;			\
 	cx->blk_u16 = 0;                                                \
-        cx->blk_oldsaveix = PL_savestack_ix;                            \
 	SvREFCNT_inc_simple_void_NN(cv);		                \
 	CvDEPTH(cv)++;							\
 	SvREFCNT_inc_void(cx->blk_format.dfoutgv)
@@ -835,8 +834,7 @@ struct block_loop {
 
 
 #define PUSHLOOP_PLAIN(cx)						\
-	cx->blk_loop.my_op = cLOOP;					\
-        cx->blk_oldsaveix = PL_savestack_ix;
+	cx->blk_loop.my_op = cLOOP;
 
 #ifdef USE_ITHREADS
 #  define PUSHLOOP_FOR_setpad(c) (c)->blk_loop.oldcomppad = PL_comppad
@@ -847,7 +845,6 @@ struct block_loop {
 #define PUSHLOOP_FOR(cx, ivar, isave)   				\
 	cx->blk_loop.my_op = cLOOP;					\
 	cx->blk_loop.itervar_u.svp = (SV**)(ivar);                      \
-        cx->blk_oldsaveix = PL_savestack_ix;                                \
         cx->blk_loop.itersave = isave;                                  \
         PUSHLOOP_FOR_setpad(cx);
 
@@ -885,7 +882,6 @@ struct block_givwhen {
 };
 
 #define PUSHWHEN(cx)    						\
-        cx->blk_oldsaveix = PL_savestack_ix;                            \
 	cx->blk_givwhen.leave_op = cLOGOP->op_other;
 
 #define PUSHGIVEN(cx, orig_var)                                         \
@@ -909,7 +905,7 @@ struct block_givwhen {
 /* basic block, i.e. pp_enter/leave */
 
 #define PUSHBASICBLK(cx)                                                \
-        cx->blk_oldsaveix = PL_savestack_ix;
+        NOOP;
 
 #define CX_POPBASICBLK(cx)                                              \
         assert(CxTYPE(cx) == CXt_BLOCK);                                \
@@ -965,11 +961,14 @@ struct block {
 		    __FILE__, __LINE__));
 
 /* Enter a block. */
-#define PUSHBLOCK(cx,t,sp) CXINC, cx = CX_CUR(),		        \
+#define PUSHBLOCK(cx,t,sp, saveix)                                      \
+        CXINC,                                                          \
+        cx = CX_CUR(),		                                        \
 	cx->cx_type		= t,					\
 	cx->blk_oldsp		= sp - PL_stack_base,			\
 	cx->blk_oldcop		= PL_curcop,				\
 	cx->blk_oldmarksp	= PL_markstack_ptr - PL_markstack,	\
+        cx->blk_oldsaveix       = saveix,                               \
 	cx->blk_oldscopesp	= PL_scopestack_ix,			\
 	cx->blk_oldpm		= PL_curpm,				\
 	cx->blk_gimme		= (U8)gimme;				\
@@ -1344,9 +1343,9 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
  	multicall_oldcatch = CATCH_GET;					\
 	CATCH_SET(TRUE);						\
 	PUSHSTACKi(PERLSI_MULTICALL);					\
-	PUSHBLOCK(cx, (CXt_SUB|CXp_MULTICALL|flags), PL_stack_sp);	\
+	PUSHBLOCK(cx, (CXt_SUB|CXp_MULTICALL|flags), PL_stack_sp,       \
+                  PL_savestack_ix);	                                \
 	PUSHSUB(cx);							\
-        cx->blk_oldsaveix = PL_savestack_ix;                            \
 	SAVEOP();					                \
         saveix_floor = PL_savestack_ix;                                 \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
