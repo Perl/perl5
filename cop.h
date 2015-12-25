@@ -1327,6 +1327,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
     CV *multicall_cv;							\
     OP *multicall_cop;							\
     bool multicall_oldcatch; 						\
+    I32 saveix_floor;                                                   \
     U8 hasargs = 0		/* used by PUSHSUB */
 
 #define PUSH_MULTICALL(the_cv) \
@@ -1347,6 +1348,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	PUSHSUB(cx);							\
         cx->blk_oldsaveix = PL_savestack_ix;                            \
 	SAVEVPTR(PL_op);					        \
+        saveix_floor = PL_savestack_ix;                                 \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
 	if (CvDEPTH(cv) >= 2) {						\
@@ -1363,6 +1365,8 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
     STMT_START {							\
 	PL_op = multicall_cop;						\
 	CALLRUNOPS(aTHX);						\
+        cx = CX_CUR();					                \
+        LEAVE_SCOPE(saveix_floor);                                      \
     } STMT_END
 
 #define POP_MULTICALL \

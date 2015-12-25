@@ -7,7 +7,7 @@
 use warnings;
 use strict;
 
-use Test::More tests => 79;
+use Test::More tests => 80;
 use XS::APItest;
 
 
@@ -161,4 +161,15 @@ use XS::APItest;
         @a = multicall_return \&f9, $gimme;
         gimme_check($gimme, \@a, ["one", "two"], "for-return two args lval");
     }
+}
+
+# RT #116577: MULTICALL should clear scope after each call
+
+{
+    my @r;
+
+    my $s = sub { my $x; push @r, \$x; 1 };
+
+    XS::APItest::multicall_each \&$s, 1,2;
+    isnt($r[0], $r[1], "#116577");
 }

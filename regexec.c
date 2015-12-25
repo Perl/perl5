@@ -6664,6 +6664,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		before = (IV)(SP-PL_stack_base);
 		PL_op = nop;
 		CALLRUNOPS(aTHX);			/* Scalar context. */
+                PERL_UNUSED_VAR(saveix_floor); /* used by MULTICALL */
 		SPAGAIN;
 		if ((IV)(SP-PL_stack_base) == before)
 		    ret = &PL_sv_undef;   /* protect against empty (?{}) blocks. */
