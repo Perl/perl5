@@ -1366,6 +1366,10 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
             &( ANYOF_COMMON_FLAGS
               |ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER
               |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP);
+            if (ANYOFL_UTF8_LOCALE_REQD(ANYOF_FLAGS(and_with))) {
+                anded_flags &=
+                    ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD;
+            }
         }
     }
 
@@ -1522,6 +1526,10 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
             |= ANYOF_FLAGS(or_with)
              & ( ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER
                 |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP);
+            if (ANYOFL_UTF8_LOCALE_REQD(ANYOF_FLAGS(or_with))) {
+                ored_flags |=
+                    ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD;
+            }
         }
     }
 
@@ -14201,7 +14209,8 @@ redo_curchar:
         assert(OP(node) == ANYOF);
 
         OP(node) = ANYOFL;
-        ANYOF_FLAGS(node) |= ANYOFL_UTF8_LOCALE_REQD;
+        ANYOF_FLAGS(node)
+                |= ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD;
     }
 
     if (save_fold) {
@@ -16098,8 +16107,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * locales, or the class matches at least one 0-255 range code point */
     if (LOC && FOLD) {
         if (only_utf8_locale_list) {
-            ANYOF_FLAGS(ret) |=  ANYOFL_FOLD
-                                |ANYOFL_SOME_FOLDS_ONLY_IN_UTF8_LOCALE;
+            ANYOF_FLAGS(ret)
+                 |=  ANYOFL_FOLD
+                    |ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD;
         }
         else if (cp_list) { /* Look to see if a 0-255 code point is in list */
             UV start, end;
@@ -17473,7 +17483,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
 
 	if (OP(o) == ANYOFL) {
-            if (flags & ANYOFL_UTF8_LOCALE_REQD) {
+            if (ANYOFL_UTF8_LOCALE_REQD(flags)) {
                 sv_catpvs(sv, "{utf8-loc}");
             }
             else {

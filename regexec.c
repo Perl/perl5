@@ -1826,7 +1826,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     case ANYOFL:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
 
-        if ((FLAGS(c) & ANYOFL_UTF8_LOCALE_REQD) && ! IN_UTF8_CTYPE_LOCALE) {
+        if (ANYOFL_UTF8_LOCALE_REQD(FLAGS(c)) && ! IN_UTF8_CTYPE_LOCALE) {
             Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE), utf8_locale_required);
         }
 
@@ -5766,7 +5766,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	case ANYOFL:  /*  /[abc]/l      */
             _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
 
-            if ((FLAGS(scan) & ANYOFL_UTF8_LOCALE_REQD) && ! IN_UTF8_CTYPE_LOCALE)
+            if (ANYOFL_UTF8_LOCALE_REQD(FLAGS(scan)) && ! IN_UTF8_CTYPE_LOCALE)
             {
               Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE), utf8_locale_required);
             }
@@ -8301,7 +8301,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
     case ANYOFL:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
 
-        if ((FLAGS(p) & ANYOFL_UTF8_LOCALE_REQD) && ! IN_UTF8_CTYPE_LOCALE) {
+        if (ANYOFL_UTF8_LOCALE_REQD(FLAGS(p)) && ! IN_UTF8_CTYPE_LOCALE) {
             Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE), utf8_locale_required);
         }
         /* FALLTHROUGH */
@@ -8648,7 +8648,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 		 * UTF8_ALLOW_FFFF */
 	if (c_len == (STRLEN)-1)
 	    Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
-        if (c > 255 && OP(n) == ANYOFL && ! (flags & ANYOFL_UTF8_LOCALE_REQD)) {
+        if (c > 255 && OP(n) == ANYOFL && ! ANYOFL_UTF8_LOCALE_REQD(flags)) {
             _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(c);
         }
     }
@@ -8751,8 +8751,8 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                                                                  && c < 256
 #                               endif
                                 )))
-                     || ((   flags & ANYOFL_SOME_FOLDS_ONLY_IN_UTF8_LOCALE)
-                          && IN_UTF8_CTYPE_LOCALE)))
+                     || (   ANYOFL_SOME_FOLDS_ONLY_IN_UTF8_LOCALE(flags)
+                         && IN_UTF8_CTYPE_LOCALE)))
         {
             SV* only_utf8_locale = NULL;
 	    SV * const sw = _get_regclass_nonbitmap_data(prog, n, TRUE, 0,
