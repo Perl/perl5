@@ -1773,7 +1773,6 @@ static I32
 S_sortcv(pTHX_ SV *const a, SV *const b)
 {
     const I32 oldsaveix = PL_savestack_ix;
-    const I32 oldscopeix = PL_scopestack_ix;
     I32 result;
     PMOP * const pm = PL_curpm;
     COP * const cop = PL_curcop;
@@ -1791,10 +1790,7 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
     assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
     result = SvIV(*PL_stack_sp);
 
-    while (PL_scopestack_ix > oldscopeix) {
-	LEAVE;
-    }
-    leave_scope(oldsaveix);
+    LEAVE_SCOPE(oldsaveix);
     PL_curpm = pm;
     return result;
 }
@@ -1803,7 +1799,6 @@ static I32
 S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
 {
     const I32 oldsaveix = PL_savestack_ix;
-    const I32 oldscopeix = PL_scopestack_ix;
     I32 result;
     AV * const av = GvAV(PL_defgv);
     PMOP * const pm = PL_curpm;
@@ -1842,10 +1837,7 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
     assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
     result = SvIV(*PL_stack_sp);
 
-    while (PL_scopestack_ix > oldscopeix) {
-	LEAVE;
-    }
-    leave_scope(oldsaveix);
+    LEAVE_SCOPE(oldsaveix);
     PL_curpm = pm;
     return result;
 }
@@ -1855,7 +1847,6 @@ S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
 {
     dSP;
     const I32 oldsaveix = PL_savestack_ix;
-    const I32 oldscopeix = PL_scopestack_ix;
     CV * const cv=MUTABLE_CV(PL_sortcop);
     I32 result;
     PMOP * const pm = PL_curpm;
@@ -1874,10 +1865,7 @@ S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
     assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
     result = SvIV(*PL_stack_sp);
 
-    while (PL_scopestack_ix > oldscopeix) {
-	LEAVE;
-    }
-    leave_scope(oldsaveix);
+    LEAVE_SCOPE(oldsaveix);
     PL_curpm = pm;
     return result;
 }
