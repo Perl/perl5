@@ -1675,10 +1675,8 @@ PP(pp_sort)
 		if (!is_xsub) {
 		    PADLIST * const padlist = CvPADLIST(cv);
 
-		    if (++CvDEPTH(cv) >= 2) {
-			PERL_STACK_OVERFLOW_CHECK();
+		    if (++CvDEPTH(cv) >= 2)
 			pad_push(padlist, CvDEPTH(cv));
-		    }
 		    PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
 
 		    if (hasargs) {

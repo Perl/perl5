@@ -2023,10 +2023,8 @@ PP(pp_dbstate)
             PL_debug = 0;
             SAVESTACK_POS();
 	    CvDEPTH(cv)++;
-	    if (CvDEPTH(cv) >= 2) {
-		PERL_STACK_OVERFLOW_CHECK();
+	    if (CvDEPTH(cv) >= 2)
 		pad_push(CvPADLIST(cv), CvDEPTH(cv));
-	    }
 	    PAD_SET_CUR_NOSAVE(CvPADLIST(cv), CvDEPTH(cv));
 	    RETURNOP(CvSTART(cv));
 	}

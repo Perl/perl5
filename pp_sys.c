@@ -1391,10 +1391,8 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 
     PUSHBLOCK(cx, CXt_FORMAT, PL_stack_sp);
     PUSHFORMAT(cx, retop);
-    if (CvDEPTH(cv) >= 2) {
-	PERL_STACK_OVERFLOW_CHECK();
+    if (CvDEPTH(cv) >= 2)
 	pad_push(CvPADLIST(cv), CvDEPTH(cv));
-    }
     PAD_SET_CUR_NOSAVE(CvPADLIST(cv), CvDEPTH(cv));
 
     setdefout(gv);	    /* locally select filehandle so $% et al work */

@@ -1351,10 +1351,8 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
         saveix_floor = PL_savestack_ix;                                 \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
-	if (CvDEPTH(cv) >= 2) {						\
-	    PERL_STACK_OVERFLOW_CHECK();				\
+	if (CvDEPTH(cv) >= 2)  						\
 	    Perl_pad_push(aTHX_ padlist, CvDEPTH(cv));			\
-	}								\
 	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));			\
 	multicall_cv = cv;						\
         PERL_UNUSED_VAR(multicall_cv); /* for API */                    \
@@ -1400,10 +1398,8 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
         PUSHSUB(cx);						        \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
-	if (CvDEPTH(cv) >= 2) {						\
-	    PERL_STACK_OVERFLOW_CHECK();				\
+	if (CvDEPTH(cv) >= 2)  						\
 	    Perl_pad_push(aTHX_ padlist, CvDEPTH(cv));			\
-	}								\
 	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));			\
 	multicall_cv = cv;						\
 	multicall_cop = CvSTART(cv);					\

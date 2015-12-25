@@ -6354,13 +6354,8 @@ expression, but with an empty argument list, like this:
 #define PERL_SCRIPT_MODE "r"
 #endif
 
-/*
- * Some operating systems are stingy with stack allocation,
- * so perl may have to guard against stack overflow.
- */
-#ifndef PERL_STACK_OVERFLOW_CHECK
+/* not used. Kept as a NOOP for backcompat */
 #define PERL_STACK_OVERFLOW_CHECK()  NOOP
-#endif
 
 /*
  * Some nonpreemptive operating systems find it convenient to

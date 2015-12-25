@@ -3859,10 +3859,8 @@ PP(pp_entersub)
         cx->blk_oldsaveix = old_savestack_ix;
 
 	padlist = CvPADLIST(cv);
-	if (UNLIKELY((depth = ++CvDEPTH(cv)) >= 2)) {
-	    PERL_STACK_OVERFLOW_CHECK();
+	if (UNLIKELY((depth = ++CvDEPTH(cv)) >= 2))
 	    pad_push(padlist, depth);
-	}
 	PAD_SET_CUR_NOSAVE(padlist, depth);
 	if (LIKELY(hasargs)) {
 	    AV *const av = MUTABLE_AV(PAD_SVl(0));
