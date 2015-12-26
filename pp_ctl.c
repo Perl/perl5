@@ -2137,6 +2137,11 @@ PP(pp_enteriter)
     /* OPpITER_DEF (implicit $_) should only occur with a GV iter var */
     assert((cxflags & CXp_FOR_GV) || !(PL_op->op_private & OPpITER_DEF));
 
+    /* Note that this context is initially set as CXt_NULL. Further on
+     * down it's changed to one of the CXt_LOOP_*. Before it's changed,
+     * there mustn't be anything in the blk_loop substruct that requires
+     * freeing or undoing, in case we die in the meantime. And vice-versa.
+     */
     PUSHBLOCK(cx, cxflags, gimme, MARK, PL_savestack_ix);
     PUSHLOOP_FOR(cx, itervarp, itersave);
 
