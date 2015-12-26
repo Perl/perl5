@@ -680,8 +680,8 @@ struct regnode_ssc {
 
 #define ANYOF_POSIXL_AND(source, dest) STMT_START { (dest)->classflags &= (source)->classflags ; } STMT_END
 
-#define ANYOF_BITMAP_ZERO(ret)	Zero(((struct regnode_charclass*)(ret))->bitmap, ANYOF_BITMAP_SIZE, char)
-#define ANYOF_BITMAP(p)		(((struct regnode_charclass*)(p))->bitmap)
+#define ANYOF_BITMAP_ZERO(ret)	Zero(((regnode_charclass*)(ret))->bitmap, ANYOF_BITMAP_SIZE, char)
+#define ANYOF_BITMAP(p)		((regnode_charclass*)(p))->bitmap
 #define ANYOF_BITMAP_BYTE(p, c)	BITMAP_BYTE(ANYOF_BITMAP(p), c)
 #define ANYOF_BITMAP_SET(p, c)	(ANYOF_BITMAP_BYTE(p, c) |=  ANYOF_BIT(c))
 #define ANYOF_BITMAP_CLEAR(p,c)	(ANYOF_BITMAP_BYTE(p, c) &= ~ANYOF_BIT(c))
@@ -692,7 +692,7 @@ struct regnode_ssc {
 #define ANYOF_BITMAP_CLEARALL(p)	\
 	Zero (ANYOF_BITMAP(p), ANYOF_BITMAP_SIZE)
 
-#define ANYOF_SKIP		EXTRA_SIZE(struct regnode_charclass)
+#define ANYOF_SKIP		EXTRA_SIZE(regnode_charclass)
 #define ANYOF_POSIXL_SKIP	EXTRA_SIZE(regnode_charclass_posixl)
 
 /*
