@@ -634,7 +634,7 @@ struct block_format {
 	cx->blk_u16 = 0;
 
 
-#define PUSHFORMAT(cx, retop)						\
+#define PUSHFORMAT(cx, cv, gv, retop)					\
 	cx->blk_format.cv = cv;						\
 	cx->blk_format.gv = gv;						\
 	cx->blk_format.retop = (retop);					\

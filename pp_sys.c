@@ -1390,7 +1390,7 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 	cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
 
     PUSHBLOCK(cx, CXt_FORMAT, gimme, PL_stack_sp, PL_savestack_ix);
-    PUSHFORMAT(cx, retop);
+    PUSHFORMAT(cx, cv, gv, retop);
     if (CvDEPTH(cv) >= 2)
 	pad_push(CvPADLIST(cv), CvDEPTH(cv));
     PAD_SET_CUR_NOSAVE(CvPADLIST(cv), CvDEPTH(cv));
