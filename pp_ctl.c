@@ -4042,7 +4042,7 @@ PP(pp_require)
 
     /* switch to eval mode */
     PUSHBLOCK(cx, CXt_EVAL, gimme, SP, old_savestack_ix);
-    PUSHEVAL(cx, PL_op->op_next, name);
+    PUSHEVAL(cx, PL_op->op_next, newSVpv(name, 0));
 
     SAVECOPLINE(&PL_compiling);
     CopLINE_set(&PL_compiling, 0);
@@ -4156,7 +4156,7 @@ PP(pp_entereval)
     runcv = find_runcv(&seq);
 
     PUSHBLOCK(cx, (CXt_EVAL|CXp_REAL), gimme, SP, old_savestack_ix);
-    PUSHEVAL(cx, PL_op->op_next, 0);
+    PUSHEVAL(cx, PL_op->op_next, NULL);
 
     /* prepare to compile string */
 
@@ -4286,7 +4286,7 @@ Perl_create_eval_scope(pTHX_ OP *retop, U32 flags)
     const I32 gimme = GIMME_V;
 	
     PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), gimme, PL_stack_sp, PL_savestack_ix);
-    PUSHEVAL(cx, retop, 0);
+    PUSHEVAL(cx, retop, NULL);
 
     PL_in_eval = EVAL_INEVAL;
     if (flags & G_KEEPERR)
