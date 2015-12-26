@@ -272,7 +272,7 @@ p	|const COP*|closest_cop	|NN const COP *cop|NULLOK const OP *o \
 : Used in perly.y
 ApdR	|OP*	|op_convert_list	|I32 optype|I32 flags|NULLOK OP* o
 : Used in op.c and perl.c
-pM	|PERL_CONTEXT*	|create_eval_scope|U32 flags
+pM	|void	|create_eval_scope|NULLOK OP *retop|U32 flags
 Aprd	|void	|croak_sv	|NN SV *baseex
 : croak()'s first parm can be NULL.  Otherwise, mod_perl breaks.
 Afprd	|void	|croak		|NULLOK const char* pat|...

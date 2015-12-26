@@ -1160,7 +1160,7 @@
 #define closest_cop(a,b,c,d)	Perl_closest_cop(aTHX_ a,b,c,d)
 #define core_prototype(a,b,c,d)	Perl_core_prototype(aTHX_ a,b,c,d)
 #define coresub_op(a,b,c)	Perl_coresub_op(aTHX_ a,b,c)
-#define create_eval_scope(a)	Perl_create_eval_scope(aTHX_ a)
+#define create_eval_scope(a,b)	Perl_create_eval_scope(aTHX_ a,b)
 #define croak_no_mem		Perl_croak_no_mem
 #define croak_popstack		Perl_croak_popstack
 #define custom_op_get_field(a,b)	Perl_custom_op_get_field(aTHX_ a,b)

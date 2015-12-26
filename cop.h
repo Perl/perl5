@@ -747,7 +747,7 @@ struct block_eval {
 #define CxOLD_IN_EVAL(cx)	(((cx)->blk_u16) & 0x7F)
 #define CxOLD_OP_TYPE(cx)	(((cx)->blk_u16) >> 7)
 
-#define PUSHEVAL(cx,n)							\
+#define PUSHEVAL(cx, op, n)						\
     STMT_START {							\
 	assert(!(PL_in_eval & ~0x7F));					\
 	assert(!(PL_op->op_type & ~0x1FF));				\
@@ -756,7 +756,7 @@ struct block_eval {
 	cx->blk_eval.old_eval_root = PL_eval_root;			\
 	cx->blk_eval.cur_text = PL_parser ? PL_parser->linestr : NULL;	\
 	cx->blk_eval.cv = NULL; /* set by doeval_compile() as applicable */ \
-	cx->blk_eval.retop = NULL;					\
+	cx->blk_eval.retop = op;					\
 	cx->blk_eval.cur_top_env = PL_top_env; 				\
     } STMT_END
 

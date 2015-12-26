@@ -540,7 +540,7 @@ PERL_CALLCONV SV *	Perl_core_prototype(pTHX_ SV *sv, const char *name, const int
 PERL_CALLCONV OP *	Perl_coresub_op(pTHX_ SV *const coreargssv, const int code, const int opnum);
 #define PERL_ARGS_ASSERT_CORESUB_OP	\
 	assert(coreargssv)
-PERL_CALLCONV PERL_CONTEXT*	Perl_create_eval_scope(pTHX_ U32 flags);
+PERL_CALLCONV void	Perl_create_eval_scope(pTHX_ OP *retop, U32 flags);
 PERL_CALLCONV_NO_RET void	Perl_croak(pTHX_ const char* pat, ...)
 			__attribute__noreturn__
 			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);

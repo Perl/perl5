@@ -4345,7 +4345,7 @@ S_fold_constants(pTHX_ OP *o)
     PL_op = curop;
 
     old_cxix = cxstack_ix;
-    create_eval_scope(G_FAKINGEVAL);
+    create_eval_scope(NULL, G_FAKINGEVAL);
 
     /* Verify that we don't need to save it:  */
     assert(PL_curcop == &PL_compiling);

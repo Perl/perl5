@@ -4043,8 +4043,7 @@ PP(pp_require)
 
     /* switch to eval mode */
     PUSHBLOCK(cx, CXt_EVAL, gimme, SP, old_savestack_ix);
-    PUSHEVAL(cx, name);
-    cx->blk_eval.retop = PL_op->op_next;
+    PUSHEVAL(cx, PL_op->op_next, name);
 
     SAVECOPLINE(&PL_compiling);
     CopLINE_set(&PL_compiling, 0);
@@ -4158,8 +4157,7 @@ PP(pp_entereval)
     runcv = find_runcv(&seq);
 
     PUSHBLOCK(cx, (CXt_EVAL|CXp_REAL), gimme, SP, old_savestack_ix);
-    PUSHEVAL(cx, 0);
-    cx->blk_eval.retop = PL_op->op_next;
+    PUSHEVAL(cx, PL_op->op_next, 0);
 
     /* prepare to compile string */
 
@@ -4282,14 +4280,14 @@ Perl_delete_eval_scope(pTHX)
 
 /* Common-ish code salvaged from Perl_call_sv and pp_entertry, because it was
    also needed by Perl_fold_constants.  */
-PERL_CONTEXT *
-Perl_create_eval_scope(pTHX_ U32 flags)
+void
+Perl_create_eval_scope(pTHX_ OP *retop, U32 flags)
 {
     PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
 	
     PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), gimme, PL_stack_sp, PL_savestack_ix);
-    PUSHEVAL(cx, 0);
+    PUSHEVAL(cx, retop, 0);
 
     PL_in_eval = EVAL_INEVAL;
     if (flags & G_KEEPERR)
@@ -4299,13 +4297,11 @@ Perl_create_eval_scope(pTHX_ U32 flags)
     if (flags & G_FAKINGEVAL) {
 	PL_eval_root = PL_op; /* Only needed so that goto works right. */
     }
-    return cx;
 }
     
 PP(pp_entertry)
 {
-    PERL_CONTEXT * const cx = create_eval_scope(0);
-    cx->blk_eval.retop = cLOGOP->op_other->op_next;
+    create_eval_scope(cLOGOP->op_other->op_next, 0);
     return DOCATCH(PL_op->op_next);
 }
 
