@@ -843,7 +843,7 @@ struct block_loop {
 #endif
 
 #define PUSHLOOP_FOR(cx, ivar, isave)   				\
-	cx->blk_loop.my_op = cLOOP;					\
+	PUSHLOOP_PLAIN(cx);					        \
 	cx->blk_loop.itervar_u.svp = (SV**)(ivar);                      \
         cx->blk_loop.itersave = isave;                                  \
         PUSHLOOP_FOR_setpad(cx);
