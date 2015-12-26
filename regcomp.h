@@ -917,7 +917,7 @@ typedef struct _reg_ac_data reg_ac_data;
 #define IS_TRIE_AC(op) ((op)>=AHOCORASICK)
 
 
-#define BITMAP_BYTE(p, c)	(((U8*)p)[(((U8)(c)) >> 3) & 31])
+#define BITMAP_BYTE(p, c)	(( (U8*) p) [ ( ( (UV) (c)) >> 3) ] )
 #define BITMAP_TEST(p, c)	(BITMAP_BYTE(p, c) &   ANYOF_BIT((U8)c))
 
 /* these defines assume uniquecharcount is the correct variable, and state may be evaluated twice */
