@@ -5775,7 +5775,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	case ANYOF:  /*   /[abc]/       */
             if (NEXTCHR_IS_EOS)
                 sayNO;
-	    if (utf8_target) {
+	    if (utf8_target && ! UTF8_IS_INVARIANT(locinput)) {
 	        if (!reginclass(rex, scan, (U8*)locinput, (U8*)reginfo->strend,
                                                                    utf8_target))
 		    sayNO;
