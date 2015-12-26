@@ -2014,8 +2014,7 @@ PP(pp_dbstate)
 	}
 	else {
 	    PUSHBLOCK(cx, CXt_SUB, gimme, SP, PL_savestack_ix);
-	    PUSHSUB_DB(cx, cv, 0);
-	    cx->blk_sub.retop = PL_op->op_next;
+	    PUSHSUB_DB(cx, cv, PL_op->op_next, 0);
 
             SAVEI32(PL_debug);
             PL_debug = 0;
