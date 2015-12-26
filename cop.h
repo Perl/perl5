@@ -595,7 +595,7 @@ struct block_format {
  * The context frame holds a reference to the CV so that it can't be
  * freed while we're executing it */
 
-#define PUSHSUB_BASE(cx)						\
+#define PUSHSUB_BASE(cx, cv, hasargs)					\
 	ENTRY_PROBE(CvNAMED(cv)						\
 			? HEK_KEY(CvNAME_HEK(cv))			\
 			: GvENAME(CvGV(cv)),	       			\
@@ -620,17 +620,17 @@ struct block_format {
 	           ? 0 : (U8)func(aTHX)					\
 	)
 
-#define PUSHSUB(cx)							\
+#define PUSHSUB(cx, cv, hasargs)					\
     {									\
 	U8 phlags = PUSHSUB_GET_LVALUE_MASK(Perl_was_lvalue_sub);	\
-	PUSHSUB_BASE(cx)						\
+	PUSHSUB_BASE(cx, cv, hasargs)					\
 	cx->blk_u16 = PL_op->op_private &				\
 	                  (phlags|OPpDEREF);				\
     }
 
 /* variant for use by OP_DBSTATE, where op_private holds hint bits */
-#define PUSHSUB_DB(cx)							\
-	PUSHSUB_BASE(cx)						\
+#define PUSHSUB_DB(cx, cv, hasargs)					\
+	PUSHSUB_BASE(cx, cv, hasargs)					\
 	cx->blk_u16 = 0;
 
 
@@ -1345,7 +1345,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	PUSHSTACKi(PERLSI_MULTICALL);					\
 	PUSHBLOCK(cx, (CXt_SUB|CXp_MULTICALL|flags), gimme,             \
                   PL_stack_sp, PL_savestack_ix);	                \
-	PUSHSUB(cx);							\
+	PUSHSUB(cx, cv, hasargs);					\
 	SAVEOP();					                \
         saveix_floor = PL_savestack_ix;                                 \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
@@ -1394,7 +1394,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	assert(CxMULTICALL(cx));                                        \
         CX_POPSUB_COMMON(cx);                                           \
 	cx->cx_type = (CXt_SUB|CXp_MULTICALL|flags);                    \
-        PUSHSUB(cx);						        \
+        PUSHSUB(cx, cv, hasargs);					\
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
 	if (CvDEPTH(cv) >= 2)  						\

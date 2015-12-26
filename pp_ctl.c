@@ -2013,9 +2013,8 @@ PP(pp_dbstate)
 	    return NORMAL;
 	}
 	else {
-            U8 hasargs = 0;
 	    PUSHBLOCK(cx, CXt_SUB, gimme, SP, PL_savestack_ix);
-	    PUSHSUB_DB(cx);
+	    PUSHSUB_DB(cx, cv, 0);
 	    cx->blk_sub.retop = PL_op->op_next;
 
             SAVEI32(PL_debug);

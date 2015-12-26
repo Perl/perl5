@@ -3854,7 +3854,7 @@ PP(pp_entersub)
         gimme = GIMME_V;
 	PUSHBLOCK(cx, CXt_SUB, gimme, MARK, old_savestack_ix);
         hasargs = cBOOL(PL_op->op_flags & OPf_STACKED);
-	PUSHSUB(cx);
+	PUSHSUB(cx, cv, hasargs);
 	cx->blk_sub.retop = PL_op->op_next;
 
 	padlist = CvPADLIST(cv);
