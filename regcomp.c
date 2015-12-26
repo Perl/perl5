@@ -600,6 +600,9 @@ static const scan_data_t zero_scan_data =
  *
  * When the substitute is constructed, we save (tI -sI) as RExC_precomp_adj,
  * and we save tC as RExC_adjusted_start.
+ *
+ * During normal processing of the input pattern, everything points to that,
+ * with RExC_precomp_adj set to 0, and RExC_adjusted_start set to sI.
  */
 
 #define tI_sI           RExC_precomp_adj
