@@ -961,7 +961,7 @@ struct block {
 		    __FILE__, __LINE__));
 
 /* Enter a block. */
-#define PUSHBLOCK(cx,t,sp, saveix)                                      \
+#define PUSHBLOCK(cx, t, gimme, sp, saveix)                             \
         CXINC,                                                          \
         cx = CX_CUR(),		                                        \
 	cx->cx_type		= t,					\
@@ -1343,8 +1343,8 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
  	multicall_oldcatch = CATCH_GET;					\
 	CATCH_SET(TRUE);						\
 	PUSHSTACKi(PERLSI_MULTICALL);					\
-	PUSHBLOCK(cx, (CXt_SUB|CXp_MULTICALL|flags), PL_stack_sp,       \
-                  PL_savestack_ix);	                                \
+	PUSHBLOCK(cx, (CXt_SUB|CXp_MULTICALL|flags), gimme,             \
+                  PL_stack_sp, PL_savestack_ix);	                \
 	PUSHSUB(cx);							\
 	SAVEOP();					                \
         saveix_floor = PL_savestack_ix;                                 \

@@ -3852,7 +3852,7 @@ PP(pp_entersub)
         }
 
         gimme = GIMME_V;
-	PUSHBLOCK(cx, CXt_SUB, MARK, old_savestack_ix);
+	PUSHBLOCK(cx, CXt_SUB, gimme, MARK, old_savestack_ix);
         hasargs = cBOOL(PL_op->op_flags & OPf_STACKED);
 	PUSHSUB(cx);
 	cx->blk_sub.retop = PL_op->op_next;
