@@ -595,7 +595,7 @@ struct block_format {
  * The context frame holds a reference to the CV so that it can't be
  * freed while we're executing it */
 
-#define PUSHSUB_BASE(cx, cv, op, hasargs)				\
+#define CX_PUSHSUB_BASE(cx, cv, op, hasargs)				\
 	ENTRY_PROBE(CvNAMED(cv)						\
 			? HEK_KEY(CvNAME_HEK(cv))			\
 			: GvENAME(CvGV(cv)),	       			\
@@ -610,7 +610,7 @@ struct block_format {
 	cx->blk_sub.retop = op;					        \
         SvREFCNT_inc_simple_void_NN(cv);
 
-#define PUSHSUB_GET_LVALUE_MASK(func) \
+#define CX_PUSHSUB_GET_LVALUE_MASK(func) \
 	/* If the context is indeterminate, then only the lvalue */	\
 	/* flags that the caller also has are applicable.        */	\
 	(								\
@@ -620,21 +620,21 @@ struct block_format {
 	           ? 0 : (U8)func(aTHX)					\
 	)
 
-#define PUSHSUB(cx, cv, op, hasargs)					\
+#define CX_PUSHSUB(cx, cv, op, hasargs)					\
     {									\
-	U8 phlags = PUSHSUB_GET_LVALUE_MASK(Perl_was_lvalue_sub);	\
-	PUSHSUB_BASE(cx, cv, op, hasargs)				\
+	U8 phlags = CX_PUSHSUB_GET_LVALUE_MASK(Perl_was_lvalue_sub);	\
+	CX_PUSHSUB_BASE(cx, cv, op, hasargs)				\
 	cx->blk_u16 = PL_op->op_private &				\
 	                  (phlags|OPpDEREF);				\
     }
 
 /* variant for use by OP_DBSTATE, where op_private holds hint bits */
-#define PUSHSUB_DB(cx, cv, op, hasargs)					\
-	PUSHSUB_BASE(cx, cv, op, hasargs)				\
+#define CX_PUSHSUB_DB(cx, cv, op, hasargs)				\
+	CX_PUSHSUB_BASE(cx, cv, op, hasargs)				\
 	cx->blk_u16 = 0;
 
 
-#define PUSHFORMAT(cx, cv, gv, retop)					\
+#define CX_PUSHFORMAT(cx, cv, gv, retop)				\
 	cx->blk_format.cv = cv;						\
 	cx->blk_format.gv = gv;						\
 	cx->blk_format.retop = (retop);					\
@@ -747,7 +747,7 @@ struct block_eval {
 #define CxOLD_IN_EVAL(cx)	(((cx)->blk_u16) & 0x7F)
 #define CxOLD_OP_TYPE(cx)	(((cx)->blk_u16) >> 7)
 
-#define PUSHEVAL(cx, op, n)						\
+#define CX_PUSHEVAL(cx, op, n)						\
     STMT_START {							\
 	assert(!(PL_in_eval & ~0x7F));					\
 	assert(!(PL_op->op_type & ~0x1FF));				\
@@ -833,20 +833,20 @@ struct block_loop {
 #define CxLVAL(c)	(0 + ((c)->blk_u16 & 0xff))
 
 
-#define PUSHLOOP_PLAIN(cx)						\
+#define CX_PUSHLOOP_PLAIN(cx)						\
 	cx->blk_loop.my_op = cLOOP;
 
 #ifdef USE_ITHREADS
-#  define PUSHLOOP_FOR_setpad(c) (c)->blk_loop.oldcomppad = PL_comppad
+#  define CX_PUSHLOOP_FOR_setpad(c) (c)->blk_loop.oldcomppad = PL_comppad
 #else
-#  define PUSHLOOP_FOR_setpad(c) NOOP
+#  define CX_PUSHLOOP_FOR_setpad(c) NOOP
 #endif
 
-#define PUSHLOOP_FOR(cx, ivar, isave)   				\
-	PUSHLOOP_PLAIN(cx);					        \
+#define CX_PUSHLOOP_FOR(cx, ivar, isave)   				\
+	CX_PUSHLOOP_PLAIN(cx);					        \
 	cx->blk_loop.itervar_u.svp = (SV**)(ivar);                      \
         cx->blk_loop.itersave = isave;                                  \
-        PUSHLOOP_FOR_setpad(cx);
+        CX_PUSHLOOP_FOR_setpad(cx);
 
 #define CX_POPLOOP(cx)							\
         assert(CxTYPE_is_LOOP(cx));                                     \
@@ -881,11 +881,11 @@ struct block_givwhen {
         SV *defsv_save; /* the original $_ */
 };
 
-#define PUSHWHEN(cx)    						\
+#define CX_PUSHWHEN(cx)    						\
 	cx->blk_givwhen.leave_op = cLOGOP->op_other;
 
-#define PUSHGIVEN(cx, orig_var)                                         \
-        PUSHWHEN(cx);                                                   \
+#define CX_PUSHGIVEN(cx, orig_var)                                      \
+        CX_PUSHWHEN(cx);                                                \
         cx->blk_givwhen.defsv_save = orig_var;
 
 #define CX_POPWHEN(cx)                                                  \
@@ -952,7 +952,7 @@ struct block {
 		    __FILE__, __LINE__));
 
 /* Enter a block. */
-#define PUSHBLOCK(cx, t, gimme, sp, saveix)                             \
+#define CX_PUSHBLOCK(cx, t, gimme, sp, saveix)                          \
         CXINC,                                                          \
         cx = CX_CUR(),		                                        \
 	cx->cx_type		= t,					\
@@ -1025,7 +1025,7 @@ struct subst {
 #define sb_rx		cx_u.cx_subst.sbu_rx
 
 #ifdef PERL_CORE
-#  define PUSHSUBST(cx) CXINC, cx = CX_CUR(),		                \
+#  define CX_PUSHSUBST(cx) CXINC, cx = CX_CUR(),		        \
 	cx->blk_oldsaveix = oldsave,				        \
 	cx->sb_iters		= iters,				\
 	cx->sb_maxiters		= maxiters,				\
@@ -1318,7 +1318,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
     OP *multicall_cop;							\
     bool multicall_oldcatch; 						\
     I32 saveix_floor;                                                   \
-    U8 hasargs = 0		/* used by PUSHSUB */
+    U8 hasargs = 0		/* used by CX_PUSHSUB */
 
 #define PUSH_MULTICALL(the_cv) \
     PUSH_MULTICALL_FLAGS(the_cv, 0)
@@ -1334,9 +1334,9 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
  	multicall_oldcatch = CATCH_GET;					\
 	CATCH_SET(TRUE);						\
 	PUSHSTACKi(PERLSI_MULTICALL);					\
-	PUSHBLOCK(cx, (CXt_SUB|CXp_MULTICALL|flags), gimme,             \
+	CX_PUSHBLOCK(cx, (CXt_SUB|CXp_MULTICALL|flags), gimme,          \
                   PL_stack_sp, PL_savestack_ix);	                \
-	PUSHSUB(cx, cv, NULL, hasargs);					\
+	CX_PUSHSUB(cx, cv, NULL, hasargs);				\
 	SAVEOP();					                \
         saveix_floor = PL_savestack_ix;                                 \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
@@ -1385,7 +1385,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	assert(CxMULTICALL(cx));                                        \
         CX_POPSUB_COMMON(cx);                                           \
 	cx->cx_type = (CXt_SUB|CXp_MULTICALL|flags);                    \
-        PUSHSUB(cx, cv, NULL, hasargs);					\
+        CX_PUSHSUB(cx, cv, NULL, hasargs);				\
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
 	if (CvDEPTH(cv) >= 2)  						\

@@ -2893,7 +2893,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	myop.op_private = (OPpEVAL_COPHH | OPpEVAL_RE_REPARSING);
 
     /* fail now; otherwise we could fail after the JMPENV_PUSH but
-     * before a PUSHEVAL, which corrupts the stack after a croak */
+     * before a CX_PUSHEVAL, which corrupts the stack after a croak */
     TAINT_PROPER("eval_sv()");
 
     JMPENV_PUSH(ret);

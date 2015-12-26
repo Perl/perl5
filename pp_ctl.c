@@ -1366,7 +1366,7 @@ Perl_is_lvalue_sub(pTHX)
 	return 0;
 }
 
-/* only used by PUSHSUB */
+/* only used by CX_PUSHSUB */
 I32
 Perl_was_lvalue_sub(pTHX)
 {
@@ -2011,8 +2011,8 @@ PP(pp_dbstate)
 	    return NORMAL;
 	}
 	else {
-	    PUSHBLOCK(cx, CXt_SUB, gimme, SP, PL_savestack_ix);
-	    PUSHSUB_DB(cx, cv, PL_op->op_next, 0);
+	    CX_PUSHBLOCK(cx, CXt_SUB, gimme, SP, PL_savestack_ix);
+	    CX_PUSHSUB_DB(cx, cv, PL_op->op_next, 0);
 
             SAVEI32(PL_debug);
             PL_debug = 0;
@@ -2035,7 +2035,7 @@ PP(pp_enter)
     PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
 
-    PUSHBLOCK(cx, CXt_BLOCK, gimme, SP, PL_savestack_ix);
+    CX_PUSHBLOCK(cx, CXt_BLOCK, gimme, SP, PL_savestack_ix);
 
     RETURN;
 }
@@ -2138,8 +2138,8 @@ PP(pp_enteriter)
      * there mustn't be anything in the blk_loop substruct that requires
      * freeing or undoing, in case we die in the meantime. And vice-versa.
      */
-    PUSHBLOCK(cx, cxflags, gimme, MARK, PL_savestack_ix);
-    PUSHLOOP_FOR(cx, itervarp, itersave);
+    CX_PUSHBLOCK(cx, cxflags, gimme, MARK, PL_savestack_ix);
+    CX_PUSHLOOP_FOR(cx, itervarp, itersave);
 
     if (PL_op->op_flags & OPf_STACKED) {
         /* OPf_STACKED implies either a single array: for(@), with a
@@ -2213,8 +2213,8 @@ PP(pp_enterloop)
     PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
 
-    PUSHBLOCK(cx, CXt_LOOP_PLAIN, gimme, SP, PL_savestack_ix);
-    PUSHLOOP_PLAIN(cx);
+    CX_PUSHBLOCK(cx, CXt_LOOP_PLAIN, gimme, SP, PL_savestack_ix);
+    CX_PUSHLOOP_PLAIN(cx);
 
     RETURN;
 }
@@ -2824,7 +2824,7 @@ PP(pp_goto)
 
                 SAVEFREESV(cv); /* later, undo the 'avoid premature free' hack */
 
-                /* partial unrolled PUSHSUB(): */
+                /* partial unrolled CX_PUSHSUB(): */
 
 		cx->blk_sub.cv = cv;
 		cx->blk_sub.olddepth = CvDEPTH(cv);
@@ -4042,8 +4042,8 @@ PP(pp_require)
     }
 
     /* switch to eval mode */
-    PUSHBLOCK(cx, CXt_EVAL, gimme, SP, old_savestack_ix);
-    PUSHEVAL(cx, PL_op->op_next, newSVpv(name, 0));
+    CX_PUSHBLOCK(cx, CXt_EVAL, gimme, SP, old_savestack_ix);
+    CX_PUSHEVAL(cx, PL_op->op_next, newSVpv(name, 0));
 
     SAVECOPLINE(&PL_compiling);
     CopLINE_set(&PL_compiling, 0);
@@ -4156,8 +4156,8 @@ PP(pp_entereval)
      * to do the dirty work for us */
     runcv = find_runcv(&seq);
 
-    PUSHBLOCK(cx, (CXt_EVAL|CXp_REAL), gimme, SP, old_savestack_ix);
-    PUSHEVAL(cx, PL_op->op_next, NULL);
+    CX_PUSHBLOCK(cx, (CXt_EVAL|CXp_REAL), gimme, SP, old_savestack_ix);
+    CX_PUSHEVAL(cx, PL_op->op_next, NULL);
 
     /* prepare to compile string */
 
@@ -4286,8 +4286,9 @@ Perl_create_eval_scope(pTHX_ OP *retop, U32 flags)
     PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
 	
-    PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), gimme, PL_stack_sp, PL_savestack_ix);
-    PUSHEVAL(cx, retop, NULL);
+    CX_PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), gimme,
+                    PL_stack_sp, PL_savestack_ix);
+    CX_PUSHEVAL(cx, retop, NULL);
 
     PL_in_eval = EVAL_INEVAL;
     if (flags & G_KEEPERR)
@@ -4344,8 +4345,8 @@ PP(pp_entergiven)
     assert(!PL_op->op_targ); /* used to be set for lexical $_ */
     GvSV(PL_defgv) = SvREFCNT_inc(newsv);
 
-    PUSHBLOCK(cx, CXt_GIVEN, gimme, SP, PL_savestack_ix);
-    PUSHGIVEN(cx, origsv);
+    CX_PUSHBLOCK(cx, CXt_GIVEN, gimme, SP, PL_savestack_ix);
+    CX_PUSHGIVEN(cx, origsv);
 
     RETURN;
 }
@@ -4924,8 +4925,8 @@ PP(pp_enterwhen)
     if ((0 == (PL_op->op_flags & OPf_SPECIAL)) && !SvTRUEx(POPs))
 	RETURNOP(cLOGOP->op_other->op_next);
 
-    PUSHBLOCK(cx, CXt_WHEN, gimme, SP, PL_savestack_ix);
-    PUSHWHEN(cx);
+    CX_PUSHBLOCK(cx, CXt_WHEN, gimme, SP, PL_savestack_ix);
+    CX_PUSHWHEN(cx);
 
     RETURN;
 }

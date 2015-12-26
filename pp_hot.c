@@ -3146,7 +3146,7 @@ PP(pp_subst)
 	     * searching for places in this sub that uses a particular var:
 	     * iters maxiters r_flags oldsave rxtainted orig dstr targ
 	     * s m strend rx once */
-	    PUSHSUBST(cx);
+	    CX_PUSHSUBST(cx);
 	    RETURNOP(cPMOP->op_pmreplrootu.op_pmreplroot);
 	}
 	first = TRUE;
@@ -3763,9 +3763,9 @@ PP(pp_entersub)
     }
 
     /* At this point we want to save PL_savestack_ix, either by doing a
-     * PUSHSUB, or for XS, doing an ENTER. But we don't yet know the final
+     * CX_PUSHSUB, or for XS, doing an ENTER. But we don't yet know the final
      * CV we will be using (so we don't know whether its XS, so we can't
-     * PUSHSUB or ENTER yet), and determining cv may itself push stuff on
+     * CX_PUSHSUB or ENTER yet), and determining cv may itself push stuff on
      * the save stack. So remember where we are currently on the save
      * stack, and later update the CX or scopestack entry accordingly. */
     old_savestack_ix = PL_savestack_ix;
@@ -3852,9 +3852,9 @@ PP(pp_entersub)
         }
 
         gimme = GIMME_V;
-	PUSHBLOCK(cx, CXt_SUB, gimme, MARK, old_savestack_ix);
+	CX_PUSHBLOCK(cx, CXt_SUB, gimme, MARK, old_savestack_ix);
         hasargs = cBOOL(PL_op->op_flags & OPf_STACKED);
-	PUSHSUB(cx, cv, PL_op->op_next, hasargs);
+	CX_PUSHSUB(cx, cv, PL_op->op_next, hasargs);
 
 	padlist = CvPADLIST(cv);
 	if (UNLIKELY((depth = ++CvDEPTH(cv)) >= 2))
@@ -3911,7 +3911,7 @@ PP(pp_entersub)
 	PUTBACK;
 
 	if (UNLIKELY(((PL_op->op_private
-	       & PUSHSUB_GET_LVALUE_MASK(Perl_is_lvalue_sub)
+	       & CX_PUSHSUB_GET_LVALUE_MASK(Perl_is_lvalue_sub)
              ) & OPpENTERSUB_LVAL_MASK) == OPpLVAL_INTRO &&
 	    !CvLVALUE(cv)))
             DIE(aTHX_ "Can't modify non-lvalue subroutine call of &%"SVf,

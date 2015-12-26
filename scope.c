@@ -80,7 +80,7 @@ Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
     si->si_cxix = -1;
     si->si_type = PERLSI_UNDEF;
     Newx(si->si_cxstack, cxitems, PERL_CONTEXT);
-    /* Without any kind of initialising PUSHSUBST()
+    /* Without any kind of initialising CX_PUSHSUBST()
      * in pp_subst() will read uninitialised heap. */
     PoisonNew(si->si_cxstack, cxitems, PERL_CONTEXT);
     return si;
