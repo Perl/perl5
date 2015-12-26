@@ -1536,9 +1536,6 @@ Perl_dounwind(pTHX_ I32 cxix)
 	case CXt_EVAL:
 	    CX_POPEVAL(cx);
 	    break;
-	case CXt_BLOCK:
-            CX_POPBASICBLK(cx);
-	    break;
 	case CXt_LOOP_PLAIN:
 	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_LAZYSV:
@@ -1552,8 +1549,9 @@ Perl_dounwind(pTHX_ I32 cxix)
 	case CXt_GIVEN:
 	    CX_POPGIVEN(cx);
 	    break;
+	case CXt_BLOCK:
 	case CXt_NULL:
-            /* there isn't a CX_POPNULL ! */
+            /* these two don't have a POPFOO() */
 	    break;
 	case CXt_FORMAT:
 	    CX_POPFORMAT(cx);
@@ -2038,7 +2036,6 @@ PP(pp_enter)
     I32 gimme = GIMME_V;
 
     PUSHBLOCK(cx, CXt_BLOCK, gimme, SP, PL_savestack_ix);
-    PUSHBASICBLK(cx);
 
     RETURN;
 }
@@ -2065,7 +2062,6 @@ PP(pp_leave)
                                 PL_op->op_private & OPpLVALUE ? 3 : 1);
 
     CX_LEAVE_SCOPE(cx);
-    CX_POPBASICBLK(cx);
     CX_POPBLOCK(cx);
     CX_POP(cx);
 

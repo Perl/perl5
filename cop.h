@@ -902,15 +902,6 @@ struct block_givwhen {
     } STMT_END
 
 
-/* basic block, i.e. pp_enter/leave */
-
-#define PUSHBASICBLK(cx)                                                \
-        NOOP;
-
-#define CX_POPBASICBLK(cx)                                              \
-        assert(CxTYPE(cx) == CXt_BLOCK);                                \
-	NOOP;
-
 
 /* context common to subroutines, evals and loops */
 struct block {
