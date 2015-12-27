@@ -100,8 +100,8 @@
  * macros */
 #define SS_MAXPUSH 4
 
-#define SSCHECK(need) if (UNLIKELY(PL_savestack_ix + (I32)(need) + SS_MAXPUSH > PL_savestack_max)) savestack_grow()
-#define SSGROW(need) if (UNLIKELY(PL_savestack_ix + (I32)(need) + SS_MAXPUSH > PL_savestack_max)) savestack_grow_cnt(need + SS_MAXPUSH)
+#define SSCHECK(need) if (UNLIKELY(PL_savestack_ix + (I32)(need) > PL_savestack_max)) savestack_grow()
+#define SSGROW(need) if (UNLIKELY(PL_savestack_ix + (I32)(need) > PL_savestack_max)) savestack_grow_cnt(need)
 #define SSPUSHINT(i) (PL_savestack[PL_savestack_ix++].any_i32 = (I32)(i))
 #define SSPUSHLONG(i) (PL_savestack[PL_savestack_ix++].any_long = (long)(i))
 #define SSPUSHBOOL(p) (PL_savestack[PL_savestack_ix++].any_bool = (p))
@@ -119,7 +119,9 @@
  * of the grow() can be done. These changes reduce the code of something
  * like save_pushptrptr() to half its former size.
  * Of course, doing the size check *after* pushing means we must always
- * ensure there are SS_MAXPUSH free slots on the savestack
+ * ensure there are SS_MAXPUSH free slots on the savestack. This ensured
+ * bt savestack_grow() and savestack_grow_cnt always allocating SS_MAXPUSH
+ * slots more than asked for, or that it sets PL_savestack_max to
  *
  * These are for internal core use only and are subject to change */
 
@@ -131,9 +133,9 @@
     assert((need) <= SS_MAXPUSH);                               \
     ix += (need);                                               \
     PL_savestack_ix = ix;                                       \
-    assert(ix <= PL_savestack_max);                             \
-    if (UNLIKELY((ix + SS_MAXPUSH) > PL_savestack_max)) savestack_grow(); \
-    assert(PL_savestack_ix + SS_MAXPUSH <= PL_savestack_max);
+    assert(ix <= PL_savestack_max + SS_MAXPUSH);                \
+    if (UNLIKELY(ix > PL_savestack_max)) savestack_grow();      \
+    assert(PL_savestack_ix <= PL_savestack_max);
 
 #define SS_ADD_INT(i)   ((ssp++)->any_i32 = (I32)(i))
 #define SS_ADD_LONG(i)  ((ssp++)->any_long = (long)(i))

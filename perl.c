@@ -4078,6 +4078,8 @@ Perl_init_debugger(pTHX)
 void
 Perl_init_stacks(pTHX)
 {
+    SSize_t size;
+
     /* start with 128-item stack and 8K cxstack */
     PL_curstackinfo = new_stackinfo(REASONABLE(128),
 				 REASONABLE(8192/sizeof(PERL_CONTEXT) - 1));
@@ -4107,9 +4109,11 @@ Perl_init_stacks(pTHX)
     PL_scopestack_ix = 0;
     PL_scopestack_max = REASONABLE(32);
 
-    Newx(PL_savestack,REASONABLE_but_at_least(128,SS_MAXPUSH),ANY);
+    size = REASONABLE_but_at_least(128,SS_MAXPUSH);
+    Newx(PL_savestack, size, ANY);
     PL_savestack_ix = 0;
-    PL_savestack_max = REASONABLE_but_at_least(128,SS_MAXPUSH);
+    /*PL_savestack_max lies: it always has SS_MAXPUSH more than it claims */
+    PL_savestack_max = size - SS_MAXPUSH;
 }
 
 #undef REASONABLE

@@ -140,15 +140,19 @@ Perl_markstack_grow(pTHX)
 void
 Perl_savestack_grow(pTHX)
 {
-    PL_savestack_max = GROW(PL_savestack_max) + 4;
-    Renew(PL_savestack, PL_savestack_max, ANY);
+    PL_savestack_max = GROW(PL_savestack_max);
+    /* Note that we allocate SS_MAXPUSH slots higher than ss_max
+     * so that SS_ADD_END(), SSGROW() etc can do a simper check */
+    Renew(PL_savestack, PL_savestack_max + SS_MAXPUSH, ANY);
 }
 
 void
 Perl_savestack_grow_cnt(pTHX_ I32 need)
 {
     PL_savestack_max = PL_savestack_ix + need;
-    Renew(PL_savestack, PL_savestack_max, ANY);
+    /* Note that we allocate SS_MAXPUSH slots higher than ss_max
+     * so that SS_ADD_END(), SSGROW() etc can do a simper check */
+    Renew(PL_savestack, PL_savestack_max + SS_MAXPUSH, ANY);
 }
 
 #undef GROW
