@@ -21,7 +21,7 @@
 
 /* one arg */
 
-/*** SPARE      	        4 ***/
+#define SAVEt_TMPSFLOOR		4
 #define SAVEt_BOOL		5
 #define SAVEt_COMPILE_WARNINGS	6
 #define SAVEt_COMPPAD		7
@@ -188,8 +188,8 @@ scope has the given name. Name must be a literal string.
 =cut
 */
 
-#define SAVETMPS Perl_save_strlen(aTHX_ (STRLEN *)&PL_tmps_floor), \
-		 PL_tmps_floor = PL_tmps_ix
+#define SAVETMPS Perl_savetmps(aTHX)
+
 #define FREETMPS if (PL_tmps_ix > PL_tmps_floor) free_tmps()
 
 #ifdef DEBUGGING

@@ -731,6 +731,18 @@ Perl_save_svref(pTHX_ SV **sptr)
     return save_scalar_at(sptr, SAVEf_SETMAGIC); /* XXX - FIXME - see #60360 */
 }
 
+
+void
+Perl_savetmps(pTHX)
+{
+    dSS_ADD;
+    SS_ADD_IV(PL_tmps_floor);
+    PL_tmps_floor = PL_tmps_ix;
+    SS_ADD_UV(SAVEt_TMPSFLOOR);
+    SS_ADD_END(2);
+}
+
+
 I32
 Perl_save_alloc(pTHX_ I32 size, I32 pad)
 {
@@ -944,6 +956,9 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_STRLEN:			/* STRLEN/size_t ref */
 	    *(STRLEN*)ARG0_PTR = (STRLEN)arg1.any_iv;
+	    break;
+	case SAVEt_TMPSFLOOR:			/* restore PL_tmps_floor */
+	    PL_tmps_floor = (SSize_t)arg0.any_iv;
 	    break;
 	case SAVEt_BOOL:			/* bool reference */
 	    *(bool*)ARG0_PTR = cBOOL(uv >> 8);

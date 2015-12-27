@@ -1304,6 +1304,7 @@ Ap	|void	|save_padsv_and_mortalize|PADOFFSET off
 Ap	|void	|save_sptr	|NN SV** sptr
 Xp	|void	|save_strlen	|NN STRLEN* ptr
 Ap	|SV*	|save_svref	|NN SV** sptr
+AMpo	|void	|savetmps
 Ap	|void	|save_pushptr	|NULLOK void *const ptr|const int type
 Ap	|void	|save_pushi32ptr|const I32 i|NULLOK void *const ptr|const int type
 : Used by SAVESWITCHSTACK() in pp.c

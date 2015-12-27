@@ -14255,6 +14255,10 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    iv = POPIV(ss,ix);
 	    TOPIV(nss,ix) = iv;
 	    break;
+	case SAVEt_TMPSFLOOR:
+	    iv = POPIV(ss,ix);
+	    TOPIV(nss,ix) = iv;
+	    break;
 	case SAVEt_HPTR:			/* HV* reference */
 	case SAVEt_APTR:			/* AV* reference */
 	case SAVEt_SPTR:			/* SV* reference */

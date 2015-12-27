@@ -2771,6 +2771,7 @@ PERL_CALLCONV char*	Perl_savesvpv(pTHX_ SV* sv)
 #define PERL_ARGS_ASSERT_SAVESVPV	\
 	assert(sv)
 
+PERL_CALLCONV void	Perl_savetmps(pTHX);
 PERL_CALLCONV OP*	Perl_sawparens(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_scalar(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_scalarvoid(pTHX_ OP* o);
