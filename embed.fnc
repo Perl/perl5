@@ -2155,6 +2155,10 @@ Es	|regnode*|regclass	|NN RExC_state_t *pRExC_state                 \
 				|NULLOK AV** posix_warnings
 Es	|void|add_above_Latin1_folds|NN RExC_state_t *pRExC_state|const U8 cp \
 				|NN SV** invlist
+Ei	|regnode*|handle_named_backref|NN RExC_state_t *pRExC_state	    \
+				|NN I32 *flagp				    \
+				|NN char * parse_start			    \
+				|char ch
 EsnP	|unsigned int|regex_set_precedence|const U8 my_operator
 Es	|regnode*|handle_regex_sets|NN RExC_state_t *pRExC_state \
 				|NULLOK SV ** return_invlist            \
