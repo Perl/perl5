@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.32';
+our $VERSION = '1.33';
 require Exporter;
 require Cwd;
 
@@ -421,9 +421,9 @@ sub _find_dir($$$) {
 	    # This dir has subdirectories.
 	    $subcount = $nlink - 2;
 
-	    # HACK: insert directories at this position. so as to preserve
-	    # the user pre-processed ordering of files.
-	    # EG: directory traversal is in user sorted order, not at random.
+	    # HACK: insert directories at this position, so as to preserve
+	    # the user pre-processed ordering of files (thus ensuring
+	    # directory traversal is in user sorted order, not at random).
             my $stack_top = @Stack;
 
 	    for my $FN (@filenames) {
@@ -773,7 +773,7 @@ $File::Find::untaint_pattern = qr|^([-+@\w./]+)$|;
 # These are hard-coded for now, but may move to hint files.
 if ($^O eq 'VMS') {
     $Is_VMS = 1;
-    $File::Find::dont_use_nlink  = 1;
+    $File::Find::dont_use_nlink = 1;
 }
 elsif ($^O eq 'MSWin32') {
     $Is_Win32 = 1;
@@ -790,7 +790,7 @@ $File::Find::dont_use_nlink = 1
 # Set dont_use_nlink in your hint file if your system's stat doesn't
 # report the number of links in a directory as an indication
 # of the number of files.
-# See, e.g. hints/machten.sh for MachTen 2.2.
+# See e.g. hints/haiku.sh for Haiku.
 unless ($File::Find::dont_use_nlink) {
     require Config;
     $File::Find::dont_use_nlink = 1 if ($Config::Config{'dont_use_nlink'});
@@ -808,11 +808,6 @@ unless ($File::Find::dont_use_nlink) {
 1;
 
 __END__
-#
-# Modified to ensure sub-directory traversal order is not inverted by stack
-# push and pops.  That is remains in the same order as in the directory file,
-# or user pre-processing (EG:sorted).
-#
 
 =head1 NAME
 
@@ -870,7 +865,7 @@ where C<find()> works from the top of the tree down.
 The first argument to C<find()> is either a code reference to your
 C<&wanted> function, or a hash reference describing the operations
 to be performed for each file.  The
-code reference is described in L<The wanted function> below.
+code reference is described in L</The wanted function> below.
 
 Here are the possible keys for the hash:
 
@@ -879,7 +874,7 @@ Here are the possible keys for the hash:
 =item C<wanted>
 
 The value should be a code reference.  This code reference is
-described in L<The wanted function> below. The C<&wanted> subroutine is
+described in L</The wanted function> below. The C<&wanted> subroutine is
 mandatory.
 
 =item C<bydepth>
@@ -923,7 +918,7 @@ If either I<follow> or I<follow_fast> is in effect:
 =item *
 
 It is guaranteed that an I<lstat> has been called before the user's
-C<wanted()> function is called. This enables fast file checks involving S<_>.
+C<wanted()> function is called. This enables fast file checks involving C<_>.
 Note that this guarantee no longer holds if I<follow> or I<follow_fast>
 are not set.
 
@@ -962,10 +957,11 @@ directories but to proceed normally otherwise.
 
 =item C<dangling_symlinks>
 
+Specifies what to do with symbolic links whose target doesn't exist.
 If true and a code reference, will be called with the symbolic link
 name and the directory it lives in as arguments.  Otherwise, if true
-and warnings are on, warning "symbolic_link_name is a dangling
-symbolic link\n" will be issued.  If false, the dangling symbolic link
+and warnings are on, a warning of the form C<"symbolic_link_name is a dangling
+symbolic link\n"> will be issued.  If false, the dangling symbolic link
 will be silently ignored.
 
 =item C<no_chdir>
@@ -976,23 +972,23 @@ C<$_> will be the same as C<$File::Find::name>.
 
 =item C<untaint>
 
-If find is used in taint-mode (-T command line switch or if EUID != UID
-or if EGID != GID) then internally directory names have to be untainted
-before they can be chdir'ed to. Therefore they are checked against a regular
-expression I<untaint_pattern>.  Note that all names passed to the user's
-I<wanted()> function are still tainted. If this option is used while
-not in taint-mode, C<untaint> is a no-op.
+If find is used in L<taint-mode|perlsec/Taint mode> (-T command line switch or
+if EUID != UID or if EGID != GID), then internally directory names have to be
+untainted before they can be C<chdir>'d to. Therefore they are checked against
+a regular expression I<untaint_pattern>.  Note that all names passed to the
+user's C<wanted()> function are still tainted. If this option is used while not
+in taint-mode, C<untaint> is a no-op.
 
 =item C<untaint_pattern>
 
 See above. This should be set using the C<qr> quoting operator.
-The default is set to  C<qr|^([-+@\w./]+)$|>.
+The default is set to C<qr|^([-+@\w./]+)$|>.
 Note that the parentheses are vital.
 
 =item C<untaint_skip>
 
 If set, a directory which fails the I<untaint_pattern> is skipped,
-including all its sub-directories. The default is to 'die' in such a case.
+including all its sub-directories. The default is to C<die> in such a case.
 
 =back
 
@@ -1028,7 +1024,7 @@ For example, when examining the file F</some/path/foo.ext> you will have:
 
 You are chdir()'d to C<$File::Find::dir> when the function is called,
 unless C<no_chdir> was specified. Note that when changing to
-directories is in effect the root directory (F</>) is a somewhat
+directories is in effect, the root directory (F</>) is a somewhat
 special case inasmuch as the concatenation of C<$File::Find::dir>,
 C<'/'> and C<$_> is not literally equal to C<$File::Find::name>. The
 table below summarizes all variants:
@@ -1052,7 +1048,7 @@ following globals available: C<$File::Find::topdir>,
 C<$File::Find::topdev>, C<$File::Find::topino>,
 C<$File::Find::topmode> and C<$File::Find::topnlink>.
 
-This library is useful for the C<find2perl> tool (distribued as part of the
+This library is useful for the C<find2perl> tool (distributed as part of the
 App-find2perl CPAN distribution), which when fed,
 
   find2perl / -name .nfs\* -mtime +7 \
@@ -1110,7 +1106,7 @@ warnings.
 
 =item $dont_use_nlink
 
-You can set the variable C<$File::Find::dont_use_nlink> to 1, if you want to
+You can set the variable C<$File::Find::dont_use_nlink> to 1 if you want to
 force File::Find to always stat directories. This was used for file systems
 that do not have an C<nlink> count matching the number of sub-directories.
 Examples are ISO-9660 (CD-ROM), AFS, HPFS (OS/2 file system), FAT (DOS file
@@ -1148,6 +1144,6 @@ The first fixed version of File::Find was 1.01.
 
 =head1 SEE ALSO
 
-find, find2perl.
+L<find(1)>, find2perl.
 
 =cut

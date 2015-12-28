@@ -83,6 +83,7 @@ File::Findgrep
 File::Map
 File::MMagic
 File::ShareDir
+find(1)
 flock(3)
 fsync(3c)
 Function::Parameters
