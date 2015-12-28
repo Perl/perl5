@@ -1349,7 +1349,7 @@ either the name of a Pod page like C<LE<lt>Foo::BarE<gt>> (which
 might be a real Perl module or program in an @INC / PATH
 directory, or a .pod file in those places); or the name of a Unix
 man page, like C<LE<lt>crontab(5)E<gt>>.  In theory, C<LE<lt>chmodE<gt>>
-in ambiguous between a Pod page called "chmod", or the Unix man page
+is ambiguous between a Pod page called "chmod", or the Unix man page
 "chmod" (in whatever man-section).  However, the presence of a string
 in parens, as in "crontab(5)", is sufficient to signal that what
 is being discussed is not a Pod page, and so is presumably a
