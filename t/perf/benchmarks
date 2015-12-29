@@ -1036,6 +1036,30 @@
         code    => 'for my $x (@a) {next}',
     },
 
+    'loop::grep::expr_3int' => {
+        desc    => 'grep $_ > 0, 1,2,3',
+        setup   => 'my @a',
+        code    => '@a = grep $_ > 0, 1,2,3',
+    },
+
+    'loop::grep::block_3int' => {
+        desc    => 'grep { 1; $_ > 0} 1,2,3',
+        setup   => 'my @a',
+        code    => '@a = grep { 1; $_ > 0} 1,2,3',
+    },
+
+    'loop::map::expr_3int' => {
+        desc    => 'map $_+1, 1,2,3',
+        setup   => 'my @a',
+        code    => '@a = map $_+1, 1,2,3',
+    },
+
+    'loop::map::block_3int' => {
+        desc    => 'map { 1; $_+1} 1,2,3',
+        setup   => 'my @a',
+        code    => '@a = map { 1; $_+1} 1,2,3',
+    },
+
     'loop::while::i1' => {
         desc    => 'empty while loop 1 iteration',
         setup   => 'my $i = 0;',
