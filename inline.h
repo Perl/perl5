@@ -473,6 +473,92 @@ S_cx_topblock(pTHX_ PERL_CONTEXT *cx)
 }
 
 
+PERL_STATIC_INLINE void
+S_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs)
+{
+    U8 phlags = CX_PUSHSUB_GET_LVALUE_MASK(Perl_was_lvalue_sub);
+
+    PERL_ARGS_ASSERT_CX_PUSHSUB;
+
+    ENTRY_PROBE(CvNAMED(cv)
+                    ? HEK_KEY(CvNAME_HEK(cv))
+                    : GvENAME(CvGV(cv)),
+                CopFILE((const COP *)CvSTART(cv)),
+                CopLINE((const COP *)CvSTART(cv)),
+                CopSTASHPV((const COP *)CvSTART(cv)));
+    cx->blk_sub.cv = cv;
+    cx->blk_sub.olddepth = CvDEPTH(cv);
+    cx->blk_sub.prevcomppad = PL_comppad;
+    cx->cx_type |= (hasargs) ? CXp_HASARGS : 0;
+    cx->blk_sub.retop = retop;
+    SvREFCNT_inc_simple_void_NN(cv);
+    cx->blk_u16 = PL_op->op_private & (phlags|OPpDEREF);
+}
+
+
+/* subsets of cx_popsub() */
+
+PERL_STATIC_INLINE void
+S_cx_popsub_common(pTHX_ PERL_CONTEXT *cx)
+{
+    CV *cv;
+
+    PERL_ARGS_ASSERT_CX_POPSUB_COMMON;
+    assert(CxTYPE(cx) == CXt_SUB);
+
+    PL_comppad = cx->blk_sub.prevcomppad;
+    PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;
+    cv = cx->blk_sub.cv;
+    CvDEPTH(cv) = cx->blk_sub.olddepth;
+    cx->blk_sub.cv = NULL;
+    SvREFCNT_dec(cv);
+}
+
+
+/* handle the @_ part of leaving a sub */
+
+PERL_STATIC_INLINE void
+S_cx_popsub_args(pTHX_ PERL_CONTEXT *cx)
+{
+    AV *av;
+
+    PERL_ARGS_ASSERT_CX_POPSUB_ARGS;
+    assert(CxTYPE(cx) == CXt_SUB);
+    assert(AvARRAY(MUTABLE_AV(
+        PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[
+                CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);
+
+    CX_POP_SAVEARRAY(cx);
+    av = MUTABLE_AV(PAD_SVl(0));
+    if (UNLIKELY(AvREAL(av)))
+        /* abandon @_ if it got reified */
+        clear_defarray(av, 0);
+    else {
+        CLEAR_ARGARRAY(av);
+    }
+}
+
+
+PERL_STATIC_INLINE void
+S_cx_popsub(pTHX_ PERL_CONTEXT *cx)
+{
+    PERL_ARGS_ASSERT_CX_POPSUB;
+    assert(CxTYPE(cx) == CXt_SUB);
+
+    RETURN_PROBE(CvNAMED(cx->blk_sub.cv)
+                    ? HEK_KEY(CvNAME_HEK(cx->blk_sub.cv))
+                    : GvENAME(CvGV(cx->blk_sub.cv)),
+            CopFILE((COP*)CvSTART((const CV*)cx->blk_sub.cv)),
+            CopLINE((COP*)CvSTART((const CV*)cx->blk_sub.cv)),
+            CopSTASHPV((COP*)CvSTART((const CV*)cx->blk_sub.cv)));
+
+    if (CxHASARGS(cx))
+        cx_popsub_args(cx);
+    cx_popsub_common(cx);
+}
+
+
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

@@ -3639,7 +3639,7 @@ PP(pp_leavesub)
         leave_adjust_stacks(oldsp, oldsp, gimme, 0);
 
     CX_LEAVE_SCOPE(cx);
-    CX_POPSUB(cx);	/* Stack values are safe: release CV and @_ ... */
+    cx_popsub(cx);	/* Stack values are safe: release CV and @_ ... */
     cx_popblock(cx);
     retop = cx->blk_sub.retop;
     CX_POP(cx);
@@ -3763,9 +3763,9 @@ PP(pp_entersub)
     }
 
     /* At this point we want to save PL_savestack_ix, either by doing a
-     * CX_PUSHSUB, or for XS, doing an ENTER. But we don't yet know the final
+     * cx_pushsub(), or for XS, doing an ENTER. But we don't yet know the final
      * CV we will be using (so we don't know whether its XS, so we can't
-     * CX_PUSHSUB or ENTER yet), and determining cv may itself push stuff on
+     * cx_pushsub() or ENTER yet), and determining cv may itself push stuff on
      * the save stack. So remember where we are currently on the save
      * stack, and later update the CX or scopestack entry accordingly. */
     old_savestack_ix = PL_savestack_ix;
@@ -3854,7 +3854,7 @@ PP(pp_entersub)
         gimme = GIMME_V;
 	cx = cx_pushblock(CXt_SUB, gimme, MARK, old_savestack_ix);
         hasargs = cBOOL(PL_op->op_flags & OPf_STACKED);
-	CX_PUSHSUB(cx, cv, PL_op->op_next, hasargs);
+	cx_pushsub(cx, cv, PL_op->op_next, hasargs);
 
 	padlist = CvPADLIST(cv);
 	if (UNLIKELY((depth = ++CvDEPTH(cv)) >= 2))
@@ -3871,7 +3871,7 @@ PP(pp_entersub)
 
             /* it's the responsibility of whoever leaves a sub to ensure
              * that a clean, empty AV is left in pad[0]. This is normally
-             * done by CX_POPSUB() */
+             * done by cx_popsub() */
             assert(!AvREAL(av) && AvFILLp(av) == -1);
 
             items = SP - MARK;

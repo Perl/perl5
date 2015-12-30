@@ -1671,7 +1671,7 @@ PP(pp_sort)
 	    cx = cx_pushblock(CXt_NULL, gimme, PL_stack_base, old_savestack_ix);
 	    if (!(flags & OPf_SPECIAL)) {
 		cx->cx_type = CXt_SUB|CXp_MULTICALL;
-		CX_PUSHSUB(cx, cv, NULL, hasargs);
+		cx_pushsub(cx, cv, NULL, hasargs);
 		if (!is_xsub) {
 		    PADLIST * const padlist = CvPADLIST(cv);
 
@@ -1703,7 +1703,7 @@ PP(pp_sort)
             CX_LEAVE_SCOPE(cx);
 	    if (!(flags & OPf_SPECIAL)) {
                 assert(CxTYPE(cx) == CXt_SUB);
-                CX_POPSUB(cx);
+                cx_popsub(cx);
 	    }
             else
                 assert(CxTYPE(cx) == CXt_NULL);

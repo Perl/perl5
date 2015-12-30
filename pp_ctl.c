@@ -1366,7 +1366,7 @@ Perl_is_lvalue_sub(pTHX)
 	return 0;
 }
 
-/* only used by CX_PUSHSUB */
+/* only used by cx_pushsub() */
 I32
 Perl_was_lvalue_sub(pTHX)
 {
@@ -1531,7 +1531,7 @@ Perl_dounwind(pTHX_ I32 cxix)
 	    CX_POPSUBST(cx);
 	    break;
 	case CXt_SUB:
-	    CX_POPSUB(cx);
+	    cx_popsub(cx);
 	    break;
 	case CXt_EVAL:
 	    CX_POPEVAL(cx);
@@ -2012,7 +2012,11 @@ PP(pp_dbstate)
 	}
 	else {
 	    cx = cx_pushblock(CXt_SUB, gimme, SP, PL_savestack_ix);
-	    CX_PUSHSUB_DB(cx, cv, PL_op->op_next, 0);
+	    cx_pushsub(cx, cv, PL_op->op_next, 0);
+            /* OP_DBSTATE's op_private holds hint bits rather than
+             * the lvalue-ish flags seen in OP_ENTERSUB. So cancel
+             * any CxLVAL() flags that have now been mis-calculated */
+            cx->blk_u16 = 0;
 
             SAVEI32(PL_debug);
             PL_debug = 0;
@@ -2347,7 +2351,7 @@ PP(pp_leavesublv)
     }
 
     CX_LEAVE_SCOPE(cx);
-    CX_POPSUB(cx);	/* Stack values are safe: release CV and @_ ... */
+    cx_popsub(cx);	/* Stack values are safe: release CV and @_ ... */
     cx_popblock(cx);
     retop =  cx->blk_sub.retop;
     CX_POP(cx);
@@ -2723,7 +2727,7 @@ PP(pp_goto)
             CX_LEAVE_SCOPE(cx);
 
 	    if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
-                /* this is part of CX_POPSUB_ARGS() */
+                /* this is part of cx_popsub_args() */
 		AV* av = MUTABLE_AV(PAD_SVl(0));
                 assert(AvARRAY(MUTABLE_AV(
                     PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[
@@ -2823,7 +2827,7 @@ PP(pp_goto)
 
                 SAVEFREESV(cv); /* later, undo the 'avoid premature free' hack */
 
-                /* partial unrolled CX_PUSHSUB(): */
+                /* partial unrolled cx_pushsub(): */
 
 		cx->blk_sub.cv = cv;
 		cx->blk_sub.olddepth = CvDEPTH(cv);

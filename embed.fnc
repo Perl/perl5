@@ -2875,7 +2875,7 @@ Ei	|STRLEN	|sv_or_pv_pos_u2b|NN SV *sv|NN const char *pv|STRLEN pos \
 #endif
 
 EMpPX	|SV*	|_get_encoding
-Xp	|void	|clear_defarray	|NN AV* av|bool abandon
+Ap	|void	|clear_defarray	|NN AV* av|bool abandon
 
 ApM	|void	|leave_adjust_stacks|NN SV **from_sp|NN SV **to_sp \
                 |I32 gimme|int filter
@@ -2884,6 +2884,11 @@ ApM	|void	|leave_adjust_stacks|NN SV **from_sp|NN SV **to_sp \
 AiM	|PERL_CONTEXT *	|cx_pushblock|U8 type|U8 gimme|NN SV** sp|I32 saveix
 AiM	|void	|cx_popblock|NN PERL_CONTEXT *cx
 AiM	|void	|cx_topblock|NN PERL_CONTEXT *cx
+AiM	|void	|cx_pushsub |NN PERL_CONTEXT *cx|NN CV *cv|NULLOK OP *retop \
+		|bool hasargs
+AiM	|void	|cx_popsub_common|NN PERL_CONTEXT *cx
+AiM	|void	|cx_popsub_args  |NN PERL_CONTEXT *cx
+AiM	|void	|cx_popsub       |NN PERL_CONTEXT *cx
 #endif
 
 : ex: set ts=8 sts=4 sw=4 noet:

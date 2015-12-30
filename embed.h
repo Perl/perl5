@@ -87,6 +87,7 @@
 #define ck_warner		Perl_ck_warner
 #define ck_warner_d		Perl_ck_warner_d
 #endif
+#define clear_defarray(a,b)	Perl_clear_defarray(aTHX_ a,b)
 #ifndef PERL_IMPLICIT_CONTEXT
 #define croak			Perl_croak
 #endif
@@ -778,7 +779,11 @@
 #define append_utf8_from_native_byte	S_append_utf8_from_native_byte
 #define av_top_index(a)		S_av_top_index(aTHX_ a)
 #define cx_popblock(a)		S_cx_popblock(aTHX_ a)
+#define cx_popsub(a)		S_cx_popsub(aTHX_ a)
+#define cx_popsub_args(a)	S_cx_popsub_args(aTHX_ a)
+#define cx_popsub_common(a)	S_cx_popsub_common(aTHX_ a)
 #define cx_pushblock(a,b,c,d)	S_cx_pushblock(aTHX_ a,b,c,d)
+#define cx_pushsub(a,b,c,d)	S_cx_pushsub(aTHX_ a,b,c,d)
 #define cx_topblock(a)		S_cx_topblock(aTHX_ a)
 #define is_safe_syscall(a,b,c,d)	S_is_safe_syscall(aTHX_ a,b,c,d)
 #endif
@@ -1159,7 +1164,6 @@
 #define ck_svconst(a)		Perl_ck_svconst(aTHX_ a)
 #define ck_tell(a)		Perl_ck_tell(aTHX_ a)
 #define ck_trunc(a)		Perl_ck_trunc(aTHX_ a)
-#define clear_defarray(a,b)	Perl_clear_defarray(aTHX_ a,b)
 #define closest_cop(a,b,c,d)	Perl_closest_cop(aTHX_ a,b,c,d)
 #define core_prototype(a,b,c,d)	Perl_core_prototype(aTHX_ a,b,c,d)
 #define coresub_op(a,b,c)	Perl_coresub_op(aTHX_ a,b,c)

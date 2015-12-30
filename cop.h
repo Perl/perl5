@@ -595,20 +595,6 @@ struct block_format {
  * The context frame holds a reference to the CV so that it can't be
  * freed while we're executing it */
 
-#define CX_PUSHSUB_BASE(cx, cv, op, hasargs)				\
-	ENTRY_PROBE(CvNAMED(cv)						\
-			? HEK_KEY(CvNAME_HEK(cv))			\
-			: GvENAME(CvGV(cv)),	       			\
-		CopFILE((const COP *)CvSTART(cv)),			\
-		CopLINE((const COP *)CvSTART(cv)),			\
-		CopSTASHPV((const COP *)CvSTART(cv)));			\
-									\
-	cx->blk_sub.cv = cv;						\
-	cx->blk_sub.olddepth = CvDEPTH(cv);				\
-	cx->blk_sub.prevcomppad = PL_comppad;				\
-	cx->cx_type |= (hasargs) ? CXp_HASARGS : 0;			\
-	cx->blk_sub.retop = op;					        \
-        SvREFCNT_inc_simple_void_NN(cv);
 
 #define CX_PUSHSUB_GET_LVALUE_MASK(func) \
 	/* If the context is indeterminate, then only the lvalue */	\
@@ -619,20 +605,6 @@ struct block_format {
 	       : !(PL_op->op_private & OPpENTERSUB_LVAL_MASK)		\
 	           ? 0 : (U8)func(aTHX)					\
 	)
-
-#define CX_PUSHSUB(cx, cv, op, hasargs)					\
-    {									\
-	U8 phlags = CX_PUSHSUB_GET_LVALUE_MASK(Perl_was_lvalue_sub);	\
-	CX_PUSHSUB_BASE(cx, cv, op, hasargs)				\
-	cx->blk_u16 = PL_op->op_private &				\
-	                  (phlags|OPpDEREF);				\
-    }
-
-/* variant for use by OP_DBSTATE, where op_private holds hint bits */
-#define CX_PUSHSUB_DB(cx, cv, op, hasargs)				\
-	CX_PUSHSUB_BASE(cx, cv, op, hasargs)				\
-	cx->blk_u16 = 0;
-
 
 #define CX_PUSHFORMAT(cx, cv, gv, retop)				\
 	cx->blk_format.cv = cv;						\
@@ -663,55 +635,6 @@ struct block_format {
 	AvFILLp(ary) = -1;						\
     } STMT_END
 
-
-/* subsets of CX_POPSUB */
-
-#define CX_POPSUB_COMMON(cx) \
-    STMT_START {							\
-        CV *cv;                                                         \
-        assert(CxTYPE(cx) == CXt_SUB);                                  \
-        PL_comppad = cx->blk_sub.prevcomppad;                           \
-        PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
-        cv = cx->blk_sub.cv;                                            \
-        CvDEPTH(cv) = cx->blk_sub.olddepth;                             \
-        cx->blk_sub.cv = NULL;                                          \
-        SvREFCNT_dec(cv);                                               \
-    } STMT_END
-
-/* handle the @_ part of leaving a sub */
-
-#define CX_POPSUB_ARGS(cx) \
-    STMT_START {							\
-        AV *av;                                                         \
-        assert(CxTYPE(cx) == CXt_SUB);                                  \
-        assert(AvARRAY(MUTABLE_AV(                                      \
-            PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[                    \
-                    CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);           \
-        CX_POP_SAVEARRAY(cx);						\
-        av = MUTABLE_AV(PAD_SVl(0));                                    \
-        if (UNLIKELY(AvREAL(av))) 			                \
-            /* abandon @_ if it got reified */				\
-            clear_defarray(av, 0);                                      \
-        else {							        \
-            CLEAR_ARGARRAY(av);			                        \
-        }								\
-    } STMT_END
-
-#define CX_POPSUB(cx)							\
-    STMT_START {							\
-        assert(CxTYPE(cx) == CXt_SUB);                                  \
-	RETURN_PROBE(CvNAMED(cx->blk_sub.cv)				\
-			? HEK_KEY(CvNAME_HEK(cx->blk_sub.cv))		\
-			: GvENAME(CvGV(cx->blk_sub.cv)),		\
-		CopFILE((COP*)CvSTART((const CV*)cx->blk_sub.cv)),	\
-		CopLINE((COP*)CvSTART((const CV*)cx->blk_sub.cv)),	\
-		CopSTASHPV((COP*)CvSTART((const CV*)cx->blk_sub.cv)));	\
-									\
-	if (CxHASARGS(cx)) {						\
-            CX_POPSUB_ARGS(cx);                                         \
-	}								\
-        CX_POPSUB_COMMON(cx);                                           \
-    } STMT_END
 
 #define CX_POPFORMAT(cx)						\
     STMT_START {							\
@@ -1299,7 +1222,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	PUSHSTACKi(PERLSI_MULTICALL);					\
 	cx = cx_pushblock((CXt_SUB|CXp_MULTICALL|flags), gimme,         \
                   PL_stack_sp, PL_savestack_ix);	                \
-	CX_PUSHSUB(cx, cv, NULL, hasargs);				\
+	cx_pushsub(cx, cv, NULL, cBOOL(hasargs));			\
 	SAVEOP();					                \
         saveix_floor = PL_savestack_ix;                                 \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
@@ -1324,7 +1247,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
     STMT_START {							\
 	cx = CX_CUR();					                \
 	CX_LEAVE_SCOPE(cx);                                             \
-        CX_POPSUB_COMMON(cx);                                           \
+        cx_popsub_common(cx);                                           \
         newsp = PL_stack_base + cx->blk_oldsp;                          \
         gimme = cx->blk_gimme;                                          \
         PERL_UNUSED_VAR(newsp); /* for API */                           \
@@ -1346,9 +1269,9 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	PADLIST * const padlist = CvPADLIST(cv);			\
 	cx = CX_CUR();					                \
 	assert(CxMULTICALL(cx));                                        \
-        CX_POPSUB_COMMON(cx);                                           \
+        cx_popsub_common(cx);                                           \
 	cx->cx_type = (CXt_SUB|CXp_MULTICALL|flags);                    \
-        CX_PUSHSUB(cx, cv, NULL, hasargs);				\
+        cx_pushsub(cx, cv, NULL, cBOOL(hasargs));			\
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
 	if (CvDEPTH(cv) >= 2)  						\
