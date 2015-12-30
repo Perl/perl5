@@ -639,6 +639,75 @@ S_cx_popeval(pTHX_ PERL_CONTEXT *cx)
 }
 
 
+/* push a plain loop, i.e.
+ *     { block }
+ *     while (cond) { block }
+ *     for (init;cond;continue) { block }
+ * This loop can be last/redo'ed etc.
+ */
+
+PERL_STATIC_INLINE void
+S_cx_pushloop_plain(pTHX_ PERL_CONTEXT *cx)
+{
+    PERL_ARGS_ASSERT_CX_PUSHLOOP_PLAIN;
+    cx->blk_loop.my_op = cLOOP;
+}
+
+
+/* push a true for loop, i.e.
+ *     for var (list) { block }
+ */
+
+PERL_STATIC_INLINE void
+S_cx_pushloop_for(pTHX_ PERL_CONTEXT *cx, void *itervarp, SV* itersave)
+{
+    PERL_ARGS_ASSERT_CX_PUSHLOOP_FOR;
+
+    /* this one line is common with cx_pushloop_plain */
+    cx->blk_loop.my_op = cLOOP;
+
+    cx->blk_loop.itervar_u.svp = (SV**)itervarp;
+    cx->blk_loop.itersave      = itersave;
+#ifdef USE_ITHREADS
+    cx->blk_loop.oldcomppad = PL_comppad;
+#endif
+}
+
+
+/* pop all loop types, including plain */
+
+PERL_STATIC_INLINE void
+S_cx_poploop(pTHX_ PERL_CONTEXT *cx)
+{
+    PERL_ARGS_ASSERT_CX_POPLOOP;
+
+    assert(CxTYPE_is_LOOP(cx));
+    if (  CxTYPE(cx) == CXt_LOOP_ARY
+       || CxTYPE(cx) == CXt_LOOP_LAZYSV)
+    {
+        /* Free ary or cur. This assumes that state_u.ary.ary
+         * aligns with state_u.lazysv.cur. See cx_dup() */
+        SV *sv = cx->blk_loop.state_u.lazysv.cur;
+        cx->blk_loop.state_u.lazysv.cur = NULL;
+        SvREFCNT_dec_NN(sv);
+        if (CxTYPE(cx) == CXt_LOOP_LAZYSV) {
+            sv = cx->blk_loop.state_u.lazysv.end;
+            cx->blk_loop.state_u.lazysv.end = NULL;
+            SvREFCNT_dec_NN(sv);
+        }
+    }
+    if (cx->cx_type & (CXp_FOR_PAD|CXp_FOR_GV)) {
+        SV *cursv;
+        SV **svp = (cx)->blk_loop.itervar_u.svp;
+        if ((cx->cx_type & CXp_FOR_GV))
+            svp = &GvSV((GV*)svp);
+        cursv = *svp;
+        *svp = cx->blk_loop.itersave;
+        cx->blk_loop.itersave = NULL;
+        SvREFCNT_dec(cursv);
+    }
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

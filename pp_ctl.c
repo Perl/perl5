@@ -1541,7 +1541,7 @@ Perl_dounwind(pTHX_ I32 cxix)
 	case CXt_LOOP_LAZYSV:
 	case CXt_LOOP_LIST:
 	case CXt_LOOP_ARY:
-	    CX_POPLOOP(cx);
+	    cx_poploop(cx);
 	    break;
 	case CXt_WHEN:
 	    CX_POPWHEN(cx);
@@ -2142,7 +2142,7 @@ PP(pp_enteriter)
      * freeing or undoing, in case we die in the meantime. And vice-versa.
      */
     cx = cx_pushblock(cxflags, gimme, MARK, PL_savestack_ix);
-    CX_PUSHLOOP_FOR(cx, itervarp, itersave);
+    cx_pushloop_for(cx, itervarp, itersave);
 
     if (PL_op->op_flags & OPf_STACKED) {
         /* OPf_STACKED implies either a single array: for(@), with a
@@ -2217,7 +2217,7 @@ PP(pp_enterloop)
     const I32 gimme = GIMME_V;
 
     cx = cx_pushblock(CXt_LOOP_PLAIN, gimme, SP, PL_savestack_ix);
-    CX_PUSHLOOP_PLAIN(cx);
+    cx_pushloop_plain(cx);
 
     RETURN;
 }
@@ -2244,7 +2244,7 @@ PP(pp_leaveloop)
                                 PL_op->op_private & OPpLVALUE ? 3 : 1);
 
     CX_LEAVE_SCOPE(cx);
-    CX_POPLOOP(cx);	/* Stack values are safe: release loop vars ... */
+    cx_poploop(cx);	/* Stack values are safe: release loop vars ... */
     cx_popblock(cx);
     CX_POP(cx);
 
@@ -2533,7 +2533,7 @@ PP(pp_last)
 
     /* Stack values are safe: */
     CX_LEAVE_SCOPE(cx);
-    CX_POPLOOP(cx);	/* release loop vars ... */
+    cx_poploop(cx);	/* release loop vars ... */
     cx_popblock(cx);
     nextop = cx->blk_loop.my_op->op_lastop->op_next;
     CX_POP(cx);

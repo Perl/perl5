@@ -700,47 +700,6 @@ struct block_loop {
 #define CxLVAL(c)	(0 + ((c)->blk_u16 & 0xff))
 
 
-#define CX_PUSHLOOP_PLAIN(cx)						\
-	cx->blk_loop.my_op = cLOOP;
-
-#ifdef USE_ITHREADS
-#  define CX_PUSHLOOP_FOR_setpad(c) (c)->blk_loop.oldcomppad = PL_comppad
-#else
-#  define CX_PUSHLOOP_FOR_setpad(c) NOOP
-#endif
-
-#define CX_PUSHLOOP_FOR(cx, ivar, isave)   				\
-	CX_PUSHLOOP_PLAIN(cx);					        \
-	cx->blk_loop.itervar_u.svp = (SV**)(ivar);                      \
-        cx->blk_loop.itersave = isave;                                  \
-        CX_PUSHLOOP_FOR_setpad(cx);
-
-#define CX_POPLOOP(cx)							\
-        assert(CxTYPE_is_LOOP(cx));                                     \
-	if (  CxTYPE(cx) == CXt_LOOP_ARY                                \
-           || CxTYPE(cx) == CXt_LOOP_LAZYSV)                            \
-        {			                                        \
-            /* Free ary or cur. This assumes that state_u.ary.ary       \
-             * aligns with state_u.lazysv.cur. See cx_dup() */          \
-            SV *sv = cx->blk_loop.state_u.lazysv.cur;                   \
-            cx->blk_loop.state_u.lazysv.cur = NULL;                     \
-	    SvREFCNT_dec_NN(sv);	                                \
-            if (CxTYPE(cx) == CXt_LOOP_LAZYSV) {                        \
-                sv = cx->blk_loop.state_u.lazysv.end;                   \
-                cx->blk_loop.state_u.lazysv.end = NULL;                 \
-                SvREFCNT_dec_NN(sv);		                        \
-            }                                                           \
-	}								\
-        if (cx->cx_type & (CXp_FOR_PAD|CXp_FOR_GV)) {                   \
-            SV *cursv;                                                  \
-            SV **svp = (cx)->blk_loop.itervar_u.svp;                    \
-            if ((cx->cx_type & CXp_FOR_GV))                             \
-                svp = &GvSV((GV*)svp);                                  \
-            cursv = *svp;                                               \
-            *svp = cx->blk_loop.itersave;                               \
-            cx->blk_loop.itersave = NULL;                               \
-            SvREFCNT_dec(cursv);                                        \
-        }
 
 /* given/when context */
 struct block_givwhen {
