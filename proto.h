@@ -3721,6 +3721,9 @@ PERL_STATIC_INLINE SSize_t	S_av_top_index(pTHX_ AV *av)
 PERL_STATIC_INLINE void	S_cx_popblock(pTHX_ PERL_CONTEXT *cx);
 #define PERL_ARGS_ASSERT_CX_POPBLOCK	\
 	assert(cx)
+PERL_STATIC_INLINE void	S_cx_popformat(pTHX_ PERL_CONTEXT *cx);
+#define PERL_ARGS_ASSERT_CX_POPFORMAT	\
+	assert(cx)
 PERL_STATIC_INLINE void	S_cx_popsub(pTHX_ PERL_CONTEXT *cx);
 #define PERL_ARGS_ASSERT_CX_POPSUB	\
 	assert(cx)
@@ -3733,6 +3736,9 @@ PERL_STATIC_INLINE void	S_cx_popsub_common(pTHX_ PERL_CONTEXT *cx);
 PERL_STATIC_INLINE PERL_CONTEXT *	S_cx_pushblock(pTHX_ U8 type, U8 gimme, SV** sp, I32 saveix);
 #define PERL_ARGS_ASSERT_CX_PUSHBLOCK	\
 	assert(sp)
+PERL_STATIC_INLINE void	S_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, GV *gv);
+#define PERL_ARGS_ASSERT_CX_PUSHFORMAT	\
+	assert(cx); assert(cv)
 PERL_STATIC_INLINE void	S_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs);
 #define PERL_ARGS_ASSERT_CX_PUSHSUB	\
 	assert(cx); assert(cv)

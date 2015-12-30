@@ -1390,7 +1390,7 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 	cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
 
     cx = cx_pushblock(CXt_FORMAT, gimme, PL_stack_sp, PL_savestack_ix);
-    CX_PUSHFORMAT(cx, cv, gv, retop);
+    cx_pushformat(cx, cv, retop, gv);
     if (CvDEPTH(cv) >= 2)
 	pad_push(CvPADLIST(cv), CvDEPTH(cv));
     PAD_SET_CUR_NOSAVE(CvPADLIST(cv), CvDEPTH(cv));
@@ -1525,7 +1525,7 @@ PP(pp_leavewrite)
     assert(CxTYPE(cx) == CXt_FORMAT);
     SP = PL_stack_base + cx->blk_oldsp; /* ignore retval of formline */
     CX_LEAVE_SCOPE(cx);
-    CX_POPFORMAT(cx);
+    cx_popformat(cx);
     cx_popblock(cx);
     retop = cx->blk_sub.retop;
     CX_POP(cx);

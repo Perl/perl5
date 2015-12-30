@@ -558,6 +558,48 @@ S_cx_popsub(pTHX_ PERL_CONTEXT *cx)
 }
 
 
+PERL_STATIC_INLINE void
+S_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, GV *gv)
+{
+    PERL_ARGS_ASSERT_CX_PUSHFORMAT;
+
+    cx->blk_format.cv          = cv;
+    cx->blk_format.retop       = retop;
+    cx->blk_format.gv          = gv;
+    cx->blk_format.dfoutgv     = PL_defoutgv;
+    cx->blk_format.prevcomppad = PL_comppad;
+    cx->blk_u16                = 0;
+
+    SvREFCNT_inc_simple_void_NN(cv);
+    CvDEPTH(cv)++;
+    SvREFCNT_inc_void(cx->blk_format.dfoutgv);
+}
+
+
+PERL_STATIC_INLINE void
+S_cx_popformat(pTHX_ PERL_CONTEXT *cx)
+{
+    CV *cv;
+    GV *dfout;
+
+    PERL_ARGS_ASSERT_CX_POPFORMAT;
+    assert(CxTYPE(cx) == CXt_FORMAT);
+
+    dfout = cx->blk_format.dfoutgv;
+    setdefout(dfout);
+    cx->blk_format.dfoutgv = NULL;
+    SvREFCNT_dec_NN(dfout);
+
+    PL_comppad = cx->blk_format.prevcomppad;
+    PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;
+    cv = cx->blk_format.cv;
+    cx->blk_format.cv = NULL;
+    --CvDEPTH(cv);
+    SvREFCNT_dec_NN(cv);
+}
+
+
+
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

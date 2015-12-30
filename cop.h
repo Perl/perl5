@@ -606,17 +606,6 @@ struct block_format {
 	           ? 0 : (U8)func(aTHX)					\
 	)
 
-#define CX_PUSHFORMAT(cx, cv, gv, retop)				\
-	cx->blk_format.cv = cv;						\
-	cx->blk_format.gv = gv;						\
-	cx->blk_format.retop = (retop);					\
-	cx->blk_format.dfoutgv = PL_defoutgv;				\
-	cx->blk_format.prevcomppad = PL_comppad;			\
-	cx->blk_u16 = 0;                                                \
-	SvREFCNT_inc_simple_void_NN(cv);		                \
-	CvDEPTH(cv)++;							\
-	SvREFCNT_inc_void(cx->blk_format.dfoutgv)
-
 /* Restore old @_ */
 #define CX_POP_SAVEARRAY(cx)						\
     STMT_START {							\
@@ -635,22 +624,6 @@ struct block_format {
 	AvFILLp(ary) = -1;						\
     } STMT_END
 
-
-#define CX_POPFORMAT(cx)						\
-    STMT_START {							\
-	CV *cv;				                                \
-	GV * const dfout = cx->blk_format.dfoutgv;			\
-        assert(CxTYPE(cx) == CXt_FORMAT);                               \
-	setdefout(dfout);						\
-        cx->blk_format.dfoutgv = NULL;                                  \
-	SvREFCNT_dec_NN(dfout); /* the cx->defoutgv ref */              \
-        PL_comppad = cx->blk_format.prevcomppad;                        \
-        PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;    \
-        cv = cx->blk_format.cv;				                \
-	cx->blk_format.cv = NULL;;				        \
-	--CvDEPTH(cv);                                                  \
-	SvREFCNT_dec_NN(cv);				                \
-    } STMT_END
 
 /* eval context */
 struct block_eval {

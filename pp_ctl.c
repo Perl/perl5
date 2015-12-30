@@ -1554,7 +1554,7 @@ Perl_dounwind(pTHX_ I32 cxix)
             /* these two don't have a POPFOO() */
 	    break;
 	case CXt_FORMAT:
-	    CX_POPFORMAT(cx);
+	    cx_popformat(cx);
 	    break;
 	}
         if (cxstack_ix == cxix + 1) {

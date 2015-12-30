@@ -2884,11 +2884,14 @@ ApM	|void	|leave_adjust_stacks|NN SV **from_sp|NN SV **to_sp \
 AiM	|PERL_CONTEXT *	|cx_pushblock|U8 type|U8 gimme|NN SV** sp|I32 saveix
 AiM	|void	|cx_popblock|NN PERL_CONTEXT *cx
 AiM	|void	|cx_topblock|NN PERL_CONTEXT *cx
-AiM	|void	|cx_pushsub |NN PERL_CONTEXT *cx|NN CV *cv|NULLOK OP *retop \
-		|bool hasargs
+AiM	|void	|cx_pushsub      |NN PERL_CONTEXT *cx|NN CV *cv \
+				 |NULLOK OP *retop|bool hasargs
 AiM	|void	|cx_popsub_common|NN PERL_CONTEXT *cx
 AiM	|void	|cx_popsub_args  |NN PERL_CONTEXT *cx
 AiM	|void	|cx_popsub       |NN PERL_CONTEXT *cx
+AiM	|void	|cx_pushformat   |NN PERL_CONTEXT *cx|NN CV *cv \
+				 |NULLOK OP *retop|NULLOK GV *gv
+AiM	|void	|cx_popformat    |NN PERL_CONTEXT *cx
 #endif
 
 : ex: set ts=8 sts=4 sw=4 noet:
