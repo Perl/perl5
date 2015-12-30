@@ -708,6 +708,54 @@ S_cx_poploop(pTHX_ PERL_CONTEXT *cx)
     }
 }
 
+
+PERL_STATIC_INLINE void
+S_cx_pushwhen(pTHX_ PERL_CONTEXT *cx)
+{
+    PERL_ARGS_ASSERT_CX_PUSHWHEN;
+
+    cx->blk_givwhen.leave_op = cLOGOP->op_other;
+}
+
+
+PERL_STATIC_INLINE void
+S_cx_popwhen(pTHX_ PERL_CONTEXT *cx)
+{
+    PERL_ARGS_ASSERT_CX_POPWHEN;
+    assert(CxTYPE(cx) == CXt_WHEN);
+
+    PERL_UNUSED_ARG(cx);
+    /* currently NOOP */
+}
+
+
+PERL_STATIC_INLINE void
+S_cx_pushgiven(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv)
+{
+    PERL_ARGS_ASSERT_CX_PUSHGIVEN;
+
+    cx->blk_givwhen.leave_op = cLOGOP->op_other;
+    cx->blk_givwhen.defsv_save = orig_defsv;
+}
+
+
+PERL_STATIC_INLINE void
+S_cx_popgiven(pTHX_ PERL_CONTEXT *cx)
+{
+    SV *sv;
+
+    PERL_ARGS_ASSERT_CX_POPGIVEN;
+    assert(CxTYPE(cx) == CXt_GIVEN);
+
+    sv = GvSV(PL_defgv);
+    GvSV(PL_defgv) = cx->blk_givwhen.defsv_save;
+    cx->blk_givwhen.defsv_save = NULL;
+    SvREFCNT_dec(sv);
+}
+
+
+
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

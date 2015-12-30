@@ -707,26 +707,6 @@ struct block_givwhen {
         SV *defsv_save; /* the original $_ */
 };
 
-#define CX_PUSHWHEN(cx)    						\
-	cx->blk_givwhen.leave_op = cLOGOP->op_other;
-
-#define CX_PUSHGIVEN(cx, orig_var)                                      \
-        CX_PUSHWHEN(cx);                                                \
-        cx->blk_givwhen.defsv_save = orig_var;
-
-#define CX_POPWHEN(cx)                                                  \
-        assert(CxTYPE(cx) == CXt_WHEN);                                 \
-	NOOP;
-
-#define CX_POPGIVEN(cx)                                                 \
-    STMT_START {							\
-        SV *sv = GvSV(PL_defgv);                                        \
-        assert(CxTYPE(cx) == CXt_GIVEN);                                \
-        GvSV(PL_defgv) = cx->blk_givwhen.defsv_save;                    \
-        cx->blk_givwhen.defsv_save = NULL;                              \
-        SvREFCNT_dec(sv);                                               \
-    } STMT_END
-
 
 
 /* context common to subroutines, evals and loops */
