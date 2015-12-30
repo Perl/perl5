@@ -423,7 +423,7 @@ S_cx_pushblock(pTHX_ U8 type, U8 gimme, SV** sp, I32 saveix)
     cx->blk_oldmarksp  = PL_markstack_ptr - PL_markstack;
     cx->blk_oldscopesp = PL_scopestack_ix;
     cx->blk_oldpm      = PL_curpm;
-    cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;
+    cx->blk_old_tmpsfloor = PL_tmps_floor;
 
     PL_tmps_floor        = PL_tmps_ix;
     CX_DEBUG(cx, "PUSH");
@@ -450,7 +450,7 @@ S_cx_popblock(pTHX_ PERL_CONTEXT *cx)
     assert(   (CxTYPE(cx) == CXt_SUB && CxMULTICALL(cx))
             || PL_savestack_ix == cx->blk_oldsaveix);
     PL_curcop     = cx->blk_oldcop;
-    PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
+    PL_tmps_floor = cx->blk_old_tmpsfloor;
 }
 
 /* Continue a block elsewhere (e.g. NEXT, REDO, GOTO).

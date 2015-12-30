@@ -739,6 +739,7 @@ struct block {
 #define blk_gimme	cx_u.cx_blk.blku_gimme
 #define blk_u16		cx_u.cx_blk.blku_u16
 #define blk_oldsaveix   cx_u.cx_blk.blku_oldsaveix
+#define blk_old_tmpsfloor cx_u.cx_blk.blku_old_tmpsfloor
 #define blk_sub		cx_u.cx_blk.blk_u.blku_sub
 #define blk_format	cx_u.cx_blk.blk_u.blku_format
 #define blk_eval	cx_u.cx_blk.blk_u.blku_eval
