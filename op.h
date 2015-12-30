@@ -67,7 +67,7 @@ typedef PERL_BITFIELD16 Optype;
     U8		op_private;
 #endif
 
-/* If op_type:9 is changed to :10, also change CX_PUSHEVAL in cop.h.
+/* If op_type:9 is changed to :10, also change cx_pusheval()
    Also, if the type of op_type is ever changed (e.g. to PERL_BITFIELD32)
    then all the other bit-fields before/after it should change their
    types too to let VC pack them into the same 4 byte integer.*/

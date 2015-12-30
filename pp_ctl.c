@@ -1534,7 +1534,7 @@ Perl_dounwind(pTHX_ I32 cxix)
 	    cx_popsub(cx);
 	    break;
 	case CXt_EVAL:
-	    CX_POPEVAL(cx);
+	    cx_popeval(cx);
 	    break;
 	case CXt_LOOP_PLAIN:
 	case CXt_LOOP_LAZYIV:
@@ -1692,7 +1692,7 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    PL_stack_sp = oldsp;
 
             CX_LEAVE_SCOPE(cx);
-	    CX_POPEVAL(cx);
+	    cx_popeval(cx);
 	    cx_popblock(cx);
 	    restartjmpenv = cx->blk_eval.cur_top_env;
 	    restartop = cx->blk_eval.retop;
@@ -3400,7 +3400,7 @@ S_doeval_compile(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 	    SP = PL_stack_base + POPMARK;	/* pop original mark */
             cx = CX_CUR();
             CX_LEAVE_SCOPE(cx);
-	    CX_POPEVAL(cx);
+	    cx_popeval(cx);
 	    cx_popblock(cx);
             if (in_require)
                 namesv = cx->blk_eval.old_namesv;
@@ -4046,7 +4046,7 @@ PP(pp_require)
 
     /* switch to eval mode */
     cx = cx_pushblock(CXt_EVAL, gimme, SP, old_savestack_ix);
-    CX_PUSHEVAL(cx, PL_op->op_next, newSVpv(name, 0));
+    cx_pusheval(cx, PL_op->op_next, newSVpv(name, 0));
 
     SAVECOPLINE(&PL_compiling);
     CopLINE_set(&PL_compiling, 0);
@@ -4160,7 +4160,7 @@ PP(pp_entereval)
     runcv = find_runcv(&seq);
 
     cx = cx_pushblock((CXt_EVAL|CXp_REAL), gimme, SP, old_savestack_ix);
-    CX_PUSHEVAL(cx, PL_op->op_next, NULL);
+    cx_pusheval(cx, PL_op->op_next, NULL);
 
     /* prepare to compile string */
 
@@ -4211,7 +4211,7 @@ PP(pp_leaveeval)
     OP *retop;
     SV *namesv = NULL;
     CV *evalcv;
-    /* grab this value before CX_POPEVAL restores old PL_in_eval */
+    /* grab this value before cx_popeval restores old PL_in_eval */
     bool keep = cBOOL(PL_in_eval & EVAL_KEEPERR);
 
     PERL_ASYNC_CHECK();
@@ -4235,7 +4235,7 @@ PP(pp_leaveeval)
     else
         leave_adjust_stacks(oldsp, oldsp, gimme, 0);
 
-    /* the CX_POPEVAL does a leavescope, which frees the optree associated
+    /* the cx_popeval does a leavescope, which frees the optree associated
      * with eval, which if it frees the nextstate associated with
      * PL_curcop, sets PL_curcop to NULL. Which can mess up freeing a
      * regex when running under 'use re Debug' because it needs PL_curcop
@@ -4244,7 +4244,7 @@ PP(pp_leaveeval)
     PL_curcop = cx->blk_oldcop;
 
     CX_LEAVE_SCOPE(cx);
-    CX_POPEVAL(cx);
+    cx_popeval(cx);
     cx_popblock(cx);
     retop = cx->blk_eval.retop;
     evalcv = cx->blk_eval.cv;
@@ -4276,7 +4276,7 @@ Perl_delete_eval_scope(pTHX)
 	
     cx = CX_CUR();
     CX_LEAVE_SCOPE(cx);
-    CX_POPEVAL(cx);
+    cx_popeval(cx);
     cx_popblock(cx);
     CX_POP(cx);
 }
@@ -4291,7 +4291,7 @@ Perl_create_eval_scope(pTHX_ OP *retop, U32 flags)
 	
     cx = cx_pushblock((CXt_EVAL|CXp_TRYBLOCK), gimme,
                     PL_stack_sp, PL_savestack_ix);
-    CX_PUSHEVAL(cx, retop, NULL);
+    cx_pusheval(cx, retop, NULL);
 
     PL_in_eval = EVAL_INEVAL;
     if (flags & G_KEEPERR)
@@ -4328,7 +4328,7 @@ PP(pp_leavetry)
     else
         leave_adjust_stacks(oldsp, oldsp, gimme, 1);
     CX_LEAVE_SCOPE(cx);
-    CX_POPEVAL(cx);
+    cx_popeval(cx);
     cx_popblock(cx);
     retop = cx->blk_eval.retop;
     CX_POP(cx);

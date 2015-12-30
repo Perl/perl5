@@ -779,11 +779,13 @@
 #define append_utf8_from_native_byte	S_append_utf8_from_native_byte
 #define av_top_index(a)		S_av_top_index(aTHX_ a)
 #define cx_popblock(a)		S_cx_popblock(aTHX_ a)
+#define cx_popeval(a)		S_cx_popeval(aTHX_ a)
 #define cx_popformat(a)		S_cx_popformat(aTHX_ a)
 #define cx_popsub(a)		S_cx_popsub(aTHX_ a)
 #define cx_popsub_args(a)	S_cx_popsub_args(aTHX_ a)
 #define cx_popsub_common(a)	S_cx_popsub_common(aTHX_ a)
 #define cx_pushblock(a,b,c,d)	S_cx_pushblock(aTHX_ a,b,c,d)
+#define cx_pusheval(a,b,c)	S_cx_pusheval(aTHX_ a,b,c)
 #define cx_pushformat(a,b,c,d)	S_cx_pushformat(aTHX_ a,b,c,d)
 #define cx_pushsub(a,b,c,d)	S_cx_pushsub(aTHX_ a,b,c,d)
 #define cx_topblock(a)		S_cx_topblock(aTHX_ a)

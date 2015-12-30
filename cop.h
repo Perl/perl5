@@ -643,35 +643,6 @@ struct block_eval {
 #define CxOLD_IN_EVAL(cx)	(((cx)->blk_u16) & 0x7F)
 #define CxOLD_OP_TYPE(cx)	(((cx)->blk_u16) >> 7)
 
-#define CX_PUSHEVAL(cx, op, n)						\
-    STMT_START {							\
-	assert(!(PL_in_eval & ~0x7F));					\
-	assert(!(PL_op->op_type & ~0x1FF));				\
-	cx->blk_u16 = (PL_in_eval & 0x7F) | ((U16)PL_op->op_type << 7);	\
-	cx->blk_eval.old_namesv = (n);		                        \
-	cx->blk_eval.old_eval_root = PL_eval_root;			\
-	cx->blk_eval.cur_text = PL_parser ? PL_parser->linestr : NULL;	\
-	cx->blk_eval.cv = NULL; /* set by doeval_compile() as applicable */ \
-	cx->blk_eval.retop = op;					\
-	cx->blk_eval.cur_top_env = PL_top_env; 				\
-    } STMT_END
-
-#define CX_POPEVAL(cx)							\
-    STMT_START {							\
-        SV *sv;                                                         \
-        assert(CxTYPE(cx) == CXt_EVAL);                                 \
-	PL_in_eval = CxOLD_IN_EVAL(cx);					\
-	PL_eval_root = cx->blk_eval.old_eval_root;			\
-	sv = cx->blk_eval.cur_text;                                     \
-	if (sv && SvSCREAM(sv)) {                                       \
-	    cx->blk_eval.cur_text = NULL;			        \
-	    SvREFCNT_dec_NN(sv);			                \
-        }                                                               \
-	sv = cx->blk_eval.old_namesv;					\
-	if (sv && !SvTEMP(sv))/* TEMP implies CX_POPEVAL re-entrantly called */ \
-	    sv_2mortal(sv);			                        \
-    } STMT_END
-
 /* loop context */
 struct block_loop {
     LOOP *	my_op;	/* My op, that contains redo, next and last ops.  */

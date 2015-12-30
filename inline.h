@@ -599,6 +599,44 @@ S_cx_popformat(pTHX_ PERL_CONTEXT *cx)
 }
 
 
+PERL_STATIC_INLINE void
+S_cx_pusheval(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv)
+{
+    PERL_ARGS_ASSERT_CX_PUSHEVAL;
+
+    cx->blk_eval.retop         = retop;
+    cx->blk_eval.old_namesv    = namesv;
+    cx->blk_eval.old_eval_root = PL_eval_root;
+    cx->blk_eval.cur_text      = PL_parser ? PL_parser->linestr : NULL;
+    cx->blk_eval.cv            = NULL; /* later set by doeval_compile() */
+    cx->blk_eval.cur_top_env   = PL_top_env;
+
+    assert(!(PL_in_eval     & ~ 0x7F));
+    assert(!(PL_op->op_type & ~0x1FF));
+    cx->blk_u16 = (PL_in_eval & 0x7F) | ((U16)PL_op->op_type << 7);
+}
+
+
+PERL_STATIC_INLINE void
+S_cx_popeval(pTHX_ PERL_CONTEXT *cx)
+{
+    SV *sv;
+
+    PERL_ARGS_ASSERT_CX_POPEVAL;
+    assert(CxTYPE(cx) == CXt_EVAL);
+
+    PL_in_eval = CxOLD_IN_EVAL(cx);
+    PL_eval_root = cx->blk_eval.old_eval_root;
+    sv = cx->blk_eval.cur_text;
+    if (sv && SvSCREAM(sv)) {
+        cx->blk_eval.cur_text = NULL;
+        SvREFCNT_dec_NN(sv);
+    }
+
+    sv = cx->blk_eval.old_namesv;
+    if (sv && !SvTEMP(sv))/* TEMP implies cx_popeval() re-entrantly called */
+        sv_2mortal(sv);
+}
 
 
 /*

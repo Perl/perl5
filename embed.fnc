@@ -2892,6 +2892,9 @@ AiM	|void	|cx_popsub       |NN PERL_CONTEXT *cx
 AiM	|void	|cx_pushformat   |NN PERL_CONTEXT *cx|NN CV *cv \
 				 |NULLOK OP *retop|NULLOK GV *gv
 AiM	|void	|cx_popformat    |NN PERL_CONTEXT *cx
+AiM	|void	|cx_pusheval     |NN PERL_CONTEXT *cx \
+				 |NULLOK OP *retop|NULLOK SV *namesv
+AiM	|void	|cx_popeval      |NN PERL_CONTEXT *cx
 #endif
 
 : ex: set ts=8 sts=4 sw=4 noet:
