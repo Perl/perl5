@@ -3640,7 +3640,6 @@ CODE:
 	MULTICALL;
     }
     POP_MULTICALL;
-    PERL_UNUSED_VAR(newsp);
     XSRETURN_UNDEF;
 }
 
@@ -3697,8 +3696,6 @@ CODE:
     }
 
     POP_MULTICALL;
-
-    PERL_UNUSED_VAR(newsp);
 
     size = AvFILLp(av) + 1;
     EXTEND(SP, size);

@@ -1081,13 +1081,9 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 */
 
 #define dMULTICALL \
-    SV **newsp;			/* set by cx_popblock */		\
-    PERL_CONTEXT *cx;							\
-    CV *multicall_cv;							\
-    OP *multicall_cop;							\
+    OP  *multicall_cop;							\
     bool multicall_oldcatch; 						\
-    I32 saveix_floor;                                                   \
-    U8 hasargs = 0		/* used by CX_PUSHSUB */
+    I32  multicall_saveix_floor
 
 #define PUSH_MULTICALL(the_cv) \
     PUSH_MULTICALL_FLAGS(the_cv, 0)
@@ -1097,6 +1093,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 
 #define PUSH_MULTICALL_FLAGS(the_cv, flags) \
     STMT_START {							\
+        PERL_CONTEXT *cx;						\
 	CV * const _nOnclAshIngNamE_ = the_cv;				\
 	CV * const cv = _nOnclAshIngNamE_;				\
 	PADLIST * const padlist = CvPADLIST(cv);			\
@@ -1105,16 +1102,14 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	PUSHSTACKi(PERLSI_MULTICALL);					\
 	cx = cx_pushblock((CXt_SUB|CXp_MULTICALL|flags), gimme,         \
                   PL_stack_sp, PL_savestack_ix);	                \
-	cx_pushsub(cx, cv, NULL, cBOOL(hasargs));			\
+        cx_pushsub(cx, cv, NULL, 0);                                    \
 	SAVEOP();					                \
-        saveix_floor = PL_savestack_ix;                                 \
+        multicall_saveix_floor = PL_savestack_ix;                       \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
 	if (CvDEPTH(cv) >= 2)  						\
 	    Perl_pad_push(aTHX_ padlist, CvDEPTH(cv));			\
 	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));			\
-	multicall_cv = cv;						\
-        PERL_UNUSED_VAR(multicall_cv); /* for API */                    \
 	multicall_cop = CvSTART(cv);					\
     } STMT_END
 
@@ -1122,18 +1117,16 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
     STMT_START {							\
 	PL_op = multicall_cop;						\
 	CALLRUNOPS(aTHX);						\
-        cx = CX_CUR();					                \
-        LEAVE_SCOPE(saveix_floor);                                      \
+        LEAVE_SCOPE(multicall_saveix_floor);                            \
     } STMT_END
 
 #define POP_MULTICALL \
     STMT_START {							\
+        PERL_CONTEXT *cx;						\
 	cx = CX_CUR();					                \
 	CX_LEAVE_SCOPE(cx);                                             \
         cx_popsub_common(cx);                                           \
-        newsp = PL_stack_base + cx->blk_oldsp;                          \
         gimme = cx->blk_gimme;                                          \
-        PERL_UNUSED_VAR(newsp); /* for API */                           \
         PERL_UNUSED_VAR(gimme); /* for API */                           \
 	cx_popblock(cx);				   		\
 	CX_POP(cx);                                                     \
@@ -1150,17 +1143,16 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	CV * const _nOnclAshIngNamE_ = the_cv;				\
 	CV * const cv = _nOnclAshIngNamE_;				\
 	PADLIST * const padlist = CvPADLIST(cv);			\
-	cx = CX_CUR();					                \
+        PERL_CONTEXT *cx = CX_CUR();					\
 	assert(CxMULTICALL(cx));                                        \
         cx_popsub_common(cx);                                           \
 	cx->cx_type = (CXt_SUB|CXp_MULTICALL|flags);                    \
-        cx_pushsub(cx, cv, NULL, cBOOL(hasargs));			\
+        cx_pushsub(cx, cv, NULL, 0);			                \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
 	if (CvDEPTH(cv) >= 2)  						\
 	    Perl_pad_push(aTHX_ padlist, CvDEPTH(cv));			\
 	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));			\
-	multicall_cv = cv;						\
 	multicall_cop = CvSTART(cv);					\
     } STMT_END
 /*

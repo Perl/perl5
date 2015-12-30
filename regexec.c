@@ -5197,11 +5197,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
     /* shut up 'may be used uninitialized' compiler warnings for dMULTICALL */
     multicall_oldcatch = 0;
-    multicall_cv = NULL;
-    cx = NULL;
     PERL_UNUSED_VAR(multicall_cop);
-    PERL_UNUSED_VAR(newsp);
-
 
     PERL_ARGS_ASSERT_REGMATCH;
 
@@ -6608,7 +6604,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     /* these assignments are just to silence compiler
                      * warnings */
 		    multicall_cop = NULL;
-		    newsp = NULL;
 		}
 		last_pad = PL_comppad;
 
@@ -6660,11 +6655,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 		/* we don't use MULTICALL here as we want to call the
 		 * first op of the block of interest, rather than the
-		 * first op of the sub */
+		 * first op of the sub. Also, we don't want to free
+                 * the savestack frame */
 		before = (IV)(SP-PL_stack_base);
 		PL_op = nop;
 		CALLRUNOPS(aTHX);			/* Scalar context. */
-                PERL_UNUSED_VAR(saveix_floor); /* used by MULTICALL */
+                PERL_UNUSED_VAR(multicall_saveix_floor); /* used by MULTICALL */
 		SPAGAIN;
 		if ((IV)(SP-PL_stack_base) == before)
 		    ret = &PL_sv_undef;   /* protect against empty (?{}) blocks. */
