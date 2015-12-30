@@ -3561,6 +3561,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_fcntl_can_lock FCNTL_CAN_LOCK		/**/
 
+/* HAS_FDCLOSE:
+ *	This symbol, if defined, indicates that the fdclose routine is
+ *	available to free a FILE structure without closing the underlying
+ *	file descriptor.  This function appeared in FreeBSD 10.2.
+ */
+#$d_fdclose HAS_FDCLOSE		/**/
+
 /* HAS_FDIM:
  *	This symbol, if defined, indicates that the fdim routine is
  *	available to do the positive difference function.

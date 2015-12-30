@@ -475,6 +475,7 @@ d_fcntl_can_lock=''
 d_fd_macros=''
 d_fd_set=''
 d_fds_bits=''
+d_fdclose=''
 d_fdim=''
 d_fegetround=''
 d_fgetpos=''
@@ -13991,6 +13992,10 @@ EOM
 fi
 $rm_try
 
+: see if fdclose exists
+set fdclose d_fdclose
+eval $inlibc
+
 : see if fdim exists
 set fdim d_fdim
 eval $inlibc
@@ -24213,6 +24218,7 @@ d_fcntl='$d_fcntl'
 d_fcntl_can_lock='$d_fcntl_can_lock'
 d_fd_macros='$d_fd_macros'
 d_fd_set='$d_fd_set'
+d_fdclose='$d_fdclose'
 d_fdim='$d_fdim'
 d_fds_bits='$d_fds_bits'
 d_fegetround='$d_fegetround'
