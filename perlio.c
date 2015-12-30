@@ -3126,7 +3126,9 @@ PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
     /* XXX this could use PerlIO_canset_fileno() and
      * PerlIO_set_fileno() support from Configure
      */
-#  if defined(__UCLIBC__)
+#  if defined(HAS_FDCLOSE)
+    return fdclose(f, NULL) == 0 ? 1 : 0;
+#  elif defined(__UCLIBC__)
     /* uClibc must come before glibc because it defines __GLIBC__ as well. */
     f->__filedes = -1;
     return 1;
