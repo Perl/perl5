@@ -3640,7 +3640,7 @@ PP(pp_leavesub)
 
     CX_LEAVE_SCOPE(cx);
     CX_POPSUB(cx);	/* Stack values are safe: release CV and @_ ... */
-    CX_POPBLOCK(cx);
+    cx_popblock(cx);
     retop = cx->blk_sub.retop;
     CX_POP(cx);
 
@@ -3852,7 +3852,7 @@ PP(pp_entersub)
         }
 
         gimme = GIMME_V;
-	CX_PUSHBLOCK(cx, CXt_SUB, gimme, MARK, old_savestack_ix);
+	cx = cx_pushblock(CXt_SUB, gimme, MARK, old_savestack_ix);
         hasargs = cBOOL(PL_op->op_flags & OPf_STACKED);
 	CX_PUSHSUB(cx, cv, PL_op->op_next, hasargs);
 

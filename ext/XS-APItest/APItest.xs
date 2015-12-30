@@ -3727,7 +3727,7 @@ CODE:
     POPSTACK_TO(PL_mainstack);
     if (cxstack_ix >= 0) {
         dounwind(-1);
-        CX_POPBLOCK(cxstack);
+        cx_popblock(cxstack);
     }
     LEAVE_SCOPE(0);
     PL_scopestack_ix = oldscope;

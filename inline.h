@@ -401,6 +401,78 @@ S_sv_only_taint_gmagic(SV *sv) {
     return TRUE;
 }
 
+/* ------------------ cop.h ------------------------------------------- */
+
+
+/* Enter a block. Push a new base context and return its address. */
+
+PERL_STATIC_INLINE PERL_CONTEXT *
+S_cx_pushblock(pTHX_ U8 type, U8 gimme, SV** sp, I32 saveix)
+{
+    PERL_CONTEXT * cx;
+
+    PERL_ARGS_ASSERT_CX_PUSHBLOCK;
+
+    CXINC;
+    cx = CX_CUR();
+    cx->cx_type        = type;
+    cx->blk_gimme      = gimme;
+    cx->blk_oldsaveix  = saveix;
+    cx->blk_oldsp      = sp - PL_stack_base;
+    cx->blk_oldcop     = PL_curcop;
+    cx->blk_oldmarksp  = PL_markstack_ptr - PL_markstack;
+    cx->blk_oldscopesp = PL_scopestack_ix;
+    cx->blk_oldpm      = PL_curpm;
+    cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;
+
+    PL_tmps_floor        = PL_tmps_ix;
+    CX_DEBUG(cx, "PUSH");
+    return cx;
+}
+
+
+/* Exit a block (RETURN and LAST). */
+
+PERL_STATIC_INLINE void
+S_cx_popblock(pTHX_ PERL_CONTEXT *cx)
+{
+    PERL_ARGS_ASSERT_CX_POPBLOCK;
+
+    CX_DEBUG(cx, "POP");
+    /* these 3 are common to cx_popblock and cx_topblock */
+    PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp;
+    PL_scopestack_ix = cx->blk_oldscopesp;
+    PL_curpm         = cx->blk_oldpm;
+
+    /* LEAVE_SCOPE() should have made this true. /(?{})/ cheats
+     * and leaves a CX entry lying around for repeated use, so
+     * skip for multicall */                  \
+    assert(   (CxTYPE(cx) == CXt_SUB && CxMULTICALL(cx))
+            || PL_savestack_ix == cx->blk_oldsaveix);
+    PL_curcop     = cx->blk_oldcop;
+    PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;
+}
+
+/* Continue a block elsewhere (e.g. NEXT, REDO, GOTO).
+ * Whereas cx_popblock() restores the state to the point just before
+ * cx_pushblock() was called,  cx_topblock() restores it to the point just
+ * *after* cx_pushblock() was called. */
+
+PERL_STATIC_INLINE void
+S_cx_topblock(pTHX_ PERL_CONTEXT *cx)
+{
+    PERL_ARGS_ASSERT_CX_TOPBLOCK;
+
+    CX_DEBUG(cx, "TOP");
+    /* these 3 are common to cx_popblock and cx_topblock */
+    PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp;
+    PL_scopestack_ix = cx->blk_oldscopesp;
+    PL_curpm         = cx->blk_oldpm;
+
+    PL_stack_sp      = PL_stack_base + cx->blk_oldsp;
+}
+
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

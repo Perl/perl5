@@ -1508,7 +1508,7 @@ S_dopoptowhen(pTHX_ I32 startingblock)
 /* dounwind(): pop all contexts above (but not including) cxix.
  * Note that it clears the savestack frame associated with each popped
  * context entry, but doesn't free any temps.
- * It does a CX_POPBLOCK of the last frame that it pops, and leaves
+ * It does a cx_popblock() of the last frame that it pops, and leaves
  * cxstack_ix equal to cxix.
  */
 
@@ -1558,7 +1558,7 @@ Perl_dounwind(pTHX_ I32 cxix)
 	    break;
 	}
         if (cxstack_ix == cxix + 1) {
-            CX_POPBLOCK(cx);
+            cx_popblock(cx);
         }
 	cxstack_ix--;
     }
@@ -1693,7 +1693,7 @@ Perl_die_unwind(pTHX_ SV *msv)
 
             CX_LEAVE_SCOPE(cx);
 	    CX_POPEVAL(cx);
-	    CX_POPBLOCK(cx);
+	    cx_popblock(cx);
 	    restartjmpenv = cx->blk_eval.cur_top_env;
 	    restartop = cx->blk_eval.retop;
             if (CxOLD_OP_TYPE(cx) == OP_REQUIRE)
@@ -2011,7 +2011,7 @@ PP(pp_dbstate)
 	    return NORMAL;
 	}
 	else {
-	    CX_PUSHBLOCK(cx, CXt_SUB, gimme, SP, PL_savestack_ix);
+	    cx = cx_pushblock(CXt_SUB, gimme, SP, PL_savestack_ix);
 	    CX_PUSHSUB_DB(cx, cv, PL_op->op_next, 0);
 
             SAVEI32(PL_debug);
@@ -2032,10 +2032,9 @@ PP(pp_dbstate)
 PP(pp_enter)
 {
     dSP;
-    PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
 
-    CX_PUSHBLOCK(cx, CXt_BLOCK, gimme, SP, PL_savestack_ix);
+    (void)cx_pushblock(CXt_BLOCK, gimme, SP, PL_savestack_ix);
 
     RETURN;
 }
@@ -2062,7 +2061,7 @@ PP(pp_leave)
                                 PL_op->op_private & OPpLVALUE ? 3 : 1);
 
     CX_LEAVE_SCOPE(cx);
-    CX_POPBLOCK(cx);
+    cx_popblock(cx);
     CX_POP(cx);
 
     return NORMAL;
@@ -2138,7 +2137,7 @@ PP(pp_enteriter)
      * there mustn't be anything in the blk_loop substruct that requires
      * freeing or undoing, in case we die in the meantime. And vice-versa.
      */
-    CX_PUSHBLOCK(cx, cxflags, gimme, MARK, PL_savestack_ix);
+    cx = cx_pushblock(cxflags, gimme, MARK, PL_savestack_ix);
     CX_PUSHLOOP_FOR(cx, itervarp, itersave);
 
     if (PL_op->op_flags & OPf_STACKED) {
@@ -2213,7 +2212,7 @@ PP(pp_enterloop)
     PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
 
-    CX_PUSHBLOCK(cx, CXt_LOOP_PLAIN, gimme, SP, PL_savestack_ix);
+    cx = cx_pushblock(CXt_LOOP_PLAIN, gimme, SP, PL_savestack_ix);
     CX_PUSHLOOP_PLAIN(cx);
 
     RETURN;
@@ -2242,7 +2241,7 @@ PP(pp_leaveloop)
 
     CX_LEAVE_SCOPE(cx);
     CX_POPLOOP(cx);	/* Stack values are safe: release loop vars ... */
-    CX_POPBLOCK(cx);
+    cx_popblock(cx);
     CX_POP(cx);
 
     return NORMAL;
@@ -2349,7 +2348,7 @@ PP(pp_leavesublv)
 
     CX_LEAVE_SCOPE(cx);
     CX_POPSUB(cx);	/* Stack values are safe: release CV and @_ ... */
-    CX_POPBLOCK(cx);
+    cx_popblock(cx);
     retop =  cx->blk_sub.retop;
     CX_POP(cx);
 
@@ -2531,7 +2530,7 @@ PP(pp_last)
     /* Stack values are safe: */
     CX_LEAVE_SCOPE(cx);
     CX_POPLOOP(cx);	/* release loop vars ... */
-    CX_POPBLOCK(cx);
+    cx_popblock(cx);
     nextop = cx->blk_loop.my_op->op_lastop->op_next;
     CX_POP(cx);
 
@@ -2547,7 +2546,7 @@ PP(pp_next)
     if (!((PL_op->op_flags & OPf_SPECIAL) && CxTYPE_is_LOOP(cx)))
         cx = S_unwind_loop(aTHX);
 
-    CX_TOPBLOCK(cx);
+    cx_topblock(cx);
     PL_curcop = cx->blk_oldcop;
     PERL_ASYNC_CHECK();
     return (cx)->blk_loop.my_op->op_nextop;
@@ -2568,7 +2567,7 @@ PP(pp_redo)
 
     FREETMPS;
     CX_LEAVE_SCOPE(cx);
-    CX_TOPBLOCK(cx);
+    cx_topblock(cx);
     PL_curcop = cx->blk_oldcop;
     PERL_ASYNC_CHECK();
     return redo_op;
@@ -2713,7 +2712,7 @@ PP(pp_goto)
 		dounwind(cxix);
             }
             cx = CX_CUR();
-	    CX_TOPBLOCK(cx);
+	    cx_topblock(cx);
 	    SPAGAIN;
 
             /* protect @_ during save stack unwind. */
@@ -2807,8 +2806,8 @@ PP(pp_goto)
                 PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;
 
 		/* XS subs don't have a CXt_SUB, so pop it;
-                 * this is a CX_POPBLOCK(), less all the stuff we already did
-                 * for CX_TOPBLOCK() earlier */
+                 * this is a cx_popblock(), less all the stuff we already did
+                 * for cx_topblock() earlier */
                 PL_curcop = cx->blk_oldcop;
                 CX_POP(cx);
 
@@ -2996,7 +2995,7 @@ PP(pp_goto)
 		DIE(aTHX_ "panic: docatch: illegal ix=%ld", (long)ix);
 	    dounwind(ix);
             cx = CX_CUR();
-	    CX_TOPBLOCK(cx);
+	    cx_topblock(cx);
 	}
 
 	/* push wanted frames */
@@ -3398,7 +3397,7 @@ S_doeval_compile(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
             cx = CX_CUR();
             CX_LEAVE_SCOPE(cx);
 	    CX_POPEVAL(cx);
-	    CX_POPBLOCK(cx);
+	    cx_popblock(cx);
             if (in_require)
                 namesv = cx->blk_eval.old_namesv;
             CX_POP(cx);
@@ -4042,7 +4041,7 @@ PP(pp_require)
     }
 
     /* switch to eval mode */
-    CX_PUSHBLOCK(cx, CXt_EVAL, gimme, SP, old_savestack_ix);
+    cx = cx_pushblock(CXt_EVAL, gimme, SP, old_savestack_ix);
     CX_PUSHEVAL(cx, PL_op->op_next, newSVpv(name, 0));
 
     SAVECOPLINE(&PL_compiling);
@@ -4156,7 +4155,7 @@ PP(pp_entereval)
      * to do the dirty work for us */
     runcv = find_runcv(&seq);
 
-    CX_PUSHBLOCK(cx, (CXt_EVAL|CXp_REAL), gimme, SP, old_savestack_ix);
+    cx = cx_pushblock((CXt_EVAL|CXp_REAL), gimme, SP, old_savestack_ix);
     CX_PUSHEVAL(cx, PL_op->op_next, NULL);
 
     /* prepare to compile string */
@@ -4242,7 +4241,7 @@ PP(pp_leaveeval)
 
     CX_LEAVE_SCOPE(cx);
     CX_POPEVAL(cx);
-    CX_POPBLOCK(cx);
+    cx_popblock(cx);
     retop = cx->blk_eval.retop;
     evalcv = cx->blk_eval.cv;
     CX_POP(cx);
@@ -4274,7 +4273,7 @@ Perl_delete_eval_scope(pTHX)
     cx = CX_CUR();
     CX_LEAVE_SCOPE(cx);
     CX_POPEVAL(cx);
-    CX_POPBLOCK(cx);
+    cx_popblock(cx);
     CX_POP(cx);
 }
 
@@ -4286,7 +4285,7 @@ Perl_create_eval_scope(pTHX_ OP *retop, U32 flags)
     PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
 	
-    CX_PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), gimme,
+    cx = cx_pushblock((CXt_EVAL|CXp_TRYBLOCK), gimme,
                     PL_stack_sp, PL_savestack_ix);
     CX_PUSHEVAL(cx, retop, NULL);
 
@@ -4326,7 +4325,7 @@ PP(pp_leavetry)
         leave_adjust_stacks(oldsp, oldsp, gimme, 1);
     CX_LEAVE_SCOPE(cx);
     CX_POPEVAL(cx);
-    CX_POPBLOCK(cx);
+    cx_popblock(cx);
     retop = cx->blk_eval.retop;
     CX_POP(cx);
 
@@ -4345,7 +4344,7 @@ PP(pp_entergiven)
     assert(!PL_op->op_targ); /* used to be set for lexical $_ */
     GvSV(PL_defgv) = SvREFCNT_inc(newsv);
 
-    CX_PUSHBLOCK(cx, CXt_GIVEN, gimme, SP, PL_savestack_ix);
+    cx = cx_pushblock(CXt_GIVEN, gimme, SP, PL_savestack_ix);
     CX_PUSHGIVEN(cx, origsv);
 
     RETURN;
@@ -4370,7 +4369,7 @@ PP(pp_leavegiven)
 
     CX_LEAVE_SCOPE(cx);
     CX_POPGIVEN(cx);
-    CX_POPBLOCK(cx);
+    cx_popblock(cx);
     CX_POP(cx);
 
     return NORMAL;
@@ -4925,7 +4924,7 @@ PP(pp_enterwhen)
     if ((0 == (PL_op->op_flags & OPf_SPECIAL)) && !SvTRUEx(POPs))
 	RETURNOP(cLOGOP->op_other->op_next);
 
-    CX_PUSHBLOCK(cx, CXt_WHEN, gimme, SP, PL_savestack_ix);
+    cx = cx_pushblock(CXt_WHEN, gimme, SP, PL_savestack_ix);
     CX_PUSHWHEN(cx);
 
     RETURN;
@@ -4964,7 +4963,7 @@ PP(pp_leavewhen)
         /* emulate pp_next. Note that any stack(s) cleanup will be
          * done by the pp_unstack which op_nextop should point to */
         cx = CX_CUR();
-	CX_TOPBLOCK(cx);
+	cx_topblock(cx);
 	PL_curcop = cx->blk_oldcop;
 	return cx->blk_loop.my_op->op_nextop;
     }
@@ -4993,7 +4992,7 @@ PP(pp_continue)
     PL_stack_sp = PL_stack_base + cx->blk_oldsp;
     CX_LEAVE_SCOPE(cx);
     CX_POPWHEN(cx);
-    CX_POPBLOCK(cx);
+    cx_popblock(cx);
     nextop = cx->blk_givwhen.leave_op->op_next;
     CX_POP(cx);
 

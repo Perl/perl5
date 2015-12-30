@@ -1668,7 +1668,7 @@ PP(pp_sort)
 	    }
 
             gimme = G_SCALAR;
-	    CX_PUSHBLOCK(cx, CXt_NULL, gimme, PL_stack_base, old_savestack_ix);
+	    cx = cx_pushblock(CXt_NULL, gimme, PL_stack_base, old_savestack_ix);
 	    if (!(flags & OPf_SPECIAL)) {
 		cx->cx_type = CXt_SUB|CXp_MULTICALL;
 		CX_PUSHSUB(cx, cv, NULL, hasargs);
@@ -1709,7 +1709,7 @@ PP(pp_sort)
                 assert(CxTYPE(cx) == CXt_NULL);
                 /* there isn't a POPNULL ! */
 
-	    CX_POPBLOCK(cx);
+	    cx_popblock(cx);
             CX_POP(cx);
 	    POPSTACK;
 	    CATCH_SET(oldcatch);

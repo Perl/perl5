@@ -951,47 +951,7 @@ struct block {
 		    (long)(cx->blk_oldsaveix),                          \
 		    __FILE__, __LINE__));
 
-/* Enter a block. */
-#define CX_PUSHBLOCK(cx, t, gimme, sp, saveix)                          \
-        CXINC,                                                          \
-        cx = CX_CUR(),		                                        \
-	cx->cx_type		= t,					\
-	cx->blk_oldsp		= sp - PL_stack_base,			\
-	cx->blk_oldcop		= PL_curcop,				\
-	cx->blk_oldmarksp	= PL_markstack_ptr - PL_markstack,	\
-        cx->blk_oldsaveix       = saveix,                               \
-	cx->blk_oldscopesp	= PL_scopestack_ix,			\
-	cx->blk_oldpm		= PL_curpm,				\
-	cx->blk_gimme		= (U8)gimme;				\
-        cx->cx_u.cx_blk.blku_old_tmpsfloor = PL_tmps_floor;             \
-        PL_tmps_floor           = PL_tmps_ix;                           \
-	CX_DEBUG(cx, "PUSH");
 
-#define _CX_POPBLOCK_COMMON(cx)						\
-	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
-	PL_scopestack_ix = cx->blk_oldscopesp,				\
-	PL_curpm	 = cx->blk_oldpm,
-
-/* Exit a block (RETURN and LAST). */
-#define CX_POPBLOCK(cx)							\
-	CX_DEBUG(cx, "POP");						\
-        _CX_POPBLOCK_COMMON(cx)                                         \
-        /* LEAVE_SCOPE() should have made this true. /(?{})/ cheats
-         * and leaves a CX entry lying around for repeated use, so
-         * skip for multicall */                  \
-        assert(   (CxTYPE(cx) == CXt_SUB && CxMULTICALL(cx))            \
-                || PL_savestack_ix == cx->blk_oldsaveix);               \
-	PL_curcop     = cx->blk_oldcop,				        \
-        PL_tmps_floor = cx->cx_u.cx_blk.blku_old_tmpsfloor;             \
-
-/* Continue a block elsewhere (e.g. NEXT, REDO, GOTO).
- * Whereas CX_POPBLOCK restores the state to the point just before PUSHBLOCK
- * was called,  CX_TOPBLOCK restores it to the point just *after* PUSHBLOCK
- * was called. */
-#define CX_TOPBLOCK(cx)							\
-	CX_DEBUG(cx, "TOP");						\
-        _CX_POPBLOCK_COMMON(cx)                                         \
-	PL_stack_sp	 = PL_stack_base + cx->blk_oldsp;
 
 /* substitution context */
 struct subst {
@@ -1291,6 +1251,9 @@ typedef struct stackinfo PERL_SI;
 #define IN_PERL_COMPILETIME	(PL_curcop == &PL_compiling)
 #define IN_PERL_RUNTIME		(PL_curcop != &PL_compiling)
 
+
+
+
 /*
 =head1 Multicall Functions
 
@@ -1312,7 +1275,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 */
 
 #define dMULTICALL \
-    SV **newsp;			/* set by CX_POPBLOCK */		\
+    SV **newsp;			/* set by cx_popblock */		\
     PERL_CONTEXT *cx;							\
     CV *multicall_cv;							\
     OP *multicall_cop;							\
@@ -1334,7 +1297,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
  	multicall_oldcatch = CATCH_GET;					\
 	CATCH_SET(TRUE);						\
 	PUSHSTACKi(PERLSI_MULTICALL);					\
-	CX_PUSHBLOCK(cx, (CXt_SUB|CXp_MULTICALL|flags), gimme,          \
+	cx = cx_pushblock((CXt_SUB|CXp_MULTICALL|flags), gimme,         \
                   PL_stack_sp, PL_savestack_ix);	                \
 	CX_PUSHSUB(cx, cv, NULL, hasargs);				\
 	SAVEOP();					                \
@@ -1366,7 +1329,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
         gimme = cx->blk_gimme;                                          \
         PERL_UNUSED_VAR(newsp); /* for API */                           \
         PERL_UNUSED_VAR(gimme); /* for API */                           \
-	CX_POPBLOCK(cx);				   		\
+	cx_popblock(cx);				   		\
 	CX_POP(cx);                                                     \
 	POPSTACK;							\
 	CATCH_SET(multicall_oldcatch);					\
