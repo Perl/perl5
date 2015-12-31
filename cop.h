@@ -1083,8 +1083,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 
 #define dMULTICALL \
     OP  *multicall_cop;							\
-    bool multicall_oldcatch; 						\
-    I32  multicall_saveix_floor
+    bool multicall_oldcatch
 
 #define PUSH_MULTICALL(the_cv) \
     PUSH_MULTICALL_FLAGS(the_cv, 0)
@@ -1105,7 +1104,6 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
                   PL_stack_sp, PL_savestack_ix);	                \
         cx_pushsub(cx, cv, NULL, 0);                                    \
 	SAVEOP();					                \
-        multicall_saveix_floor = PL_savestack_ix;                       \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
 	if (CvDEPTH(cv) >= 2)  						\
@@ -1118,7 +1116,6 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
     STMT_START {							\
 	PL_op = multicall_cop;						\
 	CALLRUNOPS(aTHX);						\
-        LEAVE_SCOPE(multicall_saveix_floor);                            \
     } STMT_END
 
 #define POP_MULTICALL \

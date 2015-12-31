@@ -161,15 +161,10 @@ use XS::APItest;
         @a = multicall_return \&f9, $gimme;
         gimme_check($gimme, \@a, ["one", "two"], "for-return two args lval");
     }
-}
 
-# RT #116577: MULTICALL should clear scope after each call
+    # MULTICALL *shouldn't* clear savestack after each call
 
-{
-    my @r;
-
-    my $s = sub { my $x; push @r, \$x; 1 };
-
-    XS::APItest::multicall_each \&$s, 1,2;
-    isnt($r[0], $r[1], "#116577");
+    sub f10 { my $x = 1; $x };
+    my @a = XS::APItest::multicall_return \&f10, G_SCALAR;
+    ::is($a[0], 1, "leave scope");
 }
