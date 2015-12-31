@@ -33,14 +33,22 @@ BEGIN {
 # pointer, which Perl converts into undef. We assume for now that all
 # such platforms support glibc-style selection of a different hashing
 # algorithm.
+# glibc supports MD5, but OpenBSD only supports Blowfish.
 my $alg = '';       # Use default algorithm
-if ( !defined(crypt("ab", "cd")) ) {
-    $alg = '$5$';   # Use SHA-256
+if ( !defined(crypt("ab", $alg."cd")) ) {
+    $alg = '$5$';   # Try SHA-256
+}
+if ( !defined(crypt("ab", $alg."cd")) ) {
+    $alg = '$2b$12$FPWWO2RJ3CK4FINTw0Hi';  # Try Blowfish
+}
+if ( !defined(crypt("ab", $alg."cd")) ) {
+    $alg = ''; # Nothing worked.  Back to default
 }
 
 SKIP: {
     skip ("VOS crypt ignores salt.", 1) if ($^O eq 'vos');
-    ok(substr(crypt("ab", $alg."cd"), 2) ne substr(crypt("ab", $alg."ce"), 2),
+    ok(substr(crypt("ab", $alg."cd"), length($alg)+2) ne 
+       substr(crypt("ab", $alg."ce"), length($alg)+2),
        "salt makes a difference");
 }
 
