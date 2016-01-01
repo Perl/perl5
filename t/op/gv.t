@@ -182,7 +182,10 @@ is (*{*x{GLOB}}, "*main::STDOUT");
 	$warn .= $_[0];
     };
     my $val = *x{FILEHANDLE};
-    print {*x{IO}} ($warn =~ /is deprecated/
+
+    # deprecation warning removed in v5.23 -- rjbs, 2015-12-31
+    # https://rt.perl.org/Ticket/Display.html?id=127060
+    print {*x{IO}} (! defined $warn
 		    ? "ok $test\n" : "not ok $test\n");
     curr_test(++$test);
 }

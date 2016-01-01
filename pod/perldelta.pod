@@ -204,7 +204,9 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+Accessing the C<IO> part of a glob as C<FILEHANDLE> instead of C<IO> is no
+longer deprecated.  It is discouraged to encourage uniformity (so that, for
+example, one can grep more easily) but it will not be removed. [perl #127060]
 
 =back
 

@@ -675,8 +675,6 @@ PP(pp_gelem)
 	    break;
 	case 'F':
 	    if (len == 10 && strEQ(second_letter, "ILEHANDLE")) {
-		/* finally deprecated in 5.8.0 */
-		deprecate("*glob{FILEHANDLE}");
 		tmpRef = MUTABLE_SV(GvIOp(gv));
 	    }
 	    else
