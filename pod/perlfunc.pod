@@ -9052,8 +9052,15 @@ X<waitpid>
 
 Waits for a particular child process to terminate and returns the pid of
 the deceased process, or C<-1> if there is no such child process.  On some
-systems, a value of 0 indicates that there are processes still running.
-The status is returned in C<$?> and C<${^CHILD_ERROR_NATIVE}>.  If you say
+systems, a return value of 0 indicates that there are processes still running.
+The status is returned in C<$?> and C<${^CHILD_ERROR_NATIVE}>.
+
+A PID of C<0> indicates to wait for any child process whose process group ID is
+equal to that of the current process.  A PID of less than C<-1> indicates to
+wait for any child process whose process group ID is equal to -PID.  A PID of
+C<-1> indicates to wait for any child process.
+
+If you say
 
     use POSIX ":sys_wait_h";
     #...
@@ -9061,7 +9068,8 @@ The status is returned in C<$?> and C<${^CHILD_ERROR_NATIVE}>.  If you say
         $kid = waitpid(-1, WNOHANG);
     } while $kid > 0;
 
-then you can do a non-blocking wait for all pending zombie processes.
+then you can do a non-blocking wait for all pending zombie processes (see
+L<POSIX/WAIT>).
 Non-blocking wait is available on machines supporting either the
 waitpid(2) or wait4(2) syscalls.  However, waiting for a particular
 pid with FLAGS of C<0> is implemented everywhere.  (Perl emulates the
