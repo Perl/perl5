@@ -9051,8 +9051,9 @@ X<waitpid>
 =for Pod::Functions wait for a particular child process to die
 
 Waits for a particular child process to terminate and returns the pid of
-the deceased process, or C<-1> if there is no such child process.  On some
-systems, a return value of 0 indicates that there are processes still running.
+the deceased process, or C<-1> if there is no such child process.  A
+non-blocking wait (with L<WNOHANG|POSIX/WNOHANG> in FLAGS) can return 0 if
+there are child processes matching PID but none have terminated yet.
 The status is returned in C<$?> and C<${^CHILD_ERROR_NATIVE}>.
 
 A PID of C<0> indicates to wait for any child process whose process group ID is
