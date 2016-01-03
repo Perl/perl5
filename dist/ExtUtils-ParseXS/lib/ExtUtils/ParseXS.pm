@@ -11,7 +11,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.30';
+  $VERSION = '3.31';
 }
 use ExtUtils::ParseXS::Constants $VERSION;
 use ExtUtils::ParseXS::CountLines $VERSION;
@@ -579,7 +579,7 @@ EOF
           } );
         }
         else {
-          print "\t$class *";
+          print "\t" . map_type($self, "$class *");
           $self->{var_types}->{"THIS"} = "$class *";
           $self->generate_init( {
             type          => "$class *",
