@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 55);
+plan(tests => 57);
 
 sub empty_sub {}
 
@@ -245,6 +245,13 @@ sub predeclared {
 predeclared(); # set $x to 42
 $main::x = $main::x = "You should not see this.";
 inside_predeclared(); # run test
+
+# RT #126845: this used to fail an assertion in Perl_newATTRSUB_x()
+eval 'sub rt126845_1 (); sub rt126845_1 () :lvalue';
+pass("RT #126845: stub with prototype, then with attribute");
+
+eval 'sub rt126845_2 (); sub rt126845_2 () :lvalue {}';
+pass("RT #126845: stub with prototype, then definition with attribute");
 
 # RT #124156 death during unwinding causes crash
 # the tie allows us to trigger another die while cleaning up the stack

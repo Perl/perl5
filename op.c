@@ -8407,7 +8407,6 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
         const_sv = NULL;
 
     if (SvPOK(gv) || (SvROK(gv) && SvTYPE(SvRV(gv)) != SVt_PVCV)) {
-	assert (block);
 	cv_ckproto_len_flags((const CV *)gv,
 			     o ? (const GV *)cSVOPo->op_sv : NULL, ps,
 			     ps_len, ps_utf8|CV_CKPROTO_CURSTASH);
