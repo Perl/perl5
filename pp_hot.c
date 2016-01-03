@@ -3364,6 +3364,7 @@ PP(pp_grepwhile)
 void
 Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, I32 gimme, int pass)
 {
+    dVAR;
     dSP;
     SSize_t tmps_base; /* lowest index into tmps stack that needs freeing now */
     SSize_t nargs;
