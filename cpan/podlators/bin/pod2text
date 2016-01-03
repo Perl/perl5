@@ -1,4 +1,4 @@
-#!perl
+#!/usr/bin/perl
 
 # pod2text -- Convert POD data to formatted ASCII text.
 #

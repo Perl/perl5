@@ -1,5 +1,17 @@
                       User-Visible podlators Changes
 
+podlators 4.04 (2016-01-02)
+
+    Fix portability of the t/docs/synopsis.t test to Windows.  It was
+    assuming UNIX path delimiters when filtering out files it didn't
+    intend to test.
+
+    Don't include .travis.yml in the distribution so that it isn't picked
+    up by Perl core.  Thanks, Karen Etheridge.  (#110385)
+
+    Add homepage information to the CPAN metadata and change the canonical
+    repository location to GitHub.
+
 podlators 4.03 (2015-12-06)
 
     Fix tests when POD_MAN_DATE or SOURCE_DATE_EPOCH are already set in

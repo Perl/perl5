@@ -38,7 +38,7 @@ use Pod::Simple ();
 
 @ISA = qw(Pod::Simple);
 
-$VERSION = '4.03';
+$VERSION = '4.04';
 
 # Set the debugging level.  If someone has inserted a debug function into this
 # class already, use that.  Otherwise, use any Pod::Simple debug function

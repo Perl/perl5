@@ -66,7 +66,7 @@ END {
 sub _stderr_save {
     my $tmpdir = File::Spec->catdir('t', 'tmp');
     if (!-d $tmpdir) {
-        mkdir('t/tmp', 0777) or BAIL_OUT("cannot create t/tmp: $!");
+        mkdir($tmpdir, 0777) or BAIL_OUT("cannot create $tmpdir: $!");
     }
     my $path = File::Spec->catfile($tmpdir, "out$$.err");
 
@@ -309,7 +309,7 @@ sub test_snippet_with_io {
     # directive.
     my $tmpdir = File::Spec->catdir('t', 'tmp');
     if (!-d $tmpdir) {
-        mkdir($tmpdir, 0777);
+        mkdir($tmpdir, 0777) or BAIL_OUT("cannot create $tmpdir: $!");
     }
     my $input_file = File::Spec->catfile('t', 'tmp', "tmp$$.pod");
     open(my $input, '>', $input_file)

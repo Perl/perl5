@@ -1,4 +1,4 @@
-#!perl
+#!/usr/bin/perl
 
 # pod2man -- Convert POD data to formatted *roff input.
 #
