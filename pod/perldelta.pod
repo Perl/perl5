@@ -121,6 +121,10 @@ XXX
 
 L<Module::CoreList> has been upgraded from version 5.20151220 to 5.20160120.
 
+=item *
+
+The F<cpan/podlators/> bundle has been upgraded from version 2.28 to 4.04.
+
 =back
 
 =head2 Removed Modules and Pragmata
