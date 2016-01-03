@@ -14007,8 +14007,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
                 /* FALLTHROUGH */
 	    case CXt_LOOP_LIST:
 	    case CXt_LOOP_LAZYIV:
-	    case CXt_LOOP_PLAIN:
-                /* code common to all CXt_LOOP_* types */
+                /* code common to all 'for' CXt_LOOP_* types */
 		ncx->blk_loop.itersave =
                                     sv_dup_inc(ncx->blk_loop.itersave, param);
 		if (CxPADLOOP(ncx)) {
@@ -14028,6 +14027,8 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 			= gv_dup((const GV *)ncx->blk_loop.itervar_u.gv,
 				    param);
 		}
+		break;
+	    case CXt_LOOP_PLAIN:
 		break;
 	    case CXt_FORMAT:
 		ncx->blk_format.prevcomppad =
