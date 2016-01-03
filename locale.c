@@ -1878,7 +1878,9 @@ Perl__setlocale_debug_string(const int category,        /* category number,
      * be overwritten by the next call, so this should be used just to
      * formulate a string to immediately print or savepv() on. */
 
-    static char ret[128] = "";
+    /* initialise to a non-null value to keep it out of BSS and so keep
+     * -DPERL_GLOBAL_STRUCT_PRIVATE happy */
+    static char ret[128] = "x";
 
     my_strlcpy(ret, "setlocale(", sizeof(ret));
 
