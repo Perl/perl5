@@ -69,7 +69,7 @@
 %type <opval> stmtseq fullstmt labfullstmt barestmt block mblock else
 %type <opval> expr term subscripted scalar ary hsh arylen star amper sideff
 %type <opval> sliceme kvslice gelem
-%type <opval> listexpr nexpr texpr iexpr mexpr mnexpr miexpr
+%type <opval> listexpr nexpr texpr iexpr mexpr mnexpr
 %type <opval> optlistexpr optexpr optrepl indirob listop method
 %type <opval> formname subname proto optsubbody cont my_scalar my_var
 %type <opval> refgen_topic formblock
@@ -358,10 +358,10 @@ barestmt:	PLUGSTMT
 			      newCONDOP(0, $4, op_scope($6), $7));
 			  parser->copline = (line_t)$1;
 			}
-	|	UNLESS '(' remember miexpr ')' mblock else
+	|	UNLESS '(' remember mexpr ')' mblock else
 			{
 			  $$ = block_end($3,
-			      newCONDOP(0, $4, op_scope($6), $7));
+                              newCONDOP(0, $4, $7, op_scope($6)));
 			  parser->copline = (line_t)$1;
 			}
 	|	GIVEN '(' remember mexpr ')' mblock
@@ -578,10 +578,6 @@ mexpr	:	expr
 	;
 
 mnexpr	:	nexpr
-			{ $$ = $1; intro_my(); }
-	;
-
-miexpr	:	iexpr
 			{ $$ = $1; intro_my(); }
 	;
 
