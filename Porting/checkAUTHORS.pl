@@ -734,7 +734,6 @@ mark.p.lutz\100boeing.com               tecmpl1\100triton.ca.boeing.com
 marnix\100gmail.com                     pttesac!marnix!vanam
 marty+p5p\100kasei.com                  marty\100martian.org
 mats\100sm6sxl.net                      mats\100sm5sxl.net
-mbarbon\100dsi.unive.it                 mattia\100barbon.org
 mbarbon\100dsi.unive.it                 mattia.barbon\100libero.it
 +                                       mattia\100barbon.org
 mcmahon\100ibiblio.org                  mcmahon\100metalab.unc.edu
