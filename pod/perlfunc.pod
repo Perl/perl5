@@ -6051,7 +6051,8 @@ X<return>
 
 =for Pod::Functions get out of a function early
 
-Returns from a subroutine, C<eval>, or C<do FILE> with the value
+Returns from a subroutine, C<eval>, C<do FILE>, sort block or regex eval
+block (but not a grep or map block) with the value
 given in EXPR.  Evaluation of EXPR may be in list, scalar, or void
 context, depending on how the return value will be used, and the context
 may vary from one execution to the next (see L</wantarray>).  If no EXPR
