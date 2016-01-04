@@ -153,11 +153,14 @@ STATIC void ab_process_assignment(pTHX_ OP *left, OP *right) {
 #define ab_process_assignment(l, r) \
     ab_process_assignment(aTHX_ (l), (r))
  if (ab_op_is_dollar_bracket(left) && right->op_type == OP_CONST) {
-  set_arybase_to(SvIV(cSVOPx_sv(right)));
+  IV base = SvIV(cSVOPx_sv(right));
+  set_arybase_to(base);
   ab_neuter_dollar_bracket(left);
-  Perl_ck_warner_d(aTHX_
-   packWARN(WARN_DEPRECATED), "Use of assignment to $[ is deprecated"
-  );
+  if (base) {
+    Perl_ck_warner_d(aTHX_
+     packWARN(WARN_DEPRECATED), "Use of assignment to $[ is deprecated"
+    );
+  }
  }
 }
 
