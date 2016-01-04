@@ -1,34 +1,36 @@
-#!/usr/bin/perl -w
+#!perl
 
 use strict;
-use Test::More tests => 2363
-    + 5;		# own tests
+use warnings;
 
+use Test::More tests => 2409            # tests in require'd file
+                        + 5;            # tests in this file
 
 use Math::BigInt lib => 'Calc';
 use Math::BigFloat;
 
-use vars qw ($class $try $x $y $f @args $ans $ans1 $ans1_str $setup $CL);
-$class = "Math::BigFloat";
-$CL = "Math::BigInt::Calc";
+our $CLASS = "Math::BigFloat";
+our $CALC  = "Math::BigInt::Calc";      # backend
 
-is ($class->config()->{class},$class);
-is ($class->config()->{with}, $CL);
+is($CLASS->config()->{class}, $CLASS, "$CLASS->config()->{class}");
+is($CLASS->config()->{with},  $CALC,  "$CLASS->config()->{with}");
 
 # bug #17447: Can't call method Math::BigFloat->bsub, not a valid method
-my $c = Math::BigFloat->new( '123.3' );
-is ($c->bsub(123), '0.3'); # calling bsub on a BigFloat works
+my $c = Math::BigFloat->new('123.3');
+is($c->bsub(123), '0.3',
+   qq|\$c = Math::BigFloat -> new("123.3"); \$y = \$c -> bsub("123")|);
 
-# Bug until BigInt v1.86, the scale wasn't treated as a scalar:
-$c = Math::BigFloat->new('0.008'); my $d = Math::BigFloat->new(3);
-my $e = $c->bdiv(Math::BigFloat->new(3),$d);
+# Bug until Math::BigInt v1.86, the scale wasn't treated as a scalar:
+$c = Math::BigFloat->new('0.008');
+my $d = Math::BigFloat->new(3);
+my $e = $c->bdiv(Math::BigFloat->new(3), $d);
 
-is ($e,'0.00267'); # '0.008 / 3 => 0.0027');
+is($e, '0.00267', '0.008 / 3 = 0.0027');
 
 SKIP: {
     skip("skipping test which is not for this backend", 1)
-      unless $CL eq 'Math::BigInt::Calc';
-    is (ref($e->{_e}->[0]), '');  # 'Not a BigInt');
+      unless $CALC eq 'Math::BigInt::Calc';
+    is(ref($e->{_e}->[0]), '', '$e->{_e}->[0] is a scalar');
 }
 
 require 't/bigfltpm.inc';	# all tests here for sharing

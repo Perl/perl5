@@ -1,15 +1,17 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 # test that the new alias names work
 
 use strict;
+use warnings;
+
 use Test::More tests => 6;
 
-BEGIN { unshift @INC, 't'; }
+use lib 't';
 
 use Math::BigInt::Subclass;
 
-use vars qw/$CL $x/;
-$CL = 'Math::BigInt::Subclass';
+our $CLASS;
+$CLASS = 'Math::BigInt::Subclass';
 
 require 't/alias.inc';

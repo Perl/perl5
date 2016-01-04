@@ -11,21 +11,15 @@ BEGIN { $class = 'Math::BigFloat'; }
 BEGIN { use_ok($class, '1.999710'); }
 
 while (<DATA>) {
-    s/\s+\z//;
-    next if /^#/ || ! /\S/;
+    s/#.*$//;           # remove comments
+    s/\s+$//;           # remove trailing whitespace
+    next unless length; # skip empty lines
 
     my ($in0, $out0) = split /:/;
     my $x;
 
     my $test = qq|\$x = $class -> from_hex("$in0");|;
-
     my $desc = $test;
-
-    print("#\n",
-          "# Now about to execute the following test.\n",
-          "#\n",
-          "# $test\n",
-          "#\n");
 
     eval $test;
     die $@ if $@;       # this should never happen

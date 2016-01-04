@@ -1,29 +1,32 @@
-#!/usr/bin/perl -w
+#!perl
 
 use strict;
+use warnings;
+
 use Test::More tests => 4;
 
-BEGIN { unshift @INC, 't'; }
+use lib 't';
 
-# first load BigInt with Calc
+# first load Math::BigInt with Math::BigInt::Calc
 use Math::BigInt lib => 'Calc';
 
-# BigFloat will remember that we loaded Calc
+# Math::BigFloat will remember that we loaded Math::BigInt::Calc
 require Math::BigFloat;
-is (Math::BigFloat::config()->{lib}, 'Math::BigInt::Calc', 'BigFloat got Calc');
+is(Math::BigFloat::config()->{lib}, 'Math::BigInt::Calc',
+   'Math::BigFloat got Math::BigInt::Calc');
 
-# now load BigInt again with a different lib
-Math::BigInt->import( lib => 'BareCalc' );
+# now load Math::BigInt again with a different lib
+Math::BigInt->import(lib => 'BareCalc');
 
-# and finally test that BigFloat knows about BareCalc
+# and finally test that Math::BigFloat knows about Math::BigInt::BareCalc
 
-is (Math::BigFloat::config()->{lib}, 'Math::BigInt::BareCalc', 'BigFloat was notified');
+is(Math::BigFloat::config()->{lib}, 'Math::BigInt::BareCalc',
+   'Math::BigFloat was notified');
 
 # See that Math::BigFloat supports "only"
 eval "Math::BigFloat->import('only' => 'Calc')";
-is (Math::BigFloat::config()->{lib}, 'Math::BigInt::Calc', '"only" worked');
+is(Math::BigFloat::config()->{lib}, 'Math::BigInt::Calc', '"only" worked');
 
 # See that Math::BigFloat supports "try"
 eval "Math::BigFloat->import('try' => 'BareCalc')";
-is (Math::BigFloat::config()->{lib}, 'Math::BigInt::BareCalc', '"try" worked');
-
+is(Math::BigFloat::config()->{lib}, 'Math::BigInt::BareCalc', '"try" worked');

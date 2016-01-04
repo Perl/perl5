@@ -1654,8 +1654,6 @@ cpan/Math-BigInt/t/bigints.t		See if BigInt.pm works
 cpan/Math-BigInt/t/biglog.t		Test the log function
 cpan/Math-BigInt/t/big_pi_e.t		test bpi() and bexp()
 cpan/Math-BigInt/t/bigroot.t		Test the broot function
-cpan/Math-BigInt/t/blog-mbf.t		Math::BigInt tests
-cpan/Math-BigInt/t/blog-mbi.t		Math::BigInt tests
 cpan/Math-BigInt/t/calling.t		Test calling conventions
 cpan/Math-BigInt/t/config.t		Test Math::BigInt->config()
 cpan/Math-BigInt/t/constant.t		Test Math::BigInt/BigFloat under :constant

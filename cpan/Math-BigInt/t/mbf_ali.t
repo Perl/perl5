@@ -1,14 +1,15 @@
-#!/usr/bin/perl -w
+#!perl
 
 # test that the new alias names work
 
 use strict;
+use warnings;
+
 use Test::More tests => 6;
 
 use Math::BigFloat;
 
-use vars qw/$x $CL/;
-
-$CL = 'Math::BigFloat';
+our $CLASS;
+$CLASS = 'Math::BigFloat';
 
 require 't/alias.inc';

@@ -22,14 +22,14 @@ use Math::BigFloat;
 my $int = Math::BigInt->new(10);
 my $int_percent = My::Percent::Float->new(100);
 
-is($int * $int_percent, 10);
+is($int * $int_percent, 10, '$int * $int_percent = 10');
 
 ############################################################################
 
 my $float = Math::BigFloat->new(10);
 my $float_percent = My::Percent::Float->new(100);
 
-is($float * $float_percent, 10);
+is($float * $float_percent, 10, '$float * $float_percent = 10');
 
 ############################################################################
 

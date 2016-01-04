@@ -1,14 +1,16 @@
-#!/usr/bin/perl -w
+#!perl
 
 use strict;
-use Test::More tests => 2363;
+use warnings;
 
-BEGIN { unshift @INC, 't'; }
+use Test::More tests => 2409;
+
+use lib 't';
 
 use Math::BigFloat lib => 'BareCalc';
 
-use vars qw ($class $try $x $y $f @args $ans $ans1 $ans1_str $setup $CL);
-$class = "Math::BigFloat";
-$CL = "Math::BigInt::BareCalc";
+our ($CLASS, $CALC);
+$CLASS = "Math::BigFloat";
+$CALC  = "Math::BigInt::BareCalc";      # backend
 
-require 't/bigfltpm.inc';	# all tests here for sharing
+require 't/bigfltpm.inc';	        # all tests here for sharing

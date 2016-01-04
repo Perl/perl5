@@ -24,13 +24,22 @@ for my $class ('Math::BigFloat', 'Math::BigFloat::Subclass') {
     # objectify() has done its thing.
 
     my $float_percent1 = My::Percent::Float1 -> new(100);
-    is($float * $float_percent1, 10);
+    is($float * $float_percent1, 10,
+       qq|\$float = $class -> new(10);|
+       . q| $float_percent1 = My::Percent::Float1 -> new(100);|
+       . q| $float * $float_percent1;|);
 
     my $float_percent2 = My::Percent::Float2 -> new(100);
-    is($float * $float_percent2, 10);
+    is($float * $float_percent2, 10,
+       qq|\$float = $class -> new(10);|
+       . q| $float_percent2 = My::Percent::Float2 -> new(100);|
+       . q| $float * $float_percent2;|);
 
     my $float_percent3 = My::Percent::Float3 -> new(100);
-    is($float * $float_percent3, 10);
+    is($float * $float_percent3, 10,
+       qq|\$float = $class -> new(10);|
+       . q| $float_percent3 = My::Percent::Float3 -> new(100);|
+       . q| $float * $float_percent3;|);
 }
 
 ###############################################################################

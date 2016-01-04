@@ -1,95 +1,107 @@
-#!/usr/bin/perl -w
+#!perl
 
 # test calling conventions, and :constant overloading
 
 use strict;
-use Test::More tests => 160;
+use warnings;
+use lib 't';
 
-BEGIN { unshift @INC, 't'; }
+my $VERSION = '1.999714';       # adjust manually to match latest release
+$VERSION = eval $VERSION;
+
+use Test::More tests => 161;
+
+##############################################################################
 
 package Math::BigInt::Test;
 
 use Math::BigInt;
-use vars qw/@ISA/;
-@ISA = qw/Math::BigInt/;		# child of MBI
+our @ISA = qw/Math::BigInt/;            # subclass of MBI
 use overload;
+
+##############################################################################
 
 package Math::BigFloat::Test;
 
 use Math::BigFloat;
-use vars qw/@ISA/;
-@ISA = qw/Math::BigFloat/;		# child of MBI
+our @ISA = qw/Math::BigFloat/;          # subclass of MBI
 use overload;
+
+##############################################################################
 
 package main;
 
 use Math::BigInt try => 'Calc';
 use Math::BigFloat;
 
-my ($x,$y,$z,$u);
-my $version = '1.76';	# adjust manually to match latest release
+my ($x, $y, $z, $u);
 
 ###############################################################################
 # check whether op's accept normal strings, even when inherited by subclasses
 
 # do one positive and one negative test to avoid false positives by "accident"
 
-my ($func,@args,$ans,$rc,$class,$try);
-while (<DATA>)
-  {
-  $_ =~ s/[\n\r]//g;	# remove newlines
-  next if /^#/; # skip comments
-  if (s/^&//)
-    {
-    $func = $_;
+my ($method, $expected);
+while (<DATA>) {
+    s/#.*$//;                   # remove comments
+    s/\s+$//;                   # remove trailing whitespace
+    next unless length;         # skip empty lines
+
+    if (s/^&//) {
+        $method = $_;
+        next;
     }
-  else
+
+    my @args = split /:/, $_, 99;
+    $expected = pop @args;
+    foreach my $class (qw/
+                             Math::BigInt Math::BigFloat
+                             Math::BigInt::Test Math::BigFloat::Test
+                         /)
     {
-    @args = split(/:/,$_,99);
-    $ans = pop @args;
-    foreach $class (qw/
-      Math::BigInt Math::BigFloat Math::BigInt::Test Math::BigFloat::Test/)
-      {
-      $try = "'$args[0]'"; 			# quote it
-      $try = $args[0] if $args[0] =~ /'/;	# already quoted
-      $try = '' if $args[0] eq '';		# undef, no argument
-      $try = "$class\->$func($try);";
-      $rc = eval $try;
-      print "# Tried: '$try'\n" if !is ($rc, $ans);
-      }
-    } 
+        my $arg = $args[0] =~ /"/ || $args[0] eq "" ? $args[0]
+                                                    : qq|"$args[0]"|;
+        my $try = "$class\->$method($arg);";
+        my $got = eval $try;
+        is($got, $expected, $try);
+    }
+}
 
-  }
+my $class = 'Math::BigInt';
 
-$class = 'Math::BigInt';
+my $try;
 
-# XXX TODO this test does not work/fail.
-# test whether use Math::BigInt qw/version/ works
-#$try = "use $class ($version.'1');";
-#$try .= ' $x = $class->new(123); $x = "$x";';
-#eval $try;
-#is ( $x, undef );               # should result in error!
+# test whether use Math::BigInt qw/VERSION/ works
+$try = "use $class (" . ($VERSION . '1') .");";
+$try .= ' $x = $class->new(123); $x = "$x";';
+eval $try;
+like($@, qr/ ^ Math::BigInt \s+ ( version \s+ )? \S+ \s+ required--this \s+
+             is \s+ only \s+ version \s+ \S+ /x,
+     $try);
 
 # test whether fallback to calc works
-$try = "use $class ($version,'try','foo, bar , ');";
-$try .= "$class\->config()->{lib};";
-$ans = eval $try;
-like ( $ans, qr/^Math::BigInt::(Fast)?Calc\z/);
+$try = qq|use $class ($VERSION, "try", "foo, bar, ");|
+     . qq| $class\->config()->{lib};|;
+$expected = eval $try;
+like($expected, qr/^Math::BigInt::(Fast)?Calc\z/, $try);
 
-# test whether constant works or not, also test for qw($version)
+# test whether constant works or not, also test for qw($VERSION)
 # bgcd() is present in subclass, too
-$try = "use Math::BigInt ($version,'bgcd',':constant');";
-$try .= ' $x = 2**150; bgcd($x); $x = "$x";';
-$ans = eval $try;
-is ( $ans, "1427247692705959881058285969449495136382746624");
+$try = qq|use $class ($VERSION, "bgcd", ":constant");|
+     . q| $x = 2**150; bgcd($x); $x = "$x";|;
+$expected = eval $try;
+is($expected, "1427247692705959881058285969449495136382746624", $try);
 
 # test whether Math::BigInt::Scalar via use works (w/ dff. spellings of calc)
-$try = "use $class ($version,'lib','Scalar');";
-$try .= ' $x = 2**10; $x = "$x";';
-$ans = eval $try; is ( $ans, "1024");
-$try = "use $class ($version,'lib','$class\::Scalar');";
-$try .= ' $x = 2**10; $x = "$x";';
-$ans = eval $try; is ( $ans, "1024");
+$try = qq|use $class ($VERSION, "lib", "Scalar");|
+     . q| $x = 2**10; $x = "$x";|;
+$expected = eval $try;
+is($expected, "1024", $try);
+
+$try = qq|use $class ($VERSION, "lib", "$class\::Scalar");|
+     . q| $x = 2**10; $x = "$x";|;
+$expected = eval $try;
+is($expected, "1024", $try);
 
 # all done
 
@@ -117,8 +129,8 @@ inf:1
 10:10
 -10:-10
 abc:NaN
-'+inf':inf
-'-inf':-inf
+"+inf":inf
+"-inf":-inf
 &bsstr
 1:1e+0
 0:0e+0
@@ -127,7 +139,7 @@ abc:NaN
 -5:-5e+0
 -100:-1e+2
 abc:NaN
-'+inf':inf
+"+inf":inf
 &babs
 -1:1
 1:1
@@ -141,9 +153,9 @@ abc:NaN
 abc:NaN
 &bone
 :1
-'+':1
-'-':-1
+"+":1
+"-":-1
 &binf
 :inf
-'+':inf
-'-':-inf
+"+":inf
+"-":-inf

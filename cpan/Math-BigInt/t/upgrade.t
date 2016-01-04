@@ -1,19 +1,22 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 use strict;
-use Test::More tests => 2124
-    + 2;			# our own tests
+use warnings;
+
+use Test::More tests => 2124            # tests in require'd file
+                         + 2;           # tests in this file
 
 use Math::BigInt upgrade => 'Math::BigFloat';
 use Math::BigFloat;
 
-use vars qw ($scale $class $try $x $y $f @args $ans $ans1 $ans1_str $setup
-             $ECL $CL);
-$class = "Math::BigInt";
-$CL = "Math::BigInt::Calc";
-$ECL = "Math::BigFloat";
+our ($CLASS, $EXPECTED_CLASS, $CALC);
+$CLASS          = "Math::BigInt";
+$EXPECTED_CLASS = "Math::BigFloat";
+$CALC           = "Math::BigInt::Calc";         # backend
 
-is (Math::BigInt->upgrade(),'Math::BigFloat');
-is (Math::BigInt->downgrade()||'','');
+is(Math::BigInt->upgrade(), "Math::BigFloat",
+   qq/Math::BigInt->upgrade()/);
+is(Math::BigInt->downgrade() || "", "",
+   qq/Math::BigInt->downgrade() || ""/);
 
 require 't/upgrade.inc';	# all tests here for sharing

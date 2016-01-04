@@ -1,15 +1,17 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
-# check that simple requiring BigInt works
+# check that simple requiring Math::BigInt works
 
 use strict;
+use warnings;
+
 use Test::More tests => 1;
 
-my ($x);
+require Math::BigInt;
 
-require Math::BigInt; $x = Math::BigInt->new(1); ++$x;
+my $x = Math::BigInt->new(1);
+++$x;
 
-is ($x,2);
+is($x, 2, '$x is 2');
 
 # all tests done
-

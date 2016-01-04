@@ -1,10 +1,11 @@
 package Math::BigInt::Calc;
 
-use 5.006002;
+use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '1.999710';
+our $VERSION = '1.999714';
+$VERSION = eval $VERSION;
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -98,20 +99,24 @@ sub _base_len
   return ($BASE_LEN, $BASE, $AND_BITS, $XOR_BITS, $OR_BITS, $BASE_LEN, $MAX_VAL);
   }
 
-sub _new
-  {
-  # (ref to string) return ref to num_array
-  # Convert a number from string format (without sign) to internal base
-  # 1ex format. Assumes normalized value as input.
-  my $il = length($_[1])-1;
+sub _new {
+    # Given a string representing an integer, returns a reference to an array
+    # of integers, where each integer represents a chunk of the original input
+    # integer. Assumes normalized value as input.
 
-  # < BASE_LEN due len-1 above
-  return [ int($_[1]) ] if $il < $BASE_LEN;	# shortcut for short numbers
+    my ($proto, $str) = @_;
 
-  # this leaves '00000' instead of int 0 and will be corrected after any op
-  [ reverse(unpack("a" . ($il % $BASE_LEN+1) 
-    . ("a$BASE_LEN" x ($il / $BASE_LEN)), $_[1])) ];
-  }                                                                             
+    my $input_len = length($str) - 1;
+
+    # Shortcut for small numbers.
+    return [ int($str) ] if $input_len < $BASE_LEN;
+
+    my $format = "a" . (($input_len % $BASE_LEN) + 1);
+    $format .= $] < 5.008 ? "a$BASE_LEN" x int($input_len / $BASE_LEN)
+                          : "(a$BASE_LEN)*";
+
+    [ reverse(map { 0 + $_ } unpack($format, $str)) ];
+}
 
 BEGIN
   {
@@ -119,11 +124,10 @@ BEGIN
   # multipliable with itself plus carry
   # Test now changed to expect the proper pattern, not a result off by 1 or 2
   my ($e, $num) = 3;	# lowest value we will use is 3+1-1 = 3
-  do 
-    {
-    $num = ('9' x ++$e) + 0;
-    $num *= $num + 1.0;
-    } while ("$num" =~ /9{$e}0{$e}/);	# must be a certain pattern
+  do {
+      $num = '9' x ++$e;
+      $num *= $num + 1;
+  } while $num =~ /9{$e}0{$e}/;		# must be a certain pattern
   $e--; 				# last test failed, so retract one step
   # the limits below brush the problems with the test above under the rug:
   # the test should be able to find the proper $e automatically
@@ -241,34 +245,32 @@ sub import { }
 ##############################################################################
 # convert back to string and number
 
-sub _str
-  {
-  # (ref to BINT) return num_str
-  # Convert number from internal base 100000 format to string format.
-  # internal format is always normalized (no leading zeros, "-0" => "+0")
-  my $ar = $_[1];
+sub _str {
+    # Convert number from internal base 1eN format to string format. Internal
+    # format is always normalized, i.e., no leading zeros.
 
-  my $l = scalar @$ar;				# number of parts
-  if ($l < 1)					# should not happen
-    {
-    require Carp;
-    Carp::croak("$_[1] has no elements");
+    my $ary = $_[1];
+    my $idx = $#$ary;             # index of last element
+
+    if ($idx < 0) {               # should not happen
+        require Carp;
+        Carp::croak("$_[1] has no elements");
     }
 
-  my $ret = "";
-  # handle first one different to strip leading zeros from it (there are no
-  # leading zero parts in internal representation)
-  $l --; $ret .= int($ar->[$l]); $l--;
-  # Interestingly, the pre-padd method uses more time
-  # the old grep variant takes longer (14 vs. 10 sec)
-  my $z = '0' x ($BASE_LEN-1);                            
-  while ($l >= 0)
-    {
-    $ret .= substr($z.$ar->[$l],-$BASE_LEN); # fastest way I could think of
-    $l--;
+    # Handle first one differently, since it should not have any leading zeros.
+    my $ret = int($ary->[$idx]);
+    if ($idx > 0) {
+        $idx--;
+        # Interestingly, the pre-padd method uses more time
+        # the old grep variant takes longer (14 vs. 10 sec)
+        my $z = '0' x ($BASE_LEN - 1);
+        while ($idx >= 0) {
+            $ret .= substr($z . $ary->[$idx], -$BASE_LEN);
+            $idx--;
+        }
     }
-  $ret;
-  }                                                                             
+    $ret;
+}
 
 sub _num
   {
@@ -293,100 +295,96 @@ sub _num
 ##############################################################################
 # actual math code
 
-sub _add
-  {
-  # (ref to int_num_array, ref to int_num_array)
-  # routine to add two base 1eX numbers
-  # stolen from Knuth Vol 2 Algorithm A pg 231
-  # there are separate routines to add and sub as per Knuth pg 233
-  # This routine modifies array x, but not y.
- 
-  my ($c,$x,$y) = @_;
+sub _add {
+    # (ref to int_num_array, ref to int_num_array)
+    #
+    # Routine to add two base 1eX numbers stolen from Knuth Vol 2 Algorithm A
+    # pg 231. There are separate routines to add and sub as per Knuth pg 233.
+    # This routine modifies array x, but not y.
 
-  return $x if (@$y == 1) && $y->[0] == 0;		# $x + 0 => $x
-  if ((@$x == 1) && $x->[0] == 0)			# 0 + $y => $y->copy
-    {
-    # twice as slow as $x = [ @$y ], but nec. to retain $x as ref :(
-    @$x = @$y; return $x;		
+    my ($c, $x, $y) = @_;
+
+    return $x if @$y == 1 && $y->[0] == 0;      # $x + 0 => $x
+    if (@$x == 1 && $x->[0] == 0) {             # 0 + $y => $y->copy
+        # Twice as slow as $x = [ @$y ], but necessary to modify $x in-place.
+        @$x = @$y;
+        return $x;
     }
- 
-  # for each in Y, add Y to X and carry. If after that, something is left in
-  # X, foreach in X add carry to X and then return X, carry
-  # Trades one "$j++" for having to shift arrays
-  my $i; my $car = 0; my $j = 0;
-  for $i (@$y)
-    {
-    $x->[$j] -= $BASE if $car = (($x->[$j] += $i + $car) >= $BASE) ? 1 : 0;
-    $j++;
+
+    # For each in Y, add Y to X and carry. If after that, something is left in
+    # X, foreach in X add carry to X and then return X, carry. Trades one
+    # "$j++" for having to shift arrays.
+    my $i;
+    my $car = 0;
+    my $j = 0;
+    for $i (@$y) {
+        $x->[$j] -= $BASE if $car = (($x->[$j] += $i + $car) >= $BASE) ? 1 : 0;
+        $j++;
     }
-  while ($car != 0)
-    {
-    $x->[$j] -= $BASE if $car = (($x->[$j] += $car) >= $BASE) ? 1 : 0; $j++;
+    while ($car != 0) {
+        $x->[$j] -= $BASE if $car = (($x->[$j] += $car) >= $BASE) ? 1 : 0;
+        $j++;
     }
-  $x;
-  }                                                                             
+    $x;
+}
 
-sub _inc
-  {
-  # (ref to int_num_array, ref to int_num_array)
-  # Add 1 to $x, modify $x in place
-  my ($c,$x) = @_;
+sub _inc {
+    # (ref to int_num_array, ref to int_num_array)
+    # Add 1 to $x, modify $x in place
+    my ($c, $x) = @_;
 
-  for my $i (@$x)
-    {
-    return $x if (($i += 1) < $BASE);		# early out
-    $i = 0;					# overflow, next
+    for my $i (@$x) {
+        return $x if ($i += 1) < $BASE;		# early out
+        $i = 0;					# overflow, next
     }
-  push @$x,1 if (($x->[-1] || 0) == 0);		# last overflowed, so extend
-  $x;
-  }                                                                             
+    push @$x, 1 if $x->[-1] == 0;		# last overflowed, so extend
+    $x;
+}
 
-sub _dec
-  {
-  # (ref to int_num_array, ref to int_num_array)
-  # Sub 1 from $x, modify $x in place
-  my ($c,$x) = @_;
+sub _dec {
+    # (ref to int_num_array, ref to int_num_array)
+    # Sub 1 from $x, modify $x in place
+    my ($c, $x) = @_;
 
-  my $MAX = $BASE-1;				# since MAX_VAL based on BASE
-  for my $i (@$x)
-    {
-    last if (($i -= 1) >= 0);			# early out
-    $i = $MAX;					# underflow, next
+    my $MAX = $BASE - 1;			# since MAX_VAL based on BASE
+    for my $i (@$x) {
+        last if ($i -= 1) >= 0;			# early out
+        $i = $MAX;				# underflow, next
     }
-  pop @$x if $x->[-1] == 0 && @$x > 1;		# last underflowed (but leave 0)
-  $x;
-  }                                                                             
+    pop @$x if $x->[-1] == 0 && @$x > 1;	# last underflowed (but leave 0)
+    $x;
+}
 
-sub _sub
-  {
-  # (ref to int_num_array, ref to int_num_array, swap)
-  # subtract base 1eX numbers -- stolen from Knuth Vol 2 pg 232, $x > $y
-  # subtract Y from X by modifying x in place
-  my ($c,$sx,$sy,$s) = @_;
- 
-  my $car = 0; my $i; my $j = 0;
-  if (!$s)
-    {
-    for $i (@$sx)
-      {
-      last unless defined $sy->[$j] || $car;
-      $i += $BASE if $car = (($i -= ($sy->[$j] || 0) + $car) < 0); $j++;
-      }
+sub _sub {
+    # (ref to int_num_array, ref to int_num_array, swap)
+    #
+    # Subtract base 1eX numbers -- stolen from Knuth Vol 2 pg 232, $x > $y
+    # subtract Y from X by modifying x in place
+    my ($c, $sx, $sy, $s) = @_;
+
+    my $car = 0;
+    my $i;
+    my $j = 0;
+    if (!$s) {
+        for $i (@$sx) {
+            last unless defined $sy->[$j] || $car;
+            $i += $BASE if $car = (($i -= ($sy->[$j] || 0) + $car) < 0);
+            $j++;
+        }
+        # might leave leading zeros, so fix that
+        return __strip_zeros($sx);
+    }
+    for $i (@$sx) {
+        # We can't do an early out if $x < $y, since we need to copy the high
+        # chunks from $y. Found by Bob Mathews.
+        #last unless defined $sy->[$j] || $car;
+        $sy->[$j] += $BASE
+          if $car = ($sy->[$j] = $i - ($sy->[$j] || 0) - $car) < 0;
+        $j++;
+    }
     # might leave leading zeros, so fix that
-    return __strip_zeros($sx);
-    }
-  for $i (@$sx)
-    {
-    # we can't do an early out if $x is < than $y, since we
-    # need to copy the high chunks from $y. Found by Bob Mathews.
-    #last unless defined $sy->[$j] || $car;
-    $sy->[$j] += $BASE
-     if $car = (($sy->[$j] = $i-($sy->[$j]||0) - $car) < 0);
-    $j++;
-    }
-  # might leave leading zeros, so fix that
-  __strip_zeros($sy);
-  }                                                                             
+    __strip_zeros($sy);
+}
 
 sub _mul_use_mul
   {
@@ -1169,373 +1167,355 @@ sub _div_use_div
 ##############################################################################
 # testing
 
-sub _acmp
-  {
-  # internal absolute post-normalized compare (ignore signs)
-  # ref to array, ref to array, return <0, 0, >0
-  # arrays must have at least one entry; this is not checked for
-  my ($c,$cx,$cy) = @_;
- 
-  # shortcut for short numbers 
-  return (($cx->[0] <=> $cy->[0]) <=> 0) 
-   if scalar @$cx == scalar @$cy && scalar @$cx == 1;
+sub _acmp {
+    # Internal absolute post-normalized compare (ignore signs)
+    # ref to array, ref to array, return <0, 0, >0
+    # Arrays must have at least one entry; this is not checked for.
+    my ($c, $cx, $cy) = @_;
 
-  # fast comp based on number of array elements (aka pseudo-length)
-  my $lxy = (scalar @$cx - scalar @$cy)
-  # or length of first element if same number of elements (aka difference 0)
-    ||
-  # need int() here because sometimes the last element is '00018' vs '18'
-   (length(int($cx->[-1])) - length(int($cy->[-1])));
-  return -1 if $lxy < 0;				# already differs, ret
-  return 1 if $lxy > 0;					# ditto
+    # shortcut for short numbers
+    return (($cx->[0] <=> $cy->[0]) <=> 0)
+      if @$cx == @$cy && @$cx == 1;
 
-  # manual way (abort if unequal, good for early ne)
-  my $a; my $j = scalar @$cx;
-  while (--$j >= 0)
-    {
-    last if ($a = $cx->[$j] - $cy->[$j]);
+    # fast comp based on number of array elements (aka pseudo-length)
+    my $lxy = (@$cx - @$cy)
+      # or length of first element if same number of elements (aka difference 0)
+      ||
+        # need int() here because sometimes the last element is '00018' vs '18'
+        (length(int($cx->[-1])) - length(int($cy->[-1])));
+
+    return -1 if $lxy < 0;      # already differs, ret
+    return  1 if $lxy > 0;      # ditto
+
+    # manual way (abort if unequal, good for early ne)
+    my $a;
+    my $j = @$cx;
+    while (--$j >= 0) {
+        last if $a = $cx->[$j] - $cy->[$j];
     }
-  $a <=> 0;
-  }
+    $a <=> 0;
+}
 
-sub _len
-  {
-  # compute number of digits in base 10
+sub _len {
+    # compute number of digits in base 10
 
-  # int() because add/sub sometimes leaves strings (like '00005') instead of
-  # '5' in this place, thus causing length() to report wrong length
-  my $cx = $_[1];
+    # int() because add/sub sometimes leaves strings (like '00005') instead of
+    # '5' in this place, thus causing length() to report wrong length
+    my $cx = $_[1];
 
-  (@$cx-1)*$BASE_LEN+length(int($cx->[-1]));
-  }
+    (@$cx - 1) * $BASE_LEN + length(int($cx->[-1]));
+}
 
-sub _digit
-  {
-  # Return the nth digit. Zero is rightmost, so _digit(123,0) gives 3.
-  # Negative values count from the left, so _digit(123, -1) gives 1.
-  my ($c,$x,$n) = @_;
+sub _digit {
+    # Return the nth digit. Zero is rightmost, so _digit(123,0) gives 3.
+    # Negative values count from the left, so _digit(123, -1) gives 1.
+    my ($c, $x, $n) = @_;
 
-  my $len = _len('',$x);
+    my $len = _len('', $x);
 
-  $n += $len if $n < 0;                 # -1 last, -2 second-to-last
-  return "0" if $n < 0 || $n >= $len;   # return 0 for digits out of range
+    $n += $len if $n < 0;               # -1 last, -2 second-to-last
+    return "0" if $n < 0 || $n >= $len; # return 0 for digits out of range
 
-  my $elem = int($n / $BASE_LEN);       # which array element
-  my $digit = $n % $BASE_LEN;           # which digit in this element
-  substr("$x->[$elem]", -$digit-1, 1);
-  }
+    my $elem = int($n / $BASE_LEN);     # which array element
+    my $digit = $n % $BASE_LEN;         # which digit in this element
+    substr("$x->[$elem]", -$digit - 1, 1);
+}
 
-sub _zeros
-  {
-  # return amount of trailing zeros in decimal
-  # check each array elem in _m for having 0 at end as long as elem == 0
-  # Upon finding a elem != 0, stop
-  my $x = $_[1];
+sub _zeros {
+    # Return number of trailing zeros in decimal.
+    # Check each array element for having 0 at end as long as elem == 0
+    # Upon finding a elem != 0, stop.
 
-  return 0 if scalar @$x == 1 && $x->[0] == 0;
+    my $x = $_[1];
 
-  my $zeros = 0; my $elem;
-  foreach my $e (@$x)
-    {
-    if ($e != 0)
-      {
-      $elem = "$e";				# preserve x
-      $elem =~ s/.*?(0*$)/$1/;			# strip anything not zero
-      $zeros *= $BASE_LEN;			# elems * 5
-      $zeros += length($elem);			# count trailing zeros
-      last;					# early out
-      }
-    $zeros ++;					# real else branch: 50% slower!
+    return 0 if @$x == 1 && $x->[0] == 0;
+
+    my $zeros = 0;
+    my $elem;
+    foreach my $e (@$x) {
+        if ($e != 0) {
+            $elem = "$e";               # preserve x
+            $elem =~ s/.*?(0*$)/$1/;    # strip anything not zero
+            $zeros *= $BASE_LEN;        # elems * 5
+            $zeros += length($elem);    # count trailing zeros
+            last;                       # early out
+        }
+        $zeros ++;                      # real else branch: 50% slower!
     }
-  $zeros;
-  }
+    $zeros;
+}
 
 ##############################################################################
 # _is_* routines
 
-sub _is_zero
-  {
-  # return true if arg is zero 
-  (((scalar @{$_[1]} == 1) && ($_[1]->[0] == 0))) <=> 0;
-  }
+sub _is_zero {
+    # return true if arg is zero 
+    @{$_[1]} == 1 && $_[1]->[0] == 0 ? 1 : 0;
+}
 
-sub _is_even
-  {
-  # return true if arg is even
-  (!($_[1]->[0] & 1)) <=> 0; 
-  }
+sub _is_even {
+    # return true if arg is even
+    $_[1]->[0] & 1 ? 0 : 1;
+}
 
-sub _is_odd
-  {
-  # return true if arg is odd
-  (($_[1]->[0] & 1)) <=> 0;
-  }
+sub _is_odd {
+    # return true if arg is odd
+    $_[1]->[0] & 1 ? 1 : 0;
+}
 
-sub _is_one
-  {
-  # return true if arg is one
-  (scalar @{$_[1]} == 1) && ($_[1]->[0] == 1) <=> 0; 
-  }
+sub _is_one {
+    # return true if arg is one
+    @{$_[1]} == 1 && $_[1]->[0] == 1 ? 1 : 0;
+}
 
-sub _is_two
-  {
-  # return true if arg is two 
-  (scalar @{$_[1]} == 1) && ($_[1]->[0] == 2) <=> 0; 
-  }
+sub _is_two {
+    # return true if arg is two 
+    @{$_[1]} == 1 && $_[1]->[0] == 2 ? 1 : 0;
+}
 
-sub _is_ten
-  {
-  # return true if arg is ten 
-  (scalar @{$_[1]} == 1) && ($_[1]->[0] == 10) <=> 0; 
-  }
+sub _is_ten {
+    # return true if arg is ten 
+    @{$_[1]} == 1 && $_[1]->[0] == 10 ? 1 : 0;
+}
 
-sub __strip_zeros
-  {
-  # internal normalization function that strips leading zeros from the array
-  # args: ref to array
-  my $s = shift;
- 
-  my $cnt = scalar @$s; # get count of parts
-  my $i = $cnt-1;
-  push @$s,0 if $i < 0;		# div might return empty results, so fix it
+sub __strip_zeros {
+    # Internal normalization function that strips leading zeros from the array.
+    # Args: ref to array
+    my $s = shift;
 
-  return $s if @$s == 1;		# early out
+    my $cnt = @$s;              # get count of parts
+    my $i = $cnt - 1;
+    push @$s, 0 if $i < 0;	# div might return empty results, so fix it
 
-  #print "strip: cnt $cnt i $i\n";
-  # '0', '3', '4', '0', '0',
-  #  0    1    2    3    4
-  # cnt = 5, i = 4
-  # i = 4
-  # i = 3
-  # => fcnt = cnt - i (5-2 => 3, cnt => 5-1 = 4, throw away from 4th pos)
-  # >= 1: skip first part (this can be zero)
-  while ($i > 0) { last if $s->[$i] != 0; $i--; }
-  $i++; splice @$s,$i if ($i < $cnt); # $i cant be 0
-  $s;                                                                    
-  }                                                                             
+    return $s if @$s == 1;	# early out
+
+    #print "strip: cnt $cnt i $i\n";
+    # '0', '3', '4', '0', '0',
+    #  0    1    2    3    4
+    # cnt = 5, i = 4
+    # i = 4
+    # i = 3
+    # => fcnt = cnt - i (5-2 => 3, cnt => 5-1 = 4, throw away from 4th pos)
+    # >= 1: skip first part (this can be zero)
+    while ($i > 0) {
+        last if $s->[$i] != 0;
+        $i--;
+    }
+    $i++;
+    splice @$s, $i if $i < $cnt;        # $i cant be 0
+    $s;
+}
 
 ###############################################################################
 # check routine to test internal state for corruptions
 
-sub _check
-  {
-  # used by the test suite
-  my $x = $_[1];
+sub _check {
+    # used by the test suite
+    my $x = $_[1];
 
-  return "$x is not a reference" if !ref($x);
+    return "$x is not a reference" if !ref($x);
 
-  # are all parts are valid?
-  my $i = 0; my $j = scalar @$x; my ($e,$try);
-  while ($i < $j)
-    {
-    $e = $x->[$i]; $e = 'undef' unless defined $e;
-    $try = '=~ /^[\+]?[0-9]+\$/; '."($x, $e)";
-    last if $e !~ /^[+]?[0-9]+$/;
-    $try = '=~ /^[\+]?[0-9]+\$/; '."($x, $e) (stringify)";
-    last if "$e" !~ /^[+]?[0-9]+$/;
-    $try = '=~ /^[\+]?[0-9]+\$/; '."($x, $e) (cat-stringify)";
-    last if '' . "$e" !~ /^[+]?[0-9]+$/;
-    $try = ' < 0 || >= $BASE; '."($x, $e)";
-    last if $e <0 || $e >= $BASE;
-    # this test is disabled, since new/bnorm and certain ops (like early out
-    # in add/sub) are allowed/expected to leave '00000' in some elements
-    #$try = '=~ /^00+/; '."($x, $e)";
-    #last if $e =~ /^00+/;
-    $i++;
+    # are all parts are valid?
+    my $i = 0;
+    my $j = @$x;
+    my ($e, $try);
+    while ($i < $j) {
+        $e = $x->[$i]; $e = 'undef' unless defined $e;
+        $try = '=~ /^[\+]?[0-9]+\$/; '."($x, $e)";
+        last if $e !~ /^[+]?[0-9]+$/;
+        $try = '=~ /^[\+]?[0-9]+\$/; '."($x, $e) (stringify)";
+        last if "$e" !~ /^[+]?[0-9]+$/;
+        $try = '=~ /^[\+]?[0-9]+\$/; '."($x, $e) (cat-stringify)";
+        last if '' . "$e" !~ /^[+]?[0-9]+$/;
+        $try = ' < 0 || >= $BASE; '."($x, $e)";
+        last if $e <0 || $e >= $BASE;
+        # This test is disabled, since new/bnorm and certain ops (like early out
+        # in add/sub) are allowed/expected to leave '00000' in some elements.
+        #$try = '=~ /^00+/; '."($x, $e)";
+        #last if $e =~ /^00+/;
+        $i++;
     }
-  return "Illegal part '$e' at pos $i (tested: $try)" if $i < $j;
-  0;
-  }
-
+    return "Illegal part '$e' at pos $i (tested: $try)" if $i < $j;
+    0;
+}
 
 ###############################################################################
 
-sub _mod
-  {
-  # if possible, use mod shortcut
-  my ($c,$x,$yo) = @_;
+sub _mod {
+    # if possible, use mod shortcut
+    my ($c, $x, $yo) = @_;
 
-  # slow way since $y too big
-  if (scalar @$yo > 1)
-    {
-    my ($xo,$rem) = _div($c,$x,$yo);
-    @$x = @$rem;
+    # slow way since $y too big
+    if (@$yo > 1) {
+        my ($xo, $rem) = _div($c, $x, $yo);
+        @$x = @$rem;
+        return $x;
+    }
+
+    my $y = $yo->[0];
+
+    # if both are single element arrays
+    if (scalar @$x == 1) {
+        $x->[0] %= $y;
+        return $x;
+    }
+
+    # if @$x has more than one element, but @$y is a single element
+    my $b = $BASE % $y;
+    if ($b == 0) {
+        # when BASE % Y == 0 then (B * BASE) % Y == 0
+        # (B * BASE) % $y + A % Y => A % Y
+        # so need to consider only last element: O(1)
+        $x->[0] %= $y;
+    } elsif ($b == 1) {
+        # else need to go through all elements in @$x: O(N), but loop is a bit
+        # simplified
+        my $r = 0;
+        foreach (@$x) {
+            $r = ($r + $_) % $y;        # not much faster, but heh...
+            #$r += $_ % $y; $r %= $y;
+        }
+        $r = 0 if $r == $y;
+        $x->[0] = $r;
+    } else {
+        # else need to go through all elements in @$x: O(N)
+        my $r = 0;
+        my $bm = 1;
+        foreach (@$x) {
+            $r = ($_ * $bm + $r) % $y;
+            $bm = ($bm * $b) % $y;
+
+            #$r += ($_ % $y) * $bm;
+            #$bm *= $b;
+            #$bm %= $y;
+            #$r %= $y;
+        }
+        $r = 0 if $r == $y;
+        $x->[0] = $r;
+    }
+    @$x = $x->[0];		# keep one element of @$x
     return $x;
-    }
-
-  my $y = $yo->[0];
-
-  # if both are single element arrays
-  if (scalar @$x == 1)
-    {
-    $x->[0] %= $y;
-    return $x;
-    }
-
-  # if @$x has more than one element, but @$y is a single element
-  my $b = $BASE % $y;
-  if ($b == 0)
-    {
-    # when BASE % Y == 0 then (B * BASE) % Y == 0
-    # (B * BASE) % $y + A % Y => A % Y
-    # so need to consider only last element: O(1)
-    $x->[0] %= $y;
-    }
-  elsif ($b == 1)
-    {
-    # else need to go through all elements in @$x: O(N), but loop is a bit
-    # simplified
-    my $r = 0;
-    foreach (@$x)
-      {
-      $r = ($r + $_) % $y;		# not much faster, but heh...
-      #$r += $_ % $y; $r %= $y;
-      }
-    $r = 0 if $r == $y;
-    $x->[0] = $r;
-    }
-  else
-    {
-    # else need to go through all elements in @$x: O(N)
-    my $r = 0;
-    my $bm = 1;
-    foreach (@$x)
-      {
-      $r = ($_ * $bm + $r) % $y;
-      $bm = ($bm * $b) % $y;
-
-      #$r += ($_ % $y) * $bm;
-      #$bm *= $b;
-      #$bm %= $y;
-      #$r %= $y;
-      }
-    $r = 0 if $r == $y;
-    $x->[0] = $r;
-    }
-  @$x = $x->[0];		# keep one element of @$x
-  return $x;
-  }
+}
 
 ##############################################################################
 # shifts
 
-sub _rsft
-  {
-  my ($c,$x,$y,$n) = @_;
+sub _rsft {
+    my ($c, $x, $y, $n) = @_;
 
-  if ($n != 10)
-    {
-    $n = _new($c,$n); return _div($c,$x, _pow($c,$n,$y));
+    if ($n != 10) {
+        $n = _new($c, $n);
+        return _div($c, $x, _pow($c, $n, $y));
     }
 
-  # shortcut (faster) for shifting by 10)
-  # multiples of $BASE_LEN
-  my $dst = 0;				# destination
-  my $src = _num($c,$y);		# as normal int
-  my $xlen = (@$x-1)*$BASE_LEN+length(int($x->[-1]));  # len of x in digits
-  if ($src >= $xlen or ($src == $xlen and ! defined $x->[1]))
-    {
-    # 12345 67890 shifted right by more than 10 digits => 0
-    splice (@$x,1);                    # leave only one element
-    $x->[0] = 0;                       # set to zero
-    return $x;
+    # shortcut (faster) for shifting by 10)
+    # multiples of $BASE_LEN
+    my $dst = 0;                                            # destination
+    my $src = _num($c, $y);                                 # as normal int
+    my $xlen = (@$x - 1) * $BASE_LEN + length(int($x->[-1]));
+    if ($src >= $xlen or ($src == $xlen and !defined $x->[1])) {
+        # 12345 67890 shifted right by more than 10 digits => 0
+        splice(@$x, 1);                 # leave only one element
+        $x->[0] = 0;                    # set to zero
+        return $x;
     }
-  my $rem = $src % $BASE_LEN;		# remainder to shift
-  $src = int($src / $BASE_LEN);		# source
-  if ($rem == 0)
-    {
-    splice (@$x,0,$src);		# even faster, 38.4 => 39.3
-    }
-  else
-    {
-    my $len = scalar @$x - $src;	# elems to go
-    my $vd; my $z = '0'x $BASE_LEN;
-    $x->[scalar @$x] = 0;		# avoid || 0 test inside loop
-    while ($dst < $len)
-      {
-      $vd = $z.$x->[$src];
-      $vd = substr($vd,-$BASE_LEN,$BASE_LEN-$rem);
-      $src++;
-      $vd = substr($z.$x->[$src],-$rem,$rem) . $vd;
-      $vd = substr($vd,-$BASE_LEN,$BASE_LEN) if length($vd) > $BASE_LEN;
-      $x->[$dst] = int($vd);
-      $dst++;
-      }
-    splice (@$x,$dst) if $dst > 0;		# kill left-over array elems
-    pop @$x if $x->[-1] == 0 && @$x > 1;	# kill last element if 0
-    } # else rem == 0
-  $x;
-  }
+    my $rem = $src % $BASE_LEN;         # remainder to shift
+    $src = int($src / $BASE_LEN);       # source
+    if ($rem == 0) {
+        splice(@$x, 0, $src);           # even faster, 38.4 => 39.3
+    } else {
+        my $len = @$x - $src;           # elems to go
+        my $vd;
+        my $z = '0' x $BASE_LEN;
+        $x->[@$x] = 0;                  # avoid || 0 test inside loop
+        while ($dst < $len) {
+            $vd = $z . $x->[$src];
+            $vd = substr($vd, -$BASE_LEN, $BASE_LEN - $rem);
+            $src++;
+            $vd = substr($z . $x->[$src], -$rem, $rem) . $vd;
+            $vd = substr($vd, -$BASE_LEN, $BASE_LEN) if length($vd) > $BASE_LEN;
+            $x->[$dst] = int($vd);
+            $dst++;
+        }
+        splice(@$x, $dst) if $dst > 0;          # kill left-over array elems
+        pop @$x if $x->[-1] == 0 && @$x > 1;    # kill last element if 0
+    }                                           # else rem == 0
+    $x;
+}
 
-sub _lsft
-  {
-  my ($c,$x,$y,$n) = @_;
+sub _lsft {
+    my ($c, $x, $y, $n) = @_;
 
-  if ($n != 10)
-    {
-    $n = _new($c,$n); return _mul($c,$x, _pow($c,$n,$y));
+    if ($n != 10) {
+        $n = _new($c, $n);
+        return _mul($c, $x, _pow($c, $n, $y));
     }
 
-  # shortcut (faster) for shifting by 10) since we are in base 10eX
-  # multiples of $BASE_LEN:
-  my $src = scalar @$x;			# source
-  my $len = _num($c,$y);		# shift-len as normal int
-  my $rem = $len % $BASE_LEN;		# remainder to shift
-  my $dst = $src + int($len/$BASE_LEN);	# destination
-  my $vd;				# further speedup
-  $x->[$src] = 0;			# avoid first ||0 for speed
-  my $z = '0' x $BASE_LEN;
-  while ($src >= 0)
-    {
-    $vd = $x->[$src]; $vd = $z.$vd;
-    $vd = substr($vd,-$BASE_LEN+$rem,$BASE_LEN-$rem);
-    $vd .= $src > 0 ? substr($z.$x->[$src-1],-$BASE_LEN,$rem) : '0' x $rem;
-    $vd = substr($vd,-$BASE_LEN,$BASE_LEN) if length($vd) > $BASE_LEN;
-    $x->[$dst] = int($vd);
-    $dst--; $src--;
+    # shortcut (faster) for shifting by 10) since we are in base 10eX
+    # multiples of $BASE_LEN:
+    my $src = @$x;                              # source
+    my $len = _num($c, $y);		        # shift-len as normal int
+    my $rem = $len % $BASE_LEN;	        	# remainder to shift
+    my $dst = $src + int($len / $BASE_LEN);     # destination
+    my $vd;                                     # further speedup
+    $x->[$src] = 0;                             # avoid first ||0 for speed
+    my $z = '0' x $BASE_LEN;
+    while ($src >= 0) {
+        $vd = $x->[$src];
+        $vd = $z . $vd;
+        $vd = substr($vd, -$BASE_LEN + $rem, $BASE_LEN - $rem);
+        $vd .= $src > 0 ? substr($z . $x->[$src - 1], -$BASE_LEN, $rem)
+                        : '0' x $rem;
+        $vd = substr($vd, -$BASE_LEN, $BASE_LEN) if length($vd) > $BASE_LEN;
+        $x->[$dst] = int($vd);
+        $dst--;
+        $src--;
     }
-  # set lowest parts to 0
-  while ($dst >= 0) { $x->[$dst--] = 0; }
-  # fix spurious last zero element
-  splice @$x,-1 if $x->[-1] == 0;
-  $x;
-  }
+    # set lowest parts to 0
+    while ($dst >= 0) {
+        $x->[$dst--] = 0;
+    }
+    # fix spurious last zero element
+    splice @$x, -1 if $x->[-1] == 0;
+    $x;
+}
 
-sub _pow
-  {
-  # power of $x to $y
-  # ref to array, ref to array, return ref to array
-  my ($c,$cx,$cy) = @_;
+sub _pow {
+    # power of $x to $y
+    # ref to array, ref to array, return ref to array
+    my ($c, $cx, $cy) = @_;
 
-  if (scalar @$cy == 1 && $cy->[0] == 0)
-    {
-    splice (@$cx,1); $cx->[0] = 1;		# y == 0 => x => 1
-    return $cx;
-    }
-  if ((scalar @$cx == 1 && $cx->[0] == 1) ||	#    x == 1
-      (scalar @$cy == 1 && $cy->[0] == 1))	# or y == 1
-    {
-    return $cx;
-    }
-  if (scalar @$cx == 1 && $cx->[0] == 0)
-    {
-    splice (@$cx,1); $cx->[0] = 0;		# 0 ** y => 0 (if not y <= 0)
-    return $cx;
+    if (@$cy == 1 && $cy->[0] == 0) {
+        splice(@$cx, 1);
+        $cx->[0] = 1;                   # y == 0 => x => 1
+        return $cx;
     }
 
-  my $pow2 = _one();
-
-  my $y_bin = _as_bin($c,$cy); $y_bin =~ s/^0b//;
-  my $len = length($y_bin);
-  while (--$len > 0)
+    if ((@$cx == 1 && $cx->[0] == 1) ||     #    x == 1
+        (@$cy == 1 && $cy->[0] == 1))       # or y == 1
     {
-    _mul($c,$pow2,$cx) if substr($y_bin,$len,1) eq '1';		# is odd?
-    _mul($c,$cx,$cx);
+        return $cx;
     }
 
-  _mul($c,$cx,$pow2);
-  $cx;
-  }
+    if (@$cx == 1 && $cx->[0] == 0) {
+        splice (@$cx, 1);
+        $cx->[0] = 0;                   # 0 ** y => 0 (if not y <= 0)
+        return $cx;
+    }
+
+    my $pow2 = _one();
+
+    my $y_bin = _as_bin($c, $cy);
+    $y_bin =~ s/^0b//;
+    my $len = length($y_bin);
+    while (--$len > 0) {
+        _mul($c, $pow2, $cx) if substr($y_bin, $len, 1) eq '1'; # is odd?
+        _mul($c, $cx, $cx);
+    }
+
+    _mul($c, $cx, $pow2);
+    $cx;
+}
 
 sub _nok {
     # Return binomial coefficient (n over k).
@@ -2293,7 +2273,7 @@ sub _as_oct
     $es .= reverse sprintf("%05o", $xr->[0]);
     }
   $es = reverse $es;
-  $es =~ s/^[0]+//;   # strip leading zeros
+  $es =~ s/^0+//;   # strip leading zeros
   '0' . $es;					# return result prepended with 0
   }
 

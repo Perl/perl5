@@ -1,4 +1,7 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
+
+use strict;
+use warnings;
 
 # Test 2 levels of upgrade classes. This used to cause a segv.
 

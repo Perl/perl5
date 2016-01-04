@@ -1,255 +1,260 @@
 # include this file into another for subclass testing
 
-# This file is nearly identical to bigintpm.t, except that certain results
-# are _requird_ to be different due to "upgrading" or "promoting" to BigFloat.
-# The reverse is not true, any unmarked results can be either BigInt or
-# BigFloat, depending on how good the internal optimization is (e.g. it
-# is usually desirable to have 2 ** 2 return a BigInt, not a BigFloat).
+# This file is nearly identical to bigintpm.t, except that certain results are
+# _requird_ to be different due to "upgrading" or "promoting" to
+# Math::BigFloat. The reverse is not true. Any unmarked results can be either
+# Math::BigInt or Math::BigFloat, depending on how good the internal
+# optimization is (e.g., it is usually desirable to have 2 ** 2 return a
+# Math::BigInt, not a Math::BigFloat).
 
-# Results that are required to be BigFloat are marked with C<^> at the end.
+# Results that are required to be Math::BigFloat are marked with C<^> at the
+# end.
 
 # Please note that the testcount goes up by two for each extra result marked
 # with ^, since then we test whether it has the proper class and that it left
 # the upgrade variable alone.
 
-my $version = ${"$class\::VERSION"};
+use strict;
+use warnings;
+
+our ($CLASS, $CALC, $EXPECTED_CLASS);
 
 ##############################################################################
 # for testing inheritance of _swap
 
 package Math::Foo;
 
-use Math::BigInt lib => $main::CL;
-use vars qw/@ISA/;
-@ISA = (qw/Math::BigInt/);
+use Math::BigInt lib => $main::CALC;
+our @ISA = (qw/Math::BigInt/);
 
 use overload
-# customized overload for sub, since original does not use swap there
-'-'     =>      sub { my @a = ref($_[0])->_swap(@_);
-                   $a[0]->bsub($a[1])};
+  # customized overload for sub, since original does not use swap there
+  '-'     =>      sub { my @a = ref($_[0])->_swap(@_);
+                        $a[0]->bsub($a[1]);
+                      };
 
-sub _swap
-  {
-  # a fake _swap, which reverses the params
-  my $self = shift;                     # for override in subclass
-  if ($_[2])
-    {
-    my $c = ref ($_[0] ) || 'Math::Foo';
-    return ( $_[0]->copy(), $_[1] );
+sub _swap {
+    # a fake _swap, which reverses the params
+    my $self = shift;           # for override in subclass
+    if ($_[2]) {
+        my $c = ref ($_[0] ) || 'Math::Foo';
+        return ( $_[0]->copy(), $_[1] );
+    } else {
+        return ( Math::Foo->new($_[1]), $_[0] );
     }
-  else
-    {
-    return ( Math::Foo->new($_[1]), $_[0] );
-    }
-  }
+}
 
 ##############################################################################
 package main;
 
-my $CALC = $class->config()->{lib}; is ($CALC,$CL);
+is($CLASS->config()->{lib}, $CALC, "$CLASS->config()->{lib}");
 
-my ($f,$z,$a,$exp,@a,$m,$e,$round_mode,$expected_class);
+my ($x, $y, $z, @args, $a, $m, $e, $try, $got, $want, $exp);
+my ($f, $round_mode, $expected_class);
 
-while (<DATA>) 
-  {
-  $_ =~ s/[\n\r]//g;	# remove newlines
-  next if /^#/;	# skip comments
-  if (s/^&//) 
-    {
-    $f = $_; next;
-    }
-  elsif (/^\$/) 
-    {
-    $round_mode = $_; $round_mode =~ s/^\$/$class\->/; next;
+while (<DATA>) {
+    s/#.*$//;                   # remove comments
+    s/\s+$//;                   # remove trailing whitespace
+    next unless length;         # skip empty lines
+
+    if (s/^&//) {
+        $f = $_;
+        next;
     }
 
-  @args = split(/:/,$_,99); $ans = pop(@args);
-  $expected_class = $class;
-  if ($ans =~ /\^$/)
-    {
-    $expected_class = $ECL; $ans =~ s/\^$//;
+    if (/^\$/) {
+        $round_mode = $_;
+        $round_mode =~ s/^\$/$CLASS\->/;
+        next;
     }
-  $try = "\$x = $class->new(\"$args[0]\");";
-  if ($f eq "bnorm")
-    {
-    $try = "\$x = $class->bnorm(\"$args[0]\");";
-  # some is_xxx tests
-   } elsif ($f =~ /^is_(zero|one|odd|even|negative|positive|nan|int)$/) {
-    $try .= "\$x->$f();";
-   } elsif ($f eq "as_hex") {
-    $try .= '$x->as_hex();';
-   } elsif ($f eq "as_bin") {
-    $try .= '$x->as_bin();';
-   } elsif ($f eq "is_inf") {
-    $try .= "\$x->is_inf('$args[1]');";
-   } elsif ($f eq "binf") {
-    $try .= "\$x->binf('$args[1]');";
-   } elsif ($f eq "bone") {
-    $try .= "\$x->bone('$args[1]');";
-   # some unary ops
-   } elsif ($f =~ /^b(nan|floor|ceil|int|sstr|neg|abs|inc|dec|not|sqrt|fac)$/) {
-    $try .= "\$x->$f();";
-   } elsif ($f eq "length") {
-    $try .= '$x->length();';
-   } elsif ($f eq "exponent"){
-    # ->bstr() to see if an object is returned
-    $try .= '$x = $x->exponent()->bstr();';
-   } elsif ($f eq "mantissa"){
-    # ->bstr() to see if an object is returned
-    $try .= '$x = $x->mantissa()->bstr();';
-   } elsif ($f eq "parts"){
-    $try .= '($m,$e) = $x->parts();'; 
-    # ->bstr() to see if an object is returned
-    $try .= '$m = $m->bstr(); $m = "NaN" if !defined $m;';
-    $try .= '$e = $e->bstr(); $e = "NaN" if !defined $e;';
-    $try .= '"$m,$e";';
-   } else {
-    if ($args[1] !~ /\./)
-      {
-      $try .= "\$y = $class->new(\"$args[1]\");";	# BigInt
-      }
-    else
-      {
-      $try .= "\$y = $ECL->new(\"$args[1]\");";		# BigFloat
-      }
-    if ($f eq "bcmp")
-      {
-      $try .= '$x->bcmp($y);';
-      } elsif ($f eq "bround") {
-      $try .= "$round_mode; \$x->bround(\$y);";
-      } elsif ($f eq "broot") {
-      $try .= "\$x->broot(\$y);";
-      } elsif ($f eq "bacmp"){
-      $try .= '$x->bacmp($y);';
-      } elsif ($f eq "badd"){
-      $try .= '$x + $y;';
-      } elsif ($f eq "bsub"){
-      $try .= '$x - $y;';
-      } elsif ($f eq "bmul"){
-      $try .= '$x * $y;';
-      } elsif ($f eq "bdiv"){
-      $try .= '$x / $y;';
-      } elsif ($f eq "bdiv-list"){
-      $try .= 'join (",",$x->bdiv($y));';
-      # overload via x=
-      } elsif ($f =~ /^.=$/){
-      $try .= "\$x $f \$y;";
-      # overload via x
-      } elsif ($f =~ /^.$/){
-      $try .= "\$x $f \$y;";
-      } elsif ($f eq "bmod"){
-      $try .= '$x % $y;';
-      } elsif ($f eq "bgcd")
-        {
-        if (defined $args[2])
-          {
-          $try .= " \$z = $class->new('$args[2]'); ";
-          }
-        $try .= "$class\::bgcd(\$x, \$y";
-        $try .= ", \$z" if (defined $args[2]);
-        $try .= " );";
+
+    @args = split(/:/, $_, 99);
+    $want = pop(@args);
+    $expected_class = $CLASS;
+
+    if ($want =~ /\^$/) {
+        $expected_class = $EXPECTED_CLASS;
+        $want =~ s/\^$//;
+    }
+
+    $try = qq|\$x = $CLASS->new("$args[0]");|;
+    if ($f eq "bnorm") {
+        $try = qq|\$x = $CLASS->bnorm("$args[0]");|;
+    } elsif ($f =~ /^is_(zero|one|odd|even|negative|positive|nan|int)$/) {
+        $try .= " \$x->$f();";
+    } elsif ($f eq "as_hex") {
+        $try .= ' $x->as_hex();';
+    } elsif ($f eq "as_bin") {
+        $try .= ' $x->as_bin();';
+    } elsif ($f eq "is_inf") {
+        $try .= " \$x->is_inf('$args[1]');";
+    } elsif ($f eq "binf") {
+        $try .= " \$x->binf('$args[1]');";
+    } elsif ($f eq "bone") {
+        $try .= " \$x->bone('$args[1]');";
+    # some unary ops
+    } elsif ($f =~ /^b(nan|floor|ceil|int|sstr|neg|abs|inc|dec|not|sqrt|fac)$/) {
+        $try .= " \$x->$f();";
+    } elsif ($f eq "length") {
+        $try .= ' $x->length();';
+    } elsif ($f eq "exponent") {
+        # ->bstr() to see if an object is returned
+        $try .= ' $x = $x->exponent()->bstr();';
+    } elsif ($f eq "mantissa") {
+        # ->bstr() to see if an object is returned
+        $try .= ' $x = $x->mantissa()->bstr();';
+    } elsif ($f eq "parts") {
+        $try .= ' ($m, $e) = $x->parts();';
+        # ->bstr() to see if an object is returned
+        $try .= ' $m = $m->bstr(); $m = "NaN" if !defined $m;';
+        $try .= ' $e = $e->bstr(); $e = "NaN" if !defined $e;';
+        $try .= ' "$m,$e";';
+    } else {
+        if ($args[1] !~ /\./) {
+            $try .= qq| \$y = $CLASS->new("$args[1]");|;
+        } else {
+            $try .= qq| \$y = $EXPECTED_CLASS->new("$args[1]");|;
         }
-      elsif ($f eq "blcm")
-        {
-        if (defined $args[2])
-          {
-          $try .= " \$z = $class->new('$args[2]'); ";
-          }
-        $try .= "$class\::blcm(\$x, \$y";
-        $try .= ", \$z" if (defined $args[2]);
-        $try .= " );";
-      }elsif ($f eq "blsft"){
-        if (defined $args[2])
-          {
-          $try .= "\$x->blsft(\$y,$args[2]);";
-          }
-        else
-          {
-          $try .= "\$x << \$y;";
-          }
-      }elsif ($f eq "brsft"){
-        if (defined $args[2])
-          {
-          $try .= "\$x->brsft(\$y,$args[2]);";
-          }
-        else
-          {
-          $try .= "\$x >> \$y;";
-          }
-      }elsif ($f eq "band"){
-        $try .= "\$x & \$y;";
-      }elsif ($f eq "bior"){
-        $try .= "\$x | \$y;";
-      }elsif ($f eq "bxor"){
-        $try .= "\$x ^ \$y;";
-      }elsif ($f eq "bpow"){
-        $try .= "\$x ** \$y;";
-      }elsif ($f eq "digit"){
-        $try = "\$x = $class->new('$args[0]'); \$x->digit($args[1]);";
-      } else { warn "Unknown op '$f'"; }
-    } # end else all other ops
+        if ($f eq "bcmp") {
+            $try .= ' $x->bcmp($y);';
+        } elsif ($f eq "bacmp") {
+            $try .= ' $x->bacmp($y);';
+        } elsif ($f eq "bround") {
+            $try .= " $round_mode; \$x->bround(\$y);";
+        } elsif ($f eq "broot") {
+            $try .= " \$x->broot(\$y);";
+        } elsif ($f eq "badd") {
+            $try .= ' $x + $y;';
+        } elsif ($f eq "bsub") {
+            $try .= ' $x - $y;';
+        } elsif ($f eq "bmul") {
+            $try .= ' $x * $y;';
+        } elsif ($f eq "bdiv") {
+            $try .= ' $x / $y;';
+        } elsif ($f eq "bdiv-list") {
+            $try .= ' join(",", $x->bdiv($y));';
+            # overload via x=
+        } elsif ($f =~ /^.=$/) {
+            $try .= " \$x $f \$y;";
+            # overload via x
+        } elsif ($f =~ /^.$/) {
+            $try .= " \$x $f \$y;";
+        } elsif ($f eq "bmod") {
+            $try .= ' $x % $y;';
+        } elsif ($f eq "bgcd") {
+            if (defined $args[2]) {
+                $try .= qq| \$z = $CLASS->new("$args[2]");|;
+            }
+            $try .= " $CLASS\::bgcd(\$x, \$y";
+            $try .= ", \$z" if defined $args[2];
+            $try .= ");";
+        } elsif ($f eq "blcm") {
+            if (defined $args[2]) {
+                $try .= qq| \$z = $CLASS->new("$args[2]");|;
+            }
+            $try .= " $CLASS\::blcm(\$x, \$y";
+            $try .= ", \$z" if defined $args[2];
+            $try .= ");";
+        } elsif ($f eq "blsft") {
+            if (defined $args[2]) {
+                $try .= " \$x->blsft(\$y, $args[2]);";
+            } else {
+                $try .= " \$x << \$y;";
+            }
+        } elsif ($f eq "brsft") {
+            if (defined $args[2]) {
+                $try .= " \$x->brsft(\$y, $args[2]);";
+            } else {
+                $try .= " \$x >> \$y;";
+            }
+        } elsif ($f eq "band") {
+            $try .= " \$x & \$y;";
+        } elsif ($f eq "bior") {
+            $try .= " \$x | \$y;";
+        } elsif ($f eq "bxor") {
+            $try .= " \$x ^ \$y;";
+        } elsif ($f eq "bpow") {
+            $try .= " \$x ** \$y;";
+        } elsif ($f eq "digit") {
+            $try = qq|\$x = $CLASS->new("$args[0]"); \$x->digit($args[1]);|;
+        } else {
+            warn "Unknown op '$f'";
+        }
+    }                           # end else all other ops
 
-  $ans1 = eval $try;
-  # convert hex/binary targets to decimal	
-  if ($ans =~ /^(0x0x|0b0b)/)
-    {
-    $ans =~ s/^0[xb]//; $ans = Math::BigInt->new($ans)->bstr();
+    $got = eval $try;
+    print "# Error: $@\n" if $@;
+
+    # convert hex/binary targets to decimal
+    if ($want =~ /^(0x0x|0b0b)/) {
+        $want =~ s/^0[xb]//;
+        $want = Math::BigInt->new($want)->bstr();
     }
-  if ($ans eq "")
-    {
-      is ($ans1, undef);
+    if ($want eq "") {
+        is($got, undef, $try);
+    } else {
+        # print "try: $try ans: $got $want\n";
+        is($got, $want, $try);
+        if ($expected_class ne $CLASS) {
+            is(ref($got), $expected_class, 'ref($got)');
+            is($Math::BigInt::upgrade, 'Math::BigFloat',
+               '$Math::BigInt::upgrade');
+        }
     }
-  else
-    {
-    # print "try: $try ans: $ans1 $ans\n";
-    print "# Tried: '$try'\n" if !is ($ans1, $ans);
-    if ($expected_class ne $class)
-      {
-      is (ref($ans1),$expected_class);	# also checks that it really is ref!
-      is ($Math::BigInt::upgrade,'Math::BigFloat');	# still okay?
-      }
-    }
-  # check internal state of number objects
-  is_valid($ans1,$f) if ref $ans1; 
-  } # endwhile data tests
+    # check internal state of number objects
+    is_valid($got, $f) if ref $got;
+}                               # endwhile data tests
 close DATA;
 
-my $warn = ''; $SIG{__WARN__} = sub { $warn = shift; };
+my $warn = '';
+$SIG{__WARN__} = sub { $warn = shift; };
 
 # these should not warn
-$warn = ''; eval "\$z = 3.17 <= \$y"; is ($z, 1); is ($warn, '');
-$warn = ''; eval "\$z = \$y >= 3.17"; is ($z, 1); is ($warn, '');
+
+$warn = '';
+eval '$z = 3.17 <= $y';
+is($z, 1, '$z = 3.17 <= $y');
+is($warn, '', 'the code "$z = 3.17 <= $y" issued no warning');
+
+$warn = '';
+eval '$z = $y >= 3.17';
+is($z, 1, '$z = $y >= 3.17');
+is($warn, '', 'the code "$z = $y >= 3.17" issued no warning');
 
 # all tests done
 
 1;
 
 ###############################################################################
-# sub to check validity of a BigInt internally, to ensure that no op leaves a
-# number object in an invalid state (f.i. "-0")
+# sub to check validity of a Math::BigInt internally, to ensure that no op
+# leaves a number object in an invalid state (f.i. "-0")
 
-sub is_valid
-  {
-  my ($x,$f,$c) = @_;
+sub is_valid {
+    my ($x, $f, $c) = @_;
 
-  # The checks here are loosened a bit to allow BigInt or BigFloats to pass
+    # The checks here are loosened a bit to allow Math::BigInt or
+    # Math::BigFloats to pass
 
-  my $e = 0;			# error?
-  # ok as reference? 
-  # $e = "Not a reference to $c" if (ref($x) || '') ne $c;
+    my $e = 0;         # error?
 
-  # has ok sign?
-  $e = "Illegal sign $x->{sign} (expected: '+', '-', '-inf', '+inf' or 'NaN'"
-   if $e eq '0' && $x->{sign} !~ /^(\+|-|\+inf|-inf|NaN)$/;
+    # ok as reference?
+    # $e = "Not a reference to $c" if (ref($x) || '') ne $c;
 
-  $e = "-0 is invalid!" if $e ne '0' && $x->{sign} eq '-' && $x == 0;
-  #$e = $CALC->_check($x->{value}) if $e eq '0';
+    # has ok sign?
+    $e = "Illegal sign $x->{sign} (expected: '+', '-', '-inf', '+inf' or 'NaN'"
+      if $e eq '0' && $x->{sign} !~ /^(\+|-|\+inf|-inf|NaN)$/;
 
-  # test done, see if error did crop up
-  is (1,1), return if ($e eq '0');
+    $e = "-0 is invalid!" if $e ne '0' && $x->{sign} eq '-' && $x == 0;
+    #$e = $CALC->_check($x->{value}) if $e eq '0';
 
-  is (1,$e." after op '$f'");
-  }
+    # test done, see if error did crop up
+    if ($e eq '0') {
+        pass('is a valid object');
+        return;
+    }
+
+    fail($e . " after op '$f'");
+}
 
 __DATA__
 &.=
@@ -558,9 +563,8 @@ NaN::0
 +inf:+:1
 -inf:-:1
 -inf:+:0
-# it must be exactly /^[+-]inf$/
-+infinity::0
--infinity::0
++iNfInItY::1
+-InFiNiTy::1
 &blsft
 abc:abc:NaN
 +2:+2:8

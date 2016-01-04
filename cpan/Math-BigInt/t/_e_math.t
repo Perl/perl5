@@ -1,8 +1,10 @@
-#!/usr/bin/perl -w
+#!perl
 
 # test the helper math routines in Math::BigFloat
 
 use strict;
+use warnings;
+
 use Test::More tests => 26;
 
 use Math::BigFloat lib => 'Calc';
@@ -10,76 +12,105 @@ use Math::BigFloat lib => 'Calc';
 #############################################################################
 # add
 
-my $a = Math::BigInt::Calc->_new("123");
-my $b = Math::BigInt::Calc->_new("321");
+{
+    my $a = Math::BigInt::Calc->_new("123");
+    my $b = Math::BigInt::Calc->_new("321");
 
-my ($x, $xs) = Math::BigFloat::_e_add($a,$b,'+','+');
-is (_str($x,$xs), '+444', 'add two positive numbers');
-is (_str($a,''), '444', 'a modified');
+    test_add(123, 321, '+', '+');
+    test_add(123, 321, '+', '-');
+    test_add(123, 321, '-', '+');
 
-($x,$xs) = _add (123,321,'+','+');
-is (_str($x,$xs), '+444', 'add two positive numbers');
+    test_add(321, 123, '-', '+');
+    test_add(321, 123, '+', '-');
 
-($x,$xs) = _add (123,321,'+','-');
-is (_str($x,$xs), '-198', 'add +x + -y');
-($x,$xs) = _add (123,321,'-','+');
-is (_str($x,$xs), '+198', 'add -x + +y');
+    test_add(10,  1, '+', '-');
+    test_add(10,  1, '-', '+');
+    test_add( 1, 10, '-', '+');
 
-($x,$xs) = _add (321,123,'-','+');
-is (_str($x,$xs), '-198', 'add -x + +y');
-($x,$xs) = _add (321,123,'+','-');
-is (_str($x,$xs), '+198', 'add +x + -y');
+  SKIP: {
+        skip q|$x -> _zero() does not (yet?) modify the first argument|, 2;
 
-($x,$xs) = _add (10,1,'+','-');
-is (_str($x,$xs), '+9', 'add 10 + -1');
-($x,$xs) = _add (10,1,'-','+');
-is (_str($x,$xs), '-9', 'add -10 + +1');
-($x,$xs) = _add (1,10,'-','+');
-is (_str($x,$xs), '+9', 'add -1 + 10');
-($x,$xs) = _add (1,10,'+','-');
-is (_str($x,$xs), '-9', 'add 1 + -10');
+        test_add(123, 123, '-', '+');
+        test_add(123, 123, '+', '-');
+    }
+
+    test_add(123, 123, '+', '+');
+    test_add(123, 123, '-', '-');
+
+    test_add(0, 0, '-', '+');
+    test_add(0, 0, '+', '-');
+    test_add(0, 0, '+', '+');
+    test_add(0, 0, '-', '-');          # gives "-0"! TODO: fix this!
+}
 
 #############################################################################
 # sub
 
-$a = Math::BigInt::Calc->_new("123");
-$b = Math::BigInt::Calc->_new("321");
-($x, $xs) = Math::BigFloat::_e_sub($b,$a,'+','+');
-is (_str($x,$xs), '+198', 'sub two positive numbers');
-is (_str($b,''), '198', 'a modified');
+{
+    my $a = Math::BigInt::Calc->_new("123");
+    my $b = Math::BigInt::Calc->_new("321");
 
-($x,$xs) = _sub (123,321,'+','-');
-is (_str($x,$xs), '+444', 'sub +x + -y');
-($x,$xs) = _sub (123,321,'-','+');
-is (_str($x,$xs), '-444', 'sub -x + +y');
+    test_sub(123, 321, '+', '-');
+    test_sub(123, 321, '-', '+');
 
-sub _add
-  {
-  my ($a,$b,$as,$bs) = @_;
+    test_sub(123, 123, '-', '+');
+    test_sub(123, 123, '+', '-');
 
-  my $aa = Math::BigInt::Calc->_new($a);
-  my $bb = Math::BigInt::Calc->_new($b);
-  my ($x, $xs) = Math::BigFloat::_e_add($aa,$bb,$as,$bs);
-  is (Math::BigInt::Calc->_str($x), Math::BigInt::Calc->_str($aa),
-    'param0 modified');
-  ($x,$xs);
-  }
+  SKIP: {
+        skip q|$x -> _zero() does not (yet?) modify the first argument|, 2;
 
-sub _sub
-  {
-  my ($a,$b,$as,$bs) = @_;
+        test_sub(123, 123, '+', '+');
+        test_sub(123, 123, '-', '-');
+    }
 
-  my $aa = Math::BigInt::Calc->_new($a);
-  my $bb = Math::BigInt::Calc->_new($b);
-  my ($x, $xs) = Math::BigFloat::_e_sub($aa,$bb,$as,$bs);
-  is (Math::BigInt::Calc->_str($x), Math::BigInt::Calc->_str($aa),
-    'param0 modified');
-  ($x,$xs);
-  }
+    test_sub(0, 0, '-', '+');          # gives "-0"! TODO: fix this!
+    test_sub(0, 0, '+', '-');
+    test_sub(0, 0, '+', '+');
+    test_sub(0, 0, '-', '-');
+}
 
-sub _str
-  {
-  my ($x,$s) = @_;
+###############################################################################
 
-  $s . Math::BigInt::Calc->_str($x);
-  }
+sub test_add {
+    my ($a, $b, $as, $bs) = @_;
+
+    my $aa = Math::BigInt::Calc -> _new($a);
+    my $bb = Math::BigInt::Calc -> _new($b);
+    my ($x, $xs) = Math::BigFloat::_e_add($aa, $bb, "$as", "$bs");
+    my $got = $xs . Math::BigInt::Calc->_str($x);
+
+    my $expected = sprintf("%+d", "$as$a" + "$bs$b");
+
+    subtest qq|Math::BigFloat::_e_add($a, $b, "$as", "$bs");|
+      => sub {
+          plan tests => 2;
+
+          is($got, $expected, 'output has the correct value');
+          is(Math::BigInt::Calc->_str($x),
+             Math::BigInt::Calc->_str($aa),
+             'first operand to _e_add() is modified'
+            );
+      };
+}
+
+sub test_sub {
+    my ($a, $b, $as, $bs) = @_;
+
+    my $aa = Math::BigInt::Calc -> _new($a);
+    my $bb = Math::BigInt::Calc -> _new($b);
+    my ($x, $xs) = Math::BigFloat::_e_sub($aa, $bb, "$as", "$bs");
+    my $got = $xs . Math::BigInt::Calc->_str($x);
+
+    my $expected = sprintf("%+d", "$as$a" - "$bs$b");
+
+    subtest qq|Math::BigFloat::_e_sub($a, $b, "$as", "$bs");|
+      => sub {
+          plan tests => 2;
+
+          is($got, $expected, 'output has the correct value');
+          is(Math::BigInt::Calc->_str($x),
+             Math::BigInt::Calc->_str($aa),
+             'first operand to _e_sub() is modified'
+            );
+      };
+}

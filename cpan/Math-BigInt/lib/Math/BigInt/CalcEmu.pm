@@ -1,10 +1,11 @@
 package Math::BigInt::CalcEmu;
 
-use 5.006002;
+use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '1.999710';
+our $VERSION = '1.999714';
+$VERSION = eval $VERSION;
 
 package Math::BigInt;
 

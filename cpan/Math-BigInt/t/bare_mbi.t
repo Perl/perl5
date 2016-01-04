@@ -1,18 +1,18 @@
-#!/usr/bin/perl -w
+#!perl
 
 use strict;
-use Test::More tests => 3701;
+use warnings;
 
-BEGIN { unshift @INC, 't'; }
+use Test::More tests => 3724;           # tests in require'd file
+
+use lib 't';
 
 use Math::BigInt lib => 'BareCalc';
 
-print "# ",Math::BigInt->config()->{lib},"\n";
+print "# ", Math::BigInt->config()->{lib}, "\n";
 
-use vars qw ($class $try $x $y $f @args $ans $ans1 $ans1_str $setup $CL);
-$class = "Math::BigInt";
-$CL = "Math::BigInt::BareCalc";
+our ($CLASS, $CALC);
+$CLASS = "Math::BigInt";
+$CALC  = "Math::BigInt::BareCalc";      # backend
 
-my $version = '1.84';	# for $VERSION tests, match current release (by hand!)
-
-require 't/bigintpm.inc';	# perform same tests as bigintpm
+require 't/bigintpm.inc';               # perform same tests as bigintpm.t
