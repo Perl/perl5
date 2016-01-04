@@ -5177,7 +5177,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 			    */
     PAD* last_pad = NULL;
     dMULTICALL;
-    I32 gimme = G_SCALAR;
+    U8 gimme = G_SCALAR;
     CV *caller_cv = NULL;	/* who called us */
     CV *last_pushed_cv = NULL;	/* most recently called (?{}) CV */
     CHECKPOINT runops_cp;	/* savestack position before executing EVAL */

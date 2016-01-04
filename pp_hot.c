@@ -963,7 +963,7 @@ PP(pp_print)
 PP(pp_rv2av)
 {
     dSP; dTOPss;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
     static const char an_array[] = "an ARRAY";
     static const char a_hash[] = "a HASH";
     const bool is_pp_rv2av = PL_op->op_type == OP_RV2AV
@@ -1251,7 +1251,7 @@ PP(pp_aassign)
     SV *sv;
     AV *ary;
 
-    I32 gimme;
+    U8 gimme;
     HV *hash;
     SSize_t i;
     int magic;
@@ -1716,7 +1716,7 @@ PP(pp_match)
     const char *truebase;			/* Start of string  */
     REGEXP *rx = PM_GETRE(pm);
     bool rxtainted;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
     STRLEN len;
     const I32 oldsave = PL_savestack_ix;
     I32 had_zerolen = 0;
@@ -1908,7 +1908,7 @@ Perl_do_readline(pTHX)
     PerlIO *fp;
     IO * const io = GvIO(PL_last_in_gv);
     const I32 type = PL_op->op_type;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
 
     if (io) {
 	const MAGIC *const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
@@ -3268,7 +3268,7 @@ PP(pp_grepwhile)
     /* All done yet? */
     if (UNLIKELY(PL_stack_base + *PL_markstack_ptr > SP)) {
 	I32 items;
-	const I32 gimme = GIMME_V;
+	const U8 gimme = GIMME_V;
 
 	LEAVE_with_name("grep");					/* exit outer scope */
 	(void)POPMARK;				/* pop src */
@@ -3362,7 +3362,7 @@ PP(pp_grepwhile)
  */
 
 void
-Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, I32 gimme, int pass)
+Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
 {
     dVAR;
     dSP;
@@ -3616,7 +3616,7 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, I32 gimme, int pass)
 
 PP(pp_leavesub)
 {
-    I32 gimme;
+    U8 gimme;
     PERL_CONTEXT *cx;
     SV **oldsp;
     OP *retop;
@@ -3833,7 +3833,7 @@ PP(pp_entersub)
 	PADLIST *padlist;
         I32 depth;
         bool hasargs;
-        I32 gimme;
+        U8 gimme;
 
         /* keep PADTMP args alive throughout the call (we need to do this
          * because @_ isn't refcounted). Note that we create the mortals

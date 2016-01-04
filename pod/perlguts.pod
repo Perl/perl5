@@ -3234,7 +3234,7 @@ following shows a simplified and stripped-down example of a non-XS call,
 along with comments showing roughly what each function does.
 
     dMARK;
-    I32 gimme     = GIMME_V;
+    U8 gimme      = GIMME_V;
     bool hasargs  = cBOOL(PL_op->op_flags & OPf_STACKED);
     OP *retop     = PL_op->op_next;
     I32 old_ss_ix = PL_savestack_ix;
@@ -3342,7 +3342,7 @@ is capable of processing and popping all contexts above the target one.
 Here is a typical example of context popping, as found in C<pp_leavesub>
 (simplified slightly):
 
-    I32 gimme;
+    U8 gimme;
     PERL_CONTEXT *cx;
     SV **oldsp;
     OP *retop;

@@ -1100,7 +1100,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
  	multicall_oldcatch = CATCH_GET;					\
 	CATCH_SET(TRUE);						\
 	PUSHSTACKi(PERLSI_MULTICALL);					\
-	cx = cx_pushblock((CXt_SUB|CXp_MULTICALL|flags), gimme,         \
+	cx = cx_pushblock((CXt_SUB|CXp_MULTICALL|flags), (U8)gimme,     \
                   PL_stack_sp, PL_savestack_ix);	                \
         cx_pushsub(cx, cv, NULL, 0);                                    \
 	SAVEOP();					                \

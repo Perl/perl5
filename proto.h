@@ -206,7 +206,7 @@ PERL_CALLCONV OP*	Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
 PERL_CALLCONV OP*	Perl_block_end(pTHX_ I32 floor, OP* seq)
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV I32	Perl_block_gimme(pTHX)
+PERL_CALLCONV U8	Perl_block_gimme(pTHX)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV int	Perl_block_start(pTHX_ int full)
@@ -775,7 +775,7 @@ PERL_CALLCONV OP *	Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref);
 #define PERL_ARGS_ASSERT_DOREF	\
 	assert(o)
 PERL_CALLCONV void	Perl_dounwind(pTHX_ I32 cxix);
-PERL_CALLCONV I32	Perl_dowantarray(pTHX)
+PERL_CALLCONV U8	Perl_dowantarray(pTHX)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV void	Perl_drand48_init_r(perl_drand48_t *random_state, U32 seed);
@@ -1610,7 +1610,7 @@ PERL_CALLCONV I32	Perl_keyword(pTHX_ const char *name, I32 len, bool all_keyword
 PERL_CALLCONV int	Perl_keyword_plugin_standard(pTHX_ char* keyword_ptr, STRLEN keyword_len, OP** op_ptr);
 #define PERL_ARGS_ASSERT_KEYWORD_PLUGIN_STANDARD	\
 	assert(keyword_ptr); assert(op_ptr)
-PERL_CALLCONV void	Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, I32 gimme, int filter);
+PERL_CALLCONV void	Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int filter);
 #define PERL_ARGS_ASSERT_LEAVE_ADJUST_STACKS	\
 	assert(from_sp); assert(to_sp)
 PERL_CALLCONV void	Perl_leave_scope(pTHX_ I32 base);
@@ -4531,7 +4531,7 @@ STATIC OP*	S_do_smartmatch(pTHX_ HV* seen_this, HV* seen_other, const bool copie
 STATIC OP*	S_docatch(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
 
-STATIC bool	S_doeval_compile(pTHX_ int gimme, CV* outside, U32 seq, HV* hh);
+STATIC bool	S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV* hh);
 STATIC OP*	S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstack, OP **oplimit)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_DOFINDLABEL	\

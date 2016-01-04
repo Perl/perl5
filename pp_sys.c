@@ -297,7 +297,7 @@ PP(pp_backtick)
     dSP; dTARGET;
     PerlIO *fp;
     const char * const tmps = POPpconstx;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
     const char *mode = "r";
 
     TAINT_PROPER("``");
@@ -1345,7 +1345,7 @@ PP(pp_getc)
     if (io) {
 	const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
-	    const U32 gimme = GIMME_V;
+	    const U8 gimme = GIMME_V;
 	    Perl_tied_method(aTHX_ SV_CONST(GETC), SP, MUTABLE_SV(io), mg, gimme, 0);
 	    if (gimme == G_SCALAR) {
 		SPAGAIN;
@@ -1382,7 +1382,7 @@ STATIC OP *
 S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 {
     PERL_CONTEXT *cx;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
 
     PERL_ARGS_ASSERT_DOFORM;
 
@@ -2870,7 +2870,7 @@ PP(pp_stat)
     dSP;
     GV *gv = NULL;
     IO *io = NULL;
-    I32 gimme;
+    U8 gimme;
     I32 max = 13;
     SV* sv;
 
@@ -4026,7 +4026,7 @@ PP(pp_readdir)
     dSP;
 
     SV *sv;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
     GV * const gv = MUTABLE_GV(POPs);
     const Direntry_t *dp;
     IO * const io = GvIOn(gv);

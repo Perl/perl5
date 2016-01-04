@@ -1826,7 +1826,7 @@ PP(pp_unpack)
 {
     dSP;
     dPOPPOPssrl;
-    I32 gimme = GIMME_V;
+    U8 gimme = GIMME_V;
     STRLEN llen;
     STRLEN rlen;
     const char *pat = SvPV_const(left,  llen);

@@ -3368,7 +3368,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     SV* res;
     const bool oldcatch = CATCH_GET;
     I32 oldmark, nret;
-    int gimme = force_scalar ? G_SCALAR : GIMME_V;
+    U8 gimme = force_scalar ? G_SCALAR : GIMME_V;
 
     CATCH_SET(TRUE);
     Zero(&myop, 1, BINOP);

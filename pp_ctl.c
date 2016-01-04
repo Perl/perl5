@@ -965,7 +965,7 @@ PP(pp_grepstart)
 PP(pp_mapwhile)
 {
     dSP;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
     I32 items = (SP - PL_stack_base) - TOPMARK; /* how many new items */
     I32 count;
     I32 shift;
@@ -1332,14 +1332,14 @@ S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)
 
 
 
-I32
+U8
 Perl_dowantarray(pTHX)
 {
-    const I32 gimme = block_gimme();
+    const U8 gimme = block_gimme();
     return (gimme == G_VOID) ? G_SCALAR : gimme;
 }
 
-I32
+U8
 Perl_block_gimme(pTHX)
 {
     const I32 cxix = dopoptosub(cxstack_ix);
@@ -1674,7 +1674,7 @@ Perl_die_unwind(pTHX_ SV *msv)
             SV *namesv = NULL;
 	    PERL_CONTEXT *cx;
 	    SV **oldsp;
-            I32 gimme;
+            U8 gimme;
 	    JMPENV *restartjmpenv;
 	    OP *restartop;
 
@@ -1800,7 +1800,7 @@ PP(pp_caller)
     dSP;
     const PERL_CONTEXT *cx;
     const PERL_CONTEXT *dbcx;
-    I32 gimme = GIMME_V;
+    U8 gimme = GIMME_V;
     const HEK *stash_hek;
     I32 count = 0;
     bool has_arg = MAXARG && TOPs;
@@ -1870,7 +1870,7 @@ PP(pp_caller)
 	PUSHs(newSVpvs_flags("(eval)", SVs_TEMP));
 	mPUSHi(0);
     }
-    gimme = (I32)cx->blk_gimme;
+    gimme = cx->blk_gimme;
     if (gimme == G_VOID)
 	PUSHs(&PL_sv_undef);
     else
@@ -1984,7 +1984,7 @@ PP(pp_dbstate)
     {
 	dSP;
 	PERL_CONTEXT *cx;
-	const I32 gimme = G_ARRAY;
+	const U8 gimme = G_ARRAY;
 	GV * const gv = PL_DBgv;
 	CV * cv = NULL;
 
@@ -2036,7 +2036,7 @@ PP(pp_dbstate)
 PP(pp_enter)
 {
     dSP;
-    I32 gimme = GIMME_V;
+    U8 gimme = GIMME_V;
 
     (void)cx_pushblock(CXt_BLOCK, gimme, SP, PL_savestack_ix);
 
@@ -2047,7 +2047,7 @@ PP(pp_leave)
 {
     PERL_CONTEXT *cx;
     SV **oldsp;
-    I32 gimme;
+    U8 gimme;
 
     cx = CX_CUR();
     assert(CxTYPE(cx) == CXt_BLOCK);
@@ -2097,7 +2097,7 @@ PP(pp_enteriter)
 {
     dSP; dMARK;
     PERL_CONTEXT *cx;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
     void *itervarp; /* GV or pad slot of the iteration variable */
     SV   *itersave; /* the old var in the iterator var slot */
     U8 cxflags = 0;
@@ -2214,7 +2214,7 @@ PP(pp_enterloop)
 {
     dSP;
     PERL_CONTEXT *cx;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
 
     cx = cx_pushblock(CXt_LOOP_PLAIN, gimme, SP, PL_savestack_ix);
     cx_pushloop_plain(cx);
@@ -2225,7 +2225,7 @@ PP(pp_enterloop)
 PP(pp_leaveloop)
 {
     PERL_CONTEXT *cx;
-    I32 gimme;
+    U8 gimme;
     SV **oldsp;
     SV **mark;
 
@@ -2262,7 +2262,7 @@ PP(pp_leaveloop)
 
 PP(pp_leavesublv)
 {
-    I32 gimme;
+    U8 gimme;
     PERL_CONTEXT *cx;
     SV **oldsp;
     OP *retop;
@@ -3260,7 +3260,7 @@ S_try_yyparse(pTHX_ int gramtype)
  */
 
 STATIC bool
-S_doeval_compile(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
+S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
 {
     dSP;
     OP * const saveop = PL_op;
@@ -3600,7 +3600,7 @@ PP(pp_require)
 #endif
     const char *tryname = NULL;
     SV *namesv = NULL;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
     int filter_has_file = 0;
     PerlIO *tryrsfp = NULL;
     SV *filter_cache = NULL;
@@ -4080,7 +4080,7 @@ PP(pp_entereval)
     dSP;
     PERL_CONTEXT *cx;
     SV *sv;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
     const U32 was = PL_breakable_sub_gen;
     char tbuf[TYPE_DIGITS(long) + 12];
     bool saved_delete = FALSE;
@@ -4206,7 +4206,7 @@ PP(pp_entereval)
 PP(pp_leaveeval)
 {
     SV **oldsp;
-    I32 gimme;
+    U8 gimme;
     PERL_CONTEXT *cx;
     OP *retop;
     SV *namesv = NULL;
@@ -4287,7 +4287,7 @@ void
 Perl_create_eval_scope(pTHX_ OP *retop, U32 flags)
 {
     PERL_CONTEXT *cx;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
 	
     cx = cx_pushblock((CXt_EVAL|CXp_TRYBLOCK), gimme,
                     PL_stack_sp, PL_savestack_ix);
@@ -4312,7 +4312,7 @@ PP(pp_entertry)
 PP(pp_leavetry)
 {
     SV **oldsp;
-    I32 gimme;
+    U8 gimme;
     PERL_CONTEXT *cx;
     OP *retop;
 
@@ -4341,7 +4341,7 @@ PP(pp_entergiven)
 {
     dSP;
     PERL_CONTEXT *cx;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
     SV *origsv = DEFSV;
     SV *newsv = POPs;
     
@@ -4357,7 +4357,7 @@ PP(pp_entergiven)
 PP(pp_leavegiven)
 {
     PERL_CONTEXT *cx;
-    I32 gimme;
+    U8 gimme;
     SV **oldsp;
     PERL_UNUSED_CONTEXT;
 
@@ -4917,7 +4917,7 @@ PP(pp_enterwhen)
 {
     dSP;
     PERL_CONTEXT *cx;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
 
     /* This is essentially an optimization: if the match
        fails, we don't want to push a context and then
@@ -4938,7 +4938,7 @@ PP(pp_leavewhen)
 {
     I32 cxix;
     PERL_CONTEXT *cx;
-    I32 gimme;
+    U8 gimme;
     SV **oldsp;
 
     cx = CX_CUR();

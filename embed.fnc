@@ -247,7 +247,7 @@ s	|MAGIC*	|get_aux_mg	|NN AV *av
 pR	|OP*	|bind_match	|I32 type|NN OP *left|NN OP *right
 : Used in perly.y
 ApdR	|OP*	|block_end	|I32 floor|NULLOK OP* seq
-ApR	|I32	|block_gimme
+ApR	|U8	|block_gimme
 : Used in perly.y
 ApdR	|int	|block_start	|int full
 Aodp	|void	|blockhook_register |NN BHK *hk
@@ -443,7 +443,7 @@ p	|void	|do_vecset	|NN SV* sv
 p	|void	|do_vop		|I32 optype|NN SV* sv|NN SV* left|NN SV* right
 : Used in perly.y
 p	|OP*	|dofile		|NN OP* term|I32 force_builtin
-ApR	|I32	|dowantarray
+ApR	|U8	|dowantarray
 Ap	|void	|dump_all
 p	|void	|dump_all_perl	|bool justperl
 Ap	|void	|dump_eval
@@ -2068,7 +2068,7 @@ sR	|I32	|dopoptoloop	|I32 startingblock
 sR	|I32	|dopoptosub_at	|NN const PERL_CONTEXT* cxstk|I32 startingblock
 sR	|I32	|dopoptowhen	|I32 startingblock
 s	|void	|save_lines	|NULLOK AV *array|NN SV *sv
-s	|bool	|doeval_compile	|int gimme \
+s	|bool	|doeval_compile	|U8 gimme \
 				|NULLOK CV* outside|U32 seq|NULLOK HV* hh
 sR	|PerlIO *|check_type_and_open|NN SV *name
 #ifndef PERL_DISABLE_PMC
@@ -2878,7 +2878,7 @@ EMpPX	|SV*	|_get_encoding
 Ap	|void	|clear_defarray	|NN AV* av|bool abandon
 
 ApM	|void	|leave_adjust_stacks|NN SV **from_sp|NN SV **to_sp \
-                |I32 gimme|int filter
+                |U8 gimme|int filter
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
 AiM	|PERL_CONTEXT *	|cx_pushblock|U8 type|U8 gimme|NN SV** sp|I32 saveix
