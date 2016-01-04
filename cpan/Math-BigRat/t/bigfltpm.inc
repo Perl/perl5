@@ -1,8 +1,9 @@
 #include this file into another test for subclass testing...
 
-ok ($class->config()->{lib},$CL);
-
 use strict;
+use warnings;
+
+ok ($class->config()->{lib},$CL);
 
 my $z;
 

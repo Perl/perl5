@@ -1,8 +1,10 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 # Test blog function (and bpow, since it uses blog), as well as bexp().
 
 use strict;
+use warnings;
+
 use Test::More tests => 17;
 
 use Math::BigRat;

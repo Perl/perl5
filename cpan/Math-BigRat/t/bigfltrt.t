@@ -1,17 +1,17 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 use strict;
-use Test::More tests => 1;
+use warnings;
 
-BEGIN {
-  unshift @INC, 't';
-}
+use lib 't';
+
+use Test::More tests => 1;
 
 use Math::BigRat::Test lib => 'Calc';	# test via this Subclass
 
-use vars qw ($class $try $x $y $f @args $ans $ans1 $ans1_str $setup $CL);
-$class = "Math::BigRat::Test";
-$CL = "Math::BigInt::Calc";
+our ($CLASS, $CALC);
+$CLASS = "Math::BigRat::Test";
+$CALC  = "Math::BigInt::Calc";
 
 pass();
 
