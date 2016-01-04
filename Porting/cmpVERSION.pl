@@ -83,6 +83,11 @@ my %skip;
 @skip{
     'cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/BFD.pm', # just a test module
     'cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/XS.pm',  # just a test module
+    'cpan/Math-BigInt/t/Math/BigFloat/Subclass.pm', # just a test module
+    'cpan/Math-BigInt/t/Math/BigInt/BareCalc.pm',   # just a test module
+    'cpan/Math-BigInt/t/Math/BigInt/Scalar.pm',     # just a test module
+    'cpan/Math-BigInt/t/Math/BigInt/Subclass.pm',   # just a test module
+    'cpan/Math-BigRat/t/Math/BigRat/Test.pm',       # just a test module
     'dist/Attribute-Handlers/demo/MyClass.pm', # it's just demonstration code
     'dist/Exporter/lib/Exporter/Heavy.pm',
     'lib/Carp/Heavy.pm',
