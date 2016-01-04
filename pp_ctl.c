@@ -1808,7 +1808,7 @@ PP(pp_caller)
 		       cx->blk_sub.retop, TRUE);
     if (!lcop)
 	lcop = cx->blk_oldcop;
-    mPUSHi((I32)CopLINE(lcop));
+    mPUSHu(CopLINE(lcop));
     if (!has_arg)
 	RETURN;
     if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {

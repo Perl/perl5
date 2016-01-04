@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 95 );
+    plan( tests => 96 );
 }
 
 my @c;
@@ -307,6 +307,11 @@ is eval "s//<<END/e;\nfoo\nEND\n(caller 0)[6]",
  ';
  is $w, 1, 'value from (caller 0)[9] (bitmask) works in ${^WARNING_BITS}';
 }
+
+# [perl #126991]
+sub getlineno { (caller)[2] }
+my $line = eval "\n#line 3000000000\ngetlineno();";
+is $line, "3000000000", "check large line numbers are preserved";
 
 # This was fixed with commit d4d03940c58a0177, which fixed bug #78742
 fresh_perl_is <<'END', "__ANON__::doof\n", {},
