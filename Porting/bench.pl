@@ -417,6 +417,8 @@ sub filter_tests {
 
 
 # Read in the test file, and filter out any tests excluded by $OPTS{tests}
+# return a hash ref { testname => { test }, ... }
+# and an array ref of the original test names order,
 
 sub read_tests_file {
     my ($file) = @_;
@@ -427,9 +429,14 @@ sub read_tests_file {
         die "Error: can't read '$file': $!\n";
     }
 
+    my @orig_order;
+    for (my $i=0; $i < @$ta; $i += 2) {
+        push @orig_order, $ta->[$i];
+    }
+
     my $t = { @$ta };
     filter_tests($t);
-    return $t;
+    return $t, \@orig_order;
 }
 
 
@@ -547,7 +554,7 @@ sub parse_cachegrind {
 sub do_grind {
     my ($perl_args) = @_; # the residue of @ARGV after option processing
 
-    my ($loop_counts, $perls, $results, $tests);
+    my ($loop_counts, $perls, $results, $tests, $order);
     my ($bisect_field, $bisect_min, $bisect_max);
 
     if (defined $OPTS{bisect}) {
@@ -576,11 +583,15 @@ sub do_grind {
             die "Error: unsupported version $hash->{version} in file"
               . "'$OPTS{read}' (too new)\n";
         }
-        ($loop_counts, $perls, $results, $tests) =
-            @$hash{qw(loop_counts perls results tests)};
+        ($loop_counts, $perls, $results, $tests, $order) =
+            @$hash{qw(loop_counts perls results tests order)};
 
         filter_tests($results);
         filter_tests($tests);
+
+        if (!$order) {
+            $order = [ sort keys %$tests ];
+        }
     }
     else {
         # How many times to execute the loop for the two trials. The lower
@@ -589,14 +600,14 @@ sub do_grind {
         # branch misses after that
         $loop_counts = [10, 20];
 
-        $tests = read_tests_file($OPTS{benchfile});
+        ($tests, $order) = read_tests_file($OPTS{benchfile});
         die "Error: only a single test may be specified with --bisect\n"
             if defined $OPTS{bisect} and keys %$tests != 1;
 
         $perls = [ process_perls(@$perl_args) ];
 
 
-        $results = grind_run($tests, $perls, $loop_counts);
+        $results = grind_run($tests, $order, $perls, $loop_counts);
     }
 
     # now that we have a list of perls, use it to process the
@@ -615,6 +626,7 @@ sub do_grind {
                     perls        => $perls,
                     results      => $results,
                     tests        => $tests,
+                    order        => $order,
                 });
 
         open my $out, '>:encoding(UTF-8)', $OPTS{write}
@@ -640,7 +652,7 @@ sub do_grind {
             exit 1;
         }
         else {
-            grind_print($processed, $averages, $perls, $tests);
+            grind_print($processed, $averages, $perls, $tests, $order);
         }
     }
 }
@@ -651,13 +663,13 @@ sub do_grind {
 # Return a hash ref suitable for input to grind_process()
 
 sub grind_run {
-    my ($tests, $perls, $counts) = @_;
+    my ($tests, $order, $perls, $counts) = @_;
 
     # Build a list of all the jobs to run
 
     my @jobs;
 
-    for my $test (sort keys %$tests) {
+    for my $test (grep $tests->{$_}, @$order) {
 
         # Create two test progs: one with an empty loop and one with code.
         # Note that the empty loop is actually '{1;}' rather than '{}';
@@ -992,7 +1004,7 @@ sub grind_process {
 #    $tests->{test_name}{desc => ..., ...}
 
 sub grind_print {
-    my ($results, $averages, $perls, $tests) = @_;
+    my ($results, $averages, $perls, $tests, $order) = @_;
 
     my @perl_names = map $_->[0], @$perls;
     my %perl_labels;
@@ -1047,7 +1059,7 @@ EOF
                 keys %$results;
         }
         else {
-            @test_names = sort(keys %$results);
+            @test_names = grep $results->{$_}, @$order;
         }
     }
 
