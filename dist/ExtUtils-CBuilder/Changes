@@ -1,6 +1,12 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
-0.282224 - 2015-10-09
+0.280225 - 2016-01-04
+
+  Fixed:
+
+  - New location of libperl on Win32 when building core (RT #126632)
+
+0.280224 - 2015-10-09
 
   Enhncements:
 

@@ -101,10 +101,10 @@ or Windows SDK. You may also use, for Visual C++ or Windows SDK, dmake instead
 of nmake.  dmake is open source software, but is not included with Visual C++ or
 Windows SDK.  Builds using gcc need dmake or gmake.  nmake is not supported for
 gcc builds.  gmake only supports gcc builds, not any other compiler.
-Parallel building is only supported with dmake with any compiler.  It is
-recommended to use dmake 4.13 or newer for parallel building.  Older dmakes,
-in parallel mode, have very high CPU usage and pound the disk/filing system
-with duplicate I/O calls in an aggressive polling loop.
+Parallel building is only supported with dmake and gmake, not nmake.  When using
+dmake it is recommended to use dmake 4.13 or newer for parallel building.
+Older dmakes, in parallel mode, have very high CPU usage and pound the
+disk/filing system with duplicate I/O calls in an aggressive polling loop.
 
 A port of dmake for Windows is available from:
 

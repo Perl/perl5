@@ -87,10 +87,10 @@ if ($^O eq 'VMS') {
     $inc = File::Spec->catdir($inc,'include');
     push(@cmd,"-I$inc");
     if ($cc eq 'cl') {
-	push(@cmd,'-link',"-libpath:$lib",$Config{'libperl'},$Config{'libs'});
+	push(@cmd,'-link',"-libpath:$lib\\lib\\CORE",$Config{'libperl'},$Config{'libs'});
     }
     else {
-	push(@cmd,"-L$lib",File::Spec->catfile($lib,$Config{'libperl'}),$Config{'libc'});
+	push(@cmd,"-L$lib",$lib.'\lib\CORE\\'.$Config{'libperl'},$Config{'libc'});
     }
    }
    elsif ($^O eq 'os390' && $Config{usedl}) {
