@@ -56,6 +56,10 @@
 #define UTF8_ALLOW_FFFF  (0)
 #endif /* UTF8_ALLOW_FFFF */
 
+#ifndef PERL_UNUSED_VAR
+#  define PERL_UNUSED_VAR(x) ((void)sizeof(x))
+#endif
+
 #define AllowAnyUTF (UTF8_ALLOW_SURROGATE|UTF8_ALLOW_BOM|UTF8_ALLOW_FE_FF|UTF8_ALLOW_FFFF)
 
 /* check if the string buffer is enough before uvchr_to_utf8(). */
