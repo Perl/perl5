@@ -2284,6 +2284,11 @@ sub trace { return main::trace(@_); }
     # may not be the actual reality, but probably nobody cares anyway for
     # these obsolete characters.)
     #
+    # [3] if present must be the string 'ONLY_EARLY'.  Normally, when
+    # compiling Unicode versions that don't invoke the early handling, the
+    # name in [1] is added as an alias to the property name used for these.
+    # This parameter says to not do this.
+    #
     # Not all files can be handled in the above way, and so the code ref
     # alternative is available.  It can do whatever it needs to.  The other
     # array elements are optional in this case, and the code is free to use or
@@ -2403,6 +2408,11 @@ sub trace { return main::trace(@_); }
 
         my $progress;
         my $function_instead_of_file = 0;
+
+        if ($early{$addr}->@* > 3 && $early{$addr}[3] ne 'ONLY_EARLY') {
+            Carp::my_carp_bug("If present, element [3] in 'Early => [ ... ]'"
+                            . " must be the string 'ONLY_EARLY'");
+        }
 
         # If we are compiling a Unicode release earlier than the file became
         # available, the constructor may have supplied a substitute
@@ -2701,7 +2711,9 @@ END
                 # will work regardless.
                 if (! $early{$addr}[0] && $early{$addr}->@* > 2) {
                     my $early_property_name = $early{$addr}[2];
-                    if ($property{$addr} ne $early_property_name) {
+                    if (   $property{$addr} ne $early_property_name
+                        && $early{$addr}->@* < 5)
+                    {
                         main::property_ref($property{$addr})
                                             ->add_alias($early_property_name);
                     }
