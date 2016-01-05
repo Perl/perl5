@@ -1,18 +1,19 @@
-#!/usr/bin/perl -w
+#!perl
 
 package Math::BigInt::Trace;
 
-require 5.005_02;
+require 5.006;
 use strict;
+use warnings;
 
 use Exporter;
 use Math::BigInt;
-use vars qw($VERSION @ISA $PACKAGE @EXPORT_OK
-            $accuracy $precision $round_mode $div_scale);
 
-@ISA = qw(Exporter Math::BigInt);
+our ($PACKAGE, @EXPORT_OK, $accuracy, $precision, $round_mode, $div_scale);
 
-$VERSION = '0.41';
+our @ISA = qw(Exporter Math::BigInt);
+
+our $VERSION = '0.42';
 
 use overload;                   # inherit overload from BigInt
 
@@ -22,8 +23,8 @@ $round_mode = 'even';
 $div_scale = 40;
 
 sub new {
-    my $proto  = shift;
-    my $class  = ref($proto) || $proto;
+    my $proto = shift;
+    my $class = ref($proto) || $proto;
 
     my $value = shift;
     my $a = $accuracy;

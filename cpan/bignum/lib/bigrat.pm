@@ -1,13 +1,16 @@
 package bigrat;
+
 use 5.006;
-
-$VERSION = '0.41';
-require Exporter;
-@ISA            = qw( bigint );
-@EXPORT_OK      = qw( PI e bpi bexp hex oct );
-@EXPORT         = qw( inf NaN );
-
 use strict;
+use warnings;
+
+our $VERSION = '0.42';
+
+use Exporter;
+our @ISA            = qw( bigint );
+our @EXPORT_OK      = qw( PI e bpi bexp hex oct );
+our @EXPORT         = qw( inf NaN );
+
 use overload;
 use bigint ();
 
@@ -23,7 +26,7 @@ BEGIN {
 # These are all alike, and thus faked by AUTOLOAD
 
 my @faked = qw/round_mode accuracy precision div_scale/;
-use vars qw/$VERSION $AUTOLOAD $_lite/; # _lite for testsuite
+our ($AUTOLOAD, $_lite);        # _lite for testsuite
 
 sub AUTOLOAD {
     my $name = $AUTOLOAD;
@@ -194,11 +197,11 @@ sub import {
 }
 
 sub PI () { Math::BigFloat->new('3.141592653589793238462643383279502884197'); }
-sub e () { Math::BigFloat->new('2.718281828459045235360287471352662497757'); }
+sub e  () { Math::BigFloat->new('2.718281828459045235360287471352662497757'); }
 
 sub bpi ($) {
     local $Math::BigFloat::upgrade;
-    Math::BigFloat::bpi(@_);
+    Math::BigFloat->bpi(@_);
 }
 
 sub bexp ($$) {
@@ -210,6 +213,8 @@ sub bexp ($$) {
 1;
 
 __END__
+
+=pod
 
 =head1 NAME
 

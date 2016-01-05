@@ -1,13 +1,16 @@
 package bigint;
+
 use 5.006;
-
-$VERSION = '0.41';
-use Exporter;
-@ISA            = qw( Exporter );
-@EXPORT_OK      = qw( PI e bpi bexp hex oct );
-@EXPORT         = qw( inf NaN );
-
 use strict;
+use warnings;
+
+our $VERSION = '0.42';
+
+use Exporter;
+our @ISA            = qw( Exporter );
+our @EXPORT_OK      = qw( PI e bpi bexp hex oct );
+our @EXPORT         = qw( inf NaN );
+
 use overload;
 
 ##############################################################################
@@ -15,7 +18,7 @@ use overload;
 # These are all alike, and thus faked by AUTOLOAD
 
 my @faked = qw/round_mode accuracy precision div_scale/;
-use vars qw/$VERSION $AUTOLOAD $_lite/;         # _lite for testsuite
+our ($AUTOLOAD, $_lite);        # _lite for testsuite
 
 sub AUTOLOAD {
     my $name = $AUTOLOAD;
@@ -370,6 +373,8 @@ sub bexp ($$) {
 1;
 
 __END__
+
+=pod
 
 =head1 NAME
 

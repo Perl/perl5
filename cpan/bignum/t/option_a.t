@@ -1,23 +1,22 @@
-#!/usr/bin/perl -w
+#!perl
 
 ###############################################################################
 
 use strict;
+use warnings;
+
 use Test::More tests => 4;
 
 use bignum a => '12';
 
-my @C = qw/Math::BigInt Math::BigFloat/;
+my @CLASSES = qw/Math::BigInt Math::BigFloat/;
 
-foreach my $c (@C)
-  {
-  is ($c->accuracy(),12, "$c accuracy = 12");
-  }
+foreach my $class (@CLASSES) {
+    is($class->accuracy(),12, "$class accuracy = 12");
+}
 
-bignum->import( accuracy => '23');
+bignum->import(accuracy => '23');
 
-foreach my $c (@C)
-  {
-  is ($c->accuracy(), 23, "$c accuracy = 23");
-  }
-
+foreach my $class (@CLASSES) {
+    is($class->accuracy(), 23, "$class accuracy = 23");
+}

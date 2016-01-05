@@ -1,18 +1,19 @@
-#!/usr/bin/perl -w
+#!perl
 
 package Math::BigFloat::Trace;
 
-require 5.005_02;
+require 5.006;
 use strict;
+use warnings;
 
 use Exporter;
 use Math::BigFloat;
-use vars qw($VERSION @ISA $PACKAGE @EXPORT_OK
-            $accuracy $precision $round_mode $div_scale);
 
-@ISA = qw(Exporter Math::BigFloat);
+our ($PACKAGE, @EXPORT_OK, $accuracy, $precision, $round_mode, $div_scale);
 
-$VERSION = '0.41';
+our @ISA = qw(Exporter Math::BigFloat);
+
+our $VERSION = '0.42';
 
 use overload;                   # inherit overload from BigFloat
 

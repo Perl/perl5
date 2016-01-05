@@ -1,9 +1,11 @@
-#!/usr/bin/perl -w
+#!perl
 
 ###############################################################################
 # Test "no bignum;" and overloading of hex()/oct() for newer Perls
 
 use strict;
+use warnings;
+
 use Test::More tests => 10;
 
 # no :hex and :oct means these do not get overloaded for older Perls:
