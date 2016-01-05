@@ -12029,15 +12029,18 @@ static const SB_enum _Perl_SB_invmap[] = { /* for ASCII/Latin1 */
 #if defined(PERL_IN_PERL_C)
 
 static const UV _Perl_WB_invlist[] = { /* for ASCII/Latin1 */
-	1524,	/* Number of elements */
+	1535,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0x0,
+	0x9,
 	0xA,
 	0xB,
 	0xD,
 	0xE,
+	0x20,
+	0x21,
 	0x22,
 	0x23,
 	0x27,
@@ -12058,6 +12061,8 @@ static const UV _Perl_WB_invlist[] = { /* for ASCII/Latin1 */
 	0x7B,
 	0x85,
 	0x86,
+	0xA0,
+	0xA1,
 	0xAA,
 	0xAB,
 	0xAD,
@@ -12745,6 +12750,8 @@ static const UV _Perl_WB_invlist[] = { /* for ASCII/Latin1 */
 	0x1FF5,
 	0x1FF6,
 	0x1FFD,
+	0x2000,
+	0x200B,
 	0x200C,
 	0x200E,
 	0x2010,
@@ -12756,12 +12763,14 @@ static const UV _Perl_WB_invlist[] = { /* for ASCII/Latin1 */
 	0x2028,
 	0x202A,
 	0x202F,
+	0x2030,
 	0x203F,
 	0x2041,
 	0x2044,
 	0x2045,
 	0x2054,
 	0x2055,
+	0x205F,
 	0x2060,
 	0x2065,
 	0x2066,
@@ -12847,6 +12856,8 @@ static const UV _Perl_WB_invlist[] = { /* for ASCII/Latin1 */
 	0x2E00,
 	0x2E2F,
 	0x2E30,
+	0x3000,
+	0x3001,
 	0x3005,
 	0x3006,
 	0x302A,
@@ -13563,7 +13574,7 @@ static const UV _Perl_WB_invlist[] = { /* for ASCII/Latin1 */
 
 #if defined(PERL_IN_REGEXEC_C)
 
-#define WB_ENUM_COUNT 19
+#define WB_ENUM_COUNT 20
 
 typedef enum {
 	WB_Other = 0,
@@ -13582,16 +13593,20 @@ typedef enum {
 	WB_MidNumLet = 13,
 	WB_Newline = 14,
 	WB_Numeric = 15,
-	WB_Regional_Indicator = 16,
-	WB_Single_Quote = 17,
-	WB_UNKNOWN = 18
+	WB_Perl_Tailored_HSpace = 16,
+	WB_Regional_Indicator = 17,
+	WB_Single_Quote = 18,
+	WB_UNKNOWN = 19
 } WB_enum;
 
 static const WB_enum _Perl_WB_invmap[] = { /* for ASCII/Latin1 */
 	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_LF,
 	WB_Newline,
 	WB_CR,
+	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_Other,
 	WB_Double_Quote,
 	WB_Other,
@@ -13613,6 +13628,8 @@ static const WB_enum _Perl_WB_invmap[] = { /* for ASCII/Latin1 */
 	WB_Other,
 	WB_Newline,
 	WB_Other,
+	WB_Perl_Tailored_HSpace,
+	WB_Other,
 	WB_ALetter,
 	WB_Other,
 	WB_Format,
@@ -14154,7 +14171,7 @@ static const WB_enum _Perl_WB_invmap[] = { /* for ASCII/Latin1 */
 	WB_ALetter,
 	WB_Other,
 	WB_ALetter,
-	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_ALetter,
 	WB_Other,
 	WB_ALetter,
@@ -14299,6 +14316,8 @@ static const WB_enum _Perl_WB_invmap[] = { /* for ASCII/Latin1 */
 	WB_ALetter,
 	WB_Other,
 	WB_ALetter,
+	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_Other,
 	WB_Extend,
 	WB_Format,
@@ -14310,6 +14329,7 @@ static const WB_enum _Perl_WB_invmap[] = { /* for ASCII/Latin1 */
 	WB_MidLetter,
 	WB_Newline,
 	WB_Format,
+	WB_Perl_Tailored_HSpace,
 	WB_Other,
 	WB_ExtendNumLet,
 	WB_Other,
@@ -14317,6 +14337,7 @@ static const WB_enum _Perl_WB_invmap[] = { /* for ASCII/Latin1 */
 	WB_Other,
 	WB_ExtendNumLet,
 	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_Format,
 	WB_Other,
 	WB_Format,
@@ -14401,6 +14422,8 @@ static const WB_enum _Perl_WB_invmap[] = { /* for ASCII/Latin1 */
 	WB_Extend,
 	WB_Other,
 	WB_ALetter,
+	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_Other,
 	WB_ALetter,
 	WB_Other,
@@ -36798,11 +36821,13 @@ static const SB_enum _Perl_SB_invmap[] = { /* for EBCDIC 1047 */
 #if defined(PERL_IN_PERL_C)
 
 static const UV _Perl_WB_invlist[] = { /* for EBCDIC 1047 */
-	1549,	/* Number of elements */
+	1558,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0x0,
+	0x5,
+	0x6,
 	0xB,
 	0xD,
 	0xE,
@@ -36810,6 +36835,7 @@ static const UV _Perl_WB_invlist[] = { /* for EBCDIC 1047 */
 	0x16,
 	0x25,
 	0x26,
+	0x40,
 	0x42,
 	0x4A,
 	0x4B,
@@ -37539,6 +37565,8 @@ static const UV _Perl_WB_invlist[] = { /* for EBCDIC 1047 */
 	0x1FF5,
 	0x1FF6,
 	0x1FFD,
+	0x2000,
+	0x200B,
 	0x200C,
 	0x200E,
 	0x2010,
@@ -37550,12 +37578,14 @@ static const UV _Perl_WB_invlist[] = { /* for EBCDIC 1047 */
 	0x2028,
 	0x202A,
 	0x202F,
+	0x2030,
 	0x203F,
 	0x2041,
 	0x2044,
 	0x2045,
 	0x2054,
 	0x2055,
+	0x205F,
 	0x2060,
 	0x2065,
 	0x2066,
@@ -37641,6 +37671,8 @@ static const UV _Perl_WB_invlist[] = { /* for EBCDIC 1047 */
 	0x2E00,
 	0x2E2F,
 	0x2E30,
+	0x3000,
+	0x3001,
 	0x3005,
 	0x3006,
 	0x302A,
@@ -38357,7 +38389,7 @@ static const UV _Perl_WB_invlist[] = { /* for EBCDIC 1047 */
 
 #if defined(PERL_IN_REGEXEC_C)
 
-#define WB_ENUM_COUNT 19
+#define WB_ENUM_COUNT 20
 
 typedef enum {
 	WB_Other = 0,
@@ -38376,12 +38408,15 @@ typedef enum {
 	WB_MidNumLet = 13,
 	WB_Newline = 14,
 	WB_Numeric = 15,
-	WB_Regional_Indicator = 16,
-	WB_Single_Quote = 17,
-	WB_UNKNOWN = 18
+	WB_Perl_Tailored_HSpace = 16,
+	WB_Regional_Indicator = 17,
+	WB_Single_Quote = 18,
+	WB_UNKNOWN = 19
 } WB_enum;
 
 static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 1047 */
+	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_Other,
 	WB_Newline,
 	WB_CR,
@@ -38390,6 +38425,7 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 1047 */
 	WB_Other,
 	WB_Newline,
 	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_ALetter,
 	WB_Other,
 	WB_MidNumLet,
@@ -38973,7 +39009,7 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 1047 */
 	WB_ALetter,
 	WB_Other,
 	WB_ALetter,
-	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_ALetter,
 	WB_Other,
 	WB_ALetter,
@@ -39118,6 +39154,8 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 1047 */
 	WB_ALetter,
 	WB_Other,
 	WB_ALetter,
+	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_Other,
 	WB_Extend,
 	WB_Format,
@@ -39129,6 +39167,7 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 1047 */
 	WB_MidLetter,
 	WB_Newline,
 	WB_Format,
+	WB_Perl_Tailored_HSpace,
 	WB_Other,
 	WB_ExtendNumLet,
 	WB_Other,
@@ -39136,6 +39175,7 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 1047 */
 	WB_Other,
 	WB_ExtendNumLet,
 	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_Format,
 	WB_Other,
 	WB_Format,
@@ -39220,6 +39260,8 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 1047 */
 	WB_Extend,
 	WB_Other,
 	WB_ALetter,
+	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_Other,
 	WB_ALetter,
 	WB_Other,
@@ -61759,11 +61801,13 @@ static const SB_enum _Perl_SB_invmap[] = { /* for EBCDIC 037 */
 #if defined(PERL_IN_PERL_C)
 
 static const UV _Perl_WB_invlist[] = { /* for EBCDIC 037 */
-	1545,	/* Number of elements */
+	1554,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0x0,
+	0x5,
+	0x6,
 	0xB,
 	0xD,
 	0xE,
@@ -61771,6 +61815,7 @@ static const UV _Perl_WB_invlist[] = { /* for EBCDIC 037 */
 	0x16,
 	0x25,
 	0x26,
+	0x40,
 	0x42,
 	0x4A,
 	0x4B,
@@ -62496,6 +62541,8 @@ static const UV _Perl_WB_invlist[] = { /* for EBCDIC 037 */
 	0x1FF5,
 	0x1FF6,
 	0x1FFD,
+	0x2000,
+	0x200B,
 	0x200C,
 	0x200E,
 	0x2010,
@@ -62507,12 +62554,14 @@ static const UV _Perl_WB_invlist[] = { /* for EBCDIC 037 */
 	0x2028,
 	0x202A,
 	0x202F,
+	0x2030,
 	0x203F,
 	0x2041,
 	0x2044,
 	0x2045,
 	0x2054,
 	0x2055,
+	0x205F,
 	0x2060,
 	0x2065,
 	0x2066,
@@ -62598,6 +62647,8 @@ static const UV _Perl_WB_invlist[] = { /* for EBCDIC 037 */
 	0x2E00,
 	0x2E2F,
 	0x2E30,
+	0x3000,
+	0x3001,
 	0x3005,
 	0x3006,
 	0x302A,
@@ -63314,7 +63365,7 @@ static const UV _Perl_WB_invlist[] = { /* for EBCDIC 037 */
 
 #if defined(PERL_IN_REGEXEC_C)
 
-#define WB_ENUM_COUNT 19
+#define WB_ENUM_COUNT 20
 
 typedef enum {
 	WB_Other = 0,
@@ -63333,12 +63384,15 @@ typedef enum {
 	WB_MidNumLet = 13,
 	WB_Newline = 14,
 	WB_Numeric = 15,
-	WB_Regional_Indicator = 16,
-	WB_Single_Quote = 17,
-	WB_UNKNOWN = 18
+	WB_Perl_Tailored_HSpace = 16,
+	WB_Regional_Indicator = 17,
+	WB_Single_Quote = 18,
+	WB_UNKNOWN = 19
 } WB_enum;
 
 static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 037 */
+	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_Other,
 	WB_Newline,
 	WB_CR,
@@ -63347,6 +63401,7 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 037 */
 	WB_Other,
 	WB_LF,
 	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_ALetter,
 	WB_Other,
 	WB_MidNumLet,
@@ -63926,7 +63981,7 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 037 */
 	WB_ALetter,
 	WB_Other,
 	WB_ALetter,
-	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_ALetter,
 	WB_Other,
 	WB_ALetter,
@@ -64071,6 +64126,8 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 037 */
 	WB_ALetter,
 	WB_Other,
 	WB_ALetter,
+	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_Other,
 	WB_Extend,
 	WB_Format,
@@ -64082,6 +64139,7 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 037 */
 	WB_MidLetter,
 	WB_Newline,
 	WB_Format,
+	WB_Perl_Tailored_HSpace,
 	WB_Other,
 	WB_ExtendNumLet,
 	WB_Other,
@@ -64089,6 +64147,7 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 037 */
 	WB_Other,
 	WB_ExtendNumLet,
 	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_Format,
 	WB_Other,
 	WB_Format,
@@ -64173,6 +64232,8 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 037 */
 	WB_Extend,
 	WB_Other,
 	WB_ALetter,
+	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_Other,
 	WB_ALetter,
 	WB_Other,
@@ -86726,11 +86787,13 @@ static const SB_enum _Perl_SB_invmap[] = { /* for EBCDIC POSIX-BC */
 #if defined(PERL_IN_PERL_C)
 
 static const UV _Perl_WB_invlist[] = { /* for EBCDIC POSIX-BC */
-	1547,	/* Number of elements */
+	1556,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0x0,
+	0x5,
+	0x6,
 	0xB,
 	0xD,
 	0xE,
@@ -86738,6 +86801,7 @@ static const UV _Perl_WB_invlist[] = { /* for EBCDIC POSIX-BC */
 	0x16,
 	0x25,
 	0x26,
+	0x40,
 	0x42,
 	0x4A,
 	0x4B,
@@ -87465,6 +87529,8 @@ static const UV _Perl_WB_invlist[] = { /* for EBCDIC POSIX-BC */
 	0x1FF5,
 	0x1FF6,
 	0x1FFD,
+	0x2000,
+	0x200B,
 	0x200C,
 	0x200E,
 	0x2010,
@@ -87476,12 +87542,14 @@ static const UV _Perl_WB_invlist[] = { /* for EBCDIC POSIX-BC */
 	0x2028,
 	0x202A,
 	0x202F,
+	0x2030,
 	0x203F,
 	0x2041,
 	0x2044,
 	0x2045,
 	0x2054,
 	0x2055,
+	0x205F,
 	0x2060,
 	0x2065,
 	0x2066,
@@ -87567,6 +87635,8 @@ static const UV _Perl_WB_invlist[] = { /* for EBCDIC POSIX-BC */
 	0x2E00,
 	0x2E2F,
 	0x2E30,
+	0x3000,
+	0x3001,
 	0x3005,
 	0x3006,
 	0x302A,
@@ -88283,7 +88353,7 @@ static const UV _Perl_WB_invlist[] = { /* for EBCDIC POSIX-BC */
 
 #if defined(PERL_IN_REGEXEC_C)
 
-#define WB_ENUM_COUNT 19
+#define WB_ENUM_COUNT 20
 
 typedef enum {
 	WB_Other = 0,
@@ -88302,12 +88372,15 @@ typedef enum {
 	WB_MidNumLet = 13,
 	WB_Newline = 14,
 	WB_Numeric = 15,
-	WB_Regional_Indicator = 16,
-	WB_Single_Quote = 17,
-	WB_UNKNOWN = 18
+	WB_Perl_Tailored_HSpace = 16,
+	WB_Regional_Indicator = 17,
+	WB_Single_Quote = 18,
+	WB_UNKNOWN = 19
 } WB_enum;
 
 static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC POSIX-BC */
+	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_Other,
 	WB_Newline,
 	WB_CR,
@@ -88316,6 +88389,7 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC POSIX-BC */
 	WB_Other,
 	WB_Newline,
 	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_ALetter,
 	WB_Other,
 	WB_MidNumLet,
@@ -88897,7 +88971,7 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC POSIX-BC */
 	WB_ALetter,
 	WB_Other,
 	WB_ALetter,
-	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_ALetter,
 	WB_Other,
 	WB_ALetter,
@@ -89042,6 +89116,8 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC POSIX-BC */
 	WB_ALetter,
 	WB_Other,
 	WB_ALetter,
+	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_Other,
 	WB_Extend,
 	WB_Format,
@@ -89053,6 +89129,7 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC POSIX-BC */
 	WB_MidLetter,
 	WB_Newline,
 	WB_Format,
+	WB_Perl_Tailored_HSpace,
 	WB_Other,
 	WB_ExtendNumLet,
 	WB_Other,
@@ -89060,6 +89137,7 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC POSIX-BC */
 	WB_Other,
 	WB_ExtendNumLet,
 	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_Format,
 	WB_Other,
 	WB_Format,
@@ -89144,6 +89222,8 @@ static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC POSIX-BC */
 	WB_Extend,
 	WB_Other,
 	WB_ALetter,
+	WB_Other,
+	WB_Perl_Tailored_HSpace,
 	WB_Other,
 	WB_ALetter,
 	WB_Other,
@@ -99537,8 +99617,8 @@ static const UV XPosixXDigit_invlist[] = { /* for EBCDIC POSIX-BC */
  * 1a0687fb9c6c4567e853913549df0944fe40821279a3e9cdaa6ab8679bc286fd lib/unicore/extracted/DLineBreak.txt
  * 40bcfed3ca727c19e1331f6c33806231d5f7eeeabd2e6a9e06a3740c85d0c250 lib/unicore/extracted/DNumType.txt
  * a18d502bad39d527ac5586d7bc93e29f565859e3bcc24ada627eff606d6f5fed lib/unicore/extracted/DNumValues.txt
- * 21f614a12bfde0478588228d46f1b594bf7e23c7d1f51492c70b13f7c9b8de09 lib/unicore/mktables
+ * 2b18fcfeafc8e8a26ff1124ad4ca94020f287bc4651be7ea199d69ecd5dcf9c5 lib/unicore/mktables
  * 462c9aaa608fb2014cd9649af1c5c009485c60b9c8b15b89401fdc10cf6161c6 lib/unicore/version
  * 996abda3c0fbc2bfd575092af09e3b9b0331e624eb2e969a268457f8fd31ecbb regen/charset_translations.pl
- * 8a097f8f726bb1619af2f27f149ab87e60a1602f790147e3a561358be16abd27 regen/mk_invlists.pl
+ * 214ab3909a11fcc57cb6ee0611897342109b5a895b2b42d5227b80d948744a0a regen/mk_invlists.pl
  * ex: set ro: */

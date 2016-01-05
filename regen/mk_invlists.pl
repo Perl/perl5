@@ -112,6 +112,7 @@ my %hard_coded_enums =
             'Newline',
             'Numeric',
             'Other',
+            'Perl_Tailored_HSpace',
             'Regional_Indicator',
             'Single_Quote',
             'UNKNOWN',

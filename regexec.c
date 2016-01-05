@@ -4534,7 +4534,8 @@ S_isWB(pTHX_ WB_enum previous,
              const bool utf8_target)
 {
     /*  Return a boolean as to if the boundary between 'before' and 'after' is
-     *  a Unicode word break, using their published algorithm.  Context may be
+     *  a Unicode word break, using their published algorithm, but tailored for
+     *  Perl by treating spans of white space as one unit.  Context may be
      *  needed to make this determination.  If the value for the character
      *  before 'before' is known, it is passed as 'previous'; otherwise that
      *  should be set to WB_UNKNOWN.  The other input parameters give the
@@ -4552,17 +4553,48 @@ S_isWB(pTHX_ WB_enum previous,
         return TRUE;
     }
 
-    /* WB 3: Do not break within CRLF. */
-    if (before == WB_CR && after == WB_LF) {
-        return FALSE;
+    /* WB 3 is: "Do not break within CRLF."  Perl extends this so that all
+     * white space sequences ending in a vertical space are treated as one
+     * unit. */
+
+    if (after == WB_CR || after == WB_LF || after == WB_Newline) {
+        if (before == WB_CR || before == WB_LF || before == WB_Newline
+                            || before == WB_Perl_Tailored_HSpace)
+        {
+            return FALSE;
+        }
+
+        /* WB 3a: Otherwise break before Newlines (including CR and LF) */
+        return TRUE;
     }
 
-    /* WB 3a and WB 3b: Otherwise break before and after Newlines (including CR
-     * and LF) */
+    /* Here, we know that 'after' is not a vertical space character, but
+     * 'before' could be.  WB 3b is: "Otherwise break after Newlines (including
+     * CR and LF)."  Perl changes that to not break-up spans of white space,
+     * except when horizontal space is followed by an Extend or Format
+     * character.  These apply just to the final white space character in the
+     * span, so it is broken away from the rest.  (If the Extend or Format
+     * character follows a vertical space character, it is treated as beginning
+     * a line, and doesn't modify the preceeding character.) */
     if (   before == WB_CR || before == WB_LF || before == WB_Newline
-        || after ==  WB_CR || after ==  WB_LF || after ==  WB_Newline)
+        || before == WB_Perl_Tailored_HSpace)
     {
-        return TRUE;
+        if (after == WB_Perl_Tailored_HSpace) {
+            U8 * temp_pos = (U8 *) curpos;
+            const WB_enum next
+                = advance_one_WB(&temp_pos, strend, utf8_target,
+                                 FALSE /* Don't skip Extend nor Format */ );
+            return next == WB_Extend || next == WB_Format;
+        }
+        else if (before != WB_Perl_Tailored_HSpace) {
+
+            /* Here, 'before' must be one of the vertical space characters, and
+             * after is not any type of white-space.  Follow WB 3b. */
+            return TRUE;
+        }
+
+        /* Here, 'before' is horizontal space, and 'after' is not any kind of
+         * space.  Normal rules apply */
     }
 
     /* Ignore Format and Extend characters, except when they appear at the

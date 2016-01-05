@@ -592,11 +592,28 @@ future Perl versions.
 
 =item C<\b{wb}>
 
-This matches a Unicode "Word Boundary".  This gives better (though not
+This matches a Unicode "Word Boundary", but tailored to Perl
+expectations.  This gives better (though not
 perfect) results for natural language processing than plain C<\b>
 (without braces) does.  For example, it understands that apostrophes can
 be in the middle of words and that parentheses aren't (see the examples
 below).  More details are at L<http://www.unicode.org/reports/tr29/>.
+
+The current Unicode definition of a Word Boundary matches between every
+white space character.  Perl tailors this, starting in version 5.24, to
+generally not break up spans of white space, just as plain C<\b> has
+always functioned.  This allows C<\b{wb}> to be a drop-in replacement for
+C<\b>, but with generally better results for natural language
+processing.  (The exception to this tailoring is when a span of white
+space is immediately followed by something like U+0303, COMBINING TILDE.
+If the final space character in the span is a horizontal white space, it
+is broken out so that it attaches instead to the combining character.
+To be precise, if a span of white space that ends in a horizontal space
+has the character immediately following it have either of the Word
+Boundary property values "Extend" or "Format", the boundary between the
+final horizontal space character and the rest of the span matches
+C<\b{wb}>.  In all other cases the boundary between two white space
+characters matches C<\B{wb}>.)
 
 =back
 

@@ -45,6 +45,15 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 C<qr/\b{wb}/> is now tailored to Perl expectations
+
+This is now more suited to be a drop-in replacement for plain C<\b>, but
+giving better results for parsing natural language.  Previously it
+strictly followed the current Unicode rules which calls for it to match
+between each white space character.  Now it doesn't generally match
+within spans of white space, behaving like C<\b> does.  See
+L<perlrebackslash/\b{wb}>
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

@@ -15054,6 +15054,34 @@ END
         }
     }
 
+    # Perl tailors the WordBreak property so that \b{wb} doesn't split
+    # adjacent spaces into separate words.  First create a copy of the regular
+    # WB property as '_Perl_WB'.  (On Unicode releases earlier than when WB
+    # was defined for, this will already have been done by the substitute file
+    # portion for 'Input_file' code for WB.)
+    my $perl_wb = property_ref('_Perl_WB');
+    if (! defined $perl_wb) {
+        $perl_wb = Property->new('_Perl_WB',
+                                 Fate => $INTERNAL_ONLY,
+                                 Perl_Extension => 1,
+                                 Directory => $map_directory,
+                                 Type => $STRING);
+        my $wb = property_ref('Word_Break');
+        $perl_wb->initialize($wb);
+        $perl_wb->set_default_map($wb->default_map);
+    }
+
+    # And simply replace the mappings of horizontal space characters that
+    # otherwise would map to the default to instead map to our tailoring.
+    my $default = $perl_wb->default_map;
+    for my $range ($Blank->ranges) {
+        for my $i ($range->start .. $range->end) {
+            next unless $perl_wb->value_of($i) eq $default;
+            $perl_wb->add_map($i, $i, 'Perl_Tailored_HSpace',
+                              Replace => $UNCONDITIONALLY);
+        }
+    }
+
     # Here done with all the basic stuff.  Ready to populate the information
     # about each character if annotating them.
     if ($annotate) {
@@ -18927,7 +18955,12 @@ my @input_file_objects = (
                     Skip => $Documentation,
                    ),
     Input_file->new("$AUXILIARY/WordBreakProperty.txt", v4.1.0,
-                    Early => [ "WBsubst.txt", '_Perl_WB', 'ALetter' ],
+                    Early => [ "WBsubst.txt", '_Perl_WB', 'ALetter',
+
+                               # Don't use _Perl_WB as a synonym for
+                               # Word_Break in later perls, as it is tailored
+                               # and isn't the same as Word_Break
+                               'ONLY_EARLY' ],
                     Property => 'Word_Break',
                     Has_Missings_Defaults => $NOT_IGNORED,
                    ),
@@ -19605,6 +19638,61 @@ sub _test_break($$) {
         $template =~ s/$breakable_utf8/$breakable/g;
     }
 
+    # Perl customizes wb.  So change the official tests accordingly
+    if ($break_type eq 'wb') {
+
+        # Split into elements that alternate between code point and
+        # break/no-break
+        my @line = split / +/, $template;
+
+        # Look at each code point and its following one
+        for (my $i = 1; $i <  @line - 1 - 1; $i+=2) {
+
+            # The customization only involves changing some breaks to
+            # non-breaks.
+            next if $line[$i+1] =~ /$nobreak/;
+
+            my $lhs = chr hex $line[$i];
+            my $rhs = chr hex $line[$i+2];
+
+            # And it only affects adjacent space characters.
+            next if $lhs !~ /\s/u;
+
+            # But, we want to make sure to test spaces followed by a Extend
+            # or Format.
+            next if $rhs !~ /[\s\p{WB=Extend}\p{WB=Format}]/;
+
+            # To test the customization, add some white-space before this to
+            # create a span.  The $lhs white space may or may not be bound to
+            # that span, and also with the $rhs.  If the $rhs is a binding
+            # character, the $lhs is bound to it and not to the span, unless
+            # $lhs is vertical space.  In all other cases, the $lhs is bound
+            # to the span.  If the $rhs is white space, it is bound to the
+            # $lhs
+            my $bound;
+            my $span;
+            if ($rhs =~ /[\p{WB=Extend}\p{WB=Format}]/) {
+                if ($lhs =~ /\v/) {
+                    $bound = $breakable;
+                    $span = $nobreak;
+                }
+                else {
+                    $bound = $nobreak;
+                    $span = $breakable;
+                }
+            }
+            else {
+                $span = $nobreak;
+                $bound = $nobreak;
+            }
+
+            splice @line, $i, 0, ( '0020', $nobreak, '0020', $span);
+            $i += 4;
+            $line[$i+1] = $bound;
+        }
+        $template = join " ", @line;
+    }
+
     # The input is just the break/no-break symbols and sequences of Unicode
     # code points as hex digits separated by spaces for legibility. e.g.:
     # ÷ 0020 × 0308 ÷ 0020 ÷
@@ -19753,3 +19841,9 @@ Test_GCB("1100 $nobreak 1161");  # Bug #70940
 Expect(0, 0x2028, '\p{Print}', ""); # Bug # 71722
 Expect(0, 0x2029, '\p{Print}', ""); # Bug # 71722
 Expect(1, 0xFF10, '\p{XDigit}', ""); # Bug # 71726
+
+# Make sure this gets tested; it was not part of the official test suite at
+# the time this was addded.  Note that this is as it would appear in the
+# official suite, and gets modified to check for the perl tailoring by
+# Test_WB()
+Test_WB("$breakable 0020 $breakable 0020 $breakable 0308 $breakable");
