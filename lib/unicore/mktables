@@ -6308,6 +6308,22 @@ END
                     }
 
                     if ($write_as_invlist) {
+                        if (   $previous_end > 0
+                            && $output_range_counts{$addr})
+                        {
+                            my $complement_count = $start - $previous_end - 1;
+                            if ($complement_count > 1) {
+                                $OUT[-1] = merge_single_annotation_line(
+                                    $OUT[-1],
+                                       "#"
+                                     . (" " x 17)
+                                     . "["
+                                     .  main::clarify_code_point_count(
+                                                            $complement_count)
+                                      . "] in complement\n",
+                                    $comment_indent);
+                            }
+                        }
 
                         # Inversion list format has a single number per line,
                         # the starting code point of a range that matches the
