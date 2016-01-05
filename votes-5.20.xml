@@ -94,6 +94,8 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 
 <div><h3>Portability Fixes</h3>
 
+<commit votes="tonyc" id="d691474c4cf3d3119367a72ebb28a990d039baf3" ticket="126922" desc="avoid access to uninitialized memory in win32 crypt()" />
+
 </div>
 
 <div><h3>Platform-Specific Test Fixes</h3>
