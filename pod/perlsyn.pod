@@ -181,23 +181,35 @@ This is so that you can write loops like:
 See L<perlfunc/do>.  Note also that the loop control statements described
 later will I<NOT> work in this construct, because modifiers don't take
 loop labels.  Sorry.  You can always put another block inside of it
-(for C<next>) or around it (for C<last>) to do that sort of thing.
-For C<next>, just double the braces:
+(for C<next>/C<redo>) or around it (for C<last>) to do that sort of thing.
 X<next> X<last> X<redo>
+
+For C<next> or C<redo>, just double the braces:
 
     do {{
         next if $x == $y;
         # do something here
     }} until $x++ > $z;
 
-For C<last>, you have to be more elaborate:
+For C<last>, you have to be more elaborate and put braces around it:
 X<last>
 
+    {
+        do {
+            last if $x == $y**2;
+            # do something here
+        } while $x++ <= $z;
+    }
+
+If you need both C<next> and C<last>, you have to do both and also use a
+loop label:
+
     LOOP: {
-            do {
-                last if $x = $y**2;
-                # do something here
-            } while $x++ <= $z;
+        do {{
+            next if $x == $y;
+            last LOOP if $x == $y**2;
+            # do something here
+        }} until $x++ > $z;
     }
 
 B<NOTE:> The behaviour of a C<my>, C<state>, or
