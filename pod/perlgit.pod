@@ -327,23 +327,27 @@ output.
 
 =head2 Sending patch emails
 
-After you've generated your patch you should sent it
-to perlbug@perl.org (as discussed L<in the previous
-section|/"Patch workflow">) with a normal mail client as an
+After you've generated your patch you should send it
+to L<perlbug@perl.org|mailto:perlbug@perl.org> (as discussed L<in the
+previous section|/"Patch workflow">) with a normal mail client as an
 attachment, along with a description of the patch.
 
 You B<must not> use git-send-email(1) to send patches generated with
 git-format-patch(1). The RT ticketing system living behind
-perlbug@perl.org does not respect the inline contents of E-Mails,
-sending an inline patch to RT guarantees that your patch will be
-destroyed.
+L<perlbug@perl.org|mailto:perlbug@perl.org> does not respect the inline
+contents of E-Mails, sending an inline patch to RT guarantees that your
+patch will be destroyed.
 
 Someone may download your patch from RT, which will result in the
-subject (the first line of the commit message) being omitted.  See RT
-#74192 and commit a4583001 for an example. Alternatively someone may
+subject (the first line of the commit message) being omitted.  See
+L<RT #74192|https://rt.perl.org/Ticket/Display.html?id=74192> and
+L<commit a4583001|http://perl5.git.perl.org/perl.git/commitdiff/a4583001>
+for an example. Alternatively someone may
 apply your patch from RT after it arrived in their mailbox, by which
-time RT will have modified the inline content of the message.  See RT
-#74532 and commit f9bcfeac for a bad example of this failure mode.
+time RT will have modified the inline content of the message.  See
+L<RT #74532|https://rt.perl.org/Ticket/Display.html?id=74532> and
+L<commit f9bcfeac|http://perl5.git.perl.org/perl.git/commitdiff/f9bcfeac>
+for a bad example of this failure mode.
 
 =head2 A note on derived files
 
@@ -352,10 +356,10 @@ patching them, because git won't see the changes to them, and the build
 process will overwrite them. Patch the originals instead. Most
 utilities (like perldoc) are in this category, i.e. patch
 F<utils/perldoc.PL> rather than F<utils/perldoc>. Similarly, don't
-create patches for files under $src_root/ext from their copies found in
-$install_root/lib. If you are unsure about the proper location of a
-file that may have gotten copied while building the source
-distribution, consult the C<MANIFEST>.
+create patches for files under F<$src_root/ext> from their copies found
+in F<$install_root/lib>. If you are unsure about the proper location of
+a file that may have gotten copied while building the source
+distribution, consult the F<MANIFEST>.
 
 =head2 Cleaning a working directory
 
@@ -371,7 +375,7 @@ However, be aware this will delete ALL untracked content. You can use
   % git clean -Xf
 
 to remove all ignored untracked files, such as build and test
-byproduct, but leave any  manually created files alone.
+byproduct, but leave any manually created files alone.
 
 If you only want to cancel some uncommitted edits, you can use C<git
 checkout> and give it a list of files to be reverted, or C<git checkout
@@ -397,8 +401,8 @@ you simply run this:
 
     .../Porting/bisect.pl -e 'my $a := 2;'
 
-Using C<bisect.pl>, with one command (and no other files) it's easy to find
-out
+Using F<Porting/bisect.pl>, with one command (and no other files) it's easy to
+find out
 
 =over 4
 
@@ -421,8 +425,8 @@ Which commit removed the last file to match this regex?
 =back
 
 usually without needing to know which versions of perl to use as start and
-end revisions, as F<bisect.pl> automatically searches to find the earliest
-stable version for which the test case passes. Run
+end revisions, as F<Porting/bisect.pl> automatically searches to find the
+earliest stable version for which the test case passes. Run
 C<Porting/bisect.pl --help> for the full documentation, including how to
 set the C<Configure> and build time options.
 
@@ -628,8 +632,8 @@ Note that some UNIX mail systems can mess with text attachments containing
 If just a raw diff is provided, it is also possible use this two-step
 process:
 
-% git apply bugfix.diff
-% git commit -a -m "Some fixing" --author="That Guy <that.guy@internets.com>"
+ % git apply bugfix.diff
+ % git commit -a -m "Some fixing" --author="That Guy <that.guy@internets.com>"
 
 Now we can inspect the change:
 
@@ -691,8 +695,8 @@ message> for details.
 Run the test suite. You might not think that one typo fix would break a
 test file. You'd be wrong. Here's an example of where not running the
 suite caused problems. A patch was submitted that added a couple of
-tests to an existing .t. It couldn't possibly affect anything else, so
-no need to test beyond the single affected .t, right?  But, the
+tests to an existing F<.t>. It couldn't possibly affect anything else, so
+no need to test beyond the single affected F<.t>, right?  But, the
 submitter's email address had changed since the last of their
 submissions, and this caused other tests to fail. Running the test
 target given in the next item would have caught this problem.
@@ -911,8 +915,8 @@ which is the 'master' repository. The second one is
 C<users.perl5.git.perl.org> (I<dromedary>), which can be used for
 general testing and development. Dromedary syncs the git tree from
 camel every few minutes, you should not push there. Both machines also
-have a full CPAN mirror in /srv/CPAN, please use this. To share files
-with the general public, dromedary serves your ~/public_html/ as
+have a full CPAN mirror in F</srv/CPAN>, please use this. To share files
+with the general public, dromedary serves your F<~/public_html/> as
 C<http://users.perl5.git.perl.org/~yourlogin/>
 
 These hosts have fairly strict firewalls to the outside. Outgoing, only
@@ -924,4 +928,4 @@ blocked. The quickest way to get unblocked is to notify the admins.
 
 These two boxes are owned, hosted, and operated by booking.com. You can
 reach the sysadmins in #p5p on irc.perl.org or via mail to
-C<perl5-porters@perl.org>.
+L<perl5-porters@perl.org|mailto:perl5-porters@perl.org>.
