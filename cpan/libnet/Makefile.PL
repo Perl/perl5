@@ -66,7 +66,7 @@ MAIN: {
         ABSTRACT => 'Collection of network protocol modules',
         AUTHOR   => 'Graham Barr <gbarr@pobox.com>, Steve Hay <shay@cpan.org>',
         LICENSE  => 'perl_5',
-        VERSION  => '3.07',
+        VERSION  => '3.08',
 
         META_MERGE => {
             'meta-spec' => {
@@ -210,7 +210,7 @@ MAIN: {
             'vars'           => '0'
         },
 
-        INSTALLDIRS => ($] >= 5.008 && $] < 5.011) ? 'perl' : 'site',
+        INSTALLDIRS => ($] < 5.011 ? 'perl' : 'site'),
 
         realclean => {
             FILES => $CfgFile

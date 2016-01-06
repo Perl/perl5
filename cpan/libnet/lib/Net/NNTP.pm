@@ -21,7 +21,7 @@ use Net::Cmd;
 use Net::Config;
 use Time::Local;
 
-our $VERSION = "3.07";
+our $VERSION = "3.08";
 
 # Code for detecting if we can use SSL
 my $ssl_class = eval {

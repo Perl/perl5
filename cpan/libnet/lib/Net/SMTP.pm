@@ -21,7 +21,7 @@ use Net::Cmd;
 use Net::Config;
 use Socket;
 
-our $VERSION = "3.07";
+our $VERSION = "3.08";
 
 # Code for detecting if we can use SSL
 my $ssl_class = eval {
@@ -833,7 +833,11 @@ usually use the right arguments already.
 
 =item auth ( USERNAME, PASSWORD )
 
-Attempt SASL authentication. Requires Authen::SASL module.
+=item auth ( SASL )
+
+Attempt SASL authentication. Requires Authen::SASL module. The first form
+constructs a new Authen::SASL object using the given username and password;
+the second form uses the given Authen::SASL object.
 
 =item mail ( ADDRESS [, OPTIONS] )
 

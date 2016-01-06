@@ -18,6 +18,7 @@ use warnings;
 use Carp;
 use Exporter;
 use Symbol 'gensym';
+use Errno 'EINTR';
 
 BEGIN {
   if ($^O eq 'os390') {
@@ -27,7 +28,7 @@ BEGIN {
   }
 }
 
-our $VERSION = "3.07";
+our $VERSION = "3.08";
 our @ISA     = qw(Exporter);
 our @EXPORT  = qw(CMD_INFO CMD_OK CMD_MORE CMD_REJECT CMD_ERROR CMD_PENDING);
 
@@ -189,7 +190,57 @@ sub set_status {
   1;
 }
 
+sub _syswrite_with_timeout {
+  my $cmd = shift;
+  my $line = shift;
 
+  my $len    = length($line);
+  my $offset = 0;
+  my $win    = "";
+  vec($win, fileno($cmd), 1) = 1;
+  my $timeout = $cmd->timeout || undef;
+  my $initial = time;
+  my $pending = $timeout;
+
+  local $SIG{PIPE} = 'IGNORE' unless $^O eq 'MacOS';
+
+  while ($len) {
+    my $wout;
+    my $nfound = select(undef, $wout = $win, undef, $pending);
+    if ((defined $nfound and $nfound > 0) or -f $cmd)    # -f for testing on win32
+    {
+      my $w = syswrite($cmd, $line, $len, $offset);
+      if (! defined($w) ) {
+        my $err = $!;
+        $cmd->close;
+        $cmd->_set_status_closed($err);
+        return;
+      }
+      $len -= $w;
+      $offset += $w;
+    }
+    elsif ($nfound == -1) {
+      if ( $! == EINTR ) {
+        if ( defined($timeout) ) {
+          redo if ($pending = $timeout - ( time - $initial ) ) > 0;
+          $cmd->_set_status_timeout;
+          return;
+        }
+        redo;
+      }
+      my $err = $!;
+      $cmd->close;
+      $cmd->_set_status_closed($err);
+      return;
+    }
+    else {
+      $cmd->_set_status_timeout;
+      return;
+    }
+  }
+
+  return 1;
+}
 
 sub _set_status_timeout {
   my $cmd = shift;
@@ -201,17 +252,18 @@ sub _set_status_timeout {
 
 sub _set_status_closed {
   my $cmd = shift;
+  my $err = shift;
   my $pkg = ref($cmd) || $cmd;
 
   $cmd->set_status($cmd->DEF_REPLY_CODE, "[$pkg] Connection closed");
   carp(ref($cmd) . ": " . (caller(1))[3]
-    . "(): unexpected EOF on command channel: $!") if $cmd->debug;
+    . "(): unexpected EOF on command channel: $err") if $cmd->debug;
 }
 
 sub _is_closed {
   my $cmd = shift;
   if (!defined fileno($cmd)) {
-     $cmd->_set_status_closed;
+     $cmd->_set_status_closed($!);
      return 1;
   }
   return 0;
@@ -227,8 +279,6 @@ sub command {
     if (exists ${*$cmd}{'net_cmd_last_ch'});
 
   if (scalar(@_)) {
-    local $SIG{PIPE} = 'IGNORE' unless $^O eq 'MacOS';
-
     my $str = join(
       " ",
       map {
@@ -240,17 +290,13 @@ sub command {
     $str = $cmd->toascii($str) if $tr;
     $str .= "\015\012";
 
-    my $len = length $str;
-    my $swlen;
-
     $cmd->debug_print(1, $str)
       if ($cmd->debug);
 
-    unless (defined($swlen = syswrite($cmd,$str,$len)) && $swlen == $len) {
-      $cmd->close;
-      $cmd->_set_status_closed;
-      return $cmd;
-    }
+    # though documented to return undef on failure, the legacy behavior
+    # was to return $cmd even on failure, so this odd construct does that
+    $cmd->_syswrite_with_timeout($str)
+      or return $cmd;
   }
 
   $cmd;
@@ -300,8 +346,9 @@ sub getline {
     my $select_ret = select($rout = $rin, undef, undef, $timeout);
     if ($select_ret > 0) {
       unless (sysread($cmd, $buf = "", 1024)) {
+        my $err = $!;
         $cmd->close;
-        $cmd->_set_status_closed;
+        $cmd->_set_status_closed($err);
         return;
       }
 
@@ -463,33 +510,8 @@ sub datasend {
 
   ${*$cmd}{'net_cmd_last_ch'} = substr($line, -1, 1);
 
-  my $len    = length($line);
-  my $offset = 0;
-  my $win    = "";
-  vec($win, fileno($cmd), 1) = 1;
-  my $timeout = $cmd->timeout || undef;
-
-  local $SIG{PIPE} = 'IGNORE' unless $^O eq 'MacOS';
-
-  while ($len) {
-    my $wout;
-    my $s = select(undef, $wout = $win, undef, $timeout);
-    if ((defined $s and $s > 0) or -f $cmd)    # -f for testing on win32
-    {
-      my $w = syswrite($cmd, $line, $len, $offset);
-      unless (defined($w) && $w == $len) {
-        $cmd->close;
-        $cmd->_set_status_closed;
-        return;
-      }
-      $len -= $w;
-      $offset += $w;
-    }
-    else {
-      $cmd->_set_status_timeout;
-      return;
-    }
-  }
+  $cmd->_syswrite_with_timeout($line)
+    or return;
 
   1;
 }
@@ -511,30 +533,8 @@ sub rawdatasend {
     print STDERR $b, join("\n$b", split(/\n/, $line)), "\n";
   }
 
-  my $len    = length($line);
-  my $offset = 0;
-  my $win    = "";
-  vec($win, fileno($cmd), 1) = 1;
-  my $timeout = $cmd->timeout || undef;
-
-  local $SIG{PIPE} = 'IGNORE' unless $^O eq 'MacOS';
-  while ($len) {
-    my $wout;
-    if (select(undef, $wout = $win, undef, $timeout) > 0) {
-      my $w = syswrite($cmd, $line, $len, $offset);
-      unless (defined($w) && $w == $len) {
-        $cmd->close;
-        $cmd->_set_status_closed;
-        return;
-      }
-      $len -= $w;
-      $offset += $w;
-    }
-    else {
-      $cmd->_set_status_timeout;
-      return;
-    }
-  }
+  $cmd->_syswrite_with_timeout($line)
+    or return;
 
   1;
 }
@@ -558,19 +558,11 @@ sub dataend {
 
   $tosend .= ".\015\012";
 
-  local $SIG{PIPE} = 'IGNORE' unless $^O eq 'MacOS';
-
   $cmd->debug_print(1, ".\n")
     if ($cmd->debug);
 
-  my $len = length $tosend;
-  my $w = syswrite($cmd, $tosend, $len);
-  unless (defined($w) && $w == $len)
-  {
-    $cmd->close;
-    $cmd->_set_status_closed;
-    return 0;
-  }
+  $cmd->_syswrite_with_timeout($tosend)
+    or return 0;
 
   delete ${*$cmd}{'net_cmd_last_ch'};
 
