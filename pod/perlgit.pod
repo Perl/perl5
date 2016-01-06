@@ -633,7 +633,8 @@ If just a raw diff is provided, it is also possible use this two-step
 process:
 
  % git apply bugfix.diff
- % git commit -a -m "Some fixing" --author="That Guy <that.guy@internets.com>"
+ % git commit -a -m "Some fixing" \
+                            --author="That Guy <that.guy@internets.com>"
 
 Now we can inspect the change:
 
