@@ -274,7 +274,7 @@ Comparing two strings that were both encoded in UTF-8 (or more
 precisely, UTF-EBCDIC) did not work properly until now.  Since C<sort()>
 uses C<cmp()>, this fixes that as well.
 
-=item EBCDIC C<tr///> and C<yr///> fixed for C<\N{}>, and C<S<use utf8>> ranges
+=item EBCDIC C<tr///> and C<y///> fixed for C<\N{}>, and C<S<use utf8>> ranges
 
 Perl v5.22 introduced the concept of portable ranges to regular
 expression patterns.  A portable range matches the same set of
