@@ -4,7 +4,7 @@
 #
 # Initially this test file just checked that CORE::foo got correctly
 # deparsed as CORE::foo, hence the name. It's since been expanded
-# to fully test both CORE:: verses none, plus that any arguments
+# to fully test both CORE:: versus none, plus that any arguments
 # are correctly deparsed. It also cross-checks against regen/keywords.pl
 # to make sure we've tested all keywords, and with the correct strength.
 #

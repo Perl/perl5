@@ -5,7 +5,7 @@
 #
 # Works by checking the debugging output of 'use re debug' and, if
 # available, -Dr. We use both to check that the different code paths
-# with Perl_foo() verses the my_foo() under ext/re/ don't cause any
+# with Perl_foo() versus the my_foo() under ext/re/ don't cause any
 # changes.
 
 $| = 1;
