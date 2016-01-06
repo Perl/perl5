@@ -19637,7 +19637,7 @@ sub _test_break($$) {
 
         my @modifiers = qw(a aa d u i);
         if ($are_ctype_locales_available) {
-            push @modifiers, "l" if defined &find_utf8_ctype_locale;
+            push @modifiers, "l$utf8_locale" if defined $utf8_locale;
 
             # The /l modifier has C after it to indicate the locale to try
             push @modifiers, "lC";
