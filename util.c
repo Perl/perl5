@@ -2178,7 +2178,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
        Configure doesn't test for that yet.  For Solaris, setenv() and unsetenv()
        were introduced in Solaris 9, so testing for HAS UNSETENV is sufficient.
     */
-#   if defined(__CYGWIN__)|| defined(__SYMBIAN32__) || defined(__riscos__) || (defined(__sun) && defined(HAS_UNSETENV))
+#   if defined(__CYGWIN__)|| defined(__SYMBIAN32__) || defined(__riscos__) || (defined(__sun) && defined(HAS_UNSETENV)) || defined(PERL_DARWIN)
 #       if defined(HAS_UNSETENV)
         if (val == NULL) {
             (void)unsetenv(nam);
