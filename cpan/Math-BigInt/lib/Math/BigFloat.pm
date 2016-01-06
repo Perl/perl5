@@ -16,7 +16,7 @@ use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '1.999714';
+our $VERSION = '1.999715';
 $VERSION = eval $VERSION;
 
 require Exporter;
@@ -1264,8 +1264,22 @@ sub bexp
   # $x contains now an estimate of e, with some surplus digits, so we can round
   if (!$x_org->is_one())
     {
-    # raise $x to the wanted power and round it in one step:
-    $x->bpow($x_org, @params);
+    # Reduce size of fractional part, followup with integer power of two.
+    my $lshift = 0;
+    while ($lshift < 30 && $x_org->bacmp(2 << $lshift) > 0)
+      {
+        $lshift++;
+      }
+    # Raise $x to the wanted power and round it.
+    if ($lshift == 0)
+      {
+        $x->bpow($x_org, @params);
+      }
+    else
+      {
+        my($mul, $rescale) = (1 << $lshift, $scale+1+$lshift);
+        $x->bpow(scalar $x_org->bdiv($mul,$rescale),$rescale)->bpow($mul, @params);
+      }
     }
   else
     {
@@ -2546,6 +2560,8 @@ sub _pow
   my ($limit,$v,$u,$below,$factor,$next,$over);
 
   $u = $x->copy()->blog(undef,$scale)->bmul($y);
+  my $do_invert = ($u->{sign} eq '-');
+  $u->bneg()  if $do_invert;
   $v = $self->bone();				# 1
   $factor = $self->new(2);			# 2
   $x->bone();					# first term: 1
@@ -2569,6 +2585,12 @@ sub _pow
     last if $x->{sign} !~ /^[-+]$/;
 
     #$steps++;
+    }
+
+  if ($do_invert)
+    {
+    my $x_copy = $x->copy;
+    $x->bone->bdiv($x_copy, $scale);
     }
   
   # shortcut to not run through _find_round_parameters again
