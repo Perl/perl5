@@ -1862,7 +1862,6 @@ cpan/Pod-Escapes/t/10_main.t		test Pod::Escapes
 cpan/Pod-Escapes/t/15_name2charnum.t	test Pod::Escapes
 cpan/podlators/bin/pod2man			Translator to turn pod into manpage
 cpan/podlators/bin/pod2text			Translator to turn pod into text
-cpan/podlators/Changes				podlators release notes
 cpan/podlators/lib/Pod/Man.pm			Convert POD data to *roff
 cpan/podlators/lib/Pod/ParseLink.pm		Perl an L<> formatting code in POD text
 cpan/podlators/lib/Pod/Text/Color.pm		Convert POD data to color ASCII text
@@ -1912,7 +1911,6 @@ cpan/podlators/t/text/overstrike.t			podlators test
 cpan/podlators/t/text/perlio.t			podlators test
 cpan/podlators/t/text/termcap.t			podlators test
 cpan/podlators/t/text/utf8.t			podlators test
-cpan/podlators/VERSION				podlators distribution version
 cpan/Pod-Parser/lib/Pod/Find.pm			find POD documents in directory trees
 cpan/Pod-Parser/lib/Pod/InputObjects.pm		Pod-Parser - define objects for input streams
 cpan/Pod-Parser/lib/Pod/Parser.pm		Pod-Parser - define base class for parsing POD
