@@ -4601,7 +4601,8 @@ S_isWB(pTHX_ WB_enum previous,
             case WBcase(WB_Hebrew_Letter, WB_MidLetter):
             case WBcase(WB_Hebrew_Letter, WB_MidNumLet):
             /*case WBcase(WB_Hebrew_Letter, WB_Single_Quote):*/
-                after = advance_one_WB(&after_pos, strend, utf8_target);
+                after = advance_one_WB(&after_pos, strend, utf8_target,
+                                       TRUE /* Do skip Extend and Format */ );
                 return after != WB_ALetter && after != WB_Hebrew_Letter;
 
             /* WB7.  (ALetter | Hebrew_Letter) (MidLetter | MidNumLet |
@@ -4622,8 +4623,9 @@ S_isWB(pTHX_ WB_enum previous,
 
             /* WB7b.  Hebrew_Letter  ×  Double_Quote Hebrew_Letter */
             case WBcase(WB_Hebrew_Letter, WB_Double_Quote):
-                return advance_one_WB(&after_pos, strend, utf8_target)
-                                                        != WB_Hebrew_Letter;
+                return advance_one_WB(&after_pos, strend, utf8_target,
+                                       TRUE /* Do skip Extend and Format */ )
+                       != WB_Hebrew_Letter;
 
             /* WB7c.  Hebrew_Letter Double_Quote  ×  Hebrew_Letter */
             case WBcase(WB_Double_Quote, WB_Hebrew_Letter):
@@ -4660,8 +4662,9 @@ S_isWB(pTHX_ WB_enum previous,
             case WBcase(WB_Numeric, WB_MidNum):
             case WBcase(WB_Numeric, WB_MidNumLet):
             case WBcase(WB_Numeric, WB_Single_Quote):
-                return advance_one_WB(&after_pos, strend, utf8_target)
-                                                               != WB_Numeric;
+                return advance_one_WB(&after_pos, strend, utf8_target,
+                                      TRUE /* Do skip Extend and Format */ )
+                        != WB_Numeric;
 
             /* Do not break between Katakana.
                WB13.  Katakana  ×  Katakana */
@@ -4697,7 +4700,10 @@ S_isWB(pTHX_ WB_enum previous,
 }
 
 STATIC WB_enum
-S_advance_one_WB(pTHX_ U8 ** curpos, const U8 * const strend, const bool utf8_target)
+S_advance_one_WB(pTHX_ U8 ** curpos,
+                       const U8 * const strend,
+                       const bool utf8_target,
+                       const bool skip_Extend_Format)
 {
     WB_enum wb;
 
@@ -4716,7 +4722,8 @@ S_advance_one_WB(pTHX_ U8 ** curpos, const U8 * const strend, const bool utf8_ta
                 return WB_EDGE;
             }
             wb = getWB_VAL_UTF8(*curpos, strend);
-        } while (wb == WB_Extend || wb == WB_Format);
+        } while (    skip_Extend_Format
+                 && (wb == WB_Extend || wb == WB_Format));
     }
     else {
         do {
@@ -4725,7 +4732,8 @@ S_advance_one_WB(pTHX_ U8 ** curpos, const U8 * const strend, const bool utf8_ta
                 return WB_EDGE;
             }
             wb = getWB_VAL_CP(**curpos);
-        } while (wb == WB_Extend || wb == WB_Format);
+        } while (    skip_Extend_Format
+                 && (wb == WB_Extend || wb == WB_Format));
     }
 
     return wb;

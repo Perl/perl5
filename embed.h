@@ -1067,7 +1067,7 @@
 #  endif
 #  if defined(PERL_IN_REGEXEC_C)
 #define advance_one_SB(a,b,c)	S_advance_one_SB(aTHX_ a,b,c)
-#define advance_one_WB(a,b,c)	S_advance_one_WB(aTHX_ a,b,c)
+#define advance_one_WB(a,b,c,d)	S_advance_one_WB(aTHX_ a,b,c,d)
 #define backup_one_SB(a,b,c)	S_backup_one_SB(aTHX_ a,b,c)
 #define backup_one_WB(a,b,c,d)	S_backup_one_WB(aTHX_ a,b,c,d)
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
