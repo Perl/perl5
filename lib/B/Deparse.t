@@ -1322,6 +1322,62 @@ print /a/u, s/b/c/u;
     print /a/d, s/b/c/d;
 }
 ####
+# all the flags (qr//)
+$_ = qr/X/m;
+$_ = qr/X/s;
+$_ = qr/X/i;
+$_ = qr/X/x;
+$_ = qr/X/p;
+$_ = qr/X/o;
+$_ = qr/X/u;
+$_ = qr/X/a;
+$_ = qr/X/l;
+$_ = qr/X/n;
+####
+use feature 'unicode_strings';
+$_ = qr/X/d;
+####
+# all the flags (m//)
+/X/m;
+/X/s;
+/X/i;
+/X/x;
+/X/p;
+/X/o;
+/X/u;
+/X/a;
+/X/l;
+/X/n;
+/X/g;
+/X/cg;
+####
+use feature 'unicode_strings';
+/X/d;
+####
+# all the flags (s///)
+s/X//m;
+s/X//s;
+s/X//i;
+s/X//x;
+s/X//p;
+s/X//o;
+s/X//u;
+s/X//a;
+s/X//l;
+s/X//n;
+s/X//g;
+s/X/'';/e;
+s/X//r;
+####
+use feature 'unicode_strings';
+s/X//d;
+####
+# all the flags (tr///)
+tr/X/Y/c;
+tr/X//d;
+tr/X//s;
+tr/X//r;
+####
 # [perl #119807] s//\(3)/ge should not warn when deparsed (\3 warns)
 s/foo/\(3);/eg;
 ####
