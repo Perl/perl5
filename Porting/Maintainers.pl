@@ -1060,12 +1060,10 @@ use File::Glob qw(:case);
     },
 
     'Test::Harness' => {
-        'DISTRIBUTION' => 'LEONT/Test-Harness-3.35.tar.gz',
+        'DISTRIBUTION' => 'LEONT/Test-Harness-3.36.tar.gz',
         'FILES'        => q[cpan/Test-Harness],
         'EXCLUDED'     => [
             qr{^examples/},
-            qr{^inc/},
-            qr{^t/lib/Test/},
             qr{^xt/},
             qw( Changes-2.64
                 MANIFEST.CUMMULATIVE

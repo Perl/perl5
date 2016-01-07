@@ -10,11 +10,11 @@ TAP::Formatter::File::Session - Harness output delegate for file output
 
 =head1 VERSION
 
-Version 3.35
+Version 3.36
 
 =cut
 
-our $VERSION = '3.35';
+our $VERSION = '3.36';
 
 =head1 DESCRIPTION
 
