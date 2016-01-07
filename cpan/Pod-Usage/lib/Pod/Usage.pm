@@ -1,8 +1,9 @@
 #############################################################################
 # Pod/Usage.pm -- print usage messages for the running script.
 #
-# Copyright (C) 1996-2000 by Bradford Appleton. All rights reserved.
-# This file is part of "PodParser". PodParser is free software;
+# Copyright (c) 1996-2000 by Bradford Appleton. All rights reserved.
+# Copyright (c) 2001-2016 by Marek Rouchal.
+# This file is part of "Pod-Usage". Pod-Usage is free software;
 # you can redistribute it and/or modify it under the same terms
 # as Perl itself.
 #############################################################################
@@ -11,7 +12,7 @@ package Pod::Usage;
 use strict;
 
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '1.67';  ## Current version of this package
+$VERSION = '1.68';  ## Current version of this package
 require  5.006;    ## requires this Perl version or later
 
 #use diagnostics;
@@ -128,7 +129,7 @@ sub pod2usage {
     }
 
     ## Check for perldoc
-    my $progpath = $opts{perldoc} ? $opts{perldoc} :
+    my $progpath = $opts{'-perldoc'} ? $opts{'-perldoc'} :
         File::Spec->catfile($Config{scriptdirexp} 
 	|| $Config{scriptdir}, 'perldoc');
 
@@ -149,7 +150,13 @@ sub pod2usage {
        if(defined $opts{-input} && $opts{-input} =~ /^\s*(\S.*?)\s*$/) {
          # the perldocs back to 5.005 should all have -F
 	 # without -F there are warnings in -T scripts
-         my @perldoc_cmd = ( $progpath, '-F', $1 );
+	 my $f = $1;
+         my @perldoc_cmd = ($progpath);
+	 if ($opts{'-perldocopt'}) {
+           $opts{'-perldocopt'} =~ s/^\s+|\s+$//g;
+	   push @perldoc_cmd, split(/\s+/, $opts{'-perldocopt'});
+	 }
+	 push @perldoc_cmd, ('-F', $f);
          unshift @perldoc_cmd, $opts{'-perlcmd'} if $opts{'-perlcmd'};
          system(@perldoc_cmd);
          if($?) {
@@ -398,7 +405,8 @@ Pod::Usage - print a usage message from embedded pod documentation
 
   pod2usage(   -verbose => 2,
                -perlcmd => $path_to_perl,
-               -perldoc => $path_to_perldoc );
+               -perldoc => $path_to_perldoc,
+               -perldocopt => $perldoc_options );
 
 =head1 ARGUMENTS
 
@@ -533,12 +541,18 @@ specified. In case of special or unusual Perl installations,
 the -perlcmd option may be used to supply the path to a L<perl> executable
 which should run L<perldoc>.
 
-=item C<-perldoc>
+=item C<-perldoc> I<path-to-perldoc>
 
 By default, Pod::Usage will call L<perldoc> when -verbose >= 2 is
 specified. In case L<perldoc> is not installed where the L<perl> interpreter
 thinks it is (see L<Config>), the -perldoc option may be used to supply
 the correct path to L<perldoc>.
+
+=item C<-perldocopt> I<string>
+
+By default, Pod::Usage will call L<perldoc> when -verbose >= 2 is specified.
+The -perldocopt option may be used to supply options to L<perldoc>. The
+string may contain several, space-separated options.
 
 =back
 
