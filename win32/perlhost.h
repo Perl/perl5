@@ -2074,9 +2074,9 @@ CPerlHost::~CPerlHost(void)
     Reset();
     InterlockedDecrement(&num_hosts);
     delete m_pvDir;
-    m_pVMemParse->Release();
-    m_pVMemShared->Release();
-    m_pVMem->Release();
+    m_pVMemParse->ReleaseVoid();
+    m_pVMemShared->ReleaseVoid();
+    m_pVMem->ReleaseVoid();
 }
 
 LPSTR

@@ -22,9 +22,11 @@
 #define ___VMEM_H_INC___
 
 #ifndef UNDER_CE
-#define _USE_MSVCRT_MEM_ALLOC
+//#define _USE_MSVCRT_MEM_ALLOC
 #endif
-#define _USE_LINKED_LIST
+//#define _USE_LINKED_LIST
+
+#define _USE_NATIVE_MEM_ALLOC
 
 // #define _USE_BUDDY_BLOCKS
 
@@ -91,6 +93,7 @@ public:
     void FreeLock(void);
     int IsLocked(void);
     long Release(void);
+    void ReleaseVoid(void);
     long AddRef(void);
 
     inline BOOL CreateOk(void)
@@ -255,6 +258,145 @@ long VMem::Release(void)
     if(!lCount)
 	delete this;
     return lCount;
+}
+
+void VMem::ReleaseVoid(void)
+{
+    long lCount = InterlockedDecrement(&m_lRefCount);
+    if(!lCount)
+	delete this;
+    return;
+}
+
+long VMem::AddRef(void)
+{
+    long lCount = InterlockedIncrement(&m_lRefCount);
+    return lCount;
+}
+
+#elif defined(_USE_NATIVE_MEM_ALLOC)
+
+#ifdef _USE_LINKED_LIST
+# error _USE_NATIVE_MEM_ALLOC and _USE_LINKED_LIST cant be used together
+#endif
+
+class VMem
+{
+public:
+    VMem();
+    ~VMem();
+    void* Malloc(size_t size);
+    void* Realloc(void* pMem, size_t size);
+    void Free(void* pMem);
+    void GetLock(void);
+    void FreeLock(void);
+    int IsLocked(void);
+    long Release(void);
+    void ReleaseVoid(void);
+    long AddRef(void);
+
+    inline BOOL CreateOk(void)
+    {
+	return TRUE;
+    };
+
+protected:
+    HANDLE		m_heap;
+
+    long		m_lRefCount;	// number of current users
+};
+
+VMem::VMem()
+{
+    m_lRefCount = 1;
+    m_heap =  HeapCreate(HEAP_GENERATE_EXCEPTIONS, 0 , 0);
+    if((void*)HeapSetInformation) {
+#define HEAP_LFH 2
+	ULONG HeapInformation = HEAP_LFH;
+	HeapSetInformation(m_heap, HeapCompatibilityInformation, &HeapInformation, sizeof(HeapInformation));
+    }
+}
+
+VMem::~VMem(void)
+{
+    HeapDestroy(m_heap);
+}
+
+void* VMem::Malloc(size_t size)
+{
+    VMem** ptr = (VMem**)HeapAlloc(m_heap, 0, size+sizeof(VMem *));
+    *ptr = this;
+    return (ptr+1);
+}
+
+void* VMem::Realloc(void* pMem, size_t size)
+{
+    if (!pMem)
+	return Malloc(size);
+//
+//    if (!size) {
+//	Free(pMem);
+//	return NULL;
+//    }
+
+    VMem** ptr = (VMem**)(((char*)pMem)-sizeof(VMem*));
+    if (*ptr != this) {
+	int *nowhere;
+	Perl_warn_nocontext("Free to wrong pool %p not %p",this,*ptr);
+	nowhere = NULL;
+	*nowhere = 0; /* this segfault is deliberate,
+			 so you can see the stack trace */
+	NOT_REACHED;
+    }
+    ptr = (VMem**)HeapReAlloc(m_heap, 0, ptr, size+sizeof(VMem*));
+    return (ptr+1);
+
+}
+
+void VMem::Free(void* pMem)
+{
+    if (pMem) {
+	VMem** ptr = (VMem**)(((char*)pMem)-sizeof(VMem*));
+	if (*ptr != this) {
+	    int *nowhere;
+	    Perl_warn_nocontext("Free to wrong pool %p not %p",this,*ptr);
+	    nowhere = NULL;
+	    *nowhere = 0; /* this segfault is deliberate,
+			     so you can see the stack trace */
+	    NOT_REACHED;
+	}
+	HeapFree(m_heap, 0, ptr);
+    }
+}
+
+void VMem::GetLock(void)
+{
+}
+
+void VMem::FreeLock(void)
+{
+}
+
+int VMem::IsLocked(void)
+{
+    ASSERT(0);	/* alarm bells for when somebody calls this */
+    return 0;
+}
+
+long VMem::Release(void)
+{
+    long lCount = InterlockedDecrement(&m_lRefCount);
+    if(!lCount)
+	delete this;
+    return lCount;
+}
+
+void VMem::ReleaseVoid(void)
+{
+    long lCount = InterlockedDecrement(&m_lRefCount);
+    if(!lCount)
+	delete this;
+    return;
 }
 
 long VMem::AddRef(void)
@@ -901,6 +1043,14 @@ long VMem::Release(void)
     if(!lCount)
 	delete this;
     return lCount;
+}
+
+void VMem::ReleaseVoid(void)
+{
+    long lCount = InterlockedDecrement(&m_lRefCount);
+    if(!lCount)
+	delete this;
+    return;
 }
 
 long VMem::AddRef(void)
