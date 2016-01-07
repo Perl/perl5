@@ -596,7 +596,7 @@ This matches a Unicode "Word Boundary".  This gives better (though not
 perfect) results for natural language processing than plain C<\b>
 (without braces) does.  For example, it understands that apostrophes can
 be in the middle of words and that parentheses aren't (see the examples
-below).   More details are at L<http://www.unicode.org/reports/tr29/>.
+below).  More details are at L<http://www.unicode.org/reports/tr29/>.
 
 =back
 
@@ -619,7 +619,9 @@ rule.
 
 It is also important to realize that these are default boundary
 definitions, and that implementations may wish to tailor the results for
-particular purposes and locales.
+particular purposes and locales.  For example, some languages, such as
+Japanese and Thai, require dictionary lookup to determine word
+boundaries.
 
 Unicode defines a fourth boundary type, accessible through the
 L<Unicode::LineBreak> module.
