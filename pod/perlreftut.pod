@@ -292,13 +292,13 @@ file of city and country names.
     1   my %table;
 
     2   while (<>) {
-    3    chomp;
+    3     chomp;
     4     my ($city, $country) = split /, /;
     5     $table{$country} = [] unless exists $table{$country};
     6     push @{$table{$country}}, $city;
     7   }
 
-    8   foreach $country (sort keys %table) {
+    8   foreach my $country (sort keys %table) {
     9     print "$country: ";
    10     my @cities = @{$table{$country}};
    11     print join ', ', sort @cities;
@@ -306,7 +306,7 @@ file of city and country names.
    13	}
 
 
-The program has two pieces: Lines 2--7 read the input and build a data
+The program has two pieces: Lines 2-7 read the input and build a data
 structure, and lines 8-13 analyze the data and print out the report.
 We're going to have a hash, C<%table>, whose keys are country names,
 and whose values are references to arrays of city names.  The data
@@ -331,7 +331,7 @@ structure will look like this:
 We'll look at output first.  Supposing we already have this structure,
 how do we print it out?
 
-    8   foreach $country (sort keys %table) {
+    8   foreach my $country (sort keys %table) {
     9     print "$country: ";
    10     my @cities = @{$table{$country}};
    11     print join ', ', sort @cities;
@@ -358,7 +358,7 @@ Lines 2-7 are responsible for building the structure in the first
 place.  Here they are again:
 
     2   while (<>) {
-    3    chomp;
+    3     chomp;
     4     my ($city, $country) = split /, /;
     5     $table{$country} = [] unless exists $table{$country};
     6     push @{$table{$country}}, $city;
@@ -384,7 +384,7 @@ There's one fine point I skipped.  Line 5 is unnecessary, and we can
 get rid of it.
 
     2   while (<>) {
-    3    chomp;
+    3     chomp;
     4     my ($city, $country) = split /, /;
     5   ####  $table{$country} = [] unless exists $table{$country};
     6     push @{$table{$country}}, $city;
