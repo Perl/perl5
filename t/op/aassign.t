@@ -382,6 +382,14 @@ SKIP: {
     my $orig;
     ($proxy[0], $orig) = (1, $set);
     is($orig, 0, 'previous value of $set');
+
+    # from cpan #110278
+    use List::Util qw(min);
+    my $x = 1;
+    my $y = 2;
+    ( $x, $y ) = ( min($y), min($x) );
+    is($x, 2, "check swap for \$x");
+    is($y, 1, "check swap for \$y");
 }
 
 done_testing();
