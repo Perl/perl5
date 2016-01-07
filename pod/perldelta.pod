@@ -342,7 +342,9 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Calls to the placeholder C<&PL_sv_yes> used internally when an
+import() or unimport() method isn't found now correctly handle scalar
+context.  [perl #126042]
 
 =item *
 
