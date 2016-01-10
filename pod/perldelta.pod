@@ -359,6 +359,11 @@ In some cases, failing to parse a here-doc would attempt to use freed
 memory.  This was caused by a pointer not being restored correctly.
 [perl #126443]
 
+=item *
+
+Report more context when we see an array where we expect to see an
+operator.  [perl #123737]
+
 =back
 
 =head1 Known Problems
