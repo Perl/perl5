@@ -870,7 +870,7 @@ make sure that no copies or perl are currently running.  Later steps
 of the build may fail since an older version of F<perl.dll> loaded into
 memory may be found.  Running C<make test> becomes meaningless, since
 the test are checking a previous build of perl (this situation is detected
-and reported by F<lib/os2_base.t> test).  Do not forget to unset
+and reported by F<os2/os2_base.t> test).  Do not forget to unset
 C<PERL_EMXLOAD_SEC> in environment.
 
 Also make sure that you have F</tmp> directory on the current drive,

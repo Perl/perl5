@@ -897,7 +897,7 @@ non-conflicting test scripts itself, and there is no standard interface
 to C<make> utilities to interact with their job schedulers.
 
 Note that currently some test scripts may fail when run in parallel
-(most notably F<ext/IO/t/io_dir.t>).  If necessary, run just the
+(most notably F<dist/IO/t/io_dir.t>).  If necessary, run just the
 failing scripts again sequentially and see if the failures go away.
 
 =head2 Running tests by hand

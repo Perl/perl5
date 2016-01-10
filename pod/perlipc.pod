@@ -168,9 +168,9 @@ is liable to generate zombies.    If this matters to you, you'll
 need to do your own fork() and exec(), and kill the errant child process.
 
 For more complex signal handling, you might see the standard POSIX
-module.  Lamentably, this is almost entirely undocumented, but
-the F<t/lib/posix.t> file from the Perl source distribution has some
-examples in it.
+module.  Lamentably, this is almost entirely undocumented, but the
+F<ext/POSIX/t/sigaction.t> file from the Perl source distribution has
+some examples in it.
 
 =head2 Handling the SIGHUP Signal in Daemons
 

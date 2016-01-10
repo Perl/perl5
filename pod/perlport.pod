@@ -2048,7 +2048,7 @@ Some tests are known to fail:
 
 =item *
 
-F<ext/XS-APItes/t/call_checker.t> - see
+F<ext/XS-APItest/t/call_checker.t> - see
 L<https://rt.perl.org/Ticket/Display.html?id=78502>
 
 =item *

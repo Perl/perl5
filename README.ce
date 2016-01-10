@@ -57,7 +57,7 @@ F<Config.pm> for further compilations.
 
 =item *
 
-During extensions build phase, a script F<./win32/buldext.pl> is invoked,
+During extensions build phase, a script F<./win32/buildext.pl> is invoked,
 which in turn steps in F<./ext> subdirectories and performs a build of
 each extension in turn.
 
