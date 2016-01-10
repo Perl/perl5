@@ -2973,7 +2973,7 @@ $define|true|[yY]*)
 	*)  echo "Using targetarch $targetarch." >&4 ;;
 	esac
 	case "$targethost" in
-	'') echo "Targethost not defined." >&4; croak=y ;;
+	'') echo "Targethost not defined." >&4; croak=n ;;
 	*)  echo "Using targethost $targethost." >&4
 	esac
 	locincpth=' '
