@@ -6364,11 +6364,12 @@ Perl_yylex(pTHX)
 	TOKEN('$');
 
     case '@':
-	if (PL_expect == XOPERATOR)
-	    no_op("Array", s);
-	else if (PL_expect == XPOSTDEREF) POSTDEREF('@');
+        if (PL_expect == XPOSTDEREF)
+            POSTDEREF('@');
 	PL_tokenbuf[0] = '@';
 	s = scan_ident(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
+	if (PL_expect == XOPERATOR)
+	    no_op("Array", s);
 	pl_yylval.ival = 0;
 	if (!PL_tokenbuf[1]) {
 	    PREREF('@');
