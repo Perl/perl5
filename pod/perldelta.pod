@@ -369,6 +369,11 @@ with magic and XS functions returning their arguments.  [perl #126633]
 Report more context when we see an array where we expect to see an
 operator.  [perl #123737]
 
+=item *
+
+Modifying an array that was previously a package C<@ISA> no longer
+causes assertion failures or crashes.  [perl #123788]
+
 =back
 
 =head1 Known Problems
