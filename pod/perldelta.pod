@@ -29,11 +29,15 @@ here, but most should go in the L</Performance Enhancements> section.
 
 =head1 Security
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
+=head2 fix out of boundary access in Win32 path handling
 
-[ List each security issue as a =head2 entry ]
+This is CVE-2015-8608.  For more information see
+L<[perl #126755]|https://rt.perl.org/Ticket/Display.html?id=126755>
+
+=head2 fix loss of taint in canonpath
+
+This is CVE-2015-8607.  For more information see
+L<[perl #126862]|https://rt.perl.org/Ticket/Display.html?id=126862>
 
 =head1 Incompatible Changes
 
