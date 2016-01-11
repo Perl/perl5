@@ -398,7 +398,6 @@ undef *UNIVERSAL::DESTROY;
 }
 
 { # 123788
-    local $::TODO = "crashes";
     fresh_perl_is(<<'PROG', "ok", {}, "don't crash when deleting ISA");
 $x = \@{q(Foo::ISA)};
 delete $Foo::{ISA};

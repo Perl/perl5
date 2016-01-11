@@ -1166,8 +1166,73 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 			 sv_2mortal((SV *)gv)
 			);
 		}
-		else if (klen == 3 && strnEQ(key, "ISA", 3))
+		else if (klen == 3 && strnEQ(key, "ISA", 3) && GvAV(gv)) {
+                    AV *isa = GvAV(gv);
+                    MAGIC *mg = mg_find((SV*)isa, PERL_MAGIC_isa);
+
 		    mro_changes = 1;
+                    if (mg) {
+                        if (mg->mg_obj == (SV*)gv) {
+                            /* This is the only stash this ISA was used for.
+                             * The isaelem magic asserts if there's no
+                             * isa magic on the array, so explicitly
+                             * remove the magic on both the array and its
+                             * elements.  @ISA shouldn't be /too/ large.
+                             */
+                            SV **svp, **end;
+                        strip_magic:
+                            svp = AvARRAY(isa);
+                            end = svp + AvFILLp(isa)+1;
+                            while (svp < end) {
+                                if (*svp)
+                                    mg_free_type(*svp, PERL_MAGIC_isaelem);
+                                ++svp;
+                            }
+                            mg_free_type((SV*)GvAV(gv), PERL_MAGIC_isa);
+                        }
+                        else {
+                            /* mg_obj is an array of stashes
+                               Note that the array doesn't keep a reference
+                               count on the stashes.
+                             */
+                            AV *av = (AV*)mg->mg_obj;
+                            SV **svp, **arrayp;
+                            SSize_t index;
+                            SSize_t items;
+
+                            assert(SvTYPE(mg->mg_obj) == SVt_PVAV);
+
+                            /* remove the stash from the magic array */
+                            arrayp = svp = AvARRAY(av);
+                            items = AvFILLp(av) + 1;
+                            if (items == 1) {
+                                assert(*arrayp == (SV *)gv);
+                                mg->mg_obj = NULL;
+                                /* avoid a double free on the last stash */
+                                AvFILLp(av) = -1;
+                                /* The magic isn't MGf_REFCOUNTED, so release
+                                 * the array manually.
+                                 */
+                                SvREFCNT_dec_NN(av);
+                                goto strip_magic;
+                            }
+                            else {
+                                while (items--) {
+                                    if (*svp == (SV*)gv)
+                                        break;
+                                    ++svp;
+                                }
+                                index = svp - arrayp;
+                                assert(index >= 0 && index <= AvFILLp(av));
+                                if (index < AvFILLp(av)) {
+                                    arrayp[index] = arrayp[AvFILLp(av)];
+                                }
+                                arrayp[AvFILLp(av)] = NULL;
+                                --AvFILLp(av);
+                            }
+                        }
+                    }
+                }
 	}
 
 	sv = d_flags & G_DISCARD ? HeVAL(entry) : sv_2mortal(HeVAL(entry));
