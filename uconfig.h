@@ -2292,6 +2292,48 @@
  */
 /*#define HAS_SIGACTION	/ **/
 
+/* HAS_SIGINFO_SI_ERRNO:
+ *	This symbol, if defined, indicates that siginfo_t has the
+ *	si_errno member
+ */
+/*#define HAS_SIGINFO_SI_ERRNO	/ **/
+
+/* HAS_SIGINFO_SI_PID:
+ *	This symbol, if defined, indicates that siginfo_t has the
+ *	si_pid member
+ */
+/*#define HAS_SIGINFO_SI_PID	/ **/
+
+/* HAS_SIGINFO_SI_UID:
+ *	This symbol, if defined, indicates that siginfo_t has the
+ *	si_uid member
+ */
+/*#define HAS_SIGINFO_SI_UID	/ **/
+
+/* HAS_SIGINFO_SI_ADDR:
+ *	This symbol, if defined, indicates that siginfo_t has the
+ *	si_addr member
+ */
+/*#define HAS_SIGINFO_SI_ADDR	/ **/
+
+/* HAS_SIGINFO_SI_STATUS:
+ *	This symbol, if defined, indicates that siginfo_t has the
+ *	si_status member
+ */
+/*#define HAS_SIGINFO_SI_STATUS	/ **/
+
+/* HAS_SIGINFO_SI_BAND:
+ *	This symbol, if defined, indicates that siginfo_t has the
+ *	si_band member
+ */
+/*#define HAS_SIGINFO_SI_BAND	/ **/
+
+/* HAS_SIGINFO_SI_VALUE:
+ *	This symbol, if defined, indicates that siginfo_t has the
+ *	si_value member
+ */
+/*#define HAS_SIGINFO_SI_VALUE	/ **/
+
 /* HAS_SIGSETJMP:
  *	This variable indicates to the C program that the sigsetjmp()
  *	routine is available to save the calling process's registers
@@ -5182,6 +5224,6 @@
 #endif
 
 /* Generated from:
- * 056bddc3ae72075045127f87d3418b2caa44b81bdac54fa0a1a3cf11c8fbdd4a config_h.SH
- * a44240b1f83708d59d68e3c6d4d37d0c55ea9a2bab6e0413c17236c9000df18d uconfig.sh
+ * 0459b706f70bb18d7481b187553e0719406d2c7d5c354c3a309332dfd8e66197 config_h.SH
+ * 9382cd0e3b112993f14cfefe78ebe24b4b09df9d9dd199226ca7ba5e6b90f21a uconfig.sh
  * ex: set ro: */

@@ -3340,13 +3340,27 @@ Perl_sighandler(int sig)
 		    * addr, status, and band are defined by POSIX/SUSv3. */
 		   (void)hv_stores(sih, "signo", newSViv(sip->si_signo));
 		   (void)hv_stores(sih, "code", newSViv(sip->si_code));
-#if 0 /* XXX TODO: Configure scan for the existence of these, but even that does not help if the SA_SIGINFO is not implemented according to the spec. */
-		   hv_stores(sih, "errno",      newSViv(sip->si_errno));
-		   hv_stores(sih, "status",     newSViv(sip->si_status));
-		   hv_stores(sih, "uid",        newSViv(sip->si_uid));
-		   hv_stores(sih, "pid",        newSViv(sip->si_pid));
-		   hv_stores(sih, "addr",       newSVuv(PTR2UV(sip->si_addr)));
-		   hv_stores(sih, "band",       newSViv(sip->si_band));
+#ifdef HAS_SIGINFO_SI_ERRNO
+		   (void)hv_stores(sih, "errno",      newSViv(sip->si_errno));
+#endif
+#ifdef HAS_SIGINFO_SI_STATUS
+		   (void)hv_stores(sih, "status",     newSViv(sip->si_status));
+#endif
+#ifdef HAS_SIGINFO_SI_UID
+		   {
+			SV *uid = newSV(0);
+			sv_setuid(uid, sip->si_uid);
+			(void)hv_stores(sih, "uid", uid);
+		   }
+#endif
+#ifdef HAS_SIGINFO_SI_PID
+		   (void)hv_stores(sih, "pid",        newSViv(sip->si_pid));
+#endif
+#ifdef HAS_SIGINFO_SI_ADDR
+		   (void)hv_stores(sih, "addr",       newSVuv(PTR2UV(sip->si_addr)));
+#endif
+#ifdef HAS_SIGINFO_SI_BAND
+		   (void)hv_stores(sih, "band",       newSViv(sip->si_band));
 #endif
 		   EXTEND(SP, 2);
 		   PUSHs(rv);

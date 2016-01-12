@@ -27,6 +27,13 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 More fields provided to C<sigaction> callback with C<SA_SIGINFO>
+
+When passing the C<SA_SIGINFO> flag to L<sigaction|POSIX/sigaction>, the
+C<errno>, C<status>, C<uid>, C<pid>, C<addr> and C<band> fields are now
+included in the hash passed to the handler, if supported by the
+platform.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

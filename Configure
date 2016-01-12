@@ -785,6 +785,13 @@ d_shmctl=''
 d_shmdt=''
 d_shmget=''
 d_sigaction=''
+d_siginfo_si_errno=''
+d_siginfo_si_pid=''
+d_siginfo_si_uid=''
+d_siginfo_si_addr=''
+d_siginfo_si_status=''
+d_siginfo_si_band=''
+d_siginfo_si_value=''
 d_signbit=''
 d_sigprocmask=''
 d_sigsetjmp=''
@@ -10748,6 +10755,25 @@ while $test $# -ge 2; do
     shift 2;
 done > try.c;
 echo "int main () { struct $struct foo; char* bar; bar = (char*)foo.$field; }" >> try.c;
+set try;
+if eval $compile; then
+	val="$define";
+else
+	val="$undef";
+fi;
+set $varname;
+eval $setvar;
+$rm_try'
+
+: Define hasfield_t macro for Configure internal use
+hasfield_t='varname=$1; struct=$2; type=$3; field=$4; shift; shift; shift; shift;
+while $test $# -ge 2; do
+	case "$1" in
+	$define) echo "#include <$2>";;
+	esac ;
+    shift 2;
+done > try.c;
+echo "int main () { $struct foo; $type bar = foo.$field; }" >> try.c;
 set try;
 if eval $compile; then
 	val="$define";
@@ -22697,6 +22723,40 @@ case "$uidsign" in
 	;;
 esac
 
+: see what siginfo fields we have
+case "$d_sigaction" in
+"$define")
+	echo "Checking if your siginfo_t has si_errno field...">&4
+	set d_siginfo_si_errno siginfo_t int si_errno $d_sigaction signal.h
+	eval $hasfield_t;
+
+	echo "Checking if your siginfo_t has si_pid field...">&4
+	set d_siginfo_si_pid siginfo_t $pidtype si_pid $d_sigaction signal.h
+	eval $hasfield_t;
+
+	echo "Checking if your siginfo_t has si_uid field...">&4
+	set d_siginfo_si_uid siginfo_t $uidtype si_uid $d_sigaction signal.h
+	eval $hasfield_t;
+
+	echo "Checking if your siginfo_t has si_addr field...">&4
+	set d_siginfo_si_addr siginfo_t "void *" si_addr $d_sigaction signal.h
+	eval $hasfield_t;
+
+	echo "Checking if your siginfo_t has si_status field...">&4
+	set d_siginfo_si_status siginfo_t int si_status $d_sigaction signal.h
+	eval $hasfield_t;
+
+	echo "Checking if your siginfo_t has si_band field...">&4
+	set d_siginfo_si_band siginfo_t long si_band $d_sigaction signal.h
+	eval $hasfield_t;
+
+	echo "Checking if your siginfo_t has si_value field...">&4
+	set d_siginfo_si_value siginfo_t "union sigval" si_value $d_sigaction signal.h
+	eval $hasfield_t;
+
+	;;
+esac
+
 : Determine if we can use sysctl with KERN_PROC_PATHNAME to find executing program
 echo " "
 echo "Determining whether we can use sysctl with KERN_PROC_PATHNAME to find executing program..." >&4
@@ -24523,6 +24583,13 @@ d_shmctl='$d_shmctl'
 d_shmdt='$d_shmdt'
 d_shmget='$d_shmget'
 d_sigaction='$d_sigaction'
+d_siginfo_si_errno='$d_siginfo_si_errno'
+d_siginfo_si_pid='$d_siginfo_si_pid'
+d_siginfo_si_uid='$d_siginfo_si_uid'
+d_siginfo_si_addr='$d_siginfo_si_addr'
+d_siginfo_si_status='$d_siginfo_si_status'
+d_siginfo_si_band='$d_siginfo_si_band'
+d_siginfo_si_value='$d_siginfo_si_value'
 d_signbit='$d_signbit'
 d_sigprocmask='$d_sigprocmask'
 d_sigsetjmp='$d_sigsetjmp'

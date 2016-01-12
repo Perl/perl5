@@ -2327,6 +2327,48 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_sigaction HAS_SIGACTION	/**/
 
+/* HAS_SIGINFO_SI_ERRNO:
+ *	This symbol, if defined, indicates that siginfo_t has the
+ *	si_errno member
+ */
+#$d_siginfo_si_errno HAS_SIGINFO_SI_ERRNO	/**/
+
+/* HAS_SIGINFO_SI_PID:
+ *	This symbol, if defined, indicates that siginfo_t has the
+ *	si_pid member
+ */
+#$d_siginfo_si_pid HAS_SIGINFO_SI_PID	/**/
+
+/* HAS_SIGINFO_SI_UID:
+ *	This symbol, if defined, indicates that siginfo_t has the
+ *	si_uid member
+ */
+#$d_siginfo_si_uid HAS_SIGINFO_SI_UID	/**/
+
+/* HAS_SIGINFO_SI_ADDR:
+ *	This symbol, if defined, indicates that siginfo_t has the
+ *	si_addr member
+ */
+#$d_siginfo_si_addr HAS_SIGINFO_SI_ADDR	/**/
+
+/* HAS_SIGINFO_SI_STATUS:
+ *	This symbol, if defined, indicates that siginfo_t has the
+ *	si_status member
+ */
+#$d_siginfo_si_status HAS_SIGINFO_SI_STATUS	/**/
+
+/* HAS_SIGINFO_SI_BAND:
+ *	This symbol, if defined, indicates that siginfo_t has the
+ *	si_band member
+ */
+#$d_siginfo_si_band HAS_SIGINFO_SI_BAND	/**/
+
+/* HAS_SIGINFO_SI_VALUE:
+ *	This symbol, if defined, indicates that siginfo_t has the
+ *	si_value member
+ */
+#$d_siginfo_si_value HAS_SIGINFO_SI_VALUE	/**/
+
 /* HAS_SIGSETJMP:
  *	This variable indicates to the C program that the sigsetjmp()
  *	routine is available to save the calling process's registers
