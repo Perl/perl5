@@ -864,7 +864,7 @@ use File::Glob qw(:case);
     },
 
     'PathTools' => {
-        'DISTRIBUTION' => 'RJBS/PathTools-3.60.tar.gz',
+        'DISTRIBUTION' => 'RJBS/PathTools-3.62.tar.gz',
         'FILES'        => q[dist/PathTools],
         'EXCLUDED'     => [
             qr{^t/lib/Test/},
