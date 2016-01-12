@@ -3069,6 +3069,7 @@ dist/Data-Dumper/t/dumper.t	See if Data::Dumper works
 dist/Data-Dumper/t/dumpperl.t	See if Data::Dumper::Dumpperl works
 dist/Data-Dumper/t/freezer.t	See if Data::Dumper::Freezer works
 dist/Data-Dumper/t/freezer_useperl.t	See if Data::Dumper works
+dist/Data-Dumper/t/huge.t	See if Data::Dumper works on huge inputs
 dist/Data-Dumper/t/indent.t	See if Data::Dumper::Indent works
 dist/Data-Dumper/t/lib/Testing.pm	Functions used in testing Data-Dumper
 dist/Data-Dumper/t/misc.t	Miscellaneous tests for Data-Dumper

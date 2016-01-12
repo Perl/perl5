@@ -65,9 +65,9 @@ typedef struct {
     int trailingcomma;
 } Style;
 
-static I32 num_q (const char *s, STRLEN slen);
-static I32 esc_q (char *dest, const char *src, STRLEN slen);
-static I32 esc_q_utf8 (pTHX_ SV *sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq);
+static STRLEN num_q (const char *s, STRLEN slen);
+static STRLEN esc_q (char *dest, const char *src, STRLEN slen);
+static STRLEN esc_q_utf8 (pTHX_ SV *sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq);
 static bool globname_needs_quote(const char *s, STRLEN len);
 static bool key_needs_quote(const char *s, STRLEN len);
 static bool safe_decimal_number(const char *p, STRLEN len);
@@ -217,10 +217,10 @@ safe_decimal_number(const char *p, STRLEN len) {
 }
 
 /* count the number of "'"s and "\"s in string */
-static I32
+static STRLEN
 num_q(const char *s, STRLEN slen)
 {
-    I32 ret = 0;
+    STRLEN ret = 0;
 
     while (slen > 0) {
 	if (*s == '\'' || *s == '\\')
@@ -235,10 +235,10 @@ num_q(const char *s, STRLEN slen)
 /* returns number of chars added to escape "'"s and "\"s in s */
 /* slen number of characters in s will be escaped */
 /* destination must be long enough for additional chars */
-static I32
+static STRLEN
 esc_q(char *d, const char *s, STRLEN slen)
 {
-    I32 ret = 0;
+    STRLEN ret = 0;
 
     while (slen > 0) {
 	switch (*s) {
@@ -257,7 +257,7 @@ esc_q(char *d, const char *s, STRLEN slen)
 }
 
 /* this function is also misused for implementing $Useqq */
-static I32
+static STRLEN
 esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
 {
     char *r, *rstart;
@@ -886,7 +886,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    SV *sname;
 	    HE *entry = NULL;
 	    char *key;
-	    I32 klen;
+	    STRLEN klen;
 	    SV *hval;
 	    AV *keys = NULL;
 	
@@ -974,10 +974,10 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
             for (i = 0; 1; i++) {
 		char *nkey;
                 char *nkey_buffer = NULL;
-		I32 nticks = 0;
+                STRLEN nticks = 0;
 		SV* keysv;
 		STRLEN keylen;
-                I32 nlen;
+                STRLEN nlen;
 		bool do_utf8 = FALSE;
 
                if (style->sortkeys) {
@@ -1059,7 +1059,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
                 sv_catsv(retval, style->pair);
                 if (style->indent >= 2) {
 		    char *extra;
-		    I32 elen = 0;
+                    STRLEN elen = 0;
 		    newapad = newSVsv(apad);
 		    New(0, extra, klen+4+1, char);
 		    while (elen < (klen+4))
@@ -1104,8 +1104,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	}
 
 	if (realpack && !no_bless) {  /* free blessed allocs */
-	    I32 plen;
-	    I32 pticks;
+            STRLEN plen, pticks;
 
             if (style->indent >= 2) {
 		SvREFCNT_dec(apad);
