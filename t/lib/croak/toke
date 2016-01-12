@@ -37,13 +37,22 @@ syntax error at - line 1, near "0$#"
 Missing right curly or square bracket at - line 1, at end of line
 Execution of - aborted due to compilation errors.
 ########
-# NAME (Missing opertaor before @foo) [perl #123737]
+# NAME (Missing operator before @foo) [perl #123737]
 0@foo
 EXPECT
 Array found where operator expected at - line 1, near "0@foo"
 	(Missing operator before @foo?)
 syntax error at - line 1, near "0@foo
 "
+Execution of - aborted due to compilation errors.
+########
+# NAME (Missing operator before @{) [perl #123737]
+0@{
+EXPECT
+Array found where operator expected at - line 1, near "0@{"
+	(Missing operator before @{?)
+syntax error at - line 1, near "0@"
+Missing right curly or square bracket at - line 1, at end of line
 Execution of - aborted due to compilation errors.
 ########
 # NAME Unterminated here-doc in string eval

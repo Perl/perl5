@@ -6153,8 +6153,14 @@ Perl_yylex(pTHX)
             POSTDEREF('@');
 	PL_tokenbuf[0] = '@';
 	s = scan_ident(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
-	if (PL_expect == XOPERATOR)
-	    no_op("Array", s);
+	if (PL_expect == XOPERATOR) {
+            d = s;
+            if (PL_bufptr > s) {
+                d = PL_bufptr-1;
+                PL_bufptr = PL_oldbufptr;
+            }
+	    no_op("Array", d);
+        }
 	pl_yylval.ival = 0;
 	if (!PL_tokenbuf[1]) {
 	    PREREF('@');
