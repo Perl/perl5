@@ -820,10 +820,14 @@ sub doConstants {
     if (eval {require ExtUtils::Constant; 1}) {
 	my @names = qw(
                        CLOCKS_PER_SEC
+                       CLOCK_BOOTTIME
                        CLOCK_HIGHRES
                        CLOCK_MONOTONIC
+                       CLOCK_MONOTONIC_COARSE
+                       CLOCK_MONOTONIC_RAW
                        CLOCK_PROCESS_CPUTIME_ID
                        CLOCK_REALTIME
+                       CLOCK_REALTIME_COARSE
                        CLOCK_SOFTTIME
                        CLOCK_THREAD_CPUTIME_ID
                        CLOCK_TIMEOFDAY
