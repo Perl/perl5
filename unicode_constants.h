@@ -140,45 +140,6 @@
 
 #endif	/* EBCDIC 037 */
 
-#if 'A' == 193 /* EBCDIC POSIX-BC */ \
-     && '\\' == 188 && '[' == 187 && ']' == 189 && '{' == 251 && '}' == 253 \
-     && '^' == 106 && '~' == 255 && '!' == 90 && '#' == 123 && '|' == 79 \
-     && '$' == 91 && '@' == 124 && '`' == 74
-#   define LATIN_SMALL_LETTER_LONG_S_UTF8  "\x90\x75"    /* U+017F */
-
-#   define COMBINING_GRAVE_ACCENT_UTF8  "\xAE\x41"    /* U+0300 */
-
-#   define GREEK_CAPITAL_LETTER_IOTA_UTF8  "\xB2\x69"    /* U+0399 */
-#   define GREEK_SMALL_LETTER_MU_UTF8  "\xB3\x72"    /* U+03BC */
-
-#   define LATIN_CAPITAL_LETTER_SHARP_S_UTF8  "\xC0\x64\x74"    /* U+1E9E */
-
-#   define LATIN_SMALL_LIGATURE_LONG_S_T_UTF8  "\xDC\x74\x68\x46"    /* U+FB05 */
-#   define LATIN_SMALL_LIGATURE_ST_UTF8  "\xDC\x74\x68\x47"    /* U+FB06 */
-#   define LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE_UTF8  "\x8E\x58"    /* U+0130 */
-#   define LATIN_SMALL_LETTER_DOTLESS_I_UTF8  "\x8E\x59"    /* U+0131 */
-
-#   define HYPHEN_UTF8  "\xCA\x41\x58"    /* U+2010 */
-#   define BOM_UTF8_FIRST_BYTE  0xDC    /* U+FEFF */
-#   define BOM_UTF8_TAIL  "\x75\x67\x75"    /* U+FEFF */
-
-#   define NBSP_NATIVE  0x41    /* U+00A0 */
-#   define NBSP_UTF8  "\x8A\x41"    /* U+00A0 */
-
-#   define DEL_NATIVE  0x07    /* U+007F */
-#   define CR_NATIVE  0x0D    /* U+000D */
-#   define LF_NATIVE  0x15    /* U+000A */
-#   define VT_NATIVE  0x0B    /* U+000B */
-#   define ESC_NATIVE  0x27    /* U+001B */
-#   define LATIN_SMALL_LETTER_SHARP_S_NATIVE  0x59    /* U+00DF */
-#   define LATIN_SMALL_LETTER_A_WITH_RING_ABOVE_NATIVE  0x47    /* U+00E5 */
-#   define LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE_NATIVE  0x67    /* U+00C5 */
-#   define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS_NATIVE  0xDF    /* U+00FF */
-#   define MICRO_SIGN_NATIVE  0xA0    /* U+00B5 */
-#   define MAX_PRINT_A_FOR_USE_ONLY_BY_REGCOMP_DOT_C   0xFF   /* The max code point that isPRINT_A */
-
-#endif	/* EBCDIC POSIX-BC */
-
 /* The number of code points not matching \pC */
 #define NON_OTHER_COUNT_FOR_USE_ONLY_BY_REGCOMP_DOT_C  120522
 
