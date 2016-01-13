@@ -89,7 +89,6 @@ perl_alloc(void)
 	fnInsertHashListAddrs(m_allocList, FALSE);
  	my_perl = perl_alloc_using(&perlMem,
 				   &perlMem,
-				   NULL,
 				   &perlEnv,
 				   &perlStdIO,
 				   &perlLIO,
@@ -115,7 +114,7 @@ perl_alloc(void)
 ==============================================================================================*/
 EXTERN_C PerlInterpreter*
 perl_alloc_override(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
-		 struct IPerlMem** ppMemParse, struct IPerlEnv** ppEnv,
+		 struct IPerlEnv** ppEnv,
 		 struct IPerlStdIO** ppStdIO, struct IPerlLIO** ppLIO,
 		 struct IPerlDir** ppDir, struct IPerlSock** ppSock,
 		 struct IPerlProc** ppProc)
@@ -170,7 +169,6 @@ perl_alloc_override(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
 		lpProc=*ppProc;
 	my_perl = perl_alloc_using(lpMem,
 				   lpMem,
-				   NULL,
 				   lpEnv,
 				   lpStdio,
 				   lpLIO,

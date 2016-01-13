@@ -17,7 +17,7 @@ if (not $Config{'useithreads'}) {
     skip_all("clone_with_stack requires threads");
 }
 
-plan(6);
+plan(7);
 
 fresh_perl_is( <<'----', <<'====', undef, "minimal clone_with_stack" );
 use XS::APItest;
@@ -99,5 +99,18 @@ scl: outer
 ary: anterior
 hsh: hale
 ====
+
+}
+
+{
+    my $name = 'Freeing mem block with wrong allocator results in warning';
+    fresh_perl_like ( <<'----', qr/wrong pool/, {stderr => 1}, $name);
+use XS::APItest;
+if($^O eq q|MSWin32|) {
+    require Win32API::File;
+    Win32API::File::SetErrorMode(Win32API::File::SEM_NOGPFAULTERRORBOX());
+}
+XS::APItest::test_wrong_pool();
+----
 
 }

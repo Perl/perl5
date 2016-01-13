@@ -150,7 +150,6 @@
 Ano	|PerlInterpreter*|perl_alloc_using \
 				|NN struct IPerlMem *ipM \
 				|NN struct IPerlMem *ipMS \
-				|NN struct IPerlMem *ipMP \
 				|NN struct IPerlEnv *ipE \
 				|NN struct IPerlStdIO *ipStd \
 				|NN struct IPerlLIO *ipLIO \
@@ -174,7 +173,6 @@ Ano	|PerlInterpreter*|perl_clone_using \
 				|UV flags \
 				|NN struct IPerlMem* ipM \
 				|NN struct IPerlMem* ipMS \
-				|NN struct IPerlMem* ipMP \
 				|NN struct IPerlEnv* ipE \
 				|NN struct IPerlStdIO* ipStd \
 				|NN struct IPerlLIO* ipLIO \

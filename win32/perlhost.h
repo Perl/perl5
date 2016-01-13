@@ -35,7 +35,7 @@ public:
     /* Constructors */
     CPerlHost(void);
     CPerlHost(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
-		 struct IPerlMem** ppMemParse, struct IPerlEnv** ppEnv,
+		 struct IPerlEnv** ppEnv,
 		 struct IPerlStdIO** ppStdIO, struct IPerlLIO** ppLIO,
 		 struct IPerlDir** ppDir, struct IPerlSock** ppSock,
 		 struct IPerlProc** ppProc);
@@ -44,7 +44,6 @@ public:
 
     static CPerlHost* IPerlMem2Host(struct IPerlMem* piPerl);
     static CPerlHost* IPerlMemShared2Host(struct IPerlMem* piPerl);
-    static CPerlHost* IPerlMemParse2Host(struct IPerlMem* piPerl);
     static CPerlHost* IPerlEnv2Host(struct IPerlEnv* piPerl);
     static CPerlHost* IPerlStdIO2Host(struct IPerlStdIO* piPerl);
     static CPerlHost* IPerlLIO2Host(struct IPerlLIO* piPerl);
@@ -79,6 +78,7 @@ public:
     inline void GetLockShared(void) { m_pVMemShared->GetLock(); };
     inline void FreeLockShared(void) { m_pVMemShared->FreeLock(); };
     inline int IsLockedShared(void) { return m_pVMemShared->IsLocked(); };
+
     inline void* MallocShared(size_t size)
     {
 	void *result;
@@ -105,25 +105,6 @@ public:
     {
 	size_t count = num*size;
 	void* lpVoid = MallocShared(count);
-	if (lpVoid)
-	    ZeroMemory(lpVoid, count);
-	return lpVoid;
-    };
-
-/* IPerlMemParse */
-    /* Assume something else is using locks to mangaging serialize
-       on a batch basis
-     */
-    inline void GetLockParse(void) { m_pVMemParse->GetLock(); };
-    inline void FreeLockParse(void) { m_pVMemParse->FreeLock(); };
-    inline int IsLockedParse(void) { return m_pVMemParse->IsLocked(); };
-    inline void* MallocParse(size_t size) { return m_pVMemParse->Malloc(size); };
-    inline void* ReallocParse(void* ptr, size_t size) { return m_pVMemParse->Realloc(ptr, size); };
-    inline void FreeParse(void* ptr) { m_pVMemParse->Free(ptr); };
-    inline void* CallocParse(size_t num, size_t size)
-    {
-	size_t count = num*size;
-	void* lpVoid = MallocParse(count);
 	if (lpVoid)
 	    ZeroMemory(lpVoid, count);
 	return lpVoid;
@@ -180,14 +161,12 @@ public:
     int Execvp(const char *cmdname, const char *const *argv);
 
     inline VMem* GetMemShared(void) { m_pVMemShared->AddRef(); return m_pVMemShared; };
-    inline VMem* GetMemParse(void) { m_pVMemParse->AddRef(); return m_pVMemParse; };
     inline VDir* GetDir(void) { return m_pvDir; };
 
 public:
 
     struct IPerlMem	    m_hostperlMem;
     struct IPerlMem	    m_hostperlMemShared;
-    struct IPerlMem	    m_hostperlMemParse;
     struct IPerlEnv	    m_hostperlEnv;
     struct IPerlStdIO	    m_hostperlStdIO;
     struct IPerlLIO	    m_hostperlLIO;
@@ -197,7 +176,6 @@ public:
 
     struct IPerlMem*	    m_pHostperlMem;
     struct IPerlMem*	    m_pHostperlMemShared;
-    struct IPerlMem*	    m_pHostperlMemParse;
     struct IPerlEnv*	    m_pHostperlEnv;
     struct IPerlStdIO*	    m_pHostperlStdIO;
     struct IPerlLIO*	    m_pHostperlLIO;
@@ -212,7 +190,6 @@ protected:
     VDir*   m_pvDir;
     VMem*   m_pVMem;
     VMem*   m_pVMemShared;
-    VMem*   m_pVMemParse;
 
     DWORD   m_dwEnvCount;
     LPSTR*  m_lppEnvList;
@@ -247,11 +224,6 @@ inline CPerlHost* IPerlMem2Host(struct IPerlMem* piPerl)
 inline CPerlHost* IPerlMemShared2Host(struct IPerlMem* piPerl)
 {
     return STRUCT2RAWPTR(piPerl, m_hostperlMemShared);
-}
-
-inline CPerlHost* IPerlMemParse2Host(struct IPerlMem* piPerl)
-{
-    return STRUCT2RAWPTR(piPerl, m_hostperlMemParse);
 }
 
 inline CPerlHost* IPerlEnv2Host(struct IPerlEnv* piPerl)
@@ -393,61 +365,6 @@ const struct IPerlMem perlMemShared =
     PerlMemSharedFreeLock,
     PerlMemSharedIsLocked,
 };
-
-#undef IPERL2HOST
-#define IPERL2HOST(x) IPerlMemParse2Host(x)
-
-/* IPerlMemParse */
-void*
-PerlMemParseMalloc(struct IPerlMem* piPerl, size_t size)
-{
-    return IPERL2HOST(piPerl)->MallocParse(size);
-}
-void*
-PerlMemParseRealloc(struct IPerlMem* piPerl, void* ptr, size_t size)
-{
-    return IPERL2HOST(piPerl)->ReallocParse(ptr, size);
-}
-void
-PerlMemParseFree(struct IPerlMem* piPerl, void* ptr)
-{
-    IPERL2HOST(piPerl)->FreeParse(ptr);
-}
-void*
-PerlMemParseCalloc(struct IPerlMem* piPerl, size_t num, size_t size)
-{
-    return IPERL2HOST(piPerl)->CallocParse(num, size);
-}
-
-void
-PerlMemParseGetLock(struct IPerlMem* piPerl)
-{
-    IPERL2HOST(piPerl)->GetLockParse();
-}
-
-void
-PerlMemParseFreeLock(struct IPerlMem* piPerl)
-{
-    IPERL2HOST(piPerl)->FreeLockParse();
-}
-
-int
-PerlMemParseIsLocked(struct IPerlMem* piPerl)
-{
-    return IPERL2HOST(piPerl)->IsLockedParse();
-}
-
-const struct IPerlMem perlMemParse =
-{
-    PerlMemParseMalloc,
-    PerlMemParseRealloc,
-    PerlMemParseFree,
-    PerlMemParseCalloc,
-    PerlMemParseGetLock,
-    PerlMemParseFreeLock,
-    PerlMemParseIsLocked,
-};
-
 
 #undef IPERL2HOST
 #define IPERL2HOST(x) IPerlEnv2Host(x)
@@ -1821,7 +1738,6 @@ PerlProcFork(struct IPerlProc* piPerl)
 						 CLONEf_COPY_STACKS,
 						 h->m_pHostperlMem,
 						 h->m_pHostperlMemShared,
-						 h->m_pHostperlMemParse,
 						 h->m_pHostperlEnv,
 						 h->m_pHostperlStdIO,
 						 h->m_pHostperlLIO,
@@ -1947,7 +1863,6 @@ CPerlHost::CPerlHost(void)
     m_pvDir = new VDir();
     m_pVMem = new VMem();
     m_pVMemShared = new VMem();
-    m_pVMemParse =  new VMem();
 
     m_pvDir->Init(NULL, m_pVMem);
 
@@ -1957,7 +1872,6 @@ CPerlHost::CPerlHost(void)
 
     CopyMemory(&m_hostperlMem, &perlMem, sizeof(perlMem));
     CopyMemory(&m_hostperlMemShared, &perlMemShared, sizeof(perlMemShared));
-    CopyMemory(&m_hostperlMemParse, &perlMemParse, sizeof(perlMemParse));
     CopyMemory(&m_hostperlEnv, &perlEnv, sizeof(perlEnv));
     CopyMemory(&m_hostperlStdIO, &perlStdIO, sizeof(perlStdIO));
     CopyMemory(&m_hostperlLIO, &perlLIO, sizeof(perlLIO));
@@ -1967,7 +1881,6 @@ CPerlHost::CPerlHost(void)
 
     m_pHostperlMem	    = &m_hostperlMem;
     m_pHostperlMemShared    = &m_hostperlMemShared;
-    m_pHostperlMemParse	    = &m_hostperlMemParse;
     m_pHostperlEnv	    = &m_hostperlEnv;
     m_pHostperlStdIO	    = &m_hostperlStdIO;
     m_pHostperlLIO	    = &m_hostperlLIO;
@@ -1988,7 +1901,7 @@ CPerlHost::CPerlHost(void)
     } STMT_END
 
 CPerlHost::CPerlHost(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
-		 struct IPerlMem** ppMemParse, struct IPerlEnv** ppEnv,
+		 struct IPerlEnv** ppEnv,
 		 struct IPerlStdIO** ppStdIO, struct IPerlLIO** ppLIO,
 		 struct IPerlDir** ppDir, struct IPerlSock** ppSock,
 		 struct IPerlProc** ppProc)
@@ -1997,7 +1910,6 @@ CPerlHost::CPerlHost(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
     m_pvDir = new VDir(0);
     m_pVMem = new VMem();
     m_pVMemShared = new VMem();
-    m_pVMemParse =  new VMem();
 
     m_pvDir->Init(NULL, m_pVMem);
 
@@ -2007,7 +1919,6 @@ CPerlHost::CPerlHost(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
 
     CopyMemory(&m_hostperlMem, &perlMem, sizeof(perlMem));
     CopyMemory(&m_hostperlMemShared, &perlMemShared, sizeof(perlMemShared));
-    CopyMemory(&m_hostperlMemParse, &perlMemParse, sizeof(perlMemParse));
     CopyMemory(&m_hostperlEnv, &perlEnv, sizeof(perlEnv));
     CopyMemory(&m_hostperlStdIO, &perlStdIO, sizeof(perlStdIO));
     CopyMemory(&m_hostperlLIO, &perlLIO, sizeof(perlLIO));
@@ -2017,7 +1928,6 @@ CPerlHost::CPerlHost(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
 
     SETUPEXCHANGE(ppMem,	m_pHostperlMem,		m_hostperlMem);
     SETUPEXCHANGE(ppMemShared,	m_pHostperlMemShared,	m_hostperlMemShared);
-    SETUPEXCHANGE(ppMemParse,	m_pHostperlMemParse,	m_hostperlMemParse);
     SETUPEXCHANGE(ppEnv,	m_pHostperlEnv,		m_hostperlEnv);
     SETUPEXCHANGE(ppStdIO,	m_pHostperlStdIO,	m_hostperlStdIO);
     SETUPEXCHANGE(ppLIO,	m_pHostperlLIO,		m_hostperlLIO);
@@ -2033,7 +1943,6 @@ CPerlHost::CPerlHost(CPerlHost& host)
     InterlockedIncrement(&num_hosts);
     m_pVMem = new VMem();
     m_pVMemShared = host.GetMemShared();
-    m_pVMemParse =  host.GetMemParse();
 
     /* duplicate directory info */
     m_pvDir = new VDir(0);
@@ -2041,7 +1950,6 @@ CPerlHost::CPerlHost(CPerlHost& host)
 
     CopyMemory(&m_hostperlMem, &perlMem, sizeof(perlMem));
     CopyMemory(&m_hostperlMemShared, &perlMemShared, sizeof(perlMemShared));
-    CopyMemory(&m_hostperlMemParse, &perlMemParse, sizeof(perlMemParse));
     CopyMemory(&m_hostperlEnv, &perlEnv, sizeof(perlEnv));
     CopyMemory(&m_hostperlStdIO, &perlStdIO, sizeof(perlStdIO));
     CopyMemory(&m_hostperlLIO, &perlLIO, sizeof(perlLIO));
@@ -2050,7 +1958,6 @@ CPerlHost::CPerlHost(CPerlHost& host)
     CopyMemory(&m_hostperlProc, &perlProc, sizeof(perlProc));
     m_pHostperlMem	    = &m_hostperlMem;
     m_pHostperlMemShared    = &m_hostperlMemShared;
-    m_pHostperlMemParse	    = &m_hostperlMemParse;
     m_pHostperlEnv	    = &m_hostperlEnv;
     m_pHostperlStdIO	    = &m_hostperlStdIO;
     m_pHostperlLIO	    = &m_hostperlLIO;
@@ -2074,9 +1981,8 @@ CPerlHost::~CPerlHost(void)
     Reset();
     InterlockedDecrement(&num_hosts);
     delete m_pvDir;
-    m_pVMemParse->Release();
-    m_pVMemShared->Release();
-    m_pVMem->Release();
+    m_pVMemShared->ReleaseVoid();
+    m_pVMem->ReleaseVoid();
 }
 
 LPSTR

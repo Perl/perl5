@@ -14457,7 +14457,6 @@ perl_clone(PerlInterpreter *proto_perl, UV flags)
    return perl_clone_using(proto_perl, flags,
 			    proto_perl->IMem,
 			    proto_perl->IMemShared,
-			    proto_perl->IMemParse,
 			    proto_perl->IEnv,
 			    proto_perl->IStdIO,
 			    proto_perl->ILIO,
@@ -14469,7 +14468,7 @@ perl_clone(PerlInterpreter *proto_perl, UV flags)
 PerlInterpreter *
 perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 		 struct IPerlMem* ipM, struct IPerlMem* ipMS,
-		 struct IPerlMem* ipMP, struct IPerlEnv* ipE,
+		 struct IPerlEnv* ipE,
 		 struct IPerlStdIO* ipStd, struct IPerlLIO* ipLIO,
 		 struct IPerlDir* ipD, struct IPerlSock* ipS,
 		 struct IPerlProc* ipP)
@@ -14528,7 +14527,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* host pointers */
     PL_Mem		= ipM;
     PL_MemShared	= ipMS;
-    PL_MemParse		= ipMP;
     PL_Env		= ipE;
     PL_StdIO		= ipStd;
     PL_LIO		= ipLIO;

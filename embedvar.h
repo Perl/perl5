@@ -59,7 +59,6 @@
 #define PL_LIO			(vTHX->ILIO)
 #define PL_Latin1		(vTHX->ILatin1)
 #define PL_Mem			(vTHX->IMem)
-#define PL_MemParse		(vTHX->IMemParse)
 #define PL_MemShared		(vTHX->IMemShared)
 #define PL_NonL1NonFinalFold	(vTHX->INonL1NonFinalFold)
 #define PL_Posix_ptrs		(vTHX->IPosix_ptrs)

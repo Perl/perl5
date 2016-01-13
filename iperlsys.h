@@ -861,23 +861,6 @@ struct IPerlMemInfo
 
 #endif
 
-/* Parse tree memory macros */
-#define PerlMemParse_malloc(size)			    \
-	(*PL_MemParse->pMalloc)(PL_MemParse, (size))
-#define PerlMemParse_realloc(buf, size)			    \
-	(*PL_MemParse->pRealloc)(PL_MemParse, (buf), (size))
-#define PerlMemParse_free(buf)				    \
-	(*PL_MemParse->pFree)(PL_MemParse, (buf))
-#define PerlMemParse_calloc(num, size)			    \
-	(*PL_MemParse->pCalloc)(PL_MemParse, (num), (size))
-#define PerlMemParse_get_lock()				    \
-	(*PL_MemParse->pGetLock)(PL_MemParse)
-#define PerlMemParse_free_lock()			    \
-	(*PL_MemParse->pFreeLock)(PL_MemParse)
-#define PerlMemParse_is_locked()			    \
-	(*PL_MemParse->pIsLocked)(PL_MemParse)
-
-
 #else	/* PERL_IMPLICIT_SYS */
 
 /* Interpreter specific memory macros */
@@ -897,15 +880,6 @@ struct IPerlMemInfo
 #define PerlMemShared_get_lock()		
 #define PerlMemShared_free_lock()
 #define PerlMemShared_is_locked()		0
-
-/* Parse tree memory macros */
-#define PerlMemParse_malloc(size)	malloc((size))
-#define PerlMemParse_realloc(buf, size)	realloc((buf), (size))
-#define PerlMemParse_free(buf)		free((buf))
-#define PerlMemParse_calloc(num, size)	calloc((num), (size))
-#define PerlMemParse_get_lock()		
-#define PerlMemParse_free_lock()
-#define PerlMemParse_is_locked()	0
 
 #endif	/* PERL_IMPLICIT_SYS */
 

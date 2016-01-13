@@ -274,7 +274,6 @@ else {
     ++$skip{$_} foreach qw(
 		    PL_Mem
 		    PL_MemShared
-		    PL_MemParse
 		    PL_Env
 		    PL_StdIO
 		    PL_LIO

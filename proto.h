@@ -4051,13 +4051,13 @@ PERL_CALLCONV void	Perl_warner_nocontext(U32 err, const char* pat, ...)
 
 #endif
 #if defined(PERL_IMPLICIT_SYS)
-PERL_CALLCONV PerlInterpreter*	perl_alloc_using(struct IPerlMem *ipM, struct IPerlMem *ipMS, struct IPerlMem *ipMP, struct IPerlEnv *ipE, struct IPerlStdIO *ipStd, struct IPerlLIO *ipLIO, struct IPerlDir *ipD, struct IPerlSock *ipS, struct IPerlProc *ipP);
+PERL_CALLCONV PerlInterpreter*	perl_alloc_using(struct IPerlMem *ipM, struct IPerlMem *ipMS, struct IPerlEnv *ipE, struct IPerlStdIO *ipStd, struct IPerlLIO *ipLIO, struct IPerlDir *ipD, struct IPerlSock *ipS, struct IPerlProc *ipP);
 #define PERL_ARGS_ASSERT_PERL_ALLOC_USING	\
-	assert(ipM); assert(ipMS); assert(ipMP); assert(ipE); assert(ipStd); assert(ipLIO); assert(ipD); assert(ipS); assert(ipP)
+	assert(ipM); assert(ipMS); assert(ipE); assert(ipStd); assert(ipLIO); assert(ipD); assert(ipS); assert(ipP)
 #  if defined(USE_ITHREADS)
-PERL_CALLCONV PerlInterpreter*	perl_clone_using(PerlInterpreter *proto_perl, UV flags, struct IPerlMem* ipM, struct IPerlMem* ipMS, struct IPerlMem* ipMP, struct IPerlEnv* ipE, struct IPerlStdIO* ipStd, struct IPerlLIO* ipLIO, struct IPerlDir* ipD, struct IPerlSock* ipS, struct IPerlProc* ipP);
+PERL_CALLCONV PerlInterpreter*	perl_clone_using(PerlInterpreter *proto_perl, UV flags, struct IPerlMem* ipM, struct IPerlMem* ipMS, struct IPerlEnv* ipE, struct IPerlStdIO* ipStd, struct IPerlLIO* ipLIO, struct IPerlDir* ipD, struct IPerlSock* ipS, struct IPerlProc* ipP);
 #define PERL_ARGS_ASSERT_PERL_CLONE_USING	\
-	assert(proto_perl); assert(ipM); assert(ipMS); assert(ipMP); assert(ipE); assert(ipStd); assert(ipLIO); assert(ipD); assert(ipS); assert(ipP)
+	assert(proto_perl); assert(ipM); assert(ipMS); assert(ipE); assert(ipStd); assert(ipLIO); assert(ipD); assert(ipS); assert(ipP)
 #  endif
 #endif
 #if defined(PERL_IN_AV_C)

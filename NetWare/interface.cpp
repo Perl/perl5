@@ -151,7 +151,6 @@ int RunPerl(int argc, char **argv, char **env)
 					new_perl = perl_clone_using(my_perl, 1,
 										h->m_pHostperlMem,
 										h->m_pHostperlMemShared,
-										h->m_pHostperlMemParse,
 										h->m_pHostperlEnv,
 										h->m_pHostperlStdIO,
 										h->m_pHostperlLIO,

@@ -91,6 +91,7 @@ public:
     void FreeLock(void);
     int IsLocked(void);
     long Release(void);
+    void ReleaseVoid(void);
     long AddRef(void);
 
     inline BOOL CreateOk(void)
@@ -147,15 +148,12 @@ VMem::~VMem(void)
 void* VMem::Malloc(size_t size)
 {
 #ifdef _USE_LINKED_LIST
-    GetLock();
     PMEMORY_BLOCK_HEADER ptr = (PMEMORY_BLOCK_HEADER)malloc(size+sizeof(MEMORY_BLOCK_HEADER));
-    if (!ptr) {
-	FreeLock();
-	return NULL;
+    if (ptr) {
+	LinkBlock(ptr);
+	ptr += 1;
     }
-    LinkBlock(ptr);
-    FreeLock();
-    return (ptr+1);
+    return ptr;
 #else
     return malloc(size);
 #endif
@@ -172,18 +170,14 @@ void* VMem::Realloc(void* pMem, size_t size)
 	return NULL;
     }
 
-    GetLock();
     PMEMORY_BLOCK_HEADER ptr = (PMEMORY_BLOCK_HEADER)(((char*)pMem)-sizeof(MEMORY_BLOCK_HEADER));
     UnlinkBlock(ptr);
     ptr = (PMEMORY_BLOCK_HEADER)realloc(ptr, size+sizeof(MEMORY_BLOCK_HEADER));
-    if (!ptr) {
-	FreeLock();
-	return NULL;
+    if (ptr) {
+	LinkBlock(ptr);
+	ptr += 1;
     }
-    LinkBlock(ptr);
-    FreeLock();
-
-    return (ptr+1);
+    return ptr;
 #else
     return realloc(pMem, size);
 #endif
@@ -195,23 +189,23 @@ void VMem::Free(void* pMem)
     if (pMem) {
 	PMEMORY_BLOCK_HEADER ptr = (PMEMORY_BLOCK_HEADER)(((char*)pMem)-sizeof(MEMORY_BLOCK_HEADER));
         if (ptr->owner != this) {
-	    if (ptr->owner) {
 #if 1
-	    	int *nowhere = NULL;
-	    	Perl_warn_nocontext("Free to wrong pool %p not %p",this,ptr->owner);
-            	*nowhere = 0; /* this segfault is deliberate, 
-            	                 so you can see the stack trace */
+	    Perl_warn_nocontext("Free to wrong pool %p not %p",this,ptr->owner);
+	    int *nowhere = NULL;
+	    *nowhere = 0; /* this segfault is deliberate,
+			     so you can see the stack trace */
+	    NOT_REACHED;
 #else
+	    if (ptr->owner) {
                 ptr->owner->Free(pMem);	
-#endif
 	    }
+	    /* else a double free that is ignored ??? */
 	    return;
+#endif
         }
-	GetLock();
 	UnlinkBlock(ptr);
 	ptr->owner = NULL;
 	free(ptr);
-	FreeLock();
     }
 #else /*_USE_LINKED_LIST*/
     free(pMem);
@@ -255,6 +249,14 @@ long VMem::Release(void)
     if(!lCount)
 	delete this;
     return lCount;
+}
+
+void VMem::ReleaseVoid(void)
+{
+    long lCount = InterlockedDecrement(&m_lRefCount);
+    if(!lCount)
+	delete this;
+    return;
 }
 
 long VMem::AddRef(void)
@@ -408,6 +410,7 @@ public:
     void FreeLock(void);
     int IsLocked(void);
     long Release(void);
+    void ReleaseVoid(void);
     long AddRef(void);
 
     inline BOOL CreateOk(void)
@@ -901,6 +904,14 @@ long VMem::Release(void)
     if(!lCount)
 	delete this;
     return lCount;
+}
+
+void VMem::ReleaseVoid(void)
+{
+    long lCount = InterlockedDecrement(&m_lRefCount);
+    if(!lCount)
+	delete this;
+    return;
 }
 
 long VMem::AddRef(void)

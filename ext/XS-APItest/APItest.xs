@@ -4185,6 +4185,14 @@ test_sv_catpvf(SV *fmtsv)
         sv = sv_2mortal(newSVpvn("", 0));
         sv_catpvf(sv, fmt, 5, 6, 7, 8);
 
+# Make sure this warning/crash doesn't accidentally stop working.
+# Whether the warning can be removed one day, this test has no opinion on that.
+
+void
+test_wrong_pool()
+    CODE:
+        PerlMem_free(PerlMemShared_malloc(1));
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int

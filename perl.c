@@ -148,7 +148,7 @@ Perl_sys_term(void)
 #ifdef PERL_IMPLICIT_SYS
 PerlInterpreter *
 perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
-		 struct IPerlMem* ipMP, struct IPerlEnv* ipE,
+		 struct IPerlEnv* ipE,
 		 struct IPerlStdIO* ipStd, struct IPerlLIO* ipLIO,
 		 struct IPerlDir* ipD, struct IPerlSock* ipS,
 		 struct IPerlProc* ipP)
@@ -163,7 +163,6 @@ perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
     Zero(my_perl, 1, PerlInterpreter);
     PL_Mem = ipM;
     PL_MemShared = ipMS;
-    PL_MemParse = ipMP;
     PL_Env = ipE;
     PL_StdIO = ipStd;
     PL_LIO = ipLIO;

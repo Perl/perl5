@@ -97,7 +97,6 @@ int xcegeteuid(){ return 0;}
 EXTERN_C void
 perl_get_host_info(struct IPerlMemInfo* perlMemInfo,
 		   struct IPerlMemInfo* perlMemSharedInfo,
-		   struct IPerlMemInfo* perlMemParseInfo,
 		   struct IPerlEnvInfo* perlEnvInfo,
 		   struct IPerlStdIOInfo* perlStdIOInfo,
 		   struct IPerlLIOInfo* perlLIOInfo,
@@ -112,10 +111,6 @@ perl_get_host_info(struct IPerlMemInfo* perlMemInfo,
     if (perlMemSharedInfo) {
 	Copy(&perlMem, &perlMemSharedInfo->perlMemList, perlMemSharedInfo->nCount, void*);
 	perlMemSharedInfo->nCount = (sizeof(struct IPerlMem)/sizeof(void*));
-    }
-    if (perlMemParseInfo) {
-	Copy(&perlMem, &perlMemParseInfo->perlMemList, perlMemParseInfo->nCount, void*);
-	perlMemParseInfo->nCount = (sizeof(struct IPerlMem)/sizeof(void*));
     }
     if (perlEnvInfo) {
 	Copy(&perlEnv, &perlEnvInfo->perlEnvList, perlEnvInfo->nCount, void*);
@@ -145,19 +140,18 @@ perl_get_host_info(struct IPerlMemInfo* perlMemInfo,
 
 EXTERN_C PerlInterpreter*
 perl_alloc_override(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
-		 struct IPerlMem** ppMemParse, struct IPerlEnv** ppEnv,
+		 struct IPerlEnv** ppEnv,
 		 struct IPerlStdIO** ppStdIO, struct IPerlLIO** ppLIO,
 		 struct IPerlDir** ppDir, struct IPerlSock** ppSock,
 		 struct IPerlProc** ppProc)
 {
     PerlInterpreter *my_perl = NULL;
-    CPerlHost* pHost = new CPerlHost(ppMem, ppMemShared, ppMemParse, ppEnv,
+    CPerlHost* pHost = new CPerlHost(ppMem, ppMemShared, ppEnv,
 				     ppStdIO, ppLIO, ppDir, ppSock, ppProc);
 
     if (pHost) {
 	my_perl = perl_alloc_using(pHost->m_pHostperlMem,
 				   pHost->m_pHostperlMemShared,
-				   pHost->m_pHostperlMemParse,
 				   pHost->m_pHostperlEnv,
 				   pHost->m_pHostperlStdIO,
 				   pHost->m_pHostperlLIO,
@@ -180,7 +174,6 @@ perl_alloc(void)
     if (pHost) {
 	my_perl = perl_alloc_using(pHost->m_pHostperlMem,
 				   pHost->m_pHostperlMemShared,
-				   pHost->m_pHostperlMemParse,
 				   pHost->m_pHostperlEnv,
 				   pHost->m_pHostperlStdIO,
 				   pHost->m_pHostperlLIO,
@@ -337,7 +330,6 @@ perl_clone_host(PerlInterpreter* proto_perl, UV flags) {
     proto_perl = perl_clone_using(proto_perl, flags,
                         h->m_pHostperlMem,
                         h->m_pHostperlMemShared,
-                        h->m_pHostperlMemParse,
                         h->m_pHostperlEnv,
                         h->m_pHostperlStdIO,
                         h->m_pHostperlLIO,

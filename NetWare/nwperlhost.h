@@ -52,7 +52,7 @@ class CPerlHost
 public:
     CPerlHost(void);
     CPerlHost(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
-		 struct IPerlMem** ppMemParse, struct IPerlEnv** ppEnv,
+		 struct IPerlEnv** ppEnv,
 		 struct IPerlStdIO** ppStdIO, struct IPerlLIO** ppLIO,
 		 struct IPerlDir** ppDir, struct IPerlSock** ppSock,
 		 struct IPerlProc** ppProc);
@@ -61,7 +61,6 @@ public:
 
     static CPerlHost* IPerlMem2Host(struct IPerlMem* piPerl);
     static CPerlHost* IPerlMemShared2Host(struct IPerlMem* piPerl);
-    static CPerlHost* IPerlMemParse2Host(struct IPerlMem* piPerl);
     static CPerlHost* IPerlEnv2Host(struct IPerlEnv* piPerl);
     static CPerlHost* IPerlStdIO2Host(struct IPerlStdIO* piPerl);
     static CPerlHost* IPerlLIO2Host(struct IPerlLIO* piPerl);
@@ -86,18 +85,6 @@ public:
     {
 	size_t count = num*size;
 	void* lpVoid = MallocShared(count);
-
-	return lpVoid;
-    };
-
-/* IPerlMemParse */
-    inline void* MallocParse(size_t size) { return m_pVMemParse->Malloc(size); };
-    inline void* ReallocParse(void* ptr, size_t size) { return m_pVMemParse->Realloc(ptr, size); };
-    inline void FreeParse(void* ptr) { m_pVMemParse->Free(ptr); };
-    inline void* CallocParse(size_t num, size_t size)
-    {
-	size_t count = num*size;
-	void* lpVoid = MallocParse(count);
 
 	return lpVoid;
     };
@@ -132,7 +119,6 @@ public:
 
     struct IPerlMem	    m_hostperlMem;
     struct IPerlMem	    m_hostperlMemShared;
-    struct IPerlMem	    m_hostperlMemParse;
     struct IPerlEnv	    m_hostperlEnv;
     struct IPerlStdIO	    m_hostperlStdIO;
     struct IPerlLIO	    m_hostperlLIO;
@@ -142,7 +128,6 @@ public:
 
     struct IPerlMem*	    m_pHostperlMem;
     struct IPerlMem*	    m_pHostperlMemShared;
-    struct IPerlMem*	    m_pHostperlMemParse;
     struct IPerlEnv*	    m_pHostperlEnv;
     struct IPerlStdIO*	    m_pHostperlStdIO;
     struct IPerlLIO*	    m_pHostperlLIO;
@@ -154,7 +139,6 @@ protected:
 
     VMem*   m_pVMem;
     VMem*   m_pVMemShared;
-    VMem*   m_pVMemParse;
 };
 
 
@@ -168,11 +152,6 @@ inline CPerlHost* IPerlMem2Host(struct IPerlMem* piPerl)
 inline CPerlHost* IPerlMemShared2Host(struct IPerlMem* piPerl)
 {
     return STRUCT2PTR(piPerl, m_hostperlMemShared);
-}
-
-inline CPerlHost* IPerlMemParse2Host(struct IPerlMem* piPerl)
-{
-    return STRUCT2PTR(piPerl, m_hostperlMemParse);
 }
 
 inline CPerlHost* IPerlEnv2Host(struct IPerlEnv* piPerl)
@@ -274,41 +253,6 @@ struct IPerlMem perlMemShared =
     PerlMemSharedFree,
     PerlMemSharedCalloc,
 };
-
-#undef IPERL2HOST
-#define IPERL2HOST(x) IPerlMemParse2Host(x)
-
-/* IPerlMemParse */
-void*
-PerlMemParseMalloc(struct IPerlMem* piPerl, size_t size)
-{
-    return IPERL2HOST(piPerl)->MallocParse(size);
-}
-void*
-PerlMemParseRealloc(struct IPerlMem* piPerl, void* ptr, size_t size)
-{
-    return IPERL2HOST(piPerl)->ReallocParse(ptr, size);
-}
-void
-PerlMemParseFree(struct IPerlMem* piPerl, void* ptr)
-{
-    IPERL2HOST(piPerl)->FreeParse(ptr);
-}
-void*
-PerlMemParseCalloc(struct IPerlMem* piPerl, size_t num, size_t size)
-{
-    return IPERL2HOST(piPerl)->CallocParse(num, size);
-}
-
-
-struct IPerlMem perlMemParse =
-{
-    PerlMemParseMalloc,
-    PerlMemParseRealloc,
-    PerlMemParseFree,
-    PerlMemParseCalloc,
-};
-
 
 #undef IPERL2HOST
 #define IPERL2HOST(x) IPerlEnv2Host(x)
@@ -1580,11 +1524,9 @@ CPerlHost::CPerlHost(void)
 {
     m_pVMem = new VMem();
     m_pVMemShared = new VMem();
-    m_pVMemParse =  new VMem();
 
 	memcpy(&m_hostperlMem, &perlMem, sizeof(perlMem));
 	memcpy(&m_hostperlMemShared, &perlMemShared, sizeof(perlMemShared));
-    memcpy(&m_hostperlMemParse, &perlMemParse, sizeof(perlMemParse));
     memcpy(&m_hostperlEnv, &perlEnv, sizeof(perlEnv));
     memcpy(&m_hostperlStdIO, &perlStdIO, sizeof(perlStdIO));
     memcpy(&m_hostperlLIO, &perlLIO, sizeof(perlLIO));
@@ -1594,7 +1536,6 @@ CPerlHost::CPerlHost(void)
 
     m_pHostperlMem	    = &m_hostperlMem;
     m_pHostperlMemShared    = &m_hostperlMemShared;
-    m_pHostperlMemParse	    = &m_hostperlMemParse;
     m_pHostperlEnv	    = &m_hostperlEnv;
     m_pHostperlStdIO	    = &m_hostperlStdIO;
     m_pHostperlLIO	    = &m_hostperlLIO;
@@ -1615,18 +1556,16 @@ CPerlHost::CPerlHost(void)
     } STMT_END
 
 CPerlHost::CPerlHost(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
-		 struct IPerlMem** ppMemParse, struct IPerlEnv** ppEnv,
+		 struct IPerlEnv** ppEnv,
 		 struct IPerlStdIO** ppStdIO, struct IPerlLIO** ppLIO,
 		 struct IPerlDir** ppDir, struct IPerlSock** ppSock,
 		 struct IPerlProc** ppProc)
 {
     m_pVMem = new VMem();
     m_pVMemShared = new VMem();
-    m_pVMemParse =  new VMem();
 
 	memcpy(&m_hostperlMem, &perlMem, sizeof(perlMem));
     memcpy(&m_hostperlMemShared, &perlMemShared, sizeof(perlMemShared));
-    memcpy(&m_hostperlMemParse, &perlMemParse, sizeof(perlMemParse));
     memcpy(&m_hostperlEnv, &perlEnv, sizeof(perlEnv));
     memcpy(&m_hostperlStdIO, &perlStdIO, sizeof(perlStdIO));
     memcpy(&m_hostperlLIO, &perlLIO, sizeof(perlLIO));
@@ -1636,7 +1575,6 @@ CPerlHost::CPerlHost(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
 
     SETUPEXCHANGE(ppMem,	m_pHostperlMem,		m_hostperlMem);
     SETUPEXCHANGE(ppMemShared,	m_pHostperlMemShared,	m_hostperlMemShared);
-    SETUPEXCHANGE(ppMemParse,	m_pHostperlMemParse,	m_hostperlMemParse);
     SETUPEXCHANGE(ppEnv,	m_pHostperlEnv,		m_hostperlEnv);
     SETUPEXCHANGE(ppStdIO,	m_pHostperlStdIO,	m_hostperlStdIO);
     SETUPEXCHANGE(ppLIO,	m_pHostperlLIO,		m_hostperlLIO);
@@ -1650,7 +1588,6 @@ CPerlHost::CPerlHost(const CPerlHost& host)
 {
 	memcpy(&m_hostperlMem, &perlMem, sizeof(perlMem));
     memcpy(&m_hostperlMemShared, &perlMemShared, sizeof(perlMemShared));
-    memcpy(&m_hostperlMemParse, &perlMemParse, sizeof(perlMemParse));
     memcpy(&m_hostperlEnv, &perlEnv, sizeof(perlEnv));
     memcpy(&m_hostperlStdIO, &perlStdIO, sizeof(perlStdIO));
     memcpy(&m_hostperlLIO, &perlLIO, sizeof(perlLIO));
@@ -1660,7 +1597,6 @@ CPerlHost::CPerlHost(const CPerlHost& host)
 
     m_pHostperlMem	    = &m_hostperlMem;
     m_pHostperlMemShared    = &m_hostperlMemShared;
-    m_pHostperlMemParse	    = &m_hostperlMemParse;
     m_pHostperlEnv	    = &m_hostperlEnv;
     m_pHostperlStdIO	    = &m_hostperlStdIO;
     m_pHostperlLIO	    = &m_hostperlLIO;
@@ -1672,7 +1608,6 @@ CPerlHost::CPerlHost(const CPerlHost& host)
 
 CPerlHost::~CPerlHost(void)
 {
-	if ( m_pVMemParse ) delete m_pVMemParse;
 	if ( m_pVMemShared ) delete m_pVMemShared;
 	if ( m_pVMem ) delete m_pVMem;
 }
