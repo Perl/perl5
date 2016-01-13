@@ -384,12 +384,15 @@ SKIP: {
     is($orig, 0, 'previous value of $set');
 
     # from cpan #110278
-    use List::Util qw(min);
-    my $x = 1;
-    my $y = 2;
-    ( $x, $y ) = ( min($y), min($x) );
-    is($x, 2, "check swap for \$x");
-    is($y, 1, "check swap for \$y");
+  SKIP: {
+      skip "no List::Util::min on miniperl", 2, if is_miniperl;
+      require List::Util;
+      my $x = 1;
+      my $y = 2;
+      ( $x, $y ) = ( List::Util::min($y), List::Util::min($x) );
+      is($x, 2, "check swap for \$x");
+      is($y, 1, "check swap for \$y");
+    }
 }
 
 done_testing();
