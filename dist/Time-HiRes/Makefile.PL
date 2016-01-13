@@ -824,13 +824,20 @@ sub doConstants {
                        CLOCK_HIGHRES
                        CLOCK_MONOTONIC
                        CLOCK_MONOTONIC_COARSE
+                       CLOCK_MONOTONIC_PRECISE
                        CLOCK_MONOTONIC_RAW
                        CLOCK_PROCESS_CPUTIME_ID
                        CLOCK_REALTIME
                        CLOCK_REALTIME_COARSE
+                       CLOCK_REALTIME_FAST
+                       CLOCK_REALTIME_PRECISE
+                       CLOCK_SECOND
                        CLOCK_SOFTTIME
                        CLOCK_THREAD_CPUTIME_ID
                        CLOCK_TIMEOFDAY
+                       CLOCK_UPTIME
+                       CLOCK_UPTIME_FAST
+                       CLOCK_UPTIME_PRECISE
                        ITIMER_PROF
                        ITIMER_REAL
                        ITIMER_REALPROF
