@@ -818,16 +818,21 @@ sub doMakefile {
 
 sub doConstants {
     if (eval {require ExtUtils::Constant; 1}) {
-	my @names = qw(CLOCK_HIGHRES CLOCK_MONOTONIC
-		       CLOCK_PROCESS_CPUTIME_ID
-		       CLOCK_REALTIME
-		       CLOCK_SOFTTIME
-		       CLOCK_THREAD_CPUTIME_ID
-		       CLOCK_TIMEOFDAY
-		       CLOCKS_PER_SEC
-		       ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF
-		       ITIMER_REALPROF
-		       TIMER_ABSTIME);
+	my @names = qw(
+                       CLOCKS_PER_SEC
+                       CLOCK_HIGHRES
+                       CLOCK_MONOTONIC
+                       CLOCK_PROCESS_CPUTIME_ID
+                       CLOCK_REALTIME
+                       CLOCK_SOFTTIME
+                       CLOCK_THREAD_CPUTIME_ID
+                       CLOCK_TIMEOFDAY
+                       ITIMER_PROF
+                       ITIMER_REAL
+                       ITIMER_REALPROF
+                       ITIMER_VIRTUAL
+                       TIMER_ABSTIME
+                      );
 	foreach (qw (d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		     d_nanosleep d_clock_gettime d_clock_getres
 		     d_clock d_clock_nanosleep d_hires_stat)) {
