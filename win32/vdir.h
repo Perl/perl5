@@ -22,7 +22,7 @@ public:
     VDir(int bManageDir = 1);
     ~VDir() {};
 
-    void Init(VDir* pDir, VMem *pMem);
+    void Init(VDir* pDir, VMemBasic *pMem);
     void SetDefaultA(char const *pDefault);
     void SetDefaultW(WCHAR const *pDefault);
     char* MapPathA(const char *pInName);
@@ -115,7 +115,7 @@ protected:
 	return (chr | 0x20)-'a';
     };
 
-    VMem *pMem;
+    VMemBasic *pMem;
     int nDefault, bManageDirectory;
     char *dirTableA[driveCount];
     char szLocalBufferA[MAX_PATH+1];
@@ -132,7 +132,7 @@ VDir::VDir(int bManageDir /* = 1 */)
     memset(dirTableW, 0, sizeof(dirTableW));
 }
 
-void VDir::Init(VDir* pDir, VMem *p)
+void VDir::Init(VDir* pDir, VMemBasic *p)
 {
     int index;
 

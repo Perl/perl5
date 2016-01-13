@@ -58,9 +58,9 @@ public:
 
 /* IPerlMem */
     /* Locks provided but should be unnecessary as this is private pool */
-    inline void* Malloc(size_t size) { return m_pVMem->Malloc(size); };
-    inline void* Realloc(void* ptr, size_t size) { return m_pVMem->Realloc(ptr, size); };
-    inline void Free(void* ptr) { m_pVMem->Free(ptr); };
+    inline void* Malloc(size_t size) { return m_VMem.Malloc(size); };
+    inline void* Realloc(void* ptr, size_t size) { return m_VMem.Realloc(ptr, size); };
+    inline void Free(void* ptr) { m_VMem.Free(ptr); };
     inline void* Calloc(size_t num, size_t size)
     {
 	size_t count = num*size;
@@ -69,9 +69,6 @@ public:
 	    ZeroMemory(lpVoid, count);
 	return lpVoid;
     };
-    inline void GetLock(void) { m_pVMem->GetLock(); };
-    inline void FreeLock(void) { m_pVMem->FreeLock(); };
-    inline int IsLocked(void) { return m_pVMem->IsLocked(); };
 
 /* IPerlMemShared */
     /* Locks used to serialize access to the pool */
@@ -188,7 +185,7 @@ public:
 protected:
 
     VDir*   m_pvDir;
-    VMem*   m_pVMem;
+    VMemBasic   m_VMem;
     VMem*   m_pVMemShared;
 
     DWORD   m_dwEnvCount;
@@ -286,19 +283,17 @@ PerlMemCalloc(struct IPerlMem* piPerl, size_t num, size_t size)
 void
 PerlMemGetLock(struct IPerlMem* piPerl)
 {
-    IPERL2HOST(piPerl)->GetLock();
 }
 
 void
 PerlMemFreeLock(struct IPerlMem* piPerl)
 {
-    IPERL2HOST(piPerl)->FreeLock();
 }
 
 int
 PerlMemIsLocked(struct IPerlMem* piPerl)
 {
-    return IPERL2HOST(piPerl)->IsLocked();
+    return 0;
 }
 
 const struct IPerlMem perlMem =
@@ -1861,10 +1856,9 @@ CPerlHost::CPerlHost(void)
     /* Construct a host from scratch */
     InterlockedIncrement(&num_hosts);
     m_pvDir = new VDir();
-    m_pVMem = new VMem();
     m_pVMemShared = new VMem();
 
-    m_pvDir->Init(NULL, m_pVMem);
+    m_pvDir->Init(NULL, &m_VMem);
 
     m_dwEnvCount = 0;
     m_lppEnvList = NULL;
@@ -1908,10 +1902,9 @@ CPerlHost::CPerlHost(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
 {
     InterlockedIncrement(&num_hosts);
     m_pvDir = new VDir(0);
-    m_pVMem = new VMem();
     m_pVMemShared = new VMem();
 
-    m_pvDir->Init(NULL, m_pVMem);
+    m_pvDir->Init(NULL, &m_VMem);
 
     m_dwEnvCount = 0;
     m_lppEnvList = NULL;
@@ -1941,12 +1934,11 @@ CPerlHost::CPerlHost(CPerlHost& host)
 {
     /* Construct a host from another host */
     InterlockedIncrement(&num_hosts);
-    m_pVMem = new VMem();
     m_pVMemShared = host.GetMemShared();
 
     /* duplicate directory info */
     m_pvDir = new VDir(0);
-    m_pvDir->Init(host.GetDir(), m_pVMem);
+    m_pvDir->Init(host.GetDir(), &m_VMem);
 
     CopyMemory(&m_hostperlMem, &perlMem, sizeof(perlMem));
     CopyMemory(&m_hostperlMemShared, &perlMemShared, sizeof(perlMemShared));
@@ -1982,7 +1974,6 @@ CPerlHost::~CPerlHost(void)
     InterlockedDecrement(&num_hosts);
     delete m_pvDir;
     m_pVMemShared->ReleaseVoid();
-    m_pVMem->ReleaseVoid();
 }
 
 LPSTR

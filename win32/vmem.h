@@ -70,29 +70,23 @@ inline void MEMODSlx(char *str, long x)
  */
 
 #ifdef _USE_LINKED_LIST
-class VMem;
+class VMemBasic;
 typedef struct _MemoryBlockHeader* PMEMORY_BLOCK_HEADER;
 typedef struct _MemoryBlockHeader {
     PMEMORY_BLOCK_HEADER    pNext;
     PMEMORY_BLOCK_HEADER    pPrev;
-    VMem *owner;
+    VMemBasic *owner;
 } MEMORY_BLOCK_HEADER, *PMEMORY_BLOCK_HEADER;
 #endif
 
-class VMem
+class VMemBasic
 {
 public:
-    VMem();
-    ~VMem();
+    VMemBasic();
+    ~VMemBasic();
     void* Malloc(size_t size);
     void* Realloc(void* pMem, size_t size);
     void Free(void* pMem);
-    void GetLock(void);
-    void FreeLock(void);
-    int IsLocked(void);
-    long Release(void);
-    void ReleaseVoid(void);
-    long AddRef(void);
 
     inline BOOL CreateOk(void)
     {
@@ -119,9 +113,22 @@ protected:
     }
 
     MEMORY_BLOCK_HEADER	m_Dummy;
-    CRITICAL_SECTION	m_cs;		// access lock
 #endif
+};
 
+class VMem: public VMemBasic
+{
+public:
+    VMem() throw();
+    ~VMem();
+    void GetLock(void);
+    void FreeLock(void);
+    int IsLocked(void);
+    long Release(void);
+    void ReleaseVoid(void);
+    long AddRef(void);
+protected:
+    CRITICAL_SECTION	m_cs;		// access lock
     long		m_lRefCount;	// number of current users
 };
 
@@ -130,22 +137,34 @@ VMem::VMem()
     m_lRefCount = 1;
 #ifdef _USE_LINKED_LIST
     InitializeCriticalSection(&m_cs);
+#endif
+}
+
+VMemBasic::VMemBasic()
+{
+#ifdef _USE_LINKED_LIST
     m_Dummy.pNext = m_Dummy.pPrev =  &m_Dummy;
     m_Dummy.owner = this;
+#endif
+}
+
+VMemBasic::~VMemBasic(void)
+{
+#ifdef _USE_LINKED_LIST
+    while (m_Dummy.pNext != &m_Dummy) {
+	Free(m_Dummy.pNext+1);
+    }
 #endif
 }
 
 VMem::~VMem(void)
 {
 #ifdef _USE_LINKED_LIST
-    while (m_Dummy.pNext != &m_Dummy) {
-	Free(m_Dummy.pNext+1);
-    }
     DeleteCriticalSection(&m_cs);
 #endif
 }
 
-void* VMem::Malloc(size_t size)
+void* VMemBasic::Malloc(size_t size)
 {
 #ifdef _USE_LINKED_LIST
     PMEMORY_BLOCK_HEADER ptr = (PMEMORY_BLOCK_HEADER)malloc(size+sizeof(MEMORY_BLOCK_HEADER));
@@ -159,7 +178,7 @@ void* VMem::Malloc(size_t size)
 #endif
 }
 
-void* VMem::Realloc(void* pMem, size_t size)
+void* VMemBasic::Realloc(void* pMem, size_t size)
 {
 #ifdef _USE_LINKED_LIST
     if (!pMem)
@@ -183,7 +202,7 @@ void* VMem::Realloc(void* pMem, size_t size)
 #endif
 }
 
-void VMem::Free(void* pMem)
+void VMemBasic::Free(void* pMem)
 {
 #ifdef _USE_LINKED_LIST
     if (pMem) {
@@ -398,20 +417,14 @@ typedef struct _HeapRec
 #endif
 } HeapRec;
 
-class VMem
+class VMemBasic
 {
 public:
-    VMem();
-    ~VMem();
+    VMemBasic();
+    ~VMemBasic();
     void* Malloc(size_t size);
     void* Realloc(void* pMem, size_t size);
     void Free(void* pMem);
-    void GetLock(void);
-    void FreeLock(void);
-    int IsLocked(void);
-    long Release(void);
-    void ReleaseVoid(void);
-    long AddRef(void);
 
     inline BOOL CreateOk(void)
     {
@@ -481,8 +494,7 @@ protected:
     HeapRec		m_heaps[maxHeaps];	    // list of all non-contiguous heap areas 
     int			m_nHeaps;		    // no. of heaps in m_heaps 
     long		m_lAllocSize;		    // current alloc size
-    long		m_lRefCount;		    // number of current users
-    CRITICAL_SECTION	m_cs;			    // access lock
+
 
 #ifdef _DEBUG_MEM
     void WalkHeap(int complete);
@@ -491,9 +503,30 @@ protected:
 #endif
 };
 
+class VMem: public VMemBasic
+{
+public:
+    VMem() throw();
+    ~VMem();
+    void GetLock(void);
+    void FreeLock(void);
+    int IsLocked(void);
+    long Release(void);
+    void ReleaseVoid(void);
+    long AddRef(void);
+protected:
+    long		m_lRefCount;		    // number of current users
+    CRITICAL_SECTION	m_cs;			    // access lock
+};
+
 VMem::VMem()
 {
     m_lRefCount = 1;
+    InitializeCriticalSection(&m_cs);
+}
+
+VMemBasic::VMemBasic()
+{
 #ifndef _USE_BUDDY_BLOCKS
     BOOL bRet = (NULL != (m_hHeap = HeapCreate(HEAP_NO_SERIALIZE,
 				lAllocStart,	/* initial size of heap */
@@ -501,7 +534,6 @@ VMem::VMem()
     ASSERT(bRet);
 #endif
 
-    InitializeCriticalSection(&m_cs);
 #ifdef _DEBUG_MEM
     m_pLog = 0;
 #endif
@@ -509,14 +541,13 @@ VMem::VMem()
     Init();
 }
 
-VMem::~VMem(void)
+VMemBasic::~VMemBasic(void)
 {
 #ifndef _USE_BUDDY_BLOCKS
     ASSERT(HeapValidate(m_hHeap, HEAP_NO_SERIALIZE, NULL));
 #endif
     WALKHEAPTRACE();
 
-    DeleteCriticalSection(&m_cs);
 #ifdef _USE_BUDDY_BLOCKS
     for(int index = 0; index < m_nHeaps; ++index) {
 	VirtualFree(m_heaps[index].base, 0, MEM_RELEASE);
@@ -534,7 +565,12 @@ VMem::~VMem(void)
 #endif /* _USE_BUDDY_BLOCKS */
 }
 
-void VMem::ReInit(void)
+VMem::~VMem(void)
+{
+    DeleteCriticalSection(&m_cs);
+}
+
+void VMemBasic::ReInit(void)
 {
     for(int index = 0; index < m_nHeaps; ++index) {
 #ifdef _USE_BUDDY_BLOCKS
@@ -553,7 +589,7 @@ void VMem::ReInit(void)
     Init();
 }
 
-void VMem::Init(void)
+void VMemBasic::Init(void)
 {
 #ifdef _USE_BUDDY_BLOCKS
     PBLOCK pFreeList;
@@ -586,7 +622,7 @@ void VMem::Init(void)
     m_lAllocSize = lAllocStart;
 }
 
-void* VMem::Malloc(size_t size)
+void* VMemBasic::Malloc(size_t size)
 {
     WALKHEAP();
 
@@ -732,7 +768,7 @@ void* VMem::Malloc(size_t size)
     }
 }
 
-void* VMem::Realloc(void* block, size_t size)
+void* VMemBasic::Realloc(void* block, size_t size)
 {
     WALKHEAP();
 
@@ -809,7 +845,7 @@ void* VMem::Realloc(void* block, size_t size)
     return ((void *)ptr);
 }
 
-void VMem::Free(void* p)
+void VMemBasic::Free(void* p)
 {
     WALKHEAP();
 
@@ -921,7 +957,7 @@ long VMem::AddRef(void)
 }
 
 
-int VMem::Getmem(size_t requestSize)
+int VMemBasic::Getmem(size_t requestSize)
 {   /* returns -1 is successful 0 if not */
 #ifdef USE_BIGBLOCK_ALLOC
     BOOL bBigBlock;
@@ -1018,7 +1054,7 @@ Restart:
     return -1;
 }
 
-int VMem::HeapAdd(void* p, size_t size
+int VMemBasic::HeapAdd(void* p, size_t size
 #ifdef USE_BIGBLOCK_ALLOC
     , BOOL bBigBlock
 #endif
@@ -1097,7 +1133,7 @@ int VMem::HeapAdd(void* p, size_t size
 }
 
 
-void* VMem::Expand(void* block, size_t size)
+void* VMemBasic::Expand(void* block, size_t size)
 {
     /*
      * Disallow negative or zero sizes.
@@ -1181,7 +1217,7 @@ void* VMem::Expand(void* block, size_t size)
 #ifdef _DEBUG_MEM
 #define LOG_FILENAME ".\\MemLog.txt"
 
-void VMem::MemoryUsageMessage(char *str, long x, long y, int c)
+void VMemBasic::MemoryUsageMessage(char *str, long x, long y, int c)
 {
     char szBuffer[512];
     if(str) {
@@ -1199,7 +1235,7 @@ void VMem::MemoryUsageMessage(char *str, long x, long y, int c)
     }
 }
 
-void VMem::WalkHeap(int complete)
+void VMemBasic::WalkHeap(int complete)
 {
     if(complete) {
 	MemoryUsageMessage(NULL, 0, 0, 0);
