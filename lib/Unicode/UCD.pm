@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.63';
+our $VERSION = '0.64';
 
 require Exporter;
 
@@ -384,6 +384,9 @@ my %SIMPLE_UPPER;
 my %UNICODE_1_NAMES;
 my %ISO_COMMENT;
 
+# Eval'd so can run on versions earlier than the property is available in
+my $Hangul_Syllables_re = eval 'qr/\p{Block=Hangul_Syllables}/';
+
 sub charinfo {
 
     # This function has traditionally mimicked what is in UnicodeData.txt,
@@ -438,7 +441,7 @@ sub charinfo {
     # "Canonical" imply a compatible decomposition, and the type is prefixed
     # to that, as it is in UnicodeData.txt
     UnicodeVersion() unless defined $v_unicode_version;
-    if ($v_unicode_version ge v2.0.0 && $char =~ /\p{Block=Hangul_Syllables}/) {
+    if ($v_unicode_version ge v2.0.0 && $char =~ $Hangul_Syllables_re) {
         # The code points of the decomposition are output in standard Unicode
         # hex format, separated by blanks.
         $prop{'decomposition'} = join " ", map { sprintf("%04X", $_)}
@@ -1233,6 +1236,9 @@ The routine returns B<false> otherwise.
 
 =cut
 
+# Eval'd so can run on versions earlier than the property is available in
+my $Composition_Exclusion_re = eval 'qr/\p{Composition_Exclusion}/';
+
 sub compexcl {
     my $arg  = shift;
     my $code = _getcode($arg);
@@ -1243,7 +1249,7 @@ sub compexcl {
     return if $v_unicode_version lt v3.0.0;
 
     no warnings "non_unicode";     # So works on non-Unicode code points
-    return chr($code) =~ /\p{Composition_Exclusion}/;
+    return chr($code) =~ $Composition_Exclusion_re
 }
 
 =head2 B<casefold()>
