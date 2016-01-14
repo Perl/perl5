@@ -361,6 +361,13 @@ specified by C<$which>.  All implementations that support POSIX high
 resolution timers are supposed to support at least the C<$which> value
 of C<CLOCK_REALTIME>, see L</clock_gettime>.
 
+B<NOTE>: the resolution returned may be highly optimistic.  Even if
+the resolution is high (a small number), all it means is that you'll
+be able to specify the arguments to clock_gettime() and clock_nanosleep()
+with that resolution.  The system might not actually be able to measure
+events at that resolution, and the various overheads and the overall system
+load are certain to affect any timings.
+
 =item clock_nanosleep ( $which, $nanoseconds, $flags = 0)
 
 Sleeps for the number of nanoseconds (1e9ths of a second) specified.
