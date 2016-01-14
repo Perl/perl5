@@ -594,15 +594,24 @@ EOD
 
     print "Looking for clock_nanosleep()... ";
     my $has_clock_nanosleep;
+    my $has_clock_nanosleep_emulation;
     if (exists $Config{d_clock_nanosleep}) {
         $has_clock_nanosleep++ if $Config{d_clock_nanosleep}; # Unlikely...
     } elsif (has_clock_nanosleep()) {
         $has_clock_nanosleep++;
 	$DEFINE .= ' -DTIME_HIRES_CLOCK_NANOSLEEP';
+    } elsif ($^O eq 'darwin') {
+        $has_clock_nanosleep++;
+        $has_clock_nanosleep_emulation++;
+	$DEFINE .= ' -DTIME_HIRES_CLOCK_NANOSLEEP';
     }
 
     if ($has_clock_nanosleep) {
-        print "found.\n";
+	if ($has_clock_nanosleep_emulation) {
+	    print "found (via emulation).\n";
+	} else {
+	    print "found.\n";
+	}
     } else {
 	print "NOT found.\n";
     }
@@ -862,7 +871,7 @@ sub doConstants {
 		     d_nanosleep d_clock_gettime d_clock_getres
 		     d_clock d_clock_nanosleep d_hires_stat)) {
 	    my $macro = $_;
-	    if ($macro =~ /^(d_nanosleep|d_clock|d_clock_nanosleep)$/) {
+	    if ($macro =~ /^(d_nanosleep|d_clock)$/) {
 		$macro =~ s/^d_(.+)/TIME_HIRES_\U$1/;
 	    } elsif ($macro =~ /^(d_hires_stat)$/) {
 		my $d_hires_stat = 0;
@@ -870,7 +879,7 @@ sub doConstants {
 		push @names, {name => $_, macro => "TIME_HIRES_STAT", value => $d_hires_stat,
 			      default => ["IV", "0"]};
 		next;
-	    } elsif ($macro =~ /^(d_clock_gettime|d_clock_getres)$/) {
+	    } elsif ($macro =~ /^(d_clock_gettime|d_clock_getres|d_clock_nanosleep)$/) {
 		$macro =~ s/^d_(.+)/TIME_HIRES_\U$1/;
 		my $val = ($DEFINE =~ /-D$macro\b/) ? 1 : 0;
 		push @names, {name => $_, macro => $macro, value => $val,

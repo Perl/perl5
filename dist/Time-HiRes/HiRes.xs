@@ -854,6 +854,44 @@ static int clock_getres(int clock_id, struct timespec *ts) {
   return -1;
 }
 
+static int clock_nanosleep(int clock_id, int flags,
+			   const struct timespec *rqtp,
+			   struct timespec *rmtp) {
+  if (darwin_time_init()) {
+    switch (clock_id) {
+    case CLOCK_REALTIME:
+    case CLOCK_MONOTONIC:
+      {
+	uint64_t nanos = rqtp->tv_sec * IV_1E9 + rqtp->tv_nsec;
+        int success;
+	if ((flags & TIMER_ABSTIME)) {
+	  uint64_t back =
+	    timespec_init.tv_sec * IV_1E9 + timespec_init.tv_nsec;
+	  nanos = nanos > back ? nanos - back : 0;
+	}
+        success =
+          mach_wait_until(mach_absolute_time() + nanos) == KERN_SUCCESS;
+
+        /* In the relative sleep, the rmtp should be filled in with
+         * the 'unused' part of the rqtp in case the sleep gets
+         * interrupted by a signal.  But it is unknown how signals
+         * interact with mach_wait_until().  In the absolute sleep,
+         * the rmtp should stay untouched. */
+        rmtp->tv_sec  = 0;
+        rmtp->tv_nsec = 0;
+
+        return success;
+      }
+
+    default:
+      break;
+    }
+  }
+
+  SETERRNO(EINVAL, LIB_INVARG);
+  return -1;
+}
+
 #endif /* PERL_DARWIN */
 
 #include "const-c.inc"
