@@ -234,9 +234,16 @@ sub output_invmap ($$$$$$$) {
     my $name_prefix;
 
     if ($input_format eq 's') {
+        my $orig_prop_name = $prop_name;
         $prop_name = (prop_aliases($prop_name))[1] // $prop_name =~ s/^_Perl_//r; # Get full name
         my $short_name = (prop_aliases($prop_name))[0] // $prop_name;
-            my @enums = prop_values($prop_name);
+            my @enums;
+            if ($orig_prop_name eq $prop_name) {
+                @enums = prop_values($prop_name);
+            }
+            else {
+                @enums = uniques(@$invmap);
+            }
             if (! @enums) {
                 die "Only enum properties are currently handled; '$prop_name' isn't one";
             }
