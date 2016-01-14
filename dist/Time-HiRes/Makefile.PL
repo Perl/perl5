@@ -536,6 +536,7 @@ EOD
 
     print "Looking for clock_gettime()... ";
     my $has_clock_gettime;
+    my $has_clock_gettime_emulation;
     if (exists $Config{d_clock_gettime}) {
         $has_clock_gettime++ if $Config{d_clock_gettime}; # Unlikely...
     } elsif (has_clock_xxx('gettime')) {
@@ -544,11 +545,17 @@ EOD
     } elsif (defined $SYSCALL_H && has_clock_xxx_syscall('gettime')) {
         $has_clock_gettime++;
 	$DEFINE .= ' -DTIME_HIRES_CLOCK_GETTIME -DTIME_HIRES_CLOCK_GETTIME_SYSCALL';
+    } elsif ($^O eq 'darwin') {
+       $has_clock_gettime_emulation++;
+       $has_clock_gettime++;
+       $DEFINE .= ' -DTIME_HIRES_CLOCK_GETTIME';
     }
 
     if ($has_clock_gettime) {
         if ($DEFINE =~ /-DTIME_HIRES_CLOCK_GETTIME_SYSCALL/) {
 	    print "found (via syscall).\n";
+	} elsif ($has_clock_gettime_emulation) {
+	    print "found (via emulation).\n";
 	} else {
 	    print "found.\n";
 	}
@@ -558,6 +565,7 @@ EOD
 
     print "Looking for clock_getres()... ";
     my $has_clock_getres;
+    my $has_clock_getres_emulation;
     if (exists $Config{d_clock_getres}) {
         $has_clock_getres++ if $Config{d_clock_getres}; # Unlikely...
     } elsif (has_clock_xxx('getres')) {
@@ -566,11 +574,17 @@ EOD
     } elsif (defined $SYSCALL_H && has_clock_xxx_syscall('getres')) {
         $has_clock_getres++;
 	$DEFINE .= ' -DTIME_HIRES_CLOCK_GETRES -DTIME_HIRES_CLOCK_GETRES_SYSCALL';
+    } elsif ($^O eq 'darwin') {
+       $has_clock_getres_emulation++;
+       $has_clock_getres++;
+       $DEFINE .= ' -DTIME_HIRES_CLOCK_GETRES';
     }
 
     if ($has_clock_getres) {
         if ($DEFINE =~ /-DTIME_HIRES_CLOCK_GETRES_SYSCALL/) {
 	    print "found (via syscall).\n";
+	} elsif ($has_clock_getres_emulation) {
+	    print "found (via emulation).\n";
 	} else {
 	    print "found.\n";
 	}
@@ -848,12 +862,18 @@ sub doConstants {
 		     d_nanosleep d_clock_gettime d_clock_getres
 		     d_clock d_clock_nanosleep d_hires_stat)) {
 	    my $macro = $_;
-	    if ($macro =~ /^(d_nanosleep|d_clock_gettime|d_clock_getres|d_clock|d_clock_nanosleep)$/) {
+	    if ($macro =~ /^(d_nanosleep|d_clock|d_clock_nanosleep)$/) {
 		$macro =~ s/^d_(.+)/TIME_HIRES_\U$1/;
 	    } elsif ($macro =~ /^(d_hires_stat)$/) {
 		my $d_hires_stat = 0;
 		$d_hires_stat = $1 if ($DEFINE =~ /-DTIME_HIRES_STAT=(\d+)/);
 		push @names, {name => $_, macro => "TIME_HIRES_STAT", value => $d_hires_stat,
+			      default => ["IV", "0"]};
+		next;
+	    } elsif ($macro =~ /^(d_clock_gettime|d_clock_getres)$/) {
+		$macro =~ s/^d_(.+)/TIME_HIRES_\U$1/;
+		my $val = ($DEFINE =~ /-D$macro\b/) ? 1 : 0;
+		push @names, {name => $_, macro => $macro, value => $val,
 			      default => ["IV", "0"]};
 		next;
 	    } else {

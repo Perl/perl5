@@ -759,6 +759,103 @@ hrstatns(UV *atime_nsec, UV *mtime_nsec, UV *ctime_nsec)
 #endif /* !TIME_HIRES_STAT */
 }
 
+/* Until Apple implements clock_gettime() (ditto clock_getres())
+ * we will emulate it using Mach interfaces. */
+#if defined(PERL_DARWIN) && !defined(CLOCK_REALTIME)
+
+#  include <mach/mach_time.h>
+
+#  define CLOCK_REALTIME  0x01
+#  define CLOCK_MONOTONIC 0x02
+
+#  define TIMER_ABSTIME   0x01
+
+#ifdef USE_ITHREADS
+STATIC perl_mutex darwin_time_mutex;
+#endif
+
+static uint64_t absolute_time_init;
+static mach_timebase_info_data_t timebase_info;
+static struct timespec timespec_init;
+
+static int darwin_time_init() {
+#ifdef USE_ITHREAD
+  PERL_MUTEX_LOCK(&darwin_time_mutex);
+#endif
+  struct timeval tv;
+  int success = 1;
+  if (absolute_time_init == 0) {
+    /* mach_absolute_time() cannot fail */
+    absolute_time_init = mach_absolute_time();
+    success = mach_timebase_info(&timebase_info) == KERN_SUCCESS;
+    if (success) {
+      success = gettimeofday(&tv, NULL) == 0;
+      if (success) {
+        timespec_init.tv_sec  = tv.tv_sec;
+        timespec_init.tv_nsec = tv.tv_usec * 1000;
+      }
+    }
+  }
+#ifdef USE_ITHREAD
+  PERL_MUTEX_UNLOCK(&darwin_time_mutex);
+#endif
+  return success;
+}
+
+static int clock_gettime(int clock_id, struct timespec *ts) {
+  if (darwin_time_init() && timebase_info.denom) {
+    switch (clock_id) {
+      case CLOCK_REALTIME:
+      {
+	uint64_t nanos =
+	  ((mach_absolute_time() - absolute_time_init) *
+	   (uint64_t)timebase_info.numer) / (uint64_t)timebase_info.denom;
+	ts->tv_sec  = timespec_init.tv_sec  + nanos / IV_1E9;
+	ts->tv_nsec = timespec_init.tv_nsec + nanos % IV_1E9;
+	return 0;
+      }
+
+      case CLOCK_MONOTONIC:
+      {
+	uint64_t nanos =
+	  (mach_absolute_time() *
+	   (uint64_t)timebase_info.numer) / (uint64_t)timebase_info.denom;
+	ts->tv_sec  = nanos / IV_1E9;
+	ts->tv_nsec = nanos - ts->tv_sec * IV_1E9;
+	return 0;
+      }
+
+      default:
+	break;
+    }
+  }
+
+  SETERRNO(EINVAL, LIB_INVARG);
+  return -1;
+}
+
+static int clock_getres(int clock_id, struct timespec *ts) {
+  if (darwin_time_init() && timebase_info.denom) {
+    switch (clock_id) {
+      case CLOCK_REALTIME:
+      case CLOCK_MONOTONIC:
+      ts->tv_sec  = 0;
+      /* In newer kernels both the numer and denom are one,
+       * resulting in conversion factor of one, which is of
+       * course unrealistic. */
+      ts->tv_nsec = timebase_info.numer / timebase_info.denom;
+      return 0;
+    default:
+      break;
+    }
+  }
+
+  SETERRNO(EINVAL, LIB_INVARG);
+  return -1;
+}
+
+#endif /* PERL_DARWIN */
+
 #include "const-c.inc"
 
 MODULE = Time::HiRes            PACKAGE = Time::HiRes
