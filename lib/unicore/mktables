@@ -19602,6 +19602,9 @@ if (defined &locales_enabled) {
     }
 }
 
+# Eval'd so can run on versions earlier than the property is available in
+my $WB_Extend_or_Format_re = eval 'qr/[\p{WB=Extend}\p{WB=Format}]/';
+
 sub _test_break($$) {
     # Test various break property matches.  The 2nd parameter gives the
     # property name.  The input is a line from auxiliary/*Test.txt for the
@@ -19639,7 +19642,7 @@ sub _test_break($$) {
     }
 
     # Perl customizes wb.  So change the official tests accordingly
-    if ($break_type eq 'wb') {
+    if ($break_type eq 'wb' && $WB_Extend_or_Format_re) {
 
         # Split into elements that alternate between code point and
         # break/no-break
@@ -19660,7 +19663,7 @@ sub _test_break($$) {
 
             # But, we want to make sure to test spaces followed by a Extend
             # or Format.
-            next if $rhs !~ /[\s\p{WB=Extend}\p{WB=Format}]/;
+            next if $rhs !~ /\s|$WB_Extend_or_Format_re/;
 
             # To test the customization, add some white-space before this to
             # create a span.  The $lhs white space may or may not be bound to
@@ -19671,7 +19674,7 @@ sub _test_break($$) {
             # $lhs
             my $bound;
             my $span;
-            if ($rhs =~ /[\p{WB=Extend}\p{WB=Format}]/) {
+            if ($rhs =~ /$WB_Extend_or_Format_re/) {
                 if ($lhs =~ /\v/) {
                     $bound = $breakable;
                     $span = $nobreak;
