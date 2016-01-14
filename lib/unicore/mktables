@@ -2284,7 +2284,11 @@ sub trace { return main::trace(@_); }
     # may not be the actual reality, but probably nobody cares anyway for
     # these obsolete characters.)
     #
-    # [3] if present must be the string 'ONLY_EARLY'.  Normally, when
+    # [3] if present is the default value for the property to assign for code
+    # points not given in the input.  If not present, the default from the
+    # normal property is used
+    #
+    # [4] if present must be the string 'ONLY_EARLY'.  Normally, when
     # compiling Unicode versions that don't invoke the early handling, the
     # name in [1] is added as an alias to the property name used for these.
     # This parameter says to not do this.
@@ -2409,8 +2413,8 @@ sub trace { return main::trace(@_); }
         my $progress;
         my $function_instead_of_file = 0;
 
-        if ($early{$addr}->@* > 3 && $early{$addr}[3] ne 'ONLY_EARLY') {
-            Carp::my_carp_bug("If present, element [3] in 'Early => [ ... ]'"
+        if ($early{$addr}->@* > 4 && $early{$addr}[4] ne 'ONLY_EARLY') {
+            Carp::my_carp_bug("If present, element [4] in 'Early => [ ... ]'"
                             . " must be the string 'ONLY_EARLY'");
         }
 
@@ -2438,10 +2442,13 @@ sub trace { return main::trace(@_); }
                                                 Perl_Extension => 1,
                                                 );
 
-                # Use the default mapping for the regular property for this
-                # substitute one.
-                if (    defined $property{$addr}
-                    &&  defined $default_mapping{$property{$addr}})
+                # If not specified by the constructor, use the default mapping
+                # for the regular property for this substitute one.
+                if ($early{$addr}[3]) {
+                    $prop_object->set_default_map($early{$addr}[3]);
+                }
+                elsif (    defined $property{$addr}
+                       &&  defined $default_mapping{$property{$addr}})
                 {
                     $prop_object
                         ->set_default_map($default_mapping{$property{$addr}});
@@ -2489,7 +2496,7 @@ END
                 push $each_line_handler{$addr}->@*, \&_exclude_unassigned;
 
                 if (   $v_version lt v2.0        # Hanguls in this release ...
-                    && defined $early{$addr}[3]) # ... need special treatment
+                    && defined $early{$addr}[4]) # ... need special treatment
                 {
                     push $eof_handler{$addr}->@*, \&_fixup_obsolete_hanguls;
                 }
