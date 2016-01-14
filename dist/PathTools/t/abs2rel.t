@@ -6,7 +6,7 @@ use Test::More;
 use Cwd qw(cwd getcwd abs_path);
 use File::Spec();
 use File::Temp qw(tempdir);
-use File::Path qw(make_path);
+use File::Path qw(mkpath);
 
 my $startdir = cwd();
 my @files = ( 'anyfile', './anyfile', '../first_sub_dir/anyfile', '../second_sub_dir/second_file' );
@@ -25,8 +25,8 @@ sub test_rel2abs {
         File::Spec->catdir('first_sub_dir',  'sub_sub_dir'),
         'second_sub_dir'
     );
-    make_path(@subdirs, { mode => 0711 })
-        or die "Unable to make_path: $!";
+    mkpath(@subdirs, { mode => 0711 })
+        or die "Unable to mkpath: $!";
 
     open my $OUT2, '>',
         File::Spec->catfile('second_sub_dir', 'second_file')
