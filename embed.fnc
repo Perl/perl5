@@ -2096,9 +2096,9 @@ s	|I32	|sv_i_ncmp	|NN SV *const a|NN SV *const b
 s	|I32	|amagic_ncmp	|NN SV *const a|NN SV *const b
 s	|I32	|amagic_i_ncmp	|NN SV *const a|NN SV *const b
 s	|I32	|amagic_cmp	|NN SV *const str1|NN SV *const str2
-#   ifdef USE_LOCALE_COLLATE
+#  ifdef USE_LOCALE_COLLATE
 s	|I32	|amagic_cmp_locale|NN SV *const str1|NN SV *const str2
-#endif
+#  endif
 s	|I32	|sortcv		|NN SV *const a|NN SV *const b
 s	|I32	|sortcv_xsub	|NN SV *const a|NN SV *const b
 s	|I32	|sortcv_stacked	|NN SV *const a|NN SV *const b
