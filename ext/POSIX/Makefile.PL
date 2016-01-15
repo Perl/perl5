@@ -128,6 +128,18 @@ push @names, {name=>$_, type=>"IV", default=>["IV", "0"]}
               _POSIX_PATH_MAX _POSIX_PIPE_BUF _POSIX_SSIZE_MAX
               _POSIX_STREAM_MAX _POSIX_TZNAME_MAX _POSIX_VDISABLE _POSIX_VERSION
              ));
+push @names, {name=>$_, type =>"IV"},
+  foreach (qw(ILL_ILLOPC ILL_ILLOPN ILL_ILLADR ILL_ILLTRP ILL_PRVOPC ILL_PRVREG
+              ILL_COPROC ILL_BADSTK
+              FPE_INTDIV FPE_INTOVF FPE_FLTDIV FPE_FLTOVF FPE_FLTUND
+              FPE_FLTRES FPE_FLTINV FPE_FLTSUB
+              SEGV_MAPERR SEGV_ACCERR
+              BUS_ADRALN BUS_ADRERR BUS_OBJERR
+              TRAP_BRKPT TRAP_TRACE
+              CLD_EXITED CLD_KILLED CLD_DUMPED CLD_TRAPPED CLD_STOPPED CLD_CONTINUED
+              POLL_IN POLL_OUT POLL_MSG POLL_ERR POLL_PRI POLL_HUP
+              SI_USER SI_QUEUE SI_TIMER SI_ASYNCIO SI_MESGQ
+             ));
 
 if ($rt_signals) {
     push @names, {name=>"SIGRTMAX", not_constant=>1},

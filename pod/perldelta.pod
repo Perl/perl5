@@ -121,6 +121,13 @@ XXX
 
 L<XXX> has been upgraded from version A.xx to B.yy.
 
+=item *
+
+L<POSIX> has been upgraded from version 1.59 to 1.60.
+
+It can now export constants for the C<code> value in the hash passed to the
+L<sigaction|POSIX/sigaction> handler when using the C<SA_SIGINFO> flag.
+
 =back
 
 =head2 Removed Modules and Pragmata
