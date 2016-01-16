@@ -79,6 +79,43 @@ my %hard_coded_enums =
             'T',
             'V',
         ],
+    lb => [
+            'Alphabetic',
+            'Break_After',
+            'Break_Before',
+            'Break_Both',
+            'Break_Symbols',
+            'Carriage_Return',
+            'Close_Parenthesis',
+            'Close_Punctuation',
+            'Combining_Mark',
+            'Contingent_Break',
+            'Exclamation',
+            'Glue',
+            'H2',
+            'H3',
+            'Hebrew_Letter',
+            'Hyphen',
+            'Ideographic',
+            'Infix_Numeric',
+            'Inseparable',
+            'JL',
+            'JT',
+            'JV',
+            'Line_Feed',
+            'Mandatory_Break',
+            'Next_Line',
+            'Nonstarter',
+            'Numeric',
+            'Open_Punctuation',
+            'Postfix_Numeric',
+            'Prefix_Numeric',
+            'Quotation',
+            'Regional_Indicator',
+            'Space',
+            'Word_Joiner',
+            'ZWSpace',
+        ],
    sb  => [
             'ATerm',
             'Close',
@@ -463,6 +500,7 @@ for my $charset (get_supported_code_pages()) {
                              _Perl_IDStart
                              _Perl_IDCont
                              _Perl_GCB,EDGE
+                             _Perl_LB,EDGE
                              _Perl_SB,EDGE
                              _Perl_WB,EDGE,UNKNOWN
                            )

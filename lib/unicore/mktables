@@ -15089,6 +15089,59 @@ END
         }
     }
 
+    # Create a version of the LineBreak property with the mappings that are
+    # omitted in the default algorithm remapped to what
+    # http://www.unicode.org/reports/tr14 says they should be.
+    #
+    # Original 	   Resolved  General_Category
+    # AI, SG, XX      AL      Any
+    # SA              CM      Only Mn or Mc
+    # SA              AL      Any except Mn and Mc
+    # CJ              NS      Any
+    my $perl_lb = property_ref('_Perl_LB');
+    if (! defined $perl_lb) {
+        $perl_lb = Property->new('_Perl_LB',
+                                 Fate => $INTERNAL_ONLY,
+                                 Perl_Extension => 1,
+                                 Directory => $map_directory,
+                                 Type => $STRING);
+        my $lb = property_ref('Line_Break');
+        $perl_lb->initialize($lb);
+    }
+    $perl_lb->set_default_map('AL');
+
+    # It's a little iffy relying on Unicode to not change which property value
+    # synonym they use, but if they do, tests should start failing and we can
+    # fix this up
+    for my $range ($perl_lb->ranges) {
+        my $value = standardize($range->value);
+        if (   $value eq standardize('Unknown')
+            || $value eq standardize('XX')
+            || $value eq standardize('AI')
+            || $value eq standardize('SG'))
+        {
+            $perl_lb->add_map($range->start, $range->end, 'AL',
+                              Replace => $UNCONDITIONALLY);
+        }
+        elsif ($value eq standardize('CJ')) {
+            $perl_lb->add_map($range->start, $range->end, 'NS',
+                              Replace => $UNCONDITIONALLY);
+        }
+        elsif ($value eq standardize('SA')) {
+            for my $i ($range->start .. $range->end) {
+                my $gc_val = $gc->value_of($i);
+                if ($gc_val eq 'Mn' || $gc_val eq 'Mc') {
+                    $perl_lb->add_map($i, $i, 'CM',
+                                      Replace => $UNCONDITIONALLY);
+                }
+                else {
+                    $perl_lb->add_map($i, $i, 'AL',
+                                      Replace => $UNCONDITIONALLY);
+                }
+            }
+        }
+    }
+
     # Here done with all the basic stuff.  Ready to populate the information
     # about each character if annotating them.
     if ($annotate) {
@@ -18839,6 +18892,13 @@ my @input_file_objects = (
                     Each_Line_Handler => (($v_version lt v3.1.0)
                                         ? \&filter_early_ea_lb
                                         : undef),
+                    Early => [ "LBsubst.txt", '_Perl_LB', 'AL',
+                               'AL', # default
+
+                               # Don't use _Perl_LB as a synonym for
+                               # Line_Break in later perls, as it is tailored
+                               # and isn't the same as Line_Break
+                               'ONLY_EARLY' ],
                    ),
     Input_file->new('EastAsianWidth.txt', v3.0.0,
                     Property => 'East_Asian_Width',
