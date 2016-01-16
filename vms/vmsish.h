@@ -747,6 +747,54 @@ struct passwd *	Perl_my_getpwnam (pTHX_ const char *name);
 struct passwd *	Perl_my_getpwuid (pTHX_ Uid_t uid);
 void	Perl_my_endpwent (pTHX);
 
+/*
+ * The following prototypes are in math.h but for some reason they
+ * are ifdefed out for C++.  So we have to repeat them here in order
+ * to build the POSIX extension.
+ */
+
+#ifdef __DECCXX
+
+double exp2(double __x);
+double fdim(double __x, double __y);
+double fma(double __x, double __y, double __z);
+double fmax(double __x, double __y);
+double fmin(double __x, double __y);
+double nexttoward(double __x, long double __y);
+double remainder(double __x, double __y);
+double remquo(double __x, double __y, int *__quo);
+double tgamma(double __x);
+float exp2f(float __x);
+float fdimf(float __x, float __y);
+float fmaf(float __x, float __y, float __z);
+float fmaxf(float __x, float __y);
+float fminf(float __x, float __y);
+float nexttowardf(float __x, long double __y);
+float remainderf(float __x, float __y);
+float remquof(float __x, float __y, int *__quo);
+float tgammaf(float __x);
+long double exp2l(long double __x);
+long double fdiml(long double __x, long double __y);
+long double fmal(long double __x, long double __y, long double __z);
+long double fmaxl(long double __x, long double __y);
+long double fminl(long double __x, long double __y);
+long double nexttowardl(long double __x, long double __y);
+long double remainderl(long double __x, long double __y);
+long double remquol(long double __x, long double __y, int *__quo);
+long double tgammal(long double __x);
+int ilogb(double __x);
+int ilogbf(float __x);
+int ilogbl(long double __x);
+long int lrint(double __x);
+long int lrintf(float __x);
+long int lrintl(long double __x);
+long int lround(double __x);
+long int lroundf(float __x);
+long int lroundl(long double __x);
+
+#endif
+
+
 #ifdef __cplusplus
 }
 #endif
