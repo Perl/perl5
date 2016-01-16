@@ -1493,19 +1493,11 @@ Perl_vmssetenv(pTHX_ const char *lnm, const char *eqv, struct dsc$descriptor_s *
             if ((cp1 = strchr(environ[i],'=')) && 
                 lnmdsc.dsc$w_length == (cp1 - environ[i]) &&
                 !strncmp(environ[i],lnm,cp1 - environ[i])) {
-#ifdef HAS_SETENV
-              return setenv(lnm,"",1) ? vaxc$errno : 0;
+              unsetenv(lnm);
+              return 0;
             }
           }
           ivenv = 1; retsts = SS$_NOLOGNAM;
-#else
-              if (ckWARN(WARN_INTERNAL))
-                Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"This Perl can't reset CRTL environ elements (%s)",lnm);
-              ivenv = 1; retsts = SS$_NOSUCHPGM;
-              break;
-            }
-          }
-#endif
         }
         else if ((tmpdsc.dsc$a_pointer = tabvec[curtab]->dsc$a_pointer) &&
                  !str$case_blind_compare(&tmpdsc,&clisym)) {
@@ -1531,13 +1523,7 @@ Perl_vmssetenv(pTHX_ const char *lnm, const char *eqv, struct dsc$descriptor_s *
     }
     else {  /* we're defining a value */
       if (!ivenv && !str$case_blind_compare(tabvec[0],&crtlenv)) {
-#ifdef HAS_SETENV
         return setenv(lnm,eqv,1) ? vaxc$errno : 0;
-#else
-        if (ckWARN(WARN_INTERNAL))
-          Perl_warner(aTHX_ packWARN(WARN_INTERNAL),"This Perl can't set CRTL environ elements (%s=%s)",lnm,eqv);
-        retsts = SS$_NOSUCHPGM;
-#endif
       }
       else {
         eqvdsc.dsc$a_pointer = (char *) eqv; /* cast ok to readonly parameter */
