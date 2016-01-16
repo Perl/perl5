@@ -115,7 +115,6 @@ my %hard_coded_enums =
             'Perl_Tailored_HSpace',
             'Regional_Indicator',
             'Single_Quote',
-            'UNKNOWN',
         ],
 );
 
@@ -457,8 +456,8 @@ for my $charset (get_supported_code_pages()) {
                              _Perl_IDStart
                              _Perl_IDCont
                              _Perl_GCB,EDGE
-                             _Perl_WB,EDGE,UNKNOWN
                              _Perl_SB,EDGE
+                             _Perl_WB,EDGE,UNKNOWN
                            )
     ) {
 
