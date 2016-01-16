@@ -2211,17 +2211,17 @@ typedef enum {
 	GCB_Other = 0,
 	GCB_CR = 1,
 	GCB_Control = 2,
-	GCB_EDGE = 3,
-	GCB_Extend = 4,
-	GCB_L = 5,
-	GCB_LF = 6,
-	GCB_LV = 7,
-	GCB_LVT = 8,
-	GCB_Prepend = 9,
-	GCB_Regional_Indicator = 10,
-	GCB_SpacingMark = 11,
-	GCB_T = 12,
-	GCB_V = 13
+	GCB_Extend = 3,
+	GCB_L = 4,
+	GCB_LF = 5,
+	GCB_LV = 6,
+	GCB_LVT = 7,
+	GCB_Prepend = 8,
+	GCB_Regional_Indicator = 9,
+	GCB_SpacingMark = 10,
+	GCB_T = 11,
+	GCB_V = 12,
+	GCB_EDGE = 13
 } GCB_enum;
 
 static const GCB_enum _Perl_GCB_invmap[] = { /* for ASCII/Latin1 */
@@ -9111,18 +9111,18 @@ typedef enum {
 	SB_ATerm = 1,
 	SB_CR = 2,
 	SB_Close = 3,
-	SB_EDGE = 4,
-	SB_Extend = 5,
-	SB_Format = 6,
-	SB_LF = 7,
-	SB_Lower = 8,
-	SB_Numeric = 9,
-	SB_OLetter = 10,
-	SB_SContinue = 11,
-	SB_STerm = 12,
-	SB_Sep = 13,
-	SB_Sp = 14,
-	SB_Upper = 15
+	SB_Extend = 4,
+	SB_Format = 5,
+	SB_LF = 6,
+	SB_Lower = 7,
+	SB_Numeric = 8,
+	SB_OLetter = 9,
+	SB_SContinue = 10,
+	SB_STerm = 11,
+	SB_Sep = 12,
+	SB_Sp = 13,
+	SB_Upper = 14,
+	SB_EDGE = 15
 } SB_enum;
 
 static const SB_enum _Perl_SB_invmap[] = { /* for ASCII/Latin1 */
@@ -13581,22 +13581,22 @@ typedef enum {
 	WB_ALetter = 1,
 	WB_CR = 2,
 	WB_Double_Quote = 3,
-	WB_EDGE = 4,
-	WB_Extend = 5,
-	WB_ExtendNumLet = 6,
-	WB_Format = 7,
-	WB_Hebrew_Letter = 8,
-	WB_Katakana = 9,
-	WB_LF = 10,
-	WB_MidLetter = 11,
-	WB_MidNum = 12,
-	WB_MidNumLet = 13,
-	WB_Newline = 14,
-	WB_Numeric = 15,
-	WB_Perl_Tailored_HSpace = 16,
-	WB_Regional_Indicator = 17,
-	WB_Single_Quote = 18,
-	WB_UNKNOWN = 19
+	WB_Extend = 4,
+	WB_ExtendNumLet = 5,
+	WB_Format = 6,
+	WB_Hebrew_Letter = 7,
+	WB_Katakana = 8,
+	WB_LF = 9,
+	WB_MidLetter = 10,
+	WB_MidNum = 11,
+	WB_MidNumLet = 12,
+	WB_Newline = 13,
+	WB_Numeric = 14,
+	WB_Perl_Tailored_HSpace = 15,
+	WB_Regional_Indicator = 16,
+	WB_Single_Quote = 17,
+	WB_UNKNOWN = 18,
+	WB_EDGE = 19
 } WB_enum;
 
 static const WB_enum _Perl_WB_invmap[] = { /* for ASCII/Latin1 */
@@ -26905,17 +26905,17 @@ typedef enum {
 	GCB_Other = 0,
 	GCB_CR = 1,
 	GCB_Control = 2,
-	GCB_EDGE = 3,
-	GCB_Extend = 4,
-	GCB_L = 5,
-	GCB_LF = 6,
-	GCB_LV = 7,
-	GCB_LVT = 8,
-	GCB_Prepend = 9,
-	GCB_Regional_Indicator = 10,
-	GCB_SpacingMark = 11,
-	GCB_T = 12,
-	GCB_V = 13
+	GCB_Extend = 3,
+	GCB_L = 4,
+	GCB_LF = 5,
+	GCB_LV = 6,
+	GCB_LVT = 7,
+	GCB_Prepend = 8,
+	GCB_Regional_Indicator = 9,
+	GCB_SpacingMark = 10,
+	GCB_T = 11,
+	GCB_V = 12,
+	GCB_EDGE = 13
 } GCB_enum;
 
 static const GCB_enum _Perl_GCB_invmap[] = { /* for EBCDIC 1047 */
@@ -33879,18 +33879,18 @@ typedef enum {
 	SB_ATerm = 1,
 	SB_CR = 2,
 	SB_Close = 3,
-	SB_EDGE = 4,
-	SB_Extend = 5,
-	SB_Format = 6,
-	SB_LF = 7,
-	SB_Lower = 8,
-	SB_Numeric = 9,
-	SB_OLetter = 10,
-	SB_SContinue = 11,
-	SB_STerm = 12,
-	SB_Sep = 13,
-	SB_Sp = 14,
-	SB_Upper = 15
+	SB_Extend = 4,
+	SB_Format = 5,
+	SB_LF = 6,
+	SB_Lower = 7,
+	SB_Numeric = 8,
+	SB_OLetter = 9,
+	SB_SContinue = 10,
+	SB_STerm = 11,
+	SB_Sep = 12,
+	SB_Sp = 13,
+	SB_Upper = 14,
+	SB_EDGE = 15
 } SB_enum;
 
 static const SB_enum _Perl_SB_invmap[] = { /* for EBCDIC 1047 */
@@ -38396,22 +38396,22 @@ typedef enum {
 	WB_ALetter = 1,
 	WB_CR = 2,
 	WB_Double_Quote = 3,
-	WB_EDGE = 4,
-	WB_Extend = 5,
-	WB_ExtendNumLet = 6,
-	WB_Format = 7,
-	WB_Hebrew_Letter = 8,
-	WB_Katakana = 9,
-	WB_LF = 10,
-	WB_MidLetter = 11,
-	WB_MidNum = 12,
-	WB_MidNumLet = 13,
-	WB_Newline = 14,
-	WB_Numeric = 15,
-	WB_Perl_Tailored_HSpace = 16,
-	WB_Regional_Indicator = 17,
-	WB_Single_Quote = 18,
-	WB_UNKNOWN = 19
+	WB_Extend = 4,
+	WB_ExtendNumLet = 5,
+	WB_Format = 6,
+	WB_Hebrew_Letter = 7,
+	WB_Katakana = 8,
+	WB_LF = 9,
+	WB_MidLetter = 10,
+	WB_MidNum = 11,
+	WB_MidNumLet = 12,
+	WB_Newline = 13,
+	WB_Numeric = 14,
+	WB_Perl_Tailored_HSpace = 15,
+	WB_Regional_Indicator = 16,
+	WB_Single_Quote = 17,
+	WB_UNKNOWN = 18,
+	WB_EDGE = 19
 } WB_enum;
 
 static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 1047 */
@@ -51901,17 +51901,17 @@ typedef enum {
 	GCB_Other = 0,
 	GCB_CR = 1,
 	GCB_Control = 2,
-	GCB_EDGE = 3,
-	GCB_Extend = 4,
-	GCB_L = 5,
-	GCB_LF = 6,
-	GCB_LV = 7,
-	GCB_LVT = 8,
-	GCB_Prepend = 9,
-	GCB_Regional_Indicator = 10,
-	GCB_SpacingMark = 11,
-	GCB_T = 12,
-	GCB_V = 13
+	GCB_Extend = 3,
+	GCB_L = 4,
+	GCB_LF = 5,
+	GCB_LV = 6,
+	GCB_LVT = 7,
+	GCB_Prepend = 8,
+	GCB_Regional_Indicator = 9,
+	GCB_SpacingMark = 10,
+	GCB_T = 11,
+	GCB_V = 12,
+	GCB_EDGE = 13
 } GCB_enum;
 
 static const GCB_enum _Perl_GCB_invmap[] = { /* for EBCDIC 037 */
@@ -58863,18 +58863,18 @@ typedef enum {
 	SB_ATerm = 1,
 	SB_CR = 2,
 	SB_Close = 3,
-	SB_EDGE = 4,
-	SB_Extend = 5,
-	SB_Format = 6,
-	SB_LF = 7,
-	SB_Lower = 8,
-	SB_Numeric = 9,
-	SB_OLetter = 10,
-	SB_SContinue = 11,
-	SB_STerm = 12,
-	SB_Sep = 13,
-	SB_Sp = 14,
-	SB_Upper = 15
+	SB_Extend = 4,
+	SB_Format = 5,
+	SB_LF = 6,
+	SB_Lower = 7,
+	SB_Numeric = 8,
+	SB_OLetter = 9,
+	SB_SContinue = 10,
+	SB_STerm = 11,
+	SB_Sep = 12,
+	SB_Sp = 13,
+	SB_Upper = 14,
+	SB_EDGE = 15
 } SB_enum;
 
 static const SB_enum _Perl_SB_invmap[] = { /* for EBCDIC 037 */
@@ -63372,22 +63372,22 @@ typedef enum {
 	WB_ALetter = 1,
 	WB_CR = 2,
 	WB_Double_Quote = 3,
-	WB_EDGE = 4,
-	WB_Extend = 5,
-	WB_ExtendNumLet = 6,
-	WB_Format = 7,
-	WB_Hebrew_Letter = 8,
-	WB_Katakana = 9,
-	WB_LF = 10,
-	WB_MidLetter = 11,
-	WB_MidNum = 12,
-	WB_MidNumLet = 13,
-	WB_Newline = 14,
-	WB_Numeric = 15,
-	WB_Perl_Tailored_HSpace = 16,
-	WB_Regional_Indicator = 17,
-	WB_Single_Quote = 18,
-	WB_UNKNOWN = 19
+	WB_Extend = 4,
+	WB_ExtendNumLet = 5,
+	WB_Format = 6,
+	WB_Hebrew_Letter = 7,
+	WB_Katakana = 8,
+	WB_LF = 9,
+	WB_MidLetter = 10,
+	WB_MidNum = 11,
+	WB_MidNumLet = 12,
+	WB_Newline = 13,
+	WB_Numeric = 14,
+	WB_Perl_Tailored_HSpace = 15,
+	WB_Regional_Indicator = 16,
+	WB_Single_Quote = 17,
+	WB_UNKNOWN = 18,
+	WB_EDGE = 19
 } WB_enum;
 
 static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 037 */
@@ -74618,5 +74618,5 @@ static const UV XPosixXDigit_invlist[] = { /* for EBCDIC 037 */
  * cd8623059fc882357fcf6fdea363d1c927af6ad1506e5aea5d383070344183f6 lib/unicore/mktables
  * 462c9aaa608fb2014cd9649af1c5c009485c60b9c8b15b89401fdc10cf6161c6 lib/unicore/version
  * 913d2f93f3cb6cdf1664db888bf840bc4eb074eef824e082fceda24a9445e60c regen/charset_translations.pl
- * 214ab3909a11fcc57cb6ee0611897342109b5a895b2b42d5227b80d948744a0a regen/mk_invlists.pl
+ * fc9308a68257fc2184997cf2a25fc143c780c62accc2377d35381a1be5306dc0 regen/mk_invlists.pl
  * ex: set ro: */

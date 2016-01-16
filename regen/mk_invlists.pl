@@ -261,8 +261,10 @@ sub output_invmap ($$$$$$$) {
                 push @enums, @expected_enums;
 
                 # Add in the extra values coded into this program, and sort.
-                push @enums, split /,/, $extra_enums if $extra_enums ne "";
                 @enums = sort @enums;
+
+                # The internal enums comes last.
+                push @enums, split /,/, $extra_enums if $extra_enums ne "";
 
                 # Assign a value to each element of the enum.  The default
                 # value always gets 0; the others are arbitrarily assigned.
@@ -288,12 +290,15 @@ sub output_invmap ($$$$$$$) {
             print $out_fh "\n#define ${name_prefix}ENUM_COUNT ", scalar keys %enums, "\n";
 
             print $out_fh "\ntypedef enum {\n";
-            print $out_fh "\t${name_prefix}$default = $enums{$default},\n";
-            delete $enums{$default};
-            foreach my $enum (sort { $a cmp $b } keys %enums) {
-                print $out_fh "\t${name_prefix}$enum = $enums{$enum}";
-                print $out_fh "," if $enums{$enum} < $enum_count - 1;
-                print $out_fh  "\n";
+            my @enum_list;
+            foreach my $enum (keys %enums) {
+                $enum_list[$enums{$enum}] = $enum;
+            }
+            foreach my $i (0 .. @enum_list - 1) {
+                my $name = $enum_list[$i];
+                print $out_fh  "\t${name_prefix}$name = $i";
+                print $out_fh "," if $i < $enum_count - 1;
+                print $out_fh "\n";
             }
             $declaration_type = "${name_prefix}enum";
             print $out_fh "} $declaration_type;\n";
