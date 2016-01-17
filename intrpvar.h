@@ -780,10 +780,11 @@ PERLVARI(I, my_cxt_keys, const char **, NULL) /* per-module array of pointers to
 #  endif
 #endif
 
-#ifdef PERL_TRACK_MEMPOOL
-/* For use with the memory debugging code in util.c  */
+/* For use with the memory debugging code in util.c. This is used only in
+ * DEBUGGING builds, but defining it in non-debug builds too means that we
+ * retain binary compatibility between otherwise-compatible plain and debug
+ * builds. */
 PERLVAR(I, memory_debug_header, struct perl_memory_debug_header)
-#endif
 
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 /* File descriptor to talk to the child which dumps scalars.  */
