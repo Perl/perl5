@@ -211,6 +211,7 @@ my @maps =  (
 
 my %SKIP_FILES = map { ($_ => 1) } qw(
     Changes
+    intrpvar.h
     MANIFEST
     Porting/Maintainers.pl
     Porting/acknowledgements.pl
