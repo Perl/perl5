@@ -92,6 +92,7 @@ odbm_TIEHASH(dbtype, filename, flags, mode)
 	{
 	    char *tmpbuf;
 	    void * dbp ;
+            Stat_t statbuf;
 	    dMY_CXT;
 
 	    if (dbmrefcnt++)
@@ -99,7 +100,7 @@ odbm_TIEHASH(dbtype, filename, flags, mode)
 	    Newx(tmpbuf, strlen(filename) + 5, char);
 	    SAVEFREEPV(tmpbuf);
 	    sprintf(tmpbuf,"%s.dir",filename);
-	    if (stat(tmpbuf, &PL_statbuf) < 0) {
+            if (stat(tmpbuf, &statbuf) < 0) {
 		if (flags & O_CREAT) {
 		    if (mode < 0 || close(creat(tmpbuf,mode)) < 0)
 			croak("ODBM_File: Can't create %s", filename);

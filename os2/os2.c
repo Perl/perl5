@@ -1140,6 +1140,7 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 		    if (!buf)
 			buf = "";	/* XXX Needed? */
 		    if (!buf[0]) {	/* Empty... */
+                        struct stat statbuf;
 			PerlIO_close(file);
 			/* Special case: maybe from -Zexe build, so
 			   there is an executable around (contrary to
@@ -1148,8 +1149,8 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 			   reached this place). */
 			sv_catpv(scrsv, ".exe");
 	                PL_Argv[0] = scr = SvPV(scrsv, n_a);	/* Reload */
-			if (PerlLIO_stat(scr,&PL_statbuf) >= 0
-			    && !S_ISDIR(PL_statbuf.st_mode)) {	/* Found */
+                        if (PerlLIO_stat(scr,&statbuf) >= 0
+                            && !S_ISDIR(statbuf.st_mode)) {	/* Found */
 				real_name = scr;
 				pass++;
 				goto reread;
