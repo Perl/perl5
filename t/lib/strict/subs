@@ -460,11 +460,10 @@ Bareword "FOO" not allowed while "strict subs" in use at - line 3.
 Execution of - aborted due to compilation errors.
 ########
 # [perl #126981] Strict subs vs. multideref
-sub CONST () { 'some_key' }
 my $h;
 my $v1 = $h->{+CONST_TYPO};
 use strict 'subs';
 my $v2 = $h->{+CONST_TYPO};
 EXPECT
-Bareword "CONST_TYPO" not allowed while "strict subs" in use at - line 6.
+Bareword "CONST_TYPO" not allowed while "strict subs" in use at - line 5.
 Execution of - aborted due to compilation errors.
