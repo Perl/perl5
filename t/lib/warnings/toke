@@ -1250,21 +1250,18 @@ EXPECT
 !=~ should be !~ at - line 9.
 ########
 # toke.c
-our $foo :unique;
 sub pam :locked;
 sub glipp :locked {
 }
 sub whack_eth ($) : locked {
 }
 no warnings 'deprecated';
-our $bar :unique;
 sub zapeth :locked;
 sub ker_plop :locked {
 }
 sub swa_a_p ($) : locked {
 }
 EXPECT
-Attribute "unique" is deprecated, and will disappear in Perl 5.28 at - line 2.
 Attribute "locked" is deprecated, and will disappear in Perl 5.28 at - line 3.
 Attribute "locked" is deprecated, and will disappear in Perl 5.28 at - line 4.
 Attribute "locked" is deprecated, and will disappear in Perl 5.28 at - line 6.

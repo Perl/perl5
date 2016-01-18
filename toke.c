@@ -5890,19 +5890,9 @@ Perl_yylex(pTHX)
 		    PL_lex_stuff = NULL;
 		}
 		else {
-		    if (len == 6 && strnEQ(SvPVX(sv), "unique", len)) {
-			sv_free(sv);
-			if (PL_in_my == KEY_our) {
-                            deprecate_disappears_in("5.28",
-                                "Attribute \"unique\" is deprecated");
-			}
-			else
-			    Perl_croak(aTHX_ "The 'unique' attribute may only be applied to 'our' variables");
-		    }
-
 		    /* NOTE: any CV attrs applied here need to be part of
 		       the CVf_BUILTIN_ATTRS define in cv.h! */
-		    else if (!PL_in_my && len == 6 && strnEQ(SvPVX(sv), "lvalue", len)) {
+		    if (!PL_in_my && len == 6 && strnEQ(SvPVX(sv), "lvalue", len)) {
 			sv_free(sv);
 			CvLVALUE_on(PL_compcv);
 		    }

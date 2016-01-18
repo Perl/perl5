@@ -431,13 +431,6 @@ will be removed in a Perl 5.28.
 example.  Since each sub can only have one prototype, the earlier
 declaration(s) are discarded while the last one is applied.
 
-=item Attribute "unique" is deprecated, and will disappear in Perl 5.28
-
-(D deprecated) You have used the attributes pragma to modify
-the "unique" attribute on an array, hash or scalar reference.
-The :unique attribute has had no effect since Perl 5.8.8, and
-will be removed in a Perl 5.28.
-
 =item av_reify called on tied array
 
 (S debugging) This indicates that something went wrong and Perl got I<very>
