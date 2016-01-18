@@ -3633,6 +3633,7 @@ ext/B/t/optree_varinit.t	my,our,local var init optimization
 ext/B/t/o.t		See if O works
 ext/B/t/pragma.t	See if user pragmas work.
 ext/B/t/showlex.t	See if B::ShowLex works
+ext/B/t/sv_stash.t	See if SvSTASH() works
 ext/B/t/terse.t		See if B::Terse works
 ext/B/t/walkoptree.t	See if B::walkoptree (and friends) work
 ext/B/t/xref.t		See if B::Xref works
