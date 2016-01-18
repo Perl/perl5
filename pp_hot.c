@@ -3405,8 +3405,6 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
 
         EXTEND_MORTAL(nargs); /* one big extend for worst-case scenario */
         tmps_basep = PL_tmps_stack + tmps_base;
-        /* whether any SVs have have SvTEMP temporarily turned off,
-         * indicating that they need saving below the cut */
 
         /* process each return arg */
 
@@ -3433,7 +3431,7 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
              *  1) there is pp code similar to pp_substr that is
              *     returning a PADTMP instead of a mortal, and probably
              *     needs fixing, or
-             *  2) pp_leavesub is making unwarranted assumptions
+             *  2) pp_leavesublv is making unwarranted assumptions
              *     about always croaking on a PADTMP
              */
             if (SvPADTMP(sv) && SvSMAGICAL(sv)) {
