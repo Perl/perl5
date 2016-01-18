@@ -1389,6 +1389,7 @@ my $has_hangul_syllables = 0;
 my $needing_code_points_ending_in_code_point = 0;
 
 my @backslash_X_tests;     # List of tests read in for testing \X
+my @LB_tests;              # List of tests read in for testing \b{lb}
 my @SB_tests;              # List of tests read in for testing \b{sb}
 my @WB_tests;              # List of tests read in for testing \b{wb}
 my @unhandled_properties;  # Will contain a list of properties found in
@@ -12051,6 +12052,18 @@ sub process_GCB_test {
     return;
 }
 
+sub process_LB_test {
+
+    my $file = shift;
+    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+    while ($file->next_line) {
+        push @LB_tests, $_;
+    }
+
+    return;
+}
+
 sub process_SB_test {
 
     my $file = shift;
@@ -18628,6 +18641,7 @@ sub make_property_test_script() {
             <DATA>,
             @output,
             (map {"Test_GCB('$_');\n"} @backslash_X_tests),
+            (map {"Test_LB('$_');\n"} @LB_tests),
             (map {"Test_SB('$_');\n"} @SB_tests),
             (map {"Test_WB('$_');\n"} @WB_tests),
             "Finished();\n"
@@ -19099,7 +19113,7 @@ my @input_file_objects = (
                           . 'F<NamedSequences.txt> and recompile perl',
                    ),
     Input_file->new("$AUXILIARY/LBTest.txt", v5.1.0,
-                    Skip => $Validation,
+                    Handler => \&process_LB_test,
                    ),
     Input_file->new("$AUXILIARY/LineBreakTest.html", v5.1.0,
                     Skip => $Validation_Documentation,
@@ -19893,6 +19907,10 @@ sub Test_GCB($) {
     _test_break(shift, 'gcb');
 }
 
+sub Test_LB($) {
+    _test_break(shift, 'lb');
+}
+
 sub Test_SB($) {
     _test_break(shift, 'sb');
 }
@@ -19917,3 +19935,4 @@ Expect(1, 0xFF10, '\p{XDigit}', ""); # Bug # 71726
 # official suite, and gets modified to check for the perl tailoring by
 # Test_WB()
 Test_WB("$breakable 0020 $breakable 0020 $breakable 0308 $breakable");
+Test_LB("$nobreak 200B $nobreak 0020 $nobreak 0020 $breakable 2060 $breakable");

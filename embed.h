@@ -1066,14 +1066,17 @@
 #define _swash_to_invlist(a)	Perl__swash_to_invlist(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_REGEXEC_C)
+#define advance_one_LB(a,b,c)	S_advance_one_LB(aTHX_ a,b,c)
 #define advance_one_SB(a,b,c)	S_advance_one_SB(aTHX_ a,b,c)
 #define advance_one_WB(a,b,c,d)	S_advance_one_WB(aTHX_ a,b,c,d)
+#define backup_one_LB(a,b,c)	S_backup_one_LB(aTHX_ a,b,c)
 #define backup_one_SB(a,b,c)	S_backup_one_SB(aTHX_ a,b,c)
 #define backup_one_WB(a,b,c,d)	S_backup_one_WB(aTHX_ a,b,c,d)
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
 #define isFOO_lc(a,b)		S_isFOO_lc(aTHX_ a,b)
 #define isFOO_utf8_lc(a,b)	S_isFOO_utf8_lc(aTHX_ a,b)
 #define isGCB			S_isGCB
+#define isLB(a,b,c,d,e,f)	S_isLB(aTHX_ a,b,c,d,e,f)
 #define isSB(a,b,c,d,e,f)	S_isSB(aTHX_ a,b,c,d,e,f)
 #define isWB(a,b,c,d,e,f,g)	S_isWB(aTHX_ a,b,c,d,e,f,g)
 #define reg_check_named_buff_matched	S_reg_check_named_buff_matched

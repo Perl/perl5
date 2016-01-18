@@ -1879,6 +1879,7 @@
  * 38b17e1118206489a7e0ab5d29d7932212d38838df7d3ec025ecb58e8798ec20 lib/unicore/UnicodeData.txt
  * 0cedd6e0f5cadf57ce9cfc96beccfd083b0faa0809a631a777cd25f0316bfabb lib/unicore/auxiliary/GCBTest.txt
  * 230005412f9a47128e37bc52330766aaa0b5522a53737a89cff66e891e14527a lib/unicore/auxiliary/GraphemeBreakProperty.txt
+ * 149b14ab93b06c887a958fb16d0ad01193063ef69cc14f10338ae4d0accd6c28 lib/unicore/auxiliary/LBTest.txt
  * 41bf82452d71ce15eda8c9bb1bb0c20b72205acaaf503e3cb84734ed8e85d33a lib/unicore/auxiliary/SBTest.txt
  * d3b45cdb0a73eeb9d25158336583dfc1e6f64da59537acb0008988b40e6b3b63 lib/unicore/auxiliary/SentenceBreakProperty.txt
  * a661f42a54f7cc4dded72a61c508be2b482f912d4b6cf140335010f0c684dbb9 lib/unicore/auxiliary/WBTest.txt
@@ -1894,7 +1895,7 @@
  * 1a0687fb9c6c4567e853913549df0944fe40821279a3e9cdaa6ab8679bc286fd lib/unicore/extracted/DLineBreak.txt
  * 40bcfed3ca727c19e1331f6c33806231d5f7eeeabd2e6a9e06a3740c85d0c250 lib/unicore/extracted/DNumType.txt
  * a18d502bad39d527ac5586d7bc93e29f565859e3bcc24ada627eff606d6f5fed lib/unicore/extracted/DNumValues.txt
- * 3589fcc6852823b96c60209bc615ad8cb96455d5047194ec3545e30ecc9d464b lib/unicore/mktables
+ * 648ee6791150b7163b4a7b61db070d5d19e9d4461a3ba20b7de536d820335e3e lib/unicore/mktables
  * 462c9aaa608fb2014cd9649af1c5c009485c60b9c8b15b89401fdc10cf6161c6 lib/unicore/version
  * 913d2f93f3cb6cdf1664db888bf840bc4eb074eef824e082fceda24a9445e60c regen/charset_translations.pl
  * d9c04ac46bdd81bb3e26519f2b8eb6242cb12337205add3f7cf092b0c58dccc4 regen/regcharclass.pl

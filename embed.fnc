@@ -2305,6 +2305,18 @@ Es	|bool	|to_byte_substr	|NN regexp * prog
 ERsn	|I32	|reg_check_named_buff_matched	|NN const regexp *rex \
 						|NN const regnode *scan
 EsnR	|bool	|isGCB		|const GCB_enum before|const GCB_enum after
+EsR	|bool	|isLB		|LB_enum before				\
+				|LB_enum after				\
+				|NN const U8 * const strbeg		\
+				|NN const U8 * const curpos		\
+				|NN const U8 * const strend		\
+				|const bool utf8_target
+EsR	|LB_enum|advance_one_LB |NN U8 ** curpos				\
+				|NN const U8 * const strend			\
+				|const bool utf8_target
+EsR	|LB_enum|backup_one_LB  |NN const U8 * const strbeg			\
+				|NN U8 ** curpos				\
+				|const bool utf8_target
 EsR	|bool	|isSB		|SB_enum before				\
 				|SB_enum after				\
 				|NN const U8 * const strbeg			\

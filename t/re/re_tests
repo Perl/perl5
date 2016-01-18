@@ -136,10 +136,12 @@ a[^]b]c	adc	y	$&	adc
 \By\B	xyz	y	-	-
 \b		n	-	-
 \b{gcb}		n	-	-
+\b{lb}		n	-	-
 \b{sb}		n	-	-
 \b{wb}		n	-	-
 \B		y	-	-
 \B{gcb}		y	-	-
+\B{lb}		y	-	-
 \B{sb}		y	-	-
 \B{wb}		y	-	-
 \w	a	y	-	-

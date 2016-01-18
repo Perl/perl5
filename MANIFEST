@@ -4355,6 +4355,7 @@ lib/Unicode/UCD.t		See if Unicode character database works
 lib/unicore/ArabicShaping.txt			Unicode character database
 lib/unicore/auxiliary/GCBTest.txt	Unicode character database
 lib/unicore/auxiliary/GraphemeBreakProperty.txt	Unicode character database
+lib/unicore/auxiliary/LBTest.txt	Unicode character database
 lib/unicore/auxiliary/SBTest.txt	Unicode character database
 lib/unicore/auxiliary/SentenceBreakProperty.txt	Unicode character database
 lib/unicore/auxiliary/WBTest.txt	Unicode character database

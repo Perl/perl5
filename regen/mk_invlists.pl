@@ -155,6 +155,9 @@ my %hard_coded_enums =
         ],
 );
 
+my %lb_enums;
+my @lb_short_enums;
+
 my @a2n;
 
 sub uniques {
@@ -318,6 +321,17 @@ sub output_invmap ($$$$$$$) {
                 for my $enum (@enums) {
                     $enums{$enum} = $enum_val++ unless exists $enums{$enum};
                 }
+
+                # Calculate the enum values for property _Perl_LB because we
+                # output a special table for that
+                if ($name eq '_Perl_LB' && ! %lb_enums) {
+                    while (my ($enum, $value) = each %enums) {
+                        my ($short) = prop_value_aliases('LB', $enum);
+                        $short = substr(lc $enum, 0, 2) unless defined $short;
+                        $lb_enums{$short} = $value;
+                        @lb_short_enums[$value] = $short;
+                    }
+                }
             }
 
             # Inversion map stuff is currently used only by regexec
@@ -439,6 +453,555 @@ sub prop_name_for_cmp ($) { # Sort helper
 
 sub UpperLatin1 {
     return mk_invlist_from_sorted_cp_list([ 128 .. 255 ]);
+}
+
+sub output_LB_table() {
+
+    # Create and output the enums, #defines, and pair table for use in
+    # determining Line Breaks.  This uses the default line break algorithm,
+    # given in http://www.unicode.org/reports/tr14/, but tailored by example 7
+    # in that page, as the Unicode-furnished tests assume that tailoring.
+
+    switch_pound_if('LB_table', 'PERL_IN_REGEXEC_C');
+
+    # The result is really just true or false.  But we follow along with tr14,
+    # creating a rule which is false for something like X SP* X.  That gets
+    # encoding 2.  The rest of the actions are synthetic ones that indicate
+    # some context handling is required.  These each are added to the
+    # underlying 0, 1, or 2, instead of replacing them, so that the underlying
+    # value can be retrieved.  Actually only rules from 7 through 18 (which
+    # are the ones where space matter) are possible to have 2 added to them.
+    # The others below add just 0 or 1.  It might be possible for one
+    # synthetic rule to be added to another, yielding a larger value.  This
+    # doesn't happen in the Unicode 8.0 rule set, and as you can see from the
+    # names of the middle grouping below, it is impossible for that to occur
+    # for them because they all start with mutually exclusive classes.  That
+    # the final rule can't be added to any of the others isn't obvious from
+    # its name, so it is assigned a power of 2 higher than the others can get
+    # to so any addition would preserve all data.  (And the code will reach an
+    # assert(0) on debugging builds should this happen.)
+    my %lb_actions = (
+        LB_NOBREAK                      => 0,
+        LB_BREAKABLE                    => 1,
+        LB_NOBREAK_EVEN_WITH_SP_BETWEEN => 2,
+
+        LB_CM_foo                       => 3,   # Rule 9
+        LB_SP_foo                       => 6,   # Rule 18
+        LB_PR_or_PO_then_OP_or_HY       => 9,   # Rule 25
+        LB_SY_or_IS_then_various        => 11,  # Rule 25
+        LB_HY_or_BA_then_foo            => 13,  # Rule 21
+
+        LB_various_then_PO_or_PR        => (1<<4),  # Rule 25
+    );
+
+    # Output the #define list, sorted by numeric value
+    my @defines;
+    while (my ($enum, $value) = each %lb_actions) {
+        $defines[$value] = $enum;
+    }
+
+    print $out_fh "\n";
+
+    foreach my $i (0 .. @defines - 1) {
+        next unless defined $defines[$i];
+        print $out_fh "#define $defines[$i]\t$i\n";
+    }
+
+    # Construct the LB pair table.  This is based on the rules in
+    # http://www.unicode.org/reports/tr14/, but modified as those rules are
+    # designed for someone taking a string of text and sequentially going
+    # through it to find the break opportunities, whereas, Perl requires
+    # determining if a given random spot is a break opportunity, without
+    # knowing all the entire string before it.
+    #
+    # The table is constructed in reverse order of the rules, to make the
+    # lower-numbered, higher priority ones override the later ones, as the
+    # algorithm stops at the earliest matching rule
+
+    my @lb_table;
+    my $table_size = @lb_short_enums;
+
+    # LB31. Break everywhere else
+    for my $i (0 .. $table_size - 1) {
+        for my $j (0 .. $table_size - 1) {
+            $lb_table[$i][$j] = $lb_actions{'LB_BREAKABLE'};
+        }
+    }
+
+    # LB30a. Don't break between Regional Indicators
+    $lb_table[$lb_enums{'RI'}][$lb_enums{'RI'}] = $lb_actions{'LB_NOBREAK'};
+
+    # LB30 Do not break between letters, numbers, or ordinary symbols and
+    # opening or closing parentheses.
+    # (AL | HL | NU) × OP
+    $lb_table[$lb_enums{'AL'}][$lb_enums{'OP'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'HL'}][$lb_enums{'OP'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'NU'}][$lb_enums{'OP'}] = $lb_actions{'LB_NOBREAK'};
+
+    # CP × (AL | HL | NU)
+    $lb_table[$lb_enums{'CP'}][$lb_enums{'AL'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'CP'}][$lb_enums{'HL'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'CP'}][$lb_enums{'NU'}] = $lb_actions{'LB_NOBREAK'};
+
+    # LB29 Do not break between numeric punctuation and alphabetics (“e.g.”).
+    # IS × (AL | HL)
+    $lb_table[$lb_enums{'IS'}][$lb_enums{'AL'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'IS'}][$lb_enums{'HL'}] = $lb_actions{'LB_NOBREAK'};
+
+    # LB28 Do not break between alphabetics (“at”).
+    # (AL | HL) × (AL | HL)
+    $lb_table[$lb_enums{'AL'}][$lb_enums{'AL'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'HL'}][$lb_enums{'AL'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'AL'}][$lb_enums{'HL'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'HL'}][$lb_enums{'HL'}] = $lb_actions{'LB_NOBREAK'};
+
+    # LB27 Treat a Korean Syllable Block the same as ID.
+    # (JL | JV | JT | H2 | H3) × IN
+    $lb_table[$lb_enums{'JL'}][$lb_enums{'IN'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'JV'}][$lb_enums{'IN'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'JT'}][$lb_enums{'IN'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'H2'}][$lb_enums{'IN'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'H3'}][$lb_enums{'IN'}] = $lb_actions{'LB_NOBREAK'};
+
+    # (JL | JV | JT | H2 | H3) × PO
+    $lb_table[$lb_enums{'JL'}][$lb_enums{'PO'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'JV'}][$lb_enums{'PO'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'JT'}][$lb_enums{'PO'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'H2'}][$lb_enums{'PO'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'H3'}][$lb_enums{'PO'}] = $lb_actions{'LB_NOBREAK'};
+
+    # PR × (JL | JV | JT | H2 | H3)
+    $lb_table[$lb_enums{'PR'}][$lb_enums{'JL'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'PR'}][$lb_enums{'JV'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'PR'}][$lb_enums{'JT'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'PR'}][$lb_enums{'H2'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'PR'}][$lb_enums{'H3'}] = $lb_actions{'LB_NOBREAK'};
+
+    # LB26 Do not break a Korean syllable.
+    # JL × (JL | JV | H2 | H3)
+    $lb_table[$lb_enums{'JL'}][$lb_enums{'JL'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'JL'}][$lb_enums{'JV'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'JL'}][$lb_enums{'H2'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'JL'}][$lb_enums{'H3'}] = $lb_actions{'LB_NOBREAK'};
+
+    # (JV | H2) × (JV | JT)
+    $lb_table[$lb_enums{'JV'}][$lb_enums{'JV'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'H2'}][$lb_enums{'JV'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'JV'}][$lb_enums{'JT'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'H2'}][$lb_enums{'JT'}] = $lb_actions{'LB_NOBREAK'};
+
+    # (JT | H3) × JT
+    $lb_table[$lb_enums{'JT'}][$lb_enums{'JT'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'H3'}][$lb_enums{'JT'}] = $lb_actions{'LB_NOBREAK'};
+
+    # LB25 Do not break between the following pairs of classes relevant to
+    # numbers, as tailored by example 7 in
+    # http://www.unicode.org/reports/tr14/#Examples
+    # We follow that tailoring because Unicode's test cases expect it
+    # (PR | PO) × ( OP | HY )? NU
+    $lb_table[$lb_enums{'PR'}][$lb_enums{'NU'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'PO'}][$lb_enums{'NU'}] = $lb_actions{'LB_NOBREAK'};
+
+        # Given that (OP | HY )? is optional, we have to test for it in code.
+        # We add in the action (instead of overriding) for this, so that in
+        # the code we can recover the underlying break value.
+    $lb_table[$lb_enums{'PR'}][$lb_enums{'OP'}]
+                                    += $lb_actions{'LB_PR_or_PO_then_OP_or_HY'};
+    $lb_table[$lb_enums{'PO'}][$lb_enums{'OP'}]
+                                    += $lb_actions{'LB_PR_or_PO_then_OP_or_HY'};
+    $lb_table[$lb_enums{'PR'}][$lb_enums{'HY'}]
+                                    += $lb_actions{'LB_PR_or_PO_then_OP_or_HY'};
+    $lb_table[$lb_enums{'PO'}][$lb_enums{'HY'}]
+                                    += $lb_actions{'LB_PR_or_PO_then_OP_or_HY'};
+
+    # ( OP | HY ) × NU
+    $lb_table[$lb_enums{'OP'}][$lb_enums{'NU'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'HY'}][$lb_enums{'NU'}] = $lb_actions{'LB_NOBREAK'};
+
+    # NU (NU | SY | IS)* × (NU | SY | IS | CL | CP )
+    # which can be rewritten as:
+    # NU (SY | IS)* × (NU | SY | IS | CL | CP )
+    $lb_table[$lb_enums{'NU'}][$lb_enums{'NU'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'NU'}][$lb_enums{'SY'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'NU'}][$lb_enums{'IS'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'NU'}][$lb_enums{'CL'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'NU'}][$lb_enums{'CP'}] = $lb_actions{'LB_NOBREAK'};
+
+        # Like earlier where we have to test in code, we add in the action so
+        # that we can recover the underlying values.  This is done in rules
+        # below, as well.  The code assumes that we haven't added 2 actions.
+        # Shoul a later Unicode release break that assumption, then tests
+        # should start failing.
+    $lb_table[$lb_enums{'SY'}][$lb_enums{'NU'}]
+                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+    $lb_table[$lb_enums{'SY'}][$lb_enums{'SY'}]
+                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+    $lb_table[$lb_enums{'SY'}][$lb_enums{'IS'}]
+                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+    $lb_table[$lb_enums{'SY'}][$lb_enums{'CL'}]
+                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+    $lb_table[$lb_enums{'SY'}][$lb_enums{'CP'}]
+                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+    $lb_table[$lb_enums{'IS'}][$lb_enums{'NU'}]
+                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+    $lb_table[$lb_enums{'IS'}][$lb_enums{'SY'}]
+                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+    $lb_table[$lb_enums{'IS'}][$lb_enums{'IS'}]
+                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+    $lb_table[$lb_enums{'IS'}][$lb_enums{'CL'}]
+                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+    $lb_table[$lb_enums{'IS'}][$lb_enums{'CP'}]
+                                    += $lb_actions{'LB_SY_or_IS_then_various'};
+
+    # NU (NU | SY | IS)* (CL | CP)? × (PO | PR)
+    # which can be rewritten as:
+    # NU (SY | IS)* (CL | CP)? × (PO | PR)
+    $lb_table[$lb_enums{'NU'}][$lb_enums{'PO'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'NU'}][$lb_enums{'PR'}] = $lb_actions{'LB_NOBREAK'};
+
+    $lb_table[$lb_enums{'CP'}][$lb_enums{'PO'}]
+                                    += $lb_actions{'LB_various_then_PO_or_PR'};
+    $lb_table[$lb_enums{'CL'}][$lb_enums{'PO'}]
+                                    += $lb_actions{'LB_various_then_PO_or_PR'};
+    $lb_table[$lb_enums{'IS'}][$lb_enums{'PO'}]
+                                    += $lb_actions{'LB_various_then_PO_or_PR'};
+    $lb_table[$lb_enums{'SY'}][$lb_enums{'PO'}]
+                                    += $lb_actions{'LB_various_then_PO_or_PR'};
+
+    $lb_table[$lb_enums{'CP'}][$lb_enums{'PR'}]
+                                    += $lb_actions{'LB_various_then_PO_or_PR'};
+    $lb_table[$lb_enums{'CL'}][$lb_enums{'PR'}]
+                                    += $lb_actions{'LB_various_then_PO_or_PR'};
+    $lb_table[$lb_enums{'IS'}][$lb_enums{'PR'}]
+                                    += $lb_actions{'LB_various_then_PO_or_PR'};
+    $lb_table[$lb_enums{'SY'}][$lb_enums{'PR'}]
+                                    += $lb_actions{'LB_various_then_PO_or_PR'};
+
+    # LB24 Do not break between prefix and letters or ideographs.
+    # PR × ID
+    $lb_table[$lb_enums{'PR'}][$lb_enums{'ID'}] = $lb_actions{'LB_NOBREAK'};
+
+    # PR × (AL | HL)
+    $lb_table[$lb_enums{'PR'}][$lb_enums{'AL'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'PR'}][$lb_enums{'HL'}] = $lb_actions{'LB_NOBREAK'};
+
+    # PO × (AL | HL)
+    $lb_table[$lb_enums{'PO'}][$lb_enums{'AL'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'PO'}][$lb_enums{'HL'}] = $lb_actions{'LB_NOBREAK'};
+
+    # LB23 Do not break within ‘a9’, ‘3a’, or ‘H%’.
+    # ID × PO
+    $lb_table[$lb_enums{'ID'}][$lb_enums{'PO'}] = $lb_actions{'LB_NOBREAK'};
+
+    # (AL | HL) × NU
+    $lb_table[$lb_enums{'AL'}][$lb_enums{'NU'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'HL'}][$lb_enums{'NU'}] = $lb_actions{'LB_NOBREAK'};
+
+    # NU × (AL | HL)
+    $lb_table[$lb_enums{'NU'}][$lb_enums{'AL'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'NU'}][$lb_enums{'HL'}] = $lb_actions{'LB_NOBREAK'};
+
+    # LB22 Do not break between two ellipses, or between letters, numbers or
+    # exclamations and ellipsis.
+    # (AL | HL) × IN
+    $lb_table[$lb_enums{'AL'}][$lb_enums{'IN'}] = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'HL'}][$lb_enums{'IN'}] = $lb_actions{'LB_NOBREAK'};
+
+    # EX × IN
+    $lb_table[$lb_enums{'EX'}][$lb_enums{'IN'}] = $lb_actions{'LB_NOBREAK'};
+
+    # ID × IN
+    $lb_table[$lb_enums{'ID'}][$lb_enums{'IN'}] = $lb_actions{'LB_NOBREAK'};
+
+    # IN × IN
+    $lb_table[$lb_enums{'IN'}][$lb_enums{'IN'}] = $lb_actions{'LB_NOBREAK'};
+
+    # NU × IN
+    $lb_table[$lb_enums{'NU'}][$lb_enums{'IN'}] = $lb_actions{'LB_NOBREAK'};
+
+    # LB21b Don’t break between Solidus and Hebrew letters.
+    # SY × HL
+    $lb_table[$lb_enums{'SY'}][$lb_enums{'HL'}] = $lb_actions{'LB_NOBREAK'};
+
+    # LB21a Don't break after Hebrew + Hyphen.
+    # HL (HY | BA) ×
+    for my $i (0 .. @lb_table - 1) {
+        $lb_table[$lb_enums{'HY'}][$i] += $lb_actions{'LB_HY_or_BA_then_foo'};
+        $lb_table[$lb_enums{'BA'}][$i] += $lb_actions{'LB_HY_or_BA_then_foo'};
+    }
+
+    # LB21 Do not break before hyphen-minus, other hyphens, fixed-width
+    # spaces, small kana, and other non-starters, or after acute accents.
+    # × BA
+    # × HY
+    # × NS
+    # BB ×
+    for my $i (0 .. @lb_table - 1) {
+        $lb_table[$i][$lb_enums{'BA'}] = $lb_actions{'LB_NOBREAK'};
+        $lb_table[$i][$lb_enums{'HY'}] = $lb_actions{'LB_NOBREAK'};
+        $lb_table[$i][$lb_enums{'NS'}] = $lb_actions{'LB_NOBREAK'};
+        $lb_table[$lb_enums{'BB'}][$i] = $lb_actions{'LB_NOBREAK'};
+    }
+
+    # LB20 Break before and after unresolved CB.
+    # ÷ CB
+    # CB ÷
+    # Conditional breaks should be resolved external to the line breaking
+    # rules. However, the default action is to treat unresolved CB as breaking
+    # before and after.
+    for my $i (0 .. @lb_table - 1) {
+        $lb_table[$i][$lb_enums{'CB'}] = $lb_actions{'LB_BREAKABLE'};
+        $lb_table[$lb_enums{'CB'}][$i] = $lb_actions{'LB_BREAKABLE'};
+    }
+
+    # LB19 Do not break before or after quotation marks, such as ‘ ” ’.
+    # × QU
+    # QU ×
+    for my $i (0 .. @lb_table - 1) {
+        $lb_table[$i][$lb_enums{'QU'}] = $lb_actions{'LB_NOBREAK'};
+        $lb_table[$lb_enums{'QU'}][$i] = $lb_actions{'LB_NOBREAK'};
+    }
+
+    # LB18 Break after spaces
+    # SP ÷
+    for my $i (0 .. @lb_table - 1) {
+        $lb_table[$lb_enums{'SP'}][$i] = $lb_actions{'LB_BREAKABLE'};
+    }
+
+    # LB17 Do not break within ‘——’, even with intervening spaces.
+    # B2 SP* × B2
+    $lb_table[$lb_enums{'B2'}][$lb_enums{'B2'}]
+                           = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+
+    # LB16 Do not break between closing punctuation and a nonstarter even with
+    # intervening spaces.
+    # (CL | CP) SP* × NS
+    $lb_table[$lb_enums{'CL'}][$lb_enums{'NS'}]
+                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+    $lb_table[$lb_enums{'CP'}][$lb_enums{'NS'}]
+                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+
+
+    # LB15 Do not break within ‘”[’, even with intervening spaces.
+    # QU SP* × OP
+    $lb_table[$lb_enums{'QU'}][$lb_enums{'OP'}]
+                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+
+    # LB14 Do not break after ‘[’, even after spaces.
+    # OP SP* ×
+    for my $i (0 .. @lb_table - 1) {
+        $lb_table[$lb_enums{'OP'}][$i]
+                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+    }
+
+    # LB13 Do not break before ‘]’ or ‘!’ or ‘;’ or ‘/’, even after spaces, as
+    # tailored by example 7 in http://www.unicode.org/reports/tr14/#Examples
+    # [^NU] × CL
+    # [^NU] × CP
+    # × EX
+    # [^NU] × IS
+    # [^NU] × SY
+    for my $i (0 .. @lb_table - 1) {
+        $lb_table[$i][$lb_enums{'EX'}]
+                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+
+        next if $i == $lb_enums{'NU'};
+
+        $lb_table[$i][$lb_enums{'CL'}]
+                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+        $lb_table[$i][$lb_enums{'CP'}]
+                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+        $lb_table[$i][$lb_enums{'IS'}]
+                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+        $lb_table[$i][$lb_enums{'SY'}]
+                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+    }
+
+    # LB12a Do not break before NBSP and related characters, except after
+    # spaces and hyphens.
+    # [^SP BA HY] × GL
+    for my $i (0 .. @lb_table - 1) {
+        next if    $i == $lb_enums{'SP'}
+                || $i == $lb_enums{'BA'}
+                || $i == $lb_enums{'HY'};
+
+        # We don't break, but if a property above has said don't break even
+        # with space between, don't override that (also in the next few rules)
+        next if $lb_table[$i][$lb_enums{'GL'}]
+                            == $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+        $lb_table[$i][$lb_enums{'GL'}] = $lb_actions{'LB_NOBREAK'};
+    }
+
+    # LB12 Do not break after NBSP and related characters.
+    # GL ×
+    for my $i (0 .. @lb_table - 1) {
+        next if $lb_table[$lb_enums{'GL'}][$i]
+                            == $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+        $lb_table[$lb_enums{'GL'}][$i] = $lb_actions{'LB_NOBREAK'};
+    }
+
+    # LB11 Do not break before or after Word joiner and related characters.
+    # × WJ
+    # WJ ×
+    for my $i (0 .. @lb_table - 1) {
+        if ($lb_table[$i][$lb_enums{'WJ'}]
+                        != $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'})
+        {
+            $lb_table[$i][$lb_enums{'WJ'}] = $lb_actions{'LB_NOBREAK'};
+        }
+        if ($lb_table[$lb_enums{'WJ'}][$i]
+                        != $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'})
+        {
+            $lb_table[$lb_enums{'WJ'}][$i] = $lb_actions{'LB_NOBREAK'};
+        }
+    }
+
+    # Special case this here to avoid having to do a special case in the code,
+    # by making this the same as other things with a SP in front of them that
+    # don't break, we avoid an extra test
+    $lb_table[$lb_enums{'SP'}][$lb_enums{'WJ'}]
+                            = $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'};
+
+    # LB9 and LB10 are done in the same loop
+    #
+    # LB9 Do not break a combining character sequence; treat it as if it has
+    # the line breaking class of the base character in all of the
+    # higher-numbered rules.
+    # Treat X CM* as if it were X.
+    # where X is any line break class except BK, CR, LF, NL, SP, or ZW.
+
+    # LB10 Treat any remaining combining mark as AL.  This catches the case
+    # where a CM is the first character on the line or follows SP, BK, CR, LF,
+    # NL, or ZW.
+    for my $i (0 .. @lb_table - 1) {
+
+        # When the CM is the first in the pair, we don't know without looking
+        # behind whether the CM is going to inherit from an earlier character,
+        # or not.  So have to figure this out in the code
+        $lb_table[$lb_enums{'CM'}][$i] = $lb_actions{'LB_CM_foo'};
+
+        if (   $i == $lb_enums{'BK'}
+            || $i == $lb_enums{'ed'}
+            || $i == $lb_enums{'CR'}
+            || $i == $lb_enums{'LF'}
+            || $i == $lb_enums{'NL'}
+            || $i == $lb_enums{'SP'}
+            || $i == $lb_enums{'ZW'})
+        {
+            # For these classes, a following CM doesn't combine, and should do
+            # whatever 'AL' would do.
+            $lb_table[$i][$lb_enums{'CM'}] = $lb_table[$i][$lb_enums{'AL'}];
+        }
+        else {
+            # For these classes, the CM combines, so doesn't break, inheriting
+            # the type of nobreak from the master character.
+            if ($lb_table[$i][$lb_enums{'CM'}]
+                            != $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'})
+            {
+                $lb_table[$i][$lb_enums{'CM'}] = $lb_actions{'LB_NOBREAK'};
+            }
+        }
+    }
+
+    # LB8 Break before any character following a zero-width space, even if one
+    # or more spaces intervene.
+    # ZW SP* ÷
+    for my $i (0 .. @lb_table - 1) {
+        $lb_table[$lb_enums{'ZW'}][$i] = $lb_actions{'LB_BREAKABLE'};
+    }
+
+    # Because of LB8-10, we need to look at context for "SP x", and this must
+    # be done in the code.  So override the existing rules for that, by adding
+    # a constant to get new rules that tell the code it needs to look at
+    # context.  By adding this action instead of replacing the existing one,
+    # we can get back to the original rule if necessary.
+    for my $i (0 .. @lb_table - 1) {
+        $lb_table[$lb_enums{'SP'}][$i] += $lb_actions{'LB_SP_foo'};
+    }
+
+    # LB7 Do not break before spaces or zero width space.
+    # × SP
+    # × ZW
+    for my $i (0 .. @lb_table - 1) {
+        $lb_table[$i][$lb_enums{'SP'}] = $lb_actions{'LB_NOBREAK'};
+        $lb_table[$i][$lb_enums{'ZW'}] = $lb_actions{'LB_NOBREAK'};
+    }
+
+    # LB6 Do not break before hard line breaks.
+    # × ( BK | CR | LF | NL )
+    for my $i (0 .. @lb_table - 1) {
+        $lb_table[$i][$lb_enums{'BK'}] = $lb_actions{'LB_NOBREAK'};
+        $lb_table[$i][$lb_enums{'CR'}] = $lb_actions{'LB_NOBREAK'};
+        $lb_table[$i][$lb_enums{'LF'}] = $lb_actions{'LB_NOBREAK'};
+        $lb_table[$i][$lb_enums{'NL'}] = $lb_actions{'LB_NOBREAK'};
+    }
+
+    # LB5 Treat CR followed by LF, as well as CR, LF, and NL as hard line breaks.
+    # CR × LF
+    # CR !
+    # LF !
+    # NL !
+    for my $i (0 .. @lb_table - 1) {
+        $lb_table[$lb_enums{'CR'}][$i] = $lb_actions{'LB_BREAKABLE'};
+        $lb_table[$lb_enums{'LF'}][$i] = $lb_actions{'LB_BREAKABLE'};
+        $lb_table[$lb_enums{'NL'}][$i] = $lb_actions{'LB_BREAKABLE'};
+    }
+    $lb_table[$lb_enums{'CR'}][$lb_enums{'LF'}] = $lb_actions{'LB_NOBREAK'};
+
+    # LB4 Always break after hard line breaks.
+    # BK !
+    for my $i (0 .. @lb_table - 1) {
+        $lb_table[$lb_enums{'BK'}][$i] = $lb_actions{'LB_BREAKABLE'};
+    }
+
+    # LB2 Never break at the start of text.
+    # sot ×
+    # LB3 Always break at the end of text.
+    # ! eot
+    # but these are reversed in the loop below, so that won't break if there
+    # is no text
+    for my $i (0 .. @lb_table - 1) {
+        $lb_table[$i][$lb_enums{'ed'}] = $lb_actions{'LB_BREAKABLE'};
+        $lb_table[$lb_enums{'ed'}][$i] = $lb_actions{'LB_NOBREAK'};
+    }
+
+    # LB1 Assign a line breaking class to each code point of the input.
+    # Resolve AI, CB, CJ, SA, SG, and XX into other line breaking classes
+    # depending on criteria outside the scope of this algorithm.
+    #
+    # In the absence of such criteria all characters with a specific
+    # combination of original class and General_Category property value are
+    # resolved as follows:
+    # Original 	   Resolved  General_Category
+    # AI, SG, XX      AL      Any
+    # SA              CM      Only Mn or Mc
+    # SA              AL      Any except Mn and Mc
+    # CJ              NS      Any
+    #
+    # This is done in mktables, so we never see any of the remapped-from
+    # classes.
+
+    print $out_fh "\nstatic const U8 LB_table[$table_size][$table_size] = {\n";
+    print $out_fh "\n/* 'ed' stands for 'edge' */\n";
+    print $out_fh "/*      ";
+    for my $i (0 .. @lb_table - 1) {
+        print $out_fh "  $lb_short_enums[$i]";
+    }
+    print $out_fh " */\n";
+
+    for my $i (0 .. @lb_table - 1) {
+        print $out_fh "/* $lb_short_enums[$i] */ ";
+        for my $j (0 .. @lb_table - 1) {
+            printf $out_fh "%2d", $lb_table[$i][$j];
+            print $out_fh "," if $i < @lb_table - 1 || $j < @lb_table - 1;
+            print $out_fh " " if $j < @lb_table - 1;
+        }
+        print $out_fh "\n";
+    }
+
+    print $out_fh "};\n";
+
+    end_file_pound_if;
 }
 
 output_invlist("Latin1", [ 0, 256 ]);
@@ -857,6 +1420,8 @@ for my $charset (get_supported_code_pages()) {
     print $out_fh "\n" . get_conditional_compile_line_end();
 }
 
+output_LB_table();
+
 my $sources_list = "lib/unicore/mktables.lst";
 my @sources = ($0, qw(lib/unicore/mktables
                       lib/Unicode/UCD.pm
@@ -878,4 +1443,5 @@ my @sources = ($0, qw(lib/unicore/mktables
         }
     }
 }
-read_only_bottom_close_and_rename($out_fh, \@sources)
+
+read_only_bottom_close_and_rename($out_fh, \@sources);

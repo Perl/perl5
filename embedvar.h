@@ -56,6 +56,7 @@
 #define PL_GCB_invlist		(vTHX->IGCB_invlist)
 #define PL_HasMultiCharFold	(vTHX->IHasMultiCharFold)
 #define PL_InBitmap		(vTHX->IInBitmap)
+#define PL_LB_invlist		(vTHX->ILB_invlist)
 #define PL_LIO			(vTHX->ILIO)
 #define PL_Latin1		(vTHX->ILatin1)
 #define PL_Mem			(vTHX->IMem)

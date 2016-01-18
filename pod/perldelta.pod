@@ -27,6 +27,15 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 New C<\b{lb}> boundary in regular expressions
+
+C<lb> stands for Line Break.  It is a Unicode property
+that determines where a line of text is suitable to break (typically so
+that it can be output without overflowing the available horizontal
+space).  This capability has long been furnished by the
+L<Unicode::LineBreak> module, but now a light-weight, non-customizable
+version that is suitable for many purposes is in core Perl.
+
 =head1 Security
 
 =head2 fix out of boundary access in Win32 path handling

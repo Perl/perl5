@@ -529,7 +529,7 @@ Mnemonic: I<G>lobal.
 C<\b{...}>, available starting in v5.22, matches a boundary (between two
 characters, or before the first character of the string, or after the
 final character of the string) based on the Unicode rules for the
-boundary type specified inside the braces.  The currently known boundary
+boundary type specified inside the braces.  The boundary
 types are given a few paragraphs below.  C<\B{...}> matches at any place
 between characters where C<\b{...}> of the same type doesn't match.
 
@@ -551,7 +551,7 @@ the non-word "=", there must be a word character immediately previous.
 All plain C<\b> and C<\B> boundary determinations look for word
 characters alone, not for
 non-word characters nor for string ends.  It may help to understand how
-<\b> and <\B> work by equating them as follows:
+C<\b> and C<\B> work by equating them as follows:
 
     \b	really means	(?:(?<=\w)(?!\w)|(?<!\w)(?=\w))
     \B	really means	(?:(?<=\w)(?=\w)|(?<!\w)(?!\w))
@@ -559,8 +559,9 @@ non-word characters nor for string ends.  It may help to understand how
 In contrast, C<\b{...}> and C<\B{...}> may or may not match at the
 beginning and end of the line, depending on the boundary type.  These
 implement the Unicode default boundaries, specified in
+L<http://www.unicode.org/reports/tr14/> and
 L<http://www.unicode.org/reports/tr29/>.
-The boundary types currently available are:
+The boundary types are:
 
 =over
 
@@ -571,6 +572,18 @@ always uses the improved "extended" grapheme cluster").  These are
 explained below under L</C<\X>>.  In fact, C<\X> is another way to get
 the same functionality.  It is equivalent to C</.+?\b{gcb}/>.  Use
 whichever is most convenient for your situation.
+
+=item C<\b{lb}>
+
+This matches according to the default Unicode Line Breaking Algorithm
+(L<http://www.unicode.org/reports/tr14/>), as customized in that
+document
+(L<Example 7 of revision 35|http://www.unicode.org/reports/tr14/tr14-35.html#Example7>)
+for better handling of numeric expressions.
+
+This is suitable for many purposes, but the L<Unicode::LineBreak> module
+is available on CPAN that provides many more features, including
+customization.
 
 =item C<\b{sb}>
 
@@ -639,9 +652,6 @@ definitions, and that implementations may wish to tailor the results for
 particular purposes and locales.  For example, some languages, such as
 Japanese and Thai, require dictionary lookup to determine word
 boundaries.
-
-Unicode defines a fourth boundary type, accessible through the
-L<Unicode::LineBreak> module.
 
 Mnemonic: I<b>oundary.
 

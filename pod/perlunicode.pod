@@ -1176,10 +1176,14 @@ Also, lines should not be split within C<CRLF> (i.e. there is no
 empty line between C<\r> and C<\n>).  For C<CRLF>, try the C<:crlf>
 layer (see L<PerlIO>).
 
-=item [9] But C<L<Unicode::LineBreak>> is available.
+=item [9] But C<qr/\b{lb}/> and C<L<Unicode::LineBreak>> are available.
 
-This module supplies line breaking conformant with
+L<C<qrE<sol>\b{lb}E<sol>>|perlrebackslash/\b{lb}> supplies default line
+breaking conformant with
 L<UAX#14 "Unicode Line Breaking Algorithm"|http://www.unicode.org/reports/tr14>.
+
+And, the module C<L<Unicode::LineBreak>> also conformant with UAX#14,
+provides customizable line breaking.
 
 =item [10]
 UTF-8/UTF-EBDDIC used in Perl allows not only C<U+10000> to
