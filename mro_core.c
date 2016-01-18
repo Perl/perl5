@@ -191,6 +191,10 @@ Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
 
     newmeta->super = NULL;
 
+    /* clear the destructor cache */
+    newmeta->destroy = NULL;
+    newmeta->destroy_gen = 0;
+
     return newmeta;
 }
 
@@ -538,8 +542,8 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
     /* pessimise derefs for now. Will get recalculated by Gv_AMupdate() */
     HvAUX(stash)->xhv_aux_flags &= ~HvAUXf_NO_DEREF;
 
-    /* DESTROY can be cached in SvSTASH. */
-    if (!SvOBJECT(stash)) SvSTASH(stash) = NULL;
+    /* DESTROY can be cached in meta. */
+    meta->destroy_gen = 0;
 
     /* Iterate the isarev (classes that are our children),
        wiping out their linearization, method and isa caches
@@ -1320,8 +1324,8 @@ Perl_mro_method_changed_in(pTHX_ HV *stash)
     /* Inc the package generation, since a local method changed */
     HvMROMETA(stash)->pkg_gen++;
 
-    /* DESTROY can be cached in SvSTASH. */
-    if (!SvOBJECT(stash)) SvSTASH(stash) = NULL;
+    /* DESTROY can be cached in meta */
+    HvMROMETA(stash)->destroy_gen = 0;
 
     /* If stash is UNIVERSAL, or one of UNIVERSAL's parents,
        invalidate all method caches globally */
@@ -1346,7 +1350,7 @@ Perl_mro_method_changed_in(pTHX_ HV *stash)
             mrometa->cache_gen++;
             if(mrometa->mro_nextmethod)
                 hv_clear(mrometa->mro_nextmethod);
-            if (!SvOBJECT(revstash)) SvSTASH(revstash) = NULL;
+            mrometa->destroy_gen = 0;
         }
     }
 
