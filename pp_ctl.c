@@ -2035,13 +2035,12 @@ PP(pp_dbstate)
 
 PP(pp_enter)
 {
-    dSP;
     U8 gimme = GIMME_V;
 
-    (void)cx_pushblock(CXt_BLOCK, gimme, SP, PL_savestack_ix);
-
-    RETURN;
+    (void)cx_pushblock(CXt_BLOCK, gimme, PL_stack_sp, PL_savestack_ix);
+    return NORMAL;
 }
+
 
 PP(pp_leave)
 {
@@ -2212,15 +2211,14 @@ PP(pp_enteriter)
 
 PP(pp_enterloop)
 {
-    dSP;
     PERL_CONTEXT *cx;
     const U8 gimme = GIMME_V;
 
-    cx = cx_pushblock(CXt_LOOP_PLAIN, gimme, SP, PL_savestack_ix);
+    cx = cx_pushblock(CXt_LOOP_PLAIN, gimme, PL_stack_sp, PL_savestack_ix);
     cx_pushloop_plain(cx);
-
-    RETURN;
+    return NORMAL;
 }
+
 
 PP(pp_leaveloop)
 {
@@ -4925,7 +4923,7 @@ PP(pp_enterwhen)
        to the op that follows the leavewhen.
        RETURNOP calls PUTBACK which restores the stack pointer after the POPs.
     */
-    if ((0 == (PL_op->op_flags & OPf_SPECIAL)) && !SvTRUEx(POPs))
+    if (!(PL_op->op_flags & OPf_SPECIAL) && !SvTRUEx(POPs))
 	RETURNOP(cLOGOP->op_other->op_next);
 
     cx = cx_pushblock(CXt_WHEN, gimme, SP, PL_savestack_ix);
