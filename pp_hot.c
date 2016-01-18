@@ -3477,18 +3477,23 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
                      * merely by moving the cut boundary up one, rather
                      * than messing with SvTEMP.  If all args are 1:1 then
                      * we can avoid the sorting stage below completely.
+                     *
+                     * If there are no items above the cut on the tmps
+                     * stack, then the SvTEMP must comne from an item
+                     * below the cut, so there's nothing to do.
                      */
-                    if (sv == *tmps_basep)
-                        tmps_basep++;
-                    else
-                        SvTEMP_off(sv);
+                    if (tmps_basep <= &PL_tmps_stack[PL_tmps_ix]) {
+                        if (sv == *tmps_basep)
+                            tmps_basep++;
+                        else
+                            SvTEMP_off(sv);
+                    }
                 }
                 else if (!SvPADTMP(sv)) {
                     /* mortalise arg to avoid it being freed during save
                      * stack unwinding. Pad tmps don't need mortalising as
-                     * they're never freed */
-                    SvREFCNT_inc_simple_void_NN(sv);
-                    /* equivalent of sv_2mortal(), except that:
+                     * they're never freed. This is the equivalent of
+                     * sv_2mortal(SvREFCNT_inc(sv)), except that:
                      *  * it assumes that the temps stack has already been
                      *    extended;
                      *  * it puts the new item at the cut rather than at
@@ -3496,7 +3501,14 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
                      *    instead.
                      */
                     if (!SvIMMORTAL(sv)) {
+                        SvREFCNT_inc_simple_void_NN(sv);
                         SvTEMP_on(sv);
+                        /* Note that if there's nothing above the cut,
+                         * this copies the garbage one slot above
+                         * PL_tmps_ix onto itself. This is harmless (the
+                         * stack's already been extended), but might in
+                         * theory trigger warnings from tools like ASan
+                         */
                         PL_tmps_stack[++PL_tmps_ix] = *tmps_basep;
                         *tmps_basep++ = sv;
                     }
