@@ -14,7 +14,6 @@ plan 1;
 # RT #126410 = used to coredump when doing SvSTASH on %version::
 
 TODO: {
-    local $TODO = 'Broken since c07f9fb2c7 - revert of a revert: slowed down detruction with no DESTROY';
     fresh_perl_is(
         'use B; version->new("v5.22.0"); $s = B::svref_2object(\%version::); $s->SvSTASH; print "ok\n"',
         "ok\n", { stderr => 1 }, 'RT #126410 - SvSTASH against %version::'
