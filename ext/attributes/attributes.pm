@@ -19,7 +19,6 @@ sub carp {
 }
 
 my %deprecated;
-$deprecated{CODE} = qr/\A-?(locked)\z/;
 
 my %msg = (
     lvalue => 'lvalue attribute applied to already-defined subroutine',
@@ -253,12 +252,6 @@ C<sub foo($$) : prototype(@) {}> is indistinguishable from C<sub foo(@){}>.
 
 If illegalproto warnings are enabled, the prototype declared inside this
 attribute will be sanity checked at compile time.
-
-=item locked
-
-The "locked" attribute is deprecated, and has no effect in 5.10.0 and later.
-It was used as part of the now-removed "Perl 5.005 threads". It will
-disappear in Perl 5.28, after which its use will be fatal.
 
 =item const
 

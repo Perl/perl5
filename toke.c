@@ -5896,11 +5896,6 @@ Perl_yylex(pTHX)
 			sv_free(sv);
 			CvLVALUE_on(PL_compcv);
 		    }
-		    else if (!PL_in_my && len == 6 && strnEQ(SvPVX(sv), "locked", len)) {
-			sv_free(sv);
-                        deprecate_disappears_in("5.28",
-                            "Attribute \"locked\" is deprecated");
-		    }
 		    else if (!PL_in_my && len == 6 && strnEQ(SvPVX(sv), "method", len)) {
 			sv_free(sv);
 			CvMETHOD_on(PL_compcv);
