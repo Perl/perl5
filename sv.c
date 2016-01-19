@@ -5757,10 +5757,9 @@ S_sv_unmagicext_flags(pTHX_ SV *const sv, const int type, MGVTBL *vtbl, const U3
 	if (SvMAGICAL(sv))	/* if we're under save_magic, wait for restore_magic; */
 	    mg_magical(sv);	/*    else fix the flags now */
     }
-    else {
+    else
 	SvMAGICAL_off(sv);
-	SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
-    }
+
     return 0;
 }
 

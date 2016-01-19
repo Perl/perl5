@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 807;
+plan tests => 808;
 
 $| = 1;
 
@@ -2376,6 +2376,19 @@ is eval { eval $::x.1 }, 1, 'reset does not taint undef';
     is_tainted $n2, "- SETn";
     $n3 = $tn * 2.2;
     is_tainted $n3, "* SETn";
+}
+
+# check that localizing something with get magic (e.g. taint) doesn't
+# upgrade pIOK to IOK
+
+{
+    local our $x = 1.1 + $TAINT0;  # $x should be NOK
+    my $ix = int($x);          #          now NOK, pIOK
+    {
+        local $x = 0;
+    }
+    my $x1 = $x * 1;
+    isnt($x, 1); # it should be 1.1, not 1
 }
 
 

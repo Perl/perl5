@@ -210,15 +210,12 @@ S_save_scalar_at(pTHX_ SV **sptr, const U32 flags)
     PERL_ARGS_ASSERT_SAVE_SCALAR_AT;
 
     osv = *sptr;
-    sv  = (flags & SAVEf_KEEPOLDELEM) ? osv : (*sptr = newSV(0));
-
-    if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv)) {
-	if (SvGMAGICAL(osv)) {
-	    SvFLAGS(osv) |= (SvFLAGS(osv) &
-	       (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
-	}
-	if (!(flags & SAVEf_KEEPOLDELEM))
-	    mg_localize(osv, sv, cBOOL(flags & SAVEf_SETMAGIC));
+    if (flags & SAVEf_KEEPOLDELEM)
+        sv = osv;
+    else {
+        sv  = (*sptr = newSV(0));
+        if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv))
+            mg_localize(osv, sv, cBOOL(flags & SAVEf_SETMAGIC));
     }
 
     return sv;
