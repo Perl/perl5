@@ -91,7 +91,7 @@ consent of the Pumpking.)
   Peter Martini <petercmartini@gmail.com>
   Philippe Bruhat <book@cpan.org>
   Ricardo Signes <rjbs@cpan.org>
-  Stevan Little <stevan.little@iinteractive.com>
+  Stevan Little <stevan@cpan.org>
   Steve Hay <steve.m.hay@googlemail.com>
   Tatsuhiko Miyagawa <miyagawa@bulknews.net>
   Tony Cook <tony@develop-help.com>
