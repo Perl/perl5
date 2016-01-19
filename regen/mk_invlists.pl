@@ -155,6 +155,8 @@ my %hard_coded_enums =
         ],
 );
 
+my %gcb_enums;
+my @gcb_short_enums;
 my %lb_enums;
 my @lb_short_enums;
 
@@ -322,9 +324,17 @@ sub output_invmap ($$$$$$$) {
                     $enums{$enum} = $enum_val++ unless exists $enums{$enum};
                 }
 
-                # Calculate the enum values for property _Perl_LB because we
-                # output a special table for that
-                if ($name eq '_Perl_LB' && ! %lb_enums) {
+                # Calculate the enum values for properties _Perl_GCB and
+                # _Perl_LB because we output special tables for them
+                if ($name eq '_Perl_GCB' && ! %gcb_enums) {
+                    while (my ($enum, $value) = each %enums) {
+                        my ($short) = prop_value_aliases('GCB', $enum);
+                        $short = lc $enum unless defined $short;
+                        $gcb_enums{$short} = $value;
+                        @gcb_short_enums[$value] = $short;
+                    }
+                }
+                elsif ($name eq '_Perl_LB' && ! %lb_enums) {
                     while (my ($enum, $value) = each %enums) {
                         my ($short) = prop_value_aliases('LB', $enum);
                         $short = substr(lc $enum, 0, 2) unless defined $short;
@@ -455,14 +465,110 @@ sub UpperLatin1 {
     return mk_invlist_from_sorted_cp_list([ 128 .. 255 ]);
 }
 
+sub output_GCB_table() {
+
+    # Create and output the pair table for use in determining Grapheme Cluster
+    # Breaks, given in http://www.unicode.org/reports/tr29/.
+
+    # The table is constructed in reverse order of the rules, to make the
+    # lower-numbered, higher priority ones override the later ones, as the
+    # algorithm stops at the earliest matching rule
+
+    my @gcb_table;
+    my $table_size = @gcb_short_enums;
+
+    # Otherwise, break everywhere.
+    # GB10 	Any ÷  Any
+    for my $i (0 .. $table_size - 1) {
+        for my $j (0 .. $table_size - 1) {
+            $gcb_table[$i][$j] = 1;
+        }
+    }
+
+    # Do not break before extending characters.
+    # Do not break before SpacingMarks, or after Prepend characters.
+    # GB9   ×  Extend
+    # GB9a  × SpacingMark
+    # GB9b  Prepend  ×
+    for my $i (0 .. @gcb_table - 1) {
+        $gcb_table[$i][$gcb_enums{'EX'}] = 0;
+        $gcb_table[$i][$gcb_enums{'SM'}] = 0;
+        $gcb_table[$gcb_enums{'PP'}][$i] = 0;
+    }
+
+    # Do not break between regional indicator symbols.
+    # GB8a  Regional_Indicator  ×  Regional_Indicator
+    $gcb_table[$gcb_enums{'RI'}][$gcb_enums{'RI'}] = 0;
+
+    # Do not break Hangul syllable sequences.
+    # GB8  ( LVT | T)  ×  T
+    $gcb_table[$gcb_enums{'LVT'}][$gcb_enums{'T'}] = 0;
+    $gcb_table[$gcb_enums{'T'}][$gcb_enums{'T'}] = 0;
+
+    # GB7  ( LV | V )  ×  ( V | T )
+    $gcb_table[$gcb_enums{'LV'}][$gcb_enums{'V'}] = 0;
+    $gcb_table[$gcb_enums{'LV'}][$gcb_enums{'T'}] = 0;
+    $gcb_table[$gcb_enums{'V'}][$gcb_enums{'V'}] = 0;
+    $gcb_table[$gcb_enums{'V'}][$gcb_enums{'T'}] = 0;
+
+    # GB6  L  ×  ( L | V | LV | LVT )
+    $gcb_table[$gcb_enums{'L'}][$gcb_enums{'L'}] = 0;
+    $gcb_table[$gcb_enums{'L'}][$gcb_enums{'V'}] = 0;
+    $gcb_table[$gcb_enums{'L'}][$gcb_enums{'LV'}] = 0;
+    $gcb_table[$gcb_enums{'L'}][$gcb_enums{'LVT'}] = 0;
+
+    # Do not break between a CR and LF. Otherwise, break before and after controls.
+    # GB5   ÷  ( Control | CR | LF )
+    # GB4  ( Control | CR | LF )  ÷
+    for my $i (0 .. @gcb_table - 1) {
+        $gcb_table[$i][$gcb_enums{'CN'}] = 1;
+        $gcb_table[$i][$gcb_enums{'CR'}] = 1;
+        $gcb_table[$i][$gcb_enums{'LF'}] = 1;
+        $gcb_table[$gcb_enums{'CN'}][$i] = 1;
+        $gcb_table[$gcb_enums{'CR'}][$i] = 1;
+        $gcb_table[$gcb_enums{'LF'}][$i] = 1;
+    }
+
+    # GB3  CR  ×  LF
+    $gcb_table[$gcb_enums{'CR'}][$gcb_enums{'LF'}] = 0;
+
+    # Break at the start and end of text.
+    # GB1  sot  ÷
+    # GB2   ÷  eot
+    for my $i (0 .. @gcb_table - 1) {
+        $gcb_table[$i][$gcb_enums{'edge'}] = 1;
+        $gcb_table[$gcb_enums{'edge'}][$i] = 1;
+    }
+
+    # But, unspecified by Unicode, we shouldn't break on an empty string.
+    $gcb_table[$gcb_enums{'edge'}][$gcb_enums{'edge'}] = 0;
+
+    print $out_fh "\nstatic const bool GCB_table[$table_size][$table_size] = {\n";
+    print $out_fh "/*       ";
+    for my $i (0 .. @gcb_table - 1) {
+        printf $out_fh "%5s", $gcb_short_enums[$i];
+    }
+    print $out_fh " */\n";
+
+    for my $i (0 .. @gcb_table - 1) {
+        printf $out_fh "/*%5s */ ", $gcb_short_enums[$i];
+        for my $j (0 .. @gcb_table - 1) {
+            printf $out_fh "%3d", $gcb_table[$i][$j];
+            print $out_fh "," if $i < @gcb_table - 1 || $j < @gcb_table - 1;
+            print $out_fh " " if $j < @gcb_table - 1;
+        }
+        print $out_fh "\n";
+    }
+
+    print $out_fh "};\n";
+}
+
 sub output_LB_table() {
 
     # Create and output the enums, #defines, and pair table for use in
     # determining Line Breaks.  This uses the default line break algorithm,
     # given in http://www.unicode.org/reports/tr14/, but tailored by example 7
     # in that page, as the Unicode-furnished tests assume that tailoring.
-
-    switch_pound_if('LB_table', 'PERL_IN_REGEXEC_C');
 
     # The result is really just true or false.  But we follow along with tr14,
     # creating a rule which is false for something like X SP* X.  That gets
@@ -1000,8 +1106,6 @@ sub output_LB_table() {
     }
 
     print $out_fh "};\n";
-
-    end_file_pound_if;
 }
 
 output_invlist("Latin1", [ 0, 256 ]);
@@ -1420,7 +1524,12 @@ for my $charset (get_supported_code_pages()) {
     print $out_fh "\n" . get_conditional_compile_line_end();
 }
 
+switch_pound_if('Boundary_pair_tables', 'PERL_IN_REGEXEC_C');
+
+output_GCB_table();
 output_LB_table();
+
+end_file_pound_if;
 
 my $sources_list = "lib/unicore/mktables.lst";
 my @sources = ($0, qw(lib/unicore/mktables

@@ -2304,7 +2304,7 @@ Es	|void	|to_utf8_substr	|NN regexp * prog
 Es	|bool	|to_byte_substr	|NN regexp * prog
 ERsn	|I32	|reg_check_named_buff_matched	|NN const regexp *rex \
 						|NN const regnode *scan
-EsnR	|bool	|isGCB		|const GCB_enum before|const GCB_enum after
+EinR	|bool	|isGCB		|const GCB_enum before|const GCB_enum after
 EsR	|bool	|isLB		|LB_enum before				\
 				|LB_enum after				\
 				|NN const U8 * const strbeg		\

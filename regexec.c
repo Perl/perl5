@@ -4247,103 +4247,13 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
     return TRUE;
 }
 
-/* This creates a single number by combining two, with 'before' being like the
- * 10's digit, but this isn't necessarily base 10; it is base however many
- * elements of the enum there are */
-#define GCBcase(before, after) ((GCB_ENUM_COUNT * before) + after)
-
-STATIC bool
+PERL_STATIC_INLINE bool
 S_isGCB(const GCB_enum before, const GCB_enum after)
 {
     /* returns a boolean indicating if there is a Grapheme Cluster Boundary
      * between the inputs.  See http://www.unicode.org/reports/tr29/ */
 
-    switch (GCBcase(before, after)) {
-
-        /*  Break at the start and end of text.
-            GB1.   sot ÷
-            GB2.   ÷ eot
-
-            Break before and after controls except between CR and LF
-            GB4.  ( Control | CR | LF )  ÷
-            GB5.   ÷  ( Control | CR | LF )
-
-            Otherwise, break everywhere.
-            GB10.  Any  ÷  Any */
-        default:
-            return TRUE;
-
-        /* Do not break between a CR and LF.
-            GB3.  CR  ×  LF */
-        case GCBcase(GCB_CR, GCB_LF):
-            return FALSE;
-
-        /* Do not break Hangul syllable sequences.
-            GB6.  L  ×  ( L | V | LV | LVT ) */
-        case GCBcase(GCB_L, GCB_L):
-        case GCBcase(GCB_L, GCB_V):
-        case GCBcase(GCB_L, GCB_LV):
-        case GCBcase(GCB_L, GCB_LVT):
-            return FALSE;
-
-        /*  GB7.  ( LV | V )  ×  ( V | T ) */
-        case GCBcase(GCB_LV, GCB_V):
-        case GCBcase(GCB_LV, GCB_T):
-        case GCBcase(GCB_V, GCB_V):
-        case GCBcase(GCB_V, GCB_T):
-            return FALSE;
-
-        /*  GB8.  ( LVT | T)  ×  T */
-        case GCBcase(GCB_LVT, GCB_T):
-        case GCBcase(GCB_T, GCB_T):
-            return FALSE;
-
-        /* Do not break between regional indicator symbols.
-            GB8a.  Regional_Indicator  ×  Regional_Indicator */
-        case GCBcase(GCB_Regional_Indicator, GCB_Regional_Indicator):
-            return FALSE;
-
-        /* Do not break before extending characters.
-            GB9.     ×  Extend */
-        case GCBcase(GCB_Other, GCB_Extend):
-        case GCBcase(GCB_Extend, GCB_Extend):
-        case GCBcase(GCB_L, GCB_Extend):
-        case GCBcase(GCB_LV, GCB_Extend):
-        case GCBcase(GCB_LVT, GCB_Extend):
-        case GCBcase(GCB_Prepend, GCB_Extend):
-        case GCBcase(GCB_Regional_Indicator, GCB_Extend):
-        case GCBcase(GCB_SpacingMark, GCB_Extend):
-        case GCBcase(GCB_T, GCB_Extend):
-        case GCBcase(GCB_V, GCB_Extend):
-            return FALSE;
-
-        /* Do not break before SpacingMarks, or after Prepend characters.
-            GB9a.     ×  SpacingMark */
-        case GCBcase(GCB_Other, GCB_SpacingMark):
-        case GCBcase(GCB_Extend, GCB_SpacingMark):
-        case GCBcase(GCB_L, GCB_SpacingMark):
-        case GCBcase(GCB_LV, GCB_SpacingMark):
-        case GCBcase(GCB_LVT, GCB_SpacingMark):
-        case GCBcase(GCB_Prepend, GCB_SpacingMark):
-        case GCBcase(GCB_Regional_Indicator, GCB_SpacingMark):
-        case GCBcase(GCB_SpacingMark, GCB_SpacingMark):
-        case GCBcase(GCB_T, GCB_SpacingMark):
-        case GCBcase(GCB_V, GCB_SpacingMark):
-            return FALSE;
-
-        /* GB9b.  Prepend  ×   */
-        case GCBcase(GCB_Prepend, GCB_Other):
-        case GCBcase(GCB_Prepend, GCB_L):
-        case GCBcase(GCB_Prepend, GCB_LV):
-        case GCBcase(GCB_Prepend, GCB_LVT):
-        case GCBcase(GCB_Prepend, GCB_Prepend):
-        case GCBcase(GCB_Prepend, GCB_Regional_Indicator):
-        case GCBcase(GCB_Prepend, GCB_T):
-        case GCBcase(GCB_Prepend, GCB_V):
-            return FALSE;
-    }
-
-    NOT_REACHED; /* NOTREACHED */
+    return GCB_table[before][after];
 }
 
 /* Combining marks attach to most classes that precede them, but this defines
@@ -4630,6 +4540,9 @@ S_backup_one_LB(pTHX_ const U8 * const strbeg, U8 ** curpos, const bool utf8_tar
     return lb;
 }
 
+/* This creates a single number by combining two, with 'before' being like the
+ * 10's digit, but this isn't necessarily base 10; it is base however many
+ * elements of the enum there are */
 #define SBcase(before, after) ((SB_ENUM_COUNT * before) + after)
 
 STATIC bool

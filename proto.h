@@ -5010,7 +5010,7 @@ STATIC bool	S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
 #define PERL_ARGS_ASSERT_ISFOO_UTF8_LC	\
 	assert(character)
 
-STATIC bool	S_isGCB(const GCB_enum before, const GCB_enum after)
+PERL_STATIC_INLINE bool	S_isGCB(const GCB_enum before, const GCB_enum after)
 			__attribute__warn_unused_result__;
 
 STATIC bool	S_isLB(pTHX_ LB_enum before, LB_enum after, const U8 * const strbeg, const U8 * const curpos, const U8 * const strend, const bool utf8_target)

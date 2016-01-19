@@ -87735,6 +87735,24 @@ static const UV XPosixXDigit_invlist[] = { /* for EBCDIC 037 */
 
 #if defined(PERL_IN_REGEXEC_C)
 
+static const bool GCB_table[14][14] = {
+/*          XX   CR   CN   EX    L   LF   LV  LVT   PP   RI   SM    T    V edge */
+/*   XX */   1,   1,   1,   0,   1,   1,   1,   1,   1,   1,   0,   1,   1,   1,
+/*   CR */   1,   1,   1,   1,   1,   0,   1,   1,   1,   1,   1,   1,   1,   1,
+/*   CN */   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,
+/*   EX */   1,   1,   1,   0,   1,   1,   1,   1,   1,   1,   0,   1,   1,   1,
+/*    L */   1,   1,   1,   0,   0,   1,   0,   0,   1,   1,   0,   1,   0,   1,
+/*   LF */   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,
+/*   LV */   1,   1,   1,   0,   1,   1,   1,   1,   1,   1,   0,   0,   0,   1,
+/*  LVT */   1,   1,   1,   0,   1,   1,   1,   1,   1,   1,   0,   0,   1,   1,
+/*   PP */   0,   1,   1,   0,   0,   1,   0,   0,   0,   0,   0,   0,   0,   1,
+/*   RI */   1,   1,   1,   0,   1,   1,   1,   1,   1,   0,   0,   1,   1,   1,
+/*   SM */   1,   1,   1,   0,   1,   1,   1,   1,   1,   1,   0,   1,   1,   1,
+/*    T */   1,   1,   1,   0,   1,   1,   1,   1,   1,   1,   0,   0,   1,   1,
+/*    V */   1,   1,   1,   0,   1,   1,   1,   1,   1,   1,   0,   0,   0,   1,
+/* edge */   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   0
+};
+
 #define LB_NOBREAK	0
 #define LB_BREAKABLE	1
 #define LB_NOBREAK_EVEN_WITH_SP_BETWEEN	2
@@ -87817,6 +87835,7 @@ static const U8 LB_table[36][36] = {
  * 38b17e1118206489a7e0ab5d29d7932212d38838df7d3ec025ecb58e8798ec20 lib/unicore/UnicodeData.txt
  * 0cedd6e0f5cadf57ce9cfc96beccfd083b0faa0809a631a777cd25f0316bfabb lib/unicore/auxiliary/GCBTest.txt
  * 230005412f9a47128e37bc52330766aaa0b5522a53737a89cff66e891e14527a lib/unicore/auxiliary/GraphemeBreakProperty.txt
+ * 149b14ab93b06c887a958fb16d0ad01193063ef69cc14f10338ae4d0accd6c28 lib/unicore/auxiliary/LBTest.txt
  * 41bf82452d71ce15eda8c9bb1bb0c20b72205acaaf503e3cb84734ed8e85d33a lib/unicore/auxiliary/SBTest.txt
  * d3b45cdb0a73eeb9d25158336583dfc1e6f64da59537acb0008988b40e6b3b63 lib/unicore/auxiliary/SentenceBreakProperty.txt
  * a661f42a54f7cc4dded72a61c508be2b482f912d4b6cf140335010f0c684dbb9 lib/unicore/auxiliary/WBTest.txt
@@ -87835,5 +87854,5 @@ static const U8 LB_table[36][36] = {
  * b99d791e3e9edab7a3e2016943081585b069aa9c18447b3cdf3137b97f453f7c lib/unicore/mktables
  * 462c9aaa608fb2014cd9649af1c5c009485c60b9c8b15b89401fdc10cf6161c6 lib/unicore/version
  * 913d2f93f3cb6cdf1664db888bf840bc4eb074eef824e082fceda24a9445e60c regen/charset_translations.pl
- * e9526360724d821ce2a46cdd11b9ddd9aac93e4edb653bf6af8f493bf42da1e6 regen/mk_invlists.pl
+ * aecdc74d0b96fe90050ec60ac2a083e99cfd937b06d29c2aed072090cf4c1900 regen/mk_invlists.pl
  * ex: set ro: */
