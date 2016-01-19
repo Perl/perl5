@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 148);
+plan(tests => 149);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -458,6 +458,17 @@ is $kalled, 1, 'calling a class method via a magic variable';
       ::is( eval { NoSub->bluh }, "NoSub::bluh", "...which works as expected" );
    }
    { bless {}, "NoSub"; }
+}
+
+{
+    # [perl #124387]
+    local $::TODO = "AUTOLOAD not being called for DESTROY";
+    my $autoloaded;
+    package AutoloadDestroy;
+    sub AUTOLOAD { $autoloaded = 1 }
+    package main;
+    bless {}, "AutoloadDestroy";
+    ok($autoloaded, "AUTOLOAD called for DESTROY");
 }
 
 eval { () = 3; new {} };
