@@ -19880,7 +19880,7 @@ sub _test_break($$) {
                 }
                 print " correctly matched $should_display[$i]; line $line\n";
             } else {
-                $matches[$i] = join("", map { sprintf "\\x{%04X}", $_ }
+                $matches[$i] = join("", map { sprintf "\\x{%04X}", ord $_ }
                                                     split "", $matches[$i]);
                 print "not ok $Tests - In \"$display_string\" =~ /(\\X)/g, \\X #",
                     $i + 1,
