@@ -361,6 +361,7 @@ for my $meth (['Bar', 'Foo::Bar'],
 {
     fresh_perl_is(<<EOT,
 package UNIVERSAL; sub AUTOLOAD { my \$c = shift; print "\$c \$AUTOLOAD\\n" }
+sub DESTROY {} # prevent AUTOLOAD being called on DESTROY
 package Xyz;
 package main; Foo->$meth->[0]();
 EOT
@@ -462,7 +463,6 @@ is $kalled, 1, 'calling a class method via a magic variable';
 
 {
     # [perl #124387]
-    local $::TODO = "AUTOLOAD not being called for DESTROY";
     my $autoloaded;
     package AutoloadDestroy;
     sub AUTOLOAD { $autoloaded = 1 }
