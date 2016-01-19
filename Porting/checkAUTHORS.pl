@@ -916,6 +916,7 @@ stef\100mongueurs.net                   stef\100payrard.net
 +                                       properler\100freesurf.fr
 +                                       stef\100francenet.fr
 stevan\100cpan.org                      stevan.little\100gmail.com
++                                       stevan.little\100iinteractive.com
 sthoenna\100efn.org                     ysth\100raven.shiftboard.com
 sisyphus1\100optusnet.com.au            sisyphus\100cpan.org
 
