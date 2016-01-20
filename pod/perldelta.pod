@@ -359,6 +359,18 @@ L<[perl #126240]|https://rt.perl.org/Ticket/Display.html?id=126240>
 
 =back
 
+=head1 Known Problems
+
+=over 4
+
+=item *
+
+Statically building perl is not currently working due to a problem
+related to multiple definitions of the C<cp1252_encoding> in the
+C<Encode> module.
+
+=back
+
 =head1 Acknowledgements
 
 Perl 5.23.7 represents approximately 4 weeks of development since Perl 5.23.6
