@@ -87805,6 +87805,42 @@ static const U8 LB_table[36][36] = {
 /* ed */ {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 }
 };
 
+#define WB_NOBREAK	0
+#define WB_BREAKABLE	1
+#define WB_hs_then_hs	2
+#define WB_Ex_or_FO_then_foo	3
+#define WB_DQ_then_HL	4
+#define WB_HL_then_DQ	6
+#define WB_LE_or_HL_then_MB_or_ML_or_SQ	8
+#define WB_MB_or_ML_or_SQ_then_LE_or_HL	10
+#define WB_MB_or_MN_or_SQ_then_NU	12
+#define WB_NU_then_MB_or_MN_or_SQ	14
+
+static const U8 WB_table[19][19] = {
+
+/* 'Ex' stands for 'Extend'; 'hs' for 'Perl_Tailored_HSpace'; 'ed' for 'edge' */
+/*        XX  LE  CR  DQ  Ex  EX  FO  HL  KA  LF  ML  MN  MB  NL  NU  hs  RI  SQ  ed */
+/* XX */ { 1,  1,  1,  1,  0,  1,  0,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1 },
+/* LE */ { 1,  0,  1,  1,  0,  0,  0,  0,  1,  1,  9,  1,  9,  1,  0,  1,  1,  9,  1 },
+/* CR */ { 1,  1,  0,  1,  1,  1,  1,  1,  1,  0,  1,  1,  1,  0,  1,  0,  1,  1,  1 },
+/* DQ */ { 1,  1,  1,  1,  0,  1,  0,  5,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1 },
+/* Ex */ { 3,  3,  1,  3,  0,  3,  0,  3,  3,  1,  3,  3,  3,  1,  3,  1,  3,  3,  1 },
+/* EX */ { 1,  0,  1,  1,  0,  0,  0,  0,  0,  1,  1,  1,  1,  1,  0,  1,  1,  1,  1 },
+/* FO */ { 3,  3,  1,  3,  0,  3,  0,  3,  3,  1,  3,  3,  3,  1,  3,  1,  3,  3,  1 },
+/* HL */ { 1,  0,  1,  7,  0,  0,  0,  0,  1,  1,  9,  1,  9,  1,  0,  1,  1,  8,  1 },
+/* KA */ { 1,  1,  1,  1,  0,  0,  0,  1,  0,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1 },
+/* LF */ { 1,  1,  0,  1,  1,  1,  1,  1,  1,  0,  1,  1,  1,  0,  1,  0,  1,  1,  1 },
+/* ML */ { 1, 11,  1,  1,  0,  1,  0, 11,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1 },
+/* MN */ { 1,  1,  1,  1,  0,  1,  0,  1,  1,  1,  1,  1,  1,  1, 13,  1,  1,  1,  1 },
+/* MB */ { 1, 11,  1,  1,  0,  1,  0, 11,  1,  1,  1,  1,  1,  1, 13,  1,  1,  1,  1 },
+/* NL */ { 1,  1,  0,  1,  1,  1,  1,  1,  1,  0,  1,  1,  1,  0,  1,  0,  1,  1,  1 },
+/* NU */ { 1,  0,  1,  1,  0,  0,  0,  0,  1,  1,  1, 15, 15,  1,  0,  1,  1, 15,  1 },
+/* hs */ { 1,  1,  0,  1,  0,  1,  0,  1,  1,  0,  1,  1,  1,  0,  1,  2,  1,  1,  1 },
+/* RI */ { 1,  1,  1,  1,  0,  1,  0,  1,  1,  1,  1,  1,  1,  1,  1,  1,  0,  1,  1 },
+/* SQ */ { 1, 11,  1,  1,  0,  1,  0, 11,  1,  1,  1,  1,  1,  1, 13,  1,  1,  1,  1 },
+/* ed */ { 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  0 }
+};
+
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
 /* Generated from:
@@ -87854,5 +87890,5 @@ static const U8 LB_table[36][36] = {
  * b99d791e3e9edab7a3e2016943081585b069aa9c18447b3cdf3137b97f453f7c lib/unicore/mktables
  * 462c9aaa608fb2014cd9649af1c5c009485c60b9c8b15b89401fdc10cf6161c6 lib/unicore/version
  * 913d2f93f3cb6cdf1664db888bf840bc4eb074eef824e082fceda24a9445e60c regen/charset_translations.pl
- * c514d55570fb9a75b62d88fed49c0bbccf1e01b83eb528b26b338734d9bcf318 regen/mk_invlists.pl
+ * 5774f77d07a81945b6a679ecce07ad90cdb334f3fb402ff63bdbecd2ec67da05 regen/mk_invlists.pl
  * ex: set ro: */
