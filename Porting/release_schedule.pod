@@ -15,7 +15,7 @@ deemed necessary by the Pumpking.
 
 Code freezes (which happen in the 5.23.X series)
 
-  2016-01-20  5.23.7          Contentious changes freeze
+  2016-01-20  5.23.7 ✓        Contentious changes freeze
   2016-02-20  5.23.8          User-visible changes freeze
   2016-03-20  5.23.9          Full code freeze
   2016-05-20  5.24.0          Stable release!
