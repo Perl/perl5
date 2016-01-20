@@ -9577,9 +9577,10 @@ S_scan_heredoc(pTHX_ char *s)
 		goto streaming;
 	    }
 	  }
-	else {	/* eval */
+	else {	/* eval or we've already hit EOF */
 	    s = (char*)memchr((void*)s, '\n', PL_bufend - s);
-	    assert(s);
+	    if (!s)
+                goto interminable;
 	}
 	linestr = shared->ls_linestr;
 	bufend = SvEND(linestr);
