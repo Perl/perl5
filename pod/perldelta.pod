@@ -63,12 +63,6 @@ L<[perl #127060]|https://rt.perl.org/Ticket/Display.html?id=127060>
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
 =head2 Updated Modules and Pragmata
 
 =over 4
