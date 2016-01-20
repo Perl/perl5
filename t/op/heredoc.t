@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-plan(tests => 40);
+plan(tests => 41);
 
 
 # heredoc without newline (#65838)
@@ -97,5 +97,13 @@ HEREDOC
         qr/^Number found where operator expected at - line 1, near "<<""0"\s+\(Missing operator/,
         {},
         "don't use an invalid oldoldbufptr"
+    );
+
+    # [perl #125540] this asserted or crashed
+    fresh_perl_like(
+	q(map d$#<<<<),
+	qr/Can't find string terminator "" anywhere before EOF at - line 1\./,
+	{},
+	"Don't assert parsing a here-doc if we hit EOF early"
     );
 }
