@@ -172,19 +172,6 @@ L<[perl #127060]|https://rt.perl.org/Ticket/Display.html?id=127060>
 
 =back
 
-=head1 Utility Changes
-
-=head2 L<podcheck>
-
-=over 4
-
-=item *
-
-Improve NAME detection. Previously if the C<=head1> NAME section contained a
-C<=for> block, that caused C<podcheck> to not detect the defined NAME.
-
-=back
-
 =head1 Configuration and Compilation
 
 =over 4
