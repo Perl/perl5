@@ -602,16 +602,25 @@ perl_destruct(pTHXx)
     my_fflush_all();
 
 #ifdef PERL_TRACE_OPS
-    /* If we traced all Perl OP usage, report and clean up */
+    /* dump OP-counts if $ENV{PERL_TRACE_OPS} > 0 */
+    {
+        const char * const ptoenv = PerlEnv_getenv("PERL_TRACE_OPS");
+        UV uv;
+
+        if (!ptoenv || !Perl_grok_atoUV(ptoenv, &uv, NULL)
+            || !(uv > 0))
+        goto no_trace_out;
+    }
     PerlIO_printf(Perl_debug_log, "Trace of all OPs executed:\n");
     for (i = 0; i <= OP_max; ++i) {
-        PerlIO_printf(Perl_debug_log, "  %s: %"UVuf"\n", PL_op_name[i], PL_op_exec_cnt[i]);
-        PL_op_exec_cnt[i] = 0;
+        if (PL_op_exec_cnt[i])
+            PerlIO_printf(Perl_debug_log, "  %s: %"UVuf"\n", PL_op_name[i], PL_op_exec_cnt[i]);
     }
     /* Utility slot for easily doing little tracing experiments in the runloop: */
     if (PL_op_exec_cnt[OP_max+1] != 0)
         PerlIO_printf(Perl_debug_log, "  SPECIAL: %"UVuf"\n", PL_op_exec_cnt[OP_max+1]);
     PerlIO_printf(Perl_debug_log, "\n");
+ no_trace_out:
 #endif
 
 
