@@ -75,11 +75,79 @@ dual-life modules would have a F<Changes> file that could be cribbed.
 
 =item *
 
+The F<cpan/podlators/> bundle has been upgraded from version 2.28 to 4.04.
+
+=item *
+
+L<B> has been upgraded from version 1.61 to 1.62.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.36 to 1.37.
+
+=item *
+
+L<Benchmark> has been upgraded from version 1.21 to 1.22.
+
+=item *
+
+L<bignum> has been upgraded from version 0.41 to 0.42.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.159 to 2.160.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.30 to 3.31.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.30 to 3.31.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.32 to 1.33.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.60 to 3.62.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999710 to 1.999715.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.38 to 0.40.
+
+=item *
+
+L<Math::BigRat> has been upgraded from version 0.260801 to 0.260802.
+
+=item *
+
 L<Module::CoreList> has been upgraded from version 5.20151220 to 5.20160120.
 
 =item *
 
-The F<cpan/podlators/> bundle has been upgraded from version 2.28 to 4.04.
+L<Pod::Usage> has been upgraded from version 1.67 to 1.68.
+
+=item *
+
+L<Test::Harness> has been upgraded from version 3.35 to 3.36.
+
+=item *
+
+L<Unicode::Normalize> has been upgraded from version 1.24 to 1.25.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.63 to 0.64.
+
+=item *
+
+L<utf8> has been upgraded from version 1.18 to 1.19.
 
 =back
 
