@@ -51,16 +51,6 @@ between each white space character.  Now it doesn't generally match
 within spans of white space, behaving like C<\b> does.  See
 L<perlrebackslash/\b{wb}>
 
-=head1 Deprecations
-
-=head2 C<*glob{FILEHANDLE}> is no longer deprecated
-
-We are now trying to use deprecation warnings only when we believe
-that a behavior will really be removed or made an error.  Since we
-don't plan to do that with C<*glob{FILEHANDLE}>, the warning is not
-useful and may be harmful.
-L<[perl #127060]|https://rt.perl.org/Ticket/Display.html?id=127060>
-
 =head1 Modules and Pragmata
 
 =head2 Updated Modules and Pragmata
@@ -155,7 +145,7 @@ L<utf8> has been upgraded from version 1.18 to 1.19.
 
 =item *
 
-Fix broken example where C<=> was used instead of
+Fixed a broken example where C<=> was used instead of
 C<==> in conditional in do/while example.
 
 =back
@@ -190,7 +180,7 @@ Consistently refer to bisect.pl as F<Porting/bisect.pl>
 
 =item *
 
-Misc. grammar and POD fixes.
+Miscellaneous grammar and POD fixes.
 
 =back
 
@@ -266,8 +256,8 @@ resulting in C<getcwd()> being 605x faster in Win32 miniperl.
 
 =item *
 
-On VMS, math function prototypes in C<math.h> now visible under C++. Building
-POSIX extension with C++ no longer crashes.
+On VMS, the math function prototypes in C<math.h> are now visible under C++.
+Now building the POSIX extension with C++ will no longer crash.
 
 =item *
 
@@ -318,7 +308,7 @@ for C<Foo::Bar>).
 
 =item *
 
-Deprecate C<to_utf8_case()> function, see
+Deprecate the C<to_utf8_case()> function, see
 L<http://nntp.perl.org/group/perl.perl5.porters/233287>.
 
 =back
@@ -329,7 +319,7 @@ L<http://nntp.perl.org/group/perl.perl5.porters/233287>.
 
 =item *
 
-A regression that allowed undeclared barewords as hash keys to work despite
+A regression that allowed undeclared barewords in hash keys to work despite
 strictures has been fixed.
 L<[perl #126981]|https://rt.perl.org/Ticket/Display.html?id=126981>
 
