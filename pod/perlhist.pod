@@ -573,6 +573,7 @@ the strings?).
  Steve     5.23.4       2015-Oct-20
  Abigail   5.23.5       2015-Nov-20
  David G   5.23.6       2015-Dec-21
+ Stevan    5.23.7       2016-Jan-20
 
 =head2 SELECTED RELEASE SIZES
 
