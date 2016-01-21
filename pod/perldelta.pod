@@ -338,7 +338,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Line numbers larger than 2**31-1 but less than 2**32 are not longer
+returned by caller() as negative numbers.  [perl #126991]
 
 =back
 
