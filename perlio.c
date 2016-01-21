@@ -5009,7 +5009,7 @@ PerlIO_tmpfile(void)
      char tempname[] = "/tmp/PerlIO_XXXXXX";
      const char * const tmpdir = TAINTING_get ? NULL : PerlEnv_getenv("TMPDIR");
      SV * sv = NULL;
-     int old_umask = umask(0600);
+     int old_umask = umask(0177);
      /*
       * I have no idea how portable mkstemp() is ... NI-S
       */
