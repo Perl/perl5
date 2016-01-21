@@ -544,19 +544,18 @@ sub output_GCB_table() {
     $gcb_table[$gcb_enums{'edge'}][$gcb_enums{'edge'}] = 0;
 
     print $out_fh "\nstatic const bool GCB_table[$table_size][$table_size] = {\n";
-    print $out_fh "/*       ";
+    print $out_fh "/*      ";
     for my $i (0 .. @gcb_table - 1) {
         printf $out_fh "%5s", $gcb_short_enums[$i];
     }
-    print $out_fh " */\n";
+    print $out_fh "*/\n";
 
     for my $i (0 .. @gcb_table - 1) {
-        printf $out_fh "/*%5s */ ", $gcb_short_enums[$i];
-        for my $j (0 .. @gcb_table - 1) {
-            printf $out_fh "%3d", $gcb_table[$i][$j];
-            print $out_fh "," if $i < @gcb_table - 1 || $j < @gcb_table - 1;
-            print $out_fh " " if $j < @gcb_table - 1;
-        }
+        printf $out_fh "/*%4s*/ ", $gcb_short_enums[$i];
+        print $out_fh "{";
+        print $out_fh join ", ", map sprintf("%3d", $_), @{ $gcb_table[$i] };
+        print $out_fh "}";
+        print $out_fh "," if $i < @gcb_table - 1;
         print $out_fh "\n";
     }
 
@@ -1089,7 +1088,7 @@ sub output_LB_table() {
 
     print $out_fh "\nstatic const U8 LB_table[$table_size][$table_size] = {\n";
     print $out_fh "\n/* 'ed' stands for 'edge' */\n";
-    print $out_fh "/*      ";
+    print $out_fh "/*        ";
     for my $i (0 .. @lb_table - 1) {
         print $out_fh "  $lb_short_enums[$i]";
     }
@@ -1097,11 +1096,10 @@ sub output_LB_table() {
 
     for my $i (0 .. @lb_table - 1) {
         print $out_fh "/* $lb_short_enums[$i] */ ";
-        for my $j (0 .. @lb_table - 1) {
-            printf $out_fh "%2d", $lb_table[$i][$j];
-            print $out_fh "," if $i < @lb_table - 1 || $j < @lb_table - 1;
-            print $out_fh " " if $j < @lb_table - 1;
-        }
+        print $out_fh "{ ";
+        print $out_fh join ", ", map sprintf("%2d", $_), @{ $lb_table[$i] };
+        print $out_fh " }";
+        print $out_fh "," if $i < @lb_table - 1;
         print $out_fh "\n";
     }
 
