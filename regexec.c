@@ -4540,11 +4540,6 @@ S_backup_one_LB(pTHX_ const U8 * const strbeg, U8 ** curpos, const bool utf8_tar
     return lb;
 }
 
-/* This creates a single number by combining two, with 'before' being like the
- * 10's digit, but this isn't necessarily base 10; it is base however many
- * elements of the enum there are */
-#define SBcase(before, after) ((SB_ENUM_COUNT * before) + after)
-
 STATIC bool
 S_isSB(pTHX_ SB_enum before,
              SB_enum after,
@@ -4557,16 +4552,17 @@ S_isSB(pTHX_ SB_enum before,
      * between the inputs.  See http://www.unicode.org/reports/tr29/ */
 
     U8 * lpos = (U8 *) curpos;
-    U8 * temp_pos;
-    SB_enum backup;
+    bool has_para_sep = FALSE;
+    bool has_sp = FALSE;
 
     PERL_ARGS_ASSERT_ISSB;
 
     /* Break at the start and end of text.
         SB1.  sot  ÷
-        SB2.  ÷  eot */
+        SB2.  ÷  eot
+      But unstated in Unicode is don't break if the text is empty */
     if (before == SB_EDGE || after == SB_EDGE) {
-        return TRUE;
+        return before != after;
     }
 
     /* SB 3: Do not break within CRLF. */
@@ -4587,11 +4583,31 @@ S_isSB(pTHX_ SB_enum before,
      * (See Section 6.2, Replacing Ignore Rules.)
         SB5.  X (Extend | Format)*  →  X */
     if (after == SB_Extend || after == SB_Format) {
+
+        /* Implied is that the these characters attach to everything
+         * immediately prior to them except for those separator-type
+         * characters.  And the rules earlier have already handled the case
+         * when one of those immediately precedes the extend char */
         return FALSE;
     }
 
     if (before == SB_Extend || before == SB_Format) {
-        before = backup_one_SB(strbeg, &lpos, utf8_target);
+        U8 * temp_pos = lpos;
+        const SB_enum backup = backup_one_SB(strbeg, &temp_pos, utf8_target);
+        if (   backup != SB_EDGE
+            && backup != SB_Sep
+            && backup != SB_CR
+            && backup != SB_LF)
+        {
+            before = backup;
+            lpos = temp_pos;
+        }
+
+        /* Here, both 'before' and 'backup' are these types; implied is that we
+         * don't break between them */
+        if (backup == SB_Extend || backup == SB_Format) {
+            return FALSE;
+        }
     }
 
     /* Do not break after ambiguous terminators like period, if they are
@@ -4609,97 +4625,107 @@ S_isSB(pTHX_ SB_enum before,
 
     /* SB7.  (Upper | Lower) ATerm  ×  Upper */
     if (before == SB_ATerm && after == SB_Upper) {
-        temp_pos = lpos;
-        backup = backup_one_SB(strbeg, &temp_pos, utf8_target);
+        U8 * temp_pos = lpos;
+        SB_enum backup = backup_one_SB(strbeg, &temp_pos, utf8_target);
         if (backup == SB_Upper || backup == SB_Lower) {
             return FALSE;
         }
     }
 
-    /* SB8a.  (STerm | ATerm) Close* Sp*  ×  (SContinue | STerm | ATerm)
-     * SB10.  (STerm | ATerm) Close* Sp*  ×  ( Sp | Sep | CR | LF )      */
-    backup = before;
-    temp_pos = lpos;
-    while (backup == SB_Sp) {
-        backup = backup_one_SB(strbeg, &temp_pos, utf8_target);
-    }
-    while (backup == SB_Close) {
-        backup = backup_one_SB(strbeg, &temp_pos, utf8_target);
-    }
-    if ((backup == SB_STerm || backup == SB_ATerm)
-        && (   after == SB_SContinue
-            || after == SB_STerm
-            || after == SB_ATerm
-            || after == SB_Sp
-            || after == SB_Sep
-            || after == SB_CR
-            || after == SB_LF))
-    {
-        return FALSE;
+    /* The remaining rules that aren't the final one, all require an STerm or
+     * an ATerm after having backed up over some Close* Sp*, and in one case an
+     * optional Paragraph separator, although one rule doesn't have any Sp's in it.
+     * So do that backup now, setting flags if either Sp or a paragraph
+     * separator are found */
+
+    if (before == SB_Sep || before == SB_CR || before == SB_LF) {
+        has_para_sep = TRUE;
+        before = backup_one_SB(strbeg, &lpos, utf8_target);
     }
 
-    /* SB8.  ATerm Close* Sp*  ×  ( ¬(OLetter | Upper | Lower | Sep | CR | LF |
-     *                                              STerm | ATerm) )* Lower */
-    if (backup == SB_ATerm) {
-        U8 * rpos = (U8 *) curpos;
-        SB_enum later = after;
-
-        while (    later != SB_OLetter
-                && later != SB_Upper
-                && later != SB_Lower
-                && later != SB_Sep
-                && later != SB_CR
-                && later != SB_LF
-                && later != SB_STerm
-                && later != SB_ATerm
-                && later != SB_EDGE)
-        {
-            later = advance_one_SB(&rpos, strend, utf8_target);
+    if (before == SB_Sp) {
+        has_sp = TRUE;
+        do {
+            before = backup_one_SB(strbeg, &lpos, utf8_target);
         }
-        if (later == SB_Lower) {
-            return FALSE;
+        while (before == SB_Sp);
+    }
+
+    while (before == SB_Close) {
+        before = backup_one_SB(strbeg, &lpos, utf8_target);
+    }
+
+    /* The next few rules apply only when the backed-up-to is an ATerm, and in
+     * most cases an STerm */
+    if (before == SB_STerm || before == SB_ATerm) {
+
+        /* So, here the lhs matches
+         *      (STerm | ATerm) Close* Sp* (Sep | CR | LF)?
+         * and we have set flags if we found an Sp, or the optional Sep,CR,LF.
+         * The rules that apply here are:
+         *
+         * SB8    ATerm Close* Sp*  ×  ( ¬(OLetter | Upper | Lower | Sep | CR
+                                           | LF | STerm | ATerm) )* Lower
+           SB8a  (STerm | ATerm) Close* Sp*  ×  (SContinue | STerm | ATerm)
+           SB9   (STerm | ATerm) Close*  ×  (Close | Sp | Sep | CR | LF)
+           SB10  (STerm | ATerm) Close* Sp*  ×  (Sp | Sep | CR | LF)
+           SB11  (STerm | ATerm) Close* Sp* (Sep | CR | LF)?  ÷
+         */
+
+        /* And all but SB11 forbid having seen a paragraph separator */
+        if (! has_para_sep) {
+            if (before == SB_ATerm) {          /* SB8 */
+                U8 * rpos = (U8 *) curpos;
+                SB_enum later = after;
+
+                while (    later != SB_OLetter
+                        && later != SB_Upper
+                        && later != SB_Lower
+                        && later != SB_Sep
+                        && later != SB_CR
+                        && later != SB_LF
+                        && later != SB_STerm
+                        && later != SB_ATerm
+                        && later != SB_EDGE)
+                {
+                    later = advance_one_SB(&rpos, strend, utf8_target);
+                }
+                if (later == SB_Lower) {
+                    return FALSE;
+                }
+            }
+
+            if (   after == SB_SContinue    /* SB8a */
+                || after == SB_STerm
+                || after == SB_ATerm)
+            {
+                return FALSE;
+            }
+
+            if (! has_sp) {     /* SB9 applies only if there was no Sp* */
+                if (   after == SB_Close
+                    || after == SB_Sp
+                    || after == SB_Sep
+                    || after == SB_CR
+                    || after == SB_LF)
+                {
+                    return FALSE;
+                }
+            }
+
+            /* SB10.  This and SB9 could probably be combined some way, but khw
+             * has decided to follow the Unicode rule book precisely for
+             * simplified maintenance */
+            if (   after == SB_Sp
+                || after == SB_Sep
+                || after == SB_CR
+                || after == SB_LF)
+            {
+                return FALSE;
+            }
         }
-    }
 
-    /* Break after sentence terminators, but include closing punctuation,
-     * trailing spaces, and a paragraph separator (if present). [See note
-     * below.]
-     * SB9.  ( STerm | ATerm ) Close*  ×  ( Close | Sp | Sep | CR | LF ) */
-    backup = before;
-    temp_pos = lpos;
-    while (backup == SB_Close) {
-        backup = backup_one_SB(strbeg, &temp_pos, utf8_target);
-    }
-    if ((backup == SB_STerm || backup == SB_ATerm)
-        && (   after == SB_Close
-            || after == SB_Sp
-            || after == SB_Sep
-            || after == SB_CR
-            || after == SB_LF))
-    {
-        return FALSE;
-    }
-
-
-    /* SB11.  ( STerm | ATerm ) Close* Sp* ( Sep | CR | LF )?  ÷ */
-    temp_pos = lpos;
-    backup = backup_one_SB(strbeg, &temp_pos, utf8_target);
-    if (   backup == SB_Sep
-        || backup == SB_CR
-        || backup == SB_LF)
-    {
-        lpos = temp_pos;
-    }
-    else {
-        backup = before;
-    }
-    while (backup == SB_Sp) {
-        backup = backup_one_SB(strbeg, &lpos, utf8_target);
-    }
-    while (backup == SB_Close) {
-        backup = backup_one_SB(strbeg, &lpos, utf8_target);
-    }
-    if (backup == SB_STerm || backup == SB_ATerm) {
+        /* SB11.  */
         return TRUE;
     }
 
