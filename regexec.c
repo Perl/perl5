@@ -4574,8 +4574,10 @@ S_isSB(pTHX_ SB_enum before,
         return FALSE;
     }
 
-    /* Break after paragraph separators.  (though why CR and LF are considered
-     * so is beyond me (khw)
+    /* Break after paragraph separators.  CR and LF are considered
+     * so because Unicode views text as like word processing text where there
+     * are no newlines except between paragraphs, and the word processor takes
+     * care of wrapping without there being hard line-breaks in the text *./
        SB4.  Sep | CR | LF  ÷ */
     if (before == SB_Sep || before == SB_CR || before == SB_LF) {
         return TRUE;
@@ -5069,6 +5071,7 @@ S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos,
 STATIC SSize_t
 S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 {
+
 #if PERL_VERSION < 9 && !defined(PERL_CORE)
     dMY_CXT;
 #endif
