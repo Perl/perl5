@@ -60,18 +60,21 @@ is($x, "1a line\n2a line\n", '<> from two files');
     );
     is($x, "Io_argv1.tmp,a line\nIo_argv2.tmp,another line\n", '$ARGV is the file name');
 
-    $x = runperl(
-	prog	=> 'print $ARGV while <>',
-	stdin	=> "foo\nbar\n",
-        args   	=> [ '-' ],
-    );
-    is($x, "--", '$ARGV is - for explicit STDIN');
+TODO: {
+        local $::TODO = "unrelated bug in redirection implementation" if $^O eq 'VMS';
+        $x = runperl(
+            prog	=> 'print $ARGV while <>',
+            stdin	=> "foo\nbar\n",
+            args   	=> [ '-' ],
+        );
+        is($x, "--", '$ARGV is - for explicit STDIN');
 
-    $x = runperl(
-	prog	=> 'print $ARGV while <>',
-	stdin	=> "foo\nbar\n",
-    );
-    is($x, "--", '$ARGV is - for implicit STDIN');
+        $x = runperl(
+            prog	=> 'print $ARGV while <>',
+            stdin	=> "foo\nbar\n",
+        );
+        is($x, "--", '$ARGV is - for implicit STDIN');
+    }
 }
 
 {
@@ -185,11 +188,14 @@ $x = runperl(
 );
 is($x, "foo\n", '<<>> from just STDIN (no argument)');
 
-$x = runperl(
-    prog	=> 'print $ARGV.q/,/ for <<>>',
-    stdin	=> "foo\nbar\n",
-);
-is($x, "-,-,", '$ARGV is - for STDIN with <<>>');
+TODO: {
+    local $::TODO = "unrelated bug in redirection implementation" if $^O eq 'VMS';
+    $x = runperl(
+        prog	=> 'print $ARGV.q/,/ for <<>>',
+        stdin	=> "foo\nbar\n",
+    );
+    is($x, "-,-,", '$ARGV is - for STDIN with <<>>');
+}
 
 $x = runperl(
     prog	=> 'while (<<>>) { print $_; }',
