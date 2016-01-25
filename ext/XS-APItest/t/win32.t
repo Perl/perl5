@@ -34,6 +34,13 @@ SKIP:
         is(decode("UTF16-LE", $result), "$bad_drive\0",
            "check bad drive $bad: (wide)");
     }
+    require Win32;
+    my (undef, $major, $minor)=  Win32::GetOSVersion();
+    if ($major >= 5 && $minor >= 1) { #atleast XP, 2K only has V5
+    #this is testing the current state of things, specifically manifest stuff
+    #this test can be changed if perls relationship to comctl32.dll changes
+        ok((Comctl32Version())[0] >= 6,'comctl32.dll is atleast version 6')
+    }
 }
 
 done_testing();

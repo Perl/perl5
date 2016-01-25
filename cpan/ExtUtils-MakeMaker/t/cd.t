@@ -26,6 +26,7 @@ my @cd_args = ($dir, "command1", "command2");
 
     {
         local *make = sub { "nmake" };
+        $mm->_clear_maketype_cache;
 
         my @dirs = (File::Spec->updir) x 2;
         my $expected_updir = File::Spec->catdir(@dirs);
@@ -39,6 +40,7 @@ qq{cd $dir
 
     {
         local *make = sub { "dmake" };
+        $mm->_clear_maketype_cache;
 
         ::is $mm->cd(@cd_args),
 qq{cd $dir && command1

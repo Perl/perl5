@@ -33,6 +33,9 @@ $mm->init_tools;  # need ECHO
 # Run Perl with the currently installing MakeMaker
 $mm->{$_} .= q[ "-I$(INST_ARCHLIB)" "-I$(INST_LIB)"] for qw( PERLRUN FULLPERLRUN ABSPERLRUN );
 
+#see sub specify_shell
+my $shell = $^O eq 'MSWin32' && $mm->is_make_type('gmake') ? $ENV{COMSPEC} : undef;
+
 #------------------- Testing functions
 
 sub test_for_echo {
@@ -53,6 +56,7 @@ sub test_for_echo {
         for my $key (qw(INST_ARCHLIB INST_LIB PERL ABSPERL ABSPERLRUN ECHO)) {
             print $makefh "$key=$mm->{$key}\n";
         }
+        print $makefh "SHELL=$shell\n" if defined $shell;
 
         print $makefh "all :\n";
         for my $args (@$calls) {

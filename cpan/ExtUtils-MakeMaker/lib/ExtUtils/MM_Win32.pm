@@ -27,7 +27,7 @@ use ExtUtils::MakeMaker qw( neatvalue );
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 our @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-our $VERSION = '7.10';
+our $VERSION = '7.10_01';
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
@@ -232,6 +232,17 @@ sub platform_constants {
     return $make_frag;
 }
 
+=item specify_shell
+
+Set SHELL to $ENV{COMSPEC} only if make is type 'gmake'.
+
+=cut
+
+sub specify_shell {
+    my $self = shift;
+    return '' unless $self->is_make_type('gmake');
+    "\nSHELL = $ENV{COMSPEC}\n";
+}
 
 =item constants
 

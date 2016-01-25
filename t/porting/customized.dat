@@ -3,8 +3,8 @@ Encode cpan/Encode/Encode.xs ef106510cceba35eaae4c52127116162f5d7260f
 Encode cpan/Encode/encoding.pm 51c19efc9bfe8467d6ae12a4654f6e7f980715bf
 Encode cpan/Encode/Unicode/Unicode.xs c7ab75e09f6b2685060d3c0bd091862fc2d31724
 ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t a0369c919e216fb02767a637666bb4577ad79b02
-ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm fd048a43fc1a53acbe133bd96ddbf1421cfb28cf
-ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_VMS.pm 0c78ba02d6249dfcca12ac9886a7c7cfb60e77fe
+ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm 830acdc810e2974d7fd4ec408ea1bfa825c75b69
+ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_VMS.pm 1997912b5018970cdeb3dae8fd7e0c24f6e5d567
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/prereq.t 53bda2c549fd13a6b6c13a070ca6bc79883081c0
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/vstrings.t 90035a2bdbf45f15b9c3196d072d7cba7e662871
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/NoXS.pm 371cdff1b2375017907cfbc9c8f4a31f5ad10582

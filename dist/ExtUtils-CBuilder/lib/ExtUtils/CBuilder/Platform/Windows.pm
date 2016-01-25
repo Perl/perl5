@@ -1,5 +1,5 @@
 package ExtUtils::CBuilder::Platform::Windows;
-$ExtUtils::CBuilder::Platform::Windows::VERSION = '0.280224';
+$ExtUtils::CBuilder::Platform::Windows::VERSION = '0.280225';
 use strict;
 use warnings;
 
@@ -151,7 +151,7 @@ sub link {
   # if running in perl source tree, look for libs there, not installed
   my $lddlflags = $cf->{lddlflags};
   my $perl_src = $self->perl_src();
-  $lddlflags =~ s/\Q$cf->{archlibexp}\E[\\\/]CORE/$perl_src/ if $perl_src;
+  $lddlflags =~ s/\Q$cf->{archlibexp}\E[\\\/]CORE/$perl_src\/lib\/CORE/ if $perl_src;
 
   my %spec = (
     srcdir        => $to,

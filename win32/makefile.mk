@@ -688,7 +688,7 @@ TESTPREPGCC	=
 CFLAGS_O	= $(CFLAGS) $(BUILDOPT)
 
 .IF "$(PREMSVC80)" == "undef"
-LINK_FLAGS	+= "/manifestdependency:type='Win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"
+PRIV_LINK_FLAGS	+= "/manifestdependency:type='Win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"
 .ELSE
 RSC_FLAGS	= -DINCLUDE_MANIFEST
 .ENDIF
@@ -705,10 +705,9 @@ LINK_FLAGS	+= -subsystem:console,"5.02"
 .ELSE
 LINK_FLAGS	+= -subsystem:console,"5.01"
 .ENDIF
-PRIV_LINK_FLAGS	=
 
 .ELIF "$(CCTYPE)" != "GCC"
-PRIV_LINK_FLAGS	= -subsystem:console
+PRIV_LINK_FLAGS	+= -subsystem:console
 .ENDIF
 
 BLINK_FLAGS	= $(PRIV_LINK_FLAGS) $(LINK_FLAGS)
@@ -823,7 +822,7 @@ UTILS		=			\
 		..\utils\perlivp	\
 		..\utils\libnetcfg	\
 		..\utils\enc2xs		\
-		..\utils\encguess		\
+		..\utils\encguess	\
 		..\utils\piconv		\
 		..\utils\corelist	\
 		..\utils\cpan		\
@@ -847,7 +846,7 @@ UTILS		=			\
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
-PERLIMPLIB	= ..\libperl523$(a)
+PERLIMPLIB	= $(COREDIR)\libperl523$(a)
 PERLSTATICLIB	= ..\libperl523s$(a)
 INT64		= long long
 
@@ -861,8 +860,8 @@ INT64		= __int64
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-PERLIMPLIB	*= ..\perl523$(a)
-PERLEXPLIB	*= ..\perl523.exp
+PERLIMPLIB	*= $(COREDIR)\perl523$(a)
+PERLEXPLIB	*= $(COREDIR)\perl523.exp
 PERLSTATICLIB	*= ..\perl523s$(a)
 PERLDLL		= ..\perl523.dll
 
@@ -990,7 +989,6 @@ GENERATED_HEADERS = $(UUDMAP_H) $(BITCOUNT_H) $(MG_DATA_H)
 #work, so this target also represents creating the COREDIR and filling it
 HAVE_COREDIR	= $(COREDIR)\ppport.h
 
-
 MICROCORE_OBJ	= $(MICROCORE_SRC:db:+$(o))
 CORE_OBJ	= $(MICROCORE_OBJ) $(EXTRACORE_SRC:db:+$(o))
 WIN32_OBJ	= $(WIN32_SRC:db:+$(o))
@@ -1064,7 +1062,7 @@ CFG_VARS	=					\
 # Top targets
 #
 
-all : CHECKDMAKE  rebasePE Extensions_nonxs $(PERLSTATIC)
+all : CHECKDMAKE rebasePE Extensions_nonxs $(PERLSTATIC)
 
 ..\regcomp$(o) : ..\regnodes.h ..\regcharclass.h
 
@@ -1093,9 +1091,8 @@ $(GLOBEXE) : perlglob.c
 	$(LIBFILES) && $(EMBED_EXE_MANI)
 .ENDIF
 
-
 ..\git_version.h : $(HAVEMINIPERL) ..\make_patchnum.pl
-	cd .. && miniperl -Ilib make_patchnum.pl
+	$(MINIPERL) -I..\lib ..\make_patchnum.pl
 
 # make sure that we recompile perl.c if the git version changes
 ..\perl$(o) : ..\git_version.h
@@ -1116,12 +1113,9 @@ regen_config_h:
 	-$(MINIPERL) -I..\lib config_h.PL "ARCHPREFIX=$(ARCHPREFIX)"
 	rename config.h $(CFGH_TMPL)
 
-$(CONFIGPM): ..\config.sh config_h.PL
+$(CONFIGPM) .\config.h .UPDATEALL: ..\config.sh config_h.PL
 	$(MINIPERL) -I..\lib ..\configpm --chdir=..
-	$(XCOPY) config.h $(COREDIR)\*.*
 	-$(MINIPERL) -I..\lib config_h.PL "ARCHPREFIX=$(ARCHPREFIX)"
-
-.\config.h : $(CONFIGPM)
 
 # See the comment in Makefile.SH explaining this seemingly cranky ordering
 ..\lib\buildcustomize.pl : $(MINI_OBJ) ..\write_buildcustomize.pl
@@ -1151,7 +1145,6 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 #
 # MINIDIR generates config.h so miniperl.exe is not rebuilt when the 2nd
 # config.h is generated in CONFIGPM target, see also the comments for $(MINI_OBJ).
-	-if exist config.h del /f config.h
 	copy $(CFGH_TMPL) config.h
 	@(echo.&& \
 	echo #ifndef _config_h_footer_&& \
@@ -1346,32 +1339,17 @@ perldll.def : $(HAVEMINIPERL) $(CONFIGPM) ..\embed.fnc ..\makedef.pl
 	$(MINIPERL) -I..\lib -w ..\makedef.pl PLATFORM=win32 $(OPTIMIZE) $(DEFINES) \
 	$(BUILDOPT) CCTYPE=$(CCTYPE) TARG_DIR=..\ > perldll.def
 
-$(PERLIMPLIB) : perldll.def
+$(PERLEXPLIB) $(PERLIMPLIB) .UPDATEALL : perldll.def
 .IF "$(CCTYPE)" == "GCC"
-	$(IMPLIB) -k -d perldll.def -l $(PERLIMPLIB)
+	$(IMPLIB) -k -d perldll.def -l $(PERLIMPLIB) -e $(PERLEXPLIB)
 .ELSE #VC family
 	lib -def:perldll.def -machine:$(ARCHITECTURE) /OUT:$(PERLIMPLIB)
 .ENDIF
-	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
-
-#PERLEXPLIB is built in PERLIMPLIB
-$(PERLEXPLIB): $(PERLIMPLIB)
 
 $(PERLDLL): $(PERLEXPLIB) $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 .IF "$(CCTYPE)" == "GCC"
-	$(LINK32) -mdll -o $@ -Wl,--base-file -Wl,perl.base $(BLINK_FLAGS) \
-	    $(mktmp $(LKPRE) $(PERLDLL_OBJ) \
-		$(shell @type Extensions_static) \
-		$(LIBFILES) $(LKPOST))
-	$(IMPLIB) --output-lib $(PERLIMPLIB) \
-		--dllname $(PERLDLL:b).dll \
-		--def perldll.def \
-		--base-file perl.base \
-		--output-exp perl.exp
 	$(LINK32) -mdll -o $@ $(BLINK_FLAGS) \
-	    $(mktmp $(LKPRE) $(PERLDLL_OBJ) \
-		$(shell @type Extensions_static) \
-		$(LIBFILES) perl.exp $(LKPOST))
+	   $(PERLDLL_OBJ) $(shell @type Extensions_static) $(LIBFILES) $(PERLEXPLIB)
 .ELSE
 	$(LINK32) -dll -out:$@ $(BLINK_FLAGS) \
 	    @Extensions_static \
@@ -1410,23 +1388,17 @@ $(GENUUDMAP) $(GENERATED_HEADERS) .UPDATEALL : ..\mg_raw.h
 	$(GENUUDMAP) $(GENERATED_HEADERS)
 
 #This generates a stub ppport.h & creates & fills /lib/CORE to allow for XS
-#building .c->.obj wise (linking is a different thing). This taget is AKA
+#building .c->.obj wise (linking is a different thing). This target is AKA
 #$(HAVE_COREDIR).
 $(COREDIR)\ppport.h : $(CORE_H)
 	$(XCOPY) *.h $(COREDIR)\*.* && $(RCOPY) include $(COREDIR)\*.* && $(XCOPY) ..\*.h $(COREDIR)\*.*
 	rem. > $@
 
-perlmain.c : runperl.c
-	copy runperl.c perlmain.c
+perlmain$(o) : runperl.c $(CONFIGPM)
+	$(CC) $(CFLAGS_O:s,-DPERLDLL,-UPERLDLL,) $(OBJOUT_FLAG)$@ $(PDBOUT) -c runperl.c
 
-perlmain$(o) : $(CONFIGPM) perlmain.c
-	$(CC) $(CFLAGS_O:s,-DPERLDLL,-UPERLDLL,) $(OBJOUT_FLAG)$@ $(PDBOUT) -c perlmain.c
-
-perlmainst.c : runperl.c
-	copy runperl.c perlmainst.c
-
-perlmainst$(o) : $(CONFIGPM) perlmainst.c
-	$(CC) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $(PDBOUT) -c perlmainst.c
+perlmainst$(o) : runperl.c $(CONFIGPM)
+	$(CC) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $(PDBOUT) -c runperl.c
 
 $(PERLEXE): $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES) $(PERLIMPLIB)
 .IF "$(CCTYPE)" == "GCC"
@@ -1485,9 +1457,9 @@ Extensions_realclean :
 # be running in parallel like UNIDATAFILES, this target a placeholder for the
 # future
 .IF "$(BUILD_STATIC)"=="define"
-rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE) $(GLOBEXE) $(PERLEXESTATIC)
+rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE) $(PERLEXESTATIC)
 .ELSE
-rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE) $(GLOBEXE)
+rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE)
 .ENDIF
 	$(NOOP)
 
@@ -1544,7 +1516,7 @@ utils: $(HAVEMINIPERL) ..\utils\Makefile
 	$(MINIPERL) -I..\lib ..\autodoc.pl ..
 	$(MINIPERL) -I..\lib ..\pod\perlmodlib.PL -q ..
 
-..\pod\perltoc.pod: $(PERLEXE) $(PERLDLL) Extensions Extensions_nonxs ..\pod\perluniprops.pod utils
+..\pod\perltoc.pod: $(PERLEXE) $(PERLDLL) Extensions Extensions_nonxs Extensions_normalize utils
 	$(PERLEXE) -f ..\pod\buildtoc -q
 
 # Note that the pod cleanup in this next section is parsed (and regenerated
@@ -1683,9 +1655,8 @@ installhtml : doc
 inst_lib : $(CONFIGPM)
 	$(RCOPY) ..\lib $(INST_LIB)\*.*
 
-$(UNIDATAFILES) ..\pod\perluniprops.pod .UPDATEALL : $(CONFIGPM) ..\lib\unicore\mktables
-	cd ..\lib\unicore && \
-	..\$(MINIPERL) -I.. mktables -P ..\..\pod -maketest -makelist -p
+$(UNIDATAFILES) ..\pod\perluniprops.pod .UPDATEALL : ..\lib\unicore\mktables $(CONFIGPM)
+	$(MINIPERL) -I..\lib ..\lib\unicore\mktables -C ..\lib\unicore -P ..\pod -maketest -makelist -p
 
 minitest : .\config.h $(HAVEMINIPERL) ..\git_version.h $(GLOBEXE) $(CONFIGPM) $(UNIDATAFILES) $(TESTPREPGCC)
 	$(XCOPY) $(MINIPERL) ..\t\$(NULL)
@@ -1774,8 +1745,6 @@ _clean :
 	-@erase *.pdb ..\*.pdb
 	-@erase Extensions_static
 
-
-
 clean : Extensions_clean _clean
 
 realclean : Extensions_realclean _clean
@@ -1784,14 +1753,15 @@ realclean : Extensions_realclean _clean
 # installed perlbug. We don't re-run the tests here - we trust the user.
 # Please *don't* use this unless all tests pass.
 # If you want to report test failures, use "dmake nok" instead.
-ok: utils
+ok: utils $(PERLEXE) $(PERLDLL) Extensions_nonxs Extensions
 	$(PERLEXE) ..\utils\perlbug -ok -s "(UNINSTALLED)"
 
-okfile: utils
+okfile: utils $(PERLEXE) $(PERLDLL) Extensions_nonxs Extensions
 	$(PERLEXE) ..\utils\perlbug -ok -s "(UNINSTALLED)" -F perl.ok
 
-nok: utils
+nok: utils $(PERLEXE) $(PERLDLL) Extensions_nonxs Extensions
 	$(PERLEXE) ..\utils\perlbug -nok -s "(UNINSTALLED)"
 
-nokfile: utils
+nokfile: utils $(PERLEXE) $(PERLDLL) Extensions_nonxs Extensions
 	$(PERLEXE) ..\utils\perlbug -nok -s "(UNINSTALLED)" -F perl.nok
+

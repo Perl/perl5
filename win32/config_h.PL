@@ -84,10 +84,12 @@ while (<SH>)
 close(H);
 close(SH);
 
-if (compare("$file.new","$opt{CORE_DIR}/$opt{CONFIG_H}")) {
-    chmod(0666,"$opt{CORE_DIR}/$opt{CONFIG_H}");
-    copy("$file.new","$opt{CORE_DIR}/$opt{CONFIG_H}") || die "Cannot copy:$!";
-    chmod(0444,"$opt{CORE_DIR}/$opt{CONFIG_H}");
+my $core_config_h = "$opt{CORE_DIR}/$opt{CONFIG_H}";
+if (compare("$file.new", $core_config_h)) {
+    mkdir $opt{CORE_DIR} unless -d $opt{CORE_DIR};
+    chmod(0666,$core_config_h);
+    copy("$file.new",$core_config_h) || die "Cannot copy:$!";
+    chmod(0444,$core_config_h);
 }
 
 if (compare("$file.new",$file))
@@ -95,13 +97,11 @@ if (compare("$file.new",$file))
   warn "$file has changed\n";
   chmod(0666,$file);
   unlink($file);
-  rename("$file.new",$file);
-  exit(1);
+  rename("$file.new",$file) || die "Cannot rename:$!";
  }
 else
  {
   unlink ("$file.new");
-  exit(0);
  }
 
 sub Config

@@ -1,5 +1,5 @@
 package ExtUtils::CBuilder::Platform::Windows::MSVC;
-$ExtUtils::CBuilder::Platform::Windows::MSVC::VERSION = '0.280224';
+$ExtUtils::CBuilder::Platform::Windows::MSVC::VERSION = '0.280225';
 use warnings;
 use strict;
 
