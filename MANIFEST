@@ -889,6 +889,7 @@ cpan/Encode/t/enc_module.enc		test data for t/enc_module.t
 cpan/Encode/t/enc_module.t		test script
 cpan/Encode/t/Encoder.t			test script
 cpan/Encode/t/Encode.t			test script
+cpan/Encode/t/encoding-locale.t		test script
 cpan/Encode/t/encoding.t		test script
 cpan/Encode/t/enc_utf8.t		test script
 cpan/Encode/t/fallback.t		test script

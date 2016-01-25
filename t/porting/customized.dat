@@ -1,7 +1,5 @@
 CPAN cpan/CPAN/lib/CPAN.pm ce62c43d72f101c011184dbbc59e21c2790826f0
-Encode cpan/Encode/Encode.xs ef106510cceba35eaae4c52127116162f5d7260f
 Encode cpan/Encode/encoding.pm 51c19efc9bfe8467d6ae12a4654f6e7f980715bf
-Encode cpan/Encode/Unicode/Unicode.xs c7ab75e09f6b2685060d3c0bd091862fc2d31724
 ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t a0369c919e216fb02767a637666bb4577ad79b02
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm 830acdc810e2974d7fd4ec408ea1bfa825c75b69
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_VMS.pm 1997912b5018970cdeb3dae8fd7e0c24f6e5d567

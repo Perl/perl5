@@ -1,5 +1,5 @@
 #
-# $Id: mime-header.t,v 2.6 2013/08/14 02:29:54 dankogai Exp $
+# $Id: mime-header.t,v 2.7 2016/01/22 06:33:07 dankogai Exp $
 # This script is written in utf8
 #
 BEGIN {
@@ -73,28 +73,29 @@ Subject: 漢字、カタカナ、ひらがなを含む、非常に長いタイ�
 EOS
 
 my $bheader =<<'EOS';
-From:=?UTF-8?B?IOWwj+mjvCDlvL4g?=<dankogai@dan.co.jp>
-To: dankogai@dan.co.jp (=?UTF-8?B?5bCP6aO8?==Kogai,=?UTF-8?B?IOW8vg==?==
- Dan)
-Subject:
- =?UTF-8?B?IOa8ouWtl+OAgeOCq+OCv+OCq+ODiuOAgeOBsuOCieOBjOOBquOCkuWQq+OCgA==?=
+From: =?UTF-8?B?5bCP6aO8?= =?UTF-8?B?5by+?= <dankogai@dan.co.jp>
+To: dankogai@dan.co.jp =?UTF-8?B?KOWwj+mjvD1Lb2dhaSw=?= 
+ =?UTF-8?B?5by+PURhbik=?=
+Subject: 
+ =?UTF-8?B?5ryi5a2X44CB44Kr44K/44Kr44OK44CB44Gy44KJ44GM44Gq44KS5ZCr44KA?=
  =?UTF-8?B?44CB6Z2e5bi444Gr6ZW344GE44K/44Kk44OI44Or6KGM44GM5LiA5L2T5YWo?=
  =?UTF-8?B?5L2T44Gp44Gu44KI44GG44Gr44GX44GmRW5jb2Rl44GV44KM44KL44Gu44GL?=
  =?UTF-8?B?77yf?=
 EOS
 
 my $qheader=<<'EOS';
-From:=?UTF-8?Q?=20=E5=B0=8F=E9=A3=BC=20=E5=BC=BE=20?=<dankogai@dan.co.jp>
-To: dankogai@dan.co.jp (=?UTF-8?Q?=E5=B0=8F=E9=A3=BC?==Kogai,
- =?UTF-8?Q?=20=E5=BC=BE?==Dan)
-Subject:
- =?UTF-8?Q?=20=E6=BC=A2=E5=AD=97=E3=80=81=E3=82=AB=E3=82=BF=E3=82=AB?=
- =?UTF-8?Q?=E3=83=8A=E3=80=81=E3=81=B2=E3=82=89=E3=81=8C=E3=81=AA=E3=82=92?=
- =?UTF-8?Q?=E5=90=AB=E3=82=80=E3=80=81=E9=9D=9E=E5=B8=B8=E3=81=AB=E9=95=B7?=
- =?UTF-8?Q?=E3=81=84=E3=82=BF=E3=82=A4=E3=83=88=E3=83=AB=E8=A1=8C=E3=81=8C?=
- =?UTF-8?Q?=E4=B8=80=E4=BD=93=E5=85=A8=E4=BD=93=E3=81=A9=E3=81=AE=E3=82=88?=
- =?UTF-8?Q?=E3=81=86=E3=81=AB=E3=81=97=E3=81=A6Encode=E3=81=95?=
- =?UTF-8?Q?=E3=82=8C=E3=82=8B=E3=81=AE=E3=81=8B=EF=BC=9F?=
+From: =?UTF-8?Q?=E5=B0=8F=E9=A3=BC?= =?UTF-8?Q?=E5=BC=BE?= 
+ <dankogai@dan.co.jp>
+To: dankogai@dan.co.jp =?UTF-8?Q?=28=E5=B0=8F=E9=A3=BC=3DKogai=2C?= 
+ =?UTF-8?Q?=E5=BC=BE=3DDan=29?=
+Subject: 
+ =?UTF-8?Q?=E6=BC=A2=E5=AD=97=E3=80=81=E3=82=AB=E3=82=BF=E3=82=AB=E3=83=8A?=
+ =?UTF-8?Q?=E3=80=81=E3=81=B2=E3=82=89=E3=81=8C=E3=81=AA=E3=82=92=E5=90=AB?=
+ =?UTF-8?Q?=E3=82=80=E3=80=81=E9=9D=9E=E5=B8=B8=E3=81=AB=E9=95=B7=E3=81=84?=
+ =?UTF-8?Q?=E3=82=BF=E3=82=A4=E3=83=88=E3=83=AB=E8=A1=8C=E3=81=8C=E4=B8=80?=
+ =?UTF-8?Q?=E4=BD=93=E5=85=A8=E4=BD=93=E3=81=A9=E3=81=AE=E3=82=88=E3=81=86?=
+ =?UTF-8?Q?=E3=81=AB=E3=81=97=E3=81=A6Encode=E3=81=95=E3=82=8C?=
+ =?UTF-8?Q?=E3=82=8B=E3=81=AE=E3=81=8B=EF=BC=9F?=
 EOS
 
 is(Encode::decode('MIME-Header', $bheader), $dheader, "decode B");

@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.34 2015/09/15 13:53:27 dankogai Exp dankogai $
+ $Id: Encode.xs,v 2.35 2016/01/22 06:33:07 dankogai Exp $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -20,7 +20,7 @@
    encode_method().  1 is recommended. 2 restores NI-S original */
 #define ENCODE_XS_USEFP   1
 
-#define UNIMPLEMENTED(x,y) y x (SV *sv, char *encoding) {		\
+#define UNIMPLEMENTED(x,y) static y x (SV *sv, char *encoding) {	\
 			Perl_croak_nocontext("panic_unimplemented");	\
                         PERL_UNUSED_VAR(sv); \
                         PERL_UNUSED_VAR(encoding); \
@@ -42,7 +42,7 @@ UNIMPLEMENTED(_encoded_bytes_to_utf8, I32)
                                 UTF8_ALLOW_NON_CONTINUATION |     \
                                 UTF8_ALLOW_LONG))
 
-void
+static void
 Encode_XSEncoding(pTHX_ encode_t * enc)
 {
     dSP;
@@ -66,7 +66,7 @@ Encode_XSEncoding(pTHX_ encode_t * enc)
     SvREFCNT_dec(sv);
 }
 
-void
+static void
 call_failure(SV * routine, U8 * done, U8 * dest, U8 * orig)
 {
     /* Exists for breakpointing */

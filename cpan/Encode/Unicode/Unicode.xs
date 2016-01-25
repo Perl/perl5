@@ -1,5 +1,5 @@
 /*
- $Id: Unicode.xs,v 2.13 2015/09/15 13:53:27 dankogai Exp dankogai $
+ $Id: Unicode.xs,v 2.14 2016/01/22 06:33:07 dankogai Exp $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -89,7 +89,7 @@ enc_unpack(pTHX_ U8 **sp, U8 *e, STRLEN size, U8 endian)
     return v;
 }
 
-void
+static void
 enc_pack(pTHX_ SV *result, STRLEN size, U8 endian, UV value)
 {
     U8 *d = (U8 *) SvPV_nolen(result);

@@ -2,7 +2,7 @@ package Encode::Alias;
 use strict;
 use warnings;
 no warnings 'redefine';
-our $VERSION = do { my @r = ( q$Revision: 2.19 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.20 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
 
 use Exporter 'import';
@@ -139,7 +139,7 @@ sub init_aliases {
     define_alias( qr/^UCS-?2-?LE$/i => '"UCS-2LE"' );
     define_alias(
         qr/^UCS-?2-?(BE)?$/i    => '"UCS-2BE"',
-        qr/^UCS-?4-?(BE|LE)?$/i => 'uc("UTF-32$1")',
+        qr/^UCS-?4-?(BE|LE|)?$/i => 'uc("UTF-32$1")',
         qr/^iso-10646-1$/i      => '"UCS-2BE"'
     );
     define_alias(
