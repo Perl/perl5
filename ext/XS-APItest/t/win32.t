@@ -40,14 +40,8 @@ SKIP:
     #this is testing the current state of things, specifically manifest stuff
     #this test can be changed if perls relationship to comctl32.dll changes
         my @ccver = Comctl32Version();
-        unless (cmp_ok($ccver[0], '>=', 6, "comctl32.dll is atleast version 6")) {
-            diag "comctl32 version is (@ccver)";
-            my $resout = "resource$$.txt";
-            if (system("mt -inputresource:$^X -out:$resout") == 0) {
-                system "type $resout >&2";
-                unlink $resout;
-            }
-      }
+        cmp_ok($ccver[0], '>=', 6, "comctl32.dll is atleast version 6")
+          or diag "comctl32 version is (@ccver)";
     }
 }
 
