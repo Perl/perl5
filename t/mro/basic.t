@@ -436,7 +436,6 @@ PROG
 
 {
     # [perl #127351]
-    local $::TODO = "assignment to *Foo::ISA doesn't magicalize elements";
     # *Foo::ISA = \@some_array
     # didn't magicalize the elements of @some_array, causing two
     # problems:

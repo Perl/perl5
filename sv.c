@@ -4184,9 +4184,18 @@ Perl_gv_setref(pTHX_ SV *const dstr, SV *const sstr)
 	    }
 	    else
 	    {
+                SSize_t i;
 		sv_magic(
 		 sref, omg ? omg->mg_obj : dstr, PERL_MAGIC_isa, NULL, 0
 		);
+                for (i = 0; i <= AvFILL(sref); ++i) {
+                    SV **elem = av_fetch ((AV*)sref, i, 0);
+                    if (elem) {
+                        sv_magic(
+                          *elem, sref, PERL_MAGIC_isaelem, NULL, i
+                        );
+                    }
+                }
 		mg = mg_find(sref, PERL_MAGIC_isa);
 	    }
 	    /* Since the *ISA assignment could have affected more than
