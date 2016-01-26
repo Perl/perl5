@@ -864,6 +864,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
     const char *cp1;
     char uplnm[LNM$C_NAMLENGTH+1], *cp2;
     unsigned short int eqvlen, curtab, ivlnm = 0, ivsym = 0, ivenv = 0, secure;
+    bool found_in_crtlenv = 0, found_in_clisym = 0;
     unsigned long int retsts, attr = LNM$M_CASE_BLIND;
     int midx;
     unsigned char acmode;
@@ -927,7 +928,10 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
               break;
             }
           }
-          if (retsts != SS$_NOLOGNAM) break;
+          if (retsts != SS$_NOLOGNAM) {
+              found_in_crtlenv = 1;
+              break;
+          }
         }
       }
       else if ((tmpdsc.dsc$a_pointer = tabvec[curtab]->dsc$a_pointer) &&
@@ -961,6 +965,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
           _ckvmssts_noperl(lib$sfree1_dd(&eqvdsc));
           if (retsts == LIB$_INVSYMNAM) { ivsym = 1; continue; }
           if (retsts == LIB$_NOSUCHSYM) continue;
+          found_in_clisym = 1;
           break;
         }
       }
@@ -991,7 +996,14 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
         break;
       }
     }
-    if (retsts & 1) { eqv[eqvlen] = '\0'; return eqvlen; }
+    /* An index only makes sense for logical names, so make sure we aren't
+     * iterating over an index for an environ var or DCL symbol and getting
+     * the same answer ad infinitum.
+     */
+    if (idx > 0 && (found_in_crtlenv || found_in_clisym)) {
+        return 0;
+    }
+    else if (retsts & 1) { eqv[eqvlen] = '\0'; return eqvlen; }
     else if (retsts == LIB$_NOSUCHSYM ||
              retsts == SS$_NOLOGNAM) {
      /* Unsuccessful lookup is normal -- no need to set errno */
