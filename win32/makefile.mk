@@ -1087,8 +1087,8 @@ $(GLOBEXE) : perlglob.c
 .IF "$(CCTYPE)" == "GCC"
 	$(LINK32) $(OPTIMIZE) $(BLINK_FLAGS) -mconsole -o $@ perlglob.c $(LIBFILES)
 .ELSE
-	$(CC) $(OPTIMIZE) -Fe$@ perlglob.c -link $(BLINK_FLAGS) setargv$(o) \
-	$(LIBFILES) && $(EMBED_EXE_MANI)
+	$(CC) $(OPTIMIZE) $(PDBOUT) -Fe$@ perlglob.c -link $(BLINK_FLAGS) \
+	setargv$(o) $(LIBFILES) && $(EMBED_EXE_MANI)
 .ENDIF
 
 ..\git_version.h : $(HAVEMINIPERL) ..\make_patchnum.pl
@@ -1382,7 +1382,7 @@ $(GENUUDMAP) $(GENERATED_HEADERS) .UPDATEALL : ..\mg_raw.h
 	$(LINK32) $(CFLAGS_O) -o..\generate_uudmap.exe ..\generate_uudmap.c \
 	$(BLINK_FLAGS) -x $(mktmp $(LKPRE) $(LIBFILES) $(LKPOST))
 .ELSE
-	$(CC) $(CFLAGS_O) -Fe..\generate_uudmap.exe ..\generate_uudmap.c @$(mktmp -link $(LIBFILES)) -link $(BLINK_FLAGS) 
+	$(CC) $(CFLAGS_O) $(PDBOUT) -Fe..\generate_uudmap.exe ..\generate_uudmap.c @$(mktmp -link $(LIBFILES)) -link $(BLINK_FLAGS)
 	$(EMBED_EXE_MANI:s/$@/..\generate_uudmap.exe/)
 .ENDIF
 	$(GENUUDMAP) $(GENERATED_HEADERS)

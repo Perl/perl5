@@ -1112,8 +1112,8 @@ $(GLOBEXE) : perlglob.c
 ifeq ($(CCTYPE),GCC)
 	$(LINK32) $(OPTIMIZE) $(BLINK_FLAGS) -mconsole -o $@ perlglob.c $(LIBFILES)
 else
-	$(CC) $(OPTIMIZE) -Fe$@ perlglob.c -link $(BLINK_FLAGS) setargv$(o) \
-	$(LIBFILES) && $(EMBED_EXE_MANI)
+	$(CC) $(OPTIMIZE) $(PDBOUT) -Fe$@ perlglob.c -link $(BLINK_FLAGS) \
+	setargv$(o) $(LIBFILES) && $(EMBED_EXE_MANI)
 endif
 
 ..\git_version.h : $(HAVEMINIPERL) ..\make_patchnum.pl
@@ -1413,7 +1413,7 @@ ifeq ($(CCTYPE),GCC)
 	$(LINK32) $(CFLAGS_O) -o..\generate_uudmap.exe ..\generate_uudmap.c \
 	$(BLINK_FLAGS) $(LIBFILES)
 else
-	$(CC) $(CFLAGS_O) -Fe..\generate_uudmap.exe ..\generate_uudmap.c -link $(LIBFILES) $(BLINK_FLAGS) 
+	$(CC) $(CFLAGS_O) $(PDBOUT) -Fe..\generate_uudmap.exe ..\generate_uudmap.c -link $(LIBFILES) $(BLINK_FLAGS)
 	$(EMBED_EXE_MANI)
 endif
 
