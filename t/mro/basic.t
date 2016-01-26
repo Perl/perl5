@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan(tests => 64);
+plan(tests => 66);
 
 require mro;
 
@@ -431,5 +431,39 @@ delete $Bar::{ISA};
 ++$y;
 @$x = "Bar";
 print "ok\n";
+PROG
+}
+
+{
+    # [perl #127351]
+    local $::TODO = "assignment to *Foo::ISA doesn't magicalize elements";
+    # *Foo::ISA = \@some_array
+    # didn't magicalize the elements of @some_array, causing two
+    # problems:
+
+    #  a) assignment to those elements didn't update the cache
+
+    fresh_perl_is(<<'PROG', "foo\nother", {}, "magical *ISA = arrayref elements");
+*My::Parent::foo = sub { "foo" };
+*My::OtherParent::foo = sub { "other" };
+my $x = [ "My::Parent" ];
+*Fake::ISA = $x;
+print Fake->foo, "\n";
+$x->[0] = "My::OtherParent";
+print Fake->foo, "\n";
+PROG
+
+    #  b) code that attempted to remove the magic when @some_array
+    #     was no longer an @ISA asserted/crashed
+
+    fresh_perl_is(<<'PROG', "foo", {}, "unmagicalize *ISA elements");
+{
+    local *My::Parent::foo = sub { "foo" };
+    my $x = [ "My::Parent" ];
+    *Fake::ISA = $x;
+    print Fake->foo, "\n";
+    my $s = \%Fake::;
+    delete $s->{ISA};
+}
 PROG
 }
