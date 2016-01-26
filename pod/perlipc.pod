@@ -964,7 +964,7 @@ or firewall machine), fill this in with your real address instead.
     sub logmsg { print "$0 $$: @_ at ", scalar localtime(), "\n" }
 
     my $port  = shift || 2345;
-    die "invalid port" unless if $port =~ /^ \d+ $/x;
+    die "invalid port" unless $port =~ /^ \d+ $/x;
 
     my $proto = getprotobyname("tcp");
 
