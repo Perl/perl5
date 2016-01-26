@@ -31,7 +31,7 @@
 
 /*  Make the parser re-entrant. */
 
-%pure_parser
+%pure-parser
 
 %start grammar
 

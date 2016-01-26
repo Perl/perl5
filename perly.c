@@ -48,6 +48,10 @@ typedef signed char yysigned_char;
 # define YY_NULL 0
 #endif
 
+#ifndef YY_NULLPTR
+# define YY_NULLPTR NULL
+#endif
+
 /* contains all the parser state tables; auto-generated from perly.y */
 #include "perly.tab"
 
@@ -169,8 +173,14 @@ yy_reduce_print (pTHX_ int yyrule)
     YYFPRINTF (Perl_debug_log, "Reducing stack by rule %d (line %u), ",
 			  yyrule - 1, yylineno);
     /* Print the symbols being reduced, and their result.  */
+#if PERL_BISON_VERSION >= 30000 /* 3.0+ */
+    for (yyi = 0; yyi < yyr2[yyrule]; yyi++)
+	YYFPRINTF (Perl_debug_log, "%s ",
+            yytname [yystos[(PL_parser->ps)[yyi + 1 - yyr2[yyrule]].state]]);
+#else
     for (yyi = yyprhs[yyrule]; 0 <= yyrhs[yyi]; yyi++)
 	YYFPRINTF (Perl_debug_log, "%s ", yytname [yyrhs[yyi]]);
+#endif
     YYFPRINTF (Perl_debug_log, "-> %s\n", yytname [yyr1[yyrule]]);
 }
 
