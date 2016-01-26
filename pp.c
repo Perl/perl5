@@ -1364,9 +1364,14 @@ PP(pp_multiply)
             NV nr = SvNVX(svr);
             NV result;
 
-            il = (IV)nl;
-            ir = (IV)nr;
-            if (nl == (NV)il && nr == (NV)ir)
+            if (
+#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+                !Perl_isnan(nl) && nl == (NV)(il = (IV)nl)
+                && !Perl_isnan(nr) && nr == (NV)(ir = (IV)nr)
+#else
+                nl == (NV)(il = (IV)nl) && nr == (NV)(ir = (IV)nr)
+#endif
+                )
                 /* nothing was lost by converting to IVs */
                 goto do_iv;
             SP--;
@@ -1940,9 +1945,14 @@ PP(pp_subtract)
             NV nl = SvNVX(svl);
             NV nr = SvNVX(svr);
 
-            il = (IV)nl;
-            ir = (IV)nr;
-            if (nl == (NV)il && nr == (NV)ir)
+            if (
+#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+                !Perl_isnan(nl) && nl == (NV)(il = (IV)nl)
+                && !Perl_isnan(nr) && nr == (NV)(ir = (IV)nr)
+#else
+                nl == (NV)(il = (IV)nl) && nr == (NV)(ir = (IV)nr)
+#endif
+                )
                 /* nothing was lost by converting to IVs */
                 goto do_iv;
             SP--;
