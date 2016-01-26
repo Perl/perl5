@@ -5547,7 +5547,7 @@ Comctl32Version()
             croak("Comctl32Version: comctl32.dll no version???");
         ver = LoadResource(dll, hrsc);
         len = SizeofResource(dll, hrsc);
-        vercopy = alloca(len);
+        vercopy = _alloca(len);
         memcpy(vercopy, ver, len);
         if (VerQueryValue(vercopy, "\\", (void**)&info, &len)) {
             int dwValueMS1 = (info->dwFileVersionMS>>16);
