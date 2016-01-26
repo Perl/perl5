@@ -10047,6 +10047,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
      * multiple fp operations. */
     bool hexfp = FALSE;
     int total_bits = 0;
+    int significant_bits = 0;
 #if NVSIZE == 8 && defined(HAS_QUAD) && defined(Uquad_t)
 #  define HEXFP_UQUAD
     Uquad_t hexfp_uquad = 0;
@@ -10057,6 +10058,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 #endif
     NV hexfp_mult = 1.0;
     UV high_non_zero = 0; /* highest digit */
+    int non_zero_integer_digits = 0;
 
     PERL_ARGS_ASSERT_SCAN_NUM;
 
@@ -10209,6 +10211,9 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                     if (high_non_zero == 0 && b > 0)
                         high_non_zero = b;
 
+                    if (high_non_zero)
+                        non_zero_integer_digits++;
+
                     /* this could be hexfp, but peek ahead
                      * to avoid matching ".." */
                     if (UNLIKELY(HEXFP_PEEK(s))) {
@@ -10235,69 +10240,103 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                  * detection will shortly be more thorough with the
                  * underbar checks. */
                 const char* h = s;
+                significant_bits = non_zero_integer_digits * shift;
 #ifdef HEXFP_UQUAD
                 hexfp_uquad = u;
 #else /* HEXFP_NV */
                 hexfp_nv = u;
 #endif
+                /* Ignore the leading zero bits of
+                 * the high (first) non-zero digit. */
+                if (high_non_zero) {
+                    if (high_non_zero < 0x8)
+                        significant_bits--;
+                    if (high_non_zero < 0x4)
+                        significant_bits--;
+                    if (high_non_zero < 0x2)
+                        significant_bits--;
+                }
+
                 if (*h == '.') {
 #ifdef HEXFP_NV
-                    NV mult = 1 / 16.0;
+                    NV nv_mult = 1.0;
 #endif
+                    bool accumulate = TRUE;
                     for (h++; (isXDIGIT(*h) || *h == '_'); h++) {
                         if (isXDIGIT(*h)) {
                             U8 b = XDIGIT_VALUE(*h);
-                            total_bits += shift;
-                            if (total_bits < NV_MANT_DIG) {
+                            significant_bits += shift;
 #ifdef HEXFP_UQUAD
-                                hexfp_uquad <<= shift;
-                                hexfp_uquad |= b;
-                                hexfp_frac_bits += shift;
-#else /* HEXFP_NV */
-                                hexfp_nv += b * mult;
-                                mult /= 16.0;
-#endif
-                            } else if (total_bits - shift < NV_MANT_DIG) {
-                                /* A hexdigit straddling the edge of
-                                 * mantissa.  We can try grabbing as
-                                 * many as possible bits. */
-                                int shift2 = 0;
-                                if (b & 1) {
-                                    shift2 = 4;
-                                } else if (b & 2) {
-                                    shift2 = 3;
-                                    total_bits--;
-                                } else if (b & 4) {
-                                    shift2 = 2;
-                                    total_bits -= 2;
-                                } else if (b & 8) {
-                                    shift2 = 1;
-                                    total_bits -= 3;
+                            if (accumulate) {
+                                if (significant_bits < NV_MANT_DIG) {
+                                    /* We are in the long "run" of xdigits,
+                                     * accumulate the full four bits. */
+                                    hexfp_uquad <<= shift;
+                                    hexfp_uquad |= b;
+                                    hexfp_frac_bits += shift;
+                                } else {
+                                    /* We are at a hexdigit either at,
+                                     * or straddling, the edge of mantissa.
+                                     * We will try grabbing as many as
+                                     * possible bits. */
+                                    int tail =
+                                      significant_bits - NV_MANT_DIG;
+                                    if (tail <= 0)
+                                       tail += shift;
+                                    hexfp_uquad <<= tail;
+                                    hexfp_uquad |= b >> (shift - tail);
+                                    hexfp_frac_bits += tail;
+
+                                    /* Ignore the trailing zero bits
+                                     * of the last non-zero xdigit.
+                                     *
+                                     * The assumption here is that if
+                                     * one has input of e.g. the xdigit
+                                     * eight (0x8), there is only one
+                                     * bit being input, not the full
+                                     * four bits.  Conversely, if one
+                                     * specifies a zero xdigit, the
+                                     * assumption is that one really
+                                     * wants all those bits to be zero. */
+                                    if (b) {
+                                        if ((b & 0x1) == 0x0) {
+                                            significant_bits--;
+                                            if ((b & 0x2) == 0x0) {
+                                                significant_bits--;
+                                                if ((b & 0x4) == 0x0) {
+                                                    significant_bits--;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    accumulate = FALSE;
                                 }
-#ifdef HEXFP_UQUAD
-                                hexfp_uquad <<= shift2;
-                                hexfp_uquad |= b;
-                                hexfp_frac_bits += shift2;
-#else /* HEXFP_NV */
-                                PERL_UNUSED_VAR(shift2);
-                                hexfp_nv += b * mult;
-                                mult /= 16.0;
-#endif
+                            } else {
+                                /* Keep skipping the xdigits, and
+                                 * accumulating the significant bits,
+                                 * but do not shift the uquad
+                                 * (which would catastrophically drop
+                                 * high-order bits) or accumulate the
+                                 * xdigits anymore. */
                             }
+#else /* HEXFP_NV */
+                            if (accumulate) {
+                                nv_mult /= 16.0;
+                                if (nv_mult > 0.0)
+                                    hexfp_nv += b * nv_mult;
+                                else
+                                    accumulate = FALSE;
+                            }
+#endif
                         }
+                        if (significant_bits >= NV_MANT_DIG)
+                            accumulate = FALSE;
                     }
                 }
 
-                if (total_bits >= 4) {
-                    if (high_non_zero < 0x8)
-                        total_bits--;
-                    if (high_non_zero < 0x4)
-                        total_bits--;
-                    if (high_non_zero < 0x2)
-                        total_bits--;
-                }
-
-                if (total_bits > 0 && (isALPHA_FOLD_EQ(*h, 'p'))) {
+                if ((total_bits > 0 || significant_bits > 0) &&
+                    isALPHA_FOLD_EQ(*h, 'p')) {
                     bool negexp = FALSE;
                     h++;
                     if (*h == '+')
@@ -10537,7 +10576,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    *d = '\0';
             if (UNLIKELY(hexfp)) {
 #  ifdef NV_MANT_DIG
-                if (total_bits > NV_MANT_DIG)
+                if (significant_bits > NV_MANT_DIG)
                     Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
                                    "Hexadecimal float: mantissa overflow");
 #  endif

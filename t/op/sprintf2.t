@@ -247,7 +247,7 @@ if ($Config{nvsize} == 8 &&
     print "# no hexfloat tests\n";
 }
 
-plan tests => 1408 + ($Q ? 0 : 12) + @hexfloat + 9;
+plan tests => 1408 + ($Q ? 0 : 12) + @hexfloat + 12;
 
 use strict;
 use Config;
@@ -697,4 +697,36 @@ SKIP: {
     is(sprintf("%a", -0.0), "-0x0p+0", "negative zero");
     is(sprintf("%+a", -0.0), "-0x0p+0", "negative zero");
     is(sprintf("%.13a", -0.0), "-0x0.0000000000000p+0", "negative zero");
+}
+
+SKIP: {
+    # [perl #127183] Non-canonical hexadecimal floats are parsed prematurely
+
+    skip("nv_preserves_uv_bits is $Config{nv_preserves_uv_bits}, not 53", 3)
+        unless $Config{nv_preserves_uv_bits} == 53;
+
+    {
+        # The 0x0.b17217f7d1cf78p0 is the original LHS value
+        # from [perl #127183], its bits are 0x162e42fefa39ef << 3,
+        # resulting in a non-canonical form of hexfp, where the most
+        # significant bit is zero, instead of one.
+        is(sprintf("%a", 0x0.b17217f7d1cf78p0 - 0x1.62e42fefa39efp-1),
+           "0x0p+0",
+           "non-canonical form [perl #127183]");
+    }
+
+    {
+        no warnings 'overflow';  # Not the point here.
+
+        # The 0x058b90bfbe8e7bc is 0x162e42fefa39ef << 2,
+        # the 0x02c5c85fdf473de is 0x162e42fefa39ef << 1,
+        # see above.
+        is(sprintf("%a", 0x0.58b90bfbe8e7bcp1 - 0x1.62e42fefa39efp-1),
+           "0x0p+0",
+           "non-canonical form");
+
+        is(sprintf("%a", 0x0.2c5c85fdf473dep2 - 0x1.62e42fefa39efp-1),
+           "0x0p+0",
+           "non-canonical form");
+    }
 }

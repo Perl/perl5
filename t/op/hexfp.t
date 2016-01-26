@@ -10,7 +10,7 @@ use strict;
 
 use Config;
 
-plan(tests => 97);
+plan(tests => 105);
 
 # Test hexfloat literals.
 
@@ -39,6 +39,11 @@ is(0x.1p0, 0.0625);
 is(0x0.1p0, 0.0625);
 is(0x0.10p0, 0.0625);
 is(0x0.100p0, 0.0625);
+
+is(0x.1p0, 0.0625);
+is(0x1.1p0, 1.0625);
+is(0x1.11p0, 1.06640625);
+is(0x1.111p0, 1.066650390625);
 
 # Positive exponents.
 is(0x1p2, 4);
@@ -107,6 +112,15 @@ is(0xa_b.c_dp+1_2, 703696);
 # different from 3e4 cf 30e3 cf 30000.  The shifting of the hexdigits
 # makes it look stranger, though: 0xap1 == 0x5p2.
 
+# [perl #127183], try some non-canonical forms.
+SKIP: {
+    skip("nv_preserves_uv_bits is $Config{nv_preserves_uv_bits} not 53", 3)
+        unless ($Config{nv_preserves_uv_bits} == 53);
+    is(0x0.b17217f7d1cf78p0, 0x1.62e42fefa39efp-1);
+    is(0x0.58b90bfbe8e7bcp1, 0x1.62e42fefa39efp-1);
+    is(0x0.2c5c85fdf473dep2, 0x1.62e42fefa39efp-1);
+}
+
 # Needs to use within() instead of is() because of long doubles.
 within(0x1.99999999999ap-4, 0.1, 1e-9);
 within(0x3.333333333333p-5, 0.1, 1e-9);
@@ -133,11 +147,17 @@ sub get_warn() {
     eval '@a = 0x3..5';
     is("@a", "3 4 5");
 
+    undef $a;
     eval '$a = eval "0x.3"';
     is($a, '03');
 
+    undef $a;
     eval '$a = eval "0xc.3"';
     is($a, '123');
+
+    undef $a;
+    eval '$a = eval "0x.p3"';
+    is($a, undef);
 }
 
 # Test warnings.
