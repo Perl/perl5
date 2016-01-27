@@ -3,7 +3,7 @@ use strict;
 use warnings;
 no warnings 'redefine';
 
-our $VERSION = do { my @r = ( q$Revision: 2.18 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.19 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 use Encode qw(find_encoding encode_utf8 decode_utf8);
 use MIME::Base64;
 use Carp;
@@ -39,7 +39,9 @@ sub perlio_ok   { 0 }
 sub decode($$;$) {
     use utf8;
     my ( $obj, $str, $chk ) = @_;
-
+    # zap spaces between encoded words
+    $str =~ s/\?=\s+=\?/\?==\?/gos;
+    
     # multi-line header to single line
     $str =~ s/(?:\r\n|[\r\n])[ \t]//gos;
 
@@ -115,15 +117,10 @@ sub encode($$;$) {
     my @line = ();
     for my $line ( split /\r\n|[\r\n]/o, $str ) {
         my ( @word, @subline );
-        for my $word ( split /($re_linear_white_space+)/o, $line ) {
-            if (   $word =~ /[^\x00-\x7f]/o
-                or $word =~ /^$re_encoded_word$/o )
-            {
-                push @word, $obj->_encode($word);
-            }
-            else {
-                push @word, $word;
-            }
+        if ($line =~ /\A([\w\-]+:\s+)(.*)\z/o) {
+            push @word, $1, $obj->_encode($2); # "X-Header-Name: ..."
+        } else {
+            push @word, $obj->_encode($line);  # anything else
         }
         my $subline = '';
         for my $word (@word) {
