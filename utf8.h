@@ -134,10 +134,20 @@ EXTCONST unsigned char PL_utf8skip[];
 
 END_EXTERN_C
 
+#if _MSC_VER < 1400
+/* older MSVC versions have a smallish macro buffer */
+#define PERL_SMALL_MACRO_BUFFER
+#endif
+
 /* Native character to/from iso-8859-1.  Are the identity functions on ASCII
  * platforms */
+#ifdef PERL_SMALL_MACRO_BUFFER
+#define NATIVE_TO_LATIN1(ch)     (ch)
+#define LATIN1_TO_NATIVE(ch)     (ch)
+#else
 #define NATIVE_TO_LATIN1(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
 #define LATIN1_TO_NATIVE(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
+#endif
 
 /* I8 is an intermediate version of UTF-8 used only in UTF-EBCDIC.  We thus
  * consider it to be identical to UTF-8 on ASCII platforms.  Strictly speaking
@@ -145,8 +155,13 @@ END_EXTERN_C
  * because they are 8-bit encodings that serve the same purpose in Perl, and
  * rarely do we need to distinguish them.  The term "NATIVE_UTF8" applies to
  * whichever one is applicable on the current platform */
+#ifdef PERL_SMALL_MACRO_BUFFER
+#define NATIVE_UTF8_TO_I8(ch) (ch)
+#define I8_TO_NATIVE_UTF8(ch) (ch)
+#else
 #define NATIVE_UTF8_TO_I8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
 #define I8_TO_NATIVE_UTF8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
+#endif
 
 /* Transforms in wide UV chars */
 #define UNI_TO_NATIVE(ch)        ((UV) (ch))
