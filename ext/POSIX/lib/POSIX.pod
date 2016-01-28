@@ -1651,8 +1651,8 @@ not very widely implemented:
     uid         the uid of the process id generating the signal
     status      exit value or signal for SIGCHLD
     band        band event for SIGPOLL
-    addr        address of faulting instruction or memory reference
-                for SIGILL, SIGFPE, SIGSEGV or SIGBUS
+    addr        address of faulting instruction or memory
+                reference for SIGILL, SIGFPE, SIGSEGV or SIGBUS
 
 A third argument is also passed to the handler, which contains a copy
 of the raw binary contents of the C<siginfo> structure: if a system has
