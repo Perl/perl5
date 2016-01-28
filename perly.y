@@ -74,7 +74,10 @@
 %type <opval> formname subname proto optsubbody cont my_scalar my_var
 %type <opval> refgen_topic formblock
 %type <opval> subattrlist myattrlist myattrterm myterm
-%type <opval> subsignature termbinop termunop anonymous termdo
+%type <opval> termbinop termunop anonymous termdo
+%type <ival>  sigslurpsigil
+%type <opval> sigvarname sigdefault sigscalarelem sigslurpelem
+%type <opval> sigelem siglist siglistornull subsignature 
 %type <opval> formstmtseq formline formarg
 
 %nonassoc <ival> PREC_LOW
@@ -628,24 +631,267 @@ myattrlist:	COLONATTR THING
 			{ $$ = (OP*)NULL; }
 	;
 
+
+
+/* --------------------------------------
+ * subroutine signature parsing
+ */
+
+/* the '' or 'foo' part of a '$' or '@foo' etc signature variable  */
+sigvarname:   /* NULL */
+			{ $$ = (OP*)NULL; }
+        |       PRIVATEREF
+                        {
+                            $$ = $1;
+                            PL_parser->in_my = 0;
+                        }
+	;
+
+sigslurpsigil:
+                '@'
+                        { $$ = '@'; }
+        |       '%'
+                        { $$ = '%'; }
+
+/* @, %, @foo, %foo */
+sigslurpelem: sigslurpsigil sigvarname sigdefault/* def only to catch errors */ 
+                        {
+                            I32 sigil = $1;
+                            OP *var   = $2;
+                            OP *defexpr = $3;
+                            int type = (sigil == '@' ? OP_PADAV : OP_PADHV);
+
+                            if (PL_parser->sig_slurpy)
+                                yyerror("Multiple slurpy parameters not allowed");
+                            PL_parser->sig_slurpy = sigil;
+
+                            if (defexpr)
+                                yyerror("a slurpy parameter may not have "
+                                        "a default value");
+
+                            if (var) {
+                                OP *slice;
+
+                                var->op_type    = type;
+                                var->op_ppaddr  = PL_ppaddr[type];
+                                var->op_flags   = (OPf_WANT_LIST | OPf_MOD);
+                                var->op_private = OPpLVAL_INTRO;
+
+                                slice = PL_parser->sig_elems
+                                    ? op_prepend_elem(OP_ASLICE,
+                                        newOP(OP_PUSHMARK, 0),
+                                        newLISTOP(OP_ASLICE, 0,
+                                            list(newRANGE(0,
+                                                newSVOP(OP_CONST, 0,
+                                                    newSViv(PL_parser->sig_elems)),
+                                                newUNOP(OP_AV2ARYLEN, 0,
+                                                    ref(newUNOP(OP_RV2AV, 0,
+                                                            newGVOP(OP_GV, 0, PL_defgv)),
+                                                        OP_AV2ARYLEN)))),
+                                            ref(newUNOP(OP_RV2AV, 0,
+                                                    newGVOP(OP_GV, 0, PL_defgv)),
+                                                OP_ASLICE)))
+                                    : newUNOP(OP_RV2AV, 0, newGVOP(OP_GV, 0, PL_defgv));
+                                $$ = newSTATEOP(0, NULL,
+                                       newASSIGNOP(OPf_STACKED, var, 0, slice));
+                            }
+                            else
+                                $$ = (OP*)NULL;
+                        }
+	;
+
+/* default part of sub signature scalar element: i.e. '= default_expr' */
+sigdefault:	/* NULL */
+			{ $$ = (OP*)NULL; }
+        |       ASSIGNOP
+                        { $$ = newOP(OP_NULL, 0); }
+        |       ASSIGNOP term
+                        { $$ = $2; }
+
+
+/* subroutine signature scalar element: e.g. '$x', '$=', '$x = $default' */
+sigscalarelem:
+                '$' sigvarname sigdefault
+                        {
+                            OP *var     = $2;
+                            OP *defexpr = $3;
+                            OP *argn    = NULL;
+                            OP *expr    = NULL;
+
+                            if (PL_parser->sig_slurpy)
+                                yyerror("Slurpy parameter not last");
+
+                            PL_parser->sig_elems++;
+
+                            if (var) {
+                                var->op_type    = OP_PADSV;
+                                var->op_ppaddr  = PL_ppaddr[OP_PADSV];
+                                var->op_flags   = (OPf_WANT_SCALAR | OPf_MOD);
+                                var->op_private = OPpLVAL_INTRO;
+                            }
+
+                            /* $_[N] */
+                            argn = newBINOP(OP_AELEM, 0,
+                                ref(newUNOP(OP_RV2AV, 0,
+                                        newGVOP(OP_GV, 0, PL_defgv)),
+                                    OP_RV2AV),
+                                newSVOP(OP_CONST, 0,
+                                    newSViv(PL_parser->sig_elems - 1)));
+
+                            if (defexpr) {
+                                PL_parser->sig_optelems++;
+                                /* is it '$var=undef', '$=' ? */
+                                if (    (   defexpr->op_type == OP_NULL
+                                         || defexpr->op_type == OP_UNDEF)
+                                    && !(defexpr->op_flags & OPf_KIDS))
+                                {
+                                    if (var) {
+                                        /* '$=' is legal, '$var=' isn't */
+                                        if (defexpr->op_type == OP_NULL)
+                                            yyerror("Optional parameter "
+                                                "lacks default expression");
+                                        else
+                                            expr = argn;
+                                    }
+                                    op_free(defexpr);
+                                }
+                                else {
+                                    /* @_ >= N */
+                                    OP *ge_op = 
+                                        newBINOP(OP_GE, 0,
+                                        scalar(newUNOP(OP_RV2AV, 0,
+                                                newGVOP(OP_GV, 0, PL_defgv))),
+                                        newSVOP(OP_CONST, 0,
+                                            newSViv(PL_parser->sig_elems)));
+
+                                    expr = var
+                                        ? newCONDOP(0, ge_op, argn, defexpr)
+                                        : newLOGOP(OP_OR, 0, ge_op, defexpr);
+                                }
+                            }
+                            else {
+                                if (PL_parser->sig_optelems)
+                                    yyerror("Mandatory parameter "
+                                            "follows optional parameter");
+                                expr = argn;
+                            }
+
+                            if (var)
+                                expr = newASSIGNOP(OPf_STACKED, var, 0, expr);
+                            if (expr)
+                                $$ = op_prepend_elem(OP_LINESEQ,
+                                        newSTATEOP(0, NULL, NULL),
+                                        expr);
+                            else
+                                $$ = (OP*)NULL;
+                        }
+	;
+
+
+/* subroutine signature element: e.g. '$x = $default' or '%h' */
+sigelem:        sigscalarelem
+                        { parser->expect = XSIGVAR; $$ = $1; }
+        |       sigslurpelem
+                        { parser->expect = XSIGVAR; $$ = $1; }
+	;
+
+/* list of subroutine signature elements */
+siglist:
+	 	siglist ','
+			{ $$ = $1; }
+	|	siglist ',' sigelem
+			{
+			  $$ = op_append_list(OP_LINESEQ, $1, $3);
+			}
+        |	sigelem  %prec PREC_LOW
+			{ $$ = $1; }
+	;
+
+/* () or (....) */
+siglistornull:		/* NULL */
+			{ $$ = (OP*)NULL; }
+	|	siglist
+			{ $$ = $1; }
+
 /* Subroutine signature */
 subsignature:	'('
+                        {
+                            ENTER;
+                            SAVEINT(PL_parser->sig_elems);
+                            SAVEINT(PL_parser->sig_optelems);
+                            SAVEI8(PL_parser->sig_slurpy);
+                            PL_parser->sig_elems    = 0;
+                            PL_parser->sig_optelems = 0;
+                            PL_parser->sig_slurpy   = 0;
+                            parser->expect = XSIGVAR;
+                        }
+                siglistornull
+                ')'
 			{
-			  /* We shouldn't get here otherwise */
-			  assert(FEATURE_SIGNATURES_IS_ENABLED);
+                            OP *sigops = $3;
+                            int min_arity =
+                                PL_parser->sig_elems - PL_parser->sig_optelems;
 
-			  Perl_ck_warner_d(aTHX_
-				packWARN(WARN_EXPERIMENTAL__SIGNATURES),
-				"The signatures feature is experimental");
-			  $<opval>$ = parse_subsignature();
-			}
-		')'
-			{
-			  $$ = op_append_list(OP_LINESEQ, $<opval>2,
-				newSTATEOP(0, NULL, sawparens(newNULLLIST())));
-			  parser->expect = XATTRBLOCK;
+                            assert(FEATURE_SIGNATURES_IS_ENABLED);
+
+                            /* We shouldn't get here otherwise */
+                            Perl_ck_warner_d(aTHX_
+                                packWARN(WARN_EXPERIMENTAL__SIGNATURES),
+                                "The signatures feature is experimental");
+
+                            /* handle odd/even for %foo */
+                            if (PL_parser->sig_slurpy == '%') {
+                                OP *chkop =
+                                    newLOGOP(
+                                        (PL_parser->sig_elems & 1)
+                                                ? OP_OR : OP_AND,
+                                        0,
+                                        newBINOP(OP_BIT_AND, 0,
+                                            scalar(newUNOP(OP_RV2AV, 0,
+                                                newGVOP(OP_GV, 0, PL_defgv))),
+                                            newSVOP(OP_CONST, 0, newSViv(1))),
+                                        op_convert_list(OP_DIE, 0,
+                                            op_convert_list(OP_SPRINTF, 0,
+                                                op_append_list(OP_LIST,
+                                                    newSVOP(OP_CONST, 0,
+                                                        newSVpvs("Odd name/value argument for subroutine at %s line %d.\n")),
+                                                    newSLICEOP(0,
+                                                        op_append_list(OP_LIST,
+                                                            newSVOP(OP_CONST, 0, newSViv(1)),
+                                                            newSVOP(OP_CONST, 0, newSViv(2))),
+                                                        newOP(OP_CALLER, 0))))));
+                                if (PL_parser->sig_optelems)
+                                    chkop = newLOGOP(OP_AND, 0,
+                                                newBINOP(OP_GT, 0,
+                                                    scalar(newUNOP(OP_RV2AV, 0,
+                                                        newGVOP(OP_GV, 0, PL_defgv))),
+                                                    newSVOP(OP_CONST, 0,
+                                                    newSViv(PL_parser->sig_elems))),
+                                                chkop);
+                                sigops = op_prepend_elem(OP_LINESEQ,
+                                            chkop, sigops);
+
+                            }
+                            if (min_arity)
+                                sigops = op_prepend_elem(OP_LINESEQ,
+                                            Perl_check_arity(aTHX_ min_arity,
+                                                FALSE),
+                                            sigops);
+                            if (!PL_parser->sig_slurpy)
+                                sigops = op_prepend_elem(OP_LINESEQ,
+                                            Perl_check_arity(aTHX_
+                                                PL_parser->sig_elems, TRUE),
+                                            sigops);
+
+                            $$ = op_append_elem(OP_LINESEQ, sigops,
+                                newSTATEOP(0, NULL, NULL));
+
+                            parser->expect = XATTRBLOCK;
+                            LEAVE;
 			}
 	;
+
+
 
 /* Optional subroutine body, for named subroutine declaration */
 optsubbody:	block

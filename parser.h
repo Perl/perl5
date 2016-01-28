@@ -112,6 +112,10 @@ typedef struct yy_parser {
     PERL_BITFIELD16	filtered:1;    /* source filters in evalbytes */
     PERL_BITFIELD16	saw_infix_sigil:1; /* saw & or * or % operator */
     PERL_BITFIELD16	parsed_sub:1;  /* last thing parsed was a sub */
+    /* these are valid whiling parsing a subroutine signature */
+    int         sig_elems;      /* number of signature elements seen so far */
+    int         sig_optelems;   /* number of optional signature elems seen */
+    char        sig_slurpy;     /* the sigil of the slurpy var (or null) */
 } yy_parser;
 
 /* flags for lexer API */

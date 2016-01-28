@@ -25,6 +25,7 @@
 #define PERL_IN_PERLY_C
 #include "perl.h"
 #include "feature.h"
+#include "keywords.h"
 
 typedef unsigned char yytype_uint8;
 typedef signed char yytype_int8;
@@ -246,6 +247,7 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
 int
 Perl_yyparse (pTHX_ int gramtype)
 {
+    dVAR;
     int yystate;
     int yyn;
     int yyresult;
