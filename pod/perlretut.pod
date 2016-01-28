@@ -2241,7 +2241,7 @@ a little background.
 
 In Perl regular expressions, most regexp elements 'eat up' a certain
 amount of string when they match.  For instance, the regexp element
-C<[abc}]> eats up one character of the string when it matches, in the
+C<[abc]> eats up one character of the string when it matches, in the
 sense that Perl moves to the next character position in the string
 after the match.  There are some elements, however, that don't eat up
 characters (advance the character position) if they match.  The examples
