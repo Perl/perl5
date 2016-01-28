@@ -1912,7 +1912,7 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 }
 
     /* change namve uv1 to 'from' */
-UV
+STATIC UV
 S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp,
 		SV **swashp, const char *normal, const char *special)
 {
