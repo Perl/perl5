@@ -88,6 +88,7 @@ my %skip;
     'cpan/Math-BigInt/t/Math/BigInt/Scalar.pm',     # just a test module
     'cpan/Math-BigInt/t/Math/BigInt/Subclass.pm',   # just a test module
     'cpan/Math-BigRat/t/Math/BigRat/Test.pm',       # just a test module
+    'cpan/podlators/t/lib/Test/Podlators.pm',       # just a test module
     'dist/Attribute-Handlers/demo/MyClass.pm', # it's just demonstration code
     'dist/Exporter/lib/Exporter/Heavy.pm',
     'lib/Carp/Heavy.pm',

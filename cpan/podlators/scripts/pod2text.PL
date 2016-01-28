@@ -1,9 +1,53 @@
 #!/usr/bin/perl
+#
+# Special wrapper script to generate the actual pod2man script.  This is
+# required for proper start-up code on non-UNIX platforms, and is used inside
+# Perl core.
+
+use 5.006;
+use strict;
+use warnings;
+
+use Config qw(%Config);
+use Cwd qw(cwd);
+use File::Basename qw(basename dirname);
+
+# List explicitly here the variables you want Configure to generate.
+# Metaconfig only looks for shell variables, so you have to mention them as if
+# they were shell variables, not %Config entries.  Thus you write
+#  $startperl
+# to ensure Configure will look for $Config{startperl}.
+
+# This forces PL files to create target in same directory as PL file.
+# This is so that make depend always knows where to find PL derivatives.
+chdir(dirname($0)) or die "Cannot change directories: $!\n";
+my $file = basename($0, '.PL');
+if ($^O eq 'VMS') {
+    $file .= '.com';
+}
+
+# Create the generated script.
+## no critic (InputOutput::RequireBriefOpen)
+## no critic (InputOutput::RequireCheckedSyscalls)
+open(my $out, '>', $file) or die "Cannot create $file: $!\n";
+print "Extracting $file (with variable substitutions)\n";
+## use critic
+
+# In this section, Perl variables will be expanded during extraction.  You can
+# use $Config{...} to use Configure variables.
+print {$out} <<"PREAMBLE" or die "Cannot write to $file: $!\n";
+$Config{startperl}
+    eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
+        if \$running_under_some_shell;
+PREAMBLE
+
+# In the following, Perl variables are not expanded during extraction.
+print {$out} <<'SCRIPT_BODY' or die "Cannot write to $file: $!\n";
 
 # pod2text -- Convert POD data to formatted ASCII text.
 #
-# Copyright 1999, 2000, 2001, 2004, 2006, 2008, 2010, 2012, 2013, 2014, 2015
-#     Russ Allbery <rra@cpan.org>
+# Copyright 1999, 2000, 2001, 2004, 2006, 2008, 2010, 2012, 2013, 2014, 2015,
+#     2016 Russ Allbery <rra@cpan.org>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -313,10 +357,18 @@ Russ Allbery <rra@cpan.org>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2000, 2001, 2004, 2006, 2008, 2010, 2012, 2013, 2014, 2015
-Russ Allbery <rra@cpan.org>
+Copyright 1999, 2000, 2001, 2004, 2006, 2008, 2010, 2012, 2013, 2014, 2015,
+2016 Russ Allbery <rra@cpan.org>
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.
 
 =cut
+SCRIPT_BODY
+
+# Finish the generation of the script.
+close($out) or die "Cannot close $file: $!\n";
+chmod(0755, $file) or die "Cannot reset permissions for $file: $!\n";
+if ($Config{'eunicefix'} ne ':') {
+    exec("$Config{'eunicefix'} $file");
+}

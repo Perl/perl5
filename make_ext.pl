@@ -352,35 +352,26 @@ sub build_extension {
 
 	    print "\nCreating Makefile.PL in $ext_dir for $mname\n" if $verbose;
 	    my ($fromname, $key, $value);
-	    if ($mname eq 'podlators') {
-		# We need to special case this somewhere, and this is fewer
-		# lines of code than a core-only Makefile.PL, and no more
-		# complex
-		$fromname = 'VERSION';
-		$key = 'DISTNAME';
-		$value = 'podlators';
-		$mname = 'Pod';
-	    } else {
-		$key = 'ABSTRACT_FROM';
-		# We need to cope well with various possible layouts
-		my @dirs = split /::/, $mname;
-		my $leaf = pop @dirs;
-		my $leafname = "$leaf.pm";
-		my $pathname = join '/', @dirs, $leafname;
-		my @locations = ($leafname, $pathname, "lib/$pathname");
-		foreach (@locations) {
-		    if (-f $_) {
-			$fromname = $_;
-			last;
-		    }
-		}
 
-		unless ($fromname) {
-		    die "For $mname tried @locations in $ext_dir but can't find source";
+	    $key = 'ABSTRACT_FROM';
+	    # We need to cope well with various possible layouts
+	    my @dirs = split /::/, $mname;
+	    my $leaf = pop @dirs;
+	    my $leafname = "$leaf.pm";
+	    my $pathname = join '/', @dirs, $leafname;
+	    my @locations = ($leafname, $pathname, "lib/$pathname");
+	    foreach (@locations) {
+		if (-f $_) {
+		    $fromname = $_;
+		    last;
 		}
-		($value = $fromname) =~ s/\.pm\z/.pod/;
-		$value = $fromname unless -e $value;
-	    }
+	}
+
+	unless ($fromname) {
+	    die "For $mname tried @locations in $ext_dir but can't find source";
+	}
+	($value = $fromname) =~ s/\.pm\z/.pod/;
+	$value = $fromname unless -e $value;
 
             if ($mname eq 'Pod::Checker') {
                 # the abstract in the .pm file is unparseable by MM,

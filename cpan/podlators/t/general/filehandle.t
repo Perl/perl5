@@ -6,7 +6,7 @@
 # Pod::Man and Pod::Text had to implement it directly.  Test to be sure it's
 # working properly.
 #
-# Copyright 2006, 2009, 2012, 2014, 2015 Russ Allbery <rra@cpan.org>
+# Copyright 2006, 2009, 2012, 2014, 2015, 2016 Russ Allbery <rra@cpan.org>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -79,4 +79,3 @@ is($got, $text_data_ref->{output}, 'Pod::Text output');
 
 # Clean up temporary files.
 unlink($infile, $outfile);
-rmdir($tmpdir);

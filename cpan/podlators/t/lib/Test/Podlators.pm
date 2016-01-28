@@ -4,7 +4,7 @@
 # suite.  It provides some supporting functions to make it easier to write
 # tests.
 #
-# Copyright 2015 Russ Allbery <rra@cpan.org>
+# Copyright 2015, 2016 Russ Allbery <rra@cpan.org>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -43,15 +43,13 @@ my $OLD_STDERR;
 # The file name used to capture standard error output.
 my $SAVED_STDERR;
 
-# Internal function to clean up the standard error output file.  The "1 while"
-# construct is for VMS, in case there are multiple versions of the file.
+# Internal function to clean up the standard error output file.  Leave the
+# temporary directory in place, since otherwise we race with other test
+# scripts trying to create the temporary directory when running tests in
+# parallel.
 sub _stderr_cleanup {
     if ($SAVED_STDERR && -f $SAVED_STDERR) {
         unlink($SAVED_STDERR);
-    }
-    my $tmpdir = File::Spec->catdir('t', 'tmp');
-    if (-d $tmpdir) {
-        rmdir($tmpdir);
     }
     return;
 }

@@ -22,10 +22,14 @@ use File::Spec;
 #
 # @scripts - List of script names
 #
-# Returns: List of relative paths from top of distribution
+# Returns: (Array) List of relative paths from top of distribution
+#          (Scalar) Space-separated relative paths from top of distribution
 sub scripts {
     my (@scripts) = @_;
-    return map { File::Spec->catfile('bin', $_) } @scripts;
+    my $script_ext = $^O eq 'VMS' ? '.com' : '';
+    my @paths = map { $_ .= $script_ext unless $_ =~ m/\.PL$/i;
+                      File::Spec->catfile('scripts', $_) } @scripts;
+    return wantarray ? @paths : join(q{ }, @paths);
 }
 
 # Generate an association between a source file and a destination man page for
@@ -57,18 +61,27 @@ my %metadata = (
     DISTNAME         => 'podlators',
     ABSTRACT         => 'Convert POD data to various other formats',
     AUTHOR           => 'Russ Allbery <rra@cpan.org>',
-    LICENSE          => 'perl',
+    LICENSE          => 'perl_5',
     EXE_FILES        => [scripts('pod2text', 'pod2man')],
     VERSION_FROM     => 'lib/Pod/Man.pm',
     MIN_PERL_VERSION => '5.006',
 
+    # Use *.PL files to generate the driver scripts so that we get the correct
+    # invocation of Perl on non-UNIX platforms.
+    PL_FILES => {
+        scripts('pod2man.PL', 'pod2man'), scripts('pod2text.PL', 'pod2text'),
+    },
+
     # Override the files that generate section 1 man pages.
-    # (done differently in blead)
-    #MAN1PODS => {
-    #    man1pod('bin', 'pod2man'),
-    #    man1pod('bin', 'pod2text'),
-    #    man1pod('pod', 'perlpodstyle'),
-    #},
+    MAN1PODS => {
+        man1pod('scripts', 'pod2man'),
+        man1pod('scripts', 'pod2text'),
+        man1pod('pod',     'perlpodstyle'),
+    },
+
+    # Clean some additional files.
+    clean     => { FILES => File::Spec->catdir('t',    'tmp') },
+    realclean => { FILES => scalar(scripts('pod2text', 'pod2man')) },
 
     # Dependencies on other modules.
     PREREQ_PM => {
@@ -76,7 +89,8 @@ my %metadata = (
         'Pod::Simple' => 3.06,
     },
 
-    # ExtUtils::MakeMaker doesn't pick up nested test directories by default.
+    # Older versions of ExtUtils::MakeMaker don't pick up nested test
+    # directories by default.
     test => { TESTS => 't/*/*.t' },
 
     # For older versions of Perl, we have to force installation into the Perl
@@ -88,8 +102,10 @@ my %metadata = (
     META_ADD => {
         'meta-spec' => { version => 2 },
         resources   => {
-            bugtracker =>
-              'https://rt.cpan.org/Public/Dist/Display.html?Name=podlators',
+            bugtracker => {
+                mailto => 'bug-podlators@rt.cpan.org',
+                web => 'https://rt.cpan.org/Dist/Display.html?Name=podlators',
+            },
             homepage   => 'http://www.eyrie.org/~eagle/software/podlators/',
             repository => {
                 url  => 'git://github.com/rra/podlators.git',
@@ -112,6 +128,8 @@ for my $key (keys(%supported)) {
         delete $metadata{$key};
     }
 }
+
+delete $metadata{MAN1PODS} if $ENV{PERL_CORE};
 
 # Generate the actual Makefile.  Pick an arbitrary module to pull the version
 # from, since they should all have the same version.

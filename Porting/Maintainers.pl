@@ -968,26 +968,17 @@ use File::Glob qw(:case);
     },
 
     'podlators' => {
-        'DISTRIBUTION' => 'RRA/podlators-4.04.tar.gz',
+        'DISTRIBUTION' => 'RRA/podlators-4.05.tar.gz',
         'FILES'        => q[cpan/podlators pod/perlpodstyle.pod],
 
-        # The perl distribution has pod2man.PL and pod2text.PL,  which are
-        # run to create pod2man and pod2text, while the CPAN distribution
-        # just has the post-generated pod2man and pod2text files.
-        # The following entries attempt to codify that odd fact.
-        'CUSTOMIZED' => [
-            qw( scripts/pod2man.PL
-                scripts/pod2text.PL
-                ),
-        ],
         'MAP' => {
             ''                 => 'cpan/podlators/',
-            'scripts/pod2man'  => 'cpan/podlators/scripts/pod2man.PL',
-            'scripts/pod2text' => 'cpan/podlators/scripts/pod2text.PL',
-
             # this file lives outside the cpan/ directory
             'pod/perlpodstyle.pod' => 'pod/perlpodstyle.pod',
         },
+        'CUSTOMIZED'   => [
+            qw( Makefile.PL )
+        ],
     },
 
     'Safe' => {

@@ -1861,8 +1861,6 @@ cpan/Pod-Escapes/lib/Pod/Escapes.pm	Pod::Escapes
 cpan/Pod-Escapes/t/01_about_verbose.t	test Pod::Escapes
 cpan/Pod-Escapes/t/10_main.t		test Pod::Escapes
 cpan/Pod-Escapes/t/15_name2charnum.t	test Pod::Escapes
-cpan/podlators/bin/pod2man			Translator to turn pod into manpage
-cpan/podlators/bin/pod2text			Translator to turn pod into text
 cpan/podlators/lib/Pod/Man.pm			Convert POD data to *roff
 cpan/podlators/lib/Pod/ParseLink.pm		Perl an L<> formatting code in POD text
 cpan/podlators/lib/Pod/Text/Color.pm		Convert POD data to color ASCII text
@@ -1870,6 +1868,8 @@ cpan/podlators/lib/Pod/Text/Overstrike.pm	Convert POD data to formatted overstri
 cpan/podlators/lib/Pod/Text.pm			Pod-Parser - convert POD data to formatted ASCII text
 cpan/podlators/lib/Pod/Text/Termcap.pm		Convert POD data to ASCII text with format escapes
 cpan/podlators/Makefile.PL			podlators Makefile.PL
+cpan/podlators/scripts/pod2man.PL		Translator to turn pod into manpage
+cpan/podlators/scripts/pod2text.PL		Translator to turn pod into text
 cpan/podlators/t/data/basic.cap			podlators test			podlators test
 cpan/podlators/t/data/basic.clr			podlators test
 cpan/podlators/t/data/basic.man			podlators test
@@ -5628,8 +5628,6 @@ utils/perlivp.PL		installation verification procedure
 utils/piconv.PL			iconv(1), reinvented in perl
 utils/pl2pm.PL			A pl to pm translator
 utils/pod2html.PL		Translator to turn pod into HTML
-utils/pod2man.PL		Convert POD data to formatted *roff input
-utils/pod2text.PL		Convert POD data to formatted ASCII text
 utils/prove.PL			The prove harness utility
 utils/ptardiff.PL		The ptardiff utility
 utils/ptargrep.PL		The ptargrep utility

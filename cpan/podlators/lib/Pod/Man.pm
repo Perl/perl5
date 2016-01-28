@@ -14,7 +14,7 @@
 # Written by Russ Allbery <rra@cpan.org>
 # Substantial contributions by Sean Burke <sburke@cpan.org>
 # Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-#     2010, 2012, 2013, 2014, 2015 Russ Allbery <rra@cpan.org>
+#     2010, 2012, 2013, 2014, 2015, 2016 Russ Allbery <rra@cpan.org>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -32,13 +32,18 @@ use warnings;
 use subs qw(makespace);
 use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 
-use Carp qw(croak);
-use Encode qw(encode);
+use Carp qw(carp croak);
 use Pod::Simple ();
+
+# Conditionally import Encode and set $HAS_ENCODE if it is available.
+our $HAS_ENCODE;
+BEGIN {
+    $HAS_ENCODE = eval { require Encode };
+}
 
 @ISA = qw(Pod::Simple);
 
-$VERSION = '4.04';
+$VERSION = '4.05';
 
 # Set the debugging level.  If someone has inserted a debug function into this
 # class already, use that.  Otherwise, use any Pod::Simple debug function
@@ -140,6 +145,13 @@ sub new {
         croak (qq(Invalid errors setting: "$$self{errors}"));
     }
     delete $$self{errors};
+
+    # Degrade back to non-utf8 if Encode is not available.
+    if ($$self{utf8} and !$HAS_ENCODE) {
+        carp ('utf8 mode requested but Encode module not available,'
+              . ' falling back to non-utf8');
+        delete $$self{utf8};
+    }
 
     # Initialize various other internal constants based on our arguments.
     $self->init_fonts;
@@ -743,7 +755,7 @@ sub outindex {
 sub output {
     my ($self, @text) = @_;
     if ($$self{ENCODE}) {
-        print { $$self{output_fh} } encode ('UTF-8', join ('', @text));
+        print { $$self{output_fh} } Encode::encode ('UTF-8', join ('', @text));
     } else {
         print { $$self{output_fh} } @text;
     }
