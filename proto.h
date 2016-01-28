@@ -266,6 +266,7 @@ PERL_CALLCONV U32	Perl_cast_ulong(NV f)
 PERL_CALLCONV UV	Perl_cast_uv(NV f)
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV OP*	Perl_check_arity(pTHX_ int arity, bool max);
 PERL_CALLCONV bool	Perl_check_utf8_print(pTHX_ const U8 *s, const STRLEN len);
 #define PERL_ARGS_ASSERT_CHECK_UTF8_PRINT	\
 	assert(s)
@@ -2449,9 +2450,6 @@ PERL_CALLCONV OP*	Perl_parse_fullstmt(pTHX_ U32 flags);
 PERL_CALLCONV SV*	Perl_parse_label(pTHX_ U32 flags);
 PERL_CALLCONV OP*	Perl_parse_listexpr(pTHX_ U32 flags);
 PERL_CALLCONV OP*	Perl_parse_stmtseq(pTHX_ U32 flags);
-PERL_CALLCONV OP *	Perl_parse_subsignature(pTHX)
-			__attribute__warn_unused_result__;
-
 PERL_CALLCONV OP*	Perl_parse_termexpr(pTHX_ U32 flags);
 PERL_CALLCONV U32	Perl_parse_unicode_opts(pTHX_ const char **popt);
 #define PERL_ARGS_ASSERT_PARSE_UNICODE_OPTS	\

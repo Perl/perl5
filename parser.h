@@ -116,6 +116,11 @@ typedef struct yy_parser {
     char	tokenbuf[256];
     line_t	herelines;	/* number of lines in here-doc */
     line_t	preambling;	/* line # when processing $ENV{PERL5DB} */
+
+    /* these are valid whiling parsing a subroutine signature */
+    int         sig_elems;      /* number of signature elements seen so far */
+    int         sig_optelems;   /* number of optional signature elems seen */
+    char        sig_slurpy;     /* the sigil of the slurpy var (or null) */
 } yy_parser;
 
 /* flags for lexer API */
