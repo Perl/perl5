@@ -38,7 +38,7 @@ static const char unees[] =
 static const char cp_above_legal_max[] =
  "Use of code point 0x%"UVXf" is deprecated; the permissible max is 0x%"UVXf"";
 
-#define MAX_NON_DEPRECATED_CP (IV_MAX)
+#define MAX_NON_DEPRECATED_CP ((UV) (IV_MAX))
 
 /*
 =head1 Unicode Support
