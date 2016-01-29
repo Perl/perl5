@@ -2232,7 +2232,7 @@ Perl_runops_debug(pTHX)
 
 /* print the names of the n lexical vars starting at pad offset off */
 
-void
+STATIC void
 S_deb_padvar(pTHX_ PADOFFSET off, int n, bool paren)
 {
     PADNAME *sv;

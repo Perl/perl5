@@ -802,6 +802,7 @@ Perl_op_free(pTHX_ OP *o)
 
 /* S_op_clear_gv(): free a GV attached to an OP */
 
+STATIC
 #ifdef USE_ITHREADS
 void S_op_clear_gv(pTHX_ OP *o, PADOFFSET *ixp)
 #else
@@ -1407,7 +1408,7 @@ Perl_op_parent(OP *o)
  * Returns the new UNOP.
  */
 
-OP *
+STATIC OP *
 S_op_sibling_newUNOP(pTHX_ OP *parent, OP *start, I32 type, I32 flags)
 {
     OP *kid, *newop;
@@ -1425,7 +1426,7 @@ S_op_sibling_newUNOP(pTHX_ OP *parent, OP *start, I32 type, I32 flags)
  * being spread throughout this file.
  */
 
-LOGOP *
+STATIC LOGOP *
 S_alloc_LOGOP(pTHX_ I32 type, OP *first, OP* other)
 {
     dVAR;
@@ -2303,7 +2304,7 @@ S_modkids(pTHX_ OP *o, I32 type)
  * key_op is the first key
  */
 
-void
+STATIC void
 S_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op)
 {
     PADNAME *lexname;
@@ -12480,7 +12481,7 @@ S_inplace_aassign(pTHX_ OP *o) {
  * OPpHINT_STRICT_REFS) as found in any rv2av/hv skipped by the caller.
  */
 
-void
+STATIC void
 S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
 {
     dVAR;

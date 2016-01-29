@@ -2189,7 +2189,7 @@ PP(pp_helem)
 /* a stripped-down version of Perl_softref2xv() for use by
  * pp_multideref(), which doesn't use PL_op->op_flags */
 
-GV *
+STATIC GV *
 S_softref2xv_lite(pTHX_ SV *const sv, const char *const what,
 		const svtype type)
 {
