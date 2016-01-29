@@ -199,6 +199,8 @@ SKIP: {
     my %opt_val = ( code => 'SI_USER' );
     my %always = map +($_ => 1), qw(signo code);
     my %skip = ( code => { darwin => "not set to SI_USER for kill()" } );
+    $skip{pid}{$^O} = $skip{uid}{$^O} = "not set for kill()"
+        if ($^O.$Config{osvers}) =~ /^darwin[0-8]\./;
     my $tests = keys %{{ %siginfo, %opt_val }};
     eval 'use POSIX qw(SA_SIGINFO); SA_SIGINFO';
     skip("no SA_SIGINFO", $tests) if $@;
