@@ -205,8 +205,8 @@ sub nm_parse_gnu {
                 $symbols->{data}{const}{$1}{$symbols->{o}}++;
             } elsif (/^r .+$/) {
                 # Skip local const (read only).
-            } elsif (/^[Tti] (\w+)(\..+)?$/) {
-                $symbols->{text}{$1}{$symbols->{o}}++;
+            } elsif (/^([Tti]) (\w+)(\..+)?$/) {
+                $symbols->{text}{$2}{$symbols->{o}}{$1}++;
             } elsif (/^C (\w+)$/) {
                 $symbols->{data}{common}{$1}{$symbols->{o}}++;
             } elsif (/^[BbSs] (\w+)(\.\d+)?$/) {
@@ -257,8 +257,9 @@ sub nm_parse_darwin {
                 # Ignore the cstring unnamed strings.
                 return if $symbol =~ /^L\.str\d+$/;
                 $symbols->{data}{const}{$symbol}{$symbols->{o}}++;
-            } elsif (/^\(__TEXT,__text\) (?:non-)?external _(\w+)$/) {
-                $symbols->{text}{$1}{$symbols->{o}}++;
+            } elsif (/^\(__TEXT,__text\) ((?:non-)?external) _(\w+)$/) {
+                my ($exp, $sym) = ($1, $2);
+                $symbols->{text}{$sym}{$symbols->{o}}{$exp =~ /^non/ ? 't' : 'T'}++;
             } elsif (/^\(__DATA,__\w*?(const|data|bss|common)\w*\) (?:non-)?external _?(\w+)(\.\w+)?$/) {
                 my ($dtype, $symbol, $suffix) = ($1, $2, $3);
                 # Ignore function-local constants like
@@ -530,6 +531,18 @@ for my $symbol (sort keys %unexpected) {
         is(@o, 0, "uses no $symbol (@o)");
     }
 }
+
+# Check that any text symbols named S_ are not exported.
+my $export_S_prefix = 0;
+for my $t (sort grep { /^S_/ } keys %{$symbols{text}}) {
+    for my $o (sort keys %{$symbols{text}{$t}}) {
+        if (exists $symbols{text}{$t}{$o}{T}) {
+            fail($t, "$t exported from $o");
+            $export_S_prefix++;
+        }
+    }
+}
+is($export_S_prefix, 0, "no S_ exports");
 
 if (defined $nm_err_tmp) {
     if (open(my $nm_err_fh, $nm_err_tmp)) {
