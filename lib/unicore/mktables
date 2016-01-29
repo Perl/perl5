@@ -19689,10 +19689,11 @@ my $WB_Extend_or_Format_re = eval 'qr/[\p{WB=Extend}\p{WB=Format}]/';
 sub _test_break($$) {
     # Test various break property matches.  The 2nd parameter gives the
     # property name.  The input is a line from auxiliary/*Test.txt for the
-    # given property.  Each such line is a sequence of code points given by
-    # their hex numbers, separated by the two characters defined just before
-    # this subroutine that indicate that either there can or cannot be a break
-    # between the adjacent code points.  All these are tested.
+    # given property.  Each such line is a sequence of Unicode (not native)
+    # code points given by their hex numbers, separated by the two characters
+    # defined just before this subroutine that indicate that either there can
+    # or cannot be a break between the adjacent code points.  All these are
+    # tested.
     #
     # For the gcb property extra tests are made.  if there isn't a break, that
     # means the sequence forms an extended grapheme cluster, which means that
@@ -19736,8 +19737,8 @@ sub _test_break($$) {
             # non-breaks.
             next if $line[$i+1] =~ /$nobreak/;
 
-            my $lhs = chr hex $line[$i];
-            my $rhs = chr hex $line[$i+2];
+            my $lhs = chr utf8::unicode_to_native(hex $line[$i]);
+            my $rhs = chr utf8::unicode_to_native(hex $line[$i+2]);
 
             # And it only affects adjacent space characters.
             next if $lhs !~ /\s/u;
