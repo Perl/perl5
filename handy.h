@@ -915,8 +915,9 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #else
     /* There is a simple definition of ASCII for ASCII platforms.  But the
      * EBCDIC one isn't so simple, so is defined using table look-up like the
-     * other macros below */
-#   define isASCII(c)    ((WIDEST_UTYPE)(c) < 128)
+     * other macros below.
+     * The '| 0' part ensures that c is an integer (and not e.g. a pointer) */
+#   define isASCII(c)    ((WIDEST_UTYPE)((c) | 0) < 128)
 #endif
 
 /* The lower 3 bits in both the ASCII and EBCDIC representations of '0' are 0,
