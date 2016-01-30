@@ -1897,6 +1897,7 @@ cpan/podlators/t/man/devise-date.t			podlators test
 cpan/podlators/t/man/devise-title.t			podlators test
 cpan/podlators/t/man/empty.t			podlators test
 cpan/podlators/t/man/heading.t			podlators test
+cpan/podlators/t/man/no-encode.t		podlators test
 cpan/podlators/t/man/options.t			podlators test
 cpan/podlators/t/man/utf8-io.t			podlators test
 cpan/podlators/t/parselink/basic.t			podlators test

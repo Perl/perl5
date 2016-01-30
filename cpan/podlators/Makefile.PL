@@ -76,7 +76,8 @@ my %metadata = (
     MAN1PODS => {
         man1pod('scripts', 'pod2man'),
         man1pod('scripts', 'pod2text'),
-        man1pod('pod',     'perlpodstyle'),
+        # This one lives in the top-level pod/ directory in core
+        ($ENV{PERL_CORE} ? () : man1pod('pod',     'perlpodstyle')),
     },
 
     # Clean some additional files.
@@ -128,8 +129,6 @@ for my $key (keys(%supported)) {
         delete $metadata{$key};
     }
 }
-
-delete $metadata{MAN1PODS} if $ENV{PERL_CORE};
 
 # Generate the actual Makefile.  Pick an arbitrary module to pull the version
 # from, since they should all have the same version.

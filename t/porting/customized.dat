@@ -55,6 +55,6 @@ Win32API::File cpan/Win32API-File/t/file.t 124e64aa77e755235eb297644a87fac5388d3
 Win32API::File cpan/Win32API-File/t/tie.t 712ea7edd0cc805ce1c0b8172c01b03dd19b583d
 Win32API::File cpan/Win32API-File/typemap 24bff088babeadac0873e8df390d1666d9d9db4a
 autodie cpan/autodie/t/mkdir.t 9e70d2282a3cc7d76a78bf8144fccba20fb37dac
-podlators cpan/podlators/Makefile.PL d99c9f93d4b26ec27400d41227b6bcd155f48ba0
+podlators cpan/podlators/Makefile.PL a356edc61af0185c174407fc5d1edb30e2a42ea6
 version cpan/version/lib/version.pm d0923b895d57f1d669ae36fcf85c87b16db341d1
 version vutil.c 668f17ca43e2527645674d29ba772b86330d5663
