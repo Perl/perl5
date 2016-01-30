@@ -201,7 +201,7 @@ guaranteed to be B<int> or B<long>.  If you really explicitly need
 Assuming one can dereference any type of pointer for any type of data
 
   char *p = ...;
-  long pony = *p;    /* BAD */
+  long pony = *(long *)p;    /* BAD */
 
 Many platforms, quite rightly so, will give you a core dump instead of
 a pony if the p happens not to be correctly aligned.
