@@ -775,19 +775,11 @@ might have.  For example:
         ...
     }
 
-or, if other non-required fields are allowed, use ARRAY ~~ HASH:
-
-    use v5.10.1;
-    sub make_dogtag {
-        state $REQUIRED_FIELDS = { name=>1, rank=>1, serial_num=>1 };
-
-        my ($class, $init_fields) = @_;
-
-        die "Must supply (at least) name, rank, and serial number"
-            unless [keys %{$init_fields}] ~~ $REQUIRED_FIELDS;
-
-        ...
-    }
+However, this only does what you mean if C<$init_fields> is indeed a hash
+reference. The condition C<$init_fields ~~ $REQUIRED_FIELDS> also allows the
+strings C<"name">, C<"rank">, C<"serial_num"> as well as any array reference
+that contains C<"name"> or C<"rank"> or C<"serial_num"> anywhere to pass
+through.
 
 The smartmatch operator is most often used as the implicit operator of a
 C<when> clause.  See the section on "Switch Statements" in L<perlsyn>.
