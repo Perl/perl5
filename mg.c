@@ -2577,7 +2577,6 @@ S_set_dollarzero(pTHX_ SV *sv)
 #endif
     const char *s;
     STRLEN len;
-    I32 i;
 #ifdef HAS_SETPROCTITLE
     /* The BSDs don't show the argv[] in ps(1) output, they
      * show a string from the process struct and provide
@@ -2610,6 +2609,7 @@ S_set_dollarzero(pTHX_ SV *sv)
     }
 #else
     if (PL_origalen > 1) {
+        I32 i;
         /* PL_origalen is set in perl_parse(). */
         s = SvPV_force(sv,len);
         if (len >= (STRLEN)PL_origalen-1) {
