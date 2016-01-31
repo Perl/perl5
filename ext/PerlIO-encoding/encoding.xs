@@ -462,8 +462,8 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 	    if (!SvPOKp(e->bufsv) || SvTHINKFIRST(e->bufsv))
 		(void)SvPV_force_nolen(e->bufsv);
 	    if ((STDCHAR *)SvPVX(e->bufsv) != e->base.buf) {
-		e->base.ptr = SvEND(e->bufsv);
-		e->base.end = SvPVX(e->bufsv) + (e->base.end-e->base.buf);
+		e->base.ptr = (STDCHAR *)SvEND(e->bufsv);
+		e->base.end = (STDCHAR *)SvPVX(e->bufsv) + (e->base.end-e->base.buf);
 		e->base.buf = (STDCHAR *)SvPVX(e->bufsv);
 	    }
 	    (void)PerlIOEncode_get_base(aTHX_ f);
