@@ -327,9 +327,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Win32
 
-XXX
+Builds using Microsoft Visual C++ 2003 and earlier no longer produce
+an "INTERNAL COMPILER ERROR" message.  [perl #126045]
 
 =back
 
