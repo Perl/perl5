@@ -117,10 +117,13 @@ Perl_set_numeric_radix(pTHX)
     else
 	PL_numeric_radix_sv = NULL;
 
-    DEBUG_L(PerlIO_printf(Perl_debug_log, "Locale radix is %s\n",
+    DEBUG_L(PerlIO_printf(Perl_debug_log, "Locale radix is %s, ?UTF-8=%d\n",
                                           (PL_numeric_radix_sv)
-                                          ? lc->decimal_point
-                                          : "NULL"));
+                                           ? SvPVX(PL_numeric_radix_sv)
+                                           : "NULL",
+                                          (PL_numeric_radix_sv)
+                                           ? SvUTF8(PL_numeric_radix_sv)
+                                           : 0));
 
 # endif /* HAS_LOCALECONV */
 #endif /* USE_LOCALE_NUMERIC */
