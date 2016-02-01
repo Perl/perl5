@@ -14471,10 +14471,12 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
 		}
 	    }
 	}
-        /* Some gcc releases emit a warning for this function:
+        /* On some platforms (HP-UX, IA64) gcc emits a warning for this function:
          * op.c: In function 'Perl_custom_op_get_field':
          * op.c:...: warning: 'any.xop_name' may be used uninitialized in this function [-Wmaybe-uninitialized]
-         * Whether this is true, is currently unknown. */
+         * This is because on those platforms (with -DEBUGGING) NOT_REACHED
+         * expands to assert(0), which expands to ((0) ? (void)0 :
+         * __assert(...)), and gcc doesn't know that __assert can never return. */
 	return any;
     }
 }
