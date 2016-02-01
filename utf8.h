@@ -134,7 +134,7 @@ EXTCONST unsigned char PL_utf8skip[];
 
 END_EXTERN_C
 
-#if _MSC_VER < 1400
+#if defined(_MSC_VER) && _MSC_VER < 1400
 /* older MSVC versions have a smallish macro buffer */
 #define PERL_SMALL_MACRO_BUFFER
 #endif
@@ -142,8 +142,8 @@ END_EXTERN_C
 /* Native character to/from iso-8859-1.  Are the identity functions on ASCII
  * platforms */
 #ifdef PERL_SMALL_MACRO_BUFFER
-#define NATIVE_TO_LATIN1(ch)     (ch)
-#define LATIN1_TO_NATIVE(ch)     (ch)
+#define NATIVE_TO_LATIN1(ch)     ((U8)(ch))
+#define LATIN1_TO_NATIVE(ch)     ((U8)(ch))
 #else
 #define NATIVE_TO_LATIN1(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
 #define LATIN1_TO_NATIVE(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
