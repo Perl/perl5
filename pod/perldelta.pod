@@ -369,6 +369,15 @@ returned by caller() as negative numbers.  [perl #126991]
 C<< unless ( I<assignment> ) >> now properly warns when syntax
 warnings are enabled.  [perl #127122]
 
+=item *
+
+Setting an C<ISA> glob to an array reference now properly adds
+C<isaelem> magic to any existing elements.  Previously modifying such
+an element would not update the ISA cache, so method calls would call
+the wrong function.  Perl would also crash if the C<ISA> glob was
+destroyed, since new code added in 5.23.7 would try to release the
+C<isaelem> magic from the elements.  [perl #127351]
+
 =back
 
 =head1 Known Problems
