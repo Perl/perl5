@@ -2475,7 +2475,7 @@ PP(pp_return)
 
 /* find the enclosing loop or labelled loop and dounwind() back to it. */
 
-PERL_CONTEXT *
+static PERL_CONTEXT *
 S_unwind_loop(pTHX)
 {
     I32 cxix;
