@@ -364,6 +364,13 @@ memory.  This was caused by a pointer not being restored correctly.
 Report more context when we see an array where we expect to see an
 operator and avoid an assertion failure.  [perl #123737]
 
+=item *
+
+If a here-doc was found while parsing another operator, the parser had
+already read end of file, and the here-doc was not terminated, perl
+could produce an assertion or a segmentation fault.  This now reliably
+complains about the unterminated here-doc.  [perl #125540]
+
 =back
 
 =head1 Known Problems
