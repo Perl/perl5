@@ -7167,7 +7167,11 @@ one or more of:
 For example:
 
   printf '<% d>',  12;   # prints "< 12>"
+  printf '<% d>',   0;   # prints "< 0>"
+  printf '<% d>', -12;   # prints "<-12>"
   printf '<%+d>',  12;   # prints "<+12>"
+  printf '<%+d>',   0;   # prints "<+0>"
+  printf '<%+d>', -12;   # prints "<-12>"
   printf '<%6s>',  12;   # prints "<    12>"
   printf '<%-6s>', 12;   # prints "<12    >"
   printf '<%06s>', 12;   # prints "<000012>"
@@ -7178,7 +7182,7 @@ For example:
   printf '<%#B>',  12;   # prints "<0B1100>"
 
 When a space and a plus sign are given as the flags at once,
-a plus sign is used to prefix a positive number.
+the space is ignored.
 
   printf '<%+ d>', 12;   # prints "<+12>"
   printf '<% +d>', 12;   # prints "<+12>"
