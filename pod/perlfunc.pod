@@ -2235,7 +2235,7 @@ value returned work just like C<ioctl> below.
 For example:
 
     use Fcntl;
-    fcntl($filehandle, F_GETFL, $packed_return_buffer)
+    my $flags = fcntl($filehandle, F_GETFL, 0)
         or die "can't fcntl F_GETFL: $!";
 
 You don't have to check for C<defined> on the return from C<fcntl>.
