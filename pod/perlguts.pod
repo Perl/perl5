@@ -3233,52 +3233,52 @@ A typical context stack pushing can be found in C<pp_entersub>; the
 following shows a simplified and stripped-down example of a non-XS call,
 along with comments showing roughly what each function does.
 
-    dMARK;
-    U8 gimme      = GIMME_V;
-    bool hasargs  = cBOOL(PL_op->op_flags & OPf_STACKED);
-    OP *retop     = PL_op->op_next;
-    I32 old_ss_ix = PL_savestack_ix;
-    CV *cv        = ....;
+ dMARK;
+ U8 gimme      = GIMME_V;
+ bool hasargs  = cBOOL(PL_op->op_flags & OPf_STACKED);
+ OP *retop     = PL_op->op_next;
+ I32 old_ss_ix = PL_savestack_ix;
+ CV *cv        = ....;
 
-    /* ... make mortal copies of stack args which are PADTMPs here ... */
+ /* ... make mortal copies of stack args which are PADTMPs here ... */
 
-    /* ... do any additional savestack pushes here ... */
+ /* ... do any additional savestack pushes here ... */
 
-    /* Now push a new context entry of type 'CXt_SUB'; initially just
-     * doing the actions common to all block types: */
+ /* Now push a new context entry of type 'CXt_SUB'; initially just
+  * doing the actions common to all block types: */
 
-    cx = cx_pushblock(CXt_SUB, gimme, MARK, old_ss_ix);
+ cx = cx_pushblock(CXt_SUB, gimme, MARK, old_ss_ix);
 
-        /* this does (approximately):
-            CXINC;              /* cxstack_ix++ (grow if necessary) */
-            cx = CX_CUR();      /* and get the address of new frame */
-            cx->cx_type        = CXt_SUB;
-            cx->blk_gimme      = gimme;
-            cx->blk_oldsp      = MARK - PL_stack_base;
-            cx->blk_oldsaveix  = old_ss_ix;
-            cx->blk_oldcop     = PL_curcop;
-            cx->blk_oldmarksp  = PL_markstack_ptr - PL_markstack;
-            cx->blk_oldscopesp = PL_scopestack_ix;
-            cx->blk_oldpm      = PL_curpm;
-            cx->blk_old_tmpsfloor = PL_tmps_floor;
+     /* this does (approximately):
+         CXINC;              /* cxstack_ix++ (grow if necessary) */
+         cx = CX_CUR();      /* and get the address of new frame */
+         cx->cx_type        = CXt_SUB;
+         cx->blk_gimme      = gimme;
+         cx->blk_oldsp      = MARK - PL_stack_base;
+         cx->blk_oldsaveix  = old_ss_ix;
+         cx->blk_oldcop     = PL_curcop;
+         cx->blk_oldmarksp  = PL_markstack_ptr - PL_markstack;
+         cx->blk_oldscopesp = PL_scopestack_ix;
+         cx->blk_oldpm      = PL_curpm;
+         cx->blk_old_tmpsfloor = PL_tmps_floor;
 
-            PL_tmps_floor        = PL_tmps_ix;
-        */
+         PL_tmps_floor        = PL_tmps_ix;
+     */
 
 
-    /* then update the new context frame with subroutine-specific info,
-     * such as the CV about to be executed: */
+ /* then update the new context frame with subroutine-specific info,
+  * such as the CV about to be executed: */
 
-    cx_pushsub(cx, cv, retop, hasargs);
+ cx_pushsub(cx, cv, retop, hasargs);
 
-        /* this does (approximately):
-            cx->blk_sub.cv          = cv;
-            cx->blk_sub.olddepth    = CvDEPTH(cv);
-            cx->blk_sub.prevcomppad = PL_comppad;
-            cx->cx_type            |= (hasargs) ? CXp_HASARGS : 0;
-            cx->blk_sub.retop       = retop;
-            SvREFCNT_inc_simple_void_NN(cv);
-        */
+     /* this does (approximately):
+         cx->blk_sub.cv          = cv;
+         cx->blk_sub.olddepth    = CvDEPTH(cv);
+         cx->blk_sub.prevcomppad = PL_comppad;
+         cx->cx_type            |= (hasargs) ? CXp_HASARGS : 0;
+         cx->blk_sub.retop       = retop;
+         SvREFCNT_inc_simple_void_NN(cv);
+     */
 
 Note that C<cx_pushblock()> sets two new floors: for the args stack (to
 C<MARK>) and the temps stack (to C<PL_tmps_ix>). While executing at this
@@ -3342,28 +3342,28 @@ is capable of processing and popping all contexts above the target one.
 Here is a typical example of context popping, as found in C<pp_leavesub>
 (simplified slightly):
 
-    U8 gimme;
-    PERL_CONTEXT *cx;
-    SV **oldsp;
-    OP *retop;
+ U8 gimme;
+ PERL_CONTEXT *cx;
+ SV **oldsp;
+ OP *retop;
 
-    cx = CX_CUR();
+ cx = CX_CUR();
 
-    gimme = cx->blk_gimme;
-    oldsp = PL_stack_base + cx->blk_oldsp; /* last arg of previous frame */
+ gimme = cx->blk_gimme;
+ oldsp = PL_stack_base + cx->blk_oldsp; /* last arg of previous frame */
 
-    if (gimme == G_VOID)
-        PL_stack_sp = oldsp;
-    else
-        leave_adjust_stacks(oldsp, oldsp, gimme, 0);
+ if (gimme == G_VOID)
+     PL_stack_sp = oldsp;
+ else
+     leave_adjust_stacks(oldsp, oldsp, gimme, 0);
 
-    CX_LEAVE_SCOPE(cx);
-    cx_popsub(cx);
-    cx_popblock(cx);
-    retop = cx->blk_sub.retop;
-    CX_POP(cx);
+ CX_LEAVE_SCOPE(cx);
+ cx_popsub(cx);
+ cx_popblock(cx);
+ retop = cx->blk_sub.retop;
+ CX_POP(cx);
 
-    return retop;
+ return retop;
 
 The steps above are in a very specific order, designed to be the reverse
 order of when the context was pushed. The first thing to do is to copy
