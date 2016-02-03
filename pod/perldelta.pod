@@ -378,6 +378,13 @@ the wrong function.  Perl would also crash if the C<ISA> glob was
 destroyed, since new code added in 5.23.7 would try to release the
 C<isaelem> magic from the elements.  [perl #127351]
 
+=item *
+
+If a here-doc was found while parsing another operator, the parser had
+already read end of file, and the here-doc was not terminated, perl
+could produce an assertion or a segmentation fault.  This now reliably
+complains about the unterminated here-doc.  [perl #125540]
+
 =back
 
 =head1 Known Problems
