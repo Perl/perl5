@@ -96,7 +96,11 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+The overhead of scope entry and exit has been considerably reduced, so
+for example subroutine calls, loops and basic blocks are all faster now.
+This empty function call now takes about a third less time to execute:
+
+    sub f{} f();
 
 =back
 
@@ -166,13 +170,14 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlguts>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+A new section has been added, L<perlguts/"Dynamic Scope and the Context
+Stack">, which explains how the perl context stack works.
 
 =back
 
@@ -346,7 +351,105 @@ well.
 
 =item *
 
-XXX
+The implementation of perl's context stack system, and its internal API,
+have been heavily reworked. Note that no significant changes have been
+made to any external APIs, but XS code which replies on such internal
+details may need to be fixed. The main changes are:
+
+=over 4
+
+=item *
+
+The C<PUSHBLOCK()>, C<POPSUB()> etc. macros have been replaced with static
+inline functions such as C<cx_pushblock()>, C<cx_popsub()> etc. These use
+function args rather than implicitly relying on local vars such as
+C<gimme> and C<newsp> being available. Also their functionality has
+changed: in particular, C<cx_popblock()> no longer decrements
+C<cxstack_ix>. The ordering of the steps in the C<pp_leave*> functions
+involving C<cx_popblock()>, C<cx_popsub()> etc. has changed. See the new
+documentation, L<perlguts/"Dynamic Scope and the Context Stack">, for
+details on how to use them.
+
+=item *
+
+Various macros, which now consistently have a CX_ prefix, have been added:
+
+    CX_CUR(), CX_LEAVE_SCOPE(), CX_POP()
+
+or renamed:
+
+    CX_POP_SAVEARRAY(), CX_DEBUG(), CX_PUSHSUBST() ,CX_POPSUBST()
+
+=item *
+
+C<cx_pushblock()> now saves C<PL_savestack_ix> and C<PL_tmps_floor>, so
+CMpp_enter*> and C<pp_leave*> no longer do
+
+  ENTER; SAVETMPS; ....; LEAVE
+
+=item *
+
+C<cx_popblock()> now also restores C<PL_curpm>.
+
+=item *
+
+In C<dounwind()> for every context type, the current savestack frame is
+now processed before each context is popped ;formerly this was only done
+for sub-like context frames. This action has been removed from
+C<cx_popsub()> and placed into its own macro, C<CX_LEAVE_SCOPE(cx)>, which
+must be called before C<cx_popsub()> etc.
+
+C<dounwind()> now also does a C<cx_popblock()> on the last popped frame
+(formerly it only did the C<cx_popsub()> etc. actions on each frame).
+
+=item *
+
+The temps stack is now freed on scope exit; previously, temps created
+during the last statement of a block wouldn't be freed until the next
+C<nextstate> following the block (apart from an existing hack that did
+this for recursive subs in scalar context); and in something like
+C<f(g())>, the temps created by the last statement in C<g()> would
+formerly not be freed until the statement following the return from
+C<f()>.
+
+=item *
+
+Most values that were saved on the savestack on scope entry are now
+saved in suitable new fields in the context struct, and saved and
+restored directly by C<cx_pushfoo()> and C<cx_popfoo()>, which is much
+faster.
+
+=item *
+
+Various context struct fields have been added, removed or modified.
+
+=item *
+
+The handling of C<@_> in C<cx_pushsub()> and C<cx_popsub()> has been
+considerably tidied up, including removing the C<argarray> field from the
+context struct, and extracting out some common (but rarely used) code into
+a separate function, C<clear_defarray()>. Also, useful subsets of
+C<cx_popsub()> which had been unrolled in places like C<pp_goto> have been
+gathered into the new functions C<cx_popsub_args()> and
+C<cx_popsub_common()>.
+
+=item *
+
+C<pp_leavesub> and C<pp_leavesublv> now use the same function as the rest
+of the C<pp_leave*>'s to process return args.
+
+=item *
+
+C<CXp_FOR_PAD> and C<CXp_FOR_GV> flags have been added, and
+C<CXt_LOOP_FOR> has been split into C<CXt_LOOP_LIST>, C<CXt_LOOP_ARY>.
+
+=item *
+
+Some variables formerly declared by C<dMULTICALL> (but not documented) have
+been removed.
+
+=back
+
 
 =back
 
