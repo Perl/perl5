@@ -374,11 +374,11 @@ details on how to use them.
 
 Various macros, which now consistently have a CX_ prefix, have been added:
 
-    CX_CUR(), CX_LEAVE_SCOPE(), CX_POP()
+ CX_CUR(), CX_LEAVE_SCOPE(), CX_POP()
 
 or renamed:
 
-    CX_POP_SAVEARRAY(), CX_DEBUG(), CX_PUSHSUBST() ,CX_POPSUBST()
+ CX_POP_SAVEARRAY(), CX_DEBUG(), CX_PUSHSUBST() ,CX_POPSUBST()
 
 =item *
 
