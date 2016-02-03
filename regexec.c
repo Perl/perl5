@@ -1736,12 +1736,26 @@ REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
             FBC_UTF8_A(TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT),           \
             TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT)
 
+#ifdef DEBUGGING
+static IV
+S_get_break_val_cp_checked(SV* const invlist, const UV cp_in) {
+  IV cp_out = Perl__invlist_search(invlist, cp_in);
+  assert(cp_out >= 0);
+  return cp_out;
+}
+#  define _generic_GET_BREAK_VAL_CP_CHECKED(invlist, invmap, cp) \
+	invmap[S_get_break_val_cp_checked(invlist, cp)]
+#else
+#  define _generic_GET_BREAK_VAL_CP_CHECKED(invlist, invmap, cp) \
+	invmap[_invlist_search(invlist, cp)]
+#endif
+
 /* Takes a pointer to an inversion list, a pointer to its corresponding
  * inversion map, and a code point, and returns the code point's value
  * according to the two arrays.  It assumes that all code points have a value.
  * This is used as the base macro for macros for particular properties */
 #define _generic_GET_BREAK_VAL_CP(invlist, invmap, cp)              \
-                             invmap[_invlist_search(invlist, cp)]
+	_generic_GET_BREAK_VAL_CP_CHECKED(invlist, invmap, cp)
 
 /* Same as above, but takes begin, end ptrs to a UTF-8 encoded string instead
  * of a code point, returning the value for the first code point in the string.
