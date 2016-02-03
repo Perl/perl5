@@ -183,7 +183,7 @@ given literal string with the new scope.
 =item LEAVE_with_name(name)
 
 Same as C<LEAVE>, but when debugging is enabled it first checks that the
-scope has the given name. Name must be a literal string.
+scope has the given name. C<name> must be a C<NUL>-terminated literal string.
 
 =back
 

@@ -500,8 +500,8 @@ Clone the state variables associated with running and compiling pads.
 /*
 =for apidoc Am|PADOFFSET|pad_add_name_pvs|const char *name|U32 flags|HV *typestash|HV *ourstash
 
-Exactly like L</pad_add_name_pvn>, but takes a literal string instead
-of a string/length pair.
+Exactly like L</pad_add_name_pvn>, but takes a C<NUL>-terminated literal string
+instead of a string/length pair.
 
 =cut
 */
@@ -512,8 +512,8 @@ of a string/length pair.
 /*
 =for apidoc Am|PADOFFSET|pad_findmy_pvs|const char *name|U32 flags
 
-Exactly like L</pad_findmy_pvn>, but takes a literal string instead
-of a string/length pair.
+Exactly like L</pad_findmy_pvn>, but takes a C<NUL>-terminated literal string
+instead of a string/length pair.
 
 =cut
 */

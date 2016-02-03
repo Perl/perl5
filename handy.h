@@ -296,47 +296,49 @@ typedef U64TYPE U64;
 =head1 SV-Body Allocation
 
 =for apidoc Ama|SV*|newSVpvs|const char* s
-Like C<newSVpvn>, but takes a literal C<NUL>-terminated string instead of a
+Like C<newSVpvn>, but takes a C<NUL>-terminated literal string instead of a
 string/length pair.
 
 =for apidoc Ama|SV*|newSVpvs_flags|const char* s|U32 flags
-Like C<newSVpvn_flags>, but takes a literal C<NUL>-terminated string instead of
+Like C<newSVpvn_flags>, but takes a C<NUL>-terminated literal string instead of
 a string/length pair.
 
 =for apidoc Ama|SV*|newSVpvs_share|const char* s
-Like C<newSVpvn_share>, but takes a literal C<NUL>-terminated string instead of
+Like C<newSVpvn_share>, but takes a C<NUL>-terminated literal string instead of
 a string/length pair and omits the hash parameter.
 
 =for apidoc Am|void|sv_catpvs_flags|SV* sv|const char* s|I32 flags
-Like C<sv_catpvn_flags>, but takes a literal C<NUL>-terminated string instead
+Like C<sv_catpvn_flags>, but takes a C<NUL>-terminated literal string instead
 of a string/length pair.
 
 =for apidoc Am|void|sv_catpvs_nomg|SV* sv|const char* s
-Like C<sv_catpvn_nomg>, but takes a literal string instead of a
-string/length pair.
+Like C<sv_catpvn_nomg>, but takes a C<NUL>-terminated literal string instead of
+a string/length pair.
 
 =for apidoc Am|void|sv_catpvs|SV* sv|const char* s
-Like C<sv_catpvn>, but takes a literal string instead of a string/length pair.
+Like C<sv_catpvn>, but takes a C<NUL>-terminated literal string instead of a
+string/length pair.
 
 =for apidoc Am|void|sv_catpvs_mg|SV* sv|const char* s
-Like C<sv_catpvn_mg>, but takes a literal string instead of a
+Like C<sv_catpvn_mg>, but takes a C<NUL>-terminated literal string instead of a
 string/length pair.
 
 =for apidoc Am|void|sv_setpvs|SV* sv|const char* s
-Like C<sv_setpvn>, but takes a literal string instead of a string/length pair.
+Like C<sv_setpvn>, but takes a C<NUL>-terminated literal string instead of a
+string/length pair.
 
 =for apidoc Am|void|sv_setpvs_mg|SV* sv|const char* s
-Like C<sv_setpvn_mg>, but takes a literal string instead of a
+Like C<sv_setpvn_mg>, but takes a C<NUL>-terminated literal string instead of a
 string/length pair.
 
 =for apidoc Am|SV *|sv_setref_pvs|const char* s
-Like C<sv_setref_pvn>, but takes a literal string instead of a
-string/length pair.
+Like C<sv_setref_pvn>, but takes a C<NUL>-terminated literal string instead of
+a string/length pair.
 
 =head1 Memory Management
 
 =for apidoc Ama|char*|savepvs|const char* s
-Like C<savepvn>, but takes a literal C<NUL>-terminated string instead of a
+Like C<savepvn>, but takes a C<NUL>-terminated literal string instead of a
 string/length pair.
 
 =for apidoc Ama|char*|savesharedpvs|const char* s
@@ -346,23 +348,26 @@ which is shared between threads.
 =head1 GV Functions
 
 =for apidoc Am|HV*|gv_stashpvs|const char* name|I32 create
-Like C<gv_stashpvn>, but takes a literal string instead of a string/length pair.
+Like C<gv_stashpvn>, but takes a C<NUL>-terminated literal string instead of a
+string/length pair.
 
 =head1 Hash Manipulation Functions
 
 =for apidoc Am|SV**|hv_fetchs|HV* tb|const char* key|I32 lval
-Like C<hv_fetch>, but takes a literal string instead of a string/length pair.
+Like C<hv_fetch>, but takes a C<NUL>-terminated literal string instead of a
+string/length pair.
 
 =for apidoc Am|SV**|hv_stores|HV* tb|const char* key|NULLOK SV* val
-Like C<hv_store>, but takes a literal string instead of a string/length pair
+Like C<hv_store>, but takes a C<NUL>-terminated literal string instead of a
+string/length pair
 and omits the hash parameter.
 
 =head1 Lexer interface
 
 =for apidoc Amx|void|lex_stuff_pvs|const char *pv|U32 flags
 
-Like L</lex_stuff_pvn>, but takes a literal string instead of a
-string/length pair.
+Like L</lex_stuff_pvn>, but takes a C<NUL>-terminated literal string instead of
+a string/length pair.
 
 =cut
 */

@@ -175,8 +175,8 @@ associated with the key.
 /*
 =for apidoc Amx|SV *|cophh_fetch_pvs|const COPHH *cophh|const char *key|U32 flags
 
-Like L</cophh_fetch_pvn>, but takes a literal string instead of a
-string/length pair, and no precomputed hash.
+Like L</cophh_fetch_pvn>, but takes a C<NUL>-terminated literal string instead
+of a string/length pair, and no precomputed hash.
 
 =cut
 */
@@ -281,8 +281,8 @@ be stored with referential integrity, but will be coerced to strings.
 /*
 =for apidoc Amx|COPHH *|cophh_store_pvs|const COPHH *cophh|const char *key|SV *value|U32 flags
 
-Like L</cophh_store_pvn>, but takes a literal string instead of a
-string/length pair, and no precomputed hash.
+Like L</cophh_store_pvn>, but takes a C<NUL>-terminated literal string instead
+of a string/length pair, and no precomputed hash.
 
 =cut
 */
@@ -338,8 +338,8 @@ hash of the key string, or zero if it has not been precomputed.
 /*
 =for apidoc Amx|COPHH *|cophh_delete_pvs|const COPHH *cophh|const char *key|U32 flags
 
-Like L</cophh_delete_pvn>, but takes a literal string instead of a
-string/length pair, and no precomputed hash.
+Like L</cophh_delete_pvn>, but takes a C<NUL>-terminated literal string instead
+of a string/length pair, and no precomputed hash.
 
 =cut
 */
@@ -478,8 +478,8 @@ associated with the key.
 /*
 =for apidoc Am|SV *|cop_hints_fetch_pvs|const COP *cop|const char *key|U32 flags
 
-Like L</cop_hints_fetch_pvn>, but takes a literal string instead of a
-string/length pair, and no precomputed hash.
+Like L</cop_hints_fetch_pvn>, but takes a C<NUL>-terminated literal string
+instead of a string/length pair, and no precomputed hash.
 
 =cut
 */
