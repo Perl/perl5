@@ -266,7 +266,7 @@ ext/vms-dclsym/dclsym.pm	? Should you be using L<...> instead of	1
 ext/vms-filespec/lib/vms/filespec.pm	Verbatim line length including indents exceeds 79 by	1
 install	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perl.pod	Verbatim line length including indents exceeds 79 by	8
-pod/perlandroid.pod	Verbatim line length including indents exceeds 79 by	1
+pod/perlandroid.pod	Verbatim line length including indents exceeds 79 by	3
 pod/perlbook.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlcall.pod	Verbatim line length including indents exceeds 79 by	2
 pod/perlce.pod	Verbatim line length including indents exceeds 79 by	3
