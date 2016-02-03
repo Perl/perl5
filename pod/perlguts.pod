@@ -3184,7 +3184,7 @@ valid.
 
 The main division in the context struct is between a substitution scope
 (C<CXt_SUBST>) and block scopes, which are everything else. The former is
-just used to while executing C<s///e>, and won't be discussed further
+just used while executing C<s///e>, and won't be discussed further
 here.
 
 All the block scope types share a common base, which corresponds to

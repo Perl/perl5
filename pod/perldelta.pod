@@ -353,7 +353,7 @@ well.
 
 The implementation of perl's context stack system, and its internal API,
 have been heavily reworked. Note that no significant changes have been
-made to any external APIs, but XS code which replies on such internal
+made to any external APIs, but XS code which relies on such internal
 details may need to be fixed. The main changes are:
 
 =over 4
@@ -394,7 +394,7 @@ C<cx_popblock()> now also restores C<PL_curpm>.
 =item *
 
 In C<dounwind()> for every context type, the current savestack frame is
-now processed before each context is popped ;formerly this was only done
+now processed before each context is popped; formerly this was only done
 for sub-like context frames. This action has been removed from
 C<cx_popsub()> and placed into its own macro, C<CX_LEAVE_SCOPE(cx)>, which
 must be called before C<cx_popsub()> etc.
