@@ -13029,7 +13029,7 @@ Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
 #if defined(HAS_FCHDIR) && defined(HAS_TELLDIR) && defined(HAS_SEEKDIR)
     DIR *pwd;
     const Direntry_t *dirent;
-    char smallbuf[256];
+    char smallbuf[256]; /* XXX MAXPATHLEN, surely? */
     char *name = NULL;
     STRLEN len = 0;
     long pos;
@@ -13079,6 +13079,14 @@ Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
     pos = PerlDir_tell(dp);
     if ((dirent = PerlDir_read(dp))) {
 	len = d_namlen(dirent);
+        if (len > sizeof(dirent->d_name)) {
+            /* If the len is somehow magically longer than the
+             * maximum length of the directory entry, even though
+             * we could fit it in a buffer, we could not copy it
+             * from the dirent.  Bail out. */
+            PerlDir_close(ret);
+            return (DIR*)NULL;
+        }
 	if (len <= sizeof smallbuf) name = smallbuf;
 	else Newx(name, len, char);
 	Move(dirent->d_name, name, len, char);
