@@ -80,7 +80,7 @@ Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
     si->si_cxix = -1;
     si->si_type = PERLSI_UNDEF;
     Newx(si->si_cxstack, cxitems, PERL_CONTEXT);
-    /* Without any kind of initialising PUSHSUBST()
+    /* Without any kind of initialising CX_PUSHSUBST()
      * in pp_subst() will read uninitialised heap. */
     PoisonNew(si->si_cxstack, cxitems, PERL_CONTEXT);
     return si;
@@ -140,15 +140,19 @@ Perl_markstack_grow(pTHX)
 void
 Perl_savestack_grow(pTHX)
 {
-    PL_savestack_max = GROW(PL_savestack_max) + 4;
-    Renew(PL_savestack, PL_savestack_max, ANY);
+    PL_savestack_max = GROW(PL_savestack_max);
+    /* Note that we allocate SS_MAXPUSH slots higher than ss_max
+     * so that SS_ADD_END(), SSGROW() etc can do a simper check */
+    Renew(PL_savestack, PL_savestack_max + SS_MAXPUSH, ANY);
 }
 
 void
 Perl_savestack_grow_cnt(pTHX_ I32 need)
 {
     PL_savestack_max = PL_savestack_ix + need;
-    Renew(PL_savestack, PL_savestack_max, ANY);
+    /* Note that we allocate SS_MAXPUSH slots higher than ss_max
+     * so that SS_ADD_END(), SSGROW() etc can do a simper check */
+    Renew(PL_savestack, PL_savestack_max + SS_MAXPUSH, ANY);
 }
 
 #undef GROW
@@ -194,7 +198,7 @@ Perl_free_tmps(pTHX)
 #ifdef PERL_POISON
 	PoisonWith(PL_tmps_stack + PL_tmps_ix + 1, 1, SV *, 0xAB);
 #endif
-	if (LIKELY(sv && sv != &PL_sv_undef)) {
+	if (LIKELY(sv)) {
 	    SvTEMP_off(sv);
 	    SvREFCNT_dec_NN(sv);		/* note, can modify tmps_ix!!! */
 	}
@@ -731,6 +735,18 @@ Perl_save_svref(pTHX_ SV **sptr)
     return save_scalar_at(sptr, SAVEf_SETMAGIC); /* XXX - FIXME - see #60360 */
 }
 
+
+void
+Perl_savetmps(pTHX)
+{
+    dSS_ADD;
+    SS_ADD_IV(PL_tmps_floor);
+    PL_tmps_floor = PL_tmps_ix;
+    SS_ADD_UV(SAVEt_TMPSFLOOR);
+    SS_ADD_END(2);
+}
+
+
 I32
 Perl_save_alloc(pTHX_ I32 size, I32 pad)
 {
@@ -944,6 +960,9 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_STRLEN:			/* STRLEN/size_t ref */
 	    *(STRLEN*)ARG0_PTR = (STRLEN)arg1.any_iv;
+	    break;
+	case SAVEt_TMPSFLOOR:			/* restore PL_tmps_floor */
+	    PL_tmps_floor = (SSize_t)arg0.any_iv;
 	    break;
 	case SAVEt_BOOL:			/* bool reference */
 	    *(bool*)ARG0_PTR = cBOOL(uv >> 8);
@@ -1233,9 +1252,11 @@ Perl_leave_scope(pTHX_ I32 base)
 		SV **svp;
 		assert (ARG1_PTR);
 		svp = AvARRAY((PAD*)ARG1_PTR) + (PADOFFSET)arg0.any_uv;
-		/* This mortalizing used to be done by POPLOOP() via itersave.
-		   But as we have all the information here, we can do it here,
-		   save even having to have itersave in the struct.  */
+                /* This mortalizing used to be done by CX_POOPLOOP() via
+                   itersave.  But as we have all the information here, we
+                   can do it here, save even having to have itersave in
+                   the struct.
+                   */
 		sv_2mortal(*svp);
 		*svp = ARG2_SV;
 	    }
@@ -1306,6 +1327,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 		      PTR2UV(cx->blk_oldcop));
 	PerlIO_printf(Perl_debug_log, "BLK_OLDMARKSP = %ld\n", (long)cx->blk_oldmarksp);
 	PerlIO_printf(Perl_debug_log, "BLK_OLDSCOPESP = %ld\n", (long)cx->blk_oldscopesp);
+	PerlIO_printf(Perl_debug_log, "BLK_OLDSAVEIX = %ld\n", (long)cx->blk_oldsaveix);
 	PerlIO_printf(Perl_debug_log, "BLK_OLDPM = 0x%"UVxf"\n",
 		      PTR2UV(cx->blk_oldpm));
 	switch (cx->blk_gimme) {
@@ -1366,22 +1388,25 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 		PTR2UV(cx->blk_eval.retop));
 	break;
 
+    case CXt_LOOP_PLAIN:
     case CXt_LOOP_LAZYIV:
     case CXt_LOOP_LAZYSV:
-    case CXt_LOOP_FOR:
-    case CXt_LOOP_PLAIN:
+    case CXt_LOOP_LIST:
+    case CXt_LOOP_ARY:
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.LABEL = %s\n", CxLABEL(cx));
-	PerlIO_printf(Perl_debug_log, "BLK_LOOP.RESETSP = %ld\n",
-		(long)cx->blk_loop.resetsp);
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.MY_OP = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_loop.my_op));
-	/* XXX: not accurate for LAZYSV/IV */
-	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERARY = 0x%"UVxf"\n",
-		PTR2UV(cx->blk_loop.state_u.ary.ary));
-	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERIX = %ld\n",
-		(long)cx->blk_loop.state_u.ary.ix);
-	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERVAR = 0x%"UVxf"\n",
-		PTR2UV(CxITERVAR(cx)));
+        if (CxTYPE(cx) != CXt_LOOP_PLAIN) {
+            PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERVAR = 0x%"UVxf"\n",
+                    PTR2UV(CxITERVAR(cx)));
+            PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERSAVE = 0x%"UVxf"\n",
+                    PTR2UV(cx->blk_loop.itersave));
+            /* XXX: not accurate for LAZYSV/IV/LIST */
+            PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERARY = 0x%"UVxf"\n",
+                    PTR2UV(cx->blk_loop.state_u.ary.ary));
+            PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERIX = %ld\n",
+                    (long)cx->blk_loop.state_u.ary.ix);
+        }
 	break;
 
     case CXt_SUBST:

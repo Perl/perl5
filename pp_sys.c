@@ -297,7 +297,7 @@ PP(pp_backtick)
     dSP; dTARGET;
     PerlIO *fp;
     const char * const tmps = POPpconstx;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
     const char *mode = "r";
 
     TAINT_PROPER("``");
@@ -1292,10 +1292,13 @@ of the typeglob that C<PL_defoutgv> points to is decreased by one.
 void
 Perl_setdefout(pTHX_ GV *gv)
 {
+    GV *oldgv = PL_defoutgv;
+
     PERL_ARGS_ASSERT_SETDEFOUT;
+
     SvREFCNT_inc_simple_void_NN(gv);
-    SvREFCNT_dec(PL_defoutgv);
     PL_defoutgv = gv;
+    SvREFCNT_dec(oldgv);
 }
 
 PP(pp_select)
@@ -1342,7 +1345,7 @@ PP(pp_getc)
     if (io) {
 	const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
-	    const U32 gimme = GIMME_V;
+	    const U8 gimme = GIMME_V;
 	    Perl_tied_method(aTHX_ SV_CONST(GETC), SP, MUTABLE_SV(io), mg, gimme, 0);
 	    if (gimme == G_SCALAR) {
 		SPAGAIN;
@@ -1379,23 +1382,17 @@ STATIC OP *
 S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 {
     PERL_CONTEXT *cx;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
 
     PERL_ARGS_ASSERT_DOFORM;
 
     if (CvCLONE(cv))
 	cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
 
-    ENTER;
-    SAVETMPS;
-
-    PUSHBLOCK(cx, CXt_FORMAT, PL_stack_sp);
-    PUSHFORMAT(cx, retop);
-    if (CvDEPTH(cv) >= 2) {
-	PERL_STACK_OVERFLOW_CHECK();
+    cx = cx_pushblock(CXt_FORMAT, gimme, PL_stack_sp, PL_savestack_ix);
+    cx_pushformat(cx, cv, retop, gv);
+    if (CvDEPTH(cv) >= 2)
 	pad_push(CvPADLIST(cv), CvDEPTH(cv));
-    }
-    SAVECOMPPAD();
     PAD_SET_CUR_NOSAVE(CvPADLIST(cv), CvDEPTH(cv));
 
     setdefout(gv);	    /* locally select filehandle so $% et al work */
@@ -1444,12 +1441,10 @@ PP(pp_enterwrite)
 PP(pp_leavewrite)
 {
     dSP;
-    GV * const gv = cxstack[cxstack_ix].blk_format.gv;
+    GV * const gv = CX_CUR()->blk_format.gv;
     IO * const io = GvIOp(gv);
     PerlIO *ofp;
     PerlIO *fp;
-    SV **newsp;
-    I32 gimme;
     PERL_CONTEXT *cx;
     OP *retop;
     bool is_return = cBOOL(PL_op->op_type == OP_RETURN);
@@ -1526,11 +1521,14 @@ PP(pp_leavewrite)
     }
 
   forget_top:
-    POPBLOCK(cx,PL_curpm);
+    cx = CX_CUR();
+    assert(CxTYPE(cx) == CXt_FORMAT);
+    SP = PL_stack_base + cx->blk_oldsp; /* ignore retval of formline */
+    CX_LEAVE_SCOPE(cx);
+    cx_popformat(cx);
+    cx_popblock(cx);
     retop = cx->blk_sub.retop;
-    POPFORMAT(cx);
-    SP = newsp; /* ignore retval of formline */
-    LEAVE;
+    CX_POP(cx);
 
     if (is_return)
         /* XXX the semantics of doing 'return' in a format aren't documented.
@@ -1561,7 +1559,6 @@ PP(pp_leavewrite)
 	}
     }
     PL_formtarget = PL_bodytarget;
-    PERL_UNUSED_VAR(gimme);
     RETURNOP(retop);
 }
 
@@ -2873,7 +2870,7 @@ PP(pp_stat)
     dSP;
     GV *gv = NULL;
     IO *io = NULL;
-    I32 gimme;
+    U8 gimme;
     I32 max = 13;
     SV* sv;
 
@@ -4029,7 +4026,7 @@ PP(pp_readdir)
     dSP;
 
     SV *sv;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
     GV * const gv = MUTABLE_GV(POPs);
     const Direntry_t *dp;
     IO * const io = GvIOn(gv);

@@ -48,7 +48,7 @@ PP(pp_nextstate)
 {
     PL_curcop = (COP*)PL_op;
     TAINT_NOT;		/* Each statement is presumed innocent */
-    PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
+    PL_stack_sp = PL_stack_base + CX_CUR()->blk_oldsp;
     FREETMPS;
     PERL_ASYNC_CHECK();
     return NORMAL;
@@ -240,13 +240,15 @@ PP(pp_cond_expr)
 
 PP(pp_unstack)
 {
+    PERL_CONTEXT *cx;
     PERL_ASYNC_CHECK();
     TAINT_NOT;		/* Each statement is presumed innocent */
-    PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
+    cx  = CX_CUR();
+    PL_stack_sp = PL_stack_base + cx->blk_oldsp;
     FREETMPS;
     if (!(PL_op->op_flags & OPf_SPECIAL)) {
-	I32 oldsave = PL_scopestack[PL_scopestack_ix - 1];
-	LEAVE_SCOPE(oldsave);
+        assert(CxTYPE(cx) == CXt_BLOCK || CxTYPE_is_LOOP(cx));
+	CX_LEAVE_SCOPE(cx);
     }
     return NORMAL;
 }
@@ -961,7 +963,7 @@ PP(pp_print)
 PP(pp_rv2av)
 {
     dSP; dTOPss;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
     static const char an_array[] = "an ARRAY";
     static const char a_hash[] = "a HASH";
     const bool is_pp_rv2av = PL_op->op_type == OP_RV2AV
@@ -1249,7 +1251,7 @@ PP(pp_aassign)
     SV *sv;
     AV *ary;
 
-    I32 gimme;
+    U8 gimme;
     HV *hash;
     SSize_t i;
     int magic;
@@ -1714,7 +1716,7 @@ PP(pp_match)
     const char *truebase;			/* Start of string  */
     REGEXP *rx = PM_GETRE(pm);
     bool rxtainted;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
     STRLEN len;
     const I32 oldsave = PL_savestack_ix;
     I32 had_zerolen = 0;
@@ -1906,7 +1908,7 @@ Perl_do_readline(pTHX)
     PerlIO *fp;
     IO * const io = GvIO(PL_last_in_gv);
     const I32 type = PL_op->op_type;
-    const I32 gimme = GIMME_V;
+    const U8 gimme = GIMME_V;
 
     if (io) {
 	const MAGIC *const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
@@ -2623,13 +2625,12 @@ PP(pp_multideref)
 
 PP(pp_iter)
 {
-    dSP;
     PERL_CONTEXT *cx;
     SV *oldsv;
     SV **itersvp;
+    SV *retsv;
 
-    EXTEND(SP, 1);
-    cx = &cxstack[cxstack_ix];
+    cx = CX_CUR();
     itersvp = CxITERVAR(cx);
 
     switch (CxTYPE(cx)) {
@@ -2643,10 +2644,14 @@ PP(pp_iter)
         STRLEN maxlen = 0;
         const char *max = SvPV_const(end, maxlen);
         if (UNLIKELY(SvNIOK(cur) || SvCUR(cur) > maxlen))
-            RETPUSHNO;
+            goto retno;
 
         oldsv = *itersvp;
-        if (LIKELY(SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv))) {
+        /* NB: on the first iteration, oldsv will have a ref count of at
+         * least 2 (one extra from blk_loop.itersave), so the GV or pad
+         * slot will get localised; on subsequent iterations the RC==1
+         * optimisation may kick in and the SV will be reused. */
+         if (oldsv && LIKELY(SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv))) {
             /* safe to reuse old SV */
             sv_setsv(oldsv, cur);
         }
@@ -2656,7 +2661,7 @@ PP(pp_iter)
              * completely new SV for closures/references to work as
              * they used to */
             *itersvp = newSVsv(cur);
-            SvREFCNT_dec_NN(oldsv);
+            SvREFCNT_dec(oldsv);
         }
         if (strEQ(SvPVX_const(cur), max))
             sv_setiv(cur, 0); /* terminate next time */
@@ -2669,13 +2674,28 @@ PP(pp_iter)
     {
         IV cur = cx->blk_loop.state_u.lazyiv.cur;
 	if (UNLIKELY(cur > cx->blk_loop.state_u.lazyiv.end))
-	    RETPUSHNO;
+	    goto retno;
 
         oldsv = *itersvp;
-	/* don't risk potential race */
-	if (LIKELY(SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv))) {
+	/* see NB comment above */
+	if (oldsv && LIKELY(SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv))) {
 	    /* safe to reuse old SV */
-	    sv_setiv(oldsv, cur);
+
+            if (    (SvFLAGS(oldsv) & (SVTYPEMASK|SVf_THINKFIRST|SVf_IVisUV))
+                 == SVt_IV)
+            {
+                /* Cheap SvIOK_only().
+                 * Assert that flags which SvIOK_only() would test or
+                 * clear can't be set, because we're SVt_IV */
+                assert(!(SvFLAGS(oldsv) &
+                    (SVf_OOK|SVf_UTF8|(SVf_OK & ~(SVf_IOK|SVp_IOK)))));
+                SvFLAGS(oldsv) |= (SVf_IOK|SVp_IOK);
+                /* SvIV_set() where sv_any points to head */
+                oldsv->sv_u.svu_iv = cur;
+
+            }
+            else
+                sv_setiv(oldsv, cur);
 	}
 	else
 	{
@@ -2683,7 +2703,7 @@ PP(pp_iter)
 	     * completely new SV for closures/references to work as they
 	     * used to */
 	    *itersvp = newSViv(cur);
-	    SvREFCNT_dec_NN(oldsv);
+	    SvREFCNT_dec(oldsv);
 	}
 
 	if (UNLIKELY(cur == IV_MAX)) {
@@ -2694,36 +2714,47 @@ PP(pp_iter)
         break;
     }
 
-    case CXt_LOOP_FOR: /* iterate array */
     {
-
-        AV *av = cx->blk_loop.state_u.ary.ary;
         SV *sv;
-        bool av_is_stack = FALSE;
+        AV *av;
         IV ix;
+        IV inc;
 
-        if (!av) {
-            av_is_stack = TRUE;
-            av = PL_curstack;
-        }
-        if (PL_op->op_private & OPpITER_REVERSED) {
-            ix = --cx->blk_loop.state_u.ary.ix;
-            if (UNLIKELY(ix <= (av_is_stack ? cx->blk_loop.resetsp : -1)))
-                RETPUSHNO;
-        }
-        else {
-            ix = ++cx->blk_loop.state_u.ary.ix;
-            if (UNLIKELY(ix > (av_is_stack ? cx->blk_oldsp : AvFILL(av))))
-                RETPUSHNO;
-        }
+    case CXt_LOOP_LIST: /* for (1,2,3) */
 
-        if (UNLIKELY(SvMAGICAL(av) || AvREIFY(av))) {
+        assert(OPpITER_REVERSED == 2); /* so inc becomes -1 or 1 */
+        inc = 1 - (PL_op->op_private & OPpITER_REVERSED);
+        ix = (cx->blk_loop.state_u.stack.ix += inc);
+        if (UNLIKELY(inc > 0
+                        ? ix > cx->blk_oldsp
+                        : ix <= cx->blk_loop.state_u.stack.basesp)
+        )
+            goto retno;
+
+        sv = PL_stack_base[ix];
+        av = NULL;
+        goto loop_ary_common;
+
+    case CXt_LOOP_ARY: /* for (@ary) */
+
+        av = cx->blk_loop.state_u.ary.ary;
+        inc = 1 - (PL_op->op_private & OPpITER_REVERSED);
+        ix = (cx->blk_loop.state_u.ary.ix += inc);
+        if (UNLIKELY(inc > 0
+                        ? ix > AvFILL(av)
+                        : ix < 0)
+        )
+            goto retno;
+
+        if (UNLIKELY(SvRMAGICAL(av))) {
             SV * const * const svp = av_fetch(av, ix, FALSE);
             sv = svp ? *svp : NULL;
         }
         else {
             sv = AvARRAY(av)[ix];
         }
+
+      loop_ary_common:
 
         if (UNLIKELY(cx->cx_type & CXp_FOR_LVREF)) {
             SvSetMagicSV(*itersvp, sv);
@@ -2743,7 +2774,7 @@ PP(pp_iter)
                 SvREFCNT_inc_simple_void_NN(sv);
             }
         }
-        else if (!av_is_stack) {
+        else if (av) {
             sv = newSVavdefelem(av, ix, 0);
         }
         else
@@ -2758,7 +2789,19 @@ PP(pp_iter)
     default:
 	DIE(aTHX_ "panic: pp_iter, type=%u", CxTYPE(cx));
     }
-    RETPUSHYES;
+
+    retsv = &PL_sv_yes;
+    if (0) {
+      retno:
+        retsv = &PL_sv_no;
+    }
+    /* pp_enteriter should have pre-extended the stack */
+    assert(PL_stack_sp < PL_stack_max);
+    *++PL_stack_sp =retsv;
+
+    return PL_op->op_next;
+
+
 }
 
 /*
@@ -3103,7 +3146,7 @@ PP(pp_subst)
 	     * searching for places in this sub that uses a particular var:
 	     * iters maxiters r_flags oldsave rxtainted orig dstr targ
 	     * s m strend rx once */
-	    PUSHSUBST(cx);
+	    CX_PUSHSUBST(cx);
 	    RETURNOP(cPMOP->op_pmreplrootu.op_pmreplroot);
 	}
 	first = TRUE;
@@ -3225,7 +3268,7 @@ PP(pp_grepwhile)
     /* All done yet? */
     if (UNLIKELY(PL_stack_base + *PL_markstack_ptr > SP)) {
 	I32 items;
-	const I32 gimme = GIMME_V;
+	const U8 gimme = GIMME_V;
 
 	LEAVE_with_name("grep");					/* exit outer scope */
 	(void)POPMARK;				/* pop src */
@@ -3258,76 +3301,387 @@ PP(pp_grepwhile)
     }
 }
 
+/* leave_adjust_stacks():
+ *
+ * Process a scope's return args (in the range from_sp+1 .. PL_stack_sp),
+ * positioning them at to_sp+1 onwards, and do the equivalent of a
+ * FREEMPS and TAINT_NOT.
+ *
+ * Not intended to be called in void context.
+ *
+ * When leaving a sub, eval, do{} or other scope, the things that need
+ * doing to process the return args are:
+ *    * in scalar context, only return the last arg (or PL_sv_undef if none);
+ *    * for the types of return that return copies of their args (such
+ *      as rvalue sub return), make a mortal copy of every return arg,
+ *      except where we can optimise the copy away without it being
+ *      semantically visible;
+ *    * make sure that the arg isn't prematurely freed; in the case of an
+ *      arg not copied, this may involve mortalising it. For example, in
+ *      C<sub f { my $x = ...; $x }>, $x would be freed when we do
+ *      CX_LEAVE_SCOPE(cx) unless it's protected or copied.
+ *
+ * What condition to use when deciding whether to pass the arg through
+ * or make a copy, is determined by the 'pass' arg; its valid values are:
+ *   0: rvalue sub/eval exit
+ *   1: other rvalue scope exit
+ *   2: :lvalue sub exit in rvalue context
+ *   3: :lvalue sub exit in lvalue context and other lvalue scope exits
+ *
+ * There is a big issue with doing a FREETMPS. We would like to free any
+ * temps created by the last statement which the sub executed, rather than
+ * leaving them for the caller. In a situation where a sub call isn't
+ * soon followed by a nextstate (e.g. nested recursive calls, a la
+ * fibonacci()), temps can accumulate, causing memory and performance
+ * issues.
+ *
+ * On the other hand, we don't want to free any TEMPs which are keeping
+ * alive any return args that we skipped copying; nor do we wish to undo
+ * any mortalising done here.
+ *
+ * The solution is to split the temps stack frame into two, with a cut
+ * point delineating the two halves. We arrange that by the end of this
+ * function, all the temps stack frame entries we wish to keep are in the
+ * range  PL_tmps_floor+1.. tmps_base-1, while the ones to free now are in
+ * the range  tmps_base .. PL_tmps_ix.  During the course of this
+ * function, tmps_base starts off as PL_tmps_floor+1, then increases
+ * whenever we find or create a temp that we know should be kept. In
+ * general the stuff above tmps_base is undecided until we reach the end,
+ * and we may need a sort stage for that.
+ *
+ * To determine whether a TEMP is keeping a return arg alive, every
+ * arg that is kept rather than copied and which has the SvTEMP flag
+ * set, has the flag temporarily unset, to mark it. At the end we scan
+ * the temps stack frame above the cut for entries without SvTEMP and
+ * keep them, while turning SvTEMP on again. Note that if we die before
+ * the SvTEMPs flags are set again, its safe: at worst, subsequent use of
+ * those SVs may be slightly less efficient.
+ *
+ * In practice various optimisations for some common cases mean we can
+ * avoid most of the scanning and swapping about with the temps stack.
+ */
+
+void
+Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
+{
+    dVAR;
+    dSP;
+    SSize_t tmps_base; /* lowest index into tmps stack that needs freeing now */
+    SSize_t nargs;
+
+    PERL_ARGS_ASSERT_LEAVE_ADJUST_STACKS;
+
+    TAINT_NOT;
+
+    if (gimme == G_ARRAY) {
+        nargs = SP - from_sp;
+        from_sp++;
+    }
+    else {
+        assert(gimme == G_SCALAR);
+        if (UNLIKELY(from_sp >= SP)) {
+            /* no return args */
+            assert(from_sp == SP);
+            EXTEND(SP, 1);
+            *++SP = &PL_sv_undef;
+            to_sp = SP;
+            nargs   = 0;
+        }
+        else {
+            from_sp = SP;
+            nargs   = 1;
+        }
+    }
+
+    /* common code for G_SCALAR and G_ARRAY */
+
+    tmps_base = PL_tmps_floor + 1;
+
+    assert(nargs >= 0);
+    if (nargs) {
+        /* pointer version of tmps_base. Not safe across temp stack
+         * reallocs. */
+        SV **tmps_basep;
+
+        EXTEND_MORTAL(nargs); /* one big extend for worst-case scenario */
+        tmps_basep = PL_tmps_stack + tmps_base;
+
+        /* process each return arg */
+
+        do {
+            SV *sv = *from_sp++;
+
+            assert(PL_tmps_ix + nargs < PL_tmps_max);
+#ifdef DEBUGGING
+            /* PADTMPs with container set magic shouldn't appear in the
+             * wild. This assert is more important for pp_leavesublv(),
+             * but by testing for it here, we're more likely to catch
+             * bad cases (what with :lvalue subs not being widely
+             * deployed). The two issues are that for something like
+             *     sub :lvalue { $tied{foo} }
+             * or
+             *     sub :lvalue { substr($foo,1,2) }
+             * pp_leavesublv() will croak if the sub returns a PADTMP,
+             * and currently functions like pp_substr() return a mortal
+             * rather than using their PADTMP when returning a PVLV.
+             * This is because the PVLV will hold a ref to $foo,
+             * so $foo would get delayed in being freed while
+             * the PADTMP SV remained in the PAD.
+             * So if this assert fails it means either:
+             *  1) there is pp code similar to pp_substr that is
+             *     returning a PADTMP instead of a mortal, and probably
+             *     needs fixing, or
+             *  2) pp_leavesublv is making unwarranted assumptions
+             *     about always croaking on a PADTMP
+             */
+            if (SvPADTMP(sv) && SvSMAGICAL(sv)) {
+                MAGIC *mg;
+                for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
+                    assert(PERL_MAGIC_TYPE_IS_VALUE_MAGIC(mg->mg_type));
+                }
+            }
+#endif
+
+            if (
+               pass == 0 ? (SvTEMP(sv) && !SvMAGICAL(sv) && SvREFCNT(sv) == 1)
+             : pass == 1 ? ((SvTEMP(sv) || SvPADTMP(sv)) && !SvMAGICAL(sv) && SvREFCNT(sv) == 1)
+             : pass == 2 ? (!SvPADTMP(sv))
+             : 1)
+            {
+                /* pass through: skip copy for logic or optimisation
+                 * reasons; instead mortalise it, except that ... */
+                *++to_sp = sv;
+
+                if (SvTEMP(sv)) {
+                    /* ... since this SV is an SvTEMP , we don't need to
+                     * re-mortalise it; instead we just need to ensure
+                     * that its existing entry in the temps stack frame
+                     * ends up below the cut and so avoids being freed
+                     * this time round. We mark it as needing to be kept
+                     * by temporarily unsetting SvTEMP; then at the end,
+                     * we shuffle any !SvTEMP entries on the tmps stack
+                     * back below the cut.
+                     * However, there's a significant chance that there's
+                     * a 1:1 correspondence between the first few (or all)
+                     * elements in the return args stack frame and those
+                     * in the temps stack frame; e,g.:
+                     *      sub f { ....; map {...} .... },
+                     * or if we're exiting multiple scopes and one of the
+                     * inner scopes has already made mortal copies of each
+                     * return arg.
+                     *
+                     * If so, this arg sv will correspond to the next item
+                     * on the tmps stack above the cut, and so can be kept
+                     * merely by moving the cut boundary up one, rather
+                     * than messing with SvTEMP.  If all args are 1:1 then
+                     * we can avoid the sorting stage below completely.
+                     *
+                     * If there are no items above the cut on the tmps
+                     * stack, then the SvTEMP must comne from an item
+                     * below the cut, so there's nothing to do.
+                     */
+                    if (tmps_basep <= &PL_tmps_stack[PL_tmps_ix]) {
+                        if (sv == *tmps_basep)
+                            tmps_basep++;
+                        else
+                            SvTEMP_off(sv);
+                    }
+                }
+                else if (!SvPADTMP(sv)) {
+                    /* mortalise arg to avoid it being freed during save
+                     * stack unwinding. Pad tmps don't need mortalising as
+                     * they're never freed. This is the equivalent of
+                     * sv_2mortal(SvREFCNT_inc(sv)), except that:
+                     *  * it assumes that the temps stack has already been
+                     *    extended;
+                     *  * it puts the new item at the cut rather than at
+                     *    ++PL_tmps_ix, moving the previous occupant there
+                     *    instead.
+                     */
+                    if (!SvIMMORTAL(sv)) {
+                        SvREFCNT_inc_simple_void_NN(sv);
+                        SvTEMP_on(sv);
+                        /* Note that if there's nothing above the cut,
+                         * this copies the garbage one slot above
+                         * PL_tmps_ix onto itself. This is harmless (the
+                         * stack's already been extended), but might in
+                         * theory trigger warnings from tools like ASan
+                         */
+                        PL_tmps_stack[++PL_tmps_ix] = *tmps_basep;
+                        *tmps_basep++ = sv;
+                    }
+                }
+            }
+            else {
+                /* Make a mortal copy of the SV.
+                 * The following code is the equivalent of sv_mortalcopy()
+                 * except that:
+                 *  * it assumes the temps stack has already been extended;
+                 *  * it optimises the copying for some simple SV types;
+                 *  * it puts the new item at the cut rather than at
+                 *    ++PL_tmps_ix, moving the previous occupant there
+                 *    instead.
+                 */
+                SV *newsv = newSV(0);
+
+                PL_tmps_stack[++PL_tmps_ix] = *tmps_basep;
+                /* put it on the tmps stack early so it gets freed if we die */
+                *tmps_basep++ = newsv;
+                *++to_sp = newsv;
+
+                if (SvTYPE(sv) <= SVt_IV) {
+                    /* arg must be one of undef, IV/UV, or RV: skip
+                     * sv_setsv_flags() and do the copy directly */
+                    U32 dstflags;
+                    U32 srcflags = SvFLAGS(sv);
+
+                    assert(!SvGMAGICAL(sv));
+                    if (srcflags & (SVf_IOK|SVf_ROK)) {
+                        SET_SVANY_FOR_BODYLESS_IV(newsv);
+
+                        if (srcflags & SVf_ROK) {
+                            newsv->sv_u.svu_rv = SvREFCNT_inc(SvRV(sv));
+                            /* SV type plus flags */
+                            dstflags = (SVt_IV|SVf_ROK|SVs_TEMP);
+                        }
+                        else {
+                            /* both src and dst are <= SVt_IV, so sv_any
+                             * points to the head; so access the heads
+                             * directly rather than going via sv_any.
+                             */
+                            assert(    &(sv->sv_u.svu_iv)
+                                    == &(((XPVIV*) SvANY(sv))->xiv_iv));
+                            assert(    &(newsv->sv_u.svu_iv)
+                                    == &(((XPVIV*) SvANY(newsv))->xiv_iv));
+                            newsv->sv_u.svu_iv = sv->sv_u.svu_iv;
+                            /* SV type plus flags */
+                            dstflags = (SVt_IV|SVf_IOK|SVp_IOK|SVs_TEMP
+                                            |(srcflags & SVf_IVisUV));
+                        }
+                    }
+                    else {
+                        assert(!(srcflags & SVf_OK));
+                        dstflags = (SVt_NULL|SVs_TEMP); /* SV type plus flags */
+                    }
+                    SvFLAGS(newsv) = dstflags;
+
+                }
+                else {
+                    /* do the full sv_setsv() */
+                    SSize_t old_base;
+
+                    SvTEMP_on(newsv);
+                    old_base = tmps_basep - PL_tmps_stack;
+                    SvGETMAGIC(sv);
+                    sv_setsv_flags(newsv, sv, SV_DO_COW_SVSETSV);
+                    /* the mg_get or sv_setsv might have created new temps
+                     * or realloced the tmps stack; regrow and reload */
+                    EXTEND_MORTAL(nargs);
+                    tmps_basep = PL_tmps_stack + old_base;
+                    TAINT_NOT;	/* Each item is independent */
+                }
+
+            }
+        } while (--nargs);
+
+        /* If there are any temps left above the cut, we need to sort
+         * them into those to keep and those to free. The only ones to
+         * keep are those for which we've temporarily unset SvTEMP.
+         * Work inwards from the two ends at tmps_basep .. PL_tmps_ix,
+         * swapping pairs as necessary. Stop when we meet in the middle.
+         */
+        {
+            SV **top = PL_tmps_stack + PL_tmps_ix;
+            while (tmps_basep <= top) {
+                SV *sv = *top;
+                if (SvTEMP(sv))
+                    top--;
+                else {
+                    SvTEMP_on(sv);
+                    *top = *tmps_basep;
+                    *tmps_basep = sv;
+                    tmps_basep++;
+                }
+            }
+        }
+
+        tmps_base = tmps_basep - PL_tmps_stack;
+    }
+
+    PL_stack_sp = to_sp;
+
+    /* unrolled FREETMPS() but using tmps_base-1 rather than PL_tmps_floor */
+    while (PL_tmps_ix >= tmps_base) {
+        SV* const sv = PL_tmps_stack[PL_tmps_ix--];
+#ifdef PERL_POISON
+        PoisonWith(PL_tmps_stack + PL_tmps_ix + 1, 1, SV *, 0xAB);
+#endif
+        if (LIKELY(sv)) {
+            SvTEMP_off(sv);
+            SvREFCNT_dec_NN(sv); /* note, can modify tmps_ix!!! */
+        }
+    }
+}
+
+
 PP(pp_leavesub)
 {
-    dSP;
-    SV **mark;
-    SV **newsp;
-    PMOP *newpm;
-    I32 gimme;
+    U8 gimme;
     PERL_CONTEXT *cx;
-    SV *sv;
+    SV **oldsp;
+    OP *retop;
 
-    if (CxMULTICALL(&cxstack[cxstack_ix])) {
+    cx = CX_CUR();
+    assert(CxTYPE(cx) == CXt_SUB);
+
+    if (CxMULTICALL(cx)) {
         /* entry zero of a stack is always PL_sv_undef, which
          * simplifies converting a '()' return into undef in scalar context */
         assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
 	return 0;
     }
 
-    POPBLOCK(cx,newpm);
-    cxstack_ix++; /* temporarily protect top context */
+    gimme = cx->blk_gimme;
+    oldsp = PL_stack_base + cx->blk_oldsp; /* last arg of previous frame */
 
-    TAINT_NOT;
-    if (gimme == G_SCALAR) {
-	MARK = newsp + 1;
-	if (LIKELY(MARK <= SP)) {
-	    if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
-		if (SvTEMP(TOPs) && SvREFCNT(TOPs) == 1
-		     && !SvMAGICAL(TOPs)) {
-		    *MARK = SvREFCNT_inc(TOPs);
-		    FREETMPS;
-		    sv_2mortal(*MARK);
-		}
-		else {
-		    sv = SvREFCNT_inc(TOPs);	/* FREETMPS could clobber it */
-		    FREETMPS;
-		    *MARK = sv_mortalcopy(sv);
-		    SvREFCNT_dec_NN(sv);
-		}
-	    }
-	    else if (SvTEMP(TOPs) && SvREFCNT(TOPs) == 1
-		     && !SvMAGICAL(TOPs)) {
-		*MARK = TOPs;
-	    }
-	    else
-		*MARK = sv_mortalcopy(TOPs);
-	}
-	else {
-	    MEXTEND(MARK, 0);
-	    *MARK = &PL_sv_undef;
-	}
-	SP = MARK;
-    }
-    else if (gimme == G_ARRAY) {
-	for (MARK = newsp + 1; MARK <= SP; MARK++) {
-	    if (!SvTEMP(*MARK) || SvREFCNT(*MARK) != 1
-		 || SvMAGICAL(*MARK)) {
-		*MARK = sv_mortalcopy(*MARK);
-		TAINT_NOT;	/* Each item is independent */
-	    }
-	}
-    }
-    PUTBACK;
+    if (gimme == G_VOID)
+        PL_stack_sp = oldsp;
+    else
+        leave_adjust_stacks(oldsp, oldsp, gimme, 0);
 
-    LEAVE;
-    POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
-    cxstack_ix--;
-    PL_curpm = newpm;	/* ... and pop $1 et al */
+    CX_LEAVE_SCOPE(cx);
+    cx_popsub(cx);	/* Stack values are safe: release CV and @_ ... */
+    cx_popblock(cx);
+    retop = cx->blk_sub.retop;
+    CX_POP(cx);
 
-    LEAVESUB(sv);
-    return cx->blk_sub.retop;
+    return retop;
 }
+
+
+/* clear (if possible) or abandon the current @_. If 'abandon' is true,
+ * forces an abandon */
+
+void
+Perl_clear_defarray(pTHX_ AV* av, bool abandon)
+{
+    const SSize_t fill = AvFILLp(av);
+
+    PERL_ARGS_ASSERT_CLEAR_DEFARRAY;
+
+    if (LIKELY(!abandon && SvREFCNT(av) == 1 && !SvMAGICAL(av))) {
+        av_clear(av);
+        AvREIFY_only(av);
+    }
+    else {
+        AV *newav = newAV();
+        av_extend(newav, fill);
+        AvREIFY_only(newav);
+        PAD_SVl(0) = MUTABLE_SV(newav);
+        SvREFCNT_dec_NN(av);
+    }
+}
+
 
 PP(pp_entersub)
 {
@@ -3335,42 +3689,53 @@ PP(pp_entersub)
     GV *gv;
     CV *cv;
     PERL_CONTEXT *cx;
-    I32 gimme;
-    const bool hasargs = (PL_op->op_flags & OPf_STACKED) != 0;
+    I32 old_savestack_ix;
 
     if (UNLIKELY(!sv))
-	DIE(aTHX_ "Not a CODE reference");
-    /* This is overwhelmingly the most common case:  */
-    if (!LIKELY(SvTYPE(sv) == SVt_PVGV && (cv = GvCVu((const GV *)sv)))) {
+	goto do_die;
+
+    /* Locate the CV to call:
+     * - most common case: RV->CV: f(), $ref->():
+     *   note that if a sub is compiled before its caller is compiled,
+     *   the stash entry will be a ref to a CV, rather than being a GV.
+     * - second most common case: CV: $ref->method()
+     */
+
+    /* a non-magic-RV -> CV ? */
+    if (LIKELY( (SvFLAGS(sv) & (SVf_ROK|SVs_GMG)) == SVf_ROK)) {
+        cv = MUTABLE_CV(SvRV(sv));
+        if (UNLIKELY(SvOBJECT(cv))) /* might be overloaded */
+            goto do_ref;
+    }
+    else
+        cv = MUTABLE_CV(sv);
+
+    /* a CV ? */
+    if (UNLIKELY(SvTYPE(cv) != SVt_PVCV)) {
+        /* handle all the weird cases */
         switch (SvTYPE(sv)) {
+        case SVt_PVLV:
+            if (!isGV_with_GP(sv))
+                goto do_default;
+            /* FALLTHROUGH */
         case SVt_PVGV:
-          we_have_a_glob:
-            if (!(cv = GvCVu((const GV *)sv))) {
+            cv = GvCVu((const GV *)sv);
+            if (UNLIKELY(!cv)) {
                 HV *stash;
                 cv = sv_2cv(sv, &stash, &gv, 0);
-            }
-            if (!cv) {
-                ENTER;
-                SAVETMPS;
-                goto try_autoload;
+                if (!cv) {
+                    old_savestack_ix = PL_savestack_ix;
+                    goto try_autoload;
+                }
             }
             break;
-        case SVt_PVLV:
-            if(isGV_with_GP(sv)) goto we_have_a_glob;
-            /* FALLTHROUGH */
+
         default:
-            if (sv == &PL_sv_yes) {		/* unfound import, ignore */
-                if (hasargs)
-                    SP = PL_stack_base + POPMARK;
-                else
-                    (void)POPMARK;
-                if (GIMME_V == G_SCALAR)
-                    PUSHs(&PL_sv_undef);
-                RETURN;
-            }
+          do_default:
             SvGETMAGIC(sv);
             if (SvROK(sv)) {
-                if (SvAMAGIC(sv)) {
+              do_ref:
+                if (UNLIKELY(SvAMAGIC(sv))) {
                     sv = amagic_deref_call(sv, to_cv_amg);
                     /* Don't SPAGAIN here.  */
                 }
@@ -3378,8 +3743,19 @@ PP(pp_entersub)
             else {
                 const char *sym;
                 STRLEN len;
-                if (!SvOK(sv))
+                if (UNLIKELY(!SvOK(sv)))
                     DIE(aTHX_ PL_no_usym, "a subroutine");
+
+                if (UNLIKELY(sv == &PL_sv_yes)) { /* unfound import, ignore */
+                    if (PL_op->op_flags & OPf_STACKED) /* hasargs */
+                        SP = PL_stack_base + POPMARK;
+                    else
+                        (void)POPMARK;
+                    if (GIMME_V == G_SCALAR)
+                        PUSHs(&PL_sv_undef);
+                    RETURN;
+                }
+
                 sym = SvPV_nomg_const(sv, len);
                 if (PL_op->op_private & HINT_STRICT_REFS)
                     DIE(aTHX_ "Can't use string (\"%" SVf32 "\"%s) as a subroutine ref while \"strict refs\" in use", sv, len>32 ? "..." : "");
@@ -3387,25 +3763,28 @@ PP(pp_entersub)
                 break;
             }
             cv = MUTABLE_CV(SvRV(sv));
-            if (SvTYPE(cv) == SVt_PVCV)
+            if (LIKELY(SvTYPE(cv) == SVt_PVCV))
                 break;
             /* FALLTHROUGH */
         case SVt_PVHV:
         case SVt_PVAV:
+          do_die:
             DIE(aTHX_ "Not a CODE reference");
-            /* This is the second most common case:  */
-        case SVt_PVCV:
-            cv = MUTABLE_CV(sv);
-            break;
         }
     }
 
-    ENTER;
+    /* At this point we want to save PL_savestack_ix, either by doing a
+     * cx_pushsub(), or for XS, doing an ENTER. But we don't yet know the final
+     * CV we will be using (so we don't know whether its XS, so we can't
+     * cx_pushsub() or ENTER yet), and determining cv may itself push stuff on
+     * the save stack. So remember where we are currently on the save
+     * stack, and later update the CX or scopestack entry accordingly. */
+    old_savestack_ix = PL_savestack_ix;
 
-  retry:
-    if (UNLIKELY(CvCLONE(cv) && ! CvCLONED(cv)))
-	DIE(aTHX_ "Closure prototype called");
-    if (UNLIKELY(!CvROOT(cv) && !CvXSUB(cv))) {
+    /* these two fields are in a union. If they ever become separate,
+     * we have to test for both of them being null below */
+    assert((void*)&CvROOT(cv) == (void*)&CvXSUB(cv));
+    while (UNLIKELY(!CvROOT(cv))) {
 	GV* autogv;
 	SV* sub_name;
 
@@ -3424,22 +3803,20 @@ PP(pp_entersub)
 	/* should call AUTOLOAD now? */
 	else {
           try_autoload:
-	    if ((autogv = gv_autoload_pvn(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
-				   GvNAMEUTF8(gv) ? SVf_UTF8 : 0)))
-	    {
-		cv = GvCV(autogv);
-	    }
-	    else {
-	       sorry:
-		sub_name = sv_newmortal();
-		gv_efullname3(sub_name, gv, NULL);
-		DIE(aTHX_ "Undefined subroutine &%"SVf" called", SVfARG(sub_name));
-	    }
+	    autogv = gv_autoload_pvn(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
+				   GvNAMEUTF8(gv) ? SVf_UTF8 : 0);
+            cv = autogv ? GvCV(autogv) : NULL;
 	}
-	if (!cv)
-	    goto sorry;
-	goto retry;
+	if (!cv) {
+            sub_name = sv_newmortal();
+            gv_efullname3(sub_name, gv, NULL);
+            DIE(aTHX_ "Undefined subroutine &%"SVf" called", SVfARG(sub_name));
+        }
     }
+
+    /* unrolled "CvCLONE(cv) && ! CvCLONED(cv)" */
+    if (UNLIKELY((CvFLAGS(cv) & (CVf_CLONE|CVf_CLONED)) == CVf_CLONE))
+	DIE(aTHX_ "Closure prototype called");
 
     if (UNLIKELY((PL_op->op_private & OPpENTERSUB_DB) && GvCV(PL_DBsub)
             && !CvNODEBUG(cv)))
@@ -3460,42 +3837,55 @@ PP(pp_entersub)
 	    DIE(aTHX_ "No DB::sub routine defined");
     }
 
-    gimme = GIMME_V;
-
     if (!(CvISXSUB(cv))) {
 	/* This path taken at least 75% of the time   */
 	dMARK;
-	PADLIST * const padlist = CvPADLIST(cv);
+	PADLIST *padlist;
         I32 depth;
+        bool hasargs;
+        U8 gimme;
 
-	PUSHBLOCK(cx, CXt_SUB, MARK);
-	PUSHSUB(cx);
-	cx->blk_sub.retop = PL_op->op_next;
-	if (UNLIKELY((depth = ++CvDEPTH(cv)) >= 2)) {
-	    PERL_STACK_OVERFLOW_CHECK();
+        /* keep PADTMP args alive throughout the call (we need to do this
+         * because @_ isn't refcounted). Note that we create the mortals
+         * in the caller's tmps frame, so they won't be freed until after
+         * we return from the sub.
+         */
+	{
+            SV **svp = MARK;
+            while (svp < SP) {
+                SV *sv = *++svp;
+                if (!sv)
+                    continue;
+                if (SvPADTMP(sv))
+                    *svp = sv = sv_mortalcopy(sv);
+                SvTEMP_off(sv);
+	    }
+        }
+
+        gimme = GIMME_V;
+	cx = cx_pushblock(CXt_SUB, gimme, MARK, old_savestack_ix);
+        hasargs = cBOOL(PL_op->op_flags & OPf_STACKED);
+	cx_pushsub(cx, cv, PL_op->op_next, hasargs);
+
+	padlist = CvPADLIST(cv);
+	if (UNLIKELY((depth = ++CvDEPTH(cv)) >= 2))
 	    pad_push(padlist, depth);
-	}
-	SAVECOMPPAD();
 	PAD_SET_CUR_NOSAVE(padlist, depth);
 	if (LIKELY(hasargs)) {
 	    AV *const av = MUTABLE_AV(PAD_SVl(0));
             SSize_t items;
             AV **defavp;
 
-	    if (UNLIKELY(AvREAL(av))) {
-		/* @_ is normally not REAL--this should only ever
-		 * happen when DB::sub() calls things that modify @_ */
-		av_clear(av);
-		AvREAL_off(av);
-		AvREIFY_on(av);
-	    }
 	    defavp = &GvAV(PL_defgv);
 	    cx->blk_sub.savearray = *defavp;
 	    *defavp = MUTABLE_AV(SvREFCNT_inc_simple_NN(av));
-	    CX_CURPAD_SAVE(cx->blk_sub);
-	    cx->blk_sub.argarray = av;
-            items = SP - MARK;
 
+            /* it's the responsibility of whoever leaves a sub to ensure
+             * that a clean, empty AV is left in pad[0]. This is normally
+             * done by cx_popsub() */
+            assert(!AvREAL(av) && AvFILLp(av) == -1);
+
+            items = SP - MARK;
 	    if (UNLIKELY(items - 1 > AvMAX(av))) {
                 SV **ary = AvALLOC(av);
                 AvMAX(av) = items - 1;
@@ -3506,20 +3896,7 @@ PP(pp_entersub)
 
 	    Copy(MARK+1,AvARRAY(av),items,SV*);
 	    AvFILLp(av) = items - 1;
-	
-	    MARK = AvARRAY(av);
-	    while (items--) {
-		if (*MARK)
-		{
-		    if (SvPADTMP(*MARK)) {
-			*MARK = sv_mortalcopy(*MARK);
-                    }
-		    SvTEMP_off(*MARK);
-		}
-		MARK++;
-	    }
 	}
-	SAVETMPS;
 	if (UNLIKELY((cx->blk_u16 & OPpENTERSUB_LVAL_MASK) == OPpLVAL_INTRO &&
 	    !CvLVALUE(cv)))
             DIE(aTHX_ "Can't modify non-lvalue subroutine call of &%"SVf,
@@ -3537,17 +3914,21 @@ PP(pp_entersub)
     else {
 	SSize_t markix = TOPMARK;
 
+        ENTER;
+        /* pretend we did the ENTER earlier */
+	PL_scopestack[PL_scopestack_ix - 1] = old_savestack_ix;
+
 	SAVETMPS;
 	PUTBACK;
 
 	if (UNLIKELY(((PL_op->op_private
-	       & PUSHSUB_GET_LVALUE_MASK(Perl_is_lvalue_sub)
+	       & CX_PUSHSUB_GET_LVALUE_MASK(Perl_is_lvalue_sub)
              ) & OPpENTERSUB_LVAL_MASK) == OPpLVAL_INTRO &&
 	    !CvLVALUE(cv)))
             DIE(aTHX_ "Can't modify non-lvalue subroutine call of &%"SVf,
                 SVfARG(cv_name(cv, NULL, 0)));
 
-	if (UNLIKELY(!hasargs && GvAV(PL_defgv))) {
+	if (UNLIKELY(!(PL_op->op_flags & OPf_STACKED) && GvAV(PL_defgv))) {
 	    /* Need to copy @_ to stack. Alternative may be to
 	     * switch stack to @_, and copy return values
 	     * back. This would allow popping @_ in XSUB, e.g.. XXXX */
@@ -3599,7 +3980,7 @@ PP(pp_entersub)
 	CvXSUB(cv)(aTHX_ cv);
 
 	/* Enforce some sanity in scalar context. */
-	if (gimme == G_SCALAR) {
+	if (GIMME_V == G_SCALAR) {
             SV **svp = PL_stack_base + markix + 1;
             if (svp != PL_stack_sp) {
                 *svp = svp > PL_stack_sp ? &PL_sv_undef : *PL_stack_sp;

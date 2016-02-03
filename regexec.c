@@ -5177,7 +5177,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 			    */
     PAD* last_pad = NULL;
     dMULTICALL;
-    I32 gimme = G_SCALAR;
+    U8 gimme = G_SCALAR;
     CV *caller_cv = NULL;	/* who called us */
     CV *last_pushed_cv = NULL;	/* most recently called (?{}) CV */
     CHECKPOINT runops_cp;	/* savestack position before executing EVAL */
@@ -5197,11 +5197,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
     /* shut up 'may be used uninitialized' compiler warnings for dMULTICALL */
     multicall_oldcatch = 0;
-    multicall_cv = NULL;
-    cx = NULL;
     PERL_UNUSED_VAR(multicall_cop);
-    PERL_UNUSED_VAR(newsp);
-
 
     PERL_ARGS_ASSERT_REGMATCH;
 
@@ -6590,6 +6586,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     U8 flags = (CXp_SUB_RE |
                                 ((newcv == caller_cv) ? CXp_SUB_RE_FAKE : 0));
 		    if (last_pushed_cv) {
+                        /* PUSH/POP_MULTICALL save and restore the
+                         * caller's PL_comppad; if we call multiple subs
+                         * using the same CX block, we have to save and
+                         * unwind the varying PL_comppad's ourselves,
+                         * especially restoring the right PL_comppad on
+                         * backtrack - so save it on the save stack */
+                        SAVECOMPPAD();
 			CHANGE_MULTICALL_FLAGS(newcv, flags);
 		    }
 		    else {
@@ -6601,7 +6604,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     /* these assignments are just to silence compiler
                      * warnings */
 		    multicall_cop = NULL;
-		    newsp = NULL;
 		}
 		last_pad = PL_comppad;
 
@@ -6653,7 +6655,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 		/* we don't use MULTICALL here as we want to call the
 		 * first op of the block of interest, rather than the
-		 * first op of the sub */
+		 * first op of the sub. Also, we don't want to free
+                 * the savestack frame */
 		before = (IV)(SP-PL_stack_base);
 		PL_op = nop;
 		CALLRUNOPS(aTHX);			/* Scalar context. */

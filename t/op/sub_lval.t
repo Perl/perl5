@@ -1,9 +1,11 @@
+#!./perl
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>207;
+plan tests=>209;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -1055,3 +1057,28 @@ sub bare119797 : lvalue {
 eval { (bare119797(0)) = 4..6 };
 is $@, "", '$@ after writing to array returned by bare block';
 is "@119797", "4 5 6", 'writing to array returned by bare block';
+
+# a sub with nested scopes must pop rubbish on the stack
+{
+    my $x = "a";
+    sub loopreturn : lvalue {
+        for (1,2) {
+            return $x
+        }
+    }
+    loopreturn = "b";
+    is($x, "b", "loopreturn");
+}
+
+# a sub without nested scopes that still leaves rubbish on the stack
+# which needs popping
+{
+    my $x = "a";
+    sub junkreturn : lvalue {
+        my $false;
+        return $x unless $false and $false;
+        1;
+    }
+    junkreturn = "b";
+    is($x, "b", "junkreturn");
+}

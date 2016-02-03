@@ -581,7 +581,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 	dSP;							\
 	SV *tmpsv;						\
 	SV *arg= *sp;						\
-        int gimme = GIMME_V;                                    \
+        U8 gimme = GIMME_V;                                    \
 	if (UNLIKELY(SvAMAGIC(arg) &&				\
 	    (tmpsv = amagic_call(arg, &PL_sv_undef, meth,	\
 				 AMGf_want_list | AMGf_noright	\

@@ -1339,7 +1339,7 @@ currently executing.
     void
     PrintContext()
         CODE:
-        I32 gimme = GIMME_V;
+        U8 gimme = GIMME_V;
         if (gimme == G_VOID)
             printf ("Context is Void\n");
         else if (gimme == G_SCALAR)
@@ -1947,7 +1947,7 @@ it. It's also inherently slower.)
 The pattern of macro calls is like this:
 
     dMULTICALL;			/* Declare local variables */
-    I32 gimme = G_SCALAR;	/* context of the call: G_SCALAR,
+    U8 gimme = G_SCALAR;	/* context of the call: G_SCALAR,
 				 * G_ARRAY, or G_VOID */
 
     PUSH_MULTICALL(cv);		/* Set up the context for calling cv,

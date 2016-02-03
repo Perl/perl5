@@ -401,6 +401,361 @@ S_sv_only_taint_gmagic(SV *sv) {
     return TRUE;
 }
 
+/* ------------------ cop.h ------------------------------------------- */
+
+
+/* Enter a block. Push a new base context and return its address. */
+
+PERL_STATIC_INLINE PERL_CONTEXT *
+S_cx_pushblock(pTHX_ U8 type, U8 gimme, SV** sp, I32 saveix)
+{
+    PERL_CONTEXT * cx;
+
+    PERL_ARGS_ASSERT_CX_PUSHBLOCK;
+
+    CXINC;
+    cx = CX_CUR();
+    cx->cx_type        = type;
+    cx->blk_gimme      = gimme;
+    cx->blk_oldsaveix  = saveix;
+    cx->blk_oldsp      = sp - PL_stack_base;
+    cx->blk_oldcop     = PL_curcop;
+    cx->blk_oldmarksp  = PL_markstack_ptr - PL_markstack;
+    cx->blk_oldscopesp = PL_scopestack_ix;
+    cx->blk_oldpm      = PL_curpm;
+    cx->blk_old_tmpsfloor = PL_tmps_floor;
+
+    PL_tmps_floor        = PL_tmps_ix;
+    CX_DEBUG(cx, "PUSH");
+    return cx;
+}
+
+
+/* Exit a block (RETURN and LAST). */
+
+PERL_STATIC_INLINE void
+S_cx_popblock(pTHX_ PERL_CONTEXT *cx)
+{
+    PERL_ARGS_ASSERT_CX_POPBLOCK;
+
+    CX_DEBUG(cx, "POP");
+    /* these 3 are common to cx_popblock and cx_topblock */
+    PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp;
+    PL_scopestack_ix = cx->blk_oldscopesp;
+    PL_curpm         = cx->blk_oldpm;
+
+    /* LEAVE_SCOPE() should have made this true. /(?{})/ cheats
+     * and leaves a CX entry lying around for repeated use, so
+     * skip for multicall */                  \
+    assert(   (CxTYPE(cx) == CXt_SUB && CxMULTICALL(cx))
+            || PL_savestack_ix == cx->blk_oldsaveix);
+    PL_curcop     = cx->blk_oldcop;
+    PL_tmps_floor = cx->blk_old_tmpsfloor;
+}
+
+/* Continue a block elsewhere (e.g. NEXT, REDO, GOTO).
+ * Whereas cx_popblock() restores the state to the point just before
+ * cx_pushblock() was called,  cx_topblock() restores it to the point just
+ * *after* cx_pushblock() was called. */
+
+PERL_STATIC_INLINE void
+S_cx_topblock(pTHX_ PERL_CONTEXT *cx)
+{
+    PERL_ARGS_ASSERT_CX_TOPBLOCK;
+
+    CX_DEBUG(cx, "TOP");
+    /* these 3 are common to cx_popblock and cx_topblock */
+    PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp;
+    PL_scopestack_ix = cx->blk_oldscopesp;
+    PL_curpm         = cx->blk_oldpm;
+
+    PL_stack_sp      = PL_stack_base + cx->blk_oldsp;
+}
+
+
+PERL_STATIC_INLINE void
+S_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs)
+{
+    U8 phlags = CX_PUSHSUB_GET_LVALUE_MASK(Perl_was_lvalue_sub);
+
+    PERL_ARGS_ASSERT_CX_PUSHSUB;
+
+    ENTRY_PROBE(CvNAMED(cv)
+                    ? HEK_KEY(CvNAME_HEK(cv))
+                    : GvENAME(CvGV(cv)),
+                CopFILE((const COP *)CvSTART(cv)),
+                CopLINE((const COP *)CvSTART(cv)),
+                CopSTASHPV((const COP *)CvSTART(cv)));
+    cx->blk_sub.cv = cv;
+    cx->blk_sub.olddepth = CvDEPTH(cv);
+    cx->blk_sub.prevcomppad = PL_comppad;
+    cx->cx_type |= (hasargs) ? CXp_HASARGS : 0;
+    cx->blk_sub.retop = retop;
+    SvREFCNT_inc_simple_void_NN(cv);
+    cx->blk_u16 = PL_op->op_private & (phlags|OPpDEREF);
+}
+
+
+/* subsets of cx_popsub() */
+
+PERL_STATIC_INLINE void
+S_cx_popsub_common(pTHX_ PERL_CONTEXT *cx)
+{
+    CV *cv;
+
+    PERL_ARGS_ASSERT_CX_POPSUB_COMMON;
+    assert(CxTYPE(cx) == CXt_SUB);
+
+    PL_comppad = cx->blk_sub.prevcomppad;
+    PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;
+    cv = cx->blk_sub.cv;
+    CvDEPTH(cv) = cx->blk_sub.olddepth;
+    cx->blk_sub.cv = NULL;
+    SvREFCNT_dec(cv);
+}
+
+
+/* handle the @_ part of leaving a sub */
+
+PERL_STATIC_INLINE void
+S_cx_popsub_args(pTHX_ PERL_CONTEXT *cx)
+{
+    AV *av;
+
+    PERL_ARGS_ASSERT_CX_POPSUB_ARGS;
+    assert(CxTYPE(cx) == CXt_SUB);
+    assert(AvARRAY(MUTABLE_AV(
+        PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[
+                CvDEPTH(cx->blk_sub.cv)])) == PL_curpad);
+
+    CX_POP_SAVEARRAY(cx);
+    av = MUTABLE_AV(PAD_SVl(0));
+    if (UNLIKELY(AvREAL(av)))
+        /* abandon @_ if it got reified */
+        clear_defarray(av, 0);
+    else {
+        CLEAR_ARGARRAY(av);
+    }
+}
+
+
+PERL_STATIC_INLINE void
+S_cx_popsub(pTHX_ PERL_CONTEXT *cx)
+{
+    PERL_ARGS_ASSERT_CX_POPSUB;
+    assert(CxTYPE(cx) == CXt_SUB);
+
+    RETURN_PROBE(CvNAMED(cx->blk_sub.cv)
+                    ? HEK_KEY(CvNAME_HEK(cx->blk_sub.cv))
+                    : GvENAME(CvGV(cx->blk_sub.cv)),
+            CopFILE((COP*)CvSTART((const CV*)cx->blk_sub.cv)),
+            CopLINE((COP*)CvSTART((const CV*)cx->blk_sub.cv)),
+            CopSTASHPV((COP*)CvSTART((const CV*)cx->blk_sub.cv)));
+
+    if (CxHASARGS(cx))
+        cx_popsub_args(cx);
+    cx_popsub_common(cx);
+}
+
+
+PERL_STATIC_INLINE void
+S_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, GV *gv)
+{
+    PERL_ARGS_ASSERT_CX_PUSHFORMAT;
+
+    cx->blk_format.cv          = cv;
+    cx->blk_format.retop       = retop;
+    cx->blk_format.gv          = gv;
+    cx->blk_format.dfoutgv     = PL_defoutgv;
+    cx->blk_format.prevcomppad = PL_comppad;
+    cx->blk_u16                = 0;
+
+    SvREFCNT_inc_simple_void_NN(cv);
+    CvDEPTH(cv)++;
+    SvREFCNT_inc_void(cx->blk_format.dfoutgv);
+}
+
+
+PERL_STATIC_INLINE void
+S_cx_popformat(pTHX_ PERL_CONTEXT *cx)
+{
+    CV *cv;
+    GV *dfout;
+
+    PERL_ARGS_ASSERT_CX_POPFORMAT;
+    assert(CxTYPE(cx) == CXt_FORMAT);
+
+    dfout = cx->blk_format.dfoutgv;
+    setdefout(dfout);
+    cx->blk_format.dfoutgv = NULL;
+    SvREFCNT_dec_NN(dfout);
+
+    PL_comppad = cx->blk_format.prevcomppad;
+    PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;
+    cv = cx->blk_format.cv;
+    cx->blk_format.cv = NULL;
+    --CvDEPTH(cv);
+    SvREFCNT_dec_NN(cv);
+}
+
+
+PERL_STATIC_INLINE void
+S_cx_pusheval(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv)
+{
+    PERL_ARGS_ASSERT_CX_PUSHEVAL;
+
+    cx->blk_eval.retop         = retop;
+    cx->blk_eval.old_namesv    = namesv;
+    cx->blk_eval.old_eval_root = PL_eval_root;
+    cx->blk_eval.cur_text      = PL_parser ? PL_parser->linestr : NULL;
+    cx->blk_eval.cv            = NULL; /* later set by doeval_compile() */
+    cx->blk_eval.cur_top_env   = PL_top_env;
+
+    assert(!(PL_in_eval     & ~ 0x7F));
+    assert(!(PL_op->op_type & ~0x1FF));
+    cx->blk_u16 = (PL_in_eval & 0x7F) | ((U16)PL_op->op_type << 7);
+}
+
+
+PERL_STATIC_INLINE void
+S_cx_popeval(pTHX_ PERL_CONTEXT *cx)
+{
+    SV *sv;
+
+    PERL_ARGS_ASSERT_CX_POPEVAL;
+    assert(CxTYPE(cx) == CXt_EVAL);
+
+    PL_in_eval = CxOLD_IN_EVAL(cx);
+    PL_eval_root = cx->blk_eval.old_eval_root;
+    sv = cx->blk_eval.cur_text;
+    if (sv && SvSCREAM(sv)) {
+        cx->blk_eval.cur_text = NULL;
+        SvREFCNT_dec_NN(sv);
+    }
+
+    sv = cx->blk_eval.old_namesv;
+    if (sv && !SvTEMP(sv))/* TEMP implies cx_popeval() re-entrantly called */
+        sv_2mortal(sv);
+}
+
+
+/* push a plain loop, i.e.
+ *     { block }
+ *     while (cond) { block }
+ *     for (init;cond;continue) { block }
+ * This loop can be last/redo'ed etc.
+ */
+
+PERL_STATIC_INLINE void
+S_cx_pushloop_plain(pTHX_ PERL_CONTEXT *cx)
+{
+    PERL_ARGS_ASSERT_CX_PUSHLOOP_PLAIN;
+    cx->blk_loop.my_op = cLOOP;
+}
+
+
+/* push a true for loop, i.e.
+ *     for var (list) { block }
+ */
+
+PERL_STATIC_INLINE void
+S_cx_pushloop_for(pTHX_ PERL_CONTEXT *cx, void *itervarp, SV* itersave)
+{
+    PERL_ARGS_ASSERT_CX_PUSHLOOP_FOR;
+
+    /* this one line is common with cx_pushloop_plain */
+    cx->blk_loop.my_op = cLOOP;
+
+    cx->blk_loop.itervar_u.svp = (SV**)itervarp;
+    cx->blk_loop.itersave      = itersave;
+#ifdef USE_ITHREADS
+    cx->blk_loop.oldcomppad = PL_comppad;
+#endif
+}
+
+
+/* pop all loop types, including plain */
+
+PERL_STATIC_INLINE void
+S_cx_poploop(pTHX_ PERL_CONTEXT *cx)
+{
+    PERL_ARGS_ASSERT_CX_POPLOOP;
+
+    assert(CxTYPE_is_LOOP(cx));
+    if (  CxTYPE(cx) == CXt_LOOP_ARY
+       || CxTYPE(cx) == CXt_LOOP_LAZYSV)
+    {
+        /* Free ary or cur. This assumes that state_u.ary.ary
+         * aligns with state_u.lazysv.cur. See cx_dup() */
+        SV *sv = cx->blk_loop.state_u.lazysv.cur;
+        cx->blk_loop.state_u.lazysv.cur = NULL;
+        SvREFCNT_dec_NN(sv);
+        if (CxTYPE(cx) == CXt_LOOP_LAZYSV) {
+            sv = cx->blk_loop.state_u.lazysv.end;
+            cx->blk_loop.state_u.lazysv.end = NULL;
+            SvREFCNT_dec_NN(sv);
+        }
+    }
+    if (cx->cx_type & (CXp_FOR_PAD|CXp_FOR_GV)) {
+        SV *cursv;
+        SV **svp = (cx)->blk_loop.itervar_u.svp;
+        if ((cx->cx_type & CXp_FOR_GV))
+            svp = &GvSV((GV*)svp);
+        cursv = *svp;
+        *svp = cx->blk_loop.itersave;
+        cx->blk_loop.itersave = NULL;
+        SvREFCNT_dec(cursv);
+    }
+}
+
+
+PERL_STATIC_INLINE void
+S_cx_pushwhen(pTHX_ PERL_CONTEXT *cx)
+{
+    PERL_ARGS_ASSERT_CX_PUSHWHEN;
+
+    cx->blk_givwhen.leave_op = cLOGOP->op_other;
+}
+
+
+PERL_STATIC_INLINE void
+S_cx_popwhen(pTHX_ PERL_CONTEXT *cx)
+{
+    PERL_ARGS_ASSERT_CX_POPWHEN;
+    assert(CxTYPE(cx) == CXt_WHEN);
+
+    PERL_UNUSED_ARG(cx);
+    /* currently NOOP */
+}
+
+
+PERL_STATIC_INLINE void
+S_cx_pushgiven(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv)
+{
+    PERL_ARGS_ASSERT_CX_PUSHGIVEN;
+
+    cx->blk_givwhen.leave_op = cLOGOP->op_other;
+    cx->blk_givwhen.defsv_save = orig_defsv;
+}
+
+
+PERL_STATIC_INLINE void
+S_cx_popgiven(pTHX_ PERL_CONTEXT *cx)
+{
+    SV *sv;
+
+    PERL_ARGS_ASSERT_CX_POPGIVEN;
+    assert(CxTYPE(cx) == CXt_GIVEN);
+
+    sv = GvSV(PL_defgv);
+    GvSV(PL_defgv) = cx->blk_givwhen.defsv_save;
+    cx->blk_givwhen.defsv_save = NULL;
+    SvREFCNT_dec(sv);
+}
+
+
+
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

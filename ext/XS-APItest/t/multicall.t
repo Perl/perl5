@@ -7,7 +7,7 @@
 use warnings;
 use strict;
 
-use Test::More tests => 79;
+use Test::More tests => 80;
 use XS::APItest;
 
 
@@ -161,4 +161,10 @@ use XS::APItest;
         @a = multicall_return \&f9, $gimme;
         gimme_check($gimme, \@a, ["one", "two"], "for-return two args lval");
     }
+
+    # MULTICALL *shouldn't* clear savestack after each call
+
+    sub f10 { my $x = 1; $x };
+    my @a = XS::APItest::multicall_return \&f10, G_SCALAR;
+    ::is($a[0], 1, "leave scope");
 }

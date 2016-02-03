@@ -9542,7 +9542,7 @@ S_scan_heredoc(pTHX_ char *s)
 	SV *linestr;
 	char *bufend;
 	char * const olds = s;
-	PERL_CONTEXT * const cx = &cxstack[cxstack_ix];
+	PERL_CONTEXT * const cx = CX_CUR();
 	/* These two fields are not set until an inner lexing scope is
 	   entered.  But we need them set here. */
 	shared->ls_bufptr  = s;

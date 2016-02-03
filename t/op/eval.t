@@ -442,9 +442,9 @@ is($got, "ok\n", 'eval and last');
 }
 
 # a syntax error in an eval called magically (eg via tie or overload)
-# resulted in an assertion failure in S_docatch, since doeval had already
-# popped the EVAL context due to the failure, but S_docatch expected the
-# context to still be there.
+# resulted in an assertion failure in S_docatch, since doeval_compile had
+# already popped the EVAL context due to the failure, but S_docatch
+# expected the context to still be there.
 
 {
     my $ok  = 0;

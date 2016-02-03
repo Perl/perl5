@@ -206,7 +206,7 @@ PERL_CALLCONV OP*	Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
 PERL_CALLCONV OP*	Perl_block_end(pTHX_ I32 floor, OP* seq)
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV I32	Perl_block_gimme(pTHX)
+PERL_CALLCONV U8	Perl_block_gimme(pTHX)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV int	Perl_block_start(pTHX_ int full)
@@ -522,6 +522,9 @@ PERL_CALLCONV void	Perl_ck_warner_d(pTHX_ U32 err, const char* pat, ...)
 
 PERL_CALLCONV bool	Perl_ckwarn(pTHX_ U32 w);
 PERL_CALLCONV bool	Perl_ckwarn_d(pTHX_ U32 w);
+PERL_CALLCONV void	Perl_clear_defarray(pTHX_ AV* av, bool abandon);
+#define PERL_ARGS_ASSERT_CLEAR_DEFARRAY	\
+	assert(av)
 PERL_CALLCONV const COP*	Perl_closest_cop(pTHX_ const COP *cop, const OP *o, const OP *curop, bool opnext);
 #define PERL_ARGS_ASSERT_CLOSEST_COP	\
 	assert(cop)
@@ -537,7 +540,7 @@ PERL_CALLCONV SV *	Perl_core_prototype(pTHX_ SV *sv, const char *name, const int
 PERL_CALLCONV OP *	Perl_coresub_op(pTHX_ SV *const coreargssv, const int code, const int opnum);
 #define PERL_ARGS_ASSERT_CORESUB_OP	\
 	assert(coreargssv)
-PERL_CALLCONV PERL_CONTEXT*	Perl_create_eval_scope(pTHX_ U32 flags);
+PERL_CALLCONV void	Perl_create_eval_scope(pTHX_ OP *retop, U32 flags);
 PERL_CALLCONV_NO_RET void	Perl_croak(pTHX_ const char* pat, ...)
 			__attribute__noreturn__
 			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
@@ -772,7 +775,7 @@ PERL_CALLCONV OP *	Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref);
 #define PERL_ARGS_ASSERT_DOREF	\
 	assert(o)
 PERL_CALLCONV void	Perl_dounwind(pTHX_ I32 cxix);
-PERL_CALLCONV I32	Perl_dowantarray(pTHX)
+PERL_CALLCONV U8	Perl_dowantarray(pTHX)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV void	Perl_drand48_init_r(perl_drand48_t *random_state, U32 seed);
@@ -1607,6 +1610,9 @@ PERL_CALLCONV I32	Perl_keyword(pTHX_ const char *name, I32 len, bool all_keyword
 PERL_CALLCONV int	Perl_keyword_plugin_standard(pTHX_ char* keyword_ptr, STRLEN keyword_len, OP** op_ptr);
 #define PERL_ARGS_ASSERT_KEYWORD_PLUGIN_STANDARD	\
 	assert(keyword_ptr); assert(op_ptr)
+PERL_CALLCONV void	Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int filter);
+#define PERL_ARGS_ASSERT_LEAVE_ADJUST_STACKS	\
+	assert(from_sp); assert(to_sp)
 PERL_CALLCONV void	Perl_leave_scope(pTHX_ I32 base);
 PERL_CALLCONV bool	Perl_lex_bufutf8(pTHX);
 PERL_CALLCONV void	Perl_lex_discard_to(pTHX_ char* ptr);
@@ -2765,6 +2771,7 @@ PERL_CALLCONV char*	Perl_savesvpv(pTHX_ SV* sv)
 #define PERL_ARGS_ASSERT_SAVESVPV	\
 	assert(sv)
 
+PERL_CALLCONV void	Perl_savetmps(pTHX);
 PERL_CALLCONV OP*	Perl_sawparens(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_scalar(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_scalarvoid(pTHX_ OP* o);
@@ -3711,6 +3718,60 @@ PERL_STATIC_INLINE SSize_t	S_av_top_index(pTHX_ AV *av)
 #define PERL_ARGS_ASSERT_AV_TOP_INDEX	\
 	assert(av)
 
+PERL_STATIC_INLINE void	S_cx_popblock(pTHX_ PERL_CONTEXT *cx);
+#define PERL_ARGS_ASSERT_CX_POPBLOCK	\
+	assert(cx)
+PERL_STATIC_INLINE void	S_cx_popeval(pTHX_ PERL_CONTEXT *cx);
+#define PERL_ARGS_ASSERT_CX_POPEVAL	\
+	assert(cx)
+PERL_STATIC_INLINE void	S_cx_popformat(pTHX_ PERL_CONTEXT *cx);
+#define PERL_ARGS_ASSERT_CX_POPFORMAT	\
+	assert(cx)
+PERL_STATIC_INLINE void	S_cx_popgiven(pTHX_ PERL_CONTEXT *cx);
+#define PERL_ARGS_ASSERT_CX_POPGIVEN	\
+	assert(cx)
+PERL_STATIC_INLINE void	S_cx_poploop(pTHX_ PERL_CONTEXT *cx);
+#define PERL_ARGS_ASSERT_CX_POPLOOP	\
+	assert(cx)
+PERL_STATIC_INLINE void	S_cx_popsub(pTHX_ PERL_CONTEXT *cx);
+#define PERL_ARGS_ASSERT_CX_POPSUB	\
+	assert(cx)
+PERL_STATIC_INLINE void	S_cx_popsub_args(pTHX_ PERL_CONTEXT *cx);
+#define PERL_ARGS_ASSERT_CX_POPSUB_ARGS	\
+	assert(cx)
+PERL_STATIC_INLINE void	S_cx_popsub_common(pTHX_ PERL_CONTEXT *cx);
+#define PERL_ARGS_ASSERT_CX_POPSUB_COMMON	\
+	assert(cx)
+PERL_STATIC_INLINE void	S_cx_popwhen(pTHX_ PERL_CONTEXT *cx);
+#define PERL_ARGS_ASSERT_CX_POPWHEN	\
+	assert(cx)
+PERL_STATIC_INLINE PERL_CONTEXT *	S_cx_pushblock(pTHX_ U8 type, U8 gimme, SV** sp, I32 saveix);
+#define PERL_ARGS_ASSERT_CX_PUSHBLOCK	\
+	assert(sp)
+PERL_STATIC_INLINE void	S_cx_pusheval(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv);
+#define PERL_ARGS_ASSERT_CX_PUSHEVAL	\
+	assert(cx)
+PERL_STATIC_INLINE void	S_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, GV *gv);
+#define PERL_ARGS_ASSERT_CX_PUSHFORMAT	\
+	assert(cx); assert(cv)
+PERL_STATIC_INLINE void	S_cx_pushgiven(pTHX_ PERL_CONTEXT *cx, SV *orig_defsv);
+#define PERL_ARGS_ASSERT_CX_PUSHGIVEN	\
+	assert(cx)
+PERL_STATIC_INLINE void	S_cx_pushloop_for(pTHX_ PERL_CONTEXT *cx, void *itervarp, SV *itersave);
+#define PERL_ARGS_ASSERT_CX_PUSHLOOP_FOR	\
+	assert(cx); assert(itervarp)
+PERL_STATIC_INLINE void	S_cx_pushloop_plain(pTHX_ PERL_CONTEXT *cx);
+#define PERL_ARGS_ASSERT_CX_PUSHLOOP_PLAIN	\
+	assert(cx)
+PERL_STATIC_INLINE void	S_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs);
+#define PERL_ARGS_ASSERT_CX_PUSHSUB	\
+	assert(cx); assert(cv)
+PERL_STATIC_INLINE void	S_cx_pushwhen(pTHX_ PERL_CONTEXT *cx);
+#define PERL_ARGS_ASSERT_CX_PUSHWHEN	\
+	assert(cx)
+PERL_STATIC_INLINE void	S_cx_topblock(pTHX_ PERL_CONTEXT *cx);
+#define PERL_ARGS_ASSERT_CX_TOPBLOCK	\
+	assert(cx)
 PERL_STATIC_INLINE bool	S_is_safe_syscall(pTHX_ const char *pv, STRLEN len, const char *what, const char *op_name)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_SAFE_SYSCALL	\
@@ -4470,7 +4531,7 @@ STATIC OP*	S_do_smartmatch(pTHX_ HV* seen_this, HV* seen_other, const bool copie
 STATIC OP*	S_docatch(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
 
-STATIC bool	S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV* hh);
+STATIC bool	S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV* hh);
 STATIC OP*	S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstack, OP **oplimit)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_DOFINDLABEL	\
@@ -4482,7 +4543,7 @@ STATIC MAGIC *	S_doparseform(pTHX_ SV *sv);
 STATIC I32	S_dopoptoeval(pTHX_ I32 startingblock)
 			__attribute__warn_unused_result__;
 
-STATIC I32	S_dopoptogiven(pTHX_ I32 startingblock)
+STATIC I32	S_dopoptogivenfor(pTHX_ I32 startingblock)
 			__attribute__warn_unused_result__;
 
 STATIC I32	S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)
@@ -4501,9 +4562,6 @@ STATIC I32	S_dopoptosub_at(pTHX_ const PERL_CONTEXT* cxstk, I32 startingblock)
 STATIC I32	S_dopoptowhen(pTHX_ I32 startingblock)
 			__attribute__warn_unused_result__;
 
-STATIC SV **	S_leave_common(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme, U32 flags, bool lvalue);
-#define PERL_ARGS_ASSERT_LEAVE_COMMON	\
-	assert(newsp); assert(sp); assert(mark)
 STATIC PMOP*	S_make_matcher(pTHX_ REGEXP* re)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_MAKE_MATCHER	\

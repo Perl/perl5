@@ -2201,6 +2201,8 @@ Perl_runops_debug(pTHX)
         ++PL_op_exec_cnt[PL_op->op_type];
 #endif
 	if (PL_debug) {
+            ENTER;
+            SAVETMPS;
 	    if (PL_watchaddr && (*PL_watchaddr != PL_watchok))
 		PerlIO_printf(Perl_debug_log,
 			      "WARNING: %"UVxf" changed from %"UVxf" to %"UVxf"\n",
@@ -2218,6 +2220,8 @@ Perl_runops_debug(pTHX)
 
 	    if (DEBUG_t_TEST_) debop(PL_op);
 	    if (DEBUG_P_TEST_) debprof(PL_op);
+            FREETMPS;
+            LEAVE;
 	}
 
         OP_ENTRY_PROBE(OP_NAME(PL_op));

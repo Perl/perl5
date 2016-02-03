@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 57);
+plan(tests => 63);
 
 sub empty_sub {}
 
@@ -41,7 +41,7 @@ is(scalar(@test), 0, 'Didnt return anything');
     ok(eq_array(\@a, [34,35]), "yes without args");
 }
 
-# [perl #81944] return should always copy
+# [perl #91844] return should always copy
 {
     $foo{bar} = 7;
     for my $x ($foo{bar}) {
@@ -63,6 +63,13 @@ is(scalar(@test), 0, 'Didnt return anything');
       'result of shift is copied when returned';
     isnt \sub { ()=\@_; return shift }->($x), \$x,
       'result of shift is copied when explicitly returned';
+
+    $foo{bar} = 7;
+    my $r = \$foo{bar};
+    sub {
+        $$r++;
+        isnt($_[0], $$r, "result of delete(helem) is copied: practical test");
+    }->(sub { delete $foo{bar} }->());
 }
 
 fresh_perl_is
@@ -303,6 +310,32 @@ pass("RT #126845: stub with prototype, then definition with attribute");
     ::is($destroyed, 1, "RT124156 freed cv");
 }
 
+# trapping dying while popping a scope needs to have the right pad at all
+# times. Localising a tied array then dying in STORE raises an exception
+# while leaving g(). Note that using an object and destructor wouldn't be
+# sufficient since DESTROY is called with call_sv(...,G_EVAL).
+# We make sure that the first item in every sub's pad is a lexical with
+# different values per sub.
+
+{
+    package tie_exception;
+    sub TIEARRAY { my $x = 4; bless [0] }
+    sub FETCH    { my $x = 5; 1 }
+    sub STORE    { my $x = 6; die if $_[0][0]; $_[0][0] = 1 }
+
+    my $y;
+    sub f { my $x = 7; eval { g() }; $y = $x }
+    sub g {
+        my $x = 8;
+        my @a;
+        tie @a, "tie_exception";
+        local $a[0];
+    }
+
+    f();
+    ::is($y, 7, "tie_exception");
+}
+
 
 # check that return pops extraneous stuff from the stack
 
@@ -338,3 +371,47 @@ is(join('-', 10, check_ret(5,6,7,8,9)), "10-25-26-27-28-29", "check_ret(5,6,7,8,
 
 is(join('-', 10, check_ret(-1)),        "10",  "check_ret(-1) list");
 is(join('-', 10, check_ret(-1,5)),      "10",  "check_ret(-1,5) list");
+
+# a sub without nested scopes that still leaves rubbish on the stack
+# which needs popping
+{
+    my @res = sub {
+        my $false;
+        # conditional leaves rubbish on stack
+        return @_ unless $false and $false;
+        1;
+    }->('a','b');
+    is(join('-', @res), "a-b", "unnested rubbish");
+}
+
+# a sub should copy returned PADTMPs
+
+{
+    sub f99 { $_[0] . "x" };
+    my $a = [ f99(1), f99(2) ];
+    is("@$a", "1x 2x", "PADTMPs copied on return");
+}
+
+# A sub should FREETMPS on exit
+# RT #124248
+
+{
+    package p124248;
+    my $d = 0;
+    sub DESTROY { $d++ }
+    sub f { ::is($d, 1, "RT 124248"); }
+    sub g { !!(my $x = bless []); }
+    f(g());
+}
+
+# return should have the right PL_curpm while copying its return args
+
+sub curpm {
+    "b" =~ /(.)/;
+    {
+        "c" =~ /(.)/;
+        return $1;
+    }
+}
+"a" =~ /(.)/;
+is(curpm(), 'c', 'return and PL_curpm');

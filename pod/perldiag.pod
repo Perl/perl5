@@ -4318,11 +4318,6 @@ there are in the savestack.
 (P) Failed an internal consistency check while trying to reset a weak
 reference.
 
-=item panic: die %s
-
-(P) We popped the context stack to an eval context, and then discovered
-it wasn't an eval context.
-
 =item panic: do_subst
 
 (P) The internal pp_subst() routine was called with invalid operational

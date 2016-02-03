@@ -3640,7 +3640,6 @@ CODE:
 	MULTICALL;
     }
     POP_MULTICALL;
-    PERL_UNUSED_VAR(newsp);
     XSRETURN_UNDEF;
 }
 
@@ -3698,8 +3697,6 @@ CODE:
 
     POP_MULTICALL;
 
-    PERL_UNUSED_VAR(newsp);
-
     size = AvFILLp(av) + 1;
     EXTEND(SP, size);
     for (i = 0; i < size; i++)
@@ -3725,11 +3722,12 @@ CODE:
     PERL_SET_CONTEXT(interp);
 
     POPSTACK_TO(PL_mainstack);
-    dounwind(-1);
+    if (cxstack_ix >= 0) {
+        dounwind(-1);
+        cx_popblock(cxstack);
+    }
     LEAVE_SCOPE(0);
-
-    while (interp->Iscopestack_ix > 1)
-        LEAVE;
+    PL_scopestack_ix = oldscope;
     FREETMPS;
 
     perl_destruct(interp);

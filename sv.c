@@ -403,34 +403,6 @@ S_del_sv(pTHX_ SV *p)
 
 #endif /* DEBUGGING */
 
-/*
- * Bodyless IVs and NVs!
- *
- * Since 5.9.2, we can avoid allocating a body for SVt_IV-type SVs.
- * Since the larger IV-holding variants of SVs store their integer
- * values in their respective bodies, the family of SvIV() accessor
- * macros would  naively have to branch on the SV type to find the
- * integer value either in the HEAD or BODY. In order to avoid this
- * expensive branch, a clever soul has deployed a great hack:
- * We set up the SvANY pointer such that instead of pointing to a
- * real body, it points into the memory before the location of the
- * head. We compute this pointer such that the location of
- * the integer member of the hypothetical body struct happens to
- * be the same as the location of the integer member of the bodyless
- * SV head. This now means that the SvIV() family of accessors can
- * always read from the (hypothetical or real) body via SvANY.
- *
- * Since the 5.21 dev series, we employ the same trick for NVs
- * if the architecture can support it (NVSIZE <= IVSIZE).
- */
-
-/* The following two macros compute the necessary offsets for the above
- * trick and store them in SvANY for SvIV() (and friends) to use. */
-#define SET_SVANY_FOR_BODYLESS_IV(sv) \
-	SvANY(sv) = (XPVIV*)((char*)&(sv->sv_u.svu_iv) - STRUCT_OFFSET(XPVIV, xiv_iv))
-
-#define SET_SVANY_FOR_BODYLESS_NV(sv) \
-	SvANY(sv) = (XPVNV*)((char*)&(sv->sv_u.svu_nv) - STRUCT_OFFSET(XPVNV, xnv_u.xnv_nv))
 
 /*
 =head1 SV Manipulation Functions
@@ -4272,25 +4244,83 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
     U32 sflags;
     int dtype;
     svtype stype;
+    unsigned int both_type;
 
     PERL_ARGS_ASSERT_SV_SETSV_FLAGS;
 
     if (UNLIKELY( sstr == dstr ))
 	return;
 
-    if (SvIS_FREED(dstr)) {
-	Perl_croak(aTHX_ "panic: attempt to copy value %" SVf
-		   " to a freed scalar %p", SVfARG(sstr), (void *)dstr);
-    }
-    SV_CHECK_THINKFIRST_COW_DROP(dstr);
     if (UNLIKELY( !sstr ))
 	sstr = &PL_sv_undef;
-    if (SvIS_FREED(sstr)) {
-	Perl_croak(aTHX_ "panic: attempt to copy freed scalar %p to %p",
-		   (void*)sstr, (void*)dstr);
-    }
+
     stype = SvTYPE(sstr);
     dtype = SvTYPE(dstr);
+    both_type = (stype | dtype);
+
+    /* with these values, we can check that both SVs are NULL/IV (and not
+     * freed) just by testing the or'ed types */
+    STATIC_ASSERT_STMT(SVt_NULL == 0);
+    STATIC_ASSERT_STMT(SVt_IV   == 1);
+    if (both_type <= 1) {
+        /* both src and dst are UNDEF/IV/RV, so we can do a lot of
+         * special-casing */
+        U32 sflags;
+        U32 new_dflags;
+
+        /* minimal subset of SV_CHECK_THINKFIRST_COW_DROP(dstr) */
+        if (SvREADONLY(dstr))
+            Perl_croak_no_modify();
+        if (SvROK(dstr))
+            sv_unref_flags(dstr, 0);
+
+        assert(!SvGMAGICAL(sstr));
+        assert(!SvGMAGICAL(dstr));
+
+        sflags = SvFLAGS(sstr);
+        if (sflags & (SVf_IOK|SVf_ROK)) {
+            SET_SVANY_FOR_BODYLESS_IV(dstr);
+            new_dflags = SVt_IV;
+
+            if (sflags & SVf_ROK) {
+                dstr->sv_u.svu_rv = SvREFCNT_inc(SvRV(sstr));
+                new_dflags |= SVf_ROK;
+            }
+            else {
+                /* both src and dst are <= SVt_IV, so sv_any points to the
+                 * head; so access the head directly
+                 */
+                assert(    &(sstr->sv_u.svu_iv)
+                        == &(((XPVIV*) SvANY(sstr))->xiv_iv));
+                assert(    &(dstr->sv_u.svu_iv)
+                        == &(((XPVIV*) SvANY(dstr))->xiv_iv));
+                dstr->sv_u.svu_iv = sstr->sv_u.svu_iv;
+                new_dflags |= (SVf_IOK|SVp_IOK|(sflags & SVf_IVisUV));
+            }
+        }
+        else {
+            new_dflags = dtype; /* turn off everything except the type */
+        }
+        SvFLAGS(dstr) = new_dflags;
+
+        return;
+    }
+
+    if (UNLIKELY(both_type == SVTYPEMASK)) {
+        if (SvIS_FREED(dstr)) {
+            Perl_croak(aTHX_ "panic: attempt to copy value %" SVf
+                       " to a freed scalar %p", SVfARG(sstr), (void *)dstr);
+        }
+        if (SvIS_FREED(sstr)) {
+            Perl_croak(aTHX_ "panic: attempt to copy freed scalar %p to %p",
+                       (void*)sstr, (void*)dstr);
+        }
+    }
+
+
+
+    SV_CHECK_THINKFIRST_COW_DROP(dstr);
+    dtype = SvTYPE(dstr); /* THINKFIRST may have changed type */
 
     /* There's a lot of redundancy below but we're going for speed here */
 
@@ -13942,24 +13972,22 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 	    ncx->blk_oldcop = (COP*)any_dup(ncx->blk_oldcop, param->proto_perl);
 	    switch (CxTYPE(ncx)) {
 	    case CXt_SUB:
-		ncx->blk_sub.cv		= (ncx->blk_sub.olddepth == 0
-					   ? cv_dup_inc(ncx->blk_sub.cv, param)
-					   : cv_dup(ncx->blk_sub.cv,param));
+		ncx->blk_sub.cv		= cv_dup_inc(ncx->blk_sub.cv, param);
 		if(CxHASARGS(ncx)){
-		    ncx->blk_sub.argarray = av_dup_inc(ncx->blk_sub.argarray,param);
 		    ncx->blk_sub.savearray = av_dup_inc(ncx->blk_sub.savearray,param);
 		} else {
-		    ncx->blk_sub.argarray = NULL;
 		    ncx->blk_sub.savearray = NULL;
 		}
-		ncx->blk_sub.oldcomppad = (PAD*)ptr_table_fetch(PL_ptr_table,
-					   ncx->blk_sub.oldcomppad);
+		ncx->blk_sub.prevcomppad = (PAD*)ptr_table_fetch(PL_ptr_table,
+					   ncx->blk_sub.prevcomppad);
 		break;
 	    case CXt_EVAL:
 		ncx->blk_eval.old_namesv = sv_dup_inc(ncx->blk_eval.old_namesv,
 						      param);
+                /* XXX should this sv_dup_inc? Or only if SvSCREAM ???? */
 		ncx->blk_eval.cur_text	= sv_dup(ncx->blk_eval.cur_text, param);
 		ncx->blk_eval.cv = cv_dup(ncx->blk_eval.cv, param);
+                /* XXX what do do with cur_top_env ???? */
 		break;
 	    case CXt_LOOP_LAZYSV:
 		ncx->blk_loop.state_u.lazysv.end
@@ -13973,33 +14001,51 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		assert ((void *) &ncx->blk_loop.state_u.ary.ary ==
 			(void *) &ncx->blk_loop.state_u.lazysv.cur);
                 /* FALLTHROUGH */
-	    case CXt_LOOP_FOR:
+	    case CXt_LOOP_ARY:
 		ncx->blk_loop.state_u.ary.ary
 		    = av_dup_inc(ncx->blk_loop.state_u.ary.ary, param);
                 /* FALLTHROUGH */
+	    case CXt_LOOP_LIST:
 	    case CXt_LOOP_LAZYIV:
-	    case CXt_LOOP_PLAIN:
-                /* code common to all CXt_LOOP_* types */
+                /* code common to all 'for' CXt_LOOP_* types */
+		ncx->blk_loop.itersave =
+                                    sv_dup_inc(ncx->blk_loop.itersave, param);
 		if (CxPADLOOP(ncx)) {
-		    ncx->blk_loop.itervar_u.oldcomppad
-			= (PAD*)ptr_table_fetch(PL_ptr_table,
-					ncx->blk_loop.itervar_u.oldcomppad);
-		} else {
+                    PADOFFSET off = ncx->blk_loop.itervar_u.svp
+                                    - &CX_CURPAD_SV(ncx->blk_loop, 0);
+                    ncx->blk_loop.oldcomppad =
+                                    (PAD*)ptr_table_fetch(PL_ptr_table,
+                                                ncx->blk_loop.oldcomppad);
+		    ncx->blk_loop.itervar_u.svp =
+                                    &CX_CURPAD_SV(ncx->blk_loop, off);
+                }
+		else {
+                    /* this copies the GV if CXp_FOR_GV, or the SV for an
+                     * alias (for \$x (...)) - relies on gv_dup being the
+                     * same as sv_dup */
 		    ncx->blk_loop.itervar_u.gv
 			= gv_dup((const GV *)ncx->blk_loop.itervar_u.gv,
 				    param);
 		}
 		break;
+	    case CXt_LOOP_PLAIN:
+		break;
 	    case CXt_FORMAT:
-		ncx->blk_format.cv	= cv_dup(ncx->blk_format.cv, param);
+		ncx->blk_format.prevcomppad =
+                        (PAD*)ptr_table_fetch(PL_ptr_table,
+					   ncx->blk_format.prevcomppad);
+		ncx->blk_format.cv	= cv_dup_inc(ncx->blk_format.cv, param);
 		ncx->blk_format.gv	= gv_dup(ncx->blk_format.gv, param);
 		ncx->blk_format.dfoutgv	= gv_dup_inc(ncx->blk_format.dfoutgv,
 						     param);
 		break;
+	    case CXt_GIVEN:
+		ncx->blk_givwhen.defsv_save =
+                                sv_dup_inc(ncx->blk_givwhen.defsv_save, param);
+		break;
 	    case CXt_BLOCK:
 	    case CXt_NULL:
 	    case CXt_WHEN:
-	    case CXt_GIVEN:
 		break;
 	    }
 	}
@@ -14207,6 +14253,10 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	case SAVEt_STRLEN:			/* STRLEN/size_t ref */
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
+	    iv = POPIV(ss,ix);
+	    TOPIV(nss,ix) = iv;
+	    break;
+	case SAVEt_TMPSFLOOR:
 	    iv = POPIV(ss,ix);
 	    TOPIV(nss,ix) = iv;
 	    break;
@@ -16290,13 +16340,10 @@ Perl_report_uninit(pTHX_ const SV *uninit_sv)
 		sv_insert(varname, 0, 0, " ", 1);
 	}
     }
-    else if (PL_curstackinfo->si_type == PERLSI_SORT
-             &&  CxMULTICALL(&cxstack[cxstack_ix]))
-    {
+    else if (PL_curstackinfo->si_type == PERLSI_SORT && cxstack_ix == 0)
         /* we've reached the end of a sort block or sub,
          * and the uninit value is probably what that code returned */
         desc = "sort";
-    }
 
     /* PL_warn_uninit_sv is constant */
     GCC_DIAG_IGNORE(-Wformat-nonliteral);

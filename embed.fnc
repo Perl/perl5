@@ -247,7 +247,7 @@ s	|MAGIC*	|get_aux_mg	|NN AV *av
 pR	|OP*	|bind_match	|I32 type|NN OP *left|NN OP *right
 : Used in perly.y
 ApdR	|OP*	|block_end	|I32 floor|NULLOK OP* seq
-ApR	|I32	|block_gimme
+ApR	|U8	|block_gimme
 : Used in perly.y
 ApdR	|int	|block_start	|int full
 Aodp	|void	|blockhook_register |NN BHK *hk
@@ -272,7 +272,7 @@ p	|const COP*|closest_cop	|NN const COP *cop|NULLOK const OP *o \
 : Used in perly.y
 ApdR	|OP*	|op_convert_list	|I32 optype|I32 flags|NULLOK OP* o
 : Used in op.c and perl.c
-pM	|PERL_CONTEXT*	|create_eval_scope|U32 flags
+pM	|void	|create_eval_scope|NULLOK OP *retop|U32 flags
 Aprd	|void	|croak_sv	|NN SV *baseex
 : croak()'s first parm can be NULL.  Otherwise, mod_perl breaks.
 Afprd	|void	|croak		|NULLOK const char* pat|...
@@ -443,7 +443,7 @@ p	|void	|do_vecset	|NN SV* sv
 p	|void	|do_vop		|I32 optype|NN SV* sv|NN SV* left|NN SV* right
 : Used in perly.y
 p	|OP*	|dofile		|NN OP* term|I32 force_builtin
-ApR	|I32	|dowantarray
+ApR	|U8	|dowantarray
 Ap	|void	|dump_all
 p	|void	|dump_all_perl	|bool justperl
 Ap	|void	|dump_eval
@@ -794,7 +794,6 @@ Apdn	|OP*	|op_parent|NN OP *o
 #if defined(PERL_IN_OP_C)
 s	|OP*	|listkids	|NULLOK OP* o
 #endif
-: Used in S_doeval in pp_ctl.c
 p	|OP*	|list		|NULLOK OP* o
 Apd	|void	|load_module|U32 flags|NN SV* name|NULLOK SV* ver|...
 Ap	|void	|vload_module|U32 flags|NN SV* name|NULLOK SV* ver|NULLOK va_list* args
@@ -1305,6 +1304,7 @@ Ap	|void	|save_padsv_and_mortalize|PADOFFSET off
 Ap	|void	|save_sptr	|NN SV** sptr
 Xp	|void	|save_strlen	|NN STRLEN* ptr
 Ap	|SV*	|save_svref	|NN SV** sptr
+AMpo	|void	|savetmps
 Ap	|void	|save_pushptr	|NULLOK void *const ptr|const int type
 Ap	|void	|save_pushi32ptr|const I32 i|NULLOK void *const ptr|const int type
 : Used by SAVESWITCHSTACK() in pp.c
@@ -2062,20 +2062,18 @@ sR	|OP*	|dofindlabel	|NN OP *o|NN const char *label|STRLEN len \
 s	|MAGIC *|doparseform	|NN SV *sv
 snR	|bool	|num_overflow	|NV value|I32 fldsize|I32 frcsize
 sR	|I32	|dopoptoeval	|I32 startingblock
-sR	|I32	|dopoptogiven	|I32 startingblock
+sR	|I32	|dopoptogivenfor|I32 startingblock
 sR	|I32	|dopoptolabel	|NN const char *label|STRLEN len|U32 flags
 sR	|I32	|dopoptoloop	|I32 startingblock
 sR	|I32	|dopoptosub_at	|NN const PERL_CONTEXT* cxstk|I32 startingblock
 sR	|I32	|dopoptowhen	|I32 startingblock
 s	|void	|save_lines	|NULLOK AV *array|NN SV *sv
-s	|bool	|doeval		|int gimme \
+s	|bool	|doeval_compile	|U8 gimme \
 				|NULLOK CV* outside|U32 seq|NULLOK HV* hh
 sR	|PerlIO *|check_type_and_open|NN SV *name
 #ifndef PERL_DISABLE_PMC
 sR	|PerlIO *|doopen_pm	|NN SV *name
 #endif
-s	|SV **	|leave_common	|NN SV **newsp|NN SV **sp|NN SV **mark|I32 gimme \
-				      |U32 flags|bool lvalue
 iRn	|bool	|path_is_searchable|NN const char *name
 sR	|I32	|run_user_filter|int idx|NN SV *buf_sv|int maxlen
 sR	|PMOP*	|make_matcher	|NN REGEXP* re
@@ -2877,5 +2875,34 @@ Ei	|STRLEN	|sv_or_pv_pos_u2b|NN SV *sv|NN const char *pv|STRLEN pos \
 #endif
 
 EMpPX	|SV*	|_get_encoding
+Ap	|void	|clear_defarray	|NN AV* av|bool abandon
+
+ApM	|void	|leave_adjust_stacks|NN SV **from_sp|NN SV **to_sp \
+                |U8 gimme|int filter
+
+#ifndef PERL_NO_INLINE_FUNCTIONS
+AiM	|PERL_CONTEXT *	|cx_pushblock|U8 type|U8 gimme|NN SV** sp|I32 saveix
+AiM	|void	|cx_popblock|NN PERL_CONTEXT *cx
+AiM	|void	|cx_topblock|NN PERL_CONTEXT *cx
+AiM	|void	|cx_pushsub      |NN PERL_CONTEXT *cx|NN CV *cv \
+				 |NULLOK OP *retop|bool hasargs
+AiM	|void	|cx_popsub_common|NN PERL_CONTEXT *cx
+AiM	|void	|cx_popsub_args  |NN PERL_CONTEXT *cx
+AiM	|void	|cx_popsub       |NN PERL_CONTEXT *cx
+AiM	|void	|cx_pushformat   |NN PERL_CONTEXT *cx|NN CV *cv \
+				 |NULLOK OP *retop|NULLOK GV *gv
+AiM	|void	|cx_popformat    |NN PERL_CONTEXT *cx
+AiM	|void	|cx_pusheval     |NN PERL_CONTEXT *cx \
+				 |NULLOK OP *retop|NULLOK SV *namesv
+AiM	|void	|cx_popeval      |NN PERL_CONTEXT *cx
+AiM	|void	|cx_pushloop_plain|NN PERL_CONTEXT *cx
+AiM	|void	|cx_pushloop_for |NN PERL_CONTEXT *cx \
+				 |NN void *itervarp|NULLOK SV *itersave
+AiM	|void	|cx_poploop      |NN PERL_CONTEXT *cx
+AiM	|void	|cx_pushwhen     |NN PERL_CONTEXT *cx
+AiM	|void	|cx_popwhen      |NN PERL_CONTEXT *cx
+AiM	|void	|cx_pushgiven    |NN PERL_CONTEXT *cx|NULLOK SV *orig_defsv
+AiM	|void	|cx_popgiven     |NN PERL_CONTEXT *cx
+#endif
 
 : ex: set ts=8 sts=4 sw=4 noet:

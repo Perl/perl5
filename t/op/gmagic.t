@@ -181,6 +181,13 @@ ok($wgot == 0, 'a plain *foo causes no set-magic');
      'mortal magic var is explicitly returned to refgen';
   is tied $$x, undef,
      'mortal magic var is copied when explicitly returned';
+
+  $tied_to = tie $_{elem}, "Tie::Monitor";
+  $x = \do { 1; delete $_{elem} };
+  expected_tie_calls $tied_to, 1, 0,
+     'mortal magic var from do passed to refgen';
+  is tied $$x, undef,
+     'mortal magic var from do is copied';
 }
 
 done_testing();

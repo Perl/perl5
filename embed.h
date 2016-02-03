@@ -87,6 +87,7 @@
 #define ck_warner		Perl_ck_warner
 #define ck_warner_d		Perl_ck_warner_d
 #endif
+#define clear_defarray(a,b)	Perl_clear_defarray(aTHX_ a,b)
 #ifndef PERL_IMPLICIT_CONTEXT
 #define croak			Perl_croak
 #endif
@@ -299,6 +300,7 @@
 #define is_utf8_xidcont(a)	Perl_is_utf8_xidcont(aTHX_ a)
 #define is_utf8_xidfirst(a)	Perl_is_utf8_xidfirst(aTHX_ a)
 #define isinfnan		Perl_isinfnan
+#define leave_adjust_stacks(a,b,c,d)	Perl_leave_adjust_stacks(aTHX_ a,b,c,d)
 #define leave_scope(a)		Perl_leave_scope(aTHX_ a)
 #define lex_bufutf8()		Perl_lex_bufutf8(aTHX)
 #define lex_discard_to(a)	Perl_lex_discard_to(aTHX_ a)
@@ -776,6 +778,24 @@
 #define _is_utf8_char_slow	S__is_utf8_char_slow
 #define append_utf8_from_native_byte	S_append_utf8_from_native_byte
 #define av_top_index(a)		S_av_top_index(aTHX_ a)
+#define cx_popblock(a)		S_cx_popblock(aTHX_ a)
+#define cx_popeval(a)		S_cx_popeval(aTHX_ a)
+#define cx_popformat(a)		S_cx_popformat(aTHX_ a)
+#define cx_popgiven(a)		S_cx_popgiven(aTHX_ a)
+#define cx_poploop(a)		S_cx_poploop(aTHX_ a)
+#define cx_popsub(a)		S_cx_popsub(aTHX_ a)
+#define cx_popsub_args(a)	S_cx_popsub_args(aTHX_ a)
+#define cx_popsub_common(a)	S_cx_popsub_common(aTHX_ a)
+#define cx_popwhen(a)		S_cx_popwhen(aTHX_ a)
+#define cx_pushblock(a,b,c,d)	S_cx_pushblock(aTHX_ a,b,c,d)
+#define cx_pusheval(a,b,c)	S_cx_pusheval(aTHX_ a,b,c)
+#define cx_pushformat(a,b,c,d)	S_cx_pushformat(aTHX_ a,b,c,d)
+#define cx_pushgiven(a,b)	S_cx_pushgiven(aTHX_ a,b)
+#define cx_pushloop_for(a,b,c)	S_cx_pushloop_for(aTHX_ a,b,c)
+#define cx_pushloop_plain(a)	S_cx_pushloop_plain(aTHX_ a)
+#define cx_pushsub(a,b,c,d)	S_cx_pushsub(aTHX_ a,b,c,d)
+#define cx_pushwhen(a)		S_cx_pushwhen(aTHX_ a)
+#define cx_topblock(a)		S_cx_topblock(aTHX_ a)
 #define is_safe_syscall(a,b,c,d)	S_is_safe_syscall(aTHX_ a,b,c,d)
 #endif
 #if (!defined(HAS_MEMCPY) && !defined(HAS_BCOPY)) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY) && !defined(HAS_SAFE_BCOPY))
@@ -1158,7 +1178,7 @@
 #define closest_cop(a,b,c,d)	Perl_closest_cop(aTHX_ a,b,c,d)
 #define core_prototype(a,b,c,d)	Perl_core_prototype(aTHX_ a,b,c,d)
 #define coresub_op(a,b,c)	Perl_coresub_op(aTHX_ a,b,c)
-#define create_eval_scope(a)	Perl_create_eval_scope(aTHX_ a)
+#define create_eval_scope(a,b)	Perl_create_eval_scope(aTHX_ a,b)
 #define croak_no_mem		Perl_croak_no_mem
 #define croak_popstack		Perl_croak_popstack
 #define custom_op_get_field(a,b)	Perl_custom_op_get_field(aTHX_ a,b)
@@ -1620,16 +1640,15 @@
 #define destroy_matcher(a)	S_destroy_matcher(aTHX_ a)
 #define do_smartmatch(a,b,c)	S_do_smartmatch(aTHX_ a,b,c)
 #define docatch(a)		S_docatch(aTHX_ a)
-#define doeval(a,b,c,d)		S_doeval(aTHX_ a,b,c,d)
+#define doeval_compile(a,b,c,d)	S_doeval_compile(aTHX_ a,b,c,d)
 #define dofindlabel(a,b,c,d,e,f)	S_dofindlabel(aTHX_ a,b,c,d,e,f)
 #define doparseform(a)		S_doparseform(aTHX_ a)
 #define dopoptoeval(a)		S_dopoptoeval(aTHX_ a)
-#define dopoptogiven(a)		S_dopoptogiven(aTHX_ a)
+#define dopoptogivenfor(a)	S_dopoptogivenfor(aTHX_ a)
 #define dopoptolabel(a,b,c)	S_dopoptolabel(aTHX_ a,b,c)
 #define dopoptoloop(a)		S_dopoptoloop(aTHX_ a)
 #define dopoptosub_at(a,b)	S_dopoptosub_at(aTHX_ a,b)
 #define dopoptowhen(a)		S_dopoptowhen(aTHX_ a)
-#define leave_common(a,b,c,d,e,f)	S_leave_common(aTHX_ a,b,c,d,e,f)
 #define make_matcher(a)		S_make_matcher(aTHX_ a)
 #define matcher_matches_sv(a,b)	S_matcher_matches_sv(aTHX_ a,b)
 #define num_overflow		S_num_overflow

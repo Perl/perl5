@@ -1476,7 +1476,7 @@ PP(pp_sort)
     AV* av = NULL;
     GV *gv;
     CV *cv = NULL;
-    I32 gimme = GIMME_V;
+    U8 gimme = GIMME_V;
     OP* const nextop = PL_op->op_next;
     I32 overloading = 0;
     bool hasargs = FALSE;
@@ -1640,10 +1640,9 @@ PP(pp_sort)
 	SV **start;
 	if (PL_sortcop) {
 	    PERL_CONTEXT *cx;
-	    SV** newsp;
 	    const bool oldcatch = CATCH_GET;
+            I32 old_savestack_ix = PL_savestack_ix;
 
-	    SAVETMPS;
 	    SAVEOP();
 
 	    CATCH_SET(TRUE);
@@ -1669,23 +1668,15 @@ PP(pp_sort)
 	    }
 
             gimme = G_SCALAR;
-	    PUSHBLOCK(cx, CXt_NULL, PL_stack_base);
+	    cx = cx_pushblock(CXt_NULL, gimme, PL_stack_base, old_savestack_ix);
 	    if (!(flags & OPf_SPECIAL)) {
-		cx->cx_type = CXt_SUB;
-		/* If our comparison routine is already active (CvDEPTH is
-		 * is not 0),  then PUSHSUB does not increase the refcount,
-		 * so we have to do it ourselves, because the LEAVESUB fur-
-		 * ther down lowers it. */
-		if (CvDEPTH(cv)) SvREFCNT_inc_simple_void_NN(cv);
-		PUSHSUB(cx);
+		cx->cx_type = CXt_SUB|CXp_MULTICALL;
+		cx_pushsub(cx, cv, NULL, hasargs);
 		if (!is_xsub) {
 		    PADLIST * const padlist = CvPADLIST(cv);
 
-		    if (++CvDEPTH(cv) >= 2) {
-			PERL_STACK_OVERFLOW_CHECK();
+		    if (++CvDEPTH(cv) >= 2)
 			pad_push(padlist, CvDEPTH(cv));
-		    }
-		    SAVECOMPPAD();
 		    PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
 
 		    if (hasargs) {
@@ -1694,29 +1685,32 @@ PP(pp_sort)
 
 			cx->blk_sub.savearray = GvAV(PL_defgv);
 			GvAV(PL_defgv) = MUTABLE_AV(SvREFCNT_inc_simple(av));
-			CX_CURPAD_SAVE(cx->blk_sub);
-			cx->blk_sub.argarray = av;
 		    }
 
 		}
 	    }
-	    cx->cx_type |= CXp_MULTICALL;
-	    
+
 	    start = p1 - max;
 	    sortsvp(aTHX_ start, max,
 		    (is_xsub ? S_sortcv_xsub : hasargs ? S_sortcv_stacked : S_sortcv),
 		    sort_flags);
 
+            /* Reset cx, in case the context stack has been reallocated. */
+            cx = CX_CUR();
+
+	    PL_stack_sp = PL_stack_base + cx->blk_oldsp;
+
+            CX_LEAVE_SCOPE(cx);
 	    if (!(flags & OPf_SPECIAL)) {
-		SV *sv;
-		/* Reset cx, in case the context stack has been
-		   reallocated. */
-		cx = &cxstack[cxstack_ix];
-		POPSUB(cx, sv);
-		LEAVESUB(sv);
+                assert(CxTYPE(cx) == CXt_SUB);
+                cx_popsub(cx);
 	    }
-	    POPBLOCK(cx,PL_curpm);
-	    PL_stack_sp = newsp;
+            else
+                assert(CxTYPE(cx) == CXt_NULL);
+                /* there isn't a POPNULL ! */
+
+	    cx_popblock(cx);
+            CX_POP(cx);
 	    POPSTACK;
 	    CATCH_SET(oldcatch);
 	}
@@ -1776,7 +1770,6 @@ static I32
 S_sortcv(pTHX_ SV *const a, SV *const b)
 {
     const I32 oldsaveix = PL_savestack_ix;
-    const I32 oldscopeix = PL_scopestack_ix;
     I32 result;
     PMOP * const pm = PL_curpm;
     COP * const cop = PL_curcop;
@@ -1794,10 +1787,7 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
     assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
     result = SvIV(*PL_stack_sp);
 
-    while (PL_scopestack_ix > oldscopeix) {
-	LEAVE;
-    }
-    leave_scope(oldsaveix);
+    LEAVE_SCOPE(oldsaveix);
     PL_curpm = pm;
     return result;
 }
@@ -1806,7 +1796,6 @@ static I32
 S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
 {
     const I32 oldsaveix = PL_savestack_ix;
-    const I32 oldscopeix = PL_scopestack_ix;
     I32 result;
     AV * const av = GvAV(PL_defgv);
     PMOP * const pm = PL_curpm;
@@ -1845,10 +1834,7 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
     assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
     result = SvIV(*PL_stack_sp);
 
-    while (PL_scopestack_ix > oldscopeix) {
-	LEAVE;
-    }
-    leave_scope(oldsaveix);
+    LEAVE_SCOPE(oldsaveix);
     PL_curpm = pm;
     return result;
 }
@@ -1858,7 +1844,6 @@ S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
 {
     dSP;
     const I32 oldsaveix = PL_savestack_ix;
-    const I32 oldscopeix = PL_scopestack_ix;
     CV * const cv=MUTABLE_CV(PL_sortcop);
     I32 result;
     PMOP * const pm = PL_curpm;
@@ -1877,10 +1862,7 @@ S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
     assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
     result = SvIV(*PL_stack_sp);
 
-    while (PL_scopestack_ix > oldscopeix) {
-	LEAVE;
-    }
-    leave_scope(oldsaveix);
+    LEAVE_SCOPE(oldsaveix);
     PL_curpm = pm;
     return result;
 }

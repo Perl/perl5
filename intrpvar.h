@@ -51,7 +51,7 @@ PERLVAR(I, scopestack_max, I32)
 PERLVAR(I, tmps_stack,	SV **)		/* mortals we've made */
 PERLVARI(I, tmps_ix,	SSize_t,	-1)
 PERLVARI(I, tmps_floor,	SSize_t,	-1)
-PERLVAR(I, tmps_max,	SSize_t)
+PERLVAR(I, tmps_max,	SSize_t)        /* first unalloced slot in tmps stack */
 
 PERLVARI(I, sub_generation, U32, 1)	/* incr to invalidate method cache */
 

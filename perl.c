@@ -2711,7 +2711,6 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
     METHOP method_op;
     I32 oldmark;
     VOL I32 retval = 0;
-    I32 oldscope;
     bool oldcatch = CATCH_GET;
     int ret;
     OP* const oldop = PL_op;
@@ -2743,7 +2742,6 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 	PUTBACK;
     }
     oldmark = TOPMARK;
-    oldscope = PL_scopestack_ix;
 
     if (PERLDB_SUB && PL_curstash != PL_debstash
 	   /* Handle first BEGIN of -d. */
@@ -2777,9 +2775,11 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 	CATCH_SET(oldcatch);
     }
     else {
+        I32 old_cxix;
 	myop.op_other = (OP*)&myop;
 	(void)POPMARK;
-	create_eval_scope(flags|G_FAKINGEVAL);
+        old_cxix = cxstack_ix;
+	create_eval_scope(NULL, flags|G_FAKINGEVAL);
 	(void)INCMARK;
 
 	JMPENV_PUSH(ret);
@@ -2820,8 +2820,13 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 	    break;
 	}
 
-	if (PL_scopestack_ix > oldscope)
+        /* if we croaked, depending on how we croaked the eval scope
+         * may or may not have already been popped */
+	if (cxstack_ix > old_cxix) {
+            assert(cxstack_ix == old_cxix + 1);
+            assert(CxTYPE(CX_CUR()) == CXt_EVAL);
 	    delete_eval_scope();
+        }
 	JMPENV_POP;
     }
 
@@ -2888,7 +2893,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	myop.op_private = (OPpEVAL_COPHH | OPpEVAL_RE_REPARSING);
 
     /* fail now; otherwise we could fail after the JMPENV_PUSH but
-     * before a PUSHEVAL, which corrupts the stack after a croak */
+     * before a cx_pusheval(), which corrupts the stack after a croak */
     TAINT_PROPER("eval_sv()");
 
     JMPENV_PUSH(ret);
@@ -4073,6 +4078,8 @@ Perl_init_debugger(pTHX)
 void
 Perl_init_stacks(pTHX)
 {
+    SSize_t size;
+
     /* start with 128-item stack and 8K cxstack */
     PL_curstackinfo = new_stackinfo(REASONABLE(128),
 				 REASONABLE(8192/sizeof(PERL_CONTEXT) - 1));
@@ -4102,9 +4109,11 @@ Perl_init_stacks(pTHX)
     PL_scopestack_ix = 0;
     PL_scopestack_max = REASONABLE(32);
 
-    Newx(PL_savestack,REASONABLE_but_at_least(128,SS_MAXPUSH),ANY);
+    size = REASONABLE_but_at_least(128,SS_MAXPUSH);
+    Newx(PL_savestack, size, ANY);
     PL_savestack_ix = 0;
-    PL_savestack_max = REASONABLE_but_at_least(128,SS_MAXPUSH);
+    /*PL_savestack_max lies: it always has SS_MAXPUSH more than it claims */
+    PL_savestack_max = size - SS_MAXPUSH;
 }
 
 #undef REASONABLE
@@ -5075,7 +5084,10 @@ S_my_exit_jump(pTHX)
     }
 
     POPSTACK_TO(PL_mainstack);
-    dounwind(-1);
+    if (cxstack_ix >= 0) {
+        dounwind(-1);
+        cx_popblock(cxstack);
+    }
     LEAVE_SCOPE(0);
 
     JMPENV_JUMP(2);

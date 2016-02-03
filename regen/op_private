@@ -619,12 +619,13 @@ addbits('rv2gv',
 );
 
 
+# NB OPpITER_REVERSED must always be bit 1: see pp_iter()
 
 addbits('enteriter',
-                    2 => qw(OPpITER_REVERSED REVERSED),# for (reverse ...)
+                    1 => qw(OPpITER_REVERSED REVERSED),# for (reverse ...)
                     3 => qw(OPpITER_DEF      DEF),     # 'for $_'
 );
-addbits('iter',     2 => qw(OPpITER_REVERSED REVERSED));
+addbits('iter',     1 => qw(OPpITER_REVERSED REVERSED));
 
 
 
