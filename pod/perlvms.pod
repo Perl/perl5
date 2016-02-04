@@ -936,9 +936,11 @@ the CRTL C<environ> array.  This default order is reversed when the
 logical name F<GNV$UNIX_SHELL> is defined, such as when running under
 GNV bash.
 
-In all operations on %ENV, the key string is treated as if it 
-were entirely uppercase, regardless of the case actually 
-specified in the Perl expression.
+For operations on %ENV entries based on logical names or DCL symbols, the
+key string is treated as if it were entirely uppercase, regardless of the
+case actually specified in the Perl expression. Entries in %ENV based on the
+CRTL's environ array preserve the case of the key string when stored, and
+lookups are case sensitive.
 
 When an element of C<%ENV> is read, the locations to which
 F<PERL_ENV_TABLES> points are checked in order, and the value

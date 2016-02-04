@@ -920,7 +920,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
           for (i = 0; environ[i]; i++) { 
             if ((eq = strchr(environ[i],'=')) && 
                 lnmdsc.dsc$w_length == (eq - environ[i]) &&
-                !strncmp(environ[i],uplnm,eq - environ[i])) {
+                !strncmp(environ[i],lnm,eq - environ[i])) {
               eq++;
               for (eqvlen = 0; eq[eqvlen]; eqvlen++) eqv[eqvlen] = eq[eqvlen];
               if (!eqvlen) continue;
