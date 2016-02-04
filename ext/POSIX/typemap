@@ -14,6 +14,7 @@ cc_t			T_IV
 POSIX::SigSet		T_OPAQUEPTROBJ
 POSIX::Termios		T_OPAQUEPTROBJ
 POSIX::SigAction	T_HVREF
+POSIX::SigNo		T_SIGNO
 
 INPUT
 T_OPAQUEPTROBJ
@@ -25,6 +26,13 @@ T_OPAQUEPTROBJ
 		croak(\"%s: %s is not of type %s\",
 			    ${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
 			\"$var\", \"$ntype\");
+	}
+
+T_SIGNO
+	if ((sig = SvIV($arg)) < 0) {
+	   croak(\"%s: Negative signals are not allowed %d\",
+		${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
+                                   sig);
 	}
 
 OUTPUT

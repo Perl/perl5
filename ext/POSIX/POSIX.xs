@@ -1395,6 +1395,7 @@ typedef int SysRet;
 typedef long SysRetLong;
 typedef sigset_t* POSIX__SigSet;
 typedef HV* POSIX__SigAction;
+typedef int POSIX__SigNo;
 #ifdef I_TERMIOS
 typedef struct termios* POSIX__Termios;
 #else /* Define termios types to int, and call not_here for the functions.*/
@@ -1893,7 +1894,7 @@ new(packname = "POSIX::SigSet", ...)
 SysRet
 addset(sigset, sig)
 	POSIX::SigSet	sigset
-	int		sig
+	POSIX::SigNo	sig
    ALIAS:
 	delset = 1
    CODE:
@@ -1914,7 +1915,7 @@ emptyset(sigset)
 int
 sigismember(sigset, sig)
 	POSIX::SigSet	sigset
-	int		sig
+	POSIX::SigNo	sig
 
 MODULE = Termios	PACKAGE = POSIX::Termios	PREFIX = cf
 
