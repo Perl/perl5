@@ -2925,10 +2925,12 @@ fma(x,y,z)
 	NV		z
     CODE:
 #ifdef c99_fma
+	RETVAL = c99_fma(x, y, z);
+#else
 	PERL_UNUSED_VAR(x);
 	PERL_UNUSED_VAR(y);
 	PERL_UNUSED_VAR(z);
-	RETVAL = c99_fma(x, y, z);
+	not_here("fma");
 #endif
     OUTPUT:
 	RETVAL
@@ -2968,14 +2970,14 @@ jn(x,y)
     ALIAS:
 	yn = 1
     CODE:
-	PERL_UNUSED_VAR(x);
-	PERL_UNUSED_VAR(y);
 	RETVAL = NV_NAN;
         switch (ix) {
 	case 0:
 #ifdef bessel_jn
           RETVAL = bessel_jn(x, y);
 #else
+	  PERL_UNUSED_VAR(x);
+	  PERL_UNUSED_VAR(y);
           not_here("jn");
 #endif
             break;
@@ -2984,6 +2986,8 @@ jn(x,y)
 #ifdef bessel_yn
           RETVAL = bessel_yn(x, y);
 #else
+	  PERL_UNUSED_VAR(x);
+	  PERL_UNUSED_VAR(y);
           not_here("yn");
 #endif
             break;
