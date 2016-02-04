@@ -488,6 +488,12 @@ already read end of file, and the here-doc was not terminated, perl
 could produce an assertion or a segmentation fault.  This now reliably
 complains about the unterminated here-doc.  [perl #125540]
 
+=item *
+
+untie() would sometimes return the last value returned by the UNTIE()
+handler as well as it's normal value, messing up the stack.  [perl
+#126621]
+
 =back
 
 =head1 Known Problems
