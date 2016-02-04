@@ -3004,7 +3004,7 @@ sigaction(sig, optaction, oldaction = 0)
 #if defined(WIN32) || defined(NETWARE) || (defined(__amigaos4__) && defined(__NEWLIB__))
 	RETVAL = not_here("sigaction");
 #else
-# This code is really grody because we're trying to make the signal
+# This code is really grody because we are trying to make the signal
 # interface look beautiful, which is hard.
 
 	{
