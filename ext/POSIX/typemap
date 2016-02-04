@@ -15,6 +15,7 @@ POSIX::SigSet		T_OPAQUEPTROBJ
 POSIX::Termios		T_OPAQUEPTROBJ
 POSIX::SigAction	T_HVREF
 POSIX::SigNo		T_SIGNO
+POSIX::Fd		T_FD
 
 INPUT
 T_OPAQUEPTROBJ
@@ -33,6 +34,12 @@ T_SIGNO
 	   croak(\"%s: Negative signals are not allowed %d\",
 		${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
                                    sig);
+	}
+
+T_FD
+	if ((fd = (int)SvIV($arg)) < 0) {
+	     SETERRNO(EBADF, RMS_IFI);
+	     XSRETURN_IV(-1);
 	}
 
 OUTPUT

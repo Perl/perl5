@@ -1396,6 +1396,7 @@ typedef long SysRetLong;
 typedef sigset_t* POSIX__SigSet;
 typedef HV* POSIX__SigAction;
 typedef int POSIX__SigNo;
+typedef int POSIX__Fd;
 #ifdef I_TERMIOS
 typedef struct termios* POSIX__Termios;
 #else /* Define termios types to int, and call not_here for the functions.*/
@@ -1941,7 +1942,7 @@ new(packname = "POSIX::Termios", ...)
 SysRet
 getattr(termios_ref, fd = 0)
 	POSIX::Termios	termios_ref
-	int		fd
+	POSIX::Fd		fd
     CODE:
 	RETVAL = tcgetattr(fd, termios_ref);
     OUTPUT:
@@ -1957,23 +1958,18 @@ getattr(termios_ref, fd = 0)
 SysRet
 setattr(termios_ref, fd = 0, optional_actions = DEF_SETATTR_ACTION)
 	POSIX::Termios	termios_ref
-	int		fd
+	POSIX::Fd	fd
 	int		optional_actions
     CODE:
-	if (fd >= 0) {
-            /* The second argument to the call is mandatory, but we'd like to give
-               it a useful default. 0 isn't valid on all operating systems - on
-               Solaris (at least) TCSANOW, TCSADRAIN and TCSAFLUSH have the same
-               values as the equivalent ioctls, TCSETS, TCSETSW and TCSETSF.  */
-            if (optional_actions < 0) {
-               SETERRNO(EINVAL, LIB_INVARG);
-               RETVAL = -1;
-            } else {
-                RETVAL = tcsetattr(fd, optional_actions, termios_ref);
-            }
-        } else {
-            SETERRNO(EBADF,RMS_IFI);
+	/* The second argument to the call is mandatory, but we'd like to give
+	   it a useful default. 0 isn't valid on all operating systems - on
+           Solaris (at least) TCSANOW, TCSADRAIN and TCSAFLUSH have the same
+           values as the equivalent ioctls, TCSETS, TCSETSW and TCSETSF.  */
+	if (optional_actions < 0) {
+            SETERRNO(EINVAL, LIB_INVARG);
             RETVAL = -1;
+        } else {
+            RETVAL = tcsetattr(fd, optional_actions, termios_ref);
         }
     OUTPUT:
 	RETVAL
@@ -3252,17 +3248,14 @@ dup2(fd1, fd2)
 
 SV *
 lseek(fd, offset, whence)
-	int		fd
+	POSIX::Fd	fd
 	Off_t		offset
 	int		whence
     CODE:
-	if (fd >= 0) {
-            Off_t pos = PerlLIO_lseek(fd, offset, whence);
-            RETVAL = sizeof(Off_t) > sizeof(IV)
-              ? newSVnv((NV)pos) : newSViv((IV)pos);
-        } else {
-            SETERRNO(EBADF,RMS_IFI);
-            RETVAL = newSViv(-1);
+	{
+              Off_t pos = PerlLIO_lseek(fd, offset, whence);
+              RETVAL = sizeof(Off_t) > sizeof(IV)
+                ? newSVnv((NV)pos) : newSViv((IV)pos);
         }
     OUTPUT:
 	RETVAL
@@ -3294,7 +3287,7 @@ read(fd, buffer, nbytes)
     PREINIT:
         SV *sv_buffer = SvROK(ST(1)) ? SvRV(ST(1)) : ST(1);
     INPUT:
-        int             fd
+	POSIX::Fd	fd
         size_t          nbytes
         char *          buffer = sv_grow( sv_buffer, nbytes+1 );
     CLEANUP:
@@ -3315,11 +3308,11 @@ setsid()
 
 pid_t
 tcgetpgrp(fd)
-	int		fd
+	POSIX::Fd	fd
 
 SysRet
 tcsetpgrp(fd, pgrp_id)
-	int		fd
+	POSIX::Fd	fd
 	pid_t		pgrp_id
 
 void
@@ -3341,7 +3334,7 @@ uname()
 
 SysRet
 write(fd, buffer, nbytes)
-	int		fd
+	POSIX::Fd	fd
 	char *		buffer
 	size_t		nbytes
 
@@ -3558,7 +3551,7 @@ mkfifo(filename, mode)
 
 SysRet
 tcdrain(fd)
-	int		fd
+	POSIX::Fd	fd
     ALIAS:
 	close = 1
 	dup = 2
@@ -3576,17 +3569,17 @@ tcdrain(fd)
 
 SysRet
 tcflow(fd, action)
-	int		fd
+	POSIX::Fd	fd
 	int		action
     ALIAS:
 	tcflush = 1
 	tcsendbreak = 2
     CODE:
-        if (fd >= 0 && action >= 0) {
+        if (action >= 0) {
             RETVAL = ix == 1 ? tcflush(fd, action)
               : (ix < 1 ? tcflow(fd, action) : tcsendbreak(fd, action));
         } else {
-            SETERRNO(EBADF,RMS_IFI);
+            SETERRNO(EINVAL,LIB_INVARG);
             RETVAL = -1;
         }
     OUTPUT:
@@ -3754,7 +3747,7 @@ cuserid(s = 0)
 
 SysRetLong
 fpathconf(fd, name)
-	int		fd
+	POSIX::Fd	fd
 	int		name
 
 SysRetLong
@@ -3789,7 +3782,7 @@ sysconf(name)
 
 char *
 ttyname(fd)
-	int		fd
+	POSIX::Fd	fd
 
 void
 getcwd()
