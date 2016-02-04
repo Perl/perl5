@@ -1667,6 +1667,7 @@ static void free_context(pTHX_ stcxt_t *cxt)
 
 	ASSERT(!cxt->s_dirty, ("clean context"));
 	ASSERT(prev, ("not freeing root context"));
+	assert(prev);
 
 	SvREFCNT_dec(cxt->my_sv);
 	SET_STCXT(prev);
