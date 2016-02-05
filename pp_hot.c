@@ -2630,6 +2630,11 @@ PP(pp_iter)
     SV **itersvp;
     SV *retsv;
 
+    SV *sv;
+    AV *av;
+    IV ix;
+    IV inc;
+
     cx = CX_CUR();
     itersvp = CxITERVAR(cx);
     assert(itersvp);
@@ -2715,12 +2720,6 @@ PP(pp_iter)
         break;
     }
 
-    {
-        SV *sv;
-        AV *av;
-        IV ix;
-        IV inc;
-
     case CXt_LOOP_LIST: /* for (1,2,3) */
 
         assert(OPpITER_REVERSED == 2); /* so inc becomes -1 or 1 */
@@ -2785,7 +2784,6 @@ PP(pp_iter)
         *itersvp = sv;
         SvREFCNT_dec(oldsv);
         break;
-    }
 
     default:
 	DIE(aTHX_ "panic: pp_iter, type=%u", CxTYPE(cx));
