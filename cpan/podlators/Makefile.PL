@@ -18,7 +18,9 @@ use Config;
 use ExtUtils::MakeMaker;
 use File::Spec;
 
-# Generate full paths for scripts distributed in the bin directory.
+# Generate full paths for scripts distributed in the bin directory.  Appends
+# the .com extension to scripts on VMS, unless they already have the .PL
+# extension.
 #
 # @scripts - List of script names
 #
@@ -26,9 +28,10 @@ use File::Spec;
 #          (Scalar) Space-separated relative paths from top of distribution
 sub scripts {
     my (@scripts) = @_;
-    my $script_ext = $^O eq 'VMS' ? '.com' : '';
-    my @paths = map { $_ .= $script_ext unless $_ =~ m/\.PL$/i;
-                      File::Spec->catfile('scripts', $_) } @scripts;
+    my @paths = map { File::Spec->catfile('scripts', $_) } @scripts;
+    if ($^O eq 'VMS') {
+        @paths = map { m{ [.] PL \z }xms ? $_ : $_ . '.com' } @paths;
+    }
     return wantarray ? @paths : join(q{ }, @paths);
 }
 
@@ -44,9 +47,9 @@ sub scripts {
 sub man1pod {
     my ($directory, $file) = @_;
 
-    # Determine the base name of the file by stripping any *.pod suffix.
+    # Build the base name of the file by stripping any *.pod or *.PL suffix.
     my $basename = $file;
-    $basename =~ s{ [.]pod }{}xms;
+    $basename =~ s{ [.] (?: pod | PL ) \z }{}xms;
 
     # Determine the output file name for the generated man page.
     my $outname = $basename . q{.} . $Config{man1ext};
@@ -74,10 +77,11 @@ my %metadata = (
 
     # Override the files that generate section 1 man pages.
     MAN1PODS => {
-        man1pod('scripts', 'pod2man'),
-        man1pod('scripts', 'pod2text'),
-        # This one lives in the top-level pod/ directory in core
-        ($ENV{PERL_CORE} ? () : man1pod('pod',     'perlpodstyle')),
+        man1pod('scripts', 'pod2man.PL'),
+        man1pod('scripts', 'pod2text.PL'),
+
+        # Perl core uses a separate copy in the top-level pod directory.
+        ($ENV{PERL_CORE} ? () : man1pod('pod', 'perlpodstyle.pod')),
     },
 
     # Clean some additional files.

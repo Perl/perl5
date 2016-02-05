@@ -968,7 +968,7 @@ use File::Glob qw(:case);
     },
 
     'podlators' => {
-        'DISTRIBUTION' => 'RRA/podlators-4.05.tar.gz',
+        'DISTRIBUTION' => 'RRA/podlators-4.06.tar.gz',
         'FILES'        => q[cpan/podlators pod/perlpodstyle.pod],
 
         'MAP' => {
@@ -976,9 +976,6 @@ use File::Glob qw(:case);
             # this file lives outside the cpan/ directory
             'pod/perlpodstyle' => 'pod/perlpodstyle.pod',
         },
-        'CUSTOMIZED'   => [
-            qw( Makefile.PL )
-        ],
     },
 
     'Safe' => {

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
 # Tests for backward compatibility with Pod::Parser.
 #

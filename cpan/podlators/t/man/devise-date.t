@@ -4,6 +4,11 @@
 # includes POSIX.  devise_date()'s use of strftime() was replaced.  This tests
 # that it's identical.  It also tests special handling of the POD_MAN_DATE
 # environment variable.
+#
+# Copyright 2009, 2014, 2015 Russ Allbery <rra@cpan.org>
+#
+# This program is free software; you may redistribute it and/or modify it
+# under the same terms as Perl itself.
 
 use 5.006;
 use strict;

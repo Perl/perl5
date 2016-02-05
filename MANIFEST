@@ -1891,6 +1891,7 @@ cpan/podlators/t/general/filehandle.t			podlators test
 cpan/podlators/t/general/pod-parser.t			podlators test
 cpan/podlators/t/lib/Test/Podlators.pm			podlators test
 cpan/podlators/t/lib/Test/RRA/Config.pm			podlators test
+cpan/podlators/t/lib/Test/RRA/ModuleVersion.pm		podlators test
 cpan/podlators/t/lib/Test/RRA.pm			podlators test
 cpan/podlators/t/man/basic.t			podlators test
 cpan/podlators/t/man/devise-date.t			podlators test

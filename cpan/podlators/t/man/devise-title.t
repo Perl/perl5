@@ -2,6 +2,11 @@
 #
 # Tests for the automatic determination of the manual page title if not
 # specified via options to pod2man or the Pod::Man constructor.
+#
+# Copyright 2015 Russ Allbery <rra@cpan.org>
+#
+# This program is free software; you may redistribute it and/or modify it
+# under the same terms as Perl itself.
 
 use 5.006;
 use strict;
