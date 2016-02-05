@@ -183,7 +183,9 @@ foreach my $pm_file (sort keys %module_diffs) {
         print "ok $count - SKIP Can't parse \$VERSION in $pm_file\n"
           if $tap;
     } elsif (!defined $pm_version || $pm_version eq 'undef') {
-        print "not ok $count - in $pm_file version was $orig_pm_version, now unparsable\n" if $tap;
+        my $nok = "not ok $count - in $pm_file version was $orig_pm_version, now unparsable\n";
+        print $nok if $tap;
+        print STDERR "# $nok\n";
     } elsif ($pm_version ne $orig_pm_version) { # good
         print "ok $count - $pm_file\n" if $tap;
     } else {
@@ -195,7 +197,9 @@ foreach my $pm_file (sort keys %module_diffs) {
 		and grep $pm_version eq $_, @{$skip_versions{$pm_file}}) {
 		print "ok $count - SKIP $pm_file version $pm_version\n";
 	    } else {
-		print "not ok $count - $pm_file version $pm_version\n";
+		my $nok = "not ok $count - $pm_file version $pm_version\n";
+		print $nok;
+		print STDERR "# $nok";
 	    }
 	} else {
 	    push @diff, @{$module_diffs{$pm_file}};
