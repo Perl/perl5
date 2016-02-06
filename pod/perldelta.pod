@@ -130,7 +130,7 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+F<cpan/podlators/> has been upgraded from version 4.04 to 4.06.
 
 =item *
 
