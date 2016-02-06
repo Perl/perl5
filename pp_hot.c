@@ -3780,6 +3780,7 @@ PP(pp_entersub)
 
     /* these two fields are in a union. If they ever become separate,
      * we have to test for both of them being null below */
+    assert(cv);
     assert((void*)&CvROOT(cv) == (void*)&CvXSUB(cv));
     while (UNLIKELY(!CvROOT(cv))) {
 	GV* autogv;
