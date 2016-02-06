@@ -291,10 +291,31 @@ You can now build perl with MSVC++ on Win32 using GNU Make.  [perl #126632]
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
+=head2 Platform-Specific Notes
 
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
+=over 4
+
+=item VMS
+
+=over
+
+=item *
+
+For those C<%ENV> elements based on the CRTL environ array, we've always
+preserved case when setting them but did look-ups only after upcasing the
+key first, which made lower- or mixed-case entries go missing. This problem
+has been corrected by making C<%ENV> elements derived from the environ array
+case-sensitive on look-up as well as case-preserving on store.
+
+=item *
+
+Environment look-ups for C<PERL5LIB> and C<PERLLIB> previously only
+considered logical names, but now consider all sources of C<%ENV> as
+determined by C<PERL_ENV_TABLES> and as documented in L<perlvms/%ENV>.
+
+=back
+
+=back
 
 =head2 New Platforms
 
