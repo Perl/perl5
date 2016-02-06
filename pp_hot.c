@@ -3913,6 +3913,7 @@ PP(pp_entersub)
     }
     else {
 	SSize_t markix = TOPMARK;
+        bool is_scalar;
 
         ENTER;
         /* pretend we did the ENTER earlier */
@@ -3975,12 +3976,16 @@ PP(pp_entersub)
 	}
 	/* Do we need to open block here? XXXX */
 
+        /* calculate gimme here as PL_op might get changed and then not
+         * restored until the LEAVE further down */
+        is_scalar = (GIMME_V == G_SCALAR);
+
 	/* CvXSUB(cv) must not be NULL because newXS() refuses NULL xsub address */
 	assert(CvXSUB(cv));
 	CvXSUB(cv)(aTHX_ cv);
 
 	/* Enforce some sanity in scalar context. */
-	if (GIMME_V == G_SCALAR) {
+	if (is_scalar) {
             SV **svp = PL_stack_base + markix + 1;
             if (svp != PL_stack_sp) {
                 *svp = svp > PL_stack_sp ? &PL_sv_undef : *PL_stack_sp;
