@@ -39,7 +39,7 @@ Perl_cast_ulong(NV f)
     if (f < U32_MAX_P1_HALF)
       return (U32) f;
     f -= U32_MAX_P1_HALF;
-    return ((U32) f) | (1 + U32_MAX >> 1);
+    return ((U32) f) | (1 + (U32_MAX >> 1));
 #else
     return (U32) f;
 #endif
@@ -57,7 +57,7 @@ Perl_cast_i32(NV f)
     if (f < U32_MAX_P1_HALF)
       return (I32)(U32) f;
     f -= U32_MAX_P1_HALF;
-    return (I32)(((U32) f) | (1 + U32_MAX >> 1));
+    return (I32)(((U32) f) | (1 + (U32_MAX >> 1)));
 #else
     return (I32)(U32) f;
 #endif
@@ -76,7 +76,7 @@ Perl_cast_iv(NV f)
     if (f < UV_MAX_P1_HALF)
       return (IV)(UV) f;
     f -= UV_MAX_P1_HALF;
-    return (IV)(((UV) f) | (1 + UV_MAX >> 1));
+    return (IV)(((UV) f) | (1 + (UV_MAX >> 1)));
 #else
     return (IV)(UV) f;
 #endif
@@ -94,7 +94,7 @@ Perl_cast_uv(NV f)
     if (f < UV_MAX_P1_HALF)
       return (UV) f;
     f -= UV_MAX_P1_HALF;
-    return ((UV) f) | (1 + UV_MAX >> 1);
+    return ((UV) f) | (1 + (UV_MAX >> 1));
 #else
     return (UV) f;
 #endif
