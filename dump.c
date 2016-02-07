@@ -968,6 +968,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
         for (i=0; i < count;  i++)
             Perl_dump_indent(aTHX_ level+1, file, "%"UVuf" => 0x%"UVxf"\n",
                                     i, items[i].uv);
+	break;
     }
 
     case OP_CONST:
