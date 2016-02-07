@@ -17659,6 +17659,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             "{sb}",
             "{wb}"
         };
+        assert(FLAGS(o) < C_ARRAY_LENGTH(bounds));
         sv_catpv(sv, bounds[FLAGS(o)]);
     }
     else if (k == BRANCHJ && (OP(o) == UNLESSM || OP(o) == IFMATCH))
