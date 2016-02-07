@@ -8393,6 +8393,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		: NULL;
 
     if (block) {
+	assert(PL_parser);
 	/* This makes sub {}; work as expected.  */
 	if (block->op_type == OP_STUB) {
 	    const line_t l = PL_parser->copline;
