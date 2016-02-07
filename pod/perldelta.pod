@@ -515,6 +515,11 @@ untie() would sometimes return the last value returned by the UNTIE()
 handler as well as it's normal value, messing up the stack.  [perl
 #126621]
 
+=item *
+
+Fixed an operator precedence problem when C< castflags & 2> is true.
+[perl #127474]
+
 =back
 
 =head1 Known Problems
