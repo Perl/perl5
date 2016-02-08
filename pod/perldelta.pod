@@ -520,6 +520,18 @@ handler as well as it's normal value, messing up the stack.  [perl
 Fixed an operator precedence problem when C< castflags & 2> is true.
 [perl #127474]
 
+=item *
+
+Caching of DESTROY methods could result in a non-pointer or a
+non-STASH stored in the SvSTASH() slot of a stash, breaking the B
+STASH() method.  The DESTROY method is now cached in the MRO metadata
+for the stash.  [perl #126410]
+
+=item *
+
+The AUTOLOAD method is now called when searching for a DESTROY method.
+[perl #124387]
+
 =back
 
 =head1 Known Problems
