@@ -1209,7 +1209,7 @@ use File::Glob qw(:case);
 
     'Time::HiRes' => {
         'DISTRIBUTION' => 'RJBS/Time-HiRes-1.9728.tar.gz',
-        'FILES'        => q[cpan/Time-HiRes],
+        'FILES'        => q[dist/Time-HiRes],
     },
 
     'Time::Local' => {
