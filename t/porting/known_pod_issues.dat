@@ -252,6 +252,8 @@ dist/storable/storable.pm	Verbatim line length including indents exceeds 79 by	4
 dist/thread-queue/lib/thread/queue.pm	Verbatim line length including indents exceeds 79 by	6
 dist/threads/lib/threads.pm	Verbatim line length including indents exceeds 79 by	3
 dist/tie-file/lib/tie/file.pm	Verbatim line length including indents exceeds 79 by	3
+dist/time-hires/hires.pm	Apparent broken link	2
+dist/time-hires/hires.pm	Verbatim line length including indents exceeds 79 by	1
 ext/amiga-arexx/arexx.pm	Verbatim line length including indents exceeds 79 by	2
 ext/amiga-exec/exec.pm	Verbatim line length including indents exceeds 79 by	2
 ext/devel-peek/peek.pm	? Should you be using L<...> instead of	2

@@ -50,6 +50,7 @@
          "dist/threads",
          "dist/threads-shared",
          "dist/Tie-File",
+         "dist/Time-HiRes",
          "dist/XSLoader",
          "lib/perl5db",
          "win32"
