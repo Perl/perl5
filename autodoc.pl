@@ -263,7 +263,7 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
 sub sort_helper {
     # Do a case-insensitive dictionary sort, with only alphabetics
     # significant, falling back to using everything for determinancy
-    return (uc($a =~ s/[[^:alpha]]//r) cmp uc($b =~ s/[[^:alpha]]//r))
+    return (uc($a =~ s/[[:^alpha:]]//r) cmp uc($b =~ s/[[:^alpha:]]//r))
            || uc($a) cmp uc($b)
            || $a cmp $b;
 }
