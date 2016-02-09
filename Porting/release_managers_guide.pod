@@ -141,12 +141,6 @@ Andreas' email address at:
 
     https://pause.perl.org/pause/query?ACTION=pause_04imprint
 
-=head3 search.cpan.org pumpkin status
-
-Make sure that search.cpan.org knows that you're allowed to upload
-perl distros. Contact Graham Barr to make sure that you're on the right
-list.
-
 =head3 rt.perl.org update access
 
 Make sure you have permission to close tickets on L<http://rt.perl.org/>
