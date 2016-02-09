@@ -12025,6 +12025,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                        FALSE, /* don't silence non-portable warnings. */
                        (bool) RExC_strict,
                        TRUE, /* Allow an optimized regnode result */
+                       NULL,
                        NULL);
         if (ret == NULL) {
             if (*flagp & (RESTART_PASS1|NEED_UTF8))
@@ -12329,6 +12330,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                      non-portables */
                            (bool) RExC_strict,
                            TRUE, /* Allow an optimized regnode result */
+                           NULL,
                            NULL);
             if (*flagp & RESTART_PASS1)
                 return NULL;
@@ -13398,56 +13400,615 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
 #define POSIXCC_DONE(c)   ((c) == ':')
 #define POSIXCC_NOTYET(c) ((c) == '=' || (c) == '.')
 #define POSIXCC(c) (POSIXCC_DONE(c) || POSIXCC_NOTYET(c))
+#define MAYBE_POSIXCC(c) (POSIXCC(c) || (c) == '^' || (c) == ';')
 
-PERL_STATIC_INLINE I32
-S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, const bool strict)
+#define WARNING_PREFIX              "Assuming NOT a POSIX class since "
+#define NO_BLANKS_POSIX_WARNING     "no blanks are allowed in one"
+#define SEMI_COLON_POSIX_WARNING    "a semi-colon was found instead of a colon"
+
+#define NOT_MEANT_TO_BE_A_POSIX_CLASS (OOB_NAMEDCLASS - 1)
+
+/* 'posix_warnings' and 'warn_text' are names of variables in the following
+ * routine. q.v. */
+#define ADD_POSIX_WARNING(p, text)  STMT_START {                            \
+        if (posix_warnings && (   posix_warnings != (AV **) -1              \
+                               || (PASS2 && ckWARN(WARN_REGEXP))))          \
+        {                                                                   \
+            if (! warn_text) warn_text = newAV();                           \
+            av_push(warn_text, Perl_newSVpvf(aTHX_                          \
+                                             WARNING_PREFIX                 \
+                                             text                           \
+                                             REPORT_LOCATION,               \
+                                             REPORT_LOCATION_ARGS(p)));     \
+        }                                                                   \
+    } STMT_END
+
+STATIC int
+S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
+
+    const char * const s,      /* Where the putative posix class begins.
+                                  Normally, this is one past the '['.  This
+                                  parameter exists so it can be somewhere
+                                  besides RExC_parse. */
+    char ** updated_parse_ptr, /* Where to set the updated parse pointer, or
+                                  NULL */
+    AV ** posix_warnings       /* Where to place any generated warnings, or -1
+                                  if to output them, or NULL */
+)
 {
-    I32 class_number = OOB_NAMEDCLASS;
+    /* This parses what the caller thinks may be one of the three POSIX
+     * constructs:
+     *  1) a character class, like [:blank:]
+     *  2) a collating symbol, like [. .]
+     *  3) an equivalence class, like [= =]
+     * In the latter two cases, it croaks if it finds a syntactically legal
+     * one, as these are not handled by Perl.
+     *
+     * The main purpose is to look for a POSIX character class.  It returns:
+     *  a) the class number
+     *      if it is a completely syntactically and semantically legal class.
+     *      'updated_parse_ptr', if not NULL, is set to point to just after the
+     *      closing ']' of the class
+     *  b) OOB_NAMEDCLASS
+     *      if it appears that one of the three POSIX constructs was meant, but
+     *      its specification was somehow defective.  'updated_parse_ptr', if
+     *      not NULL, is set to point to the character just after the end
+     *      character of the class.  See below for handling of warnings.
+     *  c) NOT_MEANT_TO_BE_A_POSIX_CLASS
+     *      if it  doesn't appear that a POSIX construct was intended.
+     *      'updated_parse_ptr' is not changed.  No warnings nor errors are
+     *      raised.
+     *
+     * In b) there may be warnings and even errors generated.  What to do about
+     * these is determined by the 'posix_warnings' parameter.  If it is NULL,
+     * this call is treated as a check-only, scouting-out-the-territory call,
+     * and no warnings nor errors are generated at all.  Otherwise, any errors
+     * are raised if found.  If 'posix_warnings' is -1 (appropriately cast),
+     * warnings are generated and displayed (in pass 2), just as they would be
+     * for any other message of the same type from this file.  If it isn't NULL
+     * and not -1, warnings aren't displayed, but instead an AV is generated
+     * with all the warning messages (that aren't to be ignored) stored into
+     * it, so that the caller can output them if it wants.  This is done in all
+     * passes.  The reason for this is that the rest of the parsing is heavily
+     * dependent on whether this routine found a valid posix class or not.  If
+     * it did, the closing ']' is absorbed as part of the class.  If no class
+     * or an invalid one is found, any ']' will be considered the terminator of
+     * the outer bracketed character class, leading to very different results.
+     * In particular, a '(?[ ])' construct will likely have a syntax error if
+     * the class is parsed other than intended, and this will happen in pass1,
+     * before the warnings would normally be output.  This mechanism allows the
+     * caller to output those warnings in pass1 just before dieing, giving a
+     * much better clue as to what is wrong.
+     *
+     * The reason for this function, and its complexity is that a bracketed
+     * character class can contain just about anything.  But it's easy to
+     * mistype the very specific posix class syntax but yielding a valid
+     * regular bracketed class, so it silently gets compiled into something
+     * quite unintended.
+     *
+     * The solution adopted here maintains backward compatibility except that
+     * it adds a warning if it looks like a posix class was intended but
+     * improperly specified.  The warning is not raised unless what is input
+     * very closely resembles one of the 14 legal posix classes.  To do this,
+     * it uses fuzzy parsing.  It calculates how many single-character edits it
+     * would take to transform what was input into a legal posix class.  Only
+     * if that number is quite small does it think that the intention was a
+     * posix class.  Obviously these are heuristics, and there will be cases
+     * where it errs on one side or another, and they can be tweaked as
+     * experience informs.
+     *
+     * The syntax for a legal posix class is:
+     *
+     * qr/(?xa: \[ : \^? [:lower:]{4,6} : \] )/
+     *
+     * What this routine considers syntactically to be an intended posix class
+     * is this (the comments indicate some restrictions that the pattern
+     * doesn't show):
+     *
+     *  qr/(?x: \[?                         # The left bracket, possibly
+     *                                      # omitted
+     *          \h*                         # possibly followed by blanks
+     *          (?: \^ \h* )?               # possibly a misplaced caret
+     *          [:;]?                       # The opening class character,
+     *                                      # possibly omitted.  A typo
+     *                                      # semi-colon can also be used.
+     *          \h*
+     *          \^?                         # possibly a correctly placed
+     *                                      # caret, but not if there was also
+     *                                      # a misplaced one
+     *          \h*
+     *          .{3,15}                     # The class name.  If there are
+     *                                      # deviations from the legal syntax,
+     *                                      # its edit distance must be close
+     *                                      # to a real class name in order
+     *                                      # for it to be considered to be
+     *                                      # an intended posix class.
+     *          \h*
+     *          [:punct:]?                  # The closing class character,
+     *                                      # possibly omitted.  If not a colon
+     *                                      # nor semi colon, the class name
+     *                                      # must be even closer to a valid
+     *                                      # one
+     *          \h*
+     *          \]?                         # The right bracket, possibly
+     *                                      # omitted.
+     *     )/
+     *
+     * In the above, \h must be ASCII-only.
+     *
+     * These are heuristics, and can be tweaked as field experience dictates.
+     * There will be cases when someone didn't intend to specify a posix class
+     * that this warns as being so.  The goal is to minimize these, while
+     * maximizing the catching of things intended to be a posix class that
+     * aren't parsed as such.
+     */
 
-    PERL_ARGS_ASSERT_REGPPOSIXCC;
+    const char* p             = s;
+    const char * const e      = RExC_end;
+    unsigned complement       = 0;      /* If to complement the class */
+    bool found_problem        = FALSE;  /* Assume OK until proven otherwise */
+    bool has_opening_bracket  = FALSE;
+    bool has_opening_colon    = FALSE;
+    int class_number          = OOB_NAMEDCLASS; /* Out-of-bounds until find
+                                                   valid class */
+    AV* warn_text             = NULL;   /* any warning messages */
+    const char * possible_end = NULL;   /* used for a 2nd parse pass */
+    const char* name_start;             /* ptr to class name first char */
 
-    if (value == '[' && RExC_parse + 1 < RExC_end &&
-	/* I smell either [: or [= or [. -- POSIX has been here, right? */
-	POSIXCC(UCHARAT(RExC_parse)))
-    {
-	const char c = UCHARAT(RExC_parse);
-	char* const s = RExC_parse++;
+    /* If the number of single-character typos the input name is away from a
+     * legal name is no more than this number, it is considered to have meant
+     * the legal name */
+    int max_distance          = 2;
 
-	while (RExC_parse < RExC_end && UCHARAT(RExC_parse) != c)
-	    RExC_parse++;
-	if (RExC_parse == RExC_end) {
-            if (strict) {
+    /* to store the name.  The size determines the maximum length before we
+     * decide that no posix class was intended.  Should be at least
+     * sizeof("alphanumeric") */
+    UV input_text[15];
 
-                /* Try to give a better location for the error (than the end of
-                 * the string) by looking for the matching ']' */
-                RExC_parse = s;
-                while (RExC_parse < RExC_end && UCHARAT(RExC_parse) != ']') {
-                    RExC_parse++;
-                }
-                vFAIL2("Unmatched '%c' in POSIX class", c);
+    PERL_ARGS_ASSERT_HANDLE_POSSIBLE_POSIX;
+
+    if (p >= e) {
+        return NOT_MEANT_TO_BE_A_POSIX_CLASS;
+    }
+
+    if (*(p - 1) != '[') {
+        ADD_POSIX_WARNING(p, "it doesn't start with a '['");
+        found_problem = TRUE;
+    }
+    else {
+        has_opening_bracket = TRUE;
+    }
+
+    /* They could be confused and think you can put spaces between the
+     * components */
+    if (isBLANK(*p)) {
+        found_problem = TRUE;
+
+        do {
+            p++;
+        } while (p < e && isBLANK(*p));
+
+        ADD_POSIX_WARNING(p, NO_BLANKS_POSIX_WARNING);
+    }
+
+    /* For [. .] and [= =].  These are quite different internally from [: :],
+     * so they are handled separately.  */
+    if (POSIXCC_NOTYET(*p)) {
+        const char open_char  = *p;
+        const char * temp_ptr = p + 1;
+        unsigned int len      = 0;
+
+        /* These two constructs are not handled by perl, and if we find a
+         * syntactically valid one, we croak.  It looks like just about any
+         * byte can be in them, but they are likely very short, like [.ch.] to
+         * denote a ligature 'ch' single character.  If we find something that
+         * started out to look like one of these constructs, but isn't, we
+         * break so that it can be checked for being a class name with a typo
+         * of '.' or '=' instead of a colon */
+        while (temp_ptr < e) {
+            len++;
+
+            /* qr/[[.].]]/, for example, is valid.  But otherwise we quit on an
+             * unexpected ']'.  It is possible, it appears, for such a ']' to
+             * be not in the final position, but that's so unlikely that that
+             * case is not handled. */
+            if (*temp_ptr == ']' && temp_ptr[1] != open_char) {
+                break;
             }
-	    /* Grandfather lone [:, [=, [. */
-	    RExC_parse = s;
+
+            /* XXX this could be cut down, but this value is certainly large
+             * enough */
+            if (len > 10) {
+                break;
+            }
+
+            if (*temp_ptr == open_char) {
+                temp_ptr++;
+                if (*temp_ptr == ']') {
+                    temp_ptr++;
+                    if (! found_problem && posix_warnings) {
+                        RExC_parse = (char *) temp_ptr;
+                        vFAIL3("POSIX syntax [%c %c] is reserved for future "
+                               "extensions", open_char, open_char);
+                    }
+
+                    /* Here, the syntax wasn't completely valid, or else the
+                     * call is to check-only */
+                    if (updated_parse_ptr) {
+                        *updated_parse_ptr = (char *) temp_ptr;
+                    }
+
+                    return OOB_NAMEDCLASS;
+                }
+            }
+            else if (*temp_ptr == '\\') {
+
+                /* A backslash is treate as like any other character, unless it
+                 * precedes a comment starter.  XXX multiple backslashes in a
+                 * row are not handled specially here, nor would they ever
+                 * likely to be handled specially in one of these constructs */
+                if (temp_ptr[1] == '#' && (RExC_flags & RXf_PMf_EXTENDED)) {
+                    temp_ptr++;
+                }
+                temp_ptr++;
+            }
+            else if (*temp_ptr == '#' && (RExC_flags & RXf_PMf_EXTENDED)) {
+                break;  /* Under no circumstances can we look at the interior
+                           of a comment */
+            }
+            else if (*temp_ptr == '\n') {   /* And we don't allow newlines
+                                               either as it's extremely
+                                               unlikely that one could be in an
+                                               intended class */
+                break;
+            }
+            else if (UTF && ! UTF8_IS_INVARIANT(*temp_ptr)) {
+                /* XXX Since perl will never handle multi-byte locales, except
+                 * for UTF-8, we could break if we found a byte above latin1,
+                 * but perhaps the person intended to use one. */
+                temp_ptr += UTF8SKIP(temp_ptr);
+            }
+            else {
+                temp_ptr++;
+            }
         }
-	else {
-	    const char* const t = RExC_parse++; /* skip over the c */
-	    assert(*t == c);
+    }
 
-  	    if (UCHARAT(RExC_parse) == ']') {
-		const char *name_start = s + 1;
-  		RExC_parse++; /* skip over the ending ] */
+    /* Here, we think there is a possibility that a [: :] class was meant, and
+     * we have the first real character.  It could be they think the '^' comes
+     * first */
+    if (*p == '^') {
+        found_problem = TRUE;
+        ADD_POSIX_WARNING(p + 1, "the '^' must come after the colon");
+        complement = 1;
+        p++;
 
-		if (*s == ':') {
-		    const I32 complement = *name_start == '^' ? *name_start++ : 0;
-		    const I32 skip = t - name_start;
+        if (isBLANK(*p)) {
+            found_problem = TRUE;
 
-		    /* Initially switch on the length of the name.  */
-                    switch (skip) {
+            do {
+                p++;
+            } while (p < e && isBLANK(*p));
+
+            ADD_POSIX_WARNING(p, NO_BLANKS_POSIX_WARNING);
+        }
+    }
+
+    /* But the first character should be a colon, which they could have easily
+     * mistyped on a qwerty keyboard as a semi-colon (and which may be hard to
+     * distinguish from a colon, so treat that as a colon).  */
+    if (*p == ':') {
+        p++;
+        has_opening_colon = TRUE;
+    }
+    else if (*p == ';') {
+        found_problem = TRUE;
+        p++;
+        ADD_POSIX_WARNING(p, SEMI_COLON_POSIX_WARNING);
+        has_opening_colon = TRUE;
+    }
+    else {
+        found_problem = TRUE;
+        ADD_POSIX_WARNING(p, "there must be a starting ':'");
+
+        /* Consider an initial punctuation (not one of the recognized ones) to
+         * be a left terminator */
+        if (*p != '^' && *p != ']' && isPUNCT(*p)) {
+            p++;
+        }
+    }
+
+    /* They may think that you can put spaces between the components */
+    if (isBLANK(*p)) {
+        found_problem = TRUE;
+
+        do {
+            p++;
+        } while (p < e && isBLANK(*p));
+
+        ADD_POSIX_WARNING(p, NO_BLANKS_POSIX_WARNING);
+    }
+
+    if (*p == '^') {
+
+        /* We consider something like [^:^alnum:]] to not have been intended to
+         * be a posix class, but XXX maybe we should */
+        if (complement) {
+            return NOT_MEANT_TO_BE_A_POSIX_CLASS;
+        }
+
+        complement = 1;
+        p++;
+    }
+
+    /* Again, they may think that you can put spaces between the components */
+    if (isBLANK(*p)) {
+        found_problem = TRUE;
+
+        do {
+            p++;
+        } while (p < e && isBLANK(*p));
+
+        ADD_POSIX_WARNING(p, NO_BLANKS_POSIX_WARNING);
+    }
+
+    if (*p == ']') {
+
+        /* XXX This ']' may be a typo, and something else was meant.  But
+         * treating it as such creates enough complications, that that
+         * possibility isn't currently considered here.  So we assume that the
+         * ']' is what is intended, and if we've already found an initial '[',
+         * this leaves this construct looking like [:] or [:^], which almost
+         * certainly weren't intended to be posix classes */
+        if (has_opening_bracket) {
+            return NOT_MEANT_TO_BE_A_POSIX_CLASS;
+        }
+
+        /* But this function can be called when we parse the colon for
+         * something like qr/[alpha:]]/, so we back up to look for the
+         * beginning */
+        p--;
+
+        if (*p == ';') {
+            found_problem = TRUE;
+            ADD_POSIX_WARNING(p, SEMI_COLON_POSIX_WARNING);
+        }
+        else if (*p != ':') {
+
+            /* XXX We are currently very restrictive here, so this code doesn't
+             * consider the possibility that, say, /[alpha.]]/ was intended to
+             * be a posix class. */
+            return NOT_MEANT_TO_BE_A_POSIX_CLASS;
+        }
+
+        /* Here we have something like 'foo:]'.  There was no initial colon,
+         * and we back up over 'foo.  XXX Unlike the going forward case, we
+         * don't handle typos of non-word chars in the middle */
+        has_opening_colon = FALSE;
+        p--;
+
+        while (p > RExC_start && isWORDCHAR(*p)) {
+            p--;
+        }
+        p++;
+
+        /* Here, we have positioned ourselves to where we think the first
+         * character in the potential class is */
+    }
+
+    /* Now the interior really starts.  There are certain key characters that
+     * can end the interior, or these could just be typos.  To catch both
+     * cases, we may have to do two passes.  In the first pass, we keep on
+     * going unless we come to a sequence that matches
+     *      qr/ [[:punct:]] [[:blank:]]* \] /xa
+     * This means it takes a sequence to end the pass, so two typos in a row if
+     * that wasn't what was intended.  If the class is perfectly formed, just
+     * this one pass is needed.  We also stop if there are too many characters
+     * being accumulated, but this number is deliberately set higher than any
+     * real class.  It is set high enough so that someone who thinks that
+     * 'alphanumeric' is a correct name would get warned that it wasn't.
+     * While doing the pass, we keep track of where the key characters were in
+     * it.  If we don't find an end to the class, and one of the key characters
+     * was found, we redo the pass, but stop when we get to that character.
+     * Thus the key character was considered a typo in the first pass, but a
+     * terminator in the second.  If two key characters are found, we stop at
+     * the second one in the first pass.  Again this can miss two typos, but
+     * catches a single one
+     *
+     * In the first pass, 'possible_end' starts as NULL, and then gets set to
+     * point to the first key character.  For the second pass, it starts as -1.
+     * */
+
+    name_start = p;
+  parse_name:
+    {
+        bool has_blank               = FALSE;
+        bool has_upper               = FALSE;
+        bool has_terminating_colon   = FALSE;
+        bool has_terminating_bracket = FALSE;
+        bool has_semi_colon          = FALSE;
+        unsigned int name_len        = 0;
+        int punct_count              = 0;
+
+        while (p < e) {
+
+            /* Squeeze out blanks when looking up the class name below */
+            if (isBLANK(*p) ) {
+                has_blank = TRUE;
+                found_problem = TRUE;
+                p++;
+                continue;
+            }
+
+            /* The name will end with a punctuation */
+            if (isPUNCT(*p)) {
+                const char * peek = p + 1;
+
+                /* Treat any non-']' punctuation followed by a ']' (possibly
+                 * with intervening blanks) as trying to terminate the class.
+                 * ']]' is very likely to mean a class was intended (but
+                 * missing the colon), but the warning message that gets
+                 * generated shows the error position better if we exit the
+                 * loop at the bottom (eventually), so skip it here. */
+                if (*p != ']') {
+                    if (peek < e && isBLANK(*peek)) {
+                        has_blank = TRUE;
+                        found_problem = TRUE;
+                        do {
+                            peek++;
+                        } while (peek < e && isBLANK(*peek));
+                    }
+
+                    if (peek < e && *peek == ']') {
+                        has_terminating_bracket = TRUE;
+                        if (*p == ':') {
+                            has_terminating_colon = TRUE;
+                        }
+                        else if (*p == ';') {
+                            has_semi_colon = TRUE;
+                            has_terminating_colon = TRUE;
+                        }
+                        else {
+                            found_problem = TRUE;
+                        }
+                        p = peek + 1;
+                        goto try_posix;
+                    }
+                }
+
+                /* Here we have punctuation we thought didn't end the class.
+                 * Keep track of the position of the key characters that are
+                 * more likely to have been class-enders */
+                if (*p == ']' || *p == '[' || *p == ':' || *p == ';') {
+
+                    /* Allow just one such possible class-ender not actually
+                     * ending the class. */
+                    if (possible_end) {
+                        break;
+                    }
+                    possible_end = p;
+                }
+
+                /* If we have too many punctuation characters, no use in
+                 * keeping going */
+                if (++punct_count > max_distance) {
+                    break;
+                }
+
+                /* Treat the punctuation as a typo. */
+                input_text[name_len++] = *p;
+                p++;
+            }
+            else if (isUPPER(*p)) { /* Use lowercase for lookup */
+                input_text[name_len++] = toLOWER(*p);
+                has_upper = TRUE;
+                found_problem = TRUE;
+                p++;
+            } else if (! UTF || UTF8_IS_INVARIANT(*p)) {
+                input_text[name_len++] = *p;
+                p++;
+            }
+            else {
+                input_text[name_len++] = utf8_to_uvchr_buf((U8 *) p, e, NULL);
+                p+= UTF8SKIP(p);
+            }
+
+            /* The declaration of 'input_text' is how long we allow a potential
+             * class name to be, before saying they didn't mean a class name at
+             * all */
+            if (name_len >= C_ARRAY_LENGTH(input_text)) {
+                break;
+            }
+        }
+
+        /* We get to here when the possible class name hasn't been properly
+         * terminated before:
+         *   1) we ran off the end of the pattern; or
+         *   2) found two characters, each of which might have been intended to
+         *      be the name's terminator
+         *   3) found so many punctuation characters in the purported name,
+         *      that the edit distance to a valid one is exceeded
+         *   4) we decided it was more characters than anyone could have
+         *      intended to be one. */
+
+        found_problem = TRUE;
+
+        /* In the final two cases, we know that looking up what we've
+         * accumulated won't lead to a match, even a fuzzy one. */
+        if (   name_len >= C_ARRAY_LENGTH(input_text)
+            || punct_count > max_distance)
+        {
+            /* If there was an intermediate key character that could have been
+             * an intended end, redo the parse, but stop there */
+            if (possible_end && possible_end != (char *) -1) {
+                possible_end = (char *) -1; /* Special signal value to say
+                                               we've done a first pass */
+                p = name_start;
+                goto parse_name;
+            }
+
+            /* Otherwise, it can't have meant to have been a class */
+            return NOT_MEANT_TO_BE_A_POSIX_CLASS;
+        }
+
+        /* If we ran off the end, and the final character was a punctuation
+         * one, back up one, to look at that final one just below.  Later, we
+         * will restore the parse pointer if appropriate */
+        if (name_len && p == e && isPUNCT(*(p-1))) {
+            p--;
+            name_len--;
+        }
+
+        if (p < e && isPUNCT(*p)) {
+            if (*p == ']') {
+                has_terminating_bracket = TRUE;
+
+                /* If this is a 2nd ']', and the first one is just below this
+                 * one, consider that to be the real terminator.  This gives a
+                 * uniform and better positioning for the warning message  */
+                if (   possible_end
+                    && possible_end != (char *) -1
+                    && *possible_end == ']'
+                    && name_len && input_text[name_len - 1] == ']')
+                {
+                    name_len--;
+                    p = possible_end;
+
+                    /* And this is actually equivalent to having done the 2nd
+                     * pass now, so set it to not try again */
+                    possible_end = (char *) -1;
+                }
+            }
+            else {
+                if (*p == ':') {
+                    has_terminating_colon = TRUE;
+                }
+                else if (*p == ';') {
+                    has_semi_colon = TRUE;
+                    has_terminating_colon = TRUE;
+                }
+                p++;
+            }
+        }
+
+    try_posix:
+
+        /* Here, we have a class name to look up.  We can short circuit the
+         * stuff below for short names that can't possibly be meant to be a
+         * class name.  (We can do this on the first pass, as any second pass
+         * will yield an even shorter name) */
+        if (name_len < 3) {
+            return NOT_MEANT_TO_BE_A_POSIX_CLASS;
+        }
+
+        /* Find which class it is.  Initially switch on the length of the name.
+         * */
+        switch (name_len) {
             case 4:
-                if (memEQ(name_start, "word", 4)) /* this is not POSIX,
-                                                    this is the Perl \w
-                                                */
+                if (memEQ(name_start, "word", 4)) {
+                    /* this is not POSIX, this is the Perl \w */
                     class_number = ANYOF_WORDCHAR;
+                }
                 break;
             case 5:
                 /* Names all of length 5: alnum alpha ascii blank cntrl digit
@@ -13502,97 +14063,172 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, const bool strict)
                 if (memEQ(name_start, "xdigit", 6))
                     class_number = ANYOF_XDIGIT;
                 break;
-		    }
+        }
 
-		    if (class_number == OOB_NAMEDCLASS)
-			vFAIL2utf8f(
-                            "POSIX class [:%"UTF8f":] unknown",
-			    UTF8fARG(UTF, t - s - 1, s + 1));
+        /* If the name exactly matches a posix class name the class number will
+         * here be set to it, and the input almost certainly was meant to be a
+         * posix class, so we can skip further checking.  If instead the syntax
+         * is exactly correct, but the name isn't one of the legal ones, we
+         * will return that as an error below.  But if neither of these apply,
+         * it could be that no posix class was intended at all, or that one
+         * was, but there was a typo.  We tease these apart by doing fuzzy
+         * matching on the name */
+        if (class_number == OOB_NAMEDCLASS && found_problem) {
+            const UV posix_names[][6] = {
+                                                { 'a', 'l', 'n', 'u', 'm' },
+                                                { 'a', 'l', 'p', 'h', 'a' },
+                                                { 'a', 's', 'c', 'i', 'i' },
+                                                { 'b', 'l', 'a', 'n', 'k' },
+                                                { 'c', 'n', 't', 'r', 'l' },
+                                                { 'd', 'i', 'g', 'i', 't' },
+                                                { 'g', 'r', 'a', 'p', 'h' },
+                                                { 'l', 'o', 'w', 'e', 'r' },
+                                                { 'p', 'r', 'i', 'n', 't' },
+                                                { 'p', 'u', 'n', 'c', 't' },
+                                                { 's', 'p', 'a', 'c', 'e' },
+                                                { 'u', 'p', 'p', 'e', 'r' },
+                                                { 'w', 'o', 'r', 'd' },
+                                                { 'x', 'd', 'i', 'g', 'i', 't' }
+                                            };
+            /* The names of the above all have added NULs to make them the same
+             * size, so we need to also have the real lengths */
+            const UV posix_name_lengths[] = {
+                                                sizeof("alnum") - 1,
+                                                sizeof("alpha") - 1,
+                                                sizeof("ascii") - 1,
+                                                sizeof("blank") - 1,
+                                                sizeof("cntrl") - 1,
+                                                sizeof("digit") - 1,
+                                                sizeof("graph") - 1,
+                                                sizeof("lower") - 1,
+                                                sizeof("print") - 1,
+                                                sizeof("punct") - 1,
+                                                sizeof("space") - 1,
+                                                sizeof("upper") - 1,
+                                                sizeof("word")  - 1,
+                                                sizeof("xdigit")- 1
+                                            };
+            unsigned int i;
+            int temp_max = max_distance;    /* Use a temporary, so if we
+                                               reparse, we haven't changed the
+                                               outer one */
 
-                    /* The #defines are structured so each complement is +1 to
-                     * the normal one */
-                    if (complement) {
-                        class_number++;
-                    }
-		    assert (name_start[skip] == ':');
-		    assert (name_start[skip+1] == ']');
-		} else if (!SIZE_ONLY) {
-		    /* [[=foo=]] and [[.foo.]] are still future. */
+            /* Use a smaller max edit distance if we are missing one of the
+             * delimiters */
+            if (   has_opening_bracket + has_opening_colon < 2
+                || has_terminating_bracket + has_terminating_colon < 2)
+            {
+                temp_max--;
+            }
 
-		    /* adjust RExC_parse so the warning shows after
-		       the class closes */
-		    while (UCHARAT(RExC_parse) && UCHARAT(RExC_parse) != ']')
-			RExC_parse++;
-		    vFAIL3("POSIX syntax [%c %c] is reserved for future extensions", c, c);
-		}
-	    } else {
-		/* Maternal grandfather:
-		 * "[:" ending in ":" but not in ":]" */
-                if (strict) {
-                    vFAIL("Unmatched '[' in POSIX class");
+            /* See if the input name is close to a legal one */
+            for (i = 0; i < C_ARRAY_LENGTH(posix_names); i++) {
+
+                /* Short circuit call if the lengths are too far apart to be
+                 * able to match */
+                if (abs( (int) (name_len - posix_name_lengths[i]))
+                    > temp_max)
+                {
+                    continue;
                 }
 
-                /* Grandfather lone [:, [=, [. */
-		RExC_parse = s;
-	    }
-	}
+                if (edit_distance(input_text,
+                                  posix_names[i],
+                                  name_len,
+                                  posix_name_lengths[i],
+                                  temp_max
+                                 )
+                    > -1)
+                { /* If it is close, it probably was intended to be a class */
+                    goto probably_meant_to_be;
+                }
+            }
+
+            /* Here the input name is not close enough to a valid class name
+             * for us to consider it to be intended to be a posix class.  If
+             * we haven't already done so, and the parse found a character that
+             * could have been terminators for the name, but which we absorbed
+             * as typos during the first pass, repeat the parse, signalling it
+             * to stop at that character */
+            if (possible_end && possible_end != (char *) -1) {
+                possible_end = (char *) -1;
+                p = name_start;
+                goto parse_name;
+            }
+
+            /* Here neither pass found a close-enough class name */
+            return NOT_MEANT_TO_BE_A_POSIX_CLASS;
+        }
+
+    probably_meant_to_be:
+
+        /* Here we think that a posix specification was intended.  Update any
+         * parse pointer */
+        if (updated_parse_ptr) {
+            *updated_parse_ptr = (char *) p;
+        }
+
+        /* If a posix class name was intended but incorrectly specified, we
+         * output or return the warnings */
+        if (found_problem) {
+
+            /* We set flags for these issues in the parse loop above instead of
+             * adding them to the list of warnings, because we can parse it
+             * twice, and we only want one warning instance */
+            if (has_upper) {
+                ADD_POSIX_WARNING(p, "the name must be all lowercase letters");
+            }
+            if (has_blank) {
+                ADD_POSIX_WARNING(p, NO_BLANKS_POSIX_WARNING);
+            }
+            if (has_semi_colon) {
+                ADD_POSIX_WARNING(p, SEMI_COLON_POSIX_WARNING);
+            }
+            else if (! has_terminating_colon) {
+                ADD_POSIX_WARNING(p, "there is no terminating ':'");
+            }
+            if (! has_terminating_bracket) {
+                ADD_POSIX_WARNING(p, "there is no terminating ']'");
+            }
+
+            if (warn_text) {
+                if (posix_warnings != (AV **) -1) {
+                    *posix_warnings = warn_text;
+                }
+                else {
+                    SV * msg;
+                    while ((msg = av_shift(warn_text)) != &PL_sv_undef) {
+                        Perl_warner(aTHX_ packWARN(WARN_REGEXP),
+                                    "%s", SvPVX(msg));
+                        SvREFCNT_dec_NN(msg);
+                    }
+                    SvREFCNT_dec_NN(warn_text);
+                }
+            }
+        }
+        else if (class_number != OOB_NAMEDCLASS) {
+            /* If it is a known class, return the class.  The class number
+             * #defines are structured so each complement is +1 to the normal
+             * one */
+            return class_number + complement;
+        }
+        else if (posix_warnings) {
+
+            /* Here, it is an unrecognized class.  This is an error (unless the
+            * call is to check only, which we've already handled above) */
+            const char * const complement_string = (complement)
+                                                   ? "^"
+                                                   : "";
+            RExC_parse = (char *) p;
+            vFAIL3utf8f("POSIX class [:%s%"UTF8f":] unknown",
+                        complement_string,
+                        UTF8fARG(UTF, RExC_parse - name_start - 2, name_start));
+        }
     }
 
-    return class_number;
+    return OOB_NAMEDCLASS;
 }
-
-STATIC bool
-S_could_it_be_a_POSIX_class(RExC_state_t *pRExC_state)
-{
-    /* This applies some heuristics at the current parse position (which should
-     * be at a '[') to see if what follows might be intended to be a [:posix:]
-     * class.  It returns true if it really is a posix class, of course, but it
-     * also can return true if it thinks that what was intended was a posix
-     * class that didn't quite make it.
-     *
-     * It will return true for
-     *      [:alphanumerics:
-     *      [:alphanumerics]  (as long as the ] isn't followed immediately by a
-     *                         ')' indicating the end of the (?[
-     *      [:any garbage including %^&$ punctuation:]
-     *
-     * This is designed to be called only from S_handle_regex_sets; it could be
-     * easily adapted to be called from the spot at the beginning of regclass()
-     * that checks to see in a normal bracketed class if the surrounding []
-     * have been omitted ([:word:] instead of [[:word:]]).  But doing so would
-     * change long-standing behavior, so I (khw) didn't do that */
-    char* p = RExC_parse + 1;
-    char first_char = *p;
-
-    PERL_ARGS_ASSERT_COULD_IT_BE_A_POSIX_CLASS;
-
-    assert(*(p - 1) == '[');
-
-    if (! POSIXCC(first_char)) {
-        return FALSE;
-    }
-
-    p++;
-    while (p < RExC_end && isWORDCHAR(*p)) p++;
-
-    if (p >= RExC_end) {
-        return FALSE;
-    }
-
-    if (p - RExC_parse > 2    /* Got at least 1 word character */
-        && (*p == first_char
-            || (*p == ']' && p + 1 < RExC_end && *(p + 1) != ')')))
-    {
-        return TRUE;
-    }
-
-    p = (char *) memchr(RExC_parse, ']', RExC_end - RExC_parse);
-
-    return (p
-            && p - RExC_parse > 2 /* [:] evaluates to colon;
-                                      [::] is a bad posix class. */
-            && first_char == *(p - 1));
-}
+#undef ADD_POSIX_WARNING
 
 STATIC unsigned  int
 S_regex_set_precedence(const U8 my_operator) {
@@ -13648,6 +14284,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
     const bool save_fold = FOLD;    /* Temporary */
     char *save_end, *save_parse;    /* Temporaries */
     const bool in_locale = LOC;     /* we turn off /l during processing */
+    AV* posix_warnings = NULL;
 
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -13699,13 +14336,15 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                     break;
                 case '[':
                 {
-                    /* If this looks like it is a [:posix:] class, leave the
-                     * parse pointer at the '[' to fool regclass() into
-                     * thinking it is part of a '[[:posix:]]'.  That function
-                     * will use strict checking to force a syntax error if it
-                     * doesn't work out to a legitimate class */
-                    bool is_posix_class
-                                    = could_it_be_a_POSIX_class(pRExC_state);
+                    /* See if this is a [:posix:] class. */
+                    bool is_posix_class = (OOB_NAMEDCLASS
+                                           < handle_possible_posix(pRExC_state,
+                                                                RExC_parse + 1,
+                                                                NULL,
+                                                                NULL));
+                    /* If it is a posix class, leave the parse pointer at the
+                     * '[' to fool regclass() into thinking it is part of a
+                     * '[[:posix:]]'. */
                     if (! is_posix_class) {
                         RExC_parse++;
                     }
@@ -13720,7 +14359,8 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                                   TRUE, /* silence non-portable warnings. */
                                   TRUE, /* strict */
                                   FALSE, /* Require return to be an ANYOF */
-                                  &current
+                                  &current,
+                                  &posix_warnings
                                  ))
                         FAIL2("panic: regclass returned NULL to handle_sets, "
                               "flags=%#"UVxf"", (UV) *flagp);
@@ -13759,6 +14399,17 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
         }
 
       no_close:
+        /* We output the messages even if warnings are off, because we'll fail
+         * the very next thing, and these give a likely diagnosis for that */
+        if (posix_warnings) {
+            SV * msg;
+            while ((msg = av_shift(posix_warnings)) != &PL_sv_undef) {
+                Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s", SvPVX(msg));
+                SvREFCNT_dec_NN(msg);
+            }
+            SvREFCNT_dec_NN(posix_warnings);
+        }
+
         FAIL("Syntax error in (?[...])");
     }
 
@@ -13977,7 +14628,8 @@ redo_curchar:
                               FALSE, /* don't silence non-portable warnings.  */
                               TRUE,  /* strict */
                               FALSE, /* Require return to be an ANYOF */
-                              &current))
+                              &current,
+                              NULL))
                 {
                     FAIL2("panic: regclass returned NULL to handle_sets, "
                           "flags=%#"UVxf"", (UV) *flagp);
@@ -13990,23 +14642,32 @@ redo_curchar:
 
             case '[':   /* Is a bracketed character class */
             {
-                bool is_posix_class = could_it_be_a_POSIX_class(pRExC_state);
-
+                /* See if this is a [:posix:] class. */
+                bool is_posix_class = (OOB_NAMEDCLASS
+                                        < handle_possible_posix(pRExC_state,
+                                                            RExC_parse + 1,
+                                                            NULL,
+                                                            NULL));
+                /* If it is a posix class, leave the parse pointer at the '['
+                 * to fool regclass() into thinking it is part of a
+                 * '[[:posix:]]'. */
                 if (! is_posix_class) {
                     RExC_parse++;
                 }
 
                 /* regclass() can only return RESTART_PASS1 and NEED_UTF8 if
                  * multi-char folds are allowed.  */
-                if(!regclass(pRExC_state, flagp,depth+1,
-                             is_posix_class, /* parse the whole char class
-                                                only if not a posix class */
-                             FALSE, /* don't allow multi-char folds */
-                             FALSE, /* don't silence non-portable warnings.  */
-                             TRUE,   /* strict */
-                             FALSE, /* Require return to be an ANYOF */
-                             &current
-                            ))
+                if (!regclass(pRExC_state, flagp,depth+1,
+                                is_posix_class, /* parse the whole char
+                                                    class only if not a
+                                                    posix class */
+                                FALSE, /* don't allow multi-char folds */
+                                TRUE, /* silence non-portable warnings. */
+                                TRUE, /* strict */
+                                FALSE, /* Require return to be an ANYOF */
+                                &current,
+                                NULL
+                                ))
                 {
                     FAIL2("panic: regclass returned NULL to handle_sets, "
                           "flags=%#"UVxf"", (UV) *flagp);
@@ -14334,6 +14995,7 @@ redo_curchar:
                              they're valid on this machine */
                     FALSE, /* similarly, no need for strict */
                     FALSE, /* Require return to be an ANYOF */
+                    NULL,
                     NULL
                 );
     if (!node)
@@ -14541,7 +15203,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  const bool strict,
                  bool optimizable,                  /* ? Allow a non-ANYOF return
                                                        node */
-                 SV** ret_invlist  /* Return an inversion list, not a node */
+                 SV** ret_invlist, /* Return an inversion list, not a node */
+                 AV** posix_warnings
           )
 {
     /* parse a bracketed class specification.  Most of these will produce an
@@ -14575,7 +15238,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     UV value = OOB_UNICODE, save_value = OOB_UNICODE;
     regnode *ret;
     STRLEN numlen;
-    IV namedclass = OOB_NAMEDCLASS;
+    int namedclass = OOB_NAMEDCLASS;
     char *rangebegin = NULL;
     bool need_class = 0;
     SV *listsv = NULL;
@@ -14654,6 +15317,14 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     const char * orig_parse = RExC_parse;
     const SSize_t orig_size = RExC_size;
     bool posixl_matches_all = FALSE; /* Does /l class have both e.g. \W,\w ? */
+
+    /* This variable is used to mark where in the input something that looks
+     * like a POSIX construct ends.  During the parse, when something looks
+     * like it could be such a construct is encountered, it is checked for
+     * being one, but not if we've already checked this area of the input.
+     * Only after this position is reached do we check again */
+    char *dont_check_for_posix_end = RExC_parse - 1;
+
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_REGCLASS;
@@ -14668,6 +15339,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                    && UNICODE_DOT_DOT_VERSION == 0)
     allow_multi_folds = FALSE;
 #endif
+
+    if (posix_warnings == NULL) {
+        posix_warnings = (AV **) -1;
+    }
 
     /* Assume we are going to generate an ANYOF node. */
     ret = reganode(pRExC_state,
@@ -14700,21 +15375,25 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     }
 
     /* Check that they didn't say [:posix:] instead of [[:posix:]] */
-    if (!SIZE_ONLY && RExC_parse < RExC_end && POSIXCC(UCHARAT(RExC_parse))) {
-	const char *s = RExC_parse;
-	const char  c = *s++;
-
-        if (*s == '^') {
-            s++;
-        }
-	while (isWORDCHAR(*s))
-	    s++;
-	if (*s && c == *s && s[1] == ']') {
-	    SAVEFREESV(RExC_rx_sv);
-	    ckWARN3reg(s+2,
-		       "POSIX syntax [%c %c] belongs inside character classes",
-		       c, c);
-	    (void)ReREFCNT_inc(RExC_rx_sv);
+    if (! ret_invlist && MAYBE_POSIXCC(UCHARAT(RExC_parse))) {
+        char *class_end;
+        int maybe_class = handle_possible_posix(pRExC_state, RExC_parse,
+                                             &class_end, NULL);
+        if (maybe_class >= OOB_NAMEDCLASS) {
+            dont_check_for_posix_end = class_end;
+            if (PASS2 && posix_warnings == (AV **) -1) {
+                SAVEFREESV(RExC_rx_sv);
+                ckWARN4reg(class_end,
+                        "POSIX syntax [%c %c] belongs inside character classes%s",
+                        *RExC_parse, *RExC_parse,
+                        (maybe_class == OOB_NAMEDCLASS)
+                        ? ((POSIXCC_NOTYET(*RExC_parse))
+                            ? " (but this one isn't implemented)"
+                            : " (but this one isn't fully valid)")
+                        : ""
+                        );
+                (void)ReREFCNT_inc(RExC_rx_sv);
+            }
 	}
     }
 
@@ -14759,11 +15438,20 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	else
 	    value = UCHARAT(RExC_parse++);
 
-        if (value == '['
-            && RExC_parse < RExC_end
-            && POSIXCC(UCHARAT(RExC_parse)))
+        if (value == '[') {
+            namedclass = handle_possible_posix(pRExC_state, RExC_parse, &dont_check_for_posix_end, posix_warnings);
+            if (namedclass > OOB_NAMEDCLASS) {
+                RExC_parse = dont_check_for_posix_end;
+            }
+            else {
+                namedclass = OOB_NAMEDCLASS;
+            }
+        }
+        else if (   RExC_parse - 1 > dont_check_for_posix_end
+                 && MAYBE_POSIXCC(value))
         {
-            namedclass = regpposixcc(pRExC_state, value, strict);
+            (void) handle_possible_posix(pRExC_state, RExC_parse - 1,  /* -1 because parse has already been advanced */
+                    &dont_check_for_posix_end, posix_warnings);
         }
         else if (value == '\\') {
             /* Is a backslash; get the code point of the char after it */

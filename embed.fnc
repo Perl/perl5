@@ -2150,11 +2150,11 @@ Es	|regnode*|regclass	|NN RExC_state_t *pRExC_state                 \
 				|bool allow_multi_fold                        \
 				|const bool silence_non_portable              \
 				|const bool strict                            \
-				|bool optimizable                       \
-				|NULLOK SV** ret_invlist
+				|bool optimizable			      \
+				|NULLOK SV** ret_invlist		      \
+				|NULLOK AV** posix_warnings
 Es	|void|add_above_Latin1_folds|NN RExC_state_t *pRExC_state|const U8 cp \
 				|NN SV** invlist
-Esn	|bool|could_it_be_a_POSIX_class|NN RExC_state_t *pRExC_state
 EsnP	|unsigned int|regex_set_precedence|const U8 my_operator
 Es	|regnode*|handle_regex_sets|NN RExC_state_t *pRExC_state \
 				|NULLOK SV ** return_invlist            \
@@ -2235,8 +2235,11 @@ Es	|SSize_t|study_chunk	|NN RExC_state_t *pRExC_state \
 EsRn	|U32	|add_data	|NN RExC_state_t* const pRExC_state \
 				|NN const char* const s|const U32 n
 rs	|void	|re_croak2	|bool utf8|NN const char* pat1|NN const char* pat2|...
-Ei	|I32	|regpposixcc	|NN RExC_state_t *pRExC_state \
-				|I32 value|const bool strict
+Es	|int	|handle_possible_posix					    \
+				|NN RExC_state_t *pRExC_state		    \
+				|NN const char* const s			    \
+				|NULLOK char ** updated_parse_ptr	    \
+				|NULLOK AV** posix_warnings
 Es	|I32	|make_trie	|NN RExC_state_t *pRExC_state \
 				|NN regnode *startbranch|NN regnode *first \
 				|NN regnode *last|NN regnode *tail \

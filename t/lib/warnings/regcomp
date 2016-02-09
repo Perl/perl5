@@ -1,6 +1,6 @@
   regcomp.c	These tests have been moved to t/re/reg_mesg.t
 		except for those that explicitly test line numbers
-                and those that don't have a <-- HERE in them.
+                and those that don't have a <-- HERE in them, and those that die plus have warnings
 
 __END__
 use warnings 'regexp';
@@ -52,3 +52,24 @@ no warnings 'utf8';
 qr/abc[ﬁ[.00./i;
 EXPECT
 Unmatched [ in regex; marked by <-- HERE in m/abc[ <-- HERE ﬁ[.00./ at - line 4.
+########
+# NAME perl qr/(?[[[:word]]])/ XXX Why is 'syntax' lc?
+# OPTION fatal
+qr/(?[[[:word]]])/;
+EXPECT
+Assuming NOT a POSIX class since there is no terminating ':' in regex; marked by <-- HERE in m/(?[[[:word <-- HERE ]]])/ at - line 2.
+syntax error in (?[...]) in regex m/(?[[[:word]]])/ at - line 2.
+########
+# NAME qr/(?[ [[:digit: ])/
+# OPTION fatal
+qr/(?[[[:digit: ])/;
+EXPECT
+Assuming NOT a POSIX class since no blanks are allowed in one in regex; marked by <-- HERE in m/(?[[[:digit: ] <-- HERE )/ at - line 2.
+syntax error in (?[...]) in regex m/(?[[[:digit: ])/ at - line 2.
+########
+# NAME qr/(?[ [:digit: ])/
+# OPTION fatal
+qr/(?[[:digit: ])/
+EXPECT
+Assuming NOT a POSIX class since no blanks are allowed in one in regex; marked by <-- HERE in m/(?[[:digit: ] <-- HERE )/ at - line 2.
+syntax error in (?[...]) in regex m/(?[[:digit: ])/ at - line 2.

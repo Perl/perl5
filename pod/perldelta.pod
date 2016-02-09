@@ -211,7 +211,8 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Assuming NOT a POSIX class since %s in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|
+perldiag/Assuming NOT a POSIX class since %s in regex; marked by <-- HERE in mE<sol>%sE<sol>>
 
 =back
 
@@ -536,6 +537,21 @@ and correctly sets C<$AUTOLOAD> too.  [perl #124387]  [perl #127494]
 
 Avoid parsing beyond the end of the buffer when processing a C<#line>
 directive with no filename.  [perl #127334]
+
+=item *
+
+Perl now raises a warning when a regular expression pattern looks like
+it was supposed to contain a POSIX class, like C<qr/[[:alpha:]]/>, but
+there was some slight defect in its specification which causes it to
+instead be treated as a regular bracketed character class.  An example
+would be missing the second colon in the above like this:
+C<qr/[[:alpha]]/>.  This compiles to match a sequence of two characters.
+The second is C<"]">, and the first is any of: C<"[">, C<":">, C<"a">,
+C<"h">, C<"l">, or C<"p">.   This is unlikely to be the intended
+meaning, and now a warning is raised.  No warning is raised unless the
+specification is very close to one of the 14 legal POSIX classes.  (See
+L<perlrecharclass/POSIX Character Classes>.)
+[perl #8904]
 
 =back
 
