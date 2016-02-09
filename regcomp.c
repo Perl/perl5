@@ -15731,7 +15731,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             sv_catpv(substitute_parse, "|[");
             prefix_end = SvCUR(substitute_parse);
             sv_catpvn(substitute_parse, orig_parse, RExC_parse - orig_parse);
-            sv_catpv(substitute_parse, "]");
+
+            /* Put in a closing ']' only if not going off the end, as otherwise
+             * we are adding something that really isn't there */
+            if (RExC_parse < RExC_end) {
+                sv_catpv(substitute_parse, "]");
+            }
         }
 
         sv_catpv(substitute_parse, ")");
