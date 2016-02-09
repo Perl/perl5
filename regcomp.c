@@ -13402,7 +13402,7 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
 PERL_STATIC_INLINE I32
 S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, const bool strict)
 {
-    I32 namedclass = OOB_NAMEDCLASS;
+    I32 class_number = OOB_NAMEDCLASS;
 
     PERL_ARGS_ASSERT_REGPPOSIXCC;
 
@@ -13434,78 +13434,77 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, const bool strict)
 	    assert(*t == c);
 
   	    if (UCHARAT(RExC_parse) == ']') {
-		const char *posixcc = s + 1;
+		const char *name_start = s + 1;
   		RExC_parse++; /* skip over the ending ] */
 
 		if (*s == ':') {
-		    const I32 complement = *posixcc == '^' ? *posixcc++ : 0;
-		    const I32 skip = t - posixcc;
+		    const I32 complement = *name_start == '^' ? *name_start++ : 0;
+		    const I32 skip = t - name_start;
 
 		    /* Initially switch on the length of the name.  */
-		    switch (skip) {
-		    case 4:
-                        if (memEQ(posixcc, "word", 4)) /* this is not POSIX,
-                                                          this is the Perl \w
-                                                        */
-			    namedclass = ANYOF_WORDCHAR;
-			break;
-		    case 5:
-			/* Names all of length 5.  */
-			/* alnum alpha ascii blank cntrl digit graph lower
-			   print punct space upper  */
-			/* Offset 4 gives the best switch position.  */
-			switch (posixcc[4]) {
-			case 'a':
-			    if (memEQ(posixcc, "alph", 4)) /* alpha */
-				namedclass = ANYOF_ALPHA;
-			    break;
-			case 'e':
-			    if (memEQ(posixcc, "spac", 4)) /* space */
-				namedclass = ANYOF_SPACE;
-			    break;
-			case 'h':
-			    if (memEQ(posixcc, "grap", 4)) /* graph */
-				namedclass = ANYOF_GRAPH;
-			    break;
-			case 'i':
-			    if (memEQ(posixcc, "asci", 4)) /* ascii */
-				namedclass = ANYOF_ASCII;
-			    break;
-			case 'k':
-			    if (memEQ(posixcc, "blan", 4)) /* blank */
-				namedclass = ANYOF_BLANK;
-			    break;
-			case 'l':
-			    if (memEQ(posixcc, "cntr", 4)) /* cntrl */
-				namedclass = ANYOF_CNTRL;
-			    break;
-			case 'm':
-			    if (memEQ(posixcc, "alnu", 4)) /* alnum */
-				namedclass = ANYOF_ALPHANUMERIC;
-			    break;
-			case 'r':
-			    if (memEQ(posixcc, "lowe", 4)) /* lower */
-				namedclass = (FOLD) ? ANYOF_CASED : ANYOF_LOWER;
-			    else if (memEQ(posixcc, "uppe", 4)) /* upper */
-				namedclass = (FOLD) ? ANYOF_CASED : ANYOF_UPPER;
-			    break;
-			case 't':
-			    if (memEQ(posixcc, "digi", 4)) /* digit */
-				namedclass = ANYOF_DIGIT;
-			    else if (memEQ(posixcc, "prin", 4)) /* print */
-				namedclass = ANYOF_PRINT;
-			    else if (memEQ(posixcc, "punc", 4)) /* punct */
-				namedclass = ANYOF_PUNCT;
-			    break;
-			}
-			break;
-		    case 6:
-			if (memEQ(posixcc, "xdigit", 6))
-			    namedclass = ANYOF_XDIGIT;
-			break;
+                    switch (skip) {
+            case 4:
+                if (memEQ(name_start, "word", 4)) /* this is not POSIX,
+                                                    this is the Perl \w
+                                                */
+                    class_number = ANYOF_WORDCHAR;
+                break;
+            case 5:
+                /* Names all of length 5: alnum alpha ascii blank cntrl digit
+                 *                        graph lower print punct space upper
+                 * Offset 4 gives the best switch position.  */
+                switch (name_start[4]) {
+                    case 'a':
+                        if (memEQ(name_start, "alph", 4)) /* alpha */
+                            class_number = ANYOF_ALPHA;
+                        break;
+                    case 'e':
+                        if (memEQ(name_start, "spac", 4)) /* space */
+                            class_number = ANYOF_SPACE;
+                        break;
+                    case 'h':
+                        if (memEQ(name_start, "grap", 4)) /* graph */
+                            class_number = ANYOF_GRAPH;
+                        break;
+                    case 'i':
+                        if (memEQ(name_start, "asci", 4)) /* ascii */
+                            class_number = ANYOF_ASCII;
+                        break;
+                    case 'k':
+                        if (memEQ(name_start, "blan", 4)) /* blank */
+                            class_number = ANYOF_BLANK;
+                        break;
+                    case 'l':
+                        if (memEQ(name_start, "cntr", 4)) /* cntrl */
+                            class_number = ANYOF_CNTRL;
+                        break;
+                    case 'm':
+                        if (memEQ(name_start, "alnu", 4)) /* alnum */
+                            class_number = ANYOF_ALPHANUMERIC;
+                        break;
+                    case 'r':
+                        if (memEQ(name_start, "lowe", 4)) /* lower */
+                            class_number = (FOLD) ? ANYOF_CASED : ANYOF_LOWER;
+                        else if (memEQ(name_start, "uppe", 4)) /* upper */
+                            class_number = (FOLD) ? ANYOF_CASED : ANYOF_UPPER;
+                        break;
+                    case 't':
+                        if (memEQ(name_start, "digi", 4)) /* digit */
+                            class_number = ANYOF_DIGIT;
+                        else if (memEQ(name_start, "prin", 4)) /* print */
+                            class_number = ANYOF_PRINT;
+                        else if (memEQ(name_start, "punc", 4)) /* punct */
+                            class_number = ANYOF_PUNCT;
+                        break;
+                }
+                break;
+            case 6:
+                if (memEQ(name_start, "xdigit", 6))
+                    class_number = ANYOF_XDIGIT;
+                break;
 		    }
 
-		    if (namedclass == OOB_NAMEDCLASS)
+		    if (class_number == OOB_NAMEDCLASS)
 			vFAIL2utf8f(
                             "POSIX class [:%"UTF8f":] unknown",
 			    UTF8fARG(UTF, t - s - 1, s + 1));
@@ -13513,10 +13512,10 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, const bool strict)
                     /* The #defines are structured so each complement is +1 to
                      * the normal one */
                     if (complement) {
-                        namedclass++;
+                        class_number++;
                     }
-		    assert (posixcc[skip] == ':');
-		    assert (posixcc[skip+1] == ']');
+		    assert (name_start[skip] == ':');
+		    assert (name_start[skip+1] == ']');
 		} else if (!SIZE_ONLY) {
 		    /* [[=foo=]] and [[.foo.]] are still future. */
 
@@ -13539,7 +13538,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, const bool strict)
 	}
     }
 
-    return namedclass;
+    return class_number;
 }
 
 STATIC bool
