@@ -997,6 +997,151 @@ DEBUG_OPTIMISE_MORE_r(if(data){                                      \
     PerlIO_printf(Perl_debug_log,"\n");                              \
 });
 
+/* =========================================================
+ * BEGIN edit_distance stuff.
+ *
+ * This calculates how many single character changes of any type are needed to
+ * transform a string into another one.  It is taken from version 3.1 of
+ *
+ * https://metacpan.org/pod/Text::Levenshtein::Damerau::XS
+ */
+
+/* Our unsorted dictionary linked list.   */
+/* Note we use UVs, not chars. */
+
+struct dictionary{
+  UV key;
+  UV value;
+  struct dictionary* next;
+};
+typedef struct dictionary item;
+
+
+PERL_STATIC_INLINE item*
+push(UV key,item* curr)
+{
+    item* head;
+    Newxz(head, 1, item);
+    head->key = key;
+    head->value = 0;
+    head->next = curr;
+    return head;
+}
+
+
+PERL_STATIC_INLINE item*
+find(item* head, UV key)
+{
+    item* iterator = head;
+    while (iterator){
+        if (iterator->key == key){
+            return iterator;
+        }
+        iterator = iterator->next;
+    }
+
+    return NULL;
+}
+
+PERL_STATIC_INLINE item*
+uniquePush(item* head,UV key)
+{
+    item* iterator = head;
+
+    while (iterator){
+        if (iterator->key == key) {
+            return head;
+        }
+        iterator = iterator->next;
+    }
+
+    return push(key,head);
+}
+
+PERL_STATIC_INLINE void
+dict_free(item* head)
+{
+    item* iterator = head;
+
+    while (iterator) {
+        item* temp = iterator;
+        iterator = iterator->next;
+        Safefree(temp);
+    }
+
+    head = NULL;
+}
+
+/* End of Dictionary Stuff */
+
+/* All calculations/work are done here */
+STATIC int
+S_edit_distance(const UV* src,
+                const UV* tgt,
+                const STRLEN x,             /* length of src[] */
+                const STRLEN y,             /* length of tgt[] */
+                const SSize_t maxDistance
+)
+{
+    item *head = NULL;
+    UV swapCount,swapScore,targetCharCount,i,j;
+    UV *scores;
+    UV score_ceil = x + y;
+
+    PERL_ARGS_ASSERT_EDIT_DISTANCE;
+
+    /* intialize matrix start values */
+    Newxz(scores, ( (x + 2) * (y + 2)), UV);
+    scores[0] = score_ceil;
+    scores[1 * (y + 2) + 0] = score_ceil;
+    scores[0 * (y + 2) + 1] = score_ceil;
+    scores[1 * (y + 2) + 1] = 0;
+    head = uniquePush(uniquePush(head,src[0]),tgt[0]);
+
+    /* work loops    */
+    /* i = src index */
+    /* j = tgt index */
+    for (i=1;i<=x;i++) {
+        if (i < x)
+            head = uniquePush(head,src[i]);
+        scores[(i+1) * (y + 2) + 1] = i;
+        scores[(i+1) * (y + 2) + 0] = score_ceil;
+        swapCount = 0;
+
+        for (j=1;j<=y;j++) {
+            if (i == 1) {
+                if(j < y)
+                head = uniquePush(head,tgt[j]);
+                scores[1 * (y + 2) + (j + 1)] = j;
+                scores[0 * (y + 2) + (j + 1)] = score_ceil;
+            }
+
+            targetCharCount = find(head,tgt[j-1])->value;
+            swapScore = scores[targetCharCount * (y + 2) + swapCount] + i - targetCharCount - 1 + j - swapCount;
+
+            if (src[i-1] != tgt[j-1]){
+                scores[(i+1) * (y + 2) + (j + 1)] = MIN(swapScore,(MIN(scores[i * (y + 2) + j], MIN(scores[(i+1) * (y + 2) + j], scores[i * (y + 2) + (j + 1)])) + 1));
+            }
+            else {
+                swapCount = j;
+                scores[(i+1) * (y + 2) + (j + 1)] = MIN(scores[i * (y + 2) + j], swapScore);
+            }
+        }
+
+        find(head,src[i-1])->value = i;
+    }
+
+    {
+        IV score = scores[(x+1) * (y + 2) + (y + 1)];
+        dict_free(head);
+        Safefree(scores);
+        return (maxDistance != 0 && maxDistance < score)?(-1):score;
+    }
+}
+
+/* END of edit_distance() stuff
+ * ========================================================= */
+
 /* is c a control character for which we have a mnemonic? */
 #define isMNEMONIC_CNTRL(c) _IS_MNEMONIC_CNTRL_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
 

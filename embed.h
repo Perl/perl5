@@ -997,6 +997,7 @@
 #define compute_EXACTish	S_compute_EXACTish
 #define construct_ahocorasick_from_trie(a,b,c)	S_construct_ahocorasick_from_trie(aTHX_ a,b,c)
 #define could_it_be_a_POSIX_class	S_could_it_be_a_POSIX_class
+#define edit_distance		S_edit_distance
 #define get_ANYOF_cp_list_for_ssc(a,b)	S_get_ANYOF_cp_list_for_ssc(aTHX_ a,b)
 #define get_invlist_iter_addr	S_get_invlist_iter_addr
 #define grok_bslash_N(a,b,c,d,e,f)	S_grok_bslash_N(aTHX_ a,b,c,d,e,f)

@@ -2244,6 +2244,11 @@ Es	|I32	|make_trie	|NN RExC_state_t *pRExC_state \
 Es	|regnode *|construct_ahocorasick_from_trie|NN RExC_state_t *pRExC_state \
                                 |NN regnode *source|U32 depth
 EnPs	|const char *|cntrl_to_mnemonic|const U8 c
+EnPs	|int	|edit_distance	|NN const UV *src		    \
+				|NN const UV *tgt		    \
+				|const STRLEN x			    \
+				|const STRLEN y			    \
+				|const SSize_t maxDistance
 #  ifdef DEBUGGING
 Es        |void        |regdump_intflags|NULLOK const char *lead| const U32 flags
 Es	|void	|regdump_extflags|NULLOK const char *lead| const U32 flags
