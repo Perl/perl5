@@ -2073,8 +2073,8 @@ If your system is quite busy and doesn't respond quickly enough,
 these tests might fail.  If possible, try running the tests again
 with the system under a lighter load.  These timing-sensitive
 and load-sensitive tests include F<t/op/alarm.t>,
-F<cpan/Time-HiRes/t/alarm.t>, F<cpan/Time-HiRes/t/clock.t>,
-F<cpan/Time-HiRes/t/itimer.t>, F<cpan/Time-HiRes/t/usleep.t>,
+F<dist/Time-HiRes/t/alarm.t>, F<dist/Time-HiRes/t/clock.t>,
+F<dist/Time-HiRes/t/itimer.t>, F<dist/Time-HiRes/t/usleep.t>,
 F<dist/threads-shared/t/waithires.t>,
 F<dist/threads-shared/t/stress.t>, F<lib/Benchmark.t>,
 F<lib/Memoize/t/expmod_t.t>, and F<lib/Memoize/t/speed.t>.

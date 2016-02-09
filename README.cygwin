@@ -562,9 +562,10 @@ be kept as clean as possible.
  pod/perltoc.pod Porting/Glossary pod/perlgit.pod
  Porting/checkAUTHORS.pl
  dist/Cwd/Changes ext/Compress-Raw-Zlib/Changes
+ dist/Time-HiRes/Changes
  ext/Compress-Raw-Zlib/README ext/Compress-Zlib/Changes
  ext/DB_File/Changes ext/Encode/Changes ext/Sys-Syslog/Changes
- ext/Time-HiRes/Changes ext/Win32API-File/Changes
+ ext/Win32API-File/Changes
  lib/ExtUtils/CBuilder/Changes lib/ExtUtils/Changes lib/ExtUtils/NOTES
  lib/ExtUtils/PATCHING lib/ExtUtils/README
  lib/Net/Ping/Changes lib/Test/Harness/Changes
