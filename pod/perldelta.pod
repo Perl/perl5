@@ -102,6 +102,11 @@ This empty function call now takes about a third less time to execute:
 
     sub f{} f();
 
+=item *
+
+On Win32, C<stat>ing or C<-X>ing a path, if the file or directory does not exist
+is now 3.5x faster on a SSD (or any drive) than before.
+
 =back
 
 =head1 Modules and Pragmata

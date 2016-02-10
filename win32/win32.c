@@ -1514,6 +1514,14 @@ win32_stat(const char *path, Stat_t *sbuf)
                 nlink = bhi.nNumberOfLinks;
             CloseHandle(handle);
         }
+	else {
+	    DWORD err = GetLastError();
+	    /* very common case, skip CRT stat and its also failing syscalls */
+	    if(err == ERROR_FILE_NOT_FOUND) {
+		errno = ENOENT;
+		return -1;
+	    }
+	}
     }
 
     /* path will be mapped correctly above */
