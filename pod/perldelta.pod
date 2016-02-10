@@ -529,8 +529,8 @@ for the stash.  [perl #126410]
 
 =item *
 
-The AUTOLOAD method is now called when searching for a DESTROY method.
-[perl #124387]
+The AUTOLOAD method is now called when searching for a DESTROY method,
+and correctly sets C<$AUTOLOAD> too.  [perl #124387]  [perl #127494]
 
 =back
 
