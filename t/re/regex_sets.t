@@ -139,6 +139,17 @@ if (! is_miniperl() && locales_enabled('LC_CTYPE')) {
     }
 }
 
+# Tests that no warnings given for valid Unicode digit range.
+my $arabic_digits = qr/(?[ [ ٠ - ٩ ] ])/;
+for my $char ("٠", "٥", "٩") {
+    use charnames ();
+    my @got = capture_warnings(sub {
+                like("٠", $arabic_digits, "Matches "
+                                                . charnames::viacode(ord $char));
+            });
+    is (@got, 0, "... without warnings");
+}
+
 # RT #126181: \cX behaves strangely inside (?[])
 {
 	no warnings qw(syntax regexp);
