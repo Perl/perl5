@@ -228,31 +228,36 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #define UTF_CONTINUATION_MARK		0x80
 
 /* Misleadingly named: is the UTF8-encoded byte 'c' part of a variant sequence
- * in UTF-8?  This is the inverse of UTF8_IS_INVARIANT */
-#define UTF8_IS_CONTINUED(c)        (((U8)c) &  UTF_CONTINUATION_MARK)
+ * in UTF-8?  This is the inverse of UTF8_IS_INVARIANT.  The |0 makes sure this
+ * isn't mistakenly called with a ptr argument */
+#define UTF8_IS_CONTINUED(c)        (((U8)((c) | 0)) &  UTF_CONTINUATION_MARK)
 
 /* Is the byte 'c' the first byte of a multi-byte UTF8-8 encoded sequence?
  * This doesn't catch invariants (they are single-byte).  It also excludes the
- * illegal overlong sequences that begin with C0 and C1. */
-#define UTF8_IS_START(c)            (((U8)c) >= 0xc2)
+ * illegal overlong sequences that begin with C0 and C1.  The |0 makes sure
+ * this isn't mistakenly called with a ptr argument */
+#define UTF8_IS_START(c)            (((U8)((c) | 0)) >= 0xc2)
 
 /* For use in UTF8_IS_CONTINUATION() below */
 #define UTF_IS_CONTINUATION_MASK    0xC0
 
 /* Is the byte 'c' part of a multi-byte UTF8-8 encoded sequence, and not the
- * first byte thereof?  */
+ * first byte thereof?  The |0 makes sure this isn't mistakenly called with a
+ * ptr argument */
 #define UTF8_IS_CONTINUATION(c)                                             \
-            ((((U8)c) & UTF_IS_CONTINUATION_MASK) == UTF_CONTINUATION_MARK)
+    ((((U8)((c) | 0)) & UTF_IS_CONTINUATION_MASK) == UTF_CONTINUATION_MARK)
 
 /* Is the UTF8-encoded byte 'c' the first byte of a two byte sequence?  Use
  * UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to
  * be well-formed.  Masking with 0xfe allows the low bit to be 0 or 1; thus
- * this matches 0xc[23]. */
-#define UTF8_IS_DOWNGRADEABLE_START(c)	(((U8)(c) & 0xfe) == 0xc2)
+ * this matches 0xc[23].  The |0 makes sure this isn't mistakenly called with a
+ * ptr argument */
+#define UTF8_IS_DOWNGRADEABLE_START(c)	((((U8)((c) | 0)) & 0xfe) == 0xc2)
 
 /* Is the UTF8-encoded byte 'c' the first byte of a sequence of bytes that
- * represent a code point > 255? */
-#define UTF8_IS_ABOVE_LATIN1(c)     ((U8)(c) >= 0xc4)
+ * represent a code point > 255?  The |0 makes sure this isn't mistakenly
+ * called with a ptr argument */
+#define UTF8_IS_ABOVE_LATIN1(c)     (((U8)((c) | 0)) >= 0xc4)
 
 /* This is the number of low-order bits a continuation byte in a UTF-8 encoded
  * sequence contributes to the specification of the code point.  In the bit
@@ -464,8 +469,9 @@ only) byte is pointed to by C<s>.
  * each for the exact same set of bit patterns.  It is valid on a subset of
  * what UVCHR_IS_INVARIANT is valid on, so can just use that; and the compiler
  * should optimize out anything extraneous given the implementation of the
- * latter */
-#define UTF8_IS_INVARIANT(c)	UVCHR_IS_INVARIANT(c)
+ * latter.  The |0 makes sure this isn't mistakenly called with a ptr argument.
+ * */
+#define UTF8_IS_INVARIANT(c)	UVCHR_IS_INVARIANT((c) | 0)
 
 /* Like the above, but its name implies a non-UTF8 input, which as the comments
  * above show, doesn't matter as to its implementation */
