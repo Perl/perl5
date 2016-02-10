@@ -58,9 +58,23 @@ you should reset the version numbers to the next blead series.
   2015-10-20  5.23.4 ✓        Steve Hay
   2015-11-20  5.23.5 ✓        Abigail
   2015-12-20  5.23.6 ✓        David Golden
-  2016-01-20  5.23.7          Stevan Little
+  2016-01-20  5.23.7 ✓        Stevan Little
   2016-02-20  5.23.8          Sawyer X
   2016-03-20  5.23.9          Abigail
+
+(RC0 for 5.24.0 will be released once we think that all the blockers have been
+addressed.  This typically means some time in April or May.)
+
+=head2 Perl 5.25
+
+  2016-05-20  5.25.0          Ricardo Signes
+  2016-06-20  5.25.1          Matthew Horsfall
+  2016-07-20  5.25.2          Steve Hay
+  2016-08-20  5.25.3          BinGOs
+  2016-09-20  5.25.4          ?
+  2016-10-20  5.25.5          ?
+  2016-11-20  5.25.6          ?
+  2016-12-20  5.25.7          ?
 
 (RC0 for 5.24.0 will be released once we think that all the blockers have been
 addressed.  This typically means some time in April or May.)
