@@ -6183,7 +6183,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
 
             to_complement = 1;
-            /* FALLTHROUGH */
+            goto join_nposixa;
 
         case POSIXA:    /* \w or [:punct:] etc. under /a */
 
@@ -6192,9 +6192,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
              * UTF-8, and also from NPOSIXA even in UTF-8 when the current
              * character is a single byte */
 
-            if (NEXTCHR_IS_EOS
-                || ! (to_complement ^ cBOOL(_generic_isCC_A(nextchr,
-                                                            FLAGS(scan)))))
+            if (NEXTCHR_IS_EOS) {
+                sayNO;
+            }
+
+          join_nposixa:
+
+            if (! (to_complement ^ cBOOL(_generic_isCC_A(nextchr,
+                                                                FLAGS(scan)))))
             {
                 sayNO;
             }
