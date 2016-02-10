@@ -206,7 +206,13 @@ and New Warnings
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Sequence (?PE<lt>... not terminated in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>
+|perldiag/"Sequence (?PE<lt>... not terminated in regex; marked by <-- HERE in mE<sol>%sE<sol>">
+
+=item *
+
+L<Sequence (?PE<gt>... not terminated in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>
+|perldiag/Sequence (?PE<gt>... not terminated in regex; marked by <-- HERE in mE<sol>%sE<sol>>
 
 =back
 

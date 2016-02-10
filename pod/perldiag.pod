@@ -5343,6 +5343,18 @@ m/%s/
 closing parenthesis after the name.  The S<<-- HERE> shows whereabouts
 in the regular expression the problem was discovered.
 
+=item Sequence (?PE<lt>... not terminated in regex; marked by S<<-- HERE> in m/%s/
+
+(F) A named group of the form C<(?PE<lt>...E<gt>')> was missing the final
+closing angle bracket.  The S<<-- HERE> shows whereabouts in the
+regular expression the problem was discovered.
+
+=item Sequence (?PE<gt>... not terminated in regex; marked by S<<-- HERE> in m/%s/
+
+(F) A named reference of the form C<(?PE<gt>...)> was missing the final
+closing parenthesis after the name.  The S<<-- HERE> shows whereabouts
+in the regular expression the problem was discovered.
+
 =item Sequence (?R) not terminated in regex m/%s/
 
 (F) An C<(?R)> or C<(?0)> sequence in a regular expression was missing the

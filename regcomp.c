@@ -9871,7 +9871,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
         cs = REGEX_UNICODE_CHARSET;
     }
 
-    while (*RExC_parse) {
+    while (RExC_parse < RExC_end) {
         /* && strchr("iogcmsx", *RExC_parse) */
         /* (?g), (?gc) and (?o) are useless here
            and must be globally applied -- japhy */
@@ -10029,7 +10029,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 NOT_REACHED; /*NOTREACHED*/
         }
 
-        ++RExC_parse;
+        RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
     }
 
     vFAIL("Sequence (?... not terminated");
@@ -10061,12 +10061,11 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
     regnode *ret;
     char* name_start = RExC_parse;
     U32 num = 0;
-
-    GET_RE_DEBUG_FLAGS_DECL;
-
     SV *sv_dat = reg_scan_name(pRExC_state, SIZE_ONLY
                                             ? REG_RSN_RETURN_NULL
                                             : REG_RSN_RETURN_DATA);
+    GET_RE_DEBUG_FLAGS_DECL;
+
     PERL_ARGS_ASSERT_HANDLE_NAMED_BACKREF;
 
     if (RExC_parse == name_start || *RExC_parse != ch) {
@@ -10152,9 +10151,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
          * indivisible */
         bool has_intervening_patws = paren == 2 && *(RExC_parse - 1) != '(';
 
+        assert(RExC_parse < RExC_end);
+
         if ( *RExC_parse == '*') { /* (*VERB:ARG) */
-	    char *start_verb = RExC_parse;
-	    STRLEN verb_len = 0;
+	    char *start_verb = RExC_parse + 1;
+	    STRLEN verb_len;
 	    char *start_arg = NULL;
 	    unsigned char op = 0;
             int arg_required = 0;
@@ -10164,27 +10165,32 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 RExC_parse++;
                 vFAIL("In '(*VERB...)', the '(' and '*' must be adjacent");
             }
-	    while ( *RExC_parse && *RExC_parse != ')' ) {
+	    while (RExC_parse < RExC_end && *RExC_parse != ')' ) {
 	        if ( *RExC_parse == ':' ) {
 	            start_arg = RExC_parse + 1;
 	            break;
 	        }
-	        RExC_parse++;
+	        RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
 	    }
-	    ++start_verb;
 	    verb_len = RExC_parse - start_verb;
 	    if ( start_arg ) {
-	        RExC_parse++;
-	        while ( *RExC_parse && *RExC_parse != ')' )
-	            RExC_parse++;
-	        if ( *RExC_parse != ')' )
+                if (RExC_parse >= RExC_end) {
+                    goto unterminated_verb_pattern;
+                }
+	        RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
+	        while ( RExC_parse < RExC_end && *RExC_parse != ')' )
+                    RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
+	        if ( RExC_parse >= RExC_end || *RExC_parse != ')' )
+                  unterminated_verb_pattern:
 	            vFAIL("Unterminated verb pattern argument");
 	        if ( RExC_parse == start_arg )
 	            start_arg = NULL;
 	    } else {
-	        if ( *RExC_parse != ')' )
+	        if ( RExC_parse >= RExC_end || *RExC_parse != ')' )
 	            vFAIL("Unterminated verb pattern");
 	    }
+
+            /* Here, we know that RExC_parse < RExC_end */
 
 	    switch ( *start_verb ) {
             case 'A':  /* (*ACCEPT) */
@@ -10268,22 +10274,36 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
             }
 
 	    RExC_parse++;
-	    paren = *RExC_parse++;
+            paren = *RExC_parse;    /* might be a trailing NUL, if not
+                                       well-formed */
+            RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
+            if (RExC_parse > RExC_end) {
+                paren = '\0';
+            }
 	    ret = NULL;			/* For lookahead/behind. */
 	    switch (paren) {
 
 	    case 'P':	/* (?P...) variants for those used to PCRE/Python */
-	        paren = *RExC_parse++;
-		if ( paren == '<')         /* (?P<...>) named capture */
+	        paren = *RExC_parse;
+		if ( paren == '<') {    /* (?P<...>) named capture */
+                    RExC_parse++;
+                    if (RExC_parse >= RExC_end) {
+                        vFAIL("Sequence (?P<... not terminated");
+                    }
 		    goto named_capture;
+                }
                 else if (paren == '>') {   /* (?P>name) named recursion */
+                    RExC_parse++;
+                    if (RExC_parse >= RExC_end) {
+                        vFAIL("Sequence (?P>... not terminated");
+                    }
                     goto named_recursion;
                 }
                 else if (paren == '=') {   /* (?P=...)  named backref */
+                    RExC_parse++;
                     return handle_named_backref(pRExC_state, flagp,
                                                 parse_start, ')');
                 }
-                --RExC_parse;
                 RExC_parse += SKIP_IF_CHAR(RExC_parse);
                 /* diag_listed_as: Sequence (?%s...) not recognized in regex; marked by <-- HERE in m/%s/ */
 		vFAIL3("Sequence (%.*s...) not recognized",
@@ -10304,9 +10324,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         SIZE_ONLY    /* reverse test from the others */
                         ? REG_RSN_RETURN_NAME
                         : REG_RSN_RETURN_NULL);
-		    if (RExC_parse == name_start || *RExC_parse != paren)
+		    if (   RExC_parse == name_start
+                        || RExC_parse >= RExC_end
+                        || *RExC_parse != paren)
+                    {
 		        vFAIL2("Sequence (?%c... not terminated",
 		            paren=='>' ? '<' : paren);
+                    }
 		    if (SIZE_ONLY) {
 			HE *he_str;
 			SV *sv_dat = NULL;
@@ -10374,6 +10398,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 RExC_seen |= REG_LOOKBEHIND_SEEN;
 		RExC_in_lookbehind++;
 		RExC_parse++;
+                assert(RExC_parse < RExC_end);
                 /* FALLTHROUGH */
 	    case '=':           /* (?=...) */
 		RExC_seen_zerolen++;
@@ -10421,7 +10446,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     		        SIZE_ONLY ? REG_RSN_RETURN_NULL : REG_RSN_RETURN_DATA);
     		     num = sv_dat ? *((I32 *)SvPVX(sv_dat)) : 0;
                 }
-                if (RExC_parse == RExC_end || *RExC_parse != ')')
+                if (RExC_parse >= RExC_end || *RExC_parse != ')')
                     vFAIL("Sequence (?&... not terminated");
                 goto gen_recurse_regop;
                 /* NOTREACHED */
@@ -10440,7 +10465,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 /* FALLTHROUGH */
             case '1': case '2': case '3': case '4': /* (?1) */
 	    case '5': case '6': case '7': case '8': case '9':
-	        RExC_parse--;
+	        RExC_parse = (char *) seqstart + 1;  /* Point to the digit */
               parse_recursion:
                 {
                     bool is_neg = FALSE;
@@ -10520,7 +10545,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    NOT_REACHED; /*NOTREACHED*/
 		}
 		*flagp |= POSTPONED;
-		paren = *RExC_parse++;
+		paren = '{';
+                RExC_parse++;
 		/* FALLTHROUGH */
 	    case '{':           /* (?{...}) */
 	    {
@@ -10587,11 +10613,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	        int is_define= 0;
                 const int DEFINE_len = sizeof("DEFINE") - 1;
 		if (RExC_parse[0] == '?') {        /* (?(?...)) */
-                    if (
-                        RExC_parse[1] == '=' ||
-                        RExC_parse[1] == '!' ||
-                        RExC_parse[1] == '<' ||
-                        RExC_parse[1] == '{'
+                    if (   RExC_parse < RExC_end - 1
+                        && (   RExC_parse[1] == '='
+                            || RExC_parse[1] == '!'
+                            || RExC_parse[1] == '<'
+                            || RExC_parse[1] == '{')
                     ) { /* Lookahead or eval. */
 			I32 flag;
                         regnode *tail;
@@ -10619,9 +10645,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	            U32 num = 0;
 	            SV *sv_dat=reg_scan_name(pRExC_state,
 	                SIZE_ONLY ? REG_RSN_RETURN_NULL : REG_RSN_RETURN_DATA);
-	            if (RExC_parse == name_start || *RExC_parse != ch)
+	            if (   RExC_parse == name_start
+                        || RExC_parse >= RExC_end
+                        || *RExC_parse != ch)
+                    {
                         vFAIL2("Sequence (?(%c... not terminated",
                             (ch == '>' ? '<' : ch));
+                    }
                     RExC_parse++;
 	            if (!SIZE_ONLY) {
                         num = add_data( pRExC_state, STR_WITH_LEN("S"));
@@ -10725,7 +10755,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    else
 			lastbr = NULL;
                     if (c != ')') {
-                        if (RExC_parse>RExC_end)
+                        if (RExC_parse >= RExC_end)
                             vFAIL("Switch (?(condition)... not terminated");
                         else
                             vFAIL("Switch (?(condition)... contains too many branches");
@@ -10754,11 +10784,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 vFAIL("Sequence (? incomplete");
                 break;
 	    default: /* e.g., (?i) */
-	        --RExC_parse;
+	        RExC_parse = (char *) seqstart + 1;
               parse_flags:
 		parse_lparen_question_flags(pRExC_state);
                 if (UCHARAT(RExC_parse) != ':') {
-                    if (*RExC_parse)
+                    if (RExC_parse < RExC_end)
                         nextchar(pRExC_state);
                     *flagp = TRYAGAIN;
                     return NULL;
@@ -11205,7 +11235,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 ret = reganode(pRExC_state, OPFAIL, 0);
                 return ret;
             }
-            else if (min == max && RExC_parse < RExC_end && *RExC_parse == '?')
+            else if (min == max && *RExC_parse == '?')
             {
                 if (PASS2) {
                     ckWARN2reg(RExC_parse + 1,
@@ -11327,13 +11357,12 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	(void)ReREFCNT_inc(RExC_rx_sv);
     }
 
-    if (RExC_parse < RExC_end && *RExC_parse == '?') {
+    if (*RExC_parse == '?') {
 	nextchar(pRExC_state);
 	reginsert(pRExC_state, MINMOD, ret, depth+1);
         REGTAIL(pRExC_state, ret, ret + NODE_STEP_REGNODE);
     }
-    else
-    if (RExC_parse < RExC_end && *RExC_parse == '+') {
+    else if (*RExC_parse == '+') {
         regnode *ender;
         nextchar(pRExC_state);
         ender = reg_node(pRExC_state, SUCCEED);
@@ -11344,7 +11373,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         REGTAIL(pRExC_state, ret, ender);
     }
 
-    if (RExC_parse < RExC_end && ISMULT2(RExC_parse)) {
+    if (ISMULT2(RExC_parse)) {
 	RExC_parse++;
 	vFAIL("Nested quantifiers");
     }
@@ -12002,6 +12031,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
   tryagain:
     parse_start = RExC_parse;
+    assert(RExC_parse < RExC_end);
     switch ((U8)*RExC_parse) {
     case '^':
 	RExC_seen_zerolen++;
@@ -12062,7 +12092,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         ret = reg(pRExC_state, 2, &flags,depth+1);
 	if (ret == NULL) {
 		if (flags & TRYAGAIN) {
-		    if (RExC_parse == RExC_end) {
+		    if (RExC_parse >= RExC_end) {
 			 /* Make parent create an empty node if needed. */
 			*flagp |= TRYAGAIN;
 			return(NULL);
@@ -12106,7 +12136,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	   required, as the default for this switch is to jump to the
 	   literal text handling code.
 	*/
-	switch ((U8)*++RExC_parse) {
+	RExC_parse++;
+	switch ((U8)*RExC_parse) {
 	/* Special Escapes */
 	case 'A':
 	    RExC_seen_zerolen++;
@@ -12174,7 +12205,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
 	    ret = reg_node(pRExC_state, op);
 	    *flagp |= SIMPLE;
-	    if (*(RExC_parse + 1) != '{') {
+	    if (RExC_parse >= RExC_end || *(RExC_parse + 1) != '{') {
                 FLAGS(ret) = TRADITIONAL_BOUND;
                 if (PASS2 && op > BOUNDA) {  /* /aa is same as /a */
                     OP(ret) = BOUNDA;
@@ -12397,8 +12428,12 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	case 'k':    /* Handle \k<NAME> and \k'NAME' */
       parse_named_seq:
         {
-            char ch= RExC_parse[1];
-	    if (ch != '<' && ch != '\'' && ch != '{') {
+            char ch;
+            if (   RExC_parse >= RExC_end - 1
+                || ((   ch = RExC_parse[1]) != '<'
+                                      && ch != '\''
+                                      && ch != '{'))
+            {
 	        RExC_parse++;
 		/* diag_listed_as: Sequence \%s... not terminated in regex; marked by <-- HERE in m/%s/ */
 	        vFAIL2("Sequence %.2s... not terminated",parse_start);
@@ -12440,6 +12475,9 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		        goto parse_named_seq;
                     }
 
+                    if (RExC_parse >= RExC_end) {
+                        goto unterminated_g;
+                    }
                     num = S_backref_value(RExC_parse);
                     if (num == 0)
                         vFAIL("Reference to invalid group 0");
@@ -12447,6 +12485,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                          if (isDIGIT(*RExC_parse))
 			    vFAIL("Reference to nonexistent group");
                         else
+                          unterminated_g:
                             vFAIL("Unterminated \\g... pattern");
                     }
 
@@ -12850,7 +12889,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 			    p += numlen;
                             if (PASS2   /* like \08, \178 */
                                 && numlen < 3
-                                && p < RExC_end
                                 && isDIGIT(*p) && ckWARN(WARN_REGEXP))
                             {
 				reg_warn_non_literal_string(
@@ -14367,9 +14405,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                 case ']':
                     if (depth--) break;
                     RExC_parse++;
-                    if (RExC_parse < RExC_end
-                        && *RExC_parse == ')')
-                    {
+                    if (*RExC_parse == ')') {
                         node = reganode(pRExC_state, ANYOF, 0);
                         RExC_size += ANYOF_SKIP;
                         nextchar(pRExC_state);
@@ -14516,7 +14552,8 @@ redo_curchar:
 
             case '(':
 
-                if (RExC_parse < RExC_end && (UCHARAT(RExC_parse + 1) == '?'))
+                if (   RExC_parse < RExC_end - 1
+                    && (UCHARAT(RExC_parse + 1) == '?'))
                 {
                     /* If is a '(?', could be an embedded '(?flags:(?[...])'.
                      * This happens when we have some thing like
@@ -14572,12 +14609,12 @@ redo_curchar:
                      * inversion list, and RExC_parse points to the trailing
                      * ']'; the next character should be the ')' */
                     RExC_parse++;
-                    assert(RExC_parse < RExC_end && UCHARAT(RExC_parse) == ')');
+                    assert(UCHARAT(RExC_parse) == ')');
 
                     /* Then the ')' matching the original '(' handled by this
                      * case: statement */
                     RExC_parse++;
-                    assert(RExC_parse < RExC_end && UCHARAT(RExC_parse) == ')');
+                    assert(UCHARAT(RExC_parse) == ')');
 
                     RExC_parse++;
                     RExC_flags = save_flags;
@@ -15173,8 +15210,7 @@ S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_string, const STRLEN c
 #define SKIP_BRACKETED_WHITE_SPACE(do_skip, p)                          \
     STMT_START {                                                        \
         if (do_skip) {                                                  \
-            while (   p < RExC_end                                      \
-                   && isBLANK_A(UCHARAT(p)))                            \
+            while (isBLANK_A(UCHARAT(p)))                               \
             {                                                           \
                 p++;                                                    \
             }                                                           \
@@ -15354,6 +15390,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     }
 
     SKIP_BRACKETED_WHITE_SPACE(skip_white, RExC_parse);
+
+    assert(RExC_parse <= RExC_end);
 
     if (UCHARAT(RExC_parse) == '^') {	/* Complement of range. */
 	RExC_parse++;
@@ -17599,6 +17637,7 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 {
     PERL_ARGS_ASSERT_NEXTCHAR;
 
+    if (RExC_parse < RExC_end) {
     assert(   ! UTF
            || UTF8_IS_INVARIANT(*RExC_parse)
            || UTF8_IS_START(*RExC_parse));
@@ -17607,6 +17646,7 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 
     skip_to_be_ignored_text(pRExC_state, &RExC_parse,
                             FALSE /* Don't assume /x */ );
+    }
 }
 
 STATIC regnode *
