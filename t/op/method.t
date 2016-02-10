@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 149);
+plan(tests => 150);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -469,6 +469,26 @@ is $kalled, 1, 'calling a class method via a magic variable';
     package main;
     bless {}, "AutoloadDestroy";
     ok($autoloaded, "AUTOLOAD called for DESTROY");
+
+    # 127494 - AUTOLOAD for DESTROY was called without setting $AUTOLOAD
+    local $::TODO = "caching of AUTOLOAD for DESTROY didn't set \$AUTOLOAD";
+    my %methods;
+    package AutoloadDestroy2;
+    sub AUTOLOAD {
+        our $AUTOLOAD;
+        (my $method = $AUTOLOAD) =~ s/.*:://;
+        ++$methods{$method};
+    }
+    package main;
+    # this cached AUTOLOAD as the DESTROY method
+    bless {}, "AutoloadDestroy2";
+    %methods = ();
+    my $o = bless {}, "AutoloadDestroy2";
+    # this sets $AUTOLOAD to "AutoloadDestroy2::foo"
+    $o->foo;
+    # this would call AUTOLOAD without setting $AUTOLOAD
+    undef $o;
+    ok($methods{DESTROY}, "\$AUTOLOAD set correctly for DESTROY");
 }
 
 eval { () = 3; new {} };
