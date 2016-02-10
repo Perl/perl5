@@ -532,6 +532,11 @@ for the stash.  [perl #126410]
 The AUTOLOAD method is now called when searching for a DESTROY method,
 and correctly sets C<$AUTOLOAD> too.  [perl #124387]  [perl #127494]
 
+=item *
+
+Avoid parsing beyond the end of the buffer when processing a C<#line>
+directive with no filename.  [perl #127334]
+
 =back
 
 =head1 Known Problems
