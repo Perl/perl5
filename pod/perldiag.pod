@@ -2036,6 +2036,8 @@ it's ugly.  Your code will be interpreted as an attempt to call a method
 named "elseif" for the class returned by the following block.  This is
 unlikely to be what you want.
 
+=item Empty \%c in regex; marked by S<<-- HERE> in m/%s/
+
 =item Empty \%c{} in regex; marked by S<<-- HERE> in m/%s/
 
 (F) C<\p> and C<\P> are used to introduce a named Unicode property, as
