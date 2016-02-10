@@ -125,6 +125,9 @@
 #   define ASSERT_UTF8_CACHE(cache) NOOP
 #endif
 
+static const char S_destroy[] = "DESTROY";
+#define S_destroy_len (sizeof(S_destroy)-1)
+
 /* ============================================================================
 
 =head1 Allocation and deallocation of SVs.
@@ -6791,13 +6794,33 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
                              (void *)destructor, HvNAME(stash)) );
             }
             else {
-		GV * const gv =
-		    gv_fetchmethod_pvn_flags(stash, "DESTROY", 7, GV_AUTOLOAD);
-		if (gv) destructor = GvCV(gv);
-                meta->destroy_gen = PL_sub_generation;
-                meta->destroy = destructor;
-                DEBUG_o( Perl_deb(aTHX_ "Set cached DESTROY method %p for %s\n",
-                             (void *)destructor, HvNAME(stash)) );
+                bool autoload = FALSE;
+		GV *gv =
+                    gv_fetchmeth_pvn(stash, S_destroy, S_destroy_len, -1, 0);
+		if (gv)
+                    destructor = GvCV(gv);
+                if (!destructor) {
+                    gv = gv_autoload_pvn(stash, S_destroy, S_destroy_len,
+                                         GV_AUTOLOAD_ISMETHOD);
+                    if (gv)
+                        destructor = GvCV(gv);
+                    if (destructor)
+                        autoload = TRUE;
+                }
+                /* we don't cache AUTOLOAD for DESTROY, since this code
+                   would then need to set $__PACKAGE__::AUTOLOAD, or the
+                   equivalent for XS AUTOLOADs */
+                if (!autoload) {
+                    meta->destroy_gen = PL_sub_generation;
+                    meta->destroy = destructor;
+
+                    DEBUG_o( Perl_deb(aTHX_ "Set cached DESTROY method %p for %s\n",
+                                      (void *)destructor, HvNAME(stash)) );
+                }
+                else {
+                    DEBUG_o( Perl_deb(aTHX_ "Not caching AUTOLOAD for DESTROY method for %s\n",
+                                      HvNAME(stash)) );
+                }
 	    }
 	    assert(!destructor || SvTYPE(destructor) == SVt_PVCV);
 	    if (destructor

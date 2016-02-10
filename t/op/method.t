@@ -471,7 +471,6 @@ is $kalled, 1, 'calling a class method via a magic variable';
     ok($autoloaded, "AUTOLOAD called for DESTROY");
 
     # 127494 - AUTOLOAD for DESTROY was called without setting $AUTOLOAD
-    local $::TODO = "caching of AUTOLOAD for DESTROY didn't set \$AUTOLOAD";
     my %methods;
     package AutoloadDestroy2;
     sub AUTOLOAD {
