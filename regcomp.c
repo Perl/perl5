@@ -8629,7 +8629,10 @@ Perl__invlist_search(SV* const invlist, const UV cp)
     array = invlist_array(invlist);
 
     mid = invlist_previous_index(invlist);
-    assert(mid >=0 && mid <= highest_element);
+    assert(mid >=0);
+    if (mid > highest_element) {
+        mid = highest_element;
+    }
 
     /* <mid> contains the cache of the result of the previous call to this
      * function (0 the first time).  See if this call is for the same result,
