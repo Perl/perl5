@@ -335,6 +335,9 @@ sub make_type_tab {
 
 
 sub my_system {
+    if ($Verbose) {
+        print "executing: @_\n";
+    }
     system(@_);
     if ($? == -1) {
 	die "failed to execute command '@_': $!\n";
