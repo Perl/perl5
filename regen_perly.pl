@@ -187,6 +187,8 @@ foreach ($act_fh, $tab_fh, $h_fh) {
 exit 0;
 
 
+# extract the tables and actions from the generated .c file
+
 sub extract {
     my $clines = shift;
     my $tablines;
@@ -207,23 +209,12 @@ sub extract {
     $tablines = $&;
 
 
+    # extract all the cases in the big action switch statement
+
     $clines =~ m@
-	switch \s* \( \s* \w+ \s* \) \s* { \s*
-	(
-	    case \s* \d+ \s* :
-	    \s*
-	    (?: \s* /\* .*? \*/ \s* )*	# optional C-comments
-	    \s*
-	    \#line [^\n]+"\Q$y_file\E"
-	    .*?
-	)
-	}
-	\s*
-	(?: \s* /\* .*? \*/ \s* )*	# optional C-comments
-	\s*
-	(
-	    YY_SYMBOL_PRINT
-	)
+	switch \s* \( \s* yyn \s* \) \s* { \s*
+            ( .*?  default: \s* break; \s* )
+        }
     @xms
 	or die "Can't extract actions from $tmpc_file\n";
     $actlines = $1;
