@@ -15459,7 +15459,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	    element_count++;
             non_portable_endpoint = 0;
 	}
-	if (UTF) {
+	if (UTF && ! UTF8_IS_INVARIANT(* RExC_parse)) {
 	    value = utf8n_to_uvchr((U8*)RExC_parse,
 				   RExC_end - RExC_parse,
 				   &numlen, UTF8_ALLOW_DEFAULT);
