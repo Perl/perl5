@@ -16999,8 +16999,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
 #define MATCHES_ALL_NON_UTF8_NON_ASCII(ret)                                 \
     (   DEPENDS_SEMANTICS                                                   \
-     && ANYOF_FLAGS(ret)                                                    \
-        & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)
+     && (ANYOF_FLAGS(ret)                                                   \
+        & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER))
 
     /* See if we can simplify things under /d */
     if (   has_upper_latin1_only_utf8_matches
