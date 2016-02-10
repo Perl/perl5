@@ -5130,7 +5130,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     SSize_t ln = 0; /* len or last;  init to avoid compiler warning */
     char *locinput = startpos;
     char *pushinput; /* where to continue after a PUSH */
-    I32 nextchr;   /* is always set to UCHARAT(locinput) */
+    I32 nextchr;   /* is always set to UCHARAT(locinput), or -1 at EOS */
 
     bool result = 0;	    /* return value of S_regmatch */
     int depth = 0;	    /* depth of backtrack stack */

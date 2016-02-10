@@ -8164,7 +8164,8 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
     assert (RExC_parse <= RExC_end);
     if (RExC_parse == RExC_end) NOOP;
     else if (isIDFIRST_lazy_if(RExC_parse, UTF)) {
-	 /* skip IDFIRST by using do...while */
+         /* Note that the code here assumes well-formed UTF-8.  Skip IDFIRST by
+          * using do...while */
 	if (UTF)
 	    do {
 		RExC_parse += UTF8SKIP(RExC_parse);
@@ -8607,7 +8608,9 @@ Perl__invlist_search(SV* const invlist, const UV cp)
     /* Searches the inversion list for the entry that contains the input code
      * point <cp>.  If <cp> is not in the list, -1 is returned.  Otherwise, the
      * return value is the index into the list's array of the range that
-     * contains <cp> */
+     * contains <cp>, that is, 'i' such that
+     *	array[i] <= cp < array[i+1]
+     */
 
     IV low = 0;
     IV mid;
@@ -10162,7 +10165,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
             int internal_argval = -1; /* if >-1 we are not allowed an argument*/
 
             if (has_intervening_patws) {
-                RExC_parse++;
+                RExC_parse++;   /* past the '*' */
                 vFAIL("In '(*VERB...)', the '(' and '*' must be adjacent");
             }
 	    while (RExC_parse < RExC_end && *RExC_parse != ')' ) {
@@ -10273,14 +10276,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 vFAIL("In '(?...)', the '(' and '?' must be adjacent");
             }
 
-	    RExC_parse++;
+	    RExC_parse++;           /* past the '?' */
             paren = *RExC_parse;    /* might be a trailing NUL, if not
                                        well-formed */
             RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
             if (RExC_parse > RExC_end) {
                 paren = '\0';
             }
-	    ret = NULL;			/* For lookahead/behind. */
+	    ret = NULL;			/* For look-ahead/behind. */
 	    switch (paren) {
 
 	    case 'P':	/* (?P...) variants for those used to PCRE/Python */
@@ -10318,9 +10321,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    char *name_start;
 		    SV *svname;
 		    paren= '>';
+                /* FALLTHROUGH */
             case '\'':          /* (?'...') */
-    		    name_start= RExC_parse;
-    		    svname = reg_scan_name(pRExC_state,
+                    name_start = RExC_parse;
+                    svname = reg_scan_name(pRExC_state,
                         SIZE_ONLY    /* reverse test from the others */
                         ? REG_RSN_RETURN_NAME
                         : REG_RSN_RETURN_NULL);
@@ -10779,7 +10783,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    case '[':           /* (?[ ... ]) */
                 return handle_regex_sets(pRExC_state, NULL, flagp, depth,
                                          oregcomp_parse);
-            case 0:
+            case 0: /* A NUL */
 		RExC_parse--; /* for vFAIL to print correctly */
                 vFAIL("Sequence (? incomplete");
                 break;
@@ -11224,7 +11228,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
                     /* We can't back off the size because we have to reserve
                      * enough space for all the things we are about to throw
-                     * away, but we can shrink it by the ammount we are about
+                     * away, but we can shrink it by the amount we are about
                      * to re-use here */
                     RExC_size += PREVOPER(RExC_size) - regarglen[(U8)OPFAIL];
                 }
@@ -11550,6 +11554,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 
     RExC_parse += 2;	/* Skip past the 'U+' */
 
+    /* Because toke.c has generated a special construct for us guaranteed not
+     * to have NULs, we can use a str function */
     endchar = RExC_parse + strcspn(RExC_parse, ".}");
 
     /* Code points are separated by dots.  If none, there is only one code
@@ -14349,18 +14355,15 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                 default:
                     break;
                 case '\\':
-                    /* Skip the next byte (which could cause us to end up in
-                     * the middle of a UTF-8 character, but since none of those
-                     * are confusable with anything we currently handle in this
-                     * switch (invariants all), it's safe.  We'll just hit the
-                     * default: case next time and keep on incrementing until
-                     * we find one of the invariants we do handle. */
+                    /* Skip past this, so the next character gets skipped, after
+                     * the switch */
                     RExC_parse++;
                     if (*RExC_parse == 'c') {
                             /* Skip the \cX notation for control characters */
                             RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
                     }
                     break;
+
                 case '[':
                 {
                     /* See if this is a [:posix:] class. */
@@ -15393,7 +15396,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     assert(RExC_parse <= RExC_end);
 
-    if (UCHARAT(RExC_parse) == '^') {	/* Complement of range. */
+    if (UCHARAT(RExC_parse) == '^') {	/* Complement the class */
 	RExC_parse++;
         invert = TRUE;
         allow_multi_folds = FALSE;
@@ -16511,9 +16514,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         if (UNLIKELY(posixl_matches_all)) {
             op = SANY;
         }
-        else if (namedclass > OOB_NAMEDCLASS) { /* this is a named class, like
-                                                   \w or [:digit:] or \p{foo}
-                                                 */
+        else if (namedclass > OOB_NAMEDCLASS) { /* this is a single named
+                                                   class, like \w or [:digit:]
+                                                   or \p{foo} */
 
             /* All named classes are mapped into POSIXish nodes, with its FLAG
              * argument giving which class it is */
@@ -16938,7 +16941,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             /* If it matters to the final outcome, see if a non-property
              * component of the class matches above Unicode.  If so, the
              * warning gets suppressed.  This is true even if just a single
-             * such code point is specified, as though not strictly correct if
+             * such code point is specified, as, though not strictly correct if
              * another such code point is matched against, the fact that they
              * are using above-Unicode code points indicates they should know
              * the issues involved */
@@ -17006,14 +17009,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         if (has_upper_latin1_only_utf8_matches) {
             if (MATCHES_ALL_NON_UTF8_NON_ASCII(ret)) {
 
-                /* Here, we have two, almost opposite, constraints in effect
-                 * for upper latin1 characters.  The macro means they all match
-                 * when the target string ISN'T in UTF-8.
-                 * 'has_upper_latin1_only_utf8_matches' contains the chars that
-                 * match only if the target string IS UTF-8.  Therefore the
-                 * ones in 'has_upper_latin1_only_utf8_matches' match
-                 * regardless of UTF-8, so can be added to the regular list,
-                 * and 'has_upper_latin1_only_utf8_matches' cleared */
+                /* Here, we have both the flag and inversion list.  Any character in
+                 * 'has_upper_latin1_only_utf8_matches' matches when UTF-8 is
+                 * in effect, but it also matches when UTF-8 is not in effect
+                 * because of MATCHES_ALL_NON_UTF8_NON_ASCII.  Therefore it
+                 * matches unconditionally, so can be added to the regular
+                 * list, and 'has_upper_latin1_only_utf8_matches' cleared */
                 _invlist_union(cp_list,
                                has_upper_latin1_only_utf8_matches,
                                &cp_list);
@@ -17638,14 +17639,14 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
     PERL_ARGS_ASSERT_NEXTCHAR;
 
     if (RExC_parse < RExC_end) {
-    assert(   ! UTF
-           || UTF8_IS_INVARIANT(*RExC_parse)
-           || UTF8_IS_START(*RExC_parse));
+        assert(   ! UTF
+               || UTF8_IS_INVARIANT(*RExC_parse)
+               || UTF8_IS_START(*RExC_parse));
 
-    RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
+        RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
 
-    skip_to_be_ignored_text(pRExC_state, &RExC_parse,
-                            FALSE /* Don't assume /x */ );
+        skip_to_be_ignored_text(pRExC_state, &RExC_parse,
+                                FALSE /* Don't assume /x */ );
     }
 }
 
