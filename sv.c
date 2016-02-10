@@ -3121,10 +3121,7 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
                     DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
                     STORE_LC_NUMERIC_SET_TO_NEEDED();
 
-                    local_radix =
-                        PL_numeric_local &&
-                        PL_numeric_radix_sv &&
-                        SvUTF8(PL_numeric_radix_sv);
+                    local_radix = PL_numeric_local && PL_numeric_radix_sv;
                     if (local_radix && SvLEN(PL_numeric_radix_sv) > 1) {
                         size += SvLEN(PL_numeric_radix_sv) - 1;
                         s = SvGROW_mutable(sv, size);
@@ -3134,8 +3131,10 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 
                     /* If the radix character is UTF-8, and actually is in the
                      * output, turn on the UTF-8 flag for the scalar */
-                    if (local_radix &&
-                        instr(s, SvPVX_const(PL_numeric_radix_sv))) {
+                    if (   local_radix
+                        && SvUTF8(PL_numeric_radix_sv)
+                        && instr(s, SvPVX_const(PL_numeric_radix_sv)))
+                    {
                         SvUTF8_on(sv);
                     }
 
