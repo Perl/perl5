@@ -19189,7 +19189,7 @@ S_put_code_point(pTHX_ SV *sv, UV c)
             Perl_sv_catpvf(aTHX_ sv, "%s", mnemonic);
         }
         else {
-            Perl_sv_catpvf(aTHX_ sv, "\\x{%02X}", (U8) c);
+            Perl_sv_catpvf(aTHX_ sv, "\\x%02X", (U8) c);
         }
     }
 }
@@ -19345,10 +19345,10 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
                     : NUM_ANYOF_CODE_POINTS - 1;
 #if NUM_ANYOF_CODE_POINTS > 256
         format = (this_end < 256)
-                 ? "\\x{%02"UVXf"}-\\x{%02"UVXf"}"
+                 ? "\\x%02"UVXf"-\\x%02"UVXf""
                  : "\\x{%04"UVXf"}-\\x{%04"UVXf"}";
 #else
-        format = "\\x{%02"UVXf"}-\\x{%02"UVXf"}";
+        format = "\\x%02"UVXf"-\\x%02"UVXf"";
 #endif
         GCC_DIAG_IGNORE(-Wformat-nonliteral);
         Perl_sv_catpvf(aTHX_ sv, format, start, this_end);
