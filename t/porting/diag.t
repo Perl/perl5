@@ -91,6 +91,9 @@ while (<$diagfh>) {
 
     $cur_entry =~ s/\n/ /gs; # Fix multi-line headers if they have \n's
     $cur_entry =~ s/\s+\z//;
+    $cur_entry =~ s/E<lt>/</g;
+    $cur_entry =~ s/E<gt>/>/g;
+    $cur_entry =~ s,E<sol>,/,g;
     $cur_entry =~ s/[BCIFS](?:<<< (.*?) >>>|<< (.*?) >>|<(.*?)>)/$+/g;
 
     if (exists $entries{$cur_entry} &&  $entries{$cur_entry}{todo}
