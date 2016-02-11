@@ -505,8 +505,9 @@ Ap	|void	|gv_efullname	|NN SV* sv|NN const GV* gv
 Apmb	|void	|gv_efullname3	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix
 Ap	|void	|gv_efullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|bool keepmain
 Ap	|GV*	|gv_fetchfile	|NN const char* name
-Ap	|GV*	|gv_fetchfile_flags|NN const char *const name|const STRLEN len\
+Am	|GV*	|gv_fetchfile_flags|NN const char *const name|const STRLEN len\
 				|const U32 flags
+pX	|GV*	|gv_fetchfile_x|NN const char *const name|const STRLEN len
 Amd	|GV*	|gv_fetchmeth	|NULLOK HV* stash|NN const char* name \
 				|STRLEN len|I32 level
 Apd	|GV*	|gv_fetchmeth_sv	|NULLOK HV* stash|NN SV* namesv|I32 level|U32 flags

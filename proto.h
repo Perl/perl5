@@ -1004,8 +1004,9 @@ PERL_CALLCONV void	Perl_gv_efullname4(pTHX_ SV* sv, const GV* gv, const char* pr
 PERL_CALLCONV GV*	Perl_gv_fetchfile(pTHX_ const char* name);
 #define PERL_ARGS_ASSERT_GV_FETCHFILE	\
 	assert(name)
-PERL_CALLCONV GV*	Perl_gv_fetchfile_flags(pTHX_ const char *const name, const STRLEN len, const U32 flags);
-#define PERL_ARGS_ASSERT_GV_FETCHFILE_FLAGS	\
+/* PERL_CALLCONV GV*	gv_fetchfile_flags(pTHX_ const char *const name, const STRLEN len, const U32 flags); */
+PERL_CALLCONV GV*	Perl_gv_fetchfile_x(pTHX_ const char *const name, const STRLEN len);
+#define PERL_ARGS_ASSERT_GV_FETCHFILE_X	\
 	assert(name)
 /* PERL_CALLCONV GV*	gv_fetchmeth(pTHX_ HV* stash, const char* name, STRLEN len, I32 level); */
 /* PERL_CALLCONV GV*	gv_fetchmeth_autoload(pTHX_ HV* stash, const char* name, STRLEN len, I32 level); */

@@ -98,16 +98,14 @@ Perl_gv_fetchfile(pTHX_ const char *name)
 }
 
 GV *
-Perl_gv_fetchfile_flags(pTHX_ const char *const name, const STRLEN namelen,
-			const U32 flags)
+Perl_gv_fetchfile_x(pTHX_ const char *const name, const STRLEN namelen)
 {
     char smallbuf[128];
     char *tmpbuf;
     const STRLEN tmplen = namelen + 2;
     GV *gv;
 
-    PERL_ARGS_ASSERT_GV_FETCHFILE_FLAGS;
-    PERL_UNUSED_ARG(flags);
+    PERL_ARGS_ASSERT_GV_FETCHFILE_X;
 
     if (!PL_defstash)
 	return NULL;
