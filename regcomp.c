@@ -18429,11 +18429,16 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                                                     bitmap_invlist);
                 if (lv && lv != &PL_sv_undef) {
                     char *s = savesvpv(lv);
-                    char * const origs = s;
+                    const char * const orig_s = s;  /* Save the beginning of
+                                                       's', so can be freed */
 
+                    /* Ignore anything before the first \n */
                     while (*s && *s != '\n')
                         s++;
 
+                    /* The data are one range per line.  A range is a single
+                     * entity; or two, separated by \t.  So can just convert \n
+                     * to space and \t to '-' */
                     if (*s == '\n') {
                         const char * const t = ++s;
 
@@ -18454,10 +18459,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                             if (*s == '\n') {
 
                                 /* Truncate very long output */
-                                if (s - origs > 256) {
+                                if ((UV) (s - t) > 256) {
                                     Perl_sv_catpvf(aTHX_ sv,
                                                 "%.*s...",
-                                                (int) (s - origs - 1),
+                                                (int) (s - t),
                                                 t);
                                     goto out_dump;
                                 }
@@ -18468,15 +18473,18 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                             }
                             s++;
                         }
+
+                        /* Here, it fits in the allocated space.  Replace a
+                         * final blank with a NUL */
                         if (s[-1] == ' ')
-                            s[-1] = 0;
+                            s[-1] = '\0';
 
                         sv_catpv(sv, t);
                     }
 
                   out_dump:
 
-                    Safefree(origs);
+                    Safefree(orig_s);
                     SvREFCNT_dec_NN(lv);
                 }
 
