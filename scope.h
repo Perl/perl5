@@ -310,7 +310,7 @@ scope has the given name. C<name> must be a C<NUL>-terminated literal string.
 #define SAVECOPLINE(c)		SAVEI32(CopLINE(c))
 
 /* SSNEW() temporarily allocates a specified number of bytes of data on the
- * savestack.  It returns an integer index into the savestack, because a
+ * savestack.  It returns an I32 index into the savestack, because a
  * pointer would get broken if the savestack is moved on reallocation.
  * SSNEWa() works like SSNEW(), but also aligns the data to the specified
  * number of bytes.  MEM_ALIGNBYTES is perhaps the most useful.  The
