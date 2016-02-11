@@ -1771,6 +1771,8 @@ if (! $has_input_files) {
                 # Transform pod language to what we are expecting
                 $node =~ s,E<sol>,/,g;
                 $node =~ s/E<verbar>/|/g;
+                $node =~ s/E<lt>/</g;
+                $node =~ s/E<gt>/>/g;
 
                 # If link is to a node that exists in the file, is ok
                 if ($nodes{$linked_to_page}{$node}) {
