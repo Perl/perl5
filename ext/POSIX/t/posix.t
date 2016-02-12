@@ -10,7 +10,7 @@ BEGIN {
     require 'loc_tools.pl';
 }
 
-use Test::More tests => 120;
+use Test::More tests => 94;
 
 use POSIX qw(fcntl_h signal_h limits_h _exit getcwd open read strftime write
 	     errno localeconv dup dup2 lseek access);
@@ -307,40 +307,6 @@ $result = eval {POSIX::fgets};
 is ($result, undef, "fgets should fail");
 like ($@, qr/^Use method IO::Handle::gets\(\) instead/,
       "check its redef message");
-
-{
-    no warnings 'deprecated';
-    # Simplistic tests for the isXXX() functions (bug #16799)
-    ok( POSIX::isalnum('1'),  'isalnum' );
-    ok(!POSIX::isalnum('*'),  'isalnum' );
-    ok( POSIX::isalpha('f'),  'isalpha' );
-    ok(!POSIX::isalpha('7'),  'isalpha' );
-    ok( POSIX::iscntrl("\cA"),'iscntrl' );
-    ok(!POSIX::iscntrl("A"),  'iscntrl' );
-    ok( POSIX::isdigit('1'),  'isdigit' );
-    ok(!POSIX::isdigit('z'),  'isdigit' );
-    ok( POSIX::isgraph('@'),  'isgraph' );
-    ok(!POSIX::isgraph(' '),  'isgraph' );
-    ok( POSIX::islower('l'),  'islower' );
-    ok(!POSIX::islower('L'),  'islower' );
-    ok( POSIX::isupper('U'),  'isupper' );
-    ok(!POSIX::isupper('u'),  'isupper' );
-    ok( POSIX::isprint('$'),  'isprint' );
-    ok(!POSIX::isprint("\n"), 'isprint' );
-    ok( POSIX::ispunct('%'),  'ispunct' );
-    ok(!POSIX::ispunct('u'),  'ispunct' );
-    ok( POSIX::isspace("\t"), 'isspace' );
-    ok(!POSIX::isspace('_'),  'isspace' );
-    ok( POSIX::isxdigit('f'), 'isxdigit' );
-    ok(!POSIX::isxdigit('g'), 'isxdigit' );
-    # metaphysical question : what should be returned for an empty string ?
-    # anyway this shouldn't segfault (bug #24554)
-    ok( POSIX::isalnum(''),   'isalnum empty string' );
-    ok( POSIX::isalnum(undef),'isalnum undef' );
-    # those functions should stringify their arguments
-    ok(!POSIX::isalpha([]),   'isalpha []' );
-    ok( POSIX::isprint([]),   'isprint []' );
-}
 
 eval { use strict; POSIX->import("S_ISBLK"); my $x = S_ISBLK };
 unlike( $@, qr/Can't use string .* as a symbol ref/, "Can import autoloaded constants" );

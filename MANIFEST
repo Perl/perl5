@@ -3850,7 +3850,6 @@ ext/POSIX/Makefile.PL		POSIX extension makefile writer
 ext/POSIX/POSIX.xs		POSIX extension external subroutines
 ext/POSIX/t/export.t		Test @EXPORT and @EXPORT_OK
 ext/POSIX/t/iscrash		See if POSIX isxxx() crashes with threads on Win32
-ext/POSIX/t/is.t		See if POSIX isxxx() work
 ext/POSIX/t/math.t		Basic math tests for POSIX
 ext/POSIX/t/posix.t		See if POSIX works
 ext/POSIX/t/sigaction.t		See if POSIX::sigaction works
