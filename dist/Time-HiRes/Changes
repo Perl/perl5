@@ -1,5 +1,11 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9729 [2016-02-13]
+  - new constants
+    [rt.cpan.org #111170]
+  - clock_getres(), clock_gettime(), clock_nanosleep() emulation for OS X
+    [rt.cpan.org #78566]
+
 1.9728 [2015-11-13]
   - No changes since 1.9727_03
 
