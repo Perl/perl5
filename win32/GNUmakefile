@@ -41,15 +41,6 @@ GCCVER1   := $(shell for /f "delims=. tokens=1,2,3" %%i in ('gcc -dumpversion') 
 GCCVER2   := $(shell for /f "delims=. tokens=1,2,3" %%i in ('gcc -dumpversion') do echo %%j)
 GCCVER3   := $(shell for /f "delims=. tokens=1,2,3" %%i in ('gcc -dumpversion') do echo %%k)
 
-ifeq ($(GCCTARGET),x86_64-w64-mingw32)
-WIN64 := define
-ARCHITECTURE := x64
-endif
-ifeq ($(GCCTARGET),i686-w64-mingw32)
-WIN64 := undef
-ARCHITECTURE := x86
-endif
-
 ##
 ## Build configuration.  Edit the values below to suit your needs.
 ##
@@ -361,6 +352,17 @@ endif
 
 ifeq ($(USE_NO_REGISTRY),define)
 BUILDOPT	+= -DWIN32_NO_REGISTRY
+endif
+
+ifeq ($(CCTYPE),GCC)
+ifeq ($(GCCTARGET),x86_64-w64-mingw32)
+WIN64 := define
+ARCHITECTURE := x64
+endif
+ifeq ($(GCCTARGET),i686-w64-mingw32)
+WIN64 := undef
+ARCHITECTURE := x86
+endif
 endif
 
 PROCESSOR_ARCHITECTURE  ?= x86
