@@ -85,7 +85,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.37';
+    $VERSION = '1.38';
 }
 
 EOT
@@ -319,6 +319,7 @@ sub bootstrap {
     <</$^O-eq-os2>>
     my @modparts = split(/::/,$module);
     my $modfname = $modparts[-1];
+    my $modfname_orig = $modfname; # For .bs file search
 
     # Some systems have restrictions on files names for DLL's etc.
     # mod2fname returns appropriate file base name (typically truncated)
@@ -338,9 +339,10 @@ sub bootstrap {
 		       "(auto/$modpname/$modfname.$dl_dlext)\n"
 	if $dl_debug;
 
+    my $dir;
     foreach (@INC) {
 	<<$^O-eq-VMS>>chop($_ = VMS::Filespec::unixpath($_));<</$^O-eq-VMS>>
-	    my $dir = "$_/auto/$modpname";
+	    $dir = "$_/auto/$modpname";
 	
 	next unless -d $dir; # skip over uninteresting directories
 	
@@ -365,7 +367,9 @@ sub bootstrap {
     # Execute optional '.bootstrap' perl script for this module.
     # The .bs file can be used to configure @dl_resolve_using etc to
     # match the needs of the individual module on this architecture.
-    my $bs = $file;
+    # N.B. The .bs file does not following the naming convention used
+    # by mod2fname.
+    my $bs = "$dir/$modfname_orig";
     $bs =~ s/(\.\w+)?(;\d*)?$/\.bs/; # look for .bs 'beside' the library
     if (-s $bs) { # only read file if it's not empty
         print STDERR "BS: $bs ($^O, $dlsrc)\n" if $dl_debug;
