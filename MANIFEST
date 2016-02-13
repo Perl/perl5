@@ -3527,6 +3527,7 @@ dist/Tie-File/t/33_defer_vs.t		Like 30_defer.t, but with varying-length records
 dist/Tie-File/t/40_abs_cache.t		Unit tests for Tie::File::Cache
 dist/Tie-File/t/41_heap.t		Unit tests for Tie::File::Heap
 dist/Tie-File/t/42_offset.t		Unit tests for the offset method
+dist/Time-HiRes/Changes			Time::HiRes extension
 dist/Time-HiRes/fallback/const-c.inc	Time::HiRes extension
 dist/Time-HiRes/fallback/const-xs.inc	Time::HiRes extension
 dist/Time-HiRes/hints/aix.pl		Hint for Time::HiRes for named architecture
