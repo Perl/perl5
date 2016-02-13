@@ -132,7 +132,7 @@ Revision history for the Perl extension Time::HiRes.
 	- it seems that HP-UX has started (at least in 11.31 ia64)
 	  #defining the CLOCK_REALTIME et alia (instead of having
 	  them just as enums)
-	- document all the diagnostics 
+	- document all the diagnostics
 
 1.9712	[2008-02-09]
 	- move the sub tick in the test file back to where it used to be
@@ -270,7 +270,7 @@ Revision history for the Perl extension Time::HiRes.
 	    my @stat = Time::HiRes::stat();
 
 	  or even override the standard stat():
-      
+
 	    use Time::HiRes qw(stat);
 
           to get the stat() timestamps
@@ -500,7 +500,7 @@ Revision history for the Perl extension Time::HiRes.
 	- should now build in Cygwin [rt.cpan.org #7535] (since 1.64)
 	- close also [rt.cpan.org #5933] "Time::HiRes::time does not
 	  pick up time adjustments like ntp" since ever reproducing it
-	  (and therefore verifying a possible fix) in the same environment 
+	  (and therefore verifying a possible fix) in the same environment
 	  has become rather unlikely
 
 1.65	[2004-09-18]
@@ -791,7 +791,7 @@ Revision history for the Perl extension Time::HiRes.
 	- 12617: don't try to print ints as IVs, from Jarkko Hietaniemi
 	- 12609: croak on negative time, from Jarkko Hietaniemi
 	- 12595: Cygwin rounds up for time(), from Jarkko Hietaniemi
-	- 12594: MacOS Classic timeofday, from Chris Nandor 
+	- 12594: MacOS Classic timeofday, from Chris Nandor
 	- 12473: allow for more than one second for sleep() and usleep()
 	- 12458: test tuning, relax timing constraints,
 		 from Jarkko Hietaniemi
@@ -809,13 +809,13 @@ Revision history for the Perl extension Time::HiRes.
 	- 11797: problem in HiRes.t, from John P. Linderman
 	- 11414: prototype from Time::HiRes::sleep(), from Abhijit Menon-Sen
 	- 11409: Time::HiRes qw(sleep) failed, from Abhijit Menon-Sen
-	- 11270: dynix/ptx 4.5.2 hints fix, from Peter Prymmer 
+	- 11270: dynix/ptx 4.5.2 hints fix, from Peter Prymmer
 	- 11032: VAX VMS s/div/lib\$ediv/ fix, from Peter Prymmer
 	- 11011: VAX VMS s/qdiv/div/ fix, from Peter Prymmer
 	- 10953: SCO OpenServer 5.0.5 requires an explicit -lc for usleep(),
 		 from Jonathan Stowe
 	- 10942: MPE/IX test tweaks, from Mark Bixby
-	- 10784: unnecessary pod2man calls, from Andy Dougherty 
+	- 10784: unnecessary pod2man calls, from Andy Dougherty
 	- 10354: ext/ + -Wall, from Doug MacEachern
 	- 10320: fix the BOOT section to call myU2time correctly
 	- 10317: correct casting for AIX< from H. Merijn Brand
@@ -826,10 +826,10 @@ Revision history for the Perl extension Time::HiRes.
 	-  9708: test also the scalar aspect of getitimer()
 	-  9705: Add interval timers (setitimer, getitimer)
 	-  9692: do not require at least 5.005 using XS
-		 
+		
 	The following changes were made on top of the changes
 	made for Time::HiRes during the Perl 5.7 development
-	cycle that culminated in the release of Perl 5.8.0. 
+	cycle that culminated in the release of Perl 5.8.0.
 
 	- add "require 5.005" to the Makefile.PL
 	- remove the REVISION section (CVS log) from HiRes.pm
@@ -844,7 +844,7 @@ Revision history for the Perl extension Time::HiRes.
 	- bump the VERSION to 1.29
 
 1.20  Wed Feb 24 21:30 1999
-	- make our usleep and ualarm substitutes into hrt_usleep 
+	- make our usleep and ualarm substitutes into hrt_usleep
 	  and hrt_ualarm. This helps static links of Perl with other
 	  packages that also have usleep, etc. From
 	  Ilya Zakharevich <ilya@math.ohio-state.edu>
@@ -886,7 +886,7 @@ Revision history for the Perl extension Time::HiRes.
 	  Hp/UX 9 doesn't like that. Provided by Roland B Robert, PhD.
 	- make Win32. We only get gettimeofday (the select hack doesn't
 	  seem to work on my Win95 system).
-	- fix test 4 on 01test.t. add test to see if time() and 
+	- fix test 4 on 01test.t. add test to see if time() and
 	  Time::HiRes::time() are close.
 
 1.16  Wed Nov 12 21:05 1997
@@ -939,18 +939,18 @@ Revision history for the Perl extension Time::HiRes.
 
 1.10  Thu May 22 20:20:00 1997
 	- HiRes.xs, HiRes.pm, t/*:
-	      -	only compile what we have OS support for (or can 
+	      -	only compile what we have OS support for (or can
 		fake with select())
-	      - only test what we compiled 
+	      - only test what we compiled
 	      - gross improvement to the test suite
-	      - fix EXPORT_FAIL. 
+	      - fix EXPORT_FAIL.
 	  This work was all done by Roderick Schertler
 	  <roderick@argon.org>. If you run Linux or
-	  one of the other ualarm-less platforms, and you like this 
-	  module, let Roderick know; without him, it still wouldn't 
+	  one of the other ualarm-less platforms, and you like this
+	  module, let Roderick know; without him, it still wouldn't
 	  be working on those boxes...
 	- Makefile.PL: figure out what routines the OS has and
-	  only build what we need. These bits were written by Jarkko 
+	  only build what we need. These bits were written by Jarkko
 	  Hietaniemi <jhi@iki.fi>. Again, gratitude is due...
 
 1.02  Mon Dec 30 08:00:00 1996
@@ -960,7 +960,7 @@ Revision history for the Perl extension Time::HiRes.
 
 1.01  Fri Oct 17 08:00:00 1996
 	- Makefile.PL: make XSPROTOARGS => '-noprototyopes'
-	- HiRes.pm: put blank line between __END__ and =head1 so that 
+	- HiRes.pm: put blank line between __END__ and =head1 so that
 	  pod2man works.
 
 1.00  Tue Sep 03 13:00:00 1996
