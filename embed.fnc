@@ -801,14 +801,13 @@ Ap	|void	|vload_module|U32 flags|NN SV* name|NULLOK SV* ver|NULLOK va_list* args
 p	|OP*	|localize	|NN OP *o|I32 lex
 ApdR	|I32	|looks_like_number|NN SV *const sv
 Apd	|UV	|grok_bin	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
-EMiR	|bool	|grok_bslash_x	|NN char** s|NN UV* uv           \
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_DQUOTE_C)
+EMpRX	|bool	|grok_bslash_x	|NN char** s|NN UV* uv           \
 				|NN const char** error_msg       \
 				|const bool output_warning       \
 				|const bool strict               \
 				|const bool silence_non_portable \
 				|const bool utf8
-#endif
 EMpRX	|char	|grok_bslash_c	|const char source|const bool output_warning
 EMpRX	|bool	|grok_bslash_o	|NN char** s|NN UV* uv           \
 				|NN const char** error_msg       \
@@ -816,8 +815,10 @@ EMpRX	|bool	|grok_bslash_o	|NN char** s|NN UV* uv           \
 				|const bool strict               \
 				|const bool silence_non_portable \
 				|const bool utf8
-EMpPRX	|char*|form_short_octal_warning|NN const char * const s  \
+EMiR	|char*|form_short_octal_warning|NN const char * const s  \
 				|const STRLEN len
+EiPRn	|I32	|regcurly	|NN const char *s
+#endif
 Apd	|UV	|grok_hex	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 Apd	|int	|grok_infnan	|NN const char** sp|NN const char *send
 Apd	|int	|grok_number	|NN const char *pv|STRLEN len|NULLOK UV *valuep
@@ -1199,9 +1200,6 @@ Ap	|char*	|re_intuit_start|NN REGEXP * const rx \
 				|const U32 flags \
 				|NULLOK re_scream_pos_data *data
 Ap	|SV*	|re_intuit_string|NN REGEXP  *const r
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
-EiPRn	|I32	|regcurly	|NN const char *s
-#endif
 Ap	|I32	|regexec_flags	|NN REGEXP *const rx|NN char *stringarg \
 				|NN char *strend|NN char *strbeg \
 				|SSize_t minend|NN SV *sv \
