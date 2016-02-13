@@ -578,8 +578,9 @@ might help in this (in case your system supports CLOCK_MONOTONIC).
 Some systems have APIs but not implementations: for example QNX and Haiku
 have the interval timer APIs but not the functionality.
 
-In OS X the clock_nanosleep() is emulated using the Mach timers;
-as a side effect the CLOCK_REALTIME and CLOCK_MONOTONIC are the same timer.
+In OS X clock_getres(), clock_gettime() and clock_nanosleep() are
+emulated using the Mach timers; as a side effect of being emulated
+the CLOCK_REALTIME and CLOCK_MONOTONIC are the same timer.
 
 =head1 SEE ALSO
 
