@@ -5604,7 +5604,9 @@ X<pos> X<match, position>
 
 Returns the offset of where the last C<m//g> search left off for the
 variable in question (L<C<$_>|perlvar/$_> is used when the variable is not
-specified).  Note that 0 is a valid match offset.
+specified).  This offset is in characters unless the
+(no-longer-recommended) L<C<use bytes>|bytes> pragma is in effect, in
+which case the offset is in bytes.  Note that 0 is a valid match offset.
 L<C<undef>|/undef EXPR> indicates
 that the search position is reset (usually due to match failure, but
 can also be because no match has yet been run on the scalar).

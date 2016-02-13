@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 29;
+plan tests => 33;
 
 $x='banana';
 $x=~/.a/g;
@@ -130,4 +130,32 @@ for my $one(pos $x) {
         is $one, undef,
            'no assertion failure when getting pos clobbers ref with undef';
     }
+}
+
+{
+    # RT # 127518
+    my $x = "\N{U+10000}abc";
+    my %expected = (
+        chars   => { length => 4, pos => 2 },
+        bytes   => { length => 7, pos => 5 },
+    );
+    my %observed;
+    $observed{chars}{length} = length($x);
+    $x =~ m/a/g;
+    $observed{chars}{pos}    = pos($x);
+
+    {
+        use bytes;
+        $observed{bytes}{length} = length($x);
+        $observed{bytes}{pos}    = pos($x);
+    }
+
+    is( $observed{chars}{length}, $expected{chars}{length},
+         "Got expected length in chars");
+    is( $observed{chars}{pos}, $expected{chars}{pos},
+         "Got expected pos in chars");
+    is( $observed{bytes}{length}, $expected{bytes}{length},
+         "Got expected length in bytes");
+    is( $observed{bytes}{pos}, $expected{bytes}{pos},
+         "Got expected pos in bytes");
 }
