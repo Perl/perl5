@@ -162,11 +162,11 @@ for file in `$cat .clist`; do
     ( $echo "#line 2 \"$file\"";                               \
       $sed -n <$file                                           \
 	-e "/^${filebase}_init(/q"                             \
-        -e ': testcont'                                        \
+        -e ': tstcont'                                         \
 	-e '/^[ 	]*#/s|[ 	]*/\*..*\*/[ 	]*| |' \
         -e '/\\$/{'                                            \
             -e 'N'                                             \
-            -e 'b testcont'                                    \
+            -e 'b tstcont'                                     \
         -e '}'                                                 \
 	-e 's/\\\n//g'                                         \
 	-e '/^#line/d'                                         \
