@@ -999,6 +999,9 @@ use it will raise a warning, unless disabled via
 Comments on this feature are welcome; send email to
 C<perl5-porters@perl.org>.
 
+The rules used by L<C<use re 'strict>|re/'strict' mode> apply to this
+construct.
+
 We can extend the example above:
 
  /(?[ ( \p{Thai} + \p{Lao} ) & \p{Digit} ])/
