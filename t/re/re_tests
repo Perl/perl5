@@ -1615,6 +1615,8 @@ a(.)\4294967298	ab\o{42}94967298	ya	$1	b	\d not converted to native; \o{} is
 ^m?(\d)(.*)\1$	5b5	y	$1	5
 ^m?(\d)(.*)\1$	aba	n	-	-
 
+^_?[^\W_0-9]\w\z	\xAA\x{100}	y	$&	\xAA\x{100}		[perl #127537]
+
 # 17F is 'Long s';  This makes sure the a's in /aa can be separate
 /s/ai	\x{17F}	y	$&	\x{17F}
 /s/aia	\x{17F}	n	-	-

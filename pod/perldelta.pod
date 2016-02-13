@@ -577,6 +577,14 @@ specification is very close to one of the 14 legal POSIX classes.  (See
 L<perlrecharclass/POSIX Character Classes>.)
 [perl #8904]
 
+=item *
+
+Certain regex patterns involving a complemented posix class in an
+inverted bracketed character class, and matching something else
+optionally would improperly fail to match.  An example of one that could
+fail is C</qr/_?[^\Wbar]\x{100}/>.  This has been fixed.
+[perl #127537]
+
 =back
 
 =head1 Known Problems
