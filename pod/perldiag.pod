@@ -7203,9 +7203,10 @@ Something Very Wrong.
 
 (F) Named Unicode character escapes (C<\N{...}>) may return a zero-length
 sequence.  Such an escape was used in an extended character class, i.e.
-C<(?[...])>, which is not permitted.  Check that the correct escape has
-been used, and the correct charnames handler is in scope.  The S<<-- HERE>
-shows whereabouts in the regular expression the problem was discovered.
+C<(?[...])>, or under C<use re 'strict'>, which is not permitted.  Check
+that the correct escape has been used, and the correct charnames handler
+is in scope.  The S<<-- HERE> shows whereabouts in the regular
+expression the problem was discovered.
 
 =back
 

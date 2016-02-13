@@ -4747,7 +4747,7 @@ PERL_STATIC_INLINE STRLEN*	S_get_invlist_iter_addr(SV* invlist)
 #define PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR	\
 	assert(invlist)
 
-STATIC bool	S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** nodep, UV *code_point_p, int* cp_count, I32 *flagp, const U32 depth);
+STATIC bool	S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** nodep, UV *code_point_p, int* cp_count, I32 *flagp, const bool strict, const U32 depth);
 #define PERL_ARGS_ASSERT_GROK_BSLASH_N	\
 	assert(pRExC_state); assert(flagp)
 PERL_STATIC_INLINE regnode*	S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, char * parse_start, char ch);

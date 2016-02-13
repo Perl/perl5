@@ -2174,6 +2174,7 @@ Es	|bool	|grok_bslash_N	|NN RExC_state_t *pRExC_state		    \
 				|NULLOK UV *code_point_p		    \
 				|NULLOK int* cp_count			    \
 				|NN I32 *flagp				    \
+				|const bool strict			    \
 				|const U32 depth
 Es	|void	|reginsert	|NN RExC_state_t *pRExC_state \
 				|U8 op|NN regnode *opnd|U32 depth

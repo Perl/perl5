@@ -52,6 +52,12 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 C<qr/\N{}/> now disallowed under C<use re "strict">
+
+An empty C<\N{}> makes no sense, but for backwards compatibility is
+silently accepted as doing nothing.  But now this is a fatal error under
+the experimental feature L<re/'strict' mode>.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
