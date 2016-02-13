@@ -1822,35 +1822,28 @@ S_is_ssc_worth_it(const RExC_state_t * pRExC_state, const regnode_ssc * ssc)
      *      (unassigned, private use, surrogates, controls and formats).  This
      *      is a much large number. */
 
-    const U32 max_match = (LOC)
-                          ? 127
-                          : (! UNI_SEMANTICS)
-                            ? 63
-                            : (invlist_highest(ssc->invlist) < 256)
-                              ? 127
-                              : ((NON_OTHER_COUNT + 1) / 2) - 1;
     U32 count = 0;      /* Running total of number of code points matched by
                            'ssc' */
     UV start, end;      /* Start and end points of current range in inversion
                            list */
+    const U32 max_code_points = (LOC)
+                                ?  256
+                                : ((   ! UNI_SEMANTICS
+                                     || invlist_highest(ssc->invlist) < 256)
+                                  ? 128
+                                  : NON_OTHER_COUNT);
+    const U32 max_match = max_code_points / 2;
 
     PERL_ARGS_ASSERT_IS_SSC_WORTH_IT;
 
     invlist_iterinit(ssc->invlist);
     while (invlist_iternext(ssc->invlist, &start, &end)) {
-
-        /* /u is the only thing that we expect to match above 255; so if not /u
-         * and even if there are matches above 255, ignore them.  This catches
-         * things like \d under /d which does match the digits above 255, but
-         * since the pattern is /d, it is not likely to be expecting them */
-        if (! UNI_SEMANTICS) {
-            if (start > 255) {
-                break;
-            }
-            end = MIN(end, 255);
+        if (start >= max_code_points) {
+            break;
         }
+        end = MIN(end, max_code_points - 1);
         count += end - start + 1;
-        if (count > max_match) {
+        if (count >= max_match) {
             invlist_iterfinish(ssc->invlist);
             return FALSE;
         }
