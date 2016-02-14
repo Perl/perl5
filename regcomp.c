@@ -19176,14 +19176,11 @@ S_put_code_point(pTHX_ SV *sv, UV c)
 	    sv_catpvs(sv, "\\");
 	sv_catpvn(sv, &string, 1);
     }
+    else if (isMNEMONIC_CNTRL(c)) {
+        Perl_sv_catpvf(aTHX_ sv, "%s", cntrl_to_mnemonic((U8) c));
+    }
     else {
-        const char * const mnemonic = cntrl_to_mnemonic((char) c);
-        if (mnemonic) {
-            Perl_sv_catpvf(aTHX_ sv, "%s", mnemonic);
-        }
-        else {
-            Perl_sv_catpvf(aTHX_ sv, "\\x%02X", (U8) c);
-        }
+        Perl_sv_catpvf(aTHX_ sv, "\\x%02X", (U8) c);
     }
 }
 
