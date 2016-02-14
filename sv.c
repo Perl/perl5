@@ -13108,7 +13108,7 @@ Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
     pos = PerlDir_tell(dp);
     if ((dirent = PerlDir_read(dp))) {
 	len = d_namlen(dirent);
-        if (len > sizeof(dirent->d_name)) {
+        if (len > sizeof(dirent->d_name) && sizeof(dirent->d_name) > PTRSIZE) {
             /* If the len is somehow magically longer than the
              * maximum length of the directory entry, even though
              * we could fit it in a buffer, we could not copy it
