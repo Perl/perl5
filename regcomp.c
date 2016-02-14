@@ -17459,8 +17459,12 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
      *    swash exists, by calling this function with 'doinit' set to false, in
      *    which case the components that will be used to eventually create the
      *    swash are returned  (in a printable form).
+     * If <only_utf8_locale_ptr> is not NULL, it is where this routine is to
+     *    store an inversion list of code points that should match only if the
+     *    execution-time locale is a UTF-8 one.
      * If <exclude_list> is not NULL, it is an inversion list of things to
      *    exclude from what's returned in <listsvp>.
+     *
      * Tied intimately to how S_set_ANYOF_arg sets up the data structure.  Note
      * that, in spite of this function's name, the swash it returns may include
      * the bitmap data as well */
@@ -18305,9 +18309,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         if ( IS_ANYOF_TRIE(op) || trie->bitmap ) {
             sv_catpvs(sv, "[");
             (void) put_charclass_bitmap_innards(sv,
-                                                (IS_ANYOF_TRIE(op))
+                                                ((IS_ANYOF_TRIE(op))
                                                  ? ANYOF_BITMAP(o)
-                                                 : TRIE_BITMAP(trie),
+                                                 : TRIE_BITMAP(trie)),
                                                 NULL);
             sv_catpvs(sv, "]");
         }
@@ -18394,7 +18398,6 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 	int do_sep = 0;
         SV* bitmap_invlist = NULL;  /* Will hold what the bit map contains */
 
-
 	if (OP(o) == ANYOFL) {
             if (ANYOFL_UTF8_LOCALE_REQD(flags)) {
                 sv_catpvs(sv, "{utf8-loc}");
@@ -18409,13 +18412,13 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 	if (flags & ANYOF_INVERT)
 	    sv_catpvs(sv, "^");
 
-        /* output what the standard cp 0-NUM_ANYOF_CODE_POINTS-1 bitmap matches
-         * */
+        /* Output what the bitmap matches, and get what that is into
+         * 'bitmap_invlist' */
         do_sep = put_charclass_bitmap_innards(sv, ANYOF_BITMAP(o),
                                                             &bitmap_invlist);
 
-        /* output any special charclass tests (used entirely under use
-         * locale) * */
+        /* Output any special charclass tests (used entirely under 'use
+        * locale'). */
 	if (ANYOF_POSIXL_TEST_ANY_SET(o)) {
             int i;
 	    for (i = 0; i < ANYOF_POSIXL_MAX; i++) {
@@ -18434,8 +18437,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         {
             if (do_sep) {
                 Perl_sv_catpvf(aTHX_ sv,"%s][%s",PL_colors[1],PL_colors[0]);
-                if (flags & ANYOF_INVERT)
-                    /*make sure the invert info is in each */
+                if (flags & ANYOF_INVERT) /*make sure the invert info is in each */
                     sv_catpvs(sv, "^");
             }
 
@@ -19229,8 +19231,15 @@ STATIC void
 S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
 {
     /* Appends to 'sv' a displayable version of the range of code points from
-     * 'start' to 'end'.  It assumes that only ASCII printables are displayable
-     * as-is (though some of these will be escaped by put_code_point()). */
+     * 'start' to 'end'.  Mnemonics (like '\r') are used for the few controls
+     * that have them, when they occur at the beginning or end of the range.
+     * It uses hex to output the remaining code points, unless 'allow_literals'
+     * is true, in which case the printable ASCII ones are output as-is (though
+     * some of these will be escaped by put_code_point()).
+     *
+     * NOTE:  This is designed only for printing ranges of code points that fit
+     *        inside an ANYOF bitmap.  Higher code points are simply suppressed
+     */
 
     const unsigned int min_range_count = 3;
 
@@ -19244,7 +19253,7 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
 
         if (end - start < min_range_count) {
 
-            /* Individual chars in short ranges */
+            /* Output chars individually when they occur in short ranges */
             for (; start <= end; start++) {
                 put_code_point(sv, start);
             }
@@ -19253,11 +19262,11 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
 
         /* If permitted by the input options, and there is a possibility that
          * this range contains a printable literal, look to see if there is
-         * one.  */
+         * one. */
         if (allow_literals && start <= MAX_PRINT_A) {
 
-            /* If the range begin isn't an ASCII printable, effectively split
-             * the range into two parts:
+            /* If the character at the beginning of the range isn't an ASCII
+             * printable, effectively split the range into two parts:
              *  1) the portion before the first such printable,
              *  2) the rest
              * and output them separately. */
@@ -19279,18 +19288,18 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
                     temp_end = end + 1;
                 }
 
-                /* Output the first part of the split range, the part that
-                 * doesn't have printables, with no looking for literals
-                 * (otherwise we would infinitely recurse) */
+                /* Output the first part of the split range: the part that
+                 * doesn't have printables, with the parameter set to not look
+                 * for literals (otherwise we would infinitely recurse) */
                 put_range(sv, start, temp_end - 1, FALSE);
 
                 /* The 2nd part of the range (if any) starts here. */
                 start = temp_end;
 
-                /* We continue instead of dropping down because even if the 2nd
-                 * part is non-empty, it could be so short that we want to
-                 * output it specially, as tested for at the top of this loop.
-                 * */
+                /* We do a continue, instead of dropping down, because even if
+                 * the 2nd part is non-empty, it could be so short that we want
+                 * to output it as individual characters, as tested for at the
+                 * top of this loop.  */
                 continue;
             }
 
@@ -19355,7 +19364,8 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
                 temp_end--;
             }
 
-            /* And separately output the range that doesn't have mnemonics */
+            /* And separately output the interior range that doesn't start or
+             * end with mnemonics */
             put_range(sv, start, temp_end, FALSE);
 
             /* Then output the mnemonic trailing controls */
@@ -19392,7 +19402,8 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv, char *bitmap, SV** bitmap_invlist)
     /* Appends to 'sv' a displayable version of the innards of the bracketed
      * character class whose bitmap is 'bitmap';  Returns 'TRUE' if it actually
      * output anything, and bitmap_invlist, if not NULL, will point to an
-     * inversion list of what is in the bit map */
+     * inversion list of what is in the bit map.  It must be freed by the
+     * caller. */
 
     int i;
     UV start, end;
@@ -19430,11 +19441,12 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv, char *bitmap, SV** bitmap_invlist)
     /* Generally, it is more readable if printable characters are output as
      * literals, but if a range (nearly) spans all of them, it's best to output
      * it as a single range.  This code will use a single range if all but 2
-     * printables are in it */
+     * ASCII printables are in it */
     invlist_iterinit(invlist);
     while (invlist_iternext(invlist, &start, &end)) {
 
-        /* If range starts beyond final printable, it doesn't have any in it */
+        /* If the range starts beyond the final printable, it doesn't have any
+         * in it */
         if (start > MAX_PRINT_A) {
             break;
         }
