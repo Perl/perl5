@@ -18400,10 +18400,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
 	if (OP(o) == ANYOFL) {
             if (ANYOFL_UTF8_LOCALE_REQD(flags)) {
-                sv_catpvs(sv, "{utf8-loc}");
+                sv_catpvs(sv, "{utf8-locale-reqd}");
             }
-            else {
-                sv_catpvs(sv, "{loc}");
             }
         }
 	if (flags & ANYOFL_FOLD)
