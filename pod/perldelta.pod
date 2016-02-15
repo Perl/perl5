@@ -271,7 +271,11 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+The GNU Make makefile for Win32 now supports parallel builds.  [perl #126632]
+
+=item *
+
+You can now build perl with MSVC++ on Win32 using GNU Make.  [perl #126632]
 
 =back
 
@@ -290,14 +294,6 @@ that they represent may be covered elsewhere.
 =item *
 
 XXX
-
-=item *
-
-The GNU Make makefile for Win32 now supports parallel builds.  [perl #126632]
-
-=item *
-
-You can now build perl with MSVC++ on Win32 using GNU Make.  [perl #126632]
 
 =back
 
