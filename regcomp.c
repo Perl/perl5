@@ -15819,6 +15819,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     SV* invlist;
                     char* name;
                     char* base_name;    /* name after any packages are stripped */
+                    char* lookup_name = NULL;
                     const char * const colon_colon = "::";
 
                     /* Try to get the definition of the property into
@@ -15826,23 +15827,27 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                      * will have its name be <__NAME_i>.  The design is
                      * discussed in commit
                      * 2f833f5208e26b208886e51e09e2c072b5eabb46 */
-                    name = savepv(Perl_form(aTHX_
-                                          "%s%.*s%s\n",
-                                          (FOLD) ? "__" : "",
-                                          (int)n,
-                                          RExC_parse,
-                                          (FOLD) ? "_i" : ""
-                                ));
+                    name = savepv(Perl_form(aTHX_ "%.*s", (int)n, RExC_parse));
+                    if (FOLD) {
+                        lookup_name = savepv(Perl_form(aTHX_ "__%s_i", name));
+                    }
 
                     /* Look up the property name, and get its swash and
                      * inversion list, if the property is found  */
                     SvREFCNT_dec(swash); /* Free any left-overs */
-                    swash = _core_swash_init("utf8", name, &PL_sv_undef,
+                    swash = _core_swash_init("utf8",
+                                             (lookup_name)
+                                              ? lookup_name
+                                              : name,
+                                             &PL_sv_undef,
                                              1, /* binary */
                                              0, /* not tr/// */
                                              NULL, /* No inversion list */
                                              &swash_init_flags
                                             );
+                    if (lookup_name) {
+                        Safefree(lookup_name);
+                    }
                     if (! swash || ! (invlist = _get_swash_invlist(swash))) {
                         HV* curpkg = (IN_PERL_COMPILETIME)
                                       ? PL_curstash
@@ -15909,9 +15914,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                 name = savepvn(full_name, n);
                             }
                         }
-                        Perl_sv_catpvf(aTHX_ listsv, "%cutf8::%"UTF8f"\n",
+                        Perl_sv_catpvf(aTHX_ listsv, "%cutf8::%s%"UTF8f"%s\n",
                                         (value == 'p' ? '+' : '!'),
-                                        UTF8fARG(UTF, n, name));
+                                        (FOLD) ? "__" : "",
+                                        UTF8fARG(UTF, n, name),
+                                        (FOLD) ? "_i" : "");
                         has_user_defined_property = TRUE;
                         optimizable = FALSE;    /* Will have to leave this an
                                                    ANYOF node */

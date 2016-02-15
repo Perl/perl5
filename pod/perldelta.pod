@@ -345,7 +345,12 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+It now works properly to specify a user-defined property, such as
+
+ qr/\p{mypkg1::IsMyProperty}/i
+
+with C</i> caseless matching, an explicit package name, and
+I<IsMYProperty> not defined at the time of the pattern compilation.
 
 =back
 
