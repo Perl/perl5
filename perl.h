@@ -3744,12 +3744,11 @@ int perl_tsa_mutex_unlock(perl_mutex* mutex)
    so pass it through to C lib as a last resort */
 #    define ASSUME(x) assert(x)
 #  endif
-#  define NOT_REACHED ASSUME(0)
 #else
 #  define ASSUME(x) assert(x)
-#  define NOT_REACHED abort()
 #endif
 
+#define NOT_REACHED ASSUME(0)
 
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define
