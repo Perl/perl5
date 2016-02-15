@@ -15670,9 +15670,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                     /* Look up the property name, and get its swash and
                      * inversion list, if the property is found  */
-                    if (swash) {    /* Return any left-overs */
-                        SvREFCNT_dec_NN(swash);
-                    }
+                    SvREFCNT_dec(swash); /* Free any left-overs */
                     swash = _core_swash_init("utf8", name, &PL_sv_undef,
                                              1, /* binary */
                                              0, /* not tr/// */
