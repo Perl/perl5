@@ -16339,7 +16339,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                            "\"%.*s\" is more clearly written simply as \"%s\"",
                            (int) (RExC_parse - rangebegin),
                            rangebegin,
-                           cntrl_to_mnemonic((char) value)
+                           cntrl_to_mnemonic((U8) value)
                         );
                 }
             }
