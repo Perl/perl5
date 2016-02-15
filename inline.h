@@ -480,12 +480,7 @@ S_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs)
 
     PERL_ARGS_ASSERT_CX_PUSHSUB;
 
-    ENTRY_PROBE(CvNAMED(cv)
-                    ? HEK_KEY(CvNAME_HEK(cv))
-                    : GvENAME(CvGV(cv)),
-                CopFILE((const COP *)CvSTART(cv)),
-                CopLINE((const COP *)CvSTART(cv)),
-                CopSTASHPV((const COP *)CvSTART(cv)));
+    PERL_DTRACE_PROBE_ENTRY(cv);
     cx->blk_sub.cv = cv;
     cx->blk_sub.olddepth = CvDEPTH(cv);
     cx->blk_sub.prevcomppad = PL_comppad;
@@ -545,12 +540,7 @@ S_cx_popsub(pTHX_ PERL_CONTEXT *cx)
     PERL_ARGS_ASSERT_CX_POPSUB;
     assert(CxTYPE(cx) == CXt_SUB);
 
-    RETURN_PROBE(CvNAMED(cx->blk_sub.cv)
-                    ? HEK_KEY(CvNAME_HEK(cx->blk_sub.cv))
-                    : GvENAME(CvGV(cx->blk_sub.cv)),
-            CopFILE((COP*)CvSTART((const CV*)cx->blk_sub.cv)),
-            CopLINE((COP*)CvSTART((const CV*)cx->blk_sub.cv)),
-            CopSTASHPV((COP*)CvSTART((const CV*)cx->blk_sub.cv)));
+    PERL_DTRACE_PROBE_RETURN(cx->blk_sub.cv);
 
     if (CxHASARGS(cx))
         cx_popsub_args(cx);

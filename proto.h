@@ -5494,6 +5494,18 @@ PERL_CALLCONV bool	Perl_dump_c_backtrace(pTHX_ PerlIO* fp, int max_depth, int sk
 PERL_CALLCONV Perl_c_backtrace*	Perl_get_c_backtrace(pTHX_ int max_depth, int skip);
 PERL_CALLCONV SV*	Perl_get_c_backtrace_dump(pTHX_ int max_depth, int skip);
 #endif
+#if defined(USE_DTRACE)
+PERL_CALLCONV void	Perl_dtrace_probe_call(pTHX_ CV *cv, bool is_call);
+#define PERL_ARGS_ASSERT_DTRACE_PROBE_CALL	\
+	assert(cv)
+PERL_CALLCONV void	Perl_dtrace_probe_load(pTHX_ const char *name, bool is_loading);
+#define PERL_ARGS_ASSERT_DTRACE_PROBE_LOAD	\
+	assert(name)
+PERL_CALLCONV void	Perl_dtrace_probe_op(pTHX_ const OP *op);
+#define PERL_ARGS_ASSERT_DTRACE_PROBE_OP	\
+	assert(op)
+PERL_CALLCONV void	Perl_dtrace_probe_phase(pTHX_ enum perl_phase phase);
+#endif
 #if defined(USE_ITHREADS)
 PERL_CALLCONV PADOFFSET	Perl_alloccopstash(pTHX_ HV *hv);
 #define PERL_ARGS_ASSERT_ALLOCCOPSTASH	\

@@ -2940,4 +2940,11 @@ AiM	|void	|cx_pushgiven    |NN PERL_CONTEXT *cx|NULLOK SV *orig_defsv
 AiM	|void	|cx_popgiven     |NN PERL_CONTEXT *cx
 #endif
 
+#ifdef USE_DTRACE
+XEop    |void   |dtrace_probe_call |NN CV *cv|bool is_call
+XEop    |void   |dtrace_probe_load |NN const char *name|bool is_loading
+XEop    |void   |dtrace_probe_op   |NN const OP *op
+XEop    |void   |dtrace_probe_phase|enum perl_phase phase
+#endif
+
 : ex: set ts=8 sts=4 sw=4 noet:
