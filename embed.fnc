@@ -1164,7 +1164,7 @@ Amb	|OP*	|ref		|NULLOK OP* o|I32 type
 s	|OP*	|refkids	|NULLOK OP* o|I32 type
 #endif
 Ap	|void	|regdump	|NN const regexp* r
-Ap	|SV*	|regclass_swash	|NULLOK const regexp *prog \
+ApM	|SV*	|regclass_swash	|NULLOK const regexp *prog \
 				|NN const struct regnode *node|bool doinit \
 				|NULLOK SV **listsvp|NULLOK SV **altsvp
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
@@ -1517,8 +1517,8 @@ Apd	|void	|sv_vsetpvfn	|NN SV *const sv|NN const char *const pat|const STRLEN pa
 				|NULLOK va_list *const args|NULLOK SV **const svargs \
 				|const I32 svmax|NULLOK bool *const maybe_tainted
 ApR	|NV	|str_to_version	|NN SV *sv
-ApR	|SV*	|swash_init	|NN const char* pkg|NN const char* name|NN SV* listsv|I32 minbits|I32 none
-Ap	|UV	|swash_fetch	|NN SV *swash|NN const U8 *ptr|bool do_utf8
+ApRM	|SV*	|swash_init	|NN const char* pkg|NN const char* name|NN SV* listsv|I32 minbits|I32 none
+ApM	|UV	|swash_fetch	|NN SV *swash|NN const U8 *ptr|bool do_utf8
 #ifdef PERL_IN_REGCOMP_C
 EiMR	|SV*	|add_cp_to_invlist	|NULLOK SV* invlist|const UV cp
 EsM	|void	|_append_range_to_invlist   |NN SV* const invlist|const UV start|const UV end
