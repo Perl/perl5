@@ -188,6 +188,8 @@ my @death =
  '/[z-a]/' => 'Invalid [] range "z-a" {#} m/[z-a{#}]/',
 
  '/\p/' => 'Empty \p {#} m/\p{#}/',
+ '/\P/' => 'Empty \P {#} m/\P{#}/',
+ '/\p{}/' => 'Empty \p{} {#} m/\p{{#}}/',
  '/\P{}/' => 'Empty \P{} {#} m/\P{{#}}/',
 
 '/a\b{cde/' => 'Missing right brace on \b{} {#} m/a\b{{#}cde/',
