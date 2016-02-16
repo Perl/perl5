@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-our $VERSION = "1.24";
+our $VERSION = "1.25";
 
 my %err = ();
 
@@ -76,9 +76,16 @@ sub process_file {
 	}
     }
     
+    my $pat;
+    if ($IsMSWin32) {
+	$pat = '^\s*#\s*define\s+((?:WSA)?E\w+)\s+';
+    }
+    else {
+	$pat = '^\s*#\s*define\s+(E\w+)\s+';
+    }
     while(<FH>) {
 	$err{$1} = 1
-	    if /^\s*#\s*define\s+(E\w+)\s+/;
+	    if /$pat/;
     }
 
     close(FH);
@@ -358,7 +365,16 @@ ESQ
 	EUSERS EWOULDBLOCK EXDEV));
 
     $k =~ s/(.{50,70})\s/$1\n\t/g;
-    print "\t",$k,"\n    )]\n);\n\n";
+    print "\t",$k,"\n    )],\n";
+
+    if ($IsMSWin32) {
+	print "    WINSOCK => [qw(\n";
+	$k = join(" ", grep { /^WSAE/ } keys %err);
+	$k =~ s/(.{50,70})\s/$1\n\t/g;
+	print "\t",$k,"\n    )],\n";
+    }
+
+    print ");\n\n";
 
     print <<'ESQ';
 sub TIEHASH { bless \%err }
@@ -406,8 +422,12 @@ Errno - System errno constants
 =head1 DESCRIPTION
 
 C<Errno> defines and conditionally exports all the error constants
-defined in your system C<errno.h> include file. It has a single export
+defined in your system F<errno.h> include file. It has a single export
 tag, C<:POSIX>, which will export all POSIX defined error numbers.
+
+On Windows, C<Errno> also defines and conditionally exports all the
+Winsock error constants defined in your system F<WinError.h> include
+file. These are included in a second export tag, C<:WINSOCK>.
 
 C<Errno> also makes C<%!> magic such that each element of C<%!> has a
 non-zero value only if C<$!> is set to that value. For example:
