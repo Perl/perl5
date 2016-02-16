@@ -553,7 +553,7 @@ struct regnode_ssc {
  * are cautioned about its shared nature */
 #define ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER 0x80
 
-#define ANYOF_FLAGS_ALL		(0xff)
+#define ANYOF_FLAGS_ALL		(0xff & ~0x10)
 
 #define ANYOF_LOCALE_FLAGS (ANYOFL_FOLD | ANYOF_MATCHES_POSIXL)
 
