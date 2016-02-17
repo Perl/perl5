@@ -110,8 +110,8 @@ This empty function call now takes about a third less time to execute:
 
 =item *
 
-On Win32, C<stat>ing or C<-X>ing a path, if the file or directory does not exist
-is now 3.5x faster on a SSD (or any drive) than before.
+On Win32, C<stat>ing or C<-X>ing a path, if the file or directory does not
+exist, is now 3.5x faster on a SSD (or any drive) than before.
 
 =back
 
@@ -145,10 +145,49 @@ F<cpan/podlators/> has been upgraded from version 4.04 to 4.06.
 
 =item *
 
-L<POSIX> has been upgraded from version 1.59 to 1.60.
+L<POSIX> has been upgraded from version 1.59 to 1.63.
 
 It can now export constants for the C<code> value in the hash passed to the
 L<sigaction|POSIX/sigaction> handler when using the C<SA_SIGINFO> flag.
+
+These previously deprecated functions are now removed: C<isalnum>,
+C<isalpha>, C<iscntrl>, C<isdigit>, C<isgraph>, C<islower>, C<isprint>,
+C<ispunct>, C<isspace>, C<isupper>, and C<isxdigit>.
+
+=item *
+
+L<Encode> has been upgraded from version 2.78 to 2.80.
+
+=item *
+
+L<Storable> has been upgraded from version 2.54 to 2.55.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9728 to 1.9730.
+
+It can now export Linux-specific and FreeBSD-specific C<clock_gettime()>
+constants. It also now has emulation for OS X C<clock_nanosleep()>,
+C<clock_gettime()>, and C<clock_getres()>.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.37 to 1.38.
+
+DynaLoader now always looks for bootstrap files having the same base name as
+the module for which the bootstrap code is being run. Previously, and only on
+platforms that use C<mod2fname> to produce unique loadable library names,
+L<DynaLoader> would look for the bootstrap file using a base name that matched
+the loadable library and not find it.
+
+=item *
+
+L<PerlIO::encoding> has been upgraded from version 0.23 to 0.24.
+
+=item *
+
+The PathTools module collection has been upgraded from version 3.62
+to 3.63.
 
 =back
 
@@ -231,6 +270,11 @@ L<Sequence (?PE<lt>... not terminated in regex; marked by S<<-- HERE> in mE<sol>
 L<Sequence (?PE<gt>... not terminated in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>
 |perldiag/Sequence (?PE<gt>... not terminated in regex; marked by <-- HERE in mE<sol>%sE<sol>>
 
+=item *
+
+L<Empty \%c in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>
+|perldiag/Empty \%c in regex; marked by <-- HERE in mE<sol>%sE<sol>>
+
 =back
 
 =head3 New Warnings
@@ -293,6 +337,10 @@ The GNU Make makefile for Win32 now supports parallel builds.  [perl #126632]
 =item *
 
 You can now build perl with MSVC++ on Win32 using GNU Make.  [perl #126632]
+
+=item *
+
+Bison 3.0 is now supported.
 
 =back
 
@@ -420,11 +468,11 @@ details on how to use them.
 
 Various macros, which now consistently have a CX_ prefix, have been added:
 
- CX_CUR(), CX_LEAVE_SCOPE(), CX_POP()
+  CX_CUR(), CX_LEAVE_SCOPE(), CX_POP()
 
 or renamed:
 
- CX_POP_SAVEARRAY(), CX_DEBUG(), CX_PUSHSUBST() ,CX_POPSUBST()
+  CX_POP_SAVEARRAY(), CX_DEBUG(), CX_PUSHSUBST(), CX_POPSUBST()
 
 =item *
 
