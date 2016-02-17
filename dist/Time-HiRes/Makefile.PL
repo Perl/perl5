@@ -150,7 +150,7 @@ __EOD__
 	    my $res = system($cccmd);
 	    $ok = defined($res) && $res == 0 && -s $tmp_exe && -x _;
 
-	    if ( $ok && exists $args{run} && $args{run}) {
+	    if ( $ok && exists $args{run} && $args{run} && !$ENV{TIME_HIRES_DONT_RUN_PROBES} ) {
 		my $tmp_exe =
 		    File::Spec->catfile(File::Spec->curdir, $tmp_exe);
 		my @run = $tmp_exe;
