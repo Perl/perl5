@@ -28,7 +28,7 @@ our @EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
 		 stat lstat
 		);
 
-our $VERSION = '1.9729';
+our $VERSION = '1.9730';
 our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 

@@ -1,5 +1,9 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9730 [2016-02-17]
+  - TIME_HIRES_DONT_RUN_PROBES=1 to build the probes but not run them
+    [rt.cpan.org #111391]
+
 1.9729 [2016-02-13]
   - new constants
     [rt.cpan.org #111170]
