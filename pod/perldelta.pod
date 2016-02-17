@@ -186,6 +186,17 @@ Stack">, which explains how the perl context stack works.
 
 =back
 
+=head3 L<perlmodlib>
+
+=over 4
+
+=item *
+
+We now recommend contacting the module-authors list or PAUSE in seeking
+guidance on the naming of modules.
+
+=back
+
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
