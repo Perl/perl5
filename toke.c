@@ -11112,7 +11112,7 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
     }
     msg = newSVpvn_flags(s, len, (flags & SVf_UTF8) | SVs_TEMP);
     Perl_sv_catpvf(aTHX_ msg, " at %s line %"IVdf", ",
-        OutCopFILE(PL_curcop),
+        CopFILE(PL_curcop),
         (IV)(PL_parser->preambling == NOLINE
                ? CopLINE(PL_curcop)
                : PL_parser->preambling));
@@ -11137,10 +11137,10 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
 	SV * errsv;
 	if (PL_in_eval && ((errsv = ERRSV), SvCUR(errsv)))
 	    Perl_croak(aTHX_ "%"SVf"%s has too many errors.\n",
-		       SVfARG(errsv), OutCopFILE(PL_curcop));
+		       SVfARG(errsv), CopFILE(PL_curcop));
 	else
 	    Perl_croak(aTHX_ "%s has too many errors.\n",
-            OutCopFILE(PL_curcop));
+            CopFILE(PL_curcop));
     }
     PL_in_my = 0;
     PL_in_my_stash = NULL;

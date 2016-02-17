@@ -1847,7 +1847,7 @@ PP(pp_caller)
 	sv_sethek(TARG, stash_hek);
 	PUSHTARG;
     }
-    mPUSHs(newSVpv(OutCopFILE(cx->blk_oldcop), 0));
+    mPUSHs(newSVpv(CopFILE(cx->blk_oldcop), 0));
     lcop = closest_cop(cx->blk_oldcop, OpSIBLING(cx->blk_oldcop),
 		       cx->blk_sub.retop, TRUE);
     if (!lcop)

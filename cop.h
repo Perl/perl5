@@ -535,7 +535,8 @@ be zero.
 #define CopLINE_dec(c)		(--CopLINE(c))
 #define CopLINE_set(c,l)	(CopLINE(c) = (l))
 
-/* OutCopFILE() is CopFILE for output (caller, die, warn, etc.) */
+/* This macro was used on Classic MacOS to pretty print the path for
+   caller, die, warn, etc, but now is a noop on all platforms */
 #define OutCopFILE(c) CopFILE(c)
 
 #define CopHINTS_get(c)		((c)->cop_hints + 0)
