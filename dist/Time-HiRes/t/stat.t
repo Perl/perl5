@@ -16,8 +16,6 @@ BEGIN {
 use Test::More 0.82 tests => 43;
 use t::Watchdog;
 
-my $limit = 0.25; # 25% is acceptable slosh for testing timers
-
 my @atime;
 my @mtime;
 for (1..5) {
