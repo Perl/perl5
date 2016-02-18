@@ -373,6 +373,8 @@ elsif ($Is_Cygwin) { # On Cygwin symlink it to CORE to make Makefile happy
     ( copy("$installbin/$libperl", $coredll) &&
       push(@corefiles, $instcoredll)
     )
+} elsif ($Is_W32) {
+    @corefiles = <*.h>;
 } else {
     # [als] hard-coded 'libperl' name... not good!
     @corefiles = <*.h libperl*.* perl*$Config{lib_ext}>;
@@ -391,6 +393,13 @@ foreach my $file (@corefiles) {
 	    chmod($NON_SO_MODE, "$installarchlib/CORE/$file");
 	}
     }
+}
+
+if ($Is_W32) { #linking lib isn't made in root but in CORE on Win32
+    @corefiles = <lib/CORE/libperl*.* lib/CORE/perl*$Config{lib_ext}>;
+    my $dest;
+    copy_if_diff($_,($dest = $installarchlib.substr($_,3))) &&
+	chmod($NON_SO_MODE, $dest) foreach @corefiles;
 }
 
 # Install main perl executables
