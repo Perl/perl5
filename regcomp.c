@@ -16984,6 +16984,19 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * fetching).  We know to set the flag if we have a non-NULL list for UTF-8
      * locales, or the class matches at least one 0-255 range code point */
     if (LOC && FOLD) {
+
+        /* Some things on the list might be unconditionally included because of
+         * other components.  Remove them, and clean up the list if it goes to
+         * 0 elements */
+        if (only_utf8_locale_list && cp_list) {
+            _invlist_subtract(only_utf8_locale_list, cp_list,
+                              &only_utf8_locale_list);
+
+            if (_invlist_len(only_utf8_locale_list) == 0) {
+                SvREFCNT_dec_NN(only_utf8_locale_list);
+                only_utf8_locale_list = NULL;
+            }
+        }
         if (only_utf8_locale_list) {
             ANYOF_FLAGS(ret)
                  |=  ANYOFL_FOLD
