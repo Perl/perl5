@@ -19586,18 +19586,17 @@ S_put_charclass_bitmap_innards_common(pTHX_
     }
 
     if (only_utf8 && _invlist_len(only_utf8)) {
-        sv_catpvs(output, "{utf8}");
+        Perl_sv_catpvf(aTHX_ output, "%s{utf8}%s", PL_colors[1], PL_colors[0]);
         put_charclass_bitmap_innards_invlist(output, only_utf8);
     }
 
     if (not_utf8 && _invlist_len(not_utf8)) {
-        sv_catpvs(output, "{not utf8}");
+        Perl_sv_catpvf(aTHX_ output, "%s{not utf8}%s", PL_colors[1], PL_colors[0]);
         put_charclass_bitmap_innards_invlist(output, not_utf8);
     }
 
     if (only_utf8_locale && _invlist_len(only_utf8_locale)) {
-        sv_catpvs(output, "{utf8 locale}");
-
+        Perl_sv_catpvf(aTHX_ output, "%s{utf8 locale}%s", PL_colors[1], PL_colors[0]);
         put_charclass_bitmap_innards_invlist(output, only_utf8_locale);
 
         /* This is the only list in this routine that can legally contain code
