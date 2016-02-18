@@ -19312,7 +19312,10 @@ S_put_code_point(pTHX_ SV *sv, UV c)
     }
     else if (isPRINT(c)) {
 	const char string = (char) c;
-	if (isBACKSLASHED_PUNCT(c))
+
+        /* We use {phrase} as metanotation in the class, so also escape literal
+         * braces */
+	if (isBACKSLASHED_PUNCT(c) || c == '{' || c == '}')
 	    sv_catpvs(sv, "\\");
 	sv_catpvn(sv, &string, 1);
     }
