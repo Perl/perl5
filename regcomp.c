@@ -18175,6 +18175,53 @@ Perl_regdump(pTHX_ const regexp *r)
 #endif	/* DEBUGGING */
 }
 
+/* Should be synchronized with ANYOF_ #defines in regcomp.h */
+#ifdef DEBUGGING
+
+#  if   _CC_WORDCHAR != 0 || _CC_DIGIT != 1        || _CC_ALPHA != 2    \
+     || _CC_LOWER != 3    || _CC_UPPER != 4        || _CC_PUNCT != 5    \
+     || _CC_PRINT != 6    || _CC_ALPHANUMERIC != 7 || _CC_GRAPH != 8    \
+     || _CC_CASED != 9    || _CC_SPACE != 10       || _CC_BLANK != 11   \
+     || _CC_XDIGIT != 12  || _CC_CNTRL != 13       || _CC_ASCII != 14   \
+     || _CC_VERTSPACE != 15
+#   error Need to adjust order of anyofs[]
+#  endif
+static const char * const anyofs[] = {
+    "\\w",
+    "\\W",
+    "\\d",
+    "\\D",
+    "[:alpha:]",
+    "[:^alpha:]",
+    "[:lower:]",
+    "[:^lower:]",
+    "[:upper:]",
+    "[:^upper:]",
+    "[:punct:]",
+    "[:^punct:]",
+    "[:print:]",
+    "[:^print:]",
+    "[:alnum:]",
+    "[:^alnum:]",
+    "[:graph:]",
+    "[:^graph:]",
+    "[:cased:]",
+    "[:^cased:]",
+    "\\s",
+    "\\S",
+    "[:blank:]",
+    "[:^blank:]",
+    "[:xdigit:]",
+    "[:^xdigit:]",
+    "[:cntrl:]",
+    "[:^cntrl:]",
+    "[:ascii:]",
+    "[:^ascii:]",
+    "\\v",
+    "\\V"
+};
+#endif
+
 /*
 - regprop - printable representation of opcode, with run time support
 */
@@ -18184,49 +18231,6 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 {
 #ifdef DEBUGGING
     int k;
-
-    /* Should be synchronized with * ANYOF_ #xdefines in regcomp.h */
-    static const char * const anyofs[] = {
-#if _CC_WORDCHAR != 0 || _CC_DIGIT != 1 || _CC_ALPHA != 2 || _CC_LOWER != 3 \
-    || _CC_UPPER != 4 || _CC_PUNCT != 5 || _CC_PRINT != 6                   \
-    || _CC_ALPHANUMERIC != 7 || _CC_GRAPH != 8 || _CC_CASED != 9            \
-    || _CC_SPACE != 10 || _CC_BLANK != 11 || _CC_XDIGIT != 12               \
-    || _CC_CNTRL != 13 || _CC_ASCII != 14 || _CC_VERTSPACE != 15
-  #error Need to adjust order of anyofs[]
-#endif
-        "\\w",
-        "\\W",
-        "\\d",
-        "\\D",
-        "[:alpha:]",
-        "[:^alpha:]",
-        "[:lower:]",
-        "[:^lower:]",
-        "[:upper:]",
-        "[:^upper:]",
-        "[:punct:]",
-        "[:^punct:]",
-        "[:print:]",
-        "[:^print:]",
-        "[:alnum:]",
-        "[:^alnum:]",
-        "[:graph:]",
-        "[:^graph:]",
-        "[:cased:]",
-        "[:^cased:]",
-        "\\s",
-        "\\S",
-        "[:blank:]",
-        "[:^blank:]",
-        "[:xdigit:]",
-        "[:^xdigit:]",
-        "[:cntrl:]",
-        "[:^cntrl:]",
-        "[:ascii:]",
-        "[:^ascii:]",
-        "\\v",
-        "\\V"
-    };
     RXi_GET_DECL(prog,progi);
     GET_RE_DEBUG_FLAGS_DECL;
 
