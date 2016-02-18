@@ -9117,8 +9117,10 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
         /* Here, 'a' or 'b' is empty and not using the complement of 'b'.  The
          * intersection must be empty */
 	if (*i == a) {
-            if (! (make_temp = cBOOL(SvTEMP(a)))) {
-                SvREFCNT_dec_NN(a);
+            if (a != NULL) {
+                if (! (make_temp = cBOOL(SvTEMP(a)))) {
+                    SvREFCNT_dec_NN(a);
+                }
             }
 	}
 	else if (*i == b) {
