@@ -397,16 +397,6 @@ EXPECT
 Subroutine main::ｆ렏 redefined at - line 7.
 ########
 # sv.c
-sprintf "%vd", new version v1.1_0;
-use warnings 'printf' ;
-sprintf "%vd", new version v1.1_0;
-no warnings 'printf' ;
-sprintf "%vd", new version v1.1_0;
-EXPECT
-vector argument not supported with alpha versions at - line 2.
-vector argument not supported with alpha versions at - line 4.
-########
-# sv.c
 my $x = "a_c";
 ++$x;
 use warnings "numeric";
