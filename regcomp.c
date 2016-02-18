@@ -17459,7 +17459,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                                         bool doinit,
                                         SV** listsvp,
                                         SV** only_utf8_locale_ptr,
-                                        SV*  exclude_list)
+                                        SV** output_invlist)
 
 {
     /* For internal core use only.
@@ -17474,8 +17474,15 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
      * If <only_utf8_locale_ptr> is not NULL, it is where this routine is to
      *    store an inversion list of code points that should match only if the
      *    execution-time locale is a UTF-8 one.
-     * If <exclude_list> is not NULL, it is an inversion list of things to
-     *    exclude from what's returned in <listsvp>.
+     * If <output_invlist> is not NULL, it is where this routine is to store an
+     *    inversion list of the code points that would be instead returned in
+     *    <listsvp> if this were NULL.  Thus, what gets output in <listsvp>
+     *    when this parameter is used, is just the non-code point data that
+     *    will go into creating the swash.  This currently should be just
+     *    user-defined properties whose definitions were not known at compile
+     *    time.  Using this parameter allows for easier manipulation of the
+     *    swash's data by the caller.  It is illegal to call this function with
+     *    this parameter set, but not <listsvp>
      *
      * Tied intimately to how S_set_ANYOF_arg sets up the data structure.  Note
      * that, in spite of this function's name, the swash it returns may include
@@ -17483,12 +17490,13 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 
     SV *sw  = NULL;
     SV *si  = NULL;         /* Input swash initialization string */
-    SV*  invlist = NULL;
+    SV* invlist = NULL;
 
     RXi_GET_DECL(prog,progi);
     const struct reg_data * const data = prog ? progi->data : NULL;
 
     PERL_ARGS_ASSERT__GET_REGCLASS_NONBITMAP_DATA;
+    assert(! output_invlist || listsvp);
 
     if (data && data->count) {
 	const U32 n = ARG(node);
@@ -17550,7 +17558,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 
     /* If requested, return a printable version of what this swash matches */
     if (listsvp) {
-	SV* matches_string = newSVpvs("");
+	SV* matches_string = NULL;
 
         /* The swash should be used, if possible, to get the data, as it
          * contains the resolved data.  But this function can be called at
@@ -17560,22 +17568,123 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 	if ((! sw || (invlist = _get_swash_invlist(sw)) == NULL)
             && (si && si != &PL_sv_undef))
         {
-	    sv_catsv(matches_string, si);
-	}
-
-	/* Add the inversion list to whatever we have.  This may have come from
-	 * the swash, or from an input parameter */
-	if (invlist) {
-            if (exclude_list) {
-                SV* clone = invlist_clone(invlist);
-                _invlist_subtract(clone, exclude_list, &clone);
-                sv_catsv(matches_string, invlist_contents(clone, TRUE));
-                SvREFCNT_dec_NN(clone);
+            /* Here, we only have 'si' (and possibly some passed-in data in
+             * 'invlist', which is handled below)  If the caller only wants
+             * 'si', use that.  */
+            if (! output_invlist) {
+                matches_string = newSVsv(si);
             }
             else {
-                sv_catsv(matches_string, invlist_contents(invlist, TRUE));
-            }
+                /* But if the caller wants an inversion list of the node, we
+                 * need to parse 'si' and place as much as possible in the
+                 * desired output inversion list, making 'matches_string' only
+                 * contain the currently unresolvable things */
+                const char *si_string = SvPVX(si);
+                STRLEN remaining = SvCUR(si);
+                UV prev_cp = 0;
+                U8 count = 0;
+
+                /* Ignore everything before the first new-line */
+                while (*si_string != '\n' && remaining > 0) {
+                    si_string++;
+                    remaining--;
+                }
+                assert(remaining > 0);
+
+                si_string++;
+                remaining--;
+
+                while (remaining > 0) {
+
+                    /* The data consists of just strings defining user-defined
+                     * property names, but in prior incarnations, and perhaps
+                     * somehow from pluggable regex engines, it could still
+                     * hold hex code point definitions.  Each component of a
+                     * range would be separated by a tab, and each range by a
+                     * new-line.  If these are found, instead add them to the
+                     * inversion list */
+                    I32 grok_flags =  PERL_SCAN_SILENT_ILLDIGIT
+                                     |PERL_SCAN_SILENT_NON_PORTABLE;
+                    STRLEN len = remaining;
+                    UV cp = grok_hex(si_string, &len, &grok_flags, NULL);
+
+                    /* If the hex decode routine found something, it should go
+                     * up to the next \n */
+                    if (   *(si_string + len) == '\n') {
+                        if (count) {    /* 2nd code point on line */
+                            *output_invlist = _add_range_to_invlist(*output_invlist, prev_cp, cp);
+                        }
+                        else {
+                            *output_invlist = add_cp_to_invlist(*output_invlist, cp);
+                        }
+                        count = 0;
+                        goto prepare_for_next_iteration;
+                    }
+
+                    /* If the hex decode was instead for the lower range limit,
+                     * save it, and go parse the upper range limit */
+                    if (*(si_string + len) == '\t') {
+                        assert(count == 0);
+
+                        prev_cp = cp;
+                        count = 1;
+                      prepare_for_next_iteration:
+                        si_string += len + 1;
+                        remaining -= len + 1;
+                        continue;
+                    }
+
+                    /* Here, didn't find a legal hex number.  Just add it from
+                     * here to the next \n */
+
+                    remaining -= len;
+                    while (*(si_string + len) != '\n' && remaining > 0) {
+                        remaining--;
+                        len++;
+                    }
+                    if (*(si_string + len) == '\n') {
+                        len++;
+                        remaining--;
+                    }
+                    if (matches_string) {
+                        sv_catpvn(matches_string, si_string, len - 1);
+                    }
+                    else {
+                        matches_string = newSVpvn(si_string, len - 1);
+                    }
+                    si_string += len;
+                    sv_catpvs(matches_string, " ");
+                } /* end of loop through the text */
+
+                if (SvCUR(matches_string)) {  /* Get rid of trailing blank */
+                    SvCUR_set(matches_string, SvCUR(matches_string) - 1);
+                }
+            } /* end of has an 'si' but no swash */
 	}
+
+        /* If we have a swash in place, its equivalent inversion list was above
+         * placed into 'invlist'.  If not, this variable may contain a stored
+         * inversion list which is information beyond what is in 'si' */
+        if (invlist) {
+
+            /* Again, if the caller doesn't want the output inversion list, put
+             * everything in 'matches-string' */
+            if (! output_invlist) {
+                if ( ! matches_string) {
+                    matches_string = newSVpvs("\n");
+                }
+                sv_catsv(matches_string, invlist_contents(invlist,
+                                                  TRUE /* traditional style */
+                                                  ));
+            }
+            else if (! *output_invlist) {
+                *output_invlist = invlist_clone(invlist);
+            }
+            else {
+                _invlist_union(*output_invlist, invlist, output_invlist);
+            }
+        }
+
 	*listsvp = matches_string;
     }
 
@@ -18324,7 +18433,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                                                 ((IS_ANYOF_TRIE(op))
                                                  ? ANYOF_BITMAP(o)
                                                  : TRIE_BITMAP(trie)),
-                                                NULL);
+                                                NULL,
+                                                NULL,
+                                                NULL
+                                               );
             sv_catpvs(sv, "]");
         }
 
@@ -18407,8 +18519,19 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);
     else if (k == ANYOF) {
 	const U8 flags = ANYOF_FLAGS(o);
-	int do_sep = 0;
-        SV* bitmap_invlist = NULL;  /* Will hold what the bit map contains */
+        bool do_sep = FALSE;    /* Do we need to separate various components of
+                                   the output? */
+        /* Set if there is still an unresolved user-defined property */
+        SV *unresolved                = NULL;
+
+        /* Things that are ignored except when the runtime locale is UTF-8 */
+        SV *only_utf8_locale_invlist = NULL;
+
+        /* Code points that don't fit in the bitmap */
+        SV *nonbitmap_invlist = NULL;
+
+        /* And things that aren't in the bitmap, but are small enough to be */
+        SV* bitmap_range_not_in_bitmap = NULL;
 
 	if (OP(o) == ANYOFL) {
             if (ANYOFL_UTF8_LOCALE_REQD(flags)) {
@@ -18418,148 +18541,111 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                 sv_catpvs(sv, "{i}");
             }
         }
-	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
-	if (flags & ANYOF_INVERT)
-	    sv_catpvs(sv, "^");
 
-        /* Output what the bitmap matches, and get what that is into
-         * 'bitmap_invlist' */
-        do_sep = put_charclass_bitmap_innards(sv, ANYOF_BITMAP(o),
-                                                            &bitmap_invlist);
-
-        /* Output any special charclass tests (used entirely under 'use
-        * locale'). */
-	if (ANYOF_POSIXL_TEST_ANY_SET(o)) {
-            int i;
-	    for (i = 0; i < ANYOF_POSIXL_MAX; i++) {
-		if (ANYOF_POSIXL_TEST(o,i)) {
-		    sv_catpv(sv, anyofs[i]);
-		    do_sep = 1;
-		}
-            }
+        /* If there is stuff outside the bitmap, get it */
+        if (ARG(o) != ANYOF_ONLY_HAS_BITMAP) {
+            (void) _get_regclass_nonbitmap_data(prog, o, FALSE,
+                                                &unresolved,
+                                                &only_utf8_locale_invlist,
+                                                &nonbitmap_invlist);
+            /* The non-bitmap data may contain stuff that could fit in the
+             * bitmap.  This could come from a user-defined property being
+             * finally resolved when this call was done; or much more likely
+             * because there are matches that require UTF-8 to be valid, and so
+             * aren't in the bitmap.  This is teased apart later */
+            _invlist_intersection(nonbitmap_invlist,
+                                  PL_InBitmap,
+                                  &bitmap_range_not_in_bitmap);
+            /* Leave just the things that don't fit into the bitmap */
+            _invlist_subtract(nonbitmap_invlist,
+                              PL_InBitmap,
+                              &nonbitmap_invlist);
         }
 
-        if (    ARG(o) != ANYOF_ONLY_HAS_BITMAP
-	    || (flags
-                & ( ANYOF_MATCHES_ALL_ABOVE_BITMAP
-                   |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP
-                   |ANYOFL_FOLD)))
-        {
+        /* Obey this flag to add all above-the-bitmap code points */
+        if (flags & ANYOF_MATCHES_ALL_ABOVE_BITMAP) {
+            nonbitmap_invlist = _add_range_to_invlist(nonbitmap_invlist,
+                                                      NUM_ANYOF_CODE_POINTS,
+                                                      UV_MAX);
+        }
+
+        /* Ready to start outputting.  First, the initial left bracket */
+	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
+
+        /* Then all the things that could fit in the bitmap */
+        do_sep = put_charclass_bitmap_innards(sv,
+                                              ANYOF_BITMAP(o),
+                                              bitmap_range_not_in_bitmap,
+                                              only_utf8_locale_invlist,
+                                              o);
+        SvREFCNT_dec(bitmap_range_not_in_bitmap);
+
+        /* If there are user-defined properties which haven't been defined yet,
+         * output them, in a separate [] from the bitmap range stuff */
+        if (unresolved) {
             if (do_sep) {
                 Perl_sv_catpvf(aTHX_ sv,"%s][%s",PL_colors[1],PL_colors[0]);
-                if (flags & ANYOF_INVERT) /*make sure the invert info is in each */
-                    sv_catpvs(sv, "^");
+            }
+            if (flags & ANYOF_INVERT) {
+                sv_catpvs(sv, "^");
+            }
+            sv_catsv(sv, unresolved);
+            do_sep = TRUE;
+            SvREFCNT_dec_NN(unresolved);
+        }
+
+        /* And, finally, add the above-the-bitmap stuff */
+        if (nonbitmap_invlist) {
+            SV* contents;
+
+            /* See if truncation size is overridden */
+            const STRLEN dump_len = (PL_dump_re_max_len)
+                                    ? PL_dump_re_max_len
+                                    : 256;
+
+            /* This is output in a separate [] */
+            if (do_sep) {
+                Perl_sv_catpvf(aTHX_ sv,"%s][%s",PL_colors[1],PL_colors[0]);
             }
 
-            if (OP(o) == ANYOFD
-                && (flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER))
-            {
-                sv_catpvs(sv, "{non-utf8-latin1-all}");
+            /* And, for easy of understanding, it is always output not-shown as
+             * complemented */
+            if (flags & ANYOF_INVERT) {
+                _invlist_invert(nonbitmap_invlist);
+                _invlist_subtract(nonbitmap_invlist, PL_InBitmap, &nonbitmap_invlist);
             }
 
-            if (flags & ANYOF_MATCHES_ALL_ABOVE_BITMAP)
-                sv_catpvs(sv, "{above_bitmap_all}");
+            contents = invlist_contents(nonbitmap_invlist,
+                                        FALSE /* output suitable for catsv */
+                                       );
 
-            if (ARG(o) != ANYOF_ONLY_HAS_BITMAP) {
-                SV *lv; /* Set if there is something outside the bit map. */
-                bool byte_output = FALSE;   /* If something has been output */
-                SV *only_utf8_locale;
+            /* If the output is shorter than the permissible maximum, just do it. */
+            if (SvCUR(contents) <= dump_len) {
+                sv_catsv(sv, contents);
+            }
+            else {
+                const char * contents_string = SvPVX(contents);
+                STRLEN i = dump_len;
 
-                /* Get the stuff that wasn't in the bitmap.  'bitmap_invlist'
-                 * is used to guarantee that nothing in the bitmap gets
-                 * returned */
-                (void) _get_regclass_nonbitmap_data(prog, o, FALSE,
-                                                    &lv, &only_utf8_locale,
-                                                    bitmap_invlist);
-                if (lv && lv != &PL_sv_undef) {
-                    char *s = savesvpv(lv);
-                    const char * const orig_s = s;  /* Save the beginning of
-                                                       's', so can be freed */
-                    const STRLEN dump_len = (PL_dump_re_max_len)
-                                            ? PL_dump_re_max_len
-                                            : 256;
-
-                    /* Ignore anything before the first \n */
-                    while (*s && *s != '\n')
-                        s++;
-
-                    /* The data are one range per line.  A range is a single
-                     * entity; or two, separated by \t.  So can just convert \n
-                     * to space and \t to '-' */
-                    if (*s == '\n') {
-                        const char * const t = ++s;
-
-                        if (flags & ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP) {
-                            if (OP(o) == ANYOFD) {
-                                sv_catpvs(sv, "{utf8}");
-                            }
-                            else {
-                                sv_catpvs(sv, "{outside bitmap}");
-                            }
-                        }
-
-                        if (byte_output) {
-                            sv_catpvs(sv, " ");
-                        }
-
-                        while (*s) {
-                            if (*s == '\n') {
-
-                                /* Truncate very long output */
-                                if ((UV) (s - t) > dump_len) {
-                                    Perl_sv_catpvf(aTHX_ sv,
-                                                "%.*s...",
-                                                (int) (s - t),
-                                                t);
-                                    goto out_dump;
-                                }
-                                *s = ' ';
-                            }
-                            else if (*s == '\t') {
-                                *s = '-';
-                            }
-                            s++;
-                        }
-
-                        /* Here, it fits in the allocated space.  Replace a
-                         * final blank with a NUL */
-                        if (s[-1] == ' ')
-                            s[-1] = '\0';
-
-                        sv_catpv(sv, t);
-                    }
-
-                  out_dump:
-
-                    Safefree(orig_s);
-                    SvREFCNT_dec_NN(lv);
+                /* Otherwise, start at the permissible max and work back to the
+                 * first break possibility */
+                while (i > 0 && contents_string[i] != ' ') {
+                    i--;
+                }
+                if (i == 0) {       /* Fail-safe.  Use the max if we couldn't
+                                       find a legal break */
+                    i = dump_len;
                 }
 
-                if ((flags & ANYOFL_FOLD)
-                     && only_utf8_locale
-                     && only_utf8_locale != &PL_sv_undef)
-                {
-                    UV start, end;
-                    int max_entries = 256;
-
-                    sv_catpvs(sv, "{utf8 locale}");
-                    invlist_iterinit(only_utf8_locale);
-                    while (invlist_iternext(only_utf8_locale,
-                                            &start, &end)) {
-                        put_range(sv, start, end, FALSE);
-                        max_entries --;
-                        if (max_entries < 0) {
-                            sv_catpvs(sv, "...");
-                            break;
-                        }
-                    }
-                    invlist_iterfinish(only_utf8_locale);
-                }
+                sv_catpvn(sv, contents_string, i);
+                sv_catpvs(sv, "...");
             }
-	}
-        SvREFCNT_dec(bitmap_invlist);
 
+            SvREFCNT_dec_NN(contents);
+            SvREFCNT_dec_NN(nonbitmap_invlist);
+        }
 
+        /* And finally the matching, closing ']' */
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
     }
     else if (k == POSIXD || k == NPOSIXD) {
@@ -19409,47 +19495,16 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
     }
 }
 
-STATIC bool
-S_put_charclass_bitmap_innards(pTHX_ SV *sv, char *bitmap, SV** bitmap_invlist)
+STATIC void
+S_put_charclass_bitmap_innards_invlist(pTHX_ SV *sv, SV* invlist)
 {
-    /* Appends to 'sv' a displayable version of the innards of the bracketed
-     * character class whose bitmap is 'bitmap';  Returns 'TRUE' if it actually
-     * output anything, and bitmap_invlist, if not NULL, will point to an
-     * inversion list of what is in the bit map.  It must be freed by the
-     * caller. */
+    /* Concatenate onto the PV in 'sv' a displayable form of the inversion list
+     * 'invlist' */
 
-    int i;
     UV start, end;
-    unsigned int punct_count = 0;
-    SV* invlist;
     bool allow_literals = TRUE;
-    bool inverted_for_output = FALSE;
 
-    PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS;
-
-    /* Worst case is exactly every-other code point is in the list */
-    invlist = _new_invlist(NUM_ANYOF_CODE_POINTS / 2);
-
-    /* Convert the bit map to an inversion list, keeping track of how many
-     * ASCII puncts are set, including an extra amount for the backslashed
-     * ones.  */
-    for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
-        if (BITMAP_TEST(bitmap, i)) {
-            invlist = add_cp_to_invlist(invlist, i);
-            if (isPUNCT_A(i)) {
-                punct_count++;
-                if isBACKSLASHED_PUNCT(i) {
-                    punct_count++;
-                }
-            }
-        }
-    }
-
-    /* Nothing to output */
-    if (_invlist_len(invlist) == 0) {
-        SvREFCNT_dec_NN(invlist);
-        return FALSE;
-    }
+    PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS_INVLIST;
 
     /* Generally, it is more readable if printable characters are output as
      * literals, but if a range (nearly) spans all of them, it's best to output
@@ -19482,24 +19537,6 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv, char *bitmap, SV** bitmap_invlist)
     }
     invlist_iterfinish(invlist);
 
-    /* The legibility of the output depends mostly on how many punctuation
-     * characters are output.  There are 32 possible ASCII ones, and some have
-     * an additional backslash, bringing it to currently 36, so if any more
-     * than 18 are to be output, we can instead output it as its complement,
-     * yielding fewer puncts, and making it more legible.  But give some weight
-     * to the fact that outputting it as a complement is less legible than a
-     * straight output, so don't complement unless we are somewhat over the 18
-     * mark */
-    if (allow_literals && punct_count > 22) {
-        sv_catpvs(sv, "^");
-
-        /* Add everything remaining to the list, so when we invert it just
-         * below, it will be excluded */
-        _invlist_union_complement_2nd(invlist, PL_InBitmap, &invlist);
-        _invlist_invert(invlist);
-        inverted_for_output = TRUE;
-    }
-
     /* Here we have figured things out.  Output each range */
     invlist_iterinit(invlist);
     while (invlist_iternext(invlist, &start, &end)) {
@@ -19510,22 +19547,332 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv, char *bitmap, SV** bitmap_invlist)
     }
     invlist_iterfinish(invlist);
 
-    if (bitmap_invlist) {
+    return;
+}
 
-        /* Here, wants the inversion list returned.  If we inverted it, we have
-         * to restore it to the original */
-        if (inverted_for_output) {
-            _invlist_invert(invlist);
-            _invlist_intersection(invlist, PL_InBitmap, &invlist);
-        }
+STATIC SV*
+S_put_charclass_bitmap_innards_common(pTHX_
+        SV* invlist,            /* The bitmap */
+        SV* posixes,            /* Under /l, things like [:word:], \S */
+        SV* only_utf8,          /* Under /d, matches iff the target is UTF-8 */
+        SV* not_utf8,           /* /d, matches iff the target isn't UTF-8 */
+        SV* only_utf8_locale,   /* Under /l, matches if the locale is UTF-8 */
+        const bool invert       /* Is the result to be inverted? */
+)
+{
+    /* Create and return an SV containing a displayable version of the bitmap
+     * and associated information determined by the input parameters. */
 
-        *bitmap_invlist = invlist;
+    SV * output;
+
+    PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS_COMMON;
+
+    if (invert) {
+        output = newSVpvs("^");
     }
     else {
-        SvREFCNT_dec_NN(invlist);
+        output = newSVpvs("");
     }
 
-    return TRUE;
+    /* First, the code points in the bitmap that are unconditionally there */
+    put_charclass_bitmap_innards_invlist(output, invlist);
+
+    /* Traditionally, these have been placed after the main code points */
+    if (posixes) {
+        sv_catsv(output, posixes);
+    }
+
+    if (only_utf8 && _invlist_len(only_utf8)) {
+        sv_catpvs(output, "{utf8}");
+        put_charclass_bitmap_innards_invlist(output, only_utf8);
+    }
+
+    if (not_utf8 && _invlist_len(not_utf8)) {
+        sv_catpvs(output, "{not utf8}");
+        put_charclass_bitmap_innards_invlist(output, not_utf8);
+    }
+
+    if (only_utf8_locale && _invlist_len(only_utf8_locale)) {
+        sv_catpvs(output, "{utf8 locale}");
+
+        put_charclass_bitmap_innards_invlist(output, only_utf8_locale);
+
+        /* This is the only list in this routine that can legally contain code
+         * points outside the bitmap range.  The call just above to
+         * 'put_charclass_bitmap_innards_invlist' will simply suppress them, so
+         * output them here.  There's about a half-dozen possible, and none in
+         * contiguous ranges longer than 2 */
+        if (invlist_highest(only_utf8_locale) >= NUM_ANYOF_CODE_POINTS) {
+            UV start, end;
+            SV* above_bitmap = NULL;
+
+            _invlist_subtract(only_utf8_locale, PL_InBitmap, &above_bitmap);
+
+            invlist_iterinit(above_bitmap);
+            while (invlist_iternext(above_bitmap, &start, &end)) {
+                UV i;
+
+                for (i = start; i <= end; i++) {
+                    put_code_point(output, i);
+                }
+            }
+            invlist_iterfinish(above_bitmap);
+            SvREFCNT_dec_NN(above_bitmap);
+        }
+    }
+
+    /* If the only thing we output is the '^', clear it */
+    if (invert && SvCUR(output) == 1) {
+        SvCUR_set(output, 0);
+    }
+
+    return output;
+}
+
+STATIC bool
+S_put_charclass_bitmap_innards(pTHX_ SV *sv,
+                                     char *bitmap,
+                                     SV *nonbitmap_invlist,
+                                     SV *only_utf8_locale_invlist,
+                                     const regnode * const node)
+{
+    /* Appends to 'sv' a displayable version of the innards of the bracketed
+     * character class defined by the other arguments:
+     *  'bitmap' points to the bitmap.
+     *  'nonbitmap_invlist' is an inversion list of the code points that are in
+     *      the bitmap range, but for some reason aren't in the bitmap; NULL if
+     *      none.  The reasons for this could be that they require some
+     *      condition such as the target string being or not being in UTF-8
+     *      (under /d), or because they came from a user-defined property that
+     *      was not resolved at the time of the regex compilation (under /u)
+     *  'only_utf8_locale_invlist' is an inversion list of the code points that
+     *      are valid only if the runtime locale is a UTF-8 one; NULL if none
+     *  'node' is the regex pattern node.  It is needed only when the above two
+     *      parameters are not null, and is passed so that this routine can
+     *      tease apart the various reasons for them.
+     *
+     * It returns TRUE if there was actually something output.  (It may be that
+     * the bitmap, etc is empty.)
+     *
+     * When called for outputting the bitmap of a non-ANYOF node, just pass the
+     * bitmap, with the succeeding parameters set to NULL.
+     *
+     */
+
+    /* In general, it tries to display the 'cleanest' representation of the
+     * innards, choosing whether to display them inverted or not, regardless of
+     * whether the class itself is to be inverted.  However,  there are some
+     * cases where it can't try inverting, as what actually matches isn't known
+     * until runtime, and hence the inversion isn't either. */
+    bool inverting_allowed = TRUE;
+
+    int i;
+    STRLEN orig_sv_cur = SvCUR(sv);
+
+    SV* invlist;            /* Inversion list we accumulate of code points that
+                               are unconditionally matched */
+    SV* only_utf8 = NULL;   /* Under /d, list of matches iff the target is
+                               UTF-8 */
+    SV* not_utf8 =  NULL;   /* /d, list of matches iff the target isn't UTF-8
+                             */
+    SV* posixes = NULL;     /* Under /l, string of things like [:word:], \D */
+    SV* only_utf8_locale = NULL;    /* Under /l, list of matches if the locale
+                                       is UTF-8 */
+
+    SV* as_is_display;      /* The output string when we take the inputs
+                              literally */
+    SV* inverted_display;   /* The output string when we invert the inputs */
+
+    U8 flags = (node) ? ANYOF_FLAGS(node) : 0;
+
+    bool invert = cBOOL(flags & ANYOF_INVERT);  /* Is the input to be inverted
+                                                   to match? */
+    /* We are biased in favor of displaying things without them being inverted,
+     * as that is generally easier to understand */
+    const int bias = 5;
+
+    PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS;
+
+    /* Start off with whatever code points are passed in.  (We clone, so we
+     * don't change the caller's list) */
+    if (nonbitmap_invlist) {
+        assert(invlist_highest(nonbitmap_invlist) < NUM_ANYOF_CODE_POINTS);
+        invlist = invlist_clone(nonbitmap_invlist);
+    }
+    else {  /* Worst case size is every other code point is matched */
+        invlist = _new_invlist(NUM_ANYOF_CODE_POINTS / 2);
+    }
+
+    if (flags) {
+        if (OP(node) == ANYOFD) {
+
+            /* This flag indicates that the code points below 0x100 in the
+             * nonbitmap list are precisely the ones that match only when the
+             * target is UTF-8 (they should all be non-ASCII). */
+            if (flags & ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP)
+            {
+                _invlist_intersection(invlist, PL_UpperLatin1, &only_utf8);
+                _invlist_subtract(invlist, only_utf8, &invlist);
+            }
+
+            /* And this flag for matching all non-ASCII 0xFF and below */
+            if (flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)
+            {
+                if (invert) {
+                    not_utf8 = _new_invlist(0);
+                }
+                else {
+                    not_utf8 = invlist_clone(PL_UpperLatin1);
+                }
+                inverting_allowed = FALSE;  /* XXX needs more work to be able
+                                               to allow this */
+            }
+        }
+        else if (OP(node) == ANYOFL) {
+
+            /* If either of these flags are set, what matches isn't
+             * determinable except during execution, so don't know enough here
+             * to invert */
+            if (flags & (ANYOFL_FOLD|ANYOF_MATCHES_POSIXL)) {
+                inverting_allowed = FALSE;
+            }
+
+            /* What the posix classes match also varies at runtime, so these
+             * will be output symbolically. */
+            if (ANYOF_POSIXL_TEST_ANY_SET(node)) {
+                int i;
+
+                posixes = newSVpvs("");
+                for (i = 0; i < ANYOF_POSIXL_MAX; i++) {
+                    if (ANYOF_POSIXL_TEST(node,i)) {
+                        sv_catpv(posixes, anyofs[i]);
+                    }
+                }
+            }
+        }
+    }
+
+    /* Accumulate the bit map into the unconditional match list */
+    for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
+        if (BITMAP_TEST(bitmap, i)) {
+            invlist = add_cp_to_invlist(invlist, i);
+        }
+    }
+
+    /* Make sure that the conditional match lists don't have anything in them
+     * that match unconditionally; otherwise the output is quite confusing.
+     * This could happen if the code that populates these misses some
+     * duplication. */
+    if (only_utf8) {
+        _invlist_subtract(only_utf8, invlist, &only_utf8);
+    }
+    if (not_utf8) {
+        _invlist_subtract(not_utf8, invlist, &not_utf8);
+    }
+
+    if (only_utf8_locale_invlist) {
+
+        /* Since this list is passed in, we have to make a copy before
+         * modifying it */
+        only_utf8_locale = invlist_clone(only_utf8_locale_invlist);
+
+        _invlist_subtract(only_utf8_locale, invlist, &only_utf8_locale);
+
+        /* And, it can get really weird for us to try outputting an inverted
+         * form of this list when it has things above the bitmap, so don't even
+         * try */
+        if (invlist_highest(only_utf8_locale) >= NUM_ANYOF_CODE_POINTS) {
+            inverting_allowed = FALSE;
+        }
+    }
+
+    /* Calculate what the output would be if we take the input as-is */
+    as_is_display = put_charclass_bitmap_innards_common(invlist,
+                                                    posixes,
+                                                    only_utf8,
+                                                    not_utf8,
+                                                    only_utf8_locale,
+                                                    invert);
+
+    /* If have to take the output as-is, just do that */
+    if (! inverting_allowed) {
+        sv_catsv(sv, as_is_display);
+    }
+    else { /* But otherwise, create the output again on the inverted input, and
+              use whichever version is shorter */
+
+        int inverted_bias, as_is_bias;
+
+        /* We will apply our bias to whichever of the the results doesn't have
+         * the '^' */
+        if (invert) {
+            invert = FALSE;
+            as_is_bias = bias;
+            inverted_bias = 0;
+        }
+        else {
+            invert = TRUE;
+            as_is_bias = 0;
+            inverted_bias = bias;
+        }
+
+        /* Now invert each of the lists that contribute to the output,
+         * excluding from the result things outside the possible range */
+
+        /* For the unconditional inversion list, we have to add in all the
+         * conditional code points, so that when inverted, they will be gone
+         * from it */
+        _invlist_union(only_utf8, invlist, &invlist);
+        _invlist_union(only_utf8_locale, invlist, &invlist);
+        _invlist_invert(invlist);
+        _invlist_intersection(invlist, PL_InBitmap, &invlist);
+
+        if (only_utf8) {
+            _invlist_invert(only_utf8);
+            _invlist_intersection(only_utf8, PL_UpperLatin1, &only_utf8);
+        }
+
+        if (not_utf8) {
+            _invlist_invert(not_utf8);
+            _invlist_intersection(not_utf8, PL_UpperLatin1, &not_utf8);
+        }
+
+        if (only_utf8_locale) {
+            _invlist_invert(only_utf8_locale);
+            _invlist_intersection(only_utf8_locale,
+                                  PL_InBitmap,
+                                  &only_utf8_locale);
+        }
+
+        inverted_display = put_charclass_bitmap_innards_common(
+                                            invlist,
+                                            posixes,
+                                            only_utf8,
+                                            not_utf8,
+                                            only_utf8_locale, invert);
+
+        /* Use the shortest representation, taking into account our bias
+         * against showing it inverted */
+        if (SvCUR(inverted_display) + inverted_bias
+            < SvCUR(as_is_display) + as_is_bias)
+        {
+	    sv_catsv(sv, inverted_display);
+        }
+        else {
+	    sv_catsv(sv, as_is_display);
+        }
+
+        SvREFCNT_dec_NN(as_is_display);
+        SvREFCNT_dec_NN(inverted_display);
+    }
+
+    SvREFCNT_dec_NN(invlist);
+    SvREFCNT_dec(only_utf8);
+    SvREFCNT_dec(not_utf8);
+    SvREFCNT_dec(posixes);
+    SvREFCNT_dec(only_utf8_locale);
+
+    return SvCUR(sv) > orig_sv_cur;
 }
 
 #define CLEAR_OPTSTART \

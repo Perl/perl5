@@ -3833,9 +3833,15 @@ STATIC void	S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie, H
 STATIC const regnode*	S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node, const regnode *last, const regnode *plast, SV* sv, I32 indent, U32 depth);
 #define PERL_ARGS_ASSERT_DUMPUNTIL	\
 	assert(r); assert(start); assert(node); assert(sv)
-STATIC bool	S_put_charclass_bitmap_innards(pTHX_ SV* sv, char* bitmap, SV** bitmap_invlist);
+STATIC bool	S_put_charclass_bitmap_innards(pTHX_ SV* sv, char* bitmap, SV* nonbitmap_invlist, SV* only_utf8_locale_invlist, const regnode * const node);
 #define PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS	\
 	assert(sv); assert(bitmap)
+STATIC SV*	S_put_charclass_bitmap_innards_common(pTHX_ SV* invlist, SV* posixes, SV* only_utf8, SV* not_utf8, SV* only_utf8_locale, const bool invert);
+#define PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS_COMMON	\
+	assert(invlist)
+STATIC void	S_put_charclass_bitmap_innards_invlist(pTHX_ SV *sv, SV* invlist);
+#define PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS_INVLIST	\
+	assert(sv); assert(invlist)
 STATIC void	S_put_code_point(pTHX_ SV* sv, UV c);
 #define PERL_ARGS_ASSERT_PUT_CODE_POINT	\
 	assert(sv)
@@ -4919,7 +4925,7 @@ PERL_CALLCONV SV*	Perl__new_invlist_C_array(pTHX_ const UV* const list)
 
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
-PERL_CALLCONV SV*	Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog, const struct regnode *node, bool doinit, SV **listsvp, SV **lonly_utf8_locale, SV *exclude_list);
+PERL_CALLCONV SV*	Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog, const struct regnode *node, bool doinit, SV **listsvp, SV **lonly_utf8_locale, SV **output_invlist);
 #define PERL_ARGS_ASSERT__GET_REGCLASS_NONBITMAP_DATA	\
 	assert(node)
 PERL_CALLCONV void	Perl__load_PL_utf8_foldclosures(pTHX);

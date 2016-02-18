@@ -1580,7 +1580,7 @@ ApM	|SV*	|_get_regclass_nonbitmap_data				   \
 				|bool doinit				   \
 				|NULLOK SV **listsvp			   \
 				|NULLOK SV **lonly_utf8_locale		   \
-				|NULLOK SV *exclude_list
+				|NULLOK SV **output_invlist
 EXp	|void|_load_PL_utf8_foldclosures|
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C)
@@ -2265,9 +2265,21 @@ Es	|const regnode*|dumpuntil|NN const regexp *r|NN const regnode *start \
 				|NULLOK const regnode *plast \
 				|NN SV* sv|I32 indent|U32 depth
 Es	|void	|put_code_point	|NN SV* sv|UV c
-Es	|bool	|put_charclass_bitmap_innards|NN SV* sv	    \
-				|NN char* bitmap	    \
-				|NULLOK SV** bitmap_invlist
+Es	|bool	|put_charclass_bitmap_innards|NN SV* sv		    \
+				|NN char* bitmap		    \
+				|NULLOK SV* nonbitmap_invlist	    \
+				|NULLOK SV* only_utf8_locale_invlist\
+				|NULLOK const regnode * const node
+Es	|SV*	|put_charclass_bitmap_innards_common		    \
+				|NN SV* invlist			    \
+				|NULLOK SV* posixes		    \
+				|NULLOK SV* only_utf8		    \
+				|NULLOK SV* not_utf8		    \
+				|NULLOK SV* only_utf8_locale	    \
+				|const bool invert
+Es	|void	|put_charclass_bitmap_innards_invlist		    \
+				|NN SV *sv			    \
+				|NN SV* invlist
 Es	|void	|put_range	|NN SV* sv|UV start|const UV end    \
 				|const bool allow_literals
 Es	|void	|dump_trie	|NN const struct _reg_trie_data *trie\
