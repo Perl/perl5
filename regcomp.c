@@ -6720,7 +6720,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 #ifdef DEBUGGING
         dump_len_string = PerlEnv_getenv("PERL_DUMP_RE_MAX_LEN");
         if (   ! dump_len_string
-            || ! grok_atoUV(dump_len_string, &PL_dump_re_max_len, NULL))
+            || ! grok_atoUV(dump_len_string, (UV *)&PL_dump_re_max_len, NULL))
         {
             PL_dump_re_max_len = 0;
         }
