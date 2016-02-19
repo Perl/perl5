@@ -17053,52 +17053,55 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     {
         /* But not if we are inverting, as that screws it up */
         if (! invert) {
-        if (has_upper_latin1_only_utf8_matches) {
-            if (MATCHES_ALL_NON_UTF8_NON_ASCII(ret)) {
+            if (has_upper_latin1_only_utf8_matches) {
+                if (MATCHES_ALL_NON_UTF8_NON_ASCII(ret)) {
 
-                /* Here, we have both the flag and inversion list.  Any character in
-                 * 'has_upper_latin1_only_utf8_matches' matches when UTF-8 is
-                 * in effect, but it also matches when UTF-8 is not in effect
-                 * because of MATCHES_ALL_NON_UTF8_NON_ASCII.  Therefore it
-                 * matches unconditionally, so can be added to the regular
-                 * list, and 'has_upper_latin1_only_utf8_matches' cleared */
-                _invlist_union(cp_list,
-                               has_upper_latin1_only_utf8_matches,
-                               &cp_list);
-                SvREFCNT_dec_NN(has_upper_latin1_only_utf8_matches);
-                has_upper_latin1_only_utf8_matches = NULL;
-            }
-            else if (cp_list) {
-
-                /* Here, 'cp_list' gives chars that always match, and
-                 * 'has_upper_latin1_only_utf8_matches' gives chars that were
-                 * specified to match only if the target string is in UTF-8.
-                 * It may be that these overlap, so we can subtract the
-                 * unconditionally matching from the conditional ones, to make
-                 * the conditional list as small as possible, perhaps even
-                 * clearing it, in which case more optimizations are possible
-                 * later */
-                _invlist_subtract(has_upper_latin1_only_utf8_matches,
-                                  cp_list,
-                                  &has_upper_latin1_only_utf8_matches);
-                if (_invlist_len(has_upper_latin1_only_utf8_matches) == 0) {
+                    /* Here, we have both the flag and inversion list.  Any
+                     * character in 'has_upper_latin1_only_utf8_matches'
+                     * matches when UTF-8 is in effect, but it also matches
+                     * when UTF-8 is not in effect because of
+                     * MATCHES_ALL_NON_UTF8_NON_ASCII.  Therefore it matches
+                     * unconditionally, so can be added to the regular list,
+                     * and 'has_upper_latin1_only_utf8_matches' cleared */
+                    _invlist_union(cp_list,
+                                   has_upper_latin1_only_utf8_matches,
+                                   &cp_list);
                     SvREFCNT_dec_NN(has_upper_latin1_only_utf8_matches);
                     has_upper_latin1_only_utf8_matches = NULL;
                 }
-            }
-        }
+                else if (cp_list) {
 
-        /* Similarly, if the unconditional matches include every upper latin1
-         * character, we can clear that flag to permit later optimizations */
-        if (cp_list && MATCHES_ALL_NON_UTF8_NON_ASCII(ret)) {
-            SV* only_non_utf8_list = invlist_clone(PL_UpperLatin1);
-            _invlist_subtract(only_non_utf8_list, cp_list, &only_non_utf8_list);
-            if (_invlist_len(only_non_utf8_list) == 0) {
-                ANYOF_FLAGS(ret) &= ~ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
+                    /* Here, 'cp_list' gives chars that always match, and
+                     * 'has_upper_latin1_only_utf8_matches' gives chars that
+                     * were specified to match only if the target string is in
+                     * UTF-8.  It may be that these overlap, so we can subtract
+                     * the unconditionally matching from the conditional ones,
+                     * to make the conditional list as small as possible,
+                     * perhaps even clearing it, in which case more
+                     * optimizations are possible later */
+                    _invlist_subtract(has_upper_latin1_only_utf8_matches,
+                                      cp_list,
+                                      &has_upper_latin1_only_utf8_matches);
+                    if (_invlist_len(has_upper_latin1_only_utf8_matches) == 0) {
+                        SvREFCNT_dec_NN(has_upper_latin1_only_utf8_matches);
+                        has_upper_latin1_only_utf8_matches = NULL;
+                    }
+                }
             }
-            SvREFCNT_dec_NN(only_non_utf8_list);
-            only_non_utf8_list = NULL;;
-        }
+
+            /* Similarly, if the unconditional matches include every upper
+             * latin1 character, we can clear that flag to permit later
+             * optimizations */
+            if (cp_list && MATCHES_ALL_NON_UTF8_NON_ASCII(ret)) {
+                SV* only_non_utf8_list = invlist_clone(PL_UpperLatin1);
+                _invlist_subtract(only_non_utf8_list, cp_list,
+                                  &only_non_utf8_list);
+                if (_invlist_len(only_non_utf8_list) == 0) {
+                    ANYOF_FLAGS(ret) &= ~ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
+                }
+                SvREFCNT_dec_NN(only_non_utf8_list);
+                only_non_utf8_list = NULL;;
+            }
         }
 
         /* If we haven't gotten rid of all conditional matching, we change the
