@@ -134,6 +134,7 @@
 #define PL_diehook		(vTHX->Idiehook)
 #define PL_doswitches		(vTHX->Idoswitches)
 #define PL_dowarn		(vTHX->Idowarn)
+#define PL_dump_re_max_len	(vTHX->Idump_re_max_len)
 #define PL_dumper_fd		(vTHX->Idumper_fd)
 #define PL_dumpindent		(vTHX->Idumpindent)
 #define PL_e_script		(vTHX->Ie_script)
