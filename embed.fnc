@@ -1539,7 +1539,8 @@ EiMn	|void	|invlist_iterfinish|NN SV* invlist
 EiMRn	|UV	|invlist_highest|NN SV* const invlist
 EMRs	|SV*	|_make_exactf_invlist	|NN RExC_state_t *pRExC_state \
 					|NN regnode *node
-EsMR	|SV*	|invlist_contents|NN SV* const invlist
+EsMR	|SV*	|invlist_contents|NN SV* const invlist		    \
+				 |const bool traditional_style
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
 EXmM	|void	|_invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i

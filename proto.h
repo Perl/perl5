@@ -4745,7 +4745,7 @@ PERL_STATIC_INLINE SV*	S_invlist_clone(pTHX_ SV* const invlist)
 #define PERL_ARGS_ASSERT_INVLIST_CLONE	\
 	assert(invlist)
 
-STATIC SV*	S_invlist_contents(pTHX_ SV* const invlist)
+STATIC SV*	S_invlist_contents(pTHX_ SV* const invlist, const bool traditional_style)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_INVLIST_CONTENTS	\
 	assert(invlist)
