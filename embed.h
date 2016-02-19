@@ -948,7 +948,6 @@
 #  if !defined(PERL_EXT_RE_BUILD)
 #    if defined(PERL_IN_REGCOMP_C)
 #define get_invlist_previous_index_addr	S_get_invlist_previous_index_addr
-#define invlist_is_iterating	S_invlist_is_iterating
 #define invlist_previous_index	S_invlist_previous_index
 #define invlist_set_previous_index	S_invlist_set_previous_index
 #define invlist_trim		S_invlist_trim
@@ -1001,8 +1000,10 @@
 #define handle_possible_posix(a,b,c,d)	S_handle_possible_posix(aTHX_ a,b,c,d)
 #define handle_regex_sets(a,b,c,d,e)	S_handle_regex_sets(aTHX_ a,b,c,d,e)
 #define invlist_clone(a)	S_invlist_clone(aTHX_ a)
+#define invlist_contents(a)	S_invlist_contents(aTHX_ a)
 #define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
 #define invlist_highest		S_invlist_highest
+#define invlist_is_iterating	S_invlist_is_iterating
 #define invlist_iterfinish	S_invlist_iterfinish
 #define invlist_iterinit	S_invlist_iterinit
 #define invlist_iternext	S_invlist_iternext
@@ -1059,7 +1060,6 @@
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 #define _get_swash_invlist(a)	Perl__get_swash_invlist(aTHX_ a)
 #define _invlist_contains_cp	S__invlist_contains_cp
-#define _invlist_contents(a)	Perl__invlist_contents(aTHX_ a)
 #define _invlist_len		S__invlist_len
 #define _invlist_search		Perl__invlist_search
 #define _swash_inversion_hash(a)	Perl__swash_inversion_hash(aTHX_ a)

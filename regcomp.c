@@ -8381,6 +8381,8 @@ S_invlist_trim(SV* const invlist)
     SvPV_shrink_to_cur((SV *) invlist);
 }
 
+#endif /* ifndef PERL_IN_XSUB_RE */
+
 PERL_STATIC_INLINE bool
 S_invlist_is_iterating(SV* const invlist)
 {
@@ -8388,8 +8390,6 @@ S_invlist_is_iterating(SV* const invlist)
 
     return *(get_invlist_iter_addr(invlist)) < (STRLEN) UV_MAX;
 }
-
-#endif /* ifndef PERL_IN_XSUB_RE */
 
 PERL_STATIC_INLINE UV
 S_invlist_max(SV* const invlist)
@@ -9513,9 +9513,8 @@ S_invlist_highest(SV* const invlist)
            : array[len - 1] - 1;
 }
 
-#ifndef PERL_IN_XSUB_RE
 SV *
-Perl__invlist_contents(pTHX_ SV* const invlist)
+S_invlist_contents(pTHX_ SV* const invlist)
 {
     /* Get the contents of an inversion list into a string SV so that they can
      * be printed out.  It uses the format traditionally done for debug tracing
@@ -9524,7 +9523,7 @@ Perl__invlist_contents(pTHX_ SV* const invlist)
     UV start, end;
     SV* output = newSVpvs("\n");
 
-    PERL_ARGS_ASSERT__INVLIST_CONTENTS;
+    PERL_ARGS_ASSERT_INVLIST_CONTENTS;
 
     assert(! invlist_is_iterating(invlist));
 
@@ -9544,7 +9543,6 @@ Perl__invlist_contents(pTHX_ SV* const invlist)
 
     return output;
 }
-#endif
 
 #ifndef PERL_IN_XSUB_RE
 void
@@ -17535,11 +17533,11 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
             if (exclude_list) {
                 SV* clone = invlist_clone(invlist);
                 _invlist_subtract(clone, exclude_list, &clone);
-                sv_catsv(matches_string, _invlist_contents(clone));
+                sv_catsv(matches_string, invlist_contents(clone));
                 SvREFCNT_dec_NN(clone);
             }
             else {
-                sv_catsv(matches_string, _invlist_contents(invlist));
+                sv_catsv(matches_string, invlist_contents(invlist));
             }
 	}
 	*listsvp = matches_string;

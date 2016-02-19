@@ -1524,9 +1524,9 @@ EiMRn	|UV*	|_invlist_array_init	|NN SV* const invlist|const bool will_have_0
 EsM	|void	|invlist_extend    |NN SV* const invlist|const UV len
 EiMRn	|UV	|invlist_max	|NN SV* const invlist
 EiM	|void	|invlist_set_len|NN SV* const invlist|const UV len|const bool offset
+EiMRn	|bool	|invlist_is_iterating|NN SV* const invlist
 #ifndef PERL_EXT_RE_BUILD
 EiMRn	|IV*	|get_invlist_previous_index_addr|NN SV* invlist
-EiMRn	|bool	|invlist_is_iterating|NN SV* const invlist
 EiMn	|void	|invlist_set_previous_index|NN SV* const invlist|const IV index
 EiMRn	|IV	|invlist_previous_index|NN SV* const invlist
 EiMn	|void	|invlist_trim	|NN SV* const invlist
@@ -1539,6 +1539,7 @@ EiMn	|void	|invlist_iterfinish|NN SV* invlist
 EiMRn	|UV	|invlist_highest|NN SV* const invlist
 EMRs	|SV*	|_make_exactf_invlist	|NN RExC_state_t *pRExC_state \
 					|NN regnode *node
+EsMR	|SV*	|invlist_contents|NN SV* const invlist
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
 EXmM	|void	|_invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
@@ -1564,7 +1565,6 @@ EXp	|SV*	|_core_swash_init|NN const char* pkg|NN const char* name \
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 EiMRn	|UV*	|invlist_array	|NN SV* const invlist
-EXMpR	|SV*	|_invlist_contents|NN SV* const invlist
 EiMRn	|bool*	|get_invlist_offset_addr|NN SV* invlist
 EiMRn	|UV	|_invlist_len	|NN SV* const invlist
 EMiRn	|bool	|_invlist_contains_cp|NN SV* const invlist|const UV cp
