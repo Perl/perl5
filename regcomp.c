@@ -195,7 +195,6 @@ struct RExC_state_t {
     scan_frame *frame_head;
     scan_frame *frame_last;
     U32         frame_count;
-    U32         strict;
 #ifdef ADD_TO_REGEXEC
     char 	*starttry;		/* -Dr: where regtry was called. */
 #define RExC_starttry	(pRExC_state->starttry)
@@ -218,6 +217,7 @@ struct RExC_state_t {
 
 #endif
     bool        seen_unfolded_sharp_s;
+    bool        strict;
 };
 
 #define RExC_flags	(pRExC_state->flags)
