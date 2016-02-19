@@ -17051,6 +17051,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     if (   has_upper_latin1_only_utf8_matches
         || MATCHES_ALL_NON_UTF8_NON_ASCII(ret))
     {
+        /* But not if we are inverting, as that screws it up */
+        if (! invert) {
         if (has_upper_latin1_only_utf8_matches) {
             if (MATCHES_ALL_NON_UTF8_NON_ASCII(ret)) {
 
@@ -17096,6 +17098,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             }
             SvREFCNT_dec_NN(only_non_utf8_list);
             only_non_utf8_list = NULL;;
+        }
         }
 
         /* If we haven't gotten rid of all conditional matching, we change the
