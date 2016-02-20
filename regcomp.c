@@ -17662,6 +17662,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                     sv_catpvs(matches_string, " ");
                 } /* end of loop through the text */
 
+                assert(matches_string);
                 if (SvCUR(matches_string)) {  /* Get rid of trailing blank */
                     SvCUR_set(matches_string, SvCUR(matches_string) - 1);
                 }
