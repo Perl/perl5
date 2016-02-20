@@ -1,0 +1,525 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5238delta - what is new for perl v5.23.8
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.23.7 release and the 5.23.8
+release.
+
+If you are upgrading from an earlier release such as 5.23.6, first read
+L<perl5237delta>, which describes differences between 5.23.6 and 5.23.7.
+
+=head1 Core Enhancements
+
+=head2 More fields provided to C<sigaction> callback with C<SA_SIGINFO>
+
+When passing the C<SA_SIGINFO> flag to L<sigaction|POSIX/sigaction>, the
+C<errno>, C<status>, C<uid>, C<pid>, C<addr> and C<band> fields are now
+included in the hash passed to the handler, if supported by the
+platform.
+
+=head1 Security
+
+=head2 Set proper umask before calling C<mkstemp(3)>
+
+In 5.22 perl started setting umask to 0600 before calling C<mkstemp(3)>
+and restoring it afterwards. This wrongfully tells open(2) to strip
+the owner read and write bits from the given mode before applying it,
+rather than the intended negation of leaving only those bits in place.
+
+Systems that use mode 0666 in C<mkstemp(3)> (like old versions of
+glibc) create a file with permissions 0066, leaving world read and
+write permissions regardless of current umask.
+
+This has been fixed by using umask 0177 instead. [perl #127322]
+
+=head1 Incompatible Changes
+
+=head2 C<qr/\N{}/> now disallowed under C<use re "strict">
+
+An empty C<\N{}> makes no sense, but for backwards compatibility is
+silently accepted as doing nothing.  But now this is a fatal error under
+the experimental feature L<re/'strict' mode>.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+The overhead of scope entry and exit has been considerably reduced, so
+for example subroutine calls, loops and basic blocks are all faster now.
+This empty function call now takes about a third less time to execute:
+
+    sub f{} f();
+
+=item *
+
+On Win32, C<stat>ing or C<-X>ing a path, if the file or directory does not
+exist, is now 3.5x faster on a SSD (or any drive) than before.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+F<cpan/podlators/> has been upgraded from version 4.04 to 4.06.
+
+=item *
+
+The PathTools module collection has been upgraded from version 3.62
+to 3.63.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.37 to 1.38.
+
+DynaLoader now always looks for bootstrap files having the same base name as
+the module for which the bootstrap code is being run. Previously, and only on
+platforms that use C<mod2fname> to produce unique loadable library names,
+L<DynaLoader> would look for the bootstrap file using a base name that matched
+the loadable library and not find it.
+
+=item *
+
+L<Encode> has been upgraded from version 2.78 to 2.80.
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280224 to 0.280225.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 7.10 to 7.10_01.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.62 to 3.63.
+
+=item *
+
+L<IPC::SysV> has been upgraded from version 2.04 to 2.05.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20160120 to 5.20160121.
+
+=item *
+
+L<ODBM_File> has been upgraded from version 1.12 to 1.13.
+
+=item *
+
+L<PerlIO::encoding> has been upgraded from version 0.23 to 0.24.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.59 to 1.63.
+
+It can now export constants for the C<code> value in the hash passed to the
+L<sigaction|POSIX/sigaction> handler when using the C<SA_SIGINFO> flag.
+
+These previously deprecated functions are now removed: C<isalnum>,
+C<isalpha>, C<iscntrl>, C<isdigit>, C<isgraph>, C<islower>, C<isprint>,
+C<ispunct>, C<isspace>, C<isupper>, and C<isxdigit>.
+
+=item *
+
+L<Storable> has been upgraded from version 2.54 to 2.55.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9728 to 1.9730.
+
+It can now export Linux-specific and FreeBSD-specific C<clock_gettime()>
+constants. It also now has emulation for OS X C<clock_nanosleep()>,
+C<clock_gettime()>, and C<clock_getres()>.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+A new section has been added, L<perlguts/"Dynamic Scope and the Context
+Stack">, which explains how the perl context stack works.
+
+=back
+
+=head3 L<perlmodlib>
+
+=over 4
+
+=item *
+
+We now recommend contacting the module-authors list or PAUSE in seeking
+guidance on the naming of modules.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<<< Sequence (?PE<lt>... not terminated in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>
+|perldiag/"Sequence (?PE<lt>... not terminated in regex; marked by <-- HERE in mE<sol>%sE<sol>" >>>
+
+=item *
+
+L<Sequence (?PE<gt>... not terminated in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>
+|perldiag/"Sequence (?PE<gt>... not terminated in regex; marked by <-- HERE in mE<sol>%sE<sol>">
+
+=item *
+
+L<Empty \%c in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>
+|perldiag/"Empty \%c in regex; marked by <-- HERE in mE<sol>%sE<sol>">
+
+=back
+
+=head3 New Warnings
+
+=over 4
+
+=item *
+
+L<Assuming NOT a POSIX class since %s in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>|
+perldiag/Assuming NOT a POSIX class since %s in regex; marked by <-- HERE in mE<sol>%sE<sol>>
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+The GNU Make makefile for Win32 now supports parallel builds.  [perl #126632]
+
+=item *
+
+You can now build perl with MSVC++ on Win32 using GNU Make.  [perl #126632]
+
+=item *
+
+Bison 3.0 is now supported.
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item VMS
+
+=over
+
+=item *
+
+For those C<%ENV> elements based on the CRTL environ array, we've always
+preserved case when setting them but did look-ups only after upcasing the
+key first, which made lower- or mixed-case entries go missing. This problem
+has been corrected by making C<%ENV> elements derived from the environ array
+case-sensitive on look-up as well as case-preserving on store.
+
+=item *
+
+Environment look-ups for C<PERL5LIB> and C<PERLLIB> previously only
+considered logical names, but now consider all sources of C<%ENV> as
+determined by C<PERL_ENV_TABLES> and as documented in L<perlvms/%ENV>.
+
+=back
+
+=item Win32
+
+Builds using Microsoft Visual C++ 2003 and earlier no longer produce
+an "INTERNAL COMPILER ERROR" message.  [perl #126045]
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The implementation of perl's context stack system, and its internal API,
+have been heavily reworked. Note that no significant changes have been
+made to any external APIs, but XS code which relies on such internal
+details may need to be fixed. The main changes are:
+
+=over 4
+
+=item *
+
+The C<PUSHBLOCK()>, C<POPSUB()> etc. macros have been replaced with static
+inline functions such as C<cx_pushblock()>, C<cx_popsub()> etc. These use
+function args rather than implicitly relying on local vars such as
+C<gimme> and C<newsp> being available. Also their functionality has
+changed: in particular, C<cx_popblock()> no longer decrements
+C<cxstack_ix>. The ordering of the steps in the C<pp_leave*> functions
+involving C<cx_popblock()>, C<cx_popsub()> etc. has changed. See the new
+documentation, L<perlguts/"Dynamic Scope and the Context Stack">, for
+details on how to use them.
+
+=item *
+
+Various macros, which now consistently have a CX_ prefix, have been added:
+
+  CX_CUR(), CX_LEAVE_SCOPE(), CX_POP()
+
+or renamed:
+
+  CX_POP_SAVEARRAY(), CX_DEBUG(), CX_PUSHSUBST(), CX_POPSUBST()
+
+=item *
+
+C<cx_pushblock()> now saves C<PL_savestack_ix> and C<PL_tmps_floor>, so
+C<pp_enter*> and C<pp_leave*> no longer do
+
+  ENTER; SAVETMPS; ....; LEAVE
+
+=item *
+
+C<cx_popblock()> now also restores C<PL_curpm>.
+
+=item *
+
+In C<dounwind()> for every context type, the current savestack frame is
+now processed before each context is popped; formerly this was only done
+for sub-like context frames. This action has been removed from
+C<cx_popsub()> and placed into its own macro, C<CX_LEAVE_SCOPE(cx)>, which
+must be called before C<cx_popsub()> etc.
+
+C<dounwind()> now also does a C<cx_popblock()> on the last popped frame
+(formerly it only did the C<cx_popsub()> etc. actions on each frame).
+
+=item *
+
+The temps stack is now freed on scope exit; previously, temps created
+during the last statement of a block wouldn't be freed until the next
+C<nextstate> following the block (apart from an existing hack that did
+this for recursive subs in scalar context); and in something like
+C<f(g())>, the temps created by the last statement in C<g()> would
+formerly not be freed until the statement following the return from
+C<f()>.
+
+=item *
+
+Most values that were saved on the savestack on scope entry are now
+saved in suitable new fields in the context struct, and saved and
+restored directly by C<cx_pushfoo()> and C<cx_popfoo()>, which is much
+faster.
+
+=item *
+
+Various context struct fields have been added, removed or modified.
+
+=item *
+
+The handling of C<@_> in C<cx_pushsub()> and C<cx_popsub()> has been
+considerably tidied up, including removing the C<argarray> field from the
+context struct, and extracting out some common (but rarely used) code into
+a separate function, C<clear_defarray()>. Also, useful subsets of
+C<cx_popsub()> which had been unrolled in places like C<pp_goto> have been
+gathered into the new functions C<cx_popsub_args()> and
+C<cx_popsub_common()>.
+
+=item *
+
+C<pp_leavesub> and C<pp_leavesublv> now use the same function as the rest
+of the C<pp_leave*>'s to process return args.
+
+=item *
+
+C<CXp_FOR_PAD> and C<CXp_FOR_GV> flags have been added, and
+C<CXt_LOOP_FOR> has been split into C<CXt_LOOP_LIST>, C<CXt_LOOP_ARY>.
+
+=item *
+
+Some variables formerly declared by C<dMULTICALL> (but not documented) have
+been removed.
+
+=back
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Line numbers larger than 2**31-1 but less than 2**32 are no longer
+returned by caller() as negative numbers.  [perl #126991]
+
+=item *
+
+C<< unless ( I<assignment> ) >> now properly warns when syntax
+warnings are enabled.  [perl #127122]
+
+=item *
+
+Setting an C<ISA> glob to an array reference now properly adds
+C<isaelem> magic to any existing elements.  Previously modifying such
+an element would not update the ISA cache, so method calls would call
+the wrong function.  Perl would also crash if the C<ISA> glob was
+destroyed, since new code added in 5.23.7 would try to release the
+C<isaelem> magic from the elements.  [perl #127351]
+
+=item *
+
+If a here-doc was found while parsing another operator, the parser had
+already read end of file, and the here-doc was not terminated, perl
+could produce an assertion or a segmentation fault.  This now reliably
+complains about the unterminated here-doc.  [perl #125540]
+
+=item *
+
+untie() would sometimes return the last value returned by the UNTIE()
+handler as well as it's normal value, messing up the stack.  [perl
+#126621]
+
+=item *
+
+Fixed an operator precedence problem when C< castflags & 2> is true.
+[perl #127474]
+
+=item *
+
+Caching of DESTROY methods could result in a non-pointer or a
+non-STASH stored in the SvSTASH() slot of a stash, breaking the B
+STASH() method.  The DESTROY method is now cached in the MRO metadata
+for the stash.  [perl #126410]
+
+=item *
+
+The AUTOLOAD method is now called when searching for a DESTROY method,
+and correctly sets C<$AUTOLOAD> too.  [perl #124387]  [perl #127494]
+
+=item *
+
+Avoid parsing beyond the end of the buffer when processing a C<#line>
+directive with no filename.  [perl #127334]
+
+=item *
+
+Perl now raises a warning when a regular expression pattern looks like
+it was supposed to contain a POSIX class, like C<qr/[[:alpha:]]/>, but
+there was some slight defect in its specification which causes it to
+instead be treated as a regular bracketed character class.  An example
+would be missing the second colon in the above like this:
+C<qr/[[:alpha]]/>.  This compiles to match a sequence of two characters.
+The second is C<"]">, and the first is any of: C<"[">, C<":">, C<"a">,
+C<"h">, C<"l">, or C<"p">.   This is unlikely to be the intended
+meaning, and now a warning is raised.  No warning is raised unless the
+specification is very close to one of the 14 legal POSIX classes.  (See
+L<perlrecharclass/POSIX Character Classes>.)
+[perl #8904]
+
+=item *
+
+Certain regex patterns involving a complemented POSIX class in an
+inverted bracketed character class, and matching something else
+optionally would improperly fail to match.  An example of one that could
+fail is C</qr/_?[^\Wbar]\x{100}/>.  This has been fixed.
+[perl #127537]
+
+=item *
+
+Perl 5.22 added support to the C99 hexadecimal floating point notation,
+but sometimes misparses hex floats. This had been fixed.
+[perl #127183]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.23.8 represents approximately 4 weeks of development since Perl 5.23.7
+and contains approximately 30,000 lines of changes across 350 files from 23
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 14,000 lines of changes to 210 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.23.8:
+
+Aaron Crane, Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn Ilmari
+Mannsåker, Daniel Dragan, David Mitchell, Ed J, Herbert Breunung, H.Merijn
+Brand, James E Keenan, Jarkko Hietaniemi, Karl Williamson, Lukas Mai, Niko
+Tyni, Pip Cet, Ricardo Signes, Sawyer X, Sisyphus, Stevan Little, Steve Hay,
+Todd Rinaldo, Tom Hukins, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles recently
+posted to the comp.lang.perl.misc newsgroup and the perl bug database at
+L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send it
+to perl5-security-report@perl.org.  This points to a closed subscription
+unarchived mailing list, which includes all the core committers, who will be
+able to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported.  Please only use this address for
+security issues in the Perl core, not for modules independently distributed on
+CPAN.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
