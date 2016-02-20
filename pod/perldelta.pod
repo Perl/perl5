@@ -196,6 +196,10 @@ L<PerlIO::encoding> has been upgraded from version 0.23 to 0.24.
 The PathTools module collection has been upgraded from version 3.62
 to 3.63.
 
+=item *
+
+L<IPC::SysV> has been upgraded from version 2.04 to 2.05.
+
 =back
 
 =head2 Removed Modules and Pragmata
