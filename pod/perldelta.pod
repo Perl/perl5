@@ -31,7 +31,7 @@ the owner read and write bits from the given mode before applying it,
 rather than the intended negation of leaving only those bits in place.
 
 Systems that use mode 0666 in C<mkstemp(3)> (like old versions of
-glibc) createa a file with permissions 0066, leaving world read and
+glibc) create a file with permissions 0066, leaving world read and
 write permissions regardless of current umask.
 
 This has been fixed by using umask 0177 instead. [perl #127322]
@@ -185,18 +185,18 @@ diagnostic messages, see L<perldiag>.
 
 =item *
 
-L<Sequence (?PE<lt>... not terminated in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>
-|perldiag/"Sequence (?PE<lt>... not terminated in regex; marked by <-- HERE in mE<sol>%sE<sol>">
+L<<< Sequence (?PE<lt>... not terminated in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>
+|perldiag/"Sequence (?PE<lt>... not terminated in regex; marked by <-- HERE in mE<sol>%sE<sol>" >>>
 
 =item *
 
-L<Sequence (?PE<gt>... not terminated in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>
-|perldiag/Sequence (?PE<gt>... not terminated in regex; marked by <-- HERE in mE<sol>%sE<sol>>
+L<Sequence (?PE<gt>... not terminated in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>
+|perldiag/"Sequence (?PE<gt>... not terminated in regex; marked by <-- HERE in mE<sol>%sE<sol>">
 
 =item *
 
-L<Empty \%c in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>
-|perldiag/Empty \%c in regex; marked by <-- HERE in mE<sol>%sE<sol>>
+L<Empty \%c in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>
+|perldiag/"Empty \%c in regex; marked by <-- HERE in mE<sol>%sE<sol>">
 
 =back
 
@@ -255,12 +255,6 @@ determined by C<PERL_ENV_TABLES> and as documented in L<perlvms/%ENV>.
 
 =back
 
-=back
-
-=head2 Platform-Specific Notes
-
-=over 4
-
 =item Win32
 
 Builds using Microsoft Visual C++ 2003 and earlier no longer produce
@@ -306,7 +300,7 @@ or renamed:
 =item *
 
 C<cx_pushblock()> now saves C<PL_savestack_ix> and C<PL_tmps_floor>, so
-CMpp_enter*> and C<pp_leave*> no longer do
+C<pp_enter*> and C<pp_leave*> no longer do
 
   ENTER; SAVETMPS; ....; LEAVE
 
