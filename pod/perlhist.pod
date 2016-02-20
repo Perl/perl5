@@ -574,6 +574,7 @@ the strings?).
  Abigail   5.23.5       2015-Nov-20
  David G   5.23.6       2015-Dec-21
  Stevan    5.23.7       2016-Jan-20
+ Sawyer X  5.23.8       2016-Feb-20
 
 =head2 SELECTED RELEASE SIZES
 

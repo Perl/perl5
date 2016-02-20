@@ -2,9 +2,6 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file.  Any text flagged as XXX needs
-to be processed before release. ]
-
 perldelta - what is new for perl v5.23.8
 
 =head1 DESCRIPTION
@@ -15,17 +12,7 @@ release.
 If you are upgrading from an earlier release such as 5.23.6, first read
 L<perl5237delta>, which describes differences between 5.23.6 and 5.23.7.
 
-=head1 Notice
-
-XXX Any important notices here
-
 =head1 Core Enhancements
-
-XXX New core language features go here.  Summarize user-visible core language
-enhancements.  Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
-
-[ List each enhancement as a =head2 entry ]
 
 =head2 More fields provided to C<sigaction> callback with C<SA_SIGINFO>
 
@@ -36,21 +23,20 @@ platform.
 
 =head1 Security
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
+=head2 Set proper umask before calling C<mkstemp(3)>
 
-[ List each security issue as a =head2 entry ]
+In 5.22 perl started setting umask to 0600 before calling C<mkstemp(3)>
+and restoring it afterwards. This wrongfully tells open(2) to strip
+the owner read and write bits from the given mode before applying it,
+rather than the intended negation of leaving only those bits in place.
+
+Systems that use mode 0666 in C<mkstemp(3)> (like old versions of
+glibc) create a file with permissions 0066, leaving world read and
+write permissions regardless of current umask.
+
+This has been fixed by using umask 0177 instead. [perl #127322]
 
 =head1 Incompatible Changes
-
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
-
-[ List each incompatible change as a =head2 entry ]
 
 =head2 C<qr/\N{}/> now disallowed under C<use re "strict">
 
@@ -58,45 +44,7 @@ An empty C<\N{}> makes no sense, but for backwards compatibility is
 silently accepted as doing nothing.  But now this is a fatal error under
 the experimental feature L<re/'strict' mode>.
 
-=head1 Deprecations
-
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-
-=head2 Module removals
-
-XXX Remove this section if inapplicable.
-
-The following modules will be removed from the core distribution in a
-future release, and will at that time need to be installed from CPAN.
-Distributions on CPAN which require these modules will need to list them as
-prerequisites.
-
-The core versions of these modules will now issue C<"deprecated">-category
-warnings to alert you to this fact.  To silence these deprecation warnings,
-install the modules in question from CPAN.
-
-Note that these are (with rare exceptions) fine modules that you are encouraged
-to continue to use.  Their disinclusion from core primarily hinges on their
-necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
-not usually on concerns over their design.
-
-=over
-
-=item XXX
-
-XXX Note that deprecated modules should be listed here even if they are listed
-as an updated module in the L</Modules and Pragmata> section.
-
-=back
-
-[ List each other deprecation as a =head2 entry ]
-
 =head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here.
-There may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
 
 =over 4
 
@@ -110,30 +58,12 @@ This empty function call now takes about a third less time to execute:
 
 =item *
 
-On Win32, C<stat>ing or C<-X>ing a path, if the file or directory does not exist
-is now 3.5x faster on a SSD (or any drive) than before.
+On Win32, C<stat>ing or C<-X>ing a path, if the file or directory does not
+exist, is now 3.5x faster on a SSD (or any drive) than before.
 
 =back
 
 =head1 Modules and Pragmata
-
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
 
 =head2 Updated Modules and Pragmata
 
@@ -145,41 +75,79 @@ F<cpan/podlators/> has been upgraded from version 4.04 to 4.06.
 
 =item *
 
-L<POSIX> has been upgraded from version 1.59 to 1.60.
+The PathTools module collection has been upgraded from version 3.62
+to 3.63.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.37 to 1.38.
+
+DynaLoader now always looks for bootstrap files having the same base name as
+the module for which the bootstrap code is being run. Previously, and only on
+platforms that use C<mod2fname> to produce unique loadable library names,
+L<DynaLoader> would look for the bootstrap file using a base name that matched
+the loadable library and not find it.
+
+=item *
+
+L<Encode> has been upgraded from version 2.78 to 2.80.
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280224 to 0.280225.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 7.10 to 7.10_01.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.62 to 3.63.
+
+=item *
+
+L<IPC::SysV> has been upgraded from version 2.04 to 2.05.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20160120 to 5.20160121.
+
+=item *
+
+L<ODBM_File> has been upgraded from version 1.12 to 1.13.
+
+=item *
+
+L<PerlIO::encoding> has been upgraded from version 0.23 to 0.24.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.59 to 1.63.
 
 It can now export constants for the C<code> value in the hash passed to the
 L<sigaction|POSIX/sigaction> handler when using the C<SA_SIGINFO> flag.
 
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
+These previously deprecated functions are now removed: C<isalnum>,
+C<isalpha>, C<iscntrl>, C<isdigit>, C<isgraph>, C<islower>, C<isprint>,
+C<ispunct>, C<isspace>, C<isupper>, and C<isxdigit>.
 
 =item *
 
-XXX
+L<Storable> has been upgraded from version 2.54 to 2.55.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9728 to 1.9730.
+
+It can now export Linux-specific and FreeBSD-specific C<clock_gettime()>
+constants. It also now has emulation for OS X C<clock_nanosleep()>,
+C<clock_gettime()>, and C<clock_getres()>.
 
 =back
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
-=head2 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
-
 =head2 Changes to Existing Documentation
-
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
 
 =head3 L<perlguts>
 
@@ -209,13 +177,7 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-XXX New or changed warnings emitted by the core's C<C> code go here.  Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
 =head2 New Diagnostics
-
-XXX Newly added diagnostic messages go under here, separated into New Errors
-and New Warnings
 
 =head3 New Errors
 
@@ -223,13 +185,18 @@ and New Warnings
 
 =item *
 
-L<Sequence (?PE<lt>... not terminated in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>
-|perldiag/"Sequence (?PE<lt>... not terminated in regex; marked by <-- HERE in mE<sol>%sE<sol>">
+L<<< Sequence (?PE<lt>... not terminated in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>
+|perldiag/"Sequence (?PE<lt>... not terminated in regex; marked by <-- HERE in mE<sol>%sE<sol>" >>>
 
 =item *
 
-L<Sequence (?PE<gt>... not terminated in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>
-|perldiag/Sequence (?PE<gt>... not terminated in regex; marked by <-- HERE in mE<sol>%sE<sol>>
+L<Sequence (?PE<gt>... not terminated in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>
+|perldiag/"Sequence (?PE<gt>... not terminated in regex; marked by <-- HERE in mE<sol>%sE<sol>">
+
+=item *
+
+L<Empty \%c in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>
+|perldiag/"Empty \%c in regex; marked by <-- HERE in mE<sol>%sE<sol>">
 
 =back
 
@@ -244,45 +211,7 @@ perldiag/Assuming NOT a POSIX class since %s in regex; marked by <-- HERE in mE<
 
 =back
 
-=head2 Changes to Existing Diagnostics
-
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
-=over 4
-
-=item *
-
-XXX Describe change here
-
-=back
-
-=head1 Utility Changes
-
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go here.
-Most of these are built within the directory F<utils>.
-
-[ List utility changes as a =head2 entry for each utility and =item
-entries for each change
-Use L<XXX> with program names to get proper documentation linking. ]
-
-=head2 L<XXX>
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Configuration and Compilation
-
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as a =item entry ].
 
 =over 4
 
@@ -294,23 +223,9 @@ The GNU Make makefile for Win32 now supports parallel builds.  [perl #126632]
 
 You can now build perl with MSVC++ on Win32 using GNU Make.  [perl #126632]
 
-=back
-
-=head1 Testing
-
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarizing, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
-
-=over 4
-
 =item *
 
-XXX
+Bison 3.0 is now supported.
 
 =back
 
@@ -340,44 +255,6 @@ determined by C<PERL_ENV_TABLES> and as documented in L<perlvms/%ENV>.
 
 =back
 
-=back
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not.  These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
-
-=over 4
-
 =item Win32
 
 Builds using Microsoft Visual C++ 2003 and earlier no longer produce
@@ -386,12 +263,6 @@ an "INTERNAL COMPILER ERROR" message.  [perl #126045]
 =back
 
 =head1 Internal Changes
-
-XXX Changes which affect the interface available to C<XS> code go here.  Other
-significant internal changes for future core maintainers should be noted as
-well.
-
-[ List each change as a =item entry ]
 
 =over 4
 
@@ -420,16 +291,16 @@ details on how to use them.
 
 Various macros, which now consistently have a CX_ prefix, have been added:
 
- CX_CUR(), CX_LEAVE_SCOPE(), CX_POP()
+  CX_CUR(), CX_LEAVE_SCOPE(), CX_POP()
 
 or renamed:
 
- CX_POP_SAVEARRAY(), CX_DEBUG(), CX_PUSHSUBST() ,CX_POPSUBST()
+  CX_POP_SAVEARRAY(), CX_DEBUG(), CX_PUSHSUBST(), CX_POPSUBST()
 
 =item *
 
 C<cx_pushblock()> now saves C<PL_savestack_ix> and C<PL_tmps_floor>, so
-CMpp_enter*> and C<pp_leave*> no longer do
+C<pp_enter*> and C<pp_leave*> no longer do
 
   ENTER; SAVETMPS; ....; LEAVE
 
@@ -496,15 +367,9 @@ been removed.
 
 =back
 
-
 =back
 
 =head1 Selected Bug Fixes
-
-XXX Important bug fixes in the core language are summarized here.  Bug fixes in
-files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
-
-[ List each fix as a =item entry ]
 
 =over 4
 
@@ -579,51 +444,50 @@ L<perlrecharclass/POSIX Character Classes>.)
 
 =item *
 
-Certain regex patterns involving a complemented posix class in an
+Certain regex patterns involving a complemented POSIX class in an
 inverted bracketed character class, and matching something else
 optionally would improperly fail to match.  An example of one that could
 fail is C</qr/_?[^\Wbar]\x{100}/>.  This has been fixed.
 [perl #127537]
 
-=back
-
-=head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
-tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
-platform specific bugs also go here.
-
-[ List each fix as a =item entry ]
-
-=over 4
-
 =item *
 
-XXX
+Perl 5.22 added support to the C99 hexadecimal floating point notation,
+but sometimes misparses hex floats. This had been fixed.
+[perl #127183]
 
 =back
-
-=head1 Errata From Previous Releases
-
-=over 4
-
-=item *
-
-XXX Add anything here that we forgot to add, or were mistaken about, in
-the perldelta of a previous release.
-
-=back
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.23.8 represents approximately 4 weeks of development since Perl 5.23.7
+and contains approximately 30,000 lines of changes across 350 files from 23
+authors.
 
-  perl Porting/acknowledgements.pl v5.23.7..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 14,000 lines of changes to 210 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.23.8:
+
+Aaron Crane, Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn Ilmari
+Mannsåker, Daniel Dragan, David Mitchell, Ed J, Herbert Breunung, H.Merijn
+Brand, James E Keenan, Jarkko Hietaniemi, Karl Williamson, Lukas Mai, Niko
+Tyni, Pip Cet, Ricardo Signes, Sawyer X, Sisyphus, Stevan Little, Steve Hay,
+Todd Rinaldo, Tom Hukins, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
