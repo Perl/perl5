@@ -75,30 +75,8 @@ F<cpan/podlators/> has been upgraded from version 4.04 to 4.06.
 
 =item *
 
-L<POSIX> has been upgraded from version 1.59 to 1.63.
-
-It can now export constants for the C<code> value in the hash passed to the
-L<sigaction|POSIX/sigaction> handler when using the C<SA_SIGINFO> flag.
-
-These previously deprecated functions are now removed: C<isalnum>,
-C<isalpha>, C<iscntrl>, C<isdigit>, C<isgraph>, C<islower>, C<isprint>,
-C<ispunct>, C<isspace>, C<isupper>, and C<isxdigit>.
-
-=item *
-
-L<Encode> has been upgraded from version 2.78 to 2.80.
-
-=item *
-
-L<Storable> has been upgraded from version 2.54 to 2.55.
-
-=item *
-
-L<Time::HiRes> has been upgraded from version 1.9728 to 1.9730.
-
-It can now export Linux-specific and FreeBSD-specific C<clock_gettime()>
-constants. It also now has emulation for OS X C<clock_nanosleep()>,
-C<clock_gettime()>, and C<clock_getres()>.
+The PathTools module collection has been upgraded from version 3.62
+to 3.63.
 
 =item *
 
@@ -112,16 +90,58 @@ the loadable library and not find it.
 
 =item *
 
-L<PerlIO::encoding> has been upgraded from version 0.23 to 0.24.
+L<Encode> has been upgraded from version 2.78 to 2.80.
 
 =item *
 
-The PathTools module collection has been upgraded from version 3.62
-to 3.63.
+L<ExtUtils::CBuilder> has been upgraded from version 0.280224 to 0.280225.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 7.10 to 7.10_01.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.62 to 3.63.
 
 =item *
 
 L<IPC::SysV> has been upgraded from version 2.04 to 2.05.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20160120 to 5.20160121.
+
+=item *
+
+L<ODBM_File> has been upgraded from version 1.12 to 1.13.
+
+=item *
+
+L<PerlIO::encoding> has been upgraded from version 0.23 to 0.24.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.59 to 1.63.
+
+It can now export constants for the C<code> value in the hash passed to the
+L<sigaction|POSIX/sigaction> handler when using the C<SA_SIGINFO> flag.
+
+These previously deprecated functions are now removed: C<isalnum>,
+C<isalpha>, C<iscntrl>, C<isdigit>, C<isgraph>, C<islower>, C<isprint>,
+C<ispunct>, C<isspace>, C<isupper>, and C<isxdigit>.
+
+=item *
+
+L<Storable> has been upgraded from version 2.54 to 2.55.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9728 to 1.9730.
+
+It can now export Linux-specific and FreeBSD-specific C<clock_gettime()>
+constants. It also now has emulation for OS X C<clock_nanosleep()>,
+C<clock_gettime()>, and C<clock_getres()>.
 
 =back
 
