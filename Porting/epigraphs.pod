@@ -17,6 +17,18 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.23.8 - Patrick Rothfuss, "The Wise Man's Fear (The Kingkiller's Chronicle: Day Two)"
+
+Denna, on the other hand, had never been trained. She knew nothing
+of shortcuts. You'd think she'd be forced to wander the city, lost and
+helpless, trapped in a twisting maze of mortared stone.
+
+But instead, she simply walked throught the walls. She didn't know
+any better. Nobody had ever told her she couldn't. Because of this,
+she moved through the city like some faerie creature. She walked roads
+no one else could see, and it made her music wild and strange and
+free.
+
 =head2 v5.23.7
 
 L<Announced on 2016-01-20 by Stevan|http://www.nntp.perl.org/group/perl.perl5.porters/2016/01/msg233856.html>
