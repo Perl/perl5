@@ -2457,6 +2457,13 @@ EOF
 		      "buffer overflow in TRIE_STORE_REVCHAR");
     }
 
+    {
+        fresh_perl_like('use warnings; s 0(?(?!00000000000000000000000000·000000)\500000000 0000000000000000000000000000000000000000000000000000·00000000000000000000000000000000 0',
+                        qr/Switch \(\?\(condition\)\.\.\. not terminated/,
+                        {},
+                        'No segfault [perl #126886]');
+    }
+
     # !!! NOTE that tests that aren't at all likely to crash perl should go
     # a ways above, above these last ones.  There's a comment there that, like
     # this comment, contains the word 'NOTE'
