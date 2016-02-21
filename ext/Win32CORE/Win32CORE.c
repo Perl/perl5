@@ -46,6 +46,7 @@ XS_EXTERNAL(boot_Win32CORE)
      * and win32/buildext.pl will all generate references to it.  The function
      * should never be called though, as Win32CORE.pm doesn't use DynaLoader.
      */
+    PERL_UNUSED_ARG(cv);
 }
 
 EXTERN_C
