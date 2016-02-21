@@ -72,7 +72,7 @@ addressed.  This typically means some time in April or May.)
   2016-07-20  5.25.2          Steve Hay
   2016-08-20  5.25.3          BinGOs
   2016-09-20  5.25.4          Stevan Little
-  2016-10-20  5.25.5          ?
+  2016-10-20  5.25.5          Sawyer X
   2016-11-20  5.25.6          ?
   2016-12-20  5.25.7          ?
 
