@@ -12310,6 +12310,11 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     5.023009 => {
         delta_from => 5.023008,
         changed => {
+            'B::Op_private'         => '5.023009',
+            'Config'                => '5.023009',
+            'Module::CoreList'      => '5.20160221',
+            'Module::CoreList::TieHashDelta'=> '5.20160221',
+            'Module::CoreList::Utils'=> '5.20160221',
         },
         removed => {
         }
