@@ -53,6 +53,12 @@ my %known_bad_locales = (
                           os390 => qr/ ^ italian /ix,
                         );
 
+# cygwin isn't returning proper radix length in this locale, but supposedly to
+# be fixed in later versions.
+if ($^O eq 'cygwin' && version->new(($Config{osvers} =~ /^(\d+(?:\.\d+)+)/)[0]) le v2.4.1) {
+    $known_bad_locales{'cygwin'} = qr/ ^ ps_AF /ix;
+}
+
 use Dumpvalue;
 
 my $dumper = Dumpvalue->new(
@@ -2025,12 +2031,14 @@ foreach my $Locale (@Locale) {
 
     report_result($Locale, ++$locales_test_number, $ok16);
     $test_names{$locales_test_number} = 'Verify that a sprintf of a number with a UTF-8 radix yields UTF-8';
+    $problematical_tests{$locales_test_number} = 1;
 
     report_result($Locale, ++$locales_test_number, $ok17);
     $test_names{$locales_test_number} = 'Verify that a sprintf of a number outside locale scope uses a dot radix';
 
     report_result($Locale, ++$locales_test_number, $ok18);
     $test_names{$locales_test_number} = 'Verify that a sprintf of a number back within locale scope uses locale radix';
+    $problematical_tests{$locales_test_number} = 1;
 
     report_result($Locale, ++$locales_test_number, $ok19);
     $test_names{$locales_test_number} = 'Verify that strftime doesn\'t return "%p" in locales where %p is empty';

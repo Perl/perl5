@@ -47,7 +47,13 @@ SKIP: {
     isnt(setlocale(LC_ALL), "C", "retrieving current non-C LC_ALL doesn't give 'C'");
 }
 
-fresh_perl_is("for (qw(@locales)) {\n" . <<'EOF',
+# Skip this locale on these cywgwin versions as the returned radix character
+# length is wrong
+my @test_numeric_locales = ($^O ne 'cygwin' || version->new(($Config{'osvers'} =~ /^(\d+(?:\.\d+)+)/)[0]) gt v2.4.1)
+                           ? @locales
+                           : grep { $_ !~ m/ps_AF/i } @locales;
+
+fresh_perl_is("for (qw(@test_numeric_locales)) {\n" . <<'EOF',
     use POSIX qw(locale_h);
     use locale;
     setlocale(LC_NUMERIC, "$_") or next;
