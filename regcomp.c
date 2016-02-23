@@ -8347,6 +8347,51 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
 
 #ifndef PERL_IN_XSUB_RE
 
+STATIC void
+S_invlist_replace_list(pTHX_ SV * dest, SV * src)
+{
+    /* Replaces the inversion list in 'src' with the one in 'dest'.  It steals
+     * the list from 'src', so 'src' is made to have a NULL list.  This is
+     * similar to what SvSetMagicSV() would do, if it were implemented on
+     * inversion lists, though this routine avoids a copy */
+
+    const UV src_len          = _invlist_len(src);
+    const bool src_offset     = *get_invlist_offset_addr(src);
+    const STRLEN src_byte_len = SvCUR(src);
+    char * array              = SvPVX(src);
+
+    const int oldtainted = TAINT_get;
+
+    PERL_ARGS_ASSERT_INVLIST_REPLACE_LIST;
+
+    assert(SvTYPE(src) == SVt_INVLIST);
+    assert(SvTYPE(dest) == SVt_INVLIST);
+    assert(! invlist_is_iterating(src));
+
+    /* Make sure it ends in the right place with a NUL, as our inversion list
+     * manipulations aren't careful to keep this true, but sv_usepvn_flags()
+     * asserts it */
+    array[src_byte_len - 1] = '\0';
+
+    TAINT_NOT;      /* Otherwise it breaks */
+    sv_usepvn_flags(dest,
+                    (char *) array,
+                    src_byte_len - 1,
+
+                    /* This flag is documented to cause a copy to be avoided */
+                    SV_HAS_TRAILING_NUL);
+    TAINT_set(oldtainted);
+    SvPV_set(src, 0);
+    SvLEN_set(src, 0);
+    SvCUR_set(src, 0);
+
+    /* Finish up copying over the other fields in an inversion list */
+    *get_invlist_offset_addr(dest) = src_offset;
+    invlist_set_len(dest, src_len, src_offset);
+    *get_invlist_previous_index_addr(dest) = 0;
+    invlist_iterfinish(dest);
+}
+
 PERL_STATIC_INLINE IV*
 S_get_invlist_previous_index_addr(SV* invlist)
 {
@@ -8806,10 +8851,10 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
     /* Take the union of two inversion lists and point <output> to it.  *output
      * SHOULD BE DEFINED upon input, and if it points to one of the two lists,
      * the reference count to that list will be decremented if not already a
-     * temporary (mortal); otherwise *output will be made correspondingly
-     * mortal.  The first list, <a>, may be NULL, in which case a copy of the
-     * second list is returned.  If <complement_b> is TRUE, the union is taken
-     * of the complement (inversion) of <b> instead of b itself.
+     * temporary (mortal); otherwise just its contents will be modified to be
+     * the union.  The first list, <a>, may be NULL, in which case a copy of
+     * the second list is returned.  If <complement_b> is TRUE, the union is
+     * taken of the complement (inversion) of <b> instead of b itself.
      *
      * The basis for this comes from "Unicode Demystified" Chapter 13 by
      * Richard Gillam, published by Addison-Wesley, and explained at some
@@ -9037,20 +9082,29 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 	}
     }
 
-    /*  We may be removing a reference to one of the inputs.  If so, the output
-     *  is made mortal if the input was.  (Mortal SVs shouldn't have their ref
-     *  count decremented) */
-    if (a == *output || b == *output) {
+    if (a != *output && b != *output) {
+        *output = u;
+    }
+    else {
+        /*  Here, the output is to be the same as one of the input scalars,
+         *  hence replacing it.  The simple thing to do is to free the input
+         *  scalar, making it instead be the output one.  But experience has
+         *  shown [perl #127392] that if the input is a mortal, we can get a
+         *  huge build-up of these during regex compilation before they get
+         *  freed.  So for that case, replace just the input's interior with
+         *  the output's, and then free the output */
+
         assert(! invlist_is_iterating(*output));
-        if ((SvTEMP(*output))) {
-            sv_2mortal(u);
+
+        if (! SvTEMP(*output)) {
+            SvREFCNT_dec_NN(*output);
+            *output = u;
         }
         else {
-            SvREFCNT_dec_NN(*output);
+            invlist_replace_list(*output, u);
+            SvREFCNT_dec_NN(u);
         }
     }
-
-    *output = u;
 
     return;
 }
@@ -9062,11 +9116,11 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
     /* Take the intersection of two inversion lists and point <i> to it.  *i
      * SHOULD BE DEFINED upon input, and if it points to one of the two lists,
      * the reference count to that list will be decremented if not already a
-     * temporary (mortal); otherwise *i will be made correspondingly mortal.
-     * The first list, <a>, may be NULL, in which case an empty list is
-     * returned.  If <complement_b> is TRUE, the result will be the
-     * intersection of <a> and the complement (or inversion) of <b> instead of
-     * <b> directly.
+     * temporary (mortal); otherwise just its contents will be modified to be
+     * the intersection.  The first list, <a>, may be NULL, in which case an
+     * empty list is returned.  If <complement_b> is TRUE, the result will be
+     * the intersection of <a> and the complement (or inversion) of <b> instead
+     * of <b> directly.
      *
      * The basis for this comes from "Unicode Demystified" Chapter 13 by
      * Richard Gillam, published by Addison-Wesley, and explained at some
@@ -9278,20 +9332,36 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 	}
     }
 
-    /*  We may be removing a reference to one of the inputs.  If so, the output
-     *  is made mortal if the input was.  (Mortal SVs shouldn't have their ref
-     *  count decremented) */
-    if (a == *i || b == *i) {
+    if (a != *i && b != *i) {
+        *i = r;
+    }
+    else {
+        /*  Here, the output is to be the same as one of the input scalars,
+         *  hence replacing it.  The simple thing to do is to free the input
+         *  scalar, making it instead be the output one.  But experience has
+         *  shown [perl #127392] that if the input is a mortal, we can get a
+         *  huge build-up of these during regex compilation before they get
+         *  freed.  So for that case, replace just the input's interior with
+         *  the output's, and then free the output.  A short-cut in this case
+         *  is if the output is empty, we can just set the input to be empty */
+
         assert(! invlist_is_iterating(*i));
-        if (SvTEMP(*i)) {
-            sv_2mortal(r);
+
+        if (! SvTEMP(*i)) {
+            SvREFCNT_dec_NN(*i);
+            *i = r;
         }
         else {
-            SvREFCNT_dec_NN(*i);
+            if (len_r) {
+                invlist_replace_list(*i, r);
+            }
+            else {
+                invlist_set_len(*i, 0, 0);
+                invlist_trim(*i);
+            }
+            SvREFCNT_dec_NN(r);
         }
     }
-
-    *i = r;
 
     return;
 }
