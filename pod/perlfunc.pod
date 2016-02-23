@@ -1495,6 +1495,10 @@ determined from the values of C<$!> and C<$?> with this pseudocode:
     exit $? >> 8 if $? >> 8;    # child exit status
     exit 255;                   # last resort
 
+As with L</exit>, C<$?> is set prior to unwinding the call stack; any
+DESTROY or END handlers can then alter this value, and thus Perl's
+exit code.
+
 The intent is to squeeze as much possible information about the likely cause
 into the limited space of the system exit
 code.  However, as C<$!> is the value
