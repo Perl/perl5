@@ -3667,7 +3667,7 @@ PERL_STATIC_INLINE IV	S_invlist_previous_index(SV* const invlist)
 PERL_STATIC_INLINE void	S_invlist_set_previous_index(SV* const invlist, const IV index);
 #define PERL_ARGS_ASSERT_INVLIST_SET_PREVIOUS_INDEX	\
 	assert(invlist)
-PERL_STATIC_INLINE void	S_invlist_trim(SV* const invlist);
+PERL_STATIC_INLINE void	S_invlist_trim(SV* invlist);
 #define PERL_ARGS_ASSERT_INVLIST_TRIM	\
 	assert(invlist)
 #  endif

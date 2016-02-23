@@ -8382,15 +8382,18 @@ S_invlist_set_previous_index(SV* const invlist, const IV index)
 }
 
 PERL_STATIC_INLINE void
-S_invlist_trim(SV* const invlist)
+S_invlist_trim(SV* invlist)
 {
     PERL_ARGS_ASSERT_INVLIST_TRIM;
 
     assert(SvTYPE(invlist) == SVt_INVLIST);
 
     /* Change the length of the inversion list to how many entries it currently
-     * has */
-    SvPV_shrink_to_cur((SV *) invlist);
+     * has.  But don't shorten it so that it would free up the required
+     * initial 0 UV (and a trailing NUL byte) */
+    if (SvCUR(invlist) > TO_INTERNAL_SIZE(1) + 1) {
+        SvPV_shrink_to_cur(invlist);
+    }
 }
 
 #endif /* ifndef PERL_IN_XSUB_RE */
