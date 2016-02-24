@@ -1907,8 +1907,8 @@ This variable was added in Perl v5.6.0.
 X<$^D> X<$DEBUGGING>
 
 The current value of the debugging flags.  May be read or set.  Like its
-command-line equivalent, you can use numeric or symbolic values, eg
-C<$^D = 10> or C<$^D = "st">.
+L<command-line equivalent|perlrun/B<-D>I<letters>>, you can use numeric
+or symbolic values, e.g. C<$^D = 10> or C<$^D = "st">.
 
 Mnemonic: value of B<-D> switch.
 
