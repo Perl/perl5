@@ -6647,7 +6647,7 @@ argument is given.  Returns the integer number of seconds actually slept.
 May be interrupted if the process receives a signal such as C<SIGALRM>.
 
     eval {
-        local $SIG{ALARM} = sub { die "Alarm!\n" };
+        local $SIG{ALRM} = sub { die "Alarm!\n" };
         sleep;
     };
     die $@ unless $@ eq "Alarm!\n";
