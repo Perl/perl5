@@ -2152,7 +2152,7 @@ Es	|regnode*|regclass	|NN RExC_state_t *pRExC_state                 \
 				|const bool strict                            \
 				|bool optimizable			      \
 				|NULLOK SV** ret_invlist		      \
-				|NULLOK AV** posix_warnings
+				|NULLOK AV** return_posix_warnings
 Es	|void|add_above_Latin1_folds|NN RExC_state_t *pRExC_state|const U8 cp \
 				|NN SV** invlist
 Ei	|regnode*|handle_named_backref|NN RExC_state_t *pRExC_state	    \

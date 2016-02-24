@@ -14479,10 +14479,10 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                 {
                     /* See if this is a [:posix:] class. */
                     bool is_posix_class = (OOB_NAMEDCLASS
-                                           < handle_possible_posix(pRExC_state,
-                                                                RExC_parse + 1,
-                                                                NULL,
-                                                                NULL));
+                            < handle_possible_posix(pRExC_state,
+                                                RExC_parse + 1,
+                                                NULL,
+                                                NULL));
                     /* If it is a posix class, leave the parse pointer at the
                      * '[' to fool regclass() into thinking it is part of a
                      * '[[:posix:]]'. */
@@ -14784,10 +14784,10 @@ redo_curchar:
             {
                 /* See if this is a [:posix:] class. */
                 bool is_posix_class = (OOB_NAMEDCLASS
-                                        < handle_possible_posix(pRExC_state,
-                                                            RExC_parse + 1,
-                                                            NULL,
-                                                            NULL));
+                            < handle_possible_posix(pRExC_state,
+                                                RExC_parse + 1,
+                                                NULL,
+                                                NULL));
                 /* If it is a posix class, leave the parse pointer at the '['
                  * to fool regclass() into thinking it is part of a
                  * '[[:posix:]]'. */
@@ -15343,7 +15343,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  bool optimizable,                  /* ? Allow a non-ANYOF return
                                                        node */
                  SV** ret_invlist, /* Return an inversion list, not a node */
-                 AV** posix_warnings
+                 AV** return_posix_warnings
           )
 {
     /* parse a bracketed class specification.  Most of these will produce an
@@ -15462,7 +15462,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * like it could be such a construct is encountered, it is checked for
      * being one, but not if we've already checked this area of the input.
      * Only after this position is reached do we check again */
-    char *dont_check_for_posix_end = RExC_parse - 1;
+    char *not_posix_region_end = RExC_parse - 1;
 
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -15479,8 +15479,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     allow_multi_folds = FALSE;
 #endif
 
-    if (posix_warnings == NULL) {
-        posix_warnings = (AV **) -1;
+    if (return_posix_warnings == NULL) {
+        return_posix_warnings = (AV **) -1;
     }
 
     /* Assume we are going to generate an ANYOF node. */
@@ -15518,11 +15518,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     /* Check that they didn't say [:posix:] instead of [[:posix:]] */
     if (! ret_invlist && MAYBE_POSIXCC(UCHARAT(RExC_parse))) {
         char *class_end;
-        int maybe_class = handle_possible_posix(pRExC_state, RExC_parse,
-                                             &class_end, NULL);
+        int maybe_class = handle_possible_posix(pRExC_state,
+                                                RExC_parse,
+                                                &class_end,
+                                                NULL);
         if (maybe_class >= OOB_NAMEDCLASS) {
-            dont_check_for_posix_end = class_end;
-            if (PASS2 && posix_warnings == (AV **) -1) {
+            not_posix_region_end = class_end;
+            if (PASS2 && return_posix_warnings == (AV **) -1) {
                 SAVEFREESV(RExC_rx_sv);
                 ckWARN4reg(class_end,
                         "POSIX syntax [%c %c] belongs inside character classes%s",
@@ -15580,19 +15582,26 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	    value = UCHARAT(RExC_parse++);
 
         if (value == '[') {
-            namedclass = handle_possible_posix(pRExC_state, RExC_parse, &dont_check_for_posix_end, posix_warnings);
+            namedclass = handle_possible_posix(pRExC_state,
+                                               RExC_parse,
+                                               &not_posix_region_end,
+                                               return_posix_warnings);
             if (namedclass > OOB_NAMEDCLASS) {
-                RExC_parse = dont_check_for_posix_end;
+                RExC_parse = not_posix_region_end;
             }
             else {
                 namedclass = OOB_NAMEDCLASS;
             }
         }
-        else if (   RExC_parse - 1 > dont_check_for_posix_end
+        else if (   RExC_parse - 1 > not_posix_region_end
                  && MAYBE_POSIXCC(value))
         {
-            (void) handle_possible_posix(pRExC_state, RExC_parse - 1,  /* -1 because parse has already been advanced */
-                    &dont_check_for_posix_end, posix_warnings);
+            (void) handle_possible_posix(
+                        pRExC_state,
+                        RExC_parse - 1,  /* -1 because parse has already been
+                                            advanced */
+                        &not_posix_region_end,
+                        return_posix_warnings);
         }
         else if (value == '\\') {
             /* Is a backslash; get the code point of the char after it */
