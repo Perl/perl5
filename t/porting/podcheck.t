@@ -1029,9 +1029,29 @@ package My::Pod::Checker {      # Extend Pod::Checker
         if ($_[0] && ($page = $_[0][1]{'-page'})) {
             my $node = $_[0][1]{'-node'};
 
-            # If the hyperlink is to an interior node of another page, save it
-            # so that we can see if we need to parse normally skipped files.
-            $has_referred_to_node{$page} = 1 if $node;
+            if ($node) {
+                $_[0][1]{'-node'} = $node = do {
+                    my $expand_seq = sub {
+                        my (undef, $seq) = @_;
+                        my $arg = join '', $seq->parse_tree->children;
+                        if ($seq->name eq 'E') {
+                            $arg =
+                                $arg eq 'sol'    ? '/' :
+                                $arg eq 'verbar' ? '|' :
+                                $arg eq 'lt'     ? '<' :
+                                $arg eq 'gt'     ? '>' :
+                                die "Not implemented: E<$arg>";
+                        }
+                        return $arg;
+                    };
+                    my $ptree = $self->parse_text({ -expand_seq => $expand_seq }, $node, $_[0][0]);
+                    join '', $ptree->children
+                };
+
+                # If the hyperlink is to an interior node of another page, save it
+                # so that we can see if we need to parse normally skipped files.
+                $has_referred_to_node{$page} = 1;
+            }
 
             # Ignore certain placeholder links in perldelta.  Check if the
             # link is page-level, and also check if to a node within the page
@@ -1723,12 +1743,7 @@ foreach my $filename (@files) {
         # could be a link target.  Count how many there are of the same name.
         foreach my $node ($checker->linkable_nodes) {
             next FILE if ! $node;        # Can be empty is like '=item *'
-            if (exists $nodes{$name}{$node}) {
-                $nodes{$name}{$node}++;
-            }
-            else {
-                $nodes{$name}{$node} = 1;
-            }
+            $nodes{$name}{$node}++;
 
             # Experiments have shown that cpan search can figure out the
             # target of a link even if the exact wording is incorrect, as long
@@ -1767,12 +1782,6 @@ if (! $has_input_files) {
 
                 # If link is only to the page-level, already have it
                 next if ! $node;
-
-                # Transform pod language to what we are expecting
-                $node =~ s,E<sol>,/,g;
-                $node =~ s/E<verbar>/|/g;
-                $node =~ s/E<lt>/</g;
-                $node =~ s/E<gt>/>/g;
 
                 # If link is to a node that exists in the file, is ok
                 if ($nodes{$linked_to_page}{$node}) {
