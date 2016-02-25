@@ -8874,7 +8874,7 @@ Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, STRLEN len,
 			     ? const_av_xsub
 			     : const_sv_xsub,
 			 file ? file : "", "",
-			 &sv, XS_DYNAMIC_FILENAME | flags);
+			 &sv, file ? XS_DYNAMIC_FILENAME | flags : flags);
     CvXSUBANY(cv).any_ptr = SvREFCNT_inc_simple(sv);
     CvCONST_on(cv);
 
