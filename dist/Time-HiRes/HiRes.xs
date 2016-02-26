@@ -417,7 +417,7 @@ gettimeofday (struct timeval *tp, void *tpz)
 #define HAS_USLEEP
 #define usleep hrt_usleep  /* could conflict with ncurses for static build */
 
-void
+static void
 hrt_usleep(unsigned long usec) /* This is used to emulate usleep. */
 {
     struct timespec res;
@@ -433,7 +433,7 @@ hrt_usleep(unsigned long usec) /* This is used to emulate usleep. */
 #define HAS_USLEEP
 #define usleep hrt_usleep  /* could conflict with ncurses for static build */
 
-void
+static void
 hrt_usleep(unsigned long usec)
 {
     struct timeval tv;
@@ -449,7 +449,7 @@ hrt_usleep(unsigned long usec)
 #define HAS_USLEEP
 #define usleep hrt_usleep  /* could conflict with ncurses for static build */
 
-void
+static void
 hrt_usleep(unsigned long usec)
 {
     long msec;
@@ -462,7 +462,7 @@ hrt_usleep(unsigned long usec)
 #define HAS_USLEEP
 #define usleep hrt_usleep  /* could conflict with ncurses for static build */
 
-void
+static void
 hrt_usleep(unsigned long usec)
 {
     int msec = usec / 1000;
@@ -484,14 +484,14 @@ hrt_ualarm_itimero(struct itimerval *oitv, int usec, int uinterval)
    return setitimer(ITIMER_REAL, &itv, oitv);
 }
 
-int
+static int
 hrt_ualarm_itimer(int usec, int uinterval)
 {
   return hrt_ualarm_itimero(NULL, usec, uinterval);
 }
 
 #ifdef HAS_UALARM
-int
+static int
 hrt_ualarm(int usec, int interval) /* for binary compat before 1.91 */
 {
    return hrt_ualarm_itimer(usec, interval);
