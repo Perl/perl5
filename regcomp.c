@@ -9599,7 +9599,7 @@ S_invlist_highest(SV* const invlist)
            : array[len - 1] - 1;
 }
 
-SV *
+STATIC SV *
 S_invlist_contents(pTHX_ SV* const invlist, const bool traditional_style)
 {
     /* Get the contents of an inversion list into a string SV so that they can
