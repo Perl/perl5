@@ -49,9 +49,9 @@ PERLVAR(I, scopestack_ix, I32)
 PERLVAR(I, scopestack_max, I32)
 
 PERLVAR(I, tmps_stack,	SV **)		/* mortals we've made */
-PERLVARI(I, tmps_ix,	SSize_t,	-1)
-PERLVARI(I, tmps_floor,	SSize_t,	-1)
-PERLVAR(I, tmps_max,	SSize_t)        /* first unalloced slot in tmps stack */
+PERLVARI(I, tmps_ix,	ssize_t,	-1)
+PERLVARI(I, tmps_floor,	ssize_t,	-1)
+PERLVAR(I, tmps_max,	ssize_t)        /* first unalloced slot in tmps stack */
 
 PERLVARI(I, sub_generation, U32, 1)	/* incr to invalidate method cache */
 
@@ -171,7 +171,7 @@ PERLVAR(I, stashcache,	HV *)		/* Cache to speed up S_method_common */
 
 
 /*
-=for apidoc Amn|STRLEN|PL_na
+=for apidoc Amn|size_t|PL_na
 
 A convenience variable which is typically used with C<SvPV> when one
 doesn't care about the length of the string.  It is usually more efficient
@@ -181,7 +181,7 @@ C<SvPV_nolen> macro.
 =cut
 */
 
-PERLVAR(I, na,		STRLEN)		/* for use in SvPV when length is
+PERLVAR(I, na,		size_t)		/* for use in SvPV when length is
 					   Not Applicable */
 
 /* stat stuff */
@@ -236,7 +236,7 @@ PERLVAR(I, secondgv,	GV *)		/* $b */
 
 /* float buffer */
 PERLVAR(I, efloatbuf,	char *)
-PERLVAR(I, efloatsize,	STRLEN)
+PERLVAR(I, efloatsize,	size_t)
 
 PERLVARI(I, dumpindent,	U16,	4)	/* number of blanks per dump
 					   indentation level */
@@ -560,8 +560,8 @@ PERLVAR(I, padix_floor,	I32)		/* how low may inner block reset padix */
 
 #ifdef USE_LOCALE_COLLATE
 PERLVAR(I, collation_name, char *)	/* Name of current collation */
-PERLVAR(I, collxfrm_base, Size_t)	/* Basic overhead in *xfrm() */
-PERLVARI(I, collxfrm_mult,Size_t, 2)	/* Expansion factor in *xfrm() */
+PERLVAR(I, collxfrm_base, size_t)	/* Basic overhead in *xfrm() */
+PERLVARI(I, collxfrm_mult,size_t, 2)	/* Expansion factor in *xfrm() */
 PERLVARI(I, collation_ix, U32,	0)	/* Collation generation index */
 PERLVARI(I, collation_standard, bool, TRUE)
 					/* Assume simple collation */
@@ -625,7 +625,7 @@ PERLVAR(I, WB_invlist, SV *)
 
 PERLVAR(I, last_swash_hv, HV *)
 PERLVAR(I, last_swash_tmps, U8 *)
-PERLVAR(I, last_swash_slen, STRLEN)
+PERLVAR(I, last_swash_slen, size_t)
 PERLVARA(I, last_swash_key,UTF8_MAXBYTES-1, U8)
 PERLVAR(I, last_swash_klen, U8)		/* Only needs to store 0-12  */
 
@@ -807,7 +807,7 @@ PERLVARA(I, op_exec_cnt, OP_max+2, UV)	/* Counts of executed OPs of the given ty
 
 PERLVAR(I, random_state, PL_RANDOM_STATE_TYPE)
 
-PERLVARI(I, dump_re_max_len, STRLEN, 0)
+PERLVARI(I, dump_re_max_len, size_t, 0)
 
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */

@@ -3295,17 +3295,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define SITELIB_STEM "$sitelib_stem"		/**/
 
 /* Size_t_size:
- *	This symbol holds the size of a Size_t in bytes.
+ *	This symbol holds the size of a size_t in bytes.
  */
 #define Size_t_size $sizesize		/**/
-
-/* Size_t:
- *	This symbol holds the type used to declare length parameters
- *	for string functions.  It is usually size_t, but may be
- *	unsigned long, int, etc.  It may be necessary to include
- *	<sys/types.h> to get any typedef'ed information.
- */
-#define Size_t $sizetype	 /* length parameter for string functions */
 
 /* Sock_size_t:
  *	This symbol holds the type used for the size argument of
@@ -3313,15 +3305,17 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define Sock_size_t		$socksizetype /**/
 
-/* SSize_t:
+/* ssize_t:
  *	This symbol holds the type used by functions that return
  *	a count of bytes or an error condition.  It must be a signed type.
  *	It is usually ssize_t, but may be long or int, etc.
  *	It may be necessary to include <sys/types.h> or <unistd.h>
  *	to get any typedef'ed information.
- *	We will pick a type such that sizeof(SSize_t) == sizeof(Size_t).
+ *	We will pick a type such that sizeof(ssize_t) == sizeof(size_t).
  */
-#define SSize_t $ssizetype	 /* signed count of bytes */
+#ifndef ssize_t
+#define ssize_t $ssizetype	 /* signed count of bytes */
+#endif
 
 /* STDCHAR:
  *	This symbol is defined to be the type of char used in stdio.h.

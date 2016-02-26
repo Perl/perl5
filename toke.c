@@ -585,7 +585,7 @@ S_missingterm(pTHX_ char *s)
  * Check whether the named feature is enabled.
  */
 bool
-Perl_feature_is_enabled(pTHX_ const char *const name, STRLEN namelen)
+Perl_feature_is_enabled(pTHX_ const char *const name, size_t namelen)
 {
     char he_name[8 + MAX_FEATURE_LEN] = "feature_";
 
@@ -720,7 +720,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
     Newxz(parser->lex_shared, 1, LEXSHARED);
 
     if (line) {
-	STRLEN len;
+	size_t len;
 	s = SvPV_const(line, len);
 	parser->linestr = flags & LEX_START_COPIED
 			    ? SvREFCNT_inc_simple_NN(line)
@@ -884,7 +884,7 @@ Perl_lex_bufutf8(pTHX)
 }
 
 /*
-=for apidoc Amx|char *|lex_grow_linestr|STRLEN len
+=for apidoc Amx|char *|lex_grow_linestr|size_t len
 
 Reallocates the lexer buffer (L</PL_parser-E<gt>linestr>) to accommodate
 at least C<len> octets (including terminating C<NUL>).  Returns a
@@ -901,12 +901,12 @@ into the buffer.
 */
 
 char *
-Perl_lex_grow_linestr(pTHX_ STRLEN len)
+Perl_lex_grow_linestr(pTHX_ size_t len)
 {
     SV *linestr;
     char *buf;
-    STRLEN bufend_pos, bufptr_pos, oldbufptr_pos, oldoldbufptr_pos;
-    STRLEN linestart_pos, last_uni_pos, last_lop_pos, re_eval_start_pos;
+    size_t bufend_pos, bufptr_pos, oldbufptr_pos, oldoldbufptr_pos;
+    size_t linestart_pos, last_uni_pos, last_lop_pos, re_eval_start_pos;
     linestr = PL_parser->linestr;
     buf = SvPVX(linestr);
     if (len <= SvLEN(linestr))
@@ -938,7 +938,7 @@ Perl_lex_grow_linestr(pTHX_ STRLEN len)
 }
 
 /*
-=for apidoc Amx|void|lex_stuff_pvn|const char *pv|STRLEN len|U32 flags
+=for apidoc Amx|void|lex_stuff_pvn|const char *pv|size_t len|U32 flags
 
 Insert characters into the lexer buffer (L</PL_parser-E<gt>linestr>),
 immediately after the current lexing point (L</PL_parser-E<gt>bufptr>),
@@ -960,7 +960,7 @@ function is more convenient.
 */
 
 void
-Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
+Perl_lex_stuff_pvn(pTHX_ const char *pv, size_t len, U32 flags)
 {
     dVAR;
     char *bufptr;
@@ -971,7 +971,7 @@ Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
 	if (flags & LEX_STUFF_UTF8) {
 	    goto plain_copy;
 	} else {
-	    STRLEN highhalf = 0;    /* Count of variants */
+	    size_t highhalf = 0;    /* Count of variants */
 	    const char *p, *e = pv+len;
 	    for (p = pv; p != e; p++) {
 		if (! UTF8_IS_INVARIANT(*p)) {
@@ -998,7 +998,7 @@ Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
 	}
     } else {
 	if (flags & LEX_STUFF_UTF8) {
-	    STRLEN highhalf = 0;
+	    size_t highhalf = 0;
 	    const char *p, *e = pv+len;
 	    for (p = pv; p != e; p++) {
 		U8 c = (U8)*p;
@@ -1102,7 +1102,7 @@ void
 Perl_lex_stuff_sv(pTHX_ SV *sv, U32 flags)
 {
     char *pv;
-    STRLEN len;
+    size_t len;
     PERL_ARGS_ASSERT_LEX_STUFF_SV;
     if (flags)
 	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_stuff_sv");
@@ -1128,7 +1128,7 @@ void
 Perl_lex_unstuff(pTHX_ char *ptr)
 {
     char *buf, *bufend;
-    STRLEN unstuff_len;
+    size_t unstuff_len;
     PERL_ARGS_ASSERT_LEX_UNSTUFF;
     buf = PL_parser->bufptr;
     if (ptr < buf)
@@ -1199,7 +1199,7 @@ void
 Perl_lex_discard_to(pTHX_ char *ptr)
 {
     char *buf;
-    STRLEN discard_len;
+    size_t discard_len;
     PERL_ARGS_ASSERT_LEX_DISCARD_TO;
     buf = SvPVX(PL_parser->linestr);
     if (ptr < buf)
@@ -1259,9 +1259,9 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
 {
     SV *linestr;
     char *buf;
-    STRLEN old_bufend_pos, new_bufend_pos;
-    STRLEN bufptr_pos, oldbufptr_pos, oldoldbufptr_pos;
-    STRLEN linestart_pos, last_uni_pos, last_lop_pos;
+    size_t old_bufend_pos, new_bufend_pos;
+    size_t bufptr_pos, oldbufptr_pos, oldoldbufptr_pos;
+    size_t linestart_pos, last_uni_pos, last_lop_pos;
     bool got_some_for_debugger = 0;
     bool got_some;
     if (flags & ~(LEX_KEEP_PREVIOUS|LEX_FAKE_EOF|LEX_NO_TERM))
@@ -1383,7 +1383,7 @@ Perl_lex_peek_unichar(pTHX_ U32 flags)
     if (UTF) {
 	U8 head;
 	I32 unichar;
-	STRLEN len, retlen;
+	size_t len, retlen;
 	if (s == bufend) {
 	    if (!lex_next_chunk(flags))
 		return -1;
@@ -1395,7 +1395,7 @@ Perl_lex_peek_unichar(pTHX_ U32 flags)
 	    return head;
 	if (UTF8_IS_START(head)) {
 	    len = UTF8SKIP(&head);
-	    while ((STRLEN)(bufend-s) < len) {
+	    while ((size_t)(bufend-s) < len) {
 		if (!lex_next_chunk(flags | LEX_KEEP_PREVIOUS))
 		    break;
 		s = PL_parser->bufptr;
@@ -1403,7 +1403,7 @@ Perl_lex_peek_unichar(pTHX_ U32 flags)
 	    }
 	}
 	unichar = utf8n_to_uvchr((U8*)s, bufend-s, &retlen, UTF8_CHECK_ONLY);
-	if (retlen == (STRLEN)-1) {
+	if (retlen == (size_t)-1) {
 	    /* malformed UTF-8 */
 	    ENTER;
 	    SAVESPTR(PL_warnhook);
@@ -1556,7 +1556,7 @@ Note that C<NULL> is a valid C<proto> and will always return C<true>.
 bool
 Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn)
 {
-    STRLEN len, origlen;
+    size_t len, origlen;
     char *p = proto ? SvPV(proto, len) : NULL;
     bool bad_proto = FALSE;
     bool in_brackets = FALSE;
@@ -1708,7 +1708,7 @@ S_incline(pTHX_ const char *s)
     line_num = ((line_t)uv) - 1;
 
     if (t - s > 0) {
-	const STRLEN len = t - s;
+	const size_t len = t - s;
 
 	if (!PL_rsfp && !PL_parser->filtered) {
 	    /* must copy *{"::_<(eval N)[oldfilename:L]"}
@@ -1718,7 +1718,7 @@ S_incline(pTHX_ const char *s)
 	    GV * const cfgv = CopFILEGV(PL_curcop);
 	    if (cfgv) {
 		char smallbuf[128];
-		STRLEN tmplen2 = len;
+		size_t tmplen2 = len;
 		char *tmpbuf2;
 		GV *gv2;
 
@@ -1772,7 +1772,7 @@ S_incline(pTHX_ const char *s)
 
 
 STATIC void
-S_update_debugger_info(pTHX_ SV *orig_sv, const char *const buf, STRLEN len)
+S_update_debugger_info(pTHX_ SV *orig_sv, const char *const buf, size_t len)
 {
     AV *av = CopFILEAVx(PL_curcop);
     if (av) {
@@ -1810,7 +1810,7 @@ S_skipspace_flags(pTHX_ char *s, U32 flags)
 	while (s < PL_bufend && (SPACE_OR_TAB(*s) || !*s))
 	    s++;
     } else {
-	STRLEN bufptr_pos = PL_bufptr - SvPVX(PL_linestr);
+	size_t bufptr_pos = PL_bufptr - SvPVX(PL_linestr);
 	PL_bufptr = s;
 	lex_read_space(flags | LEX_KEEP_PREVIOUS |
 		(PL_lex_inwhat || PL_lex_state == LEX_FORMLINE ?
@@ -1981,7 +1981,7 @@ Perl_yyunlex(pTHX)
 }
 
 STATIC SV *
-S_newSV_maybe_utf8(pTHX_ const char *const start, STRLEN len)
+S_newSV_maybe_utf8(pTHX_ const char *const start, size_t len)
 {
     SV * const sv = newSVpvn_utf8(start, len,
 				  !IN_BYTES
@@ -2011,7 +2011,7 @@ STATIC char *
 S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack)
 {
     char *s;
-    STRLEN len;
+    size_t len;
 
     PERL_ARGS_ASSERT_FORCE_WORD;
 
@@ -2023,7 +2023,7 @@ S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack)
 	s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, allow_pack, &len);
 	if (check_keyword) {
 	  char *s2 = PL_tokenbuf;
-	  STRLEN len2 = len;
+	  size_t len2 = len;
 	  if (allow_pack && len > 6 && strnEQ(s2, "CORE::", 6))
 	    s2 += 6, len2 -= 6;
 	  if (keyword(s2, len2, 0))
@@ -2061,7 +2061,7 @@ S_force_ident(pTHX_ const char *s, int kind)
     PERL_ARGS_ASSERT_FORCE_IDENT;
 
     if (s[0]) {
-	const STRLEN len = s[1] ? strlen(s) : 1; /* s = "\"" see yylex */
+	const size_t len = s[1] ? strlen(s) : 1; /* s = "\"" see yylex */
 	OP* const o = (OP*)newSVOP(OP_CONST, 0, newSVpvn_flags(s, len,
                                                                 UTF ? SVf_UTF8 : 0));
 	NEXTVAL_NEXTTOKE.opval = o;
@@ -2095,7 +2095,7 @@ Perl_str_to_version(pTHX_ SV *sv)
 {
     NV retval = 0.0;
     NV nshift = 1.0;
-    STRLEN len;
+    size_t len;
     const char *start = SvPV_const(sv,len);
     const char * const end = start + len;
     const bool utf = SvUTF8(sv) ? TRUE : FALSE;
@@ -2103,7 +2103,7 @@ Perl_str_to_version(pTHX_ SV *sv)
     PERL_ARGS_ASSERT_STR_TO_VERSION;
 
     while (start < end) {
-	STRLEN skip;
+	size_t skip;
 	UV n;
 	if (utf)
 	    n = utf8n_to_uvchr((U8*)start, len, &skip, 0);
@@ -2297,7 +2297,7 @@ S_sublex_start(pTHX)
 
 	if (SvTYPE(sv) == SVt_PVIV) {
 	    /* Overloaded constants, nothing fancy: Convert to SVt_PV: */
-	    STRLEN len;
+	    size_t len;
 	    const char * const p = SvPV_const(sv, len);
 	    SV * const nsv = newSVpvn_flags(p, len, SvUTF8(sv));
 	    SvREFCNT_dec(sv);
@@ -2676,7 +2676,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
 
     if (SvUTF8(res)) { /* Don't accept malformed input */
         const U8* first_bad_char_loc;
-        STRLEN len;
+        size_t len;
         const char* const str = SvPV_const(res, len);
         if (! is_utf8_string_loc((U8 *) str, len, &first_bad_char_loc)) {
             /* If warnings are on, this will print a more detailed analysis of
@@ -2833,7 +2833,7 @@ S_scan_const(pTHX_ char *start)
                                            example when it is entirely composed
                                            of hex constants */
     SV *res;		                /* result from charnames */
-    STRLEN offset_to_max;   /* The offset in the output to where the range
+    size_t offset_to_max;   /* The offset in the output to where the range
                                high-end character is temporarily placed */
 
     /* Note on sizing:  The scanned constant is placed into sv, which is
@@ -2950,8 +2950,8 @@ S_scan_const(pTHX_ char *start)
                 const char * min_ptr;
                 IV range_min;
 		IV range_max;	/* last character in range */
-                STRLEN save_offset;
-                STRLEN grow;
+                size_t save_offset;
+                size_t grow;
 #ifndef EBCDIC  /* Not meaningful except in EBCDIC, so initialize to false */
                 const bool convert_unicode = FALSE;
                 const IV real_range_max = 0;
@@ -3309,7 +3309,7 @@ S_scan_const(pTHX_ char *start)
 	    case '4': case '5': case '6': case '7':
 		{
                     I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
-                    STRLEN len = 3;
+                    size_t len = 3;
 		    uv = grok_oct(s, &len, &flags, NULL);
 		    s += len;
                     if (len < 3 && s < send && isDIGIT(*s)
@@ -3379,7 +3379,7 @@ S_scan_const(pTHX_ char *start)
                                                   /* Above-latin1 in string
                                                    * implies no encoding */
                                                   |SV_UTF8_NO_ENCODING,
-                                       UVCHR_SKIP(uv) + (STRLEN)(send - s) + 1);
+                                       UVCHR_SKIP(uv) + (size_t)(send - s) + 1);
 			d = SvPVX(sv) + SvCUR(sv);
 			has_utf8 = TRUE;
                     }
@@ -3392,7 +3392,7 @@ S_scan_const(pTHX_ char *start)
                         * UTF-8 for it contains 14.  And, we have to allow for
                         * a trailing NUL.  It probably can't happen on ASCII
                         * platforms, but be safe */
-                        const STRLEN needed = d - SvPVX(sv) + UVCHR_SKIP(uv)
+                        const size_t needed = d - SvPVX(sv) + UVCHR_SKIP(uv)
                                             + 1;
                         if (UNLIKELY(needed > SvLEN(sv))) {
                             SvCUR_set(sv, d - SvPVX_const(sv));
@@ -3508,9 +3508,9 @@ S_scan_const(pTHX_ char *start)
                         I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
 				| PERL_SCAN_SILENT_ILLDIGIT
 				| PERL_SCAN_DISALLOW_PREFIX;
-                        STRLEN len = e - s;
+                        size_t len = e - s;
                         uv = grok_hex(s, &len, &flags, NULL);
-                        if (len == 0 || (len != (STRLEN)(e - s)))
+                        if (len == 0 || (len != (size_t)(e - s)))
                             goto bad_NU;
 
                          /* For non-tr///, if the destination is not in utf8,
@@ -3530,7 +3530,7 @@ S_scan_const(pTHX_ char *start)
 			    sv_utf8_upgrade_flags_grow(
                                     sv,
                                     SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-				    UVCHR_SKIP(uv) + (STRLEN)(send - e) + 1);
+				    UVCHR_SKIP(uv) + (size_t)(send - e) + 1);
 			    d = SvPVX(sv) + SvCUR(sv);
 			    has_utf8 = TRUE;
 			}
@@ -3547,7 +3547,7 @@ S_scan_const(pTHX_ char *start)
 		else /* Here is \N{NAME} but not \N{U+...}. */
                      if ((res = get_and_check_backslash_N_name(s, e)))
                 {
-                    STRLEN len;
+                    size_t len;
                     const char *str = SvPV_const(res, len);
                     if (PL_lex_inpat) {
 
@@ -3563,7 +3563,7 @@ S_scan_const(pTHX_ char *start)
 			    * returned by charnames */
 
 			    const char *str_end = str + len;
-			    const STRLEN off = d - SvPVX_const(sv);
+			    const size_t off = d - SvPVX_const(sv);
 
                             if (! SvUTF8(res)) {
                                 /* For the non-UTF-8 case, we can determine the
@@ -3572,7 +3572,7 @@ S_scan_const(pTHX_ char *start)
                                  * 2 hex digits plus either a trailing dot or
                                  * the "}" */
                                 const char initial_text[] = "\\N{U+";
-                                const STRLEN initial_len = sizeof(initial_text)
+                                const size_t initial_len = sizeof(initial_text)
                                                            - 1;
                                 d = off + SvGROW(sv, off
                                                     + 3 * len
@@ -3580,7 +3580,7 @@ S_scan_const(pTHX_ char *start)
                                                     /* +1 for trailing NUL */
                                                     + initial_len + 1
 
-                                                    + (STRLEN)(send - e));
+                                                    + (size_t)(send - e));
                                 Copy(initial_text, d, initial_len, char);
                                 d += initial_len;
                                 while (str < str_end) {
@@ -3604,11 +3604,11 @@ S_scan_const(pTHX_ char *start)
                                            dot with a right brace */
                             }
                             else {
-                                STRLEN char_length; /* cur char's byte length */
+                                size_t char_length; /* cur char's byte length */
 
                                 /* and the number of bytes after this is
                                  * translated into hex digits */
-                                STRLEN output_length;
+                                size_t output_length;
 
                                 /* 2 hex per byte; 2 chars for '\N'; 2 chars
                                  * for max('U+', '.'); and 1 for NUL */
@@ -3629,7 +3629,7 @@ S_scan_const(pTHX_ char *start)
                                 /* Make sure there is enough space to hold it */
                                 d = off + SvGROW(sv, off
                                                     + output_length
-                                                    + (STRLEN)(send - e)
+                                                    + (size_t)(send - e)
                                                     + 2);	/* '}' + NUL */
                                 /* And output it */
                                 Copy(hex_string, d, output_length, char);
@@ -3638,7 +3638,7 @@ S_scan_const(pTHX_ char *start)
                                 /* For each subsequent character, append dot and
                                 * its Unicode code point in hex */
                                 while ((str += char_length) < str_end) {
-                                    const STRLEN off = d - SvPVX_const(sv);
+                                    const size_t off = d - SvPVX_const(sv);
                                     U32 uv = utf8n_to_uvchr((U8 *) str,
                                                             str_end - str,
                                                             &char_length,
@@ -3651,7 +3651,7 @@ S_scan_const(pTHX_ char *start)
 
                                     d = off + SvGROW(sv, off
                                                         + output_length
-                                                        + (STRLEN)(send - e)
+                                                        + (size_t)(send - e)
                                                         + 2);	/* '}' +  NUL */
                                     Copy(hex_string, d, output_length, char);
                                     d += output_length;
@@ -3696,15 +3696,15 @@ S_scan_const(pTHX_ char *start)
 			    /* See Note on sizing above.  */
 			    sv_utf8_upgrade_flags_grow(sv,
 						SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-						len + (STRLEN)(send - s) + 1);
+						len + (size_t)(send - s) + 1);
 			    d = SvPVX(sv) + SvCUR(sv);
 			    has_utf8 = TRUE;
-			} else if (len > (STRLEN)(e - s + 4)) { /* I _guess_ 4 is \N{} --jhi */
+			} else if (len > (size_t)(e - s + 4)) { /* I _guess_ 4 is \N{} --jhi */
 
 			    /* See Note on sizing above.  (NOTE: SvCUR() is not
 			     * set correctly here). */
-			    const STRLEN off = d - SvPVX_const(sv);
-			    d = off + SvGROW(sv, off + len + (STRLEN)(send - s) + 1);
+			    const size_t off = d - SvPVX_const(sv);
+			    d = off + SvGROW(sv, off + len + (size_t)(send - s) + 1);
 			}
 			Copy(str, d, len, char);
 			d += len;
@@ -3767,7 +3767,7 @@ S_scan_const(pTHX_ char *start)
 	/* If we started with encoded form, or already know we want it,
 	   then encode the next character */
 	if (! NATIVE_BYTE_IS_INVARIANT((U8)(*s)) && (this_utf8 || has_utf8)) {
-	    STRLEN len  = 1;
+	    size_t len  = 1;
 
 	    /* One might think that it is wasted effort in the case of the
 	     * source being utf8 (this_utf8 == TRUE) to take the next character
@@ -3779,7 +3779,7 @@ S_scan_const(pTHX_ char *start)
 	    const UV nextuv   = (this_utf8)
                                 ? utf8n_to_uvchr((U8*)s, send - s, &len, 0)
                                 : (UV) ((U8) *s);
-	    const STRLEN need = UVCHR_SKIP(nextuv);
+	    const size_t need = UVCHR_SKIP(nextuv);
 	    if (!has_utf8) {
 		SvCUR_set(sv, d - SvPVX_const(sv));
 		SvPOK_on(sv);
@@ -3787,15 +3787,15 @@ S_scan_const(pTHX_ char *start)
 		/* See Note on sizing above.  */
 		sv_utf8_upgrade_flags_grow(sv,
 					SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-					need + (STRLEN)(send - s) + 1);
+					need + (size_t)(send - s) + 1);
 		d = SvPVX(sv) + SvCUR(sv);
 		has_utf8 = TRUE;
 	    } else if (need > len) {
 		/* encoded value larger than old, may need extra space (NOTE:
 		 * SvCUR() is not set correctly here).   See Note on sizing
 		 * above.  */
-		const STRLEN off = d - SvPVX_const(sv);
-		d = SvGROW(sv, off + need + (STRLEN)(send - s) + 1) + off;
+		const size_t off = d - SvPVX_const(sv);
+		d = SvGROW(sv, off + need + (size_t)(send - s) + 1) + off;
 	    }
 	    s += len;
 
@@ -3844,9 +3844,9 @@ S_scan_const(pTHX_ char *start)
             && ! PL_parser->lex_re_reparsing)
         {
 	    const char *const key = PL_lex_inpat ? "qr" : "q";
-	    const STRLEN keylen = PL_lex_inpat ? 2 : 1;
+	    const size_t keylen = PL_lex_inpat ? 2 : 1;
 	    const char *type;
-	    STRLEN typelen;
+	    size_t typelen;
 
 	    if (PL_lex_inwhat == OP_TRANS) {
 		type = "tr";
@@ -4059,7 +4059,7 @@ S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv)
 {
     char *s = start + (*start == '$');
     char tmpbuf[sizeof PL_tokenbuf];
-    STRLEN len;
+    size_t len;
     GV* indirgv;
 	/* Mustn't actually add anything to a symbol table.
 	   But also don't want to "initialise" any placeholder
@@ -4176,13 +4176,13 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 	    if (*s == '\n') {
 		SV *linestr = PL_parser->linestr;
 		char *buf = SvPVX(linestr);
-		STRLEN const bufptr_pos = PL_parser->bufptr - buf;
-		STRLEN const oldbufptr_pos = PL_parser->oldbufptr - buf;
-		STRLEN const oldoldbufptr_pos=PL_parser->oldoldbufptr-buf;
-		STRLEN const linestart_pos = PL_parser->linestart - buf;
-		STRLEN const last_uni_pos =
+		size_t const bufptr_pos = PL_parser->bufptr - buf;
+		size_t const oldbufptr_pos = PL_parser->oldbufptr - buf;
+		size_t const oldoldbufptr_pos=PL_parser->oldoldbufptr-buf;
+		size_t const linestart_pos = PL_parser->linestart - buf;
+		size_t const last_uni_pos =
 		    PL_parser->last_uni ? PL_parser->last_uni - buf : 0;
-		STRLEN const last_lop_pos =
+		size_t const last_lop_pos =
 		    PL_parser->last_lop ? PL_parser->last_lop - buf : 0;
 		av_push(PL_rsfp_filters, linestr);
 		PL_parser->linestr = 
@@ -4262,7 +4262,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    const int old_len = SvCUR(buf_sv);
 
 	    /* ensure buf_sv is large enough */
-	    SvGROW(buf_sv, (STRLEN)(old_len + correct_length + 1)) ;
+	    SvGROW(buf_sv, (size_t)(old_len + correct_length + 1)) ;
 	    if ((len = PerlIO_read(PL_rsfp, SvPVX(buf_sv) + old_len,
 				   correct_length)) <= 0) {
 		if (PerlIO_error(PL_rsfp))
@@ -4293,7 +4293,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
     if (SvTYPE(datasv) != SVt_PVIO) {
 	if (correct_length) {
  	    /* Want a block */
-	    const STRLEN remainder = SvLEN(datasv) - SvCUR(datasv);
+	    const size_t remainder = SvLEN(datasv) - SvCUR(datasv);
 	    if (!remainder) return 0; /* eof */
 	    if (correct_length > remainder) correct_length = remainder;
 	    sv_catpvn(buf_sv, SvEND(datasv), correct_length);
@@ -4327,7 +4327,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 }
 
 STATIC char *
-S_filter_gets(pTHX_ SV *sv, STRLEN append)
+S_filter_gets(pTHX_ SV *sv, size_t append)
 {
     PERL_ARGS_ASSERT_FILTER_GETS;
 
@@ -4349,7 +4349,7 @@ S_filter_gets(pTHX_ SV *sv, STRLEN append)
 }
 
 STATIC HV *
-S_find_in_my_stash(pTHX_ const char *pkgname, STRLEN len)
+S_find_in_my_stash(pTHX_ const char *pkgname, size_t len)
 {
     GV *gv;
 
@@ -4417,7 +4417,7 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
 
 #define word_takes_any_delimeter(p,l) S_word_takes_any_delimeter(p,l)
 STATIC bool
-S_word_takes_any_delimeter(char *p, STRLEN len)
+S_word_takes_any_delimeter(char *p, size_t len)
 {
     return (len == 1 && strchr("msyq", p[0]))
             || (len == 2
@@ -4490,7 +4490,7 @@ Perl_yylex(pTHX)
     dVAR;
     char *s = PL_bufptr;
     char *d;
-    STRLEN len;
+    size_t len;
     bool bof = FALSE;
     const bool saw_infix_sigil = cBOOL(PL_parser->saw_infix_sigil);
     U8 formbrack = 0;
@@ -4827,7 +4827,7 @@ Perl_yylex(pTHX)
                                                     SVs_TEMP | SVf_UTF8),
                                             10, UNI_DISPLAY_ISPRINT)
                             : Perl_form(aTHX_ "\\x%02X", (unsigned char)*s);
-        len = UTF ? Perl_utf8_length(aTHX_ (U8 *) PL_linestart, (U8 *) s) : (STRLEN) (s - PL_linestart);
+        len = UTF ? Perl_utf8_length(aTHX_ (U8 *) PL_linestart, (U8 *) s) : (size_t) (s - PL_linestart);
         if (len > UNRECOGNIZED_PRECEDE_COUNT) {
             d = UTF ? (char *) utf8_hop((U8 *) s, -UNRECOGNIZED_PRECEDE_COUNT) : s - UNRECOGNIZED_PRECEDE_COUNT;
         } else {
@@ -5033,8 +5033,8 @@ Perl_yylex(pTHX)
                             SvSETMAGIC(x);
                         }
                         else {
-                            STRLEN blen;
-                            STRLEN llen;
+                            size_t blen;
+                            size_t llen;
                             const char *bstart = SvPV_const(copfilesv, blen);
                             const char * const lstart = SvPV_const(x, llen);
                             if (llen < blen) {
@@ -6294,7 +6294,7 @@ Perl_yylex(pTHX)
 				t++;
 			    } while (isSPACE(*t));
 			    if (isIDFIRST_lazy_if(t,UTF)) {
-				STRLEN len;
+				size_t len;
 				t = scan_word(t, tmpbuf, sizeof tmpbuf, TRUE,
 					      &len);
 				while (isSPACE(*t))
@@ -6808,8 +6808,8 @@ Perl_yylex(pTHX)
 	    /* no override, and not s### either; skipspace is safe here
 	     * check for => on following line */
 	    bool arrow;
-	    STRLEN bufoff = PL_bufptr - SvPVX(PL_linestr);
-	    STRLEN   soff = s         - SvPVX(PL_linestr);
+	    size_t bufoff = PL_bufptr - SvPVX(PL_linestr);
+	    size_t   soff = s         - SvPVX(PL_linestr);
 	    s = skipspace_flags(s, LEX_NO_INCLINE);
 	    arrow = *s == '=' && s[1] == '>';
 	    PL_bufptr = SvPVX(PL_linestr) + bufoff;
@@ -6846,7 +6846,7 @@ Perl_yylex(pTHX)
 		/* Get the rest if it looks like a package qualifier */
 
 		if (*s == '\'' || (*s == ':' && s[1] == ':')) {
-		    STRLEN morelen;
+		    size_t morelen;
 		    s = scan_word(s, PL_tokenbuf + len, sizeof PL_tokenbuf - len,
 				  TRUE, &morelen);
 		    if (!morelen)
@@ -7086,7 +7086,7 @@ Perl_yylex(pTHX)
 		    if (
 			SvPOK(cv))
 		    {
-			STRLEN protolen = CvPROTOLEN(cv);
+			size_t protolen = CvPROTOLEN(cv);
 			const char *proto = CvPROTO(cv);
 			bool optional;
 			proto = S_strip_spaces(aTHX_ proto, &protolen);
@@ -7309,7 +7309,7 @@ Perl_yylex(pTHX)
 
 	case_KEY_CORE:
 	    {
-		STRLEN olen = len;
+		size_t olen = len;
 		d = s;
 		s += 2;
 		s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
@@ -8493,7 +8493,7 @@ S_pending_ident(pTHX)
 {
     PADOFFSET tmp = 0;
     const char pit = (char)pl_yylval.ival;
-    const STRLEN tokenbuf_len = strlen(PL_tokenbuf);
+    const size_t tokenbuf_len = strlen(PL_tokenbuf);
     /* All routes through this function want to know if there is a colon.  */
     const char *const has_colon = (const char*) memchr (PL_tokenbuf, ':', tokenbuf_len);
 
@@ -8679,8 +8679,8 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
    <type> is assumed to be well formed UTF-8 */
 
 STATIC SV *
-S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
-	       SV *sv, SV *pv, const char *type, STRLEN typelen)
+S_new_constant(pTHX_ const char *s, size_t len, const char *key, size_t keylen,
+	       SV *sv, SV *pv, const char *type, size_t typelen)
 {
     dSP;
     HV * table = GvHV(PL_hintgv);		 /* ^H */
@@ -8786,7 +8786,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
 
     /* Check the eval first */
     if (!PL_in_eval && ((errsv = ERRSV), SvTRUE_NN(errsv))) {
-	STRLEN errlen;
+	size_t errlen;
 	const char * errstr;
 	sv_catpvs(errsv, "Propagated");
 	errstr = SvPV_const(errsv, errlen);
@@ -8867,7 +8867,7 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package, bool 
    *slp
    */
 STATIC char *
-S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp)
+S_scan_word(pTHX_ char *s, char *dest, size_t destlen, int allow_package, size_t *slp)
 {
     char *d = dest;
     char * const e = d + destlen - 3;  /* two-character token, ending NUL */
@@ -8910,10 +8910,10 @@ S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN
 #endif
 
 STATIC char *
-S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
+S_scan_ident(pTHX_ char *s, char *dest, size_t destlen, I32 ck_uni)
 {
     I32 herelines = PL_parser->herelines;
-    SSize_t bracket = -1;
+    ssize_t bracket = -1;
     char funny = *s++;
     char *d = dest;
     char * const e = d + destlen - 3;    /* two-character token, ending NUL */
@@ -8985,8 +8985,8 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
         }
 
         if (is_utf8) {
-            const STRLEN skip = UTF8SKIP(s);
-            STRLEN i;
+            const size_t skip = UTF8SKIP(s);
+            size_t i;
             d[skip] = '\0';
             for ( i = 0; i < skip; i++ )
                 d[i] = *s++;
@@ -9115,7 +9115,7 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charse
      * error, as we have decided to allow only one */
 
     const char c = **s;
-    STRLEN charlen = UTF ? UTF8SKIP(*s) : 1;
+    size_t charlen = UTF ? UTF8SKIP(*s) : 1;
 
     if ( charlen != 1 || ! strchr(valid_flags, c) ) {
         if (isWORDCHAR_lazy_if(*s, UTF)) {
@@ -9242,7 +9242,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
      * anon CV. False positives like qr/[(?{]/ are harmless */
 
     if (type == OP_QR) {
-	STRLEN len;
+	size_t len;
 	char *e, *p = SvPV(PL_lex_stuff, len);
 	e = p + len;
 	for (; p < e; p++) {
@@ -9948,7 +9948,7 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
     bool has_utf8 = FALSE;	/* is there any utf8 content? */
     I32 termcode;		/* terminating char. code */
     U8 termstr[UTF8_MAXBYTES];	/* terminating string */
-    STRLEN termlen;		/* length of terminating string */
+    size_t termlen;		/* length of terminating string */
     int last_off = 0;		/* last position for nesting bracket */
     line_t herelines;
 
@@ -10013,9 +10013,9 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 		char *svlast;
 
 		if (SvIsCOW(PL_linestr)) {
-		    STRLEN bufend_pos, bufptr_pos, oldbufptr_pos;
-		    STRLEN oldoldbufptr_pos, linestart_pos, last_uni_pos;
-		    STRLEN last_lop_pos, re_eval_start_pos, s_pos;
+		    size_t bufend_pos, bufptr_pos, oldbufptr_pos;
+		    size_t oldoldbufptr_pos, linestart_pos, last_uni_pos;
+		    size_t last_lop_pos, re_eval_start_pos, s_pos;
 		    char *buf = SvPVX(PL_linestr);
 		    bufend_pos = PL_parser->bufend - buf;
 		    bufptr_pos = PL_parser->bufptr - buf;
@@ -10848,7 +10848,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	if ( floatit
 	     ? (PL_hints & HINT_NEW_FLOAT) : (PL_hints & HINT_NEW_INTEGER) ) {
 	    const char *const key = floatit ? "float" : "integer";
-	    const STRLEN keylen = floatit ? 5 : 7;
+	    const size_t keylen = floatit ? 5 : 7;
 	    sv = S_new_constant(aTHX_ PL_tokenbuf, d - PL_tokenbuf,
 				key, keylen, sv, NULL, NULL, 0);
 	}
@@ -11025,7 +11025,7 @@ Perl_yyerror_pv(pTHX_ const char *const s, U32 flags)
 }
 
 int
-Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
+Perl_yyerror_pvn(pTHX_ const char *const s, size_t len, U32 flags)
 {
     const char *context = NULL;
     int contlen = -1;
@@ -11137,7 +11137,7 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
 STATIC char*
 S_swallow_bom(pTHX_ U8 *s)
 {
-    const STRLEN slen = SvCUR(PL_linestr);
+    const size_t slen = SvCUR(PL_linestr);
 
     PERL_ARGS_ASSERT_SWALLOW_BOM;
 
@@ -11175,7 +11175,7 @@ S_swallow_bom(pTHX_ U8 *s)
 	}
 	break;
     case BOM_UTF8_FIRST_BYTE: {
-        const STRLEN len = sizeof(BOM_UTF8_TAIL) - 1; /* Exclude trailing NUL */
+        const size_t len = sizeof(BOM_UTF8_TAIL) - 1; /* Exclude trailing NUL */
         if (slen > len && memEQ(s+1, BOM_UTF8_TAIL, len)) {
             if (DEBUG_p_TEST || DEBUG_T_TEST) PerlIO_printf(Perl_debug_log, "UTF-8 script encoding (BOM)\n");
             s += len + 1;                      /* UTF-8 */
@@ -11255,8 +11255,8 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 			  (UV)SvCUR(utf16_buffer), (UV)SvCUR(utf8_buffer)));
 
     while (1) {
-	STRLEN chars;
-	STRLEN have;
+	size_t chars;
+	size_t have;
 	I32 newlen;
 	U8 *end;
 	/* First, look in our buffer of existing UTF-8 data:  */
@@ -11270,7 +11270,7 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 	    nl = SvEND(utf8_buffer);
 	}
 	if (nl) {
-	    STRLEN got = nl - SvPVX(utf8_buffer);
+	    size_t got = nl - SvPVX(utf8_buffer);
 	    /* Did we have anything to append?  */
 	    retval = got != 0;
 	    sv_catpvn(sv, SvPVX(utf8_buffer), got);
@@ -11464,7 +11464,7 @@ Perl_scan_vstring(pTHX_ const char *s, const char *const e, SV *sv)
 
 int
 Perl_keyword_plugin_standard(pTHX_
-	char *keyword_ptr, STRLEN keyword_len, OP **op_ptr)
+	char *keyword_ptr, size_t keyword_len, OP **op_ptr)
 {
     PERL_ARGS_ASSERT_KEYWORD_PLUGIN_STANDARD;
     PERL_UNUSED_CONTEXT;
@@ -11752,7 +11752,7 @@ Perl_parse_label(pTHX_ U32 flags)
 	PL_parser->yychar = yylex();
 	if (PL_parser->yychar == LABEL) {
 	    char * const lpv = pl_yylval.pval;
-	    STRLEN llen = strlen(lpv);
+	    size_t llen = strlen(lpv);
 	    PL_parser->yychar = YYEMPTY;
 	    return newSVpvn_flags(lpv, llen, lpv[llen+1] ? SVf_UTF8 : 0);
 	} else {
@@ -11761,7 +11761,7 @@ Perl_parse_label(pTHX_ U32 flags)
 	}
     } else {
 	char *s, *t;
-	STRLEN wlen, bufptr_pos;
+	size_t wlen, bufptr_pos;
 	lex_read_space(0);
 	t = s = PL_bufptr;
         if (!isIDFIRST_lazy_if(s, UTF))

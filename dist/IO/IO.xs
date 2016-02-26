@@ -252,7 +252,7 @@ fsetpos(handle, pos)
 #ifdef PerlIO
 #if PERL_VERSION < 8
 	    char *p;
-	    STRLEN len;
+	    size_t len;
 	    if (SvOK(pos) && (p = SvPV(pos,len)) && len == sizeof(Fpos_t)) {
 		RETVAL = PerlIO_setpos(handle, (Fpos_t*)p);
 	    }
@@ -265,7 +265,7 @@ fsetpos(handle, pos)
 #endif
 #else
 	    char *p;
-	    STRLEN len;
+	    size_t len;
 	    if ((p = SvPV(pos,len)) && len == sizeof(Fpos_t)) {
 		RETVAL = fsetpos(handle, (Fpos_t*)p);
 	    }
@@ -379,7 +379,7 @@ ungetc(handle, c)
                 RETVAL = PerlIO_ungetc(handle, (int)v);
             else {
                 U8 buf[UTF8_MAXBYTES + 1], *end;
-                Size_t len;
+                size_t len;
 
                 if (!PerlIO_isutf8(handle))
                     croak("Wide character number in ungetc()");
@@ -388,7 +388,7 @@ ungetc(handle, c)
                  * above-Unicodes */
                 end = uvchr_to_utf8_flags(buf, v, 0);
                 len = end - buf;
-                if ((Size_t)PerlIO_unread(handle, &buf, len) == len)
+                if ((size_t)PerlIO_unread(handle, &buf, len) == len)
                     XSRETURN_UV(v);
                 else
                     RETVAL = EOF;

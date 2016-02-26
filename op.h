@@ -770,7 +770,7 @@ preprocessing token; the type of C<arg> depends on C<which>.
 #define CALL_BLOCK_HOOKS(which, arg) \
     STMT_START { \
 	if (PL_blockhooks) { \
-	    SSize_t i; \
+	    ssize_t i; \
 	    for (i = av_tindex(PL_blockhooks); i >= 0; i--) { \
 		SV *sv = AvARRAY(PL_blockhooks)[i]; \
 		BHK *hk; \

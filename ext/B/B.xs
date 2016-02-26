@@ -334,7 +334,7 @@ make_temp_object(pTHX_ SV *temp)
 static SV *
 make_warnings_object(pTHX_ const COP *const cop)
 {
-    const STRLEN *const warnings = cop->cop_warnings;
+    const size_t *const warnings = cop->cop_warnings;
     const char *type = 0;
     dMY_CXT;
     IV iv = sizeof(specialsv_list)/sizeof(SV*);
@@ -395,7 +395,7 @@ cstring(pTHX_ SV *sv, bool perlstyle)
 
     if (perlstyle && SvUTF8(sv)) {
 	SV *tmpsv = sv_newmortal(); /* Temporary SV to feed sv_uni_display */
-	const STRLEN len = SvCUR(sv);
+	const size_t len = SvCUR(sv);
 	const char *s = sv_uni_display(tmpsv, sv, 8*len, UNI_DISPLAY_QQ);
 	while (*s)
 	{
@@ -420,7 +420,7 @@ cstring(pTHX_ SV *sv, bool perlstyle)
     else
     {
 	/* XXX Optimise? */
-	STRLEN len;
+	size_t len;
 	const char *s = SvPV(sv, len);
 	for (; len; len--, s++)
 	{
@@ -919,7 +919,7 @@ void
 hash(sv)
 	SV *	sv
     CODE:
-	STRLEN len;
+	size_t len;
 	U32 hash = 0;
 	const char *s = SvPVbyte(sv, len);
 	PERL_HASH(hash, s, len);
@@ -1095,7 +1095,7 @@ next(o)
 		    int i;
 		    ret = sv_2mortal(Perl_newSVpvf(aTHX_ "PL_ppaddr[OP_%s]",
 						  PL_op_name[o->op_type]));
-		    for (i=13; (STRLEN)i < SvCUR(ret); ++i)
+		    for (i=13; (size_t)i < SvCUR(ret); ++i)
 			SvPVX(ret)[i] = toUPPER(SvPVX(ret)[i]);
 		}
 		break;
@@ -1372,7 +1372,7 @@ aux_list(o, cv)
 
                 /* len should never be big enough to truncate or wrap */
                 assert(len <= SSize_t_MAX);
-                EXTEND(SP, (SSize_t)len);
+                EXTEND(SP, (ssize_t)len);
                 PUSHs(sv_2mortal(newSViv(actions)));
 
                 while (!last) {
@@ -1608,7 +1608,7 @@ IVX(sv)
 	    ret = sv_2mortal(newSVuv(*((UV *)ptr)));
 	    break;
 	case (U8)(sv_STRLENp >> 16):
-	    ret = sv_2mortal(newSVuv(*((STRLEN *)ptr)));
+	    ret = sv_2mortal(newSVuv(*((size_t *)ptr)));
 	    break;
 	case (U8)(sv_U32p >> 16):
 	    ret = sv_2mortal(newSVuv(*((U32 *)ptr)));
@@ -1626,7 +1626,7 @@ IVX(sv)
 	    ret = newSVpvn_flags((char *)ptr, 1, SVs_TEMP);
 	    break;
 	case (U8)(sv_SSize_tp >> 16):
-	    ret = sv_2mortal(newSViv(*((SSize_t *)ptr)));
+	    ret = sv_2mortal(newSViv(*((ssize_t *)ptr)));
 	    break;
 	case (U8)(sv_I32p >> 16):
 	    ret = sv_2mortal(newSVuv(*((I32 *)ptr)));
@@ -1718,7 +1718,7 @@ PV(sv)
 	B::BM::TABLE = 3
     PREINIT:
 	const char *p;
-	STRLEN len = 0;
+	size_t len = 0;
 	U32 utf8 = 0;
     CODE:
 	if (ix == 3) {
@@ -2006,7 +2006,7 @@ IsSTD(io,name)
 
 MODULE = B	PACKAGE = B::AV		PREFIX = Av
 
-SSize_t
+ssize_t
 AvFILL(av)
 	B::AV	av
 
@@ -2127,7 +2127,7 @@ NAME_HEK(cv)
 
 MODULE = B	PACKAGE = B::HV		PREFIX = Hv
 
-STRLEN
+size_t
 HvFILL(hv)
 	B::HV	hv
 
@@ -2141,11 +2141,11 @@ HvARRAY(hv)
     PPCODE:
 	if (HvUSEDKEYS(hv) > 0) {
 	    HE *he;
-            SSize_t extend_size;
+            ssize_t extend_size;
 	    (void)hv_iterinit(hv);
             /* 2*HvUSEDKEYS() should never be big enough to truncate or wrap */
 	    assert(HvUSEDKEYS(hv) <= (SSize_t_MAX >> 1));
-            extend_size = (SSize_t)HvUSEDKEYS(hv) * 2;
+            extend_size = (ssize_t)HvUSEDKEYS(hv) * 2;
 	    EXTEND(sp, extend_size);
 	    while ((he = hv_iternext(hv))) {
                 if (HeSVKEY(he)) {
@@ -2188,7 +2188,7 @@ HASH(h)
 
 MODULE = B	PACKAGE = B::PADLIST	PREFIX = Padlist
 
-SSize_t
+ssize_t
 PadlistMAX(padlist)
 	B::PADLIST	padlist
     ALIAS: B::PADNAMELIST::MAX = 0
@@ -2209,7 +2209,7 @@ PadlistARRAY(padlist)
 	if (PadlistMAX(padlist) >= 0) {
 	    dXSTARG;
 	    PAD **padp = PadlistARRAY(padlist);
-            SSize_t i;
+            ssize_t i;
 	    sv_setiv(newSVrv(TARG, PadlistNAMES(padlist)
 				    ? "B::PADNAMELIST"
 				    : "B::NULL"),
@@ -2222,7 +2222,7 @@ PadlistARRAY(padlist)
 void
 PadlistARRAYelt(padlist, idx)
 	B::PADLIST	padlist
-	SSize_t 	idx
+	ssize_t 	idx
     PPCODE:
 	if (idx < 0 || idx > PadlistMAX(padlist))
 	    XPUSHs(make_sv_object(aTHX_ NULL));
@@ -2255,7 +2255,7 @@ PadnamelistARRAY(pnl)
     PPCODE:
 	if (PadnamelistMAX(pnl) >= 0) {
 	    PADNAME **padp = PadnamelistARRAY(pnl);
-            SSize_t i = 0;
+            ssize_t i = 0;
 	    for (; i <= PadnamelistMAX(pnl); i++)
 	    {
 		SV *rv = sv_newmortal();
@@ -2268,7 +2268,7 @@ PadnamelistARRAY(pnl)
 B::PADNAME
 PadnamelistARRAYelt(pnl, idx)
 	B::PADNAMELIST	pnl
-	SSize_t 	idx
+	ssize_t 	idx
     CODE:
 	if (idx < 0 || idx > PadnamelistMAX(pnl))
 	    RETVAL = NULL;

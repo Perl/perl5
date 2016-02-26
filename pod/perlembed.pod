@@ -393,7 +393,7 @@ C<s/bob/robert/g> or C<tr[A-Z][a-z]>), substitute() modifies the string
 within the C<SV> as according to the operation, returning the number of
 substitutions made.
 
-   SSize_t matches(SV *string, char *pattern, AV **matches);
+   ssize_t matches(SV *string, char *pattern, AV **matches);
 
 Given an C<SV>, a pattern, and a pointer to an empty C<AV>,
 matches() evaluates C<$string =~ $pattern> in a list context, and
@@ -482,10 +482,10 @@ been wrapped here):
  ** and fills in **matches with the matching substrings
  **/
 
- SSize_t matches(SV *string, char *pattern, AV **match_list)
+ ssize_t matches(SV *string, char *pattern, AV **match_list)
  {
      SV *command = newSV(0);
-     SSize_t num_matches;
+     ssize_t num_matches;
 
      sv_setpvf(command, "my $string = '%s'; @array = ($string =~ %s)",
  	      SvPV_nolen(string), pattern);

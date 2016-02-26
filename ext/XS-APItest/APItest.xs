@@ -17,7 +17,7 @@ typedef PTR_TBL_t *XS__APItest__PtrTable;
 #ifdef EBCDIC
 
 void
-cat_utf8a2n(SV* sv, const char * const ascii_utf8, STRLEN len)
+cat_utf8a2n(SV* sv, const char * const ascii_utf8, size_t len)
 {
     /* Converts variant UTF-8 text pointed to by 'ascii_utf8' of length 'len',
      * to UTF-EBCDIC, appending that text to the text already in 'sv'.
@@ -46,7 +46,7 @@ cat_utf8a2n(SV* sv, const char * const ascii_utf8, STRLEN len)
         /* Start bytes are the same in both UTF-8 and I8, therefore we can
          * treat this ASCII UTF-8 byte as an I8 byte.  But PL_utf8skip[] is
          * indexed by NATIVE_UTF8 bytes, so transform to that */
-        STRLEN char_bytes_len = PL_utf8skip[I8_TO_NATIVE_UTF8(start)];
+        size_t char_bytes_len = PL_utf8skip[I8_TO_NATIVE_UTF8(start)];
 
         if (start < 0xc2) {
             croak("fail: Expecting start byte, instead got 0x%X at %s line %d",
@@ -199,13 +199,13 @@ bitflip_key(pTHX_ IV action, SV *field) {
     SV *keysv;
     PERL_UNUSED_ARG(action);
     if (mg && (keysv = mg->mg_obj)) {
-	STRLEN len;
+	size_t len;
 	const char *p = SvPV(keysv, len);
 
 	if (len) {
             /* Allow for the flipped val to be longer than the original.  This
              * is just for testing, so can afford to have some slop */
-            const STRLEN newlen = len * 2;
+            const size_t newlen = len * 2;
 
 	    SV *newkey = newSV(newlen);
 	    const char * const new_p_orig = SvPVX(newkey);
@@ -214,7 +214,7 @@ bitflip_key(pTHX_ IV action, SV *field) {
 	    if (SvUTF8(keysv)) {
 		const char *const end = p + len;
 		while (p < end) {
-		    STRLEN curlen;
+		    size_t curlen;
 		    UV chr = utf8_to_uvchr_buf((U8 *)p, (U8 *) end, &curlen);
 
                     /* Make sure don't exceed bounds */
@@ -244,7 +244,7 @@ rot13_key(pTHX_ IV action, SV *field) {
     SV *keysv;
     PERL_UNUSED_ARG(action);
     if (mg && (keysv = mg->mg_obj)) {
-	STRLEN len;
+	size_t len;
 	const char *p = SvPV(keysv, len);
 
 	if (len) {
@@ -691,7 +691,7 @@ THX_ck_entersub_pad_scalar(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 	} break;
 	case 2: {
 	    char *namepv;
-	    STRLEN namelen;
+	    size_t namelen;
 	    SV *namesv = sv_2mortal(newSVpvs("$"));
 	    sv_catsv(namesv, a1);
 	    namepv = SvPV(namesv, namelen);
@@ -741,7 +741,7 @@ static SV *hintkey_arrayexprflags_sv;
 static SV *hintkey_DEFSV_sv;
 static SV *hintkey_with_vars_sv;
 static SV *hintkey_join_with_space_sv;
-static int (*next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);
+static int (*next_keyword_plugin)(pTHX_ char *, size_t, OP **);
 
 /* low-level parser helpers */
 
@@ -1143,7 +1143,7 @@ static int THX_keyword_active(pTHX_ SV *hintkey_sv)
 }
 
 static int my_keyword_plugin(pTHX_
-    char *keyword_ptr, STRLEN keyword_len, OP **op_ptr)
+    char *keyword_ptr, size_t keyword_len, OP **op_ptr)
 {
     if(keyword_len == 3 && strnEQ(keyword_ptr, "rpn", 3) &&
 		    keyword_active(hintkey_rpn_sv)) {
@@ -1348,9 +1348,9 @@ bytes_cmp_utf8(bytes, utf8)
 	SV *utf8
     PREINIT:
 	const U8 *b;
-	STRLEN blen;
+	size_t blen;
 	const U8 *u;
-	STRLEN ulen;
+	size_t ulen;
     CODE:
 	b = (const U8 *)SvPVbyte(bytes, blen);
 	u = (const U8 *)SvPVbyte(utf8, ulen);
@@ -1365,9 +1365,9 @@ test_utf8n_to_uvchr(s, len, flags)
         SV *len
         SV *flags
     PREINIT:
-        STRLEN retlen;
+        size_t retlen;
         UV ret;
-        STRLEN slen;
+        size_t slen;
 
     CODE:
         /* Call utf8n_to_uvchr() with the inputs.  It always asks for the
@@ -1383,7 +1383,7 @@ test_utf8n_to_uvchr(s, len, flags)
 
         /* Returns the return value in [0]; <retlen> in [1] */
         av_push(RETVAL, newSVuv(ret));
-        if (retlen == (STRLEN) -1) {
+        if (retlen == (size_t) -1) {
             av_push(RETVAL, newSViv(-1));
         }
         else {
@@ -1398,9 +1398,9 @@ test_valid_utf8_to_uvchr(s)
 
         SV *s
     PREINIT:
-        STRLEN retlen;
+        size_t retlen;
         UV ret;
-        STRLEN slen;
+        size_t slen;
 
     CODE:
         /* Call utf8n_to_uvchr() with the inputs.  It always asks for the
@@ -1591,7 +1591,7 @@ bitflip_hash(hash)
 bool
 exists(hash, key_sv)
 	PREINIT:
-	STRLEN len;
+	size_t len;
 	const char *key;
 	INPUT:
 	HV *hash
@@ -1616,7 +1616,7 @@ exists_ent(hash, key_sv)
 SV *
 delete(hash, key_sv, flags = 0)
 	PREINIT:
-	STRLEN len;
+	size_t len;
 	const char *key;
 	INPUT:
 	HV *hash
@@ -1668,7 +1668,7 @@ store_ent(hash, key, value)
 SV *
 store(hash, key_sv, value)
 	PREINIT:
-	STRLEN len;
+	size_t len;
 	const char *key;
 	SV *copy;
 	SV **result;
@@ -1711,7 +1711,7 @@ fetch_ent(hash, key_sv)
 SV *
 fetch(hash, key_sv)
 	PREINIT:
-	STRLEN len;
+	size_t len;
 	const char *key;
 	SV **result;
 	INPUT:
@@ -1739,7 +1739,7 @@ common(params)
 	HV *hv = NULL;
 	SV *keysv = NULL;
 	const char *key = NULL;
-	STRLEN klen = 0;
+	size_t klen = 0;
 	int flags = 0;
 	int action = 0;
 	SV *val = NULL;
@@ -1773,7 +1773,7 @@ common(params)
 	if (hv_fetchs(params, "hash_sv", 0)) {
             assert(keysv);
             {
-              STRLEN len;
+              size_t len;
               const char *const p = SvPV(keysv, len);
               PERL_HASH(hash, p, len);
             }
@@ -1805,7 +1805,7 @@ test_hv_delayfree_ent()
 SV *
 test_share_unshare_pvn(input)
 	PREINIT:
-	STRLEN len;
+	size_t len;
 	U32 hash;
 	char *pvx;
 	char *p;
@@ -1853,7 +1853,7 @@ void
 test_force_keys(HV *hv)
     PREINIT:
         HE *he;
-	SSize_t count = 0;
+	ssize_t count = 0;
     PPCODE:
         hv_iterinit(hv);
         he = hv_iternext(hv);
@@ -1885,7 +1885,7 @@ make_temp_mg_lv(sv)
 SV* sv
     PREINIT:
 	SV * const lv = newSV_type(SVt_PVLV);
-	STRLEN len;
+	size_t len;
     PPCODE:
         SvPV(sv, len);
 
@@ -2262,7 +2262,7 @@ mxpushu()
  #              from PL_stack_max.
  # nsv        is the SV holding the value of n indicating how many slots
  #              to extend the stack by.
- # use_ss     is a boolean indicating that n should be cast to a SSize_t
+ # use_ss     is a boolean indicating that n should be cast to a ssize_t
 
 void
 test_EXTEND(max_offset, nsv, use_ss)
@@ -2273,7 +2273,7 @@ PREINIT:
     SV **sp = PL_stack_max + max_offset;
 PPCODE:
     if (use_ss) {
-        SSize_t n = (SSize_t)SvIV(nsv);
+        ssize_t n = (ssize_t)SvIV(nsv);
         EXTEND(sp, n);
         *(sp + n) = NULL;
     }
@@ -2422,7 +2422,7 @@ newCONSTSUB(stash, name, flags, sv)
 	newCONSTSUB_flags = 1
     PREINIT:
 	CV* mycv = NULL;
-	STRLEN len;
+	size_t len;
 	const char *pv = SvPV(name, len);
     PPCODE:
         switch (ix) {
@@ -2447,7 +2447,7 @@ gv_init_type(namesv, multi, flags, type)
     I32 flags
     int type
     PREINIT:
-        STRLEN len;
+        size_t len;
         const char * const name = SvPV_const(namesv, len);
         GV *gv = *(GV**)hv_fetch(PL_defstash, name, len, TRUE);
     PPCODE:
@@ -2478,7 +2478,7 @@ gv_fetchmeth_type(stash, methname, type, level, flags)
     I32 level
     I32 flags
     PREINIT:
-        STRLEN len;
+        size_t len;
         const char * const name = SvPV_const(methname, len);
 	GV* gv = NULL;
     PPCODE:
@@ -2506,7 +2506,7 @@ gv_fetchmeth_autoload_type(stash, methname, type, level, flags)
     I32 level
     I32 flags
     PREINIT:
-        STRLEN len;
+        size_t len;
         const char * const name = SvPV_const(methname, len);
 	GV* gv = NULL;
     PPCODE:
@@ -2546,7 +2546,7 @@ gv_fetchmethod_flags_type(stash, methname, type, flags)
                gv = gv_fetchmethod_pv_flags(stash, SvPV_nolen(methname), flags | SvUTF8(methname));
                break;
            case 3: {
-               STRLEN len;
+               size_t len;
                const char * const name = SvPV_const(methname, len);
                gv = gv_fetchmethod_pvn_flags(stash, name, len, flags | SvUTF8(methname));
                break;
@@ -2561,7 +2561,7 @@ gv_autoload_type(stash, methname, type, method)
     int type
     I32 method
     PREINIT:
-        STRLEN len;
+        size_t len;
         const char * const name = SvPV_const(methname, len);
 	GV* gv = NULL;
 	I32 flags = method ? GV_AUTOLOAD_ISMETHOD : 0;
@@ -2607,7 +2607,7 @@ whichsig_type(namesv, type)
     SV* namesv
     int type
     PREINIT:
-        STRLEN len;
+        size_t len;
         const char * const name = SvPV_const(namesv, len);
         I32 i = 0;
     PPCODE:
@@ -2722,7 +2722,7 @@ void
 sv_set_deref(SV *sv, SV *sv2, int which)
     CODE:
     {
-	STRLEN len;
+	size_t len;
 	const char *pv = SvPV(sv2,len);
 	if (!SvROK(sv)) croak("Not a ref");
 	sv = SvRV(sv);
@@ -2836,7 +2836,7 @@ utf16_to_utf8 (sv, ...)
 	ALIAS:
 	    utf16_to_utf8_reversed = 1
     PREINIT:
-        STRLEN len;
+        size_t len;
 	U8 *source;
 	SV *dest;
 	I32 got; /* Gah, badly thought out APIs */
@@ -2870,7 +2870,7 @@ first_byte(sv)
 	SV *sv
    CODE:
     char *s;
-    STRLEN len;
+    size_t len;
 	s = SvPVbyte(sv, len);
 	RETVAL = s[0];
    OUTPUT:
@@ -3113,7 +3113,7 @@ test_cophh()
 #ifdef EBCDIC
         SV* key_sv;
         char * key_name;
-        STRLEN key_len;
+        size_t key_len;
 #endif
     CODE:
 #define check_ph(EXPR) \
@@ -3266,7 +3266,7 @@ test_coplabel()
     PREINIT:
         COP *cop;
         const char *label;
-        STRLEN len;
+        size_t len;
         U32 utf8;
     CODE:
         cop = &PL_compiling;
@@ -3290,7 +3290,7 @@ example_cophh_2hv()
 #ifdef EBCDIC
         SV* key_sv;
         char * key_name;
-        STRLEN key_len;
+        size_t key_len;
 #endif
     CODE:
 #define msviv(VALUE) sv_2mortal(newSViv(VALUE))
@@ -3665,7 +3665,7 @@ CODE:
     CV *cv;
     AV *av;
     SV **p;
-    SSize_t i, size;
+    ssize_t i, size;
 
     cv = sv_2cv(block, &stash, &gv, 0);
     if (cv == Nullcv) {
@@ -3935,13 +3935,13 @@ CV* cv
  OUTPUT:
   RETVAL
 
-STRLEN
+size_t
 underscore_length()
 PROTOTYPE:
 PREINIT:
     SV *u;
     U8 *pv;
-    STRLEN bytelen;
+    size_t bytelen;
 CODE:
     u = find_rundefsv();
     pv = (U8*)SvPV(u, bytelen);
@@ -4053,10 +4053,10 @@ OUTPUT:
  # string with offsets from the start of the string
 
 I32
-callregexec(SV *prog, STRLEN stringarg, STRLEN strend, I32 minend, SV *sv, U32 nosave)
+callregexec(SV *prog, size_t stringarg, size_t strend, I32 minend, SV *sv, U32 nosave)
 CODE:
     {
-	STRLEN len;
+	size_t len;
 	char *strbeg;
 	if (SvROK(prog))
 	    prog = SvRV(prog);
@@ -4124,7 +4124,7 @@ void
 sv_catpvn(SV *sv, SV *sv2)
     CODE:
     {
-	STRLEN len;
+	size_t len;
 	const char *s = SvPV(sv2,len);
 	sv_catpvn_flags(sv,s,len, SvUTF8(sv2) ? SV_CATUTF8 : SV_CATBYTES);
     }
@@ -5283,7 +5283,7 @@ AV *
 test_toLOWER_uni(UV ord)
     PREINIT:
         U8 s[UTF8_MAXBYTES_CASE + 1];
-        STRLEN len;
+        size_t len;
         AV *av;
         SV *utf8;
     CODE:
@@ -5304,7 +5304,7 @@ test_toLOWER_utf8(SV * p)
     PREINIT:
         U8 *input;
         U8 s[UTF8_MAXBYTES_CASE + 1];
-        STRLEN len;
+        size_t len;
         AV *av;
         SV *utf8;
     CODE:
@@ -5339,7 +5339,7 @@ AV *
 test_toFOLD_uni(UV ord)
     PREINIT:
         U8 s[UTF8_MAXBYTES_CASE + 1];
-        STRLEN len;
+        size_t len;
         AV *av;
         SV *utf8;
     CODE:
@@ -5360,7 +5360,7 @@ test_toFOLD_utf8(SV * p)
     PREINIT:
         U8 *input;
         U8 s[UTF8_MAXBYTES_CASE + 1];
-        STRLEN len;
+        size_t len;
         AV *av;
         SV *utf8;
     CODE:
@@ -5395,7 +5395,7 @@ AV *
 test_toUPPER_uni(UV ord)
     PREINIT:
         U8 s[UTF8_MAXBYTES_CASE + 1];
-        STRLEN len;
+        size_t len;
         AV *av;
         SV *utf8;
     CODE:
@@ -5416,7 +5416,7 @@ test_toUPPER_utf8(SV * p)
     PREINIT:
         U8 *input;
         U8 s[UTF8_MAXBYTES_CASE + 1];
-        STRLEN len;
+        size_t len;
         AV *av;
         SV *utf8;
     CODE:
@@ -5444,7 +5444,7 @@ AV *
 test_toTITLE_uni(UV ord)
     PREINIT:
         U8 s[UTF8_MAXBYTES_CASE + 1];
-        STRLEN len;
+        size_t len;
         AV *av;
         SV *utf8;
     CODE:
@@ -5465,7 +5465,7 @@ test_toTITLE_utf8(SV * p)
     PREINIT:
         U8 *input;
         U8 s[UTF8_MAXBYTES_CASE + 1];
-        STRLEN len;
+        size_t len;
         AV *av;
         SV *utf8;
     CODE:

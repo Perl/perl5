@@ -73,7 +73,7 @@ S_stdize_locale(pTHX_ char *locs)
 	if (t) {
 	    const char * const u = strchr(t, '\n');
 	    if (u && (u[1] == 0)) {
-		const STRLEN len = u - s;
+		const size_t len = u - s;
 		Move(s + 1, locs, len, char);
 		locs[len] = 0;
 		okay = TRUE;
@@ -478,13 +478,13 @@ Perl_new_collate(pTHX_ const char *newcoll)
 	  /* 50: surely no system expands a char more. */
 #define XFRMBUFSIZE  (2 * 50)
 	  char xbuf[XFRMBUFSIZE];
-	  const Size_t fa = strxfrm(xbuf, "a",  XFRMBUFSIZE);
-	  const Size_t fb = strxfrm(xbuf, "ab", XFRMBUFSIZE);
-	  const SSize_t mult = fb - fa;
+	  const size_t fa = strxfrm(xbuf, "a",  XFRMBUFSIZE);
+	  const size_t fb = strxfrm(xbuf, "ab", XFRMBUFSIZE);
+	  const ssize_t mult = fb - fa;
 	  if (mult < 1 && !(fa == 0 && fb == 0))
 	      Perl_croak(aTHX_ "panic: strxfrm() gets absurd - a => %"UVuf", ab => %"UVuf,
 			 (UV) fa, (UV) fb);
-	  PL_collxfrm_base = (fa > (Size_t)mult) ? (fa - mult) : 0;
+	  PL_collxfrm_base = (fa > (size_t)mult) ? (fa - mult) : 0;
 	  PL_collxfrm_mult = mult;
 	}
     }
@@ -1224,10 +1224,10 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
  */
 
 char *
-Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
+Perl_mem_collxfrm(pTHX_ const char *s, size_t len, size_t *xlen)
 {
     char *xbuf;
-    STRLEN xAlloc, xin, xout; /* xalloc is a reserved word in VC */
+    size_t xAlloc, xin, xout; /* xalloc is a reserved word in VC */
 
     PERL_ARGS_ASSERT_MEM_COLLXFRM;
 
@@ -1242,13 +1242,13 @@ Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
     *(U32*)xbuf = PL_collation_ix;
     xout = sizeof(PL_collation_ix);
     for (xin = 0; xin < len; ) {
-	Size_t xused;
+	size_t xused;
 
 	for (;;) {
 	    xused = strxfrm(xbuf + xout, s + xin, xAlloc - xout);
 	    if (xused >= PERL_INT_MAX)
 		goto bad;
-	    if ((STRLEN)xused < xAlloc - xout)
+	    if ((size_t)xused < xAlloc - xout)
 		break;
 	    xAlloc = (2 * xAlloc) + 1;
 	    Renew(xbuf, xAlloc, char);
@@ -1289,7 +1289,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
      * "UTF-8".  It errs on the side of not being a UTF-8 locale. */
 
     char *save_input_locale = NULL;
-    STRLEN final_pos;
+    size_t final_pos;
 
 #ifdef LC_ALL
     assert(category != LC_ALL);

@@ -420,7 +420,7 @@ myQueryWindowText(HWND hwnd)
 {
     LONG l = QueryWindowTextLength(hwnd), len;
     SV *sv;
-    STRLEN n_a;
+    size_t n_a;
 
     if (l == 0) {
 	if (Perl_rc)		/* Last error */
@@ -460,7 +460,7 @@ SV *
 myQueryClassName(HWND hwnd)
 {
     SV *sv = newSVpvs("");
-    STRLEN l = 46, len = 0, n_a;
+    size_t l = 46, len = 0, n_a;
 
     while (l + 1 >= len) {
 	if (len)
@@ -520,7 +520,7 @@ static SV*
 myWinQueryActiveDesktopPathname()
 {
     SV *buf = newSVpv("",0);
-    STRLEN n_a;
+    size_t n_a;
 
     SvGROW(buf, MAXPATHLEN);
     QueryActiveDesktopPathname(SvPV(buf,n_a), MAXPATHLEN);
@@ -535,7 +535,7 @@ myWinQueryAtomName(ATOM atom, HATOMTBL hAtomTbl)
 
   if (len) {			/* Probably always so... */
     SV *sv = newSVpvs("");
-    STRLEN n_a;
+    size_t n_a;
 
     SvGROW(sv, len + 1);
     len = QueryAtomName(hAtomTbl, atom, SvPV(sv, n_a), len + 1);
@@ -555,7 +555,7 @@ myWinQueryAtomName(ATOM atom, HATOMTBL hAtomTbl)
 void
 ClipbrdData_set(SV *sv, int convert_nl, unsigned long fmt, unsigned long rgfFmtInfo, HAB hab)
 {
-    STRLEN len;
+    size_t len;
     char *buf;
     char *pByte = 0, *s, c;
     ULONG nls = 0, rc, handle;
@@ -753,7 +753,7 @@ SV *
 swentries_list()
 {
     int num, n = 0;
-    STRLEN n_a;
+    size_t n_a;
     PSWBLOCK pswblk;
     SV *sv = newSVpvs("");
 
@@ -829,7 +829,7 @@ change_swentrysw(SWENTRY *sw)
 int
 change_swentry(SV *sv)
 {
-    STRLEN l;
+    size_t l;
     PSWENTRY pswentry = (PSWENTRY)SvPV(sv, l);
 
     if (l != sizeof(SWENTRY))
@@ -987,7 +987,7 @@ _kbdStatus_set(SV* sv, int handle)
 {
     KBDINFO viob[2], *vio;
     ULONG rc;
-    STRLEN l;
+    size_t l;
     char *s = SvPV(sv, l);
 
     VIO_FROM_VIOB;
@@ -1038,7 +1038,7 @@ _vioMode_set(SV* sv)
 {
     VIOMODEINFO viob[2], *vio;
     ULONG rc;
-    STRLEN l;
+    size_t l;
     char *s = SvPV(sv, l);
 
     VIO_FROM_VIOB;
@@ -1083,7 +1083,7 @@ vioFont_set(SV *sv, int cellwidth, int cellheight, int type)
     ULONG rc;
     UCHAR b[1<<17];
     UCHAR *buf = b;
-    STRLEN l;
+    size_t l;
     char *s = SvPV(sv, l);
 
     VIO_FROM_VIOB;
@@ -1201,7 +1201,7 @@ _vioState_set(SV *sv)
     my_VIOSTATE viob[2], *ovio = (my_VIOSTATE*)SvPV_nolen(sv), *vio = ovio;
     int what = ovio->pal.type, cb = ovio->pal.cb;
     ULONG rc, size = vio_state_size(what);
-    STRLEN l;
+    size_t l;
     char *s = SvPV(sv, l);
 
     VIO_FROM_VIOB;
@@ -1253,7 +1253,7 @@ bool
 screen_set(SV *sv)
 {
     ULONG rc;
-    STRLEN l = SvCUR(sv), bufl = bufsize();
+    size_t l = SvCUR(sv), bufl = bufsize();
     char b[(1<<16) * 2]; /* This/2 is enough for 16-bit calls, we need
 			    extra 64K due to alignment logic */
     char *buf = b;
@@ -1356,7 +1356,7 @@ sidOf(int pid)
   return sid;
 }
 
-STRLEN
+size_t
 StrLen(ULONG addr, ULONG lim, I32 unitsize)
 {
     switch (unitsize) {
@@ -1435,7 +1435,7 @@ SV *
 swentry_expand( SV *sv )
     PPCODE:
      {
-	 STRLEN l;
+	 size_t l;
 	 PSWENTRY pswentry = (PSWENTRY)SvPV(sv, l);
 
 	 if (l != sizeof(SWENTRY))
@@ -1708,7 +1708,7 @@ FlashWindow(HWND hwndFrame, bool fFlash)
     POSTCALL:
 	XSRETURN_YES;
 
-STRLEN
+size_t
 StrLen(ULONG addr, ULONG lim, I32 unitsize = 1)
 
 MODULE = OS2::Process		PACKAGE = OS2::Process	PREFIX = myQuery

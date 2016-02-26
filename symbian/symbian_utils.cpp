@@ -71,7 +71,7 @@ extern "C" {
 	dXSUB_SYS;
 	newXS("PerlApp::TextQuery", XS_PerlApp_TextQuery, file);
     }
-    EXPORT_C SSize_t symbian_read_stdin(const int fd, char *b, int n)
+    EXPORT_C ssize_t symbian_read_stdin(const int fd, char *b, int n)
     {
 #ifdef PERL_GLOBAL_STRUCT /* Avoid unused variable warning. */
         dVAR;
@@ -80,7 +80,7 @@ extern "C" {
         	((CPerlBase*)PL_appctx) = CPerlBase::NewInterpreter();
         return ((CPerlBase*)PL_appctx)->ConsoleRead(fd, b, n);
     }
-    EXPORT_C SSize_t symbian_write_stdout(const int fd, const char *b, int n)
+    EXPORT_C ssize_t symbian_write_stdout(const int fd, const char *b, int n)
     {
 #ifdef PERL_GLOBAL_STRUCT /* Avoid unused variable warning. */
         dVAR;

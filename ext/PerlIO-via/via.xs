@@ -12,7 +12,7 @@ typedef struct
  HV *		stash;
  SV *		obj;
  SV *		var;
- SSize_t	cnt;
+ ssize_t	cnt;
  IO *		io;
  SV *		fh;
  CV *PUSHED;
@@ -141,7 +141,7 @@ PerlIOVia_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 	    code = -1;
 	}
 	else {
-	    STRLEN pkglen = 0;
+	    size_t pkglen = 0;
 	    const char *pkg = SvPV(arg, pkglen);
 	    s->obj =
 		newSVpvn(Perl_form(aTHX_ "PerlIO::via::%s", pkg),
@@ -396,24 +396,24 @@ PerlIOVia_tell(pTHX_ PerlIO * f)
 	   : (Off_t) - 1;
 }
 
-static SSize_t
-PerlIOVia_unread(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
+static ssize_t
+PerlIOVia_unread(pTHX_ PerlIO * f, const void *vbuf, size_t count)
 {
     PerlIOVia *s = PerlIOSelf(f, PerlIOVia);
     SV *buf = newSVpvn_flags((char *) vbuf, count, SVs_TEMP);
     SV *result =
 	PerlIOVia_method(aTHX_ f, MYMethod(UNREAD), G_SCALAR, buf, Nullsv);
     if (result)
-	return (SSize_t) SvIV(result);
+	return (ssize_t) SvIV(result);
     else {
 	return PerlIOBase_unread(aTHX_ f, vbuf, count);
     }
 }
 
-static SSize_t
-PerlIOVia_read(pTHX_ PerlIO * f, void *vbuf, Size_t count)
+static ssize_t
+PerlIOVia_read(pTHX_ PerlIO * f, void *vbuf, size_t count)
 {
-    SSize_t rd = 0;
+    ssize_t rd = 0;
     if (PerlIOBase(f)->flags & PERLIO_F_CANREAD) {
 	if (PerlIOBase(f)->flags & PERLIO_F_FASTGETS) {
 	    rd = PerlIOBase_read(aTHX_ f, vbuf, count);
@@ -426,7 +426,7 @@ PerlIOVia_read(pTHX_ PerlIO * f, void *vbuf, Size_t count)
 		PerlIOVia_method(aTHX_ f, MYMethod(READ), G_SCALAR, buf, n,
 				 Nullsv);
 	    if (result) {
-		rd = (SSize_t) SvIV(result);
+		rd = (ssize_t) SvIV(result);
 		Move(SvPVX(buf), vbuf, rd, char);
 		return rd;
 	    }
@@ -435,8 +435,8 @@ PerlIOVia_read(pTHX_ PerlIO * f, void *vbuf, Size_t count)
     return rd;
 }
 
-static SSize_t
-PerlIOVia_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
+static ssize_t
+PerlIOVia_write(pTHX_ PerlIO * f, const void *vbuf, size_t count)
 {
     if (PerlIOBase(f)->flags & PERLIO_F_CANWRITE) {
 	PerlIOVia *s = PerlIOSelf(f, PerlIOVia);
@@ -446,7 +446,7 @@ PerlIOVia_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
 			     Nullsv);
 	SvREFCNT_dec(buf);
 	if (result)
-	    return (SSize_t) SvIV(result);
+	    return (ssize_t) SvIV(result);
 	return -1;
     }
     return 0;
@@ -464,7 +464,7 @@ PerlIOVia_fill(pTHX_ PerlIO * f)
 	    s->var = Nullsv;
 	}
 	if (result && SvOK(result)) {
-	    STRLEN len = 0;
+	    size_t len = 0;
 	    const char *p = SvPV(result, len);
 	    s->var = newSVpvn(p, len);
 	    s->cnt = SvCUR(s->var);
@@ -514,7 +514,7 @@ PerlIOVia_get_ptr(pTHX_ PerlIO * f)
     return (STDCHAR *) NULL;
 }
 
-static SSize_t
+static ssize_t
 PerlIOVia_get_cnt(pTHX_ PerlIO * f)
 {
     if (PerlIOBase(f)->flags & PERLIO_F_CANREAD) {
@@ -526,7 +526,7 @@ PerlIOVia_get_cnt(pTHX_ PerlIO * f)
     return 0;
 }
 
-static Size_t
+static size_t
 PerlIOVia_bufsiz(pTHX_ PerlIO * f)
 {
     if (PerlIOBase(f)->flags & PERLIO_F_CANREAD) {
@@ -538,7 +538,7 @@ PerlIOVia_bufsiz(pTHX_ PerlIO * f)
 }
 
 static void
-PerlIOVia_set_ptrcnt(pTHX_ PerlIO * f, STDCHAR * ptr, SSize_t cnt)
+PerlIOVia_set_ptrcnt(pTHX_ PerlIO * f, STDCHAR * ptr, ssize_t cnt)
 {
     PerlIOVia *s = PerlIOSelf(f, PerlIOVia);
     PERL_UNUSED_ARG(ptr);

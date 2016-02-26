@@ -127,12 +127,12 @@ int main(int argc, char *argv[]) {
 
 /* Off_t/off_t is a struct in Solaris with largefiles, and with gcc -ansi
  * that struct cannot be compared in some gcc releases with a flat
- * integer, such as a STRLEN. */
+ * integer, such as a size_t. */
 
   IV iv;
   Off_t t0a = 2;
-  STRLEN t0b = 3;
-  int t0c = (STRLEN)t0a == t0b;
+  size_t t0b = 3;
+  int t0c = (size_t)t0a == t0b;
 
   printf("%s: %d\n", argv[0], argc);
 

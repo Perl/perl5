@@ -57,4 +57,4 @@ Win32API::File cpan/Win32API-File/t/tie.t 712ea7edd0cc805ce1c0b8172c01b03dd19b58
 Win32API::File cpan/Win32API-File/typemap 24bff088babeadac0873e8df390d1666d9d9db4a
 autodie cpan/autodie/t/mkdir.t 9e70d2282a3cc7d76a78bf8144fccba20fb37dac
 version cpan/version/lib/version.pm d0923b895d57f1d669ae36fcf85c87b16db341d1
-version vutil.c 668f17ca43e2527645674d29ba772b86330d5663
+version vutil.c 71d645dce340e0c6baabd006a54a09f2e21b746b

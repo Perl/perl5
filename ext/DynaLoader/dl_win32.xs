@@ -48,7 +48,7 @@ OS_Error_String(pTHX)
 {
     dMY_CXT;
     DWORD err = GetLastError();
-    STRLEN len;
+    size_t len;
     SV ** l_dl_error_svp = &dl_error_sv;
     SV * l_dl_error_sv;
     if (!*l_dl_error_svp)

@@ -24,10 +24,10 @@ PerlUtil - a C++ utility class for Perl/Symbian
    static HBufC16* newHBufC16fromSvPV(SV* sv);
    static void     setTDes16fromSvPV(TDes16* aDes16, SV* sv);
 
-   static HBufC8*  newHBufC8fromPVn(const U8* s, STRLEN n);
-   static void     setTDes8fromPVn(TDes8* aDes8, const U8* s, STRLEN n);
-   static HBufC16* newHBufC16fromPVn(const U8* s, STRLEN n, bool utf8);
-   static void  setTDes16fromPVn(TDes16* aDes16, const U8* s, STRLEN n);
+   static HBufC8*  newHBufC8fromPVn(const U8* s, size_t n);
+   static void     setTDes8fromPVn(TDes8* aDes8, const U8* s, size_t n);
+   static HBufC16* newHBufC16fromPVn(const U8* s, size_t n, bool utf8);
+   static void  setTDes16fromPVn(TDes16* aDes16, const U8* s, size_t n);
 
    // An example
 

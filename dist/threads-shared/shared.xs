@@ -635,7 +635,7 @@ Perl_sharedsv_cond_timedwait(perl_cond *cond, perl_mutex *mut, double abs)
 #  else
 #    ifdef OS2
     int rc, got_it = 0;
-    STRLEN n_a;
+    size_t n_a;
 
     ABS2RELMILLI(abs);
 
@@ -707,7 +707,7 @@ S_get_RV(pTHX_ SV *sv, SV *sobj) {
     }
     if (SvOBJECT(sobj)) {
         /* Add any new old blessing */
-        STRLEN len;
+        size_t len;
         char* stash_ptr = SvPV((SV*) SvSTASH(sobj), len);
         HV* stash = gv_stashpvn(stash_ptr, len, TRUE);
         SvOBJECT_on(obj);
@@ -914,7 +914,7 @@ sharedsv_elem_mg_FETCH(pTHX_ SV *sv, MAGIC *mg)
             I32 len = mg->mg_len;
             assert ( mg->mg_ptr != 0 );
             if (mg->mg_len == HEf_SVKEY) {
-                STRLEN slen;
+                size_t slen;
                 key = SvPV((SV *)mg->mg_ptr, slen);
                 len = slen;
                 if (SvUTF8((SV *)mg->mg_ptr)) {
@@ -968,7 +968,7 @@ sharedsv_elem_mg_STORE(pTHX_ SV *sv, MAGIC *mg)
         I32 len = mg->mg_len;
         assert ( mg->mg_ptr != 0 );
         if (mg->mg_len == HEf_SVKEY) {
-            STRLEN slen;
+            size_t slen;
             key = SvPV((SV *)mg->mg_ptr, slen);
             len = slen;
             if (SvUTF8((SV *)mg->mg_ptr)) {
@@ -1012,7 +1012,7 @@ sharedsv_elem_mg_DELETE(pTHX_ SV *sv, MAGIC *mg)
         I32 len = mg->mg_len;
         assert ( mg->mg_ptr != 0 );
         if (mg->mg_len == HEf_SVKEY) {
-            STRLEN slen;
+            size_t slen;
             key = SvPV((SV *)mg->mg_ptr, slen);
             len = slen;
             if (SvUTF8((SV *)mg->mg_ptr)) {
@@ -1411,7 +1411,7 @@ EXISTS(SV *obj, SV *index)
             exists = av_exists((AV*) sobj, SvIV(index));
         } else {
             I32 len;
-            STRLEN slen;
+            size_t slen;
             char *key = SvPVutf8(index, slen);
             len = slen;
             if (SvUTF8(index)) {
@@ -1698,7 +1698,7 @@ bless(SV* myref, ...)
             stash = CopSTASH(PL_curcop);
         } else {
             SV* classname = ST(1);
-            STRLEN len;
+            size_t len;
             char *ptr;
 
             if (classname &&

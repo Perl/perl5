@@ -679,18 +679,18 @@ Since these macros have side-effects don't use them as arguments to
 macros that may evaluate their argument several times, for example:
 
   /* Bad idea, don't do this */
-  STRLEN len;
+  size_t len;
   const char *s = SvPV(POPs, len);
 
 Instead, use a temporary:
 
-  STRLEN len;
+  size_t len;
   SV *sv = POPs;
   const char *s = SvPV(sv, len);
 
 or a macro that guarantees it will evaluate its arguments only once:
 
-  STRLEN len;
+  size_t len;
   const char *s = SvPVx(POPs, len);
 
 =item 5.

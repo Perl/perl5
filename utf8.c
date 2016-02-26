@@ -72,7 +72,7 @@ See also L</is_utf8_string>(), L</is_utf8_string_loclen>(), and L</is_utf8_strin
 */
 
 bool
-Perl_is_invariant_string(const U8 *s, STRLEN len)
+Perl_is_invariant_string(const U8 *s, size_t len)
 {
     const U8* const send = s + (len ? len : strlen((const char *)s));
     const U8* x = s;
@@ -248,7 +248,7 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
      * khw believes that less code outweighs slight performance gains. */
 
     {
-	STRLEN len  = OFFUNISKIP(uv);
+	size_t len  = OFFUNISKIP(uv);
 	U8 *p = d+len-1;
 	while (p > d) {
 	    *p-- = I8_TO_NATIVE_UTF8((uv & UTF_CONTINUATION_MASK) | UTF_CONTINUATION_MARK);
@@ -386,7 +386,7 @@ See also L</is_invariant_string>(), L</is_utf8_string_loclen>(), and L</is_utf8_
 */
 
 bool
-Perl_is_utf8_string(const U8 *s, STRLEN len)
+Perl_is_utf8_string(const U8 *s, size_t len)
 {
     const U8* const send = s + (len ? len : strlen((const char *)s));
     const U8* x = s;
@@ -394,7 +394,7 @@ Perl_is_utf8_string(const U8 *s, STRLEN len)
     PERL_ARGS_ASSERT_IS_UTF8_STRING;
 
     while (x < send) {
-        STRLEN len = isUTF8_CHAR(x, send);
+        size_t len = isUTF8_CHAR(x, send);
         if (UNLIKELY(! len)) {
             return FALSE;
         }
@@ -428,16 +428,16 @@ See also L</is_utf8_string_loc>() and L</is_utf8_string>().
 */
 
 bool
-Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
+Perl_is_utf8_string_loclen(const U8 *s, size_t len, const U8 **ep, size_t *el)
 {
     const U8* const send = s + (len ? len : strlen((const char *)s));
     const U8* x = s;
-    STRLEN outlen = 0;
+    size_t outlen = 0;
 
     PERL_ARGS_ASSERT_IS_UTF8_STRING_LOCLEN;
 
     while (x < send) {
-        STRLEN len = isUTF8_CHAR(x, send);
+        size_t len = isUTF8_CHAR(x, send);
         if (UNLIKELY(! len)) {
             goto out;
         }
@@ -487,7 +487,7 @@ determinable reasonable value.
 The C<UTF8_CHECK_ONLY> flag overrides the behavior when a non-allowed (by other
 flags) malformation is found.  If this flag is set, the routine assumes that
 the caller will raise a warning, and this function will silently just set
-C<retlen> to C<-1> (cast to C<STRLEN>) and return zero.
+C<retlen> to C<-1> (cast to C<size_t>) and return zero.
 
 Note that this API requires disambiguation between successful decoding a C<NUL>
 character, and an error return (unless the C<UTF8_CHECK_ONLY> flag is set), as
@@ -550,13 +550,13 @@ warn.
 */
 
 UV
-Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
+Perl_utf8n_to_uvchr(pTHX_ const U8 *s, size_t curlen, size_t *retlen, U32 flags)
 {
     const U8 * const s0 = s;
     U8 overflow_byte = '\0';	/* Save byte in case of overflow */
     U8 * send;
     UV uv = *s;
-    STRLEN expectlen;
+    size_t expectlen;
     SV* sv = NULL;
     UV outlier_ret = 0;	/* return value when input is in error or problematic
 			 */
@@ -737,7 +737,7 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     }
 
     if (do_overlong_test
-	&& expectlen > (STRLEN) OFFUNISKIP(uv)
+	&& expectlen > (size_t) OFFUNISKIP(uv)
 	&& ! (flags & UTF8_ALLOW_LONG))
     {
 	/* The overlong malformation has lower precedence than the others.
@@ -908,7 +908,7 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 
     if (flags & UTF8_CHECK_ONLY) {
 	if (retlen)
-	    *retlen = ((STRLEN) -1);
+	    *retlen = ((size_t) -1);
 	return 0;
     }
 
@@ -955,7 +955,7 @@ unless those are turned off.
 
 
 UV
-Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
+Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, size_t *retlen)
 {
     assert(s < send);
 
@@ -968,7 +968,7 @@ Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
  * non-character code points, and non-Unicode code points are allowed. */
 
 UV
-Perl_valid_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
+Perl_valid_utf8_to_uvchr(pTHX_ const U8 *s, size_t *retlen)
 {
     UV expectlen = UTF8SKIP(s);
     const U8* send = s + expectlen;
@@ -1032,7 +1032,7 @@ unless those are turned off.
 */
 
 UV
-Perl_utf8_to_uvuni_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
+Perl_utf8_to_uvuni_buf(pTHX_ const U8 *s, const U8 *send, size_t *retlen)
 {
     PERL_ARGS_ASSERT_UTF8_TO_UVUNI_BUF;
 
@@ -1053,10 +1053,10 @@ up past C<e>, croaks.
 =cut
 */
 
-STRLEN
+size_t
 Perl_utf8_length(pTHX_ const U8 *s, const U8 *e)
 {
-    STRLEN len = 0;
+    size_t len = 0;
 
     PERL_ARGS_ASSERT_UTF8_LENGTH;
 
@@ -1158,7 +1158,7 @@ within the strings.
 */
 
 int
-Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen)
+Perl_bytes_cmp_utf8(pTHX_ const U8 *b, size_t blen, const U8 *u, size_t ulen)
 {
     const U8 *const bend = b + blen;
     const U8 *const uend = u + ulen;
@@ -1222,7 +1222,7 @@ If you need a copy of the string, see L</bytes_from_utf8>.
 */
 
 U8 *
-Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
+Perl_utf8_to_bytes(pTHX_ U8 *s, size_t *len)
 {
     U8 * const save = s;
     U8 * const send = s + *len;
@@ -1235,7 +1235,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
     while (s < send) {
         if (! UTF8_IS_INVARIANT(*s)) {
             if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, send)) {
-                *len = ((STRLEN) -1);
+                *len = ((size_t) -1);
                 return 0;
             }
             s++;
@@ -1273,7 +1273,7 @@ in UTF-8 (i.e., US-ASCII on non-EBCDIC machines).
 */
 
 U8 *
-Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
+Perl_bytes_from_utf8(pTHX_ const U8 *s, size_t *len, bool *is_utf8)
 {
     U8 *d;
     const U8 *start = s;
@@ -1336,7 +1336,7 @@ see L</sv_recode_to_utf8>().
    likewise need duplication. */
 
 U8*
-Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *len)
+Perl_bytes_to_utf8(pTHX_ const U8 *s, size_t *len)
 {
     const U8 * const send = s + (*len);
     U8 *d;
@@ -1496,7 +1496,7 @@ Perl__is_uni_perl_idstart(pTHX_ UV c)
 }
 
 UV
-Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const char S_or_s)
+Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, size_t *lenp, const char S_or_s)
 {
     /* We have the latin1-range values compiled into the core, so just use
      * those, converting the result to UTF-8.  The only difference between upper
@@ -1568,7 +1568,7 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const char S_
 #define CALL_FOLD_CASE(uv, s, d, lenp, specials) _to_utf8_case(uv, s, d, lenp, &PL_utf8_tofold, "ToCf", (specials) ? "" : NULL)
 
 UV
-Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
+Perl_to_uni_upper(pTHX_ UV c, U8* p, size_t *lenp)
 {
     /* Convert the Unicode character whose ordinal is <c> to its uppercase
      * version and store that in UTF-8 in <p> and its length in bytes in <lenp>.
@@ -1589,7 +1589,7 @@ Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
 }
 
 UV
-Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
+Perl_to_uni_title(pTHX_ UV c, U8* p, size_t *lenp)
 {
     PERL_ARGS_ASSERT_TO_UNI_TITLE;
 
@@ -1602,7 +1602,7 @@ Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
 }
 
 STATIC U8
-S_to_lower_latin1(const U8 c, U8* p, STRLEN *lenp)
+S_to_lower_latin1(const U8 c, U8* p, size_t *lenp)
 {
     /* We have the latin1-range values compiled into the core, so just use
      * those, converting the result to UTF-8.  Since the result is always just
@@ -1627,7 +1627,7 @@ S_to_lower_latin1(const U8 c, U8* p, STRLEN *lenp)
 }
 
 UV
-Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
+Perl_to_uni_lower(pTHX_ UV c, U8* p, size_t *lenp)
 {
     PERL_ARGS_ASSERT_TO_UNI_LOWER;
 
@@ -1640,7 +1640,7 @@ Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 }
 
 UV
-Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const unsigned int flags)
+Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, size_t *lenp, const unsigned int flags)
 {
     /* Corresponds to to_lower_latin1(); <flags> bits meanings:
      *	    FOLD_FLAGS_NOMIX_ASCII iff non-ASCII to ASCII folds are prohibited
@@ -1701,7 +1701,7 @@ Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const unsigned int f
 }
 
 UV
-Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
+Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, size_t *lenp, U8 flags)
 {
 
     /* Not currently externally documented, and subject to change
@@ -1903,7 +1903,7 @@ unless those are turned off.
 =cut */
 
 UV
-Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
+Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, size_t *lenp,
 			SV **swashp, const char *normal, const char *special)
 {
     PERL_ARGS_ASSERT_TO_UTF8_CASE;
@@ -1913,10 +1913,10 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 
     /* change namve uv1 to 'from' */
 STATIC UV
-S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp,
+S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, size_t *lenp,
 		SV **swashp, const char *normal, const char *special)
 {
-    STRLEN len = 0;
+    size_t len = 0;
 
     PERL_ARGS_ASSERT__TO_UTF8_CASE;
 
@@ -2085,7 +2085,7 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp,
 }
 
 STATIC UV
-S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result, U8* const ustrp, STRLEN *lenp)
+S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result, U8* const ustrp, size_t *lenp)
 {
     /* This is called when changing the case of a UTF-8-encoded character above
      * the Latin1 range, and the operation is in a non-UTF-8 locale.  If the
@@ -2153,7 +2153,7 @@ Instead use L</toUPPER_utf8>.
  *         be used. */
 
 UV
-Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags)
+Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, size_t *lenp, bool flags)
 {
     UV result;
 
@@ -2224,7 +2224,7 @@ Instead use L</toTITLE_utf8>.
  */
 
 UV
-Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags)
+Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, size_t *lenp, bool flags)
 {
     UV result;
 
@@ -2294,7 +2294,7 @@ Instead use L</toLOWER_utf8>.
  */
 
 UV
-Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags)
+Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, size_t *lenp, bool flags)
 {
     UV result;
 
@@ -2370,7 +2370,7 @@ Instead use L</toFOLD_utf8>.
  */
 
 UV
-Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
+Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, size_t *lenp, U8 flags)
 {
     UV result;
 
@@ -2899,8 +2899,8 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
     HV *const hv = MUTABLE_HV(SvRV(swash));
     U32 klen;
     U32 off;
-    STRLEN slen = 0;
-    STRLEN needents;
+    size_t slen = 0;
+    size_t needents;
     const U8 *tmps = NULL;
     SV *swatch;
     const U8 c = *ptr;
@@ -3075,7 +3075,7 @@ S_swash_scan_list_line(pTHX_ U8* l, U8* const lend, UV* min, UV* max, UV* val,
 			     const bool wants_value, const U8* const typestr)
 {
     const int  typeto  = typestr[0] == 'T' && typestr[1] == 'o';
-    STRLEN numlen;	    /* Length of the number */
+    size_t numlen;	    /* Length of the number */
     I32 flags = PERL_SCAN_SILENT_ILLDIGIT
 		| PERL_SCAN_DISALLOW_PREFIX
 		| PERL_SCAN_SILENT_NON_PORTABLE;
@@ -3171,7 +3171,7 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 {
     SV *swatch;
     U8 *l, *lend, *x, *xend, *s, *send;
-    STRLEN lcur, xcur, scur;
+    size_t lcur, xcur, scur;
     HV *const hv = MUTABLE_HV(SvRV(swash));
     SV** const invlistsvp = hv_fetchs(hv, "V", FALSE);
 
@@ -3179,8 +3179,8 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
     SV** extssvp = NULL;
     SV** invert_it_svp = NULL;
     U8* typestr = NULL;
-    STRLEN bits;
-    STRLEN octets; /* if bits == 1, then octets == 0 */
+    size_t bits;
+    size_t octets; /* if bits == 1, then octets == 0 */
     UV  none;
     UV  end = start + span;
 
@@ -3282,7 +3282,7 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 		min = start;
 	    }
 	    for (key = min; key <= upper; key++) {
-		STRLEN offset;
+		size_t offset;
 		/* offset must be non-negative (start <= min <= key < end) */
 		offset = octets * (key - start);
 		if (bits == 8)
@@ -3308,7 +3308,7 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 		min = start;
 
 	    for (key = min; key <= upper; key++) {
-		const STRLEN offset = (STRLEN)(key - start);
+		const size_t offset = (size_t)(key - start);
 		s[offset >> 3] |= 1 << (offset & 7);
 	    }
 	}
@@ -3342,14 +3342,14 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
     x = (U8*)SvPV(*extssvp, xcur);
     xend = x + xcur;
     while (x < xend) {
-	STRLEN namelen;
+	size_t namelen;
 	U8 *namestr;
 	SV** othersvp;
 	HV* otherhv;
-	STRLEN otherbits;
+	size_t otherbits;
 	SV **otherbitssvp, *other;
 	U8 *s, *o, *nl;
-	STRLEN slen, olen;
+	size_t slen, olen;
 
 	const U8 opc = *x++;
 	if (opc == '\n')
@@ -3381,7 +3381,7 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 	othersvp = hv_fetch(hv, (char *)namestr, namelen, FALSE);
 	otherhv = MUTABLE_HV(SvRV(*othersvp));
 	otherbitssvp = hv_fetchs(otherhv, "BITS", FALSE);
-	otherbits = (STRLEN)SvUV(*otherbitssvp);
+	otherbits = (size_t)SvUV(*otherbitssvp);
 	if (bits < otherbits)
 	    Perl_croak(aTHX_ "panic: swatch_get found swatch size mismatch, "
 		       "bits=%"UVuf", otherbits=%"UVuf, (UV)bits, (UV)otherbits);
@@ -3422,8 +3422,8 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 	    }
 	}
 	else {
-	    STRLEN otheroctets = otherbits >> 3;
-	    STRLEN offset = 0;
+	    size_t otheroctets = otherbits >> 3;
+	    size_t offset = 0;
 	    U8* const send = s + slen;
 
 	    while (s < send) {
@@ -3434,7 +3434,7 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 		    ++offset;
 		}
 		else {
-		    STRLEN vlen = otheroctets;
+		    size_t vlen = otheroctets;
 		    otherval = *o++;
 		    while (--vlen) {
 			otherval <<= 8;
@@ -3536,7 +3536,7 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
     * it should be generalized, this would have to be fixed */
 
     U8 *l, *lend;
-    STRLEN lcur;
+    size_t lcur;
     HV *const hv = MUTABLE_HV(SvRV(swash));
 
     /* The string containing the main body of the table.  This will have its
@@ -3548,8 +3548,8 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
     SV** const nonesvp = hv_fetchs(hv, "NONE", FALSE);
     /*SV** const extssvp = hv_fetchs(hv, "EXTRAS", FALSE);*/
     const U8* const typestr = (U8*)SvPV_nolen(*typesvp);
-    const STRLEN bits  = SvUV(*bitssvp);
-    const STRLEN octets = bits >> 3; /* if bits == 1, then octets == 0 */
+    const size_t bits  = SvUV(*bitssvp);
+    const size_t octets = bits >> 3; /* if bits == 1, then octets == 0 */
     const UV     none  = SvUV(*nonesvp);
     SV **specials_p = hv_fetchs(hv, "SPECIALS", 0);
 
@@ -3635,12 +3635,12 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 						 &char_to, &to_len)))
 	{
 	    if (av_tindex(from_list) > 0) {
-		SSize_t i;
+		ssize_t i;
 
 		/* We iterate over all combinations of i,j to place each code
 		 * point on each list */
 		for (i = 0; i <= av_tindex(from_list); i++) {
-		    SSize_t j;
+		    ssize_t j;
 		    AV* i_list = newAV();
 		    SV** entryp = av_fetch(from_list, i, FALSE);
 		    if (entryp == NULL) {
@@ -3717,7 +3717,7 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 	    /* The key is the inverse mapping */
 	    char key[UTF8_MAXBYTES+1];
 	    char* key_end = (char *) uvchr_to_utf8((U8*) key, val);
-	    STRLEN key_len = key_end - key;
+	    size_t key_len = key_end - key;
 
 	    /* Get the list for the map */
 	    if ((listp = hv_fetch(ret, key, key_len, FALSE))) {
@@ -3795,7 +3795,7 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
 
     U8 *l, *lend;
     char *loc;
-    STRLEN lcur;
+    size_t lcur;
     HV *const hv = MUTABLE_HV(SvRV(swash));
     UV elements = 0;    /* Number of elements in the inversion list */
     U8 empty[] = "";
@@ -3806,10 +3806,10 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
     SV** invert_it_svp;
 
     U8* typestr;
-    STRLEN bits;
-    STRLEN octets; /* if bits == 1, then octets == 0 */
+    size_t bits;
+    size_t octets; /* if bits == 1, then octets == 0 */
     U8 *x, *xend;
-    STRLEN xcur;
+    size_t xcur;
 
     SV* invlist;
 
@@ -3931,11 +3931,11 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
     x = (U8*)SvPV(*extssvp, xcur);
     xend = x + xcur;
     while (x < xend) {
-	STRLEN namelen;
+	size_t namelen;
 	U8 *namestr;
 	SV** othersvp;
 	HV* otherhv;
-	STRLEN otherbits;
+	size_t otherbits;
 	SV **otherbitssvp, *other;
 	U8 *nl;
 
@@ -3969,7 +3969,7 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
 	othersvp = hv_fetch(hv, (char *)namestr, namelen, FALSE);
 	otherhv = MUTABLE_HV(SvRV(*othersvp));
 	otherbitssvp = hv_fetchs(otherhv, "BITS", FALSE);
-	otherbits = (STRLEN)SvUV(*otherbitssvp);
+	otherbits = (size_t)SvUV(*otherbitssvp);
 
 	if (bits != otherbits || bits != 1) {
 	    Perl_croak(aTHX_ "panic: _swash_to_invlist only operates on boolean "
@@ -4030,7 +4030,7 @@ Perl__get_swash_invlist(pTHX_ SV* const swash)
 }
 
 bool
-Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
+Perl_check_utf8_print(pTHX_ const U8* s, const size_t len)
 {
     /* May change: warns if surrogates, non-character code points, or
      * non-Unicode code points are in s which has length len bytes.  Returns
@@ -4052,7 +4052,7 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 	    return FALSE;
 	}
 	if (UNLIKELY(isUTF8_POSSIBLY_PROBLEMATIC(*s))) {
-	    STRLEN char_len;
+	    size_t char_len;
 	    if (UTF8_IS_SUPER(s, e)) {
                 if (   ckWARN_d(WARN_NON_UNICODE)
                     || (   ckWARN_d(WARN_DEPRECATED)
@@ -4125,7 +4125,7 @@ See also L</sv_uni_display>.
 
 =cut */
 char *
-Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
+Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, size_t len, size_t pvlim, UV flags)
 {
     int truncated = 0;
     const char *s, *e;
@@ -4200,7 +4200,7 @@ The pointer to the PV of the C<dsv> is returned.
 =cut
 */
 char *
-Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
+Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, size_t pvlim, UV flags)
 {
     const char * const ptr =
         isREGEXP(ssv) ? RX_WRAPPED((REGEXP*)ssv) : SvPVX_const(ssv);
@@ -4287,7 +4287,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
     U8 *f1 = NULL;             /* Point to current folded */
     const U8 *e2 = NULL;
     U8 *f2 = NULL;
-    STRLEN n1 = 0, n2 = 0;              /* Number of bytes in current char */
+    size_t n1 = 0, n2 = 0;              /* Number of bytes in current char */
     U8 foldbuf1[UTF8_MAXBYTES_CASE+1];
     U8 foldbuf2[UTF8_MAXBYTES_CASE+1];
     U8 flags_for_folder = FOLD_FLAGS_FULL;
@@ -4504,7 +4504,7 @@ or C<L<NATIVE_TO_UNI(utf8n_to_uvchr(...))|/utf8n_to_uvchr>>.
 */
 
 UV
-Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
+Perl_utf8n_to_uvuni(pTHX_ const U8 *s, size_t curlen, size_t *retlen, U32 flags)
 {
     PERL_ARGS_ASSERT_UTF8N_TO_UVUNI;
 

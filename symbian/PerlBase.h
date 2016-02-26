@@ -114,7 +114,7 @@ class CPerlBase : public CBase
 #undef New
 #define PerlCopy(s,d,n,t)	(MEM_WRAP_CHECK(n,t), (void)memcpy((char*)(d),(char*)(s), (n) * sizeof(t)))
 #define PerlCopyD(s,d,n,t)	(MEM_WRAP_CHECK(n,t), memcpy((char*)(d),(char*)(s), (n) * sizeof(t)))
-#define PerlNew(x,v,n,t)	(v = (MEM_WRAP_CHECK(n,t), (t*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))
+#define PerlNew(x,v,n,t)	(v = (MEM_WRAP_CHECK(n,t), (t*)safemalloc((size_t)((n)*sizeof(t)))))
 
 // This is like the Symbian _LIT() but without the embedded L prefix,
 // which enables using #defined constants (which need to carry their

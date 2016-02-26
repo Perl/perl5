@@ -197,7 +197,7 @@ Pops an unsigned long off the stack.
 /* Go to some pains in the rare event that we must extend the stack. */
 
 /*
-=for apidoc Am|void|EXTEND|SP|SSize_t nitems
+=for apidoc Am|void|EXTEND|SP|ssize_t nitems
 Used to extend the argument stack for an XSUB's return values.  Once
 used, guarantees that there is room for at least C<nitems> to be pushed
 onto the stack.
@@ -207,7 +207,7 @@ Push an SV onto the stack.  The stack must have room for this element.
 Does not handle 'set' magic.  Does not use C<TARG>.  See also
 C<L</PUSHmortal>>, C<L</XPUSHs>>, and C<L</XPUSHmortal>>.
 
-=for apidoc Am|void|PUSHp|char* str|STRLEN len
+=for apidoc Am|void|PUSHp|char* str|size_t len
 Push a string onto the stack.  The stack must have room for this element.
 The C<len> indicates the length of the string.  Handles 'set' magic.  Uses
 C<TARG>, so C<dTARGET> or C<dXSTARG> should be called to declare it.  Do not
@@ -240,7 +240,7 @@ Push an SV onto the stack, extending the stack if necessary.  Does not
 handle 'set' magic.  Does not use C<TARG>.  See also C<L</XPUSHmortal>>,
 C<PUSHs> and C<PUSHmortal>.
 
-=for apidoc Am|void|XPUSHp|char* str|STRLEN len
+=for apidoc Am|void|XPUSHp|char* str|size_t len
 Push a string onto the stack, extending the stack if necessary.  The C<len>
 indicates the length of the string.  Handles 'set' magic.  Uses C<TARG>, so
 C<dTARGET> or C<dXSTARG> should be called to declare it.  Do not call
@@ -278,7 +278,7 @@ Push a new mortal SV onto the stack.  The stack must have room for this
 element.  Does not use C<TARG>.  See also C<L</PUSHs>>, C<L</XPUSHmortal>> and
 C<L</XPUSHs>>.
 
-=for apidoc Am|void|mPUSHp|char* str|STRLEN len
+=for apidoc Am|void|mPUSHp|char* str|size_t len
 Push a string onto the stack.  The stack must have room for this element.
 The C<len> indicates the length of the string.  Does not use C<TARG>.
 See also C<L</PUSHp>>, C<L</mXPUSHp>> and C<L</XPUSHp>>.
@@ -305,7 +305,7 @@ Push a new mortal SV onto the stack, extending the stack if necessary.
 Does not use C<TARG>.  See also C<L</XPUSHs>>, C<L</PUSHmortal>> and
 C<L</PUSHs>>.
 
-=for apidoc Am|void|mXPUSHp|char* str|STRLEN len
+=for apidoc Am|void|mXPUSHp|char* str|size_t len
 Push a string onto the stack, extending the stack if necessary.  The C<len>
 indicates the length of the string.  Does not use C<TARG>.  See also
 C<L</XPUSHp>>, C<mPUSHp> and C<PUSHp>.
@@ -327,13 +327,13 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 
 /* _EXTEND_SAFE_N(n): private helper macro for EXTEND().
  * Tests whether the value of n would be truncated when implicitly cast to
- * SSize_t as an arg to stack_grow(). If so, sets it to -1 instead to
+ * ssize_t as an arg to stack_grow(). If so, sets it to -1 instead to
  * trigger a panic. It will be constant folded on platforms where this
  * can't happen.
  */
 
 #define _EXTEND_SAFE_N(n) \
-        (sizeof(n) > sizeof(SSize_t) && ((SSize_t)(n) != (n)) ? -1 : (n))
+        (sizeof(n) > sizeof(ssize_t) && ((ssize_t)(n) != (n)) ? -1 : (n))
 
 #ifdef STRESS_REALLOC
 # define EXTEND(p,n)   STMT_START {                                     \
@@ -342,7 +342,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
                        } STMT_END
 /* Same thing, but update mark register too. */
 # define MEXTEND(p,n)   STMT_START {                                    \
-                            const SSize_t markoff = mark - PL_stack_base; \
+                            const ssize_t markoff = mark - PL_stack_base; \
                             sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));    \
                             mark = PL_stack_base + markoff;             \
                             PERL_UNUSED_VAR(sp);                        \
@@ -375,7 +375,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 /* Same thing, but update mark register too. */
 #  define MEXTEND(p,n)  STMT_START {                                    \
                          if (UNLIKELY(_EXTEND_NEEDS_GROW(p,n))) {       \
-                           const SSize_t markoff = mark - PL_stack_base;\
+                           const ssize_t markoff = mark - PL_stack_base;\
                            sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
                            mark = PL_stack_base + markoff;              \
                            PERL_UNUSED_VAR(sp);                         \
@@ -542,7 +542,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 
 #define EXTEND_MORTAL(n) \
     STMT_START {						\
-	SSize_t eMiX = PL_tmps_ix + (n);			\
+	ssize_t eMiX = PL_tmps_ix + (n);			\
 	if (UNLIKELY(eMiX >= PL_tmps_max))			\
 	    (void)Perl_tmps_grow_p(aTHX_ eMiX);			\
     } STMT_END
@@ -592,8 +592,8 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
                 NOOP;                                           \
             }                                                   \
             else if (gimme == G_ARRAY) {			\
-                SSize_t i;                                      \
-                SSize_t len;                                    \
+                ssize_t i;                                      \
+                ssize_t len;                                    \
                 assert(SvTYPE(tmpsv) == SVt_PVAV);              \
                 len = av_tindex((AV *)tmpsv) + 1;               \
                 (void)POPs; /* get rid of the arg */            \

@@ -329,7 +329,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 /*
 
-=for apidoc Am|STRLEN|UVCHR_SKIP|UV cp
+=for apidoc Am|size_t|UVCHR_SKIP|UV cp
 returns the number of bytes required to represent the code point C<cp> when
 encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 255; a Unicode code point otherwise.
@@ -451,7 +451,7 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 
 /*
 
-=for apidoc Am|STRLEN|UTF8SKIP|char* s
+=for apidoc Am|size_t|UTF8SKIP|char* s
 returns the number of bytes in the UTF-8 encoded character whose first (perhaps
 only) byte is pointed to by C<s>.
 
@@ -797,7 +797,7 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 
 /*
 
-=for apidoc Am|STRLEN|isUTF8_CHAR|const U8 *s|const U8 *e
+=for apidoc Am|size_t|isUTF8_CHAR|const U8 *s|const U8 *e
 
 Returns the number of bytes beginning at C<s> which form a legal UTF-8 (or
 UTF-EBCDIC) encoded character, looking no further than S<C<e - s>> bytes into

@@ -145,7 +145,7 @@ SaveError(pTHX_ const char* pat, ...)
     va_list args;
     SV *msv;
     const char *message;
-    STRLEN len;
+    size_t len;
 
     /* This code is based on croak/warn, see mess() in util.c */
 

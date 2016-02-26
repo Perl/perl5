@@ -849,7 +849,6 @@ sitelibexp='\\system\\libs\\perl\\siteperl\\x.y.z'
 siteprefix='\\system'
 siteprefixexp='\\system'
 sizesize=4
-sizetype=size_t
 so='o'
 socksizetype='unsigned int'
 srand48_r_proto='0'

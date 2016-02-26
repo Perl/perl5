@@ -52,7 +52,7 @@ we have a pointer to the start of C<pat> then, if we see a C<U> we can
 test whether we're still at the start of the string. So, here's where
 C<pat> is set up:
 
-    STRLEN fromlen;
+    size_t fromlen;
     char *pat = SvPVx(*++MARK, fromlen);
     char *patend = pat + fromlen;
     I32 len;
@@ -61,7 +61,7 @@ C<pat> is set up:
 
 We'll have another string pointer in there:
 
-    STRLEN fromlen;
+    size_t fromlen;
     char *pat = SvPVx(*++MARK, fromlen);
     char *patend = pat + fromlen;
  +  char *patcopy;

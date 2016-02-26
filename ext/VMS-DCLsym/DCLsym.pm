@@ -7,7 +7,7 @@ use strict;
 
 # Package globals
 @ISA = ( 'DynaLoader' );
-$VERSION = '1.06';
+$VERSION = '1.07';
 my(%Locsyms) = ( ':ID' => 'LOCAL' );
 my(%Gblsyms) = ( ':ID' => 'GLOBAL');
 my $DoCache = 1;
@@ -265,7 +265,7 @@ Charles Bailey  bailey@newman.upenn.edu
 
 =head1 VERSION
 
-1.05  12-Feb-2011
+1.07  26-Feb-2016
 
 =head1 BUGS
 

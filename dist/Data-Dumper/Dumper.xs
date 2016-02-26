@@ -65,14 +65,14 @@ typedef struct {
     int trailingcomma;
 } Style;
 
-static STRLEN num_q (const char *s, STRLEN slen);
-static STRLEN esc_q (char *dest, const char *src, STRLEN slen);
-static STRLEN esc_q_utf8 (pTHX_ SV *sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq);
-static bool globname_needs_quote(const char *s, STRLEN len);
-static bool key_needs_quote(const char *s, STRLEN len);
-static bool safe_decimal_number(const char *p, STRLEN len);
-static SV *sv_x (pTHX_ SV *sv, const char *str, STRLEN len, I32 n);
-static I32 DD_dump (pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval,
+static size_t num_q (const char *s, size_t slen);
+static size_t esc_q (char *dest, const char *src, size_t slen);
+static size_t esc_q_utf8 (pTHX_ SV *sv, const char *src, size_t slen, I32 do_utf8, I32 useqq);
+static bool globname_needs_quote(const char *s, size_t len);
+static bool key_needs_quote(const char *s, size_t len);
+static bool safe_decimal_number(const char *p, size_t len);
+static SV *sv_x (pTHX_ SV *sv, const char *str, size_t len, I32 n);
+static I32 DD_dump (pTHX_ SV *val, const char *name, size_t namelen, SV *retval,
                     HV *seenhv, AV *postav, const I32 level, SV *apad,
                     const Style *style);
 
@@ -87,7 +87,7 @@ static I32 DD_dump (pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval,
 #if PERL_VERSION <= 6 /* Perl 5.6 and earlier */
 
 UV
-Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
+Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, size_t *retlen)
 {
     const UV uv = utf8_to_uv(s, send - s, retlen,
                     ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
@@ -106,7 +106,7 @@ Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
 #if PERL_VERSION > 6 && PERL_VERSION <= 15 && ! defined(utf8_to_uvchr_buf)
 
 UV
-Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
+Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, size_t *retlen)
 {
     /* We have to discard <send> for these versions; hence can read off the
      * end of the buffer if there is a malformation that indicates the
@@ -134,7 +134,7 @@ Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
 
 /* does a glob name need to be protected? */
 static bool
-globname_needs_quote(const char *s, STRLEN len)
+globname_needs_quote(const char *s, size_t len)
 {
     const char *send = s+len;
 TOP:
@@ -166,7 +166,7 @@ TOP:
    like '::foo', but these aren't safe as unquoted keys under strict.
 */
 static bool
-key_needs_quote(const char *s, STRLEN len) {
+key_needs_quote(const char *s, size_t len) {
     const char *send = s+len;
 
     if (safe_decimal_number(s, len)) {
@@ -188,7 +188,7 @@ key_needs_quote(const char *s, STRLEN len) {
  * The perl code does this by matching against /^(?:0|-?[1-9]\d{0,8})\z/
 */
 static bool
-safe_decimal_number(const char *p, STRLEN len) {
+safe_decimal_number(const char *p, size_t len) {
     if (len == 1 && *p == '0')
         return TRUE;
 
@@ -217,10 +217,10 @@ safe_decimal_number(const char *p, STRLEN len) {
 }
 
 /* count the number of "'"s and "\"s in string */
-static STRLEN
-num_q(const char *s, STRLEN slen)
+static size_t
+num_q(const char *s, size_t slen)
 {
-    STRLEN ret = 0;
+    size_t ret = 0;
 
     while (slen > 0) {
 	if (*s == '\'' || *s == '\\')
@@ -235,10 +235,10 @@ num_q(const char *s, STRLEN slen)
 /* returns number of chars added to escape "'"s and "\"s in s */
 /* slen number of characters in s will be escaped */
 /* destination must be long enough for additional chars */
-static STRLEN
-esc_q(char *d, const char *s, STRLEN slen)
+static size_t
+esc_q(char *d, const char *s, size_t slen)
 {
-    STRLEN ret = 0;
+    size_t ret = 0;
 
     while (slen > 0) {
 	switch (*s) {
@@ -257,21 +257,21 @@ esc_q(char *d, const char *s, STRLEN slen)
 }
 
 /* this function is also misused for implementing $Useqq */
-static STRLEN
-esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
+static size_t
+esc_q_utf8(pTHX_ SV* sv, const char *src, size_t slen, I32 do_utf8, I32 useqq)
 {
     char *r, *rstart;
     const char *s = src;
     const char * const send = src + slen;
-    STRLEN j, cur = SvCUR(sv);
+    size_t j, cur = SvCUR(sv);
     /* Could count 128-255 and 256+ in two variables, if we want to
        be like &qquote and make a distinction.  */
-    STRLEN grow = 0;	/* bytes needed to represent chars 128+ */
-    /* STRLEN topbit_grow = 0;	bytes needed to represent chars 128-255 */
-    STRLEN backslashes = 0;
-    STRLEN single_quotes = 0;
-    STRLEN qq_escapables = 0;	/* " $ @ will need a \ in "" strings.  */
-    STRLEN normal = 0;
+    size_t grow = 0;	/* bytes needed to represent chars 128+ */
+    /* size_t topbit_grow = 0;	bytes needed to represent chars 128-255 */
+    size_t backslashes = 0;
+    size_t single_quotes = 0;
+    size_t qq_escapables = 0;	/* " $ @ will need a \ in "" strings.  */
+    size_t normal = 0;
     int increment;
 
     for (s = src; s < send; s += increment) { /* Sizing pass */
@@ -478,7 +478,7 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
 
 /* append a repeated string to an SV */
 static SV *
-sv_x(pTHX_ SV *sv, const char *str, STRLEN len, I32 n)
+sv_x(pTHX_ SV *sv, const char *str, size_t len, I32 n)
 {
     if (!sv)
 	sv = newSVpvs("");
@@ -511,11 +511,11 @@ sv_x(pTHX_ SV *sv, const char *str, STRLEN len, I32 n)
  * efficiency raisins.)  Ugggh!
  */
 static I32
-DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
+DD_dump(pTHX_ SV *val, const char *name, size_t namelen, SV *retval, HV *seenhv,
 	AV *postav, const I32 level, SV *apad, const Style *style)
 {
     char tmpbuf[128];
-    Size_t i;
+    size_t i;
     char *c, *r, *realpack;
 #ifdef DD_USE_OLD_ID_FORMAT
     char id[128];
@@ -528,7 +528,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
     SV *blesspad = Nullsv;
     AV *seenentry = NULL;
     char *iname;
-    STRLEN inamelen, idlen = 0;
+    size_t inamelen, idlen = 0;
     U32 realtype;
     bool no_bless = 0; /* when a qr// is blessed into Regexp we dont want to bless it.
                           in later perls we should actually check the classname of the 
@@ -681,7 +681,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	 * at this depth (i.e., 'Foo=ARRAY(0xdeadbeef)').
 	 */
         if (!style->purity && style->maxdepth > 0 && level >= style->maxdepth) {
-	    STRLEN vallen;
+	    size_t vallen;
 	    const char * const valstr = SvPV(val,vallen);
 	    sv_catpvs(retval, "'");
 	    sv_catpvn(retval, valstr, vallen);
@@ -694,7 +694,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	}
 
 	if (realpack && !no_bless) {				/* we have a blessed ref */
-	    STRLEN blesslen;
+	    size_t blesslen;
             const char * const blessstr = SvPV(style->bless, blesslen);
 	    sv_catpvn(retval, blessstr, blesslen);
 	    sv_catpvs(retval, "( ");
@@ -709,7 +709,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 
         if (is_regex) 
         {
-            STRLEN rlen;
+            size_t rlen;
 	    SV *sv_pattern = NULL;
 	    SV *sv_flags = NULL;
 	    CV *re_pattern_cv;
@@ -797,8 +797,8 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	}
 	else if (realtype == SVt_PVAV) {
 	    SV *totpad;
-	    SSize_t ix = 0;
-	    const SSize_t ixmax = av_len((AV *)ival);
+	    ssize_t ix = 0;
+	    const ssize_t ixmax = av_len((AV *)ival);
 	
 	    SV * const ixsv = newSViv(0);
 	    /* allowing for a 24 char wide array index */
@@ -837,7 +837,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    sv_catsv(totpad, apad);
 
 	    for (ix = 0; ix <= ixmax; ++ix) {
-		STRLEN ilen;
+		size_t ilen;
 		SV *elem;
 		svp = av_fetch((AV*)ival, ix, FALSE);
 		if (svp)
@@ -886,7 +886,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    SV *sname;
 	    HE *entry = NULL;
 	    char *key;
-	    STRLEN klen;
+	    size_t klen;
 	    SV *hval;
 	    AV *keys = NULL;
 	
@@ -974,14 +974,14 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
             for (i = 0; 1; i++) {
 		char *nkey;
                 char *nkey_buffer = NULL;
-                STRLEN nticks = 0;
+                size_t nticks = 0;
 		SV* keysv;
-		STRLEN keylen;
-                STRLEN nlen;
+		size_t keylen;
+                size_t nlen;
 		bool do_utf8 = FALSE;
 
                if (style->sortkeys) {
-                   if (!(keys && (SSize_t)i <= av_len(keys))) break;
+                   if (!(keys && (ssize_t)i <= av_len(keys))) break;
                } else {
                    if (!(entry = hv_iternext((HV *)ival))) break;
                }
@@ -1028,7 +1028,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
                  */
                 if (style->quotekeys || key_needs_quote(key,keylen)) {
                     if (do_utf8 || style->useqq) {
-                        STRLEN ocur = SvCUR(retval);
+                        size_t ocur = SvCUR(retval);
                         nlen = esc_q_utf8(aTHX_ retval, key, klen, do_utf8, style->useqq);
                         nkey = SvPVX(retval) + ocur;
                     }
@@ -1059,7 +1059,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
                 sv_catsv(retval, style->pair);
                 if (style->indent >= 2) {
 		    char *extra;
-                    STRLEN elen = 0;
+                    size_t elen = 0;
 		    newapad = newSVsv(apad);
 		    New(0, extra, klen+4+1, char);
 		    while (elen < (klen+4))
@@ -1104,7 +1104,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	}
 
 	if (realpack && !no_bless) {  /* free blessed allocs */
-            STRLEN plen, pticks;
+            size_t plen, pticks;
 
             if (style->indent >= 2) {
 		SvREFCNT_dec(apad);
@@ -1139,7 +1139,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	SvREFCNT_dec(ipad);
     }
     else {
-	STRLEN i;
+	size_t i;
 	const MAGIC *mg;
 	
 	if (namelen) {
@@ -1182,7 +1182,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	}
 
         if (DD_is_integer(val)) {
-            STRLEN len;
+            size_t len;
 	    if (SvIsUV(val))
 	      len = my_snprintf(tmpbuf, sizeof(tmpbuf), "%"UVuf, SvUV(val));
 	    else
@@ -1190,7 +1190,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
             if (SvPOK(val)) {
               /* Need to check to see if this is a string such as " 0".
                  I'm assuming from sprintf isn't going to clash with utf8. */
-              STRLEN pvlen;
+              size_t pvlen;
               const char * const pv = SvPV(val, pvlen);
               if (pvlen != len || memNE(pv, tmpbuf, len))
                 goto integer_came_from_string;
@@ -1249,7 +1249,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 
             if (style->purity) {
 		static const char* const entries[] = { "{SCALAR}", "{ARRAY}", "{HASH}" };
-		static const STRLEN sizes[] = { 8, 7, 6 };
+		static const size_t sizes[] = { 8, 7, 6 };
 		SV *e;
 		SV * const nname = newSVpvs("");
 		SV * const newapad = newSVpvs("");
@@ -1361,7 +1361,7 @@ Data_Dumper_Dumpxs(href, ...)
 	    HV *seenhv = NULL;
 	    AV *postav, *todumpav, *namesav;
 	    I32 terse = 0;
-	    SSize_t i, imax, postlen;
+	    ssize_t i, imax, postlen;
 	    SV **svp;
             SV *apad = &PL_sv_undef;
             Style style;
@@ -1524,7 +1524,7 @@ Data_Dumper_Dumpxs(href, ...)
 			    sv_insert(name, 0, 0, "$", 1);
 		    }
 		    else {
-			STRLEN nchars;
+			size_t nchars;
 			sv_setpvn(name, "$", 1);
 			sv_catsv(name, varname);
 			nchars = my_snprintf(tmpbuf, sizeof(tmpbuf), "%"IVdf, (IV)(i+1));
@@ -1558,7 +1558,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    sv_catsv(retval, valstr);
                     sv_catsv(retval, style.sep);
 		    if (postlen >= 0) {
-			SSize_t i;
+			ssize_t i;
                         sv_catsv(retval, style.pad);
 			for (i = 0; i <= postlen; ++i) {
 			    SV *elem;

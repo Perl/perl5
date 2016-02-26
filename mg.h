@@ -26,7 +26,7 @@ struct magic {
     U16		mg_private;
     char	mg_type;
     U8		mg_flags;
-    SSize_t	mg_len;
+    ssize_t	mg_len;
     SV*		mg_obj;
     char*	mg_ptr;
 };
@@ -68,8 +68,8 @@ struct magic {
     SvPOK(sv) && (!SvGMAGICAL(sv) || sv_only_taint_gmagic(sv))  \
 	? (mg)->mg_len = (off), (mg)->mg_flags |= MGf_BYTES \
 	: ((mg)->mg_len = DO_UTF8(sv)			     \
-	    ? (SSize_t)utf8_length((U8 *)(pv), (U8 *)(pv)+(off)) \
-	    : (SSize_t)(off),					  \
+	    ? (ssize_t)utf8_length((U8 *)(pv), (U8 *)(pv)+(off)) \
+	    : (ssize_t)(off),					  \
 	   (mg)->mg_flags &= ~MGf_BYTES))
 #endif
 

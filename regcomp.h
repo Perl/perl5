@@ -869,14 +869,14 @@ struct _reg_trie_data {
     reg_trie_wordinfo *wordinfo;     /* array of info per word */
     U16             uniquecharcount; /* unique chars in trie (width of trans table) */
     U32             startstate;      /* initial state - used for common prefix optimisation */
-    STRLEN          minlen;          /* minimum length of words in trie - build/opt only? */
-    STRLEN          maxlen;          /* maximum length of words in trie - build/opt only? */
+    size_t          minlen;          /* minimum length of words in trie - build/opt only? */
+    size_t          maxlen;          /* maximum length of words in trie - build/opt only? */
     U32             prefixlen;       /* #chars in common prefix */
     U32             statecount;      /* Build only - number of states in the states array 
                                         (including the unused zero state) */
     U32             wordcount;       /* Build only */
 #ifdef DEBUGGING
-    STRLEN          charcount;       /* Build only */
+    size_t          charcount;       /* Build only */
 #endif
 };
 /* There is one (3 under DEBUGGING) pointers that logically belong in this

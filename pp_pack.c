@@ -50,7 +50,7 @@ typedef struct tempsym {
   int      level;    /* () nesting level      */
   U32      flags;    /* /=4, comma=2, pack=1  */
                      /*   and group modifiers */
-  STRLEN   strbeg;   /* offset of group start */
+  size_t   strbeg;   /* offset of group start */
   struct tempsym *previous; /* previous group */
 } tempsym_t;
 
@@ -189,7 +189,7 @@ STMT_START {						\
 STATIC SV *
 S_mul128(pTHX_ SV *sv, U8 m)
 {
-  STRLEN          len;
+  size_t          len;
   char           *s = SvPV(sv, len);
   char           *t;
 
@@ -240,7 +240,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
 #include "packsizetables.inc"
 
 static void
-S_reverse_copy(const char *src, char *dest, STRLEN len)
+S_reverse_copy(const char *src, char *dest, size_t len)
 {
     dest += len;
     while (len--)
@@ -250,13 +250,13 @@ S_reverse_copy(const char *src, char *dest, STRLEN len)
 STATIC U8
 utf8_to_byte(pTHX_ const char **s, const char *end, I32 datumtype)
 {
-    STRLEN retlen;
+    size_t retlen;
     UV val = utf8n_to_uvchr((U8 *) *s, end-*s, &retlen,
 			 ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
     /* We try to process malformed UTF-8 as much as possible (preferably with
        warnings), but these two mean we make no progress in the string and
        might enter an infinite loop */
-    if (retlen == (STRLEN) -1 || retlen == 0)
+    if (retlen == (size_t) -1 || retlen == 0)
 	Perl_croak(aTHX_ "Malformed UTF-8 string in '%c' format in unpack",
 		   (int) TYPE_NO_MODIFIERS(datumtype));
     if (val >= 0x100) {
@@ -277,7 +277,7 @@ STATIC bool
 S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, int buf_len, I32 datumtype)
 {
     UV val;
-    STRLEN retlen;
+    size_t retlen;
     const char *from = *s;
     int bad = 0;
     const U32 flags = ckWARN(WARN_UTF8) ?
@@ -290,7 +290,7 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, int buf_
     for (;buf_len > 0; buf_len--) {
 	if (from >= end) return FALSE;
 	val = utf8n_to_uvchr((U8 *) from, end-from, &retlen, flags);
-	if (retlen == (STRLEN) -1 || retlen == 0) {
+	if (retlen == (size_t) -1 || retlen == 0) {
 	    from += UTF8SKIP(from);
 	    bad |= 1;
 	} else from += retlen;
@@ -327,7 +327,7 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, int buf_
 }
 
 STATIC char *
-S_my_bytes_to_utf8(const U8 *start, STRLEN len, char *dest, const bool needs_swap) {
+S_my_bytes_to_utf8(const U8 *start, size_t len, char *dest, const bool needs_swap) {
     PERL_ARGS_ASSERT_MY_BYTES_TO_UTF8;
 
     if (UNLIKELY(needs_swap)) {
@@ -360,7 +360,7 @@ STMT_START {							\
 
 #define GROWING(utf8, cat, start, cur, in_len)	\
 STMT_START {					\
-    STRLEN glen = (in_len);			\
+    size_t glen = (in_len);			\
     if (utf8) glen *= UTF8_EXPAND;		\
     if ((cur) + glen >= (start) + SvLEN(cat)) {	\
 	(start) = sv_exp_grow(cat, glen);	\
@@ -370,8 +370,8 @@ STMT_START {					\
 
 #define PUSH_GROWING_BYTES(utf8, cat, start, cur, buf, in_len) \
 STMT_START {					\
-    const STRLEN glen = (in_len);		\
-    STRLEN gl = glen;				\
+    const size_t glen = (in_len);		\
+    size_t gl = glen;				\
     if (utf8) gl *= UTF8_EXPAND;		\
     if ((cur) + gl >= (start) + SvLEN(cat)) {	\
         *cur = '\0';				\
@@ -393,10 +393,10 @@ STMT_START {					\
 /* Only to be used inside a loop (see the break) */
 #define NEXT_UNI_VAL(val, cur, str, end, utf8_flags)		\
 STMT_START {							\
-    STRLEN retlen;						\
+    size_t retlen;						\
     if (str >= end) break;					\
     val = utf8n_to_uvchr((U8 *) str, end-str, &retlen, utf8_flags);	\
-    if (retlen == (STRLEN) -1 || retlen == 0) {			\
+    if (retlen == (size_t) -1 || retlen == 0) {			\
 	*cur = '\0';						\
 	Perl_croak(aTHX_ "Malformed UTF-8 string in pack");	\
     }								\
@@ -820,7 +820,7 @@ Perl_unpackstring(pTHX_ const char *pat, const char *patend, const char *s, cons
     else if (need_utf8(pat, patend)) {
 	/* We probably should try to avoid this in case a scalar context call
 	   wouldn't get to the "U0" */
-	STRLEN len = strend - s;
+	size_t len = strend - s;
 	s = (char *) bytes_to_utf8((U8 *) s, &len);
 	SAVEFREEPV(s);
 	strend = s + len;
@@ -1217,10 +1217,10 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		int aint;
 		if (utf8)
 		  {
-		    STRLEN retlen;
+		    size_t retlen;
 		    aint = utf8n_to_uvchr((U8 *) s, strend-s, &retlen,
 				 ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
-		    if (retlen == (STRLEN) -1 || retlen == 0)
+		    if (retlen == (size_t) -1 || retlen == 0)
 			Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
 		    s += retlen;
 		  }
@@ -1240,10 +1240,10 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	  W_checksum:
 	    if (utf8) {
 		while (len-- > 0 && s < strend) {
-		    STRLEN retlen;
+		    size_t retlen;
 		    const UV val = utf8n_to_uvchr((U8 *) s, strend-s, &retlen,
 					 ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
-		    if (retlen == (STRLEN) -1 || retlen == 0)
+		    if (retlen == (size_t) -1 || retlen == 0)
 			Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
 		    s += retlen;
 		    if (!checksum)
@@ -1281,12 +1281,12 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		EXTEND_MORTAL(len);
 	    }
 	    while (len-- > 0 && s < strend) {
-		STRLEN retlen;
+		size_t retlen;
 		UV auv;
 		if (utf8) {
 		    U8 result[UTF8_MAXLEN];
 		    const char *ptr = s;
-		    STRLEN len;
+		    size_t len;
 		    /* Bug: warns about bad utf8 even if we are short on bytes
 		       and will break out of the loop */
 		    if (!S_utf8_to_bytes(aTHX_ &ptr, strend, (char *) result, 1,
@@ -1305,7 +1305,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
                                                        strend - s,
                                                        &retlen,
                                                        UTF8_ALLOW_DEFAULT));
-		    if (retlen == (STRLEN) -1 || retlen == 0)
+		    if (retlen == (size_t) -1 || retlen == 0)
 			Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
 		    s += retlen;
 		}
@@ -1703,7 +1703,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 #endif
 	case 'u':
 	    if (!checksum) {
-                const STRLEN l = (STRLEN) (strend - s) * 3 / 4;
+                const size_t l = (size_t) (strend - s) * 3 / 4;
 		sv = sv_2mortal(newSV(l));
 		if (l) SvPOK_on(sv);
 	    }
@@ -1827,8 +1827,8 @@ PP(pp_unpack)
     dSP;
     dPOPPOPssrl;
     U8 gimme = GIMME_V;
-    STRLEN llen;
-    STRLEN rlen;
+    size_t llen;
+    size_t rlen;
     const char *pat = SvPV_const(left,  llen);
     const char *s   = SvPV_const(right, rlen);
     const char *strend = s + rlen;
@@ -1870,7 +1870,7 @@ doencodes(U8 *h, const U8 *s, I32 len)
 }
 
 STATIC SV *
-S_is_an_int(pTHX_ const char *s, STRLEN l)
+S_is_an_int(pTHX_ const char *s, size_t l)
 {
   SV *result = newSVpvn(s, l);
   char *const result_c = SvPV_nolen(result);	/* convenience */
@@ -1923,7 +1923,7 @@ S_is_an_int(pTHX_ const char *s, STRLEN l)
 STATIC int
 S_div128(pTHX_ SV *pnum, bool *done)
 {
-    STRLEN len;
+    size_t len;
     char * const s = SvPV(pnum, len);
     char *t = s;
     int m = 0;
@@ -1941,7 +1941,7 @@ S_div128(pTHX_ SV *pnum, bool *done)
 	*(t++) = '0' + r;
     }
     *(t++) = '\0';
-    SvCUR_set(pnum, (STRLEN) (t - s));
+    SvCUR_set(pnum, (size_t) (t - s));
     return (m);
 }
 
@@ -1974,7 +1974,7 @@ Perl_packlist(pTHX_ SV *cat, const char *pat, const char *patend, SV **beglist, 
 /* like sv_utf8_upgrade, but also repoint the group start markers */
 STATIC void
 marked_upgrade(pTHX_ SV *sv, tempsym_t *sym_ptr) {
-    STRLEN len;
+    size_t len;
     tempsym_t *group;
     const char *from_ptr, *from_start, *from_end, **marks, **m;
     char *to_start, *to_ptr;
@@ -2041,10 +2041,10 @@ marked_upgrade(pTHX_ SV *sv, tempsym_t *sym_ptr) {
    Only grows the string if there is an actual lack of space
 */
 STATIC char *
-S_sv_exp_grow(pTHX_ SV *sv, STRLEN needed) {
-    const STRLEN cur = SvCUR(sv);
-    const STRLEN len = SvLEN(sv);
-    STRLEN extend;
+S_sv_exp_grow(pTHX_ SV *sv, size_t needed) {
+    const size_t cur = SvCUR(sv);
+    const size_t len = SvLEN(sv);
+    size_t extend;
 
     PERL_ARGS_ASSERT_SV_EXP_GROW;
 
@@ -2097,7 +2097,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 
     while (found) {
 	SV *fromstr;
-	STRLEN fromlen;
+	size_t fromlen;
 	I32 len;
 	SV *lengthcode = NULL;
         I32 datumtype = symptr->code;
@@ -2125,8 +2125,8 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 
 	    if (props && !(props & PACK_SIZE_UNPREDICTABLE)) {
 		/* We can process this letter. */
-		STRLEN size = props & PACK_SIZE_MASK;
-		GROWING(utf8, cat, start, cur, (STRLEN) len * size);
+		size_t size = props & PACK_SIZE_MASK;
+		GROWING(utf8, cat, start, cur, (size_t) len * size);
 	    }
         }
 
@@ -2287,7 +2287,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    if (cur < start+symptr->strbeg) {
 		/* Make sure group starts don't point into the void */
 		tempsym_t *group;
-		const STRLEN length = cur-start;
+		const size_t length = cur-start;
 		for (group = symptr;
 		     group && length < group->strbeg;
 		     group = group->previous) group->strbeg = length;
@@ -2915,7 +2915,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    const char     *from;
 		    char           *result, *in;
 		    SV             *norm;
-		    STRLEN          len;
+		    size_t          len;
 		    bool            done;
 
 		  w_string:
@@ -3116,7 +3116,7 @@ PP(pp_pack)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
     SV *cat = TARG;
-    STRLEN fromlen;
+    size_t fromlen;
     SV *pat_sv = *++MARK;
     const char *pat = SvPV_const(pat_sv, fromlen);
     const char *patend = pat + fromlen;

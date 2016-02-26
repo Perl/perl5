@@ -2406,7 +2406,7 @@ EOF
 
             # This test is because something was declared as 32 bits, but
             # should have been cast to 64; only a problem where
-            # sizeof(STRLEN) != sizeof(UV)
+            # sizeof(size_t) != sizeof(UV)
             ok(chr(0xFFFF_FFFF_FFFF_FFFE) !~ qr/\p{Is_32_Bit_Super}/, "chr(0xFFFF_FFFF_FFFF_FFFE) shouldn't match a range ending in 0xFFFF_FFFF");
         }
     }

@@ -259,7 +259,7 @@ PP(pp_concat)
   {
     dPOPTOPssrl;
     bool lbyte;
-    STRLEN rlen;
+    size_t rlen;
     const char *rpv = NULL;
     bool rbyte = FALSE;
     bool rcopied = FALSE;
@@ -273,7 +273,7 @@ PP(pp_concat)
     }
 
     if (TARG != left) { /* not $l .= $r */
-        STRLEN llen;
+        size_t llen;
         const char* const lpv = SvPV_nomg_const(left, llen);
 	lbyte = !DO_UTF8(left);
 	sv_setpvn(TARG, lpv, llen);
@@ -326,7 +326,7 @@ STATIC void
 S_pushav(pTHX_ AV* const av)
 {
     dSP;
-    const SSize_t maxarg = AvFILL(av) + 1;
+    const ssize_t maxarg = AvFILL(av) + 1;
     EXTEND(SP, maxarg);
     if (UNLIKELY(SvRMAGICAL(av))) {
         PADOFFSET i;
@@ -1024,7 +1024,7 @@ PP(pp_rv2av)
 	}
 	else if (gimme == G_SCALAR) {
 	    dTARGET;
-	    const SSize_t maxarg = AvFILL(av) + 1;
+	    const ssize_t maxarg = AvFILL(av) + 1;
 	    SETi(maxarg);
 	}
     } else {
@@ -1114,7 +1114,7 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
     dVAR;
     SV **relem;
     SV **lelem;
-    SSize_t lcount = lastlelem - firstlelem + 1;
+    ssize_t lcount = lastlelem - firstlelem + 1;
     bool marked = FALSE; /* have we marked any LHS with SVf_BREAK ? */
     bool const do_rc1 = cBOOL(PL_op->op_private & OPpASSIGN_COMMON_RC1);
     bool copy_all = FALSE;
@@ -1253,7 +1253,7 @@ PP(pp_aassign)
 
     U8 gimme;
     HV *hash;
-    SSize_t i;
+    ssize_t i;
     int magic;
     U32 lval;
     /* PL_delaymagic is restored by JUMPENV_POP on dieing, so we
@@ -1710,14 +1710,14 @@ PP(pp_match)
     PMOP *dynpm = pm;
     const char *s;
     const char *strend;
-    SSize_t curpos = 0; /* initial pos() or current $+[0] */
+    ssize_t curpos = 0; /* initial pos() or current $+[0] */
     I32 global;
     U8 r_flags = 0;
     const char *truebase;			/* Start of string  */
     REGEXP *rx = PM_GETRE(pm);
     bool rxtainted;
     const U8 gimme = GIMME_V;
-    STRLEN len;
+    size_t len;
     const I32 oldsave = PL_savestack_ix;
     I32 had_zerolen = 0;
     MAGIC *mg = NULL;
@@ -1767,7 +1767,7 @@ PP(pp_match)
 	rx = PM_GETRE(pm);
     }
 
-    if (RX_MINLEN(rx) >= 0 && (STRLEN)RX_MINLEN(rx) > len) {
+    if (RX_MINLEN(rx) >= 0 && (size_t)RX_MINLEN(rx) > len) {
         DEBUG_r(PerlIO_printf(Perl_debug_log, "String shorter than min possible regex match (%"
                                               UVuf" < %"IVdf")\n",
                                               (UV)len, (IV)RX_MINLEN(rx)));
@@ -1903,8 +1903,8 @@ Perl_do_readline(pTHX)
 {
     dSP; dTARGETSTACKED;
     SV *sv;
-    STRLEN tmplen = 0;
-    STRLEN offset;
+    size_t tmplen = 0;
+    size_t offset;
     PerlIO *fp;
     IO * const io = GvIO(PL_last_in_gv);
     const I32 type = PL_op->op_type;
@@ -2080,7 +2080,7 @@ Perl_do_readline(pTHX)
 	} else if (SvUTF8(sv)) { /* OP_READLINE, OP_RCATLINE */
 	     if (ckWARN(WARN_UTF8)) {
 		const U8 * const s = (const U8*)SvPVX_const(sv) + offset;
-		const STRLEN len = SvCUR(sv) - offset;
+		const size_t len = SvCUR(sv) - offset;
 		const U8 *f;
 
 		if (!is_utf8_string_loc(s, len, &f))
@@ -2099,7 +2099,7 @@ Perl_do_readline(pTHX)
 	}
 	else if (gimme == G_SCALAR && !tmplen && SvLEN(sv) - SvCUR(sv) > 80) {
 	    /* try to reclaim a bit of scalar space (only on 1st alloc) */
-	    const STRLEN new_len
+	    const size_t new_len
 		= SvCUR(sv) < 60 ? 80 : SvCUR(sv)+40; /* allow some slop */
 	    SvPV_renew(sv, new_len);
 	}
@@ -2647,7 +2647,7 @@ PP(pp_iter)
         SV *end = cx->blk_loop.state_u.lazysv.end;
         /* If the maximum is !SvOK(), pp_enteriter substitutes PL_sv_no.
            It has SvPVX of "" and SvCUR of 0, which is what we want.  */
-        STRLEN maxlen = 0;
+        size_t maxlen = 0;
         const char *max = SvPV_const(end, maxlen);
         if (UNLIKELY(SvNIOK(cur) || SvCUR(cur) > maxlen))
             goto retno;
@@ -2877,19 +2877,19 @@ PP(pp_subst)
     char *s;
     char *strend;
     const char *c;
-    STRLEN clen;
-    SSize_t iters = 0;
-    SSize_t maxiters;
+    size_t clen;
+    ssize_t iters = 0;
+    ssize_t maxiters;
     bool once;
     U8 rxtainted = 0; /* holds various SUBST_TAINT_* flag bits.
 			See "how taint works" above */
     char *orig;
     U8 r_flags;
     REGEXP *rx = PM_GETRE(pm);
-    STRLEN len;
+    size_t len;
     int force_on_match = 0;
     const I32 oldsave = PL_savestack_ix;
-    STRLEN slen;
+    size_t slen;
     bool doutf8 = FALSE; /* whether replacement is in utf8 */
 #ifdef PERL_ANY_COW
     bool is_cow;
@@ -3365,8 +3365,8 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
 {
     dVAR;
     dSP;
-    SSize_t tmps_base; /* lowest index into tmps stack that needs freeing now */
-    SSize_t nargs;
+    ssize_t tmps_base; /* lowest index into tmps stack that needs freeing now */
+    ssize_t nargs;
 
     PERL_ARGS_ASSERT_LEAVE_ADJUST_STACKS;
 
@@ -3567,7 +3567,7 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
                 }
                 else {
                     /* do the full sv_setsv() */
-                    SSize_t old_base;
+                    ssize_t old_base;
 
                     SvTEMP_on(newsv);
                     old_base = tmps_basep - PL_tmps_stack;
@@ -3664,7 +3664,7 @@ PP(pp_leavesub)
 void
 Perl_clear_defarray(pTHX_ AV* av, bool abandon)
 {
-    const SSize_t fill = AvFILLp(av);
+    const ssize_t fill = AvFILLp(av);
 
     PERL_ARGS_ASSERT_CLEAR_DEFARRAY;
 
@@ -3741,7 +3741,7 @@ PP(pp_entersub)
             }
             else {
                 const char *sym;
-                STRLEN len;
+                size_t len;
                 if (UNLIKELY(!SvOK(sv)))
                     DIE(aTHX_ PL_no_usym, "a subroutine");
 
@@ -3873,7 +3873,7 @@ PP(pp_entersub)
 	PAD_SET_CUR_NOSAVE(padlist, depth);
 	if (LIKELY(hasargs)) {
 	    AV *const av = MUTABLE_AV(PAD_SVl(0));
-            SSize_t items;
+            ssize_t items;
             AV **defavp;
 
 	    defavp = &GvAV(PL_defgv);
@@ -3912,7 +3912,7 @@ PP(pp_entersub)
 	RETURNOP(CvSTART(cv));
     }
     else {
-	SSize_t markix = TOPMARK;
+	ssize_t markix = TOPMARK;
         bool is_scalar;
 
         ENTER;
@@ -3934,10 +3934,10 @@ PP(pp_entersub)
 	     * switch stack to @_, and copy return values
 	     * back. This would allow popping @_ in XSUB, e.g.. XXXX */
 	    AV * const av = GvAV(PL_defgv);
-	    const SSize_t items = AvFILL(av) + 1;
+	    const ssize_t items = AvFILL(av) + 1;
 
 	    if (items) {
-		SSize_t i = 0;
+		ssize_t i = 0;
 		const bool m = cBOOL(SvRMAGICAL(av));
 		/* Mark is at the end of the stack. */
 		EXTEND(SP, items);
@@ -3960,7 +3960,7 @@ PP(pp_entersub)
 	}
 	else {
 	    SV **mark = PL_stack_base + markix;
-	    SSize_t items = SP - mark;
+	    ssize_t items = SP - mark;
 	    while (items--) {
 		mark++;
 		if (*mark && SvPADTMP(*mark)) {
@@ -4167,7 +4167,7 @@ S_opmethod_stash(pTHX_ SV* meth)
     else {
 	/* this isn't a reference */
 	GV* iogv;
-        STRLEN packlen;
+        size_t packlen;
         const char * const packname = SvPV_nomg_const(sv, packlen);
         const U32 packname_utf8 = SvUTF8(sv);
         stash = gv_stashpvn(packname, packlen, packname_utf8 | GV_CACHE_ONLY);

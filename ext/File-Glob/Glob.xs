@@ -66,13 +66,13 @@ doglob(pTHX_ const char *pattern, int flags)
 }
 
 static void
-iterate(pTHX_ bool(*globber)(pTHX_ AV *entries, const char *pat, STRLEN len, bool is_utf8))
+iterate(pTHX_ bool(*globber)(pTHX_ AV *entries, const char *pat, size_t len, bool is_utf8))
 {
     dSP;
     dMY_CXT;
 
     const char * const cxixpv = (char *)&PL_op;
-    STRLEN const cxixlen = sizeof(OP *);
+    size_t const cxixlen = sizeof(OP *);
     AV *entries;
     U32 const gimme = GIMME_V;
     SV *patsv = POPs;
@@ -84,7 +84,7 @@ iterate(pTHX_ bool(*globber)(pTHX_ AV *entries, const char *pat, STRLEN len, boo
     /* if we're just beginning, do it all first */
     if (SvTYPE(entries) != SVt_PVAV) {
         const char *pat;
-        STRLEN len;
+        size_t len;
         bool is_utf8;
 
         /* glob without args defaults to $_ */
@@ -145,7 +145,7 @@ iterate(pTHX_ bool(*globber)(pTHX_ AV *entries, const char *pat, STRLEN len, boo
 /* returns true if the items are on the stack already, but only in
    list context */
 static bool
-csh_glob(pTHX_ AV *entries, const char *pat, STRLEN len, bool is_utf8)
+csh_glob(pTHX_ AV *entries, const char *pat, size_t len, bool is_utf8)
 {
 	dSP;
 	AV *patav = NULL;
@@ -305,7 +305,7 @@ csh_glob_iter(pTHX)
 
 /* wrapper around doglob that can be passed to the iterator */
 static bool
-doglob_iter_wrapper(pTHX_ AV *entries, const char *pattern, STRLEN len, bool is_utf8)
+doglob_iter_wrapper(pTHX_ AV *entries, const char *pattern, size_t len, bool is_utf8)
 {
     dSP;
     SV * flags_sv = get_sv("File::Glob::DEFAULT_FLAGS", GV_ADD);
@@ -363,7 +363,7 @@ bsd_glob(pattern_sv,...)
 PREINIT:
     int flags = 0;
     char *pattern;
-    STRLEN len;
+    size_t len;
 PPCODE:
     {
         pattern = SvPV(pattern_sv, len);

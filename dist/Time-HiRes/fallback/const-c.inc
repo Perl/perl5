@@ -223,7 +223,7 @@ constant_15 (pTHX_ const char *name, IV *iv_return) {
 }
 
 static int
-constant (pTHX_ const char *name, STRLEN len, IV *iv_return) {
+constant (pTHX_ const char *name, size_t len, IV *iv_return) {
   /* Initially switch on the length of the name.  */
   /* When generated this function returned values for the list of names given
      in this section of perl code.  Rather than manually editing these functions

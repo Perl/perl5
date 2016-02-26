@@ -3513,17 +3513,17 @@
 #define SITELIB_STEM ""		/**/
 
 /* Size_t_size:
- *	This symbol holds the size of a Size_t in bytes.
+ *	This symbol holds the size of a size_t in bytes.
  */
 #define Size_t_size 4		/**/
 
-/* Size_t:
+/* size_t:
  *	This symbol holds the type used to declare length parameters
  *	for string functions.  It is usually size_t, but may be
  *	unsigned long, int, etc.  It may be necessary to include
  *	<sys/types.h> to get any typedef'ed information.
  */
-#define Size_t size_t	 /* length paramater for string functions */
+#define size_t size_t	 /* length paramater for string functions */
 
 /* Sock_size_t:
  *	This symbol holds the type used for the size argument of
@@ -3531,15 +3531,15 @@
  */
 #define Sock_size_t		int /**/
 
-/* SSize_t:
+/* ssize_t:
  *	This symbol holds the type used by functions that return
  *	a count of bytes or an error condition.  It must be a signed type.
  *	It is usually ssize_t, but may be long or int, etc.
  *	It may be necessary to include <sys/types.h> or <unistd.h>
  *	to get any typedef'ed information.
- *	We will pick a type such that sizeof(SSize_t) == sizeof(Size_t).
+ *	We will pick a type such that sizeof(ssize_t) == sizeof(size_t).
  */
-#define SSize_t int	 /* signed count of bytes */
+#define ssize_t int	 /* signed count of bytes */
 
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl

@@ -4970,12 +4970,7 @@ sitescriptexp (sitescript.U):
 	configuration time, for use in your makefiles.
 
 sizesize (sizesize.U):
-	This variable contains the size of a sizetype in bytes.
-
-sizetype (sizetype.U):
-	This variable defines sizetype to be something like size_t,
-	unsigned long, or whatever type is used to declare length
-	parameters for string functions.
+	This variable contains the size of a size_t in bytes.
 
 sleep (Loc.U):
 	This variable is defined but not used by Configure.
@@ -5103,7 +5098,7 @@ ssizetype (ssizetype.U):
 	This variable defines ssizetype to be something like ssize_t,
 	long or int.  It is used by functions that return a count
 	of bytes or an error condition.  It must be a signed type.
-	We will pick a type such that sizeof(SSize_t) == sizeof(Size_t).
+	We will pick a type such that sizeof(ssizetype) == sizeof(size_t).
 
 st_ino_sign (st_ino_def.U):
 	This variable contains the signedness of struct stat's st_ino.

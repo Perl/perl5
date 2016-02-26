@@ -50,7 +50,7 @@ TIEHASH(package, ...)
     CODE:
 	mark += 2;
 	while(mark < sp) {
-	    STRLEN len;
+	    size_t len;
 	    const char *p = SvPV_const(*mark, len);
 	    if(memEQs(p, len, "all"))
 		flag = SvTRUE(mark[1]) ? RXapif_ALL : RXapif_ONE;

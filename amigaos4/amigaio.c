@@ -452,7 +452,7 @@ static I32 S_do_amigaos_exec3(pTHX_ const char *incmd, int fd, int do_report)
 	char *buf;
 	char *cmd;
 	/* Make a copy so we can change it */
-	const Size_t cmdlen = strlen(incmd) + 1;
+	const size_t cmdlen = strlen(incmd) + 1;
 	I32 result = -1;
 
 	PERL_ARGS_ASSERT_DO_EXEC3;
@@ -600,7 +600,7 @@ void *amigaos_system_child(void *userdata)
 	I32 did_pipes;
 	int pp;
 	I32 value;
-	STRLEN n_a;
+	size_t n_a;
 	/* these next are declared by macros else where but I may be
 	 * passing modified values here so declare them explictly but
 	 * still referred to by macro below */

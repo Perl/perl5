@@ -378,7 +378,7 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p)
     );
     paren = *maxopenparen_p;
     for ( ; i > 0; i -= REGCP_PAREN_ELEMS) {
-	SSize_t tmps;
+	ssize_t tmps;
 	rex->offs[paren].start_tmp = SSPOPINT;
 	rex->offs[paren].start = SSPOPIV;
 	tmps = SSPOPIV;
@@ -535,7 +535,7 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
  */
 I32
 Perl_pregexec(pTHX_ REGEXP * const prog, char* stringarg, char *strend,
-	 char *strbeg, SSize_t minend, SV *screamer, U32 nosave)
+	 char *strbeg, ssize_t minend, SV *screamer, U32 nosave)
 /* stringarg: the point in the string at which to begin matching */
 /* strend:    pointer to null at end of string */
 /* strbeg:    real beginning of string */
@@ -629,9 +629,9 @@ Perl_re_intuit_start(pTHX_
                     re_scream_pos_data *data)
 {
     struct regexp *const prog = ReANY(rx);
-    SSize_t start_shift = prog->check_offset_min;
+    ssize_t start_shift = prog->check_offset_min;
     /* Should be nonnegative! */
-    SSize_t end_shift   = 0;
+    ssize_t end_shift   = 0;
     /* current lowest pos in string where the regex can start matching */
     char *rx_origin = strpos;
     SV *check;
@@ -775,7 +775,7 @@ Perl_re_intuit_start(pTHX_
 
 	    if (prog->check_offset_min == prog->check_offset_max) {
 	        /* Substring at constant offset from beg-of-str... */
-	        SSize_t slen = SvCUR(check);
+	        ssize_t slen = SvCUR(check);
                 char *s = HOP3c(strpos, prog->check_offset_min, strend);
 	    
                 DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
@@ -882,7 +882,7 @@ Perl_re_intuit_start(pTHX_
             && prog->intflags & PREGf_ANCH
             && prog->check_offset_max != SSize_t_MAX)
         {
-            SSize_t len = SvCUR(check) - !!SvTAIL(check);
+            ssize_t len = SvCUR(check) - !!SvTAIL(check);
             const char * const anchor =
                         (prog->intflags & PREGf_ANCH_GPOS ? strpos : strbeg);
 
@@ -1462,7 +1462,7 @@ Perl_re_intuit_start(pTHX_
 
 #define REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc, uscan, len, uvc, charid, foldlen, foldbuf, uniflags) \
 STMT_START {                                                                        \
-    STRLEN skiplen;                                                                 \
+    size_t skiplen;                                                                 \
     U8 flags = FOLD_FLAGS_FULL;                                                     \
     switch (trie_type) {                                                            \
     case trie_flu8:                                                                 \
@@ -1829,8 +1829,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     char *pat_end;	    /* ptr to end char of pat_string */
     re_fold_t folder;	/* Function for computing non-utf8 folds */
     const U8 *fold_array;   /* array for folding ords < 256 */
-    STRLEN ln;
-    STRLEN lnc;
+    size_t ln;
+    size_t lnc;
     U8 c1;
     U8 c2;
     char *e;
@@ -1947,7 +1947,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
          * characters, and there are only 2 availabe, we know without
          * trying that it will fail; so don't start a match past the
          * required minimum number from the far end */
-        e = HOP3c(strend, -((SSize_t)ln), s);
+        e = HOP3c(strend, -((ssize_t)ln), s);
 
         if (reginfo->intuit && e < s) {
             e = s;			/* Due to minlen logic of intuit() */
@@ -1993,7 +1993,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
          * only 2 are left, it's guaranteed to fail, so don't start a
          * match that would require us to go beyond the end of the string
          */
-        e = HOP3c(strend, -((SSize_t)lnc), s);
+        e = HOP3c(strend, -((ssize_t)lnc), s);
 
         if (reginfo->intuit && e < s) {
             e = s;			/* Due to minlen logic of intuit() */
@@ -2491,7 +2491,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 #ifdef DEBUGGING
             const char *real_start = s;
 #endif
-            STRLEN maxlen = trie->maxlen;
+            size_t maxlen = trie->maxlen;
             SV *sv_points;
             U8 **points; /* map of where we were in the input string
                             when reading a given char. For ASCII this
@@ -2545,8 +2545,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 U32 base = 1;
                 U32 state = 1;
                 UV uvc = 0;
-                STRLEN len = 0;
-                STRLEN foldlen = 0;
+                size_t len = 0;
+                size_t foldlen = 0;
                 U8 *uscan = (U8*)NULL;
                 U8 *leftmost = NULL;
 #ifdef DEBUGGING
@@ -2755,9 +2755,9 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
         } else
 #endif
         {
-            SSize_t min = 0;
-            SSize_t max = strend - strbeg;
-            SSize_t sublen;
+            ssize_t min = 0;
+            ssize_t max = strend - strbeg;
+            ssize_t sublen;
 
             if (    (flags & REXEC_COPY_SKIP_POST)
                 && !(prog->extflags & RXf_PMf_KEEPCOPY) /* //p */
@@ -2861,7 +2861,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
  */
 I32
 Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
-	      char *strbeg, SSize_t minend, SV *sv, void *data, U32 flags)
+	      char *strbeg, ssize_t minend, SV *sv, void *data, U32 flags)
 /* stringarg: the point in the string at which to begin matching */
 /* strend:    pointer to null at end of string */
 /* strbeg:    real beginning of string */
@@ -2877,8 +2877,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     char *s;
     regnode *c;
     char *startpos;
-    SSize_t minlen;		/* must match at least this many chars */
-    SSize_t dontbother = 0;	/* how many characters not to try at end */
+    ssize_t minlen;		/* must match at least this many chars */
+    ssize_t dontbother = 0;	/* how many characters not to try at end */
     const bool utf8_target = cBOOL(DO_UTF8(sv));
     I32 multiline;
     RXi_GET_DECL(prog,progi);
@@ -3233,8 +3233,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	      || ((prog->float_substr != NULL || prog->float_utf8 != NULL)
 		  && prog->float_max_offset < strend - s)) {
 	SV *must;
-	SSize_t back_max;
-	SSize_t back_min;
+	ssize_t back_max;
+	ssize_t back_min;
 	char *last;
 	char *last1;		/* Last position checked before */
 #ifdef DEBUGGING
@@ -3279,7 +3279,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	    last = strend;
 	} else {
             last = HOP3c(strend,	/* Cannot start after this */
-        	  -(SSize_t)(CHR_SVLEN(must)
+        	  -(ssize_t)(CHR_SVLEN(must)
         		 - (SvTAIL(must) != 0) + back_min), strbeg);
         }
 	if (s > reginfo->strbeg)
@@ -3365,7 +3365,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	    /* Trim the end. */
 	    char *last= NULL;
 	    SV* float_real;
-	    STRLEN len;
+	    size_t len;
 	    const char *little;
 
 	    if (utf8_target) {
@@ -3566,7 +3566,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
     CHECKPOINT lastcp;
     REGEXP *const rx = reginfo->prog;
     regexp *const prog = ReANY(rx);
-    SSize_t result;
+    ssize_t result;
     RXi_GET_DECL(prog,progi);
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -3908,7 +3908,7 @@ S_dump_exec_pos(pTHX_ const char *locinput,
 	RE_PV_COLOR_DECL(s2,len2,is_uni,PERL_DEBUG_PAD(2),
 		    locinput, loc_regeol - locinput, 10, 0, 1);
 
-	const STRLEN tlen=len0+len1+len2;
+	const size_t tlen=len0+len1+len2;
 	PerlIO_printf(Perl_debug_log,
 		    "%4"IVdf" <%.*s%.*s%s%.*s>%*s|",
 		    (IV)(locinput - loc_bostr),
@@ -4076,7 +4076,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                         s++;
                     }
                     else {
-                        STRLEN len;
+                        size_t len;
                         _to_utf8_fold_flags(s,
                                             d,
                                             &len,
@@ -5108,7 +5108,7 @@ S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos,
 }
 
 /* returns -1 on failure, $+[0] on success */
-STATIC SSize_t
+STATIC ssize_t
 S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 {
 
@@ -5127,7 +5127,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     regnode *scan;
     regnode *next;
     U32 n = 0;	/* general value; init to avoid compiler warning */
-    SSize_t ln = 0; /* len or last;  init to avoid compiler warning */
+    ssize_t ln = 0; /* len or last;  init to avoid compiler warning */
     char *locinput = startpos;
     char *pushinput; /* where to continue after a PUSH */
     I32 nextchr;   /* is always set to UCHARAT(locinput), or -1 at EOS */
@@ -5403,8 +5403,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             { 
 		U8 *uc = ( U8* )locinput;
 
-		STRLEN len = 0;
-		STRLEN foldlen = 0;
+		size_t len = 0;
+		size_t foldlen = 0;
 		U8 *uscan = (U8*)NULL;
 		U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
 		U32 charcount = 0; /* how many input chars we have matched */
@@ -5571,8 +5571,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    /* the hard option - fold each char in turn and find
 		     * its folded length (which may be different */
 		    U8 foldbuf[UTF8_MAXBYTES_CASE + 1];
-		    STRLEN foldlen;
-		    STRLEN len;
+		    size_t foldlen;
+		    size_t len;
 		    UV uvc;
 		    U8 *uscan;
 
@@ -6736,7 +6736,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 			if (SvUTF8(ret) && IN_BYTES) {
 			    /* In use 'bytes': make a copy of the octet
 			     * sequence, but without the flag on */
-			    STRLEN len;
+			    size_t len;
 			    const char *const p = SvPV(ret, len);
 			    ret = newSVpvn_flags(p, len, SVs_TEMP);
 			}
@@ -7192,10 +7192,10 @@ NULL
 
 		if (reginfo->poscache_iter-- == 0) {
 		    /* initialise cache */
-		    const SSize_t size = (reginfo->poscache_maxiter + 7)/8;
+		    const ssize_t size = (reginfo->poscache_maxiter + 7)/8;
                     regmatch_info_aux *const aux = reginfo->info_aux;
 		    if (aux->poscache) {
-			if ((SSize_t)reginfo->poscache_size < size) {
+			if ((ssize_t)reginfo->poscache_size < size) {
 			    Renew(aux->poscache, size, char);
 			    reginfo->poscache_size = size;
 			}
@@ -7213,7 +7213,7 @@ NULL
 
 		if (reginfo->poscache_iter < 0) {
 		    /* have we already failed at this position? */
-		    SSize_t offset, mask;
+		    ssize_t offset, mask;
 
                     reginfo->poscache_iter = -1; /* stop eventual underflow */
 		    offset  = (scan->flags & 0xf) - 1
@@ -8514,7 +8514,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	}
 	else if (reginfo->is_utf8_pat) {
             if (utf8_target) {
-                STRLEN scan_char_len;
+                size_t scan_char_len;
 
                 /* When both target and pattern are UTF-8, we have to do
                  * string EQ */
@@ -8599,7 +8599,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
             if (c1 == CHRTEST_VOID) {
                 /* Use full Unicode fold matching */
                 char *tmpeol = reginfo->strend;
-                STRLEN pat_len = reginfo->is_utf8_pat ? UTF8SKIP(STRING(p)) : 1;
+                size_t pat_len = reginfo->is_utf8_pat ? UTF8SKIP(STRING(p)) : 1;
                 while (hardcount < max
                         && foldEQ_utf8_flags(scan, &tmpeol, 0, utf8_target,
                                              STRING(p), NULL, pat_len,
@@ -8988,13 +8988,13 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
     /* If c is not already the code point, get it.  Note that
      * UTF8_IS_INVARIANT() works even if not in UTF-8 */
     if (! UTF8_IS_INVARIANT(c) && utf8_target) {
-        STRLEN c_len = 0;
+        size_t c_len = 0;
 	c = utf8n_to_uvchr(p, p_end - p, &c_len,
 		(UTF8_ALLOW_DEFAULT & UTF8_ALLOW_ANYUV)
 		| UTF8_ALLOW_FFFF | UTF8_CHECK_ONLY);
 		/* see [perl #37836] for UTF8_ALLOW_ANYUV; [perl #38293] for
 		 * UTF8_ALLOW_FFFF */
-	if (c_len == (STRLEN)-1)
+	if (c_len == (size_t)-1)
 	    Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
         if (c > 255 && OP(n) == ANYOFL && ! ANYOFL_UTF8_LOCALE_REQD(flags)) {
             _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(c);
@@ -9147,7 +9147,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 }
 
 STATIC U8 *
-S_reghop3(U8 *s, SSize_t off, const U8* lim)
+S_reghop3(U8 *s, ssize_t off, const U8* lim)
 {
     /* return the position 'off' UTF-8 characters away from 's', forward if
      * 'off' >= 0, backwards if negative.  But don't go outside of position
@@ -9178,7 +9178,7 @@ S_reghop3(U8 *s, SSize_t off, const U8* lim)
 }
 
 STATIC U8 *
-S_reghop4(U8 *s, SSize_t off, const U8* llim, const U8* rlim)
+S_reghop4(U8 *s, ssize_t off, const U8* llim, const U8* rlim)
 {
     PERL_ARGS_ASSERT_REGHOP4;
 
@@ -9208,7 +9208,7 @@ S_reghop4(U8 *s, SSize_t off, const U8* llim, const U8* rlim)
  * char pos */
 
 STATIC U8 *
-S_reghopmaybe3(U8* s, SSize_t off, const U8* lim)
+S_reghopmaybe3(U8* s, ssize_t off, const U8* lim)
 {
     PERL_ARGS_ASSERT_REGHOPMAYBE3;
 

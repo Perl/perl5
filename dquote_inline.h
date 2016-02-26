@@ -38,7 +38,7 @@ S_regcurly(const char *s)
 PERL_STATIC_INLINE char*
 S_form_short_octal_warning(pTHX_
                            const char * const s, /* Points to first non-octal */
-                           const STRLEN len      /* Length of octals string, so
+                           const size_t len      /* Length of octals string, so
                                                     (s-len) points to first
                                                     octal */
 )

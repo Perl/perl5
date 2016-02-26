@@ -137,9 +137,9 @@ same as the public C<PerlIO_xxxxx> functions:
 
   struct _PerlIO_funcs
   {
-   Size_t		fsize;
+   size_t		fsize;
    char *		name;
-   Size_t		size;
+   size_t		size;
    IV		kind;
    IV		(*Pushed)(pTHX_ PerlIO *f,const char *mode,SV *arg, PerlIO_funcs *tab);
    IV		(*Popped)(pTHX_ PerlIO *f);
@@ -154,9 +154,9 @@ same as the public C<PerlIO_xxxxx> functions:
    IV		(*Fileno)(pTHX_ PerlIO *f);
    PerlIO *     (*Dup)(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
    /* Unix-like functions - cf sfio line disciplines */
-   SSize_t	(*Read)(pTHX_ PerlIO *f, void *vbuf, Size_t count);
-   SSize_t	(*Unread)(pTHX_ PerlIO *f, const void *vbuf, Size_t count);
-   SSize_t	(*Write)(pTHX_ PerlIO *f, const void *vbuf, Size_t count);
+   ssize_t	(*Read)(pTHX_ PerlIO *f, void *vbuf, size_t count);
+   ssize_t	(*Unread)(pTHX_ PerlIO *f, const void *vbuf, size_t count);
+   ssize_t	(*Write)(pTHX_ PerlIO *f, const void *vbuf, size_t count);
    IV		(*Seek)(pTHX_ PerlIO *f, Off_t offset, int whence);
    Off_t	(*Tell)(pTHX_ PerlIO *f);
    IV		(*Close)(pTHX_ PerlIO *f);
@@ -169,10 +169,10 @@ same as the public C<PerlIO_xxxxx> functions:
    void		(*Setlinebuf)(pTHX_ PerlIO *f);
    /* Perl's snooping functions */
    STDCHAR *	(*Get_base)(pTHX_ PerlIO *f);
-   Size_t	(*Get_bufsiz)(pTHX_ PerlIO *f);
+   size_t	(*Get_bufsiz)(pTHX_ PerlIO *f);
    STDCHAR *	(*Get_ptr)(pTHX_ PerlIO *f);
-   SSize_t	(*Get_cnt)(pTHX_ PerlIO *f);
-   void		(*Set_ptrcnt)(pTHX_ PerlIO *f,STDCHAR *ptr,SSize_t cnt);
+   ssize_t	(*Get_cnt)(pTHX_ PerlIO *f);
+   void		(*Set_ptrcnt)(pTHX_ PerlIO *f,STDCHAR *ptr,ssize_t cnt);
   };
 
 The first few members of the struct give a function table size for
@@ -220,7 +220,7 @@ thus:
 	 STDCHAR *	end;        /* End of valid part of buffer */
 	 STDCHAR *	ptr;        /* Current position in buffer */
 	 Off_t		posn;       /* Offset of buf into the file */
-	 Size_t		bufsiz;     /* Real size of buffer */
+	 size_t		bufsiz;     /* Real size of buffer */
 	 IV		oneword;    /* Emergency buffer */
 	} PerlIOBuf;
 
@@ -376,7 +376,7 @@ to change during one "get".)
 
 =item fsize
 
-	Size_t fsize;
+	size_t fsize;
 
 Size of the function table. This is compared against the value PerlIO
 code "knows" as a compatibility check. Future versions I<may> be able
@@ -396,7 +396,7 @@ implemented by the APR layer.
 
 =item size
 
-	Size_t size;
+	size_t size;
 
 The size of the per-instance data structure, e.g.:
 
@@ -589,7 +589,7 @@ Similar to C<Open>, returns PerlIO* on success, C<NULL> on failure.
 
 =item Read
 
-	SSize_t	(*Read)(pTHX_ PerlIO *f, void *vbuf, Size_t count);
+	ssize_t	(*Read)(pTHX_ PerlIO *f, void *vbuf, size_t count);
 
 Basic read operation.
 
@@ -601,8 +601,8 @@ Returns actual bytes read, or -1 on an error.
 
 =item	Unread
 
-	SSize_t	(*Unread)(pTHX_ PerlIO *f,
-			  const void *vbuf, Size_t count);
+	ssize_t	(*Unread)(pTHX_ PerlIO *f,
+			  const void *vbuf, size_t count);
 
 A superset of stdio's C<ungetc()>. Should arrange for future reads to
 see the bytes in C<vbuf>. If there is no obviously better implementation
@@ -613,7 +613,7 @@ Returns the number of unread chars.
 
 =item Write
 
-	SSize_t	(*Write)(PerlIO *f, const void *vbuf, Size_t count);
+	ssize_t	(*Write)(PerlIO *f, const void *vbuf, size_t count);
 
 Basic write operation.
 
@@ -710,7 +710,7 @@ return pointer to it. Return NULL on failure.
 
 =item Get_bufsiz
 
-	Size_t	(*Get_bufsiz)(pTHX_ PerlIO *f);
+	size_t	(*Get_bufsiz)(pTHX_ PerlIO *f);
 
 Return the number of bytes that last C<Fill()> put in the buffer.
 
@@ -722,14 +722,14 @@ Return the current read pointer relative to this layer's buffer.
 
 =item Get_cnt
 
-	SSize_t	(*Get_cnt)(pTHX_ PerlIO *f);
+	ssize_t	(*Get_cnt)(pTHX_ PerlIO *f);
 
 Return the number of bytes left to be read in the current buffer.
 
 =item Set_ptrcnt
 
 	void	(*Set_ptrcnt)(pTHX_ PerlIO *f,
-			      STDCHAR *ptr, SSize_t cnt);
+			      STDCHAR *ptr, ssize_t cnt);
 
 Adjust the read pointer and count of bytes to match C<ptr> and/or C<cnt>.
 The application (or layer above) must ensure they are consistent.

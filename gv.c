@@ -98,12 +98,12 @@ Perl_gv_fetchfile(pTHX_ const char *name)
 }
 
 GV *
-Perl_gv_fetchfile_flags(pTHX_ const char *const name, const STRLEN namelen,
+Perl_gv_fetchfile_flags(pTHX_ const char *const name, const size_t namelen,
 			const U32 flags)
 {
     char smallbuf[128];
     char *tmpbuf;
-    const STRLEN tmplen = namelen + 2;
+    const size_t tmplen = namelen + 2;
     GV *gv;
 
     PERL_ARGS_ASSERT_GV_FETCHFILE_FLAGS;
@@ -164,7 +164,7 @@ Perl_newGP(pTHX_ GV *const gv)
     GP *gp;
     U32 hash;
     const char *file;
-    STRLEN len;
+    size_t len;
 #ifndef USE_ITHREADS
     GV *filegv;
 #endif
@@ -346,7 +346,7 @@ void
 Perl_gv_init_sv(pTHX_ GV *gv, HV *stash, SV* namesv, U32 flags)
 {
    char *namepv;
-   STRLEN namelen;
+   size_t namelen;
    PERL_ARGS_ASSERT_GV_INIT_SV;
    namepv = SvPV(namesv, namelen);
    if (SvUTF8(namesv))
@@ -362,14 +362,14 @@ Perl_gv_init_pv(pTHX_ GV *gv, HV *stash, const char *name, U32 flags)
 }
 
 void
-Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flags)
+Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, size_t len, U32 flags)
 {
     const U32 old_type = SvTYPE(gv);
     const bool doproto = old_type > SVt_NULL;
     char * const proto = (doproto && SvPOK(gv))
 	? ((void)(SvIsCOW(gv) && (sv_force_normal((SV *)gv), 0)), SvPVX(gv))
 	: NULL;
-    const STRLEN protolen = proto ? SvCUR(gv) : 0;
+    const size_t protolen = proto ? SvCUR(gv) : 0;
     const U32 proto_utf8  = proto ? SvUTF8(gv) : 0;
     SV *const has_constant = doproto && SvROK(gv) ? SvRV(gv) : NULL;
     const U32 exported_constant = has_constant ? SvPCS_IMPORTED(gv) : 0;
@@ -492,7 +492,7 @@ static void core_xsub(pTHX_ CV* cv);
 
 static GV *
 S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
-                          const char * const name, const STRLEN len)
+                          const char * const name, const size_t len)
 {
     const int code = keyword(name, len, 1);
     static const char file[] = __FILE__;
@@ -640,7 +640,7 @@ GV *
 Perl_gv_fetchmeth_sv(pTHX_ HV *stash, SV *namesv, I32 level, U32 flags)
 {
     char *namepv;
-    STRLEN namelen;
+    size_t namelen;
     PERL_ARGS_ASSERT_GV_FETCHMETH_SV;
     if (LIKELY(SvPOK_nog(namesv))) /* common case */
         return gv_fetchmeth_internal(stash, namesv, NULL, 0, level, flags);
@@ -694,7 +694,7 @@ obtained from the GV with the C<GvCV> macro.
 /* NOTE: No support for tied ISA */
 
 PERL_STATIC_INLINE GV*
-S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len, I32 level, U32 flags)
+S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, size_t len, I32 level, U32 flags)
 {
     GV** gvp;
     HE* he;
@@ -859,7 +859,7 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
 }
 
 GV *
-Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, U32 flags)
+Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, size_t len, I32 level, U32 flags)
 {
     PERL_ARGS_ASSERT_GV_FETCHMETH_PVN;
     return gv_fetchmeth_internal(stash, NULL, name, len, level, flags);
@@ -883,7 +883,7 @@ GV *
 Perl_gv_fetchmeth_sv_autoload(pTHX_ HV *stash, SV *namesv, I32 level, U32 flags)
 {
    char *namepv;
-   STRLEN namelen;
+   size_t namelen;
    PERL_ARGS_ASSERT_GV_FETCHMETH_SV_AUTOLOAD;
    namepv = SvPV(namesv, namelen);
    if (SvUTF8(namesv))
@@ -923,7 +923,7 @@ Currently, the only significant value for C<flags> is C<SVf_UTF8>.
 */
 
 GV *
-Perl_gv_fetchmeth_pvn_autoload(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, U32 flags)
+Perl_gv_fetchmeth_pvn_autoload(pTHX_ HV *stash, const char *name, size_t len, I32 level, U32 flags)
 {
     GV *gv = gv_fetchmeth_pvn(stash, name, len, level, flags);
 
@@ -994,7 +994,7 @@ GV *
 Perl_gv_fetchmethod_sv_flags(pTHX_ HV *stash, SV *namesv, U32 flags)
 {
     char *namepv;
-    STRLEN namelen;
+    size_t namelen;
     PERL_ARGS_ASSERT_GV_FETCHMETHOD_SV_FLAGS;
     namepv = SvPV(namesv, namelen);
     if (SvUTF8(namesv))
@@ -1012,7 +1012,7 @@ Perl_gv_fetchmethod_pv_flags(pTHX_ HV *stash, const char *name, U32 flags)
 /* Don't merge this yet, as it's likely to get a len parameter, and possibly
    even a U32 hash */
 GV *
-Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN len, U32 flags)
+Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const size_t len, U32 flags)
 {
     const char *nend;
     const char *nsplit = NULL;
@@ -1145,7 +1145,7 @@ GV*
 Perl_gv_autoload_sv(pTHX_ HV *stash, SV* namesv, U32 flags)
 {
    char *namepv;
-   STRLEN namelen;
+   size_t namelen;
    PERL_ARGS_ASSERT_GV_AUTOLOAD_SV;
    namepv = SvPV(namesv, namelen);
    if (SvUTF8(namesv))
@@ -1161,7 +1161,7 @@ Perl_gv_autoload_pv(pTHX_ HV *stash, const char *namepv, U32 flags)
 }
 
 GV*
-Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
+Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, size_t len, U32 flags)
 {
     GV* gv;
     CV* cv;
@@ -1177,7 +1177,7 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
 	return NULL;
     if (stash) {
 	if (SvTYPE(stash) < SVt_PVHV) {
-            STRLEN packname_len = 0;
+            size_t packname_len = 0;
             const char * const packname_ptr = SvPV_const(MUTABLE_SV(stash), packname_len);
             packname = newSVpvn_flags(packname_ptr, packname_len,
                                       SVs_TEMP | SvUTF8(stash));
@@ -1234,7 +1234,7 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
 	CvSTASH_set(cv, stash);
 	if (SvPOK(cv)) { /* Ouch! */
 	    SV * const tmpsv = newSVpvn_flags(name, len, is_utf8);
-	    STRLEN ulen;
+	    size_t ulen;
 	    const char *proto = CvPROTO(cv);
 	    assert(proto);
 	    if (SvUTF8(cv))
@@ -1466,7 +1466,7 @@ S_gv_stashsvpvn_cached(pTHX_ SV *namesv, const char *name, U32 namelen, I32 flag
 
     if (namesv) {
         if (SvOK(namesv)) { /* prevent double uninit warning */
-            STRLEN len;
+            size_t len;
             name = SvPV_const(namesv, len);
             namelen = len;
             flags |= SvUTF8(namesv);
@@ -1520,7 +1520,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, const svtype sv_type) {
 
 GV *
 Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, const svtype sv_type) {
-    STRLEN len;
+    size_t len;
     const char * const nambeg =
        SvPV_flags_const(name, len, flags & GV_NO_SVGMAGIC ? 0 : SV_GMAGIC);
     PERL_ARGS_ASSERT_GV_FETCHSV;
@@ -1548,7 +1548,7 @@ S_gv_magicalize_isa(pTHX_ GV *gv)
  */
 PERL_STATIC_INLINE bool
 S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name,
-               STRLEN *len, const char *nambeg, STRLEN full_len,
+               size_t *len, const char *nambeg, size_t full_len,
                const U32 is_utf8, const I32 add)
 {
     const char *name_cursor;
@@ -1637,7 +1637,7 @@ S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name,
 
 /* Checks if an unqualified name is in the main stash */
 PERL_STATIC_INLINE bool
-S_gv_is_in_main(pTHX_ const char *name, STRLEN len, const U32 is_utf8)
+S_gv_is_in_main(pTHX_ const char *name, size_t len, const U32 is_utf8)
 {
     PERL_ARGS_ASSERT_GV_IS_IN_MAIN;
     
@@ -1697,7 +1697,7 @@ S_gv_is_in_main(pTHX_ const char *name, STRLEN len, const U32 is_utf8)
  * which might happen during global destruction.
  */
 PERL_STATIC_INLINE bool
-S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
+S_find_default_stash(pTHX_ HV **stash, const char *name, size_t len,
                const U32 is_utf8, const I32 add,
                const svtype sv_type)
 {
@@ -1807,10 +1807,10 @@ S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
  * refcount should be decreased.
  */
 PERL_STATIC_INLINE bool
-S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
+S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, size_t len,
                bool addmg, const svtype sv_type)
 {
-    SSize_t paren;
+    ssize_t paren;
 
     PERL_ARGS_ASSERT_GV_MAGICALIZE;
     
@@ -1996,8 +1996,8 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                 UV uv;
                 if (!grok_atoUV(name, &uv, NULL) || uv > I32_MAX)
                     return addmg;
-                /* XXX why are we using a SSize_t? */
-                paren = (SSize_t)(I32)uv;
+                /* XXX why are we using a ssize_t? */
+                paren = (ssize_t)(I32)uv;
                 goto storeparen;
 	    }
 	    }
@@ -2233,13 +2233,13 @@ S_maybe_multimagic_gv(pTHX_ GV *gv, const char *name, const svtype sv_type)
 }
 
 GV *
-Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
+Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, size_t full_len, I32 flags,
 		       const svtype sv_type)
 {
     const char *name = nambeg;
     GV *gv = NULL;
     GV**gvp;
-    STRLEN len;
+    size_t len;
     HV *stash = NULL;
     const I32 no_init = flags & (GV_NOADD_NOINIT | GV_NOINIT);
     const I32 no_expand = flags & GV_NOEXPAND;
@@ -2385,7 +2385,7 @@ Perl_gv_fullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain)
     sv_setpv(sv, prefix ? prefix : "");
 
     if (hv && (name = HvNAME(hv))) {
-      const STRLEN len = HvNAMELEN(hv);
+      const size_t len = HvNAMELEN(hv);
       if (keepmain || strnNE(name, "main", len)) {
 	sv_catpvn_flags(sv,name,len,HvNAMEUTF8(hv)?SV_CATUTF8:SV_CATBYTES);
 	sv_catpvs(sv,"::");
@@ -2691,7 +2691,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 	const char * const cooky = PL_AMG_names[i];
 	/* Human-readable form, for debugging: */
 	const char * const cp = AMG_id2name(i);
-	const STRLEN l = PL_AMG_namelens[i];
+	const size_t l = PL_AMG_namelens[i];
 
 	DEBUG_o( Perl_deb(aTHX_ "Checking overloading of \"%s\" in package \"%.256s\"\n",
 		     cp, HvNAME_get(stash)) );
@@ -2984,13 +2984,13 @@ Perl_amagic_is_enabled(pTHX_ int method)
       else if ( lex_mask && SvPOK(lex_mask) ) {
 	  /* we have an entry in the hints hash, check if method has been
 	   * masked by overloading.pm */
-	  STRLEN len;
+	  size_t len;
 	  const int offset = method / 8;
 	  const int bit    = method % 8;
 	  char *pv = SvPV(lex_mask, len);
 
 	  /* Bit set, so this overloading operator is disabled */
-	  if ( (STRLEN)offset < len && pv[offset] & ( 1 << bit ) )
+	  if ( (size_t)offset < len && pv[offset] & ( 1 << bit ) )
 	      return FALSE;
       }
       return TRUE;
@@ -3588,7 +3588,7 @@ Perl_gv_try_downgrade(pTHX_ GV *gv)
 }
 
 GV *
-Perl_gv_override(pTHX_ const char * const name, const STRLEN len)
+Perl_gv_override(pTHX_ const char * const name, const size_t len)
 {
     GV *gv = gv_fetchpvn(name, len, GV_NOTQUAL, SVt_PVCV);
     GV * const *gvp;

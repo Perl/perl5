@@ -144,8 +144,8 @@ struct RExC_state_t {
     char	*end;			/* End of input for compile */
     char	*parse;			/* Input-scan pointer. */
     char        *adjusted_start;        /* 'start', adjusted.  See code use */
-    STRLEN      precomp_adj;            /* an offset beyond precomp.  See code use */
-    SSize_t	whilem_seen;		/* number of WHILEM in this expr */
+    size_t      precomp_adj;            /* an offset beyond precomp.  See code use */
+    ssize_t	whilem_seen;		/* number of WHILEM in this expr */
     regnode	*emit_start;		/* Start of emitted-code area */
     regnode	*emit_bound;		/* First regnode outside of the
                                            allocated space */
@@ -158,7 +158,7 @@ struct RExC_state_t {
     I32		naughty;		/* How bad is this pattern? */
     I32		sawback;		/* Did we see \1, ...? */
     U32		seen;
-    SSize_t	size;			/* Code size. */
+    ssize_t	size;			/* Code size. */
     I32                npar;            /* Capture buffer count, (OPEN) plus
                                            one. ("par" 0 is the whole
                                            pattern)*/
@@ -195,7 +195,7 @@ struct RExC_state_t {
 					    within pattern */
     int		num_code_blocks;	/* size of code_blocks[] */
     int		code_index;		/* next code_blocks[] slot */
-    SSize_t     maxlen;                        /* mininum possible number of chars in string to match */
+    ssize_t     maxlen;                        /* mininum possible number of chars in string to match */
     scan_frame *frame_head;
     scan_frame *frame_last;
     U32         frame_count;
@@ -455,25 +455,25 @@ struct RExC_state_t {
 typedef struct scan_data_t {
     /*I32 len_min;      unused */
     /*I32 len_delta;    unused */
-    SSize_t pos_min;
-    SSize_t pos_delta;
+    ssize_t pos_min;
+    ssize_t pos_delta;
     SV *last_found;
-    SSize_t last_end;	    /* min value, <0 unless valid. */
-    SSize_t last_start_min;
-    SSize_t last_start_max;
+    ssize_t last_end;	    /* min value, <0 unless valid. */
+    ssize_t last_start_min;
+    ssize_t last_start_max;
     SV **longest;	    /* Either &l_fixed, or &l_float. */
     SV *longest_fixed;      /* longest fixed string found in pattern */
-    SSize_t offset_fixed;   /* offset where it starts */
-    SSize_t *minlen_fixed;  /* pointer to the minlen relevant to the string */
+    ssize_t offset_fixed;   /* offset where it starts */
+    ssize_t *minlen_fixed;  /* pointer to the minlen relevant to the string */
     I32 lookbehind_fixed;   /* is the position of the string modfied by LB */
     SV *longest_float;      /* longest floating string found in pattern */
-    SSize_t offset_float_min; /* earliest point in string it can appear */
-    SSize_t offset_float_max; /* latest point in string it can appear */
-    SSize_t *minlen_float;  /* pointer to the minlen relevant to the string */
-    SSize_t lookbehind_float; /* is the pos of the string modified by LB */
+    ssize_t offset_float_min; /* earliest point in string it can appear */
+    ssize_t offset_float_max; /* latest point in string it can appear */
+    ssize_t *minlen_float;  /* pointer to the minlen relevant to the string */
+    ssize_t lookbehind_float; /* is the pos of the string modified by LB */
     I32 flags;
     I32 whilem_c;
-    SSize_t *last_closep;
+    ssize_t *last_closep;
     regnode_ssc *start_class;
 } scan_data_t;
 
@@ -1082,9 +1082,9 @@ dict_free(item* head)
 STATIC int
 S_edit_distance(const UV* src,
                 const UV* tgt,
-                const STRLEN x,             /* length of src[] */
-                const STRLEN y,             /* length of tgt[] */
-                const SSize_t maxDistance
+                const size_t x,             /* length of src[] */
+                const size_t y,             /* length of tgt[] */
+                const ssize_t maxDistance
 )
 {
     item *head = NULL;
@@ -1175,10 +1175,10 @@ S_cntrl_to_mnemonic(const U8 c)
 
 STATIC void
 S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
-                    SSize_t *minlenp, int is_inf)
+                    ssize_t *minlenp, int is_inf)
 {
-    const STRLEN l = CHR_SVLEN(data->last_found);
-    const STRLEN old_l = CHR_SVLEN(*data->longest);
+    const size_t l = CHR_SVLEN(data->last_found);
+    const size_t old_l = CHR_SVLEN(*data->longest);
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_SCAN_COMMIT;
@@ -1203,7 +1203,7 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
 					 ? SSize_t_MAX
 					 : data->pos_min + data->pos_delta));
 	    if (is_inf
-		 || (STRLEN)data->offset_float_max > (STRLEN)SSize_t_MAX)
+		 || (size_t)data->offset_float_max > (size_t)SSize_t_MAX)
 		data->offset_float_max = SSize_t_MAX;
 	    if (data->flags & SF_BEFORE_EOL)
 		data->flags
@@ -2402,7 +2402,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
     HV *widecharmap = NULL;
     AV *revcharmap = newAV();
     regnode *cur;
-    STRLEN len = 0;
+    size_t len = 0;
     UV uvc = 0;
     U16 curword = 0;
     U32 next_alloc = 0;
@@ -2421,7 +2421,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
      */
 #else
     const U32 data_slot = add_data( pRExC_state, STR_WITH_LEN("tu"));
-    STRLEN trie_charcount=0;
+    size_t trie_charcount=0;
 #endif
     SV *re_trie_maxbuff;
     GET_RE_DEBUG_FLAGS_DECL;
@@ -2507,8 +2507,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         const U8 *e  = uc + STR_LEN( noper );
         int foldlen = 0;
         U32 wordlen      = 0;         /* required init */
-        STRLEN minchars = 0;
-        STRLEN maxchars = 0;
+        size_t minchars = 0;
+        size_t maxchars = 0;
         bool set_bit = trie->bitmap ? 1 : 0; /*store the first char in the
                                                bitmap?*/
 
@@ -2715,7 +2715,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
             (but cant be modified once converted).
         */
 
-        STRLEN transcount = 1;
+        size_t transcount = 1;
 
         DEBUG_TRIE_COMPILE_MORE_r( PerlIO_printf( Perl_debug_log,
             "%*sCompiling trie using list compiler\n",
@@ -3249,7 +3249,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 }
                 if ( count == 1 ) {
                     SV **tmp = av_fetch( revcharmap, idx, 0);
-                    STRLEN len;
+                    size_t len;
                     char *ch = SvPV( *tmp, len );
                     DEBUG_OPTIMISE_r({
                         SV *sv=sv_newmortal();
@@ -3835,7 +3835,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                 Newx(folded, UTF8_MAX_FOLD_CHAR_EXPAND * STR_LEN(scan) + 1, U8);
                 d = folded;
                 while (s < s_end) {
-                    STRLEN s_len = UTF8SKIP(s);
+                    size_t s_len = UTF8SKIP(s);
                     if (! is_PROBLEMATIC_LOCALE_FOLD_utf8(s)) {
                         Copy(s, d, s_len, U8);
                         d += s_len;
@@ -3849,7 +3849,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                         *(d++) = toFOLD(*s);
                     }
                     else {
-                        STRLEN len;
+                        size_t len;
                         _to_utf8_fold_flags(s, d, &len, FOLD_FLAGS_FULL);
                         d += len;
                     }
@@ -4037,9 +4037,9 @@ S_unwind_scan_frames(pTHX_ const void *p)
 }
 
 
-STATIC SSize_t
+STATIC ssize_t
 S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
-                        SSize_t *minlenp, SSize_t *deltap,
+                        ssize_t *minlenp, ssize_t *deltap,
 			regnode *last,
 			scan_data_t *data,
 			I32 stopparen,
@@ -4055,17 +4055,17 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			/* and_withp: Valid if flags & SCF_DO_STCLASS_OR */
 {
     /* There must be at least this number of characters to match */
-    SSize_t min = 0;
+    ssize_t min = 0;
     I32 pars = 0, code;
     regnode *scan = *scanp, *next;
-    SSize_t delta = 0;
+    ssize_t delta = 0;
     int is_inf = (flags & SCF_DO_SUBSTR) && (data->flags & SF_IS_INF);
     int is_inf_internal = 0;		/* The studied chunk is infinite */
     I32 is_par = OP(scan) == OPEN ? ARG(scan) : 0;
     scan_data_t data_fake;
     SV *re_trie_maxbuff = NULL;
     regnode *first_non_open = scan;
-    SSize_t stopmin = SSize_t_MAX;
+    ssize_t stopmin = SSize_t_MAX;
     scan_frame *frame = NULL;
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -4159,9 +4159,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	/* The principal pseudo-switch.  Cannot be a switch, since we
 	   look into several different things.  */
         if ( OP(scan) == DEFINEP ) {
-            SSize_t minlen = 0;
-            SSize_t deltanext = 0;
-            SSize_t fake_last_close = 0;
+            ssize_t minlen = 0;
+            ssize_t deltanext = 0;
+            ssize_t fake_last_close = 0;
             I32 f = SCF_IN_DEFINE;
 
             StructCopy(&zero_scan_data, &data_fake, scan_data_t);
@@ -4201,7 +4201,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                 /* NOTE - There is similar code to this block below for
                  * handling TRIE nodes on a re-study.  If you change stuff here
                  * check there too. */
-		SSize_t max1 = 0, min1 = SSize_t_MAX, num = 0;
+		ssize_t max1 = 0, min1 = SSize_t_MAX, num = 0;
 		regnode_ssc accum;
 		regnode * const startbranch=scan;
 
@@ -4214,7 +4214,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    ssc_init_zero(pRExC_state, &accum);
 
 		while (OP(scan) == code) {
-		    SSize_t deltanext, minnext, fake;
+		    ssize_t deltanext, minnext, fake;
 		    I32 f = 0;
 		    regnode_ssc this_class;
 
@@ -4783,7 +4783,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    }
 	}
 	else if (OP(scan) == EXACT || OP(scan) == EXACTL) {
-	    SSize_t l = STR_LEN(scan);
+	    ssize_t l = STR_LEN(scan);
 	    UV uc;
 	    if (UTF) {
 		const U8 * const s = (U8*)STRING(scan);
@@ -4835,7 +4835,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	}
         else if (PL_regkind[OP(scan)] == EXACT) {
             /* But OP != EXACT!, so is EXACTFish */
-	    SSize_t l = STR_LEN(scan);
+	    ssize_t l = STR_LEN(scan);
             const U8 * s = (U8*)STRING(scan);
 
 	    /* Search for fixed substrings supports EXACT only. */
@@ -4886,7 +4886,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
             }
 	}
 	else if (REGNODE_VARIES(OP(scan))) {
-	    SSize_t mincount, maxcount, minnext, deltanext, pos_before = 0;
+	    ssize_t mincount, maxcount, minnext, deltanext, pos_before = 0;
 	    I32 fl = 0, f = flags;
 	    regnode * const oscan = scan;
 	    regnode_ssc this_class;
@@ -5169,16 +5169,16 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    pars++;
 		if (flags & SCF_DO_SUBSTR) {
 		    SV *last_str = NULL;
-                    STRLEN last_chrs = 0;
+                    size_t last_chrs = 0;
 		    int counted = mincount != 0;
 
                     if (data->last_end > 0 && mincount != 0) { /* Ends with a
                                                                   string. */
-			SSize_t b = pos_before >= data->last_start_min
+			ssize_t b = pos_before >= data->last_start_min
 			    ? pos_before : data->last_start_min;
-			STRLEN l;
+			size_t l;
 			const char * const s = SvPV_const(data->last_found, l);
-			SSize_t old = b - data->last_start_min;
+			ssize_t old = b - data->last_start_min;
 
 			if (UTF)
 			    old = utf8_hop((U8*)s, old) - (U8*)s;
@@ -5504,7 +5504,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
                    In this case we can't do fixed string optimisation.
                 */
 
-                SSize_t deltanext, minnext, fake = 0;
+                ssize_t deltanext, minnext, fake = 0;
                 regnode *nscan;
                 regnode_ssc intrnl;
                 int f = 0;
@@ -5575,7 +5575,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
                    length of the pattern, something we won't know about
                    until after the recurse.
                 */
-                SSize_t deltanext, fake = 0;
+                ssize_t deltanext, fake = 0;
                 regnode *nscan;
                 regnode_ssc intrnl;
                 int f = 0;
@@ -5585,8 +5585,8 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
                     have to worry about freeing them when we know
                     they wont be used, which would be a pain.
                  */
-                SSize_t *minnextp;
-                Newx( minnextp, 1, SSize_t );
+                ssize_t *minnextp;
+                Newx( minnextp, 1, ssize_t );
                 SAVEFREEPV(minnextp);
 
                 if (data) {
@@ -5715,7 +5715,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
 	    {
                 if (!(RExC_rx->intflags & PREGf_ANCH) && (flags & SCF_DO_SUBSTR))
                     RExC_rx->intflags |= PREGf_ANCH_GPOS;
-	        if (RExC_rx->gofs < (STRLEN)min)
+	        if (RExC_rx->gofs < (size_t)min)
 		    RExC_rx->gofs = min;
             } else {
                 RExC_rx->intflags |= PREGf_GPOS_FLOAT;
@@ -5731,7 +5731,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
             regnode *trie_node= scan;
             regnode *tail= regnext(scan);
             reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG(scan) ];
-            SSize_t max1 = 0, min1 = SSize_t_MAX;
+            ssize_t max1 = 0, min1 = SSize_t_MAX;
             regnode_ssc accum;
 
             if (flags & SCF_DO_SUBSTR) { /* XXXX Add !SUSPEND? */
@@ -5750,7 +5750,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
 
                 for ( word=1 ; word <= trie->wordcount ; word++)
                 {
-                    SSize_t deltanext=0, minnext=0, f = 0, fake;
+                    ssize_t deltanext=0, minnext=0, f = 0, fake;
                     regnode_ssc this_class;
 
                     StructCopy(&zero_scan_data, &data_fake, scan_data_t);
@@ -5783,12 +5783,12 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
                     if (nextbranch && PL_regkind[OP(nextbranch)]==BRANCH)
                         nextbranch= regnext((regnode*)nextbranch);
 
-                    if (min1 > (SSize_t)(minnext + trie->minlen))
+                    if (min1 > (ssize_t)(minnext + trie->minlen))
                         min1 = minnext + trie->minlen;
                     if (deltanext == SSize_t_MAX) {
                         is_inf = is_inf_internal = 1;
                         max1 = SSize_t_MAX;
-                    } else if (max1 < (SSize_t)(minnext + deltanext + trie->maxlen))
+                    } else if (max1 < (ssize_t)(minnext + deltanext + trie->maxlen))
                         max1 = minnext + deltanext + trie->maxlen;
 
                     if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
@@ -5920,7 +5920,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
     DEBUG_STUDYDATA("post-fin:",data,depth);
 
     {
-        SSize_t final_minlen= min < stopmin ? min : stopmin;
+        ssize_t final_minlen= min < stopmin ? min : stopmin;
 
         if (!(RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN)) {
             if (final_minlen > SSize_t_MAX - delta)
@@ -6080,12 +6080,12 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 rx_flags)
 
 static void
 S_pat_upgrade_to_utf8(pTHX_ RExC_state_t * const pRExC_state,
-		    char **pat_p, STRLEN *plen_p, int num_code_blocks)
+		    char **pat_p, size_t *plen_p, int num_code_blocks)
 {
     U8 *const src = (U8*)*pat_p;
     U8 *dst, *d;
     int n=0;
-    STRLEN s = 0;
+    size_t s = 0;
     bool do_end = 0;
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -6155,7 +6155,7 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
     for (svp = patternp; svp < patternp + pat_count; svp++) {
         SV *sv;
         SV *rx  = NULL;
-        STRLEN orig_patlen = 0;
+        size_t orig_patlen = 0;
         bool code = 0;
         SV *msv = use_delim ? delim : *svp;
         if (!msv) msv = &PL_sv_undef;
@@ -6177,7 +6177,7 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
              * The code in this block is based on S_pushav() */
 
             AV *const av = (AV*)msv;
-            const SSize_t maxarg = AvFILL(av) + 1;
+            const ssize_t maxarg = AvFILL(av) + 1;
             SV **array;
 
             if (oplist) {
@@ -6187,7 +6187,7 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
             }
 
             if (SvRMAGICAL(av)) {
-                SSize_t i;
+                ssize_t i;
 
                 Newx(array, maxarg, SV*);
                 SAVEFREEPV(array);
@@ -6280,7 +6280,7 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
                  *     sv_catsv_nomg(pat, msv);
                  * that allows us to adjust code block indices if
                  * needed */
-                STRLEN dlen;
+                size_t dlen;
                 char *dst = SvPV_force_nomg(pat, dlen);
                 orig_patlen = dlen;
                 if (SvUTF8(msv) && !SvUTF8(pat)) {
@@ -6318,7 +6318,7 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
 
                 for (i=0; i < ri->num_code_blocks; i++) {
                     struct reg_code_block *src, *dst;
-                    STRLEN offset =  orig_patlen
+                    size_t offset =  orig_patlen
                         + ReANY((REGEXP *)rx)->pre_prefix;
                     assert(n < pRExC_state->num_code_blocks);
                     src = &ri->code_blocks[i];
@@ -6349,10 +6349,10 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
 
 static bool
 S_has_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
-		    char *pat, STRLEN plen)
+		    char *pat, size_t plen)
 {
     int n = 0;
-    STRLEN s;
+    size_t s;
     
     PERL_UNUSED_CONTEXT;
 
@@ -6400,7 +6400,7 @@ S_has_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 
 static bool
 S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
-    char *pat, STRLEN plen)
+    char *pat, size_t plen)
 {
     SV *qr;
 
@@ -6418,7 +6418,7 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
     }
     else {
 	int n = 0;
-	STRLEN s;
+	size_t s;
 	char *p, *newpat;
 	int newlen = plen + 6; /* allow for "qr''x\0" extra chars */
 	SV *sv, *qr_ref;
@@ -6575,16 +6575,16 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 
 STATIC bool
 S_setup_longest(pTHX_ RExC_state_t *pRExC_state, SV* sv_longest,
-                      SV** rx_utf8, SV** rx_substr, SSize_t* rx_end_shift,
-		      SSize_t lookbehind, SSize_t offset, SSize_t *minlen,
-                      STRLEN longest_length, bool eol, bool meol)
+                      SV** rx_utf8, SV** rx_substr, ssize_t* rx_end_shift,
+		      ssize_t lookbehind, ssize_t offset, ssize_t *minlen,
+                      size_t longest_length, bool eol, bool meol)
 {
     /* This is the common code for setting up the floating and fixed length
      * string data extracted from Perl_re_op_compile() below.  Returns a boolean
      * as to whether succeeded or not */
 
     I32 t;
-    SSize_t ml;
+    ssize_t ml;
 
     if (! (longest_length
            || (eol /* Can't have SEOL and MULTI */
@@ -6609,7 +6609,7 @@ S_setup_longest(pTHX_ RExC_state_t *pRExC_state, SV* sv_longest,
         follow this item. We calculate it ahead of time as once the
         lookbehind offset is added in we lose the ability to correctly
         calculate it.*/
-    ml = minlen ? *(minlen) : (SSize_t)longest_length;
+    ml = minlen ? *(minlen) : (ssize_t)longest_length;
     *rx_end_shift = ml - offset
         - longest_length + (SvTAIL(sv_longest) != 0)
         + lookbehind;
@@ -6673,11 +6673,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     REGEXP *rx;
     struct regexp *r;
     regexp_internal *ri;
-    STRLEN plen;
+    size_t plen;
     char *exp;
     regnode *scan;
     I32 flags;
-    SSize_t minlen = 0;
+    ssize_t minlen = 0;
     U32 rx_flags;
     SV *pat;
     SV *code_blocksv = NULL;
@@ -7104,7 +7104,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         /* We output all the necessary flags; we never output a minus, as all
          * those are defaults, so are
          * covered by the caret */
-	const STRLEN wraplen = plen + has_p + has_runon
+	const size_t wraplen = plen + has_p + has_runon
             + has_default       /* If needs a caret */
             + PL_bitcount[reganch] /* 1 char for each set standard flag */
 
@@ -7126,7 +7126,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             *p++= DEFAULT_PAT_MOD;
         }
         if (has_charset) {
-	    STRLEN len;
+	    size_t len;
 	    const char* const name = get_regex_charset_name(r->extflags, &len);
 	    Copy(name, p, len, char);
 	    p += len;
@@ -7259,11 +7259,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
        data in the pattern. If there is then we can use it for optimisations */
     if (!(RExC_seen & REG_TOP_LEVEL_BRANCHES_SEEN)) { /*  Only one top-level choice.
                                                   */
-	SSize_t fake;
-	STRLEN longest_float_length, longest_fixed_length;
+	ssize_t fake;
+	size_t longest_float_length, longest_fixed_length;
 	regnode_ssc ch_class; /* pointed to by data */
 	int stclass_flag;
-	SSize_t last_close = 0; /* pointed to by data */
+	ssize_t last_close = 0; /* pointed to by data */
         regnode *first= scan;
         regnode *first_next= regnext(first);
 	/*
@@ -7532,17 +7532,17 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         r->substrs->data[0].max_offset = r->substrs->data[0].min_offset;
 
 	/* XXX Unneeded? dmq (shouldn't as this is handled elsewhere)
-	if ( (STRLEN)minlen < longest_float_length )
+	if ( (size_t)minlen < longest_float_length )
             minlen= longest_float_length;
-        if ( (STRLEN)minlen < longest_fixed_length )
+        if ( (size_t)minlen < longest_fixed_length )
             minlen= longest_fixed_length;
         */
     }
     else {
 	/* Several toplevels. Best we can is to set minlen. */
-	SSize_t fake;
+	ssize_t fake;
 	regnode_ssc ch_class;
-	SSize_t last_close = 0;
+	ssize_t last_close = 0;
 
 	DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log, "\nMulti Top Level\n"));
 
@@ -7698,8 +7698,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     });
 #ifdef RE_TRACK_PATTERN_OFFSETS
     DEBUG_OFFSETS_r(if (ri->u.offsets) {
-        const STRLEN len = ri->u.offsets[0];
-        STRLEN i;
+        const size_t len = ri->u.offsets[0];
+        size_t i;
         GET_RE_DEBUG_FLAGS_DECL;
         PerlIO_printf(Perl_debug_log,
                       "Offsets: [%"UVuf"]\n\t", (UV)ri->u.offsets[0]);
@@ -7889,7 +7889,7 @@ Perl_reg_named_buff_scalar(pTHX_ REGEXP * const r, const U32 flags)
 {
     SV *ret;
     AV *av;
-    SSize_t length;
+    ssize_t length;
     struct regexp *const rx = ReANY(r);
 
     PERL_ARGS_ASSERT_REG_NAMED_BUFF_SCALAR;
@@ -7953,8 +7953,8 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
 {
     struct regexp *const rx = ReANY(r);
     char *s = NULL;
-    SSize_t i = 0;
-    SSize_t s1, t1;
+    ssize_t i = 0;
+    ssize_t s1, t1;
     I32 n = paren;
 
     PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_FETCH;
@@ -8012,7 +8012,7 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
     }
 
     assert(s >= rx->subbeg);
-    assert((STRLEN)rx->sublen >= (STRLEN)((s - rx->subbeg) + i) );
+    assert((size_t)rx->sublen >= (size_t)((s - rx->subbeg) + i) );
     if (i >= 0) {
 #ifdef NO_TAINT_SUPPORT
         sv_setpvn(sv, s, i);
@@ -8138,7 +8138,7 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
     if (i > 0 && RXp_MATCH_UTF8(rx)) {
         const char * const s = rx->subbeg - rx->suboffset + s1;
         const U8 *ep;
-        STRLEN el;
+        size_t el;
 
         i = t1 - s1;
         if (is_utf8_string_loclen((U8*)s, i, &ep, &el))
@@ -8366,7 +8366,7 @@ S_invlist_replace_list_destroys_src(pTHX_ SV * dest, SV * src)
 
     const UV src_len          = _invlist_len(src);
     const bool src_offset     = *get_invlist_offset_addr(src);
-    const STRLEN src_byte_len = SvLEN(src);
+    const size_t src_byte_len = SvLEN(src);
     char * array              = SvPVX(src);
 
     const int oldtainted = TAINT_get;
@@ -8471,7 +8471,7 @@ S_invlist_is_iterating(SV* const invlist)
 {
     PERL_ARGS_ASSERT_INVLIST_IS_ITERATING;
 
-    return *(get_invlist_iter_addr(invlist)) < (STRLEN) UV_MAX;
+    return *(get_invlist_iter_addr(invlist)) < (size_t) UV_MAX;
 }
 
 PERL_STATIC_INLINE UV
@@ -8515,7 +8515,7 @@ Perl__new_invlist(pTHX_ IV initial_size)
     invlist_set_len(new_list, 0, 0);
 
     /* Force iterinit() to be used to get iteration to work */
-    *get_invlist_iter_addr(new_list) = (STRLEN) UV_MAX;
+    *get_invlist_iter_addr(new_list) = (size_t) UV_MAX;
 
     *get_invlist_previous_index_addr(new_list) = 0;
 
@@ -8532,7 +8532,7 @@ Perl__new_invlist_C_array(pTHX_ const UV* const list)
      * several header fields at the beginning that are not part of the
      * inversion list body proper */
 
-    const STRLEN length = (STRLEN) list[0];
+    const size_t length = (size_t) list[0];
     const UV version_id =          list[1];
     const bool offset   =    cBOOL(list[2]);
 #define HEADER_LENGTH 3
@@ -8838,7 +8838,7 @@ Perl__invlist_populate_swatch(SV* const invlist,
 	/* Here we are in a range that matches.  Populate a bit in the 3-bit U8
 	 * for each code point in it */
         for (; current < upper; current++) {
-            const STRLEN offset = (STRLEN)(current - start);
+            const size_t offset = (size_t)(current - start);
             swatch[offset >> 3] |= 1 << (offset & 7);
         }
 
@@ -8853,7 +8853,7 @@ Perl__invlist_populate_swatch(SV* const invlist,
 	     * platform's infinity, so have to handle it specially */
             if (UNLIKELY(end == UV_MAX && ELEMENT_RANGE_MATCHES_INVLIST(len-1)))
 	    {
-                const STRLEN offset = (STRLEN)(end - start);
+                const size_t offset = (size_t)(end - start);
                 swatch[offset >> 3] |= 1 << (offset & 7);
             }
             return;
@@ -9473,7 +9473,7 @@ Perl__add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
 }
 
 SV*
-Perl__setup_canned_invlist(pTHX_ const STRLEN size, const UV element0,
+Perl__setup_canned_invlist(pTHX_ const size_t size, const UV element0,
                                  UV** other_elements_ptr)
 {
     /* Create and return an inversion list whose contents are to be populated
@@ -9541,7 +9541,7 @@ S_invlist_clone(pTHX_ SV* const invlist)
     /* Need to allocate extra space to accommodate Perl's addition of a
      * trailing NUL to SvPV's, since it thinks they are always strings */
     SV* new_invlist = _new_invlist(_invlist_len(invlist) + 1);
-    STRLEN physical_length = SvCUR(invlist);
+    size_t physical_length = SvCUR(invlist);
     bool offset = *(get_invlist_offset_addr(invlist));
 
     PERL_ARGS_ASSERT_INVLIST_CLONE;
@@ -9553,7 +9553,7 @@ S_invlist_clone(pTHX_ SV* const invlist)
     return new_invlist;
 }
 
-PERL_STATIC_INLINE STRLEN*
+PERL_STATIC_INLINE size_t*
 S_get_invlist_iter_addr(SV* invlist)
 {
     /* Return the address of the UV that contains the current iteration
@@ -9587,7 +9587,7 @@ S_invlist_iterfinish(SV* invlist)
 
     PERL_ARGS_ASSERT_INVLIST_ITERFINISH;
 
-    *get_invlist_iter_addr(invlist) = (STRLEN) UV_MAX;
+    *get_invlist_iter_addr(invlist) = (size_t) UV_MAX;
 }
 
 STATIC bool
@@ -9600,14 +9600,14 @@ S_invlist_iternext(SV* invlist, UV* start, UV* end)
      * <*start> and <*end> are unchanged, and the next call to this function
      * will start over at the beginning of the list */
 
-    STRLEN* pos = get_invlist_iter_addr(invlist);
+    size_t* pos = get_invlist_iter_addr(invlist);
     UV len = _invlist_len(invlist);
     UV *array;
 
     PERL_ARGS_ASSERT_INVLIST_ITERNEXT;
 
     if (*pos >= len) {
-	*pos = (STRLEN) UV_MAX;	/* Force iterinit() to be required next time */
+	*pos = (size_t) UV_MAX;	/* Force iterinit() to be required next time */
 	return FALSE;
     }
 
@@ -9726,7 +9726,7 @@ Perl__invlist_dump(pTHX_ PerlIO *file, I32 level,
      * first element for the corresponding range is given in brackets. */
 
     UV start, end;
-    STRLEN count = 0;
+    size_t count = 0;
 
     PERL_ARGS_ASSERT__INVLIST_DUMP;
 
@@ -9848,7 +9848,7 @@ STATIC SV*
 S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
 {
     const U8 * s = (U8*)STRING(node);
-    SSize_t bytelen = STR_LEN(node);
+    ssize_t bytelen = STR_LEN(node);
     UV uc;
     /* Start out big enough for 2 separate code points */
     SV* invlist = _new_invlist(4);
@@ -9896,7 +9896,7 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
     }
     else {  /* Pattern is UTF-8 */
         U8 folded[UTF8_MAX_FOLD_CHAR_EXPAND * UTF8_MAXBYTES_CASE + 1] = { '\0' };
-        STRLEN foldlen = UTF8SKIP(s);
+        size_t foldlen = UTF8SKIP(s);
         const U8* e = s + bytelen;
         SV** listp;
 
@@ -9918,7 +9918,7 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
                     s++;
                 }
                 else {
-                    STRLEN len;
+                    size_t len;
                     to_utf8_fold(s, d, &len);
                     d += len;
                     s += UTF8SKIP(s);
@@ -10318,7 +10318,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 
         if ( *RExC_parse == '*') { /* (*VERB:ARG) */
 	    char *start_verb = RExC_parse + 1;
-	    STRLEN verb_len;
+	    size_t verb_len;
 	    char *start_arg = NULL;
 	    unsigned char op = 0;
             int arg_required = 0;
@@ -10722,7 +10722,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		if (   !pRExC_state->num_code_blocks
 		    || pRExC_state->code_index >= pRExC_state->num_code_blocks
 		    || pRExC_state->code_blocks[pRExC_state->code_index].start
-			!= (STRLEN)((RExC_parse -3 - (is_logical ? 1 : 0))
+			!= (size_t)((RExC_parse -3 - (is_logical ? 1 : 0))
 			    - RExC_start)
 		) {
 		    if (RExC_pm_flags & PMf_USE_RE_EVAL)
@@ -11727,7 +11727,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
      * point, and is terminated by the brace */
 
     if (endchar >= endbrace) {
-	STRLEN length_of_hex;
+	size_t length_of_hex;
 	I32 grok_hex_flags;
 
         /* Here, exactly one code point.  If that isn't what is wanted, fail */
@@ -11737,7 +11737,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
         }
 
         /* Convert code point from hex */
-	length_of_hex = (STRLEN)(endchar - RExC_parse);
+	length_of_hex = (size_t)(endchar - RExC_parse);
 	grok_hex_flags = PERL_SCAN_ALLOW_UNDERSCORES
                            | PERL_SCAN_DISALLOW_PREFIX
 
@@ -11760,7 +11760,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
          * bypass it by using single quoting, so check.  Don't do the check
          * here when there are multiple chars; we do it below anyway. */
         if (length_of_hex == 0
-            || length_of_hex != (STRLEN)(endchar - RExC_parse) )
+            || length_of_hex != (size_t)(endchar - RExC_parse) )
         {
             RExC_parse += length_of_hex;	/* Includes all the valid */
             RExC_parse += (RExC_orig_utf8)	/* point to after 1st invalid */
@@ -11778,7 +11778,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
     }
     else {  /* Is a multiple character sequence */
 	SV * substitute_parse;
-	STRLEN len;
+	size_t len;
 	char *orig_end = RExC_end;
 	char *save_start = RExC_start;
         I32 flags;
@@ -11830,7 +11830,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
                                                              len);
 
 	/* Don't allow empty number */
-	if (len < (STRLEN) 8) {
+	if (len < (size_t) 8) {
             RExC_parse = endbrace;
 	    vFAIL("Invalid hexadecimal number in \\N{U+...}");
 	}
@@ -11886,10 +11886,10 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 STATIC UV
 S_reg_recode(pTHX_ const U8 value, SV **encp)
 {
-    STRLEN numlen = 1;
+    size_t numlen = 1;
     SV * const sv = newSVpvn_flags((const char *) &value, numlen, SVs_TEMP);
     const char * const s = *encp ? sv_recode_to_utf8(sv, *encp) : SvPVX(sv);
-    const STRLEN newlen = SvCUR(sv);
+    const size_t newlen = SvCUR(sv);
     UV uv = UNICODE_REPLACEMENT;
 
     PERL_ARGS_ASSERT_REG_RECODE;
@@ -11930,7 +11930,7 @@ S_compute_EXACTish(RExC_state_t *pRExC_state)
 
 PERL_STATIC_INLINE void
 S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
-                         regnode *node, I32* flagp, STRLEN len, UV code_point,
+                         regnode *node, I32* flagp, size_t len, UV code_point,
                          bool downgradable)
 {
     /* This knows the details about sizing an EXACTish node, setting flags for
@@ -12383,7 +12383,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 }
             }
             else {
-                STRLEN length;
+                size_t length;
                 char name = *RExC_parse;
                 char * endbrace;
                 RExC_parse += 2;
@@ -12768,7 +12768,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * definition.  (It still may be an escape sequence that evaluates
              * to a single character) */
 
-	    STRLEN len = 0;
+	    size_t len = 0;
 	    UV ender = 0;
 	    char *p;
 	    char *s;
@@ -13054,7 +13054,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     case '0':
 			{
 			    I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
-			    STRLEN numlen = 3;
+			    size_t numlen = 3;
 			    ender = grok_oct(p, &numlen, &flags, NULL);
 			    if (ender > 0xff) {
 				REQUIRE_UTF8(flagp);
@@ -13110,7 +13110,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		default:    /* A literal character */
 		  normal_default:
 		    if (! UTF8_IS_INVARIANT(*p) && UTF) {
-			STRLEN numlen;
+			size_t numlen;
 			ender = utf8n_to_uvchr((U8*)p, RExC_end - p,
 					       &numlen, UTF8_ALLOW_DEFAULT);
 			p += numlen;
@@ -13153,7 +13153,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                      * its representation until PASS2. */
                     if (SIZE_ONLY) {
                         if (UTF) {
-                            const STRLEN unilen = UVCHR_SKIP(ender);
+                            const size_t unilen = UVCHR_SKIP(ender);
                             s += unilen;
 
                             /* We have to subtract 1 just below (and again in
@@ -13260,7 +13260,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         *(s)++ = (U8) folded;
                     }
                     else {
-                        STRLEN foldlen;
+                        size_t foldlen;
 
                         folded = _to_uni_fold_flags(
                                      ender,
@@ -13333,7 +13333,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * skip the rest of this */
             if (FOLD && p < RExC_end && upper_parse == MAX_NODE_STRING_SIZE) {
 
-                const STRLEN full_len = len;
+                const size_t full_len = len;
 
 		assert(len >= MAX_NODE_STRING_SIZE);
 
@@ -13512,7 +13512,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             skip_to_be_ignored_text(pRExC_state, &RExC_parse,
                                     FALSE /* Don't force to /x */ );
 	    {
-		/* len is STRLEN which is unsigned, need to copy to signed */
+		/* len is size_t which is unsigned, need to copy to signed */
 		IV iv = len;
 		if (iv < 0)
 		    vFAIL("Internal disaster");
@@ -14478,7 +14478,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
     IV fence = 0;                   /* Position of where most recent undealt-
                                        with left paren in stack is; -1 if none.
                                      */
-    STRLEN len;                     /* Temporary */
+    size_t len;                     /* Temporary */
     regnode* node;                  /* Temporary, and final regnode returned by
                                        this function */
     const bool save_fold = FOLD;    /* Temporary */
@@ -15319,7 +15319,7 @@ S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invl
 }
 
 STATIC AV *
-S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_string, const STRLEN cp_count)
+S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_string, const size_t cp_count)
 {
     /* This adds the string scalar <multi_string> to the array
      * <multi_char_matches>.  <multi_string> is known to have exactly
@@ -15432,12 +15432,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     IV range = 0;
     UV value = OOB_UNICODE, save_value = OOB_UNICODE;
     regnode *ret;
-    STRLEN numlen;
+    size_t numlen;
     int namedclass = OOB_NAMEDCLASS;
     char *rangebegin = NULL;
     bool need_class = 0;
     SV *listsv = NULL;
-    STRLEN initial_listsv_len = 0; /* Kind of a kludge to see if it is more
+    size_t initial_listsv_len = 0; /* Kind of a kludge to see if it is more
 				      than just initialized.  */
     SV* properties = NULL;    /* Code points that match \p{} \P{} */
     SV* posixes = NULL;     /* Code points that match classes like [:word:],
@@ -15510,7 +15510,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     regnode * const orig_emit = RExC_emit; /* Save the original RExC_emit in
         case we need to change the emitted regop to an EXACT. */
     const char * orig_parse = RExC_parse;
-    const SSize_t orig_size = RExC_size;
+    const ssize_t orig_size = RExC_size;
     bool posixl_matches_all = FALSE; /* Does /l class have both e.g. \W,\w ? */
 
     /* This variable is used to mark where in the input something that looks
@@ -16379,7 +16379,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 /* Here <value> is indeed a multi-char fold.  Get what it is */
 
                 U8 foldbuf[UTF8_MAXBYTES_CASE];
-                STRLEN foldlen;
+                size_t foldlen;
 
                 UV folded = _to_uni_fold_flags(
                                 value,
@@ -16402,7 +16402,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                      * again.  Otherwise add this character to the list of
                      * multi-char folds. */
                     if (! RExC_in_multi_char_class) {
-                        STRLEN cp_count = utf8_length(foldbuf,
+                        size_t cp_count = utf8_length(foldbuf,
                                                       foldbuf + foldlen);
                         SV* multi_fold = sv_2mortal(newSVpvs(""));
 
@@ -16578,11 +16578,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     if (multi_char_matches) {
 	SV * substitute_parse = newSVpvn_flags("?:", 2, SVs_TEMP);
         I32 cp_count;
-	STRLEN len;
+	size_t len;
 	char *save_end = RExC_end;
 	char *save_parse = RExC_parse;
 	char *save_start = RExC_start;
-        STRLEN prefix_end = 0;      /* We copy the character class after a
+        size_t prefix_end = 0;      /* We copy the character class after a
                                        prefix supplied here.  This is the size
                                        + 1 of that prefix */
         bool first_time = TRUE;     /* First multi-char occurrence doesn't get
@@ -16928,7 +16928,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 /* Look at every character in the range */
                 for (j = start; j <= end; j++) {
                     U8 foldbuf[UTF8_MAXBYTES_CASE+1];
-                    STRLEN foldlen;
+                    size_t foldlen;
                     SV** listp;
 
                     if (j < 256) {
@@ -17732,7 +17732,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                  * desired output inversion list, making 'matches_string' only
                  * contain the currently unresolvable things */
                 const char *si_string = SvPVX(si);
-                STRLEN remaining = SvCUR(si);
+                size_t remaining = SvCUR(si);
                 UV prev_cp = 0;
                 U8 count = 0;
 
@@ -17757,7 +17757,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                      * inversion list */
                     I32 grok_flags =  PERL_SCAN_SILENT_ILLDIGIT
                                      |PERL_SCAN_SILENT_NON_PORTABLE;
-                    STRLEN len = remaining;
+                    size_t len = remaining;
                     UV cp = grok_hex(si_string, &len, &grok_flags, NULL);
 
                     /* If the hex decode routine found something, it should go
@@ -17912,7 +17912,7 @@ S_skip_to_be_ignored_text(pTHX_ RExC_state_t *pRExC_state,
 	if (use_xmod) {
             const char * save_p = *p;
             while ((*p) < RExC_end) {
-                STRLEN len;
+                size_t len;
                 if ((len = is_PATWS_safe((*p), RExC_end, UTF))) {
                     (*p) += len;
                 }
@@ -17962,7 +17962,7 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 }
 
 STATIC regnode *
-S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_size, const char* const name)
+S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const U8 op, const size_t extra_size, const char* const name)
 {
     /* Allocate a regnode for 'op' and returns it, with 'extra_size' extra
      * space.  In pass1, it aligns and increments RExC_size; in pass2,
@@ -18752,7 +18752,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             SV* contents;
 
             /* See if truncation size is overridden */
-            const STRLEN dump_len = (PL_dump_re_max_len)
+            const size_t dump_len = (PL_dump_re_max_len)
                                     ? PL_dump_re_max_len
                                     : 256;
 
@@ -18778,7 +18778,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             }
             else {
                 const char * contents_string = SvPVX(contents);
-                STRLEN i = dump_len;
+                size_t i = dump_len;
 
                 /* Otherwise, start at the permissible max and work back to the
                  * first break possibility */
@@ -19385,8 +19385,8 @@ STATIC void
 S_re_croak2(pTHX_ bool utf8, const char* pat1,const char* pat2,...)
 {
     va_list args;
-    STRLEN l1 = strlen(pat1);
-    STRLEN l2 = strlen(pat2);
+    size_t l1 = strlen(pat1);
+    size_t l2 = strlen(pat2);
     char buf[512];
     SV *msv;
     const char *message;
@@ -19439,7 +19439,7 @@ Perl_save_re_context(pTHX)
 
     for (i = 1; i <= nparens; i++) {
         char digits[TYPE_CHARS(long)];
-        const STRLEN len = my_snprintf(digits, sizeof(digits),
+        const size_t len = my_snprintf(digits, sizeof(digits),
                                        "%lu", (long)i);
         GV *const *const gvp
             = (GV**)hv_fetch(PL_defstash, digits, len, 0);
@@ -19822,7 +19822,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
     bool inverting_allowed = TRUE;
 
     int i;
-    STRLEN orig_sv_cur = SvCUR(sv);
+    size_t orig_sv_cur = SvCUR(sv);
 
     SV* invlist;            /* Inversion list we accumulate of code points that
                                are unconditionally matched */

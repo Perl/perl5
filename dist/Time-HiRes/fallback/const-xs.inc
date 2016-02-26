@@ -6,7 +6,7 @@ constant(sv)
 #else
 	dTARGET;
 #endif
-	STRLEN		len;
+	size_t		len;
         int		type;
 	IV		iv;
 	/* NV		nv;	Uncomment this if you need to return NVs */

@@ -297,7 +297,7 @@ U32
 Perl_mg_length(pTHX_ SV *sv)
 {
     MAGIC* mg;
-    STRLEN len;
+    size_t len;
 
     PERL_ARGS_ASSERT_MG_LENGTH;
 
@@ -651,15 +651,15 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 	const REGEXP * const rx = PM_GETRE(PL_curpm);
 	if (rx) {
 	    const I32 paren = mg->mg_len;
-	    SSize_t s;
-	    SSize_t t;
+	    ssize_t s;
+	    ssize_t t;
 	    if (paren < 0)
 		return 0;
 	    if (paren <= (I32)RX_NPARENS(rx) &&
 		(s = RX_OFFS(rx)[paren].start) != -1 &&
 		(t = RX_OFFS(rx)[paren].end) != -1)
 		{
-		    SSize_t i;
+		    ssize_t i;
 		    if (mg->mg_obj)		/* @+ */
 			i = t;
 		    else			/* @- */
@@ -697,7 +697,7 @@ Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)
 
 #define SvRTRIM(sv) STMT_START { \
     if (SvPOK(sv)) { \
-        STRLEN len = SvCUR(sv); \
+        size_t len = SvCUR(sv); \
         char * const p = SvPVX(sv); \
 	while (len > 0 && isSPACE(p[len-1])) \
 	   --len; \
@@ -1184,7 +1184,7 @@ Perl_magic_getuvar(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 {
-    STRLEN len = 0, klen;
+    size_t len = 0, klen;
     const char * const key = MgPV_const(mg,klen);
     const char *s = "";
 
@@ -1343,7 +1343,7 @@ Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_GETSIG;
 
     if (!i) {
-        STRLEN siglen;
+        size_t siglen;
         const char * sig = MgPV_const(mg, siglen);
         mg->mg_private = i = whichsig_pvn(sig, siglen);
     }
@@ -1534,7 +1534,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
      * is in place before it is called.
      */
     SV* to_dec = NULL;
-    STRLEN len;
+    size_t len;
 #ifdef HAS_SIGPROCMASK
     sigset_t set, save;
     SV* save_sv;
@@ -2136,7 +2136,7 @@ Perl_magic_getpos(pTHX_ SV *sv, MAGIC *mg)
     PERL_UNUSED_ARG(mg);
 
     if (found && found->mg_len != -1) {
-	    STRLEN i = found->mg_len;
+	    size_t i = found->mg_len;
 	    if (found->mg_flags & MGf_BYTES && DO_UTF8(lsv))
 		i = sv_pos_b2u_flags(lsv, i, SV_GMAGIC|SV_CONST_RETURN);
 	    sv_setuv(sv, i);
@@ -2150,9 +2150,9 @@ int
 Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 {
     SV* const lsv = LvTARG(sv);
-    SSize_t pos;
-    STRLEN len;
-    STRLEN ulen = 0;
+    ssize_t pos;
+    size_t len;
+    size_t ulen = 0;
     MAGIC* found;
     const char *s;
 
@@ -2184,7 +2184,7 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 	if (pos < 0)
 	    pos = 0;
     }
-    else if (pos > (SSize_t)len)
+    else if (pos > (ssize_t)len)
 	pos = len;
 
     found->mg_len = pos;
@@ -2196,11 +2196,11 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
 {
-    STRLEN len;
+    size_t len;
     SV * const lsv = LvTARG(sv);
     const char * const tmps = SvPV_const(lsv,len);
-    STRLEN offs = LvTARGOFF(sv);
-    STRLEN rem = LvTARGLEN(sv);
+    size_t offs = LvTARGOFF(sv);
+    size_t rem = LvTARGLEN(sv);
     const bool negoff = LvFLAGS(sv) & 1;
     const bool negrem = LvFLAGS(sv) & 2;
 
@@ -2228,11 +2228,11 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 {
-    STRLEN len, lsv_len, oldtarglen, newtarglen;
+    size_t len, lsv_len, oldtarglen, newtarglen;
     const char * const tmps = SvPV_const(sv, len);
     SV * const lsv = LvTARG(sv);
-    STRLEN lvoff = LvTARGOFF(sv);
-    STRLEN lvlen = LvTARGLEN(sv);
+    size_t lvoff = LvTARGOFF(sv);
+    size_t lvlen = LvTARGLEN(sv);
     const bool negoff = LvFLAGS(sv) & 1;
     const bool neglen = LvFLAGS(sv) & 2;
 
@@ -2576,7 +2576,7 @@ S_set_dollarzero(pTHX_ SV *sv)
     dVAR;
 #endif
     const char *s;
-    STRLEN len;
+    size_t len;
 #ifdef HAS_SETPROCTITLE
     /* The BSDs don't show the argv[] in ps(1) output, they
      * show a string from the process struct and provide
@@ -2612,7 +2612,7 @@ S_set_dollarzero(pTHX_ SV *sv)
         I32 i;
         /* PL_origalen is set in perl_parse(). */
         s = SvPV_force(sv,len);
-        if (len >= (STRLEN)PL_origalen-1) {
+        if (len >= (size_t)PL_origalen-1) {
             /* Longer than original, will be truncated. We assume that
              * PL_origalen bytes are available. */
             Copy(s, PL_origargv[0], PL_origalen-1, char);
@@ -2657,7 +2657,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     I32 paren;
     const REGEXP * rx;
     I32 i;
-    STRLEN len;
+    size_t len;
     MAGIC *tmg;
 
     PERL_ARGS_ASSERT_MAGIC_SET;
@@ -2794,7 +2794,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    }
 	}
 	else if (strEQ(mg->mg_ptr, "\017PEN")) {
-	    STRLEN len;
+	    size_t len;
 	    const char *const start = SvPV(sv, len);
 	    const char *out = (const char*)memchr(start, '\0', len);
 	    SV *tmp;
@@ -2811,7 +2811,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    (void)hv_stores(GvHV(PL_hintgv), "open>", tmp);
 	    mg_set(tmp);
 
-	    tmp = newSVpvn_flags(start, out ? (STRLEN)(out - start) : len,
+	    tmp = newSVpvn_flags(start, out ? (size_t)(out - start) : len,
 				        SvUTF8(sv));
 	    (void)hv_stores(GvHV(PL_hintgv), "open<", tmp);
 	    mg_set(tmp);
@@ -2849,7 +2849,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		    break;
 		}
 		{
-		    STRLEN len, i;
+		    size_t len, i;
 		    int accumulate = 0 ;
 		    int any_fatals = 0 ;
 		    const char * const ptr = SvPV_const(sv, len) ;
@@ -2864,7 +2864,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		    }
 		    /* Yuck. I can't see how to abstract this:  */
 		    else if (isWARN_on(
-                                ((STRLEN *)SvPV_nolen_const(sv)) - 1,
+                                ((size_t *)SvPV_nolen_const(sv)) - 1,
                                 WARN_ALL)
                             && !any_fatals)
                     {
@@ -2874,7 +2874,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	                PL_dowarn |= G_WARN_ONCE ;
 	            }
                     else {
-			STRLEN len;
+			size_t len;
 			const char *const p = SvPV_const(sv, len);
 
 			PL_compiling.cop_warnings
@@ -3215,7 +3215,7 @@ I32
 Perl_whichsig_sv(pTHX_ SV *sigsv)
 {
     const char *sigpv;
-    STRLEN siglen;
+    size_t siglen;
     PERL_ARGS_ASSERT_WHICHSIG_SV;
     sigpv = SvPV_const(sigsv, siglen);
     return whichsig_pvn(sigpv, siglen);
@@ -3229,7 +3229,7 @@ Perl_whichsig_pv(pTHX_ const char *sig)
 }
 
 I32
-Perl_whichsig_pvn(pTHX_ const char *sig, STRLEN len)
+Perl_whichsig_pvn(pTHX_ const char *sig, size_t len)
 {
     char* const* sigv;
 

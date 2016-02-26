@@ -404,9 +404,9 @@ DllExport HWND		win32_create_message_window(void);
 DllExport int		win32_async_check(pTHX);
 
 extern int		my_fclose(FILE *);
-extern char *		win32_get_privlib(WIN32_NO_REGISTRY_M_(const char *pl) STRLEN *const len);
-extern char *		win32_get_sitelib(const char *pl, STRLEN *const len);
-extern char *		win32_get_vendorlib(const char *pl, STRLEN *const len);
+extern char *		win32_get_privlib(WIN32_NO_REGISTRY_M_(const char *pl) size_t *const len);
+extern char *		win32_get_sitelib(const char *pl, size_t *const len);
+extern char *		win32_get_vendorlib(const char *pl, size_t *const len);
 
 #ifdef PERL_IMPLICIT_SYS
 extern void		win32_delete_internal_host(void *h);
@@ -624,7 +624,7 @@ EXTERN_C _CRTIMP ioinfo* __pioinfo[];
  */
 #ifdef WIN32_DYN_IOINFO_SIZE
 #  define _pioinfo(i) ((intptr_t *) \
-     (((Size_t)__pioinfo[(i) >> IOINFO_L2E])/* * to head of array ioinfo [] */\
+     (((size_t)__pioinfo[(i) >> IOINFO_L2E])/* * to head of array ioinfo [] */\
       /* offset to the head of a particular ioinfo struct */ \
       + (((i) & (IOINFO_ARRAY_ELTS - 1)) * w32_ioinfo_size)) \
    )

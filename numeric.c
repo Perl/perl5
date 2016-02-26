@@ -134,10 +134,10 @@ on this platform.
  */
 
 UV
-Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
+Perl_grok_bin(pTHX_ const char *start, size_t *len_p, I32 *flags, NV *result)
 {
     const char *s = start;
-    STRLEN len = *len_p;
+    size_t len = *len_p;
     UV value = 0;
     NV value_nv = 0;
 
@@ -257,10 +257,10 @@ on this platform.
  */
 
 UV
-Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
+Perl_grok_hex(pTHX_ const char *start, size_t *len_p, I32 *flags, NV *result)
 {
     const char *s = start;
-    STRLEN len = *len_p;
+    size_t len = *len_p;
     UV value = 0;
     NV value_nv = 0;
     const UV max_div_16 = UV_MAX / 16;
@@ -376,10 +376,10 @@ on this platform.
  */
 
 UV
-Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
+Perl_grok_oct(pTHX_ const char *start, size_t *len_p, I32 *flags, NV *result)
 {
     const char *s = start;
-    STRLEN len = *len_p;
+    size_t len = *len_p;
     UV value = 0;
     NV value_nv = 0;
     const UV max_div_8 = UV_MAX / 8;
@@ -470,7 +470,7 @@ For backwards compatibility.  Use C<grok_oct> instead.
  */
 
 NV
-Perl_scan_bin(pTHX_ const char *start, STRLEN len, STRLEN *retlen)
+Perl_scan_bin(pTHX_ const char *start, size_t len, size_t *retlen)
 {
     NV rnv;
     I32 flags = *retlen ? PERL_SCAN_ALLOW_UNDERSCORES : 0;
@@ -483,7 +483,7 @@ Perl_scan_bin(pTHX_ const char *start, STRLEN len, STRLEN *retlen)
 }
 
 NV
-Perl_scan_oct(pTHX_ const char *start, STRLEN len, STRLEN *retlen)
+Perl_scan_oct(pTHX_ const char *start, size_t len, size_t *retlen)
 {
     NV rnv;
     I32 flags = *retlen ? PERL_SCAN_ALLOW_UNDERSCORES : 0;
@@ -496,7 +496,7 @@ Perl_scan_oct(pTHX_ const char *start, STRLEN len, STRLEN *retlen)
 }
 
 NV
-Perl_scan_hex(pTHX_ const char *start, STRLEN len, STRLEN *retlen)
+Perl_scan_hex(pTHX_ const char *start, size_t len, size_t *retlen)
 {
     NV rnv;
     I32 flags = *retlen ? PERL_SCAN_ALLOW_UNDERSCORES : 0;
@@ -525,7 +525,7 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
         STORE_LC_NUMERIC_SET_TO_NEEDED();
         if (PL_numeric_radix_sv) {
-            STRLEN len;
+            size_t len;
             const char * const radix = SvPV(PL_numeric_radix_sv, len);
             if (*sp + len <= send && memEQ(*sp, radix, len)) {
                 *sp += len;
@@ -686,7 +686,7 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
                     if (s[0] == '0' && s + 2 < t &&
                         isALPHA_FOLD_EQ(s[1], 'x') &&
                         isXDIGIT(s[2])) {
-                        STRLEN len = t - s;
+                        size_t len = t - s;
                         I32 flags = PERL_SCAN_ALLOW_UNDERSCORES;
                         nanval = grok_hex(s, &len, &flags, NULL);
                         if ((flags & PERL_SCAN_GREATER_THAN_UV_MAX)) {
@@ -698,7 +698,7 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
                     } else if (s[0] == '0' && s + 2 < t &&
                                isALPHA_FOLD_EQ(s[1], 'b') &&
                                (s[2] == '0' || s[2] == '1')) {
-                        STRLEN len = t - s;
+                        size_t len = t - s;
                         I32 flags = PERL_SCAN_ALLOW_UNDERSCORES;
                         nanval = grok_bin(s, &len, &flags, NULL);
                         if ((flags & PERL_SCAN_GREATER_THAN_UV_MAX)) {
@@ -834,7 +834,7 @@ Identical to C<grok_number_flags()> with C<flags> set to zero.
 =cut
  */
 int
-Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
+Perl_grok_number(pTHX_ const char *pv, size_t len, UV *valuep)
 {
     PERL_ARGS_ASSERT_GROK_NUMBER;
 
@@ -845,7 +845,7 @@ static const UV uv_max_div_10 = UV_MAX / 10;
 static const U8 uv_max_mod_10 = UV_MAX % 10;
 
 int
-Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
+Perl_grok_number_flags(pTHX_ const char *pv, size_t len, UV *valuep, U32 flags)
 {
   const char *s = pv;
   const char * const send = pv + len;
@@ -1568,7 +1568,7 @@ Perl_isinfnansv(pTHX_ SV *sv)
     if (SvIOKp(sv))
         return FALSE;
     {
-        STRLEN len;
+        size_t len;
         const char *s = SvPV_nomg_const(sv, len);
         return cBOOL(grok_infnan(&s, s+len));
     }

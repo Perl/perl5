@@ -14,7 +14,7 @@
 
 /* ------------------------------- av.h ------------------------------- */
 
-PERL_STATIC_INLINE SSize_t
+PERL_STATIC_INLINE ssize_t
 S_av_top_index(pTHX_ AV *av)
 {
     PERL_ARGS_ASSERT_AV_TOP_INDEX;
@@ -53,7 +53,7 @@ S_CvDEPTHp(const CV * const sv)
 
 #ifdef PERL_CORE
 PERL_STATIC_INLINE char *
-S_strip_spaces(pTHX_ const char * orig, STRLEN * const len)
+S_strip_spaces(pTHX_ const char * orig, size_t * const len)
 {
     SV * tmpsv;
     char * tmps;
@@ -74,15 +74,15 @@ S_strip_spaces(pTHX_ const char * orig, STRLEN * const len)
 
 #if defined(PERL_CORE) || defined(PERL_EXT)
 /* assumes get-magic and stringification have already occurred */
-PERL_STATIC_INLINE STRLEN
-S_MgBYTEPOS(pTHX_ MAGIC *mg, SV *sv, const char *s, STRLEN len)
+PERL_STATIC_INLINE size_t
+S_MgBYTEPOS(pTHX_ MAGIC *mg, SV *sv, const char *s, size_t len)
 {
     assert(mg->mg_type == PERL_MAGIC_regex_global);
     assert(mg->mg_len != -1);
     if (mg->mg_flags & MGf_BYTES || !DO_UTF8(sv))
-	return (STRLEN)mg->mg_len;
+	return (size_t)mg->mg_len;
     else {
-	const STRLEN pos = (STRLEN)mg->mg_len;
+	const size_t pos = (size_t)mg->mg_len;
 	/* Without this check, we may read past the end of the buffer: */
 	if (pos > sv_or_pv_len_utf8(sv, s, len)) return len+1;
 	return sv_or_pv_pos_u2b(sv, s, pos, NULL);
@@ -203,14 +203,14 @@ S_SvPADSTALE_off(SV *sv)
     return SvFLAGS(sv) &= ~SVs_PADSTALE;
 }
 #if defined(PERL_CORE) || defined (PERL_EXT)
-PERL_STATIC_INLINE STRLEN
-S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
+PERL_STATIC_INLINE size_t
+S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, size_t pos, size_t *lenp)
 {
     PERL_ARGS_ASSERT_SV_OR_PV_POS_U2B;
     if (SvGAMAGIC(sv)) {
 	U8 *hopped = utf8_hop((U8 *)pv, pos);
-	if (lenp) *lenp = (STRLEN)(utf8_hop(hopped, *lenp) - hopped);
-	return (STRLEN)(hopped - (U8 *)pv);
+	if (lenp) *lenp = (size_t)(utf8_hop(hopped, *lenp) - hopped);
+	return (size_t)(hopped - (U8 *)pv);
     }
     return sv_pos_u2b_flags(sv,pos,lenp,SV_CONST_RETURN);
 }
@@ -264,19 +264,19 @@ Note that an INVARIANT (i.e. ASCII on non-EBCDIC) character is a valid UTF-8
 character.
 
 =cut */
-PERL_STATIC_INLINE STRLEN
+PERL_STATIC_INLINE size_t
 S__is_utf8_char_slow(const U8 *s, const U8 *e)
 {
     dTHX;   /* The function called below requires thread context */
 
-    STRLEN actual_len;
+    size_t actual_len;
 
     PERL_ARGS_ASSERT__IS_UTF8_CHAR_SLOW;
 
     assert(e >= s);
     utf8n_to_uvchr(s, e - s, &actual_len, UTF8_CHECK_ONLY);
 
-    return (actual_len == (STRLEN) -1) ? 0 : actual_len;
+    return (actual_len == (size_t) -1) ? 0 : actual_len;
 }
 
 /* ------------------------------- perl.h ----------------------------- */
@@ -284,7 +284,7 @@ S__is_utf8_char_slow(const U8 *s, const U8 *e)
 /*
 =head1 Miscellaneous Functions
 
-=for apidoc AiR|bool|is_safe_syscall|const char *pv|STRLEN len|const char *what|const char *op_name
+=for apidoc AiR|bool|is_safe_syscall|const char *pv|size_t len|const char *what|const char *op_name
 
 Test that the given C<pv> doesn't contain any internal C<NUL> characters.
 If it does, set C<errno> to C<ENOENT>, optionally warn, and return FALSE.
@@ -297,7 +297,7 @@ Used by the C<IS_SAFE_SYSCALL()> macro.
 */
 
 PERL_STATIC_INLINE bool
-S_is_safe_syscall(pTHX_ const char *pv, STRLEN len, const char *what, const char *op_name) {
+S_is_safe_syscall(pTHX_ const char *pv, size_t len, const char *what, const char *op_name) {
     /* While the Windows CE API provides only UCS-16 (or UTF-16) APIs
      * perl itself uses xce*() functions which accept 8-bit strings.
      */
@@ -339,7 +339,7 @@ then calling:
 
 PERL_STATIC_INLINE bool
 S_should_warn_nl(const char *pv) {
-    STRLEN len;
+    size_t len;
 
     PERL_ARGS_ASSERT_SHOULD_WARN_NL;
 
@@ -355,7 +355,7 @@ S_should_warn_nl(const char *pv) {
 #define MAX_CHARSET_NAME_LENGTH 2
 
 PERL_STATIC_INLINE const char *
-get_regex_charset_name(const U32 flags, STRLEN* const lenp)
+get_regex_charset_name(const U32 flags, size_t* const lenp)
 {
     /* Returns a string that corresponds to the name of the regex character set
      * given by 'flags', and *lenp is set the length of that string, which

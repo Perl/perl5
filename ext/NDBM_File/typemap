@@ -15,7 +15,7 @@ DBZ_File		T_PTROBJ
 INPUT
 T_DATUM_K
 	{
-	    STRLEN len;
+	    size_t len;
 	    DBM_ckFilter($arg, filter[store_key], \"filter_store_key\");
 	    $var.dptr = SvPVbyte($arg, len);
 	    $var.dsize = (int)len;
@@ -23,7 +23,7 @@ T_DATUM_K
 T_DATUM_V
         DBM_ckFilter($arg, filter[store_value], \"filter_store_value\");
 	if (SvOK($arg)) {
-	    STRLEN len;
+	    size_t len;
 	    $var.dptr = SvPVbyte($arg, len);
 	    $var.dsize = (int)len;
 	}

@@ -1965,7 +1965,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		argc--,argv++;
 	    }
 	    if (s && *s) {
-		STRLEN len = strlen(s);
+		size_t len = strlen(s);
 		incpush(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_ADD_OLD_VERS);
 	    }
 	    else
@@ -2571,7 +2571,7 @@ Uses C<strlen> to get the length of C<name>, then calls C<get_cvn_flags>.
 */
 
 CV*
-Perl_get_cvn_flags(pTHX_ const char *name, STRLEN len, I32 flags)
+Perl_get_cvn_flags(pTHX_ const char *name, size_t len, I32 flags)
 {
     GV* const gv = gv_fetchpvn_flags(name, len, flags, SVt_PVCV);
 
@@ -2666,7 +2666,7 @@ Perl_call_method(pTHX_ const char *methname, I32 flags)
                		/* name of the subroutine */
           		/* See G_* flags in cop.h */
 {
-    STRLEN len;
+    size_t len;
     SV* sv;
     PERL_ARGS_ASSERT_CALL_METHOD;
 
@@ -3147,7 +3147,7 @@ Perl_moreswitches(pTHX_ const char *s)
     case '0':
     {
 	 I32 flags = 0;
-	 STRLEN numlen;
+	 size_t numlen;
 
 	 SvREFCNT_dec(PL_rs);
 	 if (s[1] == 'x' && s[2]) {
@@ -3165,7 +3165,7 @@ Perl_moreswitches(pTHX_ const char *s)
 		   s--;
 	      }
 	      PL_rs = newSVpvs("");
-	      SvGROW(PL_rs, (STRLEN)(UVCHR_SKIP(rschar) + 1));
+	      SvGROW(PL_rs, (size_t)(UVCHR_SKIP(rschar) + 1));
 	      tmps = (U8*)SvPVX(PL_rs);
 	      uvchr_to_utf8(tmps, rschar);
 	      SvCUR_set(PL_rs, UVCHR_SKIP(rschar));
@@ -3328,7 +3328,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	}
 	if (isDIGIT(*s)) {
             I32 flags = 0;
-	    STRLEN numlen;
+	    size_t numlen;
 	    PL_ors_sv = newSVpvs("\n");
 	    numlen = 3 + (*s == '0');
 	    *SvPVX(PL_ors_sv) = (char)grok_oct(s, &numlen, &flags, NULL);
@@ -3494,7 +3494,7 @@ S_minus_v(pTHX)
 	PerlIO * PIO_stdout;
 	{
 	    const char * const level_str = "v" PERL_VERSION_STRING;
-	    const STRLEN level_len = sizeof("v" PERL_VERSION_STRING)-1;
+	    const size_t level_len = sizeof("v" PERL_VERSION_STRING)-1;
 #ifdef PERL_PATCHNUM
 	    SV* level;
 #  ifdef PERL_GIT_UNCOMMITTED_CHANGES
@@ -3503,7 +3503,7 @@ S_minus_v(pTHX)
 	    static const char num [] = PERL_PATCHNUM;
 #  endif
 	    {
-		const STRLEN num_len = sizeof(num)-1;
+		const size_t num_len = sizeof(num)-1;
 		/* A very advanced compiler would fold away the strnEQ
 		   and this whole conditional, but most (all?) won't do it.
 		   SV level could also be replaced by with preprocessor
@@ -4078,7 +4078,7 @@ Perl_init_debugger(pTHX)
 void
 Perl_init_stacks(pTHX)
 {
-    SSize_t size;
+    ssize_t size;
 
     /* start with 128-item stack and 8K cxstack */
     PL_curstackinfo = new_stackinfo(REASONABLE(128),
@@ -4140,7 +4140,7 @@ S_nuke_stacks(pTHX)
 }
 
 void
-Perl_populate_isa(pTHX_ const char *name, STRLEN len, ...)
+Perl_populate_isa(pTHX_ const char *name, size_t len, ...)
 {
     GV *const gv = gv_fetchpvn(name, len, GV_ADD | GV_ADDMULTI, SVt_PVAV);
     AV *const isa = GvAVn(gv);
@@ -4366,7 +4366,7 @@ S_init_perllib(pTHX)
 #endif
     const char *s;
 #if defined(WIN32) && !defined(PERL_IS_MINIPERL)
-    STRLEN len;
+    size_t len;
 #endif
 
     if (!TAINTING_get) {
@@ -4583,7 +4583,7 @@ S_incpush_if_exists(pTHX_ AV *const av, SV *dir, SV *const stem)
 #endif
 
 STATIC SV *
-S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
+S_mayberelocate(pTHX_ const char *const dir, size_t len, U32 flags)
 {
     const U8 canrelocate = (U8)flags & INCPUSH_CAN_RELOCATE;
     SV *libdir;
@@ -4635,7 +4635,7 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	 * generates /usr/local/lib/perl5
 	 */
 	    const char *libpath = SvPVX(libdir);
-	    STRLEN libpath_len = SvCUR(libdir);
+	    size_t libpath_len = SvCUR(libdir);
 	    if (libpath_len >= 4 && memEQ (libpath, ".../", 4)) {
 		/* Game on!  */
 		SV * const caret_X = get_sv("\030", 0);
@@ -4718,7 +4718,7 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 }
 
 STATIC void
-S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
+S_incpush(pTHX_ const char *const dir, size_t len, U32 flags)
 {
 #ifndef PERL_IS_MINIPERL
     const U8 using_sub_dirs
@@ -4799,9 +4799,9 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	/* finally add this lib directory at the end of @INC */
 	if (unshift) {
 #ifdef PERL_IS_MINIPERL
-	    const Size_t extra = 0;
+	    const size_t extra = 0;
 #else
-	    Size_t extra = av_tindex(av) + 1;
+	    size_t extra = av_tindex(av) + 1;
 #endif
 	    av_unshift(inc, extra + push_basedir);
 	    if (push_basedir)
@@ -4835,7 +4835,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 }
 
 STATIC void
-S_incpush_use_sep(pTHX_ const char *p, STRLEN len, U32 flags)
+S_incpush_use_sep(pTHX_ const char *p, size_t len, U32 flags)
 {
     const char *s;
     const char *end;
@@ -4866,12 +4866,12 @@ S_incpush_use_sep(pTHX_ const char *p, STRLEN len, U32 flags)
 	    /* But you'll need to write tests */
 	    /* av_push(GvAVn(PL_incgv), newSVpvs(".")); */
 	} else {
-	    incpush(p, (STRLEN)(s - p), flags);
+	    incpush(p, (size_t)(s - p), flags);
 	}
 	p = s + 1;
     }
     if (p != end)
-	incpush(p, (STRLEN)(end - p), flags);
+	incpush(p, (size_t)(end - p), flags);
 
 }
 
@@ -4881,7 +4881,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
     SV *atsv;
     volatile const line_t oldline = PL_curcop ? CopLINE(PL_curcop) : 0;
     CV *cv;
-    STRLEN len;
+    size_t len;
     int ret;
     dJMPENV;
 

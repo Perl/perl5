@@ -190,7 +190,7 @@ VXS(version_new)
     SV *vs;
     SV *rv;
     const char * classname = "";
-    STRLEN len;
+    size_t len;
     U32 flags = 0;
     SV * svarg0 = NULL;
     PERL_UNUSED_VAR(cv);
@@ -416,7 +416,7 @@ VXS(version_qv)
 	SV * ver = ST(0);
 	SV * sv0 = ver;
 	SV * rv;
-        STRLEN len = 0;
+        size_t len = 0;
         const char * classname = "";
         U32 flags = 0;
         if ( items == 2 ) {

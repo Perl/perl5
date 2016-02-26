@@ -512,8 +512,8 @@ SKIP:
 }
 
 SKIP:
-{ # write() beyond SSize_t limit
-    skip "Can't overflow SSize_t with Off_t", 2
+{ # write() beyond ssize_t limit
+    skip "Can't overflow ssize_t with Off_t", 2
       if $Config::Config{lseeksize} <= $Config::Config{sizesize};
     my $buf0 = "hello";
     open my $fh, "+<", \$buf0 or die $!;

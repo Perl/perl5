@@ -27,10 +27,10 @@
 #include "perl.h"
 
 SV**
-Perl_stack_grow(pTHX_ SV **sp, SV **p, SSize_t n)
+Perl_stack_grow(pTHX_ SV **sp, SV **p, ssize_t n)
 {
-    SSize_t extra;
-    SSize_t current = (p - PL_stack_base);
+    ssize_t extra;
+    ssize_t current = (p - PL_stack_base);
 
     PERL_ARGS_ASSERT_STACK_GROW;
 
@@ -174,10 +174,10 @@ Perl_savestack_grow_cnt(pTHX_ I32 need)
     tmps_grow call since tmps_grow doesn't look at PL_tmps_ix.
  */
 
-SSize_t
-Perl_tmps_grow_p(pTHX_ SSize_t ix)
+ssize_t
+Perl_tmps_grow_p(pTHX_ ssize_t ix)
 {
-    SSize_t extend_to = ix;
+    ssize_t extend_to = ix;
 #ifndef STRESS_REALLOC
     if (ix - PL_tmps_max < 128)
 	extend_to += (PL_tmps_max < 512) ? 128 : 512;
@@ -192,7 +192,7 @@ void
 Perl_free_tmps(pTHX)
 {
     /* XXX should tmps_floor live in cxstack? */
-    const SSize_t myfloor = PL_tmps_floor;
+    const ssize_t myfloor = PL_tmps_floor;
     while (PL_tmps_ix > myfloor) {      /* clean up after last statement */
 	SV* const sv = PL_tmps_stack[PL_tmps_ix--];
 #ifdef PERL_POISON
@@ -481,7 +481,7 @@ Perl_save_I32(pTHX_ I32 *intp)
 }
 
 void
-Perl_save_strlen(pTHX_ STRLEN *ptr)
+Perl_save_strlen(pTHX_ size_t *ptr)
 {
     dSS_ADD;
 
@@ -591,7 +591,7 @@ Perl_save_delete(pTHX_ HV *hv, char *key, I32 klen)
 void
 Perl_save_hdelete(pTHX_ HV *hv, SV *keysv)
 {
-    STRLEN len;
+    size_t len;
     I32 klen;
     const char *key;
 
@@ -604,7 +604,7 @@ Perl_save_hdelete(pTHX_ HV *hv, SV *keysv)
 }
 
 void
-Perl_save_adelete(pTHX_ AV *av, SSize_t key)
+Perl_save_adelete(pTHX_ AV *av, ssize_t key)
 {
     dSS_ADD;
 
@@ -667,7 +667,7 @@ S_save_pushptri32ptr(pTHX_ void *const ptr1, const I32 i, void *const ptr2,
 }
 
 void
-Perl_save_aelem_flags(pTHX_ AV *av, SSize_t idx, SV **sptr,
+Perl_save_aelem_flags(pTHX_ AV *av, ssize_t idx, SV **sptr,
 			    const U32 flags)
 {
     dSS_ADD;
@@ -958,11 +958,11 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_INT:				/* int reference */
 	    *(int*)ARG0_PTR = (int)ARG1_I32;
 	    break;
-	case SAVEt_STRLEN:			/* STRLEN/size_t ref */
-	    *(STRLEN*)ARG0_PTR = (STRLEN)arg1.any_iv;
+	case SAVEt_STRLEN:			/* size_t/size_t ref */
+	    *(size_t*)ARG0_PTR = (size_t)arg1.any_iv;
 	    break;
 	case SAVEt_TMPSFLOOR:			/* restore PL_tmps_floor */
-	    PL_tmps_floor = (SSize_t)arg0.any_iv;
+	    PL_tmps_floor = (ssize_t)arg0.any_iv;
 	    break;
 	case SAVEt_BOOL:			/* bool reference */
 	    *(bool*)ARG0_PTR = cBOOL(uv >> 8);
@@ -1297,7 +1297,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    if (!specialWARN(PL_compiling.cop_warnings))
 		PerlMemShared_free(PL_compiling.cop_warnings);
 
-	    PL_compiling.cop_warnings = (STRLEN*)ARG0_PTR;
+	    PL_compiling.cop_warnings = (size_t*)ARG0_PTR;
 	    break;
 	case SAVEt_PARSER:
 	    parser_free((yy_parser *) ARG0_PTR);

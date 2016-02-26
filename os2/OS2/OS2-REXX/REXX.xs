@@ -142,7 +142,7 @@ exec_in_REXX_with(pTHX_ char *cmd, int c, char **handlerNames, RexxFunctionHandl
     }
     if (rc || SvTRUE(GvSV(PL_errgv))) {
 	if (SvTRUE(GvSV(PL_errgv))) {
-	    STRLEN n_a;
+	    size_t n_a;
 	    Perl_croak(aTHX_ "Error inside perl function called from REXX compartment:\n%s", SvPV(GvSV(PL_errgv), n_a)) ;
 	}
 	Perl_croak(aTHX_ "REXX compartment returned non-zero status %li", rc);
@@ -241,7 +241,7 @@ SubCommandPerlEval(
   PRXSTRING    retstr )                /* return code                */
 {
     dSP;
-    STRLEN len;
+    size_t len;
     int ret;
     char *str = 0;
     SV *in, *res;
@@ -356,8 +356,8 @@ _set(name,value,...)
 	   fprintf(stderr, "REXXCALL::_set");
        for (i = 0; i < n; ++i) {
 	   SHVBLOCK * var = &vars[i];
-	   STRLEN     namelen;
-	   STRLEN     valuelen;
+	   size_t     namelen;
+	   size_t     valuelen;
 	   name = SvPV(ST(2*i+0),namelen);
 	   if (2*i+1 < items) {
 	       value = SvPV(ST(2*i+1),valuelen);
@@ -401,7 +401,7 @@ _fetch(name, ...)
 	   fprintf(stderr, "REXXCALL::_fetch");
        for (i = 0; i < items; ++i) {
 	   SHVBLOCK * var = &vars[i];
-	   STRLEN     namelen;
+	   size_t     namelen;
 	   name = SvPV(ST(i),namelen);
 	   var->shvcode = RXSHV_FETCH;
 	   var->shvnext = &vars[i+1];
@@ -502,7 +502,7 @@ _drop(name,...)
        needvars(items);
        for (i = 0; i < items; ++i) {
 	   SHVBLOCK * var = &vars[i];
-	   STRLEN     namelen;
+	   size_t     namelen;
 	   name = SvPV(ST(i),namelen);
 	   var->shvcode = RXSHV_DROPV;
 	   var->shvnext = &vars[i+1];

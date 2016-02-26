@@ -141,7 +141,7 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 }
 
 bool
-Perl_do_open_raw(pTHX_ GV *gv, const char *oname, STRLEN len,
+Perl_do_open_raw(pTHX_ GV *gv, const char *oname, size_t len,
                  int rawmode, int rawperm)
 {
     PerlIO *saveifp;
@@ -158,7 +158,7 @@ Perl_do_open_raw(pTHX_ GV *gv, const char *oname, STRLEN len,
     /* For ease of blame back to 5.000, keep the existing indenting. */
     {
         /* sysopen style args, i.e. integer mode and permissions */
-	STRLEN ix = 0;
+	size_t ix = 0;
 	const int appendtrunc =
 	     0
 #ifdef O_APPEND	/* Not fully portable. */
@@ -210,7 +210,7 @@ Perl_do_open_raw(pTHX_ GV *gv, const char *oname, STRLEN len,
 }
 
 bool
-Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
+Perl_do_open6(pTHX_ GV *gv, const char *oname, size_t len,
               PerlIO *supplied_fp, SV **svp, U32 num_svs)
 {
     PerlIO *saveifp;
@@ -230,7 +230,7 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
     {
 	/* Regular (non-sys) open */
 	char *name;
-	STRLEN olen = len;
+	size_t olen = len;
 	char *tend;
 	int dodup = 0;
         bool in_raw = 0, in_crlf = 0, out_raw = 0, out_crlf = 0;
@@ -257,7 +257,7 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
 
 	if (num_svs) {
             const char *p;
-            STRLEN nlen = 0;
+            size_t nlen = 0;
 	    /* New style explicit name, type is just mode and layer info */
 #ifdef USE_STDIO
 	    if (SvROK(*svp) && !strchr(oname,'&')) {
@@ -836,7 +836,7 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 	return NULL;
     while (av_tindex(GvAV(gv)) >= 0) {
 	Stat_t statbuf;
-	STRLEN oldlen;
+	size_t oldlen;
         SV *const sv = av_shift(GvAV(gv));
 	SAVEFREESV(sv);
 	SvTAINTED_off(GvSVn(gv)); /* previous tainting irrelevant */
@@ -1220,7 +1220,7 @@ Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
 }
 
 int
-Perl_mode_from_discipline(pTHX_ const char *s, STRLEN len)
+Perl_mode_from_discipline(pTHX_ const char *s, size_t len)
 {
     int mode = O_BINARY;
     PERL_UNUSED_CONTEXT;
@@ -1344,7 +1344,7 @@ Perl_do_print(pTHX_ SV *sv, PerlIO *fp)
 	return !PerlIO_error(fp);
     }
     else {
-	STRLEN len;
+	size_t len;
 	/* Do this first to trigger any overloading.  */
 	const char *tmps = SvPV_const(sv, len);
 	U8 *tmpbuf = NULL;
@@ -1362,7 +1362,7 @@ Perl_do_print(pTHX_ SV *sv, PerlIO *fp)
 	} /* else stream isn't utf8 */
 	else if (DO_UTF8(sv)) { /* But if is utf8 internally, attempt to
 				   convert to bytes */
-	    STRLEN tmplen = len;
+	    size_t tmplen = len;
 	    bool utf8 = TRUE;
 	    U8 * const result = bytes_from_utf8((const U8*) tmps, &tmplen, &utf8);
 	    if (!utf8) {
@@ -1438,7 +1438,7 @@ Perl_my_stat_flags(pTHX_ const U32 flags)
     else {
 	SV* const sv = TOPs;
 	const char *s;
-	STRLEN len;
+	size_t len;
 	if ((gv = MAYBE_DEREF_GV_flags(sv,flags))) {
 	    goto do_fstat;
 	}
@@ -1601,7 +1601,7 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
     char *buf;
     char *cmd;
     /* Make a copy so we can change it */
-    const Size_t cmdlen = strlen(incmd) + 1;
+    const size_t cmdlen = strlen(incmd) + 1;
 
     PERL_ARGS_ASSERT_DO_EXEC3;
 
@@ -1732,7 +1732,7 @@ Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
     I32 tot = 0;
     const char *const what = PL_op_name[type];
     const char *s;
-    STRLEN len;
+    size_t len;
     SV ** const oldmark = mark;
     bool killgp = FALSE;
 
@@ -2209,7 +2209,7 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 #endif
     const I32 cmd = SvIVx(*++mark);
     SV * const astr = *++mark;
-    STRLEN infosize = 0;
+    size_t infosize = 0;
     I32 getinfo = (cmd == IPC_STAT);
 
     PERL_ARGS_ASSERT_DO_IPCCTL;
@@ -2272,7 +2272,7 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 	}
 	else
 	{
-	    STRLEN len;
+	    size_t len;
 	    a = SvPV(astr, len);
 	    if (len != infosize)
 		Perl_croak(aTHX_ "Bad arg length for %s, is %lu, should be %ld",
@@ -2335,7 +2335,7 @@ I32
 Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_MSG
-    STRLEN len;
+    size_t len;
     const I32 id = SvIVx(*++mark);
     SV * const mstr = *++mark;
     const I32 flags = SvIVx(*++mark);
@@ -2412,7 +2412,7 @@ I32
 Perl_do_semop(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_SEM
-    STRLEN opsize;
+    size_t opsize;
     const I32 id = SvIVx(*++mark);
     SV * const opstr = *++mark;
     const char * const opbuf = SvPV_const(opstr, opsize);
@@ -2491,7 +2491,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 	if (! SvOK(mstr))
 	    sv_setpvs(mstr, "");
 	SvPOK_only(mstr);
-	mbuf = SvGROW(mstr, (STRLEN)msize+1);
+	mbuf = SvGROW(mstr, (size_t)msize+1);
 
 	Copy(shm + mpos, mbuf, msize, char);
 	SvCUR_set(mstr, msize);
@@ -2501,7 +2501,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 	SvTAINTED_on(mstr);
     }
     else {
-	STRLEN len;
+	size_t len;
 
 	const char *mbuf = SvPV_const(mstr, len);
 	const I32 n = ((I32)len > msize) ? msize : (I32)len;
@@ -2538,7 +2538,7 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 {
     SV * const tmpcmd = newSV(0);
     PerlIO *fp;
-    STRLEN len;
+    size_t len;
     const char *s = SvPV(tmpglob, len);
 
     PERL_ARGS_ASSERT_START_GLOB;

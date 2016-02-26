@@ -578,7 +578,7 @@ S_no_bareword_allowed(pTHX_ OP *o)
 /* "register" allocation */
 
 PADOFFSET
-Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
+Perl_allocmy(pTHX_ const char *const name, const size_t len, const U32 flags)
 {
     PADOFFSET off;
     const bool is_our = (PL_parser->in_my == KEY_our);
@@ -695,8 +695,8 @@ Perl_op_free(pTHX_ OP *o)
 {
     dVAR;
     OPCODE type;
-    SSize_t defer_ix = -1;
-    SSize_t defer_stack_alloc = 0;
+    ssize_t defer_ix = -1;
+    ssize_t defer_stack_alloc = 0;
     OP **defer_stack = NULL;
 
     do {
@@ -1782,8 +1782,8 @@ Perl_scalarvoid(pTHX_ OP *arg)
     OP *kid;
     SV* sv;
     U8 want;
-    SSize_t defer_stack_alloc = 0;
-    SSize_t defer_ix = -1;
+    ssize_t defer_stack_alloc = 0;
+    ssize_t defer_ix = -1;
     OP **defer_stack = NULL;
     OP *o = arg;
 
@@ -2357,8 +2357,8 @@ S_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op)
             && SvOK(sv)
             && !SvROK(sv))
         {
-            SSize_t keylen;
-            const char * const key = SvPV_const(sv, *(STRLEN*)&keylen);
+            ssize_t keylen;
+            const char * const key = SvPV_const(sv, *(size_t*)&keylen);
             SV *nsv = newSVpvn_share(key, SvUTF8(sv) ? -keylen : keylen, 0);
             SvREFCNT_dec_NN(sv);
             *svp = nsv;
@@ -3479,7 +3479,7 @@ to respect attribute syntax properly would be welcome.
 
 void
 Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv,
-                        const char *attrstr, STRLEN len)
+                        const char *attrstr, size_t len)
 {
     OP *attrs = NULL;
 
@@ -3514,7 +3514,7 @@ STATIC void
 S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name)
 {
     OP *new_proto = NULL;
-    STRLEN pvlen;
+    size_t pvlen;
     char *pv;
     OP *o;
 
@@ -3548,7 +3548,7 @@ S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name)
                     SvREFCNT_dec(cSVOPo_sv);
                     *tmpo = tmpsv;
                     if (new_proto && ckWARN(WARN_MISC)) {
-                        STRLEN new_len;
+                        size_t new_len;
                         const char * newp = SvPV(cSVOPo_sv, new_len);
                         Perl_warner(aTHX_ packWARN(WARN_MISC),
                             "Attribute prototype(%"UTF8f") discards earlier prototype attribute in same sub",
@@ -3587,7 +3587,7 @@ S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name)
         if (ckWARN(WARN_ILLEGALPROTO))
             (void)validate_proto(svname, cSVOPx_sv(new_proto), TRUE);
         if (*proto && ckWARN(WARN_PROTOTYPE)) {
-            STRLEN old_len, new_len;
+            size_t old_len, new_len;
             const char * oldp = SvPV(cSVOPx_sv(*proto), old_len);
             const char * newp = SvPV(cSVOPx_sv(new_proto), new_len);
 
@@ -4432,7 +4432,7 @@ S_gen_constant_list(pTHX_ OP *o)
 {
     dVAR;
     OP *curop;
-    const SSize_t oldtmps_floor = PL_tmps_floor;
+    const ssize_t oldtmps_floor = PL_tmps_floor;
     SV **svp;
     AV *av;
 
@@ -5029,8 +5029,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     SV * const tstr = ((SVOP*)expr)->op_sv;
     SV * const rstr =
 			      ((SVOP*)repl)->op_sv;
-    STRLEN tlen;
-    STRLEN rlen;
+    size_t tlen;
+    size_t rlen;
     const U8 *t = (U8*)SvPV_const(tstr, tlen);
     const U8 *r = (U8*)SvPV_const(rstr, rlen);
     I32 i;
@@ -5058,15 +5058,15 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	SV* transv = NULL;
 	const U8* tend = t + tlen;
 	const U8* rend = r + rlen;
-	STRLEN ulen;
+	size_t ulen;
 	UV tfirst = 1;
 	UV tlast = 0;
 	IV tdiff;
-	STRLEN tcount = 0;
+	size_t tcount = 0;
 	UV rfirst = 1;
 	UV rlast = 0;
 	IV rdiff;
-	STRLEN rcount = 0;
+	size_t rcount = 0;
 	IV diff;
 	I32 none = 0;
 	U32 max = 0;
@@ -5080,12 +5080,12 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	const U32 flags = UTF8_ALLOW_DEFAULT;
 
 	if (!from_utf) {
-	    STRLEN len = tlen;
+	    size_t len = tlen;
 	    t = tsave = bytes_to_utf8(t, &len);
 	    tend = t + len;
 	}
 	if (!to_utf && rlen) {
-	    STRLEN len = rlen;
+	    size_t len = rlen;
 	    r = rsave = bytes_to_utf8(r, &len);
 	    rend = r + len;
 	}
@@ -5593,7 +5593,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, bool isreg, I32 floor)
 		 * been stolen by constant folding.
 		 */
 #ifdef DEBUGGING
-		SSize_t i = 0;
+		ssize_t i = 0;
 		assert(PadnamelistMAXNAMED(PL_comppad_name) == 0);
 		while (++i <= AvFILLp(PL_comppad)) {
 		    assert(!PL_curpad[i]);
@@ -7417,7 +7417,7 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
     /* Check for a constant argument */
     if (label->op_type == OP_CONST) {
 	    SV * const sv = ((SVOP *)label)->op_sv;
-	    STRLEN l;
+	    size_t l;
 	    const char *s = SvPV_const(sv,l);
 	    if (l == strlen(s)) {
 		o = newPVOP(type,
@@ -7666,7 +7666,7 @@ Perl_newWHENOP(pTHX_ OP *cond, OP *block)
 
 void
 Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
-		    const STRLEN len, const U32 flags)
+		    const size_t len, const U32 flags)
 {
     SV *name = NULL, *msg;
     const char * cvp = SvROK(cv)
@@ -7674,7 +7674,7 @@ Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
 			   ? (cv = (const CV *)SvRV_const(cv), CvPROTO(cv))
 			   : ""
 			: CvPROTO(cv);
-    STRLEN clen = CvPROTOLEN(cv), plen = len;
+    size_t clen = CvPROTOLEN(cv), plen = len;
 
     PERL_ARGS_ASSERT_CV_CKPROTO_LEN_FLAGS;
 
@@ -7896,7 +7896,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     CV **spot;
     SV **svspot;
     const char *ps;
-    STRLEN ps_len = 0; /* init it to avoid false uninit warning from icc */
+    size_t ps_len = 0; /* init it to avoid false uninit warning from icc */
     U32 ps_utf8 = 0;
     CV *cv = NULL;
     CV *compcv = PL_compcv;
@@ -8247,7 +8247,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 {
     GV *gv;
     const char *ps;
-    STRLEN ps_len = 0; /* init it to avoid false uninit warning from icc */
+    size_t ps_len = 0; /* init it to avoid false uninit warning from icc */
     U32 ps_utf8 = 0;
     CV *cv = NULL;
     SV *const_sv;
@@ -8261,7 +8261,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	= ec ? GV_NOADD_NOINIT :
         (block || attrs || (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS))
 	? GV_ADDMULTI : GV_ADDMULTI | GV_NOINIT;
-    STRLEN namlen = 0;
+    size_t namlen = 0;
     const char * const name =
 	 o ? SvPV_const(o_is_gv ? (SV *)o : cSVOPo->op_sv, namlen) : NULL;
     bool has_name;
@@ -8533,8 +8533,8 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		CvNAME_HEK_set(cv,
 			       share_hek(name,
 					 name_is_utf8
-					    ? -(SSize_t)namlen
-					    :  (SSize_t)namlen,
+					    ? -(ssize_t)namlen
+					    :  (ssize_t)namlen,
 					 hash));
 	    }
 
@@ -8597,8 +8597,8 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	    PERL_HASH(hash, name, namlen);
 	    CvNAME_HEK_set(cv, share_hek(name,
 					 name_is_utf8
-					    ? -(SSize_t)namlen
-					    :  (SSize_t)namlen,
+					    ? -(ssize_t)namlen
+					    :  (ssize_t)namlen,
 					 hash));
 	}
 	CvFILE_set_from_cop(cv, PL_curcop);
@@ -8834,7 +8834,7 @@ compile time.)
 */
 
 CV *
-Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, STRLEN len,
+Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, size_t len,
                              U32 flags, SV *sv)
 {
     CV* cv;
@@ -8922,7 +8922,7 @@ Perl_newXS_deffile(pTHX_ const char *name, XSUBADDR_t subaddr)
 }
 
 CV *
-Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
+Perl_newXS_len_flags(pTHX_ const char *name, size_t len,
 			   XSUBADDR_t subaddr, const char *const filename,
 			   const char *const proto, SV **const_svp,
 			   U32 flags)
@@ -9267,7 +9267,7 @@ S_io_hints(pTHX_ OP *o)
     if (table) {
 	SV **svp = hv_fetchs(table, "open_IN", FALSE);
 	if (svp && *svp) {
-	    STRLEN len = 0;
+	    size_t len = 0;
 	    const char *d = SvPV_const(*svp, len);
 	    const I32 mode = mode_from_discipline(d, len);
             /* bit-and:ing with zero O_BINARY or O_TEXT would be useless. */
@@ -9283,7 +9283,7 @@ S_io_hints(pTHX_ OP *o)
 
 	svp = hv_fetchs(table, "open_OUT", FALSE);
 	if (svp && *svp) {
-	    STRLEN len = 0;
+	    size_t len = 0;
 	    const char *d = SvPV_const(*svp, len);
 	    const I32 mode = mode_from_discipline(d, len);
             /* bit-and:ing with zero O_BINARY or O_TEXT would be useless. */
@@ -9879,7 +9879,7 @@ Perl_ck_fun(pTHX_ OP *o)
 			/* is this op a FH constructor? */
 			if (is_handle_constructor(o,numargs)) {
                             const char *name = NULL;
-			    STRLEN len = 0;
+			    size_t len = 0;
                             U32 name_utf8 = 0;
 			    bool want_dollar = TRUE;
 
@@ -10357,7 +10357,7 @@ Perl_ck_method(pTHX_ OP *o)
     const char* method;
     char* compatptr;
     int utf8;
-    STRLEN len, nsplit = 0, i;
+    size_t len, nsplit = 0, i;
     OP* new_op;
     OP * const kid = cUNOPo->op_first;
 
@@ -10585,7 +10585,7 @@ Perl_ck_require(pTHX_ OP *o)
 	HEK *hek;
 	U32 hash;
 	char *s;
-	STRLEN len;
+	size_t len;
 	if (kid->op_type == OP_CONST) {
 	  SV * const sv = kid->op_sv;
 	  U32 const was_readonly = SvREADONLY(sv);
@@ -10612,7 +10612,7 @@ Perl_ck_require(pTHX_ OP *o)
 	    sv_catpvs(sv, ".pm");
 	    PERL_HASH(hash, SvPVX(sv), SvCUR(sv));
 	    hek = share_hek(SvPVX(sv),
-			    (SSize_t)SvCUR(sv) * (SvUTF8(sv) ? -1 : 1),
+			    (ssize_t)SvCUR(sv) * (SvUTF8(sv) ? -1 : 1),
 			    hash);
 	    sv_sethek(sv, hek);
 	    unshare_hek(hek);
@@ -10623,7 +10623,7 @@ Perl_ck_require(pTHX_ OP *o)
 	    s = SvPV(sv, len);
 	    if (SvREFCNT(sv) > 1) {
 		kid->op_sv = newSVpvn_share(
-		    s, SvUTF8(sv) ? -(SSize_t)len : (SSize_t)len, 0);
+		    s, SvUTF8(sv) ? -(ssize_t)len : (ssize_t)len, 0);
 		SvREFCNT_dec_NN(sv);
 	    }
 	    else {
@@ -10631,7 +10631,7 @@ Perl_ck_require(pTHX_ OP *o)
 		if (was_readonly) SvREADONLY_off(sv);
 		PERL_HASH(hash, s, len);
 		hek = share_hek(s,
-				SvUTF8(sv) ? -(SSize_t)len : (SSize_t)len,
+				SvUTF8(sv) ? -(ssize_t)len : (ssize_t)len,
 				hash);
 		sv_sethek(sv, hek);
 		unshare_hek(hek);
@@ -10767,7 +10767,7 @@ Perl_ck_sort(pTHX_ OP *o)
 	else if (kid->op_type == OP_CONST
 	      && kid->op_private & OPpCONST_BARE) {
 	    char tmpbuf[256];
-	    STRLEN len;
+	    size_t len;
 	    PADOFFSET off;
 	    const char * const name = SvPV(kSVOP_sv, len);
 	    *tmpbuf = '&';
@@ -11222,7 +11222,7 @@ by the name defined by the C<namegv> parameter.
 OP *
 Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 {
-    STRLEN proto_len;
+    size_t proto_len;
     const char *proto, *proto_end;
     OP *aop, *prev, *cvop, *parent;
     int optional = 0;
@@ -11756,12 +11756,12 @@ Perl_ck_subr(pTHX_ OP *o)
 	    /* make class name a shared cow string to speedup method calls */
 	    /* constant string might be replaced with object, f.e. bigint */
 	    if (const_class && SvPOK(*const_class)) {
-		STRLEN len;
+		size_t len;
 		const char* str = SvPV(*const_class, len);
 		if (len) {
 		    SV* const shared = newSVpvn_share(
 			str, SvUTF8(*const_class)
-                                    ? -(SSize_t)len : (SSize_t)len,
+                                    ? -(ssize_t)len : (ssize_t)len,
                         0
 		    );
                     if (SvREADONLY(*const_class))
@@ -12224,7 +12224,7 @@ S_aassign_padcheck(pTHX_ OP* o, bool rhs)
         return TRUE;
 
     if (rhs)
-        return cBOOL(PAD_COMPNAME_GEN(o->op_targ) == (STRLEN)PL_generation);
+        return cBOOL(PAD_COMPNAME_GEN(o->op_targ) == (size_t)PL_generation);
     else
         PAD_COMPNAME_GEN_set(o->op_targ, PL_generation);
 
@@ -13068,7 +13068,7 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
             op_null(top_op);
         }
         else {
-            Size_t size = arg - arg_buf;
+            size_t size = arg - arg_buf;
 
             if (maybe_aelemfast && action_count == 1)
                 return;
@@ -14412,7 +14412,7 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
 	(he = hv_fetch_ent(PL_custom_op_names, keysv, 0, 0))
     ) {
 	const char *pv;
-	STRLEN l;
+	size_t l;
 
 	/* XXX does all this need to be shared mem? */
 	Newxz(xop, 1, XOP);

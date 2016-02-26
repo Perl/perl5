@@ -25,10 +25,10 @@ class PerlUtil {
   IMPORT_C static HBufC16*  newHBufC16fromSvPV(SV* sv);
   IMPORT_C static void      setTDes16fromSvPV(TDes16& aDes16, SV* sv);
 
-  IMPORT_C static HBufC8*   newHBufC8fromPVn(const U8* s, STRLEN n);
-  IMPORT_C static void      setTDes8fromPVn(TDes8& aDes8, const U8* s, STRLEN n);
-  IMPORT_C static HBufC16*  newHBufC16fromPVn(const U8* s, STRLEN n, bool utf8);
-  IMPORT_C static void      setTDes16fromPVn(TDes16& aDes16, const U8* s, STRLEN n, bool utf8);
+  IMPORT_C static HBufC8*   newHBufC8fromPVn(const U8* s, size_t n);
+  IMPORT_C static void      setTDes8fromPVn(TDes8& aDes8, const U8* s, size_t n);
+  IMPORT_C static HBufC16*  newHBufC16fromPVn(const U8* s, size_t n, bool utf8);
+  IMPORT_C static void      setTDes16fromPVn(TDes16& aDes16, const U8* s, size_t n, bool utf8);
 };
 
 #endif /* #ifndef __PerlUtil_h__ */

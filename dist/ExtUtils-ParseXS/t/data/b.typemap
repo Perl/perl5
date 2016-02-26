@@ -29,8 +29,8 @@ B::IO		T_SV_OBJ
 B::FM		T_SV_OBJ
 
 B::MAGIC	T_MG_OBJ
-SSize_t		T_IV
-STRLEN		T_UV
+ssize_t		T_IV
+size_t		T_UV
 PADOFFSET	T_UV
 
 B::HE		T_HE_OBJ

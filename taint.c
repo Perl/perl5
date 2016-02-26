@@ -118,7 +118,7 @@ Perl_taint_env(pTHX)
     {
     int i = 0;
     char name[10 + TYPE_DIGITS(int)] = "DCL$PATH";
-    STRLEN len = 8; /* strlen(name)  */
+    size_t len = 8; /* strlen(name)  */
 
     while (1) {
 	if (i)
@@ -155,7 +155,7 @@ Perl_taint_env(pTHX)
     /* tainted $TERM is okay if it contains no metachars */
     svp = hv_fetchs(GvHVn(PL_envgv),"TERM",FALSE);
     if (svp && *svp && SvTAINTED(*svp)) {
-	STRLEN len;
+	size_t len;
 	const bool was_tainted = TAINT_get;
 	const char *t = SvPV_const(*svp, len);
 	const char * const e = t + len;

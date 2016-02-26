@@ -1472,7 +1472,7 @@ PP(pp_sort)
 {
     dSP; dMARK; dORIGMARK;
     SV **p1 = ORIGMARK+1, **p2;
-    SSize_t max, i;
+    ssize_t max, i;
     AV* av = NULL;
     GV *gv;
     CV *cv = NULL;

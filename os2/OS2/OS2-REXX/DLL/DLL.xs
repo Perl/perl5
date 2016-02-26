@@ -144,7 +144,7 @@ _call(name, address, queue="SESSION", ...)
        if (trace)
 	   fprintf(stderr, "REXXCALL::_call name: '%s' args:", name);
        for (i = 0; i < argc; ++i) {
-	   STRLEN len;
+	   size_t len;
 	   char *ptr = SvPV(ST(3+i), len);
 	   MAKERXSTRING(strs[i], ptr, len);
 	   if (trace)

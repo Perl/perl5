@@ -174,7 +174,7 @@ Function pointer, pointing at a function used to handle extended keywords.
 The function should be declared as
 
 	int keyword_plugin_function(pTHX_
-		char *keyword_ptr, STRLEN keyword_len,
+		char *keyword_ptr, size_t keyword_len,
 		OP **op_ptr)
 
 The function is called from the tokeniser, whenever a possible keyword

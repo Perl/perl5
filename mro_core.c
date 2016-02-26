@@ -498,7 +498,7 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 
     const HEK * const stashhek = HvENAME_HEK(stash);
     const char * const stashname = HvENAME_get(stash);
-    const STRLEN stashname_len = HvENAMELEN_get(stash);
+    const size_t stashname_len = HvENAMELEN_get(stash);
 
     PERL_ARGS_ASSERT_MRO_ISA_CHANGED_IN;
 
@@ -684,7 +684,7 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 /* Deletes name from all the isarev entries listed in isa */
 STATIC void
 S_mro_clean_isarev(pTHX_ HV * const isa, const char * const name,
-                         const STRLEN len, HV * const exceptions, U32 hash,
+                         const size_t len, HV * const exceptions, U32 hash,
                          U32 flags)
 {
     HE* iter;
@@ -951,7 +951,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 	    }
 	    while (items--) {
                 const U32 name_utf8 = SvUTF8(*svp);
-		STRLEN len;
+		size_t len;
 		const char *name = SvPVx_const(*svp, len);
 		if(PL_stashcache) {
                     DEBUG_o(Perl_deb(aTHX_ "mro_gather_and_rename clearing PL_stashcache for '%"SVf"'\n",
@@ -994,7 +994,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 	}
 	while (items--) {
             const U32 name_utf8 = SvUTF8(*svp);
-	    STRLEN len;
+	    size_t len;
 	    const char *name = SvPVx_const(*svp++, len);
 	    hv_ename_add(stash, name, len, name_utf8);
 	}
@@ -1311,7 +1311,7 @@ void
 Perl_mro_method_changed_in(pTHX_ HV *stash)
 {
     const char * const stashname = HvENAME_get(stash);
-    const STRLEN stashname_len = HvENAMELEN_get(stash);
+    const size_t stashname_len = HvENAMELEN_get(stash);
 
     SV ** const svp = hv_fetchhek(PL_isarev, HvENAME_HEK(stash), 0);
     HV * const isarev = svp ? MUTABLE_HV(*svp) : NULL;

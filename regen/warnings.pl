@@ -315,8 +315,8 @@ my ($index, $warn_size);
 #define G_WARN_ALL_MASK		(G_WARN_ALL_ON|G_WARN_ALL_OFF)
 
 #define pWARN_STD		NULL
-#define pWARN_ALL		(((STRLEN*)0)+1)    /* use warnings 'all' */
-#define pWARN_NONE		(((STRLEN*)0)+2)    /* no  warnings 'all' */
+#define pWARN_ALL		(((size_t*)0)+1)    /* use warnings 'all' */
+#define pWARN_NONE		(((size_t*)0)+2)    /* no  warnings 'all' */
 
 #define specialWARN(x)		((x) == pWARN_STD || (x) == pWARN_ALL ||	\
 				 (x) == pWARN_NONE)
@@ -365,8 +365,8 @@ EOM
 #define isWARNf_on(c,x)	(IsSet((U8 *)(c + 1), 2*(x)+1))
 
 #define DUP_WARNINGS(p)		\
-    (specialWARN(p) ? (STRLEN*)(p)	\
-    : (STRLEN*)CopyD(p, PerlMemShared_malloc(sizeof(*p)+*p), sizeof(*p)+*p, \
+    (specialWARN(p) ? (size_t*)(p)	\
+    : (size_t*)CopyD(p, PerlMemShared_malloc(sizeof(*p)+*p), sizeof(*p)+*p, \
 		     			     char))
 
 #define ckWARN(w)		Perl_ckwarn(aTHX_ packWARN(w))

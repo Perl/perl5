@@ -32,7 +32,7 @@ typedef U64TYPE PADOFFSET;
  */
 
 struct padlist {
-    SSize_t	xpadl_max;	/* max index for which array has space */
+    ssize_t	xpadl_max;	/* max index for which array has space */
     union {
 	PAD **	xpadlarr_alloc; /* Pointer to beginning of array of AVs.
 				   index 0 is a padnamelist *          */
@@ -47,9 +47,9 @@ struct padlist {
 };
 
 struct padnamelist {
-    SSize_t	xpadnl_fill;	/* max index in use */
+    ssize_t	xpadnl_fill;	/* max index in use */
     PADNAME **	xpadnl_alloc;	/* pointer to beginning of array */
-    SSize_t	xpadnl_max;	/* max index for which array has space */
+    ssize_t	xpadnl_max;	/* max index for which array has space */
     PADOFFSET	xpadnl_max_named; /* highest index with len > 0 */
     U32		xpadnl_refcnt;
 };
@@ -189,7 +189,7 @@ save C<PL_comppad> and C<PL_curpad>
 The C array of a padlist, containing the pads.  Only subscript it with
 numbers >= 1, as the 0th entry is not guaranteed to remain usable.
 
-=for apidoc Amx|SSize_t|PadlistMAX|PADLIST padlist
+=for apidoc Amx|ssize_t|PadlistMAX|PADLIST padlist
 The index of the last allocated space in the padlist.  Note that the last
 pad may be in an earlier slot.  Any entries following it will be C<NULL> in
 that case.
@@ -200,7 +200,7 @@ The names associated with pad entries.
 =for apidoc Amx|PADNAME **|PadlistNAMESARRAY|PADLIST padlist
 The C array of pad names.
 
-=for apidoc Amx|SSize_t|PadlistNAMESMAX|PADLIST padlist
+=for apidoc Amx|ssize_t|PadlistNAMESMAX|PADLIST padlist
 The index of the last pad name.
 
 =for apidoc Amx|U32|PadlistREFCNT|PADLIST padlist
@@ -209,10 +209,10 @@ The reference count of the padlist.  Currently this is always 1.
 =for apidoc Amx|PADNAME **|PadnamelistARRAY|PADNAMELIST pnl
 The C array of pad names.
 
-=for apidoc Amx|SSize_t|PadnamelistMAX|PADNAMELIST pnl
+=for apidoc Amx|ssize_t|PadnamelistMAX|PADNAMELIST pnl
 The index of the last pad name.
 
-=for apidoc Amx|SSize_t|PadnamelistREFCNT|PADNAMELIST pnl
+=for apidoc Amx|ssize_t|PadnamelistREFCNT|PADNAMELIST pnl
 The reference count of the pad name list.
 
 =for apidoc Amx|void|PadnamelistREFCNT_dec|PADNAMELIST pnl
@@ -221,14 +221,14 @@ Lowers the reference count of the pad name list.
 =for apidoc Amx|SV **|PadARRAY|PAD pad
 The C array of pad entries.
 
-=for apidoc Amx|SSize_t|PadMAX|PAD pad
+=for apidoc Amx|ssize_t|PadMAX|PAD pad
 The index of the last pad entry.
 
 =for apidoc Amx|char *|PadnamePV|PADNAME pn	
 The name stored in the pad name struct.  This returns C<NULL> for a target
 slot.
 
-=for apidoc Amx|STRLEN|PadnameLEN|PADNAME pn	
+=for apidoc Amx|size_t|PadnameLEN|PADNAME pn	
 The length of the name.
 
 =for apidoc Amx|bool|PadnameUTF8|PADNAME pn
@@ -254,7 +254,7 @@ Whether this is a "state" variable.
 The stash associated with a typed lexical.  This returns the C<%Foo::> hash
 for C<my Foo $bar>.
 
-=for apidoc Amx|SSize_t|PadnameREFCNT|PADNAME pn
+=for apidoc Amx|ssize_t|PadnameREFCNT|PADNAME pn
 The reference count of the pad name.
 
 =for apidoc Amx|void|PadnameREFCNT_dec|PADNAME pn
@@ -439,11 +439,11 @@ C<po>.  Must be a valid name.  Returns null if not typed.
 Return the stash associated with an C<our> variable.
 Assumes the slot entry is a valid C<our> lexical.
 
-=for apidoc m|STRLEN|PAD_COMPNAME_GEN|PADOFFSET po
+=for apidoc m|size_t|PAD_COMPNAME_GEN|PADOFFSET po
 The generation number of the name at offset C<po> in the current
 compiling pad (lvalue).
 
-=for apidoc m|STRLEN|PAD_COMPNAME_GEN_set|PADOFFSET po|int gen
+=for apidoc m|size_t|PAD_COMPNAME_GEN_set|PADOFFSET po|int gen
 Sets the generation number of the name at offset C<po> in the current
 ling pad (lvalue) to C<gen>.
 =cut
@@ -462,7 +462,7 @@ ling pad (lvalue) to C<gen>.
     (SvOURSTASH(PAD_COMPNAME_SV(po)))
 
 #define PAD_COMPNAME_GEN(po) \
-    ((STRLEN)PadnamelistARRAY(PL_comppad_name)[po]->xpadn_gen)
+    ((size_t)PadnamelistARRAY(PL_comppad_name)[po]->xpadn_gen)
 
 #define PAD_COMPNAME_GEN_set(po, gen) \
     (PadnamelistARRAY(PL_comppad_name)[po]->xpadn_gen = (gen))

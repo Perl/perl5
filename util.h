@@ -106,13 +106,13 @@ typedef struct {
 
     /* The offsets are from the beginning of the whole backtrace,
      * which makes the backtrace relocatable. */
-    STRLEN object_name_offset; /* pathname of the shared object */
-    STRLEN object_name_size;   /* length of the pathname */
-    STRLEN symbol_name_offset; /* symbol name */
-    STRLEN symbol_name_size;   /* length of the symbol name */
-    STRLEN source_name_offset; /* source code file name */
-    STRLEN source_name_size;   /* length of the source code file name */
-    STRLEN source_line_number; /* source code line number */
+    size_t object_name_offset; /* pathname of the shared object */
+    size_t object_name_size;   /* length of the pathname */
+    size_t symbol_name_offset; /* symbol name */
+    size_t symbol_name_size;   /* length of the symbol name */
+    size_t source_name_offset; /* source code file name */
+    size_t source_name_size;   /* length of the source code file name */
+    size_t source_line_number; /* source code line number */
 
     /* OS X notes: atos(1) (more recently, "xcrun atos"), but the C
      * API atos() uses is unknown (private "Symbolicator" framework,

@@ -62,13 +62,13 @@ static int		do_spawn2(pTHX_ char *cmd, int exectype);
 static BOOL		has_shell_metachars(char *ptr);
 static long		filetime_to_clock(PFILETIME ft);
 static BOOL		filetime_from_time(PFILETIME ft, time_t t);
-static char *		get_emd_part(SV **leading, STRLEN *const len,
+static char *		get_emd_part(SV **leading, size_t *const len,
 				     char *trailing, ...);
 static void		remove_dead_process(long deceased);
 static long		find_pid(pTHX_ int pid);
 static char *		qualified_path(const char *cmd);
 static char *		win32_get_xlib(const char *pl, const char *xlib,
-				       const char *libname, STRLEN *const len);
+				       const char *libname, size_t *const len);
 
 #ifdef USE_ITHREADS
 static void		remove_dead_pseudo_process(long child);
@@ -164,7 +164,7 @@ get_regstr(const char *valuename, SV **svp)
 
 /* *prev_pathp (if non-NULL) is expected to be POK (valid allocated SvPVX(sv)) */
 static char *
-get_emd_part(SV **prev_pathp, STRLEN *const len, char *trailing_path, ...)
+get_emd_part(SV **prev_pathp, size_t *const len, char *trailing_path, ...)
 {
     char base[10];
     va_list ap;
@@ -173,7 +173,7 @@ get_emd_part(SV **prev_pathp, STRLEN *const len, char *trailing_path, ...)
     char *optr;
     char *strip;
     int oldsize, newsize;
-    STRLEN baselen;
+    size_t baselen;
 
     va_start(ap, trailing_path);
     strip = va_arg(ap, char *);
@@ -230,7 +230,7 @@ get_emd_part(SV **prev_pathp, STRLEN *const len, char *trailing_path, ...)
 }
 
 char *
-win32_get_privlib(WIN32_NO_REGISTRY_M_(const char *pl) STRLEN *const len)
+win32_get_privlib(WIN32_NO_REGISTRY_M_(const char *pl) size_t *const len)
 {
     dTHX;
     char *stdlib = "lib";
@@ -248,7 +248,7 @@ win32_get_privlib(WIN32_NO_REGISTRY_M_(const char *pl) STRLEN *const len)
 
 static char *
 win32_get_xlib(const char *pl, const char *xlib, const char *libname,
-	       STRLEN *const len)
+	       size_t *const len)
 {
     dTHX;
     char regstr[40];
@@ -288,7 +288,7 @@ win32_get_xlib(const char *pl, const char *xlib, const char *libname,
 }
 
 char *
-win32_get_sitelib(const char *pl, STRLEN *const len)
+win32_get_sitelib(const char *pl, size_t *const len)
 {
     return win32_get_xlib(pl, "sitelib", "site", len);
 }
@@ -298,7 +298,7 @@ win32_get_sitelib(const char *pl, STRLEN *const len)
 #endif
 
 char *
-win32_get_vendorlib(const char *pl, STRLEN *const len)
+win32_get_vendorlib(const char *pl, size_t *const len)
 {
     return win32_get_xlib(pl, "vendorlib", PERL_VENDORLIB_NAME, len);
 }
@@ -996,7 +996,7 @@ DllExport int
 win32_uname(struct utsname *name)
 {
     struct hostent *hep;
-    STRLEN nodemax = sizeof(name->nodename)-1;
+    size_t nodemax = sizeof(name->nodename)-1;
     OSVERSIONINFOA osver;
 
     memset(&osver, 0, sizeof(OSVERSIONINFOA));
@@ -1043,7 +1043,7 @@ win32_uname(struct utsname *name)
     /* nodename */
     hep = win32_gethostbyname("localhost");
     if (hep) {
-	STRLEN len = strlen(hep->h_name);
+	size_t len = strlen(hep->h_name);
 	if (len <= nodemax) {
 	    strcpy(name->nodename, hep->h_name);
 	}
@@ -1692,13 +1692,13 @@ win32_chmod(const char *path, int mode)
 }
 
 static char *
-create_command_line(char *cname, STRLEN clen, const char * const *args)
+create_command_line(char *cname, size_t clen, const char * const *args)
 {
     dTHX;
     int index, argc;
     char *cmd, *ptr;
     const char *arg;
-    STRLEN len = 0;
+    size_t len = 0;
     bool bat_file = FALSE;
     bool cmd_shell = FALSE;
     bool dumb_shell = FALSE;
@@ -1757,7 +1757,7 @@ create_command_line(char *cname, STRLEN clen, const char * const *args)
 
     DEBUG_p(PerlIO_printf(Perl_debug_log, "Args "));
     for (index = 0; (arg = (char*)args[index]) != NULL; ++index) {
-	STRLEN curlen = strlen(arg);
+	size_t curlen = strlen(arg);
 	if (!(arg[0] == '"' && arg[curlen-1] == '"'))
 	    len += 2;	/* assume quoting needed (worst case) */
 	len += curlen + 1;
@@ -1776,7 +1776,7 @@ create_command_line(char *cname, STRLEN clen, const char * const *args)
 
     for (index = 0; (arg = (char*)args[index]) != NULL; ++index) {
 	bool do_quote = 0;
-	STRLEN curlen = strlen(arg);
+	size_t curlen = strlen(arg);
 
 	/* we want to protect empty arguments and ones with spaces with
 	 * dquotes, but only if they aren't already there */
@@ -1791,7 +1791,7 @@ create_command_line(char *cname, STRLEN clen, const char * const *args)
 		    do_quote = 1;
 	    }
 	    else if (!(arg[0] == '"' && curlen > 1 && arg[curlen-1] == '"')) {
-		STRLEN i = 0;
+		size_t i = 0;
 		while (i < curlen) {
 		    if (isSPACE(arg[i])) {
 			do_quote = 1;
@@ -1852,7 +1852,7 @@ qualified_path(const char *cmd)
     dTHX;
     char *pathstr;
     char *fullcmd, *curfullcmd;
-    STRLEN cmdlen = 0;
+    size_t cmdlen = 0;
     int has_slash = 0;
 
     if (!cmd)
@@ -1908,7 +1908,7 @@ qualified_path(const char *cmd)
 	    if (*pathstr == '"') {	/* foo;"baz;etc";bar */
 		pathstr++;		/* skip initial '"' */
 		while (*pathstr && *pathstr != '"') {
-		    if ((STRLEN)(curfullcmd-fullcmd) < MAX_PATH-cmdlen-5)
+		    if ((size_t)(curfullcmd-fullcmd) < MAX_PATH-cmdlen-5)
 			*curfullcmd++ = *pathstr;
 		    pathstr++;
 		}
@@ -1916,7 +1916,7 @@ qualified_path(const char *cmd)
 		    pathstr++;		/* skip trailing '"' */
 	    }
 	    else {
-		if ((STRLEN)(curfullcmd-fullcmd) < MAX_PATH-cmdlen-5)
+		if ((size_t)(curfullcmd-fullcmd) < MAX_PATH-cmdlen-5)
 		    *curfullcmd++ = *pathstr;
 		pathstr++;
 	    }
@@ -1956,7 +1956,7 @@ win32_clearenv(void)
 {
     char *envv = GetEnvironmentStrings();
     char *cur = envv;
-    STRLEN len;
+    size_t len;
     while (*cur) {
 	char *end = strchr(cur,'=');
 	if (end && end != cur) {
@@ -2019,7 +2019,7 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
     char *cmd;
     char *fullcmd = NULL;
     char *cname = (char *)cmdname;
-    STRLEN clen = 0;
+    size_t clen = 0;
 
     if (cname) {
 	clen = strlen(cname);

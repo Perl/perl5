@@ -161,9 +161,9 @@ void
 Perl_set_padlist(CV * cv, PADLIST *padlist){
     PERL_ARGS_ASSERT_SET_PADLIST;
 #  if PTRSIZE == 8
-    assert((Size_t)padlist != UINT64_C(0xEFEFEFEFEFEFEFEF));
+    assert((size_t)padlist != UINT64_C(0xEFEFEFEFEFEFEFEF));
 #  elif PTRSIZE == 4
-    assert((Size_t)padlist != 0xEFEFEFEF);
+    assert((size_t)padlist != 0xEFEFEFEF);
 #  else
 #    error unknown pointer size
 #  endif
@@ -574,7 +574,7 @@ S_pad_alloc_name(pTHX_ PADNAME *name, U32 flags, HV *typestash,
 }
 
 /*
-=for apidoc Am|PADOFFSET|pad_add_name_pvn|const char *namepv|STRLEN namelen|U32 flags|HV *typestash|HV *ourstash
+=for apidoc Am|PADOFFSET|pad_add_name_pvn|const char *namepv|size_t namelen|U32 flags|HV *typestash|HV *ourstash
 
 Allocates a place in the currently-compiling pad for a named lexical
 variable.  Stores the name and other metadata in the name part of the
@@ -595,7 +595,7 @@ flags can be OR'ed together:
 */
 
 PADOFFSET
-Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
+Perl_pad_add_name_pvn(pTHX_ const char *namepv, size_t namelen,
 		U32 flags, HV *typestash, HV *ourstash)
 {
     PADOFFSET offset;
@@ -675,7 +675,7 @@ PADOFFSET
 Perl_pad_add_name_sv(pTHX_ SV *name, U32 flags, HV *typestash, HV *ourstash)
 {
     char *namepv;
-    STRLEN namelen;
+    size_t namelen;
     PERL_ARGS_ASSERT_PAD_ADD_NAME_SV;
     namepv = SvPVutf8(name, namelen);
     return pad_add_name_pvn(namepv, namelen, flags, typestash, ourstash);
@@ -735,7 +735,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 	 * For a constant, likewise, but use PL_constpadix.
 	 */
 	PADNAME * const * const names = PadnamelistARRAY(PL_comppad_name);
-	const SSize_t names_fill = PadnamelistMAX(PL_comppad_name);
+	const ssize_t names_fill = PadnamelistMAX(PL_comppad_name);
 	const bool konst = cBOOL(tmptype & SVf_READONLY);
 	retval = konst ? PL_constpadix : PL_padix;
 	for (;;) {
@@ -933,7 +933,7 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 
 
 /*
-=for apidoc Am|PADOFFSET|pad_findmy_pvn|const char *namepv|STRLEN namelen|U32 flags
+=for apidoc Am|PADOFFSET|pad_findmy_pvn|const char *namepv|size_t namelen|U32 flags
 
 Given the name of a lexical variable, find its position in the
 currently-compiling pad.
@@ -948,7 +948,7 @@ or C<NOT_IN_PAD> if no such lexical is in scope.
 */
 
 PADOFFSET
-Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
+Perl_pad_findmy_pvn(pTHX_ const char *namepv, size_t namelen, U32 flags)
 {
     PADNAME *out_pn;
     int out_flags;
@@ -1026,7 +1026,7 @@ PADOFFSET
 Perl_pad_findmy_sv(pTHX_ SV *name, U32 flags)
 {
     char *namepv;
-    STRLEN namelen;
+    size_t namelen;
     PERL_ARGS_ASSERT_PAD_FINDMY_SV;
     namepv = SvPVutf8(name, namelen);
     return pad_findmy_pvn(namepv, namelen, flags);
@@ -1067,7 +1067,7 @@ Perl_find_rundefsv(pTHX)
 }
 
 /*
-=for apidoc m|PADOFFSET|pad_findlex|const char *namepv|STRLEN namelen|U32 flags|const CV* cv|U32 seq|int warn|SV** out_capture|PADNAME** out_name|int *out_flags
+=for apidoc m|PADOFFSET|pad_findlex|const char *namepv|size_t namelen|U32 flags|const CV* cv|U32 seq|int warn|SV** out_capture|PADNAME** out_name|int *out_flags
 
 Find a named lexical anywhere in a chain of nested pads.  Add fake entries
 in the inner pads if it's found in an outer one.
@@ -1110,7 +1110,7 @@ S_unavailable(pTHX_ PADNAME *name)
 }
 
 STATIC PADOFFSET
-S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv, U32 seq,
+S_pad_findlex(pTHX_ const char *namepv, size_t namelen, U32 flags, const CV* cv, U32 seq,
 	int warn, SV** out_capture, PADNAME** out_name, int *out_flags)
 {
     I32 offset, new_offset;
@@ -1563,7 +1563,7 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
     if (AvARRAY(PL_comppad) != PL_curpad)
 	Perl_croak(aTHX_ "panic: pad_swipe curpad, %p!=%p",
 		   AvARRAY(PL_comppad), PL_curpad);
-    if (!po || ((SSize_t)po) > AvFILLp(PL_comppad))
+    if (!po || ((ssize_t)po) > AvFILLp(PL_comppad))
 	Perl_croak(aTHX_ "panic: pad_swipe po=%ld, fill=%ld",
 		   (long)po, (long)AvFILLp(PL_comppad));
 
@@ -2599,7 +2599,7 @@ PAD **
 Perl_padlist_store(pTHX_ PADLIST *padlist, I32 key, PAD *val)
 {
     PAD **ary;
-    SSize_t const oldmax = PadlistMAX(padlist);
+    ssize_t const oldmax = PadlistMAX(padlist);
 
     PERL_ARGS_ASSERT_PADLIST_STORE;
 
@@ -2650,7 +2650,7 @@ existing pad name in that slot.
 */
 
 PADNAME **
-Perl_padnamelist_store(pTHX_ PADNAMELIST *pnl, SSize_t key, PADNAME *val)
+Perl_padnamelist_store(pTHX_ PADNAMELIST *pnl, ssize_t key, PADNAME *val)
 {
     PADNAME **ary;
 
@@ -2683,7 +2683,7 @@ Fetches the pad name from the given index.
 */
 
 PADNAME *
-Perl_padnamelist_fetch(PADNAMELIST *pnl, SSize_t key)
+Perl_padnamelist_fetch(PADNAMELIST *pnl, ssize_t key)
 {
     PERL_ARGS_ASSERT_PADNAMELIST_FETCH;
     ASSUME(key >= 0);
@@ -2722,7 +2722,7 @@ PADNAMELIST *
 Perl_padnamelist_dup(pTHX_ PADNAMELIST *srcpad, CLONE_PARAMS *param)
 {
     PADNAMELIST *dstpad;
-    SSize_t max = PadnamelistMAX(srcpad);
+    ssize_t max = PadnamelistMAX(srcpad);
 
     PERL_ARGS_ASSERT_PADNAMELIST_DUP;
 
@@ -2760,7 +2760,7 @@ C<L</newPADNAMEouter>>.
 */
 
 PADNAME *
-Perl_newPADNAMEpvn(const char *s, STRLEN len)
+Perl_newPADNAMEpvn(const char *s, size_t len)
 {
     struct padname_with_str *alloc;
     char *alloc2; /* for Newxz */

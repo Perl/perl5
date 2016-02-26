@@ -818,7 +818,6 @@ sitelib='/usr/local/lib/perl5/5.23'
 sitelib_stem='/usr/local/lib/perl5'
 sitelibexp='/usr/local/lib/perl5/5.23'
 sizesize=4
-sizetype='size_t'
 socksizetype='int'
 srand48_r_proto='0'
 srandom_r_proto='0'

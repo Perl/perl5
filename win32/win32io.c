@@ -214,8 +214,8 @@ PerlIOWin32_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const ch
  return NULL;
 }
 
-SSize_t
-PerlIOWin32_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
+ssize_t
+PerlIOWin32_read(pTHX_ PerlIO *f, void *vbuf, size_t count)
 {
  PerlIOWin32 *s = PerlIOSelf(f,PerlIOWin32);
  DWORD len;
@@ -242,8 +242,8 @@ PerlIOWin32_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
   }
 }
 
-SSize_t
-PerlIOWin32_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
+ssize_t
+PerlIOWin32_write(pTHX_ PerlIO *f, const void *vbuf, size_t count)
 {
  PerlIOWin32 *s = PerlIOSelf(f,PerlIOWin32);
  DWORD len;

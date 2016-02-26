@@ -222,7 +222,7 @@ setdef(...)
 	    struct FAB deffab = cc$rms_fab;
 	    struct NAM defnam = cc$rms_nam;
 	    struct dsc$descriptor_s dirdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
-	    STRLEN n_a;
+	    size_t n_a;
 	    if (items) {
 		SV *defsv = ST(items-1);  /* mimic chdir() */
 		ST(0) = &PL_sv_undef;
@@ -295,7 +295,7 @@ vmsopen(spec,...)
 	    FILE *fp;
             SV *fh;
            PerlIO *pio_fp;
-	    STRLEN n_a;
+	    size_t n_a;
 	
 	    if (!spec || !*spec) {
 	       SETERRNO(EINVAL,LIB$_INVARG);
@@ -363,7 +363,7 @@ vmssysopen(spec,mode,perm,...)
 	    int i, myargc, fd;
 	    PerlIO *pio_fp;
 	    SV *fh;
-	    STRLEN n_a;
+	    size_t n_a;
 	    if (!spec || !*spec) {
 	       SETERRNO(EINVAL,LIB$_INVARG);
 	       XSRETURN_UNDEF;

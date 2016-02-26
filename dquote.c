@@ -89,7 +89,7 @@ Perl_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
  *	UTF is true iff the string *s is encoded in UTF-8.
  */
     char* e;
-    STRLEN numbers_len;
+    size_t numbers_len;
     I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
 		| PERL_SCAN_DISALLOW_PREFIX
 		/* XXX Until the message is improved in grok_oct, handle errors
@@ -139,10 +139,10 @@ Perl_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
     /* Note that if has non-octal, will ignore everything starting with that up
      * to the '}' */
 
-    if (numbers_len != (STRLEN) (e - *s)) {
+    if (numbers_len != (size_t) (e - *s)) {
         if (strict) {
             *s += numbers_len;
-            *s += (UTF) ? UTF8SKIP(*s) : (STRLEN) 1;
+            *s += (UTF) ? UTF8SKIP(*s) : (size_t) 1;
             *error_msg = "Non-octal character";
             return FALSE;
         }
@@ -199,7 +199,7 @@ Perl_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
  *	UTF is true iff the string *s is encoded in UTF-8.
  */
     char* e;
-    STRLEN numbers_len;
+    size_t numbers_len;
     I32 flags = PERL_SCAN_DISALLOW_PREFIX;
 #ifdef DEBUGGING
     char *start = *s - 1;
@@ -216,7 +216,7 @@ Perl_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
     }
 
     if (**s != '{') {
-        STRLEN len = (strict) ? 3 : 2;
+        size_t len = (strict) ? 3 : 2;
 
 	*uv = grok_hex(*s, &len, &flags, NULL);
 	*s += len;
@@ -269,7 +269,7 @@ Perl_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
     /* Note that if has non-hex, will ignore everything starting with that up
      * to the '}' */
 
-    if (strict && numbers_len != (STRLEN) (e - *s)) {
+    if (strict && numbers_len != (size_t) (e - *s)) {
         *s += numbers_len;
         *s += (UTF) ? UTF8SKIP(*s) : 1;
         *error_msg = "Non-hex character";

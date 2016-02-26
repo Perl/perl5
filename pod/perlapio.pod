@@ -20,7 +20,7 @@ perlapio - perl's IO abstraction interface.
   int     PerlIO_stdoutf(const char *fmt,...)
   int     PerlIO_puts(PerlIO *f,const char *string);
   int     PerlIO_putc(PerlIO *f,int ch);
-  SSize_t PerlIO_write(PerlIO *f,const void *buf,size_t numbytes);
+  ssize_t PerlIO_write(PerlIO *f,const void *buf,size_t numbytes);
   int     PerlIO_printf(PerlIO *f, const char *fmt,...);
   int     PerlIO_vprintf(PerlIO *f, const char *fmt, va_list args);
   int     PerlIO_flush(PerlIO *f);
@@ -31,7 +31,7 @@ perlapio - perl's IO abstraction interface.
 
   int     PerlIO_getc(PerlIO *d);
   int     PerlIO_ungetc(PerlIO *f,int ch);
-  SSize_t PerlIO_read(PerlIO *f, void *buf, size_t numbytes);
+  ssize_t PerlIO_read(PerlIO *f, void *buf, size_t numbytes);
 
   int     PerlIO_fileno(PerlIO *f);
 
@@ -46,16 +46,16 @@ perlapio - perl's IO abstraction interface.
 
   int     PerlIO_fast_gets(PerlIO *f);
   int     PerlIO_has_cntptr(PerlIO *f);
-  SSize_t PerlIO_get_cnt(PerlIO *f);
+  ssize_t PerlIO_get_cnt(PerlIO *f);
   char   *PerlIO_get_ptr(PerlIO *f);
-  void    PerlIO_set_ptrcnt(PerlIO *f, char *ptr, SSize_t count);
+  void    PerlIO_set_ptrcnt(PerlIO *f, char *ptr, ssize_t count);
 
   int     PerlIO_canset_cnt(PerlIO *f);              /* deprecated */
   void    PerlIO_set_cnt(PerlIO *f, int count);      /* deprecated */
 
   int     PerlIO_has_base(PerlIO *f);
   char   *PerlIO_get_base(PerlIO *f);
-  SSize_t PerlIO_get_bufsiz(PerlIO *f);
+  ssize_t PerlIO_get_bufsiz(PerlIO *f);
 
   PerlIO *PerlIO_importFILE(FILE *stdio, const char *mode);
   FILE   *PerlIO_exportFILE(PerlIO *f, int flags);

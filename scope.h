@@ -259,7 +259,7 @@ scope has the given name. C<name> must be a C<NUL>-terminated literal string.
 #define SAVEHDELETE(h,s) \
 	  save_hdelete(MUTABLE_HV(h), (s))
 #define SAVEADELETE(a,k) \
-	  save_adelete(MUTABLE_AV(a), (SSize_t)(k))
+	  save_adelete(MUTABLE_AV(a), (ssize_t)(k))
 #define SAVEDESTRUCTOR(f,p) \
 	  save_destructor((DESTRUCTORFUNC_NOCONTEXT_t)(f), (void*)(p))
 

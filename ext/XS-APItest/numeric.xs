@@ -4,7 +4,7 @@ void
 grok_number(number)
 	SV *number
     PREINIT:
-	STRLEN len;
+	size_t len;
 	const char *pv = SvPV(number, len);
 	UV value;
 	int result;
@@ -20,7 +20,7 @@ grok_number_flags(number, flags)
 	SV *number
 	U32 flags
     PREINIT:
-	STRLEN len;
+	size_t len;
 	const char *pv = SvPV(number, len);
 	UV value;
 	int result;
@@ -36,7 +36,7 @@ grok_atoUV(number, endsv)
 	SV *number
 	SV *endsv
     PREINIT:
-	STRLEN len;
+	size_t len;
 	const char *pv = SvPV(number, len);
 	UV value = 0xdeadbeef;
 	bool result;

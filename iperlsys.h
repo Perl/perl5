@@ -86,11 +86,11 @@ typedef int		(*LPFileno)(struct IPerlStdIO*, FILE*);
 typedef FILE*		(*LPFdopen)(struct IPerlStdIO*, int, const char*);
 typedef FILE*		(*LPReopen)(struct IPerlStdIO*, const char*,
 			    const char*, FILE*);
-typedef SSize_t		(*LPRead)(struct IPerlStdIO*, void*, Size_t, Size_t, FILE *);
-typedef SSize_t		(*LPWrite)(struct IPerlStdIO*, const void*, Size_t, Size_t, FILE *);
+typedef ssize_t		(*LPRead)(struct IPerlStdIO*, void*, size_t, size_t, FILE *);
+typedef ssize_t		(*LPWrite)(struct IPerlStdIO*, const void*, size_t, size_t, FILE *);
 typedef void		(*LPSetBuf)(struct IPerlStdIO*, FILE*, char*);
 typedef int		(*LPSetVBuf)(struct IPerlStdIO*, FILE*, char*, int,
-			    Size_t);
+			    size_t);
 typedef void		(*LPSetCnt)(struct IPerlStdIO*, FILE*, int);
 
 #ifndef NETWARE
@@ -479,11 +479,11 @@ typedef char*		(*LPENVGetenv_len)(struct IPerlEnv*,
 #ifdef WIN32
 typedef unsigned long	(*LPEnvOsID)(struct IPerlEnv*);
 typedef char*		(*LPEnvLibPath)(struct IPerlEnv*, WIN32_NO_REGISTRY_M_(const char*)
-					STRLEN *const len);
+					size_t *const len);
 typedef char*		(*LPEnvSiteLibPath)(struct IPerlEnv*, const char*,
-					    STRLEN *const len);
+					    size_t *const len);
 typedef char*		(*LPEnvVendorLibPath)(struct IPerlEnv*, const char*,
-					      STRLEN *const len);
+					      size_t *const len);
 typedef void		(*LPEnvGetChildIO)(struct IPerlEnv*, child_IO_table*);
 #endif
 

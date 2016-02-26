@@ -465,7 +465,7 @@ to rewrite this function as
     foo(sv)
 	    SV *addr
 	PREINIT:
-	    STRLEN len;
+	    size_t len;
 	    char *s;
 	CODE:
 	    s = SvPV(sv,len);
@@ -478,7 +478,7 @@ or alternately
     static int
     my_foo(SV *sv)
     {
-	STRLEN len;
+	size_t len;
 	char *s = SvPV(sv,len);
 
 	return foo(s, len);
@@ -1636,7 +1636,7 @@ _to_ptr(THIS)
     PROTOTYPE: \$
     CODE:
 	if (sv_derived_from(ST(0), "$name")) {
-	    STRLEN len;
+	    size_t len;
 	    char *s = SvPV((SV*)SvRV(ST(0)), len);
 	    if (len != sizeof(THIS))
 		croak("Size \%d of packed data != expected \%d",
@@ -1882,7 +1882,7 @@ if (%types_seen) {
 INPUT
 T_OPAQUE_STRUCT
 	if (sv_derived_from($arg, \"${ntype}\")) {
-	    STRLEN len;
+	    size_t len;
 	    char  *s = SvPV((SV*)SvRV($arg), len);
 
 	    if (len != sizeof($var))

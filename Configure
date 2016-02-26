@@ -1286,7 +1286,6 @@ installsitescript=''
 sitescript=''
 sitescriptexp=''
 sizesize=''
-sizetype=''
 d_libname_unique=''
 so=''
 socksizetype=''
@@ -21533,11 +21532,6 @@ EOCP
 	;;
 esac
 
-: see what type is used for size_t
-rp="What is the type used for the length parameter for string functions?"
-set size_t sizetype 'unsigned int' stdio.h sys/types.h
-eval $typedef_ask
-
 : check for type of arguments to gethostbyaddr.
 if test "X$netdb_host_type" = X -o "X$netdb_hlen_type" = X; then
 	case "$d_gethbyaddr" in
@@ -21574,7 +21568,7 @@ EOM
 			. ./myread
 			netdb_host_type=$ans
 			rp='What is the type for the 2nd argument to gethostbyaddr?'
-			dflt="$sizetype"
+			dflt="size_t"
 			. ./myread
 			netdb_hlen_type=$ans
 			;;
@@ -21582,7 +21576,7 @@ EOM
 		;;
 	*)	: no gethostbyaddr, so pick harmless defaults
 		netdb_host_type='char *'
-		netdb_hlen_type="$sizetype"
+		netdb_hlen_type="size_t"
 		;;
 	esac
 	# Remove the "const" if needed. -- but then we'll have a
@@ -22353,11 +22347,7 @@ esac
 
 : Check size of size
 echo " "
-case "$sizetype" in
-*_t) zzz="$sizetype"	;;
-*)   zzz="filesize"	;;
-esac
-echo "Checking the size of $zzz..." >&4
+echo "Checking the size of size_t..." >&4
 cat > try.c <<EOCP
 #include <sys/types.h>
 #include <stdio.h>
@@ -22366,7 +22356,7 @@ cat > try.c <<EOCP
 #include <stdlib.h>
 #endif
 int main() {
-    printf("%d\n", (int)sizeof($sizetype));
+    printf("%d\n", (int)sizeof(size_t));
     exit(0);
 }
 EOCP
@@ -22405,9 +22395,6 @@ if eval $compile; then
 else
 	val="$undef"
 	echo "You do not have socklen_t."
-	case "$sizetype" in
-	size_t) echo "(You do have size_t, that might work. Some people are happy with just an int.)" ;;
-	esac
 fi
 $rm_try
 set d_socklen_t
@@ -22428,7 +22415,7 @@ EOM
 	case "$d_socklen_t" in
 	"$define") yyy="$yyy socklen_t"
 	esac
-	yyy="$yyy $sizetype int long unsigned"
+	yyy="$yyy size_t int long unsigned"
 	for xxx in $yyy; do
 		case "$socksizetype" in
 		'')	try="$extern_C int accept(int, struct sockaddr *, $xxx *);"
@@ -22473,13 +22460,14 @@ $cat > try.c <<EOM
 #include <stdlib.h>
 #endif
 #include <sys/types.h>
-#define Size_t $sizetype
-#define SSize_t $dflt
+#ifned ssize_t
+#define ssize_t $dflt
+#endif
 int main()
 {
-	if (sizeof(Size_t) == sizeof(SSize_t))
+	if (sizeof(size_t) == sizeof(ssize_t))
 		printf("$dflt\n");
-	else if (sizeof(Size_t) == sizeof(int))
+	else if (sizeof(size_t) == sizeof(int))
 		printf("int\n");
 	else
 		printf("long\n");
@@ -22497,11 +22485,11 @@ Help! I can't compile and run the ssize_t test program: please enlighten me!
 (This is probably a misconfiguration in your system or libraries, and
 you really ought to fix it.  Still, I'll try anyway.)
 
-I need a type that is the same size as $sizetype, but is guaranteed to
+I need a type that is the same size as size_t, but is guaranteed to
 be signed.  Common values are ssize_t, int and long.
 
 EOM
-	rp="What signed type is the same size as $sizetype?"
+	rp="What signed type is the same size as siz_t?"
 	. ./myread
 	ssizetype="$ans"
 fi
@@ -25128,7 +25116,6 @@ siteprefixexp='$siteprefixexp'
 sitescript='$sitescript'
 sitescriptexp='$sitescriptexp'
 sizesize='$sizesize'
-sizetype='$sizetype'
 sleep='$sleep'
 smail='$smail'
 so='$so'

@@ -41,7 +41,7 @@ NV                      T_NV
 I32			T_IV
 I16			T_IV
 I8			T_IV
-STRLEN			T_UV
+size_t			T_UV
 U32			T_U_LONG
 U16			T_U_SHORT
 U8			T_UV
@@ -378,7 +378,7 @@ T_PACKEDARRAY
 T_ARRAY
         {
 	    U32 ix_$var;
-            SSize_t extend_size =
+            ssize_t extend_size =
                 /* The weird way this is written is because g++ is dumb
                  * enough to warn "comparison is always false" on something
                  * like:
@@ -387,9 +387,9 @@ T_ARRAY
                  *
                  * (where the LH condition is false)
                  */
-                (size_$var > (sizeof(size_$var) > sizeof(SSize_t)
+                (size_$var > (sizeof(size_$var) > sizeof(ssize_t)
                               ? SSize_t_MAX : size_$var))
-                ? -1 : (SSize_t)size_$var;
+                ? -1 : (ssize_t)size_$var;
 	    EXTEND(SP, extend_size);
 	    for (ix_$var = 0; ix_$var < size_$var; ix_$var++) {
 		ST(ix_$var) = sv_newmortal();

@@ -18,7 +18,7 @@ use XS::APItest qw(test_EXTEND);
 plan tests => 48;
 
 my $uvsize   = $Config::Config{uvsize};   # sizeof(UV)
-my $sizesize = $Config::Config{sizesize}; # sizeof(Size_t)
+my $sizesize = $Config::Config{sizesize}; # sizeof(size_t)
 
 # The first arg to test_EXTEND() is the SP to use in EXTEND(), treated
 # as an offset from PL_stack_max. So extend(-1, 1, $use_ss) shouldn't
@@ -28,7 +28,7 @@ my $sizesize = $Config::Config{sizesize}; # sizeof(Size_t)
 
 for my $offset (-1, 0, 1) {
 
-    # treat N as either an IV or a SSize_t
+    # treat N as either an IV or a ssize_t
     for my $use_ss (0, 1) {
 
         # test with N in range -1 .. 3; only the -1 should panic

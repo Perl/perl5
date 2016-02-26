@@ -26,7 +26,7 @@
 void
 Perl_av_reify(pTHX_ AV *av)
 {
-    SSize_t key;
+    ssize_t key;
 
     PERL_ARGS_ASSERT_AV_REIFY;
     assert(SvTYPE(av) == SVt_PVAV);
@@ -62,7 +62,7 @@ extended.
 */
 
 void
-Perl_av_extend(pTHX_ AV *av, SSize_t key)
+Perl_av_extend(pTHX_ AV *av, ssize_t key)
 {
     MAGIC *mg;
 
@@ -82,7 +82,7 @@ Perl_av_extend(pTHX_ AV *av, SSize_t key)
 
 /* The guts of av_extend.  *Not* for general use! */
 void
-Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
+Perl_av_extend_guts(pTHX_ AV *av, ssize_t key, ssize_t *maxp, SV ***allocp,
 			  SV ***arrayp)
 {
     PERL_ARGS_ASSERT_AV_EXTEND_GUTS;
@@ -93,8 +93,8 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
 
     if (key > *maxp) {
 	SV** ary;
-	SSize_t tmp;
-	SSize_t newmax;
+	ssize_t tmp;
+	ssize_t newmax;
 
 	if (av && *allocp != *arrayp) {
 	    ary = *allocp + AvFILLp(av) + 1;
@@ -216,7 +216,7 @@ The rough perl equivalent is C<$myarray[$idx]>.
 */
 
 static bool
-S_adjust_index(pTHX_ AV *av, const MAGIC *mg, SSize_t *keyp)
+S_adjust_index(pTHX_ AV *av, const MAGIC *mg, ssize_t *keyp)
 {
     bool adjust_index = 1;
     if (mg) {
@@ -242,7 +242,7 @@ S_adjust_index(pTHX_ AV *av, const MAGIC *mg, SSize_t *keyp)
 }
 
 SV**
-Perl_av_fetch(pTHX_ AV *av, SSize_t key, I32 lval)
+Perl_av_fetch(pTHX_ AV *av, ssize_t key, I32 lval)
 {
     PERL_ARGS_ASSERT_AV_FETCH;
     assert(SvTYPE(av) == SVt_PVAV);
@@ -311,7 +311,7 @@ more information on how to use this function on tied arrays.
 */
 
 SV**
-Perl_av_store(pTHX_ AV *av, SSize_t key, SV *val)
+Perl_av_store(pTHX_ AV *av, ssize_t key, SV *val)
 {
     SV** ary;
 
@@ -396,7 +396,7 @@ Perl equivalent: C<my @new_array = ($scalar1, $scalar2, $scalar3...);>
 */
 
 AV *
-Perl_av_make(pTHX_ SSize_t size, SV **strp)
+Perl_av_make(pTHX_ ssize_t size, SV **strp)
 {
     AV * const av = MUTABLE_AV(newSV_type(SVt_PVAV));
     /* sv_upgrade does AvREAL_only()  */
@@ -405,7 +405,7 @@ Perl_av_make(pTHX_ SSize_t size, SV **strp)
 
     if (size) {		/* "defined" was returning undef for size==0 anyway. */
         SV** ary;
-        SSize_t i;
+        ssize_t i;
 	Newx(ary,size,SV*);
 	AvALLOC(av) = ary;
 	AvARRAY(av) = ary;
@@ -452,7 +452,7 @@ to it.
 void
 Perl_av_clear(pTHX_ AV *av)
 {
-    SSize_t extra;
+    ssize_t extra;
     bool real;
 
     PERL_ARGS_ASSERT_AV_CLEAR;
@@ -481,7 +481,7 @@ Perl_av_clear(pTHX_ AV *av)
 
     if ((real = !!AvREAL(av))) {
 	SV** const ary = AvARRAY(av);
-	SSize_t index = AvFILLp(av) + 1;
+	ssize_t index = AvFILLp(av) + 1;
 	ENTER;
 	SAVEFREESV(SvREFCNT_inc_simple_NN(av));
 	while (index) {
@@ -528,7 +528,7 @@ Perl_av_undef(pTHX_ AV *av)
 	av_fill(av, -1);
 
     if ((real = !!AvREAL(av))) {
-	SSize_t key = AvFILLp(av) + 1;
+	ssize_t key = AvFILLp(av) + 1;
 	ENTER;
 	SAVEFREESV(SvREFCNT_inc_simple_NN(av));
 	while (key)
@@ -667,9 +667,9 @@ Perl equivalent: S<C<unshift @myarray, ( (undef) x $n );>>
 */
 
 void
-Perl_av_unshift(pTHX_ AV *av, SSize_t num)
+Perl_av_unshift(pTHX_ AV *av, ssize_t num)
 {
-    SSize_t i;
+    ssize_t i;
     MAGIC* mg;
 
     PERL_ARGS_ASSERT_AV_UNSHIFT;
@@ -700,9 +700,9 @@ Perl_av_unshift(pTHX_ AV *av, SSize_t num)
     }
     if (num) {
 	SV **ary;
-	const SSize_t i = AvFILLp(av);
+	const ssize_t i = AvFILLp(av);
 	/* Create extra elements */
-	const SSize_t slide = i > 0 ? i : 0;
+	const ssize_t slide = i > 0 ? i : 0;
 	num += slide;
 	av_extend(av, i + num);
 	AvFILLp(av) += num;
@@ -780,7 +780,7 @@ expect.
 =cut
 */
 
-SSize_t
+ssize_t
 Perl_av_len(pTHX_ AV *av)
 {
     PERL_ARGS_ASSERT_AV_LEN;
@@ -803,7 +803,7 @@ the same as C<av_clear(av)>.
 =cut
 */
 void
-Perl_av_fill(pTHX_ AV *av, SSize_t fill)
+Perl_av_fill(pTHX_ AV *av, ssize_t fill)
 {
     MAGIC *mg;
 
@@ -820,7 +820,7 @@ Perl_av_fill(pTHX_ AV *av, SSize_t fill)
 	return;
     }
     if (fill <= AvMAX(av)) {
-	SSize_t key = AvFILLp(av);
+	ssize_t key = AvFILLp(av);
 	SV** const ary = AvARRAY(av);
 
 	if (AvREAL(av)) {
@@ -854,7 +854,7 @@ C<G_DISCARD> version.
 =cut
 */
 SV *
-Perl_av_delete(pTHX_ AV *av, SSize_t key, I32 flags)
+Perl_av_delete(pTHX_ AV *av, ssize_t key, I32 flags)
 {
     SV *sv;
 
@@ -931,7 +931,7 @@ Perl equivalent: C<exists($myarray[$key])>.
 =cut
 */
 bool
-Perl_av_exists(pTHX_ AV *av, SSize_t key)
+Perl_av_exists(pTHX_ AV *av, ssize_t key)
 {
     PERL_ARGS_ASSERT_AV_EXISTS;
     assert(SvTYPE(av) == SVt_PVAV);

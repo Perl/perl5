@@ -488,7 +488,7 @@ int
 os2_cond_wait(perl_cond *c, perl_mutex *m)
 {						
     int rc;
-    STRLEN n_a;
+    size_t n_a;
     if ((rc = DosResetEventSem(*c,&n_a)) && (rc != ERROR_ALREADY_RESET))
 	Perl_rc = CheckOSError(rc), croak_with_os2error("panic: COND_WAIT-reset");
     if (m) MUTEX_UNLOCK(m);					
@@ -991,7 +991,7 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 	int force_shell;
  	int new_stderr = -1, nostderr = 0;
 	int fl_stderr = 0;
-	STRLEN n_a;
+	size_t n_a;
 	char *buf;
 	PerlIO *file;
 	
@@ -1373,7 +1373,7 @@ do_spawn3(pTHX_ char *cmd, int execf, int flag)
 	cmd++;
 
     if (strnEQ(cmd,"/bin/sh",7) && isSPACE(cmd[7])) {
-	STRLEN l = strlen(PL_sh_path);
+	size_t l = strlen(PL_sh_path);
 	
 	Newx(news, strlen(cmd) - 7 + l + 1, char);
 	strcpy(news, PL_sh_path);
@@ -1483,7 +1483,7 @@ os2_aspawn_4(pTHX_ SV *really, SV **args, I32 cnt, int execing)
     char **a;
     int rc;
     int flag = P_WAIT, flag_set = 0;
-    STRLEN n_a;
+    size_t n_a;
 
     if (cnt) {
 	Newx(PL_Argv, cnt + 3, char*); /* 3 extra to expand #! */
@@ -1731,7 +1731,7 @@ int
 os2_stat(const char *name, struct stat *st)
 {
     static int ino = SHRT_MAX;
-    STRLEN l = strlen(name);
+    size_t l = strlen(name);
 
     if ( ( l < 8 || l > 9) || strnicmp(name, "/dev/", 5) != 0
          || (    stricmp(name + 5, "con") != 0
@@ -1848,7 +1848,7 @@ XS(XS_File__Copy_syscopy)
     if (items < 2 || items > 3)
 	Perl_croak_nocontext("Usage: File::Copy::syscopy(src,dst,flag=0)");
     {
-	STRLEN n_a;
+	size_t n_a;
 	char *	src = (char *)SvPV(ST(0),n_a);
 	char *	dst = (char *)SvPV(ST(1),n_a);
 	U32	flag;
@@ -2005,7 +2005,7 @@ mod2fname(pTHX_ SV *sv)
     int pos = 6, len, avlen;
     unsigned int sum = 0;
     char *s;
-    STRLEN n_a;
+    size_t n_a;
 
     if (!SvROK(sv)) Perl_croak_nocontext("Not a reference given to mod2fname");
     sv = SvRV(sv);
@@ -2156,10 +2156,10 @@ CroakWinError(int die, char *name)
 }
 
 static char *
-dllname2buffer(pTHX_ char *buf, STRLEN l)
+dllname2buffer(pTHX_ char *buf, size_t l)
 {
     char *o;
-    STRLEN ll;
+    size_t ll;
     SV *dll = NULL;
 
     dll = module_name(mod_name_full);
@@ -2171,7 +2171,7 @@ dllname2buffer(pTHX_ char *buf, STRLEN l)
 }
 
 static char *
-execname2buffer(char *buf, STRLEN l, char *oname)
+execname2buffer(char *buf, size_t l, char *oname)
 {
   char *p, *orig = oname, ok = oname != NULL;
 
@@ -2256,7 +2256,7 @@ char *
 dir_subst(char *s, unsigned int l, char *b, unsigned int bl, enum dir_subst_e flags, char *msg)
 {
     char *from, *to = b, *e = b; /* `to' assignment: shut down the warning */
-    STRLEN froml = 0, tol = 0, rest = 0;	/* froml: likewise */
+    size_t froml = 0, tol = 0, rest = 0;	/* froml: likewise */
 
     if (l >= 2 && s[0] == '~') {
 	switch (s[1]) {
@@ -2349,7 +2349,7 @@ dir_subst(char *s, unsigned int l, char *b, unsigned int bl, enum dir_subst_e fl
 	}
     }						/* Else: copy as is */
     if (l && (flags & dir_subst_pathlike)) {
-	STRLEN i = 0;
+	size_t i = 0;
 
 	while ( i < l - 2 && s[i] != ';')	/* May have ~char after `;' */
 	    i++;
@@ -2613,7 +2613,7 @@ XS(XS_OS2_Errors2Drive)
     if (items != 1)
 	Perl_croak_nocontext("Usage: OS2::Errors2Drive(drive)");
     {
-	STRLEN n_a;
+	size_t n_a;
 	SV  *sv = ST(0);
 	int	suppress = SvOK(sv);
 	char	*s = suppress ? SvPV(sv, n_a) : NULL;
@@ -3370,7 +3370,7 @@ XS(XS_Cwd_sys_chdir)
     if (items != 1)
 	Perl_croak_nocontext("Usage: Cwd::sys_chdir(path)");
     {
-	STRLEN n_a;
+	size_t n_a;
 	char *	path = (char *)SvPV(ST(0),n_a);
 	bool	RETVAL;
 
@@ -3387,7 +3387,7 @@ XS(XS_Cwd_change_drive)
     if (items != 1)
 	Perl_croak_nocontext("Usage: Cwd::change_drive(d)");
     {
-	STRLEN n_a;
+	size_t n_a;
 	char	d = (char)*SvPV(ST(0),n_a);
 	bool	RETVAL;
 
@@ -3404,7 +3404,7 @@ XS(XS_Cwd_sys_is_absolute)
     if (items != 1)
 	Perl_croak_nocontext("Usage: Cwd::sys_is_absolute(path)");
     {
-	STRLEN n_a;
+	size_t n_a;
 	char *	path = (char *)SvPV(ST(0),n_a);
 	bool	RETVAL;
 
@@ -3421,7 +3421,7 @@ XS(XS_Cwd_sys_is_rooted)
     if (items != 1)
 	Perl_croak_nocontext("Usage: Cwd::sys_is_rooted(path)");
     {
-	STRLEN n_a;
+	size_t n_a;
 	char *	path = (char *)SvPV(ST(0),n_a);
 	bool	RETVAL;
 
@@ -3438,7 +3438,7 @@ XS(XS_Cwd_sys_is_relative)
     if (items != 1)
 	Perl_croak_nocontext("Usage: Cwd::sys_is_relative(path)");
     {
-	STRLEN n_a;
+	size_t n_a;
 	char *	path = (char *)SvPV(ST(0),n_a);
 	bool	RETVAL;
 
@@ -3473,7 +3473,7 @@ XS(XS_Cwd_sys_abspath)
     if (items > 2)
 	Perl_croak_nocontext("Usage: Cwd::sys_abspath(path = '.', dir = NULL)");
     {
-	STRLEN n_a;
+	size_t n_a;
 	char *	path = items ? (char *)SvPV(ST(0),n_a) : ".";
 	char *	dir, *s, *t, *e;
 	char p[MAXPATHLEN];
@@ -3651,7 +3651,7 @@ XS(XS_Cwd_extLibpath)
 	U32	rc;
 	char *	RETVAL;
 	dXSTARG;
-	STRLEN l;
+	size_t l;
 
 	if (items < 1)
 	    type = 0;
@@ -3679,7 +3679,7 @@ XS(XS_Cwd_extLibpath_set)
     if (items < 1 || items > 2)
 	Perl_croak_nocontext("Usage: OS2::extLibpath_set(s, type = 0)");
     {
-	STRLEN n_a;
+	size_t n_a;
 	char *	s = (char *)SvPV(ST(0),n_a);
 	IV	type;
 	U32	rc;
@@ -3702,7 +3702,7 @@ ULONG
 fill_extLibpath(int type, char *pre, char *post, int replace, char *msg)
 {
     char buf[2048], *to = buf, buf1[300], *s;
-    STRLEN l;
+    size_t l;
     ULONG rc;
 
     if (!pre && !post)
@@ -3850,7 +3850,7 @@ XS(XS_OS2__headerInfo)
 	Perl_croak(aTHX_ "Usage: OS2::_headerInfo(req,size[,handle,[offset]])");
     {
 	ULONG	req = (ULONG)SvIV(ST(0));
-	STRLEN	size = (STRLEN)SvIV(ST(1)), n_a;
+	size_t	size = (size_t)SvIV(ST(1)), n_a;
 	ULONG	handle = (items >= 3 ? (ULONG)SvIV(ST(2)) : 0);
 	ULONG	offset = (items >= 4 ? (ULONG)SvIV(ST(3)) : 0);
 
@@ -3879,7 +3879,7 @@ XS(XS_OS2_libPath)
 	Perl_croak(aTHX_ "Usage: OS2::libPath()");
     {
 	ULONG	size;
-	STRLEN	n_a;
+	size_t	n_a;
 
 	if (!_Dos32QueryHeaderInfo(0, 0, &size, sizeof(size), 
 				   DQHI_QUERYLIBPATHSIZE)) 
@@ -4095,7 +4095,7 @@ XS(XS_OS2_pipe)
 	ULONG	ulOpenMode;
 	int	connect = 0, count, message_r = 0, message = 0, b = 0;
 	ULONG	ulInbufLength,	ulOutbufLength,	ulPipeMode, ulTimeout, rc;
-	STRLEN	len;
+	size_t	len;
 	char	*s, buf[10], *s1, *perltype = NULL;
 	PerlIO	*perlio;
 	double	timeout;
@@ -4123,10 +4123,10 @@ XS(XS_OS2_pipe)
 	}
 	if (len == 4 && strEQ(s, "call")) {	/* DosCallNPipe() */
 	    ULONG ms = 0xFFFFFFFF, got; /* Indefinite */
-	    STRLEN l;
+	    size_t l;
 	    char *s;
 	    char buf[8192];
-	    STRLEN ll = sizeof(buf);
+	    size_t ll = sizeof(buf);
 	    char *b = buf;
 
 	    if (items < 3 || items > 5)
@@ -4141,7 +4141,7 @@ XS(XS_OS2_pipe)
 		    ms = 1;
 	    }
 	    if (items >= 5) {
-		STRLEN lll = SvUV(ST(4));
+		size_t lll = SvUV(ST(4));
 		SV *sv = NEWSV(914, lll);
 
 		sv_2mortal(sv);
@@ -4278,7 +4278,7 @@ XS(XS_OS2_pipeCntl)
 	PerlIO *perlio = IoIFP(sv_2io(ST(0)));
 	IV	fn = PerlIO_fileno(perlio);
 	HPIPE	hpipe = (HPIPE)fn;
-	STRLEN	len;
+	size_t	len;
 	char	*s = SvPV(ST(1), len);
 	int	wait = 0, disconnect = 0, connect = 0, message = -1, query = 0;
 	int	peek = 0, state = 0, info = 0;
@@ -5067,7 +5067,7 @@ my_rmdir (__const__ char *s)
 {
     char b[MAXPATHLEN];
     char *buf = b;
-    STRLEN l = strlen(s);
+    size_t l = strlen(s);
     int rc;
 
     if (s[l-1] == '/' || s[l-1] == '\\') {	/* EMX mkdir fails... */
@@ -5092,7 +5092,7 @@ my_mkdir (__const__ char *s, long perm)
 {
     char b[MAXPATHLEN];
     char *buf = b;
-    STRLEN l = strlen(s);
+    size_t l = strlen(s);
     int rc;
 
     if (s[l-1] == '/' || s[l-1] == '\\') {	/* EMX mkdir fails... */

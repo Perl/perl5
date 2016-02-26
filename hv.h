@@ -37,7 +37,7 @@ struct he {
     HEK		*hent_hek;	/* hash key */
     union {
 	SV	*hent_val;	/* scalar value that was hashed */
-	Size_t	hent_refcount;	/* references for this shared hash key */
+	size_t	hent_refcount;	/* references for this shared hash key */
     } he_valu;
 };
 
@@ -131,8 +131,8 @@ struct xpvhv_aux {
 struct xpvhv {
     HV*		xmg_stash;	/* class package */
     union _xmgu	xmg_u;
-    STRLEN      xhv_keys;       /* total keys, including placeholders */
-    STRLEN      xhv_max;        /* subscript of last element of xhv_array */
+    size_t      xhv_keys;       /* total keys, including placeholders */
+    size_t      xhv_max;        /* subscript of last element of xhv_array */
 };
 
 /*
@@ -156,7 +156,7 @@ Null HV pointer.
 Returns the package name of a stash, or C<NULL> if C<stash> isn't a stash.
 See C<L</SvSTASH>>, C<L</CvSTASH>>.
 
-=for apidoc Am|STRLEN|HvNAMELEN|HV *stash
+=for apidoc Am|size_t|HvNAMELEN|HV *stash
 Returns the length of the stash's name.
 
 =for apidoc Am|unsigned char|HvNAMEUTF8|HV *stash
@@ -170,7 +170,7 @@ A stash that is no longer in the symbol table has no effective name.  This
 name is preferable to C<HvNAME> for use in MRO linearisations and isa
 caches.
 
-=for apidoc Am|STRLEN|HvENAMELEN|HV *stash
+=for apidoc Am|size_t|HvENAMELEN|HV *stash
 Returns the length of the stash's effective name.
 
 =for apidoc Am|unsigned char|HvENAMEUTF8|HV *stash
@@ -182,7 +182,7 @@ pointer may be either C<char*> or C<SV*>, depending on the value of
 C<HeKLEN()>.  Can be assigned to.  The C<HePV()> or C<HeSVKEY()> macros are
 usually preferable for finding the value of a key.
 
-=for apidoc Am|STRLEN|HeKLEN|HE* he
+=for apidoc Am|size_t|HeKLEN|HE* he
 If this is negative, and amounts to C<HEf_SVKEY>, it indicates the entry
 holds an C<SV*> key.  Otherwise, holds the actual length of the key.  Can
 be assigned to.  The C<HePV()> macro is usually preferable for finding key
@@ -200,7 +200,7 @@ to.
 =for apidoc Am|U32|HeHASH|HE* he
 Returns the computed hash stored in the hash entry.
 
-=for apidoc Am|char*|HePV|HE* he|STRLEN len
+=for apidoc Am|char*|HePV|HE* he|size_t len
 Returns the key slot of the hash entry as a C<char*> value, doing any
 necessary dereferencing of possibly C<SV*> keys.  The length of the string
 is placed in C<len> (this is a macro, so do I<not> use C<&len>).  If you do
@@ -533,7 +533,7 @@ struct refcounted_he {
     union {
 	IV                refcounted_he_u_iv;
 	UV                refcounted_he_u_uv;
-	STRLEN            refcounted_he_u_len;
+	size_t            refcounted_he_u_len;
 	void		 *refcounted_he_u_ptr;	/* Might be useful in future */
     } refcounted_he_val;
     U32	                  refcounted_he_refcnt;	/* reference count */

@@ -36,7 +36,7 @@ haiku_do_debug_printf(pTHX_ SV *sv,
 	return;
     }
     else {
-	STRLEN len;
+	size_t len;
 	/* Do this first to trigger any overloading.  */
 	const char *tmps = SvPV_const(sv, len);
 	U8 *tmpbuf = NULL;

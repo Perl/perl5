@@ -3260,17 +3260,9 @@
 #define SITELIB_STEM "/usr/local/lib/perl5"		/**/
 
 /* Size_t_size:
- *	This symbol holds the size of a Size_t in bytes.
+ *	This symbol holds the size of a size_t in bytes.
  */
 #define Size_t_size 4		/**/
-
-/* Size_t:
- *	This symbol holds the type used to declare length parameters
- *	for string functions.  It is usually size_t, but may be
- *	unsigned long, int, etc.  It may be necessary to include
- *	<sys/types.h> to get any typedef'ed information.
- */
-#define Size_t size_t	 /* length parameter for string functions */
 
 /* Sock_size_t:
  *	This symbol holds the type used for the size argument of
@@ -3278,15 +3270,17 @@
  */
 #define Sock_size_t		int /**/
 
-/* SSize_t:
+/* ssize_t:
  *	This symbol holds the type used by functions that return
  *	a count of bytes or an error condition.  It must be a signed type.
  *	It is usually ssize_t, but may be long or int, etc.
  *	It may be necessary to include <sys/types.h> or <unistd.h>
  *	to get any typedef'ed information.
- *	We will pick a type such that sizeof(SSize_t) == sizeof(Size_t).
+ *	We will pick a type such that sizeof(ssize_t) == sizeof(size_t).
  */
-#define SSize_t int	 /* signed count of bytes */
+#ifndef ssize_t
+#define ssize_t int	 /* signed count of bytes */
+#endif
 
 /* STDCHAR:
  *	This symbol is defined to be the type of char used in stdio.h.
@@ -5224,6 +5218,6 @@
 #endif
 
 /* Generated from:
- * 0459b706f70bb18d7481b187553e0719406d2c7d5c354c3a309332dfd8e66197 config_h.SH
- * 9382cd0e3b112993f14cfefe78ebe24b4b09df9d9dd199226ca7ba5e6b90f21a uconfig.sh
+ * 3a6360653007970d54fb81250adc4b86df1e7a3e805c1d6864e862c80559e41d config_h.SH
+ * a94f60a3b6b461282763630220ba7495532e7fceb6a3c7458ad665908ec010c9 uconfig.sh
  * ex: set ro: */

@@ -36,11 +36,11 @@ struct regexp_engine;
 struct regexp;
 
 struct reg_substr_datum {
-    SSize_t min_offset; /* min pos (in chars) that substr must appear */
-    SSize_t max_offset  /* max pos (in chars) that substr must appear */;
+    ssize_t min_offset; /* min pos (in chars) that substr must appear */
+    ssize_t max_offset  /* max pos (in chars) that substr must appear */;
     SV *substr;		/* non-utf8 variant */
     SV *utf8_substr;	/* utf8 variant */
-    SSize_t end_shift;  /* how many fixed chars must end the string */
+    ssize_t end_shift;  /* how many fixed chars must end the string */
 };
 struct reg_substr_data {
     U8      check_ix;   /* index into data[] of check substr */
@@ -56,15 +56,15 @@ struct reg_substr_data {
 /* offsets within a string of a particular /(.)/ capture */
 
 typedef struct regexp_paren_pair {
-    SSize_t start;
-    SSize_t end;
+    ssize_t start;
+    ssize_t end;
     /* 'start_tmp' records a new opening position before the matching end
      * has been found, so that the old start and end values are still
      * valid, e.g.
      *	  "abc" =~ /(.(?{print "[$1]"}))+/
      *outputs [][a][b]
      * This field is not part of the API.  */
-    SSize_t start_tmp;
+    ssize_t start_tmp;
 } regexp_paren_pair;
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
@@ -79,8 +79,8 @@ typedef struct regexp_paren_pair {
 /* record the position of a (?{...}) within a pattern */
 
 struct reg_code_block {
-    STRLEN start;
-    STRLEN end;
+    size_t start;
+    size_t end;
     OP     *block;
     REGEXP *src_regex;
 };
@@ -105,9 +105,9 @@ struct reg_code_block {
 	/* Information about the match that the perl core uses to */	\
 	/* manage things */						\
 	U32 extflags;	/* Flags used both externally and internally */	\
-	SSize_t minlen;	/* mininum possible number of chars in string to match */\
-	SSize_t minlenret; /* mininum possible number of chars in $& */		\
-	STRLEN gofs;	/* chars left of pos that we search from */	\
+	ssize_t minlen;	/* mininum possible number of chars in string to match */\
+	ssize_t minlenret; /* mininum possible number of chars in $& */		\
+	size_t gofs;	/* chars left of pos that we search from */	\
 	/* substring data about strings that must appear in the */	\
 	/* final match, used for optimisations */			\
 	struct reg_substr_data *substrs;				\
@@ -125,11 +125,11 @@ struct reg_code_block {
 	/* saved or original string so \digit works forever. */		\
 	char *subbeg;							\
 	SV_SAVED_COPY	/* If non-NULL, SV which is COW from original */\
-	SSize_t sublen;	/* Length of string pointed by subbeg */	\
-	SSize_t suboffset; /* byte offset of subbeg from logical start of str */ \
-	SSize_t subcoffset; /* suboffset equiv, but in chars (for @-/@+) */ \
+	ssize_t sublen;	/* Length of string pointed by subbeg */	\
+	ssize_t suboffset; /* byte offset of subbeg from logical start of str */ \
+	ssize_t subcoffset; /* suboffset equiv, but in chars (for @-/@+) */ \
 	/* Information about the match that isn't often used */		\
-        SSize_t maxlen;        /* mininum possible number of chars in string to match */\
+        ssize_t maxlen;        /* mininum possible number of chars in string to match */\
 	/* offset from wrapped to the start of precomp */		\
 	PERL_BITFIELD32 pre_prefix:4;					\
         /* original flags used to compile the pattern, may differ */    \
@@ -148,7 +148,7 @@ typedef struct regexp {
 typedef struct re_scream_pos_data_s
 {
     char **scream_olds;		/* match pos */
-    SSize_t *scream_pos;	/* Internal iterator of scream. */
+    ssize_t *scream_pos;	/* Internal iterator of scream. */
 } re_scream_pos_data;
 
 /* regexp_engine structure. This is the dispatch table for regexes.
@@ -157,7 +157,7 @@ typedef struct re_scream_pos_data_s
 typedef struct regexp_engine {
     REGEXP* (*comp) (pTHX_ SV * const pattern, U32 flags);
     I32     (*exec) (pTHX_ REGEXP * const rx, char* stringarg, char* strend,
-                     char* strbeg, SSize_t minend, SV* sv,
+                     char* strbeg, ssize_t minend, SV* sv,
                      void* data, U32 flags);
     char*   (*intuit) (pTHX_
                         REGEXP * const rx,
@@ -507,7 +507,7 @@ and check for NULL.
 #define RX_SAVED_COPY(prog)	(ReANY(prog)->saved_copy)
 /* last match was zero-length */
 #define RX_ZERO_LEN(prog) \
-        (RX_OFFS(prog)[0].start + (SSize_t)RX_GOFS(prog) \
+        (RX_OFFS(prog)[0].start + (ssize_t)RX_GOFS(prog) \
           == RX_OFFS(prog)[0].end)
 
 #endif /* PLUGGABLE_RE_EXTENSION */
@@ -606,11 +606,11 @@ typedef struct {
     SV      *saved_copy; /* saved saved_copy field from rex */
 #endif
     char    *subbeg;    /* saved subbeg     field from rex */
-    STRLEN  sublen;     /* saved sublen     field from rex */
-    STRLEN  suboffset;  /* saved suboffset  field from rex */
-    STRLEN  subcoffset; /* saved subcoffset field from rex */
+    size_t  sublen;     /* saved sublen     field from rex */
+    size_t  suboffset;  /* saved suboffset  field from rex */
+    size_t  subcoffset; /* saved subcoffset field from rex */
     MAGIC   *pos_magic; /* pos() magic attached to $_ */
-    SSize_t pos;        /* the original value of pos() in pos_magic */
+    ssize_t pos;        /* the original value of pos() in pos_magic */
     U8      pos_flags;  /* flags to be restored; currently only MGf_BYTES*/
 } regmatch_info_aux_eval;
 
@@ -646,7 +646,7 @@ typedef struct {
     regmatch_info_aux_eval *info_aux_eval; /* extra saved state for (?{}) */
     I32  poscache_maxiter; /* how many whilems todo before S-L cache kicks in */
     I32  poscache_iter;    /* current countdown from _maxiter to zero */
-    STRLEN poscache_size;  /* size of regmatch_info_aux.poscache */
+    size_t poscache_size;  /* size of regmatch_info_aux.poscache */
     bool intuit;    /* re_intuit_start() is the top-level caller */
     bool is_utf8_pat;    /* regex is utf8 */
     bool is_utf8_target; /* string being matched is utf8 */

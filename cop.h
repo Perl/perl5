@@ -156,7 +156,7 @@ typedef struct refcounted_he COPHH;
 #define COPHH_KEY_UTF8 REFCOUNTED_HE_KEY_UTF8
 
 /*
-=for apidoc Amx|SV *|cophh_fetch_pvn|const COPHH *cophh|const char *keypv|STRLEN keylen|U32 hash|U32 flags
+=for apidoc Amx|SV *|cophh_fetch_pvn|const COPHH *cophh|const char *keypv|size_t keylen|U32 hash|U32 flags
 
 Look up the entry in the cop hints hash C<cophh> with the key specified by
 C<keypv> and C<keylen>.  If C<flags> has the C<COPHH_KEY_UTF8> bit set,
@@ -253,7 +253,7 @@ Generate and return a fresh cop hints hash containing no entries.
 #define cophh_new_empty() ((COPHH *)NULL)
 
 /*
-=for apidoc Amx|COPHH *|cophh_store_pvn|COPHH *cophh|const char *keypv|STRLEN keylen|U32 hash|SV *value|U32 flags
+=for apidoc Amx|COPHH *|cophh_store_pvn|COPHH *cophh|const char *keypv|size_t keylen|U32 hash|SV *value|U32 flags
 
 Stores a value, associated with a key, in the cop hints hash C<cophh>,
 and returns the modified hash.  The returned hash pointer is in general
@@ -315,7 +315,7 @@ string/length pair.
     Perl_refcounted_he_new_sv(aTHX_ cophh, key, hash, value, flags)
 
 /*
-=for apidoc Amx|COPHH *|cophh_delete_pvn|COPHH *cophh|const char *keypv|STRLEN keylen|U32 hash|U32 flags
+=for apidoc Amx|COPHH *|cophh_delete_pvn|COPHH *cophh|const char *keypv|size_t keylen|U32 hash|U32 flags
 
 Delete a key and its associated value from the cop hints hash C<cophh>,
 and returns the modified hash.  The returned hash pointer is in general
@@ -390,8 +390,8 @@ struct cop {
 #endif
     U32		cop_hints;	/* hints bits from pragmata */
     U32		cop_seq;	/* parse sequence number */
-    /* Beware. mg.c and warnings.pl assume the type of this is STRLEN *:  */
-    STRLEN *	cop_warnings;	/* lexical warnings bitmask */
+    /* Beware. mg.c and warnings.pl assume the type of this is size_t *:  */
+    size_t *	cop_warnings;	/* lexical warnings bitmask */
     /* compile time state of %^H.  See the comment in op.c for how this is
        used to recreate a hash to return from caller.  */
     COPHH *	cop_hints_hash;
@@ -459,7 +459,7 @@ struct cop {
 */
 
 /*
-=for apidoc Am|SV *|cop_hints_fetch_pvn|const COP *cop|const char *keypv|STRLEN keylen|U32 hash|U32 flags
+=for apidoc Am|SV *|cop_hints_fetch_pvn|const COP *cop|const char *keypv|size_t keylen|U32 hash|U32 flags
 
 Look up the hint entry in the cop C<cop> with the key specified by
 C<keypv> and C<keylen>.  If C<flags> has the C<COPHH_KEY_UTF8> bit set,
@@ -720,7 +720,7 @@ struct block {
     I32		blku_oldmarksp;	/* mark stack index */
     COP *	blku_oldcop;	/* old curcop pointer */
     PMOP *	blku_oldpm;	/* values of pattern match vars */
-    SSize_t     blku_old_tmpsfloor;     /* saved PL_tmps_floor */
+    ssize_t     blku_old_tmpsfloor;     /* saved PL_tmps_floor */
     I32		blku_oldscopesp;	/* scope stack index */
 
     union {
@@ -767,8 +767,8 @@ struct subst {
     U16		sbu_rxtainted;
     I32		sbu_oldsaveix; /* same as blku_oldsaveix */
     /* all the fields above must be aligned with same-sized fields as blk_u */
-    SSize_t	sbu_iters;
-    SSize_t	sbu_maxiters;
+    ssize_t	sbu_iters;
+    ssize_t	sbu_maxiters;
     char *	sbu_orig;
     SV *	sbu_dstr;
     SV *	sbu_targ;

@@ -902,7 +902,12 @@ EXTERN_C int usleep(unsigned int);
 #define PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
 #endif
 
-#define MEM_SIZE Size_t
+#ifndef PERL_CORE
+#define MEM_SIZE size_t
+#define Size_t size_t
+#define SSize_t ssize_t
+typedef MEM_SIZE STRLEN;
+#endif
 
 /* Round all values passed to malloc up, by default to a multiple of
    sizeof(size_t)
@@ -923,7 +928,7 @@ EXTERN_C int usleep(unsigned int);
 #   include <stddef.h>
 #   define STRUCT_OFFSET(s,m)  offsetof(s,m)
 #else
-#   define STRUCT_OFFSET(s,m)  (Size_t)(&(((s *)0)->m))
+#   define STRUCT_OFFSET(s,m)  (size_t)(&(((s *)0)->m))
 #endif
 
 /* ptrdiff_t is C11, so undef it under pedantic builds */
@@ -1574,7 +1579,7 @@ EXTERN_C char *crypt(const char *, const char *);
  * that should be true only if the snprintf()/vsnprintf() are true
  * to the standard. */
 
-#define PERL_SNPRINTF_CHECK(len, max, api) STMT_START { if ((max) > 0 && (Size_t)len >= (max)) Perl_croak_nocontext("panic: %s buffer overflow", STRINGIFY(api)); } STMT_END
+#define PERL_SNPRINTF_CHECK(len, max, api) STMT_START { if ((max) > 0 && (size_t)len >= (max)) Perl_croak_nocontext("panic: %s buffer overflow", STRINGIFY(api)); } STMT_END
 
 #ifdef USE_QUADMATH
 #  define my_snprintf Perl_my_snprintf
@@ -1714,8 +1719,8 @@ typedef UVTYPE UV;
 #  endif
 #endif
 
-#define Size_t_MAX (~(Size_t)0)
-#define SSize_t_MAX (SSize_t)(~(Size_t)0 >> 1)
+#define Size_t_MAX (~(size_t)0)
+#define SSize_t_MAX (ssize_t)(~(size_t)0 >> 1)
 
 #define IV_DIG (BIT_DIGITS(IVSIZE * 8))
 #define UV_DIG (BIT_DIGITS(UVSIZE * 8))
@@ -2602,8 +2607,6 @@ int isnan(double d);
 #    define PERL_QUAD_MIN 	(-PERL_QUAD_MAX - ((3 & -1) == 3))
 
 #endif
-
-typedef MEM_SIZE STRLEN;
 
 typedef struct op OP;
 typedef struct cop COP;
@@ -4592,7 +4595,7 @@ struct perl_memory_debug_header;
 struct perl_memory_debug_header {
   tTHX	interpreter;
 #  if defined(PERL_POISON) || defined(PERL_DEBUG_READONLY_COW)
-  MEM_SIZE size;
+  size_t size;
 #  endif
   struct perl_memory_debug_header *prev;
   struct perl_memory_debug_header *next;
@@ -4605,7 +4608,7 @@ struct perl_memory_debug_header {
 
 struct perl_memory_debug_header;
 struct perl_memory_debug_header {
-  MEM_SIZE size;
+  size_t size;
 };
 
 #endif
@@ -5451,7 +5454,7 @@ typedef void (*XSUBADDR_t) (pTHX_ CV *);
 typedef OP* (*Perl_ppaddr_t)(pTHX);
 typedef OP* (*Perl_check_t) (pTHX_ OP*);
 typedef void(*Perl_ophook_t)(pTHX_ OP*);
-typedef int (*Perl_keyword_plugin_t)(pTHX_ char*, STRLEN, OP**);
+typedef int (*Perl_keyword_plugin_t)(pTHX_ char*, size_t, OP**);
 typedef void(*Perl_cpeep_t)(pTHX_ OP *, OP *);
 
 typedef void(*globhook_t)(pTHX);

@@ -76,12 +76,12 @@ hash_value(string,...)
     PPCODE:
 {
     UV uv;
-    STRLEN len;
+    size_t len;
     char *pv= SvPV(string,len);
     if (items<2) {
         PERL_HASH(uv, pv, len);
     } else {
-        STRLEN seedlen;
+        size_t seedlen;
         U8 *seedbuf= (U8 *)SvPV(ST(1),seedlen);
         if ( seedlen < PERL_HASH_SEED_BYTES ) {
             sv_dump(ST(1));
@@ -225,7 +225,7 @@ bucket_array(rhv)
                 for (he= he_ptr[i]; he; he= HeNEXT(he) ) {
                     SV *key_sv;
                     char *str;
-                    STRLEN len;
+                    size_t len;
                     char mode;
                     if (!key_av) {
                         key_av= newAV();

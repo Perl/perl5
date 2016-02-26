@@ -398,7 +398,7 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 	}
     }
     if ( qv ) { /* quoted versions always get at least three terms*/
-	SSize_t len = AvFILLp(av);
+	ssize_t len = AvFILLp(av);
 	/* This for loop appears to trigger a compiler bug on OS X, as it
 	   loops infinitely. Yes, len is negative. No, it makes no sense.
 	   Compiler in question is:
@@ -466,7 +466,7 @@ Perl_new_version(pTHX_ SV *ver)
     PERL_ARGS_ASSERT_NEW_VERSION;
     if ( ISA_VERSION_OBJ(ver) ) /* can just copy directly */
     {
-	SSize_t key;
+	ssize_t key;
 	AV * const av = newAV();
 	AV *sav;
 	/* This will get reblessed later if a derived class*/
@@ -513,7 +513,7 @@ Perl_new_version(pTHX_ SV *ver)
     {
 	const MAGIC* const mg = SvVSTRING_mg(ver);
 	if ( mg ) { /* already a v-string */
-	    const STRLEN len = mg->mg_len;
+	    const size_t len = mg->mg_len;
 	    const char * const version = (const char*)mg->mg_ptr;
 	    sv_setpvn(rv,version,len);
 	    /* this is for consistency with the pure Perl class */
@@ -564,7 +564,7 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
     if ( (SvUOK(ver) && SvUVX(ver) > VERSION_MAX)
 	   || (SvIOK(ver) && SvIVX(ver) > VERSION_MAX) ) {
 	/* out of bounds [unsigned] integer */
-	STRLEN len;
+	size_t len;
 	char tbuf[64];
 	len = my_snprintf(tbuf, sizeof(tbuf), "%d", VERSION_MAX);
 	version = savepvn(tbuf, len);
@@ -585,7 +585,7 @@ VER_IV:
 VER_NV:
 #endif
     {
-	STRLEN len;
+	size_t len;
 
 	/* may get too much accuracy */ 
 	char tbuf[64];
@@ -654,7 +654,7 @@ VER_NV:
 VER_PV:
 #endif
     {
-	STRLEN len;
+	size_t len;
 	version = savepvn(SvPV(ver,len), SvCUR(ver));
 	SAVEFREEPV(version);
 #ifndef SvVOK
@@ -663,7 +663,7 @@ VER_PV:
 	if ( len >= 3 && !instr(version,".") && !instr(version,"_")) {
 	    /* may be a v-string */
 	    char *testv = (char *)version;
-	    STRLEN tlen = len;
+	    size_t tlen = len;
 	    for (tlen=0; tlen < len; tlen++, testv++) {
 		/* if one of the characters is non-text assume v-string */
 		if (testv[0] < ' ') {
@@ -798,7 +798,7 @@ Perl_vnumify2(pTHX_ SV *vs)
 Perl_vnumify(pTHX_ SV *vs)
 #endif
 {
-    SSize_t i, len;
+    ssize_t i, len;
     I32 digit;
     int width;
     bool alpha = FALSE;
@@ -1003,7 +1003,7 @@ Perl_vcmp2(pTHX_ SV *lhv, SV *rhv)
 Perl_vcmp(pTHX_ SV *lhv, SV *rhv)
 #endif
 {
-    SSize_t i,l,m,r;
+    ssize_t i,l,m,r;
     I32 retval;
     bool lalpha = FALSE;
     bool ralpha = FALSE;

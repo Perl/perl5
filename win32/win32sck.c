@@ -55,7 +55,7 @@ static struct servent* win32_savecopyservent(struct servent*d,
 static int wsock_started = 0;
 
 #ifdef WIN32_DYN_IOINFO_SIZE
-EXTERN_C Size_t w32_ioinfo_size;
+EXTERN_C size_t w32_ioinfo_size;
 #endif
 
 EXTERN_C void

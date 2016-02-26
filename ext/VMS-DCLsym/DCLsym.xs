@@ -29,7 +29,7 @@ _getsym(name)
   {
     struct dsc$descriptor_s namdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,0},
                             valdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_D,0};
-    STRLEN namlen;
+    size_t namlen;
     int tbltype;
     unsigned long int retsts;
     SETERRNO(0,SS$_NORMAL);
@@ -78,7 +78,7 @@ _setsym(name,val,typestr="LOCAL")
   {
     struct dsc$descriptor_s namdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,0},
                             valdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,0};
-    STRLEN slen;
+    size_t slen;
     int type;
     unsigned long int retsts;
     SETERRNO(0,SS$_NORMAL);
@@ -118,7 +118,7 @@ _delsym(name,typestr="LOCAL")
   CODE:
   {
     struct dsc$descriptor_s namdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,0};
-    STRLEN slen;
+    size_t slen;
     int type;
     unsigned long int retsts;
     SETERRNO(0,SS$_NORMAL);

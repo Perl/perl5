@@ -17,7 +17,7 @@ following format:
                          REGEXP * const rx,
                          char* stringarg,
                          char* strend, char* strbeg,
-                         SSize_t minend, SV* sv,
+                         ssize_t minend, SV* sv,
                          void* data, U32 flags);
         char*   (*intuit) (pTHX_
                            REGEXP * const rx, SV *sv,
@@ -85,7 +85,7 @@ pattern.  Previous versions of Perl would pass two C<char*> indicating
 the start and end of the stringified pattern; the following snippet can
 be used to get the old parameters:
 
-    STRLEN plen;
+    size_t plen;
     char*  exp = SvPV(pattern, plen);
     char* xend = exp + plen;
 
@@ -238,7 +238,7 @@ certain optimisations when this is set.
 
     I32 exec(pTHX_ REGEXP * const rx,
              char *stringarg, char* strend, char* strbeg,
-             SSize_t minend, SV* sv,
+             ssize_t minend, SV* sv,
              void* data, U32 flags);
 
 Execute a regexp. The arguments are

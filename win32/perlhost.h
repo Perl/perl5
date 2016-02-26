@@ -514,20 +514,20 @@ PerlEnvOsId(struct IPerlEnv* piPerl)
 }
 
 char*
-PerlEnvLibPath(struct IPerlEnv* piPerl, WIN32_NO_REGISTRY_M_(const char *pl) STRLEN *const len)
+PerlEnvLibPath(struct IPerlEnv* piPerl, WIN32_NO_REGISTRY_M_(const char *pl) size_t *const len)
 {
     return win32_get_privlib(WIN32_NO_REGISTRY_M_(pl) len);
 }
 
 char*
-PerlEnvSiteLibPath(struct IPerlEnv* piPerl, const char *pl, STRLEN *const len)
+PerlEnvSiteLibPath(struct IPerlEnv* piPerl, const char *pl, size_t *const len)
 {
     return win32_get_sitelib(pl, len);
 }
 
 char*
 PerlEnvVendorLibPath(struct IPerlEnv* piPerl, const char *pl,
-		     STRLEN *const len)
+		     size_t *const len)
 {
     return win32_get_vendorlib(pl, len);
 }
@@ -706,14 +706,14 @@ PerlStdIOReopen(struct IPerlStdIO* piPerl, const char*path, const char*mode, FIL
     return win32_freopen(path, mode, (FILE*)pf);
 }
 
-SSize_t
-PerlStdIORead(struct IPerlStdIO* piPerl, void *buffer, Size_t size, Size_t count, FILE* pf)
+ssize_t
+PerlStdIORead(struct IPerlStdIO* piPerl, void *buffer, size_t size, size_t count, FILE* pf)
 {
     return win32_fread(buffer, size, count, pf);
 }
 
-SSize_t
-PerlStdIOWrite(struct IPerlStdIO* piPerl, const void *buffer, Size_t size, Size_t count, FILE* pf)
+ssize_t
+PerlStdIOWrite(struct IPerlStdIO* piPerl, const void *buffer, size_t size, size_t count, FILE* pf)
 {
     return win32_fwrite(buffer, size, count, pf);
 }
@@ -725,7 +725,7 @@ PerlStdIOSetBuf(struct IPerlStdIO* piPerl, FILE* pf, char* buffer)
 }
 
 int
-PerlStdIOSetVBuf(struct IPerlStdIO* piPerl, FILE* pf, char* buffer, int type, Size_t size)
+PerlStdIOSetVBuf(struct IPerlStdIO* piPerl, FILE* pf, char* buffer, int type, size_t size)
 {
     return win32_setvbuf(pf, buffer, type, size);
 }

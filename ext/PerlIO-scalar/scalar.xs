@@ -114,7 +114,7 @@ PerlIOScalar_seek(pTHX_ PerlIO * f, Off_t offset, int whence)
 	break;
     case SEEK_END:
       {
-	STRLEN oldcur;
+	size_t oldcur;
 	(void)SvPV(s->var, oldcur);
 	new_posn = offset + oldcur;
 	break;
@@ -141,8 +141,8 @@ PerlIOScalar_tell(pTHX_ PerlIO * f)
 }
 
 
-static SSize_t
-PerlIOScalar_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
+static ssize_t
+PerlIOScalar_read(pTHX_ PerlIO *f, void *vbuf, size_t count)
 {
     if (!f)
 	return 0;
@@ -156,8 +156,8 @@ PerlIOScalar_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
 	SV *sv = s->var;
 	char *p;
-	STRLEN len;
-        STRLEN got;
+	size_t len;
+        size_t got;
 	p = SvPV(sv, len);
 	if (SvUTF8(sv)) {
 	    if (sv_utf8_downgrade(sv, TRUE)) {
@@ -178,17 +178,17 @@ PerlIOScalar_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
         assert((Off_t)len >= 0);
         if ((Off_t)len <= s->posn)
 	    return 0;
-	got = len - (STRLEN)(s->posn);
-	if ((STRLEN)got > (STRLEN)count)
-	    got = (STRLEN)count;
-	Copy(p + (STRLEN)(s->posn), vbuf, got, STDCHAR);
+	got = len - (size_t)(s->posn);
+	if ((size_t)got > (size_t)count)
+	    got = (size_t)count;
+	Copy(p + (size_t)(s->posn), vbuf, got, STDCHAR);
 	s->posn += (Off_t)got;
-	return (SSize_t)got;
+	return (ssize_t)got;
     }
 }
 
-static SSize_t
-PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
+static ssize_t
+PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, size_t count)
 {
     if (PerlIOBase(f)->flags & PERLIO_F_CANWRITE) {
 	Off_t offset;
@@ -210,7 +210,7 @@ PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
 	    s->posn = offset + count;
 	}
 	else {
-	    STRLEN const cur = SvCUR(sv);
+	    size_t const cur = SvCUR(sv);
 
             /* ensure we don't try to create ridiculously large
              * SVs on small platforms
@@ -226,21 +226,21 @@ PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
             }
 #endif
 
-	    if ((STRLEN)s->posn > cur) {
-		dst = SvGROW(sv, (STRLEN)s->posn + count + 1);
-		Zero(SvPVX(sv) + cur, (STRLEN)s->posn - cur, char);
+	    if ((size_t)s->posn > cur) {
+		dst = SvGROW(sv, (size_t)s->posn + count + 1);
+		Zero(SvPVX(sv) + cur, (size_t)s->posn - cur, char);
 	    }
 	    else if ((s->posn + count) >= cur)
-		dst = SvGROW(sv, (STRLEN)s->posn + count + 1);
+		dst = SvGROW(sv, (size_t)s->posn + count + 1);
 	    else
 		dst = SvPVX(sv);
 	    offset = s->posn;
 	    s->posn += count;
 	}
 	Move(vbuf, dst + offset, count, char);
-	if ((STRLEN) s->posn > SvCUR(sv)) {
-	    SvCUR_set(sv, (STRLEN)s->posn);
-	    dst[(STRLEN) s->posn] = 0;
+	if ((size_t) s->posn > SvCUR(sv)) {
+	    SvCUR_set(sv, (size_t)s->posn);
+	    dst[(size_t) s->posn] = 0;
 	}
 	SvPOK_on(sv);
 	SvSETMAGIC(sv);
@@ -285,22 +285,22 @@ PerlIOScalar_get_ptr(pTHX_ PerlIO * f)
     return (STDCHAR *) NULL;
 }
 
-static SSize_t
+static ssize_t
 PerlIOScalar_get_cnt(pTHX_ PerlIO * f)
 {
     if (PerlIOBase(f)->flags & PERLIO_F_CANREAD) {
 	PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
-	STRLEN len;
+	size_t len;
 	(void)SvPV(s->var,len);
 	if ((Off_t)len > s->posn)
-	    return len - (STRLEN)s->posn;
+	    return len - (size_t)s->posn;
 	else
 	    return 0;
     }
     return 0;
 }
 
-static Size_t
+static size_t
 PerlIOScalar_bufsiz(pTHX_ PerlIO * f)
 {
     if (PerlIOBase(f)->flags & PERLIO_F_CANREAD) {
@@ -312,10 +312,10 @@ PerlIOScalar_bufsiz(pTHX_ PerlIO * f)
 }
 
 static void
-PerlIOScalar_set_ptrcnt(pTHX_ PerlIO * f, STDCHAR * ptr, SSize_t cnt)
+PerlIOScalar_set_ptrcnt(pTHX_ PerlIO * f, STDCHAR * ptr, ssize_t cnt)
 {
     PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
-    STRLEN len;
+    size_t len;
     PERL_UNUSED_ARG(ptr);
     (void)SvPV(s->var,len);
     s->posn = len - cnt;

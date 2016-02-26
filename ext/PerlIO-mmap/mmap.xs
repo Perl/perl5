@@ -19,7 +19,7 @@
 typedef struct {
     PerlIOBuf base;             /* PerlIOBuf stuff */
     Mmap_t mptr;                /* Mapped address */
-    Size_t len;                 /* mapped length */
+    size_t len;                 /* mapped length */
     STDCHAR *bbuf;              /* malloced buffer if map fails */
 } PerlIOMmap;
 
@@ -42,7 +42,7 @@ PerlIOMmap_map(pTHX_ PerlIO *f)
         }
 	code = Fstat(fd, &st);
 	if (code == 0 && S_ISREG(st.st_mode)) {
-	    SSize_t len = st.st_size - b->posn;
+	    ssize_t len = st.st_size - b->posn;
 	    if (len > 0) {
 		Off_t posn;
 		if (PL_mmap_page_size <= 0)
@@ -149,8 +149,8 @@ PerlIOMmap_get_base(pTHX_ PerlIO *f)
     return PerlIOBuf_get_base(aTHX_ f);
 }
 
-static SSize_t
-PerlIOMmap_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
+static ssize_t
+PerlIOMmap_unread(pTHX_ PerlIO *f, const void *vbuf, size_t count)
 {
     PerlIOMmap * const m = PerlIOSelf(f, PerlIOMmap);
     PerlIOBuf * const b = &m->base;
@@ -180,8 +180,8 @@ PerlIOMmap_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     return PerlIOBuf_unread(aTHX_ f, vbuf, count);
 }
 
-static SSize_t
-PerlIOMmap_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
+static ssize_t
+PerlIOMmap_write(pTHX_ PerlIO *f, const void *vbuf, size_t count)
 {
     PerlIOMmap * const m = PerlIOSelf(f, PerlIOMmap);
     PerlIOBuf * const b = &m->base;

@@ -1109,7 +1109,7 @@ Mytest.xs:
 	    SV * paths
 	INIT:
 	    AV * results;
-	    SSize_t numpaths = 0, n;
+	    ssize_t numpaths = 0, n;
 	    int i;
 	    struct statfs buf;
 
@@ -1124,7 +1124,7 @@ Mytest.xs:
 	CODE:
 	    for (n = 0; n <= numpaths; n++) {
 		HV * rh;
-		STRLEN l;
+		size_t l;
 		char * fn = SvPV(*av_fetch((AV *)SvRV(paths), n, 0), l);
 
 		i = statfs(fn, &buf);

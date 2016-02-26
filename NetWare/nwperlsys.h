@@ -427,14 +427,14 @@ PerlStdIOReopen(struct IPerlStdIO* piPerl, const char*path, const char*mode, FIL
     return nw_freopen(path, mode, pf);
 }
 
-SSize_t
-PerlStdIORead(struct IPerlStdIO* piPerl, void *buffer, Size_t size, Size_t count, FILE* pf)
+ssize_t
+PerlStdIORead(struct IPerlStdIO* piPerl, void *buffer, size_t size, size_t count, FILE* pf)
 {
     return nw_fread(buffer, size, count, pf);
 }
 
-SSize_t
-PerlStdIOWrite(struct IPerlStdIO* piPerl, const void *buffer, Size_t size, Size_t count, FILE* pf)
+ssize_t
+PerlStdIOWrite(struct IPerlStdIO* piPerl, const void *buffer, size_t size, size_t count, FILE* pf)
 {
     return nw_fwrite(buffer, size, count, pf);
 }
@@ -446,7 +446,7 @@ PerlStdIOSetBuf(struct IPerlStdIO* piPerl, FILE* pf, char* buffer)
 }
 
 int
-PerlStdIOSetVBuf(struct IPerlStdIO* piPerl, FILE* pf, char* buffer, int type, Size_t size)
+PerlStdIOSetVBuf(struct IPerlStdIO* piPerl, FILE* pf, char* buffer, int type, size_t size)
 {
     return nw_setvbuf(pf, buffer, type, size);
 }

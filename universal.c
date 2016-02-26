@@ -39,7 +39,7 @@
  */
 
 STATIC bool
-S_isa_lookup(pTHX_ HV *stash, const char * const name, STRLEN len, U32 flags)
+S_isa_lookup(pTHX_ HV *stash, const char * const name, size_t len, U32 flags)
 {
     const struct mro_meta *const meta = HvMROMETA(stash);
     HV *isa = meta->isa;
@@ -103,7 +103,7 @@ bool
 Perl_sv_derived_from_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
 {
     char *namepv;
-    STRLEN namelen;
+    size_t namelen;
     PERL_ARGS_ASSERT_SV_DERIVED_FROM_SV;
     namepv = SvPV(namesv, namelen);
     if (SvUTF8(namesv))
@@ -144,7 +144,7 @@ Perl_sv_derived_from_pv(pTHX_ SV *sv, const char *const name, U32 flags)
 }
 
 bool
-Perl_sv_derived_from_pvn(pTHX_ SV *sv, const char *const name, const STRLEN len, U32 flags)
+Perl_sv_derived_from_pvn(pTHX_ SV *sv, const char *const name, const size_t len, U32 flags)
 {
     HV *stash;
 
@@ -277,7 +277,7 @@ Like L</sv_does_sv>, but takes a string/length pair instead of an SV.
 */
 
 bool
-Perl_sv_does_pvn(pTHX_ SV *sv, const char *const name, const STRLEN len, U32 flags)
+Perl_sv_does_pvn(pTHX_ SV *sv, const char *const name, const size_t len, U32 flags)
 {
     PERL_ARGS_ASSERT_SV_DOES_PVN;
 
@@ -444,7 +444,7 @@ XS(XS_utf8_valid)
 	 croak_xs_usage(cv, "sv");
     else {
 	SV * const sv = ST(0);
-	STRLEN len;
+	size_t len;
 	const char * const s = SvPV_const(sv,len);
 	if (!SvUTF8(sv) || is_utf8_string((const U8*)s,len))
 	    XSRETURN_YES;
@@ -490,7 +490,7 @@ XS(XS_utf8_upgrade)
 	croak_xs_usage(cv, "sv");
     else {
 	SV * const sv = ST(0);
-	STRLEN	RETVAL;
+	size_t	RETVAL;
 	dXSTARG;
 
 	RETVAL = sv_utf8_upgrade(sv);
@@ -660,7 +660,7 @@ XS(XS_PerlIO_get_layers)
 	     for (svp = MARK + 2; svp <= SP; svp += 2) {
 		  SV * const * const varp = svp;
 		  SV * const * const valp = svp + 1;
-		  STRLEN klen;
+		  size_t klen;
 		  const char * const key = SvPV_const(*varp, klen);
 
 		  switch (*key) {
@@ -702,9 +702,9 @@ XS(XS_PerlIO_get_layers)
 	if (gv && (io = GvIO(gv))) {
 	     AV* const av = PerlIO_get_layers(aTHX_ input ?
 					IoIFP(io) : IoOFP(io));
-	     SSize_t i;
-	     const SSize_t last = av_tindex(av);
-	     SSize_t nitem = 0;
+	     ssize_t i;
+	     const ssize_t last = av_tindex(av);
+	     ssize_t nitem = 0;
 	     
 	     for (i = last; i >= 0; i -= 3) {
 		  SV * const * const namsvp = av_fetch(av, i - 2, FALSE);
@@ -846,8 +846,8 @@ XS(XS_re_regnames)
     U32 flags;
     SV *ret;
     AV *av;
-    SSize_t length;
-    SSize_t i;
+    ssize_t length;
+    ssize_t i;
     SV **entry;
 
     if (items > 1)
@@ -922,7 +922,7 @@ XS(XS_re_regexp_pattern)
         SV *pattern;
 
         if ( gimme == G_ARRAY ) {
-	    STRLEN left = 0;
+	    size_t left = 0;
 	    char reflags[sizeof(INT_PAT_MODS) + MAX_CHARSET_NAME_LENGTH];
             const char *fptr;
             char ch;
@@ -935,7 +935,7 @@ XS(XS_re_regexp_pattern)
             */
 
 	    if (get_regex_charset(RX_EXTFLAGS(re)) != REGEX_DEPENDS_CHARSET) {
-		STRLEN len;
+		size_t len;
 		const char* const name = get_regex_charset_name(RX_EXTFLAGS(re),
 								&len);
 		Copy(name, reflags + left, len, char);

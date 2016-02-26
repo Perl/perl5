@@ -99,10 +99,10 @@ copy_errmsg(struct dsc$descriptor_s *msg, vmssts unused)
     dTHX;
     dMY_CXT;
     if (*(msg->dsc$a_pointer) == '%') { /* first line */
-        sv_setpvn(MY_CXT.x_dl_last_error, msg->dsc$a_pointer, (STRLEN)msg->dsc$w_length);
+        sv_setpvn(MY_CXT.x_dl_last_error, msg->dsc$a_pointer, (size_t)msg->dsc$w_length);
     }
     else { /* continuation line */
-        sv_catpvn(MY_CXT.x_dl_last_error, msg->dsc$a_pointer, (STRLEN)msg->dsc$w_length);
+        sv_catpvn(MY_CXT.x_dl_last_error, msg->dsc$a_pointer, (size_t)msg->dsc$w_length);
     }
     DLDEBUG(2,PerlIO_printf(Perl_debug_log, "Saved error message: %s\n", dl_last_error));
     return 0;
@@ -226,7 +226,7 @@ dl_load_file(filename, flags=0)
     dMY_CXT;
     char vmsspec[NAM$C_MAXRSS];
     SV *reqSV, **reqSVhndl;
-    STRLEN deflen;
+    size_t deflen;
     struct dsc$descriptor_s
       specdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0},
       symdsc  = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};

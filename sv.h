@@ -475,9 +475,9 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 #define _XPV_HEAD							\
     HV*		xmg_stash;	/* class package */			\
     union _xmgu	xmg_u;							\
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */    \
+    size_t	xpv_cur;	/* length of svu_pv as a C string */    \
     union {								\
-	STRLEN	xpvlenu_len; 	/* allocated size */			\
+	size_t	xpvlenu_len; 	/* allocated size */			\
 	char *	xpvlenu_pv;	/* regexp string */			\
     } xpv_len_u	
 
@@ -500,7 +500,7 @@ union _xivu {
 
 union _xmgu {
     MAGIC*  xmg_magic;		/* linked list of magicalness */
-    STRLEN  xmg_hash_index;	/* used while freeing hash entries */
+    size_t  xmg_hash_index;	/* used while freeing hash entries */
 };
 
 struct xpv {
@@ -539,10 +539,10 @@ struct xpvlv {
     union _xivu xiv_u;
     union _xnvu xnv_u;
     union {
-	STRLEN	xlvu_targoff;
-	SSize_t xlvu_stargoff;
+	size_t	xlvu_targoff;
+	ssize_t xlvu_stargoff;
     } xlv_targoff_u;
-    STRLEN	xlv_targlen;
+    size_t	xlv_targlen;
     SV*		xlv_targ;
     char	xlv_type;	/* k=keys .=pos x=substr v=vec /=join/re
 				 * y=alem/helem/iter t=tie T=tied HE */
@@ -554,7 +554,7 @@ struct xpvlv {
 struct xpvinvlist {
     _XPV_HEAD;
     IV          prev_index;     /* caches result of previous invlist_search() */
-    STRLEN	iterator;       /* Stores where we are in iterating */
+    size_t	iterator;       /* Stores where we are in iterating */
     bool	is_offset;	/* The data structure for all inversion lists
                                    begins with an element for code point U+0000.
                                    If this bool is set, the actual list contains
@@ -779,10 +779,10 @@ type >= C<SVt_PV>.
 This is also used to store the name of an autoloaded subroutine in an XS
 AUTOLOAD routine.  See L<perlguts/Autoloading with XSUBs>.
 
-=for apidoc Am|STRLEN|SvCUR|SV* sv
+=for apidoc Am|size_t|SvCUR|SV* sv
 Returns the length of the string which is in the SV.  See C<L</SvLEN>>.
 
-=for apidoc Am|STRLEN|SvLEN|SV* sv
+=for apidoc Am|size_t|SvLEN|SV* sv
 Returns the size of the string buffer in the SV, not including any part
 attributable to C<SvOOK>.  See C<L</SvCUR>>.
 
@@ -833,11 +833,11 @@ Set the value of the MAGIC pointer in C<sv> to val.  See C<L</SvIV_set>>.
 =for apidoc Am|void|SvSTASH_set|SV* sv|HV* val
 Set the value of the STASH pointer in C<sv> to val.  See C<L</SvIV_set>>.
 
-=for apidoc Am|void|SvCUR_set|SV* sv|STRLEN len
+=for apidoc Am|void|SvCUR_set|SV* sv|size_t len
 Set the current length of the string which is in the SV.  See C<L</SvCUR>>
 and C<SvIV_set>>.
 
-=for apidoc Am|void|SvLEN_set|SV* sv|STRLEN len
+=for apidoc Am|void|SvLEN_set|SV* sv|size_t len
 Set the size of the string buffer for the SV. See C<L</SvLEN>>.
 
 =cut
@@ -1337,11 +1337,11 @@ C<sv_force_normal> does nothing.
 	STMT_START { SvLEN_set(sv, n); \
 		SvPV_set((sv), (MEM_WRAP_CHECK_(n,char)			\
 				(char*)saferealloc((Malloc_t)SvPVX(sv), \
-						   (MEM_SIZE)((n)))));  \
+						   (size_t)((n)))));  \
 		 } STMT_END
 
 #define SvPV_shrink_to_cur(sv) STMT_START { \
-		   const STRLEN _lEnGtH = SvCUR(sv) + 1; \
+		   const size_t _lEnGtH = SvCUR(sv) + 1; \
 		   SvPV_renew(sv, _lEnGtH); \
 		 } STMT_END
 
@@ -1351,7 +1351,7 @@ C<sv_force_normal> does nothing.
 		     if (SvLEN(sv)) {					\
 			 assert(!SvROK(sv));				\
 			 if(UNLIKELY(SvOOK(sv))) {			\
-			     STRLEN zok; 				\
+			     size_t zok; 				\
 			     SvOOK_offset(sv, zok);			\
 			     SvPV_set(sv, SvPVX_mutable(sv) - zok);	\
 			     SvFLAGS(sv) &= ~SVf_OOK;			\
@@ -1479,7 +1479,7 @@ attention to precisely which outputs are influenced by which inputs.
     } STMT_END
 
 /*
-=for apidoc Am|char*|SvPV_force|SV* sv|STRLEN len
+=for apidoc Am|char*|SvPV_force|SV* sv|size_t len
 Like C<SvPV> but will force the SV into containing a string (C<SvPOK>), and
 only a string (C<SvPOK_only>), by hook or by crook.  You need force if you are
 going to update the C<SvPVX> directly.  Processes get magic.
@@ -1490,10 +1490,10 @@ referent will have its reference count decremented, and the SV itself may
 be converted to an C<SvPOK> scalar with a string buffer containing a value
 such as C<"ARRAY(0x1234)">.
 
-=for apidoc Am|char*|SvPV_force_nomg|SV* sv|STRLEN len
+=for apidoc Am|char*|SvPV_force_nomg|SV* sv|size_t len
 Like C<SvPV_force>, but doesn't process get magic.
 
-=for apidoc Am|char*|SvPV|SV* sv|STRLEN len
+=for apidoc Am|char*|SvPV|SV* sv|size_t len
 Returns a pointer to the string in the SV, or a stringified form of
 the SV if the SV does not contain a string.  The SV may cache the
 stringified version becoming C<SvPOK>.  Handles 'get' magic.  The
@@ -1510,12 +1510,12 @@ a temporary buffer or similar.  If you absolutely need the C<SvPVX> field to
 be valid (for example, if you intend to write to it), then see
 C<L</SvPV_force>>.
 
-=for apidoc Am|char*|SvPVx|SV* sv|STRLEN len
+=for apidoc Am|char*|SvPVx|SV* sv|size_t len
 A version of C<SvPV> which guarantees to evaluate C<sv> only once.
 Only use this if C<sv> is an expression with side effects, otherwise use the
 more efficient C<SvPV>.
 
-=for apidoc Am|char*|SvPV_nomg|SV* sv|STRLEN len
+=for apidoc Am|char*|SvPV_nomg|SV* sv|size_t len
 Like C<SvPV> but doesn't process magic.
 
 =for apidoc Am|char*|SvPV_nolen|SV* sv
@@ -1573,40 +1573,40 @@ private flags).
 Returns a boolean indicating whether Perl would evaluate the SV as true or
 false.  See C<L</SvOK>> for a defined/undefined test.  Does not handle 'get' magic.
 
-=for apidoc Am|char*|SvPVutf8_force|SV* sv|STRLEN len
+=for apidoc Am|char*|SvPVutf8_force|SV* sv|size_t len
 Like C<SvPV_force>, but converts C<sv> to UTF-8 first if necessary.
 
-=for apidoc Am|char*|SvPVutf8|SV* sv|STRLEN len
+=for apidoc Am|char*|SvPVutf8|SV* sv|size_t len
 Like C<SvPV>, but converts C<sv> to UTF-8 first if necessary.
 
 =for apidoc Am|char*|SvPVutf8_nolen|SV* sv
 Like C<SvPV_nolen>, but converts C<sv> to UTF-8 first if necessary.
 
-=for apidoc Am|char*|SvPVbyte_force|SV* sv|STRLEN len
+=for apidoc Am|char*|SvPVbyte_force|SV* sv|size_t len
 Like C<SvPV_force>, but converts C<sv> to byte representation first if necessary.
 
-=for apidoc Am|char*|SvPVbyte|SV* sv|STRLEN len
+=for apidoc Am|char*|SvPVbyte|SV* sv|size_t len
 Like C<SvPV>, but converts C<sv> to byte representation first if necessary.
 
 =for apidoc Am|char*|SvPVbyte_nolen|SV* sv
 Like C<SvPV_nolen>, but converts C<sv> to byte representation first if necessary.
 
-=for apidoc Am|char*|SvPVutf8x_force|SV* sv|STRLEN len
+=for apidoc Am|char*|SvPVutf8x_force|SV* sv|size_t len
 Like C<SvPV_force>, but converts C<sv> to UTF-8 first if necessary.
 Guarantees to evaluate C<sv> only once; use the more efficient C<SvPVutf8_force>
 otherwise.
 
-=for apidoc Am|char*|SvPVutf8x|SV* sv|STRLEN len
+=for apidoc Am|char*|SvPVutf8x|SV* sv|size_t len
 Like C<SvPV>, but converts C<sv> to UTF-8 first if necessary.
 Guarantees to evaluate C<sv> only once; use the more efficient C<SvPVutf8>
 otherwise.
 
-=for apidoc Am|char*|SvPVbytex_force|SV* sv|STRLEN len
+=for apidoc Am|char*|SvPVbytex_force|SV* sv|size_t len
 Like C<SvPV_force>, but converts C<sv> to byte representation first if necessary.
 Guarantees to evaluate C<sv> only once; use the more efficient C<SvPVbyte_force>
 otherwise.
 
-=for apidoc Am|char*|SvPVbytex|SV* sv|STRLEN len
+=for apidoc Am|char*|SvPVbytex|SV* sv|size_t len
 Like C<SvPV>, but converts C<sv> to byte representation first if necessary.
 Guarantees to evaluate C<sv> only once; use the more efficient C<SvPVbyte>
 otherwise.
@@ -1620,7 +1620,7 @@ COW).
 Returns a boolean indicating whether the SV is Copy-On-Write shared hash key
 scalar.
 
-=for apidoc Am|void|sv_catpvn_nomg|SV* sv|const char* ptr|STRLEN len
+=for apidoc Am|void|sv_catpvn_nomg|SV* sv|const char* ptr|size_t len
 Like C<sv_catpvn> but doesn't process magic.
 
 =for apidoc Am|void|sv_catpv_nomg|SV* sv|const char* ptr
@@ -1632,7 +1632,7 @@ Like C<sv_setsv> but doesn't process magic.
 =for apidoc Am|void|sv_catsv_nomg|SV* dsv|SV* ssv
 Like C<sv_catsv> but doesn't process magic.
 
-=for apidoc Amdb|STRLEN|sv_utf8_upgrade_nomg|NN SV *sv
+=for apidoc Amdb|size_t|sv_utf8_upgrade_nomg|NN SV *sv
 
 Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
 
@@ -2013,7 +2013,7 @@ has been loaded.
 
 =head1 SV Manipulation Functions
 
-=for apidoc Am|char *|SvGROW|SV* sv|STRLEN len
+=for apidoc Am|char *|SvGROW|SV* sv|size_t len
 Expands the character buffer in the SV so that it has room for the
 indicated number of bytes (remember to reserve space for an extra trailing
 C<NUL> character).  Calls C<sv_grow> to perform the expansion if necessary.
@@ -2133,7 +2133,7 @@ struct clone_params {
 };
 
 /*
-=for apidoc Am|SV*|newSVpvn_utf8|NULLOK const char* s|STRLEN len|U32 utf8
+=for apidoc Am|SV*|newSVpvn_utf8|NULLOK const char* s|size_t len|U32 utf8
 
 Creates a new SV and copies a string (which may contain C<NUL> (C<\0>)
 characters) into it.  If C<utf8> is true, calls
@@ -2155,12 +2155,12 @@ Creates a new SV containing the pad name.
 #define newSVpadname(pn) newSVpvn_utf8(PadnamePV(pn), PadnameLEN(pn), TRUE)
 
 /*
-=for apidoc Am|void|SvOOK_offset|NN SV*sv|STRLEN len
+=for apidoc Am|void|SvOOK_offset|NN SV*sv|size_t len
 
 Reads into C<len> the offset from C<SvPVX> back to the true start of the
 allocated buffer, which will be non-zero if C<sv_chop> has been used to
 efficiently remove characters from start of the buffer.  Implemented as a
-macro, which takes the address of C<len>, which must be of type C<STRLEN>.
+macro, which takes the address of C<len>, which must be of type C<size_t>.
 Evaluates C<sv> more than once.  Sets C<len> to 0 if C<SvOOK(sv)> is false.
 
 =cut
@@ -2172,13 +2172,13 @@ Evaluates C<sv> more than once.  Sets C<len> to 0 if C<SvOOK(sv)> is false.
 10:28 <+meta> Nicholas: crash
 */
 #  define SvOOK_offset(sv, offset) STMT_START {				\
-	assert(sizeof(offset) == sizeof(STRLEN));			\
+	assert(sizeof(offset) == sizeof(size_t));			\
 	if (SvOOK(sv)) {						\
 	    const U8 *_crash = (U8*)SvPVX_const(sv);			\
 	    (offset) = *--_crash;					\
 	    if (!(offset)) {						\
-		_crash -= sizeof(STRLEN);				\
-		Copy(_crash, (U8 *)&(offset), sizeof(STRLEN), U8);	\
+		_crash -= sizeof(size_t);				\
+		Copy(_crash, (U8 *)&(offset), sizeof(size_t), U8);	\
 	    }								\
 	    {								\
 		/* Validate the preceding buffer's sentinels to		\
@@ -2196,12 +2196,12 @@ Evaluates C<sv> more than once.  Sets C<len> to 0 if C<SvOOK(sv)> is false.
 #else
     /* This is the same code, but avoids using any temporary variables:  */
 #  define SvOOK_offset(sv, offset) STMT_START {				\
-	assert(sizeof(offset) == sizeof(STRLEN));			\
+	assert(sizeof(offset) == sizeof(size_t));			\
 	if (SvOOK(sv)) {						\
 	    (offset) = ((U8*)SvPVX_const(sv))[-1];			\
 	    if (!(offset)) {						\
-		Copy(SvPVX_const(sv) - 1 - sizeof(STRLEN),		\
-		     (U8*)&(offset), sizeof(STRLEN), U8);		\
+		Copy(SvPVX_const(sv) - 1 - sizeof(size_t),		\
+		     (U8*)&(offset), sizeof(size_t), U8);		\
 	    }								\
 	} else {							\
 	    (offset) = 0;						\

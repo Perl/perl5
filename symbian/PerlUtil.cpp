@@ -74,7 +74,7 @@ void PerlUtil::setTDes16fromSvPV(TDes16& aDes16, SV* sv) {
   PerlUtil::setTDes16fromPVn(aDes16, (const U8 *)SvPV_nolen(sv), SvLEN(sv), SvUTF8(sv));
 }
 
-EXPORT_C HBufC8* PerlUtil::newHBufC8fromPVn(const U8* s, STRLEN n) {
+EXPORT_C HBufC8* PerlUtil::newHBufC8fromPVn(const U8* s, size_t n) {
   HBufC8* aBuf8 = HBufC8::New(n);
   if (aBuf8) {
     TPtr8 ptr8 = aBuf8->Des();
@@ -83,12 +83,12 @@ EXPORT_C HBufC8* PerlUtil::newHBufC8fromPVn(const U8* s, STRLEN n) {
   return aBuf8;
 }
 
-EXPORT_C void PerlUtil::setTDes8fromPVn(TDes8& aDes8, const U8* s, STRLEN n) {
+EXPORT_C void PerlUtil::setTDes8fromPVn(TDes8& aDes8, const U8* s, size_t n) {
   // TODO: grow aDes8 if needed
   aDes8.Copy(s, n);
 }
 
-EXPORT_C HBufC16* PerlUtil::newHBufC16fromPVn(const U8 *s, STRLEN n, bool utf8) {
+EXPORT_C HBufC16* PerlUtil::newHBufC16fromPVn(const U8 *s, size_t n, bool utf8) {
   HBufC16 *hBuf16 = HBufC16::New(n); // overallocate
 
   if (hBuf16) {
@@ -105,7 +105,7 @@ EXPORT_C HBufC16* PerlUtil::newHBufC16fromPVn(const U8 *s, STRLEN n, bool utf8) 
   return hBuf16;
 }
 
-EXPORT_C void PerlUtil::setTDes16fromPVn(TDes16& aDes16, const U8 *s, STRLEN n, bool utf8) {
+EXPORT_C void PerlUtil::setTDes16fromPVn(TDes16& aDes16, const U8 *s, size_t n, bool utf8) {
   // TODO: grow aDes16 if needed
   if (utf8) {
     TPtrC8 aPtrC8(s, n);

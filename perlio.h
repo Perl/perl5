@@ -75,7 +75,7 @@ typedef PerlIOl *PerlIO;
 
 PERL_CALLCONV void PerlIO_define_layer(pTHX_ PerlIO_funcs *tab);
 PERL_CALLCONV PerlIO_funcs *PerlIO_find_layer(pTHX_ const char *name,
-                                              STRLEN len,
+                                              size_t len,
 				              int load);
 PERL_CALLCONV PerlIO *PerlIO_push(pTHX_ PerlIO *f, PERLIO_FUNCS_DECL(*tab),
 			          const char *mode, SV *arg);
@@ -226,13 +226,13 @@ PERL_CALLCONV FILE *PerlIO_findFILE(PerlIO *);
 PERL_CALLCONV void PerlIO_releaseFILE(PerlIO *, FILE *);
 #endif
 #ifndef PerlIO_read
-PERL_CALLCONV SSize_t PerlIO_read(PerlIO *, void *, Size_t);
+PERL_CALLCONV ssize_t PerlIO_read(PerlIO *, void *, size_t);
 #endif
 #ifndef PerlIO_unread
-PERL_CALLCONV SSize_t PerlIO_unread(PerlIO *, const void *, Size_t);
+PERL_CALLCONV ssize_t PerlIO_unread(PerlIO *, const void *, size_t);
 #endif
 #ifndef PerlIO_write
-PERL_CALLCONV SSize_t PerlIO_write(PerlIO *, const void *, Size_t);
+PERL_CALLCONV ssize_t PerlIO_write(PerlIO *, const void *, size_t);
 #endif
 #ifndef PerlIO_setlinebuf
 PERL_CALLCONV void PerlIO_setlinebuf(PerlIO *);
@@ -269,19 +269,19 @@ PERL_CALLCONV int PerlIO_canset_cnt(PerlIO *);
 PERL_CALLCONV STDCHAR *PerlIO_get_ptr(PerlIO *);
 #endif
 #ifndef PerlIO_get_cnt
-PERL_CALLCONV SSize_t PerlIO_get_cnt(PerlIO *);
+PERL_CALLCONV ssize_t PerlIO_get_cnt(PerlIO *);
 #endif
 #ifndef PerlIO_set_cnt
-PERL_CALLCONV void PerlIO_set_cnt(PerlIO *, SSize_t);
+PERL_CALLCONV void PerlIO_set_cnt(PerlIO *, ssize_t);
 #endif
 #ifndef PerlIO_set_ptrcnt
-PERL_CALLCONV void PerlIO_set_ptrcnt(PerlIO *, STDCHAR *, SSize_t);
+PERL_CALLCONV void PerlIO_set_ptrcnt(PerlIO *, STDCHAR *, ssize_t);
 #endif
 #ifndef PerlIO_get_base
 PERL_CALLCONV STDCHAR *PerlIO_get_base(PerlIO *);
 #endif
 #ifndef PerlIO_get_bufsiz
-PERL_CALLCONV SSize_t PerlIO_get_bufsiz(PerlIO *);
+PERL_CALLCONV ssize_t PerlIO_get_bufsiz(PerlIO *);
 #endif
 #ifndef PerlIO_tmpfile
 PERL_CALLCONV PerlIO *PerlIO_tmpfile(void);

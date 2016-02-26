@@ -164,7 +164,7 @@ extern long sdbm_hash proto((const char *, int));
 #   include <stdlib.h>
 #endif /* STANDARD_C */
 
-#define MEM_SIZE Size_t
+#define size_t size_t
 
 /* This comes after <stdlib.h> so we don't try to change the standard
  * library prototypes; we'll use our own instead. */
@@ -179,9 +179,9 @@ extern long sdbm_hash proto((const char *, int));
 extern "C" {
 #endif
 
-Malloc_t Perl_malloc proto((MEM_SIZE nbytes));
-Malloc_t Perl_calloc proto((MEM_SIZE elements, MEM_SIZE size));
-Malloc_t Perl_realloc proto((Malloc_t where, MEM_SIZE nbytes));
+Malloc_t Perl_malloc proto((size_t nbytes));
+Malloc_t Perl_calloc proto((size_t elements, size_t size));
+Malloc_t Perl_realloc proto((Malloc_t where, size_t nbytes));
 Free_t   Perl_mfree proto((Malloc_t where));
 
 #ifdef __cplusplus

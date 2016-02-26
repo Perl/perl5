@@ -363,9 +363,9 @@ Let's take an example of manipulating a PV, from C<sv_catpvn>, in
 F<sv.c>
 
      1  void
-     2  Perl_sv_catpvn(pTHX_ SV *sv, const char *ptr, STRLEN len)
+     2  Perl_sv_catpvn(pTHX_ SV *sv, const char *ptr, size_t len)
      3  {
-     4      STRLEN tlen;
+     4      size_t tlen;
      5      char *junk;
 
      6      junk = SvPV_force(sv, tlen);

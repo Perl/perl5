@@ -162,7 +162,7 @@ typedef U8 Char;
 
 static int	 compare(const void *, const void *);
 static int	 ci_compare(const void *, const void *);
-static int	 g_Ctoc(const Char *, char *, STRLEN);
+static int	 g_Ctoc(const Char *, char *, size_t);
 static int	 g_lstat(Char *, Stat_t *, glob_t *);
 static DIR	*g_opendir(Char *, glob_t *);
 static Char	*g_strchr(Char *, int);
@@ -852,7 +852,7 @@ globextend(const Char *path, glob_t *pglob, size_t *limitp)
 {
 	char **pathv;
 	int i;
-	STRLEN newsize, len;
+	size_t newsize, len;
 	char *copy;
 	const Char *p;
 
@@ -886,7 +886,7 @@ globextend(const Char *path, glob_t *pglob, size_t *limitp)
 
 	for (p = path; *p++;)
 		;
-	len = (STRLEN)(p - path);
+	len = (size_t)(p - path);
 	*limitp += len;
 	Newx(copy, p-path, char);
 	if (copy != NULL) {
@@ -1039,7 +1039,7 @@ g_strchr(Char *str, int ch)
 }
 
 static int
-g_Ctoc(const Char *str, char *buf, STRLEN len)
+g_Ctoc(const Char *str, char *buf, size_t len)
 {
 	while (len--) {
 		if ((*buf++ = (char)*str++) == BG_EOS)

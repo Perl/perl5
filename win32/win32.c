@@ -119,11 +119,11 @@ static char*	get_regstr_from(HKEY hkey, const char *valuename, SV **svp);
 static char*	get_regstr(const char *valuename, SV **svp);
 #endif
 
-static char*	get_emd_part(SV **prev_pathp, STRLEN *const len,
+static char*	get_emd_part(SV **prev_pathp, size_t *const len,
 			char *trailing, ...);
 static char*	win32_get_xlib(const char *pl,
 			WIN32_NO_REGISTRY_M_(const char *xlib)
-			const char *libname, STRLEN *const len);
+			const char *libname, size_t *const len);
 
 static BOOL	has_shell_metachars(const char *ptr);
 static long	tokenize(const char *str, char **dest, char ***destv);
@@ -145,7 +145,7 @@ static void	out_of_memory(void);
 static char*	wstr_to_str(const wchar_t* wstr);
 static long	filetime_to_clock(PFILETIME ft);
 static BOOL	filetime_from_time(PFILETIME ft, time_t t);
-static char*	create_command_line(char *cname, STRLEN clen,
+static char*	create_command_line(char *cname, size_t clen,
 				    const char * const *args);
 static char*	qualified_path(const char *cmd, bool other_exts);
 static void	ansify_path(void);
@@ -166,7 +166,7 @@ START_EXTERN_C
 HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
 char	w32_module_name[MAX_PATH+1];
 #ifdef WIN32_DYN_IOINFO_SIZE
-Size_t	w32_ioinfo_size;/* avoid 0 extend op b4 mul, otherwise could be a U8 */
+size_t	w32_ioinfo_size;/* avoid 0 extend op b4 mul, otherwise could be a U8 */
 #endif
 END_EXTERN_C
 
@@ -317,7 +317,7 @@ get_regstr(const char *valuename, SV **svp)
 
 /* *prev_pathp (if non-NULL) is expected to be POK (valid allocated SvPVX(sv)) */
 static char *
-get_emd_part(SV **prev_pathp, STRLEN *const len, char *trailing_path, ...)
+get_emd_part(SV **prev_pathp, size_t *const len, char *trailing_path, ...)
 {
     char base[10];
     va_list ap;
@@ -325,7 +325,7 @@ get_emd_part(SV **prev_pathp, STRLEN *const len, char *trailing_path, ...)
     char *ptr;
     char *optr;
     char *strip;
-    STRLEN baselen;
+    size_t baselen;
 
     va_start(ap, trailing_path);
     strip = va_arg(ap, char *);
@@ -383,7 +383,7 @@ get_emd_part(SV **prev_pathp, STRLEN *const len, char *trailing_path, ...)
 }
 
 EXTERN_C char *
-win32_get_privlib(WIN32_NO_REGISTRY_M_(const char *pl) STRLEN *const len)
+win32_get_privlib(WIN32_NO_REGISTRY_M_(const char *pl) size_t *const len)
 {
     char *stdlib = "lib";
     SV *sv = NULL;
@@ -402,7 +402,7 @@ win32_get_privlib(WIN32_NO_REGISTRY_M_(const char *pl) STRLEN *const len)
 
 static char *
 win32_get_xlib(const char *pl, WIN32_NO_REGISTRY_M_(const char *xlib)
-	       const char *libname, STRLEN *const len)
+	       const char *libname, size_t *const len)
 {
 #ifndef WIN32_NO_REGISTRY
     char regstr[40];
@@ -448,7 +448,7 @@ win32_get_xlib(const char *pl, WIN32_NO_REGISTRY_M_(const char *xlib)
 }
 
 EXTERN_C char *
-win32_get_sitelib(const char *pl, STRLEN *const len)
+win32_get_sitelib(const char *pl, size_t *const len)
 {
     return win32_get_xlib(pl, WIN32_NO_REGISTRY_M_("sitelib") "site", len);
 }
@@ -458,7 +458,7 @@ win32_get_sitelib(const char *pl, STRLEN *const len)
 #endif
 
 EXTERN_C char *
-win32_get_vendorlib(const char *pl, STRLEN *const len)
+win32_get_vendorlib(const char *pl, size_t *const len)
 {
     return win32_get_xlib(pl, WIN32_NO_REGISTRY_M_("vendorlib") PERL_VENDORLIB_NAME, len);
 }
@@ -1657,8 +1657,8 @@ win32_longpath(char *path)
 	fhand = FindFirstFile(path,&fdata);
 	*start = sep;
 	if (fhand != INVALID_HANDLE_VALUE) {
-	    STRLEN len = strlen(fdata.cFileName);
-	    if ((STRLEN)(tmpbuf + sizeof(tmpbuf) - tmpstart) > len) {
+	    size_t len = strlen(fdata.cFileName);
+	    if ((size_t)(tmpbuf + sizeof(tmpbuf) - tmpstart) > len) {
 		strcpy(tmpstart, fdata.cFileName);
 		tmpstart += len;
 		FindClose(fhand);
@@ -1827,7 +1827,7 @@ win32_getenv(const char *name)
 	       grabbing the whole env and pulling this value out if possible */
 	    char *envv = GetEnvironmentStrings();
     	    char *cur = envv;
-    	    STRLEN len;
+    	    size_t len;
     	    while (*cur) {
 		char *end = strchr(cur,'=');
 		if (end && end != cur) {
@@ -2056,7 +2056,7 @@ DllExport int
 win32_uname(struct utsname *name)
 {
     struct hostent *hep;
-    STRLEN nodemax = sizeof(name->nodename)-1;
+    size_t nodemax = sizeof(name->nodename)-1;
 
     /* sysname */
     switch (g_osver.dwPlatformId) {
@@ -2090,7 +2090,7 @@ win32_uname(struct utsname *name)
     /* nodename */
     hep = win32_gethostbyname("localhost");
     if (hep) {
-	STRLEN len = strlen(hep->h_name);
+	size_t len = strlen(hep->h_name);
 	if (len <= nodemax) {
 	    strcpy(name->nodename, hep->h_name);
 	}
@@ -3419,13 +3419,13 @@ win32_chmod(const char *path, int mode)
 
 
 static char *
-create_command_line(char *cname, STRLEN clen, const char * const *args)
+create_command_line(char *cname, size_t clen, const char * const *args)
 {
     PERL_DEB(dTHX;)
     int index, argc;
     char *cmd, *ptr;
     const char *arg;
-    STRLEN len = 0;
+    size_t len = 0;
     bool bat_file = FALSE;
     bool cmd_shell = FALSE;
     bool dumb_shell = FALSE;
@@ -3484,7 +3484,7 @@ create_command_line(char *cname, STRLEN clen, const char * const *args)
 
     DEBUG_p(PerlIO_printf(Perl_debug_log, "Args "));
     for (index = 0; (arg = (char*)args[index]) != NULL; ++index) {
-	STRLEN curlen = strlen(arg);
+	size_t curlen = strlen(arg);
 	if (!(arg[0] == '"' && arg[curlen-1] == '"'))
 	    len += 2;	/* assume quoting needed (worst case) */
 	len += curlen + 1;
@@ -3503,7 +3503,7 @@ create_command_line(char *cname, STRLEN clen, const char * const *args)
 
     for (index = 0; (arg = (char*)args[index]) != NULL; ++index) {
 	bool do_quote = 0;
-	STRLEN curlen = strlen(arg);
+	size_t curlen = strlen(arg);
 
 	/* we want to protect empty arguments and ones with spaces with
 	 * dquotes, but only if they aren't already there */
@@ -3518,7 +3518,7 @@ create_command_line(char *cname, STRLEN clen, const char * const *args)
 		    do_quote = 1;
 	    }
 	    else if (!(arg[0] == '"' && curlen > 1 && arg[curlen-1] == '"')) {
-		STRLEN i = 0;
+		size_t i = 0;
 		while (i < curlen) {
 		    if (isSPACE(arg[i])) {
 			do_quote = 1;
@@ -3585,7 +3585,7 @@ qualified_path(const char *cmd, bool other_exts)
 {
     char *pathstr;
     char *fullcmd, *curfullcmd;
-    STRLEN cmdlen = 0;
+    size_t cmdlen = 0;
     int has_slash = 0;
 
     if (!cmd)
@@ -3696,7 +3696,7 @@ win32_clearenv(void)
 {
     char *envv = GetEnvironmentStrings();
     char *cur = envv;
-    STRLEN len;
+    size_t len;
     while (*cur) {
 	char *end = strchr(cur,'=');
 	if (end && end != cur) {
@@ -3765,7 +3765,7 @@ do_spawnvp_handles(int mode, const char *cmdname, const char *const *argv,
     char *cmd;
     char *fullcmd = NULL;
     char *cname = (char *)cmdname;
-    STRLEN clen = 0;
+    size_t clen = 0;
 
     if (cname) {
 	clen = strlen(cname);
@@ -4199,7 +4199,7 @@ win32_dynaload(const char* filename)
      * so turn 'em back. */
     first = strchr(filename, '/');
     if (first) {
-	STRLEN len = strlen(filename);
+	size_t len = strlen(filename);
 	if (len <= MAX_PATH) {
 	    strcpy(buf, filename);
 	    filename = &buf[first - filename];
@@ -4495,8 +4495,8 @@ Perl_win32_init(int *argcp, char ***argvp)
 
 #ifdef WIN32_DYN_IOINFO_SIZE
     {
-	Size_t ioinfo_size = _msize((void*)__pioinfo[0]);;
-	if((SSize_t)ioinfo_size <= 0) { /* -1 is err */
+	size_t ioinfo_size = _msize((void*)__pioinfo[0]);;
+	if((ssize_t)ioinfo_size <= 0) { /* -1 is err */
 	    fprintf(stderr, "panic: invalid size for ioinfo\n"); /* no interp */
 	    exit(1);
 	}

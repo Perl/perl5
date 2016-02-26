@@ -118,7 +118,7 @@ do_aspawn (pTHX_ SV *really,SV **mark,SV **sp)
 {
     int  rc;
     char **a,*tmps,**argv; 
-    STRLEN n_a;
+    size_t n_a;
 
     if (sp<=mark)
         return -1;
@@ -262,7 +262,7 @@ glob_handler (__FSEXT_Fnumber n,int *rv,va_list args)
         case __FSEXT_open:
         {
             char   *p1,*pattern,*name=va_arg (args,char*);
-            STRLEN len;
+            size_t len;
             glob_t pglob;
 
             if (strnNE (name,"/dev/dosglob/",13))

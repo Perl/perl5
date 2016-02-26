@@ -934,7 +934,7 @@ perlglob$(o)  : perlglob.c
 	@echo #undef LSEEKSIZE>>$@
 	@echo #undef Off_t_size>>$@
 	@echo #undef PTRSIZE>>$@
-	@echo #undef SSize_t>>$@
+	@echo #undef ssize_t>>$@
 	@echo #undef HAS_ATOLL>>$@
 	@echo #undef HAS_STRTOLL>>$@
 	@echo #undef HAS_STRTOULL>>$@
@@ -963,14 +963,14 @@ perlglob$(o)  : perlglob.c
 !ENDIF
 !IF "$(WIN64)"=="define"
 	@echo #define PTRSIZE ^8>>$@
-	@echo #define SSize_t __int64>>$@
+	@echo #define ssize_t __int64>>$@
 	@echo #define HAS_ATOLL>>$@
 	@echo #define HAS_STRTOLL>>$@
 	@echo #define HAS_STRTOULL>>$@
 	@echo #define Size_t_size ^8>>$@
 !ELSE
 	@echo #define PTRSIZE ^4>>$@
-	@echo #define SSize_t int>>$@
+	@echo #define ssize_t int>>$@
 	@echo #undef HAS_ATOLL>>$@
 	@echo #undef HAS_STRTOLL>>$@
 	@echo #undef HAS_STRTOULL>>$@

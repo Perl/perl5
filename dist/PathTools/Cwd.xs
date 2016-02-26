@@ -115,7 +115,7 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
 
             p = strchr(remaining, '/');
             s = p ? p : remaining + remaining_len;
-            if ((STRLEN)(s - remaining) >= (STRLEN)sizeof(next_token)) {
+            if ((size_t)(s - remaining) >= (size_t)sizeof(next_token)) {
                 errno = ENAMETOOLONG;
                 return (NULL);
             }
@@ -210,7 +210,7 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
                      */
                     if (p != NULL) {
                         if (symlink[slen - 1] != '/') {
-                            if ((STRLEN)(slen + 1) >= (STRLEN)sizeof(symlink)) {
+                            if ((size_t)(slen + 1) >= (size_t)sizeof(symlink)) {
                                 errno = ENAMETOOLONG;
                                 return (NULL);
                             }
@@ -284,7 +284,7 @@ int Perl_getcwd_sv(pTHX_ SV *sv)
 	 * size from the heap if they are given a NULL buffer pointer.
 	 * The problem is that this behaviour is not portable. */
 	if (getcwd(buf, sizeof(buf) - 1)) {
-	    STRLEN len = strlen(buf);
+	    size_t len = strlen(buf);
 	    sv_setpvn(sv, buf, len);
 	    return TRUE;
 	}
@@ -464,9 +464,9 @@ THX_unix_canonpath(pTHX_ SV *path)
 {
     SV *retval;
     char const *p, *pe, *q;
-    STRLEN l;
+    size_t l;
     char *o;
-    STRLEN plen;
+    size_t plen;
     SvGETMAGIC(path);
     if(!SvOK(path)) return &PL_sv_undef;
     p = SvPV_nomg(path, plen);
@@ -738,7 +738,7 @@ CODE:
 	    RETVAL = SvREFCNT_inc(file);
 	} else {
 	    char const *pv;
-	    STRLEN len;
+	    size_t len;
 	    bool need_slash;
 	    SP--;
 	    ENTER;

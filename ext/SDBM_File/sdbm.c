@@ -41,7 +41,7 @@
 extern "C" {
 #endif
 
-extern Malloc_t malloc proto((MEM_SIZE));
+extern Malloc_t malloc proto((size_t));
 extern Free_t free proto((Malloc_t));
 
 #ifdef __cplusplus
