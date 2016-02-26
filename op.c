@@ -8875,12 +8875,23 @@ Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, STRLEN len,
        and so doesn't get free()d.  (It's expected to be from the C pre-
        processor __FILE__ directive). But we need a dynamically allocated one,
        and we need it to get freed.  */
+
+#ifdef USE_ITHREADS
+    /* file is a CHEK ptr because it came from CopFILE */
     cv = newXS_len_flags(name, len,
 			 sv && SvTYPE(sv) == SVt_PVAV
 			     ? const_av_xsub
 			     : const_sv_xsub,
 			 file ? file : "", "",
-			 &sv, file ? XS_DYNAMIC_FILENAME | flags : flags);
+			 &sv, file ? XS_DYNAMIC_FILENAME | XS_CHEK_FILENAME | flags : flags);
+#else
+    cv = newXS_len_flags(name, len,
+			 sv && SvTYPE(sv) == SVt_PVAV
+			     ? const_av_xsub
+			     : const_sv_xsub,
+			 file ? file : "", "",
+			 &sv, XS_DYNAMIC_FILENAME | flags);
+#endif
     CvXSUBANY(cv).any_ptr = SvREFCNT_inc_simple(sv);
     CvCONST_on(cv);
 
@@ -8988,7 +8999,17 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
             assert(!CvDYNFILE(cv)); /* cv_undef should have turned it off */
             if (flags & XS_DYNAMIC_FILENAME) {
                 CvDYNFILE_on(cv);
-                CvFILE(cv) = savepv(filename);
+#ifdef USE_ITHREADS
+/*  The flag is not stored in CvFLAGS to save bits.
+    CvFILE is Newx if aligned to 4, otherwise CHEK because of "_<" offset */
+                if (flags & XS_CHEK_FILENAME) {
+                    CHEK * chek = FNPV2CHEK(filename);
+                    chek_inc(chek);
+                    CvFILE(cv) = (char*)filename;
+                }
+                else
+#endif
+                    CvFILE(cv) = savepv(filename);
             } else {
             /* NOTE: not copied, as it is expected to be an external constant string */
                 CvFILE(cv) = (char *)filename;

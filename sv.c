@@ -13985,7 +13985,12 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 			sv_dup_inc((const SV *)CvXSUBANY(dstr).any_ptr, param);
 		}
 		assert(!CvSLABBED(dstr));
-		if (CvDYNFILE(dstr)) CvFILE(dstr) = SAVEPV(CvFILE(dstr));
+		if (CvDYNFILE(dstr)) {
+		    if((Size_t)CvFILE(dstr) & 0x3) /* ptr doesn't change */
+			chek_inc(FNPV2CHEK(CvFILE(dstr)));
+		    else
+			CvFILE(dstr) = SAVEPV(CvFILE(dstr));
+		}
 		if (CvNAMED(dstr))
 		    SvANY((CV *)dstr)->xcv_gv_u.xcv_hek =
 			hek_dup(CvNAME_HEK((CV *)sstr), param);

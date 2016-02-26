@@ -1114,7 +1114,12 @@ Perl_boot_core_UNIVERSAL(pTHX)
 	char * oldfile = *cvfile;
 	CvDYNFILE_off(cv);
 	*cvfile = (char *)file;
+#ifdef USE_ITHREADS
+	chek_dec(FNPV2CHEK(oldfile));
+#else
 	Safefree(oldfile);
+#endif
+
     }
 }
 
