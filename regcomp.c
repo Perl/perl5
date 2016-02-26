@@ -8357,7 +8357,7 @@ S_invlist_replace_list(pTHX_ SV * dest, SV * src)
 
     const UV src_len          = _invlist_len(src);
     const bool src_offset     = *get_invlist_offset_addr(src);
-    const STRLEN src_byte_len = SvCUR(src);
+    const STRLEN src_byte_len = SvLEN(src);
     char * array              = SvPVX(src);
 
     const int oldtainted = TAINT_get;
@@ -8367,6 +8367,7 @@ S_invlist_replace_list(pTHX_ SV * dest, SV * src)
     assert(SvTYPE(src) == SVt_INVLIST);
     assert(SvTYPE(dest) == SVt_INVLIST);
     assert(! invlist_is_iterating(src));
+    assert(SvCUR(src) < SvLEN(src));
 
     /* Make sure it ends in the right place with a NUL, as our inversion list
      * manipulations aren't careful to keep this true, but sv_usepvn_flags()
