@@ -1360,7 +1360,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
      * returned list must, and will, contain every code point that is a
      * possibility. */
 
-    SV* invlist = sv_2mortal(_new_invlist(0));
+    SV* invlist = NULL;
     SV* only_utf8_locale_invlist = NULL;
     unsigned int i;
     const U32 n = ARG(node);
@@ -1382,6 +1382,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 
             /* Here, no compile-time swash, and there are things that won't be
              * known until runtime -- we have to assume it could be anything */
+            invlist = sv_2mortal(_new_invlist(1));
             return _add_range_to_invlist(invlist, 0, UV_MAX);
         }
         else if (ary[3] && ary[3] != &PL_sv_undef) {
@@ -1397,6 +1398,10 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
         {
             only_utf8_locale_invlist = ary[2];
         }
+    }
+
+    if (! invlist) {
+        invlist = sv_2mortal(_new_invlist(0));
     }
 
     /* An ANYOF node contains a bitmap for the first NUM_ANYOF_CODE_POINTS
