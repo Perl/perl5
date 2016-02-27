@@ -4749,6 +4749,9 @@ STATIC int	S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state, const char* 
 STATIC regnode*	S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV ** return_invlist, I32 *flagp, U32 depth, char * const oregcomp_parse);
 #define PERL_ARGS_ASSERT_HANDLE_REGEX_SETS	\
 	assert(pRExC_state); assert(flagp); assert(oregcomp_parse)
+PERL_STATIC_INLINE void	S_invlist_clear(pTHX_ SV* invlist);
+#define PERL_ARGS_ASSERT_INVLIST_CLEAR	\
+	assert(invlist)
 PERL_STATIC_INLINE SV*	S_invlist_clone(pTHX_ SV* const invlist)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_INVLIST_CLONE	\

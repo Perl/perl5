@@ -8442,6 +8442,17 @@ S_invlist_trim(SV* invlist)
     }
 }
 
+PERL_STATIC_INLINE void
+S_invlist_clear(pTHX_ SV* invlist)    /* Empty the inversion list */
+{
+    PERL_ARGS_ASSERT_INVLIST_CLEAR;
+
+    assert(SvTYPE(invlist) == SVt_INVLIST);
+
+    invlist_set_len(invlist, 0, 0);
+    invlist_trim(invlist);
+}
+
 #endif /* ifndef PERL_IN_XSUB_RE */
 
 PERL_STATIC_INLINE bool
@@ -9357,8 +9368,7 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
                 invlist_replace_list_destroys_src(*i, r);
             }
             else {
-                invlist_set_len(*i, 0, 0);
-                invlist_trim(*i);
+                invlist_clear(*i);
             }
             SvREFCNT_dec_NN(r);
         }

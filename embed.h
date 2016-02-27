@@ -1002,6 +1002,7 @@
 #define handle_named_backref(a,b,c,d)	S_handle_named_backref(aTHX_ a,b,c,d)
 #define handle_possible_posix(a,b,c,d)	S_handle_possible_posix(aTHX_ a,b,c,d)
 #define handle_regex_sets(a,b,c,d,e)	S_handle_regex_sets(aTHX_ a,b,c,d,e)
+#define invlist_clear(a)	S_invlist_clear(aTHX_ a)
 #define invlist_clone(a)	S_invlist_clone(aTHX_ a)
 #define invlist_contents(a,b)	S_invlist_contents(aTHX_ a,b)
 #define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
