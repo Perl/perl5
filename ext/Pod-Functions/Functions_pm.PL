@@ -58,13 +58,16 @@ foreach my $TL_node (@$tree[2 .. $#$tree]) {
 
             foreach my $func (@$para[2 .. $#$para]) {
                 next unless ref $func eq 'ARRAY';
-                die "Expected only C<> blocks in paragraph after item at $TL_node->[$i-2][1]{start_line}"
-                    unless $func->[0] eq 'C' && !ref $func->[2];
-                # Everything is plain text (ie $func->[2] is everything)
+                my $c_node =
+                    $func->[0] eq 'C' && !ref $func->[2] ? $func :
+                    $func->[0] eq 'L' && ref $func->[2]
+                        && $func->[2][0] eq 'C' && !ref $func->[2][2] ? $func->[2] :
+                    die "Expected only C<> blocks in paragraph after item at $TL_node->[$i-2][1]{start_line}";
+                # Everything is plain text (ie $c_node->[2] is everything)
                 # except for C<-I<X>>. So untangle up to one level of nested <>
                 my $funcname = join '', map {
                     ref $_ ? $_->[2] : $_
-                } @$func[2..$#$func];
+                } @$c_node[2..$#$c_node];
                 $funcname =~ s!(q.?)//!$1/STRING/!;
                 push @{$Kinds{$text}}, $funcname;
             }
@@ -204,7 +207,7 @@ L<perlfunc/"Perl Functions by Category"> section.
 
 =cut
 
-our $VERSION = '1.09';
+our $VERSION = '1.10';
 
 require Exporter;
 
