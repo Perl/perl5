@@ -8376,7 +8376,7 @@ S_invlist_replace_list_destroys_src(pTHX_ SV * dest, SV * src)
     assert(SvTYPE(src) == SVt_INVLIST);
     assert(SvTYPE(dest) == SVt_INVLIST);
     assert(! invlist_is_iterating(src));
-    assert(SvCUR(src) < SvLEN(src));
+    assert(SvCUR(src) == 0 || SvCUR(src) < SvLEN(src));
 
     /* Make sure it ends in the right place with a NUL, as our inversion list
      * manipulations aren't careful to keep this true, but sv_usepvn_flags()
