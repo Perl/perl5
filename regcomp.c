@@ -8916,56 +8916,103 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
     PERL_ARGS_ASSERT__INVLIST_UNION_MAYBE_COMPLEMENT_2ND;
     assert(a != b);
 
-    /* If either one is empty, the union is the other one */
-    if (a == NULL || ((len_a = _invlist_len(a)) == 0)) {
-        bool make_temp = FALSE; /* Should we mortalize the result? */
+    len_b = _invlist_len(b);
+    if (len_b == 0) {
 
-	if (*output == a) {
-            if (a != NULL) {
-                if (! (make_temp = cBOOL(SvTEMP(a)))) {
-                    SvREFCNT_dec_NN(a);
-                }
+        /* Here, 'b' is empty.  If the output is the complement of 'b', the
+         * union is all possible code points, and we need not even look at 'a'.
+         * It's easiest to create a new inversion list that matches everything.
+         * */
+        if (complement_b) {
+            SV* everything = _new_invlist(1);
+            _append_range_to_invlist(everything, 0, UV_MAX);
+
+            /* If the output didn't exist, just point it at the new list */
+            if (*output == NULL) {
+                *output = everything;
+                return;
             }
-	}
-	if (*output != b) {
-	    *output = invlist_clone(b);
+
+            /* Otherwise, replace its contents with the new list */
+            invlist_replace_list_destroys_src(*output, everything);
+            SvREFCNT_dec_NN(everything);
+            return;
+        }
+
+        /* Here, we don't want the complement of 'b', and since it is empty,
+         * the union will come entirely from 'a'.  If 'a' is NULL or empty, the
+         * output will be empty */
+
+        if (a == NULL) {
+            *output = _new_invlist(0);
+            return;
+        }
+
+        if (_invlist_len(a) == 0) {
+            invlist_clear(*output);
+            return;
+        }
+
+        /* Here, 'a' is not empty, and entirely determines the union.  If the
+         * output is not to overwrite 'b', we can just return 'a'. */
+        if (*output != b) {
+
+            /* If the output is to overwrite 'a', we have a no-op, as it's
+             * already in 'a' */
+            if (*output == a) {
+                return;
+            }
+
+            /* But otherwise we have to copy 'a' to the output */
+            *output = invlist_clone(a);
+            return;
+        }
+
+        /* Here, 'b' is to be overwritten by the output, which will be 'a' */
+        u = invlist_clone(a);
+        invlist_replace_list_destroys_src(*output, u);
+        SvREFCNT_dec_NN(u);
+
+	return;
+    }
+
+    if (a == NULL || ((len_a = _invlist_len(a)) == 0)) {
+
+        /* Here, 'a' is empty.  That means the union will come entirely from
+         * 'b'.  If the output is not to overwrite 'a', we can just return
+         * what's in 'b'.  */
+        if (*output != a) {
+
+            /* If the output is to overwrite 'b', it's already in 'b', but
+             * otherwise we have to copy 'b' to the output */
+            if (*output != b) {
+                *output = invlist_clone(b);
+            }
+
+            /* And if the output is to be the inversion of 'b', do that */
             if (complement_b) {
                 _invlist_invert(*output);
             }
-	} /* else *output already = b; */
 
-        if (make_temp) {
-            sv_2mortal(*output);
+            return;
         }
-	return;
-    }
-    else if ((len_b = _invlist_len(b)) == 0) {
-        bool make_temp = FALSE;
-	if (*output == b) {
-            if (! (make_temp = cBOOL(SvTEMP(b)))) {
-                SvREFCNT_dec_NN(b);
-            }
+
+        /* Here, 'a', which is empty or even NULL, is to be overwritten by the
+         * output, which will either be 'b' or the complement of 'b' */
+
+        if (a == NULL) {
+            *output = invlist_clone(b);
+        }
+        else {
+            u = invlist_clone(b);
+            invlist_replace_list_destroys_src(*output, u);
+            SvREFCNT_dec_NN(u);
 	}
 
-        /* The complement of an empty list is a list that has everything in it,
-         * so the union with <a> includes everything too */
         if (complement_b) {
-            if (a == *output) {
-                if (! (make_temp = cBOOL(SvTEMP(a)))) {
-                    SvREFCNT_dec_NN(a);
-                }
-            }
-            *output = _new_invlist(1);
-            _append_range_to_invlist(*output, 0, UV_MAX);
+            _invlist_invert(*output);
         }
-        else if (*output != a) {
-            *output = invlist_clone(a);
-        }
-        /* else *output already = a; */
 
-        if (make_temp) {
-            sv_2mortal(*output);
-        }
 	return;
     }
 
@@ -9181,50 +9228,38 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
     /* Special case if either one is empty */
     len_a = (a == NULL) ? 0 : _invlist_len(a);
     if ((len_a == 0) || ((len_b = _invlist_len(b)) == 0)) {
-        bool make_temp = FALSE;
-
         if (len_a != 0 && complement_b) {
 
-            /* Here, 'a' is not empty, therefore from the above 'if', 'b' must
-             * be empty.  Here, also we are using 'b's complement, which hence
-             * must be every possible code point.  Thus the intersection is
-             * simply 'a'. */
-            if (*i != a) {
-                if (*i == b) {
-                    if (! (make_temp = cBOOL(SvTEMP(b)))) {
-                        SvREFCNT_dec_NN(b);
-                    }
-                }
+            /* Here, 'a' is not empty, therefore from the enclosing 'if', 'b'
+             * must be empty.  Here, also we are using 'b's complement, which
+             * hence must be every possible code point.  Thus the intersection
+             * is simply 'a'. */
 
+            if (*i == a) {  /* No-op */
+                return;
+            }
+
+            /* If not overwriting either input, just make a copy of 'a' */
+            if (*i != b) {
                 *i = invlist_clone(a);
+                return;
             }
-            /* else *i is already 'a' */
 
-            if (make_temp) {
-                sv_2mortal(*i);
-            }
+            /* Here we are overwriting 'b' with 'a's contents */
+            r = invlist_clone(a);
+            invlist_replace_list_destroys_src(*i, r);
+            SvREFCNT_dec_NN(r);
             return;
         }
 
         /* Here, 'a' or 'b' is empty and not using the complement of 'b'.  The
          * intersection must be empty */
-	if (*i == a) {
-            if (a != NULL) {
-                if (! (make_temp = cBOOL(SvTEMP(a)))) {
-                    SvREFCNT_dec_NN(a);
-                }
-            }
-	}
-	else if (*i == b) {
-            if (! (make_temp = cBOOL(SvTEMP(b)))) {
-                SvREFCNT_dec_NN(b);
-            }
-	}
-	*i = _new_invlist(0);
-        if (make_temp) {
-            sv_2mortal(*i);
+        if (*i == NULL) {
+            *i = _new_invlist(0);
+            return;
         }
 
+        invlist_clear(*i);
 	return;
     }
 
