@@ -8348,7 +8348,7 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
 #ifndef PERL_IN_XSUB_RE
 
 STATIC void
-S_invlist_replace_list(pTHX_ SV * dest, SV * src)
+S_invlist_replace_list_destroys_src(pTHX_ SV * dest, SV * src)
 {
     /* Replaces the inversion list in 'src' with the one in 'dest'.  It steals
      * the list from 'src', so 'src' is made to have a NULL list.  This is
@@ -8362,7 +8362,7 @@ S_invlist_replace_list(pTHX_ SV * dest, SV * src)
 
     const int oldtainted = TAINT_get;
 
-    PERL_ARGS_ASSERT_INVLIST_REPLACE_LIST;
+    PERL_ARGS_ASSERT_INVLIST_REPLACE_LIST_DESTROYS_SRC;
 
     assert(SvTYPE(src) == SVt_INVLIST);
     assert(SvTYPE(dest) == SVt_INVLIST);
@@ -9102,7 +9102,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
             *output = u;
         }
         else {
-            invlist_replace_list(*output, u);
+            invlist_replace_list_destroys_src(*output, u);
             SvREFCNT_dec_NN(u);
         }
     }
@@ -9354,7 +9354,7 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
         }
         else {
             if (len_r) {
-                invlist_replace_list(*i, r);
+                invlist_replace_list_destroys_src(*i, r);
             }
             else {
                 invlist_set_len(*i, 0, 0);
