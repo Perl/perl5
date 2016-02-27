@@ -105,6 +105,10 @@ EXTERN_C const struct regexp_engine my_reg_engine;
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
+#ifndef MAX
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
 /* this is a chain of data about sub patterns we are processing that
    need to be handled separately/specially in study_chunk. Its so
    we can simulate recursion without losing state.  */
@@ -8430,16 +8434,18 @@ S_invlist_set_previous_index(SV* const invlist, const IV index)
 PERL_STATIC_INLINE void
 S_invlist_trim(SV* invlist)
 {
+    /* Free the not currently-being-used space in an inversion list */
+
+    /* But don't free up the space needed for 0 UV that is always at the
+     * beginning of the list, nor the trailing NUL */
+    const UV min_size = TO_INTERNAL_SIZE(1) + 1;
+
     PERL_ARGS_ASSERT_INVLIST_TRIM;
 
     assert(SvTYPE(invlist) == SVt_INVLIST);
 
-    /* Change the length of the inversion list to how many entries it currently
-     * has.  But don't shorten it so that it would free up the required
-     * initial 0 UV (and a trailing NUL byte) */
-    if (SvCUR(invlist) > TO_INTERNAL_SIZE(1) + 1) {
-        SvPV_shrink_to_cur(invlist);
-    }
+    SvPV_renew(invlist, MAX(min_size, SvCUR(invlist) + 1));
+
 }
 
 PERL_STATIC_INLINE void
