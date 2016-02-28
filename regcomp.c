@@ -8441,7 +8441,7 @@ S_invlist_trim(SV* invlist)
 {
     /* Free the not currently-being-used space in an inversion list */
 
-    /* But don't free up the space needed for 0 UV that is always at the
+    /* But don't free up the space needed for the 0 UV that is always at the
      * beginning of the list, nor the trailing NUL */
     const UV min_size = TO_INTERNAL_SIZE(1) + 1;
 
@@ -8450,7 +8450,6 @@ S_invlist_trim(SV* invlist)
     assert(SvTYPE(invlist) == SVt_INVLIST);
 
     SvPV_renew(invlist, MAX(min_size, SvCUR(invlist) + 1));
-
 }
 
 PERL_STATIC_INLINE void
@@ -9078,7 +9077,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 
 	/* Here, have chosen which of the two inputs to look at.  Only output
 	 * if the running count changes to/from 0, which marks the
-	 * beginning/end of a range in that's in the set */
+	 * beginning/end of a range that's in the set */
 	if (cp_in_set) {
 	    if (count == 0) {
 		array_u[i_u++] = cp;
@@ -9139,7 +9138,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
     /* When 'count' is 0, the list that was exhausted (if one was shorter than
      * the other) ended with everything above it not in its set.  That means
      * that the remaining part of the union is precisely the same as the
-     * non-exhausted list, so can just copy it unchanged.  (If both list were
+     * non-exhausted list, so can just copy it unchanged.  (If both lists were
      * exhausted at the same time, then the operations below will be both 0.)
      */
     if (count == 0) {
@@ -13671,7 +13670,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
      * it, so that the caller can output them if it wants.  This is done in all
      * passes.  The reason for this is that the rest of the parsing is heavily
      * dependent on whether this routine found a valid posix class or not.  If
-     * it did, the closing ']' is absorbed as part of the class.  If no class
+     * it did, the closing ']' is absorbed as part of the class.  If no class,
      * or an invalid one is found, any ']' will be considered the terminator of
      * the outer bracketed character class, leading to very different results.
      * In particular, a '(?[ ])' construct will likely have a syntax error if
@@ -15513,11 +15512,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     const SSize_t orig_size = RExC_size;
     bool posixl_matches_all = FALSE; /* Does /l class have both e.g. \W,\w ? */
 
-    /* This variable is used to mark where in the input something that looks
-     * like a POSIX construct ends.  During the parse, when something looks
-     * like it could be such a construct is encountered, it is checked for
-     * being one, but not if we've already checked this area of the input.
-     * Only after this position is reached do we check again */
+    /* This variable is used to mark where the end in the input is of something
+     * that looks like a POSIX construct but isn't.  During the parse, when
+     * something looks like it could be such a construct is encountered, it is
+     * checked for being one, but not if we've already checked this area of the
+     * input.  Only after this position is reached do we check again */
     char *not_posix_region_end = RExC_parse - 1;
 
     GET_RE_DEBUG_FLAGS_DECL;
