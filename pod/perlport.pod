@@ -524,7 +524,7 @@ depends on how the system had been configured.  Also remember that for
 things such as DHCP and NAT, the hostname you get back might not be
 very useful.
 
-All the above "don't":s may look daunting, and they are, but the key
+All the above I<don't>s may look daunting, and they are, but the key
 is to degrade gracefully if one cannot reach the particular network
 service one wants.  Croaking or hanging do not look very professional.
 
