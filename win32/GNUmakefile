@@ -357,11 +357,11 @@ endif
 ifeq ($(CCTYPE),GCC)
 ifeq ($(GCCTARGET),x86_64-w64-mingw32)
 WIN64 := define
-ARCHITECTURE := x64
+PROCESSOR_ARCHITECTURE := x64
 endif
 ifeq ($(GCCTARGET),i686-w64-mingw32)
 WIN64 := undef
-ARCHITECTURE := x86
+PROCESSOR_ARCHITECTURE := x86
 endif
 endif
 
