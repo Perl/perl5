@@ -398,6 +398,7 @@ shmat(id, addr, flag)
       ST(0) = shm == (void *) -1 ? &PL_sv_undef
                                  : sv_2mortal(newSVpvn((char *) &shm, sizeof(void *)));
     } else {
+      SETERRNO(EINVAL,LIB_INVARG);
       ST(0) = &PL_sv_undef;
     }
     XSRETURN(1);
