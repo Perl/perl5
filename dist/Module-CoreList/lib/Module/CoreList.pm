@@ -4,7 +4,7 @@ use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use Module::CoreList::TieHashDelta;
 use version;
-$VERSION = '5.20160221';
+$VERSION = '5.20160228';
 
 sub _released_order {   # Sort helper, to make '?' sort after everything else
     (substr($released{$a}, 0, 1) eq "?")
@@ -8119,6 +8119,8 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     5.018003 => {
         delta_from => 5.018002,
         changed => {
+            'Config'                => '5.018003',
+            'Digest::SHA'           => '5.84_02',
             'Module::CoreList'      => '3.12',
             'Module::CoreList::TieHashDelta'=> '3.12',
             'Module::CoreList::Utils'=> '3.12',
@@ -8127,6 +8129,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     5.018004 => {
         delta_from => 5.018003,
         changed => {
+            'Config'                => '5.018004',
             'Module::CoreList'      => '3.13',
             'Module::CoreList::TieHashDelta'=> '3.13',
             'Module::CoreList::Utils'=> '3.13',
