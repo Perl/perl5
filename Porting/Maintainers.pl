@@ -1015,6 +1015,7 @@ use File::Glob qw(:case);
 
         # https://rt.cpan.org/Ticket/Display.html?id=106797
         # https://rt.cpan.org/Ticket/Display.html?id=107058
+        # https://rt.cpan.org/Ticket/Display.html?id=111707
         'CUSTOMIZED'   => [ qw[ Socket.pm Socket.xs ] ],
     },
 
