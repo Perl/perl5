@@ -861,8 +861,8 @@ unpack_sockaddr_un(sun_sv)
 #   else
 		const int maxlen = (int)sizeof(addr.sun_path);
 #   endif
-		for (addr_len = 0; addr.sun_path[addr_len]
-		     && addr_len < maxlen; addr_len++);
+		for (addr_len = 0; addr_len < maxlen
+		     && addr.sun_path[addr_len]; addr_len++);
 	}
 
 	ST(0) = sv_2mortal(newSVpvn(addr.sun_path, addr_len));
