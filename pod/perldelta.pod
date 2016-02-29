@@ -312,8 +312,8 @@ L</Modules and Pragmata> section.
 
 =item Win32
 
-Building with a 64-bit perl with GCC but a 32-bit gmake would result
-in an invalid C<$Config{archname}> for the resulting perl.
+Building a 64-bit perl with a 64-bit GCC but a 32-bit gmake would
+result in an invalid C<$Config{archname}> for the resulting perl.
 [perl #127584]
 
 =back
