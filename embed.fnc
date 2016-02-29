@@ -932,10 +932,10 @@ p	|int	|mode_from_discipline|NULLOK const char* s|STRLEN len
 Ap	|const char*	|moreswitches	|NN const char* s
 Ap	|NV	|my_atof	|NN const char *s
 #if (!defined(HAS_MEMCPY) && !defined(HAS_BCOPY)) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY) && !defined(HAS_SAFE_BCOPY))
-Anp	|char*	|my_bcopy	|NN const char* from|NN char* to|I32 len
+Anp	|void*	|my_bcopy	|NN const void* vfrom|NN void* vto|size_t len
 #endif
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
-Anp	|char*	|my_bzero	|NN char* loc|I32 len
+Anp	|void*	|my_bzero	|NN void* vloc|size_t len
 #endif
 Apr	|void	|my_exit	|U32 status
 Apr	|void	|my_failure_exit
@@ -946,10 +946,10 @@ Anp	|void	|atfork_unlock
 Apmb	|I32	|my_lstat
 pX	|I32	|my_lstat_flags	|NULLOK const U32 flags
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
-AnpP	|I32	|my_memcmp	|NN const char* s1|NN const char* s2|I32 len
+AnpP	|int	|my_memcmp	|NN const void* vs1|NN const void* vs2|size_t len
 #endif
 #if !defined(HAS_MEMSET)
-Anp	|void*	|my_memset	|NN char* loc|I32 ch|I32 len
+Anp	|void*	|my_memset	|NN void* vloc|int ch|size_t len
 #endif
 #if !defined(PERL_IMPLICIT_SYS)
 Ap	|I32	|my_pclose	|NULLOK PerlIO* ptr

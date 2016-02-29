@@ -2263,16 +2263,16 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
 }
 #endif
 
-/* this is a drop-in replacement for bcopy() */
+/* this is a drop-in replacement for bcopy(), except for the return
+ * value, which we need to be able to emulate memcpy()  */
 #if (!defined(HAS_MEMCPY) && !defined(HAS_BCOPY)) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY) && !defined(HAS_SAFE_BCOPY))
-char *
-Perl_my_bcopy(const char *from, char *to, I32 len)
+void *
+Perl_my_bcopy(const void *vfrom, void *vto, size_t len)
 {
-    char * const retval = to;
+    const unsigned char *from = (const unsigned char *)vfrom;
+    unsigned char *to = (unsigned char *)vto;
 
     PERL_ARGS_ASSERT_MY_BCOPY;
-
-    assert(len >= 0);
 
     if (from - to >= 0) {
 	while (len--)
@@ -2284,56 +2284,50 @@ Perl_my_bcopy(const char *from, char *to, I32 len)
 	while (len--)
 	    *(--to) = *(--from);
     }
-    return retval;
+    return vto;
 }
 #endif
 
 /* this is a drop-in replacement for memset() */
 #ifndef HAS_MEMSET
 void *
-Perl_my_memset(char *loc, I32 ch, I32 len)
+Perl_my_memset(void *vloc, int ch, size_t len)
 {
-    char * const retval = loc;
+    unsigned char *loc = (unsigned char *)vloc;
 
     PERL_ARGS_ASSERT_MY_MEMSET;
 
-    assert(len >= 0);
-
     while (len--)
 	*loc++ = ch;
-    return retval;
+    return vloc;
 }
 #endif
 
 /* this is a drop-in replacement for bzero() */
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
-char *
-Perl_my_bzero(char *loc, I32 len)
+void *
+Perl_my_bzero(void *vloc, size_t len)
 {
-    char * const retval = loc;
+    unsigned char *loc = (unsigned char *)vloc;
 
     PERL_ARGS_ASSERT_MY_BZERO;
 
-    assert(len >= 0);
-
     while (len--)
 	*loc++ = 0;
-    return retval;
+    return vloc;
 }
 #endif
 
 /* this is a drop-in replacement for memcmp() */
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
-I32
-Perl_my_memcmp(const char *s1, const char *s2, I32 len)
+int
+Perl_my_memcmp(const void *vs1, const void *vs2, size_t len)
 {
-    const U8 *a = (const U8 *)s1;
-    const U8 *b = (const U8 *)s2;
-    I32 tmp;
+    const U8 *a = (const U8 *)vs1;
+    const U8 *b = (const U8 *)vs2;
+    int tmp;
 
     PERL_ARGS_ASSERT_MY_MEMCMP;
-
-    assert(len >= 0);
 
     while (len--) {
         if ((tmp = *a++ - *b++))

@@ -3583,9 +3583,9 @@ PERL_CALLCONV_NO_RET int	Perl_magic_regdatum_set(pTHX_ SV* sv, MAGIC* mg)
 
 #endif
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
-PERL_CALLCONV char*	Perl_my_bzero(char* loc, I32 len);
+PERL_CALLCONV void*	Perl_my_bzero(void* vloc, size_t len);
 #define PERL_ARGS_ASSERT_MY_BZERO	\
-	assert(loc)
+	assert(vloc)
 #endif
 #if !defined(HAS_GETENV_LEN)
 PERL_CALLCONV char*	Perl_getenv_len(pTHX_ const char *env_elem, unsigned long *len);
@@ -3593,16 +3593,16 @@ PERL_CALLCONV char*	Perl_getenv_len(pTHX_ const char *env_elem, unsigned long *l
 	assert(env_elem); assert(len)
 #endif
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
-PERL_CALLCONV I32	Perl_my_memcmp(const char* s1, const char* s2, I32 len)
+PERL_CALLCONV int	Perl_my_memcmp(const void* vs1, const void* vs2, size_t len)
 			__attribute__pure__;
 #define PERL_ARGS_ASSERT_MY_MEMCMP	\
-	assert(s1); assert(s2)
+	assert(vs1); assert(vs2)
 
 #endif
 #if !defined(HAS_MEMSET)
-PERL_CALLCONV void*	Perl_my_memset(char* loc, I32 ch, I32 len);
+PERL_CALLCONV void*	Perl_my_memset(void* vloc, int ch, size_t len);
 #define PERL_ARGS_ASSERT_MY_MEMSET	\
-	assert(loc)
+	assert(vloc)
 #endif
 #if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 #  if defined(PERL_IN_PP_SYS_C)
@@ -3801,9 +3801,9 @@ PERL_CALLCONV bool	Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 	assert(incmd)
 #endif
 #if (!defined(HAS_MEMCPY) && !defined(HAS_BCOPY)) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY) && !defined(HAS_SAFE_BCOPY))
-PERL_CALLCONV char*	Perl_my_bcopy(const char* from, char* to, I32 len);
+PERL_CALLCONV void*	Perl_my_bcopy(const void* vfrom, void* vto, size_t len);
 #define PERL_ARGS_ASSERT_MY_BCOPY	\
-	assert(from); assert(to)
+	assert(vfrom); assert(vto)
 #endif
 #if defined(DEBUGGING)
 PERL_CALLCONV int	Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
