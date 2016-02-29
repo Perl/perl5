@@ -988,12 +988,14 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/Scalar-List-Utils],
         # Waiting to be merged upstream:
         # https://github.com/Scalar-List-Utils/Scalar-List-Utils/pull/24
+        # https://rt.cpan.org/Public/Bug/Display.html?id=105415
         'CUSTOMIZED'   => [
             qw( ListUtil.xs
                 lib/List/Util.pm
                 lib/List/Util/XS.pm
                 lib/Scalar/Util.pm
                 lib/Sub/Util.pm
+                t/product.t
                 )
         ],
     },
