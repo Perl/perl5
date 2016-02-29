@@ -5,11 +5,13 @@ BEGIN {
     require './test.pl';
     set_up_inc('../lib');
     require Config; import Config;
+    require constant;
+    constant->import(constcow => *Config::{NAME});
     require './charset_tools.pl';
     require './loc_tools.pl';
 }
 
-plan( tests => 269 );
+plan( tests => 270 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -17,6 +19,11 @@ ok( $_ eq 'david' && $a eq 'rules', 'non-destructive substitute' );
 
 $a = "david" =~ s/david/rules/r;
 ok( $a eq 'rules', 's///r with constant' );
+
+#[perl #127635] failed with -DPERL_NO_COW perl build (George smoker uses flag)
+#Modification of a read-only value attempted at ../t/re/subst.t line 23.
+$a = constcow =~ s/Config/David/r;
+ok( $a eq 'David::', 's///r with COW constant' );
 
 $a = "david" =~ s/david/"is"."great"/er;
 ok( $a eq 'isgreat', 's///er' );

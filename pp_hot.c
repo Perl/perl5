@@ -2914,16 +2914,18 @@ PP(pp_subst)
     /* Awooga. Awooga. "bool" types that are actually char are dangerous,
        because they make integers such as 256 "false".  */
     is_cow = SvIsCOW(TARG) ? TRUE : FALSE;
-#else
-    if (SvIsCOW(TARG))
-	sv_force_normal_flags(TARG,0);
 #endif
-    if (!(rpm->op_pmflags & PMf_NONDESTRUCT)
-	&& (SvREADONLY(TARG)
-	    || ( ((SvTYPE(TARG) == SVt_PVGV && isGV_with_GP(TARG))
-		  || SvTYPE(TARG) > SVt_PVLV)
-		 && !(SvTYPE(TARG) == SVt_PVGV && SvFAKE(TARG)))))
-	Perl_croak_no_modify();
+    if (!(rpm->op_pmflags & PMf_NONDESTRUCT)) {
+#ifndef PERL_ANY_COW
+	if (SvIsCOW(TARG))
+	    sv_force_normal_flags(TARG,0);
+#endif
+	if ((SvREADONLY(TARG)
+		|| ( ((SvTYPE(TARG) == SVt_PVGV && isGV_with_GP(TARG))
+		      || SvTYPE(TARG) > SVt_PVLV)
+		     && !(SvTYPE(TARG) == SVt_PVGV && SvFAKE(TARG)))))
+	    Perl_croak_no_modify();
+    }
     PUTBACK;
 
     orig = SvPV_nomg(TARG, len);
