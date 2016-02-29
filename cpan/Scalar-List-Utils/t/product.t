@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 13;
+use Test::More tests => 14;
 
 use List::Util qw(product);
 
@@ -18,6 +18,9 @@ is( $v, 24, '4 args');
 
 $v = product(-1);
 is( $v, -1, 'one -1');
+
+$v = product(0, 1, 2);
+is( $v, 0, 'first factor zero' );
 
 my $x = -3;
 
