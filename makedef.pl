@@ -285,7 +285,7 @@ else {
 			 );
 }
 
-unless ($define{'PERL_COPY_ON_WRITE'}) {
+if (!$define{'PERL_COPY_ON_WRITE'} || $define{'PERL_NO_COW'}) {
     ++$skip{Perl_sv_setsv_cow};
 }
 
