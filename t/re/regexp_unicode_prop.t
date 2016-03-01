@@ -105,7 +105,7 @@ my @USER_DEFINED_PROPERTIES = (
 my @USER_CASELESS_PROPERTIES = (
    #
    # User defined properties which differ depending on /i.  Second entry is
-   # false regularly, true under /i
+   # false normally, true under /i
    #
    'IsMyUpper'                => ["M", "!m" ],
 );
