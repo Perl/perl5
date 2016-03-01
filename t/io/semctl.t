@@ -10,6 +10,8 @@ use strict;
 use warnings;
 
 skip_all('no SysV semaphores on this platform') if !$Config{d_sem};
+skip_all('SysV semaphore structures not detected')
+    if !$Config{d_semctl_semid_ds} && !$Config{d_semctl_semun};
 
 my @warnings;
 {
