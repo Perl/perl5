@@ -272,7 +272,7 @@ sub run_tests {
     }
 
     print "# User-defined properties with /i differences\n";
-    foreach my $class (shift @USER_CASELESS_PROPERTIES) {
+    while (my $class = shift @USER_CASELESS_PROPERTIES) {
         my $chars_ref = shift @USER_CASELESS_PROPERTIES;
         my @in      =                       grep {!/^!./} @$chars_ref;
         my @out     = map {s/^!(?=.)//; $_} grep { /^!./} @$chars_ref;
