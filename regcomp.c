@@ -13788,33 +13788,49 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
     if (POSIXCC_NOTYET(*p)) {
         const char open_char  = *p;
         const char * temp_ptr = p + 1;
-        unsigned int len      = 0;
 
         /* These two constructs are not handled by perl, and if we find a
-         * syntactically valid one, we croak.  It looks like just about any
-         * byte can be in them, but they are likely very short, like [.ch.] to
-         * denote a ligature 'ch' single character.  If we find something that
-         * started out to look like one of these constructs, but isn't, we
-         * break so that it can be checked for being a class name with a typo
-         * of '.' or '=' instead of a colon */
-        while (temp_ptr < e) {
-            len++;
+         * syntactically valid one, we croak.  khw, who wrote this code, finds
+         * this explanation of them very unclear:
+         * http://pubs.opengroup.org/onlinepubs/009696899/basedefs/xbd_chap09.html
+         * And searching the rest of the internet wasn't very helpful either.
+         * It looks like just about any byte can be in these constructs,
+         * depending on the locale.  But unless the pattern is being compiled
+         * under /l, which is very rare, Perl runs under the C or POSIX locale.
+         * In that case, it looks like [= =] isn't allowed at all, and that
+         * [. .] could be any single code point, but for longer strings the
+         * constituent characters would have to be the ASCII alphabetics plus
+         * the minus-hyphen.  Any sensible locale definition would limit itself
+         * to these.  And any portable one definitely should.  Trying to parse
+         * the general case is a nightmare (see [perl #127604]).  So, this code
+         * looks only for interiors of these constructs that match:
+         *      qr/.|[-\w]{2,}/
+         * Using \w relaxes the apparent rules a little, without adding much
+         * danger of mistaking something else for one of these constructs.
+         *
+         * [. .] in some implementations described on the internet is usable to
+         * escape a character that otherwise is special in bracketed character
+         * classes.  For example [.].] means a literal right bracket instead of
+         * the ending of the class
+         *
+         * [= =] can legitimately contain a [. .] construct, but we don't
+         * handle this case, as that [. .] construct will later get parsed
+         * itself and croak then.  And [= =] is checked for even when not under
+         * /l, as Perl has long done so.
+         *
+         * The code below relies on there being a trailing NUL, so it doesn't
+         * have to keep checking if the parse ptr < e.
+         */
+        if (temp_ptr[1] == open_char) {
+            temp_ptr++;
+        }
+        else while (    temp_ptr < e
+                    && (isWORDCHAR(*temp_ptr) || *temp_ptr == '-'))
+        {
+            temp_ptr++;
+        }
 
-            /* qr/[[.].]]/, for example, is valid.  But otherwise we quit on an
-             * unexpected ']'.  It is possible, it appears, for such a ']' to
-             * be not in the final position, but that's so unlikely that that
-             * case is not handled. */
-            if (*temp_ptr == ']' && temp_ptr[1] != open_char) {
-                break;
-            }
-
-            /* XXX this could be cut down, but this value is certainly large
-             * enough */
-            if (len > 10) {
-                break;
-            }
-
-            if (*temp_ptr == open_char) {
+        if (*temp_ptr == open_char) {
                 temp_ptr++;
                 if (*temp_ptr == ']') {
                     temp_ptr++;
@@ -13832,38 +13848,11 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
 
                     return OOB_NAMEDCLASS;
                 }
-            }
-            else if (*temp_ptr == '\\') {
-
-                /* A backslash is treate as like any other character, unless it
-                 * precedes a comment starter.  XXX multiple backslashes in a
-                 * row are not handled specially here, nor would they ever
-                 * likely to be handled specially in one of these constructs */
-                if (temp_ptr[1] == '#' && (RExC_flags & RXf_PMf_EXTENDED)) {
-                    temp_ptr++;
-                }
-                temp_ptr++;
-            }
-            else if (*temp_ptr == '#' && (RExC_flags & RXf_PMf_EXTENDED)) {
-                break;  /* Under no circumstances can we look at the interior
-                           of a comment */
-            }
-            else if (*temp_ptr == '\n') {   /* And we don't allow newlines
-                                               either as it's extremely
-                                               unlikely that one could be in an
-                                               intended class */
-                break;
-            }
-            else if (UTF && ! UTF8_IS_INVARIANT(*temp_ptr)) {
-                /* XXX Since perl will never handle multi-byte locales, except
-                 * for UTF-8, we could break if we found a byte above latin1,
-                 * but perhaps the person intended to use one. */
-                temp_ptr += UTF8SKIP(temp_ptr);
-            }
-            else {
-                temp_ptr++;
-            }
         }
+        /* If we find something that started out to look like one of these
+         * constructs, but isn't, we continue below so that it can be checked
+         * for being a class name with a typo of '.' or '=' instead of a colon.
+         * */
     }
 
     /* Here, we think there is a possibility that a [: :] class was meant, and
