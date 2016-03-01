@@ -204,6 +204,7 @@ my @death =
  '/(?[[[::]]])/' => "Syntax error in (?[...]) in regex m/(?[[[::]]])/",
  '/(?[[[:w:]]])/' => "Syntax error in (?[...]) in regex m/(?[[[:w:]]])/",
  '/(?[[:w:]])/' => "",
+ '/[][[:alpha:]]' => "",    # [perl #127581]
  '/(?[a])/' =>  'Unexpected character {#} m/(?[a{#}])/',
  '/(?[ + \t ])/' => 'Unexpected binary operator \'+\' with no preceding operand {#} m/(?[ +{#} \t ])/',
  '/(?[ \cK - ( + \t ) ])/' => 'Unexpected binary operator \'+\' with no preceding operand {#} m/(?[ \cK - ( +{#} \t ) ])/',

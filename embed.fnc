@@ -2143,6 +2143,10 @@ Es	|void	 |set_ANYOF_arg	|NN RExC_state_t* const pRExC_state \
 				|NULLOK SV* const only_utf8_locale_list	   \
 				|NULLOK SV* const swash                    \
 				|const bool has_user_defined_property
+Es	|void	|output_or_return_posix_warnings			    \
+				|NN RExC_state_t *pRExC_state		    \
+				|NN AV* posix_warnings			    \
+				|NULLOK AV** return_posix_warnings
 Es	|AV*	 |add_multi_match|NULLOK AV* multi_char_matches		    \
 				|NN SV* multi_string			    \
 				|const STRLEN cp_count
@@ -2245,7 +2249,8 @@ Es	|int	|handle_possible_posix					    \
 				|NN RExC_state_t *pRExC_state		    \
 				|NN const char* const s			    \
 				|NULLOK char ** updated_parse_ptr	    \
-				|NULLOK AV** posix_warnings
+				|NULLOK AV** posix_warnings		    \
+				|const bool check_only
 Es	|I32	|make_trie	|NN RExC_state_t *pRExC_state \
 				|NN regnode *startbranch|NN regnode *first \
 				|NN regnode *last|NN regnode *tail \
