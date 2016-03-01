@@ -142,7 +142,7 @@ sub pod2man {
 
 	unless ($has_pod)
 	{
-	    warn "no documentation in $mod\n" unless $opts{silent};
+	    print "no documentation in $mod\n" if $opts{verbose};
 	    next;
 	}
 
