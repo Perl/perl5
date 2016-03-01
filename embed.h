@@ -948,6 +948,7 @@
 #  if !defined(PERL_EXT_RE_BUILD)
 #    if defined(PERL_IN_REGCOMP_C)
 #define get_invlist_previous_index_addr	S_get_invlist_previous_index_addr
+#define invlist_clear(a)	S_invlist_clear(aTHX_ a)
 #define invlist_previous_index	S_invlist_previous_index
 #define invlist_replace_list_destroys_src(a,b)	S_invlist_replace_list_destroys_src(aTHX_ a,b)
 #define invlist_set_previous_index	S_invlist_set_previous_index
@@ -1002,7 +1003,6 @@
 #define handle_named_backref(a,b,c,d)	S_handle_named_backref(aTHX_ a,b,c,d)
 #define handle_possible_posix(a,b,c,d,e)	S_handle_possible_posix(aTHX_ a,b,c,d,e)
 #define handle_regex_sets(a,b,c,d,e)	S_handle_regex_sets(aTHX_ a,b,c,d,e)
-#define invlist_clear(a)	S_invlist_clear(aTHX_ a)
 #define invlist_clone(a)	S_invlist_clone(aTHX_ a)
 #define invlist_contents(a,b)	S_invlist_contents(aTHX_ a,b)
 #define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
