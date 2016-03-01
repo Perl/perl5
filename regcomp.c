@@ -18795,7 +18795,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         }
 
         /* And, finally, add the above-the-bitmap stuff */
-        if (nonbitmap_invlist) {
+        if (nonbitmap_invlist && _invlist_len(nonbitmap_invlist)) {
             SV* contents;
 
             /* See if truncation size is overridden */
