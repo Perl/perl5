@@ -107,11 +107,12 @@ static const char* const non_utf8_target_but_utf8_required
 #define	STATIC	static
 #endif
 
-/* Valid only for non-utf8 strings: avoids the reginclass
- * call if there are no complications: i.e., if everything matchable is
- * straight forward in the bitmap */
-#define REGINCLASS(prog,p,c)  (ANYOF_FLAGS(p) ? reginclass(prog,p,c,c+1,0)   \
-					      : ANYOF_BITMAP_TEST(p,*(c)))
+/* Valid only if 'c', the character being looke-up, is an invariant under
+ * UTF-8: it avoids the reginclass call if there are no complications: i.e., if
+ * everything matchable is straight forward in the bitmap */
+#define REGINCLASS(prog,p,c,u)  (ANYOF_FLAGS(p)                             \
+                                ? reginclass(prog,p,c,c+1,u)                \
+                                : ANYOF_BITMAP_TEST(p,*(c)))
 
 /*
  * Forwards.
@@ -1864,7 +1865,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                       reginclass(prog, c, (U8*)s, (U8*) strend, utf8_target));
         }
         else {
-            REXEC_FBC_CLASS_SCAN(REGINCLASS(prog, c, (U8*)s));
+            REXEC_FBC_CLASS_SCAN(REGINCLASS(prog, c, (U8*)s, 0));
         }
         break;
 
@@ -6118,7 +6119,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		locinput += UTF8SKIP(locinput);
 	    }
 	    else {
-		if (!REGINCLASS(rex, scan, (U8*)locinput))
+		if (!REGINCLASS(rex, scan, (U8*)locinput, utf8_target))
 		    sayNO;
 		locinput++;
 	    }
@@ -8664,7 +8665,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 		hardcount++;
 	    }
 	} else {
-	    while (scan < loceol && REGINCLASS(prog, p, (U8*)scan))
+	    while (scan < loceol && REGINCLASS(prog, p, (U8*)scan, 0))
 		scan++;
 	}
 	break;
