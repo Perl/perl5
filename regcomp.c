@@ -1423,7 +1423,12 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     /* Add in the points from the bit map */
     for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
         if (ANYOF_BITMAP_TEST(node, i)) {
-            invlist = add_cp_to_invlist(invlist, i);
+            unsigned int start = i++;
+
+            for (; i < NUM_ANYOF_CODE_POINTS && ANYOF_BITMAP_TEST(node, i); ++i) {
+                /* empty */
+            }
+            invlist = _add_range_to_invlist(invlist, start, i-1);
             new_node_has_latin1 = TRUE;
         }
     }
@@ -19969,7 +19974,11 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
     /* Accumulate the bit map into the unconditional match list */
     for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
         if (BITMAP_TEST(bitmap, i)) {
-            invlist = add_cp_to_invlist(invlist, i);
+            int start = i++;
+            for (; i < NUM_ANYOF_CODE_POINTS && BITMAP_TEST(bitmap, i); i++) {
+                /* empty */
+            }
+            invlist = _add_range_to_invlist(invlist, start, i-1);
         }
     }
 
