@@ -1548,6 +1548,14 @@ We then determine what the console should be on various systems:
         $console = "con";
     }
 
+=item * AmigaOS - use C<CONSOLE:>.
+
+=cut
+
+    elsif ( $^O eq 'amigaos' ) {
+        $console = "CONSOLE:";
+    }
+
 =item * VMS - use C<sys$command>.
 
 =cut
