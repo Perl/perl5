@@ -102,7 +102,7 @@ struct args
 	char **envp;
 };
 
-int __myrc(char *arg)
+int __myrc(__attribute__((unused))char *arg)
 {
 	struct Task *thisTask = IExec->FindTask(0);
 	struct args *myargs = (struct args *)thisTask->tc_UserData;
@@ -154,7 +154,7 @@ char *mystrdup(const char *s)
 
 	size = strlen(s) + 1;
 
-	if ((result = (char *)IExec->AllocVec(size, MEMF_ANY)))
+	if ((result = (char *)IExec->AllocVecTags(size, TAG_DONE)))
 	{
 		memmove(result, s, size);
 	}
@@ -200,7 +200,7 @@ int fork(void)
 	return -1;
 }
 
-int wait(int *status)
+int wait(__attribute__((unused))int *status)
 {
 	fprintf(stderr, "No wait try waitpid instead\n");
 	errno = ECHILD;
@@ -278,8 +278,7 @@ static void createvars(char **envp)
 			char *val;
 			if ((len = strlen(*envp)))
 			{
-				if ((var = (char *)IExec->AllocVec(
-				               len + 1, MEMF_ANY | MEMF_CLEAR)))
+				if ((var = (char *)IExec->AllocVecTags(len + 1, AVT_ClearWithValue,0,TAG_DONE)))
 				{
 					strcpy(var, *envp);
 
@@ -304,44 +303,6 @@ static void createvars(char **envp)
 	}
 }
 
-static BOOL contains_whitespace(char *string)
-{
-
-	if (string)
-	{
-
-		if (strchr(string, ' '))
-			return TRUE;
-		if (strchr(string, '\t'))
-			return TRUE;
-		if (strchr(string, '\n'))
-			return TRUE;
-		if (strchr(string, 0xA0))
-			return TRUE;
-		if (strchr(string, '"'))
-			return TRUE;
-	}
-	return FALSE;
-}
-
-static int no_of_escapes(char *string)
-{
-	int cnt = 0;
-	char *p;
-	for (p = string; p < string + strlen(string); p++)
-	{
-		if (*p == '"')
-			cnt++;
-		if (*p == '*')
-			cnt++;
-		if (*p == '\n')
-			cnt++;
-		if (*p == '\t')
-			cnt++;
-	}
-	return cnt;
-}
-
 struct command_data
 {
 	STRPTR args;
@@ -358,10 +319,10 @@ int myexecvp(bool isperlthread, const char *filename, char *argv[])
 	int res;
 	if ((strchr(filename, '/') == NULL) && (strchr(filename, ':') == NULL))
 	{
-		char *path;
+		const char *path;
 		char *name;
 		char *pathpart;
-		char *p;
+		const char *p;
 		size_t len;
 		struct stat st;
 
@@ -432,267 +393,6 @@ int myexecl(bool isperlthread, const char *path, ...)
 	return myexecve(isperlthread, path, argv, myenviron);
 }
 
-#if 0
-
-int myexecve(const char *filename, char *argv[], char *envp[])
-{
-	FILE *fh;
-	char buffer[1000];
-	int size = 0;
-	char **cur;
-	char *interpreter = 0;
-	char *interpreter_args = 0;
-	char *full = 0;
-	char *filename_conv = 0;
-	char *interpreter_conv = 0;
-	//        char *tmp = 0;
-	char *fname;
-	//        int tmpint;
-	//        struct Task *thisTask = IExec->FindTask(0);
-	int result = -1;
-
-	StdioStore store;
-
-	dTHX;
-	if(aTHX) // I hope this is NULL when not on a interpreteer thread nor to level.
-	{
-		/* Save away our stdio */
-		amigaos_stdio_save(aTHX_ & store);
-	}
-
-	// adebug("%s %ld %s\n",__FUNCTION__,__LINE__,filename?filename:"NULL");
-
-	/* Calculate the size of filename and all args, including spaces and
-	 * quotes */
-	size = 0; // strlen(filename) + 1;
-	for (cur = (char **)argv /* +1 */; *cur; cur++)
-	{
-		size +=
-		    strlen(*cur) + 1 +
-		    (contains_whitespace(*cur) ? (2 + no_of_escapes(*cur)) : 0);
-	}
-	/* Check if it's a script file */
-
-	fh = fopen(filename, "r");
-	if (fh)
-	{
-		if (fgetc(fh) == '#' && fgetc(fh) == '!')
-		{
-			char *p;
-			char *q;
-			fgets(buffer, 999, fh);
-			p = buffer;
-			while (*p == ' ' || *p == '\t')
-				p++;
-			if (buffer[strlen(buffer) - 1] == '\n')
-				buffer[strlen(buffer) - 1] = '\0';
-			if ((q = strchr(p, ' ')))
-			{
-				*q++ = '\0';
-				if (*q != '\0')
-				{
-					interpreter_args = mystrdup(q);
-				}
-			}
-			else
-				interpreter_args = mystrdup("");
-
-			interpreter = mystrdup(p);
-			size += strlen(interpreter) + 1;
-			size += strlen(interpreter_args) + 1;
-		}
-
-		fclose(fh);
-	}
-	else
-	{
-		/* We couldn't open this why not? */
-		if (errno == ENOENT)
-		{
-			/* file didn't exist! */
-			goto out;
-		}
-	}
-
-	/* Allocate the command line */
-	filename_conv = convert_path_u2a(filename);
-
-	if (filename_conv)
-		size += strlen(filename_conv);
-	size += 1;
-	full = (char *)IExec->AllocVec(size + 10, MEMF_ANY | MEMF_CLEAR);
-	if (full)
-	{
-		if (interpreter)
-		{
-			interpreter_conv = convert_path_u2a(interpreter);
-#if !defined(__USE_RUNCOMMAND__)
-#warning(using system!)
-			sprintf(full, "%s %s %s ", interpreter_conv,
-			        interpreter_args, filename_conv);
-#else
-			sprintf(full, "%s %s ", interpreter_args,
-			        filename_conv);
-#endif
-			IExec->FreeVec(interpreter);
-			IExec->FreeVec(interpreter_args);
-
-			if (filename_conv)
-				IExec->FreeVec(filename_conv);
-			fname = mystrdup(interpreter_conv);
-
-			if (interpreter_conv)
-				IExec->FreeVec(interpreter_conv);
-		}
-		else
-		{
-#ifndef __USE_RUNCOMMAND__
-			sprintf(full, "%s ", filename_conv);
-#else
-			sprintf(full, "");
-#endif
-			fname = mystrdup(filename_conv);
-			if (filename_conv)
-				IExec->FreeVec(filename_conv);
-		}
-
-		for (cur = (char **)(argv + 1); *cur != 0; cur++)
-		{
-			if (contains_whitespace(*cur))
-			{
-				int esc = no_of_escapes(*cur);
-
-				if (esc > 0)
-				{
-					char *buff = IExec->AllocVec(
-					                 strlen(*cur) + 4 + esc,
-					                 MEMF_ANY | MEMF_CLEAR);
-					char *p = *cur;
-					char *q = buff;
-
-					*q++ = '"';
-					while (*p != '\0')
-					{
-
-						if (*p == '\n')
-						{
-							*q++ = '*';
-							*q++ = 'N';
-							p++;
-							continue;
-						}
-						else if (*p == '"')
-						{
-							*q++ = '*';
-							*q++ = '"';
-							p++;
-							continue;
-						}
-						else if (*p == '*')
-						{
-							*q++ = '*';
-						}
-						*q++ = *p++;
-					}
-					*q++ = '"';
-					*q++ = ' ';
-					*q = '\0';
-					strcat(full, buff);
-					IExec->FreeVec(buff);
-				}
-				else
-				{
-					strcat(full, "\"");
-					strcat(full, *cur);
-					strcat(full, "\" ");
-				}
-			}
-			else
-			{
-				strcat(full, *cur);
-				strcat(full, " ");
-			}
-		}
-		strcat(full, "\n");
-
-//            if(envp)
-//                 createvars(envp);
-
-#ifndef __USE_RUNCOMMAND__
-		result = IDOS->SystemTags(
-		             full, SYS_UserShell, TRUE, NP_StackSize,
-		             ((struct Process *)thisTask)->pr_StackSize, SYS_Input,
-		             ((struct Process *)thisTask)->pr_CIS, SYS_Output,
-		             ((struct Process *)thisTask)->pr_COS, SYS_Error,
-		             ((struct Process *)thisTask)->pr_CES, TAG_DONE);
-#else
-
-		if (fname)
-		{
-			BPTR seglist = IDOS->LoadSeg(fname);
-			if (seglist)
-			{
-				/* check if we have an executable! */
-				struct PseudoSegList *ps = NULL;
-				if (!IDOS->GetSegListInfoTags(
-				            seglist, GSLI_Native, &ps, TAG_DONE))
-				{
-					IDOS->GetSegListInfoTags(
-					    seglist, GSLI_68KPS, &ps, TAG_DONE);
-				}
-				if (ps != NULL)
-				{
-					//                    adebug("%s %ld %s
-					//                    %s\n",__FUNCTION__,__LINE__,fname,full);
-					IDOS->SetCliProgramName(fname);
-					//                        result=RunCommand(seglist,8*1024,full,strlen(full));
-					//                        result=myruncommand(seglist,8*1024,full,strlen(full),envp);
-					result = myruncommand(seglist, 8 * 1024,
-					                      full, -1, envp);
-					errno = 0;
-				}
-				else
-				{
-					errno = ENOEXEC;
-				}
-				IDOS->UnLoadSeg(seglist);
-			}
-			else
-			{
-				errno = ENOEXEC;
-			}
-			IExec->FreeVec(fname);
-		}
-
-#endif /* USE_RUNCOMMAND */
-
-		IExec->FreeVec(full);
-		if (errno == ENOEXEC)
-		{
-			result = -1;
-		}
-		goto out;
-	}
-
-	if (interpreter)
-		IExec->FreeVec(interpreter);
-	if (filename_conv)
-		IExec->FreeVec(filename_conv);
-
-	errno = ENOMEM;
-
-out:
-
-	amigaos_stdio_restore(aTHX_ &store);
-	STATUS_NATIVE_CHILD_SET(result);
-	PL_exit_flags |= PERL_EXIT_EXPECTED;
-	if (result != -1) my_exit(result);
-
-	return(result);
-}
-
-#endif
-
 int pause(void)
 {
 	fprintf(stderr, "Pause not implemented\n");
@@ -701,7 +401,7 @@ int pause(void)
 	return -1;
 }
 
-uint32 size_env(struct Hook *hook, APTR userdata, struct ScanVarsMsg *message)
+uint32 size_env(struct Hook *hook, __attribute__((unused))APTR userdata, struct ScanVarsMsg *message)
 {
 	if (strlen(message->sv_GDir) <= 4)
 	{
@@ -710,15 +410,15 @@ uint32 size_env(struct Hook *hook, APTR userdata, struct ScanVarsMsg *message)
 	return 0;
 }
 
-uint32 copy_env(struct Hook *hook, APTR userdata, struct ScanVarsMsg *message)
+uint32 copy_env(struct Hook *hook, __attribute__((unused))APTR userdata, struct ScanVarsMsg *message)
 {
 	if (strlen(message->sv_GDir) <= 4)
 	{
 		char **env = (char **)hook->h_Data;
 		uint32 size =
 		    strlen(message->sv_Name) + 1 + message->sv_VarLen + 1 + 1;
-		char *buffer = (char *)IExec->AllocVec((uint32)size,
-		                                       MEMF_ANY | MEMF_CLEAR);
+		char *buffer = (char *)IExec->AllocVecTags((uint32)size,AVT_ClearWithValue,0,TAG_DONE);
+
 
 		snprintf(buffer, size - 1, "%s=%s", message->sv_Name,
 		         message->sv_Var);
@@ -732,44 +432,51 @@ uint32 copy_env(struct Hook *hook, APTR userdata, struct ScanVarsMsg *message)
 
 void ___makeenviron()
 {
-	struct Hook hook;
+	struct Hook *hook = (struct Hook *)IExec->AllocSysObjectTags(ASOT_HOOK,TAG_DONE);
 
-	char varbuf[8];
-	uint32 flags = 0;
-
-	struct DOSIFace *myIDOS =
-	    (struct DOSIFace *)OpenInterface("dos.library", 53);
-	if (myIDOS)
+	if(hook)
 	{
-		if (myIDOS->GetVar("ABCSH_IMPORT_LOCAL", varbuf, 8,
-		                   GVF_LOCAL_ONLY) > 0)
+		char varbuf[8];
+		uint32 flags = 0;
+
+		struct DOSIFace *myIDOS =
+		    (struct DOSIFace *)OpenInterface("dos.library", 53);
+		if (myIDOS)
 		{
-			flags = GVF_LOCAL_ONLY;
+			uint32 size = 0;
+			if (myIDOS->GetVar("ABCSH_IMPORT_LOCAL", varbuf, 8,
+			                   GVF_LOCAL_ONLY) > 0)
+			{
+				flags = GVF_LOCAL_ONLY;
+			}
+			else
+			{
+				flags = GVF_GLOBAL_ONLY;
+			}
+
+			hook->h_Entry = size_env;
+			hook->h_Data = 0;
+
+			myIDOS->ScanVars(hook, flags, 0);
+			size  = ((uint32)hook->h_Data) + 1;
+
+			myenviron = (char **)IExec->AllocVecTags(size *
+			            sizeof(char **),
+			            AVT_ClearWithValue,0,TAG_DONE);
+			origenviron = myenviron;
+			if (!myenviron)
+			{
+				IExec->FreeSysObject(ASOT_HOOK,hook);
+				CloseInterface((struct Interface *)myIDOS);
+				return;
+			}
+			hook->h_Entry = copy_env;
+			hook->h_Data = myenviron;
+
+			myIDOS->ScanVars(hook, flags, 0);
+			IExec->FreeSysObject(ASOT_HOOK,hook);
+			CloseInterface((struct Interface *)myIDOS);
 		}
-		else
-		{
-			flags = GVF_GLOBAL_ONLY;
-		}
-
-		hook.h_Entry = size_env;
-		hook.h_Data = 0;
-
-		myIDOS->ScanVars(&hook, flags, 0);
-		hook.h_Data = (APTR)(((uint32)hook.h_Data) + 1);
-
-		myenviron = (char **)IExec->AllocVec((uint32)hook.h_Data *
-		                                     sizeof(char **),
-		                                     MEMF_ANY | MEMF_CLEAR);
-		origenviron = myenviron;
-		if (!myenviron)
-		{
-			return;
-		}
-		hook.h_Entry = copy_env;
-		hook.h_Data = myenviron;
-
-		myIDOS->ScanVars(&hook, flags, 0);
-		CloseInterface((struct Interface *)myIDOS);
 	}
 }
 
@@ -799,34 +506,12 @@ void ___freeenviron()
 
 /* reimplementation of popen, clib2's doesn't do all we want */
 
-static BOOL is_final_quote_character(const char *str)
-{
-	BOOL result;
-
-	result = (BOOL)(str[0] == '\"' && (str[1] == '\0' || isspace(str[1])));
-
-	return (result);
-}
-
-static BOOL is_final_squote_character(const char *str)
-{
-	BOOL result;
-
-	result = (BOOL)(str[0] == '\'' && (str[1] == '\0' || isspace(str[1])));
-
-	return (result);
-}
-
 int popen_child()
 {
 	struct Task *thisTask = IExec->FindTask(0);
 
 	char *command = (char *)thisTask->tc_UserData;
-	size_t len;
-	char *str;
-	int argc;
-	int number_of_arguments;
-	char *argv[4];
+	const char *argv[4];
 
 	argv[0] = "sh";
 	argv[1] = "-c";
@@ -839,7 +524,7 @@ int popen_child()
 	 * argv[]
 	 */
 
-	myexecvp(FALSE, argv[0], argv);
+	myexecvp(FALSE, argv[0], (char **)argv);
 	if (command)
 		IExec->FreeVec(command);
 
