@@ -2928,7 +2928,7 @@ PP(pp_subst)
 
     orig = SvPV_nomg(TARG, len);
     /* note we don't (yet) force the var into being a string; if we fail
-     * to match, we leave as-is; on successful match howeverm, we *will*
+     * to match, we leave as-is; on successful match however, we *will*
      * coerce into a string, then repeat the match */
     if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV || SvVOK(TARG))
 	force_on_match = 1;
