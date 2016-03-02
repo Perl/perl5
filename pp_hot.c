@@ -2911,9 +2911,7 @@ PP(pp_subst)
 
     SvGETMAGIC(TARG); /* must come before cow check */
 #ifdef PERL_ANY_COW
-    /* Awooga. Awooga. "bool" types that are actually char are dangerous,
-       because they make integers such as 256 "false".  */
-    is_cow = SvIsCOW(TARG) ? TRUE : FALSE;
+    is_cow = cBOOL(SvIsCOW(TARG));
 #endif
     if (!(rpm->op_pmflags & PMf_NONDESTRUCT)) {
 #ifndef PERL_ANY_COW
