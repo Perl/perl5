@@ -10313,7 +10313,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
          * indivisible */
         bool has_intervening_patws = paren == 2 && *(RExC_parse - 1) != '(';
 
-        assert(RExC_parse < RExC_end);
+        if (RExC_parse >= RExC_end) {
+	    vFAIL("Unmatched (");
+        }
 
         if ( *RExC_parse == '*') { /* (*VERB:ARG) */
 	    char *start_verb = RExC_parse + 1;

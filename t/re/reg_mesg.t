@@ -146,6 +146,7 @@ my @death =
 '/(?i-l:foo)/' => 'Regexp modifier "l" may not appear after the "-" {#} m/(?i-l{#}:foo)/',
 
  '/((x)/' => 'Unmatched ( {#} m/({#}(x)/',
+ '/{(}/' => 'Unmatched ( {#} m/{({#}}/',    # [perl #127599]
 
  "/x{$inf_p1}/" => "Quantifier in {,} bigger than $inf_m1 {#} m/x{{#}$inf_p1}/",
 
