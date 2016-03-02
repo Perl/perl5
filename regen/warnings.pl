@@ -489,11 +489,12 @@ package warnings;
 VERSION
 
 # Verify that we're called correctly so that warnings will work.
+# Can't use Carp, since Carp uses us!
+# String regexps because constant folding = smaller optree = less memory vs regexp literal
 # see also strict.pm.
-unless ( __FILE__ =~ /(^|[\/\\])\Q${\__PACKAGE__}\E\.pmc?$/ ) {
-    my (undef, $f, $l) = caller;
-    die("Incorrect use of pragma '${\__PACKAGE__}' at $f line $l.\n");
-}
+die sprintf "Incorrect use of pragma '%s' at %s line %d.\n", __PACKAGE__, +(caller)[1,2]
+    if __FILE__ !~ ( '(?x) \b     '.__PACKAGE__.'  \.pmc? \z' )
+    && __FILE__ =~ ( '(?x) \b (?i:'.__PACKAGE__.') \.pmc? \z' );
 
 KEYWORDS
 
