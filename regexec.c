@@ -8239,8 +8239,6 @@ NULL
     * the terminating point.
     */
     Perl_croak(aTHX_ "corrupted regexp pointers");
-    /* NOTREACHED */
-    sayNO;
     NOT_REACHED; /* NOTREACHED */
 
   yes:
