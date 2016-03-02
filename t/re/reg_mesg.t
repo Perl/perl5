@@ -99,6 +99,8 @@ my $tab_hex = sprintf "%02X", ord("\t");
 my @death =
 (
  '/[[=foo=]]/' => 'POSIX syntax [= =] is reserved for future extensions {#} m/[[=foo=]{#}]/',
+ '/[[=a]=]]/' => 'POSIX syntax [= =] is reserved for future extensions {#} m/[[=a]=]{#}]/',
+ '/[[.a].]]/' => 'POSIX syntax [. .] is reserved for future extensions {#} m/[[.a].]{#}]/',
 
  '/(?<= .*)/' =>  'Variable length lookbehind not implemented in regex m/(?<= .*)/',
 
@@ -203,8 +205,6 @@ my @death =
  '/(?[[[:w:]]])/' => "Syntax error in (?[...]) in regex m/(?[[[:w:]]])/",
  '/(?[[:w:]])/' => "",
  '/[][[:alpha:]]' => "",    # [perl #127581]
- '/([.].*)[.]/'   => "",    # [perl #127582]
- '/[.].*[.]/'     => "",    # [perl #127604]
  '/(?[a])/' =>  'Unexpected character {#} m/(?[a{#}])/',
  '/(?[ + \t ])/' => 'Unexpected binary operator \'+\' with no preceding operand {#} m/(?[ +{#} \t ])/',
  '/(?[ \cK - ( + \t ) ])/' => 'Unexpected binary operator \'+\' with no preceding operand {#} m/(?[ \cK - ( +{#} \t ) ])/',
@@ -351,6 +351,7 @@ my @death_only_under_strict = (
 
 # These need the character 'ネ' as a marker for mark_as_utf8()
 my @death_utf8 = mark_as_utf8(
+ '/ネ[[=ネ=]]ネ/' => 'POSIX syntax [= =] is reserved for future extensions {#} m/ネ[[=ネ=]{#}]ネ/',
  '/ネ(?<= .*)/' =>  'Variable length lookbehind not implemented in regex m/ネ(?<= .*)/',
 
  '/(?<= ネ{1000})/' => 'Lookbehind longer than 255 not implemented in regex m/(?<= ネ{1000})/',
@@ -398,6 +399,10 @@ my @death_utf8 = mark_as_utf8(
 
  '/ネ\o{ネ/' => 'Missing right brace on \o{ {#} m/ネ\o{{#}ネ/',
  '/ネ[[:ネ:]]ネ/' => "",
+
+ '/ネ[[=ネ=]]ネ/' => 'POSIX syntax [= =] is reserved for future extensions {#} m/ネ[[=ネ=]{#}]ネ/',
+
+ '/ネ[[.ネ.]]ネ/' => 'POSIX syntax [. .] is reserved for future extensions {#} m/ネ[[.ネ.]{#}]ネ/',
 
  '/[ネ-a]ネ/' => 'Invalid [] range "ネ-a" {#} m/[ネ-a{#}]ネ/',
 
@@ -484,6 +489,8 @@ my @warning = (
     '/[:alpha:]\x{100}/' => 'POSIX syntax [: :] belongs inside character classes {#} m/[:alpha:]{#}\x{100}/',
     '/[:zog:]\x{100}/' => 'POSIX syntax [: :] belongs inside character classes (but this one isn\'t fully valid) {#} m/[:zog:]{#}\x{100}/',
     '/[.zog.]\x{100}/' => 'POSIX syntax [. .] belongs inside character classes (but this one isn\'t implemented) {#} m/[.zog.]{#}\x{100}/',
+    '/[.z#g.]\x{100}/x' => "",  # Runs into a comment
+    '/[.z\#g.]\x{100}/x' => 'POSIX syntax [. .] belongs inside character classes (but this one isn\'t implemented) {#} m/[.z\#g.]{#}\x{100}/',
     '/[a-b]/' => "",
     '/(?c)\x{100}/' => 'Useless (?c) - use /gc modifier {#} m/(?c{#})\x{100}/',
     '/(?-c)\x{100}/' => 'Useless (?-c) - don\'t use /gc modifier {#} m/(?-c{#})\x{100}/',
