@@ -2892,7 +2892,7 @@ PP(pp_subst)
     STRLEN slen;
     bool doutf8 = FALSE; /* whether replacement is in utf8 */
 #ifdef PERL_ANY_COW
-    bool is_cow;
+    bool was_cow;
 #endif
     SV *nsv = NULL;
     /* known replacement string? */
@@ -2911,7 +2911,8 @@ PP(pp_subst)
 
     SvGETMAGIC(TARG); /* must come before cow check */
 #ifdef PERL_ANY_COW
-    is_cow = cBOOL(SvIsCOW(TARG));
+    /* note that a string might get converted to COW during matching */
+    was_cow = cBOOL(SvIsCOW(TARG));
 #endif
     if (!(rpm->op_pmflags & PMf_NONDESTRUCT)) {
 #ifndef PERL_ANY_COW
@@ -3013,7 +3014,7 @@ PP(pp_subst)
     /* can do inplace substitution? */
     if (c
 #ifdef PERL_ANY_COW
-	&& !is_cow
+	&& !was_cow
 #endif
         && (I32)clen <= RX_MINLENRET(rx)
         && (  once
@@ -3026,6 +3027,7 @@ PP(pp_subst)
     {
 
 #ifdef PERL_ANY_COW
+        /* string might have got converted to COW since we set was_cow */
 	if (SvIsCOW(TARG)) {
 	  if (!force_on_match)
 	    goto have_a_cow;
