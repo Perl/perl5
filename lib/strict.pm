@@ -1,6 +1,6 @@
 package strict;
 
-$strict::VERSION = "1.10";
+$strict::VERSION = "1.11";
 
 my ( %bitmask, %explicit_bitmask );
 
