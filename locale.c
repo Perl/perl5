@@ -122,7 +122,7 @@ Perl_set_numeric_radix(pTHX)
                                            ? SvPVX(PL_numeric_radix_sv)
                                            : "NULL",
                                           (PL_numeric_radix_sv)
-                                           ? SvUTF8(PL_numeric_radix_sv)
+                                           ? cBOOL(SvUTF8(PL_numeric_radix_sv))
                                            : 0));
 
 # endif /* HAS_LOCALECONV */
