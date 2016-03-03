@@ -2241,7 +2241,7 @@ will work fine with the 5.8.0.
 
 Known to be broken for 5.8.0 (but 5.6.1 and 5.7.2 can be used):
 
-	AmigaOS
+	AmigaOS 3
 
 The following platforms have been known to build Perl from source in
 the past (5.005_03 and earlier), but we haven't been able to verify
