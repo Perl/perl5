@@ -15944,6 +15944,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                   ? "Illegal user-defined property name"
                                   : "Can't find Unicode property definition";
                             RExC_parse = e + 1;
+                            SAVEFREEPV(name);
 
                             /* diag_listed_as: Can't find Unicode property definition "%s" */
                             vFAIL3utf8f("%s \"%"UTF8f"\"",
