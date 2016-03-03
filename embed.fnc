@@ -931,7 +931,7 @@ s	|void	|move_proto_attr|NN OP **proto|NN OP **attrs|NN const GV *name
 p	|int	|mode_from_discipline|NULLOK const char* s|STRLEN len
 Ap	|const char*	|moreswitches	|NN const char* s
 Ap	|NV	|my_atof	|NN const char *s
-#if (!defined(HAS_MEMCPY) && !defined(HAS_BCOPY)) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY) && !defined(HAS_SAFE_BCOPY))
+#if !defined(HAS_MEMCPY) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY))
 Anp	|void*	|my_bcopy	|NN const void* vfrom|NN void* vto|size_t len
 #endif
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)

@@ -1007,11 +1007,7 @@ EXTERN_C int usleep(unsigned int);
 #  endif
 #else
 #   ifndef memcpy
-#	ifdef HAS_BCOPY
-#	    define memcpy(d,s,l) bcopy(s,d,l)
-#	else
-#	    define memcpy(d,s,l) my_bcopy(s,d,l)
-#	endif
+#	define memcpy(d,s,l) my_bcopy(s,d,l)
 #   endif
 #endif /* HAS_MEMCPY */
 
@@ -1027,14 +1023,10 @@ EXTERN_C int usleep(unsigned int);
 #endif /* HAS_MEMSET */
 
 #if !defined(HAS_MEMMOVE) && !defined(memmove)
-#   if defined(HAS_BCOPY) && defined(HAS_SAFE_BCOPY)
-#	define memmove(d,s,l) bcopy(s,d,l)
+#   if defined(HAS_MEMCPY) && defined(HAS_SAFE_MEMCPY)
+#	define memmove(d,s,l) memcpy(d,s,l)
 #   else
-#	if defined(HAS_MEMCPY) && defined(HAS_SAFE_MEMCPY)
-#	    define memmove(d,s,l) memcpy(d,s,l)
-#	else
-#	    define memmove(d,s,l) my_bcopy(s,d,l)
-#	endif
+#	define memmove(d,s,l) my_bcopy(s,d,l)
 #   endif
 #endif
 

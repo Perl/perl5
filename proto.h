@@ -3599,6 +3599,11 @@ PERL_CALLCONV int	Perl_my_memcmp(const void* vs1, const void* vs2, size_t len)
 	assert(vs1); assert(vs2)
 
 #endif
+#if !defined(HAS_MEMCPY) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY))
+PERL_CALLCONV void*	Perl_my_bcopy(const void* vfrom, void* vto, size_t len);
+#define PERL_ARGS_ASSERT_MY_BCOPY	\
+	assert(vfrom); assert(vto)
+#endif
 #if !defined(HAS_MEMSET)
 PERL_CALLCONV void*	Perl_my_memset(void* vloc, int ch, size_t len);
 #define PERL_ARGS_ASSERT_MY_MEMSET	\
@@ -3799,11 +3804,6 @@ STATIC NV	S_mulexp10(NV value, I32 exponent);
 PERL_CALLCONV bool	Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report);
 #define PERL_ARGS_ASSERT_DO_EXEC3	\
 	assert(incmd)
-#endif
-#if (!defined(HAS_MEMCPY) && !defined(HAS_BCOPY)) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY) && !defined(HAS_SAFE_BCOPY))
-PERL_CALLCONV void*	Perl_my_bcopy(const void* vfrom, void* vto, size_t len);
-#define PERL_ARGS_ASSERT_MY_BCOPY	\
-	assert(vfrom); assert(vto)
 #endif
 #if defined(DEBUGGING)
 PERL_CALLCONV int	Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
