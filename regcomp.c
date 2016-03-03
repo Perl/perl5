@@ -13841,24 +13841,25 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
         }
 
         if (*temp_ptr == open_char) {
+            temp_ptr++;
+            if (*temp_ptr == ']') {
                 temp_ptr++;
-                if (*temp_ptr == ']') {
-                    temp_ptr++;
-                    if (! found_problem && ! check_only) {
-                        RExC_parse = (char *) temp_ptr;
-                        vFAIL3("POSIX syntax [%c %c] is reserved for future "
-                               "extensions", open_char, open_char);
-                    }
-
-                    /* Here, the syntax wasn't completely valid, or else the
-                     * call is to check-only */
-                    if (updated_parse_ptr) {
-                        *updated_parse_ptr = (char *) temp_ptr;
-                    }
-
-                    return OOB_NAMEDCLASS;
+                if (! found_problem && ! check_only) {
+                    RExC_parse = (char *) temp_ptr;
+                    vFAIL3("POSIX syntax [%c %c] is reserved for future "
+                            "extensions", open_char, open_char);
                 }
+
+                /* Here, the syntax wasn't completely valid, or else the call
+                 * is to check-only */
+                if (updated_parse_ptr) {
+                    *updated_parse_ptr = (char *) temp_ptr;
+                }
+
+                return OOB_NAMEDCLASS;
+            }
         }
+
         /* If we find something that started out to look like one of these
          * constructs, but isn't, we continue below so that it can be checked
          * for being a class name with a typo of '.' or '=' instead of a colon.
