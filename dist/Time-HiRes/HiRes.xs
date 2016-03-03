@@ -975,7 +975,7 @@ nanosleep(nsec)
 	sleepfor.tv_nsec = (long)(nsec - ((NV)sleepfor.tv_sec) * NV_1E9);
 	unslept.tv_sec = 0;
 	unslept.tv_nsec = 0;
-	if (!nanosleep(&sleepfor, &unslept)) {
+	if (nanosleep(&sleepfor, &unslept) == 0) {
 	    RETVAL = nsec;
 	} else {
 	    sleepfor.tv_sec -= unslept.tv_sec;
@@ -1378,7 +1378,7 @@ clock_nanosleep(clock_id, nsec, flags = 0)
 	sleepfor.tv_nsec = (long)(nsec - ((NV)sleepfor.tv_sec) * NV_1E9);
 	unslept.tv_sec = 0;
 	unslept.tv_nsec = 0;
-	if (!clock_nanosleep(clock_id, flags, &sleepfor, &unslept)) {
+	if (clock_nanosleep(clock_id, flags, &sleepfor, &unslept) == 0) {
 	    RETVAL = nsec;
 	} else {
 	    sleepfor.tv_sec -= unslept.tv_sec;
