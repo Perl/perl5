@@ -745,6 +745,17 @@ to other platforms easier.  Use the C<Config> module and the special
 variable C<$^O> to differentiate platforms, as described in
 L<"PLATFORMS">.
 
+Beware of the "else syndrome":
+
+  if ($^O eq 'MSWin32') {
+    # code that assumes Windows
+  } else {
+    # code that assumes Linux
+  }
+
+The C<else> branch should be used for the really ultimate fallback,
+not for code specific to some platform.
+
 Be careful in the tests you supply with your module or programs.
 Module code may be fully portable, but its tests might not be.  This
 often happens when tests spawn off other processes or call external
