@@ -8982,9 +8982,9 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 
     if (a == NULL || ((len_a = _invlist_len(a)) == 0)) {
 
-        /* Here, 'a' is empty.  That means the union will come entirely from
-         * 'b'.  If the output is not to overwrite 'a', we can just return
-         * what's in 'b'.  */
+        /* Here, 'a' is empty (and b is not).  That means the union will come
+         * entirely from 'b'.  If the output is not to overwrite 'a', we can
+         * just return what's in 'b'.  */
         if (*output != a) {
 
             /* If the output is to overwrite 'b', it's already in 'b', but
@@ -9116,7 +9116,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
      *	4) the exhausted wasn't in its set, non-exhausted is, count is 1;
      *	   decrementing to 0 insures that we look at the remainder of the
      *	   non-exhausted set */
-    if ((i_a != len_a && PREV_RANGE_MATCHES_INVLIST(i_a))
+    if (   (i_a != len_a && PREV_RANGE_MATCHES_INVLIST(i_a))
 	|| (i_b != len_b && PREV_RANGE_MATCHES_INVLIST(i_b)))
     {
 	count--;
@@ -9132,8 +9132,9 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 	len_u += (len_a - i_a) + (len_b - i_b);
     }
 
-    /* Set result to final length, which can change the pointer to array_u, so
-     * re-find it */
+    /* Set the result to the final length, which can change the pointer to
+     * array_u, so re-find it.  (Note that it is unlikely that this will
+     * change, as we are shrinking the space, not enlarging it) */
     if (len_u != _invlist_len(u)) {
 	invlist_set_len(u, len_u, *get_invlist_offset_addr(u));
 	invlist_trim(u);
@@ -9156,6 +9157,8 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 	}
     }
 
+    /* If the output is not to overwrite either of the inputs, just return the
+     * calculated union */
     if (a != *output && b != *output) {
         *output = u;
     }
@@ -9361,7 +9364,7 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
      *	   everything that remains in the non-exhausted set.
      *	4) the exhausted wasn't in its set, non-exhausted is, count is 1, and
      *	   remains 1.  And the intersection has nothing more. */
-    if ((i_a == len_a && PREV_RANGE_MATCHES_INVLIST(i_a))
+    if (   (i_a == len_a && PREV_RANGE_MATCHES_INVLIST(i_a))
 	|| (i_b == len_b && PREV_RANGE_MATCHES_INVLIST(i_b)))
     {
 	count++;
@@ -9375,8 +9378,9 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 	len_r += (len_a - i_a) + (len_b - i_b);
     }
 
-    /* Set result to final length, which can change the pointer to array_r, so
-     * re-find it */
+    /* Set the result to the final length, which can change the pointer to
+     * array_r, so re-find it.  (Note that it is unlikely that this will
+     * change, as we are shrinking the space, not enlarging it) */
     if (len_r != _invlist_len(r)) {
 	invlist_set_len(r, len_r, *get_invlist_offset_addr(r));
 	invlist_trim(r);
@@ -9394,6 +9398,8 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 	}
     }
 
+    /* If the output is not to overwrite either of the inputs, just return the
+     * calculated intersection */
     if (a != *i && b != *i) {
         *i = r;
     }
