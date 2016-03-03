@@ -938,14 +938,14 @@ usleep(useconds)
 	CODE:
 	gettimeofday(&Ta, NULL);
 	if (items > 0) {
-	    if (useconds >= 1E6) {
-		IV seconds = (IV) (useconds / 1E6);
+	    if (useconds >= NV_1E6) {
+		IV seconds = (IV) (useconds / NV_1E6);
 		/* If usleep() has been implemented using setitimer()
 		 * then this contortion is unnecessary-- but usleep()
 		 * may be implemented in some other way, so let's contort. */
 		if (seconds) {
 		    sleep(seconds);
-		    useconds -= 1E6 * seconds;
+		    useconds -= NV_1E6 * seconds;
 		}
 	    } else if (useconds < 0.0)
 	        croak("Time::HiRes::usleep(%"NVgf"): negative time not invented yet", useconds);
@@ -956,7 +956,7 @@ usleep(useconds)
 #if 0
 	printf("[%ld %ld] [%ld %ld]\n", Tb.tv_sec, Tb.tv_usec, Ta.tv_sec, Ta.tv_usec);
 #endif
-	RETVAL = 1E6*(Tb.tv_sec-Ta.tv_sec)+(NV)((IV)Tb.tv_usec-(IV)Ta.tv_usec);
+	RETVAL = NV_1E6*(Tb.tv_sec-Ta.tv_sec)+(NV)((IV)Tb.tv_usec-(IV)Ta.tv_usec);
 
 	OUTPUT:
 	RETVAL
@@ -971,8 +971,8 @@ nanosleep(nsec)
 	CODE:
 	if (nsec < 0.0)
 	    croak("Time::HiRes::nanosleep(%"NVgf"): negative time not invented yet", nsec);
-	sleepfor.tv_sec = (Time_t)(nsec / 1e9);
-	sleepfor.tv_nsec = (long)(nsec - ((NV)sleepfor.tv_sec) * 1e9);
+	sleepfor.tv_sec = (Time_t)(nsec / NV_1E9);
+	sleepfor.tv_nsec = (long)(nsec - ((NV)sleepfor.tv_sec) * NV_1E9);
 	unslept.tv_sec = 0;
 	unslept.tv_nsec = 0;
 	if (!nanosleep(&sleepfor, &unslept)) {
@@ -982,9 +982,9 @@ nanosleep(nsec)
 	    sleepfor.tv_nsec -= unslept.tv_nsec;
 	    if (sleepfor.tv_nsec < 0) {
 		sleepfor.tv_sec--;
-		sleepfor.tv_nsec += 1000000000;
+		sleepfor.tv_nsec += IV_1E9;
 	    }
-	    RETVAL = ((NV)sleepfor.tv_sec) * 1e9 + ((NV)sleepfor.tv_nsec);
+	    RETVAL = ((NV)sleepfor.tv_sec) * NV_1E9 + ((NV)sleepfor.tv_nsec);
 	}
     OUTPUT:
 	RETVAL
@@ -1310,7 +1310,7 @@ clock_gettime(clock_id = CLOCK_REALTIME)
 #else
 	status = clock_gettime(clock_id, &ts);
 #endif
-	RETVAL = status == 0 ? ts.tv_sec + (NV) ts.tv_nsec / (NV) 1e9 : -1;
+	RETVAL = status == 0 ? ts.tv_sec + (NV) ts.tv_nsec / NV_1E9 : -1;
 
     OUTPUT:
 	RETVAL
@@ -1343,7 +1343,7 @@ clock_getres(clock_id = CLOCK_REALTIME)
 #else
 	status = clock_getres(clock_id, &ts);
 #endif
-	RETVAL = status == 0 ? ts.tv_sec + (NV) ts.tv_nsec / (NV) 1e9 : -1;
+	RETVAL = status == 0 ? ts.tv_sec + (NV) ts.tv_nsec / NV_1E9 : -1;
 
     OUTPUT:
 	RETVAL
@@ -1374,8 +1374,8 @@ clock_nanosleep(clock_id, nsec, flags = 0)
     CODE:
 	if (nsec < 0.0)
 	    croak("Time::HiRes::clock_nanosleep(..., %"NVgf"): negative time not invented yet", nsec);
-	sleepfor.tv_sec = (Time_t)(nsec / 1e9);
-	sleepfor.tv_nsec = (long)(nsec - ((NV)sleepfor.tv_sec) * 1e9);
+	sleepfor.tv_sec = (Time_t)(nsec / NV_1E9);
+	sleepfor.tv_nsec = (long)(nsec - ((NV)sleepfor.tv_sec) * NV_1E9);
 	unslept.tv_sec = 0;
 	unslept.tv_nsec = 0;
 	if (!clock_nanosleep(clock_id, flags, &sleepfor, &unslept)) {
@@ -1385,9 +1385,9 @@ clock_nanosleep(clock_id, nsec, flags = 0)
 	    sleepfor.tv_nsec -= unslept.tv_nsec;
 	    if (sleepfor.tv_nsec < 0) {
 		sleepfor.tv_sec--;
-		sleepfor.tv_nsec += 1000000000;
+		sleepfor.tv_nsec += IV_1E9;
 	    }
-	    RETVAL = ((NV)sleepfor.tv_sec) * 1e9 + ((NV)sleepfor.tv_nsec);
+	    RETVAL = ((NV)sleepfor.tv_sec) * NV_1E9 + ((NV)sleepfor.tv_nsec);
 	}
     OUTPUT:
 	RETVAL
@@ -1468,10 +1468,10 @@ PROTOTYPE: ;$
 	  UV ctime_nsec;
 	  hrstatns(&atime_nsec, &mtime_nsec, &ctime_nsec);
 	  if (atime_nsec)
-	    ST( 8) = sv_2mortal(newSVnv(atime + 1e-9 * (NV) atime_nsec));
+	    ST( 8) = sv_2mortal(newSVnv(atime + (NV) atime_nsec / NV_1E9));
 	  if (mtime_nsec)
-	    ST( 9) = sv_2mortal(newSVnv(mtime + 1e-9 * (NV) mtime_nsec));
+	    ST( 9) = sv_2mortal(newSVnv(mtime + (NV) mtime_nsec / NV_1E9));
 	  if (ctime_nsec)
-	    ST(10) = sv_2mortal(newSVnv(ctime + 1e-9 * (NV) ctime_nsec));
+	    ST(10) = sv_2mortal(newSVnv(ctime + (NV) ctime_nsec / NV_1E9));
 	}
 	XSRETURN(nret);
