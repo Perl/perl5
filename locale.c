@@ -190,13 +190,17 @@ Perl_new_numeric(pTHX_ const char *newnum)
     }
 
     save_newnum = stdize_locale(savepv(newnum));
+
+    PL_numeric_standard = isNAME_C_OR_POSIX(save_newnum);
+    PL_numeric_local = TRUE;
+
     if (! PL_numeric_name || strNE(PL_numeric_name, save_newnum)) {
 	Safefree(PL_numeric_name);
 	PL_numeric_name = save_newnum;
     }
-
-    PL_numeric_standard = isNAME_C_OR_POSIX(save_newnum);
-    PL_numeric_local = TRUE;
+    else {
+	Safefree(save_newnum);
+    }
 
     /* Keep LC_NUMERIC in the C locale.  This is for XS modules, so they don't
      * have to worry about the radix being a non-dot.  (Core operations that
