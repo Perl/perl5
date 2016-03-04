@@ -2184,6 +2184,7 @@ setlocale(category, locale = 0)
 
         /* Save retval since subsequent setlocale() calls may overwrite it. */
         retval = savepv(retval);
+        SAVEFREEPV(retval);
 
         /* For locale == 0, we may have switched to NUMERIC_UNDERLYING.  Switch
          * back */
@@ -2259,8 +2260,6 @@ setlocale(category, locale = 0)
 	}
     OUTPUT:
 	RETVAL
-    CLEANUP:
-        Safefree(RETVAL);
 
 NV
 acos(x)
