@@ -896,6 +896,23 @@ static int clock_nanosleep(int clock_id, int flags,
 
 #include "const-c.inc"
 
+#if (defined(TIME_HIRES_NANOSLEEP)) || \
+    (defined(TIME_HIRES_CLOCK_NANOSLEEP) && defined(TIMER_ABSTIME))
+
+static NV
+nsec_without_unslept(struct timespec *sleepfor,
+                     const struct timespec *unslept) {
+  sleepfor->tv_sec -= unslept->tv_sec;
+  sleepfor->tv_nsec -= unslept->tv_nsec;
+  if (sleepfor->tv_nsec < 0) {
+    sleepfor->tv_sec--;
+    sleepfor->tv_nsec += IV_1E9;
+  }
+  return ((NV)sleepfor->tv_sec) * NV_1E9 + ((NV)sleepfor->tv_nsec);
+}
+
+#endif
+
 MODULE = Time::HiRes            PACKAGE = Time::HiRes
 
 PROTOTYPES: ENABLE
@@ -978,13 +995,7 @@ nanosleep(nsec)
 	if (nanosleep(&sleepfor, &unslept) == 0) {
 	    RETVAL = nsec;
 	} else {
-	    sleepfor.tv_sec -= unslept.tv_sec;
-	    sleepfor.tv_nsec -= unslept.tv_nsec;
-	    if (sleepfor.tv_nsec < 0) {
-		sleepfor.tv_sec--;
-		sleepfor.tv_nsec += IV_1E9;
-	    }
-	    RETVAL = ((NV)sleepfor.tv_sec) * NV_1E9 + ((NV)sleepfor.tv_nsec);
+            RETVAL = nsec_without_unslept(&sleepfor, &unslept);
 	}
     OUTPUT:
 	RETVAL
@@ -1381,13 +1392,7 @@ clock_nanosleep(clock_id, nsec, flags = 0)
 	if (clock_nanosleep(clock_id, flags, &sleepfor, &unslept) == 0) {
 	    RETVAL = nsec;
 	} else {
-	    sleepfor.tv_sec -= unslept.tv_sec;
-	    sleepfor.tv_nsec -= unslept.tv_nsec;
-	    if (sleepfor.tv_nsec < 0) {
-		sleepfor.tv_sec--;
-		sleepfor.tv_nsec += IV_1E9;
-	    }
-	    RETVAL = ((NV)sleepfor.tv_sec) * NV_1E9 + ((NV)sleepfor.tv_nsec);
+            RETVAL = nsec_without_unslept(&sleepfor, &unslept);
 	}
     OUTPUT:
 	RETVAL
