@@ -899,6 +899,16 @@ static int clock_nanosleep(int clock_id, int flags,
 #if (defined(TIME_HIRES_NANOSLEEP)) || \
     (defined(TIME_HIRES_CLOCK_NANOSLEEP) && defined(TIMER_ABSTIME))
 
+static void
+nanosleep_init(NV nsec,
+                    struct timespec *sleepfor,
+                    struct timespec *unslept) {
+  sleepfor->tv_sec = (Time_t)(nsec / NV_1E9);
+  sleepfor->tv_nsec = (long)(nsec - ((NV)sleepfor->tv_sec) * NV_1E9);
+  unslept->tv_sec = 0;
+  unslept->tv_nsec = 0;
+}
+
 static NV
 nsec_without_unslept(struct timespec *sleepfor,
                      const struct timespec *unslept) {
@@ -998,10 +1008,7 @@ nanosleep(nsec)
 	CODE:
 	if (nsec < 0.0)
 	    croak("Time::HiRes::nanosleep(%"NVgf"): negative time not invented yet", nsec);
-	sleepfor.tv_sec = (Time_t)(nsec / NV_1E9);
-	sleepfor.tv_nsec = (long)(nsec - ((NV)sleepfor.tv_sec) * NV_1E9);
-	unslept.tv_sec = 0;
-	unslept.tv_nsec = 0;
+        nanosleep_init(nsec, &sleepfor, &unslept);
 	if (nanosleep(&sleepfor, &unslept) == 0) {
 	    RETVAL = nsec;
 	} else {
@@ -1395,10 +1402,7 @@ clock_nanosleep(clock_id, nsec, flags = 0)
     CODE:
 	if (nsec < 0.0)
 	    croak("Time::HiRes::clock_nanosleep(..., %"NVgf"): negative time not invented yet", nsec);
-	sleepfor.tv_sec = (Time_t)(nsec / NV_1E9);
-	sleepfor.tv_nsec = (long)(nsec - ((NV)sleepfor.tv_sec) * NV_1E9);
-	unslept.tv_sec = 0;
-	unslept.tv_nsec = 0;
+        nanosleep_init(nsec, &sleepfor, &unslept);
 	if (clock_nanosleep(clock_id, flags, &sleepfor, &unslept) == 0) {
 	    RETVAL = nsec;
 	} else {
