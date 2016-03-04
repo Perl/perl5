@@ -476,6 +476,47 @@ S_good_stack_size(pTHX_ IV stack_size)
     return (stack_size);
 }
 
+/* run some code within a JMPENV environment.
+ * Having it in a separate small function helps avoid
+ * 'variable ‘foo’ might be clobbered by ‘longjmp’
+ * warnings.
+ * The three _p vars return values to the caller
+ */
+
+static int
+S_jmpenv_run(pTHX_ int action, ithread *thread,
+             int *len_p, int *exit_app_p, int *exit_code_p)
+{
+    dJMPENV;
+    volatile I32 oldscope = PL_scopestack_ix;
+    int jmp_rc = 0;
+
+    JMPENV_PUSH(jmp_rc);
+    if (jmp_rc == 0) {
+        if (action == 0) {
+            /* Run the specified function */
+            *len_p = (int)call_sv(thread->init_function, thread->gimme|G_EVAL);
+        }
+        else if (action == 1) {
+            /* Warn that thread died */
+            Perl_warn(aTHX_ "Thread %" UVuf " terminated abnormally: %" SVf, thread->tid, ERRSV);
+        }
+        else {
+            /* Warn if there are unjoined threads */
+            S_exit_warning(aTHX);
+        }
+    } else if (jmp_rc == 2) {
+        /* Thread exited */
+        *exit_app_p = 1;
+        *exit_code_p = STATUS_CURRENT;
+        while (PL_scopestack_ix > oldscope) {
+            LEAVE;
+        }
+    }
+    JMPENV_POP;
+    return jmp_rc;
+}
+
 
 /* Starts executing the thread.
  * Passed as the C level function to run in the new thread.
@@ -489,13 +530,10 @@ S_ithread_run(void * arg)
 #endif
 {
     ithread *thread = (ithread *)arg;
-    int jmp_rc = 0;
-    volatile I32 oldscope;
-    volatile int exit_app = 0;   /* Thread terminated using 'exit' */
-    volatile int exit_code = 0;
-    volatile int died = 0;       /* Thread terminated abnormally */
+    int exit_app = 0;   /* Thread terminated using 'exit' */
+    int exit_code = 0;
+    int died = 0;       /* Thread terminated abnormally */
 
-    dJMPENV;
 
     dTHXa(thread->interp);
 
@@ -538,8 +576,9 @@ S_ithread_run(void * arg)
 
     {
         AV *params = thread->params;
-        volatile int len = (int)av_len(params)+1;
+        int len = (int)av_len(params)+1;
         int ii;
+        int jmp_rc;
 
         dSP;
         ENTER;
@@ -552,20 +591,7 @@ S_ithread_run(void * arg)
         }
         PUTBACK;
 
-        oldscope = PL_scopestack_ix;
-        JMPENV_PUSH(jmp_rc);
-        if (jmp_rc == 0) {
-            /* Run the specified function */
-            len = (int)call_sv(thread->init_function, thread->gimme|G_EVAL);
-        } else if (jmp_rc == 2) {
-            /* Thread exited */
-            exit_app = 1;
-            exit_code = STATUS_CURRENT;
-            while (PL_scopestack_ix > oldscope) {
-                LEAVE;
-            }
-        }
-        JMPENV_POP;
+        jmp_rc = S_jmpenv_run(aTHX_ 0, thread, &len, &exit_app, &exit_code);
 
 #ifdef THREAD_SIGNAL_BLOCKING
         /* The interpreter is finished, so this thread can stop receiving
@@ -600,20 +626,8 @@ S_ithread_run(void * arg)
             }
 
             if (ckWARN_d(WARN_THREADS)) {
-                oldscope = PL_scopestack_ix;
-                JMPENV_PUSH(jmp_rc);
-                if (jmp_rc == 0) {
-                    /* Warn that thread died */
-                    Perl_warn(aTHX_ "Thread %" UVuf " terminated abnormally: %" SVf, thread->tid, ERRSV);
-                } else if (jmp_rc == 2) {
-                    /* Warn handler exited */
-                    exit_app = 1;
-                    exit_code = STATUS_CURRENT;
-                    while (PL_scopestack_ix > oldscope) {
-                        LEAVE;
-                    }
-                }
-                JMPENV_POP;
+                (void)S_jmpenv_run(aTHX_ 1, thread, NULL,
+                                            &exit_app, &exit_code);
             }
         }
 
@@ -645,20 +659,7 @@ S_ithread_run(void * arg)
 
     /* Exit application if required */
     if (exit_app) {
-        oldscope = PL_scopestack_ix;
-        JMPENV_PUSH(jmp_rc);
-        if (jmp_rc == 0) {
-            /* Warn if there are unjoined threads */
-            S_exit_warning(aTHX);
-        } else if (jmp_rc == 2) {
-            /* Warn handler exited */
-            exit_code = STATUS_CURRENT;
-            while (PL_scopestack_ix > oldscope) {
-                LEAVE;
-            }
-        }
-        JMPENV_POP;
-
+        (void)S_jmpenv_run(aTHX_ 2, thread, NULL, &exit_app, &exit_code);
         my_exit(exit_code);
     }
 
