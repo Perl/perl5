@@ -73,3 +73,10 @@ qr/(?[[:digit: ])/
 EXPECT
 Assuming NOT a POSIX class since no blanks are allowed in one in regex; marked by <-- HERE in m/(?[[:digit: ] <-- HERE )/ at - line 2.
 syntax error in (?[...]) in regex m/(?[[:digit: ])/ at - line 2.
+########
+# NAME [perl #126141]
+# OPTION fatal
+eval {/$_/}, print "$_ ==> ", $@ || "OK!\n" for "]]]]]]]]][\\", "]]]]][\\"
+EXPECT
+]]]]]]]]][\ ==> Unmatched [ in regex; marked by <-- HERE in m/]]]]]]]]][\ <-- HERE / at - line 2.
+]]]]][\ ==> Unmatched [ in regex; marked by <-- HERE in m/]]]]][\ <-- HERE / at - line 2.
