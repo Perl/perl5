@@ -15885,6 +15885,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                      * discussed in commit
                      * 2f833f5208e26b208886e51e09e2c072b5eabb46 */
                     name = savepv(Perl_form(aTHX_ "%.*s", (int)n, RExC_parse));
+                    SAVEFREEPV(name);
                     if (FOLD) {
                         lookup_name = savepv(Perl_form(aTHX_ "__%s_i", name));
                     }
@@ -15950,7 +15951,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                   ? "Illegal user-defined property name"
                                   : "Can't find Unicode property definition";
                             RExC_parse = e + 1;
-                            SAVEFREEPV(name);
 
                             /* diag_listed_as: Can't find Unicode property definition "%s" */
                             vFAIL3utf8f("%s \"%"UTF8f"\"",
@@ -15968,8 +15968,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                                             pkgname,
                                                             name);
                                 n = strlen(full_name);
-                                Safefree(name);
                                 name = savepvn(full_name, n);
+                                SAVEFREEPV(name);
                             }
                         }
                         Perl_sv_catpvf(aTHX_ listsv, "%cutf8::%s%"UTF8f"%s\n",
@@ -16024,7 +16024,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                             _invlist_union(properties, invlist, &properties);
 			}
 		    }
-		    Safefree(name);
 		}
 		RExC_parse = e + 1;
                 namedclass = ANYOF_UNIPROP;  /* no official name, but it's
