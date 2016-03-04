@@ -13684,12 +13684,16 @@ Perl_rpeep(pTHX_ OP *o)
                  * SAVEt_CLEARPADRANGE in pp_padrange.
                  * (The sizeof() stuff will be constant-folded, and is
                  * intended to avoid getting "comparison is always false"
-                 * compiler warnings)
+                 * compiler warnings. See the comments above
+                 * MEM_WRAP_CHECK for more explanation on why we do this
+                 * in a weird way to avoid compiler warnings.)
                  */
                 if (   intro
                     && (8*sizeof(base) >
                         8*sizeof(UV)-OPpPADRANGE_COUNTSHIFT-SAVE_TIGHT_SHIFT
-                        ? base : 0) >
+                        ? base
+                        : (UV_MAX >> (OPpPADRANGE_COUNTSHIFT+SAVE_TIGHT_SHIFT))
+                        ) >
                         (UV_MAX >> (OPpPADRANGE_COUNTSHIFT+SAVE_TIGHT_SHIFT))
                 )
                     break;
