@@ -138,10 +138,25 @@ Return the CV from the GV.
 #define GvGPFLAGS(gv)	(GvGP(gv)->gp_flags)
 
 #define GvLINE(gv)	(GvGP(gv)->gp_line)
-#define GvFILE_HEK(gv)	(GvGP(gv)->gp_file_hek)
-#define GvFILEx(gv)	HEK_KEY(GvFILE_HEK(gv))
-#define GvFILE(gv)	(GvFILE_HEK(gv) ? GvFILEx(gv) : NULL)
-#define GvFILEGV(gv)	(GvFILE_HEK(gv) ? gv_fetchfile(GvFILEx(gv)) : NULL)
+#ifdef USE_ITHREADS
+/* On threads the HEK starts with "_<" then filename.
+   No threads, the HEK is just filename.
+   To prevent accidental mistakes of newSVhek(GvFILE_HEK(gv)) without thinking
+   about "_<" prefix and cleanly failing with old code, GvFILE_HEK isn't
+   available if the HEK is "_<" prefix, IE with threads.
+*/
+#  define GvFILE_HEK(gv)	Perl_GvFILE_HEK_not_available_with_threads(gv)
+#  define GvFILEx(gv)		((HEK_KEY(GvFILE_HEK2(gv)))+2)
+#  define GvFILELEN(gv)		((HEK_LEN(GvFILE_HEK2(gv)))-2)
+#  define GvFILEGV(gv)	(GvFILE_HEK2(gv) ? Perl_gv_fetchfile_hek(aTHX_ GvFILE_HEK2(gv)) : NULL)
+#else
+#  define GvFILE_HEK(gv)	GvFILE_HEK2(gv)
+#  define GvFILEx(gv)		HEK_KEY(GvFILE_HEK(gv))
+#  define GvFILELEN(gv)		HEK_LEN(GvFILE_HEK(gv))
+#  define GvFILEGV(gv)	(GvFILE_HEK2(gv) ? gv_fetchfile(GvFILEx(gv)) : NULL)
+#endif
+#define GvFILE_HEK2(gv)	(GvGP(gv)->gp_file_hek)
+#define GvFILE(gv)	(GvFILE_HEK2(gv) ? GvFILEx(gv) : NULL)
 
 #define GvEGV(gv)	(GvGP(gv)->gp_egv)
 #define GvEGVx(gv)	(isGV_with_GP(gv) ? GvEGV(gv) : NULL)

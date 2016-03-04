@@ -1888,6 +1888,25 @@ BmRARE(sv)
 
 MODULE = B	PACKAGE = B::GV		PREFIX = Gv
 
+#ifdef USE_ITHREADS
+
+void
+GvNAME(gv)
+	B::GV	gv
+    ALIAS:
+	B::HV::NAME = 1
+    CODE:
+	ST(0) = sv_2mortal(newSVhek(!ix ? GvNAME_HEK(gv)
+					: HvNAME_HEK((HV *)gv)));
+
+void
+GvFILE(gv)
+	B::GV	gv
+    CODE:
+	ST(0) = newSVpvn_flags(GvFILE(gv), GvFILELEN(gv), SVs_TEMP);
+
+#else
+
 void
 GvNAME(gv)
 	B::GV	gv
@@ -1898,6 +1917,8 @@ GvNAME(gv)
 	ST(0) = sv_2mortal(newSVhek(!ix ? GvNAME_HEK(gv)
 					: (ix == 1 ? GvFILE_HEK(gv)
 						   : HvNAME_HEK((HV *)gv))));
+
+#endif
 
 bool
 is_empty(gv)

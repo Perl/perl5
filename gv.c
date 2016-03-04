@@ -191,6 +191,7 @@ Perl_newGP(pTHX_ GV *const gv)
     U32 hash;
     const char *file;
     STRLEN len;
+    HEK * hek;
 #ifndef USE_ITHREADS
     GV *filegv;
 #endif
@@ -211,8 +212,11 @@ Perl_newGP(pTHX_ GV *const gv)
 	gp->gp_line = CopLINE(PL_curcop); /* 0 otherwise Newxz */
 #ifdef USE_ITHREADS
 	if (CopFILE(PL_curcop)) {
-	    file = CopFILE(PL_curcop);
-	    len = strlen(file);
+    /* this should be a macro since it will be used in Perl_newGP in the future */
+	    CHEK * chek = FNPV2CHEK(CopFILE(PL_curcop));
+	    chek_inc(chek);
+	    hek = &chek->chek_hek;
+	    goto have_hek;
 	}
 #else
 	filegv = CopFILEGV(PL_curcop);
@@ -230,7 +234,11 @@ Perl_newGP(pTHX_ GV *const gv)
     }
 
     PERL_HASH(hash, file, len);
-    gp->gp_file_hek = share_hek(file, len, hash);
+    hek = share_hek(file, len, hash);
+#ifdef USE_ITHREADS
+    have_hek:
+#endif
+    gp->gp_file_hek = hek;
     gp->gp_refcnt = 1;
 
     return gp;
