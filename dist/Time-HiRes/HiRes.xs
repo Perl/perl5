@@ -902,11 +902,21 @@ static int clock_nanosleep(int clock_id, int flags,
 static NV
 nsec_without_unslept(struct timespec *sleepfor,
                      const struct timespec *unslept) {
-  sleepfor->tv_sec -= unslept->tv_sec;
-  sleepfor->tv_nsec -= unslept->tv_nsec;
-  if (sleepfor->tv_nsec < 0) {
-    sleepfor->tv_sec--;
-    sleepfor->tv_nsec += IV_1E9;
+  if (sleepfor->tv_sec >= unslept->tv_sec) {
+    sleepfor->tv_sec -= unslept->tv_sec;
+    if (sleepfor->tv_nsec >= unslept->tv_nsec) {
+      sleepfor->tv_nsec -= unslept->tv_nsec;
+    } else if (sleepfor->tv_sec > 0) {
+      sleepfor->tv_sec--;
+      sleepfor->tv_nsec += IV_1E9;
+      sleepfor->tv_nsec -= unslept->tv_nsec;
+    } else {
+      sleepfor->tv_sec = 0;
+      sleepfor->tv_nsec = 0;
+    }
+  } else {
+    sleepfor->tv_sec = 0;
+    sleepfor->tv_nsec = 0;
   }
   return ((NV)sleepfor->tv_sec) * NV_1E9 + ((NV)sleepfor->tv_nsec);
 }
