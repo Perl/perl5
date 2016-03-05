@@ -168,7 +168,7 @@ struct RExC_state_t {
     I32		seen_zerolen;
     regnode	**open_parens;		/* pointers to open parens */
     regnode	**close_parens;		/* pointers to close parens */
-    regnode	*end_op;			/* END node in program */
+    regnode     *end_op;                /* END node in program */
     I32		utf8;		/* whether the pattern is utf8 or not */
     I32		orig_utf8;	/* whether the pattern was originally in utf8 */
 				/* XXX use this for future optimisation of case
@@ -179,7 +179,7 @@ struct RExC_state_t {
     HV		*paren_names;		/* Paren names */
 
     regnode	**recurse;		/* Recurse regops */
-    I32		recurse_count;		/* Number of recurse regops */
+    I32                recurse_count;                /* Number of recurse regops we have generated */
     U8          *study_chunk_recursed;  /* bitmap of which subs we have moved
                                            through */
     U32         study_chunk_recursed_bytes;  /* bytes in bitmap */
@@ -928,9 +928,6 @@ static const scan_data_t zero_scan_data =
                                                                             \
             if (RExC_seen & REG_UNFOLDED_MULTI_SEEN)                        \
                 PerlIO_printf(Perl_debug_log,"REG_UNFOLDED_MULTI_SEEN ");   \
-                                                                            \
-            if (RExC_seen & REG_GOSTART_SEEN)                               \
-                PerlIO_printf(Perl_debug_log,"REG_GOSTART_SEEN ");          \
                                                                             \
             if (RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN)                               \
                 PerlIO_printf(Perl_debug_log,"REG_UNBOUNDED_QUANTIFIER_SEEN ");          \
@@ -4656,29 +4653,24 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    } else			/* single branch is optimized. */
 		scan = NEXTOPER(scan);
 	    continue;
-	} else if (OP(scan) == SUSPEND || OP(scan) == GOSUB || OP(scan) == GOSTART) {
+        } else if (OP(scan) == SUSPEND || OP(scan) == GOSUB) {
             I32 paren = 0;
             regnode *start = NULL;
             regnode *end = NULL;
             U32 my_recursed_depth= recursed_depth;
 
-
-            if (OP(scan) != SUSPEND) { /* GOSUB/GOSTART */
+            if (OP(scan) != SUSPEND) { /* GOSUB */
                 /* Do setup, note this code has side effects beyond
                  * the rest of this block. Specifically setting
                  * RExC_recurse[] must happen at least once during
                  * study_chunk(). */
-	        if (OP(scan) == GOSUB) {
-	            paren = ARG(scan);
-	            RExC_recurse[ARG2L(scan)] = scan;
-                    start = RExC_open_parens[paren-1];
-                    end   = RExC_close_parens[paren-1];
-                } else {
-                    start = RExC_rxi->program + 1;
-                    end   = RExC_end_op;
-                }
+                paren = ARG(scan);
+                RExC_recurse[ARG2L(scan)] = scan;
+                start = RExC_open_parens[paren];
+                end   = RExC_close_parens[paren];
+
                 /* NOTE we MUST always execute the above code, even
-                 * if we do nothing with a GOSUB/GOSTART */
+                 * if we do nothing with a GOSUB */
                 if (
                     ( flags & SCF_IN_DEFINE )
                     ||
@@ -5074,8 +5066,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (OP(nxt) != CLOSE)
 			goto nogo;
 		    if (RExC_open_parens) {
-			RExC_open_parens[ARG(nxt1)-1]=oscan; /*open->CURLYM*/
-			RExC_close_parens[ARG(nxt1)-1]=nxt+2; /*close->while*/
+                        RExC_open_parens[ARG(nxt1)]=oscan; /*open->CURLYM*/
+                        RExC_close_parens[ARG(nxt1)]=nxt+2; /*close->while*/
 		    }
 		    /* Now we know that nxt2 is the only contents: */
 		    oscan->flags = (U8)ARG(nxt);
@@ -5121,8 +5113,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
 			oscan->flags = (U8)ARG(nxt);
 			if (RExC_open_parens) {
-			    RExC_open_parens[ARG(nxt1)-1]=oscan; /*open->CURLYM*/
-			    RExC_close_parens[ARG(nxt1)-1]=nxt2+1; /*close->NOTHING*/
+                            RExC_open_parens[ARG(nxt1)]=oscan; /*open->CURLYM*/
+                            RExC_close_parens[ARG(nxt1)]=nxt2+1; /*close->NOTHING*/
 			}
 			OP(nxt1) = OPTIMIZED;	/* was OPEN. */
 			OP(nxt) = OPTIMIZED;	/* was CLOSE. */
@@ -7162,24 +7154,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     r->intflags = 0;
     r->nparens = RExC_npar - 1;	/* set early to validate backrefs */
 
-    /* setup various meta data about recursion, this all requires
-     * RExC_npar to be correctly set, and a bit later on we clear it */
-    if (RExC_seen & REG_RECURSE_SEEN) {
-        Newxz(RExC_open_parens, RExC_npar,regnode *);
-        SAVEFREEPV(RExC_open_parens);
-        Newxz(RExC_close_parens,RExC_npar,regnode *);
-        SAVEFREEPV(RExC_close_parens);
-    }
-    if (RExC_seen & (REG_RECURSE_SEEN | REG_GOSTART_SEEN)) {
-        /* Note, RExC_npar is 1 + the number of parens in a pattern.
-         * So its 1 if there are no parens. */
-        RExC_study_chunk_recursed_bytes= (RExC_npar >> 3) +
-                                         ((RExC_npar & 0x07) != 0);
-        Newx(RExC_study_chunk_recursed,
-             RExC_study_chunk_recursed_bytes * RExC_npar, U8);
-        SAVEFREEPV(RExC_study_chunk_recursed);
-    }
-
     /* Useful during FAIL. */
 #ifdef RE_TRACK_PATTERN_OFFSETS
     Newxz(ri->u.offsets, 2*RExC_size+1, U32); /* MJD 20001228 */
@@ -7199,17 +7173,51 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_parse = exp;
     RExC_end = exp + plen;
     RExC_naughty = 0;
-    RExC_npar = 1;
     RExC_emit_start = ri->program;
     RExC_emit = ri->program;
     RExC_emit_bound = ri->program + RExC_size + 1;
     pRExC_state->code_index = 0;
 
     *((char*) RExC_emit++) = (char) REG_MAGIC;
+    /* setup various meta data about recursion, this all requires
+     * RExC_npar to be correctly set, and a bit later on we clear it */
+    if (RExC_seen & REG_RECURSE_SEEN) {
+        DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log,
+            "%*s%*s Setting up open/close parens\n",
+                  22, "|    |", (int)(0 * 2 + 1), ""));
+
+        /* setup RExC_open_parens, which holds the address of each
+         * OPEN tag, and to make things simpler for the 0 index
+         * the start of the program - this is used later for offsets */
+        Newxz(RExC_open_parens, RExC_npar,regnode *);
+        SAVEFREEPV(RExC_open_parens);
+        RExC_open_parens[0] = RExC_emit;
+
+        /* setup RExC_close_parens, which holds the address of each
+         * CLOSE tag, and to make things simpler for the 0 index
+         * the end of the program - this is used later for offsets */
+        Newxz(RExC_close_parens, RExC_npar,regnode *);
+        SAVEFREEPV(RExC_close_parens);
+        /* we dont know where end op starts yet, so we dont
+         * need to set RExC_close_parens[0] like we do RExC_open_parens[0] above */
+
+        /* Note, RExC_npar is 1 + the number of parens in a pattern.
+         * So its 1 if there are no parens. */
+        RExC_study_chunk_recursed_bytes= (RExC_npar >> 3) +
+                                         ((RExC_npar & 0x07) != 0);
+        Newx(RExC_study_chunk_recursed,
+             RExC_study_chunk_recursed_bytes * RExC_npar, U8);
+        SAVEFREEPV(RExC_study_chunk_recursed);
+    }
+    RExC_npar = 1;
     if (reg(pRExC_state, 0, &flags,1) == NULL) {
 	ReREFCNT_dec(rx);
         Perl_croak(aTHX_ "panic: reg returned NULL to re_op_compile for generation pass, flags=%#"UVxf"", (UV) flags);
     }
+    DEBUG_OPTIMISE_r(
+        PerlIO_printf(Perl_debug_log, "Starting post parse optimization\n");
+    );
+
     /* XXXX To minimize changes to RE engine we always allocate
        3-units-long substrs field. */
     Newx(r->substrs, 1, struct reg_substr_data);
@@ -7609,6 +7617,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     if (r->minlen < minlen)
         r->minlen = minlen;
 
+    if (RExC_seen & REG_RECURSE_SEEN )
+        r->intflags |= PREGf_RECURSE_SEEN;
     if (RExC_seen & REG_GPOS_SEEN)
         r->intflags |= PREGf_GPOS_SEEN;
     if (RExC_seen & REG_LOOKBEHIND_SEEN)
@@ -7682,14 +7692,13 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                                    = (void*)SvREFCNT_inc(RExC_paren_name_list);
     } else
 #endif
-        ri->name_list_idx = 0;
+    ri->name_list_idx = 0;
 
-    if (RExC_recurse_count) {
-        for ( ; RExC_recurse_count ; RExC_recurse_count-- ) {
-            const regnode *scan = RExC_recurse[RExC_recurse_count-1];
-            ARG2L_SET( scan, RExC_open_parens[ARG(scan)-1] - scan );
-        }
+    while ( RExC_recurse_count > 0 ) {
+        const regnode *scan = RExC_recurse[ --RExC_recurse_count ];
+        ARG2L_SET( scan, RExC_open_parens[ARG(scan)] - scan );
     }
+
     Newxz(r->offs, RExC_npar, regexp_paren_pair);
     /* assume we don't need to swap parens around before we match */
     DEBUG_TEST_r({
@@ -10605,13 +10614,12 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		break;
 	    case '0' :           /* (?0) */
 	    case 'R' :           /* (?R) */
-		if (*RExC_parse != ')')
+                if (RExC_parse == RExC_end || *RExC_parse != ')')
 		    FAIL("Sequence (?R) not terminated");
-		ret = reg_node(pRExC_state, GOSTART);
-                    RExC_seen |= REG_GOSTART_SEEN;
+                num = 0;
+                RExC_seen |= REG_RECURSE_SEEN;
 		*flagp |= POSTPONED;
-		nextchar(pRExC_state);
-		return ret;
+                goto gen_recurse_regop;
 		/*notreached*/
             /* named and numeric backreferences */
             case '&':            /* (?&NAME) */
@@ -10687,6 +10695,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 } else if ( paren == '+' ) {
                     num = RExC_npar + num - 1;
                 }
+                /* We keep track how many GOSUB items we have produced.
+                   To start off the ARG2L() of the GOSUB holds its "id",
+                   which is used later in conjunction with RExC_recurse
+                   to calculate the offset we need to jump for the GOSUB,
+                   which it will store in the final representation.
+                   We have to defer the actual calculation until much later
+                   as the regop may move.
+                 */
 
                 ret = reg2Lanode(pRExC_state, GOSUB, num, RExC_recurse_count);
                 if (!SIZE_ONLY) {
@@ -10701,10 +10717,12 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                               (UV)ARG(ret), (IV)ARG2L(ret)));
                 }
                 RExC_seen |= REG_RECURSE_SEEN;
+
                 Set_Node_Length(ret, 1 + regarglen[OP(ret)]); /* MJD */
 		Set_Node_Offset(ret, parse_start); /* MJD */
 
                 *flagp |= POSTPONED;
+                assert(*RExC_parse == ')');
                 nextchar(pRExC_state);
                 return ret;
 
@@ -10848,7 +10866,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		else if (RExC_parse[0] == 'R') {
 		    RExC_parse++;
                     /* parno == 0 => /(?(R)YES|NO)/  "in any form of recursion OR eval"
-                     * parno == 1 => /(?(R0)YES|NO)/ "in GOSTART (?0) / (?R)"
+                     * parno == 1 => /(?(R0)YES|NO)/ "in GOSUB (?0) / (?R)"
                      * parno == 2 => /(?(R1)YES|NO)/ "in GOSUB (?1) (parno-1)"
                      */
 		    parno = 0;
@@ -10881,7 +10899,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                          * will return something, and when SIZE_ONLY is
                          * true, reg_scan_name() just parses the string,
                          * and doesnt return anything. (in theory) */
-                        assert(SIZE_ONLY ? !sv_dat : sv_dat);
+                        assert(SIZE_ONLY ? !sv_dat : !!sv_dat);
 
                         if (sv_dat)
                             parno = 1 + *((I32 *)SvPVX(sv_dat));
@@ -11004,14 +11022,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    if (!SIZE_ONLY ){
 	        if (!RExC_nestroot)
 	            RExC_nestroot = parno;
-                if (RExC_seen & REG_RECURSE_SEEN
-	            && !RExC_open_parens[parno-1])
+                if (RExC_open_parens && !RExC_open_parens[parno])
 	        {
 		    DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log,
                         "%*s%*s Setting open paren #%"IVdf" to %d\n",
                         22, "|    |", (int)(depth * 2 + 1), "",
 			(IV)parno, REG_NODE_NUM(ret)));
-	            RExC_open_parens[parno-1]= ret;
+                    RExC_open_parens[parno]= ret;
 	        }
 	    }
             Set_Node_Length(ret, 1); /* MJD */
@@ -11100,11 +11117,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    break;
 	case 1: case 2:
 	    ender = reganode(pRExC_state, CLOSE, parno);
-            if (!SIZE_ONLY && RExC_seen & REG_RECURSE_SEEN) {
+            if ( RExC_close_parens ) {
 		DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log,
                         "%*s%*s Setting close paren #%"IVdf" to %d\n",
                         22, "|    |", (int)(depth * 2 + 1), "", (IV)parno, REG_NODE_NUM(ender)));
-	        RExC_close_parens[parno-1]= ender;
+                RExC_close_parens[parno]= ender;
 	        if (RExC_nestroot == parno)
 	            RExC_nestroot = 0;
 	    }
@@ -11125,6 +11142,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    if (!SIZE_ONLY) {
                 assert(!RExC_end_op); /* there can only be one! */
                 RExC_end_op = ender;
+                if (RExC_close_parens) {
+                    DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log,
+                        "%*s%*s Setting close paren #0 (END) to %d\n",
+                        22, "|    |", (int)(depth * 2 + 1), "", REG_NODE_NUM(ender)));
+
+                    RExC_close_parens[0]= ender;
+                }
             }
 	    break;
 	}
@@ -18182,7 +18206,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
     if (RExC_open_parens) {
         int paren;
         /*DEBUG_PARSE_FMT("inst"," - %"IVdf, (IV)RExC_npar);*/
-        for ( paren=0 ; paren < RExC_npar ; paren++ ) {
+        for ( paren=0 ; paren <= RExC_npar ; paren++ ) {
             if ( RExC_open_parens[paren] >= opnd ) {
                 /*DEBUG_PARSE_FMT("open"," - %d",size);*/
                 RExC_open_parens[paren] += size;
@@ -18197,6 +18221,8 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
             }
         }
     }
+    if (RExC_end_op)
+        RExC_end_op += size;
 
     while (src > opnd) {
 	StructCopy(--src, --dst, regnode);
@@ -18748,7 +18774,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         }
 
         /* Paren and offset */
-	Perl_sv_catpvf(aTHX_ sv, "%d[%+d]", (int)ARG(o),(int)ARG2L(o));
+        Perl_sv_catpvf(aTHX_ sv, "%d[%+d:%d]", (int)ARG(o),(int)ARG2L(o),
+                (int)((o + (int)ARG2L(o)) - progi->program) );
         if (name_list) {
             SV **name= av_fetch(name_list, ARG(o), 0 );
             if (name)

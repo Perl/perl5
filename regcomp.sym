@@ -190,7 +190,6 @@ AHOCORASICKC    TRIE,trie charclass   ; Same as AHOCORASICK, but with embedded c
 
 #*Regex Subroutines
 GOSUB       GOSUB,      num/ofs 2L    ; recurse to paren arg1 at (signed) ofs arg2
-GOSTART     GOSTART,    no        ; recurse to start of pattern
 
 #*Special conditionals
 NGROUPP     NGROUPP,    no-sv 1   ; Whether the group matched.            

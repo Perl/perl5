@@ -746,7 +746,6 @@ will be lost.
 
  # Regex Subroutines
  GOSUB           num/ofs 2L recurse to paren arg1 at (signed) ofs arg2
- GOSTART         no         recurse to start of pattern
 
  # Special conditionals
  NGROUPP         no-sv 1    Whether the group matched.

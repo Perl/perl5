@@ -6495,7 +6495,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             regexp_internal *rei;
             regnode *startpoint;
 
-	case GOSTART: /*  (?R)  */
 	case GOSUB: /*    /(...(?1))/   /(...(?&foo))/   */
 	    if (cur_eval && cur_eval->locinput==locinput) {
                 if ( EVAL_CLOSE_PAREN_IS( cur_eval, (U32)ARG(scan) ) )
@@ -6510,13 +6509,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    re_sv = rex_sv;
             re = rex;
             rei = rexi;
-            if ( OP(scan) == GOSUB ) {
-                startpoint = scan + ARG2L(scan);
-                ST.close_paren = 1 + ARG(scan);
-            } else {
-                startpoint = rei->program + 1;
-                ST.close_paren = 1;
-            }
+            startpoint = scan + ARG2L(scan);
+            EVAL_CLOSE_PAREN_SET( st, ARG(scan) ); /* ST.close_paren = 1 + ARG(scan) */
 
             /* Save all the positions seen so far. */
             ST.cp = regcppush(rex, 0, maxopenparen);
@@ -6775,7 +6769,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                     reginfo->strend, "Matching embedded");
 		);		
 		startpoint = rei->program + 1;
-               	ST.close_paren = 0; /* only used for GOSUB */
+                EVAL_CLOSE_PAREN_CLEAR(st); /* ST.close_paren = 0;
+                                             * close_paren only for GOSUB */
                 /* Save all the seen positions so far. */
                 ST.cp = regcppush(rex, 0, maxopenparen);
                 REGCP_SET(ST.lastcp);

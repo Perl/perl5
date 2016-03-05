@@ -6,8 +6,8 @@
 
 /* Regops and State definitions */
 
-#define REGNODE_MAX           	93
-#define REGMATCH_STATE_MAX    	133
+#define REGNODE_MAX           	92
+#define REGMATCH_STATE_MAX    	132
 
 #define	END                   	0	/* 0000 End of program. */
 #define	SUCCEED               	1	/* 0x01 Return from a subroutine, basically. */
@@ -88,23 +88,22 @@
 #define	AHOCORASICK           	74	/* 0x4a Aho Corasick stclass. flags==type */
 #define	AHOCORASICKC          	75	/* 0x4b Same as AHOCORASICK, but with embedded charclass data */
 #define	GOSUB                 	76	/* 0x4c recurse to paren arg1 at (signed) ofs arg2 */
-#define	GOSTART               	77	/* 0x4d recurse to start of pattern */
-#define	NGROUPP               	78	/* 0x4e Whether the group matched. */
-#define	INSUBP                	79	/* 0x4f Whether we are in a specific recurse. */
-#define	DEFINEP               	80	/* 0x50 Never execute directly. */
-#define	ENDLIKE               	81	/* 0x51 Used only for the type field of verbs */
-#define	OPFAIL                	82	/* 0x52 Same as (?!), but with verb arg */
-#define	ACCEPT                	83	/* 0x53 Accepts the current matched string, with verbar */
-#define	VERB                  	84	/* 0x54 Used only for the type field of verbs */
-#define	PRUNE                 	85	/* 0x55 Pattern fails at this startpoint if no-backtracking through this */
-#define	MARKPOINT             	86	/* 0x56 Push the current location for rollback by cut. */
-#define	SKIP                  	87	/* 0x57 On failure skip forward (to the mark) before retrying */
-#define	COMMIT                	88	/* 0x58 Pattern fails outright if backtracking through this */
-#define	CUTGROUP              	89	/* 0x59 On failure go to the next alternation in the group */
-#define	KEEPS                 	90	/* 0x5a $& begins here. */
-#define	LNBREAK               	91	/* 0x5b generic newline pattern */
-#define	OPTIMIZED             	92	/* 0x5c Placeholder for dump. */
-#define	PSEUDO                	93	/* 0x5d Pseudo opcode for internal use. */
+#define	NGROUPP               	77	/* 0x4d Whether the group matched. */
+#define	INSUBP                	78	/* 0x4e Whether we are in a specific recurse. */
+#define	DEFINEP               	79	/* 0x4f Never execute directly. */
+#define	ENDLIKE               	80	/* 0x50 Used only for the type field of verbs */
+#define	OPFAIL                	81	/* 0x51 Same as (?!), but with verb arg */
+#define	ACCEPT                	82	/* 0x52 Accepts the current matched string, with verbar */
+#define	VERB                  	83	/* 0x53 Used only for the type field of verbs */
+#define	PRUNE                 	84	/* 0x54 Pattern fails at this startpoint if no-backtracking through this */
+#define	MARKPOINT             	85	/* 0x55 Push the current location for rollback by cut. */
+#define	SKIP                  	86	/* 0x56 On failure skip forward (to the mark) before retrying */
+#define	COMMIT                	87	/* 0x57 Pattern fails outright if backtracking through this */
+#define	CUTGROUP              	88	/* 0x58 On failure go to the next alternation in the group */
+#define	KEEPS                 	89	/* 0x59 $& begins here. */
+#define	LNBREAK               	90	/* 0x5a generic newline pattern */
+#define	OPTIMIZED             	91	/* 0x5b Placeholder for dump. */
+#define	PSEUDO                	92	/* 0x5c Pseudo opcode for internal use. */
 	/* ------------ States ------------- */
 #define	TRIE_next             	(REGNODE_MAX + 1)	/* state for TRIE */
 #define	TRIE_next_fail        	(REGNODE_MAX + 2)	/* state for TRIE */
@@ -230,7 +229,6 @@ EXTCONST U8 PL_regkind[] = {
 	TRIE,     	/* AHOCORASICK            */
 	TRIE,     	/* AHOCORASICKC           */
 	GOSUB,    	/* GOSUB                  */
-	GOSTART,  	/* GOSTART                */
 	NGROUPP,  	/* NGROUPP                */
 	INSUBP,   	/* INSUBP                 */
 	DEFINEP,  	/* DEFINEP                */
@@ -373,7 +371,6 @@ static const U8 regarglen[] = {
 	EXTRA_SIZE(struct regnode_1),        	/* AHOCORASICK  */
 	EXTRA_SIZE(struct regnode_charclass),	/* AHOCORASICKC */
 	EXTRA_SIZE(struct regnode_2L),       	/* GOSUB        */
-	0,                                   	/* GOSTART      */
 	EXTRA_SIZE(struct regnode_1),        	/* NGROUPP      */
 	EXTRA_SIZE(struct regnode_1),        	/* INSUBP       */
 	EXTRA_SIZE(struct regnode_1),        	/* DEFINEP      */
@@ -472,7 +469,6 @@ static const char reg_off_by_arg[] = {
 	0,	/* AHOCORASICK  */
 	0,	/* AHOCORASICKC */
 	0,	/* GOSUB        */
-	0,	/* GOSTART      */
 	0,	/* NGROUPP      */
 	0,	/* INSUBP       */
 	0,	/* DEFINEP      */
@@ -577,23 +573,22 @@ EXTCONST char * const PL_reg_name[] = {
 	"AHOCORASICK",           	/* 0x4a */
 	"AHOCORASICKC",          	/* 0x4b */
 	"GOSUB",                 	/* 0x4c */
-	"GOSTART",               	/* 0x4d */
-	"NGROUPP",               	/* 0x4e */
-	"INSUBP",                	/* 0x4f */
-	"DEFINEP",               	/* 0x50 */
-	"ENDLIKE",               	/* 0x51 */
-	"OPFAIL",                	/* 0x52 */
-	"ACCEPT",                	/* 0x53 */
-	"VERB",                  	/* 0x54 */
-	"PRUNE",                 	/* 0x55 */
-	"MARKPOINT",             	/* 0x56 */
-	"SKIP",                  	/* 0x57 */
-	"COMMIT",                	/* 0x58 */
-	"CUTGROUP",              	/* 0x59 */
-	"KEEPS",                 	/* 0x5a */
-	"LNBREAK",               	/* 0x5b */
-	"OPTIMIZED",             	/* 0x5c */
-	"PSEUDO",                	/* 0x5d */
+	"NGROUPP",               	/* 0x4d */
+	"INSUBP",                	/* 0x4e */
+	"DEFINEP",               	/* 0x4f */
+	"ENDLIKE",               	/* 0x50 */
+	"OPFAIL",                	/* 0x51 */
+	"ACCEPT",                	/* 0x52 */
+	"VERB",                  	/* 0x53 */
+	"PRUNE",                 	/* 0x54 */
+	"MARKPOINT",             	/* 0x55 */
+	"SKIP",                  	/* 0x56 */
+	"COMMIT",                	/* 0x57 */
+	"CUTGROUP",              	/* 0x58 */
+	"KEEPS",                 	/* 0x59 */
+	"LNBREAK",               	/* 0x5a */
+	"OPTIMIZED",             	/* 0x5b */
+	"PSEUDO",                	/* 0x5c */
 	/* ------------ States ------------- */
 	"TRIE_next",             	/* REGNODE_MAX +0x01 */
 	"TRIE_next_fail",        	/* REGNODE_MAX +0x02 */
@@ -702,11 +697,12 @@ EXTCONST char * const PL_reg_intflags_name[] = {
 	"ANCH_MBOL",                  /* 0x00000400 - PREGf_ANCH_MBOL */
 	"ANCH_SBOL",                  /* 0x00000800 - PREGf_ANCH_SBOL */
 	"ANCH_GPOS",                  /* 0x00001000 - PREGf_ANCH_GPOS */
+	"RECURSE_SEEN",               /* 0x00002000 - PREGf_RECURSE_SEEN */
 };
 #endif /* DOINIT */
 
 #ifdef DEBUGGING
-#  define REG_INTFLAGS_NAME_SIZE 12
+#  define REG_INTFLAGS_NAME_SIZE 13
 #endif
 
 /* The following have no fixed length. U8 so we can do strchr() on it. */
