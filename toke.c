@@ -4818,9 +4818,22 @@ Perl_yylex(pTHX)
   retry:
     switch (*s) {
     default:
-	if (UTF ? isIDFIRST_utf8((U8*)s) : isALNUMC(*s))
+	if (UTF) {
+            if (! isUTF8_CHAR((U8 *) s, (U8 *) PL_bufend)) {
+                ENTER;
+                SAVESPTR(PL_warnhook);
+                PL_warnhook = PERL_WARNHOOK_FATAL;
+                utf8n_to_uvchr((U8*)s, PL_bufend-s, NULL, 0);
+                LEAVE;
+            }
+            if (isIDFIRST_utf8((U8*)s)) {
+                goto keylookup;
+            }
+        }
+        else if (isALNUMC(*s)) {
 	    goto keylookup;
-	{
+	}
+    {
         SV *dsv = newSVpvs_flags("", SVs_TEMP);
         const char *c = UTF ? sv_uni_display(dsv, newSVpvn_flags(s,
                                                     UTF8SKIP(s),

@@ -757,3 +757,8 @@ Use of code point 0x80+ is deprecated; the permissible max is 0x7F+ at - line \d
 Operation "uc" returns its argument for non-Unicode code point 0x80+ at - line \d+.
 Code point 0x7F+ is not Unicode, may not be portable in print at - line \d+.
 Use of code point 0x80+ is deprecated; the permissible max is 0x7F+ in print at - line \d+.
+########
+# NAME  [perl #127262]
+BEGIN{{};$^H=2**400}Â
+EXPECT
+Malformed UTF-8 character (unexpected non-continuation byte 0x0a, immediately after start byte 0xc2) at - line 1.
