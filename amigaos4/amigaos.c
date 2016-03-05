@@ -161,7 +161,7 @@ char *mystrdup(const char *s)
 	return result;
 }
 
-static int pipenum = 0;
+static unsigned int pipenum = 0;
 
 int pipe(int filedes[2])
 {
@@ -317,11 +317,11 @@ int myexecvp(bool isperlthread, const char *filename, char *argv[])
 	/* if there's a slash or a colon consider filename a path and skip
 	 * search */
 	int res;
+	char *name = NULL;
+	char *pathpart = NULL;
 	if ((strchr(filename, '/') == NULL) && (strchr(filename, ':') == NULL))
 	{
 		const char *path;
-		char *name;
-		char *pathpart;
 		const char *p;
 		size_t len;
 		struct stat st;
@@ -332,8 +332,8 @@ int myexecvp(bool isperlthread, const char *filename, char *argv[])
 		}
 
 		len = strlen(filename) + 1;
-		name = (char *)alloca(strlen(path) + len);
-		pathpart = (char *)alloca(strlen(path) + 1);
+		name = (char *)IExec->AllocVecTags(strlen(path) + len, AVT_ClearWithValue,0,AVT_Type,MEMF_SHARED,TAG_DONE);
+		pathpart = (char *)IExec->AllocVecTags(strlen(path) + 1, AVT_ClearWithValue,0,AVT_Type,MEMF_SHARED,TAG_DONE);
 		p = path;
 		do
 		{
@@ -364,7 +364,19 @@ int myexecvp(bool isperlthread, const char *filename, char *argv[])
 		}
 		while (*p++ != '\0');
 	}
+
 	res = myexecve(isperlthread, filename, argv, myenviron);
+
+	if(name)
+	{
+		IExec->FreeVec((APTR)name);
+		name = NULL;
+	}
+	if(pathpart)
+	{
+		IExec->FreeVec((APTR)pathpart);
+		pathpart = NULL;
+	}
 	return res;
 }
 
@@ -532,6 +544,7 @@ int popen_child()
 	return 0;
 }
 
+
 FILE *amigaos_popen(const char *cmd, const char *mode)
 {
 	FILE *result = NULL;
@@ -572,29 +585,42 @@ FILE *amigaos_popen(const char *cmd, const char *mode)
 	sprintf(unix_pipe, "/PIPE/%s", pipe_name);
 	sprintf(ami_pipe, "PIPE:%s", pipe_name);
 
-	/* Now we open the AmigaOs Filehandles That we wil pass to our
-	 * Sub process
+	/* Now we open the AmigaOs filehandles that we will pass to our
+	 * subprocess
 	 */
 
 	if (mode[0] == 'r')
 	{
-		/* A read mode pipe: Output from pipe input from NIL:*/
-		input = IDOS->Open("NIL:", MODE_NEWFILE);
+		/* A read mode pipe: Output from pipe input from Output() or NIL:*/
+		/* First attempt to DUP Output() */
+		input = IDOS->DupFileHandle(IDOS->Output());
+		if(input == 0)
+		{
+			input = IDOS->Open("NIL:", MODE_READWRITE);
+		}
 		if (input != 0)
 		{
 			output = IDOS->Open(ami_pipe, MODE_NEWFILE);
 		}
+		result = fopen(unix_pipe, mode);
 	}
 	else
 	{
+		/* Open the write end first! */
 
-		input = IDOS->Open(ami_pipe, MODE_NEWFILE);
+		result = fopen(unix_pipe, mode);
+
+		input = IDOS->Open(ami_pipe, MODE_OLDFILE);
 		if (input != 0)
 		{
-			output = IDOS->Open("NIL:", MODE_NEWFILE);
+			output = IDOS->DupFileHandle(IDOS->Input());
+			if(output == 0)
+			{
+				output = IDOS->Open("NIL:", MODE_READWRITE);
+			}
 		}
 	}
-	if ((input == 0) || (output == 0))
+	if ((input == 0) || (output == 0) || (result == NULL))
 	{
 		/* Ouch stream opening failed */
 		/* Close and bail */
@@ -602,6 +628,11 @@ FILE *amigaos_popen(const char *cmd, const char *mode)
 			IDOS->Close(input);
 		if (output)
 			IDOS->Close(output);
+		if(result)
+		{
+			fclose(result);
+			result = NULL;
+		}
 		return result;
 	}
 
@@ -635,16 +666,21 @@ FILE *amigaos_popen(const char *cmd, const char *mode)
 			IDOS->Close(output);
 		if (cmd_copy)
 			IExec->FreeVec(cmd_copy);
+		if(result)
+		{
+			fclose(result);
+			result = NULL;
+		}
 	}
 
 	/* Our new process is running and will close it streams etc
 	 * once its done. All we need to is open the pipe via stdio
 	 */
 
-	return fopen(unix_pipe, mode);
+	return result;
 }
 
-/* Work arround for clib2 fstat */
+/* Workaround for clib2 fstat */
 #ifndef S_IFCHR
 #define S_IFCHR 0x0020000
 #endif
