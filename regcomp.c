@@ -168,7 +168,7 @@ struct RExC_state_t {
     I32		seen_zerolen;
     regnode	**open_parens;		/* pointers to open parens */
     regnode	**close_parens;		/* pointers to close parens */
-    regnode	*opend;			/* END node in program */
+    regnode	*end_op;			/* END node in program */
     I32		utf8;		/* whether the pattern is utf8 or not */
     I32		orig_utf8;	/* whether the pattern was originally in utf8 */
 				/* XXX use this for future optimisation of case
@@ -269,7 +269,7 @@ struct RExC_state_t {
 #define RExC_orig_utf8	(pRExC_state->orig_utf8)
 #define RExC_open_parens	(pRExC_state->open_parens)
 #define RExC_close_parens	(pRExC_state->close_parens)
-#define RExC_opend	(pRExC_state->opend)
+#define RExC_end_op	(pRExC_state->end_op)
 #define RExC_paren_names	(pRExC_state->paren_names)
 #define RExC_recurse	(pRExC_state->recurse)
 #define RExC_recurse_count	(pRExC_state->recurse_count)
@@ -4675,7 +4675,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     end   = RExC_close_parens[paren-1];
                 } else {
                     start = RExC_rxi->program + 1;
-                    end   = RExC_opend;
+                    end   = RExC_end_op;
                 }
                 /* NOTE we MUST always execute the above code, even
                  * if we do nothing with a GOSUB/GOSTART */
@@ -6964,7 +6964,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_whilem_seen = 0;
     RExC_open_parens = NULL;
     RExC_close_parens = NULL;
-    RExC_opend = NULL;
+    RExC_end_op = NULL;
     RExC_paren_names = NULL;
 #ifdef DEBUGGING
     RExC_paren_name_list = NULL;
@@ -11123,8 +11123,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	case 0:
 	    ender = reg_node(pRExC_state, END);
 	    if (!SIZE_ONLY) {
-                assert(!RExC_opend); /* there can only be one! */
-                RExC_opend = ender;
+                assert(!RExC_end_op); /* there can only be one! */
+                RExC_end_op = ender;
             }
 	    break;
 	}
