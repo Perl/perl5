@@ -10847,13 +10847,21 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		}
 		else if (RExC_parse[0] == 'R') {
 		    RExC_parse++;
+                    /* parno == 0 => /(?(R)YES|NO)/  "in any form of recursion OR eval"
+                     * parno == 1 => /(?(R0)YES|NO)/ "in GOSTART (?0) / (?R)"
+                     * parno == 2 => /(?(R1)YES|NO)/ "in GOSUB (?1) (parno-1)"
+                     */
 		    parno = 0;
-		    if (RExC_parse[0] >= '1' && RExC_parse[0] <= '9' ) {
+                    if (RExC_parse[0] == '0') {
+                        parno = 1;
+                        RExC_parse++;
+                    }
+                    else if (RExC_parse[0] >= '1' && RExC_parse[0] <= '9' ) {
                         UV uv;
                         if (grok_atoUV(RExC_parse, &uv, &endptr)
                             && uv <= I32_MAX
                         ) {
-                            parno = (I32)uv;
+                            parno = (I32)uv + 1;
                             RExC_parse = (char*)endptr;
                         }
                         /* else "Switch condition not recognized" below */
@@ -10864,7 +10872,19 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                             SIZE_ONLY
                             ? REG_RSN_RETURN_NULL
                             : REG_RSN_RETURN_DATA);
-    		        parno = sv_dat ? *((I32 *)SvPVX(sv_dat)) : 0;
+
+                        /* we should only have a false sv_dat when
+                         * SIZE_ONLY is true, and we always have false
+                         * sv_dat when SIZE_ONLY is true.
+                         * reg_scan_name() will VFAIL() if the name is
+                         * unknown when SIZE_ONLY is false, and otherwise
+                         * will return something, and when SIZE_ONLY is
+                         * true, reg_scan_name() just parses the string,
+                         * and doesnt return anything. (in theory) */
+                        assert(SIZE_ONLY ? !sv_dat : sv_dat);
+
+                        if (sv_dat)
+                            parno = 1 + *((I32 *)SvPVX(sv_dat));
 		    }
 		    ret = reganode(pRExC_state,INSUBP,parno);
 		    goto insert_if_check_paren;

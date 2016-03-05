@@ -213,7 +213,8 @@ static const char* const non_utf8_target_but_utf8_required
 */
 #define JUMPABLE(rn) (                                                             \
     OP(rn) == OPEN ||                                                              \
-    (OP(rn) == CLOSE && (!cur_eval || cur_eval->u.eval.close_paren != ARG(rn))) || \
+    (OP(rn) == CLOSE &&                                                            \
+     !EVAL_CLOSE_PAREN_IS(cur_eval,ARG(rn)) ) ||                                   \
     OP(rn) == EVAL ||                                                              \
     OP(rn) == SUSPEND || OP(rn) == IFMATCH ||                                      \
     OP(rn) == PLUS || OP(rn) == MINMOD ||                                          \
@@ -6497,7 +6498,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	case GOSTART: /*  (?R)  */
 	case GOSUB: /*    /(...(?1))/   /(...(?&foo))/   */
 	    if (cur_eval && cur_eval->locinput==locinput) {
-                if (cur_eval->u.eval.close_paren == (U32)ARG(scan)) 
+                if ( EVAL_CLOSE_PAREN_IS( cur_eval, (U32)ARG(scan) ) )
                     Perl_croak(aTHX_ "Infinite recursion in regex");
                 if ( ++nochange_depth > max_nochange_depth )
                     Perl_croak(aTHX_ 
@@ -6509,12 +6510,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    re_sv = rex_sv;
             re = rex;
             rei = rexi;
-            if (OP(scan)==GOSUB) {
+            if ( OP(scan) == GOSUB ) {
                 startpoint = scan + ARG2L(scan);
-                ST.close_paren = ARG(scan);
+                ST.close_paren = 1 + ARG(scan);
             } else {
-                startpoint = rei->program+1;
-                ST.close_paren = 0;
+                startpoint = rei->program + 1;
+                ST.close_paren = 1;
             }
 
             /* Save all the positions seen so far. */
@@ -6893,9 +6894,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    if (n > rex->lastparen)
 		rex->lastparen = n;
 	    rex->lastcloseparen = n;
-            if (cur_eval && cur_eval->u.eval.close_paren == n) {
+            if ( EVAL_CLOSE_PAREN_IS( cur_eval, n ) )
 	        goto fake_end;
-	    }    
+
 	    break;
 
         case ACCEPT:  /*  (*ACCEPT)  */
@@ -6914,8 +6915,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                             if (n > rex->lastparen)
                                 rex->lastparen = n;
                             rex->lastcloseparen = n;
-                            if ( n == ARG(scan) || (cur_eval &&
-                                cur_eval->u.eval.close_paren == n))
+                            if ( n == ARG(scan) || EVAL_CLOSE_PAREN_IS(cur_eval, n) )
                                 break;
                         }
                     }
@@ -6936,7 +6936,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case INSUBP:   /*  (?(R))  */
             n = ARG(scan);
-            sw = (cur_eval && (!n || cur_eval->u.eval.close_paren == n));
+            sw = cur_eval && (n == 0 || cur_eval->u.eval.close_paren == n);
             break;
 
         case DEFINEP:  /*  (?(DEFINE))  */
@@ -7468,8 +7468,7 @@ NULL
 			  (IV) ST.count, (IV)ST.alen)
 	    );
 
-	    if (cur_eval && cur_eval->u.eval.close_paren && 
-	        cur_eval->u.eval.close_paren == (U32)ST.me->flags) 
+            if (EVAL_CLOSE_PAREN_IS(cur_eval,(U32)ST.me->flags))
 	        goto fake_end;
 	        
 	    {
@@ -7482,9 +7481,9 @@ NULL
 	case CURLYM_A_fail: /* just failed to match an A */
 	    REGCP_UNWIND(ST.cp);
 
+
 	    if (ST.minmod || ST.count < ARG1(ST.me) /* min*/ 
-	        || (cur_eval && cur_eval->u.eval.close_paren &&
-	            cur_eval->u.eval.close_paren == (U32)ST.me->flags))
+                || EVAL_CLOSE_PAREN_IS(cur_eval,(U32)ST.me->flags))
 		sayNO;
 
 	  curlym_do_B: /* execute the B in /A{m,n}B/  */
@@ -7567,8 +7566,8 @@ NULL
 		}
 		else
 		    rex->offs[paren].end = -1;
-		if (cur_eval && cur_eval->u.eval.close_paren &&
-		    cur_eval->u.eval.close_paren == (U32)ST.me->flags) 
+
+                if (EVAL_CLOSE_PAREN_IS(cur_eval,(U32)ST.me->flags))
 		{
 		    if (ST.count) 
 	                goto fake_end;
@@ -7637,8 +7636,8 @@ NULL
 		maxopenparen = ST.paren;
 	    ST.min = ARG1(scan);  /* min to match */
 	    ST.max = ARG2(scan);  /* max to match */
-	    if (cur_eval && cur_eval->u.eval.close_paren &&
-	        cur_eval->u.eval.close_paren == (U32)ST.paren) {
+            if (EVAL_CLOSE_PAREN_IS(cur_eval,(U32)ST.paren))
+            {
 	        ST.min=1;
 	        ST.max=1;
 	    }
@@ -7825,10 +7824,8 @@ NULL
                     assert(n == REG_INFTY || locinput == li);
 		}
 		CURLY_SETPAREN(ST.paren, ST.count);
-		if (cur_eval && cur_eval->u.eval.close_paren && 
-		    cur_eval->u.eval.close_paren == (U32)ST.paren) {
+                if (EVAL_CLOSE_PAREN_IS(cur_eval,(U32)ST.paren))
 		    goto fake_end;
-	        }
 		PUSH_STATE_GOTO(CURLY_B_min_known, ST.B, locinput);
 	    }
 	    NOT_REACHED; /* NOTREACHED */
@@ -7855,10 +7852,8 @@ NULL
 		{
 		  curly_try_B_min:
 		    CURLY_SETPAREN(ST.paren, ST.count);
-		    if (cur_eval && cur_eval->u.eval.close_paren &&
-		        cur_eval->u.eval.close_paren == (U32)ST.paren) {
+                    if (EVAL_CLOSE_PAREN_IS(cur_eval,(U32)ST.paren))
                         goto fake_end;
-                    }
 		    PUSH_STATE_GOTO(CURLY_B_min, ST.B, locinput);
 		}
 	    }
@@ -7867,10 +7862,8 @@ NULL
 
           curly_try_B_max:
 	    /* a successful greedy match: now try to match B */
-            if (cur_eval && cur_eval->u.eval.close_paren &&
-                cur_eval->u.eval.close_paren == (U32)ST.paren) {
+            if (EVAL_CLOSE_PAREN_IS(cur_eval,(U32)ST.paren))
                 goto fake_end;
-            }
 	    {
 		bool could_match = locinput < reginfo->strend;
 

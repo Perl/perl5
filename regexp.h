@@ -747,7 +747,7 @@ typedef struct regmatch_state {
 	    REGEXP	*prev_rex;
 	    CHECKPOINT	cp;	/* remember current savestack indexes */
 	    CHECKPOINT	lastcp;
-	    U32        close_paren; /* which close bracket is our end */
+            U32         close_paren; /* which close bracket is our end (+1) */
 	    regnode	*B;	/* the node following us  */
 	} eval;
 
@@ -832,6 +832,13 @@ typedef struct regmatch_state {
 
     } u;
 } regmatch_state;
+
+#define EVAL_CLOSE_PAREN_IS(cur_eval,expr) \
+(\
+    ( ( cur_eval )                                         ) && \
+    ( ( cur_eval )->u.eval.close_paren                     ) && \
+    ( ( ( cur_eval )->u.eval.close_paren - 1 ) == ( expr ) ) \
+)
 
 /* how many regmatch_state structs to allocate as a single slab.
  * We do it in 4K blocks for efficiency. The "3" is 2 for the next/prev
