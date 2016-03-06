@@ -14,7 +14,8 @@ Portions of this document that are still incomplete are marked with XXX.
 Early Perl versions worked on some EBCDIC machines, but the last known
 version that ran on EBCDIC was v5.8.7, until v5.22, when the Perl core
 again works on z/OS.  Theoretically, it could work on OS/400 or Siemens'
-BS2000  (or their successors), but this is untested.  In v5.22, not all
+BS2000  (or their successors), but this is untested.  In v5.22 and 5.24,
+not all
 the modules found on CPAN but shipped with core Perl work on z/OS.
 
 If you want to use Perl on a non-z/OS EBCDIC machine, please let us know
@@ -40,7 +41,7 @@ But if you write code that uses C<\005> to mean a TAB or C<\xC1> to mean
 an "A", or C<\xDF> to mean a "E<yuml>" (small C<"y"> with a diaeresis),
 then your code may well work on your EBCDIC platform, but not on an
 ASCII one.  That's fine to do if no one will ever want to run your code
-on an ASCII platform; but the bias in this document will be in writing
+on an ASCII platform; but the bias in this document will be towards writing
 code portable between EBCDIC and ASCII systems.  Again, if every
 character you care about is easily enterable from your keyboard, you
 don't have to know anything about ASCII, but many keyboards don't easily
@@ -52,7 +53,7 @@ you can instead specify it as C<"\N{U+FF}">, and have the computer
 automatically translate it to C<\xDF> on your platform, and leave it as
 C<\xFF> on ASCII ones.  Or you could specify it by name, C<\N{LATIN
 SMALL LETTER Y WITH DIAERESIS> and not have to know the  numbers.
-Either way works, but require familiarity with Unicode.
+Either way works, but both require familiarity with Unicode.
 
 =head1 COMMON CHARACTER CODE SETS
 
@@ -63,7 +64,7 @@ US-ASCII) is a set of
 integers running from 0 to 127 (decimal) that have standardized
 interpretations by the computers which use ASCII.  For example, 65 means
 the letter "A".
-The range 0..127 can be covered by setting the bits in a 7-bit binary
+The range 0..127 can be covered by setting various bits in a 7-bit binary
 digit, hence the set is sometimes referred to as "7-bit ASCII".
 ASCII was described by the American National Standards Institute
 document ANSI X3.4-1986.  It was also described by ISO 646:1991
@@ -1839,22 +1840,6 @@ XXX.
 
 =item *
 
-The C<cmp> (and hence C<sort>) operators do not necessarily give the
-correct results when both operands are UTF-EBCDIC encoded strings and
-there is a mixture of ASCII and/or control characters, along with other
-characters.
-
-=item *
-
-Ranges containing C<\N{...}> in the C<tr///> (and C<y///>)
-transliteration operators are treated differently than the equivalent
-ranges in regular expression patterns.  They should, but don't, cause
-the values in the ranges to all be treated as Unicode code points, and
-not native ones.  (L<perlre/Version 8 Regular Expressions> gives
-details as to how it should work.)
-
-=item *
-
 Not all shells will allow multiple C<-e> string arguments to perl to
 be concatenated together properly as recipes in this document
 0, 2, 4, 5, and 6 might
@@ -1862,28 +1847,23 @@ seem to imply.
 
 =item *
 
-There are some bugs in the C<pack>/C<unpack> C<"U0"> template
-
-=item *
-
 There are a significant number of test failures in the CPAN modules
-shipped with Perl v5.22.  These are only in modules not primarily
+shipped with Perl v5.22 and 5.24.  These are only in modules not primarily
 maintained by Perl 5 porters.  Some of these are failures in the tests
 only: they don't realize that it is proper to get different results on
 EBCDIC platforms.  And some of the failures are real bugs.  If you
 compile and do a C<make test> on Perl, all tests on the C</cpan>
 directory are skipped.
 
-In particular, the extensions L<Unicode::Collate> and
-L<Unicode::Normalize> are not supported under EBCDIC; likewise for the
-(now deprecated) L<encoding> pragma.
+In particular, the (now deprecated) L<encoding> pragma is not supported
+under EBCDIC.
 
 L<Encode> partially works.
 
 =item *
 
-In earlier versions, when byte and character data were concatenated,
-the new string was sometimes created by
+In earlier Perl versions, when byte and character data were
+concatenated, the new string was sometimes created by
 decoding the byte strings as I<ISO 8859-1 (Latin-1)>, even if the
 old Unicode string used EBCDIC.
 
