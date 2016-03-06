@@ -87,7 +87,7 @@ BEGIN {
     }
 }
 
-our $VERSION = '1.38';
+our $VERSION = '1.39';
 $VERSION =~ tr/_//d;
 
 our $MaxEvalLen = 0;
@@ -445,7 +445,9 @@ sub long_error_loc {
 }
 
 sub longmess_heavy {
-    return @_ if ref( $_[0] );    # don't break references as exceptions
+    if ( ref( $_[0] ) ) {   # don't break references as exceptions
+        return wantarray ? @_ : $_[0];
+    }
     my $i = long_error_loc();
     return ret_backtrace( $i, @_ );
 }

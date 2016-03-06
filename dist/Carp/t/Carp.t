@@ -3,7 +3,7 @@ no warnings "once";
 use Config;
 
 use IPC::Open3 1.0103 qw(open3);
-use Test::More tests => 65;
+use Test::More tests => 66;
 
 sub runperl {
     my(%args) = @_;
@@ -37,6 +37,24 @@ BEGIN {
     "foo at $0 line $line.\n",
     "we don't overshoot the top stack frame",
   );
+}
+
+package MyClass;
+
+sub new { return bless +{ field => ['value1', 'SecondVal'] }; }
+
+package main;
+
+{
+    my $err = Carp::longmess(MyClass->new);
+
+    # See:
+    # https://rt.cpan.org/Public/Bug/Display.html?id=107225
+    is_deeply(
+        $err->{field},
+        ['value1', 'SecondVal',],
+        "longmess returns sth meaningful in scalar context when passed a ref.",
+    );
 }
 
 {
