@@ -1,4 +1,8 @@
 
+version 1.39; 2016-03-06
+  * bugfix: longmess() should return the error in scalar context
+  (CPANRT#107225)
+
 version 1.38; 2015-11-06
   * stable release of changes since v1.36
 
