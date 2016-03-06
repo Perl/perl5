@@ -4188,8 +4188,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                             U8 noper_trietype = TRIE_TYPE( noper_type );
 #if defined(DEBUGGING) || defined(NOJUMPTRIE)
                             regnode * const noper_next = regnext( noper );
-			    U8 noper_next_type = (noper_next && noper_next != tail) ? OP(noper_next) : 0;
-			    U8 noper_next_trietype = (noper_next && noper_next != tail) ? TRIE_TYPE( noper_next_type ) :0;
+                            U8 noper_next_type = (noper_next && noper_next < tail) ? OP(noper_next) : 0;
+                            U8 noper_next_trietype = (noper_next && noper_next < tail) ? TRIE_TYPE( noper_next_type ) :0;
 #endif
 
                             DEBUG_TRIE_COMPILE_r({
@@ -4217,7 +4217,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                             if ( noper_trietype
                                   &&
                                   (
-                                        ( noper_trietype == NOTHING)
+                                        ( noper_trietype == NOTHING )
                                         || ( trietype == NOTHING )
                                         || ( trietype == noper_trietype )
                                   )
@@ -4235,7 +4235,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 				    if ( noper_trietype == NOTHING ) {
 #if !defined(DEBUGGING) && !defined(NOJUMPTRIE)
 					regnode * const noper_next = regnext( noper );
-                                        U8 noper_next_type = (noper_next && noper_next!=tail) ? OP(noper_next) : 0;
+                                        U8 noper_next_type = (noper_next && noper_next < tail) ? OP(noper_next) : 0;
 					U8 noper_next_trietype = noper_next_type ? TRIE_TYPE( noper_next_type ) :0;
 #endif
 
