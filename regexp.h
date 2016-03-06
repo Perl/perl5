@@ -102,6 +102,7 @@ struct reg_code_block {
 	const struct regexp_engine* engine; 				\
 	REGEXP *mother_re; /* what re is this a lightweight copy of? */	\
 	HV *paren_names;   /* Optional hash of paren names */		\
+        /*--------------------------------------------------------*/    \
 	/* Information about the match that the perl core uses to */	\
 	/* manage things */						\
 	U32 extflags;	/* Flags used both externally and internally */	\
@@ -116,12 +117,15 @@ struct reg_code_block {
 	U32 intflags;	/* Engine Specific Internal flags */		\
 	void *pprivate;	/* Data private to the regex engine which */	\
 			/* created this object. */			\
+        /*--------------------------------------------------------*/    \
 	/* Data about the last/current match. These are modified */	\
 	/* during matching */						\
 	U32 lastparen;			/* last open paren matched */	\
 	U32 lastcloseparen;		/* last close paren matched */	\
 	/* Array of offsets for (@-) and (@+) */			\
 	regexp_paren_pair *offs;					\
+        char **recurse_locinput; /* used to detect infinite recursion, XXX: move to internal */ \
+        /*--------------------------------------------------------*/    \
 	/* saved or original string so \digit works forever. */		\
 	char *subbeg;							\
 	SV_SAVED_COPY	/* If non-NULL, SV which is COW from original */\
@@ -130,11 +134,13 @@ struct reg_code_block {
 	SSize_t subcoffset; /* suboffset equiv, but in chars (for @-/@+) */ \
 	/* Information about the match that isn't often used */		\
         SSize_t maxlen;        /* mininum possible number of chars in string to match */\
+        /*--------------------------------------------------------*/    \
 	/* offset from wrapped to the start of precomp */		\
 	PERL_BITFIELD32 pre_prefix:4;					\
         /* original flags used to compile the pattern, may differ */    \
         /* from extflags in various ways */                             \
         PERL_BITFIELD32 compflags:9;                                    \
+        /*--------------------------------------------------------*/    \
 	CV *qr_anoncv	/* the anon sub wrapped round qr/(?{..})/ */
 
 typedef struct regexp {
@@ -657,7 +663,7 @@ typedef struct {
 /* structures for holding and saving the state maintained by regmatch() */
 
 #ifndef MAX_RECURSE_EVAL_NOCHANGE_DEPTH
-#define MAX_RECURSE_EVAL_NOCHANGE_DEPTH 1000
+#define MAX_RECURSE_EVAL_NOCHANGE_DEPTH 10
 #endif
 
 typedef I32 CHECKPOINT;
@@ -749,6 +755,7 @@ typedef struct regmatch_state {
 	    CHECKPOINT	lastcp;
             U32         close_paren; /* which close bracket is our end (+1) */
 	    regnode	*B;	/* the node following us  */
+            char        *prev_recurse_locinput;
 	} eval;
 
 	struct {

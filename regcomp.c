@@ -4719,11 +4719,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                              RExC_study_chunk_recursed_bytes, U8);
                     }
                     /* we havent recursed into this paren yet, so recurse into it */
-	            DEBUG_STUDYDATA("set:", data,depth);
+                    DEBUG_STUDYDATA("gosub-set:", data,depth);
                     PAREN_SET(RExC_study_chunk_recursed + (recursed_depth * RExC_study_chunk_recursed_bytes), paren);
                     my_recursed_depth= recursed_depth + 1;
                 } else {
-	            DEBUG_STUDYDATA("inf:", data,depth);
+                    DEBUG_STUDYDATA("gosub-inf:", data,depth);
                     /* some form of infinite recursion, assume infinite length
                      * */
                     if (flags & SCF_DO_SUBSTR) {
@@ -7617,8 +7617,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     if (r->minlen < minlen)
         r->minlen = minlen;
 
-    if (RExC_seen & REG_RECURSE_SEEN )
+    if (RExC_seen & REG_RECURSE_SEEN ) {
         r->intflags |= PREGf_RECURSE_SEEN;
+        Newxz(r->recurse_locinput, r->nparens + 1, char *);
+    }
     if (RExC_seen & REG_GPOS_SEEN)
         r->intflags |= PREGf_GPOS_SEEN;
     if (RExC_seen & REG_LOOKBEHIND_SEEN)
@@ -19041,6 +19043,8 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
 #endif
     Safefree(r->offs);
     SvREFCNT_dec(r->qr_anoncv);
+    if (r->recurse_locinput)
+        Safefree(r->recurse_locinput);
     rx->sv_u.svu_rx = 0;
 }
 
@@ -19124,6 +19128,8 @@ Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
 #endif
     ret->mother_re = ReREFCNT_inc(r->mother_re ? r->mother_re : rx);
     SvREFCNT_inc_void(ret->qr_anoncv);
+    if (r->recurse_locinput)
+        Newxz(ret->recurse_locinput,r->nparens + 1,char *);
 
     return ret_x;
 }
@@ -19262,7 +19268,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
 #define SAVEPVN(p,n)	((p) ? savepvn(p,n) : NULL)
 
 /*
-   re_dup - duplicate a regexp.
+   re_dup_guts - duplicate a regexp.
 
    This routine is expected to clone a given regexp structure. It is only
    compiled under USE_ITHREADS.
@@ -19330,6 +19336,8 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 
     RXp_PAREN_NAMES(ret) = hv_dup_inc(RXp_PAREN_NAMES(ret), param);
     ret->qr_anoncv = MUTABLE_CV(sv_dup_inc((const SV *)ret->qr_anoncv, param));
+    if (r->recurse_locinput)
+        Newxz(ret->recurse_locinput,r->nparens + 1,char *);
 
     if (ret->pprivate)
 	RXi_SET(ret,CALLREGDUPE_PVT(dstr,param));
@@ -19383,6 +19391,7 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
     Newxc(reti, sizeof(regexp_internal) + len*sizeof(regnode),
           char, regexp_internal);
     Copy(ri->program, reti->program, len+1, regnode);
+
 
     reti->num_code_blocks = ri->num_code_blocks;
     if (ri->code_blocks) {
@@ -19444,7 +19453,7 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
 		d->data[i] = ri->data->data[i];
 		break;
             default:
-		Perl_croak(aTHX_ "panic: re_dup unknown data code '%c'",
+                Perl_croak(aTHX_ "panic: re_dup_guts unknown data code '%c'",
                                                            ri->data->what[i]);
 	    }
 	}

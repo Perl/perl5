@@ -90,8 +90,6 @@
 /* This is the stuff that used to live in regexp.h that was truly
    private to the engine itself. It now lives here. */
 
-
-
  typedef struct regexp_internal {
         int name_list_idx;	/* Optional data index of an array of paren names */
         union {

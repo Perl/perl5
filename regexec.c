@@ -3126,6 +3126,9 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	));
     }
 
+    if (prog->recurse_locinput)
+        Zero(prog->recurse_locinput,prog->nparens + 1, char *);
+
     /* Simplest case: anchored match need be tried only once, or with
      * MBOL, only at the beginning of each line.
      *
@@ -5184,7 +5187,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     bool is_utf8_pat = reginfo->is_utf8_pat;
     bool match = FALSE;
 
-
 #ifdef DEBUGGING
     GET_RE_DEBUG_FLAGS_DECL;
 #endif
@@ -6494,11 +6496,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             regexp *re;
             regexp_internal *rei;
             regnode *startpoint;
+            U32 arg;
 
 	case GOSUB: /*    /(...(?1))/   /(...(?&foo))/   */
-	    if (cur_eval && cur_eval->locinput==locinput) {
-                if ( EVAL_CLOSE_PAREN_IS( cur_eval, (U32)ARG(scan) ) )
-                    Perl_croak(aTHX_ "Infinite recursion in regex");
+            arg= (U32)ARG(scan);
+            if (cur_eval && cur_eval->locinput == locinput) {
                 if ( ++nochange_depth > max_nochange_depth )
                     Perl_croak(aTHX_ 
                         "Pattern subroutine nesting without pos change"
@@ -6510,7 +6512,32 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             re = rex;
             rei = rexi;
             startpoint = scan + ARG2L(scan);
-            EVAL_CLOSE_PAREN_SET( st, ARG(scan) ); /* ST.close_paren = 1 + ARG(scan) */
+            EVAL_CLOSE_PAREN_SET( st, arg ); /* ST.close_paren = 1 + ARG(scan) */
+            /* Detect infinite recursion
+             *
+             * A pattern like /(?R)foo/ or /(?<x>(?&y)foo)(?<y>(?&x)bar)/
+             * or "a"=~/(.(?2))((?<=(?=(?1)).))/ could recurse forever.
+             * So we track the position in the string we are at each time
+             * we recurse and if we try to enter the same routine twice from
+             * the same position we fail. This means that a pattern like
+             * "aaabbb"=~/a(?R)?b/ works as expected and does not throw an
+             * error.
+             */
+            if ( rex->recurse_locinput[arg] == locinput ) {
+                DEBUG_r({
+                    GET_RE_DEBUG_FLAGS_DECL;
+                    DEBUG_EXECUTE_r({
+                        PerlIO_printf(Perl_debug_log,
+                                    "%*s  pattern left-recursion without consuming input always fails...\n",
+                                    REPORT_CODE_OFF + depth*2, "");
+                    });
+                });
+                /* this would be infinite recursion, so we fail */
+                sayNO;
+            } else {
+                ST.prev_recurse_locinput= rex->recurse_locinput[arg];
+                rex->recurse_locinput[arg]= locinput;
+            }
 
             /* Save all the positions seen so far. */
             ST.cp = regcppush(rex, 0, maxopenparen);
@@ -6547,10 +6574,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		n = ARG(scan);
 
 		if (rexi->data->what[n] == 'r') { /* code from an external qr */
-		    newcv = (ReANY(
-						(REGEXP*)(rexi->data->data[n])
-					    ))->qr_anoncv
-					;
+                    newcv = (ReANY(
+                                    (REGEXP*)(rexi->data->data[n])
+                            ))->qr_anoncv;
 		    nop = (OP*)rexi->data->data[n+1];
 		}
 		else if (rexi->data->what[n] == 'l') { /* literal code */
@@ -6771,6 +6797,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		startpoint = rei->program + 1;
                 EVAL_CLOSE_PAREN_CLEAR(st); /* ST.close_paren = 0;
                                              * close_paren only for GOSUB */
+                ST.prev_recurse_locinput= NULL; /* only used for GOSUB */
                 /* Save all the seen positions so far. */
                 ST.cp = regcppush(rex, 0, maxopenparen);
                 REGCP_SET(ST.lastcp);
@@ -6812,6 +6839,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 	case EVAL_AB: /* cleanup after a successful (??{A})B */
 	    /* note: this is called twice; first after popping B, then A */
+            if ( cur_eval && cur_eval->u.eval.close_paren )
+                rex->recurse_locinput[cur_eval->u.eval.close_paren - 1] = cur_eval->u.eval.prev_recurse_locinput;
+
 	    rex_sv = ST.prev_rex;
             is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(rex_sv));
 	    SET_reg_curpm(rex_sv);
@@ -6837,6 +6867,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 	case EVAL_AB_fail: /* unsuccessfully ran A or B in (??{A})B */
 	    /* note: this is called twice; first after popping B, then A */
+            if ( cur_eval && cur_eval->u.eval.close_paren )
+                rex->recurse_locinput[cur_eval->u.eval.close_paren - 1] = cur_eval->u.eval.prev_recurse_locinput;
+
 	    rex_sv = ST.prev_rex;
             is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(rex_sv));
 	    SET_reg_curpm(rex_sv);
@@ -7905,6 +7938,8 @@ NULL
           fake_end:
 	    if (cur_eval) {
 		/* we've just finished A in /(??{A})B/; now continue with B */
+                if ( cur_eval->u.eval.close_paren )
+                    rex->recurse_locinput[cur_eval->u.eval.close_paren - 1] = cur_eval->u.eval.prev_recurse_locinput;
 
 		st->u.eval.prev_rex = rex_sv;		/* inner */
 

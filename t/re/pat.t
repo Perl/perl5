@@ -23,7 +23,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 776;  # Update this when adding/deleting tests.
+plan tests => 781;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1721,6 +1721,14 @@ EOP
             fresh_perl_is($code, "", {},
                             "perl [#126406] panic");
 	}
+        {
+            # [perl #126182] test for infinite pattern recursion
+            ok("aaabbb"=~/a(?R)?b/, "optional self recursion works");
+            ok("aaabbb"=~/a(?R)?b/, "optional self recursion works");
+            ok(not("aa"=~/(?R)a/), "left-recursion fails fast");
+            ok("bbaa"=~/(?&x)(?(DEFINE)(?<x>(?&y)*a)(?<y>(?&x)*b))/,"inter-cyclic optional left recursion works");
+            ok(not("a"=~/(.(?2))((?<=(?=(?1)).))/),"look ahead left-recursion fails fast");
+        }
 } # End of sub run_tests
 
 1;
