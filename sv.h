@@ -1813,9 +1813,19 @@ Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
 #define SvIsCOW_off(sv)		(SvFLAGS(sv) &= ~SVf_IsCOW)
 #define SvIsCOW_shared_hash(sv)	(SvIsCOW(sv) && SvLEN(sv) == 0)
 
+#ifdef USE_ITHREADS
+#define SvSHARED_HEK_FROM_PV(pvx) \
+	((struct hek*)(((Size_t)pvx & ~0x3) - STRUCT_OFFSET(struct hek, hek_key)))
+#define SvSHARED_HASH(sv) (assert_(((Size_t)SvPVX_const(sv) & 0x3) == 0) 0 + SvSHARED_HEK_FROM_PV(SvPVX_const(sv))->hek_hash)
+#else
 #define SvSHARED_HEK_FROM_PV(pvx) \
 	((struct hek*)(pvx - STRUCT_OFFSET(struct hek, hek_key)))
+/*be very careful using this, on ithreads, if "(Size_t)SvPVX & 0x3" is true,
+ *then you can't use the hash that SvSHARED_HASH returns because of the CHEK
+ *offset trick*/
 #define SvSHARED_HASH(sv) (0 + SvSHARED_HEK_FROM_PV(SvPVX_const(sv))->hek_hash)
+#endif
+
 
 /* flag values for sv_*_flags functions */
 #define SV_IMMEDIATE_UNREF	1

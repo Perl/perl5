@@ -151,9 +151,9 @@ Perl_gv_fetchfile_hek(pTHX_ const HEK * const hek)
     if (!isGV(gv)) {
 	gv_init(gv, PL_defstash, HEK_KEY(hek), HEK_LEN(hek), FALSE);
 #ifdef PERL_DONT_CREATE_GVSV
-	GvSV(gv) = newSVpvn(HEK_KEY(hek)+2, HEK_LEN(hek)-2);
+	GvSV(gv) = newSVhek((HEK*)((Size_t)hek+2));
 #else
-	sv_setpvn(GvSV(gv), HEK_KEY(hek)+2, HEK_LEN(hek)-2);
+	sv_sethek(GvSV(gv), (HEK*)((Size_t)hek+2));
 #endif
     }
     if (PERLDB_LINE_OR_SAVESRC && !GvAV(gv))

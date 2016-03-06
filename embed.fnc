@@ -1036,7 +1036,7 @@ Apda	|SV*	|newSVnv	|const NV n
 Apda	|SV*	|newSVpv	|NULLOK const char *const s|const STRLEN len
 Apda	|SV*	|newSVpvn	|NULLOK const char *const s|const STRLEN len
 Apda	|SV*	|newSVpvn_flags	|NULLOK const char *const s|const STRLEN len|const U32 flags
-Apda	|SV*	|newSVhek	|NULLOK const HEK *const hek
+Apda	|SV*	|newSVhek	|NULLOK const HEK *hek
 Apda	|SV*	|newSVpvn_share	|NULLOK const char* s|I32 len|U32 hash
 Apda	|SV*	|newSVpv_share	|NULLOK const char* s|U32 hash
 Afpda	|SV*	|newSVpvf	|NN const char *const pat|...
@@ -1496,7 +1496,7 @@ Apd	|SV*	|sv_setref_pvn	|NN SV *const rv|NULLOK const char *const classname \
 				|NN const char *const pv|const STRLEN n
 Apd	|void	|sv_setpv	|NN SV *const sv|NULLOK const char *const ptr
 Apd	|void	|sv_setpvn	|NN SV *const sv|NULLOK const char *const ptr|const STRLEN len
-Xp	|void	|sv_sethek	|NN SV *const sv|NULLOK const HEK *const hek
+Xp	|void	|sv_sethek	|NN SV *const sv|NULLOK const HEK *hek
 Amdb	|void	|sv_setsv	|NN SV *dstr|NULLOK SV *sstr
 Amdb	|void	|sv_taint	|NN SV* sv
 ApdR	|bool	|sv_tainted	|NN SV *const sv

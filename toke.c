@@ -7209,9 +7209,15 @@ Perl_yylex(pTHX)
 	    }
 
 	case KEY___FILE__:
+#ifdef USE_ITHREADS
+	    FUN0OP(
+		(OP*)newSVOP(OP_CONST, 0, newSVhek((HEK*)((Size_t)FNPV2HEK(CopFILE(PL_curcop))+2)))
+	    );
+#else
 	    FUN0OP(
 		(OP*)newSVOP(OP_CONST, 0, newSVpv(CopFILE(PL_curcop),0))
 	    );
+#endif
 
 	case KEY___LINE__:
 	    FUN0OP(

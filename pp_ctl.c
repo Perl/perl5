@@ -1847,7 +1847,11 @@ PP(pp_caller)
 	sv_sethek(TARG, stash_hek);
 	PUSHTARG;
     }
+#ifdef USE_ITHREADS
+    mPUSHs(newSVhek((HEK*)((Size_t)FNPV2HEK(CopFILE(cx->blk_oldcop))+2)));
+#else
     mPUSHs(newSVpv(CopFILE(cx->blk_oldcop), CopFILE_len(cx->blk_oldcop)));
+#endif
     lcop = closest_cop(cx->blk_oldcop, OpSIBLING(cx->blk_oldcop),
 		       cx->blk_sub.retop, TRUE);
     if (!lcop)
@@ -4010,12 +4014,21 @@ PP(pp_require)
     else
 	SETERRNO(0, SS_NORMAL);
 
+    old_savestack_ix = PL_savestack_ix;
+    SAVECOPFILE_FREE(&PL_compiling);
+    CopFILE_set(&PL_compiling, tryname);
+
     /* Assume success here to prevent recursive requirement. */
     /* name is never assigned to again, so len is still strlen(name)  */
     /* Check whether a hook in @INC has already filled %INC */
     if (!hook_sv) {
+#ifdef USE_ITHREADS
+	(void)hv_store(GvHVn(PL_incgv),
+		       unixname, unixlen, newSVhek((HEK*)((Size_t)FNPV2HEK(CopFILE(&PL_compiling))+2)),0);
+#else
 	(void)hv_store(GvHVn(PL_incgv),
 		       unixname, unixlen, newSVpv(tryname,0),0);
+#endif
     } else {
 	SV** const svp = hv_fetch(GvHVn(PL_incgv), unixname, unixlen, 0);
 	if (!svp)
@@ -4023,9 +4036,6 @@ PP(pp_require)
 			   unixname, unixlen, SvREFCNT_inc_simple(hook_sv), 0 );
     }
 
-    old_savestack_ix = PL_savestack_ix;
-    SAVECOPFILE_FREE(&PL_compiling);
-    CopFILE_set(&PL_compiling, tryname);
     lex_start(NULL, tryrsfp, 0);
 
     if (filter_sub || filter_cache) {
