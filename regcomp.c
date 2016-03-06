@@ -4392,9 +4392,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
                         DEBUG_TRIE_COMPILE_r({
                             regprop(RExC_rx, RExC_mysv, tail, NULL, pRExC_state);
-                            PerlIO_printf( Perl_debug_log, "%*s%s%s\n",
+                            PerlIO_printf( Perl_debug_log, "%*s%s %d:%s\n",
                               (int)depth * 2 + 2, "",
-                              "Looking for TRIE'able sequences. Tail node is: ",
+                              "Looking for TRIE'able sequences. Tail node is ",
+                              tail - RExC_emit_start,
                               SvPV_nolen_const( RExC_mysv )
                             );
                         });
@@ -4483,19 +4484,20 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
                             DEBUG_TRIE_COMPILE_r({
                                 regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
-                                PerlIO_printf( Perl_debug_log, "%*s- %s (%d)",
-                                   (int)depth * 2 + 2,"", SvPV_nolen_const( RExC_mysv ), REG_NODE_NUM(cur) );
+                                PerlIO_printf( Perl_debug_log, "%*s- %d:%s (%d)",
+                                   (int)depth * 2 + 2,"",
+                                   REG_NODE_NUM(cur), SvPV_nolen_const( RExC_mysv ), REG_NODE_NUM(cur) );
 
                                 regprop(RExC_rx, RExC_mysv, noper, NULL, pRExC_state);
-                                PerlIO_printf( Perl_debug_log, " -> %s",
-                                    SvPV_nolen_const(RExC_mysv));
+                                PerlIO_printf( Perl_debug_log, " -> %d:%s",
+                                    REG_NODE_NUM(noper), SvPV_nolen_const(RExC_mysv));
 
                                 if ( noper_next ) {
                                   regprop(RExC_rx, RExC_mysv, noper_next, NULL, pRExC_state);
-                                  PerlIO_printf( Perl_debug_log,"\t=> %s\t",
-                                    SvPV_nolen_const(RExC_mysv));
+                                  PerlIO_printf( Perl_debug_log,"\t=> %d:%s\t",
+                                    REG_NODE_NUM(noper_next), SvPV_nolen_const(RExC_mysv));
                                 }
-                                PerlIO_printf( Perl_debug_log, "(First==%d,Last==%d,Cur==%d,tt==%s,nt==%s,nnt==%s)\n",
+                                PerlIO_printf( Perl_debug_log, "(First==%d,Last==%d,Cur==%d,tt==%s,ntt==%s,nntt==%s)\n",
                                    REG_NODE_NUM(first), REG_NODE_NUM(last), REG_NODE_NUM(cur),
 				   PL_reg_name[trietype], PL_reg_name[noper_trietype], PL_reg_name[noper_next_trietype]
 				);
@@ -4592,9 +4594,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         DEBUG_TRIE_COMPILE_r({
                             regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
                             PerlIO_printf( Perl_debug_log,
-                              "%*s- %s (%d) <SCAN FINISHED>\n",
+                              "%*s- %s (%d) <SCAN FINISHED> ",
                               (int)depth * 2 + 2,
                               "", SvPV_nolen_const( RExC_mysv ),REG_NODE_NUM(cur));
+                            PerlIO_printf( Perl_debug_log, "(First==%d, Last==%d, Cur==%d, tt==%s)\n",
+                               REG_NODE_NUM(first), REG_NODE_NUM(last), REG_NODE_NUM(cur),
+                               PL_reg_name[trietype]
+                            );
 
                         });
                         if ( last && trietype ) {
