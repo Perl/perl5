@@ -1965,6 +1965,7 @@ ab(?#Comment){2}c	abbc	y	$&	abbc
 (?a-x	-	c	-	Sequence (?... not terminated
 .{1}??	-	c	-	Nested quantifiers
 .{1}?+	-	c	-	Nested quantifiers
+(?:.||)(?|)000000000@	000000000@	y	$&	000000000@		#  [perl #126405]
 
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab
