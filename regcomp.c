@@ -15986,6 +15986,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     SAVEFREEPV(name);
                     if (FOLD) {
                         lookup_name = savepv(Perl_form(aTHX_ "__%s_i", name));
+
+                        /* The function call just below that uses this can fail
+                         * to return, leaking memory if we don't do this */
+                        SAVEFREEPV(lookup_name);
                     }
 
                     /* Look up the property name, and get its swash and
@@ -16001,9 +16005,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                              NULL, /* No inversion list */
                                              &swash_init_flags
                                             );
-                    if (lookup_name) {
-                        Safefree(lookup_name);
-                    }
                     if (! swash || ! (invlist = _get_swash_invlist(swash))) {
                         HV* curpkg = (IN_PERL_COMPILETIME)
                                       ? PL_curstash
