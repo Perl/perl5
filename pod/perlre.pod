@@ -593,9 +593,10 @@ X<metacharacter> X<quantifier> X<*> X<+> X<?> X<{n}> X<{n,}> X<{n,m}>
     {n,}        Match at least n times
     {n,m}       Match at least n but not more than m times
 
-(If a curly bracket occurs in any other context and does not form part of
-a backslashed sequence like C<\x{...}>, it is treated as a regular
-character.  However, a deprecation warning is raised for all such
+(If a curly bracket occurs in a context other than one of the
+quantifiers listed above, where it does not form part of a backslashed
+sequence like C<\x{...}>, it is treated as a regular character.
+However, a deprecation warning is raised for these
 occurrences, and in Perl v5.26, literal uses of a curly bracket will be
 required to be escaped, say by preceding them with a backslash (C<"\{">)
 or enclosing them within square brackets  (C<"[{]">).  This change will
@@ -1554,7 +1555,7 @@ code or potentially compiling a returned pattern string; instead it treats
 the part of the current pattern contained within a specified capture group
 as an independent pattern that must match at the current position. Also
 different is the treatment of capture buffers, unlike C<(??{ code })>
-recursive patterns have access to their callers match state, so one can
+recursive patterns have access to their caller's match state, so one can
 use backreferences safely.
 
 I<PARNO> is a sequence of digits (not starting with 0) whose value reflects
