@@ -99,7 +99,7 @@ sub testfile ($$$$$$) {
   my @data = grep length, split /(.{1,$write_c})/s, $str;
 
   my $filename = tempfile();
-  open my $fh, '>', $filename or die;
+  open my $fh, '>', $filename or die "open: > $filename: $!";
   select $fh;
   binmode $fh, ':crlf' 
       if defined $main::use_crlf && $main::use_crlf == 1;
@@ -115,7 +115,7 @@ sub testfile ($$$$$$) {
     die "Unrecognized write: '$how_w'";
   }
   close $fh or die "close: $!";
-  open $fh, '<', $filename or die;
+  open $fh, '<', $filename or die "open: < $filename: $!";
   binmode $fh, ':crlf'
       if defined $main::use_crlf && $main::use_crlf == 1;
   testread($fh, $str, $read_c, $how_r, $write_c, $how_w, "file$why");
