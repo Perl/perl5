@@ -502,7 +502,20 @@ static const scan_data_t zero_scan_data =
 #define SF_HAS_PAR		0x0080
 #define SF_IN_PAR		0x0100
 #define SF_HAS_EVAL		0x0200
+
+
+/* SCF_DO_SUBSTR is the flag that tells the regexp analyzer to track the
+ * longest substring in the pattern. When it is not set the optimiser keeps
+ * track of position, but does not keep track of the actual strings seen,
+ *
+ * So for instance /foo/ will be parsed with SCF_DO_SUBSTR being true, but
+ * /foo/i will not.
+ *
+ * Similarly, /foo.*(blah|erm|huh).*fnorble/ will have "foo" and "fnorble"
+ * parsed with SCF_DO_SUBSTR on, but while processing the (...) it will be
+ * turned off because of the alternation (BRANCH). */
 #define SCF_DO_SUBSTR		0x0400
+
 #define SCF_DO_STCLASS_AND	0x0800
 #define SCF_DO_STCLASS_OR	0x1000
 #define SCF_DO_STCLASS		(SCF_DO_STCLASS_AND|SCF_DO_STCLASS_OR)
@@ -4144,9 +4157,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
         DEBUG_PEEP("Peep", scan, depth);
 
 
-        /* The reason we do this here we need to deal with things like /(?:f)(?:o)(?:o)/
-         * which cant be dealt with by the normal EXACT parsing code, as each (?:..) is handled
-         * by a different invocation of reg() -- Yves
+        /* The reason we do this here is that we need to deal with things like
+         * /(?:f)(?:o)(?:o)/ which cant be dealt with by the normal EXACT
+         * parsing code, as each (?:..) is handled by a different invocation of
+         * reg() -- Yves
          */
         JOIN_EXACT(scan,&min_subtract, &unfolded_multi_char, 0);
 
