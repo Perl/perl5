@@ -35,13 +35,14 @@ bytes - Perl pragma to expose the individual bytes of characters
 
 =head1 NOTICE
 
-
 Because the bytes pragma breaks encapsulation (i.e. it exposes the innards of
 how the perl executable currently happens to store a string), the byte values
-that result are in an unspecified encoding.  Use of this module for anything
-other than debugging purposes is strongly discouraged.  If you feel that the
-functions here within might be useful for your application, this possibly
-indicates a mismatch between your mental model of Perl Unicode and the current
+that result are in an unspecified encoding.
+
+B<Use of this module for anything other than debugging purposes is
+strongly discouraged.>  If you feel that the functions here within
+might be useful for your application, this possibly indicates a
+mismatch between your mental model of Perl Unicode and the current
 reality. In that case, you may wish to read some of the perl Unicode
 documentation: L<perluniintro>, L<perlunitut>, L<perlunifaq> and
 L<perlunicode>.
@@ -107,6 +108,12 @@ up the UTF8 encoding - and C<length $x> returns C<2>:
 C<chr()>, C<ord()>, C<substr()>, C<index()> and C<rindex()> behave similarly.
 
 For more on the implications, see L<perluniintro> and L<perlunicode>.
+
+C<bytes::length()> is admittedly handy if you need to know the
+B<byte length> of a Perl scalar.  But a more modern way is:
+
+   use Encode 'encode';
+   length(encode('UTF-8', $scalar))
 
 =head1 LIMITATIONS
 
