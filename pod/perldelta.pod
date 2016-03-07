@@ -352,6 +352,11 @@ It now works properly to specify a user-defined property, such as
 with C</i> caseless matching, an explicit package name, and
 I<IsMyProperty> not defined at the time of the pattern compilation.
 
+=item *
+
+Perl's memcpy(), memmove(), memset() and memcmp() fallbacks are now
+more compatible with the originals.  [perl #127619]
+
 =back
 
 =head1 Known Problems
