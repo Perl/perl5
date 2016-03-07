@@ -4130,7 +4130,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                 }
                 else {  /* Does participate in folds */
                     AV* list = (AV*) *listp;
-                    if (av_tindex(list) != 1) {
+                    if (av_tindex_nomg(list) != 1) {
 
                         /* If there aren't exactly two folds to this, it is
                          * outside the scope of this function */
