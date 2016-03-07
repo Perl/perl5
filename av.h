@@ -81,6 +81,8 @@ Same as C<av_top_index()>.
 			 ? mg_size(MUTABLE_SV(av)) : AvFILLp(av))
 #define av_tindex(av)   av_top_index(av)
 
+#define av_tindex_nomg(av)  (__ASSERT_(SvTYPE(av) == SVt_PVAV) AvFILLp(av))
+
 #define NEGATIVE_INDICES_VAR "NEGATIVE_INDICES"
 
 /*
