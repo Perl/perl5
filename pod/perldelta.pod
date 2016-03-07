@@ -357,6 +357,17 @@ I<IsMyProperty> not defined at the time of the pattern compilation.
 Perl's memcpy(), memmove(), memset() and memcmp() fallbacks are now
 more compatible with the originals.  [perl #127619]
 
+=item *
+
+The peak memory usage when compiling some regular expression patterns is
+now significantly smaller. [perl #127392]
+
+=item *
+
+A case has been fixed in which malformed UTF-8 in the source of a Perl
+script caused an assertion failure instead of an error message. [perl
+#127262]
+
 =back
 
 =head1 Known Problems
