@@ -15146,7 +15146,6 @@ redo_curchar:
 
                     only_to_avoid_leaks = av_pop(stack);
                     SvREFCNT_dec(only_to_avoid_leaks);
-                    top_index = av_tindex(stack);
 
                     /* And we redo with the inverted operand.  This allows
                      * handling multiple ! in a row */
