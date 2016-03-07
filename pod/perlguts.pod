@@ -1498,7 +1498,7 @@ and back.
 
 =item C<SAVEFREESV(SV *sv)>
 
-The refcount of C<sv> would be decremented at the end of
+The refcount of C<sv> will be decremented at the end of
 I<pseudo-block>.  This is similar to C<sv_2mortal> in that it is also a
 mechanism for doing a delayed C<SvREFCNT_dec>.  However, while C<sv_2mortal>
 extends the lifetime of C<sv> until the beginning of the next statement,
