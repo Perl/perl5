@@ -8920,7 +8920,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 
     SV* u;			/* the resulting union */
     UV* array_u;
-    UV len_u;
+    UV len_u = 0;
 
     UV i_a = 0;		    /* current index into a's array */
     UV i_b = 0;
@@ -9232,7 +9232,7 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 
     SV* r;		     /* the resulting intersection */
     UV* array_r;
-    UV len_r;
+    UV len_r = 0;
 
     UV i_a = 0;		    /* current index into a's array */
     UV i_b = 0;
