@@ -266,7 +266,7 @@ SKIP: {
 }
 
 SKIP: {
-  skip('lacking d_shm', 10) unless
+  skip('lacking d_shm', 11) unless
       $Config{'d_shm'} eq 'define';
 
   use IPC::SysV qw(shmat shmdt memread memwrite ftok);
@@ -275,7 +275,7 @@ SKIP: {
 
   # Very first time called after machine is booted value may be 0 
   unless (defined $shm && $shm >= 0) {
-    skip(skip_or_die('shmget', $!), 10);
+    skip(skip_or_die('shmget', $!), 11);
   }
 
   pass("shm acquire");

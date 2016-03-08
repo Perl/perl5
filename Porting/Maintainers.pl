@@ -689,6 +689,14 @@ use File::Glob qw(:case);
                 const-xs.inc
                 ),
         ],
+        'CUSTOMIZED' => [
+            # CPAN #118827
+	    qw(t/ipcsysv.t
+               lib/IPC/Msg.pm
+               lib/IPC/Semaphore.pm
+               lib/IPC/SharedMem.pm
+               lib/IPC/SysV.pm),
+        ],
     },
 
     'JSON::PP' => {
