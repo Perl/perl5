@@ -1317,6 +1317,7 @@ use64bitall=''
 use64bitint=''
 usecbacktrace=''
 dtrace=''
+dtraceobject=''
 usedtrace=''
 usefaststdio=''
 usekernprocpathname=''
@@ -8170,6 +8171,33 @@ EOM
 		;;
 	esac
 done
+
+case "$usedtrace" in
+$define)
+	case "$dtraceobject" in
+	$define|true|[yY]*)
+		dtraceobject=$define
+		;;
+	' '|'')
+		$dtrace -h -s ../perldtrace.d -o perldtrace.h
+		$cat >try.c <<EOM
+#include "perldtrace.h"
+int main(void) {
+    PERL_LOADED_FILE("dummy");
+    return 0;
+}
+EOM
+		dtraceobject=$undef
+		if $cc -c -o try.o $optimize $ccflags try.c \
+                    && $dtrace -G -s ../perldtrace.d try.o ; then
+		        dtraceobject=$define
+			echo "Your dtrace builds an object file"
+		fi
+		$rm -f try.c try.o perldtrace.o
+		;;
+	*) dtraceobject=$undef ;;
+	esac
+esac
 
 : See if we want extra modules installed
 echo " "
@@ -24720,6 +24748,7 @@ doublesize='$doublesize'
 drand01='$drand01'
 drand48_r_proto='$drand48_r_proto'
 dtrace='$dtrace'
+dtraceobject='$dtraceobject'
 dynamic_ext='$dynamic_ext'
 eagain='$eagain'
 ebcdic='$ebcdic'
