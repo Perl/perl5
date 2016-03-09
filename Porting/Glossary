@@ -2872,6 +2872,9 @@ drand48_r_proto (d_drand48_r.U):
 dtrace (usedtrace.U):
 	This variable holds the location of the dtrace executable.
 
+dtraceobject (usedtrace.U):
+	Whether we need to build an object file with the dtrace tool.
+
 dynamic_ext (Extensions.U):
 	This variable holds a list of XS extension files we want to
 	link dynamically into the package.  It is used by Makefile.

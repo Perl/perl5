@@ -225,10 +225,13 @@ dtrace_o=''
 minidtrace_o=''
 case "$usedtrace" in
 define|true)
-	dtrace_h='perldtrace.h' 
-	$dtrace -G -s perldtrace.d -o perldtrace.tmp >/dev/null 2>&1 \
-		&& rm -f perldtrace.tmp && dtrace_o='perldtrace$(OBJ_EXT)' \
-		&& minidtrace_o='miniperldtrace$(OBJ_EXT)'
+	dtrace_h='perldtrace.h'
+	case "$dtraceobject" in
+	define)
+		dtrace_o='perldtrace$(OBJ_EXT)'
+		minidtrace_o='miniperldtrace$(OBJ_EXT)'
+		;;
+	esac
 	;;
 esac
 
