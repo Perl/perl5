@@ -2740,7 +2740,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	    CopHINTS_set(PL_curcop, PL_hints);
 	}
 	if (!SvROK(retval) || SvTYPE(SvRV(retval)) != SVt_PVHV) {
-	    if (SvPOK(retval))
+	    if (SvPOK(retval)) {
 
 		/* If caller wants to handle missing properties, let them */
 		if (flags_p && *flags_p & _CORE_SWASH_INIT_RETURN_IF_UNDEF) {
@@ -2750,6 +2750,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 			   "Can't find Unicode property definition \"%"SVf"\"",
 			   SVfARG(retval));
                 NOT_REACHED; /* NOTREACHED */
+            }
 	}
     } /* End of calling the module to find the swash */
 
