@@ -245,7 +245,12 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+Dtrace builds now build sucessfully on systems with a newer dtrace
+that require an input object file that uses the probes in the F<.d>
+file.
+
+Previously the probe would fail and cause a build failure. [perl
+#122287]
 
 =back
 
