@@ -1,4 +1,7 @@
 
+version 1.39_01; 2016-03-10
+  * Add information for how to contribute to Carp.
+
 version 1.39; 2016-03-06
   * bugfix: longmess() should return the error in scalar context
   (CPANRT#107225)

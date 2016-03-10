@@ -87,7 +87,7 @@ BEGIN {
     }
 }
 
-our $VERSION = '1.39';
+our $VERSION = '1.40';
 $VERSION =~ tr/_//d;
 
 our $MaxEvalLen = 0;
@@ -907,6 +907,12 @@ call die() or warn(), as appropriate.
 
 L<Carp::Always>,
 L<Carp::Clan>
+
+=head1 CONTRIBUTING
+
+L<Carp> is maintained by the perl 5 porters as part of the core perl 5
+version control repository. Please see the L<perlhack> perldoc for how to
+submit patches and contribute to it.
 
 =head1 AUTHOR
 
