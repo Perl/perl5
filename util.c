@@ -563,8 +563,34 @@ Perl_instr(const char *big, const char *little)
     return strstr((char*)big, (char*)little);
 }
 
-/* same as instr but allow embedded nulls.  The end pointers point to 1 beyond
- * the final character desired to be checked */
+/*
+=head1 Miscellaneous Functions
+
+=for apidoc Am|char *|ninstr|char * big|char * bigend|char * little|char * little_end
+
+Find the first (leftmost) occurrence of a sequence of bytes within another
+sequence.  This is the Perl version of C<strstr()>, extended to handle
+arbitrary sequences, potentially containing embedded C<NUL> characters (C<NUL>
+is what the initial C<n> in the function name stands for; some systems have an
+equivalent, C<memmem()>, but with a somewhat different API).
+
+Another way of thinking about this function is finding a needle in a haystack.
+C<big> points to the first byte in the haystack.  C<big_end> points to one byte
+beyond the final byte in the haystack.  C<little> points to the first byte in
+the needle.  C<little_end> points to one byte beyond the final byte in the
+needle.  All the parameters must be non-C<NULL>.
+
+The function returns C<NULL> if there is no occurrence of C<little> within
+C<big>.  If C<little> is the empty string, C<big> is returned.
+
+Because this function operates at the byte level, and because of the inherent
+characteristics of UTF-8 (or UTF-EBCDIC), it will work properly if both the
+needle and the haystack are strings with the same UTF-8ness, but not if the
+UTF-8ness differs.
+
+=cut
+
+*/
 
 char *
 Perl_ninstr(const char *big, const char *bigend, const char *little, const char *lend)
@@ -590,7 +616,18 @@ Perl_ninstr(const char *big, const char *bigend, const char *little, const char 
     return NULL;
 }
 
-/* reverse of the above--find last substring */
+/*
+=head1 Miscellaneous Functions
+
+=for apidoc Am|char *|rninstr|char * big|char * bigend|char * little|char * little_end
+
+Like C<L</ninstr>>, but instead finds the final (rightmost) occurrence of a
+sequence of bytes within another sequence, returning C<NULL> if there is no
+such occurrence.
+
+=cut
+
+*/
 
 char *
 Perl_rninstr(const char *big, const char *bigend, const char *little, const char *lend)
