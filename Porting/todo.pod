@@ -550,7 +550,8 @@ none of the above (nor sprintf(), vsprintf(), or *SHUDDER* gets())
 ever creep back to libperl.a.
 
  nm libperl.a | ./miniperl -alne '$o = $F[0] if /:$/;
-   print "$o $F[1]" if $F[0] eq "U" && $F[1] =~ /^(?:strn?c(?:at|py)|v?sprintf|gets)$/'
+   print "$o $F[1]" if $F[0] eq "U" && $F[1]
+                              =~ /^(?:strn?c(?:at|py)|v?sprintf|gets)$/'
 
 Note, of course, that this will only tell whether B<your> platform
 is using those naughty interfaces.

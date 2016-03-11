@@ -636,7 +636,8 @@ A correct CPAN version number is a floating point number with at least
 2 digits after the decimal.  You can test whether it conforms to CPAN by 
 using
 
-    perl -MExtUtils::MakeMaker -le 'print MM->parse_version(shift)' 'Foo.pm'
+    perl -MExtUtils::MakeMaker -le 'print MM->parse_version(shift)' \
+                                                            'Foo.pm'
 
 If you want to release a 'beta' or 'alpha' version of a module but
 don't want CPAN.pm to list it as most recent use an '_' after the

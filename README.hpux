@@ -40,17 +40,21 @@ on /cdrom), issue this command:
 
   # swlist -s /cdrom perl
   # perl           D.5.8.8.B  5.8.8 Perl Programming Language
-    perl.Perl5-32  D.5.8.8.B  32-bit 5.8.8 Perl Programming Language with Extensions
-    perl.Perl5-64  D.5.8.8.B  64-bit 5.8.8 Perl Programming Language with Extensions
+    perl.Perl5-32  D.5.8.8.B  32-bit 5.8.8 Perl Programming Language
+                                           with Extensions
+    perl.Perl5-64  D.5.8.8.B  64-bit 5.8.8 Perl Programming Language
+                                           with Extensions
 
 To see what is installed on your system:
 
   # swlist -R perl
   # perl                    E.5.8.8.J  Perl Programming Language
-  # perl.Perl5-32           E.5.8.8.J  32-bit Perl Programming Language with Extensions
+  # perl.Perl5-32           E.5.8.8.J  32-bit Perl Programming Language
+                                       with Extensions
     perl.Perl5-32.PERL-MAN  E.5.8.8.J  32-bit Perl Man Pages for IA
     perl.Perl5-32.PERL-RUN  E.5.8.8.J  32-bit Perl Binaries for IA
-  # perl.Perl5-64           E.5.8.8.J  64-bit Perl Programming Language with Extensions
+  # perl.Perl5-64           E.5.8.8.J  64-bit Perl Programming Language
+                                       with Extensions
     perl.Perl5-64.PERL-MAN  E.5.8.8.J  64-bit Perl Man Pages for IA
     perl.Perl5-64.PERL-RUN  E.5.8.8.J  64-bit Perl Binaries for IA
 
@@ -666,8 +670,12 @@ best fix is to patch the header to match:
 The following compilation warnings may happen in HP-UX releases
 earlier than 11.31 but are harmless:
 
-  cc: "/usr/include/sys/socket.h", line 535: warning 562: Redeclaration of "sendfile" with a different storage class specifier: "sendfile" will have internal linkage.
-  cc: "/usr/include/sys/socket.h", line 536: warning 562: Redeclaration of "sendpath" with a different storage class specifier: "sendpath" will have internal linkage.
+ cc: "/usr/include/sys/socket.h", line 535: warning 562:
+    Redeclaration of "sendfile" with a different storage class
+    specifier: "sendfile" will have internal linkage.
+ cc: "/usr/include/sys/socket.h", line 536: warning 562:
+    Redeclaration of "sendpath" with a different storage class
+    specifier: "sendpath" will have internal linkage.
 
 They seem to be caused by broken system header files, and also other
 open source projects are seeing them.  The following HP-UX patches

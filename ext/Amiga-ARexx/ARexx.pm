@@ -26,7 +26,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 );
 
-our $VERSION = '0.02';
+our $VERSION = '0.04';
 
 require XSLoader;
 XSLoader::load('Amiga::ARexx', $VERSION);
@@ -209,7 +209,7 @@ The API is loosley modeled on the python arexx module supplied by with AmigaOS4.
     # Create a new host
 
     use Amiga::ARexx;
-    my $host = Amiga::ARexx->new('HostName' => "PERLREXX" );                                                                          );
+    my $host = Amiga::ARexx->new('HostName' => "PERLREXX" );
 
     # Wait for and process rexxcommands
 
@@ -262,7 +262,7 @@ is no need to access the low level methods directly and they are not exported by
 
 =head2 new
 
-    my $host = Amiga::ARexx->new( HostName => "PERLREXX");                                                                            );
+    my $host = Amiga::ARexx->new( HostName => "PERLREXX");
 
 
 Create an ARexx host for your script / program.

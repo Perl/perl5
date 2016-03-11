@@ -341,14 +341,15 @@ copy-on-write is skipped.  First have a look at an empty string:
 Notice here the LEN is 10.  (It may differ on your platform.)  Extend the
 length of the string to one less than 10, and do a substitution:
 
-  % ./perl -Ilib -MDevel::Peek -le '$a=""; $a.="123456789"; $a=~s/.//; Dump($a)'
-  SV = PV(0x7ffa04008a70) at 0x7ffa04030390
-    REFCNT = 1
-    FLAGS = (POK,OOK,pPOK)
-    OFFSET = 1
-    PV = 0x7ffa03c05b61 ( "\1" . ) "23456789"\0
-    CUR = 8
-    LEN = 9
+ % ./perl -Ilib -MDevel::Peek -le '$a=""; $a.="123456789"; $a=~s/.//; \
+                                                            Dump($a)'
+ SV = PV(0x7ffa04008a70) at 0x7ffa04030390
+   REFCNT = 1
+   FLAGS = (POK,OOK,pPOK)
+   OFFSET = 1
+   PV = 0x7ffa03c05b61 ( "\1" . ) "23456789"\0
+   CUR = 8
+   LEN = 9
 
 Here the number of bytes chopped off (1) is shown next as the OFFSET.  The
 portion of the string between the "real" and the "fake" beginnings is

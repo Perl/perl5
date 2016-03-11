@@ -200,13 +200,14 @@ but not earlier, you should place a prominent
 directive at the top of the file that needs it.  That way when somebody
 tries to run the new code under an old perl, rather than getting an error like
 
-    Type of arg 1 to push must be array (not array element) at /tmp/a line 8, near ""betty";"
+    Type of arg 1 to push must be array (not array element) at /tmp/a
+    line 8, near ""betty";"
     Execution of /tmp/a aborted due to compilation errors.
 
 they'll be politely informed that
 
-    Perl v5.14.0 required--this is only v5.12.3, stopped at /tmp/a line 1.
-    BEGIN failed--compilation aborted at /tmp/a line 1.
+ Perl v5.14.0 required--this is only v5.12.3, stopped at /tmp/a line 1.
+ BEGIN failed--compilation aborted at /tmp/a line 1.
 
 =head2 Access and Printing
 
@@ -270,26 +271,28 @@ you might look at the standard L<Dumpvalue> or L<Data::Dumper> modules.
 The former is what the Perl debugger uses, while the latter generates
 parsable Perl code.  For example:
 
-    use v5.14;     # using the + prototype, new to v5.14
+ use v5.14;     # using the + prototype, new to v5.14
 
-    sub show(+) {
+ sub show(+) {
 	require Dumpvalue;
 	state $prettily = new Dumpvalue::
 			    tick        => q("),
-			    compactDump => 1,  # comment these two lines out
-			    veryCompact => 1,  # if you want a bigger dump
+			    compactDump => 1,  # comment these two lines
+                                               # out
+			    veryCompact => 1,  # if you want a bigger
+                                               # dump
 			;
 	dumpValue $prettily @_;
-    }
+ }
 
-    # Assign a list of array references to an array.
-    my @AoA = (
+ # Assign a list of array references to an array.
+ my @AoA = (
 	   [ "fred", "barney" ],
 	   [ "george", "jane", "elroy" ],
 	   [ "homer", "marge", "bart" ],
-    );
-    push $AoA[0], "wilma", "betty";
-    show @AoA;
+ );
+ push $AoA[0], "wilma", "betty";
+ show @AoA;
 
 will print out:
 

@@ -363,10 +363,10 @@ If you add the C<stringify> import option to your C<use threads> declaration,
 then using a threads object in a string or a string context (e.g., as a hash
 key) will cause its ID to be used as the value:
 
-    use threads qw(stringify);
+ use threads qw(stringify);
 
-    my $thr = threads->create(...);
-    print("Thread $thr started...\n");  # Prints out: Thread 1 started...
+ my $thr = threads->create(...);
+ print("Thread $thr started...\n"); # Prints: Thread 1 started...
 
 =item threads->object($tid)
 
@@ -691,15 +691,16 @@ threaded applications.
 To specify a particular stack size for any individual thread, call
 C<-E<gt>create()> with a hash reference as the first argument:
 
-    my $thr = threads->create({'stack_size' => 32*4096}, \&foo, @args);
+ my $thr = threads->create({'stack_size' => 32*4096}, \&foo, @args);
 
 =item $thr2 = $thr1->create(FUNCTION, ARGS)
 
 This creates a new thread (C<$thr2>) that inherits the stack size from an
 existing thread (C<$thr1>).  This is shorthand for the following:
 
-    my $stack_size = $thr1->get_stack_size();
-    my $thr2 = threads->create({'stack_size' => $stack_size}, FUNCTION, ARGS);
+ my $stack_size = $thr1->get_stack_size();
+ my $thr2 = threads->create({'stack_size' => $stack_size},
+                            FUNCTION, ARGS);
 
 =back
 

@@ -120,7 +120,8 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
   getitimer ($which);
 
   use Time::HiRes qw( clock_gettime clock_getres clock_nanosleep
-		      ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF ITIMER_REALPROF );
+		      ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF
+                      ITIMER_REALPROF );
 
   $realtime   = clock_gettime(CLOCK_REALTIME);
   $resolution = clock_getres(CLOCK_REALTIME);

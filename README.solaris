@@ -694,7 +694,8 @@ but if one patiently waits, one gets these results:
  uni/tr_eucjp.t                    29  7424     6   12 200.00%  1-6
  uni/tr_sjis.t                     29  7424     6   12 200.00%  1-6
  56 tests and 467 subtests skipped.
- Failed 27/811 test scripts, 96.67% okay. 1383/75399 subtests failed, 98.17% okay.
+ Failed 27/811 test scripts, 96.67% okay. 1383/75399 subtests failed,
+   98.17% okay.
 
 The alarm() test failure is caused by system() apparently blocking
 alarm().  That is probably a libc bug, and given that SunOS 4.x

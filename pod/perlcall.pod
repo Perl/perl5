@@ -910,48 +910,48 @@ result, the subroutine calls I<die>.
 
 and some C to call it
 
-    static void
-    call_Subtract(a, b)
-    int a;
-    int b;
-    {
-        dSP;
-        int count;
-        SV *err_tmp;
+ static void
+ call_Subtract(a, b)
+ int a;
+ int b;
+ {
+     dSP;
+     int count;
+     SV *err_tmp;
 
-        ENTER;
-        SAVETMPS;
+     ENTER;
+     SAVETMPS;
 
-        PUSHMARK(SP);
-        EXTEND(SP, 2);
-        PUSHs(sv_2mortal(newSViv(a)));
-        PUSHs(sv_2mortal(newSViv(b)));
-        PUTBACK;
+     PUSHMARK(SP);
+     EXTEND(SP, 2);
+     PUSHs(sv_2mortal(newSViv(a)));
+     PUSHs(sv_2mortal(newSViv(b)));
+     PUTBACK;
 
-        count = call_pv("Subtract", G_EVAL|G_SCALAR);
+     count = call_pv("Subtract", G_EVAL|G_SCALAR);
 
-        SPAGAIN;
+     SPAGAIN;
 
-        /* Check the eval first */
-        err_tmp = ERRSV;
-        if (SvTRUE(err_tmp))
-        {
-            printf ("Uh oh - %s\n", SvPV_nolen(err_tmp));
-            POPs;
-        }
-        else
-        {
-            if (count != 1)
-               croak("call_Subtract: wanted 1 value from 'Subtract', got %d\n",
-                        count);
+     /* Check the eval first */
+     err_tmp = ERRSV;
+     if (SvTRUE(err_tmp))
+     {
+         printf ("Uh oh - %s\n", SvPV_nolen(err_tmp));
+         POPs;
+     }
+     else
+     {
+       if (count != 1)
+        croak("call_Subtract: wanted 1 value from 'Subtract', got %d\n",
+              count);
 
-            printf ("%d - %d = %d\n", a, b, POPi);
-        }
+         printf ("%d - %d = %d\n", a, b, POPi);
+     }
 
-        PUTBACK;
-        FREETMPS;
-        LEAVE;
-    }
+     PUTBACK;
+     FREETMPS;
+     LEAVE;
+ }
 
 If I<call_Subtract> is called thus
 
@@ -1909,9 +1909,10 @@ done inside our C code:
 
  ...
 
- SV *cvrv = eval_pv("sub {
-                    print 'You will not find me cluttering any namespace!'
-                    }", TRUE);
+ SV *cvrv
+    = eval_pv("sub {
+                print 'You will not find me cluttering any namespace!'
+               }", TRUE);
 
  ...
 

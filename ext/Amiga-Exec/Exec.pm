@@ -26,7 +26,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 );
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 require XSLoader;
 XSLoader::load('Amiga::Exec', $VERSION);
@@ -86,7 +86,8 @@ is no need to access the low level methods directly and they are not exported by
 
 =head2 Wait
 
-	$signals = Amiga::Exec->Wait('SignalMask' => $signalmask, 'TimeOut' => $timeoutinusecs );
+ $signals = Amiga::Exec->Wait('SignalMask' => $signalmask,
+                              'TimeOut' => $timeoutinusecs );
 
 Wait on a signal set with optional timeout. The result ($signals) should be checked to
 determine which signal was raised. It will be 0 for timeout.

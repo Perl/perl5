@@ -281,11 +281,16 @@ report on the contents.
      my $i_word = 0;
      foreach my $word ( @words ) {
          $i_word++;
-         $count{$i_LINES}{spec} += matches($i_word, $word, '[^a-zA-Z0-9]');
-         $count{$i_LINES}{only} += matches($i_word, $word, '^[^a-zA-Z0-9]+$');
-         $count{$i_LINES}{cons} += matches($i_word, $word, '^[(?i:bcdfghjklmnpqrstvwxyz)]+$');
-         $count{$i_LINES}{vows} += matches($i_word, $word, '^[(?i:aeiou)]+$');
-         $count{$i_LINES}{caps} += matches($i_word, $word, '^[(A-Z)]+$');
+         $count{$i_LINES}{spec} += matches($i_word, $word,
+                                           '[^a-zA-Z0-9]');
+         $count{$i_LINES}{only} += matches($i_word, $word,
+                                           '^[^a-zA-Z0-9]+$');
+         $count{$i_LINES}{cons} += matches($i_word, $word,
+                                     '^[(?i:bcdfghjklmnpqrstvwxyz)]+$');
+         $count{$i_LINES}{vows} += matches($i_word, $word,
+                                           '^[(?i:aeiou)]+$');
+         $count{$i_LINES}{caps} += matches($i_word, $word,
+                                           '^[(A-Z)]+$');
      }
  }
 
@@ -301,7 +306,9 @@ report on the contents.
          $has++ if $1;
      }
 
-     debug("word: $i_wd ".($has ? 'matches' : 'does not match')." chars: /$regex/");
+     debug( "word: $i_wd "
+           . ($has ? 'matches' : 'does not match')
+           . " chars: /$regex/");
 
      return $has;
  }
@@ -967,7 +974,8 @@ any way an issue, this approach is wrong.
 
 A common sight is code which looks something like this:
 
- logger->debug( "A logging message via process-id: $$ INC: " . Dumper(\%INC) )
+ logger->debug( "A logging message via process-id: $$ INC: "
+                                                       . Dumper(\%INC) )
 
 The problem is that this code will always be parsed and executed, even when the
 debug level set in the logging configuration file is zero.  Once the debug()
@@ -977,7 +985,8 @@ the program will continue.  In the example given though, the C<\%INC> hash will
 already have been dumped, and the message string constructed, all of which work
 could be bypassed by a debug variable at the statement level, like this:
 
- logger->debug( "A logging message via process-id: $$ INC: " . Dumper(\%INC) ) if $DEBUG;
+ logger->debug( "A logging message via process-id: $$ INC: "
+                                            . Dumper(\%INC) ) if $DEBUG;
 
 This effect can be demonstrated by setting up a test script with both forms,
 including a C<debug()> subroutine to emulate typical C<logger()> functionality.

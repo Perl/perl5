@@ -39,8 +39,8 @@ gives advice on how to raise the process limits
 
 Also, Configure might abort with
 
-    Build a threading Perl? [n]
-    Configure[2437]: Syntax error at line 1 : 'config.sh' is not expected.
+ Build a threading Perl? [n]
+ Configure[2437]: Syntax error at line 1 : 'config.sh' is not expected.
 
 This indicates that Configure is being run with a broken Korn shell
 (even though you think you are using a Bourne shell by using
@@ -123,17 +123,17 @@ since pointers are automatically 64-bit wide.
 When compiling Perl in Tru64 you may (depending on the compiler
 release) see two warnings like this
 
-    cc: Warning: numeric.c, line 104: In this statement, floating-point
-    overflow occurs in evaluating the expression "1.8e308". (floatoverfl)
-        return HUGE_VAL;
-    -----------^
+ cc: Warning: numeric.c, line 104: In this statement, floating-point
+ overflow occurs in evaluating the expression "1.8e308". (floatoverfl)
+     return HUGE_VAL;
+ -----------^
 
 and when compiling the POSIX extension
 
-    cc: Warning: const-c.inc, line 2007: In this statement, floating-point
-    overflow occurs in evaluating the expression "1.8e308". (floatoverfl)
-                return HUGE_VAL;
-    -------------------^
+ cc: Warning: const-c.inc, line 2007: In this statement, floating-point
+ overflow occurs in evaluating the expression "1.8e308". (floatoverfl)
+             return HUGE_VAL;
+ -------------------^
 
 The exact line numbers may vary between Perl releases.  The warnings
 are benign and can be ignored: in later C compiler releases the warnings

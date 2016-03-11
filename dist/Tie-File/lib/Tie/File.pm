@@ -7,7 +7,7 @@ use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX', 'LOCK_SH', 'O_WRONLY', 'O_RDONLY';
 sub O_ACCMODE () { O_RDONLY | O_RDWR | O_WRONLY }
 
 
-$VERSION = "1.01";
+$VERSION = "1.02";
 my $DEFAULT_MEMORY_SIZE = 1<<21;    # 2 megabytes
 my $DEFAULT_AUTODEFER_THRESHHOLD = 3; # 3 records
 my $DEFAULT_AUTODEFER_FILELEN_THRESHHOLD = 65536; # 16 disk blocksful
@@ -2013,32 +2013,32 @@ Tie::File - Access the lines of a disk file via a Perl array
 
 =head1 SYNOPSIS
 
-	# This file documents Tie::File version 0.98
-	use Tie::File;
+ # This file documents Tie::File version 0.98
+ use Tie::File;
 
-	tie @array, 'Tie::File', filename or die ...;
+ tie @array, 'Tie::File', filename or die ...;
 
-	$array[13] = 'blah';     # line 13 of the file is now 'blah'
-	print $array[42];        # display line 42 of the file
+ $array[13] = 'blah';     # line 13 of the file is now 'blah'
+ print $array[42];        # display line 42 of the file
 
-	$n_recs = @array;        # how many records are in the file?
-	$#array -= 2;            # chop two records off the end
+ $n_recs = @array;        # how many records are in the file?
+ $#array -= 2;            # chop two records off the end
 
 
-	for (@array) {
-	  s/PERL/Perl/g;         # Replace PERL with Perl everywhere in the file
-	}
+ for (@array) {
+   s/PERL/Perl/g;        # Replace PERL with Perl everywhere in the file
+ }
 
-	# These are just like regular push, pop, unshift, shift, and splice
-	# Except that they modify the file in the way you would expect
+ # These are just like regular push, pop, unshift, shift, and splice
+ # Except that they modify the file in the way you would expect
 
-	push @array, new recs...;
-	my $r1 = pop @array;
-	unshift @array, new recs...;
-	my $r2 = shift @array;
-	@old_recs = splice @array, 3, 7, new recs...;
+ push @array, new recs...;
+ my $r1 = pop @array;
+ unshift @array, new recs...;
+ my $r2 = shift @array;
+ @old_recs = splice @array, 3, 7, new recs...;
 
-	untie @array;            # all finished
+ untie @array;            # all finished
 
 
 =head1 DESCRIPTION
@@ -2174,8 +2174,8 @@ The default memory limit is 2Mib.  You can adjust the maximum read
 cache size by supplying the C<memory> option.  The argument is the
 desired cache size, in bytes.
 
-	# I have a lot of memory, so use a large cache to speed up access
-	tie @array, 'Tie::File', $file, memory => 20_000_000;
+ # I have a lot of memory, so use a large cache to speed up access
+ tie @array, 'Tie::File', $file, memory => 20_000_000;
 
 Setting the memory limit to 0 will inhibit caching; records will be
 fetched from disk every time you examine them.

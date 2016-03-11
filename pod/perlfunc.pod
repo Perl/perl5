@@ -943,12 +943,12 @@ With EXPR, it returns some extra information that the debugger uses to
 print a stack trace.  The value of EXPR indicates how many call frames
 to go back before the current one.
 
-       #  0         1          2      3            4
-    my ($package, $filename, $line, $subroutine, $hasargs,
+    #  0         1          2      3            4
+ my ($package, $filename, $line, $subroutine, $hasargs,
 
-       #  5          6          7            8       9         10
-       $wantarray, $evaltext, $is_require, $hints, $bitmask, $hinthash)
-     = caller($i);
+    #  5          6          7            8       9         10
+    $wantarray, $evaltext, $is_require, $hints, $bitmask, $hinthash)
+  = caller($i);
 
 Here, $subroutine is the function that the caller called (rather than the
 function containing the caller).  Note that $subroutine may be C<(eval)> if
@@ -3472,7 +3472,7 @@ X<join>
 Joins the separate strings of LIST into a single string with fields
 separated by the value of EXPR, and returns that new string.  Example:
 
-    my $rec = join(':', $login,$passwd,$uid,$gid,$gcos,$home,$shell);
+   my $rec = join(':', $login,$passwd,$uid,$gid,$gcos,$home,$shell);
 
 Beware that unlike L<C<split>|/split E<sol>PATTERNE<sol>,EXPR,LIMIT>,
 L<C<join>|/join EXPR,LIST> doesn't take a pattern as its first argument.
@@ -4020,14 +4020,14 @@ encounters the missing (or unexpected) comma.  The syntax error will be
 reported close to the C<}>, but you'll need to change something near the C<{>
 such as using a unary C<+> or semicolon to give Perl some help:
 
-    my %hash = map {  "\L$_" => 1  } @array # perl guesses EXPR. wrong
-    my %hash = map { +"\L$_" => 1  } @array # perl guesses BLOCK. right
-    my %hash = map {; "\L$_" => 1  } @array # this also works
-    my %hash = map { ("\L$_" => 1) } @array # as does this
-    my %hash = map {  lc($_) => 1  } @array # and this.
-    my %hash = map +( lc($_) => 1 ), @array # this is EXPR and works!
+ my %hash = map {  "\L$_" => 1  } @array # perl guesses EXPR. wrong
+ my %hash = map { +"\L$_" => 1  } @array # perl guesses BLOCK. right
+ my %hash = map {; "\L$_" => 1  } @array # this also works
+ my %hash = map { ("\L$_" => 1) } @array # as does this
+ my %hash = map {  lc($_) => 1  } @array # and this.
+ my %hash = map +( lc($_) => 1 ), @array # this is EXPR and works!
 
-    my %hash = map  ( lc($_), 1 ),   @array # evaluates to (1, @array)
+ my %hash = map  ( lc($_), 1 ),   @array # evaluates to (1, @array)
 
 or to force an anon hash constructor use C<+{>:
 
@@ -4427,28 +4427,29 @@ See L<perliol> for detailed info on PerlIO.
 
 General examples:
 
-    open(my $log, ">>", "/usr/spool/news/twitlog");
-    # if the open fails, output is discarded
+ open(my $log, ">>", "/usr/spool/news/twitlog");
+ # if the open fails, output is discarded
 
-    open(my $dbase, "+<", "dbase.mine")      # open for update
-        or die "Can't open 'dbase.mine' for update: $!";
+ open(my $dbase, "+<", "dbase.mine")      # open for update
+     or die "Can't open 'dbase.mine' for update: $!";
 
-    open(my $dbase, "+<dbase.mine")          # ditto
-        or die "Can't open 'dbase.mine' for update: $!";
+ open(my $dbase, "+<dbase.mine")          # ditto
+     or die "Can't open 'dbase.mine' for update: $!";
 
-    open(my $article_fh, "-|", "caesar <$article")  # decrypt article
-        or die "Can't start caesar: $!";
+ open(my $article_fh, "-|", "caesar <$article")  # decrypt
+                                                 # article
+     or die "Can't start caesar: $!";
 
-    open(my $article_fh, "caesar <$article |")      # ditto
-        or die "Can't start caesar: $!";
+ open(my $article_fh, "caesar <$article |")      # ditto
+     or die "Can't start caesar: $!";
 
-    open(my $out_fh, "|-", "sort >Tmp$$")    # $$ is our process id
-        or die "Can't start sort: $!";
+ open(my $out_fh, "|-", "sort >Tmp$$")    # $$ is our process id
+     or die "Can't start sort: $!";
 
-    # in-memory files
-    open(my $memory, ">", \$var)
-        or die "Can't open memory file: $!";
-    print $memory "foo!\n";              # output will appear in $var
+ # in-memory files
+ open(my $memory, ">", \$var)
+     or die "Can't open memory file: $!";
+ print $memory "foo!\n";              # output will appear in $var
 
 You may also, in the Bourne shell tradition, specify an EXPR beginning
 with C<< >& >>, in which case the rest of the string is interpreted
@@ -4528,11 +4529,11 @@ Use C<defined($pid)> or C<//> to determine whether the open was successful.
 
 For example, use either
 
-    my $child_pid = open(my $from_kid, "-|") // die "Can't fork: $!";
+   my $child_pid = open(my $from_kid, "-|") // die "Can't fork: $!";
 
 or
 
-    my $child_pid = open(my $to_kid,   "|-") // die "Can't fork: $!";
+   my $child_pid = open(my $to_kid,   "|-") // die "Can't fork: $!";
 
 followed by
 
@@ -6761,13 +6762,14 @@ subroutine like this:
 
 The usual idiom is:
 
-    my ($nfound, $timeleft) =
-      select(my $rout = $rin, my $wout = $win, my $eout = $ein, $timeout);
+ my ($nfound, $timeleft) =
+   select(my $rout = $rin, my $wout = $win, my $eout = $ein,
+                                                          $timeout);
 
 or to block until something becomes ready just do this
 
-    my $nfound =
-      select(my $rout = $rin, my $wout = $win, my $eout = $ein, undef);
+ my $nfound =
+   select(my $rout = $rin, my $wout = $win, my $eout = $ein, undef);
 
 Most systems do not bother to return anything useful in C<$timeleft>, so
 calling L<C<select>|/select RBITS,WBITS,EBITS,TIMEOUT> in scalar context

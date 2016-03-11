@@ -3,7 +3,7 @@ package Thread::Queue;
 use strict;
 use warnings;
 
-our $VERSION = '3.07';
+our $VERSION = '3.08';
 $VERSION = eval $VERSION;
 
 use threads::shared 1.21;
@@ -485,13 +485,14 @@ Sets the size of the queue.  If set, calls to C<enqueue()> will block until
 the number of pending items in the queue drops below the C<limit>.  The
 C<limit> does not prevent enqueuing items beyond that count:
 
-    my $q = Thread::Queue->new(1, 2);
-    $q->limit = 4;
-    $q->enqueue(3, 4, 5);   # Does not block
-    $q->enqueue(6);         # Blocks until at least 2 items are dequeued
-
-    my $size = $q->limit;   # Returns the current limit (may return 'undef')
-    $q->limit = 0;          # Queue size is now unlimited
+ my $q = Thread::Queue->new(1, 2);
+ $q->limit = 4;
+ $q->enqueue(3, 4, 5);   # Does not block
+ $q->enqueue(6);         # Blocks until at least 2 items are
+                         # dequeued
+ my $size = $q->limit;   # Returns the current limit (may return
+                         # 'undef')
+ $q->limit = 0;          # Queue size is now unlimited
 
 =item ->end()
 
@@ -513,14 +514,14 @@ To prevent the contents of a queue from being modified by another thread
 while it is being examined and/or changed, L<lock|threads::shared/"lock
 VARIABLE"> the queue inside a local block:
 
-    {
-        lock($q);   # Keep other threads from changing the queue's contents
-        my $item = $q->peek();
-        if ($item ...) {
-            ...
-        }
-    }
-    # Queue is now unlocked
+ {
+     lock($q);   # Keep other threads from changing the queue's contents
+     my $item = $q->peek();
+     if ($item ...) {
+         ...
+     }
+ }
+ # Queue is now unlocked
 
 =over
 
@@ -593,11 +594,12 @@ of the queue (similar to C<dequeue_nb>) if the count overlaps the head of the
 queue from the specified position (i.e. if queue size + index + count is
 greater than zero):
 
-    $q->enqueue(qw/foo bar baz/);
-    my @nada = $q->extract(-6, 2);   # Returns ()         - (3+(-6)+2) <= 0
-    my @some = $q->extract(-6, 4);   # Returns (foo)      - (3+(-6)+4) > 0
-                                     # Queue now contains:  bar, baz
-    my @rest = $q->extract(-3, 4);   # Returns (bar, baz) - (2+(-3)+4) > 0
+ $q->enqueue(qw/foo bar baz/);
+ my @nada = $q->extract(-6, 2);  # Returns ()      - (3+(-6)+2) <= 0
+ my @some = $q->extract(-6, 4);  # Returns (foo)   - (3+(-6)+4) > 0
+                                 # Queue now contains:  bar, baz
+ my @rest = $q->extract(-3, 4);  # Returns
+                                 #       (bar, baz) - (2+(-3)+4) > 0
 
 =back
 

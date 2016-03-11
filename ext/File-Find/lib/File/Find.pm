@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.33';
+our $VERSION = '1.34';
 require Exporter;
 require Cwd;
 
@@ -1056,16 +1056,16 @@ App-find2perl CPAN distribution), which when fed,
 
 produces something like:
 
-    sub wanted {
-        /^\.nfs.*\z/s &&
-        (($dev, $ino, $mode, $nlink, $uid, $gid) = lstat($_)) &&
-        int(-M _) > 7 &&
-        unlink($_)
-        ||
-        ($nlink || (($dev, $ino, $mode, $nlink, $uid, $gid) = lstat($_))) &&
-        $dev < 0 &&
-        ($File::Find::prune = 1);
-    }
+ sub wanted {
+    /^\.nfs.*\z/s &&
+    (($dev, $ino, $mode, $nlink, $uid, $gid) = lstat($_)) &&
+    int(-M _) > 7 &&
+    unlink($_)
+    ||
+    ($nlink || (($dev, $ino, $mode, $nlink, $uid, $gid) = lstat($_))) &&
+    $dev < 0 &&
+    ($File::Find::prune = 1);
+ }
 
 Notice the C<_> in the above C<int(-M _)>: the C<_> is a magical
 filehandle that caches the information from the preceding
