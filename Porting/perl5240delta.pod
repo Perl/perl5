@@ -16,6 +16,15 @@ This document describes the differences between the 5.22.0 release and the
 For details on what is in this release, see
 L<http://www.unicode.org/versions/Unicode8.0.0/>.
 
+=head2 C<qr/(?[ ])/> now works in UTF-8 locales
+
+L<Extended Bracketed Character Classes|perlrecharclass/Extended Bracketed Character Classes>
+now will successfully compile when S<C<use locale>> is in effect.  The compiled
+pattern will use standard Unicode rules.  If the runtime locale is not a
+UTF-8 one, a warning is raised and standard Unicode rules are used
+anyway.  No tainting is done since the outcome does not actually depend
+on the locale.
+
 =head2 Integer shift (C<< << >> and C<< >> >>) now more explicitly defined
 
 Negative shifts are reverse shifts: left shift becomes right shift,
@@ -113,6 +122,12 @@ C<pop>, C<shift>, C<unshift>, C<splice>, C<keys>, C<values>, and C<each> on
 a scalar argument) has been deemed unsuccessful. It has now been removed;
 trying to use the feature (or to disable the C<experimental::autoderef>
 warning it previously triggered) now yields an exception.
+
+=head2 An off by one issue in C<$Carp::MaxArgNums> has been fixed
+
+C<$Carp::MaxArgNums> is supposed to be the number of arguments to display.
+Prior to this version, it was instead showing C<$Carp::MaxArgNums> + 1 arguments,
+contrary to the documentation.
 
 =head1 Deprecations
 
@@ -308,6 +323,53 @@ exports anything.  [perl #125410]
 
 =head2 Changes to Existing Documentation
 
+=head3 L<perlcall>
+
+=over 4
+
+=item *
+
+A number of cleanups have been made to perlcall, including:
+
+=over 4
+
+=item *
+
+use EXTEND(SP, n) and PUSHs() instead of XPUSHs() where applicable
+and update prose to match
+
+=item *
+
+add POPu, POPul and POPpbytex to the "complete list of POP macros"
+and clarify the documentation for some of the existing entries, and
+a note about side-effects
+
+=item *
+
+add API documentation for POPu and POPul
+
+=item *
+
+use ERRSV more efficiently
+
+=item *
+
+approaches to thread-safety storage of SVs.
+
+=back
+
+=back
+
+=head3 L<perlunicode>
+
+=over 4
+
+=item *
+
+Discourage use of 'In' prefix for Unicode Block property.
+
+=back
+
 =head3 L<perlpolicy>
 
 =over 4
@@ -343,6 +405,15 @@ diagnostic messages, see L<perldiag>.
 =head3 New Errors
 
 =over 4
+
+=item *
+
+L<%s must not be a named sequence in transliteration operator|perldiag/"%s must not be a named sequence in transliteration operator">
+
+(F) Transliteration (C<tr///> and C<y///>) transliterates individual
+characters.  But a named sequence by definition is more than an
+individual charater, and hence doing this operation on it doesn't make
+sense.
 
 =item *
 
@@ -412,6 +483,11 @@ F<Configure> should handle spaces in paths a little better.
 A new test (F<t/op/aassign.t>) has been added to test the list assignment operator
 C<OP_AASSIGN>.
 
+=item *
+
+Parallel building has been added to the dmake C<makefile.mk> makefile. All
+Win32 compilers are supported.
+
 =back
 
 =head1 Platform Support
@@ -419,6 +495,29 @@ C<OP_AASSIGN>.
 =head2 Platform-Specific Notes
 
 =over 4
+
+=item EBCDIC
+
+=over 4
+
+=item EBCDIC C<cmp()> and C<sort()> fixed for UTF-EBCDIC strings
+
+Comparing two strings that were both encoded in UTF-8 (or more
+precisely, UTF-EBCDIC) did not work properly until now.  Since C<sort()>
+uses C<cmp()>, this fixes that as well.
+
+=item EBCDIC C<tr///> and C<y///> fixed for C<\N{}>, and C<S<use utf8>> ranges
+
+Perl v5.22 introduced the concept of portable ranges to regular
+expression patterns.  A portable range matches the same set of
+characters no matter what platform is being run on.  This concept is now
+extended to C<tr///>.  See
+C<L<trE<sol>E<sol>E<sol>|perlop/trE<sol>SEARCHLISTE<sol>REPLACEMENTLISTE<sol>cdsr>>.
+
+There were also some problems with these operations under S<C<use
+utf8>>, which are now fixed
+
+=back
 
 =item VMS
 
@@ -450,7 +549,17 @@ You can now build perl with GNU Make and GCC.  [perl #123440]
 C<truncate($filename, $size)> now works for files over 4GB in size.
 [perl #125347]
 
+=item *
+
+Parallel building has been added to the dmake C<makefile.mk> makefile. All
+Win32 compilers are supported.
+
 =back
+
+=item AmigaOS
+
+The AmigaOS port has been reintegrated into the main tree, based off of
+Perl 5.22.1.
 
 =back
 
@@ -540,6 +649,28 @@ L<[perl #125781]|https://rt.perl.org/Ticket/Display.html?id=125781>
 
 A crash with C<< %::=(); J->${\"::"} >> has been fixed.
 L<[perl #125541]|https://rt.perl.org/Ticket/Display.html?id=125541>
+
+=item *
+
+C<qr/(?[ () ])/> no longer segfaults, giving a syntax error message instead.
+[perl #125805]
+
+=item *
+
+Regular expression possessive quantifier v5.20 regression now fixed.
+C<qr/>I<PAT>C<{>I<min>,I<max>C<}+>C</> is supposed to behave identically
+to C<qr/(?E<gt>>I<PAT>C<{>I<min>,I<max>C<})/>.  Since v5.20, this didn't
+work if I<min> and I<max> were equal.  [perl #125825]
+
+=item *
+
+C<< BEGIN <> >> no longer segfaults and properly produces an error
+message.  [perl #125341]
+
+=item *
+
+In C<tr///> an illegal backwards range like C<tr/\x{101}-\x{100}//> was
+not always detected, giving incorrect results.  This is now fixed.
 
 =back
 
