@@ -539,13 +539,13 @@ as if they are Latin-1 characters.  For example, C<isWORDCHAR_L1()> will return
 true when called with the code point 0xDF, which is a word character in both
 ASCII and EBCDIC (though it represents different characters in each).
 
-Variant C<isFOO_uni> is like the C<isFOO_L1> variant, but accepts any UV code
+Variant C<isFOO_uvchr> is like the C<isFOO_L1> variant, but accepts any UV code
 point as input.  If the code point is larger than 255, Unicode rules are used
 to determine if it is in the character class.  For example,
-C<isWORDCHAR_uni(0x100)> returns TRUE, since 0x100 is LATIN CAPITAL LETTER A
+C<isWORDCHAR_uvchr(0x100)> returns TRUE, since 0x100 is LATIN CAPITAL LETTER A
 WITH MACRON in Unicode, and is a word character.
 
-Variant C<isFOO_utf8> is like C<isFOO_uni>, but the input is a pointer to a
+Variant C<isFOO_utf8> is like C<isFOO_uvchr>, but the input is a pointer to a
 (known to be well-formed) UTF-8 encoded string (C<U8*> or C<char*>, and
 possibly containing embedded C<NUL> characters).  The classification of just
 the first (possibly multi-byte) character in the string is tested.
@@ -574,7 +574,7 @@ Returns a boolean indicating whether the specified character is an
 alphabetic character, analogous to C<m/[[:alpha:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isALPHA_A>, C<isALPHA_L1>, C<isALPHA_uni>, C<isALPHA_utf8>, C<isALPHA_LC>,
+C<isALPHA_A>, C<isALPHA_L1>, C<isALPHA_uvchr>, C<isALPHA_utf8>, C<isALPHA_LC>,
 C<isALPHA_LC_uvchr>, and C<isALPHA_LC_utf8>.
 
 =for apidoc Am|bool|isALPHANUMERIC|char ch
@@ -582,7 +582,7 @@ Returns a boolean indicating whether the specified character is a either an
 alphabetic character or decimal digit, analogous to C<m/[[:alnum:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isALPHANUMERIC_A>, C<isALPHANUMERIC_L1>, C<isALPHANUMERIC_uni>,
+C<isALPHANUMERIC_A>, C<isALPHANUMERIC_L1>, C<isALPHANUMERIC_uvchr>,
 C<isALPHANUMERIC_utf8>, C<isALPHANUMERIC_LC>, C<isALPHANUMERIC_LC_uvchr>, and
 C<isALPHANUMERIC_LC_utf8>.
 
@@ -594,7 +594,7 @@ character corresponds to an ASCII character.  Variants C<isASCII_A()> and
 C<isASCII_L1()> are identical to C<isASCII()>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isASCII_uni>, C<isASCII_utf8>, C<isASCII_LC>, C<isASCII_LC_uvchr>, and
+C<isASCII_uvchr>, C<isASCII_utf8>, C<isASCII_LC>, C<isASCII_LC_uvchr>, and
 C<isASCII_LC_utf8>.  Note, however, that some platforms do not have the C
 library routine C<isascii()>.  In these cases, the variants whose names contain
 C<LC> are the same as the corresponding ones without.
@@ -610,7 +610,7 @@ Returns a boolean indicating whether the specified character is a
 character considered to be a blank, analogous to C<m/[[:blank:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isBLANK_A>, C<isBLANK_L1>, C<isBLANK_uni>, C<isBLANK_utf8>, C<isBLANK_LC>,
+C<isBLANK_A>, C<isBLANK_L1>, C<isBLANK_uvchr>, C<isBLANK_utf8>, C<isBLANK_LC>,
 C<isBLANK_LC_uvchr>, and C<isBLANK_LC_utf8>.  Note, however, that some
 platforms do not have the C library routine C<isblank()>.  In these cases, the
 variants whose names contain C<LC> are the same as the corresponding ones
@@ -621,7 +621,7 @@ Returns a boolean indicating whether the specified character is a
 control character, analogous to C<m/[[:cntrl:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isCNTRL_A>, C<isCNTRL_L1>, C<isCNTRL_uni>, C<isCNTRL_utf8>, C<isCNTRL_LC>,
+C<isCNTRL_A>, C<isCNTRL_L1>, C<isCNTRL_uvchr>, C<isCNTRL_utf8>, C<isCNTRL_LC>,
 C<isCNTRL_LC_uvchr>, and C<isCNTRL_LC_utf8>
 On EBCDIC platforms, you almost always want to use the C<isCNTRL_L1> variant.
 
@@ -631,7 +631,7 @@ digit, analogous to C<m/[[:digit:]]/>.
 Variants C<isDIGIT_A> and C<isDIGIT_L1> are identical to C<isDIGIT>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isDIGIT_uni>, C<isDIGIT_utf8>, C<isDIGIT_LC>, C<isDIGIT_LC_uvchr>, and
+C<isDIGIT_uvchr>, C<isDIGIT_utf8>, C<isDIGIT_LC>, C<isDIGIT_LC_uvchr>, and
 C<isDIGIT_LC_utf8>.
 
 =for apidoc Am|bool|isGRAPH|char ch
@@ -639,7 +639,7 @@ Returns a boolean indicating whether the specified character is a
 graphic character, analogous to C<m/[[:graph:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isGRAPH_A>, C<isGRAPH_L1>, C<isGRAPH_uni>, C<isGRAPH_utf8>, C<isGRAPH_LC>,
+C<isGRAPH_A>, C<isGRAPH_L1>, C<isGRAPH_uvchr>, C<isGRAPH_utf8>, C<isGRAPH_LC>,
 C<isGRAPH_LC_uvchr>, and C<isGRAPH_LC_utf8>.
 
 =for apidoc Am|bool|isLOWER|char ch
@@ -647,7 +647,7 @@ Returns a boolean indicating whether the specified character is a
 lowercase character, analogous to C<m/[[:lower:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isLOWER_A>, C<isLOWER_L1>, C<isLOWER_uni>, C<isLOWER_utf8>, C<isLOWER_LC>,
+C<isLOWER_A>, C<isLOWER_L1>, C<isLOWER_uvchr>, C<isLOWER_utf8>, C<isLOWER_LC>,
 C<isLOWER_LC_uvchr>, and C<isLOWER_LC_utf8>.
 
 =for apidoc Am|bool|isOCTAL|char ch
@@ -664,7 +664,7 @@ straightforward as one might desire.  See L<perlrecharclass/POSIX Character
 Classes> for details.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isPUNCT_A>, C<isPUNCT_L1>, C<isPUNCT_uni>, C<isPUNCT_utf8>, C<isPUNCT_LC>,
+C<isPUNCT_A>, C<isPUNCT_L1>, C<isPUNCT_uvchr>, C<isPUNCT_utf8>, C<isPUNCT_LC>,
 C<isPUNCT_LC_uvchr>, and C<isPUNCT_LC_utf8>.
 
 =for apidoc Am|bool|isSPACE|char ch
@@ -678,7 +678,7 @@ in the non-locale variants, was that C<isSPACE()> did not match a vertical tab.
 (See L</isPSXSPC> for a macro that matches a vertical tab in all releases.)
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isSPACE_A>, C<isSPACE_L1>, C<isSPACE_uni>, C<isSPACE_utf8>, C<isSPACE_LC>,
+C<isSPACE_A>, C<isSPACE_L1>, C<isSPACE_uvchr>, C<isSPACE_utf8>, C<isSPACE_LC>,
 C<isSPACE_LC_uvchr>, and C<isSPACE_LC_utf8>.
 
 =for apidoc Am|bool|isPSXSPC|char ch
@@ -692,7 +692,7 @@ C<isSPACE()> forms don't match a Vertical Tab, and the C<isPSXSPC()> forms do.
 Otherwise they are identical.  Thus this macro is analogous to what
 C<m/[[:space:]]/> matches in a regular expression.
 See the L<top of this section|/Character classification> for an explanation of
-variants C<isPSXSPC_A>, C<isPSXSPC_L1>, C<isPSXSPC_uni>, C<isPSXSPC_utf8>,
+variants C<isPSXSPC_A>, C<isPSXSPC_L1>, C<isPSXSPC_uvchr>, C<isPSXSPC_utf8>,
 C<isPSXSPC_LC>, C<isPSXSPC_LC_uvchr>, and C<isPSXSPC_LC_utf8>.
 
 =for apidoc Am|bool|isUPPER|char ch
@@ -700,7 +700,7 @@ Returns a boolean indicating whether the specified character is an
 uppercase character, analogous to C<m/[[:upper:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isUPPER_A>, C<isUPPER_L1>, C<isUPPER_uni>, C<isUPPER_utf8>, C<isUPPER_LC>,
+C<isUPPER_A>, C<isUPPER_L1>, C<isUPPER_uvchr>, C<isUPPER_utf8>, C<isUPPER_LC>,
 C<isUPPER_LC_uvchr>, and C<isUPPER_LC_utf8>.
 
 =for apidoc Am|bool|isPRINT|char ch
@@ -708,7 +708,7 @@ Returns a boolean indicating whether the specified character is a
 printable character, analogous to C<m/[[:print:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isPRINT_A>, C<isPRINT_L1>, C<isPRINT_uni>, C<isPRINT_utf8>, C<isPRINT_LC>,
+C<isPRINT_A>, C<isPRINT_L1>, C<isPRINT_uvchr>, C<isPRINT_utf8>, C<isPRINT_LC>,
 C<isPRINT_LC_uvchr>, and C<isPRINT_LC_utf8>.
 
 =for apidoc Am|bool|isWORDCHAR|char ch
@@ -722,7 +722,7 @@ word character includes more than the standard C language meaning of
 alphanumeric.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isWORDCHAR_A>, C<isWORDCHAR_L1>, C<isWORDCHAR_uni>, and C<isWORDCHAR_utf8>.
+C<isWORDCHAR_A>, C<isWORDCHAR_L1>, C<isWORDCHAR_uvchr>, and C<isWORDCHAR_utf8>.
 C<isWORDCHAR_LC>, C<isWORDCHAR_LC_uvchr>, and C<isWORDCHAR_LC_utf8> are also as
 described there, but additionally include the platform's native underscore.
 
@@ -732,7 +732,7 @@ digit.  In the ASCII range these are C<[0-9A-Fa-f]>.  Variants C<isXDIGIT_A()>
 and C<isXDIGIT_L1()> are identical to C<isXDIGIT()>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isXDIGIT_uni>, C<isXDIGIT_utf8>, C<isXDIGIT_LC>, C<isXDIGIT_LC_uvchr>, and
+C<isXDIGIT_uvchr>, C<isXDIGIT_utf8>, C<isXDIGIT_LC>, C<isXDIGIT_LC_uvchr>, and
 C<isXDIGIT_LC_utf8>.
 
 =for apidoc Am|bool|isIDFIRST|char ch
@@ -742,7 +742,7 @@ the official Unicode property C<XID_Start>.  The difference is that this
 returns true only if the input character also matches L</isWORDCHAR>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isIDFIRST_A>, C<isIDFIRST_L1>, C<isIDFIRST_uni>, C<isIDFIRST_utf8>,
+C<isIDFIRST_A>, C<isIDFIRST_L1>, C<isIDFIRST_uvchr>, C<isIDFIRST_utf8>,
 C<isIDFIRST_LC>, C<isIDFIRST_LC_uvchr>, and C<isIDFIRST_LC_utf8>.
 
 =for apidoc Am|bool|isIDCONT|char ch
@@ -752,7 +752,7 @@ not quite the same as the official Unicode property C<XID_Continue>.  The
 difference is that this returns true only if the input character also matches
 L</isWORDCHAR>.  See the L<top of this section|/Character classification> for
 an
-explanation of variants C<isIDCONT_A>, C<isIDCONT_L1>, C<isIDCONT_uni>,
+explanation of variants C<isIDCONT_A>, C<isIDCONT_L1>, C<isIDCONT_uvchr>,
 C<isIDCONT_utf8>, C<isIDCONT_LC>, C<isIDCONT_LC_uvchr>, and
 C<isIDCONT_LC_utf8>.
 
@@ -769,9 +769,10 @@ Converts the specified character to uppercase.  If the input is anything but an
 ASCII lowercase character, that input character itself is returned.  Variant
 C<toUPPER_A> is equivalent.
 
-=for apidoc Am|UV|toUPPER_uni|UV cp|U8* s|STRLEN* lenp
-Converts the Unicode code point C<cp> to its uppercase version, and
-stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
+=for apidoc Am|UV|toUPPER_uvchr|UV cp|U8* s|STRLEN* lenp
+Converts the code point C<cp> to its uppercase version, and
+stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  The code
+point is interpreted as native if less than 256; otherwise as Unicode.  Note
 that the buffer pointed to by C<s> needs to be at least C<UTF8_MAXBYTES_CASE+1>
 bytes since the uppercase version may be longer than the original character.
 
@@ -793,11 +794,12 @@ The input character at C<p> is assumed to be well-formed.
 Converts the specified character to foldcase.  If the input is anything but an
 ASCII uppercase character, that input character itself is returned.  Variant
 C<toFOLD_A> is equivalent.  (There is no equivalent C<to_FOLD_L1> for the full
-Latin1 range, as the full generality of L</toFOLD_uni> is needed there.)
+Latin1 range, as the full generality of L</toFOLD_uvchr> is needed there.)
 
-=for apidoc Am|UV|toFOLD_uni|UV cp|U8* s|STRLEN* lenp
-Converts the Unicode code point C<cp> to its foldcase version, and
-stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
+=for apidoc Am|UV|toFOLD_uvchr|UV cp|U8* s|STRLEN* lenp
+Converts the code point C<cp> to its foldcase version, and
+stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  The code
+point is interpreted as native if less than 256; otherwise as Unicode.  Note
 that the buffer pointed to by C<s> needs to be at least C<UTF8_MAXBYTES_CASE+1>
 bytes since the foldcase version may be longer than the original character.
 
@@ -828,9 +830,10 @@ undefined if the input doesn't fit in a byte.
 Converts the specified character to lowercase using the current locale's rules,
 if possible; otherwise returns the input character itself.
 
-=for apidoc Am|UV|toLOWER_uni|UV cp|U8* s|STRLEN* lenp
-Converts the Unicode code point C<cp> to its lowercase version, and
-stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
+=for apidoc Am|UV|toLOWER_uvchr|UV cp|U8* s|STRLEN* lenp
+Converts the code point C<cp> to its lowercase version, and
+stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  The code
+point is interpreted as native if less than 256; otherwise as Unicode.  Note
 that the buffer pointed to by C<s> needs to be at least C<UTF8_MAXBYTES_CASE+1>
 bytes since the lowercase version may be longer than the original character.
 
@@ -852,12 +855,13 @@ The input character at C<p> is assumed to be well-formed.
 Converts the specified character to titlecase.  If the input is anything but an
 ASCII lowercase character, that input character itself is returned.  Variant
 C<toTITLE_A> is equivalent.  (There is no C<toTITLE_L1> for the full Latin1
-range, as the full generality of L</toTITLE_uni> is needed there.  Titlecase is
+range, as the full generality of L</toTITLE_uvchr> is needed there.  Titlecase is
 not a concept used in locale handling, so there is no functionality for that.)
 
-=for apidoc Am|UV|toTITLE_uni|UV cp|U8* s|STRLEN* lenp
-Converts the Unicode code point C<cp> to its titlecase version, and
-stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
+=for apidoc Am|UV|toTITLE_uvchr|UV cp|U8* s|STRLEN* lenp
+Converts the code point C<cp> to its titlecase version, and
+stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  The code
+point is interpreted as native if less than 256; otherwise as Unicode.  Note
 that the buffer pointed to by C<s> needs to be at least C<UTF8_MAXBYTES_CASE+1>
 bytes since the titlecase version may be longer than the original character.
 
@@ -877,7 +881,7 @@ The input character at C<p> is assumed to be well-formed.
 
 =cut
 
-XXX Still undocumented isVERTWS_uni and _utf8; it's unclear what their names
+XXX Still undocumented isVERTWS_uvchr and _utf8; it's unclear what their names
 really should be.  Also toUPPER_LC and toFOLD_LC, which are subject to change.
 
 Note that these macros are repeated in Devel::PPPort, so should also be
@@ -1515,56 +1519,81 @@ END_EXTERN_C
 #define isPSXSPC_LC(c)		isSPACE_LC(c)
 
 /* For internal core Perl use only: the base macros for defining macros like
- * isALPHA_uni.  'c' is the code point to check.  'classnum' is the POSIX class
- * number defined earlier in this file.  _generic_uni() is used for POSIX
+ * isALPHA_uvchr.  'c' is the code point to check.  'classnum' is the POSIX class
+ * number defined earlier in this file.  _generic_uvchr() is used for POSIX
  * classes where there is a macro or function 'above_latin1' that takes the
  * single argument 'c' and returns the desired value.  These exist for those
  * classes which have simple definitions, avoiding the overhead of a hash
- * lookup or inversion list binary search.  _generic_swash_uni() can be used
+ * lookup or inversion list binary search.  _generic_swash_uvchr() can be used
  * for classes where that overhead is faster than a direct lookup.
- * _generic_uni() won't compile if 'c' isn't unsigned, as it won't match the
+ * _generic_uvchr() won't compile if 'c' isn't unsigned, as it won't match the
  * 'above_latin1' prototype. _generic_isCC() macro does bounds checking, so
  * have duplicate checks here, so could create versions of the macros that
  * don't, but experiments show that gcc optimizes them out anyway. */
 
 /* Note that all ignore 'use bytes' */
-#define _generic_uni(classnum, above_latin1, c) ((c) < 256                    \
+#define _generic_uvchr(classnum, above_latin1, c) ((c) < 256                    \
                                              ? _generic_isCC(c, classnum)     \
                                              : above_latin1(c))
-#define _generic_swash_uni(classnum, c) ((c) < 256                            \
+#define _generic_swash_uvchr(classnum, c) ((c) < 256                            \
                                              ? _generic_isCC(c, classnum)     \
                                              : _is_uni_FOO(classnum, c))
-#define isALPHA_uni(c)      _generic_swash_uni(_CC_ALPHA, c)
-#define isALPHANUMERIC_uni(c) _generic_swash_uni(_CC_ALPHANUMERIC, c)
-#define isASCII_uni(c)      isASCII(c)
-#define isBLANK_uni(c)      _generic_uni(_CC_BLANK, is_HORIZWS_cp_high, c)
-#define isCNTRL_uni(c)      isCNTRL_L1(c) /* All controls are in Latin1 */
-#define isDIGIT_uni(c)      _generic_swash_uni(_CC_DIGIT, c)
-#define isGRAPH_uni(c)      _generic_swash_uni(_CC_GRAPH, c)
-#define isIDCONT_uni(c)     _generic_uni(_CC_WORDCHAR, _is_uni_perl_idcont, c)
-#define isIDFIRST_uni(c)    _generic_uni(_CC_IDFIRST, _is_uni_perl_idstart, c)
-#define isLOWER_uni(c)      _generic_swash_uni(_CC_LOWER, c)
-#define isPRINT_uni(c)      _generic_swash_uni(_CC_PRINT, c)
+#define isALPHA_uvchr(c)      _generic_swash_uvchr(_CC_ALPHA, c)
+#define isALPHANUMERIC_uvchr(c) _generic_swash_uvchr(_CC_ALPHANUMERIC, c)
+#define isASCII_uvchr(c)      isASCII(c)
+#define isBLANK_uvchr(c)      _generic_uvchr(_CC_BLANK, is_HORIZWS_cp_high, c)
+#define isCNTRL_uvchr(c)      isCNTRL_L1(c) /* All controls are in Latin1 */
+#define isDIGIT_uvchr(c)      _generic_swash_uvchr(_CC_DIGIT, c)
+#define isGRAPH_uvchr(c)      _generic_swash_uvchr(_CC_GRAPH, c)
+#define isIDCONT_uvchr(c)     _generic_uvchr(_CC_WORDCHAR, _is_uni_perl_idcont, c)
+#define isIDFIRST_uvchr(c)    _generic_uvchr(_CC_IDFIRST, _is_uni_perl_idstart, c)
+#define isLOWER_uvchr(c)      _generic_swash_uvchr(_CC_LOWER, c)
+#define isPRINT_uvchr(c)      _generic_swash_uvchr(_CC_PRINT, c)
 
-#define isPUNCT_uni(c)      _generic_swash_uni(_CC_PUNCT, c)
-#define isSPACE_uni(c)      _generic_uni(_CC_SPACE, is_XPERLSPACE_cp_high, c)
-#define isPSXSPC_uni(c)     isSPACE_uni(c)
+#define isPUNCT_uvchr(c)      _generic_swash_uvchr(_CC_PUNCT, c)
+#define isSPACE_uvchr(c)      _generic_uvchr(_CC_SPACE, is_XPERLSPACE_cp_high, c)
+#define isPSXSPC_uvchr(c)     isSPACE_uvchr(c)
 
-#define isUPPER_uni(c)      _generic_swash_uni(_CC_UPPER, c)
-#define isVERTWS_uni(c)     _generic_uni(_CC_VERTSPACE, is_VERTWS_cp_high, c)
-#define isWORDCHAR_uni(c)   _generic_swash_uni(_CC_WORDCHAR, c)
-#define isXDIGIT_uni(c)     _generic_uni(_CC_XDIGIT, is_XDIGIT_cp_high, c)
+#define isUPPER_uvchr(c)      _generic_swash_uvchr(_CC_UPPER, c)
+#define isVERTWS_uvchr(c)     _generic_uvchr(_CC_VERTSPACE, is_VERTWS_cp_high, c)
+#define isWORDCHAR_uvchr(c)   _generic_swash_uvchr(_CC_WORDCHAR, c)
+#define isXDIGIT_uvchr(c)     _generic_uvchr(_CC_XDIGIT, is_XDIGIT_cp_high, c)
 
-#define toFOLD_uni(c,s,l)	to_uni_fold(c,s,l)
-#define toLOWER_uni(c,s,l)	to_uni_lower(c,s,l)
-#define toTITLE_uni(c,s,l)	to_uni_title(c,s,l)
-#define toUPPER_uni(c,s,l)	to_uni_upper(c,s,l)
+#define toFOLD_uvchr(c,s,l)	to_uni_fold(c,s,l)
+#define toLOWER_uvchr(c,s,l)	to_uni_lower(c,s,l)
+#define toTITLE_uvchr(c,s,l)	to_uni_title(c,s,l)
+#define toUPPER_uvchr(c,s,l)	to_uni_upper(c,s,l)
+
+/* For backwards compatibility, even though '_uni' should mean official Unicode
+ * code points, in Perl it means native for those below 256 */
+#define isALPHA_uni(c)          isALPHA_uvchr(c)
+#define isALPHANUMERIC_uni(c)   isALPHANUMERIC_uvchr(c)
+#define isASCII_uni(c)          isASCII_uvchr(c)
+#define isBLANK_uni(c)          isBLANK_uvchr(c)
+#define isCNTRL_uni(c)          isCNTRL_uvchr(c)
+#define isDIGIT_uni(c)          isDIGIT_uvchr(c)
+#define isGRAPH_uni(c)          isGRAPH_uvchr(c)
+#define isIDCONT_uni(c)         isIDCONT_uvchr(c)
+#define isIDFIRST_uni(c)        isIDFIRST_uvchr(c)
+#define isLOWER_uni(c)          isLOWER_uvchr(c)
+#define isPRINT_uni(c)          isPRINT_uvchr(c)
+#define isPUNCT_uni(c)          isPUNCT_uvchr(c)
+#define isSPACE_uni(c)          isSPACE_uvchr(c)
+#define isPSXSPC_uni(c)         isPSXSPC_uvchr(c)
+#define isUPPER_uni(c)          isUPPER_uvchr(c)
+#define isVERTWS_uni(c)         isVERTWS_uvchr(c)
+#define isWORDCHAR_uni(c)       isWORDCHAR_uvchr(c)
+#define isXDIGIT_uni(c)         isXDIGIT_uvchr(c)
+#define toFOLD_uni(c,s,l)       toFOLD_uvchr(c,s,l)
+#define toLOWER_uni(c,s,l)      toLOWER_uvchr(c,s,l)
+#define toTITLE_uni(c,s,l)      toTITLE_uvchr(c,s,l)
+#define toUPPER_uni(c,s,l)      toUPPER_uvchr(c,s,l)
 
 /* For internal core Perl use only: the base macros for defining macros like
  * isALPHA_LC_uvchr.  These are like isALPHA_LC, but the input can be any code
- * point, not just 0-255.  Like _generic_uni, there are two versions, one for
+ * point, not just 0-255.  Like _generic_uvchr, there are two versions, one for
  * simple class definitions; the other for more complex.  These are like
- * _generic_uni, so see it for more info. */
+ * _generic_uvchr, so see it for more info. */
 #define _generic_LC_uvchr(latin1, above_latin1, c)                            \
                                     (c < 256 ? latin1(c) : above_latin1(c))
 #define _generic_LC_swash_uvchr(latin1, classnum, c)                          \
