@@ -3854,6 +3854,9 @@ STATIC void	S_put_code_point(pTHX_ SV* sv, UV c);
 STATIC void	S_put_range(pTHX_ SV* sv, UV start, const UV end, const bool allow_literals);
 #define PERL_ARGS_ASSERT_PUT_RANGE	\
 	assert(sv)
+PERL_CALLCONV int	Perl_re_indentf(const char *fmt, U32 depth, ...);
+#define PERL_ARGS_ASSERT_RE_INDENTF	\
+	assert(fmt)
 STATIC void	S_regdump_extflags(pTHX_ const char *lead, const U32 flags);
 STATIC void	S_regdump_intflags(pTHX_ const char *lead, const U32 flags);
 STATIC U8	S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val, U32 depth);
@@ -3864,9 +3867,12 @@ STATIC U8	S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p, const reg
 STATIC void	S_debug_start_match(pTHX_ const REGEXP *prog, const bool do_utf8, const char *start, const char *end, const char *blurb);
 #define PERL_ARGS_ASSERT_DEBUG_START_MATCH	\
 	assert(prog); assert(start); assert(end); assert(blurb)
-STATIC void	S_dump_exec_pos(pTHX_ const char *locinput, const regnode *scan, const char *loc_regeol, const char *loc_bostr, const char *loc_reg_starttry, const bool do_utf8);
+STATIC void	S_dump_exec_pos(pTHX_ const char *locinput, const regnode *scan, const char *loc_regeol, const char *loc_bostr, const char *loc_reg_starttry, const bool do_utf8, U32 depth);
 #define PERL_ARGS_ASSERT_DUMP_EXEC_POS	\
 	assert(locinput); assert(scan); assert(loc_regeol); assert(loc_bostr); assert(loc_reg_starttry)
+PERL_CALLCONV int	Perl_re_indentfo(const char *fmt, U32 depth, ...);
+#define PERL_ARGS_ASSERT_RE_INDENTFO	\
+	assert(fmt)
 #  endif
 #  if defined(PERL_IN_SV_C)
 STATIC void	S_del_sv(pTHX_ SV *p);
@@ -4938,6 +4944,9 @@ PERL_CALLCONV SV*	Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog, co
 #define PERL_ARGS_ASSERT__GET_REGCLASS_NONBITMAP_DATA	\
 	assert(node)
 PERL_CALLCONV void	Perl__load_PL_utf8_foldclosures(pTHX);
+PERL_CALLCONV int	Perl_re_printf(const char *fmt, ...);
+#define PERL_ARGS_ASSERT_RE_PRINTF	\
+	assert(fmt)
 PERL_CALLCONV void	Perl_regprop(pTHX_ const regexp *prog, SV* sv, const regnode* o, const regmatch_info *reginfo, const RExC_state_t *pRExC_state);
 #define PERL_ARGS_ASSERT_REGPROP	\
 	assert(sv); assert(o)
