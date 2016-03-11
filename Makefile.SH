@@ -1409,6 +1409,15 @@ lint: $(c)
 splint: $(c)
 	splint $(splintflags) -DPERL_CORE -D_REENTRANT -DDEBUGGING -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(splintfiles)
 
+cscopeflags = -Rb  # Recursive, build-only.
+
+.PHONY:	cscope
+# To query the cscope.out "cscope -dLnsymbol" where n = 0 means uses,
+# 1 = definitions, 2 = callees, 3 = callers, or run cscope interactively,
+# for example "cscope -dL1Perl_mg_set".
+cscope.out cscope: $(c) $(h)
+	cscope $(cscopeflags)
+
 # Need to unset during recursion to go out of loop.
 # The README below ensures that the dependency list is never empty and
 # that when MAKEDEPEND is empty $(FIRSTMAKEFILE) doesn't need rebuilding.
