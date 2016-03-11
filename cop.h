@@ -399,6 +399,7 @@ struct cop {
 
 #ifdef USE_ITHREADS
 #  define CopFILE(c)		((c)->cop_file)
+#  define CopFILE_len(c)	strlen(CopFILE(c))
 #  define CopFILEGV(c)		(CopFILE(c) \
 				 ? gv_fetchfile(CopFILE(c)) : NULL)
 				 
@@ -440,6 +441,8 @@ struct cop {
 # endif
 #  define CopFILE(c)		(CopFILEGV(c) \
 				    ? GvNAME(CopFILEGV(c))+2 : NULL)
+#  define CopFILE_len(c)	(CopFILEGV(c) \
+				    ? GvNAMELEN(CopFILEGV(c))-2 : 0)
 #  define CopSTASH(c)		((c)->cop_stash)
 #  define CopSTASH_set(c,hv)	((c)->cop_stash = (hv))
 #  define CopFILE_free(c)	(SvREFCNT_dec(CopFILEGV(c)),(CopFILEGV(c) = NULL))
