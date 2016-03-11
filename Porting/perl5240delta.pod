@@ -207,6 +207,23 @@ Raspberry Pi, there will be a small or little speedup.  Conversely, some
 pathological cases, such as C<"ab" x 1000 =~ /aa/> will be slower now; up to 3
 times slower on the rPi, 1.5x slower on x86_64.
 
+=item *
+
+Faster addition, subtraction and multiplication.
+
+Since 5.8.0, arithmetic became slower due to the need to support
+64-bit integers. To deal with 64-bit integers, a lot more corner
+cases need to be checked, which adds time. We now detect common
+cases where there is no need to check for those corner cases,
+and special-case them.
+
+=item *
+
+Faster preincrement, predecrement, postincrement, postdecrement.
+
+By internally splitting the functions which handled multiple
+cases into different functions.
+
 =back
 
 =head1 Modules and Pragmata
@@ -511,6 +528,10 @@ L<Character following \p must be '{' or a single-character Unicode property name
 
 L<Illegal user-defined property name|perldiag/"Illegal user-defined property name">
 
+=item *
+
+L<<< Sequence (?... not terminated in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>|perldiag/"Sequence (?... not terminated in regex; marked by <-- HERE in mE<sol>%sE<sol>" >>>
+
 =back
 
 =head3 New Warnings
@@ -558,11 +579,44 @@ L<Can't modify non-lvalue subroutine call of &%s|perldiag/"Can't modify non-lval
 This error now reports the name of the non-lvalue subroutine you attempted to
 use as an lvalue.
 
+=item *
+
+When running out of memory during an attempt the increase the stack
+size, previously, perl would die using the cryptic message
+C<< panic: av_extend_guts() negative count (-9223372036854775681) >>.
+This has been fixed to show the prettier message:
+L<< Out of memory during stack extend|perldiag/"Out of memory during %s extend" >>
+
 =back
 
 =head1 Configuration and Compilation
 
 =over 4
+
+=item *
+
+C<Configure> now acts as if the C<-O> option is always passed, allowing command
+line options to override saved configuration.  This should eliminate confusion
+when command line options are ignored for no obvious reason.  C<-O> is now
+permitted, but ignored.
+
+=item *
+
+Some filesystem stat symbols which were not used by the Perl core
+were removed in an earlier commit. However, since these symbols
+turned out to be used by at least one CPAN module, these symbols
+have been restored.
+
+=item *
+
+C<< PPPort.so/PPPort.dll >> no longer get installed, as they are
+not used by C<< PPPort.pm >>, only by its test files.
+
+=item *
+
+It is now possible to specify which compilation date to show on
+C<< perl -V >> output, by setting the macro C<< PERL_BUILD_DATE >>.
+
 
 =item *
 
@@ -643,6 +697,12 @@ current; the link target is still OS X 10.3 and there is no explicit compiler
 target.
 
 =back
+
+=item Tru64
+
+Workaround where Tru64 balks when prototypes are listed as
+C<< PERL_STATIC_INLINE >>, but where the test is build with
+C<< -DPERL_NO_INLINE_FUNCTIONS >>.
 
 =item VMS
 
@@ -777,6 +837,10 @@ Perl 5.22.1.
 
 =item *
 
+C<< sv_ref() >> is now part of the API.
+
+=item *
+
 L<perlapi/sv_backoff> had its return type changed from C<int> to C<void>.  It
 previously has always returned C<0> since Perl 5.000 stable but that was
 undocumented.  Although C<sv_backoff> is marked as public API, XS code is not
@@ -806,6 +870,51 @@ C<GvASSIGN_GENERATION> and C<GvASSIGN_GENERATION_set> have been removed.
 =head1 Selected Bug Fixes
 
 =over 4
+
+=item *
+
+C<\b{sb}> works much better.  In Perl v5.22.0, this new construct didn't
+seem to give the expected results, yet passed all the tests in the
+extensive suite furnished by Unicode.  It turns out that it was because
+these were short input strings, and the failures had to do with longer
+inputs.  This was fixed in Perl 5.23.4, but the improvement was not
+noticed until after that was released, so is included here now.
+
+=item *
+
+Certain syntax errors in
+L<perlrecharclass/Extended Bracketed Character Classes> caused panics
+instead of the proper error message.  This has now been fixed. [perl
+#126481]
+
+=item *
+
+An earlier commit added a message when a quantifier in a regular
+expression was useless, but then caused the parser to skip it;
+this caused the surplus quantifier to be silently ignored, instead
+of throwing an error. This is now fixed. [perl #126253]
+
+=item *
+
+The switch to building non-XS modules last in win32/makefile.mk (introduced
+by design as part of the changes to enable parallel building) caused the
+build of POSIX to break due to problems with the version module. This
+is now fixed.
+
+=item *
+
+Improved parsing of hex float constants.
+
+=item *
+
+Fixed an issue with C<< pack >> where C<< pack "H" >> (and C<< pack "h" >>)
+could read past the source when given a non-utf8 source, and a utf8 target.
+[perl #126325]
+
+=item *
+
+Fixed several cases where perl would abort due to a segmentation fault,
+or a C-level assert. [perl #126615], [perl #126602], [perl #126193].
 
 =item *
 
