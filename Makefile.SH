@@ -1413,8 +1413,8 @@ cscopeflags = -Rb  # Recursive, build-only.
 
 .PHONY:	cscope
 # To query the cscope.out "cscope -dLnsymbol" where n = 0 means uses,
-# 1 = definitions, 2 = callees, 3 = callers, or run cscope interactively,
-# for example "cscope -dL1Perl_mg_set".
+# 1 = definitions, 2 = callees, 3 = callers, for example
+# "cscope -dL1Perl_mg_set" or run cscope interactively (no arguments).
 cscope.out cscope: $(c) $(h)
 	cscope $(cscopeflags)
 
