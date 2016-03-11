@@ -321,7 +321,7 @@ S_is_safe_syscall(pTHX_ const char *pv, STRLEN len, const char *what, const char
 /*
 
 Return true if the supplied filename has a newline character
-immediately before the final NUL.
+immediately before the first (hopefully only) NUL.
 
 My original look at this incorrectly used the len from SvPV(), but
 that's incorrect, since we allow for a NUL in pv[len-1].
