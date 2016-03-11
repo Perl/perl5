@@ -72,6 +72,30 @@ S_new_he(pTHX)
 
 #endif
 
+#ifdef USE_ITHREADS
+char *
+Perl_newchek(pTHX_ const char *str, I32 len)
+{
+    dVAR;
+    CHEK * chek;
+    PERL_ARGS_ASSERT_NEWCHEK;
+
+    if(!len)
+	len = strlen(str);
+    len +=2;
+    chek = (CHEK*)PerlMemShared_malloc(STRUCT_OFFSET(CHEK, chek_hek.hek_key[0]) + len + 2);
+    memcpy(&HEK_KEY(CHEK2HEK(chek))[2], str, len-2);
+    chek->chek_refcount = 1;
+    HEK_KEY(CHEK2HEK(chek))[0] = '_';
+    HEK_KEY(CHEK2HEK(chek))[1] = '<';
+    HEK_KEY(CHEK2HEK(chek))[len] = 0;
+    HEK_LEN(CHEK2HEK(chek)) = len;
+    HEK_FLAGS(CHEK2HEK(chek)) = HVhek_COMPILING | HVhek_UNSHARED;
+    PERL_HASH(HEK_HASH(CHEK2HEK(chek)), HEK_KEY(CHEK2HEK(chek)), len);
+    return CHEK2FNPV(chek);
+}
+#endif
+
 STATIC HEK *
 S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
 {
@@ -93,6 +117,73 @@ S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
 	Safefree(str);
     return hek;
 }
+
+#ifdef USE_ITHREADS
+
+void
+Perl_free_copfile(pTHX_ COP * cop)
+{
+    PERL_ARGS_ASSERT_FREE_COPFILE;
+    if(CopFILE(cop)) {
+	CHEK * chek = FNPV2CHEK(CopFILE(cop));
+	CopFILE(cop) = NULL;
+	chek_dec(chek);
+    }
+}
+
+void
+Perl_restore_copfile(pTHX_ void * idx)
+{
+    SSCHEK* ssent = SSPTRt((Size_t)idx, SSCHEK);
+    if(*ssent->where != CHEK2FNPV(ssent->what)) {
+	CHEK * existing = FNPV2CHEK(*ssent->where);
+	*ssent->where = CHEK2FNPV(ssent->what);
+	chek_dec(existing);
+    }
+    else
+	chek_dec(ssent->what);
+}
+
+/* instead of SSNEW and SAVEDESTRUCTOR_X this probably needs its own save type
+ * and croak if its save type is ever tried to be dup-ed. I need to research
+ * what happens if 2 different threads restore at 2 random points the CopFILE */
+void
+Perl_save_copfile(pTHX_ COP * cop)
+{
+    I32 idx = SSNEW(sizeof(void *)*2);
+    SSCHEK* ssent = SSPTR(idx, SSCHEK*);
+    CHEK * old = FNPV2CHEK(CopFILE(cop));
+    PERL_ARGS_ASSERT_SAVE_COPFILE;
+    ssent->what = old;
+    ssent->where = &CopFILE(cop);
+    SAVEDESTRUCTOR_X(Perl_restore_copfile,(void*)(Size_t)idx);
+    chek_inc(old);
+}
+
+void
+Perl_chek_inc(pTHX_ CHEK * chek)
+{
+    dVAR;
+    PERL_ARGS_ASSERT_CHEK_INC;
+    OP_REFCNT_LOCK; /* atomic in future ? */
+    chek->chek_refcount++;
+    OP_REFCNT_UNLOCK;
+}
+
+void
+Perl_chek_dec(pTHX_ CHEK * chek)
+{
+    dVAR;
+    U32 refcnt;
+    PERL_ARGS_ASSERT_CHEK_DEC;
+    OP_REFCNT_LOCK; /* atomic in future ? */
+    refcnt = --chek->chek_refcount;
+    OP_REFCNT_UNLOCK;
+    if(!refcnt)
+        PerlMemShared_free(chek);
+}
+
+#endif
 
 /* free the pool of temporary HE/HEK pairs returned by hv_fetch_ent
  * for tied hashes */
@@ -2843,6 +2934,9 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     struct shared_he *he = NULL;
 
     if (hek) {
+#ifdef USE_ITHREADS
+	assert((HEK_FLAGS(hek) & HVhek_COMPILING) == 0);
+#endif
 	/* Find the shared he which is just before us in memory.  */
 	he = (struct shared_he *)(((char *)hek)
 				  - STRUCT_OFFSET(struct shared_he,

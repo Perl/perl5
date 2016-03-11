@@ -373,6 +373,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_allocfilegv
 		    Perl_clone_params_del
 		    Perl_clone_params_new
+		    Perl_gv_fetchfile_hek
 		    Perl_parser_dup
 		    Perl_dirp_dup
 		    Perl_cx_dup

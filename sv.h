@@ -185,6 +185,7 @@ typedef enum {
 /* typedefs to eliminate some typing */
 typedef struct he HE;
 typedef struct hek HEK;
+typedef struct compiling_hek CHEK;
 
 /* Using C's structural equivalence to help emulate C++ inheritance here... */
 
@@ -587,7 +588,10 @@ typedef U32 cv_flags_t;
 	GV *	xcv_gv;							\
 	HEK *	xcv_hek;						\
     }		xcv_gv_u;						\
-    char *	xcv_file;							\
+/* If USE_ITHREADS, xcv_file might be an unowned (no refcount) CHEK */  \
+/* the refcount notch for the CHEK in xcv_file is owned by the COP  */  \
+/* in the optree hanging off the CV, not by the xcv_file member.    */  \
+    char *	xcv_file;   \
     union {									\
 	PADLIST *	xcv_padlist;						\
 	void *		xcv_hscxt;						\

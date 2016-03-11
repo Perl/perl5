@@ -383,7 +383,7 @@ struct cop {
 #ifdef USE_ITHREADS
     PADOFFSET	cop_stashoff;	/* offset into PL_stashpad, for the
 				   package the line was compiled in */
-    char *	cop_file;	/* file name the following line # is from */
+    char *	cop_file;	/* a CHEK allocated file name, part of line # */
 #else
     HV *	cop_stash;	/* package line was compiled in */
     GV *	cop_filegv;	/* file the following line # is from */
@@ -398,35 +398,32 @@ struct cop {
 };
 
 #ifdef USE_ITHREADS
+/* make this unassignable with a "+0" force ppl to use _set(), but what about setting
+   the ptr directly in the CHEK code? what suffix to use on the _setptr() variant
+   "setptr" isn't perl XS API nomenclature
+   the fact you can assign a Newx ptr to CopFILE is very dangerous and will
+   cause mem corruption, and it did in Perl_gv_check */
 #  define CopFILE(c)		((c)->cop_file)
-#  define CopFILE_len(c)	strlen(CopFILE(c))
+#  define CopFILE_len(c)	(HEK_LEN(FNPV2HEK(CopFILE(c)))-2)
 #  define CopFILEGV(c)		(CopFILE(c) \
-				 ? gv_fetchfile(CopFILE(c)) : NULL)
+				 ? Perl_gv_fetchfile_hek(aTHX_ FNPV2HEK(CopFILE(c))) : NULL)
 				 
-#  ifdef NETWARE
-#    define CopFILE_set(c,pv)	((c)->cop_file = savepv(pv))
-#    define CopFILE_setn(c,pv,l)  ((c)->cop_file = savepvn((pv),(l)))
-#  else
-#    define CopFILE_set(c,pv)	((c)->cop_file = savesharedpv(pv))
-#    define CopFILE_setn(c,pv,l)  ((c)->cop_file = savesharedpvn((pv),(l)))
-#  endif
+#define CopFILE_set(c,pv)	((c)->cop_file = newchek((pv),0))
+#define CopFILE_setn(c,pv,l)	((c)->cop_file = newchek((pv),(l)))
 
 #  define CopFILESV(c)		(CopFILE(c) \
-				 ? GvSV(gv_fetchfile(CopFILE(c))) : NULL)
+				 ? GvSV(Perl_gv_fetchfile_hek(aTHX_ FNPV2HEK(CopFILE(c)))) : NULL)
 #  define CopFILEAV(c)		(CopFILE(c) \
-				 ? GvAV(gv_fetchfile(CopFILE(c))) : NULL)
+				 ? GvAV(Perl_gv_fetchfile_hek(aTHX_ FNPV2HEK(CopFILE(c)))) : NULL)
 #  define CopFILEAVx(c)		(assert_(CopFILE(c)) \
-				   GvAV(gv_fetchfile(CopFILE(c))))
+				   GvAV(Perl_gv_fetchfile_hek(aTHX_ FNPV2HEK(CopFILE(c)))))
 
 #  define CopSTASH(c)           PL_stashpad[(c)->cop_stashoff]
 #  define CopSTASH_set(c,hv)	((c)->cop_stashoff = (hv)		\
 				    ? alloccopstash(hv)			\
 				    : 0)
-#  ifdef NETWARE
-#    define CopFILE_free(c) SAVECOPFILE_FREE(c)
-#  else
-#    define CopFILE_free(c)	(PerlMemShared_free(CopFILE(c)),(CopFILE(c) = NULL))
-#  endif
+#  define CopFILE_free(c)	free_copfile(c)
+
 #else
 #  define CopFILEGV(c)		((c)->cop_filegv)
 #  define CopFILEGV_set(c,gv)	((c)->cop_filegv = (GV*)SvREFCNT_inc(gv))

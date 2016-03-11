@@ -53,13 +53,9 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvGV_set(cv,gv)	Perl_cvgv_set(aTHX_ cv, gv)
 #define CvHASGV(cv)	cBOOL(SvANY(cv)->xcv_gv_u.xcv_gv)
 #define CvFILE(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_file
-#ifdef USE_ITHREADS
-#  define CvFILE_set_from_cop(sv, cop)	\
-    (CvFILE(sv) = savepv(CopFILE(cop)), CvDYNFILE_on(sv))
-#else
-#  define CvFILE_set_from_cop(sv, cop)	\
-    (CvFILE(sv) = CopFILE(cop), CvDYNFILE_off(sv))
-#endif
+/* remove assert once stable */
+#define CvFILE_set_from_cop(sv, cop)	\
+    (assert_(!CvDYNFILE(cv)) CvFILE(sv) = CopFILE(cop), CvDYNFILE_off(sv))
 #define CvFILEGV(sv)	(gv_fetchfile(CvFILE(sv)))
 #define CvDEPTH(sv)	(*S_CvDEPTHp((const CV *)sv))
 /* For use when you only have a XPVCV*, not a real CV*.

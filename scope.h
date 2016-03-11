@@ -299,7 +299,16 @@ scope has the given name. C<name> must be a C<NUL>-terminated literal string.
 #ifdef USE_ITHREADS
 #  define SAVECOPSTASH_FREE(c)	SAVEIV((c)->cop_stashoff)
 #  define SAVECOPFILE(c)	SAVEPPTR(CopFILE(c))
-#  define SAVECOPFILE_FREE(c)	SAVESHAREDPV(CopFILE(c))
+#  define SAVECOPFILE_FREE(c)	save_copfile(c)
+
+typedef struct {
+    char** where; /* maybe store a COP * instead of ptr to specific member 4
+                   * easier C debugging , but then it won't work for Perl_newGP
+                   * in future b/c thats a GP *
+                   */
+    CHEK * what;
+} SSCHEK;
+
 #else
 #  /* XXX not refcounted */
 #  define SAVECOPSTASH_FREE(c)	SAVESPTR(CopSTASH(c))

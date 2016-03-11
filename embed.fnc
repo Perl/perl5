@@ -508,6 +508,9 @@ Ap	|GV*	|gv_fetchfile	|NN const char* name
 Am	|GV*	|gv_fetchfile_flags|NN const char *const name|const STRLEN len\
 				|const U32 flags
 pX	|GV*	|gv_fetchfile_x|NN const char *const name|const STRLEN len
+#ifdef USE_ITHREADS
+pX	|GV*	|gv_fetchfile_hek|NN const HEK * const hek
+#endif
 Amd	|GV*	|gv_fetchmeth	|NULLOK HV* stash|NN const char* name \
 				|STRLEN len|I32 level
 Apd	|GV*	|gv_fetchmeth_sv	|NULLOK HV* stash|NN SV* namesv|I32 level|U32 flags
@@ -2881,6 +2884,13 @@ Apon	|void	|sys_init3	|NN int* argc|NN char*** argv|NN char*** env
 Apon	|void	|sys_term
 ApoM	|const char *|cop_fetch_label|NN COP *const cop \
 		|NULLOK STRLEN *len|NULLOK U32 *flags
+#ifdef USE_ITHREADS
+p	|char *	|newchek	|NN const char *str	|I32 len
+p	|void	|free_copfile	|NN COP * cop
+p	|void	|chek_inc	|NN CHEK * chek
+p	|void	|chek_dec	|NN CHEK * chek
+p	|void	|save_copfile	|NN COP * cop
+#endif
 : Only used  in op.c and the perl compiler
 ApoM	|void|cop_store_label \
 		|NN COP *const cop|NN const char *label|STRLEN len|U32 flags

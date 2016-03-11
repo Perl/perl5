@@ -1763,14 +1763,8 @@ S_incline(pTHX_ const char *s)
 	    }
 	}
 
-/* CopFILE_len is strlen on threads so dont do 2 passes through the buffer */
-	if (
-#ifdef USE_ITHREADS
-	    strnNE(CopFILE(PL_curcop), s, len)
-#else
-	   ! (CopFILE_len(PL_curcop) == len && memEQ(CopFILE(PL_curcop), s, len))
-#endif
-	   ) {
+	if (! (CopFILE_len(PL_curcop) == len
+	       && memEQ(CopFILE(PL_curcop), s, len))) {
 	    CopFILE_free(PL_curcop);
 	    CopFILE_setn(PL_curcop, s, len);
 	}

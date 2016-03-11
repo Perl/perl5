@@ -56,6 +56,33 @@ struct shared_he {
     struct hek shared_he_hek;
 };
 
+/* A CHEK is a derived class of HEK, and struct shared_he is also a derived
+ * class of HEK. This makes a CHEK and struct shared_he be sibling classes today.
+ * Provisions exist that would allow struct shared_he to be a derived class of
+ * a CHEK once atomic refcount features are added to perl.
+ * Like a HEK *, a CHEK * is an immutable string. bulk88 decided that
+ * struct refcounted_he is too heavy weight and too specialized to be a
+ * inter-interp "string class" (HEs always have 2 strings conceptually, 1
+ * string has obviously 1 string).
+ *
+ * CHEKs are currently only used to store filepaths that point to original PP
+ * or XS source code files of PP resourses. A CHEK is "stored in the optree".
+ * In reality it is shared between ithreads and psuedoforks and is allocated in
+ * process global memory (like optrees), not in per interp memory. In theory the
+ * CHEK can be used to store other strings between ithreads but that is not done
+ * ATM. Perhaps one day the Newx PV buffers in the PAD SVs of OP_CONST will be
+ * replaced by CHEKs and shared between ithreads, the SV*s and PADs cant be the
+ * same obviously between ithreads.
+ */
+
+#ifdef USE_ITHREADS
+/* position of refcount is intentional. SHEK & CHEK could be the same one day */
+struct compiling_hek {
+    U32 	chek_refcount;	/* references for this compiling HEK */
+    struct hek	chek_hek;
+};
+#endif
+
 /* Subject to change.
    Don't access this directly.
    Use the funcs in mro_core.c
@@ -402,6 +429,9 @@ C<SV*>.
 
 #define HVhek_UTF8	0x01 /* Key is utf8 encoded. */
 #define HVhek_WASUTF8	0x02 /* Key is bytes here, but was supplied as utf8. */
+#ifdef USE_ITHREADS
+#  define HVhek_COMPILING 0x04 /* Key is a chek shared between threads. */
+#endif
 #define HVhek_UNSHARED	0x08 /* This key isn't a shared hash key. */
 /* the following flags are options for functions, they are not stored in heks */
 #define HVhek_FREEKEY	0x100 /* Internal flag to say key is Newx()ed.  */
@@ -420,6 +450,22 @@ C<SV*>.
 #define HEK_WASUTF8(hek)	(HEK_FLAGS(hek) & HVhek_WASUTF8)
 #define HEK_WASUTF8_on(hek)	(HEK_FLAGS(hek) |= HVhek_WASUTF8)
 #define HEK_WASUTF8_off(hek)	(HEK_FLAGS(hek) &= ~HVhek_WASUTF8)
+
+/* for ease of C debugger use, CHEK *s aren't declared as CHEK *s in structs
+ * but they are declared as char *s to the start of the filename after chars "_<"
+ * the struct field, even though its is declared as a char * is always a
+ * refcounted CHEK, never a malloc block, the structs where CHEK * as char *
+ * the member will be documented as such in that struct definition. "FNPV" means
+ * the _< are skipped or behind the char *, "PV" (unused/unimplemented)
+ * means _< is after/part of the char *.
+ */
+#ifdef USE_ITHREADS
+#  define FNPV2CHEK(x) (CHEK*)(((char*)(x))-2-STRUCT_OFFSET(CHEK, chek_hek.hek_key[0]))
+#  define CHEK2FNPV(x) ((char*)(x))+2+STRUCT_OFFSET(CHEK, chek_hek.hek_key[0])
+#  define CHEK2HEK(x)  (&(x)->chek_hek)
+#  define FNPV2HEK(x)  (HEK*)(((char*)(x))-2-STRUCT_OFFSET(HEK, hek_key))
+#  define HEK2FNPV(x)  ((char*)(x))+2+STRUCT_OFFSET(HEK, hek_key)
+#endif
 
 /* calculate HV array allocation */
 #ifndef PERL_USE_LARGE_HV_ALLOC
@@ -445,12 +491,21 @@ C<SV*>.
 #define Perl_sharepvn(pv, len, hash) HEK_KEY(share_hek(pv, len, hash))
 #define sharepvn(pv, len, hash)	     Perl_sharepvn(pv, len, hash)
 
+#ifdef USE_ITHREADS
+#define share_hek_hek(hek)						\
+    (assert(!(HEK_FLAGS(hek) & HVhek_COMPILING)),(++(((struct shared_he *)(((char *)hek)				\
+			      - STRUCT_OFFSET(struct shared_he,		\
+					      shared_he_hek)))		\
+	->shared_he_he.he_valu.hent_refcount),				\
+     hek))
+#else
 #define share_hek_hek(hek)						\
     (++(((struct shared_he *)(((char *)hek)				\
 			      - STRUCT_OFFSET(struct shared_he,		\
 					      shared_he_hek)))		\
 	->shared_he_he.he_valu.hent_refcount),				\
      hek)
+#endif
 
 #define hv_store_ent(hv, keysv, val, hash)				\
     ((HE *) hv_common((hv), (keysv), NULL, 0, 0, HV_FETCH_ISSTORE,	\

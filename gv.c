@@ -134,6 +134,34 @@ Perl_gv_fetchfile_x(pTHX_ const char *const name, const STRLEN namelen)
     return gv;
 }
 
+#ifdef USE_ITHREADS
+/* HEK must start with "_<" */
+GV *
+Perl_gv_fetchfile_hek(pTHX_ const HEK * const hek)
+{
+    GV *gv;
+
+    PERL_ARGS_ASSERT_GV_FETCHFILE_HEK;
+
+    if (!PL_defstash)
+	return NULL;
+    assert(HEK_LEN(hek) >= 2
+	&& HEK_KEY(hek)[0] == '_' && HEK_KEY(hek)[1] == '<');
+    gv = *(GV**)hv_fetchhek(PL_defstash, hek, TRUE);
+    if (!isGV(gv)) {
+	gv_init(gv, PL_defstash, HEK_KEY(hek), HEK_LEN(hek), FALSE);
+#ifdef PERL_DONT_CREATE_GVSV
+	GvSV(gv) = newSVpvn(HEK_KEY(hek)+2, HEK_LEN(hek)-2);
+#else
+	sv_setpvn(GvSV(gv), HEK_KEY(hek)+2, HEK_LEN(hek)-2);
+#endif
+    }
+    if (PERLDB_LINE_OR_SAVESRC && !GvAV(gv))
+	    hv_magic(GvHVn(gv), GvAVn(gv), PERL_MAGIC_dbfile);
+    return gv;
+}
+#endif
+
 /*
 =for apidoc gv_const_sv
 
@@ -2443,9 +2471,12 @@ Perl_gv_check(pTHX_ HV *stash)
 		if (SvTYPE(gv) != SVt_PVGV || GvMULTI(gv))
 		    continue;
 		file = GvFILE(gv);
+                /* how is this thread safe ???????? aren't ops immutable after creation??*/
 		CopLINE_set(PL_curcop, GvLINE(gv));
 #ifdef USE_ITHREADS
-		CopFILE(PL_curcop) = (char *)file;	/* set for warning */
+		CopFILE_free(PL_curcop);
+		assert(CopFILE(PL_curcop) == NULL);
+		CopFILE_set(PL_curcop, file);	/* set for warning */
 #else
 		CopFILEGV(PL_curcop)
 		    = gv_fetchfile_flags(file, HEK_LEN(GvFILE_HEK(gv)), 0);

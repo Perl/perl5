@@ -1821,10 +1821,16 @@
 #define get_c_backtrace(a,b)	Perl_get_c_backtrace(aTHX_ a,b)
 #  endif
 #  if defined(USE_ITHREADS)
+#define chek_dec(a)		Perl_chek_dec(aTHX_ a)
+#define chek_inc(a)		Perl_chek_inc(aTHX_ a)
+#define free_copfile(a)		Perl_free_copfile(aTHX_ a)
+#define gv_fetchfile_hek(a)	Perl_gv_fetchfile_hek(aTHX_ a)
 #define mro_meta_dup(a,b)	Perl_mro_meta_dup(aTHX_ a,b)
+#define newchek(a,b)		Perl_newchek(aTHX_ a,b)
 #define padlist_dup(a,b)	Perl_padlist_dup(aTHX_ a,b)
 #define padname_dup(a,b)	Perl_padname_dup(aTHX_ a,b)
 #define padnamelist_dup(a,b)	Perl_padnamelist_dup(aTHX_ a,b)
+#define save_copfile(a)		Perl_save_copfile(aTHX_ a)
 #  endif
 #  if defined(USE_LOCALE) && defined(PERL_IN_LOCALE_C)
 #define stdize_locale(a)	S_stdize_locale(aTHX_ a)

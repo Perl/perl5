@@ -6584,7 +6584,13 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 	PL_parser->copline = NOLINE;
     }
 #ifdef USE_ITHREADS
-    CopFILE_set(cop, CopFILE(PL_curcop));	/* XXX share in a pvtable? */
+{
+    /* this should be a macro since it will be used in Perl_newGP in the future */
+    CHEK * chek = FNPV2CHEK(CopFILE(PL_curcop));
+    chek_inc(chek);
+    assert(CopFILE(cop) == NULL);
+    CopFILE(cop) = CopFILE(PL_curcop);
+}
 #else
     CopFILEGV_set(cop, CopFILEGV(PL_curcop));
 #endif
