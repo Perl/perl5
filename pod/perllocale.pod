@@ -32,10 +32,10 @@ L<perlunitut> for an introduction to that) in part to address these
 design deficiencies, and nowadays, there is a series of "UTF-8
 locales", based on Unicode.  These are locales whose character set is
 Unicode, encoded in UTF-8.  Starting in v5.20, Perl fully supports
-UTF-8 locales, except for sorting and string comparisons.  (Use
-L<Unicode::Collate> for these.)  Perl continues to support the old
-non UTF-8 locales as well.  There are currently no UTF-8 locales for
-EBCDIC platforms.
+UTF-8 locales, except for sorting and string comparisons like C<lt> and
+C<ge>.  (Use L<Unicode::Collate> for these.)  Perl continues to support
+the old non UTF-8 locales as well.  There are currently no UTF-8 locales
+for EBCDIC platforms.
 
 (Unicode is also creating C<CLDR>, the "Common Locale Data Repository",
 L<http://cldr.unicode.org/> which includes more types of information than
@@ -205,8 +205,7 @@ Also Perl gives access to various C library functions through the
 L<POSIX> module.  Some of those functions are always affected by the
 current locale.  For example, C<POSIX::strftime()> uses C<LC_TIME>;
 C<POSIX::strtod()> uses C<LC_NUMERIC>; C<POSIX::strcoll()> and
-C<POSIX::strxfrm()> use C<LC_COLLATE>; and character classification
-functions like C<POSIX::isalnum()> use C<LC_CTYPE>.  All such functions
+C<POSIX::strxfrm()> use C<LC_COLLATE>.  All such functions
 will behave according to the current underlying locale, even if that
 locale isn't exposed to Perl space.
 
@@ -869,16 +868,6 @@ interpolation with C<\F>, C<\l>, C<\L>, C<\u>, or C<\U> in double-quoted
 strings and C<s///> substitutions; and case-independent regular expression
 pattern matching using the C<i> modifier.
 
-Finally, C<LC_CTYPE> affects the (deprecated) POSIX character-class test
-functions--C<POSIX::isalpha()>, C<POSIX::islower()>, and so on.  For
-example, if you move from the "C" locale to a 7-bit ISO 646 one,
-you may find--possibly to your surprise--that C<"|"> moves from the
-C<POSIX::ispunct()> class to C<POSIX::isalpha()>.
-Unfortunately, this creates big problems for regular expressions. "|" still
-means alternation even though it matches C<\w>.  Starting in v5.22, a
-warning will be raised when such a locale is switched into.  More
-details are given several paragraphs further down.
-
 Starting in v5.20, Perl supports UTF-8 locales for C<LC_CTYPE>, but
 otherwise Perl only supports single-byte locales, such as the ISO 8859
 series.  This means that wide character locales, for example for Asian
@@ -1136,15 +1125,6 @@ B<POSIX locale-dependent functions> (C<localeconv()>, C<strcoll()>,
 C<strftime()>, C<strxfrm()>):
 
 Results are never tainted.
-
-=item *
-
-B<POSIX character class tests> (C<POSIX::isalnum()>,
-C<POSIX::isalpha()>, C<POSIX::isdigit()>, C<POSIX::isgraph()>,
-C<POSIX::islower()>, C<POSIX::isprint()>, C<POSIX::ispunct()>,
-C<POSIX::isspace()>, C<POSIX::isupper()>, C<POSIX::isxdigit()>):
-
-True/false results are never tainted.
 
 =back
 
