@@ -412,6 +412,13 @@ whose ordinal numbers are in the range 0 - 127).
 And documentation and comments may still use the term ASCII, when
 sometimes in fact the entire range from 0 - 255 is meant.
 
+The non-ASCII characters below 256 can have various meanings, depending on
+various things.  (See, most notably, L<perllocale>.)  But usually the whole
+range can be referred to as ISO-8859-1.  Often, the term "Latin-1" (or
+"Latin1") is used as an equivalent for ISO-8859-1.  But some people treat
+"Latin1" as referring just to the characters in the range 160 through 255.
+This documentation uses "Latin1" and "Latin-1" to refer to all 256 characters.
+
 Note that Perl can be compiled and run under either ASCII or EBCDIC (See
 L<perlebcdic>).  Most of the documentation (and even comments in the code)
 ignore the EBCDIC possibility.  
