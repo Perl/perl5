@@ -16,6 +16,50 @@ This document describes the differences between the 5.22.0 release and the
 For details on what is in this release, see
 L<http://www.unicode.org/versions/Unicode8.0.0/>.
 
+=head2 Integer shift (C<< << >> and C<< >> >>) now more explicitly defined
+
+Negative shifts are reverse shifts: left shift becomes right shift,
+and right shift becomes left shift.
+
+Shifting by the number of bits in a native integer (or more) is zero,
+except when the "overshift" is right shifting a negative value under
+C<use integer>, in which case the result is -1 (arithmetic shift).
+
+Until now negative shifting and overshifting have been undefined
+because they have relied on whatever the C implementation happens
+to do.  For example, for the overshift a common C behavior is
+"modulo shift":
+
+  1 >> 64 == 1 >> (64 % 64) == 1 >> 0 == 1  # Common C behavior.
+
+  # And the same for <<, while Perl now produces 0 for both.
+
+Now these behaviors are well-defined under Perl, regardless of what
+the underlying C implementation does.  Note, however, that you cannot
+escape the native integer width, you need to know how far left you
+can go.  You can use for example:
+
+  use Config;
+  my $wordbits = $Config{uvsize} * 8;  # Or $Config{uvsize} << 3.
+
+If you need a more bits on the left shift, you can use for example
+the C<bigint> pragma, or the C<Bit::Vector> module from CPAN.
+
+=head2 Postfix dereferencing is no longer experimental
+
+Using the C<postderef> and C<postderef_qq> features no longer emits a
+warning. Existing code that disables the C<experimental::postderef> warning
+category that they previously used will continue to work. The C<postderef>
+feature has no effect; all Perl code can use postfix dereferencing,
+regardless of what feature declarations are in scope. The C<5.24> feature
+bundle now includes the C<postderef_qq> feature.
+
+=head2 printf and sprintf now allow reordered precision arguments
+
+That is, C<< sprintf '|%.*2$|', 2, 3 >> now returns C<|002|>. This extends
+the existing reordering mechanism (which allows reordering for arguments
+that are used as format fields, widths, and vector separators).
+
 =head1 Incompatible Changes
 
 =head2 The C</\C/> character class has been removed.
@@ -30,6 +74,31 @@ copy) first.
 
 Using C<chdir('')> or C<chdir(undef)> to chdir home has been deprecated since
 perl v5.8, and will now fail.  Use C<chdir()> instead.
+
+=head2 ASCII characters in variable names must now be all visible
+
+It was legal until now on ASCII platforms for variable names to contain
+non-graphical ASCII control characters (ordinals 0 through 31, and 127,
+which are the C0 controls and C<DELETE>).  This usage has been
+deprecated since v5.20, and as of now causes a syntax error.  The
+variables these names referred to are special, reserved by Perl for
+whatever use it may choose, now, or in the future.  Each such variable
+has an alternative way of spelling it.  Instead of the single
+non-graphic control character, a two character sequence beginning with a
+caret is used, like C<$^]> and C<${^GLOBAL_PHASE}>.  Details are at
+L<perlvar>.   It remains legal, though unwise and deprecated (raising a
+deprecation warning), to use certain non-graphic non-ASCII characters in
+variables names when not under S<C<use utf8>>.  No code should do this,
+as all such variables are reserved by Perl, and Perl doesn't currently
+define any of them (but could at any time, without notice).
+
+=head2 The C<autoderef> feature has been removed
+
+The experimental C<autoderef> feature (which allowed calling C<push>,
+C<pop>, C<shift>, C<unshift>, C<splice>, C<keys>, C<values>, and C<each> on
+a scalar argument) has been deemed unsuccessful. It has now been removed;
+trying to use the feature (or to disable the C<experimental::autoderef>
+warning it previously triggered) now yields an exception.
 
 =head1 Modules and Pragmata
 
@@ -180,6 +249,18 @@ exports anything.  [perl #125410]
 
 =over 4
 
+=item VMS
+
+=over
+
+=item *
+
+The minimum supported version of VMS is now v7.3-2, released in 2003.  As a
+side effect of this change, VAX is no longer supported as the terminal
+release of OpenVMS VAX was v7.3 in 2001.
+
+=back
+
 =item Win32
 
 =over
@@ -236,39 +317,24 @@ caused sub-threads in threaded -DPERL_TRACE_OPS builds to spew exceedingly
 large op-counts at destruct.  These counts would print %x as "ABABABAB",
 clearly a mem-poison value.
 
+=item *
+
+A leak in the XS typemap caused one scalar to be leaked each time a C<FILE *>
+or a C<PerlIO *> was C<OUTPUT:>ed or imported to Perl, since perl 5.000. These
+particular typemap entries are thought to be extremely rarely used by XS
+modules. [perl #124181]
+
+=item *
+
+C<alarm()> and C<sleep()> will now warn if the argument is a negative number
+and return undef. Previously they would pass the negative value to the
+underlying C function which may have set up a timer with a surprising value.
+
 =back
 
 =head1 Acknowledgements
 
-Perl 5.23.0 represents approximately 3 weeks of development since Perl 5.22.0
-and contains approximately 86,000 lines of changes across 480 files from 29
-authors.
-
-Excluding auto-generated files, documentation and release tools, there were
-approximately 55,000 lines of changes to 270 .pm, .t, .c and .h files.
-
-Perl continues to flourish into its third decade thanks to a vibrant community
-of users and developers. The following people are known to have contributed the
-improvements that became Perl 5.23.0:
-
-Chase Whitener, Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn Ilmari
-Mannsåker, Daniel Dragan, David Golden, David Mitchell, Hugo van der Sanden,
-Jan Dubois, Jarkko Hietaniemi, Jerry D. Hedden, Jim Cromie, Karen Etheridge,
-Karl Williamson, kmx, Lukas Mai, Martijn Lievaart, Matthew Horsfall, Niko Tyni,
-Peter John Acklam, Rafael Garcia-Suarez, Reini Urban, Ricardo Signes, Shlomi
-Fish, Steve Hay, Thomas Sibley, Tony Cook, Unicode Consortium, Zefram.
-
-The list above is almost certainly incomplete as it is automatically generated
-from version control history. In particular, it does not include the names of
-the (very much appreciated) contributors who reported issues to the Perl bug
-tracker.
-
-Many of the changes included in this version originated in the CPAN modules
-included in Perl's core. We're grateful to the entire CPAN community for
-helping Perl to flourish.
-
-For a more complete list of all of Perl's historical contributors, please see
-the F<AUTHORS> file in the Perl source distribution.
+[ XXX: generate this just in time, Ricardo! ]
 
 =head1 Reporting Bugs
 
