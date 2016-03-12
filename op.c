@@ -13657,7 +13657,7 @@ Perl_rpeep(pTHX_ OP *o)
                     /* Note that you'd normally  expect targs to be
                      * contiguous in my($a,$b,$c), but that's not the case
                      * when external modules start doing things, e.g.
-                     i* Function::Parameters */
+                     * Function::Parameters */
                     if (p->op_targ != base + count)
                         break;
                     assert(p->op_targ == base + count);
@@ -13713,10 +13713,10 @@ Perl_rpeep(pTHX_ OP *o)
              * optimise away would have exactly the same effect as the
              * padrange.
              * In particular in void context, we can only optimise to
-             * a padrange if see see the complete sequence
+             * a padrange if we see the complete sequence
              *     pushmark, pad*v, ...., list
-             * which has the net effect of of leaving the markstack as it
-             * was.  Not pushing on to the stack (whereas padsv does touch
+             * which has the net effect of leaving the markstack as it
+             * was.  Not pushing onto the stack (whereas padsv does touch
              * the stack) makes no difference in void context.
              */
             assert(followop);
@@ -13928,11 +13928,11 @@ Perl_rpeep(pTHX_ OP *o)
 				  || o->op_next->op_type == OP_NULL))
 		o->op_next = o->op_next->op_next;
 
-	    /* if we're an OR and our next is a AND in void context, we'll
-	       follow it's op_other on short circuit, same for reverse.
+	    /* If we're an OR and our next is an AND in void context, we'll
+	       follow its op_other on short circuit, same for reverse.
 	       We can't do this with OP_DOR since if it's true, its return
 	       value is the underlying value which must be evaluated
-	       by the next op */
+	       by the next op. */
 	    if (o->op_next &&
 	        (
 		    (IS_AND_OP(o) && IS_OR_OP(o->op_next))
