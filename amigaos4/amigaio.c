@@ -18,6 +18,7 @@
 #include <exec/exectags.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
+#include <proto/utility.h>
 #include <dos/dos.h>
 
 void amigaos_stdio_get(pTHX_ StdioStore *store)
@@ -66,8 +67,16 @@ PerlIO *Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 	*/
 	//    FILE *f=amigaos_popen(cmd,mode);
 	//    fprintf(stderr,"popen returned %d\n",f);
-	return PerlIO_importFILE(amigaos_popen(cmd, mode), 0);
+	return PerlIO_importFILE(amigaos_popen(cmd, mode), mode);
 	//   return PerlIO_importFILE(f, 0);
+}
+
+I32 Perl_my_pclose(pTHX_ PerlIO *ptr)
+{
+	FILE * const f = PerlIO_findFILE(ptr);
+	const I32 result = amigaos_pclose(f);
+	PerlIO_releaseFILE(ptr,f);
+	return result;
 }
 
 #ifdef USE_ITHREADS
@@ -747,7 +756,7 @@ int myexecve(bool isperlthread,
 		    (contains_whitespace(*cur) ? (2 + no_of_escapes(*cur)) : 0);
 	}
 	/* Check if it's a script file */
-
+	IExec->DebugPrintF("%s %ld %08lx %c %c\n",__FILE__,__LINE__,filename,filename[0],filename[1]);
 	fh = fopen(filename, "r");
 	if (fh)
 	{
@@ -839,7 +848,7 @@ int myexecve(bool isperlthread,
 
 				if (esc > 0)
 				{
-					char *buff = IExec->AllocVec(
+					char *buff = (char *)IExec->AllocVec(
 					                 strlen(*cur) + 4 + esc,
 					                 MEMF_ANY | MEMF_CLEAR);
 					char *p = *cur;

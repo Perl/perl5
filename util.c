@@ -3175,10 +3175,7 @@ S_pidgone(pTHX_ Pid_t pid, int status)
 }
 #endif
 
-#if defined(OS2) || defined(__amigaos4__)
-#  if defined(__amigaos4__) && defined(pclose)
-#    undef pclose
-#  endif
+#if defined(OS2)
 int pclose();
 #ifdef HAS_FORK
 int					/* Cannot prototype with I32
