@@ -1516,7 +1516,7 @@ xsreturn( int len )
 void
 xsreturn_iv()
     PPCODE:
-        XSRETURN_IV( (1<<31) + 1 );
+        XSRETURN_IV(I32_MIN + 1);
 
 void
 xsreturn_uv()
