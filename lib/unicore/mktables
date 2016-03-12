@@ -18602,6 +18602,18 @@ sub make_property_test_script() {
                                 # conflating is possible.  In our example, we
                                 # don't want 2/3 matching 7/10, if there is
                                 # a 7/10 code point.
+
+                                # First, integers are not in the rationals
+                                # table.  Don't generate an error if this
+                                # rounds to an integer using the given
+                                # precision.
+                                my $round = sprintf "%.0f", $table_name;
+                                next PLACE if abs($table_name - $round)
+                                                        < $MAX_FLOATING_SLOP;
+
+                                # Here, isn't close enough to an integer to be
+                                # confusable with one.  Now, see it it's
+                                # "close" to a known rational
                                 for my $existing
                                         (keys %nv_floating_to_rational)
                                 {
