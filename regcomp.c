@@ -15122,7 +15122,22 @@ redo_curchar:
              * stack, we have to check if it is a !.  But first, the code above
              * may have altered the stack in the time since we earlier set
              * 'top_index'.  */
-            top_index = av_tindex_nomg(stack);
+
+            {
+                /* Work round an optimiser bug in Solaris Studio 12.3:
+                 * for some reason, the presence of the __assert() in
+                 * av_tindex_nomg() causes the value of fence to get
+                 * corrupted, even though the assert is never called. So
+                 * save the value then restore afterwards.
+                 * Note that in fact merely accessing the value of fence
+                 * prior to the statement containing the assert is enough
+                 * to make the bug go away.
+                 */
+                IV f = fence;
+                top_index = av_tindex_nomg(stack);
+                fence = f;
+            }
+
             if (top_index - fence >= 0) {
                 /* If the top entry on the stack is an operator, it had better
                  * be a '!', otherwise the entry below the top operand should
