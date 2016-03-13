@@ -96,8 +96,7 @@ SKIP: {
        'no redefinition warning when clobbering autouse stub via *a=\&b';
 }
 SKIP: {
-    skip "Fails from 5.10 to 5.15.5 (perl bug)", 1
-	if $] < 5.0150051 and $] > 5.0099;
+    skip "Fails in 5.15.5 and below (perl bug)", 1 if $] < 5.0150051;
     use Config;
     skip "no B", 1 unless $Config{extensions} =~ /\bB\b/;
     use warnings; local $^W = 1; no warnings 'once';
