@@ -179,6 +179,7 @@ _gettimeofday(pTHX_ struct timeval *tp, void *not_used)
     unsigned __int64 ticks;
     FT_t ft;
 
+    PERL_UNUSED_ARG(not_used);
     if (MY_CXT.run_count++ == 0 ||
 	MY_CXT.base_systime_as_filetime.ft_i64 > MY_CXT.reset_time) {
         QueryPerformanceFrequency((LARGE_INTEGER*)&MY_CXT.tick_frequency);
