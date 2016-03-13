@@ -1,6 +1,6 @@
 Revision history for the Perl extension Time::HiRes.
 
-1.9731 [2016-03-??]
+1.9731 [2016-03-13]
   - mark unused variable as such: blead a914236c
   - OS X emulation mutex accidentally unused: da7a6455
   - remove hrt_ualarm: 6da77c36
