@@ -2118,7 +2118,7 @@ p	|OP *	|tied_method|NN SV *methname|NN SV **sp \
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 Ep	|void	|regprop	|NULLOK const regexp *prog|NN SV* sv|NN const regnode* o|NULLOK const regmatch_info *reginfo \
 				|NULLOK const RExC_state_t *pRExC_state
-Epno	|int	|re_printf	|NN const char *fmt|...
+Ep	|int	|re_printf	|NN const char *fmt|...
 #endif
 #if defined(PERL_IN_REGCOMP_C)
 Es	|regnode*|reg		|NN RExC_state_t *pRExC_state \
@@ -2265,7 +2265,7 @@ EnPs	|int	|edit_distance	|NN const UV *src		    \
 				|const STRLEN y			    \
 				|const SSize_t maxDistance
 #  ifdef DEBUGGING
-Epno	|int	|re_indentf	|NN const char *fmt|U32 depth|...
+Ep	|int	|re_indentf	|NN const char *fmt|U32 depth|...
 Es        |void        |regdump_intflags|NULLOK const char *lead| const U32 flags
 Es	|void	|regdump_extflags|NULLOK const char *lead| const U32 flags
 Es	|const regnode*|dumpuntil|NN const regexp *r|NN const regnode *start \
@@ -2382,7 +2382,7 @@ Es	|void	|debug_start_match|NN const REGEXP *prog|const bool do_utf8\
 				|NN const char *start|NN const char *end\
 				|NN const char *blurb
 
-Epno	|int	|re_indentfo	|NN const char *fmt|U32 depth|...
+Ep	|int	|re_exec_indentf	|NN const char *fmt|U32 depth|...
 #  endif
 #endif
 
