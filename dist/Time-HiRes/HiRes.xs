@@ -485,12 +485,6 @@ hrt_ualarm_itimero(struct itimerval *oitv, int usec, int uinterval)
    return setitimer(ITIMER_REAL, &itv, oitv);
 }
 
-static int
-hrt_ualarm_itimer(int usec, int uinterval)
-{
-  return hrt_ualarm_itimero(NULL, usec, uinterval);
-}
-
 #endif /* #if !defined(HAS_UALARM) && defined(HAS_SETITIMER) */
 
 #if !defined(HAS_UALARM) && defined(HAS_SETITIMER)
