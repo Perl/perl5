@@ -1978,8 +1978,7 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap,
     PERL_ARGS_ASSERT_DUMP_TRIE;
 
     Perl_re_indentf( aTHX_  "Char : %-6s%-6s%-4s ",
-        depth+1,
-        "Match","Base","Ofs" );
+        depth+1, "Match","Base","Ofs" );
 
     for( state = 0 ; state < trie->uniquecharcount ; state++ ) {
 	SV ** const tmp = av_fetch( revcharmap, state, 0);
@@ -1994,8 +1993,8 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap,
             );
         }
     }
-    Perl_re_printf( aTHX_  "\n%*sState|-----------------------",
-        depth+1);
+    Perl_re_printf( aTHX_  "\n");
+    Perl_re_indentf( aTHX_ "State|-----------------------", depth+1);
 
     for( state = 0 ; state < trie->uniquecharcount ; state++ )
         Perl_re_printf( aTHX_  "%.*s", colwidth, "--------");
@@ -2004,12 +2003,10 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap,
     for( state = 1 ; state < trie->statecount ; state++ ) {
 	const U32 base = trie->states[ state ].trans.base;
 
-        Perl_re_indentf( aTHX_  "#%4"UVXf"|",
-                                       depth+1, (UV)state);
+        Perl_re_indentf( aTHX_  "#%4"UVXf"|", depth+1, (UV)state);
 
         if ( trie->states[ state ].wordnum ) {
-            Perl_re_printf( aTHX_  " W%4X",
-                                           trie->states[ state ].wordnum );
+            Perl_re_printf( aTHX_  " W%4X", trie->states[ state ].wordnum );
         } else {
             Perl_re_printf( aTHX_  "%6s", "" );
         }
@@ -2034,10 +2031,9 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap,
                         && trie->trans[ base + ofs
                                     - trie->uniquecharcount ].check == state )
                 {
-                   Perl_re_printf( aTHX_  "%*"UVXf,
-                    colwidth,
-                    (UV)trie->trans[ base + ofs
-                                             - trie->uniquecharcount ].next );
+                   Perl_re_printf( aTHX_  "%*"UVXf, colwidth,
+                    (UV)trie->trans[ base + ofs - trie->uniquecharcount ].next
+                   );
                 } else {
                     Perl_re_printf( aTHX_  "%*s",colwidth,"   ." );
                 }
