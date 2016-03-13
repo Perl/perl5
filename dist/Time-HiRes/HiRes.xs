@@ -490,13 +490,6 @@ hrt_ualarm_itimer(int usec, int uinterval)
   return hrt_ualarm_itimero(NULL, usec, uinterval);
 }
 
-#ifdef HAS_UALARM
-static int
-hrt_ualarm(int usec, int interval) /* for binary compat before 1.91 */
-{
-   return hrt_ualarm_itimer(usec, interval);
-}
-#endif /* #ifdef HAS_UALARM */
 #endif /* #if !defined(HAS_UALARM) && defined(HAS_SETITIMER) */
 
 #if !defined(HAS_UALARM) && defined(HAS_SETITIMER)
