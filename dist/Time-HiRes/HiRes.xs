@@ -774,7 +774,7 @@ static struct timespec timespec_init;
 
 static int darwin_time_init() {
 #ifdef USE_ITHREADS
-  PERL_MUTEX_LOCK(&darwin_time_mutex);
+  MUTEX_LOCK(&darwin_time_mutex);
 #endif
   struct timeval tv;
   int success = 1;
@@ -791,7 +791,7 @@ static int darwin_time_init() {
     }
   }
 #ifdef USE_ITHREADS
-  PERL_MUTEX_UNLOCK(&darwin_time_mutex);
+  MUTEX_UNLOCK(&darwin_time_mutex);
 #endif
   return success;
 }
