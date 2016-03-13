@@ -772,7 +772,7 @@ static mach_timebase_info_data_t timebase_info;
 static struct timespec timespec_init;
 
 static int darwin_time_init() {
-#ifdef USE_ITHREAD
+#ifdef USE_ITHREADS
   PERL_MUTEX_LOCK(&darwin_time_mutex);
 #endif
   struct timeval tv;
@@ -789,7 +789,7 @@ static int darwin_time_init() {
       }
     }
   }
-#ifdef USE_ITHREAD
+#ifdef USE_ITHREADS
   PERL_MUTEX_UNLOCK(&darwin_time_mutex);
 #endif
   return success;
