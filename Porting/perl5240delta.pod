@@ -71,6 +71,22 @@ that are used as format fields, widths, and vector separators).
 
 =head1 Incompatible Changes
 
+=head2 Regular expression compilation errors
+
+Some regular expression patterns that had runtime errors now
+don't compile at all.
+
+This should have been in the perldelta for 5.23.4, but was omitted.
+
+Almost all Unicode properties using the C<\p{}> and C<\P{}> regular
+expression pattern constructs are now checked for validity at pattern
+compilation time, and invalid ones will cause the program to not
+compile.  In earlier releases, this check was often deferred until run
+time.  Whenever an error check is moved from run- to compile time,
+erroneous code is caught 100% of the time, whereas before it would only
+get caught if and when the offending portion actually gets executed,
+which for unreachable code might be never.
+
 =head2 Nested declarations are now disallowed
 
 A C<my>, C<our>, or C<state> declaration is no longer allowed inside
@@ -148,6 +164,29 @@ L<perlrecharclass/Extended Bracketed Character Classes>.
 
 =head1 Deprecations
 
+=head2 Using code points above the platform's C<IV_MAX> is now
+deprecated
+
+Unicode defines code points in the range C<0..0x10FFFF>.  Some standards
+at one time defined them up to 2**31 - 1, but Perl has allowed them to
+be as high as anything that will fit in a word on the platform being
+used.  However, use of those above the platform's C<IV_MAX> is broken in
+some constructs, notably C<tr///>, regular expression patterns involving
+quantifiers, and in some arithmetic and comparison operations, such as
+being the upper limit of a loop.  Now the use of such code points raises
+a deprecation warning, unless that warning category is turned off.
+C<IV_MAX> is typically 2**31 -1 on 32-bit platforms, and 2**63-1 on
+64-bit ones.
+
+=head2 Doing bitwise operations on strings containing code points above
+0xFF is deprecated
+
+The string bitwise operators treat their operands as strings of bytes,
+and values beyond 0xFF are nonsensical in this context.  To operate on
+encoded bytes, first encode the strings.  To operate on code points'
+numeric values, use C<split> and C<map ord>.  In the future, this
+warning will be replaced by an exception.
+
 =head2 sysread(), syswrite(), recv() and send() are deprecated on
 :utf8 handles
 
@@ -173,6 +212,15 @@ are called on handle with the C<:utf8> layer.
 =head1 Performance Enhancements
 
 =over 4
+
+=item *
+
+Many languages, such as Chinese, are caseless.  Perl now knows about
+most modern commercially important ones, and skips much of the work when
+a program tries to change case in them (like C<ucfirst()>) or match
+caselessly (C<qr//i>).  This will speed up a program, such as a web
+server, that can operate on multiple languages, while operating on a
+caseless one.
 
 =item *
 
@@ -373,6 +421,49 @@ exports anything.  [perl #125410]
 
 =head2 Changes to Existing Documentation
 
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+The documentation of C<hex> has been revised to clarify valid inputs.
+
+=back
+
+=head3 L<perlop>
+
+=over 4
+
+=item *
+
+The documentation of C<qx//> now describes how C<$?> is affected.
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+The documentation of C<$@> was reworded to clarify that it is not just for
+syntax errors in C<eval>.
+L<[perl #124034]|https://rt.perl.org/Ticket/Display.html?id=124034>
+
+=back
+
+=head3 L<perlxs>
+
+=over 4
+
+=item *
+
+The documentation of C<PROTOTYPES> has been clarified; they are I<disabled>
+by default, not I<enabled>.
+
+=back
+
 =head3 L<perlapi>
 
 =over 4
@@ -530,6 +621,13 @@ L<Illegal user-defined property name|perldiag/"Illegal user-defined property nam
 
 =item *
 
+L<Invalid number '%s' for -C option.|perldiag/"Invalid number '%s' for -C option.">
+
+(F) You supplied a number to the -C option that either has extra leading
+zeroes or overflows perl's unsigned integer representation.
+
+=item *
+
 L<<< Sequence (?... not terminated in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>|perldiag/"Sequence (?... not terminated in regex; marked by <-- HERE in mE<sol>%sE<sol>" >>>
 
 =back
@@ -616,7 +714,6 @@ not used by C<< PPPort.pm >>, only by its test files.
 
 It is now possible to specify which compilation date to show on
 C<< perl -V >> output, by setting the macro C<< PERL_BUILD_DATE >>.
-
 
 =item *
 
@@ -768,6 +865,20 @@ removed from the code opening and executing the first 1 or 2 F<.pl> files.
 
 =over 4
 
+=item UTF-EBCDIC extended
+
+UTF-EBCDIC is like UTF-8, but for EBCDIC platforms.  It now has been
+extended so that it can represent code points up to 2 ** 64 - 1 on
+platforms with 64-bit words.  This brings it into parity with UTF-8.
+This enhancement requires an incompatible change to the representation
+of code points in the range 2 ** 30 to 2 ** 31 -1 (the latter was the
+previous maximum representable code point).  This means that a file that
+contains one of these code points, written out with previous versions of
+perl cannot be read in, without conversion, by a perl containing this
+change.  We do not believe any such files are in existence, but if you
+do have one, submit a ticket at L<perlbug@perl.org|mailto:perlbug@perl.org>,
+and we will write a conversion script for you.
+
 =item EBCDIC C<cmp()> and C<sort()> fixed for UTF-EBCDIC strings
 
 Comparing two strings that were both encoded in UTF-8 (or more
@@ -824,6 +935,36 @@ Win32 compilers are supported.
 
 =back
 
+=item Cygwin
+
+Tests are more robust against unusual cygdrive prefixes.
+L<[perl #126834]|https://rt.perl.org/Ticket/Display.html?id=126834>
+
+=item OS X/Darwin
+
+Builds with both -DDEBUGGING and threading enabled would fail with a
+"panic: free from wrong pool" error when built or tested from Terminal
+on OS X.  This was caused by perl's internal management of the
+environment conflicting with an atfork handler using the libc
+setenv() function to update the environment.
+
+Perl now uses setenv()/unsetenv() to update the environment on OS X.
+L<[perl #126240]|https://rt.perl.org/Ticket/Display.html?id=126240>
+
+=item ppc64el floating point
+
+The floating point format of ppc64el (Debian naming for little-endian
+PowerPC) is now detected correctly.
+
+=item Solaris
+
+All Solaris now builds shared libperl.
+
+Solaris and variants like OpenIndiana now always build with the shared
+Perl library (Configure -Duseshrplib).  This was required for the
+OpenIndiana builds, but this has also been the setting for Oracle/Sun
+Perl builds for several years.
+
 =item AmigaOS
 
 The AmigaOS port has been reintegrated into the main tree, based off of
@@ -834,6 +975,33 @@ Perl 5.22.1.
 =head1 Internal Changes
 
 =over 4
+
+=item *
+
+Perl core code and the threads extension have been annotated so that,
+if Perl is configured to use threads, then during compile-time clang (3.6
+or later) will warn about suspicious uses of mutexes.
+See L<http://clang.llvm.org/docs/ThreadSafetyAnalysis.html> for more
+information.
+
+=item *
+
+The C<signbit()> emulation has been enhanced.  This will help older
+and/or more exotic platforms or configurations.
+
+=item *
+
+The C<to_utf8_case> function is discouraged in favor of C<toUPPER_utf8>,
+C<toTITLE_utf8>, C<toLOWER_utf8>, and C<toFOLD_utf8>.
+
+=item *
+
+EBCDIC code paths have largely been unified to avoid repetition.
+
+=item *
+
+MSWin32 code for C<$^X> has been moved out of the F<win32> directory to
+F<caretx.c>, where other operating systems set that variable.
 
 =item *
 
@@ -870,6 +1038,58 @@ C<GvASSIGN_GENERATION> and C<GvASSIGN_GENERATION_set> have been removed.
 =head1 Selected Bug Fixes
 
 =over 4
+
+=item *
+
+C</...\G/> no longer crashes on utf8 strings. When C<\G> is a fixed number
+of characters from the start of the regex, perl needs to count back that
+many characters from the current C<pos()> position and start matching from
+there. However, it was counting back bytes rather than characters, which
+could lead to panics on utf8 strings.
+
+=item *
+
+In some cases operators that return integers would return negative
+integers as large positive integers.
+L<[perl #126635]|https://rt.perl.org/Ticket/Display.html?id=126635>
+
+=item *
+
+The C<pipe()> operator would assert for DEBUGGING builds instead of
+producing the correct error message.  The condition asserted on is
+detected and reported on correctly without the assertions, so the
+assertions were removed.
+L<[perl #126480]|https://rt.perl.org/Ticket/Display.html?id=126480>
+
+=item *
+
+In some cases, failing to parse a here-doc would attempt to use freed
+memory.  This was caused by a pointer not being restored correctly.
+L<[perl #126443]|https://rt.perl.org/Ticket/Display.html?id=126443>
+
+=item *
+
+C<< @x = sort { *a = 0; $a <=> $b } 0 .. 1 >> no longer frees the GP
+for *a before restoring its SV slot.
+L<[perl #124097]|https://rt.perl.org/Ticket/Display.html?id=124097>
+
+=item *
+
+Multiple problems with the new hexadecimal floating point printf
+format C<%a> were fixed:
+L<[perl #126582]|https://rt.perl.org/Ticket/Display.html?id=126582>,
+L<[perl #126586]|https://rt.perl.org/Ticket/Display.html?id=126586>,
+L<[perl #126822]|https://rt.perl.org/Ticket/Display.html?id=126822>
+
+=item *
+
+Calling mg_set() in leave_scope() no longer leaks.
+
+=item *
+
+A regression from Perl v5.20 was fixed in which debugging output of regular
+expression compilation was wrong.  (The pattern was correctly compiled, but
+what got displayed for it was wrong.)
 
 =item *
 
