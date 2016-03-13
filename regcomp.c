@@ -900,7 +900,7 @@ static const scan_data_t zero_scan_data =
 
 #ifdef DEBUGGING
 int
-re_printf(pTHX_ const char *fmt, ...)
+Perl_re_printf(pTHX_ const char *fmt, ...)
 {
     va_list ap;
     int result;
@@ -929,47 +929,47 @@ Perl_re_indentf(pTHX_ const char *fmt, U32 depth, ...)
 
 #define DEBUG_RExC_seen()                                                   \
         DEBUG_OPTIMISE_MORE_r({                                             \
-            re_printf("RExC_seen: ");                                       \
+            Perl_re_printf( aTHX_ "RExC_seen: ");                                       \
                                                                             \
             if (RExC_seen & REG_ZERO_LEN_SEEN)                              \
-                re_printf("REG_ZERO_LEN_SEEN ");                            \
+                Perl_re_printf( aTHX_ "REG_ZERO_LEN_SEEN ");                            \
                                                                             \
             if (RExC_seen & REG_LOOKBEHIND_SEEN)                            \
-                re_printf("REG_LOOKBEHIND_SEEN ");                          \
+                Perl_re_printf( aTHX_ "REG_LOOKBEHIND_SEEN ");                          \
                                                                             \
             if (RExC_seen & REG_GPOS_SEEN)                                  \
-                re_printf("REG_GPOS_SEEN ");                                \
+                Perl_re_printf( aTHX_ "REG_GPOS_SEEN ");                                \
                                                                             \
             if (RExC_seen & REG_RECURSE_SEEN)                               \
-                re_printf("REG_RECURSE_SEEN ");                             \
+                Perl_re_printf( aTHX_ "REG_RECURSE_SEEN ");                             \
                                                                             \
             if (RExC_seen & REG_TOP_LEVEL_BRANCHES_SEEN)                    \
-                re_printf("REG_TOP_LEVEL_BRANCHES_SEEN ");                  \
+                Perl_re_printf( aTHX_ "REG_TOP_LEVEL_BRANCHES_SEEN ");                  \
                                                                             \
             if (RExC_seen & REG_VERBARG_SEEN)                               \
-                re_printf("REG_VERBARG_SEEN ");                             \
+                Perl_re_printf( aTHX_ "REG_VERBARG_SEEN ");                             \
                                                                             \
             if (RExC_seen & REG_CUTGROUP_SEEN)                              \
-                re_printf("REG_CUTGROUP_SEEN ");                            \
+                Perl_re_printf( aTHX_ "REG_CUTGROUP_SEEN ");                            \
                                                                             \
             if (RExC_seen & REG_RUN_ON_COMMENT_SEEN)                        \
-                re_printf("REG_RUN_ON_COMMENT_SEEN ");                      \
+                Perl_re_printf( aTHX_ "REG_RUN_ON_COMMENT_SEEN ");                      \
                                                                             \
             if (RExC_seen & REG_UNFOLDED_MULTI_SEEN)                        \
-                re_printf("REG_UNFOLDED_MULTI_SEEN ");                      \
+                Perl_re_printf( aTHX_ "REG_UNFOLDED_MULTI_SEEN ");                      \
                                                                             \
             if (RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN)                  \
-                re_printf("REG_UNBOUNDED_QUANTIFIER_SEEN ");                \
+                Perl_re_printf( aTHX_ "REG_UNBOUNDED_QUANTIFIER_SEEN ");                \
                                                                             \
-            re_printf("\n");                                                \
+            Perl_re_printf( aTHX_ "\n");                                                \
         });
 
 #define DEBUG_SHOW_STUDY_FLAG(flags,flag) \
-  if ((flags) & flag) re_printf( "%s ", #flag)
+  if ((flags) & flag) Perl_re_printf( aTHX_  "%s ", #flag)
 
 #define DEBUG_SHOW_STUDY_FLAGS(flags,open_str,close_str)                    \
     if ( ( flags ) ) {                                                      \
-        re_printf( "%s", open_str);                                         \
+        Perl_re_printf( aTHX_  "%s", open_str);                                         \
         DEBUG_SHOW_STUDY_FLAG(flags,SF_FL_BEFORE_SEOL);                     \
         DEBUG_SHOW_STUDY_FLAG(flags,SF_FL_BEFORE_MEOL);                     \
         DEBUG_SHOW_STUDY_FLAG(flags,SF_IS_INF);                             \
@@ -985,13 +985,13 @@ Perl_re_indentf(pTHX_ const char *fmt, U32 depth, ...)
         DEBUG_SHOW_STUDY_FLAG(flags,SCF_SEEN_ACCEPT);                       \
         DEBUG_SHOW_STUDY_FLAG(flags,SCF_TRIE_DOING_RESTUDY);                \
         DEBUG_SHOW_STUDY_FLAG(flags,SCF_IN_DEFINE);                         \
-        re_printf( "%s", close_str);                                        \
+        Perl_re_printf( aTHX_  "%s", close_str);                                        \
     }
 
 
 #define DEBUG_STUDYDATA(str,data,depth)                              \
 DEBUG_OPTIMISE_MORE_r(if(data){                                      \
-    re_indentf( "" str "Pos:%"IVdf"/%"IVdf                           \
+    Perl_re_indentf( aTHX_  "" str "Pos:%"IVdf"/%"IVdf                           \
         " Flags: 0x%"UVXf,                                           \
         depth,                                                       \
         (IV)((data)->pos_min),                                       \
@@ -999,14 +999,14 @@ DEBUG_OPTIMISE_MORE_r(if(data){                                      \
         (UV)((data)->flags)                                          \
     );                                                               \
     DEBUG_SHOW_STUDY_FLAGS((data)->flags," [ ","]");                 \
-    re_printf(                                                       \
+    Perl_re_printf( aTHX_                                                        \
         " Whilem_c: %"IVdf" Lcp: %"IVdf" %s",                        \
         (IV)((data)->whilem_c),                                      \
         (IV)((data)->last_closep ? *((data)->last_closep) : -1),     \
         is_inf ? "INF " : ""                                         \
     );                                                               \
     if ((data)->last_found)                                          \
-        re_printf(                                                   \
+        Perl_re_printf( aTHX_                                                    \
             "Last:'%s' %"IVdf":%"IVdf"/%"IVdf" %sFixed:'%s' @ %"IVdf \
             " %sFloat: '%s' @ %"IVdf"/%"IVdf"",                      \
             SvPVX_const((data)->last_found),                         \
@@ -1023,7 +1023,7 @@ DEBUG_OPTIMISE_MORE_r(if(data){                                      \
             (IV)((data)->offset_float_min),                          \
             (IV)((data)->offset_float_max)                           \
         );                                                           \
-    re_printf("\n");                                                 \
+    Perl_re_printf( aTHX_ "\n");                                                 \
 });
 
 
@@ -1977,14 +1977,14 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap,
 
     PERL_ARGS_ASSERT_DUMP_TRIE;
 
-    re_indentf( "Char : %-6s%-6s%-4s ",
+    Perl_re_indentf( aTHX_  "Char : %-6s%-6s%-4s ",
         depth+1,
         "Match","Base","Ofs" );
 
     for( state = 0 ; state < trie->uniquecharcount ; state++ ) {
 	SV ** const tmp = av_fetch( revcharmap, state, 0);
         if ( tmp ) {
-            re_printf( "%*s",
+            Perl_re_printf( aTHX_  "%*s",
                 colwidth,
                 pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), colwidth,
 	                    PL_colors[0], PL_colors[1],
@@ -1994,27 +1994,27 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap,
             );
         }
     }
-    re_printf( "\n%*sState|-----------------------",
+    Perl_re_printf( aTHX_  "\n%*sState|-----------------------",
         depth+1);
 
     for( state = 0 ; state < trie->uniquecharcount ; state++ )
-        re_printf( "%.*s", colwidth, "--------");
-    re_printf( "\n");
+        Perl_re_printf( aTHX_  "%.*s", colwidth, "--------");
+    Perl_re_printf( aTHX_  "\n");
 
     for( state = 1 ; state < trie->statecount ; state++ ) {
 	const U32 base = trie->states[ state ].trans.base;
 
-        re_indentf( "#%4"UVXf"|",
+        Perl_re_indentf( aTHX_  "#%4"UVXf"|",
                                        depth+1, (UV)state);
 
         if ( trie->states[ state ].wordnum ) {
-            re_printf( " W%4X",
+            Perl_re_printf( aTHX_  " W%4X",
                                            trie->states[ state ].wordnum );
         } else {
-            re_printf( "%6s", "" );
+            Perl_re_printf( aTHX_  "%6s", "" );
         }
 
-        re_printf( " @%4"UVXf" ", (UV)base );
+        Perl_re_printf( aTHX_  " @%4"UVXf" ", (UV)base );
 
         if ( base ) {
             U32 ofs = 0;
@@ -2025,7 +2025,7 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap,
                                                                     != state))
                     ofs++;
 
-            re_printf( "+%2"UVXf"[ ", (UV)ofs);
+            Perl_re_printf( aTHX_  "+%2"UVXf"[ ", (UV)ofs);
 
             for ( ofs = 0 ; ofs < trie->uniquecharcount ; ofs++ ) {
                 if ( ( base + ofs >= trie->uniquecharcount )
@@ -2034,28 +2034,28 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap,
                         && trie->trans[ base + ofs
                                     - trie->uniquecharcount ].check == state )
                 {
-                   re_printf( "%*"UVXf,
+                   Perl_re_printf( aTHX_  "%*"UVXf,
                     colwidth,
                     (UV)trie->trans[ base + ofs
                                              - trie->uniquecharcount ].next );
                 } else {
-                    re_printf( "%*s",colwidth,"   ." );
+                    Perl_re_printf( aTHX_  "%*s",colwidth,"   ." );
                 }
             }
 
-            re_printf( "]");
+            Perl_re_printf( aTHX_  "]");
 
         }
-        re_printf( "\n" );
+        Perl_re_printf( aTHX_  "\n" );
     }
-    re_indentf( "word_info N:(prev,len)=",
+    Perl_re_indentf( aTHX_  "word_info N:(prev,len)=",
                                 depth);
     for (word=1; word <= trie->wordcount; word++) {
-        re_printf( " %d:(%d,%d)",
+        Perl_re_printf( aTHX_  " %d:(%d,%d)",
 	    (int)word, (int)(trie->wordinfo[word].prev),
 	    (int)(trie->wordinfo[word].len));
     }
-    re_printf( "\n" );
+    Perl_re_printf( aTHX_  "\n" );
 }
 /*
   Dumps a fully constructed but uncompressed trie in list form.
@@ -2076,20 +2076,20 @@ S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie,
     PERL_ARGS_ASSERT_DUMP_TRIE_INTERIM_LIST;
 
     /* print out the table precompression.  */
-    re_indentf( "State :Word | Transition Data\n",
+    Perl_re_indentf( aTHX_  "State :Word | Transition Data\n",
             depth+1 );
-    re_indentf( "%s",
+    Perl_re_indentf( aTHX_  "%s",
             depth+1, "------:-----+-----------------\n" );
 
     for( state=1 ; state < next_alloc ; state ++ ) {
         U16 charid;
 
-        re_indentf( " %4"UVXf" :",
+        Perl_re_indentf( aTHX_  " %4"UVXf" :",
             depth+1, (UV)state  );
         if ( ! trie->states[ state ].wordnum ) {
-            re_printf( "%5s| ","");
+            Perl_re_printf( aTHX_  "%5s| ","");
         } else {
-            re_printf( "W%4x| ",
+            Perl_re_printf( aTHX_  "W%4x| ",
                 trie->states[ state ].wordnum
             );
         }
@@ -2097,7 +2097,7 @@ S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie,
 	    SV ** const tmp = av_fetch( revcharmap,
                                         TRIE_LIST_ITEM(state,charid).forid, 0);
 	    if ( tmp ) {
-                re_printf( "%*s:%3X=%4"UVXf" | ",
+                Perl_re_printf( aTHX_  "%*s:%3X=%4"UVXf" | ",
                     colwidth,
                     pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp),
                               colwidth,
@@ -2109,11 +2109,11 @@ S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie,
                     (UV)TRIE_LIST_ITEM(state,charid).newstate
                 );
                 if (!(charid % 10))
-                    re_printf( "\n%*s| ",
+                    Perl_re_printf( aTHX_  "\n%*s| ",
                         (int)((depth * 2) + 14), "");
             }
         }
-        re_printf( "\n");
+        Perl_re_printf( aTHX_  "\n");
     }
 }
 
@@ -2141,12 +2141,12 @@ S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie,
        that they are identical.
      */
 
-    re_indentf( "Char : ", depth+1 );
+    Perl_re_indentf( aTHX_  "Char : ", depth+1 );
 
     for( charid = 0 ; charid < trie->uniquecharcount ; charid++ ) {
 	SV ** const tmp = av_fetch( revcharmap, charid, 0);
         if ( tmp ) {
-            re_printf( "%*s",
+            Perl_re_printf( aTHX_  "%*s",
                 colwidth,
                 pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), colwidth,
 	                    PL_colors[0], PL_colors[1],
@@ -2157,32 +2157,32 @@ S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie,
         }
     }
 
-    re_printf( "\n%*sState+-",depth+1 );
+    Perl_re_printf( aTHX_  "\n%*sState+-",depth+1 );
 
     for( charid=0 ; charid < trie->uniquecharcount ; charid++ ) {
-        re_printf( "%.*s", colwidth,"--------");
+        Perl_re_printf( aTHX_  "%.*s", colwidth,"--------");
     }
 
-    re_printf( "\n" );
+    Perl_re_printf( aTHX_  "\n" );
 
     for( state=1 ; state < next_alloc ; state += trie->uniquecharcount ) {
 
-        re_indentf( "%4"UVXf" : ",
+        Perl_re_indentf( aTHX_  "%4"UVXf" : ",
             depth+1,
             (UV)TRIE_NODENUM( state ) );
 
         for( charid = 0 ; charid < trie->uniquecharcount ; charid++ ) {
             UV v=(UV)SAFE_TRIE_NODENUM( trie->trans[ state + charid ].next );
             if (v)
-                re_printf( "%*"UVXf, colwidth, v );
+                Perl_re_printf( aTHX_  "%*"UVXf, colwidth, v );
             else
-                re_printf( "%*s", colwidth, "." );
+                Perl_re_printf( aTHX_  "%*s", colwidth, "." );
         }
         if ( ! trie->states[ TRIE_NODENUM( state ) ].wordnum ) {
-            re_printf( " (%4"UVXf")\n",
+            Perl_re_printf( aTHX_  " (%4"UVXf")\n",
                                             (UV)trie->trans[ state ].check );
         } else {
-            re_printf( " (%4"UVXf") W%4X\n",
+            Perl_re_printf( aTHX_  " (%4"UVXf") W%4X\n",
                                             (UV)trie->trans[ state ].check,
             trie->states[ TRIE_NODENUM( state ) ].wordnum );
         }
@@ -2494,7 +2494,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         sv_setiv(re_trie_maxbuff, RE_TRIE_MAXBUF_INIT);
     }
     DEBUG_TRIE_COMPILE_r({
-        re_indentf(
+        Perl_re_indentf( aTHX_
           "make_trie start==%d, first==%d, last==%d, tail==%d depth=%d\n",
           depth+1,
           REG_NODE_NUM(startbranch),REG_NODE_NUM(first),
@@ -2701,7 +2701,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         }
     } /* end first pass */
     DEBUG_TRIE_COMPILE_r(
-        re_indentf(
+        Perl_re_indentf( aTHX_
                 "TRIE(%s): W:%d C:%d Uq:%d Min:%d Max:%d\n",
                 depth+1,
                 ( widecharmap ? "UTF8" : "NATIVE" ), (int)word_count,
@@ -2751,7 +2751,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 
         STRLEN transcount = 1;
 
-        DEBUG_TRIE_COMPILE_MORE_r( re_indentf( "Compiling trie using list compiler\n",
+        DEBUG_TRIE_COMPILE_MORE_r( Perl_re_indentf( aTHX_  "Compiling trie using list compiler\n",
             depth+1));
 
 	trie->states = (reg_trie_state *)
@@ -2858,7 +2858,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 
                 /*
                 DEBUG_TRIE_COMPILE_MORE_r(
-                    re_printf( "tp: %d zp: %d ",tp,zp)
+                    Perl_re_printf( aTHX_  "tp: %d zp: %d ",tp,zp)
                 );
                 */
 
@@ -2920,7 +2920,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 }
                 /*
                 DEBUG_TRIE_COMPILE_MORE_r(
-                    re_printf( " base: %d\n",base);
+                    Perl_re_printf( aTHX_  " base: %d\n",base);
                 );
                 */
                 trie->states[ state ].trans.base=base;
@@ -2963,7 +2963,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
            we have to use TRIE_NODENUM() to convert.
 
         */
-        DEBUG_TRIE_COMPILE_MORE_r( re_indentf( "Compiling trie using table compiler\n",
+        DEBUG_TRIE_COMPILE_MORE_r( Perl_re_indentf( aTHX_  "Compiling trie using table compiler\n",
             depth+1));
 
 	trie->trans = (reg_trie_trans *)
@@ -3154,7 +3154,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 	    PerlMemShared_realloc( trie->states, laststate
 				   * sizeof(reg_trie_state) );
         DEBUG_TRIE_COMPILE_MORE_r(
-            re_indentf( "Alloc: %d Orig: %"IVdf" elements, Final:%"IVdf". Savings of %%%5.2f\n",
+            Perl_re_indentf( aTHX_  "Alloc: %d Orig: %"IVdf" elements, Final:%"IVdf". Savings of %%%5.2f\n",
                 depth+1,
                 (int)( ( TRIE_CHARCOUNT(trie) + 1 ) * trie->uniquecharcount
                        + 1 ),
@@ -3166,7 +3166,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         } /* end table compress */
     }
     DEBUG_TRIE_COMPILE_MORE_r(
-            re_indentf( "Statecount:%"UVxf" Lasttrans:%"UVxf"\n",
+            Perl_re_indentf( aTHX_  "Statecount:%"UVxf" Lasttrans:%"UVxf"\n",
                 depth+1,
                 (UV)trie->statecount,
                 (UV)trie->lasttrans)
@@ -3217,7 +3217,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
             });
         }
         DEBUG_OPTIMISE_r(
-            re_indentf( "MJD offset:%"UVuf" MJD length:%"UVuf"\n",
+            Perl_re_indentf( aTHX_  "MJD offset:%"UVuf" MJD length:%"UVuf"\n",
                 depth+1,
                 (UV)mjd_offset, (UV)mjd_nodelen)
         );
@@ -3248,7 +3248,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                             if ( count == 2 ) {
                                 Zero(trie->bitmap, ANYOF_BITMAP_SIZE, char);
                                 DEBUG_OPTIMISE_r(
-                                    re_indentf( "New Start State=%"UVuf" Class: [",
+                                    Perl_re_indentf( aTHX_  "New Start State=%"UVuf" Class: [",
                                         depth+1,
                                         (UV)state));
 				if (idx >= 0) {
@@ -3259,14 +3259,14 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                                     if ( folder )
                                         TRIE_BITMAP_SET(trie, folder[ *ch ]);
                                     DEBUG_OPTIMISE_r(
-                                        re_printf( "%s", (char*)ch)
+                                        Perl_re_printf( aTHX_  "%s", (char*)ch)
                                     );
 				}
 			    }
 			    TRIE_BITMAP_SET(trie,*ch);
 			    if ( folder )
 				TRIE_BITMAP_SET(trie,folder[ *ch ]);
-                            DEBUG_OPTIMISE_r(re_printf("%s", ch));
+                            DEBUG_OPTIMISE_r(Perl_re_printf( aTHX_ "%s", ch));
 			}
                         idx = ofs;
 		    }
@@ -3277,7 +3277,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                     char *ch = SvPV( *tmp, len );
                     DEBUG_OPTIMISE_r({
                         SV *sv=sv_newmortal();
-                        re_indentf( "Prefix State: %"UVuf" Idx:%"UVuf" Char='%s'\n",
+                        Perl_re_indentf( aTHX_  "Prefix State: %"UVuf" Idx:%"UVuf" Char='%s'\n",
                             depth+1,
                             (UV)state, (UV)idx,
                             pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), 6,
@@ -3298,7 +3298,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 		} else {
 #ifdef DEBUGGING
 		    if (state>1)
-                        DEBUG_OPTIMISE_r(re_printf("]\n"));
+                        DEBUG_OPTIMISE_r(Perl_re_printf( aTHX_ "]\n"));
 #endif
 		    break;
 		}
@@ -3570,13 +3570,13 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
      */
     fail[ 0 ] = fail[ 1 ] = 0;
     DEBUG_TRIE_COMPILE_r({
-        re_indentf( "Stclass Failtable (%"UVuf" states): 0",
+        Perl_re_indentf( aTHX_  "Stclass Failtable (%"UVuf" states): 0",
                       depth, (UV)numstates
         );
         for( q_read=1; q_read<numstates; q_read++ ) {
-            re_printf( ", %"UVuf, (UV)fail[q_read]);
+            Perl_re_printf( aTHX_  ", %"UVuf, (UV)fail[q_read]);
         }
-        re_printf( "\n");
+        Perl_re_printf( aTHX_  "\n");
     });
     Safefree(q);
     /*RExC_seen |= REG_TRIEDFA_SEEN;*/
@@ -3588,11 +3588,11 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
     DEBUG_OPTIMISE_r({if (scan){           \
        regnode *Next = regnext(scan);      \
        regprop(RExC_rx, RExC_mysv, scan, NULL, pRExC_state);\
-       re_indentf( "" str ">%3d: %s (%d)", \
+       Perl_re_indentf( aTHX_  "" str ">%3d: %s (%d)", \
            depth, REG_NODE_NUM(scan), SvPV_nolen_const(RExC_mysv),\
            Next ? (REG_NODE_NUM(Next)) : 0 );\
        DEBUG_SHOW_STUDY_FLAGS(flags," [ ","]");\
-       re_printf( "\n");                   \
+       Perl_re_printf( aTHX_  "\n");                   \
    }});
 
 /* The below joins as many adjacent EXACTish nodes as possible into a single
@@ -4106,7 +4106,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
     );
     DEBUG_OPTIMISE_MORE_r(
     {
-        re_indentf( "study_chunk stopparen=%ld recursed_count=%lu depth=%lu recursed_depth=%lu scan=%p last=%p",
+        Perl_re_indentf( aTHX_  "study_chunk stopparen=%ld recursed_count=%lu depth=%lu recursed_depth=%lu scan=%p last=%p",
             depth, (long)stopparen,
             (unsigned long)RExC_study_chunk_recursed_count,
             (unsigned long)depth, (unsigned long)recursed_depth,
@@ -4126,16 +4126,16 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                    (( j - 1 ) * RExC_study_chunk_recursed_bytes), i)
                         )
                     ) {
-                        re_printf(" %d",(int)i);
+                        Perl_re_printf( aTHX_ " %d",(int)i);
                         break;
                     }
                 }
                 if ( j + 1 < recursed_depth ) {
-                    re_printf( ",");
+                    Perl_re_printf( aTHX_  ",");
                 }
             }
         }
-        re_printf("\n");
+        Perl_re_printf( aTHX_ "\n");
     }
     );
     while ( scan && OP(scan) != END && scan < last ){
@@ -4411,7 +4411,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
                         DEBUG_TRIE_COMPILE_r({
                             regprop(RExC_rx, RExC_mysv, tail, NULL, pRExC_state);
-                            re_indentf( "%s %"UVuf":%s\n",
+                            Perl_re_indentf( aTHX_  "%s %"UVuf":%s\n",
                               depth+1,
                               "Looking for TRIE'able sequences. Tail node is ",
                               (UV)(tail - RExC_emit_start),
@@ -4503,20 +4503,20 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
                             DEBUG_TRIE_COMPILE_r({
                                 regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
-                                re_indentf( "- %d:%s (%d)",
+                                Perl_re_indentf( aTHX_  "- %d:%s (%d)",
                                    depth+1,
                                    REG_NODE_NUM(cur), SvPV_nolen_const( RExC_mysv ), REG_NODE_NUM(cur) );
 
                                 regprop(RExC_rx, RExC_mysv, noper, NULL, pRExC_state);
-                                re_printf( " -> %d:%s",
+                                Perl_re_printf( aTHX_  " -> %d:%s",
                                     REG_NODE_NUM(noper), SvPV_nolen_const(RExC_mysv));
 
                                 if ( noper_next ) {
                                   regprop(RExC_rx, RExC_mysv, noper_next, NULL, pRExC_state);
-                                  re_printf("\t=> %d:%s\t",
+                                  Perl_re_printf( aTHX_ "\t=> %d:%s\t",
                                     REG_NODE_NUM(noper_next), SvPV_nolen_const(RExC_mysv));
                                 }
-                                re_printf( "(First==%d,Last==%d,Cur==%d,tt==%s,ntt==%s,nntt==%s)\n",
+                                Perl_re_printf( aTHX_  "(First==%d,Last==%d,Cur==%d,tt==%s,ntt==%s,nntt==%s)\n",
                                    REG_NODE_NUM(first), REG_NODE_NUM(last), REG_NODE_NUM(cur),
 				   PL_reg_name[trietype], PL_reg_name[noper_trietype], PL_reg_name[noper_next_trietype]
 				);
@@ -4612,9 +4612,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         } /* loop over branches */
                         DEBUG_TRIE_COMPILE_r({
                             regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
-                            re_indentf( "- %s (%d) <SCAN FINISHED> ",
+                            Perl_re_indentf( aTHX_  "- %s (%d) <SCAN FINISHED> ",
                               depth+1, SvPV_nolen_const( RExC_mysv ),REG_NODE_NUM(cur));
-                            re_printf( "(First==%d, Last==%d, Cur==%d, tt==%s)\n",
+                            Perl_re_printf( aTHX_  "(First==%d, Last==%d, Cur==%d, tt==%s)\n",
                                REG_NODE_NUM(first), REG_NODE_NUM(last), REG_NODE_NUM(cur),
                                PL_reg_name[trietype]
                             );
@@ -4654,7 +4654,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                      * turn it into a plain NOTHING op. */
                                     DEBUG_TRIE_COMPILE_r({
                                         regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
-                                        re_indentf( "- %s (%d) <NOTHING BRANCH SEQUENCE>\n",
+                                        Perl_re_indentf( aTHX_  "- %s (%d) <NOTHING BRANCH SEQUENCE>\n",
                                           depth+1,
                                           SvPV_nolen_const( RExC_mysv ),REG_NODE_NUM(cur));
 
@@ -5244,13 +5244,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    /* It is counted once already... */
 		    data->pos_min += minnext * (mincount - counted);
 #if 0
-re_printf( "counted=%"UVuf" deltanext=%"UVuf
+Perl_re_printf( aTHX_  "counted=%"UVuf" deltanext=%"UVuf
                               " SSize_t_MAX=%"UVuf" minnext=%"UVuf
                               " maxcount=%"UVuf" mincount=%"UVuf"\n",
     (UV)counted, (UV)deltanext, (UV)SSize_t_MAX, (UV)minnext, (UV)maxcount,
     (UV)mincount);
 if (deltanext != SSize_t_MAX)
-re_printf( "LHS=%"UVuf" RHS=%"UVuf"\n",
+Perl_re_printf( aTHX_  "LHS=%"UVuf" RHS=%"UVuf"\n",
     (UV)(-counted * deltanext + (minnext + deltanext) * maxcount
           - minnext * mincount), (UV)(SSize_t_MAX - data->pos_delta));
 #endif
@@ -6064,7 +6064,7 @@ Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
 
     /* Dispatch a request to compile a regexp to correct regexp engine. */
     DEBUG_COMPILE_r({
-        re_printf( "Using engine %"UVxf"\n",
+        Perl_re_printf( aTHX_  "Using engine %"UVxf"\n",
 			PTR2UV(eng));
     });
     return CALLREGCOMP_ENG(eng, pattern, flags);
@@ -6109,7 +6109,7 @@ S_pat_upgrade_to_utf8(pTHX_ RExC_state_t * const pRExC_state,
     bool do_end = 0;
     GET_RE_DEBUG_FLAGS_DECL;
 
-    DEBUG_PARSE_r(re_printf(
+    DEBUG_PARSE_r(Perl_re_printf( aTHX_
         "UTF8 mismatch! Converting to utf8 for resizing and compile\n"));
 
     Newx(dst, *plen_p * 2 + 1, U8);
@@ -6477,7 +6477,7 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 	    *p++ = 'x';
 	*p++ = '\0';
 	DEBUG_COMPILE_r({
-            re_printf(
+            Perl_re_printf( aTHX_
 		"%sre-parsing pattern for runtime code:%s %s\n",
 		PL_colors[4],PL_colors[5],newpat);
 	});
@@ -6812,7 +6812,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     }
 
-    DEBUG_PARSE_r(re_printf(
+    DEBUG_PARSE_r(Perl_re_printf( aTHX_
         "Assembling pattern from %d elements%s\n", pat_count,
             orig_rx_flags & RXf_SPLIT ? " for split" : ""));
 
@@ -6841,7 +6841,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                 *is_bare_re = TRUE;
             SvREFCNT_inc(re);
             Safefree(pRExC_state->code_blocks);
-            DEBUG_PARSE_r(re_printf(
+            DEBUG_PARSE_r(Perl_re_printf( aTHX_
                 "Precompiled pattern%s\n",
                     orig_rx_flags & RXf_SPLIT ? " for split" : ""));
 
@@ -6884,7 +6884,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     DEBUG_COMPILE_r({
             SV *dsv= sv_newmortal();
             RE_PV_QUOTED_DECL(s, RExC_utf8, dsv, exp, plen, 60);
-            re_printf( "%sCompiling REx%s %s\n",
+            Perl_re_printf( aTHX_  "%sCompiling REx%s %s\n",
                           PL_colors[4],PL_colors[5],s);
         });
 
@@ -7000,7 +7000,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     assert(*RExC_end == '\0');
 
     DEBUG_PARSE_r(
-        re_printf( "Starting first pass (sizing)\n");
+        Perl_re_printf( aTHX_  "Starting first pass (sizing)\n");
         RExC_lastnum=0;
         RExC_lastparse=NULL;
     );
@@ -7030,7 +7030,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                                     pRExC_state->num_code_blocks);
             }
             else {
-                DEBUG_PARSE_r(re_printf(
+                DEBUG_PARSE_r(Perl_re_printf( aTHX_
                 "Need to redo pass 1\n"));
             }
 
@@ -7042,7 +7042,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	SvLEN_set(code_blocksv,0); /* no you can't have it, sv_clear */
 
     DEBUG_PARSE_r({
-        re_printf(
+        Perl_re_printf( aTHX_
             "Required size %"IVdf" nodes\n"
             "Starting second pass (creation)\n",
             (IV)RExC_size);
@@ -7180,7 +7180,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     /* Useful during FAIL. */
 #ifdef RE_TRACK_PATTERN_OFFSETS
     Newxz(ri->u.offsets, 2*RExC_size+1, U32); /* MJD 20001228 */
-    DEBUG_OFFSETS_r(re_printf(
+    DEBUG_OFFSETS_r(Perl_re_printf( aTHX_
                           "%s %"UVuf" bytes for offset annotations.\n",
                           ri->u.offsets ? "Got" : "Couldn't get",
                           (UV)((2*RExC_size+1) * sizeof(U32))));
@@ -7205,7 +7205,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     /* setup various meta data about recursion, this all requires
      * RExC_npar to be correctly set, and a bit later on we clear it */
     if (RExC_seen & REG_RECURSE_SEEN) {
-        DEBUG_OPTIMISE_MORE_r(re_printf(
+        DEBUG_OPTIMISE_MORE_r(Perl_re_printf( aTHX_
             "%*s%*s Setting up open/close parens\n",
                   22, "|    |", (int)(0 * 2 + 1), ""));
 
@@ -7238,7 +7238,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         Perl_croak(aTHX_ "panic: reg returned NULL to re_op_compile for generation pass, flags=%#"UVxf"", (UV) flags);
     }
     DEBUG_OPTIMISE_r(
-        re_printf( "Starting post parse optimization\n");
+        Perl_re_printf( aTHX_  "Starting post parse optimization\n");
     );
 
     /* XXXX To minimize changes to RE engine we always allocate
@@ -7267,7 +7267,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         copyRExC_state = RExC_state;
     } else {
         U32 seen=RExC_seen;
-        DEBUG_OPTIMISE_r(re_printf("Restudying\n"));
+        DEBUG_OPTIMISE_r(Perl_re_printf( aTHX_ "Restudying\n"));
 
         RExC_state = copyRExC_state;
         if (seen & REG_TOP_LEVEL_BRANCHES_SEEN)
@@ -7401,12 +7401,12 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 #ifdef TRIE_STUDY_OPT
 	DEBUG_PARSE_r(
 	    if (!restudied)
-                re_printf( "first at %"IVdf"\n",
+                Perl_re_printf( aTHX_  "first at %"IVdf"\n",
 			      (IV)(first - scan + 1))
         );
 #else
 	DEBUG_PARSE_r(
-            re_printf( "first at %"IVdf"\n",
+            Perl_re_printf( aTHX_  "first at %"IVdf"\n",
 	        (IV)(first - scan + 1))
         );
 #endif
@@ -7535,7 +7535,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	    r->intflags &= ~PREGf_SKIP;	/* Used in find_byclass(). */
 	    DEBUG_COMPILE_r({ SV *sv = sv_newmortal();
                       regprop(r, sv, (regnode*)data.start_class, NULL, pRExC_state);
-                      re_printf(
+                      Perl_re_printf( aTHX_
 				    "synthetic stclass \"%s\".\n",
 				    SvPVX_const(sv));});
             data.start_class = NULL;
@@ -7580,7 +7580,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	regnode_ssc ch_class;
 	SSize_t last_close = 0;
 
-        DEBUG_PARSE_r(re_printf( "\nMulti Top Level\n"));
+        DEBUG_PARSE_r(Perl_re_printf( aTHX_  "\nMulti Top Level\n"));
 
 	scan = ri->program + 1;
 	ssc_init(pRExC_state, &ch_class);
@@ -7615,7 +7615,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	    r->intflags &= ~PREGf_SKIP;	/* Used in find_byclass(). */
 	    DEBUG_COMPILE_r({ SV* sv = sv_newmortal();
                       regprop(r, sv, (regnode*)data.start_class, NULL, pRExC_state);
-                      re_printf(
+                      Perl_re_printf( aTHX_
 				    "synthetic stclass \"%s\".\n",
 				    SvPVX_const(sv));});
             data.start_class = NULL;
@@ -7633,7 +7633,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     /* Guard against an embedded (?=) or (?<=) with a longer minlen than
        the "real" pattern. */
     DEBUG_OPTIMISE_r({
-        re_printf("minlen: %"IVdf" r->minlen:%"IVdf" maxlen:%"IVdf"\n",
+        Perl_re_printf( aTHX_ "minlen: %"IVdf" r->minlen:%"IVdf" maxlen:%"IVdf"\n",
                       (IV)minlen, (IV)r->minlen, (IV)RExC_maxlen);
     });
     r->minlenret = minlen;
@@ -7727,12 +7727,12 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     Newxz(r->offs, RExC_npar, regexp_paren_pair);
     /* assume we don't need to swap parens around before we match */
     DEBUG_TEST_r({
-        re_printf("study_chunk_recursed_count: %lu\n",
+        Perl_re_printf( aTHX_ "study_chunk_recursed_count: %lu\n",
             (unsigned long)RExC_study_chunk_recursed_count);
     });
     DEBUG_DUMP_r({
         DEBUG_RExC_seen();
-        re_printf("Final program:\n");
+        Perl_re_printf( aTHX_ "Final program:\n");
         regdump(r);
     });
 #ifdef RE_TRACK_PATTERN_OFFSETS
@@ -7740,14 +7740,14 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         const STRLEN len = ri->u.offsets[0];
         STRLEN i;
         GET_RE_DEBUG_FLAGS_DECL;
-        re_printf(
+        Perl_re_printf( aTHX_
                       "Offsets: [%"UVuf"]\n\t", (UV)ri->u.offsets[0]);
         for (i = 1; i <= len; i++) {
             if (ri->u.offsets[i*2-1] || ri->u.offsets[i*2])
-                re_printf( "%"UVuf":%"UVuf"[%"UVuf"] ",
+                Perl_re_printf( aTHX_  "%"UVuf":%"UVuf"[%"UVuf"] ",
                 (UV)i, (UV)ri->u.offsets[i*2-1], (UV)ri->u.offsets[i*2]);
             }
-        re_printf( "\n");
+        Perl_re_printf( aTHX_  "\n");
     });
 #endif
 
@@ -8265,7 +8265,7 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 #define DEBUG_PARSE_MSG(funcname)     DEBUG_PARSE_r({           \
     int num;                                                    \
     if (RExC_lastparse!=RExC_parse) {                           \
-        re_printf( "%s",                                        \
+        Perl_re_printf( aTHX_  "%s",                                        \
             Perl_pv_pretty(aTHX_ RExC_mysv1, RExC_parse,        \
                 RExC_end - RExC_parse, 16,                      \
                 "", "",                                         \
@@ -8277,17 +8277,17 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
             )                                                   \
         );                                                      \
     } else                                                      \
-        re_printf("%16s","");                                   \
+        Perl_re_printf( aTHX_ "%16s","");                                   \
                                                                 \
     if (SIZE_ONLY)                                              \
        num = RExC_size + 1;                                     \
     else                                                        \
        num=REG_NODE_NUM(RExC_emit);                             \
     if (RExC_lastnum!=num)                                      \
-       re_printf("|%4d",num);                                   \
+       Perl_re_printf( aTHX_ "|%4d",num);                                   \
     else                                                        \
-       re_printf("|%4s","");                                    \
-    re_printf("|%*s%-4s",                                       \
+       Perl_re_printf( aTHX_ "|%4s","");                                    \
+    Perl_re_printf( aTHX_ "|%*s%-4s",                                       \
         (int)((depth*2)), "",                                   \
         (funcname)                                              \
     );                                                          \
@@ -8299,11 +8299,11 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 
 #define DEBUG_PARSE(funcname)     DEBUG_PARSE_r({           \
     DEBUG_PARSE_MSG((funcname));                            \
-    re_printf("%4s","\n");                                  \
+    Perl_re_printf( aTHX_ "%4s","\n");                                  \
 })
 #define DEBUG_PARSE_FMT(funcname,fmt,args)     DEBUG_PARSE_r({\
     DEBUG_PARSE_MSG((funcname));                            \
-    re_printf(fmt "\n",args);                               \
+    Perl_re_printf( aTHX_ fmt "\n",args);                               \
 })
 
 /* This section of code defines the inversion list object and its methods.  The
@@ -10736,7 +10736,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			vFAIL("Reference to nonexistent group");
 	            }
 	            RExC_recurse_count++;
-                    DEBUG_OPTIMISE_MORE_r(re_printf(
+                    DEBUG_OPTIMISE_MORE_r(Perl_re_printf( aTHX_
                         "%*s%*s Recurse #%"UVuf" to %"IVdf"\n",
                               22, "|    |", (int)(depth * 2 + 1), "",
                               (UV)ARG(ret), (IV)ARG2L(ret)));
@@ -11049,7 +11049,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	            RExC_nestroot = parno;
                 if (RExC_open_parens && !RExC_open_parens[parno])
 	        {
-                    DEBUG_OPTIMISE_MORE_r(re_printf(
+                    DEBUG_OPTIMISE_MORE_r(Perl_re_printf( aTHX_
                         "%*s%*s Setting open paren #%"IVdf" to %d\n",
                         22, "|    |", (int)(depth * 2 + 1), "",
 			(IV)parno, REG_NODE_NUM(ret)));
@@ -11143,7 +11143,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	case 1: case 2:
 	    ender = reganode(pRExC_state, CLOSE, parno);
             if ( RExC_close_parens ) {
-                DEBUG_OPTIMISE_MORE_r(re_printf(
+                DEBUG_OPTIMISE_MORE_r(Perl_re_printf( aTHX_
                         "%*s%*s Setting close paren #%"IVdf" to %d\n",
                         22, "|    |", (int)(depth * 2 + 1), "", (IV)parno, REG_NODE_NUM(ender)));
                 RExC_close_parens[parno]= ender;
@@ -11168,7 +11168,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 assert(!RExC_end_op); /* there can only be one! */
                 RExC_end_op = ender;
                 if (RExC_close_parens) {
-                    DEBUG_OPTIMISE_MORE_r(re_printf(
+                    DEBUG_OPTIMISE_MORE_r(Perl_re_printf( aTHX_
                         "%*s%*s Setting close paren #0 (END) to %d\n",
                         22, "|    |", (int)(depth * 2 + 1), "", REG_NODE_NUM(ender)));
 
@@ -11181,7 +11181,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
             DEBUG_PARSE_MSG("lsbr");
             regprop(RExC_rx, RExC_mysv1, lastbr, NULL, pRExC_state);
             regprop(RExC_rx, RExC_mysv2, ender, NULL, pRExC_state);
-            re_printf( "~ tying lastbr %s (%"IVdf") to ender %s (%"IVdf") offset %"IVdf"\n",
+            Perl_re_printf( aTHX_  "~ tying lastbr %s (%"IVdf") to ender %s (%"IVdf") offset %"IVdf"\n",
                           SvPV_nolen_const(RExC_mysv1),
                           (IV)REG_NODE_NUM(lastbr),
                           SvPV_nolen_const(RExC_mysv2),
@@ -11220,7 +11220,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     DEBUG_PARSE_MSG("NADA");
                     regprop(RExC_rx, RExC_mysv1, ret, NULL, pRExC_state);
                     regprop(RExC_rx, RExC_mysv2, ender, NULL, pRExC_state);
-                    re_printf( "~ converting ret %s (%"IVdf") to ender %s (%"IVdf") offset %"IVdf"\n",
+                    Perl_re_printf( aTHX_  "~ converting ret %s (%"IVdf") to ender %s (%"IVdf") offset %"IVdf"\n",
                                   SvPV_nolen_const(RExC_mysv1),
                                   (IV)REG_NODE_NUM(ret),
                                   SvPV_nolen_const(RExC_mysv2),
@@ -18340,7 +18340,7 @@ S_regtail(pTHX_ RExC_state_t * pRExC_state,
         DEBUG_PARSE_r({
             DEBUG_PARSE_MSG((scan==p ? "tail" : ""));
             regprop(RExC_rx, RExC_mysv, scan, NULL, pRExC_state);
-            re_printf( "~ %s (%d) %s %s\n",
+            Perl_re_printf( aTHX_  "~ %s (%d) %s %s\n",
                 SvPV_nolen_const(RExC_mysv), REG_NODE_NUM(scan),
                     (temp == NULL ? "->" : ""),
                     (temp == NULL ? PL_reg_name[OP(val)] : "")
@@ -18430,7 +18430,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p,
         DEBUG_PARSE_r({
             DEBUG_PARSE_MSG((scan==p ? "tsdy" : ""));
             regprop(RExC_rx, RExC_mysv, scan, NULL, pRExC_state);
-            re_printf( "~ %s (%d) -> %s\n",
+            Perl_re_printf( aTHX_  "~ %s (%d) -> %s\n",
                 SvPV_nolen_const(RExC_mysv),
                 REG_NODE_NUM(scan),
                 PL_reg_name[exact]);
@@ -18442,7 +18442,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p,
     DEBUG_PARSE_r({
         DEBUG_PARSE_MSG("");
         regprop(RExC_rx, RExC_mysv, val, NULL, pRExC_state);
-        re_printf(
+        Perl_re_printf( aTHX_
                       "~ attach to %s (%"IVdf") offset to %"IVdf"\n",
 		      SvPV_nolen_const(RExC_mysv),
 		      (IV)REG_NODE_NUM(val),
@@ -18476,15 +18476,15 @@ S_regdump_intflags(pTHX_ const char *lead, const U32 flags)
     for (bit=0; bit<REG_INTFLAGS_NAME_SIZE; bit++) {
         if (flags & (1<<bit)) {
             if (!set++ && lead)
-                re_printf( "%s",lead);
-            re_printf( "%s ",PL_reg_intflags_name[bit]);
+                Perl_re_printf( aTHX_  "%s",lead);
+            Perl_re_printf( aTHX_  "%s ",PL_reg_intflags_name[bit]);
         }
     }
     if (lead)  {
         if (set)
-            re_printf( "\n");
+            Perl_re_printf( aTHX_  "\n");
         else
-            re_printf( "%s[none-set]\n",lead);
+            Perl_re_printf( aTHX_  "%s[none-set]\n",lead);
     }
 }
 
@@ -18503,37 +18503,37 @@ S_regdump_extflags(pTHX_ const char *lead, const U32 flags)
 		continue;
 	    }
             if (!set++ && lead)
-                re_printf( "%s",lead);
-            re_printf( "%s ",PL_reg_extflags_name[bit]);
+                Perl_re_printf( aTHX_  "%s",lead);
+            Perl_re_printf( aTHX_  "%s ",PL_reg_extflags_name[bit]);
         }
     }
     if ((cs = get_regex_charset(flags)) != REGEX_DEPENDS_CHARSET) {
             if (!set++ && lead) {
-                re_printf( "%s",lead);
+                Perl_re_printf( aTHX_  "%s",lead);
             }
             switch (cs) {
                 case REGEX_UNICODE_CHARSET:
-                    re_printf( "UNICODE");
+                    Perl_re_printf( aTHX_  "UNICODE");
                     break;
                 case REGEX_LOCALE_CHARSET:
-                    re_printf( "LOCALE");
+                    Perl_re_printf( aTHX_  "LOCALE");
                     break;
                 case REGEX_ASCII_RESTRICTED_CHARSET:
-                    re_printf( "ASCII-RESTRICTED");
+                    Perl_re_printf( aTHX_  "ASCII-RESTRICTED");
                     break;
                 case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
-                    re_printf( "ASCII-MORE_RESTRICTED");
+                    Perl_re_printf( aTHX_  "ASCII-MORE_RESTRICTED");
                     break;
                 default:
-                    re_printf( "UNKNOWN CHARACTER SET");
+                    Perl_re_printf( aTHX_  "UNKNOWN CHARACTER SET");
                     break;
             }
     }
     if (lead)  {
         if (set)
-            re_printf( "\n");
+            Perl_re_printf( aTHX_  "\n");
         else
-            re_printf( "%s[none-set]\n",lead);
+            Perl_re_printf( aTHX_  "%s[none-set]\n",lead);
     }
 }
 #endif
@@ -18555,14 +18555,14 @@ Perl_regdump(pTHX_ const regexp *r)
     if (r->anchored_substr) {
 	RE_PV_QUOTED_DECL(s, 0, dsv, SvPVX_const(r->anchored_substr),
 	    RE_SV_DUMPLEN(r->anchored_substr), 30);
-        re_printf(
+        Perl_re_printf( aTHX_
 		      "anchored %s%s at %"IVdf" ",
 		      s, RE_SV_TAIL(r->anchored_substr),
 		      (IV)r->anchored_offset);
     } else if (r->anchored_utf8) {
 	RE_PV_QUOTED_DECL(s, 1, dsv, SvPVX_const(r->anchored_utf8),
 	    RE_SV_DUMPLEN(r->anchored_utf8), 30);
-        re_printf(
+        Perl_re_printf( aTHX_
 		      "anchored utf8 %s%s at %"IVdf" ",
 		      s, RE_SV_TAIL(r->anchored_utf8),
 		      (IV)r->anchored_offset);
@@ -18570,55 +18570,55 @@ Perl_regdump(pTHX_ const regexp *r)
     if (r->float_substr) {
 	RE_PV_QUOTED_DECL(s, 0, dsv, SvPVX_const(r->float_substr),
 	    RE_SV_DUMPLEN(r->float_substr), 30);
-        re_printf(
+        Perl_re_printf( aTHX_
 		      "floating %s%s at %"IVdf"..%"UVuf" ",
 		      s, RE_SV_TAIL(r->float_substr),
 		      (IV)r->float_min_offset, (UV)r->float_max_offset);
     } else if (r->float_utf8) {
 	RE_PV_QUOTED_DECL(s, 1, dsv, SvPVX_const(r->float_utf8),
 	    RE_SV_DUMPLEN(r->float_utf8), 30);
-        re_printf(
+        Perl_re_printf( aTHX_
 		      "floating utf8 %s%s at %"IVdf"..%"UVuf" ",
 		      s, RE_SV_TAIL(r->float_utf8),
 		      (IV)r->float_min_offset, (UV)r->float_max_offset);
     }
     if (r->check_substr || r->check_utf8)
-        re_printf(
+        Perl_re_printf( aTHX_
 		      (const char *)
 		      (r->check_substr == r->float_substr
 		       && r->check_utf8 == r->float_utf8
 		       ? "(checking floating" : "(checking anchored"));
     if (r->intflags & PREGf_NOSCAN)
-        re_printf( " noscan");
+        Perl_re_printf( aTHX_  " noscan");
     if (r->extflags & RXf_CHECK_ALL)
-        re_printf( " isall");
+        Perl_re_printf( aTHX_  " isall");
     if (r->check_substr || r->check_utf8)
-        re_printf( ") ");
+        Perl_re_printf( aTHX_  ") ");
 
     if (ri->regstclass) {
         regprop(r, sv, ri->regstclass, NULL, NULL);
-        re_printf( "stclass %s ", SvPVX_const(sv));
+        Perl_re_printf( aTHX_  "stclass %s ", SvPVX_const(sv));
     }
     if (r->intflags & PREGf_ANCH) {
-        re_printf( "anchored");
+        Perl_re_printf( aTHX_  "anchored");
         if (r->intflags & PREGf_ANCH_MBOL)
-            re_printf( "(MBOL)");
+            Perl_re_printf( aTHX_  "(MBOL)");
         if (r->intflags & PREGf_ANCH_SBOL)
-            re_printf( "(SBOL)");
+            Perl_re_printf( aTHX_  "(SBOL)");
         if (r->intflags & PREGf_ANCH_GPOS)
-            re_printf( "(GPOS)");
-        re_printf(" ");
+            Perl_re_printf( aTHX_  "(GPOS)");
+        Perl_re_printf( aTHX_ " ");
     }
     if (r->intflags & PREGf_GPOS_SEEN)
-        re_printf( "GPOS:%"UVuf" ", (UV)r->gofs);
+        Perl_re_printf( aTHX_  "GPOS:%"UVuf" ", (UV)r->gofs);
     if (r->intflags & PREGf_SKIP)
-        re_printf( "plus ");
+        Perl_re_printf( aTHX_  "plus ");
     if (r->intflags & PREGf_IMPLICIT)
-        re_printf( "implicit ");
-    re_printf( "minlen %"IVdf" ", (IV)r->minlen);
+        Perl_re_printf( aTHX_  "implicit ");
+    Perl_re_printf( aTHX_  "minlen %"IVdf" ", (IV)r->minlen);
     if (r->extflags & RXf_EVAL_SEEN)
-        re_printf( "with eval ");
-    re_printf( "\n");
+        Perl_re_printf( aTHX_  "with eval ");
+    Perl_re_printf( aTHX_  "\n");
     DEBUG_FLAGS_r({
         regdump_extflags("r->extflags: ",r->extflags);
         regdump_intflags("r->intflags: ",r->intflags);
@@ -19025,7 +19025,7 @@ Perl_re_intuit_string(pTHX_ REGEXP * const r)
 		      ? prog->check_utf8 : prog->check_substr);
 
 	    if (!PL_colorset) reginitcolors();
-            re_printf(
+            Perl_re_printf( aTHX_
 		      "%sUsing REx %ssubstr:%s \"%s%.60s%s%s\"\n",
 		      PL_colors[4],
 		      RX_UTF8(r) ? "utf8 " : "",
@@ -19206,7 +19206,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
 	    SV *dsv= sv_newmortal();
             RE_PV_QUOTED_DECL(s, RX_UTF8(rx),
                 dsv, RX_PRECOMP(rx), RX_PRELEN(rx), 60);
-            re_printf("%sFreeing REx:%s %s\n",
+            Perl_re_printf( aTHX_ "%sFreeing REx:%s %s\n",
                 PL_colors[4],PL_colors[5],s);
         }
     });
@@ -20203,7 +20203,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
 
 #define CLEAR_OPTSTART                                                       \
     if (optstart) STMT_START {                                               \
-        DEBUG_OPTIMISE_r(re_printf(                                          \
+        DEBUG_OPTIMISE_r(Perl_re_printf( aTHX_                                           \
                               " (%"IVdf" nodes)\n", (IV)(node - optstart))); \
         optstart=NULL;                                                       \
     } STMT_END
@@ -20227,7 +20227,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
     PERL_ARGS_ASSERT_DUMPUNTIL;
 
 #ifdef DEBUG_DUMPUNTIL
-    re_printf( "--- %d : %d - %d - %d\n",indent,node-start,
+    Perl_re_printf( aTHX_  "--- %d : %d - %d - %d\n",indent,node-start,
         last ? last-start : 0,plast ? plast-start : 0);
 #endif
 
@@ -20253,18 +20253,18 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	    CLEAR_OPTSTART;
 
         regprop(r, sv, node, NULL, NULL);
-        re_printf( "%4"IVdf":%*s%s", (IV)(node - start),
+        Perl_re_printf( aTHX_  "%4"IVdf":%*s%s", (IV)(node - start),
 		      (int)(2*indent + 1), "", SvPVX_const(sv));
 
         if (OP(node) != OPTIMIZED) {
             if (next == NULL)		/* Next ptr. */
-                re_printf( " (0)");
+                Perl_re_printf( aTHX_  " (0)");
             else if (PL_regkind[(U8)op] == BRANCH
                      && PL_regkind[OP(next)] != BRANCH )
-                re_printf( " (FAIL)");
+                Perl_re_printf( aTHX_  " (FAIL)");
             else
-                re_printf( " (%"IVdf")", (IV)(next - start));
-            re_printf("\n");
+                Perl_re_printf( aTHX_  " (%"IVdf")", (IV)(next - start));
+            Perl_re_printf( aTHX_ "\n");
         }
 
       after_print:
@@ -20302,7 +20302,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	    for (word_idx= 0; word_idx < (I32)trie->wordcount; word_idx++) {
 		SV ** const elem_ptr = av_fetch(trie_words,word_idx,0);
 
-                re_indentf( "%s ",
+                Perl_re_indentf( aTHX_  "%s ",
                     indent+3,
                     elem_ptr
                     ? pv_pretty(sv, SvPV_nolen_const(*elem_ptr),
@@ -20318,7 +20318,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
                 );
                 if (trie->jump) {
                     U16 dist= trie->jump[word_idx+1];
-                    re_printf( "(%"UVuf")\n",
+                    Perl_re_printf( aTHX_  "(%"UVuf")\n",
                                (UV)((dist ? this_trie + dist : next) - start));
                     if (dist) {
                         if (!nextbranch)
@@ -20328,7 +20328,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
                     if (nextbranch && PL_regkind[OP(nextbranch)]==BRANCH)
                         nextbranch= regnext((regnode *)nextbranch);
                 } else {
-                    re_printf( "\n");
+                    Perl_re_printf( aTHX_  "\n");
 		}
 	    }
 	    if (last && next > last)
@@ -20368,7 +20368,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
     }
     CLEAR_OPTSTART;
 #ifdef DEBUG_DUMPUNTIL
-    re_printf( "--- %d\n", (int)indent);
+    Perl_re_printf( aTHX_  "--- %d\n", (int)indent);
 #endif
     return node;
 }
