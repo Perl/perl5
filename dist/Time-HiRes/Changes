@@ -1,7 +1,11 @@
 Revision history for the Perl extension Time::HiRes.
 
 1.9731 [2016-03-??]
-  - nanosleep and clock_nanosleep cleanups: blead c8ea02b8..e3ff671b
+  - mark unused variable as such: blead a914236c
+  - OS X emulation mutex accidentally unused: da7a6455
+  - remove hrt_ualarm: 6da77c36
+  - pod error fixes: 919ca095
+  - nanosleep and clock_nanosleep cleanups: c8ea02b8..e3ff671b
   - static funcs in HiRes.xs: 4e922c26
   - Remove unused variable: 52ffb1b5
 
