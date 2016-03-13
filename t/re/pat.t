@@ -23,7 +23,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 781;  # Update this when adding/deleting tests.
+plan tests => 785;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1722,12 +1722,32 @@ EOP
                             "perl [#126406] panic");
 	}
         {
-            # [perl #126182] test for infinite pattern recursion
-            ok("aaabbb"=~/a(?R)?b/, "optional self recursion works");
-            ok("aaabbb"=~/a(?R)?b/, "optional self recursion works");
-            ok(not("aa"=~/(?R)a/), "left-recursion fails fast");
-            ok("bbaa"=~/(?&x)(?(DEFINE)(?<x>(?&y)*a)(?<y>(?&x)*b))/,"inter-cyclic optional left recursion works");
-            ok(not("a"=~/(.(?2))((?<=(?=(?1)).))/),"look ahead left-recursion fails fast");
+            my $bug="[perl #126182]"; # test for infinite pattern recursion
+            for my $tuple (
+
+                    [ 'q(a)=~/(.(?2))((?<=(?=(?1)).))/', "died", "look ahead left recursion fails fast" ],
+                    [ 'q(aa)=~/(?R)a/', "died", "left-recursion fails fast", ],
+                    [ 'q(bbaa)=~/(?&x)(?(DEFINE)(?<x>(?&y)*a)(?<y>(?&x)*b))/',
+                        "died", "inter-cyclic optional left recursion dies" ],
+                    [ 'q(abc) =~ /a((?1)?)c/', "died", "optional left recursion dies" ],
+                    [ 'q(abc) =~ /a((?1)??)c/', "died", "min mod left recursion dies" ],
+                    [ 'q(abc) =~ /a((?1)*)c/', "died", "* left recursion dies" ],
+                    [ 'q(abc) =~ /a((?1)+)c/', "died", "+ left recursion dies" ],
+                    [ 'q(abc) =~ /a((?1){0,3})c/', "died", "{0,3} left recursion fails fast" ],
+
+                    [ 'q(aaabbb)=~/a(?R)?b/', "matched", "optional self recursion works" ],
+            ) {
+                my ($expr, $expect, $test_name)= @$tuple;
+                # avoid quotes in this code!
+                my $code='
+                    BEGIN{require q(test.pl);}
+                    watchdog(3);
+                    my $status= eval(qq{ (' . $expr . ') ? q(matched) : q(failed) })
+                                || ( ( $@ =~ /Infinite recursion/ ) ? q(died) : q(strange-death) );
+                    print $status;
+                ';
+                fresh_perl_is($code, $expect, {}, "$bug - $test_name" );
+            }
         }
 } # End of sub run_tests
 

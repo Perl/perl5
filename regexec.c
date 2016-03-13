@@ -6512,6 +6512,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 #undef  ST
 #define ST st->u.eval
+#define CUR_EVAL cur_eval->u.eval
+
 	{
 	    SV *ret;
 	    REGEXP *re_sv;
@@ -6534,30 +6536,32 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             re = rex;
             rei = rexi;
             startpoint = scan + ARG2L(scan);
-            EVAL_CLOSE_PAREN_SET( st, arg ); /* ST.close_paren = 1 + ARG(scan) */
+            EVAL_CLOSE_PAREN_SET( st, arg );
             /* Detect infinite recursion
              *
              * A pattern like /(?R)foo/ or /(?<x>(?&y)foo)(?<y>(?&x)bar)/
              * or "a"=~/(.(?2))((?<=(?=(?1)).))/ could recurse forever.
              * So we track the position in the string we are at each time
              * we recurse and if we try to enter the same routine twice from
-             * the same position we fail. This means that a pattern like
-             * "aaabbb"=~/a(?R)?b/ works as expected and does not throw an
-             * error.
+             * the same position we throw an error.
              */
             if ( rex->recurse_locinput[arg] == locinput ) {
-                DEBUG_r({
-                    GET_RE_DEBUG_FLAGS_DECL;
-                    DEBUG_EXECUTE_r({
-                        Perl_re_indentfo( "  pattern left-recursion without consuming input always fails...\n",
-                                    depth);
-                    });
-                });
-                /* this would be infinite recursion, so we fail */
-                sayNO;
+                /* FIXME: we should show the regop that is failing as part
+                 * of the error message. */
+                Perl_croak(aTHX_ "Infinite recursion in regex");
             } else {
                 ST.prev_recurse_locinput= rex->recurse_locinput[arg];
                 rex->recurse_locinput[arg]= locinput;
+
+                DEBUG_r({
+                    GET_RE_DEBUG_FLAGS_DECL;
+                    DEBUG_STACK_r({
+                        Perl_re_indentfo(
+                            "entering GOSUB, prev_recurse_locinput=%p recurse_locinput[%d]=%p\n",
+                            depth, ST.prev_recurse_locinput, arg, rex->recurse_locinput[arg]
+                        );
+                    });
+                });
             }
 
             /* Save all the positions seen so far. */
@@ -6859,9 +6863,24 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	}
 
 	case EVAL_AB: /* cleanup after a successful (??{A})B */
-	    /* note: this is called twice; first after popping B, then A */
-            if ( cur_eval && cur_eval->u.eval.close_paren )
-                rex->recurse_locinput[cur_eval->u.eval.close_paren - 1] = cur_eval->u.eval.prev_recurse_locinput;
+            DEBUG_STACK_r({
+                Perl_re_indentfo( "EVAL_AB cur_eval=%p prev_eval=%p\n",
+                    depth, cur_eval, ST.prev_eval);
+            });
+
+#define SET_RECURSE_LOCINPUT(STR,VAL)\
+            if ( cur_eval && CUR_EVAL.close_paren ) {\
+                DEBUG_EXECUTE_r({ \
+                    Perl_re_indentfo( "EVAL_AB[before] GOSUB%d ce=%p recurse_locinput=%p\n",\
+                        depth,    \
+                        CUR_EVAL.close_paren - 1,\
+                        cur_eval, \
+                        VAL);     \
+                });               \
+                rex->recurse_locinput[CUR_EVAL.close_paren - 1] = VAL;\
+            }
+
+            SET_RECURSE_LOCINPUT("EVAL_AB[before]", CUR_EVAL.prev_recurse_locinput);
 
 	    rex_sv = ST.prev_rex;
             is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(rex_sv));
@@ -6883,13 +6902,19 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    reginfo->poscache_maxiter = 0;
             if ( nochange_depth )
 	        nochange_depth--;
+
+            SET_RECURSE_LOCINPUT("EVAL_AB[after]", cur_eval->locinput);
 	    sayYES;
 
 
 	case EVAL_AB_fail: /* unsuccessfully ran A or B in (??{A})B */
 	    /* note: this is called twice; first after popping B, then A */
-            if ( cur_eval && cur_eval->u.eval.close_paren )
-                rex->recurse_locinput[cur_eval->u.eval.close_paren - 1] = cur_eval->u.eval.prev_recurse_locinput;
+            DEBUG_STACK_r({
+                Perl_re_indentfo( "EVAL_AB_fail cur_eval=%p prev_eval=%p\n",
+                    depth, cur_eval, ST.prev_eval);
+            });
+
+            SET_RECURSE_LOCINPUT("EVAL_AB_fail[before]", CUR_EVAL.prev_recurse_locinput);
 
 	    rex_sv = ST.prev_rex;
             is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(rex_sv));
@@ -6901,11 +6926,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    regcppop(rex, &maxopenparen);
 	    cur_eval = ST.prev_eval;
 	    cur_curlyx = ST.prev_curlyx;
+
 	    /* Invalidate cache. See "invalidate" comment above. */
 	    reginfo->poscache_maxiter = 0;
 	    if ( nochange_depth )
 	        nochange_depth--;
-	    sayNO_SILENT;
+
+            SET_RECURSE_LOCINPUT("EVAL_AB_fail[after]", cur_eval->locinput);
+            sayNO_SILENT;
 #undef ST
 
 	case OPEN: /*  (  */
@@ -6985,7 +7013,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case INSUBP:   /*  (?(R))  */
             n = ARG(scan);
-            sw = cur_eval && (n == 0 || cur_eval->u.eval.close_paren == n);
+            sw = cur_eval && (n == 0 || CUR_EVAL.close_paren == n);
             break;
 
         case DEFINEP:  /*  (?(DEFINE))  */
@@ -7947,34 +7975,34 @@ NULL
           fake_end:
 	    if (cur_eval) {
 		/* we've just finished A in /(??{A})B/; now continue with B */
-                if ( cur_eval->u.eval.close_paren )
-                    rex->recurse_locinput[cur_eval->u.eval.close_paren - 1] = cur_eval->u.eval.prev_recurse_locinput;
-
+                SET_RECURSE_LOCINPUT("FAKE-END[before]", CUR_EVAL.prev_recurse_locinput);
 		st->u.eval.prev_rex = rex_sv;		/* inner */
 
                 /* Save *all* the positions. */
 		st->u.eval.cp = regcppush(rex, 0, maxopenparen);
-		rex_sv = cur_eval->u.eval.prev_rex;
+                rex_sv = CUR_EVAL.prev_rex;
 		is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(rex_sv));
 		SET_reg_curpm(rex_sv);
 		rex = ReANY(rex_sv);
 		rexi = RXi_GET(rex);
-		cur_curlyx = cur_eval->u.eval.prev_curlyx;
+                cur_curlyx = CUR_EVAL.prev_curlyx;
 
 		REGCP_SET(st->u.eval.lastcp);
 
 		/* Restore parens of the outer rex without popping the
 		 * savestack */
-		S_regcp_restore(aTHX_ rex, cur_eval->u.eval.lastcp,
+                S_regcp_restore(aTHX_ rex, CUR_EVAL.lastcp,
                                         &maxopenparen);
 
 		st->u.eval.prev_eval = cur_eval;
-		cur_eval = cur_eval->u.eval.prev_eval;
+                cur_eval = CUR_EVAL.prev_eval;
 		DEBUG_EXECUTE_r(
-                    Perl_re_indentfo( "  EVAL trying tail ... %"UVxf"\n",
-                                      depth,PTR2UV(cur_eval)););
+                    Perl_re_indentfo( "EVAL trying tail ... (cur_eval=%p)\n",
+                                      depth, cur_eval););
                 if ( nochange_depth )
 	            nochange_depth--;
+
+                SET_RECURSE_LOCINPUT("FAKE-END[after]", cur_eval->locinput);
 
                 PUSH_YES_STATE_GOTO(EVAL_AB, st->u.eval.prev_eval->u.eval.B,
                                     locinput); /* match B */
