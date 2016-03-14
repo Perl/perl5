@@ -129,7 +129,7 @@ static const char* const non_utf8_target_but_utf8_required
 
 #define HOPBACKc(pos, off) \
 	(char*)(reginfo->is_utf8_target \
-	    ? reghopmaybe3((U8*)pos, -off, (U8*)(reginfo->strbeg)) \
+	    ? reghopmaybe3((U8*)pos, (SSize_t)0-off, (U8*)(reginfo->strbeg)) \
 	    : (pos - off >= reginfo->strbeg)	\
 		? (U8*)pos - off		\
 		: NULL)
