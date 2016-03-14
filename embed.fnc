@@ -2377,7 +2377,7 @@ EsR	|WB_enum|backup_one_WB  |NN WB_enum * previous			\
 				|const bool utf8_target
 #  ifdef DEBUGGING
 Es	|void	|dump_exec_pos	|NN const char *locinput|NN const regnode *scan|NN const char *loc_regeol\
-				|NN const char *loc_bostr|NN const char *loc_reg_starttry|const bool do_utf8|U32 depth
+				|NN const char *loc_bostr|NN const char *loc_reg_starttry|const bool do_utf8|const U32 depth
 Es	|void	|debug_start_match|NN const REGEXP *prog|const bool do_utf8\
 				|NN const char *start|NN const char *end\
 				|NN const char *blurb

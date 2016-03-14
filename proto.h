@@ -3867,7 +3867,7 @@ STATIC U8	S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p, const reg
 STATIC void	S_debug_start_match(pTHX_ const REGEXP *prog, const bool do_utf8, const char *start, const char *end, const char *blurb);
 #define PERL_ARGS_ASSERT_DEBUG_START_MATCH	\
 	assert(prog); assert(start); assert(end); assert(blurb)
-STATIC void	S_dump_exec_pos(pTHX_ const char *locinput, const regnode *scan, const char *loc_regeol, const char *loc_bostr, const char *loc_reg_starttry, const bool do_utf8, U32 depth);
+STATIC void	S_dump_exec_pos(pTHX_ const char *locinput, const regnode *scan, const char *loc_regeol, const char *loc_bostr, const char *loc_reg_starttry, const bool do_utf8, const U32 depth);
 #define PERL_ARGS_ASSERT_DUMP_EXEC_POS	\
 	assert(locinput); assert(scan); assert(loc_regeol); assert(loc_bostr); assert(loc_reg_starttry)
 PERL_CALLCONV int	Perl_re_exec_indentf(pTHX_ const char *fmt, U32 depth, ...);
