@@ -161,7 +161,7 @@ char *mystrdup(const char *s)
 	return result;
 }
 
-static unsigned int pipenum = 0;
+unsigned int pipenum = 0;
 
 int pipe(int filedes[2])
 {
@@ -240,8 +240,8 @@ char *convert_path_u2a(const char *filename)
 	return mystrdup(filename);
 }
 
-static struct SignalSemaphore environ_sema;
-static struct SignalSemaphore popen_sema;
+struct SignalSemaphore environ_sema;
+struct SignalSemaphore popen_sema;
 
 
 void amigaos4_init_environ_sema()
@@ -520,208 +520,6 @@ void ___freeenviron()
 	}
 }
 
-/* reimplementation of popen, clib2's doesn't do all we want */
-
-struct popen_data
-{
-	struct Task *parent;
-	STRPTR command;
-};
-
-static int popen_result = 0;
-
-int popen_child()
-{
-	struct Task *thisTask = IExec->FindTask(0);
-	struct popen_data *pd = (struct popen_data *)thisTask->tc_UserData;
-	const char *argv[4];
-
-	argv[0] = "sh";
-	argv[1] = "-c";
-	argv[2] = pd->command ? pd->command : NULL;
-	argv[3] = NULL;
-
-	// adebug("%s %ld  %s\n",__FUNCTION__,__LINE__,command?command:"NULL");
-
-	/* We need to give this to sh via execvp, execvp expects filename,
-	 * argv[]
-	 */
-	IExec->ObtainSemaphore(&popen_sema);
-
-	IExec->Signal(pd->parent,SIGBREAKF_CTRL_F);
-
-	popen_result = myexecvp(FALSE, argv[0], (char **)argv);
-	if (pd->command)
-		IExec->FreeVec(pd->command);
-	IExec->FreeVec(pd);
-
-	IExec->ReleaseSemaphore(&popen_sema);
-	IExec->Forbid();
-	return 0;
-}
-
-
-FILE *amigaos_popen(const char *cmd, const char *mode)
-{
-	FILE *result = NULL;
-	char pipe_name[50];
-	char unix_pipe[50];
-	char ami_pipe[50];
-	BPTR input = 0;
-	BPTR output = 0;
-	struct Process *proc = NULL;
-	struct Task *thisTask = IExec->FindTask(0);
-	struct popen_data * pd = NULL;
-
-	/* First we need to check the mode
-	 * We can only have unidirectional pipes
-	 */
-	//    adebug("%s %ld cmd %s mode %s \n",__FUNCTION__,__LINE__,cmd,
-	//    mode);
-
-	switch (mode[0])
-	{
-	case 'r':
-	case 'w':
-		break;
-
-	default:
-
-		errno = EINVAL;
-		return result;
-	}
-
-	/* Make a unique pipe name
-	 * we need a unix one and an amigaos version (of the same pipe!)
-	 * as were linking with libunix.
-	 */
-
-	sprintf(pipe_name, "%x%08lx/4096/0", pipenum++,
-	        IUtility->GetUniqueID());
-	sprintf(unix_pipe, "/PIPE/%s", pipe_name);
-	sprintf(ami_pipe, "PIPE:%s", pipe_name);
-
-	/* Now we open the AmigaOs Filehandles That we wil pass to our
-	 * Sub process
-	 */
-
-	if (mode[0] == 'r')
-	{
-		/* A read mode pipe: Output from pipe input from Output() or NIL:*/
-		/* First attempt to DUP Output() */
-		input = IDOS->DupFileHandle(IDOS->Input());
-		if(input == 0)
-		{
-			input = IDOS->Open("NIL:", MODE_READWRITE);
-		}
-		if (input != 0)
-		{
-			output = IDOS->Open(ami_pipe, MODE_NEWFILE);
-		}
-		result = fopen(unix_pipe, mode);
-	}
-	else
-	{
-		/* Open the write end first! */
-
-		result = fopen(unix_pipe, mode);
-
-		input = IDOS->Open(ami_pipe, MODE_OLDFILE);
-		if (input != 0)
-		{
-			output = IDOS->DupFileHandle(IDOS->Output());
-			if(output == 0)
-			{
-				output = IDOS->Open("NIL:", MODE_READWRITE);
-			}
-		}
-	}
-	if ((input == 0) || (output == 0) || (result == NULL))
-	{
-		/* Ouch stream opening failed */
-		/* Close and bail */
-		if (input)
-			IDOS->Close(input);
-		if (output)
-			IDOS->Close(output);
-		if(result)
-		{
-			fclose(result);
-			result = NULL;
-		}
-		return result;
-	}
-
-	/* We have our streams now start our new process
-	 * We're using a new process so that execve can modify the environment
-	 * with messing things up for the shell that launched perl
-	 * Copy cmd before we launch the subprocess as perl seems to waste
-	 * no time in overwriting it! The subprocess will free the copy.
-	 */
-
-	if((pd = (struct popen_data*)IExec->AllocVecTags(sizeof(struct popen_data),AVT_Type,MEMF_SHARED,TAG_DONE)))
-	{
-		pd->parent = thisTask;
-		if ((pd->command  = mystrdup(cmd)))
-		{
-			// adebug("%s %ld
-			// %s\n",__FUNCTION__,__LINE__,cmd_copy?cmd_copy:"NULL");
-			proc = IDOS->CreateNewProcTags(
-			           NP_Entry, popen_child, NP_Child, TRUE, NP_StackSize,
-			           ((struct Process *)thisTask)->pr_StackSize, NP_Input, input,
-			           NP_Output, output, NP_Error, IDOS->ErrorOutput(),
-			           NP_CloseError, FALSE, NP_Cli, TRUE, NP_Name,
-			           "Perl: popen process", NP_UserData, (int)pd,
-			           TAG_DONE);
-		}
-	}
-	if(proc)
-	{
-		/* wait for the child be setup right */
-		IExec->Wait(SIGBREAKF_CTRL_F);
-	}
-	if (!proc)
-	{
-		/* New Process Failed to start
-		 * Close and bail out
-		 */
-		if(pd)
-		{
-			if(pd->command)
-			{
-				IExec->FreeVec(pd->command);
-			}
-			IExec->FreeVec(pd);
-		}
-		if (input)
-			IDOS->Close(input);
-		if (output)
-			IDOS->Close(output);
-		if(result)
-		{
-			fclose(result);
-			result = NULL;
-		}
-	}
-
-	/* Our new process is running and will close it streams etc
-	 * once its done. All we need to is open the pipe via stdio
-	 */
-
-	return result;
-}
-
-int amigaos_pclose(FILE *f)
-{
-	int result = -1;
-	/* close the file before obtaining the semaphore else we might end up
-	   hanging waiting for the child to read the last bit from the pipe */
-	fclose(f);
-	IExec->ObtainSemaphore(&popen_sema);
-	result = popen_result;
-	IExec->ReleaseSemaphore(&popen_sema);
-	return result;
-}
 
 /* Work arround for clib2 fstat */
 #ifndef S_IFCHR
