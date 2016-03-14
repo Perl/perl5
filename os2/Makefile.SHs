@@ -225,7 +225,7 @@ $(aout_static_ext) : $(static_ext) $(dynamic_ext)
 
 $(AOUT_LIBPERL) : $(aout_obj) perl$(AOUT_OBJ_EXT)
 	rm -f $@
-	$(AOUT_AR) rcu $@ perl$(AOUT_OBJ_EXT) $(aout_obj)
+	$(AOUT_AR) rc $@ perl$(AOUT_OBJ_EXT) $(aout_obj)
 	cp $@ perl$(AOUT_LIB_EXT)
 
 .c$(AOUT_OBJ_EXT):
