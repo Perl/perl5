@@ -940,6 +940,11 @@ BOOT:
   }
 #   endif
 #endif
+#if defined(PERL_DARWIN)
+#  ifdef USE_ITHREADS
+  MUTEX_INIT(&darwin_time_mutex);
+#  endif
+#endif
 }
 
 #if defined(USE_ITHREADS) && defined(MY_CXT_KEY)
