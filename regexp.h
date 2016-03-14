@@ -748,8 +748,8 @@ typedef struct regmatch_state {
 	struct {
 	    /* this first element must match u.yes */
 	    struct regmatch_state *prev_yes_state;
-	    struct regmatch_state *prev_eval;
 	    struct regmatch_state *prev_curlyx;
+            struct regmatch_state *prev_eval;
 	    REGEXP	*prev_rex;
 	    CHECKPOINT	cp;	/* remember current savestack indexes */
 	    CHECKPOINT	lastcp;
