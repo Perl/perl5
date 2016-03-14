@@ -6868,8 +6868,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 #define SET_RECURSE_LOCINPUT(STR,VAL)\
             if ( cur_eval && CUR_EVAL.close_paren ) {\
-                DEBUG_EXECUTE_r({ \
-                    Perl_re_exec_indentf( aTHX_  "EVAL_AB[before] GOSUB%d ce=%p recurse_locinput=%p\n",\
+                DEBUG_STACK_r({ \
+                    Perl_re_exec_indentf( aTHX_  STR " GOSUB%d ce=%p recurse_locinput=%p\n",\
                         depth,    \
                         CUR_EVAL.close_paren - 1,\
                         cur_eval, \
