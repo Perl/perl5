@@ -23,7 +23,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 785;  # Update this when adding/deleting tests.
+plan tests => 789;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1724,7 +1724,6 @@ EOP
         {
             my $bug="[perl #126182]"; # test for infinite pattern recursion
             for my $tuple (
-
                     [ 'q(a)=~/(.(?2))((?<=(?=(?1)).))/', "died", "look ahead left recursion fails fast" ],
                     [ 'q(aa)=~/(?R)a/', "died", "left-recursion fails fast", ],
                     [ 'q(bbaa)=~/(?&x)(?(DEFINE)(?<x>(?&y)*a)(?<y>(?&x)*b))/',
@@ -1736,14 +1735,24 @@ EOP
                     [ 'q(abc) =~ /a((?1){0,3})c/', "died", "{0,3} left recursion fails fast" ],
 
                     [ 'q(aaabbb)=~/a(?R)?b/', "matched", "optional self recursion works" ],
+                    [ '"((5maa-maa)(maa-3maa))" =~ /(\\\\((?:[^()]++|(?0))*+\\\\))/', "matched",
+                        "recursion and possessive captures", "((5maa-maa)(maa-3maa))"],
+                    [ '"((5maa-maa)(maa-3maa))" =~ /(\\\\((?:[^()]++|(?1))*+\\\\))/', "matched",
+                        "recursion and possessive captures", "((5maa-maa)(maa-3maa))"],
+                    [ '"((5maa-maa)(maa-3maa))" =~ /(\\\\((?:[^()]+|(?0))*\\\\))/', "matched",
+                        "recursion and possessive captures", "((5maa-maa)(maa-3maa))"],
+                    [ '"((5maa-maa)(maa-3maa))" =~ /(\\\\((?:[^()]+|(?1))*\\\\))/', "matched",
+                        "recursion and possessive captures", "((5maa-maa)(maa-3maa))"],
             ) {
-                my ($expr, $expect, $test_name)= @$tuple;
+                my ($expr, $expect, $test_name, $cap1)= @$tuple;
                 # avoid quotes in this code!
                 my $code='
                     BEGIN{require q(test.pl);}
                     watchdog(3);
-                    my $status= eval(qq{ (' . $expr . ') ? q(matched) : q(failed) })
-                                || ( ( $@ =~ /Infinite recursion/ ) ? q(died) : q(strange-death) );
+                    my $status= eval(q{ !(' . $expr . ') ? q(failed) : ' .
+                        ($cap1 ? '($1 ne q['.$cap1.']) ? qq(badmatch:$1) : ' : '') .
+                        ' q(matched) })
+                                || ( ( $@ =~ /Infinite recursion/ ) ? qq(died) : q(strange-death) );
                     print $status;
                 ';
                 fresh_perl_is($code, $expect, {}, "$bug - $test_name" );

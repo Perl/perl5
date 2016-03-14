@@ -840,18 +840,7 @@ typedef struct regmatch_state {
     } u;
 } regmatch_state;
 
-#define EVAL_CLOSE_PAREN_IS(st,expr) \
-(\
-    ( ( st )                                         ) && \
-    ( ( st )->u.eval.close_paren                     ) && \
-    ( ( ( st )->u.eval.close_paren - 1 ) == ( expr ) ) \
-)
 
-#define EVAL_CLOSE_PAREN_SET(st,expr) \
-    (st)->u.eval.close_paren = (expr) + 1
-
-#define EVAL_CLOSE_PAREN_CLEAR(st) \
-    (st)->u.eval.close_paren = 0
 
 /* how many regmatch_state structs to allocate as a single slab.
  * We do it in 4K blocks for efficiency. The "3" is 2 for the next/prev

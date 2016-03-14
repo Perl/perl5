@@ -5135,6 +5135,28 @@ S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos,
     return wb;
 }
 
+#define EVAL_CLOSE_PAREN_IS(st,expr)                        \
+(                                                           \
+    (   ( st )                                         ) && \
+    (   ( st )->u.eval.close_paren                     ) && \
+    ( ( ( st )->u.eval.close_paren ) == ( (expr) + 1 ) )    \
+)
+
+#define EVAL_CLOSE_PAREN_IS_TRUE(st,expr)                   \
+(                                                           \
+    (   ( st )                                         ) && \
+    (   ( st )->u.eval.close_paren                     ) && \
+    (   ( expr )                                       ) && \
+    ( ( ( st )->u.eval.close_paren ) == ( (expr) + 1 ) )    \
+)
+
+
+#define EVAL_CLOSE_PAREN_SET(st,expr) \
+    (st)->u.eval.close_paren = ( (expr) + 1 )
+
+#define EVAL_CLOSE_PAREN_CLEAR(st) \
+    (st)->u.eval.close_paren = 0
+
 /* returns -1 on failure, $+[0] on success */
 STATIC SSize_t
 S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
@@ -7011,6 +7033,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case INSUBP:   /*  (?(R))  */
             n = ARG(scan);
+            /* this does not need to use EVAL_CLOSE_PAREN macros, as the arg
+             * of SCAN is already set up as matches a eval.close_paren */
             sw = cur_eval && (n == 0 || CUR_EVAL.close_paren == n);
             break;
 
@@ -7535,7 +7559,7 @@ NULL
                           depth, (IV) ST.count, (IV)ST.alen)
 	    );
 
-            if (EVAL_CLOSE_PAREN_IS(cur_eval,(U32)ST.me->flags))
+            if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.me->flags))
 	        goto fake_end;
 	        
 	    {
@@ -7550,7 +7574,7 @@ NULL
 
 
 	    if (ST.minmod || ST.count < ARG1(ST.me) /* min*/ 
-                || EVAL_CLOSE_PAREN_IS(cur_eval,(U32)ST.me->flags))
+                || EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.me->flags))
 		sayNO;
 
 	  curlym_do_B: /* execute the B in /A{m,n}B/  */
@@ -7630,7 +7654,7 @@ NULL
 		else
 		    rex->offs[paren].end = -1;
 
-                if (EVAL_CLOSE_PAREN_IS(cur_eval,(U32)ST.me->flags))
+                if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.me->flags))
 		{
 		    if (ST.count) 
 	                goto fake_end;
@@ -7699,7 +7723,7 @@ NULL
 		maxopenparen = ST.paren;
 	    ST.min = ARG1(scan);  /* min to match */
 	    ST.max = ARG2(scan);  /* max to match */
-            if (EVAL_CLOSE_PAREN_IS(cur_eval,(U32)ST.paren))
+            if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.paren))
             {
 	        ST.min=1;
 	        ST.max=1;
@@ -7887,7 +7911,7 @@ NULL
                     assert(n == REG_INFTY || locinput == li);
 		}
 		CURLY_SETPAREN(ST.paren, ST.count);
-                if (EVAL_CLOSE_PAREN_IS(cur_eval,(U32)ST.paren))
+                if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.paren))
 		    goto fake_end;
 		PUSH_STATE_GOTO(CURLY_B_min_known, ST.B, locinput);
 	    }
@@ -7915,7 +7939,7 @@ NULL
 		{
 		  curly_try_B_min:
 		    CURLY_SETPAREN(ST.paren, ST.count);
-                    if (EVAL_CLOSE_PAREN_IS(cur_eval,(U32)ST.paren))
+                    if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.paren))
                         goto fake_end;
 		    PUSH_STATE_GOTO(CURLY_B_min, ST.B, locinput);
 		}
@@ -7925,7 +7949,7 @@ NULL
 
           curly_try_B_max:
 	    /* a successful greedy match: now try to match B */
-            if (EVAL_CLOSE_PAREN_IS(cur_eval,(U32)ST.paren))
+            if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.paren))
                 goto fake_end;
 	    {
 		bool could_match = locinput < reginfo->strend;
