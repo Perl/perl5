@@ -72,11 +72,11 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="steveh" id="a82f4918f5debccfb7e9a7047d2c2e558df538cd" ticket="126481" desc="PATCH: [perl #126481] panic for !! with syntax error in /(?[...])/"/>
 
-(steveh: jhi suggested picking dde155d before eba9828:)
+(steveh: jhi suggested picking dde155d before eba9828: -- the eba9 doesn't even apply without dde1)
 <commit votes="jhi, steveh" id="dde155d03acf6c9ecbaf478c3dd7ed9d4fb6e930" ticket="" desc="hexfp: if HEXFP_NV the shift2 is unused"/>
 <commit votes="jhi, steveh" id="eba98284740b799def26803ebac340aaa8930437" ticket="127183" desc="[perl #127183] Non-canonical hexadecimal floats are parsed prematurely"/>
 
-<commit votes="steveh, tux" id="e57270be442bfaa9dc23eebd67485e5a806b44e3" ticket="127322" desc="Fix umask for mkstemp(3) calls"/>
+<commit votes="steveh, tux, jhi" id="e57270be442bfaa9dc23eebd67485e5a806b44e3" ticket="127322" desc="Fix umask for mkstemp(3) calls"/>
 
 (steveh: If the #124387 changes are applied then the #127494 changes must also be applied:)
 <commit votes="steveh" id="f05081b8ef229712c83a6f19b217489cf5e5ab25" ticket="124387" desc="[perl #124387] TODO test for AUTOLOAD on DESTROY"/>
@@ -99,16 +99,16 @@ The same criteria apply to code in dual-life modules as to core code.)
 <commit votes="steveh" id="99fff99d79aa793bf9a6e0ce2bb18ced085ad1e2" ticket="127619" desc="util.c: make my_mem*/my_b* prototypes more like the originals"/>
 <commit votes="steveh" id="af4291a85942657772fedc3db017e89100bd916a" ticket="127619" desc="make building without memcpy work (RT #127619)"/>
 
-<commit votes="steveh" id="c2538af7458bf317cdc7bc684f65831744010d80" ticket="122287" desc="[perl #122287] probe in Configure whether dtrace builds an object"/>
+<commit votes="steveh, jhi" id="c2538af7458bf317cdc7bc684f65831744010d80" ticket="122287" desc="[perl #122287] probe in Configure whether dtrace builds an object"/>
 
 </div>
 
 <div><h3>Portability Fixes</h3>
 
-<commit votes="tonyc" id="d691474c4cf3d3119367a72ebb28a990d039baf3" ticket="126922" desc="avoid access to uninitialized memory in win32 crypt()" />
+<commit votes="tonyc, jhi" id="d691474c4cf3d3119367a72ebb28a990d039baf3" ticket="126922" desc="avoid access to uninitialized memory in win32 crypt()" />
 
-<commit votes="steveh, tux" id="e3962106e93fa80bf960e71ac7c7727e7e15eee8" ticket="126240" desc="[perl #126240] use -DPERL_USE_SAFE_PUTENV where possible on OS X"/>
-<commit votes="steveh, tux" id="12ffbb10fe94c82dda90efa15d691ababa5b8b8f" ticket="126240" desc="[perl #126240] avoid leaking memory when setting $ENV{foo} on darwin"/>
+<commit votes="steveh, tux, jhi" id="e3962106e93fa80bf960e71ac7c7727e7e15eee8" ticket="126240" desc="[perl #126240] use -DPERL_USE_SAFE_PUTENV where possible on OS X"/>
+<commit votes="steveh, tux, jhi" id="12ffbb10fe94c82dda90efa15d691ababa5b8b8f" ticket="126240" desc="[perl #126240] avoid leaking memory when setting $ENV{foo} on darwin"/>
 
 </div>
 
@@ -117,16 +117,16 @@ The same criteria apply to code in dual-life modules as to core code.)
 (steveh: This one doesn't apply cleanly and I'm inclined to leave it out unless somebody wants to prepare a version applicable to maint:)
 <commit votes="jhi, steveh" id="a4570f51dba109184d92dcbb0612242d942856fc" ticket="124212" desc="Workaround for perl #124212: these functions are not true static inline"/>
 
-<commit votes="steveh" id="35ff3d7deb0d8004539a00980bb69ece71275982" ticket="" desc="hexfp: all ppc/powerpc-ld linux tailbits difference in exp(1)"/>
+<commit votes="jhi, steveh" id="35ff3d7deb0d8004539a00980bb69ece71275982" ticket="" desc="hexfp: all ppc/powerpc-ld linux tailbits difference in exp(1)"/>
 
 </div>
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="steveh, tux" id="fc61cbf574ad7402fb8b5462426e43d38d0c9a1d" ticket="126437" desc="perlfunc: specify valid inputs precisely [perl #126437]"/>
-<commit votes="steveh, tux" id="0ff57aee45f10b3b7f1fe376f32d2dd4fc9a9848" ticket="126245" desc="fix the API description of SvLEN_set()"/>
-<commit votes="steveh, tux" id="74bfae2735a1a8db05a542cdfe297a20fd5a113f" ticket="" desc="Fix use of == to compare strings in perlref.pod"/>
-<commit votes="steveh, tux" id="d5eedefea11231da8139c9478d2c9069346b6560" ticket="126544" desc="[perl #126544] correct the first example in the fcntl documentation"/>
+<commit votes="steveh, tux, jhi" id="fc61cbf574ad7402fb8b5462426e43d38d0c9a1d" ticket="126437" desc="perlfunc: specify valid inputs precisely [perl #126437]"/>
+<commit votes="steveh, tux, jhi" id="0ff57aee45f10b3b7f1fe376f32d2dd4fc9a9848" ticket="126245" desc="fix the API description of SvLEN_set()"/>
+<commit votes="steveh, tux, jhi" id="74bfae2735a1a8db05a542cdfe297a20fd5a113f" ticket="" desc="Fix use of == to compare strings in perlref.pod"/>
+<commit votes="steveh, tux, jhi" id="d5eedefea11231da8139c9478d2c9069346b6560" ticket="126544" desc="[perl #126544] correct the first example in the fcntl documentation"/>
 
 </div>
 
