@@ -6983,18 +6983,29 @@ sub trace { return main::trace(@_); }
 
     sub set_default_map {
         # Define what code points that are missing from the input files should
-        # map to
+        # map to.  The optional second parameter 'full_name' indicates to
+        # force using the full name of the map instead of its standard name.
 
         my $self = shift;
         my $map = shift;
+        my $use_full_name = shift // 0;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+        if ($use_full_name && $use_full_name ne 'full_name') {
+            Carp::my_carp_bug("Second parameter to set_default_map() if"
+                            . " present, must be 'full_name'");
+        }
 
         my $addr = do { no overloading; pack 'J', $self; };
 
         # Convert the input to the standard equivalent, if any (won't have any
         # for $STRING properties)
         my $standard = $self->property->table($map);
-        $map = $standard->name if defined $standard;
+        if (defined $standard) {
+            $map = ($use_full_name)
+                   ? $standard->full_name
+                   : $standard->name;
+        }
 
         # Warn if there already is a non-equivalent default map for this
         # property.  Note that a default map can be a ref, which means that
@@ -10610,8 +10621,8 @@ ea ; W         ; Wide
 END
     }
 
-    if (-e 'LineBreak.txt') {
-        push @return, split /\n/, <<'END';
+    if (-e 'LineBreak.txt' || -e 'LBsubst.txt') {
+        my @lb = split /\n/, <<'END';
 lb ; AI        ; Ambiguous
 lb ; AL        ; Alphabetic
 lb ; B2        ; Break_Both
@@ -10642,6 +10653,12 @@ lb ; SY        ; Break_Symbols
 lb ; XX        ; Unknown
 lb ; ZW        ; ZWSpace
 END
+        # If this Unicode version predates the lb property, we use our
+        # substitute one
+        if (-e 'LBsubst.txt') {
+            $_ = s/^lb/_Perl_LB/r for @lb;
+        }
+        push @return, @lb;
     }
 
     if (-e 'DNormalizationProps.txt') {
@@ -12153,6 +12170,24 @@ sub process_NamedSequences {
 
         return;
     }
+}
+
+sub filter_substitute_lb {
+    # Used on Unicodes that predate the LB property, where there is a
+    # substitute file.  This just does the regular ea_lb handling for such
+    # files, and then substitutes the long property value name for the short
+    # one that comes with the file.  (The other break files have the long
+    # names in them, so this is the odd one out.)  The reason for doing this
+    # kludge is that regen/mk_invlists.pl is expecting the long name.  This
+    # also fixes the typo 'Inseperable' that leads to problems.
+
+    filter_early_ea_lb;
+    return unless $_;
+
+    my @fields = split /\s*;\s*/;
+    $fields[1] = property_ref('_Perl_LB')->table($fields[1])->full_name;
+    $fields[1] = 'Inseparable' if lc $fields[1] eq 'inseperable';
+    $_ = join '; ', @fields;
 }
 
 sub filter_old_style_arabic_shaping {
@@ -15117,6 +15152,10 @@ END
     # SA              CM      Only Mn or Mc
     # SA              AL      Any except Mn and Mc
     # CJ              NS      Any
+    #
+    # All property values are also written out in their long form, as
+    # regen/mk_invlist.pl expects that.  This also fixes occurrences of the
+    # typo in early Unicode versions: 'inseperable'.
     my $perl_lb = property_ref('_Perl_LB');
     if (! defined $perl_lb) {
         $perl_lb = Property->new('_Perl_LB',
@@ -15125,36 +15164,40 @@ END
                                  Directory => $map_directory,
                                  Type => $STRING);
         my $lb = property_ref('Line_Break');
-        $perl_lb->initialize($lb);
-    }
-    $perl_lb->set_default_map('AL');
 
-    # It's a little iffy relying on Unicode to not change which property value
-    # synonym they use, but if they do, tests should start failing and we can
-    # fix this up
+        # Populate from $lb, but use full name and fix typo.
+        foreach my $range ($lb->ranges) {
+            my $full_name = $lb->table($range->value)->full_name;
+            $full_name = 'Inseparable'
+                                if standardize($full_name) eq 'inseperable';
+            $perl_lb->add_map($range->start, $range->end, $full_name);
+        }
+    }
+
+    $perl_lb->set_default_map('Alphabetic', 'full_name');    # XX -> AL
+
     for my $range ($perl_lb->ranges) {
         my $value = standardize($range->value);
         if (   $value eq standardize('Unknown')
-            || $value eq standardize('XX')
-            || $value eq standardize('AI')
-            || $value eq standardize('SG'))
+            || $value eq standardize('Ambiguous')
+            || $value eq standardize('Surrogate'))
         {
-            $perl_lb->add_map($range->start, $range->end, 'AL',
+            $perl_lb->add_map($range->start, $range->end, 'Alphabetic',
                               Replace => $UNCONDITIONALLY);
         }
-        elsif ($value eq standardize('CJ')) {
-            $perl_lb->add_map($range->start, $range->end, 'NS',
+        elsif ($value eq standardize('Conditional_Japanese_Starter')) {
+            $perl_lb->add_map($range->start, $range->end, 'Nonstarter',
                               Replace => $UNCONDITIONALLY);
         }
-        elsif ($value eq standardize('SA')) {
+        elsif ($value eq standardize('Complex_Context')) {
             for my $i ($range->start .. $range->end) {
                 my $gc_val = $gc->value_of($i);
                 if ($gc_val eq 'Mn' || $gc_val eq 'Mc') {
-                    $perl_lb->add_map($i, $i, 'CM',
+                    $perl_lb->add_map($i, $i, 'Combining_Mark',
                                       Replace => $UNCONDITIONALLY);
                 }
                 else {
-                    $perl_lb->add_map($i, $i, 'AL',
+                    $perl_lb->add_map($i, $i, 'Alphabetic',
                                       Replace => $UNCONDITIONALLY);
                 }
             }
@@ -18921,11 +18964,16 @@ my @input_file_objects = (
                     Has_Missings_Defaults => $NOT_IGNORED,
                     Property => 'Line_Break',
                     # Early versions had problematic syntax
-                    Each_Line_Handler => (($v_version lt v3.1.0)
-                                        ? \&filter_early_ea_lb
-                                        : undef),
-                    Early => [ "LBsubst.txt", '_Perl_LB', 'AL',
-                               'AL', # default
+                    Each_Line_Handler => ($v_version ge v3.1.0)
+                                          ? undef
+                                          : ($v_version lt v3.0.0)
+                                            ? \&filter_substitute_lb
+                                            : \&filter_early_ea_lb,
+                    # Must use long names for property values see comments at
+                    # sub filter_substitute_lb
+                    Early => [ "LBsubst.txt", '_Perl_LB', 'Alphabetic',
+                               'Alphabetic', # default to this because XX ->
+                                             # AL
 
                                # Don't use _Perl_LB as a synonym for
                                # Line_Break in later perls, as it is tailored
