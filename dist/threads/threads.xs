@@ -1021,7 +1021,9 @@ S_ithread_create(
 CLANG_DIAG_IGNORE(-Wthread-safety);
 /* warning: mutex 'thread->mutex' is not held on every path through here [-Wthread-safety-analysis] */
 }
+#if defined(__clang__) || defined(__clang)
 CLANG_DIAG_RESTORE;
+#endif
 
 #endif /* USE_ITHREADS */
 
