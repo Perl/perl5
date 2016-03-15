@@ -8426,6 +8426,7 @@ NULL
 	    yes_state = st->u.yes.prev_yes_state;
 
 	state_num = st->resume_state + 1; /* failure = success + 1 */
+        PERL_ASYNC_CHECK();
 	goto reenter_switch;
     }
     result = 0;

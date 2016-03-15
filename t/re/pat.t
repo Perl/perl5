@@ -23,7 +23,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 789;  # Update this when adding/deleting tests.
+plan tests => 790;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1757,6 +1757,16 @@ EOP
                 ';
                 fresh_perl_is($code, $expect, {}, "$bug - $test_name" );
             }
+        }
+        {
+            fresh_perl_is('
+                BEGIN{require q(test.pl);}
+                watchdog(3);
+                $SIG{ALRM} = sub {print "Timeout\n"; exit(1)};
+                alarm 1;
+                $_ = "a" x 1000 . "b" x 1000 . "c" x 1000;
+                /.*a.*b.*c.*[de]/;
+            ',"Timeout",{},"Test Perl 73464")
         }
 } # End of sub run_tests
 
