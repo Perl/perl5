@@ -71,9 +71,9 @@ while (<OPS>) {
     $args{$key} = $args;
 }
 
-# Set up aliases
+# Set up aliases, and alternative funcs
 
-my %alias;
+my (%alias, %alts);
 
 # Format is "this function" => "does these op names"
 my @raw_alias = (
@@ -139,16 +139,25 @@ my @raw_alias = (
 		 Perl_pp_shostent => [qw(snetent sprotoent sservent)],
 		 Perl_pp_aelemfast => ['aelemfast_lex'],
 		 Perl_pp_grepstart => ['mapstart'],
+
+		 # 2 i_modulo mappings: 2nd is alt, needs 1st (explicit default) to not override the default
+		 Perl_pp_i_modulo  => ['i_modulo'],
+		 Perl_pp_i_modulo_glibc_bugfix => {
+                     'i_modulo' =>
+                         '#if defined(__GLIBC__) && IVSIZE == 8 '.
+                         ' && ( __GLIBC__ < 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 8))' },
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {
     if (ref $names eq 'ARRAY') {
 	foreach (@$names) {
-	    $alias{$_} = [$func, ''];
+            defined $alias{$_}
+            ? $alts{$_} : $alias{$_} = [$func, ''];
 	}
     } else {
 	while (my ($opname, $cond) = each %$names) {
-	    $alias{$opname} = [$func, $cond];
+            defined $alias{$opname}
+            ? $alts{$opname} : $alias{$opname} = [$func, $cond];
 	}
     }
 }
@@ -1251,6 +1260,14 @@ my $pp = open_new('pp_proto.h', '>',
 	++$funcs{$name};
     }
     print $pp "PERL_CALLCONV OP *$_(pTHX);\n" foreach sort keys %funcs;
+
+    print $pp "\n/* alternative functions */\n" if keys %alts;
+    for my $fn (sort keys %alts) {
+        my ($x, $cond) = @{$alts{$fn}};
+        print $pp "$cond\n" if $cond;
+        print $pp "PERL_CALLCONV OP *$x(pTHX);\n";
+        print $pp "#endif\n" if $cond;
+    }
 }
 
 print $oc "\n\n";

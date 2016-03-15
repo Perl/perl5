@@ -293,4 +293,9 @@ PERL_CALLCONV OP *Perl_pp_warn(pTHX);
 PERL_CALLCONV OP *Perl_pp_xor(pTHX);
 PERL_CALLCONV OP *Perl_unimplemented_op(pTHX);
 
+/* alternative functions */
+#if defined(__GLIBC__) && IVSIZE == 8  && ( __GLIBC__ < 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 8))
+PERL_CALLCONV OP *Perl_pp_i_modulo_glibc_bugfix(pTHX);
+#endif
+
 /* ex: set ro: */

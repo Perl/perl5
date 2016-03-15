@@ -214,6 +214,26 @@ Initializes a new Perl interpreter.  See L<perlembed>.
 =cut
 */
 
+static void
+S_fixup_platform_bugs(void)
+{
+#if defined(__GLIBC__) && IVSIZE == 8 \
+    && ( __GLIBC__ < 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 8))
+    {
+        IV l =   3;
+        IV r = -10;
+        /* Cannot do this check with inlined IV constants since
+         * that seems to work correctly even with the buggy glibc. */
+        if (l % r == -3) {
+            dTHX;
+            /* Yikes, we have the bug.
+             * Patch in the workaround version. */
+            PL_ppaddr[OP_I_MODULO] = &Perl_pp_i_modulo_glibc_bugfix;
+        }
+    }
+#endif
+}
+
 void
 perl_construct(pTHXx)
 {
@@ -250,6 +270,8 @@ perl_construct(pTHXx)
     init_stacks();
 
     init_ids();
+
+    S_fixup_platform_bugs();
 
     JMPENV_BOOTSTRAP;
     STATUS_ALL_SUCCESS;
