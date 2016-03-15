@@ -15051,8 +15051,8 @@ END
                                                    0x2060 .. 0x206F,
                                                    0xFE00 .. 0xFE0F,
                                                    0xFFF0 .. 0xFFFB,
-                                                   0xE0000 .. 0xE0FFF,
                                                   ]);
+        $temp->add_range(0xE0000, 0xE0FFF) if $v_version ge v2.0;
         $quotemeta += $temp;
     }
     calculate_DI();
