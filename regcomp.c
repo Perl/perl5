@@ -10823,7 +10823,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		Set_Node_Offset(ret, parse_start);
 		return ret;
 	    }
-	    case '(':           /* (?(?{...})...) and (?(?=...)...) */
+	    case '(':           /* (?(A)yes|no)(?(?{...})...) and (?(?=...)...) */
 	    {
 	        int is_define= 0;
                 const int DEFINE_len = sizeof("DEFINE") - 1;
@@ -10928,88 +10928,112 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    ret = reganode(pRExC_state,INSUBP,parno);
 		    goto insert_if_check_paren;
 		}
-		else if (RExC_parse[0] >= '1' && RExC_parse[0] <= '9' ) {
-                    /* (?(1)...) */
-		    char c;
+		else {
+                    /* (?(1)...) (?(+1)...) (?(-1)...) */
                     UV uv;
-                    if (grok_atoUV(RExC_parse, &uv, &endptr)
-                        && uv <= I32_MAX
-                    ) {
-                        parno = (I32)uv;
-                        RExC_parse = (char*)endptr;
+		    char c = *RExC_parse;
+                    char sign = 0;
+                    if ( c == '-' || c == '+' ) {
+                        sign = *RExC_parse++;
+                        c= *RExC_parse;
                     }
-                    else {
-                        vFAIL("panic: grok_atoUV returned FALSE");
-                    }
-                    ret = reganode(pRExC_state, GROUPP, parno);
+                    if (c >= '1' && c <= '9') {
+                        /* its a number */
 
-                 insert_if_check_paren:
-		    if (UCHARAT(RExC_parse) != ')') {
-                        RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
-			vFAIL("Switch condition not recognized");
-		    }
-		    nextchar(pRExC_state);
-		  insert_if:
-                    REGTAIL(pRExC_state, ret, reganode(pRExC_state, IFTHEN, 0));
-                    br = regbranch(pRExC_state, &flags, 1,depth+1);
-		    if (br == NULL) {
-                        if (flags & (RESTART_PASS1|NEED_UTF8)) {
-                            *flagp = flags & (RESTART_PASS1|NEED_UTF8);
-                            return NULL;
+                        if (grok_atoUV(RExC_parse, &uv, &endptr)
+                            && uv <= I32_MAX
+                        ) {
+                            if (sign == '-') {
+                                parno = RExC_npar - uv;
+                            } else if (sign == '+') {
+                                parno = RExC_npar + uv - 1;
+                            } else {
+                                parno = (I32)uv;
+                            }
+                            RExC_parse = (char*)endptr;
+		            if (parno < 1 || (!SIZE_ONLY && parno > (I32)RExC_rx->nparens)) {
+			        vFAIL("Reference to nonexistent group");
+	                    }
                         }
-                        FAIL2("panic: regbranch returned NULL, flags=%#"UVxf"",
-                              (UV) flags);
-                    } else
-                        REGTAIL(pRExC_state, br, reganode(pRExC_state,
-                                                          LONGJMP, 0));
-		    c = UCHARAT(RExC_parse);
-                    nextchar(pRExC_state);
-		    if (flags&HASWIDTH)
-			*flagp |= HASWIDTH;
-		    if (c == '|') {
-		        if (is_define)
-		            vFAIL("(?(DEFINE)....) does not allow branches");
+                        else {
+                            vFAIL("panic: grok_atoUV returned FALSE");
+                        }
+                        ret = reganode(pRExC_state, GROUPP, parno);
 
-                        /* Fake one for optimizer.  */
-                        lastbr = reganode(pRExC_state, IFTHEN, 0);
-
-                        if (!regbranch(pRExC_state, &flags, 1,depth+1)) {
+                     insert_if_check_paren:
+                        if (UCHARAT(RExC_parse) != ')') {
+                            RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
+                            vFAIL("Switch condition not recognized");
+                        }
+                        nextchar(pRExC_state);
+                      insert_if:
+                        REGTAIL(pRExC_state, ret, reganode(pRExC_state, IFTHEN, 0));
+                        br = regbranch(pRExC_state, &flags, 1,depth+1);
+                        if (br == NULL) {
                             if (flags & (RESTART_PASS1|NEED_UTF8)) {
                                 *flagp = flags & (RESTART_PASS1|NEED_UTF8);
                                 return NULL;
                             }
                             FAIL2("panic: regbranch returned NULL, flags=%#"UVxf"",
                                   (UV) flags);
-                        }
-                        REGTAIL(pRExC_state, ret, lastbr);
-		 	if (flags&HASWIDTH)
-			    *flagp |= HASWIDTH;
+                        } else
+                            REGTAIL(pRExC_state, br, reganode(pRExC_state,
+                                                              LONGJMP, 0));
                         c = UCHARAT(RExC_parse);
                         nextchar(pRExC_state);
-		    }
-		    else
-			lastbr = NULL;
-                    if (c != ')') {
-                        if (RExC_parse >= RExC_end)
-                            vFAIL("Switch (?(condition)... not terminated");
+                        if (flags&HASWIDTH)
+                            *flagp |= HASWIDTH;
+                        if (c == '|') {
+                            if (is_define)
+                                vFAIL("(?(DEFINE)....) does not allow branches");
+
+                            /* Fake one for optimizer.  */
+                            lastbr = reganode(pRExC_state, IFTHEN, 0);
+
+                            if (!regbranch(pRExC_state, &flags, 1,depth+1)) {
+                                if (flags & (RESTART_PASS1|NEED_UTF8)) {
+                                    *flagp = flags & (RESTART_PASS1|NEED_UTF8);
+                                    return NULL;
+                                }
+                                FAIL2("panic: regbranch returned NULL, flags=%#"UVxf"",
+                                      (UV) flags);
+                            }
+                            REGTAIL(pRExC_state, ret, lastbr);
+                            if (flags&HASWIDTH)
+                                *flagp |= HASWIDTH;
+                            c = UCHARAT(RExC_parse);
+                            nextchar(pRExC_state);
+                        }
                         else
-                            vFAIL("Switch (?(condition)... contains too many branches");
+                            lastbr = NULL;
+                        if (c != ')') {
+                            if (RExC_parse >= RExC_end)
+                                vFAIL("Switch (?(condition)... not terminated");
+                            else
+                                vFAIL("Switch (?(condition)... contains too many branches");
+                        }
+                        ender = reg_node(pRExC_state, TAIL);
+                        REGTAIL(pRExC_state, br, ender);
+                        if (lastbr) {
+                            REGTAIL(pRExC_state, lastbr, ender);
+                            REGTAIL(pRExC_state, NEXTOPER(NEXTOPER(lastbr)), ender);
+                        }
+                        else
+                            REGTAIL(pRExC_state, ret, ender);
+                        RExC_size++; /* XXX WHY do we need this?!!
+                                        For large programs it seems to be required
+                                        but I can't figure out why. -- dmq*/
+                        return ret;
+                    } else {
+                        if (sign) {
+                            RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
+                            vFAIL2("Expecting number after relative condition (?(%c...))",sign);
+                        } else {
+                            RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
+                            vFAIL("Unknown switch condition (?(...))");
+                        }
                     }
-		    ender = reg_node(pRExC_state, TAIL);
-                    REGTAIL(pRExC_state, br, ender);
-		    if (lastbr) {
-                        REGTAIL(pRExC_state, lastbr, ender);
-                        REGTAIL(pRExC_state, NEXTOPER(NEXTOPER(lastbr)), ender);
-		    }
-		    else
-                        REGTAIL(pRExC_state, ret, ender);
-                    RExC_size++; /* XXX WHY do we need this?!!
-                                    For large programs it seems to be required
-                                    but I can't figure out why. -- dmq*/
-		    return ret;
-		}
-                RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
-                vFAIL("Unknown switch condition (?(...))");
+                }
 	    }
 	    case '[':           /* (?[ ... ]) */
                 return handle_regex_sets(pRExC_state, NULL, flagp, depth,
