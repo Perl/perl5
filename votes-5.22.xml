@@ -119,6 +119,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="jhi, steveh" id="35ff3d7deb0d8004539a00980bb69ece71275982" ticket="" desc="hexfp: all ppc/powerpc-ld linux tailbits difference in exp(1)"/>
 
+(steveh: Note: I have a backport of this that applies to maint-5.22, supplied by jhi:)
+<commit votes="jhi, steveh" id="a4570f51dba109184d92dcbb0612242d942856fc" ticket="124212" desc="Workaround for perl #124212: these functions are not true static inline"/>
+
 </div>
 
 <div><h3>Documentation Fixes</h3>
@@ -127,6 +130,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 <commit votes="steveh, tux, jhi" id="0ff57aee45f10b3b7f1fe376f32d2dd4fc9a9848" ticket="126245" desc="fix the API description of SvLEN_set()"/>
 <commit votes="steveh, tux, jhi" id="74bfae2735a1a8db05a542cdfe297a20fd5a113f" ticket="" desc="Fix use of == to compare strings in perlref.pod"/>
 <commit votes="steveh, tux, jhi" id="d5eedefea11231da8139c9478d2c9069346b6560" ticket="126544" desc="[perl #126544] correct the first example in the fcntl documentation"/>
+<commit votes="steveh, wolfsage" id="69202faf9bbb2df79c480c008af81e3716263ae4" ticket="" desc="Fix perldoc -f sleep to use $SIG{ALRM} instead of $SIG{ALARM}."/>
 
 </div>
 
