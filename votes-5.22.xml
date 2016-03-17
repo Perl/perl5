@@ -54,7 +54,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="steveh, jhi" id="1bb1a3d6d354f67d1158693a799cb49037d27475" ticket="127334" desc="[perl #127334] S_incline: avoid overrunning the end of the parse buffer"/>
 <commit votes="steveh, jhi" id="ca76e4e9adfa1629d8fee4608cbeab9d9ba91ed3" ticket="126141" desc="PATCH: [perl #126141]: qr/]]]]][\\/ fails to raise error"/>
-<commit votes="steveh, jhi" id="710740a6ed7f31a3bcc5f991f3cb7b55fed8a68e" ticket="127262" desc="PATCH: [perl #127262] assertion fail on malformed UTF8"/>
 
 <commit votes="steveh, jhi" id="b297756b5d78ef23f3ebf878d0342947ece424aa" ticket="126405" desc="regcomp.c: fix Perl #126405, segfault regex"/>
 <commit votes="steveh, jhi" id="80edda0d5872f642d1b92e7581eb0882e59b9c2e" ticket="126405" desc="Add test for [perl #126405]"/>
