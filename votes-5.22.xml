@@ -36,7 +36,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="" id="" ticket="123878" desc=""/>
 
-<commit votes="steveh, jhi, tonyc" id="09681a13f07600082e5a7efbc9c978f62b24c502" ticket="126258" desc="op_free(): don't assert op_private ok when erred"/>
 <commit votes="steveh, jhi, tonyc" id="04106f2e5c6e8162bd22fd9c7505096116e483cd" ticket="126257" desc="assertion failure on foo(my $x : bar)"/>
 <commit votes="steveh, jhi, tonyc" id="e8c18a8486f7e900511cc2df8d2617ceab9ce437" ticket="126480" desc="[perl #126480] pipe() doesn't need the assertions"/>
 <commit votes="steveh, jhi, tonyc" id="d3b9036e206e03f8b788b7eecad735d30f355745" ticket="126443" desc="[perl #126443] make sure PL_oldbufptr is preserved in scan_heredoc()"/>
