@@ -80,12 +80,9 @@ but the series of fixes for which may not be suitable for maint-5.22, at least a
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
-(steveh: This one doesn't apply cleanly and I'm inclined to leave it out unless somebody wants to prepare a version applicable to maint:)
-<commit votes="jhi, steveh" id="a4570f51dba109184d92dcbb0612242d942856fc" ticket="124212" desc="Workaround for perl #124212: these functions are not true static inline"/>
-
 <commit votes="jhi, steveh" id="35ff3d7deb0d8004539a00980bb69ece71275982" ticket="" desc="hexfp: all ppc/powerpc-ld linux tailbits difference in exp(1)"/>
 
-(steveh: Note: I have a backport of this that applies to maint-5.22, supplied by jhi. to clarify: this change is about "static inline" functions, these functions really aren't.)
+(steveh: Note: I have a backport of this that applies to maint-5.22, supplied by jhi. to clarify: this change is about "static inline" functions, these functions really aren't -- so while this platform specific fix, it because the C compiler is stricter than most.)
 <commit votes="jhi, steveh" id="a4570f51dba109184d92dcbb0612242d942856fc" ticket="124212" desc="Workaround for perl #124212: these functions are not true static inline"/>
 
 <commit votes="steveh" id="9234e5bdb7cb62dbf09ea4fd4ae5f3831cf78890" ticket="127533" desc="[perl #127533] only test semctl() if we have everything needed to use it"/>
