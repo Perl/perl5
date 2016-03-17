@@ -36,7 +36,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="" id="" ticket="123878" desc=""/>
 
-<commit votes="steveh, jhi, tonyc" id="0403a1ad8ff01aaac2d09a986ea6bb5210472459" ticket="126325" desc="[perl #126325] don't read past the end of the source for pack [Hh]"/>
 <commit votes="steveh, jhi, tonyc" id="cf69025fa87b76cf2f1859253fb3313ffd5b7e48" ticket="126602" desc="[perl #126602] make sure targ isn't freed from under us"/>
 <commit votes="steveh, jhi, tonyc" id="9e59c36b452568c56b99957f02b853c42e280f8a" ticket="126193" desc="[perl #126193] don't use a trash SV if no indexes are provided to pp_lslice"/>
 <commit votes="steveh, jhi, tonyc" id="09681a13f07600082e5a7efbc9c978f62b24c502" ticket="126258" desc="op_free(): don't assert op_private ok when erred"/>
