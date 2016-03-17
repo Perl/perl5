@@ -167,7 +167,8 @@ Make sure you have a way of sharing files, such as a web server or
 file-sharing service.
 
 Porters have access to the "dromedary" server (users.perl5.git.perl.org),
-but as of Dec. 2015 the F<public_html> directories are not working.
+which has a F<public_html> directory to share files with.
+(L<http://users.perl5.git.perl.org/~username/perl-5.xx.y.tar.gz>)
 
 If you use Dropbox, you can append "raw=1" as a parameter to their usual
 sharing link to allow direct download (albeit with redirects).
@@ -1079,9 +1080,6 @@ new release from wherever you put it for testers to find it.  This will
 eliminate anxious gnashing of teeth while you wait to see if your
 15 megabyte HTTP upload successfully completes across your slow, twitchy
 cable modem.
-
-B<Note:> as of Dec 2015, dromedary F<public_html> is not working so
-ignore the following paragraph until it is fixed.
 
 You can make use of your home directory on dromedary for
 this purpose: F<http://users.perl5.git.perl.org/~USERNAME> maps to
