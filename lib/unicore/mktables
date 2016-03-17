@@ -2289,10 +2289,10 @@ sub trace { return main::trace(@_); }
     # points not given in the input.  If not present, the default from the
     # normal property is used
     #
-    # [4] if present must be the string 'ONLY_EARLY'.  Normally, when
-    # compiling Unicode versions that don't invoke the early handling, the
-    # name in [1] is added as an alias to the property name used for these.
-    # This parameter says to not do this.
+    # [-1] If there is an extra final element that is the string 'ONLY_EARLY'.
+    # it means to not add the name in [1] as an alias to the property name
+    # used for these.  Normally, when compiling Unicode versions that don't
+    # invoke the early handling, the name is added as a synonym.
     #
     # Not all files can be handled in the above way, and so the code ref
     # alternative is available.  It can do whatever it needs to.  The other
@@ -2303,6 +2303,9 @@ sub trace { return main::trace(@_); }
     # indicate if an early alternative is actually being used or not.  This
     # makes for easier testing later on.
     main::set_access('early', \%early, 'c');
+
+    my %only_early;
+    main::set_access('only_early', \%only_early, 'c');
 
     my %required_even_in_debug_skip;
     # debug_skip is used to speed up compilation during debugging by skipping
@@ -2414,9 +2417,9 @@ sub trace { return main::trace(@_); }
         my $progress;
         my $function_instead_of_file = 0;
 
-        if ($early{$addr}->@* > 4 && $early{$addr}[4] ne 'ONLY_EARLY') {
-            Carp::my_carp_bug("If present, element [4] in 'Early => [ ... ]'"
-                            . " must be the string 'ONLY_EARLY'");
+        if ($early{$addr}->@* && $early{$addr}[-1] eq 'ONLY_EARLY') {
+            $only_early{$addr} = 1;
+            pop $early{$addr}->@*;
         }
 
         # If we are compiling a Unicode release earlier than the file became
@@ -2427,6 +2430,8 @@ sub trace { return main::trace(@_); }
             unshift $early{$addr}->@*, 1;
 
             # See the definition of %early for what the array elements mean.
+            # Note that we have just unshifted onto the array, so the numbers
+            # below are +1 of those in the %early description.
             # If we have a property this defines, create a table and default
             # map for it now (at essentially compile time), so that it will be
             # available for the whole of run time.  (We will want to add this
@@ -2445,8 +2450,8 @@ sub trace { return main::trace(@_); }
 
                 # If not specified by the constructor, use the default mapping
                 # for the regular property for this substitute one.
-                if ($early{$addr}[3]) {
-                    $prop_object->set_default_map($early{$addr}[3]);
+                if ($early{$addr}[4]) {
+                    $prop_object->set_default_map($early{$addr}[4]);
                 }
                 elsif (    defined $property{$addr}
                        &&  defined $default_mapping{$property{$addr}})
@@ -2497,7 +2502,7 @@ END
                 push $each_line_handler{$addr}->@*, \&_exclude_unassigned;
 
                 if (   $v_version lt v2.0        # Hanguls in this release ...
-                    && defined $early{$addr}[4]) # ... need special treatment
+                    && defined $early{$addr}[3]) # ... need special treatment
                 {
                     push $eof_handler{$addr}->@*, \&_fixup_obsolete_hanguls;
                 }
@@ -2717,11 +2722,12 @@ END
                 # official property, we still have to allow the publicly
                 # inaccessible early name so that the core code which uses it
                 # will work regardless.
-                if (! $early{$addr}[0] && $early{$addr}->@* > 2) {
+                if (   ! $only_early{$addr}
+                    && ! $early{$addr}[0]
+                    && $early{$addr}->@* > 2)
+                {
                     my $early_property_name = $early{$addr}[2];
-                    if (   $property{$addr} ne $early_property_name
-                        && $early{$addr}->@* < 5)
-                    {
+                    if ($property{$addr} ne $early_property_name) {
                         main::property_ref($property{$addr})
                                             ->add_alias($early_property_name);
                     }
