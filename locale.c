@@ -29,7 +29,9 @@
  * in such scope than if not.  However, various libc functions called by Perl
  * are affected by the LC_NUMERIC category, so there are macros in perl.h that
  * are used to toggle between the current locale and the C locale depending on
- * the desired behavior of those functions at the moment.
+ * the desired behavior of those functions at the moment.  And, LC_MESSAGES is
+ * switched to the C locale for outputting the message unless within the scope
+ * of 'use locale'.
  */
 
 #include "EXTERN.h"
