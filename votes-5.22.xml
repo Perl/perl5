@@ -36,30 +36,30 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="" id="" ticket="123878" desc=""/>
 
-<commit votes="steveh" id="0403a1ad8ff01aaac2d09a986ea6bb5210472459" ticket="126325" desc="[perl #126325] don't read past the end of the source for pack [Hh]"/>
-<commit votes="steveh" id="cf69025fa87b76cf2f1859253fb3313ffd5b7e48" ticket="126602" desc="[perl #126602] make sure targ isn't freed from under us"/>
-<commit votes="steveh" id="9e59c36b452568c56b99957f02b853c42e280f8a" ticket="126193" desc="[perl #126193] don't use a trash SV if no indexes are provided to pp_lslice"/>
-<commit votes="steveh" id="09681a13f07600082e5a7efbc9c978f62b24c502" ticket="126258" desc="op_free(): don't assert op_private ok when erred"/>
-<commit votes="steveh" id="04106f2e5c6e8162bd22fd9c7505096116e483cd" ticket="126257" desc="assertion failure on foo(my $x : bar)"/>
-<commit votes="steveh" id="e8c18a8486f7e900511cc2df8d2617ceab9ce437" ticket="126480" desc="[perl #126480] pipe() doesn't need the assertions"/>
-<commit votes="steveh" id="d3b9036e206e03f8b788b7eecad735d30f355745" ticket="126443" desc="[perl #126443] make sure PL_oldbufptr is preserved in scan_heredoc()"/>
-<commit votes="steveh" id="a934a4a7d4fa99d522e169b921286755a0f8d248" ticket="126845" desc="Remove unwarranted assertion in Perl_newATTRSUB_x()"/>
-<commit votes="steveh" id="0cd52e23ae641a766983833dc8b37b743474be9e" ticket="126042" desc="[perl #126042] handle scalar context for a missing import/unimport call"/>
-<commit votes="steveh" id="a7162bf74f38a7ede2efc930a958560392ce092f" ticket="123737" desc="[perl #123737] delay reporting a missing operator for arrays"/>
-<commit votes="steveh" id="61d30259f32e5bba52238d60608b6909208eb604" ticket="123737" desc="[perl #123737] handle a non-identifer after @ better for a missing op"/>
-<commit votes="steveh" id="23c4e91245a43fb7bbe5215e27ca989e3b410552" ticket="125540" desc="[perl #125540] handle already being at EOF while not finding a heredoc terminator"/>
+<commit votes="steveh, jhi" id="0403a1ad8ff01aaac2d09a986ea6bb5210472459" ticket="126325" desc="[perl #126325] don't read past the end of the source for pack [Hh]"/>
+<commit votes="steveh, jhi" id="cf69025fa87b76cf2f1859253fb3313ffd5b7e48" ticket="126602" desc="[perl #126602] make sure targ isn't freed from under us"/>
+<commit votes="steveh, jhi" id="9e59c36b452568c56b99957f02b853c42e280f8a" ticket="126193" desc="[perl #126193] don't use a trash SV if no indexes are provided to pp_lslice"/>
+<commit votes="steveh, jhi" id="09681a13f07600082e5a7efbc9c978f62b24c502" ticket="126258" desc="op_free(): don't assert op_private ok when erred"/>
+<commit votes="steveh, jhi" id="04106f2e5c6e8162bd22fd9c7505096116e483cd" ticket="126257" desc="assertion failure on foo(my $x : bar)"/>
+<commit votes="steveh, jhi" id="e8c18a8486f7e900511cc2df8d2617ceab9ce437" ticket="126480" desc="[perl #126480] pipe() doesn't need the assertions"/>
+<commit votes="steveh, jhi" id="d3b9036e206e03f8b788b7eecad735d30f355745" ticket="126443" desc="[perl #126443] make sure PL_oldbufptr is preserved in scan_heredoc()"/>
+<commit votes="steveh, jhi" id="a934a4a7d4fa99d522e169b921286755a0f8d248" ticket="126845" desc="Remove unwarranted assertion in Perl_newATTRSUB_x()"/>
+<commit votes="steveh, jhi" id="0cd52e23ae641a766983833dc8b37b743474be9e" ticket="126042" desc="[perl #126042] handle scalar context for a missing import/unimport call"/>
+<commit votes="steveh, jhi" id="a7162bf74f38a7ede2efc930a958560392ce092f" ticket="123737" desc="[perl #123737] delay reporting a missing operator for arrays"/>
+<commit votes="steveh, jhi" id="61d30259f32e5bba52238d60608b6909208eb604" ticket="123737" desc="[perl #123737] handle a non-identifer after @ better for a missing op"/>
+<commit votes="steveh, jhi" id="23c4e91245a43fb7bbe5215e27ca989e3b410552" ticket="125540" desc="[perl #125540] handle already being at EOF while not finding a heredoc terminator"/>
 
-<commit votes="steveh" id="27895dda808516d2e00748a19f6648febae7161f" ticket="126410" desc="Document broken SvSTASH for %version:: in B's test suite"/>
-<commit votes="steveh" id="ac3b837b9e1b412c93837ea13eacd367439264ec" ticket="126410" desc="[perl #126410] keep the DESTROY cache in mro_meta"/>
+<commit votes="steveh, jhi" id="27895dda808516d2e00748a19f6648febae7161f" ticket="126410" desc="Document broken SvSTASH for %version:: in B's test suite"/>
+<commit votes="steveh, jhi" id="ac3b837b9e1b412c93837ea13eacd367439264ec" ticket="126410" desc="[perl #126410] keep the DESTROY cache in mro_meta"/>
 
-<commit votes="steveh" id="1bb1a3d6d354f67d1158693a799cb49037d27475" ticket="127334" desc="[perl #127334] S_incline: avoid overrunning the end of the parse buffer"/>
-<commit votes="steveh" id="ca76e4e9adfa1629d8fee4608cbeab9d9ba91ed3" ticket="126141" desc="PATCH: [perl #126141]: qr/]]]]][\\/ fails to raise error"/>
-<commit votes="steveh" id="710740a6ed7f31a3bcc5f991f3cb7b55fed8a68e" ticket="127262" desc="PATCH: [perl #127262] assertion fail on malformed UTF8"/>
+<commit votes="steveh, jhi" id="1bb1a3d6d354f67d1158693a799cb49037d27475" ticket="127334" desc="[perl #127334] S_incline: avoid overrunning the end of the parse buffer"/>
+<commit votes="steveh, jhi" id="ca76e4e9adfa1629d8fee4608cbeab9d9ba91ed3" ticket="126141" desc="PATCH: [perl #126141]: qr/]]]]][\\/ fails to raise error"/>
+<commit votes="steveh, jhi" id="710740a6ed7f31a3bcc5f991f3cb7b55fed8a68e" ticket="127262" desc="PATCH: [perl #127262] assertion fail on malformed UTF8"/>
 
-<commit votes="steveh" id="b297756b5d78ef23f3ebf878d0342947ece424aa" ticket="126405" desc="regcomp.c: fix Perl #126405, segfault regex"/>
-<commit votes="steveh" id="80edda0d5872f642d1b92e7581eb0882e59b9c2e" ticket="126405" desc="Add test for [perl #126405]"/>
+<commit votes="steveh, jhi" id="b297756b5d78ef23f3ebf878d0342947ece424aa" ticket="126405" desc="regcomp.c: fix Perl #126405, segfault regex"/>
+<commit votes="steveh, jhi" id="80edda0d5872f642d1b92e7581eb0882e59b9c2e" ticket="126405" desc="Add test for [perl #126405]"/>
 
-<commit votes="steveh" id="944e05e3d149b21eef2ceb8d255da390afb267a2" ticket="126206" desc="Fix Perl #126206: handle NOTHING regops and EXACTFU_SS regops in make_trie() properly"/>
+<commit votes="steveh, jhi" id="944e05e3d149b21eef2ceb8d255da390afb267a2" ticket="126206" desc="Fix Perl #126206: handle NOTHING regops and EXACTFU_SS regops in make_trie() properly"/>
 
 </div>
 
@@ -72,10 +72,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="steveh" id="a82f4918f5debccfb7e9a7047d2c2e558df538cd" ticket="126481" desc="PATCH: [perl #126481] panic for !! with syntax error in /(?[...])/"/>
 
-(steveh: jhi suggested picking dde155d before eba9828: -- the eba9 doesn't even apply without dde1)
-<commit votes="jhi, steveh" id="dde155d03acf6c9ecbaf478c3dd7ed9d4fb6e930" ticket="" desc="hexfp: if HEXFP_NV the shift2 is unused"/>
-<commit votes="jhi, steveh" id="eba98284740b799def26803ebac340aaa8930437" ticket="127183" desc="[perl #127183] Non-canonical hexadecimal floats are parsed prematurely"/>
-
 <commit votes="steveh, tux, jhi" id="e57270be442bfaa9dc23eebd67485e5a806b44e3" ticket="127322" desc="Fix umask for mkstemp(3) calls"/>
 
 (steveh: If the #124387 changes are applied then the #127494 changes must also be applied:)
@@ -87,6 +83,10 @@ The same criteria apply to code in dual-life modules as to core code.)
 </div>
 
 <div><h3>New Feature Fixes</h3>
+
+(steveh: jhi suggested picking dde155d before eba9828: -- the eba9 doesn't even apply without dde1 -- these both are about hexfp)
+<commit votes="jhi, steveh" id="dde155d03acf6c9ecbaf478c3dd7ed9d4fb6e930" ticket="" desc="hexfp: if HEXFP_NV the shift2 is unused"/>
+<commit votes="jhi, steveh" id="eba98284740b799def26803ebac340aaa8930437" ticket="127183" desc="[perl #127183] Non-canonical hexadecimal floats are parsed prematurely"/>
 
 </div>
 
@@ -119,7 +119,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="jhi, steveh" id="35ff3d7deb0d8004539a00980bb69ece71275982" ticket="" desc="hexfp: all ppc/powerpc-ld linux tailbits difference in exp(1)"/>
 
-(steveh: Note: I have a backport of this that applies to maint-5.22, supplied by jhi:)
+(steveh: Note: I have a backport of this that applies to maint-5.22, supplied by jhi. to clarify: this change is about "static inline" functions, these functions really aren't.)
 <commit votes="jhi, steveh" id="a4570f51dba109184d92dcbb0612242d942856fc" ticket="124212" desc="Workaround for perl #124212: these functions are not true static inline"/>
 
 </div>
