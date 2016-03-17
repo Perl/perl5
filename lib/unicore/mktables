@@ -6993,7 +6993,7 @@ sub trace { return main::trace(@_); }
 
         # Convert the input to the standard equivalent, if any (won't have any
         # for $STRING properties)
-        my $standard = $self->_find_table_from_alias->{$map};
+        my $standard = $self->property->table($map);
         $map = $standard->name if defined $standard;
 
         # Warn if there already is a non-equivalent default map for this
