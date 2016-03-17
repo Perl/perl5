@@ -1,5 +1,6 @@
 
-version 1.39_01; 2016-03-10
+version 1.40; 2016-03-10
+  * Get arg_string.t to compile in perl v5.6
   * Add information for how to contribute to Carp.
 
 version 1.39; 2016-03-06

@@ -15,7 +15,7 @@ my $e9 = sprintf "%02x", (($] ge 5.007_003)
                           : ((ord("A") == 193)
                              ? 0x51
                              : 0xE9));
-my $chr_e9 = chr utf8::unicode_to_native(0xe9);
+my $chr_e9 = chr eval "0x$e9";
 my $nl_as_hex = sprintf "%x", ord("\n");
 
 like lm(3), qr/main::lm\(3\)/;
