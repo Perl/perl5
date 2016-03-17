@@ -75,6 +75,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 <commit votes="steveh, tux, jhi" id="e57270be442bfaa9dc23eebd67485e5a806b44e3" ticket="127322" desc="Fix umask for mkstemp(3) calls"/>
 
 (steveh: If the #124387 changes are applied then the #127494 changes must also be applied:)
+(tonyc: these changes break CPAN modules that don't expect AUTOLOAD to be called for DESTROY (which it hadn't since 5.18), see https://rt.perl.org/Ticket/Display.html?id=127494#txn-1392066 - they may also break darkpan code.)
 <commit votes="steveh" id="f05081b8ef229712c83a6f19b217489cf5e5ab25" ticket="124387" desc="[perl #124387] TODO test for AUTOLOAD on DESTROY"/>
 <commit votes="steveh" id="000814da477053c7627c7ace5ca3ce3d4c4aad08" ticket="124387" desc="[perl #124387] call AUTOLOAD when DESTROY isn't defined"/>
 <commit votes="steveh" id="7db8c4f1f19e6f855107ec990507a1a9cb0f59a6" ticket="127494" desc="[perl #127494] TODO test for $AUTOLOAD being set for DESTROY"/>
