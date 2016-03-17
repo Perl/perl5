@@ -14356,6 +14356,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         }
         else if (value == '\\') {
             /* Is a backslash; get the code point of the char after it */
+
+            if (RExC_parse >= RExC_end) {
+                vFAIL("Unmatched [");
+            }
+
 	    if (UTF && ! UTF8_IS_INVARIANT(UCHARAT(RExC_parse))) {
 		value = utf8n_to_uvchr((U8*)RExC_parse,
 				   RExC_end - RExC_parse,

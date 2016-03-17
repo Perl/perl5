@@ -36,3 +36,10 @@ $a = qr/[\c,]/;
 EXPECT
 "\c," is more clearly written simply as "l" at - line 9.
 "\c," is more clearly written simply as "l" at - line 10.
+########
+# NAME [perl #126141]
+# OPTION fatal
+eval {/$_/}, print "$_ ==> ", $@ || "OK!\n" for "]]]]]]]]][\\", "]]]]][\\"
+EXPECT
+]]]]]]]]][\ ==> Unmatched [ in regex; marked by <-- HERE in m/]]]]]]]]][\ <-- HERE / at - line 2.
+]]]]][\ ==> Unmatched [ in regex; marked by <-- HERE in m/]]]]][\ <-- HERE / at - line 2.
