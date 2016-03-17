@@ -53,10 +53,10 @@ The same criteria apply to code in dual-life modules as to core code.)
 <commit votes="steveh, jhi, tonyc" id="1bb1a3d6d354f67d1158693a799cb49037d27475" ticket="127334" desc="[perl #127334] S_incline: avoid overrunning the end of the parse buffer"/>
 <commit votes="steveh, jhi, tonyc" id="ca76e4e9adfa1629d8fee4608cbeab9d9ba91ed3" ticket="126141" desc="PATCH: [perl #126141]: qr/]]]]][\\/ fails to raise error"/>
 
-<commit votes="steveh, jhi" id="b297756b5d78ef23f3ebf878d0342947ece424aa" ticket="126405" desc="regcomp.c: fix Perl #126405, segfault regex"/>
-<commit votes="steveh, jhi" id="80edda0d5872f642d1b92e7581eb0882e59b9c2e" ticket="126405" desc="Add test for [perl #126405]"/>
+<commit votes="steveh, jhi, khw" id="b297756b5d78ef23f3ebf878d0342947ece424aa" ticket="126405" desc="regcomp.c: fix Perl #126405, segfault regex"/>
+<commit votes="steveh, jhi, khw" id="80edda0d5872f642d1b92e7581eb0882e59b9c2e" ticket="126405" desc="Add test for [perl #126405]"/>
 
-<commit votes="steveh, jhi" id="944e05e3d149b21eef2ceb8d255da390afb267a2" ticket="126206" desc="Fix Perl #126206: handle NOTHING regops and EXACTFU_SS regops in make_trie() properly"/>
+<commit votes="steveh, jhi, khw" id="944e05e3d149b21eef2ceb8d255da390afb267a2" ticket="126206" desc="Fix Perl #126206: handle NOTHING regops and EXACTFU_SS regops in make_trie() properly"/>
 
 </div>
 
@@ -67,7 +67,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 <commit votes="steveh, arc, khw" id="0f8d761c4673440b49eeb491136a67dcf3da7400" ticket="126222" desc="Add a todo test for perl-126222"/>
 <commit votes="steveh, arc, khw" id="6625d92602279361acd0c6185b78c6d201fd81e0" ticket="126222" desc="fix perl-126222 - (?!) OPFAIL optimization does work in (?(?!)yes|no)"/>
 
-<commit votes="steveh" id="a82f4918f5debccfb7e9a7047d2c2e558df538cd" ticket="126481" desc="PATCH: [perl #126481] panic for !! with syntax error in /(?[...])/"/>
+<commit votes="steveh, khw" id="a82f4918f5debccfb7e9a7047d2c2e558df538cd" ticket="126481" desc="PATCH: [perl #126481] panic for !! with syntax error in /(?[...])/"/>
 
 <commit votes="steveh, tux, jhi" id="e57270be442bfaa9dc23eebd67485e5a806b44e3" ticket="127322" desc="Fix umask for mkstemp(3) calls"/>
 
@@ -84,7 +84,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 (steveh: jhi suggested picking dde155d before eba9828: -- the eba9 doesn't even apply without dde1 -- these both are about hexfp)
 <commit votes="jhi, steveh, tonyc" id="dde155d03acf6c9ecbaf478c3dd7ed9d4fb6e930" ticket="" desc="hexfp: if HEXFP_NV the shift2 is unused"/>
-<commit votes="jhi, steveh" id="eba98284740b799def26803ebac340aaa8930437" ticket="127183" desc="[perl #127183] Non-canonical hexadecimal floats are parsed prematurely"/>
+<commit votes="jhi, steveh, khw" id="eba98284740b799def26803ebac340aaa8930437" ticket="127183" desc="[perl #127183] Non-canonical hexadecimal floats are parsed prematurely"/>
 
 </div>
 
@@ -103,7 +103,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Portability Fixes</h3>
 
-<commit votes="tonyc, jhi" id="d691474c4cf3d3119367a72ebb28a990d039baf3" ticket="126922" desc="avoid access to uninitialized memory in win32 crypt()" />
+<commit votes="tonyc, jhi, khw" id="d691474c4cf3d3119367a72ebb28a990d039baf3" ticket="126922" desc="avoid access to uninitialized memory in win32 crypt()" />
 
 <commit votes="steveh, tux, jhi" id="e3962106e93fa80bf960e71ac7c7727e7e15eee8" ticket="126240" desc="[perl #126240] use -DPERL_USE_SAFE_PUTENV where possible on OS X"/>
 <commit votes="steveh, tux, jhi" id="12ffbb10fe94c82dda90efa15d691ababa5b8b8f" ticket="126240" desc="[perl #126240] avoid leaking memory when setting $ENV{foo} on darwin"/>
