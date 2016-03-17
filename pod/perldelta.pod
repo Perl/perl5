@@ -317,9 +317,37 @@ L</Modules and Pragmata> section.
 
 =item Win32
 
+=over
+
+=item *
+
 Building a 64-bit perl with a 64-bit GCC but a 32-bit gmake would
 result in an invalid C<$Config{archname}> for the resulting perl.
 [perl #127584]
+
+=item *
+
+Errors set by Winsock functions are now put directly into C<$^E>, and the
+relevant C<WSAE*> error codes are now exported from the L<Errno> and L<POSIX>
+modules for testing this against.
+
+The previous behaviour of putting the errors (converted to POSIX-style C<E*>
+error codes since Perl 5.20.0) into C<$!> was buggy due to the non-equivalence
+of like-named Winsock and POSIX error constants, a relationship between which
+has unfortunately been established in one way or another since Perl 5.8.0.
+
+The new behaviour provides a much more robust solution for checking Winsock
+errors in portable software without accidentally matching POSIX tests that were
+intended for other OSes and may have different meanings for Winsock.
+
+The old behaviour is currently retained, warts and all, for backwards
+compatibility, but users are encouraged to change any code that tests C<$!>
+against C<E*> constants for Winsock errors to instead test C<$^E> against
+C<WSAE*> constants.  After a suitable deprecation period, the old behaviour may
+be removed, leaving C<$!> unchanged after Winsock function calls, to avoid any
+possible confusion over which error variable to check.
+
+=back
 
 =back
 
