@@ -1177,7 +1177,7 @@ A hash with 2**31 or more keys
 
 =back
 
-Attempting to do so will result in unpredicatable overflow results.
+Attempting to do so will yield an exception.
 
 This may be fixed in the future.
 
