@@ -2921,6 +2921,7 @@ cpan/version/t/06noop.t			Tests for version objects
 cpan/version/t/07locale.t		Tests for version objects
 cpan/version/t/08_corelist.t		Tests for version objects
 cpan/version/t/09_list_util.t		Tests for version objects
+cpan/version/t/10_lyon.t		Tests for version objects
 cpan/version/t/coretests.pm		Tests for version objects
 cpan/Win32API-File/buffers.h	Win32API::File extension
 cpan/Win32API-File/cFile.h	Win32API::File extension

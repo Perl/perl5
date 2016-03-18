@@ -2980,6 +2980,10 @@ for more details on allowed version formats.
 Perhaps the internals were modified directly in some way or
 an arbitrary reference was blessed into the "version" class.
 
+=item alpha->numify() is lossy
+
+(W numeric) An alpha version can not be numified without losing information.
+
 =item In '(*VERB...)', the '(' and '*' must be adjacent in regex;
 marked by S<<-- HERE> in m/%s/
 

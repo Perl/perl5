@@ -51,7 +51,7 @@ SKIP: {
 	ok ($v == $ver, "Comparison to locale floating point");
 
         TODO: { # Resolve https://rt.cpan.org/Ticket/Display.html?id=102272
-            local $TODO = 'Fails for Perl 5.x.0 < 5.19.0';
+            local $TODO = 'Fails for Perl 5.x.0 < 5.19.0' if $] < 5.019000;
             $ver = version->new($]);
             is "$ver", "$]", 'Use PV for dualvars';
         }

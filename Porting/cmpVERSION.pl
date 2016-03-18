@@ -91,6 +91,7 @@ my %skip;
     'cpan/podlators/t/lib/Test/Podlators.pm',       # just a test module
     'cpan/podlators/t/lib/Test/RRA.pm',             # just a test module
     'cpan/podlators/t/lib/Test/RRA/Config.pm',      # just a test module
+    'cpan/version/t/coretests.pm', # just a test module
     'dist/Attribute-Handlers/demo/MyClass.pm', # it's just demonstration code
     'dist/Exporter/lib/Exporter/Heavy.pm',
     'lib/Carp/Heavy.pm',
