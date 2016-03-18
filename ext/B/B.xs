@@ -701,7 +701,7 @@ static const struct OP_methods {
   { STR_WITH_LEN("stashoff"),PADOFFSETp,STRUCT_OFFSET(struct cop,cop_stashoff),},/*25*/
 #else
   { STR_WITH_LEN("pmoffset"),op_offset_special, 0,                     },/*20*/
-  { STR_WITH_LEN("filegv"),  SVp,     STRUCT_OFFSET(struct cop, cop_filegv),},/*21*/
+  { STR_WITH_LEN("filegv"),  op_offset_special, 0,                     },/*21*/
   { STR_WITH_LEN("file"),    op_offset_special, 0,                     },/*22*/
   { STR_WITH_LEN("stash"),   SVp,     STRUCT_OFFSET(struct cop, cop_stash), },/*23*/
   { STR_WITH_LEN("stashpv"), op_offset_special, 0,                     },/*24*/
@@ -1061,11 +1061,9 @@ next(o)
 				    : NULL
 		      );
 		break;
-#ifdef USE_ITHREADS
 	    case 21: /* B::COP::filegv */
 		ret = make_sv_object(aTHX_ (SV *)CopFILEGV((COP*)o));
 		break;
-#endif
 #ifndef USE_ITHREADS
 	    case 22: /* B::COP::file */
 		ret = sv_2mortal(newSVpv(CopFILE((COP*)o), 0));
@@ -1895,15 +1893,9 @@ GvNAME(gv)
 	FILE = 1
 	B::HV::NAME = 2
     CODE:
-#ifdef USE_ITHREADS
 	ST(0) = sv_2mortal(newSVhek(!ix ? GvNAME_HEK(gv)
 					: (ix == 1 ? (HEK*)((Size_t)GvFILE_HEK2(gv)+2)
 						   : HvNAME_HEK((HV *)gv))));
-#else
-	ST(0) = sv_2mortal(newSVhek(!ix ? GvNAME_HEK(gv)
-					: (ix == 1 ? GvFILE_HEK(gv)
-						   : HvNAME_HEK((HV *)gv))));
-#endif
 
 bool
 is_empty(gv)

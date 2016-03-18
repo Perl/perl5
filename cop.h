@@ -383,11 +383,10 @@ struct cop {
 #ifdef USE_ITHREADS
     PADOFFSET	cop_stashoff;	/* offset into PL_stashpad, for the
 				   package the line was compiled in */
-    char *	cop_file;	/* a CHEK allocated file name, part of line # */
 #else
     HV *	cop_stash;	/* package line was compiled in */
-    GV *	cop_filegv;	/* file the following line # is from */
 #endif
+    char *	cop_file;	/* a CHEK allocated file name, part of line # */
     U32		cop_hints;	/* hints bits from pragmata */
     U32		cop_seq;	/* parse sequence number */
     /* Beware. mg.c and warnings.pl assume the type of this is STRLEN *:  */
@@ -397,7 +396,6 @@ struct cop {
     COPHH *	cop_hints_hash;
 };
 
-#ifdef USE_ITHREADS
 /* make this unassignable with a "+0" force ppl to use _set(), but what about setting
    the ptr directly in the CHEK code? what suffix to use on the _setptr() variant
    "setptr" isn't perl XS API nomenclature
@@ -417,33 +415,16 @@ struct cop {
 				 ? GvAV(Perl_gv_fetchfile_hek(aTHX_ FNPV2HEK(CopFILE(c)))) : NULL)
 #  define CopFILEAVx(c)		(assert_(CopFILE(c)) \
 				   GvAV(Perl_gv_fetchfile_hek(aTHX_ FNPV2HEK(CopFILE(c)))))
+#  define CopFILE_free(c)	free_copfile(c)
 
+#ifdef USE_ITHREADS
 #  define CopSTASH(c)           PL_stashpad[(c)->cop_stashoff]
 #  define CopSTASH_set(c,hv)	((c)->cop_stashoff = (hv)		\
 				    ? alloccopstash(hv)			\
 				    : 0)
-#  define CopFILE_free(c)	free_copfile(c)
-
 #else
-#  define CopFILEGV(c)		((c)->cop_filegv)
-#  define CopFILEGV_set(c,gv)	((c)->cop_filegv = (GV*)SvREFCNT_inc(gv))
-#  define CopFILE_set(c,pv)	CopFILEGV_set((c), gv_fetchfile(pv))
-#  define CopFILE_setn(c,pv,l)	CopFILEGV_set((c), gv_fetchfile_flags((pv),(l),0))
-#  define CopFILESV(c)		(CopFILEGV(c) ? GvSV(CopFILEGV(c)) : NULL)
-#  define CopFILEAV(c)		(CopFILEGV(c) ? GvAV(CopFILEGV(c)) : NULL)
-#  ifdef DEBUGGING
-#    define CopFILEAVx(c)	(assert(CopFILEGV(c)), GvAV(CopFILEGV(c)))
-#  else
-#    define CopFILEAVx(c)	(GvAV(CopFILEGV(c)))
-# endif
-#  define CopFILE(c)		(CopFILEGV(c) \
-				    ? GvNAME(CopFILEGV(c))+2 : NULL)
-#  define CopFILE_len(c)	(CopFILEGV(c) \
-				    ? GvNAMELEN(CopFILEGV(c))-2 : 0)
 #  define CopSTASH(c)		((c)->cop_stash)
 #  define CopSTASH_set(c,hv)	((c)->cop_stash = (hv))
-#  define CopFILE_free(c)	(SvREFCNT_dec(CopFILEGV(c)),(CopFILEGV(c) = NULL))
-
 #endif /* USE_ITHREADS */
 
 #define CopSTASHPV(c)		(CopSTASH(c) ? HvNAME_get(CopSTASH(c)) : NULL)

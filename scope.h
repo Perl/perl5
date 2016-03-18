@@ -296,10 +296,9 @@ scope has the given name. C<name> must be a C<NUL>-terminated literal string.
 
 #define SAVEPARSER(p) save_pushptr((p), SAVEt_PARSER)
 
-#ifdef USE_ITHREADS
-#  define SAVECOPSTASH_FREE(c)	SAVEIV((c)->cop_stashoff)
-#  define SAVECOPFILE(c)	SAVEPPTR(CopFILE(c))
-#  define SAVECOPFILE_FREE(c)	save_copfile(c)
+
+#define SAVECOPFILE(c)	SAVEPPTR(CopFILE(c))
+#define SAVECOPFILE_FREE(c)	save_copfile(c)
 
 typedef struct {
     char** where; /* maybe store a COP * instead of ptr to specific member 4
@@ -309,11 +308,10 @@ typedef struct {
     CHEK * what;
 } SSCHEK;
 
+#ifdef USE_ITHREADS
+#  define SAVECOPSTASH_FREE(c)	SAVEIV((c)->cop_stashoff)
 #else
-#  /* XXX not refcounted */
 #  define SAVECOPSTASH_FREE(c)	SAVESPTR(CopSTASH(c))
-#  define SAVECOPFILE(c)	SAVESPTR(CopFILEGV(c))
-#  define SAVECOPFILE_FREE(c)	SAVEGENERICSV(CopFILEGV(c))
 #endif
 
 #define SAVECOPLINE(c)		SAVEI32(CopLINE(c))

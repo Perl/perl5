@@ -1709,12 +1709,10 @@ S_incline(pTHX_ const char *s)
 
     if (t - s > 0) {
 	const STRLEN len = t - s;
-#ifdef USE_ITHREADS
 	/* If *{"::_<newfilename"}{SCALAR} is created, that existing CHEK is
 	 * ++ed and placed in CopFILE if CopFILE will get changed, otherwise
 	 * create a new CHEK for CopFILE */
 	char * fnpv_chek = NULL;
-#endif
 
 	if (!PL_rsfp && !PL_parser->filtered) {
 	    /* must copy *{"::_<(eval N)[oldfilename:L]"}
@@ -1724,39 +1722,14 @@ S_incline(pTHX_ const char *s)
 	    GV * const cfgv = CopFILEGV(PL_curcop);
 	    if (cfgv) {
 		GV *gv2;
-#ifdef USE_ITHREADS
 		fnpv_chek = newchek(s,len);
 		gv2 = *(GV**)hv_fetchhek(PL_defstash, FNPV2HEK(fnpv_chek), TRUE);
-#else
-		char smallbuf[128];
-		STRLEN tmplen2 = len;
-		char *tmpbuf2;
-
-		if (tmplen2 + 2 <= sizeof smallbuf)
-		    tmpbuf2 = smallbuf;
-		else
-		    Newx(tmpbuf2, tmplen2 + 2, char);
-
-		tmpbuf2[0] = '_';
-		tmpbuf2[1] = '<';
-
-		memcpy(tmpbuf2 + 2, s, tmplen2);
-		tmplen2 += 2;
-
-		gv2 = *(GV**)hv_fetch(PL_defstash, tmpbuf2, tmplen2, TRUE);
-#endif
 		if (!isGV(gv2)) {
-#ifdef USE_ITHREADS
 		    gv_init(gv2, PL_defstash,
 			    HEK_KEY(FNPV2HEK(fnpv_chek)),
 			    HEK_LEN(FNPV2HEK(fnpv_chek)), FALSE);
 		    /* adjust ${"::_<newfilename"} to store the new file name */
 		    GvSV(gv2) = newSVhek((HEK*)((Size_t)FNPV2HEK(fnpv_chek)+2));
-#else
-		    gv_init(gv2, PL_defstash, tmpbuf2, tmplen2, FALSE);
-		    /* adjust ${"::_<newfilename"} to store the new file name */
-		    GvSV(gv2) = newSVpvn(tmpbuf2 + 2, tmplen2 - 2);
-#endif
 		    /* The line number may differ. If that is the case,
 		       alias the saved lines that are in the array.
 		       Otherwise alias the whole array. */
@@ -1777,33 +1750,21 @@ S_incline(pTHX_ const char *s)
 			}
 		    }
 		}
-
-#ifndef USE_ITHREADS
-		if (tmpbuf2 != smallbuf) Safefree(tmpbuf2);
-#endif
 	    }
 	}
 
 	if (! (CopFILE_len(PL_curcop) == len
 	       && memEQ(CopFILE(PL_curcop), s, len))) {
-#ifdef USE_ITHREADS
 	    if(!fnpv_chek)
 		fnpv_chek = newchek(s,len);
-#endif
 	    CopFILE_free(PL_curcop);
-#ifdef USE_ITHREADS
 	    PL_curcop->cop_file = fnpv_chek;
-#else
-	    CopFILE_setn(PL_curcop, s, len);
-#endif
 	}
-#ifdef USE_ITHREADS
 	/*if (!PL_rsfp && !PL_parser->filtered) executed but the CHEK's notch
 	  wasn't taken over by CopFILE so dec the notch that CopFILE didn't take
 	  ownership of */
 	else if (fnpv_chek)
 	    chek_dec(FNPV2CHEK(fnpv_chek));
-#endif
     }
     CopLINE_set(PL_curcop, line_num);
 }
@@ -7245,15 +7206,9 @@ Perl_yylex(pTHX)
 	    }
 
 	case KEY___FILE__:
-#ifdef USE_ITHREADS
 	    FUN0OP(
 		(OP*)newSVOP(OP_CONST, 0, newSVhek((HEK*)((Size_t)FNPV2HEK(CopFILE(PL_curcop))+2)))
 	    );
-#else
-	    FUN0OP(
-		(OP*)newSVOP(OP_CONST, 0, newSVpv(CopFILE(PL_curcop),0))
-	    );
-#endif
 
 	case KEY___LINE__:
 	    FUN0OP(

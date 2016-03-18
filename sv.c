@@ -4711,7 +4711,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
                                           "Copy on write: Sharing hash\n"));
 
 		    assert (SvTYPE(dstr) >= SVt_PV);
-#ifdef USE_ITHREADS
 		    {
 			HEK * hek = SvSHARED_HEK_FROM_PV(SvPVX_const(sstr));
 			U8 offset = (Size_t)SvPVX_const(sstr) & 0x3;
@@ -4723,10 +4722,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 			else
 			    share_hek_hek(hek);
 		    }
-#else
-                    SvPV_set(dstr,
-			     HEK_KEY(share_hek_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sstr)))));
-#endif
 	    }
 	    SvLEN_set(dstr, len);
 	    SvCUR_set(dstr, cur);
@@ -4839,7 +4834,6 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 	    /* source is a COW shared hash key.  */
 	    DEBUG_C(PerlIO_printf(Perl_debug_log,
 				  "Fast copy on write: Sharing hash\n"));
-#ifdef USE_ITHREADS
 		{
 		    HEK * hek = SvSHARED_HEK_FROM_PV(SvPVX_const(sstr));
 		    U8 offset = (Size_t)SvPVX_const(sstr) & 0x3;
@@ -4851,9 +4845,6 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 			share_hek_hek(hek);
 		    new_pv = HEK_KEY(hek) + offset;
 		}
-#else
-	    new_pv = HEK_KEY(share_hek_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sstr))));
-#endif
 	    goto common_exit;
 	}
 	assert(SvCUR(sstr)+1 < SvLEN(sstr));
@@ -4998,19 +4989,15 @@ Perl_sv_setpv_mg(pTHX_ SV *const sv, const char *const ptr)
 void
 Perl_sv_sethek(pTHX_ SV *const sv, const HEK *hek)
 {
-#ifdef USE_ITHREADS
     U8 offset;
-#endif
     PERL_ARGS_ASSERT_SV_SETHEK;
 
     if (!hek) {
 	return;
     }
 
-#ifdef USE_ITHREADS
     offset = (Size_t)hek & 0x3;
     hek = (const HEK *)((Size_t)hek & ~0x3);
-#endif
     if (HEK_LEN(hek) == HEf_SVKEY) {
 	sv_setsv(sv, *(SV**)HEK_KEY(hek));
         return;
@@ -5022,11 +5009,7 @@ Perl_sv_sethek(pTHX_ SV *const sv, const HEK *hek)
 	    sv_usepvn_flags(sv, as_utf8, utf8_len, SV_HAS_TRAILING_NUL);
 	    SvUTF8_on(sv);
             return;
-#ifdef USE_ITHREADS
 	} else if ((flags & (HVhek_COMPILING | HVhek_UNSHARED)) == HVhek_UNSHARED) {
-#else
-        } else if (flags & HVhek_UNSHARED) {
-#endif
 	    sv_setpvn(sv, HEK_KEY(hek), HEK_LEN(hek));
 	    if (HEK_UTF8(hek))
 		SvUTF8_on(sv);
@@ -5037,21 +5020,14 @@ Perl_sv_sethek(pTHX_ SV *const sv, const HEK *hek)
 	    SV_CHECK_THINKFIRST_COW_DROP(sv);
 	    SvUPGRADE(sv, SVt_PV);
 	    SvPV_free(sv);
-#ifdef USE_ITHREADS
 	    if (flags & HVhek_COMPILING) {
 		CHEK * chek = FNPV2CHEK(HEK2FNPV(hek));
 		chek_inc(chek);
 	    }
 	    else
-#endif
 		share_hek_hek(hek);
-#ifdef USE_ITHREADS
 	    SvPV_set(sv, (char *)HEK_KEY(hek)+offset);
 	    SvCUR_set(sv, HEK_LEN(hek)-offset);
-#else
-	    SvPV_set(sv, (char *)HEK_KEY(hek));
-	    SvCUR_set(sv, HEK_LEN(hek));
-#endif
 
 	    SvLEN_set(sv, 0);
 	    SvIsCOW_on(sv);
@@ -9318,9 +9294,7 @@ SV if C<hek> is NULL.
 SV *
 Perl_newSVhek(pTHX_ const HEK * hek)
 {
-#ifdef USE_ITHREADS
     U8 offset;
-#endif
     if (!hek) {
 	SV *sv;
 
@@ -9328,10 +9302,8 @@ Perl_newSVhek(pTHX_ const HEK * hek)
 	return sv;
     }
 
-#ifdef USE_ITHREADS
     offset = (Size_t)hek & 0x3;
     hek = (const HEK *)((Size_t)hek & ~0x3);
-#endif
     if (HEK_LEN(hek) == HEf_SVKEY) {
 	return newSVsv(*(SV**)HEK_KEY(hek));
     } else {
@@ -9347,11 +9319,7 @@ Perl_newSVhek(pTHX_ const HEK * hek)
 	    sv_usepvn_flags(sv, as_utf8, utf8_len, SV_HAS_TRAILING_NUL);
 	    SvUTF8_on (sv);
 	    return sv;
-#ifdef USE_ITHREADS
 	} else if ((flags & (HVhek_COMPILING | HVhek_UNSHARED)) == HVhek_UNSHARED) {
-#else
-        } else if (flags & HVhek_UNSHARED) {
-#endif
             /* A hash that isn't using shared hash keys has to have
 	       the flag in every key so that we know not to try to call
 	       share_hek_hek on it.  */
@@ -9369,21 +9337,14 @@ Perl_newSVhek(pTHX_ const HEK * hek)
 
 	    new_SV(sv);
 	    sv_upgrade(sv, SVt_PV);
-#ifdef USE_ITHREADS
 	    if (flags & HVhek_COMPILING) {
 		CHEK * chek = FNPV2CHEK(HEK2FNPV(hek));
 		chek_inc(chek);
 	    }
 	    else
-#endif
 		share_hek_hek(hek);
-#ifdef USE_ITHREADS
 	    SvPV_set(sv, (char *)HEK_KEY(hek)+offset);
 	    SvCUR_set(sv, HEK_LEN(hek)-offset);
-#else
-	    SvPV_set(sv, (char *)HEK_KEY(hek));
-	    SvCUR_set(sv, HEK_LEN(hek));
-#endif
 	    SvLEN_set(sv, 0);
 	    SvIsCOW_on(sv);
 	    SvPOK_on(sv);

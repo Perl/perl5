@@ -880,6 +880,9 @@ PERL_CALLCONV char*	Perl_form(pTHX_ const char* pat, ...)
 #define PERL_ARGS_ASSERT_FORM	\
 	assert(pat)
 
+PERL_CALLCONV void	Perl_free_copfile(pTHX_ COP * cop);
+#define PERL_ARGS_ASSERT_FREE_COPFILE	\
+	assert(cop)
 PERL_CALLCONV void	Perl_free_tied_hv_pool(pTHX);
 PERL_CALLCONV void	Perl_free_tmps(pTHX);
 PERL_CALLCONV AV*	Perl_get_av(pTHX_ const char *name, I32 flags);
@@ -1005,6 +1008,9 @@ PERL_CALLCONV GV*	Perl_gv_fetchfile(pTHX_ const char* name);
 #define PERL_ARGS_ASSERT_GV_FETCHFILE	\
 	assert(name)
 /* PERL_CALLCONV GV*	gv_fetchfile_flags(pTHX_ const char *const name, const STRLEN len, const U32 flags); */
+PERL_CALLCONV GV*	Perl_gv_fetchfile_hek(pTHX_ const HEK * const hek);
+#define PERL_ARGS_ASSERT_GV_FETCHFILE_HEK	\
+	assert(hek)
 PERL_CALLCONV GV*	Perl_gv_fetchfile_x(pTHX_ const char *const name, const STRLEN len);
 #define PERL_ARGS_ASSERT_GV_FETCHFILE_X	\
 	assert(name)
@@ -2257,6 +2263,9 @@ PERL_CALLCONV STRLEN *	Perl_new_warnings_bitfield(pTHX_ STRLEN *buffer, const ch
 #define PERL_ARGS_ASSERT_NEW_WARNINGS_BITFIELD	\
 	assert(bits)
 
+PERL_CALLCONV char *	Perl_newchek(pTHX_ const char *str, I32 len);
+#define PERL_ARGS_ASSERT_NEWCHEK	\
+	assert(str)
 PERL_CALLCONV PerlIO*	Perl_nextargv(pTHX_ GV* gv, bool nomagicopen);
 #define PERL_ARGS_ASSERT_NEXTARGV	\
 	assert(gv)
@@ -2644,6 +2653,9 @@ PERL_CALLCONV void	Perl_save_bool(pTHX_ bool* boolp);
 PERL_CALLCONV void	Perl_save_clearsv(pTHX_ SV** svp);
 #define PERL_ARGS_ASSERT_SAVE_CLEARSV	\
 	assert(svp)
+PERL_CALLCONV void	Perl_save_copfile(pTHX_ COP * cop);
+#define PERL_ARGS_ASSERT_SAVE_COPFILE	\
+	assert(cop)
 PERL_CALLCONV void	Perl_save_delete(pTHX_ HV *hv, char *key, I32 klen);
 #define PERL_ARGS_ASSERT_SAVE_DELETE	\
 	assert(hv); assert(key)
@@ -5532,17 +5544,11 @@ PERL_CALLCONV DIR*	Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
 PERL_CALLCONV PerlIO*	Perl_fp_dup(pTHX_ PerlIO *const fp, const char type, CLONE_PARAMS *const param);
 #define PERL_ARGS_ASSERT_FP_DUP	\
 	assert(param)
-PERL_CALLCONV void	Perl_free_copfile(pTHX_ COP * cop);
-#define PERL_ARGS_ASSERT_FREE_COPFILE	\
-	assert(cop)
 PERL_CALLCONV GP*	Perl_gp_dup(pTHX_ GP *const gp, CLONE_PARAMS *const param)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_GP_DUP	\
 	assert(param)
 
-PERL_CALLCONV GV*	Perl_gv_fetchfile_hek(pTHX_ const HEK * const hek);
-#define PERL_ARGS_ASSERT_GV_FETCHFILE_HEK	\
-	assert(hek)
 PERL_CALLCONV HE*	Perl_he_dup(pTHX_ const HE* e, bool shared, CLONE_PARAMS* param)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_HE_DUP	\
@@ -5567,9 +5573,6 @@ PERL_CALLCONV OP*	Perl_newPADOP(pTHX_ I32 type, I32 flags, SV* sv)
 #define PERL_ARGS_ASSERT_NEWPADOP	\
 	assert(sv)
 
-PERL_CALLCONV char *	Perl_newchek(pTHX_ const char *str, I32 len);
-#define PERL_ARGS_ASSERT_NEWCHEK	\
-	assert(str)
 PERL_CALLCONV PADLIST *	Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_PADLIST_DUP	\
@@ -5600,9 +5603,6 @@ PERL_CALLCONV void*	Perl_regdupe_internal(pTHX_ REGEXP * const r, CLONE_PARAMS* 
 PERL_CALLCONV void	Perl_rvpv_dup(pTHX_ SV *const dstr, const SV *const sstr, CLONE_PARAMS *const param);
 #define PERL_ARGS_ASSERT_RVPV_DUP	\
 	assert(dstr); assert(sstr); assert(param)
-PERL_CALLCONV void	Perl_save_copfile(pTHX_ COP * cop);
-#define PERL_ARGS_ASSERT_SAVE_COPFILE	\
-	assert(cop)
 PERL_CALLCONV PERL_SI*	Perl_si_dup(pTHX_ PERL_SI* si, CLONE_PARAMS* param)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SI_DUP	\

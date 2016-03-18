@@ -321,11 +321,9 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
 	char * file = CvFILE(&cvbody);
 	CvFILE(&cvbody) = NULL;
 	if(CvDYNFILE(&cvbody)) {
-#ifdef USE_ITHREADS
 	    if((Size_t)file & 0x3)
 		chek_dec(FNPV2CHEK(file));
 	    else
-#endif
 		Safefree(file);
 	}
     }

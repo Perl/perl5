@@ -72,7 +72,6 @@ S_new_he(pTHX)
 
 #endif
 
-#ifdef USE_ITHREADS
 char *
 Perl_newchek(pTHX_ const char *str, I32 len)
 {
@@ -94,7 +93,6 @@ Perl_newchek(pTHX_ const char *str, I32 len)
     PERL_HASH(HEK_HASH(CHEK2HEK(chek)), HEK_KEY(CHEK2HEK(chek)), len);
     return CHEK2FNPV(chek);
 }
-#endif
 
 STATIC HEK *
 S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
@@ -117,8 +115,6 @@ S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
 	Safefree(str);
     return hek;
 }
-
-#ifdef USE_ITHREADS
 
 void
 Perl_free_copfile(pTHX_ COP * cop)
@@ -160,6 +156,7 @@ Perl_save_copfile(pTHX_ COP * cop)
     chek_inc(old);
 }
 
+#ifdef USE_ITHREADS
 void
 Perl_chek_inc(pTHX_ CHEK * chek)
 {
@@ -182,7 +179,6 @@ Perl_chek_dec(pTHX_ CHEK * chek)
     if(!refcnt)
         PerlMemShared_free(chek);
 }
-
 #endif
 
 /* free the pool of temporary HE/HEK pairs returned by hv_fetch_ent
@@ -717,9 +713,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     }
 
     if (keysv && (SvIsCOW_shared_hash(keysv))
-#ifdef USE_ITHREADS
 	&& ((Size_t)key & 0x3) == 0
-#endif
 	) {
 	HEK * keysv_hektmp  = SvSHARED_HEK_FROM_PV(key);
 	if (HvSHAREKEYS(hv))
@@ -1170,9 +1164,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     }
 
     if (keysv && (SvIsCOW_shared_hash(keysv))
-#ifdef USE_ITHREADS
 	&& ((Size_t)SvPVX_const(keysv) & 0x3) == 0
-#endif
 	) {
         if (HvSHAREKEYS(hv))
             keysv_hek  = SvSHARED_HEK_FROM_PV(SvPVX_const(keysv));
@@ -2963,12 +2955,23 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
 
 	/* Assert that the caller passed us a genuine (or at least consistent)
 	   shared hek  */
+#ifdef USE_ITHREADS
 	assert (he->shared_he_he.hent_hek == hek);
+#else
+	assert ((HEK_FLAGS(hek) & HVhek_COMPILING) || he->shared_he_he.hent_hek == hek);
+#endif
 
 	if (he->shared_he_he.he_valu.hent_refcount - 1) {
 	    --he->shared_he_he.he_valu.hent_refcount;
 	    return;
 	}
+#ifndef USE_ITHREADS
+	if(HEK_FLAGS(hek) & HVhek_COMPILING) {
+	    CHEK * chek = FNPV2CHEK(HEK2FNPV(hek));
+	    PerlMemShared_free(chek);
+	    return;
+	}
+#endif
 
         hash = HEK_HASH(hek);
     } else if (len < 0) {
@@ -3475,9 +3478,7 @@ Perl_refcounted_he_fetch_sv(pTHX_ const struct refcounted_he *chain,
     if (SvUTF8(key))
 	flags |= REFCOUNTED_HE_KEY_UTF8;
     if (!hash && SvIsCOW_shared_hash(key)
-#ifdef USE_ITHREADS
 	&& ((Size_t)keypv & 0x3) == 0
-#endif
 	)
 	hash = HEK_HASH(SvSHARED_HEK_FROM_PV(keypv));
     return refcounted_he_fetch_pvn(chain, keypv, keylen, hash, flags);
@@ -3667,9 +3668,7 @@ Perl_refcounted_he_new_sv(pTHX_ struct refcounted_he *parent,
     if (SvUTF8(key))
 	flags |= REFCOUNTED_HE_KEY_UTF8;
     if (!hash && SvIsCOW_shared_hash(key)
-#ifdef USE_ITHREADS
 	&& ((Size_t)keypv & 0x3) == 0
-#endif
 	)
 	hash = HEK_HASH(SvSHARED_HEK_FROM_PV(keypv));
     return refcounted_he_new_pvn(parent, keypv, keylen, hash, value, flags);

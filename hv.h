@@ -75,13 +75,19 @@ struct shared_he {
  * same obviously between ithreads.
  */
 
-#ifdef USE_ITHREADS
-/* position of refcount is intentional. SHEK & CHEK could be the same one day */
+
+/* on threads, refcnt is 32 bits to save mem on 64 bit perls, the ++/-- code
+ * is always a special branch due to multithread locks, on no threads, it is
+ * identical to hent_refcount's type so the same code is used for both */
 struct compiling_hek {
+#ifdef USE_ITHREADS
     U32 	chek_refcount;	/* references for this compiling HEK */
+#else
+    Size_t 	chek_refcount;	/* references for this compiling HEK */
+#endif
     struct hek	chek_hek;
 };
-#endif
+
 
 /* Subject to change.
    Don't access this directly.
@@ -429,9 +435,8 @@ C<SV*>.
 
 #define HVhek_UTF8	0x01 /* Key is utf8 encoded. */
 #define HVhek_WASUTF8	0x02 /* Key is bytes here, but was supplied as utf8. */
-#ifdef USE_ITHREADS
-#  define HVhek_COMPILING 0x04 /* Key is a chek shared between threads. */
-#endif
+#define HVhek_COMPILING 0x04 /* Key is a CHEK filepath,
+        shared between threads on threeded perl. */
 #define HVhek_UNSHARED	0x08 /* This key isn't a shared hash key. */
 /* the following flags are options for functions, they are not stored in heks */
 #define HVhek_FREEKEY	0x100 /* Internal flag to say key is Newx()ed.  */
@@ -459,13 +464,11 @@ C<SV*>.
  * the _< are skipped or behind the char *, "PV" (unused/unimplemented)
  * means _< is after/part of the char *.
  */
-#ifdef USE_ITHREADS
-#  define FNPV2CHEK(x) (CHEK*)(((char*)(x))-2-STRUCT_OFFSET(CHEK, chek_hek.hek_key[0]))
-#  define CHEK2FNPV(x) ((char*)(x))+2+STRUCT_OFFSET(CHEK, chek_hek.hek_key[0])
-#  define CHEK2HEK(x)  (&(x)->chek_hek)
-#  define FNPV2HEK(x)  (HEK*)(((char*)(x))-2-STRUCT_OFFSET(HEK, hek_key))
-#  define HEK2FNPV(x)  ((char*)(x))+2+STRUCT_OFFSET(HEK, hek_key)
-#endif
+#define FNPV2CHEK(x) (CHEK*)(((char*)(x))-2-STRUCT_OFFSET(CHEK, chek_hek.hek_key[0]))
+#define CHEK2FNPV(x) ((char*)(x))+2+STRUCT_OFFSET(CHEK, chek_hek.hek_key[0])
+#define CHEK2HEK(x)  (&(x)->chek_hek)
+#define FNPV2HEK(x)  (HEK*)(((char*)(x))-2-STRUCT_OFFSET(HEK, hek_key))
+#define HEK2FNPV(x)  ((char*)(x))+2+STRUCT_OFFSET(HEK, hek_key)
 
 /* calculate HV array allocation */
 #ifndef PERL_USE_LARGE_HV_ALLOC
@@ -505,6 +508,8 @@ C<SV*>.
 					      shared_he_hek)))		\
 	->shared_he_he.he_valu.hent_refcount),				\
      hek)
+#define chek_inc(x) (void)share_hek_hek(FNPV2HEK(CHEK2FNPV((x))))
+#define chek_dec(x) unshare_hek(FNPV2HEK(CHEK2FNPV((x))))
 #endif
 
 #define hv_store_ent(hv, keysv, val, hash)				\

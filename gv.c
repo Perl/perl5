@@ -134,7 +134,6 @@ Perl_gv_fetchfile_x(pTHX_ const char *const name, const STRLEN namelen)
     return gv;
 }
 
-#ifdef USE_ITHREADS
 /* HEK must start with "_<" */
 GV *
 Perl_gv_fetchfile_hek(pTHX_ const HEK * const hek)
@@ -160,7 +159,6 @@ Perl_gv_fetchfile_hek(pTHX_ const HEK * const hek)
 	    hv_magic(GvHVn(gv), GvAVn(gv), PERL_MAGIC_dbfile);
     return gv;
 }
-#endif
 
 /*
 =for apidoc gv_const_sv
@@ -188,13 +186,7 @@ GP *
 Perl_newGP(pTHX_ GV *const gv)
 {
     GP *gp;
-    U32 hash;
-    const char *file;
-    STRLEN len;
     HEK * hek;
-#ifndef USE_ITHREADS
-    GV *filegv;
-#endif
     dVAR;
 
     PERL_ARGS_ASSERT_NEWGP;
@@ -210,34 +202,21 @@ Perl_newGP(pTHX_ GV *const gv)
     */
     if (PL_curcop) {
 	gp->gp_line = CopLINE(PL_curcop); /* 0 otherwise Newxz */
-#ifdef USE_ITHREADS
 	if (CopFILE(PL_curcop)) {
     /* this should be a macro since it will be used in Perl_newGP in the future */
 	    CHEK * chek = FNPV2CHEK(CopFILE(PL_curcop));
 	    chek_inc(chek);
 	    hek = &chek->chek_hek;
-	    goto have_hek;
 	}
-#else
-	filegv = CopFILEGV(PL_curcop);
-	if (filegv) {
-	    file = GvNAME(filegv)+2;
-	    len = GvNAMELEN(filegv)-2;
-	}
-#endif
 	else goto no_file;
     }
     else {
+        U32 hash;
 	no_file:
-	file = "";
-	len = 0;
+        PERL_HASH(hash, "", 0);
+        hek = share_hek("", 0, hash);
     }
 
-    PERL_HASH(hash, file, len);
-    hek = share_hek(file, len, hash);
-#ifdef USE_ITHREADS
-    have_hek:
-#endif
     gp->gp_file_hek = hek;
     gp->gp_refcnt = 1;
 
@@ -2481,14 +2460,9 @@ Perl_gv_check(pTHX_ HV *stash)
 		file = GvFILE(gv);
                 /* how is this thread safe ???????? aren't ops immutable after creation??*/
 		CopLINE_set(PL_curcop, GvLINE(gv));
-#ifdef USE_ITHREADS
 		CopFILE_free(PL_curcop);
 		assert(CopFILE(PL_curcop) == NULL);
 		CopFILE_set(PL_curcop, file);	/* set for warning */
-#else
-		CopFILEGV(PL_curcop)
-		    = gv_fetchfile_flags(file, HEK_LEN(GvFILE_HEK(gv)), 0);
-#endif
 		Perl_warner(aTHX_ packWARN(WARN_ONCE),
 			"Name \"%"HEKf"::%"HEKf
 			"\" used only once: possible typo",

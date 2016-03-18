@@ -222,11 +222,9 @@ See L<perlguts/Autoloading with XSUBs>.
 
 /* Flags for newXS_flags  */
 #define XS_DYNAMIC_FILENAME	0x01	/* The filename isn't static  */
-#ifdef USE_ITHREADS
 /* filename arg is a FNPV char * from a CHEK (IE CopFILE).
  * The CHEK's refcnt will be ++ed */
-#  define XS_CHEK_FILENAME	0x02
-#endif
+#define XS_CHEK_FILENAME	0x02
 
 PERL_STATIC_INLINE HEK *
 CvNAME_HEK(CV *sv)
