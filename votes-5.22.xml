@@ -38,10 +38,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="steveh, jhi" id="a934a4a7d4fa99d522e169b921286755a0f8d248" ticket="126845" desc="Remove unwarranted assertion in Perl_newATTRSUB_x()"/>
 
-(steveh: Not a crash or memory corruption fix, but goes some way to helping the memory usage problem in #126182, which is equally as serious as a crash,
-but the series of fixes for which may not be suitable for maint-5.22, at least at this stage:)
-<commit votes="steveh, khw, jhi" id="6f8848d55c2ea11b7ed7f8cf1afb2d6a28c76e4d" ticket="" desc="reduce number of calls to add_cp_to_invlist()"/>
-
 </div>
 
 <div><h3>Regression Fixes</h3>
