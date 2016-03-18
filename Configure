@@ -8189,7 +8189,7 @@ int main(void) {
 EOM
 		dtraceobject=$undef
 		if $cc -c -o try.o $optimize $ccflags try.c \
-                    && $dtrace -G -s ../perldtrace.d try.o ; then
+                    && $dtrace -G -s ../perldtrace.d try.o >/dev/null 2>&1; then
 		        dtraceobject=$define
 			echo "Your dtrace builds an object file"
 		fi
