@@ -416,7 +416,8 @@ The non-ASCII characters below 256 can have various meanings, depending on
 various things.  (See, most notably, L<perllocale>.)  But usually the whole
 range can be referred to as ISO-8859-1.  Often, the term "Latin-1" (or
 "Latin1") is used as an equivalent for ISO-8859-1.  But some people treat
-"Latin1" as referring just to the characters in the range 160 through 255.
+"Latin1" as referring just to the characters in the range 128 through 255, or
+somethimes from 160 through 255.
 This documentation uses "Latin1" and "Latin-1" to refer to all 256 characters.
 
 Note that Perl can be compiled and run under either ASCII or EBCDIC (See
