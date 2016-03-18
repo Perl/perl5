@@ -875,6 +875,13 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #define PL_sv_placeholder PL_sv_undef
 #endif
 
+#define MUST_FIT_IN_I32(x)                                              \
+    STMT_START {                                                        \
+        if ((UV)(x) > (UV)0x7fffffffu) {                                \
+            CROAK(("Storable cannot yet handle data that needs a 64-bit machine")); \
+        }                                                               \
+    } STMT_END
+
 /*
  * Useful store shortcuts...
  */
@@ -941,6 +948,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
             if (len)                                                    \
                 WRITE(pv, len);                                         \
 	} else {							\
+            MUST_FIT_IN_I32(len);                                       \
             PUTMARK(large);                                             \
             WLEN(len);                                                  \
             WRITE(pv, len);                                             \
@@ -2259,6 +2267,7 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
             }
 #endif
 
+            MUST_FIT_IN_I32(len);
             wlen = (I32) len; /* WLEN via STORE_SCALAR expects I32 */
             if (SvUTF8 (sv))
                 STORE_UTF8STR(pv, wlen);
@@ -2287,6 +2296,8 @@ static int store_array(pTHX_ stcxt_t *cxt, AV *av)
 	I32 len = av_len(av) + 1;
 	I32 i;
 	int ret;
+
+        MUST_FIT_IN_I32(av_len(av) + 1);
 
 	TRACEME(("store_array (0x%"UVxf")", PTR2UV(av)));
 
@@ -2388,6 +2399,8 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 #endif
                             ) ? 1 : 0);
         unsigned char hash_flags = (SvREADONLY(hv) ? SHV_RESTRICTED : 0);
+
+        MUST_FIT_IN_I32(HvTOTALKEYS(hv));
 
         if (flagged_hash) {
             /* needs int cast for C++ compilers, doesn't it?  */

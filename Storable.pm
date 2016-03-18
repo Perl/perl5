@@ -24,7 +24,7 @@ package Storable; @ISA = qw(Exporter);
 
 use vars qw($canonical $forgive_me $VERSION);
 
-$VERSION = '2.53_03';
+$VERSION = '2.57_01';
 
 BEGIN {
     if (eval { local $SIG{__DIE__}; require Log::Agent; 1 }) {
@@ -1178,7 +1178,7 @@ A hash with 2**31 or more keys
 
 =back
 
-Attempting to do so will result in unpredicatable overflow results.
+Attempting to do so will yield an exception.
 
 This may be fixed in the future.
 
