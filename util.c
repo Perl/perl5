@@ -6652,6 +6652,84 @@ int perl_tsa_mutex_destroy(perl_mutex* mutex)
 
 #endif
 
+
+#ifdef USE_DTRACE
+
+/* log a sub call or return */
+
+void
+Perl_dtrace_probe_call(pTHX_ CV *cv, bool is_call)
+{
+    const char *func;
+    const char *file;
+    const char *stash;
+    const COP  *start;
+    line_t      line;
+
+    PERL_ARGS_ASSERT_DTRACE_PROBE_CALL;
+
+    if (CvNAMED(cv)) {
+        HEK *hek = CvNAME_HEK(cv);
+        func = HEK_KEY(hek);
+    }
+    else {
+        GV  *gv = CvGV(cv);
+        func = GvENAME(gv);
+    }
+    start = (const COP *)CvSTART(cv);
+    file  = CopFILE(start);
+    line  = CopLINE(start);
+    stash = CopSTASHPV(start);
+
+    if (is_call) {
+        PERL_SUB_ENTRY(func, file, line, stash);
+    }
+    else {
+        PERL_SUB_RETURN(func, file, line, stash);
+    }
+}
+
+
+/* log a require file loading/loaded  */
+
+void
+Perl_dtrace_probe_load(pTHX_ const char *name, bool is_loading)
+{
+    PERL_ARGS_ASSERT_DTRACE_PROBE_LOAD;
+
+    if (is_loading) {
+	PERL_LOADING_FILE(name);
+    }
+    else {
+	PERL_LOADED_FILE(name);
+    }
+}
+
+
+/* log an op execution */
+
+void
+Perl_dtrace_probe_op(pTHX_ const OP *op)
+{
+    PERL_ARGS_ASSERT_DTRACE_PROBE_OP;
+
+    PERL_OP_ENTRY(OP_NAME(op));
+}
+
+
+/* log a compile/run phase change */
+
+void
+Perl_dtrace_probe_phase(pTHX_ enum perl_phase phase)
+{
+    const char *ph_old = PL_phase_names[PL_phase];
+    const char *ph_new = PL_phase_names[phase];
+
+    PERL_PHASE_CHANGE(ph_new, ph_old);
+}
+
+#endif
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

@@ -3720,7 +3720,7 @@ PP(pp_require)
 	}
     }
 
-    LOADING_FILE_PROBE(unixname);
+    PERL_DTRACE_PROBE_FILE_LOADING(unixname);
 
     /* prepare to compile file */
 
@@ -4056,7 +4056,7 @@ PP(pp_require)
     else
 	op = PL_op->op_next;
 
-    LOADED_FILE_PROBE(unixname);
+    PERL_DTRACE_PROBE_FILE_LOADED(unixname);
 
     return op;
 }

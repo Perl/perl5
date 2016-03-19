@@ -3,6 +3,8 @@ use ExtUtils::MakeMaker;
 use ExtUtils::Constant 0.11 'WriteConstants';
 use Config;
 
+my $dtrace_o = $Config{dtraceobject} ? ' dtrace$(OBJ_EXT)' : '';
+
 WriteMakefile(
     'NAME'		=> 'XS::APItest',
     'VERSION_FROM'	=> 'APItest.pm', # finds $VERSION
@@ -10,7 +12,7 @@ WriteMakefile(
     ABSTRACT_FROM	=> 'APItest.pm', # retrieve abstract from module
     AUTHOR		=> 'Tim Jenness <t.jenness@jach.hawaii.edu>, Christian Soeller <csoelle@mph.auckland.ac.nz>, Hugo van der Sanden <hv@crypt.compulink.co.uk>, Andrew Main (Zefram) <zefram@fysh.org>',
     'C'                 => ['exception.c', 'core.c', 'notcore.c'],
-    'OBJECT'            => '$(BASEEXT)$(OBJ_EXT) XSUB-undef-XS_VERSION$(OBJ_EXT) XSUB-redefined-macros$(OBJ_EXT) $(O_FILES)',
+    'OBJECT'            => '$(BASEEXT)$(OBJ_EXT) XSUB-undef-XS_VERSION$(OBJ_EXT) XSUB-redefined-macros$(OBJ_EXT) $(O_FILES)'. $dtrace_o,
     realclean => {FILES	=> 'const-c.inc const-xs.inc'},
     ($Config{gccversion} && $Config{d_attribute_deprecated} ?
       (CCFLAGS => $Config{ccflags} . ' -Wno-deprecated-declarations') : ()),
@@ -40,3 +42,24 @@ WriteConstants(
 	       );
 
 sub MY::install { "install ::\n"  };
+
+
+sub MY::postamble
+{
+    package MY;
+    my $post = shift->SUPER::postamble(@_);
+    use Config;
+    return $post unless $Config{dtraceobject};
+
+    # core.o is build using PERL_CORE, so picks up any dtrace probes
+
+    $post .= <<POSTAMBLE;
+
+DTRACE_D = ../../perldtrace.d
+
+dtrace\$(OBJ_EXT): \$(DTRACE_D) core\$(OBJ_EXT)
+	$Config{dtrace} -G -s \$(DTRACE_D) -o dtrace\$(OBJ_EXT) core\$(OBJ_EXT)
+POSTAMBLE
+
+    return $post;
+}

@@ -5241,7 +5241,7 @@ EXTCONST char PL_bincompat_options[];
 
 #ifndef PERL_SET_PHASE
 #  define PERL_SET_PHASE(new_phase) \
-    PHASE_CHANGE_PROBE(PL_phase_names[new_phase], PL_phase_names[PL_phase]); \
+    PERL_DTRACE_PROBE_PHASE(new_phase); \
     PL_phase = new_phase;
 #endif
 
