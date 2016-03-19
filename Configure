@@ -678,6 +678,9 @@ d_msync=''
 d_munmap=''
 d_nan=''
 d_nearbyint=''
+d_freelocale=''
+d_newlocale=''
+d_uselocale=''
 d_nextafter=''
 d_nexttoward=''
 d_nice=''
@@ -16618,6 +16621,18 @@ eval $inlibc
 set nearbyint d_nearbyint
 eval $inlibc
 
+: see if newlocale exists
+set newlocale d_newlocale
+eval $inlibc
+
+: see if freelocale exists
+set freelocale d_freelocale
+eval $inlibc
+
+: see if uselocale exists
+set uselocale d_uselocale
+eval $inlibc
+
 : see if nextafter exists
 set nextafter d_nextafter
 eval $inlibc
@@ -24338,6 +24353,7 @@ d_fpclassify='$d_fpclassify'
 d_fpclassl='$d_fpclassl'
 d_fpgetround='$d_fpgetround'
 d_fpos64_t='$d_fpos64_t'
+d_freelocale='$d_freelocale'
 d_frexpl='$d_frexpl'
 d_fs_data_s='$d_fs_data_s'
 d_fseeko='$d_fseeko'
@@ -24510,6 +24526,7 @@ d_nan='$d_nan'
 d_ndbm='$d_ndbm'
 d_ndbm_h_uses_prototypes='$d_ndbm_h_uses_prototypes'
 d_nearbyint='$d_nearbyint'
+d_newlocale='$d_newlocale'
 d_nextafter='$d_nextafter'
 d_nexttoward='$d_nexttoward'
 d_nice='$d_nice'
@@ -24709,6 +24726,7 @@ d_uname='$d_uname'
 d_union_semun='$d_union_semun'
 d_unordered='$d_unordered'
 d_unsetenv='$d_unsetenv'
+d_uselocale='$d_uselocale'
 d_usleep='$d_usleep'
 d_usleepproto='$d_usleepproto'
 d_ustat='$d_ustat'

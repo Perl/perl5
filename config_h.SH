@@ -4150,6 +4150,23 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_nearbyint HAS_NEARBYINT		/**/
 
+/* HAS_NEWLOCALE:
+ *	This symbol, if defined, indicates that the newlocale routine is
+ *	available to return a new locale object or modify an existing
+ *	locale object.
+ */
+/* HAS_FREELOCALE:
+ *	This symbol, if defined, indicates that the freelocale routine is
+ *	available to deallocates the resources associated with a locale object.
+ */
+/* HAS_USELOCALE:
+ *	This symbol, if defined, indicates that the uselocale routine is
+ *	available to set the current locale for the calling thread.
+ */
+#$d_newlocale	HAS_NEWLOCALE	/**/
+#$d_freelocale	HAS_FREELOCALE	/**/
+#$d_uselocale	HAS_USELOCALE	/**/
+
 /* HAS_NEXTAFTER:
  *	This symbol, if defined, indicates that the nextafter routine is
  *	available to return the next machine representable double from

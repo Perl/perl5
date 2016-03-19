@@ -928,6 +928,11 @@ d_fpgetround (d_fpgetround.U):
 d_fpos64_t (d_fpos64_t.U):
 	This symbol will be defined if the C compiler supports fpos64_t.
 
+d_freelocale (d_newlocale.U):
+	This variable conditionally defines the HAS_FREELOCALE symbol, which
+	indicates to the C program that the freelocale() routine is available
+	to deallocates the resources associated with a locale object.
+
 d_frexpl (d_frexpl.U):
 	This variable conditionally defines the HAS_FREXPL symbol, which
 	indicates to the C program that the frexpl() routine is available.
@@ -1732,6 +1737,11 @@ d_nearbyint (d_nearbyint.U):
 	This variable conditionally defines HAS_NEARBYINT if nearbyint()
 	is available to return the integral value closest to (according to
 	the current rounding mode) to x.
+
+d_newlocale (d_newlocale.U):
+	This variable conditionally defines the HAS_NEWLOCALE symbol, which
+	indicates to the C program that the newlocale() routine is available
+	to return a new locale object or modify an existing locale object.
 
 d_nextafter (d_nextafter.U):
 	This variable conditionally defines HAS_NEXTAFTER if nextafter()
@@ -2664,6 +2674,11 @@ d_unordered (d_unordered.U):
 d_unsetenv (d_unsetenv.U):
 	This variable conditionally defines the HAS_UNSETENV symbol, which
 	indicates to the C program that the unsetenv () routine is available.
+
+d_uselocale (d_newlocale.U):
+	This variable conditionally defines the HAS_USELOCALE symbol, which
+	indicates to the C program that the uselocale() routine is available
+	to set the current locale for the calling thread.
 
 d_usleep (d_usleep.U):
 	This variable conditionally defines HAS_USLEEP if usleep() is
