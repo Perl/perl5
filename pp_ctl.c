@@ -3589,61 +3589,61 @@ S_require_version(pTHX_ SV *sv)
 {
     dVAR; dSP;
 
-	sv = sv_2mortal(new_version(sv));
-	if (!Perl_sv_derived_from_pvn(aTHX_ PL_patchlevel, STR_WITH_LEN("version"), 0))
-	    upg_version(PL_patchlevel, TRUE);
-	if (cUNOP->op_first->op_type == OP_CONST && cUNOP->op_first->op_private & OPpCONST_NOVER) {
-	    if ( vcmp(sv,PL_patchlevel) <= 0 )
-		DIE(aTHX_ "Perls since %"SVf" too modern--this is %"SVf", stopped",
-		    SVfARG(sv_2mortal(vnormal(sv))),
-		    SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
-		);
-	}
-	else {
-	    if ( vcmp(sv,PL_patchlevel) > 0 ) {
-		I32 first = 0;
-		AV *lav;
-		SV * const req = SvRV(sv);
-		SV * const pv = *hv_fetchs(MUTABLE_HV(req), "original", FALSE);
+    sv = sv_2mortal(new_version(sv));
+    if (!Perl_sv_derived_from_pvn(aTHX_ PL_patchlevel, STR_WITH_LEN("version"), 0))
+        upg_version(PL_patchlevel, TRUE);
+    if (cUNOP->op_first->op_type == OP_CONST && cUNOP->op_first->op_private & OPpCONST_NOVER) {
+        if ( vcmp(sv,PL_patchlevel) <= 0 )
+            DIE(aTHX_ "Perls since %"SVf" too modern--this is %"SVf", stopped",
+                SVfARG(sv_2mortal(vnormal(sv))),
+                SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
+            );
+    }
+    else {
+        if ( vcmp(sv,PL_patchlevel) > 0 ) {
+            I32 first = 0;
+            AV *lav;
+            SV * const req = SvRV(sv);
+            SV * const pv = *hv_fetchs(MUTABLE_HV(req), "original", FALSE);
 
-		/* get the left hand term */
-		lav = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(req), "version", FALSE)));
+            /* get the left hand term */
+            lav = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(req), "version", FALSE)));
 
-		first  = SvIV(*av_fetch(lav,0,0));
-		if (   first > (int)PERL_REVISION    /* probably 'use 6.0' */
-		    || hv_exists(MUTABLE_HV(req), "qv", 2 ) /* qv style */
-		    || av_tindex(lav) > 1            /* FP with > 3 digits */
-		    || strstr(SvPVX(pv),".0")        /* FP with leading 0 */
-		   ) {
-		    DIE(aTHX_ "Perl %"SVf" required--this is only "
-		    	"%"SVf", stopped",
-			SVfARG(sv_2mortal(vnormal(req))),
-			SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
-		    );
-		}
-		else { /* probably 'use 5.10' or 'use 5.8' */
-		    SV *hintsv;
-		    I32 second = 0;
+            first  = SvIV(*av_fetch(lav,0,0));
+            if (   first > (int)PERL_REVISION    /* probably 'use 6.0' */
+                || hv_exists(MUTABLE_HV(req), "qv", 2 ) /* qv style */
+                || av_tindex(lav) > 1            /* FP with > 3 digits */
+                || strstr(SvPVX(pv),".0")        /* FP with leading 0 */
+               ) {
+                DIE(aTHX_ "Perl %"SVf" required--this is only "
+                    "%"SVf", stopped",
+                    SVfARG(sv_2mortal(vnormal(req))),
+                    SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
+                );
+            }
+            else { /* probably 'use 5.10' or 'use 5.8' */
+                SV *hintsv;
+                I32 second = 0;
 
-		    if (av_tindex(lav)>=1)
-			second = SvIV(*av_fetch(lav,1,0));
+                if (av_tindex(lav)>=1)
+                    second = SvIV(*av_fetch(lav,1,0));
 
-		    second /= second >= 600  ? 100 : 10;
-		    hintsv = Perl_newSVpvf(aTHX_ "v%d.%d.0",
-					   (int)first, (int)second);
-		    upg_version(hintsv, TRUE);
+                second /= second >= 600  ? 100 : 10;
+                hintsv = Perl_newSVpvf(aTHX_ "v%d.%d.0",
+                                       (int)first, (int)second);
+                upg_version(hintsv, TRUE);
 
-		    DIE(aTHX_ "Perl %"SVf" required (did you mean %"SVf"?)"
-		    	"--this is only %"SVf", stopped",
-			SVfARG(sv_2mortal(vnormal(req))),
-			SVfARG(sv_2mortal(vnormal(sv_2mortal(hintsv)))),
-			SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
-		    );
-		}
-	    }
-	}
+                DIE(aTHX_ "Perl %"SVf" required (did you mean %"SVf"?)"
+                    "--this is only %"SVf", stopped",
+                    SVfARG(sv_2mortal(vnormal(req))),
+                    SVfARG(sv_2mortal(vnormal(sv_2mortal(hintsv)))),
+                    SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
+                );
+            }
+        }
+    }
 
-	RETPUSHYES;
+    RETPUSHYES;
 }
 
 /* Handle C<require Foo::Bar>, C<require "Foo/Bar.pm"> and C<do "Foo.pm">.
