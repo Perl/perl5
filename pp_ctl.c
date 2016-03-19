@@ -3582,38 +3582,13 @@ S_path_is_searchable(const char *name)
 }
 
 
-/* also used for: pp_dofile() */
+/* implement 'require 5.010001' */
 
-PP(pp_require)
+static OP *
+S_require_version(pTHX_ SV *sv)
 {
-    dSP;
-    PERL_CONTEXT *cx;
-    SV *sv;
-    const char *name;
-    STRLEN len;
-    char * unixname;
-    STRLEN unixlen;
-#ifdef VMS
-    int vms_unixname = 0;
-    char *unixdir;
-#endif
-    const char *tryname = NULL;
-    SV *namesv = NULL;
-    const U8 gimme = GIMME_V;
-    int filter_has_file = 0;
-    PerlIO *tryrsfp = NULL;
-    SV *filter_cache = NULL;
-    SV *filter_state = NULL;
-    SV *filter_sub = NULL;
-    SV *hook_sv = NULL;
-    OP *op;
-    int saved_errno;
-    bool path_searchable;
-    I32 old_savestack_ix;
+    dVAR; dSP;
 
-    sv = POPs;
-    SvGETMAGIC(sv);
-    if ( (SvNIOKp(sv) || SvVOK(sv)) && PL_op->op_type != OP_DOFILE) {
 	sv = sv_2mortal(new_version(sv));
 	if (!Perl_sv_derived_from_pvn(aTHX_ PL_patchlevel, STR_WITH_LEN("version"), 0))
 	    upg_version(PL_patchlevel, TRUE);
@@ -3669,7 +3644,40 @@ PP(pp_require)
 	}
 
 	RETPUSHYES;
-    }
+}
+
+/* Handle C<require Foo::Bar>, C<require "Foo/Bar.pm"> and C<do "Foo.pm">.
+ * The first form will have already been converted at compile time to
+ * the second form */
+
+static OP *
+S_require_file(pTHX_ SV *const sv)
+{
+    dVAR; dSP;
+
+    PERL_CONTEXT *cx;
+    const char *name;
+    STRLEN len;
+    char * unixname;
+    STRLEN unixlen;
+#ifdef VMS
+    int vms_unixname = 0;
+    char *unixdir;
+#endif
+    const char *tryname = NULL;
+    SV *namesv = NULL;
+    const U8 gimme = GIMME_V;
+    int filter_has_file = 0;
+    PerlIO *tryrsfp = NULL;
+    SV *filter_cache = NULL;
+    SV *filter_state = NULL;
+    SV *filter_sub = NULL;
+    SV *hook_sv = NULL;
+    OP *op;
+    int saved_errno;
+    bool path_searchable;
+    I32 old_savestack_ix;
+
     if (!SvOK(sv))
         DIE(aTHX_ "Missing or undefined argument to require");
     name = SvPV_nomg_const(sv, len);
@@ -4061,6 +4069,21 @@ PP(pp_require)
 
     return op;
 }
+
+
+/* also used for: pp_dofile() */
+
+PP(pp_require)
+{
+    dSP;
+    SV *sv = POPs;
+    SvGETMAGIC(sv);
+    PUTBACK;
+    return ((SvNIOKp(sv) || SvVOK(sv)) && PL_op->op_type != OP_DOFILE)
+        ? S_require_version(aTHX_ sv)
+        : S_require_file(aTHX_ sv);
+}
+
 
 /* This is a op added to hold the hints hash for
    pp_entereval. The hash can be modified by the code
