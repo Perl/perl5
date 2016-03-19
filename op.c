@@ -10629,10 +10629,8 @@ Perl_ck_require(pTHX_ OP *o)
 	    len = SvCUR(sv);
 	    end = s + len;
             /* treat ::foo::bar as foo::bar */
-            if (len >= 2 && s[0] == ':' && s[1] == ':') {
-                Move(s+2, s, len - 2, char);
-                end -= 2;
-            }
+            if (len >= 2 && s[0] == ':' && s[1] == ':')
+                DIE(aTHX_ "Bareword in require must not start with a double-colon: \"%s\"\n", s);
             if (s == end)
                 DIE(aTHX_ "Bareword in require maps to empty filename");
 

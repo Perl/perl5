@@ -26,13 +26,15 @@ for my $file ($nonfile, ' ') {
 	"correct error message for require '$file'";
 }
 
-for my $file ($nonfile, "::$nonfile") {
-    eval "require $file";
-    $file =~ s/^:://;
+eval "require $nonfile";
 
-    like $@, qr/^Can't locate $nonfile\.pm in \@INC \(you may need to install the $nonfile module\) \(\@INC contains: @INC\) at/,
+like $@, qr/^Can't locate $nonfile\.pm in \@INC \(you may need to install the $nonfile module\) \(\@INC contains: @INC\) at/,
         "correct error message for require $nonfile";
-}
+
+eval "require ::$nonfile";
+
+like $@, qr/^Bareword in require must not start with a double-colon:/,
+        "correct error message for require ::$nonfile";
 
 eval {
     require "$nonfile.ph";
