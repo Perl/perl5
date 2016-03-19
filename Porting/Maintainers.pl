@@ -1309,25 +1309,10 @@ use File::Glob qw(:case);
     },
 
     'Win32API::File' => {
-        'DISTRIBUTION' => 'CHORNY/Win32API-File-0.1202.tar.gz',
+        'DISTRIBUTION' => 'CHORNY/Win32API-File-0.1203.tar.gz',
         'FILES'        => q[cpan/Win32API-File],
         'EXCLUDED'     => [
             qr{^ex/},
-        ],
-
-        # Currently all EOL differences. Waiting for a new upstream release:
-        # All the files in the GitHub repo have UNIX EOLs already.
-        'CUSTOMIZED'   => [
-            qw( ExtUtils/Myconst2perl.pm
-                Makefile.PL
-                buffers.h
-                cFile.h
-                cFile.pc
-                const2perl.h
-                t/file.t
-                t/tie.t
-                typemap
-                ),
         ],
     },
 

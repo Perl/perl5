@@ -10,7 +10,7 @@ use Fcntl qw( O_RDONLY O_RDWR O_WRONLY O_APPEND O_BINARY O_TEXT );
 use vars qw( $VERSION @ISA );
 use vars qw( @EXPORT @EXPORT_OK @EXPORT_FAIL %EXPORT_TAGS );
 
-$VERSION= '0.1202';
+$VERSION= '0.1203';
 
 use base qw( Exporter DynaLoader Tie::Handle IO::File );
 
@@ -317,8 +317,8 @@ sub OsFHandleOpen {
     if ($@) {
 	return tie *{$fh}, __PACKAGE__, $osfh;
     }
-    return  undef if  $fd < 0;
-    return  open( $fh, $pref."&=".$fd );
+    return  undef unless  $fd;
+    return  open( $fh, $pref."&=".(0+$fd) );
 }
 
 sub GetOsFHandle {
