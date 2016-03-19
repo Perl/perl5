@@ -72,6 +72,11 @@ removed in a future Perl version:
 (F) The modifiers '!', '<' and '>' are allowed in pack() or unpack() only
 after certain types.  See L<perlfunc/pack>.
 
+=item alpha->numify() is lossy
+
+(W numeric) An alpha version can not be numified without losing
+information.
+
 =item Ambiguous call resolved as CORE::%s(), qualify as such or use &
 
 (W ambiguous) A subroutine you have declared has the same name as a Perl
@@ -1609,15 +1614,6 @@ See L<charnames/CUSTOM ALIASES>.
 
 (W unopened) You tried chdir() on a filehandle that was never opened.
 
-=item \C no longer supported in regex; marked by S<<-- HERE> in m/%s/
-
-(F) The \C character class used to allow a match of single byte within a
-multi-byte utf-8 character, but was removed in v5.24 as it broke
-encapsulation and its implementation was extremely buggy. If you really
-need to process the individual bytes, you probably want to convert your
-string to one where each underlying byte is stored as a character, with
-utf8::encode().
-
 =item "\c%c" is more clearly written simply as "%s"
 
 (W syntax) The C<\cI<X>> construct is intended to be a way to specify
@@ -1644,6 +1640,15 @@ a dirhandle.  Check your control flow.
 (F) If a closure has attributes, the subroutine passed to an attribute
 handler is the prototype that is cloned when a new closure is created.
 This subroutine cannot be called.
+
+=item \C no longer supported in regex; marked by S<<-- HERE> in m/%s/
+
+(F) The \C character class used to allow a match of single byte
+within a multi-byte utf-8 character, but was removed in v5.24 as
+it broke encapsulation and its implementation was extremely buggy.
+If you really need to process the individual bytes, you probably
+want to convert your string to one where each underlying byte is
+stored as a character, with utf8::encode().
 
 =item Code missing after '/'
 
@@ -2179,6 +2184,13 @@ L<perlrecharclass/Extended Bracketed Character Classes>.
     use feature "refaliasing";
     \$x = \$y;
 
+=item Experimental %s on scalar is now forbidden
+
+(F) An experimental feature added in Perl 5.14 allowed C<each>, C<keys>,
+C<push>, C<pop>, C<shift>, C<splice>, C<unshift>, and C<values> to be called with a
+scalar argument.  This experiment is considered unsuccessful, and
+has been removed.  The C<postderef> feature may meet your needs better.
+
 =item Experimental subroutine signatures not enabled
 
 (F) To use subroutine signatures, you must first enable them:
@@ -2186,13 +2198,6 @@ L<perlrecharclass/Extended Bracketed Character Classes>.
     no warnings "experimental::signatures";
     use feature "signatures";
     sub foo ($left, $right) { ... }
-
-=item Experimental %s on scalar is now forbidden
-
-(F) An experimental feature added in Perl 5.14 allowed C<each>, C<keys>,
-C<push>, C<pop>, C<shift>, C<splice>, C<unshift>, and C<values> to be called
-with a scalar argument. This experiment is considered unsuccessful, and has
-been removed. The C<postderef> feature may meet your needs better.
 
 =item Experimental "%s" subs not enabled
 
@@ -2691,32 +2696,6 @@ provides a list context to its subscript, which can do weird things
 if you're expecting only one subscript.  When called in list context,
 it also returns the key in addition to the value.
 
-=item Invalid number '%s' for -C option.
-
-(F) You supplied a number to the -C option that either has extra leading
-zeroes or overflows perl's unsigned integer representation.
-
-=item %s() is deprecated on :utf8 handles
-
-(W deprecated) The sysread(), recv(), syswrite() and send() operators
-are deprecated on handles that have the C<:utf8> layer, either
-explicitly, or implicitly, eg., with the C<:encoding(UTF-16LE)> layer.
-
-Both sysread() and recv() currently use only the C<:utf8> flag for the
-stream, ignoring the actual layers.  Since sysread() and recv() do no
-UTF-8 validation they can end up creating invalidly encoded scalars.
-
-Similarly, syswrite() and send() use only the C<:utf8> flag, otherwise
-ignoring any layers.  If the flag is set, both write the value UTF-8
-encoded, even if the layer is some different encoding, such as the
-example above.
-
-Ideally, all of these operators would completely ignore the C<:utf8>
-state, working only with bytes, but this would result in silently
-breaking existing code.  To avoid this a future version of perl will
-throw an exception when any of sysread(), recv(), syswrite() or send()
-are called on handle with the C<:utf8> layer.
-
 =item Insecure dependency in %s
 
 (F) You tried to do something that the tainting mechanism didn't like.
@@ -2904,6 +2883,11 @@ a module that is a MRO plugin.  See L<mro> and L<perlmroapi>.
 not valid character numbers, so it returns the Unicode replacement
 character (U+FFFD).
 
+=item Invalid number '%s' for -C option.
+
+(F) You supplied a number to the -C option that either has extra leading
+zeroes or overflows perl's unsigned integer representation.
+
 =item invalid option -D%c, use -D'' to see choices
 
 (S debugging) Perl was called with invalid debugger flags.  Call perl
@@ -2980,10 +2964,6 @@ for more details on allowed version formats.
 Perhaps the internals were modified directly in some way or
 an arbitrary reference was blessed into the "version" class.
 
-=item alpha->numify() is lossy
-
-(W numeric) An alpha version can not be numified without losing information.
-
 =item In '(*VERB...)', the '(' and '*' must be adjacent in regex;
 marked by S<<-- HERE> in m/%s/
 
@@ -3018,6 +2998,26 @@ neither as a system call nor an ioctl call (SIOCATMARK).
 (F) You used C<\b{...}> or C<\B{...}> and the C<...> is not known to
 Perl.  The current valid ones are given in
 L<perlrebackslash/\b{}, \b, \B{}, \B>.
+
+=item %s() is deprecated on :utf8 handles
+
+(W deprecated) The sysread(), recv(), syswrite() and send() operators are
+deprecated on handles that have the C<:utf8> layer, either explicitly, or
+implicitly, eg., with the C<:encoding(UTF-16LE)> layer.
+
+Both sysread() and recv() currently use only the C<:utf8> flag for the stream,
+ignoring the actual layers.  Since sysread() and recv() do no UTF-8
+validation they can end up creating invalidly encoded scalars.
+
+Similarly, syswrite() and send() use only the C<:utf8> flag, otherwise ignoring
+any layers.  If the flag is set, both write the value UTF-8 encoded, even if
+the layer is some different encoding, such as the example above.
+
+Ideally, all of these operators would completely ignore the C<:utf8> state,
+working only with bytes, but this would result in silently breaking existing
+code.  To avoid this a future version of perl will throw an exception when
+any of sysread(), recv(), syswrite() or send() are called on handle with the
+C<:utf8> layer.
 
 =item "%s" is more clearly written simply as "%s" in regex; marked by S<<-- HERE> in m/%s/
 
@@ -5347,10 +5347,9 @@ sequence and this has been omitted or incorrectly written.
 (F) The end of the perl code contained within the {...} must be
 followed immediately by a ')'.
 
-=item Sequence ?P=... not terminated in regex; marked by S<<-- HERE> in
-m/%s/
+=item Sequence (?PE<gt>... not terminated in regex; marked by S<<-- HERE> in m/%s/
 
-(F) A named reference of the form C<(?P=...)> was missing the final
+(F) A named reference of the form C<(?PE<gt>...)> was missing the final
 closing parenthesis after the name.  The S<<-- HERE> shows whereabouts
 in the regular expression the problem was discovered.
 
@@ -5360,9 +5359,10 @@ in the regular expression the problem was discovered.
 closing angle bracket.  The S<<-- HERE> shows whereabouts in the
 regular expression the problem was discovered.
 
-=item Sequence (?PE<gt>... not terminated in regex; marked by S<<-- HERE> in m/%s/
+=item Sequence ?P=... not terminated in regex; marked by S<<-- HERE> in
+m/%s/
 
-(F) A named reference of the form C<(?PE<gt>...)> was missing the final
+(F) A named reference of the form C<(?P=...)> was missing the final
 closing parenthesis after the name.  The S<<-- HERE> shows whereabouts
 in the regular expression the problem was discovered.
 
@@ -7149,11 +7149,6 @@ You likely need to figure out how this multi-byte character got mixed up
 with your single-byte locale (or perhaps you thought you had a UTF-8
 locale, but Perl disagrees).
 
-=item %s() with negative argument
-
-(S misc) Certain operations make no sense with negative arguments.
-Warning is given and the operation is not done.
-
 =item Within []-length '%c' not allowed
 
 (F) The count in the (un)pack template may be replaced by C<[TEMPLATE]>
@@ -7161,6 +7156,11 @@ only if C<TEMPLATE> always matches the same amount of packed bytes that
 can be determined from the template alone.  This is not possible if
 it contains any of the codes @, /, U, u, w or a *-length.  Redesign
 the template.
+
+=item %s() with negative argument
+
+(S misc) Certain operations make no sense with negative arguments.
+Warning is given and the operation is not done.
 
 =item write() on closed filehandle %s
 
