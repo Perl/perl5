@@ -14547,9 +14547,9 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                                        'stack' of where the undealt-with left
                                        parens would be if they were actually
                                        put there */
-    /* The 'volatile' is a workaround for an optimiser bug
+    /* The 'VOL' (expanding to 'volatile') is a workaround for an optimiser bug
      * in Solaris Studio 12.3. See RT #127455 */
-    volatile IV fence = 0;          /* Position of where most recent undealt-
+    VOL IV fence = 0;               /* Position of where most recent undealt-
                                        with left paren in stack is; -1 if none.
                                      */
     STRLEN len;                     /* Temporary */

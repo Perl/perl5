@@ -4939,7 +4939,7 @@ void
 Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 {
     SV *atsv;
-    volatile const line_t oldline = PL_curcop ? CopLINE(PL_curcop) : 0;
+    VOL const line_t oldline = PL_curcop ? CopLINE(PL_curcop) : 0;
     CV *cv;
     STRLEN len;
     int ret;
