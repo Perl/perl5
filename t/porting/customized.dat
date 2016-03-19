@@ -52,5 +52,5 @@ Scalar-List-Utils cpan/Scalar-List-Utils/t/product.t 99bf424804f055b99ff2a18b7dc
 Socket cpan/Socket/Socket.pm 98e38176d745c38282907f391c077298f5a3d0ba
 Socket cpan/Socket/Socket.xs edd4fed212785f11c5c2095a75941dad27d586d9
 autodie cpan/autodie/t/mkdir.t 9e70d2282a3cc7d76a78bf8144fccba20fb37dac
-version cpan/version/lib/version.pm c25428bcfe61db6ce0c264b3916d8ee7980c398c
-version vutil.c 8162dcb371f65863161f4e7f5513d2ebf4285f99
+version cpan/version/lib/version.pm ff75e2076be10bd4c05133cd979fda0b38ca8653
+version vutil.c 6d7f036a394f25a3a5b4a4a1dafd2eba4ebc67e3

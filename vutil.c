@@ -901,7 +901,6 @@ Perl_vnormal(pTHX_ SV *vs)
 #endif
 {
     I32 i, len, digit;
-    bool alpha = FALSE;
     SV *sv;
     AV *av;
 
@@ -911,9 +910,6 @@ Perl_vnormal(pTHX_ SV *vs)
     vs = VVERIFY(vs);
     if ( ! vs )
 	Perl_croak(aTHX_ "Invalid version object");
-
-    if ( hv_exists(MUTABLE_HV(vs), "alpha", 5 ) )
-	alpha = TRUE;
 
     av = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(vs), "version", FALSE)));
 
@@ -1003,8 +999,6 @@ Perl_vcmp(pTHX_ SV *lhv, SV *rhv)
 {
     SSize_t i,l,m,r;
     I32 retval;
-    bool lalpha = FALSE;
-    bool ralpha = FALSE;
     I32 left = 0;
     I32 right = 0;
     AV *lav, *rav;
@@ -1019,13 +1013,9 @@ Perl_vcmp(pTHX_ SV *lhv, SV *rhv)
 
     /* get the left hand term */
     lav = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(lhv), "version", FALSE)));
-    if ( hv_exists(MUTABLE_HV(lhv), "alpha", 5 ) )
-	lalpha = TRUE;
 
     /* and the right hand term */
     rav = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(rhv), "version", FALSE)));
-    if ( hv_exists(MUTABLE_HV(rhv), "alpha", 5 ) )
-	ralpha = TRUE;
 
     l = av_len(lav);
     r = av_len(rav);
