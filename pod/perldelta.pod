@@ -2,9 +2,6 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file.  Any text flagged as XXX needs
-to be processed before release. ]
-
 perldelta - what is new for perl v5.23.9
 
 =head1 DESCRIPTION
@@ -14,10 +11,6 @@ release.
 
 If you are upgrading from an earlier release such as 5.23.7, first read
 L<perl5238delta>, which describes differences between 5.23.7 and 5.23.8.
-
-=head1 Notice
-
-XXX Any important notices here
 
 =head1 Core Enhancements
 
@@ -30,67 +23,27 @@ successfully, an exception is raised.
 
 =head1 Security
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
+=head2 Remove duplicate environment variables from C<environ>
 
-[ List each security issue as a =head2 entry ]
+Previously, if an environment variable appeared more than once in
+C<environ[]>, C<%ENV> would contain the last entry for that name,
+while a typical C<getenv()> would return the first entry. We now
+make sure C<%ENV> contains the same as what C<getenv> returns.
 
-=head1 Incompatible Changes
+Second, we remove duplicates from C<environ[]>, so if a setting
+with that name is set in C<%ENV> we won't pass an unsafe value
+to a child process.
 
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
-
-[ List each incompatible change as a =head2 entry ]
-
-=head1 Deprecations
-
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-
-=head2 Module removals
-
-XXX Remove this section if inapplicable.
-
-The following modules will be removed from the core distribution in a
-future release, and will at that time need to be installed from CPAN.
-Distributions on CPAN which require these modules will need to list them as
-prerequisites.
-
-The core versions of these modules will now issue C<"deprecated">-category
-warnings to alert you to this fact.  To silence these deprecation warnings,
-install the modules in question from CPAN.
-
-Note that these are (with rare exceptions) fine modules that you are encouraged
-to continue to use.  Their disinclusion from core primarily hinges on their
-necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
-not usually on concerns over their design.
-
-=over
-
-=item XXX
-
-XXX Note that deprecated modules should be listed here even if they are listed
-as an updated module in the L</Modules and Pragmata> section.
-
-=back
-
-[ List each other deprecation as a =head2 entry ]
+[CVE-2016-2381]
 
 =head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here.
-There may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
 
 =over 4
 
 =item *
 
-XXX
+The number of calls to C<add_cp_to_invlist> has been reduced. This
+optimizes the compilation of inverted character classes.
 
 =back
 
@@ -141,178 +94,59 @@ XXX
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
-=head2 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
-
 =head2 Changes to Existing Documentation
 
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
-
-=head3 L<XXX>
+=head3 L<perlfunc>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
-
-=back
-
-=head1 Diagnostics
-
-The following additions or changes have been made to diagnostic output,
-including warnings and fatal error messages.  For the complete list of
-diagnostic messages, see L<perldiag>.
-
-XXX New or changed warnings emitted by the core's C<C> code go here.  Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
-=head2 New Diagnostics
-
-XXX Newly added diagnostic messages go under here, separated into New Errors
-and New Warnings
-
-=head3 New Errors
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
-
-=head3 New Warnings
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
-
-=head2 Changes to Existing Diagnostics
-
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
-=over 4
-
-=item *
-
-XXX Describe change here
-
-=back
-
-=head1 Utility Changes
-
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go here.
-Most of these are built within the directory F<utils>.
-
-[ List utility changes as a =head2 entry for each utility and =item
-entries for each change
-Use L<XXX> with program names to get proper documentation linking. ]
-
-=head2 L<XXX>
-
-=over 4
-
-=item *
-
-XXX
+The L<perlfunc> manual page got a cleanup: there's more consistency now
+(in POD usage, grammar, code examples), better practices in code examples
+(use of C<my>, removal of bareword filehandles, dropped usage of C<&>
+when calling subroutines, ...), etc.
 
 =back
 
 =head1 Configuration and Compilation
 
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as a =item entry ].
-
 =over 4
 
 =item *
 
-Dtrace builds now build sucessfully on systems with a newer dtrace
+Dtrace builds now build successfully on systems with a newer dtrace
 that require an input object file that uses the probes in the F<.d>
 file.
 
 Previously the probe would fail and cause a build failure. [perl
 #122287]
 
-=back
+=item *
 
-=head1 Testing
-
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarizing, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
-
-=over 4
+F<installman> no longer warns if a module doesn't contain documentation,
+as this isn't actually an error. Now missing documentation will only
+be reported when using the B<--verbose> switch, and if it does, the
+missing documentation will be reported on C<STDOUT> instead of C<STDERR>.
 
 =item *
 
-XXX
+The B<u> option to the C<ar> command was removed. This was redundant
+anyway, and on some systems, it caused a warning.
+
+=item *
+
+Added F<Configure> probes for C<newlocale>, C<freelocale>, and C<uselocale>.
+
+=item *
+
+Fix up dtrace compile/link for Solaris. [perl #127543]
 
 =back
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not.  These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
 =head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
 
 =over 4
 
@@ -354,26 +188,17 @@ possible confusion over which error variable to check.
 
 =head1 Internal Changes
 
-XXX Changes which affect the interface available to C<XS> code go here.  Other
-significant internal changes for future core maintainers should be noted as
-well.
-
-[ List each change as a =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+New method C<av_tindex_nomg>. This is like C<av_tindex>, but does not
+handle magic. It's undocumented and not part of the official API for now --
+it may disappear if it turns out not to be a good idea.
 
 =back
 
 =head1 Selected Bug Fixes
-
-XXX Important bug fixes in the core language are summarized here.  Bug fixes in
-files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
-
-[ List each fix as a =item entry ]
 
 =over 4
 
@@ -402,39 +227,85 @@ A case has been fixed in which malformed UTF-8 in the source of a Perl
 script caused an assertion failure instead of an error message. [perl
 #127262]
 
-=back
+=item *
 
-=head1 Known Problems
+Fixed a buffer overrun issue in F<Socked.xs> which was reported by Coverity.
+[CPAN #111707]
 
-XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
-tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
-platform specific bugs also go here.
+=item * 
 
-[ List each fix as a =item entry ]
-
-=over 4
+Fixed a possible division by 0 error in C<Scalar::List::Utils::product>
+(reported by Coverity). [CPAN #105415]
 
 =item *
 
-XXX
-
-=back
-
-=head1 Errata From Previous Releases
-
-=over 4
+Fixed the issue where a C<< s///r >>) with B<< -DPERL_NO_COW >> attempts
+to modify the source SV, resulting in the program dying. [perl #127635]
 
 =item *
 
-XXX Add anything here that we forgot to add, or were mistaken about, in
-the perldelta of a previous release.
+Fixed a spurious warning about posix character classes. [perl #127581]
+
+=item *
+
+Fixed an obscure case where a pattern could fail to match. This only 
+occurred when matching characters from the set of C1 controls, when
+the target matched string was in UTF-8, and only on EBCDIC platforms.
+
+=item *
+
+Fixed over eager warnings for C<< /[.foo.]/ >>.
+
+This prevents Perl from warning about constructs like C<< /[.].*[.]/ >>.
+[perl #127582, #127604]
+
+=item *
+
+Narrow the filename check in F<strict.pm> and F<warnings.pm>. Previously,
+it assumed that if the filename (without the F<.pmc?> extension) differed
+from the package name, if was a misspelled use statement (i.e. C<use Strict>
+instead of C<use strict>). We now check whether there's really a 
+miscapitalization happening, and not another issue.
+
+=item *
+
+Turn an assertion into a more user friendly failure when parsing
+regexes. [perl #127599]
+
+=item *
+
+Correctly raise an error when trying to compile patterns with 
+unterminated character classes while there are trailing backslashes.
+[perl #126141].
+
+=item *
+
+Added a guard against malformed UTF-8. [perl #127262]
+
+=item *
+
+Only test C<semctl> if we have everything needed to use it. In a FreeBSD
+the C<semctl> entry point may exist, but it can be disabled by policy.
+[perl #127533]
+
+=item *
+
+Handle C<NOTHING> regops and C<EXACTFU_SS> regops in C<make_trie> properly.
+[perl #126206]
+
+=item *
+
+Fix a Solaris optimiser bug which prevented certain regular expression
+to be compiled. [perl #127455]
+
+=item *
+
+Improved the detection of infinite recursion in regular expressions.
+Previously, perl would in certain cases slowly consume resources until
+finally running out of memory. [perl #126182]
+
 
 =back
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
 
 =head1 Acknowledgements
 
