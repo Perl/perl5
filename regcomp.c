@@ -20039,14 +20039,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
             /* And this flag for matching all non-ASCII 0xFF and below */
             if (flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)
             {
-                if (invert) {
-                    not_utf8 = _new_invlist(0);
-                }
-                else {
-                    not_utf8 = invlist_clone(PL_UpperLatin1);
-                }
-                inverting_allowed = FALSE;  /* XXX needs more work to be able
-                                               to allow this */
+                not_utf8 = invlist_clone(PL_UpperLatin1);
             }
         }
         else if (OP(node) == ANYOFL) {
@@ -20148,6 +20141,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
          * conditional code points, so that when inverted, they will be gone
          * from it */
         _invlist_union(only_utf8, invlist, &invlist);
+        _invlist_union(not_utf8, invlist, &invlist);
         _invlist_union(only_utf8_locale, invlist, &invlist);
         _invlist_invert(invlist);
         _invlist_intersection(invlist, PL_InBitmap, &invlist);
