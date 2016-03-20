@@ -4,7 +4,7 @@ use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use Module::CoreList::TieHashDelta;
 use version;
-$VERSION = '5.20160228';
+$VERSION = '5.20160320';
 
 sub _released_order {   # Sort helper, to make '?' sort after everything else
     (substr($released{$a}, 0, 1) eq "?")
@@ -290,7 +290,7 @@ sub changes_between {
     5.023006 => '2015-12-21',
     5.023007 => '2016-01-20',
     5.023008 => '2016-02-20',
-    5.023009 => '????-??-??',
+    5.023009 => '2016-03-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -12313,13 +12313,50 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     5.023009 => {
         delta_from => 5.023008,
         changed => {
+            'Amiga::ARexx'          => '0.04',
+            'Amiga::Exec'           => '0.02',
             'B::Op_private'         => '5.023009',
+            'Carp'                  => '1.40',
+            'Carp::Heavy'           => '1.40',
             'Config'                => '5.023009',
-            'Module::CoreList'      => '5.20160221',
-            'Module::CoreList::TieHashDelta'=> '5.20160221',
-            'Module::CoreList::Utils'=> '5.20160221',
+            'Errno'                 => '1.25',
+            'ExtUtils::Embed'       => '1.33',
+            'File::Find'            => '1.34',
+            'File::Glob'            => '1.26',
+            'File::Spec::AmigaOS'   => ';.64',
+            'IPC::Msg'              => '2.06_01',
+            'IPC::Semaphore'        => '2.06_01',
+            'IPC::SharedMem'        => '2.06_01',
+            'IPC::SysV'             => '2.06_01',
+            'List::Util'            => '1.42_02',
+            'List::Util::XS'        => '1.42_02',
+            'Module::CoreList'      => '5.20160320',
+            'Module::CoreList::TieHashDelta'=> '5.20160320',
+            'Module::CoreList::Utils'=> '5.20160320',
+            'POSIX'                 => '1.64',
+            'Pod::Functions'        => '1.10',
+            'Pod::Functions::Functions'=> '1.10',
+            'Scalar::Util'          => '1.42_02',
+            'SelfLoader'            => '1.23',
+            'Socket'                => '2.020_03',
+            'Storable'              => '2.56',
+            'Sub::Util'             => '1.42_02',
+            'Thread::Queue'         => '3.08',
+            'Tie::File'             => '1.02',
+            'Time::HiRes'           => '1.9732',
+            'Win32API::File'        => '0.1203',
+            'Win32API::File::inc::ExtUtils::Myconst2perl'=> '1',
+            'XS::APItest'           => '0.80',
+            'autouse'               => '1.11',
+            'bytes'                 => '1.05',
+            'strict'                => '1.11',
+            'threads'               => '2.06',
+            'version'               => '0.9916',
+            'version::regex'        => '0.9916',
+            'warnings'              => '1.36',
         },
         removed => {
+            'Win32API::File::ExtUtils::Myconst2perl'=> 1,
         }
     },
 );
@@ -13360,7 +13397,7 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'Unicode::Normalize'    => 'cpan',
     'Win32'                 => 'cpan',
     'Win32API::File'        => 'cpan',
-    'Win32API::File::ExtUtils::Myconst2perl'=> 'cpan',
+    'Win32API::File::inc::ExtUtils::Myconst2perl'=> 'cpan',
     'autodie'               => 'cpan',
     'autodie::Scope::Guard' => 'cpan',
     'autodie::Scope::GuardStack'=> 'cpan',
@@ -13767,7 +13804,7 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'Unicode::Normalize'    => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Unicode-Normalize',
     'Win32'                 => undef,
     'Win32API::File'        => undef,
-    'Win32API::File::ExtUtils::Myconst2perl'=> undef,
+    'Win32API::File::inc::ExtUtils::Myconst2perl'=> undef,
     'autodie'               => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=autodie',
     'autodie::Scope::Guard' => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=autodie',
     'autodie::Scope::GuardStack'=> 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=autodie',

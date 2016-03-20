@@ -644,6 +644,7 @@ Check those files over carefully:
 =head4 Bump version in Module::CoreList F<Changes>
 
 Also edit Module::CoreList's new version number in its F<Changes> file.
+This file is F<dist/Module-CoreList/Changes>.
 
 =head4 Add Module::CoreList version bump to perldelta
 

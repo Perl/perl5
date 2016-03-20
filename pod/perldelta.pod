@@ -48,46 +48,116 @@ Less peak memory is now used when compiling regular expression patterns.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<autouse> has been upgraded from version 1.08 to 1.11.
+
+=item *
+
+L<bytes> has been upgraded from version 1.04 to 1.05.
+
+=item *
+
+L<Carp> has been upgraded from version 1.38 to 1.40.
+
+C<longmess> now returns the error in scalar context. [CPAN #107225]
+
+=item *
+
+L<Errno> has been upgraded from version 1.24 to 1.25.
+
+It now exports Winsock error constants.
+
+=item *
+
+L<ExtUtils::Embed> has been upgraded from version 1.32 to 1.33.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.33 to 1.34.
+
+=item *
+
+L<File::Glob> has been upgraded from version 1.25 to 1.26.
+
+=item *
+
+L<IPC::SysV> has been upgraded from version 2.05 to 2.06_01.
+
+=item *
+
+L<List::Util> has been upgraded from version 1.42_01 to 1.42_02.
 
 =item *
 
 L<Module::CoreList> has been upgraded from version 5.20160121 to
-5.20160221.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
+5.20160320.
 
 =item *
 
-XXX
+L<Pod::Functions> has been upgraded from version 1.09 to 1.10.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.63 to 1.64.
+
+It now exports Winsock error constants.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.42_01 to 1.42_02.
+
+=item *
+
+L<SelfLoader> has been upgraded from version 1.22 to 1.23.
+
+=item *
+
+L<Socket> has been upgraded from version 2.020_02 to 2.020_03.
+
+=item *
+
+L<Storable> has been upgraded from version 2.55 to 2.56.
+
+=item *
+
+L<strict> has been upgraded from version 1.10 to 1.11.
+
+Narrowed the filename check.
+
+=item *
+
+L<Thread::Queue> has been upgraded from version 3.07 to 3.08.
+
+=item *
+
+L<threads> has been upgraded from version 2.05 to 2.06.
+
+=item *
+
+L<Tie::File> has been upgraded from version 1.01 to 1.02.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9730 to 1.9732.
+
+=item *
+
+L<version> has been upgraded from version 0.9909 to 0.9916.
+
+=item *
+
+L<warnings> has been upgraded from version 1.35 to 1.36.
+
+Narrowed the filename check.
+
+=item *
+
+L<Win32API::File> has been upgraded from version 0.1202 to 0.1203.
 
 =back
 
@@ -296,9 +366,34 @@ finally running out of memory. [perl #126182]
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.23.9 represents approximately 4 weeks of development since Perl 5.23.8
+and contains approximately 21,000 lines of changes across 230 files from 23
+authors.
 
-  perl Porting/acknowledgements.pl v5.23.8..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 8,500 lines of changes to 120 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.23.9:
+
+Abigail, Alex Vandiver, Andy Broad, Aristotle Pagaltzis, Chris 'BinGOs'
+Williams, Craig A. Berry, Dagfinn Ilmari Mannsåker, Daniel Dragan, David
+Mitchell, Father Chrysostomos, H.Merijn Brand, Jarkko Hietaniemi, John Peacock,
+Karl Williamson, Leon Timmermans, Lukas Mai, Matthew Horsfall, Ricardo Signes,
+Sawyer X, Shlomi Fish, Steve Hay, Tony Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
