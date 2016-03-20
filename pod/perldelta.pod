@@ -186,18 +186,6 @@ possible confusion over which error variable to check.
 
 =back
 
-=head1 Internal Changes
-
-=over 4
-
-=item *
-
-New method C<av_tindex_nomg>. This is like C<av_tindex>, but does not
-handle magic. It's undocumented and not part of the official API for now --
-it may disappear if it turns out not to be a good idea.
-
-=back
-
 =head1 Selected Bug Fixes
 
 =over 4
