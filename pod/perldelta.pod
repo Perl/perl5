@@ -42,8 +42,7 @@ to a child process.
 
 =item *
 
-The number of calls to C<add_cp_to_invlist> has been reduced. This
-optimizes the compilation of inverted character classes.
+Less peak memory is now used when compiling regular expression patterns.
 
 =back
 
