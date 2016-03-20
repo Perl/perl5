@@ -17,6 +17,44 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.23.9 - Tom Kitchin, "from nature to plate"
+
+L<Announced on 2016-03-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2016/03/msg235251.html>
+
+Spring
+
+Spring is the proper beginning of my kitchen and a season that I
+look forward to with great anticipation. By the time spring arrives
+I am desperate to welcome all the spring produce into my kitchen
+and I long to work with fresh green vegetables again. As much as I
+love root vegetables, such as celeriac and parsnips, and the heaver
+meat and game dishes, I'm ready to leave those behind with winter
+and begin a new adventure.
+
+Somehow spring always gives me a little bit of bounce in my feet
+-- I feel like I want to kick off my shoes and dance around in my
+kitchen. Not that I do, of course, but I feel lighter somehow. My
+adrenalin kicks in with spring and so does the level of excitement,
+as I think about all the produce that is about to come in.
+
+The moment spring arrives I'm eager to cook peas, broad beans, green
+asparagus and other fresh vegetables! I want to create lighter,
+brighter dishes and I can't wait to get my hands on the first greens
+and the first morels, not to mention the first wild Scottish salmon.
+Thanks to my network of trusted suppliers, I always get to first
+produce of the season delivered to my restaurant as soon as it is
+possible. I want my customers to experience and understand the
+beauty of locally grown produce and to try things the minute they
+are available so they can taste how incredibly fresh the ingredients
+are. I also want them to understand the relationship between
+seasonality and flavours. One of the most important things to
+remember is to allow the seasons to inspire your dishes and help
+you make natural matches. Wild spring herbs, such as sorrel, sweet
+cicely and wild garlic, as well as spring salad leaves and green
+lettuce served with wild salmon, wild sea trout, lamb or rabbit are
+marriages made in heaven.
+
+
 =head2 v5.23.8 - Patrick Rothfuss, "The Wise Man's Fear (The Kingkiller's Chronicle: Day Two)"
 
 Denna, on the other hand, had never been trained. She knew nothing
