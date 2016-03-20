@@ -3875,10 +3875,7 @@ PP(pp_ucfirst)
     /* We may be able to get away with changing only the first character, in
      * place, but not if read-only, etc.  Later we may discover more reasons to
      * not convert in-place. */
-    inplace = !SvREADONLY(source)
-	   && (  SvPADTMP(source)
-	      || (  SvTEMP(source) && !SvSMAGICAL(source)
-		 && SvREFCNT(source) == 1));
+    inplace = !SvREADONLY(source) && SvPADTMP(source);
 
     /* First calculate what the changed first character should be.  This affects
      * whether we can just swap it out, leaving the rest of the string unchanged,
@@ -4118,9 +4115,7 @@ PP(pp_uc)
 
     SvGETMAGIC(source);
 
-    if ((SvPADTMP(source)
-	 ||
-	(SvTEMP(source) && !SvSMAGICAL(source) && SvREFCNT(source) == 1))
+    if (   SvPADTMP(source)
 	&& !SvREADONLY(source) && SvPOK(source)
 	&& !DO_UTF8(source)
 	&& (
@@ -4377,10 +4372,7 @@ PP(pp_lc)
 
     SvGETMAGIC(source);
 
-    if (   (  SvPADTMP(source)
-	   || (  SvTEMP(source) && !SvSMAGICAL(source)
-	      && SvREFCNT(source) == 1  )
-	   )
+    if (   SvPADTMP(source)
 	&& !SvREADONLY(source) && SvPOK(source)
 	&& !DO_UTF8(source)) {
 
