@@ -840,7 +840,7 @@ use File::Glob qw(:case);
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20160121.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20160320.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
@@ -976,7 +976,7 @@ use File::Glob qw(:case);
     },
 
     'podlators' => {
-        'DISTRIBUTION' => 'RRA/podlators-4.06.tar.gz',
+        'DISTRIBUTION' => 'RRA/podlators-4.07.tar.gz',
         'FILES'        => q[cpan/podlators pod/perlpodstyle.pod],
 
         'MAP' => {
