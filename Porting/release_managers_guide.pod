@@ -429,16 +429,15 @@ You may also need to regen opcodes:
 
  $ ./perl -Ilib regen/opcode.pl
 
-You may have to add stub entries in C<%Module::CoreList::version>,
-C<%Module::CoreList::deprecated> and C<%Module::CoreList::Utils::delta>.
-If so, you must up their version numbers as well.
-
 Test your changes:
 
  $ git clean -xdf   # careful if you don't have local files to keep!
  $ ./Configure -des -Dusedevel
  $ make
  $ make test
+
+Do note that at this stage, porting tests will fail. They will continue
+to fail until you've updated Module::CoreList, as described below.
 
 Commit your changes:
 
