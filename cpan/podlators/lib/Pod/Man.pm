@@ -43,7 +43,7 @@ BEGIN {
 
 @ISA = qw(Pod::Simple);
 
-$VERSION = '4.06';
+$VERSION = '4.07';
 
 # Set the debugging level.  If someone has inserted a debug function into this
 # class already, use that.  Otherwise, use any Pod::Simple debug function
@@ -147,9 +147,18 @@ sub new {
     delete $$self{errors};
 
     # Degrade back to non-utf8 if Encode is not available.
+    #
+    # Suppress the warning message when PERL_CORE is set, indicating this is
+    # running as part of the core Perl build.  Perl builds podlators (and all
+    # pure Perl modules) before Encode and other XS modules, so Encode won't
+    # yet be available.  Rely on the Perl core build to generate man pages
+    # later, after all the modules are available, so that UTF-8 handling will
+    # be correct.
     if ($$self{utf8} and !$HAS_ENCODE) {
-        carp ('utf8 mode requested but Encode module not available,'
-              . ' falling back to non-utf8');
+        if (!$ENV{PERL_CORE}) {
+            carp ('utf8 mode requested but Encode module not available,'
+                    . ' falling back to non-utf8');
+        }
         delete $$self{utf8};
     }
 
@@ -676,10 +685,11 @@ sub switchquotes {
         # to Roman rather than the actual previous font when used in headings.
         # troff output may still be broken, but at least we can fix nroff by
         # just switching the font changes to the non-fixed versions.
-        $nroff =~ s/\Q$$self{FONTS}{100}\E(.*?)\\f[PR]/$1/g;
-        $nroff =~ s/\Q$$self{FONTS}{101}\E(.*?)\\f([PR])/\\fI$1\\f$2/g;
-        $nroff =~ s/\Q$$self{FONTS}{110}\E(.*?)\\f([PR])/\\fB$1\\f$2/g;
-        $nroff =~ s/\Q$$self{FONTS}{111}\E(.*?)\\f([PR])/\\f\(BI$1\\f$2/g;
+        my $font_end = "(?:\\f[PR]|\Q$$self{FONTS}{100}\E)";
+        $nroff =~ s/\Q$$self{FONTS}{100}\E(.*?)\\f([PR])/$1/g;
+        $nroff =~ s/\Q$$self{FONTS}{101}\E(.*?)$font_end/\\fI$1\\fP/g;
+        $nroff =~ s/\Q$$self{FONTS}{110}\E(.*?)$font_end/\\fB$1\\fP/g;
+        $nroff =~ s/\Q$$self{FONTS}{111}\E(.*?)$font_end/\\f\(BI$1\\fP/g;
 
         # Now finally output the command.  Bother with .ie only if the nroff
         # and troff output aren't the same.
@@ -854,44 +864,49 @@ sub devise_title {
     }
 
     # If the section isn't 3, then the name defaults to just the basename of
-    # the file.  Otherwise, assume we're dealing with a module.  We want to
-    # figure out the full module name from the path to the file, but we don't
-    # want to include too much of the path into the module name.  Lose
-    # anything up to the first off:
-    #
-    #     */lib/*perl*/         standard or site_perl module
-    #     */*perl*/lib/         from -Dprefix=/opt/perl
-    #     */*perl*/             random module hierarchy
-    #
-    # which works.  Also strip off a leading site, site_perl, or vendor_perl
-    # component, any OS-specific component, and any version number component,
-    # and strip off an initial component of "lib" or "blib/lib" since that's
-    # what ExtUtils::MakeMaker creates.  splitdir requires at least File::Spec
-    # 0.8.
+    # the file.
     if ($section !~ /^3/) {
         require File::Basename;
         $name = uc File::Basename::basename ($name);
     } else {
         require File::Spec;
         my ($volume, $dirs, $file) = File::Spec->splitpath ($name);
+
+        # Otherwise, assume we're dealing with a module.  We want to figure
+        # out the full module name from the path to the file, but we don't
+        # want to include too much of the path into the module name.  Lose
+        # anything up to the first of:
+        #
+        #     */lib/*perl*/         standard or site_perl module
+        #     */*perl*/lib/         from -Dprefix=/opt/perl
+        #     */*perl*/             random module hierarchy
+        #
+        # Also strip off a leading site, site_perl, or vendor_perl component,
+        # any OS-specific component, and any version number component, and
+        # strip off an initial component of "lib" or "blib/lib" since that's
+        # what ExtUtils::MakeMaker creates.
+        #
+        # splitdir requires at least File::Spec 0.8.
         my @dirs = File::Spec->splitdir ($dirs);
-        my $cut = 0;
-        my $i;
-        for ($i = 0; $i < @dirs; $i++) {
-            if ($dirs[$i] =~ /perl/) {
-                $cut = $i + 1;
-                $cut++ if ($dirs[$i + 1] && $dirs[$i + 1] eq 'lib');
-                last;
+        if (@dirs) {
+            my $cut = 0;
+            my $i;
+            for ($i = 0; $i < @dirs; $i++) {
+                if ($dirs[$i] =~ /perl/) {
+                    $cut = $i + 1;
+                    $cut++ if ($dirs[$i + 1] && $dirs[$i + 1] eq 'lib');
+                    last;
+                }
             }
+            if ($cut > 0) {
+                splice (@dirs, 0, $cut);
+                shift @dirs if ($dirs[0] =~ /^(site|vendor)(_perl)?$/);
+                shift @dirs if ($dirs[0] =~ /^[\d.]+$/);
+                shift @dirs if ($dirs[0] =~ /^(.*-$^O|$^O-.*|$^O)$/);
+            }
+            shift @dirs if $dirs[0] eq 'lib';
+            splice (@dirs, 0, 2) if ($dirs[0] eq 'blib' && $dirs[1] eq 'lib');
         }
-        if ($cut > 0) {
-            splice (@dirs, 0, $cut);
-            shift @dirs if ($dirs[0] =~ /^(site|vendor)(_perl)?$/);
-            shift @dirs if ($dirs[0] =~ /^[\d.]+$/);
-            shift @dirs if ($dirs[0] =~ /^(.*-$^O|$^O-.*|$^O)$/);
-        }
-        shift @dirs if $dirs[0] eq 'lib';
-        splice (@dirs, 0, 2) if ($dirs[0] eq 'blib' && $dirs[1] eq 'lib');
 
         # Remove empty directories when building the module name; they
         # occur too easily on Unix by doubling slashes.
@@ -1877,6 +1892,13 @@ option was set to C<die>.
 
 =over 4
 
+=item PERL_CORE
+
+If set and Encode is not available, silently fall back to non-UTF-8 mode
+without complaining to standard error.  This environment variable is set
+during Perl core builds, which build Encode after podlators.  Encode is
+expected to not (yet) be available in that case.
+
 =item POD_MAN_DATE
 
 If set, this will be used as the value of the left-hand footer unless the
@@ -1962,7 +1984,7 @@ mine).
 =head1 COPYRIGHT AND LICENSE
 
 Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
-2009, 2010, 2012, 2013, 2014, 2015 Russ Allbery <rra@cpan.org>
+2009, 2010, 2012, 2013, 2014, 2015, 2016 Russ Allbery <rra@cpan.org>
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.

@@ -2,8 +2,8 @@
 #
 # Additional specialized tests for Pod::Man.
 #
-# Copyright 2002, 2003, 2004, 2006, 2007, 2008, 2009, 2010, 2012, 2013, 2014
-#     Russ Allbery <rra@cpan.org>
+# Copyright 2002, 2003, 2004, 2006, 2007, 2008, 2009, 2010, 2012, 2013, 2014,
+#     2016 Russ Allbery <rra@cpan.org>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -19,7 +19,7 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 34;
+use Test::More tests => 35;
 BEGIN { use_ok ('Pod::Man') }
 
 # Test whether we can use binmode to set encoding.
@@ -564,4 +564,31 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\s0
+###
+
+###
+=head1 Fixed-width Fonts in =item
+
+The nroff portion should not use fixed-width fonts.  In podlators 4.06 and
+earlier, italic was terminated with \f(CW, which didn't properly stop italic.
+
+=over 2
+
+=item C<tar I<option>... [I<name>]...>
+
+=item C<tar I<letter>... [I<argument>]... [I<option>]... [I<name>]...>
+
+=back
+###
+.SH "Fixed-width Fonts in =item"
+.IX Header "Fixed-width Fonts in =item"
+The nroff portion should not use fixed-width fonts.  In podlators 4.06 and
+earlier, italic was terminated with \ef(\s-1CW,\s0 which didn't properly stop italic.
+.ie n .IP """tar \fIoption\fP... [\fIname\fP]...""" 2
+.el .IP "\f(CWtar \f(CIoption\f(CW... [\f(CIname\f(CW]...\fR" 2
+.IX Item "tar option... [name]..."
+.PD 0
+.ie n .IP """tar \fIletter\fP... [\fIargument\fP]... [\fIoption\fP]... [\fIname\fP]...""" 2
+.el .IP "\f(CWtar \f(CIletter\f(CW... [\f(CIargument\f(CW]... [\f(CIoption\f(CW]... [\f(CIname\f(CW]...\fR" 2
+.IX Item "tar letter... [argument]... [option]... [name]..."
 ###
