@@ -6050,7 +6050,7 @@ static const char* atos_parse(const char* p,
     *source_name_size = source_name_end - p;
     if (grok_atoUV(source_number_start, &uv,  &source_line_end)
         && source_line_end == close_paren
-        && uv <= MAX_STRLEN
+        && uv <= PERL_INT_MAX
     ) {
         *source_line = (STRLEN)uv;
         return p;
