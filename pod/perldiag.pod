@@ -7095,8 +7095,21 @@ space.
 
 =item Warning: unable to close filehandle %s properly: %s
 
-(S io) An error occurred when Perl implicitly closed a filehandle.  This
-usually indicates your file system ran out of disk space.
+(S io) Prior to version 5.22.0, perl silently ignored any errors when
+doing an implicit close of a filehandle, I<i.e.> where the reference count
+of the filehandle reached zero and the user's code hadn't already called
+<close(); for example,
+
+    {
+        open my $fh, '>', $file  or die "open: '$file': $!\n";
+        print $fh $data or die "print: $!";
+    } # implicit close here
+
+Due to buffering, in a situation such as disk full the error may only be
+detected during the final close, so not checking the result of the close
+is dangerous.
+
+So perl now warns in such situations.
 
 =item Warning: Use of "%s" without parentheses is ambiguous
 
