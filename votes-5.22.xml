@@ -6,9 +6,6 @@
 
 <commit votes="steveh" id="e1ccd2206d2572b12ff2ad8efe6b1370c580898f" ticket="126981" desc="Enforce strict 'subs' in multideref optimisation"/>
 
-(steveh: This doesn't apply cleanly. I've asked khw for assistance:)
-<commit votes="steveh, tux" id="ac33c516140ee213a8a20ada506f97b3a7776ae4" ticket="127537" desc="PATCH: [perl 127537] /\W/ regression with UTF-8"/>
-
 </div>
 
 <div><h2>Other Proposed Cherry-Picks</h2>
