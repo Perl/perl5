@@ -13,7 +13,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including 389f4c1ef819a38480243c17f0b35a2f088cd855 (harmonize S_dump_exec_pos()'s last arg type)
+Blead changes have been examined up to and including a66bda92c7bdd515ba8b572a123e215718a89f10 (List perl.develop-help.com in the RMG regarding smoke reports.)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -69,6 +69,10 @@ The same criteria apply to code in dual-life modules as to core code.)
 (steveh: These two don't apply cleanly and I'm inclined to leave them out unless somebody wants to prepare a version applicable to maint:)
 <commit votes="steveh" id="99fff99d79aa793bf9a6e0ce2bb18ced085ad1e2" ticket="127619" desc="util.c: make my_mem*/my_b* prototypes more like the originals"/>
 <commit votes="steveh" id="af4291a85942657772fedc3db017e89100bd916a" ticket="127619" desc="make building without memcpy work (RT #127619)"/>
+
+<commit votes="jhi, steveh" id="99315af872aaf23d9620b68b29cdc34181bf06c7" ticket="127764" desc="[perl #127764] Perl with '-Dusecbacktrace' doesn't compile on darwin"/>
+<commit votes="steveh" id="0632167b5a653661f48c9e38df6aa76b544d4079" ticket="" desc="Configure: gcc 5 exists."/>
+<commit votes="jhi, steveh" id="4732711e2548b6d734ca831d65dbcf501a89774e" ticket="" desc="Remove nm from libswanted"/>
 
 </div>
 
