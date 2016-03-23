@@ -68,7 +68,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 <commit votes="steveh" id="af4291a85942657772fedc3db017e89100bd916a" ticket="127619" desc="make building without memcpy work (RT #127619)"/>
 
 <commit votes="jhi, steveh" id="99315af872aaf23d9620b68b29cdc34181bf06c7" ticket="127764" desc="[perl #127764] Perl with '-Dusecbacktrace' doesn't compile on darwin"/>
-<commit votes="steveh" id="0632167b5a653661f48c9e38df6aa76b544d4079" ticket="" desc="Configure: gcc 5 exists."/>
+<commit votes="steveh, jhi" id="0632167b5a653661f48c9e38df6aa76b544d4079" ticket="" desc="Configure: gcc 5 exists."/>
 <commit votes="jhi, steveh" id="4732711e2548b6d734ca831d65dbcf501a89774e" ticket="" desc="Remove nm from libswanted"/>
 
 </div>
