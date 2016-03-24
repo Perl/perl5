@@ -37,7 +37,8 @@ sub BEGIN {
 use Storable qw(dclone freeze thaw);
 use Hash::Util qw(lock_hash unlock_value lock_keys);
 use Config;
-use Test::More tests => ($Config{usecperl} ? 105 : 304);
+$Storable::DEBUGME = $ENV{STORABLE_DEBUGME};
+use Test::More tests => (!$Storable::DEBUGME && $Config{usecperl} ? 105 : 304);
 
 my %hash = (question => '?', answer => 42, extra => 'junk', undef => undef);
 lock_hash %hash;
@@ -124,7 +125,7 @@ for $Storable::canonical (0, 1) {
 # broken again with cperl PERL_PERTURB_KEYS_TOP.
 SKIP: {
     skip "TODO restricted Storable hashes broken with PERL_PERTURB_KEYS_TOP", 1
-         if $Config{usecperl};
+         if !$Storable::DEBUGME && $Config{usecperl};
     for my $n (1..100) {
         my @keys = map { "FOO$_" } (1..$n);
 

@@ -87,7 +87,7 @@
 #  define SvTRULYREADONLY(sv)	(SvREADONLY(sv) && !SvIsCOW(sv))
 #endif
 
-#ifdef DEBUGME
+#ifdef DEBUGGING
 
 #ifndef DASSERT
 #define DASSERT
@@ -2367,7 +2367,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 #ifdef HAS_HASH_KEY_FLAGS
                              || HvHASKFLAGS(hv)
 #endif
-                                ) ? 1 : 0);
+                            ) ? 1 : 0);
         unsigned char hash_flags = (SvREADONLY(hv) ? SHV_RESTRICTED : 0);
 
         if (flagged_hash) {
@@ -2388,8 +2388,8 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
         } else {
             PUTMARK(SX_HASH);
         }
-	WLEN(len);
-	TRACEME(("size = %d", len));
+        WLEN(len);
+        TRACEME(("size = %d, used = %d", len, (int)HvUSEDKEYS(hv)));
 
 	/*
 	 * Save possible iteration state via each() on that table.
@@ -2402,8 +2402,8 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 	/*
 	 * Now store each item recursively.
 	 *
-     * If canonical is defined to some true value then store each
-     * key/value pair in sorted order otherwise the order is random.
+         * If canonical is defined to some true value then store each
+         * key/value pair in sorted order otherwise the order is random.
 	 * Canonical order is irrelevant when a deep clone operation is performed.
 	 *
 	 * Fetch the value from perl only once per store() operation, and only
@@ -2421,27 +2421,20 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 		 * mortal array, sort the array and then run through the
 		 * array.  
 		 */
-
 		AV *av = newAV();
-
-                /*av_extend (av, len);*/
+                av_extend (av, len);
 
 		TRACEME(("using canonical order"));
 
 		for (i = 0; i < len; i++) {
 #ifdef HAS_RESTRICTED_HASHES
-			HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
+                        HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
 #else
-			HE *he = hv_iternext(hv);
+                        HE *he = hv_iternext(hv);
 #endif
-			SV *key;
-
-			if (!he)
-				CROAK(("Hash %p inconsistent - expected %d keys, %dth is NULL", hv, (int)len, (int)i));
-			key = hv_iterkeysv(he);
-			av_store(av, AvFILLp(av)+1, key);	/* av_push(), really */
+			av_store(av, i, hv_iterkeysv(he));
 		}
-			
+
 		STORE_HASH_SORT;
 
 		for (i = 0; i < len; i++) {
@@ -2504,7 +2497,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
                         /* Implementation of restricted hashes isn't nicely
                            abstracted:  */
 			if ((hash_flags & SHV_RESTRICTED)
-			 && SvTRULYREADONLY(val)) {
+			    && SvTRULYREADONLY(val)) {
 				flags |= SHV_K_LOCKED;
 			}
 
@@ -5399,7 +5392,8 @@ static SV *retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 	SEEN_NN(hv, stash, 0);		/* Will return if table not allocated properly */
 	if (len == 0)
 		return (SV *) hv;	/* No data follow if table empty */
-	hv_ksplit(hv, len + 1);		/* pre-extend hash to save multiple splits */
+	TRACEME(("split %d", len+1));
+	hv_ksplit(hv, len+1);		/* pre-extend hash to save multiple splits */
 
 	/*
 	 * Now get each key/value pair in turn...
@@ -5488,7 +5482,8 @@ static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname)
     SEEN_NN(hv, stash, 0);		/* Will return if table not allocated properly */
     if (len == 0)
         return (SV *) hv;	/* No data follow if table empty */
-    hv_ksplit(hv, len + 1);		/* pre-extend hash to save multiple splits */
+    TRACEME(("split %d", len+1));
+    hv_ksplit(hv, len+1);	/* pre-extend hash to save multiple splits */
 
     /*
      * Now get each key/value pair in turn...
@@ -5809,7 +5804,8 @@ static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 	SEEN0_NN(hv, 0);		/* Will return if table not allocated properly */
 	if (len == 0)
 		return (SV *) hv;	/* No data follow if table empty */
-	hv_ksplit(hv, len + 1);		/* pre-extend hash to save multiple splits */
+	TRACEME(("split %d", len+1));
+	hv_ksplit(hv, len+1);		/* pre-extend hash to save multiple splits */
 
 	/*
 	 * Now get each key/value pair in turn...
