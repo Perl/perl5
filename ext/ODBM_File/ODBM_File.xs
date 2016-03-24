@@ -3,6 +3,10 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#if defined(PERL_IMPLICIT_SYS)
+#  undef open
+#  define open PerlLIO_open3
+#endif
 
 #ifdef I_DBM
 #  include <dbm.h>
