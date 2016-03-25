@@ -39,7 +39,7 @@ my %tables = (
 my %not_here = 
     map {$_ => 1} 
 (
- '8859-1.ucm', # default
+ '8859-1.ucm', 'cp1252.ucm', # default
  qw(cp037.ucm cp1026.ucm cp1047.ucm cp500.ucm cp875.ucm), # EBCDIC
  qw(cp932.ucm cp936.ucm cp949.ucm cp950.ucm),  # CJK
  );
