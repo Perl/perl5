@@ -300,10 +300,6 @@ my @death_only_under_strict = (
                      => 'Non-hex character {#} m/\x{ABCDEFG{#}}/',
     'm/[\x{ABCDEFG}]/' => 'Illegal hexadecimal digit \'G\' ignored',
                        => 'Non-hex character {#} m/[\x{ABCDEFG{#}}]/',
-    'm/[\N{}]/' => 'Ignoring zero length \\N{} in character class {#} m/[\\N{}{#}]/',
-                => 'Zero length \\N{} {#} m/[\\N{}{#}]/',
-    'm/\N{}/' => "",
-                => 'Zero length \\N{} {#} m/\\N{}{#}/',
     "m'[\\y]\\x{100}'" => 'Unrecognized escape \y in character class passed through {#} m/[\y{#}]\x{100}/',
                        => 'Unrecognized escape \y in character class {#} m/[\y{#}]\x{100}/',
     'm/[a-\d]\x{100}/' => 'False [] range "a-\d" {#} m/[a-\d{#}]\x{100}/',
@@ -716,6 +712,8 @@ for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") 
 
             {
                 $_ = "x";
+                #use feature 'unicode_eval';
+                #print STDERR __LINE__, ": ", "eval '$strict no warnings; $regex'", "\n";
                 eval "$strict no warnings; $regex";
             }
             if (is($@, "", "$strict $regex did not die")) {

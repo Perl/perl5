@@ -6231,6 +6231,12 @@ problems when being input or output, which is likely where this message
 came from.  If you really really know what you are doing you can turn
 off this warning by C<no warnings 'surrogate';>.
 
+=item Unknown charname '' is deprecated
+
+(D deprecated) You had a C<\N{}> with nothing between the braces.  This
+usage is deprecated, and will be made a syntax error in a future Perl
+version.
+
 =item Unknown charname '%s'
 
 (F) The name you used inside C<\N{}> is unknown to Perl.  Check the

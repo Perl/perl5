@@ -47,7 +47,10 @@ XXX For a release on a stable branch, this section aspires to be:
 
 =head1 Deprecations
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.
+=head2 \N{} with nothing between the braces is deprecated
+
+This had been illegal until v5.22, and will be illegal again in a future
+Perl version.
 
 =head2 Module removals
 

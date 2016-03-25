@@ -2518,8 +2518,11 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
 
     PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME;
 
-    if (!SvCUR(res))
+    if (!SvCUR(res)) {
+        Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+                       "Unknown charname '' is deprecated");
         return res;
+    }
 
     if (UTF && ! is_utf8_string_loc((U8 *) backslash_ptr,
                                      e - backslash_ptr,

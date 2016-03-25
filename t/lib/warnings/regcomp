@@ -1,6 +1,7 @@
   regcomp.c	These tests have been moved to t/re/reg_mesg.t
 		except for those that explicitly test line numbers
-                and those that don't have a <-- HERE in them, and those that die plus have warnings
+                and those that don't have a <-- HERE in them, and those that
+                die plus have warnings, or otherwise require special handling
 
 __END__
 use warnings 'regexp';
@@ -80,3 +81,40 @@ eval {/$_/}, print "$_ ==> ", $@ || "OK!\n" for "]]]]]]]]][\\", "]]]]][\\"
 EXPECT
 ]]]]]]]]][\ ==> Unmatched [ in regex; marked by <-- HERE in m/]]]]]]]]][\ <-- HERE / at - line 2.
 ]]]]][\ ==> Unmatched [ in regex; marked by <-- HERE in m/]]]]][\ <-- HERE / at - line 2.
+########
+# NAME [perl #123417]
+use warnings 'regexp';
+qr/[\N{}]/;
+qr/\N{}/;
+no warnings 'regexp';
+qr/[\N{}]/;
+qr/\N{}/;
+no warnings 'deprecated';
+qr/[\N{}]/;
+qr/\N{}/;
+EXPECT
+Unknown charname '' is deprecated at - line 2.
+Ignoring zero length \N{} in character class in regex; marked by <-- HERE in m/[\N{} <-- HERE ]/ at - line 2.
+Unknown charname '' is deprecated at - line 3.
+Unknown charname '' is deprecated at - line 5.
+Unknown charname '' is deprecated at - line 6.
+########
+# NAME [perl #123417]
+# OPTION fatal
+use warnings 'regexp';
+no warnings 'experimental::re_strict';
+use re 'strict';
+qr/[\N{}]/;
+EXPECT
+Unknown charname '' is deprecated at - line 5.
+Zero length \N{} in regex; marked by <-- HERE in m/[\N{} <-- HERE ]/ at - line 5.
+########
+# NAME [perl #123417]
+# OPTION fatal
+use warnings 'regexp';
+no warnings 'experimental::re_strict';
+use re 'strict';
+qr/\N{}/;
+EXPECT
+Unknown charname '' is deprecated at - line 5.
+Zero length \N{} in regex; marked by <-- HERE in m/\N{} <-- HERE / at - line 5.

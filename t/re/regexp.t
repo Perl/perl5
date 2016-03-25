@@ -406,7 +406,7 @@ EOFCODE
 	    # Probably we should annotate specific tests with which warnings
 	    # categories they're known to trigger, and hence should be
 	    # disabled just for that test
-	    no warnings qw(uninitialized regexp);
+	    no warnings qw(uninitialized regexp deprecated);
 	    eval $code;
 	}
 	chomp( my $err = $@ );
