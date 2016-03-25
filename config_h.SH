@@ -4099,6 +4099,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_malloc_good_size HAS_MALLOC_GOOD_SIZE	/**/
 
+/* HAS_MEMMEM:
+ *	This symbol, if defined, indicates that the memmem routine is
+ *	available to return a pointer to the start of the first occurance
+ *	of a substring in a memory area (or NULL if not found).
+ */
+#$d_memmem HAS_MEMMEM		/**/
+
 /* HAS_MKDTEMP:
  *	This symbol, if defined, indicates that the mkdtemp routine is
  *	available to exclusively create a uniquely named temporary directory.

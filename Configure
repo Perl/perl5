@@ -654,6 +654,7 @@ d_mbtowc=''
 d_memchr=''
 d_memcmp=''
 d_memcpy=''
+d_memmem=''
 d_memmove=''
 d_memset=''
 d_mkdir=''
@@ -16353,6 +16354,10 @@ eval $inlibc
 set memcpy d_memcpy
 eval $inlibc
 
+: see if memmem exists
+set memmem d_memmem
+eval $inlibc
+
 : see if memmove exists
 set memmove d_memmove
 eval $inlibc
@@ -24494,6 +24499,7 @@ d_mbtowc='$d_mbtowc'
 d_memchr='$d_memchr'
 d_memcmp='$d_memcmp'
 d_memcpy='$d_memcpy'
+d_memmem='$d_memmem'
 d_memmove='$d_memmove'
 d_memset='$d_memset'
 d_mkdir='$d_mkdir'
