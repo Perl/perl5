@@ -183,6 +183,13 @@ is only needed on the day of the release or shortly afterwards.
 
 You will need a quotation to use as an epigraph to your release announcement.
 
+=head3 Install the previous version of perl
+
+During the testing phase of the release you have created, you will be
+asked to compare the installed files with a previous install. Save yourself
+some time on release day, and have a (clean) install of the previous
+version ready.
+
 =head2 Building a release - advance actions
 
 The work of building a release candidate for an even numbered release
