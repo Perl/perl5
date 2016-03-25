@@ -7109,10 +7109,10 @@ when its reference count reached zero while it was still open, e.g.:
         print $fh $data or die "print: $!";
     } # implicit close here
 
-Various errors may only be detected when a filehandle is closed, e.g. buffering
-may allow the C<print> in this example to succeed even though the disk is full,
-and this makes it necessary to check the result of a close(). So when the close()
-is implicit, perl will signal errors by warning.
+Because various errors may only be detected by close() (e.g. buffering could
+allow the C<print> in this example to return true even when the disk is full),
+it is dangerous to ignore its result. So when it happens implicitly, perl will
+signal errors by warning.
 
 B<Prior to version 5.22.0, perl ignored such errors>, so the common idiom shown
 above was liable to cause B<silent data loss>.
