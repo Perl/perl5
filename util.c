@@ -6252,14 +6252,14 @@ static void atos_symbolize(atos_context* ctx,
             char out[1024];
             UV cnt = fread(out, 1, sizeof(out), fp);
             if (cnt < sizeof(out)) {
-                const char* p = atos_parse(out + cnt, out,
+                const char* p = atos_parse(out + cnt - 1, out,
                                            source_name_size,
                                            source_line);
                 if (p) {
                     Newx(*source_name,
-                         *source_name_size + 1, char);
+                         *source_name_size, char);
                     Copy(p, *source_name,
-                         *source_name_size + 1,  char);
+                         *source_name_size,  char);
                 }
             }
             pclose(fp);
@@ -6384,14 +6384,15 @@ Perl_get_c_backtrace(pTHX_ int depth, int skip)
         for (i = skip; i < try_depth; i++) {
             Dl_info* dl_info = &dl_infos[i];
 
-            total_bytes += sizeof(Perl_c_backtrace_frame);
-
-            source_names[i] = NULL;
-            source_name_sizes[i] = 0;
-            source_lines[i] = 0;
-
             /* Yes, zero from dladdr() is failure. */
             if (dladdr(raw_frames[i], dl_info)) {
+                total_bytes += sizeof(Perl_c_backtrace_frame);
+
+                object_name_sizes[i] = 0;
+                source_names[i] = NULL;
+                source_name_sizes[i] = 0;
+                source_lines[i] = 0;
+
                 object_name_sizes[i] =
                     dl_info->dli_fname ? strlen(dl_info->dli_fname) : 0;
                 symbol_name_sizes[i] =
