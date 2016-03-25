@@ -7101,21 +7101,21 @@ space.
 
 =item Warning: unable to close filehandle %s properly: %s
 
-(S io) Prior to version 5.22.0, perl silently ignored any errors when
-doing an implicit close of a filehandle, I<i.e.> where the reference count
-of the filehandle reached zero and the user's code hadn't already called
-<close(); for example,
+(S io) There were errors during the implicit close() done on a filehandle
+when its reference count reached zero while it was still open, e.g.:
 
     {
         open my $fh, '>', $file  or die "open: '$file': $!\n";
         print $fh $data or die "print: $!";
     } # implicit close here
 
-Due to buffering, in a situation such as disk full the error may only be
-detected during the final close, so not checking the result of the close
-is dangerous.
+Various errors may only be detected when a filehandle is closed, e.g. buffering
+may allow the C<print> in this example to succeed even though the disk is full,
+and this makes it necessary to check the result of a close(). So when the close()
+is implicit, perl will signal errors by warning.
 
-So perl now warns in such situations.
+B<Prior to version 5.22.0, perl ignored such errors>, so the common idiom shown
+above was liable to cause B<silent data loss>.
 
 =item Warning: Use of "%s" without parentheses is ambiguous
 
