@@ -88,6 +88,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Documentation Fixes</h3>
 
+<commit votes="steveh, jkeenan" id="1802421e7ca37d5f22605a97946d04b9b2375b43" ticket="127783" desc="Add 's' and 'S' to list of ANSI C portable filename characters."/>
+
 </div>
 
 </data>
