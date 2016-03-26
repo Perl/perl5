@@ -2166,7 +2166,8 @@ S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie,
         }
     }
 
-    Perl_re_printf( aTHX_  "\n%*sState+-",depth+1 );
+    Perl_re_printf( aTHX_ "\n");
+    Perl_re_indentf( aTHX_  "State+-", depth+1 );
 
     for( charid=0 ; charid < trie->uniquecharcount ; charid++ ) {
         Perl_re_printf( aTHX_  "%.*s", colwidth,"--------");
