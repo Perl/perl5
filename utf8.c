@@ -1118,7 +1118,7 @@ on the first byte of character or just after the last byte of a character.
 */
 
 U8 *
-Perl_utf8_hop(const U8 *s, I32 off)
+Perl_utf8_hop(const U8 *s, SSize_t off)
 {
     PERL_ARGS_ASSERT_UTF8_HOP;
 
