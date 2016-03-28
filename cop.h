@@ -1055,8 +1055,8 @@ typedef struct stackinfo PERL_SI;
 	}								\
     } STMT_END
 
-#define IN_PERL_COMPILETIME	(PL_curcop == &PL_compiling)
-#define IN_PERL_RUNTIME		(PL_curcop != &PL_compiling)
+#define IN_PERL_COMPILETIME	cBOOL(PL_curcop == &PL_compiling)
+#define IN_PERL_RUNTIME		cBOOL(PL_curcop != &PL_compiling)
 
 
 

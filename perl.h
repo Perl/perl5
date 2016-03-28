@@ -5275,7 +5275,7 @@ EXTCONST char *const PL_phase_names[];
 /* Do not use this macro. It only exists for extensions that rely on PL_dirty
  * instead of using the newer PL_phase, which provides everything PL_dirty
  * provided, and more. */
-#  define PL_dirty (PL_phase == PERL_PHASE_DESTRUCT)
+#  define PL_dirty cBOOL(PL_phase == PERL_PHASE_DESTRUCT)
 
 #  define PL_amagic_generation PL_na
 #endif /* !PERL_CORE */
