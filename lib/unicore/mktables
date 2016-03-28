@@ -5430,6 +5430,15 @@ sub trace { return main::trace(@_); }
     # used to override calculations.
     main::set_access('format', \%format, 'r', 'p_s');
 
+    my %has_dependency;
+    # A boolean that gives whether some other table in this property is
+    # defined as the complement of this table.  This is a crude, but currently
+    # sufficient, mechanism to make this table not get destroyed before what
+    # is dependent on it is.  Other dependencies could be added, so the name
+    # was chosen to reflect a more general situation than actually is
+    # currently the case.
+    main::set_access('has_dependency', \%has_dependency, 'r', 's');
+
     sub new {
         # All arguments are key => value pairs, which you can see below, most
         # of which match fields documented above.  Otherwise: Re_Pod_Entry,
@@ -5485,6 +5494,7 @@ sub trace { return main::trace(@_); }
         $note{$addr} = [ ];
         $file_path{$addr} = [ ];
         $locked{$addr} = "";
+        $has_dependency{$addr} = 0;
 
         push @{$description{$addr}}, $description if $description;
         push @{$note{$addr}}, $note if $note;
@@ -8168,6 +8178,15 @@ sub trace { return main::trace(@_); }
         }
         my $addr = do { no overloading; pack 'J', $self; };
         $complement{$addr} = $other;
+
+        # Be sure the other property knows we are depending on them; or the
+        # other table if it is one in the current property.
+        if ($self->property != $other->property) {
+            $other->property->set_has_dependency(1);
+        }
+        else {
+            $other->set_has_dependency(1);
+        }
         $self->lock;
         return;
     }
@@ -8754,6 +8773,15 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
     main::set_access('pre_declared_maps',
                                     \%pre_declared_maps, 'r', 's');
 
+    my %has_dependency;
+    # A boolean that gives whether some table somewhere is defined as the
+    # complement of a table in this property.  This is a crude, but currently
+    # sufficient, mechanism to make this property not get destroyed before
+    # what is dependent on it is.  Other dependencies could be added, so the
+    # name was chosen to reflect a more general situation than actually is
+    # currently the case.
+    main::set_access('has_dependency', \%has_dependency, 'r', 's');
+
     sub new {
         # The only required parameter is the positionally first, name.  All
         # other parameters are key => value pairs.  See the documentation just
@@ -8792,6 +8820,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         $has_only_code_point_maps{$addr} = 1;
         $table_ref{$addr} = { };
         $unique_maps{$addr} = { };
+        $has_dependency{$addr} = 0;
 
         $map{$addr} = Map_Table->new($name,
                                     Full_Name => $full_name{$addr},
@@ -18558,8 +18587,16 @@ sub make_property_test_script() {
 
     # Sort these so get results in same order on different runs of this
     # program
-    foreach my $property (sort { $a->name cmp $b->name } property_ref('*')) {
-        foreach my $table (sort { $a->name cmp $b->name } $property->tables) {
+    foreach my $property (sort { $a->has_dependency <=> $b->has_dependency
+                                    or
+                                 lc $a->name cmp lc $b->name
+                               } property_ref('*'))
+    {
+        foreach my $table (sort { $a->has_dependency <=> $b->has_dependency
+                                    or
+                                  lc $a->name cmp lc $b->name
+                                } $property->tables)
+        {
 
             # Find code points that match, and don't match this table.
             my $valid = $table->get_valid_code_point;
