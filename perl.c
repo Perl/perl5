@@ -3150,6 +3150,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
       "  M  trace smart match resolution\n"
       "  B  dump suBroutine definitions, including special Blocks like BEGIN\n",
       "  L  trace some locale setting information--for Perl core development\n",
+      "  i  trace PerlIO layer processing\n",
       NULL
     };
     UV uv = 0;
@@ -3158,7 +3159,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 
     if (isALPHA(**s)) {
 	/* if adding extra options, remember to update DEBUG_MASK */
-	static const char debopts[] = "psltocPmfrxuUHXDSTRJvCAqMBL";
+	static const char debopts[] = "psltocPmfrxuUHXDSTRJvCAqMBLi";
 
 	for (; isWORDCHAR(**s); (*s)++) {
 	    const char * const d = strchr(debopts,**s);
