@@ -352,6 +352,8 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 #
 # trace ... if main::DEBUG && $to_trace;
 #
+# main::stack_trace() will display what its name implies
+#
 # If there is just one or a few files that you're debugging, you can easily
 # cause most everything else to be skipped.  Change the line
 #
@@ -614,6 +616,22 @@ our $to_trace = 0;
         print STDERR "$caller_name: " if $print_caller;
         print STDERR $output, "\n";
         return;
+    }
+}
+
+sub stack_trace() {
+    local $to_trace = 1 if main::DEBUG;
+    my $line = (caller(0))[2];
+    my $i = 1;
+
+    # Accumulate the stack trace
+    while (1) {
+        my ($pkg, $file, $caller_line, $caller) = caller $i++;
+
+        last unless defined $caller;
+
+        trace "called from $caller() at line $line";
+        $line = $caller_line;
     }
 }
 
