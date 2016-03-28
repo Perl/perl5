@@ -3640,7 +3640,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
    messages are inline with the regop output that created them.
 */
 #define REPORT_CODE_OFF 29
-#define INDENT_CHARS(depth) ((depth) % 20)
+#define INDENT_CHARS(depth) ((int)(depth) % 20)
 #ifdef DEBUGGING
 int
 Perl_re_exec_indentf(pTHX_ const char *fmt, U32 depth, ...)
@@ -3650,7 +3650,7 @@ Perl_re_exec_indentf(pTHX_ const char *fmt, U32 depth, ...)
     PerlIO *f= Perl_debug_log;
     PERL_ARGS_ASSERT_RE_EXEC_INDENTF;
     va_start(ap, depth);
-    PerlIO_printf(f, "%*s|%4d| %*s", REPORT_CODE_OFF, "", depth, INDENT_CHARS(depth), "" );
+    PerlIO_printf(f, "%*s|%4"UVuf"| %*s", REPORT_CODE_OFF, "", (UV)depth, INDENT_CHARS(depth), "" );
     result = PerlIO_vprintf(f, fmt, ap);
     va_end(ap);
     return result;
