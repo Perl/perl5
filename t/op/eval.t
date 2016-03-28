@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 133);
+plan(tests => 134);
 
 eval 'pass();';
 
@@ -652,4 +652,16 @@ pass("eval in freed package does not crash");
     $@ = 1;
     eval q{$@ = 2};
     ok(!$@, 'eval clearing $@');
+}
+
+# RT #127786
+# this used to give an assertion failure
+
+{
+    package DB {
+        sub f127786 { eval q/\$s/ }
+    }
+    my $s;
+    sub { $s; DB::f127786}->();
+    pass("RT #127786");
 }
