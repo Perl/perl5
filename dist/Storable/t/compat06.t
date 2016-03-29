@@ -20,8 +20,6 @@ use Test::More tests => 8;
 
 use Storable qw(freeze nfreeze thaw);
 
-$Storable::flags = Storable::FLAGS_COMPAT;
-
 package TIED_HASH;
 
 sub TIEHASH {

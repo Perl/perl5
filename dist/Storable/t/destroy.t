@@ -8,7 +8,7 @@ package foo;
 sub new { return bless {} }
 DESTROY {
   open FH, '<', "foo" or die $!;
-  eval { Storable::pretrieve(*FH, Storable::FLAGS_COMPAT()); };
+  eval { Storable::pretrieve(*FH); };
   close FH or die $!;
   unlink "foo";
 }
