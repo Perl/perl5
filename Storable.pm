@@ -1056,31 +1056,33 @@ compartment:
 B<Do not accept Storable documents from untrusted sources!>
 
 Some features of Storable can lead to security vulnerabilities if you
-accept Storable documents from untrusted sources. Most obviously, the
-optional (off by default) CODE reference serialization feature allows
-transfer of code to the deserializing process. Furthermore, any
-serialized object will cause Storable to helpfully load the module
-corresponding to the class of the object in the deserializing module.
-For manipulated module names, this can load almost arbitrary code.
-Finally, the deserialized object's destructors will be invoked when
-the objects get destroyed in the deserializing process. Maliciously
-crafted Storable documents may put such objects in the value of
-a hash key that is overridden by another key/value pair in the
-same hash, thus causing immediate destructor execution.
+accept Storable documents from untrusted sources with the default
+flags. Most obviously, the optional (off by default) CODE reference
+serialization feature allows transfer of code to the deserializing
+process. Furthermore, any serialized object will cause Storable to
+helpfully load the module corresponding to the class of the object in
+the deserializing module.  For manipulated module names, this can load
+almost arbitrary code.  Finally, the deserialized object's destructors
+will be invoked when the objects get destroyed in the deserializing
+process. Maliciously crafted Storable documents may put such objects
+in the value of a hash key that is overridden by another key/value
+pair in the same hash, thus causing immediate destructor execution.
 
-In a future version of Storable, we intend to provide options to disable
-loading modules for classes and to disable deserializing objects
-altogether. I<Nonetheless, Storable deserializing documents from
-untrusted sources is expected to have other, yet undiscovered,
-security concerns such as allowing an attacker to cause the deserializer
-to crash hard.>
+To disable blessing objects while thawing/retrieving remove the flag
+BLESS_OK = 2 from C<$Storable::flags> or set the 2nd argument for
+thaw/retrieve to 0.
 
-B<Therefore, let me repeat: Do not accept Storable documents from
-untrusted sources!>
+To disable tieing data while thawing/retrieving remove the flag TIE_OK
+= 4 from C<$Storable::flags> or set the 2nd argument for thaw/retrieve
+to 0.
+
+With the default setting of $Storable::flags = 6, creating or destroying
+random objects, even renamed objects can be controlled by an attacker.
+See CVE-2015-1592 and its metasploit module.
 
 If your application requires accepting data from untrusted sources, you
 are best off with a less powerful and more-likely safe serialization format
-and implementation. If your data is sufficiently simple, JSON is a good
+and implementation. If your data is sufficiently simple, JSON is the best
 choice and offers maximum interoperability.
 
 =head1 WARNING
@@ -1151,6 +1153,34 @@ problems when storing large unsigned integers that had never been converted
 to string or floating point.  In other words values that had been generated
 by integer operations such as logic ops and then not used in any string or
 arithmetic context before storing.
+
+=head2 Large data on 64-bit platforms
+
+Storable's current data format is incapable of representing lengths greater
+than fit into a signed 32-bit integer, or about 2 GB. In practice, this
+means that, even with the latest Perl and a 64-bit machine with plenty of
+memory, you cannot store, retrieve, or clone any of the following:
+
+=over 4
+
+=item *
+
+A string containing 2**31 or more bytes (including as an element of an array, or
+a key or value in a hash)
+
+=item *
+
+An array with 2**31 or more elements
+
+=item *
+
+A hash with 2**31 or more keys
+
+=back
+
+Attempting to do so will result in unpredicatable overflow results.
+
+This may be fixed in the future.
 
 =head2 64 bit data in perl 5.6.0 and 5.6.1
 
@@ -1226,6 +1256,8 @@ Thank you to (in chronological order):
 	Erik Haugan <erik@solbors.no>
 	Benjamin A. Holzman <ben.holzman@grantstreet.com>
 	Reini Urban <rurban@cpanel.net>
+	Todd Rinaldo <toddr@cpanel.net>
+	Aaron Crane <arc@cpan.org>
 
 for their bug reports, suggestions and contributions.
 
