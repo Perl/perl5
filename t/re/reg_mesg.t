@@ -268,6 +268,11 @@ my @death =
  '/(?[\ |!])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[\ |!{#}])/',    # [perl #126180]
  '/(?[()-!])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[()-!{#}])/',    # [perl #126204]
  '/(?[!()])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[!(){#}])/',      # [perl #126404]
+ '/abc/xix' => 'Only one /x regex modifier is allowed',
+ '/(?xmsixp:abc)/' => 'Only one /x regex modifier is allowed {#} m/(?xmsixp{#}:abc)/',
+ '/(?xmsixp)abc/' => 'Only one /x regex modifier is allowed {#} m/(?xmsixp{#})abc/',
+ '/(?xxxx:abc)/' => 'Only one /x regex modifier is allowed {#} m/(?xxxx{#}:abc)/',
+
 );
 
 # These are messages that are warnings when not strict; death under 'use re
@@ -618,10 +623,6 @@ my @deprecated = (
                  'Unescaped left brace in regex is deprecated, passed through {#} m/\q{{#}/'
                ],
     '/:{4,a}/' => 'Unescaped left brace in regex is deprecated, passed through {#} m/:{{#}4,a}/',
-    '/abc/xix' => 'Having more than one /x regexp modifier is deprecated',
-    '/(?xmsixp:abc)/' => 'Having more than one /x regexp modifier is deprecated',
-    '/(?xmsixp)abc/' => 'Having more than one /x regexp modifier is deprecated',
-    '/(?xxxx:abc)/' => 'Having more than one /x regexp modifier is deprecated',
 );
 
 for my $strict ("", "use re 'strict';") {

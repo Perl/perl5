@@ -10233,8 +10233,9 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 if (RExC_flags & RXf_PMf_FOLD) {
                     RExC_contains_i = 1;
                 }
-                if (PASS2) {
-                    STD_PMMOD_FLAGS_PARSE_X_WARN(x_mod_count);
+
+                if (UNLIKELY((x_mod_count) > 1)) {
+                    vFAIL("Only one /x regex modifier is allowed");
                 }
                 return;
                 /*NOTREACHED*/

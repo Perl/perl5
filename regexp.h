@@ -287,13 +287,6 @@ and check for NULL.
     case XTENDED_PAT_MOD:   *(pmfl) |= RXf_PMf_EXTENDED; (x_count)++; break;\
     case NOCAPTURE_PAT_MOD: *(pmfl) |= RXf_PMf_NOCAPTURE; break;
 
-#define STD_PMMOD_FLAGS_PARSE_X_WARN(x_count)                                   \
-    if (UNLIKELY((x_count) > 1)) {                                              \
-        Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_REGEXP),         \
-                    "Having more than one /%c regexp modifier is deprecated",   \
-                    XTENDED_PAT_MOD);                                           \
-    }
-
 /* Note, includes charset ones, assumes 0 is the default for them */
 #define STD_PMMOD_FLAGS_CLEAR(pmfl)                        \
     *(pmfl) &= ~(RXf_PMf_FOLD|RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_EXTENDED|RXf_PMf_CHARSET|RXf_PMf_NOCAPTURE)

@@ -179,7 +179,7 @@ is qr//, '(?^:)', 'no re "/aai"';
 
   $w = "";
   eval "use re '/xamax'";
-  like $w, qr/Having more than one \/x regexp modifier is deprecated/,
-    "warning with eval \"use re \"/xamax\"";
+  like $@, qr/Only one \/x regex modifier is allowed/,
+    "error with eval \"use re \"/xamax\"";
 
 }

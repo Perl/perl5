@@ -41,6 +41,12 @@ v5.20.  This affects things like C<$I<\cT>>, where I<\cT> is a literal
 control (such as a C<NAK> or C<NEGATIVE ACKNOWLEDGE> character) in the
 source code.
 
+=head2 C<qr//xx> is no longer permissible
+
+Using more than one C</x> regular expression pattern modifier on a
+single pattern is now forbidden.  This is to allow a future enhancement
+to the language.  This usage has been deprecated since v5.22.
+
 =head2 C<NBSP> is no longer permissible in C<\N{...}>
 
 The name of a character may no longer contain non-breaking spaces.  It

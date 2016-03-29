@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.32";
+our $VERSION     = "0.33";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = ('regmust',
                     qw(is_regexp regexp_pattern
@@ -247,17 +247,9 @@ sub bits {
                        ")");
 	}
     }
-    if (exists $seen{'x'} && $seen{'x'} > 1
-        && (warnings::enabled("deprecated")
-            || warnings::enabled("regexp")))
-    {
-        my $message = "Having more than one /x regexp modifier is deprecated";
-        if (warnings::enabled("deprecated")) {
-            warnings::warn("deprecated", $message);
-        }
-        else {
-            warnings::warn("regexp", $message);
-        }
+    if (exists $seen{'x'} && $seen{'x'} > 1) {
+        require Carp;
+        Carp::croak("Only one /x regex modifier is allowed");
     }
 
     if ($turning_all_off) {

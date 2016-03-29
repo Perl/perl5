@@ -9248,7 +9248,9 @@ S_scan_pat(pTHX_ char *start, I32 type)
 		       "Use of /c modifier is meaningless without /g" );
     }
 
-    STD_PMMOD_FLAGS_PARSE_X_WARN(x_mod_count);
+    if (UNLIKELY((x_mod_count) > 1)) {
+        yyerror("Only one /x regex modifier is allowed");
+    }
 
     PL_lex_op = (OP*)pm;
     pl_yylval.ival = OP_MATCH;
@@ -9303,7 +9305,9 @@ S_scan_subst(pTHX_ char *start)
 	}
     }
 
-    STD_PMMOD_FLAGS_PARSE_X_WARN(x_mod_count);
+    if (UNLIKELY((x_mod_count) > 1)) {
+        yyerror("Only one /x regex modifier is allowed");
+    }
 
     if ((pm->op_pmflags & PMf_CONTINUE)) {
         Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), "Use of /c modifier is meaningless in s///" );
