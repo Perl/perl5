@@ -12,16 +12,16 @@ BEGIN {
         if $ENV{PERL_CORE} && $Config{'extensions'} !~ /\b Storable \b/x;
     plan skip_all => 'Need 64-bit pointers for this test'
         if $Config{ptrsize} < 8;
-    plan skip_all => 'Need ~4 GiB of core for this test'
+    plan skip_all => 'Need ~4 GiB memory for this test, set PERL_TEST_MEMORY > 4'
         if !$ENV{PERL_TEST_MEMORY} || $ENV{PERL_TEST_MEMORY} < 4;
 }
 
 # Just too big to fit in an I32.
 my $huge = int(2 ** 31);
 
-# For now, all of these should throw an exception. Actually storing and
-# retrieving them would require changing the serialisation format, and
-# that's a larger task than I'm looking to undertake right now.
+# These overlarge sizes are enabled only since Storable 3.00
+# and some cases need cperl support. Perl5 hash some internal problems
+# with >I32 sizes.
 my @cases = (
     ['huge string',
      sub { my $s = 'x' x $huge; \$s }],
@@ -39,10 +39,14 @@ my @cases = (
      sub { my $s = 'x' x $huge; +{ foo => $s } }],
 
     # Can't test hash with a huge key, because Perl internals currently
-    # limit hash keys to <2**31 anyway
+    # limit hash keys to <2**31 length.
+
+    # Only cperl can handle more than I32 hash keys due to limited iterator size.
+    ['huge hash',
+     sub { my %x = (0..0xffffffff); \%x }],
 );
 
-plan tests => scalar @cases;
+plan tests => 2 * scalar @cases;
 
 for (@cases) {
     my ($desc, $build) = @$_;
@@ -51,8 +55,14 @@ for (@cases) {
     note "running test: $desc";
     my ($exn, $clone);
     $exn = $@ if !eval { $clone = dclone($input); 1 };
-    like($exn, qr/^Storable cannot yet handle data that needs a 64-bit machine\b/,
-         "$desc: throw an exception, not a segfault or panic");
+    if ($Config{usecperl}) {
+        is($exn, '');
+        is($input, $clone);
+    } else {
+        like($exn, qr/^Storable cannot yet handle data that needs a 64-bit machine\b/,
+             "$desc: throw an exception, not a segfault or panic");
+        ok(1, "skip comparison");
+    }
 
     # Ensure the huge objects are freed right now:
     undef $input;

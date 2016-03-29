@@ -17,6 +17,7 @@ sub BEGIN {
     require 'st-dump.pl';
 }
 
+# $Storable::DEBUGME = 1;
 use Storable qw(store retrieve store_fd nstore_fd fd_retrieve);
 
 use Test::More tests => 25;
@@ -29,12 +30,12 @@ $c->{attribute} = 'attrval';
 @a = ('first', undef, 3, -4, -3.14159, 456, 4.5,
 	$b, \$a, $a, $c, \$c, \%a);
 
-isnt(store(\@a, 'store'), undef);
+isnt(store(\@a, "store$$"), undef);
 
 $dumped = &dump(\@a);
 isnt($dumped, undef);
 
-$root = retrieve('store');
+$root = retrieve("store$$");
 isnt($root, undef);
 
 $got = &dump($root);
@@ -42,7 +43,7 @@ isnt($got, undef);
 
 is($got, $dumped);
 
-1 while unlink 'store';
+1 while unlink "store$$";
 
 package FOO; @ISA = qw(Storable);
 
@@ -55,9 +56,9 @@ sub make {
 package main;
 
 $foo = FOO->make;
-isnt($foo->store('store'), undef);
+isnt($foo->store("store$$"), undef);
 
-isnt(open(OUT, '>>store'), undef);
+isnt(open(OUT, '>>', "store$$"), undef);
 binmode OUT;
 
 isnt(store_fd(\@a, ::OUT), undef);
@@ -66,7 +67,7 @@ isnt(nstore_fd(\%a, ::OUT), undef);
 
 isnt(close(OUT), undef);
 
-isnt(open(OUT, 'store'), undef);
+isnt(open(OUT, "store$$"), undef);
 
 $r = fd_retrieve(::OUT);
 isnt($r, undef);
@@ -112,4 +113,4 @@ isnt($@, '');
 }
 
 close OUT or die "Could not close: $!";
-END { 1 while unlink 'store' }
+END { 1 while unlink "store$$" }

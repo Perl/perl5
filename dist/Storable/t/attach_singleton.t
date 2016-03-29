@@ -22,8 +22,6 @@ sub BEGIN {
 use Test::More tests => 11;
 use Storable ();
 
-$Storable::flags = Storable::FLAGS_COMPAT;
-
 # Get the singleton
 my $object = My::Singleton->new;
 isa_ok( $object, 'My::Singleton' );

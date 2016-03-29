@@ -75,21 +75,13 @@ sub CLONE {
     Storable::init_perinterp();
 }
 
-sub BLESS_OK {
-    return 2;
-}
-
-sub TIE_OK {
-    return 4;
-}
-
-sub FLAGS_COMPAT {
-    return BLESS_OK | TIE_OK;
-}
+sub BLESS_OK     () { 2 }
+sub TIE_OK       () { 4 }
+sub FLAGS_COMPAT () { BLESS_OK | TIE_OK }
 
 # By default restricted hashes are downgraded on earlier perls.
 
-$Storable::flags = 6;
+$Storable::flags = FLAGS_COMPAT;
 $Storable::downgrade_restricted = 1;
 $Storable::accept_future_minor = 1;
 
@@ -371,7 +363,7 @@ sub _freeze {
 # will be blessed nor tied.
 #
 sub retrieve {
-    _retrieve($_[0], $_[1], 0);
+    _retrieve(shift, 0, @_);
 }
 
 #
@@ -380,16 +372,16 @@ sub retrieve {
 # Same as retrieve, but with advisory locking.
 #
 sub lock_retrieve {
-    _retrieve($_[0], $_[1], 1);
+    _retrieve(shift, 1, @_);
 }
 
 # Internal retrieve routine
 sub _retrieve {
-    my ($file, $flags, $use_locking) = @_;
+    my ($file, $use_locking, $flags) = @_;
     $flags = $Storable::flags unless defined $flags;
-    local *FILE;
-    open(FILE, "<", $file) || logcroak "can't open $file: $!";
-    binmode FILE;			# Archaic systems...
+    my $FILE;
+    open($FILE, "<", $file) || logcroak "can't open $file: $!";
+    binmode $FILE;			# Archaic systems...
     my $self;
     my $da = $@;			# Could be from exception handler
     if ($use_locking) {
@@ -398,11 +390,11 @@ sub _retrieve {
               "Storable::lock_store: fcntl/flock emulation broken on $^O";
             return undef;
         }
-        flock(FILE, LOCK_SH) || logcroak "can't get shared lock on $file: $!";
+        flock($FILE, LOCK_SH) || logcroak "can't get shared lock on $file: $!";
         # Unlocking will happen when FILE is closed
     }
-    eval { $self = pretrieve(*FILE, $flags) };		# Call C routine
-    close(FILE);
+    eval { $self = pretrieve($FILE, $flags) };		# Call C routine
+    close($FILE);
     logcroak $@ if $@ =~ s/\.?\n$/,/;
     $@ = $da;
     return $self;

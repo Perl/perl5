@@ -1,9 +1,10 @@
-/*
+/* -*-  indent-tabs-mode: t, c-basic-offset: 8 -*-
+ *
  *  Store and retrieve mechanism.
  *
  *  Copyright (c) 1995-2000, Raphael Manfredi
  *  Copyright (c) 2016, cPanel Inc
- *  
+ *
  *  You may redistribute only under the same terms as Perl 5, as specified
  *  in the README file that comes with the distribution.
  *
@@ -103,10 +104,10 @@
  */
 
 #define TRACEME(x)                                                      \
-    STMT_START {                                                        \
-	if (SvTRUE(perl_get_sv("Storable::DEBUGME", GV_ADD)))           \
-            { PerlIO_stdoutf x; PerlIO_stdoutf("\n"); }                 \
-    } STMT_END
+	STMT_START {							\
+	    if (SvTRUE(perl_get_sv("Storable::DEBUGME", GV_ADD)))	\
+		    { PerlIO_stdoutf x; PerlIO_stdoutf("\n"); }		\
+	} STMT_END
 #else
 #define TRACEME(x)
 #endif	/* DEBUGME */
@@ -116,7 +117,7 @@
     STMT_START {                                                        \
       if (!(x)) {                                                       \
 		PerlIO_stdoutf("ASSERT FAILED (\"%s\", line %d): ",	\
-                               __FILE__, (int)__LINE__);                \
+			       __FILE__, (int)__LINE__);                \
 		PerlIO_stdoutf y; PerlIO_stdoutf("\n");                 \
       }                                                                 \
     } STMT_END
@@ -163,6 +164,8 @@
 #define SX_LVSTRING	C(30)	/* vstring forthcoming (large) */
 #define SX_SVUNDEF_ELEM	C(31)	/* array element set to &PL_sv_undef */
 #define SX_ERROR	C(32)	/* Error */
+#define SX_LOBJECT	C(33)	/* Large object: string, array or hash (size >2G) */
+#define SX_LAST		C(34)	/* invalid. marker only */
 
 /*
  * Those are only used to retrieve "old" pre-0.6 binary images.
@@ -292,6 +295,9 @@ typedef unsigned long stag_t;	/* Used by pre-0.6 binary format */
 #define USE_PTR_TABLE
 #endif
 
+/* Needed for 32bit with lengths > 2G - 4G, and 64bit */
+#define HAS_U64
+
 /*
  * Fields s_tainted and s_dirty are prefixed with s_ because Perl's include
  * files remap tainted and dirty when threading is enabled.  That's bad for
@@ -311,7 +317,7 @@ typedef struct stcxt {
 	struct ptr_tbl *pseen;
 	/* Still need hseen for the 0.6 file format code. */
 #endif
-	HV *hseen;			
+	HV *hseen;
 	AV *hook_seen;		/* which SVs were returned by STORABLE_freeze() */
 	AV *aseen;		/* which objects have been seen, retrieve time */
 	IV where_is_undef;	/* index in aseen of PL_sv_undef */
@@ -323,16 +329,16 @@ typedef struct stcxt {
 	int netorder;		/* true if network order used */
 	int s_tainted;		/* true if input source is tainted, at retrieve time */
 	int forgive_me;		/* whether to be forgiving... */
-	int deparse;   		/* whether to deparse code refs */
+	int deparse;		/* whether to deparse code refs */
 	SV *eval;		/* whether to eval source code */
 	int canonical;		/* whether to store hashes sorted by key */
 #ifndef HAS_RESTRICTED_HASHES
-        int derestrict;         /* whether to downgrade restricted hashes */
+	int derestrict;		/* whether to downgrade restricted hashes */
 #endif
 #ifndef HAS_UTF8_ALL
-        int use_bytes;          /* whether to bytes-ify utf8 */
+	int use_bytes;		/* whether to bytes-ify utf8 */
 #endif
-        int accept_future_minor;/* croak immediately on future minor versions?  */
+	int accept_future_minor;/* croak immediately on future minor versions?  */
 	int s_dirty;		/* context is dirty due to CROAK() -- can be cleaned */
 	int membuf_ro;		/* true means membuf is read-only and msaved is rw */
 	struct extendable keybuf;	/* for hash key retrieval */
@@ -351,97 +357,97 @@ typedef struct stcxt {
 static int storable_free(pTHX_ SV *sv, MAGIC* mg);
 
 static MGVTBL vtbl_storable = {
-    NULL, /* get */
-    NULL, /* set */
-    NULL, /* len */
-    NULL, /* clear */
-    storable_free,
+	NULL, /* get */
+	NULL, /* set */
+	NULL, /* len */
+	NULL, /* clear */
+	storable_free,
 #ifdef MGf_COPY
-    NULL, /* copy */
+	NULL, /* copy */
 #endif
 #ifdef MGf_DUP
-    NULL, /* dup */
+	NULL, /* dup */
 #endif
 #ifdef MGf_LOCAL
-    NULL /* local */
+	NULL /* local */
 #endif
 };
 
 /* From Digest::MD5.  */
 #ifndef sv_magicext
 # define sv_magicext(sv, obj, type, vtbl, name, namlen)         \
-    THX_sv_magicext(aTHX_ sv, obj, type, vtbl, name, namlen)
+	THX_sv_magicext(aTHX_ sv, obj, type, vtbl, name, namlen)
 static MAGIC *THX_sv_magicext(pTHX_ SV *sv, SV *obj, int type,
-    MGVTBL const *vtbl, char const *name, I32 namlen)
+			      MGVTBL const *vtbl, char const *name, I32 namlen)
 {
-    MAGIC *mg;
-    if (obj || namlen)
-	/* exceeded intended usage of this reserve implementation */
-	return NULL;
-    Newxz(mg, 1, MAGIC);
-    mg->mg_virtual = (MGVTBL*)vtbl;
-    mg->mg_type = type;
-    mg->mg_ptr = (char *)name;
-    mg->mg_len = -1;
-    (void) SvUPGRADE(sv, SVt_PVMG);
-    mg->mg_moremagic = SvMAGIC(sv);
-    SvMAGIC_set(sv, mg);
-    SvMAGICAL_off(sv);
-    mg_magical(sv);
-    return mg;
+	MAGIC *mg;
+	if (obj || namlen)
+		/* exceeded intended usage of this reserve implementation */
+		return NULL;
+	Newxz(mg, 1, MAGIC);
+	mg->mg_virtual = (MGVTBL*)vtbl;
+	mg->mg_type = type;
+	mg->mg_ptr = (char *)name;
+	mg->mg_len = -1;
+	(void) SvUPGRADE(sv, SVt_PVMG);
+	mg->mg_moremagic = SvMAGIC(sv);
+	SvMAGIC_set(sv, mg);
+	SvMAGICAL_off(sv);
+	mg_magical(sv);
+	return mg;
 }
 #endif
 
 #define NEW_STORABLE_CXT_OBJ(cxt)					\
-    STMT_START {                                                        \
-	SV *self = newSV(sizeof(stcxt_t) - 1);                          \
-	SV *my_sv = newRV_noinc(self);					\
-	sv_magicext(self, NULL, PERL_MAGIC_ext, &vtbl_storable, NULL, 0); \
-	cxt = (stcxt_t *)SvPVX(self);					\
-	Zero(cxt, 1, stcxt_t);                                          \
-	cxt->my_sv = my_sv;                                             \
-  } STMT_END
+	STMT_START {							\
+		SV *self = newSV(sizeof(stcxt_t) - 1);			\
+		SV *my_sv = newRV_noinc(self);				\
+		sv_magicext(self, NULL, PERL_MAGIC_ext, &vtbl_storable, NULL, 0); \
+		cxt = (stcxt_t *)SvPVX(self);				\
+		Zero(cxt, 1, stcxt_t);					\
+		cxt->my_sv = my_sv;					\
+	} STMT_END
 
 #if defined(MULTIPLICITY) || defined(PERL_OBJECT) || defined(PERL_CAPI)
 
 #if (PATCHLEVEL <= 4) && (SUBVERSION < 68)
-#define dSTCXT_SV                                       \
+#define dSTCXT_SV					\
     SV *perinterp_sv = perl_get_sv(MY_VERSION, 0)
 #else	/* >= perl5.004_68 */
-#define dSTCXT_SV                                       \
-    SV *perinterp_sv = *hv_fetch(PL_modglobal,          \
-                                 MY_VERSION, sizeof(MY_VERSION)-1, TRUE)
+#define dSTCXT_SV							\
+	SV *perinterp_sv = *hv_fetch(PL_modglobal,			\
+				 MY_VERSION, sizeof(MY_VERSION)-1, TRUE)
 #endif	/* < perl5.004_68 */
 
-#define dSTCXT_PTR(T,name)                                              \
-    T name = ((perinterp_sv                                             \
-               && SvIOK(perinterp_sv) && SvIVX(perinterp_sv)            \
-               ? (T)SvPVX(SvRV(INT2PTR(SV*,SvIVX(perinterp_sv)))) : (T) 0))
-#define dSTCXT                                  \
-    dSTCXT_SV;                                  \
-    dSTCXT_PTR(stcxt_t *, cxt)
+#define dSTCXT_PTR(T,name)						\
+	T name = ((perinterp_sv					\
+		   && SvIOK(perinterp_sv) && SvIVX(perinterp_sv)	\
+		   ? (T)SvPVX(SvRV(INT2PTR(SV*,SvIVX(perinterp_sv)))) : (T) 0))
+#define dSTCXT					\
+	dSTCXT_SV;				\
+	dSTCXT_PTR(stcxt_t *, cxt)
 
-#define INIT_STCXT				\
-    dSTCXT;                                     \
-    NEW_STORABLE_CXT_OBJ(cxt);                  \
-    assert(perinterp_sv);                       \
-    sv_setiv(perinterp_sv, PTR2IV(cxt->my_sv))
+#define INIT_STCXT					\
+	dSTCXT;					\
+	NEW_STORABLE_CXT_OBJ(cxt);			\
+	assert(perinterp_sv);				\
+	sv_setiv(perinterp_sv, PTR2IV(cxt->my_sv))
 
-#define SET_STCXT(x)                            	\
-    STMT_START {                                        \
-	dSTCXT_SV;                                      \
-	sv_setiv(perinterp_sv, PTR2IV(x->my_sv));       \
-    } STMT_END
+#define SET_STCXT(x)					\
+	STMT_START {					\
+		dSTCXT_SV;				\
+		sv_setiv(perinterp_sv, PTR2IV(x->my_sv));\
+	} STMT_END
 
 #else /* !MULTIPLICITY && !PERL_OBJECT && !PERL_CAPI */
 
 static stcxt_t *Context_ptr = NULL;
 #define dSTCXT			stcxt_t *cxt = Context_ptr
 #define SET_STCXT(x)		Context_ptr = x
-#define INIT_STCXT						\
-    dSTCXT;                                                     \
-    NEW_STORABLE_CXT_OBJ(cxt);                                  \
-    SET_STCXT(cxt)
+#define INIT_STCXT				\
+	dSTCXT;				\
+	NEW_STORABLE_CXT_OBJ(cxt);		\
+	SET_STCXT(cxt)
 
 
 #endif /* MULTIPLICITY || PERL_OBJECT || PERL_CAPI */
@@ -492,11 +498,13 @@ static stcxt_t *Context_ptr = NULL;
 #if INTSIZE > 4
 #define oI(x)	((I32 *) ((char *) (x) + 4))
 #define oS(x)	((x) - 4)
+#define oL(x)	(x)
 #define oC(x)	(x = 0)
 #define CRAY_HACK
 #else
 #define oI(x)	(x)
 #define oS(x)	(x)
+#define oL(x)	(x)
 #define oC(x)
 #endif
 
@@ -505,23 +513,23 @@ static stcxt_t *Context_ptr = NULL;
  */
 #define kbuf	(cxt->keybuf).arena
 #define ksiz	(cxt->keybuf).asiz
-#define KBUFINIT()						\
-  STMT_START {							\
-      if (!kbuf) {						\
-          TRACEME(("** allocating kbuf of 128 bytes"));         \
-          New(10003, kbuf, 128, char);                          \
-          ksiz = 128;                                           \
-      }                                                         \
-  } STMT_END
-#define KBUFCHK(x)                                              \
-    STMT_START {                                                \
-	if (x >= ksiz) {                                        \
-            TRACEME(("** extending kbuf to %d bytes (had %d)",  \
-                     (int)(x+1), (int)ksiz));                   \
-            Renew(kbuf, x+1, char);                             \
-            ksiz = x+1;                                         \
-	}                                                       \
-  } STMT_END
+#define KBUFINIT()							\
+	STMT_START {							\
+		if (!kbuf) {						\
+			TRACEME(("** allocating kbuf of 128 bytes"));	\
+			New(10003, kbuf, 128, char);			\
+			ksiz = 128;					\
+		}							\
+	} STMT_END
+#define KBUFCHK(x)							\
+	STMT_START {							\
+		if (x >= ksiz) {					\
+			TRACEME(("** extending kbuf to %d bytes (had %d)", \
+				 (int)(x+1), (int)ksiz));		\
+			Renew(kbuf, x+1, char);			\
+			ksiz = x+1;					\
+		}							\
+	} STMT_END
 
 /*
  * memory buffer handling
@@ -541,19 +549,19 @@ static stcxt_t *Context_ptr = NULL;
 #define int_aligned(x)	\
 	((unsigned long) (x) == trunc_int(x))
 
-#define MBUF_INIT(x)                                               \
-    STMT_START {                                                   \
-	if (!mbase) {                                              \
-            TRACEME(("** allocating mbase of %d bytes", MGROW));   \
-            New(10003, mbase, (int)MGROW, char);                   \
-            msiz = (STRLEN)MGROW;				   \
-	}                                                          \
-	mptr = mbase;                                              \
-	if (x)							   \
-            mend = mbase + x;                                      \
-	else							   \
-            mend = mbase + msiz;                                   \
-    } STMT_END
+#define MBUF_INIT(x)							\
+	STMT_START {							\
+		if (!mbase) {						\
+			TRACEME(("** allocating mbase of %d bytes", MGROW)); \
+			New(10003, mbase, (int)MGROW, char);		\
+			msiz = (STRLEN)MGROW;				\
+		}							\
+		mptr = mbase;						\
+		if (x)							\
+			mend = mbase + x;				\
+		else							\
+			mend = mbase + msiz;				\
+	} STMT_END
 
 #define MBUF_TRUNC(x)	mptr = mbase + x
 #define MBUF_SIZE()	(mptr - mbase)
@@ -566,153 +574,159 @@ static stcxt_t *Context_ptr = NULL;
  * buffer into cxt->msaved, before MBUF_LOAD() can be used to retrieve
  * data from a string.
  */
-#define MBUF_SAVE_AND_LOAD(in)                                     \
-    STMT_START {                                                   \
-        ASSERT(!cxt->membuf_ro, ("mbase not already saved"));      \
-        cxt->membuf_ro = 1;                                        \
-        TRACEME(("saving mbuf"));                                  \
-        StructCopy(&cxt->membuf, &cxt->msaved, struct extendable); \
-        MBUF_LOAD(in);                                             \
-  } STMT_END
+#define MBUF_SAVE_AND_LOAD(in)						\
+	STMT_START {							\
+		ASSERT(!cxt->membuf_ro, ("mbase not already saved"));	\
+		cxt->membuf_ro = 1;					\
+		TRACEME(("saving mbuf"));				\
+		StructCopy(&cxt->membuf, &cxt->msaved, struct extendable); \
+		MBUF_LOAD(in);						\
+	} STMT_END
 
-#define MBUF_RESTORE()                                             \
-    STMT_START {                                                   \
-	ASSERT(cxt->membuf_ro, ("mbase is read-only"));            \
-	cxt->membuf_ro = 0;                                        \
-	TRACEME(("restoring mbuf"));                               \
-	StructCopy(&cxt->msaved, &cxt->membuf, struct extendable); \
-  } STMT_END
+#define MBUF_RESTORE()							\
+	STMT_START {							\
+		ASSERT(cxt->membuf_ro, ("mbase is read-only"));		\
+		cxt->membuf_ro = 0;					\
+		TRACEME(("restoring mbuf"));				\
+		StructCopy(&cxt->msaved, &cxt->membuf, struct extendable); \
+	} STMT_END
 
 /*
  * Use SvPOKp(), because SvPOK() fails on tainted scalars.
  * See store_scalar() for other usage of this workaround.
  */
-#define MBUF_LOAD(v)                                            \
-    STMT_START {                                                \
-	ASSERT(cxt->membuf_ro, ("mbase is read-only"));         \
-	if (!SvPOKp(v))						\
-            CROAK(("Not a scalar string"));                     \
-	mptr = mbase = SvPV(v, msiz);                           \
-	mend = mbase + msiz;                                    \
-    } STMT_END
+#define MBUF_LOAD(v)						\
+	STMT_START {						\
+		ASSERT(cxt->membuf_ro, ("mbase is read-only")); \
+		if (!SvPOKp(v))				\
+			CROAK(("Not a scalar string"));	\
+		mptr = mbase = SvPV(v, msiz);			\
+		mend = mbase + msiz;				\
+	} STMT_END
 
-#define MBUF_XTEND(x)                                           \
-    STMT_START {                                                \
-	int nsz = (int) round_mgrow((x)+msiz);                  \
-	int offset = mptr - mbase;                              \
-	ASSERT(!cxt->membuf_ro, ("mbase is not read-only"));    \
-	TRACEME(("** extending mbase from %d to %d bytes (wants %d new)", \
-                 (int)msiz, nsz, (int)(x)));                    \
-	Renew(mbase, nsz, char);                                \
-	msiz = nsz;                                             \
-	mptr = mbase + offset;                                  \
-	mend = mbase + nsz;                                     \
-  } STMT_END
+#define MBUF_XTEND(x)						\
+	STMT_START {						\
+		int nsz = (int) round_mgrow((x)+msiz);		\
+		int offset = mptr - mbase;			\
+		ASSERT(!cxt->membuf_ro, ("mbase is not read-only")); \
+		TRACEME(("** extending mbase from %d to %d bytes (wants %d new)", \
+			 (int)msiz, nsz, (int)(x)));			\
+		Renew(mbase, nsz, char);				\
+		msiz = nsz;						\
+		mptr = mbase + offset;					\
+		mend = mbase + nsz;					\
+	} STMT_END
 
-#define MBUF_CHK(x)                             \
-    STMT_START {                                \
-	if ((mptr + (x)) > mend)                \
-            MBUF_XTEND(x);			\
-    } STMT_END
+#define MBUF_CHK(x)				\
+	STMT_START {				\
+		if ((mptr + (x)) > mend)	\
+			MBUF_XTEND(x);		\
+	} STMT_END
 
-#define MBUF_GETC(x)                            \
-    STMT_START {                                \
-	if (mptr < mend)			\
-            x = (int) (unsigned char) *mptr++;  \
-	else					\
-            return (SV *) 0;                    \
-  } STMT_END
+#define MBUF_GETC(x)						\
+	STMT_START {						\
+		if (mptr < mend)				\
+			x = (int) (unsigned char) *mptr++;	\
+		else						\
+			return (SV *) 0;			\
+	} STMT_END
 
 #ifdef CRAY_HACK
-#define MBUF_GETINT(x) 				\
-    STMT_START {				\
-	oC(x);                                  \
-	if ((mptr + 4) <= mend) {		\
-            memcpy(oI(&x), mptr, 4);            \
-            mptr += 4;                          \
-	} else					\
-            return (SV *) 0;                    \
-  } STMT_END
+#define MBUF_GETINT(x)					\
+	STMT_START {					\
+		oC(x);					\
+		if ((mptr + 4) <= mend) {		\
+			memcpy(oI(&x), mptr, 4);	\
+			mptr += 4;			\
+		} else					\
+			return (SV *) 0;		\
+	} STMT_END
 #else
-#define MBUF_GETINT(x) 				\
-  STMT_START {					\
-      if ((mptr + sizeof(int)) <= mend) {       \
-          if (int_aligned(mptr))                \
-              x = *(int *) mptr;                \
-          else					\
-              memcpy(&x, mptr, sizeof(int));    \
-          mptr += sizeof(int);                  \
-      } else					\
-          return (SV *) 0;                      \
-  } STMT_END
+#define MBUF_GETINT(x)						\
+	STMT_START {						\
+		if ((mptr + sizeof(int)) <= mend) {		\
+			if (int_aligned(mptr))			\
+				x = *(int *) mptr;		\
+			else					\
+				memcpy(&x, mptr, sizeof(int));	\
+			mptr += sizeof(int);			\
+		} else						\
+			return (SV *) 0;			\
+	} STMT_END
 #endif
 
-#define MBUF_READ(x,s)                          \
-    STMT_START {                                \
-	if ((mptr + (s)) <= mend) {             \
-            memcpy(x, mptr, s);                 \
-            mptr += s;                          \
-	} else					\
-            return (SV *) 0;                    \
-    } STMT_END
+#define MBUF_READ(x,s)				\
+	STMT_START {				\
+		if ((mptr + (s)) <= mend) {	\
+			memcpy(x, mptr, s);	\
+			mptr += s;		\
+		} else				\
+			return (SV *) 0;	\
+	} STMT_END
 
-#define MBUF_SAFEREAD(x,s,z)                    \
-  STMT_START {					\
-      if ((mptr + (s)) <= mend) {               \
-          memcpy(x, mptr, s);                   \
-          mptr += s;                            \
-      } else {                                  \
-          sv_free(z);                           \
-          return (SV *) 0;                      \
-      }                                         \
-  } STMT_END
+#define MBUF_SAFEREAD(x,s,z)			\
+	STMT_START {				\
+		if ((mptr + (s)) <= mend) {	\
+			memcpy(x, mptr, s);	\
+			mptr += s;		\
+		} else {			\
+			sv_free(z);		\
+			return (SV *) 0;	\
+		}				\
+	} STMT_END
 
 #define MBUF_SAFEPVREAD(x,s,z)			\
-  STMT_START {					\
-      if ((mptr + (s)) <= mend) {		\
-          memcpy(x, mptr, s);                   \
-          mptr += s;                            \
-      } else {                                  \
-          Safefree(z);                          \
-          return (SV *) 0;                      \
-      }                                         \
-  } STMT_END
+	STMT_START {				\
+		if ((mptr + (s)) <= mend) {	\
+			memcpy(x, mptr, s);	\
+			mptr += s;		\
+		} else {			\
+			Safefree(z);		\
+			return (SV *) 0;	\
+		}				\
+	} STMT_END
 
-#define MBUF_PUTC(c)                            \
-    STMT_START {                                \
-	if (mptr < mend)			\
-            *mptr++ = (char) c;                 \
-	else {                                  \
-            MBUF_XTEND(1);			\
-            *mptr++ = (char) c;                 \
-	}                                       \
-  } STMT_END
+#define MBUF_PUTC(c)				\
+	STMT_START {				\
+		if (mptr < mend)		\
+			*mptr++ = (char) c;	\
+		else {				\
+			MBUF_XTEND(1);		\
+			*mptr++ = (char) c;	\
+		}				\
+	} STMT_END
 
 #ifdef CRAY_HACK
-#define MBUF_PUTINT(i)                          \
-  STMT_START {					\
-      MBUF_CHK(4);				\
-      memcpy(mptr, oI(&i), 4);                  \
-      mptr += 4;                                \
-  } STMT_END
+#define MBUF_PUTINT(i)				\
+	STMT_START {				\
+		MBUF_CHK(4);			\
+		memcpy(mptr, oI(&i), 4);	\
+		mptr += 4;			\
+	} STMT_END
 #else
 #define MBUF_PUTINT(i) 				\
-    STMT_START {                                \
-	MBUF_CHK(sizeof(int));			\
-	if (int_aligned(mptr))			\
-            *(int *) mptr = i;                  \
-	else					\
-            memcpy(mptr, &i, sizeof(int));      \
-	mptr += sizeof(int);                    \
-  } STMT_END
+	STMT_START {					\
+		MBUF_CHK(sizeof(int));			\
+		if (int_aligned(mptr))			\
+			*(int *) mptr = i;		\
+		else					\
+			memcpy(mptr, &i, sizeof(int));	\
+		mptr += sizeof(int);			\
+	} STMT_END
 #endif
 
-#define MBUF_WRITE(x,s)                         \
-  STMT_START {					\
-	MBUF_CHK(s);				\
-	memcpy(mptr, x, s);			\
-	mptr += s;                              \
-  } STMT_END
+#define MBUF_PUTLONG(l)			\
+	STMT_START {				\
+		MBUF_CHK(8);			\
+		memcpy(mptr, &l, 8);		\
+		mptr += 8;			\
+	} STMT_END
+#define MBUF_WRITE(x,s)			\
+	STMT_START {				\
+		MBUF_CHK(s);			\
+		memcpy(mptr, x, s);		\
+		mptr += s;			\
+	} STMT_END
 
 /*
  * Possible return values for sv_type().
@@ -776,7 +790,7 @@ static stcxt_t *Context_ptr = NULL;
  * flags to allow blessing and/or tieing data the data we load
  */
 #define FLAG_BLESS_OK 2
-#define FLAG_TIE_OK 4
+#define FLAG_TIE_OK   4
 
 /*
  * Before 0.6, the magic string was "perl-store" (binary version number 0).
@@ -859,7 +873,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #endif
 
 #define STORABLE_BIN_MAJOR	2		/* Binary major "version" */
-#define STORABLE_BIN_MINOR	10		/* Binary minor "version" */
+#define STORABLE_BIN_MINOR	11		/* Binary minor "version" */
 
 #if (PATCHLEVEL <= 5)
 #define STORABLE_BIN_WRITE_MINOR	4
@@ -870,7 +884,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #define STORABLE_BIN_WRITE_MINOR	8
 #elif PATCHLEVEL >= 19
 /* Perl 5.19 takes away the special meaning of PL_sv_undef in arrays. */
-#define STORABLE_BIN_WRITE_MINOR	10
+#define STORABLE_BIN_WRITE_MINOR	11
 #else
 #define STORABLE_BIN_WRITE_MINOR	9
 #endif /* (PATCHLEVEL <= 5) */
@@ -879,12 +893,23 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #define PL_sv_placeholder PL_sv_undef
 #endif
 
-#define MUST_FIT_IN_I32(x)                                              \
-    STMT_START {                                                        \
-        if ((UV)(x) > (UV)0x7fffffffu) {                                \
-            CROAK(("Storable cannot yet handle data that needs a 64-bit machine")); \
-        }                                                               \
-    } STMT_END
+#if IVSIZE > 4
+/* can read and write u64 */
+# define MUST_FIT_IN_I32(x)						\
+	STMT_START {							\
+		if ((UV)(x) > (UV)UINT64_MAX) {			\
+			CROAK(("Storable cannot yet handle overlong strings with len >2G")); \
+		}							\
+	} STMT_END
+#else
+# define MUST_FIT_IN_I32(x)						\
+	STMT_START {							\
+		if ((UV)(x) > (UV)0x7fffffffu) {			\
+			CROAK(("Storable cannot yet handle overlong strings with len >2G")); \
+		}							\
+	} STMT_END
+#endif
+#define  MUST_FIT_IN_UV(x) MUST_FIT_IN_I32(x)
 
 /*
  * Useful store shortcuts...
@@ -898,65 +923,101 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
  *     - samv 20Jan04
  */
 #define PUTMARK(x) 					\
-    STMT_START {                                        \
-	if (!cxt->fio)					\
-            MBUF_PUTC(x);				\
-	else if (PerlIO_putc(cxt->fio, x) == EOF)       \
-            return -1;					\
-  } STMT_END
+	STMT_START {					\
+		if (!cxt->fio)				\
+			MBUF_PUTC(x);			\
+		else if (PerlIO_putc(cxt->fio, x) == EOF)\
+			return -1;			 \
+	} STMT_END
 
-#define WRITE_I32(x)                                                    \
+#define WRITE_I32(x)							\
     STMT_START {							\
-      ASSERT(sizeof(x) == sizeof(I32), ("writing an I32"));             \
-      if (!cxt->fio)                                                    \
-          MBUF_PUTINT(x);                                               \
-      else if (PerlIO_write(cxt->fio, oI(&x), oS(sizeof(x))) != oS(sizeof(x))) \
-          return -1;                                                    \
-  } STMT_END
+	    ASSERT(sizeof(x) == sizeof(I32), ("writing an I32"));	\
+	    if (!cxt->fio)						\
+		    MBUF_PUTINT(x);					\
+	    else if (PerlIO_write(cxt->fio, oI(&x), oS(sizeof(x))) != oS(sizeof(x))) \
+		    return -1;						\
+    } STMT_END
+
+#define WRITE_U64(x)							\
+    STMT_START {							\
+	    ASSERT(sizeof(x) == sizeof(UV), ("writing an UV"));		\
+	    if (!cxt->fio)						\
+		    MBUF_PUTLONG(x);					\
+	    else if (PerlIO_write(cxt->fio, oL(&x), oS(sizeof(x))) != oS(sizeof(x))) \
+		    return -1;						\
+    } STMT_END
 
 #ifdef HAS_HTONL
 #define WLEN(x)                                                         \
-    STMT_START {                                                        \
-	ASSERT(sizeof(x) == sizeof(int), ("WLEN writing an int"));	\
-	if (cxt->netorder) {                                            \
-            int y = (int) htonl(x);                                     \
-            if (!cxt->fio)                                              \
-                MBUF_PUTINT(y);                                         \
-            else if (PerlIO_write(cxt->fio,oI(&y),oS(sizeof(y))) != oS(sizeof(y))) \
-                return -1;                                              \
-	} else {                                                        \
-            if (!cxt->fio)                                              \
-                MBUF_PUTINT(x);                                         \
-            else if (PerlIO_write(cxt->fio,oI(&x),oS(sizeof(x))) != oS(sizeof(x))) \
-                return -1;                                              \
-	}								\
-    } STMT_END
+	STMT_START {							\
+		ASSERT(sizeof(x) == sizeof(int), ("WLEN writing an int")); \
+		if (cxt->netorder) {					\
+			int y = (int) htonl(x);				\
+			if (!cxt->fio)					\
+				MBUF_PUTINT(y);				\
+			else if (PerlIO_write(cxt->fio,oI(&y),oS(sizeof(y))) != oS(sizeof(y))) \
+				return -1;				\
+		} else {						\
+			if (!cxt->fio)					\
+				MBUF_PUTINT(x);				\
+			else if (PerlIO_write(cxt->fio,oI(&x),oS(sizeof(x))) != oS(sizeof(x))) \
+				return -1;				\
+		}							\
+	} STMT_END
+#define W64LEN(x)							\
+	STMT_START {							\
+		ASSERT(sizeof(x) == 8, ("W64LEN writing a U64"));	\
+		if (cxt->netorder) {					\
+			union u64_t { U32 a; U32 b; } y;		\
+			y.b = htonl(x & 0xffffffff);			\
+			y.a = htonl(x >> 32);				\
+			if (!cxt->fio)					\
+				MBUF_PUTLONG(y);			\
+			else if (PerlIO_write(cxt->fio,oI(&y),oS(sizeof(y))) != oS(sizeof(y))) \
+				return -1;				\
+		} else {						\
+			if (!cxt->fio)					\
+				MBUF_PUTLONG(x);			\
+			else if (PerlIO_write(cxt->fio,oI(&x),oS(sizeof(x))) != oS(sizeof(x))) \
+				return -1;				\
+		}							\
+	} STMT_END
 #else
 #define WLEN(x)	WRITE_I32(x)
+#define W64LEN(x) WRITE_U64(x)
 #endif
 
 #define WRITE(x,y) 							\
-    STMT_START {                                                        \
-	if (!cxt->fio)							\
-            MBUF_WRITE(x,y);                                            \
-	else if (PerlIO_write(cxt->fio, x, y) != y)                     \
-            return -1;							\
-    } STMT_END
+	STMT_START {							\
+		if (!cxt->fio)						\
+			MBUF_WRITE(x,y);				\
+		else if (PerlIO_write(cxt->fio, x, y) != (SSize_t)y)    \
+			return -1;					\
+	} STMT_END
 
-#define STORE_PV_LEN(pv, len, small, large)                             \
-    STMT_START {                                                        \
-	if (len <= LG_SCALAR) {                                         \
-            unsigned char clen = (unsigned char) len;                   \
-            PUTMARK(small);                                             \
-            PUTMARK(clen);                                              \
-            if (len)                                                    \
-                WRITE(pv, len);                                         \
-	} else {							\
-            MUST_FIT_IN_I32(len);                                       \
-            PUTMARK(large);                                             \
-            WLEN(len);                                                  \
-            WRITE(pv, len);                                             \
-	}                                                               \
+#define STORE_PV_LEN(pv, len, small, large)				\
+	STMT_START {							\
+		if (len <= LG_SCALAR) {					\
+			int ilen = (int) len;				\
+			unsigned char clen = (unsigned char) len;	\
+			PUTMARK(small);					\
+			PUTMARK(clen);					\
+			if (len)					\
+				WRITE(pv, ilen);			\
+		} else if (len > INT32_MAX) {				\
+			MUST_FIT_IN_UV(len);				\
+			PUTMARK(SX_LOBJECT);				\
+			PUTMARK(large);					\
+			W64LEN(len);					\
+			WRITE(pv, len);					\
+		} else {						\
+			int ilen = (int) len;				\
+			MUST_FIT_IN_I32(len);				\
+			PUTMARK(large);					\
+			WLEN(ilen);					\
+			WRITE(pv, ilen);				\
+		}							\
     } STMT_END
 
 #define STORE_SCALAR(pv, len)	STORE_PV_LEN(pv, len, SX_SCALAR, SX_LSCALAR)
@@ -979,66 +1040,66 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #define GETCHAR() \
     (cxt->fio ? PerlIO_getc(cxt->fio) : (mptr >= mend ? EOF : (int) *mptr++))
 
-#define GETMARK(x)                                                      \
-    STMT_START {                                                        \
-      if (!cxt->fio)                                                    \
-          MBUF_GETC(x);							\
-      else if ((int) (x = PerlIO_getc(cxt->fio)) == EOF)                \
-          return (SV *) 0;						\
-  } STMT_END
+#define GETMARK(x)							\
+	STMT_START {							\
+		if (!cxt->fio)						\
+			MBUF_GETC(x);					\
+		else if ((int) (x = PerlIO_getc(cxt->fio)) == EOF)	\
+			return (SV *) 0;				\
+	} STMT_END
 
-#define READ_I32(x)                                                     \
-    STMT_START {                                                        \
-	ASSERT(sizeof(x) == sizeof(I32), ("reading an I32"));           \
-	oC(x);								\
-	if (!cxt->fio)                                                  \
-            MBUF_GETINT(x);                                             \
-	else if (PerlIO_read(cxt->fio, oI(&x), oS(sizeof(x))) != oS(sizeof(x))) \
-            return (SV *) 0;                                            \
-    } STMT_END
+#define READ_I32(x)							\
+	STMT_START {							\
+		ASSERT(sizeof(x) == sizeof(I32), ("reading an I32"));	\
+		oC(x);							\
+		if (!cxt->fio)						\
+			MBUF_GETINT(x);				\
+		else if (PerlIO_read(cxt->fio, oI(&x), oS(sizeof(x))) != oS(sizeof(x))) \
+			return (SV *) 0;				\
+	} STMT_END
 
 #ifdef HAS_NTOHL
 #define RLEN(x)							\
-    STMT_START {							\
-	oC(x);								\
-	if (!cxt->fio)                                                  \
-            MBUF_GETINT(x);                                             \
-	else if (PerlIO_read(cxt->fio, oI(&x), oS(sizeof(x))) != oS(sizeof(x))) \
-            return (SV *) 0;                                            \
-	if (cxt->netorder)                                              \
-            x = (int) ntohl(x);                                         \
-  } STMT_END
+	STMT_START {							\
+		oC(x);							\
+		if (!cxt->fio)						\
+			MBUF_GETINT(x);				\
+		else if (PerlIO_read(cxt->fio, oI(&x), oS(sizeof(x))) != oS(sizeof(x))) \
+			return (SV *) 0;				\
+		if (cxt->netorder)					\
+			x = (int) ntohl(x);				\
+	} STMT_END
 #else
 #define RLEN(x) READ_I32(x)
 #endif
 
 #define READ(x,y) 							\
-    STMT_START {                                                        \
+	STMT_START {							\
 	if (!cxt->fio)							\
-            MBUF_READ(x, y);                                            \
-	else if (PerlIO_read(cxt->fio, x, y) != y)                      \
-            return (SV *) 0;                                            \
-    } STMT_END
+		MBUF_READ(x, y);					\
+	else if (PerlIO_read(cxt->fio, x, y) != (SSize_t)y)             \
+		return (SV *) 0;					\
+	} STMT_END
 
-#define SAFEREAD(x,y,z)		 					\
-    STMT_START {                                                        \
-	if (!cxt->fio)                                                  \
-            MBUF_SAFEREAD(x,y,z);					\
-	else if (PerlIO_read(cxt->fio, x, y) != y)	 {              \
-            sv_free(z);                                                 \
-            return (SV *) 0;						\
-	}                                                               \
+#define SAFEREAD(x,y,z)                                                 \
+	STMT_START {							\
+		if (!cxt->fio)						\
+			MBUF_SAFEREAD(x,y,z);				\
+		else if (PerlIO_read(cxt->fio, x, y) != (SSize_t)y) {   \
+			sv_free(z);					\
+			return (SV *) 0;				\
+		}							\
   } STMT_END
 
 #define SAFEPVREAD(x,y,z)					\
-    STMT_START {                                                \
-	if (!cxt->fio)						\
-            MBUF_SAFEPVREAD(x,y,z);				\
-	else if (PerlIO_read(cxt->fio, x, y) != y)	 {	\
-            Safefree(z);					\
-            return (SV *) 0;                                    \
-	}							\
-    } STMT_END
+	STMT_START {						\
+		if (!cxt->fio)					\
+			MBUF_SAFEPVREAD(x,y,z);		\
+		else if (PerlIO_read(cxt->fio, x, y) != y) {	\
+			Safefree(z);				\
+			return (SV *) 0;			\
+		}						\
+	} STMT_END
 
 /*
  * SEEN() is used at retrieve time, to remember where object 'y', bearing a
@@ -1064,34 +1125,34 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
  *
  * The _NN variants dont check for y being null
  */
-#define SEEN0_NN(y,i)						        \
+#define SEEN0_NN(y,i)							\
+	STMT_START {							\
+		if (av_store(cxt->aseen, cxt->tagnum++, i ? (SV*)(y)	\
+			     : SvREFCNT_inc(y)) == 0)			\
+			return (SV *) 0;				\
+		TRACEME(("aseen(#%d) = 0x%" UVxf " (refcnt=%d)", (int)cxt->tagnum-1, \
+			 PTR2UV(y), (int)SvREFCNT(y)-1));		\
+	} STMT_END
+
+#define SEEN0(y,i)							\
+	STMT_START {							\
+		if (!y)						\
+			return (SV *) 0;				\
+		SEEN0_NN(y,i)						\
+			} STMT_END
+
+#define SEEN_NN(y,stash,i)						\
     STMT_START {							\
-	if (av_store(cxt->aseen, cxt->tagnum++, i ? (SV*)(y)            \
-                     : SvREFCNT_inc(y)) == 0)                           \
-            return (SV *) 0;                                            \
-	TRACEME(("aseen(#%d) = 0x%" UVxf " (refcnt=%d)", (int)cxt->tagnum-1, \
-		 PTR2UV(y), (int)SvREFCNT(y)-1));                       \
+	    SEEN0_NN(y,i);						\
+	    if (stash)							\
+		    BLESS((SV *)(y), (HV *)(stash));			\
     } STMT_END
 
-#define SEEN0(y,i)						        \
-    STMT_START {							\
-	if (!y)								\
-            return (SV *) 0;                                            \
-        SEEN0_NN(y,i)						        \
-    } STMT_END
-
-#define SEEN_NN(y,stash,i)					        \
-    STMT_START {							\
-        SEEN0_NN(y,i);						        \
-	if (stash)							\
-            BLESS((SV *)(y), (HV *)(stash));                            \
-    } STMT_END
-
-#define SEEN(y,stash,i)						        \
-    STMT_START {							\
-	if (!y)								\
-	    return (SV *) 0;					        \
-        SEEN_NN(y,stash, i);					        \
+#define SEEN(y,stash,i)						\
+	STMT_START {							\
+		if (!y)						\
+			return (SV *) 0;				\
+		SEEN_NN(y,stash, i);					\
     } STMT_END
 
 /*
@@ -1099,25 +1160,25 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
  * "A" magic is added before the sv_bless for overloaded classes, this avoids
  * an expensive call to S_reset_amagic in sv_bless.
  */
-#define BLESS(s,stash)                                                  \
-    STMT_START {                                                        \
-	SV *ref;                                                        \
-	if (cxt->flags & FLAG_BLESS_OK) {                               \
-            TRACEME(("blessing 0x%"UVxf" in %s", PTR2UV(s), (HvNAME_get(stash)))); \
-            ref = newRV_noinc(s);					\
-            if (cxt->in_retrieve_overloaded && Gv_AMG(stash)) {         \
-                cxt->in_retrieve_overloaded = 0;                        \
-                SvAMAGIC_on(ref);                                       \
-            }                                                           \
-            (void) sv_bless(ref, stash);                                \
-            SvRV_set(ref, NULL);                                        \
-            SvREFCNT_dec(ref);						\
-	}                                                               \
-	else {                                                          \
-            TRACEME(("not blessing 0x%"UVxf" in %s", PTR2UV(s),         \
-                     (HvNAME_get(stash))));                             \
-	}                                                               \
-  } STMT_END
+#define BLESS(s,stash)							\
+	STMT_START {							\
+		SV *ref;						\
+		if (cxt->flags & FLAG_BLESS_OK) {			\
+			TRACEME(("blessing 0x%"UVxf" in %s", PTR2UV(s), (HvNAME_get(stash)))); \
+			ref = newRV_noinc(s);				\
+			if (cxt->in_retrieve_overloaded && Gv_AMG(stash)) { \
+				cxt->in_retrieve_overloaded = 0;	\
+				SvAMAGIC_on(ref);			\
+			}						\
+			(void) sv_bless(ref, stash);			\
+			SvRV_set(ref, NULL);				\
+			SvREFCNT_dec(ref);				\
+		}							\
+		else {							\
+			TRACEME(("not blessing 0x%"UVxf" in %s", PTR2UV(s), \
+				 (HvNAME_get(stash))));		\
+		}							\
+	} STMT_END
 /*
  * sort (used in store_hash) - conditionally use qsort when
  * sortsv is not available ( <= 5.6.1 ).
@@ -1127,36 +1188,36 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 
 #if defined(USE_ITHREADS)
 
-#define STORE_HASH_SORT                                          \
-    ENTER; {                                                     \
-        PerlInterpreter *orig_perl = PERL_GET_CONTEXT;           \
-        SAVESPTR(orig_perl);                                     \
-        PERL_SET_CONTEXT(aTHX);                                  \
-        qsort((char *) AvARRAY(av), len, sizeof(SV *), sortcmp); \
-    } LEAVE;
+#define STORE_HASH_SORT						\
+	ENTER; {							\
+		PerlInterpreter *orig_perl = PERL_GET_CONTEXT;		\
+		SAVESPTR(orig_perl);					\
+		PERL_SET_CONTEXT(aTHX);				\
+		qsort((char *) AvARRAY(av), len, sizeof(SV *), sortcmp);\
+	} LEAVE;
 
 #else /* ! USE_ITHREADS */
 
-#define STORE_HASH_SORT                                          \
-        qsort((char *) AvARRAY(av), len, sizeof(SV *), sortcmp);
+#define STORE_HASH_SORT					\
+	qsort((char *) AvARRAY(av), len, sizeof(SV *), sortcmp);
 
 #endif  /* USE_ITHREADS */
 
 #else /* PATCHLEVEL > 6 */
 
 #define STORE_HASH_SORT \
-        sortsv(AvARRAY(av), len, Perl_sv_cmp);  
+	sortsv(AvARRAY(av), len, Perl_sv_cmp);
 
 #endif /* PATCHLEVEL <= 6 */
 
 static int store(pTHX_ stcxt_t *cxt, SV *sv);
 static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname);
 
-#define UNSEE()                             \
-  STMT_START {                              \
-    av_pop(cxt->aseen);                     \
-    cxt->tagnum--;                          \
-  } STMT_END
+#define UNSEE()			\
+	STMT_START {			\
+		av_pop(cxt->aseen);	\
+		cxt->tagnum--;		\
+	} STMT_END
 
 /*
  * Dynamic dispatching table for SV store.
@@ -1207,6 +1268,15 @@ static SV *retrieve_tied_array(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_tied_hash(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_tied_scalar(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_other(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname);
+
+/* helpers for U64 lobjects */
+
+static SV *get_lstring(pTHX_ stcxt_t *cxt, UV len, int isutf8, const char *cname);
+static SV *get_larray(pTHX_ stcxt_t *cxt, UV len, const char *cname);
+static SV *get_lhash(pTHX_ stcxt_t *cxt, UV len, int flagged, const char *cname);
+static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags);
+static int store_hentry(pTHX_ stcxt_t *cxt, HV* hv, UV i, HE *he, unsigned char hash_flags);
 
 typedef SV* (*sv_retrieve_t)(pTHX_ stcxt_t *cxt, const char *name);
 
@@ -1244,6 +1314,7 @@ static const sv_retrieve_t sv_old_retrieve[] = {
 	(sv_retrieve_t)retrieve_other,	/* SX_LVSTRING not supported */
 	(sv_retrieve_t)retrieve_other,	/* SX_SVUNDEF_ELEM not supported */
 	(sv_retrieve_t)retrieve_other,	/* SX_ERROR */
+	(sv_retrieve_t)retrieve_other,  /* SX_LOBJECT not supported */
 };
 
 static SV *retrieve_array(pTHX_ stcxt_t *cxt, const char *cname);
@@ -1273,15 +1344,15 @@ static const sv_retrieve_t sv_retrieve[] = {
 	(sv_retrieve_t)retrieve_ref,		/* SX_REF */
 	(sv_retrieve_t)retrieve_undef,		/* SX_UNDEF */
 	(sv_retrieve_t)retrieve_integer,	/* SX_INTEGER */
-	(sv_retrieve_t)retrieve_double,		/* SX_DOUBLE */
+	(sv_retrieve_t)retrieve_double,	/* SX_DOUBLE */
 	(sv_retrieve_t)retrieve_byte,		/* SX_BYTE */
-	(sv_retrieve_t)retrieve_netint,		/* SX_NETINT */
-	(sv_retrieve_t)retrieve_scalar,		/* SX_SCALAR */
+	(sv_retrieve_t)retrieve_netint,	/* SX_NETINT */
+	(sv_retrieve_t)retrieve_scalar,	/* SX_SCALAR */
 	(sv_retrieve_t)retrieve_tied_array,	/* SX_TIED_ARRAY */
 	(sv_retrieve_t)retrieve_tied_hash,	/* SX_TIED_HASH */
 	(sv_retrieve_t)retrieve_tied_scalar,	/* SX_TIED_SCALAR */
 	(sv_retrieve_t)retrieve_sv_undef,	/* SX_SV_UNDEF */
-	(sv_retrieve_t)retrieve_sv_yes,		/* SX_SV_YES */
+	(sv_retrieve_t)retrieve_sv_yes,	/* SX_SV_YES */
 	(sv_retrieve_t)retrieve_sv_no,		/* SX_SV_NO */
 	(sv_retrieve_t)retrieve_blessed,	/* SX_BLESS */
 	(sv_retrieve_t)retrieve_idx_blessed,	/* SX_IX_BLESS */
@@ -1294,14 +1365,15 @@ static const sv_retrieve_t sv_retrieve[] = {
 	(sv_retrieve_t)retrieve_flag_hash,	/* SX_HASH */
 	(sv_retrieve_t)retrieve_code,		/* SX_CODE */
 	(sv_retrieve_t)retrieve_weakref,	/* SX_WEAKREF */
-	(sv_retrieve_t)retrieve_weakoverloaded,	/* SX_WEAKOVERLOAD */
+	(sv_retrieve_t)retrieve_weakoverloaded, /* SX_WEAKOVERLOAD */
 	(sv_retrieve_t)retrieve_vstring,	/* SX_VSTRING */
 	(sv_retrieve_t)retrieve_lvstring,	/* SX_LVSTRING */
 	(sv_retrieve_t)retrieve_svundef_elem,	/* SX_SVUNDEF_ELEM */
 	(sv_retrieve_t)retrieve_other,		/* SX_ERROR */
+	(sv_retrieve_t)retrieve_lobject,	/* SX_LOBJECT */
 };
 
-#define RETRIEVE(c,x) (*(c)->retrieve_vtbl[(x) >= SX_ERROR ? SX_ERROR : (x)])
+#define RETRIEVE(c,x) (*(c)->retrieve_vtbl[(x) >= SX_LAST ? SX_ERROR : (x)])
 
 static SV *mbuf2sv(pTHX);
 
@@ -1316,11 +1388,11 @@ static SV *mbuf2sv(pTHX);
  */
 static void init_perinterp(pTHX)
 {
-    INIT_STCXT;
+	INIT_STCXT;
 
-    cxt->netorder = 0;		/* true if network order used */
-    cxt->forgive_me = -1;	/* whether to be forgiving... */
-    cxt->accept_future_minor = -1; /* would otherwise occur too late */
+	cxt->netorder = 0;		/* true if network order used */
+	cxt->forgive_me = -1;	/* whether to be forgiving... */
+	cxt->accept_future_minor = -1; /* would otherwise occur too late */
 }
 
 /*
@@ -1333,7 +1405,7 @@ static void reset_context(stcxt_t *cxt)
 {
 	cxt->entry = 0;
 	cxt->s_dirty = 0;
-	cxt->optype &= ~(ST_STORE|ST_RETRIEVE);		/* Leave ST_CLONE alone */
+	cxt->optype &= ~(ST_STORE|ST_RETRIEVE);	/* Leave ST_CLONE alone */
 }
 
 /*
@@ -1342,7 +1414,7 @@ static void reset_context(stcxt_t *cxt)
  * Initialize a new store context for real recursion.
  */
 static void init_store_context(
-        pTHX_
+	pTHX_
 	stcxt_t *cxt,
 	PerlIO *f,
 	int optype,
@@ -1359,7 +1431,7 @@ static void init_store_context(
 	cxt->classnum = -1;			/* Reset class numbers */
 	cxt->fio = f;				/* Where I/O are performed */
 	cxt->optype = optype;			/* A store, or a deep clone */
-	cxt->entry = 1;				/* No recursion yet */
+	cxt->entry = 1;			/* No recursion yet */
 
 	/*
 	 * The 'hseen' table is used to keep track of each SV stored and their
@@ -1397,7 +1469,7 @@ static void init_store_context(
 	 * It is reported fixed in 5.005, hence the #if.
 	 */
 #if PERL_VERSION >= 5
-#define HBUCKETS	4096				/* Buckets for %hseen */
+#define HBUCKETS	4096			/* Buckets for %hseen */
 #ifndef USE_PTR_TABLE
 	HvMAX(cxt->hseen) = HBUCKETS - 1;	/* keys %hseen = $HBUCKETS; */
 #endif
@@ -1426,7 +1498,7 @@ static void init_store_context(
 	 * hooks.
 	 */
 
-	cxt->hook = newHV();			/* Table where hooks are cached */
+	cxt->hook = newHV();		/* Table where hooks are cached */
 
 	/*
 	 * The 'hook_seen' array keeps track of all the SVs returned by
@@ -1435,7 +1507,7 @@ static void init_store_context(
 	 * only stored once, the first time it is seen.
 	 */
 
-	cxt->hook_seen = newAV();		/* Lists SVs returned by STORABLE_freeze */
+	cxt->hook_seen = newAV(); /* Lists SVs returned by STORABLE_freeze */
 }
 
 /*
@@ -1458,14 +1530,14 @@ static void clean_store_context(pTHX_ stcxt_t *cxt)
 #ifndef USE_PTR_TABLE
 	if (cxt->hseen) {
 		hv_iterinit(cxt->hseen);
-		while ((he = hv_iternext(cxt->hseen)))	/* Extra () for -Wall, grr.. */
+		while ((he = hv_iternext(cxt->hseen)))	/* Extra () for -Wall */
 			HeVAL(he) = &PL_sv_undef;
 	}
 #endif
 
 	if (cxt->hclass) {
 		hv_iterinit(cxt->hclass);
-		while ((he = hv_iternext(cxt->hclass)))	/* Extra () for -Wall, grr.. */
+		while ((he = hv_iternext(cxt->hclass))) /* Extra () for -Wall */
 			HeVAL(he) = &PL_sv_undef;
 	}
 
@@ -1516,13 +1588,13 @@ static void clean_store_context(pTHX_ stcxt_t *cxt)
 		sv_free((SV *) hook_seen);
 	}
 
-	cxt->forgive_me = -1;			/* Fetched from perl if needed */
-	cxt->deparse = -1;				/* Idem */
+	cxt->forgive_me = -1;		/* Fetched from perl if needed */
+	cxt->deparse = -1;		/* Idem */
 	if (cxt->eval) {
 	    SvREFCNT_dec(cxt->eval);
 	}
-	cxt->eval = NULL;				/* Idem */
-	cxt->canonical = -1;			/* Idem */
+	cxt->eval = NULL;		/* Idem */
+	cxt->canonical = -1;		/* Idem */
 
 	reset_context(cxt);
 }
@@ -1561,21 +1633,21 @@ static void init_retrieve_context(pTHX_ stcxt_t *cxt, int optype, int is_tainted
 	cxt->hseen = (((void*)cxt->retrieve_vtbl == (void*)sv_old_retrieve)
 		      ? newHV() : 0);
 
-	cxt->aseen = newAV();			/* Where retrieved objects are kept */
-	cxt->where_is_undef = -1;		/* Special case for PL_sv_undef */
-	cxt->aclass = newAV();			/* Where seen classnames are kept */
-	cxt->tagnum = 0;			/* Have to count objects... */
-	cxt->classnum = 0;			/* ...and class names as well */
+	cxt->aseen = newAV();		/* Where retrieved objects are kept */
+	cxt->where_is_undef = -1;	/* Special case for PL_sv_undef */
+	cxt->aclass = newAV();		/* Where seen classnames are kept */
+	cxt->tagnum = 0;		/* Have to count objects... */
+	cxt->classnum = 0;		/* ...and class names as well */
 	cxt->optype = optype;
 	cxt->s_tainted = is_tainted;
-	cxt->entry = 1;				/* No recursion yet */
+	cxt->entry = 1;			/* No recursion yet */
 #ifndef HAS_RESTRICTED_HASHES
-        cxt->derestrict = -1;		/* Fetched from perl if needed */
+	cxt->derestrict = -1;		/* Fetched from perl if needed */
 #endif
 #ifndef HAS_UTF8_ALL
-        cxt->use_bytes = -1;		/* Fetched from perl if needed */
+	cxt->use_bytes = -1;		/* Fetched from perl if needed */
 #endif
-        cxt->accept_future_minor = -1;	/* Fetched from perl if needed */
+	cxt->accept_future_minor = -1;	/* Fetched from perl if needed */
 	cxt->in_retrieve_overloaded = 0;
 }
 
@@ -1616,16 +1688,16 @@ static void clean_retrieve_context(pTHX_ stcxt_t *cxt)
 		HV *hseen = cxt->hseen;
 		cxt->hseen = 0;
 		hv_undef(hseen);
-		sv_free((SV *) hseen);		/* optional HV, for backward compat. */
+		sv_free((SV *) hseen);	/* optional HV, for backward compat. */
 	}
 
 #ifndef HAS_RESTRICTED_HASHES
-        cxt->derestrict = -1;		/* Fetched from perl if needed */
+	cxt->derestrict = -1;		/* Fetched from perl if needed */
 #endif
 #ifndef HAS_UTF8_ALL
-        cxt->use_bytes = -1;		/* Fetched from perl if needed */
+	cxt->use_bytes = -1;		/* Fetched from perl if needed */
 #endif
-        cxt->accept_future_minor = -1;	/* Fetched from perl if needed */
+	cxt->accept_future_minor = -1;	/* Fetched from perl if needed */
 
 	cxt->in_retrieve_overloaded = 0;
 	reset_context(cxt);
@@ -1763,7 +1835,7 @@ static int last_op_in_netorder(pTHX)
  * nor its ancestors know about the method.
  */
 static SV *pkg_fetchmeth(
-        pTHX_
+	pTHX_
 	HV *cache,
 	HV *pkg,
 	const char *method)
@@ -1803,7 +1875,7 @@ static SV *pkg_fetchmeth(
  * Force cached value to be undef: hook ignored even if present.
  */
 static void pkg_hide(
-        pTHX_
+	pTHX_
 	HV *cache,
 	HV *pkg,
 	const char *method)
@@ -1820,7 +1892,7 @@ static void pkg_hide(
  * Discard cached value: a whole fetch loop will be retried at next lookup.
  */
 static void pkg_uncache(
-        pTHX_
+	pTHX_
 	HV *cache,
 	HV *pkg,
 	const char *method)
@@ -1839,7 +1911,7 @@ static void pkg_uncache(
  * know about the method.
  */
 static SV *pkg_can(
-        pTHX_
+	pTHX_
 	HV *cache,
 	HV *pkg,
 	const char *method)
@@ -1872,7 +1944,7 @@ static SV *pkg_can(
 	}
 
 	TRACEME(("not cached yet"));
-	return pkg_fetchmeth(aTHX_ cache, pkg, method);		/* Fetch and cache */
+	return pkg_fetchmeth(aTHX_ cache, pkg, method);	/* Fetch and cache */
 }
 
 /*
@@ -1882,7 +1954,7 @@ static SV *pkg_can(
  * Propagates the single returned value if not called in void context.
  */
 static SV *scalar_call(
-        pTHX_
+	pTHX_
 	SV *obj,
 	SV *hook,
 	int cloning,
@@ -1903,26 +1975,26 @@ static SV *scalar_call(
 	XPUSHs(sv_2mortal(newSViv(cloning)));		/* Cloning flag */
 	if (av) {
 		SV **ary = AvARRAY(av);
-		int cnt = AvFILLp(av) + 1;
-		int i;
+		SSize_t cnt = AvFILLp(av) + 1;
+		SSize_t i;
 		XPUSHs(ary[0]);							/* Frozen string */
 		for (i = 1; i < cnt; i++) {
 			TRACEME(("pushing arg #%d (0x%" UVxf ")...",
-				 i, PTR2UV(ary[i])));
+				 (int)i, PTR2UV(ary[i])));
 			XPUSHs(sv_2mortal(newRV(ary[i])));
 		}
 	}
 	PUTBACK;
 
 	TRACEME(("calling..."));
-	count = perl_call_sv(hook, flags);		/* Go back to Perl code */
+	count = perl_call_sv(hook, flags);	/* Go back to Perl code */
 	TRACEME(("count = %d", count));
 
 	SPAGAIN;
 
 	if (count) {
 		sv = POPs;
-		SvREFCNT_inc(sv);		/* We're returning it, must stay alive! */
+		SvREFCNT_inc(sv); /* We're returning it, must stay alive! */
 	}
 
 	PUTBACK;
@@ -1939,7 +2011,7 @@ static SV *scalar_call(
  * Returns the list of returned values in an array.
  */
 static AV *array_call(
-        pTHX_
+	pTHX_
 	SV *obj,
 	SV *hook,
 	int cloning)
@@ -1955,11 +2027,11 @@ static AV *array_call(
 	SAVETMPS;
 
 	PUSHMARK(sp);
-	XPUSHs(obj);					/* Target object */
-	XPUSHs(sv_2mortal(newSViv(cloning)));		/* Cloning flag */
+	XPUSHs(obj);				/* Target object */
+	XPUSHs(sv_2mortal(newSViv(cloning)));	/* Cloning flag */
 	PUTBACK;
 
-	count = perl_call_sv(hook, G_ARRAY);		/* Go back to Perl code */
+	count = perl_call_sv(hook, G_ARRAY);	/* Go back to Perl code */
 
 	SPAGAIN;
 
@@ -1985,7 +2057,7 @@ static AV *array_call(
  * Return true if the class was known, false if the ID was just generated.
  */
 static int known_class(
-        pTHX_
+	pTHX_
 	stcxt_t *cxt,
 	char *name,		/* Class name */
 	int len,		/* Name length */
@@ -2041,9 +2113,8 @@ static int store_ref(pTHX_ stcxt_t *cxt, SV *sv)
 #ifdef SvWEAKREF
 	if (SvWEAKREF(sv))
 		is_weak = 1;
-	TRACEME(("ref (0x%" UVxf ") is%s weak", PTR2UV(sv), is_weak
-                                                            ? ""
-                                                            : "n't"));
+	TRACEME(("ref (0x%" UVxf ") is%s weak", PTR2UV(sv),
+		 is_weak ? "" : "n't"));
 #endif
 	sv = SvRV(sv);
 
@@ -2075,13 +2146,15 @@ static int store_ref(pTHX_ stcxt_t *cxt, SV *sv)
  *
  * If integer or double, the layout is SX_INTEGER <data> or SX_DOUBLE <data>.
  * Small integers (within [-127, +127]) are stored as SX_BYTE <byte>.
+ *
+ * For huge strings use SX_LOBJECT SX_type SX_U64 <type> <data>
  */
 static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
 {
 	IV iv;
 	char *pv;
 	STRLEN len;
-	U32 flags = SvFLAGS(sv);			/* "cc -O" may put it in register */
+	U32 flags = SvFLAGS(sv);	/* "cc -O" may put it in register */
 
 	TRACEME(("store_scalar (0x%" UVxf ")", PTR2UV(sv)));
 
@@ -2141,155 +2214,153 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
 			TRACEME(("immortal no"));
 			PUTMARK(SX_SV_NO);
 		} else {
-			pv = SvPV(sv, len);			/* We know it's SvPOK */
-			goto string;				/* Share code below */
+			pv = SvPV(sv, len);		/* We know it's SvPOK */
+			goto string;			/* Share code below */
 		}
 	} else if (flags & SVf_POK) {
-            /* public string - go direct to string read.  */
-            goto string_readlen;
-        } else if (
+		/* public string - go direct to string read.  */
+		goto string_readlen;
+	} else if (
 #if (PATCHLEVEL <= 6)
-            /* For 5.6 and earlier NV flag trumps IV flag, so only use integer
-               direct if NV flag is off.  */
-            (flags & (SVf_NOK | SVf_IOK)) == SVf_IOK
+		   /* For 5.6 and earlier NV flag trumps IV flag, so only use integer
+		      direct if NV flag is off.  */
+		   (flags & (SVf_NOK | SVf_IOK)) == SVf_IOK
 #else
-            /* 5.7 rules are that if IV public flag is set, IV value is as
-               good, if not better, than NV value.  */
-            flags & SVf_IOK
+		   /* 5.7 rules are that if IV public flag is set, IV value is as
+		      good, if not better, than NV value.  */
+		   flags & SVf_IOK
 #endif
-            ) {
-            iv = SvIV(sv);
-            /*
-             * Will come here from below with iv set if double is an integer.
-             */
-          integer:
+		   ) {
+		iv = SvIV(sv);
+		/*
+		 * Will come here from below with iv set if double is an integer.
+		 */
+	integer:
 
-            /* Sorry. This isn't in 5.005_56 (IIRC) or earlier.  */
+		/* Sorry. This isn't in 5.005_56 (IIRC) or earlier.  */
 #ifdef SVf_IVisUV
-            /* Need to do this out here, else 0xFFFFFFFF becomes iv of -1
-             * (for example) and that ends up in the optimised small integer
-             * case. 
-             */
-            if ((flags & SVf_IVisUV) && SvUV(sv) > IV_MAX) {
-                TRACEME(("large unsigned integer as string, value = %" UVuf,
-                        SvUV(sv)));
-                goto string_readlen;
-            }
+		/* Need to do this out here, else 0xFFFFFFFF becomes iv of -1
+		 * (for example) and that ends up in the optimised small integer
+		 * case. 
+		 */
+		if ((flags & SVf_IVisUV) && SvUV(sv) > IV_MAX) {
+			TRACEME(("large unsigned integer as string, value = %" UVuf,
+				 SvUV(sv)));
+			goto string_readlen;
+		}
 #endif
-            /*
-             * Optimize small integers into a single byte, otherwise store as
-             * a real integer (converted into network order if they asked).
-             */
+		/*
+		 * Optimize small integers into a single byte, otherwise store as
+		 * a real integer (converted into network order if they asked).
+		 */
 
-            if (iv >= -128 && iv <= 127) {
-                unsigned char siv = (unsigned char) (iv + 128);	/* [0,255] */
-                PUTMARK(SX_BYTE);
-                PUTMARK(siv);
-                TRACEME(("small integer stored as %d", (int)siv));
-            } else if (cxt->netorder) {
+		if (iv >= -128 && iv <= 127) {
+			unsigned char siv = (unsigned char) (iv + 128); /* [0,255] */
+			PUTMARK(SX_BYTE);
+			PUTMARK(siv);
+			TRACEME(("small integer stored as %d", (int)siv));
+		} else if (cxt->netorder) {
 #ifndef HAS_HTONL
-                TRACEME(("no htonl, fall back to string for integer"));
-                goto string_readlen;
+			TRACEME(("no htonl, fall back to string for integer"));
+			goto string_readlen;
 #else
-                I32 niv;
+			I32 niv;
 
 
 #if IVSIZE > 4
-                if (
+			if (
 #ifdef SVf_IVisUV
-                    /* Sorry. This isn't in 5.005_56 (IIRC) or earlier.  */
-                    ((flags & SVf_IVisUV) && SvUV(sv) > (UV)0x7FFFFFFF) ||
+			    /* Sorry. This isn't in 5.005_56 (IIRC) or earlier.  */
+			    ((flags & SVf_IVisUV) && SvUV(sv) > (UV)0x7FFFFFFF) ||
 #endif
-                    (iv > (IV)0x7FFFFFFF) || (iv < -(IV)0x80000000)) {
-                    /* Bigger than 32 bits.  */
-                    TRACEME(("large network order integer as string, value = %"
-                             IVdf, iv));
-                    goto string_readlen;
-                }
+			    (iv > (IV)0x7FFFFFFF) || (iv < -(IV)0x80000000)) {
+				/* Bigger than 32 bits.  */
+				TRACEME(("large network order integer as string, value = %" IVdf, iv));
+				goto string_readlen;
+			}
 #endif
 
-                niv = (I32) htonl((I32) iv);
-                TRACEME(("using network order"));
-                PUTMARK(SX_NETINT);
-                WRITE_I32(niv);
+			niv = (I32) htonl((I32) iv);
+			TRACEME(("using network order"));
+			PUTMARK(SX_NETINT);
+			WRITE_I32(niv);
 #endif
-            } else {
-                PUTMARK(SX_INTEGER);
-                WRITE(&iv, sizeof(iv));
-            }
-            
-            TRACEME(("ok (integer 0x%" UVxf ", value = %" IVdf ")",
-                     PTR2UV(sv), iv));
+		} else {
+			PUTMARK(SX_INTEGER);
+			WRITE(&iv, sizeof(iv));
+		}
+
+		TRACEME(("ok (integer 0x%"UVxf", value = %" IVdf ")", PTR2UV(sv), iv));
 	} else if (flags & SVf_NOK) {
-            NV nv;
+		NV nv;
 #if (PATCHLEVEL <= 6)
-            nv = SvNV(sv);
-            /*
-             * Watch for number being an integer in disguise.
-             */
-            if (nv == (NV) (iv = I_V(nv))) {
-                TRACEME(("double %" NVff " is actually integer %" IVdf, nv, iv));
-                goto integer;		/* Share code above */
-            }
+		nv = SvNV(sv);
+		/*
+		 * Watch for number being an integer in disguise.
+		 */
+		if (nv == (NV) (iv = I_V(nv))) {
+			TRACEME(("double %" NVff " is actually integer %" IVdf, nv, iv));
+			goto integer;		/* Share code above */
+		}
 #else
 
-            SvIV_please(sv);
-	    if (SvIOK_notUV(sv)) {
-                iv = SvIV(sv);
-                goto integer;		/* Share code above */
-            }
-            nv = SvNV(sv);
+		SvIV_please(sv);
+		if (SvIOK_notUV(sv)) {
+			iv = SvIV(sv);
+			goto integer;		/* Share code above */
+		}
+		nv = SvNV(sv);
 #endif
 
-            if (cxt->netorder) {
-                TRACEME(("double %" NVff " stored as string", nv));
-                goto string_readlen;		/* Share code below */
-            }
+		if (cxt->netorder) {
+			TRACEME(("double %" NVff " stored as string", nv));
+			goto string_readlen;		/* Share code below */
+		}
 
-            PUTMARK(SX_DOUBLE);
-            WRITE(&nv, sizeof(nv));
+		PUTMARK(SX_DOUBLE);
+		WRITE(&nv, sizeof(nv));
 
-            TRACEME(("ok (double 0x%" UVxf ", value = %" NVff ")",
-                     PTR2UV(sv), nv));
+		TRACEME(("ok (double 0x%" UVxf ", value = %" NVff ")", PTR2UV(sv), nv));
 
 	} else if (flags & (SVp_POK | SVp_NOK | SVp_IOK)) {
 #ifdef SvVOK
-	    MAGIC *mg;
+		MAGIC *mg;
 #endif
-            I32 wlen; /* For 64-bit machines */
+		UV wlen; /* For 64-bit machines */
 
-          string_readlen:
-            pv = SvPV(sv, len);
+	string_readlen:
+		pv = SvPV(sv, len);
 
-            /*
-             * Will come here from above  if it was readonly, POK and NOK but
-             * neither &PL_sv_yes nor &PL_sv_no.
-             */
-          string:
+		/*
+		 * Will come here from above  if it was readonly, POK and NOK but
+		 * neither &PL_sv_yes nor &PL_sv_no.
+		 */
+	string:
 
 #ifdef SvVOK
-            if (SvMAGICAL(sv) && (mg = mg_find(sv, 'V'))) {
-                /* The macro passes this by address, not value, and a lot of
-                   called code assumes that it's 32 bits without checking.  */
-                const int len = mg->mg_len;
-                STORE_PV_LEN((const char *)mg->mg_ptr,
-                             len, SX_VSTRING, SX_LVSTRING);
-            }
+		if (SvMAGICAL(sv) && (mg = mg_find(sv, 'V'))) {
+			/* The macro passes this by address, not value, and a lot of
+			   called code assumes that it's 32 bits without checking.  */
+			const SSize_t len = mg->mg_len;
+			STORE_PV_LEN((const char *)mg->mg_ptr,
+				     len, SX_VSTRING, SX_LVSTRING);
+		}
 #endif
 
-            MUST_FIT_IN_I32(len);
-            wlen = (I32) len; /* WLEN via STORE_SCALAR expects I32 */
-            if (SvUTF8 (sv))
-                STORE_UTF8STR(pv, wlen);
-            else
-                STORE_SCALAR(pv, wlen);
-            TRACEME(("ok (scalar 0x%" UVxf " '%s', length = %" IVdf ")",
-                     PTR2UV(sv), SvPVX(sv), (IV)len));
-	} else
-            CROAK(("Can't determine type of %s(0x%" UVxf ")",
-                   sv_reftype(sv, FALSE),
-                   PTR2UV(sv)));
-        return 0;		/* Ok, no recursion on scalars */
+		MUST_FIT_IN_UV(len);
+		wlen = (Size_t)len;
+		if (SvUTF8 (sv))
+			STORE_UTF8STR(pv, wlen);
+		else
+			STORE_SCALAR(pv, wlen);
+		TRACEME(("ok (scalar 0x%" UVxf " '%s', length = %" IVdf ")",
+			 PTR2UV(sv), SvPVX(sv), (IV)len));
+	} else {
+		CROAK(("Can't determine type of %s(0x%" UVxf ")",
+		       sv_reftype(sv, FALSE),
+		       PTR2UV(sv)));
+	}
+	return 0;		/* Ok, no recursion on scalars */
 }
 
 /*
@@ -2303,22 +2374,30 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
 static int store_array(pTHX_ stcxt_t *cxt, AV *av)
 {
 	SV **sav;
-	I32 len = av_len(av) + 1;
-	I32 i;
+	UV len = av_len(av) + 1;
+	UV i;
 	int ret;
 
-        MUST_FIT_IN_I32(av_len(av) + 1);
-
+	MUST_FIT_IN_UV(len);
 	TRACEME(("store_array (0x%" UVxf ")", PTR2UV(av)));
 
-	/* 
-	 * Signal array by emitting SX_ARRAY, followed by the array length.
-	 */
-
-	PUTMARK(SX_ARRAY);
-	WLEN(len);
-	TRACEME(("size = %d", (int)len));
-
+	if (len > 0x7fffffffu) {
+		/*
+		 * Large array by emitting SX_LOBJECT 1 U64 data
+		 */
+		PUTMARK(SX_LOBJECT);
+		PUTMARK(SX_ARRAY);
+		W64LEN(len);
+		TRACEME(("lobject size = %lu", len));
+	} else {
+		/*
+		 * Normal array by emitting SX_ARRAY, followed by the array length.
+		 */
+		I32 l = (I32)len;
+		PUTMARK(SX_ARRAY);
+		WLEN(l);
+		TRACEME(("size = %d", l));
+	}
 	/*
 	 * Now store each item recursively.
 	 */
@@ -2326,7 +2405,7 @@ static int store_array(pTHX_ stcxt_t *cxt, AV *av)
 	for (i = 0; i < len; i++) {
 		sav = av_fetch(av, i, 0);
 		if (!sav) {
-			TRACEME(("(#%d) nonexistent item", i));
+			TRACEME(("(#%d) nonexistent item", (int)i));
 			STORE_SV_UNDEF();
 			continue;
 		}
@@ -2337,14 +2416,14 @@ static int store_array(pTHX_ stcxt_t *cxt, AV *av)
 		 * nonexistent elements, so we use SX_SVUNDEF_ELEM for
 		 * &PL_sv_undef itself. */
 		if (*sav == &PL_sv_undef) {
-			TRACEME(("(#%d) undef item", i));
+			TRACEME(("(#%d) undef item", (int)i));
 			cxt->tagnum++;
 			PUTMARK(SX_SVUNDEF_ELEM);
 			continue;
 		}
-#endif			
-		TRACEME(("(#%d) item", i));
-		if ((ret = store(aTHX_ cxt, *sav)))	/* Extra () for -Wall, grr... */
+#endif
+		TRACEME(("(#%d) item", (int)i));
+		if ((ret = store(aTHX_ cxt, *sav)))	/* Extra () for -Wall */
 			return ret;
 	}
 
@@ -2366,9 +2445,9 @@ static int
 sortcmp(const void *a, const void *b)
 {
 #if defined(USE_ITHREADS)
-        dTHX;
+	dTHX;
 #endif /* USE_ITHREADS */
-        return sv_cmp(*(SV * const *) a, *(SV * const *) b);
+	return sv_cmp(*(SV * const *) a, *(SV * const *) b);
 }
 
 #endif /* PATCHLEVEL <= 6 */
@@ -2398,43 +2477,68 @@ sortcmp(const void *a, const void *b)
 static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 {
 	dVAR;
-	I32 len = HvTOTALKEYS(hv);
-	I32 i;
+	UV len = HvTOTALKEYS(hv);
+	Size_t i;
 	int ret = 0;
 	I32 riter;
 	HE *eiter;
-        int flagged_hash = ((SvREADONLY(hv)
+	int flagged_hash = ((SvREADONLY(hv)
 #ifdef HAS_HASH_KEY_FLAGS
-                             || HvHASKFLAGS(hv)
+			     || HvHASKFLAGS(hv)
 #endif
-                            ) ? 1 : 0);
-        unsigned char hash_flags = (SvREADONLY(hv) ? SHV_RESTRICTED : 0);
+			     ) ? 1 : 0);
+	unsigned char hash_flags = (SvREADONLY(hv) ? SHV_RESTRICTED : 0);
 
-        MUST_FIT_IN_I32(HvTOTALKEYS(hv));
-
-        if (flagged_hash) {
-            /* needs int cast for C++ compilers, doesn't it?  */
-            TRACEME(("store_hash (0x%" UVxf ") (flags %x)", PTR2UV(hv),
-                     (int) hash_flags));
-        } else {
-            TRACEME(("store_hash (0x%" UVxf ")", PTR2UV(hv)));
-        }
+	MUST_FIT_IN_UV(len);
 
 	/* 
 	 * Signal hash by emitting SX_HASH, followed by the table length.
 	 */
 
-        if (flagged_hash) {
-            PUTMARK(SX_FLAG_HASH);
-            PUTMARK(hash_flags);
-        } else {
-            PUTMARK(SX_HASH);
-        }
-        WLEN(len);
-        TRACEME(("size = %d, used = %d", len, (int)HvUSEDKEYS(hv)));
+	if (len > 0x7fffffffu) {
+		/* 
+		 * Large hash: SX_LOBJECT type hashflags? U64 data
+		 *
+		 * Stupid limitation:
+		 * Note that perl can store more than 2G keys, but only iterate over 2G max.
+		 * We need to manually iterate over it then, unsorted. But until perl
+		 * itself cannot do that, skip that.
+		 */
+		TRACEME(("lobject size = %lu", len));
+#ifdef HAS_U64
+		PUTMARK(SX_LOBJECT);
+		if (flagged_hash) {
+			PUTMARK(SX_FLAG_HASH);
+			PUTMARK(hash_flags);
+		} else {
+			PUTMARK(SX_HASH);
+		}
+		W64LEN(len);
+		return store_lhash(aTHX_ cxt, hv, hash_flags);
+#else
+		CROAK(("Storable cannot yet handle overlong hashes with >2G keys"));
+#endif
+	} else {
+		I32 l = (I32)len;
+		if (flagged_hash) {
+			TRACEME(("store_hash (0x%" UVxf ") (flags %x)", PTR2UV(hv),
+				 (int) hash_flags));
+			PUTMARK(SX_FLAG_HASH);
+			PUTMARK(hash_flags);
+		} else {
+			TRACEME(("store_hash (0x%" UVxf ")", PTR2UV(hv)));
+			PUTMARK(SX_HASH);
+		}
+		WLEN(l);
+		TRACEME(("size = %d, used = %d", l, (int)HvUSEDKEYS(hv)));
+	}
 
 	/*
 	 * Save possible iteration state via each() on that table.
+	 *
+	 * Note that perl as of 5.24 *can* store more than 2G keys, but *not*
+	 * iterate over it.
+	 * Lengths of hash keys are also limited to I32, which is good.
 	 */
 
 	riter = HvRITER_get(hv);
@@ -2444,8 +2548,8 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 	/*
 	 * Now store each item recursively.
 	 *
-         * If canonical is defined to some true value then store each
-         * key/value pair in sorted order otherwise the order is random.
+	 * If canonical is defined to some true value then store each
+	 * key/value pair in sorted order otherwise the order is random.
 	 * Canonical order is irrelevant when a deep clone operation is performed.
 	 *
 	 * Fetch the value from perl only once per store() operation, and only
@@ -2461,18 +2565,18 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 		 * Storing in order, sorted by key.
 		 * Run through the hash, building up an array of keys in a
 		 * mortal array, sort the array and then run through the
-		 * array.  
+		 * array.
 		 */
 		AV *av = newAV();
-                av_extend (av, len);
+		av_extend (av, len);
 
 		TRACEME(("using canonical order"));
 
 		for (i = 0; i < len; i++) {
 #ifdef HAS_RESTRICTED_HASHES
-                        HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
+			HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
 #else
-                        HE *he = hv_iternext(hv);
+			HE *he = hv_iternext(hv);
 #endif
 			av_store(av, i, hv_iterkeysv(he));
 		}
@@ -2483,10 +2587,10 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 #ifdef HAS_RESTRICTED_HASHES
 			int placeholders = (int)HvPLACEHOLDERS_get(hv);
 #endif
-                        unsigned char flags = 0;
+			unsigned char flags = 0;
 			char *keyval;
 			STRLEN keylen_tmp;
-                        I32 keylen;
+			I32 keylen;
 			SV *key = av_shift(av);
 			/* This will fail if key is a placeholder.
 			   Track how many placeholders we have, and error if we
@@ -2506,7 +2610,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 					/* This should not happen - number of
 					   retrieves should be identical to
 					   number of placeholders.  */
-			  		return 1;
+					return 1;
 				}
 				/* Value is never needed, and PL_sv_undef is
 				   more space efficient to store.  */
@@ -2518,12 +2622,12 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 				return 1;
 #endif
 			}
-			
+
 			/*
 			 * Store value first.
 			 */
-			
-			TRACEME(("(#%d) value 0x%" UVxf, i, PTR2UV(val)));
+
+			TRACEME(("(#%d) value 0x%" UVxf, (int)i, PTR2UV(val)));
 
 			if ((ret = store(aTHX_ cxt, val)))	/* Extra () for -Wall, grr... */
 				goto out;
@@ -2535,66 +2639,66 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 			 * read into a fixed unique buffer called kbuf.
 			 * See retrieve_hash() for details.
 			 */
-			 
-                        /* Implementation of restricted hashes isn't nicely
-                           abstracted:  */
+
+			/* Implementation of restricted hashes isn't nicely
+			   abstracted:  */
 			if ((hash_flags & SHV_RESTRICTED)
 			    && SvTRULYREADONLY(val)) {
 				flags |= SHV_K_LOCKED;
 			}
 
 			keyval = SvPV(key, keylen_tmp);
-                        keylen = keylen_tmp;
+			keylen = keylen_tmp;
 #ifdef HAS_UTF8_HASHES
-                        /* If you build without optimisation on pre 5.6
-                           then nothing spots that SvUTF8(key) is always 0,
-                           so the block isn't optimised away, at which point
-                           the linker dislikes the reference to
-                           bytes_from_utf8.  */
+			/* If you build without optimisation on pre 5.6
+			   then nothing spots that SvUTF8(key) is always 0,
+			   so the block isn't optimised away, at which point
+			   the linker dislikes the reference to
+			   bytes_from_utf8.  */
 			if (SvUTF8(key)) {
-                            const char *keysave = keyval;
-                            bool is_utf8 = TRUE;
+				const char *keysave = keyval;
+				bool is_utf8 = TRUE;
 
-                            /* Just casting the &klen to (STRLEN) won't work
-                               well if STRLEN and I32 are of different widths.
-                               --jhi */
-                            keyval = (char*)bytes_from_utf8((U8*)keyval,
-                                                            &keylen_tmp,
-                                                            &is_utf8);
+				/* Just casting the &klen to (STRLEN) won't work
+				   well if STRLEN and I32 are of different widths.
+				   --jhi */
+				keyval = (char*)bytes_from_utf8((U8*)keyval,
+								&keylen_tmp,
+								&is_utf8);
 
-                            /* If we were able to downgrade here, then than
-                               means that we have  a key which only had chars
-                               0-255, but was utf8 encoded.  */
+				/* If we were able to downgrade here, then than
+				   means that we have  a key which only had chars
+				   0-255, but was utf8 encoded.  */
 
-                            if (keyval != keysave) {
-                                keylen = keylen_tmp;
-                                flags |= SHV_K_WASUTF8;
-                            } else {
-                                /* keylen_tmp can't have changed, so no need
-                                   to assign back to keylen.  */
-                                flags |= SHV_K_UTF8;
-                            }
-                        }
+				if (keyval != keysave) {
+					keylen = keylen_tmp;
+					flags |= SHV_K_WASUTF8;
+				} else {
+					/* keylen_tmp can't have changed, so no need
+					   to assign back to keylen.  */
+					flags |= SHV_K_UTF8;
+				}
+			}
 #endif
 
-                        if (flagged_hash) {
-                            PUTMARK(flags);
-                            TRACEME(("(#%d) key '%s' flags %x %u", i, keyval, flags, *keyval));
-                        } else {
-                            /* This is a workaround for a bug in 5.8.0
-                               that causes the HEK_WASUTF8 flag to be
-                               set on an HEK without the hash being
-                               marked as having key flags. We just
-                               cross our fingers and drop the flag.
-                               AMS 20030901 */
-                            assert (flags == 0 || flags == SHV_K_WASUTF8);
-                            TRACEME(("(#%d) key '%s'", i, keyval));
-                        }
+			if (flagged_hash) {
+				PUTMARK(flags);
+				TRACEME(("(#%d) key '%s' flags %x %u", (int)i, keyval, flags, *keyval));
+			} else {
+				/* This is a workaround for a bug in 5.8.0
+				   that causes the HEK_WASUTF8 flag to be
+				   set on an HEK without the hash being
+				   marked as having key flags. We just
+				   cross our fingers and drop the flag.
+				   AMS 20030901 */
+				assert (flags == 0 || flags == SHV_K_WASUTF8);
+				TRACEME(("(#%d) key '%s'", (int)i, keyval));
+			}
 			WLEN(keylen);
 			if (keylen)
 				WRITE(keyval, keylen);
-                        if (flags & SHV_K_WASUTF8)
-                            Safefree (keyval);
+			if (flags & SHV_K_WASUTF8)
+				Safefree (keyval);
 		}
 
 		/* 
@@ -2610,66 +2714,63 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 		 * Storing in "random" order (in the order the keys are stored
 		 * within the hash).  This is the default and will be faster!
 		 */
-  
+
 		for (i = 0; i < len; i++) {
-			char *key = 0;
-			I32 len;
-                        unsigned char flags;
 #ifdef HV_ITERNEXT_WANTPLACEHOLDERS
-                        HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
+			HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
 #else
-                        HE *he = hv_iternext(hv);
+			HE *he = hv_iternext(hv);
 #endif
 			SV *val = (he ? hv_iterval(hv, he) : 0);
-                        SV *key_sv = NULL;
-                        HEK *hek;
 
 			if (val == 0)
 				return 1;		/* Internal error, not I/O error */
 
-                        /* Implementation of restricted hashes isn't nicely
-                           abstracted:  */
-                        flags
-                            = (((hash_flags & SHV_RESTRICTED)
-                                && SvTRULYREADONLY(val))
-                                             ? SHV_K_LOCKED : 0);
+			if ((ret = store_hentry(aTHX_ cxt, hv, i, he, hash_flags)))
+				goto out;
+#if 0
+			/* Implementation of restricted hashes isn't nicely
+			   abstracted:  */
+			flags = (((hash_flags & SHV_RESTRICTED)
+				  && SvTRULYREADONLY(val))
+				 ? SHV_K_LOCKED : 0);
 
-                        if (val == &PL_sv_placeholder) {
-                            flags |= SHV_K_PLACEHOLDER;
-			    val = &PL_sv_undef;
+			if (val == &PL_sv_placeholder) {
+				flags |= SHV_K_PLACEHOLDER;
+				val = &PL_sv_undef;
 			}
 
 			/*
 			 * Store value first.
 			 */
 
-			TRACEME(("(#%d) value 0x%" UVxf, i, PTR2UV(val)));
+			TRACEME(("(#%d) value 0x%" UVxf, (int)i, PTR2UV(val)));
 
-			if ((ret = store(aTHX_ cxt, val)))	/* Extra () for -Wall, grr... */
+			if ((ret = store(aTHX_ cxt, val)))	/* Extra () for -Wall */
 				goto out;
 
 
-                        hek = HeKEY_hek(he);
-                        len = HEK_LEN(hek);
-                        if (len == HEf_SVKEY) {
-                            /* This is somewhat sick, but the internal APIs are
-                             * such that XS code could put one of these in in
-                             * a regular hash.
-                             * Maybe we should be capable of storing one if
-                             * found.
-                             */
-                            key_sv = HeKEY_sv(he);
-                            flags |= SHV_K_ISSV;
-                        } else {
-                            /* Regular string key. */
+			hek = HeKEY_hek(he);
+			len = HEK_LEN(hek);
+			if (len == HEf_SVKEY) {
+				/* This is somewhat sick, but the internal APIs are
+				 * such that XS code could put one of these in in
+				 * a regular hash.
+				 * Maybe we should be capable of storing one if
+				 * found.
+				 */
+				key_sv = HeKEY_sv(he);
+				flags |= SHV_K_ISSV;
+			} else {
+				/* Regular string key. */
 #ifdef HAS_HASH_KEY_FLAGS
-                            if (HEK_UTF8(hek))
-                                flags |= SHV_K_UTF8;
-                            if (HEK_WASUTF8(hek))
-                                flags |= SHV_K_WASUTF8;
+				if (HEK_UTF8(hek))
+					flags |= SHV_K_UTF8;
+				if (HEK_WASUTF8(hek))
+					flags |= SHV_K_WASUTF8;
 #endif
-                            key = HEK_KEY(hek);
-                        }
+				key = HEK_KEY(hek);
+			}
 			/*
 			 * Write key string.
 			 * Keys are written after values to make sure retrieval
@@ -2678,30 +2779,31 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 			 * See retrieve_hash() for details.
 			 */
 
-                        if (flagged_hash) {
-                            PUTMARK(flags);
-                            TRACEME(("(#%d) key '%s' flags %x", i, key, flags));
-                        } else {
-                            /* This is a workaround for a bug in 5.8.0
-                               that causes the HEK_WASUTF8 flag to be
-                               set on an HEK without the hash being
-                               marked as having key flags. We just
-                               cross our fingers and drop the flag.
-                               AMS 20030901 */
-                            assert (flags == 0 || flags == SHV_K_WASUTF8);
-                            TRACEME(("(#%d) key '%s'", i, key));
-                        }
-                        if (flags & SHV_K_ISSV) {
-                            int ret;
-                            if ((ret = store(aTHX_ cxt, key_sv)))
-                                goto out;
-                        } else {
-                            WLEN(len);
-                            if (len)
-				WRITE(key, len);
-                        }
+			if (flagged_hash) {
+				PUTMARK(flags);
+				TRACEME(("(#%d) key '%s' flags %x", (int)i, key, flags));
+			} else {
+				/* This is a workaround for a bug in 5.8.0
+				   that causes the HEK_WASUTF8 flag to be
+				   set on an HEK without the hash being
+				   marked as having key flags. We just
+				   cross our fingers and drop the flag.
+				   AMS 20030901 */
+				assert (flags == 0 || flags == SHV_K_WASUTF8);
+				TRACEME(("(#%d) key '%s'", (int)i, key));
+			}
+			if (flags & SHV_K_ISSV) {
+				int ret;
+				if ((ret = store(aTHX_ cxt, key_sv)))
+					goto out;
+			} else {
+				WLEN(len);
+				if (len)
+					WRITE(key, len);
+			}
+#endif
 		}
-    }
+	}
 
 	TRACEME(("ok (hash 0x%" UVxf ")", PTR2UV(hv)));
 
@@ -2709,6 +2811,128 @@ out:
 	HvRITER_set(hv, riter);		/* Restore hash iterator state */
 	HvEITER_set(hv, eiter);
 
+	return ret;
+}
+
+static int store_hentry(pTHX_ stcxt_t *cxt, HV* hv, UV i, HE *he, unsigned char hash_flags)
+{
+	int ret = 0;
+	SV* val = hv_iterval(hv, he);
+	int flagged_hash = ((SvREADONLY(hv)
+#ifdef HAS_HASH_KEY_FLAGS
+			     || HvHASKFLAGS(hv)
+#endif
+			     ) ? 1 : 0);
+	unsigned char flags = (((hash_flags & SHV_RESTRICTED)
+				&& SvTRULYREADONLY(val))
+			       ? SHV_K_LOCKED : 0);
+
+	if (val == &PL_sv_placeholder) {
+		flags |= SHV_K_PLACEHOLDER;
+		val = &PL_sv_undef;
+	}
+
+	/*
+	 * Store value first.
+	 */
+
+	TRACEME(("(#%d) value 0x%"UVxf, (int)i, PTR2UV(val)));
+
+	{
+		HEK* hek = HeKEY_hek(he);
+		I32  len = HEK_LEN(hek);
+		SV *key_sv = NULL;
+		char *key = 0;
+
+		if ((ret = store(aTHX_ cxt, val)))
+			return ret;
+		if (len == HEf_SVKEY) {
+			key_sv = HeKEY_sv(he);
+			flags |= SHV_K_ISSV;
+		} else {
+			/* Regular string key. */
+#ifdef HAS_HASH_KEY_FLAGS
+			if (HEK_UTF8(hek))
+				flags |= SHV_K_UTF8;
+			if (HEK_WASUTF8(hek))
+				flags |= SHV_K_WASUTF8;
+#endif
+			key = HEK_KEY(hek);
+		}
+		/*
+		 * Write key string.
+		 * Keys are written after values to make sure retrieval
+		 * can be optimal in terms of memory usage, where keys are
+		 * read into a fixed unique buffer called kbuf.
+		 * See retrieve_hash() for details.
+		 */
+
+		if (flagged_hash) {
+			PUTMARK(flags);
+			TRACEME(("(#%d) key '%s' flags %x", (int)i, key, flags));
+		} else {
+			/* This is a workaround for a bug in 5.8.0
+			   that causes the HEK_WASUTF8 flag to be
+			   set on an HEK without the hash being
+			   marked as having key flags. We just
+			   cross our fingers and drop the flag.
+			   AMS 20030901 */
+			assert (flags == 0 || flags == SHV_K_WASUTF8);
+			TRACEME(("(#%d) key '%s'", (int)i, key));
+		}
+		if (flags & SHV_K_ISSV) {
+			if ((ret = store(aTHX_ cxt, key_sv)))
+				return ret;
+		} else {
+			WLEN(len);
+			if (len)
+				WRITE(key, len);
+		}
+	}
+	return ret;
+}
+
+
+/*
+ * store_lhash
+ *
+ * Store a overlong hash table, with >2G keys, which we cannot iterate over. (xhv_eiter is only I32)
+ * and we also do not want to sort it.
+ * So we walk the buckets and chains manually.
+ *
+ * type, len and flags are already written.
+ */
+
+static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags)
+{
+	dVAR;
+	int ret = 0;
+	Size_t i;
+	UV ix = 0;
+	HE** array;
+#ifdef DEBUGME
+	UV len = HvTOTALKEYS(hv);
+#endif
+	if (hash_flags) {
+		TRACEME(("store_hash (0x%"UVxf") (flags %x)", PTR2UV(hv),
+			 (int) hash_flags));
+	} else {
+		TRACEME(("store_hash (0x%"UVxf")", PTR2UV(hv)));
+	}
+	TRACEME(("size = %"UVuf", used = %"UVuf, len, HvUSEDKEYS(hv)));
+
+	array = HvARRAY(hv);
+	for (i = 0; i <= (Size_t)HvMAX(hv); i++) {
+		HE* entry = array[i];
+		if (!entry) continue;
+		if ((ret = store_hentry(aTHX_ cxt, hv, ix++, entry, hash_flags)))
+			return ret;
+		while ((entry = HeNEXT(entry))) {
+			if ((ret = store_hentry(aTHX_ cxt, hv, ix++, entry, hash_flags)))
+				return ret;
+		}
+	}
+	assert(ix == len);
 	return ret;
 }
 
@@ -2729,8 +2953,8 @@ static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
 	return store_other(aTHX_ cxt, (SV*)cv);
 #else
 	dSP;
-	I32 len;
-	int count, reallen;
+	STRLEN len;
+	STRLEN count, reallen;
 	SV *text, *bdeparse;
 
 	TRACEME(("store_code (0x%" UVxf ")", PTR2UV(cv)));
@@ -2749,7 +2973,7 @@ static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
 	 */
 	/* Ownership of both SVs is passed to load_module, which frees them. */
 	load_module(PERL_LOADMOD_NOIMPORT, newSVpvs("B::Deparse"), newSVnv(0.61));
-        SPAGAIN;
+	SPAGAIN;
 
 	ENTER;
 	SAVETMPS;
@@ -2799,7 +3023,7 @@ static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
 
 	PUTMARK(SX_CODE);
 	cxt->tagnum++;   /* necessary, as SX_CODE is a SEEN() candidate */
-	TRACEME(("size = %d", len));
+	TRACEME(("size = %d", (int)len));
 	TRACEME(("code = %s", SvPV_nolen(text)));
 
 	/*
@@ -2994,7 +3218,7 @@ static int store_tied_item(pTHX_ stcxt_t *cxt, SV *sv)
  * any other tied variable.
  */
 static int store_hook(
-        pTHX_
+	pTHX_
 	stcxt_t *cxt,
 	SV *sv,
 	int type,
@@ -3026,7 +3250,7 @@ static int store_hook(
 	 */
 
 	switch (type) {
-        case svis_REF:
+	case svis_REF:
 	case svis_SCALAR:
 		obj_type = SHT_SCALAR;
 		break;
@@ -3109,7 +3333,7 @@ static int store_hook(
 		/* free empty list returned by the hook */
 		av_undef(av);
 		sv_free((SV *) av);
-		
+
 		/*
 		 * They must not change their mind in the middle of a serialization.
 		 */
@@ -3117,7 +3341,7 @@ static int store_hook(
 		if (hv_fetch(cxt->hclass, classname, len, FALSE))
 			CROAK(("Too late to ignore hooks for %s class \"%s\"",
 				(cxt->optype & ST_CLONE) ? "cloning" : "storing", classname));
-	
+
 		pkg_hide(aTHX_ cxt->hook, pkg, "STORABLE_freeze");
 
 		ASSERT(!pkg_can(aTHX_ cxt->hook, pkg, "STORABLE_freeze"), ("hook invisible"));
@@ -3135,11 +3359,11 @@ static int store_hook(
 	/* We can't use pkg_can here because it only caches one method per
 	 * package */
 	{ 
-	    GV* gv = gv_fetchmethod_autoload(pkg, "STORABLE_attach", FALSE);
-	    if (gv && isGV(gv)) {
-	        if (count > 1)
-	            CROAK(("Freeze cannot return references if %s class is using STORABLE_attach", classname));
-	        goto check_done;
+		GV* gv = gv_fetchmethod_autoload(pkg, "STORABLE_attach", FALSE);
+		if (gv && isGV(gv)) {
+			if (count > 1)
+				CROAK(("Freeze cannot return references if %s class is using STORABLE_attach", classname));
+			goto check_done;
 	    }
 	}
 
@@ -3169,14 +3393,14 @@ static int store_hook(
 
 		if (!SvROK(rsv))
 			CROAK(("Item #%d returned by STORABLE_freeze "
-				"for %s is not a reference", i, classname));
+				"for %s is not a reference", (int)i, classname));
 		xsv = SvRV(rsv);		/* Follow ref to know what to look for */
 
 		/*
 		 * Look in hseen and see if we have a tag already.
 		 * Serialize entry if not done already, and get its tag.
 		 */
-	
+
 #ifdef USE_PTR_TABLE
 		/* Fakery needed because ptr_table_fetch returns zero for a
 		   failure, whereas the existing code assumes that it can
@@ -3218,11 +3442,11 @@ static int store_hook(
 #ifdef USE_PTR_TABLE
 		fake_tag = (char *)ptr_table_fetch(cxt->pseen, xsv);
 		if (!sv)
-			CROAK(("Could not serialize item #%d from hook in %s", i, classname));
+			CROAK(("Could not serialize item #%d from hook in %s", (int)i, classname));
 #else
 		svh = hv_fetch(cxt->hseen, (char *) &xsv, sizeof(xsv), FALSE);
 		if (!svh)
-			CROAK(("Could not serialize item #%d from hook in %s", i, classname));
+			CROAK(("Could not serialize item #%d from hook in %s", (int)i, classname));
 #endif
 		/*
 		 * It was the first time we serialized 'xsv'.
@@ -3296,7 +3520,7 @@ check_done:
 	if (count > (LG_SCALAR + 1))
 		flags |= SHF_LARGE_LISTLEN;
 
-	/* 
+	/*
 	 * We're ready to emit either serialized form:
 	 *
 	 *   SX_HOOK <flags> <len> <classname> <len2> <str> [<len3> <object-IDs>]
@@ -3432,7 +3656,7 @@ check_done:
  * on the high-order bit in flag (same encoding as above for <len>).
  */
 static int store_blessed(
-        pTHX_
+	pTHX_
 	stcxt_t *cxt,
 	SV *sv,
 	int type,
@@ -3515,7 +3739,7 @@ static int store_blessed(
  */
 static int store_other(pTHX_ stcxt_t *cxt, SV *sv)
 {
-	I32 len;
+	STRLEN len;
 	char buf[80];
 
 	TRACEME(("store_other"));
@@ -3697,7 +3921,7 @@ static int store(pTHX_ stcxt_t *cxt, SV *sv)
 			type = svis_SCALAR;
 			goto undef_special_case;
 		}
-		
+
 #ifdef USE_PTR_TABLE
 		tagval = htonl(LOW_32BITS(((char *)svh)-1));
 #else
@@ -3769,87 +3993,87 @@ undef_special_case:
  */
 static int magic_write(pTHX_ stcxt_t *cxt)
 {
-    /*
-     * Starting with 0.6, the "use_network_order" byte flag is also used to
-     * indicate the version number of the binary image, encoded in the upper
-     * bits. The bit 0 is always used to indicate network order.
-     */
-    /*
-     * Starting with 0.7, a full byte is dedicated to the minor version of
-     * the binary format, which is incremented only when new markers are
-     * introduced, for instance, but when backward compatibility is preserved.
-     */
+	/*
+	 * Starting with 0.6, the "use_network_order" byte flag is also used to
+	 * indicate the version number of the binary image, encoded in the upper
+	 * bits. The bit 0 is always used to indicate network order.
+	 */
+	/*
+	 * Starting with 0.7, a full byte is dedicated to the minor version of
+	 * the binary format, which is incremented only when new markers are
+	 * introduced, for instance, but when backward compatibility is preserved.
+	 */
 
-    /* Make these at compile time.  The WRITE() macro is sufficiently complex
-       that it saves about 200 bytes doing it this way and only using it
-       once.  */
-    static const unsigned char network_file_header[] = {
-        MAGICSTR_BYTES,
-        (STORABLE_BIN_MAJOR << 1) | 1,
-        STORABLE_BIN_WRITE_MINOR
-    };
-    static const unsigned char file_header[] = {
-        MAGICSTR_BYTES,
-        (STORABLE_BIN_MAJOR << 1) | 0,
-        STORABLE_BIN_WRITE_MINOR,
-        /* sizeof the array includes the 0 byte at the end:  */
-        (char) sizeof (byteorderstr) - 1,
-        BYTEORDER_BYTES,
-        (unsigned char) sizeof(int),
-	(unsigned char) sizeof(long),
-        (unsigned char) sizeof(char *),
-	(unsigned char) sizeof(NV)
-    };
+	/* Make these at compile time.  The WRITE() macro is sufficiently complex
+	   that it saves about 200 bytes doing it this way and only using it
+	   once.  */
+	static const unsigned char network_file_header[] = {
+		MAGICSTR_BYTES,
+		(STORABLE_BIN_MAJOR << 1) | 1,
+		STORABLE_BIN_WRITE_MINOR
+	};
+	static const unsigned char file_header[] = {
+		MAGICSTR_BYTES,
+		(STORABLE_BIN_MAJOR << 1) | 0,
+		STORABLE_BIN_WRITE_MINOR,
+		/* sizeof the array includes the 0 byte at the end:  */
+		(char) sizeof (byteorderstr) - 1,
+		BYTEORDER_BYTES,
+		(unsigned char) sizeof(int),
+		(unsigned char) sizeof(long),
+		(unsigned char) sizeof(char *),
+		(unsigned char) sizeof(NV)
+	};
 #ifdef USE_56_INTERWORK_KLUDGE
-    static const unsigned char file_header_56[] = {
-        MAGICSTR_BYTES,
-        (STORABLE_BIN_MAJOR << 1) | 0,
-        STORABLE_BIN_WRITE_MINOR,
-        /* sizeof the array includes the 0 byte at the end:  */
-        (char) sizeof (byteorderstr_56) - 1,
-        BYTEORDER_BYTES_56,
-        (unsigned char) sizeof(int),
-	(unsigned char) sizeof(long),
-        (unsigned char) sizeof(char *),
-	(unsigned char) sizeof(NV)
-    };
+	static const unsigned char file_header_56[] = {
+		MAGICSTR_BYTES,
+		(STORABLE_BIN_MAJOR << 1) | 0,
+		STORABLE_BIN_WRITE_MINOR,
+		/* sizeof the array includes the 0 byte at the end:  */
+		(char) sizeof (byteorderstr_56) - 1,
+		BYTEORDER_BYTES_56,
+		(unsigned char) sizeof(int),
+		(unsigned char) sizeof(long),
+		(unsigned char) sizeof(char *),
+		(unsigned char) sizeof(NV)
+	};
 #endif
-    const unsigned char *header;
-    SSize_t length;
+	const unsigned char *header;
+	SSize_t length;
 
-    TRACEME(("magic_write on fd=%d", cxt->fio ? PerlIO_fileno(cxt->fio) : -1));
+	TRACEME(("magic_write on fd=%d", cxt->fio ? PerlIO_fileno(cxt->fio) : -1));
 
-    if (cxt->netorder) {
-        header = network_file_header;
-        length = sizeof (network_file_header);
-    } else {
+	if (cxt->netorder) {
+		header = network_file_header;
+		length = sizeof (network_file_header);
+	} else {
 #ifdef USE_56_INTERWORK_KLUDGE
-        if (SvTRUE(perl_get_sv("Storable::interwork_56_64bit", GV_ADD))) {
-            header = file_header_56;
-            length = sizeof (file_header_56);
-        } else
+		if (SvTRUE(perl_get_sv("Storable::interwork_56_64bit", GV_ADD))) {
+			header = file_header_56;
+			length = sizeof (file_header_56);
+		} else
 #endif
-        {
-            header = file_header;
-            length = sizeof (file_header);
-        }
-    }        
+			{
+				header = file_header;
+				length = sizeof (file_header);
+			}
+	}
 
-    if (!cxt->fio) {
-        /* sizeof the array includes the 0 byte at the end.  */
-        header += sizeof (magicstr) - 1;
-        length -= sizeof (magicstr) - 1;
-    }        
+	if (!cxt->fio) {
+		/* sizeof the array includes the 0 byte at the end.  */
+		header += sizeof (magicstr) - 1;
+		length -= sizeof (magicstr) - 1;
+	}
 
-    WRITE( (unsigned char*) header, length);
+	WRITE( (unsigned char*) header, length);
 
-    if (!cxt->netorder) {
-	TRACEME(("ok (magic_write byteorder = 0x%lx [%d], I%d L%d P%d D%d)",
-		 (unsigned long) BYTEORDER, (int) sizeof (byteorderstr) - 1,
-		 (int) sizeof(int), (int) sizeof(long),
-		 (int) sizeof(char *), (int) sizeof(NV)));
-    }
-    return 0;
+	if (!cxt->netorder) {
+		TRACEME(("ok (magic_write byteorder = 0x%lx [%d], I%d L%d P%d D%d)",
+			 (unsigned long) BYTEORDER, (int) sizeof (byteorderstr) - 1,
+			 (int) sizeof(int), (int) sizeof(long),
+			 (int) sizeof(char *), (int) sizeof(NV)));
+	}
+	return 0;
 }
 
 /*
@@ -3864,7 +4088,7 @@ static int magic_write(pTHX_ stcxt_t *cxt)
  * dclone() and store() is performed to memory.
  */
 static int do_store(
-        pTHX_
+	pTHX_
 	PerlIO *f,
 	SV *sv,
 	int optype,
@@ -4410,39 +4634,41 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 	 * caches one method */
 	attach = gv_fetchmethod_autoload(stash, "STORABLE_attach", FALSE);
 	if (attach && isGV(attach)) {
-	    SV* attached;
-	    SV* attach_hook = newRV((SV*) GvCV(attach));
+		SV* attached;
+		SV* attach_hook = newRV((SV*) GvCV(attach));
 
-	    if (av)
-	        CROAK(("STORABLE_attach called with unexpected references"));
-	    av = newAV();
-	    av_extend(av, 1);
-	    AvFILLp(av) = 0;
-	    AvARRAY(av)[0] = SvREFCNT_inc(frozen);
-	    rv = newSVpv(classname, 0);
-	    attached = scalar_call(aTHX_ rv, attach_hook, clone, av, G_SCALAR);
-	    /* Free memory after a call */
-	    SvREFCNT_dec(rv);
-	    SvREFCNT_dec(frozen);
-	    av_undef(av);
-	    sv_free((SV *) av);
-	    SvREFCNT_dec(attach_hook);
-	    if (attached &&
-	        SvROK(attached) && 
-	        sv_derived_from(attached, classname)
-        ) {
-	        UNSEE();
-		/* refcnt of unneeded sv is 2 at this point (one from newHV, second from SEEN call) */
-		SvREFCNT_dec(sv);
-		SvREFCNT_dec(sv);
-		/* we need to free RV but preserve value that RV point to */
-		sv = SvRV(attached);
-		SEEN0_NN(sv, 0);
-		SvRV_set(attached, NULL);
-		SvREFCNT_dec(attached);
-		return sv;
-	    }
-	    CROAK(("STORABLE_attach did not return a %s object", classname));
+		if (av)
+			CROAK(("STORABLE_attach called with unexpected references"));
+		av = newAV();
+		av_extend(av, 1);
+		AvFILLp(av) = 0;
+		AvARRAY(av)[0] = SvREFCNT_inc(frozen);
+		rv = newSVpv(classname, 0);
+		attached = scalar_call(aTHX_ rv, attach_hook, clone, av, G_SCALAR);
+		/* Free memory after a call */
+		SvREFCNT_dec(rv);
+		SvREFCNT_dec(frozen);
+		av_undef(av);
+		sv_free((SV *) av);
+		SvREFCNT_dec(attach_hook);
+		if (attached &&
+		    SvROK(attached) && 
+		    sv_derived_from(attached, classname)
+		    ) {
+			UNSEE();
+			/* refcnt of unneeded sv is 2 at this point (one from newHV, second from SEEN call) */
+			SvREFCNT_dec(sv);
+			SvREFCNT_dec(sv);
+			/* we need to free RV but preserve value that RV point to */
+			sv = SvRV(attached);
+			SEEN0_NN(sv, 0);
+			SvRV_set(attached, NULL);
+			SvREFCNT_dec(attached);
+			if (!(flags & SHF_IDX_CLASSNAME) && classname != buf)
+				Safefree(classname);
+			return sv;
+		}
+		CROAK(("STORABLE_attach did not return a %s object", classname));
 	}
 
 	/*
@@ -4464,7 +4690,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 
 		TRACEME(("No STORABLE_thaw defined for objects of class %s", classname));
 		TRACEME(("Going to load module '%s'", classname));
-	        load_module(PERL_LOADMOD_NOIMPORT, newSVpv(classname, 0), Nullsv);
+		load_module(PERL_LOADMOD_NOIMPORT, newSVpv(classname, 0), Nullsv);
 
 		/*
 		 * We cache results of pkg_can, so we need to uncache before attempting
@@ -4495,7 +4721,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 	 * Call the hook as:
 	 *
 	 *   $object->STORABLE_thaw($cloning, $frozen, @refs);
-	 * 
+	 *
 	 * where $object is our blessed (empty) object, $cloning is a boolean
 	 * telling whether we're running a deep clone, $frozen is the frozen
 	 * string the user gave us in his serializing hook, and @refs, which may
@@ -4715,7 +4941,7 @@ static SV *retrieve_overloaded(pTHX_ stcxt_t *cxt, const char *cname)
 		       PTR2UV(sv)));
 	}
 	if (!Gv_AMG(stash)) {
-	        const char *package = HvNAME_get(stash);
+		const char *package = HvNAME_get(stash);
 		TRACEME(("No overloading defined for package %s", package));
 		TRACEME(("Going to load module '%s'", package));
 		load_module(PERL_LOADMOD_NOIMPORT, newSVpv(package, 0), Nullsv);
@@ -4942,24 +5168,17 @@ static SV *retrieve_tied_idx(pTHX_ stcxt_t *cxt, const char *cname)
 	return tv;
 }
 
-
 /*
- * retrieve_lscalar
+ * get_lstring
  *
- * Retrieve defined long (string) scalar.
- *
- * Layout is SX_LSCALAR <length> <data>, with SX_LSCALAR already read.
- * The scalar is "long" in that <length> is larger than LG_SCALAR so it
- * was not stored on a single byte.
+ * Helper to read a string
  */
-static SV *retrieve_lscalar(pTHX_ stcxt_t *cxt, const char *cname)
+static SV *get_lstring(pTHX_ stcxt_t *cxt, UV len, int isutf8, const char *cname)
 {
-	I32 len;
 	SV *sv;
 	HV *stash;
 
-	RLEN(len);
-	TRACEME(("retrieve_lscalar (#%d), len = %" IVdf, (int)cxt->tagnum, (IV) len));
+	TRACEME(("get_lstring (#%d), len = %" UVuf, (int)cxt->tagnum, len));
 
 	/*
 	 * Allocate an empty scalar of the suitable length.
@@ -4984,16 +5203,47 @@ static SV *retrieve_lscalar(pTHX_ stcxt_t *cxt, const char *cname)
 	 */
 
 	SAFEREAD(SvPVX(sv), len, sv);
-	SvCUR_set(sv, len);				/* Record C string length */
-	*SvEND(sv) = '\0';				/* Ensure it's null terminated anyway */
+	SvCUR_set(sv, len);			/* Record C string length */
+	*SvEND(sv) = '\0';			/* Ensure it's null terminated anyway */
 	(void) SvPOK_only(sv);			/* Validate string pointer */
-	if (cxt->s_tainted)				/* Is input source tainted? */
-		SvTAINT(sv);				/* External data cannot be trusted */
+	if (cxt->s_tainted)			/* Is input source tainted? */
+		SvTAINT(sv);			/* External data cannot be trusted */
 
-	TRACEME(("large scalar len %" IVdf " '%s'", (IV) len, SvPVX(sv)));
-	TRACEME(("ok (retrieve_lscalar at 0x%" UVxf ")", PTR2UV(sv)));
+	if (isutf8) {
+		TRACEME(("large utf8 string len %" UVuf " '%s'", len, SvPVX(sv)));
+#ifdef HAS_UTF8_SCALARS
+		SvUTF8_on(sv);
+#else
+		if (cxt->use_bytes < 0)
+			cxt->use_bytes
+				= (SvTRUE(perl_get_sv("Storable::drop_utf8", GV_ADD))
+				   ? 1 : 0);
+		if (cxt->use_bytes == 0)
+			UTF8_CROAK();
+#endif
+	} else {
+		TRACEME(("large string len %" UVuf " '%s'", len, SvPVX(sv)));
+	}
+	TRACEME(("ok (get_lstring at 0x%" UVxf ")", PTR2UV(sv)));
 
 	return sv;
+}
+
+/*
+ * retrieve_lscalar
+ *
+ * Retrieve defined long (string) scalar.
+ *
+ * Layout is SX_LSCALAR <length> <data>, with SX_LSCALAR already read.
+ * The scalar is "long" in that <length> is larger than LG_SCALAR so it
+ * was not stored on a single byte, but in 4 bytes. For strings longer than
+ * 4 byte (>2GB) see retrieve_lobject.
+ */
+static SV *retrieve_lscalar(pTHX_ stcxt_t *cxt, const char *cname)
+{
+	I32 len;
+	RLEN(len);
+        return get_lstring(aTHX_ cxt, len, 0, cname);
 }
 
 /*
@@ -5008,56 +5258,12 @@ static SV *retrieve_lscalar(pTHX_ stcxt_t *cxt, const char *cname)
 static SV *retrieve_scalar(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	int len;
-	SV *sv;
-	HV *stash;
+	/*SV *sv;
+	  HV *stash;*/
 
 	GETMARK(len);
 	TRACEME(("retrieve_scalar (#%d), len = %d", (int)cxt->tagnum, len));
-
-	/*
-	 * Allocate an empty scalar of the suitable length.
-	 */
-
-	sv = NEWSV(10002, len);
-	stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
-	SEEN_NN(sv, stash, 0);	/* Associate this new scalar with tag "tagnum" */
-
-	/*
-	 * WARNING: duplicates parts of sv_setpv and breaks SV data encapsulation.
-	 */
-
-	if (len == 0) {
-		/*
-		 * newSV did not upgrade to SVt_PV so the scalar is undefined.
-		 * To make it defined with an empty length, upgrade it now...
-		 * Don't upgrade to a PV if the original type contains more
-		 * information than a scalar.
-		 */
-		if (SvTYPE(sv) <= SVt_PV) {
-			sv_upgrade(sv, SVt_PV);
-		}
-		SvGROW(sv, 1);
-		*SvEND(sv) = '\0';			/* Ensure it's null terminated anyway */
-		TRACEME(("ok (retrieve_scalar empty at 0x%" UVxf ")", PTR2UV(sv)));
-	} else {
-		/*
-		 * Now, for efficiency reasons, read data directly inside the SV buffer,
-		 * and perform the SV final settings directly by duplicating the final
-		 * work done by sv_setpv. Since we're going to allocate lots of scalars
-		 * this way, it's worth the hassle and risk.
-		 */
-		SAFEREAD(SvPVX(sv), len, sv);
-		SvCUR_set(sv, len);			/* Record C string length */
-		*SvEND(sv) = '\0';			/* Ensure it's null terminated anyway */
-		TRACEME(("small scalar len %d '%s'", len, SvPVX(sv)));
-	}
-
-	(void) SvPOK_only(sv);			/* Validate string pointer */
-	if (cxt->s_tainted)				/* Is input source tainted? */
-		SvTAINT(sv);				/* External data cannot be trusted */
-
-	TRACEME(("ok (retrieve_scalar at 0x%" UVxf ")", PTR2UV(sv)));
-	return sv;
+	return get_lstring(aTHX_ cxt, (UV)len, 0, cname);
 }
 
 /*
@@ -5068,25 +5274,12 @@ static SV *retrieve_scalar(pTHX_ stcxt_t *cxt, const char *cname)
  */
 static SV *retrieve_utf8str(pTHX_ stcxt_t *cxt, const char *cname)
 {
-    SV *sv;
+	int len;
+	/*SV *sv;*/
 
-    TRACEME(("retrieve_utf8str"));
-
-    sv = retrieve_scalar(aTHX_ cxt, cname);
-    if (sv) {
-#ifdef HAS_UTF8_SCALARS
-        SvUTF8_on(sv);
-#else
-        if (cxt->use_bytes < 0)
-            cxt->use_bytes
-                = (SvTRUE(perl_get_sv("Storable::drop_utf8", GV_ADD))
-                   ? 1 : 0);
-        if (cxt->use_bytes == 0)
-            UTF8_CROAK();
-#endif
-    }
-
-    return sv;
+	TRACEME(("retrieve_utf8str"));
+	GETMARK(len);
+	return get_lstring(aTHX_ cxt, (UV)len, 1, cname);
 }
 
 /*
@@ -5097,24 +5290,12 @@ static SV *retrieve_utf8str(pTHX_ stcxt_t *cxt, const char *cname)
  */
 static SV *retrieve_lutf8str(pTHX_ stcxt_t *cxt, const char *cname)
 {
-    SV *sv;
+	int len;
 
-    TRACEME(("retrieve_lutf8str"));
+	TRACEME(("retrieve_lutf8str"));
 
-    sv = retrieve_lscalar(aTHX_ cxt, cname);
-    if (sv) {
-#ifdef HAS_UTF8_SCALARS
-        SvUTF8_on(sv);
-#else
-        if (cxt->use_bytes < 0)
-            cxt->use_bytes
-                = (SvTRUE(perl_get_sv("Storable::drop_utf8", GV_ADD))
-                   ? 1 : 0);
-        if (cxt->use_bytes == 0)
-            UTF8_CROAK();
-#endif
-    }
-    return sv;
+	RLEN(len);
+	return get_lstring(aTHX_ cxt, (UV)len, 1, cname);
 }
 
 /*
@@ -5210,6 +5391,50 @@ static SV *retrieve_integer(pTHX_ stcxt_t *cxt, const char *cname)
 	TRACEME(("integer %" IVdf, iv));
 	TRACEME(("ok (retrieve_integer at 0x%" UVxf ")", PTR2UV(sv)));
 
+	return sv;
+}
+
+/*
+ * retrieve_lobject
+ *
+ * Retrieve overlong scalar, array or hash.
+ * Layout is SX_LOBJECT type U64_len ...
+ */
+static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname)
+{
+	SV *sv;
+	int type;
+	UV  len;
+
+	TRACEME(("retrieve_lobject (#%d)", (int)cxt->tagnum));
+
+	GETMARK(type);
+	TRACEME(("object type %d", type));
+	READ(&len, 8);
+	TRACEME(("wlen %"UVuf, len));
+	switch (type) {
+	case SX_LSCALAR:
+		sv = get_lstring(aTHX_ cxt, len, 0, cname);
+		break;
+	case SX_LUTF8STR:
+		sv = get_lstring(aTHX_ cxt, len, 1, cname);
+		break;
+	case SX_ARRAY:
+		sv = get_larray(aTHX_ cxt, len, cname);
+		break;
+#ifdef HAS_U64
+	case SX_FLAG_HASH:
+		sv = get_lhash(aTHX_ cxt, len, 1, cname);
+		break;
+	case SX_HASH:
+		sv = get_lhash(aTHX_ cxt, len, 0, cname);
+		break;
+#endif
+	default:
+		CROAK(("Unexpected type %d in retrieve_lobject\n", type));
+	}
+
+	TRACEME(("ok (retrieve_lobject at 0x%"UVxf")", PTR2UV(sv)));
 	return sv;
 }
 
@@ -5429,7 +5654,7 @@ static SV *retrieve_array(pTHX_ stcxt_t *cxt, const char *cname)
 	 */
 
 	for (i = 0; i < len; i++) {
-		TRACEME(("(#%d) item", i));
+		TRACEME(("(#%d) item", (int)i));
 		sv = retrieve(aTHX_ cxt, 0);			/* Retrieve item */
 		if (!sv)
 			return (SV *) 0;
@@ -5448,6 +5673,136 @@ static SV *retrieve_array(pTHX_ stcxt_t *cxt, const char *cname)
 
 	return (SV *) av;
 }
+
+/* internal method with len already read */
+
+static SV *get_larray(pTHX_ stcxt_t *cxt, UV len, const char *cname)
+{
+	UV i;
+	AV *av;
+	SV *sv;
+	HV *stash;
+	bool seen_null = FALSE;
+
+	TRACEME(("get_larray (#%d) %lu", (int)cxt->tagnum, len));
+
+	/*
+	 * allocate array, then pre-extend it.
+	 */
+
+	av = newAV();
+	stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
+	SEEN_NN(av, stash, 0);			/* Will return if array not allocated nicely */
+	assert(len);
+	av_extend(av, len);
+
+	/*
+	 * Now get each item in turn...
+	 */
+
+	for (i = 0; i < len; i++) {
+		TRACEME(("(#%d) item", (int)i));
+		sv = retrieve(aTHX_ cxt, 0);			/* Retrieve item */
+		if (!sv)
+			return (SV *) 0;
+		if (sv == &PL_sv_undef) {
+			seen_null = TRUE;
+			continue;
+		}
+		if (sv == &PL_sv_placeholder)
+			sv = &PL_sv_undef;
+		if (av_store(av, i, sv) == 0)
+			return (SV *) 0;
+	}
+	if (seen_null) av_fill(av, len-1);
+
+	TRACEME(("ok (get_larray at 0x%"UVxf")", PTR2UV(av)));
+
+	return (SV *) av;
+}
+
+/*
+ * get_lhash
+ *
+ * Retrieve a overlong hash table.
+ * <len> is already read. What follows is each key/value pair, in random order.
+ * Keys are stored as <length> <data>, the <data> section being omitted
+ * if length is 0.
+ * Values are stored as <object>.
+ *
+ */
+static SV *get_lhash(pTHX_ stcxt_t *cxt, UV len, int hash_flags, const char *cname)
+{
+	UV size;
+	UV i;
+	HV *hv;
+	SV *sv;
+	HV *stash;
+
+	TRACEME(("get_lhash (#%d)", (int)cxt->tagnum));
+
+#ifdef HAS_RESTRICTED_HASHES
+        PERL_UNUSED_ARG(hash_flags);
+#else        
+	if (hash_flags & SHV_RESTRICTED) {
+            if (cxt->derestrict < 0)
+			cxt->derestrict
+				= (SvTRUE(perl_get_sv("Storable::downgrade_restricted", GV_ADD))
+				   ? 1 : 0);
+		if (cxt->derestrict == 0)
+			RESTRICTED_HASH_CROAK();
+	}
+#endif
+
+	TRACEME(("size = %lu", (long)len));
+	hv = newHV();
+	stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
+	SEEN_NN(hv, stash, 0);		/* Will return if table not allocated properly */
+	if (len == 0)
+		return (SV *) hv;	/* No data follow if table empty */
+	TRACEME(("split %lu", (long)len+1));
+	hv_ksplit(hv, len+1);		/* pre-extend hash to save multiple splits */
+
+	/*
+	 * Now get each key/value pair in turn...
+	 */
+
+	for (i = 0; i < len; i++) {
+		/*
+		 * Get value first.
+		 */
+
+		TRACEME(("(#%d) value", (int)i));
+		sv = retrieve(aTHX_ cxt, 0);
+		if (!sv)
+			return (SV *) 0;
+
+		/*
+		 * Get key.
+		 * Since we're reading into kbuf, we must ensure we're not
+		 * recursing between the read and the hv_store() where it's used.
+		 * Hence the key comes after the value.
+		 */
+
+		RLEN(size);						/* Get key size */
+		KBUFCHK((STRLEN)size);					/* Grow hash key read pool if needed */
+		if (size)
+			READ(kbuf, size);
+		kbuf[size] = '\0';				/* Mark string end, just in case */
+		TRACEME(("(#%d) key '%s'", (int)i, kbuf));
+
+		/*
+		 * Enter key/value pair into hash table.
+		 */
+
+		if (hv_store(hv, kbuf, (U32) size, sv, 0) == 0)
+			return (SV *) 0;
+	}
+
+	TRACEME(("ok (get_lhash at 0x%"UVxf")", PTR2UV(hv)));
+	return (SV *) hv;
+}
+
 
 /*
  * retrieve_hash
@@ -5494,7 +5849,7 @@ static SV *retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 		 * Get value first.
 		 */
 
-		TRACEME(("(#%d) value", i));
+		TRACEME(("(#%d) value", (int)i));
 		sv = retrieve(aTHX_ cxt, 0);
 		if (!sv)
 			return (SV *) 0;
@@ -5511,7 +5866,7 @@ static SV *retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 		if (size)
 			READ(kbuf, size);
 		kbuf[size] = '\0';				/* Mark string end, just in case */
-		TRACEME(("(#%d) key '%s'", i, kbuf));
+		TRACEME(("(#%d) key '%s'", (int)i, kbuf));
 
 		/*
 		 * Enter key/value pair into hash table.
@@ -5539,137 +5894,137 @@ static SV *retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
  */
 static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname)
 {
-    dVAR;
-    I32 len;
-    I32 size;
-    I32 i;
-    HV *hv;
-    SV *sv;
-    HV *stash;
-    int hash_flags;
+	dVAR;
+	I32 len;
+	I32 size;
+	I32 i;
+	HV *hv;
+	SV *sv;
+	HV *stash;
+	int hash_flags;
 
-    GETMARK(hash_flags);
-    TRACEME(("retrieve_flag_hash (#%d)", (int)cxt->tagnum));
-    /*
-     * Read length, allocate table.
-     */
+	GETMARK(hash_flags);
+	TRACEME(("retrieve_flag_hash (#%d)", (int)cxt->tagnum));
+	/*
+	 * Read length, allocate table.
+	 */
 
 #ifndef HAS_RESTRICTED_HASHES
-    if (hash_flags & SHV_RESTRICTED) {
-        if (cxt->derestrict < 0)
-            cxt->derestrict
-                = (SvTRUE(perl_get_sv("Storable::downgrade_restricted", GV_ADD))
-                   ? 1 : 0);
-        if (cxt->derestrict == 0)
-            RESTRICTED_HASH_CROAK();
-    }
-#endif
-
-    RLEN(len);
-    TRACEME(("size = %d, flags = %d", len, hash_flags));
-    hv = newHV();
-    stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
-    SEEN_NN(hv, stash, 0);		/* Will return if table not allocated properly */
-    if (len == 0)
-        return (SV *) hv;	/* No data follow if table empty */
-    TRACEME(("split %d", len+1));
-    hv_ksplit(hv, len+1);	/* pre-extend hash to save multiple splits */
-
-    /*
-     * Now get each key/value pair in turn...
-     */
-
-    for (i = 0; i < len; i++) {
-        int flags;
-        int store_flags = 0;
-        /*
-         * Get value first.
-         */
-
-        TRACEME(("(#%d) value", i));
-        sv = retrieve(aTHX_ cxt, 0);
-        if (!sv)
-            return (SV *) 0;
-
-        GETMARK(flags);
-#ifdef HAS_RESTRICTED_HASHES
-        if ((hash_flags & SHV_RESTRICTED) && (flags & SHV_K_LOCKED))
-            SvREADONLY_on(sv);
-#endif
-
-        if (flags & SHV_K_ISSV) {
-            /* XXX you can't set a placeholder with an SV key.
-               Then again, you can't get an SV key.
-               Without messing around beyond what the API is supposed to do.
-            */
-            SV *keysv;
-            TRACEME(("(#%d) keysv, flags=%d", i, flags));
-            keysv = retrieve(aTHX_ cxt, 0);
-            if (!keysv)
-                return (SV *) 0;
-
-            if (!hv_store_ent(hv, keysv, sv, 0))
-                return (SV *) 0;
-        } else {
-            /*
-             * Get key.
-             * Since we're reading into kbuf, we must ensure we're not
-             * recursing between the read and the hv_store() where it's used.
-             * Hence the key comes after the value.
-             */
-
-            if (flags & SHV_K_PLACEHOLDER) {
-                SvREFCNT_dec (sv);
-                sv = &PL_sv_placeholder;
-		store_flags |= HVhek_PLACEHOLD;
-	    }
-            if (flags & SHV_K_UTF8) {
-#ifdef HAS_UTF8_HASHES
-                store_flags |= HVhek_UTF8;
-#else
-                if (cxt->use_bytes < 0)
-                    cxt->use_bytes
-                        = (SvTRUE(perl_get_sv("Storable::drop_utf8", GV_ADD))
-                           ? 1 : 0);
-                if (cxt->use_bytes == 0)
-                    UTF8_CROAK();
-#endif
-            }
-#ifdef HAS_UTF8_HASHES
-            if (flags & SHV_K_WASUTF8)
-		store_flags |= HVhek_WASUTF8;
-#endif
-
-            RLEN(size);						/* Get key size */
-            KBUFCHK((STRLEN)size);				/* Grow hash key read pool if needed */
-            if (size)
-                READ(kbuf, size);
-            kbuf[size] = '\0';				/* Mark string end, just in case */
-            TRACEME(("(#%d) key '%s' flags %X store_flags %X", i, kbuf,
-		     flags, store_flags));
-
-            /*
-             * Enter key/value pair into hash table.
-             */
-
-#ifdef HAS_RESTRICTED_HASHES
-            if (hv_store_flags(hv, kbuf, size, sv, 0, store_flags) == 0)
-                return (SV *) 0;
-#else
-            if (!(store_flags & HVhek_PLACEHOLD))
-                if (hv_store(hv, kbuf, size, sv, 0) == 0)
-                    return (SV *) 0;
-#endif
+	if (hash_flags & SHV_RESTRICTED) {
+		if (cxt->derestrict < 0)
+			cxt->derestrict
+				= (SvTRUE(perl_get_sv("Storable::downgrade_restricted", GV_ADD))
+				   ? 1 : 0);
+		if (cxt->derestrict == 0)
+			RESTRICTED_HASH_CROAK();
 	}
-    }
-#ifdef HAS_RESTRICTED_HASHES
-    if (hash_flags & SHV_RESTRICTED)
-        SvREADONLY_on(hv);
 #endif
 
-    TRACEME(("ok (retrieve_hash at 0x%" UVxf ")", PTR2UV(hv)));
+	RLEN(len);
+	TRACEME(("size = %d, flags = %d", len, hash_flags));
+	hv = newHV();
+	stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
+	SEEN_NN(hv, stash, 0);		/* Will return if table not allocated properly */
+	if (len == 0)
+		return (SV *) hv;	/* No data follow if table empty */
+	TRACEME(("split %d", len+1));
+	hv_ksplit(hv, len+1);	/* pre-extend hash to save multiple splits */
 
-    return (SV *) hv;
+	/*
+	 * Now get each key/value pair in turn...
+	 */
+
+	for (i = 0; i < len; i++) {
+		int flags;
+		int store_flags = 0;
+		/*
+		 * Get value first.
+		 */
+
+		TRACEME(("(#%d) value", (int)i));
+		sv = retrieve(aTHX_ cxt, 0);
+		if (!sv)
+			return (SV *) 0;
+
+		GETMARK(flags);
+#ifdef HAS_RESTRICTED_HASHES
+		if ((hash_flags & SHV_RESTRICTED) && (flags & SHV_K_LOCKED))
+			SvREADONLY_on(sv);
+#endif
+
+		if (flags & SHV_K_ISSV) {
+			/* XXX you can't set a placeholder with an SV key.
+			   Then again, you can't get an SV key.
+			   Without messing around beyond what the API is supposed to do.
+			*/
+			SV *keysv;
+			TRACEME(("(#%d) keysv, flags=%d", (int)i, flags));
+			keysv = retrieve(aTHX_ cxt, 0);
+			if (!keysv)
+				return (SV *) 0;
+
+			if (!hv_store_ent(hv, keysv, sv, 0))
+				return (SV *) 0;
+		} else {
+			/*
+			 * Get key.
+			 * Since we're reading into kbuf, we must ensure we're not
+			 * recursing between the read and the hv_store() where it's used.
+			 * Hence the key comes after the value.
+			 */
+
+			if (flags & SHV_K_PLACEHOLDER) {
+				SvREFCNT_dec (sv);
+				sv = &PL_sv_placeholder;
+				store_flags |= HVhek_PLACEHOLD;
+			}
+			if (flags & SHV_K_UTF8) {
+#ifdef HAS_UTF8_HASHES
+				store_flags |= HVhek_UTF8;
+#else
+				if (cxt->use_bytes < 0)
+					cxt->use_bytes
+						= (SvTRUE(perl_get_sv("Storable::drop_utf8", GV_ADD))
+						   ? 1 : 0);
+				if (cxt->use_bytes == 0)
+					UTF8_CROAK();
+#endif
+			}
+#ifdef HAS_UTF8_HASHES
+			if (flags & SHV_K_WASUTF8)
+				store_flags |= HVhek_WASUTF8;
+#endif
+
+			RLEN(size);		/* Get key size */
+			KBUFCHK((STRLEN)size);	/* Grow hash key read pool if needed */
+			if (size)
+				READ(kbuf, size);
+			kbuf[size] = '\0';				/* Mark string end, just in case */
+			TRACEME(("(#%d) key '%s' flags %X store_flags %X", (int)i, kbuf,
+				 flags, store_flags));
+
+			/*
+			 * Enter key/value pair into hash table.
+			 */
+
+#ifdef HAS_RESTRICTED_HASHES
+			if (hv_store_flags(hv, kbuf, size, sv, 0, store_flags) == 0)
+				return (SV *) 0;
+#else
+			if (!(store_flags & HVhek_PLACEHOLD))
+				if (hv_store(hv, kbuf, size, sv, 0) == 0)
+					return (SV *) 0;
+#endif
+		}
+	}
+#ifdef HAS_RESTRICTED_HASHES
+	if (hash_flags & SHV_RESTRICTED)
+		SvREADONLY_on(hv);
+#endif
+
+	TRACEME(("ok (retrieve_hash at 0x%" UVxf ")", PTR2UV(hv)));
+
+	return (SV *) hv;
 }
 
 /*
@@ -5684,7 +6039,7 @@ static SV *retrieve_code(pTHX_ stcxt_t *cxt, const char *cname)
 #else
 	dSP;
 	I32 type, count;
-        IV tagnum;
+	IV tagnum;
 	SV *cv;
 	SV *sv, *text, *sub, *errsv;
 	HV *stash;
@@ -5846,12 +6201,12 @@ static SV *old_retrieve_array(pTHX_ stcxt_t *cxt, const char *cname)
 	for (i = 0; i < len; i++) {
 		GETMARK(c);
 		if (c == SX_IT_UNDEF) {
-			TRACEME(("(#%d) undef item", i));
+			TRACEME(("(#%d) undef item", (int)i));
 			continue;			/* av_extend() already filled us with undef */
 		}
 		if (c != SX_ITEM)
 			(void) retrieve_other(aTHX_ cxt, 0);	/* Will croak out */
-		TRACEME(("(#%d) item", i));
+		TRACEME(("(#%d) item", (int)i));
 		sv = retrieve(aTHX_ cxt, 0);						/* Retrieve item */
 		if (!sv)
 			return (SV *) 0;
@@ -5913,7 +6268,7 @@ static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 
 		GETMARK(c);
 		if (c == SX_VL_UNDEF) {
-			TRACEME(("(#%d) undef value", i));
+                    TRACEME(("(#%d) undef value", (int)i));
 			/*
 			 * Due to a bug in hv_store(), it's not possible to pass
 			 * &PL_sv_undef to hv_store() as a value, otherwise the
@@ -5923,7 +6278,7 @@ static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 				sv_h_undef = newSVsv(&PL_sv_undef);
 			sv = SvREFCNT_inc(sv_h_undef);
 		} else if (c == SX_VALUE) {
-			TRACEME(("(#%d) value", i));
+			TRACEME(("(#%d) value", (int)i));
 			sv = retrieve(aTHX_ cxt, 0);
 			if (!sv)
 				return (SV *) 0;
@@ -5939,13 +6294,13 @@ static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 
 		GETMARK(c);
 		if (c != SX_KEY)
-			(void) retrieve_other(aTHX_ cxt, 0);	/* Will croak out */
-		RLEN(size);						/* Get key size */
-		KBUFCHK((STRLEN)size);					/* Grow hash key read pool if needed */
+			(void) retrieve_other(aTHX_ cxt, 0); /* Will croak out */
+		RLEN(size);				/* Get key size */
+		KBUFCHK((STRLEN)size);			/* Grow hash key read pool if needed */
 		if (size)
 			READ(kbuf, size);
-		kbuf[size] = '\0';				/* Mark string end, just in case */
-		TRACEME(("(#%d) key '%s'", i, kbuf));
+		kbuf[size] = '\0';			/* Mark string end, just in case */
+		TRACEME(("(#%d) key '%s'", (int)i, kbuf));
 
 		/*
 		 * Enter key/value pair into hash table.
@@ -5977,182 +6332,182 @@ static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
  */
 static SV *magic_check(pTHX_ stcxt_t *cxt)
 {
-    /* The worst case for a malicious header would be old magic (which is
-       longer), major, minor, byteorder length byte of 255, 255 bytes of
-       garbage, sizeof int, long, pointer, NV.
-       So the worse of that we can read is 255 bytes of garbage plus 4.
-       Err, I am assuming 8 bit bytes here. Please file a bug report if you're
-       compiling perl on a system with chars that are larger than 8 bits.
-       (Even Crays aren't *that* perverse).
-    */
-    unsigned char buf[4 + 255];
-    unsigned char *current;
-    int c;
-    int length;
-    int use_network_order;
-    int use_NV_size;
-    int old_magic = 0;
-    int version_major;
-    int version_minor = 0;
+	/* The worst case for a malicious header would be old magic (which is
+	   longer), major, minor, byteorder length byte of 255, 255 bytes of
+	   garbage, sizeof int, long, pointer, NV.
+	   So the worse of that we can read is 255 bytes of garbage plus 4.
+	   Err, I am assuming 8 bit bytes here. Please file a bug report if you're
+	   compiling perl on a system with chars that are larger than 8 bits.
+	   (Even Crays aren't *that* perverse).
+	*/
+	unsigned char buf[4 + 255];
+	unsigned char *current;
+	int c;
+	int length;
+	int use_network_order;
+	int use_NV_size;
+	int old_magic = 0;
+	int version_major;
+	int version_minor = 0;
 
-    TRACEME(("magic_check"));
+	TRACEME(("magic_check"));
 
-    /*
-     * The "magic number" is only for files, not when freezing in memory.
-     */
+	/*
+	 * The "magic number" is only for files, not when freezing in memory.
+	 */
 
-    if (cxt->fio) {
-        /* This includes the '\0' at the end.  I want to read the extra byte,
-           which is usually going to be the major version number.  */
-        STRLEN len = sizeof(magicstr);
-        STRLEN old_len;
+	if (cxt->fio) {
+		/* This includes the '\0' at the end.  I want to read the extra byte,
+		   which is usually going to be the major version number.  */
+		STRLEN len = sizeof(magicstr);
+		STRLEN old_len;
 
-        READ(buf, (SSize_t)(len));	/* Not null-terminated */
+		READ(buf, (SSize_t)(len));	/* Not null-terminated */
 
-        /* Point at the byte after the byte we read.  */
-        current = buf + --len;	/* Do the -- outside of macros.  */
+		/* Point at the byte after the byte we read.  */
+		current = buf + --len;	/* Do the -- outside of macros.  */
 
-        if (memNE(buf, magicstr, len)) {
-            /*
-             * Try to read more bytes to check for the old magic number, which
-             * was longer.
-             */
+		if (memNE(buf, magicstr, len)) {
+			/*
+			 * Try to read more bytes to check for the old magic number, which
+			 * was longer.
+			 */
 
-            TRACEME(("trying for old magic number"));
+			TRACEME(("trying for old magic number"));
 
-            old_len = sizeof(old_magicstr) - 1;
-            READ(current + 1, (SSize_t)(old_len - len));
-            
-            if (memNE(buf, old_magicstr, old_len))
-                CROAK(("File is not a perl storable"));
-	    old_magic++;
-            current = buf + old_len;
-        }
-        use_network_order = *current;
-    } else
-	GETMARK(use_network_order);
-        
-    /*
-     * Starting with 0.6, the "use_network_order" byte flag is also used to
-     * indicate the version number of the binary, and therefore governs the
-     * setting of sv_retrieve_vtbl. See magic_write().
-     */
-    if (old_magic && use_network_order > 1) {
-	/*  0.1 dump - use_network_order is really byte order length */
-	version_major = -1;
-    }
-    else {
-        version_major = use_network_order >> 1;
-    }
-    cxt->retrieve_vtbl = (SV*(**)(pTHX_ stcxt_t *cxt, const char *cname)) (version_major > 0 ? sv_retrieve : sv_old_retrieve);
+			old_len = sizeof(old_magicstr) - 1;
+			READ(current + 1, (SSize_t)(old_len - len));
 
-    TRACEME(("magic_check: netorder = 0x%x", use_network_order));
+			if (memNE(buf, old_magicstr, old_len))
+				CROAK(("File is not a perl storable"));
+			old_magic++;
+			current = buf + old_len;
+		}
+		use_network_order = *current;
+	} else
+		GETMARK(use_network_order);
+
+	/*
+	 * Starting with 0.6, the "use_network_order" byte flag is also used to
+	 * indicate the version number of the binary, and therefore governs the
+	 * setting of sv_retrieve_vtbl. See magic_write().
+	 */
+	if (old_magic && use_network_order > 1) {
+		/*  0.1 dump - use_network_order is really byte order length */
+		version_major = -1;
+	}
+	else {
+		version_major = use_network_order >> 1;
+	}
+	cxt->retrieve_vtbl = (SV*(**)(pTHX_ stcxt_t *cxt, const char *cname)) (version_major > 0 ? sv_retrieve : sv_old_retrieve);
+
+	TRACEME(("magic_check: netorder = 0x%x", use_network_order));
 
 
-    /*
-     * Starting with 0.7 (binary major 2), a full byte is dedicated to the
-     * minor version of the protocol.  See magic_write().
-     */
+	/*
+	 * Starting with 0.7 (binary major 2), a full byte is dedicated to the
+	 * minor version of the protocol.  See magic_write().
+	 */
 
-    if (version_major > 1)
-        GETMARK(version_minor);
+	if (version_major > 1)
+		GETMARK(version_minor);
 
-    cxt->ver_major = version_major;
-    cxt->ver_minor = version_minor;
+	cxt->ver_major = version_major;
+	cxt->ver_minor = version_minor;
 
-    TRACEME(("binary image version is %d.%d", version_major, version_minor));
+	TRACEME(("binary image version is %d.%d", version_major, version_minor));
 
-    /*
-     * Inter-operability sanity check: we can't retrieve something stored
-     * using a format more recent than ours, because we have no way to
-     * know what has changed, and letting retrieval go would mean a probable
-     * failure reporting a "corrupted" storable file.
-     */
+	/*
+	 * Inter-operability sanity check: we can't retrieve something stored
+	 * using a format more recent than ours, because we have no way to
+	 * know what has changed, and letting retrieval go would mean a probable
+	 * failure reporting a "corrupted" storable file.
+	 */
 
-    if (
-        version_major > STORABLE_BIN_MAJOR ||
-        (version_major == STORABLE_BIN_MAJOR &&
-         version_minor > STORABLE_BIN_MINOR)
-        ) {
-        int croak_now = 1;
-        TRACEME(("but I am version is %d.%d", STORABLE_BIN_MAJOR,
-                 STORABLE_BIN_MINOR));
+	if (
+	    version_major > STORABLE_BIN_MAJOR ||
+	    (version_major == STORABLE_BIN_MAJOR &&
+	     version_minor > STORABLE_BIN_MINOR)
+	    ) {
+		int croak_now = 1;
+		TRACEME(("but I am version is %d.%d", STORABLE_BIN_MAJOR,
+			 STORABLE_BIN_MINOR));
 
-        if (version_major == STORABLE_BIN_MAJOR) {
-            TRACEME(("cxt->accept_future_minor is %d",
-                     cxt->accept_future_minor));
-            if (cxt->accept_future_minor < 0)
-                cxt->accept_future_minor
-                    = (SvTRUE(perl_get_sv("Storable::accept_future_minor",
-                                          GV_ADD))
-                       ? 1 : 0);
-            if (cxt->accept_future_minor == 1)
-                croak_now = 0;  /* Don't croak yet.  */
-        }
-        if (croak_now) {
-            CROAK(("Storable binary image v%d.%d more recent than I am (v%d.%d)",
-                   version_major, version_minor,
-                   STORABLE_BIN_MAJOR, STORABLE_BIN_MINOR));
-        }
-    }
+		if (version_major == STORABLE_BIN_MAJOR) {
+			TRACEME(("cxt->accept_future_minor is %d",
+				 cxt->accept_future_minor));
+			if (cxt->accept_future_minor < 0)
+				cxt->accept_future_minor
+					= (SvTRUE(perl_get_sv("Storable::accept_future_minor",
+							      GV_ADD))
+					   ? 1 : 0);
+			if (cxt->accept_future_minor == 1)
+				croak_now = 0;  /* Don't croak yet.  */
+		}
+		if (croak_now) {
+			CROAK(("Storable binary image v%d.%d more recent than I am (v%d.%d)",
+			       version_major, version_minor,
+			       STORABLE_BIN_MAJOR, STORABLE_BIN_MINOR));
+		}
+	}
 
-    /*
-     * If they stored using network order, there's no byte ordering
-     * information to check.
-     */
+	/*
+	 * If they stored using network order, there's no byte ordering
+	 * information to check.
+	 */
 
-    if ((cxt->netorder = (use_network_order & 0x1)))	/* Extra () for -Wall */
-        return &PL_sv_undef;			/* No byte ordering info */
+	if ((cxt->netorder = (use_network_order & 0x1)))	/* Extra () for -Wall */
+		return &PL_sv_undef;			/* No byte ordering info */
 
-    /* In C truth is 1, falsehood is 0. Very convenient.  */
-    use_NV_size = version_major >= 2 && version_minor >= 2;
+	/* In C truth is 1, falsehood is 0. Very convenient.  */
+	use_NV_size = version_major >= 2 && version_minor >= 2;
 
-    if (version_major >= 0) {
-        GETMARK(c);
-    }
-    else {
-	c = use_network_order;
-    }
-    length = c + 3 + use_NV_size;
-    READ(buf, length);	/* Not null-terminated */
+	if (version_major >= 0) {
+		GETMARK(c);
+	}
+	else {
+		c = use_network_order;
+	}
+	length = c + 3 + use_NV_size;
+	READ(buf, length);	/* Not null-terminated */
 
-    TRACEME(("byte order '%.*s' %d", c, buf, c));
+	TRACEME(("byte order '%.*s' %d", c, buf, c));
 
 #ifdef USE_56_INTERWORK_KLUDGE
-    /* No point in caching this in the context as we only need it once per
-       retrieve, and we need to recheck it each read.  */
-    if (SvTRUE(perl_get_sv("Storable::interwork_56_64bit", GV_ADD))) {
-        if ((c != (sizeof (byteorderstr_56) - 1))
-            || memNE(buf, byteorderstr_56, c))
-            CROAK(("Byte order is not compatible"));
-    } else
+	/* No point in caching this in the context as we only need it once per
+	   retrieve, and we need to recheck it each read.  */
+	if (SvTRUE(perl_get_sv("Storable::interwork_56_64bit", GV_ADD))) {
+		if ((c != (sizeof (byteorderstr_56) - 1))
+		    || memNE(buf, byteorderstr_56, c))
+			CROAK(("Byte order is not compatible"));
+	} else
 #endif
-    {
-        if ((c != (sizeof (byteorderstr) - 1)) || memNE(buf, byteorderstr, c))
-            CROAK(("Byte order is not compatible"));
-    }
+		{
+			if ((c != (sizeof (byteorderstr) - 1)) || memNE(buf, byteorderstr, c))
+				CROAK(("Byte order is not compatible"));
+		}
 
-    current = buf + c;
-    
-    /* sizeof(int) */
-    if ((int) *current++ != sizeof(int))
-        CROAK(("Integer size is not compatible"));
+	current = buf + c;
 
-    /* sizeof(long) */
-    if ((int) *current++ != sizeof(long))
-        CROAK(("Long integer size is not compatible"));
+	/* sizeof(int) */
+	if ((int) *current++ != sizeof(int))
+		CROAK(("Integer size is not compatible"));
 
-    /* sizeof(char *) */
-    if ((int) *current != sizeof(char *))
-        CROAK(("Pointer size is not compatible"));
+	/* sizeof(long) */
+	if ((int) *current++ != sizeof(long))
+		CROAK(("Long integer size is not compatible"));
 
-    if (use_NV_size) {
-        /* sizeof(NV) */
-        if ((int) *++current != sizeof(NV))
-            CROAK(("Double size is not compatible"));
-    }
+	/* sizeof(char *) */
+	if ((int) *current != sizeof(char *))
+		CROAK(("Pointer size is not compatible"));
 
-    return &PL_sv_undef;	/* OK */
+	if (use_NV_size) {
+		/* sizeof(NV) */
+		if ((int) *++current != sizeof(NV))
+			CROAK(("Double size is not compatible"));
+	}
+
+	return &PL_sv_undef;	/* OK */
 }
 
 /*
@@ -6180,14 +6535,14 @@ static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname)
 	 * no longer supported, hence the final "goto" in the "if" block.
 	 */
 
-	if (cxt->hseen) {						/* Retrieving old binary */
+	if (cxt->hseen) {				/* Retrieving old binary */
 		stag_t tag;
 		if (cxt->netorder) {
 			I32 nettag;
-			READ(&nettag, sizeof(I32));		/* Ordered sequence of I32 */
+			READ(&nettag, sizeof(I32));	/* Ordered sequence of I32 */
 			tag = (stag_t) nettag;
 		} else
-			READ(&tag, sizeof(stag_t));		/* Original address of the SV */
+			READ(&tag, sizeof(stag_t));	/* Original address of the SV */
 
 		GETMARK(type);
 		if (type == SX_OBJECT) {
@@ -6255,18 +6610,18 @@ static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname)
 		SvREFCNT_inc(sv);	/* One more reference to this same sv */
 		return sv;			/* The SV pointer where object was retrieved */
 	} else if (type >= SX_ERROR && cxt->ver_minor > STORABLE_BIN_MINOR) {
-            if (cxt->accept_future_minor < 0)
-                cxt->accept_future_minor
-                    = (SvTRUE(perl_get_sv("Storable::accept_future_minor",
-                                          GV_ADD))
-                       ? 1 : 0);
-            if (cxt->accept_future_minor == 1) {
-                CROAK(("Storable binary image v%d.%d contains data of type %d. "
-                       "This Storable is v%d.%d and can only handle data types up to %d",
-                       cxt->ver_major, cxt->ver_minor, type,
-                       STORABLE_BIN_MAJOR, STORABLE_BIN_MINOR, SX_ERROR - 1));
-            }
-        }
+		if (cxt->accept_future_minor < 0)
+			cxt->accept_future_minor
+				= (SvTRUE(perl_get_sv("Storable::accept_future_minor",
+						      GV_ADD))
+				   ? 1 : 0);
+		if (cxt->accept_future_minor == 1) {
+			CROAK(("Storable binary image v%d.%d contains data of type %d. "
+			       "This Storable is v%d.%d and can only handle data types up to %d",
+			       cxt->ver_major, cxt->ver_minor, type,
+			       STORABLE_BIN_MAJOR, STORABLE_BIN_MINOR, SX_ERROR - 1));
+		}
+	}
 
 first_time:		/* Will disappear when support for old format is dropped */
 
@@ -6327,7 +6682,7 @@ first_time:		/* Will disappear when support for old format is dropped */
  * Common routine for pretrieve and mretrieve.
  */
 static SV *do_retrieve(
-        pTHX_
+	pTHX_
 	PerlIO *f,
 	SV *in,
 	int optype,
@@ -6488,7 +6843,7 @@ static SV *do_retrieve(
 
 	if (!sv) {
 		TRACEME(("retrieve ERROR"));
-#if (PATCHLEVEL <= 4) 
+#if (PATCHLEVEL <= 4)
 		/* perl 5.00405 seems to screw up at this point with an
 		   'attempt to modify a read only value' error reported in the
 		   eval { $self = pretrieve(*FILE) } in _retrieve.
@@ -6565,10 +6920,10 @@ static SV *do_retrieve(
  *
  * Retrieve data held in file and return the root object, undef on error.
  */
-static SV *pretrieve(pTHX_ PerlIO *f, SV *flag)
+static SV *pretrieve(pTHX_ PerlIO *f, IV flag)
 {
 	TRACEME(("pretrieve"));
-	return do_retrieve(aTHX_ f, Nullsv, 0, (int)SvIV(flag));
+	return do_retrieve(aTHX_ f, Nullsv, 0, (int)flag);
 }
 
 /*
@@ -6576,10 +6931,10 @@ static SV *pretrieve(pTHX_ PerlIO *f, SV *flag)
  *
  * Retrieve data held in scalar and return the root object, undef on error.
  */
-static SV *mretrieve(pTHX_ SV *sv, SV *flag)
+static SV *mretrieve(pTHX_ SV *sv, IV flag)
 {
 	TRACEME(("mretrieve"));
-	return do_retrieve(aTHX_ (PerlIO*) 0, sv, 0, (int)SvIV(flag));
+	return do_retrieve(aTHX_ (PerlIO*) 0, sv, 0, (int)flag);
 }
 
 /***
@@ -6609,7 +6964,7 @@ static SV *dclone(pTHX_ SV *sv)
 	 * free up memory for them now.
 	 */
 
-        assert(cxt);
+	assert(cxt);
 	if (cxt->s_dirty)
 		clean_context(aTHX_ cxt);
 
@@ -6687,7 +7042,7 @@ static SV *dclone(pTHX_ SV *sv)
 
 #ifndef OutputStream
 #define OutputStream	PerlIO *
-#define InputStream		PerlIO *
+#define InputStream	PerlIO *
 #endif	/* !OutputStream */
 
 static int
@@ -6710,19 +7065,19 @@ PROTOTYPES: ENABLE
 
 BOOT:
 {
-    HV *stash = gv_stashpvn("Storable", 8, GV_ADD);
-    newCONSTSUB(stash, "BIN_MAJOR", newSViv(STORABLE_BIN_MAJOR));
-    newCONSTSUB(stash, "BIN_MINOR", newSViv(STORABLE_BIN_MINOR));
-    newCONSTSUB(stash, "BIN_WRITE_MINOR", newSViv(STORABLE_BIN_WRITE_MINOR));
+	HV *stash = gv_stashpvn("Storable", 8, GV_ADD);
+	newCONSTSUB(stash, "BIN_MAJOR", newSViv(STORABLE_BIN_MAJOR));
+	newCONSTSUB(stash, "BIN_MINOR", newSViv(STORABLE_BIN_MINOR));
+	newCONSTSUB(stash, "BIN_WRITE_MINOR", newSViv(STORABLE_BIN_WRITE_MINOR));
 
-    init_perinterp(aTHX);
-    gv_fetchpv("Storable::drop_utf8",   GV_ADDMULTI, SVt_PV);
+	init_perinterp(aTHX);
+	gv_fetchpv("Storable::drop_utf8",   GV_ADDMULTI, SVt_PV);
 #ifdef DEBUGME
-    /* Only disable the used only once warning if we are in debugging mode.  */
-    gv_fetchpv("Storable::DEBUGME",   GV_ADDMULTI, SVt_PV);
+	/* Only disable the used only once warning if we are in debugging mode.  */
+	gv_fetchpv("Storable::DEBUGME",   GV_ADDMULTI, SVt_PV);
 #endif
 #ifdef USE_56_INTERWORK_KLUDGE
-    gv_fetchpv("Storable::interwork_56_64bit",   GV_ADDMULTI, SVt_PV);
+	gv_fetchpv("Storable::interwork_56_64bit",   GV_ADDMULTI, SVt_PV);
 #endif
 }
 
@@ -6743,8 +7098,8 @@ init_perinterp()
 
 SV *
 pstore(f,obj)
-OutputStream	f
-SV *	obj
+	OutputStream	f
+	SV*		obj
  ALIAS:
   net_pstore = 1
  PPCODE:
@@ -6766,57 +7121,56 @@ SV *	obj
 
 SV *
 mstore(obj)
-SV *	obj
- ALIAS:
-  net_mstore = 1
- CODE:
-  RETVAL = &PL_sv_undef;
-  if (!do_store(aTHX_ (PerlIO*) 0, obj, 0, ix, &RETVAL))
-    RETVAL = &PL_sv_undef;
- OUTPUT:
-  RETVAL
+	SV*	obj
+  ALIAS:
+	net_mstore = 1
+  CODE:
+	RETVAL = &PL_sv_undef;
+	if (!do_store(aTHX_ (PerlIO*) 0, obj, 0, ix, &RETVAL))
+		RETVAL = &PL_sv_undef;
+  OUTPUT:
+	RETVAL
 
 SV *
-pretrieve(f, flag)
-InputStream	f
-SV *	flag
- CODE:
-  RETVAL = pretrieve(aTHX_ f, flag);
- OUTPUT:
-  RETVAL
+pretrieve(f, flag = 6)
+            InputStream	f
+            IV		flag
+  CODE:
+	RETVAL = pretrieve(aTHX_ f, flag);
+  OUTPUT:
+	RETVAL
 
 SV *
-mretrieve(sv, flag)
-SV *	sv
-SV *	flag
- CODE:
-  RETVAL = mretrieve(aTHX_ sv, flag);
- OUTPUT:
-  RETVAL
+mretrieve(sv, flag = 6)
+            SV* sv
+            IV	flag
+  CODE:
+	RETVAL = mretrieve(aTHX_ sv, flag);
+  OUTPUT:
+	RETVAL
 
 SV *
 dclone(sv)
-SV *	sv
- CODE:
-  RETVAL = dclone(aTHX_ sv);
- OUTPUT:
-  RETVAL
+	SV*	sv
+  CODE:
+	RETVAL = dclone(aTHX_ sv);
+  OUTPUT:
+	RETVAL
 
 void
 last_op_in_netorder()
- ALIAS:
- is_storing = ST_STORE
- is_retrieving = ST_RETRIEVE
- PREINIT:
-  bool result;
- PPCODE:
-  if (ix) {
-   dSTCXT;
-
-   assert(cxt);
-   result = cxt->entry && (cxt->optype & ix) ? TRUE : FALSE;
-  } else {
-   result = !!last_op_in_netorder(aTHX);
-  }
-  ST(0) = boolSV(result);
-  XSRETURN(1);
+  ALIAS:
+	is_storing = ST_STORE
+	is_retrieving = ST_RETRIEVE
+  PREINIT:
+	bool result;
+  PPCODE:
+	if (ix) {
+		dSTCXT;
+		assert(cxt);
+		result = cxt->entry && (cxt->optype & ix) ? TRUE : FALSE;
+	} else {
+		result = !!last_op_in_netorder(aTHX);
+	}
+	ST(0) = boolSV(result);
+	XSRETURN(1);
