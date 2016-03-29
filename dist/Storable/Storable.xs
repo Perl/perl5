@@ -2,6 +2,7 @@
  *  Store and retrieve mechanism.
  *
  *  Copyright (c) 1995-2000, Raphael Manfredi
+ *  Copyright (c) 2016, cPanel Inc
  *  
  *  You may redistribute only under the same terms as Perl 5, as specified
  *  in the README file that comes with the distribution.
@@ -26,7 +27,7 @@
 #include "ppport.h"             /* handle old perls */
 #endif
 
-#if 0
+#ifdef DEBUGGING
 #define DEBUGME /* Debug mode, turns assertions on as well */
 #define DASSERT /* Assertion mode */
 #endif
@@ -91,7 +92,7 @@
 #  define SvPVCLEAR(sv) sv_setpvs((sv), "")
 #endif
 
-#ifdef DEBUGGING
+#ifdef DEBUGME
 
 #ifndef DASSERT
 #define DASSERT
@@ -101,24 +102,24 @@
  * TRACEME() will only output things when the $Storable::DEBUGME is true.
  */
 
-#define TRACEME(x)										\
-  STMT_START {											\
-	if (SvTRUE(perl_get_sv("Storable::DEBUGME", GV_ADD)))	\
-		{ PerlIO_stdoutf x; PerlIO_stdoutf("\n"); }		\
-  } STMT_END
+#define TRACEME(x)                                                      \
+    STMT_START {                                                        \
+	if (SvTRUE(perl_get_sv("Storable::DEBUGME", GV_ADD)))           \
+            { PerlIO_stdoutf x; PerlIO_stdoutf("\n"); }                 \
+    } STMT_END
 #else
 #define TRACEME(x)
 #endif	/* DEBUGME */
 
 #ifdef DASSERT
-#define ASSERT(x,y)										\
-  STMT_START {											\
-	if (!(x)) {												\
+#define ASSERT(x,y)                                                     \
+    STMT_START {                                                        \
+      if (!(x)) {                                                       \
 		PerlIO_stdoutf("ASSERT FAILED (\"%s\", line %d): ",	\
-			__FILE__, __LINE__);							\
-		PerlIO_stdoutf y; PerlIO_stdoutf("\n");				\
-	}														\
-  } STMT_END
+                               __FILE__, (int)__LINE__);                \
+		PerlIO_stdoutf y; PerlIO_stdoutf("\n");                 \
+      }                                                                 \
+    } STMT_END
 #else
 #define ASSERT(x,y)
 #endif
@@ -166,34 +167,34 @@
 /*
  * Those are only used to retrieve "old" pre-0.6 binary images.
  */
-#define SX_ITEM		'i'		/* An array item introducer */
-#define SX_IT_UNDEF	'I'		/* Undefined array item */
-#define SX_KEY		'k'		/* A hash key introducer */
-#define SX_VALUE	'v'		/* A hash value introducer */
-#define SX_VL_UNDEF	'V'		/* Undefined hash value */
+#define SX_ITEM		'i'	/* An array item introducer */
+#define SX_IT_UNDEF	'I'	/* Undefined array item */
+#define SX_KEY		'k'	/* A hash key introducer */
+#define SX_VALUE	'v'	/* A hash value introducer */
+#define SX_VL_UNDEF	'V'	/* Undefined hash value */
 
 /*
  * Those are only used to retrieve "old" pre-0.7 binary images
  */
 
-#define SX_CLASS	'b'		/* Object is blessed, class name length <255 */
-#define SX_LG_CLASS	'B'		/* Object is blessed, class name length >255 */
-#define SX_STORED	'X'		/* End of object */
+#define SX_CLASS	'b'	/* Object is blessed, class name length <255 */
+#define SX_LG_CLASS	'B'	/* Object is blessed, class name length >255 */
+#define SX_STORED	'X'	/* End of object */
 
 /*
  * Limits between short/long length representation.
  */
 
-#define LG_SCALAR	255		/* Large scalar length limit */
-#define LG_BLESS	127		/* Large classname bless limit */
+#define LG_SCALAR	255	/* Large scalar length limit */
+#define LG_BLESS	127	/* Large classname bless limit */
 
 /*
  * Operation types
  */
 
-#define ST_STORE	0x1		/* Store operation */
-#define ST_RETRIEVE	0x2		/* Retrieval operation */
-#define ST_CLONE	0x4		/* Deep cloning operation */
+#define ST_STORE	0x1	/* Store operation */
+#define ST_RETRIEVE	0x2	/* Retrieval operation */
+#define ST_CLONE	0x4	/* Deep cloning operation */
 
 /*
  * The following structure is used for hash table key retrieval. Since, when
@@ -209,8 +210,8 @@
 struct extendable {
 	char *arena;		/* Will hold hash key strings, resized as needed */
 	STRLEN asiz;		/* Size of aforementioned buffer */
-	char *aptr;			/* Arena pointer, for in-place read/write ops */
-	char *aend;			/* First invalid address */
+	char *aptr;		/* Arena pointer, for in-place read/write ops */
+	char *aend;		/* First invalid address */
 };
 
 /*
@@ -299,8 +300,8 @@ typedef unsigned long stag_t;	/* Used by pre-0.6 binary format */
 
 struct stcxt;
 typedef struct stcxt {
-	int entry;			/* flags recursion */
-	int optype;			/* type of traversal operation */
+	int entry;		/* flags recursion */
+	int optype;		/* type of traversal operation */
 	/* which objects have been seen, store time.
 	   tags are numbers, which are cast to (SV *) and stored directly */
 #ifdef USE_PTR_TABLE
@@ -312,26 +313,26 @@ typedef struct stcxt {
 #endif
 	HV *hseen;			
 	AV *hook_seen;		/* which SVs were returned by STORABLE_freeze() */
-	AV *aseen;			/* which objects have been seen, retrieve time */
-	IV where_is_undef;		/* index in aseen of PL_sv_undef */
-	HV *hclass;			/* which classnames have been seen, store time */
-	AV *aclass;			/* which classnames have been seen, retrieve time */
-	HV *hook;			/* cache for hook methods per class name */
-	IV tagnum;			/* incremented at store time for each seen object */
+	AV *aseen;		/* which objects have been seen, retrieve time */
+	IV where_is_undef;	/* index in aseen of PL_sv_undef */
+	HV *hclass;		/* which classnames have been seen, store time */
+	AV *aclass;		/* which classnames have been seen, retrieve time */
+	HV *hook;		/* cache for hook methods per class name */
+	IV tagnum;		/* incremented at store time for each seen object */
 	IV classnum;		/* incremented at store time for each seen classname */
 	int netorder;		/* true if network order used */
 	int s_tainted;		/* true if input source is tainted, at retrieve time */
 	int forgive_me;		/* whether to be forgiving... */
-	int deparse;        /* whether to deparse code refs */
-	SV *eval;           /* whether to eval source code */
+	int deparse;   		/* whether to deparse code refs */
+	SV *eval;		/* whether to eval source code */
 	int canonical;		/* whether to store hashes sorted by key */
 #ifndef HAS_RESTRICTED_HASHES
         int derestrict;         /* whether to downgrade restricted hashes */
 #endif
 #ifndef HAS_UTF8_ALL
-        int use_bytes;         /* whether to bytes-ify utf8 */
+        int use_bytes;          /* whether to bytes-ify utf8 */
 #endif
-        int accept_future_minor; /* croak immediately on future minor versions?  */
+        int accept_future_minor;/* croak immediately on future minor versions?  */
 	int s_dirty;		/* context is dirty due to CROAK() -- can be cleaned */
 	int membuf_ro;		/* true means membuf is read-only and msaved is rw */
 	struct extendable keybuf;	/* for hash key retrieval */
@@ -368,7 +369,7 @@ static MGVTBL vtbl_storable = {
 
 /* From Digest::MD5.  */
 #ifndef sv_magicext
-# define sv_magicext(sv, obj, type, vtbl, name, namlen) \
+# define sv_magicext(sv, obj, type, vtbl, name, namlen)         \
     THX_sv_magicext(aTHX_ sv, obj, type, vtbl, name, namlen)
 static MAGIC *THX_sv_magicext(pTHX_ SV *sv, SV *obj, int type,
     MGVTBL const *vtbl, char const *name, I32 namlen)
@@ -392,44 +393,45 @@ static MAGIC *THX_sv_magicext(pTHX_ SV *sv, SV *obj, int type,
 #endif
 
 #define NEW_STORABLE_CXT_OBJ(cxt)					\
-  STMT_START {										\
-	SV *self = newSV(sizeof(stcxt_t) - 1);			\
+    STMT_START {                                                        \
+	SV *self = newSV(sizeof(stcxt_t) - 1);                          \
 	SV *my_sv = newRV_noinc(self);					\
 	sv_magicext(self, NULL, PERL_MAGIC_ext, &vtbl_storable, NULL, 0); \
 	cxt = (stcxt_t *)SvPVX(self);					\
-	Zero(cxt, 1, stcxt_t);							\
-	cxt->my_sv = my_sv;								\
+	Zero(cxt, 1, stcxt_t);                                          \
+	cxt->my_sv = my_sv;                                             \
   } STMT_END
 
 #if defined(MULTIPLICITY) || defined(PERL_OBJECT) || defined(PERL_CAPI)
 
 #if (PATCHLEVEL <= 4) && (SUBVERSION < 68)
-#define dSTCXT_SV 									\
-	SV *perinterp_sv = perl_get_sv(MY_VERSION, 0)
+#define dSTCXT_SV                                       \
+    SV *perinterp_sv = perl_get_sv(MY_VERSION, 0)
 #else	/* >= perl5.004_68 */
-#define dSTCXT_SV									\
-	SV *perinterp_sv = *hv_fetch(PL_modglobal,		\
-		MY_VERSION, sizeof(MY_VERSION)-1, TRUE)
+#define dSTCXT_SV                                       \
+    SV *perinterp_sv = *hv_fetch(PL_modglobal,          \
+                                 MY_VERSION, sizeof(MY_VERSION)-1, TRUE)
 #endif	/* < perl5.004_68 */
 
-#define dSTCXT_PTR(T,name)							\
-	T name = ((perinterp_sv && SvIOK(perinterp_sv) && SvIVX(perinterp_sv)	\
-				? (T)SvPVX(SvRV(INT2PTR(SV*,SvIVX(perinterp_sv)))) : (T) 0))
-#define dSTCXT										\
-	dSTCXT_SV;										\
-	dSTCXT_PTR(stcxt_t *, cxt)
+#define dSTCXT_PTR(T,name)                                              \
+    T name = ((perinterp_sv                                             \
+               && SvIOK(perinterp_sv) && SvIVX(perinterp_sv)            \
+               ? (T)SvPVX(SvRV(INT2PTR(SV*,SvIVX(perinterp_sv)))) : (T) 0))
+#define dSTCXT                                  \
+    dSTCXT_SV;                                  \
+    dSTCXT_PTR(stcxt_t *, cxt)
 
-#define INIT_STCXT							\
-	dSTCXT;									\
-	NEW_STORABLE_CXT_OBJ(cxt);				\
-	assert(perinterp_sv);					\
-	sv_setiv(perinterp_sv, PTR2IV(cxt->my_sv))
+#define INIT_STCXT				\
+    dSTCXT;                                     \
+    NEW_STORABLE_CXT_OBJ(cxt);                  \
+    assert(perinterp_sv);                       \
+    sv_setiv(perinterp_sv, PTR2IV(cxt->my_sv))
 
-#define SET_STCXT(x)								\
-  STMT_START {										\
-	dSTCXT_SV;										\
-	sv_setiv(perinterp_sv, PTR2IV(x->my_sv));		\
-  } STMT_END
+#define SET_STCXT(x)                            	\
+    STMT_START {                                        \
+	dSTCXT_SV;                                      \
+	sv_setiv(perinterp_sv, PTR2IV(x->my_sv));       \
+    } STMT_END
 
 #else /* !MULTIPLICITY && !PERL_OBJECT && !PERL_CAPI */
 
@@ -437,9 +439,9 @@ static stcxt_t *Context_ptr = NULL;
 #define dSTCXT			stcxt_t *cxt = Context_ptr
 #define SET_STCXT(x)		Context_ptr = x
 #define INIT_STCXT						\
-	dSTCXT;								\
-	NEW_STORABLE_CXT_OBJ(cxt);			\
-	SET_STCXT(cxt)
+    dSTCXT;                                                     \
+    NEW_STORABLE_CXT_OBJ(cxt);                                  \
+    SET_STCXT(cxt)
 
 
 #endif /* MULTIPLICITY || PERL_OBJECT || PERL_CAPI */
@@ -505,19 +507,20 @@ static stcxt_t *Context_ptr = NULL;
 #define ksiz	(cxt->keybuf).asiz
 #define KBUFINIT()						\
   STMT_START {							\
-	if (!kbuf) {						\
-		TRACEME(("** allocating kbuf of 128 bytes")); \
-		New(10003, kbuf, 128, char);	\
-		ksiz = 128;						\
-	}									\
+      if (!kbuf) {						\
+          TRACEME(("** allocating kbuf of 128 bytes"));         \
+          New(10003, kbuf, 128, char);                          \
+          ksiz = 128;                                           \
+      }                                                         \
   } STMT_END
-#define KBUFCHK(x)				\
-  STMT_START {					\
-	if (x >= ksiz) {			\
-		TRACEME(("** extending kbuf to %d bytes (had %d)", x+1, ksiz)); \
-		Renew(kbuf, x+1, char);	\
-		ksiz = x+1;				\
-	}							\
+#define KBUFCHK(x)                                              \
+    STMT_START {                                                \
+	if (x >= ksiz) {                                        \
+            TRACEME(("** extending kbuf to %d bytes (had %d)",  \
+                     (int)(x+1), (int)ksiz));                   \
+            Renew(kbuf, x+1, char);                             \
+            ksiz = x+1;                                         \
+	}                                                       \
   } STMT_END
 
 /*
@@ -538,22 +541,22 @@ static stcxt_t *Context_ptr = NULL;
 #define int_aligned(x)	\
 	((unsigned long) (x) == trunc_int(x))
 
-#define MBUF_INIT(x)					\
-  STMT_START {							\
-	if (!mbase) {						\
-		TRACEME(("** allocating mbase of %d bytes", MGROW)); \
-		New(10003, mbase, MGROW, char);	\
-		msiz = (STRLEN)MGROW;					\
-	}									\
-	mptr = mbase;						\
-	if (x)								\
-		mend = mbase + x;				\
-	else								\
-		mend = mbase + msiz;			\
-  } STMT_END
+#define MBUF_INIT(x)                                               \
+    STMT_START {                                                   \
+	if (!mbase) {                                              \
+            TRACEME(("** allocating mbase of %d bytes", MGROW));   \
+            New(10003, mbase, (int)MGROW, char);                   \
+            msiz = (STRLEN)MGROW;				   \
+	}                                                          \
+	mptr = mbase;                                              \
+	if (x)							   \
+            mend = mbase + x;                                      \
+	else							   \
+            mend = mbase + msiz;                                   \
+    } STMT_END
 
 #define MBUF_TRUNC(x)	mptr = mbase + x
-#define MBUF_SIZE()		(mptr - mbase)
+#define MBUF_SIZE()	(mptr - mbase)
 
 /*
  * MBUF_SAVE_AND_LOAD
@@ -563,20 +566,20 @@ static stcxt_t *Context_ptr = NULL;
  * buffer into cxt->msaved, before MBUF_LOAD() can be used to retrieve
  * data from a string.
  */
-#define MBUF_SAVE_AND_LOAD(in)			\
-  STMT_START {							\
-	ASSERT(!cxt->membuf_ro, ("mbase not already saved")); \
-	cxt->membuf_ro = 1;					\
-	TRACEME(("saving mbuf"));			\
-	StructCopy(&cxt->membuf, &cxt->msaved, struct extendable); \
-	MBUF_LOAD(in);						\
+#define MBUF_SAVE_AND_LOAD(in)                                     \
+    STMT_START {                                                   \
+        ASSERT(!cxt->membuf_ro, ("mbase not already saved"));      \
+        cxt->membuf_ro = 1;                                        \
+        TRACEME(("saving mbuf"));                                  \
+        StructCopy(&cxt->membuf, &cxt->msaved, struct extendable); \
+        MBUF_LOAD(in);                                             \
   } STMT_END
 
-#define MBUF_RESTORE() 					\
-  STMT_START {							\
-	ASSERT(cxt->membuf_ro, ("mbase is read-only")); \
-	cxt->membuf_ro = 0;					\
-	TRACEME(("restoring mbuf"));		\
+#define MBUF_RESTORE()                                             \
+    STMT_START {                                                   \
+	ASSERT(cxt->membuf_ro, ("mbase is read-only"));            \
+	cxt->membuf_ro = 0;                                        \
+	TRACEME(("restoring mbuf"));                               \
 	StructCopy(&cxt->msaved, &cxt->membuf, struct extendable); \
   } STMT_END
 
@@ -584,131 +587,131 @@ static stcxt_t *Context_ptr = NULL;
  * Use SvPOKp(), because SvPOK() fails on tainted scalars.
  * See store_scalar() for other usage of this workaround.
  */
-#define MBUF_LOAD(v) 					\
-  STMT_START {							\
-	ASSERT(cxt->membuf_ro, ("mbase is read-only")); \
+#define MBUF_LOAD(v)                                            \
+    STMT_START {                                                \
+	ASSERT(cxt->membuf_ro, ("mbase is read-only"));         \
 	if (!SvPOKp(v))						\
-		CROAK(("Not a scalar string"));	\
-	mptr = mbase = SvPV(v, msiz);		\
-	mend = mbase + msiz;				\
-  } STMT_END
+            CROAK(("Not a scalar string"));                     \
+	mptr = mbase = SvPV(v, msiz);                           \
+	mend = mbase + msiz;                                    \
+    } STMT_END
 
-#define MBUF_XTEND(x) 				\
-  STMT_START {						\
-	int nsz = (int) round_mgrow((x)+msiz);	\
-	int offset = mptr - mbase;		\
-	ASSERT(!cxt->membuf_ro, ("mbase is not read-only")); \
+#define MBUF_XTEND(x)                                           \
+    STMT_START {                                                \
+	int nsz = (int) round_mgrow((x)+msiz);                  \
+	int offset = mptr - mbase;                              \
+	ASSERT(!cxt->membuf_ro, ("mbase is not read-only"));    \
 	TRACEME(("** extending mbase from %d to %d bytes (wants %d new)", \
-		msiz, nsz, (x)));			\
-	Renew(mbase, nsz, char);		\
-	msiz = nsz;						\
-	mptr = mbase + offset;			\
-	mend = mbase + nsz;				\
+                 (int)msiz, nsz, (int)(x)));                    \
+	Renew(mbase, nsz, char);                                \
+	msiz = nsz;                                             \
+	mptr = mbase + offset;                                  \
+	mend = mbase + nsz;                                     \
   } STMT_END
 
-#define MBUF_CHK(x) 				\
-  STMT_START {						\
-	if ((mptr + (x)) > mend)		\
-		MBUF_XTEND(x);				\
-  } STMT_END
+#define MBUF_CHK(x)                             \
+    STMT_START {                                \
+	if ((mptr + (x)) > mend)                \
+            MBUF_XTEND(x);			\
+    } STMT_END
 
-#define MBUF_GETC(x) 				\
-  STMT_START {						\
-	if (mptr < mend)				\
-		x = (int) (unsigned char) *mptr++;	\
-	else							\
-		return (SV *) 0;			\
+#define MBUF_GETC(x)                            \
+    STMT_START {                                \
+	if (mptr < mend)			\
+            x = (int) (unsigned char) *mptr++;  \
+	else					\
+            return (SV *) 0;                    \
   } STMT_END
 
 #ifdef CRAY_HACK
-#define MBUF_GETINT(x) 					\
-  STMT_START {							\
-	oC(x);								\
-	if ((mptr + 4) <= mend) {			\
-		memcpy(oI(&x), mptr, 4);		\
-		mptr += 4;						\
-	} else								\
-		return (SV *) 0;				\
+#define MBUF_GETINT(x) 				\
+    STMT_START {				\
+	oC(x);                                  \
+	if ((mptr + 4) <= mend) {		\
+            memcpy(oI(&x), mptr, 4);            \
+            mptr += 4;                          \
+	} else					\
+            return (SV *) 0;                    \
   } STMT_END
 #else
-#define MBUF_GETINT(x) 					\
-  STMT_START {							\
-	if ((mptr + sizeof(int)) <= mend) {	\
-		if (int_aligned(mptr))			\
-			x = *(int *) mptr;			\
-		else							\
-			memcpy(&x, mptr, sizeof(int));	\
-		mptr += sizeof(int);			\
-	} else								\
-		return (SV *) 0;				\
+#define MBUF_GETINT(x) 				\
+  STMT_START {					\
+      if ((mptr + sizeof(int)) <= mend) {       \
+          if (int_aligned(mptr))                \
+              x = *(int *) mptr;                \
+          else					\
+              memcpy(&x, mptr, sizeof(int));    \
+          mptr += sizeof(int);                  \
+      } else					\
+          return (SV *) 0;                      \
   } STMT_END
 #endif
 
-#define MBUF_READ(x,s) 				\
-  STMT_START {						\
-	if ((mptr + (s)) <= mend) {		\
-		memcpy(x, mptr, s);			\
-		mptr += s;					\
-	} else							\
-		return (SV *) 0;			\
-  } STMT_END
+#define MBUF_READ(x,s)                          \
+    STMT_START {                                \
+	if ((mptr + (s)) <= mend) {             \
+            memcpy(x, mptr, s);                 \
+            mptr += s;                          \
+	} else					\
+            return (SV *) 0;                    \
+    } STMT_END
 
-#define MBUF_SAFEREAD(x,s,z) 		\
-  STMT_START {						\
-	if ((mptr + (s)) <= mend) {		\
-		memcpy(x, mptr, s);			\
-		mptr += s;					\
-	} else {						\
-		sv_free(z);					\
-		return (SV *) 0;			\
-	}								\
+#define MBUF_SAFEREAD(x,s,z)                    \
+  STMT_START {					\
+      if ((mptr + (s)) <= mend) {               \
+          memcpy(x, mptr, s);                   \
+          mptr += s;                            \
+      } else {                                  \
+          sv_free(z);                           \
+          return (SV *) 0;                      \
+      }                                         \
   } STMT_END
 
 #define MBUF_SAFEPVREAD(x,s,z)			\
   STMT_START {					\
-	if ((mptr + (s)) <= mend) {		\
-		memcpy(x, mptr, s);		\
-		mptr += s;			\
-	} else {				\
-		Safefree(z);			\
-		return (SV *) 0;		\
-	}					\
+      if ((mptr + (s)) <= mend) {		\
+          memcpy(x, mptr, s);                   \
+          mptr += s;                            \
+      } else {                                  \
+          Safefree(z);                          \
+          return (SV *) 0;                      \
+      }                                         \
   } STMT_END
 
-#define MBUF_PUTC(c) 				\
-  STMT_START {						\
-	if (mptr < mend)				\
-		*mptr++ = (char) c;			\
-	else {							\
-		MBUF_XTEND(1);				\
-		*mptr++ = (char) c;			\
-	}								\
+#define MBUF_PUTC(c)                            \
+    STMT_START {                                \
+	if (mptr < mend)			\
+            *mptr++ = (char) c;                 \
+	else {                                  \
+            MBUF_XTEND(1);			\
+            *mptr++ = (char) c;                 \
+	}                                       \
   } STMT_END
 
 #ifdef CRAY_HACK
-#define MBUF_PUTINT(i) 				\
-  STMT_START {						\
-	MBUF_CHK(4);					\
-	memcpy(mptr, oI(&i), 4);		\
-	mptr += 4;						\
+#define MBUF_PUTINT(i)                          \
+  STMT_START {					\
+      MBUF_CHK(4);				\
+      memcpy(mptr, oI(&i), 4);                  \
+      mptr += 4;                                \
   } STMT_END
 #else
 #define MBUF_PUTINT(i) 				\
-  STMT_START {						\
+    STMT_START {                                \
 	MBUF_CHK(sizeof(int));			\
 	if (int_aligned(mptr))			\
-		*(int *) mptr = i;			\
-	else							\
-		memcpy(mptr, &i, sizeof(int));	\
-	mptr += sizeof(int);			\
+            *(int *) mptr = i;                  \
+	else					\
+            memcpy(mptr, &i, sizeof(int));      \
+	mptr += sizeof(int);                    \
   } STMT_END
 #endif
 
-#define MBUF_WRITE(x,s) 			\
-  STMT_START {						\
-	MBUF_CHK(s);					\
-	memcpy(mptr, x, s);				\
-	mptr += s;						\
+#define MBUF_WRITE(x,s)                         \
+  STMT_START {					\
+	MBUF_CHK(s);				\
+	memcpy(mptr, x, s);			\
+	mptr += s;                              \
   } STMT_END
 
 /*
@@ -720,7 +723,7 @@ static stcxt_t *Context_ptr = NULL;
 #define svis_ARRAY		2
 #define svis_HASH		3
 #define svis_TIED		4
-#define svis_TIED_ITEM	5
+#define svis_TIED_ITEM		5
 #define svis_CODE		6
 #define svis_OTHER		7
 
@@ -887,66 +890,66 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
  * tagnum with cxt->tagnum++ along with this macro!
  *     - samv 20Jan04
  */
-#define PUTMARK(x) 							\
-  STMT_START {								\
-	if (!cxt->fio)							\
-		MBUF_PUTC(x);						\
-	else if (PerlIO_putc(cxt->fio, x) == EOF)	\
-		return -1;							\
+#define PUTMARK(x) 					\
+    STMT_START {                                        \
+	if (!cxt->fio)					\
+            MBUF_PUTC(x);				\
+	else if (PerlIO_putc(cxt->fio, x) == EOF)       \
+            return -1;					\
   } STMT_END
 
-#define WRITE_I32(x)					\
-  STMT_START {							\
-	ASSERT(sizeof(x) == sizeof(I32), ("writing an I32"));	\
-	if (!cxt->fio)						\
-		MBUF_PUTINT(x);					\
-	else if (PerlIO_write(cxt->fio, oI(&x), oS(sizeof(x))) != oS(sizeof(x))) \
-		return -1;					\
+#define WRITE_I32(x)                                                    \
+    STMT_START {							\
+      ASSERT(sizeof(x) == sizeof(I32), ("writing an I32"));             \
+      if (!cxt->fio)                                                    \
+          MBUF_PUTINT(x);                                               \
+      else if (PerlIO_write(cxt->fio, oI(&x), oS(sizeof(x))) != oS(sizeof(x))) \
+          return -1;                                                    \
   } STMT_END
 
 #ifdef HAS_HTONL
-#define WLEN(x)						\
-  STMT_START {						\
+#define WLEN(x)                                                         \
+    STMT_START {                                                        \
 	ASSERT(sizeof(x) == sizeof(int), ("WLEN writing an int"));	\
-	if (cxt->netorder) {			\
-		int y = (int) htonl(x);		\
-		if (!cxt->fio)				\
-			MBUF_PUTINT(y);			\
-		else if (PerlIO_write(cxt->fio,oI(&y),oS(sizeof(y))) != oS(sizeof(y))) \
-			return -1;				\
-	} else {						\
-		if (!cxt->fio)				\
-			MBUF_PUTINT(x);			\
-		else if (PerlIO_write(cxt->fio,oI(&x),oS(sizeof(x))) != oS(sizeof(x))) \
-			return -1;				\
+	if (cxt->netorder) {                                            \
+            int y = (int) htonl(x);                                     \
+            if (!cxt->fio)                                              \
+                MBUF_PUTINT(y);                                         \
+            else if (PerlIO_write(cxt->fio,oI(&y),oS(sizeof(y))) != oS(sizeof(y))) \
+                return -1;                                              \
+	} else {                                                        \
+            if (!cxt->fio)                                              \
+                MBUF_PUTINT(x);                                         \
+            else if (PerlIO_write(cxt->fio,oI(&x),oS(sizeof(x))) != oS(sizeof(x))) \
+                return -1;                                              \
 	}								\
-  } STMT_END
+    } STMT_END
 #else
 #define WLEN(x)	WRITE_I32(x)
 #endif
 
 #define WRITE(x,y) 							\
-  STMT_START {								\
+    STMT_START {                                                        \
 	if (!cxt->fio)							\
-		MBUF_WRITE(x,y);					\
-	else if (PerlIO_write(cxt->fio, x, y) != y)	\
-		return -1;							\
-  } STMT_END
+            MBUF_WRITE(x,y);                                            \
+	else if (PerlIO_write(cxt->fio, x, y) != y)                     \
+            return -1;							\
+    } STMT_END
 
-#define STORE_PV_LEN(pv, len, small, large)			\
-  STMT_START {							\
-	if (len <= LG_SCALAR) {				\
-		unsigned char clen = (unsigned char) len;	\
-		PUTMARK(small);					\
-		PUTMARK(clen);					\
-		if (len)						\
-			WRITE(pv, len);				\
+#define STORE_PV_LEN(pv, len, small, large)                             \
+    STMT_START {                                                        \
+	if (len <= LG_SCALAR) {                                         \
+            unsigned char clen = (unsigned char) len;                   \
+            PUTMARK(small);                                             \
+            PUTMARK(clen);                                              \
+            if (len)                                                    \
+                WRITE(pv, len);                                         \
 	} else {							\
-		PUTMARK(large);					\
-		WLEN(len);						\
-		WRITE(pv, len);					\
-	}									\
-  } STMT_END
+            PUTMARK(large);                                             \
+            WLEN(len);                                                  \
+            WRITE(pv, len);                                             \
+	}                                                               \
+    } STMT_END
 
 #define STORE_SCALAR(pv, len)	STORE_PV_LEN(pv, len, SX_SCALAR, SX_LSCALAR)
 
@@ -966,68 +969,68 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
  */
 
 #define GETCHAR() \
-	(cxt->fio ? PerlIO_getc(cxt->fio) : (mptr >= mend ? EOF : (int) *mptr++))
+    (cxt->fio ? PerlIO_getc(cxt->fio) : (mptr >= mend ? EOF : (int) *mptr++))
 
-#define GETMARK(x) 								\
-  STMT_START {									\
-	if (!cxt->fio)								\
-		MBUF_GETC(x);							\
-	else if ((int) (x = PerlIO_getc(cxt->fio)) == EOF)	\
-		return (SV *) 0;						\
+#define GETMARK(x)                                                      \
+    STMT_START {                                                        \
+      if (!cxt->fio)                                                    \
+          MBUF_GETC(x);							\
+      else if ((int) (x = PerlIO_getc(cxt->fio)) == EOF)                \
+          return (SV *) 0;						\
   } STMT_END
 
-#define READ_I32(x)						\
-  STMT_START {							\
-	ASSERT(sizeof(x) == sizeof(I32), ("reading an I32"));	\
+#define READ_I32(x)                                                     \
+    STMT_START {                                                        \
+	ASSERT(sizeof(x) == sizeof(I32), ("reading an I32"));           \
 	oC(x);								\
-	if (!cxt->fio)						\
-		MBUF_GETINT(x);					\
-	else if (PerlIO_read(cxt->fio, oI(&x), oS(sizeof(x))) != oS(sizeof(x)))	\
-		return (SV *) 0;				\
-  } STMT_END
+	if (!cxt->fio)                                                  \
+            MBUF_GETINT(x);                                             \
+	else if (PerlIO_read(cxt->fio, oI(&x), oS(sizeof(x))) != oS(sizeof(x))) \
+            return (SV *) 0;                                            \
+    } STMT_END
 
 #ifdef HAS_NTOHL
 #define RLEN(x)							\
-  STMT_START {							\
+    STMT_START {							\
 	oC(x);								\
-	if (!cxt->fio)						\
-		MBUF_GETINT(x);					\
-	else if (PerlIO_read(cxt->fio, oI(&x), oS(sizeof(x))) != oS(sizeof(x)))	\
-		return (SV *) 0;				\
-	if (cxt->netorder)					\
-		x = (int) ntohl(x);				\
+	if (!cxt->fio)                                                  \
+            MBUF_GETINT(x);                                             \
+	else if (PerlIO_read(cxt->fio, oI(&x), oS(sizeof(x))) != oS(sizeof(x))) \
+            return (SV *) 0;                                            \
+	if (cxt->netorder)                                              \
+            x = (int) ntohl(x);                                         \
   } STMT_END
 #else
 #define RLEN(x) READ_I32(x)
 #endif
 
 #define READ(x,y) 							\
-  STMT_START {								\
+    STMT_START {                                                        \
 	if (!cxt->fio)							\
-		MBUF_READ(x, y);					\
-	else if (PerlIO_read(cxt->fio, x, y) != y)	\
-		return (SV *) 0;					\
-  } STMT_END
+            MBUF_READ(x, y);                                            \
+	else if (PerlIO_read(cxt->fio, x, y) != y)                      \
+            return (SV *) 0;                                            \
+    } STMT_END
 
 #define SAFEREAD(x,y,z)		 					\
-  STMT_START {									\
-	if (!cxt->fio)								\
-		MBUF_SAFEREAD(x,y,z);					\
-	else if (PerlIO_read(cxt->fio, x, y) != y)	 {	\
-		sv_free(z);								\
-		return (SV *) 0;						\
-	}											\
+    STMT_START {                                                        \
+	if (!cxt->fio)                                                  \
+            MBUF_SAFEREAD(x,y,z);					\
+	else if (PerlIO_read(cxt->fio, x, y) != y)	 {              \
+            sv_free(z);                                                 \
+            return (SV *) 0;						\
+	}                                                               \
   } STMT_END
 
 #define SAFEPVREAD(x,y,z)					\
-  STMT_START {							\
+    STMT_START {                                                \
 	if (!cxt->fio)						\
-		MBUF_SAFEPVREAD(x,y,z);				\
+            MBUF_SAFEPVREAD(x,y,z);				\
 	else if (PerlIO_read(cxt->fio, x, y) != y)	 {	\
-		Safefree(z);					\
-		return (SV *) 0;				\
+            Safefree(z);					\
+            return (SV *) 0;                                    \
 	}							\
-  } STMT_END
+    } STMT_END
 
 /*
  * SEEN() is used at retrieve time, to remember where object 'y', bearing a
@@ -1055,16 +1058,17 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
  */
 #define SEEN0_NN(y,i)						        \
     STMT_START {							\
-	if (av_store(cxt->aseen, cxt->tagnum++, i ? (SV*)(y) : SvREFCNT_inc(y)) == 0) \
-		return (SV *) 0;					\
-	TRACEME(("aseen(#%d) = 0x%" UVxf " (refcnt=%d)", cxt->tagnum-1, \
-		 PTR2UV(y), SvREFCNT(y)-1));		                \
+	if (av_store(cxt->aseen, cxt->tagnum++, i ? (SV*)(y)            \
+                     : SvREFCNT_inc(y)) == 0)                           \
+            return (SV *) 0;                                            \
+	TRACEME(("aseen(#%d) = 0x%" UVxf " (refcnt=%d)", (int)cxt->tagnum-1, \
+		 PTR2UV(y), (int)SvREFCNT(y)-1));                       \
     } STMT_END
 
 #define SEEN0(y,i)						        \
     STMT_START {							\
 	if (!y)								\
-		return (SV *) 0;					\
+            return (SV *) 0;                                            \
         SEEN0_NN(y,i)						        \
     } STMT_END
 
@@ -1072,7 +1076,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
     STMT_START {							\
         SEEN0_NN(y,i);						        \
 	if (stash)							\
-		BLESS((SV *) (y), (HV *)(stash));			\
+            BLESS((SV *)(y), (HV *)(stash));                            \
     } STMT_END
 
 #define SEEN(y,stash,i)						        \
@@ -1087,24 +1091,24 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
  * "A" magic is added before the sv_bless for overloaded classes, this avoids
  * an expensive call to S_reset_amagic in sv_bless.
  */
-#define BLESS(s,stash) 						\
-  STMT_START {								\
-	SV *ref;								\
-	if (cxt->flags & FLAG_BLESS_OK) {		\
-		TRACEME(("blessing 0x%"UVxf" in %s", PTR2UV(s), (HvNAME_get(stash)))); \
-		ref = newRV_noinc(s);					\
-		if (cxt->in_retrieve_overloaded && Gv_AMG(stash)) \
-		{ \
-		    cxt->in_retrieve_overloaded = 0; \
-			SvAMAGIC_on(ref);                            \
-		} \
-		(void) sv_bless(ref, stash);			\
-		SvRV_set(ref, NULL);						\
-		SvREFCNT_dec(ref);						\
-	} \
-	else {									\
-		TRACEME(("not blessing 0x%"UVxf" in %s", PTR2UV(s), (p))); \
-	}										\
+#define BLESS(s,stash)                                                  \
+    STMT_START {                                                        \
+	SV *ref;                                                        \
+	if (cxt->flags & FLAG_BLESS_OK) {                               \
+            TRACEME(("blessing 0x%"UVxf" in %s", PTR2UV(s), (HvNAME_get(stash)))); \
+            ref = newRV_noinc(s);					\
+            if (cxt->in_retrieve_overloaded && Gv_AMG(stash)) {         \
+                cxt->in_retrieve_overloaded = 0;                        \
+                SvAMAGIC_on(ref);                                       \
+            }                                                           \
+            (void) sv_bless(ref, stash);                                \
+            SvRV_set(ref, NULL);                                        \
+            SvREFCNT_dec(ref);						\
+	}                                                               \
+	else {                                                          \
+            TRACEME(("not blessing 0x%"UVxf" in %s", PTR2UV(s),         \
+                     (HvNAME_get(stash))));                             \
+	}                                                               \
   } STMT_END
 /*
  * sort (used in store_hash) - conditionally use qsort when
@@ -1115,17 +1119,17 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 
 #if defined(USE_ITHREADS)
 
-#define STORE_HASH_SORT \
-        ENTER; { \
-        PerlInterpreter *orig_perl = PERL_GET_CONTEXT; \
-        SAVESPTR(orig_perl); \
-        PERL_SET_CONTEXT(aTHX); \
+#define STORE_HASH_SORT                                          \
+    ENTER; {                                                     \
+        PerlInterpreter *orig_perl = PERL_GET_CONTEXT;           \
+        SAVESPTR(orig_perl);                                     \
+        PERL_SET_CONTEXT(aTHX);                                  \
         qsort((char *) AvARRAY(av), len, sizeof(SV *), sortcmp); \
-        } LEAVE;
+    } LEAVE;
 
 #else /* ! USE_ITHREADS */
 
-#define STORE_HASH_SORT \
+#define STORE_HASH_SORT                                          \
         qsort((char *) AvARRAY(av), len, sizeof(SV *), sortcmp);
 
 #endif  /* USE_ITHREADS */
@@ -1340,14 +1344,14 @@ static void init_store_context(
 
 	cxt->netorder = network_order;
 	cxt->forgive_me = -1;			/* Fetched from perl if needed */
-	cxt->deparse = -1;				/* Idem */
-	cxt->eval = NULL;				/* Idem */
+	cxt->deparse = -1;			/* Idem */
+	cxt->eval = NULL;			/* Idem */
 	cxt->canonical = -1;			/* Idem */
-	cxt->tagnum = -1;				/* Reset tag numbers */
-	cxt->classnum = -1;				/* Reset class numbers */
-	cxt->fio = f;					/* Where I/O are performed */
+	cxt->tagnum = -1;			/* Reset tag numbers */
+	cxt->classnum = -1;			/* Reset class numbers */
+	cxt->fio = f;				/* Where I/O are performed */
 	cxt->optype = optype;			/* A store, or a deep clone */
-	cxt->entry = 1;					/* No recursion yet */
+	cxt->entry = 1;				/* No recursion yet */
 
 	/*
 	 * The 'hseen' table is used to keep track of each SV stored and their
@@ -1552,11 +1556,11 @@ static void init_retrieve_context(pTHX_ stcxt_t *cxt, int optype, int is_tainted
 	cxt->aseen = newAV();			/* Where retrieved objects are kept */
 	cxt->where_is_undef = -1;		/* Special case for PL_sv_undef */
 	cxt->aclass = newAV();			/* Where seen classnames are kept */
-	cxt->tagnum = 0;				/* Have to count objects... */
-	cxt->classnum = 0;				/* ...and class names as well */
+	cxt->tagnum = 0;			/* Have to count objects... */
+	cxt->classnum = 0;			/* ...and class names as well */
 	cxt->optype = optype;
 	cxt->s_tainted = is_tainted;
-	cxt->entry = 1;					/* No recursion yet */
+	cxt->entry = 1;				/* No recursion yet */
 #ifndef HAS_RESTRICTED_HASHES
         cxt->derestrict = -1;		/* Fetched from perl if needed */
 #endif
@@ -1943,7 +1947,7 @@ static AV *array_call(
 	SAVETMPS;
 
 	PUSHMARK(sp);
-	XPUSHs(obj);								/* Target object */
+	XPUSHs(obj);					/* Target object */
 	XPUSHs(sv_2mortal(newSViv(cloning)));		/* Cloning flag */
 	PUTBACK;
 
@@ -2173,7 +2177,7 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
                 unsigned char siv = (unsigned char) (iv + 128);	/* [0,255] */
                 PUTMARK(SX_BYTE);
                 PUTMARK(siv);
-                TRACEME(("small integer stored as %d", siv));
+                TRACEME(("small integer stored as %d", (int)siv));
             } else if (cxt->netorder) {
 #ifndef HAS_HTONL
                 TRACEME(("no htonl, fall back to string for integer"));
@@ -2302,7 +2306,7 @@ static int store_array(pTHX_ stcxt_t *cxt, AV *av)
 
 	PUTMARK(SX_ARRAY);
 	WLEN(len);
-	TRACEME(("size = %d", len));
+	TRACEME(("size = %d", (int)len));
 
 	/*
 	 * Now store each item recursively.
@@ -2495,7 +2499,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 				   more space efficient to store.  */
 				val = &PL_sv_undef;
 				ASSERT (flags == 0,
-					("Flags not 0 but %d", flags));
+					("Flags not 0 but %d", (int)flags));
 				flags = SHV_K_PLACEHOLDER;
 #else
 				return 1;
@@ -3002,7 +3006,7 @@ static int store_hook(
 	char mtype = '\0';				/* for blessed ref to tied structures */
 	unsigned char eflags = '\0';	/* used when object type is SHT_EXTRA */
 
-	TRACEME(("store_hook, classname \"%s\", tagged #%d", HvNAME_get(pkg), cxt->tagnum));
+	TRACEME(("store_hook, classname \"%s\", tagged #%d", HvNAME_get(pkg), (int)cxt->tagnum));
 
 	/*
 	 * Determine object type on 2 bits.
@@ -3445,7 +3449,7 @@ static int store_blessed(
 	len = strlen(classname);
 
 	TRACEME(("blessed 0x%" UVxf " in %s, no hook: tagged #%d",
-		 PTR2UV(sv), classname, cxt->tagnum));
+		 PTR2UV(sv), classname, (int)cxt->tagnum));
 
 	/*
 	 * Determine whether it is the first time we see that class name (in which
@@ -3724,7 +3728,7 @@ static int store(pTHX_ stcxt_t *cxt, SV *sv)
 
 undef_special_case:
 	TRACEME(("storing 0x%" UVxf " tag #%d, type %d...",
-		 PTR2UV(sv), cxt->tagnum, type));
+		 PTR2UV(sv), (int)cxt->tagnum, type));
 
 	if (SvOBJECT(sv)) {
 		HV *pkg = SvSTASH(sv);
@@ -4020,7 +4024,7 @@ static SV *retrieve_idx_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 	SV *sv;
 
 	PERL_UNUSED_ARG(cname);
-	TRACEME(("retrieve_idx_blessed (#%d)", cxt->tagnum));
+	TRACEME(("retrieve_idx_blessed (#%d)", (int)cxt->tagnum));
 	ASSERT(!cname, ("no bless-into class given here, got %s", cname));
 
 	GETMARK(idx);			/* Index coded on a single char? */
@@ -4064,7 +4068,7 @@ static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 	char *malloced_classname = NULL;
 
 	PERL_UNUSED_ARG(cname);
-	TRACEME(("retrieve_blessed (#%d)", cxt->tagnum));
+	TRACEME(("retrieve_blessed (#%d)", (int)cxt->tagnum));
 	ASSERT(!cname, ("no bless-into class given here, got %s", cname));
 
 	/*
@@ -4091,7 +4095,7 @@ static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 	 * It's a new classname, otherwise it would have been an SX_IX_BLESS.
 	 */
 
-	TRACEME(("new class name \"%s\" will bear ID = %d", classname, cxt->classnum));
+	TRACEME(("new class name \"%s\" will bear ID = %d", classname, (int)cxt->classnum));
 
 	if (!av_store(cxt->aclass, cxt->classnum++, newSVpvn(classname, len))) {
 		Safefree(malloced_classname);
@@ -4150,7 +4154,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 	unsigned int extra_type = 0;
 
 	PERL_UNUSED_ARG(cname);
-	TRACEME(("retrieve_hook (#%d)", cxt->tagnum));
+	TRACEME(("retrieve_hook (#%d)", (int)cxt->tagnum));
 	ASSERT(!cname, ("no bless-into class given here, got %s", cname));
 
 	/*
@@ -4434,9 +4438,33 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 
 	BLESS(sv, stash);
 
-	hook = pkg_can(aTHX_ cxt->hook, SvSTASH(sv), "STORABLE_thaw");
-	if (!hook)
-		CROAK(("No STORABLE_thaw defined for objects of class %s", classname));
+	hook = pkg_can(aTHX_ cxt->hook, stash, "STORABLE_thaw");
+	if (!hook) {
+		/*
+		 * Hook not found.  Maybe they did not require the module where this
+		 * hook is defined yet?
+		 *
+		 * If the load below succeeds, we'll be able to find the hook.
+		 * Still, it only works reliably when each class is defined in a
+		 * file of its own.
+		 */
+
+		TRACEME(("No STORABLE_thaw defined for objects of class %s", classname));
+		TRACEME(("Going to load module '%s'", classname));
+	        load_module(PERL_LOADMOD_NOIMPORT, newSVpv(classname, 0), Nullsv);
+
+		/*
+		 * We cache results of pkg_can, so we need to uncache before attempting
+		 * the lookup again.
+		 */
+
+		pkg_uncache(aTHX_ cxt->hook, SvSTASH(sv), "STORABLE_thaw");
+		hook = pkg_can(aTHX_ cxt->hook, SvSTASH(sv), "STORABLE_thaw");
+
+		if (!hook)
+			CROAK(("No STORABLE_thaw defined for objects of class %s "
+					"(even after a \"require %s;\")", classname, classname));
+	}
 
 	/*
 	 * If we don't have an 'av' yet, prepare one.
@@ -4551,7 +4579,7 @@ static SV *retrieve_ref(pTHX_ stcxt_t *cxt, const char *cname)
 	SV *sv;
 	HV *stash;
 
-	TRACEME(("retrieve_ref (#%d)", cxt->tagnum));
+	TRACEME(("retrieve_ref (#%d)", (int)cxt->tagnum));
 
 	/*
 	 * We need to create the SV that holds the reference to the yet-to-retrieve
@@ -4614,7 +4642,7 @@ static SV *retrieve_weakref(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV *sv;
 
-	TRACEME(("retrieve_weakref (#%d)", cxt->tagnum));
+	TRACEME(("retrieve_weakref (#%d)", (int)cxt->tagnum));
 
 	sv = retrieve_ref(aTHX_ cxt, cname);
 	if (sv) {
@@ -4639,7 +4667,7 @@ static SV *retrieve_overloaded(pTHX_ stcxt_t *cxt, const char *cname)
 	SV *sv;
 	HV *stash;
 
-	TRACEME(("retrieve_overloaded (#%d)", cxt->tagnum));
+	TRACEME(("retrieve_overloaded (#%d)", (int)cxt->tagnum));
 
 	/*
 	 * Same code as retrieve_ref(), duplicated to avoid extra call.
@@ -4704,7 +4732,7 @@ static SV *retrieve_weakoverloaded(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV *sv;
 
-	TRACEME(("retrieve_weakoverloaded (#%d)", cxt->tagnum));
+	TRACEME(("retrieve_weakoverloaded (#%d)", (int)cxt->tagnum));
 
 	sv = retrieve_overloaded(aTHX_ cxt, cname);
 	if (sv) {
@@ -4729,7 +4757,7 @@ static SV *retrieve_tied_array(pTHX_ stcxt_t *cxt, const char *cname)
 	SV *sv;
 	HV *stash;
 
-	TRACEME(("retrieve_tied_array (#%d)", cxt->tagnum));
+	TRACEME(("retrieve_tied_array (#%d)", (int)cxt->tagnum));
 
 	if (!(cxt->flags & FLAG_TIE_OK)) {
 		CROAK(("Tying is disabled."));
@@ -4764,7 +4792,7 @@ static SV *retrieve_tied_hash(pTHX_ stcxt_t *cxt, const char *cname)
 	SV *sv;
 	HV *stash;
 
-	TRACEME(("retrieve_tied_hash (#%d)", cxt->tagnum));
+	TRACEME(("retrieve_tied_hash (#%d)", (int)cxt->tagnum));
 
 	if (!(cxt->flags & FLAG_TIE_OK)) {
 		CROAK(("Tying is disabled."));
@@ -4798,7 +4826,7 @@ static SV *retrieve_tied_scalar(pTHX_ stcxt_t *cxt, const char *cname)
 	SV *sv, *obj = NULL;
 	HV *stash;
 
-	TRACEME(("retrieve_tied_scalar (#%d)", cxt->tagnum));
+	TRACEME(("retrieve_tied_scalar (#%d)", (int)cxt->tagnum));
 
 	if (!(cxt->flags & FLAG_TIE_OK)) {
 		CROAK(("Tying is disabled."));
@@ -4841,7 +4869,7 @@ static SV *retrieve_tied_key(pTHX_ stcxt_t *cxt, const char *cname)
 	SV *key;
 	HV *stash;
 
-	TRACEME(("retrieve_tied_key (#%d)", cxt->tagnum));
+	TRACEME(("retrieve_tied_key (#%d)", (int)cxt->tagnum));
 
 	if (!(cxt->flags & FLAG_TIE_OK)) {
 		CROAK(("Tying is disabled."));
@@ -4879,7 +4907,7 @@ static SV *retrieve_tied_idx(pTHX_ stcxt_t *cxt, const char *cname)
 	HV *stash;
 	I32 idx;
 
-	TRACEME(("retrieve_tied_idx (#%d)", cxt->tagnum));
+	TRACEME(("retrieve_tied_idx (#%d)", (int)cxt->tagnum));
 
 	if (!(cxt->flags & FLAG_TIE_OK)) {
 		CROAK(("Tying is disabled."));
@@ -4918,7 +4946,7 @@ static SV *retrieve_lscalar(pTHX_ stcxt_t *cxt, const char *cname)
 	HV *stash;
 
 	RLEN(len);
-	TRACEME(("retrieve_lscalar (#%d), len = %" IVdf, cxt->tagnum, (IV) len));
+	TRACEME(("retrieve_lscalar (#%d), len = %" IVdf, (int)cxt->tagnum, (IV) len));
 
 	/*
 	 * Allocate an empty scalar of the suitable length.
@@ -4971,7 +4999,7 @@ static SV *retrieve_scalar(pTHX_ stcxt_t *cxt, const char *cname)
 	HV *stash;
 
 	GETMARK(len);
-	TRACEME(("retrieve_scalar (#%d), len = %d", cxt->tagnum, len));
+	TRACEME(("retrieve_scalar (#%d), len = %d", (int)cxt->tagnum, len));
 
 	/*
 	 * Allocate an empty scalar of the suitable length.
@@ -5094,7 +5122,7 @@ static SV *retrieve_vstring(pTHX_ stcxt_t *cxt, const char *cname)
 	SV *sv;
 
 	GETMARK(len);
-	TRACEME(("retrieve_vstring (#%d), len = %d", cxt->tagnum, len));
+	TRACEME(("retrieve_vstring (#%d), len = %d", (int)cxt->tagnum, len));
 
 	READ(s, len);
 
@@ -5126,7 +5154,7 @@ static SV *retrieve_lvstring(pTHX_ stcxt_t *cxt, const char *cname)
 
 	RLEN(len);
 	TRACEME(("retrieve_lvstring (#%d), len = %" IVdf,
-		  cxt->tagnum, (IV)len));
+		  (int)cxt->tagnum, (IV)len));
 
 	New(10003, s, len+1, char);
 	SAFEPVREAD(s, len, s);
@@ -5159,7 +5187,7 @@ static SV *retrieve_integer(pTHX_ stcxt_t *cxt, const char *cname)
 	HV *stash;
 	IV iv;
 
-	TRACEME(("retrieve_integer (#%d)", cxt->tagnum));
+	TRACEME(("retrieve_integer (#%d)", (int)cxt->tagnum));
 
 	READ(&iv, sizeof(iv));
 	sv = newSViv(iv);
@@ -5184,7 +5212,7 @@ static SV *retrieve_netint(pTHX_ stcxt_t *cxt, const char *cname)
 	HV *stash;
 	I32 iv;
 
-	TRACEME(("retrieve_netint (#%d)", cxt->tagnum));
+	TRACEME(("retrieve_netint (#%d)", (int)cxt->tagnum));
 
 	READ_I32(iv);
 #ifdef HAS_NTOHL
@@ -5214,7 +5242,7 @@ static SV *retrieve_double(pTHX_ stcxt_t *cxt, const char *cname)
 	HV *stash;
 	NV nv;
 
-	TRACEME(("retrieve_double (#%d)", cxt->tagnum));
+	TRACEME(("retrieve_double (#%d)", (int)cxt->tagnum));
 
 	READ(&nv, sizeof(nv));
 	sv = newSVnv(nv);
@@ -5240,7 +5268,7 @@ static SV *retrieve_byte(pTHX_ stcxt_t *cxt, const char *cname)
 	int siv;
 	signed char tmp;	/* Workaround for AIX cc bug --H.Merijn Brand */
 
-	TRACEME(("retrieve_byte (#%d)", cxt->tagnum));
+	TRACEME(("retrieve_byte (#%d)", (int)cxt->tagnum));
 
 	GETMARK(siv);
 	TRACEME(("small integer read as %d", (unsigned char) siv));
@@ -5290,7 +5318,7 @@ static SV *retrieve_sv_undef(pTHX_ stcxt_t *cxt, const char *cname)
 	   deleted elements, and will return NULL (fetch failed) whenever it
 	   is fetched.  */
 	if (cxt->where_is_undef == -1) {
-		cxt->where_is_undef = cxt->tagnum;
+		cxt->where_is_undef = (int)cxt->tagnum;
 	}
 	stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
 	SEEN_NN(sv, stash, 1);
@@ -5367,7 +5395,7 @@ static SV *retrieve_array(pTHX_ stcxt_t *cxt, const char *cname)
 	HV *stash;
 	bool seen_null = FALSE;
 
-	TRACEME(("retrieve_array (#%d)", cxt->tagnum));
+	TRACEME(("retrieve_array (#%d)", (int)cxt->tagnum));
 
 	/*
 	 * Read length, and allocate array, then pre-extend it.
@@ -5428,7 +5456,7 @@ static SV *retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 	SV *sv;
 	HV *stash;
 
-	TRACEME(("retrieve_hash (#%d)", cxt->tagnum));
+	TRACEME(("retrieve_hash (#%d)", (int)cxt->tagnum));
 
 	/*
 	 * Read length, allocate table.
@@ -5508,7 +5536,7 @@ static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname)
     int hash_flags;
 
     GETMARK(hash_flags);
-    TRACEME(("retrieve_flag_hash (#%d)", cxt->tagnum));
+    TRACEME(("retrieve_flag_hash (#%d)", (int)cxt->tagnum));
     /*
      * Read length, allocate table.
      */
@@ -5642,12 +5670,13 @@ static SV *retrieve_code(pTHX_ stcxt_t *cxt, const char *cname)
     CROAK(("retrieve_code does not work with perl 5.005 or less\n"));
 #else
 	dSP;
-	int type, count, tagnum;
+	I32 type, count;
+        IV tagnum;
 	SV *cv;
 	SV *sv, *text, *sub, *errsv;
 	HV *stash;
 
-	TRACEME(("retrieve_code (#%d)", cxt->tagnum));
+	TRACEME(("retrieve_code (#%d)", (int)cxt->tagnum));
 
 	/*
 	 *  Insert dummy SV in the aseen array so that we don't screw
@@ -5782,7 +5811,7 @@ static SV *old_retrieve_array(pTHX_ stcxt_t *cxt, const char *cname)
 	int c;
 
 	PERL_UNUSED_ARG(cname);
-	TRACEME(("old_retrieve_array (#%d)", cxt->tagnum));
+	TRACEME(("old_retrieve_array (#%d)", (int)cxt->tagnum));
 
 	/*
 	 * Read length, and allocate array, then pre-extend it.
@@ -5845,7 +5874,7 @@ static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 	SV *sv_h_undef = (SV *) 0;		/* hv_store() bug */
 
 	PERL_UNUSED_ARG(cname);
-	TRACEME(("old_retrieve_hash (#%d)", cxt->tagnum));
+	TRACEME(("old_retrieve_hash (#%d)", (int)cxt->tagnum));
 
 	/*
 	 * Read length, allocate table.
@@ -6525,10 +6554,8 @@ static SV *do_retrieve(
  */
 static SV *pretrieve(pTHX_ PerlIO *f, SV *flag)
 {
-	int flags;
 	TRACEME(("pretrieve"));
-	flags = (int)SvIV(flag);
-	return do_retrieve(aTHX_ f, Nullsv, 0, flags);
+	return do_retrieve(aTHX_ f, Nullsv, 0, (int)SvIV(flag));
 }
 
 /*
@@ -6538,10 +6565,8 @@ static SV *pretrieve(pTHX_ PerlIO *f, SV *flag)
  */
 static SV *mretrieve(pTHX_ SV *sv, SV *flag)
 {
-	int flags;
 	TRACEME(("mretrieve"));
-	flags = (int)SvIV(flag);
-	return do_retrieve(aTHX_ (PerlIO*) 0, sv, 0, flags);
+	return do_retrieve(aTHX_ (PerlIO*) 0, sv, 0, (int)SvIV(flag));
 }
 
 /***
