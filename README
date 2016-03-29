@@ -1,6 +1,7 @@
-                         Storable 2.14
+                         Storable 3.00
                Copyright (c) 1995-2000, Raphael Manfredi
                Copyright (c) 2001-2004, Larry Wall
+               Copyright (c) 2016, cPanel Inc
 
 ------------------------------------------------------------------------
     This program is free software; you can redistribute it and/or modify
@@ -15,8 +16,8 @@
 +=======================================================================
 | Storable is distributed as a module, but is also part of the official
 | Perl core distribution, as of perl 5.8. 
-| Maintenance is now done by the perl5-porters.  We thank Raphael
-| Manfredi for providing us with this very useful module.
+| Maintenance is partially done by the perl5-porters, and for cperl by cPanel.
+| We thank Raphael Manfredi for providing us with this very useful module.
 +=======================================================================
 
 The Storable extension brings persistence to your data.
@@ -68,6 +69,9 @@ Thanks to (in chronological order):
     Marc Lehmann <pcg@opengroup.org>
     Justin Banks <justinb@wamnet.com>
     Jarkko Hietaniemi <jhi@iki.fi> (AGAIN, as perl 5.7.0 Pumpkin!)
+    Todd Rinaldo <toddr@cpanel.net>, JD Lightsey <jd@cpanel.net>
+      for optional disabling tie and bless for increased security
+    Reini Urban <rurban@cpanel.net> for the 3.00 >2G support and rewrite
 
 for their contributions.
 

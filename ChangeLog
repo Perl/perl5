@@ -1,3 +1,20 @@
+Thu Mar 31 17:10:27 2016 +0200 Reini Urban <rurban@cpanel.net>
+    Version 3.00c
+
+        * Added support for u64 strings, arrays and hashes >2G
+          via a new LOBJECT tag. This is for 32bit systems and lengths
+          between 2GB and 4GB (I32-U32), and 64bit (>I32).
+        * Bumped STORABLE_BIN_MINOR and STORABLE_BIN_WRITE_MINOR from 10 to 11
+        * fix parallel tests, use unique filenames.
+        * fixed 2 instances of 2arg open,
+        * added optional flag arguments to skip tie and bless on retrieve/thaw,
+        * added SECURITY WARNING and Large data support to docs
+        * compute CAN_FLOCK at compile-time
+        * reformat everything consistently
+        * enable DEBUGME tracing and asserts with -DDEBUGGING
+        * fix all 64 bit compiler warnings
+        * added some abstraction methods to avoid code duplication
+
 Wed Jul  2 16:25:25 IST 2014   Abhijit Menon-Sen <ams@toroid.org>
     Version 2.51
 

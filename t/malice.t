@@ -34,8 +34,8 @@ $file_magic_str = 'pst0';
 $other_magic = 7 + length $byteorder;
 $network_magic = 2;
 $major = 2;
-$minor = 10;
-$minor_write = $] >= 5.019 ? 10 : $] > 5.008 ? 9 : $] > 5.005_50 ? 8 : 4;
+$minor = 11;
+$minor_write = $] >= 5.019 ? 11 : $] > 5.008 ? 9 : $] > 5.005_50 ? 8 : 4;
 
 use Test::More;
 

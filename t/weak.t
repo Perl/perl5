@@ -34,7 +34,7 @@ require 'testlib.pl';
 use vars '$file';
 use strict;
 
-$Storable::flags = Storable::FLAGS_COMPAT;
+# $Storable::flags = Storable::FLAGS_COMPAT;
 
 sub tester {
   my ($contents, $sub, $testersub, $what) = @_;

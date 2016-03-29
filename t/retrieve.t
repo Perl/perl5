@@ -29,13 +29,13 @@ $c->{attribute} = 'attrval';
 @a = ('first', '', undef, 3, -4, -3.14159, 456, 4.5,
 	$b, \$a, $a, $c, \$c, \%a);
 
-isnt(store(\@a, 'store'), undef);
+isnt(store(\@a, "store$$"), undef);
 is(Storable::last_op_in_netorder(), '');
 isnt(nstore(\@a, 'nstore'), undef);
 is(Storable::last_op_in_netorder(), 1);
 is(Storable::last_op_in_netorder(), 1);
 
-$root = retrieve('store');
+$root = retrieve("store$$");
 isnt($root, undef);
 is(Storable::last_op_in_netorder(), '');
 
@@ -54,4 +54,4 @@ is($d1, $d2);
 isnt($root->[1], undef);
 is(length $root->[1], 0);
 
-END { 1 while unlink('store', 'nstore') }
+END { 1 while unlink("store$$", 'nstore') }
