@@ -106,7 +106,7 @@ for ( 0x0 .. 0xff ) {
         else {
             $name = sprintf "\\x%02x, a C1 control", $ord;
         }
-        $syntax_error = $::IS_EBCDIC;
+        $syntax_error = 1;
         $deprecated = ! $syntax_error;
     }
     elsif ($chr =~ /\p{XIDStart}/) {
@@ -114,7 +114,7 @@ for ( 0x0 .. 0xff ) {
     }
     elsif ($chr =~ /\p{XPosixSpace}/) {
         $name = sprintf "\\x%02x, a non-ASCII space character", $ord;
-        $syntax_error = $::IS_EBCDIC;
+        $syntax_error = 1;
         $deprecated = ! $syntax_error;
     }
     else {

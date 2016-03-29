@@ -32,7 +32,14 @@ L</Selected Bug Fixes> section.
 
 [ List each security issue as a =head2 entry ]
 
-=head1 Incompatible Changes
+=head2 Literal control character variable names are no longer permissible
+
+A variable name may no longer contain a literal control character under
+any circumstances.  These previously were allowed in single-character
+names on ASCII platforms, but have been deprecated there since Perl
+v5.20.  This affects things like C<$I<\cT>>, where I<\cT> is a literal
+control (such as a C<NAK> or C<NEGATIVE ACKNOWLEDGE> character) in the
+source code.
 
 =head2 C<NBSP> is no longer permissible in C<\N{...}>
 
