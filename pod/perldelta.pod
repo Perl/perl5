@@ -34,13 +34,10 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
+=head2 C<NBSP> is no longer permissible in C<\N{...}>
 
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
-
-[ List each incompatible change as a =head2 entry ]
+The name of a character may no longer contain non-breaking spaces.  It
+has been deprecated to do so since Perl v5.22.
 
 =head1 Deprecations
 

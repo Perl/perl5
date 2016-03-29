@@ -986,41 +986,13 @@ sub run_tests {
                         . "SPACE";
         my $NBSP_utf8 = $NBSP_Latin1;
         utf8::upgrade($NBSP_utf8);
-        eval qq[is("\\N{$NBSP_Latin1}", "$NBSP_Latin1", "An NBSP in character name works")];
-        like ($w, qr/NO-BREAK SPACE in a charnames alias definition is deprecated/, "... but returns a deprecation warning");
+        () = eval qq[is("\\N{$NBSP_Latin1}", "$NBSP_Latin1"];
+        like ($@, qr/Invalid character in \\N\{...}/, "A NO-BREAK SPACE in a charnames alias is fatal");
         undef $w;
             {
             use feature 'unicode_eval';
-            eval qq[use utf8; is("\\N{$NBSP_utf8}", "$NBSP_utf8", "Same under 'use utf8': they work")];
-            like ($w, qr/NO-BREAK SPACE in a charnames alias definition is deprecated/, "... but return a deprecation warning");
-        }
-        {
-            # disable lexical warnings
-            BEGIN { ${^WARNING_BITS} = undef; $^W = 0 }
-            undef $w;
-            () = eval qq["\\N{$NBSP_Latin1}"];
-            like ($w, qr/NO-BREAK SPACE in a charnames alias definition is deprecated/, "And returns a deprecation warning outside of lexical warnings");
-            undef $w;
-            use feature 'unicode_eval';
-            eval qq[use utf8; () = "\\N{$NBSP_utf8}"];
-            like ($w, qr/NO-BREAK SPACE in a charnames alias definition is deprecated/, "... same under utf8");
-        }
-        {
-            no warnings 'deprecated';
-            undef $w;
-            eval qq["\\N{$NBSP_Latin1}"];
-            ok (! defined $w, "... and no warning if warnings are off");
-            use feature 'unicode_eval';
-            eval qq[use utf8; "\\N{$NBSP_utf8}"];
-            ok (! defined $w, "... same under 'use utf8'");
-        }
-        {
-            use warnings FATAL=>'deprecated';
-            () = eval qq["\\N{$NBSP_Latin1}"];
-            like ($@, qr/NO-BREAK SPACE in a charnames alias definition is deprecated/, "... the warning can be fatal");
-            use feature 'unicode_eval';
-            eval qq[use utf8; () = "\\N{$NBSP_utf8}"];
-            like ($@, qr/NO-BREAK SPACE in a charnames alias definition is deprecated/, "... same under utf8");
+            eval qq[use utf8; is("\\N{$NBSP_utf8}"];
+            like ($@, qr/Invalid character in \\N\{...}/, "A NO-BREAK SPACE in a charnames alias is fatal");
         }
 
         {

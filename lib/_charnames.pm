@@ -6,7 +6,7 @@
 package _charnames;
 use strict;
 use warnings;
-our $VERSION = '1.43';
+our $VERSION = '1.44';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 
 use bytes ();          # for $bytes::hint_bits
@@ -202,13 +202,6 @@ sub alias (@) # Set up a single alias
             }
 
             $^H{charnames_name_aliases}{$name} = $value;
-            if (warnings::enabled('deprecated')
-                && $name =~ / ( .* $nbsp ) ( .* ) $ /x)
-            {
-                  carp "NO-BREAK SPACE in a charnames alias definition is "
-                       . "deprecated; marked by <-- HERE in '$1 <-- HERE "
-                       . $2 . "'";
-            }
         }
     }
   }

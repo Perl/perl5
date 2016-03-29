@@ -3784,14 +3784,6 @@ setgid script to even be allowed to attempt.  Generally speaking there
 will be another way to do what you want that is, if not secure, at least
 securable.  See L<perlsec>.
 
-=item NO-BREAK SPACE in a charnames alias definition is deprecated
-
-(D deprecated) You defined a character name which contained a no-break
-space character.  Change it to a regular space.  Usually these names are
-defined in the C<:alias> import argument to C<use charnames>, but they
-could be defined by a translator installed into C<$^H{charnames}>.  See
-L<charnames/CUSTOM ALIASES>.
-
 =item No code specified for -%c
 
 (F) Perl's B<-e> and B<-E> command-line options require an argument.  If

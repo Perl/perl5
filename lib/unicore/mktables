@@ -14865,7 +14865,6 @@ sub compile_perl() {
                                     + ord("(")
                                     + ord(")")
                                     + ord("-")
-                                    + utf8::unicode_to_native(0xA0) # NBSP
                         );
 
     my @composition = ('Name', 'Unicode_1_Name', '_Perl_Name_Alias');

@@ -2588,11 +2588,6 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
 	    if (*s == ' ' && *(s-1) == ' ') {
                 goto multi_spaces;
             }
-	    if ((U8) *s == NBSP_NATIVE && ckWARN_d(WARN_DEPRECATED)) {
-                Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-                           "NO-BREAK SPACE in a charnames "
-                           "alias definition is deprecated");
-            }
             s++;
         }
     }
@@ -2639,14 +2634,6 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
                 if (! isCHARNAME_CONT(EIGHT_BIT_UTF8_TO_NATIVE(*s, *(s+1))))
                 {
                     goto bad_charname;
-                }
-                if (*s == *NBSP_UTF8
-                    && *(s+1) == *(NBSP_UTF8+1)
-                    && ckWARN_d(WARN_DEPRECATED))
-                {
-                    Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-                                "NO-BREAK SPACE in a charnames "
-                                "alias definition is deprecated");
                 }
                 s += 2;
             }
