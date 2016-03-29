@@ -8891,8 +8891,8 @@ S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN
  *          2) '{'
  *     The final case currently doesn't get this far in the program, so we
  *     don't test for it.  If that were to change, it would be ok to allow it.
- *  c) When not under Unicode rules, any upper Latin1 character
- *  d) Otherwise, when unicode rules are used, all XIDS characters.
+ *  b) When not under Unicode rules, any upper Latin1 character
+ *  c) Otherwise, when unicode rules are used, all XIDS characters.
  *
  *      Because all ASCII characters have the same representation whether
  *      encoded in UTF-8 or not, we can use the foo_A macros below and '\0' and
