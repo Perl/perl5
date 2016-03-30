@@ -637,12 +637,19 @@ is join("-", 1,2,3,(stat stat stat),4,5,6), "1-2-3-4-5-6",
   'stat inside stat gets scalar context';
 
 # [perl #126162] stat an array should not work
+my $Errno_loaded = eval { require Errno };
 my $statfile = './op/stat.t';
 my @statarg = ($statfile, $statfile);
 ok !stat(@statarg),
   'stat on an array of valid paths should warn and should not return any data';
-is $!, 'No such file or directory',
-  'stat on an array of valid paths should return "No such file or directory"';
+my $error = 0+$!;
+SKIP:
+{
+    skip "Errno not available", 1
+      unless $Errno_loaded;
+    is $error, &Errno::ENOENT,
+      'stat on an array of valid paths should return ENOENT';
+}
 
 END {
     chmod 0666, $tmpfile;
