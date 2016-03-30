@@ -3623,6 +3623,8 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
 }
 
 
+/* also tail-called by pp_return */
+
 PP(pp_leavesub)
 {
     U8 gimme;

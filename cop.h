@@ -847,12 +847,12 @@ struct context {
 
 /* be careful of the ordering of these five. Macros like CxTYPE_is_LOOP,
  * CxFOREACH compare ranges */
-#define CXt_LOOP_ARY	4 /* for (@ary)     {} */
-#define CXt_LOOP_LAZYSV	5 /* for ('a'..'z') {} */
-#define CXt_LOOP_LAZYIV	6 /* for (1..9)     {} */
-#define CXt_LOOP_LIST	7 /* for (1,2,3)    {} */
-#define CXt_LOOP_PLAIN	8 /*                {} */
-
+#define CXt_LOOP_ARY	4 /* for (@ary)     { ...; } */
+#define CXt_LOOP_LAZYSV	5 /* for ('a'..'z') { ...; } */
+#define CXt_LOOP_LAZYIV	6 /* for (1..9)     { ...; } */
+#define CXt_LOOP_LIST	7 /* for (1,2,3)    { ...; } */
+#define CXt_LOOP_PLAIN	8 /* while (...)    { ...; }
+                             or plain block { ...; } */
 #define CXt_SUB		9
 #define CXt_FORMAT     10
 #define CXt_EVAL       11

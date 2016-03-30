@@ -2052,7 +2052,8 @@ PP(pp_leave)
     assert(CxTYPE(cx) == CXt_BLOCK);
 
     if (PL_op->op_flags & OPf_SPECIAL)
-	cx->blk_oldpm = PL_curpm; /* fake block should preserve $1 et al */
+        /* fake block should preserve $1 et al; e.g.  /(...)/ while ...; */
+	cx->blk_oldpm = PL_curpm;
 
     oldsp = PL_stack_base + cx->blk_oldsp;
     gimme = cx->blk_gimme;
@@ -2256,6 +2257,8 @@ PP(pp_leaveloop)
  *
  * Any changes made to this function may need to be copied to pp_leavesub
  * and vice-versa.
+ *
+ * also tail-called by pp_return
  */
 
 PP(pp_leavesublv)
@@ -2397,20 +2400,18 @@ PP(pp_return)
         }
 
         /* There are contexts that need popping. Doing this may free the
-         * return value(s), so preserve them first, e.g. popping the plain
+         * return value(s), so preserve them first: e.g. popping the plain
          * loop here would free $x:
          *     sub f {  { my $x = 1; return $x } }
          * We may also need to shift the args down; for example,
          *    for (1,2) { return 3,4 }
-         * leaves 1,2,3,4 on the stack. Both these actions can be done by
-         * leave_adjust_stacks().  By calling it with and lvalue "pass
-         * all" action, we just bump the ref count and mortalise the args
-         * that need it, do a FREETMPS.  The "scan the args and maybe copy
-         * them" process will be repeated by whoever we tail-call (e.g.
-         * pp_leaveeval), where any copying etc will be done. That is to
-         * say, in this code path two scans of the args will be done; the
-         * first just shifts and preserves; the second is the "real" arg
-         * processing, based on the type of return.
+         * leaves 1,2,3,4 on the stack. Both these actions will be done by
+         * leave_adjust_stacks(), along with freeing any temps. Note that
+         * whoever we tail-call (e.g. pp_leaveeval) will also call
+         * leave_adjust_stacks(); however, the second call is likely to
+         * just see a bunch of SvTEMPs with a ref count of 1, and so just
+         * pass them through, rather than copying them again. So this
+         * isn't as inefficient as it sounds.
          */
         cx = &cxstack[cxix];
         PUTBACK;
@@ -4201,6 +4202,9 @@ PP(pp_entereval)
     }
 }
 
+
+/* also tail-called by pp_return */
+
 PP(pp_leaveeval)
 {
     SV **oldsp;
@@ -4306,6 +4310,9 @@ PP(pp_entertry)
     create_eval_scope(cLOGOP->op_other->op_next, 0);
     return DOCATCH(PL_op->op_next);
 }
+
+
+/* also tail-called by pp_return */
 
 PP(pp_leavetry)
 {

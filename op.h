@@ -113,7 +113,8 @@ Deprecated.  Use C<GIMME_V> instead.
 				/*  On local LVAL, don't init local value. */
 				/*  On OP_SORT, subroutine is inlined. */
 				/*  On OP_NOT, inversion was implicit. */
-				/*  On OP_LEAVE, don't restore curpm. */
+				/*  On OP_LEAVE, don't restore curpm, e.g.
+                                 *      /(...)/ while ...>;  */
 				/*  On truncate, we truncate filehandle */
 				/*  On control verbs, we saw no label */
 				/*  On flipflop, we saw ... instead of .. */
