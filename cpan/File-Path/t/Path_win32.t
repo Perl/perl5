@@ -7,6 +7,9 @@ use Cwd;
 use File::Spec::Functions;
 
 plan skip_all  => 'not win32' unless $^O eq 'MSWin32';
+my ($ignore, $major, $minor, $build, $id) = Win32::GetOSVersion();
+plan skip_all  => "WinXP or later"
+     unless $id >= 2 && ($major > 5 || $major == 5 && $minor >= 1);
 plan tests     => 3;
 
 my $tmp_base = catdir(
