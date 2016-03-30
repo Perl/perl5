@@ -9733,6 +9733,10 @@ Perl_ck_ftst(pTHX_ OP *o)
 	    op_free(o);
 	    return newop;
 	}
+
+       if (kidtype == OP_RV2AV) {
+           Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Array passed to stat will be coerced to a scalar (did you want stat $_[0]?)");
+       }
 	scalar((OP *) kid);
 	if ((PL_hints & HINT_FILETEST_ACCESS) && OP_IS_FILETEST_ACCESS(o->op_type))
 	    o->op_private |= OPpFT_ACCESS;

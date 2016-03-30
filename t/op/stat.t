@@ -25,7 +25,7 @@ if ($^O eq 'MSWin32') {
     ${^WIN32_SLOPPY_STAT} = 0;
 }
 
-plan tests => 116;
+plan tests => 118;
 
 my $Perl = which_perl();
 
@@ -635,6 +635,14 @@ SKIP: {
 # [perl #126064] stat stat stack busting
 is join("-", 1,2,3,(stat stat stat),4,5,6), "1-2-3-4-5-6",
   'stat inside stat gets scalar context';
+
+# [perl #126162] stat an array should not work
+my $statfile = './op/stat.t';
+my @statarg = ($statfile, $statfile);
+ok !stat(@statarg),
+  'stat on an array of valid paths should warn and should not return any data';
+is $!, 'No such file or directory',
+  'stat on an array of valid paths should return "No such file or directory"';
 
 END {
     chmod 0666, $tmpfile;
