@@ -216,7 +216,7 @@ operator which expects either a number or a string matching
 C</^[a-zA-Z]*[0-9]*\z/>.  See L<perlop/Auto-increment and
 Auto-decrement> for details.
 
-=item Array passed to stat will be coerced to a scalar (did you want stat $_[0]?)
+=item Array passed to stat will be coerced to a scalar%s
 
 (W syntax) You called stat() on an array, but the array will be
 coerced to a scalar - the number of elements in the array.

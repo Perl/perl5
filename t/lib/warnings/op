@@ -2040,3 +2040,20 @@ EXPECT
 Non-finite repeat count does nothing at - line 5.
 Non-finite repeat count does nothing at - line 6.
 Non-finite repeat count does nothing at - line 7.
+########
+# NAME warn on stat @array
+@foo = ("op/stat.t");
+stat @foo;
+my @bar = @foo;
+stat @bar;
+my $ref = \@foo;
+stat @$ref;
+use warnings 'syntax';
+stat @foo;
+stat @bar;
+stat @$ref;
+EXPECT
+Array passed to stat will be coerced to a scalar (did you want stat $foo[0]?) at - line 8.
+Array passed to stat will be coerced to a scalar (did you want stat $bar[0]?) at - line 9.
+Array passed to stat will be coerced to a scalar at - line 10.
+
