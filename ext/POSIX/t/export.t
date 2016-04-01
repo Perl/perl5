@@ -166,6 +166,10 @@ my %expect = (
             POLL_IN POLL_OUT POLL_MSG POLL_ERR POLL_PRI POLL_HUP
             SI_USER SI_QUEUE SI_TIMER SI_ASYNCIO SI_MESGQ
         ),
+        # this was implemented in 5.21, but not exported; it was added to
+        # @EXPORT_OK late in 5.23, and will be added to :math_h_c99 tag early
+        # in 5.25
+        qw( lround ),
     ],
 );
 

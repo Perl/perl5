@@ -4,7 +4,7 @@ use warnings;
 
 our ($AUTOLOAD, %SIGRT);
 
-our $VERSION = '1.64';
+our $VERSION = '1.65';
 
 require XSLoader;
 
@@ -445,7 +445,11 @@ my %other_export_tags = (
   our @EXPORT = keys %export;
 
   our @EXPORT_OK = (qw(close lchown nice open pipe read sleep times write
-		       printf sprintf),
+		       printf sprintf lround),
+                    # lround() should really be in @EXPORT and in the
+                    # :math_h_c99 tag, but we're too far into the 5.24 code
+                    # freeze for that to be done now. This can be revisited in
+                    # the 5.25.x cycle.
 		    grep {!exists $export{$_}} keys %reimpl, keys %replacement, keys %export_ok);
 
   our %EXPORT_TAGS = ( %default_export_tags, %other_export_tags );

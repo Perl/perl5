@@ -4,6 +4,7 @@ use strict;
 
 use POSIX ':math_h_c99';
 use POSIX ':nan_payload';
+use POSIX 'lround';
 use Test::More;
 
 use Config;
@@ -118,6 +119,8 @@ SKIP: {
     is(round(-2.5), -3, "round -2.5");
     is(round(2.75), 3, "round 2.75");
     is(round(-2.75), -3, "round 2.75");
+    is(lround(-2.75), -3, "lround -0.25");
+    is(signbit(lround(-0.25)), 0, "lround -0.25 -> +0"); # unlike round()
     is(trunc(2.25), 2, "trunc 2.25");
     is(trunc(-2.25), -2, "trunc -2.25");
     is(trunc(2.5), 2, "trunc 2.5");

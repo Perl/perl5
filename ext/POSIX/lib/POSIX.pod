@@ -1011,6 +1011,10 @@ Like L</round>, but as integer, as opposed to floating point [C99].
 
 See also L</ceil>, L</floor>, L</trunc>.
 
+Owing to an oversight, this is not currently exported by default, or as part of
+the C<:math_h_c99> export tag; importing it must therefore be done by explicit
+name. This will be changed in Perl 5.26.
+
 =item C<malloc>
 
 Not implemented.  C<malloc()> is C-specific.  Perl does memory management transparently.
