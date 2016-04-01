@@ -5018,6 +5018,8 @@ Perl_mem_log_alloc(const UV n, const UV typesize, const char *type_name,
 		   const char *filename, const int linenumber,
 		   const char *funcname)
 {
+    PERL_ARGS_ASSERT_MEM_LOG_ALLOC;
+
     mem_log_common_if(MLT_ALLOC, n, typesize, type_name,
 		      NULL, NULL, newalloc,
 		      filename, linenumber, funcname);
@@ -5030,6 +5032,8 @@ Perl_mem_log_realloc(const UV n, const UV typesize, const char *type_name,
 		     const char *filename, const int linenumber, 
 		     const char *funcname)
 {
+    PERL_ARGS_ASSERT_MEM_LOG_REALLOC;
+
     mem_log_common_if(MLT_REALLOC, n, typesize, type_name,
 		      NULL, oldalloc, newalloc, 
 		      filename, linenumber, funcname);
@@ -5041,6 +5045,8 @@ Perl_mem_log_free(Malloc_t oldalloc,
 		  const char *filename, const int linenumber, 
 		  const char *funcname)
 {
+    PERL_ARGS_ASSERT_MEM_LOG_FREE;
+
     mem_log_common_if(MLT_FREE, 0, 0, "", NULL, oldalloc, NULL, 
 		      filename, linenumber, funcname);
     return oldalloc;

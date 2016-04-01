@@ -1451,12 +1451,13 @@ C<-DPERL_MEM_LOG> instead.
 
 =head2 PERL_MEM_LOG
 
-If compiled with C<-DPERL_MEM_LOG>, both memory and SV allocations go
-through logging functions, which is handy for breakpoint setting.
+If compiled with C<-DPERL_MEM_LOG> (C<-Accflags=-DPERL_MEM_LOG>), both
+memory and SV allocations go through logging functions, which is
+handy for breakpoint setting.
 
-Unless C<-DPERL_MEM_LOG_NOIMPL> is also compiled, the logging functions
-read $ENV{PERL_MEM_LOG} to determine whether to log the event, and if
-so how:
+Unless C<-DPERL_MEM_LOG_NOIMPL> (C<-Accflags=-DPERL_MEM_LOG_NOIMPL>) is
+also compiled, the logging functions read $ENV{PERL_MEM_LOG} to
+determine whether to log the event, and if so how:
 
     $ENV{PERL_MEM_LOG} =~ /m/           Log all memory ops
     $ENV{PERL_MEM_LOG} =~ /s/           Log all SV ops

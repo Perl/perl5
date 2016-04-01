@@ -5473,6 +5473,17 @@ STATIC void	S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesiz
 	assert(type_name); assert(filename); assert(funcname)
 #  endif
 #endif
+#if defined(PERL_MEM_LOG)
+PERL_CALLCONV Malloc_t	Perl_mem_log_alloc(const UV nconst, UV typesize, const char *type_name, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname);
+#define PERL_ARGS_ASSERT_MEM_LOG_ALLOC	\
+	assert(type_name); assert(filename); assert(funcname)
+PERL_CALLCONV Malloc_t	Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int linenumber, const char *funcname);
+#define PERL_ARGS_ASSERT_MEM_LOG_FREE	\
+	assert(filename); assert(funcname)
+PERL_CALLCONV Malloc_t	Perl_mem_log_realloc(const UV n, const UV typesize, const char *type_name, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname);
+#define PERL_ARGS_ASSERT_MEM_LOG_REALLOC	\
+	assert(type_name); assert(filename); assert(funcname)
+#endif
 #if defined(PERL_OP_PARENT)
 PERL_CALLCONV OP*	Perl_op_parent(OP *o);
 #define PERL_ARGS_ASSERT_OP_PARENT	\
