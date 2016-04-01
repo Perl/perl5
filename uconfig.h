@@ -4069,7 +4069,7 @@
  *	available to return a pointer to the start of the first occurance
  *	of a substring in a memory area (or NULL if not found).
  */
-# HAS_MEMMEM		/**/
+/*#define HAS_MEMMEM		/ **/
 
 /* HAS_MKDTEMP:
  *	This symbol, if defined, indicates that the mkdtemp routine is
