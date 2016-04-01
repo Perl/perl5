@@ -4014,14 +4014,17 @@ PP(pp_require)
     /* Assume success here to prevent recursive requirement. */
     /* name is never assigned to again, so len is still strlen(name)  */
     /* Check whether a hook in @INC has already filled %INC */
-    if (!hook_sv) {
-	(void)hv_store(GvHVn(PL_incgv),
-		       unixname, unixlen, newSVpv(tryname,0),0);
-    } else {
-	SV** const svp = hv_fetch(GvHVn(PL_incgv), unixname, unixlen, 0);
-	if (!svp)
-	    (void)hv_store(GvHVn(PL_incgv),
-			   unixname, unixlen, SvREFCNT_inc_simple(hook_sv), 0 );
+    {
+	HV * incgvhv = GvHVn(PL_incgv);
+	if (!hook_sv) {
+	    (void)hv_store(incgvhv,
+			   unixname, unixlen, newSVpv(tryname,0),0);
+	} else {
+	    SV** const svp = hv_fetch(incgvhv, unixname, unixlen, 0);
+	    if (!svp)
+		(void)hv_store(incgvhv,
+			       unixname, unixlen, SvREFCNT_inc_simple_NN(hook_sv), 0 );
+	}
     }
 
     old_savestack_ix = PL_savestack_ix;
