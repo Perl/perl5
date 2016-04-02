@@ -10,7 +10,7 @@
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including a66bda92c7bdd515ba8b572a123e215718a89f10 (List perl.develop-help.com in the RMG regarding smoke reports.)
+Blead changes have been examined up to and including 25a9f0e724ff0f469866f8713f0e79f3159bf870 (Export lround() from POSIX)
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 
@@ -38,6 +38,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 <commit votes="jhi, steveh" id="70ead873d4b864ca127d4f75aa654724264ff91b" ticket="127773" desc="Assertion failure in perl built with Dusecbacktrace]"/>
 <commit votes="jhi, steveh" id="4d00a3198aa6950e874328ec431d15c821382cce" ticket="127773" desc="Assertion failure in perl built with Dusecbacktrace]"/>
 
+<commit votes="steveh" id="aea0412a260d9d7295c0a5bebb8bb6978dc02ccd" ticket="127786" desc="RT #127786: assertion failure with eval in DB pkg."/>
+
 </div>
 
 <div><h3>Regression Fixes</h3>
@@ -55,6 +57,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 <commit votes="steveh" id="000814da477053c7627c7ace5ca3ce3d4c4aad08" ticket="124387" desc="[perl #124387] call AUTOLOAD when DESTROY isn't defined"/>
 <commit votes="steveh" id="7db8c4f1f19e6f855107ec990507a1a9cb0f59a6" ticket="127494" desc="[perl #127494] TODO test for $AUTOLOAD being set for DESTROY"/>
 <commit votes="steveh" id="958cdeac409681891afe77bf60db047296523465" ticket="127494" desc="[perl #127494] don't cache AUTOLOAD as DESTROY"/>
+
+<commit votes="steveh" id="1921e03146ca6022defa6af5267c4dd20c0ca699" ticket="" desc="stop lc() etc accidentally modifying in-place."/>
 
 </div>
 
@@ -92,6 +96,10 @@ The same criteria apply to code in dual-life modules as to core code.)
 <div><h3>Documentation Fixes</h3>
 
 <commit votes="steveh, jkeenan, jhi" id="1802421e7ca37d5f22605a97946d04b9b2375b43" ticket="127783" desc="Add 's' and 'S' to list of ANSI C portable filename characters."/>
+
+<commit votes="steveh" id="cc4d3128555c2fbf5af7fc75854461cd87502812" ticket="" desc="improve perldiag implicit close text"/>
+<commit votes="steveh" id="ab7ca7edf202fe21133adbdca227b5cd8d15dced" ticket="" desc="improve perldiag implicit close text further"/>
+<commit votes="steveh" id="95032a5ba8a8a8ef02ca87ced5e2e47387c05831" ticket="" desc="improve perldiag implicit close text still further"/>
 
 </div>
 
