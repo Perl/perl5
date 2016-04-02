@@ -235,7 +235,7 @@ PERLVAR(G, dollarzero_mutex, perl_mutex) /* Modifying $0 */
    code is checking SvOK().  */
 
 #ifdef PERL_IMPLICIT_CONTEXT
-PERLVAR(G, sv_placeholder, SV)
+PERLVARI(G, sv_placeholder, SV, INIT_SV_PLACEHOLDER)
 #endif
 
 #if defined(MYMALLOC) && defined(USE_ITHREADS)

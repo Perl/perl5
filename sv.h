@@ -2084,6 +2084,10 @@ alternative is to call C<sv_grow> if you are not sure of the type of SV.
 #  define SvIMMORTAL(sv) ((sv)>=&PL_sv_undef && (sv)<=&PL_sv_placeholder)
 #endif
 
+#ifdef PERL_CORE
+#  define INIT_SV_PLACEHOLDER {NULL, SvREFCNT_IMMORTAL, SVf_READONLY|SVf_PROTECT, NULL}
+#endif
+
 #ifdef DEBUGGING
    /* exercise the immortal resurrection code in sv_free2() */
 #  define SvREFCNT_IMMORTAL 1000
