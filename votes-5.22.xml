@@ -35,8 +35,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="steveh, jhi" id="a934a4a7d4fa99d522e169b921286755a0f8d248" ticket="126845" desc="Remove unwarranted assertion in Perl_newATTRSUB_x()"/>
 (jhi: note that the 127773 fix consists of two commits.)
-<commit votes="jhi" id="70ead873d4b864ca127d4f75aa654724264ff91b" ticket="127773" desc="Assertion failure in perl built with Dusecbacktrace]"/>
-<commit votes="jhi" id="4d00a3198aa6950e874328ec431d15c821382cce" ticket="127773" desc="Assertion failure in perl built with Dusecbacktrace]"/>
+<commit votes="jhi, steveh" id="70ead873d4b864ca127d4f75aa654724264ff91b" ticket="127773" desc="Assertion failure in perl built with Dusecbacktrace]"/>
+<commit votes="jhi, steveh" id="4d00a3198aa6950e874328ec431d15c821382cce" ticket="127773" desc="Assertion failure in perl built with Dusecbacktrace]"/>
 
 </div>
 
