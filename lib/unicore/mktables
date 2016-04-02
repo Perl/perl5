@@ -422,7 +422,7 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 #
 # A NOTE ON UNIHAN
 #
-# This program can generate tables from the Unihan database.  But that db
+# This program can generate tables from the Unihan database.  But that DB
 # isn't normally available, so it is marked as optional.  Prior to version
 # 5.2, this database was in a single file, Unihan.txt.  In 5.2 the database
 # was split into 8 different files, all beginning with the letters 'Unihan'.
@@ -651,7 +651,7 @@ sub stack_trace() {
 # by the code points introduced in the later version.  You probably also want
 # to use the -annotate option when using this.  Run this program on a unicore
 # containing the starting release you want to compare.  Save that output
-# structrue.  Then, switching to a unicore with the ending release, change the
+# structure.  Then, switching to a unicore with the ending release, change the
 # 0 in the $string_compare_versions definition just below to a string
 # containing a SINGLE dotted Unicode release number (e.g. "2.1") corresponding
 # to the starting release.  This program will then compile, but throw away all
@@ -731,7 +731,8 @@ while (@ARGV) {
         $verbosity = 0;
     }
     elsif ($arg eq '-w') {
-        $write_unchanged_files = 1; # update the files even if havent changed
+        # update the files even if they haven't changed
+        $write_unchanged_files = 1;
     }
     elsif ($arg eq '-check') {
         my $this = shift @ARGV;
@@ -1161,7 +1162,7 @@ my $run_on_code_point_re =
             qr/ (?: 10[0-9A-F]{4} | [1-9A-F][0-9A-F]{4} | [0-9A-F]{4} ) \b/x;
 my $code_point_re = qr/\b$run_on_code_point_re/;
 
-# This matches the beginning of the line in the Unicode db files that give the
+# This matches the beginning of the line in the Unicode DB files that give the
 # defaults for code points not listed (i.e., missing) in the file.  The code
 # depends on this ending with a semi-colon, so it can assume it is a valid
 # field when the line is split() by semi-colons
@@ -2104,7 +2105,7 @@ package Input_file;
 #   1) call before the first line is read, for pre processing
 #   2) call to adjust each line of the input before the main handler gets
 #      them.  This can be automatically generated, if appropriately simple
-#      enough, by specifiying a Properties parameter in the constructor.
+#      enough, by specifying a Properties parameter in the constructor.
 #   3) call upon EOF before the main handler exits its loop
 #   4) call at the end, for post processing
 #
@@ -2112,7 +2113,7 @@ package Input_file;
 # each_line_handler()s.  So, if the format of the line is not in the desired
 # format for the main handler, these are used to do that adjusting.  They can
 # be stacked (by enclosing them in an [ anonymous array ] in the constructor,
-# so the $_ output of one is used as the input to the next.  The eof handler
+# so the $_ output of one is used as the input to the next.  The EOF handler
 # is also stackable, but none of the others are, but could easily be changed
 # to be so.
 #
@@ -2196,7 +2197,7 @@ sub trace { return main::trace(@_); }
     # not otherwise be processed, and to not raise a warning about not being
     # handled.  In the constructor call, any value that evaluates to a numeric
     # 0 or undef means don't skip.  Any other value is a string giving the
-    # reason it is being skippped, and this will appear in generated pod.
+    # reason it is being skipped, and this will appear in generated pod.
     # However, an empty string reason will suppress the pod entry.
     # Internally, calls that evaluate to numeric 0 are changed into undef to
     # distinguish them from an empty string call.
@@ -2222,7 +2223,7 @@ sub trace { return main::trace(@_); }
     # meaningful line of the input file.  If present, an appropriate
     # each_line_handler() is automatically generated and pushed onto the stack
     # of such handlers.  This is useful when a file contains multiple
-    # proerties per line, but no other special considerations are necessary.
+    # properties per line, but no other special considerations are necessary.
     # The special value "<ignored>" means to discard the corresponding input
     # field.
     # Any @missing lines in the file should also match this syntax; no such
@@ -15420,7 +15421,7 @@ sub add_perl_synonyms() {
 
                 if (! defined $pre_existing) {
 
-                    # No name collision, so ok to add the perl synonym.
+                    # No name collision, so OK to add the perl synonym.
 
                     my $make_re_pod_entry;
                     my $ok_as_filename;
@@ -15515,7 +15516,7 @@ sub add_perl_synonyms() {
                     next;
                 }
 
-                # Here, there is a name collision, but it still could be ok if
+                # Here, there is a name collision, but it still could be OK if
                 # the tables match the identical set of code points, in which
                 # case, we can combine the names.  Compare each table's code
                 # point list to see if they are identical.
@@ -16481,7 +16482,7 @@ sub make_ucd_table_pod_entries {
                     Carp::my_carp("Bad news.  $property and $ucd_pod{$standard}->{'property'} have unexpected output status and perl-extension combinations.  Proceeding anyway.");
                 }
 
-                # We modifiy the info column of the one being output to
+                # We modify the info column of the one being output to
                 # indicate the ambiguity.  Set $which to point to that one's
                 # info.
                 my $which;
@@ -16736,7 +16737,7 @@ END
         push @bad_re_properties, "\n=back\n";
     }
 
-    # Similiarly, generate a list of files that we don't use, grouped by the
+    # Similarly, generate a list of files that we don't use, grouped by the
     # reasons why (Don't output if the reason is empty).  First, create a hash
     # whose keys are the reasons, and whose values are anonymous arrays of all
     # the files that share that reason.
@@ -17647,7 +17648,7 @@ sub make_UCD () {
             foreach my $prop_alias ($property->aliases) {
                 my $prop_alias_name = standardize($prop_alias->name);
 
-                # If no =value, there's just one combination possibe for this
+                # If no =value, there's just one combination possible for this
                 if (! $value_name) {
 
                     # The property may be suppressed, but there may be a proxy
@@ -18039,7 +18040,7 @@ sub write_all_tables() {
                     # the children.
                     make_re_pod_entries($table) if defined $pod_directory;
 
-                    # See if the the table matches identical code points with
+                    # See if the table matches identical code points with
                     # something that has already been output.  In that case,
                     # no need to have two files with the same code points in
                     # them.  We use the table's hash() method to store these
@@ -18202,7 +18203,7 @@ sub write_all_tables() {
                         # the table.  That is, all the property-values given
                         # by this table.  By agreement with Unicode::UCD,
                         # if the name and full name are identical, and there
-                        # are no other names, drop the duplcate entry to save
+                        # are no other names, drop the duplicate entry to save
                         # memory.
                         if (@values_list == 2
                             && $values_list[0] eq $values_list[1])
@@ -18366,14 +18367,14 @@ sub generate_separator($) {
 
 sub generate_tests($$$$$) {
     # This used only for making the test script.  It generates test cases that
-    # are expected to compile successfully in perl.  Note that the lhs and
-    # rhs are assumed to already be as randomized as the caller wants.
+    # are expected to compile successfully in perl.  Note that the LHS and
+    # RHS are assumed to already be as randomized as the caller wants.
 
     my $lhs = shift;           # The property: what's to the left of the colon
                                #  or equals separator
     my $rhs = shift;           # The property value; what's to the right
     my $valid_code = shift;    # A code point that's known to be in the
-                               # table given by lhs=rhs; undef if table is
+                               # table given by LHS=RHS; undef if table is
                                # empty
     my $invalid_code = shift;  # A code point known to not be in the table;
                                # undef if the table is all code points
@@ -18414,13 +18415,13 @@ sub generate_error($$$) {
                                     # colon or equals separator
     my $rhs = shift;                # The property value; what's to the right
     my $already_in_error = shift;   # Boolean; if true it's known that the
-                                # unmodified lhs and rhs will cause an error.
+                                # unmodified LHS and RHS will cause an error.
                                 # This routine should not force another one
     # Get the colon or equal
     my $separator = generate_separator($lhs);
 
     # Since this is an error only, don't bother to randomly decide whether to
-    # put the error on the left or right side; and assume that the rhs is
+    # put the error on the left or right side; and assume that the RHS is
     # loosely matched, again for convenience rather than rigor.
     $rhs = randomize_loose_name($rhs, 'ERROR') unless $already_in_error;
 
@@ -19189,7 +19190,7 @@ my @input_file_objects = (
                      # for the release it is.  To get it to actually mean
                      # something useful, someone would have to be using an
                      # earlier Unicode release, and copy it into the directory
-                     # for that release and recomplile.  So far there has been
+                     # for that release and recompile.  So far there has been
                      # no demand to do that, so this hasn't been implemented.
                     Skip => 'Documentation of corrections already '
                           . 'incorporated into the Unicode data base',
@@ -19812,7 +19813,7 @@ sub Expect($$$$) {
         $Tests++;
 
         # A string eval is needed because of the 'no warnings'.
-        # Assumes no parens in the regular expression
+        # Assumes no parentheses in the regular expression
         my $result = eval "$no_warnings
                             my \$RegObj = qr($regex);
                             $string =~ \$RegObj ? 1 : 0";
@@ -20158,7 +20159,7 @@ Expect(0, 0x2029, '\p{Print}', ""); # Bug # 71722
 Expect(1, 0xFF10, '\p{XDigit}', ""); # Bug # 71726
 
 # Make sure this gets tested; it was not part of the official test suite at
-# the time this was addded.  Note that this is as it would appear in the
+# the time this was added.  Note that this is as it would appear in the
 # official suite, and gets modified to check for the perl tailoring by
 # Test_WB()
 Test_WB("$breakable 0020 $breakable 0020 $breakable 0308 $breakable");
