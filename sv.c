@@ -14890,9 +14890,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* initialize these special pointers as early as possible */
     init_constants();
-    ptr_table_store(PL_ptr_table, &proto_perl->Isv_undef, &PL_sv_undef);
-    ptr_table_store(PL_ptr_table, &proto_perl->Isv_no, &PL_sv_no);
-    ptr_table_store(PL_ptr_table, &proto_perl->Isv_yes, &PL_sv_yes);
+    ptr_table_store(PL_ptr_table, &proto_perl->Isv_immortal.sv_undef, &PL_sv_undef);
+    ptr_table_store(PL_ptr_table, &proto_perl->Isv_immortal.sv_no, &PL_sv_no);
+    ptr_table_store(PL_ptr_table, &proto_perl->Isv_immortal.sv_yes, &PL_sv_yes);
     ptr_table_store(PL_ptr_table, &proto_perl->Ipadname_const,
 		    &PL_padname_const);
 

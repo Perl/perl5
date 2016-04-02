@@ -158,9 +158,7 @@ C<&PL_sv_yes>.
 =cut
 */
 
-PERLVAR(I, sv_undef,	SV)
-PERLVAR(I, sv_no,	SV)
-PERLVAR(I, sv_yes,	SV)
+PERLVAR(I, sv_immortal,	struct sv_immortal)
 PERLVAR(I, padname_undef,	PADNAME)
 PERLVAR(I, padname_const,	PADNAME)
 PERLVAR(I, Sv,		SV *)		/* used to hold temporary values */

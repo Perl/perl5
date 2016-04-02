@@ -262,6 +262,15 @@ struct p5rx {
     _SV_HEAD_UNION;
 };
 
+struct sv_immortal {
+    SV sv_undef;
+    SV sv_no;
+    SV sv_yes;
+#ifndef PERL_IMPLICIT_CONTEXT
+    SV sv_placeholder;
+#endif
+};
+
 #undef _SV_HEAD
 #undef _SV_HEAD_UNION		/* ensure no pollution */
 
@@ -2064,7 +2073,16 @@ alternative is to call C<sv_grow> if you are not sure of the type of SV.
 #define SvPEEK(sv) ""
 #endif
 
-#define SvIMMORTAL(sv) ((sv)==&PL_sv_undef || (sv)==&PL_sv_yes || (sv)==&PL_sv_no || (sv)==&PL_sv_placeholder)
+#define PL_sv_undef PL_sv_immortal.sv_undef
+#define PL_sv_no    PL_sv_immortal.sv_no
+#define PL_sv_yes   PL_sv_immortal.sv_yes
+
+#ifdef PERL_IMPLICIT_CONTEXT
+#  define SvIMMORTAL(sv) (((sv)>=&PL_sv_undef && (sv)<=&PL_sv_yes) || (sv)==&PL_sv_placeholder)
+#else
+#  define PL_sv_placeholder PL_sv_immortal.sv_placeholder
+#  define SvIMMORTAL(sv) ((sv)>=&PL_sv_undef && (sv)<=&PL_sv_placeholder)
+#endif
 
 #ifdef DEBUGGING
    /* exercise the immortal resurrection code in sv_free2() */

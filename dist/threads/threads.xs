@@ -1356,9 +1356,15 @@ ithread_join(...)
             PL_ptr_table = ptr_table_new();
             S_ithread_set(aTHX_ thread);
             /* Ensure 'meaningful' addresses retain their meaning */
+#if (PERL_VERSION > 23) || (PERL_VERSION == 23 && PERL_SUBVERSION >= 10)
+            ptr_table_store(PL_ptr_table, &other_perl->Isv_immortal.sv_undef, &PL_sv_undef);
+            ptr_table_store(PL_ptr_table, &other_perl->Isv_immortal.sv_no, &PL_sv_no);
+            ptr_table_store(PL_ptr_table, &other_perl->Isv_immortal.sv_yes, &PL_sv_yes);
+#else
             ptr_table_store(PL_ptr_table, &other_perl->Isv_undef, &PL_sv_undef);
             ptr_table_store(PL_ptr_table, &other_perl->Isv_no, &PL_sv_no);
             ptr_table_store(PL_ptr_table, &other_perl->Isv_yes, &PL_sv_yes);
+#endif
             params = (AV *)sv_dup((SV*)params_copy, clone_params);
             S_ithread_set(aTHX_ current_thread);
             Perl_clone_params_del(clone_params);
@@ -1782,9 +1788,15 @@ ithread_error(...)
             current_thread = S_ithread_get(aTHX);
             S_ithread_set(aTHX_ thread);
             /* Ensure 'meaningful' addresses retain their meaning */
+#if (PERL_VERSION > 23) || (PERL_VERSION == 23 && PERL_SUBVERSION >= 10)
+            ptr_table_store(PL_ptr_table, &other_perl->Isv_immortal.sv_undef, &PL_sv_undef);
+            ptr_table_store(PL_ptr_table, &other_perl->Isv_immortal.sv_no, &PL_sv_no);
+            ptr_table_store(PL_ptr_table, &other_perl->Isv_immortal.sv_yes, &PL_sv_yes);
+#else
             ptr_table_store(PL_ptr_table, &other_perl->Isv_undef, &PL_sv_undef);
             ptr_table_store(PL_ptr_table, &other_perl->Isv_no, &PL_sv_no);
             ptr_table_store(PL_ptr_table, &other_perl->Isv_yes, &PL_sv_yes);
+#endif
             err = sv_dup(thread->err, clone_params);
             S_ithread_set(aTHX_ current_thread);
             Perl_clone_params_del(clone_params);

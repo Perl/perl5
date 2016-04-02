@@ -234,7 +234,9 @@ PERLVAR(G, dollarzero_mutex, perl_mutex) /* Modifying $0 */
    In practice, &PL_sv_placeholder is returned by some APIs, and the calling
    code is checking SvOK().  */
 
+#ifdef PERL_IMPLICIT_CONTEXT
 PERLVAR(G, sv_placeholder, SV)
+#endif
 
 #if defined(MYMALLOC) && defined(USE_ITHREADS)
 PERLVAR(G, malloc_mutex, perl_mutex)	/* Mutex for malloc */
