@@ -95,8 +95,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="steveh, jkeenan, jhi" id="1802421e7ca37d5f22605a97946d04b9b2375b43" ticket="127783" desc="Add 's' and 'S' to list of ANSI C portable filename characters."/>
-
 <commit votes="steveh" id="cc4d3128555c2fbf5af7fc75854461cd87502812" ticket="" desc="improve perldiag implicit close text"/>
 <commit votes="steveh" id="ab7ca7edf202fe21133adbdca227b5cd8d15dced" ticket="" desc="improve perldiag implicit close text further"/>
 <commit votes="steveh" id="95032a5ba8a8a8ef02ca87ced5e2e47387c05831" ticket="" desc="improve perldiag implicit close text still further"/>
