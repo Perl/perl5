@@ -2064,7 +2064,7 @@ alternative is to call C<sv_grow> if you are not sure of the type of SV.
 #define SvPEEK(sv) ""
 #endif
 
-#define SvIMMORTAL(sv) (SvREADONLY(sv) && ((sv)==&PL_sv_undef || (sv)==&PL_sv_yes || (sv)==&PL_sv_no || (sv)==&PL_sv_placeholder))
+#define SvIMMORTAL(sv) ((sv)==&PL_sv_undef || (sv)==&PL_sv_yes || (sv)==&PL_sv_no || (sv)==&PL_sv_placeholder)
 
 #ifdef DEBUGGING
    /* exercise the immortal resurrection code in sv_free2() */
