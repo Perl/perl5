@@ -6883,6 +6883,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	}
 
 	case EVAL_AB: /* cleanup after a successful (??{A})B */
+            /* note: this is called twice; first after popping B, then A */
             DEBUG_STACK_r({
                 Perl_re_exec_indentf( aTHX_  "EVAL_AB cur_eval=%p prev_eval=%p\n",
                     depth, cur_eval, ST.prev_eval);
