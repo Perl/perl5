@@ -250,12 +250,18 @@ for ([chdir=>''],[chmod=>'0,'],[chown=>'0,0,'],[utime=>'0,0,'],
     check_count "$op $args\\\$tied_glob$postargs";
 }
 
-$dummy  =   crypt $var,0; check_count 'crypt $tied, ...';
-$dummy  =   crypt 0,$var; check_count 'crypt ..., $tied';
-$var = substr(chr 256,0,0);
-$dummy  =   crypt $var,0; check_count 'crypt $tied_utf8, ...';
-$var = substr(chr 256,0,0);
-$dummy  =   crypt 0,$var; check_count 'crypt ..., $tied_utf8';
+my $can_config = eval { require Config; 1 };
+SKIP:
+{
+    skip "No Config", 4 unless $can_config;
+    skip "No crypt()", 4 unless $Config::Config{d_crypt};
+    $dummy  =   crypt $var,0; check_count 'crypt $tied, ...';
+    $dummy  =   crypt 0,$var; check_count 'crypt ..., $tied';
+    $var = substr(chr 256,0,0);
+    $dummy  =   crypt $var,0; check_count 'crypt $tied_utf8, ...';
+    $var = substr(chr 256,0,0);
+    $dummy  =   crypt 0,$var; check_count 'crypt ..., $tied_utf8';
+}
 
 SKIP:
 {
