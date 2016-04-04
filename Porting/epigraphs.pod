@@ -17,6 +17,25 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.23.7
+
+L<Announced on 2016-01-20 by Stevan|http://www.nntp.perl.org/group/perl.perl5.porters/2016/01/msg233856.html>
+
+A year here and he still dreamed of cyberspace, hope fading
+nightly. All the speed he took, all the turns he'd taken and
+the corners he cut in Night City, and he'd still see the matrix
+in his dreams, bright lattices of logic unfolding across that
+colourless void...The Sprawl was a long, strange way home now
+over the Pacific, and he was no Console Man, no cyberspace
+cowboy. Just another hustler, trying to make it through. But
+the dreams came on in the Japanese night like livewire voodoo,
+and he'd cry for it, cry in his sleep, and wake alone in the
+dark, curled in his capsule in some coffin hotel, hands clawed
+into the bedslab, temper foam bunched between his fingers,
+trying to reach the console that wasn't there.
+
+  -- William Gibson, Neuromancer
+
 =head2 v5.23.6 - 5.23 Episode VII
 
   A long time ago in microseconds, in a galaxy not very far away...
