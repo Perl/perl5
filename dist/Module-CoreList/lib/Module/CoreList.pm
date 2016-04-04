@@ -4,7 +4,7 @@ use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use Module::CoreList::TieHashDelta;
 use version;
-$VERSION = '5.20160320';
+$VERSION = '5.20160410';
 
 sub _released_order {   # Sort helper, to make '?' sort after everything else
     (substr($released{$a}, 0, 1) eq "?")
@@ -291,6 +291,7 @@ sub changes_between {
     5.023007 => '2016-01-20',
     5.023008 => '2016-02-20',
     5.023009 => '2016-03-20',
+    5.022002 => '????-??-??',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -12359,6 +12360,29 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Win32API::File::ExtUtils::Myconst2perl'=> 1,
         }
     },
+    5.022002 => {
+        delta_from => 5.022001,
+        changed => {
+            'B::Op_private'         => '5.022002',
+            'Config'                => '5.022002',
+            'Cwd'                   => '3.56_01',
+            'File::Spec'            => '3.56_01',
+            'File::Spec::Cygwin'    => '3.56_01',
+            'File::Spec::Epoc'      => '3.56_01',
+            'File::Spec::Functions' => '3.56_01',
+            'File::Spec::Mac'       => '3.56_01',
+            'File::Spec::OS2'       => '3.56_01',
+            'File::Spec::Unix'      => '3.56_01',
+            'File::Spec::VMS'       => '3.56_01',
+            'File::Spec::Win32'     => '3.56_01',
+            'Module::CoreList'      => '5.20160320',
+            'Module::CoreList::TieHashDelta'=> '5.20160320',
+            'Module::CoreList::Utils'=> '5.20160320',
+            'XS::APItest'           => '0.72_01',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -12999,6 +13023,13 @@ for my $version (sort { $a <=> $b } keys %delta) {
         removed => {
         }
     },
+    5.022002 => {
+        delta_from => 5.022001,
+        changed => {
+        },
+        removed => {
+        }
+    },
 );
 
 for my $version (sort { $a <=> $b } keys %deprecated) {
@@ -13452,7 +13483,7 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'CPAN::Meta::History'   => 'https://github.com/Perl-Toolchain-Gang/CPAN-Meta/issues',
     'CPAN::Meta::Merge'     => 'https://github.com/Perl-Toolchain-Gang/CPAN-Meta/issues',
     'CPAN::Meta::Prereqs'   => 'https://github.com/Perl-Toolchain-Gang/CPAN-Meta/issues',
-    'CPAN::Meta::Requirements'=> 'https://github.com/dagolden/CPAN-Meta-Requirements/issues',
+    'CPAN::Meta::Requirements'=> 'https://github.com/Perl-Toolchain-Gang/CPAN-Meta-Requirements/issues',
     'CPAN::Meta::Spec'      => 'https://github.com/Perl-Toolchain-Gang/CPAN-Meta/issues',
     'CPAN::Meta::Validator' => 'https://github.com/Perl-Toolchain-Gang/CPAN-Meta/issues',
     'CPAN::Meta::YAML'      => 'https://github.com/Perl-Toolchain-Gang/YAML-Tiny/issues',
@@ -13584,8 +13615,8 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'IPC::SysV'             => undef,
     'JSON::PP'              => undef,
     'JSON::PP::Boolean'     => undef,
-    'List::Util'            => undef,
-    'List::Util::XS'        => undef,
+    'List::Util'            => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Scalar-List-Utils',
+    'List::Util::XS'        => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Scalar-List-Utils',
     'Locale::Codes'         => undef,
     'Locale::Codes::Constants'=> undef,
     'Locale::Codes::Country'=> undef,
@@ -13656,8 +13687,8 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'Pod::Escapes'          => undef,
     'Pod::Find'             => undef,
     'Pod::InputObjects'     => undef,
-    'Pod::Man'              => undef,
-    'Pod::ParseLink'        => undef,
+    'Pod::Man'              => 'https://rt.cpan.org/Dist/Display.html?Name=podlators',
+    'Pod::ParseLink'        => 'https://rt.cpan.org/Dist/Display.html?Name=podlators',
     'Pod::ParseUtils'       => undef,
     'Pod::Parser'           => undef,
     'Pod::Perldoc'          => undef,
@@ -13703,14 +13734,14 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'Pod::Simple::TranscodeSmart'=> 'https://github.com/perl-pod/pod-simple/issues',
     'Pod::Simple::XHTML'    => 'https://github.com/perl-pod/pod-simple/issues',
     'Pod::Simple::XMLOutStream'=> 'https://github.com/perl-pod/pod-simple/issues',
-    'Pod::Text'             => undef,
-    'Pod::Text::Color'      => undef,
-    'Pod::Text::Overstrike' => undef,
-    'Pod::Text::Termcap'    => undef,
+    'Pod::Text'             => 'https://rt.cpan.org/Dist/Display.html?Name=podlators',
+    'Pod::Text::Color'      => 'https://rt.cpan.org/Dist/Display.html?Name=podlators',
+    'Pod::Text::Overstrike' => 'https://rt.cpan.org/Dist/Display.html?Name=podlators',
+    'Pod::Text::Termcap'    => 'https://rt.cpan.org/Dist/Display.html?Name=podlators',
     'Pod::Usage'            => undef,
-    'Scalar::Util'          => undef,
+    'Scalar::Util'          => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Scalar-List-Utils',
     'Socket'                => undef,
-    'Sub::Util'             => undef,
+    'Sub::Util'             => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Scalar-List-Utils',
     'Sys::Syslog'           => undef,
     'Sys::Syslog::Win32'    => undef,
     'TAP::Base'             => 'http://rt.cpan.org/Public/Dist/Display.html?Name=Test-Harness',
@@ -13756,7 +13787,7 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'TAP::Parser::SourceHandler::RawTAP'=> 'http://rt.cpan.org/Public/Dist/Display.html?Name=Test-Harness',
     'TAP::Parser::YAMLish::Reader'=> 'http://rt.cpan.org/Public/Dist/Display.html?Name=Test-Harness',
     'TAP::Parser::YAMLish::Writer'=> 'http://rt.cpan.org/Public/Dist/Display.html?Name=Test-Harness',
-    'Term::ANSIColor'       => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Term-ANSIColor',
+    'Term::ANSIColor'       => 'https://rt.cpan.org/Dist/Display.html?Name=Term-ANSIColor',
     'Term::Cap'             => undef,
     'Test'                  => undef,
     'Test::Builder'         => 'http://github.com/Test-More/test-more/issues/',
