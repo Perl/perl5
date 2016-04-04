@@ -57,6 +57,8 @@ marriages made in heaven.
 
 =head2 v5.23.8 - Patrick Rothfuss, "The Wise Man's Fear (The Kingkiller's Chronicle: Day Two)"
 
+L<Announced on 2016-02-20 by Sawyer X|http://www.nntp.perl.org/group/perl.perl5.porters/2016/02/msg234535.html>
+
 Denna, on the other hand, had never been trained. She knew nothing
 of shortcuts. You'd think she'd be forced to wander the city, lost and
 helpless, trapped in a twisting maze of mortared stone.
@@ -67,7 +69,7 @@ she moved through the city like some faerie creature. She walked roads
 no one else could see, and it made her music wild and strange and
 free.
 
-=head2 v5.23.7
+=head2 v5.23.7 - William Gibson, "Neuromancer"
 
 L<Announced on 2016-01-20 by Stevan|http://www.nntp.perl.org/group/perl.perl5.porters/2016/01/msg233856.html>
 
@@ -83,8 +85,6 @@ and he'd cry for it, cry in his sleep, and wake alone in the
 dark, curled in his capsule in some coffin hotel, hands clawed
 into the bedslab, temper foam bunched between his fingers,
 trying to reach the console that wasn't there.
-
-  -- William Gibson, Neuromancer
 
 =head2 v5.23.6 - 5.23 Episode VII
 
@@ -284,7 +284,7 @@ L<Announced on 2015-07-20 by Matthew Horsfall|http://www.nntp.perl.org/group/per
   Will chase the sun into the morning
   Beyond the sky, beyond the sea.
 
-=head2 v5.23.0 - Bob Dylan, Maggie's Farm
+=head2 v5.23.0 - Bob Dylan, "Maggie's Farm"
 
 L<Announced on 2015-06-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2015/06/msg228807.html>
 
