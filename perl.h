@@ -3192,10 +3192,10 @@ typedef pthread_key_t	perl_key;
  * TODO: however, some platforms are starting to get these clang
  * thread safety annotations for pthreads, for example FreeBSD.
  * Do we need a way to a bypass these wrappers? */
-int perl_tsa_mutex_lock(perl_mutex* mutex)
+EXTERN_C int perl_tsa_mutex_lock(perl_mutex* mutex)
   PERL_TSA_ACQUIRE(*mutex)
   PERL_TSA_NO_TSA;
-int perl_tsa_mutex_unlock(perl_mutex* mutex)
+EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
   PERL_TSA_RELEASE(*mutex)
   PERL_TSA_NO_TSA;
 #endif
