@@ -5232,6 +5232,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     bool is_utf8_pat = reginfo->is_utf8_pat;
     bool match = FALSE;
 
+/* Solaris Studio 12.3 messes up fetching PL_charclass['\n'] */
+#if (defined(__SUNPRO_C) && (__SUNPRO_C == 0x5120) && defined(__x86_64) && defined(USE_64_BIT_ALL))
+#  define SOLARIS_BAD_OPTIMIZER
+    const U32 *pl_charclass_dup = PL_charclass;
+#  define PL_charclass pl_charclass_dup
+#endif
+
 #ifdef DEBUGGING
     GET_RE_DEBUG_FLAGS_DECL;
 #endif
@@ -8316,6 +8323,9 @@ NULL
             /* NOTREACHED */
 	}
     }
+#ifdef SOLARIS_BAD_OPTIMIZER
+#  undef pl_charclass_dup
+#endif
 
     /*
     * We get here only if there's trouble -- normally "case END" is
