@@ -4,7 +4,7 @@
 
 <div><h2>Tickets Listed in #126920: 5.22.2 blockers</h2>
 
-<commit votes="steveh" id="e1ccd2206d2572b12ff2ad8efe6b1370c580898f" ticket="126981" desc="Enforce strict 'subs' in multideref optimisation"/>
+<commit votes="steveh, khw" id="e1ccd2206d2572b12ff2ad8efe6b1370c580898f" ticket="126981" desc="Enforce strict 'subs' in multideref optimisation"/>
 
 </div>
 
@@ -33,12 +33,12 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="" id="" ticket="123878" desc=""/>
 
-<commit votes="steveh, jhi" id="a934a4a7d4fa99d522e169b921286755a0f8d248" ticket="126845" desc="Remove unwarranted assertion in Perl_newATTRSUB_x()"/>
+<commit votes="steveh, jhi, khw" id="a934a4a7d4fa99d522e169b921286755a0f8d248" ticket="126845" desc="Remove unwarranted assertion in Perl_newATTRSUB_x()"/>
 (jhi: note that the 127773 fix consists of two commits.)
-<commit votes="jhi, steveh" id="70ead873d4b864ca127d4f75aa654724264ff91b" ticket="127773" desc="Assertion failure in perl built with Dusecbacktrace]"/>
-<commit votes="jhi, steveh" id="4d00a3198aa6950e874328ec431d15c821382cce" ticket="127773" desc="Assertion failure in perl built with Dusecbacktrace]"/>
+<commit votes="jhi, steveh, khw" id="70ead873d4b864ca127d4f75aa654724264ff91b" ticket="127773" desc="Assertion failure in perl built with Dusecbacktrace]"/>
+<commit votes="jhi, steveh, khw" id="4d00a3198aa6950e874328ec431d15c821382cce" ticket="127773" desc="Assertion failure in perl built with Dusecbacktrace]"/>
 
-<commit votes="steveh" id="aea0412a260d9d7295c0a5bebb8bb6978dc02ccd" ticket="127786" desc="RT #127786: assertion failure with eval in DB pkg."/>
+<commit votes="steveh, khw" id="aea0412a260d9d7295c0a5bebb8bb6978dc02ccd" ticket="127786" desc="RT #127786: assertion failure with eval in DB pkg."/>
 
 </div>
 
@@ -46,21 +46,21 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="steveh, khw" id="a82f4918f5debccfb7e9a7047d2c2e558df538cd" ticket="126481" desc="PATCH: [perl #126481] panic for !! with syntax error in /(?[...])/"/>
 
-<commit votes="steveh" id="1921e03146ca6022defa6af5267c4dd20c0ca699" ticket="" desc="stop lc() etc accidentally modifying in-place."/>
+<commit votes="steveh, khw" id="1921e03146ca6022defa6af5267c4dd20c0ca699" ticket="" desc="stop lc() etc accidentally modifying in-place."/>
 
 </div>
 
 <div><h3>New Feature Fixes</h3>
 
-<commit votes="jhi, steveh" id="35ff3d7deb0d8004539a00980bb69ece71275982" ticket="" desc="hexfp: all ppc/powerpc-ld linux tailbits difference in exp(1)"/>
+<commit votes="jhi, steveh, khw" id="35ff3d7deb0d8004539a00980bb69ece71275982" ticket="" desc="hexfp: all ppc/powerpc-ld linux tailbits difference in exp(1)"/>
 
 </div>
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="jhi, steveh" id="99315af872aaf23d9620b68b29cdc34181bf06c7" ticket="127764" desc="[perl #127764] Perl with '-Dusecbacktrace' doesn't compile on darwin"/>
-<commit votes="steveh, jhi" id="0632167b5a653661f48c9e38df6aa76b544d4079" ticket="" desc="Configure: gcc 5 exists."/>
-<commit votes="jhi, steveh" id="4732711e2548b6d734ca831d65dbcf501a89774e" ticket="" desc="Remove nm from libswanted"/>
+<commit votes="jhi, steveh, khw" id="99315af872aaf23d9620b68b29cdc34181bf06c7" ticket="127764" desc="[perl #127764] Perl with '-Dusecbacktrace' doesn't compile on darwin"/>
+<commit votes="steveh, jhi, khw" id="0632167b5a653661f48c9e38df6aa76b544d4079" ticket="" desc="Configure: gcc 5 exists."/>
+<commit votes="jhi, steveh, khw" id="4732711e2548b6d734ca831d65dbcf501a89774e" ticket="" desc="Remove nm from libswanted"/>
 
 </div>
 
@@ -71,17 +71,17 @@ The same criteria apply to code in dual-life modules as to core code.)
 <div><h3>Platform-Specific Test Fixes</h3>
 
 (steveh: Note: I have a backport of this that applies to maint-5.22, supplied by jhi. to clarify: this change is about "static inline" functions, these functions really aren't -- so while this platform specific fix, it because the C compiler is stricter than most.)
-<commit votes="jhi, steveh" id="a4570f51dba109184d92dcbb0612242d942856fc" ticket="124212" desc="Workaround for perl #124212: these functions are not true static inline"/>
+<commit votes="jhi, steveh, khw" id="a4570f51dba109184d92dcbb0612242d942856fc" ticket="124212" desc="Workaround for perl #124212: these functions are not true static inline"/>
 
-<commit votes="steveh, jhi" id="9234e5bdb7cb62dbf09ea4fd4ae5f3831cf78890" ticket="127533" desc="[perl #127533] only test semctl() if we have everything needed to use it"/>
+<commit votes="steveh, jhi, khw" id="9234e5bdb7cb62dbf09ea4fd4ae5f3831cf78890" ticket="127533" desc="[perl #127533] only test semctl() if we have everything needed to use it"/>
 
 </div>
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="steveh" id="cc4d3128555c2fbf5af7fc75854461cd87502812" ticket="" desc="improve perldiag implicit close text"/>
-<commit votes="steveh" id="ab7ca7edf202fe21133adbdca227b5cd8d15dced" ticket="" desc="improve perldiag implicit close text further"/>
-<commit votes="steveh" id="95032a5ba8a8a8ef02ca87ced5e2e47387c05831" ticket="" desc="improve perldiag implicit close text still further"/>
+<commit votes="steveh, khw" id="cc4d3128555c2fbf5af7fc75854461cd87502812" ticket="" desc="improve perldiag implicit close text"/>
+<commit votes="steveh, khw" id="ab7ca7edf202fe21133adbdca227b5cd8d15dced" ticket="" desc="improve perldiag implicit close text further"/>
+<commit votes="steveh, khw" id="95032a5ba8a8a8ef02ca87ced5e2e47387c05831" ticket="" desc="improve perldiag implicit close text still further"/>
 
 </div>
 
