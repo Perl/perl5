@@ -8324,7 +8324,7 @@ NULL
 	}
     }
 #ifdef SOLARIS_BAD_OPTIMIZER
-#  undef pl_charclass_dup
+#  undef PL_charclass
 #endif
 
     /*
