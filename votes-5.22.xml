@@ -44,19 +44,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Regression Fixes</h3>
 
-(arc: This regression was introduced in 5.10.0. Yow!)
-(steveh: May not cherry-pick this yet since demerphq had hoped to investigate any possible performance issues with the fix first:)
-<commit votes="steveh, arc, khw" id="0f8d761c4673440b49eeb491136a67dcf3da7400" ticket="126222" desc="Add a todo test for perl-126222"/>
-<commit votes="steveh, arc, khw" id="6625d92602279361acd0c6185b78c6d201fd81e0" ticket="126222" desc="fix perl-126222 - (?!) OPFAIL optimization does work in (?(?!)yes|no)"/>
-
 <commit votes="steveh, khw" id="a82f4918f5debccfb7e9a7047d2c2e558df538cd" ticket="126481" desc="PATCH: [perl #126481] panic for !! with syntax error in /(?[...])/"/>
-
-(steveh: If the #124387 changes are applied then the #127494 changes must also be applied:)
-(tonyc: these changes break CPAN modules that don't expect AUTOLOAD to be called for DESTROY (which it hadn't since 5.18), see https://rt.perl.org/Ticket/Display.html?id=127494#txn-1392066 - they may also break darkpan code.)
-<commit votes="steveh" id="f05081b8ef229712c83a6f19b217489cf5e5ab25" ticket="124387" desc="[perl #124387] TODO test for AUTOLOAD on DESTROY"/>
-<commit votes="steveh" id="000814da477053c7627c7ace5ca3ce3d4c4aad08" ticket="124387" desc="[perl #124387] call AUTOLOAD when DESTROY isn't defined"/>
-<commit votes="steveh" id="7db8c4f1f19e6f855107ec990507a1a9cb0f59a6" ticket="127494" desc="[perl #127494] TODO test for $AUTOLOAD being set for DESTROY"/>
-<commit votes="steveh" id="958cdeac409681891afe77bf60db047296523465" ticket="127494" desc="[perl #127494] don't cache AUTOLOAD as DESTROY"/>
 
 <commit votes="steveh" id="1921e03146ca6022defa6af5267c4dd20c0ca699" ticket="" desc="stop lc() etc accidentally modifying in-place."/>
 
@@ -69,10 +57,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 </div>
 
 <div><h3>Build and Installation Fixes</h3>
-
-(steveh: These two don't apply cleanly and I'm inclined to leave them out unless somebody wants to prepare a version applicable to maint:)
-<commit votes="steveh" id="99fff99d79aa793bf9a6e0ce2bb18ced085ad1e2" ticket="127619" desc="util.c: make my_mem*/my_b* prototypes more like the originals"/>
-<commit votes="steveh" id="af4291a85942657772fedc3db017e89100bd916a" ticket="127619" desc="make building without memcpy work (RT #127619)"/>
 
 <commit votes="jhi, steveh" id="99315af872aaf23d9620b68b29cdc34181bf06c7" ticket="127764" desc="[perl #127764] Perl with '-Dusecbacktrace' doesn't compile on darwin"/>
 <commit votes="steveh, jhi" id="0632167b5a653661f48c9e38df6aa76b544d4079" ticket="" desc="Configure: gcc 5 exists."/>
