@@ -14182,7 +14182,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 {
     dVAR;
     ANY * const ss	= proto_perl->Isavestack;
-    const I32 max	= proto_perl->Isavestack_max;
+    const I32 max	= proto_perl->Isavestack_max + SS_MAXPUSH;
     I32 ix		= proto_perl->Isavestack_ix;
     ANY *nss;
     const SV *sv;
