@@ -264,6 +264,12 @@ file.
 Previously the probe would fail and cause a build failure. [perl
 #122287]
 
+=item *
+
+F<Configure> no longer probes for F<libnm> by default.  Originally
+this was the "New Math" library, but the name has been re-used by the
+GNOME NetworkManager.  [perl #127131]
+
 =back
 
 =head1 Testing
