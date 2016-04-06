@@ -378,6 +378,11 @@ non-STASH stored in the SvSTASH() slot of a stash, breaking the B
 STASH() method.  The DESTROY method is now cached in the MRO metadata
 for the stash.  [perl #126410]
 
+=item *
+
+Avoid parsing beyond the end of the buffer when processing a C<#line>
+directive with no filename.  [perl #127334]
+
 =back
 
 =head1 Known Problems
