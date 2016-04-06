@@ -12375,9 +12375,9 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'File::Spec::Unix'      => '3.56_01',
             'File::Spec::VMS'       => '3.56_01',
             'File::Spec::Win32'     => '3.56_01',
-            'Module::CoreList'      => '5.20160320',
-            'Module::CoreList::TieHashDelta'=> '5.20160320',
-            'Module::CoreList::Utils'=> '5.20160320',
+            'Module::CoreList'      => '5.20160410',
+            'Module::CoreList::TieHashDelta'=> '5.20160410',
+            'Module::CoreList::Utils'=> '5.20160410',
             'XS::APItest'           => '0.72_01',
         },
         removed => {
