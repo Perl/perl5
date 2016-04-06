@@ -39,6 +39,19 @@ L<[perl #126755]|https://rt.perl.org/Ticket/Display.html?id=126755>
 This is CVE-2015-8607.  For more information see
 L<[perl #126862]|https://rt.perl.org/Ticket/Display.html?id=126862>
 
+=head2 Set proper umask before calling C<mkstemp(3)>
+
+In 5.22 perl started setting umask to 0600 before calling C<mkstemp(3)>
+and restoring it afterwards. This wrongfully tells open(2) to strip
+the owner read and write bits from the given mode before applying it,
+rather than the intended negation of leaving only those bits in place.
+
+Systems that use mode 0666 in C<mkstemp(3)> (like old versions of
+glibc) createa a file with permissions 0066, leaving world read and
+write permissions regardless of current umask.
+
+This has been fixed by using umask 0177 instead. [perl #127322]
+
 =head1 Incompatible Changes
 
 XXX For a release on a stable branch, this section aspires to be:
