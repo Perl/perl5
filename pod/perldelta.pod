@@ -371,6 +371,13 @@ already read end of file, and the here-doc was not terminated, perl
 could produce an assertion or a segmentation fault.  This now reliably
 complains about the unterminated here-doc.  [perl #125540]
 
+=item *
+
+Caching of DESTROY methods could result in a non-pointer or a
+non-STASH stored in the SvSTASH() slot of a stash, breaking the B
+STASH() method.  The DESTROY method is now cached in the MRO metadata
+for the stash.  [perl #126410]
+
 =back
 
 =head1 Known Problems
