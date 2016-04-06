@@ -437,6 +437,17 @@ optionally would improperly fail to match.  An example of one that could
 fail is C</qr/_?[^\Wbar]\x{100}/>.  This has been fixed.
 [perl #127537]
 
+=item *
+
+Fixed an issue with C<< pack >> where C<< pack "H" >> (and C<< pack "h" >>)
+could read past the source when given a non-utf8 source, and a utf8 target.
+[perl #126325]
+
+=item *
+
+Fixed some cases where perl would abort due to a segmentation fault,
+or a C-level assert. [perl #126602], [perl #126193].
+
 =back
 
 =head1 Known Problems
