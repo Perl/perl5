@@ -396,6 +396,12 @@ for the stash.  [perl #126410]
 Avoid parsing beyond the end of the buffer when processing a C<#line>
 directive with no filename.  [perl #127334]
 
+=item *
+
+Perl 5.22 added support to the C99 hexadecimal floating point notation,
+but sometimes misparses hex floats. This had been fixed.
+[perl #127183]
+
 =back
 
 =head1 Known Problems
