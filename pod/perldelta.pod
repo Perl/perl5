@@ -423,6 +423,14 @@ Perl 5.22 added support to the C99 hexadecimal floating point notation,
 but sometimes misparses hex floats. This had been fixed.
 [perl #127183]
 
+=item *
+
+Certain regex patterns involving a complemented posix class in an
+inverted bracketed character class, and matching something else
+optionally would improperly fail to match.  An example of one that could
+fail is C</qr/_?[^\Wbar]\x{100}/>.  This has been fixed.
+[perl #127537]
+
 =back
 
 =head1 Known Problems
