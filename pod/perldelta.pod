@@ -362,7 +362,7 @@ memory.  This was caused by a pointer not being restored correctly.
 =item *
 
 Report more context when we see an array where we expect to see an
-operator.  [perl #123737]
+operator and avoid an assertion failure.  [perl #123737]
 
 =back
 
