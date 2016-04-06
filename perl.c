@@ -1784,6 +1784,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef PERL_USE_SAFE_PUTENV
 			     " PERL_USE_SAFE_PUTENV"
 #  endif
+#  ifdef SILENT_NO_TAINT_SUPPORT
+                             " SILENT_NO_TAINT_SUPPORT"
+#  endif
 #  ifdef UNLINK_ALL_VERSIONS
 			     " UNLINK_ALL_VERSIONS"
 #  endif
