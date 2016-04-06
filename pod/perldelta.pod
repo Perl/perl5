@@ -52,6 +52,11 @@ write permissions regardless of current umask.
 
 This has been fixed by using umask 0177 instead. [perl #127322]
 
+=head2 Avoid accessing uninitialized memory in win32 C<crypt()>
+
+Added validation that will detect both a short salt and invalid characters
+in the salt.  L<[perl #126922]|https://rt.perl.org/Ticket/Display.html?id=126922>
+
 =head1 Incompatible Changes
 
 XXX For a release on a stable branch, this section aspires to be:
@@ -367,7 +372,11 @@ well.
 
 =item *
 
-XXX
+Remove unwarranted assertion in C<Perl_newATTRSUB_x()>. If a stub subroutine
+definition with a prototype has been seen, then any subsequent stub (or
+definition) of the same subroutine with an attribute was causing an assertion
+failure because of a null pointer.
+L<[perl #126845]|https://rt.perl.org/Ticket/Display.html?id=126845>
 
 =back
 
@@ -447,6 +456,11 @@ could read past the source when given a non-utf8 source, and a utf8 target.
 
 Fixed some cases where perl would abort due to a segmentation fault,
 or a C-level assert. [perl #126602], [perl #126193].
+
+=item *
+
+Avoid leaking memory when setting C<$ENV{foo}> on darwin.
+L<[perl #126240]|https://rt.perl.org/Ticket/Display.html?id=126240>
 
 =back
 
