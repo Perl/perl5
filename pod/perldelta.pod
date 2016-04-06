@@ -69,7 +69,11 @@ report.  See L</Reporting Bugs> below.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<File::Spec> has been upgraded from version 3.56 to 3.56_01.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20151213 to 5.20160410.
 
 =back
 
