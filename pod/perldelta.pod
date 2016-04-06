@@ -57,6 +57,19 @@ This has been fixed by using umask 0177 instead. [perl #127322]
 Added validation that will detect both a short salt and invalid characters
 in the salt.  L<[perl #126922]|https://rt.perl.org/Ticket/Display.html?id=126922>
 
+=head2 Remove duplicate environment variables from C<environ>
+
+Previously, if an environment variable appeared more than once in
+C<environ[]>, C<%ENV> would contain the last entry for that name,
+while a typical C<getenv()> would return the first entry. We now
+make sure C<%ENV> contains the same as what C<getenv> returns.
+
+Second, we remove duplicates from C<environ[]>, so if a setting
+with that name is set in C<%ENV> we won't pass an unsafe value
+to a child process.
+
+[CVE-2016-2381]
+
 =head1 Incompatible Changes
 
 XXX For a release on a stable branch, this section aspires to be:
@@ -461,6 +474,23 @@ or a C-level assert. [perl #126602], [perl #126193].
 
 Avoid leaking memory when setting C<$ENV{foo}> on darwin.
 L<[perl #126240]|https://rt.perl.org/Ticket/Display.html?id=126240>
+
+=item *
+
+Correctly raise an error when trying to compile patterns with
+unterminated character classes while there are trailing backslashes.
+[perl #126141].
+
+=item *
+
+Handle C<NOTHING> regops and C<EXACTFU_SS> regops in C<make_trie> properly.
+[perl #126206]
+
+=item *
+
+Only test C<semctl> if we have everything needed to use it. In a FreeBSD
+the C<semctl> entry point may exist, but it can be disabled by policy.
+[perl #127533]
 
 =back
 
