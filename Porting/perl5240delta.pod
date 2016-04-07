@@ -25,6 +25,13 @@ bundle now includes the C<postderef_qq> feature.
 For details on what is in this release, see
 L<http://www.unicode.org/versions/Unicode8.0.0/>.
 
+=head2 perl will now croak when closing an in-place output file fails
+
+Until now, failure to close the output file for an in-place edit was not
+detected, meaning that the input file could be clobbered without the edit being
+successfully completed.  Now, when the output file cannot be closed
+successfully, an exception is raised.
+
 =head2 New C<\b{lb}> boundary in regular expressions
 
 C<lb> stands for Line Break.  It is a Unicode property
@@ -113,7 +120,21 @@ L<[perl #126862]|https://rt.perl.org/Ticket/Display.html?id=126862>
 =head2 Avoid accessing uninitialized memory in win32 C<crypt()>
 
 Added validation that will detect both a short salt and invalid characters
-in the salt.  L<[perl #126922]|https://rt.perl.org/Ticket/Display.html?id=126922>
+in the salt.
+L<[perl #126922]|https://rt.perl.org/Ticket/Display.html?id=126922>
+
+=head2 Remove duplicate environment variables from C<environ>
+
+Previously, if an environment variable appeared more than once in
+C<environ[]>, C<%ENV> would contain the last entry for that name,
+while a typical C<getenv()> would return the first entry. We now
+make sure C<%ENV> contains the same as what C<getenv> returns.
+
+Second, we remove duplicates from C<environ[]>, so if a setting
+with that name is set in C<%ENV> we won't pass an unsafe value
+to a child process.
+
+[CVE-2016-2381]
 
 =head1 Incompatible Changes
 
@@ -342,6 +363,10 @@ Single arguments in list assign are now slightly faster:
   ($x) = (...);
   (...) = ($x);
 
+=item *
+
+Less peak memory is now used when compiling regular expression patterns.
+
 =back
 
 =head1 Modules and Pragmata
@@ -416,6 +441,12 @@ The documentation of C<hex> has been revised to clarify valid inputs.
 
 Better explain meaning of negative PIDs in C<waitpid>.
 L<[perl #127080]|https://rt.perl.org/Ticket/Display.html?id=127080>
+
+=item *
+
+General cleanup: there's more consistency now (in POD usage, grammar, code
+examples), better practices in code examples (use of C<my>, removal of bareword
+filehandles, dropped usage of C<&> when calling subroutines, ...), etc.
 
 =back
 
@@ -718,6 +749,10 @@ L<[perl #127131]|https://rt.perl.org/Ticket/Display.html?id=127131>
 
 =item *
 
+Added F<Configure> probes for C<newlocale>, C<freelocale>, and C<uselocale>.
+
+=item *
+
 C<< PPPort.so/PPPort.dll >> no longer get installed, as they are
 not used by C<< PPPort.pm >>, only by its test files.
 
@@ -735,7 +770,6 @@ the interpreter, since Perl 5.17.10.  This has been fixed.
 =item *
 
 F<Configure> should handle spaces in paths a little better.
-
 
 =item *
 
@@ -1015,6 +1049,34 @@ C<truncate($filename, $size)> now works for files over 4GB in size.
 Parallel building has been added to the dmake C<makefile.mk> makefile. All
 Win32 compilers are supported.
 
+=item *
+
+Building a 64-bit perl with a 64-bit GCC but a 32-bit gmake would
+result in an invalid C<$Config{archname}> for the resulting perl.
+[perl #127584]
+
+=item *
+
+Errors set by Winsock functions are now put directly into C<$^E>, and the
+relevant C<WSAE*> error codes are now exported from the L<Errno> and L<POSIX>
+modules for testing this against.
+
+The previous behaviour of putting the errors (converted to POSIX-style C<E*>
+error codes since Perl 5.20.0) into C<$!> was buggy due to the non-equivalence
+of like-named Winsock and POSIX error constants, a relationship between which
+has unfortunately been established in one way or another since Perl 5.8.0.
+
+The new behaviour provides a much more robust solution for checking Winsock
+errors in portable software without accidentally matching POSIX tests that were
+intended for other OSes and may have different meanings for Winsock.
+
+The old behaviour is currently retained, warts and all, for backwards
+compatibility, but users are encouraged to change any code that tests C<$!>
+against C<E*> constants for Winsock errors to instead test C<$^E> against
+C<WSAE*> constants.  After a suitable deprecation period, the old behaviour may
+be removed, leaving C<$!> unchanged after Winsock function calls, to avoid any
+possible confusion over which error variable to check.
+
 =back
 
 =item ppc64el floating point
@@ -1220,6 +1282,61 @@ C<GvASSIGN_GENERATION> and C<GvASSIGN_GENERATION_set> have been removed.
 =head1 Selected Bug Fixes
 
 =over 4
+
+=item *
+
+It now works properly to specify a user-defined property, such as
+
+ qr/\p{mypkg1::IsMyProperty}/i
+
+with C</i> caseless matching, an explicit package name, and
+I<IsMyProperty> not defined at the time of the pattern compilation.
+
+=item *
+
+Perl's memcpy(), memmove(), memset() and memcmp() fallbacks are now
+more compatible with the originals.  [perl #127619]
+
+=item *
+
+Fixed the issue where a C<< s///r >>) with B<< -DPERL_NO_COW >> attempts
+to modify the source SV, resulting in the program dying. [perl #127635]
+
+=item *
+
+Fixed a spurious warning about posix character classes. [perl #127581]
+
+=item *
+
+Fixed an obscure case where a pattern could fail to match. This only 
+occurred when matching characters from the set of C1 controls, when
+the target matched string was in UTF-8, and only on EBCDIC platforms.
+
+=item *
+
+Fixed over eager warnings for C<< /[.foo.]/ >>.
+
+This prevents Perl from warning about constructs like C<< /[.].*[.]/ >>.
+[perl #127582, #127604]
+
+=item *
+
+Narrow the filename check in F<strict.pm> and F<warnings.pm>. Previously,
+it assumed that if the filename (without the F<.pmc?> extension) differed
+from the package name, if was a misspelled use statement (i.e. C<use Strict>
+instead of C<use strict>). We now check whether there's really a 
+miscapitalization happening, and not another issue.
+
+=item *
+
+Turn an assertion into a more user friendly failure when parsing
+regexes. [perl #127599]
+
+=item *
+
+Correctly raise an error when trying to compile patterns with 
+unterminated character classes while there are trailing backslashes.
+[perl #126141].
 
 =item *
 
