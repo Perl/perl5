@@ -17,12 +17,12 @@ L<perl5221delta>, which describes differences between 5.22.0 and 5.22.1.
 =head2 fix out of boundary access in Win32 path handling
 
 This is CVE-2015-8608.  For more information see
-L<[perl #126755]|https://rt.perl.org/Ticket/Display.html?id=126755>
+L<[perl #126755]|https://rt.perl.org/Ticket/Display.html?id=126755>.
 
 =head2 fix loss of taint in canonpath
 
 This is CVE-2015-8607.  For more information see
-L<[perl #126862]|https://rt.perl.org/Ticket/Display.html?id=126862>
+L<[perl #126862]|https://rt.perl.org/Ticket/Display.html?id=126862>.
 
 =head2 Set proper umask before calling C<mkstemp(3)>
 
@@ -35,12 +35,16 @@ Systems that use mode 0666 in C<mkstemp(3)> (like old versions of
 glibc) createa a file with permissions 0066, leaving world read and
 write permissions regardless of current umask.
 
-This has been fixed by using umask 0177 instead. [perl #127322]
+This has been fixed by using umask 0177 instead.
+
+L<[perl #127322]|https://rt.perl.org/Ticket/Display.html?id=127322>
 
 =head2 Avoid accessing uninitialized memory in win32 C<crypt()>
 
 Added validation that will detect both a short salt and invalid characters
-in the salt.  L<[perl #126922]|https://rt.perl.org/Ticket/Display.html?id=126922>
+in the salt.
+
+L<[perl #126922]|https://rt.perl.org/Ticket/Display.html?id=126922>
 
 =head2 Remove duplicate environment variables from C<environ>
 
@@ -53,7 +57,7 @@ Second, we remove duplicates from C<environ[]>, so if a setting
 with that name is set in C<%ENV> we won't pass an unsafe value
 to a child process.
 
-[CVE-2016-2381]
+This is CVE-2016-2381.
 
 =head1 Incompatible Changes
 
@@ -101,14 +105,17 @@ Dtrace builds now build sucessfully on systems with a newer dtrace
 that require an input object file that uses the probes in the F<.d>
 file.
 
-Previously the probe would fail and cause a build failure. [perl
-#122287]
+Previously the probe would fail and cause a build failure.
+
+L<[perl #122287]|https://rt.perl.org/Ticket/Display.html?id=122287>
 
 =item *
 
 F<Configure> no longer probes for F<libnm> by default.  Originally
 this was the "New Math" library, but the name has been re-used by the
-GNOME NetworkManager.  [perl #127131]
+GNOME NetworkManager.
+
+L<[perl #127131]|https://rt.perl.org/Ticket/Display.html?id=127131>
 
 =back
 
@@ -132,7 +139,8 @@ environment conflicting with an atfork handler using the libc
 setenv() function to update the environment.
 
 Perl now uses setenv()/unsetenv() to update the environment on OS X.
-[perl #126240]
+
+L<[perl #126240]|https://rt.perl.org/Ticket/Display.html?id=126240>
 
 =back
 
@@ -146,6 +154,7 @@ Remove unwarranted assertion in C<Perl_newATTRSUB_x()>. If a stub subroutine
 definition with a prototype has been seen, then any subsequent stub (or
 definition) of the same subroutine with an attribute was causing an assertion
 failure because of a null pointer.
+
 L<[perl #126845]|https://rt.perl.org/Ticket/Display.html?id=126845>
 
 =back
@@ -158,50 +167,56 @@ L<[perl #126845]|https://rt.perl.org/Ticket/Display.html?id=126845>
 
 Calls to the placeholder C<&PL_sv_yes> used internally when an
 import() or unimport() method isn't found now correctly handle scalar
-context.  [perl #126042]
+context.
+L<[perl #126042]|https://rt.perl.org/Ticket/Display.html?id=126042>
 
 =item *
 
 The pipe() operator would assert for DEBUGGING builds instead of
 producing the correct error message.  The condition asserted on is
 detected and reported on correctly without the assertions, so the
-assertions were removed.  [perl #126480]
+assertions were removed.
+L<[perl #126480]|https://rt.perl.org/Ticket/Display.html?id=126480>
 
 =item *
 
 In some cases, failing to parse a here-doc would attempt to use freed
 memory.  This was caused by a pointer not being restored correctly.
-[perl #126443]
+L<[perl #126443]|https://rt.perl.org/Ticket/Display.html?id=126443>
 
 =item *
 
 Report more context when we see an array where we expect to see an
-operator and avoid an assertion failure.  [perl #123737]
+operator and avoid an assertion failure.
+L<[perl #123737]|https://rt.perl.org/Ticket/Display.html?id=123737>
 
 =item *
 
 If a here-doc was found while parsing another operator, the parser had
 already read end of file, and the here-doc was not terminated, perl
 could produce an assertion or a segmentation fault.  This now reliably
-complains about the unterminated here-doc.  [perl #125540]
+complains about the unterminated here-doc.
+L<[perl #125540]|https://rt.perl.org/Ticket/Display.html?id=125540>
 
 =item *
 
 Caching of DESTROY methods could result in a non-pointer or a
 non-STASH stored in the SvSTASH() slot of a stash, breaking the B
 STASH() method.  The DESTROY method is now cached in the MRO metadata
-for the stash.  [perl #126410]
+for the stash.
+L<[perl #126410]|https://rt.perl.org/Ticket/Display.html?id=126410>
 
 =item *
 
 Avoid parsing beyond the end of the buffer when processing a C<#line>
-directive with no filename.  [perl #127334]
+directive with no filename.
+L<[perl #127334]|https://rt.perl.org/Ticket/Display.html?id=127334>
 
 =item *
 
 Perl 5.22 added support to the C99 hexadecimal floating point notation,
 but sometimes misparses hex floats. This had been fixed.
-[perl #127183]
+L<[perl #127183]|https://rt.perl.org/Ticket/Display.html?id=127183>
 
 =item *
 
@@ -209,18 +224,20 @@ Certain regex patterns involving a complemented posix class in an
 inverted bracketed character class, and matching something else
 optionally would improperly fail to match.  An example of one that could
 fail is C</qr/_?[^\Wbar]\x{100}/>.  This has been fixed.
-[perl #127537]
+L<[perl #127537]|https://rt.perl.org/Ticket/Display.html?id=127537>
 
 =item *
 
 Fixed an issue with C<< pack >> where C<< pack "H" >> (and C<< pack "h" >>)
 could read past the source when given a non-utf8 source, and a utf8 target.
-[perl #126325]
+L<[perl #126325]|https://rt.perl.org/Ticket/Display.html?id=126325>
 
 =item *
 
 Fixed some cases where perl would abort due to a segmentation fault,
-or a C-level assert. [perl #126602], [perl #126193].
+or a C-level assert.
+L<[perl #126602]|https://rt.perl.org/Ticket/Display.html?id=126602>
+L<[perl #126193]|https://rt.perl.org/Ticket/Display.html?id=126193>
 
 =item *
 
@@ -231,18 +248,18 @@ L<[perl #126240]|https://rt.perl.org/Ticket/Display.html?id=126240>
 
 Correctly raise an error when trying to compile patterns with
 unterminated character classes while there are trailing backslashes.
-[perl #126141].
+L<[perl #126141]|https://rt.perl.org/Ticket/Display.html?id=126141>
 
 =item *
 
 Handle C<NOTHING> regops and C<EXACTFU_SS> regops in C<make_trie> properly.
-[perl #126206]
+L<[perl #126206]|https://rt.perl.org/Ticket/Display.html?id=126206>
 
 =item *
 
 Only test C<semctl> if we have everything needed to use it. In a FreeBSD
 the C<semctl> entry point may exist, but it can be disabled by policy.
-[perl #127533]
+L<[perl #127533]|https://rt.perl.org/Ticket/Display.html?id=127533>
 
 =back
 
