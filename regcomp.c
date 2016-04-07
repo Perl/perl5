@@ -1187,7 +1187,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
      * as well.  But don't add them if inverting, as when that gets done below,
      * it would exclude all these characters, including the ones it shouldn't
      * that were added just above */
-    if (ANYOF_FLAGS(node) & (ANYOF_INVERT|ANYOF_MATCHES_ALL_NON_UTF8_NON_ASCII)
+    if ((ANYOF_FLAGS(node) & (ANYOF_INVERT|ANYOF_MATCHES_ALL_NON_UTF8_NON_ASCII))
            == ANYOF_MATCHES_ALL_NON_UTF8_NON_ASCII)
     {
         _invlist_union(invlist, PL_UpperLatin1, &invlist);
