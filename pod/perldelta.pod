@@ -257,7 +257,8 @@ L<[perl #127533]|https://rt.perl.org/Ticket/Display.html?id=127533>
 =item *
 
 A regression that allowed undeclared barewords as hash keys to work despite
-strictures has been fixed. [perl #126981]
+strictures has been fixed.
+L<[perl #126981]|https://rt.perl.org/Ticket/Display.html?id=126981>
 
 =back
 
