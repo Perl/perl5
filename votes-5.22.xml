@@ -35,8 +35,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Regression Fixes</h3>
 
-<commit votes="jhi, steveh, wolfsage" id="6fb87544af0ff2b9b9c12038bc0fb261f56a7d88" ticket="" desc="Get -Accflags=-DPERL_MEM_LOG compiling again"/>
-
 </div>
 
 <div><h3>New Feature Fixes</h3>
