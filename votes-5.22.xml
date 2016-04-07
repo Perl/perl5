@@ -41,6 +41,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="steveh, khw, jhi" id="a82f4918f5debccfb7e9a7047d2c2e558df538cd" ticket="126481" desc="PATCH: [perl #126481] panic for !! with syntax error in /(?[...])/"/>
 <commit votes="steveh, khw, jhi" id="1921e03146ca6022defa6af5267c4dd20c0ca699" ticket="" desc="stop lc() etc accidentally modifying in-place."/>
+<commit votes="jhi" id="6fb87544af0ff2b9b9c12038bc0fb261f56a7d88" ticket="" desc="Get -Accflags=-DPERL_MEM_LOG compiling again"/>
 
 </div>
 
