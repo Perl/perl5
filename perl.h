@@ -5954,6 +5954,10 @@ typedef struct am_table_short AMTS;
 
 #ifdef USE_LOCALE
 /* These locale things are all subject to change */
+
+#   define LOCALE_INIT   MUTEX_INIT(&PL_locale_mutex)
+#   define LOCALE_TERM   MUTEX_DESTROY(&PL_locale_mutex)
+
 /* Returns TRUE if the plain locale pragma without a parameter is in effect
  */
 #   define IN_LOCALE_RUNTIME	cBOOL(CopHINTS_get(PL_curcop) & HINT_LOCALE)
@@ -6037,6 +6041,8 @@ typedef struct am_table_short AMTS;
 #   endif   /* PERL_CORE or PERL_IN_XSUB_RE */
 
 #else   /* No locale usage */
+#   define LOCALE_INIT
+#   define LOCALE_TERM
 #   define IN_LOCALE_RUNTIME                0
 #   define IN_SOME_LOCALE_FORM_RUNTIME      0
 #   define IN_LOCALE_COMPILETIME            0

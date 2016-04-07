@@ -2705,6 +2705,7 @@ Perl_win32_term(void)
     OP_REFCNT_TERM;
     PERLIO_TERM;
     MALLOC_TERM;
+    LOCALE_TERM;
 }
 
 void
