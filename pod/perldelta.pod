@@ -254,6 +254,11 @@ Only test C<semctl()> if we have everything needed to use it.  In a FreeBSD the
 C<semctl()> entry point may exist, but it can be disabled by policy.
 L<[perl #127533]|https://rt.perl.org/Ticket/Display.html?id=127533>
 
+=item *
+
+A regression that allowed undeclared barewords as hash keys to work despite
+strictures has been fixed. [perl #126981]
+
 =back
 
 =head1 Acknowledgements
