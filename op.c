@@ -2629,7 +2629,13 @@ S_mark_padname_lvalue(pTHX_ PADNAME *pn)
     PadnameLVALUE_on(pn);
     while (PadnameOUTER(pn) && PARENT_PAD_INDEX(pn)) {
 	cv = CvOUTSIDE(cv);
-	assert(cv);
+        /* RT #127786: cv can be NULL due to an eval within the DB package
+         * called from an anon sub - anon subs don't have CvOUTSIDE() set
+         * unless they contain an eval, but calling eval within DB
+         * pretends the eval was done in the caller's scope.
+         */
+	if (!cv)
+            break;
 	assert(CvPADLIST(cv));
 	pn =
 	   PadlistNAMESARRAY(CvPADLIST(cv))[PARENT_PAD_INDEX(pn)];
