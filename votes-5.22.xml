@@ -4,7 +4,7 @@
 
 <div><h2>Tickets Listed in #126920: 5.22.2 blockers</h2>
 
-<commit votes="steveh, khw" id="e1ccd2206d2572b12ff2ad8efe6b1370c580898f" ticket="126981" desc="Enforce strict 'subs' in multideref optimisation"/>
+<commit votes="steveh, khw, jhi" id="e1ccd2206d2572b12ff2ad8efe6b1370c580898f" ticket="126981" desc="Enforce strict 'subs' in multideref optimisation"/>
 
 </div>
 
@@ -33,14 +33,14 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="" id="" ticket="123878" desc=""/>
 
-<commit votes="steveh, khw" id="aea0412a260d9d7295c0a5bebb8bb6978dc02ccd" ticket="127786" desc="RT #127786: assertion failure with eval in DB pkg."/>
+<commit votes="steveh, khw, jhi" id="aea0412a260d9d7295c0a5bebb8bb6978dc02ccd" ticket="127786" desc="RT #127786: assertion failure with eval in DB pkg."/>
 
 </div>
 
 <div><h3>Regression Fixes</h3>
 
-<commit votes="steveh, khw" id="a82f4918f5debccfb7e9a7047d2c2e558df538cd" ticket="126481" desc="PATCH: [perl #126481] panic for !! with syntax error in /(?[...])/"/>
-<commit votes="steveh, khw" id="1921e03146ca6022defa6af5267c4dd20c0ca699" ticket="" desc="stop lc() etc accidentally modifying in-place."/>
+<commit votes="steveh, khw, jhi" id="a82f4918f5debccfb7e9a7047d2c2e558df538cd" ticket="126481" desc="PATCH: [perl #126481] panic for !! with syntax error in /(?[...])/"/>
+<commit votes="steveh, khw, jhi" id="1921e03146ca6022defa6af5267c4dd20c0ca699" ticket="" desc="stop lc() etc accidentally modifying in-place."/>
 
 </div>
 
@@ -62,9 +62,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="steveh, khw" id="cc4d3128555c2fbf5af7fc75854461cd87502812" ticket="" desc="improve perldiag implicit close text"/>
-<commit votes="steveh, khw" id="ab7ca7edf202fe21133adbdca227b5cd8d15dced" ticket="" desc="improve perldiag implicit close text further"/>
-<commit votes="steveh, khw" id="95032a5ba8a8a8ef02ca87ced5e2e47387c05831" ticket="" desc="improve perldiag implicit close text still further"/>
+<commit votes="steveh, khw, jhi" id="cc4d3128555c2fbf5af7fc75854461cd87502812" ticket="" desc="improve perldiag implicit close text"/>
+<commit votes="steveh, khw, jhi" id="ab7ca7edf202fe21133adbdca227b5cd8d15dced" ticket="" desc="improve perldiag implicit close text further"/>
+<commit votes="steveh, khw, jhi" id="95032a5ba8a8a8ef02ca87ced5e2e47387c05831" ticket="" desc="improve perldiag implicit close text still further"/>
 
 </div>
 
