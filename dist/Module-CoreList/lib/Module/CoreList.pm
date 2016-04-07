@@ -291,7 +291,7 @@ sub changes_between {
     5.023007 => '2016-01-20',
     5.023008 => '2016-02-20',
     5.023009 => '2016-03-20',
-    5.023010 => '????-??-??',
+    5.024000 => '????-??-??',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -12360,14 +12360,21 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Win32API::File::ExtUtils::Myconst2perl'=> 1,
         }
     },
-    5.023010 => {
+    5.024000 => {
         delta_from => 5.023009,
         changed => {
-            'B::Op_private'         => '5.023010',
-            'Config'                => '5.02301',
-            'Module::CoreList'      => '5.20160420',
-            'Module::CoreList::TieHashDelta'=> '5.20160420',
-            'Module::CoreList::Utils'=> '5.20160420',
+            'B::Op_private'         => '5.024000',
+            'Config'                => '5.024',
+            'File::Path'            => '2.12_01',
+            'File::Spec::AmigaOS'   => '3.64',
+            'ODBM_File'             => '1.14',
+            'POSIX'                 => '1.65',
+            'Pod::Man'              => '4.07',
+            'Pod::ParseLink'        => '4.07',
+            'Pod::Text'             => '4.07',
+            'Pod::Text::Color'      => '4.07',
+            'Pod::Text::Overstrike' => '4.07',
+            'Pod::Text::Termcap'    => '4.07',
         },
         removed => {
         }
@@ -13012,7 +13019,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
         removed => {
         }
     },
-    5.023010 => {
+    5.024000 => {
         delta_from => 5.023009,
         changed => {
         },
@@ -13789,7 +13796,7 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'TAP::Parser::SourceHandler::RawTAP'=> 'http://rt.cpan.org/Public/Dist/Display.html?Name=Test-Harness',
     'TAP::Parser::YAMLish::Reader'=> 'http://rt.cpan.org/Public/Dist/Display.html?Name=Test-Harness',
     'TAP::Parser::YAMLish::Writer'=> 'http://rt.cpan.org/Public/Dist/Display.html?Name=Test-Harness',
-    'Term::ANSIColor'       => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Term::ANSIColor',
+    'Term::ANSIColor'       => 'https://rt.cpan.org/Dist/Display.html?Name=Term-ANSIColor',
     'Term::Cap'             => undef,
     'Test::Builder'         => 'http://github.com/Test-More/test-more/issues/',
     'Test::Builder::IO::Scalar'=> 'http://github.com/Test-More/test-more/issues/',
