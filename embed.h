@@ -1777,6 +1777,11 @@
 #define mem_log_common		S_mem_log_common
 #    endif
 #  endif
+#  if defined(PERL_MEM_LOG)
+#define mem_log_alloc		Perl_mem_log_alloc
+#define mem_log_free		Perl_mem_log_free
+#define mem_log_realloc		Perl_mem_log_realloc
+#  endif
 #  if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
 #define pidgone(a,b)		S_pidgone(aTHX_ a,b)
 #  endif
