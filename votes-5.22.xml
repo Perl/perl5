@@ -51,8 +51,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
-<commit votes="steveh" id="48d9c42720bd6af3c245182872e858b5810fd003" ticket="" desc="don't test crypt()s tied fetch count if we don't have crypt()"/>
-<commit votes="steveh" id="dfe3adb55fc27cfdbdea35190eb5023e786b1466" ticket="" desc="note for detecting crypt() on Cygwin"/>
+<commit votes="steveh, jhi" id="48d9c42720bd6af3c245182872e858b5810fd003" ticket="" desc="don't test crypt()s tied fetch count if we don't have crypt()"/>
+<commit votes="steveh, jhi" id="dfe3adb55fc27cfdbdea35190eb5023e786b1466" ticket="" desc="note for detecting crypt() on Cygwin"/>
 
 </div>
 
