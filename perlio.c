@@ -387,11 +387,11 @@ PerlIO_debug(const char *fmt, ...)
 		PL_perlio_debug_fd
 		    = PerlLIO_open3(s, O_WRONLY | O_CREAT | O_APPEND, 0666);
 	    else
-		PL_perlio_debug_fd = -1;
+		PL_perlio_debug_fd = PerlLIO_dup(2); /* stderr */
 	} else {
-	    /* tainting or set*id, so ignore the environment, and ensure we
-	       skip these tests next time through.  */
-	    PL_perlio_debug_fd = -1;
+	    /* tainting or set*id, so ignore the environment and send the
+               debug output to stderr, like other -D switches.  */
+	    PL_perlio_debug_fd = PerlLIO_dup(2); /* stderr */
 	}
     }
     if (PL_perlio_debug_fd > 0) {

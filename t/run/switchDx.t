@@ -14,7 +14,7 @@ skip_all "DEBUGGING build required"
   unless $::Config{ccflags} =~ /DEBUGGING/
          or $^O eq 'VMS' && $::Config{usedebugging_perl} eq 'Y';
 
-plan tests => 6;
+plan tests => 8;
 
 END {
     unlink $perlio_log;
@@ -32,8 +32,19 @@ END {
     ok(-e $perlio_log, "... perlio debugging file found with -Di and PERLIO_DEBUG");
 
     unlink $perlio_log;
-    fresh_perl_is("print qq(hello\n)", "\nEXECUTING...\n\nhello\n",
+    fresh_perl_like("print qq(hello\n)", qr/define raw/,
                   { stderr => 1, switches => [ "-TDi" ] },
-                  "No perlio debug file with -T..");
+                  "Perlio debug output to stderr with -TDi (with PERLIO_DEBUG)...");
     ok(!-e $perlio_log, "...no perlio debugging file found");
 }
+
+{
+    local $ENV{PERLIO_DEBUG};
+    fresh_perl_like("print qq(hello)", qr/define raw/,
+                    { stderr => 1, switches => [ '-Di' ] },
+                   "-Di defaults to stderr");
+    fresh_perl_like("print qq(hello)", qr/define raw/,
+                    { stderr => 1, switches => [ '-TDi' ] },
+                   "Perlio debug output to STDERR with -TDi (no PERLIO_DEBUG)");
+}
+
