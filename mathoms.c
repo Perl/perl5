@@ -107,6 +107,9 @@ PERL_CALLCONV UV Perl_to_utf8_title(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp);
 PERL_CALLCONV UV Perl_to_utf8_upper(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp);
 PERL_CALLCONV UV Perl_to_utf8_fold(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp);
 PERL_CALLCONV SV *Perl_sv_mortalcopy(pTHX_ SV *const oldstr);
+PERL_CALLCONV char*	Perl_instr(const char* big, const char* little)
+			__attribute__warn_unused_result__
+			__attribute__pure__;
 
 /* ref() is now a macro using Perl_doref;
  * this version provided for binary compatibility only.
@@ -1808,6 +1811,23 @@ Perl_pad_compname_type(pTHX_ const PADOFFSET po)
     return PAD_COMPNAME_TYPE(po);
 }
 
+/* now a macro */
+/* return ptr to little string in big string, NULL if not found */
+/* This routine was donated by Corey Satten. */
+
+char *
+Perl_instr(const char *big, const char *little)
+{
+    /* Porting tests require this macro to be used even though it doesn't exist
+     * (except for the commented-out version in proto.h).  So provide a commented-out
+     * "use" of the prototype and supply a real version of what it expanded to.
+    PERL_ARGS_ASSERT_INSTR;
+    */
+    assert(big);
+    assert(little);
+
+    return strstr((char*)big, (char*)little);
+}
 
 END_EXTERN_C
 
