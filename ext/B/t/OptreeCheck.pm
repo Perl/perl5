@@ -5,7 +5,7 @@ use warnings;
 use vars qw($TODO $Level $using_open);
 require "test.pl";
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 # now export checkOptree, and those test.pl functions used by tests
 our @EXPORT = qw( checkOptree plan skip skip_all pass is like unlike
@@ -703,12 +703,12 @@ sub mkCheckRex {
 		 .*			# all sorts of things follow it
 		 v			# The opening v
 		)
-		(?:(:>,<,%,\\{)		# hints when open.pm is in force
+		(?:(:>,<,%,\\\{)		# hints when open.pm is in force
 		   |(:>,<,%))		# (two variations)
 		(\ ->(?:-|[0-9a-z]+))?
 		$
 	       ]
-	[$1 . ($2 && ':{') . $4]xegm;	# change to the hints without open.pm
+        [$1 . ($2 && ':\{') . $4]xegm;	# change to the hints without open.pm
     }
 
 
