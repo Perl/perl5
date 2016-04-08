@@ -164,6 +164,15 @@ L<The setlocale function>.
 
 =head2 The C<"use locale"> pragma
 
+WARNING!  Do NOT use this pragma in scripts that have multiple
+L<threads|threads> active.  The locale is not local to a single thread.
+Another thread may change the locale at any time, which could cause at a
+minimum that a given thread is operating in a locale it isn't expecting
+to be in.  On some platforms, segfaults can also occur.  The locale
+change need not be explicit; some operations cause perl to change the
+locale itself.  You are vulnerable simply by having done a C<"use
+locale">.
+
 By default, Perl itself (outside the L<POSIX> module)
 ignores the current locale.  The S<C<use locale>>
 pragma tells Perl to use the current locale for some operations.
@@ -389,6 +398,13 @@ this, as described in L</Unicode and UTF-8>.
 
 =head2 The setlocale function
 
+WARNING!  Do NOT use this function in a L<thread|threads>.  The locale
+will change in all other threads at the same time, and should your
+thread get paused by the operating system, and another started, that
+thread will not have the locale it is expecting.  On some platforms,
+there can be a race leading to segfaults if two threads call this
+function nearly simultaneously.
+
 You can switch locales as often as you wish at run time with the
 C<POSIX::setlocale()> function:
 
@@ -416,10 +432,6 @@ C<POSIX::setlocale()> function:
 
         # restore the old locale
         setlocale(LC_CTYPE, $old_locale);
-
-This simultaneously affects all threads of the program, so it may be
-problematic to use locales in threaded applications except where there
-is a single locale applicable to all threads.
 
 The first argument of C<setlocale()> gives the B<category>, the second the
 B<locale>.  The category tells in what aspect of data processing you

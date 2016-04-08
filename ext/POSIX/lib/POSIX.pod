@@ -1405,6 +1405,13 @@ see L<perlfunc/eval>.
 
 =item C<setlocale>
 
+WARNING!  Do NOT use this function in a L<thread|threads>.  The locale
+will change in all other threads at the same time, and should your
+thread get paused by the operating system, and another started, that
+thread will not have the locale it is expecting.  On some platforms,
+there can be a race leading to segfaults if two threads call this
+function nearly simultaneously.
+
 Modifies and queries the program's underlying locale.  Users of this
 function should read L<perllocale>, whch provides a comprehensive
 discussion of Perl locale handling, knowledge of which is necessary to

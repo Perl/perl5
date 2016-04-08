@@ -1,6 +1,6 @@
 package locale;
 
-our $VERSION = '1.08';
+our $VERSION = '1.09';
 use Config;
 
 $Carp::Internal{ (__PACKAGE__) } = 1;
@@ -8,6 +8,17 @@ $Carp::Internal{ (__PACKAGE__) } = 1;
 =head1 NAME
 
 locale - Perl pragma to use or avoid POSIX locales for built-in operations
+
+=head1 WARNING
+
+DO NOT USE this pragma in scripts that have multiple
+L<threads|threads> active.  The locale is not local to a single thread.
+Another thread may change the locale at any time, which could cause at a
+minimum that a given thread is operating in a locale it isn't expecting
+to be in.  On some platforms, segfaults can also occur.  The locale
+change need not be explicit; some operations cause perl to change the
+locale itself.  You are vulnerable simply by having done a C<"use
+locale">.
 
 =head1 SYNOPSIS
 
