@@ -1671,6 +1671,10 @@ for collating (comparing) strings transformed using
 the C<strxfrm()> function.  Not really needed since
 Perl can do this transparently, see L<perllocale>.
 
+Beware that in a UTF-8 locale, anything you pass to this function must
+be in UTF-8; and when not in a UTF-8 locale, anything passed must not be
+UTF-8 encoded.
+
 =item C<strcpy>
 
 Not implemented.  C<strcpy()> is C-specific, use C<=> instead, see L<perlop>.
@@ -1842,6 +1846,10 @@ Used in conjunction with the C<strcoll()> function, see L</strcoll>.
 
 Not really needed since Perl can do this transparently, see
 L<perllocale>.
+
+Beware that in a UTF-8 locale, anything you pass to this function must
+be in UTF-8; and when not in a UTF-8 locale, anything passed must not be
+UTF-8 encoded.
 
 =item C<sysconf>
 
