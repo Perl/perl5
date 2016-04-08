@@ -6127,17 +6127,20 @@ C<undef *foo>.
 (A) You've accidentally run your script through B<csh> instead of Perl.
 Check the #! line, or manually feed your script into Perl yourself.
 
-=item Unescaped left brace in regex is deprecated, passed through in regex;
+=item Unescaped left brace in regex is illegal in regex;
 marked by S<<-- HERE> in m/%s/
 
-(D deprecated, regexp) You used a literal C<"{"> character in a regular
-expression pattern.  You should change to use C<"\{"> instead, because a
-future version of Perl (tentatively v5.26) will consider this to be a
-syntax error.  If the pattern delimiters are also braces, any matching
+(F) You used a literal C<"{"> character in a regular
+expression pattern.  You should change to use C<"\{"> or C<[{]> instead.
+If the pattern delimiters are also braces, any matching
 right brace (C<"}">) should also be escaped to avoid confusing the parser,
 for example,
 
     qr{abc\{def\}ghi}
+
+This restriction is not enforced if the C<"{"> is the first character in
+the pattern; nor is a warning generated for this case, as there are no
+current plans to forbid it.
 
 =item unexec of %s into %s failed!
 

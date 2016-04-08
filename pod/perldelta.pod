@@ -32,6 +32,17 @@ L</Selected Bug Fixes> section.
 
 [ List each security issue as a =head2 entry ]
 
+=head2 Unescaped literal C<"{"> characters in regular expression
+patterns are no longer permissible
+
+You have to now say something like C<"\{"> or C<"[{]"> to specify to
+match a LEFT CURLY BRACKET.  This will allow future extensions to the
+language.  This restriction is not enforced, nor are there current plans
+to enforce it, if the C<"{"> is the first character in the pattern.
+
+These have been deprecated since v5.16, with a deprecation message
+displayed starting in v5.22.
+
 =head2 Literal control character variable names are no longer permissible
 
 A variable name may no longer contain a literal control character under

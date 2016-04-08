@@ -13190,14 +13190,13 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		    } /* End of switch on '\' */
 		    break;
 		case '{':
-		    /* Currently we don't warn when the lbrace is at the start
+		    /* Currently we don't care if the lbrace is at the start
 		     * of a construct.  This catches it in the middle of a
 		     * literal string, or when it's the first thing after
 		     * something like "\b" */
-		    if (! SIZE_ONLY
-			&& (len || (p > RExC_start && isALPHA_A(*(p -1)))))
-		    {
-			ckWARNregdep(p + 1, "Unescaped left brace in regex is deprecated, passed through");
+		    if (len || (p > RExC_start && isALPHA_A(*(p -1)))) {
+                        RExC_parse = p + 1;
+			vFAIL("Unescaped left brace in regex is illegal");
 		    }
 		    /*FALLTHROUGH*/
 		default:    /* A literal character */

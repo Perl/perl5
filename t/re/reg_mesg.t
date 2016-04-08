@@ -268,6 +268,10 @@ my @death =
  '/(?[\ |!])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[\ |!{#}])/',    # [perl #126180]
  '/(?[()-!])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[()-!{#}])/',    # [perl #126204]
  '/(?[!()])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[!(){#}])/',      # [perl #126404]
+ '/\w{/' => 'Unescaped left brace in regex is illegal {#} m/\w{{#}/',
+ '/\q{/' => 'Unescaped left brace in regex is illegal {#} m/\q{{#}/',
+ '/:{4,a}/' => 'Unescaped left brace in regex is illegal {#} m/:{{#}4,a}/',
+ '/xa{3\,4}y/' => 'Unescaped left brace in regex is illegal {#} m/xa{{#}3\,4}y/',
  '/abc/xix' => 'Only one /x regex modifier is allowed',
  '/(?xmsixp:abc)/' => 'Only one /x regex modifier is allowed {#} m/(?xmsixp{#}:abc)/',
  '/(?xmsixp)abc/' => 'Only one /x regex modifier is allowed {#} m/(?xmsixp{#})abc/',
@@ -617,12 +621,6 @@ my @experimental_regex_sets = (
 );
 
 my @deprecated = (
-    '/\w{/' => 'Unescaped left brace in regex is deprecated, passed through {#} m/\w{{#}/',
-    '/\q{/' => [
-                 'Unrecognized escape \q{ passed through {#} m/\q{{#}/',
-                 'Unescaped left brace in regex is deprecated, passed through {#} m/\q{{#}/'
-               ],
-    '/:{4,a}/' => 'Unescaped left brace in regex is deprecated, passed through {#} m/:{{#}4,a}/',
 );
 
 for my $strict ("", "use re 'strict';") {
