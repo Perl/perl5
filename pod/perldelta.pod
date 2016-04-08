@@ -231,13 +231,6 @@ L<[perl #125540]|https://rt.perl.org/Ticket/Display.html?id=125540>
 
 =item *
 
-Caching of C<DESTROY> methods could result in a non-pointer or a non-STASH
-stored in the C<SvSTASH()> slot of a stash, breaking the L<B> C<STASH()>
-method.  The C<DESTROY> method is now cached in the MRO metadata for the stash.
-L<[perl #126410]|https://rt.perl.org/Ticket/Display.html?id=126410>
-
-=item *
-
 Avoid parsing beyond the end of the buffer when processing a C<#line> directive
 with no filename.
 L<[perl #127334]|https://rt.perl.org/Ticket/Display.html?id=127334>
