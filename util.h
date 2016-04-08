@@ -229,8 +229,6 @@ means arg not present, 1 is empty string/null byte */
 #  define HS_CXT cv
 #endif
 
-#define instr(haystack, needle) strstr(haystack, needle)
-
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

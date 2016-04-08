@@ -647,7 +647,7 @@ p	|void	|init_debugger
 Ap	|void	|init_stacks
 Ap	|void	|init_tm	|NN struct tm *ptm
 : Used in perly.y
-AbmnpPR	|char*	|instr		|NN const char* big|NN const char* little
+AnpPR	|char*	|instr		|NN const char* big|NN const char* little
 : Used in sv.c
 p	|bool	|io_close	|NN IO* io|NULLOK GV *gv \
 				|bool not_implicit|bool warn_on_fail
