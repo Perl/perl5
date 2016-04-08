@@ -1244,9 +1244,9 @@ PERL_CALLCONV void	Perl_init_stacks(pTHX);
 PERL_CALLCONV void	Perl_init_tm(pTHX_ struct tm *ptm);
 #define PERL_ARGS_ASSERT_INIT_TM	\
 	assert(ptm)
-PERL_CALLCONV char*	Perl_instr(const char* big, const char* little)
+/* PERL_CALLCONV char*	Perl_instr(const char* big, const char* little)
 			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__pure__; */
 #define PERL_ARGS_ASSERT_INSTR	\
 	assert(big); assert(little)
 
