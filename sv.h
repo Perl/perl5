@@ -2111,12 +2111,15 @@ See also C<L</PL_sv_yes>> and C<L</PL_sv_no>>.
 
 #ifdef PERL_ANY_COW
 # define SvGROW(sv,len) \
-	(SvIsCOW(sv) || SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX(sv))
+        (SvIsCOW(sv) || SvLEN(sv) < ((len)+2) ? sv_grow(sv,(len)+2) : SvPVX(sv))
+# define SvGROW_mutable(sv,len) \
+    (SvLEN(sv) < ((len)+2) ? sv_grow(sv,(len)+2) : SvPVX_mutable(sv))
 #else
-# define SvGROW(sv,len) (SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX(sv))
+# define SvGROW(sv,len) \
+    (SvLEN(sv) < ((len)+1) ? sv_grow(sv,(len)+1) : SvPVX(sv))
+# define SvGROW_mutable(sv,len) \
+    (SvLEN(sv) < ((len)+1) ? sv_grow(sv,(len)+1) : SvPVX_mutable(sv))
 #endif
-#define SvGROW_mutable(sv,len) \
-    (SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX_mutable(sv))
 #define Sv_Grow sv_grow
 
 #define CLONEf_COPY_STACKS 1
