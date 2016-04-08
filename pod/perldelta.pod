@@ -74,15 +74,34 @@ below.
 
 L<File::Spec> has been upgraded from version 3.56 to 3.56_01.
 
+C<canonpath()> now preserves taint.  See L</"Fix loss of taint in C<canonpath()>">.
+
 =item *
 
 L<Module::CoreList> has been upgraded from version 5.20151213 to 5.20160410.
+
+The version number of L<Digest::SHA> listed for Perl 5.18.4 was wrong and has
+been corrected.  Likewise for the version number of L<Config> in 5.18.3 and
+5.18.4.
+L<[perl #127624]|https://rt.perl.org/Ticket/Display.html?id=127624>
 
 =back
 
 =head1 Documentation
 
 =head2 Changes to Existing Documentation
+
+=head3 L<perldiag>
+
+=over 4
+
+=item *
+
+The explanation of the warning "unable to close filehandle %s properly: %s"
+which can occur when doing an implicit close of a filehandle has been expanded
+and improved.
+
+=back
 
 =head3 L<perlfunc>
 
@@ -114,6 +133,14 @@ F<Configure> no longer probes for F<libnm> by default.  Originally this was the
 
 L<[perl #127131]|https://rt.perl.org/Ticket/Display.html?id=127131>
 
+=item *
+
+F<Configure> now knows about gcc 5.
+
+=item *
+
+Compiling perl with B<-DPERL_MEM_LOG> now works again.
+
 =back
 
 =head1 Platform Support
@@ -122,14 +149,20 @@ L<[perl #127131]|https://rt.perl.org/Ticket/Display.html?id=127131>
 
 =over 4
 
-=item ppc64el floating point
+=item Darwin
+
+Compiling perl with B<-Dusecbacktrace> on Darwin now works again.
+
+L<[perl #127764]|https://rt.perl.org/Ticket/Display.html?id=127764>
+
+=item ppc64el
 
 The floating point format of ppc64el (Debian naming for little-endian PowerPC)
 is now detected correctly.
 
 =item OS X/Darwin
 
-Builds with both C<-DDEBUGGING> and threading enabled would fail with a "panic:
+Builds with both B<-DDEBUGGING> and threading enabled would fail with a "panic:
 free from wrong pool" error when built or tested from Terminal on OS X.  This
 was caused by perl's internal management of the environment conflicting with an
 atfork handler using the libc C<setenv()> function to update the environment.
@@ -137,6 +170,10 @@ atfork handler using the libc C<setenv()> function to update the environment.
 Perl now uses C<setenv()>/C<unsetenv()> to update the environment on OS X.
 
 L<[perl #126240]|https://rt.perl.org/Ticket/Display.html?id=126240>
+
+=item Tru64
+
+A test failure in F<t/porting/extrefs.t> has been fixed.
 
 =back
 
@@ -229,12 +266,17 @@ L<[perl #126325]|https://rt.perl.org/Ticket/Display.html?id=126325>
 
 Fixed some cases where perl would abort due to a segmentation fault, or a
 C-level assert.
-L<[perl #126602]|https://rt.perl.org/Ticket/Display.html?id=126602>
 L<[perl #126193]|https://rt.perl.org/Ticket/Display.html?id=126193>
+L<[perl #126257]|https://rt.perl.org/Ticket/Display.html?id=126257>
+L<[perl #126258]|https://rt.perl.org/Ticket/Display.html?id=126258>
+L<[perl #126405]|https://rt.perl.org/Ticket/Display.html?id=126405>
+L<[perl #126602]|https://rt.perl.org/Ticket/Display.html?id=126602>
+L<[perl #127773]|https://rt.perl.org/Ticket/Display.html?id=127773>
+L<[perl #127786]|https://rt.perl.org/Ticket/Display.html?id=127786>
 
 =item *
 
-Avoid leaking memory when setting C<$ENV{foo}> on darwin.
+Avoid leaking memory when setting C<$ENV{foo}> on Darwin.
 L<[perl #126240]|https://rt.perl.org/Ticket/Display.html?id=126240>
 
 =item *
@@ -259,6 +301,19 @@ L<[perl #127533]|https://rt.perl.org/Ticket/Display.html?id=127533>
 A regression that allowed undeclared barewords as hash keys to work despite
 strictures has been fixed.
 L<[perl #126981]|https://rt.perl.org/Ticket/Display.html?id=126981>
+
+=item *
+
+As an optimization, C<uc()>, C<lc()>, C<ucfirst()> and C<lcfirst()> sometimes
+modify their argument in-place rather than returning a modified copy, as of
+Perl 5.20.0.  The critera for this optimization has been made stricter to avoid
+these functions accidentally modifying in-place when they should not, which has
+been happening in some cases, e.g. in L<List::Util>.
+
+=item *
+
+A problem with excessive memory usage in the compilation of some regular
+expressions involving non-ASCII characters has been alleviated.
 
 =back
 
