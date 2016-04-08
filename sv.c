@@ -6890,31 +6890,25 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
 	  assert(SvTYPE(stash) == SVt_PVHV);
 	  if (HvNAME(stash)) {
 	    CV* destructor = NULL;
-            struct mro_meta *meta;
 	    assert (SvOOK(stash));
-
-            DEBUG_o( Perl_deb(aTHX_ "Looking for DESTROY method for %s\n",
-                         HvNAME(stash)) );
-
-            /* don't make this an initialization above the assert, since it needs
-               an AUX structure */
-            meta = HvMROMETA(stash);
-            if (meta->destroy_gen && meta->destroy_gen == PL_sub_generation) {
-                destructor = meta->destroy;
-                DEBUG_o( Perl_deb(aTHX_ "Using cached DESTROY method %p for %s\n",
-                             (void *)destructor, HvNAME(stash)) );
-            }
-            else {
+	    if (!SvOBJECT(stash)) destructor = (CV *)SvSTASH(stash);
+	    if (!destructor || HvMROMETA(stash)->destroy_gen
+				!= PL_sub_generation)
+	    {
 		GV * const gv =
 		    gv_fetchmeth_autoload(stash, "DESTROY", 7, 0);
 		if (gv) destructor = GvCV(gv);
-                meta->destroy_gen = PL_sub_generation;
-                meta->destroy = destructor;
-                DEBUG_o( Perl_deb(aTHX_ "Set cached DESTROY method %p for %s\n",
-                             (void *)destructor, HvNAME(stash)) );
+		if (!SvOBJECT(stash))
+		{
+		    SvSTASH(stash) =
+			destructor ? (HV *)destructor : ((HV *)0)+1;
+		    HvAUX(stash)->xhv_mro_meta->destroy_gen =
+			PL_sub_generation;
+		}
 	    }
-	    assert(!destructor || SvTYPE(destructor) == SVt_PVCV);
-	    if (destructor
+	    assert(!destructor || destructor == ((CV *)0)+1
+		|| SvTYPE(destructor) == SVt_PVCV);
+	    if (destructor && destructor != ((CV *)0)+1
 		/* A constant subroutine can have no side effects, so
 		   don't bother calling it.  */
 		&& !CvCONST(destructor)

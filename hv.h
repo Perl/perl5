@@ -82,7 +82,6 @@ struct mro_meta {
     const struct mro_alg *mro_which; /* which mro alg is in use? */
     HV      *isa;            /* Everything this class @ISA */
     HV      *super;          /* SUPER method cache */
-    CV      *destroy;        /* DESTROY method if destroy_gen non-zero */
     U32     destroy_gen;     /* Generation number of DESTROY cache */
 };
 
