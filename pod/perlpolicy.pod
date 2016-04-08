@@ -120,8 +120,8 @@ beyond our 3 year support commitment.  We can provide limited support and
 advice to you as you do so and, where possible will try to apply
 those patches to the relevant -maint branches in git, though we may or
 may not choose to make numbered releases or "official" patches
-available.  Contact us at E<lt>perl5-security-report@perl.orgE<gt>
-to begin that process.
+available. See L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details on how to begin that process.
 
 =back
 
@@ -274,8 +274,8 @@ not also fall into any of the "unacceptable" categories set out below:
 =item *
 
 Patches that fix CVEs or security issues.  These changes should
-be run through the perl5-security-report@perl.org mailing list
-rather than applied directly.
+be passed using the security reporting mechanism rather than applied
+directly; see L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>.
 
 =item *
 
