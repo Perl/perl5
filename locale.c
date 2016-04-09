@@ -486,6 +486,7 @@ Perl_new_collate(pTHX_ const char *newcoll)
 	PL_collxfrm_base = 0;
 	PL_collxfrm_mult = 2;
         PL_in_utf8_COLLATE_locale = FALSE;
+        *PL_strxfrm_min_char = '\0';
 	return;
     }
 
@@ -500,6 +501,7 @@ Perl_new_collate(pTHX_ const char *newcoll)
         }
 
         PL_in_utf8_COLLATE_locale = _is_cur_LC_category_utf8(LC_COLLATE);
+        *PL_strxfrm_min_char = '\0';
 
         /* A locale collation definition includes primary, secondary, tertiary,
          * etc. weights for each character.  To sort, the primary weights are
@@ -1295,12 +1297,135 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
  */
 
 char *
-Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
+Perl_mem_collxfrm(pTHX_ const char *input_string,
+                         STRLEN len,
+                         STRLEN *xlen
+                   )
 {
+    char * s = (char *) input_string;
+    STRLEN s_strlen = strlen(input_string);
     char *xbuf;
-    STRLEN xAlloc, xin, xout; /* xalloc is a reserved word in VC */
+    STRLEN xAlloc, xout; /* xalloc is a reserved word in VC */
 
     PERL_ARGS_ASSERT_MEM_COLLXFRM;
+
+    /* Replace any embedded NULs with the control that sorts before any others.
+     * This will give as good as possible results on strings that don't
+     * otherwise contain that character, but otherwise there may be
+     * less-than-perfect results with that character and NUL.  This is
+     * unavoidable unless we replace strxfrm with our own implementation.
+     *
+     * XXX This code may be overkill.  khw wrote it before realizing that if
+     * you change a NUL into some other character, that that may change the
+     * strxfrm results if that character is part of a sequence with other
+     * characters for weight calculations.  To minimize the chances of this,
+     * now the replacement is restricted to another control (likely to be
+     * \001).  But the full generality has been retained.
+     *
+     * This is one of the few places in the perl core, where we can use
+     * standard functions like strlen() and strcat().  It's because we're
+     * looking for NULs. */
+    if (s_strlen < len) {
+        char * e = s + len;
+        char * sans_nuls;
+        STRLEN cur_min_char_len;
+
+        /* If we don't know what control character sorts lowest for this
+         * locale, find it */
+        if (*PL_strxfrm_min_char == '\0') {
+            int j;
+            char * cur_min_x = NULL;    /* Cur cp's xfrm, (except it also
+                                           includes the collation index
+                                           prefixed. */
+
+            /* Look through all legal code points (NUL isn't) */
+            for (j = 1; j < 256; j++) {
+                char * x;       /* j's xfrm plus collation index */
+                STRLEN x_len;   /* length of 'x' */
+                STRLEN trial_len = 1;
+
+                /* Create a 1 byte string of the current code point, but with
+                 * room to be 2 bytes */
+                char cur_source[] = { (char) j, '\0' , '\0' };
+
+                if (PL_in_utf8_COLLATE_locale) {
+                    if (! isCNTRL_L1(j)) {
+                        continue;
+                    }
+
+                    /* If needs to be 2 bytes, find them */
+                    if (! UVCHR_IS_INVARIANT(j)) {
+                        continue;  /* Can't handle variants yet */
+                    }
+                }
+                else if (! isCNTRL_LC(j)) {
+                    continue;
+                }
+
+                /* Then transform it */
+                x = mem_collxfrm(cur_source, trial_len, &x_len);
+
+                /* If something went wrong (which it shouldn't), just
+                 * ignore this code point */
+                if (   x_len == 0
+                    || strlen(x + sizeof(PL_collation_ix)) < x_len)
+                {
+                    continue;
+                }
+
+                /* If this character's transformation is lower than
+                 * the current lowest, this one becomes the lowest */
+                if (   cur_min_x == NULL
+                    || strLT(x         + sizeof(PL_collation_ix),
+                             cur_min_x + sizeof(PL_collation_ix)))
+                {
+                    strcpy(PL_strxfrm_min_char, cur_source);
+                    cur_min_x = x;
+                }
+                else {
+                    Safefree(x);
+                }
+            } /* end of loop through all bytes */
+
+            /* Unlikely, but possible, if there aren't any controls in the
+             * locale, arbitrarily use \001 */
+            if (cur_min_x == NULL) {
+                STRLEN x_len;   /* temporary */
+                cur_min_x = mem_collxfrm("\001", 1, &x_len);
+                /* cur_min_cp was already initialized to 1 */
+            }
+
+            Safefree(cur_min_x);
+        }
+
+        /* The worst case length for the replaced string would be if every
+         * character in it is NUL.  Multiply that by the length of each
+         * replacement, and allow for a trailing NUL */
+        cur_min_char_len = strlen(PL_strxfrm_min_char);
+        Newx(sans_nuls, (len * cur_min_char_len) + 1, char);
+        *sans_nuls = '\0';
+
+
+        /* Replace each NUL with the lowest collating control.  Loop until have
+         * exhausted all the NULs */
+        while (s + s_strlen < e) {
+            strcat(sans_nuls, s);
+
+            /* Do the actual replacement */
+            strcat(sans_nuls, PL_strxfrm_min_char);
+
+            /* Move past the input NUL */
+            s += s_strlen + 1;
+            s_strlen = strlen(s);
+        }
+
+        /* And add anything that trails the final NUL */
+        strcat(sans_nuls, s);
+
+        /* Switch so below we transform this modified string */
+        s = sans_nuls;
+        len = strlen(s);
+    }
 
     /* The first element in the output is the collation id, used by
      * sv_collxfrm(); then comes the space for the transformed string.  The
@@ -1316,17 +1441,16 @@ Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
 
     /* Then the transformation of the input.  We loop until successful, or we
      * give up */
-    for (xin = 0; xin < len; ) {
-	Size_t xused;
-
 	for (;;) {
-	    xused = strxfrm(xbuf + xout, s + xin, xAlloc - xout);
+            STRLEN xused = strxfrm(xbuf + xout, s, xAlloc - xout);
 
             /* If the transformed string occupies less space than we told
              * strxfrm() was available, it means it successfully transformed
              * the whole string. */
-	    if ((STRLEN)xused < xAlloc - xout)
+	    if (xused < xAlloc - xout) {
+                xout += xused;
 		break;
+            }
 
 	    if (UNLIKELY(xused >= PERL_INT_MAX))
 		goto bad;
@@ -1340,19 +1464,20 @@ Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
 		goto bad;
 	}
 
-	xin += strlen(s + xin) + 1;
-	xout += xused;
+    *xlen = xout - sizeof(PL_collation_ix);
 
-	/* Embedded NULs are understood but silently skipped
-	 * because they make no sense in locale collation. */
+
+    if (s != input_string) {
+        Safefree(s);
     }
 
-    xbuf[xout] = '\0';
-    *xlen = xout - sizeof(PL_collation_ix);
     return xbuf;
 
   bad:
     Safefree(xbuf);
+    if (s != input_string) {
+        Safefree(s);
+    }
     *xlen = 0;
     return NULL;
 }

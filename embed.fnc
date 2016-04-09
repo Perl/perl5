@@ -909,7 +909,7 @@ Ap	|I32 *	|markstack_grow
 #if defined(USE_LOCALE_COLLATE)
 p	|int	|magic_setcollxfrm|NN SV* sv|NN MAGIC* mg
 : Defined in locale.c, used only in sv.c
-p	|char*	|mem_collxfrm	|NN const char* s|STRLEN len|NN STRLEN* xlen
+p	|char*	|mem_collxfrm	|NN const char* input_string|STRLEN len|NN STRLEN* xlen
 #endif
 Afpd	|SV*	|mess		|NN const char* pat|...
 Apd	|SV*	|mess_sv	|NN SV* basemsg|bool consume

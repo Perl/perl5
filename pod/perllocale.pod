@@ -1567,13 +1567,14 @@ called, and whatever it does is what you get.
 
 =head2 Collation of strings containing embedded C<NUL> characters
 
-Perl handles C<NUL> characters in the middle of strings.  In many
-locales, control characters are ignored unless the strings otherwise
-compare equal.  Unlike other control characters, C<NUL> characters are
-never ignored.   For example, if given that C<"b"> sorts after
-C<"\001">, and C<"c"> sorts after C<"b">, C<"a\0c"> always sorts before
-C<"ab">.  This is true even in locales in which C<"ab"> sorts before
-C<"a\001c">.
+C<NUL> characters will sort the same as the lowest collating control
+character does, or to C<"\001"> in the unlikely event that there are no
+control characters at all in the locale.  In cases where the strings
+don't contain this non-C<NUL> control, the results will be correct, and
+in many locales, this control, whatever it might be, will rarely be
+encountered.  But there are cases where a C<NUL> should sort before this
+control, but doesn't.  If two strings do collate identically, the one
+containing the C<NUL> will sort to earlier.
 
 =head2 Broken systems
 

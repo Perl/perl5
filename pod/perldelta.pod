@@ -27,6 +27,14 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Better locale collation of strings containing embedded C<NUL>
+characters
+
+In locales that have multi-level character weights, these are now
+ignored at the higher priority ones.  There are still some gotchas in
+some strings, though.  See
+L<perllocale/Collation of strings containing embedded C<NUL> characters>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

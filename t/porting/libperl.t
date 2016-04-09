@@ -527,6 +527,13 @@ for my $symbol (sort keys %unexpected) {
       SKIP: {
         skip("uses sprintf for Gconvert in sv.o");
       }
+    }
+    elsif (   $symbol eq 'strcat'
+           && @o == 1 && $o[0] eq 'locale.o')
+    {
+      SKIP: {
+        skip("locale.o legitimately uses strcat");
+      }
     } else {
         is(@o, 0, "uses no $symbol (@o)");
     }

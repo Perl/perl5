@@ -1740,7 +1740,7 @@ foreach my $Locale (@Locale) {
 
         ++$locales_test_number;
         $test_names{$locales_test_number}
-            = 'TODO Skip in locales where \001 has primary sorting weight; '
+            = 'Skip in locales where \001 has primary sorting weight; '
             . 'otherwise verify that \0 doesn\'t have primary sorting weight';
         if ("a\001c" lt "ab") {
             report_result($Locale, $locales_test_number, 1);
@@ -1749,6 +1749,19 @@ foreach my $Locale (@Locale) {
             my $ok = "ab" lt "a\0c";
             report_result($Locale, $locales_test_number, $ok);
         }
+
+        ++$locales_test_number;
+        $test_names{$locales_test_number}
+                            = 'TODO Verify that strings with embedded NUL collate';
+        my $ok = "a\0a\0a" lt "a\001a\001a";
+        report_result($Locale, $locales_test_number, $ok);
+
+        ++$locales_test_number;
+        $test_names{$locales_test_number}
+                            = 'TODO Verify that strings with embedded NUL and '
+                            . 'extra trailing NUL collate';
+        $ok = "a\0a\0" lt "a\001a\001";
+        report_result($Locale, $locales_test_number, $ok);
     }
 
     my $ok1;
