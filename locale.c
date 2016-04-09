@@ -1809,13 +1809,21 @@ Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
 
 char *
 Perl_my_strerror(pTHX_ const int errnum) {
+    dVAR;
 
     /* Uses C locale for the error text unless within scope of 'use locale' for
      * LC_MESSAGES */
 
 #ifdef USE_LOCALE_MESSAGES
     if (! IN_LC(LC_MESSAGES)) {
-        char * save_locale = setlocale(LC_MESSAGES, NULL);
+        char * save_locale;
+
+        /* We have a critical section to prevent another thread from changing
+         * the locale out from under us (or zapping the buffer returned from
+         * setlocale() ) */
+        LOCALE_LOCK;
+
+        save_locale = setlocale(LC_MESSAGES, NULL);
         if (! isNAME_C_OR_POSIX(save_locale)) {
             char *errstr;
 
@@ -1830,8 +1838,13 @@ Perl_my_strerror(pTHX_ const int errnum) {
 
             setlocale(LC_MESSAGES, save_locale);
             Safefree(save_locale);
+
+            LOCALE_UNLOCK;
+
             return errstr;
         }
+
+        LOCALE_UNLOCK;
     }
 #endif
 

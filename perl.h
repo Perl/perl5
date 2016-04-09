@@ -5958,6 +5958,9 @@ typedef struct am_table_short AMTS;
 #   define LOCALE_INIT   MUTEX_INIT(&PL_locale_mutex)
 #   define LOCALE_TERM   MUTEX_DESTROY(&PL_locale_mutex)
 
+#   define LOCALE_LOCK   MUTEX_LOCK(&PL_locale_mutex)
+#   define LOCALE_UNLOCK MUTEX_UNLOCK(&PL_locale_mutex)
+
 /* Returns TRUE if the plain locale pragma without a parameter is in effect
  */
 #   define IN_LOCALE_RUNTIME	cBOOL(CopHINTS_get(PL_curcop) & HINT_LOCALE)
@@ -6043,6 +6046,8 @@ typedef struct am_table_short AMTS;
 #else   /* No locale usage */
 #   define LOCALE_INIT
 #   define LOCALE_TERM
+#   define LOCALE_LOCK
+#   define LOCALE_UNLOCK
 #   define IN_LOCALE_RUNTIME                0
 #   define IN_SOME_LOCALE_FORM_RUNTIME      0
 #   define IN_LOCALE_COMPILETIME            0

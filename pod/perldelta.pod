@@ -341,7 +341,10 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+A race condition which occurred when computing C<"$!"> with threads
+activated has been fixed.  This showed up only on Darwin platforms.  A
+related problem on Cygwin platforms involving UTF-8 strings has also
+been fixed.  [perl #127708]
 
 =back
 
