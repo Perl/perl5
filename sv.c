@@ -8139,13 +8139,18 @@ Perl_sv_collxfrm_flags(pTHX_ SV *const sv, STRLEN *const nxp, const I32 flags)
     PERL_ARGS_ASSERT_SV_COLLXFRM_FLAGS;
 
     mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_collxfrm) : (MAGIC *) NULL;
+
+    /* If we don't have collation magic on 'sv', or the locale has changed
+     * since the last time we calculated it, get it and save it now */
     if (!mg || !mg->mg_ptr || *(U32*)mg->mg_ptr != PL_collation_ix) {
 	const char *s;
 	char *xf;
 	STRLEN len, xlen;
 
+        /* Free the old space */
 	if (mg)
 	    Safefree(mg->mg_ptr);
+
 	s = SvPV_flags_const(sv, len, flags);
 	if ((xf = mem_collxfrm(s, len, &xlen))) {
 	    if (! mg) {
@@ -8163,6 +8168,7 @@ Perl_sv_collxfrm_flags(pTHX_ SV *const sv, STRLEN *const nxp, const I32 flags)
 	    }
 	}
     }
+
     if (mg && mg->mg_ptr) {
 	*nxp = mg->mg_len;
 	return mg->mg_ptr + sizeof(PL_collation_ix);

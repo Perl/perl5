@@ -359,7 +359,7 @@ Perl_new_ctype(pTHX_ const char *newctype)
 
 #ifdef MB_CUR_MAX
         /* We only handle single-byte locales (outside of UTF-8 ones; so if
-         * this locale requires than one byte, there are going to be
+         * this locale requires more than one byte, there are going to be
          * problems. */
         if (check_for_problems && MB_CUR_MAX > 1
 
@@ -459,7 +459,21 @@ Perl_new_collate(pTHX_ const char *newcoll)
      * Any code changing the locale (outside this file) should use
      * POSIX::setlocale, which calls this function.  Therefore this function
      * should be called directly only from this file and from
-     * POSIX::setlocale() */
+     * POSIX::setlocale().
+     *
+     * The design of locale collation is that every locale change is given an
+     * index 'PL_collation_ix'.  The first time a string particpates in an
+     * operation that requires collation while locale collation is active, it
+     * is given PERL_MAGIC_collxfrm magic (via sv_collxfrm_flags()).  That
+     * magic includes the collation index, and the transformation of the string
+     * by strxfrm(), q.v.  That transformation is used when doing comparisons,
+     * instead of the string itself.  If a string changes, the magic is
+     * cleared.  The next time the locale changes, the index is incremented,
+     * and so we know during a comparison that the transformation is not
+     * necessarily still valid, and so is recomputed.  Note that if the locale
+     * changes enough times, the index could wrap (a U32), and it is possible
+     * that a transformation would improperly be considered valid, leading to
+     * an unlikely bug */
 
     if (! newcoll) {
 	if (PL_collation_name) {
@@ -473,6 +487,7 @@ Perl_new_collate(pTHX_ const char *newcoll)
 	return;
     }
 
+    /* If this is not the same locale as currently, set the new one up */
     if (! PL_collation_name || strNE(PL_collation_name, newcoll)) {
 	++PL_collation_ix;
 	Safefree(PL_collation_name);
@@ -480,6 +495,32 @@ Perl_new_collate(pTHX_ const char *newcoll)
 	PL_collation_standard = isNAME_C_OR_POSIX(newcoll);
 
 	{
+            /* A locale collation definition includes primary, secondary,
+             * tertiary, etc. weights for each character.  To sort, the primary
+             * weights are used, and only if they compare equal, then the
+             * secondary weights are used, and only if they compare equal, then
+             * the tertiary, etc.  strxfrm() works by taking the input string,
+             * say ABC, and creating an output string consisting of first the
+             * primary weights, A¹B¹C¹ followed by the secondary ones, A²B²C²;
+             * and then the tertiary, etc, yielding A¹B¹C¹A²B²C²A³B³C³....
+             * Some characters may not have weights at every level.  In our
+             * example, let's say B doesn't have a tertiary weight, and A
+             * doesn't have a secondary weight.  The constructed string is then
+             * going to be A¹B¹C¹B²C²A³C³....  This has the desired
+             * characteristics that strcmp() will look at the secondary or
+             * tertiary weights only if the strings compare equal at all higher
+             * priority weights.  The length of the transformed string is
+             * roughly a linear function of the input string.  It's not exactly
+             * linear because some characters don't have weights at all levels,
+             * and there are some complications, so there is often per-string
+             * overhead.  When we call strxfrm() we have to allocate some
+             * memory to hold the transformed string.  The calculations below
+             * try to find constants for this locale 'm' and 'b' so that m*x +
+             * b equals how much space we need given the size of the input
+             * string in 'x'.  If we calculate too small, we increase the size
+             * as needed, and call strxfrm() again, but it is better to get it
+             * right the first time to avoid wasted expensive string
+             * transformations. */
 	  /*  2: at most so many chars ('a', 'b'). */
 	  /* 50: surely no system expands a char more. */
 #define XFRMBUFSIZE  (2 * 50)
@@ -1226,6 +1267,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
  * differences. First, it handles embedded NULs. Second, it allocates
  * a bit more memory than needed for the transformed data itself.
  * The real transformed data begins at offset sizeof(collationix).
+ * *xlen is set to the length of that, and doesn't include the collation index
+ * size.
  * Please see sv_collxfrm() to see how this is used.
  */
 
@@ -1245,18 +1288,30 @@ Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
     if (UNLIKELY(! xbuf))
 	goto bad;
 
+    /* Store the collation id */
     *(U32*)xbuf = PL_collation_ix;
     xout = sizeof(PL_collation_ix);
+
+    /* Then the transformation of the input.  We loop until successful, or we
+     * give up */
     for (xin = 0; xin < len; ) {
 	Size_t xused;
 
 	for (;;) {
 	    xused = strxfrm(xbuf + xout, s + xin, xAlloc - xout);
+
+            /* If the transformed string occupies less space than we told
+             * strxfrm() was available, it means it successfully transformed
+             * the whole string. */
 	    if ((STRLEN)xused < xAlloc - xout)
 		break;
 
 	    if (UNLIKELY(xused >= PERL_INT_MAX))
 		goto bad;
+
+            /* Otherwise it should be that the transformation stopped in the
+             * middle because it ran out of space.  Malloc more, and try again.
+             * */
 	    xAlloc = (2 * xAlloc) + 1;
 	    Renew(xbuf, xAlloc, char);
 	    if (UNLIKELY(! xbuf))
