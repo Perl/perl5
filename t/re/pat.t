@@ -1762,12 +1762,12 @@ EOP
             # [perl #127855] Slowdown in m//g on COW strings of certain lengths
             my $elapsed= -time;
             my $len= 4e6;
-            my $zeros= 10000;
+            my $zeros= 40000;
             my $str= ( "0" x $zeros ) . ( "1" x ( $len - $zeros ) );
             my $substr= substr( $str, 1 );
             1 while $substr=~m/0/g;
             $elapsed += time;
-            ok( $elapsed < 1, "should not COW on long string with substr and m//g");
+            ok( $elapsed <= 1, "should not COW on long string with substr and m//g");
         }
 } # End of sub run_tests
 
