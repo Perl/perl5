@@ -493,19 +493,23 @@ sub process_puts {
     for my $p (reverse @_) {
         push @putargs, $p and next if $p =~ /^-/; # not-perl, dont send to qx//
 
-        my ($perl, $label) = split /=/, $p, 2;
+        my ($perl, $label, $env) = split /[=:,]/, $p, 3;
         $label //= $perl;
         $label = $perl.$label if $label =~ /^\+/;
         die "$label cannot be used on 2 different PUTs\n" if $seen{$label}++;
 
+        my %env;
+        if ($env) {
+            %env = split /[=,]/, $env;
+        }
         my $r = qx($perl -e 'print qq(ok\n)' 2>&1);
         if ($r eq "ok\n") {
-	    push @res_puts, [ $perl, $label, reverse @putargs ];
+	    push @res_puts, [ $perl, $label, \%env, reverse @putargs ];
             @putargs = ();
             warn "Added Perl-Under-Test: [ @{[@{$res_puts[-1]}]} ]\n"
                 if $OPTS{verbose};
 	} else {
-            warn "putargs: @putargs + $p, a not-perl: $r\n"
+            warn "PUT-args: @putargs + a not-perl: $p $r\n"
                 if $OPTS{verbose};
             push @putargs, $p; # not-perl
 	}
@@ -725,14 +729,18 @@ sub grind_run {
         );
 
         for my $p (@$perls) {
-            my ($perl, $label, @putargs) = @$p;
+            my ($perl, $label, $env, @putargs) = @$p;
 
             # Run both the empty loop and the active loop
             # $counts->[0] and $counts->[1] times.
 
             for my $i (0,1) {
                 for my $j (0,1) {
-                    my $cmd = "PERL_HASH_SEED=0 "
+                    my $envstr = '';
+                    if (ref $env) {
+                        $envstr .= "$_=$env->{$_} " for sort keys %$env;
+                    }
+                    my $cmd = "PERL_HASH_SEED=0 $envstr"
                             . "valgrind --tool=cachegrind  --branch-sim=yes "
                             . "--cachegrind-out-file=/dev/null "
                             . "$OPTS{grindargs} "
