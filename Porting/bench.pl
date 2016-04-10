@@ -482,9 +482,12 @@ sub select_a_perl {
 
 sub process_perls {
     my @results;
+    my %seen;
     for my $p (@_) {
         my ($perl, $label) = split /=/, $p, 2;
         $label //= $perl;
+        die "$label cannot be used on 2 different PUTs\n" if $seen{$label}++;
+
         my $r = qx($perl -e 'print qq(ok\n)' 2>&1);
         die "Error: unable to execute '$perl': $r" if $r ne "ok\n";
         push @results, [ $perl, $label ];
