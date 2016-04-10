@@ -1465,6 +1465,8 @@ Perl_mem_collxfrm(pTHX_ const char *input_string,
 
     *xlen = xout - sizeof(PL_collation_ix);
 
+    /* Free up unneeded space; retain ehough for trailing NUL */
+    Renew(xbuf, xout + 1, char);
 
     if (s != input_string) {
         Safefree(s);
