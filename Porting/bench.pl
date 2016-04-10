@@ -728,7 +728,7 @@ sub grind_run {
                             . "$OPTS{grindargs} "
                             . "$perl $OPTS{perlargs} @putargs - $counts->[$j] 2>&1";
                     # for debugging and error messages
-                    my $id = "$test/$perl "
+                    my $id = "$test/$label "
                         . ($i ? "active" : "empty") . "/"
                         . ($j ? "long"   : "short") . " loop";
 
@@ -856,7 +856,7 @@ sub grind_run {
                     . "Output\n$o";
             }
 
-            $results{$j->{test}}{$j->{perl}}[$j->{active}][$j->{loopix}]
+            $results{$j->{test}}{$j->{plabel}}[$j->{active}][$j->{loopix}]
                     = parse_cachegrind($output, $j->{id}, $j->{perl});
         }
 
