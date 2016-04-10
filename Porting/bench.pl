@@ -482,11 +482,11 @@ sub select_a_perl {
 }
 
 
-# Validate the list of perl=label on the command line.
-# Return a list of [ exe, label ] pairs.
+# Validate the list of perl=label (+ cmdline options) on the command line.
+# Return a list of [ exe, label, cmdline-options ] tuples, ie PUTs
 
 sub process_puts {
-    my @results;
+    my @res_puts; # returned, each item is [ perlexe, label, @putargs ]
     my %seen;
     my @putargs; # collect not-perls into args per PUT
 
@@ -499,13 +499,17 @@ sub process_puts {
 
         my $r = qx($perl -e 'print qq(ok\n)' 2>&1);
         if ($r eq "ok\n") {
-	    push @results, [ $perl, $label, reverse @putargs ];
+	    push @res_puts, [ $perl, $label, reverse @putargs ];
             @putargs = ();
+            warn "Added Perl-Under-Test: [ @{[@{$res_puts[-1]}]} ]\n"
+                if $OPTS{verbose};
 	} else {
+            warn "putargs: @putargs + $p, a not-perl: $r\n"
+                if $OPTS{verbose};
             push @putargs, $p; # not-perl
 	}
     }
-    return reverse @results;
+    return reverse @res_puts;
 }
 
 
