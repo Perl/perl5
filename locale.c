@@ -1441,28 +1441,27 @@ Perl_mem_collxfrm(pTHX_ const char *input_string,
 
     /* Then the transformation of the input.  We loop until successful, or we
      * give up */
-	for (;;) {
-            STRLEN xused = strxfrm(xbuf + xout, s, xAlloc - xout);
+    for (;;) {
+        STRLEN xused = strxfrm(xbuf + xout, s, xAlloc - xout);
 
-            /* If the transformed string occupies less space than we told
-             * strxfrm() was available, it means it successfully transformed
-             * the whole string. */
-	    if (xused < xAlloc - xout) {
-                xout += xused;
-		break;
-            }
+        /* If the transformed string occupies less space than we told strxfrm()
+         * was available, it means it successfully transformed the whole
+         * string. */
+        if (xused < xAlloc - xout) {
+            xout += xused;
+            break;
+        }
 
-	    if (UNLIKELY(xused >= PERL_INT_MAX))
-		goto bad;
+        if (UNLIKELY(xused >= PERL_INT_MAX))
+            goto bad;
 
-            /* Otherwise it should be that the transformation stopped in the
-             * middle because it ran out of space.  Malloc more, and try again.
-             * */
-	    xAlloc = (2 * xAlloc) + 1;
-	    Renew(xbuf, xAlloc, char);
-	    if (UNLIKELY(! xbuf))
-		goto bad;
-	}
+        /* Otherwise it should be that the transformation stopped in the middle
+         * because it ran out of space.  Malloc more, and try again.  */
+        xAlloc = (2 * xAlloc) + 1;
+        Renew(xbuf, xAlloc, char);
+        if (UNLIKELY(! xbuf))
+            goto bad;
+    }
 
     *xlen = xout - sizeof(PL_collation_ix);
 
