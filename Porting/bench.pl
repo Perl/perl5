@@ -704,7 +704,7 @@ sub grind_run {
         );
 
         for my $p (@$perls) {
-            my ($perl, $label) = @$p;
+            my ($perl, $label, @putargs) = @$p;
 
             # Run both the empty loop and the active loop
             # $counts->[0] and $counts->[1] times.
@@ -715,7 +715,7 @@ sub grind_run {
                             . "valgrind --tool=cachegrind  --branch-sim=yes "
                             . "--cachegrind-out-file=/dev/null "
                             . "$OPTS{grindargs} "
-                            . "$perl $OPTS{perlargs} - $counts->[$j] 2>&1";
+                            . "$perl $OPTS{perlargs} @putargs - $counts->[$j] 2>&1";
                     # for debugging and error messages
                     my $id = "$test/$perl "
                         . ($i ? "active" : "empty") . "/"
