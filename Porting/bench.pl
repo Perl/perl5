@@ -417,7 +417,9 @@ sub filter_tests {
     else {
         my %t;
         for (split /,/, $opt) {
-            die "Error: no such test found: '$_'\n" unless exists $tests->{$_};
+            die "Error: no such test found: '$_'\n"
+                . ($OPTS{verbose} ? "  have: @{[ sort keys %$tests ]}\n" : "")
+                unless exists $tests->{$_};
             $t{$_} = 1;
         }
         for (keys %$tests) {
