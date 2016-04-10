@@ -495,6 +495,7 @@ sub process_puts {
 
         my ($perl, $label) = split /=/, $p, 2;
         $label //= $perl;
+        $label = $perl.$label if $label =~ /^\+/;
         die "$label cannot be used on 2 different PUTs\n" if $seen{$label}++;
 
         my $r = qx($perl -e 'print qq(ok\n)' 2>&1);
