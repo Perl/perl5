@@ -26,10 +26,10 @@ L<[perl #126862]|https://rt.perl.org/Ticket/Display.html?id=126862>.
 
 =head2 Set proper umask before calling C<mkstemp(3)>
 
-In 5.22 perl started setting umask to C<0600> before calling C<mkstemp(3)> and
-restoring it afterwards.  This wrongfully tells C<open(2)> to strip the owner
-read and write bits from the given mode before applying it, rather than the
-intended negation of leaving only those bits in place.
+In 5.22.0 perl started setting umask to C<0600> before calling C<mkstemp(3)>
+and restoring it afterwards.  This wrongfully tells C<open(2)> to strip the
+owner read and write bits from the given mode before applying it, rather than
+the intended negation of leaving only those bits in place.
 
 Systems that use mode C<0666> in C<mkstemp(3)> (like old versions of glibc)
 create a file with permissions C<0066>, leaving world read and write permissions
@@ -41,28 +41,28 @@ L<[perl #127322]|https://rt.perl.org/Ticket/Display.html?id=127322>
 
 =head2 Avoid accessing uninitialized memory in Win32 C<crypt()>
 
-Added validation that will detect both a short salt and invalid characters in
-the salt.
+Validation that will detect both a short salt and invalid characters in the
+salt has been added.
 
 L<[perl #126922]|https://rt.perl.org/Ticket/Display.html?id=126922>
 
 =head2 Remove duplicate environment variables from C<environ>
 
 Previously, if an environment variable appeared more than once in C<environ[]>,
-C<%ENV> would contain the last entry for that name, while a typical C<getenv()>
-would return the first entry.  We now make sure C<%ENV> contains the same as
-what C<getenv()> returns.
+L<C<%ENV>|perlvar/%ENV> would contain the last entry for that name, while a
+typical C<getenv()> would return the first entry.  We now make sure C<%ENV>
+contains the same as what C<getenv()> returns.
 
-Second, we remove duplicates from C<environ[]>, so if a setting with that name
-is set in C<%ENV> we won't pass an unsafe value to a child process.
+Secondly, we now remove duplicates from C<environ[]>, so if a setting with that
+name is set in C<%ENV> we won't pass an unsafe value to a child process.
 
 This is CVE-2016-2381.
 
 =head1 Incompatible Changes
 
-There are no changes intentionally incompatible with 5.22.1.  If any exist,
-they are bugs, and we request that you submit a report.  See L</Reporting Bugs>
-below.
+There are no changes intentionally incompatible with Perl 5.22.1.  If any
+exist, they are bugs, and we request that you submit a report.  See
+L</Reporting Bugs> below.
 
 =head1 Modules and Pragmata
 
@@ -74,7 +74,8 @@ below.
 
 L<File::Spec> has been upgraded from version 3.56 to 3.56_01.
 
-C<canonpath()> now preserves taint.  See L</"Fix loss of taint in C<canonpath()>">.
+C<canonpath()> now preserves taint.  See L</"Fix loss of taint in
+C<canonpath()>">.
 
 =item *
 
@@ -109,7 +110,8 @@ and improved.
 
 =item *
 
-The documentation of C<hex()> has been revised to clarify valid inputs.
+The documentation of L<C<hex()>|perlfunc/hex> has been revised to clarify valid
+inputs.
 
 =back
 
@@ -155,11 +157,6 @@ Compiling perl with B<-Dusecbacktrace> on Darwin now works again.
 
 L<[perl #127764]|https://rt.perl.org/Ticket/Display.html?id=127764>
 
-=item ppc64el
-
-The floating point format of ppc64el (Debian naming for little-endian PowerPC)
-is now detected correctly.
-
 =item OS X/Darwin
 
 Builds with both B<-DDEBUGGING> and threading enabled would fail with a "panic:
@@ -170,6 +167,11 @@ atfork handler using the libc C<setenv()> function to update the environment.
 Perl now uses C<setenv()>/C<unsetenv()> to update the environment on OS X.
 
 L<[perl #126240]|https://rt.perl.org/Ticket/Display.html?id=126240>
+
+=item ppc64el
+
+The floating point format of ppc64el (Debian naming for little-endian PowerPC)
+is now detected correctly.
 
 =item Tru64
 
@@ -183,10 +185,10 @@ A test failure in F<t/porting/extrefs.t> has been fixed.
 
 =item *
 
-Remove unwarranted assertion in C<Perl_newATTRSUB_x()>.  If a stub subroutine
-definition with a prototype has been seen, then any subsequent stub (or
-definition) of the same subroutine with an attribute was causing an assertion
-failure because of a null pointer.
+An unwarranted assertion in C<Perl_newATTRSUB_x()> has been removed.  If a stub
+subroutine definition with a prototype has been seen, then any subsequent stub
+(or definition) of the same subroutine with an attribute was causing an
+assertion failure because of a null pointer.
 
 L<[perl #126845]|https://rt.perl.org/Ticket/Display.html?id=126845>
 
@@ -204,9 +206,10 @@ L<[perl #126042]|https://rt.perl.org/Ticket/Display.html?id=126042>
 
 =item *
 
-The C<pipe()> operator would assert for C<DEBUGGING> builds instead of
-producing the correct error message.  The condition asserted on is detected and
-reported on correctly without the assertions, so the assertions were removed.
+The L<C<pipe()>|perlfunc/pipe> operator would assert for C<DEBUGGING> builds
+instead of producing the correct error message.  The condition asserted on is
+detected and reported on correctly without the assertions, so the assertions
+were removed.
 L<[perl #126480]|https://rt.perl.org/Ticket/Display.html?id=126480>
 
 =item *
@@ -217,8 +220,8 @@ L<[perl #126443]|https://rt.perl.org/Ticket/Display.html?id=126443>
 
 =item *
 
-Report more context when we see an array where we expect to see an operator and
-avoid an assertion failure.
+Perl now reports more context when it sees an array where it expects to see an
+operator, and avoids an assertion failure.
 L<[perl #123737]|https://rt.perl.org/Ticket/Display.html?id=123737>
 
 =item *
@@ -231,14 +234,14 @@ L<[perl #125540]|https://rt.perl.org/Ticket/Display.html?id=125540>
 
 =item *
 
-Avoid parsing beyond the end of the buffer when processing a C<#line> directive
-with no filename.
+Parsing beyond the end of the buffer when processing a C<#line> directive with
+no filename is now avoided.
 L<[perl #127334]|https://rt.perl.org/Ticket/Display.html?id=127334>
 
 =item *
 
-Perl 5.22 added support to the C99 hexadecimal floating point notation, but
-sometimes misparses hex floats.  This had been fixed.
+Perl 5.22.0 added support for the C99 hexadecimal floating point notation, but
+sometimes misparsed hex floats.  This has been fixed.
 L<[perl #127183]|https://rt.perl.org/Ticket/Display.html?id=127183>
 
 =item *
@@ -251,8 +254,9 @@ L<[perl #127537]|https://rt.perl.org/Ticket/Display.html?id=127537>
 
 =item *
 
-Fixed an issue with C<pack()> where C<< pack "H" >> (and C<< pack "h" >>) could
-read past the source when given a non-utf8 source and a utf8 target.
+Fixed an issue with L<C<pack()>|perlfunc/pack> where C<< pack "H" >> (and
+C<< pack "h" >>) could read past the source when given a non-utf8 source and a
+utf8 target.
 L<[perl #126325]|https://rt.perl.org/Ticket/Display.html?id=126325>
 
 =item *
@@ -269,24 +273,26 @@ L<[perl #127786]|https://rt.perl.org/Ticket/Display.html?id=127786>
 
 =item *
 
-Avoid leaking memory when setting C<$ENV{foo}> on Darwin.
+A memory leak when setting C<$ENV{foo}> on Darwin has been fixed.
 L<[perl #126240]|https://rt.perl.org/Ticket/Display.html?id=126240>
 
 =item *
 
-Correctly raise an error when trying to compile patterns with unterminated
-character classes while there are trailing backslashes.
+Perl now correctly raises an error when trying to compile patterns with
+unterminated character classes while there are trailing backslashes.
 L<[perl #126141]|https://rt.perl.org/Ticket/Display.html?id=126141>
 
 =item *
 
-Handle C<NOTHING> regops and C<EXACTFU_SS> regops in C<make_trie()> properly.
+C<NOTHING> regops and C<EXACTFU_SS> regops in C<make_trie()> are now handled
+properly.
 L<[perl #126206]|https://rt.perl.org/Ticket/Display.html?id=126206>
 
 =item *
 
-Only test C<semctl()> if we have everything needed to use it.  In a FreeBSD the
-C<semctl()> entry point may exist, but it can be disabled by policy.
+Perl now only tests C<semctl()> if we have everything needed to use it.  In
+FreeBSD the C<semctl()> entry point may exist, but it can be disabled by
+policy.
 L<[perl #127533]|https://rt.perl.org/Ticket/Display.html?id=127533>
 
 =item *
@@ -297,16 +303,19 @@ L<[perl #126981]|https://rt.perl.org/Ticket/Display.html?id=126981>
 
 =item *
 
-As an optimization, C<uc()>, C<lc()>, C<ucfirst()> and C<lcfirst()> sometimes
-modify their argument in-place rather than returning a modified copy, as of
-Perl 5.20.0.  The critera for this optimization has been made stricter to avoid
-these functions accidentally modifying in-place when they should not, which has
-been happening in some cases, e.g. in L<List::Util>.
+As an optimization (introduced in Perl 5.20.0), L<C<uc()>|perlfunc/uc>,
+L<C<lc()>|perlfunc/lc>, L<C<ucfirst()>|perlfunc/ucfirst> and
+L<C<lcfirst()>|perlfunc/lcfirst> sometimes modify their argument in-place
+rather than returning a modified copy.  The criteria for this optimization has
+been made stricter to avoid these functions accidentally modifying in-place
+when they should not, which has been happening in some cases, e.g. in
+L<List::Util>.
 
 =item *
 
-A problem with excessive memory usage in the compilation of some regular
-expressions involving non-ASCII characters has been alleviated.
+Excessive memory usage in the compilation of some regular expressions involving
+non-ASCII characters has been reduced.  A more complete fix is forthcoming in
+Perl 5.24.0.
 
 =back
 
