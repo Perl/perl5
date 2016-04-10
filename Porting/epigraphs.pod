@@ -299,6 +299,40 @@ L<Announced on 2015-06-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   They sing while you slave and I just get bored
   I ain't gonna work on Maggie's farm no more
 
+=head2 v5.22.2-RC1 - Gaston Leroux, trans. Mireille Ribière, "The Phantom of the Opera"
+
+L<Announced on 2016-04-10 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2016/04/msg235732.html>
+
+This annual ball was quite a magnificent affair.  It was given some time
+before Shrovetide to celebrate the birthday of a famous illustrator
+whose pencil had immortalized, in the style of Gavarni, the extravagant
+carnival parade down La Courtille.  As such, the ball was an altogether
+merrier, noisier and more Bohemian occasion than was usual for a masked
+ball.  Many artists had arranged to meet there; they arrived with an
+entourage of models and pupils, who, by midnight, had become quite
+boisterous.
+Raoul climbed the grand staircase at five minutes to midnight.  He did
+not linger to admire the many-coloured costumes on display all the way
+up the marble steps of one of the most luxurious settings in the world;
+nor did he allow himself to be drawn into the facetious conversation of
+masked guests.  He simply ignored all the jesting remarks, and shook off
+the attentions of several all too merry couples.
+Crossing the big crush-room and escaping from the dancers' farandole
+that had encircled him awhile, he at last entered the salon mentioned by
+Christine in her letter.  The small room was crammed with people either
+on their way to supper at the restaurant in the Rotunda or back from
+raising a glass of champagne.
+In the midst of the gay and lively hubbub, Raoul thought that, for their
+mysterious assignation, Christine must have preferred this crowd to some
+lonely corner.
+He leaned against a door-jamb and waited.  He did not have to wait long;
+a black domino passed him and deftly touched his hand.  He understood
+that it was Christine and followed her.
+'Is that you, Christine?' he murmured, barely moving his slips.
+The black domino promptly looked back and raised her finger to her lips,
+no doubt to caution him against uttering her name again.  Raoul followed
+on in silence.
+
 =head2 v5.22.1 - Wilhelm Müller, trans. Anon., "Courage" (No. 22 in Schubert's song-cycle, "Winterreise")
 
 L<Announced on 2015-12-13 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2015/12/msg233318.html>
