@@ -14,7 +14,12 @@ perls.
     # Basic: run the tests in t/perf/benchmarks against two or
     # more perls
 
-    bench.pl [options] perl1[=label1] perl2[=label2] ...
+    bench.pl [options] -- perlA[=labelA] perlB[=labelB] ...
+
+    # run the tests against same perlA 2x, with and without extra
+    # options
+
+    bench.pl [options] -- perlA=fast PerlA=slow -Mstrict -Dpsltoc 
 
     # Run bench.pl's own built-in sanity tests
 
@@ -140,8 +145,8 @@ It defaults to the leftmost column.
 
 --perlargs=I<foo>
 
-Optional command-line arguments to pass to each perl that is run as part of
-a cachegrind session. For example, C<--perlargs=-Ilib>.
+Optional command-line arguments to pass to each perl-under-test
+(perlA, perlB in synopsis) For example, C<--perlargs=-Ilib>.
 
 =item *
 
