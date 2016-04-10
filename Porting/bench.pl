@@ -209,7 +209,7 @@ Requires C<JSON::PP> to be available.
 use 5.010000;
 use warnings;
 use strict;
-use Getopt::Long qw(:config no_auto_abbrev);
+use Getopt::Long qw(:config no_auto_abbrev require_order);
 use IPC::Open2 ();
 use IO::Select;
 use IO::File;
@@ -227,7 +227,7 @@ my %VALID_FIELDS = map { $_ => 1 }
 
 sub usage {
     die <<EOF;
-usage: $0 [options] perl[=label] ...
+usage: $0 [options] -- perl[=label] ...
   --action=foo       What action to perform [default: grind].
   --average          Only display average, not individual test results.
   --benchfile=foo    File containing the benchmarks;
@@ -480,19 +480,27 @@ sub select_a_perl {
 # Validate the list of perl=label on the command line.
 # Return a list of [ exe, label ] pairs.
 
-sub process_perls {
+sub process_puts {
     my @results;
     my %seen;
-    for my $p (@_) {
+    my @putargs; # collect not-perls into args per PUT
+
+    for my $p (reverse @_) {
+        push @putargs, $p and next if $p =~ /^-/; # not-perl, dont send to qx//
+
         my ($perl, $label) = split /=/, $p, 2;
         $label //= $perl;
         die "$label cannot be used on 2 different PUTs\n" if $seen{$label}++;
 
         my $r = qx($perl -e 'print qq(ok\n)' 2>&1);
-        die "Error: unable to execute '$perl': $r" if $r ne "ok\n";
-        push @results, [ $perl, $label ];
+        if ($r eq "ok\n") {
+	    push @results, [ $perl, $label, reverse @putargs ];
+            @putargs = ();
+	} else {
+            push @putargs, $p; # not-perl
+	}
     }
-    return @results;
+    return reverse @results;
 }
 
 
@@ -620,7 +628,7 @@ sub do_grind {
         die "Error: only a single test may be specified with --bisect\n"
             if defined $OPTS{bisect} and keys %$tests != 1;
 
-        $perls = [ process_perls(@$perl_args) ];
+        $perls = [ process_puts(@$perl_args) ];
 
 
         $results = grind_run($tests, $order, $perls, $loop_counts);
