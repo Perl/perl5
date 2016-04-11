@@ -6,7 +6,7 @@
 #	Windows SDK 64-bit compiler and tools
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl523.dll).  Also makes individual DLLs for the XS extensions.
+# (perl524.dll).  Also makes individual DLLs for the XS extensions.
 #
 
 ##
@@ -44,7 +44,7 @@ INST_TOP	*= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-#INST_VER	*= \5.23.10
+#INST_VER	*= \5.24.0
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -212,7 +212,7 @@ CCTYPE		*= GCC
 # set this to additionally provide a statically linked perl-static.exe.
 # Note that dynamic loading will not work with this perl, so you must
 # include required modules statically using the STATIC_EXT or ALL_STATIC
-# variables below. A static library perl523s.lib will also be created.
+# variables below. A static library perl524s.lib will also be created.
 # Ordinary perl.exe is not affected by this option.
 #
 #BUILD_STATIC	*= define
@@ -846,8 +846,8 @@ UTILS		=			\
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
-PERLIMPLIB	= $(COREDIR)\libperl523$(a)
-PERLSTATICLIB	= ..\libperl523s$(a)
+PERLIMPLIB	= $(COREDIR)\libperl524$(a)
+PERLSTATICLIB	= ..\libperl524s$(a)
 INT64		= long long
 
 .ELSE
@@ -860,10 +860,10 @@ INT64		= __int64
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-PERLIMPLIB	*= $(COREDIR)\perl523$(a)
-PERLEXPLIB	*= $(COREDIR)\perl523.exp
-PERLSTATICLIB	*= ..\perl523s$(a)
-PERLDLL		= ..\perl523.dll
+PERLIMPLIB	*= $(COREDIR)\perl524$(a)
+PERLEXPLIB	*= $(COREDIR)\perl524.exp
+PERLSTATICLIB	*= ..\perl524s$(a)
+PERLDLL		= ..\perl524.dll
 
 #EUMM on Win32 isn't ready for parallel make, so only allow this file to be parallel
 #$(MAKE) will contain the -P that this makefile was called with, which is bad for
@@ -1511,7 +1511,7 @@ utils: $(HAVEMINIPERL) ..\utils\Makefile
 	copy ..\README.tw       ..\pod\perltw.pod
 	copy ..\README.vos      ..\pod\perlvos.pod
 	copy ..\README.win32    ..\pod\perlwin32.pod
-	copy ..\pod\perldelta.pod ..\pod\perl52310delta.pod
+	copy ..\pod\perldelta.pod ..\pod\perl5240delta.pod
 	$(MINIPERL) -I..\lib $(PL2BAT) $(UTILS)
 	$(MINIPERL) -I..\lib ..\autodoc.pl ..
 	$(MINIPERL) -I..\lib ..\pod\perlmodlib.PL -q ..
@@ -1608,7 +1608,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-cd $(PODDIR) && del /f *.html *.bat roffitall \
-	    perl52310delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
+	    perl5240delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
 	    perlapi.pod perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \
 	    perldos.pod perlfreebsd.pod perlhaiku.pod perlhpux.pod \
 	    perlhurd.pod perlintern.pod perlirix.pod perljp.pod perlko.pod \

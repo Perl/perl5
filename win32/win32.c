@@ -4529,6 +4529,7 @@ Perl_win32_term(void)
     OP_REFCNT_TERM;
     PERLIO_TERM;
     MALLOC_TERM;
+    LOCALE_TERM;
 #ifndef WIN32_NO_REGISTRY
     /* handles might be NULL, RegCloseKey then returns ERROR_INVALID_HANDLE
        but no point of checking and we can't die() at this point */
