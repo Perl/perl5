@@ -545,18 +545,96 @@ Perl_new_collate(pTHX_ const char *newcoll)
          * transformations. */
 
 	{
-	  /*  2: at most so many chars ('a', 'b'). */
-	  /* 50: surely no system expands a char more. */
-#define XFRMBUFSIZE  (2 * 50)
-	  char xbuf[XFRMBUFSIZE];
-	  const Size_t fa = strxfrm(xbuf, "a",  XFRMBUFSIZE);
-	  const Size_t fb = strxfrm(xbuf, "ab", XFRMBUFSIZE);
-	  const SSize_t mult = fb - fa;
-	  if (mult < 1 && !(fa == 0 && fb == 0))
-	      Perl_croak(aTHX_ "panic: strxfrm() gets absurd - a => %"UVuf", ab => %"UVuf,
-			 (UV) fa, (UV) fb);
-	  PL_collxfrm_base = (fa > (Size_t)mult) ? (fa - mult) : 0;
-	  PL_collxfrm_mult = mult;
+            /* We use the string below to find how long the tranformation of it
+             * is.  Almost all locales are supersets of ASCII, or at least the
+             * ASCII letters.  We use all of them, half upper half lower,
+             * because if we used fewer, we might hit just the ones that are
+             * outliers in a particular locale.  Most of the strings being
+             * collated will contain a preponderance of letters, and even if
+             * they are above-ASCII, they are likely to have the same number of
+             * weight levels as the ASCII ones.  It turns out that digits tend
+             * to have fewer levels, and some punctuation has more, but those
+             * are relatively sparse in text, and khw believes this gives a
+             * reasonable result, but it could be changed if experience so
+             * dictates. */
+            const char longer[] = "ABCDEFGHIJKLMnopqrstuvwxyz";
+            char * x_longer;        /* Transformed 'longer' */
+            Size_t x_len_longer;    /* Length of 'x_longer' */
+
+            char * x_shorter;   /* We also transform a substring of 'longer' */
+            Size_t x_len_shorter;
+
+            /* mem_collxfrm() is used get the transformation (though here we
+             * are interested only in its length).  It is used because it has
+             * the intelligence to handle all cases, but to work, it needs some
+             * values of 'm' and 'b' to get it started.  For the purposes of
+             * this calculation we use a very conservative estimate of 'm' and
+             * 'b'.  This assumes a weight can be multiple bytes, enough to
+             * hold any UV on the platform, and there are 5 levels, 4 weight
+             * bytes, and a trailing NUL.  */
+            PL_collxfrm_base = 5;
+            PL_collxfrm_mult = 5 * sizeof(UV);
+
+            /* Find out how long the transformation really is */
+            x_longer = mem_collxfrm(longer,
+                                    sizeof(longer) - 1,
+                                    &x_len_longer);
+            Safefree(x_longer);
+
+            /* Find out how long the transformation of a substring of 'longer'
+             * is.  Together the lengths of these transformations are
+             * sufficient to calculate 'm' and 'b'.  The substring is all of
+             * 'longer' except the first character.  This minimizes the chances
+             * of being swayed by outliers */
+            x_shorter = mem_collxfrm(longer + 1,
+                                      sizeof(longer) - 2,
+                                      &x_len_shorter);
+            Safefree(x_shorter);
+
+            /* If the results are nonsensical for this simple test, the whole
+             * locale definition is suspect.  Mark it so that locale collation
+             * is not active at all for it.  XXX Should we warn? */
+            if (   x_len_shorter == 0
+                || x_len_longer == 0
+                || x_len_shorter >= x_len_longer)
+            {
+                PL_collxfrm_mult = 0;
+                PL_collxfrm_base = 0;
+            }
+            else {
+                SSize_t base;       /* Temporary */
+
+                /* We have both:    m * strlen(longer)  + b = x_len_longer
+                 *                  m * strlen(shorter) + b = x_len_shorter;
+                 * subtracting yields:
+                 *          m * (strlen(longer) - strlen(shorter))
+                 *                             = x_len_longer - x_len_shorter
+                 * But we have set things up so that 'shorter' is 1 byte smaller
+                 * than 'longer'.  Hence:
+                 *          m = x_len_longer - x_len_shorter
+                 *
+                 * But if something went wrong, make sure the multiplier is at
+                 * least 1.
+                 */
+                if (x_len_longer > x_len_shorter) {
+                    PL_collxfrm_mult = (STRLEN) x_len_longer - x_len_shorter;
+                }
+                else {
+                    PL_collxfrm_mult = 1;
+                }
+
+                /*     mx + b = len
+                 * so:      b = len - mx
+                 * but in case something has gone wrong, make sure it is
+                 * non-negative */
+                base = x_len_longer - PL_collxfrm_mult * (sizeof(longer) - 1);
+                if (base < 0) {
+                    base = 0;
+                }
+
+                /* Add 1 for the trailing NUL */
+                PL_collxfrm_base = base + 1;
+            }
 	}
     }
 
@@ -1304,11 +1382,16 @@ Perl_mem_collxfrm(pTHX_ const char *input_string,
 {
     char * s = (char *) input_string;
     STRLEN s_strlen = strlen(input_string);
-    char *xbuf;
+    char *xbuf = NULL;
     STRLEN xAlloc, xout; /* xalloc is a reserved word in VC */
     bool first_time = TRUE; /* Cleared after first loop iteration */
 
     PERL_ARGS_ASSERT_MEM_COLLXFRM;
+
+    /* If this locale has defective collation, skip */
+    if (PL_collxfrm_base == 0 && PL_collxfrm_mult == 0) {
+        goto bad;
+    }
 
     /* Replace any embedded NULs with the control that sorts before any others.
      * This will give as good as possible results on strings that don't
@@ -1506,7 +1589,6 @@ Perl_mem_collxfrm(pTHX_ const char *input_string,
 }
 
 #endif /* USE_LOCALE_COLLATE */
-
 #ifdef USE_LOCALE
 
 bool

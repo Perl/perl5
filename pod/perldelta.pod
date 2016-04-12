@@ -339,7 +339,8 @@ well.
 
 =item *
 
-XXX
+Perl no longer panics when switching into some locales on machines with
+buggy C<strxfrm()> implementations in their libc. [perl #121734]
 
 =back
 

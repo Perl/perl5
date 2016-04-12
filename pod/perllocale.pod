@@ -820,6 +820,9 @@ that a UTF-8 locale likely will just give you machine-native ordering.
 Use L<Unicode::Collate> for the full implementation of the Unicode
 Collation Algorithm.
 
+If Perl detects that there are problems with the locale collation order,
+it reverts to using non-locale collation rules for that locale.
+
 If you have a single string that you want to check for "equality in
 locale" against several others, you might think you could gain a little
 efficiency by using C<POSIX::strxfrm()> in conjunction with C<eq>:
