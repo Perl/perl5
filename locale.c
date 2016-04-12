@@ -1306,6 +1306,7 @@ Perl_mem_collxfrm(pTHX_ const char *input_string,
     STRLEN s_strlen = strlen(input_string);
     char *xbuf;
     STRLEN xAlloc, xout; /* xalloc is a reserved word in VC */
+    bool first_time = TRUE; /* Cleared after first loop iteration */
 
     PERL_ARGS_ASSERT_MEM_COLLXFRM;
 
@@ -1455,12 +1456,33 @@ Perl_mem_collxfrm(pTHX_ const char *input_string,
         if (UNLIKELY(xused >= PERL_INT_MAX))
             goto bad;
 
-        /* Otherwise it should be that the transformation stopped in the middle
-         * because it ran out of space.  Malloc more, and try again.  */
-        xAlloc = (2 * xAlloc) + 1;
+        /* A well-behaved strxfrm() returns exactly how much space it needs
+         * (not including the trailing NUL) when it fails due to not enough
+         * space being provided.  Assume that this is the case unless it's been
+         * proven otherwise */
+        if (LIKELY(PL_strxfrm_is_behaved) && first_time) {
+            xAlloc = xused + sizeof(PL_collation_ix) + 1;
+        }
+        else { /* Here, either:
+                *  1)  The strxfrm() has previously shown bad behavior; or
+                *  2)  It isn't the first time through the loop, which means
+                *      that the strxfrm() is now showing bad behavior, because
+                *      we gave it what it said was needed in the previous
+                *      iteration, and it came back saying it needed still more.
+                *      (Many versions of cygwin fit this.  When the buffer size
+                *      isn't sufficient, they return the input size instead of
+                *      how much is needed.)
+                * Increase the buffer size by a fixed percentage and try again. */
+            xAlloc = (2 * xAlloc) + 1;
+            PL_strxfrm_is_behaved = FALSE;
+        }
+
+
         Renew(xbuf, xAlloc, char);
         if (UNLIKELY(! xbuf))
             goto bad;
+
+        first_time = FALSE;
     }
 
     *xlen = xout - sizeof(PL_collation_ix);
