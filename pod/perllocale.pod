@@ -41,9 +41,9 @@ for EBCDIC platforms.
 L<http://cldr.unicode.org/> which includes more types of information than
 are available in the POSIX locale system.  At the time of this writing,
 there was no CPAN module that provides access to this XML-encoded data.
-However, many of its locales have the POSIX-only data extracted, and are
-available as UTF-8 locales at
-L<http://unicode.org/Public/cldr/latest/>.)
+However, it is possible to compute the POSIX locale data from them, and
+earlier CLDR versions had these already extracted for you as UTF-8 locales
+L<http://unicode.org/Public/cldr/2.0.1/>.)
 
 =head1 WHAT IS A LOCALE
 
@@ -1377,7 +1377,10 @@ system's implementation of the locale system than by Perl.
 The Unicode CLDR project extracts the POSIX portion of many of its
 locales, available at
 
-  http://unicode.org/Public/cldr/latest/
+  http://unicode.org/Public/cldr/2.0.1/
+
+(Newer versions of CLDR require you to compute the POSIX data yourself.
+See L<http://unicode.org/Public/cldr/latest/>.)
 
 There is a large collection of locale definitions at:
 
@@ -1458,7 +1461,10 @@ multi-byte:
 The only multi-byte (or wide character) locale that Perl is ever likely
 to support is UTF-8.  This is due to the difficulty of implementation,
 the fact that high quality UTF-8 locales are now published for every
-area of the world (L<http://unicode.org/Public/cldr/latest/>), and that
+area of the world (L<http://unicode.org/Public/cldr/2.0.1/> for
+ones that are already set-up, but from an earlier version;
+L<http://unicode.org/Public/cldr/latest/> for the most up-to-date, but
+you have to extract the POSIX information yourself), and that
 failing all that you can use the L<Encode> module to translate to/from
 your locale.  So, you'll have to do one of those things if you're using
 one of these locales, such as Big5 or Shift JIS.  For UTF-8 locales, in
