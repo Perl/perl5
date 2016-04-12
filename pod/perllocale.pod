@@ -768,7 +768,7 @@ The following subsections describe basic locale categories.  Beyond these,
 some combination categories allow manipulation of more than one
 basic category at a time.  See L<"ENVIRONMENT"> for a discussion of these.
 
-=head2 Category C<LC_COLLATE>: Collation
+=head2 Category C<LC_COLLATE>: Collation: Text Comparisons and Sorting
 
 In the scope of a S<C<use locale>> form that includes collation, Perl
 looks to the C<LC_COLLATE>
@@ -975,7 +975,7 @@ to crack.
 
 See also L<I18N::Langinfo> and C<CRNCYSTR>.
 
-=head2 C<LC_TIME>
+=head2 Category C<LC_TIME>: Respresentation of time
 
 Output produced by C<POSIX::strftime()>, which builds a formatted
 human-readable date/time string, is affected by the current C<LC_TIME>
