@@ -500,9 +500,9 @@ The documentation of C<qx//> now describes how C<$?> is affected.
 
 This note has been added to perlpolicy:
 
-  While civility is required, kindness is encouraged; if you have any doubt
-  about whether you are being civil, simply ask yourself, "Am I being kind?"
-  and aspire to that.
+ While civility is required, kindness is encouraged; if you have any
+ doubt about whether you are being civil, simply ask yourself, "Am I
+ being kind?" and aspire to that.
 
 =back
 
@@ -958,8 +958,8 @@ Now building the POSIX extension with C++ will no longer crash.
 
 =item *
 
-VMS has had C<setenv/unsetenv> since v7.0 (released in 1996), C<Perl_vmssetenv>
-now always uses C<setenv/unsetenv>.
+VMS has had C<setenv>/C<unsetenv> since v7.0 (released in 1996),
+C<Perl_vmssetenv> now always uses C<setenv>/C<unsetenv>.
 
 =item *
 
