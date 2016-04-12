@@ -461,6 +461,16 @@ Stack">, which explains how the perl context stack works.
 
 =back
 
+=head3 L<perllocale>
+
+=over 4
+
+A stronger caution about using locales in threaded applications is
+given.  Locales are not thread-safe, and you can get wrong results or
+even segfaults if you use them there.
+
+=back
+
 =head3 L<perlmodlib>
 
 =over 4
