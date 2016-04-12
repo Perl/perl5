@@ -1096,6 +1096,18 @@ Perl_sv_collxfrm(pTHX_ SV *const sv, STRLEN *const nxp)
 {
     return sv_collxfrm_flags(sv, nxp, SV_GMAGIC);
 }
+
+char *
+Perl_mem_collxfrm(pTHX_ const char *input_string, STRLEN len, STRLEN *xlen)
+{
+    /* This function is retained for compatibility in case someone outside core
+     * is using this (but it is undocumented) */
+
+    PERL_ARGS_ASSERT_MEM_COLLXFRM;
+
+    return _mem_collxfrm(input_string, len, xlen, FALSE);
+}
+
 #endif
 
 bool

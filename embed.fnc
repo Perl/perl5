@@ -908,9 +908,9 @@ pod	|SV*	|magic_methcall	|NN SV *sv|NN const MAGIC *mg \
 Ap	|I32 *	|markstack_grow
 #if defined(USE_LOCALE_COLLATE)
 p	|int	|magic_setcollxfrm|NN SV* sv|NN MAGIC* mg
+pb	|char*	|mem_collxfrm	|NN const char* input_string|STRLEN len|NN STRLEN* xlen
 : Defined in locale.c, used only in sv.c
-p	|char*	|mem_collxfrm	|NN const char* input_string|STRLEN len|NN STRLEN* xlen
-#   if defined(PERL_IN_LOCALE_C) || defined(PERL_IN_SV_C)
+#   if defined(PERL_IN_LOCALE_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_MATHOMS_C)
 pM	|char*	|_mem_collxfrm	|NN const char* input_string	\
 				|STRLEN len			\
 				|NN STRLEN* xlen		\

@@ -1373,19 +1373,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     return ok;
 }
 
-
 #ifdef USE_LOCALE_COLLATE
-
-char *
-Perl_mem_collxfrm(pTHX_ const char *input_string, STRLEN len, STRLEN *xlen)
-{
-    /* This function is retained for compatibility in case someone outside core
-     * is using this (but it is undocumented) */
-
-    PERL_ARGS_ASSERT_MEM_COLLXFRM;
-
-    return _mem_collxfrm(input_string, len, xlen, FALSE);
-}
 
 char *
 Perl__mem_collxfrm(pTHX_ const char *input_string,
