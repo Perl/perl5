@@ -116,7 +116,70 @@ If only one field is selected, the output is in more compact form.
 
 --grindargs=I<foo>
 
-Optional command-line arguments to pass to cachegrind invocations.
+Optional command-line arguments to pass to all cachegrind invocations.
+
+This option is appended to those which bench.pl uses for its own
+purposes; so it can be used to override them (see --debug output
+below), and can also be 'abused' to add redirects into the valgrind
+command invocation.
+
+For example, this writes PERL_MEM_LOG activity to foobar.$$, because
+3>foobar.$$ redirects fd 3, then perl under PERL_MEM_LOG writes to fd 3.
+
+ $ perl Porting/bench.pl --jobs=2 --verbose --debug \
+    --tests=call::sub::amp_empty \
+    \
+    --grindargs='--cachegrind-out-file=junk.$$ 3>foobar.$$' \
+    -- \
+    perl5.24.0	perl5.24.0:+memlog:PERL_MEM_LOG=3mst
+
+for the +memlog tests, this executes as: (shown via --debug, then prettyfied)
+
+  Command: PERL_HASH_SEED=0 PERL_MEM_LOG=3mst
+    valgrind --tool=cachegrind  --branch-sim=yes
+    --cachegrind-out-file=/dev/null --cachegrind-out-file=junk.$$
+    3>foobar.$$ perl5.24.0  - 10 2>&1
+
+The result is that a set of junk.$$ files containing raw cachegrind
+output are written, and foobar.$$ contains the expected memlog output.
+
+Notes:
+
+Theres no obvious utility for those junk.$$ and foobar.$$ files, but
+you can have them anyway.
+
+The 3 in PERL_MEM_LOG=3mst is needed because the output would
+otherwize go to STDERR, and cause parse_cachegrind() to reject the
+test and die.
+
+The --grindargs redirect is needed to capture the memlog output;
+without it, the memlog output is written to fd3, around
+parse_cachegrind and effectively into /dev/null
+
+PERL_MEM_LOG is expensive when used.
+
+call::sub::amp_empty
+&foo function call with no args or body
+
+       perl5.24.0 perl5.24.0+memlog
+       ---------- -----------------
+    Ir      394.0          543477.5
+    Dr      161.0          146814.1
+    Dw       72.0          122304.6
+  COND       58.0           66796.4
+   IND        5.0            5537.7
+
+COND_m        0.0            6743.1
+ IND_m        5.0            1490.2
+
+ Ir_m1        0.0             683.7
+ Dr_m1        0.0              65.9
+ Dw_m1        0.0               8.5
+
+ Ir_mm        0.0              11.6
+ Dr_mm        0.0              10.6
+ Dw_mm        0.0               4.7
+
 
 =item *
 
