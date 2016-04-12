@@ -1782,7 +1782,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                 *      isn't sufficient, they return the input size instead of
                 *      how much is needed.)
                 * Increase the buffer size by a fixed percentage and try again. */
-            xAlloc = (2 * xAlloc) + 1;
+            xAlloc += (xAlloc / 4) + 1;
             PL_strxfrm_is_behaved = FALSE;
 
 #ifdef DEBUGGING
