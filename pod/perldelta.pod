@@ -180,8 +180,9 @@ which for unreachable code might be never.
 =head2 C<qr/\N{}/> now disallowed under C<use re "strict">
 
 An empty C<\N{}> makes no sense, but for backwards compatibility is
-silently accepted as doing nothing.  But now this is a fatal error under
-the experimental feature L<re/'strict' mode>.
+accepted as doing nothing, though a deprecation warning is raised by
+default.  But now this is a fatal error under the experimental feature
+L<re/'strict' mode>.
 
 =head2 Nested declarations are now disallowed
 
@@ -1250,7 +1251,8 @@ C<toTITLE_utf8>, C<toLOWER_utf8>, and C<toFOLD_utf8>.
 
 =item *
 
-EBCDIC code paths have largely been unified to avoid repetition.
+EBCDIC code paths have largely been unified with non-EBCDIC ones to
+avoid repetition and make maintenance easier.
 
 =item *
 
@@ -1321,13 +1323,6 @@ Fixed a spurious warning about posix character classes. [perl #127581]
 Fixed an obscure case where a pattern could fail to match. This only 
 occurred when matching characters from the set of C1 controls, when
 the target matched string was in UTF-8, and only on EBCDIC platforms.
-
-=item *
-
-Fixed over eager warnings for C<< /[.foo.]/ >>.
-
-This prevents Perl from warning about constructs like C<< /[.].*[.]/ >>.
-[perl #127582, #127604]
 
 =item *
 
@@ -1523,8 +1518,7 @@ C<\b{sb}> works much better.  In Perl v5.22.0, this new construct didn't
 seem to give the expected results, yet passed all the tests in the
 extensive suite furnished by Unicode.  It turns out that it was because
 these were short input strings, and the failures had to do with longer
-inputs.  This was fixed in Perl 5.23.4, but the improvement was not
-noticed until after that was released, so is included here now.
+inputs.
 
 =item *
 
