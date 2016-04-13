@@ -2242,6 +2242,11 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
                              len, SX_VSTRING, SX_LVSTRING);
             }
 #endif
+#if Size_t_size > 4
+            if (len > I32_MAX) {
+                CROAK(("String too long for Storable"));
+            }
+#endif
 
             wlen = (I32) len; /* WLEN via STORE_SCALAR expects I32 */
             if (SvUTF8 (sv))
