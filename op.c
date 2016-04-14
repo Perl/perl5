@@ -109,7 +109,7 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 #define CALL_RPEEP(o) PL_rpeepp(aTHX_ o)
 #define CALL_OPFREEHOOK(o) if (PL_opfreehook) PL_opfreehook(aTHX_ o)
 
-static char array_passed_to_stat[] = "Array passed to stat will be coerced to a scalar";
+static const char array_passed_to_stat[] = "Array passed to stat will be coerced to a scalar";
 
 /* Used to avoid recursion through the op tree in scalarvoid() and
    op_free()
@@ -9751,7 +9751,7 @@ Perl_ck_ftst(pTHX_ OP *o)
             }
             else {
                 /* diag_listed_as: Array passed to stat will be coerced to a scalar%s */
-                Perl_warner(aTHX_ packWARN(WARN_SYNTAX), array_passed_to_stat);
+                Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "%s", array_passed_to_stat);
             }
        }
 	scalar((OP *) kid);
