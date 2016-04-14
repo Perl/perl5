@@ -349,8 +349,8 @@ for XSUBs and const subs has been removed.  This removed one glob/scalar combo
 for each unique C<.c> file that XSUBs and const subs came from.  On startup
 (C<perl -e"0">) about half a dozen glob/scalar debugger combos were created.
 Loading XS modules created more glob/scalar combos.  These things were created
-regardless if the perl debugger was being used or not, unlike for pure perl
-subs, and ignores that the perl debugger can not debug C code.
+regardless of whether the perl debugger was being used or not, unlike for pure
+perl subs, and ignores that the perl debugger can not debug C code.
 
 =item *
 
