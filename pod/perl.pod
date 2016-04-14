@@ -180,16 +180,6 @@ aux c2ph h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
 
     perlhist		Perl history records
     perldelta		Perl changes since previous version
-    perl5239delta	Perl changes in version 5.23.9
-    perl5238delta	Perl changes in version 5.23.8
-    perl5237delta	Perl changes in version 5.23.7
-    perl5236delta	Perl changes in version 5.23.6
-    perl5235delta	Perl changes in version 5.23.5
-    perl5234delta	Perl changes in version 5.23.4
-    perl5233delta	Perl changes in version 5.23.3
-    perl5232delta	Perl changes in version 5.23.2
-    perl5231delta	Perl changes in version 5.23.1
-    perl5230delta	Perl changes in version 5.23.0
     perl5221delta	Perl changes in version 5.22.1
     perl5220delta	Perl changes in version 5.22.0
     perl5203delta	Perl changes in version 5.20.3

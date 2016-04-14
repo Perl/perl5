@@ -4644,16 +4644,6 @@ pod/perl5202delta.pod		Perl changes in version 5.20.2
 pod/perl5203delta.pod		Perl changes in version 5.20.3
 pod/perl5220delta.pod		Perl changes in version 5.22.0
 pod/perl5221delta.pod		Perl changes in version 5.22.1
-pod/perl5230delta.pod		Perl changes in version 5.23.0
-pod/perl5231delta.pod		Perl changes in version 5.23.1
-pod/perl5232delta.pod		Perl changes in version 5.23.2
-pod/perl5233delta.pod		Perl changes in version 5.23.3
-pod/perl5234delta.pod		Perl changes in version 5.23.4
-pod/perl5235delta.pod		Perl changes in version 5.23.5
-pod/perl5236delta.pod		Perl changes in version 5.23.6
-pod/perl5237delta.pod		Perl changes in version 5.23.7
-pod/perl5238delta.pod		Perl changes in version 5.23.8
-pod/perl5239delta.pod		Perl changes in version 5.23.9
 pod/perl561delta.pod		Perl changes in version 5.6.1
 pod/perl56delta.pod		Perl changes in version 5.6
 pod/perl581delta.pod		Perl changes in version 5.8.1
