@@ -499,23 +499,25 @@ debugging.  No return value. Its main use is inside PerlIO where using
 real printf, warn() etc. would recursively call PerlIO and be a
 problem.
 
-PerlIO_debug writes to the file named by $ENV{'PERLIO_DEBUG'} typical
+PerlIO_debug writes to the file named by $ENV{'PERLIO_DEBUG'} or defaults
+to stderr if the environment variable is not defined. Typical
 use might be
 
   Bourne shells (sh, ksh, bash, zsh, ash, ...):
-   PERLIO_DEBUG=/dev/tty ./perl somescript some args
+   PERLIO_DEBUG=/tmp/perliodebug.log ./perl -Di somescript some args
 
   Csh/Tcsh:
-   setenv PERLIO_DEBUG /dev/tty
-   ./perl somescript some args
+   setenv PERLIO_DEBUG /tmp/perliodebug.log
+   ./perl -Di somescript some args
 
   If you have the "env" utility:
-   env PERLIO_DEBUG=/dev/tty ./perl somescript some args
+   env PERLIO_DEBUG=/tmp/perliodebug.log ./perl -Di somescript args
 
   Win32:
-   set PERLIO_DEBUG=CON
-   perl somescript some args
+   set PERLIO_DEBUG=perliodebug.log
+   perl -Di somescript some args
 
-If $ENV{'PERLIO_DEBUG'} is not set PerlIO_debug() is a no-op.
+On a Perl built without C<-DDEBUGGING>, or when the C<-Di> command-line switch
+is not specified, or under taint, PerlIO_debug() is a no-op.
 
 =back
