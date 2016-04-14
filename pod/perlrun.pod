@@ -1155,19 +1155,22 @@ is run in taint mode.
 =item PERLIO_DEBUG
 X<PERLIO_DEBUG>
 
-If set to the name of a file or device, certain operations of PerlIO
-subsystem will be logged to that file, which is opened in append mode.
-Typical uses are in Unix:
+If set to the name of a file or device when Perl is run with the
+B<-Di> command-line switch, the logging of certain operations of
+the PerlIO subsystem will be redirected to the specified file rather
+than going to stderr, which is the default. The file is opened in append
+mode. Typical uses are in Unix:
 
-   % env PERLIO_DEBUG=/dev/tty perl script ...
+   % env PERLIO_DEBUG=/tmp/perlio.log perl -Di script ...
 
 and under Win32, the approximately equivalent:
 
    > set PERLIO_DEBUG=CON
-   perl script ...
+   perl -Di script ...
 
-This functionality is disabled for setuid scripts and for scripts run
-with B<-T>.
+This functionality is disabled for setuid scripts, for scripts run
+with B<-T>, and for scripts run on a Perl built without C<-DDEBUGGING>
+support.
 
 =item PERLLIB
 X<PERLLIB>
