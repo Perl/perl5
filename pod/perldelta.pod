@@ -249,7 +249,7 @@ L<[perl #127183]|https://rt.perl.org/Ticket/Display.html?id=127183>
 Certain regex patterns involving a complemented posix class in an inverted
 bracketed character class, and matching something else optionally would
 improperly fail to match.  An example of one that could fail is
-C</qr/_?[^\Wbar]\x{100}/>.  This has been fixed.
+C<qr/_?[^\Wbar]\x{100}/>.  This has been fixed.
 L<[perl #127537]|https://rt.perl.org/Ticket/Display.html?id=127537>
 
 =item *
