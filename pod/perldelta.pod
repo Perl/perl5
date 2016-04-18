@@ -619,7 +619,7 @@ L<%s must not be a named sequence in transliteration operator|perldiag/"%s must 
 
 (F) Transliteration (C<tr///> and C<y///>) transliterates individual
 characters.  But a named sequence by definition is more than an
-individual charater, and hence doing this operation on it doesn't make
+individual character, and hence doing this operation on it doesn't make
 sense.
 
 =item *
