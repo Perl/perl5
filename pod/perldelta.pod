@@ -92,6 +92,13 @@ C<errno>, C<status>, C<uid>, C<pid>, C<addr> and C<band> fields are now
 included in the hash passed to the handler, if supported by the
 platform.
 
+=head2 Hashbang redirection to Perl 6
+
+Previously perl would redirect to another interpreter if it found a
+hashbang path unless the path contains "perl" (see L<perlrun>). To improve
+compatability with Perl 6 this behavior has been extended to also redirect
+if "perl" is followed by "6".
+
 =head1 Security
 
 =head2 Set proper umask before calling C<mkstemp(3)>
