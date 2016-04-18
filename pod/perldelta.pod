@@ -107,12 +107,12 @@ write permissions regardless of current umask.
 
 This has been fixed by using umask 0177 instead. [perl #127322]
 
-=head2 fix out of boundary access in Win32 path handling
+=head2 Fix out of boundary access in Win32 path handling
 
 This is CVE-2015-8608.  For more information see
 L<[perl #126755]|https://rt.perl.org/Ticket/Display.html?id=126755>
 
-=head2 fix loss of taint in canonpath
+=head2 Fix loss of taint in canonpath
 
 This is CVE-2015-8607.  For more information see
 L<[perl #126862]|https://rt.perl.org/Ticket/Display.html?id=126862>
@@ -465,6 +465,8 @@ Stack">, which explains how the perl context stack works.
 =head3 L<perllocale>
 
 =over 4
+
+=item *
 
 A stronger caution about using locales in threaded applications is
 given.  Locales are not thread-safe, and you can get wrong results or
@@ -827,13 +829,25 @@ Win32 compilers are supported.
 
 =item AmigaOS
 
+=over 4
+
+=item *
+
 The AmigaOS port has been reintegrated into the main tree, based off of
 Perl 5.22.1.
 
+=back
+
 =item Cygwin
+
+=over 4
+
+=item *
 
 Tests are more robust against unusual cygdrive prefixes.
 L<[perl #126834]|https://rt.perl.org/Ticket/Display.html?id=126834>
+
+=back
 
 =item EBCDIC
 
@@ -874,7 +888,7 @@ utf8>>, which are now fixed
 
 =item FreeBSD
 
-=over
+=over 4
 
 =item *
 
@@ -885,7 +899,7 @@ L<[perl #126847]|https://rt.perl.org/Ticket/Display.html?id=126847>
 
 =item IRIX
 
-=over
+=over 4
 
 =item *
 
@@ -903,7 +917,7 @@ L<[perl #126396]|https://rt.perl.org/Ticket/Display.html?id=126396>
 
 =item MacOS X
 
-=over
+=over 4
 
 =item *
 
@@ -935,6 +949,10 @@ L<[perl #126240]|https://rt.perl.org/Ticket/Display.html?id=126240>
 
 =item Solaris
 
+=over 4
+
+=item *
+
 All Solaris now builds shared libperl.
 
 Solaris and variants like OpenIndiana now always build with the shared
@@ -942,15 +960,23 @@ Perl library (Configure -Duseshrplib).  This was required for the
 OpenIndiana builds, but this has also been the setting for Oracle/Sun
 Perl builds for several years.
 
+=back
+
 =item Tru64
+
+=over 4
+
+=item *
 
 Workaround where Tru64 balks when prototypes are listed as
 C<< PERL_STATIC_INLINE >>, but where the test is build with
 C<< -DPERL_NO_INLINE_FUNCTIONS >>.
 
+=back
+
 =item VMS
 
-=over
+=over 4
 
 =item *
 
@@ -998,7 +1024,7 @@ release of OpenVMS VAX was v7.3 in 2001.
 
 =item Win32
 
-=over
+=over 4
 
 =item *
 
@@ -1018,7 +1044,7 @@ exist.  For performance reasons, now, if the root key (i.e.
 C<HKEY_CURRENT_USER\Software\Perl> or C<HKEY_LOCAL_MACHINE\Software\Perl>) does
 not exist at process start time, it will not be checked again for C<%ENV>
 override entries for the remainder of the Perl processes life.  This more
-closely matches Unix behaviour in that the environment is copied or inherited
+closely matches Unix behavior in that the environment is copied or inherited
 on startup and changing the variable in the parent process or another process
 or editing F<.bashrc> will not change the environmental variable in other
 existing, running, processes.
@@ -1072,28 +1098,34 @@ Errors set by Winsock functions are now put directly into C<$^E>, and the
 relevant C<WSAE*> error codes are now exported from the L<Errno> and L<POSIX>
 modules for testing this against.
 
-The previous behaviour of putting the errors (converted to POSIX-style C<E*>
+The previous behavior of putting the errors (converted to POSIX-style C<E*>
 error codes since Perl 5.20.0) into C<$!> was buggy due to the non-equivalence
 of like-named Winsock and POSIX error constants, a relationship between which
 has unfortunately been established in one way or another since Perl 5.8.0.
 
-The new behaviour provides a much more robust solution for checking Winsock
+The new behavior provides a much more robust solution for checking Winsock
 errors in portable software without accidentally matching POSIX tests that were
 intended for other OSes and may have different meanings for Winsock.
 
-The old behaviour is currently retained, warts and all, for backwards
+The old behavior is currently retained, warts and all, for backwards
 compatibility, but users are encouraged to change any code that tests C<$!>
 against C<E*> constants for Winsock errors to instead test C<$^E> against
-C<WSAE*> constants.  After a suitable deprecation period, the old behaviour may
+C<WSAE*> constants.  After a suitable deprecation period, the old behavior may
 be removed, leaving C<$!> unchanged after Winsock function calls, to avoid any
 possible confusion over which error variable to check.
 
 =back
 
-=item ppc64el floating point
+=item ppc64el
+
+=over 4
+
+=item floating point
 
 The floating point format of ppc64el (Debian naming for little-endian
 PowerPC) is now detected correctly.
+
+=back
 
 =back
 
