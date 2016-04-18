@@ -767,11 +767,11 @@ static mach_timebase_info_data_t timebase_info;
 static struct timespec timespec_init;
 
 static int darwin_time_init() {
+  struct timeval tv;
+  int success = 1;
 #ifdef USE_ITHREADS
   MUTEX_LOCK(&darwin_time_mutex);
 #endif
-  struct timeval tv;
-  int success = 1;
   if (absolute_time_init == 0) {
     /* mach_absolute_time() cannot fail */
     absolute_time_init = mach_absolute_time();
