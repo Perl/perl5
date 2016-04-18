@@ -566,7 +566,7 @@ L<IO> has been upgraded from version 1.35 to 1.36.
 
 =item *
 
-L<IO-Compress> has been upgraded from version 2.068 to 2.069.
+IO-Compress has been upgraded from version 2.068 to 2.069.
 
 =item *
 
