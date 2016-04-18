@@ -46,6 +46,10 @@
 #endif	/* PERLIO_IS_STDIO */
 #endif	/* USE_PERLIO */
 
+#ifndef SSize_t_MAX
+#define SSize_t_MAX (SSize_t)(~(Size_t)0 >> 1)
+#endif
+
 /*
  * Earlier versions of perl might be used, we can't assume they have the latest!
  */
@@ -157,7 +161,9 @@
 #define SX_VSTRING	C(29)	/* vstring forthcoming (small) */
 #define SX_LVSTRING	C(30)	/* vstring forthcoming (large) */
 #define SX_SVUNDEF_ELEM	C(31)	/* array element set to &PL_sv_undef */
-#define SX_ERROR	C(32)	/* Error */
+#define SX_VLSCALAR	C(32)	/* scalar longer than I32_MAX */
+#define SX_VLUTF8STR	C(33)	/* UTF-8 string longer than I32_MAX */
+#define SX_ERROR	C(34)	/* Error */
 
 /*
  * Those are only used to retrieve "old" pre-0.6 binary images.
@@ -527,11 +533,11 @@ static stcxt_t *Context_ptr = NULL;
 #define MMASK	(MGROW - 1)
 
 #define round_mgrow(x)	\
-	((unsigned long) (((unsigned long) (x) + MMASK) & ~MMASK))
+	((Size_t) (((Size_t) (x) + MMASK) & ~MMASK))
 #define trunc_int(x)	\
-	((unsigned long) ((unsigned long) (x) & ~(sizeof(int)-1)))
+	((Size_t) ((Size_t) (x) & ~(sizeof(int)-1)))
 #define int_aligned(x)	\
-	((unsigned long) (x) == trunc_int(x))
+	((Size_t) (x) == trunc_int(x))
 
 #define MBUF_INIT(x)					\
   STMT_START {							\
@@ -590,8 +596,8 @@ static stcxt_t *Context_ptr = NULL;
 
 #define MBUF_XTEND(x) 				\
   STMT_START {						\
-	int nsz = (int) round_mgrow((x)+msiz);	\
-	int offset = mptr - mbase;		\
+	STRLEN nsz = round_mgrow((x)+msiz);	\
+	STRLEN offset = mptr - mbase;		\
 	ASSERT(!cxt->membuf_ro, ("mbase is not read-only")); \
 	TRACEME(("** extending mbase from %d to %d bytes (wants %d new)", \
 		msiz, nsz, (x)));			\
@@ -1236,6 +1242,8 @@ static SV *retrieve_weakoverloaded(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_vstring(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_lvstring(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_svundef_elem(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_vlscalar(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_vlutf8str(pTHX_ stcxt_t *cxt, const char *cname);
 
 static const sv_retrieve_t sv_retrieve[] = {
 	0,			/* SX_OBJECT -- entry unused dynamically */
@@ -1270,6 +1278,8 @@ static const sv_retrieve_t sv_retrieve[] = {
 	(sv_retrieve_t)retrieve_vstring,	/* SX_VSTRING */
 	(sv_retrieve_t)retrieve_lvstring,	/* SX_LVSTRING */
 	(sv_retrieve_t)retrieve_svundef_elem,	/* SX_SVUNDEF_ELEM */
+	(sv_retrieve_t)retrieve_vlscalar,	/* SX_VLSCALAR */
+	(sv_retrieve_t)retrieve_vlutf8str,	/* SX_VLUTF8STR */
 	(sv_retrieve_t)retrieve_other,		/* SX_ERROR */
 };
 
@@ -2222,8 +2232,6 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
 #ifdef SvVOK
 	    MAGIC *mg;
 #endif
-            I32 wlen; /* For 64-bit machines */
-
           string_readlen:
             pv = SvPV(sv, len);
 
@@ -2244,15 +2252,30 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
 #endif
 #if Size_t_size > 4
             if (len > I32_MAX) {
-                CROAK(("String too long for Storable"));
+                STRLEN wlen = len;
+                unsigned char smark = SvUTF8(sv) ? SX_VLUTF8STR : SX_VLSCALAR;
+
+                PUTMARK(smark);
+                if (cxt->netorder && BYTEORDER == 0x87654321) {
+                    ((U32*)wlen)[0] = htonl(len >> 32);
+                    ((U32*)wlen)[1] = htonl(len & 0xffffffff);
+                }
+                else {
+                    wlen = len;
+                }
+                WRITE(&wlen, sizeof(wlen));
+                WRITE(pv, len);
             }
+            else
 #endif
 
-            wlen = (I32) len; /* WLEN via STORE_SCALAR expects I32 */
-            if (SvUTF8 (sv))
-                STORE_UTF8STR(pv, wlen);
-            else
-                STORE_SCALAR(pv, wlen);
+            {
+                I32 wlen = (I32) len; /* WLEN via STORE_SCALAR expects I32 */
+                if (SvUTF8 (sv))
+                    STORE_UTF8STR(pv, wlen);
+                else
+                    STORE_SCALAR(pv, wlen);
+            }
             TRACEME(("ok (scalar 0x%"UVxf" '%s', length = %"IVdf")",
                      PTR2UV(sv), SvPVX(sv), (IV)len));
 	} else
@@ -4990,6 +5013,69 @@ static SV *retrieve_scalar(pTHX_ stcxt_t *cxt, const char *cname)
 }
 
 /*
+ * retrieve_lscalar
+ *
+ * Retrieve defined long (string) scalar.
+ *
+ * Layout is SX_LSCALAR <length> <data>, with SX_LSCALAR already read.
+ * The scalar is "long" in that <length> is larger than LG_SCALAR so it
+ * was not stored on a single byte.
+ */
+static SV *retrieve_vlscalar(pTHX_ stcxt_t *cxt, const char *cname)
+{
+#if Size_t_size > 4
+	STRLEN len;
+	SV *sv;
+	HV *stash;
+
+        ASSERT(Size_t_size == 8, ("Size_t isn't 8 bytes, code needs re-work"));
+        if (cxt->netorder && BYTEORDER == 0x87654321) {
+            STRLEN rlen;
+            READ(&rlen, sizeof(rlen));
+            len = ((STRLEN)((U32*)&rlen)[0] << 32) | ((U32*)&rlen)[1];
+        }
+        else {
+            READ(&len, sizeof(len));
+        }
+	TRACEME(("retrieve_vlscalar (#%d), len = %"IVdf, cxt->tagnum, (IV) len));
+        if (len < I32_MAX || len > SSize_t_MAX) {
+            CROAK(("Size of very large scalar out of range"));
+        }
+
+	/*
+	 * Allocate an empty scalar of the suitable length.
+	 */
+
+	sv = NEWSV(10002, len);
+	stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
+	SEEN_NN(sv, stash, 0);	/* Associate this new scalar with tag "tagnum" */
+
+	/*
+	 * WARNING: duplicates parts of sv_setpv and breaks SV data encapsulation.
+	 *
+	 * Now, for efficiency reasons, read data directly inside the SV buffer,
+	 * and perform the SV final settings directly by duplicating the final
+	 * work done by sv_setpv. Since we're going to allocate lots of scalars
+	 * this way, it's worth the hassle and risk.
+	 */
+
+	SAFEREAD(SvPVX(sv), len, sv);
+	SvCUR_set(sv, len);				/* Record C string length */
+	*SvEND(sv) = '\0';				/* Ensure it's null terminated anyway */
+	(void) SvPOK_only(sv);			/* Validate string pointer */
+	if (cxt->s_tainted)				/* Is input source tainted? */
+		SvTAINT(sv);				/* External data cannot be trusted */
+
+	TRACEME(("large scalar len %"IVdf" '%s'", (IV) len, SvPVX(sv)));
+	TRACEME(("ok (retrieve_lscalar at 0x%"UVxf")", PTR2UV(sv)));
+
+	return sv;
+#else
+        CROAK(("Reading a 2GB or larger string on a 32-bit platform"))'
+#endif
+}
+
+/*
  * retrieve_utf8str
  *
  * Like retrieve_scalar(), but tag result as utf8.
@@ -5043,6 +5129,35 @@ static SV *retrieve_lutf8str(pTHX_ stcxt_t *cxt, const char *cname)
             UTF8_CROAK();
 #endif
     }
+    return sv;
+}
+
+/*
+ * retrieve_vlutf8str
+ *
+ * Like retrieve_vlscalar(), but tag result as utf8.
+ * If we're retrieving UTF8 data in a non-UTF8 perl, croaks.
+ */
+static SV *retrieve_vlutf8str(pTHX_ stcxt_t *cxt, const char *cname)
+{
+    SV *sv;
+
+    TRACEME(("retrieve_vlutf8str"));
+
+    sv = retrieve_vlscalar(aTHX_ cxt, cname);
+    if (sv) {
+#ifdef HAS_UTF8_SCALARS
+        SvUTF8_on(sv);
+#else
+        if (cxt->use_bytes < 0)
+            cxt->use_bytes
+                = (SvTRUE(perl_get_sv("Storable::drop_utf8", GV_ADD))
+                   ? 1 : 0);
+        if (cxt->use_bytes == 0)
+            UTF8_CROAK();
+#endif
+    }
+
     return sv;
 }
 
