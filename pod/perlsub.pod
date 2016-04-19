@@ -458,9 +458,11 @@ that the caller passed no arguments:
 	return 123;
     }
 
-When using a signature, the arguments are still available in the special
-array variable C<@_>, in addition to the lexical variables of the
-signature.  There is a difference between the two ways of accessing the
+When using a signature, the arguments are currently still available in the
+special array variable C<@_>, in addition to the lexical variables of the
+signature, but in a future release of perl that may change to being not
+available by default. There is a difference between the two ways of
+accessing the
 arguments: C<@_> I<aliases> the arguments, but the signature variables
 get I<copies> of the arguments.  So writing to a signature variable
 only changes that variable, and has no effect on the caller's variables,
