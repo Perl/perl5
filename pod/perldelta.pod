@@ -69,8 +69,8 @@ to do.  For example, for the overshift a common C behavior is
   # And the same for <<, while Perl now produces 0 for both.
 
 Now these behaviors are well-defined under Perl, regardless of what
-the underlying C implementation does.  Note, however, that you cannot
-escape the native integer width, you need to know how far left you
+the underlying C implementation does.  Note, however, that you are still
+constrained by the native integer width: you need to know how far left you
 can go.  You can use for example:
 
   use Config;
@@ -138,7 +138,7 @@ while a typical C<getenv()> would return the first entry. We now
 make sure C<%ENV> contains the same as what C<getenv> returns.
 
 Second, we remove duplicates from C<environ[]>, so if a setting
-with that name is set in C<%ENV> we won't pass an unsafe value
+with that name is set in C<%ENV>, we won't pass an unsafe value
 to a child process.
 
 [CVE-2016-2381]
@@ -355,9 +355,9 @@ Creating Perl debugger data structures (see L<perldebguts/"Debugger Internals">)
 for XSUBs and const subs has been removed.  This removed one glob/scalar combo
 for each unique C<.c> file that XSUBs and const subs came from.  On startup
 (C<perl -e"0">) about half a dozen glob/scalar debugger combos were created.
-Loading XS modules created more glob/scalar combos.  These things were created
-regardless of whether the perl debugger was being used or not, unlike for pure
-perl subs, and ignores that the perl debugger can not debug C code.
+Loading XS modules created more glob/scalar combos.  These things were
+being created regardless of whether the perl debugger was being used,
+and despite the fact that it can't debug C code anyway
 
 =item *
 
@@ -984,7 +984,7 @@ The usage of C<FIRSTKEY> and C<NEXTKEY> has been clarified.
 
 =item *
 
-Discourage use of 'In' prefix for Unicode Block property.
+Discourage use of 'In' as a prefix signifying the Unicode Block property.
 
 =back
 
@@ -1370,7 +1370,7 @@ L<[perl #126240]|https://rt.perl.org/Ticket/Display.html?id=126240>
 
 =item *
 
-All Solaris now builds shared libperl.
+All Solaris variants now build a shared libperl
 
 Solaris and variants like OpenIndiana now always build with the shared
 Perl library (Configure -Duseshrplib).  This was required for the
@@ -1456,11 +1456,12 @@ C, the name of this option is C<WIN32_NO_REGISTRY>.
 The behavior of Perl using C<HKEY_CURRENT_USER\Software\Perl> and
 C<HKEY_LOCAL_MACHINE\Software\Perl> to lookup certain values, including C<%ENV>
 vars starting with C<PERL> has changed.  Previously, the 2 keys were checked
-for entries at all times through Perl processes life time even if they did not
+for entries at all times through the perl process's life time even if
+they did not
 exist.  For performance reasons, now, if the root key (i.e.
 C<HKEY_CURRENT_USER\Software\Perl> or C<HKEY_LOCAL_MACHINE\Software\Perl>) does
 not exist at process start time, it will not be checked again for C<%ENV>
-override entries for the remainder of the Perl processes life.  This more
+override entries for the remainder of the perl process's life.  This more
 closely matches Unix behavior in that the environment is copied or inherited
 on startup and changing the variable in the parent process or another process
 or editing F<.bashrc> will not change the environmental variable in other
@@ -1661,7 +1662,8 @@ L<[perl #121351]|https://rt.perl.org/Ticket/Display.html?id=121351>
 
 =item *
 
-Remove unwarranted assertion in C<Perl_newATTRSUB_x()>. If a stub subroutine
+An unwarranted assertion in C<Perl_newATTRSUB_x()> has been removed.  If
+a stub subroutine
 definition with a prototype has been seen, then any subsequent stub (or
 definition) of the same subroutine with an attribute was causing an assertion
 failure because of a null pointer.
@@ -1669,7 +1671,7 @@ L<[perl #126845]|https://rt.perl.org/Ticket/Display.html?id=126845>
 
 =item *
 
-Replace C<::> with C<__> in C<ExtUtils::ParseXS> like it's done for
+C<::> has been replaced by C<__> in C<ExtUtils::ParseXS>, like it's done for
 parameters/return values. This is more consistent, and simplifies writing XS
 code wrapping C++ classes into a nested Perl namespace (it requires only
 a typedef for C<Foo__Bar> rather than two, one for C<Foo_Bar> and the other
@@ -1677,8 +1679,9 @@ for C<Foo::Bar>).
 
 =item *
 
-Deprecate the C<to_utf8_case()> function, see
-L<http://nntp.perl.org/group/perl.perl5.porters/233287>.
+The C<to_utf8_case()> function is now deprecated.  Instead use
+C<toUPPER_utf8>, C<toTITLE_utf8>, C<toLOWER_utf8>, and C<toFOLD_utf8>.
+(See L<http://nntp.perl.org/group/perl.perl5.porters/233287>.)
 
 =item *
 
@@ -1693,15 +1696,11 @@ information.
 The C<signbit()> emulation has been enhanced.  This will help older
 and/or more exotic platforms or configurations.
 
-=item *
-
-The C<to_utf8_case> function is discouraged in favor of C<toUPPER_utf8>,
-C<toTITLE_utf8>, C<toLOWER_utf8>, and C<toFOLD_utf8>.
 
 =item *
 
-EBCDIC code paths have largely been unified with non-EBCDIC ones to
-avoid repetition and make maintenance easier.
+Most EBCDIC-specific code in the core has been unified with non-EBCDIC
+code, to avoid repetition and make maintenance easier.
 
 =item *
 
@@ -1765,13 +1764,9 @@ to modify the source SV, resulting in the program dying. [perl #127635]
 
 =item *
 
-Fixed a spurious warning about posix character classes. [perl #127581]
-
-=item *
-
-Fixed an obscure case where a pattern could fail to match. This only 
-occurred when matching characters from the set of C1 controls, when
-the target matched string was in UTF-8, and only on EBCDIC platforms.
+Fixed an EBCDIC-platform-only case where a pattern could fail to match. This
+occurred when matching characters from the set of C1 controls when the
+target matched string was in UTF-8.
 
 =item *
 
@@ -1779,7 +1774,7 @@ Narrow the filename check in F<strict.pm> and F<warnings.pm>. Previously,
 it assumed that if the filename (without the F<.pmc?> extension) differed
 from the package name, if was a misspelled use statement (i.e. C<use Strict>
 instead of C<use strict>). We now check whether there's really a 
-miscapitalization happening, and not another issue.
+miscapitalization happening, and not some other issue.
 
 =item *
 
@@ -1978,7 +1973,7 @@ instead of the proper error message.  This has now been fixed. [perl
 
 =item *
 
-An earlier commit added a message when a quantifier in a regular
+Perl 5.20 added a message when a quantifier in a regular
 expression was useless, but then caused the parser to skip it;
 this caused the surplus quantifier to be silently ignored, instead
 of throwing an error. This is now fixed. [perl #126253]
@@ -2055,7 +2050,7 @@ L<[perl #126186]|https://rt.perl.org/Ticket/Display.html?id=126186>
 
 =item *
 
-Several bugs, including a segmentation fault, have been fixed with the bounds
+Several bugs, including a segmentation fault, have been fixed with the boundary
 checking constructs (introduced in Perl 5.22) C<\b{gcb}>, C<\b{sb}>, C<\b{wb}>,
 C<\B{gcb}>, C<\B{sb}>, and C<\B{wb}>.  All the C<\B{}> ones now match an empty
 string; none of the C<\b{}> ones do.
