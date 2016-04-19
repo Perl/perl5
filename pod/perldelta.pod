@@ -1036,11 +1036,6 @@ diagnostic messages, see L<perldiag>.
 
 L<%s must not be a named sequence in transliteration operator|perldiag/"%s must not be a named sequence in transliteration operator">
 
-(F) Transliteration (C<tr///> and C<y///>) transliterates individual
-characters.  But a named sequence by definition is more than an
-individual character, and hence doing this operation on it doesn't make
-sense.
-
 =item *
 
 L<Can't find Unicode property definition "%s" in regex;|perldiag/"Can't find Unicode property definition "%s" in regex; marked by <-- HERE in m/%s/">
@@ -1048,9 +1043,6 @@ L<Can't find Unicode property definition "%s" in regex;|perldiag/"Can't find Uni
 =item *
 
 L<Can't redeclare "%s" in "%s"|perldiag/"Can't redeclare "%s" in "%s"">
-
-(F) A "my", "our" or "state" declaration was found within another declaration,
-such as C<my ($x, my($y), $z)> or C<our (my $x)>.
 
 =item *
 
@@ -1068,9 +1060,6 @@ L<Illegal user-defined property name|perldiag/"Illegal user-defined property nam
 =item *
 
 L<Invalid number '%s' for -C option.|perldiag/"Invalid number '%s' for -C option.">
-
-(F) You supplied a number to the -C option that either has extra leading
-zeroes or overflows perl's unsigned integer representation.
 
 =item *
 
@@ -1100,25 +1089,6 @@ perldiag/Assuming NOT a POSIX class since %s in regex; marked by <-- HERE in mE<
 =item *
 
 L<%s() is deprecated on :utf8 handles|perldiag/"%s() is deprecated on :utf8 handles">
-
-(W deprecated) The sysread(), recv(), syswrite() and send() operators
-are deprecated on handles that have the C<:utf8> layer, either
-explicitly, or implicitly, eg., with the C<:encoding(UTF-16LE)> layer.
-
-Both sysread() and recv() currently use only the C<:utf8> flag for the
-stream, ignoring the actual layers.  Since sysread() and recv() do no
-UTF-8 validation they can end up creating invalidly encoded scalars.
-
-Similarly, syswrite() and send() use only the C<:utf8> flag, otherwise
-ignoring any layers.  If the flag is set, both write the value UTF-8
-encoded, even if the layer is some different encoding, such as the
-example above.
-
-Ideally, all of these operators would completely ignore the C<:utf8>
-state, working only with bytes, but this would result in silently
-breaking existing code.  To avoid this a future version of perl will
-throw an exception when any of sysread(), recv(), syswrite() or send()
-are called on handle with the C<:utf8> layer.
 
 =back
 
