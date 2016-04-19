@@ -104,7 +104,7 @@ if "perl" is followed by "6".
 =head2 Set proper umask before calling C<mkstemp(3)>
 
 In 5.22 perl started setting umask to 0600 before calling C<mkstemp(3)>
-and restoring it afterwards. This wrongfully tells open(2) to strip
+and restoring it afterwards. This wrongfully tells C<open(2)> to strip
 the owner read and write bits from the given mode before applying it,
 rather than the intended negation of leaving only those bits in place.
 
@@ -274,18 +274,18 @@ encoded bytes, first encode the strings.  To operate on code points'
 numeric values, use C<split> and C<map ord>.  In the future, this
 warning will be replaced by an exception.
 
-=head2 sysread(), syswrite(), recv() and send() are deprecated on
+=head2 C<sysread()>, C<syswrite()>, C<recv()> and C<send()> are deprecated on
 :utf8 handles
 
-The sysread(), recv(), syswrite() and send() operators
+The C<sysread()>, C<recv()>, C<syswrite()> and C<send()> operators
 are deprecated on handles that have the C<:utf8> layer, either
 explicitly, or implicitly, eg., with the C<:encoding(UTF-16LE)> layer.
 
-Both sysread() and recv() currently use only the C<:utf8> flag for the
-stream, ignoring the actual layers.  Since sysread() and recv() do no
+Both C<sysread()> and C<recv()> currently use only the C<:utf8> flag for the
+stream, ignoring the actual layers.  Since C<sysread()> and C<recv()> do no
 UTF-8 validation they can end up creating invalidly encoded scalars.
 
-Similarly, syswrite() and send() use only the C<:utf8> flag, otherwise
+Similarly, C<syswrite()> and C<send()> use only the C<:utf8> flag, otherwise
 ignoring any layers.  If the flag is set, both write the value UTF-8
 encoded, even if the layer is some different encoding, such as the
 example above.
@@ -293,7 +293,7 @@ example above.
 Ideally, all of these operators would completely ignore the C<:utf8>
 state, working only with bytes, but this would result in silently
 breaking existing code.  To avoid this a future version of perl will
-throw an exception when any of sysread(), recv(), syswrite() or send()
+throw an exception when any of C<sysread()>, C<recv()>, C<syswrite()> or C<send()>
 are called on handle with the C<:utf8> layer.
 
 =head1 Performance Enhancements
@@ -321,14 +321,14 @@ caseless one.
 
 C</fixed-substr/> has been made much faster.
 
-On platforms with a libc memchr() implementation which makes good use of
+On platforms with a libc C<memchr()> implementation which makes good use of
 underlying hardware support, patterns which include fixed substrings will now
 often be much faster; for example with glibc on a recent x86_64 CPU, this:
 
     $s = "a" x 1000 . "wxyz";
     $s =~ /wxyz/ for 1..30000
 
-is now about 7 times faster.  On systems with slow memchr(), e.g. 32-bit ARM
+is now about 7 times faster.  On systems with slow C<memchr()>, e.g. 32-bit ARM
 Raspberry Pi, there will be a small or little speedup.  Conversely, some
 pathological cases, such as C<"ab" x 1000 =~ /aa/> will be slower now; up to 3
 times slower on the rPi, 1.5x slower on x86_64.
@@ -822,7 +822,7 @@ A number of cleanups have been made to perlcall, including:
 
 =item *
 
-use EXTEND(SP, n) and PUSHs() instead of XPUSHs() where applicable
+use C<EXTEND(SP, n)> and C<PUSHs()> instead of C<XPUSHs()> where applicable
 and update prose to match
 
 =item *
@@ -1320,7 +1320,7 @@ L<[perl #126847]|https://rt.perl.org/Ticket/Display.html?id=126847>
 
 =item *
 
-Under some circumstances IRIX stdio fgetc() and fread() set the errno to
+Under some circumstances IRIX stdio C<fgetc()> and C<fread()> set the errno to
 C<ENOENT>, which made no sense according to either IRIX or POSIX docs.  Errno
 is now cleared in such cases.
 L<[perl #123977]|https://rt.perl.org/Ticket/Display.html?id=123977>
@@ -1357,9 +1357,9 @@ Builds with both -DDEBUGGING and threading enabled would fail with a
 "panic: free from wrong pool" error when built or tested from Terminal
 on OS X.  This was caused by perl's internal management of the
 environment conflicting with an atfork handler using the libc
-setenv() function to update the environment.
+C<setenv()> function to update the environment.
 
-Perl now uses setenv()/unsetenv() to update the environment on OS X.
+Perl now uses C<setenv()>/C<unsetenv()> to update the environment on OS X.
 L<[perl #126240]|https://rt.perl.org/Ticket/Display.html?id=126240>
 
 =back
@@ -1726,8 +1726,9 @@ meaningless constant that can be rewritten as C<(sv_backoff(sv),0)>.
 The C<EXTEND> and C<MEXTEND> macros have been improved to avoid various issues
 with integer truncation and wrapping.  In particular, some casts formerly used
 within the macros have been removed.  This means for example that passing an
-unsigned nitems argument is likely to raise a compiler warning now (it's always
-been documented to require a signed value; formerly int, lately SSize_t).
+unsigned C<nitems> argument is likely to raise a compiler warning now
+(it's always been documented to require a signed value; formerly int,
+lately SSize_t).
 
 =item *
 
@@ -1754,7 +1755,7 @@ I<IsMyProperty> not defined at the time of the pattern compilation.
 
 =item *
 
-Perl's memcpy(), memmove(), memset() and memcmp() fallbacks are now
+Perl's C<memcpy()>, C<memmove()>, C<memset()> and C<memcmp()> fallbacks are now
 more compatible with the originals.  [perl #127619]
 
 =item *
@@ -1790,7 +1791,7 @@ unterminated character classes while there are trailing backslashes.
 =item *
 
 Line numbers larger than 2**31-1 but less than 2**32 are no longer
-returned by caller() as negative numbers.  [perl #126991]
+returned by C<caller()> as negative numbers.  [perl #126991]
 
 =item *
 
@@ -1815,7 +1816,7 @@ complains about the unterminated here-doc.  [perl #125540]
 
 =item *
 
-untie() would sometimes return the last value returned by the UNTIE()
+C<untie()> would sometimes return the last value returned by the C<UNTIE()>
 handler as well as it's normal value, messing up the stack.  [perl
 #126621]
 
@@ -1827,8 +1828,8 @@ Fixed an operator precedence problem when C< castflags & 2> is true.
 =item *
 
 Caching of DESTROY methods could result in a non-pointer or a
-non-STASH stored in the SvSTASH() slot of a stash, breaking the B
-STASH() method.  The DESTROY method is now cached in the MRO metadata
+non-STASH stored in the C<SvSTASH()> slot of a stash, breaking the B
+C<STASH()> method.  The DESTROY method is now cached in the MRO metadata
 for the stash.  [perl #126410]
 
 =item *
@@ -1948,7 +1949,7 @@ L<[perl #126822]|https://rt.perl.org/Ticket/Display.html?id=126822>
 
 =item *
 
-Calling mg_set() in leave_scope() no longer leaks.
+Calling C<mg_set()> in C<leave_scope()> no longer leaks.
 
 =item *
 
@@ -2081,7 +2082,7 @@ The PadlistNAMES macro is an lvalue again.
 
 Zero -DPERL_TRACE_OPS memory for sub-threads.
 
-perl_clone_using() was missing Zero init of PL_op_exec_cnt[].  This
+C<perl_clone_using()> was missing Zero init of PL_op_exec_cnt[].  This
 caused sub-threads in threaded -DPERL_TRACE_OPS builds to spew exceedingly
 large op-counts at destruct.  These counts would print %x as "ABABABAB",
 clearly a mem-poison value.
