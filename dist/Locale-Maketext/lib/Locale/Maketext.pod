@@ -932,6 +932,9 @@ cache will have their cache cleared whenever the whitelist of blacklist
 setings change.  The difference between the two types of caching is explained
 in the "Readonly Lexicons" section.
 
+Methods disallowed by the blacklist cannot be permitted by the
+whitelist.
+
 =head1 AUTO LEXICONS
 
 If maketext goes to look in an individual %Lexicon for an entry
