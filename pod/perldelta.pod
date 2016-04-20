@@ -81,7 +81,7 @@ the C<bigint> pragma, or the C<Bit::Vector> module from CPAN.
 
 =head2 printf and sprintf now allow reordered precision arguments
 
-That is, C<< sprintf '|%.*2$|', 2, 3 >> now returns C<|002|>. This extends
+That is, C<< sprintf '|%.*2$d|', 2, 3 >> now returns C<|002|>. This extends
 the existing reordering mechanism (which allows reordering for arguments
 that are used as format fields, widths, and vector separators).
 
