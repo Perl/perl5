@@ -1197,6 +1197,13 @@ You can now build perl with MSVC++ on Win32 using GNU Make.  [perl #126632]
 The Win32 miniperl now has a real C<getcwd> which increases build performance
 resulting in C<getcwd()> being 605x faster in Win32 miniperl.
 
+=item *
+
+Configure now takes C<-Dusequadmath> into account when calculating the
+C<alignbytes> configuration variable.  Previously the mis-calculated
+C<alignbytes> could cause alignment errors on debugging builds. [perl
+#127894]
+
 =back
 
 =head1 Testing
