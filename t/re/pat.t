@@ -21,7 +21,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 451;  # Update this when adding/deleting tests.
+plan tests => 452;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1167,6 +1167,21 @@ sub run_tests {
         is($got,$want,'RT #84294: check that "ab" =~ /((\w+)(?{ push @got, $2 })){2}/ leaves @got in the correct state');
     }
 
+    {   # Test that we handle some malformed UTF-8 without looping [perl
+        # #123562]
+
+        my $code='
+            BEGIN{require q(test.pl);}
+            use Encode qw(_utf8_on);
+            my $malformed = "a\x80\n";
+            _utf8_on($malformed);
+            watchdog(3);
+            $malformed =~ /(\n\r|\r)$/;
+            print q(No infinite loop here!);
+        ';
+        fresh_perl_like($code, qr/Malformed UTF-8 character/, {},
+            "test that we handle some UTF-8 malformations without looping" );
+    }
 } # End of sub run_tests
 
 1;
