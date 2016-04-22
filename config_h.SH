@@ -1989,9 +1989,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LE_BE	7
 #define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_LE	8
 #define LONG_DOUBLE_IS_UNKNOWN_FORMAT			-1
-/* Backward compat. */
-#define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LE_LE
-#define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_BE
+#define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LE_LE /* back-compat */
+#define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_BE /* back-compat */
 #endif
 
 /* HAS_LONG_LONG:
@@ -2331,43 +2330,37 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that siginfo_t has the
  *	si_errno member
  */
-#$d_siginfo_si_errno HAS_SIGINFO_SI_ERRNO	/**/
-
 /* HAS_SIGINFO_SI_PID:
  *	This symbol, if defined, indicates that siginfo_t has the
  *	si_pid member
  */
-#$d_siginfo_si_pid HAS_SIGINFO_SI_PID	/**/
-
 /* HAS_SIGINFO_SI_UID:
  *	This symbol, if defined, indicates that siginfo_t has the
  *	si_uid member
  */
-#$d_siginfo_si_uid HAS_SIGINFO_SI_UID	/**/
-
 /* HAS_SIGINFO_SI_ADDR:
  *	This symbol, if defined, indicates that siginfo_t has the
  *	si_addr member
  */
-#$d_siginfo_si_addr HAS_SIGINFO_SI_ADDR	/**/
-
 /* HAS_SIGINFO_SI_STATUS:
  *	This symbol, if defined, indicates that siginfo_t has the
  *	si_status member
  */
-#$d_siginfo_si_status HAS_SIGINFO_SI_STATUS	/**/
-
 /* HAS_SIGINFO_SI_BAND:
  *	This symbol, if defined, indicates that siginfo_t has the
  *	si_band member
  */
-#$d_siginfo_si_band HAS_SIGINFO_SI_BAND	/**/
-
 /* HAS_SIGINFO_SI_VALUE:
  *	This symbol, if defined, indicates that siginfo_t has the
  *	si_value member
  */
-#$d_siginfo_si_value HAS_SIGINFO_SI_VALUE	/**/
+#$d_siginfo_si_errno	HAS_SIGINFO_SI_ERRNO	/**/
+#$d_siginfo_si_pid	HAS_SIGINFO_SI_PID	/**/
+#$d_siginfo_si_uid	HAS_SIGINFO_SI_UID	/**/
+#$d_siginfo_si_addr	HAS_SIGINFO_SI_ADDR	/**/
+#$d_siginfo_si_status	HAS_SIGINFO_SI_STATUS	/**/
+#$d_siginfo_si_band	HAS_SIGINFO_SI_BAND	/**/
+#$d_siginfo_si_value	HAS_SIGINFO_SI_VALUE	/**/
 
 /* HAS_SIGSETJMP:
  *	This variable indicates to the C program that the sigsetjmp()
@@ -4011,15 +4004,15 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* HAS_LLRINT:
  *	This symbol, if defined, indicates that the llrint routine is
- *	available to return the closest long long value according to
- *	the current rounding mode.
+ *	available to return the long long value closest to a double
+ *	(according to the current rounding mode).
  */
 #$d_llrint HAS_LLRINT		/**/
 
 /* HAS_LLRINTL:
  *	This symbol, if defined, indicates that the llrintl routine is
- *	available to return the closest long long value of the long double
- *	argument according to the current rounding mode.
+ *	available to return the long long value closest to a long double
+ *	(according to the current rounding mode).
  */
 #$d_llrintl HAS_LLRINTL		/**/
 
@@ -4056,15 +4049,15 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* HAS_LRINT:
  *	This symbol, if defined, indicates that the lrint routine is
- *	available to return the closest integral value according to
- *	the current rounding mode.
+ *	available to return the integral value closest to a double
+ *	(according to the current rounding mode).
  */
 #$d_lrint HAS_LRINT		/**/
 
 /* HAS_LRINTL:
  *	This symbol, if defined, indicates that the lrintl routine is
- *	available to return the closest integral value of the long double
- *	argument according to the current rounding mode.
+ *	available to return the integral value closest to a long double
+ *	(according to the current rounding mode).
  */
 #$d_lrintl HAS_LRINTL		/**/
 

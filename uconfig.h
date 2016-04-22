@@ -1954,9 +1954,8 @@
 #define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LE_BE	7
 #define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_LE	8
 #define LONG_DOUBLE_IS_UNKNOWN_FORMAT			-1
-/* Backward compat. */
-#define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LE_LE
-#define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_BE
+#define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LE_LE /* back-compat */
+#define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_BE /* back-compat */
 #endif
 
 /* HAS_LONG_LONG:
@@ -2296,43 +2295,37 @@
  *	This symbol, if defined, indicates that siginfo_t has the
  *	si_errno member
  */
-/*#define HAS_SIGINFO_SI_ERRNO	/ **/
-
 /* HAS_SIGINFO_SI_PID:
  *	This symbol, if defined, indicates that siginfo_t has the
  *	si_pid member
  */
-/*#define HAS_SIGINFO_SI_PID	/ **/
-
 /* HAS_SIGINFO_SI_UID:
  *	This symbol, if defined, indicates that siginfo_t has the
  *	si_uid member
  */
-/*#define HAS_SIGINFO_SI_UID	/ **/
-
 /* HAS_SIGINFO_SI_ADDR:
  *	This symbol, if defined, indicates that siginfo_t has the
  *	si_addr member
  */
-/*#define HAS_SIGINFO_SI_ADDR	/ **/
-
 /* HAS_SIGINFO_SI_STATUS:
  *	This symbol, if defined, indicates that siginfo_t has the
  *	si_status member
  */
-/*#define HAS_SIGINFO_SI_STATUS	/ **/
-
 /* HAS_SIGINFO_SI_BAND:
  *	This symbol, if defined, indicates that siginfo_t has the
  *	si_band member
  */
-/*#define HAS_SIGINFO_SI_BAND	/ **/
-
 /* HAS_SIGINFO_SI_VALUE:
  *	This symbol, if defined, indicates that siginfo_t has the
  *	si_value member
  */
-/*#define HAS_SIGINFO_SI_VALUE	/ **/
+/*#define	HAS_SIGINFO_SI_ERRNO	/ **/
+/*#define	HAS_SIGINFO_SI_PID	/ **/
+/*#define	HAS_SIGINFO_SI_UID	/ **/
+/*#define	HAS_SIGINFO_SI_ADDR	/ **/
+/*#define	HAS_SIGINFO_SI_STATUS	/ **/
+/*#define	HAS_SIGINFO_SI_BAND	/ **/
+/*#define	HAS_SIGINFO_SI_VALUE	/ **/
 
 /* HAS_SIGSETJMP:
  *	This variable indicates to the C program that the sigsetjmp()
@@ -3976,15 +3969,15 @@
 
 /* HAS_LLRINT:
  *	This symbol, if defined, indicates that the llrint routine is
- *	available to return the closest long long value according to
- *	the current rounding mode.
+ *	available to return the long long value closest to a double
+ *	(according to the current rounding mode).
  */
 /*#define HAS_LLRINT		/ **/
 
 /* HAS_LLRINTL:
  *	This symbol, if defined, indicates that the llrintl routine is
- *	available to return the closest long long value of the long double
- *	argument according to the current rounding mode.
+ *	available to return the long long value closest to a long double
+ *	(according to the current rounding mode).
  */
 /*#define HAS_LLRINTL		/ **/
 
@@ -4021,15 +4014,15 @@
 
 /* HAS_LRINT:
  *	This symbol, if defined, indicates that the lrint routine is
- *	available to return the closest integral value according to
- *	the current rounding mode.
+ *	available to return the integral value closest to a double
+ *	(according to the current rounding mode).
  */
 /*#define HAS_LRINT		/ **/
 
 /* HAS_LRINTL:
  *	This symbol, if defined, indicates that the lrintl routine is
- *	available to return the closest integral value of the long double
- *	argument according to the current rounding mode.
+ *	available to return the integral value closest to a long double
+ *	(according to the current rounding mode).
  */
 /*#define HAS_LRINTL		/ **/
 
@@ -5248,6 +5241,6 @@
 #endif
 
 /* Generated from:
- * dc6a0dd949dd1c707248914e2fdada06beb0e6193be5e94cb1423c6f050e65c3 config_h.SH
+ * 35e4b55654d9cf4aa7abd5caef04c5c7ac5bbfc024bb4eabfe952b6f1c48581b config_h.SH
  * fc611849cb5b1e14ec1687b255dac15414cc5e2e11b192d94e08136cfe277f75 uconfig.sh
  * ex: set ro: */

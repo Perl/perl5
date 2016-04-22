@@ -834,6 +834,10 @@ d_fd_set (d_fd_set.U):
 	This variable contains the eventual value of the HAS_FD_SET symbol,
 	which indicates if your C compiler knows about the fd_set typedef.
 
+d_fdclose (d_fdclose.U):
+	This variable conditionally defines the HAS_FDCLOSE symbol, which
+	indicates to the C program that the fdclose() routine is available.
+
 d_fdim (d_fdim.U):
 	This variable conditionally defines the HAS_FDIM symbol, which
 	indicates to the C program that the fdim() routine is available.
@@ -1405,6 +1409,10 @@ d_isinfl (d_isinfl.U):
 	This variable conditionally defines the HAS_ISINFL symbol, which
 	indicates to the C program that the isinfl() routine is available.
 
+d_isless (d_isless.U):
+	This variable conditionally defines the HAS_ISLESS symbol, which
+	indicates to the C program that the isless() routine is available.
+
 d_isnan (d_isnan.U):
 	This variable conditionally defines the HAS_ISNAN symbol, which
 	indicates to the C program that the isnan() routine is available.
@@ -1477,14 +1485,14 @@ d_link (d_link.U):
 d_llrint (d_llrint.U):
 	This variable conditionally defines the HAS_LLRINT symbol, which
 	indicates to the C program that the llrint() routine is available
-	to return the long long value closest to (according to the current
-	rounding mode) to x.
+	to return the long long value closest to a double (according
+	to the current rounding mode).
 
 d_llrintl (d_llrintl.U):
 	This variable conditionally defines the HAS_LLRINTL symbol, which
 	indicates to the C program that the llrintl() routine is available
-	to return the long long value closest to (according to the current
-	rounding mode) to long double x.
+	to return the long long value closest to a long double (according
+	to the current rounding mode).
 
 d_llround (d_llround.U):
 	This variable conditionally defines the HAS_LLROUND symbol, which
@@ -1494,7 +1502,7 @@ d_llround (d_llround.U):
 d_llroundl (d_llroundl.U):
 	This variable conditionally defines the HAS_LLROUNDL symbol, which
 	indicates to the C program that the llroundl() routine is available
-	to return the long long value nearest to long double x.
+	to return the long long value nearest to x away from zero.
 
 d_localtime64 (d_timefuncs64.U):
 	This variable conditionally defines the HAS_LOCALTIME64 symbol, which
@@ -1543,14 +1551,14 @@ d_longlong (d_longlong.U):
 d_lrint (d_lrint.U):
 	This variable conditionally defines the HAS_LRINT symbol, which
 	indicates to the C program that the lrint() routine is available
-	to return the integral value closest to (according to the current
-	rounding mode) to x.
+	to return the integral value closest to a double (according
+	to the current rounding mode).
 
 d_lrintl (d_lrintl.U):
 	This variable conditionally defines the HAS_LRINTL symbol, which
 	indicates to the C program that the lrintl() routine is available
-	to return the integral value closest to (according to the current
-	rounding mode) to long double x.
+	to return the integral value closest to a long double (according
+	to the current rounding mode).
 
 d_lround (d_lround.U):
 	This variable conditionally defines the HAS_LROUND symbol, which
@@ -1560,7 +1568,7 @@ d_lround (d_lround.U):
 d_lroundl (d_lroundl.U):
 	This variable conditionally defines the HAS_LROUNDL symbol, which
 	indicates to the C program that the lroundl() routine is available
-	to return the integral value nearest to x of the long double argument.
+	to return the integral value nearest to x away from zero.
 
 d_lseekproto (d_lseekproto.U):
 	This variable conditionally defines the HAS_LSEEK_PROTO symbol,
@@ -1684,6 +1692,31 @@ d_mprotect (d_mprotect.U):
 d_msg (d_msg.U):
 	This variable conditionally defines the HAS_MSG symbol, which
 	indicates that the entire msg*(2) library is present.
+
+d_msg_ctrunc (d_socket.U):
+	This variable conditionally defines the HAS_MSG_CTRUNC symbol,
+	which indicates that the MSG_CTRUNC is available.  #ifdef is
+	not enough because it may be an enum, glibc has been known to do this.
+
+d_msg_dontroute (d_socket.U):
+	This variable conditionally defines the HAS_MSG_DONTROUTE symbol,
+	which indicates that the MSG_DONTROUTE is available.  #ifdef is
+	not enough because it may be an enum, glibc has been known to do this.
+
+d_msg_oob (d_socket.U):
+	This variable conditionally defines the HAS_MSG_OOB symbol,
+	which indicates that the MSG_OOB is available.  #ifdef is
+	not enough because it may be an enum, glibc has been known to do this.
+
+d_msg_peek (d_socket.U):
+	This variable conditionally defines the HAS_MSG_PEEK symbol,
+	which indicates that the MSG_PEEK is available.  #ifdef is
+	not enough because it may be an enum, glibc has been known to do this.
+
+d_msg_proxy (d_socket.U):
+	This variable conditionally defines the HAS_MSG_PROXY symbol,
+	which indicates that the MSG_PROXY is available.  #ifdef is
+	not enough because it may be an enum, glibc has been known to do this.
 
 d_msgctl (d_msgctl.U):
 	This variable conditionally defines the HAS_MSGCTL symbol, which
@@ -2083,6 +2116,11 @@ d_sched_yield (d_pthread_y.U):
 	symbol if the sched_yield routine is available to yield
 	the execution of the current thread.
 
+d_scm_rights (d_socket.U):
+	This variable conditionally defines the HAS_SCM_RIGHTS symbol,
+	which indicates that the SCM_RIGHTS is available.  #ifdef is
+	not enough because it may be an enum, glibc has been known to do this.
+
 d_SCNfldbl (longdblfio.U):
 	This variable conditionally defines the PERL_PRIfldbl symbol, which
 	indicates that stdio has a symbol to scan long doubles.
@@ -2303,6 +2341,34 @@ d_shmget (d_shmget.U):
 d_sigaction (d_sigaction.U):
 	This variable conditionally defines the HAS_SIGACTION symbol, which
 	indicates that the Vr4 sigaction() routine is available.
+
+d_siginfo_si_addr (d_siginfo_si.U):
+	This variable conditionally defines the HAS_SIGINFO_SI_ADDR symbol,
+	which indicates that the siginfo_t struct has the si_addr member.
+
+d_siginfo_si_band (d_siginfo_si.U):
+	This variable conditionally defines the HAS_SIGINFO_SI_BAND symbol,
+	which indicates that the siginfo_t struct has the si_band member.
+
+d_siginfo_si_errno (d_siginfo_si.U):
+	This variable conditionally defines the HAS_SIGINFO_SI_ERRNO symbol,
+	which indicates that the siginfo_t struct has the si_errno member.
+
+d_siginfo_si_pid (d_siginfo_si.U):
+	This variable conditionally defines the HAS_SIGINFO_SI_PID symbol,
+	which indicates that the siginfo_t struct has the si_pid member.
+
+d_siginfo_si_status (d_siginfo_si.U):
+	This variable conditionally defines the HAS_SIGINFO_SI_STATUS symbol,
+	which indicates that the siginfo_t struct has the si_status member.
+
+d_siginfo_si_uid (d_siginfo_si.U):
+	This variable conditionally defines the HAS_SIGINFO_SI_UID symbol,
+	which indicates that the siginfo_t struct has the si_uid member.
+
+d_siginfo_si_value (d_siginfo_si.U):
+	This variable conditionally defines the HAS_SIGINFO_SI_VALUE symbol,
+	which indicates that the siginfo_t struct has the si_value member.
 
 d_signbit (d_signbit.U):
 	This variable conditionally defines the HAS_SIGNBIT symbol, which
@@ -2871,7 +2937,7 @@ drand48_r_proto (d_drand48_r.U):
 dtrace (usedtrace.U):
 	This variable holds the location of the dtrace executable.
 
-dtraceobject (usedtrace.U):
+dtraceobject (dtraceobject.U):
 	Whether we need to build an object file with the dtrace tool.
 
 dynamic_ext (Extensions.U):
@@ -4084,12 +4150,18 @@ longdblinfbytes (infnan.U):
 
 longdblkind (d_longdbl.U):
 	This variable, if defined, encodes the type of a long double:
-	0 = double, 1 = IEEE 754 128-bit little endian,
-	2 = IEEE 754 128-bit big endian, 3 = x86 80-bit little endian,
-	4 = x86 80-bit big endian, 5 = double-double 128-bit little endian,
-	6 = double-double 128-bit big endian, -1 = unknown format.
+	0 = double,
+	1 = IEEE 754 128-bit little endian,
+	2 = IEEE 754 128-bit big endian,
+	3 = x86 80-bit little endian,
+	4 = x86 80-bit big endian,
+	5 = double-double 128-bit little endian,
+	6 = double-double 128-bit big endian,
+	7 = 128-bit mixed double-double (64-bit LEs in BE),
+	8 = 128-bit mixed double-double (64-bit BEs in LE),
+	-1 = unknown format.
 
-longdblmantbits (longdblmant.U):
+longdblmantbits (mantbits.U):
 	This symbol, if defined, tells how many mantissa bits
 	there are in long double precision floating point format.
 	Note that this can be LDBL_MANT_DIG minus one,
