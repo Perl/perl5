@@ -304,7 +304,7 @@ Thread::Queue - Thread-safe queues
 
 =head1 VERSION
 
-This document describes Thread::Queue version 3.07
+This document describes Thread::Queue version 3.08
 
 =head1 SYNOPSIS
 
@@ -393,20 +393,20 @@ shared array reference via C<&shared([])>, copy the elements 'foo', 'bar'
 and 'baz' from C<@ary> into it, and then place that shared reference onto
 the queue:
 
-    my @ary = qw/foo bar baz/;
-    $q->enqueue(\@ary);
+ my @ary = qw/foo bar baz/;
+ $q->enqueue(\@ary);
 
 However, for the following, the items are already shared, so their references
 are added directly to the queue, and no cloning takes place:
 
-    my @ary :shared = qw/foo bar baz/;
-    $q->enqueue(\@ary);
+ my @ary :shared = qw/foo bar baz/;
+ $q->enqueue(\@ary);
 
-    my $obj = &shared({});
-    $$obj{'foo'} = 'bar';
-    $$obj{'qux'} = 99;
-    bless($obj, 'My::Class');
-    $q->enqueue($obj);
+ my $obj = &shared({});
+ $$obj{'foo'} = 'bar';
+ $$obj{'qux'} = 99;
+ bless($obj, 'My::Class');
+ $q->enqueue($obj);
 
 See L</"LIMITATIONS"> for caveats related to passing objects via queues.
 
@@ -546,18 +546,18 @@ Adds the list of items to the queue at the specified index position (0
 is the head of the list).  Any existing items at and beyond that position are
 pushed back past the newly added items:
 
-    $q->enqueue(1, 2, 3, 4);
-    $q->insert(1, qw/foo bar/);
-    # Queue now contains:  1, foo, bar, 2, 3, 4
+ $q->enqueue(1, 2, 3, 4);
+ $q->insert(1, qw/foo bar/);
+ # Queue now contains:  1, foo, bar, 2, 3, 4
 
 Specifying an index position greater than the number of items in the queue
 just adds the list to the end.
 
 Negative index positions are supported:
 
-    $q->enqueue(1, 2, 3, 4);
-    $q->insert(-2, qw/foo bar/);
-    # Queue now contains:  1, 2, foo, bar, 3, 4
+ $q->enqueue(1, 2, 3, 4);
+ $q->insert(-2, qw/foo bar/);
+ # Queue now contains:  1, 2, foo, bar, 3, 4
 
 Specifying a negative index position greater than the number of items in the
 queue adds the list to the head of the queue.
@@ -575,18 +575,18 @@ called with no arguments, C<extract> operates the same as C<dequeue_nb>.
 This method is non-blocking, and will return only as many items as are
 available to fulfill the request:
 
-    $q->enqueue(1, 2, 3, 4);
-    my $item  = $q->extract(2)     # Returns 3
-                                   # Queue now contains:  1, 2, 4
-    my @items = $q->extract(1, 3)  # Returns (2, 4)
-                                   # Queue now contains:  1
+ $q->enqueue(1, 2, 3, 4);
+ my $item  = $q->extract(2)     # Returns 3
+                                # Queue now contains:  1, 2, 4
+ my @items = $q->extract(1, 3)  # Returns (2, 4)
+                                # Queue now contains:  1
 
 Specifying an index position greater than the number of items in the
 queue results in C<undef> or an empty list being returned.
 
-    $q->enqueue('foo');
-    my $nada = $q->extract(3)      # Returns undef
-    my @nada = $q->extract(1, 3)   # Returns ()
+ $q->enqueue('foo');
+ my $nada = $q->extract(3)      # Returns undef
+ my @nada = $q->extract(1, 3)   # Returns ()
 
 Negative index positions are supported.  Specifying a negative index position
 greater than the number of items in the queue may return items from the head
@@ -598,8 +598,8 @@ greater than zero):
  my @nada = $q->extract(-6, 2);  # Returns ()      - (3+(-6)+2) <= 0
  my @some = $q->extract(-6, 4);  # Returns (foo)   - (3+(-6)+4) > 0
                                  # Queue now contains:  bar, baz
- my @rest = $q->extract(-3, 4);  # Returns
-                                 #       (bar, baz) - (2+(-3)+4) > 0
+ my @rest = $q->extract(-3, 4);  # Returns (bar, baz) -
+                                 #                   (2+(-3)+4) > 0
 
 =back
 
