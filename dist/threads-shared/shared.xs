@@ -1166,20 +1166,6 @@ const MGVTBL sharedsv_array_vtbl = {
 };
 
 
-#if 0
-/* XXX unused dead code */
-/* Recursively unlocks a shared sv. */
-
-static void
-Perl_sharedsv_unlock(pTHX_ SV *ssv)
-{
-    user_lock *ul = S_get_userlock(aTHX_ ssv, 0);
-    assert(ul);
-    recursive_lock_release(aTHX_ &ul->lock);
-}
-#endif
-
-
 /* Recursive locks on a sharedsv.
  * Locks are dynamically scoped at the level of the first lock.
  */
