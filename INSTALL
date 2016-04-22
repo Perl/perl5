@@ -1922,11 +1922,11 @@ specify which target environment to use, as well as C<ar> and friends:
 
 Additionally, a cross-compilation toolchain will usually install it's own
 logical system root somewhere -- that is, it'll create a directory
-somewhere which includes subdirectories like 'include' or 'lib'.  For
-example, you may end up with C</skiff/local/arm-linux>, where
-C</skiff/local/arm-linux/bin> holds the binaries for cross-compilation,
-C</skiff/local/arm-linux/include> has the headers, and
-C</skiff/local/arm-linux/lib> has the library files.
+somewhere which includes subdirectories like C<'include'> or C<'lib'>.  For
+example, you may end up with F</skiff/local/arm-linux>, where
+F</skiff/local/arm-linux/bin> holds the binaries for cross-compilation,
+F</skiff/local/arm-linux/include> has the headers, and
+F</skiff/local/arm-linux/lib> has the library files.
 If this is the case, and you are using a compiler that understands
 C<--sysroot>, like gcc or clang, you'll want to specify the
 C<-Dsysroot> option for Configure:

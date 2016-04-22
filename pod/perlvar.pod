@@ -1720,7 +1720,7 @@ from within the Win32 API.  Most Win32-specific code will report errors
 via C<$^E>.  ANSI C and Unix-like calls set C<errno> and so most
 portable Perl code will report errors via C<$!>.
 
-Caveats mentioned in the description of C<L<$!>> generally apply to
+Caveats mentioned in the description of C<L</$!>> generally apply to
 C<$^E>, also.
 
 This variable was added in Perl 5.003.

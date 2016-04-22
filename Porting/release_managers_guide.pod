@@ -1483,19 +1483,19 @@ to ensure that the tarballs are available on the website.
 
 =item *
 
-Check C</src> on CPAN (on a fast mirror) to ensure that links to
-the new tarballs have appeared: There should be links in C</src/5.0>
+Check F</src> on CPAN (on a fast mirror) to ensure that links to
+the new tarballs have appeared: There should be links in F</src/5.0>
 (which is accumulating all new versions), and (for BLEAD-FINAL and
-MAINT only) an appropriate mention in C</src/README.html> (which describes
+MAINT only) an appropriate mention in F</src/README.html> (which describes
 the latest versions in each stable branch, with links).
 
-The C</src/5.0> links should appear automatically, some hours after upload.
-If they don't, or the C</src> description is inadequate,
+The F</src/5.0> links should appear automatically, some hours after upload.
+If they don't, or the F</src> description is inadequate,
 ask Ask <ask@perl.org>.
 
 =item *
 
-Check L<http://www.cpan.org/src/> to ensure that the C</src> updates
+Check L<http://www.cpan.org/src/> to ensure that the F</src> updates
 have been correctly mirrored to the website.
 If they haven't, ask Ask <ask@perl.org>.
 

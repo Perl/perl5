@@ -258,7 +258,7 @@ produces a warning unless you use S<C<no warnings 'experimental::bitwise'>>.
 Unary C<"+"> has no effect whatsoever, even on strings.  It is useful
 syntactically for separating a function name from a parenthesized expression
 that would otherwise be interpreted as the complete list of function
-arguments.  (See examples above under L<Terms and List Operators (Leftward)>.)
+arguments.  (See examples above under L</Terms and List Operators (Leftward)>.)
 X<+>
 
 Unary C<"\"> creates a reference to whatever follows it.  See L<perlreftut>
@@ -1272,7 +1272,7 @@ in which case you might as well just use the more customary C<"||"> operator:
 
     open(HANDLE, "< :utf8", "filename") || die "Can't open: $!\n";
 
-See also discussion of list operators in L<Terms and List Operators (Leftward)>.
+See also discussion of list operators in L</Terms and List Operators (Leftward)>.
 
 =head2 Logical Not
 X<operator, logical, not> X<not>

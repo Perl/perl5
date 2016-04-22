@@ -189,12 +189,12 @@ commit 7a8f1212e5482613c8a5b0402528e3105b26ff24.
 
 =over 4
 
-=item C<ext/DynaLoader/t/DynaLoader.t>
+=item F<ext/DynaLoader/t/DynaLoader.t>
 
 One subtest fails due to the uncommon structure of the Synology file
-system. The file C</lib/glibc.so> is missing.
+system. The file F</lib/glibc.so> is missing.
 
-B<WARNING:> Do not symlink C</lib/glibc.so.6> to C</lib/glibc.so> or
+B<WARNING:> Do not symlink F</lib/glibc.so.6> to F</lib/glibc.so> or
 some system components will start to fail.
 
 =back

@@ -2742,7 +2742,7 @@ source, like this:
  =for apidoc sv_setiv
 
  Copies an integer into the given SV.  Does not handle 'set' magic.  See
- C<sv_setiv_mg>.
+ L<perlapi/sv_setiv_mg>.
 
  =cut
  */

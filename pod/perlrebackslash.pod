@@ -537,7 +537,7 @@ C<\b> when not immediately followed by a C<"{"> matches at any place
 between a word (something matched by C<\w>) and a non-word character
 (C<\W>); C<\B> when not immediately followed by a C<"{"> matches at any
 place between characters where C<\b> doesn't match.  To get better
-word matching of natural language text, see L<\b{wb}> below.
+word matching of natural language text, see L</\b{wb}> below.
 
 C<\b>
 and C<\B> assume there's a non-word character before the beginning and after
