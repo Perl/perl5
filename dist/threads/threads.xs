@@ -20,13 +20,12 @@
 #endif
 #ifdef HAS_PPPORT_H
 #  define NEED_PL_signals
-#  define NEED_newRV_noinc
 #  define NEED_sv_2pv_flags
 #  include "ppport.h"
 #  include "threads.h"
 #endif
 #ifndef sv_dup_inc
-#  define sv_dup_inc(s,t)	SvREFCNT_inc(sv_dup(s,t))
+#  define sv_dup_inc(s,t) SvREFCNT_inc(sv_dup(s,t))
 #endif
 #ifndef PERL_UNUSED_RESULT
 #  if defined(__GNUC__) && defined(HASATTRIBUTE_WARN_UNUSED_RESULT)
@@ -476,13 +475,13 @@ S_good_stack_size(pTHX_ IV stack_size)
     return (stack_size);
 }
 
-/* run some code within a JMPENV environment.
- * Having it in a separate small function helps avoid
- * 'variable ‘foo’ might be clobbered by ‘longjmp’
+
+/* Run code within a JMPENV environment.
+ * Using a separate function avoids
+ *   "variable 'foo' might be clobbered by 'longjmp'"
  * warnings.
  * The three _p vars return values to the caller
  */
-
 static int
 S_jmpenv_run(pTHX_ int action, ithread *thread,
              int *len_p, int *exit_app_p, int *exit_code_p)
@@ -496,12 +495,10 @@ S_jmpenv_run(pTHX_ int action, ithread *thread,
         if (action == 0) {
             /* Run the specified function */
             *len_p = (int)call_sv(thread->init_function, thread->gimme|G_EVAL);
-        }
-        else if (action == 1) {
+        } else if (action == 1) {
             /* Warn that thread died */
             Perl_warn(aTHX_ "Thread %" UVuf " terminated abnormally: %" SVf, thread->tid, ERRSV);
-        }
-        else {
+        } else {
             /* Warn if there are unjoined threads */
             S_exit_warning(aTHX);
         }
@@ -1018,8 +1015,9 @@ S_ithread_create(
     my_pool->running_threads++;
     MUTEX_UNLOCK(&my_pool->create_destruct_mutex);
     return (thread);
-CLANG_DIAG_IGNORE(-Wthread-safety);
-/* warning: mutex 'thread->mutex' is not held on every path through here [-Wthread-safety-analysis] */
+
+    CLANG_DIAG_IGNORE(-Wthread-safety);
+    /* warning: mutex 'thread->mutex' is not held on every path through here [-Wthread-safety-analysis] */
 }
 #if defined(__clang__) || defined(__clang)
 CLANG_DIAG_RESTORE;
@@ -1161,10 +1159,10 @@ ithread_create(...)
 
         /* Let thread run. */
         /* See S_ithread_run() for more detail. */
-	CLANG_DIAG_IGNORE(-Wthread-safety);
-	/* warning: releasing mutex 'thread->mutex' that was not held [-Wthread-safety-analysis] */
+        CLANG_DIAG_IGNORE(-Wthread-safety);
+        /* warning: releasing mutex 'thread->mutex' that was not held [-Wthread-safety-analysis] */
         MUTEX_UNLOCK(&thread->mutex);
-	CLANG_DIAG_RESTORE;
+        CLANG_DIAG_RESTORE;
 
         /* XSRETURN(1); - implied */
 
