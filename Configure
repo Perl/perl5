@@ -666,7 +666,6 @@ d_mktime=''
 d_mmap=''
 mmaptype=''
 d_modfl=''
-d_modfl_pow32_bug=''
 d_modflproto=''
 d_mprotect=''
 d_msg=''
@@ -789,12 +788,12 @@ d_shmctl=''
 d_shmdt=''
 d_shmget=''
 d_sigaction=''
+d_siginfo_si_addr=''
+d_siginfo_si_band=''
 d_siginfo_si_errno=''
 d_siginfo_si_pid=''
-d_siginfo_si_uid=''
-d_siginfo_si_addr=''
 d_siginfo_si_status=''
-d_siginfo_si_band=''
+d_siginfo_si_uid=''
 d_siginfo_si_value=''
 d_signbit=''
 d_sigprocmask=''
@@ -937,6 +936,7 @@ ld_can_script=''
 lddlflags=''
 usedl=''
 doublesize=''
+dtraceobject=''
 ebcdic=''
 fflushNULL=''
 fflushall=''
@@ -1321,7 +1321,6 @@ use64bitall=''
 use64bitint=''
 usecbacktrace=''
 dtrace=''
-dtraceobject=''
 usedtrace=''
 usefaststdio=''
 usekernprocpathname=''
@@ -8176,33 +8175,6 @@ EOM
 	esac
 done
 
-case "$usedtrace" in
-$define)
-	case "$dtraceobject" in
-	$define|true|[yY]*)
-		dtraceobject=$define
-		;;
-	' '|'')
-		$dtrace -h -s ../perldtrace.d -o perldtrace.h
-		$cat >try.c <<EOM
-#include "perldtrace.h"
-int main(void) {
-    PERL_LOADED_FILE("dummy");
-    return 0;
-}
-EOM
-		dtraceobject=$undef
-		if $cc -c -o try.o $optimize $ccflags try.c \
-                    && $dtrace -G -s ../perldtrace.d try.o >/dev/null 2>&1; then
-		        dtraceobject=$define
-			echo "Your dtrace builds an object file"
-		fi
-		$rm -f try.c try.o perldtrace.o
-		;;
-	*) dtraceobject=$undef ;;
-	esac
-esac
-
 : See if we want extra modules installed
 echo " "
 case "$extras" in
@@ -10787,25 +10759,6 @@ while $test $# -ge 2; do
     shift 2;
 done > try.c;
 echo "int main () { struct $struct foo; char* bar; bar = (char*)foo.$field; }" >> try.c;
-set try;
-if eval $compile; then
-	val="$define";
-else
-	val="$undef";
-fi;
-set $varname;
-eval $setvar;
-$rm_try'
-
-: Define hasfield_t macro for Configure internal use
-hasfield_t='varname=$1; struct=$2; type=$3; field=$4; shift; shift; shift; shift;
-while $test $# -ge 2; do
-	case "$1" in
-	$define) echo "#include <$2>";;
-	esac ;
-    shift 2;
-done > try.c;
-echo "int main () { $struct foo; $type bar = foo.$field; }" >> try.c;
 set try;
 if eval $compile; then
 	val="$define";
@@ -14174,6 +14127,18 @@ $rm_try
 set d_fpos64_t
 eval $setvar
 
+: see if newlocale exists
+set newlocale d_newlocale
+eval $inlibc
+
+: see if freelocale exists
+set freelocale d_freelocale
+eval $inlibc
+
+: see if uselocale exists
+set uselocale d_uselocale
+eval $inlibc
+
 : see if frexpl exists
 set frexpl d_frexpl
 eval $inlibc
@@ -16438,69 +16403,6 @@ echo " "
 set d_modflproto modfl $i_math math.h
 eval $hasproto
 
-d_modfl_pow32_bug="$undef"
-
-case "$d_longdbl$d_modfl" in
-$define$define)
-	$cat <<EOM
-Checking to see whether your modfl() is okay for large values...
-EOM
-$cat >try.c <<EOCP
-#include <math.h>
-#include <stdio.h>
-EOCP
-if $test "X$d_modflproto" != "X$define"; then
-	$cat >>try.c <<EOCP
-/* Sigh. many current glibcs provide the function, but do not prototype it. */
-long double modfl (long double, long double *);
-EOCP
-fi
-$cat >>try.c <<EOCP
-int main() {
-    long double nv = 4294967303.15;
-    long double v, w;
-    v = modfl(nv, &w);
-#ifdef __GLIBC__
-    printf("glibc");
-#endif
-    printf(" %"$sPRIfldbl" %"$sPRIfldbl" %"$sPRIfldbl"\n", nv, v, w);
-    return 0;
-}
-EOCP
-	case "$osname:$gccversion" in
-	aix:)	saveccflags="$ccflags"
-		ccflags="$ccflags -qlongdouble" ;; # to avoid core dump
-	esac
-	set try
-	if eval $compile; then
-		foo=`$run ./try`
-		case "$foo" in
-		*" 4294967303.150000 1.150000 4294967302.000000")
-			echo >&4 "Your modfl() is broken for large values."
-			d_modfl_pow32_bug="$define"
-			case "$foo" in
-			glibc)	echo >&4 "You should upgrade your glibc to at least 2.2.2 to get a fixed modfl()."
-			;;
-			esac
-			;;
-		*" 4294967303.150000 0.150000 4294967303.000000")
-			echo >&4 "Your modfl() seems okay for large values."
-			;;
-		*)	echo >&4 "I don't understand your modfl() at all."
-			d_modfl="$undef"
-			;;
-		esac
-		$rm_try
-	else
-		echo "I cannot figure out whether your modfl() is okay, assuming it isn't."
-		d_modfl="$undef"
-	fi
-	case "$osname:$gccversion" in
-	aix:)	ccflags="$saveccflags" ;; # restore
-	esac
-	;;
-esac
-
 if $test "$uselongdouble" = "$define"; then
     message=""
     if $test "$d_sqrtl" != "$define"; then
@@ -16624,18 +16526,6 @@ eval $inlibc
 
 : see if nearbyint exists
 set nearbyint d_nearbyint
-eval $inlibc
-
-: see if newlocale exists
-set newlocale d_newlocale
-eval $inlibc
-
-: see if freelocale exists
-set freelocale d_freelocale
-eval $inlibc
-
-: see if uselocale exists
-set uselocale d_uselocale
 eval $inlibc
 
 : see if nextafter exists
@@ -18687,6 +18577,97 @@ else
 fi
 set d_sigaction; eval $setvar
 $rm_try
+
+: see what type pids are declared as in the kernel
+rp="What is the type of process ids on this system?"
+set pid_t pidtype int stdio.h sys/types.h
+eval $typedef_ask
+
+: see what type uids are declared as in the kernel
+echo " "
+echo "Looking for the type for user ids returned by getuid()."
+set uid_t uidtype xxx stdio.h sys/types.h
+eval $typedef
+case "$uidtype" in
+xxx)
+	xxx=`./findhdr sys/user.h`
+	set `grep '_ruid;' "$xxx" 2>/dev/null` unsigned short
+	case $1 in
+	unsigned) dflt="$1 $2" ;;
+	*) dflt="$1" ;;
+	esac
+	;;
+*) dflt="$uidtype";;
+esac
+case "$uidtype" in
+uid_t)	echo "uid_t found." ;;
+*)	rp="What is the type for user ids returned by getuid()?"
+	. ./myread
+	uidtype="$ans"
+	;;
+esac
+
+: Define hasfield_t macro for Configure internal use
+hasfield_t='varname=$1; struct=$2; type=$3; field=$4; shift; shift; shift; shift;
+while $test $# -ge 2; do
+    case "$1" in
+	$define) echo "#include <$2>";;
+    esac ;
+    shift 2;
+done > try.c;
+echo "int main () { $struct foo; $type bar = foo.$field; }" >> try.c;
+set try;
+if eval $compile; then
+	val="$define";
+else
+	val="$undef";
+fi;
+set $varname;
+eval $setvar;
+$rm_try'
+
+: see what siginfo fields we have
+case "$d_sigaction" in
+"$define")
+	echo "Checking if your siginfo_t has si_errno field...">&4
+	set d_siginfo_si_errno siginfo_t int si_errno $d_sigaction signal.h
+	eval $hasfield_t;
+
+	echo "Checking if your siginfo_t has si_pid field...">&4
+	set d_siginfo_si_pid siginfo_t $pidtype si_pid $d_sigaction signal.h
+	eval $hasfield_t;
+
+	echo "Checking if your siginfo_t has si_uid field...">&4
+	set d_siginfo_si_uid siginfo_t $uidtype si_uid $d_sigaction signal.h
+	eval $hasfield_t;
+
+	echo "Checking if your siginfo_t has si_addr field...">&4
+	set d_siginfo_si_addr siginfo_t "void *" si_addr $d_sigaction signal.h
+	eval $hasfield_t;
+
+	echo "Checking if your siginfo_t has si_status field...">&4
+	set d_siginfo_si_status siginfo_t int si_status $d_sigaction signal.h
+	eval $hasfield_t;
+
+	echo "Checking if your siginfo_t has si_band field...">&4
+	set d_siginfo_si_band siginfo_t long si_band $d_sigaction signal.h
+	eval $hasfield_t;
+
+	echo "Checking if your siginfo_t has si_value field...">&4
+	set d_siginfo_si_value siginfo_t "union sigval" si_value $d_sigaction signal.h
+	eval $hasfield_t;
+
+	;;
+*)
+	d_siginfo_si_errno="$undef"
+	d_siginfo_si_pid="$undef"
+	d_siginfo_si_uid="$undef"
+	d_siginfo_si_addr="$undef"
+	d_siginfo_si_status="$undef"
+	d_siginfo_si_band="$undef"
+	d_siginfo_si_value="$undef"
+	;;
+esac
 
 : see if this is a sunmath.h system
 set sunmath.h i_sunmath
@@ -20751,6 +20732,35 @@ seedfunc="Perl_drand48_init"
 randbits=48
 randseedtype=U32
 
+: Probe whether dtrace builds an object, as newer Illumos requires an input
+: object file that uses at least one of the probes defined in the .d file
+case "$usedtrace" in
+$define)
+    case "$dtraceobject" in
+    $define|true|[yY]*)
+        dtraceobject=$define
+        ;;
+    ' '|'')
+        $dtrace -h -s ../perldtrace.d -o perldtrace.h
+        $cat >try.c <<EOM
+#include "perldtrace.h"
+int main(void) {
+    PERL_LOADED_FILE("dummy");
+    return 0;
+}
+EOM
+        dtraceobject=$undef
+        if $cc -c -o try.o $optimize $ccflags try.c \
+                    && $dtrace -G -s ../perldtrace.d try.o >/dev/null 2>&1; then
+                dtraceobject=$define
+            echo "Your dtrace builds an object file"
+        fi
+        $rm -f try.c try.o perldtrace.o
+        ;;
+    *) dtraceobject=$undef ;;
+    esac
+esac
+
 : Determine if this is an EBCDIC system
 echo " "
 echo "Determining whether or not we are on an EBCDIC system..." >&4
@@ -21734,11 +21744,6 @@ rp='What pager is used on your system?'
 . ./getfile
 pager="$ans"
 
-: see what type pids are declared as in the kernel
-rp="What is the type of process ids on this system?"
-set pid_t pidtype int stdio.h sys/types.h
-eval $typedef_ask
-
 : see if ar generates random libraries by itself
 echo " "
 echo "Checking how to generate random libraries on your machine..." >&4
@@ -22343,8 +22348,12 @@ $rm -f signal.c signal$_exe signal$_o signal.nsg signal.ls1
 EOS
 chmod a+x signal_cmd
 $eunicefix signal_cmd
+;;
+esac
 
 : generate list of signal names
+case "$sig_num_init" in
+'')
 echo " "
 case "$sig_name_init" in
 '') doinit=yes ;;
@@ -22626,30 +22635,6 @@ else
 fi
 $rm -f stdioh
 
-: see what type uids are declared as in the kernel
-echo " "
-echo "Looking for the type for user ids returned by getuid()."
-set uid_t uidtype xxx stdio.h sys/types.h
-eval $typedef
-case "$uidtype" in
-xxx)
-	xxx=`./findhdr sys/user.h`
-	set `grep '_ruid;' "$xxx" 2>/dev/null` unsigned short
-	case $1 in
-	unsigned) dflt="$1 $2" ;;
-	*) dflt="$1" ;;
-	esac
-	;;
-*) dflt="$uidtype";;
-esac
-case "$uidtype" in
-uid_t)	echo "uid_t found." ;;
-*)	rp="What is the type for user ids returned by getuid()?"
-	. ./myread
-	uidtype="$ans"
-	;;
-esac
-
 : Check size of UID
 echo " "
 case "$uidtype" in
@@ -22759,49 +22744,6 @@ case "$uidsign" in
 			fi
 		fi
 	fi
-	;;
-esac
-
-: see what siginfo fields we have
-case "$d_sigaction" in
-"$define")
-	echo "Checking if your siginfo_t has si_errno field...">&4
-	set d_siginfo_si_errno siginfo_t int si_errno $d_sigaction signal.h
-	eval $hasfield_t;
-
-	echo "Checking if your siginfo_t has si_pid field...">&4
-	set d_siginfo_si_pid siginfo_t $pidtype si_pid $d_sigaction signal.h
-	eval $hasfield_t;
-
-	echo "Checking if your siginfo_t has si_uid field...">&4
-	set d_siginfo_si_uid siginfo_t $uidtype si_uid $d_sigaction signal.h
-	eval $hasfield_t;
-
-	echo "Checking if your siginfo_t has si_addr field...">&4
-	set d_siginfo_si_addr siginfo_t "void *" si_addr $d_sigaction signal.h
-	eval $hasfield_t;
-
-	echo "Checking if your siginfo_t has si_status field...">&4
-	set d_siginfo_si_status siginfo_t int si_status $d_sigaction signal.h
-	eval $hasfield_t;
-
-	echo "Checking if your siginfo_t has si_band field...">&4
-	set d_siginfo_si_band siginfo_t long si_band $d_sigaction signal.h
-	eval $hasfield_t;
-
-	echo "Checking if your siginfo_t has si_value field...">&4
-	set d_siginfo_si_value siginfo_t "union sigval" si_value $d_sigaction signal.h
-	eval $hasfield_t;
-
-	;;
-*)
-	d_siginfo_si_errno="$undef"
-	d_siginfo_si_pid="$undef"
-	d_siginfo_si_uid="$undef"
-	d_siginfo_si_addr="$undef"
-	d_siginfo_si_status="$undef"
-	d_siginfo_si_band="$undef"
-	d_siginfo_si_value="$undef"
 	;;
 esac
 
@@ -23311,7 +23253,7 @@ case "$osname-$gccversion" in
 irix-) ccflags="\$ccflags -woff 1178" ;;
 os2-*) ccflags="\$ccflags -Zlinker /PM:VIO" ;;
 esac
-$cc -o try -Dcpp_stuff=$cpp_stuff $optimize \$ccflags $ldflags try.c $libs 2>/dev/null && $run ./try  | $sed 's/ /\\\\ /g'
+$cc -o try -Dcpp_stuff=$cpp_stuff $optimize \$ccflags $ldflags try.c $libs 2>/dev/null && $run ./try | $sed 's/ /\\\\ /g'
 EOSH
 chmod +x Cppsym.try
 $eunicefix Cppsym.try
@@ -24502,7 +24444,6 @@ d_mktime64='$d_mktime64'
 d_mktime='$d_mktime'
 d_mmap='$d_mmap'
 d_modfl='$d_modfl'
-d_modfl_pow32_bug='$d_modfl_pow32_bug'
 d_modflproto='$d_modflproto'
 d_mprotect='$d_mprotect'
 d_msg='$d_msg'
@@ -24634,12 +24575,12 @@ d_shmctl='$d_shmctl'
 d_shmdt='$d_shmdt'
 d_shmget='$d_shmget'
 d_sigaction='$d_sigaction'
+d_siginfo_si_addr='$d_siginfo_si_addr'
+d_siginfo_si_band='$d_siginfo_si_band'
 d_siginfo_si_errno='$d_siginfo_si_errno'
 d_siginfo_si_pid='$d_siginfo_si_pid'
-d_siginfo_si_uid='$d_siginfo_si_uid'
-d_siginfo_si_addr='$d_siginfo_si_addr'
 d_siginfo_si_status='$d_siginfo_si_status'
-d_siginfo_si_band='$d_siginfo_si_band'
+d_siginfo_si_uid='$d_siginfo_si_uid'
 d_siginfo_si_value='$d_siginfo_si_value'
 d_signbit='$d_signbit'
 d_sigprocmask='$d_sigprocmask'
