@@ -12375,6 +12375,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Pod::Text::Color'      => '4.07',
             'Pod::Text::Overstrike' => '4.07',
             'Pod::Text::Termcap'    => '4.07',
+            'Time::HiRes'           => '1.9733',
         },
         removed => {
         }
