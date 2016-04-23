@@ -1,5 +1,8 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9733 [2016-04-23]
+  - [rt #113856] C90 declaration-after-statement error with darwin threads
+
 1.9732 [2016-03-13]
   - MUTEX_LOCK, not PERL_MUTEX_LOCK: blead e5b02b5d
   - also hrt_ualarm_itimer() is unused: 1cb6cce3
