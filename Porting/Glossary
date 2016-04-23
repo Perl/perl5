@@ -714,6 +714,11 @@ d_dup2 (d_dup2.U):
 	This variable conditionally defines HAS_DUP2 if dup2() is
 	available to duplicate file descriptors.
 
+d_duplocale (d_newlocale.U):
+	This variable conditionally defines the HAS_DUPLOCALE symbol, which
+	indicates to the C program that the duplocale() routine is available
+	to duplicate a locale object.
+
 d_eaccess (d_eaccess.U):
 	This variable conditionally defines the HAS_EACCESS symbol, which
 	indicates to the C program that the eaccess() routine is available.
@@ -2354,6 +2359,10 @@ d_siginfo_si_errno (d_siginfo_si.U):
 	This variable conditionally defines the HAS_SIGINFO_SI_ERRNO symbol,
 	which indicates that the siginfo_t struct has the si_errno member.
 
+d_siginfo_si_fd (d_siginfo_si.U):
+	This variable conditionally defines the HAS_SIGINFO_SI_FD symbol,
+	which indicates that the siginfo_t struct has the si_fd member.
+
 d_siginfo_si_pid (d_siginfo_si.U):
 	This variable conditionally defines the HAS_SIGINFO_SI_PID symbol,
 	which indicates that the siginfo_t struct has the si_pid member.
@@ -3763,6 +3772,10 @@ i_varhdr (i_varhdr.U):
 i_vfork (i_vfork.U):
 	This variable conditionally defines the I_VFORK symbol, and indicates
 	whether a C program should include vfork.h.
+
+i_xlocale (d_newlocale.U):
+	This symbol, if defined, indicates to the C program that it should
+	include <xlocale.h> to get uselocale() and its friends
 
 ignore_versioned_solibs (libs.U):
 	This variable should be non-empty if non-versioned shared
