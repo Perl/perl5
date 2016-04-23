@@ -678,9 +678,11 @@ d_msync=''
 d_munmap=''
 d_nan=''
 d_nearbyint=''
+d_duplocale=''
 d_freelocale=''
 d_newlocale=''
 d_uselocale=''
+i_xlocale=''
 d_nextafter=''
 d_nexttoward=''
 d_nice=''
@@ -791,6 +793,7 @@ d_sigaction=''
 d_siginfo_si_addr=''
 d_siginfo_si_band=''
 d_siginfo_si_errno=''
+d_siginfo_si_fd=''
 d_siginfo_si_pid=''
 d_siginfo_si_status=''
 d_siginfo_si_uid=''
@@ -1420,10 +1423,6 @@ fi
 
 groupstype=''
 i_whoami=''
-: Trailing extension.  Override this in a hint file, if needed.
-: Extra object files, if any, needed on this platform.
-archobjs=''
-archname=''
 : Possible local include directories to search.
 : Set locincpth to "" in a hint file to defeat local include searches.
 locincpth="/usr/local/include /opt/local/include /usr/gnu/include"
@@ -1436,6 +1435,9 @@ inclwanted=''
 EBUGGING=''
 DEBUGGING=''
 
+: Trailing extension.  Override this in a hint file, if needed.
+: Extra object files, if any, needed on this platform.
+archobjs=''
 libnames=''
 : change the next line if compiling for Xenix/286 on Xenix/386
 xlibpth='/usr/lib/386 /lib/386'
@@ -1459,8 +1461,6 @@ plibpth=''
 libswanted=''
 : some systems want to use only the non-versioned libso:s
 ignore_versioned_solibs=''
-: set usethreads on the Configure command line to enable threads.
-usereentrant='undef'
 ccname=''
 ccversion=''
 perllibs=''
@@ -1474,6 +1474,9 @@ ldflags_uselargefiles=''
 libswanted_uselargefiles=''
 : set usemultiplicity on the Configure command line to enable multiplicity.
 : set usesocks on the Configure command line to enable socks.
+archname=''
+: set usethreads on the Configure command line to enable threads.
+usereentrant='undef'
 : List of libraries we want.
 : If anyone needs extra -lxxx, put those in a hint file.
 libswanted="cl pthread socket bind inet nsl ndbm gdbm dbm db malloc dl ld"
@@ -2131,22 +2134,21 @@ fi
 rm -f missing x??
 
 : Find the appropriate value for a newline for tr
-echo " "
 if test -n "$DJGPP"; then
        trnl='\012'
 fi
 if test X"$trnl" = X; then
-	case "`echo foo|tr '\n' x 2>/dev/null`" in
+	case "`echo foo | tr '\n' x 2>/dev/null`" in
 	foox) trnl='\n' ;;
 	esac
 fi
 if test X"$trnl" = X; then
-	case "`echo foo|tr '\012' x 2>/dev/null`" in
+	case "`echo foo | tr '\012' x 2>/dev/null`" in
 	foox) trnl='\012' ;;
 	esac
 fi
 if test X"$trnl" = X; then
-       case "`echo foo|tr '\r\n' xy 2>/dev/null`" in
+       case "`echo foo | tr '\r\n' xy 2>/dev/null`" in
        fooxy) trnl='\n\r' ;;
        esac
 fi
@@ -14127,6 +14129,10 @@ $rm_try
 set d_fpos64_t
 eval $setvar
 
+: see if this is an xlocale.h system
+set xlocale.h i_xlocale
+eval $inhdr
+
 : see if newlocale exists
 set newlocale d_newlocale
 eval $inlibc
@@ -14137,6 +14143,10 @@ eval $inlibc
 
 : see if uselocale exists
 set uselocale d_uselocale
+eval $inlibc
+
+: see if duplocale exists
+set duplocale d_duplocale
 eval $inlibc
 
 : see if frexpl exists
@@ -18657,6 +18667,10 @@ case "$d_sigaction" in
 	set d_siginfo_si_value siginfo_t "union sigval" si_value $d_sigaction signal.h
 	eval $hasfield_t;
 
+	echo "Checking if your siginfo_t has si_fd field...">&4
+	set d_siginfo_si_fd siginfo_t int si_fd $d_sigaction signal.h
+	eval $hasfield_t;
+
 	;;
 *)
 	d_siginfo_si_errno="$undef"
@@ -18666,6 +18680,7 @@ case "$d_sigaction" in
 	d_siginfo_si_status="$undef"
 	d_siginfo_si_band="$undef"
 	d_siginfo_si_value="$undef"
+	d_siginfo_si_fd="$undef"
 	;;
 esac
 
@@ -24241,6 +24256,7 @@ d_dosuid='$d_dosuid'
 d_drand48_r='$d_drand48_r'
 d_drand48proto='$d_drand48proto'
 d_dup2='$d_dup2'
+d_duplocale='$d_duplocale'
 d_eaccess='$d_eaccess'
 d_endgrent='$d_endgrent'
 d_endgrent_r='$d_endgrent_r'
@@ -24578,6 +24594,7 @@ d_sigaction='$d_sigaction'
 d_siginfo_si_addr='$d_siginfo_si_addr'
 d_siginfo_si_band='$d_siginfo_si_band'
 d_siginfo_si_errno='$d_siginfo_si_errno'
+d_siginfo_si_fd='$d_siginfo_si_fd'
 d_siginfo_si_pid='$d_siginfo_si_pid'
 d_siginfo_si_status='$d_siginfo_si_status'
 d_siginfo_si_uid='$d_siginfo_si_uid'
@@ -24880,6 +24897,7 @@ i_values='$i_values'
 i_varargs='$i_varargs'
 i_varhdr='$i_varhdr'
 i_vfork='$i_vfork'
+i_xlocale='$i_xlocale'
 ignore_versioned_solibs='$ignore_versioned_solibs'
 inc_version_list='$inc_version_list'
 inc_version_list_init='$inc_version_list_init'
