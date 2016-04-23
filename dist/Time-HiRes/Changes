@@ -1,7 +1,8 @@
 Revision history for the Perl extension Time::HiRes.
 
 1.9733 [2016-04-23]
-  - [rt #113856] C90 declaration-after-statement error with darwin threads
+  - C90 declaration-after-statement error with darwin threads: blead de1003b4
+    [rt.cpan.org #113856]
 
 1.9732 [2016-03-13]
   - MUTEX_LOCK, not PERL_MUTEX_LOCK: blead e5b02b5d
