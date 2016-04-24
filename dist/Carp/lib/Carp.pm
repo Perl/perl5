@@ -87,7 +87,7 @@ BEGIN {
     }
 }
 
-our $VERSION = '1.40';
+our $VERSION = '1.41';
 $VERSION =~ tr/_//d;
 
 our $MaxEvalLen = 0;
@@ -474,7 +474,7 @@ sub ret_backtrace {
         eval {
             CORE::die;
         };
-        if($@ =~ /^Died at .*(, <.*?> line \d+).$/ ) {
+        if($@ =~ /^Died at .*(, <.*?> (?:line|chunk) \d+).$/ ) {
             $mess .= $1;
         }
     }
