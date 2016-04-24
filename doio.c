@@ -223,13 +223,13 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
     PerlIO *fp;
     bool was_fdopen = FALSE;
     char *type  = NULL;
+    char *name = NULL;
 
     PERL_ARGS_ASSERT_DO_OPEN6;
 
     /* For ease of blame back to 5.000, keep the existing indenting. */
     {
 	/* Regular (non-sys) open */
-	char *name;
 	STRLEN olen = len;
 	char *tend;
 	int dodup = 0;
@@ -249,9 +249,15 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
 	tend = type+len;
 	SAVEFREEPV(type);
 
-        /* Lose leading and trailing white space */
+        /* Lose leading white space */
 	while (isSPACE(*type))
 	    type++;
+
+	/* Lose bogus nulls */
+        while (tend > type && !tend[-1])
+	    --tend;
+
+	/* Lose trailing whitespace */
         while (tend > type && isSPACE(tend[-1]))
 	    *--tend = '\0';
 
@@ -604,7 +610,7 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
     }
 
   say_false:
-    return openn_cleanup(gv, io, fp, mode, oname, saveifp, saveofp, savefd,
+    return openn_cleanup(gv, io, fp, mode, name, saveifp, saveofp, savefd,
                          savetype, writing, was_fdopen, type);
 }
 
@@ -621,7 +627,7 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
 
     if (!fp) {
 	if (IoTYPE(io) == IoTYPE_RDONLY && ckWARN(WARN_NEWLINE)
-	    && should_warn_nl(oname)
+	    && oname && should_warn_nl(oname)
 	    
 	)
         {

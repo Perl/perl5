@@ -89,13 +89,17 @@ use warnings 'io' ;
 open(F, "<true\ncd");
 open(G, "<truecd\n");
 open(H, "<truecd\n\0");
+open(I, "<", "truecd\n");
+open(I, "<", "truecd\n\0");
 no warnings 'io' ;
 open(H, "<true\ncd");
 open(I, "<truecd\n");
 open(I, "<truecd\n\0");
+open(I, "<", "truecd\n");
+open(I, "<", "truecd\n\0");
 EXPECT
-Unsuccessful open on filename containing newline at - line 4.
-Unsuccessful open on filename containing newline at - line 5.
+Unsuccessful open on filename containing newline at - line 6.
+Unsuccessful open on filename containing newline at - line 7.
 ########
 # doio.c [Perl_do_close] <<TODO
 use warnings 'unopened' ;

@@ -415,22 +415,23 @@ Useless use of length in void context at - line 4.
 use warnings FATAL => 'all', NONFATAL => 'io';
 no warnings 'once';
 
+open(F, "<", "true\ncd");
 open(F, "<true\ncd");
-open(G, "<truecd\n");
-open(H, "<truecd\n\0");
+open(G, "<", "truecd\n");
+open(H, "<", "truecd\n\0");
 close "fred" ;
 print STDERR "The End.\n" ;
 EXPECT
-Unsuccessful open on filename containing newline at - line 6.
 Unsuccessful open on filename containing newline at - line 7.
-close() on unopened filehandle fred at - line 8.
+Unsuccessful open on filename containing newline at - line 8.
+close() on unopened filehandle fred at - line 9.
 The End.
 ########
 
 use warnings FATAL => 'all', NONFATAL => 'io', FATAL => 'unopened' ;
 no warnings 'once';
 
-open(F, "<truecd\n");
+open(F, "<", "truecd\n");
 close "fred" ;
 print STDERR "The End.\n" ;
 EXPECT
