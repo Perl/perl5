@@ -15,7 +15,11 @@ plan 'no_plan';
 my $empty;
 
 sub set_errpat {
-    $errpat = qr/Experimental $_[0] on scalar is now forbidden/;
+    # Checking for a comma after the line number ensures that we are using
+    # yyerror for the error, rather than croak.  yyerror is preferable for
+    # compile-time errors.
+    $errpat =
+       qr/Experimental $_[0] on scalar is now forbidden .* line 1,/;
 }
 
 # Keys -- errors

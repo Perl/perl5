@@ -11957,10 +11957,10 @@ Perl_ck_each(pTHX_ OP *o)
 		    /* we let ck_fun handle it */
 		    break;
 	    default:
-                Perl_croak_nocontext(
+                yyerror_pv(Perl_form(aTHX_
                     "Experimental %s on scalar is now forbidden",
-                    PL_op_desc[orig_type]);
-                break;
+                     PL_op_desc[orig_type]), 0);
+                return o;
 	}
     }
     return ck_fun(o);
