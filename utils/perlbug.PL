@@ -76,6 +76,8 @@ BEGIN {
     $::HaveTemp = ($@ eq "");
     eval { require Module::CoreList; };
     $::HaveCoreList = ($@ eq "");
+    eval { require Text::Wrap; };
+    $::HaveWrap = ($@ eq "");
 };
 
 my $Version = "1.40";
@@ -1084,7 +1086,16 @@ sub _read_report {
     my $content;
     open( REP, "<:raw", $fname ) or die "Couldn't open file '$fname': $!\n";
     binmode(REP, ':raw :crlf') if $Is_MSWin32;
-    while (<REP>) { $content .= $_; }
+    # wrap long lines to make sure the report gets delivered
+    local $Text::Wrap::columns = 900;
+    local $Text::Wrap::huge = 'overflow';
+    while (<REP>) {
+        if ($::HaveWrap && /\S/) { # wrap() would remove empty lines
+            $content .= Text::Wrap::wrap(undef, undef, $_);
+        } else {
+            $content .= $_;
+        }
+    }
     close(REP) or die "Error closing report file '$fname': $!";
     return $content;
 }

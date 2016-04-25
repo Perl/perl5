@@ -151,8 +151,5 @@ for (split(/\n/, $contents)) {
         $maxlen1 = $len if $len > $maxlen1 and !/$B/;
         $maxlen2 = $len if $len > $maxlen2 and  /$B/;
 }
-TODO: {
-local $::TODO = 'long body lines not wrapped yet';
 ok($maxlen1 < 1000, "[perl #128020] long body lines are wrapped: maxlen $maxlen1");
-}
 ok($maxlen2 > 1000, "long attachment lines are not wrapped: maxlen $maxlen2");
