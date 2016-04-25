@@ -14,8 +14,12 @@ plan 'no_plan';
 
 my $empty;
 
+sub set_errpat {
+    $errpat = qr/Experimental $_[0] on scalar is now forbidden/;
+}
+
 # Keys -- errors
-$errpat = qr/Experimental keys on scalar is now forbidden/;
+set_errpat 'keys';
 
 eval "keys undef";
 like($@, $errpat,
@@ -46,7 +50,7 @@ like($@, $errpat,
 ) or print "# Got: $@";
 
 # Values -- errors
-$errpat = qr/Experimental values on scalar is now forbidden/;
+set_errpat 'values';
 
 eval "values undef";
 like($@, $errpat,
@@ -77,7 +81,7 @@ like($@, $errpat,
 ) or print "# Got: $@";
 
 # Each -- errors
-$errpat = qr/Experimental each on scalar is now forbidden/;
+set_errpat 'each';
 
 eval "each undef";
 like($@, $errpat,
