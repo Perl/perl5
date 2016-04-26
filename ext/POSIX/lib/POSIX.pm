@@ -234,7 +234,7 @@ sub sprintf {
 }
 
 sub load_imports {
-my %default_export_tags = (
+my %default_export_tags = ( # cf. exports policy below
 
     assert_h =>	[qw(assert NDEBUG)],
 
@@ -404,7 +404,7 @@ if ($^O eq 'MSWin32') {
 	WSAEREFUSED)];
 }
 
-my %other_export_tags = (
+my %other_export_tags = ( # cf. exports policy below
     fenv_h => [qw(
         FE_DOWNWARD FE_TONEAREST FE_TOWARDZERO FE_UPWARD fegetround fesetround
     )],
@@ -435,6 +435,10 @@ my %other_export_tags = (
   )],
 );
 
+# exports policy:
+# - new functions may not be added to @EXPORT, only to @EXPORT_OK
+# - new SHOUTYCONSTANTS are OK to add to @EXPORT
+
 {
   # De-duplicate the export list: 
   my ( %export, %export_ok );
@@ -444,6 +448,7 @@ my %other_export_tags = (
   # @EXPORT are actually shared hash key scalars, which will save some memory.
   our @EXPORT = keys %export;
 
+  # you do not want to add symbols to the following list. add a new tag instead
   our @EXPORT_OK = (qw(close lchown nice open pipe read sleep times write
 		       printf sprintf lround),
                     # lround() should really be in the :math_h_c99 tag, but
