@@ -9910,7 +9910,6 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Module::Build::Version'=> 1,
             'Module::Build::YAML'   => 1,
             'Package::Constants'    => 1,
-            'Simple'                => 1,
             'inc::latest'           => 1,
         }
     },
@@ -12858,7 +12857,6 @@ for my $version (sort { $a <=> $b } keys %delta) {
             'Module::Build::Version'=> 1,
             'Module::Build::YAML'   => 1,
             'Package::Constants'    => 1,
-            'Simple'                => 1,
             'inc::latest'           => 1,
         }
     },
