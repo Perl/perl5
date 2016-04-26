@@ -2769,7 +2769,7 @@ SKIP:
     );
 
     $wrapper->output_like(
-        qr/No manual entry for perlrules/,
+        qr/No (?:manual )?entry for perlrules/,
         'perldoc command works fine',
     );
 }
