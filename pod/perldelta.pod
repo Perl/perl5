@@ -2183,7 +2183,45 @@ GitHub|https://github.com/apache/mod_perl/commit/82827132efd3c2e25cc413c85af61bb
 
 =head1 Acknowledgements
 
-[ XXX: generate this just in time, Ricardo! ]
+Perl 5.24.0 represents approximately 11 months of development since Perl 5.22.0
+and contains approximately 360,000 lines of changes across 1,800 files from 77
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 250,000 lines of changes to 1,200 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.24.0:
+
+Aaron Crane, Aaron Priven, Abigail, Achim Gratz, Alexander D'Archangel, Alex
+Vandiver, Andreas König, Andy Broad, Andy Dougherty, Aristotle Pagaltzis,
+Chase Whitener, Chas. Owens, Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn
+Ilmari Mannsåker, Dan Collins, Daniel Dragan, David Golden, David Mitchell,
+Dominic Hargreaves, Doug Bell, Dr.Ruud, Ed Avis, Ed J, Father Chrysostomos,
+Herbert Breunung, H.Merijn Brand, Hugo van der Sanden, Ivan Pozdeev, James E
+Keenan, Jan Dubois, Jarkko Hietaniemi, Jerry D. Hedden, Jim Cromie, John
+Peacock, John SJ Anderson, Karen Etheridge, Karl Williamson, kmx, Leon
+Timmermans, Ludovic E. R. Tolhurst-Cleaver, Lukas Mai, Martijn Lievaart,
+Matthew Horsfall, Mattia Barbon, Max Maischein, Mohammed El-Afifi, Nicholas
+Clark, Nicolas R., Niko Tyni, Peter John Acklam, Peter Martini, Peter
+Rabbitson, Pip Cet, Rafael Garcia-Suarez, Reini Urban, Renee Baecker, Ricardo
+Signes, Sawyer X, Shlomi Fish, Sisyphus, Stanislaw Pusep, Steffen Müller,
+Stevan Little, Steve Hay, Sullivan Beck, Thomas Sibley, Todd Rinaldo, Tom
+Hukins, Tony Cook, Unicode Consortium, Victor Adam, Vincent Pit, Vladimir
+Timofeev, Yves Orton, Zachary Storer, Zefram.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
