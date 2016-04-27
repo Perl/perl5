@@ -4,7 +4,7 @@ use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use Module::CoreList::TieHashDelta;
 use version;
-$VERSION = '5.20160506';
+$VERSION = '5.20160507';
 
 sub _released_order {   # Sort helper, to make '?' sort after everything else
     (substr($released{$a}, 0, 1) eq "?")
@@ -293,6 +293,7 @@ sub changes_between {
     5.023009 => '2016-03-20',
     5.022002 => '2016-04-29',
     5.024000 => '2016-05-09',
+    5.025000 => '2016-05-09',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -12391,6 +12392,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'File::Copy'            => '2.31',
             'File::Path'            => '2.12_01',
             'File::Spec::AmigaOS'   => '3.64',
+            'IO::Handle'            => '1.36',
             'Module::CoreList'      => '5.20160506',
             'Module::CoreList::TieHashDelta'=> '5.20160506',
             'Module::CoreList::Utils'=> '5.20160506',
@@ -12406,6 +12408,19 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Time::HiRes'           => '1.9733',
             'threads'               => '2.07',
             'threads::shared'       => '1.51',
+            'locale'                => '1.09',
+        },
+        removed => {
+        }
+    },
+    5.025000 => {
+        delta_from => 5.024,
+        changed => {
+            'B::Op_private'         => '5.025000',
+            'Config'                => '5.025',
+            'Module::CoreList'      => '5.20160507',
+            'Module::CoreList::TieHashDelta'=> '5.20160507',
+            'Module::CoreList::Utils'=> '5.20160507',
         },
         removed => {
         }
@@ -13058,6 +13073,13 @@ for my $version (sort { $a <=> $b } keys %delta) {
     },
     5.024000 => {
         delta_from => 5.023009,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.025000 => {
+        delta_from => 5.024,
         changed => {
         },
         removed => {
