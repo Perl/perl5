@@ -30,7 +30,7 @@ perl executables and show how much each test has gotten better or worse.
 
 It is modelled on the F<perlbench> tool, but since it measures instruction
 reads etc., rather than timings, it is much more precise and reproducible.
-It is also considerably faster, and is capable or running tests in
+It is also considerably faster, and is capable of running tests in
 parallel (with C<-j>). Rather than  displaying a single relative
 percentage per test/perl combination, it displays values for 13 different
 measurements, such as instruction reads, conditional branch misses etc.
