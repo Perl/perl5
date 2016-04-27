@@ -51,13 +51,6 @@ When a scalar is holding a reference, it always behaves as a simple scalar.
 It doesn't magically start being an array or hash or subroutine; you have to
 tell it explicitly to do so, by dereferencing it.
 
-That said, be aware that Perl version 5.14 introduces an exception
-to the rule, for syntactic convenience.  Experimental array and hash container
-function behavior allows array and hash references to be handled by Perl as
-if they had been explicitly syntactically dereferenced.  See
-L<perl5140delta/"Syntactical Enhancements">
-and L<perlfunc> for details.
-
 =head2 Making References
 X<reference, creation> X<referencing>
 
