@@ -586,6 +586,8 @@ the strings?).
  Ricardo   5.24.0-RC5   2016-May-04
  Ricardo   5.24.0       2016-May-09
 
+ Ricardo   5.25.0       2016-May-09     The 5.25 development track
+
 =head2 SELECTED RELEASE SIZES
 
 For example the notation "core: 212  29" in the release 1.000 means that
