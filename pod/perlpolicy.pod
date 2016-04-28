@@ -572,7 +572,7 @@ month.  Subsequent removals will double in length.  After six months with no
 warning, a user's ban length is reset.  Removals, like warnings, are public.
 
 The list of moderators will be public knowledge.  At present, it is:
-Aaron Crane, Andy Dougherty, Ricardo Signes, Steffen Müller.
+Aaron Crane, Andy Dougherty, Ricardo Signes, Sawyer X, Steffen Müller.
 
 =head1 CREDITS
 
