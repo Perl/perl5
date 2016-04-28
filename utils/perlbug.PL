@@ -835,10 +835,7 @@ EOF
             if ( SaveMessage() ) { exit }
 	    } elsif ($action =~ /^(d|l|sh)/i ) { # <D>isplay, <L>ist, <Sh>ow
 		# Display the message
-		open(REP, '<:raw', $filename) or die "Couldn't open file '$filename': $!\n";
-		binmode(REP, ':raw :crlf') if $Is_MSWin32;
-		while (<REP>) { print $_ }
-		close(REP) or die "Error closing report file '$filename': $!";
+		print _read_report($filename);
 		if ($have_attachment) {
 		    print "\n\n---\nAttachment(s):\n";
 		    for my $att (split /\s*,\s*/, $attachments) { print "    $att\n"; }
@@ -1082,13 +1079,20 @@ ATTACHMENT
     return $attach;
 }
 
+sub _read_report {
+    my $fname = shift;
+    my $content;
+    open( REP, "<:raw", $fname ) or die "Couldn't open file '$fname': $!\n";
+    binmode(REP, ':raw :crlf') if $Is_MSWin32;
+    while (<REP>) { $content .= $_; }
+    close(REP) or die "Error closing report file '$fname': $!";
+    return $content;
+}
+
 sub build_complete_message {
     my $content = _build_header(%{_message_headers()}) . "\n\n";
     $content .= _add_body_start() if $have_attachment;
-    open( REP, "<:raw", $filename ) or die "Couldn't open file '$filename': $!\n";
-    binmode(REP, ':raw :crlf') if $Is_MSWin32;
-    while (<REP>) { $content .= $_; }
-    close(REP) or die "Error closing report file '$filename': $!";
+    $content .= _read_report($filename);
     $content .= _add_attachments() if $have_attachment;
     return $content;
 }
@@ -1139,10 +1143,7 @@ sub _send_message_mailsend {
     $fh = $msg->open;
     binmode($fh, ':raw');
     print $fh _add_body_start() if $have_attachment;
-    open(REP, "<:raw", $filename) or die "Couldn't open '$filename': $!\n";
-    binmode(REP, ':raw :crlf') if $Is_MSWin32;
-    while (<REP>) { print $fh $_ }
-    close(REP) or die "Error closing $filename: $!";
+    print $fh _read_report($filename);
     print $fh _add_attachments() if $have_attachment;
     $fh->close or die "Error sending mail: $!";
 
