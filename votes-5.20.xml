@@ -25,6 +25,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Security Fixes</h3>
 
+<commit votes="khw" id="854d0921f9d0fb6c5ea15abeed3dd19d63bbabe1" ticket="123562" desc="[CVE-2015-8853] Regexp-matching "hangs" indefinitely on illegal input using binmode :utf8 using 100%CPU" />
+
 </div>
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
