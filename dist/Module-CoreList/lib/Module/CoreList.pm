@@ -291,6 +291,7 @@ sub changes_between {
     5.023007 => '2016-01-20',
     5.023008 => '2016-02-20',
     5.023009 => '2016-03-20',
+    5.022002 => '2016-04-29',
     5.024000 => '2016-06-01',
   );
 
@@ -12359,6 +12360,29 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Win32API::File::ExtUtils::Myconst2perl'=> 1,
         }
     },
+    5.022002 => {
+        delta_from => 5.022001,
+        changed => {
+            'B::Op_private'         => '5.022002',
+            'Config'                => '5.022002',
+            'Cwd'                   => '3.56_01',
+            'File::Spec'            => '3.56_01',
+            'File::Spec::Cygwin'    => '3.56_01',
+            'File::Spec::Epoc'      => '3.56_01',
+            'File::Spec::Functions' => '3.56_01',
+            'File::Spec::Mac'       => '3.56_01',
+            'File::Spec::OS2'       => '3.56_01',
+            'File::Spec::Unix'      => '3.56_01',
+            'File::Spec::VMS'       => '3.56_01',
+            'File::Spec::Win32'     => '3.56_01',
+            'Module::CoreList'      => '5.20160429',
+            'Module::CoreList::TieHashDelta'=> '5.20160429',
+            'Module::CoreList::Utils'=> '5.20160429',
+            'XS::APItest'           => '0.72_01',
+        },
+        removed => {
+        }
+    },
     5.024000 => {
         delta_from => 5.023009,
         changed => {
@@ -13013,6 +13037,13 @@ for my $version (sort { $a <=> $b } keys %delta) {
     },
     5.023009 => {
         delta_from => 5.023008,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.022002 => {
+        delta_from => 5.022001,
         changed => {
         },
         removed => {
