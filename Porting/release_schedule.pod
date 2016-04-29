@@ -24,7 +24,7 @@ Code freezes (which happen in the 5.23.X series)
 
   2015-06-01  5.22.0 ✓        Ricardo Signes
   2015-12-13  5.22.1 ✓        Steve Hay
-  2016-04-??  5.22.2          Steve Hay
+  2016-04-29  5.22.2 ✓        Steve Hay
   2016-??-??  5.22.3          ??
 
 =head2 Perl 5.20
