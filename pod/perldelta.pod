@@ -321,8 +321,8 @@ Perl 5.24.0.
 
 =head1 Acknowledgements
 
-Perl 5.22.2 represents approximately 4 months of development since Perl 5.22.1
-and contains approximately 2,900 lines of changes across 110 files from 24
+Perl 5.22.2 represents approximately 5 months of development since Perl 5.22.1
+and contains approximately 3,000 lines of changes across 110 files from 24
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
