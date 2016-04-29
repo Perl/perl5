@@ -4,7 +4,7 @@ use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use Module::CoreList::TieHashDelta;
 use version;
-$VERSION = '5.20160410';
+$VERSION = '5.20160429';
 
 sub _released_order {   # Sort helper, to make '?' sort after everything else
     (substr($released{$a}, 0, 1) eq "?")
@@ -291,7 +291,7 @@ sub changes_between {
     5.023007 => '2016-01-20',
     5.023008 => '2016-02-20',
     5.023009 => '2016-03-20',
-    5.022002 => '????-??-??',
+    5.022002 => '2016-04-29',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -12375,9 +12375,9 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'File::Spec::Unix'      => '3.56_01',
             'File::Spec::VMS'       => '3.56_01',
             'File::Spec::Win32'     => '3.56_01',
-            'Module::CoreList'      => '5.20160410',
-            'Module::CoreList::TieHashDelta'=> '5.20160410',
-            'Module::CoreList::Utils'=> '5.20160410',
+            'Module::CoreList'      => '5.20160429',
+            'Module::CoreList::TieHashDelta'=> '5.20160429',
+            'Module::CoreList::Utils'=> '5.20160429',
             'XS::APItest'           => '0.72_01',
         },
         removed => {

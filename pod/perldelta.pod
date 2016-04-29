@@ -79,7 +79,7 @@ C<canonpath()>">.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20151213 to 5.20160410.
+L<Module::CoreList> has been upgraded from version 5.20151213 to 5.20160429.
 
 The version number of L<Digest::SHA> listed for Perl 5.18.4 was wrong and has
 been corrected.  Likewise for the version number of L<Config> in 5.18.3 and

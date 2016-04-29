@@ -3,7 +3,7 @@ package Module::CoreList::TieHashDelta;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '5.20160410';
+$VERSION = '5.20160429';
 
 sub TIEHASH {
     my ($class, $changed, $removed, $parent) = @_;
