@@ -299,6 +299,31 @@ L<Announced on 2015-06-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   They sing while you slave and I just get bored
   I ain't gonna work on Maggie's farm no more
 
+=head2 v5.22.2 - Gaston Leroux, trans. Mireille Ribière, "The Phantom of the Opera"
+
+L<Announced on 2016-04-29 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2016/04/msg236120.html>
+
+A silence; and then: 'If, in just two minutes' time by my watch--and a
+splendid watch it is--you have not turned the scorpion, mademoiselle, I
+shall turn the grasshopper... and the grasshopper, remember, _leaps
+straight up into the air!_'
+The silence that ensued was terrifying, worse than any we had
+experienced before.  I knew that when Erik spoke with that quiet,
+gentle, slightly weary voice, it meant that he had reached the end of
+his tether: that he was capable of the most abominable crimes or the
+most selfless devotion; that the slightest irritation might unleash a
+storm.
+Realizing that our fate was out of our hands, the Viscount fell to his
+knees and prayed.  As for me, I pressed both hands to my chest, for my
+heart was pounding so fiercely that I thought it would burst.  We were
+intensely aware of the excruciating dilemma Christine Daaé faced in
+those final seconds.  We understood why she hesitated to turn the
+scorpion.  What if the scorpion, rather than the grasshopper, were to
+set off the explosion?  What if Erik was simply intent on destroying
+everything, regardless?
+At last he spoke: 'The two minutes are up,' he said in a soft, angelic
+voice.  'Goodbye, mademoiselle.  Off you go, little grasshopper!'
+
 =head2 v5.22.2-RC1 - Gaston Leroux, trans. Mireille Ribière, "The Phantom of the Opera"
 
 L<Announced on 2016-04-10 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2016/04/msg235732.html>
