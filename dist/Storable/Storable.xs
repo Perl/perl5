@@ -867,6 +867,13 @@ static const char magicstr[] = "pst0";		 /* Used as a magic number */
 #endif
 #endif
 
+#ifndef INT32_MAX
+# define INT32_MAX 2147483647
+#endif
+#if IVSIZE > 4 && !defined(INT64_MAX)
+# define INT64_MAX 9223372036854775807LL
+#endif
+
 static const char byteorderstr[] = {BYTEORDER_BYTES, 0};
 #ifdef USE_56_INTERWORK_KLUDGE
 static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
@@ -897,7 +904,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 /* can read and write u64 */
 # define MUST_FIT_IN_I32(x)						\
 	STMT_START {							\
-		if ((UV)(x) > (UV)UINT64_MAX) {			\
+		if ((UV)(x) > (UV)INT64_MAX) {			\
 			CROAK(("Storable cannot yet handle overlong strings with len >2G")); \
 		}							\
 	} STMT_END
