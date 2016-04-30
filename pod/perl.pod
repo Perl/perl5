@@ -350,6 +350,9 @@ Perl developers, please write to perl-thanks@perl.org .
 
  "@INC"			locations of perl libraries
 
+"@INC" above is a reference to the built-in variable of the same name;
+see L<perlvar> for more information.
+
 =head1 SEE ALSO
 
  http://www.perl.org/       the Perl homepage
