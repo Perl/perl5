@@ -706,9 +706,10 @@ at least a week:
     find . -mtime +7 -print | perl -nle unlink
 
 This is faster than using the B<-exec> switch of I<find> because you don't
-have to start a process on every filename found.  It does suffer from
-the bug of mishandling newlines in pathnames, which you can fix if
-you follow the example under B<-0>.
+have to start a process on every filename found (but it's not faster
+than using the B<-delete> switch available in newer versions of I<find>.
+It does suffer from the bug of mishandling newlines in pathnames, which
+you can fix if you follow the example under B<-0>.
 
 C<BEGIN> and C<END> blocks may be used to capture control before or after
 the implicit program loop, just as in I<awk>.
