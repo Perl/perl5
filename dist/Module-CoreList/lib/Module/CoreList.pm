@@ -12388,6 +12388,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         changed => {
             'B::Op_private'         => '5.024000',
             'Config'                => '5.024',
+            'File::Copy'            => '2.31',
             'File::Path'            => '2.12_01',
             'File::Spec::AmigaOS'   => '3.64',
             'ODBM_File'             => '1.14',
