@@ -6630,7 +6630,8 @@ is the moral equivalent of these two:
     foo();
     print(uc($bar), $baz);
 
-See L<perlop> for more details on unary operators and the comma operator.
+See L<perlop> for more details on unary operators and the comma operator,
+and L<perldata> for details on evaluating a hash in scalar contex.
 
 =item seek FILEHANDLE,POSITION,WHENCE
 X<seek> X<fseek> X<filehandle, position>
