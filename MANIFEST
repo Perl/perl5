@@ -4407,6 +4407,7 @@ lib/perl5db/t/test-warnLevel-option-1	Tests for the Perl debugger
 lib/perl5db/t/test-w-statement-1	Tests for the Perl debugger
 lib/perl5db/t/uncalled-subroutine	Tests for the Perl debugger
 lib/perl5db/t/with-subroutine		Tests for the Perl debugger
+lib/perlbug.t			Tests for the Perl bug reporter
 lib/PerlIO.pm			PerlIO support module
 lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
 lib/Pod/t/Select.t		See if Pod::Select works
