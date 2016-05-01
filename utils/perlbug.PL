@@ -101,7 +101,7 @@ Init();
 
 if ($opt{h}) { Help(); exit; }
 if ($opt{d}) { Dump(*STDOUT); exit; }
-if (!-t STDIN && !($ok and not $opt{n})) {
+if (!-t STDIN && !$opt{t} && !($ok and not $opt{n})) {
     paraprint <<"EOF";
 Please use $progname interactively. If you want to
 include a file, you can use the -f switch.
@@ -1526,6 +1526,8 @@ supply one on the command line.
 =item B<-t>
 
 Test mode.  The target address defaults to B<perlbug-test@perl.org>.
+Also makes it possible to command perlbug from a pipe or file, for
+testing purposes.
 
 =item B<-T>
 
