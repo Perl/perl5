@@ -880,7 +880,7 @@ sub TrivialSubject {
     if ($subject =~
 	/^(y(es)?|no?|help|perl( (bug|problem))?|bug|problem)$/i ||
 	length($subject) < 4 ||
-	$subject !~ /\s/) {
+	($subject !~ /\s/ && ! $opt{t})) { # non-whitespace is accepted in test mode
 	print "\nThe subject you entered wasn't very descriptive. Please try again.\n\n";
         return 1;
     } else {
