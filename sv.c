@@ -4891,7 +4891,7 @@ Perl_sv_setpvn(pTHX_ SV *const sv, const char *const ptr, const STRLEN len)
     }
     SvUPGRADE(sv, SVt_PV);
 
-    dptr = SvGROW(sv, len + 1);
+    dptr = SvGROW(sv, len + 2);
     Move(ptr,dptr,len,char);
     dptr[len] = '\0';
     SvCUR_set(sv, len);
