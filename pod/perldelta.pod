@@ -525,6 +525,10 @@ L<fields> has been upgraded from version 2.17 to 2.23.
 
 =item *
 
+L<File::Copy> has been upgraded from version 2.30 to 2.31.
+
+=item *
+
 L<File::Find> has been upgraded from version 1.29 to 1.34.
 
 =item *
@@ -609,7 +613,7 @@ L<Math::BigRat> has been upgraded from version 0.2608 to 0.260802.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20150520 to 5.20160320.
+L<Module::CoreList> has been upgraded from version 5.20150520 to 5.20160506.
 
 =item *
 
@@ -658,6 +662,10 @@ L<PerlIO::scalar> has been upgraded from version 0.22 to 0.24.
 =item *
 
 L<PerlIO::via> has been upgraded from version 0.15 to 0.16.
+
+=item *
+
+podlators has been upgraded from version 2.28 to 4.07.
 
 =item *
 
@@ -721,15 +729,15 @@ L<Test::Harness> has been upgraded from version 3.35 to 3.36.
 
 =item *
 
-L<Thread::Queue> has been upgraded from version 3.05 to 3.08.
+L<Thread::Queue> has been upgraded from version 3.05 to 3.09.
 
 =item *
 
-L<threads> has been upgraded from version 2.01 to 2.06.
+L<threads> has been upgraded from version 2.01 to 2.07.
 
 =item *
 
-L<threads::shared> has been upgraded from version 1.48 to 1.50.
+L<threads::shared> has been upgraded from version 1.48 to 1.51.
 
 =item *
 
@@ -741,7 +749,7 @@ L<Tie::Scalar> has been upgraded from version 1.03 to 1.04.
 
 =item *
 
-L<Time::HiRes> has been upgraded from version 1.9726 to 1.9732.
+L<Time::HiRes> has been upgraded from version 1.9726 to 1.9733.
 
 =item *
 
