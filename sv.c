@@ -1573,7 +1573,9 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
      * Only increment if the allocation isn't MEM_SIZE_MAX,
      * otherwise it will wrap to 0.
      */
-    if (newlen & 0xff && newlen != MEM_SIZE_MAX)
+    if (   (newlen < 0x1000 || (newlen & (newlen - 1)))
+        && newlen != MEM_SIZE_MAX
+    )
         newlen++;
 #endif
 
