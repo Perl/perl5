@@ -12478,7 +12478,7 @@ sub is_core
         }
         RELEASE:
         foreach my $prn (@releases) {
-            next RELEASE if $prn <= $first_release;
+            next RELEASE if $prn < $first_release;
             last RELEASE if $prn > $perl_version;
             next unless defined(my $next_module_version
                                    = $delta{$prn}->{changed}->{$module});
