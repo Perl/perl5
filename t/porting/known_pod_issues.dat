@@ -1,4 +1,4 @@
-# This file is the data file for t/porting/podcheck.t.
+# This file is the data file for porting/podcheck.t.
 # There are three types of lines.
 # Comment lines are white-space only or begin with a '#', like this one.  Any
 #   changes you make to the comment lines will be lost when the file is
@@ -15,6 +15,7 @@ _control87(3)
 accept(2)
 access(2)
 Algorithm::C3
+Algorithm::Permute
 AnyEvent
 Apache::MP3
 Archive::Extract
@@ -141,6 +142,7 @@ IPC::Signal
 kill(3)
 langinfo(3)
 LaTeX::Encode
+lexical::underscore
 Lexical::Var
 Lingua::JA::Romanize::Japanese
 Lingua::KO::Hangul::Util
@@ -234,8 +236,10 @@ recvfrom(2)
 recvmsg(3)
 rename(2)
 Role::Tiny
+RPerl
 s2p
 Scalar::Readonly
+Scope::Upper
 sdbm(3)
 select(2)
 semctl(2)
@@ -285,6 +289,7 @@ Tk
 Tk::Pod
 touch(1)
 tr(1)
+TryCatch
 tty(1)
 umask(2)
 Unicode::CaseFold
