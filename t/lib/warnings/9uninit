@@ -2138,3 +2138,24 @@ Use of uninitialized value $i in array element at - line 12.
 Use of uninitialized value $k in hash element at - line 12.
 Use of uninitialized value $i in array element at - line 13.
 Use of uninitialized value $k in hash element at - line 13.
+########
+# perl #127877
+use warnings 'uninitialized';
+my ($p, $q, $r, $s, $t, $u, $v, $w, $x, $y);
+$p = $p . "a";
+$q .= "a";
+$r = $r + 17;
+$s += 17;
+$t = $t - 17;
+$u -= 17;
+use integer;
+$v = $v + 17;
+$w += 17;
+$x = $x - 17;
+$y -= 17;
+EXPECT
+Use of uninitialized value $p in concatenation (.) or string at - line 4.
+Use of uninitialized value $r in addition (+) at - line 6.
+Use of uninitialized value $t in subtraction (-) at - line 8.
+Use of uninitialized value $v in integer addition (+) at - line 11.
+Use of uninitialized value $x in integer subtraction (-) at - line 13.
