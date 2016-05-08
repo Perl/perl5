@@ -2157,6 +2157,8 @@ and the reworking on the perl context stack creates a further incompatibility.
 perl5-porters has L<discussed the issue on the mailing
 list|http://www.nntp.perl.org/group/perl.perl5.porters/2016/05/msg236174.html>.
 
+=item L<Data::Alias>
+
 =item L<RPerl>
 
 =item L<Scope::Upper>
