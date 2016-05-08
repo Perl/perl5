@@ -2833,7 +2833,9 @@ static int store_hentry(pTHX_ stcxt_t *cxt, HV* hv, UV i, HE *he, unsigned char 
 	unsigned char flags = (((hash_flags & SHV_RESTRICTED)
 				&& SvTRULYREADONLY(val))
 			       ? SHV_K_LOCKED : 0);
-
+#ifndef DEBUGME
+        PERL_UNUSED_ARG(i);
+#endif
 	if (val == &PL_sv_placeholder) {
 		flags |= SHV_K_PLACEHOLDER;
 		val = &PL_sv_undef;
