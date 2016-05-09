@@ -5899,15 +5899,10 @@ Perl_re_printf( aTHX_  "LHS=%"UVuf" RHS=%"UVuf"\n",
 	/* Else: zero-length, ignore. */
 	scan = regnext(scan);
     }
-    /* If we are exiting a recursion we can unset its recursed bit
-     * and allow ourselves to enter it again - no danger of an
-     * infinite loop there.
-    if (stopparen > -1 && recursed) {
-	DEBUG_STUDYDATA("unset:", data,depth);
-        PAREN_UNSET( recursed, stopparen);
-    }
-    */
+
+  finish:
     if (frame) {
+        /* we need to unwind recursion. */
         depth = depth - 1;
 
         DEBUG_STUDYDATA("frame-end:",data,depth);
@@ -5924,7 +5919,6 @@ Perl_re_printf( aTHX_  "LHS=%"UVuf" RHS=%"UVuf"\n",
         goto fake_study_recurse;
     }
 
-  finish:
     assert(!frame);
     DEBUG_STUDYDATA("pre-fin:",data,depth);
 
