@@ -57,7 +57,7 @@ you should reset the version numbers to the next blead series.
   2016-11-20  5.25.6          ?
   2016-12-20  5.25.7          ?
 
-(RC0 for 5.25.0 will be released once we think that all the blockers have been
+(RC0 for 5.26.0 will be released once we think that all the blockers have been
 addressed.  This typically means some time in April or May.)
 
 =head1 VICTIMS
