@@ -17,6 +17,113 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.25.0 - Robert Frost, "The Trial by Existence"
+
+L<Announced on 2016-05-09 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2016/05/msg236244.html>
+
+  Even the bravest that are slain
+    Shall not dissemble their surprise
+  On waking to find valor reign,
+    Even as on earth, in paradise;
+  And where they sought without the sword
+    Wide fields of asphodel fore’er,
+  To find that the utmost reward
+    Of daring should be still to dare.
+
+=head2 v5.24.0 - Robert Frost, "The Black Cottage"
+
+L<Announced on 2016-05-09 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2016/05/msg236242.html>
+
+  As I sit here, and oftentimes, I wish
+  I could be monarch of a desert land
+  I could devote and dedicate forever
+  To the truths we keep coming back and back to.
+  So desert it would have to be, so walled
+  By mountain ranges half in summer snow,
+  No one would covet it or think it worth
+  The pains of conquering to force change on.
+  Scattered oases where men dwelt, but mostly
+  Sand dunes held loosely in tamarisk
+  Blown over and over themselves in idleness.
+  Sand grains should sugar in the natal dew
+  The babe born to the desert, the sand storm
+  Retard mid-waste my cowering caravans—
+
+  “There are bees in this wall.” He struck the clapboards,
+  Fierce heads looked out; small bodies pivoted.
+  We rose to go. Sunset blazed on the windows.
+
+=head2 v5.24.0-RC5 - The Mountain Goats, "No Children"
+
+L<Announced on 2016-05-04 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2016/05/msg236198.html>
+
+  And I hope when you think of me years down the line
+  You can't find one good thing to say
+  And I'd hope that if I found the strength to walk out
+  You'd stay the hell out of my way
+
+  I am drowning, there is no sign of land
+  You are coming down with me, hand in unlovable hand
+
+=head2 v5.24.0-RC4 - The Joker in "The Killing Joke"
+
+L<Announced on 2016-05-02 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2016/05/msg236145.html>
+
+"See, there were these two guys in a lunatic asylum…"
+
+=head2 v5.24.0-RC3 - Jesse Vincent
+
+L<Announced on 2016-04-27 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2016/04/msg236066.html>
+
+The Great Pumpkin is a Santa-Claus like figure. He does bring toys like
+Santa. But unlike Santa, who gives away toys because it's his job, he
+gives away toys because it's the right thing to do.
+
+=head2 v5.24.0-RC2 - Joseph Heller, "Catch-22"
+
+L<Announced on 2016-04-23 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2016/04/msg235999.html>
+
+“How do you feel, Yossarian?”
+
+“Fine. No, I’m very frightened.”
+
+“That’s good,” said Major Danby. “It proves you’re still alive. It won’t
+be fun.”
+
+Yossarian started out. “Yes it will.”
+
+“I mean it, Yossarian. You’ll have to keep on your toes every minute of
+every day. They’ll bend heaven and earth to catch you.”
+
+“I’ll keep on my toes every minute.”
+
+“You’ll have to jump.”
+
+“I’ll jump.”
+
+“Jump!” Major Danby cried.
+
+Yossarian jumped.
+
+Nately’s [girl] was hiding just outside the door. The knife came down,
+missing him by inches, and he took off.
+
+=head2 v5.24.0-RC1 - Robert Frost, "The Census-Taker"
+
+L<Announced on 2016-04-14 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2016/04/msg235807.html>
+
+  Nothing was left to do that I could see
+  Unless to find that there was no one there
+  And declare to the cliffs too far for echo,
+  "The place is desert, and let whoso lurks
+  In silence, if in this he is aggrieved,
+  Break silence now or be forever silent.
+  Let him say why it should not be declared so."
+  The melancholy of having to count souls
+  Where they grow fewer and fewer every year
+  Is extreme where they shrink to none at all.
+  It must be I want life to go on living.
+
 =head2 v5.23.9 - Tom Kitchin, "from nature to plate"
 
 L<Announced on 2016-03-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2016/03/msg235251.html>
