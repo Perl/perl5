@@ -7745,9 +7745,8 @@ For example:
   printf '<%e>', 10;   # prints "<1.000000e+01>"
   printf '<%.1e>', 10; # prints "<1.0e+01>"
 
-For "g" and "G", this specifies the maximum number of digits to show,
-including those prior to the decimal point and those after it; for
-example:
+For "g" and "G", this specifies the maximum number of significant digits to
+show; for example:
 
   # These examples are subject to system-specific variation.
   printf '<%g>', 1;        # prints "<1>"
@@ -7757,6 +7756,9 @@ example:
   printf '<%.2g>', 100.01; # prints "<1e+02>"
   printf '<%.5g>', 100.01; # prints "<100.01>"
   printf '<%.4g>', 100.01; # prints "<100>"
+  printf '<%.1g>', 0.0111; # prints "<0.01>"
+  printf '<%.2g>', 0.0111; # prints "<0.011>"
+  printf '<%.3g>', 0.0111; # prints "<0.0111>"
 
 For integer conversions, specifying a precision implies that the
 output of the number itself should be zero-padded to this width,
