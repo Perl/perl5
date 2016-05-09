@@ -11,14 +11,19 @@ release schedules for the next, current and previous stable versions
 of Perl.  Dates with two or more question marks will only be releases if
 deemed necessary by the Pumpking.
 
+=head2 Perl 5.26
+
+Code freezes (which happen in the 5.25.X series)
+
+  2017-01-20  5.25.7          Contentious changes freeze
+  2017-02-20  5.25.8          User-visible changes freeze
+  2017-03-20  5.25.9          Full code freeze
+  2017-05-20  5.26.0          Stable release!
+
 =head2 Perl 5.24
 
-Code freezes (which happen in the 5.23.X series)
-
-  2016-01-20  5.23.7 ✓        Contentious changes freeze
-  2016-02-20  5.23.8 ✓        User-visible changes freeze
-  2016-03-20  5.23.9 ✓        Full code freeze
-  2016-05-20  5.24.0          Stable release!
+  2016-05-09  5.24.0 ✓        Ricardo Signes
+  2016-07-??  5.24.1          ??
 
 =head2 Perl 5.22
 
@@ -26,14 +31,6 @@ Code freezes (which happen in the 5.23.X series)
   2015-12-13  5.22.1 ✓        Steve Hay
   2016-04-29  5.22.2 ✓        Steve Hay
   2016-??-??  5.22.3          ??
-
-=head2 Perl 5.20
-
-  2014-05-27  5.20.0 ✓        Ricardo Signes
-  2014-09-14  5.20.1 ✓        Steve Hay
-  2015-02-14  5.20.2 ✓        Steve Hay
-  2015-09-12  5.20.3 ✓        Steve Hay
-  2016-??-??  5.20.4          ??
 
 =head1 DEVELOPMENT RELEASE SCHEDULE
 
@@ -49,25 +46,9 @@ When shipping a release, you should include the schedule for (at least)
 the next four releases. If a stable version of Perl is released,
 you should reset the version numbers to the next blead series.
 
-=head2 Perl 5.23
-
-  2015-06-20  5.23.0 ✓        Ricardo Signes
-  2015-07-20  5.23.1 ✓        Matthew Horsfall
-  2015-08-20  5.23.2 ✓        Matthew Horsfall
-  2015-09-20  5.23.3 ✓        Peter Martini
-  2015-10-20  5.23.4 ✓        Steve Hay
-  2015-11-20  5.23.5 ✓        Abigail
-  2015-12-20  5.23.6 ✓        David Golden
-  2016-01-20  5.23.7 ✓        Stevan Little
-  2016-02-20  5.23.8 ✓        Sawyer X
-  2016-03-20  5.23.9 ✓        Abigail
-
-(RC0 for 5.24.0 will be released once we think that all the blockers have been
-addressed.  This typically means some time in April or May.)
-
 =head2 Perl 5.25
 
-  2016-05-20  5.25.0          Ricardo Signes
+  2016-05-20  5.25.0 ✓        Ricardo Signes
   2016-06-20  5.25.1          Matthew Horsfall
   2016-07-20  5.25.2          Steve Hay
   2016-08-20  5.25.3          BinGOs
@@ -76,7 +57,7 @@ addressed.  This typically means some time in April or May.)
   2016-11-20  5.25.6          ?
   2016-12-20  5.25.7          ?
 
-(RC0 for 5.24.0 will be released once we think that all the blockers have been
+(RC0 for 5.25.0 will be released once we think that all the blockers have been
 addressed.  This typically means some time in April or May.)
 
 =head1 VICTIMS
