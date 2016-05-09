@@ -38,11 +38,6 @@ ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/prereq.t 53bda2c549fd13a6b6c13a070
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/vstrings.t 90035a2bdbf45f15b9c3196d072d7cba7e662871
 File::Path cpan/File-Path/lib/File/Path.pm fd8ce4420a0c113d3f47dd3223859743655c1da8
 File::Path cpan/File-Path/t/Path_win32.t 94b9276557ce7f80b91f6fd9bfa7a0cd9bf9683e
-IPC::SysV cpan/IPC-SysV/lib/IPC/Msg.pm 88865a2c7a06351cf10e08addd077bbdea02fb60
-IPC::SysV cpan/IPC-SysV/lib/IPC/Semaphore.pm 04f0d11b7d0babf8e41ccc917cccecc4a3ff9050
-IPC::SysV cpan/IPC-SysV/lib/IPC/SharedMem.pm 85dea09a5bb625fc1fdda433909633fda05ea831
-IPC::SysV cpan/IPC-SysV/lib/IPC/SysV.pm 9a0d1c3dcd67321ef1322f29102a1bc7eb91c61c
-IPC::SysV cpan/IPC-SysV/t/ipcsysv.t ee2c95e846ea201afe13c9ec53b09cef62c8ac68
 Math::BigRat cpan/Math-BigRat/lib/Math/BigRat.pm 6eabc68e04f67694f6fe523e64eb013fc337ca5b
 Pod::Perldoc cpan/Pod-Perldoc/lib/Pod/Perldoc.pm fe0bc906fb74b69cfd3fb289316ba669d770d465
 Scalar-List-Utils cpan/Scalar-List-Utils/lib/List/Util.pm 3b501b7332480b34929bc4df5d48581df3307267
