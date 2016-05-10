@@ -9712,6 +9712,8 @@ Perl_sv_resetpvn(pTHX_ const char *s, STRLEN len, HV * const stash)
 		if (!todo[(U8)*HeKEY(entry)])
 		    continue;
 		gv = MUTABLE_GV(HeVAL(entry));
+		if (!isGV(gv))
+		    continue;
 		sv = GvSV(gv);
 		if (sv && !SvREADONLY(sv)) {
 		    SV_CHECK_THINKFIRST_COW_DROP(sv);
