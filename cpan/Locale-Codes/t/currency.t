@@ -1,14 +1,28 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
+use warnings;
+use strict;
 require 5.002;
+
+my($runtests,$dir,$tdir);
+$::type          = '';
+$::module        = '';
+$::tests         = '';
+
+$::type   = 'currency';
+$::module = 'Locale::Codes::Currency';
 
 $runtests=shift(@ARGV);
 if ( -f "t/testfunc.pl" ) {
   require "t/testfunc.pl";
+  require "t/vals.pl";
+  require "t/vals_currency.pl";
   $dir="./lib";
   $tdir="t";
 } elsif ( -f "testfunc.pl" ) {
   require "testfunc.pl";
+  require "vals.pl";
+  require "vals_currency.pl";
   $dir="../lib";
   $tdir=".";
 } else {
@@ -16,30 +30,9 @@ if ( -f "t/testfunc.pl" ) {
 }
 
 unshift(@INC,$dir);
-use Locale::Codes::LangFam;
 
-%type = ( "LOCALE_LANGFAM_ALPHA"    => LOCALE_LANGFAM_ALPHA,
-        );
-
-sub test {
-   my(@test) = @_;
-   $test[1]  = $type{$test[1]}
-     if (@test == 2  &&  $test[1]  &&  exists $type{$test[1]});
-   return langfam2code(@test);
-}
-
-$tests = "
-
-_blank_ ~ _undef_
-
-Apache languages
-   ~
-   apa
-
-";
-
-print "langfam2code...\n";
-test_Func(\&test,$tests,$runtests);
+print "currency...\n";
+test_Func(\&test,$::tests,$runtests);
 
 1;
 # Local Variables:
@@ -50,5 +43,5 @@ test_Func(\&test,$tests,$runtests);
 # cperl-continued-brace-offset: 0
 # cperl-brace-offset: 0
 # cperl-brace-imaginary-offset: 0
-# cperl-label-offset: -2
+# cperl-label-offset: 0
 # End:

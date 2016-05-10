@@ -1,5 +1,5 @@
 package Locale::Codes::LangFam;
-# Copyright (c) 2011-2015 Sullivan Beck
+# Copyright (c) 2011-2016 Sullivan Beck
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -20,7 +20,7 @@ use Locale::Codes::LangFam_Retired;
 
 our($VERSION,@ISA,@EXPORT,@EXPORT_OK);
 
-$VERSION='3.37';
+$VERSION='3.38';
 @ISA       = qw(Exporter);
 @EXPORT    = qw(code2langfam
                 langfam2code
@@ -91,5 +91,5 @@ sub delete_langfam_code_alias {
 # cperl-continued-brace-offset: 0
 # cperl-brace-offset: 0
 # cperl-brace-imaginary-offset: 0
-# cperl-label-offset: -2
+# cperl-label-offset: 0
 # End:

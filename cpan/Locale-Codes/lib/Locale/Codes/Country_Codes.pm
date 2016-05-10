@@ -3,7 +3,7 @@ Locale::Codes::Country_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'harvest_data' is run.
-#    Generated on: Tue Dec  1 14:41:05 EST 2015
+#    Generated on: Wed Mar  2 08:57:53 EST 2016
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.37';
+$VERSION='3.38';
 
 $Locale::Codes::Data{'country'}{'id'} = '0250';
 

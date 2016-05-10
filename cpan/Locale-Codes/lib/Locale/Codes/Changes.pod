@@ -28,7 +28,18 @@ codes, I will add them to the module and release a new version.
 
 =head1 VERSION 3.39  (planned 2016-06-01; sbeck)
 
-=head1 VERSION 3.38  (planned 2016-03-01; sbeck)
+=head1 VERSION 3.38  (2016-03-02; sbeck)
+
+NEW CODE(s)
+
+=over 4
+
+=item B<Tests reworked>
+
+Improved test suite (and made some changes to Codes.pm) based on Devel::Cover.
+Test suite now has 100% coverage.
+
+=back
 
 =head1 VERSION 3.37  (2015-12-01; sbeck)
 
@@ -772,7 +783,7 @@ Currently maintained by Sullivan Beck (sbeck@cpan.org).
 =head1 COPYRIGHT
 
    Copyright (c) 2001-2010 Neil Bowers
-   Copyright (c) 2010-2015 Sullivan Beck
+   Copyright (c) 2010-2016 Sullivan Beck
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

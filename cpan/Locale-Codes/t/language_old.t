@@ -1,14 +1,28 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
+use warnings;
+use strict;
 require 5.002;
+
+my($runtests,$dir,$tdir);
+$::type          = '';
+$::module        = '';
+$::tests         = '';
+
+$::type   = 'language';
+$::module = 'Locale::Language';
 
 $runtests=shift(@ARGV);
 if ( -f "t/testfunc.pl" ) {
   require "t/testfunc.pl";
+  require "t/vals.pl";
+  require "t/vals_language.pl";
   $dir="./lib";
   $tdir="t";
 } elsif ( -f "testfunc.pl" ) {
   require "testfunc.pl";
+  require "vals.pl";
+  require "vals_language.pl";
   $dir="../lib";
   $tdir=".";
 } else {
@@ -16,75 +30,9 @@ if ( -f "t/testfunc.pl" ) {
 }
 
 unshift(@INC,$dir);
-use Locale::Language;
 
-%type = ( "LOCALE_LANG_ALPHA_2" => LOCALE_LANG_ALPHA_2,
-          "LOCALE_LANG_ALPHA_3" => LOCALE_LANG_ALPHA_3,
-          "LOCALE_LANG_TERM"    => LOCALE_LANG_TERM,
-        );
-
-sub test {
-   my(@test) = @_;
-
-   if      ($test[0] eq "rename_language") {
-      shift(@test);
-      $test[2]  = $type{$test[2]}
-        if (@test == 3  &&  $test[2]  &&  exists $type{$test[2]});
-      return Locale::Language::rename_language(@test,"nowarn");
-
-   } elsif ($test[0] eq "add_language") {
-      shift(@test);
-      $test[2]  = $type{$test[2]}
-        if (@test == 3  &&  $test[2]  &&  exists $type{$test[2]});
-      return Locale::Language::add_language(@test,"nowarn");
-
-   } elsif ($test[0] eq "delete_language") {
-      shift(@test);
-      $test[1]  = $type{$test[1]}
-        if (@test == 2  &&  $test[1]  &&  exists $type{$test[1]});
-      return Locale::Language::delete_language(@test,"nowarn");
-
-   } elsif ($test[0] eq "add_language_alias") {
-      shift(@test);
-      return Locale::Language::add_language_alias(@test,"nowarn");
-
-   } elsif ($test[0] eq "delete_language_alias") {
-      shift(@test);
-      return Locale::Language::delete_language_alias(@test,"nowarn");
-
-   } elsif ($test[0] eq "language2code") {
-      shift(@test);
-      $test[1]  = $type{$test[1]}
-        if (@test == 2  &&  $test[1]  &&  exists $type{$test[1]});
-      return language2code(@test);
-
-   } else {
-      $test[1]  = $type{$test[1]}
-        if (@test == 2  &&  $test[1]  &&  exists $type{$test[1]});
-      return code2language(@test);
-   }
-}
-
-$tests = "
-
-zu ~ Zulu
-
-rename_language zu NewName LOCALE_LANG_FOO ~ 0
-
-rename_language zu English LOCALE_LANG_ALPHA_2 ~ 0
-
-rename_language zu NewName LOCALE_LANG_ALPHA_3 ~ 0
-
-zu ~ Zulu
-
-rename_language zu NewName LOCALE_LANG_ALPHA_2 ~ 1
-
-zu ~ NewName
-
-";
-
-print "language (old; semi-private)...\n";
-test_Func(\&test,$tests,$runtests);
+print "language (old)...\n";
+test_Func(\&test,$::tests,$runtests);
 
 1;
 # Local Variables:
@@ -95,5 +43,5 @@ test_Func(\&test,$tests,$runtests);
 # cperl-continued-brace-offset: 0
 # cperl-brace-offset: 0
 # cperl-brace-imaginary-offset: 0
-# cperl-label-offset: -2
+# cperl-label-offset: 0
 # End:

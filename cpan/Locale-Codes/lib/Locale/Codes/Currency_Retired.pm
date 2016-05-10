@@ -3,7 +3,7 @@ Locale::Codes::Currency_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Tue Dec  1 14:45:28 EST 2015
+#    Generated on: Wed Mar  2 09:26:23 EST 2016
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.37';
+$VERSION='3.38';
 
 $Locale::Codes::Retired{'currency'}{'alpha'}{'code'} = {
    q(ADP) => q(Andorran Peseta),
@@ -78,6 +78,7 @@ $Locale::Codes::Retired{'currency'}{'num'}{'code'} = {
 $Locale::Codes::Retired{'currency'}{'alpha'}{'name'} = {
    q(andorran peseta) => [ q(ADP), q(Andorran Peseta) ],
    q(aruban guilder) => [ q(AWG), q(Aruban Guilder) ],
+   q(belarussian ruble) => [ q(BYR), q(Belarussian Ruble) ],
    q(belgian franc) => [ q(BEF), q(Belgian Franc) ],
    q(bermudian dollar (customarily known as bermuda dollar)) => [ q(BMD), q(Bermudian Dollar (customarily known as Bermuda Dollar)) ],
    q(bolivar) => [ q(VEB), q(Bolivar) ],
@@ -110,6 +111,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'name'} = {
    q(karbovanets) => [ q(UAK), q(Karbovanets) ],
    q(kroon) => [ q(EEK), q(Kroon) ],
    q(kuna) => [ q(HRK), q(Kuna) ],
+   q(kwacha) => [ q(MWK), q(Kwacha) ],
    q(kwanza reajustado) => [ q(AOR), q(Kwanza Reajustado) ],
    q(latvian lats) => [ q(LVL), q(Latvian Lats) ],
    q(leu) => [ q(RON), q(Leu) ],
@@ -130,6 +132,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'name'} = {
    q(new manat) => [ q(TMT), q(New Manat) ],
    q(new romanian leu) => [ q(RON), q(New Romanian Leu) ],
    q(new zaire) => [ q(ZRN), q(New Zaire) ],
+   q(nuevo sol) => [ q(PEN), q(Nuevo Sol) ],
    q(portuguese escudo) => [ q(PTE), q(Portuguese Escudo) ],
    q(saint helena pound) => [ q(SHP), q(Saint Helena Pound) ],
    q(schilling) => [ q(ATS), q(Schilling) ],
@@ -153,16 +156,19 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'name'} = {
 };
 
 $Locale::Codes::Retired{'currency'}{'num'}{'name'} = {
+   q(belarussian ruble) => [ q(974), q(Belarussian Ruble) ],
    q(bolivar fuerte) => [ q(937), q(Bolivar Fuerte) ],
    q(cape verde escudo) => [ q(132), q(Cape Verde Escudo) ],
    q(cedi) => [ q(936), q(Cedi) ],
    q(croatian kuna) => [ q(191), q(Croatian Kuna) ],
+   q(kwacha) => [ q(454), q(Kwacha) ],
    q(latvian lats) => [ q(428), q(Latvian Lats) ],
    q(leu) => [ q(946), q(Leu) ],
    q(lithuanian litas) => [ q(440), q(Lithuanian Litas) ],
    q(metical) => [ q(943), q(Metical) ],
    q(new manat) => [ q(934), q(New Manat) ],
    q(new romanian leu) => [ q(946), q(New Romanian Leu) ],
+   q(nuevo sol) => [ q(604), q(Nuevo Sol) ],
    q(saint helena pound) => [ q(654), q(Saint Helena Pound) ],
    q(unidades de fomento) => [ q(990), q(Unidades de fomento) ],
    q(us dollar (same day)) => [ q(998), q(US Dollar (Same day)) ],

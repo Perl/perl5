@@ -1595,31 +1595,26 @@ cpan/Locale-Codes/lib/Locale/Language.pm	Locale::Codes
 cpan/Locale-Codes/lib/Locale/Language.pod	Locale::Codes documentation
 cpan/Locale-Codes/lib/Locale/Script.pm		Locale::Codes
 cpan/Locale-Codes/lib/Locale/Script.pod		Locale::Codes documentation
-cpan/Locale-Codes/t/code2country_old.t	Locale::Codes tests
-cpan/Locale-Codes/t/code2country.t		Locale::Codes tests
-cpan/Locale-Codes/t/code2currency.t		Locale::Codes tests
-cpan/Locale-Codes/t/code2langext.t	Locale::Codes tests
-cpan/Locale-Codes/t/code2langfam.t	Locale::Codes tests
-cpan/Locale-Codes/t/code2language.t		Locale::Codes tests
-cpan/Locale-Codes/t/code2langvar.t	Locale::Codes tests
-cpan/Locale-Codes/t/code2script.t		Locale::Codes tests
-cpan/Locale-Codes/t/country2code_old.t	Locale::Codes tests
-cpan/Locale-Codes/t/country2code.t		Locale::Codes tests
-cpan/Locale-Codes/t/country_code2code_old.t	Locale::Codes tests
-cpan/Locale-Codes/t/country_code2code.t		Locale::Codes tests
 cpan/Locale-Codes/t/country_old.t	Locale::Codes tests
 cpan/Locale-Codes/t/country.t			Locale::Codes tests
-cpan/Locale-Codes/t/currency2code_old.t	Locale::Codes tests
-cpan/Locale-Codes/t/currency2code.t		Locale::Codes tests
-cpan/Locale-Codes/t/langext2code.t	Locale::Codes tests
-cpan/Locale-Codes/t/langfam2code.t	Locale::Codes tests
-cpan/Locale-Codes/t/language2code.t		Locale::Codes tests
+cpan/Locale-Codes/t/currency_old.t
+cpan/Locale-Codes/t/currency.t
+cpan/Locale-Codes/t/langext.t
+cpan/Locale-Codes/t/langfam.t
 cpan/Locale-Codes/t/language_old.t	Locale::Codes tests
 cpan/Locale-Codes/t/language.t			Locale::Codes tests
-cpan/Locale-Codes/t/langvar2code.t	Locale::Codes tests
-cpan/Locale-Codes/t/script2code_old.t	Locale::Codes tests
-cpan/Locale-Codes/t/script2code.t		Locale::Codes tests
+cpan/Locale-Codes/t/langvar.t
+cpan/Locale-Codes/t/script_old.t
+cpan/Locale-Codes/t/script.t
 cpan/Locale-Codes/t/testfunc.pl			Locale::Codes tests
+cpan/Locale-Codes/t/vals_country.pl
+cpan/Locale-Codes/t/vals_currency.pl
+cpan/Locale-Codes/t/vals_langext.pl
+cpan/Locale-Codes/t/vals_langfam.pl
+cpan/Locale-Codes/t/vals_language.pl
+cpan/Locale-Codes/t/vals_langvar.pl
+cpan/Locale-Codes/t/vals.pl
+cpan/Locale-Codes/t/vals_script.pl
 cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm	Locale::Simple
 cpan/Locale-Maketext-Simple/t/0-signature.t			Locale::Simple tests
 cpan/Locale-Maketext-Simple/t/1-basic.t				Locale::Simple tests

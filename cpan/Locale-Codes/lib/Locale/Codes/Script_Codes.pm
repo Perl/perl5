@@ -3,7 +3,7 @@ Locale::Codes::Script_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'harvest_data' is run.
-#    Generated on: Tue Dec  1 14:44:11 EST 2015
+#    Generated on: Wed Mar  2 09:24:01 EST 2016
 
 use strict;
 require 5.006;
@@ -11,9 +11,9 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.37';
+$VERSION='3.38';
 
-$Locale::Codes::Data{'script'}{'id'} = '0175';
+$Locale::Codes::Data{'script'}{'id'} = '0180';
 
 $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0001) => [
@@ -168,459 +168,478 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
       q(Gurmukhi),
       ],
    q(0048) => [
+      q(Han with Bopomofo (alias for Han + Bopomofo)),
+      ],
+   q(0049) => [
       q(Hangul (Hangul, Hangeul)),
       q(Hangul),
       q(Hangeul),
       ],
-   q(0049) => [
+   q(0050) => [
       q(Han (Hanzi, Kanji, Hanja)),
       q(Han),
       q(Hanzi),
       q(Kanji),
       q(Hanja),
       ],
-   q(0050) => [
+   q(0051) => [
       q(Hanunoo (Hanunoo)),
       q(Hanunoo),
       ],
-   q(0051) => [
+   q(0052) => [
       q(Han (Simplified variant)),
       ],
-   q(0052) => [
+   q(0053) => [
       q(Han (Traditional variant)),
       ],
-   q(0053) => [
+   q(0054) => [
       q(Hatran),
       ],
-   q(0054) => [
+   q(0055) => [
       q(Hebrew),
       ],
-   q(0055) => [
+   q(0056) => [
       q(Hiragana),
       ],
-   q(0056) => [
+   q(0057) => [
       q(Anatolian Hieroglyphs (Luwian Hieroglyphs, Hittite Hieroglyphs)),
       q(Anatolian Hieroglyphs),
       q(Luwian Hieroglyphs),
       q(Hittite Hieroglyphs),
       ],
-   q(0057) => [
+   q(0058) => [
       q(Pahawh Hmong),
       ],
-   q(0058) => [
+   q(0059) => [
       q(Japanese syllabaries (alias for Hiragana + Katakana)),
       ],
-   q(0059) => [
+   q(0060) => [
       q(Old Hungarian (Hungarian Runic)),
       q(Old Hungarian),
       q(Hungarian Runic),
       ],
-   q(0060) => [
+   q(0061) => [
       q(Indus (Harappan)),
       q(Indus),
       q(Harappan),
       ],
-   q(0061) => [
+   q(0062) => [
       q(Old Italic (Etruscan, Oscan, etc.)),
       ],
-   q(0062) => [
-      q(Javanese),
-      ],
    q(0063) => [
-      q(Japanese (alias for Han + Hiragana + Katakana)),
+      q(Jamo (alias for Jamo subset of Hangul)),
       ],
    q(0064) => [
-      q(Jurchen),
+      q(Javanese),
       ],
    q(0065) => [
-      q(Kayah Li),
+      q(Japanese (alias for Han + Hiragana + Katakana)),
       ],
    q(0066) => [
-      q(Katakana),
+      q(Jurchen),
       ],
    q(0067) => [
-      q(Kharoshthi),
+      q(Kayah Li),
       ],
    q(0068) => [
-      q(Khmer),
+      q(Katakana),
       ],
    q(0069) => [
-      q(Khojki),
+      q(Kharoshthi),
       ],
    q(0070) => [
-      q(Khitan large script),
+      q(Khmer),
       ],
    q(0071) => [
-      q(Khitan small script),
+      q(Khojki),
       ],
    q(0072) => [
-      q(Kannada),
+      q(Khitan large script),
       ],
    q(0073) => [
-      q(Korean (alias for Hangul + Han)),
+      q(Khitan small script),
       ],
    q(0074) => [
-      q(Kpelle),
+      q(Kannada),
       ],
    q(0075) => [
-      q(Kaithi),
+      q(Korean (alias for Hangul + Han)),
       ],
    q(0076) => [
+      q(Kpelle),
+      ],
+   q(0077) => [
+      q(Kaithi),
+      ],
+   q(0078) => [
       q(Tai Tham (Lanna)),
       q(Tai Tham),
       q(Lanna),
       ],
-   q(0077) => [
+   q(0079) => [
       q(Lao),
       ],
-   q(0078) => [
+   q(0080) => [
       q(Latin (Fraktur variant)),
       ],
-   q(0079) => [
+   q(0081) => [
       q(Latin (Gaelic variant)),
       ],
-   q(0080) => [
+   q(0082) => [
       q(Latin),
       ],
-   q(0081) => [
+   q(0083) => [
       q(Leke),
       ],
-   q(0082) => [
+   q(0084) => [
       q(Lepcha (Rong)),
       q(Lepcha),
       q(Rong),
       ],
-   q(0083) => [
+   q(0085) => [
       q(Limbu),
       ],
-   q(0084) => [
+   q(0086) => [
       q(Linear A),
       ],
-   q(0085) => [
+   q(0087) => [
       q(Linear B),
       ],
-   q(0086) => [
+   q(0088) => [
       q(Lisu (Fraser)),
       q(Lisu),
       q(Fraser),
       ],
-   q(0087) => [
+   q(0089) => [
       q(Loma),
       ],
-   q(0088) => [
+   q(0090) => [
       q(Lycian),
       ],
-   q(0089) => [
+   q(0091) => [
       q(Lydian),
       ],
-   q(0090) => [
+   q(0092) => [
       q(Mahajani),
       ],
-   q(0091) => [
+   q(0093) => [
       q(Mandaic, Mandaean),
       q(Mandaic),
       q(Mandaean),
       ],
-   q(0092) => [
+   q(0094) => [
       q(Manichaean),
       ],
-   q(0093) => [
+   q(0095) => [
       q(Marchen),
       ],
-   q(0094) => [
+   q(0096) => [
       q(Mayan hieroglyphs),
       ],
-   q(0095) => [
+   q(0097) => [
       q(Mende Kikakui),
       ],
-   q(0096) => [
+   q(0098) => [
       q(Meroitic Cursive),
       ],
-   q(0097) => [
+   q(0099) => [
       q(Meroitic Hieroglyphs),
       ],
-   q(0098) => [
+   q(0100) => [
       q(Malayalam),
       ],
-   q(0099) => [
+   q(0101) => [
       q(Modi, Modi),
       q(Modi),
       ],
-   q(0100) => [
+   q(0102) => [
       q(Mongolian),
       ],
-   q(0101) => [
+   q(0103) => [
       q(Moon (Moon code, Moon script, Moon type)),
       q(Moon),
       q(Moon code),
       q(Moon script),
       q(Moon type),
       ],
-   q(0102) => [
+   q(0104) => [
       q(Mro, Mru),
       q(Mro),
       q(Mru),
       ],
-   q(0103) => [
+   q(0105) => [
       q(Meitei Mayek (Meithei, Meetei)),
       q(Meitei Mayek),
       q(Meithei),
       q(Meetei),
       ],
-   q(0104) => [
+   q(0106) => [
       q(Multani),
       ],
-   q(0105) => [
+   q(0107) => [
       q(Myanmar (Burmese)),
       q(Myanmar),
       q(Burmese),
       ],
-   q(0106) => [
+   q(0108) => [
       q(Old North Arabian (Ancient North Arabian)),
       q(Old North Arabian),
       q(Ancient North Arabian),
       ],
-   q(0107) => [
+   q(0109) => [
       q(Nabataean),
       ],
-   q(0108) => [
+   q(0110) => [
+      q(Newa, Newar, Newari, Nepala lipi),
+      q(Newa),
+      q(Newar),
+      q(Newari),
+      q(Nepala lipi),
+      ],
+   q(0111) => [
       q(Nakhi Geba ('Na-'Khi Ggo-baw, Naxi Geba)),
       q(Nakhi Geba),
       q('Na-'Khi Ggo-baw),
       q(Naxi Geba),
       ],
-   q(0109) => [
+   q(0112) => [
       q(N'Ko),
       ],
-   q(0110) => [
+   q(0113) => [
       q(Nushu),
       ],
-   q(0111) => [
+   q(0114) => [
       q(Ogham),
       ],
-   q(0112) => [
+   q(0115) => [
       q(Ol Chiki (Ol Cemet, Ol, Santali)),
       q(Ol Chiki),
       q(Ol Cemet'),
       q(Ol),
       q(Santali),
       ],
-   q(0113) => [
+   q(0116) => [
       q(Old Turkic, Orkhon Runic),
       q(Old Turkic),
       q(Orkhon Runic),
       ],
-   q(0114) => [
+   q(0117) => [
       q(Oriya),
       ],
-   q(0115) => [
+   q(0118) => [
       q(Osage),
       ],
-   q(0116) => [
+   q(0119) => [
       q(Osmanya),
       ],
-   q(0117) => [
+   q(0120) => [
       q(Palmyrene),
       ],
-   q(0118) => [
+   q(0121) => [
       q(Pau Cin Hau),
       ],
-   q(0119) => [
+   q(0122) => [
       q(Old Permic),
       ],
-   q(0120) => [
+   q(0123) => [
       q(Phags-pa),
       ],
-   q(0121) => [
+   q(0124) => [
       q(Inscriptional Pahlavi),
       ],
-   q(0122) => [
+   q(0125) => [
       q(Psalter Pahlavi),
       ],
-   q(0123) => [
+   q(0126) => [
       q(Book Pahlavi),
       ],
-   q(0124) => [
+   q(0127) => [
       q(Phoenician),
       ],
-   q(0125) => [
+   q(0128) => [
       q(Miao (Pollard)),
       q(Miao),
       q(Pollard),
       ],
-   q(0126) => [
+   q(0129) => [
+      q(Klingon (KLI pIqaD)),
+      ],
+   q(0130) => [
       q(Inscriptional Parthian),
       ],
-   q(0127) => [
+   q(0131) => [
       q(Reserved for private use (start)),
       ],
-   q(0128) => [
+   q(0132) => [
       q(Reserved for private use (end)),
       ],
-   q(0129) => [
+   q(0133) => [
       q(Rejang (Redjang, Kaganga)),
       q(Rejang),
       q(Redjang),
       q(Kaganga),
       ],
-   q(0130) => [
+   q(0134) => [
       q(Rongorongo),
       ],
-   q(0131) => [
+   q(0135) => [
       q(Runic),
       ],
-   q(0132) => [
+   q(0136) => [
       q(Samaritan),
       ],
-   q(0133) => [
+   q(0137) => [
       q(Sarati),
       ],
-   q(0134) => [
+   q(0138) => [
       q(Old South Arabian),
       ],
-   q(0135) => [
+   q(0139) => [
       q(Saurashtra),
       ],
-   q(0136) => [
+   q(0140) => [
       q(SignWriting),
       ],
-   q(0137) => [
+   q(0141) => [
       q(Shavian (Shaw)),
       q(Shavian),
       q(Shaw),
       ],
-   q(0138) => [
+   q(0142) => [
       q(Sharada, Sarada),
       q(Sharada),
       q(Sarada),
       ],
-   q(0139) => [
+   q(0143) => [
       q(Siddham, Siddham, Siddhamatrka),
       q(Siddham),
       q(Siddhamatrka),
       ],
-   q(0140) => [
+   q(0144) => [
       q(Khudawadi, Sindhi),
       q(Khudawadi),
       q(Sindhi),
       ],
-   q(0141) => [
+   q(0145) => [
       q(Sinhala),
       ],
-   q(0142) => [
+   q(0146) => [
       q(Sora Sompeng),
       ],
-   q(0143) => [
+   q(0147) => [
       q(Sundanese),
       ],
-   q(0144) => [
+   q(0148) => [
       q(Syloti Nagri),
       ],
-   q(0145) => [
+   q(0149) => [
       q(Syriac),
       ],
-   q(0146) => [
+   q(0150) => [
       q(Syriac (Estrangelo variant)),
       ],
-   q(0147) => [
+   q(0151) => [
       q(Syriac (Western variant)),
       ],
-   q(0148) => [
+   q(0152) => [
       q(Syriac (Eastern variant)),
       ],
-   q(0149) => [
+   q(0153) => [
       q(Tagbanwa),
       ],
-   q(0150) => [
+   q(0154) => [
       q(Takri, Takri, Tankri),
       q(Takri),
       q(Tankri),
       ],
-   q(0151) => [
+   q(0155) => [
       q(Tai Le),
       ],
-   q(0152) => [
+   q(0156) => [
       q(New Tai Lue),
       ],
-   q(0153) => [
+   q(0157) => [
       q(Tamil),
       ],
-   q(0154) => [
+   q(0158) => [
       q(Tangut),
       ],
-   q(0155) => [
+   q(0159) => [
       q(Tai Viet),
       ],
-   q(0156) => [
+   q(0160) => [
       q(Telugu),
       ],
-   q(0157) => [
+   q(0161) => [
       q(Tengwar),
       ],
-   q(0158) => [
+   q(0162) => [
       q(Tifinagh (Berber)),
       q(Tifinagh),
       q(Berber),
       ],
-   q(0159) => [
+   q(0163) => [
       q(Tagalog (Baybayin, Alibata)),
       q(Tagalog),
       q(Baybayin),
       q(Alibata),
       ],
-   q(0160) => [
+   q(0164) => [
       q(Thaana),
       ],
-   q(0161) => [
+   q(0165) => [
       q(Thai),
       ],
-   q(0162) => [
+   q(0166) => [
       q(Tibetan),
       ],
-   q(0163) => [
+   q(0167) => [
       q(Tirhuta),
       ],
-   q(0164) => [
+   q(0168) => [
       q(Ugaritic),
       ],
-   q(0165) => [
+   q(0169) => [
       q(Vai),
       ],
-   q(0166) => [
+   q(0170) => [
       q(Visible Speech),
       ],
-   q(0167) => [
+   q(0171) => [
       q(Warang Citi (Varang Kshiti)),
       q(Warang Citi),
       q(Varang Kshiti),
       ],
-   q(0168) => [
+   q(0172) => [
       q(Woleai),
       ],
-   q(0169) => [
+   q(0173) => [
       q(Old Persian),
       ],
-   q(0170) => [
+   q(0174) => [
       q(Cuneiform, Sumero-Akkadian),
       q(Sumero-Akkadian cuneiform),
       ],
-   q(0171) => [
+   q(0175) => [
       q(Yi),
       ],
-   q(0172) => [
+   q(0176) => [
       q(Code for inherited script),
       ],
-   q(0173) => [
+   q(0177) => [
       q(Mathematical notation),
       ],
-   q(0174) => [
+   q(0178) => [
+      q(Symbols (Emoji variant)),
+      ],
+   q(0179) => [
       q(Symbols),
       ],
 };
 
 $Locale::Codes::Data{'script'}{'alias2id'} = {
    q('na-'khi ggo-baw) => [
-      q(0108),
+      q(0111),
       q(2),
       ],
    q(adlam) => [
@@ -640,19 +659,19 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0),
       ],
    q(alibata) => [
-      q(0159),
+      q(0163),
       q(3),
       ],
    q(anatolian hieroglyphs) => [
-      q(0056),
+      q(0057),
       q(1),
       ],
    q(anatolian hieroglyphs (luwian hieroglyphs, hittite hieroglyphs)) => [
-      q(0056),
+      q(0057),
       q(0),
       ],
    q(ancient north arabian) => [
-      q(0106),
+      q(0108),
       q(2),
       ],
    q(arabic) => [
@@ -688,7 +707,7 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0),
       ],
    q(baybayin) => [
-      q(0159),
+      q(0163),
       q(2),
       ],
    q(bengali) => [
@@ -696,7 +715,7 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0),
       ],
    q(berber) => [
-      q(0158),
+      q(0162),
       q(2),
       ],
    q(bhaiksuki) => [
@@ -708,7 +727,7 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0),
       ],
    q(book pahlavi) => [
-      q(0123),
+      q(0126),
       q(0),
       ],
    q(bopomofo) => [
@@ -732,7 +751,7 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0),
       ],
    q(burmese) => [
-      q(0105),
+      q(0107),
       q(2),
       ],
    q(carian) => [
@@ -760,7 +779,7 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0),
       ],
    q(code for inherited script) => [
-      q(0172),
+      q(0176),
       q(0),
       ],
    q(coptic) => [
@@ -768,7 +787,7 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0),
       ],
    q(cuneiform, sumero-akkadian) => [
-      q(0170),
+      q(0174),
       q(0),
       ],
    q(cypriot) => [
@@ -836,7 +855,7 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0),
       ],
    q(fraser) => [
-      q(0086),
+      q(0088),
       q(2),
       ],
    q(ge'ez) => [
@@ -872,71 +891,75 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0),
       ],
    q(han) => [
-      q(0049),
+      q(0050),
       q(1),
       ],
    q(han (hanzi, kanji, hanja)) => [
-      q(0049),
+      q(0050),
       q(0),
       ],
    q(han (simplified variant)) => [
-      q(0051),
-      q(0),
-      ],
-   q(han (traditional variant)) => [
       q(0052),
       q(0),
       ],
-   q(hangeul) => [
-      q(0048),
-      q(2),
-      ],
-   q(hangul) => [
-      q(0048),
-      q(1),
-      ],
-   q(hangul (hangul, hangeul)) => [
-      q(0048),
-      q(0),
-      ],
-   q(hanja) => [
-      q(0049),
-      q(4),
-      ],
-   q(hanunoo) => [
-      q(0050),
-      q(1),
-      ],
-   q(hanunoo (hanunoo)) => [
-      q(0050),
-      q(0),
-      ],
-   q(hanzi) => [
-      q(0049),
-      q(2),
-      ],
-   q(harappan) => [
-      q(0060),
-      q(2),
-      ],
-   q(hatran) => [
+   q(han (traditional variant)) => [
       q(0053),
       q(0),
       ],
-   q(hebrew) => [
+   q(han with bopomofo (alias for han + bopomofo)) => [
+      q(0048),
+      q(0),
+      ],
+   q(hangeul) => [
+      q(0049),
+      q(2),
+      ],
+   q(hangul) => [
+      q(0049),
+      q(1),
+      ],
+   q(hangul (hangul, hangeul)) => [
+      q(0049),
+      q(0),
+      ],
+   q(hanja) => [
+      q(0050),
+      q(4),
+      ],
+   q(hanunoo) => [
+      q(0051),
+      q(1),
+      ],
+   q(hanunoo (hanunoo)) => [
+      q(0051),
+      q(0),
+      ],
+   q(hanzi) => [
+      q(0050),
+      q(2),
+      ],
+   q(harappan) => [
+      q(0061),
+      q(2),
+      ],
+   q(hatran) => [
       q(0054),
       q(0),
       ],
-   q(hiragana) => [
+   q(hebrew) => [
       q(0055),
       q(0),
       ],
-   q(hittite hieroglyphs) => [
+   q(hiragana) => [
       q(0056),
+      q(0),
+      ],
+   q(hittite hieroglyphs) => [
+      q(0057),
       q(3),
       ],
    q(hungarian runic) => [
-      q(0059),
+      q(0060),
       q(2),
       ],
    q(imperial aramaic) => [
@@ -944,271 +967,279 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0),
       ],
    q(indus) => [
-      q(0060),
+      q(0061),
       q(1),
       ],
    q(indus (harappan)) => [
-      q(0060),
+      q(0061),
       q(0),
       ],
    q(inscriptional pahlavi) => [
-      q(0121),
+      q(0124),
       q(0),
       ],
    q(inscriptional parthian) => [
-      q(0126),
+      q(0130),
       q(0),
       ],
-   q(japanese (alias for han + hiragana + katakana)) => [
+   q(jamo (alias for jamo subset of hangul)) => [
       q(0063),
       q(0),
       ],
-   q(japanese syllabaries (alias for hiragana + katakana)) => [
-      q(0058),
-      q(0),
-      ],
-   q(javanese) => [
-      q(0062),
-      q(0),
-      ],
-   q(jurchen) => [
-      q(0064),
-      q(0),
-      ],
-   q(kaganga) => [
-      q(0129),
-      q(3),
-      ],
-   q(kaithi) => [
-      q(0075),
-      q(0),
-      ],
-   q(kanji) => [
-      q(0049),
-      q(3),
-      ],
-   q(kannada) => [
-      q(0072),
-      q(0),
-      ],
-   q(katakana) => [
-      q(0066),
-      q(0),
-      ],
-   q(kayah li) => [
+   q(japanese (alias for han + hiragana + katakana)) => [
       q(0065),
       q(0),
       ],
-   q(kharoshthi) => [
-      q(0067),
+   q(japanese syllabaries (alias for hiragana + katakana)) => [
+      q(0059),
       q(0),
       ],
-   q(khitan large script) => [
-      q(0070),
+   q(javanese) => [
+      q(0064),
       q(0),
       ],
-   q(khitan small script) => [
-      q(0071),
+   q(jurchen) => [
+      q(0066),
       q(0),
       ],
-   q(khmer) => [
+   q(kaganga) => [
+      q(0133),
+      q(3),
+      ],
+   q(kaithi) => [
+      q(0077),
+      q(0),
+      ],
+   q(kanji) => [
+      q(0050),
+      q(3),
+      ],
+   q(kannada) => [
+      q(0074),
+      q(0),
+      ],
+   q(katakana) => [
       q(0068),
       q(0),
       ],
-   q(khojki) => [
+   q(kayah li) => [
+      q(0067),
+      q(0),
+      ],
+   q(kharoshthi) => [
       q(0069),
       q(0),
       ],
+   q(khitan large script) => [
+      q(0072),
+      q(0),
+      ],
+   q(khitan small script) => [
+      q(0073),
+      q(0),
+      ],
+   q(khmer) => [
+      q(0070),
+      q(0),
+      ],
+   q(khojki) => [
+      q(0071),
+      q(0),
+      ],
    q(khudawadi) => [
-      q(0140),
+      q(0144),
       q(1),
       ],
    q(khudawadi, sindhi) => [
-      q(0140),
+      q(0144),
       q(0),
       ],
    q(khutsuri (asomtavruli and nuskhuri)) => [
       q(0040),
       q(0),
       ],
+   q(klingon (kli piqad)) => [
+      q(0129),
+      q(0),
+      ],
    q(korean (alias for hangul + han)) => [
-      q(0073),
+      q(0075),
       q(0),
       ],
    q(kpelle) => [
-      q(0074),
+      q(0076),
       q(0),
       ],
    q(lanna) => [
-      q(0076),
+      q(0078),
       q(2),
       ],
    q(lao) => [
-      q(0077),
-      q(0),
-      ],
-   q(latin) => [
-      q(0080),
-      q(0),
-      ],
-   q(latin (fraktur variant)) => [
-      q(0078),
-      q(0),
-      ],
-   q(latin (gaelic variant)) => [
       q(0079),
       q(0),
       ],
-   q(leke) => [
+   q(latin) => [
+      q(0082),
+      q(0),
+      ],
+   q(latin (fraktur variant)) => [
+      q(0080),
+      q(0),
+      ],
+   q(latin (gaelic variant)) => [
       q(0081),
       q(0),
       ],
-   q(lepcha) => [
-      q(0082),
-      q(1),
-      ],
-   q(lepcha (rong)) => [
-      q(0082),
-      q(0),
-      ],
-   q(limbu) => [
+   q(leke) => [
       q(0083),
       q(0),
       ],
-   q(linear a) => [
+   q(lepcha) => [
+      q(0084),
+      q(1),
+      ],
+   q(lepcha (rong)) => [
       q(0084),
       q(0),
       ],
-   q(linear b) => [
+   q(limbu) => [
       q(0085),
       q(0),
       ],
-   q(lisu) => [
-      q(0086),
-      q(1),
-      ],
-   q(lisu (fraser)) => [
+   q(linear a) => [
       q(0086),
       q(0),
       ],
-   q(loma) => [
+   q(linear b) => [
       q(0087),
       q(0),
       ],
-   q(luwian hieroglyphs) => [
-      q(0056),
-      q(2),
+   q(lisu) => [
+      q(0088),
+      q(1),
       ],
-   q(lycian) => [
+   q(lisu (fraser)) => [
       q(0088),
       q(0),
       ],
-   q(lydian) => [
+   q(loma) => [
       q(0089),
       q(0),
       ],
-   q(mahajani) => [
+   q(luwian hieroglyphs) => [
+      q(0057),
+      q(2),
+      ],
+   q(lycian) => [
       q(0090),
       q(0),
       ],
-   q(malayalam) => [
-      q(0098),
-      q(0),
-      ],
-   q(mandaean) => [
-      q(0091),
-      q(2),
-      ],
-   q(mandaic) => [
-      q(0091),
-      q(1),
-      ],
-   q(mandaic, mandaean) => [
+   q(lydian) => [
       q(0091),
       q(0),
       ],
-   q(manichaean) => [
+   q(mahajani) => [
       q(0092),
       q(0),
       ],
-   q(marchen) => [
-      q(0093),
-      q(0),
-      ],
-   q(mathematical notation) => [
-      q(0173),
-      q(0),
-      ],
-   q(mayan hieroglyphs) => [
-      q(0094),
-      q(0),
-      ],
-   q(meetei) => [
-      q(0103),
-      q(3),
-      ],
-   q(meitei mayek) => [
-      q(0103),
-      q(1),
-      ],
-   q(meitei mayek (meithei, meetei)) => [
-      q(0103),
-      q(0),
-      ],
-   q(meithei) => [
-      q(0103),
-      q(2),
-      ],
-   q(mende kikakui) => [
-      q(0095),
-      q(0),
-      ],
-   q(meroitic cursive) => [
-      q(0096),
-      q(0),
-      ],
-   q(meroitic hieroglyphs) => [
-      q(0097),
-      q(0),
-      ],
-   q(miao) => [
-      q(0125),
-      q(1),
-      ],
-   q(miao (pollard)) => [
-      q(0125),
-      q(0),
-      ],
-   q(modi) => [
-      q(0099),
-      q(1),
-      ],
-   q(modi, modi) => [
-      q(0099),
-      q(0),
-      ],
-   q(mongolian) => [
+   q(malayalam) => [
       q(0100),
       q(0),
       ],
-   q(moon) => [
+   q(mandaean) => [
+      q(0093),
+      q(2),
+      ],
+   q(mandaic) => [
+      q(0093),
+      q(1),
+      ],
+   q(mandaic, mandaean) => [
+      q(0093),
+      q(0),
+      ],
+   q(manichaean) => [
+      q(0094),
+      q(0),
+      ],
+   q(marchen) => [
+      q(0095),
+      q(0),
+      ],
+   q(mathematical notation) => [
+      q(0177),
+      q(0),
+      ],
+   q(mayan hieroglyphs) => [
+      q(0096),
+      q(0),
+      ],
+   q(meetei) => [
+      q(0105),
+      q(3),
+      ],
+   q(meitei mayek) => [
+      q(0105),
+      q(1),
+      ],
+   q(meitei mayek (meithei, meetei)) => [
+      q(0105),
+      q(0),
+      ],
+   q(meithei) => [
+      q(0105),
+      q(2),
+      ],
+   q(mende kikakui) => [
+      q(0097),
+      q(0),
+      ],
+   q(meroitic cursive) => [
+      q(0098),
+      q(0),
+      ],
+   q(meroitic hieroglyphs) => [
+      q(0099),
+      q(0),
+      ],
+   q(miao) => [
+      q(0128),
+      q(1),
+      ],
+   q(miao (pollard)) => [
+      q(0128),
+      q(0),
+      ],
+   q(modi) => [
       q(0101),
       q(1),
       ],
-   q(moon (moon code, moon script, moon type)) => [
+   q(modi, modi) => [
       q(0101),
       q(0),
       ],
+   q(mongolian) => [
+      q(0102),
+      q(0),
+      ],
+   q(moon) => [
+      q(0103),
+      q(1),
+      ],
+   q(moon (moon code, moon script, moon type)) => [
+      q(0103),
+      q(0),
+      ],
    q(moon code) => [
-      q(0101),
+      q(0103),
       q(2),
       ],
    q(moon script) => [
-      q(0101),
+      q(0103),
       q(3),
       ],
    q(moon type) => [
-      q(0101),
+      q(0103),
       q(4),
       ],
    q(mormon) => [
@@ -1216,35 +1247,35 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(2),
       ],
    q(mro) => [
-      q(0102),
+      q(0104),
       q(1),
       ],
    q(mro, mru) => [
-      q(0102),
-      q(0),
-      ],
-   q(mru) => [
-      q(0102),
-      q(2),
-      ],
-   q(multani) => [
       q(0104),
       q(0),
       ],
+   q(mru) => [
+      q(0104),
+      q(2),
+      ],
+   q(multani) => [
+      q(0106),
+      q(0),
+      ],
    q(myanmar) => [
-      q(0105),
+      q(0107),
       q(1),
       ],
    q(myanmar (burmese)) => [
-      q(0105),
+      q(0107),
       q(0),
       ],
    q(n'ko) => [
-      q(0109),
+      q(0112),
       q(0),
       ],
    q(nabataean) => [
-      q(0107),
+      q(0109),
       q(0),
       ],
    q(nagari) => [
@@ -1252,271 +1283,295 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(2),
       ],
    q(nakhi geba) => [
-      q(0108),
+      q(0111),
       q(1),
       ],
    q(nakhi geba ('na-'khi ggo-baw, naxi geba)) => [
-      q(0108),
-      q(0),
-      ],
-   q(naxi geba) => [
-      q(0108),
-      q(3),
-      ],
-   q(new tai lue) => [
-      q(0152),
-      q(0),
-      ],
-   q(nushu) => [
-      q(0110),
-      q(0),
-      ],
-   q(ogham) => [
       q(0111),
       q(0),
       ],
-   q(ol) => [
-      q(0112),
+   q(naxi geba) => [
+      q(0111),
       q(3),
       ],
-   q(ol cemet') => [
-      q(0112),
+   q(nepala lipi) => [
+      q(0110),
+      q(4),
+      ],
+   q(new tai lue) => [
+      q(0156),
+      q(0),
+      ],
+   q(newa) => [
+      q(0110),
+      q(1),
+      ],
+   q(newa, newar, newari, nepala lipi) => [
+      q(0110),
+      q(0),
+      ],
+   q(newar) => [
+      q(0110),
       q(2),
       ],
-   q(ol chiki) => [
-      q(0112),
-      q(1),
+   q(newari) => [
+      q(0110),
+      q(3),
       ],
-   q(ol chiki (ol cemet, ol, santali)) => [
-      q(0112),
-      q(0),
-      ],
-   q(old hungarian) => [
-      q(0059),
-      q(1),
-      ],
-   q(old hungarian (hungarian runic)) => [
-      q(0059),
-      q(0),
-      ],
-   q(old italic (etruscan, oscan, etc.)) => [
-      q(0061),
-      q(0),
-      ],
-   q(old north arabian) => [
-      q(0106),
-      q(1),
-      ],
-   q(old north arabian (ancient north arabian)) => [
-      q(0106),
-      q(0),
-      ],
-   q(old permic) => [
-      q(0119),
-      q(0),
-      ],
-   q(old persian) => [
-      q(0169),
-      q(0),
-      ],
-   q(old south arabian) => [
-      q(0134),
-      q(0),
-      ],
-   q(old turkic) => [
-      q(0113),
-      q(1),
-      ],
-   q(old turkic, orkhon runic) => [
+   q(nushu) => [
       q(0113),
       q(0),
       ],
-   q(oriya) => [
+   q(ogham) => [
       q(0114),
       q(0),
       ],
-   q(orkhon runic) => [
-      q(0113),
+   q(ol) => [
+      q(0115),
+      q(3),
+      ],
+   q(ol cemet') => [
+      q(0115),
       q(2),
       ],
-   q(osage) => [
+   q(ol chiki) => [
+      q(0115),
+      q(1),
+      ],
+   q(ol chiki (ol cemet, ol, santali)) => [
       q(0115),
       q(0),
       ],
-   q(osmanya) => [
-      q(0116),
+   q(old hungarian) => [
+      q(0060),
+      q(1),
+      ],
+   q(old hungarian (hungarian runic)) => [
+      q(0060),
       q(0),
       ],
-   q(pahawh hmong) => [
-      q(0057),
+   q(old italic (etruscan, oscan, etc.)) => [
+      q(0062),
       q(0),
       ],
-   q(palmyrene) => [
-      q(0117),
+   q(old north arabian) => [
+      q(0108),
+      q(1),
+      ],
+   q(old north arabian (ancient north arabian)) => [
+      q(0108),
       q(0),
       ],
-   q(pau cin hau) => [
-      q(0118),
-      q(0),
-      ],
-   q(phags-pa) => [
-      q(0120),
-      q(0),
-      ],
-   q(phoenician) => [
-      q(0124),
-      q(0),
-      ],
-   q(pollard) => [
-      q(0125),
-      q(2),
-      ],
-   q(psalter pahlavi) => [
+   q(old permic) => [
       q(0122),
       q(0),
       ],
-   q(redjang) => [
-      q(0129),
-      q(2),
+   q(old persian) => [
+      q(0173),
+      q(0),
       ],
-   q(rejang) => [
-      q(0129),
+   q(old south arabian) => [
+      q(0138),
+      q(0),
+      ],
+   q(old turkic) => [
+      q(0116),
       q(1),
       ],
-   q(rejang (redjang, kaganga)) => [
-      q(0129),
+   q(old turkic, orkhon runic) => [
+      q(0116),
       q(0),
       ],
-   q(reserved for private use (end)) => [
-      q(0128),
+   q(oriya) => [
+      q(0117),
       q(0),
       ],
-   q(reserved for private use (start)) => [
+   q(orkhon runic) => [
+      q(0116),
+      q(2),
+      ],
+   q(osage) => [
+      q(0118),
+      q(0),
+      ],
+   q(osmanya) => [
+      q(0119),
+      q(0),
+      ],
+   q(pahawh hmong) => [
+      q(0058),
+      q(0),
+      ],
+   q(palmyrene) => [
+      q(0120),
+      q(0),
+      ],
+   q(pau cin hau) => [
+      q(0121),
+      q(0),
+      ],
+   q(phags-pa) => [
+      q(0123),
+      q(0),
+      ],
+   q(phoenician) => [
       q(0127),
       q(0),
       ],
-   q(rong) => [
-      q(0082),
+   q(pollard) => [
+      q(0128),
       q(2),
       ],
-   q(rongorongo) => [
-      q(0130),
+   q(psalter pahlavi) => [
+      q(0125),
       q(0),
       ],
-   q(runic) => [
-      q(0131),
-      q(0),
-      ],
-   q(samaritan) => [
-      q(0132),
-      q(0),
-      ],
-   q(santali) => [
-      q(0112),
-      q(4),
-      ],
-   q(sarada) => [
-      q(0138),
+   q(redjang) => [
+      q(0133),
       q(2),
       ],
-   q(sarati) => [
+   q(rejang) => [
+      q(0133),
+      q(1),
+      ],
+   q(rejang (redjang, kaganga)) => [
       q(0133),
       q(0),
       ],
-   q(saurashtra) => [
+   q(reserved for private use (end)) => [
+      q(0132),
+      q(0),
+      ],
+   q(reserved for private use (start)) => [
+      q(0131),
+      q(0),
+      ],
+   q(rong) => [
+      q(0084),
+      q(2),
+      ],
+   q(rongorongo) => [
+      q(0134),
+      q(0),
+      ],
+   q(runic) => [
       q(0135),
       q(0),
       ],
-   q(sharada) => [
-      q(0138),
-      q(1),
-      ],
-   q(sharada, sarada) => [
-      q(0138),
-      q(0),
-      ],
-   q(shavian) => [
-      q(0137),
-      q(1),
-      ],
-   q(shavian (shaw)) => [
-      q(0137),
-      q(0),
-      ],
-   q(shaw) => [
-      q(0137),
-      q(2),
-      ],
-   q(siddham) => [
-      q(0139),
-      q(1),
-      ],
-   q(siddham, siddham, siddhamatrka) => [
-      q(0139),
-      q(0),
-      ],
-   q(siddhamatrka) => [
-      q(0139),
-      q(2),
-      ],
-   q(signwriting) => [
+   q(samaritan) => [
       q(0136),
       q(0),
       ],
-   q(sindhi) => [
-      q(0140),
+   q(santali) => [
+      q(0115),
+      q(4),
+      ],
+   q(sarada) => [
+      q(0142),
       q(2),
       ],
-   q(sinhala) => [
-      q(0141),
+   q(sarati) => [
+      q(0137),
       q(0),
       ],
-   q(sora sompeng) => [
+   q(saurashtra) => [
+      q(0139),
+      q(0),
+      ],
+   q(sharada) => [
+      q(0142),
+      q(1),
+      ],
+   q(sharada, sarada) => [
       q(0142),
       q(0),
       ],
-   q(sumero-akkadian cuneiform) => [
-      q(0170),
+   q(shavian) => [
+      q(0141),
       q(1),
       ],
-   q(sundanese) => [
+   q(shavian (shaw)) => [
+      q(0141),
+      q(0),
+      ],
+   q(shaw) => [
+      q(0141),
+      q(2),
+      ],
+   q(siddham) => [
+      q(0143),
+      q(1),
+      ],
+   q(siddham, siddham, siddhamatrka) => [
       q(0143),
       q(0),
       ],
-   q(syloti nagri) => [
+   q(siddhamatrka) => [
+      q(0143),
+      q(2),
+      ],
+   q(signwriting) => [
+      q(0140),
+      q(0),
+      ],
+   q(sindhi) => [
       q(0144),
-      q(0),
+      q(2),
       ],
-   q(symbols) => [
-      q(0174),
-      q(0),
-      ],
-   q(syriac) => [
+   q(sinhala) => [
       q(0145),
       q(0),
       ],
-   q(syriac (eastern variant)) => [
-      q(0148),
-      q(0),
-      ],
-   q(syriac (estrangelo variant)) => [
+   q(sora sompeng) => [
       q(0146),
       q(0),
       ],
-   q(syriac (western variant)) => [
+   q(sumero-akkadian cuneiform) => [
+      q(0174),
+      q(1),
+      ],
+   q(sundanese) => [
       q(0147),
       q(0),
       ],
+   q(syloti nagri) => [
+      q(0148),
+      q(0),
+      ],
+   q(symbols) => [
+      q(0179),
+      q(0),
+      ],
+   q(symbols (emoji variant)) => [
+      q(0178),
+      q(0),
+      ],
+   q(syriac) => [
+      q(0149),
+      q(0),
+      ],
+   q(syriac (eastern variant)) => [
+      q(0152),
+      q(0),
+      ],
+   q(syriac (estrangelo variant)) => [
+      q(0150),
+      q(0),
+      ],
+   q(syriac (western variant)) => [
+      q(0151),
+      q(0),
+      ],
    q(tagalog) => [
-      q(0159),
+      q(0163),
       q(1),
       ],
    q(tagalog (baybayin, alibata)) => [
-      q(0159),
+      q(0163),
       q(0),
       ],
    q(tagbanwa) => [
-      q(0149),
+      q(0153),
       q(0),
       ],
    q(tai ahom) => [
@@ -1524,75 +1579,75 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(2),
       ],
    q(tai le) => [
-      q(0151),
-      q(0),
-      ],
-   q(tai tham) => [
-      q(0076),
-      q(1),
-      ],
-   q(tai tham (lanna)) => [
-      q(0076),
-      q(0),
-      ],
-   q(tai viet) => [
       q(0155),
       q(0),
       ],
+   q(tai tham) => [
+      q(0078),
+      q(1),
+      ],
+   q(tai tham (lanna)) => [
+      q(0078),
+      q(0),
+      ],
+   q(tai viet) => [
+      q(0159),
+      q(0),
+      ],
    q(takri) => [
-      q(0150),
+      q(0154),
       q(1),
       ],
    q(takri, takri, tankri) => [
-      q(0150),
-      q(0),
-      ],
-   q(tamil) => [
-      q(0153),
-      q(0),
-      ],
-   q(tangut) => [
       q(0154),
       q(0),
       ],
-   q(tankri) => [
-      q(0150),
-      q(2),
-      ],
-   q(telugu) => [
-      q(0156),
-      q(0),
-      ],
-   q(tengwar) => [
+   q(tamil) => [
       q(0157),
       q(0),
       ],
-   q(thaana) => [
+   q(tangut) => [
+      q(0158),
+      q(0),
+      ],
+   q(tankri) => [
+      q(0154),
+      q(2),
+      ],
+   q(telugu) => [
       q(0160),
       q(0),
       ],
-   q(thai) => [
+   q(tengwar) => [
       q(0161),
       q(0),
       ],
+   q(thaana) => [
+      q(0164),
+      q(0),
+      ],
+   q(thai) => [
+      q(0165),
+      q(0),
+      ],
    q(tibetan) => [
-      q(0162),
+      q(0166),
       q(0),
       ],
    q(tifinagh) => [
-      q(0158),
+      q(0162),
       q(1),
       ],
    q(tifinagh (berber)) => [
-      q(0158),
+      q(0162),
       q(0),
       ],
    q(tirhuta) => [
-      q(0163),
+      q(0167),
       q(0),
       ],
    q(ugaritic) => [
-      q(0164),
+      q(0168),
       q(0),
       ],
    q(unified canadian aboriginal syllabics) => [
@@ -1600,31 +1655,31 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0),
       ],
    q(vai) => [
-      q(0165),
+      q(0169),
       q(0),
       ],
    q(varang kshiti) => [
-      q(0167),
+      q(0171),
       q(2),
       ],
    q(visible speech) => [
-      q(0166),
+      q(0170),
       q(0),
       ],
    q(warang citi) => [
-      q(0167),
+      q(0171),
       q(1),
       ],
    q(warang citi (varang kshiti)) => [
-      q(0167),
+      q(0171),
       q(0),
       ],
    q(woleai) => [
-      q(0168),
+      q(0172),
       q(0),
       ],
    q(yi) => [
-      q(0171),
+      q(0175),
       q(0),
       ],
 };
@@ -1819,526 +1874,546 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0047),
          q(0),
          ],
-      q(Hang) => [
+      q(Hanb) => [
          q(0048),
-         q(1),
+         q(0),
          ],
-      q(Hani) => [
+      q(Hang) => [
          q(0049),
          q(1),
          ],
-      q(Hano) => [
+      q(Hani) => [
          q(0050),
          q(1),
          ],
-      q(Hans) => [
+      q(Hano) => [
          q(0051),
-         q(0),
+         q(1),
          ],
-      q(Hant) => [
+      q(Hans) => [
          q(0052),
          q(0),
          ],
-      q(Hatr) => [
+      q(Hant) => [
          q(0053),
          q(0),
          ],
-      q(Hebr) => [
+      q(Hatr) => [
          q(0054),
          q(0),
          ],
-      q(Hira) => [
+      q(Hebr) => [
          q(0055),
          q(0),
          ],
-      q(Hluw) => [
+      q(Hira) => [
          q(0056),
+         q(0),
+         ],
+      q(Hluw) => [
+         q(0057),
          q(1),
          ],
       q(Hmng) => [
-         q(0057),
-         q(0),
-         ],
-      q(Hrkt) => [
          q(0058),
          q(0),
          ],
-      q(Hung) => [
+      q(Hrkt) => [
          q(0059),
-         q(1),
+         q(0),
          ],
-      q(Inds) => [
+      q(Hung) => [
          q(0060),
          q(1),
          ],
-      q(Ital) => [
+      q(Inds) => [
          q(0061),
-         q(0),
+         q(1),
          ],
-      q(Java) => [
+      q(Ital) => [
          q(0062),
          q(0),
          ],
-      q(Jpan) => [
+      q(Jamo) => [
          q(0063),
          q(0),
          ],
-      q(Jurc) => [
+      q(Java) => [
          q(0064),
          q(0),
          ],
-      q(Kali) => [
+      q(Jpan) => [
          q(0065),
          q(0),
          ],
-      q(Kana) => [
+      q(Jurc) => [
          q(0066),
          q(0),
          ],
-      q(Khar) => [
+      q(Kali) => [
          q(0067),
          q(0),
          ],
-      q(Khmr) => [
+      q(Kana) => [
          q(0068),
          q(0),
          ],
-      q(Khoj) => [
+      q(Khar) => [
          q(0069),
          q(0),
          ],
-      q(Kitl) => [
+      q(Khmr) => [
          q(0070),
          q(0),
          ],
-      q(Kits) => [
+      q(Khoj) => [
          q(0071),
          q(0),
          ],
-      q(Knda) => [
+      q(Kitl) => [
          q(0072),
          q(0),
          ],
-      q(Kore) => [
+      q(Kits) => [
          q(0073),
          q(0),
          ],
-      q(Kpel) => [
+      q(Knda) => [
          q(0074),
          q(0),
          ],
-      q(Kthi) => [
+      q(Kore) => [
          q(0075),
          q(0),
          ],
-      q(Lana) => [
+      q(Kpel) => [
          q(0076),
-         q(1),
+         q(0),
          ],
-      q(Laoo) => [
+      q(Kthi) => [
          q(0077),
          q(0),
          ],
-      q(Latf) => [
+      q(Lana) => [
          q(0078),
-         q(0),
+         q(1),
          ],
-      q(Latg) => [
+      q(Laoo) => [
          q(0079),
          q(0),
          ],
-      q(Latn) => [
+      q(Latf) => [
          q(0080),
          q(0),
          ],
-      q(Leke) => [
+      q(Latg) => [
          q(0081),
          q(0),
          ],
-      q(Lepc) => [
+      q(Latn) => [
          q(0082),
-         q(1),
+         q(0),
          ],
-      q(Limb) => [
+      q(Leke) => [
          q(0083),
          q(0),
          ],
-      q(Lina) => [
+      q(Lepc) => [
          q(0084),
-         q(0),
+         q(1),
          ],
-      q(Linb) => [
+      q(Limb) => [
          q(0085),
          q(0),
          ],
-      q(Lisu) => [
+      q(Lina) => [
          q(0086),
-         q(1),
+         q(0),
          ],
-      q(Loma) => [
+      q(Linb) => [
          q(0087),
          q(0),
          ],
-      q(Lyci) => [
+      q(Lisu) => [
          q(0088),
-         q(0),
+         q(1),
          ],
-      q(Lydi) => [
+      q(Loma) => [
          q(0089),
          q(0),
          ],
-      q(Mahj) => [
+      q(Lyci) => [
          q(0090),
          q(0),
          ],
-      q(Mand) => [
+      q(Lydi) => [
          q(0091),
-         q(1),
+         q(0),
          ],
-      q(Mani) => [
+      q(Mahj) => [
          q(0092),
          q(0),
          ],
-      q(Marc) => [
+      q(Mand) => [
          q(0093),
-         q(0),
+         q(1),
          ],
-      q(Maya) => [
+      q(Mani) => [
          q(0094),
          q(0),
          ],
-      q(Mend) => [
+      q(Marc) => [
          q(0095),
          q(0),
          ],
-      q(Merc) => [
+      q(Maya) => [
          q(0096),
          q(0),
          ],
-      q(Mero) => [
+      q(Mend) => [
          q(0097),
          q(0),
          ],
-      q(Mlym) => [
+      q(Merc) => [
          q(0098),
          q(0),
          ],
-      q(Modi) => [
+      q(Mero) => [
          q(0099),
-         q(1),
+         q(0),
          ],
-      q(Mong) => [
+      q(Mlym) => [
          q(0100),
          q(0),
          ],
-      q(Moon) => [
+      q(Modi) => [
          q(0101),
          q(1),
          ],
-      q(Mroo) => [
+      q(Mong) => [
          q(0102),
-         q(1),
+         q(0),
          ],
-      q(Mtei) => [
+      q(Moon) => [
          q(0103),
          q(1),
          ],
-      q(Mult) => [
+      q(Mroo) => [
          q(0104),
-         q(0),
+         q(1),
          ],
-      q(Mymr) => [
+      q(Mtei) => [
          q(0105),
          q(1),
          ],
-      q(Narb) => [
+      q(Mult) => [
          q(0106),
-         q(1),
-         ],
-      q(Nbat) => [
-         q(0107),
          q(0),
          ],
-      q(Nkgb) => [
+      q(Mymr) => [
+         q(0107),
+         q(1),
+         ],
+      q(Narb) => [
          q(0108),
          q(1),
          ],
-      q(Nkoo) => [
+      q(Nbat) => [
          q(0109),
          q(0),
          ],
-      q(Nshu) => [
+      q(Newa) => [
          q(0110),
+         q(1),
+         ],
+      q(Nkgb) => [
+         q(0111),
+         q(1),
+         ],
+      q(Nkoo) => [
+         q(0112),
+         q(0),
+         ],
+      q(Nshu) => [
+         q(0113),
          q(0),
          ],
       q(Ogam) => [
-         q(0111),
-         q(0),
-         ],
-      q(Olck) => [
-         q(0112),
-         q(1),
-         ],
-      q(Orkh) => [
-         q(0113),
-         q(1),
-         ],
-      q(Orya) => [
          q(0114),
          q(0),
          ],
-      q(Osge) => [
+      q(Olck) => [
          q(0115),
-         q(0),
+         q(1),
          ],
-      q(Osma) => [
+      q(Orkh) => [
          q(0116),
-         q(0),
+         q(1),
          ],
-      q(Palm) => [
+      q(Orya) => [
          q(0117),
          q(0),
          ],
-      q(Pauc) => [
+      q(Osge) => [
          q(0118),
          q(0),
          ],
-      q(Perm) => [
+      q(Osma) => [
          q(0119),
          q(0),
          ],
-      q(Phag) => [
+      q(Palm) => [
          q(0120),
          q(0),
          ],
-      q(Phli) => [
+      q(Pauc) => [
          q(0121),
          q(0),
          ],
-      q(Phlp) => [
+      q(Perm) => [
          q(0122),
          q(0),
          ],
-      q(Phlv) => [
+      q(Phag) => [
          q(0123),
          q(0),
          ],
-      q(Phnx) => [
+      q(Phli) => [
          q(0124),
          q(0),
          ],
-      q(Plrd) => [
+      q(Phlp) => [
          q(0125),
-         q(1),
+         q(0),
          ],
-      q(Prti) => [
+      q(Phlv) => [
          q(0126),
          q(0),
          ],
-      q(Qaaa) => [
+      q(Phnx) => [
          q(0127),
          q(0),
          ],
-      q(Qabx) => [
-         q(0128),
+      q(Piqd) => [
+         q(0129),
          q(0),
          ],
-      q(Rjng) => [
-         q(0129),
+      q(Plrd) => [
+         q(0128),
          q(1),
          ],
-      q(Roro) => [
+      q(Prti) => [
          q(0130),
          q(0),
          ],
-      q(Runr) => [
+      q(Qaaa) => [
          q(0131),
          q(0),
          ],
-      q(Samr) => [
+      q(Qabx) => [
          q(0132),
          q(0),
          ],
-      q(Sara) => [
+      q(Rjng) => [
          q(0133),
-         q(0),
+         q(1),
          ],
-      q(Sarb) => [
+      q(Roro) => [
          q(0134),
          q(0),
          ],
-      q(Saur) => [
+      q(Runr) => [
          q(0135),
          q(0),
          ],
-      q(Sgnw) => [
+      q(Samr) => [
          q(0136),
          q(0),
          ],
-      q(Shaw) => [
+      q(Sara) => [
          q(0137),
+         q(0),
+         ],
+      q(Sarb) => [
+         q(0138),
+         q(0),
+         ],
+      q(Saur) => [
+         q(0139),
+         q(0),
+         ],
+      q(Sgnw) => [
+         q(0140),
+         q(0),
+         ],
+      q(Shaw) => [
+         q(0141),
          q(1),
          ],
       q(Shrd) => [
-         q(0138),
+         q(0142),
          q(1),
          ],
       q(Sidd) => [
-         q(0139),
+         q(0143),
          q(1),
          ],
       q(Sind) => [
-         q(0140),
+         q(0144),
          q(1),
          ],
       q(Sinh) => [
-         q(0141),
-         q(0),
-         ],
-      q(Sora) => [
-         q(0142),
-         q(0),
-         ],
-      q(Sund) => [
-         q(0143),
-         q(0),
-         ],
-      q(Sylo) => [
-         q(0144),
-         q(0),
-         ],
-      q(Syrc) => [
          q(0145),
          q(0),
          ],
-      q(Syre) => [
+      q(Sora) => [
          q(0146),
          q(0),
          ],
-      q(Syrj) => [
+      q(Sund) => [
          q(0147),
          q(0),
          ],
-      q(Syrn) => [
+      q(Sylo) => [
          q(0148),
          q(0),
          ],
-      q(Tagb) => [
+      q(Syrc) => [
          q(0149),
          q(0),
          ],
-      q(Takr) => [
+      q(Syre) => [
          q(0150),
-         q(1),
+         q(0),
          ],
-      q(Tale) => [
+      q(Syrj) => [
          q(0151),
          q(0),
          ],
-      q(Talu) => [
+      q(Syrn) => [
          q(0152),
          q(0),
          ],
-      q(Taml) => [
+      q(Tagb) => [
          q(0153),
          q(0),
          ],
-      q(Tang) => [
+      q(Takr) => [
          q(0154),
-         q(0),
+         q(1),
          ],
-      q(Tavt) => [
+      q(Tale) => [
          q(0155),
          q(0),
          ],
-      q(Telu) => [
+      q(Talu) => [
          q(0156),
          q(0),
          ],
-      q(Teng) => [
+      q(Taml) => [
          q(0157),
          q(0),
          ],
-      q(Tfng) => [
+      q(Tang) => [
          q(0158),
-         q(1),
+         q(0),
          ],
-      q(Tglg) => [
+      q(Tavt) => [
          q(0159),
-         q(1),
+         q(0),
          ],
-      q(Thaa) => [
+      q(Telu) => [
          q(0160),
          q(0),
          ],
-      q(Thai) => [
+      q(Teng) => [
          q(0161),
          q(0),
          ],
-      q(Tibt) => [
+      q(Tfng) => [
          q(0162),
-         q(0),
+         q(1),
          ],
-      q(Tirh) => [
+      q(Tglg) => [
          q(0163),
-         q(0),
+         q(1),
          ],
-      q(Ugar) => [
+      q(Thaa) => [
          q(0164),
          q(0),
          ],
-      q(Vaii) => [
+      q(Thai) => [
          q(0165),
          q(0),
          ],
-      q(Visp) => [
+      q(Tibt) => [
          q(0166),
          q(0),
          ],
-      q(Wara) => [
+      q(Tirh) => [
          q(0167),
-         q(1),
+         q(0),
          ],
-      q(Wole) => [
+      q(Ugar) => [
          q(0168),
          q(0),
          ],
-      q(Xpeo) => [
+      q(Vaii) => [
          q(0169),
          q(0),
          ],
-      q(Xsux) => [
+      q(Visp) => [
          q(0170),
-         q(1),
-         ],
-      q(Yiii) => [
-         q(0171),
          q(0),
          ],
-      q(Zinh) => [
+      q(Wara) => [
+         q(0171),
+         q(1),
+         ],
+      q(Wole) => [
          q(0172),
          q(0),
          ],
-      q(Zmth) => [
+      q(Xpeo) => [
          q(0173),
          q(0),
          ],
-      q(Zsym) => [
+      q(Xsux) => [
          q(0174),
+         q(1),
+         ],
+      q(Yiii) => [
+         q(0175),
+         q(0),
+         ],
+      q(Zinh) => [
+         q(0176),
+         q(0),
+         ],
+      q(Zmth) => [
+         q(0177),
+         q(0),
+         ],
+      q(Zsye) => [
+         q(0178),
+         q(0),
+         ],
+      q(Zsym) => [
+         q(0179),
          q(0),
          ],
       },
    q(num) => {
       q(020) => [
-         q(0170),
+         q(0174),
          q(0),
          ],
       q(030) => [
-         q(0169),
+         q(0173),
          q(0),
          ],
       q(040) => [
-         q(0164),
+         q(0168),
          q(0),
          ],
       q(050) => [
@@ -2354,47 +2429,47 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(080) => [
-         q(0056),
+         q(0057),
          q(0),
          ],
       q(090) => [
-         q(0094),
-         q(0),
-         ],
-      q(095) => [
-         q(0136),
-         q(0),
-         ],
-      q(100) => [
-         q(0097),
-         q(0),
-         ],
-      q(101) => [
          q(0096),
          q(0),
          ],
+      q(095) => [
+         q(0140),
+         q(0),
+         ],
+      q(100) => [
+         q(0099),
+         q(0),
+         ],
+      q(101) => [
+         q(0098),
+         q(0),
+         ],
       q(105) => [
-         q(0134),
+         q(0138),
          q(0),
          ],
       q(106) => [
-         q(0106),
+         q(0108),
          q(0),
          ],
       q(115) => [
-         q(0124),
+         q(0127),
          q(0),
          ],
       q(116) => [
-         q(0089),
+         q(0091),
          q(0),
          ],
       q(120) => [
-         q(0158),
+         q(0162),
          q(0),
          ],
       q(123) => [
-         q(0132),
+         q(0136),
          q(0),
          ],
       q(124) => [
@@ -2402,31 +2477,31 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(125) => [
-         q(0054),
+         q(0055),
          q(0),
          ],
       q(126) => [
-         q(0117),
+         q(0120),
          q(0),
          ],
       q(127) => [
-         q(0053),
+         q(0054),
          q(0),
          ],
       q(130) => [
-         q(0126),
+         q(0130),
          q(0),
          ],
       q(131) => [
-         q(0121),
+         q(0124),
          q(0),
          ],
       q(132) => [
-         q(0122),
+         q(0125),
          q(0),
          ],
       q(133) => [
-         q(0123),
+         q(0126),
          q(0),
          ],
       q(134) => [
@@ -2434,35 +2509,35 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(135) => [
-         q(0145),
+         q(0149),
          q(0),
          ],
       q(136) => [
-         q(0148),
+         q(0152),
          q(0),
          ],
       q(137) => [
-         q(0147),
+         q(0151),
          q(0),
          ],
       q(138) => [
-         q(0146),
+         q(0150),
          q(0),
          ],
       q(139) => [
-         q(0092),
+         q(0094),
          q(0),
          ],
       q(140) => [
-         q(0091),
+         q(0093),
          q(0),
          ],
       q(145) => [
-         q(0100),
+         q(0102),
          q(0),
          ],
       q(159) => [
-         q(0107),
+         q(0109),
          q(0),
          ],
       q(160) => [
@@ -2474,7 +2549,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(165) => [
-         q(0109),
+         q(0112),
          q(0),
          ],
       q(166) => [
@@ -2482,19 +2557,19 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(170) => [
-         q(0160),
+         q(0164),
          q(0),
          ],
       q(175) => [
-         q(0113),
+         q(0116),
          q(0),
          ],
       q(176) => [
-         q(0059),
+         q(0060),
          q(0),
          ],
       q(199) => [
-         q(0102),
+         q(0104),
          q(0),
          ],
       q(200) => [
@@ -2506,7 +2581,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(202) => [
-         q(0088),
+         q(0090),
          q(0),
          ],
       q(204) => [
@@ -2518,35 +2593,35 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(210) => [
-         q(0061),
+         q(0062),
          q(0),
          ],
       q(211) => [
-         q(0131),
+         q(0135),
          q(0),
          ],
       q(212) => [
-         q(0111),
+         q(0114),
          q(0),
          ],
       q(215) => [
-         q(0080),
+         q(0082),
          q(0),
          ],
       q(216) => [
-         q(0079),
+         q(0081),
          q(0),
          ],
       q(217) => [
-         q(0078),
+         q(0080),
          q(0),
          ],
       q(218) => [
-         q(0101),
+         q(0103),
          q(0),
          ],
       q(219) => [
-         q(0115),
+         q(0118),
          q(0),
          ],
       q(220) => [
@@ -2566,7 +2641,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(227) => [
-         q(0119),
+         q(0122),
          q(0),
          ],
       q(230) => [
@@ -2594,31 +2669,35 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(260) => [
-         q(0116),
+         q(0119),
          q(0),
          ],
       q(261) => [
-         q(0112),
+         q(0115),
          q(0),
          ],
       q(262) => [
-         q(0167),
+         q(0171),
          q(0),
          ],
       q(263) => [
-         q(0118),
+         q(0121),
          q(0),
          ],
       q(280) => [
-         q(0166),
+         q(0170),
          q(0),
          ],
       q(281) => [
-         q(0137),
+         q(0141),
          q(0),
          ],
       q(282) => [
-         q(0125),
+         q(0128),
+         q(0),
+         ],
+      q(284) => [
+         q(0063),
          q(0),
          ],
       q(285) => [
@@ -2626,19 +2705,19 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(286) => [
-         q(0048),
+         q(0049),
          q(0),
          ],
       q(287) => [
-         q(0073),
+         q(0075),
          q(0),
          ],
       q(288) => [
-         q(0071),
+         q(0073),
          q(0),
          ],
       q(290) => [
-         q(0157),
+         q(0161),
          q(0),
          ],
       q(291) => [
@@ -2646,7 +2725,11 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(292) => [
-         q(0133),
+         q(0137),
+         q(0),
+         ],
+      q(293) => [
+         q(0129),
          q(0),
          ],
       q(300) => [
@@ -2654,11 +2737,11 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(302) => [
-         q(0139),
+         q(0143),
          q(0),
          ],
       q(305) => [
-         q(0067),
+         q(0069),
          q(0),
          ],
       q(310) => [
@@ -2666,7 +2749,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(314) => [
-         q(0090),
+         q(0092),
          q(0),
          ],
       q(315) => [
@@ -2674,19 +2757,19 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(316) => [
-         q(0144),
+         q(0148),
          q(0),
          ],
       q(317) => [
-         q(0075),
+         q(0077),
          q(0),
          ],
       q(318) => [
-         q(0140),
+         q(0144),
          q(0),
          ],
       q(319) => [
-         q(0138),
+         q(0142),
          q(0),
          ],
       q(320) => [
@@ -2694,19 +2777,19 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(321) => [
-         q(0150),
+         q(0154),
          q(0),
          ],
       q(322) => [
-         q(0069),
+         q(0071),
          q(0),
          ],
       q(323) => [
-         q(0104),
+         q(0106),
          q(0),
          ],
       q(324) => [
-         q(0099),
+         q(0101),
          q(0),
          ],
       q(325) => [
@@ -2714,23 +2797,27 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(326) => [
-         q(0163),
+         q(0167),
          q(0),
          ],
       q(327) => [
-         q(0114),
+         q(0117),
          q(0),
          ],
       q(330) => [
-         q(0162),
+         q(0166),
          q(0),
          ],
       q(331) => [
-         q(0120),
+         q(0123),
          q(0),
          ],
       q(332) => [
-         q(0093),
+         q(0095),
+         q(0),
+         ],
+      q(333) => [
+         q(0110),
          q(0),
          ],
       q(334) => [
@@ -2738,15 +2825,15 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(335) => [
-         q(0082),
+         q(0084),
          q(0),
          ],
       q(336) => [
-         q(0083),
+         q(0085),
          q(0),
          ],
       q(337) => [
-         q(0103),
+         q(0105),
          q(0),
          ],
       q(338) => [
@@ -2754,7 +2841,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(340) => [
-         q(0156),
+         q(0160),
          q(0),
          ],
       q(343) => [
@@ -2762,23 +2849,23 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(344) => [
-         q(0135),
+         q(0139),
          q(0),
          ],
       q(345) => [
-         q(0072),
+         q(0074),
          q(0),
          ],
       q(346) => [
-         q(0153),
+         q(0157),
          q(0),
          ],
       q(347) => [
-         q(0098),
+         q(0100),
          q(0),
          ],
       q(348) => [
-         q(0141),
+         q(0145),
          q(0),
          ],
       q(349) => [
@@ -2786,35 +2873,35 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(350) => [
-         q(0105),
+         q(0107),
          q(0),
          ],
       q(351) => [
-         q(0076),
+         q(0078),
          q(0),
          ],
       q(352) => [
-         q(0161),
+         q(0165),
          q(0),
          ],
       q(353) => [
-         q(0151),
+         q(0155),
          q(0),
          ],
       q(354) => [
-         q(0152),
+         q(0156),
          q(0),
          ],
       q(355) => [
-         q(0068),
+         q(0070),
          q(0),
          ],
       q(356) => [
-         q(0077),
+         q(0079),
          q(0),
          ],
       q(357) => [
-         q(0065),
+         q(0067),
          q(0),
          ],
       q(358) => [
@@ -2822,7 +2909,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(359) => [
-         q(0155),
+         q(0159),
          q(0),
          ],
       q(360) => [
@@ -2830,19 +2917,19 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(361) => [
-         q(0062),
+         q(0064),
          q(0),
          ],
       q(362) => [
-         q(0143),
+         q(0147),
          q(0),
          ],
       q(363) => [
-         q(0129),
+         q(0133),
          q(0),
          ],
       q(364) => [
-         q(0081),
+         q(0083),
          q(0),
          ],
       q(365) => [
@@ -2854,11 +2941,11 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(370) => [
-         q(0159),
+         q(0163),
          q(0),
          ],
       q(371) => [
-         q(0050),
+         q(0051),
          q(0),
          ],
       q(372) => [
@@ -2866,23 +2953,23 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(373) => [
-         q(0149),
+         q(0153),
          q(0),
          ],
       q(398) => [
-         q(0142),
+         q(0146),
          q(0),
          ],
       q(399) => [
-         q(0086),
+         q(0088),
          q(0),
          ],
       q(400) => [
-         q(0084),
+         q(0086),
          q(0),
          ],
       q(401) => [
-         q(0085),
+         q(0087),
          q(0),
          ],
       q(403) => [
@@ -2890,23 +2977,23 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(410) => [
-         q(0055),
+         q(0056),
          q(0),
          ],
       q(411) => [
-         q(0066),
+         q(0068),
          q(0),
          ],
       q(412) => [
-         q(0058),
+         q(0059),
          q(0),
          ],
       q(413) => [
-         q(0063),
+         q(0065),
          q(0),
          ],
       q(420) => [
-         q(0108),
+         q(0111),
          q(0),
          ],
       q(430) => [
@@ -2918,15 +3005,15 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(436) => [
-         q(0074),
+         q(0076),
          q(0),
          ],
       q(437) => [
-         q(0087),
+         q(0089),
          q(0),
          ],
       q(438) => [
-         q(0095),
+         q(0097),
          q(0),
          ],
       q(439) => [
@@ -2942,47 +3029,51 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(450) => [
-         q(0057),
+         q(0058),
          q(0),
          ],
       q(460) => [
-         q(0171),
+         q(0175),
          q(0),
          ],
       q(470) => [
-         q(0165),
+         q(0169),
          q(0),
          ],
       q(480) => [
-         q(0168),
+         q(0172),
          q(0),
          ],
       q(499) => [
-         q(0110),
+         q(0113),
          q(0),
          ],
       q(500) => [
-         q(0049),
+         q(0050),
          q(0),
          ],
       q(501) => [
-         q(0051),
-         q(0),
-         ],
-      q(502) => [
          q(0052),
          q(0),
          ],
+      q(502) => [
+         q(0053),
+         q(0),
+         ],
+      q(503) => [
+         q(0048),
+         q(0),
+         ],
       q(505) => [
-         q(0070),
+         q(0072),
          q(0),
          ],
       q(510) => [
-         q(0064),
+         q(0066),
          q(0),
          ],
       q(520) => [
-         q(0154),
+         q(0158),
          q(0),
          ],
       q(550) => [
@@ -2994,11 +3085,11 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(610) => [
-         q(0060),
+         q(0061),
          q(0),
          ],
       q(620) => [
-         q(0130),
+         q(0134),
          q(0),
          ],
       q(755) => [
@@ -3006,23 +3097,27 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          q(0),
          ],
       q(900) => [
-         q(0127),
+         q(0131),
          q(0),
          ],
       q(949) => [
-         q(0128),
+         q(0132),
+         q(0),
+         ],
+      q(993) => [
+         q(0178),
          q(0),
          ],
       q(994) => [
-         q(0172),
+         q(0176),
          q(0),
          ],
       q(995) => [
-         q(0173),
+         q(0177),
          q(0),
          ],
       q(996) => [
-         q(0174),
+         q(0179),
          q(0),
          ],
       },
@@ -3077,133 +3172,138 @@ $Locale::Codes::Data{'script'}{'id2code'} = {
       q(0045) => q(Grek),
       q(0046) => q(Gujr),
       q(0047) => q(Guru),
-      q(0048) => q(Hang),
-      q(0049) => q(Hani),
-      q(0050) => q(Hano),
-      q(0051) => q(Hans),
-      q(0052) => q(Hant),
-      q(0053) => q(Hatr),
-      q(0054) => q(Hebr),
-      q(0055) => q(Hira),
-      q(0056) => q(Hluw),
-      q(0057) => q(Hmng),
-      q(0058) => q(Hrkt),
-      q(0059) => q(Hung),
-      q(0060) => q(Inds),
-      q(0061) => q(Ital),
-      q(0062) => q(Java),
-      q(0063) => q(Jpan),
-      q(0064) => q(Jurc),
-      q(0065) => q(Kali),
-      q(0066) => q(Kana),
-      q(0067) => q(Khar),
-      q(0068) => q(Khmr),
-      q(0069) => q(Khoj),
-      q(0070) => q(Kitl),
-      q(0071) => q(Kits),
-      q(0072) => q(Knda),
-      q(0073) => q(Kore),
-      q(0074) => q(Kpel),
-      q(0075) => q(Kthi),
-      q(0076) => q(Lana),
-      q(0077) => q(Laoo),
-      q(0078) => q(Latf),
-      q(0079) => q(Latg),
-      q(0080) => q(Latn),
-      q(0081) => q(Leke),
-      q(0082) => q(Lepc),
-      q(0083) => q(Limb),
-      q(0084) => q(Lina),
-      q(0085) => q(Linb),
-      q(0086) => q(Lisu),
-      q(0087) => q(Loma),
-      q(0088) => q(Lyci),
-      q(0089) => q(Lydi),
-      q(0090) => q(Mahj),
-      q(0091) => q(Mand),
-      q(0092) => q(Mani),
-      q(0093) => q(Marc),
-      q(0094) => q(Maya),
-      q(0095) => q(Mend),
-      q(0096) => q(Merc),
-      q(0097) => q(Mero),
-      q(0098) => q(Mlym),
-      q(0099) => q(Modi),
-      q(0100) => q(Mong),
-      q(0101) => q(Moon),
-      q(0102) => q(Mroo),
-      q(0103) => q(Mtei),
-      q(0104) => q(Mult),
-      q(0105) => q(Mymr),
-      q(0106) => q(Narb),
-      q(0107) => q(Nbat),
-      q(0108) => q(Nkgb),
-      q(0109) => q(Nkoo),
-      q(0110) => q(Nshu),
-      q(0111) => q(Ogam),
-      q(0112) => q(Olck),
-      q(0113) => q(Orkh),
-      q(0114) => q(Orya),
-      q(0115) => q(Osge),
-      q(0116) => q(Osma),
-      q(0117) => q(Palm),
-      q(0118) => q(Pauc),
-      q(0119) => q(Perm),
-      q(0120) => q(Phag),
-      q(0121) => q(Phli),
-      q(0122) => q(Phlp),
-      q(0123) => q(Phlv),
-      q(0124) => q(Phnx),
-      q(0125) => q(Plrd),
-      q(0126) => q(Prti),
-      q(0127) => q(Qaaa),
-      q(0128) => q(Qabx),
-      q(0129) => q(Rjng),
-      q(0130) => q(Roro),
-      q(0131) => q(Runr),
-      q(0132) => q(Samr),
-      q(0133) => q(Sara),
-      q(0134) => q(Sarb),
-      q(0135) => q(Saur),
-      q(0136) => q(Sgnw),
-      q(0137) => q(Shaw),
-      q(0138) => q(Shrd),
-      q(0139) => q(Sidd),
-      q(0140) => q(Sind),
-      q(0141) => q(Sinh),
-      q(0142) => q(Sora),
-      q(0143) => q(Sund),
-      q(0144) => q(Sylo),
-      q(0145) => q(Syrc),
-      q(0146) => q(Syre),
-      q(0147) => q(Syrj),
-      q(0148) => q(Syrn),
-      q(0149) => q(Tagb),
-      q(0150) => q(Takr),
-      q(0151) => q(Tale),
-      q(0152) => q(Talu),
-      q(0153) => q(Taml),
-      q(0154) => q(Tang),
-      q(0155) => q(Tavt),
-      q(0156) => q(Telu),
-      q(0157) => q(Teng),
-      q(0158) => q(Tfng),
-      q(0159) => q(Tglg),
-      q(0160) => q(Thaa),
-      q(0161) => q(Thai),
-      q(0162) => q(Tibt),
-      q(0163) => q(Tirh),
-      q(0164) => q(Ugar),
-      q(0165) => q(Vaii),
-      q(0166) => q(Visp),
-      q(0167) => q(Wara),
-      q(0168) => q(Wole),
-      q(0169) => q(Xpeo),
-      q(0170) => q(Xsux),
-      q(0171) => q(Yiii),
-      q(0172) => q(Zinh),
-      q(0173) => q(Zmth),
-      q(0174) => q(Zsym),
+      q(0048) => q(Hanb),
+      q(0049) => q(Hang),
+      q(0050) => q(Hani),
+      q(0051) => q(Hano),
+      q(0052) => q(Hans),
+      q(0053) => q(Hant),
+      q(0054) => q(Hatr),
+      q(0055) => q(Hebr),
+      q(0056) => q(Hira),
+      q(0057) => q(Hluw),
+      q(0058) => q(Hmng),
+      q(0059) => q(Hrkt),
+      q(0060) => q(Hung),
+      q(0061) => q(Inds),
+      q(0062) => q(Ital),
+      q(0063) => q(Jamo),
+      q(0064) => q(Java),
+      q(0065) => q(Jpan),
+      q(0066) => q(Jurc),
+      q(0067) => q(Kali),
+      q(0068) => q(Kana),
+      q(0069) => q(Khar),
+      q(0070) => q(Khmr),
+      q(0071) => q(Khoj),
+      q(0072) => q(Kitl),
+      q(0073) => q(Kits),
+      q(0074) => q(Knda),
+      q(0075) => q(Kore),
+      q(0076) => q(Kpel),
+      q(0077) => q(Kthi),
+      q(0078) => q(Lana),
+      q(0079) => q(Laoo),
+      q(0080) => q(Latf),
+      q(0081) => q(Latg),
+      q(0082) => q(Latn),
+      q(0083) => q(Leke),
+      q(0084) => q(Lepc),
+      q(0085) => q(Limb),
+      q(0086) => q(Lina),
+      q(0087) => q(Linb),
+      q(0088) => q(Lisu),
+      q(0089) => q(Loma),
+      q(0090) => q(Lyci),
+      q(0091) => q(Lydi),
+      q(0092) => q(Mahj),
+      q(0093) => q(Mand),
+      q(0094) => q(Mani),
+      q(0095) => q(Marc),
+      q(0096) => q(Maya),
+      q(0097) => q(Mend),
+      q(0098) => q(Merc),
+      q(0099) => q(Mero),
+      q(0100) => q(Mlym),
+      q(0101) => q(Modi),
+      q(0102) => q(Mong),
+      q(0103) => q(Moon),
+      q(0104) => q(Mroo),
+      q(0105) => q(Mtei),
+      q(0106) => q(Mult),
+      q(0107) => q(Mymr),
+      q(0108) => q(Narb),
+      q(0109) => q(Nbat),
+      q(0110) => q(Newa),
+      q(0111) => q(Nkgb),
+      q(0112) => q(Nkoo),
+      q(0113) => q(Nshu),
+      q(0114) => q(Ogam),
+      q(0115) => q(Olck),
+      q(0116) => q(Orkh),
+      q(0117) => q(Orya),
+      q(0118) => q(Osge),
+      q(0119) => q(Osma),
+      q(0120) => q(Palm),
+      q(0121) => q(Pauc),
+      q(0122) => q(Perm),
+      q(0123) => q(Phag),
+      q(0124) => q(Phli),
+      q(0125) => q(Phlp),
+      q(0126) => q(Phlv),
+      q(0127) => q(Phnx),
+      q(0128) => q(Plrd),
+      q(0129) => q(Piqd),
+      q(0130) => q(Prti),
+      q(0131) => q(Qaaa),
+      q(0132) => q(Qabx),
+      q(0133) => q(Rjng),
+      q(0134) => q(Roro),
+      q(0135) => q(Runr),
+      q(0136) => q(Samr),
+      q(0137) => q(Sara),
+      q(0138) => q(Sarb),
+      q(0139) => q(Saur),
+      q(0140) => q(Sgnw),
+      q(0141) => q(Shaw),
+      q(0142) => q(Shrd),
+      q(0143) => q(Sidd),
+      q(0144) => q(Sind),
+      q(0145) => q(Sinh),
+      q(0146) => q(Sora),
+      q(0147) => q(Sund),
+      q(0148) => q(Sylo),
+      q(0149) => q(Syrc),
+      q(0150) => q(Syre),
+      q(0151) => q(Syrj),
+      q(0152) => q(Syrn),
+      q(0153) => q(Tagb),
+      q(0154) => q(Takr),
+      q(0155) => q(Tale),
+      q(0156) => q(Talu),
+      q(0157) => q(Taml),
+      q(0158) => q(Tang),
+      q(0159) => q(Tavt),
+      q(0160) => q(Telu),
+      q(0161) => q(Teng),
+      q(0162) => q(Tfng),
+      q(0163) => q(Tglg),
+      q(0164) => q(Thaa),
+      q(0165) => q(Thai),
+      q(0166) => q(Tibt),
+      q(0167) => q(Tirh),
+      q(0168) => q(Ugar),
+      q(0169) => q(Vaii),
+      q(0170) => q(Visp),
+      q(0171) => q(Wara),
+      q(0172) => q(Wole),
+      q(0173) => q(Xpeo),
+      q(0174) => q(Xsux),
+      q(0175) => q(Yiii),
+      q(0176) => q(Zinh),
+      q(0177) => q(Zmth),
+      q(0178) => q(Zsye),
+      q(0179) => q(Zsym),
       },
    q(num) => {
       q(0001) => q(166),
@@ -3253,133 +3353,138 @@ $Locale::Codes::Data{'script'}{'id2code'} = {
       q(0045) => q(200),
       q(0046) => q(320),
       q(0047) => q(310),
-      q(0048) => q(286),
-      q(0049) => q(500),
-      q(0050) => q(371),
-      q(0051) => q(501),
-      q(0052) => q(502),
-      q(0053) => q(127),
-      q(0054) => q(125),
-      q(0055) => q(410),
-      q(0056) => q(080),
-      q(0057) => q(450),
-      q(0058) => q(412),
-      q(0059) => q(176),
-      q(0060) => q(610),
-      q(0061) => q(210),
-      q(0062) => q(361),
-      q(0063) => q(413),
-      q(0064) => q(510),
-      q(0065) => q(357),
-      q(0066) => q(411),
-      q(0067) => q(305),
-      q(0068) => q(355),
-      q(0069) => q(322),
-      q(0070) => q(505),
-      q(0071) => q(288),
-      q(0072) => q(345),
-      q(0073) => q(287),
-      q(0074) => q(436),
-      q(0075) => q(317),
-      q(0076) => q(351),
-      q(0077) => q(356),
-      q(0078) => q(217),
-      q(0079) => q(216),
-      q(0080) => q(215),
-      q(0081) => q(364),
-      q(0082) => q(335),
-      q(0083) => q(336),
-      q(0084) => q(400),
-      q(0085) => q(401),
-      q(0086) => q(399),
-      q(0087) => q(437),
-      q(0088) => q(202),
-      q(0089) => q(116),
-      q(0090) => q(314),
-      q(0091) => q(140),
-      q(0092) => q(139),
-      q(0093) => q(332),
-      q(0094) => q(090),
-      q(0095) => q(438),
-      q(0096) => q(101),
-      q(0097) => q(100),
-      q(0098) => q(347),
-      q(0099) => q(324),
-      q(0100) => q(145),
-      q(0101) => q(218),
-      q(0102) => q(199),
-      q(0103) => q(337),
-      q(0104) => q(323),
-      q(0105) => q(350),
-      q(0106) => q(106),
-      q(0107) => q(159),
-      q(0108) => q(420),
-      q(0109) => q(165),
-      q(0110) => q(499),
-      q(0111) => q(212),
-      q(0112) => q(261),
-      q(0113) => q(175),
-      q(0114) => q(327),
-      q(0115) => q(219),
-      q(0116) => q(260),
-      q(0117) => q(126),
-      q(0118) => q(263),
-      q(0119) => q(227),
-      q(0120) => q(331),
-      q(0121) => q(131),
-      q(0122) => q(132),
-      q(0123) => q(133),
-      q(0124) => q(115),
-      q(0125) => q(282),
-      q(0126) => q(130),
-      q(0127) => q(900),
-      q(0128) => q(949),
-      q(0129) => q(363),
-      q(0130) => q(620),
-      q(0131) => q(211),
-      q(0132) => q(123),
-      q(0133) => q(292),
-      q(0134) => q(105),
-      q(0135) => q(344),
-      q(0136) => q(095),
-      q(0137) => q(281),
-      q(0138) => q(319),
-      q(0139) => q(302),
-      q(0140) => q(318),
-      q(0141) => q(348),
-      q(0142) => q(398),
-      q(0143) => q(362),
-      q(0144) => q(316),
-      q(0145) => q(135),
-      q(0146) => q(138),
-      q(0147) => q(137),
-      q(0148) => q(136),
-      q(0149) => q(373),
-      q(0150) => q(321),
-      q(0151) => q(353),
-      q(0152) => q(354),
-      q(0153) => q(346),
-      q(0154) => q(520),
-      q(0155) => q(359),
-      q(0156) => q(340),
-      q(0157) => q(290),
-      q(0158) => q(120),
-      q(0159) => q(370),
-      q(0160) => q(170),
-      q(0161) => q(352),
-      q(0162) => q(330),
-      q(0163) => q(326),
-      q(0164) => q(040),
-      q(0165) => q(470),
-      q(0166) => q(280),
-      q(0167) => q(262),
-      q(0168) => q(480),
-      q(0169) => q(030),
-      q(0170) => q(020),
-      q(0171) => q(460),
-      q(0172) => q(994),
-      q(0173) => q(995),
-      q(0174) => q(996),
+      q(0048) => q(503),
+      q(0049) => q(286),
+      q(0050) => q(500),
+      q(0051) => q(371),
+      q(0052) => q(501),
+      q(0053) => q(502),
+      q(0054) => q(127),
+      q(0055) => q(125),
+      q(0056) => q(410),
+      q(0057) => q(080),
+      q(0058) => q(450),
+      q(0059) => q(412),
+      q(0060) => q(176),
+      q(0061) => q(610),
+      q(0062) => q(210),
+      q(0063) => q(284),
+      q(0064) => q(361),
+      q(0065) => q(413),
+      q(0066) => q(510),
+      q(0067) => q(357),
+      q(0068) => q(411),
+      q(0069) => q(305),
+      q(0070) => q(355),
+      q(0071) => q(322),
+      q(0072) => q(505),
+      q(0073) => q(288),
+      q(0074) => q(345),
+      q(0075) => q(287),
+      q(0076) => q(436),
+      q(0077) => q(317),
+      q(0078) => q(351),
+      q(0079) => q(356),
+      q(0080) => q(217),
+      q(0081) => q(216),
+      q(0082) => q(215),
+      q(0083) => q(364),
+      q(0084) => q(335),
+      q(0085) => q(336),
+      q(0086) => q(400),
+      q(0087) => q(401),
+      q(0088) => q(399),
+      q(0089) => q(437),
+      q(0090) => q(202),
+      q(0091) => q(116),
+      q(0092) => q(314),
+      q(0093) => q(140),
+      q(0094) => q(139),
+      q(0095) => q(332),
+      q(0096) => q(090),
+      q(0097) => q(438),
+      q(0098) => q(101),
+      q(0099) => q(100),
+      q(0100) => q(347),
+      q(0101) => q(324),
+      q(0102) => q(145),
+      q(0103) => q(218),
+      q(0104) => q(199),
+      q(0105) => q(337),
+      q(0106) => q(323),
+      q(0107) => q(350),
+      q(0108) => q(106),
+      q(0109) => q(159),
+      q(0110) => q(333),
+      q(0111) => q(420),
+      q(0112) => q(165),
+      q(0113) => q(499),
+      q(0114) => q(212),
+      q(0115) => q(261),
+      q(0116) => q(175),
+      q(0117) => q(327),
+      q(0118) => q(219),
+      q(0119) => q(260),
+      q(0120) => q(126),
+      q(0121) => q(263),
+      q(0122) => q(227),
+      q(0123) => q(331),
+      q(0124) => q(131),
+      q(0125) => q(132),
+      q(0126) => q(133),
+      q(0127) => q(115),
+      q(0128) => q(282),
+      q(0129) => q(293),
+      q(0130) => q(130),
+      q(0131) => q(900),
+      q(0132) => q(949),
+      q(0133) => q(363),
+      q(0134) => q(620),
+      q(0135) => q(211),
+      q(0136) => q(123),
+      q(0137) => q(292),
+      q(0138) => q(105),
+      q(0139) => q(344),
+      q(0140) => q(095),
+      q(0141) => q(281),
+      q(0142) => q(319),
+      q(0143) => q(302),
+      q(0144) => q(318),
+      q(0145) => q(348),
+      q(0146) => q(398),
+      q(0147) => q(362),
+      q(0148) => q(316),
+      q(0149) => q(135),
+      q(0150) => q(138),
+      q(0151) => q(137),
+      q(0152) => q(136),
+      q(0153) => q(373),
+      q(0154) => q(321),
+      q(0155) => q(353),
+      q(0156) => q(354),
+      q(0157) => q(346),
+      q(0158) => q(520),
+      q(0159) => q(359),
+      q(0160) => q(340),
+      q(0161) => q(290),
+      q(0162) => q(120),
+      q(0163) => q(370),
+      q(0164) => q(170),
+      q(0165) => q(352),
+      q(0166) => q(330),
+      q(0167) => q(326),
+      q(0168) => q(040),
+      q(0169) => q(470),
+      q(0170) => q(280),
+      q(0171) => q(262),
+      q(0172) => q(480),
+      q(0173) => q(030),
+      q(0174) => q(020),
+      q(0175) => q(460),
+      q(0176) => q(994),
+      q(0177) => q(995),
+      q(0178) => q(993),
+      q(0179) => q(996),
       },
 };
 

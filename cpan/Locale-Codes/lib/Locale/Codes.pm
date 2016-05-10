@@ -1,7 +1,7 @@
 package Locale::Codes;
 # Copyright (C) 2001      Canon Research Centre Europe (CRE).
 # Copyright (C) 2002-2009 Neil Bowers
-# Copyright (c) 2010-2015 Sullivan Beck
+# Copyright (c) 2010-2016 Sullivan Beck
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -31,7 +31,7 @@ our($VERSION,%Data,%Retired);
 # $Retired{ TYPE }{ CODESET }{ code }{ CODE } = NAME
 #                            { name }{ NAME } = [CODE,NAME]  (the key is lowercase)
 
-$VERSION='3.37';
+$VERSION='3.38';
 
 #=======================================================================
 #
@@ -40,7 +40,7 @@ $VERSION='3.37';
 #=======================================================================
 
 sub _code {
-   return 1  if (@_ > 3);
+   return (1)  if (@_ > 3);
 
    my($type,$code,$codeset) = @_;
    $code = ''  if (! defined $code);
@@ -51,7 +51,7 @@ sub _code {
      if (! defined($codeset)  ||  $codeset eq '');
    $codeset = lc($codeset);
    return (1)  if (! exists $ALL_CODESETS{$type}{'codesets'}{$codeset});
-   return (0,$code,$codeset)  if (! $code);
+   return (0,$code,$codeset)  if ($code eq '');
 
    # Determine the properties of the codeset
 
@@ -104,8 +104,7 @@ sub _code2name {
    $code = $Data{$type}{'codealias'}{$codeset}{$code}
      if (exists $Data{$type}{'codealias'}{$codeset}{$code});
 
-   if (exists $Data{$type}{'code2id'}{$codeset}  &&
-       exists $Data{$type}{'code2id'}{$codeset}{$code}) {
+   if (exists $Data{$type}{'code2id'}{$codeset}{$code}) {
       my ($id,$i) = @{ $Data{$type}{'code2id'}{$codeset}{$code} };
       my $name    = $Data{$type}{'id2names'}{$id}[$i];
       return $name;
@@ -130,7 +129,7 @@ sub _name2code {
    $name                   = lc($name);
 
    my $retired             = 0;
-   if (@args > 0  &&  $args[$#args]  &&  $args[$#args] eq 'retired') {
+   if (@args > 0  &&  $args[$#args] eq 'retired') {
       pop(@args);
       $retired             = 1;
    }
@@ -159,7 +158,22 @@ sub _name2code {
 
 sub _code2code {
    my($type,@args) = @_;
-   (@args == 3) or croak "${type}_code2code() takes 3 arguments!";
+
+   # For tests, we'll ALWAYS have $nowarn
+   my $nowarn   = 0;
+   if (@args) {                                           # uncoverable branch false
+      if ($args[$#args] eq "nowarn") {                    # uncoverable branch false
+         $nowarn      = 1;
+         pop(@args);
+      }
+   }
+
+   if (@args != 3) {
+      if (! $nowarn) {                                    # uncoverable branch true
+         croak "${type}_code2code() takes 3 arguments!";  # uncoverable statement
+      }
+      return undef;
+   }
 
    my($code,$inset,$outset) = @args;
    my($err,$tmp);
@@ -182,7 +196,7 @@ sub _code2code {
 sub _all_codes {
    my($type,@args)         = @_;
    my $retired             = 0;
-   if (@args > 0  &&  $args[$#args]  &&  $args[$#args] eq 'retired') {
+   if (@args > 0  &&  $args[$#args] eq 'retired') {
       pop(@args);
       $retired             = 1;
    }
@@ -190,9 +204,6 @@ sub _all_codes {
    my ($err,$tmp,$codeset) = _code($type,'',@args);
    return ()  if ($err);
 
-   if (! exists $Data{$type}{'code2id'}{$codeset}) {
-      return ();
-   }
    my @codes = keys %{ $Data{$type}{'code2id'}{$codeset} };
    push(@codes,keys %{ $Retired{$type}{$codeset}{'code'} })  if ($retired);
    return (sort @codes);
@@ -207,7 +218,7 @@ sub _all_codes {
 sub _all_names {
    my($type,@args)         = @_;
    my $retired             = 0;
-   if (@args > 0  &&  $args[$#args]  &&  $args[$#args] eq 'retired') {
+   if (@args > 0  &&  $args[$#args] eq 'retired') {
       pop(@args);
       $retired             = 1;
    }
@@ -245,20 +256,25 @@ sub _all_names {
 sub _rename {
    my($type,$code,$new_name,@args) = @_;
 
+   # For tests, we'll ALWAYS have $nowarn
    my $nowarn   = 0;
-   $nowarn      = 1, pop(@args)  if (@args  &&  $args[$#args] eq "nowarn");
+   if (@args) {                                           # uncoverable branch false
+      if ($args[$#args] eq "nowarn") {                    # uncoverable branch false
+         $nowarn      = 1;
+         pop(@args);
+      }
+   }
 
    my $codeset  = shift(@args);
    my $err;
    ($err,$code,$codeset) = _code($type,$code,$codeset);
 
    if (! $codeset) {
-      carp "rename_$type(): unknown codeset\n"  unless ($nowarn);
+      if (! $nowarn) {                                    # uncoverable branch true
+         carp "rename_$type(): unknown codeset\n";        # uncoverable statement
+      }
       return 0;
    }
-
-   $code = $Data{$type}{'codealias'}{$codeset}{$code}
-     if (exists $Data{$type}{'codealias'}{$codeset}{$code});
 
    # Check that $code exists in the codeset.
 
@@ -266,7 +282,9 @@ sub _rename {
    if (exists $Data{$type}{'code2id'}{$codeset}{$code}) {
       $id = $Data{$type}{'code2id'}{$codeset}{$code}[0];
    } else {
-      carp "rename_$type(): unknown code: $code\n"  unless ($nowarn);
+      if (! $nowarn) {                                    # uncoverable branch true
+         carp "rename_$type(): unknown code: $code\n";    # uncoverable statement
+      }
       return 0;
    }
 
@@ -287,8 +305,11 @@ sub _rename {
       my ($new_id,$i) = @{ $Data{$type}{'alias2id'}{lc($new_name)} };
       if ($new_id != $id) {
          # Case 1
-         carp "rename_$type(): rename to an existing $type not allowed\n"
-           unless ($nowarn);
+         if (! $nowarn) {                                 # uncoverable branch true
+                                                          # uncoverable statement
+            carp "rename_$type(): rename to an existing $type not allowed\n";
+         }
+
          return 0;
       }
 
@@ -321,15 +342,23 @@ sub _rename {
 sub _add_code {
    my($type,$code,$name,@args) = @_;
 
+   # For tests, we'll ALWAYS have $nowarn
    my $nowarn   = 0;
-   $nowarn      = 1, pop(@args)  if (@args  &&  $args[$#args] eq "nowarn");
+   if (@args) {                                           # uncoverable branch false
+      if ($args[$#args] eq "nowarn") {                    # uncoverable branch false
+         $nowarn      = 1;
+         pop(@args);
+      }
+   }
 
    my $codeset  = shift(@args);
    my $err;
    ($err,$code,$codeset) = _code($type,$code,$codeset);
 
    if (! $codeset) {
-      carp "add_$type(): unknown codeset\n"  unless ($nowarn);
+      if (! $nowarn) {                                    # uncoverable branch true
+         carp "add_$type(): unknown codeset\n";           # uncoverable statement
+      }
       return 0;
    }
 
@@ -337,7 +366,9 @@ sub _add_code {
 
    if (exists $Data{$type}{'code2id'}{$codeset}{$code}  ||
        exists $Data{$type}{'codealias'}{$codeset}{$code}) {
-      carp "add_$type(): code already in use: $code\n"  unless ($nowarn);
+      if (! $nowarn) {                                    # uncoverable branch true
+         carp "add_$type(): code already in use: $code\n";# uncoverable statement
+      }
       return 0;
    }
 
@@ -349,7 +380,10 @@ sub _add_code {
    if (exists $Data{$type}{'alias2id'}{lc($name)}) {
       ($id,$i) = @{ $Data{$type}{'alias2id'}{lc($name)} };
       if (exists $Data{$type}{'id2code'}{$codeset}{$id}) {
-         carp "add_$type(): name already in use: $name\n"  unless ($nowarn);
+         if (! $nowarn) {                                 # uncoverable branch true
+                                                          # uncoverable statement
+            carp "add_$type(): name already in use: $name\n";
+         }
          return 0;
       }
 
@@ -379,25 +413,33 @@ sub _add_code {
 sub _delete_code {
    my($type,$code,@args) = @_;
 
+   # For tests, we'll ALWAYS have $nowarn
    my $nowarn   = 0;
-   $nowarn      = 1, pop(@args)  if (@args  &&  $args[$#args] eq "nowarn");
+   if (@args) {                                           # uncoverable branch false
+      if ($args[$#args] eq "nowarn") {                    # uncoverable branch false
+         $nowarn      = 1;
+         pop(@args);
+      }
+   }
 
    my $codeset  = shift(@args);
    my $err;
    ($err,$code,$codeset) = _code($type,$code,$codeset);
 
    if (! $codeset) {
-      carp "delete_$type(): unknown codeset\n"  unless ($nowarn);
+      if (! $nowarn) {                                    # uncoverable branch true
+         carp "delete_$type(): unknown codeset\n";        # uncoverable statement
+      }
       return 0;
    }
-
-   $code = $Data{$type}{'codealias'}{$codeset}{$code}
-     if (exists $Data{$type}{'codealias'}{$codeset}{$code});
 
    # Check that $code is valid.
 
    if (! exists $Data{$type}{'code2id'}{$codeset}{$code}) {
-      carp "delete_$type(): code does not exist: $code\n"  unless ($nowarn);
+      if (! $nowarn) {                                    # uncoverable branch true
+                                                          # uncoverable statement
+         carp "delete_$type(): code does not exist: $code\n";
+      }
       return 0;
    }
 
@@ -439,9 +481,16 @@ sub _delete_code {
 #=======================================================================
 
 sub _add_alias {
-   my($type,$name,$new_name,$nowarn) = @_;
+   my($type,$name,$new_name,@args) = @_;
 
-   $nowarn   = (defined($nowarn)  &&  $nowarn eq "nowarn" ? 1 : 0);
+   # For tests, we'll ALWAYS have $nowarn
+   my $nowarn   = 0;
+   if (@args) {                                           # uncoverable branch false
+      if ($args[$#args] eq "nowarn") {                    # uncoverable branch false
+         $nowarn      = 1;
+         pop(@args);
+      }
+   }
 
    # Check that $name is used and $new_name is new.
 
@@ -449,12 +498,18 @@ sub _add_alias {
    if (exists $Data{$type}{'alias2id'}{lc($name)}) {
       $id = $Data{$type}{'alias2id'}{lc($name)}[0];
    } else {
-      carp "add_${type}_alias(): name does not exist: $name\n"  unless ($nowarn);
+      if (! $nowarn) {                                    # uncoverable branch true
+                                                          # uncoverable statement
+         carp "add_${type}_alias(): name does not exist: $name\n";
+      }
       return 0;
    }
 
    if (exists $Data{$type}{'alias2id'}{lc($new_name)}) {
-      carp "add_${type}_alias(): alias already in use: $new_name\n"  unless ($nowarn);
+      if (! $nowarn) {                                    # uncoverable branch true
+                                                          # uncoverable statement
+         carp "add_${type}_alias(): alias already in use: $new_name\n";
+      }
       return 0;
    }
 
@@ -480,9 +535,16 @@ sub _add_alias {
 #=======================================================================
 
 sub _delete_alias {
-   my($type,$name,$nowarn) = @_;
+   my($type,$name,@args) = @_;
 
-   $nowarn   = (defined($nowarn)  &&  $nowarn eq "nowarn" ? 1 : 0);
+   # For tests, we'll ALWAYS have $nowarn
+   my $nowarn   = 0;
+   if (@args) {                                           # uncoverable branch false
+      if ($args[$#args] eq "nowarn") {                    # uncoverable branch false
+         $nowarn      = 1;
+         pop(@args);
+      }
+   }
 
    # Check that $name is used.
 
@@ -490,14 +552,19 @@ sub _delete_alias {
    if (exists $Data{$type}{'alias2id'}{lc($name)}) {
       ($id,$i) = @{ $Data{$type}{'alias2id'}{lc($name)} };
    } else {
-      carp "delete_${type}_alias(): name does not exist: $name\n"  unless ($nowarn);
+      if (! $nowarn) {                                    # uncoverable branch true
+                                                          # uncoverable statement
+         carp "delete_${type}_alias(): name does not exist: $name\n";
+      }
       return 0;
    }
 
    my $n = $#{ $Data{$type}{'id2names'}{$id} } + 1;
    if ($n == 1) {
-      carp "delete_${type}_alias(): only one name defined (use _delete_${type} instead)\n"
-        unless ($nowarn);
+      if (! $nowarn) {                                    # uncoverable branch true
+                                                          # uncoverable statement
+         carp "delete_${type}_alias(): only one name defined (use _delete_${type} instead)\n";
+      }
       return 0;
    }
 
@@ -511,15 +578,15 @@ sub _delete_alias {
    #   Set to 0   if I = $i
    #   Decrement  if I > $i
 
-   foreach my $codeset (keys %{ $Data{'code2id'} }) {
-      foreach my $code (keys %{ $Data{'code2id'}{$codeset} }) {
-         my($jd,$j) = @{ $Data{'code2id'}{$codeset}{$code} };
+   foreach my $codeset (keys %{ $Data{$type}{'code2id'} }) {
+      foreach my $code (keys %{ $Data{$type}{'code2id'}{$codeset} }) {
+         my($jd,$j) = @{ $Data{$type}{'code2id'}{$codeset}{$code} };
          next  if ($jd ne $id  ||
                    $j < $i);
          if ($i == $j) {
-            $Data{'code2id'}{$codeset}{$code}[1] = 0;
+            $Data{$type}{'code2id'}{$codeset}{$code}[1] = 0;
          } else {
-            $Data{'code2id'}{$codeset}{$code}[1]--;
+            $Data{$type}{'code2id'}{$codeset}{$code}[1]--;
          }
       }
    }
@@ -539,27 +606,35 @@ sub _delete_alias {
 sub _rename_code {
    my($type,$code,$new_code,@args) = @_;
 
+   # For tests, we'll ALWAYS have $nowarn
    my $nowarn   = 0;
-   $nowarn      = 1, pop(@args)  if (@args  &&  $args[$#args] eq "nowarn");
+   if (@args) {                                           # uncoverable branch false
+      if ($args[$#args] eq "nowarn") {                    # uncoverable branch false
+         $nowarn      = 1;
+         pop(@args);
+      }
+   }
 
    my $codeset  = shift(@args);
    my $err;
    ($err,$code,$codeset)     = _code($type,$code,$codeset);
-   ($err,$new_code,$codeset) = _code($type,$new_code,$codeset)
-     if (! $err);
 
    if (! $codeset) {
-      carp "rename_$type(): unknown codeset\n"  unless ($nowarn);
+      if (! $nowarn) {                                    # uncoverable branch true
+         carp "rename_${type}_code(): unknown codeset\n"; # uncoverable statement
+      }
       return 0;
    }
 
-   $code = $Data{$type}{'codealias'}{$codeset}{$code}
-     if (exists $Data{$type}{'codealias'}{$codeset}{$code});
+   ($err,$new_code,$codeset) = _code($type,$new_code,$codeset);
 
    # Check that $code exists in the codeset.
 
    if (! exists $Data{$type}{'code2id'}{$codeset}{$code}) {
-      carp "rename_$type(): unknown code: $code\n"  unless ($nowarn);
+      if (! $nowarn) {                                    # uncoverable branch true
+                                                          # uncoverable statement
+         carp "rename_${type}_code(): unknown code: $code\n";
+      }
       return 0;
    }
 
@@ -586,13 +661,19 @@ sub _rename_code {
 
       } else {
          # Case 2
-         carp "rename_$type(): new code already in use: $new_code\n"  unless ($nowarn);
+         if (! $nowarn) {                                 # uncoverable branch true
+                                                          # uncoverable statement
+            carp "rename_${type}_code(): new code already in use: $new_code\n";
+         }
          return 0;
       }
 
    } elsif (exists $Data{$type}{'code2id'}{$codeset}{$new_code}) {
       # Case 3
-      carp "rename_$type(): new code already in use: $new_code\n"  unless ($nowarn);
+      if (! $nowarn) {                                    # uncoverable branch true
+                                                          # uncoverable statement
+         carp "rename_${type}_code(): new code already in use: $new_code\n";
+      }
       return 0;
    }
 
@@ -620,34 +701,46 @@ sub _rename_code {
 sub _add_code_alias {
    my($type,$code,$new_code,@args) = @_;
 
+   # For tests, we'll ALWAYS have $nowarn
    my $nowarn   = 0;
-   $nowarn      = 1, pop(@args)  if (@args  &&  $args[$#args] eq "nowarn");
+   if (@args) {                                           # uncoverable branch false
+      if ($args[$#args] eq "nowarn") {                    # uncoverable branch false
+         $nowarn      = 1;
+         pop(@args);
+      }
+   }
 
    my $codeset  = shift(@args);
    my $err;
    ($err,$code,$codeset)     = _code($type,$code,$codeset);
-   ($err,$new_code,$codeset) = _code($type,$new_code,$codeset)
-     if (! $err);
 
    if (! $codeset) {
-      carp "add_${type}_code_alias(): unknown codeset\n"  unless ($nowarn);
+      if (! $nowarn) {                                    # uncoverable branch true
+                                                          # uncoverable statement
+         carp "add_${type}_code_alias(): unknown codeset\n";
+      }
       return 0;
    }
 
-   $code = $Data{$type}{'codealias'}{$codeset}{$code}
-     if (exists $Data{$type}{'codealias'}{$codeset}{$code});
+   ($err,$new_code,$codeset) = _code($type,$new_code,$codeset);
 
    # Check that $code exists in the codeset and that $new_code
    # does not exist.
 
    if (! exists $Data{$type}{'code2id'}{$codeset}{$code}) {
-      carp "add_${type}_code_alias(): unknown code: $code\n"  unless ($nowarn);
+      if (! $nowarn) {                                    # uncoverable branch true
+                                                          # uncoverable statement
+         carp "add_${type}_code_alias(): unknown code: $code\n";
+      }
       return 0;
    }
 
    if (exists $Data{$type}{'code2id'}{$codeset}{$new_code}  ||
        exists $Data{$type}{'codealias'}{$codeset}{$new_code}) {
-      carp "add_${type}_code_alias(): code already in use: $new_code\n"  unless ($nowarn);
+      if (! $nowarn) {                                    # uncoverable branch true
+                                                          # uncoverable statement
+         carp "add_${type}_code_alias(): code already in use: $new_code\n";
+      }
       return 0;
    }
 
@@ -660,7 +753,7 @@ sub _add_code_alias {
 
 #=======================================================================
 #
-# _delete_code_alias ( TYPE,CODE,CODESET )
+# _delete_code_alias ( TYPE,ALIAS,CODESET )
 #
 # Deletes an alias for the code.
 #
@@ -669,22 +762,34 @@ sub _add_code_alias {
 sub _delete_code_alias {
    my($type,$code,@args) = @_;
 
+   # For tests, we'll ALWAYS have $nowarn
    my $nowarn   = 0;
-   $nowarn      = 1, pop(@args)  if (@args  &&  $args[$#args] eq "nowarn");
+   if (@args) {                                           # uncoverable branch false
+      if ($args[$#args] eq "nowarn") {                    # uncoverable branch false
+         $nowarn      = 1;
+         pop(@args);
+      }
+   }
 
    my $codeset  = shift(@args);
    my $err;
    ($err,$code,$codeset)     = Locale::Codes::_code($type,$code,$codeset);
 
    if (! $codeset) {
-      carp "delete_${type}_code_alias(): unknown codeset\n"  unless ($nowarn);
+      if (! $nowarn) {                                    # uncoverable branch true
+                                                          # uncoverable statement
+         carp "delete_${type}_code_alias(): unknown codeset\n";
+      }
       return 0;
    }
 
    # Check that $code exists in the codeset as an alias.
 
    if (! exists $Data{$type}{'codealias'}{$codeset}{$code}) {
-      carp "delete_${type}_code_alias(): no alias defined: $code\n"  unless ($nowarn);
+      if (! $nowarn) {                                    # uncoverable branch true
+                                                          # uncoverable statement
+         carp "delete_${type}_code_alias(): no alias defined: $code\n";
+      }
       return 0;
    }
 
@@ -704,5 +809,5 @@ sub _delete_code_alias {
 # cperl-continued-brace-offset: 0
 # cperl-brace-offset: 0
 # cperl-brace-imaginary-offset: 0
-# cperl-label-offset: -2
+# cperl-label-offset: 0
 # End:

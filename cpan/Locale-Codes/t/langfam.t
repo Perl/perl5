@@ -1,14 +1,28 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
+use warnings;
+use strict;
 require 5.002;
+
+my($runtests,$dir,$tdir);
+$::type          = '';
+$::module        = '';
+$::tests         = '';
+
+$::type   = 'langfam';
+$::module = 'Locale::Codes::LangFam';
 
 $runtests=shift(@ARGV);
 if ( -f "t/testfunc.pl" ) {
   require "t/testfunc.pl";
+  require "t/vals.pl";
+  require "t/vals_langfam.pl";
   $dir="./lib";
   $tdir="t";
 } elsif ( -f "testfunc.pl" ) {
   require "testfunc.pl";
+  require "vals.pl";
+  require "vals_langfam.pl";
   $dir="../lib";
   $tdir=".";
 } else {
@@ -16,31 +30,9 @@ if ( -f "t/testfunc.pl" ) {
 }
 
 unshift(@INC,$dir);
-use Locale::Script;
 
-%type = ( "LOCALE_SCRIPT_ALPHA"   => LOCALE_SCRIPT_ALPHA,
-          "LOCALE_SCRIPT_NUMERIC" => LOCALE_SCRIPT_NUMERIC,
-        );
-
-sub test {
-   my(@test) = @_;
-   $test[1]  = $type{$test[1]}
-     if (@test == 2  &&  $test[1]  &&  exists $type{$test[1]});
-   return script2code(@test);
-}
-
-$tests = "
-
-~ _undef_
-
-Phoenician ~ Phnx
-
-Phoenician LOCALE_SCRIPT_NUMERIC ~ 115
-
-";
-
-print "script2code (old)...\n";
-test_Func(\&test,$tests,$runtests);
+print "langfam...\n";
+test_Func(\&test,$::tests,$runtests);
 
 1;
 # Local Variables:
@@ -51,5 +43,5 @@ test_Func(\&test,$tests,$runtests);
 # cperl-continued-brace-offset: 0
 # cperl-brace-offset: 0
 # cperl-brace-imaginary-offset: 0
-# cperl-label-offset: -2
+# cperl-label-offset: 0
 # End:

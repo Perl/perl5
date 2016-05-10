@@ -1,7 +1,7 @@
 package Locale::Script;
 # Copyright (C) 2001      Canon Research Centre Europe (CRE).
 # Copyright (C) 2002-2009 Neil Bowers
-# Copyright (c) 2010-2015 Sullivan Beck
+# Copyright (c) 2010-2016 Sullivan Beck
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -10,7 +10,7 @@ use warnings;
 use Exporter;
 
 our $VERSION;
-$VERSION='3.37';
+$VERSION='3.38';
 
 our (@ISA,@EXPORT);
 
@@ -44,5 +44,5 @@ sub delete_script_code_alias { Locale::Codes::Script::delete_script_code_alias(@
 # cperl-continued-brace-offset: 0
 # cperl-brace-offset: 0
 # cperl-brace-imaginary-offset: 0
-# cperl-label-offset: -2
+# cperl-label-offset: 0
 # End:

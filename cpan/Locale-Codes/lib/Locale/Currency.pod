@@ -83,7 +83,7 @@ This is the set of three-digit numeric codes from ISO 4217.
 
 =item B<Locale::Currency::add_currency_code_alias(CODE ,NEW_CODE [,CODESET])>
 
-=item B<Locale::Currency::delete_currency_code_alias( ODE [,CODESET])>
+=item B<Locale::Currency::delete_currency_code_alias( CODE [,CODESET])>
 
 These routines are all documented in the L<Locale::Codes::API> man page.
 
@@ -118,7 +118,7 @@ Currently maintained by Sullivan Beck (sbeck@cpan.org).
    Copyright (c) 1997-2001 Canon Research Centre Europe (CRE).
    Copyright (c) 2001      Michael Hennecke
    Copyright (c) 2001-2010 Neil Bowers
-   Copyright (c) 2010-2015 Sullivan Beck
+   Copyright (c) 2010-2016 Sullivan Beck
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
