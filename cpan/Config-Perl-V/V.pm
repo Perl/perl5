@@ -8,7 +8,7 @@ use warnings;
 use Config;
 use Exporter;
 use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
-$VERSION     = "0.25";
+$VERSION     = "0.26";
 @ISA         = ("Exporter");
 @EXPORT_OK   = qw( plv2hash summary myconfig signature );
 %EXPORT_TAGS = (
@@ -61,6 +61,7 @@ my %BTD = map { $_ => 0 } qw(
     PERL_RELOCATABLE_INCPUSH
     PERL_USE_DEVEL
     PERL_USE_SAFE_PUTENV
+    SILENT_NO_TAINT_SUPPORT
     UNLINK_ALL_VERSIONS
     USE_ATTRIBUTES_FOR_PERLIO
     USE_FAST_STDIO
@@ -251,6 +252,15 @@ sub plv2hash
     if ($pv =~ m/^\s+(Snapshot of:)\s+(\S+)/) {
 	$config{git_commit_id_title} = $1;
 	$config{git_commit_id}       = $2;
+	}
+
+    # these are always last on line and can have multiple quotation styles
+    for my $k (qw( ccflags ldflags lddlflags )) {
+	$pv =~ s{, \s* $k \s*=\s* (.*) \s*$}{}mx or next;
+	my $v = $1;
+	$v =~ s/\s*,\s*$//;
+	$v =~ s/^(['"])(.*)\1$/$2/;
+	$config{$k} = $v;
 	}
 
     if (my %kv = ($pv =~ m{\b
@@ -537,7 +547,7 @@ H.Merijn Brand <h.m.brand@xs4all.nl>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2015 H.Merijn Brand
+Copyright (C) 2009-2016 H.Merijn Brand
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

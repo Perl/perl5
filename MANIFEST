@@ -236,6 +236,8 @@ cpan/Config-Perl-V/t/27_plv5200.t		Config::Perl::V
 cpan/Config-Perl-V/t/27_plv5202.t		Config::Perl::V
 cpan/Config-Perl-V/t/28_plv52201w.t		Config::Perl::V
 cpan/Config-Perl-V/t/28_plv5220.t		Config::Perl::V
+cpan/Config-Perl-V/t/29_plv5235w.t		Config::Perl::V
+cpan/Config-Perl-V/t/30_plv5240.t		Config::Perl::V
 cpan/Config-Perl-V/V.pm				Config::Perl::V
 cpan/CPAN/lib/App/Cpan.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/API/HOWTO.pod	recipe book for programming with CPAN.pm
