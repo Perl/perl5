@@ -258,7 +258,10 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+C<Configure> now builds C<miniperl> and C<generate_uudmap> if you
+invoke it with C<-Dusecrosscompiler> but not C<-Dtargethost=somehost>.
+This means you can supply your target platform C<config.sh>, generate
+the headers and proceed to build your cross-target perl.  [perl #127234]
 
 =back
 
