@@ -4,7 +4,7 @@ use warnings;
 
 our ($AUTOLOAD, %SIGRT);
 
-our $VERSION = '1.67';
+our $VERSION = '1.68';
 
 require XSLoader;
 
@@ -17,18 +17,6 @@ use Fcntl qw(FD_CLOEXEC F_DUPFD F_GETFD F_GETFL F_GETLK F_RDLCK F_SETFD
 	     S_IWGRP S_IWOTH S_IWUSR S_IXGRP S_IXOTH S_IXUSR);
 
 my $loaded;
-
-sub import {
-    my $pkg = shift;
-
-    load_imports() unless $loaded++;
-
-    # Grandfather old foo_h form to new :foo_h form
-    s/^(?=\w+_h$)/:/ for my @list = @_;
-
-    local $Exporter::ExportLevel = 1;
-    Exporter::import($pkg,@list);
-}
 
 sub croak { require Carp;  goto &Carp::croak }
 sub usage { croak "Usage: POSIX::$_[0]" }
@@ -184,7 +172,38 @@ my %reimpl = (
     waitpid   => 'pid, options => CORE::waitpid($_[0], $_[1])',
 );
 
+sub import {
+    my $pkg = shift;
+
+    load_imports() unless $loaded++;
+
+    # Grandfather old foo_h form to new :foo_h form
+    s/^(?=\w+_h$)/:/ for my @list = @_;
+
+    my @unimpl = sort grep { exists $replacement{$_} } @list;
+    if (@unimpl) {
+      for my $u (@unimpl) {
+        warn "Unimplemented: POSIX::$u(): ", unimplemented_message($u);
+      }
+      croak(sprintf("Unimplemented: %s",
+                    join(" ", map { "POSIX::$_()" } @unimpl)));
+    }
+
+    local $Exporter::ExportLevel = 1;
+    Exporter::import($pkg,@list);
+}
+
 eval join ';', map "sub $_", keys %replacement, keys %reimpl;
+
+sub unimplemented_message {
+  my $func = shift;
+  my $how = $replacement{$func};
+  return "C-specific, stopped" unless defined $how;
+  return "$$how" if ref $how;
+  return "$how instead" if $how =~ /^use /;
+  return "Use method $how() instead" if $how =~ /::/;
+  return "C-specific: use $how instead";
+}
 
 sub AUTOLOAD {
     my ($func) = ($AUTOLOAD =~ /.*::(.*)/);
@@ -208,13 +227,7 @@ sub AUTOLOAD {
 	goto &$AUTOLOAD;
     }
     if (exists $replacement{$func}) {
-	my $how = $replacement{$func};
-	croak "Unimplemented: POSIX::$func() is C-specific, stopped"
-	    unless defined $how;
-	croak "Unimplemented: POSIX::$func() is $$how" if ref $how;
-	croak "Unimplemented: $how instead of POSIX::$func()" if $how =~ /^use /;
-	croak "Use method $how() instead of POSIX::$func()" if $how =~ /::/;
-	croak "Unimplemented: POSIX::$func() is C-specific: use $how instead";
+      croak "Unimplemented: POSIX::$func(): ", unimplemented_message($func);
     }
 
     constant($func);

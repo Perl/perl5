@@ -299,13 +299,13 @@ like ($@, qr/^Usage: POSIX::kill\(pid, sig\)/, "check its usage message");
 # Check unimplemented.
 $result = eval {POSIX::offsetof};
 is ($result, undef, "offsetof should fail");
-like ($@, qr/^Unimplemented: POSIX::offsetof\(\) is C-specific/,
+like ($@, qr/^Unimplemented: POSIX::offsetof\(\): C-specific/,
       "check its unimplemented message");
 
 # Check reimplemented.
 $result = eval {POSIX::fgets};
 is ($result, undef, "fgets should fail");
-like ($@, qr/^Use method IO::Handle::gets\(\) instead/,
+like ($@, qr/^Unimplemented: POSIX::fgets\(\): Use method IO::Handle::gets\(\) instead/,
       "check its redef message");
 
 eval { use strict; POSIX->import("S_ISBLK"); my $x = S_ISBLK };
