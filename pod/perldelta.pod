@@ -263,6 +263,12 @@ invoke it with C<-Dusecrosscompiler> but not C<-Dtargethost=somehost>.
 This means you can supply your target platform C<config.sh>, generate
 the headers and proceed to build your cross-target perl.  [perl #127234]
 
+=item *
+
+Builds with C<-Accflags=-DPERL_TRACE_OPS> now only dump the operator
+counts when the environment variable C<PERL_TRACE_OPS> to be set to a
+non-zero integer.  This allows C<make test> to pass on such a build.
+
 =back
 
 =head1 Testing
