@@ -222,6 +222,7 @@ struct RExC_state_t {
 #endif
     bool        seen_unfolded_sharp_s;
     bool        strict;
+    bool        study_started;
 };
 
 #define RExC_flags	(pRExC_state->flags)
@@ -288,6 +289,7 @@ struct RExC_state_t {
 #define RExC_frame_last (pRExC_state->frame_last)
 #define RExC_frame_count (pRExC_state->frame_count)
 #define RExC_strict (pRExC_state->strict)
+#define RExC_study_started      (pRExC_state->study_started)
 
 /* Heuristic check on the complexity of the pattern: if TOO_NAUGHTY, we set
  * a flag to disable back-off on the fixed/floating substrings - if it's
@@ -4102,6 +4104,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_STUDY_CHUNK;
+    RExC_study_started= 1;
 
 
     if ( depth == 0 ) {
@@ -6877,6 +6880,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_contains_locale = 0;
     RExC_contains_i = 0;
     RExC_strict = cBOOL(pm_flags & RXf_PMf_STRICT);
+    RExC_study_started = 0;
     pRExC_state->runtime_code_qr = NULL;
     RExC_frame_head= NULL;
     RExC_frame_last= NULL;
@@ -18235,7 +18239,9 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
 	RExC_size += size;
 	return;
     }
-
+    assert(!RExC_study_started); /* I believe we should never use reginsert once we have started
+                                    studying. If this is wrong then we need to adjust RExC_recurse
+                                    below like we do with RExC_open_parens/RExC_close_parens. */
     src = RExC_emit;
     RExC_emit += size;
     dst = RExC_emit;
@@ -18246,7 +18252,10 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
          * iow it is 1 more than the number of parens seen in
          * the pattern so far. */
         for ( paren=0 ; paren < RExC_npar ; paren++ ) {
-            if ( RExC_open_parens[paren] >= opnd ) {
+            /* note, RExC_open_parens[0] is the start of the
+             * regex, it can't move. RExC_close_parens[0] is the end
+             * of the regex, it *can* move. */
+            if ( paren && RExC_open_parens[paren] >= opnd ) {
                 /*DEBUG_PARSE_FMT("open"," - %d",size);*/
                 RExC_open_parens[paren] += size;
             } else {
