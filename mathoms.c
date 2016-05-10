@@ -86,7 +86,7 @@ PERL_CALLCONV void Perl_hv_magic(pTHX_ HV *hv, GV *gv, int how);
 PERL_CALLCONV bool Perl_do_open(pTHX_ GV *gv, const char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp);
 PERL_CALLCONV bool Perl_do_aexec(pTHX_ SV *really, SV **mark, SV **sp);
 PERL_CALLCONV U8 * Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv);
-PERL_CALLCONV bool Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **ep);
+PERL_CALLCONV bool Perl_is_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep);
 PERL_CALLCONV void Perl_sv_nolocking(pTHX_ SV *sv);
 PERL_CALLCONV void Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len);
 PERL_CALLCONV void Perl_sv_usepvn(pTHX_ SV *sv, char *ptr, STRLEN len);
@@ -730,10 +730,9 @@ Perl_init_i18nl14n(pTHX_ int printwarn)
 }
 
 bool
-Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **ep)
+Perl_is_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep)
 {
     PERL_ARGS_ASSERT_IS_UTF8_STRING_LOC;
-    PERL_UNUSED_CONTEXT;
 
     return is_utf8_string_loclen(s, len, ep, 0);
 }
