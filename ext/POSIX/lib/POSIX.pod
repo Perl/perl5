@@ -1949,13 +1949,9 @@ Not implemented.  Use method C<IO::File::new_tmpfile()> instead, or see L<File::
 
 =item C<tmpnam>
 
-Returns a name for a temporary file.
-
-	$tmpfile = POSIX::tmpnam();
-
 For security reasons, which are probably detailed in your system's
 documentation for the C library C<tmpnam()> function, this interface
-should not be used; instead see L<File::Temp>.
+is no more available; instead use L<File::Temp>.
 
 =item C<tolower>
 

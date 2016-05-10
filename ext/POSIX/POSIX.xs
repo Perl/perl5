@@ -3241,32 +3241,6 @@ write(fd, buffer, nbytes)
 	char *		buffer
 	size_t		nbytes
 
-SV *
-tmpnam()
-    PREINIT:
-	STRLEN i;
-	int len;
-    CODE:
-	RETVAL = newSVpvs("");
-	SvGROW(RETVAL, L_tmpnam);
-	/* Yes, we know tmpnam() is bad.  So bad that some compilers
-	 * and linkers warn against using it.  But it is here for
-	 * completeness.  POSIX.pod warns against using it.
-	 *
-	 * Then again, maybe this should be removed at some point.
-	 * No point in enabling dangerous interfaces. */
-        if (ckWARN_d(WARN_DEPRECATED)) {
-	    HV *warned = get_hv("POSIX::_warned", GV_ADD | GV_ADDMULTI);
-            if (! hv_exists(warned, (const char *)&PL_op, sizeof(PL_op))) {
-                Perl_warner(aTHX_ packWARN(WARN_DEPRECATED), "Calling POSIX::tmpnam() is deprecated");
-                (void)hv_store(warned, (const char *)&PL_op, sizeof(PL_op), &PL_sv_yes, 0);
-            }
-        }
-	len = strlen(tmpnam(SvPV(RETVAL, i)));
-	SvCUR_set(RETVAL, len);
-    OUTPUT:
-	RETVAL
-
 void
 abort()
 

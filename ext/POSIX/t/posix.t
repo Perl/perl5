@@ -10,7 +10,7 @@ BEGIN {
     require 'loc_tools.pl';
 }
 
-use Test::More tests => 94;
+use Test::More tests => 93;
 
 use POSIX qw(fcntl_h signal_h limits_h _exit getcwd open read strftime write
 	     errno localeconv dup dup2 lseek access);
@@ -402,19 +402,10 @@ SKIP: {
     cmp_ok($!, '==', POSIX::ENOTDIR);
 }
 
-{   # tmpnam() is deprecated
-    my @warn;
-    local $SIG{__WARN__} = sub { push @warn, "@_"; note "@_"; };
-    my $x = sub { POSIX::tmpnam() };
-    my $foo = $x->();
-    $foo = $x->();
-    is(@warn, 1, "POSIX::tmpnam() should warn only once per location");
-    like($warn[0], qr!^Calling POSIX::tmpnam\(\) is deprecated at t/posix.t line \d+\.$!,
-       "check POSIX::tmpnam warns by default");
-    no warnings "deprecated";
-    undef $warn;
-    my $foo = POSIX::tmpnam();
-    is($warn, undef, "... but the warning can be disabled");
+{   # tmpnam() has been removed as unsafe
+    my $x = eval { POSIX::tmpnam() };
+    is($x, undef, 'tmpnam has been removed');
+    like($@, qr/use File::Temp/, 'tmpnam advises File::Temp');
 }
 
 # Check that output is not flushed by _exit. This test should be last
