@@ -3582,13 +3582,80 @@ S_path_is_searchable(const char *name)
 }
 
 
-/* also used for: pp_dofile() */
+/* implement 'require 5.010001' */
 
-PP(pp_require)
+static OP *
+S_require_version(pTHX_ SV *sv)
 {
-    dSP;
+    dVAR; dSP;
+
+    sv = sv_2mortal(new_version(sv));
+    if (!Perl_sv_derived_from_pvn(aTHX_ PL_patchlevel, STR_WITH_LEN("version"), 0))
+        upg_version(PL_patchlevel, TRUE);
+    if (cUNOP->op_first->op_type == OP_CONST && cUNOP->op_first->op_private & OPpCONST_NOVER) {
+        if ( vcmp(sv,PL_patchlevel) <= 0 )
+            DIE(aTHX_ "Perls since %"SVf" too modern--this is %"SVf", stopped",
+                SVfARG(sv_2mortal(vnormal(sv))),
+                SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
+            );
+    }
+    else {
+        if ( vcmp(sv,PL_patchlevel) > 0 ) {
+            I32 first = 0;
+            AV *lav;
+            SV * const req = SvRV(sv);
+            SV * const pv = *hv_fetchs(MUTABLE_HV(req), "original", FALSE);
+
+            /* get the left hand term */
+            lav = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(req), "version", FALSE)));
+
+            first  = SvIV(*av_fetch(lav,0,0));
+            if (   first > (int)PERL_REVISION    /* probably 'use 6.0' */
+                || hv_exists(MUTABLE_HV(req), "qv", 2 ) /* qv style */
+                || av_tindex(lav) > 1            /* FP with > 3 digits */
+                || strstr(SvPVX(pv),".0")        /* FP with leading 0 */
+               ) {
+                DIE(aTHX_ "Perl %"SVf" required--this is only "
+                    "%"SVf", stopped",
+                    SVfARG(sv_2mortal(vnormal(req))),
+                    SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
+                );
+            }
+            else { /* probably 'use 5.10' or 'use 5.8' */
+                SV *hintsv;
+                I32 second = 0;
+
+                if (av_tindex(lav)>=1)
+                    second = SvIV(*av_fetch(lav,1,0));
+
+                second /= second >= 600  ? 100 : 10;
+                hintsv = Perl_newSVpvf(aTHX_ "v%d.%d.0",
+                                       (int)first, (int)second);
+                upg_version(hintsv, TRUE);
+
+                DIE(aTHX_ "Perl %"SVf" required (did you mean %"SVf"?)"
+                    "--this is only %"SVf", stopped",
+                    SVfARG(sv_2mortal(vnormal(req))),
+                    SVfARG(sv_2mortal(vnormal(sv_2mortal(hintsv)))),
+                    SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
+                );
+            }
+        }
+    }
+
+    RETPUSHYES;
+}
+
+/* Handle C<require Foo::Bar>, C<require "Foo/Bar.pm"> and C<do "Foo.pm">.
+ * The first form will have already been converted at compile time to
+ * the second form */
+
+static OP *
+S_require_file(pTHX_ SV *const sv)
+{
+    dVAR; dSP;
+
     PERL_CONTEXT *cx;
-    SV *sv;
     const char *name;
     STRLEN len;
     char * unixname;
@@ -3611,65 +3678,6 @@ PP(pp_require)
     bool path_searchable;
     I32 old_savestack_ix;
 
-    sv = POPs;
-    SvGETMAGIC(sv);
-    if ( (SvNIOKp(sv) || SvVOK(sv)) && PL_op->op_type != OP_DOFILE) {
-	sv = sv_2mortal(new_version(sv));
-	if (!Perl_sv_derived_from_pvn(aTHX_ PL_patchlevel, STR_WITH_LEN("version"), 0))
-	    upg_version(PL_patchlevel, TRUE);
-	if (cUNOP->op_first->op_type == OP_CONST && cUNOP->op_first->op_private & OPpCONST_NOVER) {
-	    if ( vcmp(sv,PL_patchlevel) <= 0 )
-		DIE(aTHX_ "Perls since %"SVf" too modern--this is %"SVf", stopped",
-		    SVfARG(sv_2mortal(vnormal(sv))),
-		    SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
-		);
-	}
-	else {
-	    if ( vcmp(sv,PL_patchlevel) > 0 ) {
-		I32 first = 0;
-		AV *lav;
-		SV * const req = SvRV(sv);
-		SV * const pv = *hv_fetchs(MUTABLE_HV(req), "original", FALSE);
-
-		/* get the left hand term */
-		lav = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(req), "version", FALSE)));
-
-		first  = SvIV(*av_fetch(lav,0,0));
-		if (   first > (int)PERL_REVISION    /* probably 'use 6.0' */
-		    || hv_exists(MUTABLE_HV(req), "qv", 2 ) /* qv style */
-		    || av_tindex(lav) > 1            /* FP with > 3 digits */
-		    || strstr(SvPVX(pv),".0")        /* FP with leading 0 */
-		   ) {
-		    DIE(aTHX_ "Perl %"SVf" required--this is only "
-		    	"%"SVf", stopped",
-			SVfARG(sv_2mortal(vnormal(req))),
-			SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
-		    );
-		}
-		else { /* probably 'use 5.10' or 'use 5.8' */
-		    SV *hintsv;
-		    I32 second = 0;
-
-		    if (av_tindex(lav)>=1)
-			second = SvIV(*av_fetch(lav,1,0));
-
-		    second /= second >= 600  ? 100 : 10;
-		    hintsv = Perl_newSVpvf(aTHX_ "v%d.%d.0",
-					   (int)first, (int)second);
-		    upg_version(hintsv, TRUE);
-
-		    DIE(aTHX_ "Perl %"SVf" required (did you mean %"SVf"?)"
-		    	"--this is only %"SVf", stopped",
-			SVfARG(sv_2mortal(vnormal(req))),
-			SVfARG(sv_2mortal(vnormal(sv_2mortal(hintsv)))),
-			SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
-		    );
-		}
-	    }
-	}
-
-	RETPUSHYES;
-    }
     if (!SvOK(sv))
         DIE(aTHX_ "Missing or undefined argument to require");
     name = SvPV_nomg_const(sv, len);
@@ -3719,6 +3727,46 @@ PP(pp_require)
 		DIE(aTHX_ "Attempt to reload %s aborted.\n"
 			    "Compilation failed in require", unixname);
 	}
+
+        if (PL_op->op_flags & OPf_KIDS) {
+            SVOP * const kid = (SVOP*)cUNOP->op_first;
+
+            if (kid->op_type == OP_CONST && (kid->op_private & OPpCONST_BARE)) {
+                /* require foo (or use foo) with a bareword.
+                   Perl_load_module fakes up the identical optree, but its
+                   arguments aren't restricted by the parser to real barewords.
+                */
+                const STRLEN package_len = len - 3;
+                const char slashdot[2] = {'/', '.'};
+#ifdef DOSISH
+                const char backslashdot[2] = {'\\', '.'};
+#endif
+
+                /* Disallow *purported* barewords that map to absolute
+                   filenames, filenames relative to the current or parent
+                   directory, or (*nix) hidden filenames.  Also sanity check
+                   that the generated filename ends .pm  */
+                if (!path_searchable || len < 3 || name[0] == '.'
+                    || !memEQ(name + package_len, ".pm", 3))
+                    DIE(aTHX_ "Bareword in require maps to disallowed filename \"%"SVf"\"", sv);
+                if (memchr(name, 0, package_len)) {
+                    /* diag_listed_as: Bareword in require contains "%s" */
+                    DIE(aTHX_ "Bareword in require contains \"\\0\"");
+                }
+                if (ninstr(name, name + package_len, slashdot,
+                           slashdot + sizeof(slashdot))) {
+                    /* diag_listed_as: Bareword in require contains "%s" */
+                    DIE(aTHX_ "Bareword in require contains \"/.\"");
+                }
+#ifdef DOSISH
+                if (ninstr(name, name + package_len, backslashdot,
+                           backslashdot + sizeof(backslashdot))) {
+                    /* diag_listed_as: Bareword in require contains "%s" */
+                    DIE(aTHX_ "Bareword in require contains \"\\.\"");
+                }
+#endif
+            }
+        }
     }
 
     PERL_DTRACE_PROBE_FILE_LOADING(unixname);
@@ -4061,6 +4109,21 @@ PP(pp_require)
 
     return op;
 }
+
+
+/* also used for: pp_dofile() */
+
+PP(pp_require)
+{
+    dSP;
+    SV *sv = POPs;
+    SvGETMAGIC(sv);
+    PUTBACK;
+    return ((SvNIOKp(sv) || SvVOK(sv)) && PL_op->op_type != OP_DOFILE)
+        ? S_require_version(aTHX_ sv)
+        : S_require_file(aTHX_ sv);
+}
+
 
 /* This is a op added to hold the hints hash for
    pp_entereval. The hash can be modified by the code

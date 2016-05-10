@@ -8,7 +8,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan(tests => 17);
+plan(tests => 18);
 
 my $nonfile = tempfile();
 
@@ -29,7 +29,12 @@ for my $file ($nonfile, ' ') {
 eval "require $nonfile";
 
 like $@, qr/^Can't locate $nonfile\.pm in \@INC \(you may need to install the $nonfile module\) \(\@INC contains: @INC\) at/,
-    "correct error message for require $nonfile";
+        "correct error message for require $nonfile";
+
+eval "require ::$nonfile";
+
+like $@, qr/^Bareword in require must not start with a double-colon:/,
+        "correct error message for require ::$nonfile";
 
 eval {
     require "$nonfile.ph";

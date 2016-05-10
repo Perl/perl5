@@ -4183,6 +4183,18 @@ test_sv_catpvf(SV *fmtsv)
         sv = sv_2mortal(newSVpvn("", 0));
         sv_catpvf(sv, fmt, 5, 6, 7, 8);
 
+void
+load_module(flags, name, ...)
+    U32 flags
+    SV *name
+CODE:
+    if (items == 2) {
+	Perl_load_module(aTHX_ flags, SvREFCNT_inc(name), NULL);
+    } else if (items == 3) {
+	Perl_load_module(aTHX_ flags, SvREFCNT_inc(name), SvREFCNT_inc(ST(2)));
+    } else
+        Perl_croak(aTHX_ "load_module can't yet support %lu items", items);
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int
