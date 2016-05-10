@@ -1302,6 +1302,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\TAP rmdir /s /q $(LIBDIR)\TAP
 	-if exist $(LIBDIR)\Term rmdir /s /q $(LIBDIR)\Term
 	-if exist $(LIBDIR)\Test rmdir /s /q $(LIBDIR)\Test
+	-if exist $(LIBDIR)\Test2 rmdir /s /q $(LIBDIR)\Test2
 	-if exist $(LIBDIR)\Text rmdir /s /q $(LIBDIR)\Text
 	-if exist $(LIBDIR)\Thread rmdir /s /q $(LIBDIR)\Thread
 	-if exist $(LIBDIR)\threads rmdir /s /q $(LIBDIR)\threads

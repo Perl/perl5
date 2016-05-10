@@ -7,8 +7,7 @@ use Test::Builder 1.00;
 require Exporter;
 our @ISA = qw(Exporter);
 
-our $VERSION = '1.001014';
-$VERSION = eval $VERSION;      ## no critic (BuiltinFunctions::ProhibitStringyEval)
+our $VERSION = '1.302015';
 
 
 =head1 NAME
@@ -22,7 +21,7 @@ Test::Builder::Module - Base class for test modules
 
   my $CLASS = __PACKAGE__;
 
-  use base 'Test::Builder::Module';
+  use parent 'Test::Builder::Module';
   @EXPORT = qw(ok);
 
   sub ok ($;$) {
