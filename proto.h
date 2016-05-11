@@ -3276,12 +3276,16 @@ PERL_CALLCONV void	Perl_sv_setpvf_mg(pTHX_ SV *const sv, const char *const pat, 
 #define PERL_ARGS_ASSERT_SV_SETPVF_MG	\
 	assert(sv); assert(pat)
 
+#ifndef NO_MATHOMS
 PERL_CALLCONV void	Perl_sv_setpviv(pTHX_ SV *const sv, const IV num);
 #define PERL_ARGS_ASSERT_SV_SETPVIV	\
 	assert(sv)
+#endif
+#ifndef NO_MATHOMS
 PERL_CALLCONV void	Perl_sv_setpviv_mg(pTHX_ SV *const sv, const IV iv);
 #define PERL_ARGS_ASSERT_SV_SETPVIV_MG	\
 	assert(sv)
+#endif
 PERL_CALLCONV void	Perl_sv_setpvn(pTHX_ SV *const sv, const char *const ptr, const STRLEN len);
 #define PERL_ARGS_ASSERT_SV_SETPVN	\
 	assert(sv)

@@ -666,8 +666,12 @@
 #define sv_setpvf		Perl_sv_setpvf
 #define sv_setpvf_mg		Perl_sv_setpvf_mg
 #endif
+#ifndef NO_MATHOMS
 #define sv_setpviv(a,b)		Perl_sv_setpviv(aTHX_ a,b)
+#endif
+#ifndef NO_MATHOMS
 #define sv_setpviv_mg(a,b)	Perl_sv_setpviv_mg(aTHX_ a,b)
+#endif
 #define sv_setpvn(a,b,c)	Perl_sv_setpvn(aTHX_ a,b,c)
 #define sv_setpvn_mg(a,b,c)	Perl_sv_setpvn_mg(aTHX_ a,b,c)
 #define sv_setref_iv(a,b,c)	Perl_sv_setref_iv(aTHX_ a,b,c)
