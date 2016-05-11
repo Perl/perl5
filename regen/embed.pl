@@ -45,7 +45,7 @@ sub full_name ($$) { # Returns the function name with potentially the
     my ($func, $flags) = @_;
 
     return "S_$func" if $flags =~ /[si]/;
-    return "Perl_$func" if $flags =~ /[bp]/;
+    return "Perl_$func" if $flags =~ /p/;
     return $func;
 }
 
