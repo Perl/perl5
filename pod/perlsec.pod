@@ -573,7 +573,7 @@ misbehave on any input.
 
 =back
 
-See L<http://www.cs.rice.edu/~scrosby/hash/> for more information,
+See L<https://www.usenix.org/legacy/events/sec03/tech/full_papers/crosby/crosby.pdf> for more information,
 and any computer science textbook on algorithmic complexity.
 
 =head1 SEE ALSO
