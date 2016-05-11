@@ -2319,11 +2319,6 @@ PERL_CALLCONV STRLEN *	Perl_new_warnings_bitfield(pTHX_ STRLEN *buffer, const ch
 PERL_CALLCONV PerlIO*	Perl_nextargv(pTHX_ GV* gv, bool nomagicopen);
 #define PERL_ARGS_ASSERT_NEXTARGV	\
 	assert(gv)
-PERL_CALLCONV char*	Perl_ninstr(const char* big, const char* bigend, const char* little, const char* lend)
-			__attribute__pure__;
-#define PERL_ARGS_ASSERT_NINSTR	\
-	assert(big); assert(bigend); assert(little); assert(lend)
-
 PERL_CALLCONV_NO_RET void	Perl_noperl_die(const char* pat, ...)
 			__attribute__noreturn__
 			__attribute__format__(__printf__,1,2);
@@ -3690,6 +3685,13 @@ STATIC int	S_sv_2iuv_non_preserve(pTHX_ SV *const sv);
 #    endif
 #  endif
 #endif
+#if !(defined(HAS_MEMMEM))
+PERL_CALLCONV char*	Perl_ninstr(const char* big, const char* bigend, const char* little, const char* lend)
+			__attribute__pure__;
+#define PERL_ARGS_ASSERT_NINSTR	\
+	assert(big); assert(bigend); assert(little); assert(lend)
+
+#endif
 #if !(defined(HAS_SIGACTION) && defined(SA_SIGINFO))
 PERL_CALLCONV Signal_t	Perl_csighandler(int sig);
 PERL_CALLCONV Signal_t	Perl_sighandler(int sig);
@@ -4036,6 +4038,13 @@ PERL_CALLCONV char *	Perl__setlocale_debug_string(const int category, const char
 PERL_CALLCONV void	Perl_dump_sv_child(pTHX_ SV *sv);
 #define PERL_ARGS_ASSERT_DUMP_SV_CHILD	\
 	assert(sv)
+#endif
+#if defined(HAS_MEMMEM)
+PERL_CALLCONV char*	Perl_ninstr(const char* big, const char* bigend, const char* little, const char* lend)
+			__attribute__pure__;
+#define PERL_ARGS_ASSERT_NINSTR	\
+	assert(big); assert(bigend); assert(little); assert(lend)
+
 #endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 PERL_CALLCONV I32	Perl_do_ipcctl(pTHX_ I32 optype, SV** mark, SV** sp);

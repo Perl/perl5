@@ -1093,8 +1093,13 @@ Apd	|SV*	|vstringify	|NN SV *vs
 Apd	|int	|vcmp		|NN SV *lhv|NN SV *rhv
 : Used in pp_hot.c and pp_sys.c
 p	|PerlIO*|nextargv	|NN GV* gv|bool nomagicopen
+#ifdef HAS_MEMMEM
+AdnopP	|char*	|ninstr		|NN const char* big|NN const char* bigend \
+				|NN const char* little|NN const char* lend
+#else
 AdnpP	|char*	|ninstr		|NN const char* big|NN const char* bigend \
 				|NN const char* little|NN const char* lend
+#endif
 Apd	|void	|op_free	|NULLOK OP* arg
 Mp	|OP*	|op_unscope	|NULLOK OP* o
 #ifdef PERL_CORE

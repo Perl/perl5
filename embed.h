@@ -420,7 +420,6 @@
 #define new_numeric(a)		Perl_new_numeric(aTHX_ a)
 #define new_stackinfo(a,b)	Perl_new_stackinfo(aTHX_ a,b)
 #define new_version(a)		Perl_new_version(aTHX_ a)
-#define ninstr			Perl_ninstr
 #define nothreadhook()		Perl_nothreadhook(aTHX)
 #define op_append_elem(a,b,c)	Perl_op_append_elem(aTHX_ a,b,c)
 #define op_append_list(a,b,c)	Perl_op_append_list(aTHX_ a,b,c)
@@ -760,6 +759,9 @@
 #define whichsig_pvn(a,b)	Perl_whichsig_pvn(aTHX_ a,b)
 #define whichsig_sv(a)		Perl_whichsig_sv(aTHX_ a)
 #define wrap_op_checker(a,b,c)	Perl_wrap_op_checker(aTHX_ a,b,c)
+#if !(defined(HAS_MEMMEM))
+#define ninstr			Perl_ninstr
+#endif
 #if !(defined(HAS_SIGACTION) && defined(SA_SIGINFO))
 #define csighandler		Perl_csighandler
 #endif
