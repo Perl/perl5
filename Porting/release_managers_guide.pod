@@ -374,6 +374,11 @@ at http://analysis.cpantesters.org/beforemaintrelease to see how the impending
 release is performing compared to previous releases with regard to building
 and testing CPAN modules.
 
+That page accepts a query parameter, C<pair> that takes a pair of
+colon-delimited versions to use for comparison.  For example:
+
+http://analysis.cpantesters.org/beforemaintrelease?pair=5.20.2:5.22.0%20RC1
+
 =head3 update perldelta
 
 Get perldelta in a mostly finished state.
