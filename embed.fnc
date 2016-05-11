@@ -1077,7 +1077,7 @@ Apd	|SV*	|vstringify	|NN SV *vs
 Apd	|int	|vcmp		|NN SV *lhv|NN SV *rhv
 : Used in pp_hot.c and pp_sys.c
 p	|PerlIO*|nextargv	|NN GV* gv|bool nomagicopen
-AnpP	|char*	|ninstr		|NN const char* big|NN const char* bigend \
+AdnpP	|char*	|ninstr		|NN const char* big|NN const char* bigend \
 				|NN const char* little|NN const char* lend
 Apd	|void	|op_free	|NULLOK OP* arg
 Mp	|OP*	|op_unscope	|NULLOK OP* o
@@ -1227,7 +1227,7 @@ EXp	|I32|reg_numbered_buff_length|NN REGEXP * const rx|NN const SV * const sv|co
 EXp	|SV*|reg_qr_package|NN REGEXP * const rx
 
 Anp	|void	|repeatcpy	|NN char* to|NN const char* from|I32 len|IV count
-AnpP	|char*	|rninstr	|NN const char* big|NN const char* bigend \
+AdnpP	|char*	|rninstr	|NN const char* big|NN const char* bigend \
 				|NN const char* little|NN const char* lend
 Ap	|Sighandler_t|rsignal	|int i|Sighandler_t t
 : Used in pp_sys.c
