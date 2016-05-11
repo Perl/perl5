@@ -27,20 +27,32 @@
 :
 :         proto.h: add __attribute__malloc__
 :
-:   b  Binary backward compatibility; has an exported Perl_ implementation
-:      but function is also normally a macro (i.e. has the "m" flag as well).
-:      Backcompat functions ("b") can be anywhere, but if they are also
-:      macros ("m") then they have no proto.h entries so must either be in
-:      mathoms.c to get marked EXTERN_C (and skipped for -DNO_MATHOMS builds)
-:      or else will require special attention to ensure they are marked
-:      EXTERN_C (and then won't be automatically skipped for -DNO_MATHOMS
-:      builds).
+:   b  Binary backward compatibility.  This is used for functions which are
+:      kept only to not have to change legacy applications that call them.  If
+:      there are no such legacy applications in a Perl installation for all
+:      functions flagged with this, the installation can run Configure with the
+:      -Accflags='-DNO_MATHOMS' parameter to not even compile them.  If there
+:      is a macro form of this function that provides equivalent functionality
+:      (using a different implementation), also specify the 'm' flag.  The 'b'
+:      functions are normally moved to mathoms.c, but if circumstances dictate
+:      otherwise, they can be anywhere, provided the whole function is wrapped
+:      with
+:       #ifndef NO_MATHOMS
+:       ...
+:       #endif
 :
 :      Note that this flag no longer automatically adds a 'Perl_' prefix to the
 :      name.  Additionally specify 'p' to do that.
 :
+:      For functions, like wrappers, whose macro shortcut doesn't call the
+:      function, but which, for whatever reason, aren't considered legacy-only,
+:      use the 'o' flag
+:
+:      This flag effectively causes nothing to happen if the perl interpreter
+:      is compiled with -DNO_MATHOMS; otherwise these happen:
 :         add entry to the list of exported symbols;
-:         don't define PERL_ARGS_ASSERT_FOO
+:         create PERL_ARGS_ASSERT_FOO;
+:	  add embed.h entry (unless overridden by the 'm' flag)
 :
 :   D  Function is deprecated:
 :
@@ -79,7 +91,8 @@
 :
 :   m  Implemented as a macro:
 :
-:         suppress proto.h entry (actually, not suppressed, but commented out)
+:         suppress proto.h entry unless 'b' also specified (actually, not
+:		suppressed, but commented out)
 :         suppress entry in the list of exported symbols
 :         suppress embed.h entry
 :
@@ -965,8 +978,8 @@ pX	|I32	|my_stat_flags	|NULLOK const U32 flags
 Afp	|char *	|my_strftime	|NN const char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
 : Used in pp_ctl.c
 p	|void	|my_unexec
-ADMnoPR	|UV	|NATIVE_TO_NEED	|const UV enc|const UV ch
-ADMnoPR	|UV	|ASCII_TO_NEED	|const UV enc|const UV ch
+AbDMnPR	|UV	|NATIVE_TO_NEED	|const UV enc|const UV ch
+AbDMnPR	|UV	|ASCII_TO_NEED	|const UV enc|const UV ch
 Apa	|OP*	|newANONLIST	|NULLOK OP* o
 Apa	|OP*	|newANONHASH	|NULLOK OP* o
 Ap	|OP*	|newANONSUB	|I32 floor|NULLOK OP* proto|NULLOK OP* block
@@ -1880,11 +1893,7 @@ Aop	|void	|custom_op_register	|NN Perl_ppaddr_t ppaddr \
 Adp	|void	|sv_nosharing	|NULLOK SV *sv
 Adpbm	|void	|sv_nolocking	|NULLOK SV *sv
 Adp	|bool	|sv_destroyable	|NULLOK SV *sv
-#ifdef NO_MATHOMS
-Adpbm	|void	|sv_nounlocking	|NULLOK SV *sv
-#else
 Adpb	|void	|sv_nounlocking	|NULLOK SV *sv
-#endif
 Adp	|int	|nothreadhook
 p	|void	|init_constants
 

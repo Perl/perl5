@@ -81,8 +81,8 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	my @nonnull;
 	my $has_context = ( $flags !~ /n/ );
 	my $never_returns = ( $flags =~ /r/ );
-	my $commented_out = ( $flags =~ /m/ );
 	my $binarycompat = ( $flags =~ /b/ );
+	my $commented_out = ( ! $binarycompat && $flags =~ /m/ );
 	my $is_malloc = ( $flags =~ /a/ );
 	my $can_ignore = ( $flags !~ /R/ ) && !$is_malloc;
 	my @names_of_nn;
@@ -125,7 +125,9 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	    }
 	}
 	$func = full_name($plain_func, $flags);
-	$ret = "$retval\t$func(";
+	$ret = "";
+	$ret .= "#ifndef NO_MATHOMS\n" if $binarycompat;
+	$ret .= "$retval\t$func(";
 	if ( $has_context ) {
 	    $ret .= @args ? "pTHX_ " : "pTHX";
 	}
@@ -219,6 +221,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	    $ret .= "\n#define PERL_ARGS_ASSERT_\U$plain_func\E\t\\\n\t"
 		. join '; ', map "assert($_)", @names_of_nn;
 	}
+	$ret .= "\n#endif" if $binarycompat;
 	$ret .= @attrs ? "\n\n" : "\n";
 
 	print $pr $ret;
@@ -324,6 +327,7 @@ sub embed_h {
 		$ret .= "_ " if $alist;
 		$ret .= $alist . ")\n";
 	    }
+	    $ret = "#ifndef NO_MATHOMS\n$ret#endif\n" if $flags =~ /b/;
 	}
 	$lines .= $ret;
     }

@@ -442,7 +442,9 @@
 #define pad_add_name_pvn(a,b,c,d,e)	Perl_pad_add_name_pvn(aTHX_ a,b,c,d,e)
 #define pad_add_name_sv(a,b,c,d)	Perl_pad_add_name_sv(aTHX_ a,b,c,d)
 #define pad_alloc(a,b)		Perl_pad_alloc(aTHX_ a,b)
+#ifndef NO_MATHOMS
 #define pad_compname_type(a)	Perl_pad_compname_type(aTHX_ a)
+#endif
 #define pad_findmy_pv(a,b)	Perl_pad_findmy_pv(aTHX_ a,b)
 #define pad_findmy_pvn(a,b,c)	Perl_pad_findmy_pvn(aTHX_ a,b,c)
 #define pad_findmy_sv(a,b)	Perl_pad_findmy_sv(aTHX_ a,b)
@@ -631,6 +633,9 @@
 #define sv_newmortal()		Perl_sv_newmortal(aTHX)
 #define sv_newref(a)		Perl_sv_newref(aTHX_ a)
 #define sv_nosharing(a)		Perl_sv_nosharing(aTHX_ a)
+#ifndef NO_MATHOMS
+#define sv_nounlocking(a)	Perl_sv_nounlocking(aTHX_ a)
+#endif
 #define sv_nv(a)		Perl_sv_nv(aTHX_ a)
 #define sv_peek(a)		Perl_sv_peek(aTHX_ a)
 #define sv_pos_b2u(a,b)		Perl_sv_pos_b2u(aTHX_ a,b)
@@ -753,9 +758,6 @@
 #define wrap_op_checker(a,b,c)	Perl_wrap_op_checker(aTHX_ a,b,c)
 #if !(defined(HAS_SIGACTION) && defined(SA_SIGINFO))
 #define csighandler		Perl_csighandler
-#endif
-#if !(defined(NO_MATHOMS))
-#define sv_nounlocking(a)	Perl_sv_nounlocking(aTHX_ a)
 #endif
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
 #define my_bzero		Perl_my_bzero
