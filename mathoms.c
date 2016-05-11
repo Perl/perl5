@@ -1752,22 +1752,15 @@ Perl_pad_compname_type(pTHX_ const PADOFFSET po)
     return PAD_COMPNAME_TYPE(po);
 }
 
-/* now a macro */
 /* return ptr to little string in big string, NULL if not found */
-/* This routine was donated by Corey Satten. */
+/* The original version of this routine was donated by Corey Satten. */
 
 char *
 Perl_instr(const char *big, const char *little)
 {
-    /* Porting tests require this macro to be used even though it doesn't exist
-     * (except for the commented-out version in proto.h).  So provide a commented-out
-     * "use" of the prototype and supply a real version of what it expanded to.
     PERL_ARGS_ASSERT_INSTR;
-    */
-    assert(big);
-    assert(little);
 
-    return strstr((char*)big, (char*)little);
+    return instr((char *) big, (char *) little);
 }
 
 #endif /* NO_MATHOMS */
