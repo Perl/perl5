@@ -1951,7 +1951,7 @@ Not implemented.  Use method C<IO::File::new_tmpfile()> instead, or see L<File::
 
 For security reasons, which are probably detailed in your system's
 documentation for the C library C<tmpnam()> function, this interface
-is no more available; instead use L<File::Temp>.
+is no longer available; instead use L<File::Temp>.
 
 =item C<tolower>
 
