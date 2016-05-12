@@ -303,7 +303,9 @@ sub embed_h {
 	unless ($flags =~ /[om]/) {
 	    my $args = scalar @args;
 	    if ($flags =~ /n/) {
-		$ret = hide($func, full_name($func, $flags));
+		my $full_name = full_name($func, $flags);
+		next if $full_name eq $func;	# Don't output a no-op.
+		$ret = hide($func, $full_name);
 	    }
 	    elsif ($args and $args[$args-1] =~ /\.\.\./) {
 		if ($flags =~ /p/) {
