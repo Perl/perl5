@@ -432,6 +432,11 @@ my %other_export_tags = ( # cf. exports policy below
         remainder remquo rint round scalbn signbit tgamma trunc y0 y1 yn
     )],
 
+    netdb_h => [qw(EAI_AGAIN    EAI_BADFLAGS EAI_FAIL
+                   EAI_FAMILY   EAI_MEMORY   EAI_NONAME
+                   EAI_OVERFLOW EAI_SERVICE  EAI_SOCKTYPE
+                   EAI_SYSTEM)],
+
     stdlib_h_c99 => [ @{$default_export_tags{stdlib_h}}, 'strtold' ],
 
     nan_payload => [ qw(getpayload setpayload setpayloadsig issignaling) ],

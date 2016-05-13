@@ -130,6 +130,11 @@ my %expect = (
         # it is OK to add new constants, but new functions may only go in EXPORT_OK
     ],
     EXPORT_OK => [sort
+        # this stuff was added in 5.11, but not exported until 5.25
+        qw(
+            EAI_AGAIN EAI_BADFLAGS EAI_FAIL EAI_FAMILY EAI_MEMORY
+            EAI_NONAME EAI_OVERFLOW EAI_SERVICE EAI_SOCKTYPE EAI_SYSTEM
+        ),
         # this stuff was in 5.20.2
         qw(
             abs alarm atan2 chdir chmod chown close closedir cos exit
