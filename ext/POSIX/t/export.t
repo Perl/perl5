@@ -141,6 +141,9 @@ my %expect = (
             waitpid write
         ),
         # this stuff was added in 5.21
+        # (though an oversight meant that lround wasn't listed here
+        # initially; it was added to @EXPORT_OK in 5.23, and to the
+        # :math_h_c99 tag in 5.25)
         qw(
             FE_DOWNWARD FE_TONEAREST FE_TOWARDZERO FE_UPWARD
             fegetround fesetround
@@ -148,7 +151,7 @@ my %expect = (
             acosh asinh atanh cbrt copysign erf erfc exp2 expm1 fdim
             fma fmax fmin fpclassify hypot ilogb isfinite isgreater
             isgreaterequal isinf isless islessequal islessgreater isnan
-            isnormal isunordered j0 j1 jn lgamma log1p log2 logb lrint nan
+            isnormal isunordered j0 j1 jn lgamma log1p log2 logb lrint lround nan
             nearbyint nextafter nexttoward remainder remquo rint round scalbn
             signbit tgamma trunc y0 y1 yn strtold
         ),
@@ -166,10 +169,6 @@ my %expect = (
             POLL_IN POLL_OUT POLL_MSG POLL_ERR POLL_PRI POLL_HUP
             SI_USER SI_QUEUE SI_TIMER SI_ASYNCIO SI_MESGQ
         ),
-        # this was implemented in 5.21, but not exported; it was added to
-        # @EXPORT_OK late in 5.23, and will be added to :math_h_c99 tag early
-        # in 5.25
-        qw( lround ),
     ],
 );
 

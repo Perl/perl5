@@ -4,7 +4,6 @@ use strict;
 
 use POSIX ':math_h_c99';
 use POSIX ':nan_payload';
-use POSIX 'lround';
 use Test::More;
 
 use Config;
