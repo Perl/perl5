@@ -900,12 +900,12 @@ sub disp_str ($) {
 
 sub report_result {
     my ($Locale, $i, $pass_fail, $message) = @_;
-    $message //= "";
-    $message = "  ($message)" if $message;
     if ($pass_fail) {
 	push @{$Okay{$i}}, $Locale;
     }
     else {
+        $message //= "";
+        $message = "  ($message)" if $message;
 	$Known_bad_locale{$i}{$Locale} = 1 if exists $known_bad_locales{$^O}
                                          && $Locale =~ $known_bad_locales{$^O};
 	$Problem{$i}{$Locale} = 1;
