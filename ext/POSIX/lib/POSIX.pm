@@ -439,6 +439,10 @@ my %other_export_tags = ( # cf. exports policy below
 
     stdlib_h_c99 => [ @{$default_export_tags{stdlib_h}}, 'strtold' ],
 
+    sys_socket_h => [qw(
+        MSG_CTRUNC MSG_DONTROUTE MSG_EOR MSG_OOB MSG_PEEK MSG_TRUNC MSG_WAITALL
+    )],
+
     nan_payload => [ qw(getpayload setpayload setpayloadsig issignaling) ],
 
     signal_h_si_code => [qw(

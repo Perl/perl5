@@ -130,6 +130,11 @@ my %expect = (
         # it is OK to add new constants, but new functions may only go in EXPORT_OK
     ],
     EXPORT_OK => [sort
+        # this stuff was added in 5.9, but not exported until 5.25
+        qw(
+            MSG_CTRUNC MSG_DONTROUTE MSG_EOR MSG_OOB MSG_PEEK
+            MSG_TRUNC MSG_WAITALL
+        ),
         # this stuff was added in 5.11, but not exported until 5.25
         qw(
             EAI_AGAIN EAI_BADFLAGS EAI_FAIL EAI_FAMILY EAI_MEMORY
