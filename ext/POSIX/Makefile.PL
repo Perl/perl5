@@ -48,7 +48,7 @@ my @names =
       EUSERS EWOULDBLOCK EXDEV FILENAME_MAX F_OK HUPCL ICANON ICRNL IEXTEN
       IGNBRK IGNCR IGNPAR INLCR INPCK INT_MAX INT_MIN ISIG ISTRIP IXOFF IXON
       LC_ALL LC_COLLATE LC_CTYPE LC_MESSAGES LC_MONETARY LC_NUMERIC LC_TIME
-      LINK_MAX LONG_MAX LONG_MIN L_ctermid L_cuserid L_tmpnam MAX_CANON
+      LINK_MAX LONG_MAX LONG_MIN L_ctermid L_cuserid MAX_CANON
       MAX_INPUT MB_LEN_MAX MSG_CTRUNC MSG_DONTROUTE MSG_EOR MSG_OOB MSG_PEEK
       MSG_TRUNC MSG_WAITALL NAME_MAX NCCS NGROUPS_MAX NOFLSH OPEN_MAX OPOST
       PARENB PARMRK PARODD PATH_MAX PIPE_BUF RAND_MAX R_OK SCHAR_MAX
@@ -74,8 +74,6 @@ my @names =
    {name=>"SIG_DFL", value=>"PTR2IV(SIG_DFL)", not_constant=>1},
    {name=>"SIG_ERR", value=>"PTR2IV(SIG_ERR)", not_constant=>1},
    {name=>"SIG_IGN", value=>"PTR2IV(SIG_IGN)", not_constant=>1},
-   # L_tmpnam[e] was a typo--retained for compatibility
-   {name=>"L_tmpname", value=>"L_tmpnam"},
    {name=>"NULL", value=>"0"},
    {name=>"_POSIX_JOB_CONTROL", type=>"YES", default=>["IV", "0"]},
    {name=>"_POSIX_SAVED_IDS", type=>"YES", default=>["IV", "0"]},

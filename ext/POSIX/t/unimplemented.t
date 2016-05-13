@@ -88,6 +88,7 @@ foreach ([atexit => 'C-specific: use END {} instead'],
 	 [vfprintf => 'C-specific, stopped'],
 	 [vprintf => 'C-specific, stopped'],
 	 [vsprintf => 'C-specific, stopped'],
+	 [L_tmpnam => 'C-specific, stopped'],
 	) {
     my ($func, $action) = @$_;
     my $expect = ref $action

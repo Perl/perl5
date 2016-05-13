@@ -49,7 +49,7 @@ my %expect = (
             LC_CTYPE LC_MESSAGES LC_MONETARY LC_NUMERIC LC_TIME LDBL_DIG
             LDBL_EPSILON LDBL_MANT_DIG LDBL_MAX LDBL_MAX_10_EXP
             LDBL_MAX_EXP LDBL_MIN LDBL_MIN_10_EXP LDBL_MIN_EXP LINK_MAX
-            LONG_MAX LONG_MIN L_ctermid L_cuserid L_tmpname MAX_CANON
+            LONG_MAX LONG_MIN L_ctermid L_cuserid MAX_CANON
             MAX_INPUT MB_CUR_MAX MB_LEN_MAX NAME_MAX NCCS NDEBUG
             NGROUPS_MAX NOFLSH NULL OPEN_MAX OPOST O_ACCMODE O_APPEND
             O_CREAT O_EXCL O_NOCTTY O_NONBLOCK O_RDONLY O_RDWR O_TRUNC
@@ -148,7 +148,7 @@ my %expect = (
             localtime log mkdir nice open opendir pipe printf rand
             read readdir rename rewinddir rmdir sin sleep sprintf sqrt
             srand stat system time times umask unlink utime wait
-            waitpid write
+            waitpid write L_tmpnam
         ),
         # this stuff was added in 5.21
         # (though an oversight meant that lround wasn't listed here

@@ -2593,7 +2593,7 @@ C<EXIT_FAILURE> C<EXIT_SUCCESS> C<MB_CUR_MAX> C<RAND_MAX>
 
 =item Constants
 
-C<BUFSIZ> C<EOF> C<FILENAME_MAX> C<L_ctermid> C<L_cuserid> C<L_tmpname> C<TMP_MAX>
+C<BUFSIZ> C<EOF> C<FILENAME_MAX> C<L_ctermid> C<L_cuserid> C<TMP_MAX>
 
 =back
 

@@ -4,7 +4,7 @@ use warnings;
 
 our ($AUTOLOAD, %SIGRT);
 
-our $VERSION = '1.68';
+our $VERSION = '1.69';
 
 require XSLoader;
 
@@ -24,6 +24,7 @@ sub usage { croak "Usage: POSIX::$_[0]" }
 XSLoader::load();
 
 my %replacement = (
+    L_tmpnam    => undef,
     atexit      => 'END {}',
     atof        => undef,
     atoi        => undef,
@@ -337,7 +338,7 @@ my %default_export_tags = ( # cf. exports policy below
     stddef_h =>	[qw(NULL offsetof)],
 
     stdio_h =>	[qw(BUFSIZ EOF FILENAME_MAX L_ctermid L_cuserid
-		L_tmpname NULL SEEK_CUR SEEK_END SEEK_SET
+		NULL SEEK_CUR SEEK_END SEEK_SET
 		STREAM_MAX TMP_MAX stderr stdin stdout
 		clearerr fclose fdopen feof ferror fflush fgetc fgetpos
 		fgets fopen fprintf fputc fputs fread freopen
