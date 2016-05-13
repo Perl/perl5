@@ -1436,6 +1436,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
     STRLEN s_strlen = strlen(input_string);
     char *xbuf = NULL;
     STRLEN xAlloc;          /* xalloc is a reserved word in VC */
+    STRLEN length_in_chars;
     bool first_time = TRUE; /* Cleared after first loop iteration */
 
     PERL_ARGS_ASSERT__MEM_COLLXFRM;
@@ -1735,14 +1736,16 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
         }
     }
 
+    length_in_chars = (utf8)
+                      ? utf8_length((U8 *) s, (U8 *) s + len)
+                      : len;
+
     /* The first element in the output is the collation id, used by
      * sv_collxfrm(); then comes the space for the transformed string.  The
      * equation should give us a good estimate as to how much is needed */
     xAlloc = COLLXFRM_HDR_LEN
            + PL_collxfrm_base
-           + (PL_collxfrm_mult * ((utf8)
-                                 ? utf8_length((U8 *) s, (U8 *) s + len)
-                                 : len));
+           + (PL_collxfrm_mult * length_in_chars);
     Newx(xbuf, xAlloc, char);
     if (UNLIKELY(! xbuf))
 	goto bad;
@@ -1759,6 +1762,57 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
          * was available, it means it successfully transformed the whole
          * string. */
         if (*xlen < xAlloc - COLLXFRM_HDR_LEN) {
+
+            /* If the first try didn't get it, it means our prediction was low.
+             * Modify the coefficients so that we predict a larger value in any
+             * future transformations */
+            if (! first_time) {
+                STRLEN needed = *xlen + 1;   /* +1 For trailing NUL */
+                STRLEN computed_guess = PL_collxfrm_base
+                                      + (PL_collxfrm_mult * length_in_chars);
+                const STRLEN new_m = needed / length_in_chars;
+
+                DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                    "%s: %d: initial size of %"UVuf" bytes for a length "
+                    "%"UVuf" string was insufficient, %"UVuf" needed\n",
+                    __FILE__, __LINE__,
+                    (UV) computed_guess, (UV) length_in_chars, (UV) needed));
+
+                /* If slope increased, use it, but discard this result for
+                 * length 1 strings, as we can't be sure that it's a real slope
+                 * change */
+                if (length_in_chars > 1 && new_m  > PL_collxfrm_mult) {
+#ifdef DEBUGGING
+                    STRLEN old_m = PL_collxfrm_mult;
+                    STRLEN old_b = PL_collxfrm_base;
+#endif
+                    PL_collxfrm_mult = new_m;
+                    PL_collxfrm_base = 1;   /* +1 For trailing NUL */
+                    computed_guess = PL_collxfrm_base
+                                    + (PL_collxfrm_mult * length_in_chars);
+                    if (computed_guess < needed) {
+                        PL_collxfrm_base += needed - computed_guess;
+                    }
+
+                    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                        "%s: %d: slope is now %"UVuf"; was %"UVuf", base "
+                        "is now %"UVuf"; was %"UVuf"\n",
+                        __FILE__, __LINE__,
+                        (UV) PL_collxfrm_mult, (UV) old_m,
+                        (UV) PL_collxfrm_base, (UV) old_b));
+                }
+                else {  /* Slope didn't change, but 'b' did */
+                    const STRLEN new_b = needed
+                                        - computed_guess
+                                        + PL_collxfrm_base;
+                    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                        "%s: %d: base is now %"UVuf"; was %"UVuf"\n",
+                        __FILE__, __LINE__,
+                        (UV) new_b, (UV) PL_collxfrm_base));
+                    PL_collxfrm_base = new_b;
+                }
+            }
+
             break;
         }
 
