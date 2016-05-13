@@ -437,21 +437,6 @@ unless ($define{'USE_DTRACE'}) {
                 );
 }
 
-if ($define{'NO_MATHOMS'}) {
-    # win32 builds happen in the win32/ subdirectory, but vms builds happen
-    # at the top level, so we need to look in two candidate locations for
-    # the mathoms.c file.
-    my ($file) = grep { -f } qw( mathoms.c ../mathoms.c )
-        or die "No mathoms.c file found in . or ..\n";
-    open my $mathoms, '<', $file
-        or die "Cannot open $file: $!\n";
-    while (<$mathoms>) {
-        ++$skip{$1} if /\A ( NATIVE_TO_NEED
-                           | ASCII_TO_NEED
-                           | Perl_\w+ ) \s* \( /axms;
-    }
-}
-
 unless ($define{'PERL_NEED_APPCTX'}) {
     ++$skip{PL_appctx};
 }
@@ -692,7 +677,9 @@ unless ($define{'USE_QUADMATH'}) {
     foreach (@$embed) {
 	my ($flags, $retval, $func, @args) = @$_;
 	next unless $func;
-	if ($flags =~ /[AX]/ && $flags !~ /[xmi]/ || $flags =~ /b/) {
+	if (   ($flags =~ /[AX]/ && $flags !~ /[xmi]/)
+            || ($flags =~ /b/ && ! $define{'NO_MATHOMS'}))
+        {
 	    # public API, so export
 
 	    # If a function is defined twice, for example before and after
@@ -701,7 +688,7 @@ unless ($define{'USE_QUADMATH'}) {
 	    # mean "don't export"
 	    next if $seen{$func}++;
 	    # Should we also skip adding the Perl_ prefix if $flags =~ /o/ ?
-	    $func = "Perl_$func" if ($flags =~ /[pbX]/ && $func !~ /^Perl_/); 
+	    $func = "Perl_$func" if ($flags =~ /[pX]/ && $func !~ /^Perl_/);
 	    ++$export{$func} unless exists $skip{$func};
 	}
     }

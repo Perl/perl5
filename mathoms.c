@@ -51,65 +51,7 @@ C<-Accflags='-DNO_MATHOMS'>
  */
 #else
 
-/* Not all of these have prototypes elsewhere, so do this to get
- * non-mangled names.
- */
-START_EXTERN_C
-
-PERL_CALLCONV OP * Perl_ref(pTHX_ OP *o, I32 type);
-PERL_CALLCONV void Perl_sv_unref(pTHX_ SV *sv);
-PERL_CALLCONV void Perl_sv_taint(pTHX_ SV *sv);
-PERL_CALLCONV IV Perl_sv_2iv(pTHX_ SV *sv);
-PERL_CALLCONV UV Perl_sv_2uv(pTHX_ SV *sv);
-PERL_CALLCONV NV Perl_sv_2nv(pTHX_ SV *sv);
-PERL_CALLCONV char * Perl_sv_2pv(pTHX_ SV *sv, STRLEN *lp);
-PERL_CALLCONV char * Perl_sv_2pv_nolen(pTHX_ SV *sv);
-PERL_CALLCONV char * Perl_sv_2pvbyte_nolen(pTHX_ SV *sv);
-PERL_CALLCONV char * Perl_sv_2pvutf8_nolen(pTHX_ SV *sv);
-PERL_CALLCONV void Perl_sv_force_normal(pTHX_ SV *sv);
-PERL_CALLCONV void Perl_sv_setsv(pTHX_ SV *dstr, SV *sstr);
-PERL_CALLCONV void Perl_sv_catpvn(pTHX_ SV *dsv, const char* sstr, STRLEN slen);
-PERL_CALLCONV void Perl_sv_catpvn_mg(pTHX_ SV *sv, const char *ptr, STRLEN len);
-PERL_CALLCONV void Perl_sv_catsv(pTHX_ SV *dstr, SV *sstr);
-PERL_CALLCONV void Perl_sv_catsv_mg(pTHX_ SV *dsv, SV *ssv);
-PERL_CALLCONV char * Perl_sv_pv(pTHX_ SV *sv);
-PERL_CALLCONV char * Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp);
-PERL_CALLCONV char * Perl_sv_pvbyte(pTHX_ SV *sv);
-PERL_CALLCONV char * Perl_sv_pvutf8(pTHX_ SV *sv);
-PERL_CALLCONV STRLEN Perl_sv_utf8_upgrade(pTHX_ SV *sv);
-PERL_CALLCONV NV Perl_huge(void);
-PERL_CALLCONV void Perl_gv_fullname3(pTHX_ SV *sv, const GV *gv, const char *prefix);
-PERL_CALLCONV void Perl_gv_efullname3(pTHX_ SV *sv, const GV *gv, const char *prefix);
-PERL_CALLCONV GV * Perl_gv_fetchmethod(pTHX_ HV *stash, const char *name);
-PERL_CALLCONV HE * Perl_hv_iternext(pTHX_ HV *hv);
-PERL_CALLCONV void Perl_hv_magic(pTHX_ HV *hv, GV *gv, int how);
-PERL_CALLCONV bool Perl_do_open(pTHX_ GV *gv, const char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp);
-PERL_CALLCONV bool Perl_do_aexec(pTHX_ SV *really, SV **mark, SV **sp);
-PERL_CALLCONV U8 * Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv);
-PERL_CALLCONV bool Perl_is_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep);
-PERL_CALLCONV void Perl_sv_nolocking(pTHX_ SV *sv);
-PERL_CALLCONV void Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len);
-PERL_CALLCONV void Perl_sv_usepvn(pTHX_ SV *sv, char *ptr, STRLEN len);
-PERL_CALLCONV int Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...);
-PERL_CALLCONV int Perl_printf_nocontext(const char *format, ...);
-PERL_CALLCONV int Perl_magic_setglob(pTHX_ SV* sv, MAGIC* mg);
-PERL_CALLCONV AV * Perl_newAV(pTHX);
-PERL_CALLCONV HV * Perl_newHV(pTHX);
-PERL_CALLCONV IO * Perl_newIO(pTHX);
-PERL_CALLCONV I32 Perl_my_stat(pTHX);
-PERL_CALLCONV I32 Perl_my_lstat(pTHX);
-PERL_CALLCONV I32 Perl_sv_eq(pTHX_ SV *sv1, SV *sv2);
-PERL_CALLCONV char * Perl_sv_collxfrm(pTHX_ SV *const sv, STRLEN *const nxp);
-PERL_CALLCONV bool Perl_sv_2bool(pTHX_ SV *const sv);
-PERL_CALLCONV CV * Perl_newSUB(pTHX_ I32 floor, OP* o, OP* proto, OP* block);
-PERL_CALLCONV UV Perl_to_utf8_lower(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp);
-PERL_CALLCONV UV Perl_to_utf8_title(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp);
-PERL_CALLCONV UV Perl_to_utf8_upper(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp);
-PERL_CALLCONV UV Perl_to_utf8_fold(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp);
-PERL_CALLCONV SV *Perl_sv_mortalcopy(pTHX_ SV *const oldstr);
-PERL_CALLCONV char*	Perl_instr(const char* big, const char* little)
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+/* All functions in this file should have an entry with the 'b' flag in embed.fnc */
 
 /* ref() is now a macro using Perl_doref;
  * this version provided for binary compatibility only.
@@ -1810,25 +1752,16 @@ Perl_pad_compname_type(pTHX_ const PADOFFSET po)
     return PAD_COMPNAME_TYPE(po);
 }
 
-/* now a macro */
 /* return ptr to little string in big string, NULL if not found */
-/* This routine was donated by Corey Satten. */
+/* The original version of this routine was donated by Corey Satten. */
 
 char *
 Perl_instr(const char *big, const char *little)
 {
-    /* Porting tests require this macro to be used even though it doesn't exist
-     * (except for the commented-out version in proto.h).  So provide a commented-out
-     * "use" of the prototype and supply a real version of what it expanded to.
     PERL_ARGS_ASSERT_INSTR;
-    */
-    assert(big);
-    assert(little);
 
-    return strstr((char*)big, (char*)little);
+    return instr((char *) big, (char *) little);
 }
-
-END_EXTERN_C
 
 #endif /* NO_MATHOMS */
 
