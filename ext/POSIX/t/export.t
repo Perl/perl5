@@ -182,11 +182,31 @@ my %expect = (
     ],
 );
 
-plan (tests => 2 * keys %expect);
+plan (tests => 2 * keys(%expect) + keys(%POSIX::));
 
 while (my ($var, $expect) = each %expect) {
     my $have = *{$POSIX::{$var}}{ARRAY};
     cmp_ok(@$have, '==', @$expect,
 	   "Correct number of entries for \@POSIX::$var");
     is_deeply([sort @$have], $expect, "Correct entries for \@POSIX::$var");
+}
+
+my %no_export_needed = map +($_ => 1),
+    qw(AUTOLOAD bootstrap constant croak import load_imports
+       unimplemented_message usage);
+
+my %exported = map +($_ => 1),
+    (@POSIX::EXPORT, @POSIX::EXPORT_OK, map @$_, values %POSIX::EXPORT_TAGS);
+
+for my $name (sort keys %POSIX::) {
+    my $code = do { no strict 'refs'; \&{"POSIX::$name"} };
+    if (!defined &$code) {
+        pass("$name need not be exported as it does not name a subroutine");
+    }
+    elsif ($no_export_needed{$name}) {
+        pass("$name need not be exported as it is part of the internals");
+    }
+    else {
+        ok($exported{$name}, "subroutine POSIX::$name is exported somehow");
+    }
 }
