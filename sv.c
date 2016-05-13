@@ -10525,7 +10525,8 @@ Perl_sv_tainted(pTHX_ SV *const sv)
     return FALSE;
 }
 
-#ifndef NO_MATHOMS
+#ifndef NO_MATHOMS  /* Can't move these to mathoms.c because call uiv_2buf(),
+                       private to this file */
 
 /*
 =for apidoc sv_setpviv
