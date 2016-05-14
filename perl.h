@@ -2666,6 +2666,11 @@ typedef AV PAD;
 typedef struct padnamelist PADNAMELIST;
 typedef struct padname PADNAME;
 
+/* enable PERL_OP_PARENT by default */
+#if !defined(PERL_OP_PARENT) && !defined(PERL_NO_OP_PARENT)
+#  define PERL_OP_PARENT
+#endif
+
 /* enable PERL_COPY_ON_WRITE by default */
 #if !defined(PERL_COPY_ON_WRITE) && !defined(PERL_NO_COW)
 #  define PERL_COPY_ON_WRITE
