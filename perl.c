@@ -1773,6 +1773,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef PERL_MEM_LOG_NOIMPL
 			     " PERL_MEM_LOG_NOIMPL"
 #  endif
+#  ifdef PERL_OP_PARENT
+			     " PERL_OP_PARENT"
+#  endif
 #  ifdef PERL_PERTURB_KEYS_DETERMINISTIC
 			     " PERL_PERTURB_KEYS_DETERMINISTIC"
 #  endif
