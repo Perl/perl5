@@ -32,6 +32,11 @@ L</Selected Bug Fixes> section.
 
 [ List each security issue as a =head2 entry ]
 
+=head2 require ::Foo::Bar is now illegal.
+
+Formerly, C<require ::Foo::Bar> would try to read F</Foo/Bar.pm>. Now any
+bareword require which starts with a double colon dies instead.
+
 =head2 Unescaped literal C<"{"> characters in regular expression
 patterns are no longer permissible
 
@@ -200,7 +205,19 @@ and New Warnings
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Bareword in require contains "%s"|perldiag/"Bareword in require contains "%s"">
+
+=item *
+
+L<Bareword in require maps to empty filename|perldiag/"Bareword in require maps to empty filename">
+
+=item *
+
+L<Bareword in require maps to disallowed filename "%s"|perldiag/"Bareword in require maps to disallowed filename "%s"">
+
+=item *
+
+L<Bareword in require must not start with a double-colon: "%s"|perldiag/"Bareword in require must not start with a double-colon: "%s"">
 
 =back
 
@@ -350,7 +367,13 @@ well.
 
 =item *
 
-XXX
+Perl is now built with the C<PERL_OP_PARENT> compiler define enabled by
+default. To disable it, use the C<PERL_NO_OP_PARENT> compiler define.
+This flag alters how the C<op_sibling> field is used in C<OP> structures,
+and has been available optionally since perl 5.22.0.
+
+See L<perl5220delta/"Internal Changes"> for more details of what this
+build option does.
 
 =back
 
