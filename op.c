@@ -4342,13 +4342,21 @@ S_fold_constants(pTHX_ OP *o)
 	goto nope;		/* Don't try to run w/ errors */
 
     for (curop = LINKLIST(o); curop != o; curop = LINKLIST(curop)) {
-	const OPCODE type = curop->op_type;
-	if ((type != OP_CONST || (curop->op_private & OPpCONST_BARE)) &&
-	    type != OP_LIST &&
-	    type != OP_SCALAR &&
-	    type != OP_NULL &&
-	    type != OP_PUSHMARK)
-	{
+        switch (curop->op_type) {
+        case OP_CONST:
+            if ((curop->op_private & OPpCONST_BARE)) {
+                goto nope;
+            }
+            /* FALLTHROUGH */
+        case OP_LIST:
+        case OP_SCALAR:
+        case OP_NULL:
+        case OP_PUSHMARK:
+            /* Foldable; move to next op in list */
+            break;
+
+        default:
+            /* No other op types are considered foldable */
 	    goto nope;
 	}
     }
