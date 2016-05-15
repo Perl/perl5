@@ -1818,7 +1818,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		    HEK *const *const endp = HvAUX(sv)->xhv_name_u.xhvnameu_names
 			+ (count < 0 ? -count : count);
 		    while (hekp < endp) {
-			if (HEK_LEN(*hekp)) {
+			if (*hekp) {
              SV *tmp = newSVpvs_flags("", SVs_TEMP);
 			    Perl_sv_catpvf(aTHX_ names, ", \"%s\"",
                               generic_pv_escape(tmp, HEK_KEY(*hekp), HEK_LEN(*hekp), HEK_UTF8(*hekp)));
