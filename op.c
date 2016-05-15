@@ -4344,7 +4344,9 @@ S_fold_constants(pTHX_ OP *o)
     for (curop = LINKLIST(o); curop != o; curop = LINKLIST(curop)) {
         switch (curop->op_type) {
         case OP_CONST:
-            if ((curop->op_private & OPpCONST_BARE)) {
+            if (   (curop->op_private & OPpCONST_BARE)
+                && (curop->op_private & OPpCONST_STRICT)) {
+                no_bareword_allowed(curop);
                 goto nope;
             }
             /* FALLTHROUGH */

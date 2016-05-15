@@ -20,7 +20,7 @@ BEGIN {
 use warnings;
 use strict;
 
-plan 2249;
+plan 2250;
 
 use B ();
 
@@ -260,3 +260,9 @@ test_opcount(0, 'multideref exists',
                     multideref => 1,
                 },
             );
+
+test_opcount(0, 'barewords can be constant-folded',
+             sub { no strict 'subs'; FOO . BAR },
+             {
+                 concat => 0,
+             });

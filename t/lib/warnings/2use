@@ -76,7 +76,7 @@ Reversed += operator at - line 3.
 no warnings 'reserved' ;
 foo.bar;
 EXPECT
-Useless use of concatenation (.) or string in void context at - line 3.
+Useless use of a constant ("foobar") in void context at - line 3.
 ########
 
 --FILE-- abc

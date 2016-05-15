@@ -2057,3 +2057,11 @@ Array passed to stat will be coerced to a scalar (did you want stat $foo[0]?) at
 Array passed to stat will be coerced to a scalar (did you want stat $bar[0]?) at - line 9.
 Array passed to stat will be coerced to a scalar at - line 10.
 
+########
+# NAME barewords and conditionals near constant folding
+use warnings;
+my $x1 = !a || !b; # no "in conditional" warnings
+my $x2 = !A || !B; # warning-free, because upper-case won't clash
+EXPECT
+Unquoted string "a" may clash with future reserved word at - line 2.
+Unquoted string "b" may clash with future reserved word at - line 2.
