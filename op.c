@@ -14605,13 +14605,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
     case KEY_keys:    retsetpvs("\\[%@]", OP_KEYS);
     case KEY_values:  retsetpvs("\\[%@]", OP_VALUES);
     case KEY_each:    retsetpvs("\\[%@]", OP_EACH);
-    case KEY_push:    retsetpvs("\\@@", OP_PUSH);
-    case KEY_unshift: retsetpvs("\\@@", OP_UNSHIFT);
-    case KEY_pop:     retsetpvs(";\\@", OP_POP);
-    case KEY_shift:   retsetpvs(";\\@", OP_SHIFT);
     case KEY_pos:     retsetpvs(";\\[$*]", OP_POS);
-    case KEY_splice:
-	retsetpvs("\\@;$$@", OP_SPLICE);
     case KEY___FILE__: case KEY___LINE__: case KEY___PACKAGE__:
 	retsetpvs("", 0);
     case KEY_evalbytes:
