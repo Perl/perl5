@@ -6774,6 +6774,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	if ((type == OP_AND &&  SvTRUE(((SVOP*)cstop)->op_sv)) ||
 	    (type == OP_OR  && !SvTRUE(((SVOP*)cstop)->op_sv)) ||
 	    (type == OP_DOR && !SvOK(((SVOP*)cstop)->op_sv))) {
+            /* Elide the (constant) lhs, since it can't affect the outcome */
 	    *firstp = NULL;
 	    if (other->op_type == OP_CONST)
 		other->op_private |= OPpCONST_SHORTCIRCUIT;
@@ -6791,6 +6792,9 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    return other;
 	}
 	else {
+            /* Elide the rhs, since the outcome is entirely determined by
+             * the (constant) lhs */
+
 	    /* check for C<my $x if 0>, or C<my($x,$y) if 0> */
 	    const OP *o2 = other;
 	    if ( ! (o2->op_type == OP_LIST
