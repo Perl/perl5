@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 15;
+use Test::More tests => 17;
 
 use Config;
 use List::Util qw(sum);
@@ -91,9 +91,17 @@ is($v, $v1 + 42 + 2, 'bigint + builtin int');
 }
 
 SKIP: {
-  skip "IV is not at least 64bit", 1 unless $Config{ivsize} >= 8;
+  skip "IV is not at least 64bit", 3 unless $Config{ivsize} >= 8;
 
   # Sum using NV will only preserve 53 bits of integer precision
   my $t = sum(1<<60, 1);
   cmp_ok($t, '>', 1<<60, 'sum uses IV where it can');
+
+  my $min = -(1<<63);
+  my $max = (1<<63)-1;
+
+  $t = sum($min, $max);
+  is($t, -1, 'min + max');
+  $t = sum($max, $min);
+  is($t, -1, 'max + min');
 }

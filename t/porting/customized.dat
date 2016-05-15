@@ -40,12 +40,6 @@ File::Path cpan/File-Path/lib/File/Path.pm fd8ce4420a0c113d3f47dd3223859743655c1
 File::Path cpan/File-Path/t/Path_win32.t 94b9276557ce7f80b91f6fd9bfa7a0cd9bf9683e
 Math::BigRat cpan/Math-BigRat/lib/Math/BigRat.pm 6eabc68e04f67694f6fe523e64eb013fc337ca5b
 Pod::Perldoc cpan/Pod-Perldoc/lib/Pod/Perldoc.pm fe0bc906fb74b69cfd3fb289316ba669d770d465
-Scalar-List-Utils cpan/Scalar-List-Utils/lib/List/Util.pm 3b501b7332480b34929bc4df5d48581df3307267
-Scalar-List-Utils cpan/Scalar-List-Utils/lib/List/Util/XS.pm ebd169113d3df79d31ad5535dbd7a538a8c14fd2
-Scalar-List-Utils cpan/Scalar-List-Utils/lib/Scalar/Util.pm def601405bac7a4d6690b8c4207e0f05d65eb4ca
-Scalar-List-Utils cpan/Scalar-List-Utils/lib/Sub/Util.pm 1187d6cd9bccf1264bd53b3a65ea96fad7520068
-Scalar-List-Utils cpan/Scalar-List-Utils/ListUtil.xs 6128584ecb0ae69bb21b16b22daceeffc92df9d9
-Scalar-List-Utils cpan/Scalar-List-Utils/t/product.t 99bf424804f055b99ff2a18b7dcf25bb8b6d2463
 Socket cpan/Socket/Socket.pm 98e38176d745c38282907f391c077298f5a3d0ba
 Socket cpan/Socket/Socket.xs edd4fed212785f11c5c2095a75941dad27d586d9
 autodie cpan/autodie/t/mkdir.t 9e70d2282a3cc7d76a78bf8144fccba20fb37dac

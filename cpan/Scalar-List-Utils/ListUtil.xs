@@ -14,6 +14,12 @@
 #  include "multicall.h"
 #endif
 
+#if PERL_BCDVERSION < 0x5023008
+#  define UNUSED_VAR_newsp PERL_UNUSED_VAR(newsp)
+#else
+#  define UNUSED_VAR_newsp NOOP
+#endif
+
 #ifndef CvISXSUB
 #  define CvISXSUB(cv) CvXSUB(cv)
 #endif
@@ -66,6 +72,10 @@ my_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
 #  define croak_no_modify() croak("%s", PL_no_modify)
 #endif
 
+#ifndef SvNV_nomg
+#  define SvNV_nomg SvNV
+#endif
+
 enum slu_accum {
     ACC_IV,
     ACC_NV,
@@ -96,7 +106,7 @@ ALIAS:
 CODE:
 {
     int index;
-    NV retval;
+    NV retval = 0.0; /* avoid 'uninit var' warning */
     SV *retsv;
     int magic;
 
@@ -212,17 +222,72 @@ CODE:
             break;
         case ACC_IV:
             if(is_product) {
-              if(retiv == 0 ||
-                 (!SvNOK(sv) && SvIOK(sv) && (SvIV(sv) < IV_MAX / retiv))) {
-                    retiv *= SvIV(sv);
-                    break;
+                /* TODO: Consider if product() should shortcircuit the moment its
+                 *   accumulator becomes zero
+                 */
+                /* XXX testing flags before running get_magic may
+                 * cause some valid tied values to fallback to the NV path
+                 * - DAPM */
+                if(!SvNOK(sv) && SvIOK(sv)) {
+                    IV i = SvIV(sv);
+                    if (retiv == 0) /* avoid later division by zero */
+                        break;
+                    if (retiv < 0) {
+                        if (i < 0) {
+                            if (i >= IV_MAX / retiv) {
+                                retiv *= i;
+                                break;
+                            }
+                        }
+                        else {
+                            if (i <= IV_MIN / retiv) {
+                                retiv *= i;
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        if (i < 0) {
+                            if (i >= IV_MIN / retiv) {
+                                retiv *= i;
+                                break;
+                            }
+                        }
+                        else {
+                            if (i <= IV_MAX / retiv) {
+                                retiv *= i;
+                                break;
+                            }
+                        }
+                    }
                 }
                 /* else fallthrough */
             }
             else {
-                if(!SvNOK(sv) && SvIOK(sv) && (SvIV(sv) < IV_MAX - retiv)) {
-                    retiv += SvIV(sv);
-                    break;
+                /* XXX testing flags before running get_magic may
+                 * cause some valid tied values to fallback to the NV path
+                 * - DAPM */
+                if(!SvNOK(sv) && SvIOK(sv)) {
+                    IV i = SvIV(sv);
+                    if (retiv >= 0 && i >= 0) {
+                        if (retiv <= IV_MAX - i) {
+                            retiv += i;
+                            break;
+                        }
+                        /* else fallthrough */
+                    }
+                    else if (retiv < 0 && i < 0) {
+                        if (retiv >= IV_MIN - i) {
+                            retiv += i;
+                            break;
+                        }
+                        /* else fallthrough */
+                    }
+                    else {
+                        /* mixed signs can't overflow */
+                        retiv += i;
+                        break;
+                    }
                 }
                 /* else fallthrough */
             }
@@ -328,6 +393,7 @@ CODE:
         dMULTICALL;
         I32 gimme = G_SCALAR;
 
+        UNUSED_VAR_newsp;
         PUSH_MULTICALL(cv);
         for(index = 2 ; index < items ; index++) {
             GvSV(bgv) = args[index];
@@ -381,10 +447,15 @@ CODE:
     if(!CvISXSUB(cv)) {
         dMULTICALL;
         I32 gimme = G_SCALAR;
+
+        UNUSED_VAR_newsp;
         PUSH_MULTICALL(cv);
 
         for(index = 1 ; index < items ; index++) {
-            GvSV(PL_defgv) = args[index];
+            SV *def_sv = GvSV(PL_defgv) = args[index];
+#  ifdef SvTEMP_off
+            SvTEMP_off(def_sv);
+#  endif
             MULTICALL;
             if(SvTRUEx(*PL_stack_sp)) {
 #  ifdef PERL_HAS_BAD_MULTICALL_REFCOUNT
@@ -449,9 +520,13 @@ PPCODE:
         I32 gimme = G_SCALAR;
         int index;
 
+        UNUSED_VAR_newsp;
         PUSH_MULTICALL(cv);
         for(index = 1; index < items; index++) {
-            GvSV(PL_defgv) = args[index];
+            SV *def_sv = GvSV(PL_defgv) = args[index];
+#  ifdef SvTEMP_off
+            SvTEMP_off(def_sv);
+#  endif
 
             MULTICALL;
             if(SvTRUEx(*PL_stack_sp) ^ invert) {
@@ -539,7 +614,7 @@ PPCODE:
         if(SvTYPE(SvRV(pair)) != SVt_PVAV)
             croak("Not an ARRAY reference at List::Util::unpack() argument %d", i);
 
-        // TODO: assert pair is an ARRAY ref
+        /* TODO: assert pair is an ARRAY ref */
         pairav = (AV *)SvRV(pair);
 
         EXTEND(SP, 2);
@@ -629,6 +704,7 @@ PPCODE:
         dMULTICALL;
         I32 gimme = G_SCALAR;
 
+        UNUSED_VAR_newsp;
         PUSH_MULTICALL(cv);
         for(; argi < items; argi += 2) {
             SV *a = GvSV(agv) = stack[argi];
@@ -713,6 +789,7 @@ PPCODE:
         dMULTICALL;
         I32 gimme = G_SCALAR;
 
+        UNUSED_VAR_newsp;
         PUSH_MULTICALL(cv);
         for(; argi < items; argi += 2) {
             SV *a = GvSV(agv) = stack[argi];
@@ -803,13 +880,15 @@ PPCODE:
         dMULTICALL;
         I32 gimme = G_ARRAY;
 
+        UNUSED_VAR_newsp;
         PUSH_MULTICALL(cv);
         for(; argi < items; argi += 2) {
-            SV *a = GvSV(agv) = args_copy ? args_copy[argi] : stack[argi];
-            SV *b = GvSV(bgv) = argi < items-1 ? 
+            int count;
+
+            GvSV(agv) = args_copy ? args_copy[argi] : stack[argi];
+            GvSV(bgv) = argi < items-1 ?
                 (args_copy ? args_copy[argi+1] : stack[argi+1]) :
                 &PL_sv_undef;
-            int count;
 
             MULTICALL;
             count = PL_stack_sp - PL_stack_base;
@@ -847,12 +926,13 @@ PPCODE:
     {
         for(; argi < items; argi += 2) {
             dSP;
-            SV *a = GvSV(agv) = args_copy ? args_copy[argi] : ST(argi);
-            SV *b = GvSV(bgv) = argi < items-1 ? 
-                (args_copy ? args_copy[argi+1] : ST(argi+1)) :
-                &PL_sv_undef;
             int count;
             int i;
+
+            GvSV(agv) = args_copy ? args_copy[argi] : ST(argi);
+            GvSV(bgv) = argi < items-1 ?
+                (args_copy ? args_copy[argi+1] : ST(argi+1)) :
+                &PL_sv_undef;
 
             PUSHMARK(SP);
             count = call_sv((SV*)cv, G_ARRAY);
@@ -926,6 +1006,114 @@ CODE:
     XSRETURN(items);
 }
 
+
+void
+uniq(...)
+PROTOTYPE: @
+ALIAS:
+    uniqnum = 0
+    uniqstr = 1
+    uniq    = 2
+CODE:
+{
+    int retcount = 0;
+    int index;
+    SV **args = &PL_stack_base[ax];
+    HV *seen;
+
+    if(items == 0 || (items == 1 && !SvGAMAGIC(args[0]) && SvOK(args[0]))) {
+        /* Optimise for the case of the empty list or a defined nonmagic
+         * singleton. Leave a singleton magical||undef for the regular case */
+        retcount = items;
+        goto finish;
+    }
+
+    sv_2mortal((SV *)(seen = newHV()));
+
+    if(ix == 0) {
+        /* uniqnum */
+        /* A temporary buffer for number stringification */
+        SV *keysv = sv_newmortal();
+
+        for(index = 0 ; index < items ; index++) {
+            SV *arg = args[index];
+
+            if(SvGAMAGIC(arg))
+                /* clone the value so we don't invoke magic again */
+                arg = sv_mortalcopy(arg);
+
+            if(SvUOK(arg))
+                sv_setpvf(keysv, "%"UVuf, SvUV(arg));
+            else if(SvIOK(arg))
+                sv_setpvf(keysv, "%"IVdf, SvIV(arg));
+            else
+                sv_setpvf(keysv, "%"NVgf, SvNV(arg));
+#ifdef HV_FETCH_EMPTY_HE
+            HE* he = hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
+            if (HeVAL(he))
+                continue;
+
+            HeVAL(he) = &PL_sv_undef;
+#else
+            if(hv_exists(seen, SvPVX(keysv), SvCUR(keysv)))
+                continue;
+
+            hv_store(seen, SvPVX(keysv), SvCUR(keysv), &PL_sv_undef, 0);
+#endif
+
+            if(GIMME_V == G_ARRAY)
+                ST(retcount) = SvOK(arg) ? arg : sv_2mortal(newSViv(0));
+            retcount++;
+        }
+    }
+    else {
+        /* uniqstr or uniq */
+        int seen_undef = 0;
+
+        for(index = 0 ; index < items ; index++) {
+            SV *arg = args[index];
+
+            if(SvGAMAGIC(arg))
+                /* clone the value so we don't invoke magic again */
+                arg = sv_mortalcopy(arg);
+
+            if(ix == 2 && !SvOK(arg)) {
+                /* special handling of undef for uniq() */
+                if(seen_undef)
+                    continue;
+
+                seen_undef++;
+
+                if(GIMME_V == G_ARRAY)
+                    ST(retcount) = arg;
+                retcount++;
+                continue;
+            }
+#ifdef HV_FETCH_EMPTY_HE
+            HE* he = hv_common(seen, arg, NULL, 0, 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
+            if (HeVAL(he))
+                continue;
+
+            HeVAL(he) = &PL_sv_undef;
+#else
+            if (hv_exists_ent(seen, arg, 0))
+                continue;
+
+            hv_store_ent(seen, arg, &PL_sv_undef, 0);
+#endif
+
+            if(GIMME_V == G_ARRAY)
+                ST(retcount) = SvOK(arg) ? arg : sv_2mortal(newSVpvn("", 0));
+            retcount++;
+        }
+    }
+
+  finish:
+    if(GIMME_V == G_ARRAY)
+        XSRETURN(retcount);
+    else
+        ST(0) = sv_2mortal(newSViv(retcount));
+}
 
 MODULE=List::Util       PACKAGE=Scalar::Util
 

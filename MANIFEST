@@ -2215,6 +2215,7 @@ cpan/Scalar-List-Utils/t/readonly.t		Scalar::Util
 cpan/Scalar-List-Utils/t/reduce.t		List::Util
 cpan/Scalar-List-Utils/t/refaddr.t		Scalar::Util
 cpan/Scalar-List-Utils/t/reftype.t		Scalar::Util
+cpan/Scalar-List-Utils/t/rt-96343.t		Scalar::Util
 cpan/Scalar-List-Utils/t/scalarutil-proto.t
 cpan/Scalar-List-Utils/t/shuffle.t		List::Util
 cpan/Scalar-List-Utils/t/stack-corruption.t	List::Util
@@ -2222,6 +2223,7 @@ cpan/Scalar-List-Utils/t/subname.t
 cpan/Scalar-List-Utils/t/sum0.t
 cpan/Scalar-List-Utils/t/sum.t			List::Util
 cpan/Scalar-List-Utils/t/tainted.t		Scalar::Util
+cpan/Scalar-List-Utils/t/uniq.t			Scalar::Util
 cpan/Scalar-List-Utils/t/weak.t			Scalar::Util
 cpan/Socket/Makefile.PL			Socket extension makefile writer
 cpan/Socket/Socket.pm			Socket extension Perl module
