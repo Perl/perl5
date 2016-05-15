@@ -6314,7 +6314,7 @@ PP(pp_coreargs)
 		DIE(aTHX_
 		/* diag_listed_as: Type of arg %d to &CORE::%s must be %s*/
 		 "Type of arg %d to &CORE::%s must be hash reference",
-		  whicharg, OP_DESC(PL_op->op_next)
+		  whicharg, PL_op_desc[opnum]
 		);
 	    PUSHs(SvRV(*svp));
 	    break;
