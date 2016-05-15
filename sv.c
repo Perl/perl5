@@ -10757,7 +10757,7 @@ Perl_sv_catpvf(pTHX_ SV *const sv, const char *const pat, ...)
 =for apidoc sv_vcatpvf
 
 Processes its arguments like C<sv_catpvfn> called with a non-null C-style
-variable argument list, and appends the formatted
+variable argument list, and appends the formatted output
 to an SV.  Does not handle 'set' magic.  See C<L</sv_vcatpvf_mg>>.
 
 Usually used via its frontend C<sv_catpvf>.
