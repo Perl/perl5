@@ -44,6 +44,13 @@
 
 #include "reentr.h"
 
+/* If the environment says to, we can output debugging information during
+ * initialization.  This is done before option parsing, and before any thread
+ * creation, so can be a file-level static */
+#ifdef DEBUGGING
+static bool debug_initialization = FALSE;
+#endif
+
 #ifdef USE_LOCALE
 
 /*
@@ -119,13 +126,17 @@ Perl_set_numeric_radix(pTHX)
     else
 	PL_numeric_radix_sv = NULL;
 
-    DEBUG_L(PerlIO_printf(Perl_debug_log, "Locale radix is '%s', ?UTF-8=%d\n",
+#ifdef DEBUGGING
+    if (DEBUG_L_TEST || debug_initialization) {
+        PerlIO_printf(Perl_debug_log, "Locale radix is '%s', ?UTF-8=%d\n",
                                           (PL_numeric_radix_sv)
                                            ? SvPVX(PL_numeric_radix_sv)
                                            : "NULL",
                                           (PL_numeric_radix_sv)
                                            ? cBOOL(SvUTF8(PL_numeric_radix_sv))
-                                           : 0));
+                                           : 0);
+    }
+#endif
 
 # endif /* HAS_LOCALECONV */
 #endif /* USE_LOCALE_NUMERIC */
@@ -230,8 +241,12 @@ Perl_set_numeric_standard(pTHX)
     PL_numeric_standard = TRUE;
     PL_numeric_local = isNAME_C_OR_POSIX(PL_numeric_name);
     set_numeric_radix();
-    DEBUG_L(PerlIO_printf(Perl_debug_log,
-                          "Underlying LC_NUMERIC locale now is C\n"));
+#ifdef DEBUGGING
+    if (DEBUG_L_TEST || debug_initialization) {
+        PerlIO_printf(Perl_debug_log,
+                          "Underlying LC_NUMERIC locale now is C\n");
+    }
+#endif
 
 #endif /* USE_LOCALE_NUMERIC */
 }
@@ -250,9 +265,13 @@ Perl_set_numeric_local(pTHX)
     PL_numeric_standard = isNAME_C_OR_POSIX(PL_numeric_name);
     PL_numeric_local = TRUE;
     set_numeric_radix();
-    DEBUG_L(PerlIO_printf(Perl_debug_log,
+#ifdef DEBUGGING
+    if (DEBUG_L_TEST || debug_initialization) {
+        PerlIO_printf(Perl_debug_log,
                           "Underlying LC_NUMERIC locale now is %s\n",
-                          PL_numeric_name));
+                          PL_numeric_name);
+    }
+#endif
 
 #endif /* USE_LOCALE_NUMERIC */
 }
@@ -884,24 +903,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     const char * const setlocale_init = (PerlEnv_getenv("PERL_SKIP_LOCALE_INIT"))
                                         ? NULL
                                         : "";
-#ifdef DEBUGGING
-    const bool debug = (PerlEnv_getenv("PERL_DEBUG_LOCALE_INIT"))
-                       ? TRUE
-                       : FALSE;
-#   define DEBUG_LOCALE_INIT(category, locale, result)                      \
-	STMT_START {                                                        \
-		if (debug) {                                                \
-                    PerlIO_printf(Perl_debug_log,                           \
-                                  "%s:%d: %s\n",                            \
-                                  __FILE__, __LINE__,                       \
-                                  _setlocale_debug_string(category,         \
-                                                          locale,           \
-                                                          result));         \
-                }                                                           \
-	} STMT_END
-#else
-#   define DEBUG_LOCALE_INIT(a,b,c)
-#endif
     const char* trial_locales[5];   /* 5 = 1 each for "", LC_ALL, LANG, "", C */
     unsigned int trial_locales_count;
     const char * const lc_all     = savepv(PerlEnv_getenv("LC_ALL"));
@@ -930,6 +931,25 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #endif
 #ifdef SYSTEM_DEFAULT_LOCALE
     const char *system_default_locale = NULL;
+#endif
+
+#ifdef DEBUGGING
+    debug_initialization = (PerlEnv_getenv("PERL_DEBUG_LOCALE_INIT"))
+                           ? TRUE
+                           : FALSE;
+#   define DEBUG_LOCALE_INIT(category, locale, result)                      \
+	STMT_START {                                                        \
+		if (debug_initialization) {                                 \
+                    PerlIO_printf(Perl_debug_log,                           \
+                                  "%s:%d: %s\n",                            \
+                                  __FILE__, __LINE__,                       \
+                                  _setlocale_debug_string(category,         \
+                                                          locale,           \
+                                                          result));         \
+                }                                                           \
+	} STMT_END
+#else
+#   define DEBUG_LOCALE_INIT(a,b,c)
 #endif
 
 #ifndef LOCALE_ENVIRON_REQUIRED
@@ -1369,6 +1389,11 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #else  /* !USE_LOCALE */
     PERL_UNUSED_ARG(printwarn);
 #endif /* USE_LOCALE */
+
+#ifdef DEBUGGING
+    /* So won't continue to output stuff */
+    debug_initialization = FALSE;
+#endif
 
     return ok;
 }
