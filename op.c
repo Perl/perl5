@@ -6858,9 +6858,6 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	}
     }
 
-    if (!other)
-	return first;
-
     if (type == OP_ANDASSIGN || type == OP_ORASSIGN || type == OP_DORASSIGN)
 	other->op_private |= OPpASSIGN_BACKWARDS;  /* other is an OP_SASSIGN */
 
