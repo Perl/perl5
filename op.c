@@ -11954,12 +11954,13 @@ Perl_ck_each(pTHX_ OP *o)
 		 || (  SvTYPE(SvRV(cSVOPx_sv(kid))) != SVt_PVAV
 		    && SvTYPE(SvRV(cSVOPx_sv(kid))) != SVt_PVHV  )
 		   )
-		    /* we let ck_fun handle it */
-		    break;
+		    goto bad;
 	    default:
                 yyerror_pv(Perl_form(aTHX_
                     "Experimental %s on scalar is now forbidden",
                      PL_op_desc[orig_type]), 0);
+               bad:
+                bad_type_pv(1, "hash or array", o, kid);
                 return o;
 	}
     }

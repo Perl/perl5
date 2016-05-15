@@ -19,7 +19,8 @@ sub set_errpat {
     # yyerror for the error, rather than croak.  yyerror is preferable for
     # compile-time errors.
     $errpat =
-       qr/Experimental $_[0] on scalar is now forbidden .* line 1,/;
+       qr/Experimental $_[0] on scalar is now forbidden .* line 1,(?x:
+         ).*Type of arg 1 to $_[0] must be hash or array \(not /s;
 }
 
 # Keys -- errors

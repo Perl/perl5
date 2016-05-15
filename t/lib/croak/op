@@ -137,17 +137,17 @@ Execution of - aborted due to compilation errors.
 # NAME keys BAREWORD
 @a = keys FRED ;
 EXPECT
-Type of arg 1 to keys must be hash (not constant item) at - line 1, near "FRED ;"
+Type of arg 1 to keys must be hash or array (not constant item) at - line 1, near "FRED ;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME values BAREWORD
 @a = values FRED ;
 EXPECT
-Type of arg 1 to values must be hash (not constant item) at - line 1, near "FRED ;"
+Type of arg 1 to values must be hash or array (not constant item) at - line 1, near "FRED ;"
 Execution of - aborted due to compilation errors.
 ########
 # NAME each BAREWORD
 @a = each FRED ;
 EXPECT
-Type of arg 1 to each must be hash (not constant item) at - line 1, near "FRED ;"
+Type of arg 1 to each must be hash or array (not constant item) at - line 1, near "FRED ;"
 Execution of - aborted due to compilation errors.
