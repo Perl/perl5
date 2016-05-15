@@ -715,6 +715,7 @@ S_cx_popwhen(pTHX_ PERL_CONTEXT *cx)
     assert(CxTYPE(cx) == CXt_WHEN);
 
     PERL_UNUSED_ARG(cx);
+    PERL_UNUSED_CONTEXT;
     /* currently NOOP */
 }
 
