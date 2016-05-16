@@ -159,7 +159,7 @@ int afstat(int fd, struct stat *statb);
 
 #define BIT_BUCKET "/dev/null"
 
-#define dXSUB_SYS
+#define dXSUB_SYS dNOOP
 
 #ifndef NO_ENVIRON_ARRAY
 #define USE_ENVIRON_ARRAY

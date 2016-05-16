@@ -317,7 +317,7 @@ struct interp_intern {
 #define PERL_SYS_INIT_BODY(c,v)	MALLOC_CHECK_TAINT2(*c,*v) vms_image_init((c),(v)); PERLIO_INIT; MALLOC_INIT
 #define PERL_SYS_TERM_BODY()    HINTS_REFCNT_TERM; OP_REFCNT_TERM;      \
                                 PERLIO_TERM; MALLOC_TERM; LOCALE_TERM
-#define dXSUB_SYS
+#define dXSUB_SYS dNOOP
 #define HAS_KILL
 #define HAS_WAIT
 
