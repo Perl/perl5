@@ -18,7 +18,7 @@ BEGIN {
                         $HAVE_MONOTONIC
                     ];
 
-    $VERSION        = '0.92';
+    $VERSION        = '0.94';
     $VERBOSE        = 0;
     $DEBUG          = 0;
     $WARN           = 1;
@@ -399,6 +399,14 @@ sub adjust_monotonic_start_time {
     }
 }
 
+sub uninstall_signals {
+		return unless defined($IPC::Cmd::{'__old_signals'});
+
+		foreach my $sig_name (keys %{$IPC::Cmd::{'__old_signals'}}) {
+				$SIG{$sig_name} = $IPC::Cmd::{'__old_signals'}->{$sig_name};
+		}
+}
+
 # incompatible with POSIX::SigAction
 #
 sub install_layered_signal {
@@ -410,6 +418,10 @@ sub install_layered_signal {
     unless defined($available_signals{$s});
   Carp::confess("install_layered_signal expects coderef")
     if !ref($handler_code) || ref($handler_code) ne 'CODE';
+
+  $IPC::Cmd::{'__old_signals'} = {}
+  		unless defined($IPC::Cmd::{'__old_signals'});
+	$IPC::Cmd::{'__old_signals'}->{$s} = $SIG{$s};
 
   my $previous_handler = $SIG{$s};
 
@@ -568,7 +580,8 @@ sub open3_run {
     # it will terminate only after child
     # has terminated (except for SIGKILL,
     # which is specially handled)
-    foreach my $s (keys %SIG) {
+    SIGNAL: foreach my $s (keys %SIG) {
+        next SIGNAL if $s eq '__WARN__' or $s eq '__DIE__'; # Skip and don't clobber __DIE__ & __WARN__
         my $sig_handler;
         $sig_handler = sub {
             kill("$s", $pid);
@@ -844,18 +857,15 @@ sub run_forked {
 
       # prepare sockets to read from child
 
-      $flags = 0;
-      fcntl($child_stdout_socket, POSIX::F_GETFL, $flags) || Carp::confess "can't fnctl F_GETFL: $!";
+      $flags = fcntl($child_stdout_socket, POSIX::F_GETFL, 0) || Carp::confess "can't fnctl F_GETFL: $!";
       $flags |= POSIX::O_NONBLOCK;
       fcntl($child_stdout_socket, POSIX::F_SETFL, $flags) || Carp::confess "can't fnctl F_SETFL: $!";
 
-      $flags = 0;
-      fcntl($child_stderr_socket, POSIX::F_GETFL, $flags) || Carp::confess "can't fnctl F_GETFL: $!";
+      $flags = fcntl($child_stderr_socket, POSIX::F_GETFL, 0) || Carp::confess "can't fnctl F_GETFL: $!";
       $flags |= POSIX::O_NONBLOCK;
       fcntl($child_stderr_socket, POSIX::F_SETFL, $flags) || Carp::confess "can't fnctl F_SETFL: $!";
 
-      $flags = 0;
-      fcntl($child_info_socket, POSIX::F_GETFL, $flags) || Carp::confess "can't fnctl F_GETFL: $!";
+      $flags = fcntl($child_info_socket, POSIX::F_GETFL, 0) || Carp::confess "can't fnctl F_GETFL: $!";
       $flags |= POSIX::O_NONBLOCK;
       fcntl($child_info_socket, POSIX::F_SETFL, $flags) || Carp::confess "can't fnctl F_SETFL: $!";
 
@@ -1144,6 +1154,8 @@ sub run_forked {
       else {
         delete($SIG{'CHLD'});
       }
+
+      uninstall_signals();
 
       return $o;
     }
@@ -1933,6 +1945,8 @@ sub _pp_child_error {
 
 1;
 
+__END__
+
 =head2 $q = QUOTE
 
 Returns the character used for quoting strings on this platform. This is
@@ -1946,8 +1960,6 @@ You can use it as follows:
 
 This makes sure that C<foo bar> is treated as a string, rather than two
 separate arguments to the C<echo> function.
-
-__END__
 
 =head1 HOW IT WORKS
 
