@@ -159,7 +159,7 @@ foreach my $test_case (@pkg_names) {
             or $errs++;
   }
     is( $warnings, '', "case $test_case->{name}: no warnings from parsing" ) or $errs++;
-    diag "Got: '" . join(', ', @got) . "'\nModule contents:\n$code" if $errs;
+    diag "Got: '" . join(', ', @got) . "'\nModule contents:\n$code" if !$ENV{PERL_CORE} && $errs;
 }
 continue {
   ++$test_num;
