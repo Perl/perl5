@@ -482,6 +482,7 @@ Perl_new_collate(pTHX_ const char *newcoll)
 	    PL_collation_name = NULL;
 	}
 	PL_collation_standard = TRUE;
+      is_standard_collation:
 	PL_collxfrm_base = 0;
 	PL_collxfrm_mult = 2;
 	return;
@@ -493,6 +494,9 @@ Perl_new_collate(pTHX_ const char *newcoll)
 	Safefree(PL_collation_name);
 	PL_collation_name = stdize_locale(savepv(newcoll));
 	PL_collation_standard = isNAME_C_OR_POSIX(newcoll);
+        if (PL_collation_standard) {
+            goto is_standard_collation;
+        }
 
 	{
             /* A locale collation definition includes primary, secondary,
