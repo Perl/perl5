@@ -278,7 +278,7 @@ into the repository anyway.
 =item *
 
 For any new files in the distro, determine whether they are needed.
-If not, delete them, and list them in either C<EXCLUDED> or C<@INGORE>.
+If not, delete them, and list them in either C<EXCLUDED> or C<@IGNORABLE>.
 Otherwise, add them to C<MANIFEST>, and run C<git add> to add the files
 to the repository.
 
