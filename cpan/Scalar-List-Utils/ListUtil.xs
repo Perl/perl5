@@ -1049,7 +1049,7 @@ CODE:
             else
                 sv_setpvf(keysv, "%"NVgf, SvNV(arg));
 #ifdef HV_FETCH_EMPTY_HE
-            HE* he = hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
+            HE* he = (HE*) hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
             if (HeVAL(he))
                 continue;
 
@@ -1090,7 +1090,7 @@ CODE:
                 continue;
             }
 #ifdef HV_FETCH_EMPTY_HE
-            HE* he = hv_common(seen, arg, NULL, 0, 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
+            HE* he = (HE*) hv_common(seen, arg, NULL, 0, 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
             if (HeVAL(he))
                 continue;
 
