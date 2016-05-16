@@ -167,7 +167,7 @@ use File::Glob qw(:case);
     },
 
     'autouse' => {
-        'DISTRIBUTION' => 'WOLFSAGE/autouse-1.08.tar.gz',
+        'DISTRIBUTION' => 'RJBS/autouse-1.11.tar.gz',
         'FILES'        => q[dist/autouse],
         'EXCLUDED'     => [qr{^t/release-.*\.t}],
     },
@@ -1211,7 +1211,7 @@ use File::Glob qw(:case);
     },
 
     'Time::HiRes' => {
-        'DISTRIBUTION' => 'RJBS/Time-HiRes-1.9728.tar.gz',
+        'DISTRIBUTION' => 'JHI/Time-HiRes-1.9733.tar.gz',
         'FILES'        => q[dist/Time-HiRes],
     },
 
