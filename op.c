@@ -8466,10 +8466,12 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	    if (ckWARN(WARN_REDEFINE)
 	     || (  ckWARN_d(WARN_REDEFINE)
 		&& (  !const_sv || SvRV(gv) == const_sv
-		   || sv_cmp(SvRV(gv), const_sv)  )))
+		   || sv_cmp(SvRV(gv), const_sv)  ))) {
+                assert(cSVOPo);
 		Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
 			  "Constant subroutine %"SVf" redefined",
 			  SVfARG(cSVOPo->op_sv));
+            }
 
 	    SvREFCNT_inc_simple_void_NN(PL_compcv);
 	    CopLINE_set(PL_curcop, oldline);
