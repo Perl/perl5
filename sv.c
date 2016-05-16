@@ -14789,6 +14789,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* Did the locale setup indicate UTF-8? */
     PL_utf8locale	= proto_perl->Iutf8locale;
     PL_in_utf8_CTYPE_locale = proto_perl->Iin_utf8_CTYPE_locale;
+    PL_in_utf8_COLLATE_locale = proto_perl->Iin_utf8_COLLATE_locale;
     /* Unicode features (see perlrun/-C) */
     PL_unicode		= proto_perl->Iunicode;
 

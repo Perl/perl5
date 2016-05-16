@@ -168,6 +168,7 @@
 #define PL_in_clean_objs	(vTHX->Iin_clean_objs)
 #define PL_in_eval		(vTHX->Iin_eval)
 #define PL_in_load_module	(vTHX->Iin_load_module)
+#define PL_in_utf8_COLLATE_locale	(vTHX->Iin_utf8_COLLATE_locale)
 #define PL_in_utf8_CTYPE_locale	(vTHX->Iin_utf8_CTYPE_locale)
 #define PL_incgv		(vTHX->Iincgv)
 #define PL_initav		(vTHX->Iinitav)

@@ -485,6 +485,7 @@ Perl_new_collate(pTHX_ const char *newcoll)
       is_standard_collation:
 	PL_collxfrm_base = 0;
 	PL_collxfrm_mult = 2;
+        PL_in_utf8_COLLATE_locale = FALSE;
 	return;
     }
 
@@ -497,6 +498,8 @@ Perl_new_collate(pTHX_ const char *newcoll)
         if (PL_collation_standard) {
             goto is_standard_collation;
         }
+
+        PL_in_utf8_COLLATE_locale = _is_cur_LC_category_utf8(LC_COLLATE);
 
 	{
             /* A locale collation definition includes primary, secondary,
