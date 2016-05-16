@@ -44,7 +44,7 @@ Scalar-List-Utils cpan/Scalar-List-Utils/lib/List/Util.pm e479a29c6b66ac5cbbde4e
 Scalar-List-Utils cpan/Scalar-List-Utils/lib/List/Util/XS.pm cbc38838d32fd213ae7b37ac38e30195355be3b9
 Scalar-List-Utils cpan/Scalar-List-Utils/lib/Scalar/Util.pm 14a20075dfb9a4ef33b99115ed6f43e6d1a15f9b
 Scalar-List-Utils cpan/Scalar-List-Utils/lib/Sub/Util.pm b984c0a2935bd5f5cf1733df846c8a8c0661ef32
-Scalar-List-Utils cpan/Scalar-List-Utils/ListUtil.xs 7c859728ec2fa645fc91933532ce67fc491623d2
+Scalar-List-Utils cpan/Scalar-List-Utils/ListUtil.xs 362a247c65878265fd8acae607b207400628ef3b
 Socket cpan/Socket/Socket.pm 98e38176d745c38282907f391c077298f5a3d0ba
 Socket cpan/Socket/Socket.xs edd4fed212785f11c5c2095a75941dad27d586d9
 autodie cpan/autodie/t/mkdir.t 9e70d2282a3cc7d76a78bf8144fccba20fb37dac
