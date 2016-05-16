@@ -4,9 +4,9 @@
 
 # NOTE:
 #
-# It's best to not features found only in more modern Perls here, as some cpan
-# distributions copy this file and operate on older Perls.  Similarly keep
-# things simple as this may be run under fairly broken circumstances.  For
+# Do not rely on features found only in more modern Perls here, as some CPAN
+# distributions copy this file and must operate on older Perls. Similarly, keep
+# things, simple as this may be run under fairly broken circumstances. For
 # example, increment ($x++) has a certain amount of cleverness for things like
 #
 #   $x = 'zz';
@@ -284,6 +284,12 @@ sub _qq {
     return defined $x ? '"' . display ($x) . '"' : 'undef';
 };
 
+# Support pre-5.10 Perls, for the benefit of CPAN dists that copy this file.
+# Note that chr(90) exists in both ASCII ("Z") and EBCDIC ("!").
+my $chars_template = defined(eval { pack "W*", 90 }) ? "W*" : "U*";
+eval 'sub re::is_regexp { ref($_[0]) eq "Regexp" }'
+    if !defined &re::is_regexp;
+
 # keys are the codes \n etc map to, values are 2 char strings such as \n
 my %backslash_escape;
 foreach my $x (split //, 'nrtfa\\\'"') {
@@ -296,7 +302,7 @@ sub display {
     foreach my $x (@_) {
         if (defined $x and not ref $x) {
             my $y = '';
-            foreach my $c (unpack("W*", $x)) {
+            foreach my $c (unpack($chars_template, $x)) {
                 if ($c > 255) {
                     $y = $y . sprintf "\\x{%x}", $c;
                 } elsif ($backslash_escape{$c}) {
