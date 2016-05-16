@@ -107,6 +107,26 @@ package Simple;
 $Foo::Bar::VERSION = '1.23';
 ---
 },
+{
+  name => 'script 7 from t/metadata.t', # TODO merge these
+  package => [ '_private', 'main' ],
+  TODO => '$::VERSION indicates main namespace is referenced',
+  code => <<'---',
+package _private;
+$::VERSION = 0.01;
+$VERSION = '999';
+---
+},
+{
+  name => 'script 8 from t/metadata.t', # TODO merge these
+  package => [ '_private', 'main' ],
+  TODO => '$::VERSION indicates main namespace is referenced',
+  code => <<'---',
+package _private;
+$VERSION = '999';
+$::VERSION = 0.01;
+---
+},
 );
 
 my $test_num = 0;
@@ -118,7 +138,6 @@ foreach my $test_case (@pkg_names) {
     note $test_case->{name};
     my $code = $test_case->{code};
     my $expected_name = $test_case->{package};
-    local $TODO = $test_case->{TODO};
 
     my $warnings = '';
     local $SIG{__WARN__} = sub { $warnings .= $_ for @_ };
@@ -133,9 +152,12 @@ foreach my $test_case (@pkg_names) {
     # Test::Builder will prematurely numify objects, so use this form
     my $errs;
     my @got = $pm_info->packages_inside();
+  {
+    local $TODO = $test_case->{TODO};
     is_deeply( \@got, $expected_name,
                "case $test_case->{name}: correct package names (expected '" . join(', ', @$expected_name) . "')" )
             or $errs++;
+  }
     is( $warnings, '', "case $test_case->{name}: no warnings from parsing" ) or $errs++;
     diag "Got: '" . join(', ', @got) . "'\nModule contents:\n$code" if $errs;
 }
