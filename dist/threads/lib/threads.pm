@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '2.07';
+our $VERSION = '2.08';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -134,7 +134,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 2.07
+This document describes threads version 2.08
 
 =head1 WARNING
 
@@ -1086,8 +1086,11 @@ Perl 5.8.0 or later
 
 =head1 SEE ALSO
 
-L<threads> Discussion Forum on CPAN:
-L<http://www.cpanforum.com/dist/threads>
+threads on MetaCPAN:
+L<https://metacpan.org/release/threads>
+
+Code repository for CPAN distribution:
+L<https://github.com/Dual-Life/threads>
 
 L<threads::shared>, L<perlthrtut>
 
@@ -1099,6 +1102,8 @@ L<http://lists.perl.org/list/ithreads.html>
 
 Stack size discussion:
 L<http://www.perlmonks.org/?node_id=532956>
+
+Sample code in the I<examples> directory of this distribution on CPAN.
 
 =head1 AUTHOR
 
