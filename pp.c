@@ -6241,6 +6241,18 @@ PP(unimplemented_op)
     DIE(aTHX_ "panic: unimplemented op %s (#%d) called", name,	op_type);
 }
 
+static void
+S_maybe_unwind_defav(pTHX)
+{
+    if (CX_CUR()->cx_type & CXp_HASARGS) {
+	PERL_CONTEXT *cx = CX_CUR();
+
+        assert(CxHASARGS(cx));
+        cx_popsub_args(cx);
+	cx->cx_type &= ~CXp_HASARGS;
+    }
+}
+
 /* For sorting out arguments passed to a &CORE:: subroutine */
 PP(pp_coreargs)
 {
@@ -6311,6 +6323,27 @@ PP(pp_coreargs)
 		svp++;
 	    }
 	    RETURN;
+	case OA_AVREF:
+	    if (!numargs) {
+		GV *gv;
+		if (CvUNIQUE(find_runcv_where(FIND_RUNCV_level_eq,1,NULL)))
+		    gv = PL_argvgv;
+		else {
+		    S_maybe_unwind_defav(aTHX);
+		    gv = PL_defgv;
+		}
+		PUSHs((SV *)GvAVn(gv));
+		break;
+	    }
+	    if (!svp || !*svp || !SvROK(*svp)
+	     || SvTYPE(SvRV(*svp)) != SVt_PVAV)
+		DIE(aTHX_
+		/* diag_listed_as: Type of arg %d to &CORE::%s must be %s*/
+		 "Type of arg %d to &CORE::%s must be array reference",
+		  whicharg, PL_op_desc[opnum]
+		);
+	    PUSHs(SvRV(*svp));
+	    break;
 	case OA_HVREF:
 	    if (!svp || !*svp || !SvROK(*svp)
 	     || (  SvTYPE(SvRV(*svp)) != SVt_PVHV
@@ -6367,15 +6400,10 @@ PP(pp_coreargs)
 		       : "reference to one of [$@%*]"
 		);
 	    PUSHs(SvRV(*svp));
-	    if (opnum == OP_UNDEF && SvRV(*svp) == (SV *)PL_defgv
-	     && CX_CUR()->cx_type & CXp_HASARGS) {
+	    if (opnum == OP_UNDEF && SvRV(*svp) == (SV *)PL_defgv) {
 		/* Undo @_ localisation, so that sub exit does not undo
 		   part of our undeffing. */
-		PERL_CONTEXT *cx = CX_CUR();
-
-                assert(CxHASARGS(cx));
-                cx_popsub_args(cx);;
-		cx->cx_type &= ~CXp_HASARGS;
+		S_maybe_unwind_defav(aTHX);
 	    }
 	  }
 	  break;

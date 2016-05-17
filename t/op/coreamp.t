@@ -23,6 +23,9 @@ sub lis($$;$) {
 package hov {
   use overload '%{}' => sub { +{} }
 }
+package aov {
+  use overload '@{}' => sub { [] }
+}
 package sov {
   use overload '${}' => sub { \my $x }
 }
@@ -204,6 +207,40 @@ sub test_proto {
                   )of \[\Q$2\E] at /,
         "&$o with coderef arg";
     }    
+  }
+  elsif ($p =~ /^;?\\\@([\@;])?/) { #   ;\@   \@@   \@;$$@
+    $tests += 7;
+
+    if ($1) {
+      eval { &{"CORE::$o"}() };
+      like $@, qr/^Not enough arguments for $o at /,
+         "&$o with too few args";
+    }
+    else {
+      eval " &CORE::$o(\\\@1,2) ";
+      like $@, qr/^Too many arguments for $o at /,
+        "&$o with too many args";
+    }
+    eval " &CORE::$o(2) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be array reference at /,
+        "&$o with non-ref arg";
+    eval " &CORE::$o(*STDOUT{IO}) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be array reference at /,
+        "&$o with ioref arg";
+    my $class = ref *DATA{IO};
+    eval " &CORE::$o(bless(*DATA{IO}, 'aov')) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be array reference at /,
+        "&$o with ioref arg with array overload (which does not count)";
+    bless *DATA{IO}, $class;
+    eval " &CORE::$o(\\&scriggle) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be array reference at /,
+        "&$o with coderef arg";
+    eval " &CORE::$o(\\\$_) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be array reference at /,
+        "&$o with scalarref arg";
+    eval " &CORE::$o({}) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be array reference at /,
+        "&$o with hashref arg";
   }
   elsif ($p eq '\[%@]') {
     $tests += 7;
@@ -663,6 +700,21 @@ lis [&mypack("H*", $Perl_as_a_hex_string)], ['Perl'], '&pack in list context';
 
 test_proto 'pipe';
 
+test_proto 'pop';
+$tests += 6;
+@ARGV = qw<a b c>;
+is &mypop(), 'c', 'retval of &pop with no args (@ARGV)';
+is "@ARGV", "a b", 'effect of &pop on @ARGV';
+sub {
+  is &mypop(), 'k', 'retval of &pop with no args (@_)';
+  is "@_", "q j", 'effect of &pop on @_';
+}->(qw(q j k));
+{
+  my @a = 1..4;
+  is &mypop(\@a), 4, 'retval of &pop';
+  lis [@a], [1..3], 'effect of &pop';
+}
+
 test_proto 'pos';
 $tests += 4;
 $_ = "hello";
@@ -681,6 +733,14 @@ is pos, 4, 'writing to &pos without args';
 test_proto 'prototype';
 $tests++;
 is &myprototype(\&myprototype), prototype("CORE::prototype"), '&prototype';
+
+test_proto 'push';
+$tests += 2;
+{
+  my @a = qw<a b c>;
+  is &mypush(\@a, "d", "e"), 5, 'retval of &push';
+  is "@a", "a b c d e", 'effect of &push';
+}
 
 test_proto 'quotemeta', '$', '\$';
 
@@ -847,11 +907,43 @@ test_proto "set$_" for qw '
   priority protoent pwent servent sockopt
 ';
 
+test_proto 'shift';
+$tests += 6;
+@ARGV = qw<a b c>;
+is &myshift(), 'a', 'retval of &shift with no args (@ARGV)';
+is "@ARGV", "b c", 'effect of &shift on @ARGV';
+sub {
+  is &myshift(), 'q', 'retval of &shift with no args (@_)';
+  is "@_", "j k", 'effect of &shift on @_';
+}->(qw(q j k));
+{
+  my @a = 1..4;
+  is &myshift(\@a), 1, 'retval of &shift';
+  lis [@a], [2..4], 'effect of &shift';
+}
+
 test_proto "shm$_" for qw "ctl get read write";
 test_proto 'shutdown';
 test_proto 'sin';
 test_proto 'sleep';
 test_proto "socket$_" for "", "pair";
+
+test_proto 'splice';
+$tests += 8;
+{
+  my @a = qw<a b c>;
+  is &mysplice(\@a, 1), 'c', 'retval of 2-arg &splice in scalar context';
+  lis \@a, ['a'], 'effect of 2-arg &splice in scalar context';
+  @a = qw<a b c>;
+  lis [&mysplice(\@a, 1)], ['b','c'], 'retval of 2-arg &splice in list cx';
+  lis \@a, ['a'], 'effect of 2-arg &splice in list context';
+  @a = qw<a b c d>;
+  lis [&mysplice(\@a,1,2)],['b','c'], 'retval of 3-arg &splice in list cx';
+  lis \@a, ['a','d'], 'effect of 3-arg &splice in list context';
+  @a = qw<a b c d>;
+  lis [&mysplice(\@a,1,1,'e')],['b'], 'retval of 4-arg &splice in list cx';
+  lis \@a, [qw<a e c d>], 'effect of 4-arg &splice in list context';
+}
 
 test_proto 'sprintf';
 $tests += 2;
@@ -981,6 +1073,14 @@ $_ = 'abcd';
 is &myunpack("H*"), $abcd_as_a_hex_string, '&unpack with one arg';
 is &myunpack("H*", "bcde"), $bcde_as_a_hex_string, '&unpack with two arg';
 
+
+test_proto 'unshift';
+$tests += 2;
+{
+  my @a = qw<a b c>;
+  is &myunshift(\@a, "d", "e"), 5, 'retval of &unshift';
+  is "@a", "d e a b c", 'effect of &unshift';
+}
 
 test_proto 'untie'; # behaviour already tested along with tie(d)
 
