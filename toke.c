@@ -52,7 +52,6 @@ Individual members of C<PL_parser> have their own documentation.
 #define PL_lex_brackstack	(PL_parser->lex_brackstack)
 #define PL_lex_casemods		(PL_parser->lex_casemods)
 #define PL_lex_casestack        (PL_parser->lex_casestack)
-#define PL_lex_defer		(PL_parser->lex_defer)
 #define PL_lex_dojoin		(PL_parser->lex_dojoin)
 #define PL_lex_formbrack        (PL_parser->lex_formbrack)
 #define PL_lex_inpat		(PL_parser->lex_inpat)
@@ -142,7 +141,6 @@ static const char* const ident_too_long = "Identifier too long";
 				        string or after \E, $foo, etc       */
 #define LEX_INTERPCONST		 2 /* NOT USED */
 #define LEX_FORMLINE		 1 /* expecting a format line               */
-#define LEX_KNOWNEXT		 0 /* next token known; just return it      */
 
 
 #ifdef DEBUGGING
@@ -1919,10 +1917,6 @@ S_force_next(pTHX_ I32 type)
     assert(PL_nexttoke < C_ARRAY_LENGTH(PL_nexttype));
     PL_nexttype[PL_nexttoke] = type;
     PL_nexttoke++;
-    if (PL_lex_state != LEX_KNOWNEXT) {
-	PL_lex_defer = PL_lex_state;
-	PL_lex_state = LEX_KNOWNEXT;
-    }
 }
 
 /*
@@ -2347,7 +2341,6 @@ S_sublex_push(pTHX)
     SAVEI32(PL_lex_casemods);
     SAVEI32(PL_lex_starts);
     SAVEI8(PL_lex_state);
-    SAVEI8(PL_lex_defer);
     SAVESPTR(PL_lex_repl);
     SAVEVPTR(PL_lex_inpat);
     SAVEI16(PL_lex_inwhat);
@@ -4508,10 +4501,6 @@ Perl_yylex(pTHX)
     if (PL_nexttoke) {
 	PL_nexttoke--;
 	pl_yylval = PL_nextval[PL_nexttoke];
-	if (!PL_nexttoke) {
-	    PL_lex_state = PL_lex_defer;
-	    PL_lex_defer = LEX_NORMAL;
-	}
 	{
 	    I32 next_type;
 	    next_type = PL_nexttype[PL_nexttoke];
@@ -4685,14 +4674,6 @@ Perl_yylex(pTHX)
 	/* FALLTHROUGH */
 
     case LEX_INTERPEND:
-	/* Treat state as LEX_NORMAL if we have no inner lexing scope.
-	   XXX This hack can be removed if we stop setting PL_lex_state to
-	   LEX_KNOWNEXT, as can the hack under LEX_INTREPCONCAT below.  */
-	if (UNLIKELY(!PL_lex_inwhat)) {
-	    PL_lex_state = LEX_NORMAL;
-	    break;
-	}
-
 	if (PL_lex_dojoin) {
 	    const U8 dojoin_was = PL_lex_dojoin;
 	    PL_lex_dojoin = FALSE;
@@ -4744,14 +4725,6 @@ Perl_yylex(pTHX)
 	    Perl_croak(aTHX_ "panic: INTERPCONCAT, lex_brackets=%ld",
 		       (long) PL_lex_brackets);
 #endif
-	/* Treat state as LEX_NORMAL when not in an inner lexing scope.
-	   XXX This hack can be removed if we stop setting PL_lex_state to
-	   LEX_KNOWNEXT.  */
-	if (UNLIKELY(!PL_lex_inwhat)) {
-	    PL_lex_state = LEX_NORMAL;
-	    break;
-	}
-
 	if (PL_bufptr == PL_bufend)
 	    return REPORT(sublex_done());
 
@@ -11065,8 +11038,7 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
     else if (yychar > 255)
 	sv_catpvs(where_sv, "next token ???");
     else if (yychar == YYEMPTY) {
-	if (    PL_lex_state == LEX_NORMAL
-            || (PL_lex_state == LEX_KNOWNEXT && PL_lex_defer == LEX_NORMAL))
+	if (PL_lex_state == LEX_NORMAL)
 	    sv_catpvs(where_sv, "at end of line");
 	else if (PL_lex_inpat)
 	    sv_catpvs(where_sv, "within pattern");
@@ -11735,7 +11707,7 @@ Perl_parse_label(pTHX_ U32 flags)
 {
     if (flags & ~PARSE_OPTIONAL)
 	Perl_croak(aTHX_ "Parsing code internal error (%s)", "parse_label");
-    if (PL_lex_state == LEX_KNOWNEXT) {
+    if (PL_nexttoke) {
 	PL_parser->yychar = yylex();
 	if (PL_parser->yychar == LABEL) {
 	    char * const lpv = pl_yylval.pval;
