@@ -5,31 +5,6 @@
 # by both C packages with Automake and by stand-alone Perl modules.  See
 # Test::RRA::Automake for additional functions specifically for C Automake
 # distributions.
-#
-# The canonical version of this file is maintained in the rra-c-util package,
-# which can be found at <http://www.eyrie.org/~eagle/software/rra-c-util/>.
-#
-# Written by Russ Allbery <eagle@eyrie.org>
-# Copyright 2013, 2014
-#     The Board of Trustees of the Leland Stanford Junior University
-#
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the "Software"),
-# to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense,
-# and/or sell copies of the Software, and to permit persons to whom the
-# Software is furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-# DEALINGS IN THE SOFTWARE.
 
 package Test::RRA;
 
@@ -56,7 +31,7 @@ BEGIN {
     # This version should match the corresponding rra-c-util release, but with
     # two digits for the minor version, including a leading zero if necessary,
     # so that it will sort properly.
-    $VERSION = '5.04';
+    $VERSION = '5.11';
 }
 
 # Skip this test unless author tests are requested.  Takes a short description
@@ -153,7 +128,7 @@ __END__
 
 =for stopwords
 Allbery Allbery's DESC bareword sublicense MERCHANTABILITY NONINFRINGEMENT
-rra-c-util
+rra-c-util CPAN
 
 =head1 NAME
 
@@ -176,46 +151,45 @@ Test::RRA - Support functions for Perl tests
 
 =head1 DESCRIPTION
 
-This module collects utility functions that are useful for Perl test
-scripts.  It assumes Russ Allbery's Perl module layout and test
-conventions and will only be useful for other people if they use the
-same conventions.
+This module collects utility functions that are useful for Perl test scripts.
+It assumes Russ Allbery's Perl module layout and test conventions and will
+only be useful for other people if they use the same conventions.
 
 =head1 FUNCTIONS
 
-None of these functions are imported by default.  The ones used by a
-script should be explicitly imported.
+None of these functions are imported by default.  The ones used by a script
+should be explicitly imported.
 
 =over 4
 
 =item skip_unless_author(DESC)
 
-Checks whether AUTHOR_TESTING is set in the environment and skips the
-whole test (by calling C<plan skip_all> from Test::More) if it is not.
-DESC is a description of the tests being skipped.  A space and C<only run
-for author> will be appended to it and used as the skip reason.
+Checks whether AUTHOR_TESTING is set in the environment and skips the whole
+test (by calling C<plan skip_all> from Test::More) if it is not.  DESC is a
+description of the tests being skipped.  A space and C<only run for author>
+will be appended to it and used as the skip reason.
 
 =item skip_unless_automated(DESC)
 
-Checks whether AUTHOR_TESTING, AUTOMATED_TESTING, or RELEASE_TESTING are
-set in the environment and skips the whole test (by calling C<plan
-skip_all> from Test::More) if they are not.  This should be used by tests
-that should not run during end-user installs of the module, but which
-should run as part of CPAN smoke testing and release testing.
+Checks whether AUTHOR_TESTING, AUTOMATED_TESTING, or RELEASE_TESTING are set
+in the environment and skips the whole test (by calling C<plan skip_all> from
+Test::More) if they are not.  This should be used by tests that should not run
+during end-user installs of the module, but which should run as part of CPAN
+smoke testing and release testing.
 
 DESC is a description of the tests being skipped.  A space and C<normally
 skipped> will be appended to it and used as the skip reason.
 
 =item use_prereq(MODULE[, VERSION][, IMPORT ...])
 
-Attempts to load MODULE with the given VERSION and import arguments.  If
-this fails for any reason, the test will be skipped (by calling C<plan
-skip_all> from Test::More) with a skip reason saying that MODULE is
-required for the test.
+Attempts to load MODULE with the given VERSION and import arguments.  If this
+fails for any reason, the test will be skipped (by calling C<plan skip_all>
+from Test::More) with a skip reason saying that MODULE is required for the
+test.
 
 VERSION will be passed to C<use> as a version bareword if it looks like a
-version number.  The remaining IMPORT arguments will be passed as the
-value of an array.
+version number.  The remaining IMPORT arguments will be passed as the value of
+an array.
 
 =back
 
@@ -228,33 +202,33 @@ Russ Allbery <eagle@eyrie.org>
 Copyright 2013, 2014 The Board of Trustees of the Leland Stanford Junior
 University
 
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 =head1 SEE ALSO
 
 Test::More(3), Test::RRA::Automake(3), Test::RRA::Config(3)
 
-This module is maintained in the rra-c-util package.  The current version
-is available from L<http://www.eyrie.org/~eagle/software/rra-c-util/>.
+This module is maintained in the rra-c-util package.  The current version is
+available from L<http://www.eyrie.org/~eagle/software/rra-c-util/>.
 
-The functions to control when tests are run use environment variables
-defined by the L<Lancaster
+The functions to control when tests are run use environment variables defined
+by the L<Lancaster
 Consensus|https://github.com/Perl-Toolchain-Gang/toolchain-site/blob/master/lancaster-consensus.md>.
 
 =cut

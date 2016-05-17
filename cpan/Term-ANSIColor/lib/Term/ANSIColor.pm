@@ -1,7 +1,7 @@
-# Term::ANSIColor -- Color screen output using ANSI escape sequences.
+# Color screen output using ANSI escape sequences.
 #
 # Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2005, 2006, 2008, 2009, 2010,
-#     2011, 2012, 2013, 2014, 2015 Russ Allbery <rra@cpan.org>
+#     2011, 2012, 2013, 2014, 2015, 2016 Russ Allbery <rra@cpan.org>
 # Copyright 1996 Zenin
 # Copyright 2012 Kurt Starsinic <kstarsinic@gmail.com>
 #
@@ -23,7 +23,8 @@ use 5.006;
 use strict;
 use warnings;
 
-use Carp qw(croak);
+# Also uses Carp but loads it on demand to reduce memory usage.
+
 use Exporter ();
 
 # use Exporter plus @ISA instead of use base for 5.6 compatibility.
@@ -40,7 +41,7 @@ our $AUTOLOAD;
 # against circular module loading (not that we load any modules, but
 # consistency is good).
 BEGIN {
-    $VERSION = '4.04';
+    $VERSION = '4.05';
 
     # All of the basic supported constants, used in %EXPORT_TAGS.
     my @colorlist = qw(
@@ -207,6 +208,17 @@ if (exists $ENV{ANSI_COLORS_ALIASES}) {
 our @COLORSTACK;
 
 ##############################################################################
+# Helper functions
+##############################################################################
+
+# Stub to load the Carp module on demand.
+sub croak {
+    my (@args) = @_;
+    require Carp;
+    Carp::croak(@args);
+}
+
+##############################################################################
 # Implementation (constant form)
 ##############################################################################
 
@@ -233,10 +245,17 @@ our @COLORSTACK;
 # make it easier to write scripts that also work on systems without any ANSI
 # support, like Windows consoles.
 #
+# Avoid using character classes like [:upper:] and \w here, since they load
+# Unicode character tables and consume a ton of memory.  All of our constants
+# only use ASCII characters.
+#
 ## no critic (ClassHierarchies::ProhibitAutoloading)
 ## no critic (Subroutines::RequireArgUnpacking)
+## no critic (RegularExpressions::ProhibitEnumeratedClasses)
 sub AUTOLOAD {
-    my ($sub, $attr) = $AUTOLOAD =~ m{ \A ([\w:]*::([[:upper:]\d_]+)) \z }xms;
+    my ($sub, $attr) = $AUTOLOAD =~ m{
+        \A ( [a-zA-Z0-9:]* :: ([A-Z0-9_]+) ) \z
+    }xms;
 
     # Check if we were called with something that doesn't look like an
     # attribute.
@@ -295,7 +314,7 @@ sub AUTOLOAD {
     ## no critic (References::ProhibitDoubleSigils)
     goto &$AUTOLOAD;
 }
-## use critic (Subroutines::RequireArgUnpacking)
+## use critic
 
 # Append a new color to the top of the color stack and return the top of
 # the stack.
@@ -501,13 +520,21 @@ sub coloralias {
             return $ATTRIBUTES_R{ $ALIASES{$alias} };
         }
     }
-    if ($alias !~ m{ \A [\w._-]+ \z }xms) {
+
+    # Avoid \w here to not load Unicode character tables, which increases the
+    # memory footprint of this module considerably.
+    #
+    ## no critic (RegularExpressions::ProhibitEnumeratedClasses)
+    if ($alias !~ m{ \A [a-zA-Z0-9._-]+ \z }xms) {
         croak(qq{Invalid alias name "$alias"});
     } elsif ($ATTRIBUTES{$alias}) {
         croak(qq{Cannot alias standard color "$alias"});
     } elsif (!exists $ATTRIBUTES{$color}) {
         croak(qq{Invalid attribute name "$color"});
     }
+    ## use critic
+
+    # Set the alias and return.
     $ALIASES{$alias} = $ATTRIBUTES{$color};
     return $color;
 }
@@ -793,8 +820,8 @@ If ATTR is specified, coloralias() sets up an alias of ALIAS for the
 standard color ATTR.  From that point forward, ALIAS can be passed into
 color(), colored(), and colorvalid() and will have the same meaning as
 ATTR.  One possible use of this facility is to give more meaningful names
-to the 256-color RGB colors.  Only alphanumerics, C<.>, C<_>, and C<-> are
-allowed in alias names.
+to the 256-color RGB colors.  Only ASCII alphanumerics, C<.>, C<_>, and
+C<-> are allowed in alias names.
 
 If ATTR is not specified, coloralias() returns the standard color name to
 which ALIAS is aliased, if any, or undef if ALIAS does not exist.
@@ -1193,7 +1220,7 @@ voice solutions.
 Copyright 1996 Zenin
 
 Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2005, 2006, 2008, 2009, 2010,
-2011, 2012, 2013, 2014, 2015 Russ Allbery <rra@cpan.org>
+2011, 2012, 2013, 2014, 2015, 2016 Russ Allbery <rra@cpan.org>
 
 Copyright 2012 Kurt Starsinic <kstarsinic@gmail.com>
 
