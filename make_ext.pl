@@ -652,7 +652,7 @@ sub just_pm_to_blib {
     die "Inconsistent module $mname has both lib/ and $first/"
         if $has_lib && $has_topdir;
 
-    print "\nRunning pm_to_blib for $ext_dir directly\n"
+    print "Running pm_to_blib for $ext_dir directly\n"
       unless $silent;
 
     my %pm;
