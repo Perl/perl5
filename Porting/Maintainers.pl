@@ -1030,7 +1030,7 @@ use File::Glob qw(:case);
     },
 
     'Sys::Syslog' => {
-        'DISTRIBUTION' => 'SAPER/Sys-Syslog-0.33.tar.gz',
+        'DISTRIBUTION' => 'SAPER/Sys-Syslog-0.34.tar.gz',
         'FILES'        => q[cpan/Sys-Syslog],
         'EXCLUDED'     => [
             qr{^eg/},
