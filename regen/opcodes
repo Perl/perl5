@@ -556,6 +556,7 @@ custom		unknown custom operator		ck_null		0
 
 # For CORE:: subs
 coreargs	CORE:: subroutine	ck_null		$	
+avhvswitch	Array/hash switch	ck_null		t1
 
 runcv		__SUB__			ck_null		s0
 

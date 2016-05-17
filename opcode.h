@@ -528,6 +528,7 @@ EXTCONST char* const PL_op_name[] = {
 	"once",
 	"custom",
 	"coreargs",
+	"avhvswitch",
 	"runcv",
 	"fc",
 	"padcv",
@@ -929,6 +930,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"once",
 	"unknown custom operator",
 	"CORE:: subroutine",
+	"Array/hash switch",
 	"__SUB__",
 	"fc",
 	"private subroutine",
@@ -1344,6 +1346,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_once,
 	Perl_pp_custom,	/* implemented by Perl_unimplemented_op */
 	Perl_pp_coreargs,
+	Perl_pp_avhvswitch,
 	Perl_pp_runcv,
 	Perl_pp_fc,
 	Perl_pp_padcv,
@@ -1755,6 +1758,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* once */
 	Perl_ck_null,		/* custom */
 	Perl_ck_null,		/* coreargs */
+	Perl_ck_null,		/* avhvswitch */
 	Perl_ck_null,		/* runcv */
 	Perl_ck_fun,		/* fc */
 	Perl_ck_null,		/* padcv */
@@ -2160,6 +2164,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000300,	/* once */
 	0x00000000,	/* custom */
 	0x00000600,	/* coreargs */
+	0x00000108,	/* avhvswitch */
 	0x00000004,	/* runcv */
 	0x00009b8e,	/* fc */
 	0x00000040,	/* padcv */
@@ -2797,6 +2802,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* once */
       -1, /* custom */
      181, /* coreargs */
+       0, /* avhvswitch */
        3, /* runcv */
        0, /* fc */
       -1, /* padcv */
@@ -2826,7 +2832,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
  */
 
 EXTCONST U16  PL_op_private_bitdefs[] = {
-    0x0003, /* scalar, prototype, refgen, srefgen, ref, readline, regcmaybe, regcreset, regcomp, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, complement, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, values, pop, shift, grepstart, grepwhile, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, method, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst */
+    0x0003, /* scalar, prototype, refgen, srefgen, ref, readline, regcmaybe, regcreset, regcomp, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, complement, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, values, pop, shift, grepstart, grepwhile, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, method, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, avhvswitch, fc, anonconst */
     0x2b5c, 0x3d59, /* pushmark */
     0x00bd, /* wantarray, runcv */
     0x03b8, 0x17f0, 0x3e0c, 0x38c8, 0x2f25, /* const */
@@ -3278,6 +3284,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* ONCE       */ (OPpARG1_MASK),
     /* CUSTOM     */ (0xff),
     /* COREARGS   */ (OPpCOREARGS_DEREF1|OPpCOREARGS_DEREF2|OPpCOREARGS_SCALARMOD|OPpCOREARGS_PUSHMARK),
+    /* AVHVSWITCH */ (OPpARG1_MASK),
     /* RUNCV      */ (OPpOFFBYONE),
     /* FC         */ (OPpARG1_MASK),
     /* PADCV      */ (0),

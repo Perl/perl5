@@ -245,6 +245,7 @@ $bits{anonconst}{0} = $bf[0];
 @{$bits{atan2}}{3,2,1,0} = ($bf[3], $bf[3], $bf[3], $bf[3]);
 $bits{av2arylen}{0} = $bf[0];
 $bits{avalues}{0} = $bf[0];
+$bits{avhvswitch}{0} = $bf[0];
 $bits{backtick}{0} = $bf[0];
 @{$bits{bind}}{3,2,1,0} = ($bf[3], $bf[3], $bf[3], $bf[3]);
 @{$bits{binmode}}{3,2,1,0} = ($bf[3], $bf[3], $bf[3], $bf[3]);
