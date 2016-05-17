@@ -288,8 +288,8 @@ EXTCONST char* const PL_op_name[] = {
 	"aslice",
 	"kvaslice",
 	"aeach",
-	"akeys",
 	"avalues",
+	"akeys",
 	"each",
 	"values",
 	"keys",
@@ -689,8 +689,8 @@ EXTCONST char* const PL_op_desc[] = {
 	"array slice",
 	"index/value array slice",
 	"each on array",
-	"keys on array",
 	"values on array",
+	"keys on array",
 	"each",
 	"values",
 	"keys",
@@ -1104,8 +1104,8 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_aslice,
 	Perl_pp_kvaslice,
 	Perl_pp_aeach,
-	Perl_pp_akeys,
 	Perl_pp_avalues,	/* implemented by Perl_pp_akeys */
+	Perl_pp_akeys,
 	Perl_pp_each,
 	Perl_pp_values,	/* implemented by Perl_do_kv */
 	Perl_pp_keys,	/* implemented by Perl_do_kv */
@@ -1515,8 +1515,8 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* aslice */
 	Perl_ck_null,		/* kvaslice */
 	Perl_ck_each,		/* aeach */
-	Perl_ck_each,		/* akeys */
 	Perl_ck_each,		/* avalues */
+	Perl_ck_each,		/* akeys */
 	Perl_ck_each,		/* each */
 	Perl_ck_each,		/* values */
 	Perl_ck_each,		/* keys */
@@ -1920,8 +1920,8 @@ EXTCONST U32 PL_opargs[] = {
 	0x00023401,	/* aslice */
 	0x00023401,	/* kvaslice */
 	0x00003b40,	/* aeach */
-	0x00003b08,	/* akeys */
 	0x00003b48,	/* avalues */
+	0x00003b08,	/* akeys */
 	0x00004b40,	/* each */
 	0x00004b48,	/* values */
 	0x00004b08,	/* keys */
@@ -2557,8 +2557,8 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       96, /* aslice */
       99, /* kvaslice */
        0, /* aeach */
-      39, /* akeys */
        0, /* avalues */
+      39, /* akeys */
        0, /* each */
        0, /* values */
       39, /* keys */
@@ -3038,8 +3038,8 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* ASLICE     */ (OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpLVAL_INTRO),
     /* KVASLICE   */ (OPpMAYBE_LVSUB),
     /* AEACH      */ (OPpARG1_MASK),
-    /* AKEYS      */ (OPpARG1_MASK|OPpMAYBE_LVSUB),
     /* AVALUES    */ (OPpARG1_MASK),
+    /* AKEYS      */ (OPpARG1_MASK|OPpMAYBE_LVSUB),
     /* EACH       */ (OPpARG1_MASK),
     /* VALUES     */ (OPpARG1_MASK),
     /* KEYS       */ (OPpARG1_MASK|OPpMAYBE_LVSUB),
