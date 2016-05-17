@@ -1944,7 +1944,8 @@ S_postderef(pTHX_ int const funny, char const next)
 	if (PL_lex_state == LEX_INTERPNORMAL && !PL_lex_brackets) {
 	    assert('@' == funny || '$' == funny || DOLSHARP == funny);
 	    PL_lex_state = LEX_INTERPEND;
-	    force_next(POSTJOIN);
+	    if ('@' == funny)
+		force_next(POSTJOIN);
 	}
 	force_next(next);
 	PL_bufptr+=2;
