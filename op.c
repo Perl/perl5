@@ -14689,6 +14689,12 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
 	                          newOP(OP_CALLER,0)
 	               )
 	       );
+    case OP_EACH:
+    case OP_KEYS:
+    case OP_VALUES:
+	o = newUNOP(OP_AVHVSWITCH,0,argop);
+	o->op_private = opnum-OP_EACH;
+	return o;
     case OP_SELECT: /* which represents OP_SSELECT as well */
 	if (code)
 	    return newCONDOP(

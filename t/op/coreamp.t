@@ -205,6 +205,38 @@ sub test_proto {
         "&$o with coderef arg";
     }    
   }
+  elsif ($p eq '\[%@]') {
+    $tests += 7;
+
+    eval " &CORE::$o(\\%1,2) ";
+    like $@, qr/^Too many arguments for ${\op_desc($o)} at /,
+        "&$o with too many args";
+    eval { &{"CORE::$o"}() };
+    like $@, qr/^Not enough arguments for $o at /,
+         "&$o with too few args";
+    eval " &CORE::$o(2) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be hash or array (?x:
+                )reference at /,
+        "&$o with non-ref arg";
+    eval " &CORE::$o(*STDOUT{IO}) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be hash or array (?x:
+                )reference at /,
+        "&$o with ioref arg";
+    my $class = ref *DATA{IO};
+    eval " &CORE::$o(bless(*DATA{IO}, 'hov')) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be hash or array (?x:
+                )reference at /,
+        "&$o with ioref arg with hash overload (which does not count)";
+    bless *DATA{IO}, $class;
+    eval " &CORE::$o(\\&scriggle) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be hash or array (?x:
+                )reference at /,
+        "&$o with coderef arg";
+    eval " &CORE::$o(\\\$_) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be hash or array (?x:
+                )reference at /,
+        "&$o with scalarref arg";
+  }
   elsif ($p eq ';\[$*]') {
     $tests += 4;
 
@@ -468,6 +500,13 @@ is &myformline(' @<<< @>>>', 1, 2), 1, '&myformline retval';
 is $^A,        ' 1       2', 'effect of &myformline';
 lis [&myformline('@')], [1], '&myformline in list context';
 
+test_proto 'each';
+$tests += 4;
+is &myeach({ "a","b" }), "a", '&myeach(\%hash) in scalar cx';
+lis [&myeach({qw<a b>})], [qw<a b>], '&myeach(\%hash) in list cx';
+is &myeach([ "a","b" ]), 0, '&myeach(\@array) in scalar cx';
+lis [&myeach([qw<a b>])], [qw<0 a>], '&myeach(\@array) in list cx';
+
 test_proto 'exp';
 
 test_proto 'fc';
@@ -548,6 +587,13 @@ test_proto 'join';
 $tests += 2;
 is &myjoin('a','b','c'), 'bac', '&join';
 lis [&myjoin('a','b','c')], ['bac'], '&join in list context';
+
+test_proto 'keys';
+$tests += 4;
+is &mykeys({ 1..4 }), 2, '&mykeys(\%hash) in scalar cx';
+lis [sort &mykeys({1..4})], [1,3], '&mykeys(\%hash) in list cx';
+is &mykeys([ 1..4 ]), 4, '&mykeys(\@array) in scalar cx';
+lis [&mykeys([ 1..4 ])], [0..3], '&mykeys(\@array) in list cx';
 
 test_proto 'kill'; # set up mykill alias
 if ($^O ne 'riscos') {
@@ -942,6 +988,13 @@ test_proto 'utime';
 $tests += 2;
 is &myutime(undef,undef), 0, '&utime';
 lis [&myutime(undef,undef)], [0], '&utime in list context';
+
+test_proto 'values';
+$tests += 4;
+is &myvalues({ 1..4 }), 2, '&myvalues(\%hash) in scalar cx';
+lis [sort &myvalues({1..4})], [2,4], '&myvalues(\%hash) in list cx';
+is &myvalues([ 1..4 ]), 4, '&myvalues(\@array) in scalar cx';
+lis [&myvalues([ 1..4 ])], [1..4], '&mykeys(\@array) in list cx';
 
 test_proto 'vec';
 $tests += 3;

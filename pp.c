@@ -4845,7 +4845,10 @@ PP(pp_akeys)
 
         EXTEND(SP, n + 1);
 
-	if (PL_op->op_type == OP_AKEYS) {
+	if (  PL_op->op_type == OP_AKEYS
+	   || (  PL_op->op_type == OP_AVHVSWITCH
+	      && PL_op->op_private + OP_AEACH == OP_AKEYS  ))
+	{
 	    for (i = 0;  i <= n;  i++) {
 		mPUSHi(i);
 	    }
@@ -6310,11 +6313,16 @@ PP(pp_coreargs)
 	    RETURN;
 	case OA_HVREF:
 	    if (!svp || !*svp || !SvROK(*svp)
-	     || SvTYPE(SvRV(*svp)) != SVt_PVHV)
+	     || (  SvTYPE(SvRV(*svp)) != SVt_PVHV
+		&& (  opnum == OP_DBMCLOSE || opnum == OP_DBMOPEN
+		   || SvTYPE(SvRV(*svp)) != SVt_PVAV  )))
 		DIE(aTHX_
 		/* diag_listed_as: Type of arg %d to &CORE::%s must be %s*/
-		 "Type of arg %d to &CORE::%s must be hash reference",
-		  whicharg, PL_op_desc[opnum]
+		 "Type of arg %d to &CORE::%s must be hash%s reference",
+		  whicharg, PL_op_desc[opnum],
+		  opnum == OP_DBMCLOSE || opnum == OP_DBMOPEN
+		     ? ""
+		     : " or array"
 		);
 	    PUSHs(SvRV(*svp));
 	    break;
@@ -6383,7 +6391,10 @@ PP(pp_coreargs)
 PP(pp_avhvswitch)
 {
     dSP;
-    RETURN;
+    return PL_ppaddr[
+		(SvTYPE(TOPs) == SVt_PVAV ? OP_AEACH : OP_EACH)
+		    + PL_op->op_private
+	   ](aTHX);
 }
 
 PP(pp_runcv)

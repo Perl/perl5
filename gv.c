@@ -531,8 +531,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
 	return NULL;
     case KEY_chdir:
     case KEY_chomp: case KEY_chop: case KEY_defined: case KEY_delete:
-    case KEY_each : case KEY_eof : case KEY_exec   : case KEY_exists:
-    case KEY_keys:
+    case KEY_eof  : case KEY_exec: case KEY_exists :
     case KEY_lstat:
     case KEY_pop:
     case KEY_push:
@@ -542,7 +541,6 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
     case KEY_system:
     case KEY_truncate: case KEY_unlink:
     case KEY_unshift:
-    case KEY_values:
 	ampable = FALSE;
     }
     if (!gv) {

@@ -198,7 +198,7 @@ use strict;
 
     # find which ops use 0,1,2,3 or 4 bits of op_private for arg count info
 
-    $args0{$_} = 1 for qw(entersub); # UNOPs that usurp bit 0
+    $args0{$_} = 1 for qw(entersub avhvswitch); # UNOPs that usurp bit 0
 
     $args1{$_} = 1 for (
                         qw(reverse), # ck_fun(), but most bits stolen
@@ -757,6 +757,10 @@ addbits('multideref',
     4 => qw(OPpMULTIDEREF_EXISTS EXISTS), # deref is actually exists
     5 => qw(OPpMULTIDEREF_DELETE DELETE), # deref is actually delete
 );
+
+
+
+addbits('avhvswitch', '0..1' => { });
 
 1;
 
