@@ -1399,10 +1399,9 @@ run_with_options({stdin => '/dev/null', name => 'Configure'},
 patch_SH() unless $options{'all-fixups'};
 apply_fixups($options{'late-fixup'});
 
-if (-f 'config.sh') {
+if (-f 'config.sh' && $major < 10 && $defines{noextensions}) {
     # Emulate noextensions if Configure doesn't support it.
-    fake_noextensions()
-        if $major < 10 && $defines{noextensions};
+    fake_noextensions();
     system_or_die('./Configure -S');
 }
 
