@@ -555,4 +555,7 @@ is $#foo, 3, 'assigning to arylen aliased in foreach(scalar $#arylen)';
     is "@a", 'a b c', 'assigning to itself';
 }
 
+sub { undef *_; shift }->(); # This would crash; no ok() necessary.
+sub { undef *_; pop   }->();
+
 "We're included by lib/Tie/Array/std.t so we need to return something true";
