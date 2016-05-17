@@ -2316,6 +2316,12 @@ failure modes by inspecting C<$?> like this:
         printf "child exited with value %d\n", $? >> 8;
     }
 
+Use the L<open> pragma to control the I/O layers used when reading the
+output of the command, for example:
+
+  use open IN => ":encoding(UTF-8)";
+  my $x = `cmd-producing-utf-8`;
+
 See L</"I/O Operators"> for more discussion.
 
 =item C<qw/I<STRING>/>
