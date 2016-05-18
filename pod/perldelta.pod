@@ -27,6 +27,16 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Perl can now do default collation in UTF-8 locales on platforms
+that support it
+
+Some platforms natively do a reasonable job of collating and sorting in
+UTF-8 locales.  Perl now works with those.  For portability and full
+control, L<Unicode::Collate> is still recommended, but now you may
+not need to do anything special to get good-enough results, depending on
+your application.  See
+L<perllocale/Category C<LC_COLLATE>: Collation: Text Comparisons and Sorting>
+
 =head2 Better locale collation of strings containing embedded C<NUL>
 characters
 

@@ -487,6 +487,7 @@ Perl_new_collate(pTHX_ const char *newcoll)
 	PL_collxfrm_mult = 2;
         PL_in_utf8_COLLATE_locale = FALSE;
         *PL_strxfrm_min_char = '\0';
+        PL_strxfrm_max_cp = 0;
 	return;
     }
 
@@ -502,6 +503,7 @@ Perl_new_collate(pTHX_ const char *newcoll)
 
         PL_in_utf8_COLLATE_locale = _is_cur_LC_category_utf8(LC_COLLATE);
         *PL_strxfrm_min_char = '\0';
+        PL_strxfrm_max_cp = 0;
 
         /* A locale collation definition includes primary, secondary, tertiary,
          * etc. weights for each character.  To sort, the primary weights are
@@ -564,7 +566,7 @@ Perl_new_collate(pTHX_ const char *newcoll)
             char * x_shorter;   /* We also transform a substring of 'longer' */
             Size_t x_len_shorter;
 
-            /* mem_collxfrm() is used get the transformation (though here we
+            /* _mem_collxfrm() is used get the transformation (though here we
              * are interested only in its length).  It is used because it has
              * the intelligence to handle all cases, but to work, it needs some
              * values of 'm' and 'b' to get it started.  For the purposes of
@@ -576,9 +578,18 @@ Perl_new_collate(pTHX_ const char *newcoll)
             PL_collxfrm_mult = 5 * sizeof(UV);
 
             /* Find out how long the transformation really is */
-            x_longer = mem_collxfrm(longer,
-                                    sizeof(longer) - 1,
-                                    &x_len_longer);
+            x_longer = _mem_collxfrm(longer,
+                                     sizeof(longer) - 1,
+                                     &x_len_longer,
+
+                                     /* We avoid converting to UTF-8 in the
+                                      * called function by telling it the
+                                      * string is in UTF-8 if the locale is a
+                                      * UTF-8 one.  Since the string passed
+                                      * here is invariant under UTF-8, we can
+                                      * claim it's UTF-8 even though it isn't.
+                                      * */
+                                     PL_in_utf8_COLLATE_locale);
             Safefree(x_longer);
 
             /* Find out how long the transformation of a substring of 'longer'
@@ -586,9 +597,10 @@ Perl_new_collate(pTHX_ const char *newcoll)
              * sufficient to calculate 'm' and 'b'.  The substring is all of
              * 'longer' except the first character.  This minimizes the chances
              * of being swayed by outliers */
-            x_shorter = mem_collxfrm(longer + 1,
+            x_shorter = _mem_collxfrm(longer + 1,
                                       sizeof(longer) - 2,
-                                      &x_len_shorter);
+                                      &x_len_shorter,
+                                      PL_in_utf8_COLLATE_locale);
             Safefree(x_shorter);
 
             /* If the results are nonsensical for this simple test, the whole
@@ -1364,29 +1376,44 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #ifdef USE_LOCALE_COLLATE
 
-/*
- * mem_collxfrm() is a bit like strxfrm() but with two important
- * differences. First, it handles embedded NULs. Second, it allocates
- * a bit more memory than needed for the transformed data itself.
- * The real transformed data begins at offset sizeof(collationix).
- * *xlen is set to the length of that, and doesn't include the collation index
- * size.
- * Please see sv_collxfrm() to see how this is used.
- */
+char *
+Perl_mem_collxfrm(pTHX_ const char *input_string, STRLEN len, STRLEN *xlen)
+{
+    /* This function is retained for compatibility in case someone outside core
+     * is using this (but it is undocumented) */
+
+    PERL_ARGS_ASSERT_MEM_COLLXFRM;
+
+    return _mem_collxfrm(input_string, len, xlen, FALSE);
+}
 
 char *
-Perl_mem_collxfrm(pTHX_ const char *input_string,
-                         STRLEN len,
-                         STRLEN *xlen
+Perl__mem_collxfrm(pTHX_ const char *input_string,
+                         STRLEN len,    /* Length of 'input_string' */
+                         STRLEN *xlen,  /* Set to length of returned string
+                                           (not including the collation index
+                                           prefix) */
+                         bool utf8      /* Is the input in UTF-8? */
                    )
 {
+
+    /* _mem_collxfrm() is a bit like strxfrm() but with two important
+     * differences. First, it handles embedded NULs. Second, it allocates a bit
+     * more memory than needed for the transformed data itself.  The real
+     * transformed data begins at offset sizeof(collationix).  *xlen is set to
+     * the length of that, and doesn't include the collation index size.
+     * Please see sv_collxfrm() to see how this is used. */
+
     char * s = (char *) input_string;
     STRLEN s_strlen = strlen(input_string);
     char *xbuf = NULL;
     STRLEN xAlloc, xout; /* xalloc is a reserved word in VC */
     bool first_time = TRUE; /* Cleared after first loop iteration */
 
-    PERL_ARGS_ASSERT_MEM_COLLXFRM;
+    PERL_ARGS_ASSERT__MEM_COLLXFRM;
+
+    /* Must be NUL-terminated */
+    assert(*(input_string + len) == '\0');
 
     /* If this locale has defective collation, skip */
     if (PL_collxfrm_base == 0 && PL_collxfrm_mult == 0) {
@@ -1439,7 +1466,9 @@ Perl_mem_collxfrm(pTHX_ const char *input_string,
 
                     /* If needs to be 2 bytes, find them */
                     if (! UVCHR_IS_INVARIANT(j)) {
-                        continue;  /* Can't handle variants yet */
+                        char * d = cur_source;
+                        append_utf8_from_native_byte((U8) j, (U8 **) &d);
+                        trial_len = 2;
                     }
                 }
                 else if (! isCNTRL_LC(j)) {
@@ -1447,7 +1476,8 @@ Perl_mem_collxfrm(pTHX_ const char *input_string,
                 }
 
                 /* Then transform it */
-                x = mem_collxfrm(cur_source, trial_len, &x_len);
+                x = _mem_collxfrm(cur_source, trial_len, &x_len,
+                                  PL_in_utf8_COLLATE_locale);
 
                 /* If something went wrong (which it shouldn't), just
                  * ignore this code point */
@@ -1475,7 +1505,8 @@ Perl_mem_collxfrm(pTHX_ const char *input_string,
              * locale, arbitrarily use \001 */
             if (cur_min_x == NULL) {
                 STRLEN x_len;   /* temporary */
-                cur_min_x = mem_collxfrm("\001", 1, &x_len);
+                cur_min_x = _mem_collxfrm("\001", 1, &x_len,
+                                          PL_in_utf8_COLLATE_locale);
                 /* cur_min_cp was already initialized to 1 */
             }
 
@@ -1511,10 +1542,140 @@ Perl_mem_collxfrm(pTHX_ const char *input_string,
         len = strlen(s);
     }
 
+    /* Make sure the UTF8ness of the string and locale match */
+    if (utf8 != PL_in_utf8_COLLATE_locale) {
+        const char * const t = s;   /* Temporary so we can later find where the
+                                       input was */
+
+        /* Here they don't match.  Change the string's to be what the locale is
+         * expecting */
+
+        if (! utf8) { /* locale is UTF-8, but input isn't; upgrade the input */
+            s = (char *) bytes_to_utf8((const U8 *) s, &len);
+            utf8 = TRUE;
+        }
+        else {   /* locale is not UTF-8; but input is; downgrade the input */
+
+            s = (char *) bytes_from_utf8((const U8 *) s, &len, &utf8);
+
+            /* If the downgrade was successful we are done, but if the input
+             * contains things that require UTF-8 to represent, have to do
+             * damage control ... */
+            if (UNLIKELY(utf8)) {
+
+                /* What we do is construct a non-UTF-8 string with
+                 *  1) the characters representable by a single byte converted
+                 *     to be so (if necessary);
+                 *  2) and the rest converted to collate the same as the
+                 *     highest collating representable character.  That makes
+                 *     them collate at the end.  This is similar to how we
+                 *     handle embedded NULs, but we use the highest collating
+                 *     code point instead of the smallest.  Like the NUL case,
+                 *     this isn't perfect, but is the best we can reasonably
+                 *     do.  Every above-255 code point will sort the same as
+                 *     the highest-sorting 0-255 code point.  If that code
+                 *     point can combine in a sequence with some other code
+                 *     points for weight calculations, us changing something to
+                 *     be it can adversely affect the results.  But in most
+                 *     cases, it should work reasonably.  And note that this is
+                 *     really an illegal situation: using code points above 255
+                 *     on a locale where only 0-255 are valid.  If two strings
+                 *     sort entirely equal, then the sort order for the
+                 *     above-255 code points will be in code point order. */
+
+                utf8 = FALSE;
+
+                /* If we haven't calculated the code point with the maximum
+                 * collating order for this locale, do so now */
+                if (! PL_strxfrm_max_cp) {
+                    int j;
+
+                    /* The current transformed string that collates the
+                     * highest (except it also includes the prefixed collation
+                     * index. */
+                    char * cur_max_x = NULL;
+
+                    /* Look through all legal code points (NUL isn't) */
+                    for (j = 1; j < 256; j++) {
+                        char * x;
+                        STRLEN x_len;
+
+                        /* Create a 1-char string of the current code point. */
+                        char cur_source[] = { (char) j, '\0' };
+
+                        /* Then transform it */
+                        x = _mem_collxfrm(cur_source, 1, &x_len, FALSE);
+
+                        /* If something went wrong (which it shouldn't), just
+                         * ignore this code point */
+                        if (x_len == 0) {
+                            Safefree(x);
+                            continue;
+                        }
+
+                        /* If this character's transformation is higher than
+                         * the current highest, this one becomes the highest */
+                        if (   cur_max_x == NULL
+                            || strGT(x         + sizeof(PL_collation_ix),
+                                     cur_max_x + sizeof(PL_collation_ix)))
+                        {
+                            PL_strxfrm_max_cp = j;
+                            cur_max_x = x;
+                        }
+                        else {
+                            Safefree(x);
+                        }
+                    }
+
+                    Safefree(cur_max_x);
+                }
+
+                /* Here we know which legal code point collates the highest.
+                 * We are ready to construct the non-UTF-8 string.  The length
+                 * will be at least 1 byte smaller than the input string
+                 * (because we changed at least one 2-byte character into a
+                 * single byte), but that is eaten up by the trailing NUL */
+                Newx(s, len, char);
+
+                {
+                    STRLEN i;
+                    STRLEN d= 0;
+
+                    for (i = 0; i < len; i+= UTF8SKIP(t + i)) {
+                        U8 cur_char = t[i];
+                        if (UTF8_IS_INVARIANT(cur_char)) {
+                            s[d++] = cur_char;
+                        }
+                        else if (UTF8_IS_DOWNGRADEABLE_START(cur_char)) {
+                            s[d++] = EIGHT_BIT_UTF8_TO_NATIVE(cur_char, t[i+1]);
+                        }
+                        else {  /* Replace illegal cp with highest collating
+                                   one */
+                            s[d++] = PL_strxfrm_max_cp;
+                        }
+                    }
+                    s[d++] = '\0';
+                    Renew(s, d, char);   /* Free up unused space */
+                }
+            }
+        }
+
+        /* Here, we have constructed a modified version of the input.  It could
+         * be that we already had a modified copy before we did this version.
+         * If so, that copy is no longer needed */
+        if (t != input_string) {
+            Safefree(t);
+        }
+    }
+
     /* The first element in the output is the collation id, used by
      * sv_collxfrm(); then comes the space for the transformed string.  The
      * equation should give us a good estimate as to how much is needed */
-    xAlloc = sizeof(PL_collation_ix) + PL_collxfrm_base + (PL_collxfrm_mult * len) + 1;
+    xAlloc = sizeof(PL_collation_ix)
+           + PL_collxfrm_base
+           + (PL_collxfrm_mult * ((utf8)
+                                 ? utf8_length((U8 *) s, (U8 *) s + len)
+                                 : len));
     Newx(xbuf, xAlloc, char);
     if (UNLIKELY(! xbuf))
 	goto bad;

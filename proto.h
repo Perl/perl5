@@ -4430,6 +4430,13 @@ PERL_CALLCONV SV*	Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp);
 #define PERL_ARGS_ASSERT_HFREE_NEXT_ENTRY	\
 	assert(hv); assert(indexp)
 #endif
+#if defined(PERL_IN_LOCALE_C) || defined(PERL_IN_SV_C)
+#  if defined(USE_LOCALE_COLLATE)
+PERL_CALLCONV char*	Perl__mem_collxfrm(pTHX_ const char* input_string, STRLEN len, STRLEN* xlen, bool utf8);
+#define PERL_ARGS_ASSERT__MEM_COLLXFRM	\
+	assert(input_string); assert(xlen)
+#  endif
+#endif
 #if defined(PERL_IN_MALLOC_C)
 STATIC int	S_adjust_size_and_find_bucket(size_t *nbytes_p);
 #define PERL_ARGS_ASSERT_ADJUST_SIZE_AND_FIND_BUCKET	\

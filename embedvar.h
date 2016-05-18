@@ -310,6 +310,7 @@
 #define PL_stdingv		(vTHX->Istdingv)
 #define PL_strtab		(vTHX->Istrtab)
 #define PL_strxfrm_is_behaved	(vTHX->Istrxfrm_is_behaved)
+#define PL_strxfrm_max_cp	(vTHX->Istrxfrm_max_cp)
 #define PL_strxfrm_min_char	(vTHX->Istrxfrm_min_char)
 #define PL_sub_generation	(vTHX->Isub_generation)
 #define PL_subline		(vTHX->Isubline)

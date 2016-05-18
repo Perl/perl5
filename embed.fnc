@@ -910,6 +910,12 @@ Ap	|I32 *	|markstack_grow
 p	|int	|magic_setcollxfrm|NN SV* sv|NN MAGIC* mg
 : Defined in locale.c, used only in sv.c
 p	|char*	|mem_collxfrm	|NN const char* input_string|STRLEN len|NN STRLEN* xlen
+#   if defined(PERL_IN_LOCALE_C) || defined(PERL_IN_SV_C)
+pM	|char*	|_mem_collxfrm	|NN const char* input_string	\
+				|STRLEN len			\
+				|NN STRLEN* xlen		\
+				|bool utf8
+#   endif
 #endif
 Afpd	|SV*	|mess		|NN const char* pat|...
 Apd	|SV*	|mess_sv	|NN SV* basemsg|bool consume

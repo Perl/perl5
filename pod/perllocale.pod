@@ -33,9 +33,11 @@ design deficiencies, and nowadays, there is a series of "UTF-8
 locales", based on Unicode.  These are locales whose character set is
 Unicode, encoded in UTF-8.  Starting in v5.20, Perl fully supports
 UTF-8 locales, except for sorting and string comparisons like C<lt> and
-C<ge>.  (Use L<Unicode::Collate> for these.)  Perl continues to support
-the old non UTF-8 locales as well.  There are currently no UTF-8 locales
-for EBCDIC platforms.
+C<ge>.  Starting in v5.26, Perl can handle these reasonably as well,
+depending on the platform's implementation.  However, for earlier
+releases or for better control, use L<Unicode::Collate> .  Perl continues to
+support the old non UTF-8 locales as well.  There are currently no UTF-8
+locales for EBCDIC platforms.
 
 (Unicode is also creating C<CLDR>, the "Common Locale Data Repository",
 L<http://cldr.unicode.org/> which includes more types of information than
@@ -815,10 +817,31 @@ C<$equal_in_locale> will be true if the collation locale specifies a
 dictionary-like ordering that ignores space characters completely and
 which folds case.
 
-Perl currently only supports single-byte locales for C<LC_COLLATE>.  This means
-that a UTF-8 locale likely will just give you machine-native ordering.
-Use L<Unicode::Collate> for the full implementation of the Unicode
-Collation Algorithm.
+Perl uses the platform's C library collation functions C<strcoll()> and
+C<strxfrm()>.  That means you get whatever they give.  On some
+platforms, these functions work well on UTF-8 locales, giving
+a reasonable default collation for the code points that are important in
+that locale.  (And if they aren't working well, the problem may only be
+that the locale definition is deficient, so can be fixed by using a
+better definition file.  Unicode's definitions (see L</Freely available
+locale definitions>) provide reasonable UTF-8 locale collation
+definitions.)  Starting in Perl v5.26, Perl's use of these functions has
+been made more seamless.  This may be sufficient for your needs.  For
+more control, and to make sure strings containing any code point (not
+just the ones important in the locale) collate properly, the
+L<Unicode::Collate> module is suggested.
+
+In non-UTF-8 locales (hence single byte), code points above 0xFF are
+technically invalid.  But if present, again starting in v5.26, they will
+collate to the same position as the highest valid code point does.  This
+generally gives good results, but the collation order may be skewed if
+the valid code point gets special treatment when it forms particular
+sequences with other characters as defined by the locale.
+When two strings collate identically, the code point order is used as a
+tie breaker.
+
+If Perl detects that there are problems with the locale collation order,
+it reverts to using non-locale collation rules for that locale.
 
 If Perl detects that there are problems with the locale collation order,
 it reverts to using non-locale collation rules for that locale.
@@ -1417,9 +1440,12 @@ into bankers, bikers, gamers, and so on.
 The support of Unicode is new starting from Perl version v5.6, and more fully
 implemented in versions v5.8 and later.  See L<perluniintro>.
 
-Starting in Perl v5.20, UTF-8 locales are supported in Perl, except for
-C<LC_COLLATE> (use L<Unicode::Collate> instead).  If you have Perl v5.16
-or v5.18 and can't upgrade, you can use
+Starting in Perl v5.20, UTF-8 locales are supported in Perl, except
+C<LC_COLLATE> is only partially supported; collation support is improved
+in Perl v5.26 to a level that may be sufficient for your needs
+(see L</Category C<LC_COLLATE>: Collation: Text Comparisons and Sorting>).
+
+If you have Perl v5.16 or v5.18 and can't upgrade, you can use
 
     use locale ':not_characters';
 
@@ -1445,10 +1471,7 @@ command line switch.
 
 This form of the pragma allows essentially seamless handling of locales
 with Unicode.  The collation order will be by Unicode code point order.
-It is strongly
-recommended that when you need to order and sort strings that you use
-the standard module L<Unicode::Collate> which gives much better results
-in many instances than you can get with the old-style locale handling.
+L<Unicode::Collate> can be used to get Unicode rules collation.
 
 All the modules and switches just described can be used in v5.20 with
 just plain C<use locale>, and, should the input locales not be UTF-8,
@@ -1564,7 +1587,8 @@ consistently to regular expression matching except for bracketed
 character classes; in v5.14 it was extended to all regex matches; and in
 v5.16 to the casing operations such as C<\L> and C<uc()>.  For
 collation, in all releases so far, the system's C<strxfrm()> function is
-called, and whatever it does is what you get.
+called, and whatever it does is what you get.  Starting in v5.26, various
+bugs are fixed with the way perl uses this function.
 
 =head1 BUGS
 

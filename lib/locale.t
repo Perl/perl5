@@ -1752,16 +1752,66 @@ foreach my $Locale (@Locale) {
 
         ++$locales_test_number;
         $test_names{$locales_test_number}
-                            = 'TODO Verify that strings with embedded NUL collate';
+                            = 'Verify that strings with embedded NUL collate';
         my $ok = "a\0a\0a" lt "a\001a\001a";
         report_result($Locale, $locales_test_number, $ok);
 
         ++$locales_test_number;
         $test_names{$locales_test_number}
-                            = 'TODO Verify that strings with embedded NUL and '
+                            = 'Verify that strings with embedded NUL and '
                             . 'extra trailing NUL collate';
         $ok = "a\0a\0" lt "a\001a\001";
         report_result($Locale, $locales_test_number, $ok);
+
+        ++$locales_test_number;
+        $test_names{$locales_test_number}
+            = "Skip in non-UTF-8 locales; otherwise verify that UTF8ness "
+            . "doesn't matter with collation";
+        if (! $is_utf8_locale) {
+            report_result($Locale, $locales_test_number, 1);
+        }
+        else {
+
+            # khw can't think of anything better.  Start with a string that is
+            # higher than its UTF-8 representation in both EBCDIC and ASCII
+            my $string = chr utf8::unicode_to_native(0xff);
+            my $utf8_string = $string;
+            utf8::upgrade($utf8_string);
+
+            # 8 should be lt 9 in all locales (except ones that aren't
+            # ASCII-based, which might fail this)
+            $ok = ("a${string}8") lt ("a${utf8_string}9");
+            report_result($Locale, $locales_test_number, $ok);
+        }
+
+        ++$locales_test_number;
+        $test_names{$locales_test_number}
+            = "Skip in UTF-8 locales; otherwise verify that single byte "
+            . "collates before 0x100 and above";
+        if ($is_utf8_locale) {
+            report_result($Locale, $locales_test_number, 1);
+        }
+        else {
+            my $max_collating = chr 0;  # Find byte that collates highest
+            for my $i (0 .. 255) {
+                my $char = chr $i;
+                $max_collating = $char if $char gt $max_collating;
+            }
+            $ok = $max_collating lt chr 0x100;
+            report_result($Locale, $locales_test_number, $ok);
+        }
+
+        ++$locales_test_number;
+        $test_names{$locales_test_number}
+            = "Skip in UTF-8 locales; otherwise verify that 0x100 and "
+            . "above collate in code point order";
+        if ($is_utf8_locale) {
+            report_result($Locale, $locales_test_number, 1);
+        }
+        else {
+            $ok = chr 0x100 lt chr 0x101;
+            report_result($Locale, $locales_test_number, $ok);
+        }
     }
 
     my $ok1;
