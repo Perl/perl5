@@ -501,33 +501,48 @@ Perl_new_collate(pTHX_ const char *newcoll)
 
         PL_in_utf8_COLLATE_locale = _is_cur_LC_category_utf8(LC_COLLATE);
 
+        /* A locale collation definition includes primary, secondary, tertiary,
+         * etc. weights for each character.  To sort, the primary weights are
+         * used, and only if they compare equal, then the secondary weights are
+         * used, and only if they compare equal, then the tertiary, etc.
+         *
+         * strxfrm() works by taking the input string, say ABC, and creating an
+         * output transformed string consisting of first the primary weights,
+         * A¹B¹C¹ followed by the secondary ones, A²B²C²; and then the
+         * tertiary, etc, yielding A¹B¹C¹ A²B²C² A³B³C³ ....  Some characters
+         * may not have weights at every level.  In our example, let's say B
+         * doesn't have a tertiary weight, and A doesn't have a secondary
+         * weight.  The constructed string is then going to be
+         *  A¹B¹C¹ B²C² A³C³ ....
+         * This has the desired effect that strcmp() will look at the secondary
+         * or tertiary weights only if the strings compare equal at all higher
+         * priority weights.  The spaces shown here, like in
+         *  "A¹B¹C¹ * A²B²C² "
+         * are not just for readability.  In the general case, these must
+         * actually be bytes, which we will call here 'separator weights'; and
+         * they must be smaller than any other weight value, but since these
+         * are C strings, only the terminating one can be a NUL (some
+         * implementations may include a non-NUL separator weight just before
+         * the NUL).  Implementations tend to reserve 01 for the separator
+         * weights.  They are needed so that a shorter string's secondary
+         * weights won't be misconstrued as primary weights of a longer string,
+         * etc.  By making them smaller than any other weight, the shorter
+         * string will sort first.  (Actually, if all secondary weights are
+         * smaller than all primary ones, there is no need for a separator
+         * weight between those two levels, etc.)
+         *
+         * The length of the transformed string is roughly a linear function of
+         * the input string.  It's not exactly linear because some characters
+         * don't have weights at all levels.  When we call strxfrm() we have to
+         * allocate some memory to hold the transformed string.  The
+         * calculations below try to find coefficients 'm' and 'b' for this
+         * locale so that m*x + b equals how much space we need, given the size
+         * of the input string in 'x'.  If we calculate too small, we increase
+         * the size as needed, and call strxfrm() again, but it is better to
+         * get it right the first time to avoid wasted expensive string
+         * transformations. */
+
 	{
-            /* A locale collation definition includes primary, secondary,
-             * tertiary, etc. weights for each character.  To sort, the primary
-             * weights are used, and only if they compare equal, then the
-             * secondary weights are used, and only if they compare equal, then
-             * the tertiary, etc.  strxfrm() works by taking the input string,
-             * say ABC, and creating an output string consisting of first the
-             * primary weights, A¹B¹C¹ followed by the secondary ones, A²B²C²;
-             * and then the tertiary, etc, yielding A¹B¹C¹A²B²C²A³B³C³....
-             * Some characters may not have weights at every level.  In our
-             * example, let's say B doesn't have a tertiary weight, and A
-             * doesn't have a secondary weight.  The constructed string is then
-             * going to be A¹B¹C¹B²C²A³C³....  This has the desired
-             * characteristics that strcmp() will look at the secondary or
-             * tertiary weights only if the strings compare equal at all higher
-             * priority weights.  The length of the transformed string is
-             * roughly a linear function of the input string.  It's not exactly
-             * linear because some characters don't have weights at all levels,
-             * and there are some complications, so there is often per-string
-             * overhead.  When we call strxfrm() we have to allocate some
-             * memory to hold the transformed string.  The calculations below
-             * try to find constants for this locale 'm' and 'b' so that m*x +
-             * b equals how much space we need given the size of the input
-             * string in 'x'.  If we calculate too small, we increase the size
-             * as needed, and call strxfrm() again, but it is better to get it
-             * right the first time to avoid wasted expensive string
-             * transformations. */
 	  /*  2: at most so many chars ('a', 'b'). */
 	  /* 50: surely no system expands a char more. */
 #define XFRMBUFSIZE  (2 * 50)
@@ -1287,9 +1302,9 @@ Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
 
     PERL_ARGS_ASSERT_MEM_COLLXFRM;
 
-    /* the first sizeof(collationix) bytes are used by sv_collxfrm(). */
-    /* the +1 is for the terminating NUL. */
-
+    /* The first element in the output is the collation id, used by
+     * sv_collxfrm(); then comes the space for the transformed string.  The
+     * equation should give us a good estimate as to how much is needed */
     xAlloc = sizeof(PL_collation_ix) + PL_collxfrm_base + (PL_collxfrm_mult * len) + 1;
     Newx(xbuf, xAlloc, char);
     if (UNLIKELY(! xbuf))
