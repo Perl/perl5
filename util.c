@@ -4677,10 +4677,8 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
     else
 #endif /* NO_PERL_HASH_ENV */
     {
-        (void)seedDrand01((Rand_seed_t)seed());
-
         for( i = 0; i < PERL_HASH_SEED_BYTES; i++ ) {
-            seed_buffer[i] = (unsigned char)(Drand01() * (U8_MAX+1));
+            seed_buffer[i] = (unsigned char)(Perl_internal_drand48() * (U8_MAX+1));
         }
     }
 #ifdef USE_PERL_PERTURB_KEYS

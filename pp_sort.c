@@ -788,7 +788,7 @@ S_qsortsvu(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
       size_t n;
       SV ** const q = array;
       for (n = num_elts; n > 1; ) {
-         const size_t j = (size_t)(n-- * Drand01());
+         const size_t j = (size_t)(n-- * Perl_internal_drand48());
          temp = q[j];
          q[j] = q[n];
          q[n] = temp;

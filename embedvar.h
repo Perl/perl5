@@ -174,6 +174,7 @@
 #define PL_incgv		(vTHX->Iincgv)
 #define PL_initav		(vTHX->Iinitav)
 #define PL_inplace		(vTHX->Iinplace)
+#define PL_internal_random_state	(vTHX->Iinternal_random_state)
 #define PL_isarev		(vTHX->Iisarev)
 #define PL_known_layers		(vTHX->Iknown_layers)
 #define PL_langinfo_buf		(vTHX->Ilanginfo_buf)
