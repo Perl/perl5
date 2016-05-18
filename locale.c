@@ -666,6 +666,19 @@ Perl_new_collate(pTHX_ const char *newcoll)
                 /* Add 1 for the trailing NUL */
                 PL_collxfrm_base = base + 1;
             }
+
+#ifdef DEBUGGING
+            if (DEBUG_L_TEST || debug_initialization) {
+                PerlIO_printf(Perl_debug_log,
+                    "%s:%d: ?UTF-8 locale=%d; x_len_shorter=%"UVuf", "
+                    "x_len_longer=%"UVuf","
+                    " collate multipler=%"UVuf", collate base=%"UVuf"\n",
+                    __FILE__, __LINE__,
+                    PL_in_utf8_COLLATE_locale,
+                    x_len_shorter, x_len_longer,
+                    PL_collxfrm_mult, PL_collxfrm_base);
+            }
+#endif
 	}
     }
 
@@ -1460,7 +1473,10 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
          * locale, find it */
         if (*PL_strxfrm_min_char == '\0') {
             int j;
-            char * cur_min_x = NULL;    /* Cur cp's xfrm, (except it also
+#ifdef DEBUGGING
+            U8     cur_min_cp = 1;  /* The code point that sorts lowest, so far */
+#endif
+            char * cur_min_x = NULL;    /* And its xfrm, (except it also
                                            includes the collation index
                                            prefixed. */
 
@@ -1510,6 +1526,9 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                 {
                     strcpy(PL_strxfrm_min_char, cur_source);
                     cur_min_x = x;
+#ifdef DEBUGGING
+                    cur_min_cp = j;
+#endif
                 }
                 else {
                     Safefree(x);
@@ -1523,6 +1542,21 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                 cur_min_x = _mem_collxfrm("\001", 1, &x_len,
                                           PL_in_utf8_COLLATE_locale);
                 /* cur_min_cp was already initialized to 1 */
+            }
+
+            DEBUG_L(PerlIO_printf(Perl_debug_log,
+                    "_mem_collxfrm: lowest collating control in the 0-255 "
+                    "range in locale %s is 0x%02X\n",
+                    PL_collation_name,
+                    cur_min_cp));
+            if (DEBUG_Lv_TEST) {
+                unsigned i;
+                PerlIO_printf(Perl_debug_log, "Its xfrm is");
+                for (i = 0; i < strlen(cur_min_x + COLLXFRM_HDR_LEN); i ++) {
+                    PerlIO_printf(Perl_debug_log, " %02x",
+                                (U8) *(cur_min_x + COLLXFRM_HDR_LEN + i));
+                }
+                PerlIO_printf(Perl_debug_log, "\n");
             }
 
             Safefree(cur_min_x);
@@ -1642,6 +1676,24 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                         }
                     }
 
+                    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                            "_mem_collxfrm: highest 1-byte collating character"
+                            " in locale %s is 0x%02X\n",
+                            PL_collation_name,
+                            PL_strxfrm_max_cp));
+                    if (DEBUG_Lv_TEST) {
+                        unsigned i;
+                        PerlIO_printf(Perl_debug_log, "Its xfrm is ");
+                        for (i = 0;
+                             i < strlen(cur_max_x + COLLXFRM_HDR_LEN);
+                             i++)
+                        {
+                            PerlIO_printf(Perl_debug_log, " %02x",
+                                        (U8) cur_max_x[i + COLLXFRM_HDR_LEN]);
+                        }
+                        PerlIO_printf(Perl_debug_log, "\n");
+                    }
+
                     Safefree(cur_max_x);
                 }
 
@@ -1732,8 +1784,17 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                 * Increase the buffer size by a fixed percentage and try again. */
             xAlloc = (2 * xAlloc) + 1;
             PL_strxfrm_is_behaved = FALSE;
-        }
 
+#ifdef DEBUGGING
+            if (DEBUG_Lv_TEST || debug_initialization) {
+                PerlIO_printf(Perl_debug_log,
+                "_mem_collxfrm required more space than previously calculated"
+                " for locale %s, trying again with new guess=%d+%"UVuf"\n",
+                PL_collation_name, (int) COLLXFRM_HDR_LEN,
+                (UV) xAlloc - COLLXFRM_HDR_LEN);
+            }
+#endif
+        }
 
         Renew(xbuf, xAlloc, char);
         if (UNLIKELY(! xbuf))
@@ -1742,6 +1803,20 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
         first_time = FALSE;
     }
 
+
+#ifdef DEBUGGING
+    if (DEBUG_Lv_TEST || debug_initialization) {
+        unsigned i;
+        PerlIO_printf(Perl_debug_log,
+            "_mem_collxfrm[%d]: returning %"UVuf" for locale %s '%s'\n",
+            PL_collation_ix, *xlen, PL_collation_name, input_string);
+        PerlIO_printf(Perl_debug_log, "Its xfrm is");
+        for (i = COLLXFRM_HDR_LEN; i < *xlen + COLLXFRM_HDR_LEN; i++) {
+            PerlIO_printf(Perl_debug_log, " %02x", (U8) xbuf[i]);
+        }
+        PerlIO_printf(Perl_debug_log, "\n");
+    }
+#endif
 
     /* Free up unneeded space; retain ehough for trailing NUL */
     Renew(xbuf, COLLXFRM_HDR_LEN + *xlen + 1, char);
@@ -1758,10 +1833,17 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
         Safefree(s);
     }
     *xlen = 0;
+#ifdef DEBUGGING
+    if (DEBUG_Lv_TEST || debug_initialization) {
+        PerlIO_printf(Perl_debug_log, "_mem_collxfrm[%d] returning NULL\n",
+                                      PL_collation_ix);
+    }
+#endif
     return NULL;
 }
 
 #endif /* USE_LOCALE_COLLATE */
+
 #ifdef USE_LOCALE
 
 bool
