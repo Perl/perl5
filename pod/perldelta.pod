@@ -151,8 +151,6 @@ XXX
 
 =item *
 
-=item *
-
 L<POSIX> has been upgraded from version 1.68 to 1.69. This remedies several
 defects in making its symbols exportable. [perl #127821]
 
