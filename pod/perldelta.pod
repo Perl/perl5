@@ -112,7 +112,16 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Bareword constant strings are now permitted to take part in constant
+folding. They were originally exempted from constant folding in August 1999,
+during the development of Perl 5.6, to ensure that C<use strict "subs">
+would still apply to bareword constants. That has now been accomplished a
+different way, so barewords, like other constants, now gain the performance
+benefits of constant folding.
+
+This also means that void-context warnings on constant expressions of
+barewords now report the folded constant operand, rather than the operation;
+this matches the behaviour for non-bareword constants.
 
 =back
 
@@ -142,7 +151,10 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+=item *
+
+L<POSIX> has been upgraded from version 1.68 to 1.69. This remedies several
+defects in making its symbols exportable. [perl #127821]
 
 =back
 
@@ -239,7 +251,10 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+Code like C<$x = $x . "a"> was incorrectly failing to yield a
+L<use of uninitialized value|perldiag/"Use of uninitialized value%s">
+warning when C<$x> was a lexical variable with an undefined value. That has
+now been fixed. [perl #127877]
 
 =back
 
@@ -252,13 +267,18 @@ Most of these are built within the directory F<utils>.
 entries for each change
 Use L<XXX> with program names to get proper documentation linking. ]
 
-=head2 L<XXX>
+=head2 L<perlbug>
 
 =over 4
 
 =item *
 
-XXX
+Long lines in the message body are now wrapped at 900 characters, to stay
+well within the 1000-character limit imposed by SMTP mail transfer agents.
+This is particularly likely to be important for the list of arguments to
+C<Configure>, which can readily exceed the limit if, for example, it names
+several non-default installation paths. This change also adds the first unit
+tests for perlbug. [perl #128020]
 
 =back
 
@@ -285,6 +305,26 @@ the headers and proceed to build your cross-target perl.  [perl #127234]
 Builds with C<-Accflags=-DPERL_TRACE_OPS> now only dump the operator
 counts when the environment variable C<PERL_TRACE_OPS> to be set to a
 non-zero integer.  This allows C<make test> to pass on such a build.
+
+=item *
+
+When building with GCC 6 and link-time optimization (the C<-flto> option to
+C<gcc>), C<Configure> was treating all probed symbols as present on the
+system, regardless of whether they actually exist. This has been fixed.
+[perl #128131]
+
+=item *
+
+The F<t/test.pl> library is used for internal testing of Perl itself, and
+also copied by several CPAN modules. Some of those modules must work on
+older versions of Perl, so F<t/test.pl> must in turn avoid newer Perl
+features. Compatibility with Perl 5.8 was inadvertently removed some time
+ago; it has now been restored. [perl #128052]
+
+=item *
+
+The build process no longer emits an extra blank line before building each
+"simple" extension (those with only F<*.pm> and F<*.pod> files).
 
 =back
 
@@ -388,7 +428,14 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Expressions containing an C<&&> or C<||> operator (or their synonyms C<and>
+and C<or>) were being compiled incorrectly in some cases. If the left-hand
+side consisted of either a negated bareword constant or a negated C<do {}>
+block containing a constant expression, and the right-hand side consisted of
+a negated non-foldable expression, one of the negations was effectively
+ignored. The same was true of C<if> and C<unless> statement modifiers,
+though with the left-hand and right-hand sides swapped. This long-standing
+bug has now been fixed. [perl #127952]
 
 =back
 
