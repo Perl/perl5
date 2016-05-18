@@ -254,6 +254,30 @@ L<use of uninitialized value|perldiag/"Use of uninitialized value%s">
 warning when C<$x> was a lexical variable with an undefined value. That has
 now been fixed. [perl #127877]
 
+=item *
+
+When the error "Experimental push on scalar is now forbidden" is raised for
+the hash functions C<keys>, C<each>, and C<values>, it is now followed by
+the more helpful message, "Type of arg 1 to whatever must be hash or
+array". [perl #127976]
+
+=item *
+
+C<undef *_; shift> or C<undef *_; pop> inside a subroutine, with no
+argument to C<shift> or C<pop>, began crashing in Perl 5.14.0, but has now
+been fixed.
+
+=item *
+
+C<< "string$scalar->$*" >> now correctly prefers concat overloading to
+string overlading if C<< $scalar->$* >> returns an overloaded object,
+bringing it into consistency with C<$$scalar>.
+
+=item *
+
+C<< /@0{0*->@*/*0 >> and similar contortions used to crash, but no longer
+do, but merely produce a syntax error. [perl #128171]
+
 =back
 
 =head1 Utility Changes
@@ -434,6 +458,16 @@ a negated non-foldable expression, one of the negations was effectively
 ignored. The same was true of C<if> and C<unless> statement modifiers,
 though with the left-hand and right-hand sides swapped. This long-standing
 bug has now been fixed. [perl #127952]
+
+=item *
+
+C<reset> with an argument no longer crashes when encountering stash entries
+other than globs. [perl #128106]
+
+=item *
+
+Assignment of hashes to, and deletion of, typeglobs named C<*::::::> no
+longer causes crashes. [perl #128086]
 
 =back
 
