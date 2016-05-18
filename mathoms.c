@@ -19,10 +19,10 @@
 
 
 
-/* 
+/*
  * This file contains mathoms, various binary artifacts from previous
  * versions of Perl.  For binary or source compatibility reasons, though,
- * we cannot completely remove them from the core code.  
+ * we cannot completely remove them from the core code.
  *
  * REMEMBER to update makedef.pl when adding a function to mathoms.c whose
  * name doesn't begin with "Perl_".
@@ -51,7 +51,21 @@ C<-Accflags='-DNO_MATHOMS'>
  */
 #else
 
-/* All functions in this file should have an entry with the 'b' flag in embed.fnc */
+/* NOTE ALL FUNCTIONS IN THIS FILE should have an entry with the 'b' flag in
+ * embed.fnc.
+ *
+ * To move a function to this file, simply cut and paste it here, and change
+ * its embed.fnc entry to additionally have the 'b' flag.  If, for some reason
+ * a function you'd like to be treated as mathoms can't be moved from its
+ * current place, simply enclose it between
+ *
+ * #ifndef NO_MATHOMS
+ *    ...
+ * #endif
+ *
+ * and add the 'b' flag in embed.fnc.
+ *
+ * */
 
 /* ref() is now a macro using Perl_doref;
  * this version provided for binary compatibility only.
