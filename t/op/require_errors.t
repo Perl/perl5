@@ -3,6 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
+    @INC="../lib";
 }
 
 use strict;
