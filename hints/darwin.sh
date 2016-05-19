@@ -294,7 +294,7 @@ case "$osvers" in  # Note: osvers is the kernel version, not the 10.x
 [7-9].*)   # OS X 10.3.x - 10.5.x
    lddlflags="${ldflags} -bundle -undefined dynamic_lookup"
    case "$ld" in
-       *MACOSX_DEVELOPMENT_TARGET*) ;;
+       *MACOSX_DEPLOYMENT_TARGET*) ;;
        *) ld="env MACOSX_DEPLOYMENT_TARGET=10.3 ${ld}" ;;
    esac
    ;;
