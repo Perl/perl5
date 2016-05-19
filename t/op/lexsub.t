@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 151;
+plan 152;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -760,6 +760,10 @@ not_lexical11();
   my sub x;
   eval 'sub x {3}';
   is x, 3, 'my sub defined inside eval';
+
+  my sub z;
+  BEGIN { eval 'sub z {4}' }
+  is z, 4, 'my sub defined in BEGIN { eval "..." }';
 }
 
 {
