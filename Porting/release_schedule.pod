@@ -15,10 +15,10 @@ deemed necessary by the Pumpking.
 
 Code freezes (which happen in the 5.25.X series)
 
-  2017-01-20  5.25.7          Contentious changes freeze
-  2017-02-20  5.25.8          User-visible changes freeze
-  2017-03-20  5.25.9          Full code freeze
-  2017-05-20  5.26.0          Stable release!
+  2016-12-20  5.25.8          Contentious changes freeze
+  2017-01-20  5.25.9          User-visible changes freeze
+  2017-02-20  5.25.10         Full code freeze
+  2017-04-20  5.26.0          Stable release!
 
 =head2 Perl 5.24
 
@@ -48,14 +48,15 @@ you should reset the version numbers to the next blead series.
 
 =head2 Perl 5.25
 
-  2016-05-20  5.25.0 ✓        Ricardo Signes
-  2016-06-20  5.25.1          Matthew Horsfall
-  2016-07-20  5.25.2          Steve Hay
-  2016-08-20  5.25.3          BinGOs
-  2016-09-20  5.25.4          Stevan Little
-  2016-10-20  5.25.5          Sawyer X
-  2016-11-20  5.25.6          ?
-  2016-12-20  5.25.7          ?
+  2016-04-08  5.25.0 ✓        Ricardo Signes
+  2016-05-20  5.25.1          Sawyer X
+  2016-06-20  5.25.2          Matthew Horsfall
+  2016-07-20  5.25.3          Steve Hay
+  2016-08-20  5.25.4          BinGOs
+  2016-09-20  5.25.5          Stevan Little
+  2016-10-20  5.25.6          Sawyer X
+  2016-11-20  5.25.7          Aaron Crane
+  2016-12-20  5.25.8          ?
 
 (RC0 for 5.26.0 will be released once we think that all the blockers have been
 addressed.  This typically means some time in April or May.)
