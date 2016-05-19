@@ -32,6 +32,12 @@ L</Selected Bug Fixes> section.
 
 [ List each security issue as a =head2 entry ]
 
+=head2 POSIX::tmpnam() has been removed
+
+The fundamentally unsafe C<tmpnam()> interface was deprecated in
+Perl 5.22.0 and has now been removed.  In its place you can use
+for example the L<File::Temp> interfaces.
+
 =head2 require ::Foo::Bar is now illegal.
 
 Formerly, C<require ::Foo::Bar> would try to read F</Foo/Bar.pm>. Now any
@@ -151,8 +157,10 @@ XXX
 
 =item *
 
-L<POSIX> has been upgraded from version 1.68 to 1.69. This remedies several
-defects in making its symbols exportable. [perl #127821]
+L<POSIX> has been upgraded from version 1.66 to 1.69. This remedies several
+defects in making its symbols exportable. [perl #127821]  Furthermore,
+the C<POSIX::tmpnam()> interface has been removed,
+see L</"POSIX::tmpnam() has been removed">.
 
 =back
 
