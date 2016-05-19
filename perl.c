@@ -3378,12 +3378,6 @@ Perl_moreswitches(pTHX_ const char *s)
 
     case 'i':
 	Safefree(PL_inplace);
-#if defined(__CYGWIN__) /* do backup extension automagically */
-	if (*(s+1) == '\0') {
-	PL_inplace = savepvs(".bak");
-	return s+1;
-	}
-#endif /* __CYGWIN__ */
 	{
 	    const char * const start = ++s;
 	    while (*s && !isSPACE(*s))
