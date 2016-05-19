@@ -243,7 +243,7 @@ necessary, fix things up. For example, you might think that both blead
 and maint are synchronised with a particular CPAN module, but one might
 have some extra changes.
 
-=head3 How to sync a CPAN module with a cpan/ distro
+=head3 How to sync a CPAN module with a cpanE<sol> distro
 
 =over 4
 
