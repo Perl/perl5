@@ -286,6 +286,12 @@ bringing it into consistency with C<$$scalar>.
 C<< /@0{0*->@*/*0 >> and similar contortions used to crash, but no longer
 do, but merely produce a syntax error. [perl #128171]
 
+=item *
+
+C<do> or C<require> with a reference or typeglob which, when stringified,
+contains a null character started crashing in Perl 5.20.0, but has now been
+fixed. [perl #128182]
+
 =back
 
 =head1 Utility Changes
