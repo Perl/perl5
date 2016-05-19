@@ -126,11 +126,11 @@ use feature 'state'; # state
 {
   state sub foo { 44 }
   isnt \&::foo, \&foo, 'state sub is not stored in the package';
-  is eval foo, 44, 'calling state sub from same package';
-  is eval &foo, 44, 'calling state sub from same package (amper)';
+  is foo, 44, 'calling state sub from same package';
+  is &foo, 44, 'calling state sub from same package (amper)';
   package bar;
-  is eval foo, 44, 'calling state sub from another package';
-  is eval &foo, 44, 'calling state sub from another package (amper)';
+  is foo, 44, 'calling state sub from another package';
+  is &foo, 44, 'calling state sub from another package (amper)';
 }
 package bar;
 is foo, 43, 'state sub falling out of scope';
