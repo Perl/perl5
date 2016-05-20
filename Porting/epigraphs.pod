@@ -17,6 +17,25 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.25.1 - Eli Pariser, "The Filter Bubble"
+
+Announced on 2016-05-20 by Sawyer X
+
+Imagine that you're a smart high school student on the low end of the social
+totem pole. You're alienated from adult authority, but unlike many teenagers,
+you're also alienated from the power structures of your peers -- an existence
+that can feel lonely and peripheral. Systems and equations are intuitive, but
+people aren't -- social signals are confusing and messy, difficult to interpret.
+
+Then you discover code. You may be powerless at the lunch table, but code
+gives you power over an infinitely malleable world and opens the door to a
+symbolic system that's perfectly clear and ordered. The jostling for position
+and status fades away. The nagging parental voices disappear. There's just a
+clean, white page for you to fill, an opportunity to build a better place, a
+home, from the ground up.
+
+No wonder you're a geek.
+
 =head2 v5.25.0 - Robert Frost, "The Trial by Existence"
 
 L<Announced on 2016-05-09 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2016/05/msg236244.html>
