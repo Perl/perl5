@@ -65,9 +65,6 @@ my %feature_bundle = (
 		    evalbytes current_sub fc postderef_qq)],
 );
 
-# not actually used currently
-my @experimental = qw( lexical_subs );
-
 
 ###########################################################################
 # More data generated from the above
@@ -188,10 +185,6 @@ for (sort keys %Aliases) {
     print $pm
 	qq'\$feature_bundle{"$_"} = \$feature_bundle{"$Aliases{$_}"};\n';
 };
-
-#print $pm "my \%experimental = (\n";
-#print $pm "    $_ => 1,\n", for @experimental;
-#print $pm ");\n";
 
 print $pm <<EOPM;
 
