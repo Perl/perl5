@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '2.08';
+our $VERSION = '2.09';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -134,7 +134,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 2.08
+This document describes threads version 2.09
 
 =head1 WARNING
 
@@ -1060,6 +1060,18 @@ determine whether your system supports it.
 In prior perl versions, spawning threads with open directory handles would
 crash the interpreter.
 L<[perl #75154]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75154>
+
+=item Detached threads and global destruction
+
+If the main thread exits while there are detached threads which are still
+running, then Perl's global destruction phase is not executed because
+otherwise certain global structures that control the operation of threads and
+that are allocated in the main thread's memory may get destroyed before the
+detached thread is destroyed.
+
+If you are using any code that requires the execution of the global
+destruction phase for clean up (e.g., removing temp files), then do not use
+detached threads, but rather join all threads before exiting the program.
 
 =item Perl Bugs and the CPAN Version of L<threads>
 
