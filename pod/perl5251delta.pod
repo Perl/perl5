@@ -1,0 +1,421 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5251delta - what is new for perl v5.25.1
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.25.0 release and the 5.25.1
+release.
+
+If you are upgrading from an earlier release such as 5.24.0, first read
+L<perl5250delta>, which describes differences between 5.24.0 and 5.25.0.
+
+=head1 Core Enhancements
+
+=head2 POSIX::tmpnam() has been removed
+
+The fundamentally unsafe C<tmpnam()> interface was deprecated in
+Perl 5.22.0 and has now been removed.  In its place you can use
+for example the L<File::Temp> interfaces.
+
+=head2 require ::Foo::Bar is now illegal.
+
+Formerly, C<require ::Foo::Bar> would try to read F</Foo/Bar.pm>. Now any
+bareword require which starts with a double colon dies instead.
+
+=head2 Unescaped literal C<"{"> characters in regular expression
+patterns are no longer permissible
+
+You have to now say something like C<"\{"> or C<"[{]"> to specify to
+match a LEFT CURLY BRACKET.  This will allow future extensions to the
+language.  This restriction is not enforced, nor are there current plans
+to enforce it, if the C<"{"> is the first character in the pattern.
+
+These have been deprecated since v5.16, with a deprecation message
+displayed starting in v5.22.
+
+=head2 Literal control character variable names are no longer permissible
+
+A variable name may no longer contain a literal control character under
+any circumstances.  These previously were allowed in single-character
+names on ASCII platforms, but have been deprecated there since Perl
+v5.20.  This affects things like C<$I<\cT>>, where I<\cT> is a literal
+control (such as a C<NAK> or C<NEGATIVE ACKNOWLEDGE> character) in the
+source code.
+
+=head2 C<qr//xx> is no longer permissible
+
+Using more than one C</x> regular expression pattern modifier on a
+single pattern is now forbidden.  This is to allow a future enhancement
+to the language.  This usage has been deprecated since v5.22.
+
+=head2 C<NBSP> is no longer permissible in C<\N{...}>
+
+The name of a character may no longer contain non-breaking spaces.  It
+has been deprecated to do so since Perl v5.22.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+Bareword constant strings are now permitted to take part in constant
+folding. They were originally exempted from constant folding in August 1999,
+during the development of Perl 5.6, to ensure that C<use strict "subs">
+would still apply to bareword constants. That has now been accomplished a
+different way, so barewords, like other constants, now gain the performance
+benefits of constant folding.
+
+This also means that void-context warnings on constant expressions of
+barewords now report the folded constant operand, rather than the operation;
+this matches the behaviour for non-bareword constants.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Archive::Tar> has been upgraded from version 2.04 to 2.08.
+
+=item *
+
+L<Carp> has been upgraded from version 1.40 to 1.41.
+
+=item *
+
+L<charnames> has been upgraded from version 1.43 to 1.44.
+
+=item *
+
+L<Config::Perl::V> has been upgraded from version 0.25 to 0.26.
+
+=item *
+
+L<DB_File> has been upgraded from version 1.835 to 1.838.
+
+=item *
+
+L<Digest::MD5> has been upgraded from version 2.54 to 2.55.
+
+=item *
+
+L<IPC::Cmd> has been upgraded from version 0.92 to 0.94.
+
+=item *
+
+L<IPC::SysV> has been upgraded from version 2.06_01 to 2.07.
+
+=item *
+
+L<List::Util> has been upgraded from version 1.42_02 to 1.45_01.
+
+=item *
+
+L<Locale::Codes> has been upgraded from version 3.37 to 3.38.
+
+=item *
+
+L<Locale::Maketext> has been upgraded from version 1.26 to 1.27.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20160507 to 5.20160520.
+
+=item *
+
+L<Module::Metadata> has been upgraded from version 1.000031 to 1.000032.
+
+=item *
+
+L<perlfaq> has been upgraded from version 5.021010 to 5.021011.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.65 to 1.69. This remedies several
+defects in making its symbols exportable. [perl #127821]
+The C<POSIX::tmpnam()> interface has been removed,
+see L</"POSIX::tmpnam() has been removed">.
+Trying to import POSIX subs that have no real implementations
+(like C<POSIX::atend()>) now fails at import time, instead of
+waiting until runtime.
+
+=item *
+
+L<re> has been upgraded from version 0.32 to 0.33.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.42_02 to 1.45_01.
+
+=item *
+
+L<Sys::Syslog> has been upgraded from version 0.33 to 0.34.
+
+=item *
+
+L<Term::ANSIColor> has been upgraded from version 4.04 to 4.05.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.001014 to 1.302015.
+
+=item *
+
+L<threads> has been upgraded from version 2.07 to 2.08. Compatibility
+with 5.8 has been restored.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.51 to 1.52.
+Compatibility with 5.8 has been restored.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+=over 4
+
+=item *
+
+Fixed link to Crosby paper on hash complexity attack in L<perlsec>.
+
+=back
+
+=head1 Diagnostics
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<Bareword in require contains "%s"|perldiag/"Bareword in require contains "%s"">
+
+=item *
+
+L<Bareword in require maps to empty filename|perldiag/"Bareword in require maps to empty filename">
+
+=item *
+
+L<Bareword in require maps to disallowed filename "%s"|perldiag/"Bareword in require maps to disallowed filename "%s"">
+
+=item *
+
+L<Bareword in require must not start with a double-colon: "%s"|perldiag/"Bareword in require must not start with a double-colon: "%s"">
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+Code like C<$x = $x . "a"> was incorrectly failing to yield a
+L<use of uninitialized value|perldiag/"Use of uninitialized value%s">
+warning when C<$x> was a lexical variable with an undefined value. That has
+now been fixed. [perl #127877]
+
+=item *
+
+When the error "Experimental push on scalar is now forbidden" is raised for
+the hash functions C<keys>, C<each>, and C<values>, it is now followed by
+the more helpful message, "Type of arg 1 to whatever must be hash or
+array". [perl #127976]
+
+=item *
+
+C<undef *_; shift> or C<undef *_; pop> inside a subroutine, with no
+argument to C<shift> or C<pop>, began crashing in Perl 5.14.0, but has now
+been fixed.
+
+=item *
+
+C<< "string$scalar-E<gt>$*" >> now correctly prefers concat overloading to
+string overloading if C<< $scalar-E<gt>$* >> returns an overloaded object,
+bringing it into consistency with C<$$scalar>.
+
+=item *
+
+C<< /@0{0*-E<gt>@*/*0 >> and similar contortions used to crash, but no longer
+do, but merely produce a syntax error. [perl #128171]
+
+=item *
+
+C<do> or C<require> with a reference or typeglob which, when stringified,
+contains a null character started crashing in Perl 5.20.0, but has now been
+fixed. [perl #128182]
+
+=back
+
+=head1 Utility Changes
+
+=head2 L<perlbug>
+
+=over 4
+
+=item *
+
+Long lines in the message body are now wrapped at 900 characters, to stay
+well within the 1000-character limit imposed by SMTP mail transfer agents.
+This is particularly likely to be important for the list of arguments to
+C<Configure>, which can readily exceed the limit if, for example, it names
+several non-default installation paths. This change also adds the first unit
+tests for perlbug. [perl #128020]
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+C<Configure> now builds C<miniperl> and C<generate_uudmap> if you
+invoke it with C<-Dusecrosscompiler> but not C<-Dtargethost=somehost>.
+This means you can supply your target platform C<config.sh>, generate
+the headers and proceed to build your cross-target perl.  [perl #127234]
+
+=item *
+
+Builds with C<-Accflags=-DPERL_TRACE_OPS> now only dump the operator
+counts when the environment variable C<PERL_TRACE_OPS> to be set to a
+non-zero integer.  This allows C<make test> to pass on such a build.
+
+=item *
+
+When building with GCC 6 and link-time optimization (the C<-flto> option to
+C<gcc>), C<Configure> was treating all probed symbols as present on the
+system, regardless of whether they actually exist. This has been fixed.
+[perl #128131]
+
+=item *
+
+The F<t/test.pl> library is used for internal testing of Perl itself, and
+also copied by several CPAN modules. Some of those modules must work on
+older versions of Perl, so F<t/test.pl> must in turn avoid newer Perl
+features. Compatibility with Perl 5.8 was inadvertently removed some time
+ago; it has now been restored. [perl #128052]
+
+=item *
+
+The build process no longer emits an extra blank line before building each
+"simple" extension (those with only F<*.pm> and F<*.pod> files).
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+Perl is now built with the C<PERL_OP_PARENT> compiler define enabled by
+default. To disable it, use the C<PERL_NO_OP_PARENT> compiler define.
+This flag alters how the C<op_sibling> field is used in C<OP> structures,
+and has been available optionally since perl 5.22.0.
+
+See L<perl5220delta/"Internal Changes"> for more details of what this
+build option does.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Expressions containing an C<&&> or C<||> operator (or their synonyms C<and>
+and C<or>) were being compiled incorrectly in some cases. If the left-hand
+side consisted of either a negated bareword constant or a negated C<do {}>
+block containing a constant expression, and the right-hand side consisted of
+a negated non-foldable expression, one of the negations was effectively
+ignored. The same was true of C<if> and C<unless> statement modifiers,
+though with the left-hand and right-hand sides swapped. This long-standing
+bug has now been fixed. [perl #127952]
+
+=item *
+
+C<reset> with an argument no longer crashes when encountering stash entries
+other than globs. [perl #128106]
+
+=item *
+
+Assignment of hashes to, and deletion of, typeglobs named C<*::::::> no
+longer causes crashes. [perl #128086]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.25.1 represents approximately 2 weeks of development since Perl 5.25.0
+and contains approximately 46,000 lines of changes across 630 files from 24
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 40,000 lines of changes to 510 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.25.1:
+
+Aaron Crane, Andreas Voegele, Chad Granum, Chris 'BinGOs' Williams, Craig A.
+Berry, David Mitchell, Doug Bell, Father Chrysostomos, H.Merijn Brand, Hugo van
+der Sanden, Jarkko Hietaniemi, Jerry D. Hedden, Jim Cromie, John Lightsey,
+Karen Etheridge, Karl Williamson, Lukas Mai, Maxwell Carey, Nicholas Clark,
+Niko Tyni, Ricardo Signes, Sawyer X, Tony Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles recently
+posted to the comp.lang.perl.misc newsgroup and the perl bug database at
+L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut

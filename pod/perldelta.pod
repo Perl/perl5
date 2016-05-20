@@ -2,80 +2,116 @@
 
 =head1 NAME
 
-perldelta - what is new for perl v5.25.1
+[ this is a template for a new perldelta file.  Any text flagged as XXX needs
+to be processed before release. ]
+
+perldelta - what is new for perl v5.25.2
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.25.0 release and the 5.25.1
+This document describes differences between the 5.25.1 release and the 5.25.2
 release.
 
-If you are upgrading from an earlier release such as 5.24.0, first read
-L<perl5250delta>, which describes differences between 5.24.0 and 5.25.0.
+If you are upgrading from an earlier release such as 5.25.0, first read
+L<perl5251delta>, which describes differences between 5.25.0 and 5.25.1.
+
+=head1 Notice
+
+XXX Any important notices here
 
 =head1 Core Enhancements
 
-=head2 POSIX::tmpnam() has been removed
+XXX New core language features go here.  Summarize user-visible core language
+enhancements.  Particularly prominent performance optimisations could go
+here, but most should go in the L</Performance Enhancements> section.
 
-The fundamentally unsafe C<tmpnam()> interface was deprecated in
-Perl 5.22.0 and has now been removed.  In its place you can use
-for example the L<File::Temp> interfaces.
+[ List each enhancement as a =head2 entry ]
 
-=head2 require ::Foo::Bar is now illegal.
+=head1 Security
 
-Formerly, C<require ::Foo::Bar> would try to read F</Foo/Bar.pm>. Now any
-bareword require which starts with a double colon dies instead.
+XXX Any security-related notices go here.  In particular, any security
+vulnerabilities closed should be noted here rather than in the
+L</Selected Bug Fixes> section.
 
-=head2 Unescaped literal C<"{"> characters in regular expression
-patterns are no longer permissible
+[ List each security issue as a =head2 entry ]
 
-You have to now say something like C<"\{"> or C<"[{]"> to specify to
-match a LEFT CURLY BRACKET.  This will allow future extensions to the
-language.  This restriction is not enforced, nor are there current plans
-to enforce it, if the C<"{"> is the first character in the pattern.
+=head1 Incompatible Changes
 
-These have been deprecated since v5.16, with a deprecation message
-displayed starting in v5.22.
+XXX For a release on a stable branch, this section aspires to be:
 
-=head2 Literal control character variable names are no longer permissible
+    There are no changes intentionally incompatible with 5.XXX.XXX
+    If any exist, they are bugs, and we request that you submit a
+    report.  See L</Reporting Bugs> below.
 
-A variable name may no longer contain a literal control character under
-any circumstances.  These previously were allowed in single-character
-names on ASCII platforms, but have been deprecated there since Perl
-v5.20.  This affects things like C<$I<\cT>>, where I<\cT> is a literal
-control (such as a C<NAK> or C<NEGATIVE ACKNOWLEDGE> character) in the
-source code.
+[ List each incompatible change as a =head2 entry ]
 
-=head2 C<qr//xx> is no longer permissible
+=head1 Deprecations
 
-Using more than one C</x> regular expression pattern modifier on a
-single pattern is now forbidden.  This is to allow a future enhancement
-to the language.  This usage has been deprecated since v5.22.
+XXX Any deprecated features, syntax, modules etc. should be listed here.
 
-=head2 C<NBSP> is no longer permissible in C<\N{...}>
+=head2 Module removals
 
-The name of a character may no longer contain non-breaking spaces.  It
-has been deprecated to do so since Perl v5.22.
+XXX Remove this section if inapplicable.
+
+The following modules will be removed from the core distribution in a
+future release, and will at that time need to be installed from CPAN.
+Distributions on CPAN which require these modules will need to list them as
+prerequisites.
+
+The core versions of these modules will now issue C<"deprecated">-category
+warnings to alert you to this fact.  To silence these deprecation warnings,
+install the modules in question from CPAN.
+
+Note that these are (with rare exceptions) fine modules that you are encouraged
+to continue to use.  Their disinclusion from core primarily hinges on their
+necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
+not usually on concerns over their design.
+
+=over
+
+=item XXX
+
+XXX Note that deprecated modules should be listed here even if they are listed
+as an updated module in the L</Modules and Pragmata> section.
+
+=back
+
+[ List each other deprecation as a =head2 entry ]
 
 =head1 Performance Enhancements
+
+XXX Changes which enhance performance without changing behaviour go here.
+There may well be none in a stable release.
+
+[ List each enhancement as a =item entry ]
 
 =over 4
 
 =item *
 
-Bareword constant strings are now permitted to take part in constant
-folding. They were originally exempted from constant folding in August 1999,
-during the development of Perl 5.6, to ensure that C<use strict "subs">
-would still apply to bareword constants. That has now been accomplished a
-different way, so barewords, like other constants, now gain the performance
-benefits of constant folding.
-
-This also means that void-context warnings on constant expressions of
-barewords now report the folded constant operand, rather than the operation;
-this matches the behaviour for non-bareword constants.
+XXX
 
 =back
 
 =head1 Modules and Pragmata
+
+XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
+go here.  If Module::CoreList is updated, generate an initial draft of the
+following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
+for important changes should then be added by hand.  In an ideal world,
+dual-life modules would have a F<Changes> file that could be cribbed.
+
+[ Within each section, list entries as a =item entry ]
+
+=head2 New Modules and Pragmata
+
+=over 4
+
+=item *
+
+XXX
+
+=back
 
 =head2 Updated Modules and Pragmata
 
@@ -83,117 +119,62 @@ this matches the behaviour for non-bareword constants.
 
 =item *
 
-L<Archive::Tar> has been upgraded from version 2.04 to 2.08.
-
-=item *
-
-L<Carp> has been upgraded from version 1.40 to 1.41.
-
-=item *
-
-L<charnames> has been upgraded from version 1.43 to 1.44.
-
-=item *
-
-L<Config::Perl::V> has been upgraded from version 0.25 to 0.26.
-
-=item *
-
-L<DB_File> has been upgraded from version 1.835 to 1.838.
-
-=item *
-
-L<Digest::MD5> has been upgraded from version 2.54 to 2.55.
-
-=item *
-
-L<IPC::Cmd> has been upgraded from version 0.92 to 0.94.
-
-=item *
-
-L<IPC::SysV> has been upgraded from version 2.06_01 to 2.07.
-
-=item *
-
-L<List::Util> has been upgraded from version 1.42_02 to 1.45_01.
-
-=item *
-
-L<Locale::Codes> has been upgraded from version 3.37 to 3.38.
-
-=item *
-
-L<Locale::Maketext> has been upgraded from version 1.26 to 1.27.
-
-=item *
-
-L<Module::CoreList> has been upgraded from version 5.20160507 to 5.20160520.
-
-=item *
-
-L<Module::Metadata> has been upgraded from version 1.000031 to 1.000032.
-
-=item *
-
-L<perlfaq> has been upgraded from version 5.021010 to 5.021011.
-
-=item *
-
-L<POSIX> has been upgraded from version 1.65 to 1.69. This remedies several
-defects in making its symbols exportable. [perl #127821]
-The C<POSIX::tmpnam()> interface has been removed,
-see L</"POSIX::tmpnam() has been removed">.
-Trying to import POSIX subs that have no real implementations
-(like C<POSIX::atend()>) now fails at import time, instead of
-waiting until runtime.
-
-=item *
-
-L<re> has been upgraded from version 0.32 to 0.33.
-
-=item *
-
-L<Scalar::Util> has been upgraded from version 1.42_02 to 1.45_01.
-
-=item *
-
-L<Sys::Syslog> has been upgraded from version 0.33 to 0.34.
-
-=item *
-
-L<Term::ANSIColor> has been upgraded from version 4.04 to 4.05.
-
-=item *
-
-L<Test::Simple> has been upgraded from version 1.001014 to 1.302015.
-
-=item *
-
-L<threads> has been upgraded from version 2.07 to 2.08. Compatibility
-with 5.8 has been restored.
-
-=item *
-
-L<threads::shared> has been upgraded from version 1.51 to 1.52.
-Compatibility with 5.8 has been restored.
+L<XXX> has been upgraded from version A.xx to B.yy.
 
 =back
 
-=head1 Documentation
-
-=head2 Changes to Existing Documentation
+=head2 Removed Modules and Pragmata
 
 =over 4
 
 =item *
 
-Fixed link to Crosby paper on hash complexity attack in L<perlsec>.
+XXX
+
+=back
+
+=head1 Documentation
+
+XXX Changes to files in F<pod/> go here.  Consider grouping entries by
+file and be sure to link to the appropriate page, e.g. L<perlfunc>.
+
+=head2 New Documentation
+
+XXX Changes which create B<new> files in F<pod/> go here.
+
+=head3 L<XXX>
+
+XXX Description of the purpose of the new file here
+
+=head2 Changes to Existing Documentation
+
+XXX Changes which significantly change existing files in F<pod/> go here.
+However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
+section.
+
+=head3 L<XXX>
+
+=over 4
+
+=item *
+
+XXX Description of the change here
 
 =back
 
 =head1 Diagnostics
 
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+XXX New or changed warnings emitted by the core's C<C> code go here.  Also
+include any changes in L<perldiag> that reconcile it to the C<C> code.
+
 =head2 New Diagnostics
+
+XXX Newly added diagnostic messages go under here, separated into New Errors
+and New Warnings
 
 =head3 New Errors
 
@@ -201,194 +182,203 @@ Fixed link to Crosby paper on hash complexity attack in L<perlsec>.
 
 =item *
 
-L<Bareword in require contains "%s"|perldiag/"Bareword in require contains "%s"">
+XXX L<message|perldiag/"message">
+
+=back
+
+=head3 New Warnings
+
+=over 4
 
 =item *
 
-L<Bareword in require maps to empty filename|perldiag/"Bareword in require maps to empty filename">
-
-=item *
-
-L<Bareword in require maps to disallowed filename "%s"|perldiag/"Bareword in require maps to disallowed filename "%s"">
-
-=item *
-
-L<Bareword in require must not start with a double-colon: "%s"|perldiag/"Bareword in require must not start with a double-colon: "%s"">
+XXX L<message|perldiag/"message">
 
 =back
 
 =head2 Changes to Existing Diagnostics
 
+XXX Changes (i.e. rewording) of diagnostic messages go here
+
 =over 4
 
 =item *
 
-Code like C<$x = $x . "a"> was incorrectly failing to yield a
-L<use of uninitialized value|perldiag/"Use of uninitialized value%s">
-warning when C<$x> was a lexical variable with an undefined value. That has
-now been fixed. [perl #127877]
-
-=item *
-
-When the error "Experimental push on scalar is now forbidden" is raised for
-the hash functions C<keys>, C<each>, and C<values>, it is now followed by
-the more helpful message, "Type of arg 1 to whatever must be hash or
-array". [perl #127976]
-
-=item *
-
-C<undef *_; shift> or C<undef *_; pop> inside a subroutine, with no
-argument to C<shift> or C<pop>, began crashing in Perl 5.14.0, but has now
-been fixed.
-
-=item *
-
-C<< "string$scalar-E<gt>$*" >> now correctly prefers concat overloading to
-string overloading if C<< $scalar-E<gt>$* >> returns an overloaded object,
-bringing it into consistency with C<$$scalar>.
-
-=item *
-
-C<< /@0{0*-E<gt>@*/*0 >> and similar contortions used to crash, but no longer
-do, but merely produce a syntax error. [perl #128171]
-
-=item *
-
-C<do> or C<require> with a reference or typeglob which, when stringified,
-contains a null character started crashing in Perl 5.20.0, but has now been
-fixed. [perl #128182]
+XXX Describe change here
 
 =back
 
 =head1 Utility Changes
 
-=head2 L<perlbug>
+XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go here.
+Most of these are built within the directory F<utils>.
+
+[ List utility changes as a =head2 entry for each utility and =item
+entries for each change
+Use L<XXX> with program names to get proper documentation linking. ]
+
+=head2 L<XXX>
 
 =over 4
 
 =item *
 
-Long lines in the message body are now wrapped at 900 characters, to stay
-well within the 1000-character limit imposed by SMTP mail transfer agents.
-This is particularly likely to be important for the list of arguments to
-C<Configure>, which can readily exceed the limit if, for example, it names
-several non-default installation paths. This change also adds the first unit
-tests for perlbug. [perl #128020]
+XXX
 
 =back
 
 =head1 Configuration and Compilation
 
+XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
+go here.  Any other changes to the Perl build process should be listed here.
+However, any platform-specific changes should be listed in the
+L</Platform Support> section, instead.
+
+[ List changes as a =item entry ].
+
 =over 4
 
 =item *
 
-C<Configure> now builds C<miniperl> and C<generate_uudmap> if you
-invoke it with C<-Dusecrosscompiler> but not C<-Dtargethost=somehost>.
-This means you can supply your target platform C<config.sh>, generate
-the headers and proceed to build your cross-target perl.  [perl #127234]
+XXX
+
+=back
+
+=head1 Testing
+
+XXX Any significant changes to the testing of a freshly built perl should be
+listed here.  Changes which create B<new> files in F<t/> go here as do any
+large changes to the testing harness (e.g. when parallel testing was added).
+Changes to existing files in F<t/> aren't worth summarizing, although the bugs
+that they represent may be covered elsewhere.
+
+[ List each test improvement as a =item entry ]
+
+=over 4
 
 =item *
 
-Builds with C<-Accflags=-DPERL_TRACE_OPS> now only dump the operator
-counts when the environment variable C<PERL_TRACE_OPS> to be set to a
-non-zero integer.  This allows C<make test> to pass on such a build.
+XXX
 
-=item *
+=back
 
-When building with GCC 6 and link-time optimization (the C<-flto> option to
-C<gcc>), C<Configure> was treating all probed symbols as present on the
-system, regardless of whether they actually exist. This has been fixed.
-[perl #128131]
+=head1 Platform Support
 
-=item *
+XXX Any changes to platform support should be listed in the sections below.
 
-The F<t/test.pl> library is used for internal testing of Perl itself, and
-also copied by several CPAN modules. Some of those modules must work on
-older versions of Perl, so F<t/test.pl> must in turn avoid newer Perl
-features. Compatibility with Perl 5.8 was inadvertently removed some time
-ago; it has now been restored. [perl #128052]
+[ Within the sections, list each platform as a =item entry with specific
+changes as paragraphs below it. ]
 
-=item *
+=head2 New Platforms
 
-The build process no longer emits an extra blank line before building each
-"simple" extension (those with only F<*.pm> and F<*.pod> files).
+XXX List any platforms that this version of perl compiles on, that previous
+versions did not.  These will either be enabled by new files in the F<hints/>
+directories, or new subdirectories and F<README> files at the top level of the
+source tree.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
+
+=back
+
+=head2 Discontinued Platforms
+
+XXX List any platforms that this version of perl no longer compiles on.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
+
+=back
+
+=head2 Platform-Specific Notes
+
+XXX List any changes for specific platforms.  This could include configuration
+and compilation changes or changes in portability/compatibility.  However,
+changes within modules for platforms should generally be listed in the
+L</Modules and Pragmata> section.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
 
 =back
 
 =head1 Internal Changes
 
+XXX Changes which affect the interface available to C<XS> code go here.  Other
+significant internal changes for future core maintainers should be noted as
+well.
+
+[ List each change as a =item entry ]
+
 =over 4
 
 =item *
 
-Perl is now built with the C<PERL_OP_PARENT> compiler define enabled by
-default. To disable it, use the C<PERL_NO_OP_PARENT> compiler define.
-This flag alters how the C<op_sibling> field is used in C<OP> structures,
-and has been available optionally since perl 5.22.0.
-
-See L<perl5220delta/"Internal Changes"> for more details of what this
-build option does.
+XXX
 
 =back
 
 =head1 Selected Bug Fixes
 
+XXX Important bug fixes in the core language are summarized here.  Bug fixes in
+files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
+
+[ List each fix as a =item entry ]
+
 =over 4
 
 =item *
 
-Expressions containing an C<&&> or C<||> operator (or their synonyms C<and>
-and C<or>) were being compiled incorrectly in some cases. If the left-hand
-side consisted of either a negated bareword constant or a negated C<do {}>
-block containing a constant expression, and the right-hand side consisted of
-a negated non-foldable expression, one of the negations was effectively
-ignored. The same was true of C<if> and C<unless> statement modifiers,
-though with the left-hand and right-hand sides swapped. This long-standing
-bug has now been fixed. [perl #127952]
-
-=item *
-
-C<reset> with an argument no longer crashes when encountering stash entries
-other than globs. [perl #128106]
-
-=item *
-
-Assignment of hashes to, and deletion of, typeglobs named C<*::::::> no
-longer causes crashes. [perl #128086]
+XXX
 
 =back
 
+=head1 Known Problems
+
+XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
+tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
+platform specific bugs also go here.
+
+[ List each fix as a =item entry ]
+
+=over 4
+
+=item *
+
+XXX
+
+=back
+
+=head1 Errata From Previous Releases
+
+=over 4
+
+=item *
+
+XXX Add anything here that we forgot to add, or were mistaken about, in
+the perldelta of a previous release.
+
+=back
+
+=head1 Obituary
+
+XXX If any significant core contributor has died, we've added a short obituary
+here.
+
 =head1 Acknowledgements
 
-Perl 5.25.1 represents approximately 2 weeks of development since Perl 5.25.0
-and contains approximately 46,000 lines of changes across 630 files from 24
-authors.
+XXX Generate this with:
 
-Excluding auto-generated files, documentation and release tools, there were
-approximately 40,000 lines of changes to 510 .pm, .t, .c and .h files.
-
-Perl continues to flourish into its third decade thanks to a vibrant community
-of users and developers. The following people are known to have contributed the
-improvements that became Perl 5.25.1:
-
-Aaron Crane, Andreas Voegele, Chad Granum, Chris 'BinGOs' Williams, Craig A.
-Berry, David Mitchell, Doug Bell, Father Chrysostomos, H.Merijn Brand, Hugo van
-der Sanden, Jarkko Hietaniemi, Jerry D. Hedden, Jim Cromie, John Lightsey,
-Karen Etheridge, Karl Williamson, Lukas Mai, Maxwell Carey, Nicholas Clark,
-Niko Tyni, Ricardo Signes, Sawyer X, Tony Cook, Yves Orton.
-
-The list above is almost certainly incomplete as it is automatically generated
-from version control history. In particular, it does not include the names of
-the (very much appreciated) contributors who reported issues to the Perl bug
-tracker.
-
-Many of the changes included in this version originated in the CPAN modules
-included in Perl's core. We're grateful to the entire CPAN community for
-helping Perl to flourish.
-
-For a more complete list of all of Perl's historical contributors, please see
-the F<AUTHORS> file in the Perl source distribution.
+  perl Porting/acknowledgements.pl v5.25.1..HEAD
 
 =head1 Reporting Bugs
 
