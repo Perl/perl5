@@ -997,15 +997,11 @@ sub phred { 2 };
 state sub jorge { 1 }
 sub jorge () { 2 } # should *not* produce redef warnings by default
 EXPECT
-The lexical_subs feature is experimental at - line 3.
 Prototype mismatch: sub fred () vs none at - line 4.
 Constant subroutine fred redefined at - line 4.
-The lexical_subs feature is experimental at - line 5.
 Prototype mismatch: sub george: none vs () at - line 6.
-The lexical_subs feature is experimental at - line 7.
 Prototype mismatch: sub phred () vs none at - line 8.
 Constant subroutine phred redefined at - line 8.
-The lexical_subs feature is experimental at - line 9.
 Prototype mismatch: sub jorge: none vs () at - line 10.
 ########
 # op.c
