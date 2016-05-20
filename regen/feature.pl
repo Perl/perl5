@@ -563,17 +563,21 @@ This feature is available from Perl 5.16 onwards.
 
 =head2 The 'lexical_subs' feature
 
-B<WARNING>: This feature is still experimental and the implementation may
-change in future versions of Perl.  For this reason, Perl will
-warn when you use the feature, unless you have explicitly disabled the
-warning:
-
-    no warnings "experimental::lexical_subs";
-
-This enables declaration of subroutines via C<my sub foo>, C<state sub foo>
+In Perl versions prior to 5.26, this feature enabled
+declaration of subroutines via C<my sub foo>, C<state sub foo>
 and C<our sub foo> syntax.  See L<perlsub/Lexical Subroutines> for details.
 
-This feature is available from Perl 5.18 onwards.
+This feature is available from Perl 5.18 onwards.  From Perl 5.18 to 5.24,
+it was classed as experimental, and Perl emitted a warning for its
+usage, except when explicitly disabled:
+
+  no warnings "experimental::lexical_subs";
+
+As of Perl 5.26, use of this feature no longer triggers a warning, though
+the C<experimental::lexical_subs> warning category still exists (for
+compatibility with code that disables it).  In addition, this syntax is
+not only no longer experimental, but it is enabled for all Perl code,
+regardless of what feature declarations are in scope.
 
 =head2 The 'postderef' and 'postderef_qq' features
 
