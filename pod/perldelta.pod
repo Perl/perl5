@@ -189,6 +189,14 @@ XXX Description of the purpose of the new file here
 
 =head2 Changes to Existing Documentation
 
+=over 4
+
+=item *
+
+Fixed link to Crosby paper on hash complexity attack in L<perlsec>.
+
+=back
+
 XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
