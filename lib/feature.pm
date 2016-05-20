@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.43';
+our $VERSION = '1.44';
 
 our %feature = (
     fc              => 'feature_fc',
@@ -14,12 +14,10 @@ our %feature = (
     switch          => 'feature_switch',
     bitwise         => 'feature_bitwise',
     evalbytes       => 'feature_evalbytes',
-    postderef       => 'feature_postderef',
     array_base      => 'feature_arybase',
     signatures      => 'feature_signatures',
     current_sub     => 'feature___SUB__',
     refaliasing     => 'feature_refaliasing',
-    lexical_subs    => 'feature_lexsubs',
     postderef_qq    => 'feature_postderef_qq',
     unicode_eval    => 'feature_unieval',
     unicode_strings => 'feature_unicode',
@@ -30,7 +28,7 @@ our %feature_bundle = (
     "5.11"    => [qw(array_base say state switch unicode_strings)],
     "5.15"    => [qw(current_sub evalbytes fc say state switch unicode_eval unicode_strings)],
     "5.23"    => [qw(current_sub evalbytes fc postderef_qq say state switch unicode_eval unicode_strings)],
-    "all"     => [qw(array_base bitwise current_sub evalbytes fc lexical_subs postderef postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
+    "all"     => [qw(array_base bitwise current_sub evalbytes fc postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
     "default" => [qw(array_base)],
 );
 
@@ -48,6 +46,10 @@ $feature_bundle{"5.24"} = $feature_bundle{"5.23"};
 $feature_bundle{"5.25"} = $feature_bundle{"5.23"};
 $feature_bundle{"5.26"} = $feature_bundle{"5.23"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
+my %noops = (
+    postderef => 1,
+    lexical_subs => 1,
+);
 
 our $hint_shift   = 26;
 our $hint_mask    = 0x1c000000;
@@ -248,17 +250,21 @@ This feature is available from Perl 5.16 onwards.
 
 =head2 The 'lexical_subs' feature
 
-B<WARNING>: This feature is still experimental and the implementation may
-change in future versions of Perl.  For this reason, Perl will
-warn when you use the feature, unless you have explicitly disabled the
-warning:
-
-    no warnings "experimental::lexical_subs";
-
-This enables declaration of subroutines via C<my sub foo>, C<state sub foo>
+In Perl versions prior to 5.26, this feature enabled
+declaration of subroutines via C<my sub foo>, C<state sub foo>
 and C<our sub foo> syntax.  See L<perlsub/Lexical Subroutines> for details.
 
-This feature is available from Perl 5.18 onwards.
+This feature is available from Perl 5.18 onwards.  From Perl 5.18 to 5.24,
+it was classed as experimental, and Perl emitted a warning for its
+usage, except when explicitly disabled:
+
+  no warnings "experimental::lexical_subs";
+
+As of Perl 5.26, use of this feature no longer triggers a warning, though
+the C<experimental::lexical_subs> warning category still exists (for
+compatibility with code that disables it).  In addition, this syntax is
+not only no longer experimental, but it is enabled for all Perl code,
+regardless of what feature declarations are in scope.
 
 =head2 The 'postderef' and 'postderef_qq' features
 
@@ -493,6 +499,9 @@ sub __common {
             next;
         }
         if (!exists $feature{$name}) {
+            if (exists $noops{$name}) {
+                next;
+            }
             unknown_feature($name);
         }
 	if ($import) {

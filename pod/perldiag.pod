@@ -2221,14 +2221,6 @@ has been removed.  The C<postderef> feature may meet your needs better.
     use feature "signatures";
     sub foo ($left, $right) { ... }
 
-=item Experimental "%s" subs not enabled
-
-(F) To use lexical subs, you must first enable them:
-
-    no warnings 'experimental::lexical_subs';
-    use feature 'lexical_subs';
-    my sub foo { ... }
-
 =item Explicit blessing to '' (assuming package main)
 
 (W misc) You are blessing a reference to a zero length string.  This has
@@ -5867,18 +5859,6 @@ will deny it.
 
 (F) The function indicated isn't implemented on this architecture,
 according to the probings of Configure.
-
-=item The lexical_subs feature is experimental
-
-(S experimental::lexical_subs) This warning is emitted if you
-declare a sub with C<my> or C<state>.  Simply suppress the warning
-if you want to use the feature, but know that in doing so you
-are taking the risk of using an experimental feature which may
-change or be removed in a future Perl version:
-
-    no warnings "experimental::lexical_subs";
-    use feature "lexical_subs";
-    my sub foo { ... }
 
 =item The regex_sets feature is experimental
 

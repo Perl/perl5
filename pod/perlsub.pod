@@ -1056,20 +1056,20 @@ using the CPAN module Sentinel or something similar.
 =head2 Lexical Subroutines
 X<my sub> X<state sub> X<our sub> X<subroutine, lexical>
 
-B<WARNING>: Lexical subroutines are still experimental.  The feature may be
-modified or removed in future versions of Perl.
-
-Lexical subroutines are only available under the C<use feature
-'lexical_subs'> pragma, which produces a warning unless the
-"experimental::lexical_subs" warnings category is disabled.
-
 Beginning with Perl 5.18, you can declare a private subroutine with C<my>
 or C<state>.  As with state variables, the C<state> keyword is only
 available under C<use feature 'state'> or C<use 5.010> or higher.
 
+Prior to Perl 5.26, lexical subroutines were deemed experimental and were
+available only under the C<use feature 'lexical_subs'> pragma.  They also
+produced a warning unless the "experimental::lexical_subs" warnings
+category was disabled.
+
 These subroutines are only visible within the block in which they are
 declared, and only after that declaration:
 
+    # Include these two lines if your code is intended to run under Perl
+    # versions earlier than 5.26.
     no warnings "experimental::lexical_subs";
     use feature 'lexical_subs';
 
@@ -1102,9 +1102,6 @@ containing block to the next.
 So, in general, "state" subroutines are faster.  But "my" subs are
 necessary if you want to create closures:
 
-    no warnings "experimental::lexical_subs";
-    use feature 'lexical_subs';
-
     sub whatever {
 	my $x = shift;
 	my sub inner {
@@ -1125,9 +1122,6 @@ subroutine of the same name.
 The two main uses for this are to switch back to using the package sub
 inside an inner scope:
 
-    no warnings "experimental::lexical_subs";
-    use feature 'lexical_subs';
-
     sub foo { ... }
 
     sub bar {
@@ -1142,9 +1136,6 @@ inside an inner scope:
 and to make a subroutine visible to other packages in the same scope:
 
     package MySneakyModule;
-
-    no warnings "experimental::lexical_subs";
-    use feature 'lexical_subs';
 
     our sub do_something { ... }
 

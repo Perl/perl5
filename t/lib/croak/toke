@@ -99,20 +99,17 @@ Missing $ on loop variable at - line 1.
 # NAME Missing name in "my sub"
 use feature 'lexical_subs'; my sub;
 EXPECT
-The lexical_subs feature is experimental at - line 1.
 Missing name in "my sub" at - line 1.
 ########
 # NAME Missing name in "our sub"
 use feature 'lexical_subs'; our sub;
 EXPECT
-The lexical_subs feature is experimental at - line 1.
 Missing name in "our sub" at - line 1.
 ########
 # NAME Missing name in "state sub"
-use 5.01; use feature 'lexical_subs';
+use 5.01;
 state sub;
 EXPECT
-The lexical_subs feature is experimental at - line 2.
 Missing name in "state sub" at - line 2.
 ########
 # NAME my sub pack::foo
@@ -120,8 +117,6 @@ use feature 'lexical_subs', 'state';
 my sub foo::bar;
 state sub foo::bear;
 EXPECT
-The lexical_subs feature is experimental at - line 2.
-The lexical_subs feature is experimental at - line 3.
 "my" subroutine &foo::bar can't be in a package at - line 2, near "my sub foo::bar"
 "state" subroutine &foo::bear can't be in a package at - line 3, near "state sub foo::bear"
 Execution of - aborted due to compilation errors.

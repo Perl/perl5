@@ -46,18 +46,6 @@ See L<perlapi/PL_keyword_plugin> for the mechanism.
 
 Introduced in Perl 5.11.2
 
-=item Lexical subroutines
-
-Introduced in Perl 5.18
-
-See also: L<perlsub/Lexical Subroutines>
-
-Using this feature triggers warnings in the category
-C<experimental::lexical_subs>.
-
-The ticket for this feature is
-L<[perl #120085]|https://rt.perl.org/rt3/Ticket/Display.html?id=120085>.
-
 =item Regular Expression Set Operations
 
 Introduced in Perl 5.18
@@ -248,6 +236,12 @@ Accepted in Perl 5.22.0
 Introduced in Perl 5.20.0
 
 Accepted in Perl 5.24.0
+
+=item Lexical subroutines
+
+Introduced in Perl 5.18.0
+
+Accepted in Perl 5.26.0
 
 =back
 

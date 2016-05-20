@@ -7,24 +7,10 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 152;
-
-# -------------------- Errors with feature disabled -------------------- #
-
-eval "#line 8 foo\nmy sub foo";
-is $@, qq 'Experimental "my" subs not enabled at foo line 8.\n',
-  'my sub unexperimental error';
-eval "#line 8 foo\nCORE::state sub foo";
-is $@, qq 'Experimental "state" subs not enabled at foo line 8.\n',
-  'state sub unexperimental error';
-eval "#line 8 foo\nour sub foo";
-is $@, qq 'Experimental "our" subs not enabled at foo line 8.\n',
-  'our sub unexperimental error';
+plan 149;
 
 # -------------------- our -------------------- #
 
-no warnings "experimental::lexical_subs";
-use feature 'lexical_subs';
 {
   our sub foo { 42 }
   is foo, 42, 'calling our sub from same package';
