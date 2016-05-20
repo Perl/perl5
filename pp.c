@@ -5158,7 +5158,8 @@ PP(pp_kvhslice)
        if (flags) {
            if (!(flags & OPpENTERSUB_INARGS))
                /* diag_listed_as: Can't modify %s in %s */
-	       Perl_croak(aTHX_ "Can't modify key/value hash slice in list assignment");
+	       Perl_croak(aTHX_ "Can't modify key/value hash slice in %s assignment",
+				 GIMME_V == G_ARRAY ? "list" : "scalar");
 	   lval = flags;
        }
     }
