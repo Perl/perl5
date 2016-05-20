@@ -4433,15 +4433,15 @@ S_check_scalar_slice(pTHX_ char *s)
     The type of the next token
 
   Structure:
+      Check if we have already built the token; if so, use it.
       Switch based on the current state:
-	  - if we already built the token before, use it
 	  - if we have a case modifier in a string, deal with that
 	  - handle other cases of interpolation inside a string
 	  - scan the next line if we are inside a format
-      In the normal state switch on the next character:
+      In the normal state, switch on the next character:
 	  - default:
 	    if alphabetic, go to key lookup
-	    unrecoginized character - croak
+	    unrecognized character - croak
 	  - 0/4/26: handle end-of-line or EOF
 	  - cases for whitespace
 	  - \n and #: handle comments and line numbers
