@@ -2977,6 +2977,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	break;
     case OP_KVHSLICE:
     case OP_KVASLICE:
+    case OP_AKEYS:
 	if (type == OP_LEAVESUBLV)
 	    o->op_private |= OPpMAYBE_LVSUB;
         goto nomod;
