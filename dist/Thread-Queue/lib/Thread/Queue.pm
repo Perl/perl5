@@ -3,7 +3,7 @@ package Thread::Queue;
 use strict;
 use warnings;
 
-our $VERSION = '3.09';
+our $VERSION = '3.11';
 $VERSION = eval $VERSION;
 
 use threads::shared 1.21;
@@ -304,7 +304,7 @@ Thread::Queue - Thread-safe queues
 
 =head1 VERSION
 
-This document describes Thread::Queue version 3.09
+This document describes Thread::Queue version 3.11
 
 =head1 SYNOPSIS
 
@@ -618,8 +618,11 @@ Passing array/hash refs that contain objects may not work for Perl prior to
 
 =head1 SEE ALSO
 
-Thread::Queue Discussion Forum on CPAN:
-L<http://www.cpanforum.com/dist/Thread-Queue>
+Thread::Queue on MetaCPAN:
+L<https://metacpan.org/release/Thread-Queue>
+
+Code repository for CPAN distribution:
+L<https://github.com/Dual-Life/Thread-Queue>
 
 L<threads>, L<threads::shared>
 
