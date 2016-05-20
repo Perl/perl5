@@ -158,9 +158,12 @@ XXX
 =item *
 
 L<POSIX> has been upgraded from version 1.66 to 1.69. This remedies several
-defects in making its symbols exportable. [perl #127821]  Furthermore,
-the C<POSIX::tmpnam()> interface has been removed,
+defects in making its symbols exportable. [perl #127821]
+The C<POSIX::tmpnam()> interface has been removed,
 see L</"POSIX::tmpnam() has been removed">.
+Trying to import POSIX subs that have no real implementations
+(like C<POSIX::atend()>) now fails at import time, instead of
+waiting until runtime.
 
 =back
 
