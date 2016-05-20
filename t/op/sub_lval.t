@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>209;
+plan tests=>210;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -553,6 +553,9 @@ sub keeze : lvalue { keys %__ }
 %__ = ("a","b");
 keeze = 64;
 is scalar %__, '1/64', 'keys assignment through lvalue sub';
+eval { (keeze) = 64 };
+like $@, qr/^Can't modify keys in list assignment at /,
+  'list assignment to keys through lv sub is forbidden';
 
 # Bug 20001223.002: split thought that the list had only one element
 @ary = qw(4 5 6);

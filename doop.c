@@ -1273,6 +1273,13 @@ Perl_do_kv(pTHX)
 	RETURN;
     }
 
+    if (UNLIKELY(PL_op->op_private & OPpMAYBE_LVSUB)) {
+	const I32 flags = is_lvalue_sub();
+	if (flags && !(flags & OPpENTERSUB_INARGS))
+	    /* diag_listed_as: Can't modify %s in %s */
+	    Perl_croak(aTHX_ "Can't modify keys in list assignment");
+    }
+
     /* 2*HvUSEDKEYS() should never be big enough to truncate or wrap */
     assert(HvUSEDKEYS(keys) <= (SSize_t_MAX >> 1));
     extend_size = (SSize_t)HvUSEDKEYS(keys) * (dokeys + dovalues);
