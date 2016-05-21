@@ -182,6 +182,10 @@ and New Warnings
 
 =item *
 
+L<Version control conflict marker '%s'|perldiag/"Version control conflict marker '%s'">
+
+=item *
+
 XXX L<message|perldiag/"message">
 
 =back

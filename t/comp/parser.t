@@ -8,7 +8,7 @@ BEGIN {
     chdir 't' if -d 't';
 }
 
-print "1..173\n";
+print "1..182\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -545,6 +545,25 @@ eval "grep+grep";
 
 eval 'qq{@{0]}${}},{})';
 is(1, 1, "RT #124207");
+
+# RT #127993 version control conflict markers
+" this should keep working
+<<<<<<<
+" =~ /
+>>>>>>>
+/;
+for my $marker (qw(
+<<<<<<<
+=======
+>>>>>>>
+)) {
+    eval "$marker";
+    like $@, qr/^Version control conflict marker '$marker' at \(eval \d+\) line 1\./, "VCS marker '$marker' at beginning";
+    eval "\$_\n$marker";
+    like $@, qr/^Version control conflict marker '$marker' at \(eval \d+\) line 2\./, "VCS marker '$marker' after value";
+    eval "\n\$_ =\n$marker";
+    like $@, qr/^Version control conflict marker '$marker' at \(eval \d+\) line 3\./, "VCS marker '$marker' after operator";
+}
 
 
 # Add new tests HERE (above this line)
