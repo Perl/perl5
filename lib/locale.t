@@ -1735,6 +1735,20 @@ foreach my $Locale (@Locale) {
                 last;
             }
         }
+
+        use locale;
+
+        ++$locales_test_number;
+        $test_names{$locales_test_number}
+            = 'TODO Skip in locales where \001 has primary sorting weight; '
+            . 'otherwise verify that \0 doesn\'t have primary sorting weight';
+        if ("a\001c" lt "ab") {
+            report_result($Locale, $locales_test_number, 1);
+        }
+        else {
+            my $ok = "ab" lt "a\0c";
+            report_result($Locale, $locales_test_number, $ok);
+        }
     }
 
     my $ok1;

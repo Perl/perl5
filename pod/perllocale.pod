@@ -1565,6 +1565,16 @@ called, and whatever it does is what you get.
 
 =head1 BUGS
 
+=head2 Collation of strings containing embedded C<NUL> characters
+
+Perl handles C<NUL> characters in the middle of strings.  In many
+locales, control characters are ignored unless the strings otherwise
+compare equal.  Unlike other control characters, C<NUL> characters are
+never ignored.   For example, if given that C<"b"> sorts after
+C<"\001">, and C<"c"> sorts after C<"b">, C<"a\0c"> always sorts before
+C<"ab">.  This is true even in locales in which C<"ab"> sorts before
+C<"a\001c">.
+
 =head2 Broken systems
 
 In certain systems, the operating system's locale support
