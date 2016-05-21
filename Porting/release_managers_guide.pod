@@ -1385,18 +1385,6 @@ F<perlhist.pod> on blead.  e.g.
 
     5.8.9         2008-Dec-14
 
-=head3 bump RT version number
-
-Log into http://rt.perl.org/ and check whether the new version is in the RT
-fields C<Perl Version> and C<Fixed In>. The easiest way to determine this is to
-open up any ticket for modification and check the drop downs next to the
-C<Perl Version> and C<Fixed In> labels.
-
-Here, try this link: L<https://rt.perl.org/Ticket/Modify.html?id=10000>
-
-If the new version is not listed there, send an email to C<perlbug-admin at
-perl.org> requesting this.
-
 =head3 Relax!
 
 I<You MUST RETIRE to your preferred PUB, CAFE or SEASIDE VILLA for some
