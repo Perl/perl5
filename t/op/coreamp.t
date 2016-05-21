@@ -994,7 +994,7 @@ $tests += 4;
 is &myvalues({ 1..4 }), 2, '&myvalues(\%hash) in scalar cx';
 lis [sort &myvalues({1..4})], [2,4], '&myvalues(\%hash) in list cx';
 is &myvalues([ 1..4 ]), 4, '&myvalues(\@array) in scalar cx';
-lis [&myvalues([ 1..4 ])], [1..4], '&mykeys(\@array) in list cx';
+lis [&myvalues([ 1..4 ])], [1..4], '&myvalues(\@array) in list cx';
 
 test_proto 'vec';
 $tests += 3;
