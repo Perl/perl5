@@ -2,13 +2,15 @@
 
 <data>
 
-<div><h2>Tickets Listed in #126920: 5.22.2 blockers</h2>
+<div><h2>Tickets Listed in #xxxxx: 5.24.1 blockers</h2>
+
+(No ticket exists yet.)
 
 </div>
 
 <div><h2>Other Proposed Cherry-Picks</h2>
 
-Blead changes have been examined up to and including f43a4a461783c0090f64e82f4ea444fd336bbf5b (Add another missing link to epigraphs.pod)
+<!--Blead changes have been examined up to and including be2c0c650b028f54e427f2469a59942edfdff8a9 (final commit for v5.24.0!)-->
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
 

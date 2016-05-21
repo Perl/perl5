@@ -85,7 +85,9 @@ Does this need d9a13252ba5aad7b3eaaff069b56472cfb651a40 too? -- steveh
 
 <div><h3>Regression Fixes</h3>
 
-</div>
+<commit votes="sprout" id="08f800f8519574aea9e744ff83230fb93772652b" ticket="128182" desc="Fix crash with require $nonstring"/>
+
+/div>
 
 <div><h3>Build and Installation Fixes</h3>
 
