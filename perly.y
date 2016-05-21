@@ -889,7 +889,7 @@ term	:	termbinop
 	|	myattrterm	%prec UNIOP
 			{ $$ = $1; }
 	|	LOCAL term	%prec UNIOP
-			{ $$ = localize($2,$1); }
+			{ $$ = localize($2,0); }
 	|	'(' expr ')'
 			{ $$ = sawparens($2); }
 	|	QWLIST
@@ -1040,7 +1040,7 @@ term	:	termbinop
 myattrterm:	MY myterm myattrlist
 			{ $$ = my_attrs($2,$3); }
 	|	MY myterm
-			{ $$ = localize($2,$1); }
+			{ $$ = localize($2,1); }
 	;
 
 /* Things that can be "my"'d */

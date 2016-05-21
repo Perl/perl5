@@ -1115,7 +1115,7 @@ case 2:
 
   case 170:
 #line 892 "perly.y"
-    { (yyval.opval) = localize((ps[(2) - (2)].val.opval),(ps[(1) - (2)].val.ival)); ;}
+    { (yyval.opval) = localize((ps[(2) - (2)].val.opval),0); ;}
     break;
 
   case 171:
@@ -1395,7 +1395,7 @@ case 2:
 
   case 218:
 #line 1043 "perly.y"
-    { (yyval.opval) = localize((ps[(2) - (2)].val.opval),(ps[(1) - (2)].val.ival)); ;}
+    { (yyval.opval) = localize((ps[(2) - (2)].val.opval),1); ;}
     break;
 
   case 219:
@@ -1539,6 +1539,6 @@ case 2:
     
 
 /* Generated from:
- * 703ebd267cf8ca45f9dee9bc0f4b21511117a0c1dca1c8bc9438ce91950217ae perly.y
+ * 70adb6e1be5382fb5c8cd783cd886cb4725c98a3e69c54eb16da5d7829d929aa perly.y
  * 3e1dff60f26df8933d7aed0c0e87177a0f022c14800c0707eb62a7db4196ac98 regen_perly.pl
  * ex: set ro: */
