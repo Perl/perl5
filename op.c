@@ -2981,6 +2981,11 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	if (type == OP_LEAVESUBLV)
 	    o->op_private |= OPpMAYBE_LVSUB;
         goto nomod;
+    case OP_AVHVSWITCH:
+	if (type == OP_LEAVESUBLV
+	 && (o->op_private & 3) + OP_EACH == OP_KEYS)
+	    o->op_private |= OPpMAYBE_LVSUB;
+        goto nomod;
     case OP_AV2ARYLEN:
 	PL_hints |= HINT_BLOCK_SCOPE;
 	if (type == OP_LEAVESUBLV)
@@ -14689,6 +14694,12 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
 	                          newOP(OP_CALLER,0)
 	               )
 	       );
+    case OP_EACH:
+    case OP_KEYS:
+    case OP_VALUES:
+	o = newUNOP(OP_AVHVSWITCH,0,argop);
+	o->op_private = opnum-OP_EACH;
+	return o;
     case OP_SELECT: /* which represents OP_SSELECT as well */
 	if (code)
 	    return newCONDOP(

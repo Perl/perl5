@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.34";
+$VERSION = "1.35";
 
 use Carp;
 use Exporter ();
@@ -338,7 +338,7 @@ invert_opset function.
 
     warn die lineseq nextstate scope enter leave
 
-    rv2cv anoncode prototype coreargs anonconst
+    rv2cv anoncode prototype coreargs avhvswitch anonconst
 
     entersub leavesub leavesublv return method method_named
     method_super method_redir method_redir_super

@@ -156,8 +156,8 @@ typedef enum opcode {
 	OP_ASLICE	 = 139,
 	OP_KVASLICE	 = 140,
 	OP_AEACH	 = 141,
-	OP_AKEYS	 = 142,
-	OP_AVALUES	 = 143,
+	OP_AVALUES	 = 142,
+	OP_AKEYS	 = 143,
 	OP_EACH		 = 144,
 	OP_VALUES	 = 145,
 	OP_KEYS		 = 146,
@@ -396,21 +396,22 @@ typedef enum opcode {
 	OP_ONCE		 = 379,
 	OP_CUSTOM	 = 380,
 	OP_COREARGS	 = 381,
-	OP_RUNCV	 = 382,
-	OP_FC		 = 383,
-	OP_PADCV	 = 384,
-	OP_INTROCV	 = 385,
-	OP_CLONECV	 = 386,
-	OP_PADRANGE	 = 387,
-	OP_REFASSIGN	 = 388,
-	OP_LVREF	 = 389,
-	OP_LVREFSLICE	 = 390,
-	OP_LVAVREF	 = 391,
-	OP_ANONCONST	 = 392,
+	OP_AVHVSWITCH	 = 382,
+	OP_RUNCV	 = 383,
+	OP_FC		 = 384,
+	OP_PADCV	 = 385,
+	OP_INTROCV	 = 386,
+	OP_CLONECV	 = 387,
+	OP_PADRANGE	 = 388,
+	OP_REFASSIGN	 = 389,
+	OP_LVREF	 = 390,
+	OP_LVREFSLICE	 = 391,
+	OP_LVAVREF	 = 392,
+	OP_ANONCONST	 = 393,
 	OP_max		
 } opcode;
 
-#define MAXO 393
+#define MAXO 394
 #define OP_FREED MAXO
 
 /* the OP_IS_* macros are optimized to a simple range check because

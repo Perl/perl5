@@ -22,6 +22,7 @@ PERL_CALLCONV OP *Perl_pp_anonlist(pTHX);
 PERL_CALLCONV OP *Perl_pp_aslice(pTHX);
 PERL_CALLCONV OP *Perl_pp_atan2(pTHX);
 PERL_CALLCONV OP *Perl_pp_av2arylen(pTHX);
+PERL_CALLCONV OP *Perl_pp_avhvswitch(pTHX);
 PERL_CALLCONV OP *Perl_pp_backtick(pTHX);
 PERL_CALLCONV OP *Perl_pp_bind(pTHX);
 PERL_CALLCONV OP *Perl_pp_binmode(pTHX);

@@ -231,8 +231,8 @@ aslice		array slice		ck_null		m@	A L
 kvaslice	index/value array slice	ck_null		m@	A L
 
 aeach		each on array		ck_each		d%	A
-akeys		keys on array		ck_each		t%	A
 avalues		values on array		ck_each		dt%	A
+akeys		keys on array		ck_each		t%	A
 
 # Hashes.
 
@@ -556,6 +556,7 @@ custom		unknown custom operator		ck_null		0
 
 # For CORE:: subs
 coreargs	CORE:: subroutine	ck_null		$	
+avhvswitch	Array/hash switch	ck_null		t1
 
 runcv		__SUB__			ck_null		s0
 

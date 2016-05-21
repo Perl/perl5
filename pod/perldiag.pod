@@ -4531,6 +4531,12 @@ was string.
 (P) The compiler is screwed up and attempted to use an op that isn't
 permitted at run time.
 
+=item panic: unknown OA_*: %x
+
+(P) The internal routine that handles arguments to C<&CORE::foo()>
+subroutine calls was unable to determine what type of arguments
+were expected.
+
 =item panic: utf16_to_utf8: odd bytelen
 
 (P) Something tried to call utf16_to_utf8 with an odd (as opposed

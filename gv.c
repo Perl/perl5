@@ -531,18 +531,12 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
 	return NULL;
     case KEY_chdir:
     case KEY_chomp: case KEY_chop: case KEY_defined: case KEY_delete:
-    case KEY_each : case KEY_eof : case KEY_exec   : case KEY_exists:
-    case KEY_keys:
+    case KEY_eof  : case KEY_exec: case KEY_exists :
     case KEY_lstat:
-    case KEY_pop:
-    case KEY_push:
-    case KEY_shift:
-    case KEY_splice: case KEY_split:
+    case KEY_split:
     case KEY_stat:
     case KEY_system:
     case KEY_truncate: case KEY_unlink:
-    case KEY_unshift:
-    case KEY_values:
 	ampable = FALSE;
     }
     if (!gv) {
@@ -604,7 +598,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
                )) != NULL) {
             assert(GvCV(gv) == orig_cv);
             if (opnum != OP_VEC && opnum != OP_SUBSTR && opnum != OP_POS
-                && opnum != OP_UNDEF)
+                && opnum != OP_UNDEF && opnum != OP_KEYS)
                 CvLVALUE_off(cv); /* Now *that* was a neat trick. */
         }
 	LEAVE;
