@@ -626,11 +626,18 @@ is &myjoin('a','b','c'), 'bac', '&join';
 lis [&myjoin('a','b','c')], ['bac'], '&join in list context';
 
 test_proto 'keys';
-$tests += 4;
+$tests += 6;
 is &mykeys({ 1..4 }), 2, '&mykeys(\%hash) in scalar cx';
 lis [sort &mykeys({1..4})], [1,3], '&mykeys(\%hash) in list cx';
 is &mykeys([ 1..4 ]), 4, '&mykeys(\@array) in scalar cx';
 lis [&mykeys([ 1..4 ])], [0..3], '&mykeys(\@array) in list cx';
+{
+  my %h = 1..2;
+  &mykeys(\%h) = 1024;
+  like %h, qr|/1024\z|, '&mykeys = ...';
+  eval { (&mykeys(\%h)) = 1025; };
+  like $@, qr/^Can't modify keys in list assignment at /;
+}
 
 test_proto 'kill'; # set up mykill alias
 if ($^O ne 'riscos') {

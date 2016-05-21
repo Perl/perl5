@@ -1243,10 +1243,10 @@ Perl_do_kv(pTHX)
     /* op_type is OP_RKEYS/OP_RVALUES if pp_rkeys delegated to here */
     const I32 dokeys =   dokv || (PL_op->op_type == OP_KEYS)
 	|| (  PL_op->op_type == OP_AVHVSWITCH
-	   && PL_op->op_private + OP_EACH == OP_KEYS  );
+	   && (PL_op->op_private & 3) + OP_EACH == OP_KEYS  );
     const I32 dovalues = dokv || (PL_op->op_type == OP_VALUES)
 	|| (  PL_op->op_type == OP_AVHVSWITCH
-	   && PL_op->op_private + OP_EACH == OP_VALUES  );
+	   && (PL_op->op_private & 3) + OP_EACH == OP_VALUES  );
 
     (void)hv_iterinit(keys);	/* always reset iterator regardless */
 

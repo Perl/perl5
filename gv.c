@@ -598,7 +598,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
                )) != NULL) {
             assert(GvCV(gv) == orig_cv);
             if (opnum != OP_VEC && opnum != OP_SUBSTR && opnum != OP_POS
-                && opnum != OP_UNDEF)
+                && opnum != OP_UNDEF && opnum != OP_KEYS)
                 CvLVALUE_off(cv); /* Now *that* was a neat trick. */
         }
 	LEAVE;
