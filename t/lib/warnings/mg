@@ -110,5 +110,5 @@ ${^ENCODING} = 42;
 ${^ENCODING} = undef;
 { local ${^ENCODING} = 37; }
 EXPECT
-Setting ${^ENCODING} is deprecated at - line 1.
-Setting ${^ENCODING} is deprecated at - line 4.
+${^ENCODING} is no longer supported at - line 1.
+${^ENCODING} is no longer supported at - line 4.

@@ -12,6 +12,10 @@ BEGIN {
     print "1..0 # encoding pragma does not support EBCDIC platforms\n";
     exit(0);
     }
+    if ("$]" >= 5.025) {
+    print "1..0 # encoding pragma not supported in Perl 5.26\n";
+    exit(0);
+    }
 }
 
 print "1..33\n";

@@ -856,8 +856,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\005':  /* ^E */
 	 if (nextchar != '\0') {
             if (strEQ(remaining, "NCODING"))
-                sv_setsv(sv, _get_encoding());
-            else if (strEQ(remaining, "_NCODING"))
                 sv_setsv(sv, NULL);
             break;
         }
@@ -2733,41 +2731,11 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #endif
 	}
 	else {
-            unsigned int offset = 1;
-            bool lex = FALSE;
-
-            /* It may be the shadow variable ${E_NCODING} which has lexical
-             * scope.  See comments at Perl__get_encoding in this file */
-            if (*(mg->mg_ptr + 1) == '_') {
-                if (CopSTASH(PL_curcop) != get_hv("encoding::",0))
-                    Perl_croak_no_modify();
-                lex = TRUE;
-                offset++;
-            }
-            if (strEQ(mg->mg_ptr + offset, "NCODING")) {
-                if (lex) {  /* Use the shadow global */
-                    SvREFCNT_dec(PL_lex_encoding);
-                    if (SvOK(sv) || SvGMAGICAL(sv)) {
-                        PL_lex_encoding = newSVsv(sv);
-                    }
-                    else {
-                        PL_lex_encoding = NULL;
-                    }
-                }
-                else { /* Use the regular global */
-                    SvREFCNT_dec(PL_encoding);
-                    if (SvOK(sv) || SvGMAGICAL(sv)) {
+            if (strEQ(mg->mg_ptr + 1, "NCODING") && SvOK(sv))
                         if (PL_localizing != 2) {
                             Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-                                          "Setting ${^ENCODING} is deprecated");
+                                    "${^ENCODING} is no longer supported");
                         }
-                        PL_encoding = newSVsv(sv);
-                    }
-                    else {
-                        PL_encoding = NULL;
-                    }
-                }
-            }
         }
 	break;
     case '\006':	/* ^F */
