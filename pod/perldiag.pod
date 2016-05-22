@@ -4122,9 +4122,9 @@ with real files).
 
 =item Only one /x regex modifier is allowed in regex; marked by <-- HERE in m/%s/
 
-(F) You used the C</x> regular expression pattern modifier at
-least twice in a string of modifiers.  It is illegal to do
-this with, to allow future extensions to the Perl language.
+(F) You used the C</x> regular expression pattern modifier at least twice in a
+string of modifiers.  This has been made illegal, in order to allow future
+extensions to the Perl language.
 
 =item %s() on unopened %s
 
