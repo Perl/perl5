@@ -1037,7 +1037,6 @@
 #define reg(a,b,c,d)		S_reg(aTHX_ a,b,c,d)
 #define reg2Lanode(a,b,c,d)	S_reg2Lanode(aTHX_ a,b,c,d)
 #define reg_node(a,b)		S_reg_node(aTHX_ a,b)
-#define reg_recode(a,b)		S_reg_recode(aTHX_ a,b)
 #define reg_scan_name(a,b)	S_reg_scan_name(aTHX_ a,b)
 #define reg_skipcomment		S_reg_skipcomment
 #define reganode(a,b,c)		S_reganode(aTHX_ a,b,c)

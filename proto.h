@@ -4991,9 +4991,6 @@ STATIC regnode*	S_reg2Lanode(pTHX_ RExC_state_t *pRExC_state, const U8 op, const
 STATIC regnode*	S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op);
 #define PERL_ARGS_ASSERT_REG_NODE	\
 	assert(pRExC_state)
-STATIC UV	S_reg_recode(pTHX_ const U8 value, SV **encp);
-#define PERL_ARGS_ASSERT_REG_RECODE	\
-	assert(encp)
 STATIC SV *	S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags);
 #define PERL_ARGS_ASSERT_REG_SCAN_NAME	\
 	assert(pRExC_state)

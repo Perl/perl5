@@ -2195,7 +2195,6 @@ Es	|regnode*|handle_regex_sets|NN RExC_state_t *pRExC_state \
 				|NN char * const oregcomp_parse
 Es	|void|parse_lparen_question_flags|NN RExC_state_t *pRExC_state
 Es	|regnode*|reg_node	|NN RExC_state_t *pRExC_state|U8 op
-Es	|UV	|reg_recode	|const U8 value|NN SV **encp
 Es	|regnode*|regpiece	|NN RExC_state_t *pRExC_state \
 				|NN I32 *flagp|U32 depth
 Es	|bool	|grok_bslash_N	|NN RExC_state_t *pRExC_state		    \

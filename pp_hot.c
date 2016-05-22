@@ -3011,10 +3011,7 @@ PP(pp_subst)
 	if (DO_UTF8(TARG) && !doutf8) {
 	     nsv = sv_newmortal();
 	     SvSetSV(nsv, dstr);
-	     if (IN_ENCODING)
-		  sv_recode_to_utf8(nsv, _get_encoding());
-	     else
-		  sv_utf8_upgrade(nsv);
+	     sv_utf8_upgrade(nsv);
 	     c = SvPV_const(nsv, clen);
 	     doutf8 = TRUE;
 	}
@@ -3193,13 +3190,7 @@ PP(pp_subst)
 	      first = FALSE;
 	    }
 	    else {
-		if (IN_ENCODING) {
-		    if (!nsv) nsv = sv_newmortal();
-		    sv_copypv(nsv, repl);
-		    if (!DO_UTF8(nsv)) sv_recode_to_utf8(nsv, _get_encoding());
-		    sv_catsv(dstr, nsv);
-		}
-		else sv_catsv(dstr, repl);
+		sv_catsv(dstr, repl);
 		if (UNLIKELY(SvTAINTED(repl)))
 		    rxtainted |= SUBST_TAINT_REPL;
 	    }

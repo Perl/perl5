@@ -3456,12 +3456,6 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ SV *const sv, const I32 flags, STRLEN extr
         S_sv_uncow(aTHX_ sv, 0);
     }
 
-    if (IN_ENCODING && !(flags & SV_UTF8_NO_ENCODING)) {
-        sv_recode_to_utf8(sv, _get_encoding());
-	if (extra) SvGROW(sv, SvCUR(sv) + extra);
-	return SvCUR(sv);
-    }
-
     if (SvCUR(sv) == 0) {
 	if (extra) SvGROW(sv, extra);
     } else { /* Assume Latin-1/EBCDIC */
@@ -7757,37 +7751,17 @@ Perl_sv_eq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
 	pv2 = SvPV_flags_const(sv2, cur2, flags);
 
     if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTES) {
-        /* Differing utf8ness.
-	 * Do not UTF8size the comparands as a side-effect. */
-	 if (IN_ENCODING) {
-	      if (SvUTF8(sv1)) {
-		   svrecode = newSVpvn(pv2, cur2);
-		   sv_recode_to_utf8(svrecode, _get_encoding());
-		   pv2 = SvPV_const(svrecode, cur2);
-	      }
-	      else {
-		   svrecode = newSVpvn(pv1, cur1);
-		   sv_recode_to_utf8(svrecode, _get_encoding());
-		   pv1 = SvPV_const(svrecode, cur1);
-	      }
-	      /* Now both are in UTF-8. */
-	      if (cur1 != cur2) {
-		   SvREFCNT_dec_NN(svrecode);
-		   return FALSE;
-	      }
-	 }
-	 else {
-	      if (SvUTF8(sv1)) {
+        /* Differing utf8ness.  */
+	if (SvUTF8(sv1)) {
 		  /* sv1 is the UTF-8 one  */
 		  return bytes_cmp_utf8((const U8*)pv2, cur2,
 					(const U8*)pv1, cur1) == 0;
-	      }
-	      else {
+	}
+	else {
 		  /* sv2 is the UTF-8 one  */
 		  return bytes_cmp_utf8((const U8*)pv1, cur1,
 					(const U8*)pv2, cur2) == 0;
-	      }
-	 }
+	}
     }
 
     if (cur1 == cur2)
@@ -7847,31 +7821,16 @@ Perl_sv_cmp_flags(pTHX_ SV *const sv1, SV *const sv2,
 	pv2 = SvPV_flags_const(sv2, cur2, flags);
 
     if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTES) {
-        /* Differing utf8ness.
-	 * Do not UTF8size the comparands as a side-effect. */
+        /* Differing utf8ness.  */
 	if (SvUTF8(sv1)) {
-	    if (IN_ENCODING) {
-		 svrecode = newSVpvn(pv2, cur2);
-		 sv_recode_to_utf8(svrecode, _get_encoding());
-		 pv2 = SvPV_const(svrecode, cur2);
-	    }
-	    else {
 		const int retval = -bytes_cmp_utf8((const U8*)pv2, cur2,
 						   (const U8*)pv1, cur1);
 		return retval ? retval < 0 ? -1 : +1 : 0;
-	    }
 	}
 	else {
-	    if (IN_ENCODING) {
-		 svrecode = newSVpvn(pv1, cur1);
-		 sv_recode_to_utf8(svrecode, _get_encoding());
-		 pv1 = SvPV_const(svrecode, cur1);
-	    }
-	    else {
 		const int retval = bytes_cmp_utf8((const U8*)pv1, cur1,
 						  (const U8*)pv2, cur2);
 		return retval ? retval < 0 ? -1 : +1 : 0;
-	    }
 	}
     }
 
