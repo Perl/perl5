@@ -766,12 +766,6 @@ S_fixup_errno_string(pTHX_ SV* sv)
     }
 }
 
-SV*
-Perl__get_encoding(pTHX)
-{
-    return NULL;
-}
-
 #ifdef VMS
 #include <descrip.h>
 #include <starlet.h>

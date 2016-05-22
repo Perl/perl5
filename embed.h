@@ -931,7 +931,6 @@
 #define do_spawn_nowait(a)	Perl_do_spawn_nowait(aTHX_ a)
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
-#define _get_encoding()		Perl__get_encoding(aTHX)
 #define _warn_problematic_locale	Perl__warn_problematic_locale
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
 #define current_re_engine()	Perl_current_re_engine(aTHX)

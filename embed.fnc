@@ -2945,7 +2945,6 @@ Ei	|STRLEN	|sv_or_pv_pos_u2b|NN SV *sv|NN const char *pv|STRLEN pos \
 				 |NULLOK STRLEN *lenp
 #endif
 
-EMpPX	|SV*	|_get_encoding
 Ap	|void	|clear_defarray	|NN AV* av|bool abandon
 
 ApM	|void	|leave_adjust_stacks|NN SV **from_sp|NN SV **to_sp \
