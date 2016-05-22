@@ -695,9 +695,6 @@ PERLVARI(I, known_layers, PerlIO_list_t *, NULL)
 PERLVARI(I, def_layerlist, PerlIO_list_t *, NULL)
 #endif
 
-PERLVARI(I, encoding,	SV *,	NULL)	/* $^ENCODING */
-PERLVARI(I, lex_encoding, SV *,	NULL)	/* encoding pragma */
-
 PERLVAR(I, utf8_idstart, SV *)
 PERLVAR(I, utf8_idcont,	SV *)
 PERLVAR(I, utf8_xidstart, SV *)

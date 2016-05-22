@@ -769,40 +769,6 @@ S_fixup_errno_string(pTHX_ SV* sv)
 SV*
 Perl__get_encoding(pTHX)
 {
-    /* For core Perl use only: Returns the $^ENCODING or 'use encoding' in
-     * effect; NULL if none.
-     *
-     * $^ENCODING maps to PL_encoding, and is the old way to do things, and is
-     * retained for backwards compatibility.  Now, there is a shadow variable
-     * ${^E_NCODING} set only by the encoding pragma, used to give this pragma
-     * lexical scope, unlike the global scope it (shudder) used to have.  This
-     * variable maps to PL_lex_encoding.  Again for backwards compatibility,
-     * PL_encoding has precedence over PL_lex_encoding.  The hints hash is used
-     * to determine if PL_lex_encoding is in scope, and hence valid.  The hints
-     * hash only accepts simple values, so we can't put an Encode object into
-     * it, so we put the object into the global, and put a simple boolean into
-     * the hints hash giving whether the global is valid or not */
-
-    dVAR;
-    SV *is_encoding;
-
-    if (PL_encoding) {
-        return PL_encoding;
-    }
-
-    if (! PL_lex_encoding) {
-        return NULL;
-    }
-
-    is_encoding = cop_hints_fetch_pvs(PL_curcop, "encoding", 0);
-    if (   is_encoding
-        && is_encoding != &PL_sv_placeholder
-        && SvIOK(is_encoding)
-        && SvIV(is_encoding))  /* non-zero mean valid */
-    {
-        return PL_lex_encoding;
-    }
-
     return NULL;
 }
 
