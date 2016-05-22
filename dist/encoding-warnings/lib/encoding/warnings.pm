@@ -1,5 +1,5 @@
 package encoding::warnings;
-$encoding::warnings::VERSION = '0.12';
+$encoding::warnings::VERSION = '0.13';
 
 use strict;
 use 5.007;
@@ -10,8 +10,8 @@ encoding::warnings - Warn on implicit encoding conversions
 
 =head1 VERSION
 
-This document describes version 0.11 of encoding::warnings, released
-June 5, 2007.
+This document describes version 0.13 of encoding::warnings, released
+June 20, 2016.
 
 =head1 NOTICE
 
