@@ -609,10 +609,10 @@ struct block_format {
 /* Restore old @_ */
 #define CX_POP_SAVEARRAY(cx)						\
     STMT_START {							\
-        AV *av = GvAV(PL_defgv);                                        \
+        AV *cx_pop_savearray_av = GvAV(PL_defgv);                       \
 	GvAV(PL_defgv) = cx->blk_sub.savearray;				\
         cx->blk_sub.savearray = NULL;                                   \
-        SvREFCNT_dec(av);	        				\
+        SvREFCNT_dec(cx_pop_savearray_av);	 			\
     } STMT_END
 
 /* junk in @_ spells trouble when cloning CVs and in pp_caller(), so don't
