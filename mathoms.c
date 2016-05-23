@@ -32,14 +32,29 @@
  *    but XS code may still explicitly use the long form, i.e.
  *    Perl_foo(aTHX_ ...)
  *
+ * NOTE: ALL FUNCTIONS IN THIS FILE should have an entry with the 'b' flag in
+ * embed.fnc.
+ *
+ * To move a function to this file, simply cut and paste it here, and change
+ * its embed.fnc entry to additionally have the 'b' flag.  If, for some reason
+ * a function you'd like to be treated as mathoms can't be moved from its
+ * current place, simply enclose it between
+ *
+ * #ifndef NO_MATHOMS
+ *    ...
+ * #endif
+ *
+ * and add the 'b' flag in embed.fnc.
+ *
  * REMEMBER to update makedef.pl when adding a function to mathoms.c whose
  * name doesn't begin with "Perl_".
  *
- * SMP - Oct. 24, 2005
- *
  * The compilation of this file can be suppressed; see INSTALL
  *
+ * Some blurb for perlapi.pod:
+
 =head1 Obsolete backwards compatibility functions
+
 Some of these are also deprecated.  You can exclude these from
 your compiled Perl by adding this option to Configure:
 C<-Accflags='-DNO_MATHOMS'>
@@ -58,22 +73,6 @@ C<-Accflags='-DNO_MATHOMS'>
    So make sure we have something in here by processing the headers anyway.
  */
 #else
-
-/* NOTE ALL FUNCTIONS IN THIS FILE should have an entry with the 'b' flag in
- * embed.fnc.
- *
- * To move a function to this file, simply cut and paste it here, and change
- * its embed.fnc entry to additionally have the 'b' flag.  If, for some reason
- * a function you'd like to be treated as mathoms can't be moved from its
- * current place, simply enclose it between
- *
- * #ifndef NO_MATHOMS
- *    ...
- * #endif
- *
- * and add the 'b' flag in embed.fnc.
- *
- * */
 
 /* ref() is now a macro using Perl_doref;
  * this version provided for binary compatibility only.
