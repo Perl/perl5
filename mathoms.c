@@ -21,8 +21,16 @@
 
 /*
  * This file contains mathoms, various binary artifacts from previous
- * versions of Perl.  For binary or source compatibility reasons, though,
- * we cannot completely remove them from the core code.
+ * versions of Perl which we cannot completely remove from the core
+ * code. There are two reasons functions should be here:
+ *
+ * 1) A function has been been replaced by a macro within a minor release,
+ *    so XS modules compiled against an older release will expect to
+ *    still be able to link against the function
+ * 2) A function Perl_foo(...) with #define foo Perl_foo(aTHX_ ...)
+ *    has been replaced by a macro, e.g. #define foo(...) foo_flags(...,0)
+ *    but XS code may still explicitly use the long form, i.e.
+ *    Perl_foo(aTHX_ ...)
  *
  * REMEMBER to update makedef.pl when adding a function to mathoms.c whose
  * name doesn't begin with "Perl_".
