@@ -32,6 +32,7 @@ my %feature = (
     refaliasing     => 'refaliasing',
     postderef_qq    => 'postderef_qq',
     unicode_eval    => 'unieval',
+    declared_refs   => 'myref',
     unicode_strings => 'unicode',
     fc              => 'fc',
     signatures      => 'signatures',
