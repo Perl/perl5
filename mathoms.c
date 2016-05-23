@@ -46,9 +46,6 @@
  *
  * and add the 'b' flag in embed.fnc.
  *
- * REMEMBER to update makedef.pl when adding a function to mathoms.c whose
- * name doesn't begin with "Perl_".
- *
  * The compilation of this file can be suppressed; see INSTALL
  *
  * Some blurb for perlapi.pod:
