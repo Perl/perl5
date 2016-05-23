@@ -12,7 +12,7 @@ BEGIN {
 
 BEGIN { require "./test.pl";  require "./loc_tools.pl"; }
 
-plan(tests => 115);
+plan(tests => 120);
 
 use Config;
 
@@ -400,6 +400,55 @@ __EOF__
         args     => ['file'],
     );
     is($out2, "", "no warning when files given");
+
+    open my $f, ">", "file" or die "$0: failed to create 'file': $!";
+    print $f "foo\nbar\n";
+    close $f;
+
+    # a backup extension is no longer required on any platform
+    my $out3 = runperl(
+        switches => [ '-i', '-p' ],
+        prog => 's/foo/quux/',
+        stderr => 1,
+        args => [ 'file' ],
+    );
+    is($out3, "", "no warnings/errors without backup extension");
+    open $f, "<", "file" or die "$0: cannot open 'file': $!";
+    chomp(my @out4 = <$f>);
+    close $f;
+    is(join(":", @out4), "quux:bar", "correct output without backup extension");
+
+    # test that path parsing is correct
+    -d "inplacetmp" or mkdir("inplacetmp")
+      or die "Cannot mkdir 'inplacetmp': $!";
+    require File::Spec;
+    my $work = File::Spec->catfile("inplacetmp", "foo");
+    open $f, ">", $work or die "Cannot create $work: $!";
+    print $f "foo\nbar\n";
+    close $f;
+
+    my $out4 = runperl
+      (
+       switches => [ "-i", "-p" ],
+       prog => 's/foo/bar/',
+       stderr => 1,
+       args => [ $work ],
+      );
+    is ($out4, "", "no errors or warnings");
+    open $f, "<", $work or die "Cannot open $work: $!";
+    chomp(my @file4 = <$f>);
+    close $f;
+    is(join(":", @file4), "bar:bar", "check output");
+
+    unlink $work;
+
+    # we now use temp files for in-place editing, make sure we didn't leave
+    # any behind in the above test
+    opendir my $d, "inplacetmp" or die "Cannot opendir inplacetmp: $!";
+    my @names = grep !/^\.\.?$/, readdir $d;
+    closedir $d;
+    is(scalar(@names), 0, "no extra files")
+      or diag "Found @names, expected none";
 }
 
 # Tests for -E
