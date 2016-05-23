@@ -3193,6 +3193,13 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_SREFGEN:
 	if (type == OP_NULL) { /* local */
 	  local_refgen:
+	    if (!FEATURE_MYREF_IS_ENABLED)
+		Perl_croak(aTHX_ "The experimental declared_refs "
+				 "feature is not enabled");
+	    Perl_ck_warner_d(aTHX_
+		     packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
+		    "Reference constructors after declarators are "
+		    "experimental");
 	    op_lvalue(cUNOPo->op_first, OP_NULL);
 	    return o;
 	}
@@ -3773,6 +3780,13 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 	return o;
     }
     else if (type == OP_REFGEN || type == OP_SREFGEN) {
+	if (!FEATURE_MYREF_IS_ENABLED)
+	    Perl_croak(aTHX_ "The experimental declared_refs "
+			     "feature is not enabled");
+	Perl_ck_warner_d(aTHX_
+	     packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
+	    "Reference constructors after declarators are "
+	    "experimental");
 	/* Kid is a nulled OP_LIST, handled above.  */
 	my_kid(cUNOPo->op_first, attrs, imopsp);
 	return o;
