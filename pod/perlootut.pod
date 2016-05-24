@@ -505,7 +505,7 @@ new C<File>.
 
 C<Moose> lets you define roles the same way you define classes:
 
-  package HasOnOfSwitch;
+  package HasOnOffSwitch;
   use Moose::Role;
 
   has is_on => (
