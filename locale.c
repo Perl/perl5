@@ -1488,6 +1488,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                                            includes the collation index
                                            prefixed. */
 
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log, "Looking to replace NUL\n"));
             /* Look through all legal code points (NUL isn't) */
             for (j = 1; j < 256; j++) {
                 char * x;       /* j's xfrm plus collation index */
@@ -1555,8 +1556,8 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
             }
 
             DEBUG_L(PerlIO_printf(Perl_debug_log,
-                    "_mem_collxfrm: lowest collating control in the 0-255 "
-                    "range in locale %s is 0x%02X\n",
+                    "_mem_collxfrm: lowest collating non-NUL control in the "
+                    "0-255 range in locale %s is 0x%02X\n",
                     PL_collation_name,
                     cur_min_cp));
             if (DEBUG_Lv_TEST) {
@@ -1875,10 +1876,34 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
 #ifdef DEBUGGING
     if (DEBUG_Lv_TEST || debug_initialization) {
         unsigned i;
+        char * t = s;
+        bool prev_was_printable = TRUE;
+        bool first_time = TRUE;
         PerlIO_printf(Perl_debug_log,
-            "_mem_collxfrm[%d]: returning %"UVuf" for locale %s '%s'\n",
-            PL_collation_ix, *xlen, PL_collation_name, input_string);
-        PerlIO_printf(Perl_debug_log, "Its xfrm is");
+            "_mem_collxfrm[%d]: returning %"UVuf" for locale %s string '",
+            PL_collation_ix, *xlen, PL_collation_name);
+        while (t < s + len ) {
+            UV cp = (utf8)
+                    ?  utf8_to_uvchr_buf((U8 *) t, s + len, NULL)
+                    : * (U8 *) t;
+            if (isPRINT(cp)) {
+                if (! prev_was_printable) {
+                    PerlIO_printf(Perl_debug_log, " ");
+                }
+                PerlIO_printf(Perl_debug_log, "%c", (U8) cp);
+                prev_was_printable = TRUE;
+            }
+            else {
+                if (! first_time) {
+                    PerlIO_printf(Perl_debug_log, " ");
+                }
+                PerlIO_printf(Perl_debug_log, "%02"UVXf"", cp);
+                prev_was_printable = FALSE;
+            }
+            t += (utf8) ? UTF8SKIP(t) : 1;
+            first_time = FALSE;
+        }
+        PerlIO_printf(Perl_debug_log, "'\nIts xfrm is");
         for (i = COLLXFRM_HDR_LEN; i < *xlen + COLLXFRM_HDR_LEN; i++) {
             PerlIO_printf(Perl_debug_log, " %02x", (U8) xbuf[i]);
         }
