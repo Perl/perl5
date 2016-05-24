@@ -2,7 +2,8 @@ package ExtUtils::MM_MacOS;
 
 use strict;
 
-our $VERSION = '7.10_01';
+our $VERSION = '7.18';
+$VERSION = eval $VERSION;
 
 sub new {
     die 'MacOS Classic (MacPerl) is no longer supported by MakeMaker';

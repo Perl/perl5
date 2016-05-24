@@ -1089,6 +1089,8 @@ cpan/ExtUtils-MakeMaker/lib/ExtUtils/MY.pm			MakeMaker user override class
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/testlib.pm			Fixes up @INC to use just-built extension
 cpan/ExtUtils-MakeMaker/t/00compile.t				See if MakeMaker modules compile
 cpan/ExtUtils-MakeMaker/t/01perl_bugs.t
+cpan/ExtUtils-MakeMaker/t/02-xsdynamic.t
+cpan/ExtUtils-MakeMaker/t/03-xsstatic.t
 cpan/ExtUtils-MakeMaker/t/arch_check.t				Test MakeMaker's arch_check()
 cpan/ExtUtils-MakeMaker/t/backwards.t				Check MakeMaker's backwards compatibility
 cpan/ExtUtils-MakeMaker/t/basic.t				See if MakeMaker can build a module
@@ -1111,12 +1113,6 @@ cpan/ExtUtils-MakeMaker/t/is_of_type.t				Test for ExtUtils::MakeMaker
 cpan/ExtUtils-MakeMaker/t/Liblist.t				See if ExtUtils::Liblist works
 cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/NoXS.pm		MakeMaker test utilities
 cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/BFD.pm	MakeMaker test utilities
-cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/MPV.pm	MakeMaker test utilities
-cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/PL_FILES.pm	MakeMaker test utilities
-cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/Problem.pm	MakeMaker test utilities
-cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/Recurs.pm	MakeMaker test utilities
-cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/SAS.pm	MakeMaker test utilities
-cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/Unicode.pm
 cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/XS.pm	MakeMaker test utilities
 cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Utils.pm		MakeMaker test utilities
 cpan/ExtUtils-MakeMaker/t/lib/TieIn.pm				Testing library for dummy input handles
@@ -1167,7 +1163,6 @@ cpan/ExtUtils-MakeMaker/t/VERSION_FROM.t			See if MakeMaker's VERSION_FROM works
 cpan/ExtUtils-MakeMaker/t/vstrings.t
 cpan/ExtUtils-MakeMaker/t/WriteEmptyMakefile.t			See if WriteEmptyMakefile works
 cpan/ExtUtils-MakeMaker/t/writemakefile_args.t			See if WriteMakefile works
-cpan/ExtUtils-MakeMaker/t/xs.t					Part of MakeMaker's test suite
 cpan/ExtUtils-Manifest/lib/ExtUtils/Manifest.pm			Utilities to write MANIFEST files
 cpan/ExtUtils-Manifest/lib/ExtUtils/MANIFEST.SKIP		The default MANIFEST.SKIP
 cpan/ExtUtils-Manifest/t/Manifest.t				See if ExtUtils::Manifest works

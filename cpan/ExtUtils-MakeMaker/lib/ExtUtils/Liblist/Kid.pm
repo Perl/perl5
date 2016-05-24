@@ -11,7 +11,8 @@ use 5.006;
 
 use strict;
 use warnings;
-our $VERSION = '7.10_01';
+our $VERSION = '7.18';
+$VERSION = eval $VERSION;
 
 use ExtUtils::MakeMaker::Config;
 use Cwd 'cwd';
@@ -337,7 +338,7 @@ sub _win32_ext {
         $libs_seen{$fullname} = 1 if $path;    # why is this a special case?
     }
 
-    my @libs = keys %libs_seen;
+    my @libs = sort keys %libs_seen;
 
     return ( '', '', '', '', ( $give_libs ? \@libs : () ) ) unless @extralibs;
 
