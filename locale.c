@@ -1525,7 +1525,9 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                     || strLT(x         + COLLXFRM_HDR_LEN,
                              cur_min_x + COLLXFRM_HDR_LEN))
                 {
-                    strcpy(PL_strxfrm_min_char, cur_source);
+                    PL_strxfrm_min_char[0] = cur_source[0];
+                    PL_strxfrm_min_char[1] = cur_source[1];
+                    PL_strxfrm_min_char[2] = cur_source[2];
                     cur_min_x = x;
 #ifdef DEBUGGING
                     cur_min_cp = j;
