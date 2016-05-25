@@ -3,7 +3,7 @@
 
 package Devel::Peek;
 
-$VERSION = '1.23';
+$VERSION = '1.24';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -133,7 +133,9 @@ means no limit.
 
 If C<use Devel::Peek> directive has a C<:opd=FLAGS> argument,
 this switches on debugging of opcode dispatch.  C<FLAGS> should be a
-combination of C<s>, C<t>, and C<P> (see B<-D> flags in L<perlrun>).
+combination of C<s>, C<t>, and C<P> (see
+L<< B<-D> flags in perlrun|perlrun/B<-D>I<letters> >>).
+
 C<:opd> is a shortcut for C<:opd=st>.
 
 =head2 Runtime debugging
@@ -548,7 +550,7 @@ inside a 5th eval in the program;
 
 =item *
 
-it is not currently executed (see C<DEPTH>);
+it is not currently executed (because C<DEPTH> is 0);
 
 =item *
 
