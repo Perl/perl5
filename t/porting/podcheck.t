@@ -439,6 +439,22 @@ my $non_pods = qr/ (?: \.
                            | ^(?i:Makefile\.PL)$
                 /x;
 
+# Matches something that looks like a file name, but is enclosed in C<...>
+my $C_path_re = qr{ \b ( C<
+                        # exclude various things that have slashes
+                        # in them but aren't paths
+                        (?!
+                            (?: (?: s | qr | m) / ) # regexes
+                            | \d+/\d+>       # probable fractions
+                            | OS/2>
+                            | Perl/Tk>
+                            | origin/blead>
+                            | origin/maint
+                            | -    # File names don't begin with "-"
+                            )
+                            [-\w]+ (?: / [-\w]+ )+ (?: \. \w+ )? > )
+                    }x;
+
 # '.PL' files should be excluded, as they aren't final pods, but often contain
 # material used in generating pods, and so can look like a pod.  We can't use
 # the regexp above because case sensisitivity is important for these, as some
@@ -856,23 +872,6 @@ package My::Pod::Checker {      # Extend Pod::Checker
             }
         }
         $paragraph = join " ", split /^/, $paragraph;
-
-        # Matches something that looks like a file name, but is enclosed in
-        # C<...>
-        my $C_path_re = qr{ \b ( C<
-                                # exclude various things that have slashes
-                                # in them but aren't paths
-                                (?!
-                                    (?: (?: s | qr | m) / ) # regexes
-                                    | \d+/\d+>       # probable fractions
-                                    | OS/2>
-                                    | Perl/Tk>
-                                    | origin/blead>
-                                    | origin/maint
-                                    | -    # File names don't begin with "-"
-                                 )
-                                 [-\w]+ (?: / [-\w]+ )+ (?: \. \w+ )? > )
-                          }x;
 
         # If looks like a reference to other documentation by containing the
         # word 'See' and then a likely pod directive, warn.
