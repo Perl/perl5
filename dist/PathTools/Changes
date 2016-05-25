@@ -1,5 +1,8 @@
 Revision history for Perl distribution PathTools.
 
+3.64 - Tue May 24 10:00:19 MST 2016
+- just minor pod changes to silence Pod::Checker
+
 3.62 - Mon Jan 11 08:39:19 EST 2016
 - ensure File::Spec::canonpath() preserves taint (CVE-2015-8607)
 

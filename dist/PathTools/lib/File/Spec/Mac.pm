@@ -4,7 +4,7 @@ use strict;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '3.63';
+$VERSION = '3.64';
 $VERSION =~ tr/_//d;
 
 @ISA = qw(File::Spec::Unix);
@@ -121,7 +121,7 @@ doesn't alter the path, i.e. these arguments are ignored. (When a ""
 is passed as the first argument, it has a special meaning, see
 (6)). This way, a colon ":" is handled like a "." (curdir) on Unix,
 while an empty string "" is generally ignored (see
-C<Unix-E<gt>canonpath()> ). Likewise, a "::" is handled like a ".."
+L<File::Spec::Unix/canonpath()> ). Likewise, a "::" is handled like a ".."
 (updir), and a ":::" is handled like a "../.." etc.  E.g.
 
     catdir("a",":",":","b")   = ":a:b:"
@@ -168,7 +168,7 @@ their Unix counterparts:
                                                     # (e.g. "HD:a:")
 
 However, this approach is limited to the first arguments following
-"root" (again, see C<Unix-E<gt>canonpath()> ). If there are more
+"root" (again, see L<File::Spec::Unix/canonpath()>. If there are more
 arguments that move up the directory tree, an invalid path going
 beyond root can be created.
 
