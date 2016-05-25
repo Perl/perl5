@@ -435,7 +435,7 @@ my $C_path_re = qr{ ^
                         # exclude various things that have slashes
                         # in them but aren't paths
                         (?!
-                            (?: (?: s | qr | m) / ) # regexes
+                            (?: (?: s | qr | m | tr | y ) / ) # regexes
                             | \d+/\d+ \b       # probable fractions
                             | (?: [LF] < )+
                             | OS/2 \b
