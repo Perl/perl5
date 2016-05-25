@@ -1845,6 +1845,7 @@ cpan/Pod-Checker/t/pod/contains_bad_pod.xr
 cpan/Pod-Checker/t/pod/empty.xr
 cpan/Pod-Checker/t/pod/podchkenc.t
 cpan/Pod-Checker/t/pod/podchkenc.xr
+cpan/Pod-Checker/t/pod/podchklink.t
 cpan/Pod-Checker/t/pod/poderrs.t
 cpan/Pod-Checker/t/pod/poderrs.xr
 cpan/Pod-Checker/t/pod/selfcheck.t
