@@ -48,7 +48,14 @@
  * initialization.  This is done before option parsing, and before any thread
  * creation, so can be a file-level static */
 #ifdef DEBUGGING
+# ifdef PERL_GLOBAL_STRUCT
+  /* no global syms allowed */
+#  define debug_initialization 0
+#  define DEBUG_INITIALIZATION_set(v)
+# else
 static bool debug_initialization = FALSE;
+#  define DEBUG_INITIALIZATION_set(v) (debug_initialization = v)
+# endif
 #endif
 
 #ifdef USE_LOCALE
@@ -947,9 +954,9 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #endif
 
 #ifdef DEBUGGING
-    debug_initialization = (PerlEnv_getenv("PERL_DEBUG_LOCALE_INIT"))
+    DEBUG_INITIALIZATION_set((PerlEnv_getenv("PERL_DEBUG_LOCALE_INIT"))
                            ? TRUE
-                           : FALSE;
+                           : FALSE);
 #   define DEBUG_LOCALE_INIT(category, locale, result)                      \
 	STMT_START {                                                        \
 		if (debug_initialization) {                                 \
@@ -1405,7 +1412,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #ifdef DEBUGGING
     /* So won't continue to output stuff */
-    debug_initialization = FALSE;
+    DEBUG_INITIALIZATION_set(FALSE);
 #endif
 
     return ok;
