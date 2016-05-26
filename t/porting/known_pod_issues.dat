@@ -322,7 +322,6 @@ ext/hash-util/lib/hash/util.pm	Verbatim line length including indents exceeds 79
 ext/pod-html/testdir/perlpodspec-copy.pod	Verbatim line length including indents exceeds 79 by	2
 ext/pod-html/testdir/perlvar-copy.pod	? Should you be using L<...> instead of	3
 ext/pod-html/testdir/perlvar-copy.pod	Verbatim line length including indents exceeds 79 by	6
-ext/vms-dclsym/dclsym.pm	? Should you be using L<...> instead of	1
 ext/vms-filespec/lib/vms/filespec.pm	Verbatim line length including indents exceeds 79 by	1
 install	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perl.pod	Verbatim line length including indents exceeds 79 by	8
