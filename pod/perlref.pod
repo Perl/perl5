@@ -718,7 +718,7 @@ outer() at the time outer is invoked.
 This has the interesting effect of creating a function local to another
 function, something not normally supported in Perl.
 
-=head1 WARNING
+=head1 WARNING: Don't use references as hash keys
 X<reference, string context> X<reference, use as hash key>
 
 You may not (usefully) use a reference as the key to a hash.  It will be
@@ -738,7 +738,7 @@ real refs, instead of the keys(), which won't.
 
 The standard Tie::RefHash module provides a convenient workaround to this.
 
-=head1 Postfix Dereference Syntax
+=head2 Postfix Dereference Syntax
 
 Beginning in v5.20.0, a postfix syntax for using references is
 available.  It behaves as described in L</Using References>, but instead
@@ -798,7 +798,7 @@ As with postfix array, postfix value slice dereferencing I<can> be used
 in interpolating strings (double quotes or the C<qq> operator), but only
 if the C<postderef_qq> L<feature> is enabled.
 
-=head1 Assigning to References
+=head2 Assigning to References
 
 Beginning in v5.22.0, the referencing operator can be assigned to.  It
 performs an aliasing operation, so that the variable name referenced on the
