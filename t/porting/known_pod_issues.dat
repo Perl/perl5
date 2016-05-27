@@ -331,6 +331,7 @@ pod/perlce.pod	Verbatim line length including indents exceeds 79 by	3
 pod/perldebguts.pod	Verbatim line length including indents exceeds 79 by	27
 pod/perldebtut.pod	Verbatim line length including indents exceeds 79 by	3
 pod/perldtrace.pod	Verbatim line length including indents exceeds 79 by	7
+pod/perlgit.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perlgit.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlguts.pod	? Should you be using L<...> instead of	1
 pod/perlhack.pod	? Should you be using L<...> instead of	1
@@ -341,6 +342,7 @@ pod/perlirix.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlmacosx.pod	Verbatim line length including indents exceeds 79 by	3
 pod/perlmodlib.pod	Verbatim line length including indents exceeds 79 by	3
 pod/perlmroapi.pod	? Should you be using L<...> instead of	1
+pod/perlop.pod	? Should you be using F<...> or maybe L<...> instead of	2
 pod/perlos2.pod	? Should you be using L<...> instead of	2
 pod/perlos2.pod	Verbatim line length including indents exceeds 79 by	5
 pod/perlos390.pod	Verbatim line length including indents exceeds 79 by	2
@@ -353,7 +355,8 @@ pod/perltru64.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlwin32.pod	Verbatim line length including indents exceeds 79 by	7
 porting/epigraphs.pod	Verbatim line length including indents exceeds 79 by	16
 porting/release_managers_guide.pod	Verbatim line length including indents exceeds 79 by	1
-utils/encguess	There is no NAME	1
+porting/todo.pod	? Should you be using F<...> or maybe L<...> instead of	1
+utils/ptar	Verbatim paragraph in NAME section	1
 lib/benchmark.pm	Verbatim line length including indents exceeds 79 by	2
 lib/config.pod	? Should you be using L<...> instead of	-1
 lib/perl5db.pl	? Should you be using L<...> instead of	1
