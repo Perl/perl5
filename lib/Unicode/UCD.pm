@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.64';
+our $VERSION = '0.65';
 
 require Exporter;
 
@@ -128,7 +128,8 @@ Examples:
 
     223     # Decimal 223 in native character set
     0223    # Hexadecimal 223, native (= 547 decimal)
-    0xDF    # Hexadecimal DF, native (= 223 decimal
+    0xDF    # Hexadecimal DF, native (= 223 decimal)
+    '0xDF'  # String form of hexadecimal (= 223 decimal)
     'U+DF'  # Hexadecimal DF, in Unicode's character set
                               (= LATIN SMALL LETTER SHARP S)
 
