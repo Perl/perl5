@@ -281,7 +281,7 @@ sub nm_parse_darwin {
         } elsif (/^ {8}(?: {8})? \(undefined(?: \[lazy bound\])?\) external _?(.+)/) {
             # darwin/ppc marks most undefined text symbols
             # as "[lazy bound]".
-            my ($symbol) = $1;
+            my ($symbol) = $1 =~ s/\$UNIX2003\z//r;
             return if is_perlish_symbol($symbol);
             $symbols->{undef}{$symbol}{$symbols->{o}}++;
             return;
