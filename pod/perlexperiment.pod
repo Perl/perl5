@@ -120,6 +120,18 @@ L<[perl #119453]|https://rt.perl.org/rt3/Ticket/Display.html?id=119453>.
 
 See also L<perlrun>
 
+=item Declaring a reference to a variable
+
+Introduced in Perl 5.26.0
+
+Using this feature triggers warnings in the category
+C<experimental::declared_refs>.
+
+The ticket for this feature is
+L<[perl #128654]|https://rt.perl.org/rt3/Ticket/Display.html?id=128654>.
+
+See also: L<perlref/Declaring a Reference to a Variable>
+
 =item There is an C<installhtml> target in the Makefile.
 
 The ticket for this feature is

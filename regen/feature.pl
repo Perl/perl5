@@ -665,6 +665,22 @@ See L<perlop/Bitwise String Operators> for details.
 
 This feature is available from Perl 5.22 onwards.
 
+=head2 The 'declared_refs' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the
+warning:
+
+    no warnings "experimental::declared_refs";
+
+This allows a reference to a variable to be declared with C<my>, C<state>,
+our C<our>, or localized with C<local>.  It is intended mainly for use in
+conjunction with the "refaliasing" feature.  See L<perlref/Declaring a
+Reference to a Variable> for examples.
+
+This feature is available from Perl 5.26 onwards.
+
 =head1 FEATURE BUNDLES
 
 It's possible to load multiple features together, using

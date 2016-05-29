@@ -909,6 +909,26 @@ will only be visible within that inner sub, and will not affect the outer
 subroutine where the variables are declared.  This bizarre behavior is
 subject to change.
 
+=head1 Declaring a Reference to a Variable
+
+Beginning in v5.26.0, the referencing operator can come after C<my>, C<state>, C<our>, or C<local>.  This syntax must be enabled with C<use feature 'declared_refs'>.  It is experimental, and will warn by default unless C<no warnings 'experimental::refaliasing'> is in effect.
+
+This feature makes these:
+
+    my \$x;
+    our \$y;
+
+equivalent to:
+
+    \my $x;
+    \our $x;
+
+It is intended mainly for use in assignments to references (see
+L</Assigning to References>, above).  It also allows the backslash to be
+used on just some items in a list of declared variables:
+
+    my ($foo, \@bar, \%baz); # equivalent to:  my $foo, \my(@bar, %baz);
+
 =head1 SEE ALSO
 
 Besides the obvious documents, source code can be instructive.
