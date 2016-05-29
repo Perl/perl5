@@ -7813,8 +7813,7 @@ Perl_yylex(pTHX)
 				     "feature is not enabled");
 		Perl_ck_warner_d(aTHX_
 		     packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
-		    "Reference constructors after declarators are "
-		    "experimental");
+		    "Declaring references is experimental");
 	    }
 	    OPERATOR(MY);
 

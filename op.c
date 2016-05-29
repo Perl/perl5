@@ -3198,8 +3198,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 				 "feature is not enabled");
 	    Perl_ck_warner_d(aTHX_
 		     packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
-		    "Reference constructors after declarators are "
-		    "experimental");
+		    "Declaring references is experimental");
 	    op_lvalue(cUNOPo->op_first, OP_NULL);
 	    return o;
 	}
@@ -3785,8 +3784,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 			     "feature is not enabled");
 	Perl_ck_warner_d(aTHX_
 	     packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
-	    "Reference constructors after declarators are "
-	    "experimental");
+	    "Declaring references is experimental");
 	/* Kid is a nulled OP_LIST, handled above.  */
 	my_kid(cUNOPo->op_first, attrs, imopsp);
 	return o;
