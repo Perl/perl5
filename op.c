@@ -3668,7 +3668,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 	return o;
     } else if (type == OP_RV2SV ||	/* "our" declaration */
 	       type == OP_RV2AV ||
-	       type == OP_RV2HV) { /* XXX does this let anything illegal in? */
+	       type == OP_RV2HV) {
 	if (cUNOPo->op_first->op_type != OP_GV) { /* MJD 20011224 */
 	    S_cant_declare(aTHX_ o);
 	} else if (attrs) {
