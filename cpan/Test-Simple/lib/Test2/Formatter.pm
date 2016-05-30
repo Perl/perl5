@@ -2,7 +2,7 @@ package Test2::Formatter;
 use strict;
 use warnings;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 
 my %ADDED;
@@ -53,8 +53,8 @@ A formatter is any package or object with a C<write($event, $num)> method.
 The C<write> method is a method, so it either gets a class or instance. The 2
 arguments are the C<$event> object it should record, and the C<$assert_num>
 which is the number of the current assertion (ok), or the last assertion if
-this even is not itself an assertion. The assertion number may be any inyeger 0
-or greator, and may be undefined in some cases.
+this even is not itself an assertion. The assertion number may be any integer 0
+or greater, and may be undefined in some cases.
 
 The C<hide_buffered()> method must return a boolean. This is used to tell
 buffered subtests whether or not to send it events as they are being buffered.

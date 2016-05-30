@@ -2,12 +2,12 @@ package Test::Builder::Module;
 
 use strict;
 
-use Test::Builder 1.00;
+use Test::Builder;
 
 require Exporter;
 our @ISA = qw(Exporter);
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 
 =head1 NAME
@@ -89,7 +89,8 @@ sub import {
 
     $test->plan(@_);
 
-    $class->export_to_level( 1, $class, @imports );
+    local $Exporter::ExportLevel = $Exporter::ExportLevel + 1;
+    $class->Exporter::import(@imports);
 }
 
 sub _strip_imports {

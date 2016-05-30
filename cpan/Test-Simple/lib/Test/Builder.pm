@@ -4,15 +4,13 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 BEGIN {
     if( $] < 5.008 ) {
         require Test::Builder::IO::Scalar;
     }
 }
-
-use overload();
 
 use Scalar::Util qw/blessed reftype weaken/;
 
@@ -40,16 +38,7 @@ use Test::Builder::Formatter;
 use Test::Builder::TodoDiag;
 
 our $Level = 1;
-our $Test = Test::Builder->new;
-
-# Non-TB tools normally expect 0 added to the level. $Level is normally 1. So
-# we only want the level to change if $Level != 1.
-# TB->ctx compensates for this later.
-Test2::API::test2_add_callback_context_aquire(sub {$_[0]->{level} += $Level - 1});
-
-Test2::API::test2_add_callback_exit(sub { $Test->_ending(@_) });
-
-Test2::API::test2_ipc()->set_no_fatal(1) if USE_THREADS;
+our $Test = $ENV{TB_NO_EARLY_INIT} ? undef : Test::Builder->new;
 
 sub _add_ts_hooks {
     my $self = shift;
@@ -102,6 +91,15 @@ sub new {
         my $ctx = context();
         $Test = $class->create(singleton => 1);
         $ctx->release;
+
+        # Non-TB tools normally expect 0 added to the level. $Level is normally 1. So
+        # we only want the level to change if $Level != 1.
+        # TB->ctx compensates for this later.
+        Test2::API::test2_add_callback_context_aquire(sub { $_[0]->{level} += $Level - 1 });
+
+        Test2::API::test2_add_callback_exit(sub { $Test->_ending(@_) });
+
+        Test2::API::test2_ipc()->set_no_fatal(1) if USE_THREADS;
     }
     return $Test;
 }
@@ -304,7 +302,7 @@ sub subtest {
         ($err, $child_error) = ($@, $?);
 
         # They might have done 'BEGIN { skip_all => "whatever" }'
-        if (!$ok && $err =~ m/Label not found for "last T2_SUBTEST_WRAPPER"/) {
+        if (!$ok && $err =~ m/Label not found for "last T2_SUBTEST_WRAPPER"/ || (blessed($err) && blessed($err) eq 'Test::Builder::Exception')) {
             $ok  = undef;
             $err = undef;
         }
@@ -485,6 +483,12 @@ sub no_plan {
     my($self, $arg) = @_;
 
     my $ctx = $self->ctx;
+
+    if (defined $ctx->hub->plan) {
+        warn "Plan already set, no_plan() is a no-op, this will change to a hard failure in the future.";
+        $ctx->release;
+        return;
+    }
 
     $ctx->alert("no_plan takes no arguments") if $arg;
 
@@ -685,6 +689,10 @@ sub _unoverload {
 
     return unless ref $$thing;
     return unless blessed($$thing) || scalar $self->_try(sub{ $$thing->isa('UNIVERSAL') });
+    {
+        local ($!, $@);
+        require overload;
+    }
     my $string_meth = overload::Method( $$thing, $type ) || return;
     $$thing = $$thing->$string_meth();
 }
@@ -1731,9 +1739,9 @@ Ok, so there can be more than one Test::Builder object and this is how
 you get it.  You might use this instead of C<new()> if you're testing
 a Test::Builder based module, but otherwise you probably want C<new>.
 
-B<NOTE>: the implementation is not complete.  C<level>, for example, is
-still shared amongst B<all> Test::Builder objects, even ones created using
-this method.  Also, the method name may change in the future.
+B<NOTE>: the implementation is not complete.  C<level>, for example, is still
+shared by B<all> Test::Builder objects, even ones created using this method.
+Also, the method name may change in the future.
 
 =item B<subtest>
 
@@ -1779,19 +1787,6 @@ A convenient way to set up your tests.  Call this and Test::Builder
 will print the appropriate headers and take the appropriate actions.
 
 If you call C<plan()>, don't call any of the other methods below.
-
-If a child calls "skip_all" in the plan, a C<Test::Builder::Exception> is
-thrown.  Trap this error, call C<finalize()> and don't run any more tests on
-the child.
-
- my $child = $Test->child('some child');
- eval { $child->plan( $condition ? ( skip_all => $reason ) : ( tests => 3 )  ) };
- if ( eval { $@->isa('Test::Builder::Exception') } ) {
-    $child->finalize;
-    return;
- }
- # run your tests
-
 
 =item B<expected_tests>
 
@@ -2020,7 +2015,7 @@ Takes a quoted regular expression produced by C<qr//>, or a string
 representing a regular expression.
 
 Returns a Perl value which may be used instead of the corresponding
-regular expression, or C<undef> if its argument is not recognised.
+regular expression, or C<undef> if its argument is not recognized.
 
 For example, a version of C<like()>, sans the useful diagnostic messages,
 could be written as:
@@ -2440,9 +2435,9 @@ If you fail more than 254 tests, it will be reported as 254.
 
 =head1 THREADS
 
-In perl 5.8.1 and later, Test::Builder is thread-safe.  The test
-number is shared amongst all threads.  This means if one thread sets
-the test number using C<current_test()> they will all be effected.
+In perl 5.8.1 and later, Test::Builder is thread-safe.  The test number is
+shared by all threads.  This means if one thread sets the test number using
+C<current_test()> they will all be effected.
 
 While versions earlier than 5.8.1 had threads they contain too many
 bugs to support.

@@ -30,7 +30,7 @@ isnt("foo", undef, "'isnt' undef test 1");
 isnt(undef, "foo", "'isnt' undef test 2");
 like("foo", qr/o/, "'like' test");
 unlike("foo", qr/a/, "'unlike' test");
-diag("Testing Diag");
+
 note("Testing Note");
 
 my $str = "abc";

@@ -1,14 +1,13 @@
 use strict;
 use warnings;
 
+use Test2::Util qw/CAN_THREAD/;
 BEGIN {
-    my $skip = !eval { require threads; 1 };
-    if ($skip) {
+    unless(CAN_THREAD) {
         require Test::More;
-        Test::More::plan(skip_all => 'no threads');
+        Test::More->import(skip_all => "threads are not supported");
     }
 }
-
 use threads;
 use Test::More;
 

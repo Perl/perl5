@@ -2,12 +2,12 @@ package Test2::Hub::Interceptor;
 use strict;
 use warnings;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 
 use Test2::Hub::Interceptor::Terminator();
 
-use base 'Test2::Hub';
+BEGIN { require Test2::Hub; our @ISA = qw(Test2::Hub) }
 use Test2::Util::HashBase;
 
 sub inherit {

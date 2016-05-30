@@ -2,10 +2,10 @@ package Test2::Event::Subtest;
 use strict;
 use warnings;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 
-use base 'Test2::Event::Ok';
+BEGIN { require Test2::Event::Ok; our @ISA = qw(Test2::Event::Ok) }
 use Test2::Util::HashBase qw{subevents buffered subtest_id};
 
 sub init {

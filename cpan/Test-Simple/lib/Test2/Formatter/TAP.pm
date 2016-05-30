@@ -2,7 +2,7 @@ package Test2::Formatter::TAP;
 use strict;
 use warnings;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 
 use Test2::Util::HashBase qw{
@@ -14,7 +14,7 @@ sub OUT_ERR() { 1 }
 
 use Carp qw/croak/;
 
-use base 'Test2::Formatter';
+BEGIN { require Test2::Formatter; our @ISA = qw(Test2::Formatter) }
 
 my %CONVERTERS = (
     'Test2::Event::Ok'        => 'event_ok',
@@ -234,7 +234,7 @@ sub event_subtest {
 
     # In a verbose harness we indent the diagnostics from the 'Ok' event since
     # they will appear inside the subtest braces. This helps readability. In a
-    # non-verbose harness we do nto do this because it is less readable.
+    # non-verbose harness we do not do this because it is less readable.
     if ($ENV{HARNESS_IS_VERBOSE}) {
         # index 0 is the filehandle, index 1 is the message we want to indent.
         $_->[1] =~ s/^(.*\S.*)$/    $1/mg for @diag;
@@ -461,7 +461,7 @@ Process an L<Test2::Event::Subtest> event.
 
 =item @out = $TAP->event_other($e, $num)
 
-Fallback for unregistered event types. It uses the L<Test2::Event> api to
+Fallback for unregistered event types. It uses the L<Test2::Event> API to
 convert the event to TAP.
 
 =back

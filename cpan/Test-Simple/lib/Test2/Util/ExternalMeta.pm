@@ -2,7 +2,7 @@ package Test2::Util::ExternalMeta;
 use strict;
 use warnings;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 
 use Carp qw/croak/;
@@ -10,7 +10,7 @@ use Carp qw/croak/;
 sub META_KEY() { '_meta' }
 
 our @EXPORT = qw/meta set_meta get_meta delete_meta/;
-use base 'Exporter';
+BEGIN { require Exporter; our @ISA = qw(Exporter) }
 
 sub set_meta {
     my $self = shift;
@@ -91,7 +91,7 @@ tools to attach meta-data to your instances. If your object consumes this
 package, and imports its methods, then third party meta-data has a safe place
 to live.
 
-=head1 SYNOPSYS
+=head1 SYNOPSIS
 
     package My::Object;
     use strict;
@@ -124,7 +124,7 @@ hash, then there is a conflict and you cannot use this package.
 =item $val = $obj->meta($key, $default)
 
 This will get the value for a specified meta C<$key>. Normally this will return
-C<undef> when there is no value for the C<$key>, however you can specfi a
+C<undef> when there is no value for the C<$key>, however you can specify a
 C<$default> value to set when no value is already set.
 
 =item $val = $obj->get_meta($key)
@@ -143,7 +143,7 @@ Set the value of a specified meta C<$key>.
 
 =back
 
-=head1 META-KEY RESTICTIONS
+=head1 META-KEY RESTRICTIONS
 
 Meta keys must be defined, and must be true when used as a boolean. Keys may
 not be references. You are free to stringify a reference C<"$ref"> for use as a

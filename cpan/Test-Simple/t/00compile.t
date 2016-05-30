@@ -34,7 +34,12 @@ foreach my $file (@modules) {
     # they're already loaded.  This avoids recompilation warnings.
     local @INC = @INC;
     unshift @INC, ".";
-    ok eval { require($file); 1 } or diag "require $file failed.\n$@";
+    my @warnings;
+    ok eval {
+        local $SIG{__WARN__} = sub { push @warnings => @_ };
+        require($file);
+        1
+    } or diag "require $file failed.", "\n", @warnings, "\n", $@;
 
     SKIP: {
         skip "Test::Pod not installed", 1 unless $Has_Test_Pod;

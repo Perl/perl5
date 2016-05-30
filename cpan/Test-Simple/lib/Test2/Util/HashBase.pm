@@ -2,54 +2,43 @@ package Test2::Util::HashBase;
 use strict;
 use warnings;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 
 require Carp;
 $Carp::Internal{+__PACKAGE__} = 1;
 
-my %ATTRS;
-my %META;
+my %ATTR_SUBS;
 
-sub _get_inherited_attrs {
-    no strict 'refs';
-    my @todo = map @{"$_\::ISA"}, @_;
-    my %seen;
-    my @all;
-    while (my $pkg = shift @todo) {
-        next if $seen{$pkg}++;
-        my $found = $META{$pkg};
-        push @all => %$found if $found;
-
-        my $isa = \@{"$pkg\::ISA"};
-        push @todo => @$isa if @$isa;
+BEGIN {
+    # these are not strictly equivalent, but for out use we don't care
+    # about order
+    *_isa = ($] >= 5.010 && require mro) ? \&mro::get_linear_isa : sub {
+        no strict 'refs';
+        my @packages = ($_[0]);
+        my %seen;
+        for my $package (@packages) {
+            push @packages, grep !$seen{$_}++, @{"$package\::ISA"};
+        }
+        return \@packages;
     }
-
-    return \@all;
-}
-
-sub _make_subs {
-    my ($str) = @_;
-    return $ATTRS{$str} ||= {
-        uc($str) => sub() { $str },
-        $str => sub { $_[0]->{$str} },
-        "set_$str" => sub { $_[0]->{$str} = $_[1] },
-    };
 }
 
 sub import {
     my $class = shift;
     my $into = caller;
 
-    my %attrs = map %{_make_subs($_)}, @_;
-
-    my @meta = map uc, @_;
-    @{$META{$into}}{@meta} = map $attrs{$_}, @meta;
-
+    my $isa = _isa($into);
+    my $attr_subs = $ATTR_SUBS{$into} ||= {};
     my %subs = (
-        %attrs,
-        @{_get_inherited_attrs($into)},
-        $into->can('new') ? () : (new => \&_new)
+        ($into->can('new') ? () : (new => \&_new)),
+        (map %{ $ATTR_SUBS{$_}||{} }, @{$isa}[1 .. $#$isa]),
+        (map {
+            my ($sub, $attr) = (uc $_, $_);
+            $sub => ($attr_subs->{$sub} = sub() { $attr }),
+            $attr => sub { $_[0]->{$attr} },
+            "set_$attr" => sub { $_[0]->{$attr} = $_[1] },
+        } @_),
     );
 
     no strict 'refs';
@@ -146,7 +135,7 @@ This package is used to generate classes based on hashrefs. Using this class
 will give you a C<new()> method, as well as generating accessors you request.
 Generated accessors will be getters, C<set_ACCESSOR> setters will also be
 generated for you. You also get constants for each accessor (all caps) which
-return the key into the hash for that accessor. Single inheritence is also
+return the key into the hash for that accessor. Single inheritance is also
 supported.
 
 =head1 METHODS
@@ -160,7 +149,7 @@ supported.
 Create a new instance using key/value pairs.
 
 HashBase will not export C<new()> if there is already a C<new()> method in your
-packages inheritence chain.
+packages inheritance chain.
 
 B<If you do not want this method you can define your own> you just have to
 declare it before loading L<Test2::Util::HashBase>.

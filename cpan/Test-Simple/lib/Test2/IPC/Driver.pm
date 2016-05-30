@@ -2,7 +2,7 @@ package Test2::IPC::Driver;
 use strict;
 use warnings;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 
 use Carp qw/confess longmess/;
@@ -29,7 +29,7 @@ for my $meth (qw/send cull add_hub drop_hub waiting is_viable/) {
 }
 
 # Print the error and call exit. We are not using 'die' cause this is a
-# catastophic error that should never be caught. If we get here it
+# catastrophic error that should never be caught. If we get here it
 # means some serious shit has happened in a child process, the only way
 # to inform the parent may be to exit false.
 
@@ -254,7 +254,7 @@ True if you want to make use of the L<Test2::API>/L<Test2::API::Instance> SHM.
 
 =item $bites = $ipc->shm_size()
 
-Use this to customize the size of the shm space. There are no guarantees about
+Use this to customize the size of the SHM space. There are no guarantees about
 what the size will be if you do not implement this.
 
 =back

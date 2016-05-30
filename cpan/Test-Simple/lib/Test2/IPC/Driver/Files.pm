@@ -2,10 +2,10 @@ package Test2::IPC::Driver::Files;
 use strict;
 use warnings;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 
-use base 'Test2::IPC::Driver';
+BEGIN { require Test2::IPC::Driver; our @ISA = qw(Test2::IPC::Driver) }
 
 use Test2::Util::HashBase qw{tempdir event_id tid pid globals};
 
@@ -13,8 +13,9 @@ use Scalar::Util qw/blessed/;
 use File::Temp();
 use Storable();
 use File::Spec();
+use POSIX();
 
-use Test2::Util qw/try get_tid pkg_to_file/;
+use Test2::Util qw/try get_tid pkg_to_file IS_WIN32/;
 use Test2::API qw/test2_ipc_set_pending/;
 
 sub use_shm { 1 }
@@ -52,7 +53,7 @@ sub hub_file {
     my $self = shift;
     my ($hid) = @_;
     my $tdir = $self->{+TEMPDIR};
-    return File::Spec->canonpath("$tdir/HUB-$hid");
+    return File::Spec->catfile($tdir, "HUB-$hid");
 }
 
 sub event_file {
@@ -68,7 +69,7 @@ sub event_file {
     my @type = split '::', $type;
     my $name = join('-', $hid, $$, get_tid(), $self->{+EVENT_ID}++, @type);
 
-    return File::Spec->canonpath("$tempdir/$name");
+    return File::Spec->catfile($tempdir, $name);
 }
 
 sub add_hub {
@@ -151,11 +152,31 @@ do so if Test::Builder is loaded for legacy reasons.
         $self->{+GLOBALS}->{$hid}->{$name}++;
     }
 
+    my ($old, $blocked);
+    unless(IS_WIN32) {
+        my $to_block = POSIX::SigSet->new(
+            POSIX::SIGINT(),
+            POSIX::SIGALRM(),
+            POSIX::SIGHUP(),
+            POSIX::SIGTERM(),
+            POSIX::SIGUSR1(),
+            POSIX::SIGUSR2(),
+        );
+        $old = POSIX::SigSet->new;
+        $blocked = POSIX::sigprocmask(POSIX::SIG_BLOCK(), $to_block, $old);
+        # Silently go on if we failed to log signals, not much we can do.
+    }
+
+    # Write and rename the file.
     my ($ok, $err) = try {
         Storable::store($e, $file);
         rename($file, $ready) or $self->abort("Could not rename file '$file' -> '$ready'");
         test2_ipc_set_pending(substr($file, -(shm_size)));
     };
+
+    # If our block was successful we want to restore the old mask.
+    POSIX::sigprocmask(POSIX::SIG_SETMASK(), $old, POSIX::SigSet->new()) if defined $blocked;
+
     if (!$ok) {
         my $src_file = __FILE__;
         $err =~ s{ at \Q$src_file\E.*$}{};
@@ -207,7 +228,7 @@ sub cull {
         next if $global && $self->{+GLOBALS}->{$hid}->{$file}++;
 
         # Untaint the path.
-        my $full = File::Spec->canonpath("$tempdir/$file");
+        my $full = File::Spec->catfile($tempdir, $file);
         ($full) = ($full =~ m/^(.*)$/gs);
 
         my $obj = $self->read_event_file($full);
@@ -279,7 +300,7 @@ sub DESTROY {
     while(my $file = readdir($dh)) {
         next if $file =~ m/^\.+$/;
         next if $file =~ m/\.complete$/;
-        my $full = File::Spec->canonpath("$tempdir/$file");
+        my $full = File::Spec->catfile($tempdir, $file);
 
         if ($file =~ m/^(GLOBAL|HUB-)/) {
             $full =~ m/^(.*)$/;

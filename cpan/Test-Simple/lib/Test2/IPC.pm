@@ -2,7 +2,7 @@ package Test2::IPC;
 use strict;
 use warnings;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 
 use Test2::API::Instance;
@@ -19,13 +19,13 @@ use Test2::API qw{
 use Carp qw/confess/;
 
 our @EXPORT_OK = qw/cull/;
-use base 'Exporter';
+BEGIN { require Exporter; our @ISA = qw(Exporter) }
 
 sub import {
     goto &Exporter::import unless test2_init_done();
 
-    confess "Cannot add IPC in a child process" if test2_pid() != $$;
-    confess "Cannot add IPC in a child thread"  if test2_tid() != get_tid();
+    confess "Cannot add IPC in a child process (" . test2_pid() . " vs $$)" if test2_pid() != $$;
+    confess "Cannot add IPC in a child thread (" . test2_tid() . " vs " . get_tid() . ")"  if test2_tid() != get_tid();
 
     Test2::API::_set_ipc(_make_ipc());
     apply_ipc(test2_stack());

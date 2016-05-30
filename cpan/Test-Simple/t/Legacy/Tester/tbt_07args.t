@@ -9,7 +9,7 @@ use strict;
 
 # argh! now we need to test the thing we're testing.  Basically we need
 # to pretty much reimplement the whole code again.  This is very
-# annoying but can't be avoided.  And onwards with the cut and paste
+# annoying but can't be avoided.  And onward with the cut and paste
 
 # My brain is melting.  My brain is melting.  ETOOMANYLAYERSOFTESTING
 

@@ -2,7 +2,7 @@ package Test2::API::Stack;
 use strict;
 use warnings;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 
 use Test2::Hub();
@@ -110,7 +110,7 @@ instances.
 =head1 ***INTERNALS NOTE***
 
 B<The internals of this package are subject to change at any time!> The public
-methods provided will not change in backwords incompatible ways, but the
+methods provided will not change in backwards incompatible ways, but the
 underlying implementation details might. B<Do not break encapsulation here!>
 
 =head1 DESCRIPTION
@@ -146,10 +146,10 @@ If you specify the C<< 'class' => $class >> argument, the new hub will be an
 instance of the specified class.
 
 Unless your parameters specify C<'formatter'> or C<'ipc'> arguments, the
-formatter and ipc instance will be inherited from the current top hub. You can
-set the parameters to C<undef> to avoid having a formatter or ipc instance.
+formatter and IPC instance will be inherited from the current top hub. You can
+set the parameters to C<undef> to avoid having a formatter or IPC instance.
 
-If there is no top hub, and you do not ask to leave ipc and formatter undef,
+If there is no top hub, and you do not ask to leave IPC and formatter undef,
 then a new formatter will be created, and the IPC instance from
 L<Test2::API> will be used.
 

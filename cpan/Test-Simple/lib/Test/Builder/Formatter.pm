@@ -2,9 +2,9 @@ package Test::Builder::Formatter;
 use strict;
 use warnings;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
-use base 'Test2::Formatter::TAP';
+BEGIN { require Test2::Formatter::TAP; our @ISA = qw(Test2::Formatter::TAP) }
 
 use Test2::Util::HashBase qw/no_header no_diag/;
 

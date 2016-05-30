@@ -12,6 +12,8 @@ use Test2::Util qw/
     CAN_FORK
     CAN_THREAD
     CAN_REALLY_FORK
+
+    IS_WIN32
 /;
 
 {
@@ -33,5 +35,8 @@ is(pkg_to_file('A::Package::Name'), 'A/Package/Name.pm', "Converted package to f
 CAN_THREAD();
 CAN_FORK();
 CAN_REALLY_FORK();
+IS_WIN32();
+
+is(IS_WIN32(), ($^O eq 'MSWin32') ? 1 : 0, "IS_WIN32 is correct ($^O)");
 
 done_testing;

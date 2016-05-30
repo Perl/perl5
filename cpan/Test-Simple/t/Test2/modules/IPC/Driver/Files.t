@@ -1,6 +1,7 @@
 BEGIN { require "t/tools.pl" };
 use Test2::Util qw/get_tid USE_THREADS try/;
 use File::Temp qw/tempfile/;
+use File::Spec qw/catfile/;
 use strict;
 use warnings;
 
@@ -42,8 +43,9 @@ is($ipc->tid, get_tid(), "stored the tid");
 my $hid = '12345';
 
 $ipc->add_hub($hid);
-ok(-f $ipc->tempdir . '/HUB-' . $hid, "wrote hub file");
-if(ok(open(my $fh, '<', $ipc->tempdir . '/HUB-' . $hid), "opened hub file")) {
+my $hubfile = File::Spec->catfile($ipc->tempdir, "HUB-$hid");
+ok(-f $hubfile, "wrote hub file");
+if(ok(open(my $fh, '<', $hubfile), "opened hub file")) {
     my @lines = <$fh>;
     close($fh);
     is_deeply(
@@ -62,7 +64,7 @@ $ipc->send($hid, bless({ foo => 1 }, 'Foo'));
 $ipc->send($hid, bless({ bar => 1 }, 'Foo'));
 
 opendir(my $dh, $ipc->tempdir) || die "Could not open tempdir: !?";
-my @files = grep { $_ !~ m/^\.+$/ && $_ ne "HUB-$hid" } readdir($dh);
+my @files = grep { $_ !~ m/^\.+$/ && $_ !~ m/^HUB-$hid/ } readdir($dh);
 closedir($dh);
 is(@files, 2, "2 files added to the IPC directory");
 
@@ -74,7 +76,7 @@ is_deeply(
 );
 
 opendir($dh, $ipc->tempdir) || die "Could not open tempdir: !?";
-@files = grep { $_ !~ m/^\.+$/ && $_ ne "HUB-$hid" } readdir($dh);
+@files = grep { $_ !~ m/^\.+$/ && $_ !~ m/^HUB-$hid/ } readdir($dh);
 closedir($dh);
 is(@files, 0, "All files collected");
 
@@ -152,6 +154,18 @@ ok(!-d $tmpdir, "cleaned up temp dir");
         1;
     };
 
+    my $cleanup = sub {
+        if (opendir(my $d, $tmpdir)) {
+            for my $f (readdir($d)) {
+                next if $f =~ m/^\.+$/;
+                next unless -f "$tmpdir/$f";
+                unlink("$tmpdir/$f");
+            }
+        }
+        rmdir($tmpdir) or warn "Could not remove temp dir '$tmpdir': $!";
+    };
+    $cleanup->();
+
     is($out->{STDOUT}, "not ok - IPC Fatal Error\nnot ok - IPC Fatal Error\n", "printed ");
 
     like($out->{STDERR}, qr/IPC Temp Dir: \Q$tmpdir\E/m, "Got temp dir path");
@@ -186,12 +200,14 @@ ok(!-d $tmpdir, "cleaned up temp dir");
 
     $out = capture {
         my $ipc = Test2::IPC::Driver::Files->new();
+        $tmpdir = $ipc->tempdir;
         $ipc->add_hub($hid);
         $ipc->send($hid, bless({ foo => 1 }, 'Foo'));
         local $@;
         eval { $ipc->drop_hub($hid) };
         print STDERR $@ unless $@ =~ m/^255/;
     };
+    $cleanup->();
     like($out->{STDERR}, qr/IPC Fatal Error: Not all files from hub '12345' have been collected/, "Leftover files");
     like($out->{STDERR}, qr/IPC Fatal Error: Leftover files in the directory \(.*\.ready\)/, "What file");
 

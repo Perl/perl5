@@ -2,7 +2,7 @@ package Test2::Util::Trace;
 use strict;
 use warnings;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 
 use Test2::Util qw/get_tid/;
@@ -87,7 +87,7 @@ C<< at <FILE> line <LINE> >> when calling C<< $trace->debug >>.
 =item $str = $trace->debug
 
 Typically returns the string C<< at <FILE> line <LINE> >>. If C<detail> is set
-then its value wil be returned instead.
+then its value will be returned instead.
 
 =item $trace->alert($MESSAGE)
 

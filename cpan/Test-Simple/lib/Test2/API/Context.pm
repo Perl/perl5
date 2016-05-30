@@ -2,7 +2,7 @@ package Test2::API::Context;
 use strict;
 use warnings;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 
 use Carp qw/confess croak longmess/;
@@ -484,8 +484,8 @@ the current hub.
 
 =item $hub = $ctx->hub()
 
-This will return the L<Test2::Hub> instance the context recognises as
-the current one to which all events should be sent.
+This will return the L<Test2::Hub> instance the context recognizes as the
+current one to which all events should be sent.
 
 =item $dbg = $ctx->trace()
 
@@ -508,7 +508,7 @@ will be affected.
     });
 
 B<Note:> The context will actually be cloned, the clone will be used instead of
-the original. This allows the TID, PID, and error vars to be correct without
+the original. This allows the thread id, process id, and error variables to be correct without
 modifying the original context.
 
 =item $ctx->restore_error_vars()
@@ -676,7 +676,7 @@ new one is generated, or if an existing one is returned.
 
 This object consumes L<Test2::Util::ExternalMeta> which provides a consistent
 way for you to attach meta-data to instances of this class. This is useful for
-tools, plugins, and other extentions.
+tools, plugins, and other extensions.
 
 =head1 SOURCE
 

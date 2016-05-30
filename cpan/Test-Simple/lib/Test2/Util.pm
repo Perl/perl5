@@ -2,7 +2,7 @@ package Test2::Util;
 use strict;
 use warnings;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 
 use Config qw/%Config/;
@@ -16,8 +16,14 @@ our @EXPORT_OK = qw{
     CAN_THREAD
     CAN_REALLY_FORK
     CAN_FORK
+
+    IS_WIN32
 };
-use base 'Exporter';
+BEGIN { require Exporter; our @ISA = qw(Exporter) }
+
+BEGIN {
+    *IS_WIN32 = ($^O eq 'MSWin32') ? sub() { 1 } : sub() { 0 };
+}
 
 sub _can_thread {
     return 0 unless $] >= 5.008001;
@@ -26,7 +32,7 @@ sub _can_thread {
     # Threads are broken on perl 5.10.0 built with gcc 4.8+
     if ($] == 5.010000 && $Config{'ccname'} eq 'gcc' && $Config{'gccversion'}) {
         my @parts = split /\./, $Config{'gccversion'};
-        return 0 if $parts[0] >= 4 && $parts[1] >= 8;
+        return 0 if $parts[0] > 4 || ($parts[0] == 4 && $parts[1] >= 8);
     }
 
     # Change to a version check if this ever changes
@@ -36,7 +42,7 @@ sub _can_thread {
 
 sub _can_fork {
     return 1 if $Config{d_fork};
-    return 0 unless $^O eq 'MSWin32' || $^O eq 'NetWare';
+    return 0 unless IS_WIN32 || $^O eq 'NetWare';
     return 0 unless $Config{useithreads};
     return 0 unless $Config{ccflags} =~ /-DPERL_IMPLICIT_SYS/;
 
@@ -45,9 +51,25 @@ sub _can_fork {
 
 BEGIN {
     no warnings 'once';
-    *CAN_REALLY_FORK = $Config{d_fork} ? sub() { 1 } : sub() { 0 };
     *CAN_THREAD      = _can_thread()   ? sub() { 1 } : sub() { 0 };
-    *CAN_FORK        = _can_fork()     ? sub() { 1 } : sub() { 0 };
+}
+my $can_fork;
+sub CAN_FORK () {
+    return $can_fork
+        if defined $can_fork;
+    $can_fork = !!_can_fork();
+    no warnings 'redefine';
+    *CAN_FORK = $can_fork ? sub() { 1 } : sub() { 0 };
+    $can_fork;
+}
+my $can_really_fork;
+sub CAN_REALLY_FORK () {
+    return $can_really_fork
+        if defined $can_really_fork;
+    $can_really_fork = !!$Config{d_fork};
+    no warnings 'redefine';
+    *CAN_REALLY_FORK = $can_really_fork ? sub() { 1 } : sub() { 0 };
+    $can_really_fork;
 }
 
 sub _manual_try(&;@) {
@@ -80,7 +102,7 @@ sub _local_try(&;@) {
 # before forking or starting a new thread. So for those systems we use the
 # non-local form. When possible though we use the faster 'local' form.
 BEGIN {
-    if ($^O eq 'MSWin32' && $] < 5.020002) {
+    if (IS_WIN32 && $] < 5.020002) {
         *try = \&_manual_try;
     }
     else {
@@ -89,17 +111,17 @@ BEGIN {
 }
 
 BEGIN {
-    if(CAN_THREAD) {
+    if (CAN_THREAD) {
         if ($INC{'threads.pm'}) {
             # Threads are already loaded, so we do not need to check if they
             # are loaded each time
             *USE_THREADS = sub() { 1 };
-            *get_tid = sub { threads->tid() };
+            *get_tid     = sub() { threads->tid() };
         }
         else {
             # :-( Need to check each time to see if they have been loaded.
-            *USE_THREADS = sub { $INC{'threads.pm'} ? 1 : 0 };
-            *get_tid = sub { $INC{'threads.pm'} ? threads->tid() : 0 };
+            *USE_THREADS = sub() { $INC{'threads.pm'} ? 1 : 0 };
+            *get_tid     = sub() { $INC{'threads.pm'} ? threads->tid() : 0 };
         }
     }
     else {
@@ -154,7 +176,7 @@ be restored, but $@ will contain the exception being thrown.
 
 =item CAN_FORK
 
-True if this system is capable of true or psuedo-fork.
+True if this system is capable of true or pseudo-fork.
 
 =item CAN_REALLY_FORK
 

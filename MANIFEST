@@ -2656,6 +2656,7 @@ cpan/Test-Simple/t/lib/Test/Simple/sample_tests/too_few.plx
 cpan/Test-Simple/t/lib/Test/Simple/sample_tests/two_fail.plx
 cpan/Test-Simple/t/lib/TieOut.pm
 cpan/Test-Simple/t/regression/642_persistent_end.t
+cpan/Test-Simple/t/regression/662-tbt-no-plan.t
 cpan/Test-Simple/t/regression/no_name_in_subtest.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_done_testing.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_fork.t

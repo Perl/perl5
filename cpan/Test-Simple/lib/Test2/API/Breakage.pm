@@ -2,7 +2,7 @@ package Test2::API::Breakage;
 use strict;
 use warnings;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 
 use Test2::Util qw/pkg_to_file/;
@@ -12,7 +12,7 @@ our @EXPORT_OK = qw{
     upgrade_required
     known_broken
 };
-use base 'Exporter';
+BEGIN { require Exporter; our @ISA = qw(Exporter) }
 
 sub upgrade_suggested {
     return (
@@ -138,6 +138,8 @@ This returns key/value pairs. The key is the module name, the value is the
 version number. If the installed version of the module is at or below the
 specified one then the module will not work. A newer version may work, but is
 not tested or verified.
+
+=back
 
 =head1 SOURCE
 

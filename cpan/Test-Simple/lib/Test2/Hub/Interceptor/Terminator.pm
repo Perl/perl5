@@ -2,7 +2,7 @@ package Test2::Hub::Interceptor::Terminator;
 use strict;
 use warnings;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 
 1;

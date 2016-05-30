@@ -47,6 +47,5 @@ diag "should be a note";
 test2_stack->top->unfilter($filter);
 
 ok(1, "Third");
-diag "should be a diag";
 
 done_testing;

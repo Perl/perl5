@@ -7,7 +7,7 @@ Test2::Transition - Transition notes when upgrading to Test2
 =head1 DESCRIPTION
 
 This is where gotchas and breakages related to the Test2 upgrade are
-documented. The upgrade causes Test::Builder to defer to Test2 uner the hood.
+documented. The upgrade causes Test::Builder to defer to Test2 under the hood.
 This transition is mostly transparent, but there are a few cases that can trip
 you up.
 
@@ -24,14 +24,14 @@ Confusingly these were called Test::Builder2 and Test::Builder1.5, in that
 order. Many people put conditionals in their code to check the Test::Builder
 version number and adapt their code accordingly.
 
-The Test::Builder2/1.5 projects both died out. Now the conditional code poeple
+The Test::Builder2/1.5 projects both died out. Now the conditional code people
 added has become a mine field. A vast majority of modules broken by Test2 fall
 into this category.
 
 =head3 The Fix
 
 The fix is to remove all Test::Builder1.5/2 related code. Either use the
-lagacy Test::Builder API, or use Test2 directly.
+legacy Test::Builder API, or use Test2 directly.
 
 =head2 Replacing the Test::Builder singleton
 
@@ -77,7 +77,7 @@ as needed.
 
 An early change, in fact the change that made Test2 an idea, was a change to
 the indentation of the subtest note. IT was decided it would be more readable
-to outdent the subtest note instead of having it inline withthe subtest:
+to outdent the subtest note instead of having it inline with the subtest:
 
     # subtest foo
         ok 1 - blah
@@ -132,7 +132,7 @@ Known broken in versions: 1.0.9 and older
 =item Test::Kit
 
 This actually works fine, but will not install because L<Test::Aggregate> is in
-the dep chain.
+the dependency chain.
 
 See the L<Test::Aggregate> info below for additional information.
 

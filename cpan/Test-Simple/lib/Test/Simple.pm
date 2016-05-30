@@ -4,9 +4,9 @@ use 5.006;
 
 use strict;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
-use Test::Builder::Module 0.99;
+use Test::Builder::Module;
 our @ISA    = qw(Test::Builder::Module);
 our @EXPORT = qw(ok);
 

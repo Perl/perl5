@@ -18,7 +18,7 @@ require Exporter;
 
 use vars qw( @ISA @EXPORT );
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 @EXPORT = qw( run_tests check_tests check_test cmp_results show_space );
 @ISA = qw( Exporter );
@@ -40,7 +40,7 @@ sub show_space
 my $colour = '';
 my $reset = '';
 
-if (my $want_colour = $ENV{TESTTESTERCOLOUR} || $ENV{TESTTESTERCOLOUR})
+if (my $want_colour = $ENV{TESTTESTERCOLOUR} || $ENV{TESTTESTERCOLOR})
 {
 	if (eval "require Term::ANSIColor")
 	{
@@ -447,7 +447,7 @@ diagnostics output B<after> the test result is declared.
 
 Note that Test::Builder ensures that any diagnostics end in a \n and
 it in earlier versions of Test::Tester it was essential that you have
-the final \n in your expected diagnostics. From version 0.10 onwards,
+the final \n in your expected diagnostics. From version 0.10 onward,
 Test::Tester will add the \n if you forgot it. It will not add a \n if
 you are expecting no diagnostics. See below for help tracking down
 hard to find space and tab related problems.
@@ -496,7 +496,7 @@ are scratching your head trying to work out why Test::Tester is saying that
 your diagnostics are wrong when they look perfectly right then the answer is
 probably whitespace. From version 0.10 on, Test::Tester surrounds the
 expected and got diag values with single quotes to make it easier to spot
-trailing whitesapce. So in this example
+trailing whitespace. So in this example
 
   # Got diag (5 bytes):
   # 'abcd '
@@ -514,7 +514,7 @@ switch Test::Tester into a mode whereby all "tricky" characters are shown as
 \{xx}. Tricky characters are those with ASCII code less than 33 or higher
 than 126. This makes the output more difficult to read but much easier to
 find subtle differences between strings. To turn on this mode either call
-show_space() in your test script or set the TESTTESTERSPACE environment
+C<show_space()> in your test script or set the C<TESTTESTERSPACE> environment
 variable to be a true value. The example above would then look like
 
   # Got diag (5 bytes):
@@ -525,13 +525,13 @@ variable to be a true value. The example above would then look like
 =head1 COLOUR
 
 If you prefer to use colour as a means of finding tricky whitespace
-characters then you can set the TESTTESTCOLOUR environment variable to a
+characters then you can set the C<TESTTESTCOLOUR> environment variable to a
 comma separated pair of colours, the first for the foreground, the second
 for the background. For example "white,red" will print white text on a red
 background. This requires the Term::ANSIColor module. You can specify any
 colour that would be acceptable to the Term::ANSIColor::color function.
 
-If you spell colour differently, that's no problem. The TESTTESTERCOLOR
+If you spell colour differently, that's no problem. The C<TESTTESTERCOLOR>
 variable also works (if both are set then the British spelling wins out).
 
 =head1 EXPORTED FUNCTIONS

@@ -2,10 +2,10 @@ package Test2::Event::Diag;
 use strict;
 use warnings;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 
-use base 'Test2::Event';
+BEGIN { require Test2::Event; our @ISA = qw(Test2::Event) }
 use Test2::Util::HashBase qw/message/;
 
 sub init {

@@ -2,7 +2,7 @@ package Test2::Event;
 use strict;
 use warnings;
 
-our $VERSION = '1.302015';
+our $VERSION = '1.302022';
 
 
 use Test2::Util::HashBase qw/trace nested in_subtest subtest_id/;
@@ -109,7 +109,7 @@ thing to want, it is used by bail-out and skip_all to end testing.
 
 This is called B<AFTER> your event has been passed to the formatter. This
 should normally return undef, only change this if your event should cause the
-test to exit immedietly.
+test to exit immediately.
 
 If you want this event to cause the test to exit you should return the exit
 code here. Exit code of 0 means exit success, any other integer means exit with
@@ -172,7 +172,7 @@ If the event is inside a subtest this should have the subtest ID.
 
 =item $id = $e->subtest_id
 
-If the event is a final subtes event, this should contain the subtest ID.
+If the event is a final subtest event, this should contain the subtest ID.
 
 =back
 
@@ -180,7 +180,7 @@ If the event is a final subtes event, this should contain the subtest ID.
 
 This object consumes L<Test2::Util::ExternalMeta> which provides a consistent
 way for you to attach meta-data to instances of this class. This is useful for
-tools, plugins, and other extentions.
+tools, plugins, and other extensions.
 
 =head1 SOURCE
 
