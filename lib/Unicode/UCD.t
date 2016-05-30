@@ -1415,9 +1415,14 @@ sub fail_with_diff ($$$$) {
     # For use below to output better messages
     my ($prop, $official, $constructed, $tested_function_name) = @_;
 
-    is($constructed, $official, "$tested_function_name('$prop')");
-    diag("Comment out lines " . (__LINE__ - 1) . " through " . (__LINE__ + 1) . " in '$0' on Un*x-like systems to see just the differences.  Uses the 'diff' first in your \$PATH");
-    return;
+    if (! $ENV{PERL_DIFF_TOOL}) {
+
+        is($constructed, $official, "$tested_function_name('$prop')");
+
+        diag("Set environment variable PERL_DIFF_TOOL=diff_tool to see just "
+           . "the differences.");
+        return;
+    }
 
     fail("$tested_function_name('$prop')");
 
@@ -1434,7 +1439,7 @@ sub fail_with_diff ($$$$) {
     close $gend || die "Can't close gend";
 
     my $diff = File::Temp->new();
-    system("diff $off $gend > $diff");
+    system("$ENV{PERL_DIFF_TOOL} $off $gend > $diff");
 
     open my $fh, "<", $diff || die "Can't open $diff";
     my @diffs = <$fh>;
