@@ -67,6 +67,7 @@ unless(GetOptions(\%options,
                   'all-fixups', 'early-fixup=s@', 'late-fixup=s@', 'valgrind',
                   'check-args', 'check-shebang!', 'usage|help|?', 'gold=s',
                   'module=s', 'with-module=s', 'cpan-config-dir=s',
+                  'no-module-tests',
                   'A=s@',
                   'D=s@' => sub {
                       my (undef, $val) = @_;
@@ -130,6 +131,10 @@ pod2usage(exitval => 255, verbose => 1)
     unless @ARGV || $match || $options{'test-build'} || defined $options{'one-liner'} || defined $options{module};
 pod2usage(exitval => 255, verbose => 1)
     if !$options{'one-liner'} && ($options{l} || $options{w});
+if ($options{'no-module-tests'} && $options{module}) {
+    print STDERR "--module and --no-module-tests are exclusive.\n\n";
+    pod2usage(exitval => 255, verbose => 1)
+}
 
 check_shebang($ARGV[0])
     if $options{'check-shebang'} && @ARGV && !$options{match};
@@ -591,6 +596,17 @@ And then:
 
 Like I<--module> above, except this simply installs the requested
 modules and they can then be used in other tests.
+
+For example:
+
+  .../Porting/bisect.pl --with-module=Moose -e 'use Moose; ...'
+
+=item *
+
+--no-module-tests
+
+Use in conjunction with I<--with-module> to install the modules without
+running their tests. This can be a big time saver.
 
 For example:
 
@@ -1509,8 +1525,13 @@ if ($options{module} || $options{'with-module'}) {
     s/-/::/g if /-/ and !m|/|;
   }
   my $install = join ",", map { "'$_'" } @m;
+  if ($options{'no-module-tests'}) {
+    $install = "notest('install',$install)";
+  } else {
+    $install = "install($install)";
+  }
   my $last = $m[-1];
-  my $shellcmd = "install($install); die unless CPAN::Shell->expand(Module => '$last')->uptodate;";
+  my $shellcmd = "$install; die unless CPAN::Shell->expand(Module => '$last')->uptodate;";
 
   if ($options{module}) {
     run_report_and_exit(@cpanshell, $shellcmd);
