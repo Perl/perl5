@@ -6893,6 +6893,7 @@ $ WC "d_lgamma_r='undef'"
 $ WC "d_localtime_r='undef'"   ! leave undef'd; we use my_localtime
 $ WC "d_localtime_r_needs_tzset='undef'"
 $ WC "d_newlocale='undef'"
+$ WC "d_querylocale='undef'"
 $ WC "d_random_r='undef'"
 $ WC "d_readdir_r='define'"	! always defined; we roll our own
 $ WC "d_readdir64_r='undef'"

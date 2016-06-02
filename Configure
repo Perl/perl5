@@ -681,6 +681,7 @@ d_nearbyint=''
 d_duplocale=''
 d_freelocale=''
 d_newlocale=''
+d_querylocale=''
 d_uselocale=''
 i_xlocale=''
 d_nextafter=''
@@ -14149,6 +14150,10 @@ eval $inlibc
 set duplocale d_duplocale
 eval $inlibc
 
+: see if querylocale exists
+set querylocale d_querylocale
+eval $inlibc
+
 : see if frexpl exists
 set frexpl d_frexpl
 eval $inlibc
@@ -24518,6 +24523,7 @@ d_pwpasswd='$d_pwpasswd'
 d_pwquota='$d_pwquota'
 d_qgcvt='$d_qgcvt'
 d_quad='$d_quad'
+d_querylocale='$d_querylocale'
 d_random_r='$d_random_r'
 d_re_comp='$d_re_comp'
 d_readdir64_r='$d_readdir64_r'

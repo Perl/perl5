@@ -3246,9 +3246,14 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that the uselocale routine is
  *	available to set the current locale for the calling thread.
  */
+/* HAS_QUERYLOCALE:
+ *	This symbol, if defined, indicates that the querylocale routine is
+ *	available to return the name of the locale for a category mask.
+ */
 #$d_newlocale	HAS_NEWLOCALE	/**/
 #$d_freelocale	HAS_FREELOCALE	/**/
 #$d_uselocale	HAS_USELOCALE	/**/
+#$d_querylocale	HAS_QUERYLOCALE	/**/
 
 /* HAS_NEXTAFTER:
  *	This symbol, if defined, indicates that the nextafter routine is
