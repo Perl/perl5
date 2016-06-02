@@ -3472,6 +3472,13 @@
  */
 /*#define HAS_FSTATVFS		/ **/
 
+/* HAS_STRERROR_L:
+ *	This symbol, if defined, indicates that the strerror_l routine is
+ *	available to return the error message for a given errno value in
+ *	a particular locale (identified by a locale_t object).
+ */
+/*#define HAS_STRERROR_L		/ **/
+
 /* HAS_STRFTIME:
  *	This symbol, if defined, indicates that the strftime routine is
  *	available to do time formatting.
@@ -5246,6 +5253,6 @@
 #endif
 
 /* Generated from:
- * ad669f127235e5deedd1f98bea3dbe5c0b7c3b18ebbe8f0d91f3496f18af832c config_h.SH
- * fb9ab8a0e51b906cd21cc8e6fc3a50303358996b27814b31f94850c4777e65d7 uconfig.sh
+ * c14530f7567d861ce42d42446fc2ee9cd3625763f65867d5f42849c337bbc361 config_h.SH
+ * 3b14c76342a834042da506e8c3b4269f7d545453079733cb740970ab9cc4294e uconfig.sh
  * ex: set ro: */

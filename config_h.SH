@@ -3507,6 +3507,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_fstatvfs HAS_FSTATVFS		/**/
 
+/* HAS_STRERROR_L:
+ *	This symbol, if defined, indicates that the strerror_l routine is
+ *	available to return the error message for a given errno value in
+ *	a particular locale (identified by a locale_t object).
+ */
+#$d_strerror_l HAS_STRERROR_L		/**/
+
 /* HAS_STRFTIME:
  *	This symbol, if defined, indicates that the strftime routine is
  *	available to do time formatting.

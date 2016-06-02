@@ -862,6 +862,7 @@ d_strerrm=''
 d_strerror=''
 d_sysernlst=''
 d_syserrlst=''
+d_strerror_l=''
 d_strerror_r=''
 strerror_r_proto=''
 d_strftime=''
@@ -19280,6 +19281,10 @@ if test "X$d_strerror" = X -o "X$d_syserrlst" = X; then
     fi
 fi
 
+: see if strerror_l exists
+set strerror_l d_strerror_l
+eval $inlibc
+
 : see if strerror_r exists
 set strerror_r d_strerror_r
 eval $inlibc
@@ -24643,6 +24648,7 @@ d_strcoll='$d_strcoll'
 d_strctcpy='$d_strctcpy'
 d_strerrm='$d_strerrm'
 d_strerror='$d_strerror'
+d_strerror_l='$d_strerror_l'
 d_strerror_r='$d_strerror_r'
 d_strftime='$d_strftime'
 d_strlcat='$d_strlcat'
