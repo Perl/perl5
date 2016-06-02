@@ -66,8 +66,6 @@ my $Touch_Time = calibrate_mtime();
 
 $| = 1;
 
-delete @ENV{qw(PERL_CORE)};
-
 ok( setup_recurs(), 'setup' );
 
 ok( chdir('Big-Dummy'), "chdir'd to Big-Dummy" ) ||
@@ -266,21 +264,26 @@ SKIP: {
     rmtree('other');
 }
 
+my ($dist_test_out, $distdir, $meta_yml, $mymeta_yml, $meta_json, $mymeta_json);
+SKIP: {
+    skip 'disttest depends on metafile, which is not run in core', 1 if $ENV{PERL_CORE};
+    $dist_test_out = run("$make disttest");
+    is( $?, 0, 'disttest' ) || diag($dist_test_out);
 
-my $dist_test_out = run("$make disttest");
-is( $?, 0, 'disttest' ) || diag($dist_test_out);
+    # Test META.yml generation
+    use ExtUtils::Manifest qw(maniread);
 
-# Test META.yml generation
-use ExtUtils::Manifest qw(maniread);
-
-my $distdir  = 'Big-Dummy-0.01';
-$distdir =~ s/\./_/g if $Is_VMS;
-my $meta_yml = "$distdir/META.yml";
-my $mymeta_yml = "$distdir/MYMETA.yml";
-my $meta_json = "$distdir/META.json";
-my $mymeta_json = "$distdir/MYMETA.json";
+    $distdir  = 'Big-Dummy-0.01';
+    $distdir =~ s/\./_/g if $Is_VMS;
+    $meta_yml = "$distdir/META.yml";
+    $mymeta_yml = "$distdir/MYMETA.yml";
+    $meta_json = "$distdir/META.json";
+    $mymeta_json = "$distdir/MYMETA.json";
+}
 
 note "META file validity"; SKIP: {
+    skip 'disttest depends on metafile, which is not run in core', 104 if $ENV{PERL_CORE};
+
     eval { require CPAN::Meta; };
     skip 'Loading CPAN::Meta failed', 104 if $@;
 

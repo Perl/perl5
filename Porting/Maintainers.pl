@@ -476,6 +476,7 @@ use File::Glob qw(:case);
             'README.packaging',
             'lib/ExtUtils/MakeMaker/version/vpp.pm',
         ],
+        'CUSTOMIZED' => [ qw( t/basic.t ) ],
     },
 
     'ExtUtils::Manifest' => {

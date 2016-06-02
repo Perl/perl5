@@ -1,6 +1,7 @@
 CPAN cpan/CPAN/lib/CPAN.pm ce62c43d72f101c011184dbbc59e21c2790826f0
 Encode cpan/Encode/encoding.pm 51c19efc9bfe8467d6ae12a4654f6e7f980715bf
 ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t a0369c919e216fb02767a637666bb4577ad79b02
+ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/basic.t b7ee8691baf37197bf4249534f429fcf28f5cedf
 File::Path cpan/File-Path/lib/File/Path.pm fd8ce4420a0c113d3f47dd3223859743655c1da8
 File::Path cpan/File-Path/t/Path_win32.t 94b9276557ce7f80b91f6fd9bfa7a0cd9bf9683e
 Math::BigRat cpan/Math-BigRat/lib/Math/BigRat.pm 6eabc68e04f67694f6fe523e64eb013fc337ca5b
