@@ -25316,8 +25316,7 @@ Id='$Id'
 : Finish up by extracting the .SH files
 case "$alldone" in
 exit)
-	$rm -rf UU
-	echo "Extraction done."
+	echo "Stopping at your request, leaving temporary files around."
 	exit 0
 	;;
 cont)
@@ -25392,11 +25391,10 @@ the policy defaults.
 
 EOM
 fi
-if $test -f config.msg; then
+if $test -f UU/config.msg; then
     echo "Hmm.  I also noted the following information while running:"
     echo " "
-    $cat config.msg >&4
-    $rm -f config.msg
+    $cat UU/config.msg >&4
 fi
 $rm -f kit*isdone ark*isdone
 $rm -rf UU

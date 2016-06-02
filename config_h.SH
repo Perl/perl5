@@ -217,7 +217,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_getlogin HAS_GETLOGIN		/**/
 
 /* HAS_GETPGID:
- *	This symbol, if defined, indicates to the C program that 
+ *	This symbol, if defined, indicates to the C program that
  *	the getpgid(pid) function is available to get the
  *	process group id.
  */
@@ -676,8 +676,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol holds the type used for the second argument to
  *	getgroups() and setgroups().  Usually, this is the same as
  *	gidtype (gid_t) , but sometimes it isn't.
- *	It can be int, ushort, gid_t, etc... 
- *	It may be necessary to include <sys/types.h> to get any 
+ *	It can be int, ushort, gid_t, etc...
+ *	It may be necessary to include <sys/types.h> to get any
  *	typedef'ed information.  This is only required if you have
  *	getgroups() or setgroups()..
  */
