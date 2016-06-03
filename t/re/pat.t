@@ -21,7 +21,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 452;  # Update this when adding/deleting tests.
+plan tests => 453;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1181,6 +1181,16 @@ sub run_tests {
         ';
         fresh_perl_like($code, qr/Malformed UTF-8 character/, {},
             "test that we handle some UTF-8 malformations without looping" );
+    }
+    {
+        fresh_perl_is('
+            BEGIN{require q(test.pl);}
+            watchdog(3);
+            $SIG{ALRM} = sub {print "Timeout\n"; exit(1)};
+            alarm 1;
+            $_ = "a" x 1000 . "b" x 1000 . "c" x 1000;
+            /.*a.*b.*c.*[de]/;
+        ',"Timeout",{},"Test Perl 73464")
     }
 } # End of sub run_tests
 
