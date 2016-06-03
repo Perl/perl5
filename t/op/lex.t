@@ -7,7 +7,7 @@ use warnings;
 
 BEGIN { chdir 't' if -d 't'; require './test.pl'; }
 
-plan(tests => 25);
+plan(tests => 26);
 
 {
     no warnings 'deprecated';
@@ -208,4 +208,11 @@ fresh_perl_is(
   "Can't find string terminator \"a\" anywhere before EOF at - line 1.\n",
    { stderr => 1 },
   's;@{<<a; [perl #123995]'
+);
+
+fresh_perl_is(
+  '$_ = q-strict.pm-; 1 ? require : die;'
+ .' print qq-ok\n- if $INC{q-strict.pm-}',
+  "ok\n",
+  'foo ? require : bar [perl #128307]'
 );

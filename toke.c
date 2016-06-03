@@ -2012,7 +2012,7 @@ S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack)
     start = skipspace(start);
     s = start;
     if (isIDFIRST_lazy_if(s,UTF)
-        || (allow_pack && *s == ':') )
+        || (allow_pack && *s == ':' && s[1] == ':') )
     {
 	s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, allow_pack, &len);
 	if (check_keyword) {
