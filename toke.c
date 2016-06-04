@@ -4422,6 +4422,26 @@ S_check_scalar_slice(pTHX_ char *s)
 	pl_yylval.ival = OPpSLICEWARNING;
 }
 
+#define lex_token_boundary() S_lex_token_boundary(aTHX)
+static void
+S_lex_token_boundary(pTHX)
+{
+    PL_oldoldbufptr = PL_oldbufptr;
+    PL_oldbufptr = PL_bufptr;
+}
+
+#define vcs_conflict_marker(s) S_vcs_conflict_marker(aTHX_ s)
+static char *
+S_vcs_conflict_marker(pTHX_ char *s)
+{
+    lex_token_boundary();
+    PL_bufptr = s;
+    yyerror("Version control conflict marker");
+    while (s < PL_bufend && *s != '\n')
+	s++;
+    return s;
+}
+
 /*
   yylex
 
@@ -5992,8 +6012,10 @@ Perl_yylex(pTHX)
 	{
 	    const char tmp = *s++;
 	    if (tmp == '=') {
-	        if ((s == PL_linestart+2 || s[-3] == '\n') && strnEQ(s, "=====", 5))
-	            Perl_croak(aTHX_ "Version control conflict marker '%.*s'", 7, s - 2);
+	        if ((s == PL_linestart+2 || s[-3] == '\n') && strnEQ(s, "=====", 5)) {
+	            s = vcs_conflict_marker(s + 5);
+	            goto retry;
+	        }
 		if (!PL_lex_allbrackets
                     && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
                 {
@@ -6109,8 +6131,10 @@ Perl_yylex(pTHX)
 	    if (s[1] != '<' && !strchr(s,'>'))
 		check_uni();
 	    if (s[1] == '<' && s[2] != '>') {
-	        if ((s == PL_linestart || s[-1] == '\n') && strnEQ(s+2, "<<<<<", 5))
-	            Perl_croak(aTHX_ "Version control conflict marker '%.*s'", 7, s);
+	        if ((s == PL_linestart || s[-1] == '\n') && strnEQ(s+2, "<<<<<", 5)) {
+	            s = vcs_conflict_marker(s + 7);
+	            goto retry;
+	        }
 		s = scan_heredoc(s);
 	    }
 	    else
@@ -6122,8 +6146,10 @@ Perl_yylex(pTHX)
 	{
 	    char tmp = *s++;
 	    if (tmp == '<') {
-	        if ((s == PL_linestart+2 || s[-3] == '\n') && strnEQ(s, "<<<<<", 5))
-	            Perl_croak(aTHX_ "Version control conflict marker '%.*s'", 7, s - 2);
+	        if ((s == PL_linestart+2 || s[-3] == '\n') && strnEQ(s, "<<<<<", 5)) {
+                    s = vcs_conflict_marker(s + 5);
+	            goto retry;
+	        }
 		if (*s == '=' && !PL_lex_allbrackets
                     && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
                 {
@@ -6164,8 +6190,10 @@ Perl_yylex(pTHX)
 	{
 	    const char tmp = *s++;
 	    if (tmp == '>') {
-	        if ((s == PL_linestart+2 || s[-3] == '\n') && strnEQ(s, ">>>>>", 5))
-	            Perl_croak(aTHX_ "Version control conflict marker '%.*s'", 7, s - 2);
+	        if ((s == PL_linestart+2 || s[-3] == '\n') && strnEQ(s, ">>>>>", 5)) {
+	            s = vcs_conflict_marker(s + 5);
+	            goto retry;
+	        }
 		if (*s == '=' && !PL_lex_allbrackets
                     && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
                 {
@@ -11825,14 +11853,6 @@ Perl_parse_stmtseq(pTHX_ U32 flags)
     if (c != -1 && c != /*{*/'}')
 	qerror(Perl_mess(aTHX_ "Parse error"));
     return stmtseqop;
-}
-
-#define lex_token_boundary() S_lex_token_boundary(aTHX)
-static void
-S_lex_token_boundary(pTHX)
-{
-    PL_oldoldbufptr = PL_oldbufptr;
-    PL_oldbufptr = PL_bufptr;
 }
 
 #define parse_opt_lexvar() S_parse_opt_lexvar(aTHX)

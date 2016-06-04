@@ -204,7 +204,7 @@ and New Warnings
 
 =item *
 
-L<Version control conflict marker '%s'|perldiag/"Version control conflict marker '%s'">
+L<Version control conflict marker|perldiag/"Version control conflict marker">
 
 =item *
 

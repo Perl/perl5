@@ -558,11 +558,11 @@ for my $marker (qw(
 >>>>>>>
 )) {
     eval "$marker";
-    like $@, qr/^Version control conflict marker '$marker' at \(eval \d+\) line 1\./, "VCS marker '$marker' at beginning";
+    like $@, qr/^Version control conflict marker at \(eval \d+\) line 1, near "$marker"/, "VCS marker '$marker' at beginning";
     eval "\$_\n$marker";
-    like $@, qr/^Version control conflict marker '$marker' at \(eval \d+\) line 2\./, "VCS marker '$marker' after value";
+    like $@, qr/^Version control conflict marker at \(eval \d+\) line 2, near "$marker"/, "VCS marker '$marker' after value";
     eval "\n\$_ =\n$marker";
-    like $@, qr/^Version control conflict marker '$marker' at \(eval \d+\) line 3\./, "VCS marker '$marker' after operator";
+    like $@, qr/^Version control conflict marker at \(eval \d+\) line 3, near "$marker"/, "VCS marker '$marker' after operator";
 }
 
 

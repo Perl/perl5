@@ -7057,7 +7057,7 @@ S<<-- HERE> in m/%s/
 (F) You used a verb pattern that is not allowed an argument.  Remove the 
 argument or check that you are using the right verb.
 
-=item Version control conflict marker '%s'
+=item Version control conflict marker
 
 (F) The parser found a line starting with C<E<lt><<<<<<>,
 C<E<gt>E<gt>E<gt>E<gt>E<gt>E<gt>E<gt>>, or C<=======>. These may be left by a
