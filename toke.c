@@ -7777,6 +7777,7 @@ Perl_yylex(pTHX)
 	case KEY_my:
 	case KEY_state:
 	    if (PL_in_my) {
+	        PL_bufptr = s;
 	        yyerror(Perl_form(aTHX_
 	                          "Can't redeclare \"%s\" in \"%s\"",
 	                           tmp      == KEY_my    ? "my" :
