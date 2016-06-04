@@ -4398,9 +4398,9 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
 	};
 #endif
 
-#define word_takes_any_delimeter(p,l) S_word_takes_any_delimeter(p,l)
+#define word_takes_any_delimiter(p,l) S_word_takes_any_delimiter(p,l)
 STATIC bool
-S_word_takes_any_delimeter(char *p, STRLEN len)
+S_word_takes_any_delimiter(char *p, STRLEN len)
 {
     return (len == 1 && strchr("msyq", p[0]))
             || (len == 2
@@ -6635,7 +6635,7 @@ Perl_yylex(pTHX)
 	s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
 
 	/* Some keywords can be followed by any delimiter, including ':' */
-	anydelim = word_takes_any_delimeter(PL_tokenbuf, len);
+	anydelim = word_takes_any_delimiter(PL_tokenbuf, len);
 
 	/* x::* is just a word, unless x is "CORE" */
 	if (!anydelim && *s == ':' && s[1] == ':') {
@@ -11722,7 +11722,7 @@ Perl_parse_label(pTHX_ U32 flags)
         if (!isIDFIRST_lazy_if(s, UTF))
 	    goto no_label;
 	t = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &wlen);
-	if (word_takes_any_delimeter(s, wlen))
+	if (word_takes_any_delimiter(s, wlen))
 	    goto no_label;
 	bufptr_pos = s - SvPVX(PL_linestr);
 	PL_bufptr = t;
