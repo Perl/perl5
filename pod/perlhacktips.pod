@@ -134,7 +134,7 @@ Use the Configure C<-Dgccansipedantic> flag to enable the gcc C<-ansi
 -pedantic> flags which enforce stricter ANSI rules.
 
 If using the C<gcc -Wall> note that not all the possible warnings (like
-C<-Wunitialized>) are given unless you also compile with C<-O>.
+C<-Wuninitialized>) are given unless you also compile with C<-O>.
 
 Note that if using gcc, starting from Perl 5.9.5 the Perl core source
 code files (the ones at the top level of the source code distribution,
