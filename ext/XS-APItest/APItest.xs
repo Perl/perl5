@@ -4091,6 +4091,7 @@ lexical_import(SV *name, CV *cv)
 			      padadd_STATE, 0, 0);
 	SvREFCNT_dec(PL_curpad[off]);
 	PL_curpad[off] = SvREFCNT_inc(cv);
+	intro_my();
 	LEAVE;
     }
 
