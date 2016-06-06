@@ -23,20 +23,6 @@ not, but if your patch is incorporated, then we'll add your name to the
 F<AUTHORS> file, which ships in the official distribution. How many other
 programming languages offer you 1 line of immortality?
 
-=head1 Tasks that need only a little Perl knowledge
-
-=head2 Fix POD errors in Perl documentation
-
-Perl documentation is furnished in POD (Plain Old Documentation); see
-L<perlpod>.  We also have a utility that checks for various errors in
-this documentation: F<t/porting/podcheck.t>.  Unfortunately many files
-have errors in them, and there is a database of known problems, kept in
-F<t/porting/known_pod_issues.dat>.  The most prevalent errors are lines
-too wide to fit in a standard terminal window, but there are more
-serious problems as well; and there are items listed there that are not
-in fact errors.  The task would be to go through and clean up the
-documentation.  This would be a good way to learn more about Perl.
-
 =head1 Tasks that only need Perl knowledge
 
 =head2 Classify bug tickets by type
