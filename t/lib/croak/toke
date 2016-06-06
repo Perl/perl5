@@ -297,3 +297,15 @@ Execution of - aborted due to compilation errors.
 BEGIN <>
 EXPECT
 Illegal declaration of subroutine BEGIN at - line 1.
+########
+# NAME multiple conflict markers
+<<<<<<< yours:sample.txt
+my $some_code;
+=======
+my $some_other_code;
+>>>>>>> theirs:sample.txt
+EXPECT
+Version control conflict marker at - line 1, near "<<<<<<<"
+Version control conflict marker at - line 3, near "======="
+Version control conflict marker at - line 5, near ">>>>>>>"
+Execution of - aborted due to compilation errors.
