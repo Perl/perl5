@@ -595,6 +595,11 @@ term, once the run-time implementation is proven, it should be possible to
 progressively update ExtUtils::ParseXS to generate OP implementations for
 some XSUBs.
 
+=head2 Document how XS modules can install lexical subs
+
+There is an example in XS::APItest (look for C<lexical_import> in
+F<ext/XS-APItest/APItest.xs>). The documentation could be based on it.
+
 =head2 Remove the use of SVs as temporaries in dump.c
 
 F<dump.c> contains debugging routines to dump out the contains of perl data
