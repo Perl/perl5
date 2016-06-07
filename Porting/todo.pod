@@ -766,7 +766,9 @@ allow taint to "leak" everywhere within an expression.
 
 system() accepts a LIST syntax (and a PROGRAM LIST syntax) to avoid
 running a shell. readpipe() (the function behind qx//) could be similarly
-extended.
+extended. Note that changing readpipe() itself may not be the solution, as
+it currently has unary precedence, and allowing a list would change the
+precedence.
 
 =head2 Audit the code for destruction ordering assumptions
 
