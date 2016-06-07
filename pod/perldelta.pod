@@ -365,7 +365,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+C< until ($x = 1) { ... } > and C< ... until $x = 1 > now properly
+warn when syntax warnings are enabled.  [perl #127333]
 
 =back
 
