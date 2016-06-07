@@ -1022,6 +1022,9 @@ See also L</"Extend PerlIO and PerlIO::Scalar">.
 
 =head2 repack the optree
 
+B<Note:> This entry was written in reference to the I<old> slab allocator,
+removed in commit 7aef8e5bd14.
+
 Repacking the optree after execution order is determined could allow
 removal of NULL ops, and optimal ordering of OPs with respect to cache-line
 filling.  I think that
