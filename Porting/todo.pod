@@ -974,10 +974,6 @@ have a general mechanism for this, backwards compatible and little speed hit.
 This would allow proposals such as short circuiting sort to be implemented
 as a module on CPAN.
 
-=head2 lexical aliases
-
-Allow lexical aliases (maybe via the syntax C<my \$alias = \$foo>).
-
 =head2 Self-ties
 
 Self-ties are currently illegal because they caused too many segfaults. Maybe
