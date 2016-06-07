@@ -134,6 +134,28 @@ Found = in conditional, should be == at - line 3.
 Found = in conditional, should be == at - line 4.
 ########
 # op.c
+# NAME while with assignment as condition
+use warnings 'syntax';
+1 while $a = 0;
+while ($a = 0) {
+    1;
+}
+EXPECT
+Found = in conditional, should be == at - line 3.
+Found = in conditional, should be == at - line 4.
+########
+# op.c
+# NAME until with assignment as condition
+use warnings 'syntax';
+1 until $a = 1;
+until ($a = 1) {
+    1;
+}
+EXPECT
+Found = in conditional, should be == at - line 3.
+Found = in conditional, should be == at - line 4.
+########
+# op.c
 use warnings 'syntax' ;
 @a[3];
 @a{3};

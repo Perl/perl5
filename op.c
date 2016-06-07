@@ -1532,8 +1532,11 @@ S_scalarboolean(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_SCALARBOOLEAN;
 
-    if (o->op_type == OP_SASSIGN && cBINOPo->op_first->op_type == OP_CONST
-     && !(cBINOPo->op_first->op_flags & OPf_SPECIAL)) {
+    if ((o->op_type == OP_SASSIGN && cBINOPo->op_first->op_type == OP_CONST &&
+         !(cBINOPo->op_first->op_flags & OPf_SPECIAL)) ||
+        (o->op_type == OP_NOT     && cUNOPo->op_first->op_type == OP_SASSIGN &&
+         cBINOPx(cUNOPo->op_first)->op_first->op_type == OP_CONST &&
+         !(cBINOPx(cUNOPo->op_first)->op_first->op_flags & OPf_SPECIAL))) {
 	if (ckWARN(WARN_SYNTAX)) {
 	    const line_t oldline = CopLINE(PL_curcop);
 
