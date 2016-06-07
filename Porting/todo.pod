@@ -187,6 +187,38 @@ Sometimes bugs get fixed as a side effect of something else, and
 the bug remains open because no one realizes that it has been fixed.
 Ideally, every open bug should have a TODO test in the core test suite.
 
+=head2 deparse warnings nicely
+
+Currently Deparse punts on deparsing the bitmask for warnings, which it
+dumps uglily as-is. Try running this:
+
+    $ ./perl -Ilib -MO=Deparse -e 'use warnings "pipe"; die'
+
+Deparse.pm could use the package variables in warnings.pm that warnings.pm
+itself uses to convert the list passed to it into a bitfield. Deparse just
+needs to reverse that.
+
+=head2 test and fix Deparse with perl's test suite
+
+If you run perl's tests with the TEST_ARGS environment variable set to
+C<-deparse> (e.g., run C<TEST=-deparse make test>), each test file will be
+deparsed and the deparsed output will be run. Currently there are many 
+failures, which ought to be fixed. There is in F<Porting/deparse-skips.txt>
+a list of tests known to fail, but it is out of date. Updating it would
+also help.
+
+This is an incremental task. Every small bit helps. It is also a task that
+may never end. As new tests are added, they tickle corner cases that
+B::Deparse cannot yet handle correctly.
+
+This task I<may> need a bit of perl guts knowledge. But what changes need
+to be made is usually easy to see by dumping op trees with B::Concise:
+
+    $ ./perl -Ilib -MO=Concise -e 'foo(); print @_; die $$_'
+
+and adjusting B::Deparse to handle whatever you see B::Concise produce.
+This is also a good way to I<learn> how perl's op trees work.
+
 =head1 Tasks that need a little sysadmin-type knowledge
 
 Or if you prefer, tasks that you would learn from, and broaden your skills
