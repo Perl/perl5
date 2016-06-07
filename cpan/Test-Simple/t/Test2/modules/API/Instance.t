@@ -5,6 +5,8 @@ use Test2::IPC;
 BEGIN { require "t/tools.pl" };
 use Test2::Util qw/CAN_THREAD CAN_REALLY_FORK USE_THREADS get_tid/;
 
+skip_all("Leaks shm blocks");
+
 my $CLASS = 'Test2::API::Instance';
 
 my $one = $CLASS->new;

@@ -1069,6 +1069,8 @@ use File::Glob qw(:case);
                 t/xxx-changes_updated.t
                 ),
         ],
+        # https://github.com/Test-More/test-more/issues/679
+        CUSTOMIZED => [ 't/Test2/modules/API/Instance.t' ],
     },
 
     'Text::Abbrev' => {
