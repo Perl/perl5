@@ -2467,6 +2467,7 @@ cpan/Test-Simple/lib/Test2/API/Stack.pm
 cpan/Test-Simple/lib/Test2/Event/Bail.pm
 cpan/Test-Simple/lib/Test2/Event/Diag.pm
 cpan/Test-Simple/lib/Test2/Event/Exception.pm
+cpan/Test-Simple/lib/Test2/Event/Generic.pm
 cpan/Test-Simple/lib/Test2/Event/Note.pm
 cpan/Test-Simple/lib/Test2/Event/Ok.pm
 cpan/Test-Simple/lib/Test2/Event/Plan.pm
@@ -2505,7 +2506,6 @@ cpan/Test-Simple/lib/Test/Tester/Delegate.pm
 cpan/Test-Simple/lib/Test/Tester.pm
 cpan/Test-Simple/lib/Test/Tutorial.pod
 cpan/Test-Simple/lib/Test/use/ok.pm
-cpan/Test-Simple/t/00compile.t
 cpan/Test-Simple/t/Legacy/00test_harness_check.t
 cpan/Test-Simple/t/Legacy/01-basic.t
 cpan/Test-Simple/t/Legacy/478-cmp_ok_hash.t
@@ -2682,6 +2682,7 @@ cpan/Test-Simple/t/Test2/modules/API.t
 cpan/Test-Simple/t/Test2/modules/Event/Bail.t
 cpan/Test-Simple/t/Test2/modules/Event/Diag.t
 cpan/Test-Simple/t/Test2/modules/Event/Exception.t
+cpan/Test-Simple/t/Test2/modules/Event/Generic.t
 cpan/Test-Simple/t/Test2/modules/Event/Note.t
 cpan/Test-Simple/t/Test2/modules/Event/Ok.t
 cpan/Test-Simple/t/Test2/modules/Event/Plan.t

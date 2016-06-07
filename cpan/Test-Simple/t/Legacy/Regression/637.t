@@ -4,10 +4,19 @@ use warnings;
 use Test2::Util qw/CAN_THREAD/;
 BEGIN {
     unless(CAN_THREAD) {
-        require Test::More;
-        Test::More->import(skip_all => "threads are not supported");
+        print "1..0 # Skip threads are not supported.\n";
+        exit 0;
     }
 }
+
+BEGIN {
+    unless ( $ENV{AUTHOR_TESTING} ) {
+        print "1..0 # Skip many perls have broken threads.  Enable with AUTHOR_TESTING.\n";
+        exit 0;
+    }
+}
+
+use Test2::IPC;
 use threads;
 use Test::More;
 

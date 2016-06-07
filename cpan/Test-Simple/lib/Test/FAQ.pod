@@ -33,7 +33,7 @@ Yes, L<Test::Class> allows you to write test methods while continuing to
 use all the usual CPAN testing modules.  It is the best and most
 perlish way to do xUnit style testing.
 
-L<Test::Unit> is a more direct port of XUnit to Perl, but it does not use
+L<Test::Unit> is a more direct port of xUnit to Perl, but it does not use
 the Perl conventions and does not play well with other CPAN testing
 modules.  As of this writing, it is abandoned.  B<Do not use>.
 
@@ -269,7 +269,7 @@ recall the Dummy Mode.
     could tell her to run naked across campus with a powercord rammed
     up her backside and she'd probably do it...  Hmmm...
 
-There seems to be a Dummy Mode WRT testing.  An otherwise competent
+There seems to be a Dummy Mode with respect to testing.  An otherwise competent
 person goes to write a test and they suddenly forget all basic
 programming practice.
 

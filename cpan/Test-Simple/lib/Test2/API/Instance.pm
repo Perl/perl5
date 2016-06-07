@@ -2,7 +2,7 @@ package Test2::API::Instance;
 use strict;
 use warnings;
 
-our $VERSION = '1.302022';
+our $VERSION = '1.302026';
 
 
 our @CARP_NOT = qw/Test2::API Test2::API::Instance Test2::IPC::Driver Test2::Formatter/;
@@ -270,6 +270,9 @@ sub add_ipc_driver {
 sub enable_ipc_polling {
     my $self = shift;
 
+    $self->{+_PID} = $$        unless defined $self->{+_PID};
+    $self->{+_TID} = get_tid() unless defined $self->{+_TID};
+
     $self->add_context_init_callback(
         # This is called every time a context is created, it needs to be fast.
         # $_[0] is a context object
@@ -296,6 +299,9 @@ sub ipc_enable_shm {
     my $self = shift;
 
     return 1 if defined $self->{+IPC_SHM_ID};
+
+    $self->{+_PID} = $$        unless defined $self->{+_PID};
+    $self->{+_TID} = get_tid() unless defined $self->{+_TID};
 
     my ($ok, $err) = try {
         require IPC::SysV;
@@ -487,8 +493,7 @@ This is not a supported configuration, you will have problems.
 
     $new_exit = 255 if $new_exit > 255;
 
-    if ($new_exit) {
-        require Test2::API::Breakage;
+    if ($new_exit && eval { require Test2::API::Breakage; 1 }) {
         my @warn = Test2::API::Breakage->report();
 
         if (@warn) {
