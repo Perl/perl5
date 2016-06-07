@@ -214,6 +214,18 @@ is($@, '', 'ex-PVBM assert'.$@);
     }
 }
 
+# time() can't be tested using the standard framework since two successive
+# calls may return differing values.
+
+{
+    my $a;
+    $a = time;
+    $b = time;
+    my $diff = $b - $a;
+    cmp_ok($diff, '>=', 0,  "time is monotically increasing");
+    cmp_ok($diff, '<',  2,  "time delta is small");
+}
+
 
 done_testing();
 
@@ -222,7 +234,7 @@ ref $xref			# ref
 ref $cstr			# ref nonref
 `$runme -e "print qq[1\\n]"`				# backtick skip(MSWin32)
 `$undefed`			# backtick undef skip(MSWin32)
-<*>				# glob
+'???'				# glob  (not currently OA_TARGLEX)
 <OP>				# readline
 'faked'				# rcatline
 (@z = (1 .. 3))			# aassign
@@ -355,7 +367,7 @@ getpgrp				# getpgrp
 setpgrp				# setpgrp
 getpriority $$, $$		# getpriority
 '???'				# setpriority
-time				# time
+'???'				# time
 localtime $^T			# localtime
 gmtime $^T			# gmtime
 '???'				# sleep: can randomly fail
