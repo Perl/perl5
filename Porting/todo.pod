@@ -868,6 +868,35 @@ also the warning messages (see L<warnings>, F<regen/warnings.pl>).
 These tasks would need C knowledge, and knowledge of how the interpreter works,
 or a willingness to learn.
 
+=head2 fix refaliasing with nested and recursive subroutines
+
+Currently aliasing lexical variables via reference only applies to the
+current subroutine, and does not propagate to inner closures, nor does
+aliasing of outer variables within closures propagate to the outer
+subroutine. This is because each subroutine has its own lexical pad and the
+aliasing works by changing which SV the pad points to.
+
+One possible way to fix this would be to create new ops for accessing
+variables that are closed over. So C<my $x; sub {$x}> would use a new op
+type, say C<padoutsv>, instead of the C<padsv> currently used in the
+sub. That new op would possibly check a flag or some such and see if it
+needs to fetch the variable from an outer pad. If we follow this approach,
+it should be possible at compile time to detect cases where the more
+complex C<padoutsv> op is unnecessary and revert back to the simpler,
+faster C<padsv>. There would need to be corresponding ops for arrays,
+hashes, and subs, too.
+
+There is also a related issue with recursion and C<state> variables. A
+subroutine actually has a list of lexical pads, each one used at a
+different recursion level. If a C<state> variable is aliased to another
+variable after a recursive call to the same subroutine, that higher call
+depth will not see the effect of aliasing, because the second pad will have
+been created already. Similarly, aliasing a state variable within a
+recursive call will not affect outer calls, even though all call depths are
+supposed to share the same C<state> variables.
+
+Both of these bugs affect C<foreach> aliasing, too.
+
 =head2 forbid labels with keyword names
 
 Currently C<goto keyword> "computes" the label value:
