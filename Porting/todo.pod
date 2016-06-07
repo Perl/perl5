@@ -850,7 +850,7 @@ bareword expressions after a "goto" as a label and never as a keyword.
 =head2 truncate() prototype
 
 The prototype of truncate() is currently C<$$>. It should probably
-be C<*$> instead. (This is changed in F<opcode.pl>)
+be C<*$> instead. (This is changed in F<regen/opcodes>.)
 
 =head2 error reporting of [$a ; $b]
 
