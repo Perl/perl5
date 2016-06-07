@@ -942,11 +942,6 @@ program if you pass the process ID. It would be good to do this with the Perl
 debugger on a running Perl program, although I'm not sure how it would be
 done." ssh and screen do this with named pipes in /tmp. Maybe we can too.
 
-=head2 LVALUE functions for lists
-
-The old perltodo notes that lvalue functions don't work for list or hash
-slices. This would be good to fix.
-
 =head2 regexp optimizer optional
 
 The regexp optimizer is not optional. It should be configurable to be optional
