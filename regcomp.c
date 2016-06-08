@@ -199,6 +199,7 @@ struct RExC_state_t {
     scan_frame *frame_head;
     scan_frame *frame_last;
     U32         frame_count;
+    AV         *warn_text;
 #ifdef ADD_TO_REGEXEC
     char 	*starttry;		/* -Dr: where regtry was called. */
 #define RExC_starttry	(pRExC_state->starttry)
@@ -288,6 +289,7 @@ struct RExC_state_t {
 #define RExC_frame_last (pRExC_state->frame_last)
 #define RExC_frame_count (pRExC_state->frame_count)
 #define RExC_strict (pRExC_state->strict)
+#define RExC_warn_text (pRExC_state->warn_text)
 
 /* Heuristic check on the complexity of the pattern: if TOO_NAUGHTY, we set
  * a flag to disable back-off on the fixed/floating substrings - if it's
@@ -6767,6 +6769,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 #endif
     }
 
+    pRExC_state->warn_text = NULL;
     pRExC_state->code_blocks = NULL;
     pRExC_state->num_code_blocks = 0;
 
@@ -13704,8 +13707,8 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
  * routine. q.v. */
 #define ADD_POSIX_WARNING(p, text)  STMT_START {                            \
         if (posix_warnings) {                                               \
-            if (! warn_text) warn_text = newAV();                           \
-            av_push(warn_text, Perl_newSVpvf(aTHX_                          \
+            if (! RExC_warn_text ) RExC_warn_text = (AV *) sv_2mortal((SV *) newAV()); \
+            av_push(RExC_warn_text, Perl_newSVpvf(aTHX_                          \
                                              WARNING_PREFIX                 \
                                              text                           \
                                              REPORT_LOCATION,               \
@@ -13836,7 +13839,6 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
     bool has_opening_colon    = FALSE;
     int class_number          = OOB_NAMEDCLASS; /* Out-of-bounds until find
                                                    valid class */
-    AV* warn_text             = NULL;   /* any warning messages */
     const char * possible_end = NULL;   /* used for a 2nd parse pass */
     const char* name_start;             /* ptr to class name first char */
 
@@ -13851,6 +13853,9 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
     UV input_text[15];
 
     PERL_ARGS_ASSERT_HANDLE_POSSIBLE_POSIX;
+
+    if (posix_warnings && RExC_warn_text)
+        av_clear(RExC_warn_text);
 
     if (p >= e) {
         return NOT_MEANT_TO_BE_A_POSIX_CLASS;
@@ -14469,14 +14474,8 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
                 ADD_POSIX_WARNING(p, "there is no terminating ']'");
             }
 
-            if (warn_text) {
-                if (posix_warnings) {
-                    /* mortalize to avoid a leak with FATAL warnings */
-                    *posix_warnings = (AV *) sv_2mortal((SV *) warn_text);
-                }
-                else {
-                    SvREFCNT_dec_NN(warn_text);
-                }
+            if (posix_warnings && RExC_warn_text && av_top_index(RExC_warn_text) > -1) {
+                *posix_warnings = RExC_warn_text;
             }
         }
         else if (class_number != OOB_NAMEDCLASS) {
