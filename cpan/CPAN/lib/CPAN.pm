@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '2.11';
+$CPAN::VERSION = '2.14';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -14,6 +14,7 @@ BEGIN {
             $inc = File::Spec->rel2abs($inc) unless ref $inc;
         }
     }
+    $SIG{WINCH} = 'IGNORE' if exists $SIG{WINCH};
 }
 use CPAN::Author;
 use CPAN::HandleConfig;
@@ -460,7 +461,7 @@ Enter 'h' for help.
         }
         for my $class (qw(Module Distribution)) {
             # again unsafe meta access?
-            for my $dm (keys %{$CPAN::META->{readwrite}{"CPAN::$class"}}) {
+            for my $dm (sort keys %{$CPAN::META->{readwrite}{"CPAN::$class"}}) {
                 next unless $CPAN::META->{readwrite}{"CPAN::$class"}{$dm}{incommandcolor};
                 CPAN->debug("BUG: $class '$dm' was in command state, resetting");
                 delete $CPAN::META->{readwrite}{"CPAN::$class"}{$dm}{incommandcolor};
@@ -708,13 +709,14 @@ sub checklock {
         my $otherpid  = <$fh>;
         my $otherhost = <$fh>;
         $fh->close;
-        if (defined $otherpid && $otherpid) {
+        if (defined $otherpid && length $otherpid) {
             chomp $otherpid;
         }
-        if (defined $otherhost && $otherhost) {
+        if (defined $otherhost && length $otherhost) {
             chomp $otherhost;
         }
         my $thishost  = hostname();
+        my $ask_if_degraded_wanted = 0;
         if (defined $otherhost && defined $thishost &&
             $otherhost ne '' && $thishost ne '' &&
             $otherhost ne $thishost) {
@@ -732,31 +734,7 @@ There seems to be running another CPAN process (pid $otherpid).  Contacting...
 });
             if (kill 0, $otherpid or $!{EPERM}) {
                 $CPAN::Frontend->mywarn(qq{Other job is running.\n});
-                my($ans) =
-                    CPAN::Shell::colorable_makemaker_prompt
-                        (qq{Shall I try to run in downgraded }.
-                        qq{mode? (Y/n)},"y");
-                if ($ans =~ /^y/i) {
-                    $CPAN::Frontend->mywarn("Running in downgraded mode (experimental).
-Please report if something unexpected happens\n");
-                    $RUN_DEGRADED = 1;
-                    for ($CPAN::Config) {
-                        # XXX
-                        # $_->{build_dir_reuse} = 0; # 2006-11-17 akoenig Why was that?
-                        $_->{commandnumber_in_prompt} = 0; # visibility
-                        $_->{histfile}       = "";  # who should win otherwise?
-                        $_->{cache_metadata} = 0;   # better would be a lock?
-                        $_->{use_sqlite}     = 0;   # better would be a write lock!
-                        $_->{auto_commit}    = 0;   # we are violent, do not persist
-                        $_->{test_report}    = 0;   # Oliver Paukstadt had sent wrong reports in degraded mode
-                    }
-                } else {
-                    $CPAN::Frontend->mydie("
-You may want to kill the other job and delete the lockfile. On UNIX try:
-    kill $otherpid
-    rm $lockfile
-");
-                }
+                $ask_if_degraded_wanted = 1;
             } elsif (-w $lockfile) {
                 my($ans) =
                     CPAN::Shell::colorable_makemaker_prompt
@@ -773,9 +751,45 @@ You may want to kill the other job and delete the lockfile. On UNIX try:
                     qq{  and then rerun us.\n}
                 );
             }
+        } elsif ($^O eq "MSWin32") {
+            $CPAN::Frontend->mywarn(
+                                    qq{
+There seems to be running another CPAN process according to '$lockfile'.
+});
+            $ask_if_degraded_wanted = 1;
         } else {
             $CPAN::Frontend->mydie(sprintf("CPAN.pm panic: Found invalid lockfile ".
                                            "'$lockfile', please remove. Cannot proceed.\n"));
+        }
+        if ($ask_if_degraded_wanted) {
+            my($ans) =
+                CPAN::Shell::colorable_makemaker_prompt
+                    (qq{Shall I try to run in downgraded }.
+                     qq{mode? (Y/n)},"y");
+            if ($ans =~ /^y/i) {
+                $CPAN::Frontend->mywarn("Running in downgraded mode (experimental).
+Please report if something unexpected happens\n");
+                $RUN_DEGRADED = 1;
+                for ($CPAN::Config) {
+                    # XXX
+                    # $_->{build_dir_reuse} = 0; # 2006-11-17 akoenig Why was that?
+                    $_->{commandnumber_in_prompt} = 0; # visibility
+                    $_->{histfile}       = "";  # who should win otherwise?
+                    $_->{cache_metadata} = 0;   # better would be a lock?
+                    $_->{use_sqlite}     = 0;   # better would be a write lock!
+                    $_->{auto_commit}    = 0;   # we are violent, do not persist
+                    $_->{test_report}    = 0;   # Oliver Paukstadt had sent wrong reports in degraded mode
+                }
+            } else {
+                my $msg = "You may want to kill the other job and delete the lockfile.";
+                if (defined $otherpid) {
+                    $msg .= " Something like:
+    kill $otherpid
+    rm $lockfile
+";
+                }
+                $CPAN::Frontend->mydie("\n$msg");
+            }
         }
     }
     my $dotcpan = $CPAN::Config->{cpan_home};
@@ -1352,8 +1366,8 @@ sub _list_sorted_descending_is_tested {
                     keys %{$self->{is_tested}};
     if ($foul) {
         $CPAN::Frontend->mywarn("Lost build_dir detected ($foul), giving up all cached test results of currently running session.\n");
-        for my $dbd (keys %{$self->{is_tested}}) { # distro-build-dir
-        SEARCH: for my $d ($CPAN::META->all_objects("CPAN::Distribution")) {
+        for my $dbd (sort keys %{$self->{is_tested}}) { # distro-build-dir
+        SEARCH: for my $d (sort { $a->id cmp $b->id } $CPAN::META->all_objects("CPAN::Distribution")) {
                 if ($d->{build_dir} && $d->{build_dir} eq $dbd) {
                     $CPAN::Frontend->mywarn(sprintf "Flushing cache for %s\n", $d->pretty_id);
                     $d->fforce("");
@@ -1968,6 +1982,10 @@ The C<plugin_list> configuration parameter holds a list of strings of
 the form
 
   Modulename=arg0,arg1,arg2,arg3,...
+
+eg:
+
+  CPAN::Plugin::Flurb=dir,/opt/pkgs/flurb/raw,verbose,1
 
 At run time, each listed plugin is instantiated as a singleton object
 by running the equivalent of this pseudo code:

@@ -14,7 +14,7 @@ use vars qw($connect_to_internet_ok $Ua $Thesite $ThesiteURL $Themethod);
 use vars qw(
             $VERSION
 );
-$VERSION = "5.5006";
+$VERSION = "5.5007";
 
 #-> sub CPAN::FTP::ftp_statistics
 # if they want to rewrite, they need to pass in a filehandle
@@ -35,13 +35,19 @@ sub _ftp_statistics {
     while (!CPAN::_flock($fh, $locktype|LOCK_NB)) {
         $waitstart ||= localtime();
         if ($sleep>3) {
-            $CPAN::Frontend->mywarn("Waiting for a read lock on '$file' (since $waitstart)\n");
+            my $now = localtime();
+            $CPAN::Frontend->mywarn("$now: waiting for read lock on '$file' (since $waitstart)\n");
         }
-        $CPAN::Frontend->mysleep($sleep);
+        sleep($sleep); # this sleep must not be overridden;
+                       # Frontend->mysleep with AUTOMATED_TESTING has
+                       # provoked complete lock contention on my NFS
         if ($sleep <= 3) {
             $sleep+=0.33;
-        } elsif ($sleep <=6) {
+        } elsif ($sleep <= 6) {
             $sleep+=0.11;
+        } else {
+            # retry to get a fresh handle. If it is NFS and the handle is stale, we will never get an flock
+            open $fh, "+>>$file" or $CPAN::Frontend->mydie("Could not open '$file': $!");
         }
     }
     my $stats = eval { CPAN->_yaml_loadfile($file); };

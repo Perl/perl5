@@ -10,7 +10,7 @@ use File::Path ();
 use File::Spec ();
 use CPAN::Mirrors ();
 use vars qw($VERSION $auto_config);
-$VERSION = "5.5307";
+$VERSION = "5.5309";
 
 =head1 NAME
 
@@ -775,7 +775,7 @@ sub init {
         }
     } elsif (0 == length $matcher) {
     } elsif (0 && $matcher eq "~") { # extremely buggy, but a nice idea
-        my @unconfigured = grep { not exists $CPAN::Config->{$_}
+        my @unconfigured = sort grep { not exists $CPAN::Config->{$_}
                                       or not defined $CPAN::Config->{$_}
                                           or not length $CPAN::Config->{$_}
                                   } keys %$CPAN::Config;
@@ -1300,8 +1300,9 @@ sub init {
             $CPAN::Frontend->myprint("\nWriting $configpm for bootstrap...\n");
             delete $CPAN::Config->{install_help}; # temporary only
             CPAN::HandleConfig->commit;
-            my $dist;
-            if ( $dist = CPAN::Shell->expand('Module', 'local::lib')->distribution ) {
+            my($dist, $locallib);
+            $locallib = CPAN::Shell->expand('Module', 'local::lib');
+            if ( $locallib and $dist = $locallib->distribution ) {
                 # this is a hack to force bootstrapping
                 $dist->{prefs}{pl}{commandline} = "$^X Makefile.PL --bootstrap";
                 # Set @INC for this process so we find things as they bootstrap

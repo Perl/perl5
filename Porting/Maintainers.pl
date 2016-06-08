@@ -248,7 +248,7 @@ use File::Glob qw(:case);
     },
 
     'CPAN' => {
-        'DISTRIBUTION' => 'ANDK/CPAN-2.10.tar.gz',
+        'DISTRIBUTION' => 'ANDK/CPAN-2.14-TRIAL.tar.gz',
         'FILES'        => q[cpan/CPAN],
         'EXCLUDED'     => [
             qr{^distroprefs/},
@@ -283,8 +283,6 @@ use File::Glob qw(:case);
                 t/yaml_code.yml
                 ),
         ],
-        # See commit 3198fda65dbcd975c56916e4b98f515fab7f02e5
-        'CUSTOMIZED'   => [ qw[ lib/CPAN.pm ] ],
     },
 
     # Note: When updating CPAN-Meta the META.* files will need to be regenerated

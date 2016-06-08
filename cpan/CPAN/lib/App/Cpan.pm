@@ -6,7 +6,7 @@ use vars qw($VERSION);
 
 use if $] < 5.008 => 'IO::Scalar';
 
-$VERSION = '1.63';
+$VERSION = '1.64';
 
 =head1 NAME
 
@@ -34,7 +34,7 @@ App::Cpan - easily interact with CPAN from the command line
 	cpan
 
 	# without arguments, but some switches
-	cpan [-ahpruvACDLOP]
+	cpan [-ahpruvACDLOPX]
 
 =head1 DESCRIPTION
 
@@ -104,7 +104,7 @@ distribution.
 Print a help message and exit. When you specify C<-h>, it ignores all
 of the other options and arguments.
 
-=item -i
+=item -i module [ module ... ]
 
 Install the specified modules. With no other switches, this switch
 is implied.
@@ -164,7 +164,12 @@ session.
 
 Recompiles dynamically loaded modules with CPAN::Shell->recompile.
 
-=item -t
+=item -s
+
+Drop in the CPAN.pm shell. This command does this automatically if you don't
+specify any arguments.
+
+=item -t module [ module ... ]
 
 Run a `make test` on the specified modules.
 
@@ -191,6 +196,16 @@ UNIMPLEMENTED
 
 Turn on cpan warnings. This checks various things, like directory permissions,
 and tells you about problems you might have.
+
+=item -x module [ module ... ]
+
+Find close matches to the named modules that you think you might have
+mistyped. This requires the optional installation of Text::Levenshtein or
+Text::Levenshtein::Damerau.
+
+=item -X
+
+Dump all the namespaces to standard output.
 
 =back
 
@@ -299,7 +314,7 @@ BEGIN { # most of this should be in methods
 use vars qw( @META_OPTIONS $Default %CPAN_METHODS @CPAN_OPTIONS  @option_order
 	%Method_table %Method_table_index );
 
-@META_OPTIONS = qw( h v V I g G M: C A D O l L a r p P j: J w T);
+@META_OPTIONS = qw( h v V I g G M: C A D O l L a r p P j: J w x X );
 
 $Default = 'default';
 
@@ -312,6 +327,7 @@ $Default = 'default';
 	't'      => 'test',
 	'u'      => 'upgrade',
 	'T'      => 'notest',
+	's'      => 'shell',
 	);
 @CPAN_OPTIONS = grep { $_ ne $Default } sort keys %CPAN_METHODS;
 
@@ -332,6 +348,7 @@ sub GOOD_EXIT () { 0 }
 	h =>  [ \&_print_help,        NO_ARGS, GOOD_EXIT, 'Printing help'                ],
 	v =>  [ \&_print_version,     NO_ARGS, GOOD_EXIT, 'Printing version'             ],
 	V =>  [ \&_print_details,     NO_ARGS, GOOD_EXIT, 'Printing detailed version'    ],
+	X =>  [ \&_list_all_namespaces, NO_ARGS, GOOD_EXIT, 'Listing all namespaces'      ],
 
 	# options that affect other options
 	j =>  [ \&_load_config,          ARGS, GOOD_EXIT, 'Use specified config file'    ],
@@ -343,8 +360,8 @@ sub GOOD_EXIT () { 0 }
     w =>  [ \&_turn_on_warnings,  NO_ARGS, GOOD_EXIT, 'Turning on warnings'          ],
 
 	# options that do their one thing
-	g =>  [ \&_download,          NO_ARGS, GOOD_EXIT, 'Download the latest distro'        ],
-	G =>  [ \&_gitify,            NO_ARGS, GOOD_EXIT, 'Down and gitify the latest distro' ],
+	g =>  [ \&_download,             ARGS, GOOD_EXIT, 'Download the latest distro'        ],
+	G =>  [ \&_gitify,               ARGS, GOOD_EXIT, 'Down and gitify the latest distro' ],
 
 	C =>  [ \&_show_Changes,         ARGS, GOOD_EXIT, 'Showing Changes file'         ],
 	A =>  [ \&_show_Author,          ARGS, GOOD_EXIT, 'Showing Author'               ],
@@ -358,7 +375,9 @@ sub GOOD_EXIT () { 0 }
 
 	r =>  [ \&_recompile,         NO_ARGS, GOOD_EXIT, 'Recompiling'                  ],
 	u =>  [ \&_upgrade,           NO_ARGS, GOOD_EXIT, 'Running `make test`'          ],
+   's' => [ \&_shell,            NO_ARGS, GOOD_EXIT, 'Running `make test`'          ],
 
+   'x' => [ \&_guess_namespace,      ARGS, GOOD_EXIT, 'Guessing namespaces'          ],
 	c =>  [ \&_default,              ARGS, GOOD_EXIT, 'Running `make clean`'         ],
 	f =>  [ \&_default,              ARGS, GOOD_EXIT, 'Installing with force'        ],
 	i =>  [ \&_default,              ARGS, GOOD_EXIT, 'Running `make install`'       ],
@@ -510,7 +529,7 @@ sub run
 			last OPTION;
 			}
 
-		$logger->info( "$description -- ignoring other arguments" )
+		$logger->info( "[$option] $description -- ignoring other arguments" )
 			if( @ARGV && ! $takes_args );
 
 		$return_value = $sub->( \ @ARGV, $options );
@@ -536,7 +555,7 @@ sub _init_logger
 
     unless( $log4perl_loaded )
         {
-        print "Loading internal null logger. Install Log::Log4perl for logging messages\n";
+        print STDERR "Loading internal null logger. Install Log::Log4perl for logging messages\n";
         $logger = Local::Null::Logger->new;
         return $logger;
         }
@@ -597,6 +616,12 @@ sub _default
 
 	foreach my $arg ( @$args )
 		{
+		# check the argument and perhaps capture typos
+		my $module = _expand_module( $arg ) or do {
+			$logger->error( "Skipping $arg because I couldn't find a matching namespace." );
+			next;
+			};
+
 		_clear_cpanpm_output();
 		$action->( $arg );
 
@@ -785,8 +810,7 @@ HERE
         $CPAN::Frontend->myprint("\n");
       }
 
-	my $mirrors   = CPAN::Mirrors->new(  );
-	$mirrors->parse_mirrored_by( File::Spec->catfile($CPAN::Config->{keep_source_where},'MIRRORED.BY') );
+	my $mirrors   = CPAN::Mirrors->new( _mirror_file() );
 	my @continents = $mirrors->find_best_continents;
 
 	my @mirrors   = $mirrors->get_mirrors_by_continents( $continents[0] );
@@ -907,9 +931,7 @@ sub _is_pingable_scheme {
 	$uri->scheme eq 'file'
 	}
 
-sub _find_good_mirrors {
-	require CPAN::Mirrors;
-
+sub _mirror_file {
 	my $file = do {
 		my $file = 'MIRRORED.BY';
 		my $local_path = File::Spec->catfile(
@@ -922,7 +944,12 @@ sub _find_good_mirrors {
 			$local_path;
 			}
 		};
-	my $mirrors = CPAN::Mirrors->new( $file );
+	}
+
+sub _find_good_mirrors {
+	require CPAN::Mirrors;
+
+	my $mirrors = CPAN::Mirrors->new( _mirror_file() );
 
 	my @mirrors = $mirrors->best_mirrors(
 		how_many   => 5,
@@ -1044,6 +1071,15 @@ sub _upgrade
 	return HEY_IT_WORKED;
 	}
 
+sub _shell
+	{
+	$logger->info( "Dropping into shell" );
+
+	CPAN::shell();
+
+	return HEY_IT_WORKED;
+	}
+
 sub _load_config # -j
 	{
 	my $file = shift || '';
@@ -1102,14 +1138,17 @@ sub _download
 
 	my %paths;
 
-	foreach my $module ( @$args )
-		{
-		$logger->info( "Checking $module" );
-		my $path = CPAN::Shell->expand( "Module", $module )->cpan_file;
+	foreach my $arg ( @$args ) {
+		$logger->info( "Checking $arg" );
+
+		my $module = _expand_module( $arg ) or next;
+		my $path = $module->cpan_file;
 
 		$logger->debug( "Inst file would be $path\n" );
 
-		$paths{$module} = _get_file( _make_path( $path ) );
+		$paths{$arg} = _get_file( _make_path( $path ) );
+
+		$logger->info( "Downloaded [$arg] to [$paths{$module}]" );
 		}
 
 	return \%paths;
@@ -1149,16 +1188,14 @@ sub _gitify
 
 	my $starting_dir = cwd();
 
-	foreach my $module ( @$args )
+	foreach my $arg ( @$args )
 		{
-		$logger->info( "Checking $module" );
-		my $path = CPAN::Shell->expand( "Module", $module )->cpan_file;
+		$logger->info( "Checking $arg" );
+		my $store_paths = _download( [ $arg ] );
+		$logger->debug( "gitify Store path is $store_paths->{$arg}" );
+		my $dirname = dirname( $store_paths->{$arg} );
 
-		my $store_paths = _download( [ $module ] );
-		$logger->debug( "gitify Store path is $store_paths->{$module}" );
-		my $dirname = dirname( $store_paths->{$module} );
-
-		my $ae = Archive::Extract->new( archive => $store_paths->{$module} );
+		my $ae = Archive::Extract->new( archive => $store_paths->{$arg} );
 		$ae->extract( to => $dirname );
 
 		chdir $ae->extract_path;
@@ -1186,7 +1223,8 @@ sub _show_Changes
 		{
 		$logger->info( "Checking $arg\n" );
 
-		my $module = eval { CPAN::Shell->expand( "Module", $arg ) };
+		my $module = _expand_module( $arg ) or next;
+
 		my $out = _get_cpanpm_output();
 
 		next unless eval { $module->inst_file };
@@ -1233,7 +1271,8 @@ sub _show_Author
 
 	foreach my $arg ( @$args )
 		{
-		my $module = CPAN::Shell->expand( "Module", $arg );
+		my $module = _expand_module( $arg ) or next;
+
 		unless( $module )
 			{
 			$logger->info( "Didn't find a $arg module, so no author!" );
@@ -1257,7 +1296,7 @@ sub _show_Details
 
 	foreach my $arg ( @$args )
 		{
-		my $module = CPAN::Shell->expand( "Module", $arg );
+		my $module = _expand_module( $arg ) or next;
 		my $author = CPAN::Shell->expand( "Author", $module->userid );
 
 		next unless $module->userid;
@@ -1279,14 +1318,23 @@ sub _show_Details
 	return HEY_IT_WORKED;
 	}
 
+BEGIN {
+my $modules;
+sub _get_all_namespaces
+	{
+	return $modules if $modules;
+	$modules = [ map { $_->id } CPAN::Shell->expand( "Module", "/./" ) ];
+	}
+}
+
 sub _show_out_of_date
 	{
-	my @modules = CPAN::Shell->expand( "Module", "/./" );
+	my $modules = _get_all_namespaces();
 
 	printf "%-40s  %6s  %6s\n", "Module Name", "Local", "CPAN";
 	print "-" x 73, "\n";
 
-	foreach my $module ( @modules )
+	foreach my $module ( @$modules )
 		{
 		next unless $module->inst_file;
 		next if $module->uptodate;
@@ -1305,10 +1353,9 @@ sub _show_author_mods
 
 	my %hash = map { lc $_, 1 } @$args;
 
-	my @modules = CPAN::Shell->expand( "Module", "/./" );
+	my $modules = _get_all_namespaces();
 
-	foreach my $module ( @modules )
-		{
+	foreach my $module ( @$modules ) {
 		next unless exists $hash{ lc $module->userid };
 		print $module->id, "\n";
 		}
@@ -1428,6 +1475,107 @@ sub _path_to_module
 	return $module_name;
 	}
 
+
+sub _expand_module
+	{
+	my( $module ) = @_;
+
+	my $expanded = CPAN::Shell->expand( "Module", $module );
+	unless( defined $expanded ) {
+		$logger->error( "Could not expand [$module]. Check the module name." );
+		my $threshold = (
+			grep { int }
+			sort { length $a <=> length $b }
+				length($module)/4, 4
+			)[0];
+
+		my $guesses = _guess_at_module_name( $module, $threshold );
+		if( defined $guesses and @$guesses ) {
+			$logger->info( "Perhaps you meant one of these:" );
+			foreach my $guess ( @$guesses ) {
+				$logger->info( "\t$guess" );
+				}
+			}
+		return;
+		}
+
+	return $expanded;
+	}
+
+my $guessers = [
+	[ qw( Text::Levenshtein::XS distance 7 ) ],
+	[ qw( Text::Levenshtein::Damerau::XS     xs_edistance 7 ) ],
+
+	[ qw( Text::Levenshtein     distance 7 ) ],
+	[ qw( Text::Levenshtein::Damerau::PP     pp_edistance 7 ) ],
+
+	];
+
+# for -x
+sub _guess_namespace
+	{
+	my $args = shift;
+
+	foreach my $arg ( @$args )
+		{
+		$logger->debug( "Checking $arg" );
+		my $guesses = _guess_at_module_name( $arg );
+
+		foreach my $guess ( @$guesses ) {
+			print $guess, "\n";
+			}
+		}
+
+	return HEY_IT_WORKED;
+	}
+
+sub _list_all_namespaces {
+	my $modules = _get_all_namespaces();
+
+	foreach my $module ( @$modules ) {
+		print $module, "\n";
+		}
+	}
+
+BEGIN {
+my $distance;
+sub _guess_at_module_name
+	{
+	my( $target, $threshold ) = @_;
+
+	unless( defined $distance ) {
+		foreach my $try ( @$guessers ) {
+			my $can_guess = eval "require $try->[0]; 1" or next;
+
+			no strict 'refs';
+			$distance = \&{ join "::", @$try[0,1] };
+			$threshold ||= $try->[2];
+			}
+		}
+
+	unless( $distance ) {
+		my $modules = join ", ", map { $_->[0] } @$guessers;
+		substr $modules, rindex( $modules, ',' ), 1, ', and';
+
+		$logger->info( "I can suggest names if you install one of $modules" );
+		return;
+		}
+
+	my $modules = _get_all_namespaces();
+	$logger->info( "Checking " . @$modules . " namespaces for close match suggestions" );
+
+	my %guesses;
+	foreach my $guess ( @$modules ) {
+		my $distance = $distance->( $target, $guess );
+		next if $distance > $threshold;
+		$guesses{$guess} = $distance;
+		}
+
+	my @guesses = sort { $guesses{$a} <=> $guesses{$b} } keys %guesses;
+	return [ grep { defined } @guesses[0..9] ];
+	}
+}
+
 1;
 
 =back
@@ -1459,8 +1607,6 @@ report them to the user.
 * Warnings switch
 
 * Check then exit
-
-* no test option
 
 =head1 BUGS
 
@@ -1497,7 +1643,7 @@ brian d foy, C<< <bdfoy@cpan.org> >>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2001-2014, brian d foy, All Rights Reserved.
+Copyright (c) 2001-2015, brian d foy, All Rights Reserved.
 
 You may redistribute this under the same terms as Perl itself.
 
