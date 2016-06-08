@@ -35,6 +35,25 @@ L</Selected Bug Fixes> section.
 
 [ List each security issue as a =head2 entry ]
 
+=head2 C<-Di> switch is now required for PerlIO debugging output
+
+Previously PerlIO debugging output would be sent to the file specified
+by the C<PERLIO_DEBUG> environment variable if perl wasn't running
+setuid and the C<-T> or C<-t> switches hadn't been parsed yet.
+
+If perl performed output at a point where it hadn't yet parsed its
+switches this could result in perl creating or overwriting the file
+named by C<PERLIO_DEBUG> even when the C<-T> switch had been supplied.
+
+Perl now requires the C<-Di> switch to produce PerlIO debugging
+output.  By default this is written to C<stderr>, but can optionally
+be redirected to a file by setting the C<PERLIO_DEBUG> environment
+variable.
+
+If perl is running setuid or the C<-T> switch has supplied
+C<PERLIO_DEBUG> is ignored and the debugging output is sent to
+C<stderr> as for any other C<-D> switch.
+
 =head1 Incompatible Changes
 
 XXX For a release on a stable branch, this section aspires to be:
