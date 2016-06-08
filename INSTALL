@@ -2389,10 +2389,9 @@ to report problems, as it automatically includes summary configuration
 information about your perl, which may help us track down problems far
 more quickly. But first you should read the advice in this file,
 carefully re-read the error message and check the relevant manual pages
-on your system, as these may help you find an immediate solution.  If
-you are not sure whether what you are seeing is a bug, you can send a
-message describing the problem to the comp.lang.perl.misc newsgroup to
-get advice.
+on your system, as these may help you find an immediate solution.
+Once you've exhausted the documentation, please report bugs to us using
+the 'perlbug' tool.
 
 The perlbug tool is installed along with perl, so after you have
 completed C<make install> it should be possible to run it with plain

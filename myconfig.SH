@@ -25,7 +25,7 @@ $startsh
 
 # This script is designed to provide a handy summary of the configuration
 # information being used to build perl. This is especially useful if you
-# are requesting help from comp.lang.perl.misc on usenet or via mail.
+# are requesting help online or via email.
 
 # Note that the text lines /^Summary of/ .. /^\s*$/ are copied into Config.pm.
 cat <<'!NO!SUBS!'

@@ -1129,10 +1129,6 @@ out http://www.cpan.org/CPAN.html ).
 =head1 Help Save the World
 
 You should definitely announce your patch on the perl5-porters list.
-You should also consider announcing your patch on
-comp.lang.perl.announce, though you should make it quite clear that a
-subversion is not a production release, and be prepared to deal with
-people who will not read your disclaimer.
 
 =head1 Todo
 

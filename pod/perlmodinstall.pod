@@ -415,8 +415,8 @@ If you have any suggested changes for this page, let me know.  Please
 don't send me mail asking for help on how to install your modules.
 There are too many modules, and too few Orwants, for me to be able to
 answer or even acknowledge all your questions.  Contact the module
-author instead, or post to comp.lang.perl.modules, or ask someone
-familiar with Perl on your operating system.
+author instead, ask someone familiar with Perl on your operating
+system, or if all else fails, file a ticket at http://rt.cpan.org/.
 
 =head1 AUTHOR
 

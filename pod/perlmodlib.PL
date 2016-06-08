@@ -1405,42 +1405,21 @@ See perldoc ExtUtils::MakeMaker.pm for details.
 
 How to release and distribute a module.
 
-It's good idea to post an announcement of the availability of your
-module (or the module itself if small) to the comp.lang.perl.announce
-Usenet newsgroup.  This will at least ensure very wide once-off
-distribution.
+If possible, register the module with CPAN. Follow the instructions
+and links on:
 
-If possible, register the module with CPAN.  You should
-include details of its location in your announcement.
-
-Some notes about ftp archives: Please use a long descriptive file
-name that includes the version number. Most incoming directories
-will not be readable/listable, i.e., you won't be able to see your
-file after uploading it. Remember to send your email notification
-message as soon as possible after uploading else your file may get
-deleted automatically. Allow time for the file to be processed
-and/or check the file has been processed before announcing its
-location.
-
-FTP Archives for Perl Modules:
-
-Follow the instructions and links on:
-
-   http://www.cpan.org/modules/00modlist.long.html
    http://www.cpan.org/modules/04pause.html
 
-or upload to one of these sites:
+and upload to:
 
-   https://pause.kbx.de/pause/
    http://pause.perl.org/
 
-and notify <modules@perl.org>.
+and notify <modules@perl.org>. This will allow anyone to install
+your module using the C<cpan> tool distributed with Perl.
 
 By using the WWW interface you can ask the Upload Server to mirror
 your modules from your ftp or WWW site into your own directory on
 CPAN!
-
-Please remember to send me an updated entry for the Module list!
 
 =item  *
 

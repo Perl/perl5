@@ -95,11 +95,11 @@ reinventing the wheel!
 
 You might love it. You might feel that everyone else needs it. But there
 might not actually be any real demand for it out there. If you're unsure
-about the demand your module will have, consider sending out feelers
-on the C<comp.lang.perl.modules> newsgroup, or as a last resort, ask the
-modules list at C<modules@perl.org>. Remember that this is a closed list
-with a very long turn-around time - be prepared to wait a good while for
-a response from them.
+about the demand your module will have, consider asking the
+C<module-authors@perl.org> mailing list (send an email to
+C<module-authors-subscribe@perl.org> to subscribe; see
+L<http://lists.perl.org/list/module-authors.html> for more information
+and a link to the archives).
 
 =item Choose a name
 
@@ -254,11 +254,6 @@ Once uploaded, it'll sit unnoticed in your author directory. If you want
 it connected to the rest of the CPAN, you'll need to go to "Register
 Namespace" on PAUSE.  Once registered, your module will appear in the
 by-module and by-category listings on CPAN.
-
-=item Announce to clpa
-
-If you have a burning desire to tell the world about your release, post
-an announcement to the moderated C<comp.lang.perl.announce> newsgroup.
 
 =item Fix bugs!
 
