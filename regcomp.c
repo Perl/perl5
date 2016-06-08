@@ -13764,7 +13764,7 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
  * routine. q.v. */
 #define ADD_POSIX_WARNING(p, text)  STMT_START {                            \
         if (posix_warnings) {                                               \
-            if (! warn_text) warn_text = newAV();                           \
+            if (! warn_text) warn_text = (AV *) sv_2mortal((SV *) newAV()); \
             av_push(warn_text, Perl_newSVpvf(aTHX_                          \
                                              WARNING_PREFIX                 \
                                              text                           \
@@ -14530,13 +14530,9 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
             }
 
             if (warn_text) {
-                if (posix_warnings) {
-                    /* mortalize to avoid a leak with FATAL warnings */
-                    *posix_warnings = (AV *) sv_2mortal((SV *) warn_text);
-                }
-                else {
-                    SvREFCNT_dec_NN(warn_text);
-                }
+                /* warn_text should only be true if posix_warnings is true */
+                assert(posix_warnings);
+                *posix_warnings = warn_text;
             }
         }
         else if (class_number != OOB_NAMEDCLASS) {
