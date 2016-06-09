@@ -1,14 +1,14 @@
 ; charset=UTF-8
-@@@	The Unicode Standard 8.0.0
-@@@+	U80M150527.lst
-	Unicode 8.0.0 final names list.
+@@@	The Unicode Standard 9.0.0
+@@@+	U90M160615.lst
+	Unicode 9.0.0 final names list.
 	This file is semi-automatically derived from UnicodeData.txt and
 	a set of manually created annotations using a script to select
 	or suppress information from the data file. The rules used
 	for this process are aimed at readability for the human reader,
 	at the expense of some details; therefore, this file should not
 	be parsed for machine-readable information.
-@+		Copyright (c) 1991-2015 Unicode, Inc.
+@+		© 2016 Unicode®, Inc.
 	For terms of use, see http://www.unicode.org/terms_of_use.html
 @@	0000	C0 Controls and Basic Latin (Basic Latin)	007F
 @@+
@@ -166,6 +166,8 @@
 	x (asterisk operator - 2217)
 	x (sextile - 26B9)
 	x (heavy asterisk - 2731)
+	~ 002A FE0E text style
+	~ 002A FE0F emoji style
 002B	PLUS SIGN
 	x (heavy plus sign - 2795)
 002C	COMMA
@@ -198,6 +200,7 @@
 	x (division slash - 2215)
 @		ASCII digits
 0030	DIGIT ZERO
+	~ 0030 FE00 short diagonal stroke form
 	~ 0030 FE0E text style
 	~ 0030 FE0F emoji style
 0031	DIGIT ONE
@@ -614,16 +617,15 @@
 	* usually closing, sometimes opening
 	x (much greater-than - 226B)
 	x (right double angle bracket - 300B)
+@		Vulgar fractions
+@+		The fraction bar for these may be rendered horizontally or at a slant. For other fraction characters, see 2150-215E.
 00BC	VULGAR FRACTION ONE QUARTER
-	* bar may be horizontal or slanted
-	* other fraction characters: 2153-215E
 	# <fraction> 0031 2044 0034
 00BD	VULGAR FRACTION ONE HALF
-	* bar may be horizontal or slanted
 	# <fraction> 0031 2044 0032
 00BE	VULGAR FRACTION THREE QUARTERS
-	* bar may be horizontal or slanted
 	# <fraction> 0033 2044 0034
+@		Punctuation
 00BF	INVERTED QUESTION MARK
 	= turned question mark
 	* Spanish
@@ -644,7 +646,7 @@
 	x (angstrom sign - 212B)
 	: 0041 030A
 00C6	LATIN CAPITAL LETTER AE
-	= latin capital ligature ae (1.0)
+	= latin capital ligature ae (1.1)
 00C7	LATIN CAPITAL LETTER C WITH CEDILLA
 	: 0043 0327
 00C8	LATIN CAPITAL LETTER E WITH GRAVE
@@ -664,7 +666,7 @@
 00CF	LATIN CAPITAL LETTER I WITH DIAERESIS
 	: 0049 0308
 00D0	LATIN CAPITAL LETTER ETH
-	x (latin small letter eth - 00F0)
+	* lowercase is 00F0
 	x (latin capital letter d with stroke - 0110)
 	x (latin capital letter african d - 0189)
 00D1	LATIN CAPITAL LETTER N WITH TILDE
@@ -702,9 +704,9 @@
 	= Eszett
 	* German
 	* uppercase is "SS"
+	* nonstandard uppercase is 1E9E
 	* typographically the glyph for this character can be based on a ligature of 017F with either 0073 or with an old-style glyph for 007A (the latter similar in appearance to 0292). Both forms exist interchangeably today.
 	x (greek small letter beta - 03B2)
-	x (latin capital letter sharp s - 1E9E)
 00E0	LATIN SMALL LETTER A WITH GRAVE
 	: 0061 0300
 00E1	LATIN SMALL LETTER A WITH ACUTE
@@ -720,7 +722,7 @@
 	* Danish, Norwegian, Swedish, Walloon
 	: 0061 030A
 00E6	LATIN SMALL LETTER AE
-	= latin small ligature ae (1.0)
+	= latin small ligature ae (1.1)
 	= ash (from Old English æsc)
 	* Danish, Norwegian, Icelandic, Faroese, Old English, French, IPA
 	x (latin small ligature oe - 0153)
@@ -746,7 +748,7 @@
 	: 0069 0308
 00F0	LATIN SMALL LETTER ETH
 	* Icelandic, Faroese, Old English, IPA
-	x (latin capital letter eth - 00D0)
+	* uppercase is 00D0
 	x (greek small letter delta - 03B4)
 	x (partial differential - 2202)
 00F1	LATIN SMALL LETTER N WITH TILDE
@@ -796,7 +798,7 @@
 	x (runic letter thurisaz thurs thorn - 16A6)
 00FF	LATIN SMALL LETTER Y WITH DIAERESIS
 	* French, medieval Hungarian orthography
-	x (latin capital letter y with diaeresis - 0178)
+	* uppercase is 0178
 	: 0079 0308
 @~	!
 @@	0100	Latin Extended-A	017F
@@ -1133,7 +1135,7 @@
 	: 0079 0302
 0178	LATIN CAPITAL LETTER Y WITH DIAERESIS
 	* French, Igbo
-	x (latin small letter y with diaeresis - 00FF)
+	* lowercase is 00FF
 	: 0059 0308
 0179	LATIN CAPITAL LETTER Z WITH ACUTE
 	: 005A 0301
@@ -1665,30 +1667,33 @@
 0234	LATIN SMALL LETTER L WITH CURL
 0235	LATIN SMALL LETTER N WITH CURL
 0236	LATIN SMALL LETTER T WITH CURL
-@		Miscellaneous additions
+@		Miscellaneous addition
 0237	LATIN SMALL LETTER DOTLESS J
 	x (mathematical italic small dotless j - 1D6A5)
+@		Additions for Africanist linguistics
 0238	LATIN SMALL LETTER DB DIGRAPH
-	* used in Africanist linguistics
 0239	LATIN SMALL LETTER QP DIGRAPH
-	* used in Africanist linguistics
+@		Additions for Sencoten
 023A	LATIN CAPITAL LETTER A WITH STROKE
-	* Sencoten
 	* lowercase is 2C65
 023B	LATIN CAPITAL LETTER C WITH STROKE
-	* Sencoten
 023C	LATIN SMALL LETTER C WITH STROKE
-	* used in Americanist linguistics
+	* also used in Americanist linguistics
 023D	LATIN CAPITAL LETTER L WITH BAR
-	* Sencoten
 	* lowercase is 019A
 023E	LATIN CAPITAL LETTER T WITH DIAGONAL STROKE
-	* Sencoten
 	* lowercase is 2C66
+@		Additions for Africanist linguistics
+@+		These letters were used in a Shona orthography from 1931 to 1955.
 023F	LATIN SMALL LETTER S WITH SWASH TAIL
+	* voiceless labio-alveolar fricative
 	* uppercase is 2C7E
+	x (latin small letter s with hook - 0282)
 0240	LATIN SMALL LETTER Z WITH SWASH TAIL
+	* voiced labio-alveolar fricative
 	* uppercase is 2C7F
+	x (latin small letter z with retroflex hook - 0290)
+@		Miscellaneous additions
 0241	LATIN CAPITAL LETTER GLOTTAL STOP
 0242	LATIN SMALL LETTER GLOTTAL STOP
 	* casing use in Chipewyan, Dogrib, Slavey (Canadian aboriginal orthographies)
@@ -1826,7 +1831,7 @@
 026A	LATIN LETTER SMALL CAPITAL I
 	* semi-high front unrounded vowel
 	* preferred IPA alternate for 0269
-	* uppercase is 0197
+	* uppercase is A7AE
 026B	LATIN SMALL LETTER L WITH MIDDLE TILDE
 	* velarized voiced alveolar lateral approximant
 	* uppercase is 2C62
@@ -2374,6 +2379,7 @@
 0310	COMBINING CANDRABINDU
 	x (devanagari sign candrabindu - 0901)
 0311	COMBINING INVERTED BREVE
+	x (combining cyrillic palatalization - 0484)
 	x (combining cyrillic pokrytie - 0487)
 0312	COMBINING TURNED COMMA ABOVE
 	= cedilla above
@@ -2602,6 +2608,7 @@
 036E	COMBINING LATIN SMALL LETTER V
 036F	COMBINING LATIN SMALL LETTER X
 @@	0370	Greek and Coptic	03FF
+@+		Casing relationships between Greek letters are complex and not self-evident from inspection of the charts. See the core specification for details.
 @		Archaic letters
 0370	GREEK CAPITAL LETTER HETA
 	x (latin capital letter half h - 2C75)
@@ -2647,6 +2654,7 @@
 	x (combining vertical line above - 030D)
 	# 0020 0301
 0385	GREEK DIALYTIKA TONOS
+	* compatibility decomposition (NFKD) is 0020 0308 0301
 	: 00A8 0301
 @		Letter
 0386	GREEK CAPITAL LETTER ALPHA WITH TONOS
@@ -3081,14 +3089,16 @@
 	: 0474 030F
 0477	CYRILLIC SMALL LETTER IZHITSA WITH DOUBLE GRAVE ACCENT
 	: 0475 030F
+@		Historic digraphs
+@+		These characters may be rendered as either digraph or monograph forms, with preferred alternative representations.
 0478	CYRILLIC CAPITAL LETTER UK
-	* may be rendered as either monograph or digraph form
-	* for "digraph uk" the preferred spelling is 041E 0443
+	* for "digraph onik" the preferred spelling is 041E 0443
 	* for "monograph uk" the preferred character is A64A
 	x (cyrillic capital letter u - 0423)
 0479	CYRILLIC SMALL LETTER UK
-	* for "digraph uk" the preferred spelling is 043E 0443
+	* for "digraph onik" the preferred spelling is 043E 0443
 	* for "monograph uk" the preferred character is A64B
+@		Historic letters
 047A	CYRILLIC CAPITAL LETTER ROUND OMEGA
 047B	CYRILLIC SMALL LETTER ROUND OMEGA
 047C	CYRILLIC CAPITAL LETTER OMEGA WITH TITLO
@@ -3096,6 +3106,7 @@
 	* despite its name, this character does not have a titlo, nor is it composed of an omega plus a diacritic
 	x (cyrillic capital letter broad omega - A64C)
 047D	CYRILLIC SMALL LETTER OMEGA WITH TITLO
+	x (greek small letter omega with psili and perispomeni - 1F66)
 047E	CYRILLIC CAPITAL LETTER OT
 047F	CYRILLIC SMALL LETTER OT
 0480	CYRILLIC CAPITAL LETTER KOPPA
@@ -3103,16 +3114,18 @@
 @		Historic miscellaneous
 0482	CYRILLIC THOUSANDS SIGN
 0483	COMBINING CYRILLIC TITLO
-	* not used with letter titlos
+	* not used with titlo letters
 	x (combining cyrillic vzmet - A66F)
 0484	COMBINING CYRILLIC PALATALIZATION
-	x (combining vertical tilde - 033E)
+	* not used for kamora
+	x (modifier letter apostrophe - 02BC)
+	x (combining inverted breve - 0311)
 0485	COMBINING CYRILLIC DASIA PNEUMATA
 	x (combining reversed comma above - 0314)
 0486	COMBINING CYRILLIC PSILI PNEUMATA
 	x (combining comma above - 0313)
 0487	COMBINING CYRILLIC POKRYTIE
-	* used only with letter titlos
+	* used only with titlo letters
 	* also attested in Glagolitic
 	x (combining inverted breve - 0311)
 	x (combining cyrillic vzmet - A66F)
@@ -3164,6 +3177,7 @@
 04A4	CYRILLIC CAPITAL LIGATURE EN GHE
 04A5	CYRILLIC SMALL LIGATURE EN GHE
 	* Altay, Mari, Yakut
+	* also used for soft en in Old Church Slavonic
 	* this is not a decomposable ligature
 04A6	CYRILLIC CAPITAL LETTER PE WITH MIDDLE HOOK
 04A7	CYRILLIC SMALL LETTER PE WITH MIDDLE HOOK
@@ -3867,7 +3881,7 @@
 @		Archaic letters
 066E	ARABIC LETTER DOTLESS BEH
 066F	ARABIC LETTER DOTLESS QAF
-@		Point
+@		Tashkil
 0670	ARABIC LETTER SUPERSCRIPT ALEF
 	* actually a vowel sign, despite the name
 @		Extended Arabic letters
@@ -4184,6 +4198,7 @@
 0709	SYRIAC SUBLINEAR COLON SKEWED RIGHT
 	% SYRIAC SUBLINEAR COLON SKEWED LEFT
 	* marks the end of a real or rhetorical question
+	* character name is a misnomer
 070A	SYRIAC CONTRACTION
 	* a contraction mark, mostly used in East Syriac
 	* placed at the end of an incomplete word
@@ -4612,7 +4627,7 @@
 @		Punctuation
 085E	MANDAIC PUNCTUATION
 @@	08A0	Arabic Extended-A	08FF
-@		Extended Arabic letters for African languages
+@		Arabic letters for African languages
 08A0	ARABIC LETTER BEH WITH SMALL V BELOW
 08A1	ARABIC LETTER BEH WITH HAMZA ABOVE
 	* Adamawa Fulfulde (Cameroon)
@@ -4647,7 +4662,7 @@
 08AF	ARABIC LETTER SAD WITH THREE DOTS BELOW
 	* Belarusian
 08B0	ARABIC LETTER GAF WITH INVERTED STROKE
-	* Crimean Tatar, Chechen, Lak 
+	* Crimean Tatar, Chechen, Lak
 08B1	ARABIC LETTER STRAIGHT WAW
 	* Tatar
 @		Arabic letter for Berber
@@ -4655,6 +4670,42 @@
 @		Arabic letters for Arwi
 08B3	ARABIC LETTER AIN WITH THREE DOTS BELOW
 08B4	ARABIC LETTER KAF WITH DOT BELOW
+@		Arabic letters for Bravanese
+08B6	ARABIC LETTER BEH WITH SMALL MEEM ABOVE
+08B7	ARABIC LETTER PEH WITH SMALL MEEM ABOVE
+08B8	ARABIC LETTER TEH WITH SMALL TEH ABOVE
+08B9	ARABIC LETTER REH WITH SMALL NOON ABOVE
+08BA	ARABIC LETTER YEH WITH TWO DOTS BELOW AND SMALL NOON ABOVE
+@		Arabic letters for Warsh orthography
+@+		The Warsh orthography is the most widespread tradition for the Arabic script in North and West Africa.
+08BB	ARABIC LETTER AFRICAN FEH
+	* initial and medial forms have one dot below
+	x (arabic letter dotless feh - 06A1)
+	x (arabic letter feh with dot moved below - 06A2)
+08BC	ARABIC LETTER AFRICAN QAF
+	* initial and medial forms have one dot above
+	x (arabic letter dotless qaf - 066F)
+	x (arabic letter qaf with dot above - 06A7)
+08BD	ARABIC LETTER AFRICAN NOON
+	* initial and medial forms have one dot above
+	x (arabic letter noon ghunna - 06BA)
+	x (arabic letter noon - 0646)
+@		Pakistani Quranic marks
+08D4	ARABIC SMALL HIGH WORD AR-RUB
+08D5	ARABIC SMALL HIGH SAD
+08D6	ARABIC SMALL HIGH AIN
+08D7	ARABIC SMALL HIGH QAF
+08D8	ARABIC SMALL HIGH NOON WITH KASRA
+08D9	ARABIC SMALL LOW NOON WITH KASRA
+08DA	ARABIC SMALL HIGH WORD ATH-THALATHA
+08DB	ARABIC SMALL HIGH WORD AS-SAJDA
+08DC	ARABIC SMALL HIGH WORD AN-NISF
+08DD	ARABIC SMALL HIGH WORD SAKTA
+08DE	ARABIC SMALL HIGH WORD QIF
+08DF	ARABIC SMALL HIGH WORD WAQFA
+08E0	ARABIC SMALL HIGH FOOTNOTE MARKER
+08E1	ARABIC SMALL HIGH SIGN SAFHA
+08E2	ARABIC DISPUTED END OF AYAH
 @		Extended vowel sign for Arwi
 08E3	ARABIC TURNED DAMMA BELOW
 @		Extended vowel signs for Rohingya
@@ -4671,7 +4722,7 @@
 08ED	ARABIC TONE ONE DOT BELOW
 08EE	ARABIC TONE TWO DOTS BELOW
 08EF	ARABIC TONE LOOP BELOW
-@		Koranic annotation signs
+@		Quranic annotation signs
 08F0	ARABIC OPEN FATHATAN
 	= successive fathatan
 08F1	ARABIC OPEN DAMMATAN
@@ -4868,6 +4919,7 @@
 	= deergh viram
 @		Digits
 0966	DEVANAGARI DIGIT ZERO
+	* also used to represent an anusvara following digits indicating secondary svara-s in Samavedic texts
 0967	DEVANAGARI DIGIT ONE
 0968	DEVANAGARI DIGIT TWO
 0969	DEVANAGARI DIGIT THREE
@@ -5666,6 +5718,7 @@
 0C7F	TELUGU SIGN TUUMU
 @@	0C80	Kannada	0CFF
 @		Various signs
+0C80	KANNADA SIGN SPACING CANDRABINDU
 0C81	KANNADA SIGN CANDRABINDU
 0C82	KANNADA SIGN ANUSVARA
 0C83	KANNADA SIGN VISARGA
@@ -5785,6 +5838,7 @@
 @		Various signs
 0D01	MALAYALAM SIGN CANDRABINDU
 0D02	MALAYALAM SIGN ANUSVARA
+	* used in Prakrit language texts to indicate gemination of the following consonant
 0D03	MALAYALAM SIGN VISARGA
 @		Independent vowels
 0D05	MALAYALAM LETTER A
@@ -5893,10 +5947,34 @@
 @		Dot reph
 0D4E	MALAYALAM LETTER DOT REPH
 	* not used in reformed modern Malayalam orthography
+@		Measurement symbol
+0D4F	MALAYALAM SIGN PARA
+	* used historically to measure rice
+@		Chillu letters
+0D54	MALAYALAM LETTER CHILLU M
+0D55	MALAYALAM LETTER CHILLU Y
+0D56	MALAYALAM LETTER CHILLU LLL
 @		Various signs
 0D57	MALAYALAM AU LENGTH MARK
 	* used alone to write the /au/ dependent vowel in modern texts
 	x (malayalam vowel sign au - 0D4C)
+@		Minor fractions
+@+		Some minor fractions are represented by letters.
+@+		The fraction one three-hundred and twentieth "muntiri" is denoted by the syllable "pta" (0D2A 0D4D 0D24).
+0D58	MALAYALAM FRACTION ONE ONE-HUNDRED-AND-SIXTIETH
+	= arakaani
+0D59	MALAYALAM FRACTION ONE FORTIETH
+	= aramaa
+0D5A	MALAYALAM FRACTION THREE EIGHTIETHS
+	= muunnukaani
+0D5B	MALAYALAM FRACTION ONE TWENTIETH
+	= orumaa
+0D5C	MALAYALAM FRACTION ONE TENTH
+	= rantumaa
+0D5D	MALAYALAM FRACTION THREE TWENTIETHS
+	= muunnumaa
+0D5E	MALAYALAM FRACTION ONE FIFTH
+	= naalumaa
 @		Additional historic vowel
 0D5F	MALAYALAM LETTER ARCHAIC II
 @		Additional vowels for Sanskrit
@@ -5933,6 +6011,12 @@
 	= ara
 0D75	MALAYALAM FRACTION THREE QUARTERS
 	= mukkaal
+0D76	MALAYALAM FRACTION ONE SIXTEENTH
+	= maakaani
+0D77	MALAYALAM FRACTION ONE EIGHTH
+	= arakkaal
+0D78	MALAYALAM FRACTION THREE SIXTEENTHS
+	= muntaani
 @		Date mark
 0D79	MALAYALAM DATE MARK
 @		Chillu letters
@@ -6753,10 +6837,13 @@
 @@	1000	Myanmar	109F
 @		Consonants
 1000	MYANMAR LETTER KA
+	~ 1000 FE00 dotted form
 1001	MYANMAR LETTER KHA
 1002	MYANMAR LETTER GA
+	~ 1002 FE00 dotted form
 1003	MYANMAR LETTER GHA
 1004	MYANMAR LETTER NGA
+	~ 1004 FE00 dotted form
 1005	MYANMAR LETTER CA
 1006	MYANMAR LETTER CHA
 1007	MYANMAR LETTER JA
@@ -6769,19 +6856,26 @@
 100E	MYANMAR LETTER DDHA
 100F	MYANMAR LETTER NNA
 1010	MYANMAR LETTER TA
+	~ 1010 FE00 dotted form
 1011	MYANMAR LETTER THA
+	~ 1011 FE00 dotted form
 1012	MYANMAR LETTER DA
 1013	MYANMAR LETTER DHA
 1014	MYANMAR LETTER NA
 1015	MYANMAR LETTER PA
+	~ 1015 FE00 dotted form
 1016	MYANMAR LETTER PHA
 1017	MYANMAR LETTER BA
 1018	MYANMAR LETTER BHA
 1019	MYANMAR LETTER MA
+	~ 1019 FE00 dotted form
 101A	MYANMAR LETTER YA
+	~ 101A FE00 dotted form
 101B	MYANMAR LETTER RA
 101C	MYANMAR LETTER LA
+	~ 101C FE00 dotted form
 101D	MYANMAR LETTER WA
+	~ 101D FE00 dotted form
 101E	MYANMAR LETTER SA
 101F	MYANMAR LETTER HA
 1020	MYANMAR LETTER LLA
@@ -6789,6 +6883,7 @@
 1021	MYANMAR LETTER A
 	* also represents the glottal stop as a consonant
 1022	MYANMAR LETTER SHAN A
+	~ 1022 FE00 dotted form
 1023	MYANMAR LETTER I
 1024	MYANMAR LETTER II
 1025	MYANMAR LETTER U
@@ -6807,6 +6902,7 @@
 1030	MYANMAR VOWEL SIGN UU
 1031	MYANMAR VOWEL SIGN E
 	* stands to the left of the consonant
+	~ 1031 FE00 dotted form
 1032	MYANMAR VOWEL SIGN AI
 1033	MYANMAR VOWEL SIGN MON II
 1034	MYANMAR VOWEL SIGN MON O
@@ -6895,17 +6991,21 @@
 1074	MYANMAR VOWEL SIGN KAYAH EE
 @		Extensions for Shan
 1075	MYANMAR LETTER SHAN KA
+	~ 1075 FE00 dotted form
 1076	MYANMAR LETTER SHAN KHA
 1077	MYANMAR LETTER SHAN GA
 1078	MYANMAR LETTER SHAN CA
+	~ 1078 FE00 dotted form
 1079	MYANMAR LETTER SHAN ZA
 107A	MYANMAR LETTER SHAN NYA
+	~ 107A FE00 dotted form
 107B	MYANMAR LETTER SHAN DA
 107C	MYANMAR LETTER SHAN NA
 107D	MYANMAR LETTER SHAN PHA
 107E	MYANMAR LETTER SHAN FA
 107F	MYANMAR LETTER SHAN BA
 1080	MYANMAR LETTER SHAN THA
+	~ 1080 FE00 dotted form
 1081	MYANMAR LETTER SHAN HA
 1082	MYANMAR CONSONANT SIGN SHAN MEDIAL WA
 1083	MYANMAR VOWEL SIGN SHAN AA
@@ -6942,6 +7042,7 @@
 @		Shan symbols
 109E	MYANMAR SYMBOL SHAN ONE
 109F	MYANMAR SYMBOL SHAN EXCLAMATION
+@~	!
 @@	10A0	Georgian	10FF
 @		Capital letters (Khutsuri)
 @+		This is the uppercase of the old ecclesiastical alphabet. The style shown in the code charts is known as Asomtavruli. See the Georgian Supplement block for lowercase Nuskhuri.
@@ -7037,6 +7138,7 @@
 10FA	GEORGIAN LETTER AIN
 @		Punctuation
 10FB	GEORGIAN PARAGRAPH SEPARATOR
+	x (three dot punctuation - 2056)
 @		Modifier letter
 10FC	MODIFIER LETTER GEORGIAN NAR
 	# <super> 10DC
@@ -9115,6 +9217,7 @@
 @@	1800	Mongolian	18AF
 @@+
 @		Punctuation
+@+		Additional birgas are encoded in the Mongolian Supplement block at 11660-1167F.
 1800	MONGOLIAN BIRGA
 	x (tibetan mark initial yig mgo mdun ma - 0F04)
 1801	MONGOLIAN ELLIPSIS
@@ -9151,33 +9254,57 @@
 1818	MONGOLIAN DIGIT EIGHT
 1819	MONGOLIAN DIGIT NINE
 @		Basic letters
+@+		Cross-references show commonly used Cyrillic transliterations.
 1820	MONGOLIAN LETTER A
 	x (cyrillic small letter a - 0430)
+	~ 1820 ALT1 first form (initial)
+	~ 1820 ALT1 first form (medial)
+	~ 1820 ALT1 first form (final)
 	~ 1820 180B second form (isolate)
 	~ 1820 180B second form (medial)
 	~ 1820 180B second form (final)
 	~ 1820 180C third form (medial)
 1821	MONGOLIAN LETTER E
 	x (cyrillic small letter e - 044D)
+	~ 1821 ALT1 first form (initial)
+	~ 1821 ALT1 first form (medial)
+	~ 1821 ALT1 first form (final)
 	~ 1821 180B second form (initial)
 	~ 1821 180B second form (final)
 1822	MONGOLIAN LETTER I
 	x (cyrillic small letter i - 0438)
+	~ 1822 ALT1 first form (initial)
+	~ 1822 ALT1 first form (medial)
+	~ 1822 ALT1 first form (final)
 	~ 1822 180B second form (medial)
 1823	MONGOLIAN LETTER O
 	x (cyrillic small letter o - 043E)
+	~ 1823 ALT1 first form (initial)
+	~ 1823 ALT1 first form (medial)
+	~ 1823 ALT1 first form (final)
 	~ 1823 180B second form (medial)
 	~ 1823 180B second form (final)
 1824	MONGOLIAN LETTER U
 	x (cyrillic small letter u - 0443)
+	~ 1824 ALT1 first form (isolate)
+	~ 1824 ALT1 first form (initial)
+	~ 1824 ALT1 first form (medial)
+	~ 1824 ALT1 first form (final)
 	~ 1824 180B second form (medial)
 1825	MONGOLIAN LETTER OE
 	x (cyrillic small letter barred o - 04E9)
+	~ 1825 ALT1 first form (initial)
+	~ 1825 ALT1 first form (medial)
+	~ 1825 ALT1 first form (final)
 	~ 1825 180B second form (medial)
 	~ 1825 180B second form (final)
 	~ 1825 180C third form (medial)
 1826	MONGOLIAN LETTER UE
 	x (cyrillic small letter straight u - 04AF)
+	~ 1826 ALT1 first form (isolate)
+	~ 1826 ALT1 first form (initial)
+	~ 1826 ALT1 first form (medial)
+	~ 1826 ALT1 first form (final)
 	~ 1826 180B second form (isolate)
 	~ 1826 180B second form (medial)
 	~ 1826 180B second form (final)
@@ -9185,6 +9312,9 @@
 1827	MONGOLIAN LETTER EE
 1828	MONGOLIAN LETTER NA
 	x (cyrillic small letter en - 043D)
+	~ 1828 ALT1 first form (initial)
+	~ 1828 ALT1 first form (medial)
+	~ 1828 ALT1 first form (final)
 	~ 1828 180B second form (initial)
 	~ 1828 180B second form (medial)
 	~ 1828 180C third form (medial)
@@ -9192,11 +9322,17 @@
 1829	MONGOLIAN LETTER ANG
 182A	MONGOLIAN LETTER BA
 	x (cyrillic small letter be - 0431)
+	~ 182A ALT1 first form (initial)
+	~ 182A ALT1 first form (medial)
+	~ 182A ALT1 first form (final)
 	~ 182A 180B alternative form (final)
 182B	MONGOLIAN LETTER PA
 	x (cyrillic small letter pe - 043F)
 182C	MONGOLIAN LETTER QA
 	x (cyrillic small letter ha - 0445)
+	~ 182C ALT1 first form (initial)
+	~ 182C ALT1 first form (medial)
+	~ 182C ALT1 first form (final)
 	~ 182C 180B second form (initial)
 	~ 182C 180B second form (medial)
 	~ 182C 180B feminine second form (isolate)
@@ -9204,6 +9340,9 @@
 	~ 182C 180D fourth form (medial)
 182D	MONGOLIAN LETTER GA
 	x (cyrillic small letter ghe - 0433)
+	~ 182D ALT1 first form (initial)
+	~ 182D ALT1 first form (medial)
+	~ 182D ALT1 first form (final)
 	~ 182D 180B second form (initial)
 	~ 182D 180B second form (medial)
 	~ 182D 180B feminine form (final)
@@ -9215,15 +9354,24 @@
 	x (cyrillic small letter el - 043B)
 1830	MONGOLIAN LETTER SA
 	x (cyrillic small letter es - 0441)
+	~ 1830 ALT1 first form (initial)
+	~ 1830 ALT1 first form (medial)
+	~ 1830 ALT1 first form (final)
 	~ 1830 180B second form (final)
 	~ 1830 180C third form (final)
 1831	MONGOLIAN LETTER SHA
 	x (cyrillic small letter sha - 0448)
 1832	MONGOLIAN LETTER TA
 	x (cyrillic small letter te - 0442)
+	~ 1832 ALT1 first form (initial)
+	~ 1832 ALT1 first form (medial)
+	~ 1832 ALT1 first form (final)
 	~ 1832 180B second form (medial)
 1833	MONGOLIAN LETTER DA
 	x (cyrillic small letter de - 0434)
+	~ 1833 ALT1 first form (initial)
+	~ 1833 ALT1 first form (medial)
+	~ 1833 ALT1 first form (final)
 	~ 1833 180B second form (initial)
 	~ 1833 180B second form (medial)
 	~ 1833 180B second form (final)
@@ -9231,9 +9379,15 @@
 	x (cyrillic small letter che - 0447)
 1835	MONGOLIAN LETTER JA
 	x (cyrillic small letter zhe - 0436)
+	~ 1835 ALT1 first form (initial)
+	~ 1835 ALT1 first form (medial)
+	~ 1835 ALT1 first form (final)
 	~ 1835 180B second form (medial)
 1836	MONGOLIAN LETTER YA
 	x (cyrillic small letter short i - 0439)
+	~ 1836 ALT1 first form (initial)
+	~ 1836 ALT1 first form (medial)
+	~ 1836 ALT1 first form (final)
 	~ 1836 180B second form (initial)
 	~ 1836 180B second form (medial)
 	~ 1836 180C third form (medial)
@@ -9241,6 +9395,9 @@
 	x (cyrillic small letter er - 0440)
 1838	MONGOLIAN LETTER WA
 	x (cyrillic small letter ve - 0432)
+	~ 1838 ALT1 first form (initial)
+	~ 1838 ALT1 first form (medial)
+	~ 1838 ALT1 first form (final)
 	~ 1838 180B second form (final)
 1839	MONGOLIAN LETTER FA
 	x (cyrillic small letter ef - 0444)
@@ -9262,28 +9419,52 @@
 @		Todo letters
 1843	MONGOLIAN LETTER TODO LONG VOWEL SIGN
 1844	MONGOLIAN LETTER TODO E
+	~ 1844 ALT1 first form (initial)
+	~ 1844 ALT1 first form (medial)
+	~ 1844 ALT1 first form (final)
 	~ 1844 180B second form (medial)
 1845	MONGOLIAN LETTER TODO I
+	~ 1845 ALT1 first form (initial)
+	~ 1845 ALT1 first form (medial)
+	~ 1845 ALT1 first form (final)
 	~ 1845 180B second form (medial)
 1846	MONGOLIAN LETTER TODO O
+	~ 1846 ALT1 first form (initial)
+	~ 1846 ALT1 first form (medial)
+	~ 1846 ALT1 first form (final)
 	~ 1846 180B second form (medial)
 1847	MONGOLIAN LETTER TODO U
+	~ 1847 ALT1 first form (initial)
+	~ 1847 ALT1 first form (medial)
+	~ 1847 ALT1 first form (final)
 	~ 1847 180B second form (isolate)
 	~ 1847 180B second form (medial)
 	~ 1847 180B second form (final)
 	~ 1847 180C third form (medial)
 1848	MONGOLIAN LETTER TODO OE
+	~ 1848 ALT1 first form (initial)
+	~ 1848 ALT1 first form (medial)
+	~ 1848 ALT1 first form (final)
 	~ 1848 180B second form (medial)
 1849	MONGOLIAN LETTER TODO UE
+	~ 1849 ALT1 first form (initial)
+	~ 1849 ALT1 first form (medial)
+	~ 1849 ALT1 first form (final)
 	~ 1849 180B second form (isolate)
 	~ 1849 180B second form (medial)
 184A	MONGOLIAN LETTER TODO ANG
 184B	MONGOLIAN LETTER TODO BA
 184C	MONGOLIAN LETTER TODO PA
 184D	MONGOLIAN LETTER TODO QA
+	~ 184D ALT1 first form (initial)
+	~ 184D ALT1 first form (medial)
+	~ 184D ALT1 first form (final)
 	~ 184D 180B feminine form (initial)
 	~ 184D 180B feminine form (medial)
 184E	MONGOLIAN LETTER TODO GA
+	~ 184E ALT1 first form (initial)
+	~ 184E ALT1 first form (medial)
+	~ 184E ALT1 first form (final)
 	~ 184E 180B second form (medial)
 184F	MONGOLIAN LETTER TODO MA
 1850	MONGOLIAN LETTER TODO TA
@@ -9301,30 +9482,48 @@
 185C	MONGOLIAN LETTER TODO DZA
 @		Sibe letters
 185D	MONGOLIAN LETTER SIBE E
+	~ 185D ALT1 first form (initial)
+	~ 185D ALT1 first form (medial)
+	~ 185D ALT1 first form (final)
 	~ 185D 180B second form (medial)
 	~ 185D 180B second form (final)
 185E	MONGOLIAN LETTER SIBE I
+	~ 185E ALT1 first form (initial)
+	~ 185E ALT1 first form (medial)
+	~ 185E ALT1 first form (final)
 	~ 185E 180B second form (medial)
 	~ 185E 180B second form (final)
 	~ 185E 180C third form (medial)
 	~ 185E 180C third form (final)
 185F	MONGOLIAN LETTER SIBE IY
 1860	MONGOLIAN LETTER SIBE UE
+	~ 1860 ALT1 first form (initial)
+	~ 1860 ALT1 first form (medial)
+	~ 1860 ALT1 first form (final)
 	~ 1860 180B second form (medial)
 	~ 1860 180B second form (final)
 1861	MONGOLIAN LETTER SIBE U
 1862	MONGOLIAN LETTER SIBE ANG
 1863	MONGOLIAN LETTER SIBE KA
+	~ 1863 ALT1 first form (initial)
+	~ 1863 ALT1 first form (medial)
+	~ 1863 ALT1 first form (final)
 	~ 1863 180B second form (medial)
 1864	MONGOLIAN LETTER SIBE GA
 1865	MONGOLIAN LETTER SIBE HA
 1866	MONGOLIAN LETTER SIBE PA
 1867	MONGOLIAN LETTER SIBE SHA
 1868	MONGOLIAN LETTER SIBE TA
+	~ 1868 ALT1 first form (initial)
+	~ 1868 ALT1 first form (medial)
+	~ 1868 ALT1 first form (final)
 	~ 1868 180B second form (initial)
 	~ 1868 180B second form (medial)
 	~ 1868 180C third form (medial)
 1869	MONGOLIAN LETTER SIBE DA
+	~ 1869 ALT1 first form (initial)
+	~ 1869 ALT1 first form (medial)
+	~ 1869 ALT1 first form (final)
 	~ 1869 180B second form (initial)
 	~ 1869 180B second form (medial)
 186A	MONGOLIAN LETTER SIBE JA
@@ -9333,6 +9532,9 @@
 186D	MONGOLIAN LETTER SIBE HAA
 186E	MONGOLIAN LETTER SIBE TSA
 186F	MONGOLIAN LETTER SIBE ZA
+	~ 186F ALT1 first form (initial)
+	~ 186F ALT1 first form (medial)
+	~ 186F ALT1 first form (final)
 	~ 186F 180B second form (initial)
 	~ 186F 180B second form (medial)
 1870	MONGOLIAN LETTER SIBE RAA
@@ -9340,12 +9542,18 @@
 1872	MONGOLIAN LETTER SIBE ZHA
 @		Manchu letters
 1873	MONGOLIAN LETTER MANCHU I
+	~ 1873 ALT1 first form (initial)
+	~ 1873 ALT1 first form (medial)
+	~ 1873 ALT1 first form (final)
 	~ 1873 180B second form (medial)
 	~ 1873 180B second form (final)
 	~ 1873 180C third form (medial)
 	~ 1873 180C third form (final)
 	~ 1873 180D fourth form (medial)
 1874	MONGOLIAN LETTER MANCHU KA
+	~ 1874 ALT1 first form (initial)
+	~ 1874 ALT1 first form (medial)
+	~ 1874 ALT1 first form (final)
 	~ 1874 180B second form (medial)
 	~ 1874 180B feminine first final form (final)
 	~ 1874 180C feminine first medial form (medial)
@@ -9353,6 +9561,9 @@
 	~ 1874 180D feminine second medial form (medial)
 1875	MONGOLIAN LETTER MANCHU RA
 1876	MONGOLIAN LETTER MANCHU FA
+	~ 1876 ALT1 first form (initial)
+	~ 1876 ALT1 first form (medial)
+	~ 1876 ALT1 first form (final)
 	~ 1876 180B second form (initial)
 	~ 1876 180B second form (medial)
 1877	MONGOLIAN LETTER MANCHU ZHA
@@ -9372,14 +9583,23 @@
 	x (tibetan mark paluta - 0F85)
 1886	MONGOLIAN LETTER ALI GALI THREE BALUDA
 1887	MONGOLIAN LETTER ALI GALI A
+	~ 1887 ALT1 first form (initial)
+	~ 1887 ALT1 first form (medial)
+	~ 1887 ALT1 first form (final)
 	~ 1887 180B second form (isolate)
 	~ 1887 180B second form (final)
 	~ 1887 180C third form (final)
 	~ 1887 180D fourth form (final)
 1888	MONGOLIAN LETTER ALI GALI I
+	~ 1888 ALT1 first form (initial)
+	~ 1888 ALT1 first form (medial)
+	~ 1888 ALT1 first form (final)
 	~ 1888 180B second form (final)
 1889	MONGOLIAN LETTER ALI GALI KA
 188A	MONGOLIAN LETTER ALI GALI NGA
+	~ 188A ALT1 first form (initial)
+	~ 188A ALT1 first form (medial)
+	~ 188A ALT1 first form (final)
 	~ 188A 180B second form (initial)
 	~ 188A 180B second form (medial)
 188B	MONGOLIAN LETTER ALI GALI CA
@@ -9414,7 +9634,7 @@
 18A8	MONGOLIAN LETTER MANCHU ALI GALI BHA
 18A9	MONGOLIAN LETTER ALI GALI DAGALGA
 18AA	MONGOLIAN LETTER MANCHU ALI GALI LHA
-@~	Standardized Variation Sequences
+@@@~	Contextual Variants and Standardized Variation Sequences
 @+		Unlike other blocks, these variation sequences use the script-specific variation selectors for Mongolian.
 @@	18B0	Unified Canadian Aboriginal Syllabics Extended	18FF
 @		Syllables for Moose Cree
@@ -10347,7 +10567,7 @@
 1BEE	BATAK VOWEL SIGN U
 	= boruta
 1BEF	BATAK VOWEL SIGN U FOR SIMALUNGUN SA
-	= haboritan for simalungun sa 
+	= haboritan for simalungun sa
 @		Dependent consonant signs
 1BF0	BATAK CONSONANT SIGN NG
 	= amisara
@@ -10505,6 +10725,17 @@
 @		Punctuation
 1C7E	OL CHIKI PUNCTUATION MUCAAD
 1C7F	OL CHIKI PUNCTUATION DOUBLE MUCAAD
+@@	1C80	Cyrillic Extended-C	1C8F
+@		Historic letter variants
+1C80	CYRILLIC SMALL LETTER ROUNDED VE
+1C81	CYRILLIC SMALL LETTER LONG-LEGGED DE
+1C82	CYRILLIC SMALL LETTER NARROW O
+1C83	CYRILLIC SMALL LETTER WIDE ES
+1C84	CYRILLIC SMALL LETTER TALL TE
+1C85	CYRILLIC SMALL LETTER THREE-LEGGED TE
+1C86	CYRILLIC SMALL LETTER TALL HARD SIGN
+1C87	CYRILLIC SMALL LETTER TALL YAT
+1C88	CYRILLIC SMALL LETTER UNBLENDED UK
 @@	1CC0	Sundanese Supplement	1CCF
 @		Punctuation
 1CC0	SUNDANESE PUNCTUATION BINDU SURYA
@@ -11055,6 +11286,9 @@
 1DF4	COMBINING LATIN SMALL LETTER U WITH DIAERESIS
 @		Diacritic for American lexicography
 1DF5	COMBINING UP TACK ABOVE
+@		Miscellaneous mark
+1DFB	COMBINING DELETION MARK
+	* used for "mhusaa" in Newa scribal tradition
 @		Double diacritic mark for UPA
 1DFC	COMBINING DOUBLE INVERTED BREVE BELOW
 @		Miscellaneous mark
@@ -12402,6 +12636,7 @@
 	x (heavy eight teardrop-spoked propeller asterisk - 274B)
 @		Archaic punctuation
 2056	THREE DOT PUNCTUATION
+	x (georgian paragraph separator - 10FB)
 @		General punctuation
 2057	QUADRUPLE PRIME
 	# 2032 2032 2032 2032
@@ -12646,7 +12881,7 @@
 	x (cent sign - 00A2)
 	x (latin capital letter c with stroke - 023B)
 20B6	LIVRE TOURNOIS SIGN
-	* used in France from 13th-18th centuries 
+	* used in France from 13th-18th centuries
 20B7	SPESMILO SIGN
 	* historical international currency associated with Esperanto
 20B8	TENGE SIGN
@@ -12835,7 +13070,7 @@
 2120	SERVICE MARK
 	# <super> 0053 004D
 2121	TELEPHONE SIGN
-	* typical forms for this symbol may use lower case, small caps or superscripted letter shapes
+	* typical forms for this symbol may use lowercase, small caps or superscripted letter shapes
 	x (black telephone - 260E)
 	x (telephone location sign - 2706)
 	x (telephone receiver - 1F4DE)
@@ -12931,7 +13166,7 @@
 213A	ROTATED CAPITAL Q
 	* a binding signature mark
 213B	FACSIMILE SIGN
-	* typical forms for this symbol may use lower case, small caps or superscripted letter shapes
+	* typical forms for this symbol may use lowercase, small caps or superscripted letter shapes
 	x (telephone sign - 2121)
 	x (fax machine - 1F4E0)
 	# 0046 0041 0058
@@ -13344,6 +13579,7 @@
 	* used in linguistics to indicate a null morpheme or phonological "zero"
 	x (latin capital letter o with stroke - 00D8)
 	x (diameter sign - 2300)
+	~ 2205 FE00 zero with long diagonal stroke overlay form
 2206	INCREMENT
 	= Laplace operator
 	= forward difference
@@ -13425,7 +13661,7 @@
 @		Miscellaneous mathematical symbol
 221E	INFINITY
 @		Angles
-@+	Other angle symbols are found at 299B-29AF.
+@+		Other angle symbols are found at 299B-29AF.
 221F	RIGHT ANGLE
 2220	ANGLE
 	x (acute angle - 299F)
@@ -13465,11 +13701,7 @@
 @		Integrals
 222B	INTEGRAL
 	x (latin small letter esh - 0283)
-;experimenting with variant syntax
-;	~ 222B ALT1 slanted style
 222C	DOUBLE INTEGRAL
-;experimenting with variant syntax
-;	~ 222C ALT1 slanted style
 	# 222B 222B
 222D	TRIPLE INTEGRAL
 	x (quadruple integral operator - 2A0C)
@@ -13982,6 +14214,8 @@
 2328	KEYBOARD
 	x (keyboard and mouse - 1F5A6)
 	x (wired keyboard - 1F5AE)
+	~ 2328 FE0E text style
+	~ 2328 FE0F emoji style
 @		Deprecated angle brackets
 @+		These characters are deprecated and are strongly discouraged for mathematical use because of their canonical equivalence to CJK punctuation.
 2329	LEFT-POINTING ANGLE BRACKET
@@ -14257,6 +14491,8 @@
 	x (return left - 2B90)
 23CF	EJECT SYMBOL
 	* UI symbol to eject media
+	~ 23CF FE0E text style
+	~ 23CF FE0F emoji style
 @		Special character extension
 23D0	VERTICAL LINE EXTENSION
 	* used for extension of arrows
@@ -14310,14 +14546,24 @@
 23EB	BLACK UP-POINTING DOUBLE TRIANGLE
 23EC	BLACK DOWN-POINTING DOUBLE TRIANGLE
 23ED	BLACK RIGHT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR
+	~ 23ED FE0E text style
+	~ 23ED FE0F emoji style
 23EE	BLACK LEFT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR
+	~ 23EE FE0E text style
+	~ 23EE FE0F emoji style
 23EF	BLACK RIGHT-POINTING TRIANGLE WITH DOUBLE VERTICAL BAR
+	~ 23EF FE0E text style
+	~ 23EF FE0F emoji style
 23F0	ALARM CLOCK
 	x (watch - 231A)
 	x (clock face one oclock - 1F550)
 	x (mantelpiece clock - 1F570)
 23F1	STOPWATCH
+	~ 23F1 FE0E text style
+	~ 23F1 FE0F emoji style
 23F2	TIMER CLOCK
+	~ 23F2 FE0E text style
+	~ 23F2 FE0F emoji style
 23F3	HOURGLASS WITH FLOWING SAND
 	x (hourglass - 231B)
 23F4	BLACK MEDIUM LEFT-POINTING TRIANGLE
@@ -14339,12 +14585,30 @@
 23F8	DOUBLE VERTICAL BAR
 	= pause
 	x (double vertical line - 2016)
+	~ 23F8 FE0E text style
+	~ 23F8 FE0F emoji style
 23F9	BLACK SQUARE FOR STOP
 	= stop
 	x (black medium square - 25FC)
+	~ 23F9 FE0E text style
+	~ 23F9 FE0F emoji style
 23FA	BLACK CIRCLE FOR RECORD
 	= record
 	x (medium black circle - 26AB)
+	~ 23FA FE0E text style
+	~ 23FA FE0F emoji style
+@		Power symbols from ISO 7000:2012
+23FB	POWER SYMBOL
+@+	* IEC 5009 standby symbol
+@+	* IEEE 1621 power symbol
+23FC	POWER ON-OFF SYMBOL
+@+	* IEC 5010 power on-off symbol
+23FD	POWER ON SYMBOL
+	* use 2B58 for power off symbol
+	x (heavy circle - 2B58)
+@		Power symbol from IEEE 1621-2004
+23FE	POWER SLEEP SYMBOL
+	x (last quarter moon - 263E)
 @~	!
 @@	2400	Control Pictures	243F
 @+		The diagonal lettering glyphs are only exemplary; alternate representations may be, and often are used in the visible display of control codes.
@@ -14411,7 +14675,7 @@
 	= unique asterisk
 	x (bowtie - 22C8)
 @		MICR
-@+		These magnetic ink character recognition symbols are used on checks. The are derived from the E-13B font and are standardized in ISO 1004:1995. The Unicode character names include several misnomers.
+@+		These magnetic ink character recognition symbols are used on checks. They are derived from the E-13B font and are standardized in ISO 1004:1995. The Unicode character names include several misnomers.
 2446	OCR BRANCH BANK IDENTIFICATION
 	= transit
 2447	OCR AMOUNT OF CHECK
@@ -14550,7 +14814,7 @@
 249B	NUMBER TWENTY FULL STOP
 	# 0032 0030 002E
 @		Parenthesized Latin letters
-@+		See also the uppercase set starting at 1F100.
+@+		See also the uppercase set starting at 1F100. Parenthesized Latin letters do not have case mappings.
 249C	PARENTHESIZED LATIN SMALL LETTER A
 	# 0028 0061 0029
 249D	PARENTHESIZED LATIN SMALL LETTER B
@@ -15178,9 +15442,15 @@
 2602	UMBRELLA
 	= rainy weather
 	x (closed umbrella - 1F302)
+	~ 2602 FE0E text style
+	~ 2602 FE0F emoji style
 2603	SNOWMAN
 	= snowy weather
+	~ 2603 FE0E text style
+	~ 2603 FE0F emoji style
 2604	COMET
+	~ 2604 FE0E text style
+	~ 2604 FE0F emoji style
 2605	BLACK STAR
 	x (star operator - 22C6)
 2606	WHITE STAR
@@ -15247,6 +15517,8 @@
 @		Miscellaneous symbols
 2618	SHAMROCK
 	x (four leaf clover - 1F340)
+	~ 2618 FE0E text style
+	~ 2618 FE0F emoji style
 2619	REVERSED ROTATED FLORAL HEART BULLET
 	* a binding signature mark
 	x (rotated floral heart bullet - 2767)
@@ -15271,9 +15543,15 @@
 2620	SKULL AND CROSSBONES
 	= poison
 	x (black skull and crossbones - 1F571)
+	~ 2620 FE0E text style
+	~ 2620 FE0F emoji style
 2621	CAUTION SIGN
 2622	RADIOACTIVE SIGN
+	~ 2622 FE0E text style
+	~ 2622 FE0F emoji style
 2623	BIOHAZARD SIGN
+	~ 2623 FE0E text style
+	~ 2623 FE0F emoji style
 @		Medical and healing symbols
 2624	CADUCEUS
 	x (staff of aesculapius - 2695)
@@ -15281,6 +15559,8 @@
 2625	ANKH
 @		Religious and political symbols
 2626	ORTHODOX CROSS
+	~ 2626 FE0E text style
+	~ 2626 FE0F emoji style
 2627	CHI RHO
 	= Constantine's cross, Christogram
 	x (coptic symbol khi ro - 2CE9)
@@ -15288,14 +15568,20 @@
 2629	CROSS OF JERUSALEM
 	x (alchemical symbol for vinegar - 1F70A)
 262A	STAR AND CRESCENT
+	~ 262A FE0E text style
+	~ 262A FE0F emoji style
 262B	FARSI SYMBOL
 	= symbol of iran (1.0)
 262C	ADI SHAKTI
 	= Gurmukhi khanda
 262D	HAMMER AND SICKLE
 262E	PEACE SYMBOL
+	~ 262E FE0E text style
+	~ 262E FE0F emoji style
 262F	YIN YANG
 	x (tibetan symbol nor bu nyis -khyil - 0FCA)
+	~ 262F FE0E text style
+	~ 262F FE0F emoji style
 @		Yijing trigram symbols
 2630	TRIGRAM FOR HEAVEN
 	= qian2
@@ -15316,10 +15602,14 @@
 @		Miscellaneous symbol
 2638	WHEEL OF DHARMA
 	x (helm symbol - 2388)
+	~ 2638 FE0E text style
+	~ 2638 FE0F emoji style
 @		Emoticons
 @+		Many other emoticons are encoded in the Emoticons block starting at 1F600.
 2639	WHITE FROWNING FACE
 	x (slightly frowning face - 1F641)
+	~ 2639 FE0E text style
+	~ 2639 FE0F emoji style
 263A	WHITE SMILING FACE
 	x (slightly smiling face - 1F642)
 	= have a nice day!
@@ -15337,6 +15627,7 @@
 	= alchemical symbol for silver
 263E	LAST QUARTER MOON
 	= alchemical symbol for silver
+	x (power sleep symbol - 23FE)
 	x (crescent moon - 1F319)
 263F	MERCURY
 	= alchemical symbol for quicksilver
@@ -15363,6 +15654,7 @@
 	= alchemical symbol for bismuth/tinglass
 2647	PLUTO
 @		Zodiacal symbols
+@+		See also Asian zodiacal symbols among the animal symbols in the range 1F400-1F418.
 2648	ARIES
 	x (ram - 1F40F)
 	~ 2648 FE0E text style
@@ -15441,6 +15733,7 @@
 	x (heavy black heart - 2764)
 	x (heart with tip on the left - 1F394)
 	x (blue heart - 1F499)
+	x (black heart - 1F5A4)
 	~ 2665 FE0E text style
 	~ 2665 FE0F emoji style
 2666	BLACK DIAMOND SUIT
@@ -15537,12 +15830,17 @@
 	= mining, working day (in timetables)
 	x (pick - 26CF)
 	x (hammer and wrench - 1F6E0)
+	~ 2692 FE0E text style
+	~ 2692 FE0F emoji style
 2693	ANCHOR
 	= nautical term, harbor (on maps)
 	~ 2693 FE0E text style
 	~ 2693 FE0F emoji style
 2694	CROSSED SWORDS
 	= military term, battleground (on maps), killed in action
+	x (fencer - 1F93A)
+	~ 2694 FE0E text style
+	~ 2694 FE0F emoji style
 2695	STAFF OF AESCULAPIUS
 	= medical term
 	* both inclined or upright renderings of this symbol are common
@@ -15551,9 +15849,13 @@
 2696	SCALES
 	= legal term, jurisprudence
 	x (libra - 264E)
+	~ 2696 FE0E text style
+	~ 2696 FE0F emoji style
 2697	ALEMBIC
 	= chemical term, chemistry
 	x (alchemical symbol for retort - 1F76D)
+	~ 2697 FE0E text style
+	~ 2697 FE0F emoji style
 2698	FLOWER
 	= botanical term
 	x (flower punctuation mark - 2055)
@@ -15561,13 +15863,19 @@
 	x (tulip - 1F337)
 2699	GEAR
 	= technology, tools
+	~ 2699 FE0E text style
+	~ 2699 FE0F emoji style
 269A	STAFF OF HERMES
 	* signifies a commercial term or commerce
 	* glyph shows a heraldic staff with a winged wheel
 269B	ATOM SYMBOL
 	= nuclear installation (on maps)
+	~ 269B FE0E text style
+	~ 269B FE0F emoji style
 @		Miscellaneous symbols
 269C	FLEUR-DE-LIS
+	~ 269C FE0E text style
+	~ 269C FE0F emoji style
 269D	OUTLINED WHITE STAR
 	* alternative form of the interlaced pentagram (a symbol of Morocco)
 	x (right-handed interlaced pentagram - 26E5)
@@ -15580,6 +15888,7 @@
 	x (three rays right - 1F5E7)
 @		Miscellaneous symbols
 26A0	WARNING SIGN
+	x (octagonal sign - 1F6D1)
 	~ 26A0 FE0E text style
 	~ 26A0 FE0F emoji style
 26A1	HIGH VOLTAGE SIGN
@@ -15638,8 +15947,12 @@
 26B0	COFFIN
 	= buried (genealogy)
 	x (white rectangle - 25AD)
+	~ 26B0 FE0E text style
+	~ 26B0 FE0F emoji style
 26B1	FUNERAL URN
 	= cremated (genealogy)
+	~ 26B1 FE0E text style
+	~ 26B1 FE0F emoji style
 @		Gender symbol
 26B2	NEUTER
 @		Astrological signs
@@ -15651,6 +15964,7 @@
 26B8	BLACK MOON LILITH
 26B9	SEXTILE
 	x (asterisk - 002A)
+	x (six pointed black star - 2736)
 	x (alchemical symbol for sal-ammoniac - 1F739)
 26BA	SEMISEXTILE
 	x (xor - 22BB)
@@ -15691,6 +16005,8 @@
 26C8	THUNDER CLOUD AND RAIN
 	= thunderstorm
 	x (cloud with lightning - 1F329)
+	~ 26C8 FE0E text style
+	~ 26C8 FE0F emoji style
 @		Game symbols from ARIB STD B24
 26C9	TURNED WHITE SHOGI PIECE
 26CA	TURNED BLACK SHOGI PIECE
@@ -15708,16 +16024,22 @@
 	= under construction
 	x (hammer and pick - 2692)
 	x (construction sign - 1F6A7)
+	~ 26CF FE0E text style
+	~ 26CF FE0F emoji style
 26D0	CAR SLIDING
 	= icy road
 26D1	HELMET WITH WHITE CROSS
 	= maintenance
 	x (construction worker - 1F477)
+	~ 26D1 FE0E text style
+	~ 26D1 FE0F emoji style
 26D2	CIRCLED CROSSING LANES
 	= road closed
 	x (circled times - 2297)
 26D3	CHAINS
 	= tyre chains required
+	~ 26D3 FE0E text style
+	~ 26D3 FE0F emoji style
 26D4	NO ENTRY
 	x (no entry sign - 1F6AB)
 	~ 26D4 FE0E text style
@@ -15772,6 +16094,8 @@
 	x (hospital - 1F3E5)
 26E9	SHINTO SHRINE
 	= torii
+	~ 26E9 FE0E text style
+	~ 26E9 FE0F emoji style
 26EA	CHURCH
 	~ 26EA FE0E text style
 	~ 26EA FE0F emoji style
@@ -15789,10 +16113,14 @@
 26F0	MOUNTAIN
 	x (black up-pointing triangle - 25B2)
 	x (snow capped mountain - 1F3D4)
+	~ 26F0 FE0E text style
+	~ 26F0 FE0F emoji style
 26F1	UMBRELLA ON GROUND
 	= bathing beach
 	x (umbrella - 2602)
 	x (beach with umbrella - 1F3D6)
+	~ 26F1 FE0E text style
+	~ 26F1 FE0F emoji style
 26F2	FOUNTAIN
 	= park
 	~ 26F2 FE0E text style
@@ -15805,6 +16133,8 @@
 26F4	FERRY
 	= ferry boat terminal
 	x (ship - 1F6A2)
+	~ 26F4 FE0E text style
+	~ 26F4 FE0F emoji style
 26F5	SAILBOAT
 	= marina or yacht harbour
 	x (rowboat - 1F6A3)
@@ -15815,10 +16145,16 @@
 26F7	SKIER
 	= ski resort
 	x (ski and ski boot - 1F3BF)
+	~ 26F7 FE0E text style
+	~ 26F7 FE0F emoji style
 26F8	ICE SKATE
 	= ice skating rink
+	~ 26F8 FE0E text style
+	~ 26F8 FE0F emoji style
 26F9	PERSON WITH BALL
 	= track and field, gymnasium
+	~ 26F9 FE0E text style
+	~ 26F9 FE0F emoji style
 26FA	TENT
 	= camping site
 	x (camping - 1F3D5)
@@ -15891,6 +16227,8 @@
 	~ 270C FE0F emoji style
 270D	WRITING HAND
 	x (left writing hand - 1F58E)
+	~ 270D FE0E text style
+	~ 270D FE0F emoji style
 270E	LOWER RIGHT PENCIL
 	x (lower left pencil - 1F589)
 270F	PENCIL
@@ -15926,6 +16264,8 @@
 271B	OPEN CENTRE CROSS
 271C	HEAVY OPEN CENTRE CROSS
 271D	LATIN CROSS
+	~ 271D FE0E text style
+	~ 271D FE0F emoji style
 271E	SHADOWED WHITE LATIN CROSS
 	x (white latin cross - 1F546)
 271F	OUTLINED LATIN CROSS
@@ -15934,6 +16274,8 @@
 @		Stars and asterisks
 2721	STAR OF DAVID
 	x (six pointed star with middle dot - 1F52F)
+	~ 2721 FE0E text style
+	~ 2721 FE0F emoji style
 2722	FOUR TEARDROP-SPOKED ASTERISK
 2723	FOUR BALLOON-SPOKED ASTERISK
 2724	HEAVY FOUR BALLOON-SPOKED ASTERISK
@@ -15967,7 +16309,7 @@
 2735	EIGHT POINTED PINWHEEL STAR
 	x (heavy eight pointed pinwheel star - 1F7D1)
 2736	SIX POINTED BLACK STAR
-	= sextile
+	x (sextile - 26B9)
 2737	EIGHT POINTED RECTILINEAR BLACK STAR
 	x (medium eight pointed black star - 1F7CE)
 2738	HEAVY EIGHT POINTED RECTILINEAR BLACK STAR
@@ -16048,6 +16390,8 @@
 2762	HEAVY EXCLAMATION MARK ORNAMENT
 	x (exclamation mark - 0021)
 2763	HEAVY HEART EXCLAMATION MARK ORNAMENT
+	~ 2763 FE0E text style
+	~ 2763 FE0F emoji style
 2764	HEAVY BLACK HEART
 	x (black heart suit - 2665)
 	~ 2764 FE0E text style
@@ -16840,10 +17184,13 @@
 298A	Z NOTATION RIGHT BINDING BRACKET
 298B	LEFT SQUARE BRACKET WITH UNDERBAR
 298C	RIGHT SQUARE BRACKET WITH UNDERBAR
+@		Brackets with ticks
+@+		For bidirectional processing, the brackets with ticks are paired on the basis of their left/right symmetric glyphs, rather than on the basis of an open/close pairing inferred from code point order.
 298D	LEFT SQUARE BRACKET WITH TICK IN TOP CORNER
 298E	RIGHT SQUARE BRACKET WITH TICK IN BOTTOM CORNER
 298F	LEFT SQUARE BRACKET WITH TICK IN BOTTOM CORNER
 2990	RIGHT SQUARE BRACKET WITH TICK IN TOP CORNER
+@		Brackets
 2991	LEFT ANGLE BRACKET WITH DOT
 2992	RIGHT ANGLE BRACKET WITH DOT
 2993	LEFT ARC LESS-THAN BRACKET
@@ -17637,23 +17984,25 @@
 	x (bullseye - 25CE)
 2B58	HEAVY CIRCLE
 	= town or village office
+	= power off symbol
+	x (power on symbol - 23FD)
 	x (white circle - 25CB)
 2B59	HEAVY CIRCLED SALTIRE
 	= police station
 	x (n-ary circled times operator - 2A02)
 @		Intonation marks for Lithuanian dialectology
 2B5A	SLANTED NORTH ARROW WITH HOOKED HEAD
-	* increasing tone with falling trend at the end 
+	* increasing tone with falling trend at the end
 2B5B	BACKSLANTED SOUTH ARROW WITH HOOKED TAIL
 	* sharp rise and fall in tone
 2B5C	SLANTED NORTH ARROW WITH HORIZONTAL TAIL
-	* continued rise in tone 
+	* continued rise in tone
 2B5D	BACKSLANTED SOUTH ARROW WITH HORIZONTAL TAIL
 	* continued fall in tone
 2B5E	BENT ARROW POINTING DOWNWARDS THEN NORTH EAST
 	* sharp fall in tone with rising trend at the end
 2B5F	SHORT BENT ARROW POINTING DOWNWARDS THEN NORTH EAST
-	* slight fall in tone with rising trend at the end 
+	* slight fall in tone with rising trend at the end
 @		Triangle-headed arrows
 2B60	LEFTWARDS TRIANGLE-HEADED ARROW
 	x (leftwards arrow - 2190)
@@ -18011,9 +18360,9 @@
 	# <super> 0056
 @		Additions for Shona
 2C7E	LATIN CAPITAL LETTER S WITH SWASH TAIL
-	* lower case is 023F
+	* lowercase is 023F
 2C7F	LATIN CAPITAL LETTER Z WITH SWASH TAIL
-	* lower case is 0240
+	* lowercase is 0240
 @@	2C80	Coptic	2CFF
 @+		Other Coptic letters derived from Demotic are encoded in the Greek and Coptic block.
 @		Bohairic Coptic letters
@@ -18389,7 +18738,7 @@
 2DF3	COMBINING CYRILLIC LETTER SHCHA
 2DF4	COMBINING CYRILLIC LETTER FITA
 2DF5	COMBINING CYRILLIC LETTER ES-TE
-	* preferred representation is the sequence: 2DED 2DEE 
+	* preferred representation is the sequence: 2DED 2DEE
 2DF6	COMBINING CYRILLIC LETTER A
 	x (combining latin small letter a - 0363)
 2DF7	COMBINING CYRILLIC LETTER IE
@@ -18571,6 +18920,10 @@
 	x (arabic comma - 060C)
 2E42	DOUBLE LOW-REVERSED-9 QUOTATION MARK
 	x (double low-9 quotation mark - 201E)
+@		Dash
+2E43	DASH WITH LEFT UPTURN
+@		Miscellaneous punctuation
+2E44	DOUBLE SUSPENSION MARK
 @@	2E80	CJK Radicals Supplement	2EFF
 @		CJK radicals supplement
 2E80	CJK RADICAL REPEAT
@@ -19301,6 +19654,7 @@
 	x (double prime - 2033)
 3004	JAPANESE INDUSTRIAL STANDARD SYMBOL
 3005	IDEOGRAPHIC ITERATION MARK
+	x (tangut iteration mark - 16FE0)
 3006	IDEOGRAPHIC CLOSING MARK
 3007	IDEOGRAPHIC NUMBER ZERO
 	x (combining enclosing circle - 20DD)
@@ -23447,7 +23801,7 @@ A78E	LATIN SMALL LETTER L WITH RETROFLEX HOOK AND BELT
 	* used to transcribe Toda
 @		Transliteration letter
 A78F	LATIN LETTER SINOLOGICAL DOT
-	* used for transliteration for Phags-Pa and phonetic transcription for Tangut
+	* used in transliteration of Phags-Pa and in phonetic transcription of Tangut
 	x (middle dot - 00B7)
 @		Additional letters
 A790	LATIN CAPITAL LETTER N WITH DESCENDER
@@ -23500,6 +23854,10 @@ A7AC	LATIN CAPITAL LETTER SCRIPT G
 	* lowercase is 0261
 A7AD	LATIN CAPITAL LETTER L WITH BELT
 	* lowercase is 026C
+@		Letter for West African languages
+A7AE	LATIN CAPITAL LETTER SMALL CAPITAL I
+	* lowercase is 026A
+	* also used in Unifon
 @		Letters for Americanist orthographies
 A7B0	LATIN CAPITAL LETTER TURNED K
 	* lowercase is 029E
@@ -23511,7 +23869,7 @@ A7B2	LATIN CAPITAL LETTER J WITH CROSSED-TAIL
 	* lowercase is 029D
 @		Letter for German dialectology
 A7B3	LATIN CAPITAL LETTER CHI
-	* lower case is AB53
+	* lowercase is AB53
 	x (greek capital letter chi - 03A7)
 @		Letters for African languages
 A7B4	LATIN CAPITAL LETTER BETA
@@ -23854,6 +24212,8 @@ A8C2	SAURASHTRA VOWEL SIGN OO
 A8C3	SAURASHTRA VOWEL SIGN AU
 @		Virama
 A8C4	SAURASHTRA SIGN VIRAMA
+@		Sign
+A8C5	SAURASHTRA SIGN CANDRABINDU
 @		Punctuation
 A8CE	SAURASHTRA DANDA
 A8CF	SAURASHTRA DOUBLE DANDA
@@ -24357,21 +24717,31 @@ AA5F	CHAM PUNCTUATION TRIPLE DANDA
 @@	AA60	Myanmar Extended-A	AA7F
 @		Khamti Shan consonants
 AA60	MYANMAR LETTER KHAMTI GA
+	~ AA60 FE00 dotted form
 AA61	MYANMAR LETTER KHAMTI CA
+	~ AA61 FE00 dotted form
 AA62	MYANMAR LETTER KHAMTI CHA
+	~ AA62 FE00 dotted form
 AA63	MYANMAR LETTER KHAMTI JA
+	~ AA63 FE00 dotted form
 AA64	MYANMAR LETTER KHAMTI JHA
+	~ AA64 FE00 dotted form
 AA65	MYANMAR LETTER KHAMTI NYA
+	~ AA65 FE00 dotted form
 AA66	MYANMAR LETTER KHAMTI TTA
+	~ AA66 FE00 dotted form
 AA67	MYANMAR LETTER KHAMTI TTHA
 AA68	MYANMAR LETTER KHAMTI DDA
 AA69	MYANMAR LETTER KHAMTI DDHA
 AA6A	MYANMAR LETTER KHAMTI DHA
 AA6B	MYANMAR LETTER KHAMTI NA
+	~ AA6B FE00 dotted form
 AA6C	MYANMAR LETTER KHAMTI SA
+	~ AA6C FE00 dotted form
 AA6D	MYANMAR LETTER KHAMTI HA
 AA6E	MYANMAR LETTER KHAMTI HHA
 AA6F	MYANMAR LETTER KHAMTI FA
+	~ AA6F FE00 dotted form
 AA70	MYANMAR MODIFIER LETTER KHAMTI REDUPLICATION
 	x (myanmar modifier letter shan reduplication - A9E6)
 AA71	MYANMAR LETTER KHAMTI XA
@@ -24386,6 +24756,7 @@ AA77	MYANMAR SYMBOL AITON EXCLAMATION
 AA78	MYANMAR SYMBOL AITON ONE
 AA79	MYANMAR SYMBOL AITON TWO
 AA7A	MYANMAR LETTER AITON RA
+	~ AA7A FE00 dotted form
 @		Pa'o Karen tone mark
 AA7B	MYANMAR SIGN PAO KAREN TONE
 @		Tai Laing tone marks
@@ -24394,6 +24765,7 @@ AA7D	MYANMAR SIGN TAI LAING TONE-5
 @		Shwe Palaung letters
 AA7E	MYANMAR LETTER SHWE PALAUNG CHA
 AA7F	MYANMAR LETTER SHWE PALAUNG SHA
+@~	!
 @@	AA80	Tai Viet	AADF
 @		Consonants
 AA80	TAI VIET LETTER LOW KO
@@ -26956,6 +27328,7 @@ FD3D	ARABIC LIGATURE ALEF WITH FATHATAN ISOLATED FORM
 	# <isolated> 0627 064B
 @		Punctuation
 @+		For legacy reasons, these parentheses do not mirror in bidirectional display and do not have the Bidi_Paired_Bracket property.
+@+		These parentheses also do not have compatibility decompositions and should not be considered presentation forms.
 FD3E	ORNATE LEFT PARENTHESIS
 FD3F	ORNATE RIGHT PARENTHESIS
 @		Ligatures (three elements)
@@ -27241,6 +27614,8 @@ FDF3	ARABIC LIGATURE AKBAR ISOLATED FORM
 FDF4	ARABIC LIGATURE MOHAMMAD ISOLATED FORM
 	# <isolated> 0645 062D 0645 062F
 FDF5	ARABIC LIGATURE SALAM ISOLATED FORM
+	* common abbreviation for sallallahou alayhe wasallam
+	x (arabic ligature sallallahou alayhe wasallam - FDFA)
 	# <isolated> 0635 0644 0639 0645
 FDF6	ARABIC LIGATURE RASOUL ISOLATED FORM
 	# <isolated> 0631 0633 0648 0644
@@ -27258,6 +27633,7 @@ FDFB	ARABIC LIGATURE JALLAJALALOUHOU
 FDFC	RIAL SIGN
 	# <isolated> 0631 06CC 0627 0644
 @		Symbol
+@+		The bismillah is treated as an atomic symbol, rather than as a word ligature. It has no decomposition.
 FDFD	ARABIC LIGATURE BISMILLAH AR-RAHMAN AR-RAHEEM
 @@	FE00	Variation Selectors	FE0F
 @		Variation selectors
@@ -27343,6 +27719,7 @@ FE2D	COMBINING CONJOINING MACRON BELOW
 @+		These are used for supralineation in Church Slavonic texts.
 FE2E	COMBINING CYRILLIC TITLO LEFT HALF
 FE2F	COMBINING CYRILLIC TITLO RIGHT HALF
+	x (combining cyrillic titlo - 0483)
 @@	FE30	CJK Compatibility Forms	FE4F
 @		Glyphs for vertical variants
 FE30	PRESENTATION FORM FOR VERTICAL TWO DOT LEADER
@@ -28498,6 +28875,7 @@ FFFF	<not a character>
 100E6	LINEAR B IDEOGRAM VESSEL B207
 100E7	LINEAR B IDEOGRAM VESSEL B208
 100E8	LINEAR B IDEOGRAM VESSEL B209
+	x (amphora - 1F3FA)
 100E9	LINEAR B IDEOGRAM VESSEL B210
 100EA	LINEAR B IDEOGRAM VESSEL B211
 100EB	LINEAR B IDEOGRAM VESSEL B212
@@ -28661,9 +29039,13 @@ FFFF	<not a character>
 10189	GREEK TRYBLION BASE SIGN
 1018A	GREEK ZERO SIGN
 1018B	GREEK ONE QUARTER SIGN
-@		Ancient Greek symbol
+@		Ancient Greek symbols
 1018C	GREEK SINUSOID SIGN
 	* designates year
+1018D	GREEK INDICTION SIGN
+	* timekeeping
+1018E	NOMISMA SIGN
+	* currency sign and marker of weight
 @@	10190	Ancient Symbols	101CF
 @		Roman weights and measures
 10190	ROMAN SEXTANS SIGN
@@ -29240,6 +29622,81 @@ FFFF	<not a character>
 104A7	OSMANYA DIGIT SEVEN
 104A8	OSMANYA DIGIT EIGHT
 104A9	OSMANYA DIGIT NINE
+@@	104B0	Osage	104FF
+@		Uppercase letters
+104B0	OSAGE CAPITAL LETTER A
+104B1	OSAGE CAPITAL LETTER AI
+104B2	OSAGE CAPITAL LETTER AIN
+104B3	OSAGE CAPITAL LETTER AH
+104B4	OSAGE CAPITAL LETTER BRA
+104B5	OSAGE CAPITAL LETTER CHA
+104B6	OSAGE CAPITAL LETTER EHCHA
+104B7	OSAGE CAPITAL LETTER E
+104B8	OSAGE CAPITAL LETTER EIN
+104B9	OSAGE CAPITAL LETTER HA
+104BA	OSAGE CAPITAL LETTER HYA
+104BB	OSAGE CAPITAL LETTER I
+104BC	OSAGE CAPITAL LETTER KA
+104BD	OSAGE CAPITAL LETTER EHKA
+104BE	OSAGE CAPITAL LETTER KYA
+104BF	OSAGE CAPITAL LETTER LA
+104C0	OSAGE CAPITAL LETTER MA
+104C1	OSAGE CAPITAL LETTER NA
+104C2	OSAGE CAPITAL LETTER O
+104C3	OSAGE CAPITAL LETTER OIN
+104C4	OSAGE CAPITAL LETTER PA
+104C5	OSAGE CAPITAL LETTER EHPA
+104C6	OSAGE CAPITAL LETTER SA
+104C7	OSAGE CAPITAL LETTER SHA
+104C8	OSAGE CAPITAL LETTER TA
+104C9	OSAGE CAPITAL LETTER EHTA
+104CA	OSAGE CAPITAL LETTER TSA
+104CB	OSAGE CAPITAL LETTER EHTSA
+104CC	OSAGE CAPITAL LETTER TSHA
+104CD	OSAGE CAPITAL LETTER DHA
+104CE	OSAGE CAPITAL LETTER U
+104CF	OSAGE CAPITAL LETTER WA
+104D0	OSAGE CAPITAL LETTER KHA
+104D1	OSAGE CAPITAL LETTER GHA
+104D2	OSAGE CAPITAL LETTER ZA
+104D3	OSAGE CAPITAL LETTER ZHA
+@		Lowercase letters
+104D8	OSAGE SMALL LETTER A
+104D9	OSAGE SMALL LETTER AI
+104DA	OSAGE SMALL LETTER AIN
+104DB	OSAGE SMALL LETTER AH
+104DC	OSAGE SMALL LETTER BRA
+104DD	OSAGE SMALL LETTER CHA
+104DE	OSAGE SMALL LETTER EHCHA
+104DF	OSAGE SMALL LETTER E
+104E0	OSAGE SMALL LETTER EIN
+104E1	OSAGE SMALL LETTER HA
+104E2	OSAGE SMALL LETTER HYA
+104E3	OSAGE SMALL LETTER I
+104E4	OSAGE SMALL LETTER KA
+104E5	OSAGE SMALL LETTER EHKA
+104E6	OSAGE SMALL LETTER KYA
+104E7	OSAGE SMALL LETTER LA
+104E8	OSAGE SMALL LETTER MA
+104E9	OSAGE SMALL LETTER NA
+104EA	OSAGE SMALL LETTER O
+104EB	OSAGE SMALL LETTER OIN
+104EC	OSAGE SMALL LETTER PA
+104ED	OSAGE SMALL LETTER EHPA
+104EE	OSAGE SMALL LETTER SA
+104EF	OSAGE SMALL LETTER SHA
+104F0	OSAGE SMALL LETTER TA
+104F1	OSAGE SMALL LETTER EHTA
+104F2	OSAGE SMALL LETTER TSA
+104F3	OSAGE SMALL LETTER EHTSA
+104F4	OSAGE SMALL LETTER TSHA
+104F5	OSAGE SMALL LETTER DHA
+104F6	OSAGE SMALL LETTER U
+104F7	OSAGE SMALL LETTER WA
+104F8	OSAGE SMALL LETTER KHA
+104F9	OSAGE SMALL LETTER GHA
+104FA	OSAGE SMALL LETTER ZA
+104FB	OSAGE SMALL LETTER ZHA
 @@	10500	Elbasan	1052F
 @		Letters
 10500	ELBASAN LETTER A
@@ -29865,7 +30322,7 @@ FFFF	<not a character>
 1074F	LINEAR A SIGN A712 Y
 	x (runic letter wunjo wynn w - 16B9)
 10750	LINEAR A SIGN A713 OMEGA
-	* used with 106A5 linear a sign a405-vas 
+	* used with 106A5 linear a sign a405-vas
 10751	LINEAR A SIGN A714 ABB
 10752	LINEAR A SIGN A715 BB
 10753	LINEAR A SIGN A717 DD
@@ -31309,7 +31766,7 @@ FFFF	<not a character>
 1106F	BRAHMI DIGIT NINE
 @		Number joiner
 1107F	BRAHMI NUMBER JOINER
-	* used to form ligatures between Brahmi numbers signifying multiplication
+	* a virama used to form ligatures between Brahmi numbers signifying multiplication
 @@	11080	Kaithi	110CF
 @		Various signs
 11080	KAITHI SIGN CANDRABINDU
@@ -31825,6 +32282,9 @@ FFFF	<not a character>
 	* delimits larger chunks of text, such as paragraphs
 	x (kaithi double section mark - 110BF)
 1123D	KHOJKI ABBREVIATION SIGN
+@		Sign
+1123E	KHOJKI SIGN SUKUN
+	* used for Arabic transliteration
 @@	11280	Multani	112AF
 @		Vowels
 11280	MULTANI LETTER A
@@ -31945,6 +32405,7 @@ FFFF	<not a character>
 112F8	KHUDAWADI DIGIT EIGHT
 112F9	KHUDAWADI DIGIT NINE
 @@	11300	Grantha	1137F
+@+		The Grantha script uses digits from the Tamil block.
 @		Various signs
 11300	GRANTHA SIGN COMBINING ANUSVARA ABOVE
 	* used in Prakrit language Jain texts for the linguistic anusvara
@@ -32050,8 +32511,140 @@ FFFF	<not a character>
 11372	COMBINING GRANTHA LETTER NA
 11373	COMBINING GRANTHA LETTER VI
 11374	COMBINING GRANTHA LETTER PA
+@@	11400	Newa	1147F
+@+		This script is also known as Nepaalalipi, Nepalakshar, Newah Akhah, Pachumol, Prachalit, and other names.
+@		Independent vowels
+@+		Some of the vowels are only used for Sanskrit, and are not needed for Nepal Bhasa.
+11400	NEWA LETTER A
+11401	NEWA LETTER AA
+11402	NEWA LETTER I
+11403	NEWA LETTER II
+11404	NEWA LETTER U
+11405	NEWA LETTER UU
+11406	NEWA LETTER VOCALIC R
+11407	NEWA LETTER VOCALIC RR
+11408	NEWA LETTER VOCALIC L
+11409	NEWA LETTER VOCALIC LL
+1140A	NEWA LETTER E
+1140B	NEWA LETTER AI
+1140C	NEWA LETTER O
+1140D	NEWA LETTER AU
+@		Consonants
+@+		Six consonant letters involving ha are encoded for the representation of murmured resonants in Nepal Bhasa, a Tibeto-Burman language. Those letters are not used for the representation of Sanskrit in the Newa script.
+1140E	NEWA LETTER KA
+1140F	NEWA LETTER KHA
+11410	NEWA LETTER GA
+11411	NEWA LETTER GHA
+11412	NEWA LETTER NGA
+11413	NEWA LETTER NGHA
+	* murmured nasal for Nepal Bhasa language
+11414	NEWA LETTER CA
+11415	NEWA LETTER CHA
+11416	NEWA LETTER JA
+11417	NEWA LETTER JHA
+11418	NEWA LETTER NYA
+11419	NEWA LETTER NYHA
+	* murmured nasal for Nepal Bhasa language
+1141A	NEWA LETTER TTA
+1141B	NEWA LETTER TTHA
+1141C	NEWA LETTER DDA
+1141D	NEWA LETTER DDHA
+1141E	NEWA LETTER NNA
+1141F	NEWA LETTER TA
+11420	NEWA LETTER THA
+11421	NEWA LETTER DA
+11422	NEWA LETTER DHA
+11423	NEWA LETTER NA
+11424	NEWA LETTER NHA
+	* murmured nasal for Nepal Bhasa language
+11425	NEWA LETTER PA
+11426	NEWA LETTER PHA
+11427	NEWA LETTER BA
+11428	NEWA LETTER BHA
+11429	NEWA LETTER MA
+1142A	NEWA LETTER MHA
+	* murmured nasal for Nepal Bhasa language
+1142B	NEWA LETTER YA
+1142C	NEWA LETTER RA
+1142D	NEWA LETTER RHA
+	* murmured tap for Nepal Bhasa language
+1142E	NEWA LETTER LA
+1142F	NEWA LETTER LHA
+	* murmured lateral for Nepal Bhasa language
+11430	NEWA LETTER WA
+11431	NEWA LETTER SHA
+11432	NEWA LETTER SSA
+11433	NEWA LETTER SA
+11434	NEWA LETTER HA
+@		Dependent vowel signs
+@+		Some of the vowel signs are only used for Sanskrit, and are not needed for Nepal Bhasa.
+11435	NEWA VOWEL SIGN AA
+11436	NEWA VOWEL SIGN I
+11437	NEWA VOWEL SIGN II
+11438	NEWA VOWEL SIGN U
+11439	NEWA VOWEL SIGN UU
+1143A	NEWA VOWEL SIGN VOCALIC R
+1143B	NEWA VOWEL SIGN VOCALIC RR
+1143C	NEWA VOWEL SIGN VOCALIC L
+1143D	NEWA VOWEL SIGN VOCALIC LL
+1143E	NEWA VOWEL SIGN E
+1143F	NEWA VOWEL SIGN AI
+11440	NEWA VOWEL SIGN O
+11441	NEWA VOWEL SIGN AU
+@		Various signs
+11442	NEWA SIGN VIRAMA
+	= tutisaalaa
+11443	NEWA SIGN CANDRABINDU
+	= milaaphuti
+11444	NEWA SIGN ANUSVARA
+	= sinhaphuti
+11445	NEWA SIGN VISARGA
+	= liphuti
+11446	NEWA SIGN NUKTA
+11447	NEWA SIGN AVAGRAHA
+	= sulaa
+11448	NEWA SIGN FINAL ANUSVARA
+	= baadipu
+@		Invocation signs
+11449	NEWA OM
+1144A	NEWA SIDDHI
+@		Punctuation
+1144B	NEWA DANDA
+	= dipu
+1144C	NEWA DOUBLE DANDA
+1144D	NEWA COMMA
+	= jhaasu
+1144E	NEWA GAP FILLER
+	= thaayjaayekaa
+1144F	NEWA ABBREVIATION SIGN
+@		Digits
+11450	NEWA DIGIT ZERO
+	= guli
+11451	NEWA DIGIT ONE
+	= chi
+11452	NEWA DIGIT TWO
+	= nasi
+11453	NEWA DIGIT THREE
+	= swa
+11454	NEWA DIGIT FOUR
+	= pi
+11455	NEWA DIGIT FIVE
+	= njaa
+11456	NEWA DIGIT SIX
+	= khu
+11457	NEWA DIGIT SEVEN
+	= nhasa
+11458	NEWA DIGIT EIGHT
+	= cyaa
+11459	NEWA DIGIT NINE
+	= gu
+@		Various signs
+1145B	NEWA PLACEHOLDER MARK
+	= jaayekaa
+1145D	NEWA INSERTION SIGN
+	= tansaa
 @@	11480	Tirhuta	114DF
-@+		The Tirhuta script is also known by the names 'Mithilakshara' and 'Maithili'.
+@+		The Tirhuta script is also known by the names Mithilakshara and Maithili.
 @		Sign
 11480	TIRHUTA ANJI
 @		Independent vowels
@@ -32353,6 +32946,22 @@ FFFF	<not a character>
 11657	MODI DIGIT SEVEN
 11658	MODI DIGIT EIGHT
 11659	MODI DIGIT NINE
+@@	11660	Mongolian Supplement	1167F
+@		Punctuation
+11660	MONGOLIAN BIRGA WITH ORNAMENT
+	x (mongolian birga - 1800)
+11661	MONGOLIAN ROTATED BIRGA
+11662	MONGOLIAN DOUBLE BIRGA WITH ORNAMENT
+11663	MONGOLIAN TRIPLE BIRGA WITH ORNAMENT
+11664	MONGOLIAN BIRGA WITH DOUBLE ORNAMENT
+11665	MONGOLIAN ROTATED BIRGA WITH ORNAMENT
+11666	MONGOLIAN ROTATED BIRGA WITH DOUBLE ORNAMENT
+11667	MONGOLIAN INVERTED BIRGA
+11668	MONGOLIAN INVERTED BIRGA WITH DOUBLE ORNAMENT
+11669	MONGOLIAN SWIRL BIRGA
+1166A	MONGOLIAN SWIRL BIRGA WITH ORNAMENT
+1166B	MONGOLIAN SWIRL BIRGA WITH DOUBLE ORNAMENT
+1166C	MONGOLIAN TURNED SWIRL BIRGA WITH DOUBLE ORNAMENT
 @@	11680	Takri	116CF
 @		Independent vowels
 11680	TAKRI LETTER A
@@ -32646,6 +33255,187 @@ FFFF	<not a character>
 11AF6	PAU CIN HAU LOW-FALLING TONE LONG FINAL
 11AF7	PAU CIN HAU LOW-FALLING TONE FINAL
 11AF8	PAU CIN HAU GLOTTAL STOP FINAL
+@@	11C00	Bhaiksuki	11C6F
+@		Independent vowels
+11C00	BHAIKSUKI LETTER A
+11C01	BHAIKSUKI LETTER AA
+11C02	BHAIKSUKI LETTER I
+11C03	BHAIKSUKI LETTER II
+11C04	BHAIKSUKI LETTER U
+11C05	BHAIKSUKI LETTER UU
+11C06	BHAIKSUKI LETTER VOCALIC R
+11C07	BHAIKSUKI LETTER VOCALIC RR
+11C08	BHAIKSUKI LETTER VOCALIC L
+11C0A	BHAIKSUKI LETTER E
+11C0B	BHAIKSUKI LETTER AI
+11C0C	BHAIKSUKI LETTER O
+11C0D	BHAIKSUKI LETTER AU
+@		Consonants
+11C0E	BHAIKSUKI LETTER KA
+11C0F	BHAIKSUKI LETTER KHA
+11C10	BHAIKSUKI LETTER GA
+11C11	BHAIKSUKI LETTER GHA
+11C12	BHAIKSUKI LETTER NGA
+11C13	BHAIKSUKI LETTER CA
+11C14	BHAIKSUKI LETTER CHA
+11C15	BHAIKSUKI LETTER JA
+11C16	BHAIKSUKI LETTER JHA
+11C17	BHAIKSUKI LETTER NYA
+11C18	BHAIKSUKI LETTER TTA
+11C19	BHAIKSUKI LETTER TTHA
+11C1A	BHAIKSUKI LETTER DDA
+11C1B	BHAIKSUKI LETTER DDHA
+11C1C	BHAIKSUKI LETTER NNA
+11C1D	BHAIKSUKI LETTER TA
+11C1E	BHAIKSUKI LETTER THA
+11C1F	BHAIKSUKI LETTER DA
+11C20	BHAIKSUKI LETTER DHA
+11C21	BHAIKSUKI LETTER NA
+11C22	BHAIKSUKI LETTER PA
+11C23	BHAIKSUKI LETTER PHA
+11C24	BHAIKSUKI LETTER BA
+11C25	BHAIKSUKI LETTER BHA
+11C26	BHAIKSUKI LETTER MA
+11C27	BHAIKSUKI LETTER YA
+11C28	BHAIKSUKI LETTER RA
+11C29	BHAIKSUKI LETTER LA
+11C2A	BHAIKSUKI LETTER VA
+11C2B	BHAIKSUKI LETTER SHA
+11C2C	BHAIKSUKI LETTER SSA
+11C2D	BHAIKSUKI LETTER SA
+11C2E	BHAIKSUKI LETTER HA
+@		Dependent vowel signs
+11C2F	BHAIKSUKI VOWEL SIGN AA
+11C30	BHAIKSUKI VOWEL SIGN I
+11C31	BHAIKSUKI VOWEL SIGN II
+11C32	BHAIKSUKI VOWEL SIGN U
+11C33	BHAIKSUKI VOWEL SIGN UU
+11C34	BHAIKSUKI VOWEL SIGN VOCALIC R
+11C35	BHAIKSUKI VOWEL SIGN VOCALIC RR
+11C36	BHAIKSUKI VOWEL SIGN VOCALIC L
+11C38	BHAIKSUKI VOWEL SIGN E
+11C39	BHAIKSUKI VOWEL SIGN AI
+11C3A	BHAIKSUKI VOWEL SIGN O
+11C3B	BHAIKSUKI VOWEL SIGN AU
+@		Various signs
+11C3C	BHAIKSUKI SIGN CANDRABINDU
+11C3D	BHAIKSUKI SIGN ANUSVARA
+11C3E	BHAIKSUKI SIGN VISARGA
+11C3F	BHAIKSUKI SIGN VIRAMA
+11C40	BHAIKSUKI SIGN AVAGRAHA
+@		Punctuation
+11C41	BHAIKSUKI DANDA
+11C42	BHAIKSUKI DOUBLE DANDA
+11C43	BHAIKSUKI WORD SEPARATOR
+@		Gap fillers
+11C44	BHAIKSUKI GAP FILLER-1
+11C45	BHAIKSUKI GAP FILLER-2
+@		Digits
+11C50	BHAIKSUKI DIGIT ZERO
+11C51	BHAIKSUKI DIGIT ONE
+11C52	BHAIKSUKI DIGIT TWO
+11C53	BHAIKSUKI DIGIT THREE
+11C54	BHAIKSUKI DIGIT FOUR
+11C55	BHAIKSUKI DIGIT FIVE
+11C56	BHAIKSUKI DIGIT SIX
+11C57	BHAIKSUKI DIGIT SEVEN
+11C58	BHAIKSUKI DIGIT EIGHT
+11C59	BHAIKSUKI DIGIT NINE
+@		Numbers
+11C5A	BHAIKSUKI NUMBER ONE
+11C5B	BHAIKSUKI NUMBER TWO
+11C5C	BHAIKSUKI NUMBER THREE
+11C5D	BHAIKSUKI NUMBER FOUR
+11C5E	BHAIKSUKI NUMBER FIVE
+11C5F	BHAIKSUKI NUMBER SIX
+11C60	BHAIKSUKI NUMBER SEVEN
+11C61	BHAIKSUKI NUMBER EIGHT
+11C62	BHAIKSUKI NUMBER NINE
+11C63	BHAIKSUKI NUMBER TEN
+11C64	BHAIKSUKI NUMBER TWENTY
+11C65	BHAIKSUKI NUMBER THIRTY
+11C66	BHAIKSUKI NUMBER FORTY
+11C67	BHAIKSUKI NUMBER FIFTY
+11C68	BHAIKSUKI NUMBER SIXTY
+11C69	BHAIKSUKI NUMBER SEVENTY
+11C6A	BHAIKSUKI NUMBER EIGHTY
+11C6B	BHAIKSUKI NUMBER NINETY
+11C6C	BHAIKSUKI HUNDREDS UNIT MARK
+@@	11C70	Marchen	11CBF
+@		Punctuation
+11C70	MARCHEN HEAD MARK
+	x (left-facing svasti sign - 0FD6)
+11C71	MARCHEN MARK SHAD
+@		Letters
+11C72	MARCHEN LETTER KA
+11C73	MARCHEN LETTER KHA
+11C74	MARCHEN LETTER GA
+11C75	MARCHEN LETTER NGA
+11C76	MARCHEN LETTER CA
+11C77	MARCHEN LETTER CHA
+11C78	MARCHEN LETTER JA
+11C79	MARCHEN LETTER NYA
+11C7A	MARCHEN LETTER TA
+11C7B	MARCHEN LETTER THA
+11C7C	MARCHEN LETTER DA
+11C7D	MARCHEN LETTER NA
+11C7E	MARCHEN LETTER PA
+11C7F	MARCHEN LETTER PHA
+11C80	MARCHEN LETTER BA
+11C81	MARCHEN LETTER MA
+11C82	MARCHEN LETTER TSA
+11C83	MARCHEN LETTER TSHA
+11C84	MARCHEN LETTER DZA
+11C85	MARCHEN LETTER WA
+11C86	MARCHEN LETTER ZHA
+11C87	MARCHEN LETTER ZA
+11C88	MARCHEN LETTER -A
+11C89	MARCHEN LETTER YA
+11C8A	MARCHEN LETTER RA
+11C8B	MARCHEN LETTER LA
+11C8C	MARCHEN LETTER SHA
+11C8D	MARCHEN LETTER SA
+11C8E	MARCHEN LETTER HA
+11C8F	MARCHEN LETTER A
+@		Subjoined letters
+11C92	MARCHEN SUBJOINED LETTER KA
+11C93	MARCHEN SUBJOINED LETTER KHA
+11C94	MARCHEN SUBJOINED LETTER GA
+11C95	MARCHEN SUBJOINED LETTER NGA
+11C96	MARCHEN SUBJOINED LETTER CA
+11C97	MARCHEN SUBJOINED LETTER CHA
+11C98	MARCHEN SUBJOINED LETTER JA
+11C99	MARCHEN SUBJOINED LETTER NYA
+11C9A	MARCHEN SUBJOINED LETTER TA
+11C9B	MARCHEN SUBJOINED LETTER THA
+11C9C	MARCHEN SUBJOINED LETTER DA
+11C9D	MARCHEN SUBJOINED LETTER NA
+11C9E	MARCHEN SUBJOINED LETTER PA
+11C9F	MARCHEN SUBJOINED LETTER PHA
+11CA0	MARCHEN SUBJOINED LETTER BA
+11CA1	MARCHEN SUBJOINED LETTER MA
+11CA2	MARCHEN SUBJOINED LETTER TSA
+11CA3	MARCHEN SUBJOINED LETTER TSHA
+11CA4	MARCHEN SUBJOINED LETTER DZA
+11CA5	MARCHEN SUBJOINED LETTER WA
+11CA6	MARCHEN SUBJOINED LETTER ZHA
+11CA7	MARCHEN SUBJOINED LETTER ZA
+11CA9	MARCHEN SUBJOINED LETTER YA
+11CAA	MARCHEN SUBJOINED LETTER RA
+11CAB	MARCHEN SUBJOINED LETTER LA
+11CAC	MARCHEN SUBJOINED LETTER SHA
+11CAD	MARCHEN SUBJOINED LETTER SA
+11CAE	MARCHEN SUBJOINED LETTER HA
+11CAF	MARCHEN SUBJOINED LETTER A
+@		Dependent vowel signs
+11CB0	MARCHEN VOWEL SIGN AA
+11CB1	MARCHEN VOWEL SIGN I
+11CB2	MARCHEN VOWEL SIGN U
+11CB3	MARCHEN VOWEL SIGN E
+11CB4	MARCHEN VOWEL SIGN O
+@		Various signs
+11CB5	MARCHEN SIGN ANUSVARA
+11CB6	MARCHEN SIGN CANDRABINDU
 @@	12000	Cuneiform	123FF
 @		Signs
 12000	CUNEIFORM SIGN A
@@ -35714,7 +36504,7 @@ FFFF	<not a character>
 14537	ANATOLIAN HIEROGLYPH A276
 	= frater2
 14538	ANATOLIAN HIEROGLYPH A277
-	=  iudex.la, iudex+la
+	= iudex.la, iudex+la
 14539	ANATOLIAN HIEROGLYPH A278
 	= syllabic li
 1453A	ANATOLIAN HIEROGLYPH A279
@@ -37109,11 +37899,11 @@ FFFF	<not a character>
 16F04	MIAO LETTER MA
 16F05	MIAO LETTER MHA
 16F06	MIAO LETTER ARCHAIC MA
-	* used in Pollard's early orthography 
+	* used in Pollard's early orthography
 16F07	MIAO LETTER FA
 16F08	MIAO LETTER VA
 16F09	MIAO LETTER VFA
-	* used in Black Yi 
+	* used in Black Yi
 16F0A	MIAO LETTER TA
 	* used for da in Dry Yi
 16F0B	MIAO LETTER DA
@@ -37128,15 +37918,15 @@ FFFF	<not a character>
 16F12	MIAO LETTER YI NNA
 	* used in Hei Yi
 16F13	MIAO LETTER ARCHAIC NA
-	* used in Pollard's early orthography 
+	* used in Pollard's early orthography
 16F14	MIAO LETTER NNA
 16F15	MIAO LETTER NNHA
 16F16	MIAO LETTER LA
 16F17	MIAO LETTER LYA
-	* used in Black Yi 
+	* used in Black Yi
 16F18	MIAO LETTER LHA
 16F19	MIAO LETTER LHYA
-	* used in Black Yi 
+	* used in Black Yi
 16F1A	MIAO LETTER TLHA
 16F1B	MIAO LETTER DLHA
 16F1C	MIAO LETTER TLHYA
@@ -37151,7 +37941,7 @@ FFFF	<not a character>
 16F23	MIAO LETTER NGA
 16F24	MIAO LETTER NGHA
 16F25	MIAO LETTER ARCHAIC NGA
-	* used in Pollard's early orthography 
+	* used in Pollard's early orthography
 16F26	MIAO LETTER HA
 16F27	MIAO LETTER XA
 @+	* archaic character used in a post-1949 reformed orthography
@@ -37173,9 +37963,9 @@ FFFF	<not a character>
 16F33	MIAO LETTER SHA
 16F34	MIAO LETTER SSA
 16F35	MIAO LETTER ZHA
-	* used in Black Yi 
+	* used in Black Yi
 16F36	MIAO LETTER ZSHA
-	* used in Black Yi 
+	* used in Black Yi
 16F37	MIAO LETTER TSA
 	* used for dza in Dry Yi
 16F38	MIAO LETTER DZA
@@ -37184,21 +37974,21 @@ FFFF	<not a character>
 16F3A	MIAO LETTER SA
 16F3B	MIAO LETTER ZA
 16F3C	MIAO LETTER ZSA
-	* used in Black Yi 
+	* used in Black Yi
 16F3D	MIAO LETTER ZZA
 16F3E	MIAO LETTER ZZSA
-	* used in Black Yi 
+	* used in Black Yi
 16F3F	MIAO LETTER ARCHAIC ZZA
-	* used in Pollard's early orthography 
+	* used in Pollard's early orthography
 16F40	MIAO LETTER ZZYA
-	* used in Black Yi 
+	* used in Black Yi
 16F41	MIAO LETTER ZZSYA
-	* used in Black Yi 
+	* used in Black Yi
 16F42	MIAO LETTER WA
 16F43	MIAO LETTER AH
 	* glottal stop
 16F44	MIAO LETTER HHA
-	* used in Black Yi 
+	* used in Black Yi
 @		Modifiers
 16F50	MIAO LETTER NASALIZATION
 16F51	MIAO SIGN ASPIRATION
@@ -37209,7 +37999,7 @@ FFFF	<not a character>
 @		Vowels and finals
 16F54	MIAO VOWEL SIGN A
 16F55	MIAO VOWEL SIGN AA
-	* used in Eastern Lisu 
+	* used in Eastern Lisu
 16F56	MIAO VOWEL SIGN AHH
 	* used in Gan Yi
 16F57	MIAO VOWEL SIGN AN
@@ -37232,7 +38022,7 @@ FFFF	<not a character>
 16F65	MIAO VOWEL SIGN IO
 16F66	MIAO VOWEL SIGN IE
 16F67	MIAO VOWEL SIGN II
-	* used in Eastern Lisu 
+	* used in Eastern Lisu
 16F68	MIAO VOWEL SIGN IU
 16F69	MIAO VOWEL SIGN ING
 	* also used for in
@@ -37242,20 +38032,20 @@ FFFF	<not a character>
 16F6D	MIAO VOWEL SIGN UANG
 	* also used for uaw
 16F6E	MIAO VOWEL SIGN UU
-	* used in Eastern Lisu 
+	* used in Eastern Lisu
 16F6F	MIAO VOWEL SIGN UEI
 16F70	MIAO VOWEL SIGN UNG
 16F71	MIAO VOWEL SIGN Y
 16F72	MIAO VOWEL SIGN YI
 16F73	MIAO VOWEL SIGN AE
 16F74	MIAO VOWEL SIGN AEE
-	* used in Eastern Lisu 
+	* used in Eastern Lisu
 16F75	MIAO VOWEL SIGN ERR
 16F76	MIAO VOWEL SIGN ROUNDED ERR
-	* used in Eastern Lisu 
+	* used in Eastern Lisu
 16F77	MIAO VOWEL SIGN ER
 16F78	MIAO VOWEL SIGN ROUNDED ER
-	* used in Eastern Lisu 
+	* used in Eastern Lisu
 16F79	MIAO VOWEL SIGN AI
 16F7A	MIAO VOWEL SIGN EI
 16F7B	MIAO VOWEL SIGN AU
@@ -37278,13 +38068,789 @@ FFFF	<not a character>
 16F98	MIAO LETTER TONE-7
 16F99	MIAO LETTER TONE-8
 @		Archaic baseline tone marks
-@+		These are archaic characters used in a post-1949 reformed orthography. 
+@+		These are archaic characters used in a post-1949 reformed orthography.
 16F9A	MIAO LETTER REFORMED TONE-1
 16F9B	MIAO LETTER REFORMED TONE-2
 16F9C	MIAO LETTER REFORMED TONE-4
 16F9D	MIAO LETTER REFORMED TONE-5
 16F9E	MIAO LETTER REFORMED TONE-6
 16F9F	MIAO LETTER REFORMED TONE-8
+@@	16FE0	Ideographic Symbols and Punctuation	16FFF
+@		Tangut mark
+16FE0	TANGUT ITERATION MARK
+	x (ideographic iteration mark - 3005)
+@@	17000	Tangut	187EC
+@@	18800	Tangut Components	18AFF
+@+		This is a superset of components used in various Tangut sources. Indexes of components (001..755) used for Tangut ideographs are shown in the Tangut block.
+@		One-stroke components
+18800	TANGUT COMPONENT-001
+18801	TANGUT COMPONENT-002
+18802	TANGUT COMPONENT-003
+18803	TANGUT COMPONENT-004
+18804	TANGUT COMPONENT-005
+18805	TANGUT COMPONENT-006
+18806	TANGUT COMPONENT-007
+18807	TANGUT COMPONENT-008
+18808	TANGUT COMPONENT-009
+18809	TANGUT COMPONENT-010
+@		Two-stroke components
+1880A	TANGUT COMPONENT-011
+1880B	TANGUT COMPONENT-012
+1880C	TANGUT COMPONENT-013
+1880D	TANGUT COMPONENT-014
+1880E	TANGUT COMPONENT-015
+1880F	TANGUT COMPONENT-016
+18810	TANGUT COMPONENT-017
+18811	TANGUT COMPONENT-018
+18812	TANGUT COMPONENT-019
+18813	TANGUT COMPONENT-020
+18814	TANGUT COMPONENT-021
+18815	TANGUT COMPONENT-022
+18816	TANGUT COMPONENT-023
+18817	TANGUT COMPONENT-024
+18818	TANGUT COMPONENT-025
+18819	TANGUT COMPONENT-026
+1881A	TANGUT COMPONENT-027
+1881B	TANGUT COMPONENT-028
+1881C	TANGUT COMPONENT-029
+1881D	TANGUT COMPONENT-030
+1881E	TANGUT COMPONENT-031
+1881F	TANGUT COMPONENT-032
+18820	TANGUT COMPONENT-033
+18821	TANGUT COMPONENT-034
+18822	TANGUT COMPONENT-035
+18823	TANGUT COMPONENT-036
+18824	TANGUT COMPONENT-037
+18825	TANGUT COMPONENT-038
+@		Three-stroke components
+18826	TANGUT COMPONENT-039
+18827	TANGUT COMPONENT-040
+18828	TANGUT COMPONENT-041
+18829	TANGUT COMPONENT-042
+1882A	TANGUT COMPONENT-043
+1882B	TANGUT COMPONENT-044
+1882C	TANGUT COMPONENT-045
+1882D	TANGUT COMPONENT-046
+1882E	TANGUT COMPONENT-047
+1882F	TANGUT COMPONENT-048
+18830	TANGUT COMPONENT-049
+18831	TANGUT COMPONENT-050
+18832	TANGUT COMPONENT-051
+18833	TANGUT COMPONENT-052
+18834	TANGUT COMPONENT-053
+18835	TANGUT COMPONENT-054
+18836	TANGUT COMPONENT-055
+18837	TANGUT COMPONENT-056
+18838	TANGUT COMPONENT-057
+18839	TANGUT COMPONENT-058
+1883A	TANGUT COMPONENT-059
+1883B	TANGUT COMPONENT-060
+1883C	TANGUT COMPONENT-061
+1883D	TANGUT COMPONENT-062
+1883E	TANGUT COMPONENT-063
+1883F	TANGUT COMPONENT-064
+18840	TANGUT COMPONENT-065
+18841	TANGUT COMPONENT-066
+18842	TANGUT COMPONENT-067
+18843	TANGUT COMPONENT-068
+18844	TANGUT COMPONENT-069
+18845	TANGUT COMPONENT-070
+18846	TANGUT COMPONENT-071
+18847	TANGUT COMPONENT-072
+18848	TANGUT COMPONENT-073
+18849	TANGUT COMPONENT-074
+1884A	TANGUT COMPONENT-075
+1884B	TANGUT COMPONENT-076
+1884C	TANGUT COMPONENT-077
+1884D	TANGUT COMPONENT-078
+1884E	TANGUT COMPONENT-079
+1884F	TANGUT COMPONENT-080
+18850	TANGUT COMPONENT-081
+18851	TANGUT COMPONENT-082
+18852	TANGUT COMPONENT-083
+18853	TANGUT COMPONENT-084
+18854	TANGUT COMPONENT-085
+18855	TANGUT COMPONENT-086
+18856	TANGUT COMPONENT-087
+18857	TANGUT COMPONENT-088
+18858	TANGUT COMPONENT-089
+18859	TANGUT COMPONENT-090
+1885A	TANGUT COMPONENT-091
+1885B	TANGUT COMPONENT-092
+1885C	TANGUT COMPONENT-093
+1885D	TANGUT COMPONENT-094
+1885E	TANGUT COMPONENT-095
+1885F	TANGUT COMPONENT-096
+@		Four-stroke components
+18860	TANGUT COMPONENT-097
+18861	TANGUT COMPONENT-098
+18862	TANGUT COMPONENT-099
+18863	TANGUT COMPONENT-100
+18864	TANGUT COMPONENT-101
+18865	TANGUT COMPONENT-102
+18866	TANGUT COMPONENT-103
+18867	TANGUT COMPONENT-104
+18868	TANGUT COMPONENT-105
+18869	TANGUT COMPONENT-106
+1886A	TANGUT COMPONENT-107
+1886B	TANGUT COMPONENT-108
+1886C	TANGUT COMPONENT-109
+1886D	TANGUT COMPONENT-110
+1886E	TANGUT COMPONENT-111
+1886F	TANGUT COMPONENT-112
+18870	TANGUT COMPONENT-113
+18871	TANGUT COMPONENT-114
+18872	TANGUT COMPONENT-115
+18873	TANGUT COMPONENT-116
+18874	TANGUT COMPONENT-117
+18875	TANGUT COMPONENT-118
+18876	TANGUT COMPONENT-119
+18877	TANGUT COMPONENT-120
+18878	TANGUT COMPONENT-121
+18879	TANGUT COMPONENT-122
+1887A	TANGUT COMPONENT-123
+1887B	TANGUT COMPONENT-124
+1887C	TANGUT COMPONENT-125
+1887D	TANGUT COMPONENT-126
+1887E	TANGUT COMPONENT-127
+1887F	TANGUT COMPONENT-128
+18880	TANGUT COMPONENT-129
+18881	TANGUT COMPONENT-130
+18882	TANGUT COMPONENT-131
+18883	TANGUT COMPONENT-132
+18884	TANGUT COMPONENT-133
+18885	TANGUT COMPONENT-134
+18886	TANGUT COMPONENT-135
+18887	TANGUT COMPONENT-136
+18888	TANGUT COMPONENT-137
+18889	TANGUT COMPONENT-138
+1888A	TANGUT COMPONENT-139
+1888B	TANGUT COMPONENT-140
+1888C	TANGUT COMPONENT-141
+1888D	TANGUT COMPONENT-142
+1888E	TANGUT COMPONENT-143
+1888F	TANGUT COMPONENT-144
+18890	TANGUT COMPONENT-145
+18891	TANGUT COMPONENT-146
+18892	TANGUT COMPONENT-147
+18893	TANGUT COMPONENT-148
+18894	TANGUT COMPONENT-149
+18895	TANGUT COMPONENT-150
+18896	TANGUT COMPONENT-151
+18897	TANGUT COMPONENT-152
+18898	TANGUT COMPONENT-153
+18899	TANGUT COMPONENT-154
+1889A	TANGUT COMPONENT-155
+1889B	TANGUT COMPONENT-156
+1889C	TANGUT COMPONENT-157
+1889D	TANGUT COMPONENT-158
+1889E	TANGUT COMPONENT-159
+1889F	TANGUT COMPONENT-160
+188A0	TANGUT COMPONENT-161
+188A1	TANGUT COMPONENT-162
+188A2	TANGUT COMPONENT-163
+188A3	TANGUT COMPONENT-164
+188A4	TANGUT COMPONENT-165
+188A5	TANGUT COMPONENT-166
+188A6	TANGUT COMPONENT-167
+188A7	TANGUT COMPONENT-168
+188A8	TANGUT COMPONENT-169
+188A9	TANGUT COMPONENT-170
+188AA	TANGUT COMPONENT-171
+188AB	TANGUT COMPONENT-172
+188AC	TANGUT COMPONENT-173
+188AD	TANGUT COMPONENT-174
+188AE	TANGUT COMPONENT-175
+188AF	TANGUT COMPONENT-176
+188B0	TANGUT COMPONENT-177
+188B1	TANGUT COMPONENT-178
+188B2	TANGUT COMPONENT-179
+188B3	TANGUT COMPONENT-180
+188B4	TANGUT COMPONENT-181
+188B5	TANGUT COMPONENT-182
+188B6	TANGUT COMPONENT-183
+188B7	TANGUT COMPONENT-184
+188B8	TANGUT COMPONENT-185
+188B9	TANGUT COMPONENT-186
+188BA	TANGUT COMPONENT-187
+188BB	TANGUT COMPONENT-188
+188BC	TANGUT COMPONENT-189
+188BD	TANGUT COMPONENT-190
+188BE	TANGUT COMPONENT-191
+188BF	TANGUT COMPONENT-192
+188C0	TANGUT COMPONENT-193
+188C1	TANGUT COMPONENT-194
+188C2	TANGUT COMPONENT-195
+188C3	TANGUT COMPONENT-196
+188C4	TANGUT COMPONENT-197
+188C5	TANGUT COMPONENT-198
+188C6	TANGUT COMPONENT-199
+188C7	TANGUT COMPONENT-200
+188C8	TANGUT COMPONENT-201
+188C9	TANGUT COMPONENT-202
+188CA	TANGUT COMPONENT-203
+188CB	TANGUT COMPONENT-204
+@		Five-stroke components
+188CC	TANGUT COMPONENT-205
+188CD	TANGUT COMPONENT-206
+188CE	TANGUT COMPONENT-207
+188CF	TANGUT COMPONENT-208
+188D0	TANGUT COMPONENT-209
+188D1	TANGUT COMPONENT-210
+188D2	TANGUT COMPONENT-211
+188D3	TANGUT COMPONENT-212
+188D4	TANGUT COMPONENT-213
+188D5	TANGUT COMPONENT-214
+188D6	TANGUT COMPONENT-215
+188D7	TANGUT COMPONENT-216
+188D8	TANGUT COMPONENT-217
+188D9	TANGUT COMPONENT-218
+188DA	TANGUT COMPONENT-219
+188DB	TANGUT COMPONENT-220
+188DC	TANGUT COMPONENT-221
+188DD	TANGUT COMPONENT-222
+188DE	TANGUT COMPONENT-223
+188DF	TANGUT COMPONENT-224
+188E0	TANGUT COMPONENT-225
+188E1	TANGUT COMPONENT-226
+188E2	TANGUT COMPONENT-227
+188E3	TANGUT COMPONENT-228
+188E4	TANGUT COMPONENT-229
+188E5	TANGUT COMPONENT-230
+188E6	TANGUT COMPONENT-231
+188E7	TANGUT COMPONENT-232
+188E8	TANGUT COMPONENT-233
+188E9	TANGUT COMPONENT-234
+188EA	TANGUT COMPONENT-235
+188EB	TANGUT COMPONENT-236
+188EC	TANGUT COMPONENT-237
+188ED	TANGUT COMPONENT-238
+188EE	TANGUT COMPONENT-239
+188EF	TANGUT COMPONENT-240
+188F0	TANGUT COMPONENT-241
+188F1	TANGUT COMPONENT-242
+188F2	TANGUT COMPONENT-243
+188F3	TANGUT COMPONENT-244
+188F4	TANGUT COMPONENT-245
+188F5	TANGUT COMPONENT-246
+188F6	TANGUT COMPONENT-247
+188F7	TANGUT COMPONENT-248
+188F8	TANGUT COMPONENT-249
+188F9	TANGUT COMPONENT-250
+188FA	TANGUT COMPONENT-251
+188FB	TANGUT COMPONENT-252
+188FC	TANGUT COMPONENT-253
+188FD	TANGUT COMPONENT-254
+188FE	TANGUT COMPONENT-255
+188FF	TANGUT COMPONENT-256
+18900	TANGUT COMPONENT-257
+18901	TANGUT COMPONENT-258
+18902	TANGUT COMPONENT-259
+18903	TANGUT COMPONENT-260
+18904	TANGUT COMPONENT-261
+18905	TANGUT COMPONENT-262
+18906	TANGUT COMPONENT-263
+18907	TANGUT COMPONENT-264
+18908	TANGUT COMPONENT-265
+18909	TANGUT COMPONENT-266
+1890A	TANGUT COMPONENT-267
+1890B	TANGUT COMPONENT-268
+1890C	TANGUT COMPONENT-269
+1890D	TANGUT COMPONENT-270
+1890E	TANGUT COMPONENT-271
+1890F	TANGUT COMPONENT-272
+18910	TANGUT COMPONENT-273
+18911	TANGUT COMPONENT-274
+18912	TANGUT COMPONENT-275
+18913	TANGUT COMPONENT-276
+18914	TANGUT COMPONENT-277
+18915	TANGUT COMPONENT-278
+18916	TANGUT COMPONENT-279
+18917	TANGUT COMPONENT-280
+18918	TANGUT COMPONENT-281
+18919	TANGUT COMPONENT-282
+1891A	TANGUT COMPONENT-283
+1891B	TANGUT COMPONENT-284
+1891C	TANGUT COMPONENT-285
+1891D	TANGUT COMPONENT-286
+1891E	TANGUT COMPONENT-287
+1891F	TANGUT COMPONENT-288
+18920	TANGUT COMPONENT-289
+18921	TANGUT COMPONENT-290
+18922	TANGUT COMPONENT-291
+18923	TANGUT COMPONENT-292
+18924	TANGUT COMPONENT-293
+18925	TANGUT COMPONENT-294
+18926	TANGUT COMPONENT-295
+18927	TANGUT COMPONENT-296
+18928	TANGUT COMPONENT-297
+18929	TANGUT COMPONENT-298
+1892A	TANGUT COMPONENT-299
+1892B	TANGUT COMPONENT-300
+1892C	TANGUT COMPONENT-301
+1892D	TANGUT COMPONENT-302
+1892E	TANGUT COMPONENT-303
+1892F	TANGUT COMPONENT-304
+18930	TANGUT COMPONENT-305
+18931	TANGUT COMPONENT-306
+18932	TANGUT COMPONENT-307
+18933	TANGUT COMPONENT-308
+18934	TANGUT COMPONENT-309
+18935	TANGUT COMPONENT-310
+18936	TANGUT COMPONENT-311
+18937	TANGUT COMPONENT-312
+18938	TANGUT COMPONENT-313
+18939	TANGUT COMPONENT-314
+1893A	TANGUT COMPONENT-315
+1893B	TANGUT COMPONENT-316
+1893C	TANGUT COMPONENT-317
+1893D	TANGUT COMPONENT-318
+1893E	TANGUT COMPONENT-319
+1893F	TANGUT COMPONENT-320
+18940	TANGUT COMPONENT-321
+18941	TANGUT COMPONENT-322
+18942	TANGUT COMPONENT-323
+18943	TANGUT COMPONENT-324
+18944	TANGUT COMPONENT-325
+18945	TANGUT COMPONENT-326
+18946	TANGUT COMPONENT-327
+18947	TANGUT COMPONENT-328
+18948	TANGUT COMPONENT-329
+18949	TANGUT COMPONENT-330
+1894A	TANGUT COMPONENT-331
+1894B	TANGUT COMPONENT-332
+1894C	TANGUT COMPONENT-333
+1894D	TANGUT COMPONENT-334
+1894E	TANGUT COMPONENT-335
+1894F	TANGUT COMPONENT-336
+18950	TANGUT COMPONENT-337
+18951	TANGUT COMPONENT-338
+18952	TANGUT COMPONENT-339
+18953	TANGUT COMPONENT-340
+18954	TANGUT COMPONENT-341
+18955	TANGUT COMPONENT-342
+18956	TANGUT COMPONENT-343
+18957	TANGUT COMPONENT-344
+18958	TANGUT COMPONENT-345
+@		Six-stroke components
+18959	TANGUT COMPONENT-346
+1895A	TANGUT COMPONENT-347
+1895B	TANGUT COMPONENT-348
+1895C	TANGUT COMPONENT-349
+1895D	TANGUT COMPONENT-350
+1895E	TANGUT COMPONENT-351
+1895F	TANGUT COMPONENT-352
+18960	TANGUT COMPONENT-353
+18961	TANGUT COMPONENT-354
+18962	TANGUT COMPONENT-355
+18963	TANGUT COMPONENT-356
+18964	TANGUT COMPONENT-357
+18965	TANGUT COMPONENT-358
+18966	TANGUT COMPONENT-359
+18967	TANGUT COMPONENT-360
+18968	TANGUT COMPONENT-361
+18969	TANGUT COMPONENT-362
+1896A	TANGUT COMPONENT-363
+1896B	TANGUT COMPONENT-364
+1896C	TANGUT COMPONENT-365
+1896D	TANGUT COMPONENT-366
+1896E	TANGUT COMPONENT-367
+1896F	TANGUT COMPONENT-368
+18970	TANGUT COMPONENT-369
+18971	TANGUT COMPONENT-370
+18972	TANGUT COMPONENT-371
+18973	TANGUT COMPONENT-372
+18974	TANGUT COMPONENT-373
+18975	TANGUT COMPONENT-374
+18976	TANGUT COMPONENT-375
+18977	TANGUT COMPONENT-376
+18978	TANGUT COMPONENT-377
+18979	TANGUT COMPONENT-378
+1897A	TANGUT COMPONENT-379
+1897B	TANGUT COMPONENT-380
+1897C	TANGUT COMPONENT-381
+1897D	TANGUT COMPONENT-382
+1897E	TANGUT COMPONENT-383
+1897F	TANGUT COMPONENT-384
+18980	TANGUT COMPONENT-385
+18981	TANGUT COMPONENT-386
+18982	TANGUT COMPONENT-387
+18983	TANGUT COMPONENT-388
+18984	TANGUT COMPONENT-389
+18985	TANGUT COMPONENT-390
+18986	TANGUT COMPONENT-391
+18987	TANGUT COMPONENT-392
+18988	TANGUT COMPONENT-393
+18989	TANGUT COMPONENT-394
+1898A	TANGUT COMPONENT-395
+1898B	TANGUT COMPONENT-396
+1898C	TANGUT COMPONENT-397
+1898D	TANGUT COMPONENT-398
+1898E	TANGUT COMPONENT-399
+1898F	TANGUT COMPONENT-400
+18990	TANGUT COMPONENT-401
+18991	TANGUT COMPONENT-402
+18992	TANGUT COMPONENT-403
+18993	TANGUT COMPONENT-404
+18994	TANGUT COMPONENT-405
+18995	TANGUT COMPONENT-406
+18996	TANGUT COMPONENT-407
+18997	TANGUT COMPONENT-408
+18998	TANGUT COMPONENT-409
+18999	TANGUT COMPONENT-410
+1899A	TANGUT COMPONENT-411
+1899B	TANGUT COMPONENT-412
+1899C	TANGUT COMPONENT-413
+1899D	TANGUT COMPONENT-414
+1899E	TANGUT COMPONENT-415
+1899F	TANGUT COMPONENT-416
+189A0	TANGUT COMPONENT-417
+189A1	TANGUT COMPONENT-418
+189A2	TANGUT COMPONENT-419
+189A3	TANGUT COMPONENT-420
+189A4	TANGUT COMPONENT-421
+189A5	TANGUT COMPONENT-422
+189A6	TANGUT COMPONENT-423
+189A7	TANGUT COMPONENT-424
+189A8	TANGUT COMPONENT-425
+189A9	TANGUT COMPONENT-426
+189AA	TANGUT COMPONENT-427
+189AB	TANGUT COMPONENT-428
+189AC	TANGUT COMPONENT-429
+189AD	TANGUT COMPONENT-430
+189AE	TANGUT COMPONENT-431
+189AF	TANGUT COMPONENT-432
+189B0	TANGUT COMPONENT-433
+189B1	TANGUT COMPONENT-434
+189B2	TANGUT COMPONENT-435
+189B3	TANGUT COMPONENT-436
+189B4	TANGUT COMPONENT-437
+189B5	TANGUT COMPONENT-438
+189B6	TANGUT COMPONENT-439
+189B7	TANGUT COMPONENT-440
+189B8	TANGUT COMPONENT-441
+189B9	TANGUT COMPONENT-442
+189BA	TANGUT COMPONENT-443
+189BB	TANGUT COMPONENT-444
+189BC	TANGUT COMPONENT-445
+189BD	TANGUT COMPONENT-446
+189BE	TANGUT COMPONENT-447
+189BF	TANGUT COMPONENT-448
+189C0	TANGUT COMPONENT-449
+189C1	TANGUT COMPONENT-450
+189C2	TANGUT COMPONENT-451
+189C3	TANGUT COMPONENT-452
+189C4	TANGUT COMPONENT-453
+189C5	TANGUT COMPONENT-454
+189C6	TANGUT COMPONENT-455
+189C7	TANGUT COMPONENT-456
+189C8	TANGUT COMPONENT-457
+189C9	TANGUT COMPONENT-458
+189CA	TANGUT COMPONENT-459
+189CB	TANGUT COMPONENT-460
+189CC	TANGUT COMPONENT-461
+189CD	TANGUT COMPONENT-462
+189CE	TANGUT COMPONENT-463
+189CF	TANGUT COMPONENT-464
+189D0	TANGUT COMPONENT-465
+189D1	TANGUT COMPONENT-466
+189D2	TANGUT COMPONENT-467
+189D3	TANGUT COMPONENT-468
+189D4	TANGUT COMPONENT-469
+189D5	TANGUT COMPONENT-470
+189D6	TANGUT COMPONENT-471
+189D7	TANGUT COMPONENT-472
+189D8	TANGUT COMPONENT-473
+189D9	TANGUT COMPONENT-474
+189DA	TANGUT COMPONENT-475
+@		Seven-stroke components
+189DB	TANGUT COMPONENT-476
+189DC	TANGUT COMPONENT-477
+189DD	TANGUT COMPONENT-478
+189DE	TANGUT COMPONENT-479
+189DF	TANGUT COMPONENT-480
+189E0	TANGUT COMPONENT-481
+189E1	TANGUT COMPONENT-482
+189E2	TANGUT COMPONENT-483
+189E3	TANGUT COMPONENT-484
+189E4	TANGUT COMPONENT-485
+189E5	TANGUT COMPONENT-486
+189E6	TANGUT COMPONENT-487
+189E7	TANGUT COMPONENT-488
+189E8	TANGUT COMPONENT-489
+189E9	TANGUT COMPONENT-490
+189EA	TANGUT COMPONENT-491
+189EB	TANGUT COMPONENT-492
+189EC	TANGUT COMPONENT-493
+189ED	TANGUT COMPONENT-494
+189EE	TANGUT COMPONENT-495
+189EF	TANGUT COMPONENT-496
+189F0	TANGUT COMPONENT-497
+189F1	TANGUT COMPONENT-498
+189F2	TANGUT COMPONENT-499
+189F3	TANGUT COMPONENT-500
+189F4	TANGUT COMPONENT-501
+189F5	TANGUT COMPONENT-502
+189F6	TANGUT COMPONENT-503
+189F7	TANGUT COMPONENT-504
+189F8	TANGUT COMPONENT-505
+189F9	TANGUT COMPONENT-506
+189FA	TANGUT COMPONENT-507
+189FB	TANGUT COMPONENT-508
+189FC	TANGUT COMPONENT-509
+189FD	TANGUT COMPONENT-510
+189FE	TANGUT COMPONENT-511
+189FF	TANGUT COMPONENT-512
+18A00	TANGUT COMPONENT-513
+18A01	TANGUT COMPONENT-514
+18A02	TANGUT COMPONENT-515
+18A03	TANGUT COMPONENT-516
+18A04	TANGUT COMPONENT-517
+18A05	TANGUT COMPONENT-518
+18A06	TANGUT COMPONENT-519
+18A07	TANGUT COMPONENT-520
+18A08	TANGUT COMPONENT-521
+18A09	TANGUT COMPONENT-522
+18A0A	TANGUT COMPONENT-523
+18A0B	TANGUT COMPONENT-524
+18A0C	TANGUT COMPONENT-525
+18A0D	TANGUT COMPONENT-526
+18A0E	TANGUT COMPONENT-527
+18A0F	TANGUT COMPONENT-528
+18A10	TANGUT COMPONENT-529
+18A11	TANGUT COMPONENT-530
+18A12	TANGUT COMPONENT-531
+18A13	TANGUT COMPONENT-532
+18A14	TANGUT COMPONENT-533
+18A15	TANGUT COMPONENT-534
+18A16	TANGUT COMPONENT-535
+18A17	TANGUT COMPONENT-536
+18A18	TANGUT COMPONENT-537
+18A19	TANGUT COMPONENT-538
+18A1A	TANGUT COMPONENT-539
+18A1B	TANGUT COMPONENT-540
+18A1C	TANGUT COMPONENT-541
+18A1D	TANGUT COMPONENT-542
+18A1E	TANGUT COMPONENT-543
+18A1F	TANGUT COMPONENT-544
+18A20	TANGUT COMPONENT-545
+18A21	TANGUT COMPONENT-546
+18A22	TANGUT COMPONENT-547
+18A23	TANGUT COMPONENT-548
+18A24	TANGUT COMPONENT-549
+18A25	TANGUT COMPONENT-550
+18A26	TANGUT COMPONENT-551
+18A27	TANGUT COMPONENT-552
+18A28	TANGUT COMPONENT-553
+18A29	TANGUT COMPONENT-554
+18A2A	TANGUT COMPONENT-555
+18A2B	TANGUT COMPONENT-556
+18A2C	TANGUT COMPONENT-557
+18A2D	TANGUT COMPONENT-558
+18A2E	TANGUT COMPONENT-559
+18A2F	TANGUT COMPONENT-560
+18A30	TANGUT COMPONENT-561
+18A31	TANGUT COMPONENT-562
+18A32	TANGUT COMPONENT-563
+18A33	TANGUT COMPONENT-564
+18A34	TANGUT COMPONENT-565
+18A35	TANGUT COMPONENT-566
+18A36	TANGUT COMPONENT-567
+18A37	TANGUT COMPONENT-568
+18A38	TANGUT COMPONENT-569
+18A39	TANGUT COMPONENT-570
+18A3A	TANGUT COMPONENT-571
+18A3B	TANGUT COMPONENT-572
+18A3C	TANGUT COMPONENT-573
+18A3D	TANGUT COMPONENT-574
+18A3E	TANGUT COMPONENT-575
+18A3F	TANGUT COMPONENT-576
+18A40	TANGUT COMPONENT-577
+@		Eight-stroke components
+18A41	TANGUT COMPONENT-578
+18A42	TANGUT COMPONENT-579
+18A43	TANGUT COMPONENT-580
+18A44	TANGUT COMPONENT-581
+18A45	TANGUT COMPONENT-582
+18A46	TANGUT COMPONENT-583
+18A47	TANGUT COMPONENT-584
+18A48	TANGUT COMPONENT-585
+18A49	TANGUT COMPONENT-586
+18A4A	TANGUT COMPONENT-587
+18A4B	TANGUT COMPONENT-588
+18A4C	TANGUT COMPONENT-589
+18A4D	TANGUT COMPONENT-590
+18A4E	TANGUT COMPONENT-591
+18A4F	TANGUT COMPONENT-592
+18A50	TANGUT COMPONENT-593
+18A51	TANGUT COMPONENT-594
+18A52	TANGUT COMPONENT-595
+18A53	TANGUT COMPONENT-596
+18A54	TANGUT COMPONENT-597
+18A55	TANGUT COMPONENT-598
+18A56	TANGUT COMPONENT-599
+18A57	TANGUT COMPONENT-600
+18A58	TANGUT COMPONENT-601
+18A59	TANGUT COMPONENT-602
+18A5A	TANGUT COMPONENT-603
+18A5B	TANGUT COMPONENT-604
+18A5C	TANGUT COMPONENT-605
+18A5D	TANGUT COMPONENT-606
+18A5E	TANGUT COMPONENT-607
+18A5F	TANGUT COMPONENT-608
+18A60	TANGUT COMPONENT-609
+18A61	TANGUT COMPONENT-610
+18A62	TANGUT COMPONENT-611
+18A63	TANGUT COMPONENT-612
+18A64	TANGUT COMPONENT-613
+18A65	TANGUT COMPONENT-614
+18A66	TANGUT COMPONENT-615
+18A67	TANGUT COMPONENT-616
+18A68	TANGUT COMPONENT-617
+18A69	TANGUT COMPONENT-618
+18A6A	TANGUT COMPONENT-619
+18A6B	TANGUT COMPONENT-620
+18A6C	TANGUT COMPONENT-621
+18A6D	TANGUT COMPONENT-622
+18A6E	TANGUT COMPONENT-623
+18A6F	TANGUT COMPONENT-624
+18A70	TANGUT COMPONENT-625
+18A71	TANGUT COMPONENT-626
+18A72	TANGUT COMPONENT-627
+18A73	TANGUT COMPONENT-628
+18A74	TANGUT COMPONENT-629
+18A75	TANGUT COMPONENT-630
+18A76	TANGUT COMPONENT-631
+18A77	TANGUT COMPONENT-632
+18A78	TANGUT COMPONENT-633
+18A79	TANGUT COMPONENT-634
+18A7A	TANGUT COMPONENT-635
+18A7B	TANGUT COMPONENT-636
+18A7C	TANGUT COMPONENT-637
+18A7D	TANGUT COMPONENT-638
+18A7E	TANGUT COMPONENT-639
+18A7F	TANGUT COMPONENT-640
+18A80	TANGUT COMPONENT-641
+18A81	TANGUT COMPONENT-642
+18A82	TANGUT COMPONENT-643
+18A83	TANGUT COMPONENT-644
+18A84	TANGUT COMPONENT-645
+18A85	TANGUT COMPONENT-646
+18A86	TANGUT COMPONENT-647
+18A87	TANGUT COMPONENT-648
+18A88	TANGUT COMPONENT-649
+18A89	TANGUT COMPONENT-650
+18A8A	TANGUT COMPONENT-651
+18A8B	TANGUT COMPONENT-652
+18A8C	TANGUT COMPONENT-653
+18A8D	TANGUT COMPONENT-654
+18A8E	TANGUT COMPONENT-655
+18A8F	TANGUT COMPONENT-656
+18A90	TANGUT COMPONENT-657
+18A91	TANGUT COMPONENT-658
+18A92	TANGUT COMPONENT-659
+18A93	TANGUT COMPONENT-660
+18A94	TANGUT COMPONENT-661
+18A95	TANGUT COMPONENT-662
+18A96	TANGUT COMPONENT-663
+18A97	TANGUT COMPONENT-664
+18A98	TANGUT COMPONENT-665
+@		Nine-stroke components
+18A99	TANGUT COMPONENT-666
+18A9A	TANGUT COMPONENT-667
+18A9B	TANGUT COMPONENT-668
+18A9C	TANGUT COMPONENT-669
+18A9D	TANGUT COMPONENT-670
+18A9E	TANGUT COMPONENT-671
+18A9F	TANGUT COMPONENT-672
+18AA0	TANGUT COMPONENT-673
+18AA1	TANGUT COMPONENT-674
+18AA2	TANGUT COMPONENT-675
+18AA3	TANGUT COMPONENT-676
+18AA4	TANGUT COMPONENT-677
+18AA5	TANGUT COMPONENT-678
+18AA6	TANGUT COMPONENT-679
+18AA7	TANGUT COMPONENT-680
+18AA8	TANGUT COMPONENT-681
+18AA9	TANGUT COMPONENT-682
+18AAA	TANGUT COMPONENT-683
+18AAB	TANGUT COMPONENT-684
+18AAC	TANGUT COMPONENT-685
+18AAD	TANGUT COMPONENT-686
+18AAE	TANGUT COMPONENT-687
+18AAF	TANGUT COMPONENT-688
+18AB0	TANGUT COMPONENT-689
+18AB1	TANGUT COMPONENT-690
+18AB2	TANGUT COMPONENT-691
+18AB3	TANGUT COMPONENT-692
+18AB4	TANGUT COMPONENT-693
+18AB5	TANGUT COMPONENT-694
+18AB6	TANGUT COMPONENT-695
+18AB7	TANGUT COMPONENT-696
+18AB8	TANGUT COMPONENT-697
+18AB9	TANGUT COMPONENT-698
+18ABA	TANGUT COMPONENT-699
+18ABB	TANGUT COMPONENT-700
+18ABC	TANGUT COMPONENT-701
+18ABD	TANGUT COMPONENT-702
+18ABE	TANGUT COMPONENT-703
+18ABF	TANGUT COMPONENT-704
+18AC0	TANGUT COMPONENT-705
+@		Ten-stroke components
+18AC1	TANGUT COMPONENT-706
+18AC2	TANGUT COMPONENT-707
+18AC3	TANGUT COMPONENT-708
+18AC4	TANGUT COMPONENT-709
+18AC5	TANGUT COMPONENT-710
+18AC6	TANGUT COMPONENT-711
+18AC7	TANGUT COMPONENT-712
+18AC8	TANGUT COMPONENT-713
+18AC9	TANGUT COMPONENT-714
+18ACA	TANGUT COMPONENT-715
+18ACB	TANGUT COMPONENT-716
+18ACC	TANGUT COMPONENT-717
+18ACD	TANGUT COMPONENT-718
+18ACE	TANGUT COMPONENT-719
+18ACF	TANGUT COMPONENT-720
+18AD0	TANGUT COMPONENT-721
+18AD1	TANGUT COMPONENT-722
+18AD2	TANGUT COMPONENT-723
+18AD3	TANGUT COMPONENT-724
+18AD4	TANGUT COMPONENT-725
+@		Eleven-stroke components
+18AD5	TANGUT COMPONENT-726
+18AD6	TANGUT COMPONENT-727
+18AD7	TANGUT COMPONENT-728
+18AD8	TANGUT COMPONENT-729
+18AD9	TANGUT COMPONENT-730
+18ADA	TANGUT COMPONENT-731
+18ADB	TANGUT COMPONENT-732
+18ADC	TANGUT COMPONENT-733
+18ADD	TANGUT COMPONENT-734
+18ADE	TANGUT COMPONENT-735
+18ADF	TANGUT COMPONENT-736
+18AE0	TANGUT COMPONENT-737
+18AE1	TANGUT COMPONENT-738
+18AE2	TANGUT COMPONENT-739
+@		Twelve-stroke components
+18AE3	TANGUT COMPONENT-740
+18AE4	TANGUT COMPONENT-741
+18AE5	TANGUT COMPONENT-742
+18AE6	TANGUT COMPONENT-743
+18AE7	TANGUT COMPONENT-744
+18AE8	TANGUT COMPONENT-745
+18AE9	TANGUT COMPONENT-746
+18AEA	TANGUT COMPONENT-747
+18AEB	TANGUT COMPONENT-748
+@		Thirteen-stroke components
+18AEC	TANGUT COMPONENT-749
+18AED	TANGUT COMPONENT-750
+18AEE	TANGUT COMPONENT-751
+18AEF	TANGUT COMPONENT-752
+18AF0	TANGUT COMPONENT-753
+18AF1	TANGUT COMPONENT-754
+@		Sixteen-stroke components
+18AF2	TANGUT COMPONENT-755
 @@	1B000	Kana Supplement	1B0FF
 @		Historic Katakana
 1B000	KATAKANA LETTER ARCHAIC E
@@ -41425,6 +42991,46 @@ FFFF	<not a character>
 1DAAD	SIGNWRITING ROTATION MODIFIER-14
 1DAAE	SIGNWRITING ROTATION MODIFIER-15
 1DAAF	SIGNWRITING ROTATION MODIFIER-16
+@@	1E000	Glagolitic Supplement	1E02F
+@		Combining letters
+1E000	COMBINING GLAGOLITIC LETTER AZU
+1E001	COMBINING GLAGOLITIC LETTER BUKY
+1E002	COMBINING GLAGOLITIC LETTER VEDE
+1E003	COMBINING GLAGOLITIC LETTER GLAGOLI
+1E004	COMBINING GLAGOLITIC LETTER DOBRO
+1E005	COMBINING GLAGOLITIC LETTER YESTU
+1E006	COMBINING GLAGOLITIC LETTER ZHIVETE
+1E008	COMBINING GLAGOLITIC LETTER ZEMLJA
+1E009	COMBINING GLAGOLITIC LETTER IZHE
+1E00A	COMBINING GLAGOLITIC LETTER INITIAL IZHE
+1E00B	COMBINING GLAGOLITIC LETTER I
+1E00C	COMBINING GLAGOLITIC LETTER DJERVI
+1E00D	COMBINING GLAGOLITIC LETTER KAKO
+1E00E	COMBINING GLAGOLITIC LETTER LJUDIJE
+1E00F	COMBINING GLAGOLITIC LETTER MYSLITE
+1E010	COMBINING GLAGOLITIC LETTER NASHI
+1E011	COMBINING GLAGOLITIC LETTER ONU
+1E012	COMBINING GLAGOLITIC LETTER POKOJI
+1E013	COMBINING GLAGOLITIC LETTER RITSI
+1E014	COMBINING GLAGOLITIC LETTER SLOVO
+1E015	COMBINING GLAGOLITIC LETTER TVRIDO
+1E016	COMBINING GLAGOLITIC LETTER UKU
+1E017	COMBINING GLAGOLITIC LETTER FRITU
+1E018	COMBINING GLAGOLITIC LETTER HERU
+1E01B	COMBINING GLAGOLITIC LETTER SHTA
+1E01C	COMBINING GLAGOLITIC LETTER TSI
+1E01D	COMBINING GLAGOLITIC LETTER CHRIVI
+1E01E	COMBINING GLAGOLITIC LETTER SHA
+1E01F	COMBINING GLAGOLITIC LETTER YERU
+1E020	COMBINING GLAGOLITIC LETTER YERI
+1E021	COMBINING GLAGOLITIC LETTER YATI
+1E023	COMBINING GLAGOLITIC LETTER YU
+1E024	COMBINING GLAGOLITIC LETTER SMALL YUS
+1E026	COMBINING GLAGOLITIC LETTER YO
+1E027	COMBINING GLAGOLITIC LETTER IOTATED SMALL YUS
+1E028	COMBINING GLAGOLITIC LETTER BIG YUS
+1E029	COMBINING GLAGOLITIC LETTER IOTATED BIG YUS
+1E02A	COMBINING GLAGOLITIC LETTER FITA
 @@	1E800	Mende Kikakui	1E8DF
 @		Syllables in k-
 1E800	MENDE KIKAKUI SYLLABLE M001 KI
@@ -41691,6 +43297,102 @@ FFFF	<not a character>
 1E8D4	MENDE KIKAKUI COMBINING NUMBER TEN THOUSANDS
 1E8D5	MENDE KIKAKUI COMBINING NUMBER HUNDRED THOUSANDS
 1E8D6	MENDE KIKAKUI COMBINING NUMBER MILLIONS
+@@	1E900	Adlam	1E95F
+@		Capital letters
+1E900	ADLAM CAPITAL LETTER ALIF
+1E901	ADLAM CAPITAL LETTER DAALI
+1E902	ADLAM CAPITAL LETTER LAAM
+1E903	ADLAM CAPITAL LETTER MIIM
+1E904	ADLAM CAPITAL LETTER BA
+1E905	ADLAM CAPITAL LETTER SINNYIIYHE
+1E906	ADLAM CAPITAL LETTER PE
+1E907	ADLAM CAPITAL LETTER BHE
+1E908	ADLAM CAPITAL LETTER RA
+1E909	ADLAM CAPITAL LETTER E
+1E90A	ADLAM CAPITAL LETTER FA
+1E90B	ADLAM CAPITAL LETTER I
+1E90C	ADLAM CAPITAL LETTER O
+1E90D	ADLAM CAPITAL LETTER DHA
+1E90E	ADLAM CAPITAL LETTER YHE
+1E90F	ADLAM CAPITAL LETTER WAW
+1E910	ADLAM CAPITAL LETTER NUN
+1E911	ADLAM CAPITAL LETTER KAF
+1E912	ADLAM CAPITAL LETTER YA
+1E913	ADLAM CAPITAL LETTER U
+1E914	ADLAM CAPITAL LETTER JIIM
+1E915	ADLAM CAPITAL LETTER CHI
+1E916	ADLAM CAPITAL LETTER HA
+1E917	ADLAM CAPITAL LETTER QAAF
+1E918	ADLAM CAPITAL LETTER GA
+1E919	ADLAM CAPITAL LETTER NYA
+1E91A	ADLAM CAPITAL LETTER TU
+1E91B	ADLAM CAPITAL LETTER NHA
+@		Supplementary capital letters
+1E91C	ADLAM CAPITAL LETTER VA
+1E91D	ADLAM CAPITAL LETTER KHA
+1E91E	ADLAM CAPITAL LETTER GBE
+1E91F	ADLAM CAPITAL LETTER ZAL
+1E920	ADLAM CAPITAL LETTER KPO
+1E921	ADLAM CAPITAL LETTER SHA
+@		Small letters
+1E922	ADLAM SMALL LETTER ALIF
+1E923	ADLAM SMALL LETTER DAALI
+1E924	ADLAM SMALL LETTER LAAM
+1E925	ADLAM SMALL LETTER MIIM
+1E926	ADLAM SMALL LETTER BA
+1E927	ADLAM SMALL LETTER SINNYIIYHE
+1E928	ADLAM SMALL LETTER PE
+1E929	ADLAM SMALL LETTER BHE
+1E92A	ADLAM SMALL LETTER RA
+1E92B	ADLAM SMALL LETTER E
+1E92C	ADLAM SMALL LETTER FA
+1E92D	ADLAM SMALL LETTER I
+1E92E	ADLAM SMALL LETTER O
+1E92F	ADLAM SMALL LETTER DHA
+1E930	ADLAM SMALL LETTER YHE
+1E931	ADLAM SMALL LETTER WAW
+1E932	ADLAM SMALL LETTER NUN
+1E933	ADLAM SMALL LETTER KAF
+1E934	ADLAM SMALL LETTER YA
+1E935	ADLAM SMALL LETTER U
+1E936	ADLAM SMALL LETTER JIIM
+1E937	ADLAM SMALL LETTER CHI
+1E938	ADLAM SMALL LETTER HA
+1E939	ADLAM SMALL LETTER QAAF
+1E93A	ADLAM SMALL LETTER GA
+1E93B	ADLAM SMALL LETTER NYA
+1E93C	ADLAM SMALL LETTER TU
+1E93D	ADLAM SMALL LETTER NHA
+@		Supplementary small letters
+1E93E	ADLAM SMALL LETTER VA
+1E93F	ADLAM SMALL LETTER KHA
+1E940	ADLAM SMALL LETTER GBE
+1E941	ADLAM SMALL LETTER ZAL
+1E942	ADLAM SMALL LETTER KPO
+1E943	ADLAM SMALL LETTER SHA
+@		Diacritical marks
+1E944	ADLAM ALIF LENGTHENER
+1E945	ADLAM VOWEL LENGTHENER
+1E946	ADLAM GEMINATION MARK
+1E947	ADLAM HAMZA
+1E948	ADLAM CONSONANT MODIFIER
+1E949	ADLAM GEMINATE CONSONANT MODIFIER
+1E94A	ADLAM NUKTA
+	* called hoortobbhere when drawn above and lestobbhere when drawn below the base character
+@		Digits
+1E950	ADLAM DIGIT ZERO
+1E951	ADLAM DIGIT ONE
+1E952	ADLAM DIGIT TWO
+1E953	ADLAM DIGIT THREE
+1E954	ADLAM DIGIT FOUR
+1E955	ADLAM DIGIT FIVE
+1E956	ADLAM DIGIT SIX
+1E957	ADLAM DIGIT SEVEN
+1E958	ADLAM DIGIT EIGHT
+1E959	ADLAM DIGIT NINE
+@		Punctuation
+1E95E	ADLAM INITIAL EXCLAMATION MARK
+1E95F	ADLAM INITIAL QUESTION MARK
 @@	1EE00	Arabic Mathematical Alphabetic Symbols	1EEFF
 @		Isolated symbols
 1EE00	ARABIC MATHEMATICAL ALEF
@@ -42379,7 +44081,7 @@ FFFF	<not a character>
 1F10B	DINGBAT CIRCLED SANS-SERIF DIGIT ZERO
 1F10C	DINGBAT NEGATIVE CIRCLED SANS-SERIF DIGIT ZERO
 @		Parenthesized Latin letters
-@+		This set provides uppercase versions of the set starting at 249C.
+@+		This set provides uppercase versions of the set starting at 249C. Parenthesized Latin letters do not have case mappings.
 1F110	PARENTHESIZED LATIN CAPITAL LETTER A
 	# 0028 0041 0029
 1F111	PARENTHESIZED LATIN CAPITAL LETTER B
@@ -42666,6 +44368,32 @@ FFFF	<not a character>
 	= new information, update
 1F19A	SQUARED VS
 	= versus
+@		Squared Latin letter sequences from ARIB STD B62
+1F19B	SQUARED THREE D
+1F19C	SQUARED SECOND SCREEN
+1F19D	SQUARED TWO K
+1F19E	SQUARED FOUR K
+1F19F	SQUARED EIGHT K
+1F1A0	SQUARED FIVE POINT ONE
+1F1A1	SQUARED SEVEN POINT ONE
+1F1A2	SQUARED TWENTY-TWO POINT TWO
+1F1A3	SQUARED SIXTY P
+1F1A4	SQUARED ONE HUNDRED TWENTY P
+1F1A5	SQUARED LATIN SMALL LETTER D
+	= data
+1F1A6	SQUARED HC
+	= hybrid cast
+1F1A7	SQUARED HDR
+	= high dynamic range
+1F1A8	SQUARED HI-RES
+	= high resolution
+1F1A9	SQUARED LOSSLESS
+1F1AA	SQUARED SHV
+	= super high vision
+1F1AB	SQUARED UHD
+	= ultra-high definition
+1F1AC	SQUARED VOD
+	= video on demand
 @		Regional indicator symbols
 @+		These characters can be used in pairs to represent regional codes. In some emoji implementations, certain pairs may be recognized and displayed by alternate means; for instance, an implementation might recognize F + R and display this combination with a symbol representing the flag of France.
 1F1E6	REGIONAL INDICATOR SYMBOL LETTER A
@@ -42852,6 +44580,9 @@ FFFF	<not a character>
 1F23A	SQUARED CJK UNIFIED IDEOGRAPH-55B6
 	= in business sign
 	# <square> 55B6
+1F23B	SQUARED CJK UNIFIED IDEOGRAPH-914D
+	= program delivery over network (ARIB STD B62)
+	# <square> 914D
 @		Ideographs with tortoise shell brackets from ARIB STD B24
 1F240	TORTOISE SHELL BRACKETED CJK UNIFIED IDEOGRAPH-672C
 	= home run
@@ -42941,6 +44672,8 @@ FFFF	<not a character>
 @		Weather symbols
 1F321	THERMOMETER
 	= temperature, warm
+	~ 1F321 FE0E text style
+	~ 1F321 FE0F emoji style
 1F322	BLACK DROPLET
 	= droplet
 	x (droplet - 1F4A7)
@@ -42950,23 +44683,41 @@ FFFF	<not a character>
 1F324	WHITE SUN WITH SMALL CLOUD
 	= mostly sunny
 	x (sun behind cloud - 26C5)
+	~ 1F324 FE0E text style
+	~ 1F324 FE0F emoji style
 1F325	WHITE SUN BEHIND CLOUD
 	= mostly cloudy
+	~ 1F325 FE0E text style
+	~ 1F325 FE0F emoji style
 1F326	WHITE SUN BEHIND CLOUD WITH RAIN
 	= showers
+	~ 1F326 FE0E text style
+	~ 1F326 FE0F emoji style
 1F327	CLOUD WITH RAIN
 	= rain
+	~ 1F327 FE0E text style
+	~ 1F327 FE0F emoji style
 1F328	CLOUD WITH SNOW
 	= snow, snow showers
+	~ 1F328 FE0E text style
+	~ 1F328 FE0F emoji style
 1F329	CLOUD WITH LIGHTNING
 	= lightning, thunderstorm
 	x (thunder cloud and rain - 26C8)
+	~ 1F329 FE0E text style
+	~ 1F329 FE0F emoji style
 1F32A	CLOUD WITH TORNADO
 	= tornado, twister
+	~ 1F32A FE0E text style
+	~ 1F32A FE0F emoji style
 1F32B	FOG
 	x (foggy - 1F301)
+	~ 1F32B FE0E text style
+	~ 1F32B FE0F emoji style
 1F32C	WIND BLOWING FACE
 	= wind
+	~ 1F32C FE0E text style
+	~ 1F32C FE0F emoji style
 @		Food symbols
 1F32D	HOT DOG
 1F32E	TACO
@@ -42983,10 +44734,13 @@ FFFF	<not a character>
 	x (desert - 1F3DC)
 1F336	HOT PEPPER
 	= hot, spicy
+	~ 1F336 FE0E text style
+	~ 1F336 FE0F emoji style
 1F337	TULIP
 	x (flower - 2698)
 1F338	CHERRY BLOSSOM
 1F339	ROSE
+	x (wilted flower - 1F940)
 1F33A	HIBISCUS
 1F33B	SUNFLOWER
 1F33C	BLOSSOM
@@ -43063,6 +44817,7 @@ FFFF	<not a character>
 	* glyph may show a fork and spoon
 	* glyph may show a crossed fork and knife
 	x (fork and knife with plate - 1F37D)
+	x (spoon - 1F944)
 @		Beverage symbols
 1F375	TEACUP WITHOUT HANDLE
 	x (hot beverage - 2615)
@@ -43072,15 +44827,19 @@ FFFF	<not a character>
 1F378	COCKTAIL GLASS
 	= lounge
 	x (couch and lamp - 1F6CB)
+	x (tumbler glass - 1F943)
 1F379	TROPICAL DRINK
 1F37A	BEER MUG
 1F37B	CLINKING BEER MUGS
 	= cheers
+	x (clinking glasses - 1F942)
 1F37C	BABY BOTTLE
 @		Accommodation symbol
 1F37D	FORK AND KNIFE WITH PLATE
 	= dining
 	x (fork and knife - 1F374)
+	~ 1F37D FE0E text style
+	~ 1F37D FE0F emoji style
 @		Beverage and food symbols
 1F37E	BOTTLE WITH POPPING CORK
 1F37F	POPCORN
@@ -43094,6 +44853,7 @@ FFFF	<not a character>
 1F384	CHRISTMAS TREE
 1F385	FATHER CHRISTMAS
 	= Santa Claus
+	x (mother christmas - 1F936)
 1F386	FIREWORKS
 1F387	FIREWORK SPARKLER
 	* long, stick-like firework that looks like a burning incense stick
@@ -43125,7 +44885,11 @@ FFFF	<not a character>
 	= occasion
 	x (bouquet - 1F490)
 1F396	MILITARY MEDAL
+	~ 1F396 FE0E text style
+	~ 1F396 FE0F emoji style
 1F397	REMINDER RIBBON
+	~ 1F397 FE0E text style
+	~ 1F397 FE0F emoji style
 @		Musical symbols
 1F398	MUSICAL KEYBOARD WITH JACKS
 	= midi, midi keyboard
@@ -43133,10 +44897,16 @@ FFFF	<not a character>
 1F399	STUDIO MICROPHONE
 	= microphone
 	x (microphone - 1F3A4)
+	~ 1F399 FE0E text style
+	~ 1F399 FE0F emoji style
 1F39A	LEVEL SLIDER
 	= level control
+	~ 1F39A FE0E text style
+	~ 1F39A FE0F emoji style
 1F39B	CONTROL KNOBS
 	= audio control
+	~ 1F39B FE0E text style
+	~ 1F39B FE0F emoji style
 1F39C	BEAMED ASCENDING MUSICAL NOTES
 	= musical performance
 	= music, musical background
@@ -43149,9 +44919,13 @@ FFFF	<not a character>
 1F39E	FILM FRAMES
 	= film clip
 	x (movie camera - 1F3A5)
+	~ 1F39E FE0E text style
+	~ 1F39E FE0F emoji style
 1F39F	ADMISSION TICKETS
 	= ticket
 	x (ticket - 1F3AB)
+	~ 1F39F FE0E text style
+	~ 1F39F FE0F emoji style
 1F3A0	CAROUSEL HORSE
 	= amusement park
 1F3A1	FERRIS WHEEL
@@ -43214,6 +44988,10 @@ FFFF	<not a character>
 @		Sport symbols
 @+		See other sport symbols in the Miscelleaneous Symbols block.
 1F3BD	RUNNING SHIRT WITH SASH
+	= ekiden (Japanese)
+	* running shirt with separate sash signifies long-distance relay running
+	* symbol is generalized to represent athletics
+	* glyph may be shown with a sash, a stripe, or neither
 1F3BE	TENNIS RACQUET AND BALL
 	= tennis
 1F3BF	SKI AND SKI BOOT
@@ -43229,6 +45007,7 @@ FFFF	<not a character>
 1F3C4	SURFER
 	= surfing
 1F3C5	SPORTS MEDAL
+	x (first place medal - 1F947)
 1F3C6	TROPHY
 1F3C7	HORSE RACING
 1F3C8	AMERICAN FOOTBALL
@@ -43236,48 +45015,80 @@ FFFF	<not a character>
 1F3CA	SWIMMER
 1F3CB	WEIGHT LIFTER
 	= health
+	~ 1F3CB FE0E text style
+	~ 1F3CB FE0F emoji style
 1F3CC	GOLFER
+	~ 1F3CC FE0E text style
+	~ 1F3CC FE0F emoji style
 1F3CD	RACING MOTORCYCLE
 	= motorcycle
 	* may be depicted as an ordinary motorcycle, especially in emoji presentation
+	~ 1F3CD FE0E text style
+	~ 1F3CD FE0F emoji style
 1F3CE	RACING CAR
 	= race car
+	~ 1F3CE FE0E text style
+	~ 1F3CE FE0F emoji style
 1F3CF	CRICKET BAT AND BALL
 1F3D0	VOLLEYBALL
 1F3D1	FIELD HOCKEY STICK AND BALL
 1F3D2	ICE HOCKEY STICK AND PUCK
 1F3D3	TABLE TENNIS PADDLE AND BALL
-@		Buiding and map symbols
+@		Building and map symbols
 1F3D4	SNOW CAPPED MOUNTAIN
 	x (mountain - 26F0)
+	~ 1F3D4 FE0E text style
+	~ 1F3D4 FE0F emoji style
 1F3D5	CAMPING
 	= camping site
 	x (tent - 26FA)
+	~ 1F3D5 FE0E text style
+	~ 1F3D5 FE0F emoji style
 1F3D6	BEACH WITH UMBRELLA
 	x (umbrella on ground - 26F1)
+	~ 1F3D6 FE0E text style
+	~ 1F3D6 FE0F emoji style
 1F3D7	BUILDING CONSTRUCTION
 	= under construction
 	x (construction sign - 1F6A7)
+	~ 1F3D7 FE0E text style
+	~ 1F3D7 FE0F emoji style
 1F3D8	HOUSE BUILDINGS
 	= town
 	x (house with garden - 1F3E1)
+	~ 1F3D8 FE0E text style
+	~ 1F3D8 FE0F emoji style
 1F3D9	CITYSCAPE
 	= skyline, city
 	x (cityscape at dusk - 1F306)
+	~ 1F3D9 FE0E text style
+	~ 1F3D9 FE0F emoji style
 1F3DA	DERELICT HOUSE BUILDING
 	= derelict site
+	~ 1F3DA FE0E text style
+	~ 1F3DA FE0F emoji style
 1F3DB	CLASSICAL BUILDING
 	= public building
+	~ 1F3DB FE0E text style
+	~ 1F3DB FE0F emoji style
 1F3DC	DESERT
 	= desert
 	x (cactus - 1F335)
+	~ 1F3DC FE0E text style
+	~ 1F3DC FE0F emoji style
 1F3DD	DESERT ISLAND
 	= island
 	x (palm tree - 1F334)
+	~ 1F3DD FE0E text style
+	~ 1F3DD FE0F emoji style
 1F3DE	NATIONAL PARK
 	* by semantic extension has come to connote saving trees, and hence is also used as a symbol meaning "do not print this (email, document)"
 	x (evergreen tree - 1F332)
+	~ 1F3DE FE0E text style
+	~ 1F3DE FE0F emoji style
 1F3DF	STADIUM
+	~ 1F3DF FE0E text style
+	~ 1F3DF FE0F emoji style
 1F3E0	HOUSE BUILDING
 1F3E1	HOUSE WITH GARDEN
 	= home, house with yard
@@ -43315,25 +45126,33 @@ FFFF	<not a character>
 1F3F3	WAVING WHITE FLAG
 	= flag
 	x (white flag - 2690)
+	~ 1F3F3 FE0E text style
+	~ 1F3F3 FE0F emoji style
 1F3F4	WAVING BLACK FLAG
 @		Rosettes
 1F3F5	ROSETTE
 	x (white florette - 2740)
+	~ 1F3F5 FE0E text style
+	~ 1F3F5 FE0F emoji style
 1F3F6	BLACK ROSETTE
 	x (eight petalled outlined black florette - 2741)
 @		Miscellaneous symbol
 1F3F7	LABEL
 	= price, price tag
 	x (bookmark - 1F516)
+	~ 1F3F7 FE0E text style
+	~ 1F3F7 FE0F emoji style
 @		Sport symbols
 1F3F8	BADMINTON RACQUET AND SHUTTLECOCK
 1F3F9	BOW AND ARROW
-	* used for Sagittarius
+	= archery
+	* also used for Sagittarius
 	x (sagittarius - 2650)
 @		Miscellaneous symbol
 1F3FA	AMPHORA
 	* used for Aquarius
 	x (aquarius - 2652)
+	x (linear b ideogram vessel b209 - 100E8)
 @		Emoji modifiers
 1F3FB	EMOJI MODIFIER FITZPATRICK TYPE-1-2
 1F3FC	EMOJI MODIFIER FITZPATRICK TYPE-3
@@ -43371,6 +45190,7 @@ FFFF	<not a character>
 1F40D	SNAKE
 	* sixth of the signs of the Asian zodiac
 1F40E	HORSE
+	= equestrian sports
 	* seventh of the signs of the Asian zodiac
 1F40F	RAM
 	* eighth of the signs of the Asian zodiac
@@ -43408,6 +45228,7 @@ FFFF	<not a character>
 1F420	TROPICAL FISH
 1F421	BLOWFISH
 1F422	TURTLE
+	= tortoise, terrapin
 1F423	HATCHING CHICK
 1F424	BABY CHICK
 1F425	FRONT-FACING BABY CHICK
@@ -43444,10 +45265,14 @@ FFFF	<not a character>
 	x (footprints - 1F463)
 1F43F	CHIPMUNK
 	= animal, critter
+	~ 1F43F FE0E text style
+	~ 1F43F FE0F emoji style
 @		Facial parts symbols
 1F440	EYES
 1F441	EYE
 	= sight
+	~ 1F441 FE0E text style
+	~ 1F441 FE0F emoji style
 1F442	EAR
 1F443	NOSE
 1F444	MOUTH
@@ -43520,6 +45345,7 @@ FFFF	<not a character>
 1F46F	WOMAN WITH BUNNY EARS
 	* most popularly depicted as two women dancing
 1F470	BRIDE WITH VEIL
+	x (man in tuxedo - 1F935)
 1F471	PERSON WITH BLOND HAIR
 1F472	MAN WITH GUA PI MAO
 1F473	MAN WITH TURBAN
@@ -43532,6 +45358,7 @@ FFFF	<not a character>
 	x (helmet with white cross - 26D1)
 @		Fairy tale symbols
 1F478	PRINCESS
+	x (prince - 1F934)
 1F479	JAPANESE OGRE
 1F47A	JAPANESE GOBLIN
 1F47B	GHOST
@@ -43548,6 +45375,8 @@ FFFF	<not a character>
 1F482	GUARDSMAN
 1F483	DANCER
 	* also used for "let's party"
+	* may be depicted as gender neutral
+	x (man dancing - 1F57A)
 @		Personal care symbols
 1F484	LIPSTICK
 1F485	NAIL POLISH
@@ -43757,6 +45586,8 @@ FFFF	<not a character>
 1F4FD	FILM PROJECTOR
 	= movies
 	x (cinema - 1F3A6)
+	~ 1F4FD FE0E text style
+	~ 1F4FD FE0F emoji style
 1F4FE	PORTABLE STEREO
 	= stereo
 @		Religious symbol
@@ -43847,9 +45678,11 @@ FFFF	<not a character>
 	= Japanese kitchen knife
 	x (dagger knife - 1F5E1)
 1F52B	PISTOL
+	= handgun, revolver
 1F52C	MICROSCOPE
 1F52D	TELESCOPE
 1F52E	CRYSTAL BALL
+@		Miscellaneous symbols
 1F52F	SIX POINTED STAR WITH MIDDLE DOT
 	x (star of david - 2721)
 1F530	JAPANESE SYMBOL FOR BEGINNER
@@ -43907,8 +45740,12 @@ FFFF	<not a character>
 1F549	OM SYMBOL
 	* generic symbol independent of Devanagari font
 	x (devanagari om - 0950)
+	~ 1F549 FE0E text style
+	~ 1F549 FE0F emoji style
 1F54A	DOVE OF PEACE
 	= peace
+	~ 1F54A FE0E text style
+	~ 1F54A FE0F emoji style
 1F54B	KAABA
 1F54C	MOSQUE
 1F54D	SYNAGOGUE
@@ -43962,25 +45799,47 @@ FFFF	<not a character>
 1F56E	BOOK
 	x (open book - 1F4D6)
 1F56F	CANDLE
+	~ 1F56F FE0E text style
+	~ 1F56F FE0F emoji style
 1F570	MANTELPIECE CLOCK
 	= clock
 	x (alarm clock - 23F0)
+	~ 1F570 FE0E text style
+	~ 1F570 FE0F emoji style
 1F571	BLACK SKULL AND CROSSBONES
 	x (skull and crossbones - 2620)
 1F572	NO PIRACY
 1F573	HOLE
 	= portable hole
+	~ 1F573 FE0E text style
+	~ 1F573 FE0F emoji style
 1F574	MAN IN BUSINESS SUIT LEVITATING
 	= jump
+	~ 1F574 FE0E text style
+	~ 1F574 FE0F emoji style
 1F575	SLEUTH OR SPY
 	= investigate
+	~ 1F575 FE0E text style
+	~ 1F575 FE0F emoji style
 1F576	DARK SUNGLASSES
 	= cool
+	~ 1F576 FE0E text style
+	~ 1F576 FE0F emoji style
 @		Animal symbols
 1F577	SPIDER
+	~ 1F577 FE0E text style
+	~ 1F577 FE0F emoji style
 1F578	SPIDER WEB
+	~ 1F578 FE0E text style
+	~ 1F578 FE0F emoji style
 @		Game symbol
 1F579	JOYSTICK
+	~ 1F579 FE0E text style
+	~ 1F579 FE0F emoji style
+@		Role symbol
+1F57A	MAN DANCING
+	* forms a gender pair with 1F483
+	x (dancer - 1F483)
 @		Communication symbols
 1F57B	LEFT HAND TELEPHONE RECEIVER
 	x (telephone receiver - 1F4DE)
@@ -44013,6 +45872,8 @@ FFFF	<not a character>
 1F587	LINKED PAPERCLIPS
 	= links
 	x (paperclip - 1F4CE)
+	~ 1F587 FE0E text style
+	~ 1F587 FE0F emoji style
 1F588	BLACK PUSHPIN
 	= marker
 	x (pushpin - 1F4CC)
@@ -44021,13 +45882,21 @@ FFFF	<not a character>
 	x (lower right pencil - 270E)
 1F58A	LOWER LEFT BALLPOINT PEN
 	= ballpoint pen
+	~ 1F58A FE0E text style
+	~ 1F58A FE0F emoji style
 1F58B	LOWER LEFT FOUNTAIN PEN
 	= fountain pen
 	x (white nib - 2711)
+	~ 1F58B FE0E text style
+	~ 1F58B FE0F emoji style
 1F58C	LOWER LEFT PAINTBRUSH
 	= brush
+	~ 1F58C FE0E text style
+	~ 1F58C FE0F emoji style
 1F58D	LOWER LEFT CRAYON
 	= crayon
+	~ 1F58D FE0E text style
+	~ 1F58D FE0F emoji style
 @		Hand symbols
 1F58E	LEFT WRITING HAND
 	x (writing hand - 270D)
@@ -44036,6 +45905,8 @@ FFFF	<not a character>
 1F590	RAISED HAND WITH FINGERS SPLAYED
 	= halt
 	x (raised hand - 270B)
+	~ 1F590 FE0E text style
+	~ 1F590 FE0F emoji style
 1F591	REVERSED RAISED HAND WITH FINGERS SPLAYED
 1F592	REVERSED THUMBS UP SIGN
 	x (thumbs up sign - 1F44D)
@@ -44045,6 +45916,7 @@ FFFF	<not a character>
 	x (victory hand - 270C)
 1F595	REVERSED HAND WITH MIDDLE FINGER EXTENDED
 1F596	RAISED HAND WITH PART BETWEEN MIDDLE AND RING FINGERS
+	= Vulcan salute
 1F597	WHITE DOWN POINTING LEFT HAND INDEX
 	x (white down pointing index - 261F)
 	x (white down pointing backhand index - 1F447)
@@ -44068,15 +45940,23 @@ FFFF	<not a character>
 	x (white up pointing backhand index - 1F446)
 1F5A3	BLACK DOWN POINTING BACKHAND INDEX
 	x (white down pointing backhand index - 1F447)
+@		Heart symbol
+1F5A4	BLACK HEART
+	* unequivocally represented as black in all variants
+	x (black heart suit - 2665)
 @		Computer symbols
 1F5A5	DESKTOP COMPUTER
 	= tower computer
+	~ 1F5A5 FE0E text style
+	~ 1F5A5 FE0F emoji style
 1F5A6	KEYBOARD AND MOUSE
 	x (keyboard - 2328)
 1F5A7	THREE NETWORKED COMPUTERS
 	= computer network
 1F5A8	PRINTER
 	x (fax machine - 1F4E0)
+	~ 1F5A8 FE0E text style
+	~ 1F5A8 FE0F emoji style
 1F5A9	POCKET CALCULATOR
 	= calculator
 1F5AA	BLACK HARD SHELL FLOPPY DISK
@@ -44091,8 +45971,12 @@ FFFF	<not a character>
 1F5AF	ONE BUTTON MOUSE
 1F5B0	TWO BUTTON MOUSE
 1F5B1	THREE BUTTON MOUSE
+	~ 1F5B1 FE0E text style
+	~ 1F5B1 FE0F emoji style
 1F5B2	TRACKBALL
 	= ballpoint
+	~ 1F5B2 FE0E text style
+	~ 1F5B2 FE0F emoji style
 1F5B3	OLD PERSONAL COMPUTER
 	= personal computer
 	x (personal computer - 1F4BB)
@@ -44114,6 +45998,8 @@ FFFF	<not a character>
 	= graphic document
 1F5BC	FRAME WITH PICTURE
 	= art
+	~ 1F5BC FE0E text style
+	~ 1F5BC FE0F emoji style
 1F5BD	FRAME WITH TILES
 	= frames
 1F5BE	FRAME WITH AN X
@@ -44128,9 +46014,15 @@ FFFF	<not a character>
 1F5C2	CARD INDEX DIVIDERS
 	= index
 	x (card index - 1F4C7)
+	~ 1F5C2 FE0E text style
+	~ 1F5C2 FE0F emoji style
 1F5C3	CARD FILE BOX
 	= archive
+	~ 1F5C3 FE0E text style
+	~ 1F5C3 FE0F emoji style
 1F5C4	FILE CABINET
+	~ 1F5C4 FE0E text style
+	~ 1F5C4 FE0F emoji style
 1F5C5	EMPTY NOTE
 1F5C6	EMPTY NOTE PAGE
 1F5C7	EMPTY NOTE PAD
@@ -44147,12 +46039,18 @@ FFFF	<not a character>
 1F5D0	PAGES
 1F5D1	WASTEBASKET
 	= trashcan
+	~ 1F5D1 FE0E text style
+	~ 1F5D1 FE0F emoji style
 1F5D2	SPIRAL NOTE PAD
 	= note, empty calendar
 	x (calendar - 1F4C5)
+	~ 1F5D2 FE0E text style
+	~ 1F5D2 FE0F emoji style
 1F5D3	SPIRAL CALENDAR PAD
 	= calendar, day 1
 	x (tear-off calendar - 1F4C6)
+	~ 1F5D3 FE0E text style
+	~ 1F5D3 FE0F emoji style
 1F5D4	DESKTOP WINDOW
 1F5D5	MINIMIZE
 1F5D6	MAXIMIZE
@@ -44168,13 +46066,19 @@ FFFF	<not a character>
 1F5DB	DECREASE FONT SIZE SYMBOL
 1F5DC	COMPRESSION
 	* symbol depicts a hand press with a box inside
+	~ 1F5DC FE0E text style
+	~ 1F5DC FE0F emoji style
 1F5DD	OLD KEY
 	= encryption
 	x (key - 1F511)
+	~ 1F5DD FE0E text style
+	~ 1F5DD FE0F emoji style
 @		Miscellaneous symbols
 1F5DE	ROLLED-UP NEWSPAPER
 	= news
 	x (newspaper - 1F4F0)
+	~ 1F5DE FE0E text style
+	~ 1F5DE FE0F emoji style
 1F5DF	PAGE WITH CIRCLED TEXT
 	= classified
 1F5E0	STOCK CHART
@@ -44186,12 +46090,16 @@ FFFF	<not a character>
 	= rated for violence
 	= hate
 	x (hocho - 1F52A)
+	~ 1F5E1 FE0E text style
+	~ 1F5E1 FE0F emoji style
 1F5E2	LIPS
 	= rated for sex
 	= kiss
 	x (kiss mark - 1F48B)
 1F5E3	SPEAKING HEAD IN SILHOUETTE
 	= rated for strong language
+	~ 1F5E3 FE0E text style
+	~ 1F5E3 FE0F emoji style
 @		Sound symbols
 1F5E4	THREE RAYS ABOVE
 1F5E5	THREE RAYS BELOW
@@ -44201,6 +46109,8 @@ FFFF	<not a character>
 	x (three lines converging left - 269F)
 @		Bubble symbols
 1F5E8	LEFT SPEECH BUBBLE
+	~ 1F5E8 FE0E text style
+	~ 1F5E8 FE0F emoji style
 1F5E9	RIGHT SPEECH BUBBLE
 1F5EA	TWO SPEECH BUBBLES
 	= chat
@@ -44213,6 +46123,8 @@ FFFF	<not a character>
 	= shout left
 1F5EF	RIGHT ANGER BUBBLE
 	= shout right
+	~ 1F5EF FE0E text style
+	~ 1F5EF FE0F emoji style
 1F5F0	MOOD BUBBLE
 	= new
 	x (collision symbol - 1F4A5)
@@ -44225,6 +46137,8 @@ FFFF	<not a character>
 1F5F3	BALLOT BOX WITH BALLOT
 	= vote
 	x (ballot box with x - 2612)
+	~ 1F5F3 FE0E text style
+	~ 1F5F3 FE0F emoji style
 1F5F4	BALLOT SCRIPT X
 	= x mark
 	x (ballot x - 2717)
@@ -44240,6 +46154,8 @@ FFFF	<not a character>
 	x (ballot box with check - 2611)
 @		Map symbol
 1F5FA	WORLD MAP
+	~ 1F5FA FE0E text style
+	~ 1F5FA FE0F emoji style
 @		Cultural symbols
 1F5FB	MOUNT FUJI
 1F5FC	TOKYO TOWER
@@ -44247,6 +46163,7 @@ FFFF	<not a character>
 1F5FE	SILHOUETTE OF JAPAN
 1F5FF	MOYAI
 	* Japanese stone statue like Moai on Easter Island
+@~	!
 @@	1F600	Emoticons	1F64F
 @+		The emoticons have been organized by mouth shape to make it easier to locate the different characters in the code chart.
 @		Faces
@@ -44318,7 +46235,6 @@ FFFF	<not a character>
 1F634	SLEEPING FACE
 1F635	DIZZY FACE
 1F636	FACE WITHOUT MOUTH
-	* used for the South Wind in some Mahjong annotation
 	x (white circle with two dots - 2687)
 1F637	FACE WITH MEDICAL MASK
 @		Cat faces
@@ -44345,6 +46261,7 @@ FFFF	<not a character>
 	* conveys "no deal" or "not ok", not anger; the inverse of 1F646 face with ok gesture
 1F646	FACE WITH OK GESTURE
 1F647	PERSON BOWING DEEPLY
+	* most commonly depicted as Japanese-style bowing while seated (dogeza)
 1F648	SEE-NO-EVIL MONKEY
 1F649	HEAR-NO-EVIL MONKEY
 1F64A	SPEAK-NO-EVIL MONKEY
@@ -44390,7 +46307,7 @@ FFFF	<not a character>
 1F668	HOLLOW QUILT SQUARE ORNAMENT
 1F669	HOLLOW QUILT SQUARE ORNAMENT IN BLACK SQUARE
 1F66A	SOLID QUILT SQUARE ORNAMENT
-	=  fourfold knot ornament
+	= fourfold knot ornament
 1F66B	SOLID QUILT SQUARE ORNAMENT IN BLACK SQUARE
 	= inverse fourfold knot ornament
 @		Rocket ornaments
@@ -44402,7 +46319,7 @@ FFFF	<not a character>
 1F66F	DOWNWARDS ROCKET
 @		Ampersand and ligature et ornaments
 1F670	SCRIPT LIGATURE ET ORNAMENT
-	= italic ampersand lower case
+	= italic ampersand lowercase
 	x (tironian sign et - 204A)
 1F671	HEAVY SCRIPT LIGATURE ET ORNAMENT
 1F672	LIGATURE OPEN ET ORNAMENT
@@ -44549,31 +46466,58 @@ FFFF	<not a character>
 @+		These symbols constitute a set along with 1F378 for lounge.
 1F6CB	COUCH AND LAMP
 	= furniture, lifestyles
+	~ 1F6CB FE0E text style
+	~ 1F6CB FE0F emoji style
 1F6CC	SLEEPING ACCOMMODATION
 	= hotel, guestrooms
 	x (hotel - 1F3E8)
 1F6CD	SHOPPING BAGS
 	= shopping
+	~ 1F6CD FE0E text style
+	~ 1F6CD FE0F emoji style
 1F6CE	BELLHOP BELL
 	= reception, services
+	~ 1F6CE FE0E text style
+	~ 1F6CE FE0F emoji style
 1F6CF	BED
-@		Signage
+	~ 1F6CF FE0E text style
+	~ 1F6CF FE0F emoji style
+@		Signage and other symbols
 1F6D0	PLACE OF WORSHIP
+1F6D1	OCTAGONAL SIGN
+	= stop sign
+	* may contain text indicating stop
+	x (warning sign - 26A0)
+	x (heavy white down-pointing triangle - 26DB)
+1F6D2	SHOPPING TROLLEY
+	= shopping cart
 @		Miscellaneous symbols
 1F6E0	HAMMER AND WRENCH
 	= tools, repair facility
 	x (hammer and pick - 2692)
+	~ 1F6E0 FE0E text style
+	~ 1F6E0 FE0F emoji style
 1F6E1	SHIELD
 	= US road interstate highway
+	~ 1F6E1 FE0E text style
+	~ 1F6E1 FE0F emoji style
 1F6E2	OIL DRUM
 	= commodities
+	~ 1F6E2 FE0E text style
+	~ 1F6E2 FE0F emoji style
 1F6E3	MOTORWAY
+	~ 1F6E3 FE0E text style
+	~ 1F6E3 FE0F emoji style
 1F6E4	RAILWAY TRACK
 	= railroad
+	~ 1F6E4 FE0E text style
+	~ 1F6E4 FE0F emoji style
 @		Vehicles
 1F6E5	MOTOR BOAT
 	= boat
 	x (speedboat - 1F6A4)
+	~ 1F6E5 FE0E text style
+	~ 1F6E5 FE0F emoji style
 1F6E6	UP-POINTING MILITARY AIRPLANE
 	= military airport
 1F6E7	UP-POINTING AIRPLANE
@@ -44582,12 +46526,16 @@ FFFF	<not a character>
 1F6E8	UP-POINTING SMALL AIRPLANE
 	= airfield
 1F6E9	SMALL AIRPLANE
+	~ 1F6E9 FE0E text style
+	~ 1F6E9 FE0F emoji style
 1F6EA	NORTHEAST-POINTING AIRPLANE
 1F6EB	AIRPLANE DEPARTURE
 	= departures
 1F6EC	AIRPLANE ARRIVING
 	= arrivals
 1F6F0	SATELLITE
+	~ 1F6F0 FE0E text style
+	~ 1F6F0 FE0F emoji style
 1F6F1	ONCOMING FIRE ENGINE
 	= fire
 	x (fire engine - 1F692)
@@ -44598,6 +46546,12 @@ FFFF	<not a character>
 1F6F3	PASSENGER SHIP
 	= cruise line vacation
 	x (ship - 1F6A2)
+	~ 1F6F3 FE0E text style
+	~ 1F6F3 FE0F emoji style
+1F6F4	SCOOTER
+1F6F5	MOTOR SCOOTER
+1F6F6	CANOE
+@~	!
 @@	1F700	Alchemical Symbols	1F77F
 @		Symbols for Aristotelian elements
 1F700	ALCHEMICAL SYMBOL FOR QUINTESSENCE
@@ -44838,7 +46792,7 @@ FFFF	<not a character>
 1F784	BLACK SLIGHTLY SMALL CIRCLE
 @		White circles
 @+		Adjective refers to the thickness of the ring.
-@+		Constitute a set as follows: 25CB, 2B58, 1F785-1F789. 
+@+		Constitute a set as follows: 25CB, 2B58, 1F785-1F789
 1F785	MEDIUM BOLD WHITE CIRCLE
 	x (medium white circle - 26AA)
 1F786	BOLD WHITE CIRCLE
@@ -45161,8 +47115,101 @@ FFFF	<not a character>
 1F916	ROBOT FACE
 	x (alien monster - 1F47E)
 1F917	HUGGING FACE
-@		Hand symbol
+@		Hand symbols
 1F918	SIGN OF THE HORNS
+1F919	CALL ME HAND
+1F91A	RAISED BACK OF HAND
+1F91B	LEFT-FACING FIST
+1F91C	RIGHT-FACING FIST
+1F91D	HANDSHAKE
+1F91E	HAND WITH INDEX AND MIDDLE FINGERS CROSSED
+@		Emoticon faces
+1F920	FACE WITH COWBOY HAT
+1F921	CLOWN FACE
+1F922	NAUSEATED FACE
+1F923	ROLLING ON THE FLOOR LAUGHING
+	= rofl, rotfl
+1F924	DROOLING FACE
+1F925	LYING FACE
+1F926	FACE PALM
+	= frustration, disbelief
+1F927	SNEEZING FACE
+	= gesundheit
+@		Portrait and role symbols
+1F930	PREGNANT WOMAN
+1F933	SELFIE
+	* typically used with face or human figure on the left
+1F934	PRINCE
+	x (princess - 1F478)
+1F935	MAN IN TUXEDO
+	* appearance for groom, may be paired with 1F470
+	x (bride with veil - 1F470)
+1F936	MOTHER CHRISTMAS
+	= Mrs. Claus
+	x (father christmas - 1F385)
+1F937	SHRUG
+1F938	PERSON DOING CARTWHEEL
+	= gymnastics
+1F939	JUGGLING
+1F93A	FENCER
+	= fencing
+	x (crossed swords - 2694)
+1F93B	MODERN PENTATHLON
+1F93C	WRESTLERS
+	= wrestling
+1F93D	WATER POLO
+1F93E	HANDBALL
+@		Miscellaneous symbols
+1F940	WILTED FLOWER
+	x (rose - 1F339)
+1F941	DRUM WITH DRUMSTICKS
+1F942	CLINKING GLASSES
+	= celebration, formal toasting
+	x (clinking beer mugs - 1F37B)
+1F943	TUMBLER GLASS
+	= whisky
+	* typically shown with ice
+	x (cocktail glass - 1F378)
+1F944	SPOON
+	x (fork and knife - 1F374)
+1F945	GOAL NET
+1F946	RIFLE
+	= marksmanship, shooting, hunting
+1F947	FIRST PLACE MEDAL
+	= gold medal
+	x (sports medal - 1F3C5)
+1F948	SECOND PLACE MEDAL
+	= silver medal
+1F949	THIRD PLACE MEDAL
+	= bronze medal
+1F94A	BOXING GLOVE
+	= boxing
+1F94B	MARTIAL ARTS UNIFORM
+	= judo, karate, taekwondo
+@		Food symbols
+1F950	CROISSANT
+1F951	AVOCADO
+1F952	CUCUMBER
+	= pickle
+1F953	BACON
+1F954	POTATO
+1F955	CARROT
+1F956	BAGUETTE BREAD
+	= French bread
+1F957	GREEN SALAD
+1F958	SHALLOW PAN OF FOOD
+	= paella, casserole
+1F959	STUFFED FLATBREAD
+	= döner kebab, falafel, gyro, shawarma
+1F95A	EGG
+	= chicken egg
+1F95B	GLASS OF MILK
+	= milk
+1F95C	PEANUTS
+1F95D	KIWIFRUIT
+1F95E	PANCAKES
+	= hotcakes, crêpes, blini
+	* sweet or savory
 @		Animal symbols
 1F980	CRAB
 	* used for Cancer
@@ -45175,6 +47222,19 @@ FFFF	<not a character>
 	x (scorpius - 264F)
 1F983	TURKEY
 1F984	UNICORN FACE
+1F985	EAGLE
+1F986	DUCK
+1F987	BAT
+1F988	SHARK
+1F989	OWL
+1F98A	FOX FACE
+1F98B	BUTTERFLY
+1F98C	DEER
+1F98D	GORILLA
+1F98E	LIZARD
+1F98F	RHINOCEROS
+1F990	SHRIMP
+1F991	SQUID
 @		Food symbol
 1F9C0	CHEESE WEDGE
 @@	1FF80	Unassigned	1FFFF
@@ -46447,7 +48507,6 @@ E007D	TAG RIGHT CURLY BRACKET
 E007E	TAG TILDE
 @		Stateful tag terminator
 E007F	CANCEL TAG
-	* This character is deprecated, and its use is strongly discouraged.
 @@	E0100	Variation Selectors Supplement	E01EF
 @+		These complete the set started at FE00 to FE0F
 @		Variation selectors

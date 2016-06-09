@@ -1,14 +1,16 @@
-# NamedSequencesProv-8.0.0.txt
-# Date: 2015-05-11, 23:40:00 GMT [KW, LI]
+# NamedSequencesProv-9.0.0.txt
+# Date: 2016-05-26, 00:00:00 GMT [KW, LI]
+# © 2016 Unicode®, Inc.
+# For terms of use, see http://www.unicode.org/terms_of_use.html
+#
+# Unicode Character Database
+# For documentation, see http://www.unicode.org/reports/tr44/
 #
 # Provisional Unicode Named Character Sequences
 #
 # Note: This data file contains those named character
 #   sequences which have been designated to be provisional,
 #   rather than fully approved.
-#
-# Copyright (c) 1991-2015 Unicode, Inc.
-# For terms of use, see http://www.unicode.org/terms_of_use.html
 #
 # Format:
 # Name of Sequence; Code Point Sequence for USI
@@ -40,19 +42,20 @@
 
 # Named keycap sequences for telephone keypad (used for emoji)
 # Added to provisional named sequences, 2015-05-05
+# FE0F added to the sequences, 2016-05-11
 
-KEYCAP NUMBER SIGN;0023 20E3
-KEYCAP ASTERISK;002A 20E3
-KEYCAP DIGIT ZERO;0030 20E3
-KEYCAP DIGIT ONE;0031 20E3
-KEYCAP DIGIT TWO;0032 20E3
-KEYCAP DIGIT THREE;0033 20E3
-KEYCAP DIGIT FOUR;0034 20E3
-KEYCAP DIGIT FIVE;0035 20E3
-KEYCAP DIGIT SIX;0036 20E3
-KEYCAP DIGIT SEVEN;0037 20E3
-KEYCAP DIGIT EIGHT;0038 20E3
-KEYCAP DIGIT NINE;0039 20E3
+KEYCAP NUMBER SIGN;0023 FE0F 20E3
+KEYCAP ASTERISK;002A FE0F 20E3
+KEYCAP DIGIT ZERO;0030 FE0F 20E3
+KEYCAP DIGIT ONE;0031 FE0F 20E3
+KEYCAP DIGIT TWO;0032 FE0F 20E3
+KEYCAP DIGIT THREE;0033 FE0F 20E3
+KEYCAP DIGIT FOUR;0034 FE0F 20E3
+KEYCAP DIGIT FIVE;0035 FE0F 20E3
+KEYCAP DIGIT SIX;0036 FE0F 20E3
+KEYCAP DIGIT SEVEN;0037 FE0F 20E3
+KEYCAP DIGIT EIGHT;0038 FE0F 20E3
+KEYCAP DIGIT NINE;0039 FE0F 20E3
 
 # ================================================
 

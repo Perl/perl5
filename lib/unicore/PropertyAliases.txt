@@ -1,10 +1,11 @@
-# PropertyAliases-8.0.0.txt
-# Date: 2015-02-14, 10:26:09 GMT [MD]
+# PropertyAliases-9.0.0.txt
+# Date: 2016-03-02, 18:55:05 GMT
+# © 2016 Unicode®, Inc.
+# Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
+# For terms of use, see http://www.unicode.org/terms_of_use.html
 #
 # Unicode Character Database
-# Copyright (c) 1991-2015 Unicode, Inc.
-# For terms of use, see http://www.unicode.org/terms_of_use.html
-# For documentation, see http://www.unicode.org/reports/tr44/
+#   For documentation, see http://www.unicode.org/reports/tr44/
 #
 # This file contains aliases for properties used in the UCD.
 # These names can be used for XML formats of UCD data, for regular-expression
@@ -171,10 +172,11 @@ OMath                    ; Other_Math
 OUpper                   ; Other_Uppercase
 Pat_Syn                  ; Pattern_Syntax
 Pat_WS                   ; Pattern_White_Space
+PCM                      ; Prepended_Concatenation_Mark
 QMark                    ; Quotation_Mark
 Radical                  ; Radical
 SD                       ; Soft_Dotted
-STerm                    ; STerm
+STerm                    ; Sentence_Terminal
 Term                     ; Terminal_Punctuation
 UIdeo                    ; Unified_Ideograph
 Upper                    ; Uppercase
@@ -188,6 +190,6 @@ XO_NFKC                  ; Expands_On_NFKC
 XO_NFKD                  ; Expands_On_NFKD
 
 # ================================================
-# Total:    117
+# Total:    118
 
 # EOF

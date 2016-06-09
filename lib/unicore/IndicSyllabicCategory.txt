@@ -1,9 +1,9 @@
-# IndicSyllabicCategory-8.0.0.txt
-# Date: 2015-05-12, 10:00:00 GMT [RP, KW, LI]
-#
-# Unicode Character Database
-# Copyright (c) 1991-2015 Unicode, Inc.
+# IndicSyllabicCategory-9.0.0.txt
+# Date: 2016-05-21, 02:46:00 GMT [RP]
+# © 2016 Unicode®, Inc.
+# Unicode and the Unicode Logo are registered trademarks of Unicode, Inc. in the U.S. and other countries.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
+#
 # For documentation, see UAX #44: Unicode Character Database,
 # at http://www.unicode.org/reports/tr44/
 #
@@ -35,14 +35,14 @@
 # The scripts assessed as Indic in the structural sense used for the
 # Indic_Syllabic_Category are the following:
 #
-# Ahom, Balinese, Batak, Bengali, Brahmi, Buginese, Buhid, Chakma,
-# Cham, Devanagari, Grantha, Gujarati, Gurmukhi, Hanunoo, Javanese,
-# Kaithi, Kannada, Kayah Li, Kharoshthi, Khmer, Khojki, Khudawadi,
-# Lao, Lepcha, Limbu, Mahajani, Malayalam, Meetei Mayek, Modi,
-# Multani, Myanmar, New Tai Lue, Oriya, Phags-pa, Rejang, Saurashtra,
-# Sharada, Siddham, Sinhala, Sundanese, Syloti Nagri, Tagalog,
-# Tagbanwa, Tai Le, Tai Tham, Tai Viet, Takri, Tamil, Telugu, Thai,
-# Tibetan, and Tirhuta.
+# Ahom, Balinese, Batak, Bengali, Bhaiksuki, Brahmi, Buginese, Buhid,
+# Chakma, Cham, Devanagari, Grantha, Gujarati, Gurmukhi, Hanunoo,
+# Javanese, Kaithi, Kannada, Kayah Li, Kharoshthi, Khmer, Khojki,
+# Khudawadi, Lao, Lepcha, Limbu, Mahajani, Malayalam, Marchen, Meetei
+# Mayek, Modi, Multani, Myanmar, Newa, New Tai Lue, Oriya, Phags-pa,
+# Rejang, Saurashtra, Sharada, Siddham, Sinhala, Sundanese, Syloti
+# Nagri, Tagalog, Tagbanwa, Tai Le, Tai Tham, Tai Viet, Takri, Tamil,
+# Telugu, Thai, Tibetan, and Tirhuta.
 #
 # All characters for all other scripts not in that list
 # take the default value for this property, unless they
@@ -96,6 +96,7 @@
 A80B          ; Bindu # Mn       SYLOTI NAGRI SIGN ANUSVARA
 A873          ; Bindu # Lo       PHAGS-PA LETTER CANDRABINDU
 A880          ; Bindu # Mc       SAURASHTRA SIGN ANUSVARA
+A8C5          ; Bindu # Mn       SAURASHTRA SIGN CANDRABINDU
 A980..A981    ; Bindu # Mn   [2] JAVANESE SIGN PANYANGGA..JAVANESE SIGN CECAK
 10A0E         ; Bindu # Mn       KHAROSHTHI SIGN ANUSVARA
 11000         ; Bindu # Mc       BRAHMI SIGN CANDRABINDU
@@ -107,10 +108,13 @@ A980..A981    ; Bindu # Mn   [2] JAVANESE SIGN PANYANGGA..JAVANESE SIGN CECAK
 112DF         ; Bindu # Mn       KHUDAWADI SIGN ANUSVARA
 11300..11301  ; Bindu # Mn   [2] GRANTHA SIGN COMBINING ANUSVARA ABOVE..GRANTHA SIGN CANDRABINDU
 11302         ; Bindu # Mc       GRANTHA SIGN ANUSVARA
+11443..11444  ; Bindu # Mn   [2] NEWA SIGN CANDRABINDU..NEWA SIGN ANUSVARA
 114BF..114C0  ; Bindu # Mn   [2] TIRHUTA SIGN CANDRABINDU..TIRHUTA SIGN ANUSVARA
 115BC..115BD  ; Bindu # Mn   [2] SIDDHAM SIGN CANDRABINDU..SIDDHAM SIGN ANUSVARA
 1163D         ; Bindu # Mn       MODI SIGN ANUSVARA
 116AB         ; Bindu # Mn       TAKRI SIGN ANUSVARA
+11C3C..11C3D  ; Bindu # Mn   [2] BHAIKSUKI SIGN CANDRABINDU..BHAIKSUKI SIGN ANUSVARA
+11CB5..11CB6  ; Bindu # Mn   [2] MARCHEN SIGN ANUSVARA..MARCHEN SIGN CANDRABINDU
 
 # ================================================
 
@@ -147,10 +151,12 @@ AAF5          ; Visarga # Mc       MEETEI MAYEK VOWEL SIGN VISARGA
 11102         ; Visarga # Mn       CHAKMA SIGN VISARGA
 11182         ; Visarga # Mc       SHARADA SIGN VISARGA
 11303         ; Visarga # Mc       GRANTHA SIGN VISARGA
+11445         ; Visarga # Mc       NEWA SIGN VISARGA
 114C1         ; Visarga # Mc       TIRHUTA SIGN VISARGA
 115BE         ; Visarga # Mc       SIDDHAM SIGN VISARGA
 1163E         ; Visarga # Mc       MODI SIGN VISARGA
 116AC         ; Visarga # Mc       TAKRI SIGN VISARGA
+11C3E         ; Visarga # Mc       BHAIKSUKI SIGN VISARGA
 
 # ================================================
 
@@ -172,7 +178,9 @@ AAF5          ; Visarga # Mc       MEETEI MAYEK VOWEL SIGN VISARGA
 1BBA          ; Avagraha # Lo       SUNDANESE AVAGRAHA
 111C1         ; Avagraha # Lo       SHARADA SIGN AVAGRAHA
 1133D         ; Avagraha # Lo       GRANTHA SIGN AVAGRAHA
+11447         ; Avagraha # Lo       NEWA SIGN AVAGRAHA
 114C4         ; Avagraha # Lo       TIRHUTA SIGN AVAGRAHA
+11C40         ; Avagraha # Lo       BHAIKSUKI SIGN AVAGRAHA
 
 # ================================================
 
@@ -181,7 +189,7 @@ AAF5          ; Visarga # Mc       MEETEI MAYEK VOWEL SIGN VISARGA
 # Nukta (diacritic for borrowed consonants or other consonant
 # modifications)
 
-# [Derivation: (ccc=7) + 0F39 + 10A38..10A3A - 1037]
+# [Derivation: (ccc=7) + 0F39 + 10A38..10A3A - 1037 - 1E94A]
 
 093C          ; Nukta # Mn       DEVANAGARI SIGN NUKTA
 09BC          ; Nukta # Mn       BENGALI SIGN NUKTA
@@ -201,6 +209,7 @@ A9B3          ; Nukta # Mn       JAVANESE SIGN CECAK TELU
 11236         ; Nukta # Mn       KHOJKI SIGN NUKTA
 112E9         ; Nukta # Mn       KHUDAWADI SIGN NUKTA
 1133C         ; Nukta # Mn       GRANTHA SIGN NUKTA
+11446         ; Nukta # Mn       NEWA SIGN NUKTA
 114C3         ; Nukta # Mn       TIRHUTA SIGN NUKTA
 115C0         ; Nukta # Mn       SIDDHAM SIGN NUKTA
 116B7         ; Nukta # Mn       TAKRI SIGN NUKTA
@@ -236,10 +245,12 @@ A9C0          ; Virama # Mc       JAVANESE PANGKON
 111C0         ; Virama # Mc       SHARADA SIGN VIRAMA
 11235         ; Virama # Mc       KHOJKI SIGN VIRAMA
 1134D         ; Virama # Mc       GRANTHA SIGN VIRAMA
+11442         ; Virama # Mn       NEWA SIGN VIRAMA
 114C2         ; Virama # Mn       TIRHUTA SIGN VIRAMA
 115BF         ; Virama # Mn       SIDDHAM SIGN VIRAMA
 1163F         ; Virama # Mn       MODI SIGN VIRAMA
 116B6         ; Virama # Mc       TAKRI SIGN VIRAMA
+11C3F         ; Virama # Mn       BHAIKSUKI SIGN VIRAMA
 
 # ================================================
 
@@ -355,11 +366,14 @@ ABD1          ; Vowel_Independent # Lo       MEETEI MAYEK LETTER ATIYA
 1130F..11310  ; Vowel_Independent # Lo   [2] GRANTHA LETTER EE..GRANTHA LETTER AI
 11313..11314  ; Vowel_Independent # Lo   [2] GRANTHA LETTER OO..GRANTHA LETTER AU
 11360..11361  ; Vowel_Independent # Lo   [2] GRANTHA LETTER VOCALIC RR..GRANTHA LETTER VOCALIC LL
+11400..1140D  ; Vowel_Independent # Lo  [14] NEWA LETTER A..NEWA LETTER AU
 11481..1148E  ; Vowel_Independent # Lo  [14] TIRHUTA LETTER A..TIRHUTA LETTER AU
 11580..1158D  ; Vowel_Independent # Lo  [14] SIDDHAM LETTER A..SIDDHAM LETTER AU
 115D8..115DB  ; Vowel_Independent # Lo   [4] SIDDHAM LETTER THREE-CIRCLE ALTERNATE I..SIDDHAM LETTER ALTERNATE U
 11600..1160D  ; Vowel_Independent # Lo  [14] MODI LETTER A..MODI LETTER AU
 11680..11689  ; Vowel_Independent # Lo  [10] TAKRI LETTER A..TAKRI LETTER AU
+11C00..11C08  ; Vowel_Independent # Lo   [9] BHAIKSUKI LETTER A..BHAIKSUKI LETTER VOCALIC L
+11C0A..11C0D  ; Vowel_Independent # Lo   [4] BHAIKSUKI LETTER E..BHAIKSUKI LETTER AU
 
 # ================================================
 
@@ -556,6 +570,9 @@ ABE9..ABEA    ; Vowel_Dependent # Mc   [2] MEETEI MAYEK VOWEL SIGN CHEINAP..MEET
 1134B..1134C  ; Vowel_Dependent # Mc   [2] GRANTHA VOWEL SIGN OO..GRANTHA VOWEL SIGN AU
 11357         ; Vowel_Dependent # Mc       GRANTHA AU LENGTH MARK
 11362..11363  ; Vowel_Dependent # Mc   [2] GRANTHA VOWEL SIGN VOCALIC L..GRANTHA VOWEL SIGN VOCALIC LL
+11435..11437  ; Vowel_Dependent # Mc   [3] NEWA VOWEL SIGN AA..NEWA VOWEL SIGN II
+11438..1143F  ; Vowel_Dependent # Mn   [8] NEWA VOWEL SIGN U..NEWA VOWEL SIGN AI
+11440..11441  ; Vowel_Dependent # Mc   [2] NEWA VOWEL SIGN O..NEWA VOWEL SIGN AU
 114B0..114B2  ; Vowel_Dependent # Mc   [3] TIRHUTA VOWEL SIGN AA..TIRHUTA VOWEL SIGN II
 114B3..114B8  ; Vowel_Dependent # Mn   [6] TIRHUTA VOWEL SIGN U..TIRHUTA VOWEL SIGN VOCALIC LL
 114B9         ; Vowel_Dependent # Mc       TIRHUTA VOWEL SIGN E
@@ -576,6 +593,13 @@ ABE9..ABEA    ; Vowel_Dependent # Mc   [2] MEETEI MAYEK VOWEL SIGN CHEINAP..MEET
 11722..11725  ; Vowel_Dependent # Mn   [4] AHOM VOWEL SIGN I..AHOM VOWEL SIGN UU
 11726         ; Vowel_Dependent # Mc       AHOM VOWEL SIGN E
 11727..1172A  ; Vowel_Dependent # Mn   [4] AHOM VOWEL SIGN AW..AHOM VOWEL SIGN AM
+11C2F         ; Vowel_Dependent # Mc       BHAIKSUKI VOWEL SIGN AA
+11C30..11C36  ; Vowel_Dependent # Mn   [7] BHAIKSUKI VOWEL SIGN I..BHAIKSUKI VOWEL SIGN VOCALIC L
+11C38..11C3B  ; Vowel_Dependent # Mn   [4] BHAIKSUKI VOWEL SIGN E..BHAIKSUKI VOWEL SIGN AU
+11CB0         ; Vowel_Dependent # Mn       MARCHEN VOWEL SIGN AA
+11CB1         ; Vowel_Dependent # Mc       MARCHEN VOWEL SIGN I
+11CB2..11CB3  ; Vowel_Dependent # Mn   [2] MARCHEN VOWEL SIGN U..MARCHEN VOWEL SIGN E
+11CB4         ; Vowel_Dependent # Mc       MARCHEN VOWEL SIGN O
 
 # ================================================
 
@@ -612,6 +636,7 @@ A926..A92A    ; Vowel # Mn   [5] KAYAH LI VOWEL UE..KAYAH LI VOWEL O
 1900          ; Consonant_Placeholder # Lo       LIMBU VOWEL-CARRIER LETTER
 2010..2014    ; Consonant_Placeholder # Pd   [5] HYPHEN..EM DASH
 25CC          ; Consonant_Placeholder # So       DOTTED CIRCLE
+AA74..AA76    ; Consonant_Placeholder # Lo   [3] MYANMAR LOGOGRAM KHAMTI OAY..MYANMAR LOGOGRAM KHAMTI HM
 
 # ================================================
 
@@ -760,11 +785,14 @@ ABD2..ABDA    ; Consonant # Lo   [9] MEETEI MAYEK LETTER GOK..MEETEI MAYEK LETTE
 1132A..11330  ; Consonant # Lo   [7] GRANTHA LETTER PA..GRANTHA LETTER RA
 11332..11333  ; Consonant # Lo   [2] GRANTHA LETTER LA..GRANTHA LETTER LLA
 11335..11339  ; Consonant # Lo   [5] GRANTHA LETTER VA..GRANTHA LETTER HA
+1140E..11434  ; Consonant # Lo  [39] NEWA LETTER KA..NEWA LETTER HA
 1148F..114AF  ; Consonant # Lo  [33] TIRHUTA LETTER KA..TIRHUTA LETTER HA
 1158E..115AE  ; Consonant # Lo  [33] SIDDHAM LETTER KA..SIDDHAM LETTER HA
 1160E..1162F  ; Consonant # Lo  [34] MODI LETTER KA..MODI LETTER LLA
 1168A..116AA  ; Consonant # Lo  [33] TAKRI LETTER KA..TAKRI LETTER RRA
 11700..11719  ; Consonant # Lo  [26] AHOM LETTER KA..AHOM LETTER JHA
+11C0E..11C2E  ; Consonant # Lo  [33] BHAIKSUKI LETTER KA..BHAIKSUKI LETTER HA
+11C72..11C8F  ; Consonant # Lo  [30] MARCHEN LETTER KA..MARCHEN LETTER A
 
 # ================================================
 
@@ -775,6 +803,7 @@ ABD2..ABDA    ; Consonant # Lo   [9] MEETEI MAYEK LETTER GOK..MEETEI MAYEK LETTE
 # [Not derivable]
 
 09CE          ; Consonant_Dead # Lo       BENGALI LETTER KHANDA TA
+0D54..0D56    ; Consonant_Dead # Lo   [3] MALAYALAM LETTER CHILLU M..MALAYALAM LETTER CHILLU LLL
 0D7A..0D7F    ; Consonant_Dead # Lo   [6] MALAYALAM LETTER CHILLU NN..MALAYALAM LETTER CHILLU K
 
 # ================================================
@@ -840,6 +869,9 @@ A982          ; Consonant_Succeeding_Repha # Mn       JAVANESE SIGN LAYAR
 A867..A868    ; Consonant_Subjoined # Lo   [2] PHAGS-PA SUBJOINED LETTER WA..PHAGS-PA SUBJOINED LETTER YA
 A871          ; Consonant_Subjoined # Lo       PHAGS-PA SUBJOINED LETTER RA
 A9BD          ; Consonant_Subjoined # Mc       JAVANESE CONSONANT SIGN KERET
+11C92..11CA7  ; Consonant_Subjoined # Mn  [22] MARCHEN SUBJOINED LETTER KA..MARCHEN SUBJOINED LETTER ZA
+11CA9         ; Consonant_Subjoined # Mc       MARCHEN SUBJOINED LETTER YA
+11CAA..11CAF  ; Consonant_Subjoined # Mn   [6] MARCHEN SUBJOINED LETTER RA..MARCHEN SUBJOINED LETTER A
 
 # ================================================
 
@@ -977,6 +1009,7 @@ ABEC          ; Tone_Mark # Mc       MEETEI MAYEK LUM IYEK
 1CF4          ; Cantillation_Mark # Mn       VEDIC TONE CANDRA ABOVE
 1CF8..1CF9    ; Cantillation_Mark # Mn   [2] VEDIC TONE RING ABOVE..VEDIC TONE DOUBLE RING ABOVE
 A8E0..A8F1    ; Cantillation_Mark # Mn  [18] COMBINING DEVANAGARI DIGIT ZERO..COMBINING DEVANAGARI SIGN AVAGRAHA
+1123E         ; Cantillation_Mark # Mn       KHOJKI SIGN SUKUN
 11366..1136C  ; Cantillation_Mark # Mn   [7] COMBINING GRANTHA DIGIT ZERO..COMBINING GRANTHA DIGIT SIX
 11370..11374  ; Cantillation_Mark # Mn   [5] COMBINING GRANTHA LETTER A..COMBINING GRANTHA LETTER PA
 
@@ -1006,10 +1039,12 @@ A8E0..A8F1    ; Cantillation_Mark # Mn  [18] COMBINING DEVANAGARI DIGIT ZERO..CO
 17CB          ; Syllable_Modifier # Mn       KHMER SIGN BANTOC
 17CE..17D0    ; Syllable_Modifier # Mn   [3] KHMER SIGN KAKABAT..KHMER SIGN SAMYOK SANNYA
 17D3          ; Syllable_Modifier # Mn       KHMER SIGN BATHAMASAT
+17DD          ; Syllable_Modifier # Mn       KHMER SIGN ATTHACAN
 193B          ; Syllable_Modifier # Mn       LIMBU SIGN SA-I
 1A7A..1A7C    ; Syllable_Modifier # Mn   [3] TAI THAM SIGN RA HAAM..TAI THAM SIGN KHUEN-LUE KARAN
 1A7F          ; Syllable_Modifier # Mn       TAI THAM COMBINING CRYPTOGRAMMIC DOT
 1C36          ; Syllable_Modifier # Mn       LEPCHA SIGN RAN
+1DFB          ; Syllable_Modifier # Mn       COMBINING DELETION MARK
 2074          ; Syllable_Modifier # No       SUPERSCRIPT FOUR
 2082..2084    ; Syllable_Modifier # No   [3] SUBSCRIPT TWO..SUBSCRIPT FOUR
 
@@ -1100,11 +1135,14 @@ ABF0..ABF9    ; Number # Nd  [10] MEETEI MAYEK DIGIT ZERO..MEETEI MAYEK DIGIT NI
 111D0..111D9  ; Number # Nd  [10] SHARADA DIGIT ZERO..SHARADA DIGIT NINE
 111E1..111F4  ; Number # No  [20] SINHALA ARCHAIC DIGIT ONE..SINHALA ARCHAIC NUMBER ONE THOUSAND
 112F0..112F9  ; Number # Nd  [10] KHUDAWADI DIGIT ZERO..KHUDAWADI DIGIT NINE
+11450..11459  ; Number # Nd  [10] NEWA DIGIT ZERO..NEWA DIGIT NINE
 114D0..114D9  ; Number # Nd  [10] TIRHUTA DIGIT ZERO..TIRHUTA DIGIT NINE
 11650..11659  ; Number # Nd  [10] MODI DIGIT ZERO..MODI DIGIT NINE
 116C0..116C9  ; Number # Nd  [10] TAKRI DIGIT ZERO..TAKRI DIGIT NINE
 11730..11739  ; Number # Nd  [10] AHOM DIGIT ZERO..AHOM DIGIT NINE
 1173A..1173B  ; Number # No   [2] AHOM NUMBER TEN..AHOM NUMBER TWENTY
+11C50..11C59  ; Number # Nd  [10] BHAIKSUKI DIGIT ZERO..BHAIKSUKI DIGIT NINE
+11C5A..11C6C  ; Number # No  [19] BHAIKSUKI NUMBER ONE..BHAIKSUKI HUNDREDS UNIT MARK
 
 # ================================================
 
