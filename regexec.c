@@ -9263,7 +9263,7 @@ S_reghop4(U8 *s, SSize_t off, const U8* llim, const U8* rlim)
  * char pos */
 
 STATIC U8 *
-S_reghopmaybe3(U8* s, SSize_t off, const U8* lim)
+S_reghopmaybe3(U8* s, SSize_t off, const U8* const lim)
 {
     PERL_ARGS_ASSERT_REGHOPMAYBE3;
 

@@ -2350,7 +2350,7 @@ Es	|void	|regcppop	|NN regexp *rex\
 ERsn	|U8*	|reghop3	|NN U8 *s|SSize_t off|NN const U8 *lim
 ERsn	|U8*	|reghop4	|NN U8 *s|SSize_t off|NN const U8 *llim \
 				|NN const U8 *rlim
-ERsn	|U8*	|reghopmaybe3	|NN U8 *s|SSize_t off|NN const U8 *lim
+ERsn	|U8*	|reghopmaybe3	|NN U8 *s|SSize_t off|NN const U8 * const lim
 ERs	|char*	|find_byclass	|NN regexp * prog|NN const regnode *c \
 				|NN char *s|NN const char *strend \
 				|NULLOK regmatch_info *reginfo
