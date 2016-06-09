@@ -610,7 +610,8 @@ running their tests. This can be a big time saver.
 
 For example:
 
-  .../Porting/bisect.pl --with-module=Moose -e 'use Moose; ...'
+  .../Porting/bisect.pl --with-module=Moose --no-module-tests \
+       -e 'use Moose; ...'
 
 =item *
 
