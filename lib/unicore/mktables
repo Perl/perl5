@@ -2198,6 +2198,15 @@ sub trace { return main::trace(@_); }
     # 'handler'
     main::set_access('each_line_handler', \%each_line_handler, 'c');
 
+    my %retain_trailing_comments;
+    # This is used to not discard the comments that end data lines.  This
+    # would be used only for files with non-typical syntax, and most code here
+    # assumes that comments have been stripped, so special handlers would have
+    # to be written.  It is assumed that the code will use these in
+    # single-quoted contexts, and so any "'" marks in the comment will be
+    # prefixed by a backslash.
+    main::set_access('retain_trailing_comments', \%retain_trailing_comments, 'c');
+
     my %properties; # Optional ordered list of the properties that occur in each
     # meaningful line of the input file.  If present, an appropriate
     # each_line_handler() is automatically generated and pushed onto the stack
@@ -2355,6 +2364,7 @@ sub trace { return main::trace(@_); }
 
         # Set defaults
         $handler{$addr} = \&main::process_generic_property_file;
+        $retain_trailing_comments{$addr} = 0;
         $non_skip{$addr} = 0;
         $skip{$addr} = undef;
         $has_missings_defaults{$addr} = $NO_DEFAULTS;
@@ -3020,9 +3030,21 @@ END
                 next;
             }
 
-            # Remove comments and trailing space, and skip this line if the
-            # result is empty
-            s/#.*//;
+            # Unless to keep, remove comments.  If to keep, ignore
+            # comment-only lines
+            if ($retain_trailing_comments{$addr}) {
+                next if / ^ \s* \# /x;
+
+                # But escape any single quotes (done in both the comment and
+                # non-comment portion; this could be a bug someday, but not
+                # likely)
+                s/'/\\'/g;
+            }
+            else {
+                s/#.*//;
+            }
+
+            # Remove trailing space, and skip this line if the result is empty
             s/\s+$//;
             next if /^$/;
 
@@ -19188,18 +19210,21 @@ my @input_file_objects = (
                    ),
     Input_file->new("$AUXILIARY/GCBTest.txt", v4.1.0,
                     Handler => \&process_GCB_test,
+                    retain_trailing_comments => 1,
                    ),
     Input_file->new("$AUXILIARY/GraphemeBreakTest.html", v4.1.0,
                     Skip => $Validation_Documentation,
                    ),
     Input_file->new("$AUXILIARY/SBTest.txt", v4.1.0,
                     Handler => \&process_SB_test,
+                    retain_trailing_comments => 1,
                    ),
     Input_file->new("$AUXILIARY/SentenceBreakTest.html", v4.1.0,
                     Skip => $Validation_Documentation,
                    ),
     Input_file->new("$AUXILIARY/WBTest.txt", v4.1.0,
                     Handler => \&process_WB_test,
+                    retain_trailing_comments => 1,
                    ),
     Input_file->new("$AUXILIARY/WordBreakTest.html", v4.1.0,
                     Skip => $Validation_Documentation,
@@ -19250,6 +19275,7 @@ my @input_file_objects = (
                    ),
     Input_file->new("$AUXILIARY/LBTest.txt", v5.1.0,
                     Handler => \&process_LB_test,
+                    retain_trailing_comments => 1,
                    ),
     Input_file->new("$AUXILIARY/LineBreakTest.html", v5.1.0,
                     Skip => $Validation_Documentation,
@@ -19842,6 +19868,15 @@ sub _test_break($$) {
     my $break_type = shift;
 
     my $line   = (caller 1)[2];   # Line number
+    my $comment = "";
+
+    if ($template =~ / ( .*? ) \s* \# (.*) /x) {
+        $template = $1;
+        $comment = $2;
+
+        # Replace leading spaces with a single one.
+        $comment =~ s/ ^ \s* / # /x;
+    }
 
     # The line contains characters above the ASCII range, but in Latin1.  It
     # may or may not be in utf8, and if it is, it may or may not know it.  So,
@@ -19985,7 +20020,10 @@ sub _test_break($$) {
 
             # Fancy display of test results
             $matched = ($matched) ? "matched" : "failed to match";
-            print "ok ", ++$Tests, " - \"$display_string\" $matched /$pattern/$display_upgrade; line $line $display_locale\n";
+            print "ok ", ++$Tests, " - \"$display_string\" $matched /$pattern/$display_upgrade; line $line $display_locale$comment\n";
+
+            # Only print the comment on the first use of this line
+            $comment = "";
 
             # Repeat with the first \B{} in the pattern.  This makes sure the
             # code in regexec.c:find_byclass() for \B gets executed
