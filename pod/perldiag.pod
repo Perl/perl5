@@ -6139,20 +6139,117 @@ C<undef *foo>.
 (A) You've accidentally run your script through B<csh> instead of Perl.
 Check the #! line, or manually feed your script into Perl yourself.
 
-=item Unescaped left brace in regex is illegal in regex;
+=item Unescaped left brace in regex is deprecated here, passed through in
+regex; marked by S<<-- HERE> in m/%s/
+
+(D deprecated, regexp)  The simple rule to remember, if you want to
+match a literal C<"{"> character (U+007B C<LEFT CURLY BRACKET>) in a
+regular expression pattern, is to escape each literal instance of it in
+some way.  Generally easiest is to precede it with a backslash, like
+C<"\{"> or enclose it in square brackets (C<"[{]">).  If the pattern
+delimiters are also braces, any matching right brace (C<"}">) should
+also be escaped to avoid confusing the parser, for example,
+
+ qr{abc\{def\}ghi}
+
+Forcing literal C<"{"> characters to be escaped will enable the Perl
+language to be extended in various ways in future releases.  To avoid
+needlessly breaking existing code, the restriction is is not enforced in
+contexts where there are unlikely to ever be extensions that could
+conflict with the use there of C<"{"> as a literal.
+
+In this release of Perl, some literal uses of C<"{"> are fatal, and some
+still just deprecated.  This is because of an oversight:  some uses of a
+literal C<"{"> that should have raised a deprecation warning starting in
+v5.20 did not warn until v5.26.  By making the already-warned uses fatal
+now, some of the planned extensions can be made to the language sooner.
+
+The contexts where no warnings or errors are raised are:
+
+=over 4
+
+=item *
+
+as the first character in a pattern, or following C<"^"> indicating to
+anchor the match to the beginning of a line.
+
+=item *
+
+as the first character following a C<"|"> indicating alternation.
+
+=item *
+
+as the first character in a parenthesized grouping like
+
+ /foo({bar)/
+ /foo(?:{bar)/
+
+=item *
+
+as the first character following a quantifier
+
+ /\s*{/
+
+=back
+
+=for comment
+The text of the message above is duplicated below to allow splain (and
+'use diagnostics') to work.  Since one is fatal, and one not, they can't
+be combined as one message.  And since the non-fatal one is temporary,
+there's no real need to enhance perldiag to handle this transient case.
+
+=item Unescaped left brace in regex is illegal here in regex;
 marked by S<<-- HERE> in m/%s/
 
-(F) You used a literal C<"{"> character in a regular
-expression pattern.  You should change to use C<"\{"> or C<[{]> instead.
-If the pattern delimiters are also braces, any matching
-right brace (C<"}">) should also be escaped to avoid confusing the parser,
-for example,
+(F) The simple rule to remember, if you want to
+match a literal C<"{"> character (U+007B C<LEFT CURLY BRACKET>) in a
+regular expression pattern, is to escape each literal instance of it in
+some way.  Generally easiest is to precede it with a backslash, like
+C<"\{"> or enclose it in square brackets (C<"[{]">).  If the pattern
+delimiters are also braces, any matching right brace (C<"}">) should
+also be escaped to avoid confusing the parser, for example,
 
-    qr{abc\{def\}ghi}
+ qr{abc\{def\}ghi}
 
-This restriction is not enforced if the C<"{"> is the first character in
-the pattern; nor is a warning generated for this case, as there are no
-current plans to forbid it.
+Forcing literal C<"{"> characters to be escaped will enable the Perl
+language to be extended in various ways in future releases.  To avoid
+needlessly breaking existing code, the restriction is is not enforced in
+contexts where there are unlikely to ever be extensions that could
+conflict with the use there of C<"{"> as a literal.
+
+In this release of Perl, some literal uses of C<"{"> are fatal, and some
+still just deprecated.  This is because of an oversight:  some uses of a
+literal C<"{"> that should have raised a deprecation warning starting in
+v5.20 did not warn until v5.26.  By making the already-warned uses fatal
+now, some of the planned extensions can be made to the language sooner.
+
+The contexts where no warnings or errors are raised are:
+
+=over 4
+
+=item *
+
+as the first character in a pattern, or following C<"^"> indicating to
+anchor the match to the beginning of a line.
+
+=item *
+
+as the first character following a C<"|"> indicating alternation.
+
+=item *
+
+as the first character in a parenthesized grouping like
+
+ /foo({bar)/
+ /foo(?:{bar)/
+
+=item *
+
+as the first character following a quantifier
+
+ /\s*{/
+
+=back
 
 =item unexec of %s into %s failed!
 

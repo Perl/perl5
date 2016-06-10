@@ -268,10 +268,11 @@ my @death =
  '/(?[\ |!])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[\ |!{#}])/',    # [perl #126180]
  '/(?[()-!])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[()-!{#}])/',    # [perl #126204]
  '/(?[!()])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[!(){#}])/',      # [perl #126404]
- '/\w{/' => 'Unescaped left brace in regex is illegal {#} m/\w{{#}/',
- '/\q{/' => 'Unescaped left brace in regex is illegal {#} m/\q{{#}/',
- '/:{4,a}/' => 'Unescaped left brace in regex is illegal {#} m/:{{#}4,a}/',
- '/xa{3\,4}y/' => 'Unescaped left brace in regex is illegal {#} m/xa{{#}3\,4}y/',
+ '/\w{/' => 'Unescaped left brace in regex is illegal here {#} m/\w{{#}/',
+ '/\q{/' => 'Unescaped left brace in regex is illegal here {#} m/\q{{#}/',
+ '/\A{/' => 'Unescaped left brace in regex is illegal here {#} m/\A{{#}/',
+ '/:{4,a}/' => 'Unescaped left brace in regex is illegal here {#} m/:{{#}4,a}/',
+ '/xa{3\,4}y/' => 'Unescaped left brace in regex is illegal here {#} m/xa{{#}3\,4}y/',
  '/abc/xix' => 'Only one /x regex modifier is allowed',
  '/(?xmsixp:abc)/' => 'Only one /x regex modifier is allowed {#} m/(?xmsixp{#}:abc)/',
  '/(?xmsixp)abc/' => 'Only one /x regex modifier is allowed {#} m/(?xmsixp{#})abc/',
@@ -621,6 +622,16 @@ my @experimental_regex_sets = (
 );
 
 my @deprecated = (
+ '/^{/'          => "",
+ '/foo|{/'       => "",
+ '/foo|^{/'      => "",
+ '/foo({bar)/'   => "",
+ '/foo(:?{bar)/' => "",
+ '/\s*{/'        => "",
+ '/a{3,4}{/'     => "",
+ '/.{/'         => 'Unescaped left brace in regex is deprecated here, passed through {#} m/.{{#}/',
+ '/[x]{/'       => 'Unescaped left brace in regex is deprecated here, passed through {#} m/[x]{{#}/',
+ '/\p{Latin}{/' => 'Unescaped left brace in regex is deprecated here, passed through {#} m/\p{Latin}{{#}/',
 );
 
 for my $strict ("", "use re 'strict';") {

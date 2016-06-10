@@ -271,7 +271,12 @@ Perl yourself.  The #! line at the top of your file could look like
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Unescaped left brace in regex is deprecated here, passed through in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>|perldiag/"Unescaped left brace in regex is deprecated here, passed through in regex; marked by S<<-- HERE> in m/%s/">
+
+Unescaped left braces are already illegal in some contexts in regular
+expression patterns, but, due to an oversight, no deprecation warning
+was raised in other contexts where they are intended to become illegal.
+This warning is now raised in these contexts.
 
 =back
 
@@ -293,7 +298,11 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+L<Unescaped left brace in regex is illegal here in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>|perldiag/"Unescaped left brace in regex is illegal here in regex; marked by S<<-- HERE> in m/%s/">
+
+The word "here" has been added to the message that was raised in
+v5.25.1.  This is to indicate that there are contexts in which unescaped
+left braces are not (yet) illegal.
 
 =back
 
