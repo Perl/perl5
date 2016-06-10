@@ -3042,7 +3042,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	break;
 
     case OP_KEYS:
-	if (type != OP_SASSIGN && type != OP_LEAVESUBLV)
+	if (type != OP_LEAVESUBLV && !scalar_mod_type(NULL, type))
 	    goto nomod;
 	goto lvalue_func;
     case OP_SUBSTR:
