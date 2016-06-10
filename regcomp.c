@@ -14534,8 +14534,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
                 ADD_POSIX_WARNING(p, "there is no terminating ']'");
             }
 
-            if (posix_warnings && av_top_index(RExC_warn_text) > -1) {
-                /* warn_text should only be true if posix_warnings is true */
+            if (posix_warnings && RExC_warn_text && av_top_index(RExC_warn_text) > -1) {
                 *posix_warnings = RExC_warn_text;
             }
         }
