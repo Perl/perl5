@@ -637,14 +637,16 @@ is join("-", 1,2,3,(stat stat stat),4,5,6), "1-2-3-4-5-6",
   'stat inside stat gets scalar context';
 
 # [perl #126162] stat an array should not work
-my $Errno_loaded = eval { require Errno };
-my $statfile = './op/stat.t';
-my @statarg = ($statfile, $statfile);
-ok !stat(@statarg),
-  'stat on an array of valid paths should warn and should not return any data';
-my $error = 0+$!;
+# skip if -e '2'.
 SKIP:
 {
+    skip "There is a file named '2', which invalidates this test", 2 if -e '2';
+
+    my $Errno_loaded = eval { require Errno };
+    my @statarg = ($statfile, $statfile);
+    ok !stat(@statarg),
+    'stat on an array of valid paths should warn and should not return any data';
+    my $error = 0+$!;
     skip "Errno not available", 1
       unless $Errno_loaded;
     is $error, &Errno::ENOENT,
