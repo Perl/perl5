@@ -231,8 +231,8 @@ a C<next> from inside a C<foreach> and C<break> from inside a C<given>.
 
 Under the current implementation, the C<foreach> loop can be
 anywhere within the C<when> modifier's dynamic scope, but must be
-within the C<given> block's lexical scope.  This restricted may
-be relaxed in a future release.  See L<"Switch Statements"> below.
+within the C<given> block's lexical scope.  This restriction may
+be relaxed in a future release.  See L</"Switch Statements"> below.
 
 =head2 Compound Statements
 X<statement, compound> X<block> X<bracket, curly> X<curly bracket> X<brace>
@@ -411,7 +411,7 @@ they aren't loops.  You can double the braces to make them such, though.
     }}
 
 This is caused by the fact that a block by itself acts as a loop that
-executes once, see L<"Basic BLOCKs">.
+executes once, see L</"Basic BLOCKs">.
 
 The form C<while/if BLOCK BLOCK>, available in Perl 4, is no longer
 available.   Replace any occurrence of C<if BLOCK> by C<if (do BLOCK)>.
