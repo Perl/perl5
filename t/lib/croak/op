@@ -113,6 +113,30 @@ The bitwise feature is experimental at - line 2.
 Can't modify array dereference in string bitwise xor (^.) at - line 2, near "1;"
 Execution of - aborted due to compilation errors.
 ########
+# NAME substr %h in scalar assignment
+substr(%h,0) = 3;
+EXPECT
+Can't modify hash dereference in substr at - line 1, near "3;"
+Execution of - aborted due to compilation errors.
+########
+# NAME substr %h in list assignment
+(substr %h,0) = 3;
+EXPECT
+Can't modify hash dereference in substr at - line 1, near "3;"
+Execution of - aborted due to compilation errors.
+########
+# NAME vec %h in scalar assignment
+vec(%h,1,1) = 3;
+EXPECT
+Can't modify hash dereference in vec at - line 1, near "3;"
+Execution of - aborted due to compilation errors.
+########
+# NAME vec %h in list assignment
+(vec %h,1,1) = 3;
+EXPECT
+Can't modify hash dereference in vec at - line 1, near "3;"
+Execution of - aborted due to compilation errors.
+########
 # NAME Can't declare conditional
 my($a?$b:$c)
 EXPECT

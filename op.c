@@ -3059,8 +3059,15 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
       lvalue_func:
 	if (type == OP_LEAVESUBLV)
 	    o->op_private |= OPpMAYBE_LVSUB;
-	if (o->op_flags & OPf_KIDS)
-	    op_lvalue(OpSIBLING(cBINOPo->op_first), type);
+	if (o->op_flags & OPf_KIDS && OpHAS_SIBLING(cBINOPo->op_first)) {
+	    /* substr and vec */
+	    /* If this op is in merely potential (non-fatal) modifiable
+	       context, then propagate that context to the kid op.  Other-
+	       wise pass this op’s own type so the correct op is mentioned
+	       in error messages.  */
+	    op_lvalue(OpSIBLING(cBINOPo->op_first),
+		      S_potential_mod_type(type) ? type : o->op_type);
+	}
 	break;
 
     case OP_AELEM:
@@ -3253,6 +3260,8 @@ S_scalar_mod_type(const OP *o, I32 type)
     case OP_ANDASSIGN:
     case OP_ORASSIGN:
     case OP_DORASSIGN:
+    case OP_VEC:
+    case OP_SUBSTR:
 	return TRUE;
     default:
 	return FALSE;
