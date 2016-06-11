@@ -2548,7 +2548,7 @@ running it hits the print statement before it discovers that we don't
 have a match.
 
 To take a closer look at how the engine does optimizations, see the
-section L<"Pragmas and debugging"> below.
+section L</"Pragmas and debugging"> below.
 
 More fun with C<?{}>:
 

@@ -196,7 +196,7 @@ Read the module's documentation, looking for
 reasons why you might have trouble using it with MacPerl.  Look for
 F<.xs> and F<.c> files, which normally denote that the distribution
 must be compiled, and you cannot install it "out of the box."
-(See L<"PORTABILITY">.)
+(See L</"PORTABILITY">.)
 
 D. INSTALL
 

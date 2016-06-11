@@ -144,7 +144,7 @@ C<define>.
 
 If you want a Perl application to process and present your data
 according to a particular locale, the application code should include
-the S<C<use locale>> pragma (see L<The "use locale" pragma>) where
+the S<C<use locale>> pragma (see L</The "use locale" pragma>) where
 appropriate, and B<at least one> of the following must be true:
 
 =over 4
@@ -158,7 +158,7 @@ by yourself or by whomever set up your system account; or
 =item 2
 
 B<The application must set its own locale> using the method described in
-L<The setlocale function>.
+L</The setlocale function>.
 
 =back
 
@@ -336,7 +336,7 @@ the outer scope's rules at the end of the inner scope.
 
 The string result of any operation that uses locale
 information is tainted, as it is possible for a locale to be
-untrustworthy.  See L<"SECURITY">.
+untrustworthy.  See L</"SECURITY">.
 
 Starting in Perl v5.16 in a very limited way, and more generally in
 v5.22, you can restrict which category or categories are enabled by this
@@ -592,8 +592,8 @@ than the C<PERL_BADLANG> approach, but setting C<LC_ALL> (or
 other locale variables) may affect other programs as well, not just
 Perl.  In particular, external programs run from within Perl will see
 these changes.  If you make the new settings permanent (read on), all
-programs you run see the changes.  See L<"ENVIRONMENT"> for
-the full list of relevant environment variables and L<USING LOCALES>
+programs you run see the changes.  See L</"ENVIRONMENT"> for
+the full list of relevant environment variables and L</"USING LOCALES">
 for their effects in Perl.  Effects in other programs are
 easily deducible.  For example, the variable C<LC_COLLATE> may well affect
 your B<sort> program (or whatever the program that arranges "records"
@@ -627,7 +627,7 @@ fix the misconfiguration of your own environment variables.  The
 mis(sing)configuration of the whole system's locales usually requires
 the help of your friendly system administrator.
 
-First, see earlier in this document about L<Finding locales>.  That tells
+First, see earlier in this document about L</Finding locales>.  That tells
 how to find which locales are really supported--and more importantly,
 installed--on your system.  In our example error message, environment
 variables affecting the locale are listed in the order of decreasing
@@ -639,7 +639,7 @@ Second, if using the listed commands you see something B<exactly>
 (prefix matches do not count and case usually counts) like "En_US"
 without the quotes, then you should be okay because you are using a
 locale name that should be installed and available in your system.
-In this case, see L<Permanently fixing your system's locale configuration>.
+In this case, see L</Permanently fixing your system's locale configuration>.
 
 =head2 Permanently fixing your system's locale configuration
 
@@ -656,14 +656,14 @@ the same.  In this case, try running under a locale
 that you can list and which somehow matches what you tried.  The
 rules for matching locale names are a bit vague because
 standardization is weak in this area.  See again the
-L<Finding locales> about general rules.
+L</Finding locales> about general rules.
 
 =head2 Fixing system locale configuration
 
 Contact a system administrator (preferably your own) and report the exact
 error message you get, and ask them to read this same documentation you
 are now reading.  They should be able to check whether there is something
-wrong with the locale configuration of the system.  The L<Finding locales>
+wrong with the locale configuration of the system.  The L</Finding locales>
 section is unfortunately a bit vague about the exact commands and places
 because these things are not that standardized.
 
@@ -675,7 +675,7 @@ underlying C<LC_NUMERIC> and C<LC_MONETARY> locales (regardless of
 whether called from within the scope of C<S<use locale>> or not).  (If
 you just want the name of
 the current locale for a particular category, use C<POSIX::setlocale()>
-with a single parameter--see L<The setlocale function>.)
+with a single parameter--see L</The setlocale function>.)
 
         use POSIX qw(locale_h);
 
@@ -768,7 +768,7 @@ See L<I18N::Langinfo> for more information.
 
 The following subsections describe basic locale categories.  Beyond these,
 some combination categories allow manipulation of more than one
-basic category at a time.  See L<"ENVIRONMENT"> for a discussion of these.
+basic category at a time.  See L</"ENVIRONMENT"> for a discussion of these.
 
 =head2 Category C<LC_COLLATE>: Collation: Text Comparisons and Sorting
 
@@ -804,7 +804,7 @@ locale>> has appeared earlier in the same block) must be used for
 sorting raw binary data, whereas the locale-dependent collation of the
 first example is useful for natural text.
 
-As noted in L<USING LOCALES>, C<cmp> compares according to the current
+As noted in L</USING LOCALES>, C<cmp> compares according to the current
 collation locale when C<use locale> is in effect, but falls back to a
 char-by-char comparison for strings that the locale says are equal. You
 can use C<POSIX::strcoll()> if you don't want this fall-back:
@@ -952,7 +952,7 @@ B<Note:> A broken or malicious C<LC_CTYPE> locale definition may result
 in clearly ineligible characters being considered to be alphanumeric by
 your application.  For strict matching of (mundane) ASCII letters and
 digits--for example, in command strings--locale-aware applications
-should use C<\w> with the C</a> regular expression modifier.  See L<"SECURITY">.
+should use C<\w> with the C</a> regular expression modifier.  See L</"SECURITY">.
 
 =head2 Category C<LC_NUMERIC>: Numeric Formatting
 
@@ -963,7 +963,7 @@ of how numbers should be formatted for human readability.
 In most implementations the only effect is to
 change the character used for the decimal point--perhaps from "."  to ",".
 The functions aren't aware of such niceties as thousands separation and
-so on. (See L<The localeconv function> if you care about these things.)
+so on. (See L</The localeconv function> if you care about these things.)
 
  use POSIX qw(strtod setlocale LC_NUMERIC);
  use locale;
@@ -990,7 +990,7 @@ that is affected by its contents.  (Those with experience of standards
 committees will recognize that the working group decided to punt on the
 issue.)  Consequently, Perl essentially takes no notice of it.  If you
 really want to use C<LC_MONETARY>, you can query its contents--see
-L<The localeconv function>--and use the information that it returns in your
+L</The localeconv function>--and use the information that it returns in your
 application's own formatting of currency amounts.  However, you may well
 find that the information, voluminous and complex though it may be, still
 does not quite meet your requirements: currency formatting is a hard nut
@@ -1363,10 +1363,10 @@ You could also exclude C<LC_NUMERIC>, if you don't need it, by
 Versions of Perl prior to 5.004 B<mostly> ignored locale information,
 generally behaving as if something similar to the C<"C"> locale were
 always in force, even if the program environment suggested otherwise
-(see L<The setlocale function>).  By default, Perl still behaves this
+(see L</The setlocale function>).  By default, Perl still behaves this
 way for backward compatibility.  If you want a Perl application to pay
 attention to locale information, you B<must> use the S<C<use locale>>
-pragma (see L<The "use locale" pragma>) or, in the unlikely event
+pragma (see L</The "use locale" pragma>) or, in the unlikely event
 that you want to do so for just pattern matching, the
 C</l> regular expression modifier (see L<perlre/Character set
 modifiers>) to instruct it to do so.

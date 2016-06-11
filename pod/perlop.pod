@@ -128,13 +128,13 @@ To do what you meant properly, you must write:
 
     print(($foo & 255) + 1, "\n");
 
-See L<Named Unary Operators> for more discussion of this.
+See L</Named Unary Operators> for more discussion of this.
 
 Also parsed as terms are the S<C<do {}>> and S<C<eval {}>> constructs, as
 well as subroutine and method calls, and the anonymous
 constructors C<[]> and C<{}>.
 
-See also L<Quote and Quote-like Operators> toward the end of this section,
+See also L</Quote and Quote-like Operators> toward the end of this section,
 as well as L</"I/O Operators">.
 
 =head2 The Arrow Operator
@@ -235,8 +235,8 @@ B<Argument "the string" isn't numeric in negation (-) at ...>.
 X<-> X<negation, arithmetic>
 
 Unary C<"~"> performs bitwise negation, that is, 1's complement.  For
-example, S<C<0666 & ~027>> is 0640.  (See also L<Integer Arithmetic> and
-L<Bitwise String Operators>.)  Note that the width of the result is
+example, S<C<0666 & ~027>> is 0640.  (See also L</Integer Arithmetic> and
+L</Bitwise String Operators>.)  Note that the width of the result is
 platform-dependent: C<~0> is 32 bits wide on a 32-bit platform, but 64
 bits wide on a 64-bit platform, so if you are expecting a certain bit
 width, remember to use the C<"&"> operator to mask off the excess bits.
@@ -370,13 +370,13 @@ X<shl> X<shr> X<shift, right> X<shift, left>
 
 Binary C<<< "<<" >>> returns the value of its left argument shifted left by the
 number of bits specified by the right argument.  Arguments should be
-integers.  (See also L<Integer Arithmetic>.)
+integers.  (See also L</Integer Arithmetic>.)
 
 Binary C<<< ">>" >>> returns the value of its left argument shifted right by
 the number of bits specified by the right argument.  Arguments should
-be integers.  (See also L<Integer Arithmetic>.)
+be integers.  (See also L</Integer Arithmetic>.)
 
-If S<C<use integer>> (see L<Integer Arithmetic>) is in force then
+If S<C<use integer>> (see L</Integer Arithmetic>) is in force then
 signed C integers are used (I<arithmetic shift>), otherwise unsigned C
 integers are used (I<logical shift>), even for negative shiftees.
 In arithmetic right shift the sign bit is replicated on the left,
@@ -443,7 +443,7 @@ parenthesis rule.  That means, for example, that C<-f($file).".bak"> is
 equivalent to S<C<-f "$file.bak">>.
 X<-X> X<filetest> X<operator, filetest>
 
-See also L<"Terms and List Operators (Leftward)">.
+See also L</"Terms and List Operators (Leftward)">.
 
 =head2 Relational Operators
 X<relational operator> X<operator, relational>
@@ -837,7 +837,7 @@ X<operator, bitwise, and> X<bitwise and> X<&>
 Binary C<"&"> returns its operands ANDed together bit by bit.  Although no
 warning is currently raised, the result is not well defined when this operation
 is performed on operands that aren't either numbers (see
-L<Integer Arithmetic>) nor bitstrings (see L<Bitwise String Operators>).
+L</Integer Arithmetic>) nor bitstrings (see L</Bitwise String Operators>).
 
 Note that C<"&"> has lower priority than relational operators, so for example
 the parentheses are essential in a test like
@@ -859,7 +859,7 @@ Binary C<"^"> returns its operands XORed together bit by bit.
 
 Although no warning is currently raised, the results are not well
 defined when these operations are performed on operands that aren't either
-numbers (see L<Integer Arithmetic>) nor bitstrings (see L<Bitwise String
+numbers (see L</Integer Arithmetic>) nor bitstrings (see L</Bitwise String
 Operators>).
 
 Note that C<"|"> and C<"^"> have lower priority than relational operators, so
@@ -3322,7 +3322,7 @@ still get C<1.4142135623731> or so.
 
 Used on numbers, the bitwise operators (C<&> C<|> C<^> C<~> C<< << >>
 C<< >> >>) always produce integral results.  (But see also
-L<Bitwise String Operators>.)  However, S<C<use integer>> still has meaning for
+L</Bitwise String Operators>.)  However, S<C<use integer>> still has meaning for
 them.  By default, their results are interpreted as unsigned integers, but
 if S<C<use integer>> is in effect, their results are interpreted
 as signed integers.  For example, C<~0> usually evaluates to a large

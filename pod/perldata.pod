@@ -25,7 +25,7 @@ be a chain of identifiers, separated by C<::> (or by the slightly
 archaic C<'>); all but the last are interpreted as names of packages,
 to locate the namespace in which to look up the final identifier
 (see L<perlmod/Packages> for details).  For a more in-depth discussion
-on identifiers, see L<Identifier parsing>.  It's possible to
+on identifiers, see L</Identifier parsing>.  It's possible to
 substitute for a simple identifier, an expression that produces a reference
 to the value at runtime.   This is described in more detail below
 and in L<perlref>.

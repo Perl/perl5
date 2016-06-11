@@ -118,7 +118,7 @@ Execute this statement for a hint about where to find CORE:
     perl -MConfig -e 'print $Config{archlib}'
 
 Here's how you'd compile the example in the next section,
-L<Adding a Perl interpreter to your C program>, on my Linux box:
+L</Adding a Perl interpreter to your C program>, on my Linux box:
 
     % gcc -O2 -Dbool=char -DHAS_BOOL -I/usr/local/include
     -I/usr/local/lib/perl5/i586-linux/5.003/CORE
@@ -297,7 +297,7 @@ If you want to pass arguments to the Perl subroutine, you can add
 strings to the C<NULL>-terminated C<args> list passed to
 I<call_argv>.  For other data types, or to examine return values,
 you'll need to manipulate the Perl stack.  That's demonstrated in
-L<Fiddling with the Perl stack from your C program>.
+L</Fiddling with the Perl stack from your C program>.
 
 =head2 Evaluating a Perl statement from your C program
 

@@ -1752,7 +1752,7 @@ and vice versa.
 
 Internationalization (I18N) and localization (L10N) are supported at least
 in principle even on EBCDIC platforms.  The details are system-dependent
-and discussed under the L<OS ISSUES> section below.
+and discussed under the L</OS ISSUES> section below.
 
 =head1 MULTI-OCTET CHARACTER SETS
 

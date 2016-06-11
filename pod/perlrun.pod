@@ -34,7 +34,7 @@ Specified line by line via B<-e> or B<-E> switches on the command line.
 
 Contained in the file specified by the first filename on the command line.
 (Note that systems supporting the C<#!> notation invoke interpreters this
-way. See L<Location of Perl>.)
+way. See L</Location of Perl>.)
 
 =item 3.
 

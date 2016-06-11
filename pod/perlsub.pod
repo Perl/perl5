@@ -98,8 +98,8 @@ Aside from an experimental facility (see L</Signatures> below),
 Perl does not have named formal parameters.  In practice all you
 do is assign to a C<my()> list of these.  Variables that aren't
 declared to be private are global variables.  For gory details
-on creating private variables, see L<"Private Variables via my()">
-and L<"Temporary Values via local()">.  To create protected
+on creating private variables, see L</"Private Variables via my()">
+and L</"Temporary Values via local()">.  To create protected
 environments for a set of functions in a separate package (and
 probably a separate file), see L<perlmod/"Packages">.
 X<formal parameter> X<parameter, formal>
@@ -192,7 +192,7 @@ Do not, however, be tempted to do this:
 Like the flattened incoming parameter list, the return list is also
 flattened on return.  So all you have managed to do here is stored
 everything in C<@a> and made C<@b> empty.  See 
-L<Pass by Reference> for alternatives.
+L</Pass by Reference> for alternatives.
 
 A subroutine may be called using an explicit C<&> prefix.  The
 C<&> is optional in modern Perl, as are parentheses if the

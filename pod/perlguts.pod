@@ -103,7 +103,7 @@ important.  Note that this function requires you to specify the length of
 the format.
 
 The C<sv_set*()> functions are not generic enough to operate on values
-that have "magic".  See L<Magic Virtual Tables> later in this document.
+that have "magic".  See L</Magic Virtual Tables> later in this document.
 
 All SVs that contain strings should be terminated with a C<NUL> character.
 If it is not C<NUL>-terminated there is a risk of
@@ -252,7 +252,7 @@ SV with the string stored in the second SV.  It also forces the second SV
 to be interpreted as a string.
 
 The C<sv_cat*()> functions are not generic enough to operate on values that
-have "magic".  See L<Magic Virtual Tables> later in this document.
+have "magic".  See L</Magic Virtual Tables> later in this document.
 
 If you know the name of a scalar variable, you can get a pointer to its SV
 by using the following:
@@ -282,7 +282,7 @@ But won't work when called as:
 So to repeat always use SvOK() to check whether an sv is defined.
 
 Also you have to be careful when using C<&PL_sv_undef> as a value in
-AVs or HVs (see L<AVs, HVs and undefined values>).
+AVs or HVs (see L</AVs, HVs and undefined values>).
 
 There are also the two values C<PL_sv_yes> and C<PL_sv_no>, which contain
 boolean TRUE and FALSE values, respectively.  Like C<PL_sv_undef>, their
@@ -304,7 +304,7 @@ bus error, or just weird results.  Change the zero to C<&PL_sv_undef> in the
 first line and all will be well.
 
 To free an SV that you've created, call C<SvREFCNT_dec(SV*)>.  Normally this
-call is not necessary (see L<Reference Counts and Mortality>).
+call is not necessary (see L</Reference Counts and Mortality>).
 
 =head2 Offsets
 
@@ -461,7 +461,7 @@ by using the following:
 
 This returns NULL if the variable does not exist.
 
-See L<Understanding the Magic of Tied Hashes and Arrays> for more
+See L</Understanding the Magic of Tied Hashes and Arrays> for more
 information on how to use the array access functions on tied arrays.
 
 =head2 Working with HVs
@@ -545,7 +545,7 @@ The exact implementation of this macro varies by architecture and version
 of perl, and the return value may change per invocation, so the value
 is only valid for the duration of a single perl process.
 
-See L<Understanding the Magic of Tied Hashes and Arrays> for more
+See L</Understanding the Magic of Tied Hashes and Arrays> for more
 information on how to use the hash access functions on tied hashes.
 
 =head2 Hash API Extensions
@@ -702,7 +702,7 @@ A reference can be blessed into a package with the following function:
 
 The C<sv> argument must be a reference value.  The C<stash> argument
 specifies which class the reference will belong to.  See
-L<Stashes and Globs> for information on converting class names into stashes.
+L</Stashes and Globs> for information on converting class names into stashes.
 
 /* Still under construction */
 
@@ -1076,7 +1076,7 @@ to contain an C<SV*> and is stored as-is with its REFCNT incremented.
 
 The sv_magic function uses C<how> to determine which, if any, predefined
 "Magic Virtual Table" should be assigned to the C<mg_virtual> field.
-See the L<Magic Virtual Tables> section below.  The C<how> argument is also
+See the L</Magic Virtual Tables> section below.  The C<how> argument is also
 stored in the C<mg_type> field.  The value of
 C<how> should be chosen from the set of macros
 C<PERL_MAGIC_foo> found in F<perl.h>.  Note that before
@@ -1371,7 +1371,7 @@ creates a second hash which it blesses into the class which will implement
 the tie methods.  Lastly it ties the two hashes together, and returns a
 reference to the new tied hash.  Note that the code below does NOT call the
 TIEHASH method in the MyTie class -
-see L<Calling Perl Routines from within C Programs> for details on how
+see L</Calling Perl Routines from within C Programs> for details on how
 to do this.
 
     SV*
@@ -1733,7 +1733,7 @@ reuse specially assigned SVs (I<target>s) which are (as a corollary)
 not constantly freed/created.
 
 Each of the targets is created only once (but see
-L<Scratchpads and recursion> below), and when an opcode needs to put
+L</Scratchpads and recursion> below), and when an opcode needs to put
 an integer, a double, or a string on stack, it just sets the
 corresponding parts of its I<target> and puts the I<target> on stack.
 

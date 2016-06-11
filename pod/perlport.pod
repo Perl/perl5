@@ -67,9 +67,9 @@ The important thing is to decide where the code will run and to be
 deliberate in your decision.
 
 The material below is separated into three main sections: main issues of
-portability (L<"ISSUES">), platform-specific issues (L<"PLATFORMS">), and
+portability (L</"ISSUES">), platform-specific issues (L</"PLATFORMS">), and
 built-in Perl functions that behave differently on various ports
-(L<"FUNCTION IMPLEMENTATIONS">).
+(L</"FUNCTION IMPLEMENTATIONS">).
 
 This information should not be considered complete; it includes possibly
 transient information about idiosyncrasies of some of the ports, almost
@@ -743,7 +743,7 @@ For those times when it is necessary to have platform-specific code,
 consider keeping the platform-specific code in one place, making porting
 to other platforms easier.  Use the C<Config> module and the special
 variable C<$^O> to differentiate platforms, as described in
-L<"PLATFORMS">.
+L</"PLATFORMS">.
 
 Beware of the "else syndrome":
 
@@ -892,7 +892,7 @@ scripts such as I<pl2bat.bat> or I<pl2cmd> to
 put wrappers around your scripts.
 
 Newline (C<\n>) is translated as C<\015\012> by STDIO when reading from
-and writing to files (see L<"Newlines">).  C<binmode(FILEHANDLE)>
+and writing to files (see L</"Newlines">).  C<binmode(FILEHANDLE)>
 will keep C<\n> translated as C<\012> for that filehandle.  Since it is a
 no-op on other systems, C<binmode> should be used for cross-platform code
 that deals with binary data.  That's assuming you realize in advance
@@ -1217,7 +1217,7 @@ an effect on what happens with some Perl functions (such as C<chr>,
 C<pack>, C<print>, C<printf>, C<ord>, C<sort>, C<sprintf>, C<unpack>), as
 well as bit-fiddling with ASCII constants using operators like C<^>, C<&>
 and C<|>, not to mention dealing with socket interfaces to ASCII computers
-(see L<"Newlines">).
+(see L</"Newlines">).
 
 Fortunately, most web servers for the mainframe will correctly
 translate the C<\n> in the following statement to its ASCII equivalent

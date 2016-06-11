@@ -1440,7 +1440,7 @@ similar localizing behaviours. So later code blocks within the same
 pattern will still see the values which were localized in earlier blocks.
 These accumulated localizations are undone either at the end of a
 successful match, or if the assertion is backtracked (compare
-L<"Backtracking">). For example,
+L</"Backtracking">). For example,
 
   $_ = 'a' x 8;
   m<
@@ -1473,7 +1473,7 @@ regular expression.
 
 The assignment to C<$^R> above is properly localized, so the old
 value of C<$^R> is restored if the assertion is backtracked; compare
-L<"Backtracking">.
+L</"Backtracking">.
 
 Note that the special variable C<$^N>  is particularly useful with code
 blocks to capture the results of submatches in variables without having to
@@ -1775,7 +1775,7 @@ An "independent" subexpression, one which matches the substring
 that a I<standalone> C<pattern> would match if anchored at the given
 position, and it matches I<nothing other than this substring>.  This
 construct is useful for optimizations of what would otherwise be
-"eternal" matches, because it will not backtrack (see L<"Backtracking">).
+"eternal" matches, because it will not backtrack (see L</"Backtracking">).
 It may also be useful in places where the "grab all you can, and do not
 give anything back" semantic is desirable.
 
@@ -1784,7 +1784,7 @@ For example: C<< ^(?>a*)ab >> will never match, since C<< (?>a*) >>
 characters C<a> at the beginning of string, leaving no C<a> for
 C<ab> to match.  In contrast, C<a*ab> will match the same as C<a+b>,
 since the match of the subgroup C<a*> is influenced by the following
-group C<ab> (see L<"Backtracking">).  In particular, C<a*> inside
+group C<ab> (see L</"Backtracking">).  In particular, C<a*> inside
 C<a*ab> will match fewer characters than a standalone C<a*>, since
 this makes the tail match.
 
@@ -2135,7 +2135,7 @@ X<backtrack> X<backtracking>
 NOTE: This section presents an abstract approximation of regular
 expression behavior.  For a more rigorous (and complicated) view of
 the rules involved in selecting a match among possible alternatives,
-see L<Combining RE Pieces>.
+see L</Combining RE Pieces>.
 
 A fundamental feature of regular expression matching involves the
 notion called I<backtracking>, which is currently used (when needed)
@@ -2533,7 +2533,7 @@ the C<"*">.
 The higher-level loops preserve an additional state between iterations:
 whether the last match was zero-length.  To break the loop, the following
 match after a zero-length match is prohibited to have a length of zero.
-This prohibition interacts with backtracking (see L<"Backtracking">),
+This prohibition interacts with backtracking (see L</"Backtracking">),
 and so the I<second best> match is chosen if the I<best> match is of
 zero length.
 
@@ -2567,7 +2567,7 @@ patterns using combining operators C<ST>, C<S|T>, C<S*> etc.
 Such combinations can include alternatives, leading to a problem of choice:
 if we match a regular expression C<a|ab> against C<"abc">, will it match
 substring C<"a"> or C<"ab">?  One way to describe which substring is
-actually matched is the concept of backtracking (see L<"Backtracking">).
+actually matched is the concept of backtracking (see L</"Backtracking">).
 However, this description is too low-level and makes you think
 in terms of a particular implementation.
 
