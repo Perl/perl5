@@ -65,7 +65,7 @@ years, it will become a standard practice.
 
 
 However, C<package NAME VERSION> requires a new, 'strict' version
-number format. See L<"Version number formats"> for details.
+number format. See L</"Version number formats"> for details.
 
 
 =head2 The C<...> operator
@@ -430,7 +430,7 @@ to bless them into C<IO::Handle>.
 =item *
 
 The semantics of C<use feature :5.10*> have changed slightly.
-See L<"Modules and Pragmata"> for more information.
+See L</"Modules and Pragmata"> for more information.
 
 =item *
 
