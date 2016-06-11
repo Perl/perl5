@@ -17,7 +17,7 @@ found in the top-level directory to which the Perl distribution
 was extracted.  Make sure you read and understand the terms under
 which this software is being distributed.
 
-Also make sure you read L<BUGS AND CAVEATS> below for the
+Also make sure you read L</BUGS AND CAVEATS> below for the
 known limitations of this port.
 
 The INSTALL file in the perl top-level has much information that is
@@ -87,7 +87,7 @@ Also, the trimmed down compiler only passes tests when USE_ITHREADS *= define
 This port fully supports MakeMaker (the set of modules that
 is used to build extensions to perl).  Therefore, you should be
 able to build and install most extensions found in the CPAN sites.
-See L<Usage Hints for Perl on Windows> below for general hints about this.
+See L</Usage Hints for Perl on Windows> below for general hints about this.
 
 =head2 Setting Up Perl on Windows
 
@@ -444,7 +444,7 @@ include some tools (C<type> for instance) which override the Windows
 ones and makes tests fail. Remove them from your path while testing to
 avoid these errors.
 
-Please report any other failures as described under L<BUGS AND CAVEATS>.
+Please report any other failures as described under L</BUGS AND CAVEATS>.
 
 =head2 Installation of Perl on Windows
 

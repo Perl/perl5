@@ -246,7 +246,7 @@ the build.
 Once you issue your MMS or MMK command, sit back and wait.  Perl should 
 compile and link without a problem.  If a problem does occur check the 
 "CAVEATS" section of this document.  If that does not help send some 
-mail to the VMSPERL mailing list.  Instructions are in the L<"Mailing Lists"> 
+mail to the VMSPERL mailing list.  Instructions are in the L</"Mailing Lists"> 
 section of this document.
 
 =head1 Testing Perl
