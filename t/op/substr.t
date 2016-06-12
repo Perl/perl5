@@ -22,7 +22,7 @@ $SIG{__WARN__} = sub {
      }
 };
 
-plan(388);
+plan(390);
 
 run_tests() unless caller;
 
@@ -838,6 +838,14 @@ is $o::count, 1, 'assigning utf8 overload to substr lvalue calls ovld 1ce';
 
 # [perl #7678] core dump with substr reference and localisation
 {$b="abcde"; local $k; *k=\substr($b, 2, 1);}
+
+# [perl #128260] assertion failure with \substr %h, \substr @h
+{
+    my %h = 1..100;
+    my @a = 1..100;
+    is ${\substr %h, 0}, scalar %h, '\substr %h';
+    is ${\substr @a, 0}, scalar @a, '\substr @a';
+}
 
 } # sub run_tests - put tests above this line that can run in threads
 

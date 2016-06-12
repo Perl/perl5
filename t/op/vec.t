@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan( tests => 35 );
+plan( tests => 37 );
 
 
 is(vec($foo,0,1), 0);
@@ -126,4 +126,12 @@ like($@, qr/^Modification of a read-only value attempted at /,
     is($v, 255, "downgraded utf8 try 1");
     $v = vec($x, 0, 8);
     is($v, 255, "downgraded utf8 try 2");
+}
+
+# [perl #128260] assertion failure with \vec %h, \vec @h
+{
+    my %h = 1..100;
+    my @a = 1..100;
+    is ${\vec %h, 0, 1}, vec(scalar %h, 0, 1), '\vec %h';
+    is ${\vec @a, 0, 1}, vec(scalar @a, 0, 1), '\vec @a';
 }
