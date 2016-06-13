@@ -1663,6 +1663,11 @@ allocate_struct(pTHX_ SV *rv, const STRLEN size, const char *packname) {
     SV *const t = newSVrv(rv, packname);
     void *const p = sv_grow(t, size + 1);
 
+    /* Ensure at least one use of not_here() to avoid "defined but not
+     * used" warning.  This is not at all related to allocate_struct(); I
+     * just needed somewhere to dump it - DAPM */
+    if (0) { not_here(""); }
+
     SvCUR_set(t, size);
     SvPOK_on(t);
     return p;
