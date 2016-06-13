@@ -1,6 +1,8 @@
 5.006000
+DO_UTF8                        # U
 PERL_SYS_INIT3                 # U
 PL_check                       # E
+POPul                          # E
 SvIOK_UV                       # U
 SvIOK_notUV                    # U
 SvIOK_only_UV                  # U
@@ -17,6 +19,7 @@ SvUOK                          # U
 SvUTF8                         # U
 SvUTF8_off                     # U
 SvUTF8_on                      # U
+UTF8SKIP                       # U
 av_delete                      # U
 av_exists                      # U
 call_atexit                    # E

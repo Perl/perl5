@@ -36,7 +36,6 @@ savepvs                        # U
 sortsv_flags                   # U
 sv_catpvs                      # U
 vverify                        # U
-GvSVn                          # added by devel/scanprov
 HvNAMELEN_get                  # added by devel/scanprov
 HvNAME_get                     # added by devel/scanprov
 PERLIO_FUNCS_CAST              # added by devel/scanprov

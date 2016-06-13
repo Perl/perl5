@@ -28,7 +28,7 @@ sub all_files_in_dir
   my @files = grep { !-d && !/^\./ } readdir DIR;  # no dirs or hidden files
   closedir DIR;
 
-  return map { cat_file($dir, $_) } @files;
+  return map { cat_file($dir, $_) } sort @files;
 }
 
 sub parse_todo

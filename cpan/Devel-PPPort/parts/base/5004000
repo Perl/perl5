@@ -3,6 +3,7 @@ GIMME_V                        # E
 G_VOID                         # E
 HePV                           # A
 HeSVKEY_set                    # U
+POPu                           # E
 PUSHu                          # U
 SvSetMagicSV                   # U
 SvSetMagicSV_nosteal           # U
@@ -27,6 +28,8 @@ hv_free_ent                    # E
 ibcmp_locale                   # U
 intro_my                       # E
 isPRINT                        # U
+memEQ                          # U
+memNE                          # U
 my_failure_exit                # E
 newRV_inc                      # U
 newRV_noinc                    # E
@@ -47,5 +50,3 @@ sv_vcatpvfn                    # E
 sv_vsetpvfn                    # E
 toLOWER_LC                     # U
 SvUVXx                         # added by devel/scanprov
-memEQ                          # added by devel/scanprov
-memNE                          # added by devel/scanprov

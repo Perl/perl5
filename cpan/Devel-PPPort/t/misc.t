@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (41) {
+  if (48) {
     load();
-    plan(tests => 41);
+    plan(tests => 48);
   }
 }
 
@@ -57,7 +57,7 @@ $_ = "Fred";
 ok(&Devel::PPPort::DEFSV(), "Fred");
 ok(&Devel::PPPort::UNDERBAR(), "Fred");
 
-if ($] >= 5.009002 && $] < 5.023) {
+if ($] >= 5.009002 && $] < 5.023 && $] < 5.023004) {
   eval q{
     no warnings "deprecated";
     no if $^V > v5.17.9, warnings => "experimental::lexical_topic";
@@ -127,6 +127,8 @@ ok(&Devel::PPPort::Perl_ppaddr_t("FOO"), "foo");
 
 ok(&Devel::PPPort::ptrtests(), 63);
 
+ok(&Devel::PPPort::OpSIBLING_tests(), 0);
+
 if ($] >= 5.009000) {
   eval q{
     ok(&Devel::PPPort::check_HeUTF8("hello"), "norm");
@@ -135,5 +137,21 @@ if ($] >= 5.009000) {
 } else {
   ok(1, 1);
   ok(1, 1);
+}
+
+@r = &Devel::PPPort::check_c_array();
+ok($r[0], 4);
+ok($r[1], "13");
+
+ok(!Devel::PPPort::SvRXOK(""));
+ok(!Devel::PPPort::SvRXOK(bless [], "Regexp"));
+
+if ($] < 5.005) {
+        skip 'no qr// objects in this perl', 0;
+        skip 'no qr// objects in this perl', 0;
+} else {
+        my $qr = eval 'qr/./';
+        ok(Devel::PPPort::SvRXOK($qr));
+        ok(Devel::PPPort::SvRXOK(bless $qr, "Surprise"));
 }
 

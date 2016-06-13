@@ -78,13 +78,16 @@ Amn|SV|PL_sv_undef
 Amn|SV|PL_sv_yes
 Amn|U32|GIMME
 Amn|U32|GIMME_V
+Amn|UV|POPu
 Amn|char*|CLASS
 Amn|char*|POPp
 Amn|char*|POPpbytex
 Amn|char*|POPpx
 Amn|long|POPl
+Amn|long|POPul
 Amn|peep_t|PL_peepp
 Amn|peep_t|PL_rpeepp
+Amn|void|DECLARATION_FOR_LC_NUMERIC_MANIPULATION
 Ams||ENTER
 Ams||FREETMPS
 Ams||LEAVE
@@ -175,6 +178,7 @@ Am|NV|SvNV_nomg|SV* sv
 Am|NV|SvNVx|SV* sv
 Am|NV|SvNV|SV* sv
 Am|OP*|LINKLIST|OP *o
+Am|OP*|OpSIBLING|OP *o
 Am|PADOFFSET|pad_add_name_pvs|const char *name|U32 flags|HV *typestash|HV *ourstash
 Am|PADOFFSET|pad_findmy_pvs|const char *name|U32 flags
 Am|REGEXP *|SvRX|SV *sv
@@ -183,6 +187,8 @@ Am|STRLEN|HvENAMELEN|HV *stash
 Am|STRLEN|HvNAMELEN|HV *stash
 Am|STRLEN|SvCUR|SV* sv
 Am|STRLEN|SvLEN|SV* sv
+Am|STRLEN|UTF8SKIP|char* s
+Am|STRLEN|UVCHR_SKIP|UV cp
 Am|STRLEN|isUTF8_CHAR|const U8 *s|const U8 *e
 Am|SV *|boolSV|bool b
 Am|SV *|cop_hints_fetch_pvn|const COP *cop|const char *keypv|STRLEN keylen|U32 hash|U32 flags
@@ -235,19 +241,18 @@ Am|UV|SvUVX|SV* sv
 Am|UV|SvUV_nomg|SV* sv
 Am|UV|SvUVx|SV* sv
 Am|UV|SvUV|SV* sv
-Am|UV|toFOLD_uni|UV cp|U8* s|STRLEN* lenp
 Am|UV|toFOLD_utf8|U8* p|U8* s|STRLEN* lenp
-Am|UV|toLOWER_uni|UV cp|U8* s|STRLEN* lenp
+Am|UV|toFOLD_uvchr|UV cp|U8* s|STRLEN* lenp
 Am|UV|toLOWER_utf8|U8* p|U8* s|STRLEN* lenp
-Am|UV|toTITLE_uni|UV cp|U8* s|STRLEN* lenp
+Am|UV|toLOWER_uvchr|UV cp|U8* s|STRLEN* lenp
 Am|UV|toTITLE_utf8|U8* p|U8* s|STRLEN* lenp
-Am|UV|toUPPER_uni|UV cp|U8* s|STRLEN* lenp
+Am|UV|toTITLE_uvchr|UV cp|U8* s|STRLEN* lenp
 Am|UV|toUPPER_utf8|U8* p|U8* s|STRLEN* lenp
+Am|UV|toUPPER_uvchr|UV cp|U8* s|STRLEN* lenp
+Am|bool|DO_UTF8|SV* sv
 Am|bool|OP_TYPE_IS_OR_WAS|OP *o|Optype type
 Am|bool|OP_TYPE_IS|OP *o|Optype type
 Am|bool|OpHAS_SIBLING|OP *o
-Am|bool|OpSIBLING_set|OP *o|OP *sib
-Am|bool|OpSIBLING|OP *o
 Am|bool|SvIOK_UV|SV* sv
 Am|bool|SvIOK_notUV|SV* sv
 Am|bool|SvIsCOW_shared_hash|SV* sv
@@ -275,6 +280,8 @@ Am|bool|isSPACE|char ch
 Am|bool|isUPPER|char ch
 Am|bool|isWORDCHAR|char ch
 Am|bool|isXDIGIT|char ch
+Am|bool|memEQ|char* s1|char* s2|STRLEN len
+Am|bool|memNE|char* s1|char* s2|STRLEN len
 Am|bool|strEQ|char* s1|char* s2
 Am|bool|strGE|char* s1|char* s2
 Am|bool|strGT|char* s1|char* s2
@@ -322,6 +329,9 @@ Am|void|Move|void* src|void* dest|int nitems|type
 Am|void|Newxc|void* ptr|int nitems|type|cast
 Am|void|Newxz|void* ptr|int nitems|type
 Am|void|Newx|void* ptr|int nitems|type
+Am|void|OpLASTSIB_set|OP *o|OP *parent
+Am|void|OpMAYBESIB_set|OP *o|OP *sib|OP *parent
+Am|void|OpMORESIB_set|OP *o|OP *sib
 Am|void|PERL_SYS_INIT3|int *argc|char*** argv|char*** env
 Am|void|PERL_SYS_INIT|int *argc|char*** argv
 Am|void|PERL_SYS_TERM|
@@ -336,8 +346,11 @@ Am|void|PoisonFree|void* dest|int nitems|type
 Am|void|PoisonNew|void* dest|int nitems|type
 Am|void|PoisonWith|void* dest|int nitems|type|U8 byte
 Am|void|Poison|void* dest|int nitems|type
+Am|void|RESTORE_LC_NUMERIC
 Am|void|Renewc|void* ptr|int nitems|type|cast
 Am|void|Renew|void* ptr|int nitems|type
+Am|void|STORE_LC_NUMERIC_FORCE_TO_UNDERLYING
+Am|void|STORE_LC_NUMERIC_SET_TO_NEEDED
 Am|void|Safefree|void* ptr
 Am|void|StructCopy|type *src|type *dest|type
 Am|void|SvCUR_set|SV* sv|STRLEN len

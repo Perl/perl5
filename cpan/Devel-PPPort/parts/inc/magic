@@ -29,13 +29,15 @@ __UNDEFINED__  SvGETMAGIC(x) STMT_START { if (SvGMAGICAL(x)) mg_get(x); } STMT_E
 
 __UNDEFINED__  HEf_SVKEY   -2
 
+#ifndef MUTABLE_PTR
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define MUTABLE_PTR(p) ({ void *_p = (p); _p; })
 #else
 #  define MUTABLE_PTR(p) ((void *) (p))
 #endif
+#endif
 
-#define MUTABLE_SV(p)   ((SV *)MUTABLE_PTR(p))
+__UNDEFINED__ MUTABLE_SV(p)   ((SV *)MUTABLE_PTR(p))
 
 /* end of random bits */
 

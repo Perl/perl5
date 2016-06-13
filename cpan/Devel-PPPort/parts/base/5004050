@@ -5,6 +5,7 @@ PL_sv_undef                    # E
 PL_sv_yes                      # E
 SvGETMAGIC                     # U
 do_binmode                     # E
+my_bcopy                       # U
 newCONSTSUB                    # E
 newSVpvn                       # E
 save_aelem                     # U
