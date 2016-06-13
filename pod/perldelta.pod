@@ -285,7 +285,9 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+F<make_ext.pl> no longer updates a module's F<pm_to_blib> file when no
+files require updates.  This could cause dependencies, F<perlmain.c>
+in particular, to be rebuilt unnecessarily.  [perl #126710]
 
 =back
 
