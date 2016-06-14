@@ -51,6 +51,11 @@ for my $file ( dir_list("corpus", qr/^mirror/ ) ) {
     open my $fh, ">", $tempfile;
     close $fh;
     utime $mtime, $mtime, $tempfile;
+    if ($^O eq 'MSWin32') {
+        # Deal with stat and daylight savings issues on Windows
+        # by reading back mtime
+        $timestamp{$url_basename} = (stat $tempfile)[9];
+    }
   }
 
   # setup mocking and test

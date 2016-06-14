@@ -104,6 +104,9 @@ for my $file ( dir_list("corpus", qr/^get/ ) ) {
   else {
     $check_expected->( $response->{content}, "$label content" );
   }
+
+  ok ( ! exists $response->{redirects}, "$label redirects array doesn't exist")
+    or diag explain $response->{redirects};
 }
 
 done_testing;
