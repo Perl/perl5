@@ -26,7 +26,24 @@ codes, I will add them to the module and release a new version.
 
 =head1 VERSION 3.40  (planned 2016-09-01; sbeck)
 
-=head1 VERSION 3.39  (planned 2016-06-01; sbeck)
+=head1 VERSION 3.39  (2016-05-31; sbeck)
+
+No new codes (for the existing codesets).
+
+=over 4
+
+=item B<Added UN codes back in>
+
+The UN codes have been added back in as their own list of codes.
+Jarkko Hietaniemi
+
+=item B<Added GENC codes>
+
+The GENC codes have been added.  These are the new US Government codes
+that replace the FIPS-10 codes.  They are based on, but not identical to
+the ISO 3166 codes.
+
+=back
 
 =head1 VERSION 3.38  (2016-03-02; sbeck)
 

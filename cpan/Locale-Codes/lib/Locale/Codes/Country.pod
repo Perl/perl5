@@ -70,6 +70,23 @@ The IANA is responsible for delegating management of the top level country
 domains.  The country domains are the two-letter (lowercase) codes from ISO 3166
 with a few other additions.
 
+=item B<un-alpha-3, LOCALE_CODE_UN_ALPHA_3>
+
+=item B<un-numeric, LOCALE_CODE_UN_NUMERIC>
+
+The UN maintains a list of codes that is similar, but not identical, to the
+standard ISO 3166 lists.  They maintain a 3-letter code (similar to alpha-3)
+and a numeric code (similar to numeric).
+
+=item B<genc-alpha-2, LOCALE_CODE_GENC_ALPHA_2>
+
+=item B<genc-alpha-3, LOCALE_CODE_GENC_ALPHA_3>
+
+=item B<genc-numeric, LOCALE_CODE_GENC_NUMERIC>
+
+The GENC codes are the US Government codes that replace the FIPS-11 codes.
+They are based on, but not identical to the standard ISO 3166 lists.
+
 =back
 
 NOTE: As of version 3.27, the FIPS code set is no longer supported.  See the
@@ -143,12 +160,15 @@ Official source of the top-level domain names.
 
 =item L<http://unstats.un.org/unsd/methods/m49/m49alpha.htm>
 
-The source of the official ISO 3166-1 three-letter codes and
-three-digit codes.
+The source of the UN codes.
 
-For some reason, this table is incomplete! Several countries are
-missing from it, and I cannot find them anywhere on the UN site.  I
-no longer use this as a source of data.
+Previously, this table was treated as a source of the ISO 3166 data,
+but I found that the table was incomplete, so I stopped using it.
+Later, it was added back in as it's own list of codes.
+
+=item L<https://nsgreg.nga.mil/genc/discovery>
+
+The source of the GENC codes.
 
 =item L<https://www.cia.gov/library/publications/the-world-factbook/appendix/print_appendix-d.html>
 

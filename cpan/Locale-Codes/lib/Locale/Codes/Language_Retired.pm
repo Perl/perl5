@@ -3,7 +3,7 @@ Locale::Codes::Language_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Wed Mar  2 09:26:23 EST 2016
+#    Generated on: Tue May 31 09:21:49 EDT 2016
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.38';
+$VERSION='3.39';
 
 $Locale::Codes::Retired{'language'}{'alpha-2'}{'code'} = {
    q(in) => q(Indonesian),

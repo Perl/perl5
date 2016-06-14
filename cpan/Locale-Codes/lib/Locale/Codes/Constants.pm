@@ -17,12 +17,17 @@ require Exporter;
 our($VERSION,@ISA,@EXPORT);
 our(%ALL_CODESETS);
 
-$VERSION='3.38';
+$VERSION='3.39';
 @ISA     = qw(Exporter);
 @EXPORT  = qw(LOCALE_CODE_ALPHA_2
               LOCALE_CODE_ALPHA_3
               LOCALE_CODE_NUMERIC
               LOCALE_CODE_DOM
+              LOCALE_CODE_UN_NUMERIC
+              LOCALE_CODE_UN_ALPHA_3
+              LOCALE_CODE_GENC_ALPHA_2
+              LOCALE_CODE_GENC_ALPHA_3
+              LOCALE_CODE_GENC_NUMERIC
 
               LOCALE_LANG_ALPHA_2
               LOCALE_LANG_ALPHA_3
@@ -47,17 +52,27 @@ $VERSION='3.38';
 #	Constants
 #-----------------------------------------------------------------------
 
-use constant LOCALE_CODE_ALPHA_2    => 'alpha-2';
-use constant LOCALE_CODE_ALPHA_3    => 'alpha-3';
-use constant LOCALE_CODE_NUMERIC    => 'numeric';
-use constant LOCALE_CODE_DOM        => 'dom';
+use constant LOCALE_CODE_ALPHA_2      => 'alpha-2';
+use constant LOCALE_CODE_ALPHA_3      => 'alpha-3';
+use constant LOCALE_CODE_NUMERIC      => 'numeric';
+use constant LOCALE_CODE_DOM          => 'dom';
+use constant LOCALE_CODE_UN_ALPHA_3   => 'un-alpha-3';
+use constant LOCALE_CODE_UN_NUMERIC   => 'un-numeric';
+use constant LOCALE_CODE_GENC_ALPHA_2 => 'genc-alpha-2';
+use constant LOCALE_CODE_GENC_ALPHA_3 => 'genc-alpha-3';
+use constant LOCALE_CODE_GENC_NUMERIC => 'genc-numeric';
 
 $ALL_CODESETS{'country'} = {
                             'default'  => 'alpha-2',
-                            'codesets' => { 'alpha-2'  => ['lc'],
-                                            'alpha-3'  => ['lc'],
-                                            'numeric'  => ['numeric',3],
-                                            'dom'      => ['lc'],
+                            'codesets' => { 'alpha-2'      => ['lc'],
+                                            'alpha-3'      => ['lc'],
+                                            'numeric'      => ['numeric',3],
+                                            'dom'          => ['lc'],
+                                            'un-alpha-3'   => ['uc'],
+                                            'un-numeric'   => ['numeric',3],
+                                            'genc-alpha-2' => ['uc'],
+                                            'genc-alpha-3' => ['uc'],
+                                            'genc-numeric' => ['numeric',3],
                                           }
                            };
 

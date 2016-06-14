@@ -3,7 +3,7 @@ Locale::Codes::Country_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Wed Mar  2 09:26:23 EST 2016
+#    Generated on: Tue May 31 09:21:49 EDT 2016
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.38';
+$VERSION='3.39';
 
 $Locale::Codes::Retired{'country'}{'alpha-2'}{'code'} = {
    q(an) => q(Netherlands Antilles),
@@ -308,6 +308,15 @@ $Locale::Codes::Retired{'country'}{'dom'}{'code'} = {
    q(uk) => q(United Kingdom),
 };
 
+$Locale::Codes::Retired{'country'}{'genc-alpha-2'}{'code'} = {
+};
+
+$Locale::Codes::Retired{'country'}{'genc-alpha-3'}{'code'} = {
+};
+
+$Locale::Codes::Retired{'country'}{'genc-numeric'}{'code'} = {
+};
+
 $Locale::Codes::Retired{'country'}{'numeric'}{'code'} = {
    q(010) => q(Antarctica),
    q(074) => q(Bouvet Island),
@@ -325,6 +334,12 @@ $Locale::Codes::Retired{'country'}{'numeric'}{'code'} = {
    q(736) => q(Sudan),
    q(830) => q(Channel Islands),
    q(891) => q(Serbia and Montenegro),
+};
+
+$Locale::Codes::Retired{'country'}{'un-alpha-3'}{'code'} = {
+};
+
+$Locale::Codes::Retired{'country'}{'un-numeric'}{'code'} = {
 };
 
 $Locale::Codes::Retired{'country'}{'alpha-2'}{'name'} = {
@@ -498,6 +513,15 @@ $Locale::Codes::Retired{'country'}{'dom'}{'name'} = {
    q(yugoslavia ) => [ q(YU), q(Yugoslavia ) ],
 };
 
+$Locale::Codes::Retired{'country'}{'genc-alpha-2'}{'name'} = {
+};
+
+$Locale::Codes::Retired{'country'}{'genc-alpha-3'}{'name'} = {
+};
+
+$Locale::Codes::Retired{'country'}{'genc-numeric'}{'name'} = {
+};
+
 $Locale::Codes::Retired{'country'}{'numeric'}{'name'} = {
    q(antarctica) => [ q(010), q(Antarctica) ],
    q(bolivia) => [ q(068), q(Bolivia) ],
@@ -580,6 +604,12 @@ $Locale::Codes::Retired{'country'}{'numeric'}{'name'} = {
    q(wallis and futuna islands) => [ q(876), q(Wallis and Futuna Islands) ],
    q(yugoslavia) => [ q(891), q(Yugoslavia) ],
    q(zaire) => [ q(180), q(Zaire) ],
+};
+
+$Locale::Codes::Retired{'country'}{'un-alpha-3'}{'name'} = {
+};
+
+$Locale::Codes::Retired{'country'}{'un-numeric'}{'name'} = {
 };
 
 
