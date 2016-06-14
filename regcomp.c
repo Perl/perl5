@@ -8951,10 +8951,12 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 
     /* running count, as explained in the algorithm source book; items are
      * stopped accumulating and are output when the count changes to/from 0.
-     * The count is incremented when we start a range that's in the set, and
-     * decremented when we start a range that's not in the set.  So its range
-     * is 0 to 2.  Only when the count is zero is something not in the set.
-     */
+     * The count is incremented when we start a range that's in an input's set,
+     * and decremented when we start a range that's not in a set.  So this
+     * variable can be 0, 1, or 2.  When it is 0 neither input is in their set,
+     * and hence nothing goes into the union; 1, just one of the inputs is in
+     * its set (and its current range gets added to the union); and 2 when both
+     * inputs are in their sets.  */
     UV count = 0;
 
     PERL_ARGS_ASSERT__INVLIST_UNION_MAYBE_COMPLEMENT_2ND;
@@ -9017,7 +9019,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
         invlist_replace_list_destroys_src(*output, u);
         SvREFCNT_dec_NN(u);
 
-	return;
+        return;
     }
 
     if (a == NULL || ((len_a = _invlist_len(a)) == 0)) {
@@ -9088,10 +9090,10 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
     u = _new_invlist(len_a + len_b);
 
     /* Will contain U+0000 if either component does */
-    array_u = _invlist_array_init(u, (len_a > 0 && array_a[0] == 0)
-				      || (len_b > 0 && array_b[0] == 0));
+    array_u = _invlist_array_init(u, (    len_a > 0 && array_a[0] == 0)
+                                      || (len_b > 0 && array_b[0] == 0));
 
-    /* Go through each list item by item, stopping when exhausted one of
+    /* Go through each input list item by item, stopping when exhausted one of
      * them */
     while (i_a < len_a && i_b < len_b) {
 	UV cp;	    /* The element to potentially add to the union's array */
@@ -9099,21 +9101,21 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 
 	/* We need to take one or the other of the two inputs for the union.
 	 * Since we are merging two sorted lists, we take the smaller of the
-	 * next items.  In case of a tie, we take the one that is in its set
-	 * first.  If we took one not in the set first, it would decrement the
-	 * count, possibly to 0 which would cause it to be output as ending the
-	 * range, and the next time through we would take the same number, and
-	 * output it again as beginning the next range.  By doing it the
-	 * opposite way, there is no possibility that the count will be
-	 * momentarily decremented to 0, and thus the two adjoining ranges will
-	 * be seamlessly merged.  (In a tie and both are in the set or both not
-	 * in the set, it doesn't matter which we take first.) */
-	if (array_a[i_a] < array_b[i_b]
-	    || (array_a[i_a] == array_b[i_b]
+         * next items.  In case of a tie, we take first the one that is in its
+         * set.  If we first took the one not in its set, it would decrement
+         * the count, possibly to 0 which would cause it to be output as ending
+         * the range, and the next time through we would take the same number,
+         * and output it again as beginning the next range.  By doing it the
+         * opposite way, there is no possibility that the count will be
+         * momentarily decremented to 0, and thus the two adjoining ranges will
+         * be seamlessly merged.  (In a tie and both are in the set or both not
+         * in the set, it doesn't matter which we take first.) */
+	if (       array_a[i_a] < array_b[i_b]
+	    || (   array_a[i_a] == array_b[i_b]
 		&& ELEMENT_RANGE_MATCHES_INVLIST(i_a)))
 	{
 	    cp_in_set = ELEMENT_RANGE_MATCHES_INVLIST(i_a);
-	    cp= array_a[i_a++];
+	    cp = array_a[i_a++];
 	}
 	else {
 	    cp_in_set = ELEMENT_RANGE_MATCHES_INVLIST(i_b);
@@ -9137,39 +9139,53 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 	}
     }
 
-    /* Here, we are finished going through at least one of the lists, which
-     * means there is something remaining in at most one.  We check if the list
-     * that hasn't been exhausted is positioned such that we are in the middle
-     * of a range in its set or not.  (i_a and i_b point to the element beyond
-     * the one we care about.) If in the set, we decrement 'count'; if 0, there
-     * is potentially more to output.
-     * There are four cases:
-     *	1) Both weren't in their sets, count is 0, and remains 0.  What's left
-     *	   in the union is entirely from the non-exhausted set.
-     *	2) Both were in their sets, count is 2.  Nothing further should
-     *	   be output, as everything that remains will be in the exhausted
-     *	   list's set, hence in the union; decrementing to 1 but not 0 insures
-     *	   that
-     *	3) the exhausted was in its set, non-exhausted isn't, count is 1.
-     *	   Nothing further should be output because the union includes
-     *	   everything from the exhausted set.  Not decrementing ensures that.
-     *	4) the exhausted wasn't in its set, non-exhausted is, count is 1;
-     *	   decrementing to 0 insures that we look at the remainder of the
-     *	   non-exhausted set */
+
+    /* The loop above increments the index into exactly one of the input lists
+     * each iteration, and ends when either index gets to its list end.  That
+     * means the other index is lower than its end, and so something is
+     * remaining in that one.  We decrement 'count', as explained below, if
+     * that list is in its set.  (i_a and i_b each currently index the element
+     * beyond the one we care about.) */
     if (   (i_a != len_a && PREV_RANGE_MATCHES_INVLIST(i_a))
 	|| (i_b != len_b && PREV_RANGE_MATCHES_INVLIST(i_b)))
     {
 	count--;
     }
 
-    /* The final length is what we've output so far, plus what else is about to
-     * be output.  (If 'count' is non-zero, then the input list we exhausted
-     * has everything remaining up to the machine's limit in its set, and hence
-     * in the union, so there will be no further output. */
-    len_u = i_u;
-    if (count == 0) {
-	/* At most one of the subexpressions will be non-zero */
-	len_u += (len_a - i_a) + (len_b - i_b);
+    /* Above we decremented 'count' if the list that had unexamined elements in
+     * it was in its set.  This has made it so that 'count' being non-zero
+     * means there isn't anything left to output; and 'count' equal to 0 means
+     * that what is left to output is precisely that which is left in the
+     * non-exhausted input list.
+     *
+     * To see why, note first that the exhausted input obviously has nothing
+     * left to add to the union.  If it was in its set at its end, that means
+     * the set extends from here to the platform's infinity, and hence so does
+     * the union and the non-exhausted set is irrelevant.  The exhausted set
+     * also contributed 1 to 'count'.  If 'count' was 2, it got decremented to
+     * 1, but if it was 1, the non-exhausted set wasn't in its set, and so
+     * 'count' remains at 1.  This is consistent with the decremented 'count'
+     * != 0 meaning there's nothing left to add to the union.
+     *
+     * But if the exhausted input wasn't in its set, it contributed 0 to
+     * 'count', and the rest of the union will be whatever the other input is.
+     * If 'count' was 0, neither list was in its set, and 'count' remains 0;
+     * otherwise it gets decremented to 0.  This is consistent with 'count'
+     * == 0 meaning the remainder of the union is whatever is left in the
+     * non-exhausted list. */
+    if (count != 0) {
+        len_u = i_u;
+    }
+    else {
+        IV copy_count = len_a - i_a;
+        if (copy_count > 0) {   /* The non-exhausted input is 'a' */
+	    Copy(array_a + i_a, array_u + i_u, copy_count, UV);
+        }
+        else { /* The non-exhausted input is b */
+            copy_count = len_b - i_b;
+	    Copy(array_b + i_b, array_u + i_u, copy_count, UV);
+        }
+        len_u = i_u + copy_count;
     }
 
     /* Set the result to the final length, which can change the pointer to
@@ -9179,22 +9195,6 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 	invlist_set_len(u, len_u, *get_invlist_offset_addr(u));
 	invlist_trim(u);
 	array_u = invlist_array(u);
-    }
-
-    /* When 'count' is 0, the list that was exhausted (if one was shorter than
-     * the other) ended with everything above it not in its set.  That means
-     * that the remaining part of the union is precisely the same as the
-     * non-exhausted list, so can just copy it unchanged.  (If both lists were
-     * exhausted at the same time, then the operations below will be both 0.)
-     */
-    if (count == 0) {
-	IV copy_count; /* At most one will have a non-zero copy count */
-	if ((copy_count = len_a - i_a) > 0) {
-	    Copy(array_a + i_a, array_u + i_u, copy_count, UV);
-	}
-	else if ((copy_count = len_b - i_b) > 0) {
-	    Copy(array_b + i_b, array_u + i_u, copy_count, UV);
-	}
     }
 
     /* If the output is not to overwrite either of the inputs, just return the
@@ -9209,7 +9209,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
          *  shown [perl #127392] that if the input is a mortal, we can get a
          *  huge build-up of these during regex compilation before they get
          *  freed.  So for that case, replace just the input's interior with
-         *  the output's, and then free the output */
+         *  the union's, and then free the union */
 
         assert(! invlist_is_iterating(*output));
 
@@ -9261,12 +9261,12 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
     UV i_b = 0;
     UV i_r = 0;
 
-    /* running count, as explained in the algorithm source book; items are
-     * stopped accumulating and are output when the count changes to/from 2.
-     * The count is incremented when we start a range that's in the set, and
-     * decremented when we start a range that's not in the set.  So its range
-     * is 0 to 2.  Only when the count is 2 is something in the intersection.
-     */
+    /* running count of how many of the two inputs are postitioned at ranges
+     * that are in their sets.  As explained in the algorithm source book,
+     * items are stopped accumulating and are output when the count changes
+     * to/from 2.  The count is incremented when we start a range that's in an
+     * input's set, and decremented when we start a range that's not in a set.
+     * Only when it is 2 are we in the intersection. */
     UV count = 0;
 
     PERL_ARGS_ASSERT__INVLIST_INTERSECTION_MAYBE_COMPLEMENT_2ND;
@@ -9338,8 +9338,8 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
     r= _new_invlist(len_a + len_b);
 
     /* Will contain U+0000 iff both components do */
-    array_r = _invlist_array_init(r, len_a > 0 && array_a[0] == 0
-				     && len_b > 0 && array_b[0] == 0);
+    array_r = _invlist_array_init(r,    len_a > 0 && array_a[0] == 0
+                                     && len_b > 0 && array_b[0] == 0);
 
     /* Go through each list item by item, stopping when exhausted one of
      * them */
@@ -9350,21 +9350,21 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 
 	/* We need to take one or the other of the two inputs for the
 	 * intersection.  Since we are merging two sorted lists, we take the
-	 * smaller of the next items.  In case of a tie, we take the one that
-	 * is not in its set first (a difference from the union algorithm).  If
-	 * we took one in the set first, it would increment the count, possibly
-	 * to 2 which would cause it to be output as starting a range in the
-	 * intersection, and the next time through we would take that same
-	 * number, and output it again as ending the set.  By doing it the
-	 * opposite of this, there is no possibility that the count will be
-	 * momentarily incremented to 2.  (In a tie and both are in the set or
-	 * both not in the set, it doesn't matter which we take first.) */
-	if (array_a[i_a] < array_b[i_b]
-	    || (array_a[i_a] == array_b[i_b]
+         * smaller of the next items.  In case of a tie, we take first the one
+         * that is not in its set (a difference from the union algorithm).  If
+         * we first took the one in its set, it would increment the count,
+         * possibly to 2 which would cause it to be output as starting a range
+         * in the intersection, and the next time through we would take that
+         * same number, and output it again as ending the set.  By doing the
+         * opposite of this, there is no possibility that the count will be
+         * momentarily incremented to 2.  (In a tie and both are in the set or
+         * both not in the set, it doesn't matter which we take first.) */
+	if (       array_a[i_a] < array_b[i_b]
+	    || (   array_a[i_a] == array_b[i_b]
 		&& ! ELEMENT_RANGE_MATCHES_INVLIST(i_a)))
 	{
 	    cp_in_set = ELEMENT_RANGE_MATCHES_INVLIST(i_a);
-	    cp= array_a[i_a++];
+	    cp = array_a[i_a++];
 	}
 	else {
 	    cp_in_set = ELEMENT_RANGE_MATCHES_INVLIST(i_b);
@@ -9386,36 +9386,54 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 	    }
 	    count--;
 	}
-    }
 
-    /* Here, we are finished going through at least one of the lists, which
-     * means there is something remaining in at most one.  We check if the list
-     * that has been exhausted is positioned such that we are in the middle
-     * of a range in its set or not.  (i_a and i_b point to elements 1 beyond
-     * the ones we care about.)  There are four cases:
-     *	1) Both weren't in their sets, count is 0, and remains 0.  There's
-     *	   nothing left in the intersection.
-     *	2) Both were in their sets, count is 2 and perhaps is incremented to
-     *	   above 2.  What should be output is exactly that which is in the
-     *	   non-exhausted set, as everything it has is also in the intersection
-     *	   set, and everything it doesn't have can't be in the intersection
-     *	3) The exhausted was in its set, non-exhausted isn't, count is 1, and
-     *	   gets incremented to 2.  Like the previous case, the intersection is
-     *	   everything that remains in the non-exhausted set.
-     *	4) the exhausted wasn't in its set, non-exhausted is, count is 1, and
-     *	   remains 1.  And the intersection has nothing more. */
+    }
+    /* The loop above increments the index into exactly one of the input lists
+     * each iteration, and ends when either index gets to its list end.  That
+     * means the other index is lower than its end, and so something is
+     * remaining in that one.  We increment 'count', as explained below, if the
+     * exhausted list was in its set.  (i_a and i_b each currently index the element
+     * beyond the one we care about.) */
     if (   (i_a == len_a && PREV_RANGE_MATCHES_INVLIST(i_a))
-	|| (i_b == len_b && PREV_RANGE_MATCHES_INVLIST(i_b)))
+        || (i_b == len_b && PREV_RANGE_MATCHES_INVLIST(i_b)))
     {
 	count++;
     }
 
-    /* The final length is what we've output so far plus what else is in the
-     * intersection.  At most one of the subexpressions below will be non-zero
-     * */
-    len_r = i_r;
-    if (count >= 2) {
-	len_r += (len_a - i_a) + (len_b - i_b);
+    /* Above we incremented 'count' if the exhausted list was in its set.  This
+     * has made it so that 'count' being below 2 means there is nothing left to
+     * output; otheriwse what's left to add to the intersection is precisely
+     * that which is left in the non-exhausted input list.
+     *
+     * To see why, note first that the exhausted input obviously has nothing
+     * left to affect the intersection.  If it was in its set at its end, that
+     * means the set extends from here to the platform's infinity, and hence
+     * anything in the non-exhausted's list will be in the intersection, and
+     * anything not in it won't be.  Hence, the rest of the intersection is
+     * precisely what's in the non-exhausted list  The exhausted set also
+     * contributed 1 to 'count', meaning 'count' was at least 1.  Incrementing
+     * it means 'count' is now at least 2.  This is consistent with the
+     * incremented 'count' being >= 2 means to add the non-exhausted list to
+     * the intersection.
+     *
+     * But if the exhausted input wasn't in its set, it contributed 0 to
+     * 'count', and the intersection can't include anything further; the
+     * non-exhausted set is irrelevant.  'count' was at most 1, and doesn't get
+     * incremented.  This is consistent with 'count' being < 2 meaning nothing
+     * further to add to the intersection. */
+    if (count < 2) { /* Nothing left to put in the intersection. */
+        len_r = i_r;
+    }
+    else { /* copy the non-exhausted list, unchanged. */
+        IV copy_count = len_a - i_a;
+        if (copy_count > 0) {   /* a is the one with stuff left */
+	    Copy(array_a + i_a, array_r + i_r, copy_count, UV);
+        }
+        else {  /* b is the one with stuff left */
+            copy_count = len_b - i_b;
+	    Copy(array_b + i_b, array_r + i_r, copy_count, UV);
+        }
+        len_r = i_r + copy_count;
     }
 
     /* Set the result to the final length, which can change the pointer to
@@ -11351,7 +11369,7 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
             FAIL2("panic: regpiece returned NULL, flags=%#"UVxf"", (UV) flags);
 	}
 	else if (ret == NULL)
-	    ret = latest;
+            ret = latest;
 	*flagp |= flags&(HASWIDTH|POSTPONED);
 	if (chain == NULL) 	/* First piece. */
 	    *flagp |= flags&SPSTART;
@@ -12207,13 +12225,15 @@ S_backref_value(char *p)
 /*
  - regatom - the lowest level
 
-   Try to identify anything special at the start of the pattern. If there
-   is, then handle it as required. This may involve generating a single regop,
-   such as for an assertion; or it may involve recursing, such as to
-   handle a () structure.
+   Try to identify anything special at the start of the current parse position.
+   If there is, then handle it as required. This may involve generating a
+   single regop, such as for an assertion; or it may involve recursing, such as
+   to handle a () structure.
 
    If the string doesn't start with something special then we gobble up
-   as much literal text as we can.
+   as much literal text as we can.  If we encounter a quantifier, we have to
+   back off the final literal character, as that quantifier applies to just it
+   and not to the whole string of literals.
 
    Once we have been able to handle whatever type of thing started the
    sequence, we return.
@@ -12928,6 +12948,9 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                    || UTF8_IS_INVARIANT(UCHARAT(RExC_parse))
                    || UTF8_IS_START(UCHARAT(RExC_parse)));
 
+            /* Here, we have a literal character.  Find the maximal string of
+             * them in the input that we can fit into a single EXACTish node.
+             * We quit at the first non-literal or when the node gets full */
 	    for (p = RExC_parse;
 	         len < upper_parse && p < RExC_end;
 	         len++)
@@ -13223,6 +13246,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                  * the node, close the node with just them, and set up to do
                  * this character again next time through, when it will be the
                  * only thing in its new node */
+
                 if ((next_is_quantifier = (   LIKELY(p < RExC_end)
                                            && UNLIKELY(ISMULT2(p))))
                     && LIKELY(len))
@@ -18107,7 +18131,7 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
         RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
 
         skip_to_be_ignored_text(pRExC_state, &RExC_parse,
-                                FALSE /* Don't assume /x */ );
+                                FALSE /* Don't force /x */ );
     }
 }
 

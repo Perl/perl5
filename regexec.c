@@ -5980,7 +5980,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         b1 = (locinput == reginfo->strbeg)
                              ? 0 /* isWORDCHAR_L1('\n') */
                              : isWORDCHAR_utf8(reghop3((U8*)locinput, -1,
-                                                                (U8*)(reginfo->strbeg)));
+                                                       (U8*)(reginfo->strbeg)));
                         b2 = (NEXTCHR_IS_EOS)
                             ? 0 /* isWORDCHAR_L1('\n') */
                             : isWORDCHAR_utf8((U8*)locinput);
