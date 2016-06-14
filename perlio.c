@@ -848,6 +848,7 @@ XS(XS_PerlIO__Layer__NoWarnings)
      */
     dXSARGS;
     PERL_UNUSED_ARG(cv);
+    PERL_UNUSED_VAR(items);
     DEBUG_i(
         if (items)
             PerlIO_debug("warning:%s\n",SvPV_nolen_const(ST(0))) );
@@ -1299,6 +1300,9 @@ PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
 int
 PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
 {
+    PERL_UNUSED_ARG(iotype);
+    PERL_UNUSED_ARG(mode);
+
     DEBUG_i(
         PerlIO_debug("PerlIO_binmode f=%p %s %c %x %s\n", (void*)f,
                      (PerlIOBase(f) && PerlIOBase(f)->tab) ?
