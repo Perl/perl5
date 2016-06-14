@@ -1,6 +1,6 @@
 #! perl
 
-# use the testsuite from http://www.json.org/JSON::PP_checker/
+# use the testsuite from http://www.json.org/JSON_checker/
 # except for fail18.json, as we do not support a depth of 20 (but 16 and 32).
 
 # copied over from JSON::PP::XS and modified to use JSON::PP

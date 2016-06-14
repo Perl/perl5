@@ -32,7 +32,7 @@ if ( $version ) {
 
 $json_opt = '' if $json_opt eq '-';
 
-my @json_opt = grep { $allow_json_opt{ $_ } or die "'$_' is invalid json opttion" } split/,/, $json_opt;
+my @json_opt = grep { $allow_json_opt{ $_ } or die "'$_' is not a valid json option" } split/,/, $json_opt;
 
 my %F = (
    'json' => sub {
