@@ -388,8 +388,8 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'DANKOGAI/Encode-2.80.tar.gz',
         'FILES'        => q[cpan/Encode],
         CUSTOMIZED     => [
-            qw( encoding.pm
-                ),
+            qw( encoding.pm ),
+            'Byte/Makefile.PL',
         ],
     },
 

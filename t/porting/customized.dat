@@ -1,4 +1,4 @@
-CPAN cpan/CPAN/lib/CPAN.pm ce62c43d72f101c011184dbbc59e21c2790826f0
+Encode cpan/Encode/Byte/Makefile.PL 54f446297d614331ef3f51e8310faff27cc44f90
 Encode cpan/Encode/encoding.pm 51c19efc9bfe8467d6ae12a4654f6e7f980715bf
 ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t a0369c919e216fb02767a637666bb4577ad79b02
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/basic.t b7ee8691baf37197bf4249534f429fcf28f5cedf
@@ -13,6 +13,5 @@ Scalar-List-Utils cpan/Scalar-List-Utils/lib/Sub/Util.pm b984c0a2935bd5f5cf1733d
 Scalar-List-Utils cpan/Scalar-List-Utils/ListUtil.xs 362a247c65878265fd8acae607b207400628ef3b
 Socket cpan/Socket/Socket.pm 98e38176d745c38282907f391c077298f5a3d0ba
 Socket cpan/Socket/Socket.xs edd4fed212785f11c5c2095a75941dad27d586d9
-Test::Simple cpan/Test-Simple/t/Test2/modules/API/Instance.t 599d265dde552753be5f77fe323fc5eedb9cbdd7
 autodie cpan/autodie/t/mkdir.t 9e70d2282a3cc7d76a78bf8144fccba20fb37dac
 version cpan/version/lib/version.pm ff75e2076be10bd4c05133cd979fda0b38ca8653
