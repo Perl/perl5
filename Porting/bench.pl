@@ -14,7 +14,12 @@ perls.
     # Basic: run the tests in t/perf/benchmarks against two or
     # more perls
 
-    bench.pl [options] perl1[=label1] perl2[=label2] ...
+    bench.pl [options] -- perlA[=labelA] perlB[=labelB] ...
+
+    # run the tests against same perlA 2x, with and without extra
+    # options
+
+    bench.pl [options] -- perlA=fast PerlA=slow -Mstrict -Dpsltoc 
 
     # Run bench.pl's own built-in sanity tests
 
@@ -111,7 +116,70 @@ If only one field is selected, the output is in more compact form.
 
 --grindargs=I<foo>
 
-Optional command-line arguments to pass to cachegrind invocations.
+Optional command-line arguments to pass to all cachegrind invocations.
+
+This option is appended to those which bench.pl uses for its own
+purposes; so it can be used to override them (see --debug output
+below), and can also be 'abused' to add redirects into the valgrind
+command invocation.
+
+For example, this writes PERL_MEM_LOG activity to foobar.$$, because
+3>foobar.$$ redirects fd 3, then perl under PERL_MEM_LOG writes to fd 3.
+
+ $ perl Porting/bench.pl --jobs=2 --verbose --debug \
+    --tests=call::sub::amp_empty \
+    \
+    --grindargs='--cachegrind-out-file=junk.$$ 3>foobar.$$' \
+    -- \
+    perl5.24.0	perl5.24.0:+memlog:PERL_MEM_LOG=3mst
+
+for the +memlog tests, this executes as: (shown via --debug, then prettyfied)
+
+  Command: PERL_HASH_SEED=0 PERL_MEM_LOG=3mst
+    valgrind --tool=cachegrind  --branch-sim=yes
+    --cachegrind-out-file=/dev/null --cachegrind-out-file=junk.$$
+    3>foobar.$$ perl5.24.0  - 10 2>&1
+
+The result is that a set of junk.$$ files containing raw cachegrind
+output are written, and foobar.$$ contains the expected memlog output.
+
+Notes:
+
+Theres no obvious utility for those junk.$$ and foobar.$$ files, but
+you can have them anyway.
+
+The 3 in PERL_MEM_LOG=3mst is needed because the output would
+otherwize go to STDERR, and cause parse_cachegrind() to reject the
+test and die.
+
+The --grindargs redirect is needed to capture the memlog output;
+without it, the memlog output is written to fd3, around
+parse_cachegrind and effectively into /dev/null
+
+PERL_MEM_LOG is expensive when used.
+
+call::sub::amp_empty
+&foo function call with no args or body
+
+       perl5.24.0 perl5.24.0+memlog
+       ---------- -----------------
+    Ir      394.0          543477.5
+    Dr      161.0          146814.1
+    Dw       72.0          122304.6
+  COND       58.0           66796.4
+   IND        5.0            5537.7
+
+COND_m        0.0            6743.1
+ IND_m        5.0            1490.2
+
+ Ir_m1        0.0             683.7
+ Dr_m1        0.0              65.9
+ Dw_m1        0.0               8.5
+
+ Ir_mm        0.0              11.6
+ Dr_mm        0.0              10.6
+ Dw_mm        0.0               4.7
+
 
 =item *
 
@@ -140,8 +208,8 @@ It defaults to the leftmost column.
 
 --perlargs=I<foo>
 
-Optional command-line arguments to pass to each perl that is run as part of
-a cachegrind session. For example, C<--perlargs=-Ilib>.
+Optional command-line arguments to pass to each perl-under-test
+(perlA, perlB in synopsis) For example, C<--perlargs=-Ilib>.
 
 =item *
 
@@ -209,7 +277,7 @@ Requires C<JSON::PP> to be available.
 use 5.010000;
 use warnings;
 use strict;
-use Getopt::Long qw(:config no_auto_abbrev);
+use Getopt::Long qw(:config no_auto_abbrev require_order);
 use IPC::Open2 ();
 use IO::Select;
 use IO::File;
@@ -227,7 +295,7 @@ my %VALID_FIELDS = map { $_ => 1 }
 
 sub usage {
     die <<EOF;
-usage: $0 [options] perl[=label] ...
+usage: $0 [options] -- perl[=label] ...
   --action=foo       What action to perform [default: grind].
   --average          Only display average, not individual test results.
   --benchfile=foo    File containing the benchmarks;
@@ -417,7 +485,9 @@ sub filter_tests {
     else {
         my %t;
         for (split /,/, $opt) {
-            die "Error: no such test found: '$_'\n" unless exists $tests->{$_};
+            die "Error: no such test found: '$_'\n"
+                . ($OPTS{verbose} ? "  have: @{[ sort keys %$tests ]}\n" : "")
+                unless exists $tests->{$_};
             $t{$_} = 1;
         }
         for (keys %$tests) {
@@ -475,19 +545,39 @@ sub select_a_perl {
 }
 
 
-# Validate the list of perl=label on the command line.
-# Return a list of [ exe, label ] pairs.
+# Validate the list of perl=label (+ cmdline options) on the command line.
+# Return a list of [ exe, label, cmdline-options ] tuples, ie PUTs
 
-sub process_perls {
-    my @results;
-    for my $p (@_) {
-        my ($perl, $label) = split /=/, $p, 2;
+sub process_puts {
+    my @res_puts; # returned, each item is [ perlexe, label, @putargs ]
+    my %seen;
+    my @putargs; # collect not-perls into args per PUT
+
+    for my $p (reverse @_) {
+        push @putargs, $p and next if $p =~ /^-/; # not-perl, dont send to qx//
+
+        my ($perl, $label, $env) = split /[=:,]/, $p, 3;
         $label //= $perl;
+        $label = $perl.$label if $label =~ /^\+/;
+        die "$label cannot be used on 2 different PUTs\n" if $seen{$label}++;
+
+        my %env;
+        if ($env) {
+            %env = split /[=,]/, $env;
+        }
         my $r = qx($perl -e 'print qq(ok\n)' 2>&1);
-        die "Error: unable to execute '$perl': $r" if $r ne "ok\n";
-        push @results, [ $perl, $label ];
+        if ($r eq "ok\n") {
+	    push @res_puts, [ $perl, $label, \%env, reverse @putargs ];
+            @putargs = ();
+            warn "Added Perl-Under-Test: [ @{[@{$res_puts[-1]}]} ]\n"
+                if $OPTS{verbose};
+	} else {
+            warn "PUT-args: @putargs + a not-perl: $p $r\n"
+                if $OPTS{verbose};
+            push @putargs, $p; # not-perl
+	}
     }
-    return @results;
+    return reverse @res_puts;
 }
 
 
@@ -615,7 +705,7 @@ sub do_grind {
         die "Error: only a single test may be specified with --bisect\n"
             if defined $OPTS{bisect} and keys %$tests != 1;
 
-        $perls = [ process_perls(@$perl_args) ];
+        $perls = [ process_puts(@$perl_args) ];
 
 
         $results = grind_run($tests, $order, $perls, $loop_counts);
@@ -702,20 +792,24 @@ sub grind_run {
         );
 
         for my $p (@$perls) {
-            my ($perl, $label) = @$p;
+            my ($perl, $label, $env, @putargs) = @$p;
 
             # Run both the empty loop and the active loop
             # $counts->[0] and $counts->[1] times.
 
             for my $i (0,1) {
                 for my $j (0,1) {
-                    my $cmd = "PERL_HASH_SEED=0 "
+                    my $envstr = '';
+                    if (ref $env) {
+                        $envstr .= "$_=$env->{$_} " for sort keys %$env;
+                    }
+                    my $cmd = "PERL_HASH_SEED=0 $envstr"
                             . "valgrind --tool=cachegrind  --branch-sim=yes "
                             . "--cachegrind-out-file=/dev/null "
                             . "$OPTS{grindargs} "
-                            . "$perl $OPTS{perlargs} - $counts->[$j] 2>&1";
+                            . "$perl $OPTS{perlargs} @putargs - $counts->[$j] 2>&1";
                     # for debugging and error messages
-                    my $id = "$test/$perl "
+                    my $id = "$test/$label "
                         . ($i ? "active" : "empty") . "/"
                         . ($j ? "long"   : "short") . " loop";
 
@@ -843,7 +937,7 @@ sub grind_run {
                     . "Output\n$o";
             }
 
-            $results{$j->{test}}{$j->{perl}}[$j->{active}][$j->{loopix}]
+            $results{$j->{test}}{$j->{plabel}}[$j->{active}][$j->{loopix}]
                     = parse_cachegrind($output, $j->{id}, $j->{perl});
         }
 
@@ -932,7 +1026,7 @@ sub grind_process {
     my %counts;
     my %data;
 
-    my $perl_norm = $perls->[$OPTS{norm}][0]; # the name of the reference perl
+    my $perl_norm = $perls->[$OPTS{norm}][1]; # the label of the reference perl
 
     for my $test_name (keys %$res) {
         my $res1 = $res->{$test_name};
@@ -1088,6 +1182,7 @@ sub grind_print {
     my ($results, $averages, $perls, $tests, $order) = @_;
 
     my @perl_names = map $_->[0], @$perls;
+    my @perl_labels = map $_->[1], @$perls;
     my %perl_labels;
     $perl_labels{$_->[0]} = $_->[1] for @$perls;
 
@@ -1095,7 +1190,7 @@ sub grind_print {
     # Calculate the width to display for each column.
     my $min_width = $OPTS{raw} ? 8 : 6;
     my @widths = map { length($_) < $min_width ? $min_width : length($_) }
-                            @perl_labels{@perl_names};
+    			@perl_labels;
 
     # Print standard header.
     grind_blurb($perls);
@@ -1125,7 +1220,7 @@ sub grind_print {
             print " " x $field_label_width;
             for (0..$#widths) {
                 printf " %*s", $widths[$_],
-                    $i ? ('-' x$widths[$_]) :  $perl_labels{$perl_names[$_]};
+                    $i ? ('-' x$widths[$_]) :  $perl_labels[$_];
             }
             print "\n";
         }
@@ -1147,7 +1242,7 @@ sub grind_print {
                 print " " x $field_label_width;
                 for (0..$#widths) {
                     printf " %*s", $widths[$_],
-                        $i ? ('-' x$widths[$_]) :  $perl_labels{$perl_names[$_]};
+                        $i ? ('-' x$widths[$_]) :  $perl_labels[$_];
                 }
                 print "\n";
             }
@@ -1177,7 +1272,7 @@ sub grind_print {
             }
 
             for my $i (0..$#widths) {
-                my $res2 = $res1->{$perl_names[$i]};
+                my $res2 = $res1->{$perl_labels[$i]};
                 my $p = $res2->{$field};
                 if (!defined $p) {
                     printf " %*s", $widths[$i], '-';
