@@ -186,7 +186,7 @@ use 5.009001;
 use Carp;
 $Carp::Internal{__PACKAGE__.""}++;
 
-our $VERSION = '1.34';
+our $VERSION = '1.35';
 our $DEBUG;
 our $VERBOSE;
 our $PRETTY;
@@ -310,6 +310,7 @@ sub transmo {
 EOFUNC
 
 my %msg;
+my $over_level = 0;     # We look only at =item lines at the first =over level
 {
     print STDERR "FINISHING COMPILATION for $_\n" if $DEBUG;
     local $/ = '';
@@ -386,7 +387,7 @@ my %msg;
 	    push @headers, $header if defined $header;
 	}
 
-	unless ( s/=item (.*?)\s*\z//s) {
+	if ( ! s/=item (.*?)\s*\z//s || $over_level != 1) {
 
 	    if ( s/=head1\sDESCRIPTION//) {
 		$msg{$header = 'DESCRIPTION'} = '';
@@ -395,11 +396,17 @@ my %msg;
 	    elsif( s/^=for\s+diagnostics\s*\n(.*?)\s*\z// ) {
 		$for_item = $1;
 	    }
-	    elsif( /^=back/ ) { # Stop processing body here
-		undef $header;
-		undef $for_item;
-		$seen_body = 0;
-		next;
+	    elsif( /^=over\b/ ) {
+                $over_level++;
+            }
+	    elsif( /^=back\b/ ) { # Stop processing body here
+                $over_level--;
+                if ($over_level == 0) {
+                    undef $header;
+                    undef $for_item;
+                    $seen_body = 0;
+                    next;
+                }
 	    }
 	    next;
 	}
