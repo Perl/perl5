@@ -35,15 +35,10 @@ esac
 # but that caused too much grief.
 # vendorlib="/System/Library/Perl/${version}"; # Apple-supplied modules
 
-# BSD paths
-case "$prefix" in
-'')	# Default install; use non-system directories
-	prefix='/usr/local';
-	siteprefix='/usr/local';
-	;;
-'/usr')	# We are building/replacing the built-in perl
-	prefix='/';
-	installprefix='/';
+case "$darwin_distribution" in
+$define) # We are building/replacing the built-in perl
+	prefix='/usr';
+	installprefix='/usr';
 	bin='/usr/bin';
 	siteprefix='/usr/local';
 	# We don't want /usr/bin/HEAD issues.
@@ -67,8 +62,6 @@ case "$prefix" in
 	# New style.
 	siteman1dir='/usr/local/share/man/man1';
 	siteman3dir='/usr/local/share/man/man3';
-	;;
-  *)	# Anything else; use non-system directories, use Configure defaults
 	;;
 esac
 
