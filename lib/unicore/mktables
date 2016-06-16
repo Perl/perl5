@@ -36,6 +36,17 @@ my $debugging_build = $Config{"ccflags"} =~ /-DDEBUGGING/;
 
 sub NON_ASCII_PLATFORM { ord("A") != 65 }
 
+# When a new version of Unicode is published, unfortunately the algorithms for
+# dealing with various bounds, like \b{gcb}, \b{lb} may have to be updated
+# manually.  The changes may or may not be backward compatible with older
+# releases.  The code is in regen/mk_invlist.pl and regexec.c.  Make the
+# changes, then come back here and set the variable below to what version the
+# code is expecting.  If a newer version of Unicode is being compiled than
+# expected, a warning will be generated.  If an older version is being
+# compiled, any bounds tests that fail in the generated test file (-maketest
+# option) will be marked as TODO.
+my $version_of_mk_invlist_bounds = v8.0.0;
+
 ##########################################################################
 #
 # mktables -- create the runtime Perl Unicode files (lib/unicore/.../*.pl),
@@ -18788,9 +18799,16 @@ sub make_property_test_script() {
         $property->DESTROY();
     }
 
+    # Make any test of the boundary (break) properties TODO if the code
+    # doesn't match the version being compiled
+    my $TODO_FAILING_BREAKS = ($version_of_mk_invlist_bounds ne $v_version)
+                             ? "\nsub TODO_FAILING_BREAKS { 1 }\n"
+                             : "\nsub TODO_FAILING_BREAKS { 0 }\n";
+
     &write($t_path,
            0,           # Not utf8;
            [$HEADER,
+            $TODO_FAILING_BREAKS,
             <DATA>,
             @output,
             (map {"Test_GCB('$_');\n"} @backslash_X_tests),
@@ -19721,6 +19739,13 @@ if ($verbosity >= $NORMAL_VERBOSITY && ! $debug_skip) {
     }
     print "\nAll done\n" if $verbosity >= $VERBOSE;
 }
+
+if ($version_of_mk_invlist_bounds lt $v_version) {
+    Carp::my_carp("WARNING: \\b{} algorithms (regen/mk_invlist.pl) need"
+                . " to be checked and possibly updated to Unicode"
+                . " $string_version");
+}
+
 exit(0);
 
 # TRAILING CODE IS USED BY make_property_test_script()
@@ -20015,12 +20040,21 @@ sub _test_break($$) {
             my $pattern = "(?$modifier:$break_pattern)";
 
             # Actually do the test
+            my $matched_text;
             my $matched = $string =~ qr/$pattern/;
-            print "not " unless $matched;
+            if ($matched) {
+                $matched_text = "matched";
+            }
+            else {
+                $matched_text = "failed to match";
+                print "not ";
 
-            # Fancy display of test results
-            $matched = ($matched) ? "matched" : "failed to match";
-            print "ok ", ++$Tests, " - \"$display_string\" $matched /$pattern/$display_upgrade; line $line $display_locale$comment\n";
+                if (TODO_FAILING_BREAKS) {
+                    $comment = " # $comment" unless $comment =~ / ^ \s* \# /x;
+                    $comment =~ s/#/# TODO/;
+                }
+            }
+            print "ok ", ++$Tests, " - \"$display_string\" $matched_text /$pattern/$display_upgrade; line $line $display_locale$comment\n";
 
             # Only print the comment on the first use of this line
             $comment = "";
@@ -20031,8 +20065,10 @@ sub _test_break($$) {
                 my $B_pattern = "$1$2";
                 $matched = $string =~ qr/$B_pattern/;
                 print "not " unless $matched;
-                $matched = ($matched) ? "matched" : "failed to match";
-                print "ok ", ++$Tests, " - \"$display_string\" $matched /$B_pattern/$display_upgrade; line $line $display_locale\n";
+                $matched_text = ($matched) ? "matched" : "failed to match";
+                print "ok ", ++$Tests, " - \"$display_string\" $matched_text /$B_pattern/$display_upgrade; line $line $display_locale";
+                print " # TODO" if TODO_FAILING_BREAKS && ! $matched;
+                print "\n";
             }
         }
 
@@ -20057,7 +20093,9 @@ sub _test_break($$) {
             } else {
                 $matches[$i] = join("", map { sprintf "\\x{%04X}", ord $_ }
                                                     split "", $matches[$i]);
-                print "not ok $Tests - In \"$display_string\" =~ /(\\X)/g, \\X #",
+                print "not ok $Tests -";
+                print " # TODO" if TODO_FAILING_BREAKS;
+                print " In \"$display_string\" =~ /(\\X)/g, \\X #",
                     $i + 1,
                     " should have matched $should_display[$i]",
                     " but instead matched $matches[$i]",
@@ -20071,7 +20109,9 @@ sub _test_break($$) {
         if (@matches == @should_match) {
             print "ok $Tests - Nothing was left over; line $line\n";
         } else {
-            print "not ok $Tests - There were ", scalar @should_match, " \\X matches expected, but got ", scalar @matches, " instead; line $line\n";
+            print "not ok $Tests - There were ", scalar @should_match, " \\X matches expected, but got ", scalar @matches, " instead; line $line";
+            print " # TODO" if TODO_FAILING_BREAKS;
+            print "\n";
         }
     }
 
