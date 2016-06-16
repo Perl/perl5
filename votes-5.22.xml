@@ -37,6 +37,11 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="sprout" id="08f800f8519574aea9e744ff83230fb93772652b" ticket="128182" desc="Fix crash with require $nonstring"/>
 
+Perhaps just the removal of SETERRNO() from this.
+<commit votes="tonyc" id="d484df69ed26120321cdca989748cd4636b276bb" ticket="125347" desc="[perl #125347] allow truncate to work on large files on Win32" />
+
+<commit votes="tonyc" id="3f6b66c14467c0f8c7459e32c576618155ca89f3" ticket="128316" desc="(perl #128316) preserve errno from failed system calls" />
+
 </div>
 
 <div><h3>New Feature Fixes</h3>
