@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.65';
+our $VERSION = '0.66';
 
 require Exporter;
 
@@ -98,6 +98,9 @@ Unicode::UCD - Unicode character database
     use Unicode::UCD 'search_invlist';
     my $index = search_invlist(\@invlist, $code_point);
 
+    # The following function should be used only internally in
+    # implementations of the Unicode Normalization Algorithm, and there
+    # are better choices than it.
     use Unicode::UCD 'compexcl';
     my $compexcl = compexcl($codepoint);
 
@@ -1199,6 +1202,12 @@ sub bidi_types {
 }
 
 =head2 B<compexcl()>
+
+WARNING: Unicode discourages the use of this function or any of the
+alternative mechanisms listed in this section (the documention of
+C<compexcl()>), except internally in implementations of the Unicode
+Normalization Algorithm.  You should be using L<Unicode::Normalize> directly
+instead of these.  Using these will likely lead to half-baked results.
 
     use Unicode::UCD 'compexcl';
 
@@ -3044,6 +3053,8 @@ L<Unicode::Normalize::NFD()|Unicode::Normalize>.
 
 Note that the mapping is the one that is specified in the Unicode data files,
 and to get the final decomposition, it may need to be applied recursively.
+Unicode in fact discourages use of this property except internally in
+implementations of the Unicode Normalization Algorithm.
 
 The fourth (index [3]) element (C<$default>) in the list returned for this
 format is 0.

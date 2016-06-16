@@ -2118,7 +2118,11 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     while (s < strend) {
                         GCB_enum after = getGCB_VAL_UTF8((U8*) s,
                                                         (U8*) reginfo->strend);
-                        if (   (to_complement ^ isGCB(before, after))
+                        if (   (to_complement ^ isGCB(before,
+                                                      after,
+                                                      (U8*) reginfo->strbeg,
+                                                      (U8*) s,
+                                                      utf8_target))
                             && (reginfo->intuit || regtry(reginfo, &s)))
                         {
                             goto got_it;
@@ -4289,13 +4293,108 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
     return TRUE;
 }
 
-PERL_STATIC_INLINE bool
-S_isGCB(const GCB_enum before, const GCB_enum after)
+STATIC bool
+S_isGCB(pTHX_ const GCB_enum before, const GCB_enum after, const U8 * const strbeg, const U8 * curpos, const bool utf8_target)
 {
     /* returns a boolean indicating if there is a Grapheme Cluster Boundary
-     * between the inputs.  See http://www.unicode.org/reports/tr29/ */
+     * between the inputs.  See http://www.unicode.org/reports/tr29/. */
 
-    return GCB_table[before][after];
+    PERL_ARGS_ASSERT_ISGCB;
+
+    switch (GCB_table[before][after]) {
+        case GCB_BREAKABLE:
+            return TRUE;
+
+        case GCB_NOBREAK:
+            return FALSE;
+
+        case GCB_RI_then_RI:
+            {
+                int RI_count = 1;
+                U8 * temp_pos = (U8 *) curpos;
+
+                /* Do not break within emoji flag sequences. That is, do not
+                 * break between regional indicator (RI) symbols if there is an
+                 * odd number of RI characters before the break point.
+                 *  GB12     ^ (RI RI)* RI × RI
+                 *  GB13 [^RI] (RI RI)* RI × RI */
+
+                while (backup_one_GCB(strbeg,
+                                    &temp_pos,
+                                    utf8_target) == GCB_Regional_Indicator)
+                {
+                    RI_count++;
+                }
+
+                return RI_count % 2 != 1;
+            }
+
+        case GCB_EX_then_EM:
+
+            /* GB10  ( E_Base | E_Base_GAZ ) Extend* ×  E_Modifier */
+            {
+                U8 * temp_pos = (U8 *) curpos;
+                GCB_enum prev;
+
+                do {
+                    prev = backup_one_GCB(strbeg, &temp_pos, utf8_target);
+                }
+                while (prev == GCB_Extend);
+
+                return prev != GCB_E_Base && prev != GCB_E_Base_GAZ;
+            }
+
+        default:
+            break;
+    }
+
+#ifdef DEBUGGING
+    Perl_re_printf( aTHX_  "Unhandled GCB pair: GCB_table[%d, %d] = %d\n",
+                                  before, after, GCB_table[before][after]);
+    assert(0);
+#endif
+    return TRUE;
+}
+
+STATIC GCB_enum
+S_backup_one_GCB(pTHX_ const U8 * const strbeg, U8 ** curpos, const bool utf8_target)
+{
+    GCB_enum gcb;
+
+    PERL_ARGS_ASSERT_BACKUP_ONE_GCB;
+
+    if (*curpos < strbeg) {
+        return GCB_EDGE;
+    }
+
+    if (utf8_target) {
+        U8 * prev_char_pos = reghopmaybe3(*curpos, -1, strbeg);
+        U8 * prev_prev_char_pos;
+
+        if (! prev_char_pos) {
+            return GCB_EDGE;
+        }
+
+        if ((prev_prev_char_pos = reghopmaybe3((U8 *) prev_char_pos, -1, strbeg))) {
+            gcb = getGCB_VAL_UTF8(prev_prev_char_pos, prev_char_pos);
+            *curpos = prev_char_pos;
+            prev_char_pos = prev_prev_char_pos;
+        }
+        else {
+            *curpos = (U8 *) strbeg;
+            return GCB_EDGE;
+        }
+    }
+    else {
+        if (*curpos - 2 < strbeg) {
+            *curpos = (U8 *) strbeg;
+            return GCB_EDGE;
+        }
+        (*curpos)--;
+        gcb = getGCB_VAL_CP(*(*curpos - 1));
+    }
+
+    return gcb;
 }
 
 /* Combining marks attach to most classes that precede them, but this defines
@@ -4326,7 +4425,7 @@ S_isLB(pTHX_ LB_enum before,
 
     PERL_ARGS_ASSERT_ISLB;
 
-    /* Rule numbers in the comments below are as of Unicode 8.0 */
+    /* Rule numbers in the comments below are as of Unicode 9.0 */
 
   redo:
     before = prev;
@@ -4420,14 +4519,14 @@ S_isLB(pTHX_ LB_enum before,
              * that is overriden */
             return LB_table[prev][after] != LB_NOBREAK_EVEN_WITH_SP_BETWEEN;
 
-        case LB_CM_foo:
+        case LB_CM_ZWJ_foo:
 
             /* We don't know how to treat the CM except by looking at the first
-             * non-CM character preceding it */
+             * non-CM character preceding it.  ZWJ is treated as CM */
             do {
                 prev = backup_one_LB(strbeg, &temp_pos, utf8_target);
             }
-            while (prev == LB_Combining_Mark);
+            while (prev == LB_Combining_Mark || prev == LB_ZWJ);
 
             /* Here, 'prev' is that first earlier non-CM character.  If the CM
              * attatches to it, then it inherits the behavior of 'prev'.  If it
@@ -4499,6 +4598,28 @@ S_isLB(pTHX_ LB_enum before,
             }
             return LB_various_then_PO_or_PR;
         }
+
+        case LB_RI_then_RI + LB_NOBREAK:
+        case LB_RI_then_RI + LB_BREAKABLE:
+            {
+                int RI_count = 1;
+
+                /* LB30a Break between two regional indicator symbols if and
+                 * only if there are an even number of regional indicators
+                 * preceding the position of the break.
+                 *
+                 *  sot (RI RI)* RI × RI
+                 *  [^RI] (RI RI)* RI × RI */
+
+                while (backup_one_LB(strbeg,
+                                     &temp_pos,
+                                     utf8_target) == LB_Regional_Indicator)
+                {
+                    RI_count++;
+                }
+
+                return RI_count % 2 == 0;
+            }
 
         default:
             break;
@@ -4884,7 +5005,7 @@ S_isWB(pTHX_ WB_enum previous,
 
     PERL_ARGS_ASSERT_ISWB;
 
-    /* Rule numbers in the comments below are as of Unicode 8.0 */
+    /* Rule numbers in the comments below are as of Unicode 9.0 */
 
   redo:
     before = prev;
@@ -4910,11 +5031,11 @@ S_isWB(pTHX_ WB_enum previous,
          * the beginning of a region of text', the rule is to break before
          * them, just like any other character.  Therefore, the default rule
          * applies and we don't have to look in more depth.  Should this ever
-         * change, we would have to have 2 'case' statements, like in the
-         * rules below, and backup a single character (not spacing over the
-         * extend ones) and then see if that is one of the region-end
-         * characters and go from there */
-        case WB_Ex_or_FO_then_foo:
+         * change, we would have to have 2 'case' statements, like in the rules
+         * below, and backup a single character (not spacing over the extend
+         * ones) and then see if that is one of the region-end characters and
+         * go from there */
+        case WB_Ex_or_FO_or_ZWJ_then_foo:
             prev = backup_one_WB(&previous, strbeg, &before_pos, utf8_target);
             goto redo;
 
@@ -5007,6 +5128,30 @@ S_isWB(pTHX_ WB_enum previous,
             return WB_table[before][after]
                                 - WB_NU_then_MB_or_MN_or_SQ == WB_BREAKABLE;
 
+        case WB_RI_then_RI + WB_NOBREAK:
+        case WB_RI_then_RI + WB_BREAKABLE:
+            {
+                int RI_count = 1;
+
+                /* Do not break within emoji flag sequences. That is, do not
+                 * break between regional indicator (RI) symbols if there is an
+                 * odd number of RI characters before the potential break
+                 * point.
+                 *
+                 * WB15     ^ (RI RI)* RI × RI
+                 * WB16 [^RI] (RI RI)* RI × RI */
+
+                while (backup_one_WB(&previous,
+                                     strbeg,
+                                     &before_pos,
+                                     utf8_target) == WB_Regional_Indicator)
+                {
+                    RI_count++;
+                }
+
+                return RI_count % 2 != 1;
+            }
+
         default:
             break;
     }
@@ -5087,8 +5232,8 @@ S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos,
             *previous = (*curpos <= strbeg) ? WB_EDGE : WB_UNKNOWN;
         }
 
-        /* And we always back up over these two types */
-        if (wb != WB_Extend && wb != WB_Format) {
+        /* And we always back up over these three types */
+        if (wb != WB_Extend && wb != WB_Format && wb != WB_ZWJ) {
             return wb;
         }
     }
@@ -5119,7 +5264,7 @@ S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos,
                 *curpos = (U8 *) strbeg;
                 return WB_EDGE;
             }
-        } while (wb == WB_Extend || wb == WB_Format);
+        } while (wb == WB_Extend || wb == WB_Format || wb == WB_ZWJ);
     }
     else {
         do {
@@ -6001,7 +6146,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                                         (U8*)(reginfo->strbeg)),
                                                 (U8*) reginfo->strend),
                                           getGCB_VAL_UTF8((U8*) locinput,
-                                                        (U8*) reginfo->strend));
+                                                        (U8*) reginfo->strend),
+                                          (U8*) reginfo->strbeg,
+                                          (U8*) locinput,
+                                          utf8_target);
                         }
                         break;
 
@@ -6383,7 +6531,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 while (locinput < reginfo->strend) {
                     GCB_enum cur_gcb = getGCB_VAL_UTF8((U8*) locinput,
                                                          (U8*) reginfo->strend);
-                    if (isGCB(prev_gcb, cur_gcb)) {
+                    if (isGCB(prev_gcb, cur_gcb,
+                              (U8*) reginfo->strbeg, (U8*) locinput,
+                              utf8_target))
+                    {
                         break;
                     }
 

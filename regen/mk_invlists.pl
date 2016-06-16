@@ -72,7 +72,11 @@ my %hard_coded_enums =
  ( gcb => [
             'Control',
             'CR',
+            'E_Base',
+            'E_Base_GAZ',
+            'E_Modifier',
             'Extend',
+            'Glue_After_Zwj',
             'L',
             'LF',
             'LV',
@@ -83,6 +87,7 @@ my %hard_coded_enums =
             'SpacingMark',
             'T',
             'V',
+            'ZWJ',
         ],
     lb => [
             'Alphabetic',
@@ -95,6 +100,8 @@ my %hard_coded_enums =
             'Close_Punctuation',
             'Combining_Mark',
             'Contingent_Break',
+            'E_Base',
+            'E_Modifier',
             'Exclamation',
             'Glue',
             'H2',
@@ -119,6 +126,7 @@ my %hard_coded_enums =
             'Regional_Indicator',
             'Space',
             'Word_Joiner',
+            'ZWJ',
             'ZWSpace',
         ],
    sb  => [
@@ -142,9 +150,13 @@ my %hard_coded_enums =
             'ALetter',
             'CR',
             'Double_Quote',
+            'E_Base',
+            'E_Base_GAZ',
+            'E_Modifier',
             'Extend',
             'ExtendNumLet',
             'Format',
+            'Glue_After_Zwj',
             'Hebrew_Letter',
             'Katakana',
             'LF',
@@ -157,6 +169,7 @@ my %hard_coded_enums =
             'Perl_Tailored_HSpace',
             'Regional_Indicator',
             'Single_Quote',
+            'ZWJ',
         ],
 );
 
@@ -720,6 +733,12 @@ sub output_GCB_table() {
 
     # Create and output the pair table for use in determining Grapheme Cluster
     # Breaks, given in http://www.unicode.org/reports/tr29/.
+    my %gcb_actions = (
+        GCB_NOBREAK                      => 0,
+        GCB_BREAKABLE                    => 1,
+        GCB_RI_then_RI                   => 2,   # Rules 12 and 13
+        GCB_EX_then_EM                   => 3,   # Rule 10
+    );
 
     # The table is constructed in reverse order of the rules, to make the
     # lower-numbered, higher priority ones override the later ones, as the
@@ -729,28 +748,44 @@ sub output_GCB_table() {
     my $table_size = @gcb_short_enums;
 
     # Otherwise, break everywhere.
-    # GB10 	Any ÷  Any
+    # GB99   Any ÷  Any
     for my $i (0 .. $table_size - 1) {
         for my $j (0 .. $table_size - 1) {
             $gcb_table[$i][$j] = 1;
         }
     }
 
-    # Do not break before extending characters.
-    # Do not break before SpacingMarks, or after Prepend characters.
-    # GB9   ×  Extend
-    # GB9a  × SpacingMark
-    # GB9b  Prepend  ×
-    for my $i (0 .. @gcb_table - 1) {
-        $gcb_table[$i][$gcb_enums{'Extend'}] = 0;
-        $gcb_table[$i][$gcb_enums{'SpacingMark'}] = 0;
-        $gcb_table[$gcb_enums{'Prepend'}][$i] = 0;
-    }
-
-    # Do not break between regional indicator symbols.
-    # GB8a  Regional_Indicator  ×  Regional_Indicator
+    # Do not break within emoji flag sequences. That is, do not break between
+    # regional indicator (RI) symbols if there is an odd number of RI
+    # characters before the break point.  Must be resolved in runtime code.
+    #
+    # GB12 ^ (RI RI)* RI × RI
+    # GB13 [^RI] (RI RI)* RI × RI
     $gcb_table[$gcb_enums{'Regional_Indicator'}]
-              [$gcb_enums{'Regional_Indicator'}] = 0;
+              [$gcb_enums{'Regional_Indicator'}] = $gcb_actions{GCB_RI_then_RI};
+
+    # Do not break within emoji modifier sequences or emoji zwj sequences.
+    # GB11  ZWJ  × ( Glue_After_Zwj | E_Base_GAZ )
+    $gcb_table[$gcb_enums{'ZWJ'}][$gcb_enums{'Glue_After_Zwj'}] = 0;
+    $gcb_table[$gcb_enums{'ZWJ'}][$gcb_enums{'E_Base_GAZ'}] = 0;
+
+    # GB10  ( E_Base | E_Base_GAZ ) Extend* ×  E_Modifier
+    $gcb_table[$gcb_enums{'Extend'}][$gcb_enums{'E_Modifier'}]
+                                                = $gcb_actions{GCB_EX_then_EM};
+    $gcb_table[$gcb_enums{'E_Base'}][$gcb_enums{'E_Modifier'}] = 0;
+    $gcb_table[$gcb_enums{'E_Base_GAZ'}][$gcb_enums{'E_Modifier'}] = 0;
+
+    # Do not break before extending characters or ZWJ.
+    # Do not break before SpacingMarks, or after Prepend characters.
+    # GB9b  Prepend  ×
+    # GB9a  × SpacingMark
+    # GB9   ×  ( Extend | ZWJ )
+    for my $i (0 .. @gcb_table - 1) {
+        $gcb_table[$gcb_enums{'Prepend'}][$i] = 0;
+        $gcb_table[$i][$gcb_enums{'SpacingMark'}] = 0;
+        $gcb_table[$i][$gcb_enums{'Extend'}] = 0;
+        $gcb_table[$i][$gcb_enums{'ZWJ'}] = 0;
+    }
 
     # Do not break Hangul syllable sequences.
     # GB8  ( LVT | T)  ×  T
@@ -785,18 +820,16 @@ sub output_GCB_table() {
     # GB3  CR  ×  LF
     $gcb_table[$gcb_enums{'CR'}][$gcb_enums{'LF'}] = 0;
 
-    # Break at the start and end of text.
+    # Break at the start and end of text, unless the text is empty
     # GB1  sot  ÷
     # GB2   ÷  eot
     for my $i (0 .. @gcb_table - 1) {
         $gcb_table[$i][$gcb_enums{'EDGE'}] = 1;
         $gcb_table[$gcb_enums{'EDGE'}][$i] = 1;
     }
-
-    # But, unspecified by Unicode, we shouldn't break on an empty string.
     $gcb_table[$gcb_enums{'EDGE'}][$gcb_enums{'EDGE'}] = 0;
 
-    output_table_common('GCB', undef,
+    output_table_common('GCB', \%gcb_actions,
                         \@gcb_table, \@gcb_short_enums, \%gcb_abbreviations);
 }
 
@@ -828,13 +861,14 @@ sub output_LB_table() {
         LB_BREAKABLE                    => 1,
         LB_NOBREAK_EVEN_WITH_SP_BETWEEN => 2,
 
-        LB_CM_foo                       => 3,   # Rule 9
+        LB_CM_ZWJ_foo                   => 3,   # Rule 9
         LB_SP_foo                       => 6,   # Rule 18
         LB_PR_or_PO_then_OP_or_HY       => 9,   # Rule 25
         LB_SY_or_IS_then_various        => 11,  # Rule 25
         LB_HY_or_BA_then_foo            => 13,  # Rule 21
+        LB_RI_then_RI	                => 15,  # Rule 30a
 
-        LB_various_then_PO_or_PR        => (1<<4),  # Rule 25
+        LB_various_then_PO_or_PR        => (1<<5),  # Rule 25
     );
 
     # Construct the LB pair table.  This is based on the rules in
@@ -858,9 +892,18 @@ sub output_LB_table() {
         }
     }
 
-    # LB30a. Don't break between Regional Indicators
+    # LB30b Do not break between an emoji base and an emoji modifier.
+    # EB × EM
+    $lb_table[$lb_enums{'E_Base'}][$lb_enums{'E_Modifier'}]
+                                                = $lb_actions{'LB_NOBREAK'};
+
+    # LB30a Break between two regional indicator symbols if and only if there
+    # are an even number of regional indicators preceding the position of the
+    # break.
+    # sot (RI RI)* RI × RI
+    # [^RI] (RI RI)* RI × RI
     $lb_table[$lb_enums{'Regional_Indicator'}]
-             [$lb_enums{'Regional_Indicator'}] = $lb_actions{'LB_NOBREAK'};
+             [$lb_enums{'Regional_Indicator'}] = $lb_actions{'LB_RI_then_RI'};
 
     # LB30 Do not break between letters, numbers, or ordinary symbols and
     # opening or closing parentheses.
@@ -1046,28 +1089,47 @@ sub output_LB_table() {
     $lb_table[$lb_enums{'Break_Symbols'}][$lb_enums{'Prefix_Numeric'}]
                                     += $lb_actions{'LB_various_then_PO_or_PR'};
 
-    # LB24 Do not break between prefix and letters or ideographs.
-    # PR × ID
-    $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'Ideographic'}]
-                                                = $lb_actions{'LB_NOBREAK'};
-
-    # PR × (AL | HL)
+    # LB24 Do not break between numeric prefix/postfix and letters, or between
+    # letters and prefix/postfix.
+    # (PR | PO) × (AL | HL)
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'Alphabetic'}]
                                                 = $lb_actions{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'Hebrew_Letter'}]
                                                 = $lb_actions{'LB_NOBREAK'};
-
-    # PO × (AL | HL)
     $lb_table[$lb_enums{'Postfix_Numeric'}][$lb_enums{'Alphabetic'}]
                                                 = $lb_actions{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Postfix_Numeric'}][$lb_enums{'Hebrew_Letter'}]
                                                 = $lb_actions{'LB_NOBREAK'};
 
-    # LB23 Do not break within ‘a9’, ‘3a’, or ‘H%’.
-    # ID × PO
-    $lb_table[$lb_enums{'Ideographic'}][$lb_enums{'Postfix_Numeric'}]
+    # (AL | HL) × (PR | PO)
+    $lb_table[$lb_enums{'Alphabetic'}][$lb_enums{'Prefix_Numeric'}]
+                                                = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'Hebrew_Letter'}][$lb_enums{'Prefix_Numeric'}]
+                                                = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'Alphabetic'}][$lb_enums{'Postfix_Numeric'}]
+                                                = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'Hebrew_Letter'}][$lb_enums{'Postfix_Numeric'}]
                                                 = $lb_actions{'LB_NOBREAK'};
 
+    # LB23a Do not break between numeric prefixes and ideographs, or between
+    # ideographs and numeric postfixes.
+    # PR × (ID | EB | EM)
+    $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'Ideographic'}]
+                                                = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'E_Base'}]
+                                                = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'E_Modifier'}]
+                                                = $lb_actions{'LB_NOBREAK'};
+
+    # (ID | EB | EM) × PO
+    $lb_table[$lb_enums{'Ideographic'}][$lb_enums{'Postfix_Numeric'}]
+                                                = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'E_Base'}][$lb_enums{'Postfix_Numeric'}]
+                                                = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'E_Modifier'}][$lb_enums{'Postfix_Numeric'}]
+                                                = $lb_actions{'LB_NOBREAK'};
+
+    # LB23 Do not break between digits and letters
     # (AL | HL) × NU
     $lb_table[$lb_enums{'Alphabetic'}][$lb_enums{'Numeric'}]
                                                 = $lb_actions{'LB_NOBREAK'};
@@ -1092,8 +1154,12 @@ sub output_LB_table() {
     $lb_table[$lb_enums{'Exclamation'}][$lb_enums{'Inseparable'}]
                                                 = $lb_actions{'LB_NOBREAK'};
 
-    # ID × IN
+    # (ID | EB | EM) × IN
     $lb_table[$lb_enums{'Ideographic'}][$lb_enums{'Inseparable'}]
+                                                = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'E_Base'}][$lb_enums{'Inseparable'}]
+                                                = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'E_Modifier'}][$lb_enums{'Inseparable'}]
                                                 = $lb_actions{'LB_NOBREAK'};
 
     # IN × IN
@@ -1256,19 +1322,22 @@ sub output_LB_table() {
     #
     # LB9 Do not break a combining character sequence; treat it as if it has
     # the line breaking class of the base character in all of the
-    # higher-numbered rules.
-    # Treat X CM* as if it were X.
+    # higher-numbered rules.  Treat ZWJ as if it were CM
+    # Treat X (CM|ZWJ)* as if it were X.
     # where X is any line break class except BK, CR, LF, NL, SP, or ZW.
 
-    # LB10 Treat any remaining combining mark as AL.  This catches the case
-    # where a CM is the first character on the line or follows SP, BK, CR, LF,
-    # NL, or ZW.
+    # LB10 Treat any remaining combining mark or ZWJ as AL.  This catches the
+    # case where a CM or ZWJ is the first character on the line or follows SP,
+    # BK, CR, LF, NL, or ZW.
     for my $i (0 .. @lb_table - 1) {
 
-        # When the CM is the first in the pair, we don't know without looking
-        # behind whether the CM is going to inherit from an earlier character,
-        # or not.  So have to figure this out in the code
-        $lb_table[$lb_enums{'Combining_Mark'}][$i] = $lb_actions{'LB_CM_foo'};
+        # When the CM or ZWJ is the first in the pair, we don't know without
+        # looking behind whether the CM or ZWJ is going to attach to an
+        # earlier character, or not.  So have to figure this out at runtime in
+        # the code
+        $lb_table[$lb_enums{'Combining_Mark'}][$i]
+                                        = $lb_actions{'LB_CM_ZWJ_foo'};
+        $lb_table[$lb_enums{'ZWJ'}][$i] = $lb_actions{'LB_CM_ZWJ_foo'};
 
         if (   $i == $lb_enums{'Mandatory_Break'}
             || $i == $lb_enums{'EDGE'}
@@ -1282,18 +1351,37 @@ sub output_LB_table() {
             # whatever 'Alphabetic' would do.
             $lb_table[$i][$lb_enums{'Combining_Mark'}]
                                     = $lb_table[$i][$lb_enums{'Alphabetic'}];
+            $lb_table[$i][$lb_enums{'ZWJ'}]
+                                    = $lb_table[$i][$lb_enums{'Alphabetic'}];
         }
         else {
-            # For these classes, the CM combines, so doesn't break, inheriting
-            # the type of nobreak from the master character.
+            # For these classes, the CM or ZWJ combines, so doesn't break,
+            # inheriting the type of nobreak from the master character.
             if ($lb_table[$i][$lb_enums{'Combining_Mark'}]
                             != $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'})
             {
                 $lb_table[$i][$lb_enums{'Combining_Mark'}]
                                         = $lb_actions{'LB_NOBREAK'};
             }
+            if ($lb_table[$i][$lb_enums{'ZWJ'}]
+                            != $lb_actions{'LB_NOBREAK_EVEN_WITH_SP_BETWEEN'})
+            {
+                $lb_table[$i][$lb_enums{'ZWJ'}]
+                                        = $lb_actions{'LB_NOBREAK'};
+            }
         }
     }
+
+    # LB8a Do not break between a zero width joiner and an ideograph, emoji
+    # base or emoji modifier. This rule prevents breaks within emoji joiner
+    # sequences.
+    # ZWJ × (ID | EB | EM)
+    $lb_table[$lb_enums{'ZWJ'}][$lb_enums{'Ideographic'}]
+                                                    = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'ZWJ'}][$lb_enums{'E_Base'}]
+                                                    = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'ZWJ'}][$lb_enums{'E_Modifier'}]
+                                                    = $lb_actions{'LB_NOBREAK'};
 
     # LB8 Break before any character following a zero-width space, even if one
     # or more spaces intervene.
@@ -1349,12 +1437,10 @@ sub output_LB_table() {
                                 = $lb_actions{'LB_BREAKABLE'};
     }
 
-    # LB2 Never break at the start of text.
-    # sot ×
     # LB3 Always break at the end of text.
     # ! eot
-    # but these are reversed in the loop below, so that won't break if there
-    # is no text
+    # LB2 Never break at the start of text.
+    # sot ×
     for my $i (0 .. @lb_table - 1) {
         $lb_table[$i][$lb_enums{'EDGE'}] = $lb_actions{'LB_BREAKABLE'};
         $lb_table[$lb_enums{'EDGE'}][$i] = $lb_actions{'LB_NOBREAK'};
@@ -1393,13 +1479,14 @@ sub output_WB_table() {
         WB_NOBREAK                      => 0,
         WB_BREAKABLE                    => 1,
         WB_hs_then_hs                   => 2,
-        WB_Ex_or_FO_then_foo	        => 3,
+        WB_Ex_or_FO_or_ZWJ_then_foo	=> 3,
         WB_DQ_then_HL	                => 4,
         WB_HL_then_DQ	                => 6,
         WB_LE_or_HL_then_MB_or_ML_or_SQ	=> 8,
         WB_MB_or_ML_or_SQ_then_LE_or_HL	=> 10,
         WB_MB_or_MN_or_SQ_then_NU	=> 12,
         WB_NU_then_MB_or_MN_or_SQ	=> 14,
+        WB_RI_then_RI	                => 16,
     );
 
     # Construct the WB pair table.
@@ -1411,17 +1498,27 @@ sub output_WB_table() {
     my $table_size = @wb_short_enums - 1;   # -1 because we don't use UNKNOWN
 
     # Otherwise, break everywhere (including around ideographs).
-    # WB14  Any  ÷  Any
+    # WB99  Any  ÷  Any
     for my $i (0 .. $table_size - 1) {
         for my $j (0 .. $table_size - 1) {
             $wb_table[$i][$j] = $wb_actions{'WB_BREAKABLE'};
         }
     }
 
-    # Do not break between regional indicator symbols.
-    # WB13c  Regional_Indicator  ×  Regional_Indicator
+    # Do not break within emoji flag sequences. That is, do not break between
+    # regional indicator (RI) symbols if there is an odd number of RI
+    # characters before the break point.
+    # WB16  [^RI] (RI RI)* RI × RI
+    # WB15   ^    (RI RI)* RI × RI
     $wb_table[$wb_enums{'Regional_Indicator'}]
-             [$wb_enums{'Regional_Indicator'}] = $wb_actions{'WB_NOBREAK'};
+             [$wb_enums{'Regional_Indicator'}] = $wb_actions{'WB_RI_then_RI'};
+
+    # Do not break within emoji modifier sequences.
+    # WB14  ( E_Base | EBG )  ×  E_Modifier
+    $wb_table[$wb_enums{'E_Base'}][$wb_enums{'E_Modifier'}]
+                                                    = $wb_actions{'WB_NOBREAK'};
+    $wb_table[$wb_enums{'E_Base_GAZ'}][$wb_enums{'E_Modifier'}]
+                                                    = $wb_actions{'WB_NOBREAK'};
 
     # Do not break from extenders.
     # WB13b  ExtendNumLet  ×  (ALetter | Hebrew_Letter | Numeric | Katakana)
@@ -1541,14 +1638,21 @@ sub output_WB_table() {
     $wb_table[$wb_enums{'Hebrew_Letter'}][$wb_enums{'Hebrew_Letter'}]
                                                     = $wb_actions{'WB_NOBREAK'};
 
-    # Ignore Format and Extend characters, except when they appear at the
-    # beginning of a region of text.
-    # WB4  X (Extend | Format)*  →  X
+    # Ignore Format and Extend characters, except after sot, CR, LF, and
+    # Newline.  This also has the effect of: Any × (Format | Extend | ZWJ)
+    # WB4  X (Extend | Format | ZWJ)* → X
     for my $i (0 .. @wb_table - 1) {
         $wb_table[$wb_enums{'Extend'}][$i]
-                                        = $wb_actions{'WB_Ex_or_FO_then_foo'};
+                                = $wb_actions{'WB_Ex_or_FO_or_ZWJ_then_foo'};
         $wb_table[$wb_enums{'Format'}][$i]
-                                        = $wb_actions{'WB_Ex_or_FO_then_foo'};
+                                = $wb_actions{'WB_Ex_or_FO_or_ZWJ_then_foo'};
+        $wb_table[$wb_enums{'ZWJ'}][$i]
+                                = $wb_actions{'WB_Ex_or_FO_or_ZWJ_then_foo'};
+    }
+    for my $i (0 .. @wb_table - 1) {
+        $wb_table[$i][$wb_enums{'Extend'}] = $wb_actions{'WB_NOBREAK'};
+        $wb_table[$i][$wb_enums{'Format'}] = $wb_actions{'WB_NOBREAK'};
+        $wb_table[$i][$wb_enums{'ZWJ'}]    = $wb_actions{'WB_NOBREAK'};
     }
 
     # Implied is that these attach to the character before them, except for
@@ -1559,6 +1663,13 @@ sub output_WB_table() {
         $wb_table[$i][$wb_enums{'Extend'}] = $wb_actions{'WB_NOBREAK'};
         $wb_table[$i][$wb_enums{'Format'}] = $wb_actions{'WB_NOBREAK'};
     }
+
+    # Do not break within emoji zwj sequences.
+    # WB3c ZWJ × ( Glue_After_Zwj | EBG )
+    $wb_table[$wb_enums{'ZWJ'}][$wb_enums{'Glue_After_Zwj'}]
+                                                = $wb_actions{'WB_NOBREAK'};
+    $wb_table[$wb_enums{'ZWJ'}][$wb_enums{'E_Base_GAZ'}]
+                                                = $wb_actions{'WB_NOBREAK'};
 
     # Break before and after white space
     # WB3b     ÷  (Newline | CR | LF)
@@ -1580,24 +1691,24 @@ sub output_WB_table() {
         }
     }
 
-    # And do not break horizontal space followed by Extend or Format
+    # And do not break horizontal space followed by Extend or Format or ZWJ
     $wb_table[$wb_enums{'Perl_Tailored_HSpace'}][$wb_enums{'Extend'}]
                                                     = $wb_actions{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Perl_Tailored_HSpace'}][$wb_enums{'Format'}]
+                                                    = $wb_actions{'WB_NOBREAK'};
+    $wb_table[$wb_enums{'Perl_Tailored_HSpace'}][$wb_enums{'ZWJ'}]
                                                     = $wb_actions{'WB_NOBREAK'};
     $wb_table[$wb_enums{'Perl_Tailored_HSpace'}]
               [$wb_enums{'Perl_Tailored_HSpace'}]
                                                 = $wb_actions{'WB_hs_then_hs'};
 
-    # Break at the start and end of text.
-    # WB2     ÷  eot
-    # WB1  sot  ÷
+    # Break at the start and end of text, unless the text is empty
+    # WB2  Any  ÷  eot
+    # WB1  sot  ÷  Any
     for my $i (0 .. @wb_table - 1) {
         $wb_table[$i][$wb_enums{'EDGE'}] = $wb_actions{'WB_BREAKABLE'};
         $wb_table[$wb_enums{'EDGE'}][$i] = $wb_actions{'WB_BREAKABLE'};
     }
-
-    # But, unspecified by Unicode, we shouldn't break on an empty string.
     $wb_table[$wb_enums{'EDGE'}][$wb_enums{'EDGE'}] = 0;
 
     output_table_common('WB', \%wb_actions,

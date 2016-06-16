@@ -45,7 +45,7 @@ sub NON_ASCII_PLATFORM { ord("A") != 65 }
 # expected, a warning will be generated.  If an older version is being
 # compiled, any bounds tests that fail in the generated test file (-maketest
 # option) will be marked as TODO.
-my $version_of_mk_invlist_bounds = v8.0.0;
+my $version_of_mk_invlist_bounds = v9.0.0;
 
 ##########################################################################
 #
@@ -11741,7 +11741,16 @@ END
                                           . $CMD_DELIM
                                           . $fields[$CHARNAME];
             }
-            elsif ($fields[$CHARNAME] =~ /^CJK/) {
+            elsif ($fields[$CATEGORY] eq 'Lo') {    # Is a letter
+
+                # All the CJK ranges like this have the name given as a
+                # special case in the next code line.  And for the others, we
+                # hope that Unicode continues to use the correct name in
+                # future releases, so we don't have to make further special
+                # cases.
+                my $name = ($fields[$CHARNAME] =~ /^CJK/)
+                           ? 'CJK UNIFIED IDEOGRAPH'
+                           : uc $fields[$CHARNAME];
 
                 # The name for these contains the code point itself, and all
                 # are defined to have the same base name, regardless of what
@@ -11753,7 +11762,7 @@ END
                                            . '='
                                            . $CP_IN_NAME
                                            . $CMD_DELIM
-                                           . 'CJK UNIFIED IDEOGRAPH';
+                                           . $name;
 
             }
             elsif ($fields[$CATEGORY] eq 'Co'
@@ -19193,7 +19202,8 @@ my @input_file_objects = (
                           . 'incorporated into the Unicode data base',
                    ),
     Input_file->new('StandardizedVariants.html', v3.2.0,
-                    Skip => 'Provides a visual display of the standard '
+                    Skip => 'Obsoleted as of Unicode 9.0, but previously '
+                          . 'provided a visual display of the standard '
                           . 'variant sequences derived from '
                           . 'F<StandardizedVariants.txt>.',
                         # I don't know why the html came earlier than the
@@ -19406,6 +19416,12 @@ my @input_file_objects = (
     Input_file->new('IndicPositionalCategory.txt', v8.0.0,
                     Property => 'Indic_Positional_Category',
                     Has_Missings_Defaults => $NOT_IGNORED,
+                   ),
+    Input_file->new('TangutSources.txt', v9.0.0,
+                    Skip => 'Specifies source mappings for Tangut ideographs'
+                          . ' and components. This data file also includes'
+                          . ' informative radical-stroke values that are used'
+                          . ' internally by Unicode',
                    ),
 );
 
@@ -19871,7 +19887,10 @@ if (defined &locales_enabled) {
 }
 
 # Eval'd so can run on versions earlier than the property is available in
-my $WB_Extend_or_Format_re = eval 'qr/[\p{WB=Extend}\p{WB=Format}]/';
+my $WB_Extend_or_Format_re = eval 'qr/[\p{WB=Extend}\p{WB=Format}\p{WB=ZWJ}]/';
+if (! defined $WB_Extend_or_Format_re) {
+    $WB_Extend_or_Format_re = eval 'qr/[\p{WB=Extend}\p{WB=Format}]/';
+}
 
 sub _test_break($$) {
     # Test various break property matches.  The 2nd parameter gives the

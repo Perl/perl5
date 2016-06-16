@@ -2205,23 +2205,28 @@ static const UV _Perl_GCB_invlist[] = { /* for ASCII/Latin1 */
 
 #if defined(PERL_IN_REGEXEC_C)
 
-#define GCB_ENUM_COUNT 14
+#define GCB_ENUM_COUNT 19
 
 typedef enum {
 	GCB_Other = 0,
 	GCB_CR = 1,
 	GCB_Control = 2,
-	GCB_Extend = 3,
-	GCB_L = 4,
-	GCB_LF = 5,
-	GCB_LV = 6,
-	GCB_LVT = 7,
-	GCB_Prepend = 8,
-	GCB_Regional_Indicator = 9,
-	GCB_SpacingMark = 10,
-	GCB_T = 11,
-	GCB_V = 12,
-	GCB_EDGE = 13
+	GCB_E_Base = 3,
+	GCB_E_Base_GAZ = 4,
+	GCB_E_Modifier = 5,
+	GCB_Extend = 6,
+	GCB_Glue_After_Zwj = 7,
+	GCB_L = 8,
+	GCB_LF = 9,
+	GCB_LV = 10,
+	GCB_LVT = 11,
+	GCB_Prepend = 12,
+	GCB_Regional_Indicator = 13,
+	GCB_SpacingMark = 14,
+	GCB_T = 15,
+	GCB_V = 16,
+	GCB_ZWJ = 17,
+	GCB_EDGE = 18
 } GCB_enum;
 
 static const GCB_enum _Perl_GCB_invmap[] = { /* for ASCII/Latin1 */
@@ -8364,7 +8369,7 @@ static const UV _Perl_LB_invlist[] = { /* for ASCII/Latin1 */
 
 #if defined(PERL_IN_REGEXEC_C)
 
-#define LB_ENUM_COUNT 36
+#define LB_ENUM_COUNT 39
 
 typedef enum {
 	LB_Alphabetic = 0,
@@ -8377,32 +8382,35 @@ typedef enum {
 	LB_Close_Punctuation = 7,
 	LB_Combining_Mark = 8,
 	LB_Contingent_Break = 9,
-	LB_Exclamation = 10,
-	LB_Glue = 11,
-	LB_H2 = 12,
-	LB_H3 = 13,
-	LB_Hebrew_Letter = 14,
-	LB_Hyphen = 15,
-	LB_Ideographic = 16,
-	LB_Infix_Numeric = 17,
-	LB_Inseparable = 18,
-	LB_JL = 19,
-	LB_JT = 20,
-	LB_JV = 21,
-	LB_Line_Feed = 22,
-	LB_Mandatory_Break = 23,
-	LB_Next_Line = 24,
-	LB_Nonstarter = 25,
-	LB_Numeric = 26,
-	LB_Open_Punctuation = 27,
-	LB_Postfix_Numeric = 28,
-	LB_Prefix_Numeric = 29,
-	LB_Quotation = 30,
-	LB_Regional_Indicator = 31,
-	LB_Space = 32,
-	LB_Word_Joiner = 33,
-	LB_ZWSpace = 34,
-	LB_EDGE = 35
+	LB_E_Base = 10,
+	LB_E_Modifier = 11,
+	LB_Exclamation = 12,
+	LB_Glue = 13,
+	LB_H2 = 14,
+	LB_H3 = 15,
+	LB_Hebrew_Letter = 16,
+	LB_Hyphen = 17,
+	LB_Ideographic = 18,
+	LB_Infix_Numeric = 19,
+	LB_Inseparable = 20,
+	LB_JL = 21,
+	LB_JT = 22,
+	LB_JV = 23,
+	LB_Line_Feed = 24,
+	LB_Mandatory_Break = 25,
+	LB_Next_Line = 26,
+	LB_Nonstarter = 27,
+	LB_Numeric = 28,
+	LB_Open_Punctuation = 29,
+	LB_Postfix_Numeric = 30,
+	LB_Prefix_Numeric = 31,
+	LB_Quotation = 32,
+	LB_Regional_Indicator = 33,
+	LB_Space = 34,
+	LB_Word_Joiner = 35,
+	LB_ZWJ = 36,
+	LB_ZWSpace = 37,
+	LB_EDGE = 38
 } LB_enum;
 
 static const LB_enum _Perl_LB_invmap[] = { /* for ASCII/Latin1 */
@@ -17945,29 +17953,34 @@ static const UV _Perl_WB_invlist[] = { /* for ASCII/Latin1 */
 
 #if defined(PERL_IN_REGEXEC_C)
 
-#define WB_ENUM_COUNT 20
+#define WB_ENUM_COUNT 25
 
 typedef enum {
 	WB_Other = 0,
 	WB_ALetter = 1,
 	WB_CR = 2,
 	WB_Double_Quote = 3,
-	WB_Extend = 4,
-	WB_ExtendNumLet = 5,
-	WB_Format = 6,
-	WB_Hebrew_Letter = 7,
-	WB_Katakana = 8,
-	WB_LF = 9,
-	WB_MidLetter = 10,
-	WB_MidNum = 11,
-	WB_MidNumLet = 12,
-	WB_Newline = 13,
-	WB_Numeric = 14,
-	WB_Perl_Tailored_HSpace = 15,
-	WB_Regional_Indicator = 16,
-	WB_Single_Quote = 17,
-	WB_EDGE = 18,
-	WB_UNKNOWN = 19
+	WB_E_Base = 4,
+	WB_E_Base_GAZ = 5,
+	WB_E_Modifier = 6,
+	WB_Extend = 7,
+	WB_ExtendNumLet = 8,
+	WB_Format = 9,
+	WB_Glue_After_Zwj = 10,
+	WB_Hebrew_Letter = 11,
+	WB_Katakana = 12,
+	WB_LF = 13,
+	WB_MidLetter = 14,
+	WB_MidNum = 15,
+	WB_MidNumLet = 16,
+	WB_Newline = 17,
+	WB_Numeric = 18,
+	WB_Perl_Tailored_HSpace = 19,
+	WB_Regional_Indicator = 20,
+	WB_Single_Quote = 21,
+	WB_ZWJ = 22,
+	WB_EDGE = 23,
+	WB_UNKNOWN = 24
 } WB_enum;
 
 static const WB_enum _Perl_WB_invmap[] = { /* for ASCII/Latin1 */
@@ -31270,23 +31283,28 @@ static const UV _Perl_GCB_invlist[] = { /* for EBCDIC 1047 */
 
 #if defined(PERL_IN_REGEXEC_C)
 
-#define GCB_ENUM_COUNT 14
+#define GCB_ENUM_COUNT 19
 
 typedef enum {
 	GCB_Other = 0,
 	GCB_CR = 1,
 	GCB_Control = 2,
-	GCB_Extend = 3,
-	GCB_L = 4,
-	GCB_LF = 5,
-	GCB_LV = 6,
-	GCB_LVT = 7,
-	GCB_Prepend = 8,
-	GCB_Regional_Indicator = 9,
-	GCB_SpacingMark = 10,
-	GCB_T = 11,
-	GCB_V = 12,
-	GCB_EDGE = 13
+	GCB_E_Base = 3,
+	GCB_E_Base_GAZ = 4,
+	GCB_E_Modifier = 5,
+	GCB_Extend = 6,
+	GCB_Glue_After_Zwj = 7,
+	GCB_L = 8,
+	GCB_LF = 9,
+	GCB_LV = 10,
+	GCB_LVT = 11,
+	GCB_Prepend = 12,
+	GCB_Regional_Indicator = 13,
+	GCB_SpacingMark = 14,
+	GCB_T = 15,
+	GCB_V = 16,
+	GCB_ZWJ = 17,
+	GCB_EDGE = 18
 } GCB_enum;
 
 static const GCB_enum _Perl_GCB_invmap[] = { /* for EBCDIC 1047 */
@@ -37491,7 +37509,7 @@ static const UV _Perl_LB_invlist[] = { /* for EBCDIC 1047 */
 
 #if defined(PERL_IN_REGEXEC_C)
 
-#define LB_ENUM_COUNT 36
+#define LB_ENUM_COUNT 39
 
 typedef enum {
 	LB_Alphabetic = 0,
@@ -37504,32 +37522,35 @@ typedef enum {
 	LB_Close_Punctuation = 7,
 	LB_Combining_Mark = 8,
 	LB_Contingent_Break = 9,
-	LB_Exclamation = 10,
-	LB_Glue = 11,
-	LB_H2 = 12,
-	LB_H3 = 13,
-	LB_Hebrew_Letter = 14,
-	LB_Hyphen = 15,
-	LB_Ideographic = 16,
-	LB_Infix_Numeric = 17,
-	LB_Inseparable = 18,
-	LB_JL = 19,
-	LB_JT = 20,
-	LB_JV = 21,
-	LB_Line_Feed = 22,
-	LB_Mandatory_Break = 23,
-	LB_Next_Line = 24,
-	LB_Nonstarter = 25,
-	LB_Numeric = 26,
-	LB_Open_Punctuation = 27,
-	LB_Postfix_Numeric = 28,
-	LB_Prefix_Numeric = 29,
-	LB_Quotation = 30,
-	LB_Regional_Indicator = 31,
-	LB_Space = 32,
-	LB_Word_Joiner = 33,
-	LB_ZWSpace = 34,
-	LB_EDGE = 35
+	LB_E_Base = 10,
+	LB_E_Modifier = 11,
+	LB_Exclamation = 12,
+	LB_Glue = 13,
+	LB_H2 = 14,
+	LB_H3 = 15,
+	LB_Hebrew_Letter = 16,
+	LB_Hyphen = 17,
+	LB_Ideographic = 18,
+	LB_Infix_Numeric = 19,
+	LB_Inseparable = 20,
+	LB_JL = 21,
+	LB_JT = 22,
+	LB_JV = 23,
+	LB_Line_Feed = 24,
+	LB_Mandatory_Break = 25,
+	LB_Next_Line = 26,
+	LB_Nonstarter = 27,
+	LB_Numeric = 28,
+	LB_Open_Punctuation = 29,
+	LB_Postfix_Numeric = 30,
+	LB_Prefix_Numeric = 31,
+	LB_Quotation = 32,
+	LB_Regional_Indicator = 33,
+	LB_Space = 34,
+	LB_Word_Joiner = 35,
+	LB_ZWJ = 36,
+	LB_ZWSpace = 37,
+	LB_EDGE = 38
 } LB_enum;
 
 static const LB_enum _Perl_LB_invmap[] = { /* for EBCDIC 1047 */
@@ -47155,29 +47176,34 @@ static const UV _Perl_WB_invlist[] = { /* for EBCDIC 1047 */
 
 #if defined(PERL_IN_REGEXEC_C)
 
-#define WB_ENUM_COUNT 20
+#define WB_ENUM_COUNT 25
 
 typedef enum {
 	WB_Other = 0,
 	WB_ALetter = 1,
 	WB_CR = 2,
 	WB_Double_Quote = 3,
-	WB_Extend = 4,
-	WB_ExtendNumLet = 5,
-	WB_Format = 6,
-	WB_Hebrew_Letter = 7,
-	WB_Katakana = 8,
-	WB_LF = 9,
-	WB_MidLetter = 10,
-	WB_MidNum = 11,
-	WB_MidNumLet = 12,
-	WB_Newline = 13,
-	WB_Numeric = 14,
-	WB_Perl_Tailored_HSpace = 15,
-	WB_Regional_Indicator = 16,
-	WB_Single_Quote = 17,
-	WB_EDGE = 18,
-	WB_UNKNOWN = 19
+	WB_E_Base = 4,
+	WB_E_Base_GAZ = 5,
+	WB_E_Modifier = 6,
+	WB_Extend = 7,
+	WB_ExtendNumLet = 8,
+	WB_Format = 9,
+	WB_Glue_After_Zwj = 10,
+	WB_Hebrew_Letter = 11,
+	WB_Katakana = 12,
+	WB_LF = 13,
+	WB_MidLetter = 14,
+	WB_MidNum = 15,
+	WB_MidNumLet = 16,
+	WB_Newline = 17,
+	WB_Numeric = 18,
+	WB_Perl_Tailored_HSpace = 19,
+	WB_Regional_Indicator = 20,
+	WB_Single_Quote = 21,
+	WB_ZWJ = 22,
+	WB_EDGE = 23,
+	WB_UNKNOWN = 24
 } WB_enum;
 
 static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 1047 */
@@ -60661,23 +60687,28 @@ static const UV _Perl_GCB_invlist[] = { /* for EBCDIC 037 */
 
 #if defined(PERL_IN_REGEXEC_C)
 
-#define GCB_ENUM_COUNT 14
+#define GCB_ENUM_COUNT 19
 
 typedef enum {
 	GCB_Other = 0,
 	GCB_CR = 1,
 	GCB_Control = 2,
-	GCB_Extend = 3,
-	GCB_L = 4,
-	GCB_LF = 5,
-	GCB_LV = 6,
-	GCB_LVT = 7,
-	GCB_Prepend = 8,
-	GCB_Regional_Indicator = 9,
-	GCB_SpacingMark = 10,
-	GCB_T = 11,
-	GCB_V = 12,
-	GCB_EDGE = 13
+	GCB_E_Base = 3,
+	GCB_E_Base_GAZ = 4,
+	GCB_E_Modifier = 5,
+	GCB_Extend = 6,
+	GCB_Glue_After_Zwj = 7,
+	GCB_L = 8,
+	GCB_LF = 9,
+	GCB_LV = 10,
+	GCB_LVT = 11,
+	GCB_Prepend = 12,
+	GCB_Regional_Indicator = 13,
+	GCB_SpacingMark = 14,
+	GCB_T = 15,
+	GCB_V = 16,
+	GCB_ZWJ = 17,
+	GCB_EDGE = 18
 } GCB_enum;
 
 static const GCB_enum _Perl_GCB_invmap[] = { /* for EBCDIC 037 */
@@ -66874,7 +66905,7 @@ static const UV _Perl_LB_invlist[] = { /* for EBCDIC 037 */
 
 #if defined(PERL_IN_REGEXEC_C)
 
-#define LB_ENUM_COUNT 36
+#define LB_ENUM_COUNT 39
 
 typedef enum {
 	LB_Alphabetic = 0,
@@ -66887,32 +66918,35 @@ typedef enum {
 	LB_Close_Punctuation = 7,
 	LB_Combining_Mark = 8,
 	LB_Contingent_Break = 9,
-	LB_Exclamation = 10,
-	LB_Glue = 11,
-	LB_H2 = 12,
-	LB_H3 = 13,
-	LB_Hebrew_Letter = 14,
-	LB_Hyphen = 15,
-	LB_Ideographic = 16,
-	LB_Infix_Numeric = 17,
-	LB_Inseparable = 18,
-	LB_JL = 19,
-	LB_JT = 20,
-	LB_JV = 21,
-	LB_Line_Feed = 22,
-	LB_Mandatory_Break = 23,
-	LB_Next_Line = 24,
-	LB_Nonstarter = 25,
-	LB_Numeric = 26,
-	LB_Open_Punctuation = 27,
-	LB_Postfix_Numeric = 28,
-	LB_Prefix_Numeric = 29,
-	LB_Quotation = 30,
-	LB_Regional_Indicator = 31,
-	LB_Space = 32,
-	LB_Word_Joiner = 33,
-	LB_ZWSpace = 34,
-	LB_EDGE = 35
+	LB_E_Base = 10,
+	LB_E_Modifier = 11,
+	LB_Exclamation = 12,
+	LB_Glue = 13,
+	LB_H2 = 14,
+	LB_H3 = 15,
+	LB_Hebrew_Letter = 16,
+	LB_Hyphen = 17,
+	LB_Ideographic = 18,
+	LB_Infix_Numeric = 19,
+	LB_Inseparable = 20,
+	LB_JL = 21,
+	LB_JT = 22,
+	LB_JV = 23,
+	LB_Line_Feed = 24,
+	LB_Mandatory_Break = 25,
+	LB_Next_Line = 26,
+	LB_Nonstarter = 27,
+	LB_Numeric = 28,
+	LB_Open_Punctuation = 29,
+	LB_Postfix_Numeric = 30,
+	LB_Prefix_Numeric = 31,
+	LB_Quotation = 32,
+	LB_Regional_Indicator = 33,
+	LB_Space = 34,
+	LB_Word_Joiner = 35,
+	LB_ZWJ = 36,
+	LB_ZWSpace = 37,
+	LB_EDGE = 38
 } LB_enum;
 
 static const LB_enum _Perl_LB_invmap[] = { /* for EBCDIC 037 */
@@ -76526,29 +76560,34 @@ static const UV _Perl_WB_invlist[] = { /* for EBCDIC 037 */
 
 #if defined(PERL_IN_REGEXEC_C)
 
-#define WB_ENUM_COUNT 20
+#define WB_ENUM_COUNT 25
 
 typedef enum {
 	WB_Other = 0,
 	WB_ALetter = 1,
 	WB_CR = 2,
 	WB_Double_Quote = 3,
-	WB_Extend = 4,
-	WB_ExtendNumLet = 5,
-	WB_Format = 6,
-	WB_Hebrew_Letter = 7,
-	WB_Katakana = 8,
-	WB_LF = 9,
-	WB_MidLetter = 10,
-	WB_MidNum = 11,
-	WB_MidNumLet = 12,
-	WB_Newline = 13,
-	WB_Numeric = 14,
-	WB_Perl_Tailored_HSpace = 15,
-	WB_Regional_Indicator = 16,
-	WB_Single_Quote = 17,
-	WB_EDGE = 18,
-	WB_UNKNOWN = 19
+	WB_E_Base = 4,
+	WB_E_Base_GAZ = 5,
+	WB_E_Modifier = 6,
+	WB_Extend = 7,
+	WB_ExtendNumLet = 8,
+	WB_Format = 9,
+	WB_Glue_After_Zwj = 10,
+	WB_Hebrew_Letter = 11,
+	WB_Katakana = 12,
+	WB_LF = 13,
+	WB_MidLetter = 14,
+	WB_MidNum = 15,
+	WB_MidNumLet = 16,
+	WB_Newline = 17,
+	WB_Numeric = 18,
+	WB_Perl_Tailored_HSpace = 19,
+	WB_Regional_Indicator = 20,
+	WB_Single_Quote = 21,
+	WB_ZWJ = 22,
+	WB_EDGE = 23,
+	WB_UNKNOWN = 24
 } WB_enum;
 
 static const WB_enum _Perl_WB_invmap[] = { /* for EBCDIC 037 */
@@ -87735,116 +87774,142 @@ static const UV XPosixXDigit_invlist[] = { /* for EBCDIC 037 */
 
 #if defined(PERL_IN_REGEXEC_C)
 
-static const bool GCB_table[14][14] = {
-   /* 'edg' stands for 'EDGE' */
-/*        XX CR CN EX  L LF LV LVT PP RI SM  T  V edg */
-/* XX */ { 1, 1, 1, 0, 1, 1, 1,  1, 1, 1, 0, 1, 1,  1 },
-/* CR */ { 1, 1, 1, 1, 1, 0, 1,  1, 1, 1, 1, 1, 1,  1 },
-/* CN */ { 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1,  1 },
-/* EX */ { 1, 1, 1, 0, 1, 1, 1,  1, 1, 1, 0, 1, 1,  1 },
-/* L  */ { 1, 1, 1, 0, 0, 1, 0,  0, 1, 1, 0, 1, 0,  1 },
-/* LF */ { 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1,  1 },
-/* LV */ { 1, 1, 1, 0, 1, 1, 1,  1, 1, 1, 0, 0, 0,  1 },
-/* LVT*/ { 1, 1, 1, 0, 1, 1, 1,  1, 1, 1, 0, 0, 1,  1 },
-/* PP */ { 0, 1, 1, 0, 0, 1, 0,  0, 0, 0, 0, 0, 0,  1 },
-/* RI */ { 1, 1, 1, 0, 1, 1, 1,  1, 1, 0, 0, 1, 1,  1 },
-/* SM */ { 1, 1, 1, 0, 1, 1, 1,  1, 1, 1, 0, 1, 1,  1 },
-/* T  */ { 1, 1, 1, 0, 1, 1, 1,  1, 1, 1, 0, 0, 1,  1 },
-/* V  */ { 1, 1, 1, 0, 1, 1, 1,  1, 1, 1, 0, 0, 0,  1 },
-/* edg*/ { 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1,  0 }
+#define GCB_NOBREAK      0
+#define GCB_BREAKABLE    1
+#define GCB_RI_then_RI   2
+#define GCB_EX_then_EM   3
+
+static const U8 GCB_table[19][19] = {
+   /* 'edg' stands for 'EDGE'; other lowercase names are placeholders
+    * for property values not defined until a later Unicode release, so
+    * are irrelevant in this one, as they are not assigned to any code
+    * points */
+/*        XX CR CN  a  b  c EX  d  L LF LV LVT PP RI SM  T  V  e edg */
+/* XX */ { 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1,  1, 1, 1, 0, 1, 1, 0,  1 },
+/* CR */ { 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1,  1, 1, 1, 1, 1, 1, 1,  1 },
+/* CN */ { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1,  1 },
+/* a  */ { 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1,  1, 1, 1, 0, 1, 1, 0,  1 },
+/* b  */ { 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1,  1, 1, 1, 0, 1, 1, 0,  1 },
+/* c  */ { 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1,  1, 1, 1, 0, 1, 1, 0,  1 },
+/* EX */ { 1, 1, 1, 1, 1, 3, 0, 1, 1, 1, 1,  1, 1, 1, 0, 1, 1, 0,  1 },
+/* d  */ { 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1,  1, 1, 1, 0, 1, 1, 0,  1 },
+/* L  */ { 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0,  0, 1, 1, 0, 1, 0, 0,  1 },
+/* LF */ { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1,  1 },
+/* LV */ { 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1,  1, 1, 1, 0, 0, 0, 0,  1 },
+/* LVT*/ { 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1,  1, 1, 1, 0, 0, 1, 0,  1 },
+/* PP */ { 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0,  0, 0, 0, 0, 0, 0, 0,  1 },
+/* RI */ { 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1,  1, 1, 2, 0, 1, 1, 0,  1 },
+/* SM */ { 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1,  1, 1, 1, 0, 1, 1, 0,  1 },
+/* T  */ { 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1,  1, 1, 1, 0, 0, 1, 0,  1 },
+/* V  */ { 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1,  1, 1, 1, 0, 0, 0, 0,  1 },
+/* e  */ { 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1,  1, 1, 1, 0, 1, 1, 0,  1 },
+/* edg*/ { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1,  0 }
 };
 
 #define LB_NOBREAK                        0
 #define LB_BREAKABLE                      1
 #define LB_NOBREAK_EVEN_WITH_SP_BETWEEN   2
-#define LB_CM_foo                         3
+#define LB_CM_ZWJ_foo                     3
 #define LB_SP_foo                         6
 #define LB_PR_or_PO_then_OP_or_HY         9
 #define LB_SY_or_IS_then_various         11
 #define LB_HY_or_BA_then_foo             13
-#define LB_various_then_PO_or_PR         16
+#define LB_RI_then_RI                    15
+#define LB_various_then_PO_or_PR         32
 
-static const U8 LB_table[36][36] = {
-   /* 'edg' stands for 'EDGE' */
-/*        AL BA BB B2 SY CR CP CL CM CB EX GL H2 H3 HL HY ID IS IN JL JT JV LF BK NL NS NU OP PO PR QU RI SP WJ ZW edg */
-/* AL */ { 0, 0, 1, 1, 2, 0, 2, 2, 0, 1, 2, 0, 1, 1, 0, 0, 1, 2, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0,  1 },
-/* BA */ {14, 0,14,14, 2, 0, 2, 2, 0, 1, 2,14,14,14,14, 0,14, 2,14,14,14,14, 0, 0, 0, 0,14,14,14,14, 0,14, 0, 0, 0,  1 },
-/* BB */ { 0, 0, 0, 0, 2, 0, 2, 2, 0, 1, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  1 },
-/* B2 */ { 1, 0, 1, 2, 2, 0, 2, 2, 0, 1, 2, 0, 1, 1, 1, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0,  1 },
-/* SY */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 2, 0, 1, 1, 0, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0,12, 1,17,17, 0, 1, 0, 0, 0,  1 },
-/* CR */ { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1 },
-/* CP */ { 0, 0, 1, 1, 2, 0, 2, 2, 0, 1, 2, 0, 1, 1, 0, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 2, 0, 1,17,17, 0, 1, 0, 0, 0,  1 },
-/* CL */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 2, 0, 1, 1, 1, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 2, 1, 1,17,17, 0, 1, 0, 0, 0,  1 },
-/* CM */ { 3, 3, 3, 3, 3, 0, 3, 3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 0, 3, 0,  1 },
-/* CB */ { 1, 1, 1, 1, 2, 0, 2, 2, 0, 1, 2, 0, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0,  1 },
-/* EX */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 2, 0, 1, 1, 1, 0, 1, 2, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0,  1 },
-/* GL */ { 0, 0, 0, 0, 2, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  1 },
-/* H2 */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 2, 0, 1, 1, 1, 0, 1, 2, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0,  1 },
-/* H3 */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 2, 0, 1, 1, 1, 0, 1, 2, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0,  1 },
-/* HL */ { 0, 0, 1, 1, 2, 0, 2, 2, 0, 1, 2, 0, 1, 1, 0, 0, 1, 2, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0,  1 },
-/* HY */ {14, 0,14,14, 2, 0, 2, 2, 0, 1, 2,14,14,14,14, 0,14, 2,14,14,14,14, 0, 0, 0, 0,13,14,14,14, 0,14, 0, 0, 0,  1 },
-/* ID */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 2, 0, 1, 1, 1, 0, 1, 2, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0,  1 },
-/* IS */ { 0, 0, 1, 1, 2, 0, 2, 2, 0, 1, 2, 0, 1, 1, 0, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0,12, 1,17,17, 0, 1, 0, 0, 0,  1 },
-/* IN */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 2, 0, 1, 1, 1, 0, 1, 2, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0,  1 },
-/* JL */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 2, 0, 0, 0, 1, 0, 1, 2, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0,  1 },
-/* JT */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 2, 0, 1, 1, 1, 0, 1, 2, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0,  1 },
-/* JV */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 2, 0, 1, 1, 1, 0, 1, 2, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0,  1 },
-/* LF */ { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1 },
-/* BK */ { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1 },
-/* NL */ { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1 },
-/* NS */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 2, 0, 1, 1, 1, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0,  1 },
-/* NU */ { 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 2, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,  1 },
-/* OP */ { 2, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 0, 2, 0,  1 },
-/* PO */ { 0, 0, 1, 1, 2, 0, 2, 2, 0, 1, 2, 0, 1, 1, 0, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0, 0,10, 1, 1, 0, 1, 0, 0, 0,  1 },
-/* PR */ { 0, 0, 1, 1, 2, 0, 2, 2, 0, 1, 2, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0,10, 1, 1, 0, 1, 0, 0, 0,  1 },
-/* QU */ { 0, 0, 0, 0, 2, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0,  1 },
-/* RI */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 2, 0, 1, 1, 1, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0,  1 },
-/* SP */ { 7, 7, 7, 7, 8, 0, 8, 8, 7, 7, 8, 7, 7, 7, 7, 7, 7, 8, 7, 7, 7, 7, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 0, 8, 0,  1 },
-/* WJ */ { 0, 0, 0, 0, 2, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  1 },
-/* ZW */ { 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0,  1 },
-/* edg*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0 }
+static const U8 LB_table[39][39] = {
+   /* 'edg' stands for 'EDGE'; other lowercase names are placeholders for property values not defined until a later Unicode
+    * release, so are irrelevant in this one, as they are not assigned to any code points */
+/*        AL BA BB B2 SY CR CP CL CM CB  a  b EX GL H2 H3 HL HY ID IS IN JL JT JV LF BK NL NS NU OP PO PR QU RI SP WJ  c ZW edg */
+/* AL */ { 0, 0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 1, 1, 0, 0, 1, 2, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,  1 },
+/* BA */ {14, 0,14,14, 2, 0, 2, 2, 0, 1,14,14, 2,14,14,14,14, 0,14, 2,14,14,14,14, 0, 0, 0, 0,14,14,14,14, 0,14, 0, 0, 0, 0,  1 },
+/* BB */ { 0, 0, 0, 0, 2, 0, 2, 2, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  1 },
+/* B2 */ { 1, 0, 1, 2, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 1, 1, 1, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0,  1 },
+/* SY */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 1, 1, 0, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0,12, 1,33,33, 0, 1, 0, 0, 0, 0,  1 },
+/* CR */ { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1 },
+/* CP */ { 0, 0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 1, 1, 0, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 2, 0, 1,33,33, 0, 1, 0, 0, 0, 0,  1 },
+/* CL */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 1, 1, 1, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 2, 1, 1,33,33, 0, 1, 0, 0, 0, 0,  1 },
+/* CM */ { 3, 3, 3, 3, 3, 0, 3, 3, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 0, 3, 3, 0,  1 },
+/* CB */ { 1, 1, 1, 1, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0,  1 },
+/* a  */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 0, 2, 0, 1, 1, 1, 0, 1, 2, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  1 },
+/* b  */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 1, 1, 1, 0, 1, 2, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  1 },
+/* EX */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 1, 1, 1, 0, 1, 2, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0,  1 },
+/* GL */ { 0, 0, 0, 0, 2, 0, 2, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  1 },
+/* H2 */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 1, 1, 1, 0, 1, 2, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  1 },
+/* H3 */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 1, 1, 1, 0, 1, 2, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  1 },
+/* HL */ { 0, 0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 1, 1, 0, 0, 1, 2, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,  1 },
+/* HY */ {14, 0,14,14, 2, 0, 2, 2, 0, 1,14,14, 2,14,14,14,14, 0,14, 2,14,14,14,14, 0, 0, 0, 0,13,14,14,14, 0,14, 0, 0, 0, 0,  1 },
+/* ID */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 1, 1, 1, 0, 1, 2, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  1 },
+/* IS */ { 0, 0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 1, 1, 0, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0,12, 1,33,33, 0, 1, 0, 0, 0, 0,  1 },
+/* IN */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 1, 1, 1, 0, 1, 2, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0,  1 },
+/* JL */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 0, 0, 1, 0, 1, 2, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  1 },
+/* JT */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 1, 1, 1, 0, 1, 2, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  1 },
+/* JV */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 1, 1, 1, 0, 1, 2, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0,  1 },
+/* LF */ { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1 },
+/* BK */ { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1 },
+/* NL */ { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1 },
+/* NS */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 1, 1, 1, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0,  1 },
+/* NU */ { 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 2, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,  1 },
+/* OP */ { 2, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 0,  1 },
+/* PO */ { 0, 0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 1, 1, 0, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0, 0,10, 1, 1, 0, 1, 0, 0, 0, 0,  1 },
+/* PR */ { 0, 0, 1, 1, 2, 0, 2, 2, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0,10, 1, 1, 0, 1, 0, 0, 0, 0,  1 },
+/* QU */ { 0, 0, 0, 0, 2, 0, 2, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0,  1 },
+/* RI */ { 1, 0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 1, 2, 0, 1, 1, 1, 0, 1, 2, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0,15, 0, 0, 0, 0,  1 },
+/* SP */ { 7, 7, 7, 7, 8, 0, 8, 8, 7, 7, 7, 7, 8, 7, 7, 7, 7, 7, 7, 8, 7, 7, 7, 7, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 0, 8, 7, 0,  1 },
+/* WJ */ { 0, 0, 0, 0, 2, 0, 2, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  1 },
+/* c  */ { 3, 3, 3, 3, 3, 0, 3, 3, 0, 3, 0, 0, 3, 3, 3, 3, 3, 3, 0, 3, 3, 3, 3, 3, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 0, 3, 0, 0,  1 },
+/* ZW */ { 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0,  1 },
+/* edg*/ { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0 }
 };
 
 #define WB_NOBREAK                        0
 #define WB_BREAKABLE                      1
 #define WB_hs_then_hs                     2
-#define WB_Ex_or_FO_then_foo              3
+#define WB_Ex_or_FO_or_ZWJ_then_foo       3
 #define WB_DQ_then_HL                     4
 #define WB_HL_then_DQ                     6
 #define WB_LE_or_HL_then_MB_or_ML_or_SQ   8
 #define WB_MB_or_ML_or_SQ_then_LE_or_HL  10
 #define WB_MB_or_MN_or_SQ_then_NU        12
 #define WB_NU_then_MB_or_MN_or_SQ        14
+#define WB_RI_then_RI                    16
 
-static const U8 WB_table[19][19] = {
-   /* 'Ext' stands for 'Extend'; 'edg' stands for 'EDGE'; 'hs' stands
-    * for 'Perl_Tailored_HSpace'; 'unk' stands for 'UNKNOWN' */
-/*        XX LE CR DQ Ext EX FO HL KA LF ML MN MB NL NU hs RI SQ edg */
-/* XX */ { 1, 1, 1, 1,  0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1 },
-/* LE */ { 1, 0, 1, 1,  0, 0, 0, 0, 1, 1, 9, 1, 9, 1, 0, 1, 1, 9,  1 },
-/* CR */ { 1, 1, 0, 1,  1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1,  1 },
-/* DQ */ { 1, 1, 1, 1,  0, 1, 0, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1 },
-/* Ext*/ { 3, 3, 1, 3,  0, 3, 0, 3, 3, 1, 3, 3, 3, 1, 3, 1, 3, 3,  1 },
-/* EX */ { 1, 0, 1, 1,  0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1,  1 },
-/* FO */ { 3, 3, 1, 3,  0, 3, 0, 3, 3, 1, 3, 3, 3, 1, 3, 1, 3, 3,  1 },
-/* HL */ { 1, 0, 1, 7,  0, 0, 0, 0, 1, 1, 9, 1, 9, 1, 0, 1, 1, 8,  1 },
-/* KA */ { 1, 1, 1, 1,  0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1 },
-/* LF */ { 1, 1, 0, 1,  1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1,  1 },
-/* ML */ { 1,11, 1, 1,  0, 1, 0,11, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  1 },
-/* MN */ { 1, 1, 1, 1,  0, 1, 0, 1, 1, 1, 1, 1, 1, 1,13, 1, 1, 1,  1 },
-/* MB */ { 1,11, 1, 1,  0, 1, 0,11, 1, 1, 1, 1, 1, 1,13, 1, 1, 1,  1 },
-/* NL */ { 1, 1, 0, 1,  1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1,  1 },
-/* NU */ { 1, 0, 1, 1,  0, 0, 0, 0, 1, 1, 1,15,15, 1, 0, 1, 1,15,  1 },
-/* hs */ { 1, 1, 0, 1,  0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 2, 1, 1,  1 },
-/* RI */ { 1, 1, 1, 1,  0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1,  1 },
-/* SQ */ { 1,11, 1, 1,  0, 1, 0,11, 1, 1, 1, 1, 1, 1,13, 1, 1, 1,  1 },
-/* edg*/ { 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0 }
+static const U8 WB_table[24][24] = {
+   /* 'Ext' stands for 'Extend'; 'edg' stands for 'EDGE'; 'hs' stands for
+    * 'Perl_Tailored_HSpace'; 'unk' stands for 'UNKNOWN'; other lowercase names are
+    * placeholders for property values not defined until a later Unicode release, so
+    * are irrelevant in this one, as they are not assigned to any code points */
+/*        XX LE CR DQ  a  b  c Ext EX FO  d HL KA LF ML MN MB NL NU hs RI SQ  e edg */
+/* XX */ { 1, 1, 1, 1, 1, 1, 1,  0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,  1 },
+/* LE */ { 1, 0, 1, 1, 1, 1, 1,  0, 0, 0, 1, 0, 1, 1, 9, 1, 9, 1, 0, 1, 1, 9, 0,  1 },
+/* CR */ { 1, 1, 0, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1,  1 },
+/* DQ */ { 1, 1, 1, 1, 1, 1, 1,  0, 1, 0, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,  1 },
+/* a  */ { 1, 1, 1, 1, 1, 1, 0,  0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,  1 },
+/* b  */ { 1, 1, 1, 1, 1, 1, 0,  0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,  1 },
+/* c  */ { 1, 1, 1, 1, 1, 1, 1,  0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,  1 },
+/* Ext*/ { 3, 3, 1, 3, 3, 3, 3,  0, 3, 0, 3, 3, 3, 1, 3, 3, 3, 1, 3, 1, 3, 3, 0,  1 },
+/* EX */ { 1, 0, 1, 1, 1, 1, 1,  0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0,  1 },
+/* FO */ { 3, 3, 1, 3, 3, 3, 3,  0, 3, 0, 3, 3, 3, 1, 3, 3, 3, 1, 3, 1, 3, 3, 0,  1 },
+/* d  */ { 1, 1, 1, 1, 1, 1, 1,  0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,  1 },
+/* HL */ { 1, 0, 1, 7, 1, 1, 1,  0, 0, 0, 1, 0, 1, 1, 9, 1, 9, 1, 0, 1, 1, 8, 0,  1 },
+/* KA */ { 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,  1 },
+/* LF */ { 1, 1, 0, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1,  1 },
+/* ML */ { 1,11, 1, 1, 1, 1, 1,  0, 1, 0, 1,11, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,  1 },
+/* MN */ { 1, 1, 1, 1, 1, 1, 1,  0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1,13, 1, 1, 1, 0,  1 },
+/* MB */ { 1,11, 1, 1, 1, 1, 1,  0, 1, 0, 1,11, 1, 1, 1, 1, 1, 1,13, 1, 1, 1, 0,  1 },
+/* NL */ { 1, 1, 0, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1,  1 },
+/* NU */ { 1, 0, 1, 1, 1, 1, 1,  0, 0, 0, 1, 0, 1, 1, 1,15,15, 1, 0, 1, 1,15, 0,  1 },
+/* hs */ { 1, 1, 0, 1, 1, 1, 1,  0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 2, 1, 1, 0,  1 },
+/* RI */ { 1, 1, 1, 1, 1, 1, 1,  0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,16, 1, 0,  1 },
+/* SQ */ { 1,11, 1, 1, 1, 1, 1,  0, 1, 0, 1,11, 1, 1, 1, 1, 1, 1,13, 1, 1, 1, 0,  1 },
+/* e  */ { 3, 3, 1, 3, 3, 0, 3,  0, 3, 0, 0, 3, 3, 1, 3, 3, 3, 1, 3, 1, 3, 3, 0,  1 },
+/* edg*/ { 1, 1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0 }
 };
 
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
 /* Generated from:
- * 66726fe32be96a422e8c9b45bc9daf61e068d988c99ff41112972ef721365521 lib/Unicode/UCD.pm
+ * de6076d81bc4e85f179377ded4c68f3b257c8f7990227d4302eca442fda558f8 lib/Unicode/UCD.pm
  * ae98bec7e4f0564758eed81eca5015481ba32581f8a735a825b71b3bba714450 lib/unicore/ArabicShaping.txt
  * 1687fe5994eb7e5c0dab8503fc2a1b3b479d91af9d3b8055941c9bd791f7d0b5 lib/unicore/BidiBrackets.txt
  * 350d1302116194b0b21def287434b55c5088098fbc726e879f7420a391965643 lib/unicore/BidiMirroring.txt
@@ -87887,8 +87952,8 @@ static const U8 WB_table[19][19] = {
  * 1a0687fb9c6c4567e853913549df0944fe40821279a3e9cdaa6ab8679bc286fd lib/unicore/extracted/DLineBreak.txt
  * 40bcfed3ca727c19e1331f6c33806231d5f7eeeabd2e6a9e06a3740c85d0c250 lib/unicore/extracted/DNumType.txt
  * a18d502bad39d527ac5586d7bc93e29f565859e3bcc24ada627eff606d6f5fed lib/unicore/extracted/DNumValues.txt
- * 45321b549a605b65ead1e83cdb90fdd9c5a6c8731a537197f335bab251b4e778 lib/unicore/mktables
+ * 4fbcc500e9215a31d39fa3fba793a4c893285e7d19912fc86fa6518120ecc4e1 lib/unicore/mktables
  * 462c9aaa608fb2014cd9649af1c5c009485c60b9c8b15b89401fdc10cf6161c6 lib/unicore/version
  * 913d2f93f3cb6cdf1664db888bf840bc4eb074eef824e082fceda24a9445e60c regen/charset_translations.pl
- * 12bd58cb9d5a99f631ca95e269f7f9c90dacaf81020efa5d95a995f3cdc19200 regen/mk_invlists.pl
+ * 11011bc761487f5a63c8135e67248394d4cdff6f8f204a41cdfbdc8131e79406 regen/mk_invlists.pl
  * ex: set ro: */
