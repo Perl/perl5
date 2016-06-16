@@ -1718,7 +1718,23 @@ being readable by a later Perl.
 instead of Perl.  Check the #! line, or manually feed your script into
 Perl yourself.  The #! line at the top of your file could look like
 
-  #!/usr/bin/perl -w
+  #!/usr/bin/perl
+
+=item %s: command not found
+
+(A) You've accidentally run your script through B<bash> or another shell
+instead of Perl.  Check the #! line, or manually feed your script into
+Perl yourself.  The #! line at the top of your file could look like
+
+  #!/usr/bin/perl
+
+=item %s: command not found: %s
+
+(A) You've accidentally run your script through B<zsh> or another shell
+instead of Perl.  Check the #! line, or manually feed your script into
+Perl yourself.  The #! line at the top of your file could look like
+
+  #!/usr/bin/perl
 
 =item Compilation failed in require
 
