@@ -2172,6 +2172,10 @@ cpan/Pod-Simple/t/xhtml-bkb.t
 cpan/Pod-Simple/t/x_nixer.t				Pod::Simple test file
 cpan/Pod-Usage/lib/Pod/Usage.pm
 cpan/Pod-Usage/scripts/pod2usage.PL
+cpan/Pod-Usage/t/inc/Pod/InputObjects.pm
+cpan/Pod-Usage/t/inc/Pod/Parser.pm
+cpan/Pod-Usage/t/inc/Pod/PlainText.pm
+cpan/Pod-Usage/t/inc/Pod/Select.pm
 cpan/Pod-Usage/t/pod/headwithmarkup.pl
 cpan/Pod-Usage/t/pod/headwithmarkup.t
 cpan/Pod-Usage/t/pod/p2u_data.pl
