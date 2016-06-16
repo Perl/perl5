@@ -2497,7 +2497,6 @@ PP(pp_socket)
     TAINT_PROPER("socket");
     fd = PerlSock_socket(domain, type, protocol);
     if (fd < 0) {
-        SETERRNO(EBADF,RMS_IFI);
 	RETPUSHUNDEF;
     }
     IoIFP(io) = PerlIO_fdopen(fd, "r"SOCKET_OPEN_MODE);	/* stdio gets confused about sockets */
@@ -3531,8 +3530,9 @@ PP(pp_fttext)
         }
 	PL_laststatval = PerlLIO_fstat(fd, &PL_statcache);
 	if (PL_laststatval < 0)	{
+            dSAVE_ERRNO;
 	    (void)PerlIO_close(fp);
-            SETERRNO(EBADF,RMS_IFI);
+            RESTORE_ERRNO;
 	    FT_RETURNUNDEF;
 	}
 	PerlIO_binmode(aTHX_ fp, '<', O_BINARY, NULL);
