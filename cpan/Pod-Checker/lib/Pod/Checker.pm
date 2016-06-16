@@ -9,9 +9,8 @@
 package Pod::Checker;
 use strict;
 use warnings;
-use Data::Dumper
 
-our $VERSION = '1.72';  ## Current version of this package
+our $VERSION = '1.73';  ## Current version of this package
 
 =head1 NAME
 
