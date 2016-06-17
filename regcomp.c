@@ -8949,10 +8949,6 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
     UV i_b = 0;
     UV i_u = 0;
 
-    bool has_something_from_a = FALSE;
-    bool has_something_from_b = FALSE;
-
-
     /* running count, as explained in the algorithm source book; items are
      * stopped accumulating and are output when the count changes to/from 0.
      * The count is incremented when we start a range that's in the set, and
@@ -9118,12 +9114,10 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 	{
 	    cp_in_set = ELEMENT_RANGE_MATCHES_INVLIST(i_a);
 	    cp= array_a[i_a++];
-            has_something_from_a = TRUE;
 	}
 	else {
 	    cp_in_set = ELEMENT_RANGE_MATCHES_INVLIST(i_b);
 	    cp = array_b[i_b++];
-            has_something_from_b = TRUE;
 	}
 
 	/* Here, have chosen which of the two inputs to look at.  Only output
@@ -9172,54 +9166,10 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
      * be output.  (If 'count' is non-zero, then the input list we exhausted
      * has everything remaining up to the machine's limit in its set, and hence
      * in the union, so there will be no further output. */
-    if (count != 0) {
-
-        /* Here, there is nothing left to put in the union.  If the union came
-         * only from the input that it is to overwrite, this whole operation is
-         * a no-op */
-        if (   UNLIKELY(! has_something_from_b && *output == a)
-            || UNLIKELY(! has_something_from_a && *output == b))
-        {
-            SvREFCNT_dec_NN(u);
-            return;
-        }
-
-        len_u = i_u;
-    }
-    else {
-        /* When 'count' is 0, the list that was exhausted (if one was shorter
-         * than the other) ended with everything above it not in its set.  That
-         * means that the remaining part of the union is precisely the same as
-         * the non-exhausted list, so can just copy it unchanged.  If only one
-         * of the inputs contributes to the union, and the output is to
-         * overwite that particular input, then this whole operation was a
-         * no-op. */
-
-        IV copy_count = len_a - i_a;
-	if (copy_count > 0) {
-            if (UNLIKELY(! has_something_from_b && *output == a)) {
-                SvREFCNT_dec_NN(u);
-                return;
-            }
-	    Copy(array_a + i_a, array_u + i_u, copy_count, UV);
-            len_u = i_u + copy_count;
-        }
-        else if ((copy_count = len_b - i_b) > 0) {
-            if (UNLIKELY(! has_something_from_a && *output == b)) {
-                SvREFCNT_dec_NN(u);
-                return;
-            }
-	    Copy(array_b + i_b, array_u + i_u, copy_count, UV);
-            len_u = i_u + copy_count;
-        } else if (   UNLIKELY(! has_something_from_b && *output == a)
-                   || UNLIKELY(! has_something_from_a && *output == b))
-        {
-        /* Here, both arrays are exhausted, so no need to do any additional
-         * copying.  Also here, the union came only from the input that it is
-         * to overwrite, so this whole operation is a no-op */
-            SvREFCNT_dec_NN(u);
-            return;
-        }
+    len_u = i_u;
+    if (count == 0) {
+	/* At most one of the subexpressions will be non-zero */
+	len_u += (len_a - i_a) + (len_b - i_b);
     }
 
     /* Set the result to the final length, which can change the pointer to
@@ -9229,6 +9179,22 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 	invlist_set_len(u, len_u, *get_invlist_offset_addr(u));
 	invlist_trim(u);
 	array_u = invlist_array(u);
+    }
+
+    /* When 'count' is 0, the list that was exhausted (if one was shorter than
+     * the other) ended with everything above it not in its set.  That means
+     * that the remaining part of the union is precisely the same as the
+     * non-exhausted list, so can just copy it unchanged.  (If both lists were
+     * exhausted at the same time, then the operations below will be both 0.)
+     */
+    if (count == 0) {
+	IV copy_count; /* At most one will have a non-zero copy count */
+	if ((copy_count = len_a - i_a) > 0) {
+	    Copy(array_a + i_a, array_u + i_u, copy_count, UV);
+	}
+	else if ((copy_count = len_b - i_b) > 0) {
+	    Copy(array_b + i_b, array_u + i_u, copy_count, UV);
+	}
     }
 
     /* If the output is not to overwrite either of the inputs, just return the
@@ -9302,9 +9268,6 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
      * is 0 to 2.  Only when the count is 2 is something in the intersection.
      */
     UV count = 0;
-
-    bool has_something_from_a = FALSE;
-    bool has_something_from_b = FALSE;
 
     PERL_ARGS_ASSERT__INVLIST_INTERSECTION_MAYBE_COMPLEMENT_2ND;
     assert(a != b);
@@ -9402,12 +9365,10 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 	{
 	    cp_in_set = ELEMENT_RANGE_MATCHES_INVLIST(i_a);
 	    cp= array_a[i_a++];
-            has_something_from_a = TRUE;
 	}
 	else {
 	    cp_in_set = ELEMENT_RANGE_MATCHES_INVLIST(i_b);
 	    cp= array_b[i_b++];
-            has_something_from_b = TRUE;
 	}
 
 	/* Here, have chosen which of the two inputs to look at.  Only output
@@ -9449,52 +9410,12 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 	count++;
     }
 
-    if (count < 2) {
-
-        /* Here, there is nothing left to put in the intersection.  If the
-         * intersection came only from the input that it is to overwrite, this
-         * whole operation is a no-op */
-        if (   UNLIKELY(! has_something_from_b && *i == a)
-            || UNLIKELY(! has_something_from_a && *i == b))
-        {
-            SvREFCNT_dec_NN(r);
-            return;
-        }
-
-        len_r = i_r;
-    }
-    else {
-        /* When 'count' is 2 or more, the list that was exhausted, what remains
-         * in the intersection is precisely the same as the non-exhausted list,
-         * so can just copy it unchanged.  If only one of the inputs
-         * contributes to the intersection, and the output is to overwite that
-         * particular input, then this whole operation was a no-op. */
-
-        IV copy_count = len_a - i_a;
-	if (copy_count > 0) {
-            if (UNLIKELY(! has_something_from_b && *i == a)) {
-                SvREFCNT_dec_NN(r);
-                return;
-            }
-	    Copy(array_a + i_a, array_r + i_r, copy_count, UV);
-            len_r = i_r + copy_count;
-        }
-        else if ((copy_count = len_b - i_b) > 0) {
-            if (UNLIKELY(! has_something_from_a && *i == b)) {
-                SvREFCNT_dec_NN(r);
-                return;
-            }
-	    Copy(array_b + i_b, array_r + i_r, copy_count, UV);
-            len_r = i_r + copy_count;
-        } else if (   UNLIKELY(! has_something_from_b && *i == a)
-                   || UNLIKELY(! has_something_from_a && *i == b))
-        {
-            /* Here, both arrays are exhausted, so no need to do any additional
-             * copying.  Also here, the intersection came only from the input
-             * that it is to overwrite, so this whole operation is a no-op */
-            SvREFCNT_dec_NN(r);
-            return;
-        }
+    /* The final length is what we've output so far plus what else is in the
+     * intersection.  At most one of the subexpressions below will be non-zero
+     * */
+    len_r = i_r;
+    if (count >= 2) {
+	len_r += (len_a - i_a) + (len_b - i_b);
     }
 
     /* Set the result to the final length, which can change the pointer to
@@ -9504,6 +9425,17 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 	invlist_set_len(r, len_r, *get_invlist_offset_addr(r));
 	invlist_trim(r);
 	array_r = invlist_array(r);
+    }
+
+    /* Finish outputting any remaining */
+    if (count >= 2) { /* At most one will have a non-zero copy count */
+	IV copy_count;
+	if ((copy_count = len_a - i_a) > 0) {
+	    Copy(array_a + i_a, array_r + i_r, copy_count, UV);
+	}
+	else if ((copy_count = len_b - i_b) > 0) {
+	    Copy(array_b + i_b, array_r + i_r, copy_count, UV);
+	}
     }
 
     /* If the output is not to overwrite either of the inputs, just return the
