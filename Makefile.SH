@@ -635,7 +635,7 @@ esac
 
 $spitshell >>$Makefile <<!GROK!THIS!
 utils/Makefile: \$(MINIPERL_EXE) \$(CONFIGPM) utils/Makefile.PL
-	\$(MINIPERL) -Ilib utils/Makefile.PL
+	\$(MINIPERL) utils/Makefile.PL
 
 utilities:	utils/Makefile $util_deps
 	@echo " "; echo "	Making utilities"; cd utils; \$(LDLIBPTH) \$(MAKE) all
@@ -731,7 +731,7 @@ case "$osname" in
 amigaos*)
 $spitshell >>$Makefile <<'!NO!SUBS!'
 perlmain.c: $(MINIPERL_EXE) ext/ExtUtils-Miniperl/pm_to_blib
-	$(MINIPERL) -Ilib -MExtUtils::Miniperl -e 'writemain(\\"perlmain.c", @ARGV)' DynaLoader $(static_ext)
+	$(MINIPERL) -MExtUtils::Miniperl -e 'writemain(\\"perlmain.c", @ARGV)' DynaLoader $(static_ext)
 
 # The file ext.libs is a list of libraries that must be linked in
 # for static extensions, e.g. -lm -lgdbm, etc.  The individual
@@ -744,7 +744,7 @@ ext.libs: $(static_ext)
 *)
 $spitshell >>$Makefile <<'!NO!SUBS!'
 perlmain.c: $(MINIPERL_EXE) ext/ExtUtils-Miniperl/pm_to_blib
-	$(MINIPERL) -Ilib -MExtUtils::Miniperl -e 'writemain(\"perlmain.c", @ARGV)' DynaLoader $(static_ext)
+	$(MINIPERL) -MExtUtils::Miniperl -e 'writemain(\"perlmain.c", @ARGV)' DynaLoader $(static_ext)
 
 # The file ext.libs is a list of libraries that must be linked in
 # for static extensions, e.g. -lm -lgdbm, etc.  The individual
