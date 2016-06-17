@@ -37,7 +37,7 @@ pop @{$EXPORT_TAGS{bsd_glob}}; # no "glob"
 
 @EXPORT_OK   = (@{$EXPORT_TAGS{'glob'}}, 'csh_glob');
 
-$VERSION = '1.26';
+$VERSION = '1.27';
 
 sub import {
     require Exporter;
@@ -176,10 +176,15 @@ means this will loop forever:
 =head3 C<bsd_glob>
 
 This function, which is included in the two export tags listed above,
-takes one or two arguments.  The first is the glob pattern.  The second is
-a set of flags ORed together.  The available flags are listed below under
-L</POSIX FLAGS>.  If the second argument is omitted, C<GLOB_CSH> (or
-C<GLOB_CSH|GLOB_NOCASE> on VMS and DOSish systems) is used by default.
+takes one or two arguments.  The first is the glob pattern.  The
+second, if given, is a set of flags ORed together.  The available
+flags and the default set of flags are listed below under L</POSIX FLAGS>.
+
+Remember that to use the named constants for flags you must import
+them, for example with C<:bsd_glob> described above.  If not imported,
+and C<use strict> is not in effect, then the constants will be
+treated as bareword strings, which won't do what you what.
+
 
 =head3 C<:nocase> and C<:case>
 
@@ -196,7 +201,9 @@ uses this internally.
 
 =head2 POSIX FLAGS
 
-The POSIX defined flags for bsd_glob() are:
+If no flags argument is give then C<GLOB_CSH> is set, and on VMS and
+Windows systems, C<GLOB_NOCASE> too.  Otherwise the flags to use are
+determined solely by the flags argument.  The POSIX defined flags are:
 
 =over 4
 
