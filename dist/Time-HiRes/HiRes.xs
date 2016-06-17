@@ -940,7 +940,7 @@ BOOT:
   }
 #   endif
 #endif
-#if defined(PERL_DARWIN)
+#if defined(PERL_DARWIN) && !defined(CLOCK_REALTIME)
 #  ifdef USE_ITHREADS
   MUTEX_INIT(&darwin_time_mutex);
 #  endif
