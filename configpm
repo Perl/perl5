@@ -478,20 +478,17 @@ sub _V {
 
     my ($bincompat, $non_bincompat, $date, @patches) = Internals::V();
 
-    my $opts = join ' ', sort split ' ', "$bincompat $non_bincompat";
-
-    # wrap at 76 columns.
-
-    $opts =~ s/(?=.{53})(.{1,53}) /$1\n                        /mg;
+    my @opts = sort split ' ', "$bincompat $non_bincompat";
 
     print Config::myconfig();
     print "\nCharacteristics of this %s: \n";
 
-    print "  Compile-time options: $opts\n";
+    print "  Compile-time options:\n";
+    print "    $_\n" for @opts;
 
     if (@patches) {
         print "  Locally applied patches:\n";
-        print "\t$_\n" foreach @patches;
+        print "    $_\n" foreach @patches;
     }
 
     print "  Built under %s\n";
