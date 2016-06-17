@@ -203,6 +203,16 @@ XXX Description of the change here
 
 =back
 
+=head3 L<perllocale>
+
+=over 4
+
+=item *
+
+Document NUL collation handling.
+
+=back
+
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
@@ -224,6 +234,30 @@ and New Warnings
 =item *
 
 L<Version control conflict marker|perldiag/"Version control conflict marker">
+
+(F) The parser found a line starting with C<E<lt><<<<<<>,
+C<E<gt>E<gt>E<gt>E<gt>E<gt>E<gt>E<gt>>, or C<=======>. These may be left by a
+version control system to mark conflicts after a failed merge operation.
+
+=item *
+
+L<%s: command not found|perldiag/"%s: command not found">
+
+(A) You've accidentally run your script through B<bash> or another shell
+instead of Perl.  Check the #! line, or manually feed your script into
+Perl yourself.  The #! line at the top of your file could look like
+
+  #!/usr/bin/perl
+
+=item *
+
+L<%s: command not found: %s|perldiag/"%s: command not found: %s">
+
+(A) You've accidentally run your script through B<zsh> or another shell
+instead of Perl.  Check the #! line, or manually feed your script into
+Perl yourself.  The #! line at the top of your file could look like
+
+  #!/usr/bin/perl
 
 =item *
 
