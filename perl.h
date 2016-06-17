@@ -5129,7 +5129,7 @@ EXTCONST char* PL_block_type[];
 
 /* These are all the compile time options that affect binary compatibility.
    Other compile time options that are binary compatible are in perl.c
-   Both are combined for the output of perl -V
+   (in S_Internals_V()). Both are combined for the output of perl -V
    However, this string will be embedded in any shared perl library, which will
    allow us add a comparison check in perlmain.c in the near future.  */
 #ifdef DOINIT
