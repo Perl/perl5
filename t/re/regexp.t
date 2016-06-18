@@ -442,7 +442,8 @@ EOFCODE
 		else { # better diagnostics
 		    my $s = Data::Dumper->new([$subject],['subject'])->Useqq(1)->Dump;
 		    my $g = Data::Dumper->new([$got],['got'])->Useqq(1)->Dump;
-		    print "not ok $testname$todo ($study) $input => '$got', match=$match\n", _comment("$s\n$g\n$code\n");
+		    my $e = Data::Dumper->new([$expect],['expected'])->Useqq(1)->Dump;
+		    print "not ok $testname$todo ($study) $input => '$got', match=$match\n", _comment("$s\n$code\n$g\n$e\n");
 		}
 		next TEST;
 	    }
