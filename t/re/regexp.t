@@ -358,8 +358,8 @@ foreach (@tests) {
         }
     }
 
-    for my $study ('', 'study $subject', 'utf8::upgrade($subject)',
-		   'utf8::upgrade($subject); study $subject') {
+    for my $study ('', 'study $subject;', 'utf8::upgrade($subject);',
+		   'utf8::upgrade($subject); study $subject;') {
 	# Need to make a copy, else the utf8::upgrade of an already studied
 	# scalar confuses things.
 	my $subject = $subject;
@@ -367,7 +367,7 @@ foreach (@tests) {
 	my ($code, $match, $got);
         if ($repl eq 'pos') {
             $code= <<EOFCODE;
-                $study;
+                $study
                 pos(\$subject)=0;
                 \$match = ( \$subject =~ m${pat}g );
                 \$got = pos(\$subject);
@@ -376,7 +376,7 @@ EOFCODE
         elsif ($qr_embed) {
             $code= <<EOFCODE;
                 my \$RE = qr$pat;
-                $study;
+                $study
                 \$match = (\$subject =~ /(?:)\$RE(?:)/) while \$c--;
                 \$got = "$repl";
 EOFCODE
@@ -386,14 +386,14 @@ EOFCODE
 		# Can't run the match in a subthread, but can do this and
 	 	# clone the pattern the other way.
                 my \$RE = threads->new(sub {qr$pat})->join();
-                $study;
+                $study
                 \$match = (\$subject =~ /(?:)\$RE(?:)/) while \$c--;
                 \$got = "$repl";
 EOFCODE
         }
         else {
             $code= <<EOFCODE;
-                $study;
+                $study
                 \$match = (\$subject =~ $OP$pat) while \$c--;
                 \$got = "$repl";
 EOFCODE
