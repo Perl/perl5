@@ -371,6 +371,13 @@ F<make_ext.pl> no longer updates a module's F<pm_to_blib> file when no
 files require updates.  This could cause dependencies, F<perlmain.c>
 in particular, to be rebuilt unnecessarily.  [perl #126710]
 
+=item *
+
+The output of C<perl -V> has been reformatted so that each configuration
+and compile-time option is now listed one per line, to improve
+readability.
+
+
 =back
 
 =head1 Testing
