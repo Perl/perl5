@@ -45,6 +45,13 @@ ignored at the higher priority ones.  There are still some gotchas in
 some strings, though.  See
 L<perllocale/Collation of strings containing embedded C<NUL> characters>.
 
+=head2 Lexical subroutines are no longer experimental
+
+Using the C<lexical_subs> feature no longer emits a warning.  Existing code that disables the C<experimental::lexical_subs> warning category that the
+feature previously used will continue to work.  The C<lexical_subs> feature
+has no effect; all Perl code can use lexical subroutines, regardless of
+what feature declarations are in scope.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -92,8 +99,8 @@ to in list context.
     sub bar : lvalue { keys(@_) }
     (bar) = 3; # also an error
 
-This makes the lvalue sub case consistent with C<(keys %hash) = ...>, which
-is also an error.  [perl #128187]
+This makes the lvalue sub case consistent with C<(keys %hash) = ...> and
+C<(keys @_) = ...>, which are also errors.  [perl #128187]
 
 =head1 Deprecations
 
