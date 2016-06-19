@@ -481,6 +481,12 @@ failure.  [perl #128316]
 Assignment variants of any bitwise ops under the C<bitwise> feature would
 crash if the left-hand side was an array or hash.  [perl #128204]
 
+=item *
+
+C<require> followed by a single colon (as in C<foo() ? require : ...> is
+now parsed correctly as C<require> with implicit $_, rather than
+C<require "">.  [perl #128307]
+
 =back
 
 =head1 Known Problems
