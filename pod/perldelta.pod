@@ -82,13 +82,15 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
-=head2
+=head2 C<keys> returned from an lvalue subroutine
 
-C<keys> return from an lvalue subroutine can no longer be assigned to in
-list context.
+C<keys> returned from an lvalue subroutine can no longer be assigned
+to in list context.
 
     sub foo : lvalue { keys(%INC) }
     (foo) = 3; # death
+    sub bar : lvalue { keys(@_) }
+    (bar) = 3; # also an error
 
 This makes the lvalue sub case consistent with C<(keys %hash) = ...>, which
 is also an error.  [perl #128187]
