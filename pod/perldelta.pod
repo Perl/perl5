@@ -367,6 +367,11 @@ other than globs. [perl #128106]
 Assignment of hashes to, and deletion of, typeglobs named C<*::::::> no
 longer causes crashes. [perl #128086]
 
+=item *
+
+Assignment variants of any bitwise ops under the C<bitwise> feature would
+crash if the left-hand side was an array or hash.  [perl #128204]
+
 =back
 
 =head1 Known Problems
