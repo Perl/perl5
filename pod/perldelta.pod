@@ -492,6 +492,13 @@ C<require "">.  [perl #128307]
 Scalar C<keys %hash> can now be assigned to consistently in all scalar
 lvalue contexts.  Previously it worked for some contexts but not others.
 
+=item *
+
+List assignment to C<vec> or C<substr> with an array or hash for its first
+argument used to result in crashes or "Can't coerce" error messages at run
+time, unlike scalar assignment, which would give an error at compile time.
+List assignment now gives a compile-time error, too.  [perl #128260]
+
 =back
 
 =head1 Known Problems
