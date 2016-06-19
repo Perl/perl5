@@ -52,6 +52,15 @@ feature previously used will continue to work.  The C<lexical_subs> feature
 has no effect; all Perl code can use lexical subroutines, regardless of
 what feature declarations are in scope.
 
+=head2 C<CORE> subroutines for hash and array functions callable via
+reference
+
+The hash and array functions in the C<CORE> namespace--C<keys>, C<each>,
+C<values>, C<push>, C<pop>, C<shift>, C<unshift> and C<splice>--, can now
+be called with ampersand syntax (C<&CORE::keys(\%hash>) and via reference
+(C<<my $k = \&CORE::keys; $k->(\%hash) >>).  Previously they could only be
+used when inlined.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
