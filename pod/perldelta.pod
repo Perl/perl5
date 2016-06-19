@@ -487,6 +487,11 @@ C<require> followed by a single colon (as in C<foo() ? require : ...> is
 now parsed correctly as C<require> with implicit $_, rather than
 C<require "">.  [perl #128307]
 
+=item *
+
+Scalar C<keys %hash> can now be assigned to consistently in all scalar
+lvalue contexts.  Previously it worked for some contexts but not others.
+
 =back
 
 =head1 Known Problems
