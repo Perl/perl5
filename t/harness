@@ -188,7 +188,7 @@ if ($^O eq 'MSWin32') {
 
 # Allow eg ./perl t/harness t/op/lc.t
 for (@tests) {
-    if (-f "../$_") {
+    if (! -f $_ && !/^\.\./ && -f "../$_") {
         $_ = "../$_";
         s{^\.\./t/}{};
     }
