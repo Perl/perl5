@@ -22,7 +22,7 @@ UTF-8 locales.  Perl now works with those.  For portability and full
 control, L<Unicode::Collate> is still recommended, but now you may
 not need to do anything special to get good-enough results, depending on
 your application.  See
-L<perllocale/Category C<LC_COLLATE>: Collation: Text Comparisons and Sorting>
+L<perllocale/Category C<LC_COLLATE>: Collation: Text Comparisons and Sorting>.
 
 =head2 Better locale collation of strings containing embedded C<NUL>
 characters
@@ -45,7 +45,7 @@ reference
 The hash and array functions in the C<CORE> namespace--C<keys>, C<each>,
 C<values>, C<push>, C<pop>, C<shift>, C<unshift> and C<splice>--, can now
 be called with ampersand syntax (C<&CORE::keys(\%hash>) and via reference
-(C<<my $k = \&CORE::keys; $k->(\%hash) >>).  Previously they could only be
+(C<< my $k = \&CORE::keys; $k->(\%hash) >>).  Previously they could only be
 used when inlined.
 
 =head1 Security
@@ -85,24 +85,6 @@ This makes the lvalue sub case consistent with C<(keys %hash) = ...> and
 C<(keys @_) = ...>, which are also errors.  [perl #128187]
 
 =head1 Modules and Pragmata
-
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
 
 =head2 Updated Modules and Pragmata
 
@@ -224,20 +206,6 @@ L<Unicode::UCD> has been upgraded from version 0.64 to 0.65.
 
 L<VMS::DCLsym> has been upgraded from version 1.06 to 1.07.
 
-=item *
-
-L<XXX> has been upgraded from version A.xx to B.yy.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
 =back
 
 =head1 Documentation
@@ -334,7 +302,7 @@ L<%s: command not found|perldiag/"%s: command not found">
 
 (A) You've accidentally run your script through B<bash> or another shell
 instead of Perl.  Check the #! line, or manually feed your script into
-Perl yourself.  The #! line at the top of your file could look like
+Perl yourself.  The #! line at the top of your file could look like:
 
   #!/usr/bin/perl
 
@@ -344,7 +312,7 @@ L<%s: command not found: %s|perldiag/"%s: command not found: %s">
 
 (A) You've accidentally run your script through B<zsh> or another shell
 instead of Perl.  Check the #! line, or manually feed your script into
-Perl yourself.  The #! line at the top of your file could look like
+Perl yourself.  The #! line at the top of your file could look like:
 
   #!/usr/bin/perl
 
