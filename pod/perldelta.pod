@@ -100,6 +100,16 @@ XXX
 
 =back
 
+=head2 C<scalar(%hash)> return signature changed
+
+The value returned for C<scalar(%hash)> will no longer show information
+about the buckets allocated in the hash. It will simply return the count
+of used keys. It is thus equivalent to C<0+keys(%hash)>.
+
+A form of backwards compatibility is provided via C<Hash::Util::bucket_ratio()>
+which provides the same behavior as scalar(%hash) provided prior to
+Perl 5.25.
+
 =head1 Modules and Pragmata
 
 XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>

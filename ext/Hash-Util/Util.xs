@@ -263,3 +263,53 @@ bucket_array(rhv)
     }
     XSRETURN(0);
 }
+
+#if PERL_VERSION < 25
+SV*
+bucket_ratio(rhv)
+        SV* rhv
+    PROTOTYPE: \%
+    PPCODE:
+{
+    if (SvROK(rhv)) {
+        rhv= SvRV(rhv);
+        if ( SvTYPE(rhv)==SVt_PVHV ) {
+            SV *ret= Perl_hv_scalar(aTHX_ (HV*)rhv);
+            ST(0)= ret;
+            XSRETURN(1);
+        }
+    }
+    XSRETURN_UNDEF;
+}
+
+SV*
+num_buckets(rhv)
+        SV* rhv
+    PROTOTYPE: \%
+    PPCODE:
+{
+    if (SvROK(rhv)) {
+        rhv= SvRV(rhv);
+        if ( SvTYPE(rhv)==SVt_PVHV ) {
+            XSRETURN_UV(HvMAX((HV*)rhv)+1);
+        }
+    }
+    XSRETURN_UNDEF;
+}
+
+SV*
+used_buckets(rhv)
+        SV* rhv
+    PROTOTYPE: \%
+    PPCODE:
+{
+    if (SvROK(rhv)) {
+        rhv= SvRV(rhv);
+        if ( SvTYPE(rhv)==SVt_PVHV ) {
+            XSRETURN_UV(HvFILL((HV*)rhv));
+        }
+    }
+    XSRETURN_UNDEF;
+}
+
+#endif

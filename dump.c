@@ -1761,15 +1761,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                 } while (++ents <= last);
             }
 
-            if (SvOOK(sv)) {
-                struct xpvhv_aux *const aux = HvAUX(sv);
-                Perl_dump_indent(aTHX_ level, file, "  FILL = %"UVuf
-                                 " (cached = %"UVuf")\n",
-                                 (UV)count, (UV)aux->xhv_fill_lazy);
-            } else {
-                Perl_dump_indent(aTHX_ level, file, "  FILL = %"UVuf"\n",
-                                 (UV)count);
-            }
+            Perl_dump_indent(aTHX_ level, file, "  FILL = %"UVuf"\n",
+                             (UV)count);
         }
 	Perl_dump_indent(aTHX_ level, file, "  MAX = %"IVdf"\n", (IV)HvMAX(sv));
         if (SvOOK(sv)) {

@@ -829,13 +829,6 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	HeKEY_hek(entry) = save_hek_flags(key, klen, hash, flags);
     HeVAL(entry) = val;
 
-    if (!*oentry && SvOOK(hv)) {
-        /* initial entry, and aux struct present.  */
-        struct xpvhv_aux *const aux = HvAUX(hv);
-        if (aux->xhv_fill_lazy)
-            ++aux->xhv_fill_lazy;
-    }
-
 #ifdef PERL_HASH_RANDOMIZE_KEYS
     /* This logic semi-randomizes the insert order in a bucket.
      * Either we insert into the top, or the slot below the top,
@@ -937,8 +930,14 @@ S_hv_magic_check(HV *hv, bool *needs_copy, bool *needs_store)
 /*
 =for apidoc hv_scalar
 
-Evaluates the hash in scalar context and returns the result.  Handles magic
-when the hash is tied.
+Evaluates the hash in scalar context and returns the result.
+
+When the hash is tied dispatches through to the SCALAR method,
+otherwise returns a mortal SV containing the number of keys
+in the hash.
+
+Note, prior to 5.25 this function returned what is now
+returned by the hv_bucket_ratio() function.
 
 =cut
 */
@@ -957,7 +956,41 @@ Perl_hv_scalar(pTHX_ HV *hv)
     }
 
     sv = sv_newmortal();
-    if (HvTOTALKEYS((const HV *)hv)) 
+    sv_setuv(sv, HvUSEDKEYS(hv));
+
+    return sv;
+}
+
+/*
+=for apidoc Perl_hv_bucket_ratio
+
+If the hash is tied dispatches through to the SCALAR tied method,
+otherwise if the hash contains no keys returns 0, otherwise returns
+a mortal sv containing a string specifying the number of used buckets,
+followed by a slash, followed by the number of available buckets.
+
+This function is expensive, it must scan all of the buckets
+to determine which are used, and the count is NOT cached.
+In a large hash this could be a lot of buckets.
+
+=cut
+*/
+
+SV *
+Perl_hv_bucket_ratio(pTHX_ HV *hv)
+{
+    SV *sv;
+
+    PERL_ARGS_ASSERT_HV_BUCKET_RATIO;
+
+    if (SvRMAGICAL(hv)) {
+        MAGIC * const mg = mg_find((const SV *)hv, PERL_MAGIC_tied);
+        if (mg)
+            return magic_scalarpack(hv, mg);
+    }
+
+    sv = sv_newmortal();
+    if (HvUSEDKEYS((const HV *)hv))
         Perl_sv_setpvf(aTHX_ sv, "%ld/%ld",
                 (long)HvFILL(hv), (long)HvMAX(hv) + 1);
     else
@@ -1256,12 +1289,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    HvPLACEHOLDERS(hv)++;
 	else {
 	    *oentry = HeNEXT(entry);
-            if(!*first_entry && SvOOK(hv)) {
-                /* removed last entry, and aux struct present.  */
-                struct xpvhv_aux *const aux = HvAUX(hv);
-                if (aux->xhv_fill_lazy)
-                    --aux->xhv_fill_lazy;
-            }
 	    if (SvOOK(hv) && entry == HvAUX(hv)->xhv_eiter /* HvEITER(hv) */)
 		HvLAZYDEL_on(hv);
 	    else {
@@ -1353,10 +1380,6 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
 #ifdef PERL_HASH_RANDOMIZE_KEYS
             dest->xhv_rand = (U32)PL_hash_rand_bits;
 #endif
-            /* For now, just reset the lazy fill counter.
-               It would be possible to update the counter in the code below
-               instead.  */
-            dest->xhv_fill_lazy = 0;
         } else {
             /* no existing aux structure, but we allocated space for one
              * so initialize it properly. This unrolls hv_auxinit() a bit,
@@ -1852,12 +1875,6 @@ Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
             iter->xhv_last_rand = iter->xhv_rand;
 #endif
         }
-        /* Reset any cached HvFILL() to "unknown".  It's unlikely that anyone
-           will actually call HvFILL() on a hash under destruction, so it
-           seems pointless attempting to track the number of keys remaining.
-           But if they do, we want to reset it again.  */
-        if (iter->xhv_fill_lazy)
-            iter->xhv_fill_lazy = 0;
     }
 
     if (!((XPVHV*)SvANY(hv))->xhv_keys)
@@ -2002,17 +2019,15 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 /*
 =for apidoc hv_fill
 
-Returns the number of hash buckets that
-happen to be in use.  This function is
-wrapped by the macro C<HvFILL>.
+Returns the number of hash buckets that happen to be in use.
 
-Previously this value was always stored in the HV structure, which created an
-overhead on every hash (and pretty much every object) for something that was
-rarely used.  Now we calculate it on demand the first
-time that it is needed, and cache it if that calculation
-is going to be costly to repeat.  The cached
-value is updated by insertions and deletions, but (currently) discarded if
-the hash is split.
+This function is wrapped by the macro C<HvFILL>.
+
+As of perl 5.25 this function is used only for debugging
+purposes, and the number of used hash buckets is not
+in any way cached, thus this function can be costly
+to execute as it must iterate over all the buckets in the
+hash.
 
 =cut
 */
@@ -2022,7 +2037,6 @@ Perl_hv_fill(pTHX_ HV *const hv)
 {
     STRLEN count = 0;
     HE **ents = HvARRAY(hv);
-    struct xpvhv_aux *aux = SvOOK(hv) ? HvAUX(hv) : NULL;
 
     PERL_ARGS_ASSERT_HV_FILL;
 
@@ -2031,12 +2045,12 @@ Perl_hv_fill(pTHX_ HV *const hv)
     if (HvTOTALKEYS(hv) < 2)
         return HvTOTALKEYS(hv);
 
-#ifndef DEBUGGING
-    if (aux && aux->xhv_fill_lazy)
-        return aux->xhv_fill_lazy;
-#endif
-
     if (ents) {
+        /* I wonder why we count down here...
+         * Is it some micro-optimisation?
+         * I would have thought counting up was better.
+         * - Yves
+         */
 	HE *const *const last = ents + HvMAX(hv);
 	count = last + 1 - ents;
 
@@ -2045,16 +2059,6 @@ Perl_hv_fill(pTHX_ HV *const hv)
 		--count;
 	} while (++ents <= last);
     }
-    if (aux) {
-#ifdef DEBUGGING
-        if (aux->xhv_fill_lazy)
-            assert(aux->xhv_fill_lazy == count);
-#endif
-        aux->xhv_fill_lazy = count;
-    } else if (HvMAX(hv) >= HV_FILL_THRESHOLD) {
-        aux = hv_auxinit(hv);
-        aux->xhv_fill_lazy = count;
-    }        
     return count;
 }
 
@@ -2099,7 +2103,6 @@ S_hv_auxinit_internal(struct xpvhv_aux *iter) {
 #ifdef PERL_HASH_RANDOMIZE_KEYS
     iter->xhv_last_rand = iter->xhv_rand;
 #endif
-    iter->xhv_fill_lazy = 0;
     iter->xhv_name_u.xhvnameu_name = 0;
     iter->xhv_name_count = 0;
     iter->xhv_backreferences = 0;
@@ -2181,7 +2184,7 @@ Perl_hv_iterinit(pTHX_ HV *hv)
 	hv_auxinit(hv);
     }
 
-    /* used to be xhv->xhv_fill before 5.004_65 */
+    /* note this includes placeholders! */
     return HvTOTALKEYS(hv);
 }
 

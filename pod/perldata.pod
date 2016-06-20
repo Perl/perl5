@@ -400,17 +400,24 @@ leave nothing to doubt:
     $element_count = scalar(@whatever);
 
 If you evaluate a hash in scalar context, it returns false if the
-hash is empty.  If there are any key/value pairs, it returns true;
-more precisely, the value returned is a string consisting of the
+hash is empty.  If there are any key/value pairs, it returns true.
+A more precise definition is version dependent.
+
+Prior to Perl 5.25 the value returned was a string consisting of the
 number of used buckets and the number of allocated buckets, separated
 by a slash.  This is pretty much useful only to find out whether
 Perl's internal hashing algorithm is performing poorly on your data
 set.  For example, you stick 10,000 things in a hash, but evaluating
 %HASH in scalar context reveals C<"1/16">, which means only one out
 of sixteen buckets has been touched, and presumably contains all
-10,000 of your items.  This isn't supposed to happen.  If a tied hash
-is evaluated in scalar context, the C<SCALAR> method is called (with a
-fallback to C<FIRSTKEY>).
+10,000 of your items.  This isn't supposed to happen.
+
+As of Perl 5.25 the return was changed to be the count of keys in the
+hash. If you need access to the old behavior you can use
+C<Hash::Util::bucket_ratio()> instead.
+
+If a tied hash is evaluated in scalar context, the C<SCALAR> method is
+called (with a fallback to C<FIRSTKEY>).
 X<hash, scalar context> X<hash, bucket> X<bucket>
 
 You can preallocate space for a hash by assigning to the keys() function.

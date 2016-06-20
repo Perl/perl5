@@ -119,7 +119,6 @@ struct xpvhv_aux {
     U32         xhv_last_rand;  /* last random value for hash traversal,
                                    used to detect each() after insert for warnings */
 #endif
-    U32         xhv_fill_lazy;
     U32         xhv_aux_flags;      /* assorted extra flags */
 };
 

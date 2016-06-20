@@ -634,7 +634,7 @@ lis [&mykeys([ 1..4 ])], [0..3], '&mykeys(\@array) in list cx';
 {
   my %h = 1..2;
   &mykeys(\%h) = 1024;
-  like %h, qr|/1024\z|, '&mykeys = ...';
+  like Hash::Util::bucket_ratio(%h), qr|/1024\z|, '&mykeys = changed number of buckets allocated';
   eval { (&mykeys(\%h)) = 1025; };
   like $@, qr/^Can't modify keys in list assignment at /;
 }

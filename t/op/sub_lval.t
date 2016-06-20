@@ -552,7 +552,7 @@ is("@p", "1 8");
 sub keeze : lvalue { keys %__ }
 %__ = ("a","b");
 keeze = 64;
-is scalar %__, '1/64', 'keys assignment through lvalue sub';
+is Hash::Util::bucket_ratio(%__), '1/64', 'keys assignment through lvalue sub';
 eval { (keeze) = 64 };
 like $@, qr/^Can't modify keys in list assignment at /,
   'list assignment to keys through lv sub is forbidden';

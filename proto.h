@@ -1117,6 +1117,12 @@ PERL_CALLCONV void	Perl_gv_try_downgrade(pTHX_ GV* gv);
 PERL_CALLCONV AV**	Perl_hv_backreferences_p(pTHX_ HV *hv);
 #define PERL_ARGS_ASSERT_HV_BACKREFERENCES_P	\
 	assert(hv)
+PERL_CALLCONV SV*	Perl_hv_bucket_ratio(pTHX_ HV *hv)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_HV_BUCKET_RATIO	\
+	assert(hv)
+
 PERL_CALLCONV void	Perl_hv_clear(pTHX_ HV *hv);
 PERL_CALLCONV void	Perl_hv_clear_placeholders(pTHX_ HV *hv);
 #define PERL_ARGS_ASSERT_HV_CLEAR_PLACEHOLDERS	\

@@ -3858,6 +3858,7 @@ ext/Hash-Util-FieldHash/t/11_hashassign.t	Adapted from t/op/hashassign.t
 ext/Hash-Util-FieldHash/t/12_hashwarn.t		Adapted from t/op/hashwarn.t
 ext/Hash-Util/lib/Hash/Util.pm	Hash::Util
 ext/Hash-Util/Makefile.PL	Makefile for Hash::Util
+ext/Hash-Util/t/builtin.t	See if Hash::Util builtin exports work as expected
 ext/Hash-Util/t/Util.t		See if Hash::Util works
 ext/Hash-Util/Util.xs		XS bits of Hash::Util
 ext/I18N-Langinfo/Langinfo.pm	I18N::Langinfo

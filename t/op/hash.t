@@ -127,10 +127,19 @@ sub validate_hash {
   my ($desc, $h) = @_;
   local $::Level = $::Level + 1;
 
-  my $scalar = %$h;
+  # test that scalar(%hash) works as expected, which as of perl 5.25 is
+  # the same as 0+keys %hash;
+  my $scalar= scalar %$h;
+  my $count= 0+keys %$h;
+
+  is($scalar, $count, "$desc scalar() should be the same as 0+keys() as of perl 5.25");
+
+  # back compat tests, via Hash::Util::bucket_ratio();
+  my $ratio = Hash::Util::bucket_ratio(%$h);
   my $expect = qr!\A(\d+)/(\d+)\z!;
-  like($scalar, $expect, "$desc in scalar context matches pattern");
-  my ($used, $total) = $scalar =~ $expect;
+  like($ratio, $expect, "$desc bucket_ratio matches pattern");
+  my ($used, $total)= (0,0);
+  ($used, $total)= ($1,$2) if $ratio =~ /$expect/;
   cmp_ok($total, '>', 0, "$desc has >0 array size ($total)");
   cmp_ok($used, '>', 0, "$desc uses >0 heads ($used)");
   cmp_ok($used, '<=', $total,

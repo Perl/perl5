@@ -34,8 +34,12 @@ our @EXPORT_OK  = qw(
                      lock_hashref_recurse unlock_hashref_recurse
 
                      hash_traversal_mask
+
+                     bucket_ratio
+                     used_buckets
+                     num_buckets
                     );
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 require XSLoader;
 XSLoader::load();
 
@@ -726,6 +730,29 @@ hash. Setting the mask ensures that a given hash will produce the same key
 order. B<Note> that this does B<not> guarantee that B<two> hashes will produce
 the same key order for the same hash seed and traversal mask, items that
 collide into one bucket may have different orders regardless of this setting.
+
+=item B<bucket_ratio>
+
+This function behaves the same way that scalar(%hash) behaved prior to
+Perl 5.25. Specifically if the hash is tied, then it calls the SCALAR tied
+hash method, if untied then if the hash is empty it return 0, otherwise it
+returns a string containing the number of used buckets in the hash,
+followed by a slash, followed by the total number of buckets in the hash.
+
+    my %hash=("foo"=>1);
+    print Hash::Util::bucket_ratio(%hash); # prints "1/8"
+
+=item B<used_buckets>
+
+This function returns the count of used buckets in the hash. It is expensive
+to calculate and the value is NOT cached, so avoid use of this function
+in production code.
+
+=item B<num_buckets>
+
+This function returns the total number of buckets the hash holds, or would
+hold if the array were created. (When a hash is freshly created the array
+may not be allocated even though this value will be non-zero.)
 
 =back
 

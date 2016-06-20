@@ -828,6 +828,11 @@ referenced by C<$self-E<gt>{LIST}>:
 	return scalar %{ $self->{LIST} }
     }
 
+NOTE: In perl 5.25 the behavior of scalar %hash on an untied hash changed
+to return the count of keys. Prior to this it returned a string containing
+information about the bucket setup of the hash. See
+L<Hash::Util/bucket_ratio> for a backwards compatibility path.
+
 =item UNTIE this
 X<UNTIE>
 
@@ -1196,10 +1201,11 @@ modules L<Tie::Scalar>, L<Tie::Array>, L<Tie::Hash>, or L<Tie::Handle>.
 
 =head1 BUGS
 
-The bucket usage information provided by C<scalar(%hash)> is not
+The normal return provided by C<scalar(%hash)> is not
 available.  What this means is that using %tied_hash in boolean
 context doesn't work right (currently this always tests false,
 regardless of whether the hash is empty or hash elements).
+[ This paragraph needs review in light of changes in 5.25 ]
 
 Localizing tied arrays or hashes does not work.  After exiting the
 scope the arrays or the hashes are not restored.
