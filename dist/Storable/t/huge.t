@@ -19,9 +19,9 @@ BEGIN {
 # Just too big to fit in an I32.
 my $huge = int(2 ** 31);
 
-# These overlarge sizes are enabled only since Storable 3.00
-# and some cases need cperl support. Perl5 hash some internal problems
-# with >I32 sizes.
+# These overlarge sizes are enabled only since Storable 3.00 and some
+# cases need cperl support. Perl5 (as of 5.24) has some internal
+# problems with >I32 sizes.
 my @cases = (
     ['huge string',
      sub { my $s = 'x' x $huge; \$s }],
@@ -55,7 +55,7 @@ for (@cases) {
     note "running test: $desc";
     my ($exn, $clone);
     $exn = $@ if !eval { $clone = dclone($input); 1 };
-    if ($Config{usecperl}) {
+    if ($Config{usecperl} or $] >= 5.025003) { # guessing
         is($exn, '');
         is($input, $clone);
     } else {
