@@ -588,6 +588,7 @@ the strings?).
 
  Ricardo   5.25.0       2016-May-09     The 5.25 development track
  Sawyer X  5.25.1       2016-May-20
+ Matthew   5.25.2       2016-Jun-20
 
 =head2 SELECTED RELEASE SIZES
 
