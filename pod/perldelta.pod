@@ -378,6 +378,10 @@ XXX
 XXX Add anything here that we forgot to add, or were mistaken about, in
 the perldelta of a previous release.
 
+=item *
+
+Parsing bad POSIX charclasses no longer leaks memory. [perl #128313]
+
 =back
 
 =head1 Obituary
