@@ -119,6 +119,10 @@ XXX
 
 =item *
 
+L<Module::CoreList> has been upgraded from version 5.20160620 to 5.20160720.
+
+=item *
+
 L<XXX> has been upgraded from version A.xx to B.yy.
 
 =back
