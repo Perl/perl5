@@ -50,7 +50,7 @@ you should reset the version numbers to the next blead series.
 
   2016-04-08  5.25.0 ✓        Ricardo Signes
   2016-05-20  5.25.1 ✓        Sawyer X
-  2016-06-20  5.25.2          Matthew Horsfall
+  2016-06-20  5.25.2 ✓        Matthew Horsfall
   2016-07-20  5.25.3          Steve Hay
   2016-08-20  5.25.4          BinGOs
   2016-09-20  5.25.5          Stevan Little
