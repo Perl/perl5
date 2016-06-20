@@ -1,4 +1,5 @@
 5.20160620
+  - Updated for v5.25.2
 
 5.20160520
  - fixed edge-case checking in is_core() (checking for a specific
