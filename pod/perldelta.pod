@@ -382,6 +382,11 @@ the perldelta of a previous release.
 
 Parsing bad POSIX charclasses no longer leaks memory. [perl #128313]
 
+=item *
+
+Fixed issues with recursive regexes. The behavior was broken in 5.24.0.
+[perl #126182]
+
 =back
 
 =head1 Obituary
