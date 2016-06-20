@@ -17,6 +17,19 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.25.2 - Dan le Sac Vs Scroobius Pip "Waiting For The Beat To Kick In"
+
+L<Announced on 2016-06-20 by Matthew Horsfall|http://www.nntp.perl.org/group/perl.perl5.porters/2016/06/msg237274.html>
+
+  Waiting for the beat to kick in
+  But it never does
+  Waiting for my feet to grow wings
+  That lift me above
+  All of these tiresome things
+  That we know and love
+  Waiting for the beat to kick in
+  But it never does
+
 =head2 v5.25.1 - Eli Pariser, "The Filter Bubble"
 
 L<Announced on 2016-05-20 by Sawyer X|http://www.nntp.perl.org/group/perl.perl5.porters/2016/05/msg236566.html>
