@@ -132,6 +132,26 @@ XXX
 
 =head2 Changes to Existing Documentation
 
+=head3 L<perlcommunity>
+
+=over 4
+
+=item *
+
+All references to Usenet have been removed.
+
+=back
+
+=head3 L<perldelta>
+
+=over 4
+
+=item *
+
+All references to Usenet have been removed.
+
+=back
+
 =head3 L<perllocale>
 
 =over 4
@@ -142,6 +162,16 @@ Document NUL collation handling.
 
 =back
 
+=head3 L<perlmodinstall>
+
+=over 4
+
+=item *
+
+All references to Usenet have been removed.
+
+=back
+
 =head3 L<perlmodlib>
 
 =over 4
@@ -149,6 +179,20 @@ Document NUL collation handling.
 =item *
 
 Updated the mirror list.
+
+=item *
+
+All references to Usenet have been removed.
+
+=back
+
+=head3 L<perlnewmod>
+
+=over 4
+
+=item *
+
+All references to Usenet have been removed.
 
 =back
 
