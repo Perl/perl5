@@ -921,12 +921,6 @@ nsec_without_unslept(struct timespec *sleepfor,
 
 #endif
 
-/* In case Perl and/or Devel::PPPort are too old, minimally emulate
- * IS_SAFE_PATHNAME() (which looks for zero bytes in the pathname). */
- #ifndef IS_SAFE_PATHNAME
-#define IS_SAFE_PATHNAME(pv, len, opname) (((len)>1)&&memchr((pv), 0, (len)-1)?(SETERRNO(ENOENT, LIB_INVARG),Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Invalid \\0 character in pathname for %s",opname),FALSE):(TRUE))
-#endif
-
 MODULE = Time::HiRes            PACKAGE = Time::HiRes
 
 PROTOTYPES: ENABLE
@@ -1322,83 +1316,6 @@ getitimer(which)
 #endif
 
 #endif /* #if defined(HAS_GETITIMER) && defined(HAS_SETITIMER) */
-
-#if defined(TIME_HIRES_UTIME)
-
-I32
-utime(accessed, modified, ...)
-PROTOTYPE: $$@
-    PREINIT:
-	SV* accessed;
-	SV* modified;
-	SV* file;
-
-	struct timespec utbuf[2];
-	struct timespec *utbufp = utbuf;
-	int tot;
-
-    CODE:
-	dXSARGS;
-	accessed = ST(0);
-	modified = ST(1);
-	items -= 2;
-	tot = 0;
-
-	if ( accessed == &PL_sv_undef && modified == &PL_sv_undef )
-		utbufp = NULL;
-	else {
-		if (SvNV(accessed) < 0.0 || SvNV(modified) < 0.0)
-	        	croak("Time::HiRes::utime(%"NVgf", %"NVgf"): negative time not invented yet", SvNV(accessed), SvNV(modified));
-		Zero(&utbuf, sizeof utbuf, char);
-		utbuf[0].tv_sec = (Time_t)SvNV(accessed);  /* time accessed */
-		utbuf[0].tv_nsec = (long)( ( SvNV(accessed) - utbuf[0].tv_sec ) * 1e9 );
-		utbuf[1].tv_sec = (Time_t)SvNV(modified);  /* time modified */
-		utbuf[1].tv_nsec = (long)( ( SvNV(modified) - utbuf[1].tv_sec ) * 1e9 );
-	}
-
-	while (items > 0) {
-		file = POPs; items--;
-
-		if (SvROK(file) && GvIO(SvRV(file)) && IoIFP(sv_2io(SvRV(file)))) {
-			int fd =  PerlIO_fileno(IoIFP(sv_2io(file)));
-			if (fd < 0)
-				SETERRNO(EBADF,RMS_IFI);
-			else 
-#ifdef HAS_FUTIMENS
-			if (futimens(fd, utbufp) == 0)
-				tot++;
-#else  /* HAS_FUTIMES */
-				croak("futimens unimplemented in this platform");
-#endif /* HAS_FUTIMES */
-		}
-		else {
-#ifdef HAS_UTIMENSAT
-			STRLEN len;
-			char * name = SvPV(file, len);
-			if (IS_SAFE_PATHNAME(name, len, "utime") &&
-			    utimensat(AT_FDCWD, name, utbufp, 0) == 0)
-				tot++;
-#else  /* HAS_UTIMENSAT */
-			croak("utimensat unimplemented in this platform");
-#endif /* HAS_UTIMENSAT */
-		}
-	} /* while items */
-	RETVAL = tot;
-
-    OUTPUT:
-	RETVAL
-
-#else  /* #if defined(TIME_HIRES_UTIME) */
-
-I32
-utime(accessed, modified, ...)
-    CODE:
-        croak("Time::HiRes::utime(): unimplemented in this platform");
-        RETVAL = 0;
-    OUTPUT:
-	RETVAL
-
-#endif /* #if defined(TIME_HIRES_UTIME) */
 
 #if defined(TIME_HIRES_CLOCK_GETTIME)
 

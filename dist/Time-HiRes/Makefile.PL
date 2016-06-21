@@ -354,41 +354,6 @@ int main(int argc, char** argv)
 EOM
 }
 
-sub has_futimens {
-    return 1 if
-    try_compile_and_link(<<EOM);
-#include "EXTERN.h"
-#include "perl.h"
-#include "XSUB.h"
-#include <sys/time.h>
-int main(int argc, char** argv)
-{
-    int ret;
-    struct timespec ts[2];
-    ret = futimens(0, ts);
-    ret == 0 ? exit(0) : exit(errno ? errno : -1);
-}
-EOM
-}
-
-sub has_utimensat{
-    return 1 if
-    try_compile_and_link(<<EOM);
-#include "EXTERN.h"
-#include "perl.h"
-#include "XSUB.h"
-#include <sys/time.h>
-#include <fcntl.h>
-int main(int argc, char** argv)
-{
-    int ret;
-    struct timespec ts[2];
-    ret = utimensat(AT_FDCWD, 0, ts, 0);
-    ret == 0 ? exit(0) : exit(errno ? errno : -1);
-}
-EOM
-}
-
 sub DEFINE {
     my ($def, $val) = @_;
     my $define = defined $val ? "$def=$val" : $def ;
@@ -666,36 +631,6 @@ EOD
 	print "NOT found.\n";
     }
 
-    print "Looking for futimens()... ";
-    my $has_futimens;
-    if (has_futimens()) {
-        $has_futimens++;
-	$DEFINE .= ' -DHAS_FUTIMENS';
-    }
-
-    if ($has_futimens) {
-        print "found.\n";
-    } else {
-	print "NOT found.\n";
-    }
-
-    print "Looking for utimensat()... ";
-    my $has_utimensat;
-    if (has_utimensat()) {
-        $has_utimensat++;
-	$DEFINE .= ' -DHAS_UTIMENSAT';
-    }
-
-    if ($has_utimensat) {
-        print "found.\n";
-    } else {
-	print "NOT found.\n";
-    }
-
-    if ($has_futimens or $has_utimensat) {
-	$DEFINE .= ' -DTIME_HIRES_UTIME';
-    }
-
     print "Looking for stat() subsecond timestamps...\n";
 
     print "Trying struct stat st_atimespec.tv_nsec...";
@@ -709,7 +644,7 @@ int main(int argc, char** argv) {
 }
 EOM
       $has_stat_st_xtimespec++;
-      DEFINE('TIME_HIRES_STAT_ST_XTIMESPEC');  # 1
+      DEFINE('TIME_HIRES_STAT', 1);
     }
 
     if ($has_stat_st_xtimespec) {
@@ -729,7 +664,7 @@ int main(int argc, char** argv) {
 }
 EOM
       $has_stat_st_xtimensec++;
-      DEFINE('TIME_HIRES_STAT_ST_XTIMENSEC');  # 2
+      DEFINE('TIME_HIRES_STAT', 2);
     }
 
     if ($has_stat_st_xtimensec) {
@@ -749,7 +684,7 @@ int main(int argc, char** argv) {
 }
 EOM
       $has_stat_st_xtime_n++;
-      DEFINE('TIME_HIRES_STAT_ST_XTIME_N');  # 3
+      DEFINE('TIME_HIRES_STAT', 3);
     }
 
     if ($has_stat_st_xtime_n) {
@@ -769,7 +704,7 @@ int main(int argc, char** argv) {
 }
 EOM
       $has_stat_st_xtim++;
-      DEFINE('TIME_HIRES_STAT_XTIM');  # 4
+      DEFINE('TIME_HIRES_STAT', 4);
     }
 
     if ($has_stat_st_xtim) {
@@ -789,7 +724,7 @@ int main(int argc, char** argv) {
 }
 EOM
       $has_stat_st_uxtime++;
-      DEFINE('TIME_HIRES_STAT_ST_UXTIME');  # 5
+      DEFINE('TIME_HIRES_STAT', 5);
     }
 
     if ($has_stat_st_uxtime) {
@@ -797,19 +732,6 @@ EOM
     } else {
 	print "NOT found.\n";
     }
-
-    # See HiRes.xs hrstatns()
-    if ($has_stat_st_xtimespec) {
-        DEFINE('TIME_HIRES_STAT', 1);
-    } elsif ($has_stat_st_xtimensec) {
-        DEFINE('TIME_HIRES_STAT', 2);
-    } elsif ($has_stat_st_xtime_n) {
-        DEFINE('TIME_HIRES_STAT', 3);
-    } elsif ($has_stat_st_xtim) {
-        DEFINE('TIME_HIRES_STAT', 4);
-    } elsif ($has_stat_st_uxtime) {
-        DEFINE('TIME_HIRES_STAT', 5);
-    }    
 
    if ($DEFINE =~ /-DTIME_HIRES_STAT=\d+/) {
     print "You seem to have stat() subsecond timestamps.\n";
@@ -947,7 +869,7 @@ sub doConstants {
                       );
 	foreach (qw (d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		     d_nanosleep d_clock_gettime d_clock_getres
-		     d_clock d_clock_nanosleep d_hires_stat d_hires_utime)) {
+		     d_clock d_clock_nanosleep d_hires_stat)) {
 	    my $macro = $_;
 	    if ($macro =~ /^(d_nanosleep|d_clock)$/) {
 		$macro =~ s/^d_(.+)/TIME_HIRES_\U$1/;
@@ -963,8 +885,6 @@ sub doConstants {
 		push @names, {name => $_, macro => $macro, value => $val,
 			      default => ["IV", "0"]};
 		next;
-	    } elsif ($macro =~ /^(d_hires_.*)$/) {
-		$macro =~ s/^d_(.+)/TIME_\U$1/;
 	    } else {
 		$macro =~ s/^d_(.+)/HAS_\U$1/;
 	    }
