@@ -13,6 +13,7 @@
 	## "-0" option for reading bit strings, and
 	## "-p" option for portable digests (to be deprecated).
 
+BEGIN { pop @INC if $INC[-1] eq '.' }
 use strict;
 use warnings;
 use Fcntl;
