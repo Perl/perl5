@@ -2423,7 +2423,10 @@ Perl_gv_check(pTHX_ HV *stash)
 	for (entry = HvARRAY(stash)[i]; entry; entry = HeNEXT(entry)) {
             GV *gv;
             HV *hv;
-	    if (HeKEY(entry)[HeKLEN(entry)-1] == ':' &&
+	    STRLEN keylen = HeKLEN(entry);
+            const char * const key = HeKEY(entry);
+
+	    if (keylen >= 2 && key[keylen-2] == ':'  && key[keylen-1] == ':' &&
 		(gv = MUTABLE_GV(HeVAL(entry))) && isGV(gv) && (hv = GvHV(gv)))
 	    {
 		if (hv != PL_defstash && hv != stash
