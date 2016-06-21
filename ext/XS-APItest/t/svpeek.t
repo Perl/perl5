@@ -23,12 +23,8 @@ $| = 1;
   my $foo = "$!";
 like (DPeek ($!), qr'^PVMG\("',			'$!');
 
-if ($^O eq 'VMS') {
-    local $?; # Reset anything Test::* has done to it.
-  # VMS defines COMPLEX_STATUS and upgrades $? to PVLV
-  is (DPeek ($?),    'PVLV()',			'$?');
-} else {
-    local $?; # Reset anything Test::* has done to it.
+{
+  local $?; # Reset anything Test::* has done to it.
   is (DPeek ($?),    'PVMG()',			'$?');
 }
   is (DPeek ($|),    'PVMG(1)',			'$|');
