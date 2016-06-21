@@ -17,6 +17,7 @@ sv_cat_decode                  # U
 sv_setpviv                     # U
 sv_setpviv_mg                  # U
 unpackstring                   # U
+C_ARRAY_LENGTH                 # added by devel/scanprov
 IN_PERL_COMPILETIME            # added by devel/scanprov
 PERL_ABS                       # added by devel/scanprov
 PERL_GCC_BRACE_GROUPS_FORBIDDEN # added by devel/scanprov

@@ -1,7 +1,5 @@
 5.009005
 Perl_signbit                   # U
-SvRX                           # U
-SvRXOK                         # U
 av_create_and_push             # U
 av_create_and_unshift_one      # U
 gv_fetchfile_flags             # U

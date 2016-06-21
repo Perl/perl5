@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (5) {
+  if (7) {
     load();
-    plan(tests => 5);
+    plan(tests => 7);
   }
 }
 
@@ -57,4 +57,7 @@ ok(Devel::PPPort::get_cvn_flags(), 3);
 ok(Devel::PPPort::gv_fetchpvn_flags(), \*Devel::PPPort::VERSION);
 
 ok(Devel::PPPort::gv_fetchsv("Devel::PPPort::VERSION"), \*Devel::PPPort::VERSION);
+
+ok(Devel::PPPort::gv_init_type("sanity_check", 0, 0), "*main::sanity_check");
+ok($::{sanity_check});
 

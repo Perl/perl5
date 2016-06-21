@@ -10,3 +10,4 @@ isIDFIRST_lazy                 # U
 isUTF8_CHAR                    # U
 markstack_grow                 # E (Perl_markstack_grow)
 my_strerror                    # U
+PERL_UNUSED_RESULT             # added by devel/scanprov

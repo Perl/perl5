@@ -3,6 +3,7 @@ GIMME_V                        # E
 G_VOID                         # E
 HePV                           # A
 HeSVKEY_set                    # U
+POPu                           # E
 SvSetMagicSV                   # U
 SvSetMagicSV_nosteal           # U
 SvSetSV_nosteal                # U

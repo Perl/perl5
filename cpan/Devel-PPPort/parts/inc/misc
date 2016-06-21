@@ -16,6 +16,7 @@ PERL_UNUSED_DECL
 PERL_UNUSED_ARG
 PERL_UNUSED_VAR
 PERL_UNUSED_CONTEXT
+PERL_UNUSED_RESULT
 PERL_GCC_BRACE_GROUPS_FORBIDDEN
 PERL_USE_GCC_BRACE_GROUPS
 PERLIO_FUNCS_DECL
@@ -38,8 +39,50 @@ UTF8_MAXBYTES
 WIDEST_UTYPE
 XSRETURN
 HeUTF8
+C_ARRAY_LENGTH
+C_ARRAY_END
+SvRX
+SvRXOK
+PERL_MAGIC_qr
+cBOOL
+OpHAS_SIBLING
+OpSIBLING
+OpMORESIB_set
+OpLASTSIB_set
+OpMAYBESIB_set
 
 =implementation
+
+__UNDEFINED__ PERL_MAGIC_qr             'r'
+
+__UNDEFINED__ cBOOL(cbool) ((cbool) ? (bool)1 : (bool)0)
+__UNDEFINED__ OpHAS_SIBLING(o)      (cBOOL((o)->op_sibling))
+__UNDEFINED__ OpSIBLING(o)          (0 + (o)->op_sibling)
+__UNDEFINED__ OpMORESIB_set(o, sib) ((o)->op_sibling = (sib))
+__UNDEFINED__ OpLASTSIB_set(o, parent) ((o)->op_sibling = NULL)
+__UNDEFINED__ OpMAYBESIB_set(o, sib, parent) ((o)->op_sibling = (sib))
+
+#ifndef SvRX
+#if { NEED SvRX }
+
+void *
+SvRX(pTHX_ SV *rv)
+{
+	if (SvROK(rv)) {
+		SV *sv = SvRV(rv);
+		if (SvMAGICAL(sv)) {
+			MAGIC *mg = mg_find(sv, PERL_MAGIC_qr);
+			if (mg && mg->mg_obj) {
+				return mg->mg_obj;
+			}
+		}
+	}
+	return 0;
+}
+#endif
+#endif
+
+__UNDEFINED__ SvRXOK(sv) (!!SvRX(sv))
 
 #ifndef PERL_UNUSED_DECL
 #  ifdef HASATTRIBUTE
@@ -71,6 +114,14 @@ HeUTF8
 #    define PERL_UNUSED_CONTEXT PERL_UNUSED_ARG(my_perl)
 #  else
 #    define PERL_UNUSED_CONTEXT
+#  endif
+#endif
+
+#ifndef PERL_UNUSED_RESULT
+#  if defined(__GNUC__) && defined(HASATTRIBUTE_WARN_UNUSED_RESULT)
+#    define PERL_UNUSED_RESULT(v) STMT_START { __typeof__(v) z = (v); (void)sizeof(z); } STMT_END
+#  else
+#    define PERL_UNUSED_RESULT(v) ((void)(v))
 #  endif
 #endif
 
@@ -299,6 +350,9 @@ __UNDEFINED__ HeUTF8(he)        ((HeKLEN(he) == HEf_SVKEY) ?            \
 
 #endif
 
+__UNDEFINED__ C_ARRAY_LENGTH(a)		(sizeof(a)/sizeof((a)[0]))
+__UNDEFINED__ C_ARRAY_END(a)		((a) + C_ARRAY_LENGTH(a))
+
 =xsmisc
 
 typedef XSPROTO(XSPROTO_test_t);
@@ -333,6 +387,10 @@ XS(XS_Devel__PPPort_dAXMARK)
   XSRETURN(1);
 }
 
+=xsinit
+
+#define NEED_SvRX
+
 =xsboot
 
 {
@@ -342,6 +400,89 @@ XS(XS_Devel__PPPort_dAXMARK)
 newXS("Devel::PPPort::dAXMARK", XS_Devel__PPPort_dAXMARK, file);
 
 =xsubs
+
+int
+OpSIBLING_tests()
+	PREINIT:
+		OP *x;
+		OP *kid;
+		OP *lastkid;
+		int count = 0;
+		int failures = 0;
+		int i;
+	CODE:
+		x = newOP(OP_PUSHMARK, 0);
+
+		/* No siblings yet! */
+		if (OpHAS_SIBLING(x) || OpSIBLING(x)) {
+			failures++; warn("Op should not have had a sib");
+		}
+
+
+		/* Add 2 siblings */
+		kid = x;
+
+		for (i = 0; i < 2; i++) {
+			OP *newsib = newOP(OP_PUSHMARK, 0);
+			OpMORESIB_set(kid, newsib);
+
+			kid = OpSIBLING(kid);
+			lastkid = kid;
+		}
+
+		/* Should now have a sibling */
+		if (! OpHAS_SIBLING(x) || ! OpSIBLING(x) ) {
+			failures++; warn("Op should have had a sib after moresib_set");
+		}
+
+		/* Count the siblings */
+		for (kid = OpSIBLING(x); kid; kid = OpSIBLING(kid)) {
+			count++;
+		}
+
+		if (count != 2) {
+			failures++; warn("Kid had %d sibs, expected 2", count);
+		}
+
+		if (OpHAS_SIBLING(lastkid) || OpSIBLING(lastkid)) {
+			failures++; warn("Last kid should not have a sib");
+		}
+
+		/* Really sets the parent, and says 'no more siblings' */
+		OpLASTSIB_set(x, lastkid);
+
+		if (OpHAS_SIBLING(x) || OpSIBLING(x)) {
+			failures++; warn("OpLASTSIB_set failed?");
+		}
+
+		/* Restore the kid */
+		OpMORESIB_set(x, lastkid);
+
+		/* Try to remove it again */
+		OpLASTSIB_set(x, NULL);
+
+		if (OpHAS_SIBLING(x) || OpSIBLING(x)) {
+			failures++; warn("OpLASTSIB_set with NULL failed?");
+		}
+
+		/* Try to restore with maybesib_set */
+		OpMAYBESIB_set(x, lastkid, NULL);
+
+		if (! OpHAS_SIBLING(x) || ! OpSIBLING(x) ) {
+			failures++; warn("Op should have had a sib after maybesibset");
+		}
+
+		RETVAL = failures;
+	OUTPUT:
+		RETVAL
+
+int
+SvRXOK(sv)
+	SV *sv
+	CODE:
+		RETVAL = SvRXOK(sv);
+	OUTPUT:
+		RETVAL
 
 int
 ptrtests()
@@ -521,15 +662,22 @@ check_HeUTF8(utf8_key)
                 hv_store(hash, key, klen, newSVpvs("string"), 0);
                 hv_iterinit(hash);
                 ent = hv_iternext(hash);
-                if (ent) {
-                    mXPUSHp((HeUTF8(ent) == 0 ? "norm" : "utf8"), 4);
-                }
+                assert(ent);
+                mXPUSHp((HeUTF8(ent) == 0 ? "norm" : "utf8"), 4);
                 hv_undef(hash);
 
 
 #endif
 
-=tests plan => 41
+void
+check_c_array()
+        PREINIT:
+                int x[] = { 10, 11, 12, 13 };
+        PPCODE:
+                mXPUSHi(C_ARRAY_LENGTH(x));  /* 4 */
+                mXPUSHi(*(C_ARRAY_END(x)-1)); /* 13 */
+
+=tests plan => 48
 
 use vars qw($my_sv @my_av %my_hv);
 
@@ -540,7 +688,7 @@ $_ = "Fred";
 ok(&Devel::PPPort::DEFSV(), "Fred");
 ok(&Devel::PPPort::UNDERBAR(), "Fred");
 
-if ($] >= 5.009002 && $] < 5.023) {
+if ($] >= 5.009002 && $] < 5.023 && $] < 5.023004) {
   eval q{
     no warnings "deprecated";
     no if $^V > v5.17.9, warnings => "experimental::lexical_topic";
@@ -610,6 +758,8 @@ ok(&Devel::PPPort::Perl_ppaddr_t("FOO"), "foo");
 
 ok(&Devel::PPPort::ptrtests(), 63);
 
+ok(&Devel::PPPort::OpSIBLING_tests(), 0);
+
 if ($] >= 5.009000) {
   eval q{
     ok(&Devel::PPPort::check_HeUTF8("hello"), "norm");
@@ -618,4 +768,20 @@ if ($] >= 5.009000) {
 } else {
   ok(1, 1);
   ok(1, 1);
+}
+
+@r = &Devel::PPPort::check_c_array();
+ok($r[0], 4);
+ok($r[1], "13");
+
+ok(!Devel::PPPort::SvRXOK(""));
+ok(!Devel::PPPort::SvRXOK(bless [], "Regexp"));
+
+if ($] < 5.005) {
+        skip 'no qr// objects in this perl', 0;
+        skip 'no qr// objects in this perl', 0;
+} else {
+        my $qr = eval 'qr/./';
+        ok(Devel::PPPort::SvRXOK($qr));
+        ok(Devel::PPPort::SvRXOK(bless $qr, "Surprise"));
 }

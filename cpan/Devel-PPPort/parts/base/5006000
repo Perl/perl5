@@ -1,6 +1,8 @@
 5.006000
+DO_UTF8                        # U
 PERL_SYS_INIT3                 # U
 POPn                           # E
+POPul                          # E
 PUSHn                          # E
 SvIOK_UV                       # U
 SvIOK_notUV                    # U
@@ -23,6 +25,7 @@ SvPVutf8x_force                # U
 SvUTF8                         # U
 SvUTF8_off                     # U
 SvUTF8_on                      # U
+UTF8SKIP                       # U
 XPUSHn                         # E
 XSRETURN_NV                    # E
 XST_mNV                        # E

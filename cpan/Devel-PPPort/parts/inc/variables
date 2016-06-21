@@ -167,7 +167,7 @@ __NEED_DUMMY_VAR__ yy_parser PL_parser;
 /* PL_expect, PL_copline, PL_rsfp, PL_rsfp_filters, PL_linestr, PL_bufptr, PL_bufend, PL_lex_state, PL_lex_stuff, PL_tokenbuf depends on PL_parser */
 /* Warning: PL_expect, PL_copline, PL_rsfp, PL_rsfp_filters, PL_linestr, PL_bufptr, PL_bufend, PL_lex_state, PL_lex_stuff, PL_tokenbuf
  * Do not use this variable unless you know exactly what you're
- * doint. It is internal to the perl parser and may change or even
+ * doing. It is internal to the perl parser and may change or even
  * be removed in the future. As of perl 5.9.5, you have to check
  * for (PL_parser != NULL) for this variable to have any effect.
  * An always non-NULL PL_parser dummy is provided for earlier
@@ -222,7 +222,12 @@ extern U32 get_PL_signals_3(void);
 int no_dummy_parser_vars(int);
 int dummy_parser_warning(void);
 
-#define ppp_TESTVAR(var)          STMT_START { mXPUSHi(&var); count++; } STMT_END
+/* No PTRSIZE IN 5.004 and below, so PTR2IV would warn and possibly misbehave */
+#if { VERSION > 5.004 }
+  #define ppp_TESTVAR(var)          STMT_START { mXPUSHi(PTR2IV(&var)); count++; } STMT_END
+#else
+  #define ppp_TESTVAR(var)          STMT_START { mXPUSHi(&var); count++; } STMT_END
+#endif
 
 #define ppp_PARSERVAR(type, var)  STMT_START {                   \
                                     type volatile my_ ## var;    \
