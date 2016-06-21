@@ -27,6 +27,13 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Unicode 9.0 is now supported
+
+A list of changes is at
+L<http://www.unicode.org/versions/Unicode9.0.0/>.  Modules that are
+shipped with core Perl but not maintained by p5p do not necessarily
+support Unicode 9.0.  L<Unicode::Normalize> does work on 9.0.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
