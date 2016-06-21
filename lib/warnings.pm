@@ -5,7 +5,7 @@
 
 package warnings;
 
-our $VERSION = "1.36";
+our $VERSION = "1.37";
 
 # Verify that we're called correctly so that warnings will work.
 # Can't use Carp, since Carp uses us!
@@ -235,7 +235,7 @@ our %DeadBits = (
 
 # These are used by various things, including our own tests
 our $NONE				=  "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
-our $DEFAULT				=  "\x10\x01\x00\x00\x00\x50\x04\x00\x00\x00\x00\x00\x00\x55\x51\x55\x00", # [2,58,59,52,55,60,61,53,56,54,62,4,63,22,23,25]
+our $DEFAULT				=  "\x10\x01\x00\x00\x00\x50\x04\x00\x00\x00\x00\x00\x00\x55\x51\x55\x00", # [2,4,22,23,25,52..56,58..63]
 our $LAST_BIT				=  132 ;
 our $BYTES				=  17 ;
 
