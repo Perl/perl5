@@ -13,7 +13,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $AnyUncompressError);
 
-$VERSION = '2.069';
+$VERSION = '2.069_001';
 $AnyUncompressError = '';
 
 @ISA = qw( Exporter IO::Uncompress::Base );
