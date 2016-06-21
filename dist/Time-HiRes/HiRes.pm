@@ -23,12 +23,12 @@ our @EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
 		 ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF ITIMER_REALPROF
 		 TIMER_ABSTIME
 		 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
-		 d_nanosleep d_clock_gettime d_clock_getres
+		 d_nanosleep d_clock_gettime d_clock_getres d_hires_utime
 		 d_clock d_clock_nanosleep
-		 stat lstat
+		 stat lstat utime
 		);
 
-our $VERSION = '1.9734';
+our $VERSION = '1.9735';
 our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -60,6 +60,7 @@ sub import {
 	    ($i eq 'clock'           && !&d_clock)           ||
 	    ($i eq 'nanosleep'       && !&d_nanosleep)       ||
 	    ($i eq 'usleep'          && !&d_usleep)          ||
+	    ($i eq 'utime'           && !&d_hires_utime)     ||
 	    ($i eq 'ualarm'          && !&d_ualarm)) {
 	    require Carp;
 	    Carp::croak("Time::HiRes::$i(): unimplemented in this platform");
@@ -92,7 +93,7 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
 
   use Time::HiRes qw( usleep ualarm gettimeofday tv_interval nanosleep
 		      clock_gettime clock_getres clock_nanosleep clock
-                      stat lstat );
+                      stat lstat utime);
 
   usleep ($microseconds);
   nanosleep ($nanoseconds);
@@ -136,6 +137,9 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
   my @stat = stat("file");
   my @stat = stat(FH);
   my @stat = lstat("file");
+
+  use Time::HiRes qw( utime );
+  utime $floating_seconds_atime, $floating_seconds_mtime, $file...;
 
 =head1 DESCRIPTION
 
@@ -445,6 +449,23 @@ if the operations are
 
 the access time stamp from t2 need not be greater-than the modify
 time stamp from t1: it may be equal or I<less>.
+
+=item utime LIST
+
+As L<perlfunc/utime> but with the ability to set the access/modify
+file timestamps in subsecond resolution, if the operating system and
+the filesystem both support such timestamps.  To override the standard
+utime():
+
+    use Time::HiRes qw(utime);
+
+Test for the value of &Time::HiRes::d_hires_utime to find out whether
+the operating system supports setting subsecond file timestamps.
+
+As with CORE::utime(), passing undef as both the atime and mtime will
+call the syscall with a NULL argument.
+
+Returns the number of files successfully changed.
 
 =back
 

@@ -3684,6 +3684,7 @@ dist/Time-HiRes/t/time.t		Test for Time::HiRes
 dist/Time-HiRes/t/tv_interval.t		Test for Time::HiRes
 dist/Time-HiRes/t/ualarm.t		Test for Time::HiRes
 dist/Time-HiRes/t/usleep.t		Test for Time::HiRes
+dist/Time-HiRes/t/utime.t
 dist/Time-HiRes/t/Watchdog.pm		Test for Time::HiRes
 dist/Time-HiRes/typemap			Time::HiRes extension
 dist/XSLoader/Makefile.PL	Dynamic Loader makefile writer
