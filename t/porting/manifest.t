@@ -19,7 +19,7 @@
 # which will output "'MANIFEST' is NOT sorted properly" but which will
 # correct the problem; or:
 #
-#   make manifest
+#   make manisort
 #
 # which will output "WARNING: re-sorting MANIFEST" but which will also
 # correct the problem.
