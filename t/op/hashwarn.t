@@ -6,7 +6,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 16 );
+plan( tests => 18 );
 
 use strict;
 use warnings;
@@ -70,4 +70,21 @@ my $fail_not_hr   = 'Not a HASH reference at ';
     };
     cmp_ok(scalar(@warnings),'==',0,'pseudo-hash 2 count');
     cmp_ok(substr($@,0,length($fail_not_hr)),'eq',$fail_not_hr,'pseudo-hash 2 msg');
+}
+
+# RT #128189
+# this used to coredump
+
+{
+    @warnings = ();
+    my %h;
+
+    no warnings;
+    use warnings qw(uninitialized);
+
+    my $x = "$h{\1}";
+    is(scalar @warnings, 1, "RT #128189 - 1 warning");
+    like("@warnings",
+        qr/Use of uninitialized value \$h\{"SCALAR\(0x[\da-f]+\)"\}/,
+        "RT #128189 correct warning");
 }
