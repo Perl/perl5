@@ -32,7 +32,8 @@ struct TM64 {
  * Otherwise, if we are on android, use const but
  * not with g++.
  */
-#  if defined(__GLIBC__) || (defined(__ANDROID__) && !defined(__cplusplus)) || defined(__QNX__)
+#  if defined(__GLIBC__) || (defined(__ANDROID__) && !defined(__cplusplus)) \
+    || defined(__QNX__) || defined(__CYGWIN__)
         const
 #  endif
         char    *tm_zone;
