@@ -6,6 +6,7 @@ bin/*.bat
 html/
 mini/
 Extensions_static
+.coreheaders
 dlutils.c
 perllibst.h
 perlmain.c
