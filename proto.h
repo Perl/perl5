@@ -5355,7 +5355,7 @@ STATIC I32	S_expect_number(pTHX_ char **const pattern)
 #define PERL_ARGS_ASSERT_EXPECT_NUMBER	\
 	assert(pattern)
 
-STATIC I32	S_find_array_subscript(pTHX_ const AV *const av, const SV *const val);
+STATIC SSize_t	S_find_array_subscript(pTHX_ const AV *const av, const SV *const val);
 #define PERL_ARGS_ASSERT_FIND_ARRAY_SUBSCRIPT	\
 	assert(val)
 STATIC SV *	S_find_hash_subscript(pTHX_ const HV *const hv, const SV *const val);
@@ -5435,7 +5435,7 @@ STATIC void	S_unreferenced_to_tmp_stack(pTHX_ AV *const unreferenced);
 #  endif
 #endif
 #if defined(PERL_IN_SV_C) || defined (PERL_IN_OP_C)
-PERL_CALLCONV SV *	Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ, const SV *const keyname, I32 aindex, int subscript_type)
+PERL_CALLCONV SV *	Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ, const SV *const keyname, SSize_t aindex, int subscript_type)
 			__attribute__warn_unused_result__;
 
 #endif

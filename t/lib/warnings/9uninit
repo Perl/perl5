@@ -2159,3 +2159,24 @@ Use of uninitialized value $r in addition (+) at - line 6.
 Use of uninitialized value $t in subtraction (-) at - line 8.
 Use of uninitialized value $v in integer addition (+) at - line 11.
 Use of uninitialized value $x in integer subtraction (-) at - line 13.
+########
+# NAME 64-bit array subscripts
+# SKIP ? eval { my $q = pack "q", 0 }; $@
+use warnings 'uninitialized';
+
+# aelem + const
+use constant foo => \0;
+$SIG{__WARN__} = sub {
+ print
+   $_[0] =~ /\$a\[([^]]+)]/ && $1 == foo
+       ? "ok\n"
+       : ("$1 != ",0+foo,"\n")
+};
+() = "$a[foo]";
+undef $SIG{__WARN__};
+
+# Multideref
+() = "$a[140688675223280]";
+EXPECT
+Use of uninitialized value $a[140688675223280] in string at - line 15.
+ok

@@ -2440,7 +2440,7 @@ poM	|void	|sv_kill_backrefs	|NN SV *const sv|NULLOK AV *const av
 #if defined(PERL_IN_SV_C) || defined (PERL_IN_OP_C)
 pR	|SV *	|varname	|NULLOK const GV *const gv|const char gvtype \
 				|PADOFFSET targ|NULLOK const SV *const keyname \
-				|I32 aindex|int subscript_type
+				|SSize_t aindex|int subscript_type
 #endif
 
 pX	|void	|sv_del_backref	|NN SV *const tsv|NN SV *const sv
@@ -2801,7 +2801,7 @@ p	|SV*	|magic_scalarpack|NN HV *hv|NN MAGIC *mg
 #if defined(PERL_IN_SV_C)
 s	|SV *	|find_hash_subscript|NULLOK const HV *const hv \
 		|NN const SV *const val
-s	|I32	|find_array_subscript|NULLOK const AV *const av \
+s	|SSize_t|find_array_subscript|NULLOK const AV *const av \
 		|NN const SV *const val
 sMd	|SV*	|find_uninit_var|NULLOK const OP *const obase \
 		|NULLOK const SV *const uninit_sv|bool match \
