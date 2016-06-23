@@ -97,7 +97,11 @@ sub import {
             {
                 local $SIG{__DIE__};
                 my $fn = _module_to_filename($base);
-                eval { require $fn };
+                eval {
+                    local @INC = @INC;
+                    pop @INC if $INC[-1] eq '.';
+                    require $fn
+                };
                 # Only ignore "Can't locate" errors from our eval require.
                 # Other fatal errors (syntax etc) must be reported.
                 #

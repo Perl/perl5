@@ -505,7 +505,12 @@ sub _diff_complain {
     my($result, $expected, $detail, $prefix) = @_;
     return _diff_complain_external(@_) if $ENV{PERL_TEST_DIFF};
     return _diff_complain_algdiff(@_)
-     if eval { require Algorithm::Diff; Algorithm::Diff->VERSION(1.15); 1; };
+      if eval {
+          local @INC = @INC;
+          pop @INC if $INC[-1] eq '.';
+          require Algorithm::Diff; Algorithm::Diff->VERSION(1.15);
+          1;
+      };
 
     $told_about_diff++ or print $TESTERR <<"EOT";
 # $prefix   (Install the Algorithm::Diff module to have differences in multiline

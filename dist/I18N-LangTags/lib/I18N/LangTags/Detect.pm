@@ -145,6 +145,8 @@ sub _try_use {   # Basically a wrapper around "require Modulename"
   print " About to use $module ...\n" if DEBUG;
   {
     local $SIG{'__DIE__'};
+    local @INC = @INC;
+    pop @INC if $INC[-1] eq '.';
     eval "require $module"; # used to be "use $module", but no point in that.
   }
   if($@) {
