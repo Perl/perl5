@@ -2,9 +2,24 @@ package Module::CoreList;
 use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
-use Module::CoreList::TieHashDelta;
 use version;
 $VERSION = '5.20160720';
+
+sub _undelta {
+    my ($delta) = @_;
+    my %expanded;
+    for my $version (sort { $a cmp $b } keys %$delta) {
+        my $data = $delta->{$version};
+        my $from = $data->{delta_from};
+        my %full = (
+            ( $from ? %{$expanded{$from}} : () ),
+            %{$data->{changed} || {}},
+        );
+        delete @full{ keys %{$data->{removed}} };
+        $expanded{$version} = \%full;
+    }
+    return %expanded;
+}
 
 sub _released_order {   # Sort helper, to make '?' sort after everything else
     (substr($released{$a}, 0, 1) eq "?")
@@ -12768,12 +12783,7 @@ sub is_core
     return $perl_version <= $final_release;
 }
 
-for my $version (sort { $a <=> $b } keys %delta) {
-    my $data = $delta{$version};
-    tie %{$version{$version}}, 'Module::CoreList::TieHashDelta',
-        $data->{changed}, $data->{removed},
-        $data->{delta_from} ? $version{$data->{delta_from}} : undef;
-}
+%version = _undelta(\%delta);
 
 %deprecated = (
     5.011    => {
@@ -13397,12 +13407,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
     },
 );
 
-for my $version (sort { $a <=> $b } keys %deprecated) {
-    my $data = $deprecated{$version};
-    tie %{ $deprecated{$version} }, 'Module::CoreList::TieHashDelta',
-        $data->{changed}, $data->{removed},
-        $data->{delta_from} ? $deprecated{ $data->{delta_from} } : undef;
-}
+%deprecated = _undelta(\%deprecated);
 
 %upstream = (
     'App::Cpan'             => 'cpan',

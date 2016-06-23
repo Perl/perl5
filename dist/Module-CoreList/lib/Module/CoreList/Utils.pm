@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use vars qw[$VERSION %utilities];
 use Module::CoreList;
-use Module::CoreList::TieHashDelta;
 
 $VERSION = '5.20160720';
 
@@ -1180,13 +1179,7 @@ my %delta = (
     },
 );
 
-for my $version (sort { $a <=> $b } keys %delta) {
-    my $data = $delta{$version};
-
-    tie %{$utilities{$version}}, 'Module::CoreList::TieHashDelta',
-        $data->{changed}, $data->{removed},
-        $data->{delta_from} ? $utilities{$data->{delta_from}} : undef;
-}
+%utilities = Module::CoreList::_undelta(\%delta);
 
 # Create aliases with trailing zeros for $] use
 
