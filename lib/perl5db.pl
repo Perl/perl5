@@ -1938,7 +1938,10 @@ sub _DB__handle_y_command {
         = $obj->cmd_args =~ /\A(?:(\d*)\s*(.*))?\z/) {
 
         # See if we've got the necessary support.
-        if (!eval { require PadWalker; PadWalker->VERSION(0.08) }) {
+        if (!eval {
+            local @INC = @INC;
+            pop @INC if $INC[-1] eq '.';
+            require PadWalker; PadWalker->VERSION(0.08) }) {
             my $Err = $@;
             _db_warn(
                 $Err =~ /locate/
@@ -9420,7 +9423,10 @@ if PadWalker could be loaded.
 
 =cut
 
-        if (not $text =~ /::/ and eval { require PadWalker } ) {
+        if (not $text =~ /::/ and eval {
+            local @INC = @INC;
+            pop @INC if $INC[-1] eq '.';
+            require PadWalker } ) {
             my $level = 1;
             while (1) {
                 my @info = caller($level);
