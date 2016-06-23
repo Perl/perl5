@@ -2167,7 +2167,7 @@ use warnings 'uninitialized';
 # aelem + const
 use constant foo => \0;
 $SIG{__WARN__} = sub {
- print
+ print STDERR
    $_[0] =~ /\$a\[([^]]+)]/ && $1 == foo
        ? "ok\n"
        : ("$1 != ",0+foo,"\n")
@@ -2178,5 +2178,5 @@ undef $SIG{__WARN__};
 # Multideref
 () = "$a[140688675223280]";
 EXPECT
-Use of uninitialized value $a[140688675223280] in string at - line 15.
 ok
+Use of uninitialized value $a[140688675223280] in string at - line 15.
