@@ -36,11 +36,6 @@ SKIP: {
   );
 }
 
-package tyrone::slothrop;
-$bongo::shaftsbury::scalar = 1;
-
-package main;
-
 # Used to warn
 # Unbalanced string table refcount: (1) for "A::" during global destruction.
 # for ithreads.
