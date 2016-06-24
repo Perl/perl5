@@ -2411,10 +2411,10 @@ Perl_gv_check(pTHX_ HV *stash)
 
     PERL_ARGS_ASSERT_GV_CHECK;
 
-    if (!HvARRAY(stash))
+    if (!SvOOK(stash))
 	return;
 
-    assert(SvOOK(stash));
+    assert(HvARRAY(stash));
 
     for (i = 0; i <= (I32) HvMAX(stash); i++) {
         const HE *entry;
