@@ -326,7 +326,7 @@ sub list_dynamic {
     $^O ne 'MSWin32' ? (
         [ 'bscode', '', '' ],
         [ 'bscodemulti', '', '' ],
-        [ 'subdirscomplex', '', '' ],
+        $^O ne 'VMS' ? ([ 'subdirscomplex', '', '' ]) : (),
     ) : (), # DynaLoader different
     [ 'subdirs', '', '' ],
     [ 'subdirsstatic', ' LINKTYPE=dynamic', ' LINKTYPE=dynamic' ],
