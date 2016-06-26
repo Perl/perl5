@@ -75,7 +75,7 @@ utf8>> is needed.>  (See L<utf8>).
 
 =item C<BOM>-marked scripts and L<UTF-16|/Unicode Encodings> scripts autodetected
 
-However, if a Perl script begins with the Unicode C<BOM> (UTF-16LE,
+If a Perl script begins with the Unicode C<BOM> (UTF-16LE,
 UTF16-BE, or UTF-8), or if the script looks like non-C<BOM>-marked
 UTF-16 of either endianness, Perl will correctly read in the script as
 the appropriate Unicode encoding.  (C<BOM>-less UTF-8 cannot be
@@ -1069,38 +1069,40 @@ See L<Encode>.
 =head2 Unicode Regular Expression Support Level
 
 The following list of Unicode supported features for regular expressions describes
-all features currently directly supported by core Perl.  The references to "Level N"
-and the section numbers refer to the Unicode Technical Standard #18,
-"Unicode Regular Expressions", version 13, from August 2008.
+all features currently directly supported by core Perl.  The references
+to "Level I<N>" and the section numbers refer to
+L<UTS#18 "Unicode Regular Expressions"|http://www.unicode.org/reports/tr18>,
+version 13, November 2013.
 
-=over 4
+=head3 Level 1 - Basic Unicode Support
 
-=item *
-
-Level 1 - Basic Unicode Support
-
- RL1.1   Hex Notation                     - done          [1]
- RL1.2   Properties                       - done          [2][3]
- RL1.2a  Compatibility Properties         - done          [4]
- RL1.3   Subtraction and Intersection     - experimental  [5]
- RL1.4   Simple Word Boundaries           - done          [6]
- RL1.5   Simple Loose Matches             - done          [7]
- RL1.6   Line Boundaries                  - MISSING       [8][9]
- RL1.7   Supplementary Code Points        - done          [10]
+ RL1.1   Hex Notation                     - Done          [1]
+ RL1.2   Properties                       - Done          [2]
+ RL1.2a  Compatibility Properties         - Done          [3]
+ RL1.3   Subtraction and Intersection     - Experimental  [4]
+ RL1.4   Simple Word Boundaries           - Done          [5]
+ RL1.5   Simple Loose Matches             - Done          [6]
+ RL1.6   Line Boundaries                  - Partial       [7]
+ RL1.7   Supplementary Code Points        - Done          [8]
 
 =over 4
 
 =item [1] C<\N{U+...}> and C<\x{...}>
 
-=item [2] C<\p{...}> C<\P{...}>
+=item [2]
+C<\p{...}> C<\P{...}>.  This requirement is for a minimal list of
+properties.  Perl supports these and all other Unicode character
+properties, as R2.7 asks (see L</"Unicode Character Properties"> above).
 
-=item [3] supports not only minimal list, but all Unicode character
-properties (see Unicode Character Properties above)
+=item [3]
+Perl has C<\d> C<\D> C<\s> C<\S> C<\w> C<\W> C<\X> C<[:I<prop>:]>
+C<[:^I<prop>:]>, plus all the properties specified by
+L<http://www.unicode.org/reports/tr18/#Compatibility_Properties>.  These
+are described above in L</Other Properties>
 
-=item [4] C<\d> C<\D> C<\s> C<\S> C<\w> C<\W> C<\X> C<[:I<prop>:]>
-C<[:^I<prop>:]>
+=item [4]
 
-=item [5] The experimental feature starting in v5.18 C<"(?[...])"> accomplishes
+The experimental feature C<"(?[...])"> starting in v5.18 accomplishes
 this.
 
 See L<perlre/(?[ ])>.  If you don't want to use an experimental
@@ -1109,7 +1111,6 @@ feature, you can use one of the following:
 =over 4
 
 =item *
-
 Regular expression lookahead
 
 You can mimic class subtraction using lookahead.
@@ -1143,9 +1144,12 @@ C<"+"> for union, C<"-"> for removal (set-difference), C<"&"> for intersection
 
 =back
 
-=item [6] C<\b> C<\B>
+=item [5]
+C<\b> C<\B> meet most, but not all, the details of this requirement, but
+C<\b{wb}> and C<\B{wb}> do, as well as the stricter R2.3.
 
-=item [7]
+=item [6]
+
 Note that Perl does Full case-folding in matching, not Simple:
 
 For example C<U+1F88> is equivalent to C<U+1F00 U+03B9>, instead of just
@@ -1154,9 +1158,18 @@ letters with certain modifiers: the Full case-folding decomposes the
 letter, while the Simple case-folding would map it to a single
 character.
 
-=item [8]
-Perl treats C<\n> as the start- and end-line delimiter.  Unicode
-specifies more characters that should be so-interpreted.
+=item [7]
+
+The reason this is considered to be only partially implemented is that
+Perl has L<C<qrE<sol>\b{lb}E<sol>>|perlrebackslash/\b{lb}> and
+C<L<Unicode::LineBreak>> that are conformant with
+L<UAX#14 "Unicode Line Breaking Algorithm"|http://www.unicode.org/reports/tr14>.
+The regular expression construct provides default behavior, while the
+heavier-weight module provides customizable line breaking.
+
+But Perl treats C<\n> as the start- and end-line
+delimiter, whereas Unicode specifies more characters that should be
+so-interpreted.
 
 These are:
 
@@ -1176,63 +1189,66 @@ Also, lines should not be split within C<CRLF> (i.e. there is no
 empty line between C<\r> and C<\n>).  For C<CRLF>, try the C<:crlf>
 layer (see L<PerlIO>).
 
-=item [9] But C<qr/\b{lb}/> and C<L<Unicode::LineBreak>> are available.
-
-L<C<qrE<sol>\b{lb}E<sol>>|perlrebackslash/\b{lb}> supplies default line
-breaking conformant with
-L<UAX#14 "Unicode Line Breaking Algorithm"|http://www.unicode.org/reports/tr14>.
-
-And, the module C<L<Unicode::LineBreak>> also conformant with UAX#14,
-provides customizable line breaking.
-
-=item [10]
+=item [8]
 UTF-8/UTF-EBDDIC used in Perl allows not only C<U+10000> to
 C<U+10FFFF> but also beyond C<U+10FFFF>
 
 =back
 
-=item *
+=head3 Level 2 - Extended Unicode Support
 
-Level 2 - Extended Unicode Support
+ RL2.1   Canonical Equivalents           - Retracted     [9]
+                                           by Unicode
+ RL2.2   Extended Grapheme Clusters      - Partial       [10]
+ RL2.3   Default Word Boundaries         - Done          [11]
+ RL2.4   Default Case Conversion         - Done
+ RL2.5   Name Properties                 - Done
+ RL2.6   Wildcard Properties             - Missing
+ RL2.7   Full Properties                 - Done
 
- RL2.1   Canonical Equivalents           - MISSING       [10][11]
- RL2.2   Default Grapheme Clusters       - MISSING       [12]
- RL2.3   Default Word Boundaries         - DONE          [14]
- RL2.4   Default Loose Matches           - MISSING       [15]
- RL2.5   Name Properties                 - DONE
- RL2.6   Wildcard Properties             - MISSING
+=over 4
 
- [10] see UAX#15 "Unicode Normalization Forms"
- [11] have Unicode::Normalize but not integrated to regexes
- [12] have \X and \b{gcb} but we don't have a "Grapheme Cluster
-      Mode"
- [14] see UAX#29, Word Boundaries
- [15] This is covered in Chapter 3.13 (in Unicode 6.0)
+=item [9]
+Unicode has rewritten this portion of UTS#18 to say that getting
+canonical equivalence (see UAX#15
+L<"Unicode Normalization Forms"|http://www.unicode.org/reports/tr15>)
+is basically to be done at the programmer level.  Use NFD to write
+both your regular expressions and text to match them against (you
+can use L<Unicode::Normalize>).
 
-=item *
+=item [10]
+Perl has C<\X> and C<\b{gcb}> but we don't have a "Grapheme Cluster Mode".
 
-Level 3 - Tailored Support
+=item [11] see
+L<UAX#29 "Unicode Text Segmentation"|http://www.unicode.org/reports/tr29>,
 
- RL3.1   Tailored Punctuation            - MISSING
- RL3.2   Tailored Grapheme Clusters      - MISSING       [17][18]
- RL3.3   Tailored Word Boundaries        - MISSING
- RL3.4   Tailored Loose Matches          - MISSING
- RL3.5   Tailored Ranges                 - MISSING
- RL3.6   Context Matching                - MISSING       [19]
- RL3.7   Incremental Matches             - MISSING
-      ( RL3.8   Unicode Set Sharing )
- RL3.9   Possible Match Sets             - MISSING
- RL3.10  Folded Matching                 - MISSING       [20]
- RL3.11  Submatchers                     - MISSING
+=back
 
- [17] see UAX#10 "Unicode Collation Algorithms"
- [18] have Unicode::Collate but not integrated to regexes
- [19] have (?<=x) and (?=x), but lookaheads or lookbehinds
-      should see outside of the target substring
- [20] need insensitive matching for linguistic features other
-      than case; for example, hiragana to katakana, wide and
-      narrow, simplified Han to traditional Han (see UTR#30
-      "Character Foldings")
+=head3 Level 3 - Tailored Support
+
+ RL3.1   Tailored Punctuation            - Missing
+ RL3.2   Tailored Grapheme Clusters      - Missing       [12]
+ RL3.3   Tailored Word Boundaries        - Missing
+ RL3.4   Tailored Loose Matches          - Retracted by Unicode
+ RL3.5   Tailored Ranges                 - Retracted by Unicode
+ RL3.6   Context Matching                - Missing       [13]
+ RL3.7   Incremental Matches             - Missing
+ RL3.8   Unicode Set Sharing             - Unicode is proposing
+                                           to retract this
+ RL3.9   Possible Match Sets             - Missing
+ RL3.10  Folded Matching                 - Retracted by Unicode
+ RL3.11  Submatchers                     - Missing
+
+=over 4
+
+=item [12]
+Perl has L<Unicode::Collate>, but it isn't integrated with regular
+expressions.  See
+L<UTS#10 "Unicode Collation Algorithms"|http://www.unicode.org/reports/tr10>.
+
+=item [13]
+Perl has C<(?<=x)> and C<(?=x)>, but lookaheads or lookbehinds should
+see outside of the target substring
 
 =back
 
