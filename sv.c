@@ -2097,15 +2097,19 @@ S_sv_setnv(pTHX_ SV* sv, int numtype)
 {
     bool pok = cBOOL(SvPOK(sv));
     bool nok = FALSE;
+#ifdef NV_INF
     if ((numtype & IS_NUMBER_INFINITY)) {
         SvNV_set(sv, (numtype & IS_NUMBER_NEG) ? -NV_INF : NV_INF);
         nok = TRUE;
-    }
-    else if ((numtype & IS_NUMBER_NAN)) {
+    } else
+#endif
+#ifdef NV_NAN
+    if ((numtype & IS_NUMBER_NAN)) {
         SvNV_set(sv, NV_NAN);
         nok = TRUE;
-    }
-    else if (pok) {
+    } else
+#endif
+    if (pok) {
         SvNV_set(sv, Atof(SvPVX_const(sv)));
         /* Purposefully no true nok here, since we don't want to blow
          * away the possible IOK/UV of an existing sv. */

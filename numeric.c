@@ -1138,7 +1138,7 @@ S_mulexp10(NV value, I32 exponent)
      * a hammer.  Therefore we need to catch potential overflows before
      * it's too late. */
 
-#if ((defined(VMS) && !defined(_IEEE_FP)) || defined(_UNICOS)) && defined(NV_MAX_10_EXP)
+#if ((defined(VMS) && !defined(_IEEE_FP)) || defined(_UNICOS) || defined(DOUBLE_IS_VAX_FLOAT)) && defined(NV_MAX_10_EXP)
     STMT_START {
 	const NV exp_v = log10(value);
 	if (exponent >= NV_MAX_10_EXP || exponent + exp_v >= NV_MAX_10_EXP)
@@ -1185,7 +1185,11 @@ S_mulexp10(NV value, I32 exponent)
 	    result *= power;
 #ifdef FP_OVERFLOWS_TO_ZERO
             if (result == 0)
+# ifdef NV_INF
                 return value < 0 ? -NV_INF : NV_INF;
+# else
+                return value < 0 ? -FLT_MAX : FLT_MAX;
+# endif
 #endif
 	    /* Floating point exceptions are supposed to be turned off,
 	     *  but if we're obviously done, don't risk another iteration.  
@@ -1247,6 +1251,7 @@ Perl_my_atof(pTHX_ const char* s)
     return x;
 }
 
+#if defined(NV_INF) || defined(NV_NAN)
 
 #ifdef USING_MSVC6
 #  pragma warning(push)
@@ -1276,8 +1281,6 @@ S_my_atof_infnan(pTHX_ const char* s, bool negative, const char* send, NV* value
         /* If still here, we didn't have either NV_INF or NV_NAN,
          * and can try falling back to native strtod/strtold.
          *
-         * (Though, are our NV_INF or NV_NAN ever not defined?)
-         *
          * The native interface might not recognize all the possible
          * inf/nan strings Perl recognizes.  What we can try
          * is to try faking the input.  We will try inf/-inf/nan
@@ -1286,36 +1289,44 @@ S_my_atof_infnan(pTHX_ const char* s, bool negative, const char* send, NV* value
             const char* fake = NULL;
             char* endp;
             NV nv;
+#ifdef NV_INF
             if ((infnan & IS_NUMBER_INFINITY)) {
                 fake = ((infnan & IS_NUMBER_NEG)) ? "-inf" : "inf";
             }
-            else if ((infnan & IS_NUMBER_NAN)) {
+#endif
+#ifdef NV_NAN
+            if ((infnan & IS_NUMBER_NAN)) {
                 fake = "nan";
             }
+#endif
             assert(fake);
             nv = Perl_strtod(fake, &endp);
             if (fake != endp) {
+#ifdef NV_INF
                 if ((infnan & IS_NUMBER_INFINITY)) {
-#ifdef Perl_isinf
+#  ifdef Perl_isinf
                     if (Perl_isinf(nv))
                         *value = nv;
-#else
+#  else
                     /* last resort, may generate SIGFPE */
                     *value = Perl_exp((NV)1e9);
                     if ((infnan & IS_NUMBER_NEG))
                         *value = -*value;
-#endif
+#  endif
                     return (char*)p; /* p, not endp */
                 }
-                else if ((infnan & IS_NUMBER_NAN)) {
-#ifdef Perl_isnan
+#endif
+#ifdef NV_NAN
+                if ((infnan & IS_NUMBER_NAN)) {
+#  ifdef Perl_isnan
                     if (Perl_isnan(nv))
                         *value = nv;
-#else
+#  else
                     /* last resort, may generate SIGFPE */
                     *value = Perl_log((NV)-1.0);
-#endif
+#  endif
                     return (char*)p; /* p, not endp */
+#endif
                 }
             }
         }
@@ -1326,6 +1337,8 @@ S_my_atof_infnan(pTHX_ const char* s, bool negative, const char* send, NV* value
 #ifdef USING_MSVC6
 #  pragma warning(pop)
 #endif
+
+#endif /* if defined(NV_INF) || defined(NV_NAN) */
 
 char*
 Perl_my_atof2(pTHX_ const char* orig, NV* value)

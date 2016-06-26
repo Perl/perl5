@@ -5736,6 +5736,12 @@ EXTCONST bool PL_valid_types_NV_set[];
  * Also, do NOT try doing NV_NAN based on NV_INF and trying (NV_INF-NV_INF).
  * Though logically correct, some compilers (like Visual C 2003)
  * falsely misoptimize that to zero (x-x is always zero, right?)
+ *
+ * Finally, note that not all floating point formats define Inf (or NaN).
+ * For the infinity a large number may be used instead.  Operations that
+ * under the IEEE floating point would return Inf or NaN may return
+ * either large numbers (positive or negative), or they may cause
+ * a floating point exception or some other fault.
  */
 
 /* The quadmath literals are anon structs which -Wc++-compat doesn't like. */
@@ -6743,6 +6749,14 @@ extern void moncontrol(int);
 #define PERL_PV_PRETTY_DUMP  PERL_PV_PRETTY_ELLIPSES|PERL_PV_PRETTY_QUOTE
 #define PERL_PV_PRETTY_REGPROP PERL_PV_PRETTY_ELLIPSES|PERL_PV_PRETTY_LTGT|PERL_PV_ESCAPE_RE|PERL_PV_ESCAPE_NONASCII
 
+#if DOUBLEKIND == DOUBLE_IS_VAX_F_FLOAT || \
+    DOUBLEKIND == DOUBLE_IS_VAX_D_FLOAT || \
+    DOUBLEKIND == DOUBLE_IS_VAX_G_FLOAT
+#  define DOUBLE_IS_VAX_FLOAT
+#else
+#  define DOUBLE_IS_IEEE_FORMAT
+#endif
+
 #if DOUBLEKIND == DOUBLE_IS_IEEE_754_32_BIT_LITTLE_ENDIAN || \
     DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_LITTLE_ENDIAN || \
     DOUBLEKIND == DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
@@ -6760,11 +6774,23 @@ extern void moncontrol(int);
 #  define DOUBLE_MIX_ENDIAN
 #endif
 
+/* Even though the VAX formats are kind of little-endian,
+ * they are not really fully little-endian like Intel IEEE,
+ * but neither they are really IEEE-mixed endian like the
+ * mixed-endian ARM IEEE formats (with swapped bytes).
+ * The VAX format ultimately come from PDP. */
+
+#ifdef DOUBLE_IS_VAX_FLOAT
+#  define DOUBLE_VAX_ENDIAN
+#endif
+
+#ifdef DOUBLE_IS_IEEE_FORMAT
 /* All the basic IEEE formats have the implicit bit,
  * except for the 80-bit extended formats, which will undef this. */
-#define NV_IMPLICIT_BIT
+#  define NV_IMPLICIT_BIT
+#endif
 
-#ifdef LONG_DOUBLEKIND
+#if defined(LONG_DOUBLEKIND) && LONG_DOUBLEKIND != LONG_DOUBLE_IS_DOUBLE
 
 #  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN || \
       LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN || \
@@ -6818,6 +6844,9 @@ extern void moncontrol(int);
 #  ifdef DOUBLE_MIX_ENDIAN
 #    define NV_MIX_ENDIAN
 #  endif
+#  ifdef DOUBLE_VAX_ENDIAN
+#    define NV_VAX_ENDIAN
+#  endif
 #elif NVSIZE == LONG_DOUBLESIZE
 #  ifdef LONGDOUBLE_LITTLE_ENDIAN
 #    define NV_LITTLE_ENDIAN
@@ -6829,6 +6858,13 @@ extern void moncontrol(int);
 #    define NV_MIX_ENDIAN
 #  endif
 #endif
+
+#ifdef DOUBLE_IS_IEEE_FORMAT
+#  define DOUBLE_HAS_INF
+#  define DOUBLE_HAS_NAN
+#endif
+
+#ifdef DOUBLE_HAS_NAN
 
 /* NaNs (not-a-numbers) can carry payload bits, in addition to
  * "nan-ness".  Part of the payload is the quiet/signaling bit.
@@ -6980,6 +7016,8 @@ extern void moncontrol(int);
 #  elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE
 #    define NV_NAN_QS_BYTE_OFFSET 5 /* bytes 3 2 1 0 7 6 5 4 (MSB 7) */
 #  else
+/* For example the VAX formats should never
+ * get here because they do not have NaN. */
 #    error "Unexpected double format"
 #  endif
 #endif
@@ -7182,6 +7220,9 @@ extern void moncontrol(int);
 #    error "Unexpected double format"
 #  endif
 #endif
+
+#endif /* DOUBLE_HAS_NAN */
+
 /*
 
    (KEEP THIS LAST IN perl.h!)
