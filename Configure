@@ -10127,6 +10127,11 @@ int main() {
     printf("2\n");
     exit(0);
   }
+  if (b[0] == 0xCC && b[3] == 0xCC) {
+    /* VAX format F */
+    printf("9\n");
+    exit(0);
+  }
 #endif
 #if DOUBLESIZE == 8
   if (b[0] == 0x9A && b[7] == 0xBF) {
@@ -10153,6 +10158,16 @@ int main() {
     printf("8\n");
     exit(0);
   }
+  if (b[0] == 0xCC && b[7] == 0xCC) {
+   /* VAX format D, 64-bit little-endian. */
+    printf("10\n");
+    exit(0);
+  }
+  if (b[0] == 0xD9 && b[7] == 0x99) {
+   /* VAX format G, 64-bit little-endian. */
+    printf("11\n");
+    exit(0);
+  }
 #endif
 #if DOUBLESIZE == 16
   if (b[0] == 0x9A && b[15] == 0xBF) {
@@ -10166,7 +10181,7 @@ int main() {
     exit(0);
   }
 #endif
-  /* Then there are old mainframe/miniframe formats like VAX, IBM, and CRAY.
+  /* Then there are old mainframe/miniframe formats like IBM, and CRAY.
    * Whether those environments can still build Perl is debatable. */
   printf("-1\n"); /* unknown */
   exit(0);
@@ -10187,7 +10202,10 @@ case "$doublekind" in
 6) echo "You have IEEE 754 128-bit big endian doubles." >&4 ;;
 7) echo "You have IEEE 754 64-bit mixed endian doubles (32-bit LEs in BE)." >&4 ;;
 8) echo "You have IEEE 754 64-bit mixed endian doubles (32-bit BEs in LE)." >&4 ;;
-*) echo "Cannot figure out your double.  You VAX, or something?" >&4 ;;
+9) echo "You have VAX format F 32-bit little-endian doubles." >&4 ;;
+10) echo "You have VAX format D 64-bit little-endian doubles." >&4 ;;
+11) echo "You have VAX format G 64-bit little-endian doubles." >&4 ;;
+*) echo "Cannot figure out your double.  You CRAY, or something?" >&4 ;;
 esac
 $rm_try
 
