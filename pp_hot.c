@@ -819,11 +819,27 @@ PP(pp_aelemfast)
     AV * const av = PL_op->op_type == OP_AELEMFAST_LEX
 	? MUTABLE_AV(PAD_SV(PL_op->op_targ)) : GvAVn(cGVOP_gv);
     const U32 lval = PL_op->op_flags & OPf_MOD;
-    SV** const svp = av_fetch(av, (I8)PL_op->op_private, lval);
-    SV *sv = (svp ? *svp : &PL_sv_undef);
+    const I8 key   = (I8)PL_op->op_private;
+    SV** svp;
+    SV *sv;
+
+    assert(SvTYPE(av) == SVt_PVAV);
+
+    /* inlined av_fetch() for simple cases ... */
+    if (!SvRMAGICAL(av) && key >= 0 && key <= AvFILLp(av)) {
+        sv = AvARRAY(av)[key];
+        if (sv && !SvIS_FREED(sv)) {
+            PUSHs(sv);
+            RETURN;
+        }
+    }
+
+    /* ... else do it the hard way */
+    svp = av_fetch(av, key, lval);
+    sv = (svp ? *svp : &PL_sv_undef);
 
     if (UNLIKELY(!svp && lval))
-        DIE(aTHX_ PL_no_aelem, (int)(I8)PL_op->op_private);
+        DIE(aTHX_ PL_no_aelem, (int)key);
 
     EXTEND(SP, 1);
     if (!lval && SvRMAGICAL(av) && SvGMAGICAL(sv)) /* see note in pp_helem() */
