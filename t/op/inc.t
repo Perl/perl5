@@ -191,6 +191,11 @@ SKIP: {
         ($Config{longdblkind} == 6 || $Config{longdblkind} == 5)) {
         skip "the double-double format is weird", 1;
     }
+    if ($Config{doublekind} == 9  ||
+        $Config{doublekind} == 10 ||
+        $Config{doublekind} == 11) {
+        skip "the VAX format is not IEEE", 1;
+    }
 
 # I'm sure that there's an IBM format with a 48 bit mantissa
 # IEEE doubles have a 53 bit mantissa

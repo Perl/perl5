@@ -239,7 +239,11 @@ SKIP: { #rt #73040
     like $warning, qr/^localtime\($small_time_f\) failed/m;
 }
 
-{
+my $is_vax = (pack("d", 1) =~ /^[\x80\x10]\x40/);
+my $has_nan = !$is_vax;
+
+SKIP: {
+    skip("No NaN", 2) unless $has_nan;
     local $^W;
     is scalar gmtime("NaN"), undef, '[perl #123495] gmtime(NaN)';
     is scalar localtime("NaN"), undef, 'localtime(NaN)';
