@@ -941,7 +941,7 @@ use File::Glob qw(:case);
         'MAP' => {
             ''                 => 'cpan/podlators/',
             # this file lives outside the cpan/ directory
-            'pod/perlpodstyle' => 'pod/perlpodstyle.pod',
+            'pod/perlpodstyle.pod' => 'pod/perlpodstyle.pod',
         },
     },
 
