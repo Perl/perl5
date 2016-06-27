@@ -825,6 +825,8 @@ PP(pp_aelemfast)
 
     assert(SvTYPE(av) == SVt_PVAV);
 
+    EXTEND(SP, 1);
+
     /* inlined av_fetch() for simple cases ... */
     if (!SvRMAGICAL(av) && key >= 0 && key <= AvFILLp(av)) {
         sv = AvARRAY(av)[key];
@@ -841,7 +843,6 @@ PP(pp_aelemfast)
     if (UNLIKELY(!svp && lval))
         DIE(aTHX_ PL_no_aelem, (int)key);
 
-    EXTEND(SP, 1);
     if (!lval && SvRMAGICAL(av) && SvGMAGICAL(sv)) /* see note in pp_helem() */
 	mg_get(sv);
     PUSHs(sv);
