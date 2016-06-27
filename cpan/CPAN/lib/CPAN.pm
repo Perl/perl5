@@ -1104,6 +1104,8 @@ sub has_usable {
                                ]
               };
     if ($usable->{$mod}) {
+        local @INC = @INC;
+        pop @INC if $INC[-1] eq '.';
         for my $c (0..$#{$usable->{$mod}}) {
             my $code = $usable->{$mod}[$c];
             my $ret = eval { &$code() };
@@ -1146,6 +1148,8 @@ sub has_inst {
       $CPAN::META->{dontload_hash}{$mod}||=1; # unsafe meta access, ok
       return 0;
     }
+    local @INC = @INC;
+    pop @INC if $INC[-1] eq '.';
     my $file = $mod;
     my $obj;
     $file =~ s|::|/|g;

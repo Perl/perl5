@@ -38,7 +38,11 @@ sub new
         unless (exists ${"$class\::"}{"VERSION"}) {
             my $pm_file = $class . ".pm";
             $pm_file =~ s{::}{/}g;
-            eval { require $pm_file };
+            eval {
+                local @INC = @INC;
+                pop @INC if $INC[-1] eq '.';
+                require $pm_file
+	    };
             if ($@) {
                 $err ||= $@;
                 next;

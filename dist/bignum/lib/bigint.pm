@@ -248,6 +248,8 @@ sub import
     # see if we can find Math::BigInt::Lite
     if (!defined $a && !defined $p)		# rounding won't work to well
       {
+      local @INC = @INC;
+      pop @INC if $INC[-1] eq '.';
       if (eval { require Math::BigInt::Lite; 1 })
         {
         @import = ( );				# :constant in Lite, not MBI
