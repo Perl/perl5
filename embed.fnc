@@ -1584,7 +1584,7 @@ EXmM	|void	|_invlist_subtract|NN SV* const a|NN SV* const b|NN SV** result
 EXpM	|void	|_invlist_invert|NN SV* const invlist
 EXMpR	|SV*	|_new_invlist	|IV initial_size
 EXMpR	|SV*	|_swash_to_invlist	|NN SV* const swash
-EXMpR	|SV*	|_add_range_to_invlist	|NULLOK SV* invlist|const UV start|const UV end
+EXMpR	|SV*	|_add_range_to_invlist	|NULLOK SV* invlist|UV start|UV end
 EXMpR	|SV*	|_setup_canned_invlist|const STRLEN size|const UV element0|NN UV** other_elements_ptr
 EXMpn	|void	|_invlist_populate_swatch   |NN SV* const invlist|const UV start|const UV end|NN U8* swatch
 #endif
