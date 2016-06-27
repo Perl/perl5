@@ -888,6 +888,12 @@ use File::Glob qw(:case);
     'Pod::Checker' => {
         'DISTRIBUTION' => 'MAREKR/Pod-Checker-1.73.tar.gz',
         'FILES'        => q[cpan/Pod-Checker],
+        'CUSTOMIZED'   => [ qw[
+            t/pod/contains_bad_pod.xr
+            t/pod/selfcheck.t
+            t/pod/testcmp.pl
+            t/pod/testpchk.pl
+        ] ],
     },
 
     'Pod::Escapes' => {
