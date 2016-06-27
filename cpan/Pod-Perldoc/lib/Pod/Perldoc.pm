@@ -575,6 +575,9 @@ sub find_good_formatter_class {
   my @class_list = @{ $self->{'formatter_classes'} || [] };
   $self->die( "WHAT?  Nothing in the formatter class list!?" ) unless @class_list;
 
+  local @INC = @INC;
+  pop @INC if $INC[-1] eq '.';
+
   my $good_class_found;
   foreach my $c (@class_list) {
     DEBUG > 4 and print "Trying to load $c...\n";
@@ -1006,6 +1009,8 @@ sub new_translator { # $tr = $self->new_translator($lang);
     my $self = shift;
     my $lang = shift;
 
+    local @INC = @INC;
+    pop @INC if $INC[-1] eq '.';
     my $pack = 'POD2::' . uc($lang);
     eval "require $pack";
     if ( !$@ && $pack->can('new') ) {

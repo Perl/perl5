@@ -504,6 +504,8 @@ sub can_ssl {
     my($ok, $reason) = (1, '');
 
     # Need IO::Socket::SSL 1.42 for SSL_create_ctx_callback
+    local @INC = @INC;
+    pop @INC if $INC[-1] eq '.';
     unless (eval {require IO::Socket::SSL; IO::Socket::SSL->VERSION(1.42)}) {
         $ok = 0;
         $reason .= qq/IO::Socket::SSL 1.42 must be installed for https support\n/;
@@ -1568,6 +1570,8 @@ sub _find_CA_file {
         return $ca_file;
     }
 
+    local @INC = @INC;
+    pop @INC if $INC[-1] eq '.';
     return Mozilla::CA::SSL_ca_file()
         if eval { require Mozilla::CA; 1 };
 
