@@ -2,9 +2,20 @@
 
 <data>
 
-<div><h2>Tickets Listed in #xxxxx: 5.24.1 blockers</h2>
+<div><h2>Tickets Listed in #128222: 5.24.1 blockers</h2>
 
-(No ticket exists yet.)
+<commit votes="" id="f15d05806fb7522031b75cb5a8784727ae03b98a" ticket="127952" desc="[perl #127952] misoptimization for negated constant-ish on lhs of logop" />
+
+<commit votes="" id="60a26c797bbff039ea7f861903732e7cceae415a" ticket="128086" desc="[perl #128086] Fix precedence in hv_ename_delete" />
+<commit votes="" id="7f1bd063e5aa5aeb26ed9c39db6864cc0ecd7a73" ticket="128086" desc="[perl #128086] Test the prev commit" />
+<commit votes="" id="8e5993c4dcf9a5b7c84224dd04946a4e49ec96fe" ticket="128086" desc="Dump empty-string ENAMEs as empty strings" />
+
+<commit votes="" id="fcd130693a9e7a753f63a08691ff619ad91bf8eb" ticket="128106" desc="[perl #128106] Fix reset with non-globs" />
+<commit votes="" id="adec5bbf0b66ee5ebc2ba80eda2389bb68e23d86" ticket="128131" desc="fix symbol detection with gcc 6 link-time optimization (RT #128131)" />
+<commit votes="" id="d674449463a15ac3f36086e3a0bb3a9d02729887" ticket="128171" desc="[perl #128171] Fix assert fail with /@0{0*->@*/*0" />
+<commit votes="" id="08f800f8519574aea9e744ff83230fb93772652b" ticket="128182" desc="[perl #128182] Fix crash with require $nonstring" />
+<commit votes="" id="76734a3218e712760695898e424c2369ccdd49c6" ticket="128204" desc="[perl #128204] Fix crash with @a &amp;.= etc." />
+<commit votes="" id="4cb26c52ed90189e6e3564a4654b869fe4c4d3e6" ticket="128219" desc="PATCH: [perl #128219] typo in perlrecharclass" />
 
 </div>
 
@@ -72,14 +83,14 @@ Perhaps just the removal of SETERRNO() from this.
   <xsl:template match="/">
     <html>
       <head>
-        <title>Cherry-pick votes for maint-5.22</title>
+        <title>Cherry-pick votes for maint-5.24</title>
         <style>
           .accepted .ref a { color: #090 }
           .unvoted  .ref a { color: #c00 }
         </style>
       </head>
       <body>
-        <h1>Cherry-pick votes for maint-5.22</h1>
+        <h1>Cherry-pick votes for maint-5.24</h1>
         <xsl:for-each select="/doc/data/div">
           <h2><xsl:value-of select="h2"/></h2>
           <h3><xsl:value-of select="h3"/></h3>
