@@ -50,6 +50,8 @@ for my $size ( 16, 32, 64 ) {
 my $IsTwosComplement = pack('i', -1) eq "\xFF" x $Config{intsize};
 print "# \$IsTwosComplement = $IsTwosComplement\n";
 
+my $vax_float = (pack("d", 1) =~ /^[\x80\x10]\x40/);
+
 sub is_valid_error
 {
   my $err = shift;
@@ -295,7 +297,7 @@ sub list_eq ($$) {
     # Is this a stupid thing to do on VMS, VOS and other unusual platforms?
 
     skip("-- the IEEE infinity model is unavailable in this configuration.", 1)
-       if (($^O eq 'VMS') && !defined($Config{useieee}));
+       if (($^O eq 'VMS') && !defined($Config{useieee}) || $vax_float);
 
     skip("-- $^O has serious fp indigestion on w-packed infinities", 1)
        if (
@@ -320,7 +322,7 @@ sub list_eq ($$) {
  SKIP: {
 
     skip("-- the full range of an IEEE double may not be available in this configuration.", 3)
-       if (($^O eq 'VMS') && !defined($Config{useieee}));
+       if (($^O eq 'VMS') && !defined($Config{useieee}) || $vax_float);
 
     skip("-- $^O does not like 2**1023", 3)
        if (($^O eq 'ultrix'));
@@ -1340,7 +1342,7 @@ SKIP: {
 			| [Bb]  (?{ '101' })
 			| [Hh]  (?{ 'b8' })
 			| [svnSiIlVNLqQjJ]  (?{ 10111 })
-			| [FfDd]  (?{ 1.36514538e67 })
+			| [FfDd]  (?{ 1.36514538e37 })
 			| [pP]  (?{ "try this buffer" })
 			/x; $^R } @codes;
    my @end = (0x12345678, 0x23456781, 0x35465768, 0x15263748);
@@ -1531,8 +1533,11 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
     my (@y) = unpack("%b10a", "abcd");
     is($x[1], $y[1], "checksum advance ok");
 
-    # verify that the checksum is not overflowed with C0
-    is(unpack("C0%128U", "abcd"), unpack("U0%128U", "abcd"), "checksum not overflowed");
+    SKIP: {
+        skip("-- VAX float", 1) if $vax_float;
+        # verify that the checksum is not overflowed with C0
+        is(unpack("C0%128U", "abcd"), unpack("U0%128U", "abcd"), "checksum not overflowed");
+    }
 }
 
 my $U_1FFC_bytes = byte_utf8a_to_utf8n("\341\277\274");

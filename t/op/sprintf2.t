@@ -529,10 +529,15 @@ for my $num (0, -1, 1) {
     }
 }
 
-# test that %f doesn't panic with +Inf, -Inf, NaN [perl #45383]
-foreach my $n (2**1e100, -2**1e100, 2**1e100/2**1e100) { # +Inf, -Inf, NaN
-    eval { my $f = sprintf("%f", $n); };
-    is $@, "", "sprintf(\"%f\", $n)";
+my $vax_float = (pack("d", 1) =~ /^[\x80\x10]\x40/);
+
+SKIP: {
+    if ($vax_float) { skip "VAX float has no Inf or NaN", 3 }
+    # test that %f doesn't panic with +Inf, -Inf, NaN [perl #45383]
+    foreach my $n ('2**1e100', '-2**1e100', '2**1e100/2**1e100') { # +Inf, -Inf, NaN
+        eval { my $f = sprintf("%f", eval $n); };
+        is $@, "", "sprintf(\"%f\", $n)";
+    }
 }
 
 # test %ll formats with and without HAS_QUAD
@@ -594,6 +599,9 @@ $o::count = 0;
 () = sprintf "%d", $o;
 is $o::count,    0, 'sprintf %d string overload count is 0';
 is $o::numcount, 1, 'sprintf %d number overload count is 1';
+
+SKIP: {  # hexfp
+    if ($vax_float) { skip "VAX float no hexfp", scalar @hexfloat }
 
 my $ppc_linux = $Config{archname} =~ /^(?:ppc|power(?:pc)?)(?:64)?-linux/;
 my $irix_ld   = $Config{archname} =~ /^IP\d+-irix-ld$/;
@@ -682,6 +690,8 @@ for my $t (@hexfloat) {
     ok($ok, "'$format' '$arg' -> '$result' cf '$expected'");
 }
 
+} # SKIP: # hexfp
+
 # double-double long double %a special testing.
 SKIP: {
     skip("uselongdouble=" . ($Config{uselongdouble} ? 'define' : 'undef')
@@ -696,17 +706,17 @@ SKIP: {
                 && $^O eq 'linux'
                 );
     # [rt.perl.org 125633]
-    like(sprintf("%La\n", (2**1020) + (2**-1072)),
+    like(sprintf("%La\n", eval '(2**1020) + (2**-1072)'),
          qr/^0x1.0{522}1p\+1020$/);
-    like(sprintf("%La\n", (2**1021) + (2**-1072)),
+    like(sprintf("%La\n", eval '(2**1021) + (2**-1072)'),
          qr/^0x1.0{523}8p\+1021$/);
-    like(sprintf("%La\n", (2**1022) + (2**-1072)),
+    like(sprintf("%La\n", eval '(2**1022) + (2**-1072)'),
          qr/^0x1.0{523}4p\+1022$/);
-    like(sprintf("%La\n", (2**1023) + (2**-1072)),
+    like(sprintf("%La\n", eval '(2**1023) + (2**-1072)'),
          qr/^0x1.0{523}2p\+1023$/);
-    like(sprintf("%La\n", (2**1023) + (2**-1073)),
+    like(sprintf("%La\n", eval '(2**1023) + (2**-1073)'),
          qr/^0x1.0{523}1p\+1023$/);
-    like(sprintf("%La\n", (2**1023) + (2**-1074)),
+    like(sprintf("%La\n", eval '(2**1023) + (2**-1074)'),
          qr/^0x1.0{524}8p\+1023$/);
 }
 
