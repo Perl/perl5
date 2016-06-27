@@ -6,6 +6,11 @@ ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/XS.pm 27a
 File::Path cpan/File-Path/lib/File/Path.pm fd8ce4420a0c113d3f47dd3223859743655c1da8
 File::Path cpan/File-Path/t/Path_win32.t 94b9276557ce7f80b91f6fd9bfa7a0cd9bf9683e
 Math::BigRat cpan/Math-BigRat/lib/Math/BigRat.pm 6eabc68e04f67694f6fe523e64eb013fc337ca5b
+Module::Metadata cpan/Module-Metadata/t/extract-package.t ddb0a96a6bd0c1593c5654d4ac4449c1a64f6953
+Pod::Checker cpan/Pod-Checker/t/pod/contains_bad_pod.xr 73538fd80dfe6e19ad561fe034009b44460208f6
+Pod::Checker cpan/Pod-Checker/t/pod/selfcheck.t 8ce3cfd38e4b9bcf5bc7fe7f2a14195e49aed7d8
+Pod::Checker cpan/Pod-Checker/t/pod/testcmp.pl a0cd5c8eca775c7753f4464eee96fa916e3d8a16
+Pod::Checker cpan/Pod-Checker/t/pod/testpchk.pl b2072c7f4379fd050e15424175d7cac5facf5b3b
 Pod::Perldoc cpan/Pod-Perldoc/lib/Pod/Perldoc.pm fe0bc906fb74b69cfd3fb289316ba669d770d465
 Scalar-List-Utils cpan/Scalar-List-Utils/lib/List/Util.pm e479a29c6b66ac5cbbde4ef2296afaab6c4635a6
 Scalar-List-Utils cpan/Scalar-List-Utils/lib/List/Util/XS.pm cbc38838d32fd213ae7b37ac38e30195355be3b9
