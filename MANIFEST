@@ -2508,7 +2508,6 @@ cpan/Test-Simple/lib/Test/Builder/Module.pm
 cpan/Test-Simple/lib/Test/Builder/Tester.pm
 cpan/Test-Simple/lib/Test/Builder/Tester/Color.pm
 cpan/Test-Simple/lib/Test/Builder/TodoDiag.pm
-cpan/Test-Simple/lib/Test/FAQ.pod
 cpan/Test-Simple/lib/Test/More.pm
 cpan/Test-Simple/lib/Test/Simple.pm
 cpan/Test-Simple/lib/Test/Tester.pm
@@ -2644,7 +2643,6 @@ cpan/Test-Simple/t/Legacy/subtest/for_do_t.test
 cpan/Test-Simple/t/Legacy/subtest/fork.t
 cpan/Test-Simple/t/Legacy/subtest/implicit_done.t
 cpan/Test-Simple/t/Legacy/subtest/line_numbers.t
-cpan/Test-Simple/t/Legacy/subtest/plan.t
 cpan/Test-Simple/t/Legacy/subtest/predicate.t
 cpan/Test-Simple/t/Legacy/subtest/singleton.t
 cpan/Test-Simple/t/Legacy/subtest/threads.t
@@ -2713,7 +2711,6 @@ cpan/Test-Simple/t/Test2/behavior/nested_context_exception.t
 cpan/Test-Simple/t/Test2/behavior/no_load_api.t
 cpan/Test-Simple/t/Test2/behavior/Subtest_buffer_formatter.t
 cpan/Test-Simple/t/Test2/behavior/Subtest_events.t
-cpan/Test-Simple/t/Test2/behavior/Subtest_plan.t
 cpan/Test-Simple/t/Test2/behavior/Taint.t
 cpan/Test-Simple/t/Test2/legacy/TAP.t
 cpan/Test-Simple/t/Test2/modules/API.t

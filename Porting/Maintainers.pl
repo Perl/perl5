@@ -1073,7 +1073,7 @@ use File::Glob qw(:case);
                 dist.ini
                 examples/indent.pl
                 examples/subtest.t
-                examples/tools.t
+                examples/tools.pl
                 examples/tools.t
                 t/00compile.t
                 t/xxx-changes_updated.t
