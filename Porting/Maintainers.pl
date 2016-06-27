@@ -819,6 +819,8 @@ use File::Glob qw(:case);
             qr{weaver.ini},
             qr{^xt},
         ],
+        # https://rt.perl.org/Ticket/Display.html?id=128160
+        'CUSTOMIZED'   => [ qw[ t/extract-package.t ] ],
     },
 
     'Net::Ping' => {
