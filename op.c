@@ -2744,7 +2744,7 @@ S_lvref(pTHX_ OP *o, I32 type)
     case OP_ASLICE:
     case OP_HSLICE:
         OpTYPE_set(o, OP_LVREFSLICE);
-	o->op_private &= OPpLVAL_INTRO|OPpLVREF_ELEM;
+	o->op_private &= OPpLVAL_INTRO;
 	return;
     case OP_NULL:
 	if (o->op_flags & OPf_SPECIAL)		/* do BLOCK */
