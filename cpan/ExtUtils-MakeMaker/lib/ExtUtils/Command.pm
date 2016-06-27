@@ -20,7 +20,10 @@ if( $Is_VMS ) {
     my $vms_efs;
     my $vms_case;
 
-    if (eval { local $SIG{__DIE__}; require VMS::Feature; }) {
+    if (eval { local $SIG{__DIE__};
+               local @INC = @INC;
+               pop @INC if $INC[-1] eq '.';
+               require VMS::Feature; }) {
         $vms_unix_rpt = VMS::Feature::current("filename_unix_report");
         $vms_efs = VMS::Feature::current("efs_charset");
         $vms_case = VMS::Feature::current("efs_case_preserve");

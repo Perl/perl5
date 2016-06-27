@@ -24,7 +24,12 @@ our $VERSION = "3.08";
 
 our($CONFIGURE, $LIBNET_CFG);
 
-eval { local $SIG{__DIE__}; require Net::LocalCfg };
+eval {
+  local @INC = @INC;
+  pop @INC if $INC[-1] eq '.';
+  local $SIG{__DIE__};
+  require Net::LocalCfg;
+};
 
 our %NetConfig = (
   nntp_hosts      => [],

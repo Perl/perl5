@@ -184,7 +184,11 @@ sub _my_tie {
   }
   my $modulefile = $module . '.pm';
   $modulefile =~ s{::}{/}g;
-  eval { require $modulefile };
+  eval {
+    local @INC = @INC;
+    pop @INC if $INC[-1] eq '.';
+    require $modulefile
+  };
   if ($@) {
     croak "Memoize: Couldn't load hash tie module `$module': $@; aborting";
   }

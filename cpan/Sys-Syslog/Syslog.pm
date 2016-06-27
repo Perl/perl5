@@ -888,6 +888,8 @@ sub silent_eval (&) {
 sub can_load {
     my ($module, $verbose) = @_;
     local($SIG{__DIE__}, $SIG{__WARN__}, $@);
+    local @INC = @INC;
+    pop @INC if $INC[-1] eq '.';
     my $loaded = eval "use $module; 1";
     warn $@ if not $loaded and $verbose;
     return $loaded
