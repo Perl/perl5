@@ -2548,7 +2548,7 @@ s	|int	|deprecate_commaless_var_list
 s	|int	|ao		|int toketype
 s  |void|parse_ident|NN char **s|NN char **d \
                      |NN char * const e|int allow_package \
-                     |bool is_utf8
+				|bool is_utf8|bool check_dollar
 #  if defined(PERL_CR_FILTER)
 s	|I32	|cr_textfilter	|int idx|NULLOK SV *sv|int maxlen
 s	|void	|strip_return	|NN SV *sv

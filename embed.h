@@ -1784,7 +1784,7 @@
 #define lop(a,b,c)		S_lop(aTHX_ a,b,c)
 #define missingterm(a)		S_missingterm(aTHX_ a)
 #define no_op(a,b)		S_no_op(aTHX_ a,b)
-#define parse_ident(a,b,c,d,e)	S_parse_ident(aTHX_ a,b,c,d,e)
+#define parse_ident(a,b,c,d,e,f)	S_parse_ident(aTHX_ a,b,c,d,e,f)
 #define pending_ident()		S_pending_ident(aTHX)
 #define scan_const(a)		S_scan_const(aTHX_ a)
 #define scan_formline(a)	S_scan_formline(aTHX_ a)

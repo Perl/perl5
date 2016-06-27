@@ -8819,7 +8819,8 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
 }
 
 PERL_STATIC_INLINE void
-S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package, bool is_utf8) {
+S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
+                    bool is_utf8, bool check_dollar) {
     PERL_ARGS_ASSERT_PARSE_IDENT;
 
     for (;;) {
@@ -8855,7 +8856,7 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package, bool 
             * the code path that triggers the "Bad name after" warning
             * when looking for barewords.
             */
-           && (*s)[2] != '$') {
+           && !(check_dollar && (*s)[2] == '$')) {
             *(*d)++ = *(*s)++;
             *(*d)++ = *(*s)++;
         }
@@ -8877,7 +8878,7 @@ S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN
 
     PERL_ARGS_ASSERT_SCAN_WORD;
 
-    parse_ident(&s, &d, e, allow_package, is_utf8);
+    parse_ident(&s, &d, e, allow_package, is_utf8, TRUE);
     *d = '\0';
     *slp = d - dest;
     return s;
@@ -8925,7 +8926,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 	}
     }
     else {  /* See if it is a "normal" identifier */
-        parse_ident(&s, &d, e, 1, is_utf8);
+        parse_ident(&s, &d, e, 1, is_utf8, FALSE);
     }
     *d = '\0';
     d = dest;
@@ -8994,7 +8995,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
                (the later check for } being at the expected point will trap
                cases where this doesn't pan out.)  */
             d += is_utf8 ? UTF8SKIP(d) : 1;
-            parse_ident(&s, &d, e, 1, is_utf8);
+            parse_ident(&s, &d, e, 1, is_utf8, TRUE);
 	    *d = '\0';
             tmp_copline = CopLINE(PL_curcop);
             if (s < PL_bufend && isSPACE(*s)) {
@@ -11875,7 +11876,8 @@ S_parse_opt_lexvar(pTHX)
     s = PL_bufptr;
     d = PL_tokenbuf + 1;
     PL_tokenbuf[0] = (char)sigil;
-    parse_ident(&s, &d, PL_tokenbuf + sizeof(PL_tokenbuf) - 1, 0, cBOOL(UTF));
+    parse_ident(&s, &d, PL_tokenbuf + sizeof(PL_tokenbuf) - 1, 0,
+		cBOOL(UTF), FALSE);
     PL_bufptr = s;
     if (d == PL_tokenbuf+1)
 	return NULL;

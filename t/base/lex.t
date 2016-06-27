@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..105\n";
+print "1..107\n";
 
 $x = 'x';
 
@@ -528,3 +528,10 @@ eval q|s##[}#e|;
  eval ('/@0{0*->@*/*]');
  print "ok $test - 128171\n"; $test++;
 }
+
+$foo = "WRONG"; $foo:: = "bar"; $bar = "baz";
+print "not " unless "$foo::$bar" eq "barbaz";
+print qq|ok $test - [perl #128478] "\$foo::\$bar"\n|; $test++;
+@bar = ("baz","bonk");
+print "not " unless "$foo::@bar" eq "barbaz bonk";
+print qq|ok $test - [perl #128478] "\$foo::\@bar"\n|; $test ++;

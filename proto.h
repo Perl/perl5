@@ -5496,7 +5496,7 @@ STATIC SV*	S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRL
 STATIC void	S_no_op(pTHX_ const char *const what, char *s);
 #define PERL_ARGS_ASSERT_NO_OP	\
 	assert(what)
-STATIC void	S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package, bool is_utf8);
+STATIC void	S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package, bool is_utf8, bool check_dollar);
 #define PERL_ARGS_ASSERT_PARSE_IDENT	\
 	assert(s); assert(d); assert(e)
 STATIC int	S_pending_ident(pTHX);
