@@ -3408,11 +3408,10 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
 
 	errsv = ERRSV;
 	if (in_require) {
-            if (yystatus == 3) {
-                cx = CX_CUR();
-                assert(CxTYPE(cx) == CXt_EVAL);
-                namesv = cx->blk_eval.old_namesv;
-            }
+            /* die_unwind() re-croaks when in require, having popped
+             * the  require EVAL context. So we should never catch
+             * a require exception here */
+            assert(yystatus != 3);
             S_undo_inc_then_croak(aTHX_ namesv, errsv, FALSE);
             NOT_REACHED; /* NOTREACHED */
 	}
