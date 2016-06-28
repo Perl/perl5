@@ -1691,11 +1691,12 @@ Perl_die_unwind(pTHX_ SV *msv)
 		*++oldsp = &PL_sv_undef;
 	    PL_stack_sp = oldsp;
 
+	    restartjmpenv = cx->blk_eval.cur_top_env;
+	    restartop     = cx->blk_eval.retop;
+
             CX_LEAVE_SCOPE(cx);
 	    cx_popeval(cx);
 	    cx_popblock(cx);
-	    restartjmpenv = cx->blk_eval.cur_top_env;
-	    restartop = cx->blk_eval.retop;
             if (CxOLD_OP_TYPE(cx) == OP_REQUIRE)
                 namesv = cx->blk_eval.old_namesv;
             CX_POP(cx);
@@ -3401,7 +3402,8 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
             CX_LEAVE_SCOPE(cx);
 	    cx_popeval(cx);
 	    cx_popblock(cx);
-            if (in_require)
+            assert((CxOLD_OP_TYPE(cx) == OP_REQUIRE) == cBOOL(in_require));
+            if (CxOLD_OP_TYPE(cx) == OP_REQUIRE)
                 namesv = cx->blk_eval.old_namesv;
             CX_POP(cx);
 
@@ -4308,17 +4310,17 @@ PP(pp_leaveeval)
      */
     PL_curcop = cx->blk_oldcop;
 
-    CX_LEAVE_SCOPE(cx);
-    cx_popeval(cx);
-    cx_popblock(cx);
     retop = cx->blk_eval.retop;
     evalcv = cx->blk_eval.cv;
-    CX_POP(cx);
-
 #ifdef DEBUGGING
     assert(CvDEPTH(evalcv) == 1);
 #endif
     CvDEPTH(evalcv) = 0;
+
+    CX_LEAVE_SCOPE(cx);
+    cx_popeval(cx);
+    cx_popblock(cx);
+    CX_POP(cx);
 
     if (namesv) { /* require returned false */
 	/* Unassume the success we assumed earlier. */
