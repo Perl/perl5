@@ -564,7 +564,7 @@ use File::Glob qw(:case);
     },
 
     'Getopt::Long' => {
-        'DISTRIBUTION' => 'JV/Getopt-Long-2.49.tar.gz',
+        'DISTRIBUTION' => 'JV/Getopt-Long-2.49.1.tar.gz',
         'FILES'        => q[cpan/Getopt-Long],
         'EXCLUDED'     => [
             qr{^examples/},
