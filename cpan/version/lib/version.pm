@@ -10,7 +10,7 @@ if ($] >= 5.015) {
 
 use vars qw(@ISA $VERSION $CLASS $STRICT $LAX *declare *qv);
 
-$VERSION = 0.9916;
+$VERSION = 0.9917;
 $CLASS = 'version';
 
 # avoid using Exporter

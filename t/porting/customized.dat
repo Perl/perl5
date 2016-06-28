@@ -19,4 +19,4 @@ Scalar-List-Utils cpan/Scalar-List-Utils/ListUtil.xs 362a247c65878265fd8acae607b
 Socket cpan/Socket/Socket.pm 98e38176d745c38282907f391c077298f5a3d0ba
 Socket cpan/Socket/Socket.xs edd4fed212785f11c5c2095a75941dad27d586d9
 autodie cpan/autodie/t/mkdir.t 9e70d2282a3cc7d76a78bf8144fccba20fb37dac
-version cpan/version/lib/version.pm ff75e2076be10bd4c05133cd979fda0b38ca8653
+version cpan/version/lib/version.pm a032a751524bdd07a93c945d2a1703abe7ad8ef0
