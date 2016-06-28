@@ -4,7 +4,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 153;
+plan 155;
 
 eval '\$x = \$y';
 like $@, qr/^Experimental aliasing via reference not enabled/,
@@ -590,3 +590,12 @@ SKIP: {
 
 # Used to fail an assertion [perl #123821]
 eval '\(&$0)=0';
+pass("RT #123821");
+
+# Used to fail an assertion [perl #128252]
+{
+    no feature 'refaliasing';
+    use warnings;
+    eval q{sub{\@0[0]=0};};
+    pass("RT #128252");
+}
