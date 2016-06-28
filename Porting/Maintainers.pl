@@ -751,19 +751,15 @@ use File::Glob qw(:case);
     },
 
     'Math::BigRat' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigRat-0.260802.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigRat-0.260804.tar.gz',
         'FILES'        => q[cpan/Math-BigRat],
         'EXCLUDED'     => [
             qr{^inc/},
+            qr{^t/author-},
             qw( t/00sig.t
                 t/01load.t
                 t/02pod.t
                 t/03podcov.t
-                t/blog-mbr.t
-                ),
-        ],
-        'CUSTOMIZED'   => [
-            qw( lib/Math/BigRat.pm
                 ),
         ],
     },
