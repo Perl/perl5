@@ -14,8 +14,9 @@ use Encode qw<find_encoding>;
 my $locale_encoding = encoding::_get_locale_encoding;
 
 SKIP: {
-    is(ref $locale_encoding, '', '_get_locale_encoding returns a scalar value')
-	or skip 'no locale encoding found', 1;
+    defined $locale_encoding or skip 'no locale encoding found', 3;
+
+    is(ref $locale_encoding, '', '_get_locale_encoding returns a scalar value');
 
     my $enc = find_encoding($locale_encoding);
     ok(defined $enc, 'encoding returned is supported')
