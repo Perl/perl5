@@ -3383,7 +3383,6 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
     yystatus = (!in_require && CATCH_GET) ? S_try_yyparse(aTHX_ GRAMPROG) : yyparse(GRAMPROG);
 
     if (yystatus || PL_parser->error_count || !PL_eval_root) {
-        SV *namesv = NULL; /* initialise  to avoid compiler warning */
 	PERL_CONTEXT *cx;
         SV *errsv;
 
@@ -3392,6 +3391,7 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
          * compilation, so the EVAL CX block has already been popped, and
          * various vars restored */
 	if (yystatus != 3) {
+            SV *namesv;
 	    if (PL_eval_root) {
 		op_free(PL_eval_root);
 		PL_eval_root = NULL;
@@ -3404,18 +3404,19 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
             if (in_require)
                 namesv = cx->blk_eval.old_namesv;
             CX_POP(cx);
+
+            if (in_require) {
+                S_undo_inc_then_croak(aTHX_ namesv, ERRSV, FALSE);
+                NOT_REACHED; /* NOTREACHED */
+            }
 	}
+
+        /* die_unwind() re-croaks when in require, having popped the
+         * require EVAL context. So we should never catch a require
+         * exception here */
+	assert(!in_require);
 
 	errsv = ERRSV;
-	if (in_require) {
-            /* die_unwind() re-croaks when in require, having popped
-             * the  require EVAL context. So we should never catch
-             * a require exception here */
-            assert(yystatus != 3);
-            S_undo_inc_then_croak(aTHX_ namesv, errsv, FALSE);
-            NOT_REACHED; /* NOTREACHED */
-	}
-
         if (!*(SvPV_nolen_const(errsv)))
             sv_setpvs(errsv, "Compilation error");
 
