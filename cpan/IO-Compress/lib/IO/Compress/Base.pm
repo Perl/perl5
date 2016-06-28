@@ -20,7 +20,7 @@ use Symbol();
 our (@ISA, $VERSION);
 @ISA    = qw(Exporter IO::File);
 
-$VERSION = '2.068';
+$VERSION = '2.068_001';
 
 #Can't locate object method "SWASHNEW" via package "utf8" (perhaps you forgot to load "utf8"?) at .../ext/Compress-Zlib/Gzip/blib/lib/Compress/Zlib/Common.pm line 16.
 

@@ -5,7 +5,7 @@ use warnings;
 
 use base 'TAP::Object';
 
-our $VERSION = '3.35';
+our $VERSION = '3.35_01';
 
 # TODO:
 #   Handle blessed object syntax

@@ -7,7 +7,7 @@ use bytes;
 use IO::Compress::Base::Common  2.068 qw(:Status);
 our ($VERSION);
 
-$VERSION = '2.068';
+$VERSION = '2.068_001';
 
 sub mkCompObject
 {
