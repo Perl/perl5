@@ -6,7 +6,7 @@ use warnings;
 
 use Math::BigInt::Calc 1.999706;
 
-our $VERSION = '0.40';
+our $VERSION = '0.42';
 
 ##############################################################################
 # global constants, flags and accessory
