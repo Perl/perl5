@@ -2647,6 +2647,7 @@ cpan/Test-Simple/t/Legacy/plan_no_plan.t
 cpan/Test-Simple/t/Legacy/plan_shouldnt_import.t
 cpan/Test-Simple/t/Legacy/plan_skip_all.t
 cpan/Test-Simple/t/Legacy/Regression/637.t
+cpan/Test-Simple/t/Legacy/Regression/683_thread_todo.t
 cpan/Test-Simple/t/Legacy/require_ok.t
 cpan/Test-Simple/t/Legacy/run_test.t
 cpan/Test-Simple/t/Legacy/simple.t
@@ -2718,6 +2719,7 @@ cpan/Test-Simple/t/lib/Test/Simple/sample_tests/two_fail.plx
 cpan/Test-Simple/t/lib/TieOut.pm
 cpan/Test-Simple/t/regression/642_persistent_end.t
 cpan/Test-Simple/t/regression/662-tbt-no-plan.t
+cpan/Test-Simple/t/regression/684-nested_todo_diag.t
 cpan/Test-Simple/t/regression/no_name_in_subtest.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_done_testing.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_fork.t
@@ -2730,6 +2732,7 @@ cpan/Test-Simple/t/Test2/behavior/err_var.t
 cpan/Test-Simple/t/Test2/behavior/init_croak.t
 cpan/Test-Simple/t/Test2/behavior/nested_context_exception.t
 cpan/Test-Simple/t/Test2/behavior/no_load_api.t
+cpan/Test-Simple/t/Test2/behavior/run_subtest_inherit.t
 cpan/Test-Simple/t/Test2/behavior/Subtest_buffer_formatter.t
 cpan/Test-Simple/t/Test2/behavior/Subtest_events.t
 cpan/Test-Simple/t/Test2/behavior/Taint.t

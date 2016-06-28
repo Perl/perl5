@@ -2,7 +2,7 @@ package Test2::API;
 use strict;
 use warnings;
 
-our $VERSION = '1.302026';
+our $VERSION = '1.302035';
 
 
 my $INST;
@@ -416,8 +416,9 @@ sub intercept(&) {
 sub run_subtest {
     my ($name, $code, $params, @args) = @_;
 
-    $params = { buffered => $params } unless ref $params;
-    my $buffered = delete $params->{buffered};
+    $params = {buffered => $params} unless ref $params;
+    my $buffered      = delete $params->{buffered};
+    my $inherit_trace = delete $params->{inherit_trace};
 
     my $ctx = context();
 
@@ -440,6 +441,17 @@ sub run_subtest {
             my $hide = $format->can('hide_buffered') ? $format->hide_buffered : 1;
             $hub->format(undef) if $hide;
         }
+    }
+
+    if ($inherit_trace) {
+        my $orig = $code;
+        $code = sub {
+            my $st_ctx = Test2::API::Context->new(
+                trace => $ctx->trace,
+                hub   => $hub,
+            );
+            $st_ctx->do_in_context($orig, @args);
+        };
     }
 
     my ($ok, $err, $finished);
@@ -909,10 +921,26 @@ The code to run inside the subtest.
 If this is a simple scalar then it will be treated as a boolean for the
 'buffered' setting. If this is a hash reference then it will be used as a
 parameters hash. The param hash will be used for hub construction (with the
-'buffered' key removed).
+specified keys removed).
 
-If this is true, or a hashref with a true value for the 'buffered' key, then
-the subtest will be buffered.
+Keys that are removed and used by run_subtest:
+
+=over 4
+
+=item 'buffered' => $bool
+
+Toggle buffered status.
+
+=item 'inherit_trace' => $bool
+
+Normally the subtest hub is pushed and the sub is allowed to generate its own
+root context for the hub. When this setting is turned on a root context will be
+created for the hub that shares the same trace as the current context.
+
+Set this to true if your tool is producing subtests without user-specified
+subs.
+
+=back
 
 =item @ARGS
 

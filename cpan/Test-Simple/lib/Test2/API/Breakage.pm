@@ -2,7 +2,7 @@ package Test2::API::Breakage;
 use strict;
 use warnings;
 
-our $VERSION = '1.302026';
+our $VERSION = '1.302035';
 
 
 use Test2::Util qw/pkg_to_file/;
@@ -30,6 +30,7 @@ sub upgrade_required {
         'Test::Modern'            => '0.012',
         'Test::SharedFork'        => '0.34',
         'Test::Alien'             => '0.04',
+        'Test::UseAllModules'     => '0.14',
 
         'Test::Clustericious::Cluster' => '0.30',
     );

@@ -248,6 +248,14 @@ tool.
 
 Fixed in version: 0.012
 
+=item Test::UseAllModules
+
+Version 0.14 relied on C<< Test::Builder->history >> which was available in
+Test::Builder 1.5. Versions 0.12 and 0.13 relied on other Test::Builder
+internals.
+
+Fixed in version: 0.15
+
 =back
 
 =head2 STILL BROKEN
@@ -258,14 +266,14 @@ Fixed in version: 0.012
 
 This distribution directly accesses the hash keys in the L<Test::Builder>
 singleton. It also approaches the problem from the wrong angle, please consider
-using L<Test2::Harness> (not yet released) or L<App::ForkProve> which both
-solve the same problem at the harness level.
+using L<Test2::Harness> or L<App::ForkProve> which both solve the same problem
+at the harness level.
 
 Still broken as of version: 0.373
 
 =item Test::Wrapper
 
-This module directly uses hash keys in the L<Test::BuildeR> singleton. This
+This module directly uses hash keys in the L<Test::Builder> singleton. This
 module is also obsolete thanks to the benefits of L<Test2>. Use C<intercept()>
 from L<Test2::API> to achieve a similar result.
 

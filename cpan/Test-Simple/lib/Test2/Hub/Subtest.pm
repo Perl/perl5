@@ -2,7 +2,7 @@ package Test2::Hub::Subtest;
 use strict;
 use warnings;
 
-our $VERSION = '1.302026';
+our $VERSION = '1.302035';
 
 
 BEGIN { require Test2::Hub; our @ISA = qw(Test2::Hub) }

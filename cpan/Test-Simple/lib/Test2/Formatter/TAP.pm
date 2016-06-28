@@ -2,7 +2,7 @@ package Test2::Formatter::TAP;
 use strict;
 use warnings;
 
-our $VERSION = '1.302026';
+our $VERSION = '1.302035';
 
 
 use Test2::Util::HashBase qw{
@@ -381,7 +381,7 @@ order to do this you use the C<register_event()> class method.
     use Test2::Formatter::TAP;
 
     use base 'Test2::Event';
-    use Test2::Util::HashBase accessors => [qw/pass name diag note/];
+    use Test2::Util::HashBase qw/pass name diag note/;
 
     Test2::Formatter::TAP->register_event(
         __PACKAGE__,

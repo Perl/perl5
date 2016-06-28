@@ -17,7 +17,7 @@ sub _carp {
     return warn @_, " at $file line $line\n";
 }
 
-our $VERSION = '1.302026';
+our $VERSION = '1.302035';
 
 use Test::Builder::Module;
 our @ISA    = qw(Test::Builder::Module);
@@ -724,7 +724,7 @@ sub new_ok {
 
 =item B<subtest>
 
-    subtest $name => \&code;
+    subtest $name => \&code, @args;
 
 C<subtest()> runs the &code as its own little test with its own plan and
 its own result.  The main test counts this as a single test using the
@@ -783,11 +783,20 @@ subtests are equivalent:
       done_testing();
   };
 
+Extra arguments given to C<subtest> are passed to the callback. For example:
+
+    sub my_subtest {
+        my $range = shift;
+        ...
+    }
+
+    for my $range (1, 10, 100, 1000) {
+        subtest "testing range $range", \&my_subtest, $range;
+    }
+
 =cut
 
 sub subtest {
-    my ($name, $subtests) = @_;
-
     my $tb = Test::More->builder;
     return $tb->subtest(@_);
 }
