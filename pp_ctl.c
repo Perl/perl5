@@ -1588,30 +1588,48 @@ Perl_qerror(pTHX_ SV *err)
 
 
 
-/* undef or delete the $INC{namesv} entry, then croak.
- * require0 indicates that the require didn't return a true value */
+/* pop a CXt_EVAL context and in addition, if it was a require then
+ * based on action:
+ *     0: do nothing extra;
+ *     1: undef  $INC{$name}; croak "$name did not return a true value";
+ *     2: delete $INC{$name}; croak "$errsv: Compilation failed in require"
+ */
 
 static void
-S_undo_inc_then_croak(pTHX_ SV *namesv, SV *err, bool require0)
+S_pop_eval_context_maybe_croak(pTHX_ PERL_CONTEXT *cx, SV *errsv, int action)
 {
-    const char *fmt;
-    HV *inc_hv = GvHVn(PL_incgv);
-    I32  klen  = SvUTF8(namesv) ? -(I32)SvCUR(namesv) : (I32)SvCUR(namesv);
-    const char *key = SvPVX_const(namesv);
+    SV  *namesv;
+    bool do_croak;
 
-    if (require0) {
-	(void)hv_delete(inc_hv, key, klen, G_DISCARD);
-	fmt = "%"SVf" did not return a true value";
-        err = namesv;
-    }
-    else {
-        (void)hv_store(inc_hv, key, klen, &PL_sv_undef, 0);
-        fmt = "%"SVf"Compilation failed in require";
-        err = err ? err : newSVpvs_flags("Unknown error\n", SVs_TEMP);
-    }
+    CX_LEAVE_SCOPE(cx);
+    do_croak = action && (CxOLD_OP_TYPE(cx) == OP_REQUIRE);
+    namesv = cx->blk_eval.old_namesv;
+    cx_popeval(cx);
+    cx_popblock(cx);
+    CX_POP(cx);
 
-    Perl_croak(aTHX_ fmt, SVfARG(err));
+    if (do_croak) {
+        const char *fmt;
+        HV *inc_hv = GvHVn(PL_incgv);
+        I32  klen  = SvUTF8(namesv) ? -(I32)SvCUR(namesv) : (I32)SvCUR(namesv);
+        const char *key = SvPVX_const(namesv);
+
+        if (action == 1) {
+            (void)hv_delete(inc_hv, key, klen, G_DISCARD);
+            fmt = "%"SVf" did not return a true value";
+            errsv = namesv;
+        }
+        else {
+            (void)hv_store(inc_hv, key, klen, &PL_sv_undef, 0);
+            fmt = "%"SVf"Compilation failed in require";
+            if (!errsv)
+                errsv = newSVpvs_flags("Unknown error\n", SVs_TEMP);
+        }
+
+        Perl_croak(aTHX_ fmt, SVfARG(errsv));
+    }
 }
+
 
 
 void
@@ -1671,7 +1689,6 @@ Perl_die_unwind(pTHX_ SV *msv)
 	}
 
 	if (cxix >= 0) {
-            SV *namesv = NULL;
 	    PERL_CONTEXT *cx;
 	    SV **oldsp;
             U8 gimme;
@@ -1693,22 +1710,13 @@ Perl_die_unwind(pTHX_ SV *msv)
 
 	    restartjmpenv = cx->blk_eval.cur_top_env;
 	    restartop     = cx->blk_eval.retop;
-
-            CX_LEAVE_SCOPE(cx);
-	    cx_popeval(cx);
-	    cx_popblock(cx);
-            if (CxOLD_OP_TYPE(cx) == OP_REQUIRE)
-                namesv = cx->blk_eval.old_namesv;
-            CX_POP(cx);
-
-            if (namesv) {
-                /* note that unlike pp_entereval, pp_require isn't
-                 * supposed to trap errors. So now that we've popped the
-                 * EVAL that pp_require pushed, process the error message
-                 * and rethrow the error */
-                S_undo_inc_then_croak(aTHX_ namesv, exceptsv, FALSE);
-                NOT_REACHED; /* NOTREACHED */
-            }
+            /* Note that unlike pp_entereval, pp_require isn't supposed to
+             * trap errors. So if we're a require, after we pop the
+             * CXt_EVAL that pp_require pushed, rethrow the error with
+             * croak(exceptsv). This is all handled by the call below when
+             * action == 2.
+             */
+            S_pop_eval_context_maybe_croak(aTHX_ cx, exceptsv, 2);
 
 	    if (!(in_eval & EVAL_KEEPERR))
 		sv_setsv(ERRSV, exceptsv);
@@ -3392,25 +3400,15 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
          * compilation, so the EVAL CX block has already been popped, and
          * various vars restored */
 	if (yystatus != 3) {
-            SV *namesv;
 	    if (PL_eval_root) {
 		op_free(PL_eval_root);
 		PL_eval_root = NULL;
 	    }
 	    SP = PL_stack_base + POPMARK;	/* pop original mark */
             cx = CX_CUR();
-            CX_LEAVE_SCOPE(cx);
-	    cx_popeval(cx);
-	    cx_popblock(cx);
-            assert((CxOLD_OP_TYPE(cx) == OP_REQUIRE) == cBOOL(in_require));
-            if (CxOLD_OP_TYPE(cx) == OP_REQUIRE)
-                namesv = cx->blk_eval.old_namesv;
-            CX_POP(cx);
-
-            if (in_require) {
-                S_undo_inc_then_croak(aTHX_ namesv, ERRSV, FALSE);
-                NOT_REACHED; /* NOTREACHED */
-            }
+            assert(CxTYPE(cx) == CXt_EVAL);
+            /* pop the CXt_EVAL, and if was a require, croak */
+            S_pop_eval_context_maybe_croak(aTHX_ cx, ERRSV, 2);
 	}
 
         /* die_unwind() re-croaks when in require, having popped the
@@ -4276,10 +4274,9 @@ PP(pp_leaveeval)
     U8 gimme;
     PERL_CONTEXT *cx;
     OP *retop;
-    SV *namesv = NULL;
+    int failed;
     CV *evalcv;
-    /* grab this value before cx_popeval restores old PL_in_eval */
-    bool keep = cBOOL(PL_in_eval & EVAL_KEEPERR);
+    bool keep;
 
     PERL_ASYNC_CHECK();
 
@@ -4290,12 +4287,10 @@ PP(pp_leaveeval)
     gimme = cx->blk_gimme;
 
     /* did require return a false value? */
-    if (       CxOLD_OP_TYPE(cx) == OP_REQUIRE
-            && !(gimme == G_SCALAR
+    failed =    CxOLD_OP_TYPE(cx) == OP_REQUIRE
+             && !(gimme == G_SCALAR
                     ? SvTRUE(*PL_stack_sp)
-                : PL_stack_sp > oldsp)
-    )
-        namesv = cx->blk_eval.old_namesv;
+                    : PL_stack_sp > oldsp);
 
     if (gimme == G_VOID)
         PL_stack_sp = oldsp;
@@ -4310,6 +4305,8 @@ PP(pp_leaveeval)
      */
     PL_curcop = cx->blk_oldcop;
 
+    /* grab this value before cx_popeval restores the old PL_in_eval */
+    keep = cBOOL(PL_in_eval & EVAL_KEEPERR);
     retop = cx->blk_eval.retop;
     evalcv = cx->blk_eval.cv;
 #ifdef DEBUGGING
@@ -4317,16 +4314,8 @@ PP(pp_leaveeval)
 #endif
     CvDEPTH(evalcv) = 0;
 
-    CX_LEAVE_SCOPE(cx);
-    cx_popeval(cx);
-    cx_popblock(cx);
-    CX_POP(cx);
-
-    if (namesv) { /* require returned false */
-	/* Unassume the success we assumed earlier. */
-        S_undo_inc_then_croak(aTHX_ namesv, NULL, TRUE);
-        NOT_REACHED; /* NOTREACHED */
-    }
+    /* pop the CXt_EVAL, and if a require failed, croak */
+    S_pop_eval_context_maybe_croak(aTHX_ cx, NULL, failed);
 
     if (!keep)
         CLEAR_ERRSV();
