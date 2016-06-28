@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 3724            # tests in require'd file
+use Test::More tests => 3913            # tests in require'd file
                          + 6;           # tests in this file
 
 use Math::BigInt lib => 'Calc';

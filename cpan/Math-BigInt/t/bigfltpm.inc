@@ -15,7 +15,6 @@ while (<DATA>) {
     s/\s+$//;                   # remove trailing whitespace
     next unless length;         # skip empty lines
 
-
     if (s/^&//) {
         $f = $_;
         next;
@@ -71,9 +70,9 @@ while (<DATA>) {
     } elsif ($f eq "bpi") {
         $try .= qq| $CLASS->bpi(\$x);|;
     } elsif ($f eq "binc") {
-        $try .= ' ++$x;';
+        $try .= ' $x->binc();';
     } elsif ($f eq "bdec") {
-        $try .= ' --$x;';
+        $try .= ' $x->bdec();';
     } elsif ($f eq "bround") {
         $try .= qq| $setup; \$x->bround($args[1]);|;
     } elsif ($f eq "bfround") {
@@ -112,7 +111,7 @@ while (<DATA>) {
         } elsif ($f eq "bacmp") {
             $try .= ' $x->bacmp($y);';
         } elsif ($f eq "bpow") {
-            $try .= ' $x ** $y;';
+            $try .= ' $x->bpow($y);';
         } elsif ($f eq "bnok") {
             $try .= ' $x->bnok($y);';
         } elsif ($f eq "bcos") {
@@ -124,21 +123,21 @@ while (<DATA>) {
         } elsif ($f eq "broot") {
             $try .= qq| $setup; \$x->broot(\$y);|;
         } elsif ($f eq "badd") {
-            $try .= ' $x + $y;';
+            $try .= ' $x->badd($y);';
         } elsif ($f eq "bsub") {
-            $try .= ' $x - $y;';
+            $try .= ' $x->bsub($y);';
         } elsif ($f eq "bmul") {
-            $try .= ' $x * $y;';
+            $try .= ' $x->bmul($y);';
         } elsif ($f eq "bdiv") {
-            $try .= qq| $setup; \$x / \$y;|;
+            $try .= qq| $setup; scalar \$x->bdiv(\$y);|;
         } elsif ($f eq "bdiv-list") {
             $try .= qq| $setup; join(",", \$x->bdiv(\$y));|;
         } elsif ($f eq "brsft") {
-            $try .= ' $x >> $y;';
+            $try .= ' $x->brsft($y);';
         } elsif ($f eq "blsft") {
-            $try .= ' $x << $y;';
+            $try .= ' $x->blsft($y);';
         } elsif ($f eq "bmod") {
-            $try .= ' $x % $y;';
+            $try .= ' $x->bmod($y);';
         } else {
             # Functions with three arguments
             $try .= qq| \$z = $CLASS->new("$args[2]");|;
@@ -258,42 +257,6 @@ is($CLASS->binf("-inf"), "-inf", qq|$CLASS->binf("-inf")|);
 
 $CLASS->accuracy(undef);	# reset
 $CLASS->precision(undef);	# reset
-
-###############################################################################
-# bug in bsstr()/numify() showed up in after-rounding in bdiv()
-
-$x = $CLASS->new("0.008");
-$y = $CLASS->new(2);
-$x->bdiv(3, $y);
-is($x, "0.0027",
-   qq|\$x = $CLASS->new("0.008"); \$y = $CLASS->new(2); \$x->bdiv(3, \$y);|);
-
-###############################################################################
-# Verify that numify() returns a normalized value, and underflows and
-# overflows when given "extreme" values.
-
-like($CLASS->new("12345e67")->numify(), qr/^1\.2345e\+?0*71$/,
-     qq|$CLASS->new("12345e67")->numify()|);
-
-# underflow
-like($CLASS->new("1e-9999")->numify(), qr/^\+?0$/,
-     qq|$CLASS->new("1e-9999")->numify()|);
-
-# overflow
-unlike($CLASS->new("1e9999")->numify(), qr/^1(\.0*)?e\+?9+$/,
-       qq|$CLASS->new("1e9999")->numify()|);
-
-###############################################################################
-# Check numify on non-finite objects.
-
-{
-    require Math::Complex;
-    my $inf = Math::Complex::Inf();
-    my $nan = $inf - $inf;
-    is($CLASS -> binf("+") -> numify(),  $inf, "numify of +Inf");
-    is($CLASS -> binf("-") -> numify(), -$inf, "numify of -Inf");
-    is($CLASS -> bnan()    -> numify(),  $nan, "numify of NaN");
-}
 
 ###############################################################################
 # bsqrt() with set global A/P or A/P enabled on $x, also a test whether bsqrt()
@@ -497,7 +460,7 @@ is($x, 2,
 $x = $CLASS->new("2");
 $y = $CLASS->new("18.2");
 
-# 2 * (2 ** 18.2);
+# 2 * (2 ** int(18.2));
 $x <<= $y;
 is($x->copy()->bfround(-9), "602248.763144685",
    qq|\$x = $CLASS->new("2"); \$y = $CLASS->new("18.2");| .

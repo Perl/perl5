@@ -5,7 +5,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 2409            # tests in require'd file
+use Test::More tests => 2402            # tests in require'd file
                          + 1;           # tests in this file
 
 use Math::BigFloat with => 'Math::BigInt::Subclass',

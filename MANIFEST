@@ -1670,6 +1670,10 @@ cpan/Math-BigInt/t/alias.inc		Support for BigInt tests
 cpan/Math-BigInt/t/bare_mbf.t		Test MBF under Math::BigInt::BareCalc
 cpan/Math-BigInt/t/bare_mbi.t		Test MBI under Math::BigInt::BareCalc
 cpan/Math-BigInt/t/bare_mif.t		Rounding tests under BareCalc
+cpan/Math-BigInt/t/bdstr-mbf.t		Test Math::BigInt
+cpan/Math-BigInt/t/bdstr-mbi.t		Test Math::BigInt
+cpan/Math-BigInt/t/bestr-mbf.t		Test Math::BigInt
+cpan/Math-BigInt/t/bestr-mbi.t		Test Math::BigInt
 cpan/Math-BigInt/t/big_pi_e.t		test bpi() and bexp()
 cpan/Math-BigInt/t/bigfltpm.inc		Shared tests for bigfltpm.t and sub_mbf.t
 cpan/Math-BigInt/t/bigfltpm.t		See if BigFloat.pm works
@@ -1679,12 +1683,24 @@ cpan/Math-BigInt/t/bigintpm.t		See if BigInt.pm works
 cpan/Math-BigInt/t/bigints.t		See if BigInt.pm works
 cpan/Math-BigInt/t/biglog.t		Test the log function
 cpan/Math-BigInt/t/bigroot.t		Test the broot function
+cpan/Math-BigInt/t/bnstr-mbf.t		Test Math::BigInt
+cpan/Math-BigInt/t/bnstr-mbi.t		Test Math::BigInt
+cpan/Math-BigInt/t/bsstr-mbf.t		Test Math::BigInt
+cpan/Math-BigInt/t/bsstr-mbi.t		Test Math::BigInt
 cpan/Math-BigInt/t/calling.t		Test calling conventions
+cpan/Math-BigInt/t/calling-class-methods.t	Test Math::BigInt
+cpan/Math-BigInt/t/calling-instance-methods.t	Test Math::BigInt
 cpan/Math-BigInt/t/config.t		Test Math::BigInt->config()
 cpan/Math-BigInt/t/const_mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/constant.t		Test Math::BigInt/BigFloat under :constant
 cpan/Math-BigInt/t/downgrade.t		Test if use Math::BigInt(); under downgrade works
+cpan/Math-BigInt/t/dparts-mbf.t		Test Math::BigInt
+cpan/Math-BigInt/t/dparts-mbi.t		Test Math::BigInt
+cpan/Math-BigInt/t/eparts-mbf.t		Test Math::BigInt
+cpan/Math-BigInt/t/eparts-mbi.t		Test Math::BigInt
+cpan/Math-BigInt/t/from_bin-mbf.t	Test Math::BigInt
 cpan/Math-BigInt/t/from_hex-mbf.t	Test Math::BigInt
+cpan/Math-BigInt/t/from_oct-mbf.t	Test Math::BigInt
 cpan/Math-BigInt/t/inf_nan.t		Special tests for inf and *NaN* handling
 cpan/Math-BigInt/t/isa.t		Test for Math::BigInt inheritance
 cpan/Math-BigInt/t/lib_load.t		Test sane lib names
@@ -1698,7 +1714,10 @@ cpan/Math-BigInt/t/mbi_rand.t		Test Math::BigInt randomly
 cpan/Math-BigInt/t/mbimbf.inc		Actual BigInt/BigFloat accuracy, precision and fallback, round_mode tests
 cpan/Math-BigInt/t/mbimbf.t		BigInt/BigFloat accuracy, precision and fallback, round_mode
 cpan/Math-BigInt/t/nan_cmp.t		overloaded comparison involving *NaN*
+cpan/Math-BigInt/t/new-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/new_overloaded.t	test overloaded numbers in BigFloat's new()
+cpan/Math-BigInt/t/nparts-mbf.t		Test Math::BigInt
+cpan/Math-BigInt/t/nparts-mbi.t		Test Math::BigInt
 cpan/Math-BigInt/t/objectify_mbf.t	Math::BigInt tests
 cpan/Math-BigInt/t/objectify_mbi.t	Math::BigInt tests
 cpan/Math-BigInt/t/req_mbf0.t		test: require Math::BigFloat; ->bzero();
@@ -1710,6 +1729,8 @@ cpan/Math-BigInt/t/req_mbfw.t		require Math::BigFloat; import ( with => );
 cpan/Math-BigInt/t/require.t		Test if require Math::BigInt works
 cpan/Math-BigInt/t/round.t		Test rounding with non-integer A and P
 cpan/Math-BigInt/t/rt-16221.t		Tests for objectify() w/foreign objs
+cpan/Math-BigInt/t/sparts-mbf.t		Test Math::BigInt
+cpan/Math-BigInt/t/sparts-mbi.t		Test Math::BigInt
 cpan/Math-BigInt/t/sub_ali.t		Tests for aliases in BigInt subclasses
 cpan/Math-BigInt/t/sub_mbf.t		Empty subclass test of BigFloat
 cpan/Math-BigInt/t/sub_mbi.t		Empty subclass test of BigInt
