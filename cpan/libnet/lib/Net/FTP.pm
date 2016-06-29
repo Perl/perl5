@@ -24,7 +24,7 @@ use Net::Config;
 use Socket;
 use Time::Local;
 
-our $VERSION = '3.05';
+our $VERSION = '3.05_01';
 
 our $IOCLASS;
 BEGIN {

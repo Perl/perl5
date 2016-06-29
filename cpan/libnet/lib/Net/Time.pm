@@ -23,7 +23,7 @@ use Net::Config;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(inet_time inet_daytime);
 
-our $VERSION = "3.05";
+our $VERSION = "3.05_01";
 
 our $TIMEOUT = 120;
 

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
 
-our $VERSION = '0.054';
+our $VERSION = '0.054_01';
 
 use Carp ();
 
