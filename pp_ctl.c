@@ -1603,7 +1603,12 @@ S_pop_eval_context_maybe_croak(pTHX_ PERL_CONTEXT *cx, SV *errsv, int action)
 
     CX_LEAVE_SCOPE(cx);
     do_croak = action && (CxOLD_OP_TYPE(cx) == OP_REQUIRE);
-    namesv = cx->blk_eval.old_namesv;
+    if (do_croak) {
+        /* keep namesv alive after cx_popeval() */
+        namesv = cx->blk_eval.old_namesv;
+        cx->blk_eval.old_namesv = NULL;
+        sv_2mortal(namesv);
+    }
     cx_popeval(cx);
     cx_popblock(cx);
     CX_POP(cx);
