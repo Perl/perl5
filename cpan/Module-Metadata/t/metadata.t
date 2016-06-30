@@ -361,7 +361,7 @@ Hello, this is pod.
 
   my $errs;
 
-  my ($vol, $dir, $basename) = File::Spec->splitpath(File::Spec->catdir($tmpdir, "Simple${test_num}", ($test_case->{filename} || 'Simple.pm')));
+  my ($vol, $dir, $basename) = File::Spec->splitpath(File::Spec->catfile($tmpdir, "Simple${test_num}", ($test_case->{filename} || 'Simple.pm')));
   my $pm_info = Module::Metadata->new_from_file(generate_file($dir, $basename, $code));
 
   my $got_name = $pm_info->name;
