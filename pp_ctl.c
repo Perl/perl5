@@ -1636,16 +1636,25 @@ S_pop_eval_context_maybe_croak(pTHX_ PERL_CONTEXT *cx, SV *errsv, int action)
 }
 
 
+/* die_unwind(): this is the final destination for the various croak()
+ * functions. If we're in an eval, unwind the context and other stacks
+ * back to the top-most CXt_EVAL and set $@ to msv; otherwise print msv
+ * to STDERR and initiate an exit. Note that if the CXt_EVAL popped back
+ * to is a require the exception will be rethrown, as requires don't
+ * actually trap exceptions.
+ */
 
 void
 Perl_die_unwind(pTHX_ SV *msv)
 {
-    SV *exceptsv = sv_mortalcopy(msv);
+    SV *exceptsv = msv;
     U8 in_eval = PL_in_eval;
     PERL_ARGS_ASSERT_DIE_UNWIND;
 
     if (in_eval) {
 	I32 cxix;
+
+        exceptsv = sv_2mortal(SvREFCNT_inc_simple_NN(exceptsv));
 
 	/*
 	 * Historically, perl used to set ERRSV ($@) early in the die
@@ -1676,10 +1685,9 @@ Perl_die_unwind(pTHX_ SV *msv)
 	 * perls 5.13.{1..7} which had late setting of $@ without this
 	 * early-setting hack.
 	 */
-	if (!(in_eval & EVAL_KEEPERR)) {
-	    SvTEMP_off(exceptsv);
-	    sv_setsv(ERRSV, exceptsv);
-	}
+	if (!(in_eval & EVAL_KEEPERR))
+	    sv_setsv_flags(ERRSV, exceptsv,
+                        (SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL));
 
 	if (in_eval & EVAL_KEEPERR) {
 	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %"SVf,
