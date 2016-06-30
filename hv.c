@@ -962,7 +962,7 @@ Perl_hv_scalar(pTHX_ HV *hv)
 }
 
 /*
-=for apidoc Perl_hv_bucket_ratio
+=for apidoc hv_bucket_ratio
 
 If the hash is tied dispatches through to the SCALAR tied method,
 otherwise if the hash contains no keys returns 0, otherwise returns
