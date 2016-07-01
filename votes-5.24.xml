@@ -77,6 +77,9 @@ Perhaps just the removal of SETERRNO() from this.
 
 <div><h3>Documentation Fixes</h3>
 
+<commit votes="khw" id="d2b457d752c03448e8006f00a3761b5f542000d6" desc="perlunicode: Forgot to update pod to reflect 5.24 fix"/>
+<commit votes="khw" id="d2b457d752c03448e8006f00a3761b5f542000d6" desc="Fix typo in d2b457d"/>
+
 </div>
 
 </data>
