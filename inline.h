@@ -624,8 +624,10 @@ S_cx_popeval(pTHX_ PERL_CONTEXT *cx)
     }
 
     sv = cx->blk_eval.old_namesv;
-    if (sv && !SvTEMP(sv))/* TEMP implies cx_popeval() re-entrantly called */
-        sv_2mortal(sv);
+    if (sv) {
+        cx->blk_eval.old_namesv = NULL;
+        SvREFCNT_dec_NN(sv);
+    }
 }
 
 
