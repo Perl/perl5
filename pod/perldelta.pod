@@ -34,6 +34,18 @@ L<http://www.unicode.org/versions/Unicode9.0.0/>.  Modules that are
 shipped with core Perl but not maintained by p5p do not necessarily
 support Unicode 9.0.  L<Unicode::Normalize> does work on 9.0.
 
+=head2 Use of C<\p{I<script>}> uses the improved Script_Extensions
+property
+
+Unicode 6.0 introduced an improved form of the Script (C<sc>) property,
+and called it Script_Extensions (C<scx>).  As of now, Perl uses this
+improved version when a property is specified as just C<\p{I<script>}>.
+The meaning of compound forms, like C<\p{sc=I<script>}> are unchanged.
+This should make programs be more accurate when determining if a
+character is used in a given script, but there is a slight chance of
+breakage for programs that very specifically needed the old behavior.
+See L<perlunicode/Scripts>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

@@ -91515,7 +91515,7 @@ static const U8 WB_table[24][24] = {
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
 /* Generated from:
- * de6076d81bc4e85f179377ded4c68f3b257c8f7990227d4302eca442fda558f8 lib/Unicode/UCD.pm
+ * d4d1ae3d05b9b07d066661a93af8896abe10fbf0f5cbe89575fbbc06a2928d60 lib/Unicode/UCD.pm
  * 47cb62a53beea6d0263e2147331c7e751853c9327225d95bbe2d9e1dc3e1aa44 lib/unicore/ArabicShaping.txt
  * 153f0a100c315f9f3945e78f57137611d36c44b3a975919c499fd403413fede8 lib/unicore/BidiBrackets.txt
  * fbe806975c1bf9fc9960bbaa39ff6290c42c7da8315f9cd459109b024cc1c485 lib/unicore/BidiMirroring.txt
@@ -91558,7 +91558,7 @@ static const U8 WB_table[24][24] = {
  * 37f6186253da9824bdb27f4ad867bfe8c25d4dc6bdb2f05585e40a034675a348 lib/unicore/extracted/DLineBreak.txt
  * ef24061b5a5dc93d7e90c2e34530ec757180ee75d872cba65ffc946e52624ae8 lib/unicore/extracted/DNumType.txt
  * a197371fec9a1b517058b440841f60f9378d81682084eef8db22a88cb2f96e90 lib/unicore/extracted/DNumValues.txt
- * 58e546458da91e33d5cdacd9ca1b5a87868701a1e7e4eea6b0c4cf0c62fff431 lib/unicore/mktables
+ * 0cc006e22469cee3db1a55a4df1ac656c9d26a70ba920985883eb77198931c1a lib/unicore/mktables
  * cdecb300baad839a6f62791229f551a4fa33f3cbdca08e378dc976466354e778 lib/unicore/version
  * 913d2f93f3cb6cdf1664db888bf840bc4eb074eef824e082fceda24a9445e60c regen/charset_translations.pl
  * 11011bc761487f5a63c8135e67248394d4cdff6f8f204a41cdfbdc8131e79406 regen/mk_invlists.pl

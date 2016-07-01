@@ -1986,14 +1986,18 @@ also listed there.  Some synonyms are a single character.  For these,
 you can drop the braces.  For instance, C<\pM> is the same thing as
 C<\p{Mark}>, meaning things like accent marks.
 
-The Unicode C<\p{Script}> property is used to categorize every Unicode
-character into the language script it is written in.  For example,
+The Unicode C<\p{Script}> and C<\p{Script_Extensions}> properties are
+used to categorize every Unicode character into the language script it
+is written in.  (C<Script_Extensions> is an improved version of
+C<Script>, which is retained for backward compatibility, and so you
+should generally use C<Script_Extensions>.)
+For example,
 English, French, and a bunch of other European languages are written in
 the Latin script.  But there is also the Greek script, the Thai script,
 the Katakana script, etc.  You can test whether a character is in a
-particular script with, for example C<\p{Latin}>, C<\p{Greek}>,
-or C<\p{Katakana}>.  To test if it isn't in the Balinese script, you
-would use C<\P{Balinese}>.
+particular script (based on C<Script_Extensions>) with, for example
+C<\p{Latin}>, C<\p{Greek}>, or C<\p{Katakana}>.  To test if it isn't in
+the Balinese script, you would use C<\P{Balinese}>.
 
 What we have described so far is the single form of the C<\p{...}> character
 classes.  There is also a compound form which you may run into.  These
@@ -2001,8 +2005,8 @@ look like C<\p{name=value}> or C<\p{name:value}> (the equals sign and colon
 can be used interchangeably).  These are more general than the single form,
 and in fact most of the single forms are just Perl-defined shortcuts for common
 compound forms.  For example, the script examples in the previous paragraph
-could be written equivalently as C<\p{Script=Latin}>, C<\p{Script:Greek}>,
-C<\p{script=katakana}>, and C<\P{script=balinese}> (case is irrelevant
+could be written equivalently as C<\p{Script_Extensions=Latin}>, C<\p{Script_Extensions:Greek}>,
+C<\p{script_extensions=katakana}>, and C<\P{script_extensions=balinese}> (case is irrelevant
 between the C<{}> braces).  You may
 never have to use the compound forms, but sometimes it is necessary, and their
 use can make your code easier to understand.

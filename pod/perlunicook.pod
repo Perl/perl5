@@ -391,7 +391,7 @@ one codepoint lacking that property.
  \p{Sk}, \p{Ps}, \p{Lt}
  \p{alpha}, \p{upper}, \p{lower}
  \p{Latin}, \p{Greek}
- \p{script=Latin}, \p{script=Greek}
+ \p{script_extensions=Latin}, \p{scx=Greek}
  \p{East_Asian_Width=Wide}, \p{EA=W}
  \p{Line_Break=Hyphen}, \p{LB=HY}
  \p{Numeric_Value=4}, \p{NV=4}

@@ -15335,7 +15335,7 @@ sub add_perl_synonyms() {
     # the single-form, \p{name}.  These are:
     #   All the binary property Y tables, so that \p{Name=Y} gets \p{Name} and
     #       \p{Is_Name} as synonyms
-    #   \p{Script=Value} gets \p{Value}, \p{Is_Value} as synonyms
+    #   \p{Script_Extensions=Value} gets \p{Value}, \p{Is_Value} as synonyms
     #   \p{General_Category=Value} gets \p{Value}, \p{Is_Value} as synonyms
     #   \p{Block=Value} gets \p{In_Value} as a synonym, and, if there is no
     #       conflict, \p{Value} and \p{Is_Value} as well
@@ -15349,8 +15349,15 @@ sub add_perl_synonyms() {
                                                             property_ref('*');
     push @tables, $gc->tables;
 
-    # If the version of Unicode includes the Script property, add its tables
-    push @tables, $script->tables if defined $script;
+    # If the version of Unicode includes the Script Extensions (preferably),
+    # or Script property, add its tables
+    my $scx = property_ref("Script_Extensions");
+    if (defined $scx) {
+        push @tables, $scx->tables;
+    }
+    else {
+        push @tables, $script->tables if defined $script;
+    }
 
     # The Block tables are kept separate because they are treated differently.
     # And the earliest versions of Unicode didn't include them, so add only if

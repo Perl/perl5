@@ -602,16 +602,19 @@ The world's languages are written in many different scripts.  This sentence
 written in Cyrillic, and Greek is written in, well, Greek; Japanese mainly in
 Hiragana or Katakana.  There are many more.
 
-The Unicode C<Script> and C<Script_Extensions> properties give what script a
-given character is in.  Either property can be specified with the
-compound form like
+The Unicode C<Script> and C<Script_Extensions> properties give what
+script a given character is in.  The C<Script_Extensions> property is an
+improved version of C<Script>, as demonstrated below.  Either property
+can be specified with the compound form like
 C<\p{Script=Hebrew}> (short: C<\p{sc=hebr}>), or
 C<\p{Script_Extensions=Javanese}> (short: C<\p{scx=java}>).
 In addition, Perl furnishes shortcuts for all
-C<Script> property names.  You can omit everything up through the equals
-(or colon), and simply write C<\p{Latin}> or C<\P{Cyrillic}>.
-(This is not true for C<Script_Extensions>, which is required to be
-written in the compound form.)
+C<Script_Extensions> property names.  You can omit everything up through
+the equals (or colon), and simply write C<\p{Latin}> or C<\P{Cyrillic}>.
+(This is not true for C<Script>, which is required to be
+written in the compound form.  Prior to Perl v5.26, the single form
+returned the plain old C<Script> version, but was changed because
+C<Script_Extensions> gives better results.)
 
 The difference between these two properties involves characters that are
 used in multiple scripts.  For example the digits '0' through '9' are
@@ -645,7 +648,11 @@ fewer characters in the C<Common> script, and correspondingly more in
 other scripts.  It is new in Unicode version 6.0, and its data are likely
 to change significantly in later releases, as things get sorted out.
 New code should probably be using C<Script_Extensions> and not plain
-C<Script>.
+C<Script>.  If you compile perl with a Unicode release that doesn't have
+C<Script_Extensions>, the single form Perl extensions will instead refer
+to the plain C<Script> property.  If you compile with a version of
+Unicode that doesn't have the C<Script> property, these extensions will
+not be defined at all.
 
 (Actually, besides C<Common>, the C<Inherited> script, contains
 characters that are used in multiple scripts.  These are modifier
@@ -658,9 +665,12 @@ C<Script>, but not in C<Script_Extensions>.)
 It is worth stressing that there are several different sets of digits in
 Unicode that are equivalent to 0-9 and are matchable by C<\d> in a
 regular expression.  If they are used in a single language only, they
-are in that language's C<Script> and C<Script_Extension>.  If they are
+are in that language's C<Script> and C<Script_Extensions>.  If they are
 used in more than one script, they will be in C<sc=Common>, but only
 if they are used in many scripts should they be in C<scx=Common>.
+
+The explanation above has omitted some detail; refer to UAX#24 "Unicode
+Script Property": L<http://www.unicode.org/reports/tr24>.
 
 A complete list of scripts and their shortcuts is in L<perluniprops>.
 
@@ -690,7 +700,7 @@ C<Common> script.
 For more about scripts versus blocks, see UAX#24 "Unicode Script Property":
 L<http://www.unicode.org/reports/tr24>
 
-The C<Script> or C<Script_Extensions> properties are likely to be the
+The C<Script_Extensions> or C<Script> properties are likely to be the
 ones you want to use when processing
 natural language; the C<Block> property may occasionally be useful in working
 with the nuts and bolts of Unicode.
@@ -711,10 +721,11 @@ longer work.  The extensions are mentioned here for completeness:  Take
 the block name and prefix it with one of: C<In> (for example
 C<\p{Blk=Arrows}> can currently be written as C<\p{In_Arrows}>); or
 sometimes C<Is> (like C<\p{Is_Arrows}>); or sometimes no prefix at all
-(C<\p{Arrows}>).  As of this writing (Unicode 8.0) there are no
+(C<\p{Arrows}>).  As of this writing (Unicode 9.0) there are no
 conflicts with using the C<In_> prefix, but there are plenty with the
 other two forms.  For example, C<\p{Is_Hebrew}> and C<\p{Hebrew}> mean
-C<\p{Script=Hebrew}> which is NOT the same thing as C<\p{Blk=Hebrew}>.  Our
+C<\p{Script_Extensions=Hebrew}> which is NOT the same thing as
+C<\p{Blk=Hebrew}>.  Our
 advice used to be to use the C<In_> prefix as a single form way of
 specifying a block.  But Unicode 8.0 added properties whose names begin
 with C<In>, and it's now clear that it's only luck that's so far
