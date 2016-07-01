@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-plan(tests => 48);
+plan(tests => 49);
 
 
 # heredoc without newline (#65838)
@@ -111,6 +111,13 @@ HEREDOC
 # indented heredocs
 {
     my $string = 'some data';
+
+    fresh_perl_is(
+        "print <<~HEREDOC;\n  ${string}\nHEREDOC\n",
+        "  $string",
+        { switches => ['-w'], stderr => 1 },
+        "indented heredoc with no actual indentation"
+    );
 
     fresh_perl_is(
         "print <<~HEREDOC;\n  ${string}\n  HEREDOC\n",

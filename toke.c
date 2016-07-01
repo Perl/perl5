@@ -9780,6 +9780,7 @@ S_scan_heredoc(pTHX_ char *s)
 		sv_catpvn(newstr, ss, le);
 
 		ss += le;
+
 	    /* Line doesn't begin with our indentation? Warn */
 	    } else {
 		STRLEN le = 0;
