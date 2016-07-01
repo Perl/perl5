@@ -60,10 +60,12 @@ sub yaml_error {
 
 sub slurp {
 	my $file = shift;
+	my $layer = shift;
+	$layer = "" unless defined $layer;
 	local $/ = undef;
-	open( FILE, " $file" ) or die "open($file) failed: $!";
-	my $source = <FILE>;
-	close( FILE ) or die "close($file) failed: $!";
+	open my $fh, "<$layer", $file or die "open($file) failed: $!";
+	my $source = <$fh>;
+	close( $fh ) or die "close($file) failed: $!";
 	$source;
 }
 
@@ -71,9 +73,10 @@ sub load_ok {
 	my $name = shift;
 	my $file = shift;
 	my $size = shift;
+	my $layer = shift;
 	Test::More::ok( -f $file, "Found $name" ) or Test::More::diag("Searched at '$file'");
 	Test::More::ok( -r $file, "Can read $name" );
-	my $content = slurp( $file );
+	my $content = slurp( $file, $layer );
 	Test::More::ok( (defined $content and ! ref $content), "Loaded $name" );
 	Test::More::ok( ($size < length $content), "Content of $name larger than $size bytes" );
 	return $content;

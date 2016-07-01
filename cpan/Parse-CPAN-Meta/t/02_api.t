@@ -2,6 +2,8 @@
 
 delete $ENV{PERL_YAML_BACKEND};
 delete $ENV{PERL_JSON_BACKEND};
+delete $ENV{CPAN_META_JSON_BACKEND};
+delete $ENV{CPAN_META_JSON_DECODER};
 
 # Testing of a known-bad file from an editor
 
@@ -17,6 +19,7 @@ use Parse::CPAN::Meta;
 use Parse::CPAN::Meta::Test;
 # use Test::More skip_all => 'Temporarily ignoring failing test';
 use Test::More 'no_plan';
+use utf8;
 
 #####################################################################
 # Testing that Perl::Smith config files work
@@ -47,14 +50,20 @@ my $want = {
      "repository" => "git://git.codesimply.com/Version-Requirements.git"
   },
   "version" => "0.101010",
+  "x_contributors" => [
+    "Dagfinn Ilmari Mannsåker <ilmari\@ilmari.org>",
+  ],
 };
 
 my $meta_json = catfile( test_data_directory(), 'META-VR.json' );
 my $meta_yaml = catfile( test_data_directory(), 'META-VR.yml' );
-my $yaml_meta = catfile( test_data_directory(), 'yaml.meta' );
-my $json_meta = catfile( test_data_directory(), 'json.meta' );
 my $bare_yaml_meta = catfile( test_data_directory(), 'bareyaml.meta' );
 my $bad_yaml_meta = catfile( test_data_directory(), 'BadMETA.yml' );
+my $CL018_yaml_meta = catfile( test_data_directory(), 'CL018_yaml.meta' );
+
+# These test YAML/JSON detection without the typical file name suffix
+my $yaml_meta = catfile( test_data_directory(), 'yaml.meta' );
+my $json_meta = catfile( test_data_directory(), 'json.meta' );
 
 ### YAML tests
 {
@@ -88,7 +97,16 @@ my $bad_yaml_meta = catfile( test_data_directory(), 'BadMETA.yml' );
 
   note '';
   is(Parse::CPAN::Meta->yaml_backend(), 'CPAN::Meta::YAML', 'yaml_backend(): CPAN::Meta::YAML');
-  my $yaml   = load_ok( 'META-VR.yml', $meta_yaml, 100);
+  my $from_yaml = Parse::CPAN::Meta->load_file( $CL018_yaml_meta );
+  like($from_yaml->{x_contributors}[5], qr/Olivier Mengu/, "Open question: what to expect from double encoded UTF-8");
+}
+
+{
+  local $ENV{PERL_YAML_BACKEND}; # ensure we get CPAN::META::YAML
+
+  note '';
+  is(Parse::CPAN::Meta->yaml_backend(), 'CPAN::Meta::YAML', 'yaml_backend(): CPAN::Meta::YAML');
+  my $yaml   = load_ok( $meta_yaml, $meta_yaml, 100, ":encoding(UTF-8)");
   my $from_yaml = Parse::CPAN::Meta->load_yaml_string( $yaml );
   is_deeply($from_yaml, $want, "load from YAML str results in expected data");
 }
@@ -110,7 +128,7 @@ SKIP: {
   local $ENV{PERL_YAML_BACKEND} = 'YAML';
 
   is(Parse::CPAN::Meta->yaml_backend(), 'YAML', 'yaml_backend(): YAML');
-  my $yaml   = load_ok( 'META-VR.yml', $meta_yaml, 100);
+  my $yaml   = load_ok( $meta_yaml, $meta_yaml, 100, ":encoding(UTF-8)");
   my $from_yaml = Parse::CPAN::Meta->load_yaml_string( $yaml );
   is_deeply($from_yaml, $want, "load_yaml_string using PERL_YAML_BACKEND");
 }
@@ -142,7 +160,7 @@ SKIP: {
 
   note '';
   is(Parse::CPAN::Meta->json_backend(), 'JSON::PP', 'json_backend(): JSON::PP');
-  my $json   = load_ok( 'META-VR.json', $meta_json, 100);
+  my $json   = load_ok( $meta_json, $meta_json, 100, "encoding(UTF-8)");
   my $from_json = Parse::CPAN::Meta->load_json_string( $json );
   is_deeply($from_json, $want, "load from JSON str results in expected data");
 }
@@ -153,7 +171,7 @@ SKIP: {
 
   note '';
   is(Parse::CPAN::Meta->json_backend(), 'JSON::PP', 'json_backend(): JSON::PP');
-  my $json   = load_ok( 'META-VR.json', $meta_json, 100);
+  my $json   = load_ok( $meta_json, $meta_json, 100, ":encoding(UTF-8)");
   my $from_json = Parse::CPAN::Meta->load_json_string( $json );
   is_deeply($from_json, $want, "load_json_string with PERL_JSON_BACKEND = 0");
 }
@@ -164,9 +182,23 @@ SKIP: {
 
   note '';
   is(Parse::CPAN::Meta->json_backend(), 'JSON::PP', 'json_backend(): JSON::PP');
-  my $json   = load_ok( 'META-VR.json', $meta_json, 100);
+  my $json   = load_ok( $meta_json, $meta_json, 100, ":encoding(UTF-8)");
   my $from_json = Parse::CPAN::Meta->load_json_string( $json );
   is_deeply($from_json, $want, "load_json_string with PERL_JSON_BACKEND = 'JSON::PP'");
+}
+
+{
+  # JSON tests with fake backend
+  { package MyJSONThingy; $INC{'MyJSONThingy.pm'} = __FILE__; require JSON::PP;
+    sub decode_json { JSON::PP::decode_json(@_) } }
+
+  local $ENV{CPAN_META_JSON_DECODER} = 'MyJSONThingy'; # request fake backend
+
+  note '';
+  is(Parse::CPAN::Meta->json_decoder(), 'MyJSONThingy', 'json_decoder(): MyJSONThingy');
+  my $json   = load_ok( $meta_json, $meta_json, 100, ":encoding(UTF-8)");
+  my $from_json = Parse::CPAN::Meta->load_json_string( $json );
+  is_deeply($from_json, $want, "load_json_string with PERL_JSON_DECODER = 'MyJSONThingy'");
 }
 
 SKIP: {
@@ -176,7 +208,7 @@ SKIP: {
   local $ENV{PERL_JSON_BACKEND} = 1;
 
   is(Parse::CPAN::Meta->json_backend(), 'JSON', 'json_backend(): JSON');
-  my $json   = load_ok( 'META-VR.json', $meta_json, 100);
+  my $json   = load_ok( $meta_json, $meta_json, 100, ":encoding(UTF-8)");
   my $from_json = Parse::CPAN::Meta->load_json_string( $json );
   is_deeply($from_json, $want, "load_json_string with PERL_JSON_BACKEND = 1");
 }

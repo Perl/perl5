@@ -20,3 +20,5 @@ requires:
 resources:
   repository: git://git.codesimply.com/Version-Requirements.git
 version: 0.101010
+x_contributors:
+  - 'Dagfinn Ilmari Mannsåker <ilmari@ilmari.org>'

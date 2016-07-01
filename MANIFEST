@@ -1872,6 +1872,7 @@ cpan/parent/t/parent-pmc.t			tests for parent.pm
 cpan/parent/t/parent-returns-false.t		tests for parent.pm
 cpan/Parse-CPAN-Meta/corpus/BadMETA.yml
 cpan/Parse-CPAN-Meta/corpus/bareyaml.meta
+cpan/Parse-CPAN-Meta/corpus/CL018_yaml.meta
 cpan/Parse-CPAN-Meta/corpus/json.meta
 cpan/Parse-CPAN-Meta/corpus/META-VR.json
 cpan/Parse-CPAN-Meta/corpus/META-VR.yml
