@@ -3068,7 +3068,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	       in error messages.  */
 	    op_lvalue(OpSIBLING(cBINOPo->op_first),
 		      S_potential_mod_type(type)
-			? OP_ENTERSUB
+			? (I32)OP_ENTERSUB
 			: o->op_type);
 	}
 	break;
