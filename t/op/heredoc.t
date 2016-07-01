@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-plan(tests => 41);
+plan(tests => 48);
 
 
 # heredoc without newline (#65838)
@@ -105,5 +105,62 @@ HEREDOC
 	qr/Can't find string terminator "" anywhere before EOF at - line 1\./,
 	{},
 	"Don't assert parsing a here-doc if we hit EOF early"
+    );
+}
+
+# indented heredocs
+{
+    my $string = 'some data';
+
+    fresh_perl_is(
+        "print <<~HEREDOC;\n  ${string}\n  HEREDOC\n",
+        $string,
+        { switches => ['-w'], stderr => 1 },
+        "indented heredoc"
+    );
+
+    fresh_perl_is(
+        "print <<~'HEREDOC';\n  ${string}\n  HEREDOC\n",
+        $string,
+        { switches => ['-w'], stderr => 1 },
+        "indented 'heredoc'"
+    );
+
+    fresh_perl_is(
+        "print <<~\"HEREDOC\";\n  ${string}\n  HEREDOC\n",
+        $string,
+        { switches => ['-w'], stderr => 1 },
+        "indented \"heredoc\""
+    );
+
+    fresh_perl_is(
+        "print <<~\\HEREDOC;\n  ${string}\n  HEREDOC\n",
+        $string,
+        { switches => ['-w'], stderr => 1 },
+        "indented \\heredoc"
+    );
+
+    fresh_perl_is(
+        "print <<~HEREDOC;\n\t \t${string}\n\t \tHEREDOC\n",
+        $string,
+        { switches => ['-w'], stderr => 1 },
+        "indented heredoc with tabs and spaces"
+    );
+
+    fresh_perl_is(
+        "print <<~HEREDOC;\n\t \t${string}\n\t \tHEREDOC",
+        $string,
+        { switches => ['-w'], stderr => 1 },
+        "indented heredoc at EOF"
+    );
+
+    fresh_perl_is(
+        "print <<~HEREDOC;\n ${string}\n$string\n   $string\n $string\n   HEREDOC",
+        "Indentation on line 1 of heredoc doesn't match delimiter at - line 1.\n" .
+        "Indentation on line 2 of heredoc doesn't match delimiter at - line 1.\n" .
+        "Indentation on line 4 of heredoc doesn\'t match delimiter at - line 1.\n" .
+        " some data\nsome data\nsome data\n some data",
+        { switches => ['-w'], stderr => 1 },
+        "indented heredoc with bad indentation"
     );
 }
