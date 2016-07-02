@@ -37,6 +37,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="sprout" id="08f800f8519574aea9e744ff83230fb93772652b" ticket="128182" desc="Fix crash with require $nonstring"/>
 
+<commit votes="sprout" id="b3dd0aba3d2bf0b22280303ef6f068e976e31888" ticket="128508" desc="[perl #128508] Fix line numbers with perl -x" />
+
 </div>
 
 <div><h3>Build and Installation Fixes</h3>
