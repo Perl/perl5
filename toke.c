@@ -723,7 +723,8 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
 	parser->linestr = flags & LEX_START_COPIED
 			    ? SvREFCNT_inc_simple_NN(line)
 			    : newSVpvn_flags(s, len, SvUTF8(line));
-	sv_catpvn(parser->linestr, "\n;", rsfp ? 1 : 2);
+	if (!rsfp)
+	    sv_catpvs(parser->linestr, "\n;");
     } else {
 	parser->linestr = newSVpvn("\n;", rsfp ? 1 : 2);
     }
