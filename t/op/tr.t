@@ -1,13 +1,17 @@
 # tr.t
 $|=1;
 
-use utf8;
-
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
+    if (is_miniperl()) {
+	eval 'require utf8';
+        skip_all("miniperl, no 'utf8'");
+    }
 }
+
+use utf8;
 
 plan tests => 164;
 
