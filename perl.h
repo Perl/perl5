@@ -6776,7 +6776,7 @@ extern void moncontrol(int);
 
 /* Even though the VAX formats are kind of little-endian,
  * they are not really fully little-endian like Intel IEEE,
- * but neither they are really IEEE-mixed endian like the
+ * but neither are they really IEEE-mixed endian like the
  * mixed-endian ARM IEEE formats (with swapped bytes).
  * The VAX format ultimately come from PDP. */
 
