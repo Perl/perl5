@@ -1598,7 +1598,7 @@ Perl_qerror(pTHX_ SV *err)
 static void
 S_pop_eval_context_maybe_croak(pTHX_ PERL_CONTEXT *cx, SV *errsv, int action)
 {
-    SV  *namesv = NULL; /* just to silence compiler warnings */
+    SV  *namesv;
     bool do_croak;
 
     CX_LEAVE_SCOPE(cx);
@@ -1654,13 +1654,7 @@ Perl_die_unwind(pTHX_ SV *msv)
     if (in_eval) {
 	I32 cxix;
 
-        /* We need to keep this SV alive through all the stack unwinding
-         * and FREETMPSing below, while ensuing that it doesn't leak
-         * if we call out to something which then dies (e.g. sub STORE{die}
-         * when unlocalising a tied var). So we do a dance with
-         * mortalising and SAVEFREEing.
-         */
-        sv_2mortal(SvREFCNT_inc_simple_NN(exceptsv));
+        exceptsv = sv_2mortal(SvREFCNT_inc_simple_NN(exceptsv));
 
 	/*
 	 * Historically, perl used to set ERRSV ($@) early in the die
@@ -1729,24 +1723,6 @@ Perl_die_unwind(pTHX_ SV *msv)
 
 	    restartjmpenv = cx->blk_eval.cur_top_env;
 	    restartop     = cx->blk_eval.retop;
-
-            /* We need a FREETMPS here to avoid late-called destructors
-             * clobbering $@ *after* we set it below, e.g.
-             *    sub DESTROY { eval { die "X" } }
-             *    eval { my $x = bless []; die $x = 0, "Y" };
-             *    is($@, "Y")
-             * Here the clearing of the $x ref mortalises the anon array,
-             * which needs to be freed *before* $& is set to "Y",
-             * otherwise it gets overwritten with "X".
-             *
-             * However, the FREETMPS will clobber exceptsv, so preserve it
-             * on the savestack for now.
-             */
-            SAVEFREESV(SvREFCNT_inc_simple_NN(exceptsv));
-            FREETMPS;
-            /* now we're about to pop the savestack, so re-mortalise it */
-            sv_2mortal(SvREFCNT_inc_simple_NN(exceptsv));
-
             /* Note that unlike pp_entereval, pp_require isn't supposed to
              * trap errors. So if we're a require, after we pop the
              * CXt_EVAL that pp_require pushed, rethrow the error with
@@ -4329,11 +4305,8 @@ PP(pp_leaveeval)
                     ? SvTRUE(*PL_stack_sp)
                     : PL_stack_sp > oldsp);
 
-    if (gimme == G_VOID) {
+    if (gimme == G_VOID)
         PL_stack_sp = oldsp;
-        /* free now to avoid late-called destructors clobbering $@ */
-        FREETMPS;
-    }
     else
         leave_adjust_stacks(oldsp, oldsp, gimme, 0);
 
@@ -4422,11 +4395,8 @@ PP(pp_leavetry)
     oldsp = PL_stack_base + cx->blk_oldsp;
     gimme = cx->blk_gimme;
 
-    if (gimme == G_VOID) {
+    if (gimme == G_VOID)
         PL_stack_sp = oldsp;
-        /* free now to avoid late-called destructors clobbering $@ */
-        FREETMPS;
-    }
     else
         leave_adjust_stacks(oldsp, oldsp, gimme, 1);
     CX_LEAVE_SCOPE(cx);
