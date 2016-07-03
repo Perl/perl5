@@ -11,7 +11,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.32';
+  $VERSION = '3.33';
 }
 use ExtUtils::ParseXS::Constants $VERSION;
 use ExtUtils::ParseXS::CountLines $VERSION;
@@ -686,7 +686,7 @@ EOF
         var         => $_,
         do_setmagic => $self->{DoSetMagic},
         do_push     => undef,
-      } ) for grep $self->{in_out}->{$_} =~ /OUT$/, keys %{ $self->{in_out} };
+      } ) for grep $self->{in_out}->{$_} =~ /OUT$/, sort keys %{ $self->{in_out} };
 
       my $prepush_done;
       # all OUTPUT done, so now push the return value on the stack
