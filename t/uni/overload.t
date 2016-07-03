@@ -9,7 +9,7 @@ BEGIN {
     set_up_inc( '../lib' );
 }
 
-plan(tests => 216);
+plan(tests => 217);
 
 package UTF8Toggle;
 use strict;
@@ -294,5 +294,15 @@ TODO: {
     use overload '""' => sub { "$_[0]" };
     print bless {}, __PACKAGE__;
     print "ok\n";
+EOP
+}
+
+TODO: {
+    local $::TODO = 'RT #3270: Overloaded operators can not be treated as lvalues';
+    fresh_perl_is(<<'EOP', '', {stderr => 1}, 'RT #3270: Overloaded operator that returns an lvalue can be used as an lvalue');
+    use overload '.' => \&dot;
+    sub dot : lvalue {my ($obj, $method) = @_; $obj -> {$method};}
+    my $o  = bless {} => "main";
+    $o.foo = "bar";
 EOP
 }
