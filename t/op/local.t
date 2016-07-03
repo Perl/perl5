@@ -469,8 +469,7 @@ is($h{'c'}, 3);
 # local() should preserve the existenceness of tied hash elements
 ok(! exists $h{'y'});
 ok(! exists $h{'z'});
-TODO: {
-    todo_skip("Localize entire tied hash");
+{
     my $d = join("\n", map { "$_=>$h{$_}" } sort keys %h);
     local %h = %h;
     is(join("\n", map { "$_=>$h{$_}" } sort keys %h), $d);
