@@ -9,7 +9,7 @@ BEGIN {
     set_up_inc( '../lib' );
 }
 
-plan(tests => 215);
+plan(tests => 216);
 
 package UTF8Toggle;
 use strict;
@@ -286,4 +286,13 @@ foreach my $value ("\243", UTF8Toggle->new("\243")) {
     my $text = bless { data => "\x{3075}" }, 'RT69422';
     my $p = substr $text, 0, 1;
     is ($p, "\x{3075}");
+}
+
+TODO: {
+    local $::TODO = 'RT #3054: Recursive operator overloading overflows the C stack';
+    fresh_perl_is(<<'EOP', "ok\n", {}, 'RT #3054: Recursive operator overloading should not crash the interpreter');
+    use overload '""' => sub { "$_[0]" };
+    print bless {}, __PACKAGE__;
+    print "ok\n";
+EOP
 }
