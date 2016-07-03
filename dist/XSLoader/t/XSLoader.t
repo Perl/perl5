@@ -33,7 +33,7 @@ my %modules = (
     'Time::HiRes'=> q| ::can_ok( 'Time::HiRes' => 'usleep'  ) |,  # 5.7.3
 );
 
-plan tests => keys(%modules) * 3 + 9;
+plan tests => keys(%modules) * 3 + 10;
 
 # Try to load the module
 use_ok( 'XSLoader' );
@@ -124,4 +124,29 @@ package Not::Devel::Peek;
 XSLoader::load("Devel::Peek");
 EOS
     or ::diag $@;
+}
+
+SKIP: {
+  skip "File::Path not available", 1
+    unless eval { require File::Path };
+  my $name = "phooo$$";
+  File::Path::make_path("$name/auto/Foo/Bar");
+  open my $fh,
+    ">$name/auto/Foo/Bar/Bar.$Config::Config{'dlext'}";
+  close $fh;
+  my $fell_back;
+  local *XSLoader::bootstrap_inherit = sub {
+    $fell_back++;
+    # Break out of the calling subs
+    goto the_test;
+  };
+  eval <<END;
+#line 1 $name
+package Foo::Bar;
+XSLoader::load("Foo::Bar");
+END
+ the_test:
+  ok $fell_back,
+    'XSLoader will not load relative paths based on (caller)[1]';
+  File::Path::remove_tree($name);
 }
