@@ -2083,3 +2083,19 @@ my $x2 = !A || !B; # warning-free, because upper-case won't clash
 EXPECT
 Unquoted string "a" may clash with future reserved word at - line 2.
 Unquoted string "b" may clash with future reserved word at - line 2.
+########
+# RT #6870: Odd parsing of do...for...
+# This was really more a tokenizer bug, but it manifests as spurious warnings
+use warnings;
+no warnings 'reserved';
+$a=do xa for ax;
+do "xa" for ax;
+do xa for ax;
+do xa for "ax";
+do xa for sin(1);
+do xa for (sin(1));
+do xa for "sin";
+do xa for qq(sin);
+do xa for my $a;
+do xa for my @a;
+EXPECT
