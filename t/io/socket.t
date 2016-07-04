@@ -154,6 +154,14 @@ SKIP:
     is(0+$!, Errno::EMFILE(), "check correct errno for too many files");
 }
 
+{
+    my $sock;
+    my $proto = getprotobyname('tcp');
+    socket($sock, PF_INET, SOCK_STREAM, $proto);
+    accept($sock, $sock);
+    ok('RT #7614: still alive after accept($sock, $sock)');
+}
+
 done_testing();
 
 my @child_tests;
@@ -172,3 +180,4 @@ sub is_child {
 sub end_child {
     print @child_tests;
 }
+
