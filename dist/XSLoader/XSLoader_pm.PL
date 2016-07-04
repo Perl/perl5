@@ -90,8 +90,20 @@ print OUT <<'EOT';
     my $modpname = join('/',@modparts);
     my $c = () = split(/::/,$caller,-1);
     $modlibname =~ s,[\\/][^\\/]+$,, while $c--;    # Q&D basename
+EOT
+
+my $to_print = <<'EOT';
     # Does this look like a relative path?
-    if ($modlibname !~ m|^[\\/]|) {
+    if ($modlibname !~ m{regexp}) {
+EOT
+
+$to_print =~ s~regexp~
+    $^O eq 'MSWin32' || $^O eq 'os2' || $^O eq 'cygwin' || $^O eq 'amigaos'
+        ? '^(?:[A-Za-z]:)?[\\\/]' # Optional drive letter
+        : '^/'
+~e;
+
+print OUT $to_print, <<'EOT';
         # Someone may have a #line directive that changes the file name, or
         # may be calling XSLoader::load from inside a string eval.  We cer-
         # tainly do not want to go loading some code that is not in @INC,
