@@ -2285,12 +2285,11 @@ under $archlib so that any user may later build new modules, run the
 optional Perl compiler, or embed the perl interpreter into another
 program even if the Perl source is no longer available.
 
-=head2 Installing only version-specific parts
+=head2 Installing with a version-specific suffix
 
-Sometimes you only want to install the version-specific parts of the perl
-installation.  For example, you may wish to install a newer version of
-perl alongside an already installed production version without
-disabling installation of new modules for the production version.
+Sometimes you only want to install the perl distribution with a
+version-specific suffix.  For example, you may wish to install a newer
+version of perl alongside an already installed production version.
 To only install the version-specific parts of the perl installation, run
 
 	Configure -Dversiononly

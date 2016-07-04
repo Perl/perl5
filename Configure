@@ -9395,17 +9395,20 @@ rp='Perl administrator e-mail address'
 . ./myread
 perladmin="$ans"
 
-: determine whether to only install version-specific parts.
+: determine whether to use a version number suffix for installed binaries
 echo " "
 $cat <<EOM
-Do you want to install only the version-specific parts of the perl
-distribution?  Usually you do *not* want to do this.
+Do you want to use a version number suffix for installed binaries? This
+will install 'perl$version' instead of 'perl', and likewise for other
+binaries like 'perldoc' and 'cpan'. This allows many versions of perl
+to be installed side-by-side. Unless you are a developer, you probably
+do *not* want to do this.
 EOM
 case "$versiononly" in
 "$define"|[Yy]*|true) dflt='y' ;;
 *) dflt='n';
 esac
-rp="Do you want to install only the version-specific parts of perl?"
+rp="Do you want to use a version number suffix for installed binaries?"
 . ./myread
 case "$ans" in
 [yY]*)	val="$define";;
