@@ -1,8 +1,9 @@
 package Test2::Formatter::TAP;
 use strict;
 use warnings;
+require PerlIO;
 
-our $VERSION = '1.302035';
+our $VERSION = '1.302037';
 
 
 use Test2::Util::HashBase qw{
@@ -108,8 +109,13 @@ sub write {
 sub _open_handles {
     my $self = shift;
 
-    open( my $out, '>&', STDOUT ) or die "Can't dup STDOUT:  $!";
-    open( my $err, '>&', STDERR ) or die "Can't dup STDERR:  $!";
+    my %seen;
+    open(my $out, '>&', STDOUT) or die "Can't dup STDOUT:  $!";
+    binmode($out, join(":", "", "raw", grep { $_ ne 'unix' and !$seen{$_}++ } PerlIO::get_layers(STDOUT)));
+
+    %seen = ();
+    open(my $err, '>&', STDERR) or die "Can't dup STDERR:  $!";
+    binmode($err, join(":", "", "raw", grep { $_ ne 'unix' and !$seen{$_}++ } PerlIO::get_layers(STDERR)));
 
     _autoflush($out);
     _autoflush($err);
