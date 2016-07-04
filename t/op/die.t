@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 19;
+plan tests => 20;
 
 eval {
     eval {
@@ -95,3 +95,10 @@ like($@, qr/\.{3}propagated at/, '... and appends a phrase');
     eval { undef $@; die };
     is( $ok, 1, 'no warnings if $@ is undef' );
 }
+
+TODO: {
+    local $TODO = 'RT #4821: die qr{x} does not check termination';
+    my $out = runperl(prog => 'die qr{x}', stderr => 1);
+    like($out, qr/at -e line 1./, 'RT #4821: output from die qr{x}');
+}
+
