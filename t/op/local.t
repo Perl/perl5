@@ -5,7 +5,7 @@ BEGIN {
     require './test.pl';
     set_up_inc(  qw(. ../lib) );
 }
-plan tests => 314;
+plan tests => 315;
 
 my $list_assignment_supported = 1;
 
@@ -837,4 +837,12 @@ TODO: {
 
     is($#a, 4, 'RT #7411: after local($#a), count should be restored');
     is("@a", '1 2 3 4 5', 'RT #7411: after local($#a), array should be restored');
+}
+
+$a = 10;
+TODO: {
+    local $::TODO = 'RT #7615: if (local $a)';
+    if (local $a = 1){
+    }
+    is($a, 10, 'RT #7615: local in if condition should be restored');
 }
