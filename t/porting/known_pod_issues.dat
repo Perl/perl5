@@ -317,6 +317,7 @@ XML::LibXML
 YAML
 YAML::Syck
 YAML::Tiny
+dist/data-dumper/changes	Verbatim line length including indents exceeds 79 by	1
 dist/data-dumper/dumper.pm	? Should you be using L<...> instead of	1
 ext/amiga-exec/exec.pm	Verbatim line length including indents exceeds 79 by	1
 ext/dynaloader/dynaloader.pm	Verbatim line length including indents exceeds 79 by	1
