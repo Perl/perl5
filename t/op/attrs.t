@@ -480,4 +480,13 @@ fresh_perl_like(
     'RT #129086 attr(00000'
 );
 
+TODO: {
+    local $TODO = 'RT #3605: Attribute syntax causes parsing errors near my $var :';
+    my $out = runperl(prog => <<'EOP', stderr => 1);
+    $ref = \($1 ? my $var : my $othervar);
+EOP
+    unlike($out, qr/Invalid separator character/, 'RT #3605: Errors near attribute colon need a better error message');
+    is($out, '', 'RT #3605: $a ? my $var : my $othervar is perfectly valid syntax');
+}
+
 done_testing();
