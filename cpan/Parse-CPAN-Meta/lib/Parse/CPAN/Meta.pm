@@ -3,7 +3,7 @@ use strict;
 package Parse::CPAN::Meta;
 # ABSTRACT: Parse META.yml and META.json CPAN metadata files
 
-our $VERSION = '1.4421';
+our $VERSION = '1.4422';
 
 use Exporter;
 use Carp 'croak';
@@ -50,6 +50,7 @@ sub load_yaml_string {
 
 sub load_json_string {
   my ($class, $string) = @_;
+  require Encode;
   # load_json_string takes characters, decode_json expects bytes
   my $encoded = Encode::encode('UTF-8', $string, Encode::PERLQQ());
   my $data = eval { $class->json_decoder()->can('decode_json')->($encoded) };
@@ -157,7 +158,7 @@ Parse::CPAN::Meta - Parse META.yml and META.json CPAN metadata files
 
 =head1 VERSION
 
-version 1.4421
+version 1.4422
 
 =head1 SYNOPSIS
 
