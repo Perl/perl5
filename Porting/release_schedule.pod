@@ -57,7 +57,7 @@ you should reset the version numbers to the next blead series.
   2016-10-20  5.25.6          Sawyer X
   2016-11-20  5.25.7          Aaron Crane
   2016-12-20  5.25.8          ?
-  2017-01-20  5.25.9          ?
+  2017-01-20  5.25.9          Abigail
   2017-02-20  5.25.10         Renée Bäcker
 
 (RC0 for 5.26.0 will be released once we think that all the blockers have been
