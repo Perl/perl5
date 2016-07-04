@@ -6,6 +6,32 @@ Changes - public release history for Data::Dumper
 
 =over 8
 
+=item 2.160 (Jul 3 2016)
+
+Now handles huge inputs on 64bit perls.
+
+Add Trailingcomma option. This is as suggested in RT#126813.
+
+Significant refactoring of XS implementation.
+
+Pure Perl implementation fixes in corner cases ("\n" dumped raw").
+
+=item 2.154 (Sep 18 2014)
+
+Most notably, this release fixes CVE-2014-4330:
+
+  Don't recurse infinitely in Data::Dumper
+
+  Add a configuration variable/option to limit recursion when dumping
+  deep data structures.
+  [...]
+  This patch addresses CVE-2014-4330.  This bug was found and
+  reported by: LSE Leading Security Experts GmbH employee Markus
+  Vervier.
+
+On top of that, there are several minor big fixes and improvements,
+see "git log" if the core perl distribution for details.
+
 =item 2.151 (Mar 7 2014)
 
 A "useqq" implementation for the XS version of Data::Dumper.
@@ -328,7 +354,7 @@ C<require 5.002>.
 MLDBM example removed (as its own module, it has a separate CPAN 
 reality now).
 
-Fixed bugs in handling keys with weird characters.  Perl can be
+Fixed bugs in handling keys with wierd characters.  Perl can be
 tripped up in its implicit quoting of the word before '=>'.  The
 fix: C<Data::Dumper::Purity>, when set, always triggers quotes
 around hash keys.
