@@ -9081,7 +9081,7 @@ Perl_newSTUB(pTHX_ GV *gv, bool fake)
     assert(!GvCVu(gv));
     GvCV_set(gv, cv);
     GvCVGEN(gv) = 0;
-    if (!fake && HvENAME_HEK(GvSTASH(gv)))
+    if (!fake && GvSTASH(gv) && HvENAME_HEK(GvSTASH(gv)))
 	gv_method_changed(gv);
     if (SvFAKE(gv)) {
 	cvgv = gv_fetchsv((SV *)gv, GV_ADDMULTI, SVt_PVCV);

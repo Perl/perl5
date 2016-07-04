@@ -8,7 +8,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(235);
+plan(236);
 
 # Test this first before we extend the stack with other operations.
 # This caused an asan failure due to a bad write past the end of the stack.
@@ -124,6 +124,10 @@ is (join(':',@{$spring2{"foo"}}), "1:2:3:4");
     is ($called, 1);
 }
 is ref eval {\&{""}}, "CODE", 'reference to &{""} [perl #94476]';
+delete $My::{"Foo::"}; 
+is ref \&My::Foo::foo, "CODE",
+  'creating stub with \&deleted_stash::foo [perl #128532]';
+
 
 # Test references to return values of operators (TARGs/PADTMPs)
 {
