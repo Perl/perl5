@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
     if (is_miniperl()) {
 	eval 'require utf8';
-        skip_all("miniperl, no 'utf8'");
+        if ($@) { skip_all("miniperl, no 'utf8'") }
     }
 }
 
