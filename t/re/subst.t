@@ -11,7 +11,7 @@ BEGIN {
     require './loc_tools.pl';
 }
 
-plan( tests => 271 );
+plan( tests => 274 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -1118,4 +1118,32 @@ SKIP: {
                    "ok\n",
                    {stderr => 1 },
                    '[perl #129038 ] s/\xff//l no longer crashes');
+}
+
+{
+    # RT #23624 scoping of @+/@- when used with tie()
+    #! /usr/bin/perl -w
+
+    package Tie::Prematch;
+    sub TIEHASH { bless \my $dummy => __PACKAGE__ }
+    sub FETCH   { return substr $_[1], 0, $-[0] }
+
+    package main;
+
+    tie my %pre, 'Tie::Prematch';
+    my $foo = 'foobar';
+    $foo =~ s/.ob/$pre{ $foo }/;
+    is($foo, 'ffar', 'RT #23624');
+
+    $foo = 'foobar';
+    $foo =~ s/.ob/tied(%pre)->FETCH($foo)/e;
+    is($foo, 'ffar', 'RT #23624');
+
+    tie %-, 'Tie::Prematch';
+    $foo = 'foobar';
+    $foo =~ s/.ob/$-{$foo}/;
+    is($foo, 'ffar', 'RT #23624');
+
+    undef *Tie::Prematch::TIEHASH;
+    undef *Tie::Prematch::FETCH;
 }
