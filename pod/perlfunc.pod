@@ -2760,8 +2760,8 @@ Here's a mailbox appender for BSD systems.
     sub lock {
         my ($fh) = @_;
         flock($fh, LOCK_EX) or die "Cannot lock mailbox - $!\n";
-
-        # and, in case someone appended while we were waiting...
+        # and, in case we're running on a very old UNIX
+        # variant without the modern O_APPEND semantics...
         seek($fh, 0, SEEK_END) or die "Cannot seek - $!\n";
     }
 
