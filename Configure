@@ -7187,7 +7187,7 @@ case "$usequadmath" in
 $define)
 	echo "quadmath selected." >&4
 	case "$archname" in
-	*-ld*) echo "...and architecture name already has -quadmath." >&4
+	*-quadmath*) echo "...and architecture name already has -quadmath." >&4
 		;;
 	*)      archname="$archname-quadmath"
 		echo "...setting architecture name to $archname." >&4
