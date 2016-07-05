@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 799;  # Update this when adding/deleting tests.
+plan tests => 800;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1796,6 +1796,10 @@ EOP
             like("sS", qr/\N{}Ss|/i, "\N{} with empty branch alternation works");
         }
 
+    TODO: {
+        local $::TODO = "RT #21491: m'' interpolates escape sequences";
+        is(0+("\n" =~ m'\n'), 0, q|RT #21491: m'\n' should not interpolate|);
+    }
 } # End of sub run_tests
 
 1;
