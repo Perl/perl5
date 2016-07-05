@@ -1878,7 +1878,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
         while (t < s + len ) {
             UV cp = (utf8)
                     ?  utf8_to_uvchr_buf((U8 *) t, s + len, NULL)
-                    : (UV) t;
+                    :  *t;
             PerlIO_printf(Perl_debug_log, " 0x%02"UVXf"", cp);
             if (isPRINT(cp)) {
                 PerlIO_printf(Perl_debug_log, "=%c", (U8) cp);
