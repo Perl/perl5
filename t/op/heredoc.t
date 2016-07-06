@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-plan(tests => 49);
+plan(tests => 50);
 
 
 # heredoc without newline (#65838)
@@ -159,6 +159,13 @@ HEREDOC
         $string,
         { switches => ['-w'], stderr => 1 },
         "indented heredoc at EOF"
+    );
+
+    fresh_perl_is(
+        "print <<~HEREDOC;\n\t \t${string}\n\t \tTHEREDOC",
+        "Can't find string terminator \"HEREDOC\" anywhere before EOF at - line 1.",
+        { switches => ['-w'], stderr => 1 },
+	"indented heredoc missing terminator error is correct"
     );
 
     fresh_perl_is(
