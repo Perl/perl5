@@ -9493,20 +9493,6 @@ S_scan_heredoc(pTHX_ char *s)
     *d = '\0';
     len = d - PL_tokenbuf;
 
-    if (indented) {
-      int i;
-
-      /* Shift left 1 char, nuke first \n */
-      for (i = 0; i < len - 1; i++) {
-        PL_tokenbuf[i] = PL_tokenbuf[i+1];
-      }
-
-      d -= 1;
-      *d = '\0';
-
-      len -= 1;
-    }
-
 #ifndef PERL_STRICT_CR
     d = strchr(s, '\r');
     if (d) {
@@ -9647,12 +9633,8 @@ S_scan_heredoc(pTHX_ char *s)
       char *oldbufptr_save;
      streaming:
       sv_setpvs(tmpstr,"");   /* avoid "uninitialized" warning */
-      if (indented) {
-        term = PL_tokenbuf[0];
-      } else {
-        term = PL_tokenbuf[1];
-        len--;
-      }
+      term = PL_tokenbuf[1];
+      len--;
       linestr_save = PL_linestr; /* must restore this afterwards */
       d = s;			 /* and this */
       oldbufptr_save = PL_oldbufptr;
@@ -9702,8 +9684,7 @@ S_scan_heredoc(pTHX_ char *s)
 	    PL_bufend[-1] = '\n';
 #endif
 	if (indented && (PL_bufend - s) >= len) {
-	    char * found = ninstr(s, s + (PL_bufend - s), PL_tokenbuf, PL_tokenbuf + len);
-
+	    char * found = instr(s, PL_tokenbuf + 1);
 	    if (found) {
 		char *backup = found;
 
