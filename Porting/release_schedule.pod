@@ -54,9 +54,9 @@ you should reset the version numbers to the next blead series.
   2016-07-20  5.25.3          Steve Hay
   2016-08-20  5.25.4          BinGOs
   2016-09-20  5.25.5          Stevan Little
-  2016-10-20  5.25.6          Sawyer X
+  2016-10-20  5.25.6          Chad Granum
   2016-11-20  5.25.7          Aaron Crane
-  2016-12-20  5.25.8          ?
+  2016-12-20  5.25.8          Sawyer X
   2017-01-20  5.25.9          Abigail
   2017-02-20  5.25.10         Renée Bäcker
 
