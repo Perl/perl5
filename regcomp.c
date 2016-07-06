@@ -19748,15 +19748,19 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
          * mnemonic names.  Split off any of those at the beginning and end of
          * the range to print mnemonically.  It isn't possible for many of
          * these to be in a row, so this won't overwhelm with output */
+        if (   start <= end
+            && (isMNEMONIC_CNTRL(start) || isMNEMONIC_CNTRL(end)))
+        {
         while (isMNEMONIC_CNTRL(start) && start <= end) {
             put_code_point(sv, start);
             start++;
         }
-        if (start < end && isMNEMONIC_CNTRL(end)) {
 
-            /* Here, the final character in the range has a mnemonic name.
-             * Work backwards from the end to find the final non-mnemonic */
-            UV temp_end = end - 1;
+        /* If this didn't take care of the whole range ... */
+        if (start <= end) {
+
+            /* Look backwards from the end to find the final non-mnemonic */
+            UV temp_end = end;
             while (isMNEMONIC_CNTRL(temp_end)) {
                 temp_end--;
             }
@@ -19772,6 +19776,7 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
                 start++;
             }
             break;
+        }
         }
 
         /* As a final resort, output the range or subrange as hex. */

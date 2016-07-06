@@ -34,6 +34,7 @@ my @tests = (
     '[^\/\|,\$\%%\@\ \%"\<\>\:\#\&\*\{\}\[\]\(\)]' => 'ANYOF[^ "#$%&()*,/:<>@[\]\{|\}][0100-INFINITY]',
     '[ [:blank:]]' => 'ANYOFD[\t {utf8}\xA0][1680 2000-200A 202F 205F 3000]',
     '[\xA0[:^blank:]]' => 'ANYOF[^\t ][0100-167F 1681-1FFF 200B-202E 2030-205E 2060-2FFF 3001-INFINITY]',
+    '[\x{07}-\x{0B}]' => 'ANYOF[\a\b\t\n\x0B]',
     '(?il:[\x{212A}])' => 'ANYOFL{i}[{utf8 locale}Kk][212A]',
     '(?il:(?[\x{212A}]))' => 'ANYOFL{utf8-locale-reqd}[Kk][212A]',
 
