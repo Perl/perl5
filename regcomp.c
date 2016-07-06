@@ -8324,33 +8324,47 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * as an SVt_INVLIST scalar.
  *
  * An inversion list for Unicode is an array of code points, sorted by ordinal
- * number.  The zeroth element is the first code point in the list.  The 1th
- * element is the first element beyond that not in the list.  In other words,
- * the first range is
- *  invlist[0]..(invlist[1]-1)
- * The other ranges follow.  Thus every element whose index is divisible by two
- * marks the beginning of a range that is in the list, and every element not
- * divisible by two marks the beginning of a range not in the list.  A single
- * element inversion list that contains the single code point N generally
- * consists of two elements
- *  invlist[0] == N
- *  invlist[1] == N+1
- * (The exception is when N is the highest representable value on the
- * machine, in which case the list containing just it would be a single
- * element, itself.  By extension, if the last range in the list extends to
- * infinity, then the first element of that range will be in the inversion list
- * at a position that is divisible by two, and is the final element in the
- * list.)
+ * number.  Each element gives the code point that begins a range that extends
+ * up-to but not including the code point given by the next element.  The final
+ * element gives the first code point of a range that extends to the platform's
+ * infinity.  The even-numbered elements (invlist[0], invlist[2], invlist[4],
+ * ...) give ranges whose code points are all in the inversion list.  We say
+ * that those ranges are in the set.  The odd-numbered elements give ranges
+ * whose code points are not in the inversion list, and hence not in the set.
+ * Thus, element [0] is the first code point in the list.  Element [1]
+ * is the first code point beyond that not in the list; and element [2] is the
+ * first code point beyond that that is in the list.  In other words, the first
+ * range is invlist[0]..(invlist[1]-1), and all code points in that range are
+ * in the inversion list.  The second range is invlist[1]..(invlist[2]-1), and
+ * all code points in that range are not in the inversion list.  The third
+ * range invlist[2]..(invlist[3]-1) gives code points that are in the inversion
+ * list, and so forth.  Thus every element whose index is divisible by two
+ * gives the beginning of a range that is in the list, and every element whose
+ * index is not divisible by two gives the beginning of a range not in the
+ * list.  If the final element's index is divisible by two, the inversion list
+ * extends to the platform's infinity; otherwise the highest code point in the
+ * inversion list is the contents of that element minus 1.
+ *
+ * A range that contains just a single code point N will look like
+ *  invlist[i]   == N
+ *  invlist[i+1] == N+1
+ *
+ * If N is UV_MAX (the highest representable code point on the machine), N+1 is
+ * impossible to represent, so element [i+1] is omitted.  The single element
+ * inversion list
+ *  invlist[0] == UV_MAX
+ * contains just UV_MAX, but is interpreted as matching to infinity.
+ *
  * Taking the complement (inverting) an inversion list is quite simple, if the
  * first element is 0, remove it; otherwise add a 0 element at the beginning.
  * This implementation reserves an element at the beginning of each inversion
  * list to always contain 0; there is an additional flag in the header which
  * indicates if the list begins at the 0, or is offset to begin at the next
- * element.
+ * element.  This means that the inversion list can be inverted without any
+ * copying; just flip the flag.
  *
  * More about inversion lists can be found in "Unicode Demystified"
  * Chapter 13 by Richard Gillam, published by Addison-Wesley.
- * More will be coming when functionality is added later.
  *
  * The inversion list data structure is currently implemented as an SV pointing
  * to an array of UVs that the SV thinks are bytes.  This allows us to have an
@@ -8671,7 +8685,7 @@ S__append_range_to_invlist(pTHX_ SV* const invlist,
 
 	UV final_element = len - 1;
 	array = invlist_array(invlist);
-	if (array[final_element] > start
+	if (   array[final_element] > start
 	    || ELEMENT_RANGE_MATCHES_INVLIST(final_element))
 	{
 	    Perl_croak(aTHX_ "panic: attempting to append to an inversion list, but wasn't at the end of the list, final=%"UVuf", start=%"UVuf", match=%c",
@@ -8679,10 +8693,10 @@ S__append_range_to_invlist(pTHX_ SV* const invlist,
 		     ELEMENT_RANGE_MATCHES_INVLIST(final_element) ? 't' : 'f');
 	}
 
-	/* Here, it is a legal append.  If the new range begins with the first
-	 * value not in the set, it is extending the set, so the new first
-	 * value not in the set is one greater than the newly extended range.
-	 * */
+        /* Here, it is a legal append.  If the new range begins 1 above the end
+         * of the range below it, it is extending the range below it, so the
+         * new first value not in the set is one greater than the newly
+         * extended range.  */
         offset = *get_invlist_offset_addr(invlist);
 	if (array[final_element] == start) {
 	    if (end != UV_MAX) {
@@ -8690,7 +8704,8 @@ S__append_range_to_invlist(pTHX_ SV* const invlist,
 	    }
 	    else {
 		/* But if the end is the maximum representable on the machine,
-		 * just let the range that this would extend to have no end */
+                 * assume that infinity was actually what was meant.  Just let
+                 * the range that this would extend to have no end */
 		invlist_set_len(invlist, len - 1, offset);
 	    }
 	    return;
@@ -9388,12 +9403,13 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 	}
 
     }
+
     /* The loop above increments the index into exactly one of the input lists
      * each iteration, and ends when either index gets to its list end.  That
      * means the other index is lower than its end, and so something is
      * remaining in that one.  We increment 'count', as explained below, if the
-     * exhausted list was in its set.  (i_a and i_b each currently index the element
-     * beyond the one we care about.) */
+     * exhausted list was in its set.  (i_a and i_b each currently index the
+     * element beyond the one we care about.) */
     if (   (i_a == len_a && PREV_RANGE_MATCHES_INVLIST(i_a))
         || (i_b == len_b && PREV_RANGE_MATCHES_INVLIST(i_b)))
     {
@@ -16303,9 +16319,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             else if (! SIZE_ONLY) {
 
                 /* Here, not in pass1 (in that pass we skip calculating the
-                 * contents of this class), and is /l, or is a POSIX class for
-                 * which /l doesn't matter (or is a Unicode property, which is
-                 * skipped here). */
+                 * contents of this class), and is not /l, or is a POSIX class
+                 * for which /l doesn't matter (or is a Unicode property, which
+                 * is skipped here). */
                 if (namedclass >= ANYOF_POSIXL_MAX) {  /* If a special class */
                     if (namedclass != ANYOF_UNIPROP) { /* UNIPROP = \p and \P */
 
@@ -16330,9 +16346,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                 &cp_list);
                     }
                 }
-                else if (UNI_SEMANTICS
+                else if (  UNI_SEMANTICS
                         || classnum == _CC_ASCII
-                        || (DEPENDS_SEMANTICS && (classnum == _CC_DIGIT
+                        || (DEPENDS_SEMANTICS && (   classnum == _CC_DIGIT
                                                   || classnum == _CC_XDIGIT)))
                 {
                     /* We usually have to worry about /d and /a affecting what
@@ -17129,11 +17145,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	SvREFCNT_dec_NN(cp_foldable_list);
     }
 
-    /* And combine the result (if any) with any inversion list from posix
+    /* And combine the result (if any) with any inversion lists from posix
      * classes.  The lists are kept separate up to now because we don't want to
      * fold the classes (folding of those is automatically handled by the swash
      * fetching code) */
-    if (simple_posixes) {
+    if (simple_posixes) {   /* These are the classes known to be unaffected by
+                               /a, /aa, and /d */
         _invlist_union(cp_list, simple_posixes, &cp_list);
         SvREFCNT_dec_NN(simple_posixes);
     }
@@ -19751,32 +19768,33 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
         if (   start <= end
             && (isMNEMONIC_CNTRL(start) || isMNEMONIC_CNTRL(end)))
         {
-        while (isMNEMONIC_CNTRL(start) && start <= end) {
-            put_code_point(sv, start);
-            start++;
-        }
-
-        /* If this didn't take care of the whole range ... */
-        if (start <= end) {
-
-            /* Look backwards from the end to find the final non-mnemonic */
-            UV temp_end = end;
-            while (isMNEMONIC_CNTRL(temp_end)) {
-                temp_end--;
-            }
-
-            /* And separately output the interior range that doesn't start or
-             * end with mnemonics */
-            put_range(sv, start, temp_end, FALSE);
-
-            /* Then output the mnemonic trailing controls */
-            start = temp_end + 1;
-            while (start <= end) {
+            while (isMNEMONIC_CNTRL(start) && start <= end) {
                 put_code_point(sv, start);
                 start++;
             }
-            break;
-        }
+
+            /* If this didn't take care of the whole range ... */
+            if (start <= end) {
+
+                /* Look backwards from the end to find the final non-mnemonic
+                 * */
+                UV temp_end = end;
+                while (isMNEMONIC_CNTRL(temp_end)) {
+                    temp_end--;
+                }
+
+                /* And separately output the interior range that doesn't start
+                 * or end with mnemonics */
+                put_range(sv, start, temp_end, FALSE);
+
+                /* Then output the mnemonic trailing controls */
+                start = temp_end + 1;
+                while (start <= end) {
+                    put_code_point(sv, start);
+                    start++;
+                }
+                break;
+            }
         }
 
         /* As a final resort, output the range or subrange as hex. */
@@ -19987,7 +20005,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
                                        is UTF-8 */
 
     SV* as_is_display;      /* The output string when we take the inputs
-                              literally */
+                               literally */
     SV* inverted_display;   /* The output string when we invert the inputs */
 
     U8 flags = (node) ? ANYOF_FLAGS(node) : 0;
