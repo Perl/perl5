@@ -1283,8 +1283,8 @@ S_ssc_anything(pTHX_ regnode_ssc *ssc)
 
     assert(is_ANYOF_SYNTHETIC(ssc));
 
-    ssc->invlist = sv_2mortal(_new_invlist(2)); /* mortalize so won't leak */
-    _append_range_to_invlist(ssc->invlist, 0, UV_MAX);
+    /* mortalize so won't leak */
+    ssc->invlist = sv_2mortal(_add_range_to_invlist(NULL, 0, UV_MAX));
     ANYOF_FLAGS(ssc) |= SSC_MATCHES_EMPTY_STRING;  /* Plus matches empty */
 }
 
@@ -8985,8 +8985,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
          * It's easiest to create a new inversion list that matches everything.
          * */
         if (complement_b) {
-            SV* everything = _new_invlist(1);
-            _append_range_to_invlist(everything, 0, UV_MAX);
+            SV* everything = _add_range_to_invlist(NULL, 0, UV_MAX);
 
             /* If the output didn't exist, just point it at the new list */
             if (*output == NULL) {
@@ -9788,7 +9787,7 @@ Perl__setup_canned_invlist(pTHX_ const STRLEN size, const UV element0,
 
     PERL_ARGS_ASSERT__SETUP_CANNED_INVLIST;
 
-    _append_range_to_invlist(invlist, element0, element0);
+    invlist = add_cp_to_invlist(invlist, element0);
     offset = *get_invlist_offset_addr(invlist);
 
     invlist_set_len(invlist, size, offset);
