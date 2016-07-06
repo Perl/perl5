@@ -1054,7 +1054,7 @@ re.pm, especially to the documentation.
 /* get_sv() can return NULL during global destruction. */
 #define GET_RE_DEBUG_FLAGS DEBUG_r({ \
         SV * re_debug_flags_sv = NULL; \
-        re_debug_flags_sv = PL_curcop ? get_sv(RE_DEBUG_FLAGS, 1) : NULL; \
+        re_debug_flags_sv = PL_curcop ? get_sv(RE_DEBUG_FLAGS, GV_ADD) : NULL; \
         if (re_debug_flags_sv) { \
             if (!SvIOK(re_debug_flags_sv)) \
                 sv_setuv(re_debug_flags_sv, RE_DEBUG_COMPILE_DUMP | RE_DEBUG_EXECUTE_MASK ); \
