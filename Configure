@@ -10181,7 +10181,7 @@ int main() {
     exit(0);
   }
 #endif
-  /* Then there are old mainframe/miniframe formats like IBM, and CRAY.
+  /* Then there are old mainframe/miniframe formats like IBM and CRAY.
    * Whether those environments can still build Perl is debatable. */
   printf("-1\n"); /* unknown */
   exit(0);
