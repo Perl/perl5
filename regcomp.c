@@ -18699,7 +18699,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                                                  : TRIE_BITMAP(trie)),
                                                 NULL,
                                                 NULL,
-                                                NULL
+                                                NULL,
+                                                FALSE
                                                );
             sv_catpvs(sv, "]");
         }
@@ -18798,6 +18799,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         /* And things that aren't in the bitmap, but are small enough to be */
         SV* bitmap_range_not_in_bitmap = NULL;
 
+        const bool inverted = flags & ANYOF_INVERT;
+
 	if (OP(o) == ANYOFL) {
             if (ANYOFL_UTF8_LOCALE_REQD(flags)) {
                 sv_catpvs(sv, "{utf8-locale-reqd}");
@@ -18842,21 +18845,37 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                                               ANYOF_BITMAP(o),
                                               bitmap_range_not_in_bitmap,
                                               only_utf8_locale_invlist,
-                                              o);
+                                              o,
+
+                                              /* Can't try inverting for a
+                                               * better display if there are
+                                               * things that haven't been
+                                               * resolved */
+                                              unresolved != NULL);
         SvREFCNT_dec(bitmap_range_not_in_bitmap);
 
         /* If there are user-defined properties which haven't been defined yet,
-         * output them, in a separate [] from the bitmap range stuff */
+         * output them.  If the result is not to be inverted, it is clearest to
+         * output them in a separate [] from the bitmap range stuff.  If the
+         * result is to be complemented, we have to show everything in one [],
+         * as the inversion applies to the whole thing.  Use {braces} to
+         * separate them from anything in the bitmap and anything above the
+         * bitmap. */
         if (unresolved) {
-            if (do_sep) {
+            if (inverted) {
+                if (! do_sep) { /* If didn't output anything in the bitmap */
+                    sv_catpvs(sv, "^");
+                }
+                sv_catpvs(sv, "{");
+            }
+            else if (do_sep) {
                 Perl_sv_catpvf(aTHX_ sv,"%s][%s",PL_colors[1],PL_colors[0]);
             }
-            if (flags & ANYOF_INVERT) {
-                sv_catpvs(sv, "^");
-            }
             sv_catsv(sv, unresolved);
-            do_sep = TRUE;
-            SvREFCNT_dec_NN(unresolved);
+            if (inverted) {
+                sv_catpvs(sv, "}");
+            }
+            do_sep = ! inverted;
         }
 
         /* And, finally, add the above-the-bitmap stuff */
@@ -18873,9 +18892,11 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                 Perl_sv_catpvf(aTHX_ sv,"%s][%s",PL_colors[1],PL_colors[0]);
             }
 
-            /* And, for easy of understanding, it is always output not-shown as
-             * complemented */
-            if (flags & ANYOF_INVERT) {
+            /* And, for easy of understanding, it is shown in the
+             * uncomplemented form if possible.  The one exception being if
+             * there are unresolved items, where the inversion has to be
+             * delayed until runtime */
+            if (inverted && ! unresolved) {
                 _invlist_invert(nonbitmap_invlist);
                 _invlist_subtract(nonbitmap_invlist, PL_InBitmap, &nonbitmap_invlist);
             }
@@ -18912,6 +18933,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
         /* And finally the matching, closing ']' */
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
+
+        SvREFCNT_dec(unresolved);
     }
     else if (k == POSIXD || k == NPOSIXD) {
         U8 index = FLAGS(o) * 2;
@@ -19836,7 +19859,9 @@ S_put_charclass_bitmap_innards_common(pTHX_
 )
 {
     /* Create and return an SV containing a displayable version of the bitmap
-     * and associated information determined by the input parameters. */
+     * and associated information determined by the input parameters.  If the
+     * output would have been only the inversion indicator '^', NULL is instead
+     * returned. */
 
     SV * output;
 
@@ -19895,9 +19920,8 @@ S_put_charclass_bitmap_innards_common(pTHX_
         }
     }
 
-    /* If the only thing we output is the '^', clear it */
     if (invert && SvCUR(output) == 1) {
-        SvCUR_set(output, 0);
+        return NULL;
     }
 
     return output;
@@ -19908,7 +19932,8 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
                                      char *bitmap,
                                      SV *nonbitmap_invlist,
                                      SV *only_utf8_locale_invlist,
-                                     const regnode * const node)
+                                     const regnode * const node,
+                                     const bool force_as_is_display)
 {
     /* Appends to 'sv' a displayable version of the innards of the bracketed
      * character class defined by the other arguments:
@@ -19924,13 +19949,16 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
      *  'node' is the regex pattern node.  It is needed only when the above two
      *      parameters are not null, and is passed so that this routine can
      *      tease apart the various reasons for them.
+     *  'force_as_is_display' is TRUE if this routine should definitely NOT try
+     *      to invert things to see if that leads to a cleaner display.  If
+     *      FALSE, this routine is free to use its judgment about doing this.
      *
      * It returns TRUE if there was actually something output.  (It may be that
      * the bitmap, etc is empty.)
      *
      * When called for outputting the bitmap of a non-ANYOF node, just pass the
-     * bitmap, with the succeeding parameters set to NULL.
-     *
+     * bitmap, with the succeeding parameters set to NULL, and the final one to
+     * FALSE.
      */
 
     /* In general, it tries to display the 'cleanest' representation of the
@@ -19938,7 +19966,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
      * whether the class itself is to be inverted.  However,  there are some
      * cases where it can't try inverting, as what actually matches isn't known
      * until runtime, and hence the inversion isn't either. */
-    bool inverting_allowed = TRUE;
+    bool inverting_allowed = ! force_as_is_display;
 
     int i;
     STRLEN orig_sv_cur = SvCUR(sv);
@@ -20067,7 +20095,10 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
 
     /* If have to take the output as-is, just do that */
     if (! inverting_allowed) {
-        sv_catsv(sv, as_is_display);
+        if (as_is_display) {
+            sv_catsv(sv, as_is_display);
+            SvREFCNT_dec_NN(as_is_display);
+        }
     }
     else { /* But otherwise, create the output again on the inverted input, and
               use whichever version is shorter */
@@ -20125,17 +20156,19 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
 
         /* Use the shortest representation, taking into account our bias
          * against showing it inverted */
-        if (SvCUR(inverted_display) + inverted_bias
-            < SvCUR(as_is_display) + as_is_bias)
+        if (   inverted_display
+            && (   ! as_is_display
+                || (  SvCUR(inverted_display) + inverted_bias
+                    < SvCUR(as_is_display)    + as_is_bias)))
         {
 	    sv_catsv(sv, inverted_display);
         }
-        else {
+        else if (as_is_display) {
 	    sv_catsv(sv, as_is_display);
         }
 
-        SvREFCNT_dec_NN(as_is_display);
-        SvREFCNT_dec_NN(inverted_display);
+        SvREFCNT_dec(as_is_display);
+        SvREFCNT_dec(inverted_display);
     }
 
     SvREFCNT_dec_NN(invlist);

@@ -2300,7 +2300,8 @@ Es	|bool	|put_charclass_bitmap_innards|NN SV* sv		    \
 				|NN char* bitmap		    \
 				|NULLOK SV* nonbitmap_invlist	    \
 				|NULLOK SV* only_utf8_locale_invlist\
-				|NULLOK const regnode * const node
+				|NULLOK const regnode * const node  \
+				|const bool force_as_is_display
 Es	|SV*	|put_charclass_bitmap_innards_common		    \
 				|NN SV* invlist			    \
 				|NULLOK SV* posixes		    \
