@@ -8730,7 +8730,7 @@ S__append_range_to_invlist(pTHX_ SV* const invlist,
 
 #ifndef PERL_IN_XSUB_RE
 
-IV
+SSize_t
 Perl__invlist_search(SV* const invlist, const UV cp)
 {
     /* Searches the inversion list for the entry that contains the input code
