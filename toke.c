@@ -9442,7 +9442,7 @@ S_scan_heredoc(pTHX_ char *s)
     char *e;
     char *peek;
     char *indent = 0;
-    STRLEN indent_len = 0;
+    I32 indent_len = 0;
     bool indented = FALSE;
     const bool infile = PL_rsfp || PL_parser->filtered;
     const line_t origline = CopLINE(PL_curcop);
@@ -9701,8 +9701,8 @@ S_scan_heredoc(pTHX_ char *s)
 	else if (PL_bufend - PL_linestart == 1 && PL_bufend[-1] == '\r')
 	    PL_bufend[-1] = '\n';
 #endif
-	if (indented) {
-	    char * found = ninstr(s, s + (PL_bufend-s), PL_tokenbuf, PL_tokenbuf + len);
+	if (indented && (PL_bufend - s) >= len) {
+	    char * found = ninstr(s, s + (PL_bufend - s), PL_tokenbuf, PL_tokenbuf + len);
 
 	    if (found) {
 		char *backup = found;
@@ -9767,7 +9767,8 @@ S_scan_heredoc(pTHX_ char *s)
 		ss++;
 
 	    /* Found our indentation? Strip it */
-	    } else if (memEQ(ss, indent, indent_len)) {
+	    } else if (se - ss >= indent_len
+	       && memEQ(ss, indent, indent_len)) {
 		STRLEN le = 0;
 
 		ss += indent_len;
