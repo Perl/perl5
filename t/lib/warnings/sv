@@ -413,3 +413,11 @@ Argument "a_c" isn't numeric in preincrement (++) at - line 5.
 Argument "(?^:abc)" isn't numeric in preincrement (++) at - line 6.
 Argument "123x" isn't numeric in preincrement (++) at - line 7.
 Argument "123e" isn't numeric in preincrement (++) at - line 8.
+########
+# RT #128257 This used to SEGV
+use warnings;
+sub Foo::f {}
+undef *Foo::;
+*Foo::f =sub {};
+EXPECT
+Subroutine f redefined at - line 5.

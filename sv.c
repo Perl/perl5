@@ -4074,14 +4074,18 @@ Perl_gv_setref(pTHX_ SV *const dstr, SV *const sstr)
 			    CvCONST((const CV *)sref)
 				 ? cv_const_sv((const CV *)sref)
 				 : NULL;
+                        HV * const stash = GvSTASH((const GV *)dstr);
 			report_redefined_cv(
-			   sv_2mortal(Perl_newSVpvf(aTHX_
-				"%"HEKf"::%"HEKf,
-				HEKfARG(
-				 HvNAME_HEK(GvSTASH((const GV *)dstr))
-				),
-				HEKfARG(GvENAME_HEK(MUTABLE_GV(dstr)))
-			   )),
+			   sv_2mortal(
+                             stash
+                               ? Perl_newSVpvf(aTHX_
+				    "%"HEKf"::%"HEKf,
+				    HEKfARG(HvNAME_HEK(stash)),
+				    HEKfARG(GvENAME_HEK(MUTABLE_GV(dstr))))
+                               : Perl_newSVpvf(aTHX_
+				    "%"HEKf,
+				    HEKfARG(GvENAME_HEK(MUTABLE_GV(dstr))))
+			   ),
 			   cv,
 			   CvCONST((const CV *)sref) ? &new_const_sv : NULL
 			);
