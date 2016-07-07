@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-plan(tests => 50);
+plan(tests => 51);
 
 
 # heredoc without newline (#65838)
@@ -159,6 +159,15 @@ HEREDOC
         $string,
         { switches => ['-w'], stderr => 1 },
         "indented heredoc at EOF"
+    );
+
+    fresh_perl_is(
+        "print <<~EOF;\nx EOF\n\t \t${string}\n\t \tEOF\n",
+        "Indentation on line 1 of heredoc doesn\'t match delimiter at - line 1.\n" .
+        "x EOF\n" .
+        $string,
+        { switches => ['-w'], stderr => 1 },
+        "indented heredoc with embedded EOF lookalike"
     );
 
     fresh_perl_is(

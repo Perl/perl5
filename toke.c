@@ -9688,6 +9688,7 @@ S_scan_heredoc(pTHX_ char *s)
 
 	    if (found) {
 		char *backup = found;
+		indent_len = 0;
 
 		/* Only valid if it's preceded by whitespace only */
 		while (backup != s && --backup >= s) {
@@ -9699,7 +9700,7 @@ S_scan_heredoc(pTHX_ char *s)
 		}
 
 		/* All whitespace! */
-		if (backup == s) {
+		if (!indent_len || *backup == ' ' || *backup == '\t') {
 		    Newxz(indent, indent_len + 1, char);
 		    memcpy(indent, s, indent_len);
 		    SvREFCNT_dec(PL_linestr);
