@@ -9683,8 +9683,9 @@ S_scan_heredoc(pTHX_ char *s)
 	else if (PL_bufend - PL_linestart == 1 && PL_bufend[-1] == '\r')
 	    PL_bufend[-1] = '\n';
 #endif
-	if (indented && (PL_bufend - s) >= len) {
-	    char * found = instr(s, PL_tokenbuf + 1);
+	if (indented && (PL_bufend-s) >= len) {
+	    char * found = ninstr(s, PL_bufend, (PL_tokenbuf + 1), (PL_tokenbuf + 1 + len));
+
 	    if (found) {
 		char *backup = found;
 
