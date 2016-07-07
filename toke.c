@@ -9579,13 +9579,45 @@ S_scan_heredoc(pTHX_ char *s)
 	linestr = shared->ls_linestr;
 	bufend = SvEND(linestr);
 	d = s;
-	while (s < bufend - len + 1
-               && memNE(s,PL_tokenbuf,len) )
-        {
-	    if (*s++ == '\n')
-		++PL_parser->herelines;
+
+	if (indented) {
+	    while (s < bufend - len + 1) {
+		if (*s++ == '\n')
+		    ++PL_parser->herelines;
+
+		if (memEQ(s, PL_tokenbuf + 1, len - 1)) {
+		    char *backup = s;
+		    indent_len = 0;
+
+		    /* Only valid if it's preceded by whitespace only */
+		    while (backup != olds && --backup >= olds) {
+			if (*backup != ' ' && *backup != '\t') {
+			    break;
+			}
+
+			indent_len++;
+		    }
+
+		    /* All whitespace! */
+		    if (backup == s || *backup == '\n') {
+			Newxz(indent, indent_len + 1, char);
+			memcpy(indent, backup + 1, indent_len);
+			s--; /* before our delimiter */
+			PL_parser->herelines--; /* this line doesn't count */
+			break;
+		    }
+		}
+	    }
+	} else {
+	    while (s < bufend - len + 1
+	           && memNE(s,PL_tokenbuf,len) )
+	    {
+		if (*s++ == '\n')
+		    ++PL_parser->herelines;
+	    }
 	}
-	if (s >= bufend - len + 1) {
+
+	if (!indent && s >= bufend - len + 1) {
 	    goto interminable;
 	}
 	sv_setpvn(tmpstr,d+1,s-d);
@@ -9692,17 +9724,17 @@ S_scan_heredoc(pTHX_ char *s)
 
 		/* Only valid if it's preceded by whitespace only */
 		while (backup != s && --backup >= s) {
-		    indent_len++;
-
 		    if (*backup != ' ' && *backup != '\t') {
 			break;
 		    }
+
+		    indent_len++;
 		}
 
-		/* All whitespace! */
-		if (!indent_len || *backup == ' ' || *backup == '\t') {
+		/* All whitespace or none! */
+		if (backup == found || *backup == ' ' || *backup == '\t') {
 		    Newxz(indent, indent_len + 1, char);
-		    memcpy(indent, s, indent_len);
+		    memcpy(indent, backup, indent_len);
 		    SvREFCNT_dec(PL_linestr);
 		    PL_linestr = linestr_save;
 		    PL_linestart = SvPVX(linestr_save);
@@ -9756,7 +9788,7 @@ S_scan_heredoc(pTHX_ char *s)
 
 		ss += indent_len;
 
-		while (*(ss + le) != '\n')
+		while (*ss && *(ss + le) != '\n')
 		    le++;
 
 		le += 1; /* include new line */
