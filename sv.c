@@ -15968,11 +15968,14 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
         /* If we were executing OP_MULTIDEREF when the undef warning
          * triggered, then it must be one of the index values within
          * that triggered it. If not, then the only possibility is that
-         * the value retrieved by the last aggregate lookup might be the
+         * the value retrieved by the last aggregate index might be the
          * culprit. For the former, we set PL_multideref_pc each time before
          * using an index, so work though the item list until we reach
          * that point. For the latter, just work through the entire item
          * list; the last aggregate retrieved will be the candidate.
+         * There is a third rare possibility: something triggered
+         * magic while fetching an array/hash element. Just display
+         * nothing in this case.
          */
 
         /* the named aggregate, if any */
@@ -16072,7 +16075,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 
             if (   index_type == MDEREF_INDEX_none
                 || (actions & MDEREF_FLAG_last)
-                || (last && items == last)
+                || (last && items >= last)
             )
                 break;
 
@@ -16080,7 +16083,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
         } /* while */
 
 	if (PL_op == obase) {
-	    /* index was undef */
+	    /* most likely index was undef */
 
             *desc_p = (    (actions & MDEREF_FLAG_last)
                         && (obase->op_private
@@ -16091,13 +16094,22 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
                                 : "delete"
                         : is_hv ? "hash element" : "array element";
             assert(index_type != MDEREF_INDEX_none);
-            if (index_gv)
-                return varname(index_gv, '$', 0, NULL, 0, FUV_SUBSCRIPT_NONE);
-            if (index_targ)
-                return varname(NULL, '$', index_targ,
+            if (index_gv) {
+                if (GvSV(index_gv) == uninit_sv)
+                    return varname(index_gv, '$', 0, NULL, 0,
+                                                    FUV_SUBSCRIPT_NONE);
+                else
+                    return NULL;
+            }
+            if (index_targ) {
+                if (PL_curpad[index_targ] == uninit_sv)
+                    return varname(NULL, '$', index_targ,
 				    NULL, 0, FUV_SUBSCRIPT_NONE);
-            assert(is_hv); /* AV index is an IV and can't be undef */
-            /* can a const HV index ever be undef? */
+                else
+                    return NULL;
+            }
+            /* If we got to this point it was undef on a const subscript,
+             * so magic probably involved, e.g. $ISA[0]. Give up. */
             return NULL;
         }
 
