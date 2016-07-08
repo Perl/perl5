@@ -98,7 +98,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 21;
 
 # number of tests in section 3
-my $bug_tests = 66 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 11 + 3;
+my $bug_tests = 66 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 11 + 4;
 
 # number of tests in section 4
 my $hmb_tests = 37;
@@ -1971,6 +1971,19 @@ EOP
 a    x
 EXPECT
 	      { stderr => 1 }, '#123538 crash in FF_MORE');
+
+# this used to assert fail
+fresh_perl_like(<<'EOP',
+format STDOUT =
+@
+0"$x"
+.
+print "got here\n";
+EOP
+    qr/Use of comma-less variable list is deprecated.*got here/s,
+    { stderr => 1 },
+    '#128255 Assert fail in S_sublex_done');
+
 
 #############################
 ## Section 4
