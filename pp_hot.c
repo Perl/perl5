@@ -4023,6 +4023,28 @@ Perl_sub_crush_depth(pTHX_ CV *cv)
     }
 }
 
+
+
+/* like croak, but report in context of caller */
+
+void
+Perl_croak_caller(const char *pat, ...)
+{
+    dTHX;
+    va_list args;
+    const PERL_CONTEXT *cx = caller_cx(0, NULL);
+
+    /* make error appear at call site */
+    assert(cx);
+    PL_curcop = cx->blk_oldcop;
+
+    va_start(args, pat);
+    vcroak(pat, &args);
+    NOT_REACHED; /* NOTREACHED */
+    va_end(args);
+}
+
+
 PP(pp_aelem)
 {
     dSP;

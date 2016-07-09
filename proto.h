@@ -267,7 +267,6 @@ PERL_CALLCONV U32	Perl_cast_ulong(NV f)
 PERL_CALLCONV UV	Perl_cast_uv(NV f)
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV OP*	Perl_check_arity(pTHX_ int arity, bool max);
 PERL_CALLCONV bool	Perl_check_utf8_print(pTHX_ const U8 *s, const STRLEN len);
 #define PERL_ARGS_ASSERT_CHECK_UTF8_PRINT	\
 	assert(s)
@@ -547,6 +546,10 @@ PERL_CALLCONV void	Perl_create_eval_scope(pTHX_ OP *retop, U32 flags);
 PERL_CALLCONV_NO_RET void	Perl_croak(pTHX_ const char* pat, ...)
 			__attribute__noreturn__
 			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
+
+PERL_CALLCONV_NO_RET void	Perl_croak_caller(const char* pat, ...)
+			__attribute__noreturn__
+			__attribute__format__null_ok__(__printf__,1,2);
 
 PERL_STATIC_NO_RET void	S_croak_memory_wrap(void)
 			__attribute__noreturn__;
@@ -5494,7 +5497,7 @@ STATIC void	S_no_op(pTHX_ const char *const what, char *s);
 STATIC void	S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package, bool is_utf8, bool check_dollar);
 #define PERL_ARGS_ASSERT_PARSE_IDENT	\
 	assert(s); assert(d); assert(e)
-STATIC int	S_pending_ident(pTHX);
+STATIC int	S_pending_ident(pTHX_ bool is_sig);
 STATIC char*	S_scan_const(pTHX_ char *start)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SCAN_CONST	\

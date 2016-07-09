@@ -762,6 +762,18 @@ addbits('multideref',
 
 addbits('avhvswitch', '0..1' => { });
 
+addbits('argelem',
+   '1..2' =>  {
+                   mask_def  => 'OPpARGELEM_MASK',
+                   enum => [ qw(
+                               0   OPpARGELEM_SV   SV
+                               1   OPpARGELEM_AV   AV
+                               2   OPpARGELEM_HV   HV
+                           )],
+               },
+);
+
+
 1;
 
 # ex: set ts=8 sts=4 sw=4 et:

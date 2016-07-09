@@ -929,6 +929,7 @@ Perl_op_clear(pTHX_ OP *o)
         /* FALLTHROUGH */
     case OP_ENTERTRY:
     case OP_ENTEREVAL:	/* Was holding hints. */
+    case OP_ARGDEFELEM:	/* Was holding signature index. */
 	o->op_targ = 0;
 	break;
     default:
@@ -1051,6 +1052,10 @@ Perl_op_clear(pTHX_ OP *o)
 #endif
 
 	break;
+
+    case OP_ARGCHECK:
+        PerlMemShared_free(cUNOP_AUXo->op_aux);
+        break;
 
     case OP_MULTIDEREF:
         {
@@ -15018,41 +15023,6 @@ const_av_xsub(pTHX_ CV* cv)
     XSRETURN(AvFILLp(av)+1);
 }
 
-/* return an optree that checks for too few or too many args -
- * used for subroutine signatures
- */
-OP *
-Perl_check_arity(pTHX_ int arity, bool max)
-{
-    return
-        newSTATEOP(0, NULL,
-            newLOGOP(OP_OR, 0,
-                newBINOP((max ? OP_LE : OP_GE), 0,
-                    scalar(newUNOP(OP_RV2AV, 0,
-                        newGVOP(OP_GV, 0, PL_defgv))
-                    ),
-                    newSVOP(OP_CONST, 0, newSViv(arity))
-                ),
-                op_convert_list(OP_DIE, 0,
-                    op_convert_list(OP_SPRINTF, 0,
-                        op_append_list(OP_LIST,
-                            newSVOP(OP_CONST, 0,
-                                max
-                                    ? newSVpvs("Too many arguments for subroutine at %s line %d.\n")
-                                    : newSVpvs("Too few arguments for subroutine at %s line %d.\n")
-                            ),
-                            newSLICEOP(0,
-                                op_append_list(OP_LIST,
-                                    newSVOP(OP_CONST, 0, newSViv(1)),
-                                    newSVOP(OP_CONST, 0, newSViv(2))),
-                                newOP(OP_CALLER, 0)
-                            )
-                        )
-                    )
-                )
-            )
-        );
-}
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

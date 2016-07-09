@@ -46,7 +46,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.37';
+$VERSION = '1.38';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1256,6 +1256,11 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
 		push @ops, $o;
 	    }
 	    $body = $self->lineseq(undef, 0, @ops).";";
+            if ($ops[-1]->name =~ /^(next|db)state$/) {
+                # this handles void context in
+                #   use feature signatures; sub ($=1) {}
+                $body .= "\n()";
+            }
 	    my $scope_en = $self->find_scope_en($lineseq);
 	    if (defined $scope_en) {
 		my $subs = join"", $self->seq_subs($scope_en);
@@ -5771,6 +5776,61 @@ sub pp_lvavref {
 		? maybe_local(@_, rv2x(@_, "\@"))
 		: &pp_padsv)  . ')'
 }
+
+
+sub pp_argcheck {
+    my $self = shift;
+    my($op, $cx) = @_;
+    my ($params, $opt_params, $slurpy) = $op->aux_list($self->{curcv});
+    my $mandatory = $params - $opt_params;
+    my $check = '';
+
+    $check .= <<EOF if !$slurpy;
+die sprintf("Too many arguments for subroutine at %s line %d.\\n", (caller)[1, 2]) unless \@_ <= $params;
+EOF
+
+    $check .= <<EOF if $mandatory > 0;
+die sprintf("Too few arguments for subroutine at %s line %d.\\n", (caller)[1, 2]) unless \@_ >= $mandatory;
+EOF
+
+    my $cond = ($params & 1) ? 'unless' : 'if';
+    $check .= <<EOF if $slurpy eq '%';
+die sprintf("Odd name/value argument for subroutine at %s line %d.\\n", (caller)[1, 2]) if \@_ > $params && ((\@_ - $params) & 1);
+EOF
+
+    $check =~ s/;\n\z//;
+    return $check;
+}
+
+
+sub pp_argelem {
+    my $self = shift;
+    my($op, $cx) = @_;
+    my $var = $self->padname($op->targ);
+    my $ix  = $op->string($self->{curcv});
+    my $expr;
+    if ($op->flags & OPf_KIDS) {
+        $expr = $self->deparse($op->first, 7);
+    }
+    elsif ($var =~ /^[@%]/) {
+        $expr = $ix ? "\@_[$ix .. \$#_]" : '@_';
+    }
+    else {
+        $expr = "\$_[$ix]";
+    }
+    return "my $var = $expr";
+}
+
+
+sub pp_argdefelem {
+    my $self = shift;
+    my($op, $cx) = @_;
+    my $ix  = $op->targ;
+    my $expr = "\@_ >= " . ($ix+1) . " ? \$_[$ix] : ";
+    $expr .= $self->deparse($op->first, $cx);
+    return $expr;
+}
+
 
 1;
 __END__

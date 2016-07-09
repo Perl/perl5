@@ -298,6 +298,7 @@ Anprd	|void	|croak_xs_usage	|NN const CV *const cv \
 				|NN const char *const params
 npr	|void	|croak_no_mem
 nprX	|void	|croak_popstack
+fnrp	|void	|croak_caller|NULLOK const char* pat|...
 fnprx	|void	|noperl_die|NN const char* pat|...
 #if defined(WIN32)
 norx	|void	|win32_croak_not_implemented|NN const char * fname
@@ -2533,7 +2534,7 @@ s	|int	|intuit_more	|NN char *s
 s	|I32	|lop		|I32 f|int x|NN char *s
 rs	|void	|missingterm	|NULLOK char *s
 s	|void	|no_op		|NN const char *const what|NULLOK char *s
-s	|int	|pending_ident
+s	|int	|pending_ident	|bool is_sig
 sR	|I32	|sublex_done
 sR	|I32	|sublex_push
 sR	|I32	|sublex_start
@@ -2989,7 +2990,5 @@ XEop    |void   |dtrace_probe_load |NN const char *name|bool is_loading
 XEop    |void   |dtrace_probe_op   |NN const OP *op
 XEop    |void   |dtrace_probe_phase|enum perl_phase phase
 #endif
-
-xpo	|OP*	|check_arity	|int arity |bool max
 
 : ex: set ts=8 sts=4 sw=4 noet:
