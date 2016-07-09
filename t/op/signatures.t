@@ -1297,6 +1297,23 @@ is scalar(t117()), undef;
 is scalar(@{[ t117(333, 444) ]}), 0;
 is scalar(t117(333, 444)), undef;
 
+sub t145 ($=3) { }
+is scalar(t145()), undef;
+
+{
+    my $want;
+    sub want { $want = wantarray ? "list"
+                        : defined(wantarray) ? "scalar" : "void"; 1 }
+
+    sub t144 ($a = want()) { $a }
+    t144();
+    is ($want, "scalar", "default expression is scalar in void context");
+    my $x = t144();
+    is ($want, "scalar", "default expression is scalar in scalar context");
+    () = t144();
+    is ($want, "scalar", "default expression is scalar in list context");
+}
+
 use File::Spec::Functions;
 my $keywords_file = catfile(updir,'regen','keywords.pl');
 open my $kh, $keywords_file

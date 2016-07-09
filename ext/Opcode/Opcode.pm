@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.35";
+$VERSION = "1.36";
 
 use Carp;
 use Exporter ();
@@ -312,7 +312,7 @@ invert_opset function.
     av2arylen
 
     rv2hv helem hslice kvhslice each values keys exists delete
-    aeach akeys avalues multideref
+    aeach akeys avalues multideref argelem argdefelem argcheck
 
     preinc i_preinc predec i_predec postinc i_postinc
     postdec i_postdec int hex oct abs pow multiply i_multiply

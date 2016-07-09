@@ -1325,14 +1325,30 @@ string(o, cv)
 	B::CV  cv
     PREINIT:
 	SV *ret;
+        UNOP_AUX_item *aux;
     PPCODE:
+        aux = cUNOP_AUXo->op_aux;
         switch (o->op_type) {
         case OP_MULTIDEREF:
             ret = multideref_stringify(o, cv);
             break;
+
+        case OP_ARGELEM:
+            ret = sv_2mortal(Perl_newSVpvf(aTHX_ "%"UVuf,
+                            PTR2UV(aux)));
+            break;
+
+        case OP_ARGCHECK:
+            ret = Perl_newSVpvf(aTHX_ "%"UVuf",%"UVuf, aux[0].uv, aux[1].uv);
+            if (aux[2].iv)
+                Perl_sv_catpvf(aTHX_ ret, ",%c", (char)aux[2].iv);
+            ret = sv_2mortal(ret);
+            break;
+
         default:
             ret = sv_2mortal(newSVpvn("", 0));
         }
+
 	ST(0) = ret;
 	XSRETURN(1);
 
@@ -1346,11 +1362,27 @@ void
 aux_list(o, cv)
 	B::OP  o
 	B::CV  cv
+    PREINIT:
+        UNOP_AUX_item *aux;
     PPCODE:
         PERL_UNUSED_VAR(cv); /* not needed on unthreaded builds */
+        aux = cUNOP_AUXo->op_aux;
         switch (o->op_type) {
         default:
             XSRETURN(0); /* by default, an empty list */
+
+        case OP_ARGELEM:
+            XPUSHs(sv_2mortal(newSVuv(PTR2UV(aux))));
+            XSRETURN(1);
+            break;
+
+        case OP_ARGCHECK:
+            EXTEND(SP, 3);
+            PUSHs(sv_2mortal(newSVuv(aux[0].uv)));
+            PUSHs(sv_2mortal(newSVuv(aux[1].uv)));
+            PUSHs(sv_2mortal(aux[2].iv ? Perl_newSVpvf(aTHX_ "%c",
+                                (char)aux[2].iv) : &PL_sv_no));
+            break;
 
         case OP_MULTIDEREF:
 #ifdef USE_ITHREADS

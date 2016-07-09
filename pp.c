@@ -6615,6 +6615,212 @@ PP(pp_anonconst)
     RETURN;
 }
 
+
+/* process one subroutine argument - typically when the sub has a signature:
+ * introduce PL_curpad[op_targ] and assign to it the value
+ *  for $:   (OPf_STACKED ? *sp : $_[N])
+ *  for @/%: @_[N..$#_]
+ *
+ * It's equivalent to 
+ *    my $foo = $_[N];
+ * or
+ *    my $foo = (value-on-stack)
+ * or
+ *    my @foo = @_[N..$#_]
+ * etc
+ *
+ * It assumes that the pad var is currently uninitialised, so this op
+ * should only be used at the start of a sub, where its not possible to
+ * skip the op (e.g. no 'my $x if $cond' stuff for example).
+ */
+
+PP(pp_argelem)
+{
+    dTARG;
+    SV *val;
+    SV ** padentry;
+    OP *o = PL_op;
+    AV *defav = GvAV(PL_defgv); /* @_ */
+    UV ix = PTR2UV(cUNOP_AUXo->op_aux);
+    IV argc;
+    SV **argv;
+
+    assert(!SvMAGICAL(defav));
+
+    /* do 'my $var, @var or %var' action */
+    padentry = &(PAD_SVl(o->op_targ));
+    save_clearsv(padentry);
+    targ = *padentry;
+
+    if ((o->op_private & OPpARGELEM_MASK) == OPpARGELEM_SV) {
+        if (o->op_flags & OPf_STACKED) {
+            dSP;
+            val = POPs;
+            PUTBACK;
+        }
+        else {
+            /* should already have been checked */
+            assert(ix < I32_MAX && AvFILLp(defav) >= (I32)ix);
+            val = AvARRAY(defav)[ix];
+            if (UNLIKELY(!val))
+                val = &PL_sv_undef;
+        }
+
+        /* $var = $val */
+
+        /* cargo-culted from pp_sassign */
+        assert(TAINTING_get || !TAINT_get);
+        if (UNLIKELY(TAINT_get) && !SvTAINTED(val))
+            TAINT_NOT;
+
+        /* Short-cut assignment of IV and RV values as these are
+         * common and simple. For RVs, it's likely that on
+         * subsequent calls to a function, targ is already of the
+         * correct storage class */
+        if (LIKELY(!SvMAGICAL(val))) {
+            /* just an IV */
+            if ((SvFLAGS(val) & (SVf_IOK|SVf_NOK|SVf_POK|SVf_IVisUV)) == SVf_IOK) {
+                IV i = SvIVX(val);
+                if (LIKELY(SvTYPE(targ) == SVt_IV)) {
+                    assert(!SvOK(targ));
+                    assert(!SvMAGICAL(targ));
+                    (void)SvIOK_only(targ);
+                    SvIV_set(targ, i);
+                }
+                else
+                    sv_setiv(targ, i);
+            }
+            else if (SvROK(val) && SvTYPE(targ) == SVt_IV) {
+                /* quick ref assignment */
+                assert(!SvOK(targ));
+                SvRV_set(targ, SvREFCNT_inc(SvRV(val)));
+                SvROK_on(targ);
+            }
+            else
+                sv_setsv(targ, val);
+        }
+        else
+            sv_setsv(targ, val);
+        return o->op_next;
+    }
+
+    /* must be AV or HV */
+
+    assert(!(o->op_flags & OPf_STACKED));
+    argc = ((IV)AvFILLp(defav) + 1) - (IV)ix;
+    assert(!SvMAGICAL(targ));
+    if (argc <= 0)
+        return o->op_next;
+    argv = AvARRAY(defav) + ix;
+    assert(argv);
+
+    /* This is a copy of the relevant parts of pp_aassign().
+     * We *know* that @foo / %foo is a plain empty lexical at this point,
+     * so we can avoid a lot of the extra baggage.
+     * We know, because all the usual tricks like 'my @a if 0',
+     * 'foo: my @a = ...; goto foo' can't be done with signatures.
+     */
+    if ((o->op_private & OPpARGELEM_MASK) == OPpARGELEM_AV) {
+        UV i = 0;
+
+        assert(AvFILLp((AV*)targ) == -1); /* can skip av_clear() */
+        av_extend((AV*)targ, argc);
+
+        while (argc--) {
+            SV *tmpsv;
+            SV *arg = *argv++;
+            tmpsv = newSV(0);
+            sv_setsv(tmpsv, arg);
+            av_store((AV*)targ, i++, tmpsv);
+            TAINT_NOT;
+        }
+
+    }
+    else {
+        assert((o->op_private & OPpARGELEM_MASK) == OPpARGELEM_HV);
+
+        assert(argc % 2 == 0);
+        assert(!HvTOTALKEYS(targ)); /* can skip hv_clear() */
+
+        while (argc) {
+            SV *tmpsv;
+            SV *key = *argv++;
+            SV *val = *argv++;
+
+            assert(key); assert(val);
+            argc -= 2;
+            if (UNLIKELY(SvGMAGICAL(key)))
+                key = sv_mortalcopy(key);
+            tmpsv = newSV(0);
+            sv_setsv(tmpsv, val);
+            hv_store_ent((HV*)targ, key, tmpsv, 0);
+            TAINT_NOT;
+        }
+    }
+
+    return o->op_next;
+}
+
+/* Handle a default value for one subroutine argument (typically as part
+ * of a subroutine signature).
+ * It's equivalent to
+ *    @_ > op_targ ? $_[op_targ] : result_of(op_other)
+ *
+ * Intended to be used where op_next is an OP_ARGELEM
+ *
+ * We abuse the op_targ field slightly: it's an index into @_ rather than
+ * into PL_curpad.
+ */
+
+PP(pp_argdefelem)
+{
+    OP * const o = PL_op;
+    AV *defav = GvAV(PL_defgv); /* @_ */
+    PADOFFSET ix = o->op_targ;
+
+    assert(!SvMAGICAL(defav));
+    assert(ix < I32_MAX);
+    if (AvFILLp(defav) >= (I32)ix) {
+        dSP;
+        XPUSHs(AvARRAY(defav)[ix]);
+        RETURN;
+    }
+    return cLOGOPo->op_other;
+}
+
+
+
+/* Check a  a subs arguments - i.e. that it has the correct number of args
+ * (and anything else we might think of in future). Typically used with
+ * signatured subs.
+ */
+
+PP(pp_argcheck)
+{
+    OP * const o       = PL_op;
+    UNOP_AUX_item *aux = cUNOP_AUXo->op_aux;
+    UV   params        = aux[0].uv;
+    UV   opt_params    = aux[1].uv;
+    char slurpy        = (char)(aux[2].iv);
+    AV  *defav         = GvAV(PL_defgv); /* @_ */
+    UV argc;
+    bool too_few;
+
+    assert(!SvMAGICAL(defav));
+    argc = (UV)(AvFILLp(defav) + 1);
+    too_few = (argc < (params - opt_params));
+
+    if (UNLIKELY(too_few || (!slurpy && argc > params)))
+        Perl_croak_caller("Too %s arguments for subroutine",
+                            too_few ? "few" : "many");
+
+    if (UNLIKELY(slurpy == '%' && argc > params && (argc - params) % 2))
+        Perl_croak_caller("Odd name/value argument for subroutine");
+
+
+    return NORMAL;
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

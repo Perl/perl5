@@ -2514,6 +2514,7 @@ Perl_debop(pTHX_ const OP *o)
     case OP_PADSV:
     case OP_PADAV:
     case OP_PADHV:
+    case OP_ARGELEM:
         S_deb_padvar(aTHX_ o->op_targ, 1, 1);
         break;
 

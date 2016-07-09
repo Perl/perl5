@@ -641,10 +641,7 @@ myattrlist:	COLONATTR THING
 sigvarname:   /* NULL */
 			{ $$ = (OP*)NULL; }
         |       PRIVATEREF
-                        {
-                            $$ = $1;
-                            PL_parser->in_my = 0;
-                        }
+                        { $$ = $1; }
 	;
 
 sigslurpsigil:
@@ -656,10 +653,9 @@ sigslurpsigil:
 /* @, %, @foo, %foo */
 sigslurpelem: sigslurpsigil sigvarname sigdefault/* def only to catch errors */ 
                         {
-                            I32 sigil = $1;
-                            OP *var   = $2;
+                            I32 sigil   = $1;
+                            OP *var     = $2;
                             OP *defexpr = $3;
-                            int type = (sigil == '@' ? OP_PADAV : OP_PADHV);
 
                             if (PL_parser->sig_slurpy)
                                 yyerror("Multiple slurpy parameters not allowed");
@@ -669,34 +665,7 @@ sigslurpelem: sigslurpsigil sigvarname sigdefault/* def only to catch errors */
                                 yyerror("a slurpy parameter may not have "
                                         "a default value");
 
-                            if (var) {
-                                OP *slice;
-
-                                var->op_type    = type;
-                                var->op_ppaddr  = PL_ppaddr[type];
-                                var->op_flags   = (OPf_WANT_LIST | OPf_MOD);
-                                var->op_private = OPpLVAL_INTRO;
-
-                                slice = PL_parser->sig_elems
-                                    ? op_prepend_elem(OP_ASLICE,
-                                        newOP(OP_PUSHMARK, 0),
-                                        newLISTOP(OP_ASLICE, 0,
-                                            list(newRANGE(0,
-                                                newSVOP(OP_CONST, 0,
-                                                    newSViv(PL_parser->sig_elems)),
-                                                newUNOP(OP_AV2ARYLEN, 0,
-                                                    ref(newUNOP(OP_RV2AV, 0,
-                                                            newGVOP(OP_GV, 0, PL_defgv)),
-                                                        OP_AV2ARYLEN)))),
-                                            ref(newUNOP(OP_RV2AV, 0,
-                                                    newGVOP(OP_GV, 0, PL_defgv)),
-                                                OP_ASLICE)))
-                                    : newUNOP(OP_RV2AV, 0, newGVOP(OP_GV, 0, PL_defgv));
-                                $$ = newSTATEOP(0, NULL,
-                                       newASSIGNOP(OPf_STACKED, var, 0, slice));
-                            }
-                            else
-                                $$ = (OP*)NULL;
+                            $$ = var ? newSTATEOP(0, NULL, var) : (OP*)NULL;
                         }
 	;
 
@@ -715,75 +684,61 @@ sigscalarelem:
                         {
                             OP *var     = $2;
                             OP *defexpr = $3;
-                            OP *argn    = NULL;
-                            OP *expr    = NULL;
 
                             if (PL_parser->sig_slurpy)
                                 yyerror("Slurpy parameter not last");
 
                             PL_parser->sig_elems++;
 
-                            if (var) {
-                                var->op_type    = OP_PADSV;
-                                var->op_ppaddr  = PL_ppaddr[OP_PADSV];
-                                var->op_flags   = (OPf_WANT_SCALAR | OPf_MOD);
-                                var->op_private = OPpLVAL_INTRO;
-                            }
-
-                            /* $_[N] */
-                            argn = newBINOP(OP_AELEM, 0,
-                                ref(newUNOP(OP_RV2AV, 0,
-                                        newGVOP(OP_GV, 0, PL_defgv)),
-                                    OP_RV2AV),
-                                newSVOP(OP_CONST, 0,
-                                    newSViv(PL_parser->sig_elems - 1)));
-
                             if (defexpr) {
                                 PL_parser->sig_optelems++;
-                                /* is it '$var=undef', '$=' ? */
-                                if (    (   defexpr->op_type == OP_NULL
-                                         || defexpr->op_type == OP_UNDEF)
+
+                                if (   defexpr->op_type == OP_NULL
                                     && !(defexpr->op_flags & OPf_KIDS))
                                 {
-                                    if (var) {
-                                        /* '$=' is legal, '$var=' isn't */
-                                        if (defexpr->op_type == OP_NULL)
-                                            yyerror("Optional parameter "
-                                                "lacks default expression");
-                                        else
-                                            expr = argn;
-                                    }
+                                    /* handle '$=' special case */
+                                    if (var)
+                                        yyerror("Optional parameter "
+                                                    "lacks default expression");
                                     op_free(defexpr);
                                 }
-                                else {
-                                    /* @_ >= N */
-                                    OP *ge_op = 
-                                        newBINOP(OP_GE, 0,
-                                        scalar(newUNOP(OP_RV2AV, 0,
-                                                newGVOP(OP_GV, 0, PL_defgv))),
-                                        newSVOP(OP_CONST, 0,
-                                            newSViv(PL_parser->sig_elems)));
+                                else { 
+                                    /* a normal '=default' expression */ 
+                                    OP *defop = (OP*)alloc_LOGOP(OP_ARGDEFELEM,
+                                                        defexpr,
+                                                        LINKLIST(defexpr));
+                                    /* re-purpose op_targ to hold @_ index */
+                                    defop->op_targ = PL_parser->sig_elems - 1;
 
-                                    expr = var
-                                        ? newCONDOP(0, ge_op, argn, defexpr)
-                                        : newLOGOP(OP_OR, 0, ge_op, defexpr);
+                                    if (var) {
+                                        var->op_flags |= OPf_STACKED;
+                                        (void)op_sibling_splice(var,
+                                                        NULL, 0, defop);
+                                        scalar(defop);
+                                    }
+                                    else
+                                        var = newUNOP(OP_NULL, 0, defop);
+
+                                    LINKLIST(var);
+                                    /* NB: normally the first child of a
+                                     * logop is executed before the logop,
+                                     * and it pushes a boolean result
+                                     * ready for the logop. For ARGDEFELEM,
+                                     * the op itself does the boolean
+                                     * calculation, so set the first op to
+                                     * it instead.
+                                     */
+                                    var->op_next = defop;
+                                    defexpr->op_next = var;
                                 }
                             }
                             else {
                                 if (PL_parser->sig_optelems)
                                     yyerror("Mandatory parameter "
                                             "follows optional parameter");
-                                expr = argn;
                             }
 
-                            if (var)
-                                expr = newASSIGNOP(OPf_STACKED, var, 0, expr);
-                            if (expr)
-                                $$ = op_prepend_elem(OP_LINESEQ,
-                                        newSTATEOP(0, NULL, NULL),
-                                        expr);
-                            else
-                                $$ = (OP*)NULL;
+                            $$ = var ? newSTATEOP(0, NULL, var) : (OP*)NULL;
                         }
 	;
 
@@ -828,9 +783,9 @@ subsignature:	'('
                 siglistornull
                 ')'
 			{
-                            OP *sigops = $3;
-                            int min_arity =
-                                PL_parser->sig_elems - PL_parser->sig_optelems;
+                            OP            *sigops = $3;
+                            UNOP_AUX_item *aux;
+                            OP            *check;
 
                             assert(FEATURE_SIGNATURES_IS_ENABLED);
 
@@ -839,52 +794,21 @@ subsignature:	'('
                                 packWARN(WARN_EXPERIMENTAL__SIGNATURES),
                                 "The signatures feature is experimental");
 
-                            /* handle odd/even for %foo */
-                            if (PL_parser->sig_slurpy == '%') {
-                                OP *chkop =
-                                    newLOGOP(
-                                        (PL_parser->sig_elems & 1)
-                                                ? OP_OR : OP_AND,
-                                        0,
-                                        newBINOP(OP_BIT_AND, 0,
-                                            scalar(newUNOP(OP_RV2AV, 0,
-                                                newGVOP(OP_GV, 0, PL_defgv))),
-                                            newSVOP(OP_CONST, 0, newSViv(1))),
-                                        op_convert_list(OP_DIE, 0,
-                                            op_convert_list(OP_SPRINTF, 0,
-                                                op_append_list(OP_LIST,
-                                                    newSVOP(OP_CONST, 0,
-                                                        newSVpvs("Odd name/value argument for subroutine at %s line %d.\n")),
-                                                    newSLICEOP(0,
-                                                        op_append_list(OP_LIST,
-                                                            newSVOP(OP_CONST, 0, newSViv(1)),
-                                                            newSVOP(OP_CONST, 0, newSViv(2))),
-                                                        newOP(OP_CALLER, 0))))));
-                                if (PL_parser->sig_optelems)
-                                    chkop = newLOGOP(OP_AND, 0,
-                                                newBINOP(OP_GT, 0,
-                                                    scalar(newUNOP(OP_RV2AV, 0,
-                                                        newGVOP(OP_GV, 0, PL_defgv))),
-                                                    newSVOP(OP_CONST, 0,
-                                                    newSViv(PL_parser->sig_elems))),
-                                                chkop);
-                                sigops = op_prepend_elem(OP_LINESEQ,
-                                            chkop, sigops);
-
-                            }
-                            if (min_arity)
-                                sigops = op_prepend_elem(OP_LINESEQ,
-                                            Perl_check_arity(aTHX_ min_arity,
-                                                FALSE),
-                                            sigops);
-                            if (!PL_parser->sig_slurpy)
-                                sigops = op_prepend_elem(OP_LINESEQ,
-                                            Perl_check_arity(aTHX_
-                                                PL_parser->sig_elems, TRUE),
-                                            sigops);
-
-                            $$ = op_append_elem(OP_LINESEQ, sigops,
-                                newSTATEOP(0, NULL, NULL));
+                            aux = (UNOP_AUX_item*)PerlMemShared_malloc(
+                                sizeof(UNOP_AUX_item) * 3);
+                            aux[0].uv = PL_parser->sig_elems;
+                            aux[1].uv = PL_parser->sig_optelems;
+                            aux[2].iv = PL_parser->sig_slurpy;
+                            check = newUNOP_AUX(OP_ARGCHECK, 0, NULL, aux);
+                            sigops = op_prepend_elem(OP_LINESEQ, check, sigops);
+                            sigops = op_prepend_elem(OP_LINESEQ,
+                                                newSTATEOP(0, NULL, NULL),
+                                                sigops);
+                            /* a nextstate at the end handles context
+                             * correctly for an empty sub body */
+                            $$ = op_append_elem(OP_LINESEQ,
+                                                sigops,
+                                                newSTATEOP(0, NULL, NULL));
 
                             parser->expect = XATTRBLOCK;
                             LEAVE;

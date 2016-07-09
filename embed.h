@@ -1202,6 +1202,7 @@
 #define core_prototype(a,b,c,d)	Perl_core_prototype(aTHX_ a,b,c,d)
 #define coresub_op(a,b,c)	Perl_coresub_op(aTHX_ a,b,c)
 #define create_eval_scope(a,b)	Perl_create_eval_scope(aTHX_ a,b)
+#define croak_caller		Perl_croak_caller
 #define croak_no_mem		Perl_croak_no_mem
 #define croak_popstack		Perl_croak_popstack
 #define custom_op_get_field(a,b)	Perl_custom_op_get_field(aTHX_ a,b)
@@ -1783,7 +1784,7 @@
 #define missingterm(a)		S_missingterm(aTHX_ a)
 #define no_op(a,b)		S_no_op(aTHX_ a,b)
 #define parse_ident(a,b,c,d,e,f)	S_parse_ident(aTHX_ a,b,c,d,e,f)
-#define pending_ident()		S_pending_ident(aTHX)
+#define pending_ident(a)	S_pending_ident(aTHX_ a)
 #define scan_const(a)		S_scan_const(aTHX_ a)
 #define scan_formline(a)	S_scan_formline(aTHX_ a)
 #define scan_heredoc(a)		S_scan_heredoc(aTHX_ a)

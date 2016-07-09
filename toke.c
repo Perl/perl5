@@ -4533,7 +4533,8 @@ Perl_yylex(pTHX)
 		    PL_lex_allbrackets--;
 		next_type &= 0xffff;
 	    }
-	    return REPORT(next_type == 'p' ? pending_ident() : next_type);
+	    return REPORT(next_type == 'p' ?  pending_ident(0)
+                        : next_type == 'P' ?  pending_ident(1) : next_type);
 	}
     }
 
@@ -4825,16 +4826,14 @@ Perl_yylex(pTHX)
             s = skipspace(s);
             if (isIDFIRST_lazy_if(s, UTF)) {
                 char *dest = PL_tokenbuf + 1;
-                /*  on next call to yylex this causes pending_ident()
-                 *  to allocmy() etc */
-                PL_in_my = KEY_my;
                 /* read var name, including sigil, into PL_tokenbuf */
                 PL_tokenbuf[0] = sigil;
                 parse_ident(&s, &dest, dest + sizeof(PL_tokenbuf) - 1,
                     0, cBOOL(UTF), FALSE);
                 *dest = '\0';
                 assert(PL_tokenbuf[1]); /* we have a variable name */
-                force_ident_maybe_lex(sigil);
+                NEXTVAL_NEXTTOKE.ival = sigil;
+                force_next('P'); /* force a signature pending identifier */
             }
             PL_expect = XOPERATOR;
             break;
@@ -8523,6 +8522,9 @@ Perl_yylex(pTHX)
 
   Looks up an identifier in the pad or in a package
 
+  is_sig indicates that this is a subroutine signature variable
+  rather than a plain pad var.
+
   Returns:
     PRIVATEREF if this is a lexical name.
     BAREWORD   if this belongs to a package.
@@ -8539,7 +8541,7 @@ Perl_yylex(pTHX)
 */
 
 static int
-S_pending_ident(pTHX)
+S_pending_ident(pTHX_ bool is_sig)
 {
     PADOFFSET tmp = 0;
     const char pit = (char)pl_yylval.ival;
@@ -8556,7 +8558,7 @@ S_pending_ident(pTHX)
 
        if it's a legal name, the OP is a PADANY.
     */
-    if (PL_in_my) {
+    if (is_sig || PL_in_my) {
         if (PL_in_my == KEY_our) {	/* "our" is merely analogous to "my" */
             if (has_colon)
                 yyerror_pv(Perl_form(aTHX_ "No package name allowed for "
@@ -8565,6 +8567,7 @@ S_pending_ident(pTHX)
             tmp = allocmy(PL_tokenbuf, tokenbuf_len, UTF ? SVf_UTF8 : 0);
         }
         else {
+            OP *o;
             if (has_colon) {
                 /* "my" variable %s can't be in a package */
                 /* PL_no_myglob is constant */
@@ -8577,9 +8580,26 @@ S_pending_ident(pTHX)
                 GCC_DIAG_RESTORE;
             }
 
-            pl_yylval.opval = newOP(OP_PADANY, 0);
-            pl_yylval.opval->op_targ = allocmy(PL_tokenbuf, tokenbuf_len,
+            if (is_sig) {
+                /* A signature 'padop' needs in addition, an op_first to
+                 * point to a child sigdefelem, and an extra field to hold
+                 * the signature index. We can achieve both by using an
+                 * UNOP_AUX and (ab)using the op_aux field to hold the
+                 * index. If we ever need more fields, use a real malloced
+                 * aux strut instead.
+                 */
+                o = newUNOP_AUX(OP_ARGELEM, 0, NULL,
+                                    INT2PTR(UNOP_AUX_item *,
+                                        (UV)(PL_parser->sig_elems)));
+                o->op_private |= (  PL_tokenbuf[0] == '$' ? OPpARGELEM_SV
+                                  : PL_tokenbuf[0] == '@' ? OPpARGELEM_AV
+                                  :                         OPpARGELEM_HV);
+            }
+            else
+                o = newOP(OP_PADANY, 0);
+            o->op_targ = allocmy(PL_tokenbuf, tokenbuf_len,
                                                         UTF ? SVf_UTF8 : 0);
+            pl_yylval.opval = o;
 	    return PRIVATEREF;
         }
     }
