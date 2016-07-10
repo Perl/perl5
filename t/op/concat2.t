@@ -17,12 +17,13 @@ plan 3;
 SKIP: {
 skip("no encoding pragma in EBCDIC", 1) if $::IS_EBCDIC;
 skip_if_miniperl("no dynamic loading on miniperl, no Encode", 1);
-fresh_perl_is <<'end', "ok\n", {},
+fresh_perl_like <<'end',
     BEGIN { $SIG{__WARN__} = sub{} };
     use encoding 'utf8';
     map { "a" . $a } ((1)x5000);
     print "ok\n";
 end
+  qr "The encoding pragma is no longer supported at ", {},
  "concat does not lose its stack pointer after utf8 upgrade [perl #78674]";
 }
 

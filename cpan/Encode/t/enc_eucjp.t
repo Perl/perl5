@@ -19,6 +19,10 @@ BEGIN {
     print "1..0 # Skip: Perl 5.8.1 or later required\n";
     exit 0;
     }
+    if ($] >= 5.025003){
+    print "1..0 # Skip: Perl 5.25.2 or lower required\n";
+    exit 0;
+    }
 }
 
 no warnings "deprecated";

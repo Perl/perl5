@@ -114,10 +114,9 @@ sub import {
         Carp::croak("encoding: pragma does not support EBCDIC platforms");
     }
 
-    if ($] >= 5.017) {
-	warnings::warnif("deprecated",
-			 "Use of the encoding pragma is deprecated")
-    }
+    my $deprecate =
+        $] >= 5.017 ? "Use of the encoding pragma is deprecated" : 0;
+
     my $class = shift;
     my $name  = shift;
     if (!$name){
@@ -142,6 +141,12 @@ sub import {
     }
     $name = $enc->name;    # canonize
     unless ( $arg{Filter} ) {
+        if ($] >= 5.025003) {
+            require Carp;
+            Carp::croak("The encoding pragma is no longer supported");
+        }
+        warnings::warnif("deprecated",$deprecate) if $deprecate;
+
         DEBUG and warn "_exception($name) = ", _exception($name);
         if (! _exception($name)) {
             if (!PERL_5_21_7) {
@@ -158,6 +163,8 @@ sub import {
         HAS_PERLIO or return 1;
     }
     else {
+        warnings::warnif("deprecate",$deprecate) if $deprecate;
+
         defined( ${^ENCODING} ) and undef ${^ENCODING};
         undef ${^E_NCODING} if PERL_5_21_7;
 
@@ -280,6 +287,10 @@ Old code should be converted to UTF-8, via something like the recipe in the
 L</SYNOPSIS> (though this simple approach may require manual adjustments
 afterwards).
 
+If UTF-8 is not an option, it is recommended that one use a simple source
+filter, such as that provided by L<Filter::Encoding> on CPAN or this
+pragma's own C<Filter> option (see below).
+
 The only legitimate use of this pragma is almost certainly just one per file,
 near the top, with file scope, as the file is likely going to only be written
 in one encoding.  Further restrictions apply in Perls before v5.22 (see
@@ -290,6 +301,9 @@ There are two basic modes of operation (plus turning if off):
 =over 4
 
 =item C<use encoding ['I<ENCNAME>'] ;>
+
+Please note: This mode of operation is not longer supported as of Perl
+v5.26.
 
 This is the normal operation.  It translates various literals encountered in
 the Perl source file from the encoding I<ENCNAME> into UTF-8, and similarly
