@@ -163,9 +163,7 @@ HEREDOC
 
     fresh_perl_is(
         "print <<~EOF;\nx EOF\n\t \t${string}\n\t \tEOF\n",
-        "Indentation on line 1 of heredoc doesn\'t match delimiter at - line 1.\n" .
-        "x EOF\n" .
-        $string,
+        "Indentation on line 1 of heredoc doesn\'t match delimiter at - line 1.\n",
         { switches => ['-w'], stderr => 1 },
         "indented heredoc with embedded EOF lookalike"
     );
@@ -179,10 +177,7 @@ HEREDOC
 
     fresh_perl_is(
         "print <<~HEREDOC;\n ${string}\n$string\n   $string\n $string\n   HEREDOC",
-        "Indentation on line 1 of heredoc doesn't match delimiter at - line 1.\n" .
-        "Indentation on line 2 of heredoc doesn't match delimiter at - line 1.\n" .
-        "Indentation on line 4 of heredoc doesn\'t match delimiter at - line 1.\n" .
-        " some data\nsome data\nsome data\n some data",
+        "Indentation on line 1 of heredoc doesn't match delimiter at - line 1.\n",
         { switches => ['-w'], stderr => 1 },
         "indented heredoc with bad indentation"
     );

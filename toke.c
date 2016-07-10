@@ -9810,7 +9810,7 @@ S_scan_heredoc(pTHX_ char *s)
 
 		ss += le;
 
-		Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
+		Perl_croak(aTHX_
 		    "Indentation on line %d of heredoc doesn't match delimiter",
 		     (int)linecount
 		);
