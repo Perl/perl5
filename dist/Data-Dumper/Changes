@@ -6,6 +6,11 @@ Changes - public release history for Data::Dumper
 
 =over 8
 
+=item NEXT
+
+The XS implementation now handles the C<Deparse> option, so using it no
+longer forces use of the pure-Perl version.
+
 =item 2.161 (Jul 11 2016)
 
 Perl 5.12 fix/workaround until fixed PPPort release.

@@ -63,6 +63,7 @@ typedef struct {
     I32 useqq;
     int use_sparse_seen_hash;
     int trailingcomma;
+    int deparse;
 } Style;
 
 static STRLEN num_q (const char *s, STRLEN slen);
@@ -503,6 +504,51 @@ sv_x(pTHX_ SV *sv, const char *str, STRLEN len, I32 n)
 	    }
     }
     return sv;
+}
+
+static SV *
+deparsed_output(pTHX_ SV *val)
+{
+    SV *text;
+    int n;
+    dSP;
+
+    /* This is passed to load_module(), which decrements its ref count and
+     * modifies it (so we also can't reuse it below) */
+    SV *pkg = newSVpvs("B::Deparse");
+
+    load_module(PERL_LOADMOD_NOIMPORT, pkg, 0);
+
+    SAVETMPS;
+
+    PUSHMARK(SP);
+    mXPUSHs(newSVpvs("B::Deparse"));
+    PUTBACK;
+
+    n = call_method("new", G_SCALAR);
+    SPAGAIN;
+
+    if (n != 1) {
+        croak("B::Deparse->new returned %d items, but expected exactly 1", n);
+    }
+
+    PUSHMARK(SP - n);
+    XPUSHs(val);
+    PUTBACK;
+
+    n = call_method("coderef2text", G_SCALAR);
+    SPAGAIN;
+
+    if (n != 1) {
+        croak("$b_deparse->coderef2text returned %d items, but expected exactly 1", n);
+    }
+
+    text = POPs;
+    SvREFCNT_inc(text);         /* the caller will mortalise this */
+
+    FREETMPS;
+
+    return text;
 }
 
 /*
@@ -1095,9 +1141,41 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    SvREFCNT_dec(totpad);
 	}
 	else if (realtype == SVt_PVCV) {
-	    sv_catpvs(retval, "sub { \"DUMMY\" }");
-            if (style->purity)
-		warn("Encountered CODE ref, using dummy placeholder");
+            if (style->deparse) {
+                SV *deparsed = sv_2mortal(deparsed_output(aTHX_ val));
+                SV *fullpad = sv_2mortal(newSVsv(style->sep));
+                const char *p;
+                STRLEN plen;
+                I32 i;
+
+                sv_catsv(fullpad, style->pad);
+                sv_catsv(fullpad, apad);
+                for (i = 0; i < level; i++) {
+                    sv_catsv(fullpad, style->xpad);
+                }
+
+                sv_catpvs(retval, "sub ");
+                p = SvPV(deparsed, plen);
+                while (plen > 0) {
+                    const char *nl = (const char *) memchr(p, '\n', plen);
+                    if (!nl) {
+                        sv_catpvn(retval, p, plen);
+                        break;
+                    }
+                    else {
+                        size_t n = nl - p;
+                        sv_catpvn(retval, p, n);
+                        sv_catsv(retval, fullpad);
+                        p += n + 1;
+                        plen -= n + 1;
+                    }
+                }
+            }
+            else {
+                sv_catpvs(retval, "sub { \"DUMMY\" }");
+                if (style->purity)
+                    warn("Encountered CODE ref, using dummy placeholder");
+            }
 	}
 	else {
 	    warn("cannot handle ref type %d", (int)realtype);
@@ -1452,6 +1530,8 @@ Data_Dumper_Dumpxs(href, ...)
                     style.quotekeys = SvTRUE(*svp);
                 if ((svp = hv_fetchs(hv, "trailingcomma", FALSE)))
                     style.trailingcomma = SvTRUE(*svp);
+                if ((svp = hv_fetchs(hv, "deparse", FALSE)))
+                    style.deparse = SvTRUE(*svp);
 		if ((svp = hv_fetchs(hv, "bless", FALSE)))
                     style.bless = *svp;
 		if ((svp = hv_fetchs(hv, "maxdepth", FALSE)))
