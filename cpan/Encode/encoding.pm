@@ -1,6 +1,6 @@
 # $Id: encoding.pm,v 2.17 2015/09/15 13:53:27 dankogai Exp dankogai $
 package encoding;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.17 $ =~ /(\d+)/g;
+our $VERSION = '2.17_01';
 
 use Encode;
 use strict;
