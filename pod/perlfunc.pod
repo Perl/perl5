@@ -4622,6 +4622,7 @@ filehandle. These affect how the input and output are processed (see
 L<open> and
 L<PerlIO> for more details).  For example:
 
+    # loads PerlIO::encoding automatically
     open(my $fh, "<:encoding(UTF-8)", $filename)
         || die "Can't open UTF-8 encoded $filename: $!";
 
