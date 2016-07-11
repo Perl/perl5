@@ -6274,21 +6274,30 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 
 =for apidoc load_module
 
-Loads the module whose name is pointed to by the string part of name.
+Loads the module whose name is pointed to by the string part of C<name>.
 Note that the actual module name, not its filename, should be given.
-Eg, "Foo::Bar" instead of "Foo/Bar.pm".  flags can be any of
+Eg, "Foo::Bar" instead of "Foo/Bar.pm". ver, if specified and not NULL,
+provides version semantics similar to C<use Foo::Bar VERSION>. The optional
+trailing arguments can be used to specify arguments to the module's C<import()>
+method, similar to C<use Foo::Bar VERSION LIST>; their precise handling depends
+on the flags. The flags argument is a bitwise-ORed collection of any of
 C<PERL_LOADMOD_DENY>, C<PERL_LOADMOD_NOIMPORT>, or C<PERL_LOADMOD_IMPORT_OPS>
-(or 0 for no flags).  ver, if specified
-and not NULL, provides version semantics
-similar to C<use Foo::Bar VERSION>.  The optional trailing SV*
-arguments can be used to specify arguments to the module's C<import()>
-method, similar to C<use Foo::Bar VERSION LIST>.  They must be
-terminated with a final C<NULL> pointer.  Note that this list can only
-be omitted when the C<PERL_LOADMOD_NOIMPORT> flag has been used.
-Otherwise at least a single C<NULL> pointer to designate the default
-import list is required.
+(or 0 for no flags).
 
-The reference count for each specified C<SV*> parameter is decremented.
+If C<PERL_LOADMOD_NOIMPORT> is set, the module is loaded as if with an empty
+import list, as in C<use Foo::Bar ()>; this is the only circumstance in which
+the trailing optional arguments may be omitted entirely. Otherwise, if
+C<PERL_LOADMOD_IMPORT_OPS> is set, the trailing arguments must consist of
+exactly one C<OP*>, containing the op tree that produces the relevant import
+arguments. Otherwise, the trailing arguments must all be C<SV*> values that
+will be used as import arguments; and the list must be terminated with C<(SV*)
+NULL>. If neither C<PERL_LOADMOD_NOIMPORT> nor C<PERL_LOADMOD_IMPORT_OPS> is
+set, the trailing C<NULL> pointer is needed even if no import arguments are
+desired. The reference count for each specified C<SV*> argument is
+decremented. In addition, the C<name> argument is modified.
+
+If C<PERL_LOADMOD_DENY> is set, the module is loaded as if with C<no> rather
+than C<use>.
 
 =cut */
 
