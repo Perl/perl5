@@ -10,7 +10,7 @@
 package Data::Dumper;
 
 BEGIN {
-    $VERSION = '2.163'; # Don't forget to set version and release
+    $VERSION = '2.164'; # Don't forget to set version and release
 }               # date in POD below!
 
 #$| = 1;
@@ -487,7 +487,7 @@ sub _dump {
         require B::Deparse;
         my $sub =  'sub ' . (B::Deparse->new)->coderef2text($val);
         $pad    =  $s->{sep} . $s->{pad} . $s->{apad} . $s->{xpad} x ($s->{level} - 1);
-        $sub    =~ s/\n/$pad/gse;
+        $sub    =~ s/\n/$pad/gs;
         $out   .=  $sub;
       }
       else {
@@ -1472,7 +1472,7 @@ modify it under the same terms as Perl itself.
 
 =head1 VERSION
 
-Version 2.162  (September 21 2016)
+Version 2.164  (November 12 2016)
 
 =head1 SEE ALSO
 
