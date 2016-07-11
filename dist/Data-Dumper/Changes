@@ -6,6 +6,12 @@ Changes - public release history for Data::Dumper
 
 =over 8
 
+=item 2.161 (Jul 11 2016)
+
+Perl 5.12 fix/workaround until fixed PPPort release.
+
+Pre-5.12 fixes for test dependency.
+
 =item 2.160 (Jul 3 2016)
 
 Now handles huge inputs on 64bit perls.
