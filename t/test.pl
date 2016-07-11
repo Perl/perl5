@@ -953,11 +953,16 @@ sub register_tempfile {
     return $count;
 }
 
-# This is the temporary file for _fresh_perl
+# This is the temporary file for fresh_perl
 my $tmpfile = tempfile();
 
-sub _fresh_perl {
-    my($prog, $action, $expect, $runperl_args, $name) = @_;
+sub fresh_perl {
+    my($prog, $runperl_args) = @_;
+
+    # Run 'runperl' with the complete perl program contained in '$prog', and
+    # arguments in the hash referred to by '$runperl_args'.  The results are
+    # returned, with $? set to the exit code.  Unless overridden, stderr is
+    # redirected to stdout.
 
     # Given the choice of the mis-parsable {}
     # (we want an anon hash, but a borked lexer might think that it's a block)
@@ -975,7 +980,8 @@ sub _fresh_perl {
     close TEST or die "Cannot close $tmpfile: $!";
 
     my $results = runperl(%$runperl_args);
-    my $status = $?;
+    my $status = $?;    # Not necessary to save this, but it makes it clear to
+                        # future maintainers.
 
     # Clean up the results into something a bit more predictable.
     $results  =~ s/\n+$//;
@@ -993,6 +999,17 @@ sub _fresh_perl {
         # pipes double these sometimes
         $results =~ s/\n\n/\n/g;
     }
+
+    $? = $status;
+    return $results;
+}
+
+
+sub _fresh_perl {
+    my($prog, $action, $expect, $runperl_args, $name) = @_;
+
+    my $results = fresh_perl($prog, $runperl_args);
+    my $status = $?;
 
     # Use the first line of the program as a name if none was given
     unless( $name ) {
