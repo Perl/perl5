@@ -5739,8 +5739,6 @@ t/uni/sprintf.t			See if Unicode sprintf works
 t/uni/stash.t			See if Unicode stashes work
 t/uni/tie.t			See if Unicode tie works
 t/uni/title.t			See if Unicode casing works
-t/uni/tr_7jis.t			See if Unicode tr/// in 7jis works
-t/uni/tr_sjis.t			See if Unicode tr/// in sjis works
 t/uni/tr_utf8.t			See if Unicode tr/// in utf8 works
 t/uni/universal.t		See if Unicode in calls to UNIVERSAL works
 t/uni/upper.t			See if Unicode casing works
