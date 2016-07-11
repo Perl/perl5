@@ -214,5 +214,6 @@ fresh_perl_is(
   '$_ = q-strict.pm-; 1 ? require : die;'
  .' print qq-ok\n- if $INC{q-strict.pm-}',
   "ok\n",
+  {},
   'foo ? require : bar [perl #128307]'
 );

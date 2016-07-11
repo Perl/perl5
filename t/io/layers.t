@@ -223,7 +223,7 @@ __EOH__
 
     # Check that PL_sigwarn's reference count is correct, and that 
     # &PerlIO::Layer::NoWarnings isn't prematurely freed.
-    fresh_perl_like (<<"EOT", qr/^CODE/);
+    fresh_perl_like (<<"EOT", qr/^CODE/, {}, "Check PL_sigwarn's reference count");
 open(UTF, "<:raw:encoding(utf8)", '$afile') or die \$!;
 print ref *PerlIO::Layer::NoWarnings{CODE};
 EOT

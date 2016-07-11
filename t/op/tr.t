@@ -502,7 +502,7 @@ is( ref $x, 'SCALAR', "    doesn't stringify its argument" );
 
 # rt.perl.org 36622.  Perl didn't like a y/// at end of file.  No trailing
 # newline allowed.
-fresh_perl_is(q[$_ = "foo"; y/A-Z/a-z/], '');
+fresh_perl_is(q[$_ = "foo"; y/A-Z/a-z/], '', {}, 'RT #36622 y/// at end of file');
 
 
 { # [perl #38293] chr(65535) should be allowed in regexes
