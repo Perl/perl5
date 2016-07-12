@@ -43,6 +43,12 @@ my @tests = (
     '(?l:[\s\x{212A}])' => 'ANYOFL[\s][1680 2000-200A 2028-2029 202F 205F 212A 3000]',
     '(?l:[^\S\x{202F}])' => 'ANYOFL[^\\S][1680 2000-200A 2028-2029 205F 3000]',
     '(?i:[^:])' => 'ANYOF[^:][0100-INFINITY]',
+    '[\p{Any}]' => 'ANYOF[\x00-\xFF][0100-10FFFF]',
+    '[\p{IsMyRuntimeProperty}]' => 'ANYOF[+utf8::IsMyRuntimeProperty]',
+    '[^\p{IsMyRuntimeProperty}]' => 'ANYOF[^{+utf8::IsMyRuntimeProperty}]',
+    '[a\p{IsMyRuntimeProperty}]' => 'ANYOF[a][+utf8::IsMyRuntimeProperty]',
+    '[^a\p{IsMyRuntimeProperty}]' => 'ANYOF[^a{+utf8::IsMyRuntimeProperty}]',
+    '[^a\x{100}\p{IsMyRuntimeProperty}]' => 'ANYOF[^a{+utf8::IsMyRuntimeProperty}0100]',
 );
 
 # 2**32-1 or 2**64-1
