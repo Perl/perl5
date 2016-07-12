@@ -2,7 +2,7 @@ package Test2::API::Context;
 use strict;
 use warnings;
 
-our $VERSION = '1.302037';
+our $VERSION = '1.302040';
 
 
 use Carp qw/confess croak longmess/;
@@ -19,7 +19,7 @@ my %LOADED = (
         my $file = "Test2/Event/$_.pm";
         require $file unless $INC{$file};
         ( $pkg => $pkg, $_ => $pkg )
-    } qw/Ok Diag Note Plan Bail Exception Waiting Skip Subtest/
+    } qw/Ok Diag Note Info Plan Bail Exception Waiting Skip Subtest/
 );
 
 use Test2::Util::ExternalMeta qw/meta get_meta set_meta delete_meta/;
@@ -224,7 +224,7 @@ sub build_event {
 
 sub ok {
     my $self = shift;
-    my ($pass, $name, $diag) = @_;
+    my ($pass, $name, $on_fail) = @_;
 
     my $hub = $self->{+HUB};
 
@@ -240,8 +240,15 @@ sub ok {
 
     $self->failure_diag($e);
 
-    if ($diag && @$diag) {
-        $self->diag($_) for @$diag
+    if ($on_fail && @$on_fail) {
+        for my $of (@$on_fail) {
+            if (ref($of)) {
+                $self->info($of, diagnostics => 1);
+            }
+            else {
+                $self->diag($of);
+            }
+        }
     }
 
     return $e;
@@ -284,6 +291,12 @@ sub skip {
         pass => 1,
         @extra,
     );
+}
+
+sub info {
+    my $self = shift;
+    my ($renderer, %params) = @_;
+    $self->send_event('Info', renderer => $renderer, %params);
 }
 
 sub note {
@@ -537,15 +550,21 @@ The value of C<$@> when the context was created.
 
 =item $event = $ctx->ok($bool, $name)
 
-=item $event = $ctx->ok($bool, $name, \@diag)
+=item $event = $ctx->ok($bool, $name, \@on_fail)
 
 This will create an L<Test2::Event::Ok> object for you. If C<$bool> is false
 then an L<Test2::Event::Diag> event will be sent as well with details about the
 failure. If you do not want automatic diagnostics you should use the
 C<send_event()> method directly.
 
-The C<\@diag> can contain diagnostics messages you wish to have displayed in the
-event of a failure. For a passing test the diagnostics array will be ignored.
+The third argument C<\@on_fail>) is an optional set of diagnostics to be sent in
+the event of a test failure. Plain strings will be sent as
+L<Test2::Event::Diag> events. References will be used to construct
+L<Test2::Event::Info> events with C<< diagnostics => 1 >>.
+
+=item $event = $ctx->info($renderer, diagnostics => $bool, %other_params)
+
+Send an L<Test2::Event::Info>.
 
 =item $event = $ctx->note($message)
 

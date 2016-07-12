@@ -2,7 +2,7 @@ package Test2::Hub;
 use strict;
 use warnings;
 
-our $VERSION = '1.302037';
+our $VERSION = '1.302040';
 
 
 use Carp qw/carp croak confess/;
@@ -476,7 +476,7 @@ handle thread/fork sync, filters, listeners, TAP output, etc.
 
 =head2 ALTERING OR REMOVING EVENTS
 
-You can use either C<filter()> or C<pre_filter()>, which one depends on your
+You can use either C<filter()> or C<pre_filter()>, depending on your
 needs. Both have identical syntax, so only C<filter()> is shown here.
 
     $hub->filter(sub {
@@ -499,7 +499,7 @@ needs. Both have identical syntax, so only C<filter()> is shown here.
         die "Should not happen";
     });
 
-By default filters are not inherited by child hubs, that means if you start a
+By default, filters are not inherited by child hubs. That means if you start a
 subtest, the subtest will not inherit the filter. You can change this behavior
 with the C<inherit> parameter:
 
@@ -515,7 +515,7 @@ with the C<inherit> parameter:
         # return is ignored
     });
 
-By default listeners are not inherited by child hubs, that means if you start a
+By default listeners are not inherited by child hubs. That means if you start a
 subtest, the subtest will not inherit the listener. You can change this behavior
 with the C<inherit> parameter:
 
@@ -532,7 +532,7 @@ with the C<inherit> parameter:
         # Return is ignored
     });
 
-follow_up subs are called only once, ether when done_testing is called, or in
+follow_up subs are called only once, either when done_testing is called, or in
 an END block.
 
 =head2 SETTING THE FORMATTER
@@ -543,7 +543,7 @@ By default an instance of L<Test2::Formatter::TAP> is created and used.
 
 Setting the formatter will REPLACE any existing formatter. You may set the
 formatter to undef to prevent output. The old formatter will be returned if one
-was already set. Only 1 formatter is allowed at a time.
+was already set. Only one formatter is allowed at a time.
 
 =head1 METHODS
 
