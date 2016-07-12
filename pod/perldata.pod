@@ -538,7 +538,7 @@ The infinity and not-a-number have their own special arithmetic rules.
 The general rule is that they are "contagious": C<Inf> plus one is
 C<Inf>, and C<NaN> plus one is C<NaN>.  Where things get interesting
 is when you combine infinities and not-a-numbers: C<Inf> minus C<Inf>
-and C<Inf> divided by C<INf> are C<NaN> (while C<Inf> plus C<Inf> is
+and C<Inf> divided by C<Inf> are C<NaN> (while C<Inf> plus C<Inf> is
 C<Inf> and C<Inf> times C<Inf> is C<Inf>).  C<NaN> is also curious
 in that it does not equal any number, I<including> itself:
 C<NaN> != C<NaN>.
