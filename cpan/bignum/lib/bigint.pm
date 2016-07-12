@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '0.42';
+our $VERSION = '0.43';
 
 use Exporter;
 our @ISA            = qw( Exporter );
@@ -359,8 +359,8 @@ sub import {
     }
 }
 
-sub inf () { Math::BigInt::binf(); }
-sub NaN () { Math::BigInt::bnan(); }
+sub inf () { Math::BigInt->binf(); }
+sub NaN () { Math::BigInt->bnan(); }
 
 sub PI () { Math::BigInt->new(3); }
 sub e () { Math::BigInt->new(2); }
