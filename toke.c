@@ -3798,11 +3798,6 @@ S_scan_const(pTHX_ char *start)
 		   " >= %"UVuf, (UV)SvCUR(sv), (UV)SvLEN(sv));
 
     SvPOK_on(sv);
-    if (IN_ENCODING && !has_utf8) {
-	sv_recode_to_utf8(sv, _get_encoding());
-	if (SvUTF8(sv))
-	    has_utf8 = TRUE;
-    }
     if (has_utf8) {
 	SvUTF8_on(sv);
 	if (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op) {
@@ -7278,24 +7273,6 @@ Perl_yylex(pTHX)
 		if (!IN_BYTES) {
 		    if (UTF)
 			PerlIO_apply_layers(aTHX_ PL_rsfp, NULL, ":utf8");
-		    else if (IN_ENCODING) {
-			SV *name;
-			dSP;
-			ENTER;
-			SAVETMPS;
-			PUSHMARK(sp);
-			XPUSHs(_get_encoding());
-			PUTBACK;
-			call_method("name", G_SCALAR);
-			SPAGAIN;
-			name = POPs;
-			PUTBACK;
-			PerlIO_apply_layers(aTHX_ PL_rsfp, NULL,
-					    Perl_form(aTHX_ ":encoding(%"SVf")",
-						      SVfARG(name)));
-			FREETMPS;
-			LEAVE;
-		    }
 		}
 #endif
 		PL_rsfp = NULL;
@@ -9698,8 +9675,6 @@ S_scan_heredoc(pTHX_ char *s)
     if (!IN_BYTES) {
 	if (UTF && is_utf8_string((U8*)SvPVX_const(tmpstr), SvCUR(tmpstr)))
 	    SvUTF8_on(tmpstr);
-	else if (IN_ENCODING)
-	    sv_recode_to_utf8(tmpstr, _get_encoding());
     }
     PL_lex_stuff = tmpstr;
     pl_yylval.ival = op_type;
@@ -9936,7 +9911,6 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
     I32 termcode;		/* terminating char. code */
     U8 termstr[UTF8_MAXBYTES];	/* terminating string */
     STRLEN termlen;		/* length of terminating string */
-    int last_off = 0;		/* last position for nesting bracket */
     line_t herelines;
 
     PERL_ARGS_ASSERT_SCAN_STR;
@@ -9989,116 +9963,6 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 	sv_catpvn(sv, s, termlen);
     s += termlen;
     for (;;) {
-	if (IN_ENCODING && !UTF && !re_reparse) {
-	    bool cont = TRUE;
-
-	    while (cont) {
-		int offset = s - SvPVX_const(PL_linestr);
-		const bool found = sv_cat_decode(sv, _get_encoding(), PL_linestr,
-					   &offset, (char*)termstr, termlen);
-		const char *ns;
-		char *svlast;
-
-		if (SvIsCOW(PL_linestr)) {
-		    STRLEN bufend_pos, bufptr_pos, oldbufptr_pos;
-		    STRLEN oldoldbufptr_pos, linestart_pos, last_uni_pos;
-		    STRLEN last_lop_pos, re_eval_start_pos, s_pos;
-		    char *buf = SvPVX(PL_linestr);
-		    bufend_pos = PL_parser->bufend - buf;
-		    bufptr_pos = PL_parser->bufptr - buf;
-		    oldbufptr_pos = PL_parser->oldbufptr - buf;
-		    oldoldbufptr_pos = PL_parser->oldoldbufptr - buf;
-		    linestart_pos = PL_parser->linestart - buf;
-		    last_uni_pos = PL_parser->last_uni
-			? PL_parser->last_uni - buf
-			: 0;
-		    last_lop_pos = PL_parser->last_lop
-			? PL_parser->last_lop - buf
-			: 0;
-		    re_eval_start_pos =
-			PL_parser->lex_shared->re_eval_start ?
-                            PL_parser->lex_shared->re_eval_start - buf : 0;
-		    s_pos = s - buf;
-
-		    sv_force_normal(PL_linestr);
-
-		    buf = SvPVX(PL_linestr);
-		    PL_parser->bufend = buf + bufend_pos;
-		    PL_parser->bufptr = buf + bufptr_pos;
-		    PL_parser->oldbufptr = buf + oldbufptr_pos;
-		    PL_parser->oldoldbufptr = buf + oldoldbufptr_pos;
-		    PL_parser->linestart = buf + linestart_pos;
-		    if (PL_parser->last_uni)
-			PL_parser->last_uni = buf + last_uni_pos;
-		    if (PL_parser->last_lop)
-			PL_parser->last_lop = buf + last_lop_pos;
-		    if (PL_parser->lex_shared->re_eval_start)
-		        PL_parser->lex_shared->re_eval_start  =
-			    buf + re_eval_start_pos;
-		    s = buf + s_pos;
-		}
-		ns = SvPVX_const(PL_linestr) + offset;
-		svlast = SvEND(sv) - 1;
-
-		for (; s < ns; s++) {
-		    if (*s == '\n' && !PL_rsfp && !PL_parser->filtered)
-			COPLINE_INC_WITH_HERELINES;
-		}
-		if (!found)
-		    goto read_more_line;
-		else {
-		    /* handle quoted delimiters */
-		    if (SvCUR(sv) > 1 && *(svlast-1) == '\\') {
-			const char *t;
-			for (t = svlast-2; t >= SvPVX_const(sv) && *t == '\\';)
-			    t--;
-			if ((svlast-1 - t) % 2) {
-			    if (!keep_bracketed_quoted) {
-				*(svlast-1) = term;
-				*svlast = '\0';
-				SvCUR_set(sv, SvCUR(sv) - 1);
-			    }
-			    continue;
-			}
-		    }
-		    if (PL_multi_open == PL_multi_close) {
-			cont = FALSE;
-		    }
-		    else {
-			const char *t;
-			char *w;
-			for (t = w = SvPVX(sv)+last_off; t < svlast; w++, t++) {
-			    /* At here, all closes are "was quoted" one,
-			       so we don't check PL_multi_close. */
-			    if (*t == '\\') {
-				if (!keep_bracketed_quoted && *(t+1) == PL_multi_open)
-				    t++;
-				else
-				    *w++ = *t++;
-			    }
-			    else if (*t == PL_multi_open)
-				brackets++;
-
-			    *w = *t;
-			}
-			if (w < t) {
-			    *w++ = term;
-			    *w = '\0';
-			    SvCUR_set(sv, w - SvPVX_const(sv));
-			}
-			last_off = w - SvPVX(sv);
-			if (--brackets <= 0)
-			    cont = FALSE;
-		    }
-		}
-	    }
-	    if (!keep_delims) {
-		SvCUR_set(sv, SvCUR(sv) - 1);
-		*SvEND(sv) = '\0';
-	    }
-	    break;
-	}
-
     	/* extend sv if need be */
 	SvGROW(sv, SvCUR(sv) + (PL_bufend - s) + 1);
 	/* set 'to' to the next character in the sv's string */
@@ -10191,7 +10055,6 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 	    to[-1] = '\n';
 #endif
 	
-     read_more_line:
 	/* if we're out of file, or a read fails, bail and reset the current
 	   line marker so we can report where the unterminated string began
 	*/
@@ -10207,13 +10070,11 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 
     /* at this point, we have successfully read the delimited string */
 
-    if (!IN_ENCODING || UTF || re_reparse) {
-
-	if (keep_delims)
+    if (keep_delims)
 	    sv_catpvn(sv, s, termlen);
-	s += termlen;
-    }
-    if (has_utf8 || (IN_ENCODING && !re_reparse))
+    s += termlen;
+
+    if (has_utf8)
 	SvUTF8_on(sv);
 
     PL_multi_end = CopLINE(PL_curcop);
@@ -10950,8 +10811,6 @@ S_scan_formline(pTHX_ char *s)
 	if (!IN_BYTES) {
 	    if (UTF && is_utf8_string((U8*)SvPVX_const(stuff), SvCUR(stuff)))
 		SvUTF8_on(stuff);
-	    else if (IN_ENCODING)
-		sv_recode_to_utf8(stuff, _get_encoding());
 	}
 	NEXTVAL_NEXTTOKE.opval = (OP*)newSVOP(OP_CONST, 0, stuff);
 	force_next(THING);

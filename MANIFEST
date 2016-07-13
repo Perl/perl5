@@ -5717,7 +5717,6 @@ t/uni/cache.t			See if Unicode swash caching works
 t/uni/caller.t			See if Unicode doesn't get mangled in caller()
 t/uni/case.pl			See if Unicode casing works
 t/uni/chomp.t			See if Unicode chomp works
-t/uni/chr.t			See if Unicode chr works
 t/uni/class.t			See if Unicode classes work (\p)
 t/uni/eval.t			See if Unicode hints don't affect eval()
 t/uni/fold.t			See if Unicode folding works
@@ -5740,9 +5739,6 @@ t/uni/sprintf.t			See if Unicode sprintf works
 t/uni/stash.t			See if Unicode stashes work
 t/uni/tie.t			See if Unicode tie works
 t/uni/title.t			See if Unicode casing works
-t/uni/tr_7jis.t			See if Unicode tr/// in 7jis works
-t/uni/tr_eucjp.t		See if Unicode tr/// in eucjp works
-t/uni/tr_sjis.t			See if Unicode tr/// in sjis works
 t/uni/tr_utf8.t			See if Unicode tr/// in utf8 works
 t/uni/universal.t		See if Unicode in calls to UNIVERSAL works
 t/uni/upper.t			See if Unicode casing works

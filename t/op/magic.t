@@ -675,11 +675,14 @@ is ${^MPEN}, undef, '${^MPEN} starts undefined';
 # This one used to croak due to that missing break:
 is ++${^MPEN}, 1, '${^MPEN} can be incremented';
 
-eval { ${^E_NCODING} = 1 };
-like $@, qr/^Modification of a /, 'Setting ${^E_NCODING} croaks';
-$_ = ${^E_NCODING};
-pass('can read ${^E_NCODING} without blowing up');
-is $_, undef, '${^E_NCODING} is undef';
+{
+    no warnings 'deprecated';
+    eval { ${^E_NCODING} = 1 };
+    is $@, "", 'Setting ${^E_NCODING} does nothing';
+    $_ = ${^E_NCODING};
+    pass('can read ${^E_NCODING} without blowing up');
+    is $_, 1, '${^E_NCODING} is whatever it was set to';
+}
 
 {
     my $warned = 0;

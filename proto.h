@@ -42,9 +42,6 @@ PERL_CALLCONV void*	Perl_Slab_Alloc(pTHX_ size_t sz)
 PERL_CALLCONV void	Perl_Slab_Free(pTHX_ void *op);
 #define PERL_ARGS_ASSERT_SLAB_FREE	\
 	assert(op)
-PERL_CALLCONV SV*	Perl__get_encoding(pTHX)
-			__attribute__pure__;
-
 PERL_CALLCONV bool	Perl__is_in_locale_category(pTHX_ const bool compiling, const int category);
 PERL_CALLCONV bool	Perl__is_uni_FOO(pTHX_ const U8 classnum, const UV c)
 			__attribute__warn_unused_result__;
@@ -4991,9 +4988,6 @@ STATIC regnode*	S_reg2Lanode(pTHX_ RExC_state_t *pRExC_state, const U8 op, const
 STATIC regnode*	S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op);
 #define PERL_ARGS_ASSERT_REG_NODE	\
 	assert(pRExC_state)
-STATIC UV	S_reg_recode(pTHX_ const U8 value, SV **encp);
-#define PERL_ARGS_ASSERT_REG_RECODE	\
-	assert(encp)
 STATIC SV *	S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags);
 #define PERL_ARGS_ASSERT_REG_SCAN_NAME	\
 	assert(pRExC_state)

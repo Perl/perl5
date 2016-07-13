@@ -809,17 +809,6 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
             Perl_croak_no_modify();
     }
 
-    if (IN_ENCODING) {
-	if (!SvUTF8(sv)) {
-	    /* XXX, here sv is utf8-ized as a side-effect!
-	       If encoding.pm is used properly, almost string-generating
-	       operations, including literal strings, chr(), input data, etc.
-	       should have been utf8-ized already, right?
-	    */
-	    sv_recode_to_utf8(sv, _get_encoding());
-	}
-    }
-
     s = SvPV(sv, len);
     if (chomping) {
 	if (s && len) {
@@ -860,14 +849,6 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 			    goto nope_free_sv;
 			}
 			rsptr = temp_buffer;
-		    }
-		    else if (IN_ENCODING) {
-			/* RS is 8 bit, encoding.pm is used.
-			 * Do not recode PL_rs as a side-effect. */
-			svrecode = newSVpvn(rsptr, rslen);
-			sv_recode_to_utf8(svrecode, _get_encoding());
-			rsptr = SvPV_const(svrecode, rslen);
-			rs_charlen = sv_len_utf8(svrecode);
 		    }
 		    else {
 			/* RS is 8 bit, scalar is utf8.  */
@@ -3544,7 +3525,7 @@ PP(pp_index)
     little_utf8 = DO_UTF8(little);
     if (big_utf8 ^ little_utf8) {
 	/* One needs to be upgraded.  */
-	if (little_utf8 && !IN_ENCODING) {
+	if (little_utf8) {
 	    /* Well, maybe instead we might be able to downgrade the small
 	       string?  */
 	    char * const pv = (char*)bytes_from_utf8((U8 *)little_p, &llen,
@@ -3566,11 +3547,7 @@ PP(pp_index)
 	    temp = little_utf8
 		? newSVpvn(big_p, biglen) : newSVpvn(little_p, llen);
 
-	    if (IN_ENCODING) {
-		sv_recode_to_utf8(temp, _get_encoding());
-	    } else {
-		sv_utf8_upgrade(temp);
-	    }
+	    sv_utf8_upgrade(temp);
 	    if (little_utf8) {
 		big = temp;
 		big_utf8 = TRUE;
@@ -3652,13 +3629,6 @@ PP(pp_ord)
     STRLEN len;
     const U8 *s = (U8*)SvPV_const(argsv, len);
 
-    if (IN_ENCODING && SvPOK(argsv) && !DO_UTF8(argsv)) {
-        SV * const tmpsv = sv_2mortal(newSVsv(argsv));
-        s = (U8*)sv_recode_to_utf8(tmpsv, _get_encoding());
-        len = UTF8SKIP(s);  /* Should be well-formed; so this is its length */
-        argsv = tmpsv;
-    }
-
     SETu(DO_UTF8(argsv)
            ? utf8n_to_uvchr(s, len, 0, UTF8_ALLOW_ANYUV)
            : (UV)(*s));
@@ -3719,22 +3689,6 @@ PP(pp_chr)
     *tmps++ = (char)value;
     *tmps = '\0';
     (void)SvPOK_only(TARG);
-
-    if (IN_ENCODING && !IN_BYTES) {
-        sv_recode_to_utf8(TARG, _get_encoding());
-	tmps = SvPVX(TARG);
-	if (SvCUR(TARG) == 0
-	    || ! is_utf8_string((U8*)tmps, SvCUR(TARG))
-	    || UTF8_IS_REPLACEMENT((U8*) tmps, (U8*) tmps + SvCUR(TARG)))
-	{
-	    SvGROW(TARG, 2);
-	    tmps = SvPVX(TARG);
-	    SvCUR_set(TARG, 1);
-	    *tmps++ = (char)value;
-	    *tmps = '\0';
-	    SvUTF8_off(TARG);
-	}
-    }
 
     SETTARG;
     return NORMAL;

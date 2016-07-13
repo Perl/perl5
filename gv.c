@@ -1921,9 +1921,6 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 		    goto magicalize;
 		break;
 	    case '\005':	/* $^ENCODING */
-                if (*name2 == '_') {
-                    name2++;
-                }
 		if (strEQ(name2, "NCODING"))
 		    goto magicalize;
 		break;

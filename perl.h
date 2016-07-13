@@ -757,10 +757,6 @@
 #   endif
 #endif /* !NO_LOCALE && HAS_SETLOCALE */
 
-/* Is $^ENCODING set, or are we under the encoding pragma? */
-#define IN_ENCODING UNLIKELY(PL_encoding                                      \
-                             || (PL_lex_encoding && _get_encoding() != NULL))
-
 #include <setjmp.h>
 
 #ifdef I_SYS_PARAM
