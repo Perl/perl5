@@ -302,7 +302,7 @@ There are two basic modes of operation (plus turning if off):
 
 =item C<use encoding ['I<ENCNAME>'] ;>
 
-Please note: This mode of operation is not longer supported as of Perl
+Please note: This mode of operation is no longer supported as of Perl
 v5.26.
 
 This is the normal operation.  It translates various literals encountered in
