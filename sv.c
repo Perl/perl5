@@ -14929,9 +14929,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* magical thingies */
 
-    PL_encoding		= sv_dup(proto_perl->Iencoding, param);
-    PL_lex_encoding     = sv_dup(proto_perl->Ilex_encoding, param);
-
     sv_setpvs(PERL_DEBUG_PAD(0), "");	/* For regex debugging. */
     sv_setpvs(PERL_DEBUG_PAD(1), "");	/* ext/re needs these */
     sv_setpvs(PERL_DEBUG_PAD(2), "");	/* even without DEBUGGING. */
