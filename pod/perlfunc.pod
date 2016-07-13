@@ -6650,8 +6650,8 @@ otherwise.
 
 Note the I<in bytes>: even if the filehandle has been set to
 operate on characters (for example by using the C<:encoding(utf8)> open
-layer), L<C<seek>|/seek FILEHANDLE,POSITION,WHENCE> will take byte offsets,
-not character offsets (because implementing that would render
+layer), L<C<tell>|/tell FILEHANDLE> will return byte offsets, not
+character offsets (because implementing that would render
 L<C<seek>|/seek FILEHANDLE,POSITION,WHENCE> and
 L<C<tell>|/tell FILEHANDLE> rather slow).
 
@@ -8537,26 +8537,10 @@ for WHENCE are C<0> to set the new position to POSITION; C<1> to set the it
 to the current position plus POSITION; and C<2> to set it to EOF plus
 POSITION, typically negative.
 
-For WHENCE, you may also use the constants C<SEEK_SET>, C<SEEK_CUR>,
-and C<SEEK_END> (start of the file, current position, end of the file)
-from the L<Fcntl> module.  Use of the constants is also more portable
-than relying on 0, 1, and 2.
-
-Returns the new position in bytes, or the undefined value on failure.  A
-position of zero is returned as the string C<"0 but true">; thus
-L<C<sysseek>|/sysseek FILEHANDLE,POSITION,WHENCE> returns
-true on success and false on failure, yet you can still easily determine
-the new position.
-
-For example to define a C<systell> function:
-
-    use Fcntl 'SEEK_CUR';
-    sub systell { sysseek($_[0], 0, SEEK_CUR) }
-
 Note the I<in bytes>: even if the filehandle has been set to operate
 on characters (for example by using the C<:encoding(utf8)> I/O layer),
-L<C<sysseek>|/sysseek FILEHANDLE,POSITION,WHENCE> will take and return byte
-offsets, not character offsets (because implementing that would render
+L<C<tell>|/tell FILEHANDLE> will return byte offsets, not character
+offsets (because implementing that would render
 L<C<sysseek>|/sysseek FILEHANDLE,POSITION,WHENCE> unacceptably slow).
 
 L<C<sysseek>|/sysseek FILEHANDLE,POSITION,WHENCE> bypasses normal
@@ -8568,6 +8552,20 @@ L<C<print>|/print FILEHANDLE LIST>, L<C<write>|/write FILEHANDLE>,
 L<C<seek>|/seek FILEHANDLE,POSITION,WHENCE>,
 L<C<tell>|/tell FILEHANDLE>, or L<C<eof>|/eof FILEHANDLE> may cause
 confusion.
+
+For WHENCE, you may also use the constants C<SEEK_SET>, C<SEEK_CUR>,
+and C<SEEK_END> (start of the file, current position, end of the file)
+from the L<Fcntl> module.  Use of the constants is also more portable
+than relying on 0, 1, and 2.  For example to define a "systell" function:
+
+    use Fcntl 'SEEK_CUR';
+    sub systell { sysseek($_[0], 0, SEEK_CUR) }
+
+Returns the new position, or the undefined value on failure.  A position
+of zero is returned as the string C<"0 but true">; thus
+L<C<sysseek>|/sysseek FILEHANDLE,POSITION,WHENCE> returns
+true on success and false on failure, yet you can still easily determine
+the new position.
 
 =item system LIST
 X<system> X<shell>
