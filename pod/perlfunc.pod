@@ -6648,12 +6648,13 @@ C<SEEK_CUR>, and C<SEEK_END> (start of the file, current position, end
 of the file) from the L<Fcntl> module.  Returns C<1> on success, false
 otherwise.
 
-Note the I<in bytes>: even if the filehandle has been set to
-operate on characters (for example by using the C<:encoding(utf8)> open
-layer), L<C<tell>|/tell FILEHANDLE> will return byte offsets, not
-character offsets (because implementing that would render
-L<C<seek>|/seek FILEHANDLE,POSITION,WHENCE> and
-L<C<tell>|/tell FILEHANDLE> rather slow).
+Note the emphasis on bytes: even if the filehandle has been set to operate
+on characters (for example using the C<:encoding(utf8)> I/O layer), the
+L<C<seek>|/seek FILEHANDLE,POSITION,WHENCE>,
+L<C<tell>|/tell FILEHANDLE>, and
+L<C<sysseek>|/sysseek FILEHANDLE,POSITION,WHENCE>
+family of functions use byte offsets, not character offsets,
+because seeking to a character offset would be very slow in a UTF-8 file.
 
 If you want to position the file for
 L<C<sysread>|/sysread FILEHANDLE,SCALAR,LENGTH,OFFSET> or
@@ -8531,17 +8532,19 @@ X<sysseek> X<lseek>
 
 =for Pod::Functions +5.004 position I/O pointer on handle used with sysread and syswrite
 
-Sets FILEHANDLE's system position in bytes using L<lseek(2)>.  FILEHANDLE may
+Sets FILEHANDLE's system position I<in bytes> using L<lseek(2)>.  FILEHANDLE may
 be an expression whose value gives the name of the filehandle.  The values
 for WHENCE are C<0> to set the new position to POSITION; C<1> to set the it
 to the current position plus POSITION; and C<2> to set it to EOF plus
 POSITION, typically negative.
 
-Note the I<in bytes>: even if the filehandle has been set to operate
-on characters (for example by using the C<:encoding(utf8)> I/O layer),
-L<C<tell>|/tell FILEHANDLE> will return byte offsets, not character
-offsets (because implementing that would render
-L<C<sysseek>|/sysseek FILEHANDLE,POSITION,WHENCE> unacceptably slow).
+Note the emphasis on bytes: even if the filehandle has been set to operate
+on characters (for example using the C<:encoding(utf8)> I/O layer), the
+L<C<seek>|/seek FILEHANDLE,POSITION,WHENCE>,
+L<C<tell>|/tell FILEHANDLE>, and
+L<C<sysseek>|/sysseek FILEHANDLE,POSITION,WHENCE>
+family of functions use byte offsets, not character offsets,
+because seeking to a character offset would be very slow in a UTF-8 file.
 
 L<C<sysseek>|/sysseek FILEHANDLE,POSITION,WHENCE> bypasses normal
 buffered IO, so mixing it with reads other than
@@ -8702,12 +8705,13 @@ error.  FILEHANDLE may be an expression whose value gives the name of
 the actual filehandle.  If FILEHANDLE is omitted, assumes the file
 last read.
 
-Note the I<in bytes>: even if the filehandle has been set to
-operate on characters (for example by using the C<:encoding(utf8)> open
-layer), L<C<tell>|/tell FILEHANDLE> will return byte offsets, not
-character offsets (because that would render
-L<C<seek>|/seek FILEHANDLE,POSITION,WHENCE> and
-L<C<tell>|/tell FILEHANDLE> rather slow).
+Note the emphasis on bytes: even if the filehandle has been set to operate
+on characters (for example using the C<:encoding(utf8)> I/O layer), the
+L<C<seek>|/seek FILEHANDLE,POSITION,WHENCE>,
+L<C<tell>|/tell FILEHANDLE>, and
+L<C<sysseek>|/sysseek FILEHANDLE,POSITION,WHENCE>
+family of functions use byte offsets, not character offsets,
+because seeking to a character offset would be very slow in a UTF-8 file.
 
 The return value of L<C<tell>|/tell FILEHANDLE> for the standard streams
 like the STDIN depends on the operating system: it may return -1 or
