@@ -22,13 +22,19 @@
 /* This file contains the functions that create, manipulate and optimize
  * the OP structures that hold a compiled perl program.
  *
- * A Perl program is compiled into a tree of OPs. Each op contains
- * structural pointers (eg to its siblings and the next op in the
- * execution sequence), a pointer to the function that would execute the
- * op, plus any data specific to that op. For example, an OP_CONST op
- * points to the pp_const() function and to an SV containing the constant
- * value. When pp_const() is executed, its job is to push that SV onto the
- * stack.
+ * Note that during the build of miniperl, a temporary copy of this file
+ * is made, called opmini.c.
+ *
+ * A Perl program is compiled into a tree of OP nodes. Each op contains:
+ *  * structural OP pointers to its children and siblings (op_sibling,
+ *    op_first etc) that define the tree structure;
+ *  * execution order OP pointers (op_next, plus sometimes op_other,
+ *    op_lastop  etc) that define the execution sequence plus variants;
+ *  * a pointer to the C "pp" function that would execute the op;
+ *  * any data specific to that op.
+ * For example, an OP_CONST op points to the pp_const() function and to an
+ * SV containing the constant value. When pp_const() is executed, its job
+ * is to push that SV onto the stack.
  *
  * OPs are mainly created by the newFOO() functions, which are mainly
  * called from the parser (in perly.y) as the code is parsed. For example
@@ -40,11 +46,65 @@
  *	newBINOP(OP_MULTIPLY, flags, newSVREF($b), newSVREF($c))
  *  )
  *
- * Note that during the build of miniperl, a temporary copy of this file
- * is made, called opmini.c.
+ * As the parser reduces low-level rules, it creates little op subtrees;
+ * as higher-level rules are resolved, these subtrees get joined together
+ * as branches on a bigger subtree, until eventually a top-level rule like
+ * a subroutine definition is reduced, at which point there is one large
+ * parse tree left.
+ *
+ * The execution order pointers (op_next) are generated as the subtrees
+ * are joined together. Consider this sub-expression: A*B + C/D: at the
+ * point when it's just been parsed, the op tree looks like:
+ *
+ *   [+]
+ *    |
+ *   [*]------[/]
+ *    |        |
+ *    A---B    C---D
+ *
+ * with the intended execution order being:
+ *
+ *   [PREV] => A => B => [*] => C => D => [/] =>  [+] => [NEXT]
+ *
+ * At this point all the nodes' op_next pointers will have been set,
+ * except that:
+ *    * we don't know what the [NEXT] node will be yet;
+ *    * we don't know what the [PREV] node will be yet, but when it gets
+ *      created and needs its op_next set, it needs to be set to point to
+ *      A, which is non-obvious.
+ * To handle both those cases, we temporarily set the top node's
+ * op_next to point to the first node to be executed in this subtree (A in
+ * this case). This means that initially a subtree's op_next chain,
+ * starting from the top node, will visit each node in execution sequence
+ * then point back at the top node.
+ * When we embed this subtree in a larger tree, its top op_next is used
+ * to get the start node, then is set to point to its new neighbour.
+ * For example the two separate [*],A,B and [/],C,D subtrees would
+ * initially have had:
+ *   [*] => A;  A => B;  B => [*]
+ * and
+ *   [/] => C;  C => D;  D => [/]
+ * When these two subtrees were joined together to make the [+] subtree,
+ * [+]'s op_next was set to [*]'s op_next, i.e. A; then [*]'s op_next was
+ * set to point to [/]'s op_next, i.e. C.
+ *
+ * This op_next linking is done by the LINKLIST() macro and its underlying
+ * op_linklist() function. Given a top-level op, if its op_next is
+ * non-null, it's already been linked, so leave it. Otherwise link it with
+ * its children as described above, possibly recursively if any of the
+ * children have a null op_next.
+ *
+ * In summary: given a subtree, its top-level node's op_next will either
+ * be:
+ *   NULL: the subtree hasn't been LINKLIST()ed yet;
+ *   fake: points to the start op for this subtree;
+ *   real: once the subtree has been embedded into a larger tree
  */
 
 /*
+
+Here's an older description from Larry.
+
 Perl's compiler is essentially a 3-pass compiler with interleaved phases:
 
     A bottom-up pass
