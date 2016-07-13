@@ -132,6 +132,10 @@ SKIP:
 {
     eval { require Errno; defined &Errno::EMFILE }
       or skip "Can't load Errno or EMFILE not defined", 1;
+    # stdio might return strange values in errno if it runs
+    # out of FILE entries, and does on darwin
+    $^O eq "darwin" && exists $ENV{PERLIO} && $ENV{PERLIO} =~ /stdio/
+      and skip "errno values from stdio are unspecified", 1;
     my @socks;
     my $sock_limit = 1000; # don't consume every file in the system
     # Default limits on various systems I have:
