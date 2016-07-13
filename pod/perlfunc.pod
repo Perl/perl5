@@ -8172,68 +8172,16 @@ X<study>
 
 =item study
 
-=for Pod::Functions optimize input data for repeated searches
+=for Pod::Functions no-op, formerly optimized input data for repeated searches
 
-B<Note that since Perl version 5.16 this function has been a no-op, but
-this might change in a future release.>
+At this time, C<study> does nothing. This may change in the future.
 
-May take extra time to study SCALAR (L<C<$_>|perlvar/$_> if unspecified)
-in anticipation
-of doing many pattern matches on the string before it is next modified.
-This may or may not save time, depending on the nature and number of
-patterns you are searching and the distribution of character
-frequencies in the string to be searched; you probably want to compare
-run times with and without it to see which is faster.  Those loops
-that scan for many short constant strings (including the constant
-parts of more complex patterns) will benefit most.
+Prior to Perl version 5.16, it would create an inverted index of all characters
+that occurred in the given SCALAR (or L<C<$_>|perlvar/$_> if unspecified). When
+matching a pattern, the rarest character from the pattern would be looked up in
+this index. Rarity was based on some static frequency tables constructed from
+some C programs and English text.
 
-(The way L<C<study>|/study SCALAR> used to work is this: a linked list
-of every
-character in the string to be searched is made, so we know, for
-example, where all the C<'k'> characters are.  From each search string,
-the rarest character is selected, based on some static frequency tables
-constructed from some C programs and English text.  Only those places
-that contain this "rarest" character are examined.)
-
-For example, here is a loop that inserts index producing entries
-before any line containing a certain pattern:
-
-    while (<>) {
-        study;
-        print ".IX foo\n"    if /\bfoo\b/;
-        print ".IX bar\n"    if /\bbar\b/;
-        print ".IX blurfl\n" if /\bblurfl\b/;
-        # ...
-        print;
-    }
-
-In searching for C</\bfoo\b/>, only locations in L<C<$_>|perlvar/$_>
-that contain C<f>
-will be looked at, because C<f> is rarer than C<o>.  In general, this is
-a big win except in pathological cases.  The only question is whether
-it saves you more time than it took to build the linked list in the
-first place.
-
-Note that if you have to look for strings that you don't know till
-runtime, you can build an entire loop as a string and L<C<eval>|/eval
-EXPR> that to avoid recompiling all your patterns all the time.
-Together with undefining L<C<$E<sol>>|perlvar/$E<sol>> to input entire
-files as one record, this can be quite
-fast, often faster than specialized programs like L<fgrep(1)>.  The following
-scans a list of files (C<@files>) for a list of words (C<@words>), and prints
-out the names of those files that contain a match:
-
-    my $search = 'local $/; while (<>) { study;';
-    foreach my $word (@words) {
-        $search .= "++\$seen{\$ARGV} if /\\b$word\\b/;\n";
-    }
-    $search .= "}";
-    @ARGV = @files;
-    my %seen;
-    eval $search;        # this screams
-    foreach my $file (sort keys(%seen)) {
-        print $file, "\n";
-    }
 
 =item sub NAME BLOCK
 X<sub>
