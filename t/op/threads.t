@@ -9,7 +9,7 @@ BEGIN {
      skip_all_without_config('useithreads');
      skip_all_if_miniperl("no dynamic loading on miniperl, no threads");
 
-     plan(29);
+     plan(30);
 }
 
 use strict;
@@ -416,5 +416,11 @@ $List[3] = $v;
 printf "%s,%s", @List[(3)], $List[3];
 CODE
 
+fresh_perl_like(<<'CODE', qr/ok/, {}, 'RT #41121 binmode(STDOUT,":encoding(utf8) does not crash');
+use threads;
+binmode(STDOUT,":encoding(utf8)");
+threads->create(sub{});
+print "ok\n";
+CODE
 
 # EOF
