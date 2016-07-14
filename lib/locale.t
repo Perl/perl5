@@ -1765,6 +1765,12 @@ foreach my $Locale (@Locale) {
 
         ++$locales_test_number;
         $test_names{$locales_test_number}
+                            = 'Verify that empty strings collate';
+        $ok = "" le "";
+        report_result($Locale, $locales_test_number, $ok);
+
+        ++$locales_test_number;
+        $test_names{$locales_test_number}
             = "Skip in non-UTF-8 locales; otherwise verify that UTF8ness "
             . "doesn't matter with collation";
         if (! $is_utf8_locale) {

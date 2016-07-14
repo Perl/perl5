@@ -1779,7 +1779,12 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                 STRLEN needed = *xlen + 1;   /* +1 For trailing NUL */
                 STRLEN computed_guess = PL_collxfrm_base
                                       + (PL_collxfrm_mult * length_in_chars);
-                const STRLEN new_m = needed / length_in_chars;
+
+                /* On zero-length input, just keep current slope instead of
+                 * dividing by 0 */
+                const STRLEN new_m = (length_in_chars != 0)
+                                     ? needed / length_in_chars
+                                     : PL_collxfrm_mult;
 
                 DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                     "%s: %d: initial size of %"UVuf" bytes for a length "
