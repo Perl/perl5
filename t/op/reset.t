@@ -184,7 +184,7 @@ SKIP:
 	    my $copy = $prog;
 	    $copy =~ s/8/$eight/gm;
 	    $copy =~ s/9/$nine/gm;
-	    fresh_perl_is($copy, "pass", "",
+	    fresh_perl_is($copy, "pass", {},
 			  "first pattern $eight$eight, second $nine$nine");
 	}
     }
