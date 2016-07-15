@@ -292,7 +292,7 @@ sub changes_between {
     5.023008 => '2016-02-20',
     5.023009 => '2016-03-20',
     5.022002 => '2016-04-29',
-    5.023010 => '????-??-??',
+    5.024000 => '????-??-??',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -12384,14 +12384,21 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
-    5.023010 => {
+    5.024000 => {
         delta_from => 5.023009,
         changed => {
-            'B::Op_private'         => '5.023010',
-            'Config'                => '5.02301',
-            'Module::CoreList'      => '5.20160420',
-            'Module::CoreList::TieHashDelta'=> '5.20160420',
-            'Module::CoreList::Utils'=> '5.20160420',
+            'B::Op_private'         => '5.024000',
+            'Config'                => '5.024',
+            'File::Path'            => '2.12_01',
+            'File::Spec::AmigaOS'   => '3.64',
+            'ODBM_File'             => '1.14',
+            'POSIX'                 => '1.65',
+            'Pod::Man'              => '4.07',
+            'Pod::ParseLink'        => '4.07',
+            'Pod::Text'             => '4.07',
+            'Pod::Text::Color'      => '4.07',
+            'Pod::Text::Overstrike' => '4.07',
+            'Pod::Text::Termcap'    => '4.07',
         },
         removed => {
         }
@@ -13043,7 +13050,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
         removed => {
         }
     },
-    5.023010 => {
+    5.024000 => {
         delta_from => 5.023009,
         changed => {
         },
