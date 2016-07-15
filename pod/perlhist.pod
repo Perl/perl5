@@ -580,6 +580,7 @@ the strings?).
  Abigail   5.23.9       2016-Mar-20
 
  Ricardo   5.24.0-RC1   2016-Apr-13     The 5.24 maintenance track
+ Ricardo   5.24.0-RC2   2016-Apr-23
 
 =head2 SELECTED RELEASE SIZES
 
