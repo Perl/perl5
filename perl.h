@@ -5285,6 +5285,7 @@ EXTCONST char *const PL_phase_names[];
 #  define PL_dirty cBOOL(PL_phase == PERL_PHASE_DESTRUCT)
 
 #  define PL_amagic_generation PL_na
+#  define PL_encoding ((SV *)NULL)
 #endif /* !PERL_CORE */
 
 #define PL_hints PL_compiling.cop_hints
