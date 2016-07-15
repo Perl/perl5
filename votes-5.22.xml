@@ -25,9 +25,15 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Security Fixes</h3>
 
+When these two are merged, the version needs to be bumped to 0.20_01 (change the version in the pod, too):
+<commit votes="sprout" id="08e3451d7b3b714ad63a27f1b9c2a23ee75d15ee" ticket="128528" desc="Don’t let XSLoader load relative paths"/>
+<commit votes="sprout" id="a651dcdf6a9151150dcf0fb6b18849d3e39b0811" ticket="128528" desc="Fix XSLoader to recognize drive letters"/>
+
 </div>
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
+
+<commit votes="sprout" id="a2637ca0a3fec01b80d7ea5ba62802354fd5e6f3" ticket="128597" desc="[perl #128597] Crash from gp_free/ckWARN_d"/>
 
 <commit votes="" id="" ticket="123878" desc=""/>
 

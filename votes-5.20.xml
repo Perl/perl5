@@ -27,6 +27,10 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="khw" id="854d0921f9d0fb6c5ea15abeed3dd19d63bbabe1" ticket="123562" desc="[CVE-2015-8853] Regexp-matching &quot;hangs&quot; indefinitely on illegal input using binmode :utf8 using 100%CPU" />
 
+When these two are merged, the version needs to be bumped to 0.17_01 (change the version in the pod, too):
+<commit votes="sprout" id="08e3451d7b3b714ad63a27f1b9c2a23ee75d15ee" ticket="128528" desc="Don’t let XSLoader load relative paths"/>
+<commit votes="sprout" id="a651dcdf6a9151150dcf0fb6b18849d3e39b0811" ticket="128528" desc="Fix XSLoader to recognize drive letters"/>
+
 </div>
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
