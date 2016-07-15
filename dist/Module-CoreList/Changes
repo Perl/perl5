@@ -1,6 +1,8 @@
-
- - fixed edge-case checking in is_core() (checking for a specific version of
-   a module returned false for the first perl release that contained it)
+5.20160520
+ - fixed edge-case checking in is_core() (checking for a specific
+   version of a module returned false for the first perl release
+   that contained it)
+ - Updated for v5.25.1
 
 5.20160429
  - Updated for v5.22.2
