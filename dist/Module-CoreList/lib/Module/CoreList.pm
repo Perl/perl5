@@ -12421,6 +12421,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Module::CoreList'      => '5.20160507',
             'Module::CoreList::TieHashDelta'=> '5.20160507',
             'Module::CoreList::Utils'=> '5.20160507',
+            'feature'               => '1.43',
         },
         removed => {
         }
