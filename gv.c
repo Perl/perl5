@@ -1017,6 +1017,7 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
     const U32 autoload = flags & GV_AUTOLOAD;
     const U32 do_croak = flags & GV_CROAK;
     const U32 is_utf8  = flags & SVf_UTF8;
+    const char *stash_name = NULL;
 
     PERL_ARGS_ASSERT_GV_FETCHMETHOD_PVN_FLAGS;
 
@@ -1061,10 +1062,21 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 
     gv = gv_fetchmeth_pvn(stash, name, nend - name, 0, flags);
     if (!gv) {
+	if (stash && (stash_name = HvNAME_get(stash)) && memEQs(stash_name, HvNAMELEN_get(stash), "UNIVERSAL"))
+	    /* no-op here so we don't consider import/unimport for
+	       UNIVERSAL to exist. In the past "use UNIVERSAL qw(can)"
+	       worked, but not anymore. Make sure the import routine
+	       dies instead of silently doing nothing.
+	       
+	       This used to be done with a dummy UNIVERSAL::import()
+	       that died, but that made every single package return
+	       true for $package->can("import"), which leads to some
+	       other silly edge cases. */
+	    ;
 	/* This is the special case that exempts Foo->import and
 	   Foo->unimport from being an error even if there's no
 	  import/unimport subroutine */
-	if (strEQ(name,"import") || strEQ(name,"unimport"))
+	else if (strEQ(name,"import") || strEQ(name,"unimport"))
 	    gv = MUTABLE_GV(&PL_sv_yes);
 	else if (autoload)
 	    gv = gv_autoload_pvn(
@@ -1077,7 +1089,8 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 		/* If we can't find an IO::File method, it might be a call on
 		 * a filehandle. If IO:File has not been loaded, try to
 		 * require it first instead of croaking */
-		const char *stash_name = HvNAME_get(stash);
+		if (!stash_name)
+		    stash_name = HvNAME_get(stash);
 		if (stash_name && memEQs(stash_name, HvNAMELEN_get(stash), "IO::File")
 		    && !Perl_hv_common(aTHX_ GvHVn(PL_incgv), NULL,
 				       STR_WITH_LEN("IO/File.pm"), 0,
@@ -1089,7 +1102,7 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 			return gv;
 		}
 		Perl_croak(aTHX_
-			   "Can't locate object method \"%"UTF8f
+			   "Can't locate object blah method \"%"UTF8f
 			   "\" via package \"%"HEKf"\"",
 			            UTF8fARG(is_utf8, nend - name, name),
                                     HEKfARG(HvNAME_HEK(stash)));
