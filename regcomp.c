@@ -20157,10 +20157,13 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
             _invlist_invert(only_utf8);
             _invlist_intersection(only_utf8, PL_UpperLatin1, &only_utf8);
         }
+        else if (not_utf8) {
 
-        if (not_utf8) {
-            _invlist_invert(not_utf8);
-            _invlist_intersection(not_utf8, PL_UpperLatin1, &not_utf8);
+            /* If a code point matches iff the target string is not in UTF-8,
+             * then complementing the result has it not match iff not in UTF-8,
+             * which is the same thing as matching iff it is UTF-8. */
+            only_utf8 = not_utf8;
+            not_utf8 = NULL;
         }
 
         if (only_utf8_locale) {
