@@ -1,3 +1,5 @@
+5.20160620
+
 5.20160520
  - fixed edge-case checking in is_core() (checking for a specific
    version of a module returned false for the first perl release
