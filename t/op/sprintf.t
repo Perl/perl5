@@ -115,14 +115,22 @@ for (@tests) {
 	# >comment skip: all<
 	if ($os =~ /\ball\b/i) {
 	    $skip = 1;
-	} elsif ($os =~ /\b$^O(?::(\S+))\b/i) {
+	} elsif ($os =~ /\b$^O(?::(\S+))?\b/i) {
+            # We can have the $^O followed by an optional condition.
+            # The condition, if present, can be one of:
+            # (1) a regex between slashes...
+            #     tested as a regex against $Config{archname}
+            # (2) starts with a digit...
+            #     the first pair of dot-separated digits is
+            #     tested against $Config{osvers}
+            # (3) tested as literal string against $Config{archname}
             my $cond = $1;
             if ($cond =~ m{^/(.+)/$}) {
                 # >comment skip: solaris:/86/<
                 my $vsr = $1;
-                $skip = $Config{archname} =~ /$vsr/;
+                $skip = $archname =~ /$vsr/;
             } elsif ($cond =~ /^\d/) {
-                # >comment skip: VMS hpux:10.20<
+                # >comment skip: hpux:10.20<
                 my $vsn = $cond;
                 # Only compare on the the first pair of digits, as numeric
                 # compares do not like 2.6.10-3mdksmp or 2.6.8-24.10-default
