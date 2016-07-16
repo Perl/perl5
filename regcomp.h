@@ -522,7 +522,7 @@ struct regnode_ssc {
                |ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD))   \
              == ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD)
 
-/* Spare:                                       0x10 */
+/* Spare: Be sure to change ANYOF_FLAGS_ALL if this gets used  0x10 */
 
 /* If set, the node matches every code point NUM_ANYOF_CODE_POINTS and above.
  * Can be in an SSC */

@@ -23,7 +23,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 790;  # Update this when adding/deleting tests.
+plan tests => 796;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -973,6 +973,19 @@ sub run_tests {
         @b = grep /\s/, @a;
         @c = grep /[\s]/, @a;
         is("@b", "@c", $message);
+
+        # Test an inverted posix class with a char also in the class.
+        my $nbsp = chr utf8::unicode_to_native(0xA0);
+        my $non_s = chr utf8::unicode_to_native(0xA1);
+        my $pat_string = "[^\\S ]";
+        unlike(" ", qr/$pat_string/, "Verify ' ' !~ /$pat_string/");
+        like("\t", qr/$pat_string/, "Verify '\\t =~ /$pat_string/");
+        unlike($nbsp, qr/$pat_string/, "Verify non-utf8-NBSP !~ /$pat_string/");
+        utf8::upgrade($nbsp);
+        like($nbsp, qr/$pat_string/, "Verify utf8-NBSP =~ /$pat_string/");
+        unlike($non_s, qr/$pat_string/, "Verify non-utf8-inverted-bang !~ /$pat_string/");
+        utf8::upgrade($non_s);
+        unlike($non_s, qr/$pat_string/, "Verify utf8-inverted-bang !~ /$pat_string/");
     }
     {
         my $message = '\D, [\D], \d, [\d]';
