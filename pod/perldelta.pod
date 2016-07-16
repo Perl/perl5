@@ -50,7 +50,7 @@ output.  By default this is written to C<stderr>, but can optionally
 be redirected to a file by setting the C<PERLIO_DEBUG> environment
 variable.
 
-If perl is running setuid or the C<-T> switch has supplied
+If perl is running setuid or the C<-T> switch was supplied
 C<PERLIO_DEBUG> is ignored and the debugging output is sent to
 C<stderr> as for any other C<-D> switch.
 
