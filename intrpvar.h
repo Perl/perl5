@@ -32,10 +32,14 @@
  *
  * Important ones in the first cache line (if alignment is done right) */
 
-PERLVAR(I, stack_sp,	SV **)		/* top of the stack */
+PERLVAR(I, rstack_sp,	SV **)		/* top of the refcounted stack */
 PERLVAR(I, op,		OP *)		/* currently executing op */
 PERLVAR(I, curpad,	SV **)		/* active pad (lexicals+tmps) */
 
+PERLVAR(I, rstack_base,	SV **)		/* Refcounted stack */
+PERLVAR(I, rstack_max,	SV **)
+
+PERLVAR(I, stack_sp,	SV **)		/* Back-compat non-rc stack */
 PERLVAR(I, stack_base,	SV **)
 PERLVAR(I, stack_max,	SV **)
 
@@ -59,6 +63,11 @@ PERLVAR(I, markstack,	I32 *)		/* stack_sp locations we're
 					   remembering */
 PERLVAR(I, markstack_ptr, I32 *)
 PERLVAR(I, markstack_max, I32 *)
+
+PERLVAR(I, rmarkstack,	I32 *)		/* rstack_sp locations we're
+					   remembering */
+PERLVAR(I, rmarkstack_ptr, I32 *)
+PERLVAR(I, rmarkstack_max, I32 *)
 
 #ifdef PERL_HASH_RANDOMIZE_KEYS
 #ifdef USE_PERL_PERTURB_KEYS
@@ -120,7 +129,8 @@ PERLVAR(I, defstash,	HV *)		/* main symbol table */
 PERLVAR(I, curstash,	HV *)		/* symbol table for current package */
 
 PERLVAR(I, curcop,	COP *)
-PERLVAR(I, curstack,	AV *)		/* THE STACK */
+PERLVAR(I, rcurstack,	AV *)		/* THE STACK */
+PERLVAR(I, curstack,	AV *)		/* The other stack, for XSUBs */
 PERLVAR(I, curstackinfo, PERL_SI *)	/* current stack + context */
 PERLVAR(I, mainstack,	AV *)		/* the stack when nothing funny is
 					   happening */
