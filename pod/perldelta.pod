@@ -55,13 +55,24 @@ L<Module::CoreList> has been upgraded from version 5.20160429 to 5.20160730.
 
 =head2 Changes to Existing Documentation
 
-=head3 L<XXX>
+=head3 L<perlapio>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+The documentation of C<PERLIO_DEBUG> has been updated.
+
+=back
+
+=head3 L<perlrun>
+
+=over 4
+
+=item *
+
+The new B<-Di> switch has been documented, and the documentation of
+C<PERLIO_DEBUG> has been updated.
 
 =back
 
@@ -71,7 +82,8 @@ XXX Description of the change here
 
 =item *
 
-XXX
+A new test script, F<t/run/switchDx.t>, has been added to test that the new
+B<-Di> switch is working correctly.
 
 =back
 
