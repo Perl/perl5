@@ -126,7 +126,8 @@ sub parse_opcode_def {
     # the content of the "desc" field from the first step is extracted here:
     @{$node}{qw(type code args flags longj)}= split /[,\s]\s*/, $node->{desc};
 
-    $node->{$_} //= "" for qw(type code args flags longj);
+    defined $node->{$_} or $node->{$_} = ""
+        for qw(type code args flags longj);
 
     register_node($node); # has to be before the type_alias code below
 
@@ -612,7 +613,7 @@ format GuTS =
  ^*~~
  \$node->{pod_comment}
  ^$name_fmt ^<<<<<<<<< ^$descr_fmt~~
- \$node->{name}, \$code, \$node->{comment}//''
+ \$node->{name}, \$code, defined \$node->{comment} ? \$node->{comment} : ''
 .
 1;
 EOD
