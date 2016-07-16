@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 98;
+plan tests => 99;
 our $TODO;
 
 my $deprecated = 0;
@@ -774,3 +774,30 @@ sub FETCH     { $_[0][0] }
 tie my $t, "", sub { "cluck up porridge" };
 is eval { sub { goto $t }->() }//$@, 'cluck up porridge',
   'tied arg returning sub ref';
+
+TODO: {
+  local $::TODO = 'RT #45091: goto in CORE::GLOBAL::exit unsupported';
+  fresh_perl_is(<<'EOC', "before\ndie handler\n", {stderr => 1}, 'RT #45091: goto in CORE::GLOBAL::EXIT');
+  BEGIN {
+    *CORE::GLOBAL::exit = sub {
+      goto FASTCGI_NEXT_REQUEST;
+    };
+  }
+  while (1) {
+    eval { that_cgi_script() };
+    FASTCGI_NEXT_REQUEST:
+    last;
+  }
+  
+  sub that_cgi_script {
+    local $SIG{__DIE__} = sub { print "die handler\n"; exit; print "exit failed?\n"; };
+    print "before\n";
+    eval { buggy_code() };
+    print "after\n";
+  }
+  sub buggy_code {
+    die "error!";
+    print "after die\n";
+  }
+EOC
+}
