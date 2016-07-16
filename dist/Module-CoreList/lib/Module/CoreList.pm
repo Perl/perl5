@@ -4,7 +4,7 @@ use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use Module::CoreList::TieHashDelta;
 use version;
-$VERSION = '5.20160620';
+$VERSION = '5.20160730';
 
 sub _released_order {   # Sort helper, to make '?' sort after everything else
     (substr($released{$a}, 0, 1) eq "?")
@@ -296,6 +296,7 @@ sub changes_between {
     5.025000 => '2016-05-09',
     5.025001 => '2016-05-20',
     5.025002 => '2016-06-20',
+    5.024001 => '????-??-??',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -12702,6 +12703,21 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.024001 => {
+        delta_from => 5.024000,
+        changed => {
+            'B::Op_private'         => '5.024001',
+            'Config'                => '5.024001',
+            'Module::CoreList'      => '5.20160730',
+            'Module::CoreList::TieHashDelta'=> '5.20160730',
+            'Module::CoreList::Utils'=> '5.20160730',
+            'Module::Metadata::corpus::BOMTest::UTF16BE'=> undef,
+            'Module::Metadata::corpus::BOMTest::UTF16LE'=> undef,
+            'Module::Metadata::corpus::BOMTest::UTF8'=> '1',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -13376,6 +13392,13 @@ for my $version (sort { $a <=> $b } keys %delta) {
         removed => {
         }
     },
+    5.024001 => {
+        delta_from => 5.024000,
+        changed => {
+        },
+        removed => {
+        }
+    },
 );
 
 for my $version (sort { $a <=> $b } keys %deprecated) {
@@ -13613,6 +13636,9 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'Module::Load::Conditional'=> 'cpan',
     'Module::Loaded'        => 'cpan',
     'Module::Metadata'      => 'cpan',
+    'Module::Metadata::corpus::BOMTest::UTF16BE'=> 'cpan',
+    'Module::Metadata::corpus::BOMTest::UTF16LE'=> 'cpan',
+    'Module::Metadata::corpus::BOMTest::UTF8'=> 'cpan',
     'NEXT'                  => 'cpan',
     'Net::Cmd'              => 'cpan',
     'Net::Config'           => 'cpan',
@@ -14017,6 +14043,9 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'Module::Load::Conditional'=> undef,
     'Module::Loaded'        => undef,
     'Module::Metadata'      => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Module-Metadata',
+    'Module::Metadata::corpus::BOMTest::UTF16BE'=> undef,
+    'Module::Metadata::corpus::BOMTest::UTF16LE'=> undef,
+    'Module::Metadata::corpus::BOMTest::UTF8'=> undef,
     'NEXT'                  => undef,
     'Net::Cmd'              => undef,
     'Net::Config'           => undef,
@@ -14142,19 +14171,19 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'TAP::Parser::YAMLish::Writer'=> 'http://rt.cpan.org/Public/Dist/Display.html?Name=Test-Harness',
     'Term::ANSIColor'       => 'https://rt.cpan.org/Dist/Display.html?Name=Term-ANSIColor',
     'Term::Cap'             => undef,
-    'Test::Builder'         => 'http://github.com/Test-More/test-more/issues/',
-    'Test::Builder::IO::Scalar'=> 'http://github.com/Test-More/test-more/issues/',
-    'Test::Builder::Module' => 'http://github.com/Test-More/test-more/issues/',
-    'Test::Builder::Tester' => 'http://github.com/Test-More/test-more/issues/',
-    'Test::Builder::Tester::Color'=> 'http://github.com/Test-More/test-more/issues/',
+    'Test::Builder'         => 'http://github.com/Test-More/test-more/issues',
+    'Test::Builder::IO::Scalar'=> 'http://github.com/Test-More/test-more/issues',
+    'Test::Builder::Module' => 'http://github.com/Test-More/test-more/issues',
+    'Test::Builder::Tester' => 'http://github.com/Test-More/test-more/issues',
+    'Test::Builder::Tester::Color'=> 'http://github.com/Test-More/test-more/issues',
     'Test::Harness'         => 'http://rt.cpan.org/Public/Dist/Display.html?Name=Test-Harness',
-    'Test::More'            => 'http://github.com/Test-More/test-more/issues/',
-    'Test::Simple'          => 'http://github.com/Test-More/test-more/issues/',
-    'Test::Tester'          => 'http://github.com/Test-More/test-more/issues/',
-    'Test::Tester::Capture' => 'http://github.com/Test-More/test-more/issues/',
-    'Test::Tester::CaptureRunner'=> 'http://github.com/Test-More/test-more/issues/',
-    'Test::Tester::Delegate'=> 'http://github.com/Test-More/test-more/issues/',
-    'Test::use::ok'         => 'http://github.com/Test-More/test-more/issues/',
+    'Test::More'            => 'http://github.com/Test-More/test-more/issues',
+    'Test::Simple'          => 'http://github.com/Test-More/test-more/issues',
+    'Test::Tester'          => 'http://github.com/Test-More/test-more/issues',
+    'Test::Tester::Capture' => 'http://github.com/Test-More/test-more/issues',
+    'Test::Tester::CaptureRunner'=> 'http://github.com/Test-More/test-more/issues',
+    'Test::Tester::Delegate'=> 'http://github.com/Test-More/test-more/issues',
+    'Test::use::ok'         => 'http://github.com/Test-More/test-more/issues',
     'Text::Balanced'        => undef,
     'Text::ParseWords'      => undef,
     'Text::Tabs'            => undef,
@@ -14189,7 +14218,7 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'bigrat'                => undef,
     'encoding'              => undef,
     'experimental'          => 'http://rt.cpan.org/Public/Dist/Display.html?Name=experimental',
-    'ok'                    => 'http://github.com/Test-More/test-more/issues/',
+    'ok'                    => 'http://github.com/Test-More/test-more/issues',
     'parent'                => undef,
     'perlfaq'               => 'https://github.com/perl-doc-cats/perlfaq/issues',
     'version'               => 'https://rt.cpan.org/Public/Dist/Display.html?Name=version',
