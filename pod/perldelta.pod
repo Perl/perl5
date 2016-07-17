@@ -102,18 +102,19 @@ cases such as C<#!/opt/perl64/bin/perl>.
 =head1 Acknowledgements
 
 Perl 5.24.1 represents approximately 2 months of development since Perl 5.24.0
-and contains approximately 5,700 lines of changes across 45 files from 10
+and contains approximately 5,700 lines of changes across 46 files from 11
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
-approximately 590 lines of changes to 10 .pm, .t, .c and .h files.
+approximately 590 lines of changes to 11 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its third decade thanks to a vibrant community
 of users and developers.  The following people are known to have contributed
 the improvements that became Perl 5.24.1:
 
 Alex Vandiver, Craig A. Berry, Father Chrysostomos, James E Keenan, Karen
-Etheridge, Matthew Horsfall, Ricardo Signes, Sawyer X, Steve Hay, Tony Cook.
+Etheridge, Leon Timmermans, Matthew Horsfall, Ricardo Signes, Sawyer X, Steve
+Hay, Tony Cook.
 
 The list above is almost certainly incomplete as it is automatically generated
 from version control history.  In particular, it does not include the names of
