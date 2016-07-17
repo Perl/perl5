@@ -6779,9 +6779,20 @@ extern void moncontrol(int);
  * The ordering of the parts in VAX floats is quite vexing.
  * In the below the fraction_n are the mantissa bits.
  * The fraction_1 is the most significant (numbering as by DEC/Digital),
- * and the rightmost bit in each fraction is the least significant.
- * This means for example that both the the most and least significant
- * bits are in the middle of the floats, not at either end.
+ * while the rightmost bit in each fraction is the least significant:
+ * in other words, big-endian bit order within the fractions.
+ * The fraction segments themselves would be big-endianly, except that
+ * within 32 bit segments the less significant comes first, the more
+ * significant after, except that in the format H (used for long doubles)
+ * the first fraction segment is on its own.  As promised, vexing.
+ * This means for example that both the most and the least significant
+ * bits can be in the middle of the floats, not at either end.
+ *
+ * References:
+ * http://nssdc.gsfc.nasa.gov/nssdc/formats/VAXFloatingPoint.htm
+ * http://www.quadibloc.com/comp/cp0201.htm
+ * http://h71000.www7.hp.com/doc/82final/6443/6443pro_028.html
+ * (somebody at HP should be fired for the URLs)
  *
  * F   fraction_2:16 sign:1 exp:7  fraction_1:7
  *     (exponent bias 128)
@@ -6790,7 +6801,7 @@ extern void moncontrol(int);
  *     fraction_4:16               fraction_3:16
  *     (exponent bias 128)
  *
- * G   fraction_2:16 sign:1 exp:11 fraction_1:7
+ * G   fraction_2:16 sign:1 exp:11 fraction_1:4
  *     fraction_4:16               fraction_3:16
  *     (exponent bias 1024)
  *
