@@ -386,6 +386,12 @@ which was to parse it as C<$foo:: . $bar>, has been restored. [perl
 Since Perl v5.20, line numbers have been off by one when perl is invoked
 with the B<-x> switch.  This has been fixed. [perl #128508]
 
+=item *
+
+Vivifying a subroutine stub in a deleted stash (e.g., C<delete
+$My::{"Foo::"}; \&My::Foo::foo>) no longer crashes.  It had begun crashing
+in v5.18. [perl #128532]
+
 =back
 
 =head1 Known Problems
