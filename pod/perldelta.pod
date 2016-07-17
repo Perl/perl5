@@ -381,6 +381,11 @@ failure.  [perl #128316]
 
 Parsing bad POSIX charclasses no longer leaks memory. [perl #128313]
 
+=item *
+
+Since Perl v5.20, line numbers have been off by one when perl is invoked
+with the B<-x> switch.  This has been fixed. [perl #128508]
+
 =back
 
 =head1 Known Problems
