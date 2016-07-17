@@ -65,6 +65,8 @@ Perhaps just the removal of SETERRNO() from this.
 
 <div><h3>Portability Fixes</h3>
 
+<commit votes="jhi" id="bf49eae4014ca7ff7b44362d99251f5b9f30bec8" desc="Perl_my_vsnprintf: avoid compiler warning"/>
+
 </div>
 
 <div><h3>Platform-Specific Test Fixes</h3>
