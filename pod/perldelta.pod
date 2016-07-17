@@ -86,6 +86,19 @@ B<-Di> switch is working correctly.
 
 =back
 
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+The change to hashbang redirection introduced in Perl 5.24.0, whereby perl
+would redirect to another interpreter (Perl 6) if it found a hashbang path
+which contains "perl" followed by "6", has been reverted because it broke in
+cases such as C<#!/opt/perl64/bin/perl>.
+
+=back
+
 =head1 Acknowledgements
 
 Perl 5.24.1 represents approximately 2 months of development since Perl 5.24.0
