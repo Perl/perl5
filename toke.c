@@ -7554,7 +7554,7 @@ Perl_yylex(pTHX)
 		    p = scan_word(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
 		    p = skipspace(p);
 		}
-		if (*p != '$')
+		if (*p != '$' && *p != '\\')
 		    Perl_croak(aTHX_ "Missing $ on loop variable");
 	    }
 	    OPERATOR(FOR);
@@ -7806,6 +7806,14 @@ Perl_yylex(pTHX)
                     PERL_MY_SNPRINTF_POST_GUARD(len, sizeof(tmpbuf));
 		    yyerror_pv(tmpbuf, UTF ? SVf_UTF8 : 0);
 		}
+	    }
+	    else if (*s == '\\') {
+		if (!FEATURE_MYREF_IS_ENABLED)
+		    Perl_croak(aTHX_ "The experimental declared_refs "
+				     "feature is not enabled");
+		Perl_ck_warner_d(aTHX_
+		     packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
+		    "Declaring references is experimental");
 	    }
 	    OPERATOR(MY);
 

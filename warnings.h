@@ -111,6 +111,10 @@
 #define WARN_MISSING			 64
 #define WARN_REDUNDANT			 65
 
+/* Warnings Categories added in Perl 5.025 */
+
+#define WARN_EXPERIMENTAL__DECLARED_REFS 66
+
 #define WARNsize			 17
 #define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
 #define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"

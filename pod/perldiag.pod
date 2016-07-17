@@ -1893,6 +1893,18 @@ valid magic number.
 you have also specified an explicit size for the string.  See
 L<perlfunc/pack>.
 
+=item Declaring references is experimental
+
+(S experimental::declared_refs) This warning is emitted if you use
+a reference constructor on the right-hand side of C<my>, C<state>, C<our>, or
+C<local>.  Simply suppress the warning if you want to use the feature, but
+know that in doing so you are taking the risk of using an experimental
+feature which may change or be removed in a future Perl version:
+
+    no warnings "experimental::declared_refs";
+    use feature "declared_refs";
+    $fooref = my \$foo;
+
 =for comment
 The following are used in lib/diagnostics.t for testing two =items that
 share the same description.  Changes here need to be propagated to there
@@ -5880,6 +5892,14 @@ probably because your vendor didn't supply it, probably because they
 think the U.S. Government thinks it's a secret, or at least that they
 will continue to pretend that it is.  And if you quote me on that, I
 will deny it.
+
+=item The experimental declared_refs feature is not enabled
+
+(F) To declare references to variables, as in C<my \%x>, you must first enable
+the feature:
+
+    no warnings "experimental::declared_refs";
+    use feature "declared_refs";
 
 =item The %s function is unimplemented
 

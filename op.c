@@ -3191,6 +3191,17 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	goto nomod;
 
     case OP_SREFGEN:
+	if (type == OP_NULL) { /* local */
+	  local_refgen:
+	    if (!FEATURE_MYREF_IS_ENABLED)
+		Perl_croak(aTHX_ "The experimental declared_refs "
+				 "feature is not enabled");
+	    Perl_ck_warner_d(aTHX_
+		     packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
+		    "Declaring references is experimental");
+	    op_lvalue(cUNOPo->op_first, OP_NULL);
+	    return o;
+	}
 	if (type != OP_AASSIGN && type != OP_SASSIGN
 	 && type != OP_ENTERLOOP)
 	    goto nomod;
@@ -3199,6 +3210,8 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	assert (!OpHAS_SIBLING(kid));
 	goto kid_2lvref;
     case OP_REFGEN:
+	if (type == OP_NULL) /* local */
+	    goto local_refgen;
 	if (type != OP_AASSIGN) goto nomod;
 	kid = cUNOPo->op_first;
       kid_2lvref:
@@ -3739,7 +3752,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 
     type = o->op_type;
 
-    if (type == OP_LIST) {
+    if (OP_TYPE_IS_OR_WAS(o, OP_LIST)) {
         OP *kid;
         for (kid = cLISTOPo->op_first; kid; kid = OpSIBLING(kid))
 	    my_kid(kid, attrs, imopsp);
@@ -3763,6 +3776,17 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 			attrs);
 	}
 	o->op_private |= OPpOUR_INTRO;
+	return o;
+    }
+    else if (type == OP_REFGEN || type == OP_SREFGEN) {
+	if (!FEATURE_MYREF_IS_ENABLED)
+	    Perl_croak(aTHX_ "The experimental declared_refs "
+			     "feature is not enabled");
+	Perl_ck_warner_d(aTHX_
+	     packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
+	    "Declaring references is experimental");
+	/* Kid is a nulled OP_LIST, handled above.  */
+	my_kid(cUNOPo->op_first, attrs, imopsp);
 	return o;
     }
     else if (type != OP_PADSV &&

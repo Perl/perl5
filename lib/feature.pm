@@ -20,6 +20,7 @@ our %feature = (
     refaliasing     => 'feature_refaliasing',
     postderef_qq    => 'feature_postderef_qq',
     unicode_eval    => 'feature_unieval',
+    declared_refs   => 'feature_myref',
     unicode_strings => 'feature_unicode',
 );
 
@@ -28,7 +29,7 @@ our %feature_bundle = (
     "5.11"    => [qw(array_base say state switch unicode_strings)],
     "5.15"    => [qw(current_sub evalbytes fc say state switch unicode_eval unicode_strings)],
     "5.23"    => [qw(current_sub evalbytes fc postderef_qq say state switch unicode_eval unicode_strings)],
-    "all"     => [qw(array_base bitwise current_sub evalbytes fc postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
+    "all"     => [qw(array_base bitwise current_sub declared_refs evalbytes fc postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
     "default" => [qw(array_base)],
 );
 
@@ -353,6 +354,22 @@ same applies to the assignment variants (C<&= |= ^= &.= |.= ^.=>).
 See L<perlop/Bitwise String Operators> for details.
 
 This feature is available from Perl 5.22 onwards.
+
+=head2 The 'declared_refs' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the
+warning:
+
+    no warnings "experimental::declared_refs";
+
+This allows a reference to a variable to be declared with C<my>, C<state>,
+our C<our>, or localized with C<local>.  It is intended mainly for use in
+conjunction with the "refaliasing" feature.  See L<perlref/Declaring a
+Reference to a Variable> for examples.
+
+This feature is available from Perl 5.26 onwards.
 
 =head1 FEATURE BUNDLES
 
