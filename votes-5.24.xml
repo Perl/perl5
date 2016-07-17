@@ -65,6 +65,8 @@ Perhaps just the removal of SETERRNO() from this.
 <commit votes="tonyc jhi" id="d484df69ed26120321cdca989748cd4636b276bb" ticket="125347" desc="[perl #125347] allow truncate to work on large files on Win32" />
 
 <commit votes="tonyc jhi" id="3f6b66c14467c0f8c7459e32c576618155ca89f3" ticket="128316" desc="(perl #128316) preserve errno from failed system calls" />
+ 
+<commit votes="khw" id="753b2c6a60a81dacbe59e2041e30e8302484dc2d" desc="Fix -Dr output regression"/>
 
 </div>
 
