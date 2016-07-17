@@ -373,6 +373,13 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 An assertion failure with C<%: = 0> has been fixed. [perl #128238]
 
+=item *
+
+In Perl v5.18, the parsing of C<"$foo::$bar"> was accidentally changed,
+such that it would be treated as C<$foo."::".$bar>.  The previous behavior,
+which was to parse it as C<$foo:: . $bar>, has been restored. [perl
+#128478]
+
 =back
 
 =head1 Known Problems
