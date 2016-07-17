@@ -42,8 +42,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Security Fixes</h3>
 
-<commit votes="sprout" id="08e3451d7b3b714ad63a27f1b9c2a23ee75d15ee" ticket="128528" desc="Don’t let XSLoader load relative paths"/>
-<commit votes="sprout" id="a651dcdf6a9151150dcf0fb6b18849d3e39b0811" ticket="128528" desc="Fix XSLoader to recognize drive letters"/>
+<commit votes="sprout jhi" id="08e3451d7b3b714ad63a27f1b9c2a23ee75d15ee" ticket="128528" desc="Don’t let XSLoader load relative paths"/>
+<commit votes="sprout jhi" id="a651dcdf6a9151150dcf0fb6b18849d3e39b0811" ticket="128528" desc="Fix XSLoader to recognize drive letters"/>
 <commit votes="sprout" id="ae635bbffa4769051671b9832a7472b9d977c198" ticket="128528" desc="Synchronize blead with CPAN XSLoader 0.22"/>
 
 </div>
@@ -62,9 +62,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 <commit votes="sprout" id="08f800f8519574aea9e744ff83230fb93772652b" ticket="128182" desc="Fix crash with require $nonstring"/>
 
 Perhaps just the removal of SETERRNO() from this.
-<commit votes="tonyc" id="d484df69ed26120321cdca989748cd4636b276bb" ticket="125347" desc="[perl #125347] allow truncate to work on large files on Win32" />
+<commit votes="tonyc jhi" id="d484df69ed26120321cdca989748cd4636b276bb" ticket="125347" desc="[perl #125347] allow truncate to work on large files on Win32" />
 
-<commit votes="tonyc" id="3f6b66c14467c0f8c7459e32c576618155ca89f3" ticket="128316" desc="(perl #128316) preserve errno from failed system calls" />
+<commit votes="tonyc jhi" id="3f6b66c14467c0f8c7459e32c576618155ca89f3" ticket="128316" desc="(perl #128316) preserve errno from failed system calls" />
 
 </div>
 
@@ -89,8 +89,8 @@ Perhaps just the removal of SETERRNO() from this.
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="khw sprout" id="d2b457d752c03448e8006f00a3761b5f542000d6" desc="perlunicode: Forgot to update pod to reflect 5.24 fix"/>
-<commit votes="khw sprout" id="c55dd03d1d6eb39244430d1cf2e0e94240d2b37a" desc="Fix typo in d2b457d"/>
+<commit votes="khw sprout jhi" id="d2b457d752c03448e8006f00a3761b5f542000d6" desc="perlunicode: Forgot to update pod to reflect 5.24 fix"/>
+<commit votes="khw sprout jhi" id="c55dd03d1d6eb39244430d1cf2e0e94240d2b37a" desc="Fix typo in d2b457d"/>
 
 </div>
 
