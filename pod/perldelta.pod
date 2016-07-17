@@ -380,6 +380,11 @@ such that it would be treated as C<$foo."::".$bar>.  The previous behavior,
 which was to parse it as C<$foo:: . $bar>, has been restored. [perl
 #128478]
 
+=item *
+
+Since Perl v5.20, line numbers have been off by one when perl is invoked
+with the B<-x> switch.  This has been fixed. [perl #128508]
+
 =back
 
 =head1 Known Problems
