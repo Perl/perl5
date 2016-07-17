@@ -108,6 +108,7 @@ File::Findgrep
 File::Map
 File::MMagic
 File::ShareDir
+Filter::Encoding
 find(1)
 flock(2)
 flock(3)
