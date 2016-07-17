@@ -2161,7 +2161,7 @@ Use of uninitialized value $v in integer addition (+) at - line 11.
 Use of uninitialized value $x in integer subtraction (-) at - line 13.
 ########
 # NAME 64-bit array subscripts
-# SKIP ? eval { my $q = pack "q", 0 }; $@
+# SKIP ? length(pack "p", "") < 8
 use warnings 'uninitialized';
 
 # aelem + const
