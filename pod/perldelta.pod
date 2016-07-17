@@ -152,7 +152,8 @@ L<Module::CoreList> has been upgraded from version 5.20160620 to 5.20160720.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<XSLoader> has been upgraded from version 0.21 to 0.22, fixing a security
+hole in which binary files could be loaded from a path outside of @INC.
 
 =back
 
