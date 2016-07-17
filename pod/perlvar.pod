@@ -1917,24 +1917,19 @@ Mnemonic: value of B<-D> switch.
 =item ${^ENCODING}
 X<${^ENCODING}>
 
-DEPRECATED!!!
+This variable is no longer supported.
 
-The I<object reference> to the C<Encode> object that is used to convert
-the source code to Unicode.  Thanks to this variable your Perl script
-does not have to be written in UTF-8.  Default is C<undef>.
+It used to hold the I<object reference> to the C<Encode> object that was
+used to convert the source code to Unicode.
 
-Setting this variable to any other value than C<undef> is deprecated due
-to fundamental defects in its design and implementation.  It is planned
-to remove it from a future Perl version.  Its purpose was to allow your
-non-ASCII Perl scripts to not have to be written in UTF-8; this was
+Its purpose was to allow your non-ASCII Perl
+scripts not to have to be written in UTF-8; this was
 useful before editors that worked on UTF-8 encoded text were common, but
-that was long ago.  It causes problems, such as affecting the operation
-of other modules that aren't expecting it, causing general mayhem.  Its
-use can lead to segfaults.
+that was long ago.  It caused problems, such as affecting the operation
+of other modules that weren't expecting it, causing general mayhem.
 
-If you need something like this functionality, you should use the
-L<encoding> pragma, which is also deprecated, but has fewer nasty side
-effects.
+If you need something like this functionality, it is recommended that use
+you a simple source filter, such as L<Filter::Encoding>.
 
 If you are coming here because code of yours is being adversely affected
 by someone's use of this variable, you can usually work around it by
@@ -1946,7 +1941,7 @@ near the beginning of the functions that are getting broken.  This
 undefines the variable during the scope of execution of the including
 function.
 
-This variable was added in Perl 5.8.2.
+This variable was added in Perl 5.8.2 and removed in 5.26.0.
 
 =item ${^GLOBAL_PHASE}
 X<${^GLOBAL_PHASE}>
