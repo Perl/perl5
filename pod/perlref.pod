@@ -911,7 +911,10 @@ subject to change.
 
 =head1 Declaring a Reference to a Variable
 
-Beginning in v5.26.0, the referencing operator can come after C<my>, C<state>, C<our>, or C<local>.  This syntax must be enabled with C<use feature 'declared_refs'>.  It is experimental, and will warn by default unless C<no warnings 'experimental::refaliasing'> is in effect.
+Beginning in v5.26.0, the referencing operator can come after C<my>,
+C<state>, C<our>, or C<local>.  This syntax must be enabled with C<use
+feature 'declared_refs'>.  It is experimental, and will warn by default
+unless C<no warnings 'experimental::refaliasing'> is in effect.
 
 This feature makes these:
 
