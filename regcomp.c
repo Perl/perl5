@@ -10859,7 +10859,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 RExC_seen |= REG_LOOKBEHIND_SEEN;
 		RExC_in_lookbehind++;
 		RExC_parse++;
-                assert(RExC_parse < RExC_end);
+                if (RExC_parse >= RExC_end) {
+                    vFAIL("Sequence (?... not terminated");
+                }
+
                 /* FALLTHROUGH */
 	    case '=':           /* (?=...) */
 		RExC_seen_zerolen++;

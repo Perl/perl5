@@ -277,6 +277,7 @@ my @death =
  '/(?xmsixp:abc)/' => 'Only one /x regex modifier is allowed {#} m/(?xmsixp{#}:abc)/',
  '/(?xmsixp)abc/' => 'Only one /x regex modifier is allowed {#} m/(?xmsixp{#})abc/',
  '/(?xxxx:abc)/' => 'Only one /x regex modifier is allowed {#} m/(?xxxx{#}:abc)/',
+ '/(?<=/' => 'Sequence (?... not terminated {#} m/(?<={#}/',                        # [perl #128170]
 
 );
 
