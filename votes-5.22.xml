@@ -58,8 +58,8 @@ Perhaps just the removal of SETERRNO() from this.
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="jhi" id="d06c8f869698f7905df974ab8bafb703a5438fc1" desc="[perl #128538] [PATCH] Fix copy/paste error in Configure"/>
-<commit votes="jhi" id="a2c061044c1e87ae8e777d6134191760235db0de" desc="make Configure abort if both -Duselongdouble and -Dusequadmath are requested"/>
+<commit votes="jhi sprout" id="d06c8f869698f7905df974ab8bafb703a5438fc1" desc="[perl #128538] [PATCH] Fix copy/paste error in Configure"/>
+<commit votes="jhi sprout" id="a2c061044c1e87ae8e777d6134191760235db0de" desc="make Configure abort if both -Duselongdouble and -Dusequadmath are requested"/>
 
 </div>
 
