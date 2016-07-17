@@ -46,7 +46,7 @@ L</Reporting Bugs> below.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20160429 to 5.20160730.
+L<Module::CoreList> has been upgraded from version 5.20160429 to 5.20160730_22.
 
 =back
 
