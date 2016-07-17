@@ -46,6 +46,20 @@ character is used in a given script, but there is a slight chance of
 breakage for programs that very specifically needed the old behavior.
 See L<perlunicode/Scripts>.
 
+=head2 Declaring a reference to a variable
+
+As an experimental feature, Perl now allows the referencing operator to
+come after C<my>, C<state>, C<our>, or C<local>. This syntax must be
+enabled with C<use feature 'declared_refs'>.  It is experimental, and will
+warn by default unless C<no warnings 'experimental::refaliasing'> is in
+effect.  It is intended mainly for use in assignments to references.  For
+example:
+
+    use experimental 'refaliasing', 'declared_refs';
+    my \$a = \$b;
+
+See L<perlref/Assigning to References> for slightly more detail.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
