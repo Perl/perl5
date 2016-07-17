@@ -14,30 +14,29 @@ L<perl5240delta>, which describes differences between 5.23.0 and 5.24.0.
 
 =head1 Security
 
-=head2 C<-Di> switch is now required for PerlIO debugging output
+=head2 B<-Di> switch is now required for PerlIO debugging output
 
-Previously PerlIO debugging output would be sent to the file specified
-by the C<PERLIO_DEBUG> environment variable if perl wasn't running
-setuid and the C<-T> or C<-t> switches hadn't been parsed yet.
+Previously PerlIO debugging output would be sent to the file specified by the
+C<PERLIO_DEBUG> environment variable if perl wasn't running setuid and the
+B<-T> or B<-t> switches hadn't been parsed yet.
 
-If perl performed output at a point where it hadn't yet parsed its
-switches this could result in perl creating or overwriting the file
-named by C<PERLIO_DEBUG> even when the C<-T> switch had been supplied.
+If perl performed output at a point where it hadn't yet parsed its switches
+this could result in perl creating or overwriting the file named by
+C<PERLIO_DEBUG> even when the B<-T> switch had been supplied.
 
-Perl now requires the C<-Di> switch to produce PerlIO debugging
-output.  By default this is written to C<stderr>, but can optionally
-be redirected to a file by setting the C<PERLIO_DEBUG> environment
-variable.
+Perl now requires the B<-Di> switch to produce PerlIO debugging output.  By
+default this is written to C<stderr>, but can optionally be redirected to a
+file by setting the C<PERLIO_DEBUG> environment variable.
 
-If perl is running setuid or the C<-T> switch was supplied
-C<PERLIO_DEBUG> is ignored and the debugging output is sent to
-C<stderr> as for any other C<-D> switch.
+If perl is running setuid or the B<-T> switch was supplied C<PERLIO_DEBUG> is
+ignored and the debugging output is sent to C<stderr> as for any other B<-D>
+switch.
 
 =head1 Incompatible Changes
 
-There are no changes intentionally incompatible with 5.24.0.
-If any exist, they are bugs, and we request that you submit a
-report.  See L</Reporting Bugs> below.
+There are no changes intentionally incompatible with 5.24.0.  If any exist,
+they are bugs, and we request that you submit a report.  See
+L</Reporting Bugs> below.
 
 =head1 Modules and Pragmata
 
@@ -107,8 +106,8 @@ will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
 
 If the bug you are reporting has security implications which make it
 inappropriate to send to a publicly archived mailing list, then see
-L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
-for details of how to report the issue.
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION> for details of how to
+report the issue.
 
 =head1 SEE ALSO
 
