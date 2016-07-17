@@ -6771,11 +6771,38 @@ extern void moncontrol(int);
 #  define DOUBLE_MIX_ENDIAN
 #endif
 
-/* Even though the VAX formats are kind of little-endian,
- * they are not really fully little-endian like Intel IEEE,
- * but neither are they really IEEE-mixed endian like the
- * mixed-endian ARM IEEE formats (with swapped bytes).
- * The VAX format ultimately come from PDP. */
+/* The VAX fp formats are neither consistently little-endian nor
+ * big-endian, and neither are they really IEEE-mixed endian like
+ * the mixed-endian ARM IEEE formats (with swapped bytes).
+ * Ultimately, the VAX format ultimately came from the PDP.
+ *
+ * The ordering of the parts in VAX floats is quite vexing.
+ * In the below the fraction_n are the mantissa bits.
+ * The fraction_1 is the most significant (numbering as by DEC/Digital),
+ * and the rightmost bit in each fraction is the least significant.
+ * This means for example that both the the most and least significant
+ * bits are in the middle of the floats, not at either end.
+ *
+ * F   fraction_2:16 sign:1 exp:7  fraction_1:7
+ *     (exponent bias 128)
+ *
+ * D   fraction_2:16 sign:1 exp:7  fraction_1:7
+ *     fraction_4:16               fraction_3:16
+ *     (exponent bias 128)
+ *
+ * G   fraction_2:16 sign:1 exp:11 fraction_1:7
+ *     fraction_4:16               fraction_3:16
+ *     (exponent bias 1024)
+ *
+ * H   fraction_1:16 sign:1 exp:15
+ *     fraction_3:16               fraction_2:16
+ *     fraction_5:16               fraction_4:16
+ *     fraction_7:16               fraction_6:16
+ *     (exponent bias 16384)
+ *
+ * The formats T and X are available on the Alpha (and IA64?)
+ * and are equivalent with the IEEE 754 64 and 128 bit formats.
+ */
 
 #ifdef DOUBLE_IS_VAX_FLOAT
 #  define DOUBLE_VAX_ENDIAN
