@@ -64,6 +64,13 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 C<${^ENCODING}> has been removed
+
+Consequently, the L<encoding> pragma's default mode is no longer supported.
+If you still need to write your source code in encodings other than UTF-8,
+use a source filter such as L<Filter::Encoding> on CPAN or L<encoding>'s
+C<Filter> option.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -154,6 +161,20 @@ L<Module::CoreList> has been upgraded from version 5.20160620 to 5.20160720.
 
 L<XSLoader> has been upgraded from version 0.21 to 0.22, fixing a security
 hole in which binary files could be loaded from a path outside of @INC.
+
+=item *
+
+L<encoding> has been upgraded from version 2.17 to 2.17_01.
+
+This module's default mode is no longer supported as of Perl v5.25.3.  It
+now dies when imported, unless the C<Filter> option is being used.
+
+=item *
+
+L<encoding::warnings> has been upgraded from version 0.12 to 0.13.
+
+This module is no longer supported as of Perl v5.25.3.  It emits a
+warning to that effect and then does nothing.
 
 =back
 
