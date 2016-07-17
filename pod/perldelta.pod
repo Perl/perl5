@@ -392,6 +392,12 @@ Vivifying a subroutine stub in a deleted stash (e.g., C<delete
 $My::{"Foo::"}; \&My::Foo::foo>) no longer crashes.  It had begun crashing
 in v5.18. [perl #128532]
 
+=item *
+
+Some obscure cases of subroutines and file handles being freed at the same
+time could result in crashes, but have been fixed.  The crash was
+introduced in v5.22. [perl #128597]
+
 =back
 
 =head1 Known Problems
