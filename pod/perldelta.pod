@@ -34,8 +34,8 @@ switch.
 
 =head1 Incompatible Changes
 
-There are no changes intentionally incompatible with 5.22.2.  If any exist,
-they are bugs, and we request that you submit a report.  See
+There are no changes intentionally incompatible with Perl 5.22.2.  If any
+exist, they are bugs, and we request that you submit a report.  See
 L</Reporting Bugs> below.
 
 =head1 Modules and Pragmata
@@ -88,14 +88,37 @@ B<-Di> switch is working correctly.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.22.3 represents approximately 3 months of development since Perl 5.22.2
+and contains approximately 2,000 lines of changes across 46 files from 14
+authors.
 
-  perl Porting/acknowledgements.pl v5.22.2..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 650 lines of changes to 12 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers.  The following people are known to have contributed
+the improvements that became Perl 5.22.3:
+
+Abigail, Alex Vandiver, Aristotle Pagaltzis, Craig A. Berry, Father
+Chrysostomos, James E Keenan, Karen Etheridge, Karl Williamson, Matthew
+Horsfall, Niko Tyni, Ricardo Signes, Sawyer X, Steve Hay, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history.  In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core.  We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
 If you find what you think is a bug, you might check the articles recently
-posted to the comp.lang.perl.misc newsgroup and the perl bug database at
+posted to the comp.lang.perl.misc newsgroup and the Perl bug database at
 https://rt.perl.org/ .  There may also be information at http://www.perl.org/ ,
 the Perl Home Page.
 
