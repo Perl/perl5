@@ -8641,7 +8641,6 @@ Perl__new_invlist_C_array(pTHX_ const UV* const list)
 
     return invlist;
 }
-#endif /* ifndef PERL_IN_XSUB_RE */
 
 STATIC void
 S_invlist_extend(pTHX_ SV* const invlist, const UV new_max)
@@ -8742,8 +8741,6 @@ S__append_range_to_invlist(pTHX_ SV* const invlist,
 	invlist_set_len(invlist, len - 1, offset);
     }
 }
-
-#ifndef PERL_IN_XSUB_RE
 
 SSize_t
 Perl__invlist_search(SV* const invlist, const UV cp)
