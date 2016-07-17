@@ -371,7 +371,7 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+An assertion failure with C<%: = 0> has been fixed. [perl #128238]
 
 =back
 
