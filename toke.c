@@ -5075,8 +5075,6 @@ Perl_yylex(pTHX)
 		d = instr(s,"perl -");
 		if (!d) {
 		    d = instr(s,"perl");
-                    if (d && d[4] == '6')
-                        d = NULL;
 #if defined(DOSISH)
 		    /* avoid getting into infinite loops when shebang
 		     * line contains "Perl" rather than "perl" */
