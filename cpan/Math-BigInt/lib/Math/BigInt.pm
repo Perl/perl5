@@ -20,7 +20,7 @@ use warnings;
 
 use Carp ();
 
-our $VERSION = '1.999724';
+our $VERSION = '1.999726';
 $VERSION = eval $VERSION;
 
 our @ISA = qw(Exporter);
@@ -870,8 +870,8 @@ sub bzero {
     # create/assign '+0'
 
     if (@_ == 0) {
-        Carp::carp("Using bzero() as a function is deprecated;",
-                   " use bzero() as a method instead");
+        #Carp::carp("Using bzero() as a function is deprecated;",
+        #           " use bzero() as a method instead");
         unshift @_, __PACKAGE__;
     }
 
@@ -907,8 +907,8 @@ sub bone {
     # Create or assign '+1' (or -1 if given sign '-').
 
     if (@_ == 0 || (defined($_[0]) && ($_[0] eq '+' || $_[0] eq '-'))) {
-        Carp::carp("Using bone() as a function is deprecated;",
-                   " use bone() as a method instead");
+        #Carp::carp("Using bone() as a function is deprecated;",
+        #           " use bone() as a method instead");
         unshift @_, __PACKAGE__;
     }
 
@@ -949,8 +949,8 @@ sub binf {
     if (@_ == 0 || (defined($_[0]) && !ref($_[0]) &&
                     $_[0] =~ /^\s*[+-](inf(inity)?)?\s*$/))
     {
-        Carp::carp("Using binf() as a function is deprecated;",
-                   " use binf() as a method instead");
+        #Carp::carp("Using binf() as a function is deprecated;",
+        #           " use binf() as a method instead");
         unshift @_, __PACKAGE__;
     }
 
@@ -983,8 +983,8 @@ sub bnan {
     # create/assign a 'NaN'
 
     if (@_ == 0) {
-        Carp::carp("Using bnan() as a function is deprecated;",
-                   " use bnan() as a method instead");
+        #Carp::carp("Using bnan() as a function is deprecated;",
+        #           " use bnan() as a method instead");
         unshift @_, __PACKAGE__;
     }
 
@@ -1075,6 +1075,11 @@ sub is_one {
     $CALC->_is_one($x->{value});
 }
 
+sub is_finite {
+    my $x = shift;
+    return $x->{sign} eq '+' || $x->{sign} eq '-';
+}
+
 sub is_inf {
     # return true if arg (BINT or num_str) is +-inf
     my ($class, $x, $sign) = ref($_[0]) ? (undef, @_) : objectify(1, @_);
@@ -1144,12 +1149,9 @@ sub bcmp {
     # (BINT or num_str, BINT or num_str) return cond_code
 
     # set up parameters
-    my ($class, $x, $y) = (ref($_[0]), @_);
-
-    # objectify is costly, so avoid it
-    if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1]))) {
-        ($class, $x, $y) = objectify(2, @_);
-    }
+    my ($class, $x, $y) = ref($_[0]) && ref($_[0]) eq ref($_[1])
+                        ? (ref($_[0]), @_)
+                        : objectify(2, @_);
 
     return $upgrade->bcmp($x, $y) if defined $upgrade &&
       ((!$x->isa($class)) || (!$y->isa($class)));
@@ -1187,11 +1189,9 @@ sub bacmp {
     # (BINT, BINT) return cond_code
 
     # set up parameters
-    my ($class, $x, $y) = (ref($_[0]), @_);
-    # objectify is costly, so avoid it
-    if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1]))) {
-        ($class, $x, $y) = objectify(2, @_);
-    }
+    my ($class, $x, $y) = ref($_[0]) && ref($_[0]) eq ref($_[1])
+                        ? (ref($_[0]), @_)
+                        : objectify(2, @_);
 
     return $upgrade->bacmp($x, $y) if defined $upgrade &&
       ((!$x->isa($class)) || (!$y->isa($class)));
@@ -2443,9 +2443,7 @@ sub bnok {
 
     # k > n or k < 0 => 0
     my $cmp = $x->bacmp($y);
-    return $x->bzero() if $cmp < 0 || $y->{sign} =~ /^-/;
-    # k == n => 1
-    return $x->bone(@r) if $cmp == 0;
+    return $x->bzero() if $cmp < 0 || substr($y->{sign}, 0, 1) eq "-";
 
     if ($CALC->can('_nok')) {
         $x->{value} = $CALC->_nok($x->{value}, $y->{value});
@@ -2454,24 +2452,49 @@ sub bnok {
         # ( - ) = --------- =  --------------- = --------- = 5 * - * -
         # ( 3 )   (7-3)! 3!    1*2*3*4 * 1*2*3   1 * 2 * 3       2   3
 
-        if (!$y->is_zero()) {
-            my $z = $x - $y;
-            $z->binc();
-            my $r = $z->copy();
-            $z->binc();
-            my $d = $class->new(2);
-            while ($z->bacmp($x) <= 0) {        # f <= x ?
-                $r->bmul($z);
-                $r->bdiv($d);
-                $z->binc();
-                $d->binc();
+        my $n = $x -> {value};
+        my $k = $y -> {value};
+
+        # If k > n/2, or, equivalently, 2*k > n, compute nok(n, k) as
+        # nok(n, n-k) to minimize the number if iterations in the loop.
+
+        {
+            my $twok = $CALC->_mul($CALC->_two(), $CALC->_copy($k));
+            if ($CALC->_acmp($twok, $n) > 0) {
+                $k = $CALC->_sub($CALC->_copy($n), $k);
             }
-            $x->{value} = $r->{value};
-            $x->{sign} = '+';
-        } else {
-            $x->bone();
         }
+
+        if ($CALC->_is_zero($k)) {
+            $n = $CALC->_one();
+        } else {
+
+            # Make a copy of the original n, since we'll be modifying n
+            # in-place.
+
+            my $n_orig = $CALC->_copy($n);
+
+            $CALC->_sub($n, $k);
+            $CALC->_inc($n);
+
+            my $f = $CALC->_copy($n);
+            $CALC->_inc($f);
+
+            my $d = $CALC->_two();
+
+            # while f <= n (the original n, that is) ...
+
+            while ($CALC->_acmp($f, $n_orig) <= 0) {
+                $CALC->_mul($n, $f);
+                $CALC->_div($n, $d);
+                $CALC->_inc($f);
+                $CALC->_inc($d);
+            }
+        }
+
+        $x -> {value} = $n;
     }
+
     $x->round(@r);
 }
 
@@ -4603,6 +4626,13 @@ Returns true if the invocand is zero and false otherwise.
     $x->is_one("-");            # true if $x is -1
 
 Returns true if the invocand is one and false otherwise.
+
+=item is_finite()
+
+    $x->is_finite();    # true if $x is not +inf, -inf or NaN
+
+Returns true if the invocand is a finite number, i.e., it is neither +inf,
+-inf, nor NaN.
 
 =item is_inf( [ SIGN ] )
 

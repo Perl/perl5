@@ -19,7 +19,7 @@ use warnings;
 use Carp ();
 use Math::BigInt ();
 
-our $VERSION = '1.999724';
+our $VERSION = '1.999726';
 $VERSION = eval $VERSION;
 
 require Exporter;
@@ -272,8 +272,6 @@ sub DESTROY {
 }
 
 sub AUTOLOAD {
-    # make fxxx and bxxx both work by selectively mapping fxxx() to MBF::bxxx()
-    # or falling back to MBI::bxxx()
     my $name = $AUTOLOAD;
 
     $name =~ s/(.*):://;        # split package
@@ -767,8 +765,8 @@ sub bzero {
     # create/assign '+0'
 
     if (@_ == 0) {
-        Carp::carp("Using bone() as a function is deprecated;",
-                   " use bone() as a method instead");
+        #Carp::carp("Using bone() as a function is deprecated;",
+        #           " use bone() as a method instead");
         unshift @_, __PACKAGE__;
     }
 
@@ -806,8 +804,8 @@ sub bone {
     # Create or assign '+1' (or -1 if given sign '-').
 
     if (@_ == 0 || (defined($_[0]) && ($_[0] eq '+' || $_[0] eq '-'))) {
-        Carp::carp("Using bone() as a function is deprecated;",
-                   " use bone() as a method instead");
+        #Carp::carp("Using bone() as a function is deprecated;",
+        #           " use bone() as a method instead");
         unshift @_, __PACKAGE__;
     }
 
@@ -850,8 +848,8 @@ sub binf {
     if (@_ == 0 || (defined($_[0]) && !ref($_[0]) &&
                     $_[0] =~ /^\s*[+-](inf(inity)?)?\s*$/))
     {
-        Carp::carp("Using binf() as a function is deprecated;",
-                   " use binf() as a method instead");
+        #Carp::carp("Using binf() as a function is deprecated;",
+        #           " use binf() as a method instead");
         unshift @_, __PACKAGE__;
     }
 
@@ -886,8 +884,8 @@ sub bnan {
     # create/assign a 'NaN'
 
     if (@_ == 0) {
-        Carp::carp("Using bnan() as a function is deprecated;",
-                   " use bnan() as a method instead");
+        #Carp::carp("Using bnan() as a function is deprecated;",
+        #           " use bnan() as a method instead");
         unshift @_, __PACKAGE__;
     }
 
@@ -939,9 +937,7 @@ sub bpi {
     my $selfref = ref $self;
     my $class   = $selfref || $self;
 
-    my $accu;                      # accuracy (number of digits)
-    my $prec;                      # precision
-    my $rndm;                      # round mode
+    my @r;                      # rounding paramters
 
     # If bpi() is called as a function ...
     #
@@ -955,103 +951,107 @@ sub bpi {
           ||
         !defined($self))
     {
-        $accu = $self;
+        $r[0]  = $self;
         $class = __PACKAGE__;
-        $self = $class -> bzero();      # initialize
+        $self  = $class -> bzero(@r);       # initialize
     }
 
     # ... or if bpi() is called as a method ...
 
     else {
-        if ($selfref) {                 # bpi() called as instance method
+        @r = @_;
+        if ($selfref) {                     # bpi() called as instance method
             return $self if $self -> modify('bpi');
-        } else {                        # bpi() called as class method
-            $self = $class -> bzero();  # initialize
+        } else {                            # bpi() called as class method
+            $self = $class -> bzero(@r);    # initialize
         }
-        $accu = shift;
-        $prec = shift;
-        $rndm = shift;
     }
 
-    my @r = ($accu, $prec, $rndm);
-
-    # We need to limit the accuracy to protect against overflow.
-    my $fallback = 0;
-    my ($scale, @params);
-    ($self, @params) = $self -> _find_round_parameters(@r);
-
-    # Error in _find_round_parameters?
-    #
-    # We can't return here, because that will fail if $self was a NaN when
-    # bpi() was invoked, and we want to assign pi to $x. It is probably not a
-    # good idea that _find_round_parameters() signals invalid round parameters
-    # by silently returning a NaN. Fixme!
-    #return $self if $self && $self->is_nan();
-
-    # No rounding at all, so must use fallback.
-    if (scalar @params == 0) {
-        # Simulate old behaviour
-        $params[0] = $self -> div_scale();  # and round to it as accuracy
-        $params[1] = undef;                 # disable P
-        $params[2] = $r[2];                 # round mode by caller or undef
-        $fallback = 1;                      # to clear a/p afterwards
-    }
+    ($self, @r) = $self -> _find_round_parameters(@r);
 
     # The accuracy, i.e., the number of digits. Pi has one digit before the
     # dot, so a precision of 4 digits is equivalent to an accuracy of 5 digits.
 
-    my $n = $params[0] || 1 - $params[1];
+    my $n = defined $r[0] ? $r[0]
+          : defined $r[1] ? 1 - $r[1]
+          : $self -> div_scale();
 
-    if ($n < 1000) {
+    my $rmode = defined $r[2] ? $r[2] : $self -> round_mode();
 
-        # after 黃見利 (Hwang Chien-Lih) (1997)
-        # pi/4 = 183 * atan(1/239) + 32 * atan(1/1023) – 68 * atan(1/5832)
-        #        + 12 * atan(1/110443) - 12 * atan(1/4841182) - 100 * atan(1/6826318)
+    my $pi;
 
-        # Use a few more digits in the intermediate computations.
+    if ($n <= 1000) {
 
-        my $nextra = $n < 800 ? 4 : 5;
-        $n += $nextra;
+        # 75 x 14 = 1050 digits
 
-        my ($a, $b) = $class->_atan_inv($MBI->_new(239), $n);
-        my ($c, $d) = $class->_atan_inv($MBI->_new(1023), $n);
-        my ($e, $f) = $class->_atan_inv($MBI->_new(5832), $n);
-        my ($g, $h) = $class->_atan_inv($MBI->_new(110443), $n);
-        my ($i, $j) = $class->_atan_inv($MBI->_new(4841182), $n);
-        my ($k, $l) = $class->_atan_inv($MBI->_new(6826318), $n);
+        my $all_digits = <<EOF;
+314159265358979323846264338327950288419716939937510582097494459230781640628
+620899862803482534211706798214808651328230664709384460955058223172535940812
+848111745028410270193852110555964462294895493038196442881097566593344612847
+564823378678316527120190914564856692346034861045432664821339360726024914127
+372458700660631558817488152092096282925409171536436789259036001133053054882
+046652138414695194151160943305727036575959195309218611738193261179310511854
+807446237996274956735188575272489122793818301194912983367336244065664308602
+139494639522473719070217986094370277053921717629317675238467481846766940513
+200056812714526356082778577134275778960917363717872146844090122495343014654
+958537105079227968925892354201995611212902196086403441815981362977477130996
+051870721134999999837297804995105973173281609631859502445945534690830264252
+230825334468503526193118817101000313783875288658753320838142061717766914730
+359825349042875546873115956286388235378759375195778185778053217122680661300
+192787661119590921642019893809525720106548586327886593615338182796823030195
+EOF
 
-        $MBI->_mul($a, $MBI->_new(732));
-        $MBI->_mul($c, $MBI->_new(128));
-        $MBI->_mul($e, $MBI->_new(272));
-        $MBI->_mul($g, $MBI->_new(48));
-        $MBI->_mul($i, $MBI->_new(48));
-        $MBI->_mul($k, $MBI->_new(400));
+        # Should we round up?
 
-        my $x = $class->bone(); $x->{_m} = $a; my $x_d = $class->bone(); $x_d->{_m} = $b;
-        my $y = $class->bone(); $y->{_m} = $c; my $y_d = $class->bone(); $y_d->{_m} = $d;
-        my $z = $class->bone(); $z->{_m} = $e; my $z_d = $class->bone(); $z_d->{_m} = $f;
-        my $u = $class->bone(); $u->{_m} = $g; my $u_d = $class->bone(); $u_d->{_m} = $h;
-        my $v = $class->bone(); $v->{_m} = $i; my $v_d = $class->bone(); $v_d->{_m} = $j;
-        my $w = $class->bone(); $w->{_m} = $k; my $w_d = $class->bone(); $w_d->{_m} = $l;
-        $x->bdiv($x_d, $n);
-        $y->bdiv($y_d, $n);
-        $z->bdiv($z_d, $n);
-        $u->bdiv($u_d, $n);
-        $v->bdiv($v_d, $n);
-        $w->bdiv($w_d, $n);
+        my $round_up;
 
-        delete $x->{_a}; delete $y->{_a}; delete $z->{_a};
-        delete $u->{_a}; delete $v->{_a}; delete $w->{_a};
-        $x->badd($y)->bsub($z)->badd($u)->bsub($v)->bsub($w);
+        # From the string above, we need to extract the number of digits we
+        # want plus extra characters for the newlines.
 
-        for my $key (qw/ sign _m _es _e _a _p /) {
-            $self -> {$key} = $x -> {$key} if exists $x -> {$key};
+        my $nchrs = $n + int($n / 75);
+
+        # Extract the digits we want.
+
+        my $digits = substr($all_digits, 0, $nchrs);
+
+        # Find out whether we should round up or down. Since pi is a
+        # transcendental number, we only have to look at one digit after the
+        # last digit we want.
+
+        if ($rmode eq '+inf') {
+            $round_up = 1;
+        } elsif ($rmode eq 'trunc' || $rmode eq 'zero' || $rmode eq '-inf') {
+            $round_up = 0;
+        } else {
+            my $next_digit = substr($all_digits, $nchrs, 1);
+            $round_up = $next_digit lt '5' ? 0 : 1;
         }
+
+        # Remove the newlines.
+
+        $digits =~ tr/0-9//cd;
+
+        # Now do the rounding. We could easily make the regex substitution
+        # handle all cases, but we avoid using the regex engine when it is
+        # simple to avoid it.
+
+        if ($round_up) {
+            my $last_digit = substr($digits, -1, 1);
+            if ($last_digit lt '9') {
+                substr($digits, -1, 1) = ++$last_digit;
+            } else {
+                $digits =~ s/([0-8])(9+)$/ ($1 + 1) . ("0" x CORE::length($2)) /e;
+            }
+        }
+
+        # Append the exponent and convert to an object.
+
+        $pi = Math::BigFloat -> new($digits . 'e-' . ($n - 1));
 
     } else {
 
         # For large accuracy, the arctan formulas become very inefficient with
-        # Math::BigFloat. Switch to Brent-Salamin (aka AGM or Gauss-Legendre).
+        # Math::BigFloat, so use Brent-Salamin (aka AGM or Gauss-Legendre).
 
         # Use a few more digits in the intermediate computations.
         my $nextra = 8;
@@ -1070,16 +1070,18 @@ sub bpi {
         $an -> badd($bn);
         $an -> bmul($an, $n) -> bdiv(4 * $tn, $n);
 
-        for my $key (qw/ sign _m _es _e _a _p /) {
-            $self -> {$key} = $an -> {$key} if exists $an -> {$key};;
-        }
+        $an -> round(@r);
+        $pi = $an;
     }
 
-    $self -> round(@params);
+    if (defined $r[0]) {
+        $pi -> accuracy($r[0]);
+    } elsif (defined $r[1]) {
+        $pi -> precision($r[1]);
+    }
 
-    if ($fallback) {
-        delete $self->{_a};
-        delete $self->{_p};
+    for my $key (qw/ sign _m _es _e _a _p /) {
+        $self -> {$key} = $pi -> {$key};
     }
 
     return $self;
@@ -2892,14 +2894,14 @@ sub batan2 {
         } else {                                     #   -inf < y < inf
             $y -> bdiv($x, $scale) -> batan($scale); #       atan(y/x)
         }
-    } elsif ($x < 0) {          # -inf < x < 0
+    } elsif ($x < 0) {                        # -inf < x < 0
         my $pi = $class -> bpi($scale);
         if ($y >= 0) {                        #    y >= 0
             $y -> bdiv($x, $scale) -> batan() #       atan(y/x) + pi
-              -> badd($pi);
+               -> badd($pi);
         } else {                              #    y < 0
             $y -> bdiv($x, $scale) -> batan() #       atan(y/x) - pi
-              -> bsub($pi);
+               -> bsub($pi);
         }
     } else {                                   # x = 0
         if ($y > 0) {                          #    y > 0
@@ -4505,7 +4507,7 @@ sub _pow {
     # we also need to disable any set A or P on $x (_find_round_parameters took
     # them already into account), since these would interfere, too
     delete $x->{_a};
-delete $x->{_p};
+    delete $x->{_p};
     # need to disable $upgrade in BigInt, to avoid deep recursion
     local $Math::BigInt::upgrade = undef;
 
@@ -4560,135 +4562,6 @@ delete $x->{_p};
     $$abr = $ab;
     $$pbr = $pb;
     $x;
-}
-
-# helper function for bpi() and batan2(), calculates arcus tanges (1/x)
-
-sub _atan_inv {
-    # return a/b so that a/b approximates atan(1/x) to at least limit digits
-    my ($class, $x, $limit) = @_;
-
-    # Taylor:       x^3   x^5   x^7   x^9
-    #    atan = x - --- + --- - --- + --- - ...
-    #                3     5     7     9
-
-    #               1      1         1        1
-    #    atan 1/x = - - ------- + ------- - ------- + ...
-    #               x   x^3 * 3   x^5 * 5   x^7 * 7
-
-    #               1      1         1            1
-    #    atan 1/x = - - --------- + ---------- - ----------- + ...
-    #               5    3 * 125     5 * 3125     7 * 78125
-
-    # Subtraction/addition of a rational:
-
-    #  5    7    5*3 +- 7*4
-    #  - +- -  = ----------
-    #  4    3       4*3
-
-    # Term:  N        N+1
-    #
-    #        a             1                  a * d * c +- b
-    #        ----- +- ------------------  =  ----------------
-    #        b           d * c                b * d * c
-
-    #  since b1 = b0 * (d-2) * c
-
-    #        a             1                  a * d +- b / c
-    #        ----- +- ------------------  =  ----------------
-    #        b           d * c                b * d
-
-    # and  d = d + 2
-    # and  c = c * x * x
-
-    #        u = d * c
-    #        stop if length($u) > limit
-    #        a = a * u +- b
-    #        b = b * u
-    #        d = d + 2
-    #        c = c * x * x
-    #        sign = 1 - sign
-
-    my $a = $MBI->_one();
-    my $b = $MBI->_copy($x);
-
-    my $x2  = $MBI->_mul($MBI->_copy($x), $b); # x2 = x * x
-    my $d   = $MBI->_new(3);                   # d = 3
-    my $c   = $MBI->_mul($MBI->_copy($x), $x2); # c = x ^ 3
-    my $two = $MBI->_new(2);
-
-    # run the first step unconditionally
-    my $u = $MBI->_mul($MBI->_copy($d), $c);
-    $a = $MBI->_mul($a, $u);
-    $a = $MBI->_sub($a, $b);
-    $b = $MBI->_mul($b, $u);
-    $d = $MBI->_add($d, $two);
-    $c = $MBI->_mul($c, $x2);
-
-    # a is now a * (d-3) * c
-    # b is now b * (d-2) * c
-
-    # run the second step unconditionally
-    $u = $MBI->_mul($MBI->_copy($d), $c);
-    $a = $MBI->_mul($a, $u);
-    $a = $MBI->_add($a, $b);
-    $b = $MBI->_mul($b, $u);
-    $d = $MBI->_add($d, $two);
-    $c = $MBI->_mul($c, $x2);
-
-    # a is now a * (d-3) * (d-5) * c * c
-    # b is now b * (d-2) * (d-4) * c * c
-
-    # so we can remove c * c from both a and b to shorten the numbers involved:
-    $a = $MBI->_div($a, $x2);
-    $b = $MBI->_div($b, $x2);
-    $a = $MBI->_div($a, $x2);
-    $b = $MBI->_div($b, $x2);
-
-    #  my $step = 0;
-    my $sign = 0;               # 0 => -, 1 => +
-    while (3 < 5) {
-        #    $step++;
-        #    if (($i++ % 100) == 0)
-        #      {
-        #    print "a=", $MBI->_str($a), "\n";
-        #    print "b=", $MBI->_str($b), "\n";
-        #      }
-        #    print "d=", $MBI->_str($d), "\n";
-        #    print "x2=", $MBI->_str($x2), "\n";
-        #    print "c=", $MBI->_str($c), "\n";
-
-        my $u = $MBI->_mul($MBI->_copy($d), $c);
-        # use _alen() for libs like GMP where _len() would be O(N^2)
-        last if $MBI->_alen($u) > $limit;
-        my ($bc, $r) = $MBI->_div($MBI->_copy($b), $c);
-        if ($MBI->_is_zero($r)) {
-            # b / c is an integer, so we can remove c from all terms
-            # this happens almost every time:
-            $a = $MBI->_mul($a, $d);
-            $a = $MBI->_sub($a, $bc) if $sign == 0;
-            $a = $MBI->_add($a, $bc) if $sign == 1;
-            $b = $MBI->_mul($b, $d);
-        } else {
-            # b / c is not an integer, so we keep c in the terms
-            # this happens very rarely, for instance for x = 5, this happens only
-            # at the following steps:
-            # 1, 5, 14, 32, 72, 157, 340, ...
-            $a = $MBI->_mul($a, $u);
-            $a = $MBI->_sub($a, $b) if $sign == 0;
-            $a = $MBI->_add($a, $b) if $sign == 1;
-            $b = $MBI->_mul($b, $u);
-        }
-        $d = $MBI->_add($d, $two);
-        $c = $MBI->_mul($c, $x2);
-        $sign = 1 - $sign;
-
-    }
-
-    #  print "Took $step steps for ", $MBI->_str($x), "\n";
-    #  print "a=", $MBI->_str($a), "\n"; print "b=", $MBI->_str($b), "\n";
-    # return a/b so that a/b approximates atan(1/x)
-    ($a, $b);
 }
 
 1;

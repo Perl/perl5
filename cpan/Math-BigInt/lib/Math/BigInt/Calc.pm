@@ -4,7 +4,7 @@ use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '1.999724';
+our $VERSION = '1.999726';
 $VERSION = eval $VERSION;
 
 # Package to store unsigned big integers in decimal and do math with them
@@ -97,18 +97,22 @@ sub _base_len {
 sub _new {
     # Given a string representing an integer, returns a reference to an array
     # of integers, where each integer represents a chunk of the original input
-    # integer. Assumes normalized value as input.
+    # integer.
 
     my ($proto, $str) = @_;
+    #unless ($str =~ /^([1-9]\d*|0)\z/) {
+    #    require Carp;
+    #    Carp::croak("Invalid input string '$str'");
+    #}
 
     my $input_len = length($str) - 1;
 
     # Shortcut for small numbers.
-    return [ int($str) ] if $input_len < $BASE_LEN;
+    return [ $str ] if $input_len < $BASE_LEN;
 
     my $format = "a" . (($input_len % $BASE_LEN) + 1);
     $format .= $] < 5.008 ? "a$BASE_LEN" x int($input_len / $BASE_LEN)
-      : "(a$BASE_LEN)*";
+                          : "(a$BASE_LEN)*";
 
     [ reverse(map { 0 + $_ } unpack($format, $str)) ];
 }
@@ -134,8 +138,7 @@ BEGIN {
         use integer;
         my $e1 = 7;
         $num = 7;
-        do
-        {
+        do {
             $num = ('9' x ++$e1) + 0;
             $num *= $num + 1;
         } while ("$num" =~ /9{$e1}0{$e1}/); # must be a certain pattern
@@ -154,7 +157,7 @@ BEGIN {
     local $^W = 0;              # don't warn about 'nonportable number'
     $AND_BITS = 15;
     $XOR_BITS = 15;
-    $OR_BITS = 15;
+    $OR_BITS  = 15;
 
     # find max bits, we will not go higher than numberofbits that fit into $BASE
     # to make _and etc simpler (and faster for smaller, slower for large numbers)
@@ -167,6 +170,7 @@ BEGIN {
         $max = 16 if $] < 5.006; # older Perls might not take >16 too well
     }
     my ($x, $y, $z);
+
     do {
         $AND_BITS++;
         $x = CORE::oct('0b' . '1' x $AND_BITS);
@@ -174,6 +178,7 @@ BEGIN {
         $z = (2 ** $AND_BITS) - 1;
     } while ($AND_BITS < $max && $x == $z && $y == $x);
     $AND_BITS --;               # retreat one step
+
     do {
         $XOR_BITS++;
         $x = CORE::oct('0b' . '1' x $XOR_BITS);
@@ -181,6 +186,7 @@ BEGIN {
         $z = (2 ** $XOR_BITS) - 1;
     } while ($XOR_BITS < $max && $x == $z && $y == $x);
     $XOR_BITS --;               # retreat one step
+
     do {
         $OR_BITS++;
         $x = CORE::oct('0b' . '1' x $OR_BITS);
@@ -189,9 +195,9 @@ BEGIN {
     } while ($OR_BITS < $max && $x == $z && $y == $x);
     $OR_BITS--;                # retreat one step
 
-    $AND_MASK = __PACKAGE__->_new( ( 2 ** $AND_BITS ));
-    $XOR_MASK = __PACKAGE__->_new( ( 2 ** $XOR_BITS ));
-    $OR_MASK = __PACKAGE__->_new( ( 2 ** $OR_BITS ));
+    $AND_MASK = __PACKAGE__->_new(( 2 ** $AND_BITS ));
+    $XOR_MASK = __PACKAGE__->_new(( 2 ** $XOR_BITS ));
+    $OR_MASK  = __PACKAGE__->_new(( 2 ** $OR_BITS  ));
 
     # We can compute the approximate length no faster than the real length:
     *_alen = \&_len;
@@ -221,8 +227,8 @@ sub _ten {
 
 sub _1ex {
     # create a 1Ex
-    my $rem = $_[1] % $BASE_LEN;   # remainder
-    my $parts = $_[1] / $BASE_LEN; # parts
+    my $rem   = $_[1] % $BASE_LEN;      # remainder
+    my $parts = $_[1] / $BASE_LEN;      # parts
 
     # 000000, 000000, 100
     [ (0) x $parts, '1' . ('0' x $rem) ];
@@ -270,7 +276,7 @@ sub _num {
     # Make a Perl scalar number (int/float) from a BigInt object.
     my $x = $_[1];
 
-    return 0 + $x->[0] if @$x == 1; # below $BASE
+    return $x->[0] if @$x == 1;         # below $BASE
 
     # Start with the most significant element and work towards the least
     # significant element. Avoid multiplying "inf" (which happens if the number
@@ -297,9 +303,13 @@ sub _add {
 
     my ($c, $x, $y) = @_;
 
-    return $x if @$y == 1 && $y->[0] == 0; # $x + 0 => $x
-    if (@$x == 1 && $x->[0] == 0) {        # 0 + $y => $y->copy
-        # Twice as slow as $x = [ @$y ], but necessary to modify $x in-place.
+    # $x + 0 => $x
+
+    return $x if @$y == 1 && $y->[0] == 0;
+
+    # 0 + $y => $y->copy
+
+    if (@$x == 1 && $x->[0] == 0) {
         @$x = @$y;
         return $x;
     }
@@ -626,9 +636,8 @@ sub _div_use_mul {
     # check whether y has more elements than x, if yet, the result will be 0
     if (@$yorg > @$x) {
         my $rem;
-        $rem = [ @$x ] if wantarray;      # make copy
-        splice(@$x, 1);                # keep ref to original array
-        $x->[0] = 0;                    # set to 0
+        $rem = [ @$x ] if wantarray;    # make copy
+        @$x = 0;                        # set to 0
         return ($x, $rem) if wantarray; # including remainder?
         return $x;                      # only x, which is [0] now
     }
@@ -639,10 +648,9 @@ sub _div_use_mul {
         # if $yorg has more digits than $x (it's leading element is longer than
         # the one from $x), the result will also be 0:
         if (length(int($yorg->[-1])) > length(int($x->[-1]))) {
-            $rem = [ @$x ] if wantarray;      # make copy
-            splice(@$x, 1);                # keep ref to org array
-            $x->[0] = 0;                    # set to 0
-            return ($x, $rem) if wantarray; # including remainder?
+            $rem = [ @$x ] if wantarray;        # make copy
+            @$x = 0;                            # set to 0
+            return ($x, $rem) if wantarray;     # including remainder?
             return $x;
         }
         # now calculate $x / $yorg
@@ -659,10 +667,9 @@ sub _div_use_mul {
             # $a contains the result of the compare between X and Y
             # a < 0: x < y, a == 0: x == y, a > 0: x > y
             if ($a <= 0) {
-                $rem = [ 0 ];            # a = 0 => x == y => rem 0
+                $rem = [ 0 ];              # a = 0 => x == y => rem 0
                 $rem = [ @$x ] if $a != 0; # a < 0 => x < y => rem = x
-                splice(@$x, 1);           # keep single element
-                $x->[0] = 0;             # if $a < 0
+                @$x = 0;             # if $a < 0
                 $x->[0] = 1 if $a == 0;  # $x == $y
                 return ($x, $rem) if wantarray;
                 return $x;
@@ -793,9 +800,8 @@ sub _div_use_div_64 {
     # check whether y has more elements than x, if yet, the result will be 0
     if (@$yorg > @$x) {
         my $rem;
-        $rem = [ @$x ] if wantarray;      # make copy
-        splice(@$x, 1);                # keep ref to original array
-        $x->[0] = 0;                    # set to 0
+        $rem = [ @$x ] if wantarray;    # make copy
+        @$x = 0;                        # set to 0
         return ($x, $rem) if wantarray; # including remainder?
         return $x;                      # only x, which is [0] now
     }
@@ -807,8 +813,7 @@ sub _div_use_div_64 {
         # the one from $x), the result will also be 0:
         if (length(int($yorg->[-1])) > length(int($x->[-1]))) {
             $rem = [ @$x ] if wantarray;     # make copy
-            splice(@$x, 1);                # keep ref to org array
-            $x->[0] = 0;                   # set to 0
+            @$x = 0;                          # set to 0
             return ($x, $rem) if wantarray; # including remainder?
             return $x;
         }
@@ -829,8 +834,7 @@ sub _div_use_div_64 {
             if ($a <= 0) {
                 $rem = [ 0 ];                  # a = 0 => x == y => rem 0
                 $rem = [ @$x ] if $a != 0;       # a < 0 => x < y => rem = x
-                splice(@$x, 1);                 # keep single element
-                $x->[0] = 0;                   # if $a < 0
+                @$x = 0;                       # if $a < 0
                 $x->[0] = 1 if $a == 0;        # $x == $y
                 return ($x, $rem) if wantarray; # including remainder?
                 return $x;
@@ -964,11 +968,10 @@ sub _div_use_div {
     # check whether y has more elements than x, if yet, the result will be 0
     if (@$yorg > @$x) {
         my $rem;
-        $rem = [ @$x ] if wantarray;     # make copy
-        splice(@$x, 1);                # keep ref to original array
-        $x->[0] = 0;                   # set to 0
+        $rem = [ @$x ] if wantarray;    # make copy
+        @$x = 0;                        # set to 0
         return ($x, $rem) if wantarray; # including remainder?
-        return $x;                     # only x, which is [0] now
+        return $x;                      # only x, which is [0] now
     }
     # check whether the numbers have the same number of elements, in that case
     # the result will fit into one element and can be computed efficiently
@@ -977,10 +980,9 @@ sub _div_use_div {
         # if $yorg has more digits than $x (it's leading element is longer than
         # the one from $x), the result will also be 0:
         if (length(int($yorg->[-1])) > length(int($x->[-1]))) {
-            $rem = [ @$x ] if wantarray;     # make copy
-            splice(@$x, 1);                # keep ref to org array
-            $x->[0] = 0;                   # set to 0
-            return ($x, $rem) if wantarray; # including remainder?
+            $rem = [ @$x ] if wantarray;        # make copy
+            @$x = 0;                            # set to 0
+            return ($x, $rem) if wantarray;     # including remainder?
             return $x;
         }
         # now calculate $x / $yorg
@@ -998,11 +1000,11 @@ sub _div_use_div {
             # $a contains the result of the compare between X and Y
             # a < 0: x < y, a == 0: x == y, a > 0: x > y
             if ($a <= 0) {
-                $rem = [ 0 ];                  # a = 0 => x == y => rem 0
-                $rem = [ @$x ] if $a != 0;       # a < 0 => x < y => rem = x
-                splice(@$x, 1);                 # keep single element
-                $x->[0] = 0;                   # if $a < 0
-                $x->[0] = 1 if $a == 0;        # $x == $y
+                $rem = [ 0 ];                   # a = 0 => x == y => rem 0
+                $rem = [ @$x ] if $a != 0;      # a < 0 => x < y => rem = x
+                @$x = 0;
+                $x->[0] = 0;                    # if $a < 0
+                $x->[0] = 1 if $a == 0;         # $x == $y
                 return ($x, $rem) if wantarray; # including remainder?
                 return $x;
             }
@@ -1099,7 +1101,7 @@ sub _acmp {
 
     # shortcut for short numbers
     return (($cx->[0] <=> $cy->[0]) <=> 0)
-      if @$cx == @$cy && @$cx == 1;
+      if @$cx == 1 && @$cy == 1;
 
     # fast comp based on number of array elements (aka pseudo-length)
     my $lxy = (@$cx - @$cy)
@@ -1138,11 +1140,15 @@ sub _digit {
     my $len = _len('', $x);
 
     $n += $len if $n < 0;               # -1 last, -2 second-to-last
+
+    # Math::BigInt::Calc returns 0 if N is out of range, but this is not done
+    # by the other backend libraries.
+
     return "0" if $n < 0 || $n >= $len; # return 0 for digits out of range
 
-    my $elem = int($n / $BASE_LEN); # which array element
-    my $digit = $n % $BASE_LEN;     # which digit in this element
-    substr("$x->[$elem]", -$digit - 1, 1);
+    my $elem = int($n / $BASE_LEN);     # index of array element
+    my $digit = $n % $BASE_LEN;         # index of digit within the element
+    substr("0" x $BASE_LEN . "$x->[$elem]", -1 - $digit, 1);
 }
 
 sub _zeros {
@@ -1155,16 +1161,13 @@ sub _zeros {
     return 0 if @$x == 1 && $x->[0] == 0;
 
     my $zeros = 0;
-    my $elem;
-    foreach my $e (@$x) {
-        if ($e != 0) {
-            $elem = "$e";            # preserve x
-            $elem =~ s/.*?(0*$)/$1/; # strip anything not zero
-            $zeros *= $BASE_LEN;     # elems * 5
-            $zeros += length($elem); # count trailing zeros
-            last;                    # early out
+    foreach my $elem (@$x) {
+        if ($elem != 0) {
+            $elem =~ /[^0](0*)\z/;
+            $zeros += length($1);       # count trailing zeros
+            last;                       # early out
         }
-        $zeros ++;              # real else branch: 50% slower!
+        $zeros += $BASE_LEN;
     }
     $zeros;
 }
@@ -1205,13 +1208,10 @@ sub _is_ten {
 sub __strip_zeros {
     # Internal normalization function that strips leading zeros from the array.
     # Args: ref to array
-    my $s = shift;
+    my $x = shift;
 
-    my $cnt = @$s;              # get count of parts
-    my $i = $cnt - 1;
-    push @$s, 0 if $i < 0;      # div might return empty results, so fix it
-
-    return $s if @$s == 1;      # early out
+    push @$x, 0 if @$x == 0;    # div might return empty results, so fix it
+    return $x if @$x == 1;      # early out
 
     #print "strip: cnt $cnt i $i\n";
     # '0', '3', '4', '0', '0',
@@ -1221,13 +1221,15 @@ sub __strip_zeros {
     # i = 3
     # => fcnt = cnt - i (5-2 => 3, cnt => 5-1 = 4, throw away from 4th pos)
     # >= 1: skip first part (this can be zero)
+
+    my $i = $#$x;
     while ($i > 0) {
-        last if $s->[$i] != 0;
+        last if $x->[$i] != 0;
         $i--;
     }
     $i++;
-    splice(@$s, $i) if $i < $cnt; # $i cant be 0
-    $s;
+    splice(@$x, $i) if $i < @$x;
+    $x;
 }
 
 ###############################################################################
@@ -1237,31 +1239,37 @@ sub _check {
     # used by the test suite
     my $x = $_[1];
 
-    return "$x is not a reference" if !ref($x);
+    return "Undefined" unless defined $x;
+    return "$x is not a reference" unless ref($x);
+    return "Not an ARRAY reference" unless ref($x) eq 'ARRAY';
 
-    # are all parts are valid?
-    my $i = 0;
-    my $j = @$x;
-    my ($e, $try);
-    while ($i < $j) {
-        $e = $x->[$i];
-        $e = 'undef' unless defined $e;
-        $try = '=~ /^[\+]?[0-9]+\$/; '."($x, $e)";
-        last if $e !~ /^[+]?[0-9]+$/;
-        $try = '=~ /^[\+]?[0-9]+\$/; '."($x, $e) (stringify)";
-        last if "$e" !~ /^[+]?[0-9]+$/;
-        $try = '=~ /^[\+]?[0-9]+\$/; '."($x, $e) (cat-stringify)";
-        last if '' . "$e" !~ /^[+]?[0-9]+$/;
-        $try = ' < 0 || >= $BASE; '."($x, $e)";
-        last if $e <0 || $e >= $BASE;
-        # This test is disabled, since new/bnorm and certain ops (like early out
-        # in add/sub) are allowed/expected to leave '00000' in some elements.
-        #$try = '=~ /^00+/; '."($x, $e)";
-        #last if $e =~ /^00+/;
-        $i++;
+    for (my $i = 0 ; $i <= $#$x ; ++ $i) {
+        my $e = $x -> [$i];
+
+        return "Element at index $i is undefined"
+          unless defined $e;
+
+        return "Element at index $i is a '" . ref($e) .
+          "', which is not a scalar"
+          unless ref($e) eq "";
+
+        return "Element at index $i is '$e', which does not look like an" .
+          " normal integer"
+            #unless $e =~ /^([1-9]\d*|0)\z/;
+            unless $e =~ /^\d+\z/;
+
+        return "Element at index $i is '$e', which is negative"
+          if $e < 0;
+
+        return "Element at index $i is '$e', which is not smaller than" .
+          " the base '$BASE'"
+            if $e >= $BASE;
+
+        return "Element at index $i (last element) is zero"
+          if $#$x > 0 && $i == $#$x && $e == 0;
     }
-    return "Illegal part '$e' at pos $i (tested: $try)" if $i < $j;
-    0;
+
+    return 0;
 }
 
 ###############################################################################
@@ -1330,7 +1338,7 @@ sub _rsft {
 
     if ($n != 10) {
         $n = _new($c, $n);
-        return _div($c, $x, _pow($c, $n, $y));
+        return scalar _div($c, $x, _pow($c, $n, $y));
     }
 
     # shortcut (faster) for shifting by 10)
@@ -1369,40 +1377,51 @@ sub _rsft {
 }
 
 sub _lsft {
-    my ($c, $x, $y, $n) = @_;
+    my ($c, $x, $n, $b) = @_;
 
-    if ($n != 10) {
-        $n = _new($c, $n);
-        return _mul($c, $x, _pow($c, $n, $y));
-    }
+    return $x if _is_zero($c, $x);
 
-    # shortcut (faster) for shifting by 10) since we are in base 10eX
-    # multiples of $BASE_LEN:
-    my $src = @$x;                          # source
-    my $len = _num($c, $y);                 # shift-len as normal int
-    my $rem = $len % $BASE_LEN;             # remainder to shift
-    my $dst = $src + int($len / $BASE_LEN); # destination
-    my $vd;                                 # further speedup
-    $x->[$src] = 0;                         # avoid first ||0 for speed
-    my $z = '0' x $BASE_LEN;
-    while ($src >= 0) {
-        $vd = $x->[$src];
-        $vd = $z . $vd;
-        $vd = substr($vd, -$BASE_LEN + $rem, $BASE_LEN - $rem);
-        $vd .= $src > 0 ? substr($z . $x->[$src - 1], -$BASE_LEN, $rem)
-          : '0' x $rem;
-        $vd = substr($vd, -$BASE_LEN, $BASE_LEN) if length($vd) > $BASE_LEN;
-        $x->[$dst] = int($vd);
-        $dst--;
-        $src--;
+    # Handle the special case when the base is a power of 10. Don't check
+    # whether log($b)/log(10) is an integer, because log(1000)/log(10) is not
+    # exactly 3.
+
+    my $log10 = sprintf "%.0f", log($b) / log(10);
+    if ($b == 10 ** $log10) {
+        $b = 10;
+        $n = _mul($c, $n, _new($c, $log10));
+
+        # shortcut (faster) for shifting by 10) since we are in base 10eX
+        # multiples of $BASE_LEN:
+        my $src = @$x;                      # source
+        my $len = _num($c, $n);             # shift-len as normal int
+        my $rem = $len % $BASE_LEN;         # remainder to shift
+        my $dst = $src + int($len / $BASE_LEN); # destination
+        my $vd;                                 # further speedup
+        $x->[$src] = 0;                         # avoid first ||0 for speed
+        my $z = '0' x $BASE_LEN;
+        while ($src >= 0) {
+            $vd = $x->[$src];
+            $vd = $z . $vd;
+            $vd = substr($vd, -$BASE_LEN + $rem, $BASE_LEN - $rem);
+            $vd .= $src > 0 ? substr($z . $x->[$src - 1], -$BASE_LEN, $rem)
+              : '0' x $rem;
+            $vd = substr($vd, -$BASE_LEN, $BASE_LEN) if length($vd) > $BASE_LEN;
+            $x->[$dst] = int($vd);
+            $dst--;
+            $src--;
+        }
+        # set lowest parts to 0
+        while ($dst >= 0) {
+            $x->[$dst--] = 0;
+        }
+        # fix spurious last zero element
+        splice @$x, -1 if $x->[-1] == 0;
+        return $x;
+    } else {
+        $b = _new($c, $b);
+        #print $c->_str($b);
+        return _mul($c, $x, _pow($c, $b, $n));
     }
-    # set lowest parts to 0
-    while ($dst >= 0) {
-        $x->[$dst--] = 0;
-    }
-    # fix spurious last zero element
-    splice @$x, -1 if $x->[-1] == 0;
-    $x;
 }
 
 sub _pow {
@@ -1699,33 +1718,38 @@ sub _fac {
     $cx;                        # return result
 }
 
-#############################################################################
-
 sub _log_int {
     # calculate integer log of $x to base $base
     # ref to array, ref to array - return ref to array
     my ($c, $x, $base) = @_;
 
     # X == 0 => NaN
-    return if (@$x == 1 && $x->[0] == 0);
+    return if @$x == 1 && $x->[0] == 0;
+
     # BASE 0 or 1 => NaN
-    return if (@$base == 1 && $base->[0] < 2);
-    my $cmp = _acmp($c, $x, $base); # X == BASE => 1
-    if ($cmp == 0) {
-        splice (@$x, 1);
-        $x->[0] = 1;
-        return ($x, 1)
-    }
-    # X < BASE
-    if ($cmp < 0) {
-        splice (@$x, 1);
-        $x->[0] = 0;
-        return ($x, undef);
+    return if @$base == 1 && $base->[0] < 2;
+
+    # X == 1 => 0 (is exact)
+    if (@$x == 1 && $x->[0] == 1) {
+        @$x = 0;
+        return $x, 1;
     }
 
-    my $x_org = _copy($c, $x);   # preserve x
-    splice(@$x, 1);
-    $x->[0] = 1;                # keep ref to $x
+    my $cmp = _acmp($c, $x, $base);
+
+    # X == BASE => 1 (is exact)
+    if ($cmp == 0) {
+        @$x = 1;
+        return $x, 1;
+    }
+
+    # 1 < X < BASE => 0 (is truncated)
+    if ($cmp < 0) {
+        @$x = 0;
+        return $x, 0;
+    }
+
+    my $x_org = _copy($c, $x);  # preserve x
 
     # Compute a guess for the result based on:
     # $guess = int ( length_in_base_10(X) / ( log(base) / log(10) ) )
@@ -1740,69 +1764,32 @@ sub _log_int {
     # calculate now a guess based on the values obtained above:
     my $res = int($len / $log);
 
-    $x->[0] = $res;
-    my $trial = _pow ($c, _copy($c, $base), $x);
-    my $a = _acmp($c, $trial, $x_org);
+    @$x = $res;
+    my $trial = _pow($c, _copy($c, $base), $x);
+    my $acmp = _acmp($c, $trial, $x_org);
 
-    #  print STDERR "# trial ", _str($c, $x), " was: $a (0 = exact, -1 too small, +1 too big)\n";
+    # Did we get the exact result?
 
-    # found an exact result?
-    return ($x, 1) if $a == 0;
+    return $x, 1 if $acmp == 0;
 
-    if ($a > 0) {
-        # or too big
-        _div($c, $trial, $base);
-        _dec($c, $x);
-        while (($a = _acmp($c, $trial, $x_org)) > 0) {
-            #      print STDERR "# big _log_int at ", _str($c, $x), "\n";
-            _div($c, $trial, $base);
-            _dec($c, $x);
-        }
-        # result is now exact (a == 0), or too small (a < 0)
-        return ($x, $a == 0 ? 1 : 0);
-    }
+    # Too small?
 
-    # else: result was to small
-    _mul($c, $trial, $base);
-
-    # did we now get the right result?
-    $a = _acmp($c, $trial, $x_org);
-
-    if ($a == 0)                # yes, exactly
-    {
+    while ($acmp < 0) {
+        _mul($c, $trial, $base);
         _inc($c, $x);
-        return ($x, 1);
-    }
-    return ($x, 0) if $a > 0;
-
-    # Result still too small (we should come here only if the estimate above
-    # was very off base):
-
-    # Now let the normal trial run obtain the real result
-    # Simple loop that increments $x by 2 in each step, possible overstepping
-    # the real result
-
-    my $base_mul = _mul($c, _copy($c, $base), $base); # $base * $base
-
-    while (($a = _acmp($c, $trial, $x_org)) < 0) {
-        #    print STDERR "# small _log_int at ", _str($c, $x), "\n";
-        _mul($c, $trial, $base_mul);
-        _add($c, $x, [2]);
+        $acmp = _acmp($c, $trial, $x_org);
     }
 
-    my $exact = 1;
-    if ($a > 0) {
-        # overstepped the result
-        _dec($c, $x);
+    # Too big?
+
+    while ($acmp > 0) {
         _div($c, $trial, $base);
-        $a = _acmp($c, $trial, $x_org);
-        if ($a > 0) {
-            _dec($c, $x);
-        }
-        $exact = 0 if $a != 0;  # a = -1 => not exact result, a = 0 => exact
+        _dec($c, $x);
+        $acmp = _acmp($c, $trial, $x_org);
     }
 
-    ($x, $exact);                # return result
+    return $x, 1 if $acmp == 0;         # result is exact
+    return $x, 0;                       # result is too small
 }
 
 # for debugging:
@@ -1924,7 +1911,7 @@ sub _root {
             _sqrt($c, $x);
         }
         # $x is now one element to big, so truncate result by removing it
-        splice (@$x, 0, 1);
+        shift @$x;
     } else {
         # trial computation by starting with 2, 4, 8, 16 etc until we overstep
         my $step;
@@ -1990,29 +1977,21 @@ sub _and {
     my ($xr, $yr);
     my $mask = $AND_MASK;
 
-    my $x1 = $x;
-    my $y1 = _copy($c, $y);      # make copy
-    $x = _zero();
-    my ($b, $xrr, $yrr);
+    my $x1 = _copy($c, $x);
+    my $y1 = _copy($c, $y);
+    my $z  = _zero($c);
+
     use integer;
-    while (!_is_zero($c, $x1) && !_is_zero($c, $y1)) {
+    until (_is_zero($c, $x1) || _is_zero($c, $y1)) {
         ($x1, $xr) = _div($c, $x1, $mask);
         ($y1, $yr) = _div($c, $y1, $mask);
 
-        # make ints() from $xr, $yr
-        # this is when the AND_BITS are greater than $BASE and is slower for
-        # small (<256 bits) numbers, but faster for large numbers. Disabled
-        # due to KISS principle
-
-        #    $b = 1; $xrr = 0; foreach (@$xr) { $xrr += $_ * $b; $b *= $BASE; }
-        #    $b = 1; $yrr = 0; foreach (@$yr) { $yrr += $_ * $b; $b *= $BASE; }
-        #    _add($c, $x, _mul($c, _new( $c, ($xrr & $yrr) ), $m) );
-
-        # 0+ due to '&' doesn't work in strings
-        _add($c, $x, _mul($c, [ 0 + $xr->[0] & 0 + $yr->[0] ], $m) );
+        _add($c, $z, _mul($c, [ 0 + $xr->[0] & 0 + $yr->[0] ], $m));
         _mul($c, $m, $mask);
     }
-    $x;
+
+    @$x = @$z;
+    return $x;
 }
 
 sub _xor {
@@ -2024,12 +2003,12 @@ sub _xor {
     my ($xr, $yr);
     my $mask = $XOR_MASK;
 
-    my $x1 = $x;
+    my $x1 = _copy($c, $x);
     my $y1 = _copy($c, $y);      # make copy
-    $x = _zero();
-    my ($b, $xrr, $yrr);
+    my $z  = _zero($c);
+
     use integer;
-    while (!_is_zero($c, $x1) && !_is_zero($c, $y1)) {
+    until (_is_zero($c, $x1) || _is_zero($c, $y1)) {
         ($x1, $xr) = _div($c, $x1, $mask);
         ($y1, $yr) = _div($c, $y1, $mask);
         # make ints() from $xr, $yr (see _and())
@@ -2037,17 +2016,17 @@ sub _xor {
         #$b = 1; $yrr = 0; foreach (@$yr) { $yrr += $_ * $b; $b *= $BASE; }
         #_add($c, $x, _mul($c, _new( $c, ($xrr ^ $yrr) ), $m) );
 
-        # 0+ due to '^' doesn't work in strings
-        _add($c, $x, _mul($c, [ 0+$xr->[0] ^ 0+$yr->[0] ], $m) );
+        _add($c, $z, _mul($c, [ 0 + $xr->[0] ^ 0 + $yr->[0] ], $m));
         _mul($c, $m, $mask);
     }
     # the loop stops when the shorter of the two numbers is exhausted
     # the remainder of the longer one will survive bit-by-bit, so we simple
     # multiply-add it in
-    _add($c, $x, _mul($c, $x1, $m) ) if !_is_zero($c, $x1);
-    _add($c, $x, _mul($c, $y1, $m) ) if !_is_zero($c, $y1);
+    _add($c, $z, _mul($c, $x1, $m) ) if !_is_zero($c, $x1);
+    _add($c, $z, _mul($c, $y1, $m) ) if !_is_zero($c, $y1);
 
-    $x;
+    @$x = @$z;
+    return $x;
 }
 
 sub _or {
@@ -2059,12 +2038,12 @@ sub _or {
     my ($xr, $yr);
     my $mask = $OR_MASK;
 
-    my $x1 = $x;
+    my $x1 = _copy($c, $x);
     my $y1 = _copy($c, $y);      # make copy
-    $x = _zero();
-    my ($b, $xrr, $yrr);
+    my $z  = _zero($c);
+
     use integer;
-    while (!_is_zero($c, $x1) && !_is_zero($c, $y1)) {
+    until (_is_zero($c, $x1) || _is_zero($c, $y1)) {
         ($x1, $xr) = _div($c, $x1, $mask);
         ($y1, $yr) = _div($c, $y1, $mask);
         # make ints() from $xr, $yr (see _and())
@@ -2072,17 +2051,17 @@ sub _or {
         #    $b = 1; $yrr = 0; foreach (@$yr) { $yrr += $_ * $b; $b *= $BASE; }
         #    _add($c, $x, _mul($c, _new( $c, ($xrr | $yrr) ), $m) );
 
-        # 0+ due to '|' doesn't work in strings
-        _add($c, $x, _mul($c, [ 0+$xr->[0] | 0+$yr->[0] ], $m) );
+        _add($c, $z, _mul($c, [ 0 + $xr->[0] | 0 + $yr->[0] ], $m));
         _mul($c, $m, $mask);
     }
     # the loop stops when the shorter of the two numbers is exhausted
     # the remainder of the longer one will survive bit-by-bit, so we simple
     # multiply-add it in
-    _add($c, $x, _mul($c, $x1, $m) ) if !_is_zero($c, $x1);
-    _add($c, $x, _mul($c, $y1, $m) ) if !_is_zero($c, $y1);
+    _add($c, $z, _mul($c, $x1, $m) ) if !_is_zero($c, $x1);
+    _add($c, $z, _mul($c, $y1, $m) ) if !_is_zero($c, $y1);
 
-    $x;
+    @$x = @$z;
+    return $x;
 }
 
 sub _as_hex {
@@ -2755,8 +2734,7 @@ Return the binomial coefficient OBJ1 over OBJ1.
 =item I<_alen(OBJ)>
 
 Return the approximate number of decimal digits of the object. The output is
-one Perl scalar. This estimate must be greater than or equal to what C<_len()>
-returns.
+one Perl scalar.
 
 =back
 
