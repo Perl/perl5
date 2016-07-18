@@ -71,7 +71,8 @@ values only, not array values.
     left	and
     left	or xor
 
-In the following sections, these operators are covered in precedence order.
+In the following sections, these operators are covered in detail, in the
+same order in which they appear in the table above.
 
 Many operators can be overloaded for objects.  See L<overload>.
 
