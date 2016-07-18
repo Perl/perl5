@@ -47,7 +47,7 @@
 
 %token <ival> '{' '}' '[' ']' '-' '+' '@' '%' '&' '=' '.'
 
-%token <opval> WORD METHOD FUNCMETH THING PMFUNC PRIVATEREF QWLIST
+%token <opval> BAREWORD METHOD FUNCMETH THING PMFUNC PRIVATEREF QWLIST
 %token <opval> FUNC0OP FUNC0SUB UNIOPSUB LSTOPSUB
 %token <opval> PLUGEXPR PLUGSTMT
 %token <pval> LABEL
@@ -336,7 +336,7 @@ barestmt:	PLUGSTMT
 			  intro_my();
 			  parser->parsed_sub = 1;
 			}
-	|	PACKAGE WORD WORD ';'
+	|	PACKAGE BAREWORD BAREWORD ';'
 			{
 			  package($3);
 			  if ($2)
@@ -345,7 +345,7 @@ barestmt:	PLUGSTMT
 			}
 	|	USE startsub
 			{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
-		WORD WORD optlistexpr ';'
+		BAREWORD BAREWORD optlistexpr ';'
 			{
 			  SvREFCNT_inc_simple_void(PL_compcv);
 			  utilize($1, $2, $4, $5, $6);
@@ -453,7 +453,7 @@ barestmt:	PLUGSTMT
 			  $$ = newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
 				  (OP*)NULL, $1, $2, 0);
 			}
-	|	PACKAGE WORD WORD '{' remember
+	|	PACKAGE BAREWORD BAREWORD '{' remember
 			{
 			  package($3);
 			  if ($2) {
@@ -581,7 +581,7 @@ mnexpr	:	nexpr
 			{ $$ = $1; intro_my(); }
 	;
 
-formname:	WORD		{ $$ = $1; }
+formname:	BAREWORD	{ $$ = $1; }
 	|	/* NULL */	{ $$ = (OP*)NULL; }
 	;
 
@@ -602,7 +602,7 @@ startformsub:	/* NULL */	/* start a format subroutine scope */
 	;
 
 /* Name of a subroutine - must be a bareword, could be special */
-subname	:	WORD
+subname	:	BAREWORD
 	|	PRIVATEREF
 	;
 
@@ -1028,7 +1028,7 @@ term	:	termbinop
 			}
 		    '(' listexpr optrepl ')'
 			{ $$ = pmruntime($1, $4, $5, 1, $<ival>2); }
-	|	WORD
+	|	BAREWORD
 	|	listop
 	|	YADAYADA
 			{
@@ -1145,7 +1145,7 @@ gelem	:	star
 	;
 
 /* Indirect objects */
-indirob	:	WORD
+indirob	:	BAREWORD
 			{ $$ = scalar($1); }
 	|	scalar %prec PREC_LOW
 			{ $$ = scalar($1); }

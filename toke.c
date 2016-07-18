@@ -211,7 +211,7 @@ static const char* const lex_state_names[] = {
 #define PREREF(retval) return (PL_expect = XREF,PL_bufptr = s, REPORT(retval))
 #define TERM(retval) return (CLINE, PL_expect = XOPERATOR, PL_bufptr = s, REPORT(retval))
 #define POSTDEREF(f) return (PL_bufptr = s, S_postderef(aTHX_ REPORT(f),s[1]))
-#define LOOPX(f) return (PL_bufptr = force_word(s,WORD,TRUE,FALSE), \
+#define LOOPX(f) return (PL_bufptr = force_word(s,BAREWORD,TRUE,FALSE), \
 			 pl_yylval.ival=f, \
 			 PL_expect = PL_nexttoke ? XOPERATOR : XTERM, \
 			 REPORT((int)LOOPEX))
@@ -373,7 +373,7 @@ static struct debug_tokens {
     { USE,		TOKENTYPE_IVAL,		"USE" },
     { WHEN,		TOKENTYPE_IVAL,		"WHEN" },
     { WHILE,		TOKENTYPE_IVAL,		"WHILE" },
-    { WORD,		TOKENTYPE_OPVAL,	"WORD" },
+    { BAREWORD,		TOKENTYPE_OPVAL,	"BAREWORD" },
     { YADAYADA,		TOKENTYPE_IVAL,		"YADAYADA" },
     { 0,		TOKENTYPE_NONE,		NULL }
 };
@@ -1995,7 +1995,8 @@ S_newSV_maybe_utf8(pTHX_ const char *const start, STRLEN len)
  *
  * Arguments:
  *   char *start : buffer position (must be within PL_linestr)
- *   int token   : PL_next* will be this type of bare word (e.g., METHOD,WORD)
+ *   int token   : PL_next* will be this type of bare word
+ *                 (e.g., METHOD,BAREWORD)
  *   int check_keyword : if true, Perl checks to make sure the word isn't
  *       a keyword (do this if the word is a label, e.g. goto FOO)
  *   int allow_pack : if true, : characters will also be allowed (require,
@@ -2046,7 +2047,7 @@ S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack)
  * Called when the lexer wants $foo *foo &foo etc, but the program
  * text only contains the "foo" portion.  The first argument is a pointer
  * to the "foo", and the second argument is the type symbol to prefix.
- * Forces the next token to be a "WORD".
+ * Forces the next token to be a "BAREWORD".
  * Creates the symbol if it didn't already exist (via gv_fetchpv()).
  */
 
@@ -2060,7 +2061,7 @@ S_force_ident(pTHX_ const char *s, int kind)
 	OP* const o = (OP*)newSVOP(OP_CONST, 0, newSVpvn_flags(s, len,
                                                                 UTF ? SVf_UTF8 : 0));
 	NEXTVAL_NEXTTOKE.opval = o;
-	force_next(WORD);
+	force_next(BAREWORD);
 	if (kind) {
 	    o->op_private = OPpCONST_ENTERED;
 	    /* XXX see note in pp_entereval() for why we forgo typo
@@ -2155,7 +2156,7 @@ S_force_version(pTHX_ char *s, int guessing)
 
     /* NOTE: The parser sees the package name and the VERSION swapped */
     NEXTVAL_NEXTTOKE.opval = version;
-    force_next(WORD);
+    force_next(BAREWORD);
 
     return s;
 }
@@ -2192,7 +2193,7 @@ S_force_strict_version(pTHX_ char *s)
 
     /* NOTE: The parser sees the package name and the VERSION swapped */
     NEXTVAL_NEXTTOKE.opval = version;
-    force_next(WORD);
+    force_next(BAREWORD);
 
     return s;
 }
@@ -4096,7 +4097,7 @@ S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv)
 						  S_newSV_maybe_utf8(aTHX_ tmpbuf, len));
 	    NEXTVAL_NEXTTOKE.opval->op_private = OPpCONST_BARE;
 	    PL_expect = XTERM;
-	    force_next(WORD);
+	    force_next(BAREWORD);
 	    PL_bufptr = s;
 	    return *s == '(' ? FUNCMETH : METHOD;
 	}
@@ -4372,15 +4373,15 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
 	if (*s == ';' || *s == '}'
 		|| (s = skipspace(s), (*s == ';' || *s == '}'))) {
 	    NEXTVAL_NEXTTOKE.opval = NULL;
-	    force_next(WORD);
+	    force_next(BAREWORD);
 	}
 	else if (*s == 'v') {
-	    s = force_word(s,WORD,FALSE,TRUE);
+	    s = force_word(s,BAREWORD,FALSE,TRUE);
 	    s = force_version(s, FALSE);
 	}
     }
     else {
-	s = force_word(s,WORD,FALSE,TRUE);
+	s = force_word(s,BAREWORD,FALSE,TRUE);
 	s = force_version(s, FALSE);
     }
     pl_yylval.ival = is_use;
@@ -5251,7 +5252,7 @@ Perl_yylex(pTHX)
 		s++;
 
 	    if (strnEQ(s,"=>",2)) {
-		s = force_word(PL_bufptr,WORD,FALSE,FALSE);
+		s = force_word(PL_bufptr,BAREWORD,FALSE,FALSE);
 		DEBUG_T( { printbuf("### Saw unary minus before =>, forcing word %s\n", s); } );
 		OPERATOR('-');		/* unary minus */
 	    }
@@ -5734,7 +5735,7 @@ Perl_yylex(pTHX)
 		    d++;
 		if (*d == '}') {
 		    const char minus = (PL_tokenbuf[0] == '-');
-		    s = force_word(s + minus, WORD, FALSE, TRUE);
+		    s = force_word(s + minus, BAREWORD, FALSE, TRUE);
 		    if (minus)
 			force_next('-');
 		}
@@ -6679,7 +6680,7 @@ Perl_yylex(pTHX)
 		= (OP*)newSVOP(OP_CONST, 0,
 			       S_newSV_maybe_utf8(aTHX_ PL_tokenbuf, len));
 	    pl_yylval.opval->op_private = OPpCONST_BARE;
-	    TERM(WORD);
+	    TERM(BAREWORD);
 	}
 
 	/* Check for plugged-in keyword */
@@ -7001,7 +7002,7 @@ Perl_yylex(pTHX)
 			      SvUTF8_on(sv);
 			SvREADONLY_on(sv);
 		    }
-		    TERM(WORD);
+		    TERM(BAREWORD);
 		}
 
 		/* If followed by a paren, it's certainly a subroutine. */
@@ -7020,7 +7021,7 @@ Perl_yylex(pTHX)
 			off ? rv2cv_op : pl_yylval.opval;
 		    if (off)
 			 op_free(pl_yylval.opval), force_next(PRIVATEREF);
-		    else op_free(rv2cv_op),	   force_next(WORD);
+		    else op_free(rv2cv_op),	   force_next(BAREWORD);
 		    pl_yylval.ival = 0;
 		    TOKEN('&');
 		}
@@ -7082,7 +7083,7 @@ Perl_yylex(pTHX)
 			    pl_yylval.opval->op_folded = 1;
 			    pl_yylval.opval->op_flags |= OPf_SPECIAL;
 			}
-			TOKEN(WORD);
+			TOKEN(BAREWORD);
 		    }
 
 		    op_free(pl_yylval.opval);
@@ -7140,7 +7141,7 @@ Perl_yylex(pTHX)
 		    }
 		    NEXTVAL_NEXTTOKE.opval = pl_yylval.opval;
 		    PL_expect = XTERM;
-		    force_next(off ? PRIVATEREF : WORD);
+		    force_next(off ? PRIVATEREF : BAREWORD);
 		    if (!PL_lex_allbrackets
                         && PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
                     {
@@ -7197,7 +7198,7 @@ Perl_yylex(pTHX)
 				     "Ambiguous use of %c resolved as operator %c",
 				     lastchar, lastchar);
 		}
-		TOKEN(WORD);
+		TOKEN(BAREWORD);
 	    }
 
 	case KEY___FILE__:
@@ -7901,7 +7902,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_PACK,XTERM);
 
 	case KEY_package:
-	    s = force_word(s,WORD,FALSE,TRUE);
+	    s = force_word(s,BAREWORD,FALSE,TRUE);
 	    s = skipspace(s);
 	    s = force_strict_version(s);
 	    PREBLOCK(PACKAGE);
@@ -8002,7 +8003,7 @@ Perl_yylex(pTHX)
 		    || (s = force_version(s, TRUE), *s == 'v'))
 	    {
 		*PL_tokenbuf = '\0';
-		s = force_word(s,WORD,TRUE,TRUE);
+		s = force_word(s,BAREWORD,TRUE,TRUE);
 		if (isIDFIRST_lazy_if(PL_tokenbuf,UTF))
 		    gv_stashpvn(PL_tokenbuf, strlen(PL_tokenbuf),
                                 GV_ADD | (UTF ? SVf_UTF8 : 0));
@@ -8166,7 +8167,7 @@ Perl_yylex(pTHX)
 	    checkcomma(s,PL_tokenbuf,"subroutine name");
 	    s = skipspace(s);
 	    PL_expect = XTERM;
-	    s = force_word(s,WORD,TRUE,TRUE);
+	    s = force_word(s,BAREWORD,TRUE,TRUE);
 	    LOP(OP_SORT,XREF);
 
 	case KEY_split:
@@ -8254,7 +8255,7 @@ Perl_yylex(pTHX)
                         NEXTVAL_NEXTTOKE.opval
                             = (OP*)newSVOP(OP_CONST,0, format_name);
                         NEXTVAL_NEXTTOKE.opval->op_private |= OPpCONST_BARE;
-                        force_next(WORD);
+                        force_next(BAREWORD);
                     }
 		    PREBLOCK(FORMAT);
 		}
@@ -8463,7 +8464,7 @@ Perl_yylex(pTHX)
 
   Returns:
     PRIVATEREF if this is a lexical name.
-    WORD       if this belongs to a package.
+    BAREWORD   if this belongs to a package.
 
   Structure:
       if we're in a my declaration
@@ -8547,7 +8548,7 @@ S_pending_ident(pTHX)
                     ((PL_tokenbuf[0] == '$') ? SVt_PV
                      : (PL_tokenbuf[0] == '@') ? SVt_PVAV
                      : SVt_PVHV));
-                return WORD;
+                return BAREWORD;
             }
 
             pl_yylval.opval = newOP(OP_PADANY, 0);
@@ -8595,7 +8596,7 @@ S_pending_ident(pTHX)
 		     ((PL_tokenbuf[0] == '$') ? SVt_PV
 		      : (PL_tokenbuf[0] == '@') ? SVt_PVAV
 		      : SVt_PVHV));
-    return WORD;
+    return BAREWORD;
 }
 
 STATIC void
