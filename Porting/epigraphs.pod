@@ -62,6 +62,30 @@ L<Announced on 2016-05-09 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   To find that the utmost reward
     Of daring should be still to dare.
 
+=head2 v5.24.1-RC1 - Dante Alighieri, trans. Dorothy L. Sayers, "The Divine Comedy", Cantica I: Hell, Canto XX
+
+L<Announced on 2016-07-17 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2016/07/msg238072.html>
+
+  New punishments behoves me sing in this
+    Twentieth canto of my first canticle,
+    Which tells of spirits sunk in the Abyss.
+
+  I now stood ready to observe the full
+    Extent of the new chasm thus laid bare,
+    Drenched as it was in tears most miserable.
+
+  Through the round vale I saw folk drawing near,
+    Weeping and silent, and at such slow pace
+    As Litany processions keep, up here.
+
+  And presently, when I had dropped my gaze
+    Lower than the head, I saw them strangely wried
+    'Twixt collar-bone and chin, so that the face
+
+  Of each was turned towards his own backside,
+    And backwards must they needs creep with their feet,
+    All power of looking forward being denied.
+
 =head2 v5.24.0 - Robert Frost, "The Black Cottage"
 
 L<Announced on 2016-05-09 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2016/05/msg236242.html>
@@ -437,6 +461,30 @@ L<Announced on 2015-06-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   To be just like them
   They sing while you slave and I just get bored
   I ain't gonna work on Maggie's farm no more
+
+=head2 v5.22.3-RC1 - Dante Alighieri, trans. Dorothy L. Sayers, "The Divine Comedy", Cantica I: Hell, Canto XII
+
+L<Announced on 2016-07-17 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2016/07/msg238071.html>
+
+  The place we came to, to descend the brink from,
+    Was sheer crag; and there was a Thing there - making,
+    All told, a prospect any eye would shrink from.
+
+  Like the great landslide that rushed downward, shaking
+    The bank of Adige on this side Trent,
+    (Whether through faulty shoring or the earth's quaking)
+
+  So that the rock, down from the summit rent
+    Far as the plain, lies strewn, and one might crawl
+    From top to bottom by that unsure descent,
+
+  Such was the precipice; and there we spied,
+    Topping the cleft that split the rocky wall,
+    That which was wombed in the false heifer's side,
+
+  The infamy of Crete, stretched out a-sprawl;
+    And seeing us, he gnawed himself, like one
+    Inly devoured with spite and burning gall.
 
 =head2 v5.22.2 - Gaston Leroux, trans. Mireille Ribière, "The Phantom of the Opera"
 
