@@ -1738,11 +1738,22 @@ foreach my $Locale (@Locale) {
 
         use locale;
 
+        my @sorted_controls = sort @{$posixes{'cntrl'}};
+        debug "sorted :cntrl: = ", disp_chars(@sorted_controls), "\n";
+
         ++$locales_test_number;
         $test_names{$locales_test_number}
-            = 'Skip in locales where \001 has primary sorting weight; '
+                            = 'Verify that \0 sorts before any other control';
+        my $ok = $sorted_controls[0] eq "\0";
+        report_result($Locale, $locales_test_number, $ok);
+        shift @sorted_controls;
+        my $lowest_control = $sorted_controls[0];
+
+        ++$locales_test_number;
+        $test_names{$locales_test_number}
+            = 'Skip in locales where all controls have primary sorting weight; '
             . 'otherwise verify that \0 doesn\'t have primary sorting weight';
-        if ("a\001c" lt "ab") {
+        if ("a${lowest_control}c" lt "ab") {
             report_result($Locale, $locales_test_number, 1);
         }
         else {
@@ -1753,14 +1764,14 @@ foreach my $Locale (@Locale) {
         ++$locales_test_number;
         $test_names{$locales_test_number}
                             = 'Verify that strings with embedded NUL collate';
-        my $ok = "a\0a\0a" lt "a\001a\001a";
+        $ok = "a\0a\0a" lt "a${lowest_control}a${lowest_control}a";
         report_result($Locale, $locales_test_number, $ok);
 
         ++$locales_test_number;
         $test_names{$locales_test_number}
                             = 'Verify that strings with embedded NUL and '
                             . 'extra trailing NUL collate';
-        $ok = "a\0a\0" lt "a\001a\001";
+        $ok = "a\0a\0" lt "a${lowest_control}a${lowest_control}";
         report_result($Locale, $locales_test_number, $ok);
 
         ++$locales_test_number;
