@@ -7321,6 +7321,11 @@ extern void moncontrol(int);
 
 #endif /* DOUBLE_HAS_NAN */
 
+#define PERL_STACK_REFCOUNTED 1
+#ifdef PERL_CORE
+# define PERL_STACK_LOCALLY_REFCOUNTED 1
+#endif
+
 /*
 
    (KEEP THIS LAST IN perl.h!)
