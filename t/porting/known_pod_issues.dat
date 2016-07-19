@@ -152,6 +152,7 @@ List::Gather
 listen(2)
 local::lib
 lockf(3)
+Log::Agent
 Log::Message
 Log::Message::Config
 Log::Message::Handlers
