@@ -1058,15 +1058,12 @@ use File::Glob qw(:case);
     },
 
     'Test::Simple' => {
-        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302040.tar.gz',
+        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302045.tar.gz',
         'FILES'        => q[cpan/Test-Simple],
         'EXCLUDED'     => [
-            qr{^xt},
+            qr{^examples/},
+            qr{^xt/},
             qw( perltidyrc
-                examples/indent.pl
-                examples/subtest.t
-                examples/tools.pl
-                examples/tools.t
                 t/00compile.t
                 t/00-report.t
                 t/zzz-check-breaks.t

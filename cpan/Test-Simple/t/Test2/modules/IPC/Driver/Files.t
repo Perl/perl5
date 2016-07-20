@@ -2,6 +2,7 @@ BEGIN { require "t/tools.pl" };
 use Test2::Util qw/get_tid USE_THREADS try/;
 use File::Temp qw/tempfile/;
 use File::Spec qw/catfile/;
+use List::Util qw/shuffle/;
 use strict;
 use warnings;
 
@@ -40,7 +41,7 @@ ok(-d $ipc->tempdir, "created temp dir");
 is($ipc->pid, $$, "stored pid");
 is($ipc->tid, get_tid(), "stored the tid");
 
-my $hid = '12345';
+my $hid = '12345-1-1';
 
 $ipc->add_hub($hid);
 my $hubfile = File::Spec->catfile($ipc->tempdir, "HUB-$hid");
@@ -171,8 +172,8 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     like($out->{STDERR}, qr/IPC Temp Dir: \Q$tmpdir\E/m, "Got temp dir path");
     like($out->{STDERR}, qr/^# Not removing temp dir: \Q$tmpdir\E$/m, "Notice about not closing tempdir");
 
-    like($out->{STDERR}, qr/^IPC Fatal Error: File for hub '12345' already exists/m, "Got message for duplicate hub");
-    like($out->{STDERR}, qr/^IPC Fatal Error: File for hub '12345' does not exist/m, "Cannot remove hub twice");
+    like($out->{STDERR}, qr/^IPC Fatal Error: File for hub '12345-1-1' already exists/m, "Got message for duplicate hub");
+    like($out->{STDERR}, qr/^IPC Fatal Error: File for hub '12345-1-1' does not exist/m, "Cannot remove hub twice");
 
     $out = capture {
         my $ipc = Test2::IPC::Driver::Files->new();
@@ -185,7 +186,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
 
     like($out->{STDERR}, qr/IPC Fatal Error:/, "Got fatal error");
     like($out->{STDERR}, qr/There was an error writing an event/, "Explanation");
-    like($out->{STDERR}, qr/Destination: 12345/, "Got dest");
+    like($out->{STDERR}, qr/Destination: 12345-1-1/, "Got dest");
     like($out->{STDERR}, qr/Origin PID:\s+$$/, "Got pid");
     like($out->{STDERR}, qr/Error: Can't store GLOB items/, "Got cause");
 
@@ -196,7 +197,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
         print STDERR $@ unless $@ =~ m/^255/;
         $ipc = undef;
     };
-    like($out->{STDERR}, qr/IPC Fatal Error: hub '12345' is not available, failed to send event!/, "Cannot send to missing hub");
+    like($out->{STDERR}, qr/IPC Fatal Error: hub '12345-1-1' is not available, failed to send event!/, "Cannot send to missing hub");
 
     $out = capture {
         my $ipc = Test2::IPC::Driver::Files->new();
@@ -208,7 +209,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
         print STDERR $@ unless $@ =~ m/^255/;
     };
     $cleanup->();
-    like($out->{STDERR}, qr/IPC Fatal Error: Not all files from hub '12345' have been collected/, "Leftover files");
+    like($out->{STDERR}, qr/IPC Fatal Error: Not all files from hub '12345-1-1' have been collected/, "Leftover files");
     like($out->{STDERR}, qr/IPC Fatal Error: Leftover files in the directory \(.*\.ready\)/, "What file");
 
     $out = capture {
@@ -294,5 +295,232 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     $ipc = undef;
 }
 
-done_testing;
+{
+    my @list = shuffle (
+        {global => 0, pid => 2, tid => 1, eid => 1},
+        {global => 0, pid => 2, tid => 1, eid => 2},
+        {global => 0, pid => 2, tid => 1, eid => 3},
 
+        {global => 1, pid => 1,  tid => 1, eid => 1},
+        {global => 1, pid => 12, tid => 1, eid => 3},
+        {global => 1, pid => 11, tid => 1, eid => 2},
+
+        {global => 0, pid => 2, tid => 3, eid => 1},
+        {global => 0, pid => 2, tid => 3, eid => 10},
+        {global => 0, pid => 2, tid => 3, eid => 100},
+
+        {global => 0, pid => 5, tid => 3, eid => 2},
+        {global => 0, pid => 5, tid => 3, eid => 20},
+        {global => 0, pid => 5, tid => 3, eid => 200},
+    );
+
+    my @sorted;
+    {
+        package Test2::IPC::Driver::Files;
+        @sorted = sort cmp_events @list;
+    }
+
+    is_deeply(
+        \@sorted,
+        [
+            {global => 1, pid => 1,  tid => 1, eid => 1},
+            {global => 1, pid => 11, tid => 1, eid => 2},
+            {global => 1, pid => 12, tid => 1, eid => 3},
+
+            {global => 0, pid => 2, tid => 1, eid => 1},
+            {global => 0, pid => 2, tid => 1, eid => 2},
+            {global => 0, pid => 2, tid => 1, eid => 3},
+
+            {global => 0, pid => 2, tid => 3, eid => 1},
+            {global => 0, pid => 2, tid => 3, eid => 10},
+            {global => 0, pid => 2, tid => 3, eid => 100},
+
+            {global => 0, pid => 5, tid => 3, eid => 2},
+            {global => 0, pid => 5, tid => 3, eid => 20},
+            {global => 0, pid => 5, tid => 3, eid => 200},
+        ],
+        "Sort by global, pid, tid and then eid"
+    );
+}
+
+{
+    my $ipc = 'Test2::IPC::Driver::Files';
+
+    is_deeply(
+        $ipc->parse_event_filename('GLOBAL-123-456-789-Event-Type-Foo.ready.complete'),
+        {
+            ready    => 1,
+            complete => 1,
+            global   => 1,
+            type     => "Event::Type::Foo",
+            hid      => "GLOBAL",
+            pid      => "123",
+            tid      => "456",
+            eid      => "789",
+        },
+        "Parsed global complete"
+    );
+
+    is_deeply(
+        $ipc->parse_event_filename('GLOBAL-123-456-789-Event-Type-Foo.ready'),
+        {
+            ready    => 1,
+            complete => 0,
+            global   => 1,
+            type     => "Event::Type::Foo",
+            hid      => "GLOBAL",
+            pid      => "123",
+            tid      => "456",
+            eid      => "789",
+        },
+        "Parsed global ready"
+    );
+
+    is_deeply(
+        $ipc->parse_event_filename('GLOBAL-123-456-789-Event-Type-Foo'),
+        {
+            ready    => 0,
+            complete => 0,
+            global   => 1,
+            type     => "Event::Type::Foo",
+            hid      => "GLOBAL",
+            pid      => "123",
+            tid      => "456",
+            eid      => "789",
+        },
+        "Parsed global not ready"
+    );
+
+    is_deeply(
+        $ipc->parse_event_filename('1-1-1-123-456-789-Event-Type-Foo.ready.complete'),
+        {
+            ready    => 1,
+            complete => 1,
+            global   => 0,
+            type     => "Event::Type::Foo",
+            hid      => "1-1-1",
+            pid      => "123",
+            tid      => "456",
+            eid      => "789",
+        },
+        "Parsed event complete"
+    );
+
+    is_deeply(
+        $ipc->parse_event_filename('1-2-3-123-456-789-Event-Type-Foo.ready'),
+        {
+            ready    => 1,
+            complete => 0,
+            global   => 0,
+            type     => "Event::Type::Foo",
+            hid      => "1-2-3",
+            pid      => "123",
+            tid      => "456",
+            eid      => "789",
+        },
+        "Parsed event ready"
+    );
+
+    is_deeply(
+        $ipc->parse_event_filename('3-2-11-123-456-789-Event'),
+        {
+            ready    => 0,
+            complete => 0,
+            global   => 0,
+            type     => "Event",
+            hid      => "3-2-11",
+            pid      => "123",
+            tid      => "456",
+            eid      => "789",
+        },
+        "Parsed event not ready"
+    );
+}
+
+{
+    my $ipc = Test2::IPC::Driver::Files->new();
+
+    my $hid = "1-1-1";
+
+    is_deeply(
+        $ipc->should_read_event($hid, "GLOBAL-123-456-789-Event-Type-Foo.ready.complete") ? 1 : 0,
+        0,
+        "Do not read complete global"
+    );
+
+    is_deeply(
+        $ipc->should_read_event($hid, "GLOBAL-123-456-789-Event-Type-Foo.ready") ? 1 : 0,
+        1,
+        "Should read ready global the first time"
+    );
+    is_deeply(
+        $ipc->should_read_event($hid, "GLOBAL-123-456-789-Event-Type-Foo.ready") ? 1 : 0,
+        0,
+        "Should not read ready global again"
+    );
+
+    is_deeply(
+        $ipc->should_read_event($hid, "GLOBAL-123-456-789-Event-Type-Foo") ? 1 : 0,
+        0,
+        "Should not read un-ready global"
+    );
+
+    is_deeply(
+        $ipc->should_read_event($hid, "$hid-123-456-789-Event-Type-Foo.ready.complete") ? 1 : 0,
+        0,
+        "Do not read complete our hid"
+    );
+
+    is_deeply(
+        $ipc->should_read_event($hid, "$hid-123-456-789-Event-Type-Foo.ready") ? 1 : 0,
+        1,
+        "Should read ready our hid"
+    );
+
+    is_deeply(
+        $ipc->should_read_event($hid, "$hid-123-456-789-Event-Type-Foo.ready") ? 1 : 0,
+        1,
+        "Should read ready our hid (again, no duplicate checking)"
+    );
+
+    is_deeply(
+        $ipc->should_read_event($hid, "$hid-123-456-789-Event-Type-Foo") ? 1 : 0,
+        0,
+        "Should not read un-ready our hid"
+    );
+
+    is_deeply(
+        $ipc->should_read_event($hid, "1-2-3-123-456-789-Event-Type-Foo.ready.complete") ? 1 : 0,
+        0,
+        "Not ours - complete"
+    );
+
+    is_deeply(
+        $ipc->should_read_event($hid, "1-2-3-123-456-789-Event-Type-Foo.ready") ? 1 : 0,
+        0,
+        "Not ours - ready"
+    );
+
+    is_deeply(
+        $ipc->should_read_event($hid, "1-2-3-123-456-789-Event-Type-Foo") ? 1 : 0,
+        0,
+        "Not ours - unready"
+    );
+
+    my @got = $ipc->should_read_event($hid, "$hid-123-456-789-Event-Type-Foo");
+    ok(!@got, "return empty list for false");
+
+    @got = $ipc->should_read_event($hid, "$hid-123-456-789-Event-Type-Foo.ready");
+    is(@got, 1, "got 1 item on true");
+
+    like(delete $got[0]->{full_path}, qr{^.+\Q$hid\E-123-456-789-Event-Type-Foo\.ready$}, "Got full path");
+    is_deeply(
+        $got[0],
+        $ipc->parse_event_filename("$hid-123-456-789-Event-Type-Foo.ready"),
+        "Apart from full_path we get entire parsed filename"
+    );
+
+    $ipc = undef;
+}
+
+done_testing;

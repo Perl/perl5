@@ -4,7 +4,7 @@ use warnings;
 
 use Scalar::Util qw/blessed/;
 
-our $VERSION = '1.302040';
+our $VERSION = '1.302045';
 
 BEGIN { require Test2::Event; our @ISA = qw(Test2::Event) }
 use Test2::Util::HashBase qw/diagnostics renderer/;

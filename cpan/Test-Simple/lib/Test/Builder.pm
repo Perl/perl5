@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302040';
+our $VERSION = '1.302045';
 
 BEGIN {
     if( $] < 5.008 ) {
@@ -69,7 +69,7 @@ sub _add_ts_hooks {
         return Test::Builder::TodoDiag->new(%$e) if ref($e) eq 'Test2::Event::Diag';
 
         # Set todo on ok's
-        if ($hub == $active_hub && $e->isa('Test2::Event::Ok')) {
+        if ($e->isa('Test2::Event::Ok')) {
             $e->set_todo($todo);
             $e->set_effective_pass(1);
 

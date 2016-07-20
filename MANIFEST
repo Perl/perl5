@@ -2771,6 +2771,7 @@ cpan/Test-Simple/t/Test2/modules/Util.t
 cpan/Test-Simple/t/Test2/modules/Util/ExternalMeta.t
 cpan/Test-Simple/t/Test2/modules/Util/HashBase.t
 cpan/Test-Simple/t/Test2/modules/Util/Trace.t
+cpan/Test-Simple/t/Test2/regression/693_ipc_ordering.t
 cpan/Test-Simple/t/Test2/regression/gh_16.t
 cpan/Test-Simple/t/Test2/regression/ipc_files_abort_exit.t
 cpan/Test-Simple/t/tools.pl

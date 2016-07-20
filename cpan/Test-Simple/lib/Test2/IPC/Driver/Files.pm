@@ -2,7 +2,7 @@ package Test2::IPC::Driver::Files;
 use strict;
 use warnings;
 
-our $VERSION = '1.302040';
+our $VERSION = '1.302045';
 
 
 BEGIN { require Test2::IPC::Driver; our @ISA = qw(Test2::IPC::Driver) }
@@ -17,6 +17,51 @@ use POSIX();
 
 use Test2::Util qw/try get_tid pkg_to_file IS_WIN32/;
 use Test2::API qw/test2_ipc_set_pending/;
+
+BEGIN {
+    if (IS_WIN32) {
+        my $max_tries = 5;
+
+        *do_rename = sub {
+            my ($from, $to) = @_;
+
+            my $err;
+            for (1 .. $max_tries) {
+                return (1) if rename($from, $to);
+                $err = "$!";
+                last if $_ == $max_tries;
+                sleep 1;
+            }
+
+            return (0, $err);
+        };
+        *do_unlink = sub {
+            my ($file) = @_;
+
+            my $err;
+            for (1 .. $max_tries) {
+                return (1) if unlink($file);
+                $err = "$!";
+                last if $_ == $max_tries;
+                sleep 1;
+            }
+
+            return (0, "$!");
+        };
+    }
+    else {
+        *do_rename = sub {
+            my ($from, $to) = @_;
+            return (1) if rename($from, $to);
+            return (0, "$!");
+        };
+        *do_unlink = sub {
+            my ($file) = @_;
+            return (1) if unlink($file);
+            return (0, "$!");
+        };
+    }
+}
 
 sub use_shm { 1 }
 sub shm_size() { 64 }
@@ -107,10 +152,12 @@ sub drop_hub {
         unless get_tid() == $tid;
 
     if ($ENV{T2_KEEP_TEMPDIR}) {
-        rename($hfile, File::Spec->canonpath("$hfile.complete")) or $self->abort_trace("Could not rename file '$hfile' -> '$hfile.complete'");
+        my ($ok, $err) = do_rename($hfile, File::Spec->canonpath("$hfile.complete"));
+        $self->abort_trace("Could not rename file '$hfile' -> '$hfile.complete': $err") unless $ok
     }
     else {
-        unlink($hfile) or $self->abort_trace("Could not remove file for hub '$hid'");
+        my ($ok, $err) = do_unlink($hfile);
+        $self->abort_trace("Could not remove file for hub '$hid': $err") unless $ok
     }
 
     opendir(my $dh, $tdir) or $self->abort_trace("Could not open temp dir!");
@@ -170,7 +217,11 @@ do so if Test::Builder is loaded for legacy reasons.
     # Write and rename the file.
     my ($ok, $err) = try {
         Storable::store($e, $file);
-        rename($file, $ready) or $self->abort("Could not rename file '$file' -> '$ready'");
+        my ($ok, $err) = do_rename("$file", $ready);
+        unless ($ok) {
+            POSIX::sigprocmask(POSIX::SIG_SETMASK(), $old, POSIX::SigSet->new()) if defined $blocked;
+            $self->abort("Could not rename file '$file' -> '$ready': $err");
+        };
         test2_ipc_set_pending(substr($file, -(shm_size)));
     };
 
@@ -214,40 +265,85 @@ sub cull {
     opendir(my $dh, $tempdir) or $self->abort("could not open IPC temp dir ($tempdir)!");
 
     my @out;
-    for my $file (sort readdir($dh)) {
-        next if substr($file, 0, 1) eq '.';
-
-        next unless substr($file, -6, 6) eq '.ready';
-
-        my $global   = substr($file, 0, 6) eq 'GLOBAL';
-        my $hid_len = length($hid);
-        my $have_hid = !$global && substr($file, 0, $hid_len) eq $hid && substr($file, $hid_len, 1) eq '-';
-
-        next unless $have_hid || $global;
-
-        next if $global && $self->{+GLOBALS}->{$hid}->{$file}++;
-
-        # Untaint the path.
-        my $full = File::Spec->catfile($tempdir, $file);
-        ($full) = ($full =~ m/^(.*)$/gs);
-
+    for my $info (sort cmp_events map { $self->should_read_event($hid, $_) } readdir($dh)) {
+        my $full = $info->{full_path};
         my $obj = $self->read_event_file($full);
         push @out => $obj;
 
         # Do not remove global events
-        next if $global;
+        next if $info->{global};
 
-        my $complete = File::Spec->canonpath("$full.complete");
         if ($ENV{T2_KEEP_TEMPDIR}) {
-            rename($full, $complete) or $self->abort("Could not rename IPC file '$full', '$complete'");
+            my $complete = File::Spec->canonpath("$full.complete");
+            my ($ok, $err) = do_rename($full, $complete);
+            $self->abort("Could not rename IPC file '$full', '$complete': $err") unless $ok;
         }
         else {
-            unlink($full) or $self->abort("Could not unlink IPC file: $file");
+            my ($ok, $err) = do_unlink("$full");
+            $self->abort("Could not unlink IPC file '$full': $err") unless $ok;
         }
     }
 
     closedir($dh);
     return @out;
+}
+
+sub parse_event_filename {
+    my $self = shift;
+    my ($file) = @_;
+
+    # The || is to force 0 in false
+    my $complete = substr($file, -9, 9) eq '.complete' || 0 and substr($file, -9, 9, "");
+    my $ready    = substr($file, -6, 6) eq '.ready'    || 0 and substr($file, -6, 6, "");
+
+    my @parts = split '-', $file;
+    my ($global, $hid) = $parts[0] eq 'GLOBAL' ? (1, shift @parts) : (0, join '-' => splice(@parts, 0, 3));
+    my ($pid, $tid, $eid) = splice(@parts, 0, 3);
+    my $type = join '::' => @parts;
+
+    return {
+        ready    => $ready,
+        complete => $complete,
+        global   => $global,
+        type     => $type,
+        hid      => $hid,
+        pid      => $pid,
+        tid      => $tid,
+        eid      => $eid,
+    };
+}
+
+sub should_read_event {
+    my $self = shift;
+    my ($hid, $file) = @_;
+
+    return if substr($file, 0, 1) eq '.';
+
+    my $parsed = $self->parse_event_filename($file);
+
+    return if $parsed->{complete};
+    return unless $parsed->{ready};
+    return unless $parsed->{global} || $parsed->{hid} eq $hid;
+
+    return if $parsed->{global} && $self->{+GLOBALS}->{$hid}->{$file}++;
+
+    # Untaint the path.
+    my $full = File::Spec->catfile($self->{+TEMPDIR}, $file);
+    ($full) = ($full =~ m/^(.*)$/gs) if ${^TAINT};
+
+    $parsed->{full_path} = $full;
+
+    return $parsed;
+}
+
+sub cmp_events {
+    # Globals first
+    return -1 if $a->{global} && !$b->{global};
+    return  1 if $b->{global} && !$a->{global};
+
+    return $a->{pid} <=> $b->{pid}
+        || $a->{tid} <=> $b->{tid}
+        || $a->{eid} <=> $b->{eid};
 }
 
 sub read_event_file {
@@ -306,7 +402,8 @@ sub DESTROY {
             $full =~ m/^(.*)$/;
             $full = $1; # Untaint it
             next if $ENV{T2_KEEP_TEMPDIR};
-            unlink($full) or $self->abort("Could not unlink IPC file: $full");
+            my ($ok, $err) = do_unlink($full);
+            $self->abort("Could not unlink IPC file '$full': $err") unless $ok;
             next;
         }
 
