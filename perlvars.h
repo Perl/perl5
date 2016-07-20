@@ -101,6 +101,10 @@ PERLVARI(G, mmap_page_size, IV, 0)
 PERLVAR(G, hints_mutex, perl_mutex)    /* Mutex for refcounted he refcounting */
 PERLVAR(G, locale_mutex, perl_mutex)   /* Mutex for setlocale() changing */
 
+#   ifdef HAS_NEWLOCALE
+PERLVAR(G, C_locale_obj, locale_t)
+#   endif
+
 #endif
 
 #ifdef DEBUGGING

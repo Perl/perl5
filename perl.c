@@ -420,6 +420,9 @@ perl_construct(pTHXx)
     PL_SB_invlist = _new_invlist_C_array(_Perl_SB_invlist);
     PL_WB_invlist = _new_invlist_C_array(_Perl_WB_invlist);
     PL_LB_invlist = _new_invlist_C_array(_Perl_LB_invlist);
+#ifdef USE_THREAD_SAFE_LOCALE
+    PL_C_locale_obj = newlocale(LC_ALL_MASK, "C", NULL);
+#endif
 
     ENTER;
 }
@@ -1123,6 +1126,16 @@ perl_destruct(pTHXx)
     PL_LB_invlist = NULL;
     PL_SB_invlist = NULL;
     PL_WB_invlist = NULL;
+
+#ifdef USE_THREAD_SAFE_LOCALE
+    if (PL_C_locale_obj) {
+        /* Make sure we aren't using the locale space we are about to free */
+        uselocale(LC_GLOBAL_LOCALE);
+
+        freelocale(PL_C_locale_obj);
+        PL_C_locale_obj = (locale_t) NULL;
+    }
+#endif
 
     if (!specialWARN(PL_compiling.cop_warnings))
 	PerlMemShared_free(PL_compiling.cop_warnings);

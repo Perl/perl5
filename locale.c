@@ -2464,47 +2464,94 @@ Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
 }
 
 char *
-Perl_my_strerror(pTHX_ const int errnum) {
+Perl_my_strerror(pTHX_ const int errnum)
+{
+    /* Returns a mortalized copy of the text of the error message associated
+     * with 'errnum'.  It uses the current locale's text unless the platform
+     * doesn't have the LC_MESSAGES category or we are not being called from
+     * within the scope of 'use locale'.  In the former case, it uses whatever
+     * strerror returns; in the latter case it uses the text from the C locale.
+     *
+     * The function just calls strerror(), but temporarily switches, if needed,
+     * to the C locale */
+
+    char *errstr;
+
+#ifdef USE_LOCALE_MESSAGES  /* If platform doesn't have messages category, we
+                               don't do any switching to the C locale; we just
+                               use whatever strerror() returns */
+    const bool within_locale_scope = IN_LC(LC_MESSAGES);
+
     dVAR;
 
-    /* Uses C locale for the error text unless within scope of 'use locale' for
-     * LC_MESSAGES */
+#  ifdef USE_THREAD_SAFE_LOCALE
+    locale_t save_locale;
+#  else
+    char * save_locale;
+    bool locale_is_C;
 
-#ifdef USE_LOCALE_MESSAGES
-    if (! IN_LC(LC_MESSAGES)) {
-        char * save_locale;
+    /* We have a critical section to prevent another thread from changing the
+     * locale out from under us (or zapping the buffer returned from
+     * setlocale() ) */
+    LOCALE_LOCK;
 
-        /* We have a critical section to prevent another thread from changing
-         * the locale out from under us (or zapping the buffer returned from
-         * setlocale() ) */
-        LOCALE_LOCK;
+#  endif
+
+    if (! within_locale_scope) {
+
+#  ifdef USE_THREAD_SAFE_LOCALE /* Use the thread-safe locale functions */
+
+        save_locale = uselocale(PL_C_locale_obj);
+
+#  else    /* Not thread-safe build */
 
         save_locale = setlocale(LC_MESSAGES, NULL);
-        if (! isNAME_C_OR_POSIX(save_locale)) {
-            char *errstr;
+        locale_is_C = isNAME_C_OR_POSIX(save_locale);
 
-            /* The next setlocale likely will zap this, so create a copy */
+        /* Switch to the C locale if not already in it */
+        if (! locale_is_C) {
+
+            /* The setlocale() just below likely will zap 'save_locale', so
+             * create a copy.  */
             save_locale = savepv(save_locale);
-
             setlocale(LC_MESSAGES, "C");
-
-            /* This points to the static space in Strerror, with all its
-             * limitations */
-            errstr = Strerror(errnum);
-
-            setlocale(LC_MESSAGES, save_locale);
-            Safefree(save_locale);
-
-            LOCALE_UNLOCK;
-
-            return errstr;
         }
 
-        LOCALE_UNLOCK;
-    }
+#  endif
+
+    }   /* end of ! within_locale_scope */
+
 #endif
 
-    return Strerror(errnum);
+    errstr = Strerror(errnum);
+    if (errstr) {
+        errstr = savepv(errstr);
+        SAVEFREEPV(errstr);
+    }
+
+#ifdef USE_LOCALE_MESSAGES
+
+    if (! within_locale_scope) {
+
+#  ifdef USE_THREAD_SAFE_LOCALE
+
+        uselocale(save_locale);
+    }
+
+#  else
+
+        if (! locale_is_C) {
+            setlocale(LC_MESSAGES, save_locale);
+            Safefree(save_locale);
+        }
+    }
+
+    LOCALE_UNLOCK;
+
+#  endif
+#endif
+
+    return errstr;
 }
 
 /*

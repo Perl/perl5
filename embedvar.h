@@ -365,6 +365,8 @@
 
 #if defined(PERL_GLOBAL_STRUCT)
 
+#define PL_C_locale_obj		(my_vars->GC_locale_obj)
+#define PL_GC_locale_obj	(my_vars->GC_locale_obj)
 #define PL_appctx		(my_vars->Gappctx)
 #define PL_Gappctx		(my_vars->Gappctx)
 #define PL_check		(my_vars->Gcheck)

@@ -99,6 +99,8 @@ END_EXTERN_C
 
 #else	/* !PERL_CORE */
 
+#undef  PL_C_locale_obj
+#define PL_C_locale_obj		(*Perl_GC_locale_obj_ptr(NULL))
 #undef  PL_appctx
 #define PL_appctx		(*Perl_Gappctx_ptr(NULL))
 #undef  PL_check

@@ -398,6 +398,14 @@ unless ($define{'USE_ITHREADS'}) {
 			 );
 }
 
+unless (   $define{'USE_ITHREADS'}
+        && $define{'HAS_NEWLOCALE'})
+{
+    ++$skip{$_} foreach qw(
+        PL_C_locale_obj
+    );
+}
+
 unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
     ++$skip{$_} foreach qw(
 		    PL_my_cxt_index
