@@ -886,7 +886,6 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    SV *sname;
 	    HE *entry = NULL;
 	    char *key;
-	    STRLEN klen;
 	    SV *hval;
 	    AV *keys = NULL;
 	
@@ -976,6 +975,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
                 char *nkey_buffer = NULL;
                 STRLEN nticks = 0;
 		SV* keysv;
+                STRLEN klen;
 		STRLEN keylen;
                 STRLEN nlen;
 		bool do_utf8 = FALSE;
@@ -1029,7 +1029,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
                 if (style->quotekeys || key_needs_quote(key,keylen)) {
                     if (do_utf8 || style->useqq) {
                         STRLEN ocur = SvCUR(retval);
-                        nlen = esc_q_utf8(aTHX_ retval, key, klen, do_utf8, style->useqq);
+                        klen = nlen = esc_q_utf8(aTHX_ retval, key, klen, do_utf8, style->useqq);
                         nkey = SvPVX(retval) + ocur;
                     }
                     else {
