@@ -823,7 +823,8 @@ use File::Glob qw(:case);
             qr{^xt},
         ],
         # https://rt.perl.org/Ticket/Display.html?id=128160
-        'CUSTOMIZED'   => [ qw[ t/extract-package.t ] ],
+	# https://github.com/Perl-Toolchain-Gang/Module-Metadata/commit/59b3f5b45ff862a1a422a409518255736fe81b66
+        'CUSTOMIZED'   => [ qw[ t/extract-package.t t/metadata.t ] ],
     },
 
     'Net::Ping' => {
