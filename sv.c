@@ -4925,7 +4925,7 @@ Perl_sv_setpvn_mg(pTHX_ SV *const sv, const char *const ptr, const STRLEN len)
 =for apidoc sv_setpv
 
 Copies a string into an SV.  The string must be terminated with a C<NUL>
-character.
+character, and not contain embeded C<NUL>'s.
 Does not handle 'set' magic.  See C<L</sv_setpv_mg>>.
 
 =cut
