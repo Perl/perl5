@@ -211,11 +211,12 @@ introduced in v5.22. [perl #128597]
 
 =item *
 
-Parsing bad POSIX charclasses no longer leaks memory. [perl #128313]
+Parsing bad POSIX charclasses no longer leaks memory.  This was fixed in Perl
+5.25.2 [perl #128313]
 
 =item *
 
-Fixed issues with recursive regexes. The behavior was broken in 5.24.0.
+Fixed issues with recursive regexes. The behavior was fixed in Perl 5.24.0.
 [perl #126182]
 
 =back
