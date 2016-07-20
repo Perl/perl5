@@ -495,46 +495,8 @@ sub next_todo {
     my $ent = shift @{$self->{'subs_todo'}};
     my $cv = $ent->[1];
     if (ref $ent->[3]) { # lexical sub
+	# emit the sub.
 	my @text;
-
-	# At this point, we may not yet have deparsed the hints that allow
-	# lexical subroutines to be recognized.  So adjust the current
-	# hints and deparse them.
-	# When lex subs cease being experimental, we should be able to
-	# remove this code.
-	{
-	    local $^H = $self->{'hints'};
-	    local %^H = %{ $self->{'hinthash'} || {} };
-	    local ${^WARNING_BITS} = $self->{'warnings'};
-	    feature->import("lexical_subs");
-	    warnings->unimport("experimental::lexical_subs");
-	    # Here we depend on the fact that individual features
-	    # will always set the feature bundle to ‘custom’
-	    # (== $feature::hint_mask).  If we had another specific bundle
-	    # enabled previously, normalise it.
-	    if (($self->{'hints'} & $feature::hint_mask)
-		    != $feature::hint_mask)
-	    {
-		if ($self->{'hinthash'}) {
-		    delete $self->{'hinthash'}{$_}
-			for grep /^feature_/, keys %{$self->{'hinthash'}};
-		}
-		else { $self->{'hinthash'} = {} }
-		$self->{'hinthash'}
-		    = _features_from_bundle(@$self{'hints','hinthash'});
-	    }
-	    push @text, $self->declare_hinthash($self->{'hinthash'}, \%^H,
-						$self->{indent_size}, $^H);
-	    push @text, $self->declare_warnings($self->{'warnings'},
-						${^WARNING_BITS})
-		unless ($self->{'warnings'} // 'u')
-		    eq (${^WARNING_BITS   } // 'u');
-	    $self->{'warnings'} = ${^WARNING_BITS};
-	    $self->{'hints'} = $^H;
-	    $self->{'hinthash'} = {%^H};
-	}
-
-	# Now emit the sub itself.
 	my $padname = $ent->[3];
 	my $flags = $padname->FLAGS;
 	push @text,
@@ -560,6 +522,7 @@ sub next_todo {
 	}
 	return join "", @text;
     }
+
     my $gv = $cv->GV;
     my $name = $ent->[3] // $self->gv_name($gv);
     if ($ent->[2]) {
@@ -1946,11 +1909,7 @@ sub pp_nextstate {
     my($op, $cx) = @_;
     $self->{'curcop'} = $op;
     my @text;
-    push @text, $self->cop_subs($op);
-    if (@text) {
-	# Special marker to swallow up the semicolon
-	push @text, "\cK";
-    }
+
     my $stash = $op->stashpv;
     if ($stash ne $self->{'curstash'}) {
 	push @text, $self->keyword("package") . " $stash;\n";
@@ -2028,6 +1987,21 @@ sub pp_nextstate {
 	);
 	$self->{'hinthash'} = $newhh;
     }
+
+    my @subs = $self->cop_subs($op);
+    if (@subs) {
+	# Special marker to swallow up the semicolon
+	push @subs, "\cK";
+    }
+    push @text, @subs;
+
+    # cop_subs above may have changed the package; restore it
+    $stash = $op->stashpv;
+    if ($stash ne $self->{'curstash'}) {
+	push @text, $self->keyword("package") . " $stash;\n";
+	$self->{'curstash'} = $stash;
+    }
+
 
     # This should go after of any branches that add statements, to
     # increase the chances that it refers to the same line it did in
@@ -6316,7 +6290,7 @@ which is not, consequently, deparsed correctly.
 =item *
 
 Lexical (my) variables declared in scopes external to a subroutine
-appear in code2ref output text as package variables.  This is a tricky
+appear in coderef2text output text as package variables.  This is a tricky
 problem, as perl has no native facility for referring to a lexical variable
 defined within a different scope, although L<PadWalker> is a good start.
 
