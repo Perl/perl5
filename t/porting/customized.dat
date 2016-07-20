@@ -1,5 +1,11 @@
 Encode cpan/Encode/Byte/Makefile.PL 54f446297d614331ef3f51e8310faff27cc44f90
 Encode cpan/Encode/encoding.pm 90ea1844e5ae863a17dd40ac6a0f27f438db9c1f
+Encode cpan/Encode/t/enc_data.t e8b94d651a6519e186a2b74245f0002c4bb62160
+Encode cpan/Encode/t/enc_eucjp.t 9d73fce7d5ae83036be546d1603262baffd68cdb
+Encode cpan/Encode/t/enc_module.t aad4fcde7389ad55731206f62284dadf21ffe274
+Encode cpan/Encode/t/enc_utf8.t 7d1c9a4260c0c6b263eff30539e591c417e602a9
+Encode cpan/Encode/t/encoding.t ed051c17c92510713b24217c22384815088834a8
+Encode cpan/Encode/t/jperl.t 584a3813e7bc680ee6ec1d54253bbf861bda8215
 ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t a0369c919e216fb02767a637666bb4577ad79b02
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/basic.t b7ee8691baf37197bf4249534f429fcf28f5cedf
 ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/XS.pm 27aaa6acefd4223b57de74299314c19891ed17bc
