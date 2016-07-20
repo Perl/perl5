@@ -34,7 +34,7 @@ specifically needed the old behavior.  See L<perlunicode/Scripts>.
 
 As an experimental feature, Perl now allows the referencing operator to come
 after L<C<my()>|perlfunc/my>, L<C<state()>|perlfunc/state>,
-L<C<our()>|perlfunc/mour>, or L<C<local()>|perlfunc/local>.  This syntax must
+L<C<our()>|perlfunc/our>, or L<C<local()>|perlfunc/local>.  This syntax must
 be enabled with C<use feature 'declared_refs'>.  It is experimental, and will
 warn by default unless C<no warnings 'experimental::refaliasing'> is in effect.
 It is intended mainly for use in assignments to references.  For example:
