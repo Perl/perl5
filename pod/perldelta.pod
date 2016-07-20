@@ -71,13 +71,19 @@ which provides the same behavior as C<scalar(%hash)> provided prior to Perl
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20160620 to 5.20160720.
+L<bignum> has been upgraded from version 0.42 to 0.43.
 
 =item *
 
-L<XSLoader> has been upgraded from version 0.21 to 0.22, fixing a security hole
-in which binary files could be loaded from a path outside of
-L<C<@INC>|perlvar/@INC>.
+L<Data::Dumper> has been upgraded from version 2.160 to 2.161.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.32 to 3.35.
+
+=item *
+
+L<Encode> has been upgraded from version 2.80 to 2.84.
 
 =item *
 
@@ -92,6 +98,72 @@ L<encoding::warnings> has been upgraded from version 0.12 to 0.13.
 
 This module is no longer supported as of Perl 5.25.3.  It emits a warning to
 that effect and then does nothing.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.32 to 3.33.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.32 to 3.33.
+
+=item *
+
+L<feature> has been upgraded from version 1.44 to 1.45.
+
+=item *
+
+L<Hash::Util> has been upgraded from version 0.19 to 0.20.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999715 to 1.999726.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.40 to 0.42.
+
+=item *
+
+L<Math::BigRat> has been upgraded from version 0.260802 to 0.260804.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20160620 to 5.20160720.
+
+=item *
+
+L<Parse::CPAN::Meta> has been upgraded from version 1.4417 to 1.4422.
+
+=item *
+
+L<Perl::OSType> has been upgraded from version 1.009 to 1.010.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302026 to 1.302045.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9734 to 1.9739.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.65 to 0.66.
+
+=item *
+
+L<version> has been upgraded from version 0.9916 to 0.9917.
+
+=item *
+
+L<warnings> has been upgraded from version 1.36 to 1.37.
+
+=item *
+
+L<XSLoader> has been upgraded from version 0.21 to 0.22, fixing a security hole
+in which binary files could be loaded from a path outside of
+L<C<@INC>|perlvar/@INC>.
 
 =back
 
