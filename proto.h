@@ -3802,6 +3802,11 @@ STATIC PerlIO *	S_doopen_pm(pTHX_ SV *name)
 STATIC void	S__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end);
 #define PERL_ARGS_ASSERT__APPEND_RANGE_TO_INVLIST	\
 	assert(invlist)
+PERL_STATIC_INLINE UV*	S__invlist_array_init(SV* const invlist, const bool will_have_0)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT__INVLIST_ARRAY_INIT	\
+	assert(invlist)
+
 PERL_STATIC_INLINE IV*	S_get_invlist_previous_index_addr(SV* invlist)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_GET_INVLIST_PREVIOUS_INDEX_ADDR	\
@@ -3813,6 +3818,11 @@ PERL_STATIC_INLINE void	S_invlist_clear(pTHX_ SV* invlist);
 STATIC void	S_invlist_extend(pTHX_ SV* const invlist, const UV len);
 #define PERL_ARGS_ASSERT_INVLIST_EXTEND	\
 	assert(invlist)
+PERL_STATIC_INLINE UV	S_invlist_max(SV* const invlist)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_INVLIST_MAX	\
+	assert(invlist)
+
 PERL_STATIC_INLINE IV	S_invlist_previous_index(SV* const invlist)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_INVLIST_PREVIOUS_INDEX	\
@@ -4853,11 +4863,6 @@ STATIC SV *	S_space_join_names_mortal(pTHX_ char *const *array);
 	assert(array)
 #endif
 #if defined(PERL_IN_REGCOMP_C)
-PERL_STATIC_INLINE UV*	S__invlist_array_init(SV* const invlist, const bool will_have_0)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__INVLIST_ARRAY_INIT	\
-	assert(invlist)
-
 STATIC SV*	S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT__MAKE_EXACTF_INVLIST	\
@@ -4944,11 +4949,6 @@ STATIC bool	S_invlist_iternext(SV* invlist, UV* start, UV* end)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_INVLIST_ITERNEXT	\
 	assert(invlist); assert(start); assert(end)
-
-PERL_STATIC_INLINE UV	S_invlist_max(SV* const invlist)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_INVLIST_MAX	\
-	assert(invlist)
 
 PERL_STATIC_INLINE void	S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset);
 #define PERL_ARGS_ASSERT_INVLIST_SET_LEN	\

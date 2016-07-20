@@ -955,9 +955,11 @@
 #  if !defined(PERL_EXT_RE_BUILD)
 #    if defined(PERL_IN_REGCOMP_C)
 #define _append_range_to_invlist(a,b,c)	S__append_range_to_invlist(aTHX_ a,b,c)
+#define _invlist_array_init	S__invlist_array_init
 #define get_invlist_previous_index_addr	S_get_invlist_previous_index_addr
 #define invlist_clear(a)	S_invlist_clear(aTHX_ a)
 #define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
+#define invlist_max		S_invlist_max
 #define invlist_previous_index	S_invlist_previous_index
 #define invlist_replace_list_destroys_src(a,b)	S_invlist_replace_list_destroys_src(aTHX_ a,b)
 #define invlist_set_previous_index	S_invlist_set_previous_index
@@ -1000,7 +1002,6 @@
 #define sv_or_pv_pos_u2b(a,b,c,d)	S_sv_or_pv_pos_u2b(aTHX_ a,b,c,d)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C)
-#define _invlist_array_init	S__invlist_array_init
 #define _make_exactf_invlist(a,b)	S__make_exactf_invlist(aTHX_ a,b)
 #define add_above_Latin1_folds(a,b,c)	S_add_above_Latin1_folds(aTHX_ a,b,c)
 #define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
@@ -1024,7 +1025,6 @@
 #define invlist_iterfinish	S_invlist_iterfinish
 #define invlist_iterinit	S_invlist_iterinit
 #define invlist_iternext	S_invlist_iternext
-#define invlist_max		S_invlist_max
 #define invlist_set_len(a,b,c)	S_invlist_set_len(aTHX_ a,b,c)
 #define is_ssc_worth_it		S_is_ssc_worth_it
 #define join_exact(a,b,c,d,e,f,g)	S_join_exact(aTHX_ a,b,c,d,e,f,g)

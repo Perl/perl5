@@ -8376,6 +8376,8 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 
 /* The header definitions are in F<invlist_inline.h> */
 
+#ifndef PERL_IN_XSUB_RE
+
 PERL_STATIC_INLINE UV*
 S__invlist_array_init(SV* const invlist, const bool will_have_0)
 {
@@ -8401,6 +8403,8 @@ S__invlist_array_init(SV* const invlist, const bool will_have_0)
     *offset = 1 ^ will_have_0;
     return zero_addr + *offset;
 }
+
+#endif
 
 PERL_STATIC_INLINE void
 S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
@@ -8538,6 +8542,8 @@ S_invlist_is_iterating(SV* const invlist)
     return *(get_invlist_iter_addr(invlist)) < (STRLEN) UV_MAX;
 }
 
+#ifndef PERL_IN_XSUB_RE
+
 PERL_STATIC_INLINE UV
 S_invlist_max(SV* const invlist)
 {
@@ -8554,8 +8560,6 @@ S_invlist_max(SV* const invlist)
            ? FROM_INTERNAL_SIZE(SvCUR(invlist)) - 1
            : FROM_INTERNAL_SIZE(SvLEN(invlist)) - 1;
 }
-
-#ifndef PERL_IN_XSUB_RE
 SV*
 Perl__new_invlist(pTHX_ IV initial_size)
 {
