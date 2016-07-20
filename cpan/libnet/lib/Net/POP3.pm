@@ -20,7 +20,7 @@ use IO::Socket;
 use Net::Cmd;
 use Net::Config;
 
-our $VERSION = "3.08";
+our $VERSION = "3.09";
 
 # Code for detecting if we can use SSL
 my $ssl_class = eval {
@@ -38,7 +38,7 @@ my $family_key = 'Domain';
 my $inet6_class = eval {
   require IO::Socket::IP;
   no warnings 'numeric';
-  IO::Socket::IP->VERSION(0.20) || die;
+  IO::Socket::IP->VERSION(0.25) || die;
   $family_key = 'Family';
 } && 'IO::Socket::IP' || eval {
   require IO::Socket::INET6;

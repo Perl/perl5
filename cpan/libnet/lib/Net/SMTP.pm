@@ -21,7 +21,7 @@ use Net::Cmd;
 use Net::Config;
 use Socket;
 
-our $VERSION = "3.08";
+our $VERSION = "3.09";
 
 # Code for detecting if we can use SSL
 my $ssl_class = eval {
@@ -39,7 +39,7 @@ my $family_key = 'Domain';
 my $inet6_class = eval {
   require IO::Socket::IP;
   no warnings 'numeric';
-  IO::Socket::IP->VERSION(0.20) || die;
+  IO::Socket::IP->VERSION(0.25) || die;
   $family_key = 'Family';
 } && 'IO::Socket::IP' || eval {
   require IO::Socket::INET6;
@@ -225,11 +225,15 @@ sub auth {
     if defined $str and length $str;
 
   while (($code = $self->command(@cmd)->response()) == CMD_MORE) {
+    my $str2 = MIME::Base64::decode_base64(($self->message)[0]);
+    $self->debug_print(0, "(decoded) " . $str2 . "\n") if $self->debug;
+
+    $str = $client->client_step($str2);
     @cmd = (
-      MIME::Base64::encode_base64(
-        $client->client_step(MIME::Base64::decode_base64(($self->message)[0])), ''
-      )
+      MIME::Base64::encode_base64($str, '')
     );
+
+    $self->debug_print(1, "(decoded) " . $str . "\n") if $self->debug;
   }
 
   $code == CMD_OK;

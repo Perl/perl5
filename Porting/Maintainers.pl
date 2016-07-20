@@ -666,7 +666,7 @@ use File::Glob qw(:case);
     },
 
     'libnet' => {
-        'DISTRIBUTION' => 'SHAY/libnet-3.08.tar.gz',
+        'DISTRIBUTION' => 'SHAY/libnet-3.09.tar.gz',
         'FILES'        => q[cpan/libnet],
         'EXCLUDED'     => [
             qw( Configure

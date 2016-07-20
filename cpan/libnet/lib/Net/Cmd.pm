@@ -28,7 +28,7 @@ BEGIN {
   }
 }
 
-our $VERSION = "3.08";
+our $VERSION = "3.09";
 our @ISA     = qw(Exporter);
 our @EXPORT  = qw(CMD_INFO CMD_OK CMD_MORE CMD_REJECT CMD_ERROR CMD_PENDING);
 
@@ -189,6 +189,8 @@ sub set_status {
 
   1;
 }
+
+sub timeout { 0 }
 
 sub _syswrite_with_timeout {
   my $cmd = shift;
@@ -747,6 +749,12 @@ a space character and CRLF is appended, this string is then sent to the
 command server.
 
 Returns undef upon failure.
+
+=item timeout ()
+
+Returns the timeout value for this class, in seconds. The timeout provided
+by the default implementation is 0; subclasses may override this if they
+choose.
 
 =item unsupported ()
 

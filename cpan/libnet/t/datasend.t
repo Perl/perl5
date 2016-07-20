@@ -21,8 +21,6 @@ BEGIN {
   use Net::Cmd;
   our @ISA = qw(Net::Cmd IO::File);
 
-  sub timeout { 0 }
-
   sub new {
     my $fh = shift->new_tmpfile;
     binmode($fh);

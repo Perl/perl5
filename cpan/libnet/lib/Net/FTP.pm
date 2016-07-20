@@ -25,7 +25,7 @@ use Net::Config;
 use Socket;
 use Time::Local;
 
-our $VERSION = '3.08';
+our $VERSION = '3.09';
 
 our $IOCLASS;
 my $family_key;
@@ -45,7 +45,7 @@ BEGIN {
   my $inet6_class = eval {
     require IO::Socket::IP;
     no warnings 'numeric';
-    IO::Socket::IP->VERSION(0.20);
+    IO::Socket::IP->VERSION(0.25);
   } && 'IO::Socket::IP' || eval {
     require IO::Socket::INET6;
     no warnings 'numeric';
