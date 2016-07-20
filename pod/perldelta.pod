@@ -127,7 +127,8 @@ Documented new feature: See L</Declaring a reference to a variable> above.
 =item *
 
 Clarified documentation of L<C<seek()>|perlfunc/seek>,
-L<C<tell()>|perlfunc/tell> and L<C<sysseek()>|perlfunc/sysseek>. [perl #128607]
+L<C<tell()>|perlfunc/tell> and L<C<sysseek()>|perlfunc/sysseek>.
+L<[perl #128607]|https://rt.perl.org/Public/Bug/Display.html?id=128607>
 
 =item *
 
@@ -258,30 +259,34 @@ XXX
 
 =item *
 
-An assertion failure with C<%: = 0> has been fixed. [perl #128238]
+An assertion failure with C<%: = 0> has been fixed.
+L<[perl #128238]|https://rt.perl.org/Public/Bug/Display.html?id=128238>
 
 =item *
 
 In Perl 5.18, the parsing of C<"$foo::$bar"> was accidentally changed, such
 that it would be treated as C<$foo."::".$bar>.  The previous behavior, which
-was to parse it as C<$foo:: . $bar>, has been restored. [perl #128478]
+was to parse it as C<$foo:: . $bar>, has been restored.
+L<[perl #128478]|https://rt.perl.org/Public/Bug/Display.html?id=128478>
 
 =item *
 
 Since Perl 5.20, line numbers have been off by one when perl is invoked with
-the B<-x> switch.  This has been fixed. [perl #128508]
+the B<-x> switch.  This has been fixed.
+L<[perl #128508]|https://rt.perl.org/Public/Bug/Display.html?id=128508>
 
 =item *
 
 Vivifying a subroutine stub in a deleted stash (e.g., C<delete $My::{"Foo::"};
 \&My::Foo::foo>) no longer crashes.  It had begun crashing in Perl 5.18.
-[perl #128532]
+L<[perl #128532]|https://rt.perl.org/Public/Bug/Display.html?id=128532>
 
 =item *
 
 Some obscure cases of subroutines and file handles being freed at the same time
 could result in crashes, but have been fixed.  The crash was introduced in Perl
-5.22. [perl #128597]
+5.22.
+L<[perl #128597]|https://rt.perl.org/Public/Bug/Display.html?id=128597>
 
 =back
 
@@ -292,12 +297,13 @@ could result in crashes, but have been fixed.  The crash was introduced in Perl
 =item *
 
 Parsing bad POSIX charclasses no longer leaks memory.  This was fixed in Perl
-5.25.2 [perl #128313]
+5.25.2
+L<[perl #128313]|https://rt.perl.org/Public/Bug/Display.html?id=128313>
 
 =item *
 
 Fixed issues with recursive regexes.  The behavior was fixed in Perl 5.24.0.
-[perl #126182]
+L<[perl #126182]|https://rt.perl.org/Public/Bug/Display.html?id=126182>
 
 =back
 
