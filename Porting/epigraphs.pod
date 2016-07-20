@@ -17,6 +17,38 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.25.3 - Edward Lear, ed. Vivien Noakes, "The Complete Nonsense and Other Verse": The Dong with a Luminous Nose
+
+L<Announced on 2016-07-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2016/07/msg238158.html>
+
+  When awful darkness and silence reign
+    Over the great Gromboolian plain,
+      Through the long, long wintry nights; -
+  When the angry breakers roar
+  As they beat on the rocky shore; -
+      When Storm-clouds brood on the towering heights
+  Of the Hills of the Chankly Bore: -
+
+  Then, through the vast and gloomy dark,
+  There moves what seems a fiery spark,
+      A lonely spark with silvery rays
+      Piercing the coal-black night, -
+      A Meteor strange and bright: -
+  Hither and thither the vision strays,
+      A single lurid light.
+
+  Slowly it wanders, - pauses, - creeps, -
+  Anon it sparkles, - flashes and leaps;
+  And ever as onward it gleaming goes
+  A light on the Bong-tree stems it throws.
+  And those who watch at that midnight hour
+  From Hall or Terrace, or lofty Tower,
+  Cry, as the wild light passes along, -
+        'The Dong! - the Dong!
+      The wandering Dong through the forest goes!
+        The Dong! the Dong!
+      The Dong with a luminous Nose!'
+
 =head2 v5.25.2 - Dan le Sac Vs Scroobius Pip "Waiting For The Beat To Kick In"
 
 L<Announced on 2016-06-20 by Matthew Horsfall|http://www.nntp.perl.org/group/perl.perl5.porters/2016/06/msg237274.html>
