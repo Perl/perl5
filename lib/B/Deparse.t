@@ -87,7 +87,12 @@ EOC
 	$regex =~ s/\s+/\\s+/g;
 	$regex = '^\{\s*' . $regex . '\s*\}$';
 
-        like($deparsed, qr/$regex/, $desc);
+        like($deparsed, qr/$regex/, $desc)
+            or diag "=============================================\n"
+                  . "CODE:\n--------\n$input\n--------\n"
+                  . "EXPECTED:\n--------\n{\n$expected\n}\n--------\n"
+                  . "GOT:\n--------\n$deparsed\n--------\n"
+                  . "=============================================\n";
     }
 }
 
@@ -376,7 +381,7 @@ like($a, qr/my sub use;\nCORE::use less;/,
 $a = readpipe qq`$^X $path "-MO=Deparse" -Xe `
              .qq`"use feature q|:all|; my sub __DATA__; `
              .qq`CORE::__DATA__" 2>&1`;
-like($a, qr/my sub __DATA__;\n.*\nCORE::__DATA__/s,
+like($a, qr/my sub __DATA__;\nCORE::__DATA__/s,
     'CORE::__DATA__ after my sub __DATA__');
 
 # sub declarations
@@ -1946,12 +1951,10 @@ no warnings "experimental::lexical_subs";
 my sub f {}
 print f();
 >>>>
-BEGIN {${^WARNING_BITS} = "\x54\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55"}
+BEGIN {${^WARNING_BITS} = "\x54\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55"}
 my sub f {
-    BEGIN {${^WARNING_BITS} = "\x54\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55"}
     
 }
-BEGIN {${^WARNING_BITS} = "\x54\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55"}
 print f();
 ####
 # SKIP ?$] < 5.017004 && "lexical subs not implemented on this Perl version"
@@ -1961,12 +1964,10 @@ no warnings 'experimental::lexical_subs';
 state sub f {}
 print f();
 >>>>
-BEGIN {${^WARNING_BITS} = "\x54\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55"}
+BEGIN {${^WARNING_BITS} = "\x54\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55"}
 state sub f {
-    BEGIN {${^WARNING_BITS} = "\x54\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55"}
     
 }
-BEGIN {${^WARNING_BITS} = "\x54\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55"}
 print f();
 ####
 # SKIP ?$] < 5.017004 && "lexical subs not implemented on this Perl version"
