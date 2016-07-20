@@ -99,13 +99,67 @@ that effect and then does nothing.
 
 =head2 Changes to Existing Documentation
 
-=head3 L<XXX>
+=head3 L<perldata> and L<perltie>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Updated documentation of C<scalar(%hash)>.  See L</scalar(%hash) return
+signature changed> above.
+
+=back
+
+=head3 L<perlexperiment> and L<perlref>
+
+=over 4
+
+=item *
+
+Documented new feature: See L</Declaring a reference to a variable> above.
+
+=back
+
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+Clarified documentation of L<C<seek()>|perlfunc/seek>,
+L<C<tell()>|perlfunc/tell> and L<C<sysseek()>|perlfunc/sysseek>. [perl #128607]
+
+=item *
+
+Removed obsolete documentation of L<C<study()>|perlfunc/study>.
+
+=back
+
+=head3 L<perlunicode>
+
+=over 4
+
+=item *
+
+Documented change to C<\p{I<script>}> to now use the improved Script_Extensions
+property.  See L</Use of \p{script} uses the improved Script_Extensions
+property> above.
+
+=item *
+
+Updated the text to correspond with changes in Unicode UTS#18, concerning
+regular expressions, and Perl compatibility with what it says.
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+Removed obsolete documentation of C<${^ENCODING}>.  See L</${^ENCODING} has
+been removed> above.
 
 =back
 
