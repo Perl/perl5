@@ -42,10 +42,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Security Fixes</h3>
 
-<commit votes="sprout jhi" id="08e3451d7b3b714ad63a27f1b9c2a23ee75d15ee" ticket="128528" desc="Don’t let XSLoader load relative paths"/>
-<commit votes="sprout jhi" id="a651dcdf6a9151150dcf0fb6b18849d3e39b0811" ticket="128528" desc="Fix XSLoader to recognize drive letters"/>
-<commit votes="sprout" id="ae635bbffa4769051671b9832a7472b9d977c198" ticket="128528" desc="Synchronize blead with CPAN XSLoader 0.22"/>
-
 </div>
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
