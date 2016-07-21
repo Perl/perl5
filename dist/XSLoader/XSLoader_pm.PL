@@ -10,7 +10,7 @@ print OUT <<'EOT';
 
 package XSLoader;
 
-$VERSION = "0.20";
+$VERSION = "0.20_01";
 
 #use strict;
 
@@ -245,7 +245,7 @@ XSLoader - Dynamically load C libraries into Perl code
 
 =head1 VERSION
 
-Version 0.17
+Version 0.20_01
 
 =head1 SYNOPSIS
 
