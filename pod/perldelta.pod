@@ -53,6 +53,7 @@ L<Module::CoreList> has been upgraded from version 5.20160506 to 5.20160730_24.
 L<XSLoader> has been upgraded from version 0.21 to 0.22, fixing a security hole
 in which binary files could be loaded from a path outside of
 L<C<@INC>|perlvar/@INC>.
+L<[perl #128528]|https://rt.perl.org/Public/Bug/Display.html?id=128528>
 
 =back
 
