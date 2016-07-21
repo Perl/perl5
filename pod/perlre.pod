@@ -1883,6 +1883,213 @@ See L<perlrecharclass/Extended Bracketed Character Classes>.
 
 =back
 
+=head2 Backtracking
+X<backtrack> X<backtracking>
+
+NOTE: This section presents an abstract approximation of regular
+expression behavior.  For a more rigorous (and complicated) view of
+the rules involved in selecting a match among possible alternatives,
+see L</Combining RE Pieces>.
+
+A fundamental feature of regular expression matching involves the
+notion called I<backtracking>, which is currently used (when needed)
+by all regular non-possessive expression quantifiers, namely C<"*">, C<"*?">, C<"+">,
+C<"+?">, C<{n,m}>, and C<{n,m}?>.  Backtracking is often optimized
+internally, but the general principle outlined here is valid.
+
+For a regular expression to match, the I<entire> regular expression must
+match, not just part of it.  So if the beginning of a pattern containing a
+quantifier succeeds in a way that causes later parts in the pattern to
+fail, the matching engine backs up and recalculates the beginning
+part--that's why it's called backtracking.
+
+Here is an example of backtracking:  Let's say you want to find the
+word following "foo" in the string "Food is on the foo table.":
+
+    $_ = "Food is on the foo table.";
+    if ( /\b(foo)\s+(\w+)/i ) {
+        print "$2 follows $1.\n";
+    }
+
+When the match runs, the first part of the regular expression (C<\b(foo)>)
+finds a possible match right at the beginning of the string, and loads up
+C<$1> with "Foo".  However, as soon as the matching engine sees that there's
+no whitespace following the "Foo" that it had saved in C<$1>, it realizes its
+mistake and starts over again one character after where it had the
+tentative match.  This time it goes all the way until the next occurrence
+of "foo". The complete regular expression matches this time, and you get
+the expected output of "table follows foo."
+
+Sometimes minimal matching can help a lot.  Imagine you'd like to match
+everything between "foo" and "bar".  Initially, you write something
+like this:
+
+    $_ =  "The food is under the bar in the barn.";
+    if ( /foo(.*)bar/ ) {
+        print "got <$1>\n";
+    }
+
+Which perhaps unexpectedly yields:
+
+  got <d is under the bar in the >
+
+That's because C<.*> was greedy, so you get everything between the
+I<first> "foo" and the I<last> "bar".  Here it's more effective
+to use minimal matching to make sure you get the text between a "foo"
+and the first "bar" thereafter.
+
+    if ( /foo(.*?)bar/ ) { print "got <$1>\n" }
+  got <d is under the >
+
+Here's another example. Let's say you'd like to match a number at the end
+of a string, and you also want to keep the preceding part of the match.
+So you write this:
+
+    $_ = "I have 2 numbers: 53147";
+    if ( /(.*)(\d*)/ ) {                                # Wrong!
+        print "Beginning is <$1>, number is <$2>.\n";
+    }
+
+That won't work at all, because C<.*> was greedy and gobbled up the
+whole string. As C<\d*> can match on an empty string the complete
+regular expression matched successfully.
+
+    Beginning is <I have 2 numbers: 53147>, number is <>.
+
+Here are some variants, most of which don't work:
+
+    $_ = "I have 2 numbers: 53147";
+    @pats = qw{
+        (.*)(\d*)
+        (.*)(\d+)
+        (.*?)(\d*)
+        (.*?)(\d+)
+        (.*)(\d+)$
+        (.*?)(\d+)$
+        (.*)\b(\d+)$
+        (.*\D)(\d+)$
+    };
+
+    for $pat (@pats) {
+        printf "%-12s ", $pat;
+        if ( /$pat/ ) {
+            print "<$1> <$2>\n";
+        } else {
+            print "FAIL\n";
+        }
+    }
+
+That will print out:
+
+    (.*)(\d*)    <I have 2 numbers: 53147> <>
+    (.*)(\d+)    <I have 2 numbers: 5314> <7>
+    (.*?)(\d*)   <> <>
+    (.*?)(\d+)   <I have > <2>
+    (.*)(\d+)$   <I have 2 numbers: 5314> <7>
+    (.*?)(\d+)$  <I have 2 numbers: > <53147>
+    (.*)\b(\d+)$ <I have 2 numbers: > <53147>
+    (.*\D)(\d+)$ <I have 2 numbers: > <53147>
+
+As you see, this can be a bit tricky.  It's important to realize that a
+regular expression is merely a set of assertions that gives a definition
+of success.  There may be 0, 1, or several different ways that the
+definition might succeed against a particular string.  And if there are
+multiple ways it might succeed, you need to understand backtracking to
+know which variety of success you will achieve.
+
+When using lookahead assertions and negations, this can all get even
+trickier.  Imagine you'd like to find a sequence of non-digits not
+followed by "123".  You might try to write that as
+
+    $_ = "ABC123";
+    if ( /^\D*(?!123)/ ) {                # Wrong!
+        print "Yup, no 123 in $_\n";
+    }
+
+But that isn't going to match; at least, not the way you're hoping.  It
+claims that there is no 123 in the string.  Here's a clearer picture of
+why that pattern matches, contrary to popular expectations:
+
+    $x = 'ABC123';
+    $y = 'ABC445';
+
+    print "1: got $1\n" if $x =~ /^(ABC)(?!123)/;
+    print "2: got $1\n" if $y =~ /^(ABC)(?!123)/;
+
+    print "3: got $1\n" if $x =~ /^(\D*)(?!123)/;
+    print "4: got $1\n" if $y =~ /^(\D*)(?!123)/;
+
+This prints
+
+    2: got ABC
+    3: got AB
+    4: got ABC
+
+You might have expected test 3 to fail because it seems to a more
+general purpose version of test 1.  The important difference between
+them is that test 3 contains a quantifier (C<\D*>) and so can use
+backtracking, whereas test 1 will not.  What's happening is
+that you've asked "Is it true that at the start of C<$x>, following 0 or more
+non-digits, you have something that's not 123?"  If the pattern matcher had
+let C<\D*> expand to "ABC", this would have caused the whole pattern to
+fail.
+
+The search engine will initially match C<\D*> with "ABC".  Then it will
+try to match C<(?!123)> with "123", which fails.  But because
+a quantifier (C<\D*>) has been used in the regular expression, the
+search engine can backtrack and retry the match differently
+in the hope of matching the complete regular expression.
+
+The pattern really, I<really> wants to succeed, so it uses the
+standard pattern back-off-and-retry and lets C<\D*> expand to just "AB" this
+time.  Now there's indeed something following "AB" that is not
+"123".  It's "C123", which suffices.
+
+We can deal with this by using both an assertion and a negation.
+We'll say that the first part in C<$1> must be followed both by a digit
+and by something that's not "123".  Remember that the lookaheads
+are zero-width expressions--they only look, but don't consume any
+of the string in their match.  So rewriting this way produces what
+you'd expect; that is, case 5 will fail, but case 6 succeeds:
+
+    print "5: got $1\n" if $x =~ /^(\D*)(?=\d)(?!123)/;
+    print "6: got $1\n" if $y =~ /^(\D*)(?=\d)(?!123)/;
+
+    6: got ABC
+
+In other words, the two zero-width assertions next to each other work as though
+they're ANDed together, just as you'd use any built-in assertions:  C</^$/>
+matches only if you're at the beginning of the line AND the end of the
+line simultaneously.  The deeper underlying truth is that juxtaposition in
+regular expressions always means AND, except when you write an explicit OR
+using the vertical bar.  C</ab/> means match "a" AND (then) match "b",
+although the attempted matches are made at different positions because "a"
+is not a zero-width assertion, but a one-width assertion.
+
+B<WARNING>: Particularly complicated regular expressions can take
+exponential time to solve because of the immense number of possible
+ways they can use backtracking to try for a match.  For example, without
+internal optimizations done by the regular expression engine, this will
+take a painfully long time to run:
+
+    'aaaaaaaaaaaa' =~ /((a{0,5}){0,5})*[c]/
+
+And if you used C<"*">'s in the internal groups instead of limiting them
+to 0 through 5 matches, then it would take forever--or until you ran
+out of stack space.  Moreover, these internal optimizations are not
+always applicable.  For example, if you put C<{0,5}> instead of C<"*">
+on the external group, no current optimization is applicable, and the
+match takes a long time to finish.
+
+A powerful tool for optimizing such beasts is what is known as an
+"independent group",
+which does not backtrack (see L</C<< (?>pattern) >>>).  Note also that
+zero-length lookahead/lookbehind assertions will not backtrack to make
+the tail match, since they are in "logical" context: only
+whether they match is considered relevant.  For an example
+where side-effects of lookahead I<might> have influenced the
+following match, see L</C<< (?>pattern) >>>.
+
 =head2 Special Backtracking Control Verbs
 
 These special patterns are generally of the form C<(*I<VERB>:I<ARG>)>. Unless
@@ -2128,213 +2335,6 @@ C<$REGMARK> after the match completes.
 =back
 
 =back
-
-=head2 Backtracking
-X<backtrack> X<backtracking>
-
-NOTE: This section presents an abstract approximation of regular
-expression behavior.  For a more rigorous (and complicated) view of
-the rules involved in selecting a match among possible alternatives,
-see L</Combining RE Pieces>.
-
-A fundamental feature of regular expression matching involves the
-notion called I<backtracking>, which is currently used (when needed)
-by all regular non-possessive expression quantifiers, namely C<"*">, C<"*?">, C<"+">,
-C<"+?">, C<{n,m}>, and C<{n,m}?>.  Backtracking is often optimized
-internally, but the general principle outlined here is valid.
-
-For a regular expression to match, the I<entire> regular expression must
-match, not just part of it.  So if the beginning of a pattern containing a
-quantifier succeeds in a way that causes later parts in the pattern to
-fail, the matching engine backs up and recalculates the beginning
-part--that's why it's called backtracking.
-
-Here is an example of backtracking:  Let's say you want to find the
-word following "foo" in the string "Food is on the foo table.":
-
-    $_ = "Food is on the foo table.";
-    if ( /\b(foo)\s+(\w+)/i ) {
-        print "$2 follows $1.\n";
-    }
-
-When the match runs, the first part of the regular expression (C<\b(foo)>)
-finds a possible match right at the beginning of the string, and loads up
-C<$1> with "Foo".  However, as soon as the matching engine sees that there's
-no whitespace following the "Foo" that it had saved in C<$1>, it realizes its
-mistake and starts over again one character after where it had the
-tentative match.  This time it goes all the way until the next occurrence
-of "foo". The complete regular expression matches this time, and you get
-the expected output of "table follows foo."
-
-Sometimes minimal matching can help a lot.  Imagine you'd like to match
-everything between "foo" and "bar".  Initially, you write something
-like this:
-
-    $_ =  "The food is under the bar in the barn.";
-    if ( /foo(.*)bar/ ) {
-        print "got <$1>\n";
-    }
-
-Which perhaps unexpectedly yields:
-
-  got <d is under the bar in the >
-
-That's because C<.*> was greedy, so you get everything between the
-I<first> "foo" and the I<last> "bar".  Here it's more effective
-to use minimal matching to make sure you get the text between a "foo"
-and the first "bar" thereafter.
-
-    if ( /foo(.*?)bar/ ) { print "got <$1>\n" }
-  got <d is under the >
-
-Here's another example. Let's say you'd like to match a number at the end
-of a string, and you also want to keep the preceding part of the match.
-So you write this:
-
-    $_ = "I have 2 numbers: 53147";
-    if ( /(.*)(\d*)/ ) {                                # Wrong!
-        print "Beginning is <$1>, number is <$2>.\n";
-    }
-
-That won't work at all, because C<.*> was greedy and gobbled up the
-whole string. As C<\d*> can match on an empty string the complete
-regular expression matched successfully.
-
-    Beginning is <I have 2 numbers: 53147>, number is <>.
-
-Here are some variants, most of which don't work:
-
-    $_ = "I have 2 numbers: 53147";
-    @pats = qw{
-        (.*)(\d*)
-        (.*)(\d+)
-        (.*?)(\d*)
-        (.*?)(\d+)
-        (.*)(\d+)$
-        (.*?)(\d+)$
-        (.*)\b(\d+)$
-        (.*\D)(\d+)$
-    };
-
-    for $pat (@pats) {
-        printf "%-12s ", $pat;
-        if ( /$pat/ ) {
-            print "<$1> <$2>\n";
-        } else {
-            print "FAIL\n";
-        }
-    }
-
-That will print out:
-
-    (.*)(\d*)    <I have 2 numbers: 53147> <>
-    (.*)(\d+)    <I have 2 numbers: 5314> <7>
-    (.*?)(\d*)   <> <>
-    (.*?)(\d+)   <I have > <2>
-    (.*)(\d+)$   <I have 2 numbers: 5314> <7>
-    (.*?)(\d+)$  <I have 2 numbers: > <53147>
-    (.*)\b(\d+)$ <I have 2 numbers: > <53147>
-    (.*\D)(\d+)$ <I have 2 numbers: > <53147>
-
-As you see, this can be a bit tricky.  It's important to realize that a
-regular expression is merely a set of assertions that gives a definition
-of success.  There may be 0, 1, or several different ways that the
-definition might succeed against a particular string.  And if there are
-multiple ways it might succeed, you need to understand backtracking to
-know which variety of success you will achieve.
-
-When using lookahead assertions and negations, this can all get even
-trickier.  Imagine you'd like to find a sequence of non-digits not
-followed by "123".  You might try to write that as
-
-    $_ = "ABC123";
-    if ( /^\D*(?!123)/ ) {                # Wrong!
-        print "Yup, no 123 in $_\n";
-    }
-
-But that isn't going to match; at least, not the way you're hoping.  It
-claims that there is no 123 in the string.  Here's a clearer picture of
-why that pattern matches, contrary to popular expectations:
-
-    $x = 'ABC123';
-    $y = 'ABC445';
-
-    print "1: got $1\n" if $x =~ /^(ABC)(?!123)/;
-    print "2: got $1\n" if $y =~ /^(ABC)(?!123)/;
-
-    print "3: got $1\n" if $x =~ /^(\D*)(?!123)/;
-    print "4: got $1\n" if $y =~ /^(\D*)(?!123)/;
-
-This prints
-
-    2: got ABC
-    3: got AB
-    4: got ABC
-
-You might have expected test 3 to fail because it seems to a more
-general purpose version of test 1.  The important difference between
-them is that test 3 contains a quantifier (C<\D*>) and so can use
-backtracking, whereas test 1 will not.  What's happening is
-that you've asked "Is it true that at the start of C<$x>, following 0 or more
-non-digits, you have something that's not 123?"  If the pattern matcher had
-let C<\D*> expand to "ABC", this would have caused the whole pattern to
-fail.
-
-The search engine will initially match C<\D*> with "ABC".  Then it will
-try to match C<(?!123)> with "123", which fails.  But because
-a quantifier (C<\D*>) has been used in the regular expression, the
-search engine can backtrack and retry the match differently
-in the hope of matching the complete regular expression.
-
-The pattern really, I<really> wants to succeed, so it uses the
-standard pattern back-off-and-retry and lets C<\D*> expand to just "AB" this
-time.  Now there's indeed something following "AB" that is not
-"123".  It's "C123", which suffices.
-
-We can deal with this by using both an assertion and a negation.
-We'll say that the first part in C<$1> must be followed both by a digit
-and by something that's not "123".  Remember that the lookaheads
-are zero-width expressions--they only look, but don't consume any
-of the string in their match.  So rewriting this way produces what
-you'd expect; that is, case 5 will fail, but case 6 succeeds:
-
-    print "5: got $1\n" if $x =~ /^(\D*)(?=\d)(?!123)/;
-    print "6: got $1\n" if $y =~ /^(\D*)(?=\d)(?!123)/;
-
-    6: got ABC
-
-In other words, the two zero-width assertions next to each other work as though
-they're ANDed together, just as you'd use any built-in assertions:  C</^$/>
-matches only if you're at the beginning of the line AND the end of the
-line simultaneously.  The deeper underlying truth is that juxtaposition in
-regular expressions always means AND, except when you write an explicit OR
-using the vertical bar.  C</ab/> means match "a" AND (then) match "b",
-although the attempted matches are made at different positions because "a"
-is not a zero-width assertion, but a one-width assertion.
-
-B<WARNING>: Particularly complicated regular expressions can take
-exponential time to solve because of the immense number of possible
-ways they can use backtracking to try for a match.  For example, without
-internal optimizations done by the regular expression engine, this will
-take a painfully long time to run:
-
-    'aaaaaaaaaaaa' =~ /((a{0,5}){0,5})*[c]/
-
-And if you used C<"*">'s in the internal groups instead of limiting them
-to 0 through 5 matches, then it would take forever--or until you ran
-out of stack space.  Moreover, these internal optimizations are not
-always applicable.  For example, if you put C<{0,5}> instead of C<"*">
-on the external group, no current optimization is applicable, and the
-match takes a long time to finish.
-
-A powerful tool for optimizing such beasts is what is known as an
-"independent group",
-which does not backtrack (see L</C<< (?>pattern) >>>).  Note also that
-zero-length lookahead/lookbehind assertions will not backtrack to make
-the tail match, since they are in "logical" context: only
-whether they match is considered relevant.  For an example
-where side-effects of lookahead I<might> have influenced the
-following match, see L</C<< (?>pattern) >>>.
 
 =head2 Version 8 Regular Expressions
 X<regular expression, version 8> X<regex, version 8> X<regexp, version 8>
