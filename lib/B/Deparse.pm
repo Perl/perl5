@@ -495,6 +495,13 @@ sub next_todo {
     my $ent = shift @{$self->{'subs_todo'}};
     my ($seq, $cv, $is_form, $name) = @$ent;
 
+    # any 'use strict; package foo' that should come before the sub
+    # declaration to sync with the first COP of the sub
+    my $pragmata = '';
+    if ($cv and !null($cv->START) and is_state($cv->START))  {
+        $pragmata = $self->pragmata($cv->START);
+    }
+
     if (ref $name) { # lexical sub
 	# emit the sub.
 	my @text;
@@ -520,20 +527,20 @@ sub next_todo {
 	    # my sub foo;
 	    push @text, ";\n";
 	}
-	return join "", @text;
+	return $pragmata . join "", @text;
     }
 
     my $gv = $cv->GV;
     $name //= $self->gv_name($gv);
     if ($is_form) {
-	return $self->keyword("format") . " $name =\n"
+	return $pragmata . $self->keyword("format") . " $name =\n"
 	    . $self->deparse_format($cv). "\n";
     } else {
 	my $use_dec;
 	if ($name eq "BEGIN") {
 	    $use_dec = $self->begin_is_use($cv);
 	    if (defined ($use_dec) and $self->{'expand'} < 5) {
-		return () if 0 == length($use_dec);
+		return $pragmata if 0 == length($use_dec);
 		$use_dec =~ s/^(use|no)\b/$self->keyword($1)/e;
 	    }
 	}
@@ -554,7 +561,7 @@ sub next_todo {
 	    }
 	}
 	if ($use_dec) {
-	    return "$p$l$use_dec";
+	    return "$pragmata$p$l$use_dec";
 	}
         if ( $name !~ /::/ and $self->lex_in_scope("&$name")
                             || $self->lex_in_scope("&$name", 1) )
@@ -563,7 +570,7 @@ sub next_todo {
         } elsif (defined $stash) {
             $name =~ s/^\Q$stash\E::(?!\z|.*::)//;
         }
-	my $ret = "${p}${l}" . $self->keyword("sub") . " $name "
+	my $ret = "$pragmata${p}${l}" . $self->keyword("sub") . " $name "
 	      . $self->deparse_sub($cv);
 	$self->{'subs_declared'}{$name} = 1;
 	return $ret;
@@ -2001,7 +2008,7 @@ sub pp_nextstate {
     my($op, $cx) = @_;
     $self->{'curcop'} = $op;
 
-    my @text = $self->pragmata($op);
+    my @text;
 
     my @subs = $self->cop_subs($op);
     if (@subs) {
@@ -2010,13 +2017,8 @@ sub pp_nextstate {
     }
     push @text, @subs;
 
+    push @text, $self->pragmata($op);
 
-    # cop_subs above may have changed the package; restore it
-    my $stash = $op->stashpv;
-    if ($stash ne $self->{'curstash'}) {
-	push @text, $self->keyword("package") . " $stash;\n";
-	$self->{'curstash'} = $stash;
-    }
 
     # This should go after of any branches that add statements, to
     # increase the chances that it refers to the same line it did in
