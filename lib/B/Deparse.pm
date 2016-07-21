@@ -493,14 +493,14 @@ sub todo {
 sub next_todo {
     my $self = shift;
     my $ent = shift @{$self->{'subs_todo'}};
-    my $cv = $ent->[1];
-    if (ref $ent->[3]) { # lexical sub
+    my ($seq, $cv, $is_form, $name) = @$ent;
+
+    if (ref $name) { # lexical sub
 	# emit the sub.
 	my @text;
-	my $padname = $ent->[3];
-	my $flags = $padname->FLAGS;
+	my $flags = $name->FLAGS;
 	push @text,
-	    !$cv || $ent->[0] <= $padname->COP_SEQ_RANGE_LOW
+	    !$cv || $seq <= $name->COP_SEQ_RANGE_LOW
 		? $self->keyword($flags & SVpad_OUR
 				    ? "our"
 				    : $flags & SVpad_STATE
@@ -510,7 +510,7 @@ sub next_todo {
 	# XXX We would do $self->keyword("sub"), but ‘my CORE::sub’
 	#     doesn’t work and ‘my sub’ ignores a &sub in scope.  I.e.,
 	#     we have a core bug here.
-	push @text, "sub " . substr $padname->PVX, 1;
+	push @text, "sub " . substr $name->PVX, 1;
 	if ($cv) {
 	    # my sub foo { }
 	    push @text,  " " . $self->deparse_sub($cv);
@@ -524,10 +524,10 @@ sub next_todo {
     }
 
     my $gv = $cv->GV;
-    my $name = $ent->[3] // $self->gv_name($gv);
-    if ($ent->[2]) {
+    $name //= $self->gv_name($gv);
+    if ($is_form) {
 	return $self->keyword("format") . " $name =\n"
-	    . $self->deparse_format($ent->[1]). "\n";
+	    . $self->deparse_format($cv). "\n";
     } else {
 	my $use_dec;
 	if ($name eq "BEGIN") {
@@ -569,6 +569,7 @@ sub next_todo {
 	return $ret;
     }
 }
+
 
 # Return a "use" declaration for this BEGIN block, if appropriate
 sub begin_is_use {
