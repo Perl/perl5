@@ -86,6 +86,16 @@ B<-Di> switch is working correctly.
 
 =back
 
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+The C<PadlistNAMES> macro is an lvalue again.
+
+=back
+
 =head1 Acknowledgements
 
 Perl 5.22.3 represents approximately 3 months of development since Perl 5.22.2
