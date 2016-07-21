@@ -23,7 +23,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan tests => 796;  # Update this when adding/deleting tests.
+plan tests => 798;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1781,6 +1781,16 @@ EOP
                 /.*a.*b.*c.*[de]/;
             ',"Timeout",{},"Test Perl 73464")
         }
+
+        {   # [perl #128686], crashed the the interpreter
+            my $AE = chr utf8::unicode_to_native(0xC6);
+            my $ae = chr utf8::unicode_to_native(0xE6);
+            my $re = qr/[$ae\s]/i;
+            ok($AE !~ $re, '/[\xE6\s]/i doesn\'t match \xC6 when not in UTF-8');
+            utf8::upgrade $AE;
+            ok($AE =~ $re, '/[\xE6\s]/i matches \xC6 when in UTF-8');
+        }
+
 } # End of sub run_tests
 
 1;

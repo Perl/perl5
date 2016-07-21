@@ -17475,22 +17475,15 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                       &nonascii_but_latin1_properties);
 
                 /* And add them to the final list of such characters. */
-                if (has_upper_latin1_only_utf8_matches) {
-                    _invlist_union(has_upper_latin1_only_utf8_matches,
-                                   nonascii_but_latin1_properties,
-                                   &has_upper_latin1_only_utf8_matches);
-                    SvREFCNT_dec_NN(nonascii_but_latin1_properties);
-                }
-                else {
-                    has_upper_latin1_only_utf8_matches
-                                                = nonascii_but_latin1_properties;
-                }
+                _invlist_union(has_upper_latin1_only_utf8_matches,
+                               nonascii_but_latin1_properties,
+                               &has_upper_latin1_only_utf8_matches);
 
                 /* Remove them from what now becomes the unconditional list */
                 _invlist_subtract(posixes, nonascii_but_latin1_properties,
                                   &posixes);
 
-                /* And the remainder are the unconditional ones */
+                /* And add those unconditional ones to the final list */
                 if (cp_list) {
                     _invlist_union(cp_list, posixes, &cp_list);
                     SvREFCNT_dec_NN(posixes);
@@ -17500,8 +17493,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     cp_list = posixes;
                 }
 
+                SvREFCNT_dec(nonascii_but_latin1_properties);
+
                 /* Get rid of any characters that we now know are matched
-                 * unconditionally from the conditional list */
+                 * unconditionally from the conditional list, which may make
+                 * that list empty */
                 _invlist_subtract(has_upper_latin1_only_utf8_matches,
                                   cp_list,
                                   &has_upper_latin1_only_utf8_matches);
