@@ -1902,12 +1902,13 @@ sub _features_from_bundle {
     return $hh;
 }
 
-# Notice how subs and formats are inserted between statements here;
-# also $[ assignments and pragmas.
-sub pp_nextstate {
+# generate any pragmas, 'package foo' etc needed to synchronise
+# with the given cop
+
+sub pragmata {
     my $self = shift;
-    my($op, $cx) = @_;
-    $self->{'curcop'} = $op;
+    my($op) = @_;
+
     my @text;
 
     my $stash = $op->stashpv;
@@ -1988,6 +1989,19 @@ sub pp_nextstate {
 	$self->{'hinthash'} = $newhh;
     }
 
+    return join("", @text);
+}
+
+
+# Notice how subs and formats are inserted between statements here;
+# also $[ assignments and pragmas.
+sub pp_nextstate {
+    my $self = shift;
+    my($op, $cx) = @_;
+    $self->{'curcop'} = $op;
+
+    my @text = $self->pragmata($op);
+
     my @subs = $self->cop_subs($op);
     if (@subs) {
 	# Special marker to swallow up the semicolon
@@ -1995,13 +2009,13 @@ sub pp_nextstate {
     }
     push @text, @subs;
 
+
     # cop_subs above may have changed the package; restore it
-    $stash = $op->stashpv;
+    my $stash = $op->stashpv;
     if ($stash ne $self->{'curstash'}) {
 	push @text, $self->keyword("package") . " $stash;\n";
 	$self->{'curstash'} = $stash;
     }
-
 
     # This should go after of any branches that add statements, to
     # increase the chances that it refers to the same line it did in
