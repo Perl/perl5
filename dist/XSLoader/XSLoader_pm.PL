@@ -255,7 +255,7 @@ XSLoader - Dynamically load C libraries into Perl code
 
 =head1 VERSION
 
-Version 0.17
+Version 0.22
 
 =head1 SYNOPSIS
 
