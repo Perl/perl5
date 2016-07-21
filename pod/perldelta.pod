@@ -48,6 +48,12 @@ L</Reporting Bugs> below.
 
 L<Module::CoreList> has been upgraded from version 5.20160506 to 5.20160730_24.
 
+=item *
+
+L<XSLoader> has been upgraded from version 0.21 to 0.22, fixing a security hole
+in which binary files could be loaded from a path outside of
+L<C<@INC>|perlvar/@INC>.
+
 =back
 
 =head1 Documentation
