@@ -368,20 +368,20 @@ EOCODP
 # CORE::no
 $a = readpipe qq`$^X $path "-MO=Deparse" -Xe `
              .qq`"use feature q|:all|; my sub no; CORE::no less" 2>&1`;
-like($a, qr/my sub no;\nCORE::no less;/,
+like($a, qr/my sub no;\n.*CORE::no less;/s,
     'CORE::no after my sub no');
 
 # CORE::use
 $a = readpipe qq`$^X $path "-MO=Deparse" -Xe `
              .qq`"use feature q|:all|; my sub use; CORE::use less" 2>&1`;
-like($a, qr/my sub use;\nCORE::use less;/,
+like($a, qr/my sub use;\n.*CORE::use less;/s,
     'CORE::use after my sub use');
 
 # CORE::__DATA__
 $a = readpipe qq`$^X $path "-MO=Deparse" -Xe `
              .qq`"use feature q|:all|; my sub __DATA__; `
              .qq`CORE::__DATA__" 2>&1`;
-like($a, qr/my sub __DATA__;\nCORE::__DATA__/s,
+like($a, qr/my sub __DATA__;\n.*CORE::__DATA__/s,
     'CORE::__DATA__ after my sub __DATA__');
 
 # sub declarations
