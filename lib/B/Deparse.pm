@@ -1195,19 +1195,28 @@ sub pad_subs {
 sub deparse_sub {
     my $self = shift;
     my $cv = shift;
-    my $proto = "";
+    my @attrs;
+    my $protosig; # prototype or signature (what goes in the (....))
+
 Carp::confess("NULL in deparse_sub") if !defined($cv) || $cv->isa("B::NULL");
 Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
     local $self->{'curcop'} = $self->{'curcop'};
+
+    my $has_sig = $self->{hinthash}{feature_signatures};
     if ($cv->FLAGS & SVf_POK) {
-	$proto = "(". $cv->PV . ") ";
+	my $proto = $cv->PV;
+	if ($has_sig) {
+            push @attrs, "prototype($proto)";
+        }
+        else {
+            $protosig = $proto;
+        }
     }
     if ($cv->CvFLAGS & (CVf_METHOD|CVf_LOCKED|CVf_LVALUE|CVf_ANONCONST)) {
-        $proto .= ": ";
-        $proto .= "lvalue " if $cv->CvFLAGS & CVf_LVALUE;
-        $proto .= "locked " if $cv->CvFLAGS & CVf_LOCKED;
-        $proto .= "method " if $cv->CvFLAGS & CVf_METHOD;
-        $proto .= "const "  if $cv->CvFLAGS & CVf_ANONCONST;
+        push @attrs, "lvalue" if $cv->CvFLAGS & CVf_LVALUE;
+        push @attrs, "locked" if $cv->CvFLAGS & CVf_LOCKED;
+        push @attrs, "method" if $cv->CvFLAGS & CVf_METHOD;
+        push @attrs, "const"  if $cv->CvFLAGS & CVf_ANONCONST;
     }
 
     local($self->{'curcv'}) = $cv;
@@ -1241,17 +1250,21 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
 	else {
 	    $body = $self->deparse($root->first, 0);
 	}
+        $body = "{\n\t$body\n\b}";
     }
     else {
 	my $sv = $cv->const_sv;
 	if ($$sv) {
 	    # uh-oh. inlinable sub... format it differently
-	    return $proto . "{ " . $self->const($sv, 0) . " }\n";
+	    $body = "{ " . $self->const($sv, 0) . " }\n";
 	} else { # XSUB? (or just a declaration)
-	    return "$proto;\n";
+	    $body = ';'
 	}
     }
-    return $proto ."{\n\t$body\n\b}" ."\n";
+    $protosig = defined $protosig ? "($protosig) " : "";
+    my $attrs = '';
+    $attrs = ': ' . join('', map "$_ ", @attrs) if @attrs;
+    return "$protosig$attrs$body\n";
 }
 
 sub deparse_format {
