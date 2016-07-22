@@ -39,14 +39,8 @@ __DEPARSE_FAILURES__
 ../cpan/Encode/t/enc_data.t
 ../cpan/Encode/t/encoding.t
 ../cpan/Encode/t/jperl.t
-../cpan/ExtUtils-Install/t/Installapi2.t
-../cpan/ExtUtils-Install/t/Packlist.t
 ../cpan/ExtUtils-MakeMaker/t/xs.t
-../cpan/ExtUtils-Manifest/t/Manifest.t
 ../cpan/File-Path/t/taint.t
-../cpan/File-Temp/t/object.t
-../cpan/IO-Compress/t/050interop-gzip.t
-../cpan/IO-Compress/t/cz-08encoding.t
 ../cpan/Module-Build/t/manifypods_with_utf8.t
 ../cpan/Socket/t/sockaddr.t
 ../cpan/Term-ANSIColor/t/taint.t
@@ -99,7 +93,6 @@ __DEPARSE_FAILURES__
 ../dist/Data-Dumper/t/dumper.t
 ../dist/Exporter/t/Exporter.t
 ../dist/Filter-Simple/t/data.t
-../dist/I18N-LangTags/t/50_super.t
 ../dist/IO/t/io_file_export.t
 ../dist/IO/t/io_multihomed.t
 ../dist/IO/t/io_sel.t
@@ -117,9 +110,7 @@ __DEPARSE_FAILURES__
 ../dist/PathTools/t/cwd.t
 ../dist/Storable/t/blessed.t
 ../dist/Storable/t/croak.t
-../dist/Term-ReadLine/t/ReadLine.t
 ../dist/Thread-Queue/t/08_nothreads.t
-../dist/Tie-File/t/42_offset.t
 ../dist/bignum/t/big_e_pi.t
 ../dist/bignum/t/bigexp.t
 ../dist/bignum/t/bigint.t
@@ -147,33 +138,20 @@ __DEPARSE_FAILURES__
 ../ext/B/t/optree_samples.t
 ../ext/B/t/xref.t
 ../ext/Devel-Peek/t/Peek.t
-../ext/File-Glob/t/basic.t
 ../ext/File-Glob/t/taint.t
 ../ext/Hash-Util/t/Util.t
 ../ext/IPC-Open3/t/IPC-Open2.t
 ../ext/IPC-Open3/t/IPC-Open3.t
-../ext/Opcode/t/Opcode.t
-../ext/PerlIO-via/t/via.t
 ../ext/XS-APItest/t/autoload.t
 ../ext/XS-APItest/t/blockhooks.t
 ../ext/XS-APItest/t/call_checker.t
 ../ext/XS-APItest/t/cleanup.t
 ../ext/XS-APItest/t/fetch_pad_names.t
-../ext/XS-APItest/t/overload.t
 ../ext/XS-APItest/t/svpeek.t
-../ext/XS-APItest/t/xsub_h.t
 ../lib/DB.t
-../lib/DBM_Filter/t/01error.t
-../lib/DBM_Filter/t/02core.t
-../lib/DBM_Filter/t/compress.t
-../lib/DBM_Filter/t/encode.t
-../lib/DBM_Filter/t/int32.t
-../lib/DBM_Filter/t/null.t
-../lib/DBM_Filter/t/utf8.t
 ../lib/English.t
 ../lib/File/Basename.t
 ../lib/charnames.t
-../lib/less.t
 ../lib/overload.t
 base/lex.t                # checks regexp stringification
 comp/final_line_num.t     # tests syntax error after BEGIN block
@@ -242,5 +220,4 @@ __DEPARSE_SKIPS__
 
 op/smartkve.t                        # Gobbles up all memory...
 comp/redef.t                         # Redefinition happens at compile time
-lib/Switch/t/                        # B::Deparse doesn't support source filtering
 ../lib/locale.t                      # Memory...
