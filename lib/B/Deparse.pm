@@ -541,6 +541,17 @@ sub next_todo {
 	    $use_dec = $self->begin_is_use($cv);
 	    if (defined ($use_dec) and $self->{'expand'} < 5) {
 		return $pragmata if 0 == length($use_dec);
+
+                #  XXX bit of a hack: Test::More's use_ok() method
+                #  builds a fake use statement which deparses as, e.g.
+                #      use Net::Ping (@{$args[0];});
+                #  As well as being superfluous (the use_ok() is deparsed
+                #  too) and ugly, it fails under use strict and otherwise
+                #  makes use of a lexical var that's not in scope.
+                #  So strip it out.
+                return $pragmata
+                            if $use_dec =~ /^use \S+ \(@\{\$args\[0\];}\);/;
+
 		$use_dec =~ s/^(use|no)\b/$self->keyword($1)/e;
 	    }
 	}
