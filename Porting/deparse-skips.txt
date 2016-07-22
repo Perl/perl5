@@ -200,7 +200,6 @@ op/pack.t
 op/postfixderef.t
 op/range.t
 op/readline.t
-op/signatures.t
 op/split.t
 op/srand.t
 op/sub.t
