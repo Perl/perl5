@@ -36,9 +36,6 @@ __DEPARSE_FAILURES__
 ../cpan/autodie/t/internal.t
 ../cpan/AutoLoader/t/01AutoLoader.t
 ../cpan/CGI/t/utf8.t
-../cpan/Encode/t/enc_data.t
-../cpan/Encode/t/encoding.t
-../cpan/Encode/t/jperl.t
 ../cpan/ExtUtils-MakeMaker/t/xs.t
 ../cpan/File-Path/t/taint.t
 ../cpan/Module-Build/t/manifypods_with_utf8.t
@@ -202,10 +199,8 @@ run/switchI.t             # -I on #! line is not deparsed
 run/switchd-78586.t       # -I on #! line is not deparsed
 uni/attrs.t
 uni/bless.t
-uni/greek.t
 uni/gv.t
 uni/labels.t
-uni/latin2.t
 uni/lex_utf8.t
 uni/method.t
 uni/package.t
