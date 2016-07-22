@@ -2458,11 +2458,16 @@ my $e = delete $h{'foo'}[$i];
 ####
 # multideref with leading expression
 my $r;
-my $x = ($r // [])->{'foo'}[0];
+my $x = +($r // [])->{'foo'}[0];
 ####
 # multideref with complex middle index
 my(%h, $i, $j, $k);
 my $x = $h{'foo'}[$i + $j]{$k};
+####
+# multideref with trailing non-simple index that initially looks simple
+# (i.e. the constant "3")
+my($r, $i, $j, $k);
+my $x = +($r || {})->{'foo'}[$i + $j]{3 + $k};
 ####
 # chdir
 chdir 'file';

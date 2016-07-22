@@ -13044,6 +13044,8 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                 is_last = TRUE;
                 index_skip = action_count;
                 action |= MDEREF_FLAG_last;
+                if (index_type != MDEREF_INDEX_none)
+                    arg--;
             }
 
             if (pass)
