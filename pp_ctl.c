@@ -1598,7 +1598,7 @@ Perl_qerror(pTHX_ SV *err)
 static void
 S_pop_eval_context_maybe_croak(pTHX_ PERL_CONTEXT *cx, SV *errsv, int action)
 {
-    SV  *namesv;
+    SV  *namesv = NULL; /* init to avoid dumb compiler warning */
     bool do_croak;
 
     CX_LEAVE_SCOPE(cx);
