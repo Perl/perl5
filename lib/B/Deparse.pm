@@ -4030,7 +4030,11 @@ sub pp_multideref {
 
     if ($op->first && ($op->first->flags & OPf_KIDS)) {
         # arbitrary initial expression, e.g. f(1,2,3)->[...]
-        $text .=  $self->deparse($op->first, 24);
+        my $expr = $self->deparse($op->first, 24);
+        # stop "exists (expr)->{...}" being interpreted as
+        #"(exists (expr))->{...}"
+        $expr = "+$expr" if $expr =~ /^\(/;
+        $text .=  $expr;
     }
 
     my @items = $op->aux_list($self->{curcv});
