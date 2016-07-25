@@ -626,14 +626,14 @@ foreach my $test_case (@modules) {
 
   SKIP: {
     skip( "No our() support until perl 5.6", (defined $expected_version ? 3 : 2) )
-        if $] < 5.006 && $code =~ /\bour\b/;
+        if "$]" < 5.006 && $code =~ /\bour\b/;
     skip( "No package NAME VERSION support until perl 5.11.1", (defined $expected_version ? 3 : 2) )
-        if $] < 5.011001 && $code =~ /package\s+[\w\:\']+\s+v?[0-9._]+/;
+        if "$]" < 5.011001 && $code =~ /package\s+[\w\:\']+\s+v?[0-9._]+/;
 
     my $warnings = '';
     local $SIG{__WARN__} = sub { $warnings .= $_ for @_ };
 
-    my $pm_info = Module::Metadata->new_from_file(generate_file(File::Spec->catdir($tmpdir, "Simple${test_num}"), 'Simple.pm', $code));
+    my $pm_info = Module::Metadata->new_from_file(generate_file(File::Spec->catfile($tmpdir, "Simple${test_num}"), 'Simple.pm', $code));
 
     # whenever we drop support for 5.6, we can do this:
     # open my $fh, '<', \(encode('UTF-8', $code, Encode::FB_CROAK))

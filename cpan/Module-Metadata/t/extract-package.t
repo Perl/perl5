@@ -142,7 +142,7 @@ foreach my $test_case (@pkg_names) {
     my $warnings = '';
     local $SIG{__WARN__} = sub { $warnings .= $_ for @_ };
 
-    my $pm_info = Module::Metadata->new_from_file(generate_file(File::Spec->catdir($tmpdir, "Simple${test_num}"), 'Simple.pm', $code));
+    my $pm_info = Module::Metadata->new_from_file(generate_file(File::Spec->catfile($tmpdir, "Simple${test_num}"), 'Simple.pm', $code));
 
     # whenever we drop support for 5.6, we can do this:
     # open my $fh, '<', \(encode('UTF-8', $code, Encode::FB_CROAK))

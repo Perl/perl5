@@ -1,6 +1,6 @@
 # -*- mode: cperl; tab-width: 8; indent-tabs-mode: nil; basic-offset: 2 -*-
 # vim:ts=8:sw=2:et:sta:sts=2:tw=78
-package Module::Metadata; # git description: v1.000031-13-g7c061c9
+package Module::Metadata; # git description: v1.000032-7-gb4e8a3f
 # ABSTRACT: Gather package and POD information from perl module files
 
 # Adapted from Perl-licensed code originally distributed with
@@ -14,7 +14,7 @@ sub __clean_eval { eval $_[0] }
 use strict;
 use warnings;
 
-our $VERSION = '1.000032'; # TRIAL
+our $VERSION = '1.000033';
 
 use Carp qw/croak/;
 use File::Spec;
@@ -841,7 +841,7 @@ Module::Metadata - Gather package and POD information from perl module files
 
 =head1 VERSION
 
-version 1.000032
+version 1.000033
 
 =head1 SYNOPSIS
 
@@ -1070,7 +1070,7 @@ assistance from David Golden (xdg) <dagolden@cpan.org>.
 
 =head1 CONTRIBUTORS
 
-=for stopwords Karen Etheridge David Golden Vincent Pit Matt S Trout Chris Nehren Graham Knop Olivier Mengué Tomas Doran Tatsuhiko Miyagawa tokuhirom Peter Rabbitson Steve Hay Josh Jore Craig A. Berry Mitchell Steinbrunner Edward Zborowski Gareth Harper James Raspass Jerry D. Hedden 'BinGOs' Williams Kent Fredric
+=for stopwords Karen Etheridge David Golden Vincent Pit Matt S Trout Chris Nehren Graham Knop Olivier Mengué Tomas Doran Tatsuhiko Miyagawa tokuhirom Kent Fredric Peter Rabbitson Steve Hay Jerry D. Hedden Craig A. Berry Mitchell Steinbrunner Edward Zborowski Gareth Harper James Raspass 'BinGOs' Williams Josh Jore
 
 =over 4
 
@@ -1116,6 +1116,10 @@ tokuhirom <tokuhirom@gmail.com>
 
 =item *
 
+Kent Fredric <kentnl@cpan.org>
+
+=item *
+
 Peter Rabbitson <ribasushi@cpan.org>
 
 =item *
@@ -1124,11 +1128,15 @@ Steve Hay <steve.m.hay@googlemail.com>
 
 =item *
 
-Josh Jore <jjore@cpan.org>
+Jerry D. Hedden <jdhedden@cpan.org>
 
 =item *
 
 Craig A. Berry <cberry@cpan.org>
+
+=item *
+
+Craig A. Berry <craigberry@mac.com>
 
 =item *
 
@@ -1152,15 +1160,11 @@ James Raspass <jraspass@gmail.com>
 
 =item *
 
-Jerry D. Hedden <jdhedden@cpan.org>
-
-=item *
-
 Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
 
 =item *
 
-Kent Fredric <kentnl@cpan.org>
+Josh Jore <jjore@cpan.org>
 
 =back
 
