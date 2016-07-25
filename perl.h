@@ -6770,7 +6770,7 @@ extern void moncontrol(int);
 /* The VAX fp formats are neither consistently little-endian nor
  * big-endian, and neither are they really IEEE-mixed endian like
  * the mixed-endian ARM IEEE formats (with swapped bytes).
- * Ultimately, the VAX format ultimately came from the PDP.
+ * Ultimately, the VAX format came from the PDP-11.
  *
  * The ordering of the parts in VAX floats is quite vexing.
  * In the below the fraction_n are the mantissa bits.
@@ -6793,24 +6793,36 @@ extern void moncontrol(int);
  * (somebody at HP should be fired for the URLs)
  *
  * F   fraction_2:16 sign:1 exp:8  fraction_1:7
- *     (exponent bias 128)
+ *     (exponent bias 128, hidden first one-bit)
  *
  * D   fraction_2:16 sign:1 exp:8  fraction_1:7
  *     fraction_4:16               fraction_3:16
- *     (exponent bias 128)
+ *     (exponent bias 128, hidden first one-bit)
  *
  * G   fraction_2:16 sign:1 exp:11 fraction_1:4
  *     fraction_4:16               fraction_3:16
- *     (exponent bias 1024)
+ *     (exponent bias 1024, hidden first one-bit)
  *
  * H   fraction_1:16 sign:1 exp:15
  *     fraction_3:16               fraction_2:16
  *     fraction_5:16               fraction_4:16
  *     fraction_7:16               fraction_6:16
- *     (exponent bias 16384)
+ *     (exponent bias 16384, hidden first one-bit)
+ *     (available only on VAX, and only on Fortran?)
  *
- * The formats T and X are available on the Alpha (and IA64?)
- * and are equivalent with the IEEE 754 64 and 128 bit formats.
+ * The formats S, T and X are available on the Alpha (and Itanium,
+ * also known as I64/IA64) and are equivalent with the IEEE-754 formats
+ * binary32, binary64, and binary128 (commonly: float, double, long double).
+ *
+ * S   sign:1 exp:8 mantissa:23
+ *     (exponent bias 127, hidden first one-bit)
+ *
+ * T   sign:1 exp:11 mantissa:52
+ *     (exponent bias 1022, hidden first one-bit)
+ *
+ * X   sign:1 exp:15 mantissa:112
+ *     (exponent bias 16382, hidden first one-bit)
+ *
  */
 
 #ifdef DOUBLE_IS_VAX_FLOAT
