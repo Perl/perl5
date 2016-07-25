@@ -8602,7 +8602,7 @@ S_pending_ident(pTHX_ bool is_sig)
                  */
                 o = newUNOP_AUX(OP_ARGELEM, 0, NULL,
                                     INT2PTR(UNOP_AUX_item *,
-                                        (UV)(PL_parser->sig_elems)));
+                                        (PL_parser->sig_elems)));
                 o->op_private |= (  PL_tokenbuf[0] == '$' ? OPpARGELEM_SV
                                   : PL_tokenbuf[0] == '@' ? OPpARGELEM_AV
                                   :                         OPpARGELEM_HV);

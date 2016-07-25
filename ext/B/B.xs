@@ -1334,12 +1334,12 @@ string(o, cv)
             break;
 
         case OP_ARGELEM:
-            ret = sv_2mortal(Perl_newSVpvf(aTHX_ "%"UVuf,
-                            PTR2UV(aux)));
+            ret = sv_2mortal(Perl_newSVpvf(aTHX_ "%"IVdf,
+                            PTR2IV(aux)));
             break;
 
         case OP_ARGCHECK:
-            ret = Perl_newSVpvf(aTHX_ "%"UVuf",%"UVuf, aux[0].uv, aux[1].uv);
+            ret = Perl_newSVpvf(aTHX_ "%"IVdf",%"IVdf, aux[0].iv, aux[1].iv);
             if (aux[2].iv)
                 Perl_sv_catpvf(aTHX_ ret, ",%c", (char)aux[2].iv);
             ret = sv_2mortal(ret);
@@ -1372,14 +1372,14 @@ aux_list(o, cv)
             XSRETURN(0); /* by default, an empty list */
 
         case OP_ARGELEM:
-            XPUSHs(sv_2mortal(newSVuv(PTR2UV(aux))));
+            XPUSHs(sv_2mortal(newSViv(PTR2IV(aux))));
             XSRETURN(1);
             break;
 
         case OP_ARGCHECK:
             EXTEND(SP, 3);
-            PUSHs(sv_2mortal(newSVuv(aux[0].uv)));
-            PUSHs(sv_2mortal(newSVuv(aux[1].uv)));
+            PUSHs(sv_2mortal(newSViv(aux[0].iv)));
+            PUSHs(sv_2mortal(newSViv(aux[1].iv)));
             PUSHs(sv_2mortal(aux[2].iv ? Perl_newSVpvf(aTHX_ "%c",
                                 (char)aux[2].iv) : &PL_sv_no));
             break;

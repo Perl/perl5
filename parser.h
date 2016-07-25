@@ -118,8 +118,8 @@ typedef struct yy_parser {
     line_t	preambling;	/* line # when processing $ENV{PERL5DB} */
 
     /* these are valid whiling parsing a subroutine signature */
-    int         sig_elems;      /* number of signature elements seen so far */
-    int         sig_optelems;   /* number of optional signature elems seen */
+    IV          sig_elems;      /* number of signature elements seen so far */
+    IV          sig_optelems;   /* number of optional signature elems seen */
     char        sig_slurpy;     /* the sigil of the slurpy var (or null) */
 } yy_parser;
 

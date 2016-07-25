@@ -708,7 +708,8 @@ sigscalarelem:
                                                         defexpr,
                                                         LINKLIST(defexpr));
                                     /* re-purpose op_targ to hold @_ index */
-                                    defop->op_targ = PL_parser->sig_elems - 1;
+                                    defop->op_targ =
+                                        (PADOFFSET)(PL_parser->sig_elems - 1);
 
                                     if (var) {
                                         var->op_flags |= OPf_STACKED;
@@ -772,8 +773,8 @@ siglistornull:		/* NULL */
 subsignature:	'('
                         {
                             ENTER;
-                            SAVEINT(PL_parser->sig_elems);
-                            SAVEINT(PL_parser->sig_optelems);
+                            SAVEIV(PL_parser->sig_elems);
+                            SAVEIV(PL_parser->sig_optelems);
                             SAVEI8(PL_parser->sig_slurpy);
                             PL_parser->sig_elems    = 0;
                             PL_parser->sig_optelems = 0;
@@ -796,8 +797,8 @@ subsignature:	'('
 
                             aux = (UNOP_AUX_item*)PerlMemShared_malloc(
                                 sizeof(UNOP_AUX_item) * 3);
-                            aux[0].uv = PL_parser->sig_elems;
-                            aux[1].uv = PL_parser->sig_optelems;
+                            aux[0].iv = PL_parser->sig_elems;
+                            aux[1].iv = PL_parser->sig_optelems;
                             aux[2].iv = PL_parser->sig_slurpy;
                             check = newUNOP_AUX(OP_ARGCHECK, 0, NULL, aux);
                             sigops = op_prepend_elem(OP_LINESEQ, check, sigops);

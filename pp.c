@@ -6641,7 +6641,7 @@ PP(pp_argelem)
     SV ** padentry;
     OP *o = PL_op;
     AV *defav = GvAV(PL_defgv); /* @_ */
-    UV ix = PTR2UV(cUNOP_AUXo->op_aux);
+    IV ix = PTR2IV(cUNOP_AUXo->op_aux);
     IV argc;
     SV **argv;
 
@@ -6660,7 +6660,10 @@ PP(pp_argelem)
         }
         else {
             /* should already have been checked */
-            assert(ix < I32_MAX && AvFILLp(defav) >= (I32)ix);
+#if IVSIZE > PTRSIZE
+            assert(ix <= SSize_t_MAX);
+#endif
+            assert(ix >=0 && ix <= AvFILLp(defav));
             val = AvARRAY(defav)[ix];
             if (UNLIKELY(!val))
                 val = &PL_sv_undef;
@@ -6707,7 +6710,7 @@ PP(pp_argelem)
     /* must be AV or HV */
 
     assert(!(o->op_flags & OPf_STACKED));
-    argc = ((IV)AvFILLp(defav) + 1) - (IV)ix;
+    argc = ((IV)AvFILLp(defav) + 1) - ix;
     assert(!SvMAGICAL(targ));
     if (argc <= 0)
         return o->op_next;
@@ -6776,11 +6779,14 @@ PP(pp_argdefelem)
 {
     OP * const o = PL_op;
     AV *defav = GvAV(PL_defgv); /* @_ */
-    PADOFFSET ix = o->op_targ;
+    IV ix = (IV)o->op_targ;
 
     assert(!SvMAGICAL(defav));
-    assert(ix < I32_MAX);
-    if (AvFILLp(defav) >= (I32)ix) {
+#if IVSIZE > PTRSIZE
+    assert(ix <= SSize_t_MAX);
+#endif
+    assert(ix >= 0);
+    if (AvFILLp(defav) >= ix) {
         dSP;
         XPUSHs(AvARRAY(defav)[ix]);
         RETURN;
@@ -6799,15 +6805,15 @@ PP(pp_argcheck)
 {
     OP * const o       = PL_op;
     UNOP_AUX_item *aux = cUNOP_AUXo->op_aux;
-    UV   params        = aux[0].uv;
-    UV   opt_params    = aux[1].uv;
+    IV   params        = aux[0].iv;
+    IV   opt_params    = aux[1].iv;
     char slurpy        = (char)(aux[2].iv);
     AV  *defav         = GvAV(PL_defgv); /* @_ */
-    UV argc;
+    IV   argc;
     bool too_few;
 
     assert(!SvMAGICAL(defav));
-    argc = (UV)(AvFILLp(defav) + 1);
+    argc = (AvFILLp(defav) + 1);
     too_few = (argc < (params - opt_params));
 
     if (UNLIKELY(too_few || (!slurpy && argc > params)))
