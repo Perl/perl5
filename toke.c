@@ -4844,6 +4844,15 @@ Perl_yylex(pTHX)
         case ',': /* handle ($a,,$b) */
             break;
 
+        case '\\':
+            if (!FEATURE_REFALIASING_IS_ENABLED)
+                yyerror("Experimental aliasing via reference not enabled");
+            else
+                Perl_ck_warner_d(aTHX_
+                                 packWARN(WARN_EXPERIMENTAL__REFALIASING),
+                                "Aliasing via reference is experimental");
+            TOKEN(REFGEN);
+
         default:
             yyerror("a signature parameter must start with '$', '@' or '%'");
             /* very crude error recovery: skip to likely next signature

@@ -6647,12 +6647,15 @@ PP(pp_argelem)
 
     assert(!SvMAGICAL(defav));
 
-    /* do 'my $var, @var or %var' action */
     padentry = &(PAD_SVl(o->op_targ));
-    save_clearsv(padentry);
-    targ = *padentry;
+    /* do 'my $var, @var or %var' action */
+    if (LIKELY(!(o->op_private & OPpARGELEM_REF))) {
+        save_clearsv(padentry);
+        targ = *padentry;
+    }
 
-    if ((o->op_private & OPpARGELEM_MASK) == OPpARGELEM_SV) {
+    if (o->op_private & OPpARGELEM_REF
+     ||(o->op_private & OPpARGELEM_MASK) == OPpARGELEM_SV) {
         if (o->op_flags & OPf_STACKED) {
             dSP;
             val = POPs;
@@ -6664,6 +6667,34 @@ PP(pp_argelem)
             val = AvARRAY(defav)[ix];
             if (UNLIKELY(!val))
                 val = &PL_sv_undef;
+        }
+
+        /* \$var = $val */
+        if (UNLIKELY(o->op_private & OPpARGELEM_REF)) {
+            SV * const old = *padentry;
+            const char *bad = NULL;
+            if (!SvROK(val))
+                DIE(aTHX_ "Assigned value is not a reference");
+            switch (o->op_private & OPpARGELEM_MASK) {
+            case OPpARGELEM_SV:
+                if (SvTYPE(SvRV(val)) > SVt_PVLV)
+                    bad = " SCALAR";
+                break;
+            case OPpARGELEM_AV:
+                if (SvTYPE(SvRV(val)) != SVt_PVAV)
+                    bad = "n ARRAY";
+                break;
+            case OPpARGELEM_HV:
+                if (SvTYPE(SvRV(val)) != SVt_PVHV)
+                    bad = " HASH";
+            }
+            if (bad)
+                /* diag_listed_as: Assigned value is not %s reference */
+                DIE(aTHX_ "Assigned value is not a%s reference", bad);
+            *padentry = SvREFCNT_inc_NN(SvRV(val));
+            SvREFCNT_dec(old);
+            save_clearsv(padentry);
+            return o->op_next;
         }
 
         /* $var = $val */

@@ -1328,6 +1328,71 @@ while(<$kh>) {
     }
 }
 
+eval 'sub t145 (\$x) {}';
+like $@, qr/^Experimental aliasing via reference not enabled at /,
+    '(\$x) disallowed with refaliasing disabled';
+eval 'sub t145 (\@x) {}';
+like $@, qr/^Experimental aliasing via reference not enabled at /,
+    '(\@x) disallowed with refaliasing disabled';
+eval 'sub t145 (\%x) {}';
+like $@, qr/^Experimental aliasing via reference not enabled at /,
+    '(\%x) disallowed with refaliasing disabled';
+
+no warnings "experimental::refaliasing";
+use feature 'refaliasing';
+# Space after \ is deliberate, to test that it is permitted.
+sub (\ $x) { is \$x, $_[0], '(\$x) makes alias to $_[0] referent' }->(\$_);
+sub (\ @x) { is \@x, $_[0], '(\@x) makes alias to $_[0] referent' }->([]);
+sub (\ %x) { is \%x, $_[0], '(\%x) makes alias to $_[0] referent' }->({});
+
+sub t146s(\$x) {}
+sub t146a(\@x) {}
+sub t146h(\%x) {}
+eval { t146s 3 };
+like $@, qr/^Assigned value is not a reference at /, '(\$x) with non-ref';
+eval { t146a 3 };
+like $@, qr/^Assigned value is not a reference at /, '(\@x) with non-ref';
+eval { t146h 3 };
+like $@, qr/^Assigned value is not a reference at /, '(\%x) with non-ref';
+eval { t146s [] };
+like $@, qr/^Assigned value is not a SCALAR reference at /,
+    '(\$x) with non-scalar ref';
+eval { t146a {} };
+like $@, qr/^Assigned value is not an ARRAY reference at /,
+    '(\@x) with non-array ref';
+eval { t146h [] };
+like $@, qr/^Assigned value is not a HASH reference at /,
+    '(\%x) with non-hash ref';
+
+sub (\ $x=\$;){ is \$x, \$;, '(\$x=\$;) makes alias to $;' }->();
+sub (\ @x=\@;){ is \@x, \@;, '(\@x=\@;) makes alias to @;' }->();
+sub (\ %x=\%;){ is \%x, \%;, '(\%x=\%;) makes alias to %;' }->();
+
+sub t147s(\$x=3) {}
+sub t147a(\@x=3) {}
+sub t147h(\%x=3) {}
+eval { t147s };
+like $@, qr/^Assigned value is not a reference at /, '(\$x=) with non-ref';
+eval { t147a };
+like $@, qr/^Assigned value is not a reference at /, '(\@x=) with non-ref';
+eval { t147h };
+like $@, qr/^Assigned value is not a reference at /, '(\%x=) with non-ref';
+sub t148s(\$x=[]) {}
+sub t148a(\@x={}) {}
+sub t148h(\%x=[]) {}
+eval { t148s };
+like $@, qr/^Assigned value is not a SCALAR reference at /,
+    '(\$x=) with non-scalar ref';
+eval { t148a };
+like $@, qr/^Assigned value is not an ARRAY reference at /,
+    '(\@x=) with non-array ref';
+eval { t148h };
+like $@, qr/^Assigned value is not a HASH reference at /,
+    '(\%x=) with non-hash ref';
+
+eval 'sub (\\\$a) {}';  # That’s a double backslash.
+like $@, qr/syntax error/, '(\\\$a) not allowed';
+
 done_testing;
 
 1;

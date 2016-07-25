@@ -75,7 +75,7 @@
 %type <opval> refgen_topic formblock
 %type <opval> subattrlist myattrlist myattrterm myterm
 %type <opval> termbinop termunop anonymous termdo
-%type <ival>  sigslurpsigil
+%type <ival>  sigslurpsigil sigscalarsigil
 %type <opval> sigvarname sigdefault sigscalarelem sigslurpelem
 %type <opval> sigelem siglist siglistornull subsignature 
 %type <opval> formstmtseq formline formarg
@@ -677,10 +677,20 @@ sigdefault:	/* NULL */
         |       ASSIGNOP term
                         { $$ = $2; }
 
+sigscalarsigil:
+                '$'     { $$ = 0; }
+        |       REFGEN '$'
+                        { $$ = 1; }
+        |       REFGEN '@'
+                        { $$ = 1; }
+        |       REFGEN '%'
+                        { $$ = 1; }
+        ;
 
-/* subroutine signature scalar element: e.g. '$x', '$=', '$x = $default' */
+/* subroutine signature scalar element: e.g. '$x', '$=', '$x = $default'
+                                        ditto with \$x \@x etc.  */
 sigscalarelem:
-                '$' sigvarname sigdefault
+                sigscalarsigil sigvarname sigdefault
                         {
                             OP *var     = $2;
                             OP *defexpr = $3;
@@ -737,6 +747,8 @@ sigscalarelem:
                                     yyerror("Mandatory parameter "
                                             "follows optional parameter");
                             }
+                            if ($1 && var)
+                                var->op_private |= OPpARGELEM_REF;
 
                             $$ = var ? newSTATEOP(0, NULL, var) : (OP*)NULL;
                         }
