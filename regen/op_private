@@ -771,6 +771,7 @@ addbits('argelem',
                                2   OPpARGELEM_HV   HV
                            )],
                },
+    3     => 'OPpARGELEM_REF', 'REF',
 );
 
 
