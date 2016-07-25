@@ -282,18 +282,18 @@ The C<PadlistNAMES> macro is an lvalue again.
 =head1 Acknowledgements
 
 Perl 5.22.3 represents approximately 3 months of development since Perl 5.22.2
-and contains approximately 2,000 lines of changes across 49 files from 15
+and contains approximately 3,300 lines of changes across 240 files from 16
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
-approximately 650 lines of changes to 12 .pm, .t, .c and .h files.
+approximately 1,400 lines of changes to 170 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its third decade thanks to a vibrant community
 of users and developers.  The following people are known to have contributed
 the improvements that became Perl 5.22.3:
 
-Abigail, Alex Vandiver, Aristotle Pagaltzis, Craig A. Berry, Father
-Chrysostomos, James E Keenan, Karen Etheridge, Karl Williamson, Matthew
+Abigail, Alex Vandiver, Aristotle Pagaltzis, Craig A. Berry, David Mitchell,
+Father Chrysostomos, James E Keenan, Karen Etheridge, Karl Williamson, Matthew
 Horsfall, Niko Tyni, Ricardo Signes, Sawyer X, Stevan Little, Steve Hay, Tony
 Cook.
 
