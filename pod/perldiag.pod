@@ -44,14 +44,14 @@ letter.
 
 =over 4
 
-=item a signature parameter must start with '$', '@' or '%'
+=item A signature parameter must start with '$', '@' or '%'
 
 (F) Each subroutine signature parameter declaration must start with a valid
 sigil; for example:
 
     sub foo ($a, $, $b = 1, @c) {}
 
-=item a slurpy parameter may not have a default value
+=item A slurpy parameter may not have a default value
 
 (F) Only scalar subroutine signature parameters may have a default value;
 for example:
@@ -2592,7 +2592,7 @@ declaration.  The '_' in a prototype must be followed by a ';',
 indicating the rest of the parameters are optional, or one of '@'
 or '%', since those two will accept 0 or more final parameters.
 
-=item illegal character following sigil in a subroutine signature
+=item Illegal character following sigil in a subroutine signature
 
 (F) A parameter in a subroutine signature contained an unexpected character
 following the C<$>, C<@> or C<%> sigil character. Normally the sigil
@@ -6043,12 +6043,6 @@ uc(), or ucfirst() (or their string-inlined versions), but you
 specified an illegal mapping.
 See L<perlunicode/"User-Defined Character Properties">.
 
-=item Too %s arguments for subroutine
-
-(F) A subroutine using a signature received too few or too many arguments
-than required by the signature.  The caller of the subroutine is
-presumably at fault.
-
 =item Too deeply nested ()-groups
 
 (F) Your template contains ()-groups with a ridiculously deep nesting level.
@@ -6057,6 +6051,12 @@ presumably at fault.
 
 (F) There has to be at least one argument to syscall() to specify the
 system call to call, silly dilly.
+
+=item Too few arguments for subroutine
+
+(F) A subroutine using a signature received too few arguments than
+required by the signature.  The caller of the subroutine is presumably
+at fault.
 
 =item Too late for "-%s" option
 
@@ -6087,6 +6087,13 @@ BEGIN block.
 =item Too many arguments for %s
 
 (F) The function requires fewer arguments than you specified.
+
+=item Too many arguments for subroutine
+
+(F) A subroutine using a signature received too many arguments than
+required by the signature.  The caller of the subroutine is presumably
+at fault.
+
 
 =item Too many )'s
 

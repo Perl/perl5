@@ -4827,7 +4827,7 @@ Perl_yylex(pTHX)
         case '%':
             /* spot stuff that looks like an prototype */
             if (strchr("$:@%&*;\\[]", *s)) {
-                yyerror("illegal character following sigil in a subroutine signature");
+                yyerror("Illegal character following sigil in a subroutine signature");
                 break;
             }
             /* '$#' is banned, while '$ # comment' isn't */
@@ -4857,7 +4857,7 @@ Perl_yylex(pTHX)
             break;
 
         default:
-            yyerror("a signature parameter must start with '$', '@' or '%'");
+            yyerror("A signature parameter must start with '$', '@' or '%'");
             /* very crude error recovery: skip to likely next signature
              * element */
             while (*s && *s != '$' && *s != '@' && *s != '%' && *s != ')')

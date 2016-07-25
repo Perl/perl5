@@ -662,7 +662,7 @@ sigslurpelem: sigslurpsigil sigvarname sigdefault/* def only to catch errors */
                             PL_parser->sig_slurpy = sigil;
 
                             if (defexpr)
-                                yyerror("a slurpy parameter may not have "
+                                yyerror("A slurpy parameter may not have "
                                         "a default value");
 
                             $$ = var ? newSTATEOP(0, NULL, var) : (OP*)NULL;

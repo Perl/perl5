@@ -579,10 +579,10 @@ is eval("t034(456, 789, 987, 654, 321, 111)"), "456/789/987/654/321/111;6";
 is $a, 123;
 
 eval "#line 8 foo\nsub t136 (\@abc = 222) { }";
-is $@, qq{a slurpy parameter may not have a default value at foo line 8, near "222) "\n};
+is $@, qq{A slurpy parameter may not have a default value at foo line 8, near "222) "\n};
 
 eval "#line 8 foo\nsub t137 (\@abc =) { }";
-is $@, qq{a slurpy parameter may not have a default value at foo line 8, near "=) "\n};
+is $@, qq{A slurpy parameter may not have a default value at foo line 8, near "=) "\n};
 
 sub t035 (@) { $a }
 is prototype(\&t035), undef;
@@ -597,10 +597,10 @@ is eval("t035(456, 789, 987, 654, 321, 111)"), 123;
 is $a, 123;
 
 eval "#line 8 foo\nsub t138 (\@ = 222) { }";
-is $@, qq{a slurpy parameter may not have a default value at foo line 8, near "222) "\n};
+is $@, qq{A slurpy parameter may not have a default value at foo line 8, near "222) "\n};
 
 eval "#line 8 foo\nsub t139 (\@ =) { }";
-is $@, qq{a slurpy parameter may not have a default value at foo line 8, near "=) "\n};
+is $@, qq{A slurpy parameter may not have a default value at foo line 8, near "=) "\n};
 
 sub t039 (%abc) { join("/", map { $_."=".$abc{$_} } sort keys %abc) }
 is prototype(\&t039), undef;
@@ -619,10 +619,10 @@ is eval("t039(456, 789, 987, 654, 321, 111)"), "321=111/456=789/987=654";
 is $a, 123;
 
 eval "#line 8 foo\nsub t140 (\%abc = 222) { }";
-is $@, qq{a slurpy parameter may not have a default value at foo line 8, near "222) "\n};
+is $@, qq{A slurpy parameter may not have a default value at foo line 8, near "222) "\n};
 
 eval "#line 8 foo\nsub t141 (\%abc =) { }";
-is $@, qq{a slurpy parameter may not have a default value at foo line 8, near "=) "\n};
+is $@, qq{A slurpy parameter may not have a default value at foo line 8, near "=) "\n};
 
 sub t040 (%) { $a }
 is prototype(\&t040), undef;
@@ -641,10 +641,10 @@ is eval("t040(456, 789, 987, 654, 321, 111)"), 123;
 is $a, 123;
 
 eval "#line 8 foo\nsub t142 (\% = 222) { }";
-is $@, qq{a slurpy parameter may not have a default value at foo line 8, near "222) "\n};
+is $@, qq{A slurpy parameter may not have a default value at foo line 8, near "222) "\n};
 
 eval "#line 8 foo\nsub t143 (\% =) { }";
-is $@, qq{a slurpy parameter may not have a default value at foo line 8, near "=) "\n};
+is $@, qq{A slurpy parameter may not have a default value at foo line 8, near "=) "\n};
 
 sub t041 ($a, @b) { $a.";".join("/", @b) }
 is prototype(\&t041), undef;
@@ -1082,11 +1082,11 @@ eval "#line 8 foo\nsub t093 (\%#foo\na) { }";
 like $@, qr{\A'#' not allowed immediately following a sigil in a subroutine signature at foo line 8, near "\(%"\n};
 
 eval "#line 8 foo\nsub t094 (123) { }";
-like $@, qr{\Aa signature parameter must start with '\$', '\@' or '%' at foo line 8, near "\(1"\n};
+like $@, qr{\AA signature parameter must start with '\$', '\@' or '%' at foo line 8, near "\(1"\n};
 
 eval "#line 8 foo\nsub t095 (\$a, 123) { }";
 is $@, <<EOF;
-a signature parameter must start with '\$', '\@' or '%' at foo line 8, near ", 1"
+A signature parameter must start with '\$', '\@' or '%' at foo line 8, near ", 1"
 syntax error at foo line 8, near ", 123"
 EOF
 
@@ -1096,7 +1096,7 @@ is $@, qq{syntax error at foo line 8, near "\$a 123"\n};
 eval "#line 8 foo\nsub t097 (\$a { }) { }";
 is $@, <<EOF;
 syntax error at foo line 8, near "\$a { "
-a signature parameter must start with '\$', '\@' or '%' at foo line 8, near "{ }"
+A signature parameter must start with '\$', '\@' or '%' at foo line 8, near "{ }"
 Missing right curly or square bracket at foo line 8, at end of line
 EOF
 
@@ -1108,7 +1108,7 @@ EOF
 
 eval "#line 8 foo\nsub t099 (\$\$) { }";
 is $@, <<EOF;
-illegal character following sigil in a subroutine signature at foo line 8, near "(\$"
+Illegal character following sigil in a subroutine signature at foo line 8, near "(\$"
 syntax error at foo line 8, near "\$\$"
 EOF
 

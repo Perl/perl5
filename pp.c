@@ -6811,6 +6811,8 @@ PP(pp_argcheck)
     too_few = (argc < (params - opt_params));
 
     if (UNLIKELY(too_few || (!slurpy && argc > params)))
+        /* diag_listed_as: Too few arguments for subroutine */
+        /* diag_listed_as: Too many arguments for subroutine */
         Perl_croak_caller("Too %s arguments for subroutine",
                             too_few ? "few" : "many");
 

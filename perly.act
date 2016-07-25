@@ -826,7 +826,7 @@ case 2:
                             PL_parser->sig_slurpy = sigil;
 
                             if (defexpr)
-                                yyerror("a slurpy parameter may not have "
+                                yyerror("A slurpy parameter may not have "
                                         "a default value");
 
                             (yyval.opval) = var ? newSTATEOP(0, NULL, var) : (OP*)NULL;
@@ -1973,6 +1973,6 @@ case 2:
     
 
 /* Generated from:
- * 6deb43709ef5dcefc6a8b7059606df5a86eae75b6a769e7451f39368b1de5d9d perly.y
+ * f197986843aaef0ab285344b7144e3bf7b35fea3ed9aa46884a25d31c7485700 perly.y
  * 3e1dff60f26df8933d7aed0c0e87177a0f022c14800c0707eb62a7db4196ac98 regen_perly.pl
  * ex: set ro: */
