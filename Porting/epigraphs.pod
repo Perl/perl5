@@ -94,6 +94,26 @@ L<Announced on 2016-05-09 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   To find that the utmost reward
     Of daring should be still to dare.
 
+=head2 v5.24.1-RC2 - Dante Alighieri, trans. Dorothy L. Sayers, "The Divine Comedy", Cantica II: Purgatory, Canto X
+
+L<Announced on 2016-07-25 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2016/07/msg238269.html>
+
+  When we had crossed the threshold of that gate
+    Which the soul's evil loves put out of use,
+    Because they make the crooked path seem straight,
+
+  I heard its closing clang ring clamorous,
+    And had I then turned back my eyes to it
+    How could my fault have found the least excuse?
+
+  We had to climb now through a rocky slit
+    Which ran from side to side in many a swerve,
+    As runs the wave in onset and retreat.
+
+  "Now here," the master said, "we must observe
+    Some little caution, hugging now this wall,
+    Now that, upon the far side of the curve."
+
 =head2 v5.24.1-RC1 - Dante Alighieri, trans. Dorothy L. Sayers, "The Divine Comedy", Cantica I: Hell, Canto XX
 
 L<Announced on 2016-07-17 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2016/07/msg238072.html>
@@ -493,6 +513,26 @@ L<Announced on 2015-06-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   To be just like them
   They sing while you slave and I just get bored
   I ain't gonna work on Maggie's farm no more
+
+=head2 v5.22.3-RC2 - Dante Alighieri, trans. Dorothy L. Sayers, "The Divine Comedy", Cantica II: Purgatory, Canto I
+
+L<Announced on 2016-07-25 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2016/07/msg238270.html>
+
+  For better waters heading with the wind
+    My ship of genius now shakes out her sail
+    And leaves that ocean of despair behind;
+
+  For to the second realm I tune my tale,
+    Where human spirits purge themselves, and train
+    To leap up into joy celestial.
+
+  Now from the grave wake poetry again,
+    O sacred Muses I have served so long!
+    Now let Calliope uplift her strain
+
+  And lift my voice up on the mighty song
+    That smote the miserable Magpies nine
+    Out of all hope of pardon for their wrong!
 
 =head2 v5.22.3-RC1 - Dante Alighieri, trans. Dorothy L. Sayers, "The Divine Comedy", Cantica I: Hell, Canto XII
 
