@@ -13,7 +13,7 @@ This one does not fix a crash, but merely fixed bad debugging output that confus
 <commit votes="" id="8e5993c4dcf9a5b7c84224dd04946a4e49ec96fe" ticket="128086" desc="Dump empty-string ENAMEs as empty strings" />
 
 <commit votes="sprout" id="fcd130693a9e7a753f63a08691ff619ad91bf8eb" ticket="128106" desc="[perl #128106] Fix reset with non-globs" />
-<commit votes="" id="adec5bbf0b66ee5ebc2ba80eda2389bb68e23d86" ticket="128131" desc="fix symbol detection with gcc 6 link-time optimization (RT #128131)" />
+<commit votes="jhi" id="adec5bbf0b66ee5ebc2ba80eda2389bb68e23d86" ticket="128131" desc="fix symbol detection with gcc 6 link-time optimization (RT #128131)" />
 <commit votes="sprout" id="d674449463a15ac3f36086e3a0bb3a9d02729887" ticket="128171" desc="[perl #128171] Fix assert fail with /@0{0*->@*/*0" />
 <commit votes="sprout" id="08f800f8519574aea9e744ff83230fb93772652b" ticket="128182" desc="[perl #128182] Fix crash with require $nonstring" />
 <commit votes="sprout" id="76734a3218e712760695898e424c2369ccdd49c6" ticket="128204" desc="[perl #128204] Fix crash with @a &amp;.= etc." />
@@ -74,7 +74,7 @@ Perhaps just the removal of SETERRNO() from this.
 
 <commit votes="jhi sprout" id="d06c8f869698f7905df974ab8bafb703a5438fc1" desc="[perl #128538] [PATCH] Fix copy/paste error in Configure"/>
 <commit votes="jhi sprout" id="a2c061044c1e87ae8e777d6134191760235db0de" desc="make Configure abort if both -Duselongdouble and -Dusequadmath are requested"/>
-<commit votes="steveh" id="ab0fe36e478f78846a1944a3e22e9cd26260c042" desc="fix build on clang plus -DPERL_GLOBAL_STRUCT"/>
+<commit votes="steveh jhi" id="ab0fe36e478f78846a1944a3e22e9cd26260c042" desc="fix build on clang plus -DPERL_GLOBAL_STRUCT"/>
 
 </div>
 
