@@ -108,6 +108,7 @@ Lingua::KO::Romanize::Hangul
 Lingua::ZH::Romanize::Pinyin
 List::Gather
 local::lib
+Log::Agent
 Log::Message
 Log::Message::Config
 Log::Message::Handlers
