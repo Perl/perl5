@@ -32,56 +32,55 @@ If perl is running setuid or the B<-T> switch was supplied C<PERLIO_DEBUG> is
 ignored and the debugging output is sent to C<stderr> as for any other B<-D>
 switch.
 
-=head2 Core modules and tools no longer search C<.> for optional modules
+=head2 Core modules and tools no longer search F<"."> for optional modules
 
-The tools and many modules supplied in core no longer search the
-default current directory entry in @INC for optional modules, for
-example, L<Storable> will remove the final C<"."> from C<@INC> before
-trying to load L<Log::Agent>.
+The tools and many modules supplied in core no longer search the default
+current directory entry in L<C<@INC>|perlvar/@INC> for optional modules.  For
+example, L<Storable> will remove the final F<"."> from C<@INC> before trying to
+load L<Log::Agent>.
 
-This prevents an attacker injecting an optional module into a process
-run by another user where the current directory is writable by the
-attacker, eg. the F</tmp> directory.
+This prevents an attacker injecting an optional module into a process run by
+another user where the current directory is writable by the attacker, e.g. the
+F</tmp> directory.
 
-In most cases this removal should not cause problems, the exception
-being L<base>.
+In most cases this removal should not cause problems, the exception being
+L<base>.
 
-C<base> treats every module name supplied as optional - if you have
-applications that use C<base> to load non-optional modules from the
-current directory you will need to modify your code or environment.
+L<base> treats every module name supplied as optional.  If you have
+applications that use L<base> to load non-optional modules from the current
+directory you will need to modify your code or environment.
 
-If your code always trusts the contents of the current directory, the
-simplest change is adding C<"."> to C<PERL5LIB>:
+If your code always trusts the contents of the current directory, the simplest
+change is adding F<"."> to C<PERL5LIB>:
 
   # for Bourne shell and similar
   set PERL5LIB=.
   export PERL5LIB
 
-If you do B<not> trust the current directory this will open your code
-up to attacks on any module load, not just optional modules.  You may
-want to add the absoluete path of your application's module directory
-to C<PERL5LIB> instead.
+If you do B<not> trust the current directory this will open your code up to
+attacks on any module load, not just optional modules.  You may want to add the
+absolute path of your application's module directory to C<PERL5LIB> instead.
 
-Alternatively you can change your code, either to add the directory
-with your binary to C<@INC>:
+Alternatively, you can change your code, either to add the directory with your
+binary to C<@INC>:
 
   use FindBin;
   use lib $FindBin::Bin;
 
-or switch to C<parent>, which requires an explicit parameter for
-optional modules:
+or switch to L<parent>, which requires an explicit parameter for optional
+modules:
 
   use parent 'Nonoptional::Module';
 
-though this will have the same problem if the current directory is
-removed from C<@INC> in perl 5.26.
+though this will have the same problem if the current directory is removed from
+C<@INC> in Perl 5.26.
 
-Also, since C<base> now localizes C<@INC> when loading modules changes
-to C<@INC> in the loaded module will be discarded when C<@INC> is
-restored to its previous value.
+Also, since L<base> now localizes C<@INC> when loading modules, changes to
+C<@INC> in the loaded module will be discarded when C<@INC> is restored to its
+previous value.
 
-To protect your own code from this attack either remove the default
-C<"."> entry from C<@INC> at the start of your script, so:
+To protect your own code from this attack, either remove the default F<".">
+entry from C<@INC> at the start of your script, so:
 
   #!/usr/bin/perl
   use strict;
@@ -94,7 +93,7 @@ becomes:
   use strict;
   ...
 
-or for modules, remove C<"."> from a localized C<@INC>, so:
+or for modules, remove F<"."> from a localized C<@INC>, so:
 
   my $can_foo = eval { require Foo; }
 
@@ -108,9 +107,9 @@ becomes:
 
 =head1 Incompatible Changes
 
-There are no changes intentionally incompatible with Perl 5.24.0.  If any
-exist, they are bugs, and we request that you submit a report.  See
-L</Reporting Bugs> below.
+Other than the security changes above there are no changes intentionally
+incompatible with Perl 5.24.0.  If any exist, they are bugs, and we request
+that you submit a report.  See L</Reporting Bugs> below.
 
 =head1 Modules and Pragmata
 
@@ -125,8 +124,7 @@ L<Module::CoreList> has been upgraded from version 5.20160506 to 5.20160730_24.
 =item *
 
 L<XSLoader> has been upgraded from version 0.21 to 0.22, fixing a security hole
-in which binary files could be loaded from a path outside of
-L<C<@INC>|perlvar/@INC>.
+in which binary files could be loaded from a path outside of C<@INC>.
 L<[perl #128528]|https://rt.perl.org/Public/Bug/Display.html?id=128528>
 
 =back
