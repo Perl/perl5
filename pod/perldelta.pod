@@ -119,7 +119,107 @@ that you submit a report.  See L</Reporting Bugs> below.
 
 =item *
 
+L<Archive::Tar> has been upgraded from version 2.04 to 2.04_01.
+
+=item *
+
+L<base> has been upgraded from version 2.23 to 2.23_01.
+
+=item *
+
+L<bignum> has been upgraded from version 0.42 to 0.42_01.
+
+=item *
+
+L<CPAN> has been upgraded from version 2.11 to 2.11_01.
+
+=item *
+
+L<Digest> has been upgraded from version 1.17 to 1.17_01.
+
+=item *
+
+L<Digest::SHA> has been upgraded from version 5.95 to 5.95_01.
+
+=item *
+
+L<Encode> has been upgraded from version 2.80 to 2.80_01.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 7.10_01 to 7.10_02.
+
+=item *
+
+L<File::Fetch> has been upgraded from version 0.48 to 0.48_01.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.63 to 3.63_01.
+
+=item *
+
+L<HTTP::Tiny> has been upgraded from version 0.056 to 0.056_001.
+
+=item *
+
+L<IO> has been upgraded from version 1.36 to 1.36_01.
+
+=item *
+
+The IO-Compress modules have been upgraded from version 2.069 to 2.069_001.
+
+=item *
+
+L<IPC::Cmd> has been upgraded from version 0.92 to 0.92_01.
+
+=item *
+
+L<JSON::PP> has been upgraded from version 2.27300 to 2.27300_01.
+
+=item *
+
+L<Locale::Maketext> has been upgraded from version 1.26 to 1.26_01.
+
+=item *
+
+L<Locale::Maketext::Simple> has been upgraded from version 0.21 to 0.21_01.
+
+=item *
+
+L<Memoize> has been upgraded from version 1.03 to 1.03_01.
+
+=item *
+
 L<Module::CoreList> has been upgraded from version 5.20160506 to 5.20160730_24.
+
+=item *
+
+L<Net::Ping> has been upgraded from version 2.43 to 2.43_01.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.22 to 1.2201.
+
+=item *
+
+L<Pod::Perldoc> has been upgraded from version 3.25_02 to 3.25_03.
+
+=item *
+
+L<Storable> has been upgraded from version 2.56 to 2.56_01.
+
+=item *
+
+L<Sys::Syslog> has been upgraded from version 0.33 to 0.33_01.
+
+=item *
+
+L<Test> has been upgraded from version 1.28 to 1.28_01.
+
+=item *
+
+L<Test::Harness> has been upgraded from version 3.36 to 3.36_01.
 
 =item *
 
