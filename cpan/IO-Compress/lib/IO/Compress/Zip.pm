@@ -36,7 +36,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $ZipError);
 
-$VERSION = '2.069';
+$VERSION = '2.069_01';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);

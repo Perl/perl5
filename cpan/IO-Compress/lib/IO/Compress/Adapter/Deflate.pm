@@ -10,7 +10,7 @@ use Compress::Raw::Zlib  2.069 qw( !crc32 !adler32 ) ;
 require Exporter;                                     
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, @EXPORT, %DEFLATE_CONSTANTS);
 
-$VERSION = '2.069';
+$VERSION = '2.069_01';
 @ISA = qw(Exporter);
 @EXPORT_OK = @Compress::Raw::Zlib::DEFLATE_CONSTANTS;
 %EXPORT_TAGS = %Compress::Raw::Zlib::DEFLATE_CONSTANTS;

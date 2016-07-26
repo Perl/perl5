@@ -14,7 +14,7 @@ use IO::Uncompress::Adapter::Inflate  2.069 ;
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $RawInflateError);
 
-$VERSION = '2.069';
+$VERSION = '2.069_01';
 $RawInflateError = '';
 
 @ISA    = qw( Exporter IO::Uncompress::Base );
