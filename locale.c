@@ -1758,12 +1758,22 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
     /* Then the transformation of the input.  We loop until successful, or we
      * give up */
     for (;;) {
+
         *xlen = strxfrm(xbuf + COLLXFRM_HDR_LEN, s, xAlloc - COLLXFRM_HDR_LEN);
 
         /* If the transformed string occupies less space than we told strxfrm()
          * was available, it means it successfully transformed the whole
          * string. */
         if (*xlen < xAlloc - COLLXFRM_HDR_LEN) {
+
+            /* Some systems include a trailing NUL in the returned length.
+             * Ignore it, using a loop in case multiple trailing NULs are
+             * returned. */
+            while (   (*xlen) > 0
+                   && *(xbuf + COLLXFRM_HDR_LEN + (*xlen) - 1) == '\0')
+            {
+                (*xlen)--;
+            }
 
             /* If the first try didn't get it, it means our prediction was low.
              * Modify the coefficients so that we predict a larger value in any
@@ -1827,9 +1837,9 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
             goto bad;
 
         /* A well-behaved strxfrm() returns exactly how much space it needs
-         * (not including the trailing NUL) when it fails due to not enough
-         * space being provided.  Assume that this is the case unless it's been
-         * proven otherwise */
+         * (usually not including the trailing NUL) when it fails due to not
+         * enough space being provided.  Assume that this is the case unless
+         * it's been proven otherwise */
         if (LIKELY(PL_strxfrm_is_behaved) && first_time) {
             xAlloc = *xlen + COLLXFRM_HDR_LEN + 1;
         }
