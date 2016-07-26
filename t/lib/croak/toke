@@ -85,6 +85,20 @@ Can't find string terminator "/" anywhere before EOF at - line 1.
 EXPECT
 Can't find string terminator "'" anywhere before EOF at - line 1.
 ########
+# NAME Unterminated q// with non-ASCII delimiter, under utf8
+BEGIN { binmode STDERR, ":utf8" }
+use utf8;
+q«
+EXPECT
+Can't find string terminator "«" anywhere before EOF at - line 3.
+########
+# NAME Unterminated q// with non-Latin-1 delimiter
+BEGIN { binmode STDERR, ":utf8" }
+use utf8;
+q 옷
+EXPECT
+Can't find string terminator "옷" anywhere before EOF at - line 3.
+########
 # NAME /\N{/
 /\N{/
 EXPECT

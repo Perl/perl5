@@ -555,26 +555,38 @@ S_no_op(pTHX_ const char *const what, char *s)
 STATIC void
 S_missingterm(pTHX_ char *s)
 {
-    char tmpbuf[3];
+    char tmpbuf[UTF8_MAXBYTES];
     char q;
+    bool uni = FALSE;
+    SV *sv;
     if (s) {
 	char * const nl = strrchr(s,'\n');
 	if (nl)
 	    *nl = '\0';
     }
-    else if ((U8) PL_multi_close < 32) {
+    else if (PL_multi_close < 32) {
 	*tmpbuf = '^';
 	tmpbuf[1] = (char)toCTRL(PL_multi_close);
 	tmpbuf[2] = '\0';
 	s = tmpbuf;
     }
     else {
-	*tmpbuf = (char)PL_multi_close;
-	tmpbuf[1] = '\0';
+	if (LIKELY(PL_multi_close < 256)) {
+	    *tmpbuf = (char)PL_multi_close;
+	    tmpbuf[1] = '\0';
+	}
+	else {
+	    uni = TRUE;
+	    *uvchr_to_utf8((U8 *)tmpbuf, PL_multi_close) = 0;
+	}
 	s = tmpbuf;
     }
     q = strchr(s,'"') ? '\'' : '"';
-    Perl_croak(aTHX_ "Can't find string terminator %c%s%c anywhere before EOF",q,s,q);
+    sv = sv_2mortal(newSVpv(s,0));
+    if (uni)
+	SvUTF8_on(sv);
+    Perl_croak(aTHX_ "Can't find string terminator %c%"SVf
+		     "%c anywhere before EOF",q,SVfARG(sv),q);
 }
 
 #include "feature.h"
@@ -9947,14 +9959,14 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 
     /* mark where we are */
     PL_multi_start = CopLINE(PL_curcop);
-    PL_multi_open = term;
+    PL_multi_open = termcode;
     herelines = PL_parser->herelines;
 
     /* find corresponding closing delimiter */
     if (term && (tmps = strchr("([{< )]}> )]}>",term)))
 	termcode = termstr[0] = term = tmps[5];
 
-    PL_multi_close = term;
+    PL_multi_close = termcode;
 
     if (PL_multi_open == PL_multi_close) {
         keep_bracketed_quoted = FALSE;
