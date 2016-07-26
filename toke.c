@@ -563,6 +563,7 @@ S_missingterm(pTHX_ char *s)
 	char * const nl = strrchr(s,'\n');
 	if (nl)
 	    *nl = '\0';
+	uni = UTF;
     }
     else if (PL_multi_close < 32) {
 	*tmpbuf = '^';

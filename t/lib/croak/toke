@@ -70,6 +70,13 @@ Can't find string terminator "foo" anywhere before EOF at (eval 1) line 1.
 EXPECT
 Can't find string terminator "foo" anywhere before EOF at - line 1.
 ########
+# NAME Unterminated here-doc with non-Latin-1 terminator
+BEGIN { binmode STDERR, ":utf8" }
+use utf8;
+<<옷옷
+EXPECT
+Can't find string terminator "옷옷" anywhere before EOF at - line 3.
+########
 # NAME Unterminated qw//
 qw/
 EXPECT
