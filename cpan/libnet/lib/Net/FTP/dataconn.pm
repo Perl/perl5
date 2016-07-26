@@ -13,7 +13,7 @@ use Carp;
 use Errno;
 use Net::Cmd;
 
-our $VERSION = '3.09';
+our $VERSION = '3.09_01';
 
 $Net::FTP::IOCLASS or die "please load Net::FTP before Net::FTP::dataconn";
 our @ISA = $Net::FTP::IOCLASS;

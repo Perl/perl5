@@ -3,7 +3,7 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.64';
+$VERSION = '3.3.65';
 my $xs_version = $VERSION;
 $VERSION =~ tr/_//d;
 
@@ -40,7 +40,10 @@ if ($^O eq 'os2') {
 my $use_vms_feature;
 BEGIN {
     if ($^O eq 'VMS') {
-        if (eval { local $SIG{__DIE__}; require VMS::Feature; }) {
+        if (eval { local $SIG{__DIE__};
+                   local @INC = @INC;
+                   pop @INC if $INC[-1] eq '.';
+                   require VMS::Feature; }) {
             $use_vms_feature = 1;
         }
     }

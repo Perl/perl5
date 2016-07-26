@@ -4,7 +4,7 @@
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.84 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d_01", q$Revision: 2.84 $ =~ /(\d+)/g;
 use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -56,6 +56,8 @@ require Encode::Config;
 eval {
     local $SIG{__DIE__};
     local $SIG{__WARN__};
+    local @INC = @INC;
+    pop @INC if $INC[-1] eq '.';
     require Encode::ConfigLocal;
 };
 

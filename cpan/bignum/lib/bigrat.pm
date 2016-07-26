@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '0.43';
+our $VERSION = '0.43_01';
 
 use Exporter;
 our @ISA            = qw( bigint );
@@ -150,6 +150,8 @@ sub import {
     else {
         # see if we can find Math::BigInt::Lite
         if (!defined $a && !defined $p) {       # rounding won't work to well
+            local @INC = @INC;
+            pop @INC if $INC[-1] eq '.';
             if (eval { require Math::BigInt::Lite; 1 }) {
                 @import = ();                   # :constant in Lite, not MBI
                 Math::BigInt::Lite->import(':constant');

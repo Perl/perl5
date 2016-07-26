@@ -19,7 +19,7 @@ require Exporter;
                );
 %EXPORT_TAGS = ('ALL' => \@EXPORT_OK);
 
-$VERSION = "0.40";
+$VERSION = "0.41";
 
 sub uniq { my %seen; return grep(!($seen{$_}++), @_); } # a util function
 

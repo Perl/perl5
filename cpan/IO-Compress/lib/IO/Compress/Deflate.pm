@@ -17,7 +17,7 @@ use IO::Compress::Base::Common  2.069 qw();
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $DeflateError);
 
-$VERSION = '2.069';
+$VERSION = '2.069_01';
 $DeflateError = '';
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
