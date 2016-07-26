@@ -330,3 +330,23 @@ Version control conflict marker at - line 1, near "<<<<<<<"
 Version control conflict marker at - line 3, near "======="
 Version control conflict marker at - line 5, near ">>>>>>>"
 Execution of - aborted due to compilation errors.
+########
+# NAME (Might be a runaway multi-line...) with Latin-1 delimiters in utf8
+BEGIN { binmode STDERR, ':utf8' }
+use utf8;
+q«
+« time
+EXPECT
+syntax error at - line 4, near "« time"
+  (Might be a runaway multi-line «« string starting on line 3)
+Execution of - aborted due to compilation errors.
+########
+# NAME (Might be a runaway multi-line...) with non-Latin-1 delimiters
+BEGIN { binmode STDERR, ':utf8' }
+use utf8;
+q ϡ
+ϡ time
+EXPECT
+syntax error at - line 4, near "ϡ time"
+  (Might be a runaway multi-line ϡϡ string starting on line 3)
+Execution of - aborted due to compilation errors.
