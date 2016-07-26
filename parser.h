@@ -68,8 +68,8 @@ typedef struct yy_parser {
     SV		*lex_stuff;	/* runtime pattern from m// or s/// */
     I32		multi_start;	/* 1st line of multi-line string */
     I32		multi_end;	/* last line of multi-line string */
-    char	multi_open;	/* delimiter of said string */
-    char	multi_close;	/* delimiter of said string */
+    UV		multi_open;	/* delimiter of said string */
+    UV		multi_close;	/* delimiter of said string */
     bool	preambled;
     bool        lex_re_reparsing; /* we're doing G_RE_REPARSING */
     I32		lex_allbrackets;/* (), [], {}, ?: bracket count */

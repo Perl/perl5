@@ -10020,7 +10020,8 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 		/* backslashes can escape the open or closing characters */
 		if (*s == '\\' && s+1 < PL_bufend) {
 		    if (!keep_bracketed_quoted
-                       && ((s[1] == PL_multi_open) || (s[1] == PL_multi_close)))
+                       && ( ((UV)s[1] == PL_multi_open)
+                         || ((UV)s[1] == PL_multi_close) ))
                     {
 			s++;
                     }
@@ -10028,9 +10029,9 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 			*to++ = *s++;
                 }
 		/* allow nested opens and closes */
-		else if (*s == PL_multi_close && --brackets <= 0)
+		else if ((UV)*s == PL_multi_close && --brackets <= 0)
 		    break;
-		else if (*s == PL_multi_open)
+		else if ((UV)*s == PL_multi_open)
 		    brackets++;
 		else if (!has_utf8 && !UTF8_IS_INVARIANT((U8)*s) && UTF)
 		    has_utf8 = TRUE;
