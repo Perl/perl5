@@ -1393,6 +1393,13 @@ like $@, qr/^Assigned value is not a HASH reference at /,
 eval 'sub (\\\$a) {}';  # That’s a double backslash.
 like $@, qr/syntax error/, '(\\\$a) not allowed';
 
+sub (\$x=\my $y) {
+    $x = 3;
+    ($x, my $z) = (1, $y);
+    is $z, 3, 'list assignment after aliasing via signature';
+}->();
+
+
 done_testing;
 
 1;

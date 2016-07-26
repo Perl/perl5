@@ -748,7 +748,11 @@ sigscalarelem:
                                             "follows optional parameter");
                             }
                             if ($1 && var)
+                            {
                                 var->op_private |= OPpARGELEM_REF;
+                                PAD_COMPNAME_GEN_set(var->op_targ,
+                                                     PERL_INT_MAX);
+                            }
 
                             $$ = var ? newSTATEOP(0, NULL, var) : (OP*)NULL;
                         }
