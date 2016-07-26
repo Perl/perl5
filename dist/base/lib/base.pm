@@ -3,7 +3,7 @@ package base;
 
 use strict 'vars';
 use vars qw($VERSION);
-$VERSION = '2.23';
+$VERSION = '2.24';
 $VERSION =~ tr/_//d;
 
 # constant.pm is slow
