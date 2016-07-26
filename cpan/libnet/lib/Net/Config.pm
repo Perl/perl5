@@ -20,7 +20,7 @@ use Socket qw(inet_aton inet_ntoa);
 
 our @EXPORT  = qw(%NetConfig);
 our @ISA     = qw(Net::LocalCfg Exporter);
-our $VERSION = "3.09";
+our $VERSION = "3.09_01";
 
 our($CONFIGURE, $LIBNET_CFG);
 

@@ -15,7 +15,7 @@ require 5.005;
 
 
 {   no strict 'vars';
-    $VERSION = '0.34';
+    $VERSION = '0.34_01';
 
     %EXPORT_TAGS = (
         standard => [qw(openlog syslog closelog setlogmask)],

@@ -12,7 +12,7 @@ use File::Spec::Functions qw(catfile catdir splitdir);
 use vars qw($VERSION @Pagers $Bindir $Pod2man
   $Temp_Files_Created $Temp_File_Lifetime
 );
-$VERSION = '3.25_02'; # patched in perl5.git
+$VERSION = '3.25_03'; # patched in perl5.git
 $VERSION =~ s/_//;
 
 #..........................................................................
