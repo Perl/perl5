@@ -1462,13 +1462,6 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
      * less-than-perfect results with that character and NUL.  This is
      * unavoidable unless we replace strxfrm with our own implementation.
      *
-     * XXX This code may be overkill.  khw wrote it before realizing that if
-     * you change a NUL into some other character, that that may change the
-     * strxfrm results if that character is part of a sequence with other
-     * characters for weight calculations.  To minimize the chances of this,
-     * now the replacement is restricted to another control (likely to be
-     * \001).  But the full generality has been retained.
-     *
      * This is one of the few places in the perl core, where we can use
      * standard functions like strlen() and strcat().  It's because we're
      * looking for NULs. */
@@ -1476,6 +1469,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
         char * e = s + len;
         char * sans_nuls;
         STRLEN cur_min_char_len;
+        int try_non_controls;
 
         /* If we don't know what control character sorts lowest for this
          * locale, find it */
@@ -1489,6 +1483,13 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                                            prefixed. */
 
             DEBUG_Lv(PerlIO_printf(Perl_debug_log, "Looking to replace NUL\n"));
+
+            /* Unlikely, but it may be that no control will work to replace
+             * NUL, in which case we instead look for any character */
+            for (try_non_controls = 0;
+                 try_non_controls < 2;
+                 try_non_controls++)
+            {
             /* Look through all legal code points (NUL isn't) */
             for (j = 1; j < 256; j++) {
                 char * x;       /* j's xfrm plus collation index */
@@ -1500,7 +1501,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                 char cur_source[] = { (char) j, '\0' , '\0' };
 
                 if (PL_in_utf8_COLLATE_locale) {
-                    if (! isCNTRL_L1(j)) {
+                    if (! try_non_controls && ! isCNTRL_L1(j)) {
                         continue;
                     }
 
@@ -1511,7 +1512,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                         trial_len = 2;
                     }
                 }
-                else if (! isCNTRL_LC(j)) {
+                else if (! try_non_controls && ! isCNTRL_LC(j)) {
                     continue;
                 }
 
@@ -1519,11 +1520,8 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                 x = _mem_collxfrm(cur_source, trial_len, &x_len,
                                   PL_in_utf8_COLLATE_locale);
 
-                /* If something went wrong (which it shouldn't), just
-                 * ignore this code point */
-                if (   x_len == 0
-                    || strlen(x + COLLXFRM_HDR_LEN) < x_len)
-                {
+                /* Ignore any character that didn't successfully transform */
+                if (! x) {
                     continue;
                 }
 
@@ -1546,29 +1544,27 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                 }
             } /* end of loop through all bytes */
 
-            /* Unlikely, but possible, if there aren't any controls in the
-             * locale, arbitrarily use \001 */
-            if (cur_min_x == NULL) {
-                STRLEN x_len;   /* temporary */
-                cur_min_x = _mem_collxfrm("\001", 1, &x_len,
-                                          PL_in_utf8_COLLATE_locale);
-                /* cur_min_cp was already initialized to 1 */
+                if (cur_min_x) {
+                    break;
+                }
+
+                /* Unlikely, but possible, if there aren't any controls that
+                 * work in the locale, repeat the loop, looking for any
+                 * character that works */
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                "_mem_collxfrm: No control worked.  Trying non-controls\n"));
+            }
+
+            if (! cur_min_x) {
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                    "_mem_collxfrm: Couldn't find any character to replace"
+                    " embedded NULs in locale %s with", PL_collation_name));
+                goto bad;
             }
 
             DEBUG_L(PerlIO_printf(Perl_debug_log,
-                    "_mem_collxfrm: lowest collating non-NUL control in the "
-                    "0-255 range in locale %s is 0x%02X\n",
-                    PL_collation_name,
-                    cur_min_cp));
-            if (DEBUG_Lv_TEST) {
-                unsigned i;
-                PerlIO_printf(Perl_debug_log, "Its xfrm is");
-                for (i = 0; i < strlen(cur_min_x + COLLXFRM_HDR_LEN); i ++) {
-                    PerlIO_printf(Perl_debug_log, " %02x",
-                                (U8) *(cur_min_x + COLLXFRM_HDR_LEN + i));
-                }
-                PerlIO_printf(Perl_debug_log, "\n");
-            }
+                    "_mem_collxfrm: Replacing embedded NULs in locale %s with "
+                    "0x%02X\n", PL_collation_name, cur_min_cp));
 
             Safefree(cur_min_x);
         }
@@ -1668,8 +1664,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
 
                         /* If something went wrong (which it shouldn't), just
                          * ignore this code point */
-                        if (x_len == 0) {
-                            Safefree(x);
+                        if (! x) {
                             continue;
                         }
 
@@ -1687,23 +1682,19 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                         }
                     }
 
+                    if (! cur_max_x) {
+                        DEBUG_L(PerlIO_printf(Perl_debug_log,
+                            "_mem_collxfrm: Couldn't find any character to"
+                            " replace above-Latin1 chars in locale %s with",
+                            PL_collation_name));
+                        goto bad;
+                    }
+
                     DEBUG_L(PerlIO_printf(Perl_debug_log,
                             "_mem_collxfrm: highest 1-byte collating character"
                             " in locale %s is 0x%02X\n",
                             PL_collation_name,
                             PL_strxfrm_max_cp));
-                    if (DEBUG_Lv_TEST) {
-                        unsigned i;
-                        PerlIO_printf(Perl_debug_log, "Its xfrm is ");
-                        for (i = 0;
-                             i < strlen(cur_max_x + COLLXFRM_HDR_LEN);
-                             i++)
-                        {
-                            PerlIO_printf(Perl_debug_log, " %02x",
-                                        (U8) cur_max_x[i + COLLXFRM_HDR_LEN]);
-                        }
-                        PerlIO_printf(Perl_debug_log, "\n");
-                    }
 
                     Safefree(cur_max_x);
                 }
