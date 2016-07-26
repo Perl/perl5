@@ -3925,6 +3925,7 @@ PP(pp_entersub)
 	RETURNOP(CvSTART(cv));
     }
     else {
+	const bool rstack = cBOOL(CvRSTACK(cv));
 	SSize_t markix = TOPMARK;
         bool is_scalar;
 
@@ -3942,6 +3943,9 @@ PP(pp_entersub)
             DIE(aTHX_ "Can't modify non-lvalue subroutine call of &%"SVf,
                 SVfARG(cv_name(cv, NULL, 0)));
 
+	/* This is where the code gets really ugly.  We have to manage two
+	   blinking stacks at once.  */
+
 	if (UNLIKELY(!(PL_op->op_flags & OPf_STACKED) && GvAV(PL_defgv))) {
 	    /* Need to copy @_ to stack. Alternative may be to
 	     * switch stack to @_, and copy return values
@@ -3952,7 +3956,18 @@ PP(pp_entersub)
 	    if (items) {
 		SSize_t i = 0;
 		const bool m = cBOOL(SvRMAGICAL(av));
+
+/* Stack macros we use in this block are defined in terms of this bool-
+   ean macro. */
+#undef PERL_STACK_LOCALLY_REFCOUNTED
+#define PERL_STACK_LOCALLY_REFCOUNTED rstack
+
+		dSP;
+
 		/* Mark is at the end of the stack. */
+		/* But we cannot assume that about the other stack.  */
+		if (!rstack)
+		    PUSHMARK(SP);
 		EXTEND(SP, items);
 		for (; i < items; ++i)
 		{
@@ -3969,16 +3984,24 @@ PP(pp_entersub)
 		}
 		SP += items;
 		PUTBACK ;		
+
+#undef PERL_STACK_LOCALLY_REFCOUNTED
+#define PERL_STACK_LOCALLY_REFCOUNTED 1
 	    }
 	}
 	else {
-	    SV **mark = PL_stack_base + markix;
+	    SV **mark = PL_rstack_base + markix;
 	    SSize_t items = SP - mark;
 	    while (items--) {
 		mark++;
 		if (*mark && SvPADTMP(*mark)) {
 		    *mark = sv_mortalcopy(*mark);
                 }
+	    }
+	    if (!rstack) {
+		S_PUSHMARK(aTHX_ PL_stack_sp);
+		Copy(PL_rstack_base + markix, PL_stack_sp,
+		     SP - PL_rstack_base - markix, SV *);
 	    }
 	}
 	/* We assume first XSUB in &DB::sub is the called one. */
@@ -3996,6 +4019,13 @@ PP(pp_entersub)
 	/* CvXSUB(cv) must not be NULL because newXS() refuses NULL xsub address */
 	assert(CvXSUB(cv));
 	CvXSUB(cv)(aTHX_ cv);
+
+	/* For !rstack subs, copy the stack back.  */
+	if (!rstack) {
+	    I32 other_markix = S_POPMARK(aTHX);
+	    Copy(PL_stack_base + other_markix, PL_rstack_base + markix,
+		 PL_stack_sp - PL_stack_base - other_markix, SV *);
+	}
 
 	/* Enforce some sanity in scalar context. */
 	if (is_scalar) {

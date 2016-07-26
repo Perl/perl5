@@ -2676,6 +2676,9 @@ Perl_call_argv(pTHX_ const char *sub_name, I32 flags, char **argv)
           		/* See G_* flags in cop.h */
                      	/* null terminated arg list */
 {
+    const bool rstack = cBOOL(flags & G_RSTACK);
+#undef PERL_STACK_LOCALLY_REFCOUNTED
+#define PERL_STACK_LOCALLY_REFCOUNTED rstack
     dSP;
 
     PERL_ARGS_ASSERT_CALL_ARGV;
@@ -2687,6 +2690,8 @@ Perl_call_argv(pTHX_ const char *sub_name, I32 flags, char **argv)
     }
     PUTBACK;
     return call_pv(sub_name, flags);
+#undef PERL_STACK_LOCALLY_REFCOUNTED
+#define PERL_STACK_LOCALLY_REFCOUNTED 1
 }
 
 /*
@@ -2770,6 +2775,7 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
     int ret;
     OP* const oldop = PL_op;
     dJMPENV;
+    const bool rstack = cBOOL(flags & G_RSTACK);
 
     PERL_ARGS_ASSERT_CALL_SV;
 
@@ -2789,6 +2795,20 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
     myop.op_flags |= OP_GIMME_REVERSE(flags);
     SAVEOP();
     PL_op = (OP*)&myop;
+
+    /* If the arguments are on the non-refcounted stack, then copy them to
+       the other stack, where pp_entersub expects to see them.  */
+    if (!rstack) {
+	/* Unrolled non-rstack dMARK and dSP */
+	SV **mark = PL_stack_base + S_POPMARK(aTHX);
+	SV **other_sp = PL_stack_sp;
+	dSP;
+	PUSHMARK(SP);
+	EXTEND(SP, other_sp-mark);
+	while (mark++ < other_sp)
+	    *SP = SvREFCNT_inc_NN(*mark);
+/* XXX Do we need to reset the stack pointer now? */
+    }
 
     if (!(flags & G_METHOD_NAMED)) {
 	dSP;
@@ -2826,7 +2846,7 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
     if (!(flags & G_EVAL)) {
 	CATCH_SET(TRUE);
 	CALL_BODY_SUB((OP*)&myop);
-	retval = PL_stack_sp - (PL_stack_base + oldmark);
+	retval = PL_rstack_sp - (PL_rstack_base + oldmark);
 	CATCH_SET(oldcatch);
     }
     else {
@@ -2843,7 +2863,7 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 	case 0:
  redo_body:
 	    CALL_BODY_SUB((OP*)&myop);
-	    retval = PL_stack_sp - (PL_stack_base + oldmark);
+	    retval = PL_rstack_sp - (PL_rstack_base + oldmark);
 	    if (!(flags & G_KEEPERR)) {
 		CLEAR_ERRSV();
 	    }
@@ -2865,12 +2885,12 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 		PL_restartop = 0;
 		goto redo_body;
 	    }
-	    PL_stack_sp = PL_stack_base + oldmark;
+	    PL_rstack_sp = PL_rstack_base + oldmark;
 	    if ((flags & G_WANT) == G_ARRAY)
 		retval = 0;
 	    else {
 		retval = 1;
-		*++PL_stack_sp = &PL_sv_undef;
+		*++PL_rstack_sp = &PL_sv_undef;
 	    }
 	    break;
 	}
@@ -2886,7 +2906,7 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
     }
 
     if (flags & G_DISCARD) {
-	PL_stack_sp = PL_stack_base + oldmark;
+	PL_rstack_sp = PL_rstack_base + oldmark;
 	retval = 0;
 	FREETMPS;
 	LEAVE;
@@ -4139,8 +4159,18 @@ Perl_init_stacks(pTHX)
     PL_curstackinfo = new_stackinfo(REASONABLE(128),
 				 REASONABLE(8192/sizeof(PERL_CONTEXT) - 1));
     PL_curstackinfo->si_type = PERLSI_MAIN;
-    PL_curstack = PL_curstackinfo->si_stack;
-    PL_mainstack = PL_curstack;		/* remember in case we switch stacks */
+    PL_rcurstack = PL_curstackinfo->si_stack;
+    PL_mainstack = PL_rcurstack;	/* remember in case we switch stacks */
+
+    PL_rstack_base = AvARRAY(PL_rcurstack);
+    PL_rstack_sp = PL_rstack_base;
+    PL_rstack_max = PL_rstack_base + AvMAX(PL_rcurstack);
+
+    PL_curstack = newAV();
+    AvREAL_off(PL_curstack);
+    av_extend(PL_curstack, 0); /* Small at first; it may not be needed.  */
+    AvALLOC(PL_curstack)[0] = &PL_sv_undef;
+    AvFILLp(PL_curstack) = 0;
 
     PL_stack_base = AvARRAY(PL_curstack);
     PL_stack_sp = PL_stack_base;
@@ -5014,7 +5044,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	JMPENV_PUSH(ret);
 	switch (ret) {
 	case 0:
-	    PUSHMARK(PL_stack_sp);
+	    PUSHMARK(PL_rstack_sp);
 	    call_sv(MUTABLE_SV((cv)), G_EVAL|G_DISCARD|G_VOID);
 	    atsv = ERRSV;
 	    (void)SvPV_const(atsv, len);

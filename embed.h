@@ -69,12 +69,8 @@
 #define bytes_cmp_utf8(a,b,c,d)	Perl_bytes_cmp_utf8(aTHX_ a,b,c,d)
 #define bytes_from_utf8(a,b,c)	Perl_bytes_from_utf8(aTHX_ a,b,c)
 #define bytes_to_utf8(a,b)	Perl_bytes_to_utf8(aTHX_ a,b)
-#define call_argv(a,b,c)	Perl_call_argv(aTHX_ a,b,c)
 #define call_atexit(a,b)	Perl_call_atexit(aTHX_ a,b)
 #define call_list(a,b)		Perl_call_list(aTHX_ a,b)
-#define call_method(a,b)	Perl_call_method(aTHX_ a,b)
-#define call_pv(a,b)		Perl_call_pv(aTHX_ a,b)
-#define call_sv(a,b)		Perl_call_sv(aTHX_ a,b)
 #define caller_cx(a,b)		Perl_caller_cx(aTHX_ a,b)
 #define cast_i32		Perl_cast_i32
 #define cast_iv			Perl_cast_iv

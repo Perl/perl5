@@ -1043,14 +1043,14 @@ typedef struct stackinfo PERL_SI;
 	if (!prev) {							\
 	    Perl_croak_popstack();					\
 	}								\
-	SWITCHSTACK(PL_curstack,prev->si_stack);			\
+	SWITCHSTACK(PL_rcurstack,prev->si_stack);			\
 	/* don't free prev here, free them all at the END{} */		\
 	PL_curstackinfo = prev;						\
     } STMT_END
 
 #define POPSTACK_TO(s) \
     STMT_START {							\
-	while (PL_curstack != s) {					\
+	while (PL_rcurstack != s) {					\
 	    dounwind(-1);						\
 	    POPSTACK;							\
 	}								\

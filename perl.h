@@ -6749,6 +6749,28 @@ extern void moncontrol(int);
 
 #define IS_SAFE_PATHNAME(p, len, op_name) IS_SAFE_SYSCALL((p), (len), "pathname", (op_name))
 
+#define call_argv(a,f,g)                             \
+    Perl_call_argv(aTHX_ a,                           \
+                         PERL_STACK_LOCALLY_REFCOUNTED \
+                          ? ((f)|G_RSTACK)              \
+                          : (f),                         \
+                         g)
+#define call_method(a,f)                             \
+    Perl_call_method(aTHX_ a,                         \
+                         PERL_STACK_LOCALLY_REFCOUNTED \
+                          ? ((f)|G_RSTACK)              \
+                          : (f))
+#define call_pv(a,f)                               \
+    Perl_call_pv(aTHX_ a,                           \
+                       PERL_STACK_LOCALLY_REFCOUNTED \
+                          ? ((f)|G_RSTACK)            \
+                          : (f))
+#define call_sv(a,f)                               \
+    Perl_call_sv(aTHX_ a,                           \
+                       PERL_STACK_LOCALLY_REFCOUNTED \
+                          ? ((f)|G_RSTACK)            \
+                          : (f))
+
 #if defined(OEMVS) || defined(__amigaos4__)
 #define NO_ENV_ARRAY_IN_MAIN
 #endif

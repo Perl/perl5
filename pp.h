@@ -99,13 +99,15 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
       }                                                               \
     } STMT_END
 
-#define dSP		SV **sp = PL_stack_sp
+#define dSP		SV **sp = PERL_STACK_LOCALLY_REFCOUNTED \
+					? PL_rstack_sp : PL_stack_sp
 #define djSP		dSP
 #define dMARK		SV **mark = PL_stack_base + POPMARK
 #define dORIGMARK	const I32 origmark = (I32)(mark - PL_stack_base)
 #define ORIGMARK	(PL_stack_base + origmark)
 
-#define SPAGAIN		sp = PL_stack_sp
+#define SPAGAIN		sp = PERL_STACK_LOCALLY_REFCOUNTED \
+				? PL_rstack_sp : PL_stack_sp
 #define MSPAGAIN	STMT_START { sp = PL_stack_sp; mark = ORIGMARK; } STMT_END
 
 #define GETTARGETSTACKED targ = (PL_op->op_flags & OPf_STACKED ? POPs : PAD_SV(PL_op->op_targ))
@@ -158,7 +160,8 @@ Pops an unsigned long off the stack.
 =cut
 */
 
-#define PUTBACK		PL_stack_sp = sp
+#define PUTBACK		*(PERL_STACK_LOCALLY_REFCOUNTED \
+			    ? &PL_rstack_sp : &PL_stack_sp) = sp
 #define RETURN		return (PUTBACK, NORMAL)
 #define RETURNOP(o)	return (PUTBACK, o)
 #define RETURNX(x)	return (x, PUTBACK, NORMAL)
@@ -325,16 +328,20 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 
 #define _EXTEND_SAFE_N(n) \
         (sizeof(n) > sizeof(SSize_t) && ((SSize_t)(n) != (n)) ? -1 : (n))
+#define _EXTEND_STACK_GROW(sp,p,n)              \
+        (PERL_STACK_LOCALLY_REFCOUNTED           \
+            ? rstack_grow(sp,p,_EXTEND_SAFE_N(n)) \
+            : stack_grow(sp,p,_EXTEND_SAFE_N(n)))
 
 #ifdef STRESS_REALLOC
 # define EXTEND(p,n)   STMT_START {                                     \
-                           sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
+                           sp = _EXTEND_STACK_GROW(sp,p,n);             \
                            PERL_UNUSED_VAR(sp);                         \
                        } STMT_END
 /* Same thing, but update mark register too. */
 # define MEXTEND(p,n)   STMT_START {                                    \
                             const SSize_t markoff = mark - PL_stack_base; \
-                            sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));    \
+                            sp = _EXTEND_STACK_GROW(sp,p,n);            \
                             mark = PL_stack_base + markoff;             \
                             PERL_UNUSED_VAR(sp);                        \
                         } STMT_END
@@ -360,14 +367,14 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 
 #  define EXTEND(p,n)   STMT_START {                                    \
                          if (UNLIKELY(_EXTEND_NEEDS_GROW(p,n))) {       \
-                           sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
+                           sp = _EXTEND_STACK_GROW(sp,p,n);             \
                            PERL_UNUSED_VAR(sp);                         \
                          } } STMT_END
 /* Same thing, but update mark register too. */
 #  define MEXTEND(p,n)  STMT_START {                                    \
                          if (UNLIKELY(_EXTEND_NEEDS_GROW(p,n))) {       \
                            const SSize_t markoff = mark - PL_stack_base;\
-                           sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
+                           sp = _EXTEND_STACK_GROW(sp,p,n);             \
                            mark = PL_stack_base + markoff;              \
                            PERL_UNUSED_VAR(sp);                         \
                          } } STMT_END

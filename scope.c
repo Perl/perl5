@@ -83,7 +83,6 @@ Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
     PERL_SI *si;
     Newx(si, 1, PERL_SI);
     si->si_stack = newAV();
-    AvREAL_off(si->si_stack);
     av_extend(si->si_stack, stitems > 0 ? stitems-1 : 0);
     AvALLOC(si->si_stack)[0] = &PL_sv_undef;
     AvFILLp(si->si_stack) = 0;
