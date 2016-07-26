@@ -1024,13 +1024,13 @@ foreach my $Locale (@Locale) {
     debug ":cased:  = ", disp_chars(@{$posixes{'cased'}}), "\n";
     debug ":alpha:  = ", disp_chars(@{$posixes{'alpha'}}), "\n";
     debug ":alnum:  = ", disp_chars(@{$posixes{'alnum'}}), "\n";
-    debug " w       = ", disp_chars(@{$posixes{'word'}}), "\n";
+    debug ' \w      = ', disp_chars(@{$posixes{'word'}}), "\n";
     debug ":graph:  = ", disp_chars(@{$posixes{'graph'}}), "\n";
     debug ":print:  = ", disp_chars(@{$posixes{'print'}}), "\n";
-    debug " d       = ", disp_chars(@{$posixes{'digit'}}), "\n";
+    debug ' \d      = ', disp_chars(@{$posixes{'digit'}}), "\n";
     debug ":xdigit: = ", disp_chars(@{$posixes{'xdigit'}}), "\n";
     debug ":blank:  = ", disp_chars(@{$posixes{'blank'}}), "\n";
-    debug " s       = ", disp_chars(@{$posixes{'space'}}), "\n";
+    debug ' \s      = ', disp_chars(@{$posixes{'space'}}), "\n";
     debug ":punct:  = ", disp_chars(@{$posixes{'punct'}}), "\n";
     debug ":cntrl:  = ", disp_chars(@{$posixes{'cntrl'}}), "\n";
     debug ":ascii:  = ", disp_chars(@{$posixes{'ascii'}}), "\n";
