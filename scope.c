@@ -26,19 +26,18 @@
 #define PERL_IN_SCOPE_C
 #include "perl.h"
 
-SV**
-Perl_stack_grow(pTHX_ SV **sp, SV **p, SSize_t n)
+static SV**
+S_stack_grow(pTHX_ SV **sp, SV **p, SSize_t n, SV **base, AV *stack,
+                   SV ***spp)
 {
     SSize_t extra;
-    SSize_t current = (p - PL_stack_base);
-
-    PERL_ARGS_ASSERT_STACK_GROW;
+    SSize_t current = (p - base);
 
     if (UNLIKELY(n < 0))
         Perl_croak(aTHX_
             "panic: stack_grow() negative count (%"IVdf")", (IV)n);
 
-    PL_stack_sp = sp;
+    *spp = sp;
     extra =
 #ifdef STRESS_REALLOC
         1;
@@ -54,8 +53,22 @@ Perl_stack_grow(pTHX_ SV **sp, SV **p, SSize_t n)
         /* diag_listed_as: Out of memory during %s extend */
         Perl_croak(aTHX_ "Out of memory during stack extend");
 
-    av_extend(PL_curstack, current + n + extra);
-    return PL_stack_sp;
+    av_extend(stack, current + n + extra);
+    return *spp;
+}
+
+SV **
+Perl_stack_grow(pTHX_ SV **sp, SV **p, SSize_t n) {
+    PERL_ARGS_ASSERT_STACK_GROW;
+    return S_stack_grow(aTHX_ sp, p, n, PL_stack_base, PL_curstack,
+                              &PL_stack_sp);
+}
+
+SV **
+Perl_rstack_grow(pTHX_ SV **sp, SV **p, SSize_t n) {
+    PERL_ARGS_ASSERT_RSTACK_GROW;
+    return S_stack_grow(aTHX_ sp, p, n, PL_rstack_base, PL_rcurstack,
+                              &PL_rstack_sp);
 }
 
 #ifndef STRESS_REALLOC

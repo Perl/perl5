@@ -504,6 +504,7 @@
 #define rninstr			Perl_rninstr
 #define rsignal(a,b)		Perl_rsignal(aTHX_ a,b)
 #define rsignal_state(a)	Perl_rsignal_state(aTHX_ a)
+#define rstack_grow(a,b,c)	Perl_rstack_grow(aTHX_ a,b,c)
 #define runops_debug()		Perl_runops_debug(aTHX)
 #define runops_standard()	Perl_runops_standard(aTHX)
 #define rv2cv_op_cv(a,b)	Perl_rv2cv_op_cv(aTHX_ a,b)

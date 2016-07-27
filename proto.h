@@ -2613,6 +2613,9 @@ PERL_CALLCONV int	Perl_rsignal_save(pTHX_ int i, Sighandler_t t1, Sigsave_t* sav
 #define PERL_ARGS_ASSERT_RSIGNAL_SAVE	\
 	assert(save)
 PERL_CALLCONV Sighandler_t	Perl_rsignal_state(pTHX_ int i);
+PERL_CALLCONV SV**	Perl_rstack_grow(pTHX_ SV** sp, SV** p, SSize_t n);
+#define PERL_ARGS_ASSERT_RSTACK_GROW	\
+	assert(sp); assert(p)
 PERL_CALLCONV int	Perl_runops_debug(pTHX);
 PERL_CALLCONV int	Perl_runops_standard(pTHX);
 PERL_CALLCONV CV*	Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags);
