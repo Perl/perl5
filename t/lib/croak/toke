@@ -350,3 +350,14 @@ EXPECT
 syntax error at - line 4, near "ϡ time"
   (Might be a runaway multi-line ϡϡ string starting on line 3)
 Execution of - aborted due to compilation errors.
+########
+# NAME (Might be a runaway multi-line...) with delimiters > U+7fffffff
+# You have to be seriously twisted to write code that exercises these code
+# paths. :-)
+eval "q \x{80000000}
+\x{80000000} time";
+die
+  $@ =~ /Might be a runaway multi-line \x{80000000}\x{80000000}/
+     ? "ok\n" : $@;
+EXPECT
+ok

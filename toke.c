@@ -9930,7 +9930,7 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
     char *to;			/* current position in the sv's data */
     I32 brackets = 1;		/* bracket nesting level */
     bool has_utf8 = FALSE;	/* is there any utf8 content? */
-    I32 termcode;		/* terminating char. code */
+    UV termcode;		/* terminating char. code */
     U8 termstr[UTF8_MAXBYTES];	/* terminating string */
     STRLEN termlen;		/* length of terminating string */
     line_t herelines;
@@ -10977,8 +10977,20 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
     else
 	Perl_sv_catpvf(aTHX_ msg, "%"SVf"\n", SVfARG(where_sv));
     if (PL_multi_start < PL_multi_end && (U32)(CopLINE(PL_curcop) - PL_multi_end) <= 1) {
-        Perl_sv_catpvf(aTHX_ msg,
-        "  (Might be a runaway multi-line %c%c string starting on line %"IVdf")\n",
+        if (UNLIKELY(PL_multi_open > INT_MAX)) {
+            U8 tmpbuf[UTF8_MAXBYTES];
+            STRLEN len = uvchr_to_utf8(tmpbuf, PL_multi_close) - tmpbuf;
+            assert(PL_multi_open == PL_multi_close);
+            Perl_sv_catpvf(aTHX_ msg,
+                "  (Might be a runaway multi-line %"UTF8f"%"UTF8f" string "
+                "starting on line %"IVdf")\n",
+                UTF8fARG(1, len, tmpbuf), UTF8fARG(1, len, tmpbuf),
+                (IV)PL_multi_start);
+        }
+        else
+            Perl_sv_catpvf(aTHX_ msg,
+                "  (Might be a runaway multi-line %c%c string starting on "
+                "line %"IVdf")\n",
                 (int)PL_multi_open,(int)PL_multi_close,(IV)PL_multi_start);
         PL_multi_end = 0;
     }
