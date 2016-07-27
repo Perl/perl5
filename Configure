@@ -7044,6 +7044,16 @@ int main() {
     exit(0);
   }
 #endif
+/* We are largely making this up because it may well be
+ * that the VAX format H was never made available to C,
+ * only to Fortran. */
+#if LONGDBLSIZE == 16 && defined(__vax__)
+  if (b[0] == 0xFD && b[15] == 0x99) {
+    /* VAX format H, PDP-11 mixed endian. */
+    printf("9\n");
+    exit(0);
+  }
+#endif
   printf("-1\n"); /* unknown */
   exit(0);
 }
@@ -7065,8 +7075,9 @@ case "$longdblkind" in
 4) echo "You have x86 80-bit big endian long doubles." >& 4 ;;
 5) echo "You have 128-bit fully little-endian double-double long doubles (64-bit LEs in LE)." >& 4 ;;
 6) echo "You have 128-bit fully big-endian double-double long doubles (64-bit BEs in BE)." >& 4 ;;
-7) echo "You have 128-bit mixed double-double long doubles (64-bit LEs in BE)." >& 4 ;;
-8) echo "You have 128-bit mixed double-double long doubles (64-bit BEs in LE)." >& 4 ;;
+7) echo "You have 128-bit mixed-endian double-double long doubles (64-bit LEs in BE)." >& 4 ;;
+8) echo "You have 128-bit mixed-endian double-double long doubles (64-bit BEs in LE)." >& 4 ;;
+9) echo "You have 128-bit PDP-style mixed-endian long doubles." >& 4 ;;
 *) echo "Cannot figure out your long double." >&4 ;;
 esac
 $rm_try
