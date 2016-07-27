@@ -64,6 +64,8 @@ Perhaps just the removal of SETERRNO() from this.
  
 <commit votes="khw" id="753b2c6a60a81dacbe59e2041e30e8302484dc2d" desc="Fix -Dr output regression"/>
 
+<commit votes="khw" id="3a34ca0bce7835211b45e070373cf653c253636a" ticket="128734" desc="Fix tr// regression"/>
+
 </div>
 
 <div><h3>New Feature Fixes</h3>
