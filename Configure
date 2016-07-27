@@ -20523,6 +20523,7 @@ esac
 
 : Check what kind of inf/nan your system has
 $echo "Checking the kind of infinities and nans you have..." >&4
+$echo "(The following tests may crash.  That's okay.)" >&4
 $cat >try.c <<EOP
 #define DOUBLESIZE $doublesize
 #$d_longdbl HAS_LONG_DOUBLE
