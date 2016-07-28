@@ -2365,7 +2365,7 @@ S_sublex_push(pTHX)
 	SAVEI32(PL_parser->herelines);
 	PL_parser->herelines = 0;
     }
-    SAVEI8(PL_multi_close);
+    SAVEIV(PL_multi_close);
     SAVEPPTR(PL_bufptr);
     SAVEPPTR(PL_bufend);
     SAVEPPTR(PL_oldbufptr);
