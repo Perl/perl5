@@ -1314,6 +1314,151 @@ is scalar(t145()), undef;
     is ($want, "scalar", "default expression is scalar in list context");
 }
 
+
+# check for default arg code doing nasty things (closures, gotos,
+# modifying @_ etc).
+
+{
+    no warnings qw(closure);
+    use Tie::Array;
+    use Tie::Hash;
+
+    sub t146 ($a = t146x()) {
+        sub t146x { $a = "abc"; 1 }
+        $a;
+    }
+    is t146(), 1, "t146: closure can make new lexical not undef";
+
+    sub t147 ($a = t147x()) {
+        sub t147x { $a = "abc"; pos($a)=1; 1 }
+        is pos($a), undef, "t147: pos magic cleared";
+        $a;
+    }
+    is t147(), 1, "t147: closure can make new lexical not undef and magical";
+
+    sub t148 ($a = t148x()) {
+        sub t148x { $a = [];  1 }
+        $a;
+    }
+    is t148(), 1, "t148: closure can make new lexical a ref";
+
+    sub t149 ($a = t149x()) {
+        sub t149x { $a = 1;  [] }
+        $a;
+    }
+    is ref(t149()), "ARRAY", "t149: closure can make new lexical a ref";
+
+    sub t150 ($a = do {@_ = qw(a b c); 1}, $b = 2) {
+        is $a, 1,   "t150: a: growing \@_";
+        is $b, "b", "t150: b: growing \@_";
+    }
+    t150();
+
+
+    sub t151 ($a = do {tie @_, 'Tie::StdArray'; @_ = qw(a b c); 1}, $b = 2) {
+        is $a, 1,   "t151: a: tied \@_";
+        is $b, "b", "t151: b: tied \@_";
+    }
+    t151();
+
+    sub t152 ($a = t152x(), @b) {
+        sub t152x { @b = qw(a b c); 1 }
+        $a . '-' . join(':', @b);
+    }
+    is t152(), "1-", "t152: closure can make new lexical array non-empty";
+
+    sub t153 ($a = t153x(), %b) {
+        sub t153x { %b = qw(a 10 b 20); 1 }
+        $a . '-' . join(':', sort %b);
+    }
+    is t153(), "1-", "t153: closure can make new lexical hash non-empty";
+
+    sub t154 ($a = t154x(), @b) {
+        sub t154x { tie @b, 'Tie::StdArray'; @b = qw(a b c); 1 }
+        $a . '-' . join(':', @b);
+    }
+    is t154(), "1-", "t154: closure can make new lexical array tied";
+
+    sub t155 ($a = t155x(), %b) {
+        sub t155x { tie %b, 'Tie::StdHash'; %b = qw(a 10 b 20); 1 }
+        $a . '-' . join(':', sort %b);
+    }
+    is t155(), "1-", "t155: closure can make new lexical hash tied";
+
+    sub t156 ($a = do {@_ = qw(a b c); 1}, @b) {
+        is $a, 1,       "t156: a: growing \@_";
+        is "@b", "b c", "t156: b: growing \@_";
+    }
+    t156();
+
+    sub t157 ($a = do {@_ = qw(a b c); 1}, %b) {
+        is $a, 1,                     "t157: a: growing \@_";
+        is join(':', sort %b), "b:c", "t157: b: growing \@_";
+    }
+    t157();
+
+    sub t158 ($a = do {tie @_, 'Tie::StdArray'; @_ = qw(a b c); 1}, @b) {
+        is $a, 1,          "t158: a: tied \@_";
+        is "@b", "b c",    "t158: b: tied \@_";
+    }
+    t158();
+
+    sub t159 ($a = do {tie @_, 'Tie::StdArray'; @_ = qw(a b c); 1}, %b) {
+        is  $a, 1,                     "t159: a: tied \@_";
+        is  join(':', sort %b), "b:c", "t159: b: tied \@_";
+    }
+    t159();
+
+    # see if we can handle the equivalent of @a = ($a[1], $a[0])
+
+    sub t160 ($s, @a) {
+        sub t160x {
+            @a = qw(x y);
+            t160(1, $a[1], $a[0]);
+        }
+        # encourage recently-freed SVPVs to be realloced with new values
+        my @pad = qw(a b);
+        join ':', $s, @a;
+    }
+    is t160x(), "1:y:x", 'handle commonality in slurpy array';
+
+    # see if we can handle the equivalent of %h = ('foo', $h{foo})
+
+    sub t161 ($s, %h) {
+        sub t161x {
+            %h = qw(k1 v1 k2 v2);
+            t161(1, k1 => $h{k2}, k2 => $h{k1});
+        }
+        # encourage recently-freed SVPVs to be realloced with new values
+        my @pad = qw(a b);
+        join ' ', $s, map "($_,$h{$_})", sort keys %h;
+    }
+    is t161x(), "1 (k1,v2) (k2,v1)", 'handle commonality in slurpy hash';
+
+    # see if we can handle the equivalent of ($a,$b) = ($b,$a)
+    # Note that for non-signatured subs, my ($a,$b) = @_ already fails the
+    # equivalent of this test too, since I skipped pessimising it
+    # (90ce4d057857) as commonality in this case is rare and contrived,
+    # as the example below shows. DAPM.
+    sub t162 ($a, $b) {
+        sub t162x {
+            ($a, $b) = qw(x y);
+            t162($b, $a);
+        }
+        "$a:$b";
+    }
+    {
+        local $TODO = q{can't handle commonaility};
+        is t162x(), "y:x", 'handle commonality in scalar parms';
+    }
+
+
+
+
+}
+
+
+
 use File::Spec::Functions;
 my $keywords_file = catfile(updir,'regen','keywords.pl');
 open my $kh, $keywords_file

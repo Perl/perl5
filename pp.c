@@ -6628,10 +6628,6 @@ PP(pp_anonconst)
  * or
  *    my @foo = @_[N..$#_]
  * etc
- *
- * It assumes that the pad var is currently uninitialised, so this op
- * should only be used at the start of a sub, where its not possible to
- * skip the op (e.g. no 'my $x if $cond' stuff for example).
  */
 
 PP(pp_argelem)
@@ -6643,9 +6639,6 @@ PP(pp_argelem)
     AV *defav = GvAV(PL_defgv); /* @_ */
     IV ix = PTR2IV(cUNOP_AUXo->op_aux);
     IV argc;
-    SV **argv;
-
-    assert(!SvMAGICAL(defav));
 
     /* do 'my $var, @var or %var' action */
     padentry = &(PAD_SVl(o->op_targ));
@@ -6659,14 +6652,15 @@ PP(pp_argelem)
             PUTBACK;
         }
         else {
+            SV **svp;
             /* should already have been checked */
+            assert(ix >= 0);
 #if IVSIZE > PTRSIZE
             assert(ix <= SSize_t_MAX);
 #endif
-            assert(ix >=0 && ix <= AvFILLp(defav));
-            val = AvARRAY(defav)[ix];
-            if (UNLIKELY(!val))
-                val = &PL_sv_undef;
+
+            svp = av_fetch(defav, ix, FALSE);
+            val = svp ? *svp : &PL_sv_undef;
         }
 
         /* $var = $val */
@@ -6676,81 +6670,91 @@ PP(pp_argelem)
         if (UNLIKELY(TAINT_get) && !SvTAINTED(val))
             TAINT_NOT;
 
-        /* Short-cut assignment of IV and RV values as these are
-         * common and simple. For RVs, it's likely that on
-         * subsequent calls to a function, targ is already of the
-         * correct storage class */
-        if (LIKELY(!SvMAGICAL(val))) {
-            /* just an IV */
-            if ((SvFLAGS(val) & (SVf_IOK|SVf_NOK|SVf_POK|SVf_IVisUV)) == SVf_IOK) {
-                IV i = SvIVX(val);
-                if (LIKELY(SvTYPE(targ) == SVt_IV)) {
-                    assert(!SvOK(targ));
-                    assert(!SvMAGICAL(targ));
-                    (void)SvIOK_only(targ);
-                    SvIV_set(targ, i);
-                }
-                else
-                    sv_setiv(targ, i);
-            }
-            else if (SvROK(val) && SvTYPE(targ) == SVt_IV) {
-                /* quick ref assignment */
-                assert(!SvOK(targ));
-                SvRV_set(targ, SvREFCNT_inc(SvRV(val)));
-                SvROK_on(targ);
-            }
-            else
-                sv_setsv(targ, val);
-        }
-        else
-            sv_setsv(targ, val);
+        SvSetMagicSV(targ, val);
         return o->op_next;
     }
 
     /* must be AV or HV */
 
     assert(!(o->op_flags & OPf_STACKED));
-    argc = ((IV)AvFILLp(defav) + 1) - ix;
-    assert(!SvMAGICAL(targ));
-    if (argc <= 0)
-        return o->op_next;
-    argv = AvARRAY(defav) + ix;
-    assert(argv);
+    argc = ((IV)AvFILL(defav) + 1) - ix;
 
     /* This is a copy of the relevant parts of pp_aassign().
-     * We *know* that @foo / %foo is a plain empty lexical at this point,
-     * so we can avoid a lot of the extra baggage.
-     * We know, because all the usual tricks like 'my @a if 0',
-     * 'foo: my @a = ...; goto foo' can't be done with signatures.
      */
     if ((o->op_private & OPpARGELEM_MASK) == OPpARGELEM_AV) {
-        UV i = 0;
+        IV i;
 
-        assert(AvFILLp((AV*)targ) == -1); /* can skip av_clear() */
+        if (AvFILL((AV*)targ) > -1) {
+            /* target should usually be empty. If we get get
+             * here, someone's been doing some weird closure tricks.
+             * Make a copy of all args before clearing the array,
+             * to avoid the equivalent of @a = ($a[0]) prematurely freeing
+             * elements. See similar code in pp_aassign.
+             */
+            for (i = 0; i < argc; i++) {
+                SV **svp = av_fetch(defav, ix + i, FALSE);
+                SV *newsv = newSV(0);
+                sv_setsv_flags(newsv,
+                                svp ? *svp : &PL_sv_undef,
+                                (SV_DO_COW_SVSETSV|SV_NOSTEAL));
+                if (!av_store(defav, ix + i, newsv))
+                    SvREFCNT_dec_NN(newsv);
+            }
+            av_clear((AV*)targ);
+        }
+
+        if (argc <= 0)
+            return o->op_next;
+
         av_extend((AV*)targ, argc);
 
+        i = 0;
         while (argc--) {
             SV *tmpsv;
-            SV *arg = *argv++;
+            SV **svp = av_fetch(defav, ix + i, FALSE);
+            SV *val = svp ? *svp : &PL_sv_undef;
             tmpsv = newSV(0);
-            sv_setsv(tmpsv, arg);
+            sv_setsv(tmpsv, val);
             av_store((AV*)targ, i++, tmpsv);
             TAINT_NOT;
         }
 
     }
     else {
+        IV i;
+
         assert((o->op_private & OPpARGELEM_MASK) == OPpARGELEM_HV);
 
-        assert(argc % 2 == 0);
-        assert(!HvTOTALKEYS(targ)); /* can skip hv_clear() */
+        if (SvRMAGICAL(targ) || HvUSEDKEYS((HV*)targ)) {
+            /* see "target should usually be empty" comment above */
+            for (i = 0; i < argc; i++) {
+                SV **svp = av_fetch(defav, ix + i, FALSE);
+                SV *newsv = newSV(0);
+                sv_setsv_flags(newsv,
+                                svp ? *svp : &PL_sv_undef,
+                                (SV_DO_COW_SVSETSV|SV_NOSTEAL));
+                if (!av_store(defav, ix + i, newsv))
+                    SvREFCNT_dec_NN(newsv);
+            }
+            hv_clear((HV*)targ);
+        }
 
+        if (argc <= 0)
+            return o->op_next;
+        assert(argc % 2 == 0);
+
+        i = 0;
         while (argc) {
             SV *tmpsv;
-            SV *key = *argv++;
-            SV *val = *argv++;
+            SV **svp;
+            SV *key;
+            SV *val;
 
-            assert(key); assert(val);
+            svp = av_fetch(defav, ix + i++, FALSE);
+            key = svp ? *svp : &PL_sv_undef;
+            svp = av_fetch(defav, ix + i++, FALSE);
+            val = svp ? *svp : &PL_sv_undef;
+
             argc -= 2;
             if (UNLIKELY(SvGMAGICAL(key)))
                 key = sv_mortalcopy(key);
@@ -6781,14 +6785,16 @@ PP(pp_argdefelem)
     AV *defav = GvAV(PL_defgv); /* @_ */
     IV ix = (IV)o->op_targ;
 
-    assert(!SvMAGICAL(defav));
+    assert(ix >= 0);
 #if IVSIZE > PTRSIZE
     assert(ix <= SSize_t_MAX);
 #endif
-    assert(ix >= 0);
-    if (AvFILLp(defav) >= ix) {
+
+    if (AvFILL(defav) >= ix) {
         dSP;
-        XPUSHs(AvARRAY(defav)[ix]);
+        SV **svp = av_fetch(defav, ix, FALSE);
+        SV  *val = svp ? *svp : &PL_sv_undef;
+        XPUSHs(val);
         RETURN;
     }
     return cLOGOPo->op_other;
