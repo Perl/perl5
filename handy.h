@@ -1153,82 +1153,75 @@ END_EXTERN_C
 
     /* If we don't have perl.h, we are compiling a utility program.  Below we
      * hard-code various macro definitions that wouldn't otherwise be available
-     * to it. Most are coded based on first principals.  First some ones common
-     * to both ASCII and EBCDIC */
+     * to it. Most are coded based on first principals.  These are written to
+     * avoid EBCDIC vs. ASCII #ifdef's as much as possible. */
 #   define isDIGIT_A(c)  ((c) <= '9' && (c) >= '0')
 #   define isBLANK_A(c)  ((c) == ' ' || (c) == '\t')
-#   define isSPACE_A(c)  (isBLANK_A(c)                                       \
-                          || (c) == '\n'                                     \
-                          || (c) == '\r'                                     \
-                          || (c) == '\v'                                     \
+#   define isSPACE_A(c)  (isBLANK_A(c)                                   \
+                          || (c) == '\n'                                 \
+                          || (c) == '\r'                                 \
+                          || (c) == '\v'                                 \
                           || (c) == '\f')
-#   ifdef EBCDIC    /* There are gaps between 'i' and 'j'; 'r' and 's'.  Same
-                       for uppercase.  This is ordered to exclude most things
-                       early */
-#       define isLOWER_A(c)  ((c) >= 'a' && (c) <= 'z'                       \
-                               && ((c) <= 'i'                                \
-                                   || ((c) >= 'j' && (c) <= 'r')             \
-                                   || (c) >= 's'))
-#       define isUPPER_A(c)  ((c) >= 'A' && (c) <= 'Z'                       \
-                               && ((c) <= 'I'                                \
-                                   || ((c) >= 'J' && (c) <= 'R')             \
-                                   || (c) >= 'S'))
-#   else   /* ASCII platform. */
-#       define isLOWER_A(c)  ((c) >= 'a' && (c) <= 'z')
-#       define isUPPER_A(c)  ((c) <= 'Z' && (c) >= 'A')
-#   endif
-
-    /* Some more ASCII, non-ASCII common definitions */
+    /* On EBCDIC, there are gaps between 'i' and 'j'; 'r' and 's'.  Same for
+     * uppercase.  The tests for those aren't necessary on ASCII, but hurt only
+     * performance (if optimization isn't on), and allow the same code to be
+     * used for both platform types */
+#   define isLOWER_A(c)  ((c) >= 'a' && (c) <= 'z'                      \
+                  && (    (c) <= 'i'                                    \
+                      || ((c) >= 'j' && (c) <= 'r')                     \
+                      ||  (c) >= 's'))
+#   define isUPPER_A(c)  ((c) >= 'A' && (c) <= 'Z'                      \
+                  && (    (c) <= 'I'                                    \
+                      || ((c) >= 'J' && (c) <= 'R')                     \
+                      ||  (c) >= 'S'))
 #   define isALPHA_A(c)  (isUPPER_A(c) || isLOWER_A(c))
 #   define isALPHANUMERIC_A(c) (isALPHA_A(c) || isDIGIT_A(c))
 #   define isWORDCHAR_A(c)   (isALPHANUMERIC_A(c) || (c) == '_')
 #   define isIDFIRST_A(c)    (isALPHA_A(c) || (c) == '_')
-#   define isXDIGIT_A(c) (isDIGIT_A(c)                                      \
-                          || ((c) >= 'a' && (c) <= 'f')                     \
+#   define isXDIGIT_A(c) (isDIGIT_A(c)                                  \
+                          || ((c) >= 'a' && (c) <= 'f')                 \
                           || ((c) <= 'F' && (c) >= 'A'))
+#   define isPUNCT_A(c)  ((c) == '-' || (c) == '!' || (c) == '"'        \
+                       || (c) == '#' || (c) == '$' || (c) == '%'        \
+                       || (c) == '&' || (c) == '\'' || (c) == '('       \
+                       || (c) == ')' || (c) == '*' || (c) == '+'        \
+                       || (c) == ',' || (c) == '.' || (c) == '/'        \
+                       || (c) == ':' || (c) == ';' || (c) == '<'        \
+                       || (c) == '=' || (c) == '>' || (c) == '?'        \
+                       || (c) == '@' || (c) == '[' || (c) == '\\'       \
+                       || (c) == ']' || (c) == '^' || (c) == '_'        \
+                       || (c) == '`' || (c) == '{' || (c) == '|'        \
+                       || (c) == '}' || (c) == '~')
+#   define isGRAPH_A(c)  (isALPHANUMERIC_A(c) || isPUNCT_A(c))
+#   define isPRINT_A(c)  (isGRAPH_A(c) || (c) == ' ')
 
 #   ifdef EBCDIC
-#       define isPUNCT_A(c)  ((c) == '-' || (c) == '!' || (c) == '"'        \
-                           || (c) == '#' || (c) == '$' || (c) == '%'        \
-                           || (c) == '&' || (c) == '\'' || (c) == '('       \
-                           || (c) == ')' || (c) == '*' || (c) == '+'        \
-                           || (c) == ',' || (c) == '.' || (c) == '/'        \
-                           || (c) == ':' || (c) == ';' || (c) == '<'        \
-                           || (c) == '=' || (c) == '>' || (c) == '?'        \
-                           || (c) == '@' || (c) == '[' || (c) == '\\'       \
-                           || (c) == ']' || (c) == '^' || (c) == '_'        \
-                           || (c) == '`' || (c) == '{' || (c) == '|'        \
-                           || (c) == '}' || (c) == '~')
-#       define isGRAPH_A(c)  (isALPHANUMERIC_A(c) || isPUNCT_A(c))
-#       define isPRINT_A(c)  (isGRAPH_A(c) || (c) == ' ')
-
-#       ifdef QUESTION_MARK_CTRL
-#           define _isQMC(c) ((c) == QUESTION_MARK_CTRL)
-#       else
-#           define _isQMC(c) 0
-#       endif
-
-        /* I (khw) can't think of a way to define all the ASCII controls
-         * without resorting to a libc (locale-sensitive) call.  But we know
-         * that all controls but the question-mark one are in the range 0-0x3f.
-         * This makes sure that all the controls that have names are included,
-         * and all controls that are also considered ASCII in the locale.  This
-         * may include more or fewer than what it actually should, but the
-         * wrong ones are less-important controls, so likely won't impact
-         * things (keep in mind that this is compiled only if perl.h isn't
-         * available).  The question mark control is included if available */
-#       define isCNTRL_A(c)  (((c) < 0x40 && isascii(c))                    \
-                            || (c) == '\0' || (c) == '\a' || (c) == '\b'    \
-                            || (c) == '\f' || (c) == '\n' || (c) == '\r'    \
-                            || (c) == '\t' || (c) == '\v' || _isQMC(c))
-
+        /* The below is accurate for the 3 EBCDIC code pages traditionally
+         * supported by perl.  The only difference between them in the controls
+         * is the position of \n, and that is represented symbolically below */
+#       define isCNTRL_A(c)  ((c) == '\0' || (c) == '\a' || (c) == '\b'     \
+                          ||  (c) == '\f' || (c) == '\n' || (c) == '\r'     \
+                          ||  (c) == '\t' || (c) == '\v'                    \
+                          || ((c) <= 3 && (c) >= 1) /* SOH, STX, ETX */     \
+                          ||  (c) == 7    /* U+7F DEL */                    \
+                          || ((c) <= 0x13 && (c) >= 0x0E) /* SO, SI */      \
+                                                         /* DLE, DC[1-3] */ \
+                          ||  (c) == 0x18 /* U+18 CAN */                    \
+                          ||  (c) == 0x19 /* U+19 EOM */                    \
+                          || ((c) <= 0x1F && (c) >= 0x1C) /* [FGRU]S */     \
+                          ||  (c) == 0x26 /* U+17 ETB */                    \
+                          ||  (c) == 0x27 /* U+1B ESC */                    \
+                          ||  (c) == 0x2D /* U+05 ENQ */                    \
+                          ||  (c) == 0x2E /* U+06 ACK */                    \
+                          ||  (c) == 0x32 /* U+16 SYN */                    \
+                          ||  (c) == 0x37 /* U+04 EOT */                    \
+                          ||  (c) == 0x3C /* U+14 DC4 */                    \
+                          ||  (c) == 0x3D /* U+15 NAK */                    \
+                          ||  (c) == 0x3F)/* U+1A SUB */
 #       define isASCII(c)    (isCNTRL_A(c) || isPRINT_A(c))
-#   else    /* ASCII platform; things are simpler, and  isASCII has already
-               been defined */
-#       define isGRAPH_A(c)  (((c) > ' ' && (c) < 127))
-#       define isPRINT_A(c)  (isGRAPH_A(c) || (c) == ' ')
-#       define isPUNCT_A(c)  (isGRAPH_A(c) && (! isALPHANUMERIC_A(c)))
-#       define isCNTRL_A(c)  (isASCII(c) && (! isPRINT_A(c)))
+#   else /* isASCII is already defined for ASCII platforms, so can use that to
+            define isCNTRL */
+#       define isCNTRL_A(c)  (isASCII(c) && ! isPRINT_A(c))
 #   endif
 
     /* The _L1 macros may be unnecessary for the utilities; I (khw) added them
