@@ -3678,9 +3678,9 @@ S_scan_const(pTHX_ char *start)
                         }
                         else if (! SvUTF8(res)) {
                             /* Make sure \N{} return is UTF-8.  This is because
-                            * \N{} implies Unicode semantics, and scalars have to
-                            * be in utf8 to guarantee those semantics; but not
-                            * needed in tr/// */
+                             * \N{} implies Unicode semantics, and scalars have
+                             * to be in utf8 to guarantee those semantics; but
+                             * not needed in tr/// */
                             sv_utf8_upgrade_flags(res, SV_UTF8_NO_ENCODING);
                             str = SvPV_const(res, len);
                         }
