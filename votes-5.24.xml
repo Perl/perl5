@@ -48,6 +48,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="sprout" id="a2637ca0a3fec01b80d7ea5ba62802354fd5e6f3" ticket="128597" desc="[perl #128597] Crash from gp_free/ckWARN_d"/>
 <commit votes="khw sprout" id="f2e32b2c677945ce6a36531a7cd5696dc1ca2cef" ticket="128170" desc="[perl #128170] Regression: Assert fail in regcomp.c"/>
+
+This one needs the version in ext/POSIX/lib/POSIX.pm bumped to 1.65_01:
 <commit votes="sprout" id="d80a6052a64d2df61ee61888853ef5f3872c0e34" ticket="128763" desc="[perl #128763] Fix POSIX.xs longdbl assertion"/>
 
 <commit votes="" id="" ticket="123878" desc="OPEN: Infinite recursion (+segfault) on die() after goto-ing out of __DIE__ handler"/>
