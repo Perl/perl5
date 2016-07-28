@@ -748,17 +748,6 @@ Perl_save_long(pTHX_ long int *longp)
 }
 
 void
-Perl_save_iv(pTHX_ IV *ivp)
-{
-    PERL_ARGS_ASSERT_SAVE_IV;
-
-    SSCHECK(3);
-    SSPUSHIV(*ivp);
-    SSPUSHPTR(ivp);
-    SSPUSHUV(SAVEt_IV);
-}
-
-void
 Perl_save_nogv(pTHX_ GV *gv)
 {
     PERL_ARGS_ASSERT_SAVE_NOGV;

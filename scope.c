@@ -497,6 +497,17 @@ Perl_save_strlen(pTHX_ STRLEN *ptr)
     SS_ADD_END(3);
 }
 
+void
+Perl_save_iv(pTHX_ IV *ivp)
+{
+    PERL_ARGS_ASSERT_SAVE_IV;
+
+    SSCHECK(3);
+    SSPUSHIV(*ivp);
+    SSPUSHPTR(ivp);
+    SSPUSHUV(SAVEt_IV);
+}
+
 /* Cannot use save_sptr() to store a char* since the SV** cast will
  * force word-alignment and we'll miss the pointer.
  */
