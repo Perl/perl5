@@ -27,7 +27,8 @@ if (@ARGV) {
     print "ARGV = [@ARGV]\n";
     @w_files = map { "./lib/$pragma_name/$_" } @ARGV;
 } else {
-    @w_files = sort glob catfile(curdir(), "lib", $pragma_name, "*");
+    @w_files = sort grep !/\.rej\z/,
+			 glob catfile(curdir(), "lib", $pragma_name, "*");
 }
 
 my ($tests, @prgs) = setup_multiple_progs(@w_files);
