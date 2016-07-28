@@ -928,7 +928,16 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
     /* There is a simple definition of ASCII for ASCII platforms.  But the
      * EBCDIC one isn't so simple, so is defined using table look-up like the
      * other macros below.
-     * The '| 0' part ensures that c is an integer (and not e.g. a pointer) */
+     *
+     * The cast here is used instead of '(c) >= 0', because some compilers emit
+     * a warning that that test is always true when the parameter is an
+     * unsigned type.  khw supposes that it could be written as
+     *      && ((c) == '\0' || (c) > 0)
+     * to avoid the message, but the cast will likely avoid extra branches even
+     * with stupid compilers.
+     *
+     * The '| 0' part ensures a compiler error if c is not integer (like e.g.,
+     * a pointer) */
 #   define isASCII(c)    ((WIDEST_UTYPE)((c) | 0) < 128)
 #endif
 
