@@ -3225,7 +3225,7 @@
 /*#define	HAS_FREELOCALE	/ **/
 /*#define	HAS_USELOCALE	/ **/
 /*#define	HAS_QUERYLOCALE	/ **/
-#	I_XLOCALE               /**/
+/*#define	I_XLOCALE               / **/
 
 /* HAS_NEXTAFTER:
  *	This symbol, if defined, indicates that the nextafter routine is
@@ -5267,5 +5267,5 @@
 
 /* Generated from:
  * cfa085ebfb9eb05bf5e1ba22c5b95092f6706990ceaf36a22d1d69af4e9cc060 config_h.SH
- * 3b14c76342a834042da506e8c3b4269f7d545453079733cb740970ab9cc4294e uconfig.sh
+ * d9b976f8d350063d614cfaf6dc334c3ca7361603add9f38c49e2fed7c85ca388 uconfig.sh
  * ex: set ro: */
