@@ -1154,9 +1154,11 @@ static NV my_trunc(NV x)
 #endif
 
 #if defined(USE_LONG_DOUBLE) && defined(LONGDOUBLE_DOUBLEDOUBLE)
-#  define NV_PAYLOAD_SIZEOF_ASSERT(a) assert(sizeof(a) == NVSIZE / 2)
+#  define NV_PAYLOAD_SIZEOF_ASSERT(a) \
+    STATIC_ASSERT_STMT(sizeof(a) == NVSIZE / 2)
 #else
-#  define NV_PAYLOAD_SIZEOF_ASSERT(a) assert(sizeof(a) == NVSIZE)
+#  define NV_PAYLOAD_SIZEOF_ASSERT(a) \
+    STATIC_ASSERT_STMT(sizeof(a) == NVSIZE)
 #endif
 
 static void S_setpayload(NV* nvp, NV_PAYLOAD_TYPE payload, bool signaling)
