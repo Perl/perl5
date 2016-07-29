@@ -913,7 +913,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
   /* The '| 0' part ensures a compiler error if c is not integer (like e.g., a
    * pointer) */
 #define FITS_IN_8_BITS(c) (   (sizeof(c) == 1)                      \
-                           || !(((WIDEST_UTYPE)(c | 0)) & ~0xFF))
+                           || !(((WIDEST_UTYPE)((c) | 0)) & ~0xFF))
 #else
 #define FITS_IN_8_BITS(c) (1)
 #endif
