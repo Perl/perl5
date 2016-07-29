@@ -48,6 +48,7 @@ Class::Tiny
 Class::Tiny::Antlers
 Classic::Perl
 clearerr(3)
+clock(3)
 Clone
 closedir(2)
 connect(2)
@@ -69,6 +70,7 @@ Data::Float
 Data::Structure::Util
 Data::Types
 Data::Util
+Date::Parse
 Date::Pcalc
 DateTime
 DB_File(3)
@@ -161,7 +163,9 @@ Log::Message::Item
 Log::Message::Simple
 lseek(2)
 LWP::ConsoleLogger
+Mail::Mailer
 Mail::Send
+Mail::Sendmail
 Mail::SpamAssassin
 man(5)
 man(7)
