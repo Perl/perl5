@@ -22,7 +22,7 @@ BEGIN {
                         $FIND_VERSION $ERROR $CHECK_INC_HASH $FORCE_SAFE_INC ];
     use Exporter;
     @ISA            = qw[Exporter];
-    $VERSION        = '0.66';
+    $VERSION        = '0.68';
     $VERBOSE        = 0;
     $DEPRECATED     = 0;
     $FIND_VERSION   = 1;
@@ -202,8 +202,7 @@ sub check_install {
     ### so scan the dirs
     unless( $filename ) {
 
-        local @INC = @INC;
-        pop @INC if $FORCE_SAFE_INC && $INC[-1] eq '.';
+        local @INC = @INC[0..$#INC-1] if $FORCE_SAFE_INC && $INC[-1] eq '.';
 
         DIR: for my $dir ( @INC ) {
 
@@ -311,8 +310,7 @@ sub check_install {
     }
 
     if ( $DEPRECATED and "$]" >= 5.011 ) {
-        local @INC = @INC;
-        pop @INC if $INC[-1] eq '.';
+        local @INC = @INC[0..$#INC-1] if $FORCE_SAFE_INC && $INC[-1] eq '.';
         require Module::CoreList;
         require Config;
 
@@ -450,8 +448,7 @@ sub can_load {
 
             if ( $CACHE->{$mod}->{uptodate} ) {
 
-                local @INC = @INC;
-                pop @INC if $FORCE_SAFE_INC && $INC[-1] eq '.';
+                local @INC = @INC[0..$#INC-1] if $FORCE_SAFE_INC && $INC[-1] eq '.';
 
                 if ( $args->{autoload} ) {
                     my $who = (caller())[0];
@@ -518,8 +515,7 @@ sub requires {
         return undef;
     }
 
-    local @INC = @INC;
-    pop @INC if $FORCE_SAFE_INC && $INC[-1] eq '.';
+    local @INC = @INC[0..$#INC-1] if $FORCE_SAFE_INC && $INC[-1] eq '.';
 
     my $lib = join " ", map { qq["-I$_"] } @INC;
     my $oneliner = 'print(join(qq[\n],map{qq[BONG=$_]}keys(%INC)),qq[\n])';
