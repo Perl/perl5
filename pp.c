@@ -6174,7 +6174,7 @@ PP(pp_lock)
 }
 
 
-/* used for: pp_padany(), pp_mapstart(), pp_custom(); plus any system ops
+/* used for: pp_padany(), pp_custom(); plus any system ops
  * that aren't implemented on a particular platform */
 
 PP(unimplemented_op)
