@@ -3,7 +3,7 @@ use strict;
 package Parse::CPAN::Meta;
 # ABSTRACT: Parse META.yml and META.json CPAN metadata files
 
-our $VERSION = '1.4417';
+our $VERSION = '1.4417_001';
 
 use Exporter;
 use Carp 'croak';
@@ -56,7 +56,7 @@ sub load_json_string {
 }
 
 sub yaml_backend {
-  if (! defined $ENV{PERL_YAML_BACKEND} ) {
+  if ($ENV{PERL_CORE} or not defined $ENV{PERL_YAML_BACKEND} ) {
     _can_load( 'CPAN::Meta::YAML', 0.011 )
       or croak "CPAN::Meta::YAML 0.011 is not available\n";
     return "CPAN::Meta::YAML";
@@ -72,7 +72,7 @@ sub yaml_backend {
 }
 
 sub json_backend {
-  if (! $ENV{PERL_JSON_BACKEND} or $ENV{PERL_JSON_BACKEND} eq 'JSON::PP') {
+  if ($ENV{PERL_CORE} or ! $ENV{PERL_JSON_BACKEND} or $ENV{PERL_JSON_BACKEND} eq 'JSON::PP') {
     _can_load( 'JSON::PP' => 2.27103 )
       or croak "JSON::PP 2.27103 is not available\n";
     return 'JSON::PP';
