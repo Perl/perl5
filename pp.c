@@ -104,7 +104,9 @@ PP(pp_padav)
 	    SSize_t i;
 	    for (i=0; i < maxarg; i++) {
 		SV * const sv = AvARRAY((const AV *)TARG)[i];
-		SP[i+1] = sv ? sv : &PL_sv_undef;
+		SP[i+1] = sv
+		    ? SvREFCNT_inc_NN(sv_2mortal(sv))
+		    : &PL_sv_undef;
 	    }
 	}
 	SP += maxarg;

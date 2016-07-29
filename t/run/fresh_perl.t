@@ -624,13 +624,14 @@ my @h = 1 .. 10;
 bad(@h);
 sub bad {
    undef @h;
-   warn "O\n";
+   print "O\n";
    print for @_;
-   warn "K\n";
+   print "\nK\n";
 }
 EXPECT
 O
-Use of freed value in iteration at - line 7.
+12345678910
+K
 ########
 # Bug 20010506.041 (#6952)
 "abcd\x{1234}" =~ /(a)(b[c])(d+)?/i and print "ok\n";
