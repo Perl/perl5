@@ -34,6 +34,9 @@ Use of uninitialized value $a in scalar dereference at - line 4.
 use warnings 'pack' ;
 sub foo { my $a = "a"; return $a . $a++ . $a++ }
 my $a = pack("p", &foo) ;
+@a = "foo";
+sub bar { pop @{\@_}, pack "p", $a[0] } # This should *not* warn, even
+bar(@a);                                # though $a[0] is SvTEMP.
 no warnings 'pack' ;
 my $b = pack("p", &foo) ;
 EXPECT

@@ -3042,7 +3042,8 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		     * of pack() (and all copies of the result) are
 		     * gone.
 		     */
-		    if ((SvTEMP(fromstr) || (SvPADTMP(fromstr) &&
+		    if (((SvTEMP(fromstr) && SvREFCNT(fromstr) == 1)
+			 || (SvPADTMP(fromstr) &&
 			     !SvREADONLY(fromstr)))) {
 			Perl_ck_warner(aTHX_ packWARN(WARN_PACK),
 				       "Attempt to pack pointer to temporary value");
