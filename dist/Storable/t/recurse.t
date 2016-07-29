@@ -272,7 +272,7 @@ sub set_c2 { $_[0]->{c2} = $_[1] }
 
 #
 # Is the reference count of the extra references returned from a
-# STORABLE_freeze hook correct? [ID 20020601.005]
+# STORABLE_freeze hook correct? [ID 20020601.005 (#9436)]
 #
 package Foo2;
 

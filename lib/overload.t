@@ -1021,7 +1021,7 @@ unless ($aaa) {
   main::ok($x+0 =~ qr/Recurse=ARRAY/);
 }
 
-# BugID 20010422.003
+# BugID 20010422.003 (#6872)
 package Foo;
 
 use overload

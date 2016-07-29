@@ -188,7 +188,7 @@ sub test_vianame ($$$) {
 }
 
 {
-    # 20001114.001
+    # 20001114.001 (#4690)
 
     no utf8; # naked Latin-1
 

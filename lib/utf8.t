@@ -40,7 +40,7 @@ no utf8; # Ironic, no?
 #
 
 {
-    # bug id 20001009.001
+    # bug id 20001009.001 (#4409)
 
     my ($a, $b);
 
@@ -56,7 +56,7 @@ no utf8; # Ironic, no?
 
 
 {
-    # bug id 20000730.004
+    # bug id 20000730.004 (#3599)
 
     my $smiley = "\x{263a}";
 

@@ -2148,7 +2148,7 @@ foreach my $Locale (@Locale) {
     debug "$first_f_test..$locales_test_number: \$f = $f, \$g = $g, back to locale = $Locale\n";
 
     # Does taking lc separately differ from taking
-    # the lc "in-line"?  (This was the bug 19990704.002, change #3568.)
+    # the lc "in-line"?  (This was the bug 19990704.002 (#965), change #3568.)
     # The bug was in the caching of the 'o'-magic.
     if (! $is_utf8_locale) {
 	use locale;
