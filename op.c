@@ -3254,7 +3254,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	goto nomod;
     }
 
-    /* [20011101.069] File test operators interpret OPf_REF to mean that
+    /* [20011101.069 (#7861)] File test operators interpret OPf_REF to mean that
        their argument is a filehandle; thus \stat(".") should not set
        it. AMS 20011102 */
     if (type == OP_REFGEN &&
@@ -13668,7 +13668,7 @@ Perl_rpeep(pTHX_ OP *o)
 	    /* XXX: We avoid setting op_seq here to prevent later calls
 	       to rpeep() from mistakenly concluding that optimisation
 	       has already occurred. This doesn't fix the real problem,
-	       though (See 20010220.007). AMS 20010719 */
+	       though (See 20010220.007 (#5874)). AMS 20010719 */
 	    /* op_seq functionality is now replaced by op_opt */
 	    o->op_opt = 0;
 	    /* FALLTHROUGH */

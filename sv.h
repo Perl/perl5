@@ -617,7 +617,7 @@ struct xpvio {
      * Perl_filter_add() tries to do with the dirp), hence the
      *  following union trick (as suggested by Gurusamy Sarathy).
      * For further information see Geir Johansen's problem report
-     * titled [ID 20000612.002] Perl problem on Cray system
+     * titled [ID 20000612.002 (#3366)] Perl problem on Cray system
      * The any pointer (known as IoANY()) will also be a good place
      * to hang any IO disciplines to.
      */
