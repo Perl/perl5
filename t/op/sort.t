@@ -408,7 +408,7 @@ cmp_ok($x,'eq','123',q(optimized-away comparison block doesn't take any other ar
 {
     sub routine { "one", "two" };
     @a = sort(routine(1));
-    cmp_ok("@a",'eq',"one two",'bug id 19991001.003');
+    cmp_ok("@a",'eq',"one two",'bug id 19991001.003 (#1549)');
 }
 
 

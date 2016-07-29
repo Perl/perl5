@@ -24,7 +24,7 @@ sub { @c = caller(0) } -> ();
 ::is( $c[3], "ｍａｉｎ::__ANON__", "anonymous subroutine name" );
 ::ok( $c[4], "hasargs true with anon sub" );
 
-# Bug 20020517.003, used to dump core
+# Bug 20020517.003 (#9367), used to dump core
 sub ｆｏｏ { @c = caller(0) }
 my $fooref = delete $ｍａｉｎ::{ｆｏｏ};
 $fooref -> ();

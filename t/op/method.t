@@ -311,7 +311,7 @@ is( Foo->boogie(), "yes, sir!");
 eval 'sub AUTOLOAD { "ok ", shift, "\n"; }';
 ok(1);
 
-# Bug ID 20010902.002
+# Bug ID 20010902.002 (#7609)
 is(
     eval q[
 	my $x = 'x'; # Lexical or package variable, 5.6.1 panics.
@@ -336,7 +336,7 @@ is(
     is($w, '');
 }
 
-# [ID 20020305.025] PACKAGE::SUPER doesn't work anymore
+# [ID 20020305.025 (#8788)] PACKAGE::SUPER doesn't work anymore
 
 package main;
 our @X;

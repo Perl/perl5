@@ -561,7 +561,7 @@ eval { (akeeze) = 64 };
 like $@, qr/^Can't modify keys on array in list assignment at /,
   'list assignment to keys @_ through lv sub is forbidden';
 
-# Bug 20001223.002: split thought that the list had only one element
+# Bug 20001223.002 (#5005): split thought that the list had only one element
 @ary = qw(4 5 6);
 sub lval1 : lvalue { $ary[0]; }
 sub lval2 : lvalue { $ary[1]; }

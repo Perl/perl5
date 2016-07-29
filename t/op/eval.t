@@ -221,7 +221,7 @@ is(do {
 }
 
 # Check that eval catches bad goto calls
-#   (BUG ID 20010305.003)
+#   (BUG ID 20010305.003 (#5963))
 {
     eval {
 	eval { goto foo; };
@@ -248,7 +248,7 @@ is(do {
 {
     $@ = 5;
     eval q{};
-    cmp_ok(length $@, '==', 0, '[ID 20020623.002] eval "" doesn\'t clear $@');
+    cmp_ok(length $@, '==', 0, '[ID 20020623.002 (#9721)] eval "" doesn\'t clear $@');
 }
 
 # DAPM Nov-2002. Perl should now capture the full lexical context during

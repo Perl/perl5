@@ -20,7 +20,7 @@ sub f { my $p=$_[0]; return $p }
 $x=~/.a/g;
 is(f(pos($x)), 4, "matching again, pos() next leaves off at offset 4");
 
-# Is pos() set inside //g? (bug id 19990615.008)
+# Is pos() set inside //g? (bug id 19990615.008 (#874))
 $x = "test string?"; $x =~ s/\w/pos($x)/eg;
 is($x, "0123 5678910?", "pos() set inside //g");
 

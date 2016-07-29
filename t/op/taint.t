@@ -1462,7 +1462,7 @@ SKIP: {
 }
 
 {
-    # bug id 20001004.006
+    # bug id 20001004.006 (#4380)
 
     open my $fh, '<', $TEST or warn "$0: cannot read $TEST: $!" ;
     local $/;
@@ -1475,7 +1475,7 @@ SKIP: {
 }
 
 {
-    # bug id 20001004.007
+    # bug id 20001004.007 (#4381)
 
     open my $fh, '<', $TEST or warn "$0: cannot read $TEST: $!" ;
     my $a = <$fh>;
@@ -1502,7 +1502,7 @@ SKIP: {
 }
 
 {
-    # bug id 20010519.003
+    # bug id 20010519.003 (#7015)
 
     BEGIN {
 	use vars qw($has_fcntl);
@@ -1547,7 +1547,7 @@ SKIP: {
 }
 
 {
-    # bug 20010526.004
+    # bug 20010526.004 (#7041)
 
     use warnings;
 
@@ -1568,7 +1568,7 @@ SKIP: {
 
 
 {
-    # Bug ID 20010730.010
+    # Bug ID 20010730.010 (#7387)
 
     my $i = 0;
 
@@ -1618,7 +1618,7 @@ like($@, qr/^Modification of a read-only value attempted/,
      'Assigning to ${^TAINT} fails');
 
 {
-    # bug 20011111.105
+    # bug 20011111.105 (#7897)
     
     my $re1 = qr/x$TAINT/;
     is_tainted($re1);
@@ -1633,7 +1633,7 @@ like($@, qr/^Modification of a read-only value attempted/,
 SKIP: {
     skip "system {} has different semantics on Win32", 1 if $Is_MSWin32;
 
-    # bug 20010221.005
+    # bug 20010221.005 (#5882)
     local $ENV{PATH} .= $TAINT;
     eval { system { "echo" } "/arg0", "arg1" };
     like($@, qr/^Insecure \$ENV/);
@@ -1643,7 +1643,7 @@ TODO: {
     todo_skip 'tainted %ENV warning occludes tainted arguments warning', 22
       if $Is_VMS;
 
-    # bug 20020208.005 plus some single arg exec/system extras
+    # bug 20020208.005 (#8465) plus some single arg exec/system extras
     violates_taint(sub { exec $TAINT, $TAINT }, 'exec');
     violates_taint(sub { exec $TAINT $TAINT }, 'exec');
     violates_taint(sub { exec $TAINT $TAINT, $TAINT }, 'exec');
@@ -1672,7 +1672,7 @@ TODO: {
 }
 
 {
-    # [ID 20020704.001] taint propagation failure
+    # [ID 20020704.001 (#10026)] taint propagation failure
     use re 'taint';
     $TAINT =~ /(.*)/;
     is_tainted(my $foo = $1);

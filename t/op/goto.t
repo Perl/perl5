@@ -97,7 +97,7 @@ for (1) {
 is($count, 2, 'end of loop');
 
 # Does goto work correctly within a for(;;) loop?
-#  (BUG ID 20010309.004)
+#  (BUG ID 20010309.004 (#5998))
 
 for(my $i=0;!$i++;) {
   my $x=1;

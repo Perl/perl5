@@ -413,7 +413,7 @@ unlink <Op_dbmx*>, $Dfile;
 }
 
 {
-    # Bug ID 20001013.009
+    # Bug ID 20001013.009 (#4434)
     #
     # test that $hash{KEY} = undef doesn't produce the warning
     #     Use of uninitialized value in null operation

@@ -30,15 +30,15 @@ run_tests() unless caller;
 sub run_tests {
 
     like("A \x{263a} B z C", qr/A . B (??{ "z" }) C/,
-	 "Match UTF-8 char in presence of (??{ }); Bug 20000731.001");
+	 "Match UTF-8 char in presence of (??{ }); Bug 20000731.001 (#3600)");
 
     {
         no warnings 'uninitialized';
-        ok(undef =~ /^([^\/]*)(.*)$/, "Used to cause a SEGV; Bug 20001021.005");
+        ok(undef =~ /^([^\/]*)(.*)$/, "Used to cause a SEGV; Bug 20001021.005 (#4492)");
     }
 
     {
-        my $message = 'bug id 20001008.001';
+        my $message = 'bug id 20001008.001 (#4407)';
 
         my @x = ("stra\337e 138", "stra\337e 138");
         for (@x) {
@@ -57,14 +57,14 @@ sub run_tests {
 
     {
         # Fist half of the bug.
-        my $message = 'HEBREW ACCENT QADMA matched by .*; Bug 20001028.003';
+        my $message = 'HEBREW ACCENT QADMA matched by .*; Bug 20001028.003 (#4536)';
         my $X = chr (1448);
         ok(my ($Y) = $X =~ /(.*)/, $message);
         is($Y, v1448, $message);
         is(length $Y, 1, $message);
 
         # Second half of the bug.
-        $message = 'HEBREW ACCENT QADMA in replacement; Bug 20001028.003';
+        $message = 'HEBREW ACCENT QADMA in replacement; Bug 20001028.003 (#4536)';
         $X = '';
         $X =~ s/^/chr(1488)/e;
         is(length $X, 1, $message);
@@ -72,7 +72,7 @@ sub run_tests {
     }
 
     {   
-        my $message = 'Repeated s///; Bug 20001108.001';
+        my $message = 'Repeated s///; Bug 20001108.001 (#4631)';
         my $X = "Szab\x{f3},Bal\x{e1}zs";
         my $Y = $X;
         $Y =~ s/(B)/$1/ for 0 .. 3;
@@ -81,7 +81,7 @@ sub run_tests {
     }
 
     {
-        my $message = 's/// on UTF-8 string; Bug 20000517.001';
+        my $message = 's/// on UTF-8 string; Bug 20000517.001 (#3253)';
         my $x = "\x{100}A";
         $x =~ s/A/B/;
         is($x, "\x{100}B", $message);
@@ -91,13 +91,13 @@ sub run_tests {
     {
         # The original bug report had 'no utf8' here but that was irrelevant.
 
-        my $message = "Don't dump core; Bug 20010306.008";
+        my $message = "Don't dump core; Bug 20010306.008 (#5982)";
         my $a = "a\x{1234}";
         like($a, qr/\w/, $message);  # used to core dump.
     }
 
     {
-        my $message = '/g in scalar context; Bug 20010410.006';
+        my $message = '/g in scalar context; Bug 20010410.006 (#6796)';
         for my $rx ('/(.*?)\{(.*?)\}/csg',
 		    '/(.*?)\{(.*?)\}/cg',
 		    '/(.*?)\{(.*?)\}/sg',
@@ -117,28 +117,28 @@ sub run_tests {
     {
         # Amazingly vertical tabulator is the same in ASCII and EBCDIC.
         for ("\n", "\t", "\014", "\r") {
-            unlike($_, qr/[[:print:]]/, sprintf "\\%03o not in [[:print:]]; Bug 20010619.003", ord $_);
+            unlike($_, qr/[[:print:]]/, sprintf "\\%03o not in [[:print:]]; Bug 20010619.003 (#7131)", ord $_);
         }
         for (" ") {
-            like($_, qr/[[:print:]]/, "'$_' in [[:print:]]; Bug 20010619.003");
+            like($_, qr/[[:print:]]/, "'$_' in [[:print:]]; Bug 20010619.003 (#7131)");
         }
     }
 
     {
-        # [ID 20010814.004] pos() doesn't work when using =~m// in list context
+        # [ID 20010814.004 (#7526)] pos() doesn't work when using =~m// in list context
 
         $_ = "ababacadaea";
         my $a = join ":", /b./gc;
         my $b = join ":", /a./gc;
         my $c = pos;
-        is("$a $b $c", 'ba:ba ad:ae 10', "pos() works with () = m//; Bug 20010814.004");
+        is("$a $b $c", 'ba:ba ad:ae 10', "pos() works with () = m//; Bug 20010814.004 (#7526)");
     }
 
     {
-        # [ID 20010407.006] matching utf8 return values from
+        # [ID 20010407.006 (#6767)] matching utf8 return values from
         # functions does not work
 
-        my $message = 'UTF-8 return values from functions; Bug 20010407.006';
+        my $message = 'UTF-8 return values from functions; Bug 20010407.006 (#6767)';
         package ID_20010407_006;
         sub x {"a\x{1234}"}
         my $x = x;
@@ -174,7 +174,7 @@ sub run_tests {
     }
 
     {
-        my $message = "s///eg [change 13f46d054db22cf4]; Bug 20020124.005";
+        my $message = "s///eg [change 13f46d054db22cf4]; Bug 20020124.005 (#8335)";
 
         for my $char ("a", "\x{df}", "\x{100}") {
             my $x = "$char b $char";
@@ -187,7 +187,7 @@ sub run_tests {
     }
 
     {
-        my $message = "Correct pmop flags checked when empty pattern; Bug 20020412.005";
+        my $message = "Correct pmop flags checked when empty pattern; Bug 20020412.005 (#8935)";
 
         # Requires reuse of last successful pattern.
         my $num = 123;
@@ -205,7 +205,7 @@ sub run_tests {
     }
 
     {
-        my $message = 'UTF-8 regex matches above 32k; Bug 20020630.002';
+        my $message = 'UTF-8 regex matches above 32k; Bug 20020630.002 (#10013)';
         for (['byte', "\x{ff}"], ['utf8', "\x{1ff}"]) {
             my ($type, $char) = @$_;
             for my $len (32000, 32768, 33000) {

@@ -207,8 +207,8 @@ $cnt =           split //, v1.20.300.4000.50000.4000.300.20.1;
 is("@ary", "1 20 300 4000 50000 4000 300 20 1");
 is($cnt, scalar(@ary));
 
-@ary = split(/\x{FE}/, "\x{FF}\x{FE}\x{FD}"); # bug id 20010105.016
-$cnt = split(/\x{FE}/, "\x{FF}\x{FE}\x{FD}"); # bug id 20010105.016
+@ary = split(/\x{FE}/, "\x{FF}\x{FE}\x{FD}"); # bug id 20010105.016 (#5088)
+$cnt = split(/\x{FE}/, "\x{FF}\x{FE}\x{FD}"); # bug id 20010105.016 (#5088)
 ok(@ary == 2 &&
    $ary[0] eq "\xFF"   && $ary[1] eq "\xFD" &&
    $ary[0] eq "\x{FF}" && $ary[1] eq "\x{FD}");
@@ -244,7 +244,7 @@ is($cnt, scalar(@ary));
 }
 
 {
-    # bug id 20000427.003 
+    # bug id 20000427.003 (#3173) 
 
     use warnings;
     use strict;
@@ -266,7 +266,7 @@ is($cnt, scalar(@ary));
     my $s = "\x20\x40\x{80}\x{100}\x{80}\x40\x20";
 
   {
-	# bug id 20000426.003
+	# bug id 20000426.003 (#3166)
 
 	my ($a, $b, $c) = split(/\x40/, $s);
 	ok($a eq "\x20" && $b eq "\x{80}\x{100}\x{80}" && $c eq $a);
@@ -288,7 +288,7 @@ is($cnt, scalar(@ary));
 }
 
 {
-    # 20001205.014
+    # 20001205.014 (#4844)
 
     my $a = "ABC\x{263A}";
 

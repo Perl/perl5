@@ -219,7 +219,7 @@ is (*{*Ẋ{GLOB}}, "*main::STDOUT");
     is ($state, 'ok');
 }
 
-# [ID 20010526.001] localized glob loses value when assigned to
+# [ID 20010526.001 (#7038)] localized glob loses value when assigned to
 
 $Ｊ=1; %Ｊ=(a=>1); @Ｊ=(1); local *Ｊ=*Ｊ; *Ｊ = sub{};
 

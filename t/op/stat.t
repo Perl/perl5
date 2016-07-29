@@ -443,7 +443,7 @@ ok(-f(),    '     -f() "');
 
 unlink $tmpfile or print "# unlink failed: $!\n";
 
-# bug id 20011101.069
+# bug id 20011101.069 (#7861)
 my @r = \stat($Curdir);
 is(scalar @r, 13,   'stat returns full 13 elements');
 
@@ -489,7 +489,7 @@ like $@, qr/^The stat preceding lstat\(\) wasn't an lstat at /,
 SKIP: {
     skip "No lstat", 2 unless $Config{d_lstat};
 
-    # bug id 20020124.004
+    # bug id 20020124.004 (#8334)
     # If we have d_lstat, we should have symlink()
     my $linkname = 'stat-' . rand =~ y/.//dr;
     my $target = $Perl;

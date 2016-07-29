@@ -152,10 +152,10 @@ is($Tiecount::Tiecount, 1,
    '(...)x... in void context in list (via scalar comma)');
 
 
-# perlbug 20011113.110 works in 5.6.1, broken in 5.7.2
+# perlbug 20011113.110 (#7902) works in 5.6.1, broken in 5.7.2
 {
     my $x= [("foo") x 2];
-    is( join('', @$x), 'foofoo', 'list repeat in anon array ref broken [ID 20011113.110]' );
+    is( join('', @$x), 'foofoo', 'list repeat in anon array ref broken [ID 20011113.110 (#7902)]' );
 }
 
 # [perl #35885]

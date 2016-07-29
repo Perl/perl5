@@ -26,7 +26,7 @@ $a = scalar context('S');
 ($a) = scalar context('S');
 
 {
-  # [ID 20020626.011] incorrect wantarray optimisation
+  # [ID 20020626.011 (#9998)] incorrect wantarray optimisation
   sub simple { wantarray ? 1 : 2 }
   sub inline {
     my $a = wantarray ? simple() : simple();

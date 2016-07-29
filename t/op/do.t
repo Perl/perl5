@@ -41,7 +41,7 @@ if (open my $do, '>', $file18) {
 
 do $file18; die $@ if $@;
 
-# bug ID 20010920.007
+# bug ID 20010920.007 (#7713)
 eval qq{ do qq(a file that does not exist); };
 is($@, '', "do on a non-existing file, first try");
 

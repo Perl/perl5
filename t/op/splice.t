@@ -39,12 +39,12 @@ is( j(@a), j(1,7,7,3), '... array 1,7,7,3');
 is( j(splice(@a,-3,-2,2)), j(7), 'replace first 7 with a 2, negative offset, negative length, return value is 7');
 is( j(@a), j(1,2,7,3), '... array has 1,2,7,3');
 
-# Bug 20000223.001 - no test for splice(@array).  Destructive test!
+# Bug 20000223.001 (#2196) - no test for splice(@array).  Destructive test!
 is( j(splice(@a)), j(1,2,7,3), 'bare splice empties the array, return value is the array');
 is( j(@a),  '', 'array is empty');
 
 # Tests 11 and 12:
-# [ID 20010711.005] in Tie::Array, SPLICE ignores context, breaking SHIFT
+# [ID 20010711.005 (#7265)] in Tie::Array, SPLICE ignores context, breaking SHIFT
 
 my $foo;
 

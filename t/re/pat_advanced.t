@@ -62,7 +62,7 @@ sub run_tests {
     }
 
     {
-        my $message = 'bug id 20001008.001';
+        my $message = 'bug id 20001008.001 (#4407)';
 
         my $strasse = "stra" . uni_to_native("\337") . "e";
         my @x = ("$strasse 138", "$strasse 138");

@@ -170,7 +170,7 @@ like $@, qr\^Using !~ with tr///r doesn't make sense\,
   is $wc, 1, '/r warns just once';
 }
 
-# perlbug [ID 20000511.005]
+# perlbug [ID 20000511.005 (#3237)]
 $_ = 'fred';
 /([a-z]{2})/;
 $1 =~ tr/A-Z//;

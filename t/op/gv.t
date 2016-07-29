@@ -240,7 +240,7 @@ is *x{PACKAGE}, 'main', 'and *foo{PACKAGE} the original package';
     ok(defined *{$a});
 }
 
-# [ID 20010526.001] localized glob loses value when assigned to
+# [ID 20010526.001 (#7038)] localized glob loses value when assigned to
 
 $j=1; %j=(a=>1); @j=(1); local *j=*j; *j = sub{};
 

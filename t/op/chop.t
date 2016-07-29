@@ -123,7 +123,7 @@ is ($_, "\x{1234}");
 my @stuff = qw(this that);
 is (chop(@stuff[0,1]), 't');
 
-# bug id 20010305.012
+# bug id 20010305.012 (#5972)
 @stuff = qw(ab cd ef);
 is (chop(@stuff = @stuff), 'f');
 

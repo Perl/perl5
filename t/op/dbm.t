@@ -11,7 +11,7 @@ BEGIN {
 
 plan tests => 5;
 
-# This is [20020104.007] "coredump on dbmclose"
+# This is [20020104.007 (#8179)] "coredump on dbmclose"
 
 my $filename = tempfile();
 
