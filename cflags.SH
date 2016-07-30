@@ -226,33 +226,31 @@ Intel*) ;; # # Is that you, Intel C++?
                    ;;
                  esac
                  ;;
-               *) case "$opt" in
-                  -W)
-                    # -Wextra is the modern form of -W, so add
-                    # -W only if -Wextra is not there already.
-                    case " $warn " in
-                    *-Wextra*) ;;
-                    *)
-                      echo "cflags.SH: Adding $opt."
-                      warn="$warn $opt"
-                      ;;
-                    esac
-                    ;;
-		  -Werror=declaration-after-statement)
-                    # -pedantic* (with -std=c89) covers -Werror=d-a-s.
-                    case "$stdflags$warn" in
-                    *-std=c89*-pedantic*|*-pedantic*-std=c89*) ;;
-                    *)
-                      echo "cflags.SH: Adding $opt."
-                      warn="$warn $opt"
-                      ;;
-                    esac
-		    ;;
+               -W)
+                 # -Wextra is the modern form of -W, so add
+                 # -W only if -Wextra is not there already.
+                 case " $warn " in
+                 *-Wextra*) ;;
+                 *)
+                   echo "cflags.SH: Adding $opt."
+                   warn="$warn $opt"
+                   ;;
+                 esac
+                 ;;
+               -Werror=declaration-after-statement)
+                  # -pedantic* (with -std=c89) covers -Werror=d-a-s.
+                  case "$stdflags$warn" in
+                  *-std=c89*-pedantic*|*-pedantic*-std=c89*) ;;
                   *)
                      echo "cflags.SH: Adding $opt."
                      warn="$warn $opt"
                      ;;
                   esac
+                  ;;
+               *)
+                  echo "cflags.SH: Adding $opt."
+                  warn="$warn $opt"
+                  ;;
                esac
              fi
              ;;
