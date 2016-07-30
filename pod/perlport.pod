@@ -1766,7 +1766,7 @@ Not implemented.  (Android, Win32, S<Plan 9>)
 
 Not implemented.  (S<Plan 9>, Win32)
 
-=item getsockopt SOCKET,LEVEL,OPTNAME
+=item getsockopt
 
 Not implemented.  (S<Plan 9>)
 
@@ -1784,7 +1784,7 @@ will be fixed in the future.
 
 Time values are 32-bit quantities.  (VOS)
 
-=item ioctl FILEHANDLE,FUNCTION,SCALAR
+=item ioctl
 
 Not implemented.  (VMS)
 
