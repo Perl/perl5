@@ -1689,8 +1689,6 @@ Not implemented.  (Android, Win32, S<Plan 9>)
 
 Not implemented.  (Android)
 
-=item getservbyport
-
 =item getpwent
 
 Not implemented.  (Android, Win32)
