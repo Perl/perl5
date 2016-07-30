@@ -1459,7 +1459,7 @@ S<Plan 9>, F<README.plan9>
 
 Listed below are functions that are either completely unimplemented
 or else have been implemented differently on various platforms.
-Following each description will be, in parentheses, a list of
+Preceding each description will be, in parentheses, a list of
 platforms that the description applies to.
 
 The list may well be incomplete, or even wrong in some places.  When
@@ -1481,125 +1481,154 @@ full description of available variables.
 
 =item -X
 
+(Win32)
 C<-w> only inspects the read-only file attribute (FILE_ATTRIBUTE_READONLY),
 which determines whether the directory can be deleted, not whether it can
 be written to. Directories always have read and write access unless denied
-by discretionary access control lists (DACLs).  (Win32)
+by discretionary access control lists (DACLs).
 
+(VMS)
 C<-r>, C<-w>, C<-x>, and C<-o> tell whether the file is accessible,
-which may not reflect UIC-based file protections.  (VMS)
+which may not reflect UIC-based file protections.
 
+(S<RISC OS>)
 C<-s> by name on an open file will return the space reserved on disk,
 rather than the current extent.  C<-s> on an open filehandle returns the
-current size.  (S<RISC OS>)
+current size.
 
-C<-R>, C<-W>, C<-X>, C<-O> are indistinguishable from C<-r>, C<-w>,
-C<-x>, C<-o>.  (Win32, VMS, S<RISC OS>)
-
-C<-g>, C<-k>, C<-l>, C<-u>, C<-A> are not particularly meaningful.
 (Win32, VMS, S<RISC OS>)
+C<-R>, C<-W>, C<-X>, C<-O> are indistinguishable from C<-r>, C<-w>,
+C<-x>, C<-o>.
 
-C<-p> is not particularly meaningful.  (VMS, S<RISC OS>)
+(Win32, VMS, S<RISC OS>)
+C<-g>, C<-k>, C<-l>, C<-u>, C<-A> are not particularly meaningful.
 
-C<-d> is true if passed a device spec without an explicit directory.
+(VMS, S<RISC OS>)
+C<-p> is not particularly meaningful.
+
 (VMS)
+C<-d> is true if passed a device spec without an explicit directory.
 
+(Win32)
 C<-x> (or C<-X>) determine if a file ends in one of the executable
-suffixes.  C<-S> is meaningless.  (Win32)
+suffixes.  C<-S> is meaningless.
 
-C<-x> (or C<-X>) determine if a file has an executable file type.
 (S<RISC OS>)
+C<-x> (or C<-X>) determine if a file has an executable file type.
 
 =item alarm
 
+(Win32)
 Emulated using timers that must be explicitly polled whenever Perl
 wants to dispatch "safe signals" and therefore cannot interrupt
-blocking system calls.  (Win32)
+blocking system calls.
 
 =item atan2
 
+(Tru64, HP-UX 10.20)
 Due to issues with various CPUs, math libraries, compilers, and standards,
 results for C<atan2> may vary depending on any combination of the above.
 Perl attempts to conform to the Open Group/IEEE standards for the results
 returned from C<atan2>, but cannot force the issue if the system Perl is
-run on does not allow it.  (Tru64, HP-UX 10.20)
+run on does not allow it.
 
 The current version of the standards for C<atan2> is available at
 L<http://www.opengroup.org/onlinepubs/009695399/functions/atan2.html>.
 
 =item binmode
 
-Meaningless.  (S<RISC OS>)
+(S<RISC OS>)
+Meaningless.
 
+(VMS)
 Reopens file and restores pointer; if function fails, underlying
 filehandle may be closed, or pointer may be in a different position.
-(VMS)
 
+(Win32)
 The value returned by L<C<tell>|perlfunc/tell FILEHANDLE> may be affected
-after the call, and the filehandle may be flushed.  (Win32)
+after the call, and the filehandle may be flushed.
 
 =item chmod
 
+(Win32)
 Only good for changing "owner" read-write access; "group" and "other"
-bits are meaningless.  (Win32)
+bits are meaningless.
 
-Only good for changing "owner" and "other" read-write access.  (S<RISC OS>)
+(S<RISC OS>)
+Only good for changing "owner" and "other" read-write access.
 
-Access permissions are mapped onto VOS access-control list changes.  (VOS)
+(VOS)
+Access permissions are mapped onto VOS access-control list changes.
 
+(Cygwin)
 The actual permissions set depend on the value of the C<CYGWIN> variable
-in the SYSTEM environment settings.  (Cygwin)
+in the SYSTEM environment settings.
 
+(Android)
 Setting the exec bit on some locations (generally F</sdcard>) will return true
-but not actually set the bit.  (Android)
+but not actually set the bit.
 
 =item chown
 
-Not implemented.  (S<Plan 9>, S<RISC OS>)
+(S<Plan 9>, S<RISC OS>)
+Not implemented.
 
-Does nothing, but won't fail.  (Win32)
+(Win32)
+Does nothing, but won't fail.
 
-A little funky, because VOS's notion of ownership is a little funky.  (VOS)
+(VOS)
+A little funky, because VOS's notion of ownership is a little funky.
 
 =item chroot
 
-Not implemented.  (Win32, VMS, S<Plan 9>, S<RISC OS>, VOS)
+(Win32, VMS, S<Plan 9>, S<RISC OS>, VOS)
+Not implemented.
 
 =item crypt
 
+(Win32)
 May not be available if library or source was not provided when building
-perl.  (Win32)
+perl.
 
-Not implemented.  (Android)
+(Android)
+Not implemented.
 
 =item dbmclose
 
-Not implemented.  (VMS, S<Plan 9>, VOS)
+(VMS, S<Plan 9>, VOS)
+Not implemented.
 
 =item dbmopen
 
-Not implemented.  (VMS, S<Plan 9>, VOS)
+(VMS, S<Plan 9>, VOS)
+Not implemented.
 
 =item dump
 
-Not useful.  (S<RISC OS>)
+(S<RISC OS>)
+Not useful.
 
-Not supported.  (Cygwin, Win32)
+(Cygwin, Win32)
+Not supported.
 
-Invokes VMS debugger.  (VMS)
+(VMS)
+Invokes VMS debugger.
 
 =item exec
 
+(Win32)
 C<exec LIST> without the use of indirect object syntax (C<exec PROGRAM LIST>)
-may fall back to trying the shell if the first C<spawn()> fails.  (Win32)
+may fall back to trying the shell if the first C<spawn()> fails.
 
-Does not automatically flush output handles on some platforms.
 (SunOS, Solaris, HP-UX)
+Does not automatically flush output handles on some platforms.
 
-Not supported.  (Symbian OS)
+(Symbian OS)
+Not supported.
 
 =item exit
 
+(VMS)
 Emulates Unix C<exit> (which considers C<exit 1> to indicate an error) by
 mapping the C<1> to C<SS$_ABORT> (C<44>).  This behavior may be overridden
 with the pragma L<C<use vmsish 'exit'>|vmsish/C<vmsish exit>>.  As with
@@ -1611,12 +1640,13 @@ POSIX_EXIT mode is enabled, the exit code should always be a valid
 VMS exit code and not a generic number.  When the POSIX_EXIT mode is
 enabled, a generic number will be encoded in a method compatible with
 the C library _POSIX_EXIT macro so that it can be decoded by other
-programs, particularly ones written in C, like the GNV package.  (VMS)
+programs, particularly ones written in C, like the GNV package.
 
+(Solaris)
 C<exit> resets file pointers, which is a problem when called
 from a child process (created by L<C<fork>|perlfunc/fork>) in
 L<C<BEGIN>|perlmod/BEGIN, UNITCHECK, CHECK, INIT and END>.
-A workaround is to use L<C<POSIX::_exit>|POSIX/C<_exit>>.  (Solaris)
+A workaround is to use L<C<POSIX::_exit>|POSIX/C<_exit>>.
 
     exit unless $Config{archname} =~ /\bsolaris\b/;
     require POSIX;
@@ -1624,149 +1654,187 @@ A workaround is to use L<C<POSIX::_exit>|POSIX/C<_exit>>.  (Solaris)
 
 =item fcntl
 
-Not implemented.  (Win32)
+(Win32)
+Not implemented.
 
-Some functions available based on the version of VMS.  (VMS)
+(VMS)
+Some functions available based on the version of VMS.
 
 =item flock
 
-Not implemented  (VMS, S<RISC OS>, VOS).
+(VMS, S<RISC OS>, VOS)
+Not implemented.
 
 =item fork
 
-Not implemented.  (AmigaOS, S<RISC OS>, VMS)
+(AmigaOS, S<RISC OS>, VMS)
+Not implemented.
 
-Emulated using multiple interpreters.  See L<perlfork>.  (Win32)
+(Win32)
+Emulated using multiple interpreters.  See L<perlfork>.
 
-Does not automatically flush output handles on some platforms.
 (SunOS, Solaris, HP-UX)
+Does not automatically flush output handles on some platforms.
 
 =item getlogin
 
-Not implemented.  (S<RISC OS>)
+(S<RISC OS>)
+Not implemented.
 
 =item getpgrp
 
-Not implemented.  (Win32, VMS, S<RISC OS>)
+(Win32, VMS, S<RISC OS>)
+Not implemented.
 
 =item getppid
 
-Not implemented.  (Win32, S<RISC OS>)
+(Win32, S<RISC OS>)
+Not implemented.
 
 =item getpriority
 
-Not implemented.  (Win32, VMS, S<RISC OS>, VOS)
+(Win32, VMS, S<RISC OS>, VOS)
+Not implemented.
 
 =item getpwnam
 
-Not implemented.  (Win32)
+(Win32)
+Not implemented.
 
-Not useful.  (S<RISC OS>)
+(S<RISC OS>)
+Not useful.
 
 =item getgrnam
 
-Not implemented.  (Win32, VMS, S<RISC OS>)
+(Win32, VMS, S<RISC OS>)
+Not implemented.
 
 =item getnetbyname
 
-Not implemented.  (Android, Win32, S<Plan 9>)
+(Android, Win32, S<Plan 9>)
+Not implemented.
 
 =item getpwuid
 
-Not implemented.  (Win32)
+(Win32)
+Not implemented.
 
-Not useful.  (S<RISC OS>)
+(S<RISC OS>)
+Not useful.
 
 =item getgrgid
 
-Not implemented.  (Win32, VMS, S<RISC OS>)
+(Win32, VMS, S<RISC OS>)
+Not implemented.
 
 =item getnetbyaddr
 
-Not implemented.  (Android, Win32, S<Plan 9>)
+(Android, Win32, S<Plan 9>)
+Not implemented.
 
 =item getprotobynumber
 
-Not implemented.  (Android)
+(Android)
+Not implemented.
 
 =item getpwent
 
-Not implemented.  (Android, Win32)
+(Android, Win32)
+Not implemented.
 
 =item getgrent
 
-Not implemented.  (Android, Win32, VMS)
+(Android, Win32, VMS)
+Not implemented.
 
 =item gethostbyname
 
+(S<Irix 5>)
 C<gethostbyname('localhost')> does not work everywhere: you may have
-to use C<gethostbyname('127.0.0.1')>.  (S<Irix 5>)
+to use C<gethostbyname('127.0.0.1')>.
 
 =item gethostent
 
-Not implemented.  (Win32)
+(Win32)
+Not implemented.
 
 =item getnetent
 
-Not implemented.  (Android, Win32, S<Plan 9>)
+(Android, Win32, S<Plan 9>)
+Not implemented.
 
 =item getprotoent
 
-Not implemented.  (Android, Win32, S<Plan 9>)
+(Android, Win32, S<Plan 9>)
+Not implemented.
 
 =item getservent
 
-Not implemented.  (Win32, S<Plan 9>)
+(Win32, S<Plan 9>)
+Not implemented.
 
 =item seekdir
 
-Not implemented.  (Android)
+(Android)
+Not implemented.
 
 =item sethostent
 
-Not implemented.  (Android, Win32, S<Plan 9>, S<RISC OS>)
+(Android, Win32, S<Plan 9>, S<RISC OS>)
+Not implemented.
 
 =item setnetent
 
-Not implemented.  (Win32, S<Plan 9>, S<RISC OS>)
+(Win32, S<Plan 9>, S<RISC OS>)
+Not implemented.
 
 =item setprotoent
 
-Not implemented.  (Android, Win32, S<Plan 9>, S<RISC OS>)
+(Android, Win32, S<Plan 9>, S<RISC OS>)
+Not implemented.
 
 =item setservent
 
-Not implemented.  (S<Plan 9>, Win32, S<RISC OS>)
+(S<Plan 9>, Win32, S<RISC OS>)
+Not implemented.
 
 =item endpwent
 
-Not implemented.  (Win32)
+(Win32)
+Not implemented.
 
-Either not implemented or a no-op.  (Android)
+(Android)
+Either not implemented or a no-op.
 
 =item endgrent
 
-Not implemented.  (Android, S<RISC OS>, VMS, Win32)
+(Android, S<RISC OS>, VMS, Win32)
+Not implemented.
 
 =item endhostent
 
-Not implemented.  (Android, Win32)
+(Android, Win32)
+Not implemented.
 
 =item endnetent
 
-Not implemented.  (Android, Win32, S<Plan 9>)
+(Android, Win32, S<Plan 9>)
+Not implemented.
 
 =item endprotoent
 
-Not implemented.  (Android, Win32, S<Plan 9>)
+(Android, Win32, S<Plan 9>)
+Not implemented.
 
 =item endservent
 
-Not implemented.  (S<Plan 9>, Win32)
+(S<Plan 9>, Win32)
+Not implemented.
 
 =item getsockopt
 
-Not implemented.  (S<Plan 9>)
+(S<Plan 9>)
+Not implemented.
 
 =item glob
 
@@ -1780,50 +1848,62 @@ because work-arounds in the implementation use floating point numbers,
 it will become inaccurate as the time gets larger.  This is a bug and
 will be fixed in the future.
 
-Time values are 32-bit quantities.  (VOS)
+(VOS)
+Time values are 32-bit quantities.
 
 =item ioctl
 
-Not implemented.  (VMS)
+(VMS)
+Not implemented.
 
+(Win32)
 Available only for socket handles, and it does what the C<ioctlsocket()> call
-in the Winsock API does.  (Win32)
+in the Winsock API does.
 
-Available only for socket handles.  (S<RISC OS>)
+(S<RISC OS>)
+Available only for socket handles.
 
 =item kill
 
-Not implemented, hence not useful for taint checking.  (S<RISC OS>)
+(S<RISC OS>)
+Not implemented, hence not useful for taint checking.
 
+(Win32)
 C<kill> doesn't send a signal to the identified process like it does on
 Unix platforms.  Instead C<kill($sig, $pid)> terminates the process
 identified by C<$pid>, and makes it exit immediately with exit status
 C<$sig>.  As in Unix, if C<$sig> is 0 and the specified process exists, it
-returns true without actually terminating it.  (Win32)
+returns true without actually terminating it.
 
+(Win32)
 C<kill(-9, $pid)> will terminate the process specified by C<$pid> and
 recursively all child processes owned by it.  This is different from
 the Unix semantics, where the signal will be delivered to all
 processes in the same process group as the process specified by
-C<$pid>.  (Win32)
+C<$pid>.
 
+(VMS)
 A pid of -1 indicating all processes on the system is not currently
-supported.  (VMS)
+supported.
 
 =item link
 
-Not implemented.  (S<RISC OS>, VOS)
+(S<RISC OS>, VOS)
+Not implemented.
 
+(AmigaOS)
 Link count not updated because hard links are not quite that hard
-(They are sort of half-way between hard and soft links).  (AmigaOS)
+(They are sort of half-way between hard and soft links).
 
+(Win32)
 Hard links are implemented on Win32 under NTFS only. They are
 natively supported on Windows 2000 and later.  On Windows NT they
 are implemented using the Windows POSIX subsystem support and the
 Perl process will need Administrator or Backup Operator privileges
-to create hard links.  (Win32)
+to create hard links.
 
-Available on 64 bit OpenVMS 8.2 and later.  (VMS)
+(VMS)
+Available on 64 bit OpenVMS 8.2 and later.
 
 =item localtime
 
@@ -1833,9 +1913,11 @@ but usually by no more than an hour.
 
 =item lstat
 
-Not implemented.  (S<RISC OS>)
+(S<RISC OS>)
+Not implemented.
 
-Return values (especially for device and inode) may be bogus.  (Win32)
+(Win32)
+Return values (especially for device and inode) may be bogus.
 
 =item msgctl
 
@@ -1845,34 +1927,42 @@ Return values (especially for device and inode) may be bogus.  (Win32)
 
 =item msgrcv
 
-Not implemented.  (Android, Win32, VMS, S<Plan 9>, S<RISC OS>, VOS)
+(Android, Win32, VMS, S<Plan 9>, S<RISC OS>, VOS)
+Not implemented.
 
 =item open
 
-Open modes C<|-> and C<-|> are unsupported.  (Win32, S<RISC OS>)
+(Win32, S<RISC OS>)
+Open modes C<|-> and C<-|> are unsupported.
 
+(SunOS, Solaris, HP-UX)
 Opening a process does not automatically flush output handles on some
-platforms.  (SunOS, Solaris, HP-UX)
+platforms.
 
 =item readlink
 
-Not implemented.  (Win32, VMS, S<RISC OS>)
+(Win32, VMS, S<RISC OS>)
+Not implemented.
 
 =item rename
 
-Can't move directories between directories on different logical volumes.  (Win32)
+(Win32)
+Can't move directories between directories on different logical volumes.
 
 =item rewinddir
 
+(Win32)
 Will not cause L<C<readdir>|perlfunc/readdir DIRHANDLE> to re-read the
 directory stream.  The entries already read before the C<rewinddir> call
-will just be returned again from a cache buffer.  (Win32)
+will just be returned again from a cache buffer.
 
 =item select
 
-Only implemented on sockets.  (Win32, VMS)
+(Win32, VMS)
+Only implemented on sockets.
 
-Only reliable on sockets.  (S<RISC OS>)
+(S<RISC OS>)
+Only reliable on sockets.
 
 Note that the L<C<select FILEHANDLE>|perlfunc/select FILEHANDLE> form is
 generally portable.
@@ -1883,27 +1973,33 @@ generally portable.
 
 =item semop
 
-Not implemented.  (Android, Win32, VMS, S<RISC OS>)
+(Android, Win32, VMS, S<RISC OS>)
+Not implemented.
 
 =item setgrent
 
-Not implemented.  (Android, VMS, Win32, S<RISC OS>)
+(Android, VMS, Win32, S<RISC OS>)
+Not implemented.
 
 =item setpgrp
 
-Not implemented.  (Win32, VMS, S<RISC OS>, VOS)
+(Win32, VMS, S<RISC OS>, VOS)
+Not implemented.
 
 =item setpriority
 
-Not implemented.  (Win32, VMS, S<RISC OS>, VOS)
+(Win32, VMS, S<RISC OS>, VOS)
+Not implemented.
 
 =item setpwent
 
-Not implemented.  (Android, Win32, S<RISC OS>)
+(Android, Win32, S<RISC OS>)
+Not implemented.
 
 =item setsockopt
 
-Not implemented.  (S<Plan 9>)
+(S<Plan 9>)
+Not implemented.
 
 =item shmctl
 
@@ -1913,19 +2009,23 @@ Not implemented.  (S<Plan 9>)
 
 =item shmwrite
 
-Not implemented.  (Android, Win32, VMS, S<RISC OS>)
+(Android, Win32, VMS, S<RISC OS>)
+Not implemented.
 
 =item sleep
 
+(Win32)
 Emulated using synchronization functions such that it can be
 interrupted by L<C<alarm>|perlfunc/alarm SECONDS>, and limited to a
-maximum of 4294967 seconds, approximately 49 days.  (Win32)
+maximum of 4294967 seconds, approximately 49 days.
 
 =item socketpair
 
-Not implemented.  (S<RISC OS>)
+(S<RISC OS>)
+Not implemented.
 
-Available on 64 bit OpenVMS 8.2 and later.  (VMS)
+(VMS)
+Available on 64 bit OpenVMS 8.2 and later.
 
 =item stat
 
@@ -1933,48 +2033,60 @@ Platforms that do not have C<rdev>, C<blksize>, or C<blocks> will return
 these as C<''>, so numeric comparison or manipulation of these fields may
 cause 'not numeric' warnings.
 
-C<ctime> not supported on UFS.  (S<Mac OS X>)
+(S<Mac OS X>)
+C<ctime> not supported on UFS.
 
-C<ctime> is creation time instead of inode change time.  (Win32)
+(Win32)
+C<ctime> is creation time instead of inode change time.
 
-C<dev> and C<ino> are not meaningful.  (Win32)
+(Win32)
+C<dev> and C<ino> are not meaningful.
 
-C<dev> and C<ino> are not necessarily reliable.  (VMS)
+(VMS)
+C<dev> and C<ino> are not necessarily reliable.
 
+(S<RISC OS>)
 C<mtime>, C<atime> and C<ctime> all return the last modification time.
-C<dev> and C<ino> are not necessarily reliable.  (S<RISC OS>)
+C<dev> and C<ino> are not necessarily reliable.
 
+(OS/2)
 C<dev>, C<rdev>, C<blksize>, and C<blocks> are not available.  C<ino> is not
-meaningful and will differ between stat calls on the same file.  (OS/2)
+meaningful and will differ between stat calls on the same file.
 
+(Cygwin)
 Some versions of cygwin when doing a C<stat("foo")> and not finding it
-may then attempt to C<stat("foo.exe")>.  (Cygwin)
+may then attempt to C<stat("foo.exe")>.
 
+(Win32)
 C<stat> needs to open the file to determine the link count
 and update attributes that may have been changed through hard links.
 Setting L<C<${^WIN32_SLOPPY_STAT}>|perlvar/${^WIN32_SLOPPY_STAT}> to a
-true value speeds up C<stat> by not performing this operation.  (Win32)
+true value speeds up C<stat> by not performing this operation.
 
 =item symlink
 
-Not implemented.  (Win32, S<RISC OS>)
+(Win32, S<RISC OS>)
+Not implemented.
 
+(VMS)
 Implemented on 64 bit VMS 8.3.  VMS requires the symbolic link to be in Unix
-syntax if it is intended to resolve to a valid path.  (VMS)
+syntax if it is intended to resolve to a valid path.
 
 =item syscall
 
-Not implemented.  (Win32, VMS, S<RISC OS>, VOS)
+(Win32, VMS, S<RISC OS>, VOS)
+Not implemented.
 
 =item sysopen
 
+(S<Mac OS>, OS/390)
 The traditional C<0>, C<1>, and C<2> MODEs are implemented with different
 numeric values on some systems.  The flags exported by L<C<Fcntl>|Fcntl>
 (C<O_RDONLY>, C<O_WRONLY>, C<O_RDWR>) should work everywhere though.
-(S<Mac OS>, OS/390)
 
 =item system
 
+(Win32)
 As an optimization, may not call the command shell specified in
 C<$ENV{PERL5SHELL}>.  C<system(1, @args)> spawns an external
 process and immediately returns its process designator, without
@@ -1983,8 +2095,9 @@ in L<C<wait>|perlfunc/wait> or L<C<waitpid>|perlfunc/waitpid PID,FLAGS>.
 Failure to C<spawn()> a subprocess is indicated by setting
 L<C<$?>|perlvar/$?> to C<<< 255 << 8 >>>.  L<C<$?>|perlvar/$?> is set in a
 way compatible with Unix (i.e. the exit status of the subprocess is
-obtained by C<<< $? >> 8 >>>, as described in the documentation).  (Win32)
+obtained by C<<< $? >> 8 >>>, as described in the documentation).
 
+(S<RISC OS>)
 There is no shell to process metacharacters, and the native standard is
 to pass a command line terminated by "\n" "\r" or "\0" to the spawned
 program.  Redirection such as C<< > foo >> is performed (if at all) by
@@ -1994,72 +2107,84 @@ which attempts to provide emulation of the stdin, stdout, stderr in force
 in the parent, provided the child program uses a compatible version of the
 emulation library.  C<system SCALAR> will call the native command line
 directly and no such emulation of a child Unix program will occur.
-Mileage B<will> vary.  (S<RISC OS>)
+Mileage B<will> vary.
 
+(Win32)
 C<system LIST> without the use of indirect object syntax (C<system PROGRAM LIST>)
-may fall back to trying the shell if the first C<spawn()> fails.  (Win32)
+may fall back to trying the shell if the first C<spawn()> fails.
 
-Does not automatically flush output handles on some platforms.
 (SunOS, Solaris, HP-UX)
+Does not automatically flush output handles on some platforms.
 
+(VMS)
 The return value is POSIX-like (shifted up by 8 bits), which only allows
 room for a made-up value derived from the severity bits of the native
 32-bit condition code (unless overridden by
 L<C<use vmsish 'status'>|vmsish/C<vmsish status>>).  If the native
 condition code is one that has a POSIX value encoded, the POSIX value will
 be decoded to extract the expected exit value.  For more details see
-L<perlvms/$?>.  (VMS)
+L<perlvms/$?>.
 
 =item telldir
 
-Not implemented.  (Android)
+(Android)
+Not implemented.
 
 =item times
 
+(Win32)
 "Cumulative" times will be bogus.  On anything other than Windows NT
 or Windows 2000, "system" time will be bogus, and "user" time is
 actually the time returned by the L<C<clock()>|clock(3)> function in the C
-runtime library.  (Win32)
+runtime library.
 
-Not useful.  (S<RISC OS>)
+(S<RISC OS>)
+Not useful.
 
 =item truncate
 
-Not implemented.  (Older versions of VMS)
+(Older versions of VMS)
+Not implemented.
 
-Truncation to same-or-shorter lengths only.  (VOS)
+(VOS)
+Truncation to same-or-shorter lengths only.
 
+(Win32)
 If a FILEHANDLE is supplied, it must be writable and opened in append
 mode (i.e., use C<<< open(my $fh, '>>', 'filename') >>>
 or C<sysopen(my $fh, ..., O_APPEND|O_RDWR)>.  If a filename is supplied, it
-should not be held open elsewhere.  (Win32)
+should not be held open elsewhere.
 
 =item umask
 
 Returns C<undef> where unavailable.
 
+(AmigaOS)
 C<umask> works but the correct permissions are set only when the file
-is finally closed.  (AmigaOS)
+is finally closed.
 
 =item utime
 
-Only the modification time is updated.  (VMS, S<RISC OS>)
+(VMS, S<RISC OS>)
+Only the modification time is updated.
 
+(Win32)
 May not behave as expected.  Behavior depends on the C runtime
 library's implementation of L<C<utime()>|utime(2)>, and the filesystem
 being used.  The FAT filesystem typically does not support an "access
 time" field, and it may limit timestamps to a granularity of two seconds.
-(Win32)
 
 =item wait
 
 =item waitpid
 
+(Win32)
 Can only be applied to process handles returned for processes spawned
 using C<system(1, ...)> or pseudo processes created with
-L<C<fork>|perlfunc/fork>.  (Win32)
+L<C<fork>|perlfunc/fork>.
 
-Not useful.  (S<RISC OS>)
+(S<RISC OS>)
+Not useful.
 
 =back
 
