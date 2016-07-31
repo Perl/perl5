@@ -677,9 +677,9 @@ Perl_new_collate(pTHX_ const char *newcoll)
 #ifdef DEBUGGING
             if (DEBUG_L_TEST || debug_initialization) {
                 PerlIO_printf(Perl_debug_log,
-                    "%s:%d: ?UTF-8 locale=%d; x_len_shorter=%"UVuf", "
-                    "x_len_longer=%"UVuf","
-                    " collate multipler=%"UVuf", collate base=%"UVuf"\n",
+                    "%s:%d: ?UTF-8 locale=%d; x_len_shorter=%zu, "
+                    "x_len_longer=%zu,"
+                    " collate multipler=%zu, collate base=%zu\n",
                     __FILE__, __LINE__,
                     PL_in_utf8_COLLATE_locale,
                     x_len_shorter, x_len_longer,
@@ -1790,10 +1790,10 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                                      : PL_collxfrm_mult;
 
                 DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                    "%s: %d: initial size of %"UVuf" bytes for a length "
-                    "%"UVuf" string was insufficient, %"UVuf" needed\n",
+                    "%s: %d: initial size of %zu bytes for a length "
+                    "%zu string was insufficient, %zu needed\n",
                     __FILE__, __LINE__,
-                    (UV) computed_guess, (UV) length_in_chars, (UV) needed));
+                    computed_guess, length_in_chars, needed));
 
                 /* If slope increased, use it, but discard this result for
                  * length 1 strings, as we can't be sure that it's a real slope
@@ -1812,20 +1812,20 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                     }
 
                     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                        "%s: %d: slope is now %"UVuf"; was %"UVuf", base "
-                        "is now %"UVuf"; was %"UVuf"\n",
+                        "%s: %d: slope is now %zu; was %zu, base "
+                        "is now %zu; was %zu\n",
                         __FILE__, __LINE__,
-                        (UV) PL_collxfrm_mult, (UV) old_m,
-                        (UV) PL_collxfrm_base, (UV) old_b));
+                        PL_collxfrm_mult, old_m,
+                        PL_collxfrm_base, old_b));
                 }
                 else {  /* Slope didn't change, but 'b' did */
                     const STRLEN new_b = needed
                                         - computed_guess
                                         + PL_collxfrm_base;
                     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                        "%s: %d: base is now %"UVuf"; was %"UVuf"\n",
+                        "%s: %d: base is now %zu; was %zu\n",
                         __FILE__, __LINE__,
-                        (UV) new_b, (UV) PL_collxfrm_base));
+                        new_b, PL_collxfrm_base));
                     PL_collxfrm_base = new_b;
                 }
             }
@@ -1861,9 +1861,9 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
             if (DEBUG_Lv_TEST || debug_initialization) {
                 PerlIO_printf(Perl_debug_log,
                 "_mem_collxfrm required more space than previously calculated"
-                " for locale %s, trying again with new guess=%d+%"UVuf"\n",
+                " for locale %s, trying again with new guess=%d+%zu\n",
                 PL_collation_name, (int) COLLXFRM_HDR_LEN,
-                (UV) xAlloc - COLLXFRM_HDR_LEN);
+                xAlloc - COLLXFRM_HDR_LEN);
             }
 #endif
         }
@@ -1883,7 +1883,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
         bool prev_was_printable = TRUE;
         bool first_time = TRUE;
         PerlIO_printf(Perl_debug_log,
-            "_mem_collxfrm[%d]: returning %"UVuf" for locale %s string '",
+            "_mem_collxfrm[%d]: returning %zu for locale %s string '",
             PL_collation_ix, *xlen, PL_collation_name);
         while (t < s + len ) {
             UV cp = (utf8)
