@@ -1831,6 +1831,10 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 		    GvMULTI_on(gv);
 		break;
 	    case 'a':
+		if (stash == PL_debstash && len==4 && strEQ(name2,"rgs")) {
+		    GvMULTI_on(gv_AVadd(gv));
+		    break;
+		}
 	    case 'b':
 		if (len == 1 && sv_type == SVt_PV)
 		    GvMULTI_on(gv);
