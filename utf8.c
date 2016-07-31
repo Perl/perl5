@@ -2888,7 +2888,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
  *
  * Non-binary properties are stored in as many bits as necessary to represent
  * their values (32 currently, though the code is more general than that), not
- * as single bits, but the principal is the same: the value for each key is a
+ * as single bits, but the principle is the same: the value for each key is a
  * vector that encompasses the property values for all code points whose UTF-8
  * representations are represented by the key.  That is, for all code points
  * whose UTF-8 representations are length N bytes, and the key is the first N-1

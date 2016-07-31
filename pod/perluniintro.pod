@@ -112,7 +112,7 @@ unallocated, for future growth.  But there have been occasions when
 a later release needed more code points than the available extras, and a
 new block had to allocated somewhere else, not contiguous to the initial
 one, to handle the overflow.  Thus, it became apparent early on that
-"block" wasn't an adequate organizing principal, and so the C<Script>
+"block" wasn't an adequate organizing principle, and so the C<Script>
 property was created.  (Later an improved script property was added as
 well, the C<Script_Extensions> property.)  Those code points that are in
 overflow blocks can still

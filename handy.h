@@ -1153,7 +1153,7 @@ END_EXTERN_C
 
     /* If we don't have perl.h, we are compiling a utility program.  Below we
      * hard-code various macro definitions that wouldn't otherwise be available
-     * to it. Most are coded based on first principals.  These are written to
+     * to it. Most are coded based on first principles.  These are written to
      * avoid EBCDIC vs. ASCII #ifdef's as much as possible. */
 #   define isDIGIT_A(c)  ((c) <= '9' && (c) >= '0')
 #   define isBLANK_A(c)  ((c) == ' ' || (c) == '\t')
