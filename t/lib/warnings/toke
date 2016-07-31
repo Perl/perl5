@@ -1112,6 +1112,11 @@ no warnings 'ambiguous';
 EXPECT
 Possible unintended interpolation of @mjd_previously_unused_ぁrrぁy in string at - line 5.
 ########
+-w
+# toke.c
+$_ = "@DB::args";        
+EXPECT
+########
 # toke.c
 # 20020328 mjd-perl-patch+@plover.com at behest of jfriedl@yahoo.com
 use warnings 'regexp';

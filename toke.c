@@ -8581,11 +8581,9 @@ S_pending_ident(pTHX)
         && !PL_lex_brackets)
     {
         GV *const gv = gv_fetchpvn_flags(PL_tokenbuf + 1, tokenbuf_len - 1,
-                                        ( UTF ? SVf_UTF8 : 0 ), SVt_PVAV);
+                                         ( UTF ? SVf_UTF8 : 0 ) | GV_ADDMG,
+                                         SVt_PVAV);
         if ((!gv || ((PL_tokenbuf[0] == '@') ? !GvAV(gv) : !GvHV(gv)))
-		/* DO NOT warn for @- and @+ */
-		&& !( PL_tokenbuf[2] == '\0'
-                      && ( PL_tokenbuf[1] == '-' || PL_tokenbuf[1] == '+' ))
 	   )
         {
             /* Downgraded from fatal to warning 20000522 mjd */
