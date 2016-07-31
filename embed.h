@@ -1461,6 +1461,9 @@
 #define printbuf(a,b)		S_printbuf(aTHX_ a,b)
 #define tokereport(a,b)		S_tokereport(aTHX_ a,b)
 #    endif
+#    if defined(USE_LOCALE) && defined(PERL_IN_LOCALE_C)
+#define print_collxfrm_input_and_return(a,b,c,d)	S_print_collxfrm_input_and_return(aTHX_ a,b,c,d)
+#    endif
 #  endif
 #  if defined(DEBUG_LEAKING_SCALARS_FORK_DUMP)
 #define dump_sv_child(a)	Perl_dump_sv_child(aTHX_ a)

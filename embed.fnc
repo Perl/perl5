@@ -2567,6 +2567,13 @@ s	|bool	|isa_lookup	|NN HV *stash|NN const char * const name \
 
 #if defined(USE_LOCALE) && defined(PERL_IN_LOCALE_C)
 s	|char*	|stdize_locale	|NN char* locs
+#   ifdef DEBUGGING
+s	|void	|print_collxfrm_input_and_return		\
+			    |NN const char * const s		\
+			    |NN const char * const e		\
+			    |NULLOK const STRLEN * const xlen	\
+			    |const bool is_utf8
+#   endif
 #endif
 
 #if defined(USE_LOCALE) \

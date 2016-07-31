@@ -1453,6 +1453,8 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
 
     /* If this locale has defective collation, skip */
     if (PL_collxfrm_base == 0 && PL_collxfrm_mult == 0) {
+        DEBUG_L(PerlIO_printf(Perl_debug_log,
+                      "_mem_collxfrm: locale's collation is defective\n"));
         goto bad;
     }
 
@@ -1576,7 +1578,6 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
         cur_min_char_len = strlen(PL_strxfrm_min_char);
         Newx(sans_nuls, (len * cur_min_char_len) + 1, char);
         *sans_nuls = '\0';
-
 
         /* Replace each NUL with the lowest collating control.  Loop until have
          * exhausted all the NULs */
@@ -1749,8 +1750,11 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
            + PL_collxfrm_base
            + (PL_collxfrm_mult * length_in_chars);
     Newx(xbuf, xAlloc, char);
-    if (UNLIKELY(! xbuf))
+    if (UNLIKELY(! xbuf)) {
+        DEBUG_L(PerlIO_printf(Perl_debug_log,
+                      "_mem_collxfrm: Couldn't malloc %zu bytes\n", xAlloc));
 	goto bad;
+    }
 
     /* Store the collation id */
     *(U32*)xbuf = PL_collation_ix;
@@ -1833,8 +1837,12 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
             break;
         }
 
-        if (UNLIKELY(*xlen >= PERL_INT_MAX))
+        if (UNLIKELY(*xlen >= PERL_INT_MAX)) {
+            DEBUG_L(PerlIO_printf(Perl_debug_log,
+                  "_mem_collxfrm: Needed %zu bytes, max permissible is %u\n",
+                  *xlen, PERL_INT_MAX));
             goto bad;
+        }
 
         /* A well-behaved strxfrm() returns exactly how much space it needs
          * (usually not including the trailing NUL) when it fails due to not
@@ -1869,8 +1877,11 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
         }
 
         Renew(xbuf, xAlloc, char);
-        if (UNLIKELY(! xbuf))
+        if (UNLIKELY(! xbuf)) {
+            DEBUG_L(PerlIO_printf(Perl_debug_log,
+                      "_mem_collxfrm: Couldn't realloc %zu bytes\n", xAlloc));
             goto bad;
+        }
 
         first_time = FALSE;
     }
@@ -1878,35 +1889,10 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
 
 #ifdef DEBUGGING
     if (DEBUG_Lv_TEST || debug_initialization) {
-        unsigned i;
-        char * t = s;
-        bool prev_was_printable = TRUE;
-        bool first_time = TRUE;
-        PerlIO_printf(Perl_debug_log,
-            "_mem_collxfrm[%d]: returning %zu for locale %s string '",
-            PL_collation_ix, *xlen, PL_collation_name);
-        while (t < s + len ) {
-            UV cp = (utf8)
-                    ?  utf8_to_uvchr_buf((U8 *) t, s + len, NULL)
-                    : * (U8 *) t;
-            if (isPRINT(cp)) {
-                if (! prev_was_printable) {
-                    PerlIO_printf(Perl_debug_log, " ");
-                }
-                PerlIO_printf(Perl_debug_log, "%c", (U8) cp);
-                prev_was_printable = TRUE;
-            }
-            else {
-                if (! first_time) {
-                    PerlIO_printf(Perl_debug_log, " ");
-                }
-                PerlIO_printf(Perl_debug_log, "%02"UVXf"", cp);
-                prev_was_printable = FALSE;
-            }
-            t += (utf8) ? UTF8SKIP(t) : 1;
-            first_time = FALSE;
-        }
-        PerlIO_printf(Perl_debug_log, "'\nIts xfrm is");
+        Size_t i;
+
+        print_collxfrm_input_and_return(s, s + len, xlen, utf8);
+        PerlIO_printf(Perl_debug_log, "Its xfrm is:");
         for (i = COLLXFRM_HDR_LEN; i < *xlen + COLLXFRM_HDR_LEN; i++) {
             PerlIO_printf(Perl_debug_log, " %02x", (U8) xbuf[i]);
         }
@@ -1931,12 +1917,64 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
     *xlen = 0;
 #ifdef DEBUGGING
     if (DEBUG_Lv_TEST || debug_initialization) {
-        PerlIO_printf(Perl_debug_log, "_mem_collxfrm[%d] returning NULL\n",
-                                      PL_collation_ix);
+        print_collxfrm_input_and_return(s, s + len, NULL, utf8);
     }
 #endif
     return NULL;
 }
+
+#ifdef DEBUGGING
+
+void
+S_print_collxfrm_input_and_return(pTHX_
+                                  const char * const s,
+                                  const char * const e,
+                                  const STRLEN * const xlen,
+                                  const bool is_utf8)
+{
+    const char * t = s;
+    bool prev_was_printable = TRUE;
+    bool first_time = TRUE;
+
+    PERL_ARGS_ASSERT_PRINT_COLLXFRM_INPUT_AND_RETURN;
+
+    PerlIO_printf(Perl_debug_log, "_mem_collxfrm[%d]: returning ",
+                                                            PL_collation_ix);
+    if (xlen) {
+        PerlIO_printf(Perl_debug_log, "%"UVuf"", (UV) *xlen);
+    }
+    else {
+        PerlIO_printf(Perl_debug_log, "NULL");
+    }
+    PerlIO_printf(Perl_debug_log, " for locale '%s', string='",
+                                                            PL_collation_name);
+
+    while (t < e) {
+        UV cp = (is_utf8)
+                ?  utf8_to_uvchr_buf((U8 *) t, e, NULL)
+                : * (U8 *) t;
+        if (isPRINT(cp)) {
+            if (! prev_was_printable) {
+                PerlIO_printf(Perl_debug_log, " ");
+            }
+            PerlIO_printf(Perl_debug_log, "%c", (U8) cp);
+            prev_was_printable = TRUE;
+        }
+        else {
+            if (! first_time) {
+                PerlIO_printf(Perl_debug_log, " ");
+            }
+            PerlIO_printf(Perl_debug_log, "%02"UVXf"", cp);
+            prev_was_printable = FALSE;
+        }
+        t += (is_utf8) ? UTF8SKIP(t) : 1;
+        first_time = FALSE;
+    }
+
+    PerlIO_printf(Perl_debug_log, "'\n");
+}
+
+#endif   /* #ifdef DEBUGGING */
 
 #endif /* USE_LOCALE_COLLATE */
 
