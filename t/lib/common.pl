@@ -27,7 +27,7 @@ if (@ARGV) {
     print "ARGV = [@ARGV]\n";
     @w_files = map { "./lib/$pragma_name/$_" } @ARGV;
 } else {
-    @w_files = sort grep !/\.rej\z/,
+    @w_files = sort grep !/( \.rej | ~ | \ \(Autosaved\)\.txt ) \z/nx,
 			 glob catfile(curdir(), "lib", $pragma_name, "*");
 }
 
