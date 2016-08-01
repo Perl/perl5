@@ -8606,11 +8606,15 @@ S_pending_ident(pTHX_ bool is_sig)
                 o->op_private |= (  PL_tokenbuf[0] == '$' ? OPpARGELEM_SV
                                   : PL_tokenbuf[0] == '@' ? OPpARGELEM_AV
                                   :                         OPpARGELEM_HV);
+                /* make allocmy() warnings be for 'my', not 'state' */
+                PL_in_my = KEY_my;
             }
             else
                 o = newOP(OP_PADANY, 0);
             o->op_targ = allocmy(PL_tokenbuf, tokenbuf_len,
                                                         UTF ? SVf_UTF8 : 0);
+            if (is_sig)
+                PL_in_my = 0;
             pl_yylval.opval = o;
 	    return PRIVATEREF;
         }

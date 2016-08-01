@@ -1457,6 +1457,15 @@ is scalar(t145()), undef;
 
 }
 
+{
+    my $w;
+    use warnings qw(misc);
+    local $SIG{__WARN__} = sub { $w .= "@_" };
+    is eval q{sub ($x,$x) { $x}->(1,2)}, 2, "duplicate sig var names";
+    like $w, qr/^"my" variable \$x masks earlier declaration in same scope/,
+            "masking warning";
+}
+
 
 
 use File::Spec::Functions;
