@@ -32,7 +32,7 @@ use strict;
 use feature 'fc', 'postderef';
 
 # =1 adds debugging output; =2 increases the verbosity somewhat
-my $debug = $ENV{PERL_DEBUG_FULL_TEST} // 0;
+our $debug = $ENV{PERL_DEBUG_FULL_TEST} // 0;
 
 # Certain tests have been shown to be problematical for a few locales.  Don't
 # fail them unless at least this percentage of the tested locales fail.
@@ -66,11 +66,17 @@ my $dumper = Dumpvalue->new(
                             quoteHighBit => 0,
                             unctrl => "quote"
                            );
+
 sub debug {
   return unless $debug;
   my($mess) = join "", '# ', @_;
   chomp $mess;
   print STDERR $dumper->stringify($mess,1), "\n";
+}
+
+sub note {
+    local $debug = 1;
+    debug @_;
 }
 
 sub debug_more {
