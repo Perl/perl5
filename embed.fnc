@@ -2132,7 +2132,7 @@ s	|OP*	|doform		|NN CV *cv|NN GV *gv|NULLOK OP *retop
 #  if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 sR	|int	|dooneliner	|NN const char *cmd|NN const char *filename
 #  endif
-s	|SV *	|space_join_names_mortal|NN char *const *array
+s	|SV *	|space_join_names_mortal|NULLOK char *const *array
 #endif
 p	|OP *	|tied_method|NN SV *methname|NN SV **sp \
 				|NN SV *const sv|NN const MAGIC *const mg \
