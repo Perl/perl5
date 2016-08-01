@@ -659,7 +659,7 @@ sigslurpelem: sigslurpsigil sigvarname sigdefault/* def only to catch errors */
 
                             if (PL_parser->sig_slurpy)
                                 yyerror("Multiple slurpy parameters not allowed");
-                            PL_parser->sig_slurpy = sigil;
+                            PL_parser->sig_slurpy = (char)sigil;
 
                             if (defexpr)
                                 yyerror("A slurpy parameter may not have "
