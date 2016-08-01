@@ -501,6 +501,7 @@
 #define regnext(a)		Perl_regnext(aTHX_ a)
 #define repeatcpy		Perl_repeatcpy
 #define require_pv(a)		Perl_require_pv(aTHX_ a)
+#define rmarkstack_grow()	Perl_rmarkstack_grow(aTHX)
 #define rninstr			Perl_rninstr
 #define rsignal(a,b)		Perl_rsignal(aTHX_ a,b)
 #define rsignal_state(a)	Perl_rsignal_state(aTHX_ a)

@@ -135,19 +135,34 @@ Perl_pop_scope(pTHX)
     LEAVE_SCOPE(oldsave);
 }
 
+static I32 *
+S_markstack_grow(pTHX_ I32 **markstack_max, I32 **markstack,
+                          I32 **markstack_ptr)
+{
+    const I32 oldmax = *markstack_max - *markstack;
+    const I32 newmax = GROW(oldmax);
+
+    Renew(*markstack, newmax, I32);
+    *markstack_max = *markstack + newmax;
+    *markstack_ptr = *markstack + oldmax;
+    DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,
+            "MARK grow %p %"IVdf" by %"IVdf"\n",
+            *markstack_ptr, (IV)**markstack_ptr, (IV)oldmax)));
+    return *markstack_ptr;
+}
+
 I32 *
 Perl_markstack_grow(pTHX)
 {
-    const I32 oldmax = PL_markstack_max - PL_markstack;
-    const I32 newmax = GROW(oldmax);
+    return S_markstack_grow(aTHX_ &PL_markstack_max, &PL_markstack,
+                                  &PL_markstack_ptr);
+}
 
-    Renew(PL_markstack, newmax, I32);
-    PL_markstack_max = PL_markstack + newmax;
-    PL_markstack_ptr = PL_markstack + oldmax;
-    DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,
-            "MARK grow %p %"IVdf" by %"IVdf"\n",
-            PL_markstack_ptr, (IV)*PL_markstack_ptr, (IV)oldmax)));
-    return PL_markstack_ptr;
+I32 *
+Perl_rmarkstack_grow(pTHX)
+{
+    return S_markstack_grow(aTHX_ &PL_rmarkstack_max, &PL_rmarkstack,
+                                  &PL_rmarkstack_ptr);
 }
 
 void

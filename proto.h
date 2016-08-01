@@ -2601,6 +2601,7 @@ PERL_CALLCONV void	Perl_report_wrongway_fh(pTHX_ const GV *gv, const char have);
 PERL_CALLCONV void	Perl_require_pv(pTHX_ const char* pv);
 #define PERL_ARGS_ASSERT_REQUIRE_PV	\
 	assert(pv)
+PERL_CALLCONV I32 *	Perl_rmarkstack_grow(pTHX);
 PERL_CALLCONV char*	Perl_rninstr(const char* big, const char* bigend, const char* little, const char* lend)
 			__attribute__pure__;
 #define PERL_ARGS_ASSERT_RNINSTR	\
