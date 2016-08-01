@@ -985,6 +985,8 @@ use File::Glob qw(:case);
             qw[t/00-report-prereqs.t],
             qr{^xt},
         ],
+        # https://github.com/Perl-Toolchain-Gang/CPAN-Meta/pull/119
+        'CUSTOMIZED'   => [ qw[ lib/Parse/CPAN/Meta.pm t/02_api.t ] ],
     },
 
     'PathTools' => {

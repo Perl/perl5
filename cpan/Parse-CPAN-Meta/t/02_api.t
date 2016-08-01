@@ -57,7 +57,7 @@ my $bare_yaml_meta = catfile( test_data_directory(), 'bareyaml.meta' );
 
 ### YAML tests
 {
-  local $ENV{PERL_YAML_BACKEND}; # ensure we get CPAN::META::YAML
+  local $ENV{PERL_YAML_BACKEND} if not $ENV{PERL_CORE}; # ensure we get CPAN::META::YAML
 
   is(Parse::CPAN::Meta->yaml_backend(), 'CPAN::Meta::YAML', 'yaml_backend()');
   my $from_yaml = Parse::CPAN::Meta->load_file( $meta_yaml );
@@ -65,7 +65,7 @@ my $bare_yaml_meta = catfile( test_data_directory(), 'bareyaml.meta' );
 }
 
 {
-  local $ENV{PERL_YAML_BACKEND}; # ensure we get CPAN::META::YAML
+  local $ENV{PERL_YAML_BACKEND} if not $ENV{PERL_CORE}; # ensure we get CPAN::META::YAML
 
   is(Parse::CPAN::Meta->yaml_backend(), 'CPAN::Meta::YAML', 'yaml_backend()');
   my $from_yaml = Parse::CPAN::Meta->load_file( $yaml_meta );
@@ -73,7 +73,7 @@ my $bare_yaml_meta = catfile( test_data_directory(), 'bareyaml.meta' );
 }
 
 {
-  local $ENV{PERL_YAML_BACKEND}; # ensure we get CPAN::META::YAML
+  local $ENV{PERL_YAML_BACKEND} if not $ENV{PERL_CORE}; # ensure we get CPAN::META::YAML
 
   is(Parse::CPAN::Meta->yaml_backend(), 'CPAN::Meta::YAML', 'yaml_backend()');
   my $from_yaml = Parse::CPAN::Meta->load_file( $bare_yaml_meta );
@@ -81,7 +81,7 @@ my $bare_yaml_meta = catfile( test_data_directory(), 'bareyaml.meta' );
 }
 
 {
-  local $ENV{PERL_YAML_BACKEND}; # ensure we get CPAN::META::YAML
+  local $ENV{PERL_YAML_BACKEND} if not $ENV{PERL_CORE}; # ensure we get CPAN::META::YAML
 
   my $yaml   = load_ok( 'META-VR.yml', $meta_yaml, 100);
   my $from_yaml = Parse::CPAN::Meta->load_yaml_string( $yaml );
@@ -89,7 +89,7 @@ my $bare_yaml_meta = catfile( test_data_directory(), 'bareyaml.meta' );
 }
 
 {
-  local $ENV{PERL_YAML_BACKEND}; # ensure we get CPAN::META::YAML
+  local $ENV{PERL_YAML_BACKEND} if not $ENV{PERL_CORE}; # ensure we get CPAN::META::YAML
 
   my @yaml   = Parse::CPAN::Meta::LoadFile( 't/data/BadMETA.yml' );
   is($yaml[0]{author}[0], 'Olivier Mengu\xE9', "Bad UTF-8 is replaced");
@@ -97,6 +97,7 @@ my $bare_yaml_meta = catfile( test_data_directory(), 'bareyaml.meta' );
 
 
 SKIP: {
+  skip 'these tests are for cpan builds only', 2 if $ENV{PERL_CORE};
   skip "YAML module not installed", 2
     unless eval "require YAML; 1";
   local $ENV{PERL_YAML_BACKEND} = 'YAML';
@@ -110,7 +111,7 @@ SKIP: {
 ### JSON tests
 {
   # JSON tests with JSON::PP
-  local $ENV{PERL_JSON_BACKEND}; # ensure we get JSON::PP
+  local $ENV{PERL_JSON_BACKEND} if not $ENV{PERL_CORE}; # ensure we get JSON::PP
 
   is(Parse::CPAN::Meta->json_backend(), 'JSON::PP', 'json_backend()');
   my $from_json = Parse::CPAN::Meta->load_file( $meta_json );
@@ -119,7 +120,7 @@ SKIP: {
 
 {
   # JSON tests with JSON::PP
-  local $ENV{PERL_JSON_BACKEND}; # ensure we get JSON::PP
+  local $ENV{PERL_JSON_BACKEND} if not $ENV{PERL_CORE}; # ensure we get JSON::PP
 
   is(Parse::CPAN::Meta->json_backend(), 'JSON::PP', 'json_backend()');
   my $from_json = Parse::CPAN::Meta->load_file( $json_meta );
@@ -128,7 +129,7 @@ SKIP: {
 
 {
   # JSON tests with JSON::PP
-  local $ENV{PERL_JSON_BACKEND}; # ensure we get JSON::PP
+  local $ENV{PERL_JSON_BACKEND} if not $ENV{PERL_CORE}; # ensure we get JSON::PP
 
   my $json   = load_ok( 'META-VR.json', $meta_json, 100);
   my $from_json = Parse::CPAN::Meta->load_json_string( $json );
@@ -137,7 +138,7 @@ SKIP: {
 
 {
   # JSON tests with JSON::PP, take 2
-  local $ENV{PERL_JSON_BACKEND} = 0; # request JSON::PP
+  local $ENV{PERL_JSON_BACKEND} = 0 if not $ENV{PERL_CORE}; # request JSON::PP
 
   my $json   = load_ok( 'META-VR.json', $meta_json, 100);
   my $from_json = Parse::CPAN::Meta->load_json_string( $json );
@@ -146,7 +147,7 @@ SKIP: {
 
 {
   # JSON tests with JSON::PP, take 3
-  local $ENV{PERL_JSON_BACKEND} = 'JSON::PP'; # request JSON::PP
+  local $ENV{PERL_JSON_BACKEND} = 'JSON::PP' if not $ENV{PERL_CORE}; # request JSON::PP
 
   my $json   = load_ok( 'META-VR.json', $meta_json, 100);
   my $from_json = Parse::CPAN::Meta->load_json_string( $json );
@@ -154,6 +155,7 @@ SKIP: {
 }
 
 SKIP: {
+  skip 'these tests are for cpan builds only', 2 if $ENV{PERL_CORE};
   skip "JSON module version 2.5 not installed", 2
     unless eval "require JSON; JSON->VERSION(2.5); 1";
   local $ENV{PERL_JSON_BACKEND} = 1;

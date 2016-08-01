@@ -86,6 +86,8 @@ JSON::PP cpan/JSON-PP/bin/json_pp 22e1b3760ec2b2cfd7ff0d2165f6e88907b94c70
 JSON::PP cpan/JSON-PP/lib/JSON/PP.pm 817730a21b9be855d844e4d26023758960039e99
 Locale::Maketext::Simple cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm 57ed38905791a17c150210cd6f42ead22a7707b6
 Memoize cpan/Memoize/Memoize.pm 902092ff91cdec9c7b4bd06202eb179e1ce26ca2
+Parse::CPAN::Meta cpan/Parse-CPAN-Meta/lib/Parse/CPAN/Meta.pm ab6b77a820c2a7779b5d81c4244e15822e9e1a7b
+Parse::CPAN::Meta cpan/Parse-CPAN-Meta/t/02_api.t 43bddf467352c5bb1d017971d37e64ec90461df0
 Pod::Perldoc cpan/Pod-Perldoc/lib/Pod/Perldoc.pm 6928fb8a381cfba8204886c656844bcf1abc60f5
 Sys::Syslog cpan/Sys-Syslog/Syslog.pm 181d7541a6aa2a0a4d15f5beec32d16c17c76caf
 Test cpan/Test/lib/Test.pm 785c02014198ec3dae35e41def2cb24766fcf1cb
