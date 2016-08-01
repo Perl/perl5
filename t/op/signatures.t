@@ -6,15 +6,19 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-no warnings "illegalproto";
+use warnings;
+use strict;
 
 our $a = 123;
 our $z;
 
-sub t000 ($a) { $a || "z" }
-is prototype(\&t000), "\$a", "(\$a) interpreted as protoype when not enabled";
-is &t000(456), 123, "(\$a) not signature when not enabled";
-is $a, 123;
+{
+    no warnings "illegalproto";
+    sub t000 ($a) { $a || "z" }
+    is prototype(\&t000), "\$a", "(\$a) interpreted as protoype when not enabled";
+    is &t000(456), 123, "(\$a) not signature when not enabled";
+    is $a, 123;
+}
 
 no warnings "experimental::signatures";
 use feature "signatures";
@@ -1090,7 +1094,7 @@ A signature parameter must start with '\$', '\@' or '%' at foo line 8, near ", 1
 syntax error at foo line 8, near ", 123"
 EOF
 
-eval "#line 8 foo\nsub t096 (\$a 123) { }";
+eval "#line 8 foo\nno warnings; sub t096 (\$a 123) { }";
 is $@, qq{syntax error at foo line 8, near "\$a 123"\n};
 
 eval "#line 8 foo\nsub t097 (\$a { }) { }";
@@ -1448,18 +1452,13 @@ is scalar(t145()), undef;
         "$a:$b";
     }
     {
-        local $TODO = q{can't handle commonaility};
+        local $::TODO = q{can't handle commonaility};
         is t162x(), "y:x", 'handle commonality in scalar parms';
     }
-
-
-
-
 }
 
 {
     my $w;
-    use warnings qw(misc);
     local $SIG{__WARN__} = sub { $w .= "@_" };
     is eval q{sub ($x,$x) { $x}->(1,2)}, 2, "duplicate sig var names";
     like $w, qr/^"my" variable \$x masks earlier declaration in same scope/,
@@ -1477,7 +1476,7 @@ while(<$kh>) {
         chomp(my $word = $');
         # $y should be an error after $x=foo.  The exact error we get may
         # differ if this is __END__ or s or some other special keyword.
-        eval 'sub ($x = ' . $word . ', $y) {}';
+        eval 'no warnings; sub ($x = ' . $word . ', $y) {}';
         isnt $@, "", "$word does not swallow trailing comma";
     }
 }
