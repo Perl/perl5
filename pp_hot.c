@@ -345,7 +345,9 @@ S_pushav(pTHX_ AV* const av)
         PADOFFSET i;
         for (i=0; i < (PADOFFSET)maxarg; i++) {
             SV * const sv = AvARRAY(av)[i];
-            SP[i+1] = LIKELY(sv) ? sv : &PL_sv_undef;
+            SP[i+1] = LIKELY(sv)
+                         ? SvREFCNT_inc_NN(sv_2mortal(sv))
+                         : &PL_sv_undef;
         }
     }
     SP += maxarg;
