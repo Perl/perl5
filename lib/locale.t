@@ -1745,7 +1745,11 @@ foreach my $Locale (@Locale) {
         use locale;
 
         my @sorted_controls = sort @{$posixes{'cntrl'}};
-        debug "sorted :cntrl: = ", disp_chars(@sorted_controls), "\n";
+        my $output = "";
+        for my $control (@sorted_controls) {
+            $output .= " " . disp_chars($control);
+        }
+        debug "sorted :cntrl: = $output\n";
 
         ++$locales_test_number;
         $test_names{$locales_test_number}
