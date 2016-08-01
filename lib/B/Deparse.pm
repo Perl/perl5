@@ -460,6 +460,7 @@ sub _pessimise_walk_exe {
 sub pessimise {
     my ($self, $root, $start) = @_;
 
+    no warnings 'recursion';
     # walk tree in root-to-branch order
     $self->_pessimise_walk($root);
 
@@ -473,6 +474,9 @@ sub null {
     my $op = shift;
     return class($op) eq "NULL";
 }
+
+
+# Add a CV to the list of subs that still need deparsing.
 
 sub todo {
     my $self = shift;
@@ -489,6 +493,9 @@ sub todo {
     }
     push @{$self->{'subs_todo'}}, [$seq, $cv, $is_form, $name];
 }
+
+
+# Pop the next sub from the todo list and deparse it
 
 sub next_todo {
     my $self = shift;
@@ -1300,6 +1307,9 @@ sub deparse_argops {
     return ($o, join(', ', @sig));
 }
 
+# Deparse a sub. Returns everything except the 'sub foo',
+# e.g.  ($$) : method { ...; }
+# or    ($a, $b) : prototype($$) lvalue;
 
 sub deparse_sub {
     my $self = shift;
