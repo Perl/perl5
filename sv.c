@@ -8038,10 +8038,24 @@ Perl_sv_cmp_locale_flags(pTHX_ SV *const sv1, SV *const sv2,
     if (PL_collation_standard)
 	goto raw_compare;
 
-    len1 = 0;
-    pv1 = sv1 ? sv_collxfrm_flags(sv1, &len1, flags) : (char *) NULL;
-    len2 = 0;
-    pv2 = sv2 ? sv_collxfrm_flags(sv2, &len2, flags) : (char *) NULL;
+    len1 = len2 = 0;
+
+    /* Revert to using raw compare if both operands exist, but either one
+     * doesn't transform properly for collation */
+    if (sv1 && sv2) {
+        pv1 = sv_collxfrm_flags(sv1, &len1, flags);
+        if (! pv1) {
+            goto raw_compare;
+        }
+        pv2 = sv_collxfrm_flags(sv2, &len2, flags);
+        if (! pv2) {
+            goto raw_compare;
+        }
+    }
+    else {
+        pv1 = sv1 ? sv_collxfrm_flags(sv1, &len1, flags) : (char *) NULL;
+        pv2 = sv2 ? sv_collxfrm_flags(sv2, &len2, flags) : (char *) NULL;
+    }
 
     if (!pv1 || !len1) {
 	if (pv2 && len2)
