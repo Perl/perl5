@@ -231,8 +231,9 @@ if $test -s .deptmp; then
         $sed 's|\.incl\.c|.h|' .deptmp >.deptmp.vos
         mv -f .deptmp.vos .deptmp
     fi
-    $sed 's|^\(.*\$(OBJ_EXT):\) *\(.*/.*\.c\) *$|\1 \2; '"$defrule \2|" .deptmp \
-       >>$mf.new
+    $sed -e 's|^\(.*\$(OBJ_EXT):\) *\(.*/.*\.c\) *$|\1 \2; '"$defrule \2|" \
+       -e 'h; s/mini\(perlmain\)/\1/p; g' \
+       .deptmp >>$mf.new
 else
     $MAKE hlist || ($echo "Searching for .h files..."; \
 	$echo *.h | $tr ' ' $trnl | $egrep -v '\*' >.hlist)
