@@ -2609,7 +2609,7 @@ foreach ($first_locales_test_number..$final_locales_test_number) {
 	print <<EOW;
 #
 # If your users are not using these locales you are safe for the moment,
-# but please report this failure first to perlbug\@perl.com using the
+# but please report this failure first to perlbug\@perl.org using the
 # perlbug script (as described in the INSTALL file) so that the exact
 # details of the failures can be sorted out first and then your operating
 # system supplier can be alerted about these anomalies.

@@ -1892,7 +1892,7 @@ $   DECK
 If you or somebody else will be maintaining perl at your site, please
 fill in the correct e-mail address here so that they may be contacted
 if necessary. Currently, the "perlbug" program included with perl
-will send mail to this address in addition to perlbug@perl.com. You may
+will send mail to this address in addition to perlbug@perl.org. You may
 enter "none" for no administrator.
 $   EOD
 $ ENDIF
