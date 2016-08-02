@@ -12,7 +12,7 @@ BEGIN {
 
 BEGIN { require "./test.pl";  require "./loc_tools.pl"; }
 
-plan(tests => 120);
+plan(tests => 124);
 
 use Config;
 
@@ -355,11 +355,12 @@ for (qw( e f x E S V )) {
     sub do_i_unlink { unlink_all("file", "file.bak") }
 
     open(FILE, ">file") or die "$0: Failed to create 'file': $!";
-    print FILE <<__EOF__;
+    my $yada = <<__EOF__;
 foo yada dada
 bada foo bing
 king kong foo
 __EOF__
+    print FILE $yada;
     close FILE;
 
     END { do_i_unlink() }
@@ -418,11 +419,32 @@ __EOF__
     close $f;
     is(join(":", @out4), "quux:bar", "correct output without backup extension");
 
-    # test that path parsing is correct
     -d "inplacetmp" or mkdir("inplacetmp")
       or die "Cannot mkdir 'inplacetmp': $!";
     require File::Spec;
     my $work = File::Spec->catfile("inplacetmp", "foo");
+
+    # exit or die should leave original content in file
+    for my $inplace (qw/-i -i.bak/) {
+        for my $prog (qw/die exit/) {
+            open my $fh, ">", $work or die "$0: failed to open '$work': $!";
+            print $fh $yada;
+            close $fh or die "Failed to close: $!";
+            my $out = runperl (
+               switches => [ $inplace, '-n' ],
+               prog => "print q(foo\n); $prog",
+               stderr => 1,
+               args => [ $work ],
+            );
+            open my $in, "<", $work or die "$0: failed to open '$work': $!";
+            my $data = do { local $/; <$in> };
+            close $in;
+            is ($data, $yada, "check original content still in file");
+            unlink $work;
+        }
+    }
+
+    # test that path parsing is correct
     open $f, ">", $work or die "Cannot create $work: $!";
     print $f "foo\nbar\n";
     close $f;
@@ -449,6 +471,8 @@ __EOF__
     closedir $d;
     is(scalar(@names), 0, "no extra files")
       or diag "Found @names, expected none";
+
+    rmdir "inplacetmp";
 }
 
 # Tests for -E
