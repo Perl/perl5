@@ -97,8 +97,8 @@ sub import {
             {
                 local $SIG{__DIE__};
                 my $fn = _module_to_filename($base);
-                my $localinc = $INC[-1] eq '.';
-                local @INC = @INC[0..$#INC-1] if $localinc;
+                local @INC = @INC;
+                pop @INC if my $dotty = $INC[-1] eq '.';
                 eval {
                     require $fn
                 };
@@ -120,7 +120,7 @@ Base class package "$base" is empty.
     (Perhaps you need to 'use' the module which defines that package first,
     or make that module available in \@INC (\@INC contains: @INC).
 ERROR
-                    if ($localinc && -e $fn) {
+                    if ($dotty && -e $fn) {
                         $e .= <<ERROS;
     If you mean to load $fn from the current directory, you may
     want to try "use lib '.'".
