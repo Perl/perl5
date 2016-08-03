@@ -657,9 +657,9 @@ sigslurpelem: sigslurpsigil sigvarname sigdefault/* def only to catch errors */
                             OP *var     = $2;
                             OP *defexpr = $3;
 
-                            if (PL_parser->sig_slurpy)
+                            if (parser->sig_slurpy)
                                 yyerror("Multiple slurpy parameters not allowed");
-                            PL_parser->sig_slurpy = (char)sigil;
+                            parser->sig_slurpy = (char)sigil;
 
                             if (defexpr)
                                 yyerror("A slurpy parameter may not have "
@@ -685,13 +685,13 @@ sigscalarelem:
                             OP *var     = $2;
                             OP *defexpr = $3;
 
-                            if (PL_parser->sig_slurpy)
+                            if (parser->sig_slurpy)
                                 yyerror("Slurpy parameter not last");
 
-                            PL_parser->sig_elems++;
+                            parser->sig_elems++;
 
                             if (defexpr) {
-                                PL_parser->sig_optelems++;
+                                parser->sig_optelems++;
 
                                 if (   defexpr->op_type == OP_NULL
                                     && !(defexpr->op_flags & OPf_KIDS))
@@ -709,7 +709,7 @@ sigscalarelem:
                                                         LINKLIST(defexpr));
                                     /* re-purpose op_targ to hold @_ index */
                                     defop->op_targ =
-                                        (PADOFFSET)(PL_parser->sig_elems - 1);
+                                        (PADOFFSET)(parser->sig_elems - 1);
 
                                     if (var) {
                                         var->op_flags |= OPf_STACKED;
@@ -734,7 +734,7 @@ sigscalarelem:
                                 }
                             }
                             else {
-                                if (PL_parser->sig_optelems)
+                                if (parser->sig_optelems)
                                     yyerror("Mandatory parameter "
                                             "follows optional parameter");
                             }
@@ -773,12 +773,12 @@ siglistornull:		/* NULL */
 subsignature:	'('
                         {
                             ENTER;
-                            SAVEIV(PL_parser->sig_elems);
-                            SAVEIV(PL_parser->sig_optelems);
-                            SAVEI8(PL_parser->sig_slurpy);
-                            PL_parser->sig_elems    = 0;
-                            PL_parser->sig_optelems = 0;
-                            PL_parser->sig_slurpy   = 0;
+                            SAVEIV(parser->sig_elems);
+                            SAVEIV(parser->sig_optelems);
+                            SAVEI8(parser->sig_slurpy);
+                            parser->sig_elems    = 0;
+                            parser->sig_optelems = 0;
+                            parser->sig_slurpy   = 0;
                             parser->expect = XSIGVAR;
                         }
                 siglistornull
@@ -797,9 +797,9 @@ subsignature:	'('
 
                             aux = (UNOP_AUX_item*)PerlMemShared_malloc(
                                 sizeof(UNOP_AUX_item) * 3);
-                            aux[0].iv = PL_parser->sig_elems;
-                            aux[1].iv = PL_parser->sig_optelems;
-                            aux[2].iv = PL_parser->sig_slurpy;
+                            aux[0].iv = parser->sig_elems;
+                            aux[1].iv = parser->sig_optelems;
+                            aux[2].iv = parser->sig_slurpy;
                             check = newUNOP_AUX(OP_ARGCHECK, 0, NULL, aux);
                             sigops = op_prepend_elem(OP_LINESEQ, check, sigops);
                             sigops = op_prepend_elem(OP_LINESEQ,
