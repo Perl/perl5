@@ -868,17 +868,26 @@ S_openindirtemp(pTHX_ GV *gv, SV *orig_name, SV *temp_out_name) {
 #define ARGVMG_ORIG_MODE 3
 
 static int
-S_argvout_free(pTHX_ SV *sv, MAGIC *mg) {
+S_argvout_free(pTHX_ SV *io, MAGIC *mg) {
     SV **temp_psv;
 
-    PERL_UNUSED_ARG(sv);
+    PERL_UNUSED_ARG(io);
 
     /* note this can be entered once the file has been
        successfully deleted too */
     assert(mg->mg_obj && SvTYPE(mg->mg_obj) == SVt_PVAV);
-    temp_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_TEMP_NAME, FALSE);
-    if (temp_psv && *temp_psv && SvOK(*temp_psv)) {
-        UNLINK(SvPVX(*temp_psv));
+    assert(IoTYPE(io) != IoTYPE_PIPE);
+
+    if (IoIFP(io)) {
+        /* if we get here the file hasn't been closed explicitly by the
+           user and hadn't been closed implicitly by nextargv(), so
+           abandon the edit */
+        PerlIO *iop = IoIFP(io);
+        (void)PerlIO_close(iop);
+        IoIFP(io) = IoOFP(io) = NULL;
+        temp_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_TEMP_NAME, FALSE);
+        assert(temp_psv && *temp_psv && SvPOK(*temp_psv));
+        (void)UNLINK(SvPVX(*temp_psv));
     }
 
     return 0;
