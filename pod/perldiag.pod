@@ -44,6 +44,22 @@ letter.
 
 =over 4
 
+=item A signature parameter must start with '$', '@' or '%'
+
+(F) Each subroutine signature parameter declaration must start with a valid
+sigil; for example:
+
+    sub foo ($a, $, $b = 1, @c) {}
+
+=item A slurpy parameter may not have a default value
+
+(F) Only scalar subroutine signature parameters may have a default value;
+for example:
+
+    sub foo ($a = 1)        {} # legal
+    sub foo (@a = (1))      {} # invalid
+    sub foo (%a = (a => b)) {} # invalid
+
 =item accept() on closed socket %s
 
 (W closed) You tried to do an accept on a closed socket.  Did you forget
@@ -2576,6 +2592,22 @@ declaration.  The '_' in a prototype must be followed by a ';',
 indicating the rest of the parameters are optional, or one of '@'
 or '%', since those two will accept 0 or more final parameters.
 
+=item Illegal character following sigil in a subroutine signature
+
+(F) A parameter in a subroutine signature contained an unexpected character
+following the C<$>, C<@> or C<%> sigil character. Normally the sigil
+should be followed by the variable name or C<=> etc. Perhaps you are
+trying use a prototype while in the scope of C<use feature 'signatures'>?
+For example:
+
+    sub foo ($$) {}            # legal - a prototype
+
+    use feature 'signatures;
+    sub foo ($$) {}            # illegal - was expecting a signature
+    sub foo ($a, $b)
+            :prototype($$) {}  # legal
+
+
 =item Illegal character \%o (carriage return)
 
 (F) Perl normally treats carriage returns in the program text as it
@@ -3641,6 +3673,15 @@ mutable before freeing the ops.
 (W syntax) Multidimensional arrays aren't written like C<$foo[1,2,3]>.
 They're written like C<$foo[1][2][3]>, as in C.
 
+=item Multiple slurpy parameters not allowed
+
+(F) In subroutine signatures, a slurpy parameter (C<@> or C<%>) must be
+the last parameter, and there must not be more than one of them; for
+example:
+
+    sub foo ($a, @b)    {} # legal
+    sub foo ($a, @b, %) {} # invalid
+
 =item '/' must follow a numeric type in unpack
 
 (F) You had an unpack template that contained a '/', but this did not
@@ -4052,6 +4093,19 @@ doesn't somehow point to a valid subroutine.  See L<overload>.
 
 (W syntax) A format specified more picture fields than the next line
 supplied.  See L<perlform>.
+
+=item '#' not allowed immediately following a sigil in a subroutine signature
+
+(F) In a subroutine signature definition, a comment following a sigil
+(C<$>, C<@> or C<%>), needs to be separated by whitespace or a commma etc.,
+in particular to avoid confusion with the C<$#> variable. For example:
+
+    # bad
+    sub f ($# ignore first arg
+           , $b) {}
+    # good
+    sub f ($, # ignore first arg
+           $b) {}
 
 =item %s: not found
 
@@ -6000,10 +6054,9 @@ system call to call, silly dilly.
 
 =item Too few arguments for subroutine
 
-(F) A subroutine using a signature received fewer arguments than required
-by the signature.  The caller of the subroutine is presumably at fault.
-Inconveniently, this error will be reported at the location of the
-subroutine, not that of the caller.
+(F) A subroutine using a signature received too few arguments than
+required by the signature.  The caller of the subroutine is presumably
+at fault.
 
 =item Too late for "-%s" option
 
@@ -6037,10 +6090,10 @@ BEGIN block.
 
 =item Too many arguments for subroutine
 
-(F) A subroutine using a signature received more arguments than required
-by the signature.  The caller of the subroutine is presumably at fault.
-Inconveniently, this error will be reported at the location of the
-subroutine, not that of the caller.
+(F) A subroutine using a signature received too many arguments than
+required by the signature.  The caller of the subroutine is presumably
+at fault.
+
 
 =item Too many )'s
 

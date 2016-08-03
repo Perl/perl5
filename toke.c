@@ -4403,7 +4403,7 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
     static const char* const exp_name[] =
 	{ "OPERATOR", "TERM", "REF", "STATE", "BLOCK", "ATTRBLOCK",
 	  "ATTRTERM", "TERMBLOCK", "XBLOCKTERM", "POSTDEREF",
-	  "TERMORDORDOR"
+	  "SIGVAR", "TERMORDORDOR"
 	};
 #endif
 
@@ -4545,7 +4545,8 @@ Perl_yylex(pTHX)
 		    PL_lex_allbrackets--;
 		next_type &= 0xffff;
 	    }
-	    return REPORT(next_type == 'p' ? pending_ident() : next_type);
+	    return REPORT(next_type == 'p' ?  pending_ident(0)
+                        : next_type == 'P' ?  pending_ident(1) : next_type);
 	}
     }
 
@@ -4806,6 +4807,65 @@ Perl_yylex(pTHX)
     PL_oldoldbufptr = PL_oldbufptr;
     PL_oldbufptr = s;
     PL_parser->saw_infix_sigil = 0;
+
+    if (PL_expect == XSIGVAR) {
+        /* we expect the sigil and optional var name part of a
+         * signature element here. Since a '$' is not necessarily
+         * followed by a var name, handle it specially here; the general
+         * yylex code would otherwise try to interpret whatever follows
+         * as a var; e.g. ($, ...) would be seen as the var '$,'
+         */
+
+        char sigil;
+
+        s = skipspace(s);
+        sigil = *s++;
+        PL_bufptr = s; /* for error reporting */
+        switch (sigil) {
+        case '$':
+        case '@':
+        case '%':
+            /* spot stuff that looks like an prototype */
+            if (strchr("$:@%&*;\\[]", *s)) {
+                yyerror("Illegal character following sigil in a subroutine signature");
+                break;
+            }
+            /* '$#' is banned, while '$ # comment' isn't */
+            if (*s == '#') {
+                yyerror("'#' not allowed immediately following a sigil in a subroutine signature");
+                break;
+            }
+            s = skipspace(s);
+            if (isIDFIRST_lazy_if(s, UTF)) {
+                char *dest = PL_tokenbuf + 1;
+                /* read var name, including sigil, into PL_tokenbuf */
+                PL_tokenbuf[0] = sigil;
+                parse_ident(&s, &dest, dest + sizeof(PL_tokenbuf) - 1,
+                    0, cBOOL(UTF), FALSE);
+                *dest = '\0';
+                assert(PL_tokenbuf[1]); /* we have a variable name */
+                NEXTVAL_NEXTTOKE.ival = sigil;
+                force_next('P'); /* force a signature pending identifier */
+            }
+            PL_expect = XOPERATOR;
+            break;
+
+        case ')':
+            PL_expect = XBLOCK;
+            break;
+        case ',': /* handle ($a,,$b) */
+            break;
+
+        default:
+            yyerror("A signature parameter must start with '$', '@' or '%'");
+            /* very crude error recovery: skip to likely next signature
+             * element */
+            while (*s && *s != '$' && *s != '@' && *s != '%' && *s != ')')
+                s++;
+            break;
+        }
+        TOKEN(sigil);
+    }
 
   retry:
     switch (*s) {
@@ -8474,6 +8534,9 @@ Perl_yylex(pTHX)
 
   Looks up an identifier in the pad or in a package
 
+  is_sig indicates that this is a subroutine signature variable
+  rather than a plain pad var.
+
   Returns:
     PRIVATEREF if this is a lexical name.
     BAREWORD   if this belongs to a package.
@@ -8490,7 +8553,7 @@ Perl_yylex(pTHX)
 */
 
 static int
-S_pending_ident(pTHX)
+S_pending_ident(pTHX_ bool is_sig)
 {
     PADOFFSET tmp = 0;
     const char pit = (char)pl_yylval.ival;
@@ -8507,7 +8570,7 @@ S_pending_ident(pTHX)
 
        if it's a legal name, the OP is a PADANY.
     */
-    if (PL_in_my) {
+    if (is_sig || PL_in_my) {
         if (PL_in_my == KEY_our) {	/* "our" is merely analogous to "my" */
             if (has_colon)
                 yyerror_pv(Perl_form(aTHX_ "No package name allowed for "
@@ -8516,6 +8579,7 @@ S_pending_ident(pTHX)
             tmp = allocmy(PL_tokenbuf, tokenbuf_len, UTF ? SVf_UTF8 : 0);
         }
         else {
+            OP *o;
             if (has_colon) {
                 /* "my" variable %s can't be in a package */
                 /* PL_no_myglob is constant */
@@ -8528,9 +8592,30 @@ S_pending_ident(pTHX)
                 GCC_DIAG_RESTORE;
             }
 
-            pl_yylval.opval = newOP(OP_PADANY, 0);
-            pl_yylval.opval->op_targ = allocmy(PL_tokenbuf, tokenbuf_len,
+            if (is_sig) {
+                /* A signature 'padop' needs in addition, an op_first to
+                 * point to a child sigdefelem, and an extra field to hold
+                 * the signature index. We can achieve both by using an
+                 * UNOP_AUX and (ab)using the op_aux field to hold the
+                 * index. If we ever need more fields, use a real malloced
+                 * aux strut instead.
+                 */
+                o = newUNOP_AUX(OP_ARGELEM, 0, NULL,
+                                    INT2PTR(UNOP_AUX_item *,
+                                        (PL_parser->sig_elems)));
+                o->op_private |= (  PL_tokenbuf[0] == '$' ? OPpARGELEM_SV
+                                  : PL_tokenbuf[0] == '@' ? OPpARGELEM_AV
+                                  :                         OPpARGELEM_HV);
+                /* make allocmy() warnings be for 'my', not 'state' */
+                PL_in_my = KEY_my;
+            }
+            else
+                o = newOP(OP_PADANY, 0);
+            o->op_targ = allocmy(PL_tokenbuf, tokenbuf_len,
                                                         UTF ? SVf_UTF8 : 0);
+            if (is_sig)
+                PL_in_my = 0;
+            pl_yylval.opval = o;
 	    return PRIVATEREF;
         }
     }
@@ -11734,219 +11819,6 @@ Perl_parse_stmtseq(pTHX_ U32 flags)
     if (c != -1 && c != /*{*/'}')
 	qerror(Perl_mess(aTHX_ "Parse error"));
     return stmtseqop;
-}
-
-#define parse_opt_lexvar() S_parse_opt_lexvar(aTHX)
-static OP *
-S_parse_opt_lexvar(pTHX)
-{
-    I32 sigil, c;
-    char *s, *d;
-    OP *var;
-    lex_token_boundary();
-    sigil = lex_read_unichar(0);
-    if (lex_peek_unichar(0) == '#') {
-	qerror(Perl_mess(aTHX_ "Parse error"));
-	return NULL;
-    }
-    lex_read_space(0);
-    c = lex_peek_unichar(0);
-    if (c == -1 || !(UTF ? isIDFIRST_uni(c) : isIDFIRST_A(c)))
-	return NULL;
-    s = PL_bufptr;
-    d = PL_tokenbuf + 1;
-    PL_tokenbuf[0] = (char)sigil;
-    parse_ident(&s, &d, PL_tokenbuf + sizeof(PL_tokenbuf) - 1, 0,
-		cBOOL(UTF), FALSE);
-    PL_bufptr = s;
-    if (d == PL_tokenbuf+1)
-	return NULL;
-    var = newOP(sigil == '$' ? OP_PADSV : sigil == '@' ? OP_PADAV : OP_PADHV,
-		OPf_MOD | (OPpLVAL_INTRO<<8));
-    var->op_targ = allocmy(PL_tokenbuf, d - PL_tokenbuf, UTF ? SVf_UTF8 : 0);
-    return var;
-}
-
-OP *
-Perl_parse_subsignature(pTHX)
-{
-    I32 c;
-    int prev_type = 0, pos = 0, min_arity = 0, max_arity = 0;
-    OP *initops = NULL;
-    lex_read_space(0);
-    c = lex_peek_unichar(0);
-    while (c != /*(*/')') {
-	switch (c) {
-	    case '$': {
-		OP *var, *expr;
-		if (prev_type == 2)
-		    qerror(Perl_mess(aTHX_ "Slurpy parameter not last"));
-		var = parse_opt_lexvar();
-		expr = var ?
-		    newBINOP(OP_AELEM, 0,
-			ref(newUNOP(OP_RV2AV, 0, newGVOP(OP_GV, 0, PL_defgv)),
-			    OP_RV2AV),
-			newSVOP(OP_CONST, 0, newSViv(pos))) :
-		    NULL;
-		lex_read_space(0);
-		c = lex_peek_unichar(0);
-		if (c == '=') {
-		    lex_token_boundary();
-		    lex_read_unichar(0);
-		    lex_read_space(0);
-		    c = lex_peek_unichar(0);
-		    if (c == ',' || c == /*(*/')') {
-			if (var)
-			    qerror(Perl_mess(aTHX_ "Optional parameter "
-				    "lacks default expression"));
-		    } else {
-			OP *defexpr = parse_termexpr(0);
-			if (defexpr->op_type == OP_UNDEF
-                            && !(defexpr->op_flags & OPf_KIDS))
-                        {
-			    op_free(defexpr);
-			} else {
-			    OP *ifop = 
-				newBINOP(OP_GE, 0,
-				    scalar(newUNOP(OP_RV2AV, 0,
-					    newGVOP(OP_GV, 0, PL_defgv))),
-				    newSVOP(OP_CONST, 0, newSViv(pos+1)));
-			    expr = var ?
-				newCONDOP(0, ifop, expr, defexpr) :
-				newLOGOP(OP_OR, 0, ifop, defexpr);
-			}
-		    }
-		    prev_type = 1;
-		} else {
-		    if (prev_type == 1)
-			qerror(Perl_mess(aTHX_ "Mandatory parameter "
-				"follows optional parameter"));
-		    prev_type = 0;
-		    min_arity = pos + 1;
-		}
-		if (var) expr = newASSIGNOP(OPf_STACKED, var, 0, expr);
-		if (expr)
-		    initops = op_append_list(OP_LINESEQ, initops,
-				newSTATEOP(0, NULL, expr));
-		max_arity = ++pos;
-	    } break;
-	    case '@':
-	    case '%': {
-		OP *var;
-		if (prev_type == 2)
-		    qerror(Perl_mess(aTHX_ "Slurpy parameter not last"));
-		var = parse_opt_lexvar();
-		if (c == '%') {
-		    OP *chkop = newLOGOP((pos & 1) ? OP_OR : OP_AND, 0,
-			    newBINOP(OP_BIT_AND, 0,
-				scalar(newUNOP(OP_RV2AV, 0,
-				    newGVOP(OP_GV, 0, PL_defgv))),
-				newSVOP(OP_CONST, 0, newSViv(1))),
-		            op_convert_list(OP_DIE, 0,
-		                op_convert_list(OP_SPRINTF, 0,
-		                    op_append_list(OP_LIST,
-		                        newSVOP(OP_CONST, 0,
-		                            newSVpvs("Odd name/value argument for subroutine at %s line %d.\n")),
-		                        newSLICEOP(0,
-		                            op_append_list(OP_LIST,
-		                                newSVOP(OP_CONST, 0, newSViv(1)),
-		                                newSVOP(OP_CONST, 0, newSViv(2))),
-		                            newOP(OP_CALLER, 0))))));
-		    if (pos != min_arity)
-			chkop = newLOGOP(OP_AND, 0,
-				    newBINOP(OP_GT, 0,
-					scalar(newUNOP(OP_RV2AV, 0,
-					    newGVOP(OP_GV, 0, PL_defgv))),
-					newSVOP(OP_CONST, 0, newSViv(pos))),
-				    chkop);
-		    initops = op_append_list(OP_LINESEQ,
-				newSTATEOP(0, NULL, chkop),
-				initops);
-		}
-		if (var) {
-		    OP *slice = pos ?
-			op_prepend_elem(OP_ASLICE,
-			    newOP(OP_PUSHMARK, 0),
-			    newLISTOP(OP_ASLICE, 0,
-				list(newRANGE(0,
-				    newSVOP(OP_CONST, 0, newSViv(pos)),
-				    newUNOP(OP_AV2ARYLEN, 0,
-					ref(newUNOP(OP_RV2AV, 0,
-						newGVOP(OP_GV, 0, PL_defgv)),
-					    OP_AV2ARYLEN)))),
-				ref(newUNOP(OP_RV2AV, 0,
-					newGVOP(OP_GV, 0, PL_defgv)),
-				    OP_ASLICE))) :
-			newUNOP(OP_RV2AV, 0, newGVOP(OP_GV, 0, PL_defgv));
-		    initops = op_append_list(OP_LINESEQ, initops,
-			newSTATEOP(0, NULL,
-			    newASSIGNOP(OPf_STACKED, var, 0, slice)));
-		}
-		prev_type = 2;
-		max_arity = -1;
-	    } break;
-	    default:
-		parse_error:
-		qerror(Perl_mess(aTHX_ "Parse error"));
-		return NULL;
-	}
-	lex_read_space(0);
-	c = lex_peek_unichar(0);
-	switch (c) {
-	    case /*(*/')': break;
-	    case ',':
-		do {
-		    lex_token_boundary();
-		    lex_read_unichar(0);
-		    lex_read_space(0);
-		    c = lex_peek_unichar(0);
-		} while (c == ',');
-		break;
-	    default:
-		goto parse_error;
-	}
-    }
-    if (min_arity != 0) {
-	initops = op_append_list(OP_LINESEQ,
-	    newSTATEOP(0, NULL,
-		newLOGOP(OP_OR, 0,
-		    newBINOP(OP_GE, 0,
-			scalar(newUNOP(OP_RV2AV, 0,
-			    newGVOP(OP_GV, 0, PL_defgv))),
-			newSVOP(OP_CONST, 0, newSViv(min_arity))),
-		    op_convert_list(OP_DIE, 0,
-		        op_convert_list(OP_SPRINTF, 0,
-		            op_append_list(OP_LIST,
-		                newSVOP(OP_CONST, 0,
-		                    newSVpvs("Too few arguments for subroutine at %s line %d.\n")),
-		                newSLICEOP(0,
-		                    op_append_list(OP_LIST,
-		                        newSVOP(OP_CONST, 0, newSViv(1)),
-		                        newSVOP(OP_CONST, 0, newSViv(2))),
-		                    newOP(OP_CALLER, 0))))))),
-	    initops);
-    }
-    if (max_arity != -1) {
-	initops = op_append_list(OP_LINESEQ,
-	    newSTATEOP(0, NULL,
-		newLOGOP(OP_OR, 0,
-		    newBINOP(OP_LE, 0,
-			scalar(newUNOP(OP_RV2AV, 0,
-			    newGVOP(OP_GV, 0, PL_defgv))),
-			newSVOP(OP_CONST, 0, newSViv(max_arity))),
-		    op_convert_list(OP_DIE, 0,
-		        op_convert_list(OP_SPRINTF, 0,
-		            op_append_list(OP_LIST,
-		                newSVOP(OP_CONST, 0,
-		                    newSVpvs("Too many arguments for subroutine at %s line %d.\n")),
-		                newSLICEOP(0,
-		                    op_append_list(OP_LIST,
-		                        newSVOP(OP_CONST, 0, newSViv(1)),
-		                        newSVOP(OP_CONST, 0, newSViv(2))),
-		                    newOP(OP_CALLER, 0))))))),
-	    initops);
-    }
-    return initops;
 }
 
 /*

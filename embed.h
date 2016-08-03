@@ -1141,6 +1141,7 @@
 #ifdef PERL_CORE
 #define Slab_Alloc(a)		Perl_Slab_Alloc(aTHX_ a)
 #define Slab_Free(a)		Perl_Slab_Free(aTHX_ a)
+#define alloc_LOGOP(a,b,c)	Perl_alloc_LOGOP(aTHX_ a,b,c)
 #define allocmy(a,b,c)		Perl_allocmy(aTHX_ a,b,c)
 #define amagic_is_enabled(a)	Perl_amagic_is_enabled(aTHX_ a)
 #define apply(a,b,c)		Perl_apply(aTHX_ a,b,c)
@@ -1201,6 +1202,7 @@
 #define core_prototype(a,b,c,d)	Perl_core_prototype(aTHX_ a,b,c,d)
 #define coresub_op(a,b,c)	Perl_coresub_op(aTHX_ a,b,c)
 #define create_eval_scope(a,b)	Perl_create_eval_scope(aTHX_ a,b)
+#define croak_caller		Perl_croak_caller
 #define croak_no_mem		Perl_croak_no_mem
 #define croak_popstack		Perl_croak_popstack
 #define custom_op_get_field(a,b)	Perl_custom_op_get_field(aTHX_ a,b)
@@ -1338,7 +1340,6 @@
 #define pad_push(a,b)		Perl_pad_push(aTHX_ a,b)
 #define pad_swipe(a,b)		Perl_pad_swipe(aTHX_ a,b)
 #define padlist_store(a,b,c)	Perl_padlist_store(aTHX_ a,b,c)
-#define parse_subsignature()	Perl_parse_subsignature(aTHX)
 #define parse_unicode_opts(a)	Perl_parse_unicode_opts(aTHX_ a)
 #define parser_free(a)		Perl_parser_free(aTHX_ a)
 #define peep(a)			Perl_peep(aTHX_ a)
@@ -1786,7 +1787,7 @@
 #define missingterm(a)		S_missingterm(aTHX_ a)
 #define no_op(a,b)		S_no_op(aTHX_ a,b)
 #define parse_ident(a,b,c,d,e,f)	S_parse_ident(aTHX_ a,b,c,d,e,f)
-#define pending_ident()		S_pending_ident(aTHX)
+#define pending_ident(a)	S_pending_ident(aTHX_ a)
 #define scan_const(a)		S_scan_const(aTHX_ a)
 #define scan_formline(a)	S_scan_formline(aTHX_ a)
 #define scan_heredoc(a)		S_scan_heredoc(aTHX_ a)

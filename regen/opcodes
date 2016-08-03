@@ -299,6 +299,9 @@ method		method lookup		ck_method	d.
 entersub	subroutine entry	ck_subr		dm1	L
 leavesub	subroutine exit		ck_null		1	
 leavesublv	lvalue subroutine return	ck_null		1	
+argcheck	check subroutine arguments	ck_null		+
+argelem		subroutine argument	ck_null		+
+argdefelem	subroutine argument default value	ck_null		|
 caller		caller			ck_fun		t%	S?
 warn		warn			ck_fun		imst@	L
 die		die			ck_fun		imst@	L

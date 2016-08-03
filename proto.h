@@ -108,6 +108,7 @@ PERL_CALLCONV UV	Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN 
 #define PERL_ARGS_ASSERT__TO_UTF8_UPPER_FLAGS	\
 	assert(p); assert(ustrp)
 PERL_CALLCONV void	Perl__warn_problematic_locale(void);
+PERL_CALLCONV LOGOP*	Perl_alloc_LOGOP(pTHX_ I32 type, OP *first, OP *other);
 PERL_CALLCONV PADOFFSET	Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags);
 #define PERL_ARGS_ASSERT_ALLOCMY	\
 	assert(name)
@@ -545,6 +546,10 @@ PERL_CALLCONV void	Perl_create_eval_scope(pTHX_ OP *retop, U32 flags);
 PERL_CALLCONV_NO_RET void	Perl_croak(pTHX_ const char* pat, ...)
 			__attribute__noreturn__
 			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
+
+PERL_CALLCONV_NO_RET void	Perl_croak_caller(const char* pat, ...)
+			__attribute__noreturn__
+			__attribute__format__null_ok__(__printf__,1,2);
 
 PERL_STATIC_NO_RET void	S_croak_memory_wrap(void)
 			__attribute__noreturn__;
@@ -2449,9 +2454,6 @@ PERL_CALLCONV OP*	Perl_parse_fullstmt(pTHX_ U32 flags);
 PERL_CALLCONV SV*	Perl_parse_label(pTHX_ U32 flags);
 PERL_CALLCONV OP*	Perl_parse_listexpr(pTHX_ U32 flags);
 PERL_CALLCONV OP*	Perl_parse_stmtseq(pTHX_ U32 flags);
-PERL_CALLCONV OP *	Perl_parse_subsignature(pTHX)
-			__attribute__warn_unused_result__;
-
 PERL_CALLCONV OP*	Perl_parse_termexpr(pTHX_ U32 flags);
 PERL_CALLCONV U32	Perl_parse_unicode_opts(pTHX_ const char **popt);
 #define PERL_ARGS_ASSERT_PARSE_UNICODE_OPTS	\
@@ -5495,7 +5497,7 @@ STATIC void	S_no_op(pTHX_ const char *const what, char *s);
 STATIC void	S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package, bool is_utf8, bool check_dollar);
 #define PERL_ARGS_ASSERT_PARSE_IDENT	\
 	assert(s); assert(d); assert(e)
-STATIC int	S_pending_ident(pTHX);
+STATIC int	S_pending_ident(pTHX_ bool is_sig);
 STATIC char*	S_scan_const(pTHX_ char *start)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SCAN_CONST	\

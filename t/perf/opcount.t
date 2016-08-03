@@ -20,7 +20,7 @@ BEGIN {
 use warnings;
 use strict;
 
-plan 2250;
+plan 2251;
 
 use B ();
 
@@ -266,3 +266,16 @@ test_opcount(0, 'barewords can be constant-folded',
              {
                  concat => 0,
              });
+
+{
+    no warnings 'experimental::signatures';
+    use feature 'signatures';
+
+    my @a;
+    test_opcount(0, 'signature default expressions get optimised',
+                 sub ($s = $a[0]) {},
+                 {
+                     aelem         => 0,
+                     aelemfast_lex => 1,
+                 });
+}

@@ -6615,6 +6615,226 @@ PP(pp_anonconst)
     RETURN;
 }
 
+
+/* process one subroutine argument - typically when the sub has a signature:
+ * introduce PL_curpad[op_targ] and assign to it the value
+ *  for $:   (OPf_STACKED ? *sp : $_[N])
+ *  for @/%: @_[N..$#_]
+ *
+ * It's equivalent to 
+ *    my $foo = $_[N];
+ * or
+ *    my $foo = (value-on-stack)
+ * or
+ *    my @foo = @_[N..$#_]
+ * etc
+ */
+
+PP(pp_argelem)
+{
+    dTARG;
+    SV *val;
+    SV ** padentry;
+    OP *o = PL_op;
+    AV *defav = GvAV(PL_defgv); /* @_ */
+    IV ix = PTR2IV(cUNOP_AUXo->op_aux);
+    IV argc;
+
+    /* do 'my $var, @var or %var' action */
+    padentry = &(PAD_SVl(o->op_targ));
+    save_clearsv(padentry);
+    targ = *padentry;
+
+    if ((o->op_private & OPpARGELEM_MASK) == OPpARGELEM_SV) {
+        if (o->op_flags & OPf_STACKED) {
+            dSP;
+            val = POPs;
+            PUTBACK;
+        }
+        else {
+            SV **svp;
+            /* should already have been checked */
+            assert(ix >= 0);
+#if IVSIZE > PTRSIZE
+            assert(ix <= SSize_t_MAX);
+#endif
+
+            svp = av_fetch(defav, ix, FALSE);
+            val = svp ? *svp : &PL_sv_undef;
+        }
+
+        /* $var = $val */
+
+        /* cargo-culted from pp_sassign */
+        assert(TAINTING_get || !TAINT_get);
+        if (UNLIKELY(TAINT_get) && !SvTAINTED(val))
+            TAINT_NOT;
+
+        SvSetMagicSV(targ, val);
+        return o->op_next;
+    }
+
+    /* must be AV or HV */
+
+    assert(!(o->op_flags & OPf_STACKED));
+    argc = ((IV)AvFILL(defav) + 1) - ix;
+
+    /* This is a copy of the relevant parts of pp_aassign().
+     */
+    if ((o->op_private & OPpARGELEM_MASK) == OPpARGELEM_AV) {
+        IV i;
+
+        if (AvFILL((AV*)targ) > -1) {
+            /* target should usually be empty. If we get get
+             * here, someone's been doing some weird closure tricks.
+             * Make a copy of all args before clearing the array,
+             * to avoid the equivalent of @a = ($a[0]) prematurely freeing
+             * elements. See similar code in pp_aassign.
+             */
+            for (i = 0; i < argc; i++) {
+                SV **svp = av_fetch(defav, ix + i, FALSE);
+                SV *newsv = newSV(0);
+                sv_setsv_flags(newsv,
+                                svp ? *svp : &PL_sv_undef,
+                                (SV_DO_COW_SVSETSV|SV_NOSTEAL));
+                if (!av_store(defav, ix + i, newsv))
+                    SvREFCNT_dec_NN(newsv);
+            }
+            av_clear((AV*)targ);
+        }
+
+        if (argc <= 0)
+            return o->op_next;
+
+        av_extend((AV*)targ, argc);
+
+        i = 0;
+        while (argc--) {
+            SV *tmpsv;
+            SV **svp = av_fetch(defav, ix + i, FALSE);
+            SV *val = svp ? *svp : &PL_sv_undef;
+            tmpsv = newSV(0);
+            sv_setsv(tmpsv, val);
+            av_store((AV*)targ, i++, tmpsv);
+            TAINT_NOT;
+        }
+
+    }
+    else {
+        IV i;
+
+        assert((o->op_private & OPpARGELEM_MASK) == OPpARGELEM_HV);
+
+        if (SvRMAGICAL(targ) || HvUSEDKEYS((HV*)targ)) {
+            /* see "target should usually be empty" comment above */
+            for (i = 0; i < argc; i++) {
+                SV **svp = av_fetch(defav, ix + i, FALSE);
+                SV *newsv = newSV(0);
+                sv_setsv_flags(newsv,
+                                svp ? *svp : &PL_sv_undef,
+                                (SV_DO_COW_SVSETSV|SV_NOSTEAL));
+                if (!av_store(defav, ix + i, newsv))
+                    SvREFCNT_dec_NN(newsv);
+            }
+            hv_clear((HV*)targ);
+        }
+
+        if (argc <= 0)
+            return o->op_next;
+        assert(argc % 2 == 0);
+
+        i = 0;
+        while (argc) {
+            SV *tmpsv;
+            SV **svp;
+            SV *key;
+            SV *val;
+
+            svp = av_fetch(defav, ix + i++, FALSE);
+            key = svp ? *svp : &PL_sv_undef;
+            svp = av_fetch(defav, ix + i++, FALSE);
+            val = svp ? *svp : &PL_sv_undef;
+
+            argc -= 2;
+            if (UNLIKELY(SvGMAGICAL(key)))
+                key = sv_mortalcopy(key);
+            tmpsv = newSV(0);
+            sv_setsv(tmpsv, val);
+            hv_store_ent((HV*)targ, key, tmpsv, 0);
+            TAINT_NOT;
+        }
+    }
+
+    return o->op_next;
+}
+
+/* Handle a default value for one subroutine argument (typically as part
+ * of a subroutine signature).
+ * It's equivalent to
+ *    @_ > op_targ ? $_[op_targ] : result_of(op_other)
+ *
+ * Intended to be used where op_next is an OP_ARGELEM
+ *
+ * We abuse the op_targ field slightly: it's an index into @_ rather than
+ * into PL_curpad.
+ */
+
+PP(pp_argdefelem)
+{
+    OP * const o = PL_op;
+    AV *defav = GvAV(PL_defgv); /* @_ */
+    IV ix = (IV)o->op_targ;
+
+    assert(ix >= 0);
+#if IVSIZE > PTRSIZE
+    assert(ix <= SSize_t_MAX);
+#endif
+
+    if (AvFILL(defav) >= ix) {
+        dSP;
+        SV **svp = av_fetch(defav, ix, FALSE);
+        SV  *val = svp ? *svp : &PL_sv_undef;
+        XPUSHs(val);
+        RETURN;
+    }
+    return cLOGOPo->op_other;
+}
+
+
+
+/* Check a  a subs arguments - i.e. that it has the correct number of args
+ * (and anything else we might think of in future). Typically used with
+ * signatured subs.
+ */
+
+PP(pp_argcheck)
+{
+    OP * const o       = PL_op;
+    UNOP_AUX_item *aux = cUNOP_AUXo->op_aux;
+    IV   params        = aux[0].iv;
+    IV   opt_params    = aux[1].iv;
+    char slurpy        = (char)(aux[2].iv);
+    AV  *defav         = GvAV(PL_defgv); /* @_ */
+    IV   argc;
+    bool too_few;
+
+    assert(!SvMAGICAL(defav));
+    argc = (AvFILLp(defav) + 1);
+    too_few = (argc < (params - opt_params));
+
+    if (UNLIKELY(too_few || (!slurpy && argc > params)))
+        /* diag_listed_as: Too few arguments for subroutine */
+        /* diag_listed_as: Too many arguments for subroutine */
+        Perl_croak_caller("Too %s arguments for subroutine",
+                            too_few ? "few" : "many");
+
+    if (UNLIKELY(slurpy == '%' && argc > params && (argc - params) % 2))
+        Perl_croak_caller("Odd name/value argument for subroutine");
+
+
+    return NORMAL;
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

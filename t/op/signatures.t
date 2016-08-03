@@ -6,15 +6,19 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-no warnings "illegalproto";
+use warnings;
+use strict;
 
 our $a = 123;
 our $z;
 
-sub t000 ($a) { $a || "z" }
-is prototype(\&t000), "\$a", "(\$a) interpreted as protoype when not enabled";
-is &t000(456), 123, "(\$a) not signature when not enabled";
-is $a, 123;
+{
+    no warnings "illegalproto";
+    sub t000 ($a) { $a || "z" }
+    is prototype(\&t000), "\$a", "(\$a) interpreted as protoype when not enabled";
+    is &t000(456), 123, "(\$a) not signature when not enabled";
+    is $a, 123;
+}
 
 no warnings "experimental::signatures";
 use feature "signatures";
@@ -415,7 +419,8 @@ like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 eval "#line 8 foo\nsub t024 (\$a =) { }";
-is $@, "Optional parameter lacks default expression at foo line 8\.\n";
+is $@,
+    qq{Optional parameter lacks default expression at foo line 8, near "=) "\n};
 
 sub t025 ($ = undef) { $a // "z" }
 is prototype(\&t025), undef;
@@ -557,10 +562,13 @@ like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 eval "#line 8 foo\nsub t030 (\$a = 222, \$b) { }";
-is $@, "Mandatory parameter follows optional parameter at foo line 8\.\n";
+is $@, qq{Mandatory parameter follows optional parameter at foo line 8, near "\$b) "\n};
 
 eval "#line 8 foo\nsub t031 (\$a = 222, \$b = 333, \$c, \$d) { }";
-is $@, "Mandatory parameter follows optional parameter at foo line 8\.\n";
+is $@, <<EOF;
+Mandatory parameter follows optional parameter at foo line 8, near "\$c,"
+Mandatory parameter follows optional parameter at foo line 8, near "\$d) "
+EOF
 
 sub t034 (@abc) { join("/", @abc).";".scalar(@abc) }
 is prototype(\&t034), undef;
@@ -575,10 +583,10 @@ is eval("t034(456, 789, 987, 654, 321, 111)"), "456/789/987/654/321/111;6";
 is $a, 123;
 
 eval "#line 8 foo\nsub t136 (\@abc = 222) { }";
-like $@, qr/\AParse error at foo line 8\.\n/;
+is $@, qq{A slurpy parameter may not have a default value at foo line 8, near "222) "\n};
 
 eval "#line 8 foo\nsub t137 (\@abc =) { }";
-like $@, qr/\AParse error at foo line 8\.\n/;
+is $@, qq{A slurpy parameter may not have a default value at foo line 8, near "=) "\n};
 
 sub t035 (@) { $a }
 is prototype(\&t035), undef;
@@ -593,10 +601,10 @@ is eval("t035(456, 789, 987, 654, 321, 111)"), 123;
 is $a, 123;
 
 eval "#line 8 foo\nsub t138 (\@ = 222) { }";
-like $@, qr/\AParse error at foo line 8\.\n/;
+is $@, qq{A slurpy parameter may not have a default value at foo line 8, near "222) "\n};
 
 eval "#line 8 foo\nsub t139 (\@ =) { }";
-like $@, qr/\AParse error at foo line 8\.\n/;
+is $@, qq{A slurpy parameter may not have a default value at foo line 8, near "=) "\n};
 
 sub t039 (%abc) { join("/", map { $_."=".$abc{$_} } sort keys %abc) }
 is prototype(\&t039), undef;
@@ -615,10 +623,10 @@ is eval("t039(456, 789, 987, 654, 321, 111)"), "321=111/456=789/987=654";
 is $a, 123;
 
 eval "#line 8 foo\nsub t140 (\%abc = 222) { }";
-like $@, qr/\AParse error at foo line 8\.\n/;
+is $@, qq{A slurpy parameter may not have a default value at foo line 8, near "222) "\n};
 
 eval "#line 8 foo\nsub t141 (\%abc =) { }";
-like $@, qr/\AParse error at foo line 8\.\n/;
+is $@, qq{A slurpy parameter may not have a default value at foo line 8, near "=) "\n};
 
 sub t040 (%) { $a }
 is prototype(\&t040), undef;
@@ -637,10 +645,10 @@ is eval("t040(456, 789, 987, 654, 321, 111)"), 123;
 is $a, 123;
 
 eval "#line 8 foo\nsub t142 (\% = 222) { }";
-like $@, qr/\AParse error at foo line 8\.\n/;
+is $@, qq{A slurpy parameter may not have a default value at foo line 8, near "222) "\n};
 
 eval "#line 8 foo\nsub t143 (\% =) { }";
-like $@, qr/\AParse error at foo line 8\.\n/;
+is $@, qq{A slurpy parameter may not have a default value at foo line 8, near "=) "\n};
 
 sub t041 ($a, @b) { $a.";".join("/", @b) }
 is prototype(\&t041), undef;
@@ -873,67 +881,70 @@ is eval("t058(456, 789, 987, 654, 321, 111)"), "456;789;987/654/321/111;4";
 is $a, 123;
 
 eval "#line 8 foo\nsub t059 (\@a, \$b) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Slurpy parameter not last at foo line 8, near "\$b) "\n};
 
 eval "#line 8 foo\nsub t060 (\@a, \$b = 222) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Slurpy parameter not last at foo line 8, near "222) "\n};
 
 eval "#line 8 foo\nsub t061 (\@a, \@b) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Multiple slurpy parameters not allowed at foo line 8, near "\@b) "\n};
 
 eval "#line 8 foo\nsub t062 (\@a, \%b) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Multiple slurpy parameters not allowed at foo line 8, near "%b) "\n};
 
 eval "#line 8 foo\nsub t063 (\@, \$b) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Slurpy parameter not last at foo line 8, near "\$b) "\n};
 
 eval "#line 8 foo\nsub t064 (\@, \$b = 222) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Slurpy parameter not last at foo line 8, near "222) "\n};
 
 eval "#line 8 foo\nsub t065 (\@, \@b) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Multiple slurpy parameters not allowed at foo line 8, near "\@b) "\n};
 
 eval "#line 8 foo\nsub t066 (\@, \%b) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Multiple slurpy parameters not allowed at foo line 8, near "%b) "\n};
 
 eval "#line 8 foo\nsub t067 (\@a, \$) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Slurpy parameter not last at foo line 8, near "\$) "\n};
 
 eval "#line 8 foo\nsub t068 (\@a, \$ = 222) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Slurpy parameter not last at foo line 8, near "222) "\n};
 
 eval "#line 8 foo\nsub t069 (\@a, \@) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Multiple slurpy parameters not allowed at foo line 8, near "\@) "\n};
 
 eval "#line 8 foo\nsub t070 (\@a, \%) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Multiple slurpy parameters not allowed at foo line 8, near "\%) "\n};
 
 eval "#line 8 foo\nsub t071 (\@, \$) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Slurpy parameter not last at foo line 8, near "\$) "\n};
 
 eval "#line 8 foo\nsub t072 (\@, \$ = 222) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Slurpy parameter not last at foo line 8, near "222) "\n};
 
 eval "#line 8 foo\nsub t073 (\@, \@) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Multiple slurpy parameters not allowed at foo line 8, near "\@) "\n};
 
 eval "#line 8 foo\nsub t074 (\@, \%) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Multiple slurpy parameters not allowed at foo line 8, near "\%) "\n};
 
 eval "#line 8 foo\nsub t075 (\%a, \$b) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Slurpy parameter not last at foo line 8, near "\$b) "\n};
 
 eval "#line 8 foo\nsub t076 (\%, \$b) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Slurpy parameter not last at foo line 8, near "\$b) "\n};
 
 eval "#line 8 foo\nsub t077 (\$a, \@b, \$c) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Slurpy parameter not last at foo line 8, near "\$c) "\n};
 
 eval "#line 8 foo\nsub t078 (\$a, \%b, \$c) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, qq{Slurpy parameter not last at foo line 8, near "\$c) "\n};
 
 eval "#line 8 foo\nsub t079 (\$a, \@b, \$c, \$d) { }";
-is $@, "Slurpy parameter not last at foo line 8\.\n";
+is $@, <<EOF;
+Slurpy parameter not last at foo line 8, near "\$c,"
+Slurpy parameter not last at foo line 8, near "\$d) "
+EOF
 
 sub t080 ($a,,, $b) { $a.$b }
 is prototype(\&t080), undef;
@@ -962,10 +973,10 @@ like $@, qr/\AToo many arguments for subroutine at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 eval "#line 8 foo\nsub t082 (, \$a) { }";
-like $@, qr/\AParse error at foo line 8\.\n/;
+is $@, qq{syntax error at foo line 8, near "(,"\n};
 
 eval "#line 8 foo\nsub t083 (,) { }";
-like $@, qr/\AParse error at foo line 8\.\n/;
+is $@, qq{syntax error at foo line 8, near "(,"\n};
 
 sub t084($a,$b){ $a.$b }
 is prototype(\&t084), undef;
@@ -1058,38 +1069,52 @@ is $a, 123;
 eval "#line 8 foo\nsub t088 (\$ #foo\na) { }";
 is $@, "";
 
+
 eval "#line 8 foo\nsub t089 (\$#foo\na) { }";
-like $@, qr/\AParse error at foo line 8\.\n/;
+like $@, qr{\A'#' not allowed immediately following a sigil in a subroutine signature at foo line 8, near "\(\$"\n};
 
 eval "#line 8 foo\nsub t090 (\@ #foo\na) { }";
 is $@, "";
 
 eval "#line 8 foo\nsub t091 (\@#foo\na) { }";
-like $@, qr/\AParse error at foo line 8\.\n/;
+like $@, qr{\A'#' not allowed immediately following a sigil in a subroutine signature at foo line 8, near "\(\@"\n};
 
 eval "#line 8 foo\nsub t092 (\% #foo\na) { }";
 is $@, "";
 
 eval "#line 8 foo\nsub t093 (\%#foo\na) { }";
-like $@, qr/\AParse error at foo line 8\.\n/;
+like $@, qr{\A'#' not allowed immediately following a sigil in a subroutine signature at foo line 8, near "\(%"\n};
 
 eval "#line 8 foo\nsub t094 (123) { }";
-like $@, qr/\AParse error at foo line 8\.\n/;
+like $@, qr{\AA signature parameter must start with '\$', '\@' or '%' at foo line 8, near "\(1"\n};
 
 eval "#line 8 foo\nsub t095 (\$a, 123) { }";
-like $@, qr/\AParse error at foo line 8\.\n/;
+is $@, <<EOF;
+A signature parameter must start with '\$', '\@' or '%' at foo line 8, near ", 1"
+syntax error at foo line 8, near ", 123"
+EOF
 
-eval "#line 8 foo\nsub t096 (\$a 123) { }";
-like $@, qr/\AParse error at foo line 8\.\n/;
+eval "#line 8 foo\nno warnings; sub t096 (\$a 123) { }";
+is $@, qq{syntax error at foo line 8, near "\$a 123"\n};
 
 eval "#line 8 foo\nsub t097 (\$a { }) { }";
-like $@, qr/\AParse error at foo line 8\.\n/;
+is $@, <<EOF;
+syntax error at foo line 8, near "\$a { "
+A signature parameter must start with '\$', '\@' or '%' at foo line 8, near "{ }"
+Missing right curly or square bracket at foo line 8, at end of line
+EOF
 
 eval "#line 8 foo\nsub t098 (\$a; \$b) { }";
-like $@, qr/\AParse error at foo line 8\.\n/;
+is $@, <<EOF;
+syntax error at foo line 8, at EOF
+syntax error at foo line 8, near "\$b) "
+EOF
 
 eval "#line 8 foo\nsub t099 (\$\$) { }";
-like $@, qr/\AParse error at foo line 8\.\n/;
+is $@, <<EOF;
+Illegal character following sigil in a subroutine signature at foo line 8, near "(\$"
+syntax error at foo line 8, near "\$\$"
+EOF
 
 eval "#line 8 foo\nsub t101 (\@_) { }";
 like $@, qr/\ACan't use global \@_ in "my" at foo line 8/;
@@ -1276,6 +1301,172 @@ is scalar(t117()), undef;
 is scalar(@{[ t117(333, 444) ]}), 0;
 is scalar(t117(333, 444)), undef;
 
+sub t145 ($=3) { }
+is scalar(t145()), undef;
+
+{
+    my $want;
+    sub want { $want = wantarray ? "list"
+                        : defined(wantarray) ? "scalar" : "void"; 1 }
+
+    sub t144 ($a = want()) { $a }
+    t144();
+    is ($want, "scalar", "default expression is scalar in void context");
+    my $x = t144();
+    is ($want, "scalar", "default expression is scalar in scalar context");
+    () = t144();
+    is ($want, "scalar", "default expression is scalar in list context");
+}
+
+
+# check for default arg code doing nasty things (closures, gotos,
+# modifying @_ etc).
+
+{
+    no warnings qw(closure);
+    use Tie::Array;
+    use Tie::Hash;
+
+    sub t146 ($a = t146x()) {
+        sub t146x { $a = "abc"; 1 }
+        $a;
+    }
+    is t146(), 1, "t146: closure can make new lexical not undef";
+
+    sub t147 ($a = t147x()) {
+        sub t147x { $a = "abc"; pos($a)=1; 1 }
+        is pos($a), undef, "t147: pos magic cleared";
+        $a;
+    }
+    is t147(), 1, "t147: closure can make new lexical not undef and magical";
+
+    sub t148 ($a = t148x()) {
+        sub t148x { $a = [];  1 }
+        $a;
+    }
+    is t148(), 1, "t148: closure can make new lexical a ref";
+
+    sub t149 ($a = t149x()) {
+        sub t149x { $a = 1;  [] }
+        $a;
+    }
+    is ref(t149()), "ARRAY", "t149: closure can make new lexical a ref";
+
+    sub t150 ($a = do {@_ = qw(a b c); 1}, $b = 2) {
+        is $a, 1,   "t150: a: growing \@_";
+        is $b, "b", "t150: b: growing \@_";
+    }
+    t150();
+
+
+    sub t151 ($a = do {tie @_, 'Tie::StdArray'; @_ = qw(a b c); 1}, $b = 2) {
+        is $a, 1,   "t151: a: tied \@_";
+        is $b, "b", "t151: b: tied \@_";
+    }
+    t151();
+
+    sub t152 ($a = t152x(), @b) {
+        sub t152x { @b = qw(a b c); 1 }
+        $a . '-' . join(':', @b);
+    }
+    is t152(), "1-", "t152: closure can make new lexical array non-empty";
+
+    sub t153 ($a = t153x(), %b) {
+        sub t153x { %b = qw(a 10 b 20); 1 }
+        $a . '-' . join(':', sort %b);
+    }
+    is t153(), "1-", "t153: closure can make new lexical hash non-empty";
+
+    sub t154 ($a = t154x(), @b) {
+        sub t154x { tie @b, 'Tie::StdArray'; @b = qw(a b c); 1 }
+        $a . '-' . join(':', @b);
+    }
+    is t154(), "1-", "t154: closure can make new lexical array tied";
+
+    sub t155 ($a = t155x(), %b) {
+        sub t155x { tie %b, 'Tie::StdHash'; %b = qw(a 10 b 20); 1 }
+        $a . '-' . join(':', sort %b);
+    }
+    is t155(), "1-", "t155: closure can make new lexical hash tied";
+
+    sub t156 ($a = do {@_ = qw(a b c); 1}, @b) {
+        is $a, 1,       "t156: a: growing \@_";
+        is "@b", "b c", "t156: b: growing \@_";
+    }
+    t156();
+
+    sub t157 ($a = do {@_ = qw(a b c); 1}, %b) {
+        is $a, 1,                     "t157: a: growing \@_";
+        is join(':', sort %b), "b:c", "t157: b: growing \@_";
+    }
+    t157();
+
+    sub t158 ($a = do {tie @_, 'Tie::StdArray'; @_ = qw(a b c); 1}, @b) {
+        is $a, 1,          "t158: a: tied \@_";
+        is "@b", "b c",    "t158: b: tied \@_";
+    }
+    t158();
+
+    sub t159 ($a = do {tie @_, 'Tie::StdArray'; @_ = qw(a b c); 1}, %b) {
+        is  $a, 1,                     "t159: a: tied \@_";
+        is  join(':', sort %b), "b:c", "t159: b: tied \@_";
+    }
+    t159();
+
+    # see if we can handle the equivalent of @a = ($a[1], $a[0])
+
+    sub t160 ($s, @a) {
+        sub t160x {
+            @a = qw(x y);
+            t160(1, $a[1], $a[0]);
+        }
+        # encourage recently-freed SVPVs to be realloced with new values
+        my @pad = qw(a b);
+        join ':', $s, @a;
+    }
+    is t160x(), "1:y:x", 'handle commonality in slurpy array';
+
+    # see if we can handle the equivalent of %h = ('foo', $h{foo})
+
+    sub t161 ($s, %h) {
+        sub t161x {
+            %h = qw(k1 v1 k2 v2);
+            t161(1, k1 => $h{k2}, k2 => $h{k1});
+        }
+        # encourage recently-freed SVPVs to be realloced with new values
+        my @pad = qw(a b);
+        join ' ', $s, map "($_,$h{$_})", sort keys %h;
+    }
+    is t161x(), "1 (k1,v2) (k2,v1)", 'handle commonality in slurpy hash';
+
+    # see if we can handle the equivalent of ($a,$b) = ($b,$a)
+    # Note that for non-signatured subs, my ($a,$b) = @_ already fails the
+    # equivalent of this test too, since I skipped pessimising it
+    # (90ce4d057857) as commonality in this case is rare and contrived,
+    # as the example below shows. DAPM.
+    sub t162 ($a, $b) {
+        sub t162x {
+            ($a, $b) = qw(x y);
+            t162($b, $a);
+        }
+        "$a:$b";
+    }
+    {
+        local $::TODO = q{can't handle commonaility};
+        is t162x(), "y:x", 'handle commonality in scalar parms';
+    }
+}
+
+{
+    my $w;
+    local $SIG{__WARN__} = sub { $w .= "@_" };
+    is eval q{sub ($x,$x) { $x}->(1,2)}, 2, "duplicate sig var names";
+    like $w, qr/^"my" variable \$x masks earlier declaration in same scope/,
+            "masking warning";
+}
+
+
+
 use File::Spec::Functions;
 my $keywords_file = catfile(updir,'regen','keywords.pl');
 open my $kh, $keywords_file
@@ -1285,11 +1476,7 @@ while(<$kh>) {
         chomp(my $word = $');
         # $y should be an error after $x=foo.  The exact error we get may
         # differ if this is __END__ or s or some other special keyword.
-        eval 'sub ($x = ' . $word . ', $y) {}';
-        local $::TODO = 'does not work yet'
-          if $word =~ /^(?:chmod|chown|die|exec|glob|kill|mkdir|print
-                          |printf|return|reverse|select|setpgrp|sort|split
-                          |system|unlink|utime|warn)\z/x;
+        eval 'no warnings; sub ($x = ' . $word . ', $y) {}';
         isnt $@, "", "$word does not swallow trailing comma";
     }
 }

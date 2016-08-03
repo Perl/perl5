@@ -5312,6 +5312,7 @@ typedef enum {
     XTERMBLOCK,
     XBLOCKTERM,
     XPOSTDEREF,
+    XSIGVAR,     /* expecting a var in a sub  signature */
     XTERMORDORDOR /* evil hack */
     /* update exp_name[] in toke.c if adding to this enum */
 } expectation;

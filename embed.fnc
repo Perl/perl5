@@ -298,6 +298,7 @@ Anprd	|void	|croak_xs_usage	|NN const CV *const cv \
 				|NN const char *const params
 npr	|void	|croak_no_mem
 nprX	|void	|croak_popstack
+fnrp	|void	|croak_caller|NULLOK const char* pat|...
 fnprx	|void	|noperl_die|NN const char* pat|...
 #if defined(WIN32)
 norx	|void	|win32_croak_not_implemented|NN const char * fname
@@ -475,7 +476,6 @@ Apd	|void	|fbm_compile	|NN SV* sv|U32 flags
 ApdR	|char*	|fbm_instr	|NN unsigned char* big|NN unsigned char* bigend \
 				|NN SV* littlestr|U32 flags
 p	|CV *	|find_lexical_cv|PADOFFSET off
-pR	|OP *	|parse_subsignature
 : Defined in util.c, used only in perl.c
 p	|char*	|find_script	|NN const char *scriptname|bool dosearch \
 				|NULLOK const char *const *const search_ext|I32 flags
@@ -999,6 +999,7 @@ Ap	|void	|newFORM	|I32 floor|NULLOK OP* o|NULLOK OP* block
 Apda	|OP*	|newFOROP	|I32 flags|NULLOK OP* sv|NN OP* expr|NULLOK OP* block|NULLOK OP* cont
 Apda	|OP*	|newGIVENOP	|NN OP* cond|NN OP* block|PADOFFSET defsv_off
 Apda	|OP*	|newLOGOP	|I32 optype|I32 flags|NN OP *first|NN OP *other
+pM	|LOGOP*	|alloc_LOGOP	|I32 type|NULLOK OP *first|NULLOK OP *other
 Apda	|OP*	|newLOOPEX	|I32 type|NN OP* label
 Apda	|OP*	|newLOOPOP	|I32 flags|I32 debuggable|NULLOK OP* expr|NULLOK OP* block
 Apda	|OP*	|newNULLLIST
@@ -2533,7 +2534,7 @@ s	|int	|intuit_more	|NN char *s
 s	|I32	|lop		|I32 f|int x|NN char *s
 rs	|void	|missingterm	|NULLOK char *s
 s	|void	|no_op		|NN const char *const what|NULLOK char *s
-s	|int	|pending_ident
+s	|int	|pending_ident	|bool is_sig
 sR	|I32	|sublex_done
 sR	|I32	|sublex_push
 sR	|I32	|sublex_start

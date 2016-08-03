@@ -74,7 +74,10 @@
 %type <opval> formname subname proto optsubbody cont my_scalar my_var
 %type <opval> refgen_topic formblock
 %type <opval> subattrlist myattrlist myattrterm myterm
-%type <opval> subsignature termbinop termunop anonymous termdo
+%type <opval> termbinop termunop anonymous termdo
+%type <ival>  sigslurpsigil
+%type <opval> sigvarname sigdefault sigscalarelem sigslurpelem
+%type <opval> sigelem siglist siglistornull subsignature 
 %type <opval> formstmtseq formline formarg
 
 %nonassoc <ival> PREC_LOW
@@ -628,24 +631,192 @@ myattrlist:	COLONATTR THING
 			{ $$ = (OP*)NULL; }
 	;
 
+
+
+/* --------------------------------------
+ * subroutine signature parsing
+ */
+
+/* the '' or 'foo' part of a '$' or '@foo' etc signature variable  */
+sigvarname:   /* NULL */
+			{ $$ = (OP*)NULL; }
+        |       PRIVATEREF
+                        { $$ = $1; }
+	;
+
+sigslurpsigil:
+                '@'
+                        { $$ = '@'; }
+        |       '%'
+                        { $$ = '%'; }
+
+/* @, %, @foo, %foo */
+sigslurpelem: sigslurpsigil sigvarname sigdefault/* def only to catch errors */ 
+                        {
+                            I32 sigil   = $1;
+                            OP *var     = $2;
+                            OP *defexpr = $3;
+
+                            if (PL_parser->sig_slurpy)
+                                yyerror("Multiple slurpy parameters not allowed");
+                            PL_parser->sig_slurpy = (char)sigil;
+
+                            if (defexpr)
+                                yyerror("A slurpy parameter may not have "
+                                        "a default value");
+
+                            $$ = var ? newSTATEOP(0, NULL, var) : (OP*)NULL;
+                        }
+	;
+
+/* default part of sub signature scalar element: i.e. '= default_expr' */
+sigdefault:	/* NULL */
+			{ $$ = (OP*)NULL; }
+        |       ASSIGNOP
+                        { $$ = newOP(OP_NULL, 0); }
+        |       ASSIGNOP term
+                        { $$ = $2; }
+
+
+/* subroutine signature scalar element: e.g. '$x', '$=', '$x = $default' */
+sigscalarelem:
+                '$' sigvarname sigdefault
+                        {
+                            OP *var     = $2;
+                            OP *defexpr = $3;
+
+                            if (PL_parser->sig_slurpy)
+                                yyerror("Slurpy parameter not last");
+
+                            PL_parser->sig_elems++;
+
+                            if (defexpr) {
+                                PL_parser->sig_optelems++;
+
+                                if (   defexpr->op_type == OP_NULL
+                                    && !(defexpr->op_flags & OPf_KIDS))
+                                {
+                                    /* handle '$=' special case */
+                                    if (var)
+                                        yyerror("Optional parameter "
+                                                    "lacks default expression");
+                                    op_free(defexpr);
+                                }
+                                else { 
+                                    /* a normal '=default' expression */ 
+                                    OP *defop = (OP*)alloc_LOGOP(OP_ARGDEFELEM,
+                                                        defexpr,
+                                                        LINKLIST(defexpr));
+                                    /* re-purpose op_targ to hold @_ index */
+                                    defop->op_targ =
+                                        (PADOFFSET)(PL_parser->sig_elems - 1);
+
+                                    if (var) {
+                                        var->op_flags |= OPf_STACKED;
+                                        (void)op_sibling_splice(var,
+                                                        NULL, 0, defop);
+                                        scalar(defop);
+                                    }
+                                    else
+                                        var = newUNOP(OP_NULL, 0, defop);
+
+                                    LINKLIST(var);
+                                    /* NB: normally the first child of a
+                                     * logop is executed before the logop,
+                                     * and it pushes a boolean result
+                                     * ready for the logop. For ARGDEFELEM,
+                                     * the op itself does the boolean
+                                     * calculation, so set the first op to
+                                     * it instead.
+                                     */
+                                    var->op_next = defop;
+                                    defexpr->op_next = var;
+                                }
+                            }
+                            else {
+                                if (PL_parser->sig_optelems)
+                                    yyerror("Mandatory parameter "
+                                            "follows optional parameter");
+                            }
+
+                            $$ = var ? newSTATEOP(0, NULL, var) : (OP*)NULL;
+                        }
+	;
+
+
+/* subroutine signature element: e.g. '$x = $default' or '%h' */
+sigelem:        sigscalarelem
+                        { parser->expect = XSIGVAR; $$ = $1; }
+        |       sigslurpelem
+                        { parser->expect = XSIGVAR; $$ = $1; }
+	;
+
+/* list of subroutine signature elements */
+siglist:
+	 	siglist ','
+			{ $$ = $1; }
+	|	siglist ',' sigelem
+			{
+			  $$ = op_append_list(OP_LINESEQ, $1, $3);
+			}
+        |	sigelem  %prec PREC_LOW
+			{ $$ = $1; }
+	;
+
+/* () or (....) */
+siglistornull:		/* NULL */
+			{ $$ = (OP*)NULL; }
+	|	siglist
+			{ $$ = $1; }
+
 /* Subroutine signature */
 subsignature:	'('
+                        {
+                            ENTER;
+                            SAVEIV(PL_parser->sig_elems);
+                            SAVEIV(PL_parser->sig_optelems);
+                            SAVEI8(PL_parser->sig_slurpy);
+                            PL_parser->sig_elems    = 0;
+                            PL_parser->sig_optelems = 0;
+                            PL_parser->sig_slurpy   = 0;
+                            parser->expect = XSIGVAR;
+                        }
+                siglistornull
+                ')'
 			{
-			  /* We shouldn't get here otherwise */
-			  assert(FEATURE_SIGNATURES_IS_ENABLED);
+                            OP            *sigops = $3;
+                            UNOP_AUX_item *aux;
+                            OP            *check;
 
-			  Perl_ck_warner_d(aTHX_
-				packWARN(WARN_EXPERIMENTAL__SIGNATURES),
-				"The signatures feature is experimental");
-			  $<opval>$ = parse_subsignature();
-			}
-		')'
-			{
-			  $$ = op_append_list(OP_LINESEQ, $<opval>2,
-				newSTATEOP(0, NULL, sawparens(newNULLLIST())));
-			  parser->expect = XATTRBLOCK;
+                            assert(FEATURE_SIGNATURES_IS_ENABLED);
+
+                            /* We shouldn't get here otherwise */
+                            Perl_ck_warner_d(aTHX_
+                                packWARN(WARN_EXPERIMENTAL__SIGNATURES),
+                                "The signatures feature is experimental");
+
+                            aux = (UNOP_AUX_item*)PerlMemShared_malloc(
+                                sizeof(UNOP_AUX_item) * 3);
+                            aux[0].iv = PL_parser->sig_elems;
+                            aux[1].iv = PL_parser->sig_optelems;
+                            aux[2].iv = PL_parser->sig_slurpy;
+                            check = newUNOP_AUX(OP_ARGCHECK, 0, NULL, aux);
+                            sigops = op_prepend_elem(OP_LINESEQ, check, sigops);
+                            sigops = op_prepend_elem(OP_LINESEQ,
+                                                newSTATEOP(0, NULL, NULL),
+                                                sigops);
+                            /* a nextstate at the end handles context
+                             * correctly for an empty sub body */
+                            $$ = op_append_elem(OP_LINESEQ,
+                                                sigops,
+                                                newSTATEOP(0, NULL, NULL));
+
+                            parser->expect = XATTRBLOCK;
+                            LEAVE;
 			}
 	;
+
+
 
 /* Optional subroutine body, for named subroutine declaration */
 optsubbody:	block

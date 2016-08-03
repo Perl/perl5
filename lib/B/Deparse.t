@@ -87,7 +87,12 @@ EOC
 	$regex =~ s/\s+/\\s+/g;
 	$regex = '^\{\s*' . $regex . '\s*\}$';
 
-        like($deparsed, qr/$regex/, $desc);
+        like($deparsed, qr/$regex/, $desc)
+            or diag "=============================================\n"
+                  . "CODE:\n--------\n$input\n--------\n"
+                  . "EXPECTED:\n--------\n{\n$expected\n}\n--------\n"
+                  . "GOT:\n--------\n$deparsed\n--------\n"
+                  . "=============================================\n";
     }
 }
 
@@ -363,20 +368,20 @@ EOCODP
 # CORE::no
 $a = readpipe qq`$^X $path "-MO=Deparse" -Xe `
              .qq`"use feature q|:all|; my sub no; CORE::no less" 2>&1`;
-like($a, qr/my sub no;\nCORE::no less;/,
+like($a, qr/my sub no;\n.*CORE::no less;/s,
     'CORE::no after my sub no');
 
 # CORE::use
 $a = readpipe qq`$^X $path "-MO=Deparse" -Xe `
              .qq`"use feature q|:all|; my sub use; CORE::use less" 2>&1`;
-like($a, qr/my sub use;\nCORE::use less;/,
+like($a, qr/my sub use;\n.*CORE::use less;/s,
     'CORE::use after my sub use');
 
 # CORE::__DATA__
 $a = readpipe qq`$^X $path "-MO=Deparse" -Xe `
              .qq`"use feature q|:all|; my sub __DATA__; `
              .qq`CORE::__DATA__" 2>&1`;
-like($a, qr/my sub __DATA__;\n.*\nCORE::__DATA__/s,
+like($a, qr/my sub __DATA__;\n.*CORE::__DATA__/s,
     'CORE::__DATA__ after my sub __DATA__');
 
 # sub declarations
@@ -1946,12 +1951,10 @@ no warnings "experimental::lexical_subs";
 my sub f {}
 print f();
 >>>>
-BEGIN {${^WARNING_BITS} = "\x54\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55"}
+BEGIN {${^WARNING_BITS} = "\x54\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55"}
 my sub f {
-    BEGIN {${^WARNING_BITS} = "\x54\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55"}
     
 }
-BEGIN {${^WARNING_BITS} = "\x54\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55"}
 print f();
 ####
 # SKIP ?$] < 5.017004 && "lexical subs not implemented on this Perl version"
@@ -1961,12 +1964,10 @@ no warnings 'experimental::lexical_subs';
 state sub f {}
 print f();
 >>>>
-BEGIN {${^WARNING_BITS} = "\x54\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55"}
+BEGIN {${^WARNING_BITS} = "\x54\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55"}
 state sub f {
-    BEGIN {${^WARNING_BITS} = "\x54\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55"}
     
 }
-BEGIN {${^WARNING_BITS} = "\x54\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55"}
 print f();
 ####
 # SKIP ?$] < 5.017004 && "lexical subs not implemented on this Perl version"
@@ -2457,11 +2458,16 @@ my $e = delete $h{'foo'}[$i];
 ####
 # multideref with leading expression
 my $r;
-my $x = ($r // [])->{'foo'}[0];
+my $x = +($r // [])->{'foo'}[0];
 ####
 # multideref with complex middle index
 my(%h, $i, $j, $k);
 my $x = $h{'foo'}[$i + $j]{$k};
+####
+# multideref with trailing non-simple index that initially looks simple
+# (i.e. the constant "3")
+my($r, $i, $j, $k);
+my $x = +($r || {})->{'foo'}[$i + $j]{3 + $k};
 ####
 # chdir
 chdir 'file';
@@ -2484,3 +2490,97 @@ $_ ^= $_;
 $_ |.= $_;
 $_ &.= $_;
 $_ ^.= $_;
+####
+####
+# Should really use 'no warnings "experimental::signatures"',
+# but it doesn't yet deparse correctly.
+# anon subs used because this test framework doesn't deparse named subs
+# in the DATA code snippets.
+#
+# general signature
+no warnings;
+use feature 'signatures';
+my $x;
+sub ($a, $, $b = $glo::bal, $c = $a, $d = 'foo', $e = -37, $f = 0, $g = 1, $h = undef, $i = $a + 1, $j = /foo/, @) {
+    $x++;
+}
+;
+$x++;
+####
+# Signature and prototype
+no warnings;
+use feature 'signatures';
+my $x;
+sub ($a, $b) : prototype($$) {
+    $x++;
+}
+;
+$x++;
+####
+# Signature and prototype and attrs
+no warnings;
+use feature 'signatures';
+my $x;
+sub ($a, $b) : prototype($$) lvalue {
+    $x++;
+}
+;
+$x++;
+####
+# Signature and attrs
+no warnings;
+use feature 'signatures';
+my $x;
+sub ($a, $b) : lvalue method {
+    $x++;
+}
+;
+$x++;
+####
+# named array slurp, null body
+no warnings;
+use feature 'signatures';
+sub (@a) {
+    ;
+}
+;
+####
+# named hash slurp
+no warnings;
+use feature 'signatures';
+sub ($key, %h) {
+    $h{$key};
+}
+;
+####
+# anon hash slurp
+no warnings;
+use feature 'signatures';
+sub ($a, %) {
+    $a;
+}
+;
+####
+# parenthesised default arg
+no warnings;
+use feature 'signatures';
+sub ($a, $b = (/foo/), $c = 1) {
+    $a + $b + $c;
+}
+;
+####
+# parenthesised default arg with TARGMY
+no warnings;
+use feature 'signatures';
+sub ($a, $b = ($a + 1), $c = 1) {
+    $a + $b + $c;
+}
+;
+####
+# empty default
+no warnings;
+use feature 'signatures';
+sub ($a, $=) {
+    $a;
+}
+;

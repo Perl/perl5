@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.996";
+our $VERSION   = "0.997";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -820,6 +820,7 @@ sub concise_op {
 	$h{targarg}     = join '; ', @targarg;
 	$h{targarglife} = join '; ', @targarglife;
     }
+
     $h{arg} = "";
     $h{svclass} = $h{svaddr} = $h{svval} = "";
     if ($h{class} eq "PMOP") {
@@ -884,6 +885,11 @@ sub concise_op {
 	undef $lastnext;
 	$h{arg} = "(other->" . seq($op->other) . ")";
 	$h{otheraddr} = sprintf("%#x", $ {$op->other});
+        if ($h{name} eq "argdefelem") {
+            # targ used for element index
+            $h{targarglife} = $h{targarg} = "";
+            $h{arg} .= "[" . $op->targ . "]";
+        }
     }
     elsif ($h{class} eq "SVOP" or $h{class} eq "PADOP") {
 	unless ($h{name} eq 'aelemfast' and $op->flags & OPf_SPECIAL) {

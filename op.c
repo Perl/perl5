@@ -929,6 +929,7 @@ Perl_op_clear(pTHX_ OP *o)
         /* FALLTHROUGH */
     case OP_ENTERTRY:
     case OP_ENTEREVAL:	/* Was holding hints. */
+    case OP_ARGDEFELEM:	/* Was holding signature index. */
 	o->op_targ = 0;
 	break;
     default:
@@ -1051,6 +1052,10 @@ Perl_op_clear(pTHX_ OP *o)
 #endif
 
 	break;
+
+    case OP_ARGCHECK:
+        PerlMemShared_free(cUNOP_AUXo->op_aux);
+        break;
 
     case OP_MULTIDEREF:
         {
@@ -1488,8 +1493,8 @@ S_op_sibling_newUNOP(pTHX_ OP *parent, OP *start, I32 type, I32 flags)
  * being spread throughout this file.
  */
 
-STATIC LOGOP *
-S_alloc_LOGOP(pTHX_ I32 type, OP *first, OP* other)
+LOGOP *
+Perl_alloc_LOGOP(pTHX_ I32 type, OP *first, OP* other)
 {
     dVAR;
     LOGOP *logop;
@@ -5857,7 +5862,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, bool isreg, I32 floor)
 	    expr = list(force_list(newUNOP(OP_ENTERSUB, 0, scalar(expr)), 1));
 	}
 
-        rcop = S_alloc_LOGOP(aTHX_ OP_REGCOMP, scalar(expr), o);
+        rcop = alloc_LOGOP(OP_REGCOMP, scalar(expr), o);
 	rcop->op_flags |=  ((PL_hints & HINT_RE_EVAL) ? OPf_SPECIAL : 0)
 			   | (reglist ? OPf_STACKED : 0);
 	rcop->op_targ = cv_targ;
@@ -5921,7 +5926,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, bool isreg, I32 floor)
 	    op_prepend_elem(o->op_type, scalar(repl), o);
 	}
 	else {
-            rcop = S_alloc_LOGOP(aTHX_ OP_SUBSTCONT, scalar(repl), o);
+            rcop = alloc_LOGOP(OP_SUBSTCONT, scalar(repl), o);
 	    rcop->op_private = 1;
 
 	    /* establish postfix order */
@@ -6993,7 +6998,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
         }
     }
 
-    logop = S_alloc_LOGOP(aTHX_ type, first, LINKLIST(other));
+    logop = alloc_LOGOP(type, first, LINKLIST(other));
     logop->op_flags |= (U8)flags;
     logop->op_private = (U8)(1 | (flags >> 8));
 
@@ -7064,7 +7069,7 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 	live->op_folded = 1;
 	return live;
     }
-    logop = S_alloc_LOGOP(aTHX_ OP_COND_EXPR, first, LINKLIST(trueop));
+    logop = alloc_LOGOP(OP_COND_EXPR, first, LINKLIST(trueop));
     logop->op_flags |= (U8)flags;
     logop->op_private = (U8)(1 | (flags >> 8));
     logop->op_next = LINKLIST(falseop);
@@ -7113,7 +7118,7 @@ Perl_newRANGE(pTHX_ I32 flags, OP *left, OP *right)
 
     PERL_ARGS_ASSERT_NEWRANGE;
 
-    range = S_alloc_LOGOP(aTHX_ OP_RANGE, left, LINKLIST(right));
+    range = alloc_LOGOP(OP_RANGE, left, LINKLIST(right));
     range->op_flags = OPf_KIDS;
     leftstart = LINKLIST(left);
     range->op_private = (U8)(1 | (flags >> 8));
@@ -7633,7 +7638,7 @@ S_newGIVWHENOP(pTHX_ OP *cond, OP *block,
     PERL_ARGS_ASSERT_NEWGIVWHENOP;
     PERL_UNUSED_ARG(entertarg); /* used to indicate targ of lexical $_ */
 
-    enterop = S_alloc_LOGOP(aTHX_ enter_opcode, block, NULL);
+    enterop = alloc_LOGOP(enter_opcode, block, NULL);
     enterop->op_targ = 0;
     enterop->op_private = 0;
 
@@ -9674,7 +9679,7 @@ Perl_ck_eval(pTHX_ OP *o)
             op_sibling_splice(o, NULL, -1, NULL);
 	    op_free(o);
 
-            enter = S_alloc_LOGOP(aTHX_ OP_ENTERTRY, NULL, NULL);
+            enter = alloc_LOGOP(OP_ENTERTRY, NULL, NULL);
 
 	    /* establish postfix order */
 	    enter->op_next = (OP*)enter;
@@ -10246,7 +10251,7 @@ Perl_ck_grep(pTHX_ OP *o)
 	Perl_croak(aTHX_ "panic: ck_grep, type=%u", (unsigned) kid->op_type);
     kid = kUNOP->op_first;
 
-    gwop = S_alloc_LOGOP(aTHX_ type, o, LINKLIST(kid));
+    gwop = alloc_LOGOP(type, o, LINKLIST(kid));
     kid->op_next = (OP*)gwop;
     o->op_private = gwop->op_private = 0;
     gwop->op_targ = pad_alloc(type, SVs_PADTMP);
@@ -13039,6 +13044,8 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                 is_last = TRUE;
                 index_skip = action_count;
                 action |= MDEREF_FLAG_last;
+                if (index_type != MDEREF_INDEX_none)
+                    arg--;
             }
 
             if (pass)
@@ -14162,6 +14169,7 @@ Perl_rpeep(pTHX_ OP *o)
 	case OP_DORASSIGN:
 	case OP_RANGE:
 	case OP_ONCE:
+	case OP_ARGDEFELEM:
 	    while (cLOGOP->op_other->op_type == OP_NULL)
 		cLOGOP->op_other = cLOGOP->op_other->op_next;
 	    DEFER(cLOGOP->op_other);
@@ -15017,6 +15025,7 @@ const_av_xsub(pTHX_ CV* cv)
     Copy(AvARRAY(av), &ST(0), AvFILLp(av)+1, SV *);
     XSRETURN(AvFILLp(av)+1);
 }
+
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
