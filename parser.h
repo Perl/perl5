@@ -72,7 +72,10 @@ typedef struct yy_parser {
     bool	preambled;
     bool        lex_re_reparsing; /* we're doing G_RE_REPARSING */
     I32		lex_allbrackets;/* (), [], {}, ?: bracket count */
-    SUBLEXINFO	sublex_info;
+    U8		lex_super_state;/* lexer state to save */
+    U16		lex_sub_inwhat;	/* "lex_inwhat" to use in sublex_push */
+    OP		*lex_sub_op;	/* current op in y/// or pattern */
+    SV		*lex_sub_repl;	/* repl of s/// used in sublex_push */
     LEXSHARED	*lex_shared;
     SV		*linestr;	/* current chunk of src text */
     char	*bufptr;	/* carries the cursor (current parsing

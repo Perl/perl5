@@ -64,7 +64,6 @@ Individual members of C<PL_parser> have their own documentation.
 #define PL_multi_open		(PL_parser->multi_open)
 #define PL_multi_close		(PL_parser->multi_close)
 #define PL_preambled		(PL_parser->preambled)
-#define PL_sublex_info		(PL_parser->sublex_info)
 #define PL_linestr		(PL_parser->linestr)
 #define PL_expect		(PL_parser->expect)
 #define PL_copline		(PL_parser->copline)
@@ -774,7 +773,7 @@ Perl_parser_free(pTHX_  const yy_parser *parser)
 	PerlIO_close(parser->rsfp);
     SvREFCNT_dec(parser->rsfp_filters);
     SvREFCNT_dec(parser->lex_stuff);
-    SvREFCNT_dec(parser->sublex_info.repl);
+    SvREFCNT_dec(parser->lex_sub_repl);
 
     Safefree(parser->lex_brackstack);
     Safefree(parser->lex_casestack);
@@ -2316,9 +2315,9 @@ S_sublex_start(pTHX)
 	return THING;
     }
 
-    PL_sublex_info.super_state = PL_lex_state;
-    PL_sublex_info.sub_inwhat = (U16)op_type;
-    PL_sublex_info.sub_op = PL_lex_op;
+    PL_parser->lex_super_state = PL_lex_state;
+    PL_parser->lex_sub_inwhat = (U16)op_type;
+    PL_parser->lex_sub_op = PL_lex_op;
     PL_lex_state = LEX_INTERPPUSH;
 
     PL_expect = XTERM;
@@ -2346,7 +2345,7 @@ S_sublex_push(pTHX)
     const bool is_heredoc = PL_multi_close == '<';
     ENTER;
 
-    PL_lex_state = PL_sublex_info.super_state;
+    PL_lex_state = PL_parser->lex_super_state;
     SAVEI8(PL_lex_dojoin);
     SAVEI32(PL_lex_brackets);
     SAVEI32(PL_lex_allbrackets);
@@ -2388,16 +2387,16 @@ S_sublex_push(pTHX)
     PL_parser->lex_shared->ls_bufptr  = PL_bufptr;
 
     PL_linestr = PL_lex_stuff;
-    PL_lex_repl = PL_sublex_info.repl;
+    PL_lex_repl = PL_parser->lex_sub_repl;
     PL_lex_stuff = NULL;
-    PL_sublex_info.repl = NULL;
+    PL_parser->lex_sub_repl = NULL;
 
     /* Arrange for PL_lex_stuff to be freed on scope exit, in case it gets
        set for an inner quote-like operator and then an error causes scope-
        popping.  We must not have a PL_lex_stuff value left dangling, as
        that breaks assumptions elsewhere.  See bug #123617.  */
     SAVEGENERICSV(PL_lex_stuff);
-    SAVEGENERICSV(PL_sublex_info.repl);
+    SAVEGENERICSV(PL_parser->lex_sub_repl);
 
     PL_bufend = PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart
 	= SvPVX(PL_linestr);
@@ -2424,10 +2423,10 @@ S_sublex_push(pTHX)
     shared->ls_prev = PL_parser->lex_shared;
     PL_parser->lex_shared = shared;
 
-    PL_lex_inwhat = PL_sublex_info.sub_inwhat;
+    PL_lex_inwhat = PL_parser->lex_sub_inwhat;
     if (PL_lex_inwhat == OP_TRANSR) PL_lex_inwhat = OP_TRANS;
     if (PL_lex_inwhat == OP_MATCH || PL_lex_inwhat == OP_QR || PL_lex_inwhat == OP_SUBST)
-	PL_lex_inpat = PL_sublex_info.sub_op;
+	PL_lex_inpat = PL_parser->lex_sub_op;
     else
 	PL_lex_inpat = NULL;
 
@@ -2857,10 +2856,10 @@ S_scan_const(pTHX_ char *start)
     PERL_ARGS_ASSERT_SCAN_CONST;
 
     assert(PL_lex_inwhat != OP_TRANSR);
-    if (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op) {
+    if (PL_lex_inwhat == OP_TRANS && PL_parser->lex_sub_op) {
 	/* If we are doing a trans and we know we want UTF8 set expectation */
-	has_utf8   = PL_sublex_info.sub_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF);
-	this_utf8  = PL_sublex_info.sub_op->op_private & (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF);
+	has_utf8   = PL_parser->lex_sub_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF);
+	this_utf8  = PL_parser->lex_sub_op->op_private & (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF);
     }
 
     /* Protect sv from errors and fatal warnings. */
@@ -3399,9 +3398,9 @@ S_scan_const(pTHX_ char *start)
 
 		        d = (char*)uvchr_to_utf8((U8*)d, uv);
 			if (PL_lex_inwhat == OP_TRANS
-                            && PL_sublex_info.sub_op)
+                            && PL_parser->lex_sub_op)
                         {
-			    PL_sublex_info.sub_op->op_private |=
+			    PL_parser->lex_sub_op->op_private |=
 				(PL_lex_repl ? OPpTRANS_FROM_UTF
 					     : OPpTRANS_TO_UTF);
 			}
@@ -3814,8 +3813,8 @@ S_scan_const(pTHX_ char *start)
     SvPOK_on(sv);
     if (has_utf8) {
 	SvUTF8_on(sv);
-	if (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op) {
-	    PL_sublex_info.sub_op->op_private |=
+	if (PL_lex_inwhat == OP_TRANS && PL_parser->lex_sub_op) {
+	    PL_parser->lex_sub_op->op_private |=
 		    (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF);
 	}
     }
@@ -9323,15 +9322,15 @@ S_scan_subst(pTHX_ char *start)
 		sv_catpvs(repl, "do ");
 	}
 	sv_catpvs(repl, "{");
-	sv_catsv(repl, PL_sublex_info.repl);
+	sv_catsv(repl, PL_parser->lex_sub_repl);
 	sv_catpvs(repl, "}");
 	SvEVALED_on(repl);
-	SvREFCNT_dec(PL_sublex_info.repl);
-	PL_sublex_info.repl = repl;
+	SvREFCNT_dec(PL_parser->lex_sub_repl);
+	PL_parser->lex_sub_repl = repl;
     }
     if (CopLINE(PL_curcop) != first_line) {
-	sv_upgrade(PL_sublex_info.repl, SVt_PVNV);
-	((XPVNV*)SvANY(PL_sublex_info.repl))->xnv_u.xpad_cop_seq.xlow =
+	sv_upgrade(PL_parser->lex_sub_repl, SVt_PVNV);
+	((XPVNV*)SvANY(PL_parser->lex_sub_repl))->xnv_u.xpad_cop_seq.xlow =
 	    CopLINE(PL_curcop) - first_line;
 	CopLINE_set(PL_curcop, first_line);
     }
@@ -9395,7 +9394,7 @@ S_scan_trans(pTHX_ char *start)
     o->op_private &= ~OPpTRANS_ALL;
     o->op_private |= del|squash|complement|
       (DO_UTF8(PL_lex_stuff)? OPpTRANS_FROM_UTF : 0)|
-      (DO_UTF8(PL_sublex_info.repl) ? OPpTRANS_TO_UTF   : 0);
+      (DO_UTF8(PL_parser->lex_sub_repl) ? OPpTRANS_TO_UTF   : 0);
 
     PL_lex_op = o;
     pl_yylval.ival = nondestruct ? OP_TRANSR : OP_TRANS;
@@ -10113,7 +10112,7 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
     */
 
     if (PL_lex_stuff)
-	PL_sublex_info.repl = sv;
+	PL_parser->lex_sub_repl = sv;
     else
 	PL_lex_stuff = sv;
     if (delimp) *delimp = PL_multi_open == PL_multi_close ? s-termlen : s;

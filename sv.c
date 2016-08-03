@@ -12966,7 +12966,10 @@ Perl_parser_dup(pTHX_ const yy_parser *const proto, CLONE_PARAMS *const param)
     parser->multi_start	= proto->multi_start;
     parser->multi_end	= proto->multi_end;
     parser->preambled	= proto->preambled;
-    parser->sublex_info	= proto->sublex_info; /* XXX not quite right */
+    parser->lex_super_state = proto->lex_super_state;
+    parser->lex_sub_inwhat  = proto->lex_sub_inwhat;
+    parser->lex_sub_op	= proto->lex_sub_op;
+    parser->lex_sub_repl= sv_dup_inc(proto->lex_sub_repl, param);
     parser->linestr	= sv_dup_inc(proto->linestr, param);
     parser->expect	= proto->expect;
     parser->copline	= proto->copline;

@@ -3919,14 +3919,6 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #undef _XPVMG_HEAD
 #undef _XPVCV_COMMON
 
-typedef struct _sublex_info SUBLEXINFO;
-struct _sublex_info {
-    U8 super_state;	/* lexer state to save */
-    U16 sub_inwhat;	/* "lex_inwhat" to use */
-    OP *sub_op;		/* "lex_op" to use */
-    SV *repl;		/* replacement of s/// or y/// */
-};
-
 #include "parser.h"
 
 typedef struct magic_state MGS;	/* struct magic_state defined in mg.c */
