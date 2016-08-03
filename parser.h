@@ -57,6 +57,7 @@ typedef struct yy_parser {
     U8		lex_dojoin;	/* doing an array interpolation
 				   1 = @{...}  2 = ->@ */
     U8		expect;		/* how to interpret ambiguous tokens */
+    bool	preambled;
     I32		lex_formbrack;	/* bracket count at outer format level */
     OP		*lex_inpat;	/* in pattern $) and $| are special */
     OP		*lex_op;	/* extra info to pass back on op */
@@ -69,11 +70,10 @@ typedef struct yy_parser {
     I32		multi_end;	/* last line of multi-line string */
     UV		multi_open;	/* delimiter of said string */
     UV		multi_close;	/* delimiter of said string */
-    bool	preambled;
     bool        lex_re_reparsing; /* we're doing G_RE_REPARSING */
-    I32		lex_allbrackets;/* (), [], {}, ?: bracket count */
     U8		lex_super_state;/* lexer state to save */
     U16		lex_sub_inwhat;	/* "lex_inwhat" to use in sublex_push */
+    I32		lex_allbrackets;/* (), [], {}, ?: bracket count */
     OP		*lex_sub_op;	/* current op in y/// or pattern */
     SV		*lex_sub_repl;	/* repl of s/// used in sublex_push */
     LEXSHARED	*lex_shared;
@@ -95,6 +95,7 @@ typedef struct yy_parser {
     U16		in_my;		/* we're compiling a "my"/"our" declaration */
     U8		lex_state;	/* next token is determined */
     U8		error_count;	/* how many compile errors so far, max 10 */
+		/* 16-BIT HOLE */
     HV		*in_my_stash;	/* declared class of this "my" declaration */
     PerlIO	*rsfp;		/* current source file pointer */
     AV		*rsfp_filters;	/* holds chain of active source filters */
