@@ -100,7 +100,7 @@ typedef struct yy_parser {
 
     YYSTYPE	nextval[5];	/* value of next token, if any */
     I32		nexttype[5];	/* type of next token */
-    U32		nexttoke;
+    U8		nexttoke;
 
     COP		*saved_curcop;	/* the previous PL_curcop */
     char	tokenbuf[256];
