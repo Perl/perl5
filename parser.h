@@ -95,28 +95,26 @@ typedef struct yy_parser {
     U16		in_my;		/* we're compiling a "my"/"our" declaration */
     U8		lex_state;	/* next token is determined */
     U8		error_count;	/* how many compile errors so far, max 10 */
-    U8		form_lex_state;	/* remember lex_state when parsing fmt */
-		/* 8-BIT HOLE */
+		/* 16-BIT HOLE */
     HV		*in_my_stash;	/* declared class of this "my" declaration */
     PerlIO	*rsfp;		/* current source file pointer */
     AV		*rsfp_filters;	/* holds chain of active source filters */
+    U8		form_lex_state;	/* remember lex_state when parsing fmt */
 
     YYSTYPE	nextval[5];	/* value of next token, if any */
     I32		nexttype[5];	/* type of next token */
     U8		nexttoke;
 
+    COP		*saved_curcop;	/* the previous PL_curcop */
+    char	tokenbuf[256];
+    line_t	herelines;	/* number of lines in here-doc */
+    line_t	preambling;	/* line # when processing $ENV{PERL5DB} */
     U8		lex_fakeeof;	/* precedence at which to fake EOF */
     U8		lex_flags;
     PERL_BITFIELD16	in_pod:1;      /* lexer is within a =pod section */
     PERL_BITFIELD16	filtered:1;    /* source filters in evalbytes */
     PERL_BITFIELD16	saw_infix_sigil:1; /* saw & or * or % operator */
     PERL_BITFIELD16	parsed_sub:1;  /* last thing parsed was a sub */
-		/* 4 spare bits */
-    COP		*saved_curcop;	/* the previous PL_curcop */
-    char	tokenbuf[256];
-    line_t	herelines;	/* number of lines in here-doc */
-    line_t	preambling;	/* line # when processing $ENV{PERL5DB} */
-
     /* these are valid whiling parsing a subroutine signature */
     IV          sig_elems;      /* number of signature elements seen so far */
     IV          sig_optelems;   /* number of optional signature elems seen */
