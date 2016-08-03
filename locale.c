@@ -1476,7 +1476,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
         if (*PL_strxfrm_min_char == '\0') {
             int j;
 #ifdef DEBUGGING
-            U8     cur_min_cp = 1;  /* The code point that sorts lowest, so far */
+            U8     cur_min_cp = 1; /* The code point that sorts lowest, so far */
 #endif
             char * cur_min_x = NULL;    /* And its xfrm, (except it also
                                            includes the collation index
@@ -1490,59 +1490,60 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                  try_non_controls < 2;
                  try_non_controls++)
             {
-            /* Look through all legal code points (NUL isn't) */
-            for (j = 1; j < 256; j++) {
-                char * x;       /* j's xfrm plus collation index */
-                STRLEN x_len;   /* length of 'x' */
-                STRLEN trial_len = 1;
+                /* Look through all legal code points (NUL isn't) */
+                for (j = 1; j < 256; j++) {
+                    char * x;       /* j's xfrm plus collation index */
+                    STRLEN x_len;   /* length of 'x' */
+                    STRLEN trial_len = 1;
 
-                /* Create a 1 byte string of the current code point, but with
-                 * room to be 2 bytes */
-                char cur_source[] = { (char) j, '\0' , '\0' };
+                    /* Create a 1 byte string of the current code point, but
+                     * with room to be 2 bytes */
+                    char cur_source[] = { (char) j, '\0' , '\0' };
 
-                if (PL_in_utf8_COLLATE_locale) {
-                    if (! try_non_controls && ! isCNTRL_L1(j)) {
+                    if (PL_in_utf8_COLLATE_locale) {
+                        if (! try_non_controls && ! isCNTRL_L1(j)) {
+                            continue;
+                        }
+
+                        /* If needs to be 2 bytes, find them */
+                        if (! UVCHR_IS_INVARIANT(j)) {
+                            char * d = cur_source;
+                            append_utf8_from_native_byte((U8) j, (U8 **) &d);
+                            trial_len = 2;
+                        }
+                    }
+                    else if (! try_non_controls && ! isCNTRL_LC(j)) {
                         continue;
                     }
 
-                    /* If needs to be 2 bytes, find them */
-                    if (! UVCHR_IS_INVARIANT(j)) {
-                        char * d = cur_source;
-                        append_utf8_from_native_byte((U8) j, (U8 **) &d);
-                        trial_len = 2;
+                    /* Then transform it */
+                    x = _mem_collxfrm(cur_source, trial_len, &x_len,
+                                      PL_in_utf8_COLLATE_locale);
+
+                    /* Ignore any character that didn't successfully transform
+                     * */
+                    if (! x) {
+                        continue;
                     }
-                }
-                else if (! try_non_controls && ! isCNTRL_LC(j)) {
-                    continue;
-                }
 
-                /* Then transform it */
-                x = _mem_collxfrm(cur_source, trial_len, &x_len,
-                                  PL_in_utf8_COLLATE_locale);
-
-                /* Ignore any character that didn't successfully transform */
-                if (! x) {
-                    continue;
-                }
-
-                /* If this character's transformation is lower than
-                 * the current lowest, this one becomes the lowest */
-                if (   cur_min_x == NULL
-                    || strLT(x         + COLLXFRM_HDR_LEN,
-                             cur_min_x + COLLXFRM_HDR_LEN))
-                {
-                    PL_strxfrm_min_char[0] = cur_source[0];
-                    PL_strxfrm_min_char[1] = cur_source[1];
-                    PL_strxfrm_min_char[2] = cur_source[2];
-                    cur_min_x = x;
+                    /* If this character's transformation is lower than
+                     * the current lowest, this one becomes the lowest */
+                    if (   cur_min_x == NULL
+                        || strLT(x         + COLLXFRM_HDR_LEN,
+                                 cur_min_x + COLLXFRM_HDR_LEN))
+                    {
+                        PL_strxfrm_min_char[0] = cur_source[0];
+                        PL_strxfrm_min_char[1] = cur_source[1];
+                        PL_strxfrm_min_char[2] = cur_source[2];
+                        cur_min_x = x;
 #ifdef DEBUGGING
-                    cur_min_cp = j;
+                        cur_min_cp = j;
 #endif
-                }
-                else {
-                    Safefree(x);
-                }
-            } /* end of loop through all bytes */
+                    }
+                    else {
+                        Safefree(x);
+                    }
+                } /* end of loop through all bytes */
 
                 if (cur_min_x) {
                     break;
@@ -1841,7 +1842,8 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                 *      (Many versions of cygwin fit this.  When the buffer size
                 *      isn't sufficient, they return the input size instead of
                 *      how much is needed.)
-                * Increase the buffer size by a fixed percentage and try again. */
+                * Increase the buffer size by a fixed percentage and try again.
+                * */
             xAlloc += (xAlloc / 4) + 1;
             PL_strxfrm_is_behaved = FALSE;
 
