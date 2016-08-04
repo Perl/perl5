@@ -1933,7 +1933,7 @@ s  |bool|find_default_stash|NN HV **stash|NN const char *name \
                      |STRLEN len|const U32 is_utf8|const I32 add \
                      |const svtype sv_type
 s  |bool|gv_magicalize|NN GV *gv|NN HV *stash|NN const char *name \
-                     |STRLEN len|bool addmg \
+                     |STRLEN len \
                      |const svtype sv_type
 s  |void|maybe_multimagic_gv|NN GV *gv|NN const char *name|const svtype sv_type
 s  |bool|gv_is_in_main|NN const char *name|STRLEN len \

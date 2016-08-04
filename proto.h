@@ -4308,7 +4308,7 @@ STATIC void	S_gv_init_svtype(pTHX_ GV *gv, const svtype sv_type);
 STATIC bool	S_gv_is_in_main(pTHX_ const char *name, STRLEN len, const U32 is_utf8);
 #define PERL_ARGS_ASSERT_GV_IS_IN_MAIN	\
 	assert(name)
-STATIC bool	S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, bool addmg, const svtype sv_type);
+STATIC bool	S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, const svtype sv_type);
 #define PERL_ARGS_ASSERT_GV_MAGICALIZE	\
 	assert(gv); assert(stash); assert(name)
 STATIC void	S_gv_magicalize_isa(pTHX_ GV *gv);
