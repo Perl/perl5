@@ -516,6 +516,9 @@ Or you can try casting to a "wide enough" type:
 
    printf("i = %"IVdf"\n", (IV)something_very_small_and_signed);
 
+See L<perlguts/Formatted Printing of Size_t and SSize_t> for how to
+print those.
+
 Also remember that the C<%p> format really does require a void pointer:
 
    U8* p = ...;
