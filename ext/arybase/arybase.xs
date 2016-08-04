@@ -410,10 +410,6 @@ PROTOTYPES: DISABLE
 
 BOOT:
 {
-    GV *const gv = gv_fetchpvn("[", 1, GV_ADDMULTI|GV_NOTQUAL, SVt_PV);
-    sv_unmagic(GvSV(gv), PERL_MAGIC_sv); /* This is *our* scalar now! */
-    tie(aTHX_ GvSV(gv), NULL, GvSTASH(CvGV(cv)));
-
     if (!ab_initialized++) {
 	ab_op_map = ptable_new();
 #ifdef USE_ITHREADS
@@ -436,6 +432,16 @@ BOOT:
 	check(POS,      pos,      base);
     }
 }
+
+void
+_tie_it(SV *sv)
+    INIT:
+	GV * const gv = (GV *)sv;
+    CODE:
+	if (GvSV(gv))
+	    /* This is *our* scalar now!  */
+	    sv_unmagic(GvSV(gv), PERL_MAGIC_sv);
+	tie(aTHX_ GvSVn(gv), NULL, GvSTASH(CvGV(cv)));
 
 void
 FETCH(...)

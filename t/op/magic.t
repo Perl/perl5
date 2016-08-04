@@ -466,6 +466,7 @@ SKIP:  {
 
     undef %Errno::;
     delete $INC{"Errno.pm"};
+    delete $::{"!"};
 
     open(FOO, "nonesuch"); # Generate ENOENT
     my %errs = %{"!"}; # Cause Errno.pm to be loaded at run-time

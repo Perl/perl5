@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 132;
+plan tests => 138;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -77,6 +77,19 @@ leak(5, 1, sub {push @a,1;},       "basic check 3 of leak test infrastructure");
     leak(2, 0, sub { delete local $ENV{$key} },
 	'delete local on nonexistent env var');
 }
+
+# defined
+leak(2, 0, sub { defined *{"!"} }, 'defined *{"!"}');
+leak(2, 0, sub { defined *{"["} }, 'defined *{"["}');
+leak(2, 0, sub { defined *{"-"} }, 'defined *{"-"}');
+sub def_bang { defined *{"!"}; delete $::{"!"} }
+def_bang;
+leak(2, 0, \&def_bang,'defined *{"!"} vivifying GV');
+leak(2, 0, sub { defined *{"["}; delete $::{"["} },
+    'defined *{"["} vivifying GV');
+sub def_neg { defined *{"-"}; delete $::{"-"} }
+def_neg;
+leak(2, 0, \&def_neg, 'defined *{"-"} vivifying GV');
 
 # Fatal warnings
 my $f = "use warnings FATAL =>";
