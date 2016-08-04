@@ -5789,6 +5789,40 @@ Perl_my_dirfd(DIR * dir) {
 #endif 
 }
 
+#ifndef HAS_MKSTEMP
+
+#define TEMP_FILE_CH "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvxyz0123456789"
+#define TEMP_FILE_CH_COUNT (sizeof(TEMP_FILE_CH)-1)
+
+int
+Perl_my_mkstemp(char *templte) {
+    dTHX;
+    STRLEN len = strlen(templte);
+    int fd;
+    int attempts = 0;
+
+    PERL_ARGS_ASSERT_MY_MKSTEMP;
+
+    if (len < 6 ||
+        templte[len-1] != 'X' || templte[len-2] != 'X' || templte[len-3] != 'X' ||
+        templte[len-4] != 'X' || templte[len-5] != 'X' || templte[len-6] != 'X') {
+        errno = EINVAL;
+        return -1;
+    }
+
+    do {
+        int i;
+        for (i = 1; i <= 6; ++i) {
+            templte[len-i] = TEMP_FILE_CH[(int)(Perl_internal_drand48() * TEMP_FILE_CH_COUNT)];
+        }
+        fd = PerlLIO_open3(templte, O_RDWR | O_CREAT | O_EXCL, 0600);
+    } while (fd == -1 && errno == EEXIST && ++attempts <= 100);
+
+    return fd;
+}
+
+#endif
+
 REGEXP *
 Perl_get_re_arg(pTHX_ SV *sv) {
 

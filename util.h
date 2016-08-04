@@ -246,6 +246,10 @@ means arg not present, 1 is empty string/null byte */
             ((char *) memmem(big, bigend - big, little, lend - little))
 #endif
 
+#if defined(HAS_MKSTEMP) && defined(PERL_CORE)
+#   define Perl_my_mkstemp(templte) mkstemp(templte)
+#endif
+
 #endif /* PERL_UTIL_H_ */
 
 /*
