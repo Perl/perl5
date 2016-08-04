@@ -4324,9 +4324,9 @@ STATIC void	S_maybe_multimagic_gv(pTHX_ GV *gv, const char *name, const svtype s
 STATIC bool	S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name, STRLEN *len, const char *nambeg, STRLEN full_len, const U32 is_utf8, const I32 add);
 #define PERL_ARGS_ASSERT_PARSE_GV_STASH_NAME	\
 	assert(stash); assert(gv); assert(name); assert(len); assert(nambeg)
-STATIC void	S_require_tie_mod(pTHX_ GV *gv, const char *varpv, SV* namesv, const U32 flags);
+STATIC void	S_require_tie_mod(pTHX_ GV *gv, const char *varpv, const char * name, STRLEN len, const U32 flags);
 #define PERL_ARGS_ASSERT_REQUIRE_TIE_MOD	\
-	assert(gv); assert(varpv); assert(namesv)
+	assert(gv); assert(varpv); assert(name)
 #endif
 #if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_PAD_C) || defined(PERL_IN_OP_C)
 PERL_CALLCONV void	Perl_sv_add_backref(pTHX_ SV *const tsv, SV *const sv);

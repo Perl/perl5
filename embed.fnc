@@ -1938,7 +1938,8 @@ s  |bool|gv_magicalize|NN GV *gv|NN HV *stash|NN const char *name \
 s  |void|maybe_multimagic_gv|NN GV *gv|NN const char *name|const svtype sv_type
 s  |bool|gv_is_in_main|NN const char *name|STRLEN len \
                       |const U32 is_utf8
-s	|void	|require_tie_mod|NN GV *gv|NN const char *varpv|NN SV* namesv \
+s	|void	|require_tie_mod|NN GV *gv|NN const char *varpv \
+				|NN const char * name|STRLEN len \
 				|const U32 flags
 #endif
 
