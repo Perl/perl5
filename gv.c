@@ -1312,6 +1312,7 @@ S_require_tie_mod(pTHX_ GV *gv, const char *varpv, const char * name,
                                     load_module, so save it.  For the
                                     moment it’s always a single char.  */
     const SV * const target = varname == '[' ? GvSV(gv) : (SV *)GvHV(gv);
+    SV * const namesv = newSVpvn(name, len);
 
     PERL_ARGS_ASSERT_REQUIRE_TIE_MOD;
 
@@ -1325,20 +1326,19 @@ S_require_tie_mod(pTHX_ GV *gv, const char *varpv, const char * name,
       dSP;
 
       ENTER;
+      SAVEFREESV(namesv);
 
 #define HV_FETCH_TIE_FUNC (GV **)hv_fetch(stash, "_tie_it", 7, 0)
 
       /* Load the module if it is not loaded.  */
-      if (!(stash = gv_stashpvn(name, len, 0))
+      if (!(stash = gv_stashsv(namesv, 0))
        || !(gvp = HV_FETCH_TIE_FUNC) || !*gvp || !GvCV(*gvp))
       {
-        SV * const namesv = newSVpvn(name, len);
+	SV *module = newSVsv(namesv);
 	const char type = varname == '[' ? '$' : '%';
-	SAVEFREESV(namesv);
 	if ( flags & 1 )
 	    save_scalar(gv);
-	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
-			       SvREFCNT_inc_NN(namesv), NULL);
+	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, module, NULL);
 	assert(sp == PL_stack_sp);
 	stash = gv_stashsv(namesv, 0);
 	if (!stash)
@@ -1356,6 +1356,7 @@ S_require_tie_mod(pTHX_ GV *gv, const char *varpv, const char * name,
       call_sv((SV *)*gvp, G_VOID|G_DISCARD);
       LEAVE;
     }
+    else SvREFCNT_dec_NN(namesv);
 }
 
 /*
