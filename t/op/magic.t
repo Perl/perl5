@@ -719,10 +719,12 @@ SKIP: {
 	    if $ENV{PERL_VALGRIND} || $Is_VMS;
 
 	    $PATH = $ENV{PATH};
+	    $SYSTEMROOT = $ENV{SYSTEMROOT} if exists $ENV{SYSTEMROOT}; # win32
 	    $PDL = $ENV{PERL_DESTRUCT_LEVEL} || 0;
 	    $ENV{foo} = "bar";
 	    %ENV = ();
 	    $ENV{PATH} = $PATH;
+	    $ENV{SYSTEMROOT} = $SYSTEMROOT if defined $SYSTEMROOT;
 	    $ENV{PERL_DESTRUCT_LEVEL} = $PDL || 0;
 	    if ($Is_MSWin32) {
 		is `set foo 2>NUL`, "";
