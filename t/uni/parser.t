@@ -9,7 +9,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan (tests => 53);
+plan (tests => 55);
 
 use utf8;
 use open qw( :utf8 :std );
@@ -227,6 +227,22 @@ like( $@, qr/Bad name after Ｆｏｏ'/, 'Bad name after Ｆｏｏ\'' );
         /xm,
 
         {stderr => 1}, "RT# 124216");
+}
+
+SKIP: {   # [perl #128738]
+    use Config;
+    if ($Config{uvsize} < 8) {
+        skip("test is only valid on 64-bit ints", 2);
+    }
+    else {
+        my $a;
+        eval "\$a = q \x{ffffffff}Hello, \\\\whirled!\x{ffffffff}";
+        is $@, "",
+               "No errors in eval'ing a string with large code point delimiter";
+        is $a, 'Hello, \whirled!',
+               "Got expected result in eval'ing a string with a large code point"
+            . " delimiter";
+    }
 }
 
 
