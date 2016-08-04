@@ -2608,14 +2608,11 @@ Perl_vms_start_glob
 #endif /* !CSH */
 #endif /* !DOSISH */
     {
-	GV * const envgv = gv_fetchpvs("ENV", 0, SVt_PVHV);
-	SV ** const home = hv_fetchs(GvHV(envgv), "HOME", 0);
-	SV ** const path = hv_fetchs(GvHV(envgv), "PATH", 0);
-	if (home && *home) SvGETMAGIC(*home);
-	if (path && *path) SvGETMAGIC(*path);
-	save_hash(gv_fetchpvs("ENV", 0, SVt_PVHV));
-	if (home && *home) SvSETMAGIC(*home);
-	if (path && *path) SvSETMAGIC(*path);
+        SV ** const svp = hv_fetchs(GvHVn(PL_envgv), "LS_COLORS", 0);
+        if (svp && *svp)
+            save_helem_flags(GvHV(PL_envgv),
+                             newSVpvs_flags("LS_COLORS", SVs_TEMP), svp,
+                             SAVEf_SETMAGIC);
     }
     (void)do_open6(PL_last_in_gv, SvPVX_const(tmpcmd), SvCUR(tmpcmd),
                    NULL, NULL, 0);
