@@ -1312,7 +1312,6 @@ S_require_tie_mod(pTHX_ GV *gv, const char *varpv, const char * name,
                                     load_module, so save it.  For the
                                     moment it’s always a single char.  */
     const SV * const target = varname == '[' ? GvSV(gv) : (SV *)GvHV(gv);
-    SV * const namesv = newSVpvn(name, len);
 
     PERL_ARGS_ASSERT_REQUIRE_TIE_MOD;
 
@@ -1326,27 +1325,26 @@ S_require_tie_mod(pTHX_ GV *gv, const char *varpv, const char * name,
       dSP;
 
       ENTER;
-      SAVEFREESV(namesv);
 
 #define HV_FETCH_TIE_FUNC (GV **)hv_fetch(stash, "_tie_it", 7, 0)
 
       /* Load the module if it is not loaded.  */
-      if (!(stash = gv_stashsv(namesv, 0))
+      if (!(stash = gv_stashpvn(name, len, 0))
        || !(gvp = HV_FETCH_TIE_FUNC) || !*gvp || !GvCV(*gvp))
       {
-	SV *module = newSVsv(namesv);
+	SV * const module = newSVpvn(name, len);
 	const char type = varname == '[' ? '$' : '%';
 	if ( flags & 1 )
 	    save_scalar(gv);
 	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, module, NULL);
 	assert(sp == PL_stack_sp);
-	stash = gv_stashsv(namesv, 0);
+	stash = gv_stashpvn(name, len, 0);
 	if (!stash)
-	    Perl_croak(aTHX_ "panic: Can't use %c%c because %"SVf" is not available",
-		    type, varname, SVfARG(namesv));
+	    Perl_croak(aTHX_ "panic: Can't use %c%c because %s is not available",
+		    type, varname, name);
 	else if (!(gvp = HV_FETCH_TIE_FUNC) || !*gvp || !GvCV(*gvp))
-	    Perl_croak(aTHX_ "panic: Can't use %c%c because %"SVf" does not define _tie_it",
-		    type, varname, SVfARG(namesv));
+	    Perl_croak(aTHX_ "panic: Can't use %c%c because %s does not define _tie_it",
+		    type, varname, name);
       }
       /* Now call the tie function.  It should be in *gvp.  */
       assert(gvp); assert(*gvp); assert(GvCV(*gvp));
@@ -1356,7 +1354,6 @@ S_require_tie_mod(pTHX_ GV *gv, const char *varpv, const char * name,
       call_sv((SV *)*gvp, G_VOID|G_DISCARD);
       LEAVE;
     }
-    else SvREFCNT_dec_NN(namesv);
 }
 
 /*
