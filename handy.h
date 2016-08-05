@@ -941,10 +941,10 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #   define isASCII(c)    ((WIDEST_UTYPE)((c) | 0) < 128)
 #endif
 
-/* The lower 3 bits in both the ASCII and EBCDIC representations of '0' are 0,
- * and the 8 possible permutations of those bits exactly comprise the 8 octal
- * digits */
-#define isOCTAL_A(c)  cBOOL(FITS_IN_8_BITS(c) && (0xF8 & (c)) == '0')
+/* Take the eight possible bit patterns of the lower 3 bits and you get the
+ * lower 3 bits of the 8 octal digits, in both ASCII and EBCDIC, so those bits
+ * can be ignored.  If the rest match '0', we have an octal */
+#define isOCTAL_A(c)  (((WIDEST_UTYPE)((c) | 0) & ~7) == '0')
 
 #ifdef H_PERL       /* If have access to perl.h, lookup in its table */
 
