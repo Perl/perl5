@@ -260,6 +260,19 @@ foreach my $name (sort keys %properties) {
     }
 }
 
+# Test isOCTAL()
+for my $i (0 .. 256, 0x110000) {
+    my $char_name = charnames::viacode($i) // "No name";
+    my $display_name = sprintf "\\N{U+%02X, %s}", $i, $char_name;
+    my $truth = truth($i >= ord('0') && $i <= ord('7'));
+
+    my $ret = truth test_isOCTAL_A($i);
+    is($ret, $truth, "isOCTAL_A( $display_name ) == $truth");
+
+    $ret = truth test_isOCTAL_L1($i);
+    is($ret, $truth, "isOCTAL_L1( $display_name ) == $truth");
+}
+
 my %to_properties = (
                 FOLD => 'Case_Folding',
                 LOWER => 'Lowercase_Mapping',
