@@ -45,13 +45,26 @@ WriteMakefile(
         'Test::More' => '0.47',
     },
     META_MERGE      => {
-        resources   => {
-            repository  => 'git://perl5.git.perl.org/perl.git',
-            license     => 'http://dev.perl.org/licenses/',
+        'meta-spec'     => { version => 2 },
+        dynamic_config  => 0,
+        resources       => {
+            repository  => {
+                type        => 'git',
+                url         => 'git://perl5.git.perl.org/perl.git',
+            },
             homepage    => 'https://metacpan.org/module/XSLoader',
-            irc         => 'irc://irc.perl.org/#p5p',
-            mailinglist => 'http://lists.perl.org/list/perl5-porters.html',
-            bugtracker  => "https://rt.perl.org/rt3/Search/Results.html?Query=Queue='perl5' AND Content LIKE 'module=XSLoader' AND (Status='open' OR Status='new' OR Status='stalled')",
+            x_IRC       => 'irc://irc.perl.org/#p5p',
+            x_MailingList => 'http://lists.perl.org/list/perl5-porters.html',
+            bugtracker => {
+                mailto      => 'perlbug@perl.org',
+                web         => "https://rt.perl.org/rt3/Search/Results.html?Query=Queue='perl5' AND Content LIKE 'module=XSLoader' AND (Status='open' OR Status='new' OR Status='stalled')",
+            },
+        },
+        provides    => {
+            'XSLoader'  => {
+                file        => 'XSLoader_pm.PL',
+                version     => ${$PACKAGE.'::VERSION'},
+            },
         },
     },
     dist            => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
