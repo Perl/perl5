@@ -15,5 +15,5 @@ like $@, qr/\@INC contains: $inc\).\)/,
     'Error does not list final dot in @INC (or mention use lib)';
 eval { 'base'->import('t::lib::Dummy') };
 like $@, qr<\@INC contains: $inc\).\n(?x:
-           )    If you mean to load t/lib/Dummy\.pm from the current >,
+           )    The file t/lib/Dummy\.pm does exist in the current direct>,
     'special cur dir message for existing files in . that are ignored';
