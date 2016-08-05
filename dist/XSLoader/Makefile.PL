@@ -42,6 +42,12 @@ WriteMakefile(
     PL_FILES        => { 'XSLoader_pm.PL'  => 'XSLoader.pm' },
     PM              => { 'XSLoader.pm' => '$(INST_ARCHLIB)/XSLoader.pm' },
     PREREQ_PM       => {
+        # NOTE: If we should require a Test::More version higher than 0.98
+        # (that included with perl 5.14), we need to remove the meta-spec
+        # entry below for EUMM 6.57_02 to 6.57_06 (the buggy versions
+        # included with perl 5.14).  Otherwise installation will break.
+        # See https://github.com/Perl-Toolchain-Gang/CPAN-Meta/issues/118
+        # for details.
         'Test::More' => '0.47',
     },
     META_MERGE      => {
