@@ -648,10 +648,10 @@ for ("", nullrocow) {
 }
 
 { # [perl #128734
-    my $string = "\x{00e0}";
+    my $string = chr utf8::unicode_to_native(0x00e0);
     $string =~ tr/\N{U+00e0}/A/;
     is($string, "A", 'tr// of \N{U+...} works for upper-Latin1');
-    $string = "\x{00e1}";
+    my $string = chr utf8::unicode_to_native(0x00e1);
     $string =~ tr/\N{LATIN SMALL LETTER A WITH ACUTE}/A/;
     is($string, "A", 'tr// of \N{name} works for upper-Latin1');
 }
