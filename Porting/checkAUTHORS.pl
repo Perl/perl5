@@ -731,6 +731,7 @@ marcel\100codewerk.com                  gr\100univie.ac.at
 +                                       hanekomu\100gmail.com
 marcgreen\100cpan.org                   marcgreen\100wpi.edu
 markleightonfisher\100gmail.com         fisherm\100tce.com
++                                       mark-fisher\100mindspring.com
 mark.p.lutz\100boeing.com               tecmpl1\100triton.ca.boeing.com
 marnix\100gmail.com                     pttesac!marnix!vanam
 marty+p5p\100kasei.com                  marty\100martian.org
