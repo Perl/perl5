@@ -121,6 +121,10 @@ XXX
 
 L<XXX> has been upgraded from version A.xx to B.yy.
 
+=item *
+
+L<NEXT> has been upgraded from version 0.65 to 0.67.
+
 =back
 
 =head2 Removed Modules and Pragmata
