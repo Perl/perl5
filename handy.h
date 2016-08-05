@@ -967,7 +967,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define _CC_PRINT              6      /* [:print:] */
 #  define _CC_ALPHANUMERIC       7      /* [:alnum:] */
 #  define _CC_GRAPH              8      /* [:graph:] */
-#  define _CC_CASED              9      /* [:lower:] and [:upper:] under /i */
+#  define _CC_CASED              9      /* [:lower:] or [:upper:] under /i */
 
 #define _FIRST_NON_SWASH_CC     10
 /* The character classes above are implemented with swashes.  The second group
