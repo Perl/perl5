@@ -44,22 +44,6 @@ letter.
 
 =over 4
 
-=item A signature parameter must start with '$', '@' or '%'
-
-(F) Each subroutine signature parameter declaration must start with a valid
-sigil; for example:
-
-    sub foo ($a, $, $b = 1, @c) {}
-
-=item A slurpy parameter may not have a default value
-
-(F) Only scalar subroutine signature parameters may have a default value;
-for example:
-
-    sub foo ($a = 1)        {} # legal
-    sub foo (@a = (1))      {} # invalid
-    sub foo (%a = (a => b)) {} # invalid
-
 =item accept() on closed socket %s
 
 (W closed) You tried to do an accept on a closed socket.  Did you forget
@@ -236,6 +220,22 @@ Auto-decrement> for details.
 
 (W syntax) You called stat() on an array, but the array will be
 coerced to a scalar - the number of elements in the array.
+
+=item A signature parameter must start with '$', '@' or '%'
+
+(F) Each subroutine signature parameter declaration must start with a valid
+sigil; for example:
+
+    sub foo ($a, $, $b = 1, @c) {}
+
+=item A slurpy parameter may not have a default value
+
+(F) Only scalar subroutine signature parameters may have a default value;
+for example:
+
+    sub foo ($a = 1)        {} # legal
+    sub foo (@a = (1))      {} # invalid
+    sub foo (%a = (a => b)) {} # invalid
 
 =item assertion botched: %s
 
@@ -2592,6 +2592,14 @@ declaration.  The '_' in a prototype must be followed by a ';',
 indicating the rest of the parameters are optional, or one of '@'
 or '%', since those two will accept 0 or more final parameters.
 
+=item Illegal character \%o (carriage return)
+
+(F) Perl normally treats carriage returns in the program text as
+it would any other whitespace, which means you should never see
+this error when Perl was built using standard options.  For some
+reason, your version of Perl appears to have been built without
+this support.  Talk to your Perl administrator.
+
 =item Illegal character following sigil in a subroutine signature
 
 (F) A parameter in a subroutine signature contained an unexpected character
@@ -2607,14 +2615,6 @@ For example:
     sub foo ($a, $b)
             :prototype($$) {}  # legal
 
-
-=item Illegal character \%o (carriage return)
-
-(F) Perl normally treats carriage returns in the program text as it
-would any other whitespace, which means you should never see this error
-when Perl was built using standard options.  For some reason, your
-version of Perl appears to have been built without this support.  Talk
-to your Perl administrator.
 
 =item Illegal character in prototype for %s : %s
 
@@ -4061,6 +4061,19 @@ kind of ref it really was.  See L<perlref>.
 reference to something else instead.  You can use the ref() function to
 find out what kind of ref it really was.  See L<perlref>.
 
+=item '#' not allowed immediately following a sigil in a subroutine signature
+
+(F) In a subroutine signature definition, a comment following a sigil
+(C<$>, C<@> or C<%>), needs to be separated by whitespace or a commma etc., in
+particular to avoid confusion with the C<$#> variable.  For example:
+
+    # bad
+    sub f ($# ignore first arg
+           , $b) {}
+    # good
+    sub f ($, # ignore first arg
+           $b) {}
+
 =item Not an ARRAY reference
 
 (F) Perl was trying to evaluate a reference to an array value, but found
@@ -4093,19 +4106,6 @@ doesn't somehow point to a valid subroutine.  See L<overload>.
 
 (W syntax) A format specified more picture fields than the next line
 supplied.  See L<perlform>.
-
-=item '#' not allowed immediately following a sigil in a subroutine signature
-
-(F) In a subroutine signature definition, a comment following a sigil
-(C<$>, C<@> or C<%>), needs to be separated by whitespace or a commma etc.,
-in particular to avoid confusion with the C<$#> variable. For example:
-
-    # bad
-    sub f ($# ignore first arg
-           , $b) {}
-    # good
-    sub f ($, # ignore first arg
-           $b) {}
 
 =item %s: not found
 
