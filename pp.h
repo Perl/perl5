@@ -55,9 +55,7 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 #define MARK mark
 #define TARG targ
 
-#if defined(DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
-
-#  define PUSHMARK(p) \
+#define PUSHMARK(p) \
     STMT_START {                                                      \
         I32 * mark_stack_entry;                                       \
         if (UNLIKELY((mark_stack_entry = ++PL_markstack_ptr)          \
@@ -69,44 +67,16 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
                 PL_markstack_ptr, (IV)*mark_stack_entry)));           \
     } STMT_END
 
-#  define TOPMARK \
-    ({                                                                \
-        DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,                 \
-                "MARK top  %p %"IVdf"\n",                             \
-                PL_markstack_ptr, (IV)*PL_markstack_ptr)));           \
-        *PL_markstack_ptr;                                            \
-    })
+#define TOPMARK S_TOPMARK(aTHX)
+#define POPMARK S_POPMARK(aTHX)
 
-#  define POPMARK \
-    ({                                                                \
-        DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,                 \
-                "MARK pop  %p %"IVdf"\n",                             \
-                (PL_markstack_ptr-1), (IV)*(PL_markstack_ptr-1))));   \
-        assert((PL_markstack_ptr > PL_markstack) || !"MARK underflow");\
-        *PL_markstack_ptr--;                                          \
-    })
-
-#  define INCMARK \
-    ({                                                                \
+#define INCMARK \
+    STMT_START {                                                      \
         DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,                 \
                 "MARK inc  %p %"IVdf"\n",                             \
                 (PL_markstack_ptr+1), (IV)*(PL_markstack_ptr+1))));   \
-        *PL_markstack_ptr++;                                          \
-    })
-
-#else
-
-#  define PUSHMARK(p)                                                   \
-    STMT_START {					              \
-        I32 * mark_stack_entry;                                       \
-        if (UNLIKELY((mark_stack_entry = ++PL_markstack_ptr) == PL_markstack_max)) \
-	    mark_stack_entry = markstack_grow();                      \
-        *mark_stack_entry  = (I32)((p) - PL_stack_base);              \
+        PL_markstack_ptr++;                                           \
     } STMT_END
-#  define TOPMARK                (*PL_markstack_ptr)
-#  define POPMARK                (*PL_markstack_ptr--)
-#  define INCMARK                (*PL_markstack_ptr++)
-#endif
 
 #define dSP		SV **sp = PL_stack_sp
 #define djSP		dSP
