@@ -262,7 +262,7 @@ if ($Config{nvsize} == 8 &&
     print "# no hexfloat tests\n";
 }
 
-plan tests => 1408 + ($Q ? 0 : 12) + @hexfloat + 12;
+plan tests => 1408 + ($Q ? 0 : 12) + @hexfloat + 37;
 
 use strict;
 use Config;
@@ -731,6 +731,7 @@ SKIP: {
 SKIP: {
     # [perl #127183] Non-canonical hexadecimal floats are parsed prematurely
 
+    # IEEE 754 64-bit
     skip("nv_preserves_uv_bits is $Config{nv_preserves_uv_bits}, not 53", 3)
         unless $Config{nv_preserves_uv_bits} == 53;
 
@@ -757,5 +758,46 @@ SKIP: {
         is(sprintf("%a", 0x0.2c5c85fdf473dep2 - 0x1.62e42fefa39efp-1),
            "0x0p+0",
            "non-canonical form");
+    }
+}
+
+SKIP: {
+    my @subnormals = (
+	# Keep these as strings so that non-IEEE-754 don't trip over them.
+	[ '1e-320', '%a', '0x1.fap-1064' ],
+	[ '1e-321', '%a', '0x1.94p-1067' ],
+	[ '1e-322', '%a', '0x1.4p-1070' ],
+	[ '1e-323', '%a', '0x1p-1073' ],
+	[ '1e-324', '%a', '0x0p+0' ],  # underflow
+	[ '3e-320', '%a', '0x1.7b8p-1062' ],
+	[ '3e-321', '%a', '0x1.2f8p-1065' ],
+	[ '3e-322', '%a', '0x1.e8p-1069' ],
+	[ '3e-323', '%a', '0x1.8p-1072' ],
+	[ '3e-324', '%a', '0x1p-1074' ], # the smallest possible value
+	[ '7e-320', '%a', '0x1.bacp-1061' ],
+	[ '7e-321', '%a', '0x1.624p-1064' ],
+	[ '7e-322', '%a', '0x1.1cp-1067' ],
+	[ '7e-323', '%a', '0x1.cp-1071' ],
+	[ '7e-324', '%a', '0x1p-1074' ], # the smallest possible value, again
+	[ '3e-320', '%.4a', '0x1.7b80p-1062' ],
+	[ '3e-321', '%.4a', '0x1.2f80p-1065' ],
+	[ '3e-322', '%.4a', '0x1.e800p-1069' ],
+	[ '3e-323', '%.4a', '0x1.8000p-1072' ],
+	[ '3e-324', '%.4a', '0x1.0000p-1074' ],
+	[ '3e-320', '%.1a', '0x1.8p-1062' ],
+	[ '3e-321', '%.1a', '0x1.3p-1065' ],
+	[ '3e-322', '%.1a', '0x1.ep-1069' ],
+	[ '3e-323', '%.1a', '0x1.8p-1072' ],
+	[ '3e-324', '%.1a', '0x1.0p-1074' ],
+	);
+
+    # IEEE 754 64-bit
+    skip("nv_preserves_uv_bits is $Config{nv_preserves_uv_bits}, not 53",
+         scalar @subnormals)
+        unless $Config{nv_preserves_uv_bits} == 53;
+
+    for my $t (@subnormals) {
+        my $s = sprintf($t->[1], $t->[0]);
+        is($s, $t->[2], "subnormal @$t got $s");
     }
 }
