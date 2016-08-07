@@ -31,6 +31,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="sprout" id="a2637ca0a3fec01b80d7ea5ba62802354fd5e6f3" ticket="128597" desc="[perl #128597] Crash from gp_free/ckWARN_d"/>
 
+<commit votes="sprout" id="d35c1b5e43e773f353239d9182ddccb41cdab3d6" ticket="128740" desc="[perl #128740] Check for null in pp_ghostent et al."/>
+
 <commit votes="" id="" ticket="123878" desc=""/>
 
 </div>
