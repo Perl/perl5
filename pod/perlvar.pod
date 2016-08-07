@@ -715,13 +715,14 @@ conversion, which works for both v-strings or version objects:
 See the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
 
-See also C<$]> for a decimal representation of the Perl version.
+See also C<L</$]>> for a decimal representation of the Perl version.
 
 The main advantage of C<$^V> over C<$]> is that, for Perl v5.10.0 or
 later, it overloads operators, allowing easy comparison against other
 version representations (e.g. decimal, literal v-string, "v1.2.3", or
 objects).  The disadvantage is that prior to v5.10.0, it was only a
-literal v-string, which can't be easily printed or compared.
+literal v-string, which can't be easily printed or compared, whereas
+the behavior of C<$]> is unchanged on all versions of Perl.
 
 Mnemonic: use ^V for a version object.
 
