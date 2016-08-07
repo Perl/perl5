@@ -10556,6 +10556,14 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 #ifdef NV_MIN_EXP
                                 if (negexp
                                     && -hexfp_exp < NV_MIN_EXP - 1) {
+                                    /* NOTE: this means that the exponent
+                                     * underflow warning happens for
+                                     * the IEEE 754 subnormals (denormals),
+                                     * because DBL_MIN_EXP etc are the lowest
+                                     * possible binary (or, rather, DBL_RADIX-base)
+                                     * exponent for normals, not subnormals.
+                                     *
+                                     * This may or may not be a good thing. */
                                     Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
                                                    "Hexadecimal float: exponent underflow");
                                     break;
