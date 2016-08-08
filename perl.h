@@ -6842,7 +6842,9 @@ extern void moncontrol(int);
 
 #ifdef DOUBLE_IS_IEEE_FORMAT
 /* All the basic IEEE formats have the implicit bit,
- * except for the 80-bit extended formats, which will undef this. */
+ * except for the x86 80-bit extended formats, which will undef this.
+ * Also note that the IEEE subnormals (formerly known as denormals)
+ * do not have the implicit bit of one. */
 #  define NV_IMPLICIT_BIT
 #endif
 
