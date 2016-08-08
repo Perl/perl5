@@ -1,9 +1,3 @@
-Archive::Tar cpan/Archive-Tar/bin/ptar 5e9f3c6f565114193d98847ed8569cd0010c229c
-Archive::Tar cpan/Archive-Tar/bin/ptardiff 5a9f4c01a0390bf98da7e63f1c0bbf5bc74d12c7
-Archive::Tar cpan/Archive-Tar/bin/ptargrep eb74056c434acf314ac5a122e33bdd2ef99e6edb
-Archive::Tar cpan/Archive-Tar/lib/Archive/Tar.pm d3cffe8156e09b82b4fbb3e2dd39bb0c1da25497
-Archive::Tar cpan/Archive-Tar/lib/Archive/Tar/Constant.pm f5bbf97096cdc0da63ae31713743cccc7a289db9
-Archive::Tar cpan/Archive-Tar/lib/Archive/Tar/File.pm 76c43a4e2f7374d2efdf6d9b1eee002ac623fa7e
 CPAN cpan/CPAN/lib/App/Cpan.pm 3cef68c2a44a4996b432bc25622e3a544a188aa5
 CPAN cpan/CPAN/lib/CPAN.pm 4616a44963045f7bd07bb7f8e5f99bbd789af4e5
 CPAN cpan/CPAN/scripts/cpan 22610ed0301d48a269d1739afd2f7f84359d956f

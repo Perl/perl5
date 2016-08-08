@@ -120,19 +120,11 @@ use File::Glob qw(:case);
 %Modules = (
 
     'Archive::Tar' => {
-        'DISTRIBUTION' => 'BINGOS/Archive-Tar-2.08.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Archive-Tar-2.10.tar.gz',
         'FILES'        => q[cpan/Archive-Tar],
         'BUGS'         => 'bug-archive-tar@rt.cpan.org',
         'EXCLUDED'     => [
             qw(t/07_ptardiff.t),
-        ],
-        'CUSTOMIZED'   => [
-            # CVE-2016-1238
-            qw(
-               bin/ptar bin/ptardiff bin/ptargrep
-               lib/Archive/Tar.pm lib/Archive/Tar/Constant.pm
-               lib/Archive/Tar/File.pm
-            )
         ],
     },
 
