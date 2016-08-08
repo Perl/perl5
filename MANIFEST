@@ -1,4 +1,5 @@
 .dir-locals.el			Emacs control file
+.travis.yml		continuous integration on github (where enabled)
 amigaos4/amigaio.c	AmigaOS4 port
 amigaos4/amigaio.h	AmigaOS4 port
 amigaos4/amigaos.c	AmigaOS4 port
