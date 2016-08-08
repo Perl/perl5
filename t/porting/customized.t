@@ -13,6 +13,7 @@ BEGIN {
     @INC = qw(lib Porting t);
     require 'test.pl';
     skip_all("pre-computed SHA1 won't match under EBCDIC") if $::IS_EBCDIC;
+    skip_all("cPanel modifies some of these files so they'll differ");
 }
 
 use strict;
