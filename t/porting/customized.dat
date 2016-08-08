@@ -48,7 +48,6 @@ IO-Compress cpan/IO-Compress/lib/IO/Uncompress/Gunzip.pm 7490524bf3714621bb32925
 IO-Compress cpan/IO-Compress/lib/IO/Uncompress/Inflate.pm c75aa1ec1f2a6138ef9ae660771fb2cac8be6931
 IO-Compress cpan/IO-Compress/lib/IO/Uncompress/RawInflate.pm 8f30a77bcda7123300ef5a8d02c2160ebb72f013
 IO-Compress cpan/IO-Compress/lib/IO/Uncompress/Unzip.pm 321a55011a1f11fe73b005e33942eb27fed6d046
-IPC::Cmd cpan/IPC-Cmd/lib/IPC/Cmd.pm 6febe21e35afa2a31101e7a686c97c36dc1a843d
 JSON::PP cpan/JSON-PP/bin/json_pp a7b8de6c201ef177ee82624ee4ca6a47cc1a3b4f
 JSON::PP cpan/JSON-PP/lib/JSON/PP.pm c8762a306740d0b32c099faf7118f2c1a391d9db
 Locale::Maketext::Simple cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm 57ed38905791a17c150210cd6f42ead22a7707b6

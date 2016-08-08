@@ -717,12 +717,8 @@ use File::Glob qw(:case);
     },
 
     'IPC::Cmd' => {
-        'DISTRIBUTION' => 'BINGOS/IPC-Cmd-0.94.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/IPC-Cmd-0.96.tar.gz',
         'FILES'        => q[cpan/IPC-Cmd],
-        'CUSTOMIZED'   => [
-            # CVE-2016-1238
-            qw( lib/IPC/Cmd.pm )
-        ],
     },
 
     'IPC::SysV' => {
