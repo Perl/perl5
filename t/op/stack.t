@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 
-plan 4;
+plan 5;
 
 my @a = ( 'abc', 'def', 'ghi' );
 @a = map { splice( @a, 0 ); $_ } ( @a );
@@ -36,3 +36,6 @@ F('start', @X, 'end');
 our @files = (1,2);
 eval { for (sort @files) { @files = (); } };
 is $@, '', '[perl #18489] freeing elems of sort @pkg_array';
+
+map{@a=($_+=0)x$_}@a=qw(1 1);
+pass '[perl #22312] map freeing elems from array assignment';

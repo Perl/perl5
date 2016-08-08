@@ -1426,8 +1426,9 @@ PP(pp_aassign)
 		    sv = SvREFCNT_inc_NN(SvRV(*relem));
 		}
 		relem++;
-                if (already_copied)
-                    SvREFCNT_inc_simple_void_NN(sv); /* undo mortal free */
+		if (!already_copied)
+		    (void)sv_2mortal(sv);
+		SvREFCNT_inc_simple_void_NN(sv); /* undo mortal free */
 		didstore = av_store(ary,i++,sv);
 		if (magic) {
 		    if (!didstore)
