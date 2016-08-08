@@ -733,28 +733,39 @@ happened, or how did we end up having wrong or unexpected results.
 To really poke around with Perl, you'll probably want to build Perl for
 debugging, like this:
 
-    ./Configure -d -D optimize=-g
+    ./Configure -d -DDEBUGGING
     make
 
-C<-g> is a flag to the C compiler to have it produce debugging
-information which will allow us to step through a running program, and
-to see in which C function we are at (without the debugging information
-we might see only the numerical addresses of the functions, which is
-not very helpful).
-
-F<Configure> will also turn on the C<DEBUGGING> compilation symbol
-which enables all the internal debugging code in Perl.  There are a
-whole bunch of things you can debug with this: L<perlrun> lists them
-all, and the best way to find out about them is to play about with
-them.  The most useful options are probably
+C<-DDEBUGGING> turns on the C compiler's C<-g> flag to have it produce
+debugging information which will allow us to step through a running
+program, and to see in which C function we are at (without the debugging
+information we might see only the numerical addresses of the functions,
+which is not very helpful). It will also turn on the C<DEBUGGING>
+compilation symbol which enables all the internal debugging code in Perl.
+There are a whole bunch of things you can debug with this: L<perlrun>
+lists them all, and the best way to find out about them is to play about
+with them.  The most useful options are probably
 
     l  Context (loop) stack processing
+    s  Stack snapshots (with v, displays all stacks)
     t  Trace execution
     o  Method and overloading resolution
     c  String/numeric conversions
 
-Some of the functionality of the debugging code can be achieved using
-XS modules.
+For example
+
+    $ perl -Dst -e '$a + 1'
+    ....
+    (-e:1)	gvsv(main::a)
+        =>  UNDEF
+    (-e:1)	const(IV(1))
+        =>  UNDEF  IV(1)
+    (-e:1)	add
+        =>  NV(1)
+
+
+Some of the functionality of the debugging code can be achieved with a
+non-debugging perl by using XS modules:
 
     -Dr => use re 'debug'
     -Dx => use O 'Debug'

@@ -930,46 +930,47 @@ You can run perl scripts under the perl debugger at any time with
 B<perl -d your_script>.  If, however, you want to debug perl itself,
 you probably want to have support for perl internal debugging code
 (activated by adding -DDEBUGGING to ccflags), and/or support for the
-system debugger by adding -g to the optimisation flags. For that,
-use the parameter:
+system debugger by adding -g to the optimisation flags.
 
-	sh Configure -DDEBUGGING
+A perl compiled with the DEBUGGING C preprocessor macro will support the
+C<-D> perl command-line switch, have assertions enabled, and have many
+extra checks compiled into the code; but will execute much more slowly
+(typically 2-3x) and the binary will be much larger (typically 2-3x).
 
-or
-
-	sh Configure -DDEBUGGING=<mode>
-
-For a more eye appealing call, -DEBUGGING is defined to be an alias
-for -DDEBUGGING. For both, the -U calls are also supported, in order
-to be able to overrule the hints or Policy.sh settings.
+As a convenience, debugging code (-DDEBUGGING) and debugging symbols (-g)
+can be enabled jointly or separately using a Configure switch, also
+(somewhat confusingly) named -DDEBUGGING.  For a more eye appealing call,
+-DEBUGGING is defined to be an alias for -DDEBUGGING. For both, the -U
+calls are also supported, in order to be able to overrule the hints or
+Policy.sh settings.
 
 Here are the DEBUGGING modes:
 
 =over 4
 
-=item -DDEBUGGING
+=item Configure -DDEBUGGING
 
-=item -DEBUGGING
+=item Configure -DEBUGGING
 
-=item -DEBUGGING=both
+=item Configure -DEBUGGING=both
 
 Sets both -DDEBUGGING in the ccflags, and adds -g to optimize.
 
 You can actually specify -g and -DDEBUGGING independently (see below),
 but usually it's convenient to have both.
 
-=item -DEBUGGING=-g
+=item Configure -DEBUGGING=-g
 
-=item -Doptimize=-g
+=item Configure -Doptimize=-g
 
 Adds -g to optimize, but does not set -DDEBUGGING.
 
 (Note:  Your system may actually require something like cc -g2.
 Check your man pages for cc(1) and also any hint file for your system.)
 
-=item -DEBUGGING=none
+=item Configure -DEBUGGING=none
 
-=item -UDEBUGGING
+=item Configure -UDEBUGGING
 
 Removes -g from optimize, and -DDEBUGGING from ccflags.
 
