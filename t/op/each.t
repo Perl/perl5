@@ -5,6 +5,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
+use Hash::Util;
 
 plan tests => 59;
 

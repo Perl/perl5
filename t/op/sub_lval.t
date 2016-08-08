@@ -6,6 +6,7 @@ BEGIN {
     require './test.pl';
 }
 plan tests=>211;
+use Hash::Util;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }

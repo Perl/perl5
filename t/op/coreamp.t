@@ -14,6 +14,7 @@ BEGIN {
     $^P |= 0x100;
 }
 
+use Hash::Util;
 no warnings 'experimental::smartmatch';
 
 sub lis($$;$) {

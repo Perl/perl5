@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-
+use Hash::Util;
 # This will crash perl if it fails
 
 use constant PVBM => 'foo';

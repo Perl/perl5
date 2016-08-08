@@ -752,68 +752,6 @@ XS(XS_PerlIO_get_layers)
     XSRETURN(0);
 }
 
-XS(XS_Hash_Util_bucket_ratio); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Hash_Util_bucket_ratio)
-{
-    dXSARGS;
-    SV *rhv;
-    PERL_UNUSED_VAR(cv);
-
-    if (items != 1)
-        croak_xs_usage(cv, "hv");
-
-    rhv= ST(0);
-    if (SvROK(rhv)) {
-        rhv= SvRV(rhv);
-        if ( SvTYPE(rhv)==SVt_PVHV ) {
-            SV *ret= Perl_hv_bucket_ratio(aTHX_ (HV*)rhv);
-            ST(0)= ret;
-            XSRETURN(1);
-        }
-    }
-    XSRETURN_UNDEF;
-}
-
-XS(XS_Hash_Util_num_buckets); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Hash_Util_num_buckets)
-{
-    dXSARGS;
-    SV *rhv;
-    PERL_UNUSED_VAR(cv);
-
-    if (items != 1)
-        croak_xs_usage(cv, "hv");
-
-    rhv= ST(0);
-    if (SvROK(rhv)) {
-        rhv= SvRV(rhv);
-        if ( SvTYPE(rhv)==SVt_PVHV ) {
-            XSRETURN_UV(HvMAX((HV*)rhv)+1);
-        }
-    }
-    XSRETURN_UNDEF;
-}
-
-XS(XS_Hash_Util_used_buckets); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Hash_Util_used_buckets)
-{
-    dXSARGS;
-    SV *rhv;
-    PERL_UNUSED_VAR(cv);
-
-    if (items != 1)
-        croak_xs_usage(cv, "hv");
-
-    rhv= ST(0);
-    if (SvROK(rhv)) {
-        rhv= SvRV(rhv);
-        if ( SvTYPE(rhv)==SVt_PVHV ) {
-            XSRETURN_UV(HvFILL((HV*)rhv));
-        }
-    }
-    XSRETURN_UNDEF;
-}
-
 XS(XS_re_is_regexp); /* prototype to pass -Wmissing-prototypes */
 XS(XS_re_is_regexp)
 {
@@ -1066,9 +1004,6 @@ static const struct xsub_details details[] = {
     {"Internals::SvREFCNT", XS_Internals_SvREFCNT, "\\[$%@];$"},
     {"constant::_make_const", XS_constant__make_const, "\\[$@]"},
     {"PerlIO::get_layers", XS_PerlIO_get_layers, "*;@"},
-    {"Hash::Util::bucket_ratio", XS_Hash_Util_bucket_ratio, "\\%"},
-    {"Hash::Util::num_buckets", XS_Hash_Util_num_buckets, "\\%"},
-    {"Hash::Util::used_buckets", XS_Hash_Util_used_buckets, "\\%"},
     {"re::is_regexp", XS_re_is_regexp, "$"},
     {"re::regname", XS_re_regname, ";$$"},
     {"re::regnames", XS_re_regnames, ";$"},
