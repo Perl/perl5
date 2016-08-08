@@ -39,9 +39,13 @@ our @EXPORT_OK  = qw(
                      used_buckets
                      num_buckets
                     );
-our $VERSION = '0.20';
-require XSLoader;
-XSLoader::load();
+BEGIN {
+    # make sure all our XS routines are available early so their prototypes
+    # are correctly applied in the following code.
+    our $VERSION = '0.21';
+    require XSLoader;
+    XSLoader::load();
+}
 
 sub import {
     my $class = shift;
@@ -172,7 +176,7 @@ Both routines return a reference to the hash operated on.
 sub lock_ref_keys {
     my($hash, @keys) = @_;
 
-    Internals::hv_clear_placeholders %$hash;
+    _clear_placeholders(%$hash);
     if( @keys ) {
         my %keys = map { ($_ => 1) } @keys;
         my %original_keys = map { ($_ => 1) } keys %$hash;
@@ -207,6 +211,19 @@ sub unlock_ref_keys {
 sub   lock_keys (\%;@) {   lock_ref_keys(@_) }
 sub unlock_keys (\%)   { unlock_ref_keys(@_) }
 
+#=item B<_clear_placeholders>
+#
+# This function removes any placeholder keys from a hash. See Perl_hv_clear_placeholders()
+# in hv.c for what it does exactly. It is currently exposed as XS by universal.c and
+# injected into the Hash::Util namespace.
+#
+# It is not intended for use outside of this module, and may be changed
+# or removed without notice or deprecation cycle.
+#
+#=cut
+#
+# sub _clear_placeholders {} # just in case someone searches...
+
 =item B<lock_keys_plus>
 
   lock_keys_plus(%hash,@additional_keys)
@@ -225,7 +242,7 @@ Returns a reference to %hash
 sub lock_ref_keys_plus {
     my ($hash,@keys) = @_;
     my @delete;
-    Internals::hv_clear_placeholders(%$hash);
+    _clear_placeholders(%$hash);
     foreach my $key (@keys) {
         unless (exists($hash->{$key})) {
             $hash->{$key}=undef;

@@ -627,20 +627,6 @@ XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
 
 }
 
-XS(XS_Internals_hv_clear_placehold); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Internals_hv_clear_placehold)
-{
-    dXSARGS;
-
-    if (items != 1 || !SvROK(ST(0)))
-	croak_xs_usage(cv, "hv");
-    else {
-	HV * const hv = MUTABLE_HV(SvRV(ST(0)));
-	hv_clear_placeholders(hv);
-	XSRETURN(0);
-    }
-}
-
 XS(XS_PerlIO_get_layers); /* prototype to pass -Wmissing-prototypes */
 XS(XS_PerlIO_get_layers)
 {
@@ -1079,7 +1065,6 @@ static const struct xsub_details details[] = {
     {"Internals::SvREADONLY", XS_Internals_SvREADONLY, "\\[$%@];$"},
     {"constant::_make_const", XS_constant__make_const, "\\[$@]"},
     {"Internals::SvREFCNT", XS_Internals_SvREFCNT, "\\[$%@];$"},
-    {"Internals::hv_clear_placeholders", XS_Internals_hv_clear_placehold, "\\%"},
     {"PerlIO::get_layers", XS_PerlIO_get_layers, "*;@"},
     {"Hash::Util::bucket_ratio", XS_hash_util_bucket_ratio, "\\%"},
     {"Hash::Util::num_buckets", XS_hash_util_num_buckets, "\\%"},

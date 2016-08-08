@@ -996,7 +996,7 @@ SKIP:{
 	/e;
     };
     is $locker{key}, '3', 'locking target in $hash{key} =~ s//.../e';
-    like $@, qr/^Modification of a read-only value/, 'err msg';
+    like $@, qr/^Modification of a read-only value/, 'err msg' . ($@ ? ": $@" : "");
 }
 delete $::{does_not_exist}; # just in case
 eval { no warnings; $::{does_not_exist}=~s/(?:)/*{"does_not_exist"}; 4/e };

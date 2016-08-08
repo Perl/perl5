@@ -7,6 +7,16 @@
 MODULE = Hash::Util		PACKAGE = Hash::Util
 
 void
+_clear_placeholders(hashref)
+        HV *hashref
+    PROTOTYPE: \%
+    PREINIT:
+        HV *hv;
+    CODE:
+        hv = MUTABLE_HV(hashref);
+        hv_clear_placeholders(hv);
+
+void
 all_keys(hash,keys,placeholder)
 	HV *hash
 	AV *keys
