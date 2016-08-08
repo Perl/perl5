@@ -2377,9 +2377,9 @@ of those; in other words, an lvalue.
 A character range may be specified with a hyphen, so C<tr/A-J/0-9/>
 does the same replacement as C<tr/ACEGIBDFHJ/0246813579/>.
 For B<sed> devotees, C<y> is provided as a synonym for C<tr>.  If the
-I<SEARCHLIST> is delimited by bracketing quotes, the I<REPLACEMENTLIST> has
-its own pair of quotes, which may or may not be bracketing quotes;
-for example, C<tr[aeiouy][yuoiea]> or C<tr(+\-*/)/ABCD/>.
+I<SEARCHLIST> is delimited by bracketing quotes, the I<REPLACEMENTLIST>
+must have its own pair of quotes, which may or may not be bracketing
+quotes; for example, C<tr[aeiouy][yuoiea]> or C<tr(+\-*/)/ABCD/>.
 
 Characters may be literals or any of the escape sequences accepted in
 double-quoted strings.  But there is no interpolation, so C<"$"> and
@@ -2390,12 +2390,14 @@ Quote-like Operators>.
 
 Note that C<tr> does B<not> do regular expression character classes such as
 C<\d> or C<\pL>.  The C<tr> operator is not equivalent to the C<L<tr(1)>>
-utility.  If you want to map strings between lower/upper cases, see
-L<perlfunc/lc> and L<perlfunc/uc>, and in general consider using the C<s>
-operator if you need regular expressions.  The C<\U>, C<\u>, C<\L>, and
-C<\l> string-interpolation escapes on the right side of a substitution
-operator will perform correct case-mappings, but C<tr[a-z][A-Z]> will not
-(except sometimes on legacy 7-bit data).
+utility.  C<tr[a-z][A-Z]> will uppercase the 26 letters "a" through "z",
+but for case changing not confined to ASCII, use
+L<C<lc>|perlfunc/lc>, L<C<uc>|perlfunc/uc>,
+L<C<lcfirst>|perlfunc/lcfirst>, L<C<ucfirst>|perlfunc/ucfirst>
+(all documented in L<perlfunc>), or the
+L<substitution operator C<sE<sol>I<PATTERN>E<sol>I<REPLACEMENT>E<sol>>|/sE<sol>PATTERNE<sol>REPLACEMENTE<sol>msixpodualngcer>
+(with C<\U>, C<\u>, C<\L>, and C<\l> string-interpolation escapes in the
+I<REPLACEMENT> portion).
 
 Most ranges are unportable between character sets, but certain ones
 signal Perl to do special handling to make them portable.  There are two
