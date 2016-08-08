@@ -505,7 +505,7 @@ use File::Glob qw(:case);
     },
 
     'ExtUtils::MakeMaker' => {
-        'DISTRIBUTION' => 'BINGOS/ExtUtils-MakeMaker-7.18.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/ExtUtils-MakeMaker-7.22.tar.gz',
         'FILES'        => q[cpan/ExtUtils-MakeMaker],
         'EXCLUDED'     => [
             qr{^t/lib/Test/},
@@ -516,30 +516,6 @@ use File::Glob qw(:case);
             'PATCHING',
             'README.packaging',
             'lib/ExtUtils/MakeMaker/version/vpp.pm',
-        ],
-        'CUSTOMIZED' => [ qw( t/basic.t t/lib/MakeMaker/Test/Setup/XS.pm ),
-            # CVE-2016-1238
-            qw(
-               bin/instmodsh lib/ExtUtils/Command.pm
-               lib/ExtUtils/Command/MM.pm
-               lib/ExtUtils/Liblist.pm
-               lib/ExtUtils/Liblist/Kid.pm lib/ExtUtils/MM.pm
-               lib/ExtUtils/MM_AIX.pm lib/ExtUtils/MM_Any.pm
-               lib/ExtUtils/MM_BeOS.pm lib/ExtUtils/MM_Cygwin.pm
-               lib/ExtUtils/MM_DOS.pm lib/ExtUtils/MM_Darwin.pm
-               lib/ExtUtils/MM_MacOS.pm lib/ExtUtils/MM_NW5.pm
-               lib/ExtUtils/MM_OS2.pm lib/ExtUtils/MM_QNX.pm
-               lib/ExtUtils/MM_UWIN.pm lib/ExtUtils/MM_Unix.pm
-               lib/ExtUtils/MM_VMS.pm lib/ExtUtils/MM_VOS.pm
-               lib/ExtUtils/MM_Win32.pm lib/ExtUtils/MM_Win95.pm
-               lib/ExtUtils/MY.pm lib/ExtUtils/MakeMaker.pm
-               lib/ExtUtils/MakeMaker/Config.pm
-               lib/ExtUtils/MakeMaker/version.pm
-               lib/ExtUtils/MakeMaker/version/regex.pm
-               lib/ExtUtils/Mkbootstrap.pm
-               lib/ExtUtils/Mksymlists.pm
-               lib/ExtUtils/testlib.pm
-            ),
         ],
     },
 

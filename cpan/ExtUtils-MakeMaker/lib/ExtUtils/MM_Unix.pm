@@ -14,7 +14,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue _sprintf562);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '7.18_01';
+$VERSION = '7.22';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 require ExtUtils::MM_Any;
@@ -1043,7 +1043,7 @@ sub xs_make_dynamic_lib {
         $ld_run_path_shell = 'LD_RUN_PATH="$(LD_RUN_PATH)" ';
     }
 
-    push @m, sprintf <<'MAKE', $ld_run_path_shell, $ldrun, $self->xs_obj_opt('$@'), $ldfrom, $libs, $exportlist;
+    push @m, sprintf <<'MAKE', $ld_run_path_shell, $ldrun, $ldfrom, $self->xs_obj_opt('$@'), $libs, $exportlist;
 	%s$(LD) %s $(LDDLFLAGS) %s $(OTHERLDFLAGS) %s $(MYEXTLIB) \
 	  $(PERL_ARCHIVE) %s $(PERL_ARCHIVE_AFTER) %s \
 	  $(INST_DYNAMIC_FIX)
@@ -2065,7 +2065,7 @@ sub init_PERL {
 
     # Make sure perl can find itself before it's installed.
     my $lib_paths = $self->{UNINSTALLED_PERL} || $self->{PERL_CORE}
-        ? $self->{PERL_ARCHLIB} ne $self->{PERL_LIB} ?
+        ? ( $self->{PERL_ARCHLIB} && $self->{PERL_LIB} && $self->{PERL_ARCHLIB} ne $self->{PERL_LIB} ) ?
             q{ "-I$(PERL_LIB)" "-I$(PERL_ARCHLIB)"} : q{ "-I$(PERL_LIB)"}
         : undef;
     my $inst_lib_paths = $self->{INST_ARCHLIB} ne $self->{INST_LIB}
@@ -2658,7 +2658,7 @@ $(INST_ARCHAUTODIR)/extralibs.all : $(INST_ARCHAUTODIR)$(DFSEP).exists '.join(" 
 
     my $ldfrom = $self->{XSMULTI} ? '' : '$(LDFROM)';
     #                             1     2                        3        4
-    push @m, _sprintf562 <<'EOF', $tmp, $self->xs_obj_opt('$@'), $ldfrom, $makefilename;
+    push @m, _sprintf562 <<'EOF', $tmp, $ldfrom, $self->xs_obj_opt('$@'), $makefilename;
 $(MAP_TARGET) :: %1$s/perlmain$(OBJ_EXT) $(MAP_LIBPERLDEP) $(MAP_STATICDEP) $(INST_ARCHAUTODIR)/extralibs.all
 	$(MAP_LINKCMD) %2$s $(OPTIMIZE) %1$s/perlmain$(OBJ_EXT) %3$s $(MAP_STATIC) "$(LLIBPERL)" `cat $(INST_ARCHAUTODIR)/extralibs.all` $(MAP_PRELIBS)
 	$(NOECHO) $(ECHO) "To install the new '$(MAP_TARGET)' binary, call"

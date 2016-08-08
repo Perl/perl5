@@ -1,6 +1,6 @@
 package ExtUtils::MakeMaker::FAQ;
 
-our $VERSION = '7.18';
+our $VERSION = '7.22';
 $VERSION = eval $VERSION;
 
 1;
@@ -119,6 +119,29 @@ And then set PERL5LIB to F<~/tmp/lib/perl5>.  This works well when you
 have multiple modules to work with.  It also ensures that the module
 goes through its full installation process which may modify it.
 Again, L<local::lib> may assist you here.
+
+=item How can I organize tests into subdirectories and have them run?
+
+Let's take the following test directory structure:
+
+    t/foo/sometest.t
+    t/bar/othertest.t
+    t/bar/baz/anothertest.t
+
+Now, inside of the C<WriteMakeFile()> function in your F<Makefile.PL>, specify
+where your tests are located with the C<test> directive:
+
+    test => {TESTS => 't/*.t t/*/*.t t/*/*/*.t'}
+
+The first entry in the string will run all tests in the top-level F<t/> 
+directory. The second will run all test files located in any subdirectory under
+F<t/>. The third, runs all test files within any subdirectory within any other
+subdirectory located under F<t/>.
+
+Note that you do not have to use wildcards. You can specify explicitly which
+subdirectories to run tests in:
+
+    test => {TESTS => 't/*.t t/foo/*.t t/bar/baz/*.t'}
 
 =item PREFIX vs INSTALL_BASE from Module::Build::Cookbook
 

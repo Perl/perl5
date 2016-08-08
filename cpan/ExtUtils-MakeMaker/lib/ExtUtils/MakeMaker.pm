@@ -12,7 +12,7 @@ use Carp;
 use File::Path;
 my $CAN_DECODE = eval { require ExtUtils::MakeMaker::Locale; }; # 2 birds, 1 stone
 eval { ExtUtils::MakeMaker::Locale::reinit('UTF-8') }
-  if $CAN_DECODE and $ExtUtils::MakeMaker::Locale::ENCODING_LOCALE eq 'US-ASCII';
+  if $CAN_DECODE and Encode::find_encoding('locale')->name eq 'ascii';
 
 our $Verbose = 0;       # exported
 our @Parent;            # needs to be localized
@@ -24,7 +24,7 @@ my %Recognized_Att_Keys;
 our %macro_fsentity; # whether a macro is a filesystem name
 our %macro_dep; # whether a macro is a dependency
 
-our $VERSION = '7.18_01';
+our $VERSION = '7.22';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 # Emulate something resembling CVS $Revision$
@@ -1465,6 +1465,23 @@ proper set of perl C<-I> options.
 MakeMaker also checks for any files matching glob("t/*.t"). It will
 execute all matching files in alphabetical order via the
 L<Test::Harness> module with the C<-I> switches set correctly.
+
+You can also organize your tests within subdirectories in the F<t/> directory.
+To do so, use the F<test> directive in your I<Makefile.PL>. For example, if you
+had tests in:
+
+    t/foo
+    t/foo/bar
+
+You could tell make to run tests in both of those directories with the
+following directives:
+
+    test => {TESTS => 't/*/*.t t/*/*/*.t'}
+    test => {TESTS => 't/foo/*.t t/foo/bar/*.t'}
+
+The first will run all test files in all first-level subdirectories and all
+subdirectories they contain. The second will run tests in only the F<t/foo>
+and F<t/foo/bar>.
 
 If you'd like to see the raw output of your tests, set the
 C<TEST_VERBOSE> variable to true.
