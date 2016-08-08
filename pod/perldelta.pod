@@ -89,7 +89,9 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+The rather slow implementation for the experimental subroutine signatures
+feature has been made much faster; it is now comparable in speed with the
+old-style C<my ($a, $b, @c) = @_>.
 
 =back
 
@@ -327,7 +329,9 @@ well.
 
 =item *
 
-XXX
+Three new ops, C<OP_ARGELEM>, C<OP_ARGDEFELEM> and C<OP_ARGCHECK> have
+been added. These are intended principally to implement the individual
+elements of a subroutine signature, plus any overall checking required.
 
 =back
 
