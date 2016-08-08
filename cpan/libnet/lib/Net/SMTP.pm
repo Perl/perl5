@@ -21,7 +21,7 @@ use Net::Cmd;
 use Net::Config;
 use Socket;
 
-our $VERSION = "3.09_01";
+our $VERSION = "3.10";
 
 # Code for detecting if we can use SSL
 my $ssl_class = eval {

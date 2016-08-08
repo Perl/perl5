@@ -779,7 +779,7 @@ use File::Glob qw(:case);
     },
 
     'libnet' => {
-        'DISTRIBUTION' => 'SHAY/libnet-3.09.tar.gz',
+        'DISTRIBUTION' => 'SHAY/libnet-3.10.tar.gz',
         'FILES'        => q[cpan/libnet],
         'EXCLUDED'     => [
             qw( Configure
@@ -790,17 +790,6 @@ use File::Glob qw(:case);
                 ),
             qr(^demos/),
             qr(^t/external/),
-        ],
-        'CUSTOMIZED'   => [
-            # CVE-2016-1238
-            qw(
-               lib/Net/Cmd.pm lib/Net/Config.pm
-               lib/Net/Domain.pm lib/Net/FTP.pm lib/Net/FTP/A.pm
-               lib/Net/FTP/E.pm lib/Net/FTP/I.pm
-               lib/Net/FTP/L.pm lib/Net/FTP/dataconn.pm
-               lib/Net/NNTP.pm lib/Net/Netrc.pm lib/Net/POP3.pm
-               lib/Net/SMTP.pm lib/Net/Time.pm
-            )
         ],
     },
 
