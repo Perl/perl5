@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302045';
+our $VERSION = '1.302049';
 
 BEGIN {
     if( $] < 5.008 ) {
@@ -1183,6 +1183,7 @@ sub diag {
     my $ctx = $self->ctx;
     $ctx->diag(join '' => map {defined($_) ? $_ : 'undef'} @_);
     $ctx->release;
+    return 0;
 }
 
 
@@ -1193,6 +1194,7 @@ sub note {
     my $ctx = $self->ctx;
     $ctx->note(join '' => map {defined($_) ? $_ : 'undef'} @_);
     $ctx->release;
+    return 0;
 }
 
 

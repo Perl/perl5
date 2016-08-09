@@ -2,7 +2,7 @@ package Test2::API::Context;
 use strict;
 use warnings;
 
-our $VERSION = '1.302045';
+our $VERSION = '1.302049';
 
 
 use Carp qw/confess croak longmess/;
@@ -412,7 +412,7 @@ inherit it:
 =item you MUST always use the context() sub from Test2::API
 
 Creating your own context via C<< Test2::API::Context->new() >> will almost never
-produce a desirable result. Use C<context()> which is exported by L<Test2>.
+produce a desirable result. Use C<context()> which is exported by L<Test2::API>.
 
 There are a handful of cases where a tool author may want to create a new
 context by hand, which is why the C<new> method exists. Unless you really know

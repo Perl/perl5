@@ -2,7 +2,7 @@ package Test2::Hub;
 use strict;
 use warnings;
 
-our $VERSION = '1.302045';
+our $VERSION = '1.302049';
 
 
 use Carp qw/carp croak confess/;
@@ -23,6 +23,7 @@ use Test2::Util::HashBase qw{
     _context_init
     _context_release
 
+    active
     count
     failed
     ended
@@ -329,9 +330,10 @@ sub finalize {
     my $plan   = $self->{+_PLAN};
     my $count  = $self->{+COUNT};
     my $failed = $self->{+FAILED};
+    my $active = $self->{+ACTIVE};
 
     # return if NOTHING was done.
-    return unless $do_plan || defined($plan) || $count || $failed;
+    return unless $active || $do_plan || defined($plan) || $count || $failed;
 
     unless ($self->{+ENDED}) {
         if ($self->{+_FOLLOW_UPS}) {
@@ -718,6 +720,15 @@ Get the IPC object used by the hub.
 This can be used to disable auto-ending behavior for a hub. The auto-ending
 behavior is triggered by an end block and is used to cull IPC events, and
 output the final plan if the plan was 'no_plan'.
+
+=item $bool = $hub->active
+
+=item $hub->set_active($bool)
+
+These are used to get/set the 'active' attribute. When true this attribute will
+force C<< hub->finalize() >> to take action even if there is no plan, and no
+tests have been run. This flag is useful for plugins that add follow-up
+behaviors that need to run even if no events are seen.
 
 =back
 
