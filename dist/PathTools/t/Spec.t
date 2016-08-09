@@ -448,6 +448,13 @@ my @tests = (
 # During the Perl 5.8 era, FS::Unix stopped eliminating redundant path elements, so mimic that here.
 [ "VMS->canonpath('a/../../b/c.dat')",                  $vms_unix_rpt ? 'a/../../b/c.dat'              : '[-.b]c.dat'                      ],
 [ "VMS->canonpath('^<test^.new.-.caret^ escapes^>')",   $vms_unix_rpt ? '/<test.new.-.caret escapes>' : '^<test^.new.-.caret^ escapes^>'                                                   ],
+# Check that directory specs with caret-dot component is treated correctly
+[ "VMS->canonpath('foo:[bar.coo.kie.--]file.txt')",     $vms_unix_rpt ? '/foo/bar/file.txt'            : "foo:[bar]file.txt" ],
+[ "VMS->canonpath('foo:[bar^.coo.kie.--]file.txt')",    $vms_unix_rpt ? '/foo/file.txt'                : "foo:[000000]file.txt" ],
+[ "VMS->canonpath('foo:[bar.coo^.kie.--]file.txt')",    $vms_unix_rpt ? '/foo/file.txt'                : "foo:[000000]file.txt" ],
+[ "VMS->canonpath('foo:[bar.coo.kie.-]file.txt')",      $vms_unix_rpt ? '/foo/bar/coo/file.txt'        : "foo:[bar.coo]file.txt" ],
+[ "VMS->canonpath('foo:[bar^.coo.kie.-]file.txt')",     $vms_unix_rpt ? '/foo/bar.coo/file.txt'        : "foo:[bar^.coo]file.txt" ],
+[ "VMS->canonpath('foo:[bar.coo^.kie.-]file.txt')",     $vms_unix_rpt ? '/foo/bar/file.txt'            : "foo:[bar]file.txt" ],
 
 [ "VMS->splitdir('')",            ''          ],
 [ "VMS->splitdir('[]')",          ''          ],
