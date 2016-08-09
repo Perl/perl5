@@ -15241,6 +15241,16 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 			    PL_tmps_ix+1, param);
 
 	/* next PUSHMARK() sets *(PL_markstack_ptr+1) */
+	i = proto_perl->Irmarkstack_max - proto_perl->Irmarkstack;
+	Newxz(PL_rmarkstack, i, I32);
+	PL_rmarkstack_max	= PL_rmarkstack
+					+ (proto_perl->Irmarkstack_max
+					    - proto_perl->Irmarkstack);
+	PL_rmarkstack_ptr	= PL_rmarkstack
+					+ (proto_perl->Irmarkstack_ptr
+					    - proto_perl->Irmarkstack);
+	Copy(proto_perl->Irmarkstack, PL_rmarkstack,
+	     PL_rmarkstack_ptr - PL_rmarkstack + 1, I32);
 	i = proto_perl->Imarkstack_max - proto_perl->Imarkstack;
 	Newxz(PL_markstack, i, I32);
 	PL_markstack_max	= PL_markstack + (proto_perl->Imarkstack_max
@@ -15268,10 +15278,15 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	PL_curstackinfo		= si_dup(proto_perl->Icurstackinfo, param);
 
 	/* PL_curstack		= PL_curstackinfo->si_stack; */
+	PL_rcurstack		= av_dup(proto_perl->Icurstack, param);
 	PL_curstack		= av_dup(proto_perl->Icurstack, param);
 	PL_mainstack		= av_dup(proto_perl->Imainstack, param);
 
 	/* next PUSHs() etc. set *(PL_stack_sp+1) */
+	PL_rstack_base		= AvARRAY(PL_rcurstack);
+	PL_rstack_sp		= PL_rstack_base + (proto_perl->Irstack_sp
+					       - proto_perl->Irstack_base);
+	PL_rstack_max		= PL_rstack_base + AvMAX(PL_rcurstack);
 	PL_stack_base		= AvARRAY(PL_curstack);
 	PL_stack_sp		= PL_stack_base + (proto_perl->Istack_sp
 						   - proto_perl->Istack_base);
