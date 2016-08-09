@@ -385,17 +385,13 @@ use File::Glob qw(:case);
     },
 
     'Digest::SHA' => {
-        'DISTRIBUTION' => 'MSHELOR/Digest-SHA-5.95.tar.gz',
+        'DISTRIBUTION' => 'MSHELOR/Digest-SHA-5.96.tar.gz',
         'FILES'        => q[cpan/Digest-SHA],
         'EXCLUDED'     => [
             qw( t/pod.t
                 t/podcover.t
                 examples/dups
                 ),
-        ],
-        'CUSTOMIZED'   => [
-            # CVE-2016-1238
-            qw( lib/Digest/SHA.pm shasum )
         ],
     },
 
