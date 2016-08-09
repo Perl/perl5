@@ -127,6 +127,36 @@ PadnameIN_SCOPE(const PADNAME * const pn, const U32 seq)
 
 /* ------------------------------- pp.h ------------------------------- */
 
+PERL_STATIC_INLINE void
+S_PUSHMARK(pTHX_ SV **p)
+{
+    
+    I32 * mark_stack_entry;
+    if (UNLIKELY((mark_stack_entry = ++PL_markstack_ptr)
+			== PL_markstack_max))
+    mark_stack_entry = markstack_grow();
+    *mark_stack_entry  = (I32)((p) - PL_stack_base);
+    DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,
+				 "MARK push %p %"IVdf"\n",
+				  PL_markstack_ptr, (IV)*mark_stack_entry
+				 )));
+}
+
+PERL_STATIC_INLINE void
+S_rPUSHMARK(pTHX_ SV **p)
+{
+    
+    I32 * mark_stack_entry;
+    if (UNLIKELY((mark_stack_entry = ++PL_rmarkstack_ptr)
+			== PL_rmarkstack_max))
+    mark_stack_entry = markstack_grow();
+    *mark_stack_entry  = (I32)((p) - PL_rstack_base);
+    DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,
+				 "MARK push %p %"IVdf"\n",
+				  PL_rmarkstack_ptr, (IV)*mark_stack_entry
+				 )));
+}
+
 PERL_STATIC_INLINE I32
 S_TOPMARK(pTHX)
 {
@@ -138,6 +168,16 @@ S_TOPMARK(pTHX)
 }
 
 PERL_STATIC_INLINE I32
+S_rTOPMARK(pTHX)
+{
+    DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,
+				 "MARK top  %p %"IVdf"\n",
+				  PL_rmarkstack_ptr,
+				  (IV)*PL_rmarkstack_ptr)));
+    return *PL_rmarkstack_ptr;
+}
+
+PERL_STATIC_INLINE I32
 S_POPMARK(pTHX)
 {
     DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,
@@ -146,6 +186,17 @@ S_POPMARK(pTHX)
 				  (IV)*(PL_markstack_ptr-1))));
     assert((PL_markstack_ptr > PL_markstack) || !"MARK underflow");
     return *PL_markstack_ptr--;
+}
+
+PERL_STATIC_INLINE I32
+S_rPOPMARK(pTHX)
+{
+    DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,
+				 "MARK pop  %p %"IVdf"\n",
+				  (PL_rmarkstack_ptr-1),
+				  (IV)*(PL_rmarkstack_ptr-1))));
+    assert((PL_rmarkstack_ptr > PL_rmarkstack) || !"MARK underflow");
+    return *PL_rmarkstack_ptr--;
 }
 
 /* ----------------------------- regexp.h ----------------------------- */

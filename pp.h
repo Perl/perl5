@@ -57,7 +57,17 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 
 #define PUSHMARK(p) \
     STMT_START {                                                      \
-        I32 * mark_stack_entry;                                       \
+      I32 * mark_stack_entry;                                         \
+      if (0 /*PERL_STACK_LOCALLY_REFCOUNTED*/) {                            \
+        if (UNLIKELY((mark_stack_entry = ++PL_rmarkstack_ptr)         \
+                                           == PL_rmarkstack_max))     \
+	    mark_stack_entry = rmarkstack_grow();                     \
+        *mark_stack_entry  = (I32)((p) - PL_rstack_base);             \
+        DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,                 \
+                "MARK push %p %"IVdf"\n",                             \
+                PL_rmarkstack_ptr, (IV)*mark_stack_entry)));          \
+      }                                                               \
+      else {                                                          \
         if (UNLIKELY((mark_stack_entry = ++PL_markstack_ptr)          \
                                            == PL_markstack_max))      \
 	    mark_stack_entry = markstack_grow();                      \
@@ -65,17 +75,28 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
         DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,                 \
                 "MARK push %p %"IVdf"\n",                             \
                 PL_markstack_ptr, (IV)*mark_stack_entry)));           \
+      }                                                               \
     } STMT_END
 
-#define TOPMARK S_TOPMARK(aTHX)
-#define POPMARK S_POPMARK(aTHX)
+#define TOPMARK \
+    (0 /*PERL_STACK_LOCALLY_REFCOUNTED*/ ? S_rTOPMARK(aTHX) : S_TOPMARK(aTHX))
+#define POPMARK \
+    (0 /*PERL_STACK_LOCALLY_REFCOUNTED*/ ? S_rPOPMARK(aTHX) : S_POPMARK(aTHX))
 
 #define INCMARK \
     STMT_START {                                                      \
+      if (0 /*PERL_STACK_LOCALLY_REFCOUNTED*/) {                            \
+        DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,                 \
+                "MARK inc  %p %"IVdf"\n",                             \
+                (PL_rmarkstack_ptr+1), (IV)*(PL_rmarkstack_ptr+1)))); \
+        PL_rmarkstack_ptr++;                                          \
+      }                                                               \
+      else {                                                          \
         DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,                 \
                 "MARK inc  %p %"IVdf"\n",                             \
                 (PL_markstack_ptr+1), (IV)*(PL_markstack_ptr+1))));   \
         PL_markstack_ptr++;                                           \
+      }                                                               \
     } STMT_END
 
 #define dSP		SV **sp = PL_stack_sp
