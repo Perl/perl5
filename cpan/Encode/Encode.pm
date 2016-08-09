@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.84 2016/04/11 07:16:52 dankogai Exp $
+# $Id: Encode.pm,v 2.85 2016/08/04 03:15:58 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d_01", q$Revision: 2.84 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.85 $ =~ /(\d+)/g;
 use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -220,8 +220,34 @@ sub from_to($$$;$) {
         require Carp;
         Carp::croak("Unknown encoding '$to'");
     }
-    my $uni = $f->decode($string);
-    $_[0] = $string = $t->encode( $uni, $check );
+
+    # For Unicode, warnings need to be caught and re-issued at this level
+    # so that callers can disable utf8 warnings lexically.
+    my $uni;
+    if ( ref($f) eq 'Encode::Unicode' ) {
+        my $warn = '';
+        {
+            local $SIG{__WARN__} = sub { $warn = shift };
+            $uni = $f->decode($string);
+        }
+        warnings::warnif('utf8', $warn) if length $warn;
+    }
+    else {
+        $uni = $f->decode($string);
+    }
+
+    if ( ref($t) eq 'Encode::Unicode' ) {
+        my $warn = '';
+        {
+            local $SIG{__WARN__} = sub { $warn = shift };
+            $_[0] = $string = $t->encode( $uni, $check );
+        }
+        warnings::warnif('utf8', $warn) if length $warn;
+    }
+    else {
+        $_[0] = $string = $t->encode( $uni, $check );
+    }
+
     return undef if ( $check && length($uni) );
     return defined( $_[0] ) ? length($string) : undef;
 }
@@ -470,6 +496,10 @@ I<ENCODING> and returns a sequence of octets.  I<ENCODING> can be either a
 canonical name or an alias.  For encoding names and aliases, see
 L</"Defining Aliases">.  For CHECK, see L</"Handling Malformed Data">.
 
+B<CAVEAT>: the input scalar I<STRING> might be modified in-place depending
+on what is set in CHECK. See L</LEAVE_SRC> if you want your inputs to be
+left unchanged.
+
 For example, to convert a string from Perl's internal format into
 ISO-8859-1, also known as Latin1:
 
@@ -493,6 +523,10 @@ Perl's internal form.  As with encode(),
 I<ENCODING> can be either a canonical name or an alias. For encoding names
 and aliases, see L</"Defining Aliases">; for I<CHECK>, see L</"Handling
 Malformed Data">.
+
+B<CAVEAT>: the input scalar I<OCTETS> might be modified in-place depending
+on what is set in CHECK. See L</LEAVE_SRC> if you want your inputs to be
+left unchanged.
 
 For example, to convert ISO-8859-1 data into a string in Perl's
 internal format:
@@ -608,6 +642,10 @@ from UTF-8 into a sequence of logical characters.
 Because not all sequences of octets are valid UTF-8,
 it is quite possible for this function to fail.
 For CHECK, see L</"Handling Malformed Data">.
+
+B<CAVEAT>: the input I<$octets> might be modified in-place depending on
+what is set in CHECK. See L</LEAVE_SRC> if you want your inputs to be
+left unchanged.
 
 =head2 Listing available encodings
 

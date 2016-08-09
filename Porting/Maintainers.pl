@@ -402,7 +402,7 @@ use File::Glob qw(:case);
     },
 
     'Encode' => {
-        'DISTRIBUTION' => 'DANKOGAI/Encode-2.84.tar.gz',
+        'DISTRIBUTION' => 'DANKOGAI/Encode-2.85.tar.gz',
         'FILES'        => q[cpan/Encode],
         CUSTOMIZED     => [
             qw( encoding.pm
@@ -414,13 +414,6 @@ use File::Glob qw(:case);
                 t/encoding.t
                 t/jperl.t
                 ),
-        ],
-        'CUSTOMIZED'   => [
-            # CVE-2016-1238
-            qw(
-               Encode.pm bin/enc2xs bin/encguess bin/piconv
-               bin/ucmlint bin/unidump
-            )
         ],
     },
 

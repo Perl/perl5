@@ -1,5 +1,5 @@
 #
-# $Id: Makefile.PL,v 2.16 2015/09/24 02:19:21 dankogai Exp $
+# $Id: Makefile.PL,v 2.17 2016/08/04 03:15:58 dankogai Exp dankogai $
 #
 use 5.007003;
 use strict;
@@ -50,6 +50,9 @@ WriteMakefile(
     PREREQ_PM   => {
         Exporter   => '5.57',   # use Exporter 'import';
 	parent     => '0.221',  # version bundled with 5.10.1
+    },
+    TEST_REQUIRES => {
+        'Test::More' => '0.81_01',
     },
     PMLIBDIRS   => \@pmlibdirs,
     INSTALLDIRS => ($] < 5.011 ? 'perl' : 'site'),
