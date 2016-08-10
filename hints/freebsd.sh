@@ -310,3 +310,5 @@ esac
 # of FreeBSD.
 d_printf_format_null='undef'
 
+# As of 10.3-RELEASE FreeBSD.  See [perl #128867]
+d_uselocale='undef'
