@@ -1,5 +1,9 @@
 Revision history for Perl suite Locale::Maketext
 
+2016-07-25
+    * Release of 1.28 to CPAN
+    * Fix optional runtime load for CVE-2016-1238
+
 2016-06-22
     * Release of 1.27 to CPAN
 
