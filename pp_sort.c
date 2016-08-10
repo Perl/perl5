@@ -1482,7 +1482,6 @@ PP(pp_sort)
     bool hasargs = FALSE;
     bool copytmps;
     I32 is_xsub = 0;
-    I32 sorting_av = 0;
     const U8 priv = PL_op->op_private;
     const U8 flags = PL_op->op_flags;
     U32 sort_flags = 0;
@@ -1563,34 +1562,31 @@ PP(pp_sort)
 	PL_sortcop = NULL;
     }
 
-    /* optimiser converts "@a = sort @a" to "sort \@a";
-     * in case of tied @a, pessimise: push (@a) onto stack, then assign
-     * result back to @a at the end of this function */
+    /* optimiser converts "@a = sort @a" to "sort \@a".  In this case,
+     * push (@a) onto stack, then assign result back to @a at the end of
+     * this function */
     if (priv & OPpSORT_INPLACE) {
 	assert( MARK+1 == SP && *SP && SvTYPE(*SP) == SVt_PVAV);
 	(void)POPMARK; /* remove mark associated with ex-OP_AASSIGN */
 	av = MUTABLE_AV((*SP));
+        if (SvREADONLY(av))
+            Perl_croak_no_modify();
 	max = AvFILL(av) + 1;
+        MEXTEND(SP, max);
 	if (SvMAGICAL(av)) {
-	    MEXTEND(SP, max);
 	    for (i=0; i < max; i++) {
 		SV **svp = av_fetch(av, i, FALSE);
 		*SP++ = (svp) ? *svp : NULL;
 	    }
-	    SP--;
-	    p1 = p2 = SP - (max-1);
 	}
-	else {
-	    if (SvREADONLY(av))
-		Perl_croak_no_modify();
-	    else
-	    {
-		SvREADONLY_on(av);
-		save_pushptr((void *)av, SAVEt_READONLY_OFF);
-	    }
-	    p1 = p2 = AvARRAY(av);
-	    sorting_av = 1;
+        else {
+            SV **svp = AvARRAY(av);
+            assert(svp || max == 0);
+	    for (i = 0; i < max; i++)
+                *SP++ = *svp++;
 	}
+        SP--;
+        p1 = p2 = SP - (max-1);
     }
     else {
 	p2 = MARK+1;
@@ -1600,7 +1596,7 @@ PP(pp_sort)
     /* shuffle stack down, removing optional initial cv (p1!=p2), plus
      * any nulls; also stringify or converting to integer or number as
      * required any args */
-    copytmps = !sorting_av && PL_sortcop;
+    copytmps = PL_sortcop;
     for (i=max; i > 0 ; i--) {
 	if ((*p1 = *p2++)) {			/* Weed out nulls. */
 	    if (copytmps && SvPADTMP(*p1)) {
@@ -1633,9 +1629,6 @@ PP(pp_sort)
 	else
 	    max--;
     }
-    if (sorting_av)
-	AvFILLp(av) = max-1;
-
     if (max > 1) {
 	SV **start;
 	if (PL_sortcop) {
@@ -1716,7 +1709,7 @@ PP(pp_sort)
 	}
 	else {
 	    MEXTEND(SP, 20);	/* Can't afford stack realloc on signal. */
-	    start = sorting_av ? AvARRAY(av) : ORIGMARK+1;
+	    start = ORIGMARK+1;
 	    sortsvp(aTHX_ start, max,
 		    (priv & OPpSORT_NUMERIC)
 		        ? ( ( ( priv & OPpSORT_INTEGER) || all_SIVs)
@@ -1742,27 +1735,45 @@ PP(pp_sort)
 	    }
 	}
     }
-    if (sorting_av)
-	SvREADONLY_off(av);
-    else if (av && !sorting_av) {
-	/* simulate pp_aassign of tied AV */
-	SV** const base = MARK+1;
-	for (i=0; i < max; i++) {
-	    base[i] = newSVsv(base[i]);
-	}
-	av_clear(av);
-	av_extend(av, max);
-	for (i=0; i < max; i++) {
-	    SV * const sv = base[i];
-	    SV ** const didstore = av_store(av, i, sv);
-	    if (SvSMAGICAL(sv))
-		mg_set(sv);
-	    if (!didstore)
-		sv_2mortal(sv);
-	}
+
+    if (av) {
+        /* copy back result to the array */
+        SV** const base = MARK+1;
+        if (SvMAGICAL(av)) {
+            for (i = 0; i < max; i++)
+                base[i] = newSVsv(base[i]);
+            av_clear(av);
+            av_extend(av, max);
+            for (i=0; i < max; i++) {
+                SV * const sv = base[i];
+                SV ** const didstore = av_store(av, i, sv);
+                if (SvSMAGICAL(sv))
+                    mg_set(sv);
+                if (!didstore)
+                    sv_2mortal(sv);
+            }
+        }
+        else {
+            /* the elements of av are likely to be the same as the
+             * (non-refcounted) elements on the stack, just in a different
+             * order. However, its possible that someone's messed with av
+             * in the meantime. So bump and unbump the relevant refcounts
+             * first.
+             */
+            for (i = 0; i < max; i++)
+                SvREFCNT_inc_void(base[i]);
+            av_clear(av);
+            if (max > 0) {
+                av_extend(av, max);
+                Copy(base, AvARRAY(av), max, SV*);
+            }
+            AvFILLp(av) = max - 1;
+            AvREIFY_off(av);
+            AvREAL_on(av);
+        }
     }
     LEAVE;
-    PL_stack_sp = ORIGMARK + (sorting_av ? 0 : max);
+    PL_stack_sp = ORIGMARK +  max;
     return nextop;
 }
 

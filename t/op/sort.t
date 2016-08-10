@@ -474,6 +474,16 @@ cmp_ok($x,'eq','123',q(optimized-away comparison block doesn't take any other ar
     no warnings 'void';
     my @m; push @m, 0 for 1 .. 1024; $#m; @m = sort @m;
     ::pass("in-place sorting segfault");
+
+    # RT #39358 - array should be preserved during sort
+
+    {
+        my @aa = qw(b c a);
+        my @copy;
+        @aa = sort { @copy = @aa; $a cmp $b } @aa;
+        is "@aa",   "a b c", "RT 39358 - aa";
+        is "@copy", "b c a", "RT 39358 - copy";
+    }
 }
 
 # Test optimisations of reversed sorts. As we now guarantee stability by
@@ -846,16 +856,6 @@ cmp_ok($answer,'eq','good','sort subr called from other package');
 }
 
 
-# Bug 7567 - an array shouldn't be modifiable while it's being
-# sorted in-place.
-{
-    eval { @a=(1..8); @a = sort { @a = (0) } @a; };
-
-    $fail_msg = q(Modification of a read-only value attempted);
-    cmp_ok(substr($@,0,length($fail_msg)),'eq',$fail_msg,'bug 7567');
-    eval { @a=1..3 };
-    is $@, "", 'abrupt scope exit turns off readonliness';
-}
 
 # I commented out this TODO test because messing with FREEd scalars on the
 # stack can have all sorts of strange side-effects, not made safe by eval

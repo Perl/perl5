@@ -33,6 +33,7 @@
 #
 #     call::     subroutine and method handling
 #     expr::     expressions: e.g. $x=1, $foo{bar}[0]
+#     func::     perl functions, e.g. func::sort::...
 #     loop::     structural code like for, while(), etc
 #     regex::    regular expressions
 #     string::   string handling
@@ -895,9 +896,73 @@
         code    => '$y = $x--', # scalar context so not optimised to --$x
     },
 
+
+    'func::sort::num' => {
+        desc    => 'plain numeric sort',
+        setup   => 'my (@a, @b); @a = reverse 1..10;',
+        code    => '@b = sort { $a <=> $b } @a',
+    },
+    'func::sort::num_block' => {
+        desc    => 'codeblock numeric sort',
+        setup   => 'my (@a, @b); @a = reverse 1..10;',
+        code    => '@b = sort { $a + 1 <=> $b + 1 } @a',
+    },
+    'func::sort::num_fn' => {
+        desc    => 'function numeric sort',
+        setup   => 'sub f { $a + 1 <=> $b + 1 } my (@a, @b); @a = reverse 1..10;',
+        code    => '@b = sort f @a',
+    },
+    'func::sort::str' => {
+        desc    => 'plain string sort',
+        setup   => 'my (@a, @b); @a = reverse "a".."j";',
+        code    => '@b = sort { $a cmp $b } @a',
+    },
+    'func::sort::str_block' => {
+        desc    => 'codeblock string sort',
+        setup   => 'my (@a, @b); @a = reverse "a".."j";',
+        code    => '@b = sort { ($a . "") cmp ($b . "") } @a',
+    },
+    'func::sort::str_fn' => {
+        desc    => 'function string sort',
+        setup   => 'sub f { ($a . "") cmp ($b . "") } my (@a, @b); @a = reverse  "a".."j";',
+        code    => '@b = sort f @a',
+    },
+
+    'func::sort::num_inplace' => {
+        desc    => 'plain numeric sort in-place',
+        setup   => 'my @a = reverse 1..10;',
+        code    => '@a = sort { $a <=> $b } @a',
+    },
+    'func::sort::num_block_inplace' => {
+        desc    => 'codeblock numeric sort in-place',
+        setup   => 'my @a = reverse 1..10;',
+        code    => '@a = sort { $a + 1 <=> $b + 1 } @a',
+    },
+    'func::sort::num_fn_inplace' => {
+        desc    => 'function numeric sort in-place',
+        setup   => 'sub f { $a + 1 <=> $b + 1 } my @a = reverse 1..10;',
+        code    => '@a = sort f @a',
+    },
+    'func::sort::str_inplace' => {
+        desc    => 'plain string sort in-place',
+        setup   => 'my @a = reverse "a".."j";',
+        code    => '@a = sort { $a cmp $b } @a',
+    },
+    'func::sort::str_block_inplace' => {
+        desc    => 'codeblock string sort in-place',
+        setup   => 'my @a = reverse "a".."j";',
+        code    => '@a = sort { ($a . "") cmp ($b . "") } @a',
+    },
+    'func::sort::str_fn_inplace' => {
+        desc    => 'function string sort in-place',
+        setup   => 'sub f { ($a . "") cmp ($b . "") } my @a = reverse  "a".."j";',
+        code    => '@a = sort f @a',
+    },
+
+
     'loop::block' => {
         desc    => 'empty basic loop',
-        setup   => ';',
+        setup   => '',
         code    => '{1;}',
     },
 
