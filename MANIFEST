@@ -1978,7 +1978,6 @@ cpan/Pod-Perldoc/Makefile.PL
 cpan/Pod-Perldoc/perldoc.pod
 cpan/Pod-Perldoc/t/00_load.t			test file for Pod-Perldoc
 cpan/Pod-Perldoc/t/01_about_verbose.t		test file for Pod-Perldoc
-cpan/Pod-Perldoc/t/02_module_pod_output.t	test file for Pod-Perldoc
 cpan/Pod-Perldoc/t/man/_get_columns.t		test file for Pod-Perldoc
 cpan/Pod-Perldoc/t/pod.t			test file for Pod-Perldoc
 cpan/Pod-Simple/lib/Pod/Simple.pm			Pod made simple
