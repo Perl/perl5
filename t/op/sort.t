@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 use warnings;
-plan(tests => 195);
+plan(tests => 196);
 
 # these shouldn't hang
 {
@@ -417,21 +417,21 @@ cmp_ok($x,'eq','123',q(optimized-away comparison block doesn't take any other ar
     my ($r1,$r2,@a);
     our @g;
     @g = (3,2,1); $r1 = \$g[2]; @g = sort @g; $r2 = \$g[0];
-    is "$r1-@g", "$r2-1 2 3", "inplace sort of global";
+    is "$$r1-$$r2-@g", "1-1-1 2 3", "inplace sort of global";
 
     @a = qw(b a c); $r1 = \$a[1]; @a = sort @a; $r2 = \$a[0];
-    is "$r1-@a", "$r2-a b c", "inplace sort of lexical";
+    is "$$r1-$$r2-@a", "a-a-a b c", "inplace sort of lexical";
 
     @g = (2,3,1); $r1 = \$g[1]; @g = sort { $b <=> $a } @g; $r2 = \$g[0];
-    is "$r1-@g", "$r2-3 2 1", "inplace reversed sort of global";
+    is "$$r1-$$r2-@g", "3-3-3 2 1", "inplace reversed sort of global";
 
     @g = (2,3,1);
     $r1 = \$g[1]; @g = sort { $a<$b?1:$a>$b?-1:0 } @g; $r2 = \$g[0];
-    is "$r1-@g", "$r2-3 2 1", "inplace custom sort of global";
+    is "$$r1-$$r2-@g", "3-3-3 2 1", "inplace custom sort of global";
 
     sub mysort { $b cmp $a };
     @a = qw(b c a); $r1 = \$a[1]; @a = sort mysort @a; $r2 = \$a[0];
-    is "$r1-@a", "$r2-c b a", "inplace sort with function of lexical";
+    is "$$r1-$$r2-@a", "c-c-c b a", "inplace sort with function of lexical";
 
     use Tie::Array;
     my @t;
@@ -484,6 +484,15 @@ cmp_ok($x,'eq','123',q(optimized-away comparison block doesn't take any other ar
         is "@aa",   "a b c", "RT 39358 - aa";
         is "@copy", "b c a", "RT 39358 - copy";
     }
+
+    # RT #128340: in-place sort incorrectly preserves element lvalue identity
+
+    @a = (5, 4, 3);
+    my $r = \$a[2];
+    @a = sort { $a <=> $b } @a;
+    $$r = "z";
+    is ("@a", "3 4 5", "RT #128340");
+
 }
 
 # Test optimisations of reversed sorts. As we now guarantee stability by

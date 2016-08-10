@@ -1760,8 +1760,14 @@ PP(pp_sort)
              * in the meantime. So bump and unbump the relevant refcounts
              * first.
              */
-            for (i = 0; i < max; i++)
-                SvREFCNT_inc_void(base[i]);
+            for (i = 0; i < max; i++) {
+                SV *sv = base[i];
+                assert(sv);
+                if (SvREFCNT(sv) > 1)
+                    base[i] = newSVsv(sv);
+                else
+                    SvREFCNT_inc_simple_void_NN(sv);
+            }
             av_clear(av);
             if (max > 0) {
                 av_extend(av, max);
