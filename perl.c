@@ -1127,16 +1127,6 @@ perl_destruct(pTHXx)
     PL_SB_invlist = NULL;
     PL_WB_invlist = NULL;
 
-#ifdef USE_THREAD_SAFE_LOCALE
-    if (PL_C_locale_obj) {
-        /* Make sure we aren't using the locale space we are about to free */
-        uselocale(LC_GLOBAL_LOCALE);
-
-        freelocale(PL_C_locale_obj);
-        PL_C_locale_obj = (locale_t) NULL;
-    }
-#endif
-
     if (!specialWARN(PL_compiling.cop_warnings))
 	PerlMemShared_free(PL_compiling.cop_warnings);
     PL_compiling.cop_warnings = NULL;

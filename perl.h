@@ -5963,7 +5963,23 @@ typedef struct am_table_short AMTS;
 /* These locale things are all subject to change */
 
 #   define LOCALE_INIT   MUTEX_INIT(&PL_locale_mutex)
-#   define LOCALE_TERM   MUTEX_DESTROY(&PL_locale_mutex)
+
+#   ifdef USE_THREAD_SAFE_LOCALE
+#       define LOCALE_TERM                                                  \
+                    STMT_START {                                            \
+                        MUTEX_DESTROY(&PL_locale_mutex);                    \
+                        if (PL_C_locale_obj) {                              \
+                            /* Make sure we aren't using the locale         \
+                             * space we are about to free */                \
+                            uselocale(LC_GLOBAL_LOCALE);                    \
+                            freelocale(PL_C_locale_obj);                    \
+                            PL_C_locale_obj = (locale_t) NULL;              \
+                        }                                                   \
+                     } STMT_END
+    }
+#   else
+#       define LOCALE_TERM   MUTEX_DESTROY(&PL_locale_mutex)
+#   endif
 
 #   define LOCALE_LOCK   MUTEX_LOCK(&PL_locale_mutex)
 #   define LOCALE_UNLOCK MUTEX_UNLOCK(&PL_locale_mutex)
