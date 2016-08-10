@@ -1596,7 +1596,7 @@ PP(pp_sort)
     /* shuffle stack down, removing optional initial cv (p1!=p2), plus
      * any nulls; also stringify or converting to integer or number as
      * required any args */
-    copytmps = PL_sortcop;
+    copytmps = cBOOL(PL_sortcop);
     for (i=max; i > 0 ; i--) {
 	if ((*p1 = *p2++)) {			/* Weed out nulls. */
 	    if (copytmps && SvPADTMP(*p1)) {
