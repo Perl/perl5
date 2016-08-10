@@ -975,7 +975,7 @@ use File::Glob qw(:case);
     },
 
     'Pod::Perldoc' => {
-        'DISTRIBUTION' => 'MALLEN/Pod-Perldoc-3.25.tar.gz',
+        'DISTRIBUTION' => 'MALLEN/Pod-Perldoc-3.27.tar.gz',
         'FILES'        => q[cpan/Pod-Perldoc],
 
         # Note that we use the CPAN-provided Makefile.PL, since it
@@ -986,10 +986,6 @@ use File::Glob qw(:case);
         # XXX We can and should fix this, but clean up the DRY-failure in utils
         # first
         'EXCLUDED' => ['perldoc'],
-
-        # https://rt.cpan.org/Ticket/Display.html?id=106798
-        # https://rt.cpan.org/Ticket/Display.html?id=110368
-        'CUSTOMIZED'   => [ qw[ lib/Pod/Perldoc.pm ] ],
     },
 
     'Pod::Simple' => {
