@@ -2529,7 +2529,7 @@ Perl_my_strerror(pTHX_ const int errnum)
     locale_t save_locale;
 #  else
     char * save_locale;
-    bool locale_is_C;
+    bool locale_is_C = FALSE;
 
     /* We have a critical section to prevent another thread from changing the
      * locale out from under us (or zapping the buffer returned from
@@ -2539,23 +2539,34 @@ Perl_my_strerror(pTHX_ const int errnum)
 #  endif
 
     if (! within_locale_scope) {
+        errno = 0;
 
 #  ifdef USE_THREAD_SAFE_LOCALE /* Use the thread-safe locale functions */
 
         save_locale = uselocale(PL_C_locale_obj);
+        if (! save_locale) {
+            DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                  "uselocale failed, errno=%d\n", errno));
+        }
 
 #  else    /* Not thread-safe build */
 
         save_locale = setlocale(LC_MESSAGES, NULL);
-        locale_is_C = isNAME_C_OR_POSIX(save_locale);
+        if (! save_locale) {
+            DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                  "setlocale failed, errno=%d\n", errno));
+        }
+        else {
+            locale_is_C = isNAME_C_OR_POSIX(save_locale);
 
-        /* Switch to the C locale if not already in it */
-        if (! locale_is_C) {
+            /* Switch to the C locale if not already in it */
+            if (! locale_is_C) {
 
-            /* The setlocale() just below likely will zap 'save_locale', so
-             * create a copy.  */
-            save_locale = savepv(save_locale);
-            setlocale(LC_MESSAGES, "C");
+                /* The setlocale() just below likely will zap 'save_locale', so
+                 * create a copy.  */
+                save_locale = savepv(save_locale);
+                setlocale(LC_MESSAGES, "C");
+            }
         }
 
 #  endif
@@ -2573,16 +2584,23 @@ Perl_my_strerror(pTHX_ const int errnum)
 #ifdef USE_LOCALE_MESSAGES
 
     if (! within_locale_scope) {
+        errno = 0;
 
 #  ifdef USE_THREAD_SAFE_LOCALE
 
-        uselocale(save_locale);
+        if (save_locale && ! uselocale(save_locale)) {
+            DEBUG_L(PerlIO_printf(Perl_debug_log,
+                          "uselocale restore failed, errno=%d\n", errno));
+        }
     }
 
 #  else
 
-        if (! locale_is_C) {
-            setlocale(LC_MESSAGES, save_locale);
+        if (save_locale && ! locale_is_C) {
+            if (! setlocale(LC_MESSAGES, save_locale)) {
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                      "setlocale restore failed, errno=%d\n", errno));
+            }
             Safefree(save_locale);
         }
     }
