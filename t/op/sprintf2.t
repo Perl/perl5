@@ -761,6 +761,7 @@ SKIP: {
     }
 }
 
+# [rt.perl.org #128843]
 SKIP: {
     my @subnormals = (
 	# Keep these as strings so that non-IEEE-754 don't trip over them.
