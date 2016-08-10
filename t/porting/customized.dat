@@ -46,8 +46,6 @@ JSON::PP cpan/JSON-PP/bin/json_pp a7b8de6c201ef177ee82624ee4ca6a47cc1a3b4f
 JSON::PP cpan/JSON-PP/lib/JSON/PP.pm c8762a306740d0b32c099faf7118f2c1a391d9db
 Locale::Maketext::Simple cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm 57ed38905791a17c150210cd6f42ead22a7707b6
 Memoize cpan/Memoize/Memoize.pm 902092ff91cdec9c7b4bd06202eb179e1ce26ca2
-Module::Metadata cpan/Module-Metadata/t/extract-package.t ddb0a96a6bd0c1593c5654d4ac4449c1a64f6953
-Module::Metadata cpan/Module-Metadata/t/metadata.t ed2fa6cb370800830a826f19c4f012ff622e6aab
 Pod::Checker cpan/Pod-Checker/t/pod/contains_bad_pod.xr 73538fd80dfe6e19ad561fe034009b44460208f6
 Pod::Checker cpan/Pod-Checker/t/pod/selfcheck.t 8ce3cfd38e4b9bcf5bc7fe7f2a14195e49aed7d8
 Pod::Checker cpan/Pod-Checker/t/pod/testcmp.pl a0cd5c8eca775c7753f4464eee96fa916e3d8a16
@@ -110,6 +108,7 @@ Test::Harness cpan/Test-Harness/lib/TAP/Parser/YAMLish/Reader.pm 76771092dd2b87a
 Test::Harness cpan/Test-Harness/lib/TAP/Parser/YAMLish/Writer.pm bf1fbfff9720330886651f183959a5db56daeea0
 Test::Harness cpan/Test-Harness/lib/Test/Harness.pm da2d76ba673372da129060c9d0adb8cf0d91f9f7
 autodie cpan/autodie/t/mkdir.t 9e70d2282a3cc7d76a78bf8144fccba20fb37dac
+base dist/base/lib/base.pm 9575442273694d41c8e86cb1d86fa1935a07c8a8
 bignum cpan/bignum/lib/bigint.pm b901044cb5ecd8b331495769f547350da5d4ed60
 bignum cpan/bignum/lib/bignum.pm 9903bb25a330e0af73016000c0fba147bb990afd
 bignum cpan/bignum/lib/bigrat.pm b8fcffd8e60bfa9f32ccb9ab8c0fa5726d6392f8
