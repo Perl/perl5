@@ -12430,12 +12430,12 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 bool hexradix = FALSE; /* should we output the radix */
                 bool subnormal = FALSE; /* IEEE 754 subnormal/denormal */
 
-                /* XXX: denormals, NaN, Inf.
+                /* XXX: NaN, Inf -- though they are printed as "NaN" and "Inf".
                  *
                  * For example with denormals, (assuming the vanilla
                  * 64-bit double): the exponent is zero. 1xp-1074 is
                  * the smallest denormal and the smallest double, it
-                 * should be output as 0x0.0000000000001p-1022 to
+                 * could be output also as 0x0.0000000000001p-1022 to
                  * match its internal structure. */
 
                 vend = S_hextract(aTHX_ nv, &exponent, &subnormal, vhex, NULL);
