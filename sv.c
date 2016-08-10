@@ -12518,7 +12518,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                       v0 = vhex;
                     }
 
-                    if (precis > 0) {
+                    if (has_precis) {
                         U8* ve = (subnormal ? vlnz + 1 : vend);
                         SSize_t vn = ve - (subnormal ? vfnz : vhex);
                         if ((SSize_t)(precis + 1) < vn) {
