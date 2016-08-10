@@ -176,13 +176,13 @@ for my $entry (@map) {
 ### Heuristics
 {
   require IO::Socket::INET;
-  my $sock = IO::Socket::INET->new( PeerAddr => 'ftp.funet.fi', PeerPort => 21, Timeout => 20 )
+  my $sock = IO::Socket::INET->new( PeerAddr => 'mirror.bytemark.co.uk', PeerPort => 21, Timeout => 20 )
      or $heuristics{ftp} = 0;
 }
 
 ### ftp:// tests ###
-{   my $uri = 'ftp://ftp.funet.fi/pub/CPAN/index.html';
-    for (qw[lwp netftp wget curl lftp fetch ncftp]) {
+{   my $uri = 'ftp://mirror.bytemark.co.uk/CPAN/index.html';
+    for (qw[wget curl lftp fetch ncftp]) {
 
         ### STUPID STUPID warnings ###
         next if $_ eq 'ncftp' and $File::Fetch::FTP_PASSIVE
@@ -203,6 +203,7 @@ for my $entry (@map) {
 {   for my $uri ( 'http://www.cpan.org/index.html',
                   'http://www.cpan.org/index.html?q=1',
                   'http://www.cpan.org/index.html?q=1&y=2',
+                  'http://user:passwd@httpbin.org/basic-auth/user/passwd',
     ) {
         for (qw[lwp httptiny wget curl lftp fetch lynx httplite iosock]) {
             _fetch_uri( http => $uri, $_ );

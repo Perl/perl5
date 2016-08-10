@@ -519,12 +519,8 @@ use File::Glob qw(:case);
     },
 
     'File::Fetch' => {
-        'DISTRIBUTION' => 'BINGOS/File-Fetch-0.48.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/File-Fetch-0.50.tar.gz',
         'FILES'        => q[cpan/File-Fetch],
-        'CUSTOMIZED'   => [
-            # CVE-2016-1238
-            qw( lib/File/Fetch.pm )
-        ],
     },
 
     'File::Path' => {

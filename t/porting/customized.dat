@@ -11,7 +11,6 @@ Encode cpan/Encode/t/enc_utf8.t 7d1c9a4260c0c6b263eff30539e591c417e602a9
 Encode cpan/Encode/t/encoding.t ed051c17c92510713b24217c22384815088834a8
 Encode cpan/Encode/t/jperl.t 584a3813e7bc680ee6ec1d54253bbf861bda8215
 ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t a0369c919e216fb02767a637666bb4577ad79b02
-File::Fetch cpan/File-Fetch/lib/File/Fetch.pm bd0b64a1d8ee2ffac39e017f9fa9f78f95514b4d
 File::Path cpan/File-Path/lib/File/Path.pm fd8ce4420a0c113d3f47dd3223859743655c1da8
 File::Path cpan/File-Path/t/Path_win32.t 94b9276557ce7f80b91f6fd9bfa7a0cd9bf9683e
 HTTP::Tiny cpan/HTTP-Tiny/lib/HTTP/Tiny.pm 5c418f455ac27283d5728ecb166707e6eb0e359c
