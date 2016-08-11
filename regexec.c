@@ -458,7 +458,7 @@ S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
         case _CC_ENUM_ALPHA:     return isALPHA_LC(character);
         case _CC_ENUM_ASCII:     return isASCII_LC(character);
         case _CC_ENUM_BLANK:     return isBLANK_LC(character);
-        case _CC_ENUM_CASED:     return isLOWER_LC(character)
+        case _CC_ENUM_CASED:     return    isLOWER_LC(character)
                                         || isUPPER_LC(character);
         case _CC_ENUM_CNTRL:     return isCNTRL_LC(character);
         case _CC_ENUM_DIGIT:     return isDIGIT_LC(character);
