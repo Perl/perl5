@@ -3098,8 +3098,7 @@ S_scan_const(pTHX_ char *start)
 
                 /* Subtract 3 for the bytes that were already accounted for
                  * (min, max, and the hyphen) */
-                SvGROW(sv, SvLEN(sv) + grow - 3);
-		d = SvPVX(sv) + save_offset;	/* refresh d after realloc */
+                d = save_offset + SvGROW(sv, SvLEN(sv) + grow - 3);
 
                 /* Here, we expand out the range.  On ASCII platforms, the
                  * compiler should optimize out the 'convert_unicode==TRUE'

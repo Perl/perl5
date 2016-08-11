@@ -4109,8 +4109,7 @@ PP(pp_uc)
                      * allocate without allocating too much.  Such is life.
                      * See corresponding comment in lc code for another option
                      * */
-                    SvGROW(dest, min);
-                    d = (U8*)SvPVX(dest) + o;
+                    d = o + (U8*) SvGROW(dest, min);
                 }
                 Copy(tmpbuf, d, ulen, U8);
                 d += ulen;
@@ -4174,8 +4173,7 @@ PP(pp_uc)
 			 * ASCII.  If not enough room, grow the string */
 			if (SvLEN(dest) < ++min) {	
 			    const UV o = d - (U8*)SvPVX_const(dest);
-			    SvGROW(dest, min);
-			    d = (U8*)SvPVX(dest) + o;
+			    d = o + (U8*) SvGROW(dest, min);
 			}
 			*d++ = 'S'; *d = 'S'; /* upper case is 'SS' */
 			continue;   /* Back to the tight loop; still in ASCII */
@@ -4325,8 +4323,7 @@ PP(pp_lc)
 		 * Another option would be to grow an extra byte or two more
 		 * each time we need to grow, which would cut down the million
 		 * to 500K, with little waste */
-		SvGROW(dest, min);
-		d = (U8*)SvPVX(dest) + o;
+		d = o + (U8*) SvGROW(dest, min);
 	    }
 
 	    /* Copy the newly lowercased letter to the output buffer we're
@@ -4520,8 +4517,7 @@ PP(pp_fc)
 
             if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
                 const UV o = d - (U8*)SvPVX_const(dest);
-                SvGROW(dest, min);
-                d = (U8*)SvPVX(dest) + o;
+                d = o + (U8*) SvGROW(dest, min);
             }
 
             Copy(tmpbuf, d, ulen, U8);
@@ -4600,8 +4596,7 @@ PP(pp_fc)
                      * becomes "ss", which may require growing the SV. */
                     if (SvLEN(dest) < ++min) {
                         const UV o = d - (U8*)SvPVX_const(dest);
-                        SvGROW(dest, min);
-                        d = (U8*)SvPVX(dest) + o;
+                        d = o + (U8*) SvGROW(dest, min);
                      }
                     *(d)++ = 's';
                     *d = 's';
