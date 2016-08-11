@@ -12421,6 +12421,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 int exponent = 0; /* exponent of the floating point input */
                 bool hexradix = FALSE; /* should we output the radix */
                 bool subnormal = FALSE; /* IEEE 754 subnormal/denormal */
+                bool negative = FALSE;
 
                 /* XXX: NaN, Inf -- though they are printed as "NaN" and "Inf".
                  *
@@ -12448,9 +12449,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #  endif
 #endif
 
-                if (fv < 0
-                    || Perl_signbit(nv)
-                  )
+                negative = fv < 0 || Perl_signbit(nv);
+                if (negative)
                     *p++ = '-';
                 else if (plus)
                     *p++ = plus;
@@ -12628,12 +12628,18 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         memset(PL_efloatbuf + elen, ' ', width - elen);
                     }
                     else if (fill == '0') {
-                        /* Insert the zeros between the "0x" and
-                         * the digits, otherwise we end up with
-                         * "0000xHHH..." */
+                        /* Insert the zeros after the "0x" and the
+                         * the potential sign, but before the digits,
+                         * otherwise we end up with "0000xH.HHH...",
+                         * when we want "0x000H.HHH..."  */
                         STRLEN nzero = width - elen;
                         char* zerox = PL_efloatbuf + 2;
-                        Move(zerox, zerox + nzero,  elen - 2, char);
+                        STRLEN nmove = elen - 2;
+                        if (negative || plus) {
+                            zerox++;
+                            nmove--;
+                        }
+                        Move(zerox, zerox + nzero, nmove, char);
                         memset(zerox, fill, nzero);
                     }
                     else {
