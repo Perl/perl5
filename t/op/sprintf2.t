@@ -794,55 +794,55 @@ SKIP: {
 
     # IEEE 754 64-bit
     skip("nv_preserves_uv_bits is $Config{nv_preserves_uv_bits}, not 53",
-         scalar @subnormals)
+         scalar @subnormals + 34)
         unless $Config{nv_preserves_uv_bits} == 53;
 
     for my $t (@subnormals) {
         my $s = sprintf($t->[1], $t->[0]);
         is($s, $t->[2], "subnormal @$t got $s");
     }
+
+    # [rt.perl.org #128888]
+    is(sprintf("%a", 1.03125),   "0x1.08p+0");
+    is(sprintf("%.1a", 1.03125), "0x1.0p+0");
+    is(sprintf("%.0a", 1.03125), "0x1p+0", "[rt.perl.org #128888]");
+
+   # [rt.perl.org #128889]
+   is(sprintf("%.*a", -1, 1.03125), "0x1.08p+0", "[rt.perl.org #128889]");
+
+   # [rt.perl.org #128890]
+   is(sprintf("%a", 0x1.18p+0), "0x1.18p+0");
+   is(sprintf("%.1a", 0x1.08p+0), "0x1.0p+0");
+   is(sprintf("%.1a", 0x1.18p+0), "0x1.2p+0", "[rt.perl.org #128890]");
+   is(sprintf("%.1a", 0x1.28p+0), "0x1.2p+0");
+   is(sprintf("%.1a", 0x1.38p+0), "0x1.4p+0");
+   is(sprintf("%.1a", 0x1.48p+0), "0x1.4p+0");
+   is(sprintf("%.1a", 0x1.58p+0), "0x1.6p+0");
+   is(sprintf("%.1a", 0x1.68p+0), "0x1.6p+0");
+   is(sprintf("%.1a", 0x1.78p+0), "0x1.8p+0");
+   is(sprintf("%.1a", 0x1.88p+0), "0x1.8p+0");
+   is(sprintf("%.1a", 0x1.98p+0), "0x1.ap+0");
+   is(sprintf("%.1a", 0x1.a8p+0), "0x1.ap+0");
+   is(sprintf("%.1a", 0x1.b8p+0), "0x1.cp+0");
+   is(sprintf("%.1a", 0x1.c8p+0), "0x1.cp+0");
+   is(sprintf("%.1a", 0x1.d8p+0), "0x1.ep+0");
+   is(sprintf("%.1a", 0x1.e8p+0), "0x1.ep+0");
+   is(sprintf("%.1a", 0x1.f8p+0), "0x2.0p+0");
+
+   is(sprintf("%.1a", 0x1.10p+0), "0x1.1p+0");
+   is(sprintf("%.1a", 0x1.17p+0), "0x1.1p+0");
+   is(sprintf("%.1a", 0x1.19p+0), "0x1.2p+0");
+   is(sprintf("%.1a", 0x1.1fp+0), "0x1.2p+0");
+
+   is(sprintf("%.2a", 0x1.fffp+0), "0x2.00p+0");
+   is(sprintf("%.2a", 0xf.fffp+0), "0x2.00p+3");
+
+   # [rt.perl.org #128893]
+   is(sprintf("%020a", 1.5), "0x0000000000001.8p+0");
+   is(sprintf("%020a", -1.5), "-0x000000000001.8p+0", "[rt.perl.org #128893]");
+   is(sprintf("%+020a", 1.5), "+0x000000000001.8p+0", "[rt.perl.org #128893]");
+   is(sprintf("% 020a", 1.5), " 0x000000000001.8p+0", "[rt.perl.org #128893]");
+   is(sprintf("%20a", -1.5), "           -0x1.8p+0");
+   is(sprintf("%+20a", 1.5), "           +0x1.8p+0");
+   is(sprintf("% 20a", 1.5), "            0x1.8p+0");
 }
-
-# [rt.perl.org #128888]
-is(sprintf("%a", 1.03125),   "0x1.08p+0");
-is(sprintf("%.1a", 1.03125), "0x1.0p+0");
-is(sprintf("%.0a", 1.03125), "0x1p+0", "[rt.perl.org #128888]");
-
-# [rt.perl.org #128889]
-is(sprintf("%.*a", -1, 1.03125), "0x1.08p+0", "[rt.perl.org #128889]");
-
-# [rt.perl.org #128890]
-is(sprintf("%a", 0x1.18p+0), "0x1.18p+0");
-is(sprintf("%.1a", 0x1.08p+0), "0x1.0p+0");
-is(sprintf("%.1a", 0x1.18p+0), "0x1.2p+0", "[rt.perl.org #128890]");
-is(sprintf("%.1a", 0x1.28p+0), "0x1.2p+0");
-is(sprintf("%.1a", 0x1.38p+0), "0x1.4p+0");
-is(sprintf("%.1a", 0x1.48p+0), "0x1.4p+0");
-is(sprintf("%.1a", 0x1.58p+0), "0x1.6p+0");
-is(sprintf("%.1a", 0x1.68p+0), "0x1.6p+0");
-is(sprintf("%.1a", 0x1.78p+0), "0x1.8p+0");
-is(sprintf("%.1a", 0x1.88p+0), "0x1.8p+0");
-is(sprintf("%.1a", 0x1.98p+0), "0x1.ap+0");
-is(sprintf("%.1a", 0x1.a8p+0), "0x1.ap+0");
-is(sprintf("%.1a", 0x1.b8p+0), "0x1.cp+0");
-is(sprintf("%.1a", 0x1.c8p+0), "0x1.cp+0");
-is(sprintf("%.1a", 0x1.d8p+0), "0x1.ep+0");
-is(sprintf("%.1a", 0x1.e8p+0), "0x1.ep+0");
-is(sprintf("%.1a", 0x1.f8p+0), "0x2.0p+0");
-
-is(sprintf("%.1a", 0x1.10p+0), "0x1.1p+0");
-is(sprintf("%.1a", 0x1.17p+0), "0x1.1p+0");
-is(sprintf("%.1a", 0x1.19p+0), "0x1.2p+0");
-is(sprintf("%.1a", 0x1.1fp+0), "0x1.2p+0");
-
-is(sprintf("%.2a", 0x1.fffp+0), "0x2.00p+0");
-is(sprintf("%.2a", 0xf.fffp+0), "0x2.00p+3");
-
-# [rt.perl.org #128893]
-is(sprintf("%020a", 1.5), "0x0000000000001.8p+0");
-is(sprintf("%020a", -1.5), "-0x000000000001.8p+0", "[rt.perl.org #128893]");
-is(sprintf("%+020a", 1.5), "+0x000000000001.8p+0", "[rt.perl.org #128893]");
-is(sprintf("% 020a", 1.5), " 0x000000000001.8p+0", "[rt.perl.org #128893]");
-is(sprintf("%20a", -1.5), "           -0x1.8p+0");
-is(sprintf("%+20a", 1.5), "           +0x1.8p+0");
-is(sprintf("% 20a", 1.5), "            0x1.8p+0");
