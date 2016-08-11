@@ -4,7 +4,7 @@ use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use Module::CoreList::TieHashDelta;
 use version;
-$VERSION = '5.20160730_24';
+$VERSION = '5.20160819_24';
 
 sub _released_order {   # Sort helper, to make '?' sort after everything else
     (substr($released{$a}, 0, 1) eq "?")
@@ -12905,9 +12905,9 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Math::BigFloat::Trace' => '0.42_01',
             'Math::BigInt::Trace'   => '0.42_01',
             'Memoize'               => '1.03_01',
-            'Module::CoreList'      => '5.20160730_24',
-            'Module::CoreList::TieHashDelta'=> '5.20160730_24',
-            'Module::CoreList::Utils'=> '5.20160730_24',
+            'Module::CoreList'      => '5.20160819_24',
+            'Module::CoreList::TieHashDelta'=> '5.20160819_24',
+            'Module::CoreList::Utils'=> '5.20160819_24',
             'Module::Metadata::corpus::BOMTest::UTF16BE'=> undef,
             'Module::Metadata::corpus::BOMTest::UTF16LE'=> undef,
             'Module::Metadata::corpus::BOMTest::UTF8'=> '1',
@@ -12926,6 +12926,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Net::Ping'             => '2.43_01',
             'Net::SMTP'             => '3.08_01',
             'Net::Time'             => '3.08_01',
+            'Parse::CPAN::Meta'     => '1.4417_001',
             'Pod::Html'             => '1.2201',
             'Pod::Perldoc'          => '3.25_03',
             'Storable'              => '2.56_01',
@@ -13666,7 +13667,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
         }
     },
     5.024001 => {
-        delta_from => 5.024,
+        delta_from => 5.024000,
         changed => {
         },
         removed => {
