@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 
-plan 5;
+plan 6;
 
 my @a = ( 'abc', 'def', 'ghi' );
 @a = map { splice( @a, 0 ); $_ } ( @a );
@@ -39,3 +39,9 @@ is $@, '', '[perl #18489] freeing elems of sort @pkg_array';
 
 map{@a=($_+=0)x$_}@a=qw(1 1);
 pass '[perl #22312] map freeing elems from array assignment';
+
+our @F;
+$F[7] = 8;
+$a=@F[4,7]-=@F=3;
+is $a, 7,
+  '[perl #24342] array assignment freeing stack elem from array slice';

@@ -4692,7 +4692,7 @@ PP(pp_aslice)
 			SAVEADELETE(av, elem);
 		}
 	    }
-	    *MARK = svp ? *svp : &PL_sv_undef;
+	    *MARK = svp ? SvREFCNT_inc_NN(sv_2mortal(*svp)) : &PL_sv_undef;
 	}
     }
     if (GIMME_V != G_ARRAY) {
