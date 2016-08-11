@@ -12525,12 +12525,12 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                             bool overflow = FALSE;
                             if (v0[precis + 1] < 0x8) {
                                 /* Round down, nothing to do. */
-                            } else if (v[precis + 1] > 0x8) {
+                            } else if (v0[precis + 1] > 0x8) {
                                 /* Round up. */
-                                v0[precis + 1]++;
-                                overflow = v0[precis + 1] > 0xF;
-                                v0[precis + 1] &= 0xF;
-                            } else { /* v[precis + 1] == 0x8 */
+                                v0[precis]++;
+                                overflow = v0[precis] > 0xF;
+                                v0[precis] &= 0xF;
+                            } else { /* v0[precis] == 0x8 */
                                 /* Half-point: round towards the one
                                  * with the even least-significant digit:
                                  * 08 -> 0  88 -> 8
