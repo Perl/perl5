@@ -979,7 +979,7 @@ foreach my $Locale (@Locale) {
         @{$posixes{'punct'}} = grep /[[:punct:]]/, map {chr } 0..255;
         @{$posixes{'upper'}} = grep /[[:upper:]]/, map {chr } 0..255;
         @{$posixes{'xdigit'}} = grep /[[:xdigit:]]/, map {chr } 0..255;
-        @{$posixes{'cased'}} = grep /[[:upper:]]/i, map {chr } 0..255;
+        @{$posixes{'cased'}} = grep /[[:upper:][:lower:]]/i, map {chr } 0..255;
 
         # Sieve the uppercase and the lowercase.
 
@@ -1010,7 +1010,7 @@ foreach my $Locale (@Locale) {
         @{$posixes{'punct'}} = grep /[[:punct:]]/, map {chr } 0..255;
         @{$posixes{'upper'}} = grep /[[:upper:]]/, map {chr } 0..255;
         @{$posixes{'xdigit'}} = grep /[[:xdigit:]]/, map {chr } 0..255;
-        @{$posixes{'cased'}} = grep /[[:upper:]]/i, map {chr } 0..255;
+        @{$posixes{'cased'}} = grep /[[:upper:][:lower:]]/i, map {chr } 0..255;
         for (@{$posixes{'word'}}) {
             if (/[^\d_]/) { # skip digits and the _
                 if (uc($_) eq $_) {
@@ -1204,7 +1204,7 @@ foreach my $Locale (@Locale) {
                     (/[[:xdigit:]]/ xor /[[:^xdigit:]]/) ||
 
                     # effectively is what [:cased:] would be if it existed.
-                    (/[[:upper:]]/i xor /[[:^upper:]]/i);
+                    (/[[:upper:][:lower:]]/i xor /[^[:upper:][:lower:]]/i);
         }
         else {
             push @f, $_ unless   (/[[:alpha:]]/ xor /[[:^alpha:]]/)   ||
@@ -1220,7 +1220,7 @@ foreach my $Locale (@Locale) {
                     (/[[:upper:]]/ xor /[[:^upper:]]/)   ||
                     (/[[:word:]]/  xor /[[:^word:]]/)    ||
                     (/[[:xdigit:]]/ xor /[[:^xdigit:]]/) ||
-                    (/[[:upper:]]/i xor /[[:^upper:]]/i);
+                    (/[[:upper:][:lower:]]/i xor /[^[:upper:][:lower:]]/i);
         }
     }
     report_multi_result($Locale, $locales_test_number, \@f);
