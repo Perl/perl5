@@ -473,11 +473,11 @@ Originally, the tree would have looked like this:
     11              SVOP (0x816dcf0) gv  GV (0x80fa460) *a
 
 That is, fetch the C<a> entry from the main symbol table, and then look
-at the scalar component of it: C<gvsv> (C<pp_gvsv> into F<pp_hot.c>)
+at the scalar component of it: C<gvsv> (C<pp_gvsv> in F<pp_hot.c>)
 happens to do both these things.
 
 The right hand side, starting at line 5 is similar to what we've just
-seen: we have the C<add> op (C<pp_add> also in F<pp_hot.c>) add
+seen: we have the C<add> op (C<pp_add>, also in F<pp_hot.c>) add
 together two C<gvsv>s.
 
 Now, what's this about?
