@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.36 2016/08/04 03:15:58 dankogai Exp dankogai $
+ $Id: Encode.xs,v 2.37 2016/08/10 18:08:45 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -482,6 +482,10 @@ MODULE = Encode		PACKAGE = Encode::utf8	PREFIX = Method_
 
 PROTOTYPES: DISABLE
 
+#ifndef SvIsCOW
+# define SvIsCOW(sv) (SvREADONLY(sv) && SvFAKE(sv))
+#endif
+
 void
 Method_decode_xs(obj,src,check_sv = &PL_sv_no)
 SV *	obj
@@ -499,7 +503,13 @@ CODE:
     dSP; ENTER; SAVETMPS;
     if (src == &PL_sv_undef || SvROK(src)) src = sv_2mortal(newSV(0));
     check = SvROK(check_sv) ? ENCODE_PERLQQ|ENCODE_LEAVE_SRC : SvIV(check_sv);
-    if (!(check & ENCODE_LEAVE_SRC) && SvIsCOW(src)) sv_force_normal(src); // disassociate from any other scalars before doing in-place modifications
+    if (!(check & ENCODE_LEAVE_SRC) && SvIsCOW(src)) {
+        /*
+         * disassociate from any other scalars before doing
+         * in-place modifications
+         */
+        sv_force_normal(src);
+    }
     s = (U8 *) SvPV(src, slen);
     e = (U8 *) SvEND(src);
     /* 
@@ -712,6 +722,17 @@ CODE:
     XSRETURN(1);
 }
 
+
+#ifndef SvPV_force_nolen
+#   define SvPV_force_nolen(sv) SvPV_force_flags_nolen(sv, SV_GMAGIC)
+#endif
+
+#ifndef SvPV_force_flags_nolen
+#   define SvPV_force_flags_nolen(sv, flags) \
+        ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == SVf_POK \
+        ? SvPVX(sv) : sv_pvn_force_flags(sv, &PL_na, flags))
+#endif
+
 void
 Method_encode(obj,src,check_sv = &PL_sv_no)
 SV *	obj
@@ -922,10 +943,6 @@ CODE:
 }
 OUTPUT:
     RETVAL
-
-#ifndef SvIsCOW
-# define SvIsCOW(sv) (SvREADONLY(sv) && SvFAKE(sv))
-#endif
 
 SV *
 _utf8_on(sv)

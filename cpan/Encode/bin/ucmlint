@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 #
-# $Id: ucmlint,v 2.3 2016/08/04 03:15:58 dankogai Exp dankogai $
+# $Id: ucmlint,v 2.3 2016/08/04 03:15:58 dankogai Exp $
 #
 
 BEGIN { pop @INC if $INC[-1] eq '.' }

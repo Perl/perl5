@@ -1,6 +1,6 @@
-# $Id: encoding.pm,v 2.17 2015/09/15 13:53:27 dankogai Exp dankogai $
+# $Id: encoding.pm,v 2.18 2016/08/10 18:08:45 dankogai Exp dankogai $
 package encoding;
-our $VERSION = '2.17_01';
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.18 $ =~ /(\d+)/g;
 
 use Encode;
 use strict;
@@ -160,10 +160,12 @@ sub import {
                 ${^E_NCODING} = $enc;
             }
         }
-        HAS_PERLIO or return 1;
+        if (! HAS_PERLIO ) {
+            return 1;
+        }
     }
     else {
-        warnings::warnif("deprecate",$deprecate) if $deprecate;
+        warnings::warnif("deprecated",$deprecate) if $deprecate;
 
         defined( ${^ENCODING} ) and undef ${^ENCODING};
         undef ${^E_NCODING} if PERL_5_21_7;

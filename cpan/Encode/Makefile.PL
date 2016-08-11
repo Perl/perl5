@@ -1,5 +1,5 @@
 #
-# $Id: Makefile.PL,v 2.17 2016/08/04 03:15:58 dankogai Exp dankogai $
+# $Id: Makefile.PL,v 2.17 2016/08/04 03:15:58 dankogai Exp $
 #
 use 5.007003;
 use strict;
