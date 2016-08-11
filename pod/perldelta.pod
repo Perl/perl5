@@ -195,11 +195,15 @@ L<Memoize> has been upgraded from version 1.03 to 1.03_01.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20160429 to 5.20160730_22.
+L<Module::CoreList> has been upgraded from version 5.20160429 to 5.20160819_22.
 
 =item *
 
 L<Net::Ping> has been upgraded from version 2.43 to 2.43_01.
+
+=item *
+
+L<Parse::CPAN::Meta> has been upgraded from version 1.4414 to 1.4414_001.
 
 =item *
 
