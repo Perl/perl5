@@ -80,10 +80,6 @@ static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
     if (PL_op) \
 	CALLRUNOPS(aTHX);
 
-#define CALL_LIST_BODY(cv) \
-    PUSHMARK(PL_stack_sp); \
-    call_sv(MUTABLE_SV((cv)), G_EVAL|G_DISCARD|G_VOID);
-
 static void
 S_init_tls_and_interp(PerlInterpreter *my_perl)
 {
@@ -5014,7 +5010,8 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	JMPENV_PUSH(ret);
 	switch (ret) {
 	case 0:
-	    CALL_LIST_BODY(cv);
+	    PUSHMARK(PL_stack_sp);
+	    call_sv(MUTABLE_SV((cv)), G_EVAL|G_DISCARD|G_VOID);
 	    atsv = ERRSV;
 	    (void)SvPV_const(atsv, len);
 	    if (len) {
