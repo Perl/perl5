@@ -8,7 +8,7 @@
  *
  */
 
-/* *** these are ordered by number of of auto-popped args */
+/* *** Update arg_counts[] in scope.c if you modify these */
 
 /* zero args */
 
@@ -16,8 +16,6 @@
 #define SAVEt_CLEARPADRANGE	1
 #define SAVEt_CLEARSV		2
 #define SAVEt_REGCONTEXT	3
-
-#define SAVEt_ARG0_MAX		3
 
 /* one arg */
 
@@ -40,8 +38,6 @@
 #define SAVEt_STACK_POS		20
 #define SAVEt_READONLY_OFF	21
 #define SAVEt_FREEPADNAME	22
-
-#define SAVEt_ARG1_MAX		22
 
 /* two args */
 
@@ -70,8 +66,6 @@
 #define SAVEt_VPTR		45
 #define SAVEt_ADELETE		46
 #define SAVEt_APTR		47
-
-#define SAVEt_ARG2_MAX		47
 
 /* three args */
 
