@@ -12514,39 +12514,50 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         U8* ve = (subnormal ? vlnz + 1 : vend);
                         SSize_t vn = ve - (subnormal ? vfnz : vhex);
                         if ((SSize_t)(precis + 1) < vn) {
-                            bool round;
+                            bool overflow = FALSE;
+                            if (v0[precis + 1] < 0x8) {
+                                /* Round down, nothing to do. */
+                            } else if (v[precis + 1] > 0x8) {
+                                /* Round up. */
+                                v0[precis + 1]++;
+                                overflow = v0[precis + 1] > 0xF;
+                                v0[precis + 1] &= 0xF;
+                            } else { /* v[precis + 1] == 0x8 */
+                                /* Half-point: round towards the one
+                                 * with the even least-significant digit:
+                                 * 08 -> 0  88 -> 8
+                                 * 18 -> 2  98 -> a
+                                 * 28 -> 2  a8 -> a
+                                 * 38 -> 4  b8 -> c
+                                 * 48 -> 4  c8 -> c
+                                 * 58 -> 6  d8 -> e
+                                 * 68 -> 6  e8 -> e
+                                 * 78 -> 8  f8 -> 10 */
+                                if ((v0[precis] & 0x1)) {
+                                    v0[precis]++;
+                                }
+                                overflow = v0[precis] > 0xF;
+                                v0[precis] &= 0xF;
+                            }
 
-                            v = v0 + precis + 1;
-                            /* Round away from zero: if the tail
-                             * beyond the precis xdigits is equal to
-                             * or greater than 0x8000... */
-                            round = *v > 0x8;
-                            if (!round && *v == 0x8) {
-                                for (v++; v < ve; v++) {
-                                    if (*v) {
-                                        round = TRUE;
+                            if (overflow) {
+                                for (v = v0 + precis - 1; v >= v0; v--) {
+                                    (*v)++;
+                                    overflow = *v > 0xF;
+                                    (*v) &= 0xF;
+                                    if (!overflow) {
                                         break;
                                     }
                                 }
-                            }
-                            if (round) {
-                                for (v = v0 + precis; v >= v0; v--) {
-                                    if (*v < 0xF) {
-                                        (*v)++;
-                                        break;
-                                    }
-                                    *v = 0;
-                                    if (v == v0) {
-                                        /* If the carry goes all the way to
-                                         * the front, we need to output
-                                         * a single '1'. This goes against
-                                         * the "xdigit and then radix"
-                                         * but since this is "cannot happen"
-                                         * category, that is probably good. */
-                                        *p++ = xdig[1];
-                                    }
+                                if (v == v0 && overflow) {
+                                    /* If the overflow goes all the
+                                     * way to the front, we need to
+                                     * insert 0x1 in front. */
+                                    Move(v0, v0 + 1, vn, char);
+                                    *v0 = 0x1;
                                 }
                             }
+
                             /* The new effective "last non zero". */
                             vlnz = v0 + precis;
                         }
