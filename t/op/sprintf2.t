@@ -262,7 +262,7 @@ if ($Config{nvsize} == 8 &&
     print "# no hexfloat tests\n";
 }
 
-plan tests => 1408 + ($Q ? 0 : 12) + @hexfloat + 64;
+plan tests => 1408 + ($Q ? 0 : 12) + @hexfloat + 71;
 
 use strict;
 use Config;
@@ -827,3 +827,12 @@ is(sprintf("%.1a", 0x1.1fp+0), "0x1.2p+0");
 
 is(sprintf("%.2a", 0x1.fffp+0), "0x2.00p+0");
 is(sprintf("%.2a", 0xf.fffp+0), "0x2.00p+3");
+
+# [rt.perl.org #128893]
+is(sprintf("%020a", 1.5), "0x0000000000001.8p+0");
+is(sprintf("%020a", -1.5), "-0x000000000001.8p+0", "[rt.perl.org #128893]");
+is(sprintf("%+020a", 1.5), "+0x000000000001.8p+0", "[rt.perl.org #128893]");
+is(sprintf("% 020a", 1.5), " 0x000000000001.8p+0", "[rt.perl.org #128893]");
+is(sprintf("%20a", -1.5), "           -0x1.8p+0");
+is(sprintf("%+20a", 1.5), "           +0x1.8p+0");
+is(sprintf("% 20a", 1.5), "            0x1.8p+0");
