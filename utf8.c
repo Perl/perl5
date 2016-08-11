@@ -638,14 +638,10 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     /* Here is not a continuation byte, nor an invariant.  The only thing left
      * is a start byte (possibly for an overlong) */
 
-#ifdef EBCDIC
-    uv = NATIVE_UTF8_TO_I8(uv);
-#endif
-
-    /* Remove the leading bits that indicate the number of bytes in the
-     * character's whole UTF-8 sequence, leaving just the bits that are part of
-     * the value */
-    uv &= UTF_START_MASK(expectlen);
+    /* Convert to I8 on EBCDIC (no-op on ASCII), then remove the leading bits
+     * that indicate the number of bytes in the character's whole UTF-8
+     * sequence, leaving just the bits that are part of the value.  */
+    uv = NATIVE_UTF8_TO_I8(uv) & UTF_START_MASK(expectlen);
 
     /* Now, loop through the remaining bytes in the character's sequence,
      * accumulating each into the working value as we go.  Be sure to not look
