@@ -506,6 +506,7 @@ d_ftello=''
 d_ftime=''
 d_gettimeod=''
 d_futimes=''
+d_gai_strerror=''
 d_Gconvert=''
 d_getaddrinfo=''
 d_getcwd=''
@@ -14293,6 +14294,34 @@ else
 fi
 $rm_try
 
+: look for gai_strerror
+echo " "
+$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+int main ()
+{
+    return (gai_strerror (0) ? 0 : 1);
+    }
+EOCP
+set try
+val="$undef"
+if eval $compile; then
+    `$run ./try`
+    case "$?" in
+	0)  echo "A working gai_strerror() found." >&4
+	    val="$define" ;;
+	*)  echo "gai_strerror() found, but it doesn't work" >&4
+	    ;;
+	esac
+else
+    echo "gai_strerror() NOT found." >&4
+    fi
+set d_gai_strerror
+eval $setvar
+$rm_try
+
 : see if ndbm.h is available
 set ndbm.h i_ndbm
 eval $inhdr
@@ -24375,6 +24404,7 @@ d_fsync='$d_fsync'
 d_ftello='$d_ftello'
 d_ftime='$d_ftime'
 d_futimes='$d_futimes'
+d_gai_strerror='$d_gai_strerror'
 d_gdbm_ndbm_h_uses_prototypes='$d_gdbm_ndbm_h_uses_prototypes'
 d_gdbmndbm_h_uses_prototypes='$d_gdbmndbm_h_uses_prototypes'
 d_getaddrinfo='$d_getaddrinfo'

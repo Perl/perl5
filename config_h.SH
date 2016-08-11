@@ -2882,6 +2882,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_futimes HAS_FUTIMES		/**/
 
+/* HAS_GAI_STRERROR:
+ *	This symbol, if defined, indicates that the gai_strerror routine
+ *	is available to translate error codes returned by getaddrinfo()
+ *	into human readable strings.
+ */
+#$d_gai_strerror HAS_GAI_STRERROR	/**/
+
 /* HAS_GETADDRINFO:
  *	This symbol, if defined, indicates that the getaddrinfo() function
  *	is available for use.

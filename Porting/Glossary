@@ -983,6 +983,12 @@ d_futimes (d_futimes.U):
 	This variable conditionally defines the HAS_FUTIMES symbol, which
 	indicates to the C program that the futimes() routine is available.
 
+d_gai_strerror (d_gai_strerror.U):
+	This variable conditionally defines the HAS_GAI_STRERROR symbol
+	if the gai_strerror() routine is available and can be used to
+	translate error codes returned by getaddrinfo() into human
+	readable strings.
+
 d_Gconvert (d_gconvert.U):
 	This variable holds what Gconvert is defined as to convert
 	floating point numbers into strings.  By default, Configure
