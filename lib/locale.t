@@ -1988,12 +1988,15 @@ foreach my $Locale (@Locale) {
                 foreach my $err (keys %!) {
                     use Errno;
                     $! = eval "&Errno::$err";   # Convert to strerror() output
+                    my $errnum = 0+$!;
                     my $strerror = "$!";
                     if ("$strerror" =~ /\P{ASCII}/) {
                         $ok14 = utf8::is_utf8($strerror);
                         no locale;
                         $ok14_5 = "$!" !~ /\P{ASCII}/;
-                        debug(disp_str("non-ASCII \$!=$!")) if ! $ok14_5;
+                        debug( disp_str(
+                        "non-ASCII \$! for error $errnum='$strerror'"))
+                                                                   if ! $ok14_5;
                         last;
                     }
                 }
