@@ -262,7 +262,7 @@ if ($Config{nvsize} == 8 &&
     print "# no hexfloat tests\n";
 }
 
-plan tests => 1408 + ($Q ? 0 : 12) + @hexfloat + 41;
+plan tests => 1408 + ($Q ? 0 : 12) + @hexfloat + 64;
 
 use strict;
 use Config;
@@ -776,7 +776,7 @@ SKIP: {
 	[ '3e-323', '%.4a', '0x1.8000p-1072' ],
 	[ '3e-324', '%.4a', '0x1.0000p-1074' ],
 	[ '3e-320', '%.1a', '0x1.8p-1062' ],
-	[ '3e-321', '%.1a', '0x1.3p-1065' ],
+	[ '3e-321', '%.1a', '0x1.2p-1065' ],
 	[ '3e-322', '%.1a', '0x1.ep-1069' ],
 	[ '3e-323', '%.1a', '0x1.8p-1072' ],
 	[ '3e-324', '%.1a', '0x1.0p-1074' ],
@@ -800,3 +800,30 @@ is(sprintf("%.0a", 1.03125), "0x1p+0", "[rt.perl.org #128888]");
 
 # [rt.perl.org #128889]
 is(sprintf("%.*a", -1, 1.03125), "0x1.08p+0", "[rt.perl.org #128889]");
+
+# [rt.perl.org #128890]
+is(sprintf("%a", 0x1.18p+0), "0x1.18p+0");
+is(sprintf("%.1a", 0x1.08p+0), "0x1.0p+0");
+is(sprintf("%.1a", 0x1.18p+0), "0x1.2p+0", "[rt.perl.org #128890]");
+is(sprintf("%.1a", 0x1.28p+0), "0x1.2p+0");
+is(sprintf("%.1a", 0x1.38p+0), "0x1.4p+0");
+is(sprintf("%.1a", 0x1.48p+0), "0x1.4p+0");
+is(sprintf("%.1a", 0x1.58p+0), "0x1.6p+0");
+is(sprintf("%.1a", 0x1.68p+0), "0x1.6p+0");
+is(sprintf("%.1a", 0x1.78p+0), "0x1.8p+0");
+is(sprintf("%.1a", 0x1.88p+0), "0x1.8p+0");
+is(sprintf("%.1a", 0x1.98p+0), "0x1.ap+0");
+is(sprintf("%.1a", 0x1.a8p+0), "0x1.ap+0");
+is(sprintf("%.1a", 0x1.b8p+0), "0x1.cp+0");
+is(sprintf("%.1a", 0x1.c8p+0), "0x1.cp+0");
+is(sprintf("%.1a", 0x1.d8p+0), "0x1.ep+0");
+is(sprintf("%.1a", 0x1.e8p+0), "0x1.ep+0");
+is(sprintf("%.1a", 0x1.f8p+0), "0x2.0p+0");
+
+is(sprintf("%.1a", 0x1.10p+0), "0x1.1p+0");
+is(sprintf("%.1a", 0x1.17p+0), "0x1.1p+0");
+is(sprintf("%.1a", 0x1.19p+0), "0x1.2p+0");
+is(sprintf("%.1a", 0x1.1fp+0), "0x1.2p+0");
+
+is(sprintf("%.2a", 0x1.fffp+0), "0x2.00p+0");
+is(sprintf("%.2a", 0xf.fffp+0), "0x2.00p+3");
