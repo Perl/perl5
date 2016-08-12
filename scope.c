@@ -1116,8 +1116,10 @@ Perl_leave_scope(pTHX_ I32 base)
 
         case SAVEt_CLEARPADRANGE:
         {
-            I32 i = (I32)((uv >> SAVE_TIGHT_SHIFT) & OPpPADRANGE_COUNTMASK);
-	    SV **svp = &PL_curpad[uv >>
+            I32 i;
+	    SV **svp;
+            i = (I32)((uv >> SAVE_TIGHT_SHIFT) & OPpPADRANGE_COUNTMASK);
+            svp = &PL_curpad[uv >>
                     (OPpPADRANGE_COUNTSHIFT + SAVE_TIGHT_SHIFT)] + i - 1;
             goto clearsv;
 	case SAVEt_CLEARSV:
