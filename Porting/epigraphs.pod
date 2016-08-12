@@ -94,6 +94,22 @@ L<Announced on 2016-05-09 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   To find that the utmost reward
     Of daring should be still to dare.
 
+=head2 v5.24.1-RC3 - Dante Alighieri, trans. Dorothy L. Sayers and Barbara Reynolds, "The Divine Comedy", Cantica III: Paradise, Canto XXIII
+
+L<Announced on 2016-08-11 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2016/08/msg238909.html>
+
+  A bird within the bower of her delight,
+    Quiet upon the nest with her sweet brood
+    Throughout the dark concealment of the night,
+
+  Anxious to look on them and gather food -
+    No weary task for her, for as at play
+    Blithely she toils to seek her fledglings' good -
+
+  Before the time, upon the topmost spray
+    Eager awaits the sun and on the East
+    Fixes her wakeful eye till break of day.
+
 =head2 v5.24.1-RC2 - Dante Alighieri, trans. Dorothy L. Sayers, "The Divine Comedy", Cantica II: Purgatory, Canto X
 
 L<Announced on 2016-07-25 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2016/07/msg238269.html>
@@ -513,6 +529,22 @@ L<Announced on 2015-06-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   To be just like them
   They sing while you slave and I just get bored
   I ain't gonna work on Maggie's farm no more
+
+=head2 v5.22.3-RC3 - Dante Alighieri, trans. Dorothy L. Sayers and Barbara Reynolds, "The Divine Comedy", Cantica III: Paradise, Canto IV
+
+L<Announced on 2016-08-11 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2016/08/msg238908.html>
+
+  Between two dishes, equally attractive
+    And near to him, a free man, I suppose,
+    Would starve to death before his teeth got active;
+
+  So would a lamb 'twixt two fierce wolfish foes,
+    Fearing the fangs both ways, not stir a foot;
+    So would a deerhound halt between two does;
+
+  So I can't blame myself for standing mute,
+    Nor praise myself: for I must needs so do,
+    Suspended 'twixt two doubts, alike acute.
 
 =head2 v5.22.3-RC2 - Dante Alighieri, trans. Dorothy L. Sayers, "The Divine Comedy", Cantica II: Purgatory, Canto I
 
