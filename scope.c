@@ -1052,24 +1052,12 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 
 	case SAVEt_SPTR:			/* SV* reference */
-            a0 = ap[0]; a1 = ap[1];
-	    *a1.any_svp= a0.any_sv;
-	    break;
-
 	case SAVEt_VPTR:			/* random* reference */
 	case SAVEt_PPTR:			/* char* reference */
-            a0 = ap[0]; a1 = ap[1];
-	    *a1.any_pvp = a0.any_pv;
-	    break;
-
 	case SAVEt_HPTR:			/* HV* reference */
-            a0 = ap[0]; a1 = ap[1];
-	    *(HV**)a1.any_ptr = a0.any_hv;
-	    break;
-
 	case SAVEt_APTR:			/* AV* reference */
             a0 = ap[0]; a1 = ap[1];
-	    *(AV**)a1.any_ptr = a0.any_av;
+	    *a1.any_svp= a0.any_sv;
 	    break;
 
 	case SAVEt_GP:				/* scalar reference */
