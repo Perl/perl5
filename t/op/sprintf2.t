@@ -839,9 +839,9 @@ SKIP: {
 }
 
 # x86 80-bit long-double tests for
-# rt.perl.org #128843, #128888, #128889, #128890, #128893
+# rt.perl.org #128843, #128888, #128889, #128890, #128893, #128909
 SKIP: {
-    skip("non-80-bit-long-double", 7)
+    skip("non-80-bit-long-double", 12)
         unless ($Config{uselongdouble} &&
 		($Config{nvsize} == 16 || $Config{nvsize} == 12) &&
 		($Config{longdblkind} == 3 ||
@@ -854,6 +854,11 @@ SKIP: {
     is(sprintf("%020a", -1.5), "-0x0000000000000cp-3", "[rt.perl.org #128893]");
     is(sprintf("%+020a", 1.5), "+0x0000000000000cp-3", "[rt.perl.org #128893]");
     is(sprintf("% 020a", 1.5), " 0x0000000000000cp-3", "[rt.perl.org #128893]");
+    is(sprintf("%a", 1.9999999999999999999), "0xf.fffffffffffffffp-3");
+    is(sprintf("%.3a", 1.9999999999999999999), "0x1.000p+1", "[rt.perl.org #128909]");
+    is(sprintf("%.2a", 1.9999999999999999999), "0x1.00p+1");
+    is(sprintf("%.1a", 1.9999999999999999999), "0x1.0p+1");
+    is(sprintf("%.0a", 1.9999999999999999999), "0x1p+1");
 }
 
 done_testing();
