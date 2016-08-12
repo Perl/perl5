@@ -3796,6 +3796,13 @@ UNION_ANY_DEFINITION;
 #else
 union any {
     void*	any_ptr;
+    SV*         any_sv;
+    SV**        any_svp;
+    GV*         any_gv;
+    AV*         any_av;
+    HV*         any_hv;
+    char*       any_pv;
+    char**      any_pvp;
     I32		any_i32;
     U32		any_u32;
     IV		any_iv;
