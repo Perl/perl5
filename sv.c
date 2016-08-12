@@ -12549,12 +12549,14 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                                         break;
                                     }
                                 }
-                                if (v == v0 && overflow) {
+                                if (v == v0 - 1 && overflow) {
                                     /* If the overflow goes all the
                                      * way to the front, we need to
-                                     * insert 0x1 in front. */
+                                     * insert 0x1 in front, and adjust
+                                     * the argument. */
                                     Move(v0, v0 + 1, vn, char);
                                     *v0 = 0x1;
+                                    exponent += 4;
                                 }
                             }
 
