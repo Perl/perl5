@@ -851,7 +851,7 @@ SKIP: {
 # x86 80-bit long-double tests for
 # rt.perl.org #128843, #128888, #128889, #128890, #128893
 SKIP: {
-    skip("non-80-bit-long-double", scalar @subnormals + 34)
+    skip("non-80-bit-long-double", 7)
         unless ($Config{uselongdouble} &&
 		($Config{nvsize} == 16 || $Config{nvsize} == 12) &&
 		($Config{longdblkind} == 3 ||
