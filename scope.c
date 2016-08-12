@@ -854,8 +854,6 @@ Perl_leave_scope(pTHX_ I32 base)
     while (PL_savestack_ix > base) {
 	UV uv;
 	U8 type;
-        SV **svp;
-        I32 i;
         ANY *ap; /* arg pointer */
         ANY a0, a1, a2; /* up to 3 args */
 
@@ -888,18 +886,18 @@ Perl_leave_scope(pTHX_ I32 base)
 	       function, S_save_scalar_at(), so has to stay in this file.  */
 	case SAVEt_SVREF:			/* scalar reference */
             a0 = ap[0]; a1 = ap[1];
-	    svp = a0.any_svp;
+	    a2.any_svp = a0.any_svp;
 	    a0.any_sv = NULL; /* what to refcnt_dec */
 	    goto restore_sv;
 
 	case SAVEt_SV:				/* scalar reference */
             a0 = ap[0]; a1 = ap[1];
-	    svp = &GvSV(a0.any_gv);
+	    a2.any_svp = &GvSV(a0.any_gv);
 	restore_sv:
         {
-            /* do *svp = a1 and free a0 */
-	    SV * const sv = *svp;
-	    *svp = a1.any_sv;
+            /* do *a2.any_svp = a1 and free a0 */
+	    SV * const sv = *a2.any_svp;
+	    *a2.any_svp = a1.any_sv;
 	    SvREFCNT_dec(sv);
             if (UNLIKELY(SvSMAGICAL(a1.any_sv))) {
                 /* mg_set could die, skipping the freeing of a0 and
@@ -942,17 +940,16 @@ Perl_leave_scope(pTHX_ I32 base)
 
 	case SAVEt_GVSV:			/* scalar slot in GV */
             a0 = ap[0]; a1 = ap[1];
-	    svp = &GvSV(a0.any_gv);
+	    a0.any_svp = &GvSV(a0.any_gv);
 	    goto restore_svp;
 
 	case SAVEt_GENERIC_SVREF:		/* generic sv */
             a0 = ap[0]; a1 = ap[1];
-            svp = a0.any_svp;
 	restore_svp:
         {
-            /* do *svp = a1 */
-	    SV * const sv = *svp;
-	    *svp = a1.any_sv;
+            /* do *a0.any_svp = a1 */
+	    SV * const sv = *a0.any_svp;
+	    *a0.any_svp = a1.any_sv;
 	    SvREFCNT_dec(sv);
 	    SvREFCNT_dec(a1.any_sv);
 	    break;
@@ -963,19 +960,19 @@ Perl_leave_scope(pTHX_ I32 base)
             HV * hv;
             a0 = ap[0]; a1 = ap[1]; a2 = ap[2];
             hv = GvSTASH(a0.any_gv);
-	    svp = a1.any_svp;
 	    if (hv && HvENAME(hv) && (
 		    (a2.any_sv && SvTYPE(a2.any_sv) == SVt_PVCV)
-		 || (*svp && SvTYPE(*svp) == SVt_PVCV)
+		 || (*a1.any_svp && SvTYPE(*a1.any_svp) == SVt_PVCV)
 	       ))
 	    {
-		if ((char *)svp < (char *)GvGP(a0.any_gv)
-		 || (char *)svp > (char *)GvGP(a0.any_gv) + sizeof(struct gp)
+		if ((char *)a1.any_svp < (char *)GvGP(a0.any_gv)
+		 || (char *)a1.any_svp > (char *)GvGP(a0.any_gv) + sizeof(struct gp)
 		 || GvREFCNT(a0.any_gv) > 2) /* "> 2" to ignore savestack's ref */
 		    PL_sub_generation++;
 		else mro_method_changed_in(hv);
 	    }
-            a1.any_sv = a2.any_sv;
+            a0.any_svp = a1.any_svp;
+            a1.any_sv  = a2.any_sv;
 	    goto restore_svp;
         }
 
@@ -1130,8 +1127,9 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 
         case SAVEt_CLEARPADRANGE:
-            i = (I32)((uv >> SAVE_TIGHT_SHIFT) & OPpPADRANGE_COUNTMASK);
-	    svp = &PL_curpad[uv >>
+        {
+            I32 i = (I32)((uv >> SAVE_TIGHT_SHIFT) & OPpPADRANGE_COUNTMASK);
+	    SV **svp = &PL_curpad[uv >>
                     (OPpPADRANGE_COUNTSHIFT + SAVE_TIGHT_SHIFT)] + i - 1;
             goto clearsv;
 	case SAVEt_CLEARSV:
@@ -1248,6 +1246,7 @@ Perl_leave_scope(pTHX_ I32 base)
                 }
             }
 	    break;
+        }
 
 	case SAVEt_DELETE:
             a0 = ap[0]; a1 = ap[1]; a2 = ap[2];
@@ -1279,6 +1278,8 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 
 	case SAVEt_AELEM:		/* array element */
+        {
+            SV **svp;
             a0 = ap[0]; a1 = ap[1]; a2 = ap[2];
 	    svp = av_fetch(a0.any_av, a1.any_iv, 1);
 	    if (UNLIKELY(!AvREAL(a0.any_av) && AvREIFY(a0.any_av))) /* undo reify guard */
@@ -1288,13 +1289,15 @@ Perl_leave_scope(pTHX_ I32 base)
 		if (LIKELY(sv && sv != &PL_sv_undef)) {
 		    if (UNLIKELY(SvTIED_mg((const SV *)a0.any_av, PERL_MAGIC_tied)))
 			SvREFCNT_inc_void_NN(sv);
-                    a1.any_sv = a2.any_sv;
+                    a1.any_sv  = a2.any_sv;
+                    a2.any_svp = svp;
 		    goto restore_sv;
 		}
 	    }
 	    SvREFCNT_dec(a0.any_av);
 	    SvREFCNT_dec(a2.any_sv);
 	    break;
+        }
 
 	case SAVEt_HELEM:		/* hash element */
         {
@@ -1306,10 +1309,11 @@ Perl_leave_scope(pTHX_ I32 base)
 	    if (LIKELY(he)) {
 		const SV * const oval = HeVAL(he);
 		if (LIKELY(oval && oval != &PL_sv_undef)) {
-		    svp = &HeVAL(he);
+                    SV **svp = &HeVAL(he);
 		    if (UNLIKELY(SvTIED_mg((const SV *)a0.any_hv, PERL_MAGIC_tied)))
 			SvREFCNT_inc_void(*svp);
-                    a1.any_sv = a2.any_sv;
+                    a1.any_sv  = a2.any_sv;
+                    a2.any_svp = svp;
 		    goto restore_sv;
 		}
 	    }
@@ -1317,6 +1321,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    SvREFCNT_dec(a2.any_sv);
 	    break;
         }
+
 	case SAVEt_OP:
             a0 = ap[0];
 	    PL_op = (OP*)a0.any_ptr;
@@ -1439,7 +1444,8 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 
 	default:
-	    Perl_croak(aTHX_ "panic: leave_scope inconsistency %u", type);
+	    Perl_croak(aTHX_ "panic: leave_scope inconsistency %u",
+                    (U8)uv & SAVE_MASK);
 	}
     }
 
