@@ -6,6 +6,13 @@ use vars qw($VERSION);
 $VERSION = '2.24';
 $VERSION =~ tr/_//d;
 
+{
+    package #
+        base::__scope_guard;
+
+    sub DESTROY { $_[0]->[0]->() }
+}
+
 # constant.pm is slow
 sub SUCCESS () { 1 }
 
@@ -91,14 +98,22 @@ sub import {
 
         next if grep $_->isa($base), ($inheritor, @bases);
 
-        # Following blocks help isolate $SIG{__DIE__} changes
+        # Following blocks help isolate $SIG{__DIE__} and @INC changes
         {
-            my $sigdie;
+            my ($sigdie, $redotty_scopeguard);
             {
                 local $SIG{__DIE__};
                 my $fn = _module_to_filename($base);
-                local @INC = @INC;
-                pop @INC if my $dotty = $INC[-1] eq '.';
+
+                if ($INC[-1] eq '.') {
+                    pop @INC;
+                    my $localized_tail = $INC[-1];
+                    $redotty_scopeguard = bless([ sub {
+                        push @INC, '.'
+                            if $localized_tail eq $INC[-1]||'';
+                    } ], 'base::__scope_guard');
+                }
+
                 eval {
                     require $fn
                 };
@@ -120,7 +135,7 @@ Base class package "$base" is empty.
     (Perhaps you need to 'use' the module which defines that package first,
     or make that module available in \@INC (\@INC contains: @INC).
 ERROR
-                    if ($dotty && -e $fn) {
+                    if ($redotty_scopeguard && -e $fn) {
                         $e .= <<ERROS;
     The file $fn does exist in the current directory.  But note
     that base.pm, when loading a module, now ignores the current working
