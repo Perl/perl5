@@ -21,7 +21,7 @@ print "# uvsize = $Config{uvsize}\n";
 print "# nvsize = $Config{nvsize}\n";
 print "# nv_preserves_uv_bits = $Config{nv_preserves_uv_bits}\n";
 print "# d_quad = $Config{d_quad}\n";
-print "# uselongdouble = $Config{uselongdouble}\n";
+print "# uselongdouble = " . ($Config{uselongdouble} // 'undef') . "\n";
 if ($Config{nvsize} == 8 &&
     (
      # IEEE-754 64-bit ("double precision"), the most common out there
