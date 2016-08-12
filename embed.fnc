@@ -2644,7 +2644,7 @@ Apd	|void	|sv_catsv_flags	|NN SV *const dsv|NULLOK SV *const ssv|const I32 flags
 Apmd	|STRLEN	|sv_utf8_upgrade_flags|NN SV *const sv|const I32 flags
 Ap	|STRLEN	|sv_utf8_upgrade_flags_grow|NN SV *const sv|const I32 flags|STRLEN extra
 Apd	|char*	|sv_pvn_force_flags|NN SV *const sv|NULLOK STRLEN *const lp|const I32 flags
-pmb	|void	|sv_copypv	|NN SV *const dsv|NN SV *const ssv
+Apmb	|void	|sv_copypv	|NN SV *const dsv|NN SV *const ssv
 Apmd	|void	|sv_copypv_nomg	|NN SV *const dsv|NN SV *const ssv
 Apd	|void	|sv_copypv_flags	|NN SV *const dsv|NN SV *const ssv|const I32 flags
 Ap	|char*	|my_atof2	|NN const char *s|NN NV* value
