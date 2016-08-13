@@ -10,7 +10,7 @@ use strict;
 
 use Config;
 
-plan(tests => 105);
+plan(tests => 109);
 
 # Test hexfloat literals.
 
@@ -241,6 +241,16 @@ SKIP:
         print "# skipping warning tests\n";
         skip "nv_preserves_uv_bits is $Config{nv_preserves_uv_bits} not 53", 26;
     }
+}
+
+# [perl #128919] limited exponent range in hex fp literal with long double
+SKIP: {
+    skip("nv_preserves_uv_bits is $Config{nv_preserves_uv_bits} not 64", 4)
+        unless ($Config{nv_preserves_uv_bits} == 64);
+    is(0x1p-1074,  4.94065645841246544e-324);
+    is(0x1p-1075,  2.47032822920623272e-324, '[perl #128919]');
+    is(0x1p-1076,  1.23516411460311636e-324);
+    is(0x1p-16445, 3.6451995318824746e-4951);
 }
 
 # sprintf %a/%A testing is done in sprintf2.t,
