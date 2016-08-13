@@ -2742,9 +2742,9 @@ either consume text or fail.
 =item Initialization of state variables in list context currently forbidden
 
 (F) C<state> only permits initializing a single scalar variable, in scalar
-context. So C<state $a = 42> is allowed, but not C<state ($a) = 42>. To apply
-state semantics to a hash or array, store a hash or array reference in a scalar
-variable.
+context.  So C<state $a = 42> is allowed, but not C<state ($a) = 42>.  To apply
+state semantics to a hash or array, store a hash or array reference in a
+scalar variable.
 
 =item %%s[%s] in scalar context better written as $%s[%s]
 
