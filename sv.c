@@ -14780,8 +14780,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_forkprocess	= proto_perl->Iforkprocess;
 
     /* internal state */
-    PL_maxo		= proto_perl->Imaxo;
-
     PL_main_start	= proto_perl->Imain_start;
     PL_eval_root	= proto_perl->Ieval_root;
     PL_eval_start	= proto_perl->Ieval_start;

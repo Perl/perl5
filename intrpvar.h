@@ -543,7 +543,7 @@ PERLVARA(I, body_roots,	PERL_ARENA_ROOTS_SIZE, void*) /* array of body roots */
 
 PERLVAR(I, debug,	VOL U32)	/* flags given to -D switch */
 
-PERLVARI(I, maxo,	int,	MAXO)	/* maximum number of ops */
+					/* 32-BIT HOLE !!! */
 
 PERLVARI(I, runops,	runops_proc_t, RUNOPS_DEFAULT)
 

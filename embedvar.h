@@ -195,7 +195,6 @@
 #define PL_markstack_max	(vTHX->Imarkstack_max)
 #define PL_markstack_ptr	(vTHX->Imarkstack_ptr)
 #define PL_max_intro_pending	(vTHX->Imax_intro_pending)
-#define PL_maxo			(vTHX->Imaxo)
 #define PL_maxsysfd		(vTHX->Imaxsysfd)
 #define PL_memory_debug_header	(vTHX->Imemory_debug_header)
 #define PL_mess_sv		(vTHX->Imess_sv)

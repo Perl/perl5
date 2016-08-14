@@ -5288,6 +5288,7 @@ EXTCONST char *const PL_phase_names[];
 #endif /* !PERL_CORE */
 
 #define PL_hints PL_compiling.cop_hints
+#define PL_maxo  MAXO
 
 END_EXTERN_C
 
