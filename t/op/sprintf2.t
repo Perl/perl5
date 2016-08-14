@@ -778,6 +778,12 @@ my @subnormals = (
     [ '3e-322', '%.1a', '0x1.ep-1069' ],
     [ '3e-323', '%.1a', '0x1.8p-1072' ],
     [ '3e-324', '%.1a', '0x1.0p-1074' ],
+    [ '0x1.fffffffffffffp-1022', '%a', '0x1.fffffffffffffp-1022' ],
+    [ '0x0.fffffffffffffp-1022', '%a', '0x1.ffffffffffffep-1023' ],
+    [ '0x0.7ffffffffffffp-1022', '%a', '0x1.ffffffffffffcp-1024' ],
+    [ '0x0.3ffffffffffffp-1022', '%a', '0x1.ffffffffffff8p-1025' ],
+    [ '0x0.1ffffffffffffp-1022', '%a', '0x1.ffffffffffffp-1026' ],
+    [ '0x0.0ffffffffffffp-1022', '%a', '0x1.fffffffffffep-1027' ],
     );
 
 SKIP: {
@@ -789,7 +795,9 @@ SKIP: {
 		 $Config{doublekind} == 4));
 
     for my $t (@subnormals) {
-        my $s = sprintf($t->[1], $t->[0]);
+	# Note that "0x1p+2" is not considered numeric,
+	# since neither is "0x12", hence the eval.
+        my $s = sprintf($t->[1], eval $t->[0]);
         is($s, $t->[2], "subnormal @$t got $s");
     }
 
@@ -841,13 +849,16 @@ SKIP: {
 # x86 80-bit long-double tests for
 # rt.perl.org #128843, #128888, #128889, #128890, #128893, #128909
 SKIP: {
-    skip("non-80-bit-long-double", 12)
+    skip("non-80-bit-long-double", 15)
         unless ($Config{uselongdouble} &&
 		($Config{nvsize} == 16 || $Config{nvsize} == 12) &&
 		($Config{longdblkind} == 3 ||
 		 $Config{longdblkind} == 4));
 
     is(sprintf("%.4a", 3e-320), "0xb.dc09p-1065", "[rt.perl.org #128843]");
+    is(sprintf("%a", eval '0x1.ffffp-2000'), "0xf.fff8p-2003", "[rt.perl.org #128843]");
+    is(sprintf("%.3a", eval '0x1.ffffp-2000'), "0x1.000p-1999", "[rt.perl.org #128843]");
+    is(sprintf("%.2a", eval '0x1.ffffp-2000'), "0x1.00p-1999", "[rt.perl.org #128843]");
     is(sprintf("%.0a", 1.03125), "0x8p-3", "[rt.perl.org #128888]");
     is(sprintf("%.*a", -1, 1.03125), "0x8.4p-3", "[rt.perl.org #128889]");
     is(sprintf("%.1a", 0x8.18p+0), "0x8.2p+0", "[rt.perl.org #128890]");
