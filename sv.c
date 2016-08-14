@@ -11030,9 +11030,10 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
     for (ix = a; ix >= b; ix--) { HEXTRACT_BYTE(ix); }
 #define HEXTRACT_BYTES_BE(a, b) \
     for (ix = a; ix <= b; ix++) { HEXTRACT_BYTE(ix); }
+#define HEXTRACT_GET_SUBNORMAL(nv) *subnormal = Perl_fp_class_denorm(nv)
 #define HEXTRACT_IMPLICIT_BIT(nv) \
     STMT_START { \
-        if (!(*subnormal = (HEXTRACT_EXPONENT_BITS() == 0))) { \
+        if (!*subnormal) { \
             if (vend) *v++ = ((nv) == 0.0) ? 0 : 1; else v++; \
         } \
    } STMT_END
@@ -11070,7 +11071,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
         /* The bytes 13..0 are the mantissa/fraction,
          * the 15,14 are the sign+exponent. */
         const U8* nvp = (const U8*)(&nv);
-#   define HEXTRACT_EXPONENT_BITS() (nvp[14] | (nvp[15] & 0x7F) << 8)
+	HEXTRACT_GET_SUBNORMAL(nv);
         HEXTRACT_IMPLICIT_BIT(nv);
 #   undef HEXTRACT_HAS_TOP_NYBBLE
         HEXTRACT_BYTES_LE(13, 0);
@@ -11080,7 +11081,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
         /* The bytes 2..15 are the mantissa/fraction,
          * the 0,1 are the sign+exponent. */
         const U8* nvp = (const U8*)(&nv);
-#   define HEXTRACT_EXPONENT_BITS() ((nvp[0] & 0x7F) << 8 | nvp[1])
+	HEXTRACT_GET_SUBNORMAL(nv);
         HEXTRACT_IMPLICIT_BIT(nv);
 #   undef HEXTRACT_HAS_TOP_NYBBLE
         HEXTRACT_BYTES_BE(2, 15);
@@ -11089,10 +11090,12 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
          * significand, 15 bits of exponent, 1 bit of sign.  No implicit bit.
          * NVSIZE can be either 12 (ILP32, Solaris x86) or 16 (LP64, Linux
          * and OS X), meaning that 2 or 6 bytes are empty padding. */
-        /* The bytes 7..0 are the mantissa/fraction */
+        /* The bytes 0..1 are the sign+exponent,
+	 * the bytes 2..9 are the mantissa/fraction. */
         const U8* nvp = (const U8*)(&nv);
 #    undef HEXTRACT_HAS_IMPLICIT_BIT
 #    undef HEXTRACT_HAS_TOP_NYBBLE
+	HEXTRACT_GET_SUBNORMAL(nv);
         HEXTRACT_BYTES_LE(7, 0);
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
         /* Does this format ever happen? (Wikipedia says the Motorola
@@ -11102,6 +11105,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
         const U8* nvp = (const U8*)(&nv);
 #    undef HEXTRACT_HAS_IMPLICIT_BIT
 #    undef HEXTRACT_HAS_TOP_NYBBLE
+	HEXTRACT_GET_SUBNORMAL(nv);
         HEXTRACT_BYTES_BE(0, 7);
 #  else
 #    define HEXTRACT_FALLBACK
@@ -11137,21 +11141,21 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
 #    ifdef HEXTRACT_LITTLE_ENDIAN
         /* 0 1 2 3 4 5 6 7 (MSB = 7, LSB = 0, 6+7 = exponent+sign) */
         const U8* nvp = (const U8*)(&nv);
-#   define HEXTRACT_EXPONENT_BITS() (nvp[6] | (nvp[7] & 0x7F) << 4)
+	HEXTRACT_GET_SUBNORMAL(nv);
         HEXTRACT_IMPLICIT_BIT(nv);
         HEXTRACT_TOP_NYBBLE(6);
         HEXTRACT_BYTES_LE(5, 0);
 #    elif defined(HEXTRACT_BIG_ENDIAN)
         /* 7 6 5 4 3 2 1 0 (MSB = 7, LSB = 0, 6+7 = exponent+sign) */
         const U8* nvp = (const U8*)(&nv);
-#   define HEXTRACT_EXPONENT_BITS() (nvp[1] | (nvp[0] & 0x7F) << 4)
+	HEXTRACT_GET_SUBNORMAL(nv);
         HEXTRACT_IMPLICIT_BIT(nv);
         HEXTRACT_TOP_NYBBLE(1);
         HEXTRACT_BYTES_BE(2, 7);
 #    elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_LE_BE
         /* 4 5 6 7 0 1 2 3 (MSB = 7, LSB = 0, 6:7 = nybble:exponent:sign) */
         const U8* nvp = (const U8*)(&nv);
-#   define HEXTRACT_EXPONENT_BITS() (nvp[2] | (nvp[3] & 0x7F) << 4)
+	HEXTRACT_GET_SUBNORMAL(nv);
         HEXTRACT_IMPLICIT_BIT(nv);
         HEXTRACT_TOP_NYBBLE(2); /* 6 */
         HEXTRACT_BYTE(1); /* 5 */
@@ -11163,7 +11167,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
 #    elif DOUBLEKIND == DOUBLE_IS_IEEE_754_64_BIT_MIXED_ENDIAN_BE_LE
         /* 3 2 1 0 7 6 5 4 (MSB = 7, LSB = 0, 7:6 = sign:exponent:nybble) */
         const U8* nvp = (const U8*)(&nv);
-#   define HEXTRACT_EXPONENT_BITS() (nvp[5] | (nvp[4] & 0x7F) << 4)
+	HEXTRACT_GET_SUBNORMAL(nv);
         HEXTRACT_IMPLICIT_BIT(nv);
         HEXTRACT_TOP_NYBBLE(5); /* 6 */
         HEXTRACT_BYTE(6); /* 5 */
@@ -11180,6 +11184,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
 #  endif
 #endif /* #if defined(USE_LONG_DOUBLE) && (NVSIZE > DOUBLESIZE) #else */
 #  ifdef HEXTRACT_FALLBACK
+	HEXTRACT_GET_SUBNORMAL(nv);
 #    undef HEXTRACT_HAS_TOP_NYBBLE /* Meaningless, but consistent. */
         /* The fallback is used for the double-double format, and
          * for unknown long double formats, and for unknown double
