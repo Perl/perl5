@@ -36,10 +36,6 @@ ifeq ($(GCCBIN),i686-w64-mingw32-gcc)
 GCCCROSS := i686-w64-mingw32
 endif
 
-GCCTARGET := $(shell $(GCCBIN) -dumpmachine)
-GCCVER1   := $(shell for /f "delims=. tokens=1,2,3" %%i in ('gcc -dumpversion') do echo %%i)
-GCCVER2   := $(shell for /f "delims=. tokens=1,2,3" %%i in ('gcc -dumpversion') do echo %%j)
-GCCVER3   := $(shell for /f "delims=. tokens=1,2,3" %%i in ('gcc -dumpversion') do echo %%k)
 
 ##
 ## Build configuration.  Edit the values below to suit your needs.
@@ -178,7 +174,7 @@ USE_LARGE_FILES	:= define
 # Visual C++ 2013 Express Edition (aka Visual C++ 12.0) (free version)
 #CCTYPE		:= MSVC120FREE
 # MinGW or mingw-w64 with gcc-3.4.5 or later
-CCTYPE		:= GCC
+#CCTYPE		:= GCC
 
 #
 # If you are using Intel C++ Compiler uncomment this
@@ -355,6 +351,27 @@ BUILDOPT	+= -DWIN32_NO_REGISTRY
 endif
 
 ifeq ($(CCTYPE),GCC)
+GCCTARGET	:= $(shell $(GCCBIN) -dumpmachine)
+endif
+
+#no explicit CCTYPE given, do auto detection
+ifeq ($(CCTYPE),)
+GCCTARGET	:= $(shell $(GCCBIN) -dumpmachine 2>NUL)
+#do we have a GCC?
+ifneq ($(GCCTARGET),)
+CCTYPE		:= GCC
+else
+#use var to capture 1st line only, not 8th token of lines 2 & 3 in cl.exe output
+#rmving the cmd /c causes the var2b undef4echo but!4"set MSVCVER", cmd.exe bug?
+MSVCVER		:= $(shell (set MSVCVER=) & (for /f "tokens=8 delims=.^ " \
+	%%i in ('cl ^2^>^&1') do if not defined MSVCVER set /A "MSVCVER=%%i-6") \
+	& cmd /c echo %%MSVCVER%%)
+CCTYPE		:= MSVC$(MSVCVER)0
+endif
+endif
+
+
+ifeq ($(CCTYPE),GCC)
 ifeq ($(GCCTARGET),x86_64-w64-mingw32)
 WIN64 := define
 PROCESSOR_ARCHITECTURE := x64
@@ -482,6 +499,10 @@ ifeq ($(USE_LONG_DOUBLE),define)
 BUILDOPT        += -D__USE_MINGW_ANSI_STDIO
 MINIBUILDOPT    += -D__USE_MINGW_ANSI_STDIO
 endif
+
+GCCVER1   := $(shell for /f "delims=. tokens=1,2,3" %%i in ('gcc -dumpversion') do echo %%i)
+GCCVER2   := $(shell for /f "delims=. tokens=1,2,3" %%i in ('gcc -dumpversion') do echo %%j)
+GCCVER3   := $(shell for /f "delims=. tokens=1,2,3" %%i in ('gcc -dumpversion') do echo %%k)
 
 # If you are using GCC, 4.3 or later by default we add the -fwrapv option.
 # See https://rt.perl.org/Ticket/Display.html?id=121505
@@ -1083,15 +1104,18 @@ CFG_VARS	=					\
 all : info rebasePE Extensions_nonxs $(PERLSTATIC)
 
 info :
+	@echo # CCTYPE=$(CCTYPE)
+ifeq ($(CCTYPE),GCC)
 	@echo # GCCBIN=$(GCCBIN)
 	@echo # GCCVER=$(GCCVER1).$(GCCVER2).$(GCCVER3)
 	@echo # GCCTARGET=$(GCCTARGET)
 	@echo # GCCCROSS=$(GCCCROSS)
+endif
 	@echo # WIN64=$(WIN64)
 	@echo # ARCHITECTURE=$(ARCHITECTURE)
 	@echo # ARCHNAME=$(ARCHNAME)
 	@echo # MAKE=$(PLMAKE)
-ifeq ($(GCCTARGET),)
+ifeq ($(CCTYPE),)
 	@echo Unable to detect gcc and/or architecture!
 	@exit 1
 endif

@@ -146,7 +146,7 @@ USE_LARGE_FILES	*= define
 # Visual C++ 2013 Express Edition (aka Visual C++ 12.0) (free version)
 #CCTYPE		= MSVC120FREE
 # MinGW or mingw-w64 with gcc-3.4.5 or later
-CCTYPE		*= GCC
+#CCTYPE		= GCC
 
 #
 # If you are using GCC, 4.3 or later by default we add the -fwrapv option.
@@ -354,6 +354,20 @@ BUILDOPT	+= -DPERL_IMPLICIT_SYS
 .IF "$(USE_NO_REGISTRY)" != "undef"
 BUILDOPT	+= -DWIN32_NO_REGISTRY
 .ENDIF
+
+#no explicit CCTYPE given, do auto detection
+.IF "$(CCTYPE)" == ""
+GCCTARGET	*= $(shell gcc -dumpmachine 2>NUL & exit /b 0)
+#do we have a GCC?
+.IF "$(GCCTARGET)" != ""
+CCTYPE		= GCC
+else
+#use var to capture 1st line only, not 8th token of lines 2 & 3 in cl.exe output
+MSVCVER		:= $(shell (set MSVCVER=) & (for /f "tokens=8 delims=.^ " \
+	%i in ('cl ^2^>^&1') do @if not defined MSVCVER set /A "MSVCVER=%i-6"))
+CCTYPE		:= MSVC$(MSVCVER)0
+endif
+endif
 
 PROCESSOR_ARCHITECTURE *= x86
 
