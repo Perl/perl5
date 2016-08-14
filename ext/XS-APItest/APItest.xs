@@ -2396,6 +2396,23 @@ call_pv(subname, flags, ...)
 	PUSHs(sv_2mortal(newSViv(i)));
 
 void
+call_argv(subname, flags, ...)
+    char* subname
+    I32 flags
+    PREINIT:
+	I32 i;
+	char *tmpary[4];
+    PPCODE:
+	for (i=0; i<items-2; i++)
+	    tmpary[i] = SvPV_nolen(ST(i+2)); /* ignore first two args */
+	tmpary[i] = NULL;
+	PUTBACK;
+	i = call_argv(subname, flags, tmpary);
+	SPAGAIN;
+	EXTEND(SP, 1);
+	PUSHs(sv_2mortal(newSViv(i)));
+
+void
 call_method(methname, flags, ...)
     char* methname
     I32 flags
