@@ -543,7 +543,7 @@ PERLVARA(I, body_roots,	PERL_ARENA_ROOTS_SIZE, void*) /* array of body roots */
 
 PERLVAR(I, debug,	VOL U32)	/* flags given to -D switch */
 
-					/* 32-BIT HOLE !!! */
+PERLVARI(I, padlist_generation, U32, 1)	/* id to identify padlist clones */
 
 PERLVARI(I, runops,	runops_proc_t, RUNOPS_DEFAULT)
 
@@ -761,8 +761,6 @@ PERLVAR(I, debug_pad,	struct perl_debug_pad)	/* always needed because of the re 
 
 /* Hook for File::Glob */
 PERLVARI(I, globhook,	globhook_t, NULL)
-
-PERLVARI(I, padlist_generation, U32, 1)	/* id to identify padlist clones */
 
 /* The last unconditional member of the interpreter structure when 5.18.0 was
    released. The offset of the end of this is baked into a global variable in 
