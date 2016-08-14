@@ -3,6 +3,7 @@
 /* We want to be able to test things that aren't API yet. */
 #define PERL_EXT
 
+#define PERL_NO_GET_CONTEXT     /* we wants efficiency */
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -117,6 +118,7 @@ my_cxt_getsv_interp_context(void)
 SV*
 my_cxt_getsv_interp(void)
 {
+    dTHX;
     dMY_CXT;
     return MY_CXT.sv;
 }
@@ -141,7 +143,7 @@ bool sv_setsv_cow_hashkey_notcore(void);
 typedef void (freeent_function)(pTHX_ HV *, HE *);
 
 void
-test_freeent(freeent_function *f) {
+test_freeent(pTHX_ freeent_function *f) {
     dSP;
     HV *test_hash = newHV();
     HE *victim;
@@ -515,9 +517,9 @@ THX_ck_entersub_multi_sum(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     return sumop;
 }
 
-STATIC void test_op_list_describe_part(SV *res, OP *o);
+STATIC void test_op_list_describe_part(pTHX_ SV *res, OP *o);
 STATIC void
-test_op_list_describe_part(SV *res, OP *o)
+test_op_list_describe_part(pTHX_ SV *res, OP *o)
 {
     sv_catpv(res, PL_op_name[o->op_type]);
     switch (o->op_type) {
@@ -529,7 +531,7 @@ test_op_list_describe_part(SV *res, OP *o)
 	OP *k;
 	sv_catpvs(res, "[");
 	for (k = cUNOPx(o)->op_first; k; k = OpSIBLING(k))
-	    test_op_list_describe_part(res, k);
+	    test_op_list_describe_part(aTHX_ res, k);
 	sv_catpvs(res, "]");
     } else {
 	sv_catpvs(res, ".");
@@ -537,11 +539,11 @@ test_op_list_describe_part(SV *res, OP *o)
 }
 
 STATIC char *
-test_op_list_describe(OP *o)
+test_op_list_describe(pTHX_ OP *o)
 {
     SV *res = sv_2mortal(newSVpvs(""));
     if (o)
-	test_op_list_describe_part(res, o);
+	test_op_list_describe_part(aTHX_ res, o);
     return SvPVX(res);
 }
 
@@ -585,7 +587,7 @@ THX_mkLISTOP(pTHX_ U32 type, OP *first, OP *sib, OP *last)
 }
 
 static char *
-test_op_linklist_describe(OP *start)
+test_op_linklist_describe(pTHX_ OP *start)
 {
     SV *rv = sv_2mortal(newSVpvs(""));
     OP *o;
@@ -1793,13 +1795,13 @@ common(params)
 void
 test_hv_free_ent()
 	PPCODE:
-	test_freeent(&Perl_hv_free_ent);
+	test_freeent(aTHX_ &Perl_hv_free_ent);
 	XSRETURN(4);
 
 void
 test_hv_delayfree_ent()
 	PPCODE:
-	test_freeent(&Perl_hv_delayfree_ent);
+	test_freeent(aTHX_ &Perl_hv_delayfree_ent);
 	XSRETURN(4);
 
 SV *
@@ -3426,8 +3428,8 @@ test_op_list()
 #define iv_op(iv) newSVOP(OP_CONST, 0, newSViv(iv))
 #define check_op(o, expect) \
     do { \
-	if (strcmp(test_op_list_describe(o), (expect))) \
-	    croak("fail %s %s", test_op_list_describe(o), (expect)); \
+	if (strcmp(test_op_list_describe(aTHX_ o), (expect))) \
+	    croak("fail %s %s", test_op_list_describe(aTHX_ o),(expect)); \
     } while(0)
 	a = op_append_elem(OP_LIST, NULL, NULL);
 	check_op(a, "");
@@ -3541,8 +3543,9 @@ test_op_linklist ()
     CODE:
 #define check_ll(o, expect) \
     STMT_START { \
-	if (strNE(test_op_linklist_describe(o), (expect))) \
-	    croak("fail %s %s", test_op_linklist_describe(o), (expect)); \
+	if (strNE(test_op_linklist_describe(aTHX_ o), (expect))) \
+	    croak("fail %s %s", test_op_linklist_describe(aTHX_ o), \
+		   (expect)); \
     } STMT_END
         o = iv_op(1);
         check_ll(o, ".const1");
