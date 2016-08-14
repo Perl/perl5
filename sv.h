@@ -269,7 +269,8 @@ struct p5rx {
 =head1 SV Manipulation Functions
 
 =for apidoc Am|U32|SvREFCNT|SV* sv
-Returns the value of the object's reference count.
+Returns the value of the object's reference count. Exposed
+to perl code via Internals::SvREFCNT().
 
 =for apidoc Am|SV*|SvREFCNT_inc|SV* sv
 Increments the reference count of the given SV, returning the SV.
@@ -1088,6 +1089,22 @@ C<sv_force_normal> does nothing.
 #define SvOBJECT(sv)		(SvFLAGS(sv) & SVs_OBJECT)
 #define SvOBJECT_on(sv)		(SvFLAGS(sv) |= SVs_OBJECT)
 #define SvOBJECT_off(sv)	(SvFLAGS(sv) &= ~SVs_OBJECT)
+
+/*
+=for apidoc Am|U32|SvREADONLY|SV* sv
+Returns true if the argument is readonly, otherwise returns false.
+Exposed to to perl code via Internals::SvREADONLY().
+
+=for apidoc Am|U32|SvREADONLY_on|SV* sv
+Mark an object as readonly. Exactly what this means depends on the object
+type. Exposed to perl code via Internals::SvREADONLY().
+
+=for apidoc Am|U32|SvREADONLY_off|SV* sv
+Mark an object as not-readonly. Exactly what this mean depends on the
+object type. Exposed to perl code via Internals::SvREADONLY().
+
+=cut
+*/
 
 #define SvREADONLY(sv)		(SvFLAGS(sv) & (SVf_READONLY|SVf_PROTECT))
 #ifdef PERL_CORE

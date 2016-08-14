@@ -22,7 +22,7 @@ use vars qw(@ISA @EXPORT_OK $VERSION);
 		show_results process_options files_to_modules
 		finish_tap_output
 		reload_manifest);
-$VERSION = 0.10;
+$VERSION = 0.11;
 
 require Exporter;
 
@@ -356,7 +356,7 @@ sub duplicated_maintainers {
 
 sub warn_maintainer {
     my $name = shift;
-    ok($files{$name}, "$name has a maintainer");
+    ok($files{$name}, "$name has a maintainer (see Porting/Maintainer.pl)");
 }
 
 sub missing_maintainers {
