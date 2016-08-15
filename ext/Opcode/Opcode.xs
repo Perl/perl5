@@ -51,7 +51,7 @@ op_names_init(pTHX)
     int i;
     STRLEN len;
     char **op_names;
-    char *bitmap;
+    U8 *bitmap;
     dMY_CXT;
 
     op_named_bits = newHV();
@@ -65,10 +65,11 @@ op_names_init(pTHX)
     put_op_bitspec(aTHX_ STR_WITH_LEN(":none"), sv_2mortal(new_opset(aTHX_ Nullsv)));
 
     opset_all = new_opset(aTHX_ Nullsv);
-    bitmap = SvPV(opset_all, len);
+    bitmap = (U8*)SvPV(opset_all, len);
     memset(bitmap, 0xFF, len-1); /* deal with last byte specially, see below */
     /* Take care to set the right number of bits in the last byte */
-    bitmap[len-1] = (PL_maxo & 0x07) ? ~(0xFF << (PL_maxo & 0x07)) : 0xFF;
+    bitmap[len-1] = (PL_maxo & 0x07) ? ((~(0xFF << (PL_maxo & 0x07))) & 0xFF)
+                                     : 0xFF;
     put_op_bitspec(aTHX_ STR_WITH_LEN(":all"), opset_all); /* don't mortalise */
 }
 
