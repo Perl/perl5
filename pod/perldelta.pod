@@ -346,7 +346,13 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Problems with in-place array sorts: code like C<@a = sort { ... } @a>,
+where the source and destination of the sort are the same plain array, are
+optimised to do less copying around. Two side-effects of this optimisation
+were that the contents of C<@a> as visible to to sort routine were
+partially sorted, and under some circumstances accessing C<@a> during the
+sort could crash the interpreter. Both these issues have been fixed, and
+Sort functions see the original value of C<@a>.
 
 =back
 
