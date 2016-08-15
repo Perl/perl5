@@ -16243,6 +16243,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	     */
 	     break;
 	}
+	match = 1;
 	goto do_op;
 
     /* ops where $_ may be an implicit arg */

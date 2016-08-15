@@ -2180,3 +2180,9 @@ undef $SIG{__WARN__};
 EXPECT
 ok
 Use of uninitialized value $a[140688675223280] in string at - line 15.
+########
+# RT #128940
+use warnings 'uninitialized';
+my $x = "" . open my $fh, "<", "no / such / file";
+EXPECT
+Use of uninitialized value in concatenation (.) or string at - line 3.
