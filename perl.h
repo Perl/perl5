@@ -6897,6 +6897,7 @@ extern void moncontrol(int);
 #    define LONGDOUBLE_X86_80_BIT
 #    ifdef USE_LONG_DOUBLE
 #      undef NV_IMPLICIT_BIT
+#      define NV_X86_80_BIT
 #    endif
 #  endif
 

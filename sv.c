@@ -10978,8 +10978,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
  * are being extracted from (either directly from the long double in-memory
  * presentation, or from the uquad computed via frexp+ldexp).  frexp also
  * is used to update the exponent.  The subnormal is set to true
- * for IEEE 754 subnormals/denormals.  The vhex is the pointer to
- * the beginning of the output buffer (of VHEX_SIZE).
+ * for IEEE 754 subnormals/denormals (including the x86 80-bit format).
+ * The vhex is the pointer to the beginning of the output buffer of VHEX_SIZE.
  *
  * The tricky part is that S_hextract() needs to be called twice:
  * the first time with vend as NULL, and the second time with vend as
@@ -12442,15 +12442,25 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #if NVSIZE > DOUBLESIZE
 #  ifdef HEXTRACT_HAS_IMPLICIT_BIT
                 /* In this case there is an implicit bit,
-                 * and therefore the exponent is shifted by one,
-                 * unless this is a subnormal/denormal. */
-                if (!subnormal) {
-                    exponent--;
-                }
+                 * and therefore the exponent is shifted by one. */
+                exponent--;
 #  else
-                /* In this case there is no implicit bit,
-                 * and the exponent is shifted by the first xdigit. */
-                exponent -= 4;
+#   ifdef NV_X86_80_BIT
+                if (subnormal) {
+                    /* The subnormals of the x86-80 have a base exponent of -16382,
+                     * (while the physical exponent bits are zero) but the frexp()
+                     * returned the scientific-style floating exponent.  We want
+                     * to map the last one as:
+                     * -16831..-16384 -> -16382 (the last normal is 0x1p-16382)
+                     * -16835..-16388 -> -16384
+                     * since we want to keep the first hexdigit
+                     * as one of the [8421]. */
+                    exponent = -4 * ( (exponent + 1) / -4) - 2;
+                } else {
+                    exponent -= 4;
+                }
+#   endif
+                /* TBD: other non-implicit-bit platforms than the x86-80. */
 #  endif
 #endif
 
@@ -12491,10 +12501,15 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #endif
 
                     if (subnormal) {
+#ifndef NV_X86_80_BIT
                       if (vfnz[0] > 1) {
-                        /* We need to right shift the hex nybbles so
-                         * that the output of the subnormal starts
-                         * from the first true bit. */
+                        /* IEEE 754 subnormals (but not the x86 80-bit):
+                         * we want "normalize" the subnormal,
+			 * so we need to right shift the hex nybbles
+                         * so that the output of the subnormal starts
+                         * from the first true bit.  (Another, equally
+			 * valid, policy would be to dump the subnormal
+			 * nybbles as-is, to display the "physical" layout.) */
                         int i, n;
                         U8 *vshr;
                         /* Find the ceil(log2(v[0])) of
@@ -12510,6 +12525,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                           vlnz++;
                         }
                       }
+#endif
                       v0 = vfnz;
                     } else {
                       v0 = vhex;
@@ -12558,7 +12574,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                                     /* If the overflow goes all the
                                      * way to the front, we need to
                                      * insert 0x1 in front, and adjust
-                                     * the argument. */
+                                     * the exponent. */
                                     Move(v0, v0 + 1, vn, char);
                                     *v0 = 0x1;
                                     exponent += 4;
