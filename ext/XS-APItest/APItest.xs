@@ -3,6 +3,9 @@
 /* We want to be able to test things that aren't API yet. */
 #define PERL_EXT
 
+/* Do *not* define PERL_NO_GET_CONTEXT.  This is the one place where we get
+   to test implicit Perl_get_context().  */
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
