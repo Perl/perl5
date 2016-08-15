@@ -621,7 +621,7 @@ for my $t (@hexfloat) {
         ok($ok, "'$format' '$arg' -> '$result' cf '$expected'");
         next;
     }
-    unless ($ok) {
+    if (!$ok && $result =~ /\./ && $expected =~ /\./) {
         # It seems that there can be difference in the last bits:
         # [perl #122578]
         #      got "0x1.5bf0a8b14576ap+1"
