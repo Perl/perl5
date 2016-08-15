@@ -274,7 +274,7 @@ bucket_array(rhv)
     XSRETURN(0);
 }
 
-SV*
+void
 bucket_ratio(rhv)
         SV* rhv
     PROTOTYPE: \%
@@ -295,7 +295,7 @@ bucket_ratio(rhv)
     XSRETURN_UNDEF;
 }
 
-SV*
+void
 num_buckets(rhv)
         SV* rhv
     PROTOTYPE: \%
@@ -310,7 +310,7 @@ num_buckets(rhv)
     XSRETURN_UNDEF;
 }
 
-SV*
+void
 used_buckets(rhv)
         SV* rhv
     PROTOTYPE: \%
