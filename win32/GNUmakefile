@@ -238,27 +238,7 @@ USE_LARGE_FILES	:= define
 # so you may have to set CCHOME explicitly (spaces in the path name should
 # not be quoted)
 #
-ifeq ($(CCTYPE),GCC)
-CCHOME		:= C:\MinGW
-else
-CCHOME		:= $(MSVCDIR)
-endif
-
-#
-# Following sets $Config{incpath} and $Config{libpth}
-#
-
-ifneq ($(GCCCROSS),)
-CCINCDIR := $(CCHOME)\$(GCCCROSS)\include
-CCLIBDIR := $(CCHOME)\$(GCCCROSS)\lib
-CCDLLDIR := $(CCLIBDIR)
-ARCHPREFIX := $(GCCCROSS)-
-else
-CCINCDIR := $(CCHOME)\include
-CCLIBDIR := $(CCHOME)\lib
-CCDLLDIR := $(CCHOME)\bin
-ARCHPREFIX :=
-endif
+#CCHOME		:= C:\MinGW
 
 #
 # Additional compiler flags can be specified here.
@@ -370,6 +350,29 @@ CCTYPE		:= MSVC$(MSVCVER)0
 endif
 endif
 
+ifeq ($(CCHOME),)
+ifeq ($(CCTYPE),GCC)
+CCHOME		:= C:\MinGW
+else
+CCHOME		:= $(MSVCDIR)
+endif
+endif
+
+#
+# Following sets $Config{incpath} and $Config{libpth}
+#
+
+ifneq ($(GCCCROSS),)
+CCINCDIR := $(CCHOME)\$(GCCCROSS)\include
+CCLIBDIR := $(CCHOME)\$(GCCCROSS)\lib
+CCDLLDIR := $(CCLIBDIR)
+ARCHPREFIX := $(GCCCROSS)-
+else
+CCINCDIR := $(CCHOME)\include
+CCLIBDIR := $(CCHOME)\lib
+CCDLLDIR := $(CCHOME)\bin
+ARCHPREFIX :=
+endif
 
 ifeq ($(CCTYPE),GCC)
 ifeq ($(GCCTARGET),x86_64-w64-mingw32)

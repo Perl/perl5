@@ -233,11 +233,8 @@ USE_LARGE_FILES	*= define
 # so you may have to set CCHOME explicitly (spaces in the path name should
 # not be quoted)
 #
-.IF "$(CCTYPE)" == "GCC"
-CCHOME		*= C:\MinGW
-.ELSE
-CCHOME		*= $(MSVCDIR)
-.ENDIF
+
+#CCHOME		*= C:\MinGW
 
 #
 # uncomment this if you are using x86_64-w64-mingw32 cross-compiler
@@ -245,20 +242,6 @@ CCHOME		*= $(MSVCDIR)
 # instead of the usual 'gcc'.
 #
 #GCCCROSS	*= define
-
-#
-# Following sets $Config{incpath} and $Config{libpth}
-#
-
-.IF "$(GCCCROSS)" == "define"
-CCINCDIR *= $(CCHOME)\x86_64-w64-mingw32\include
-CCLIBDIR *= $(CCHOME)\x86_64-w64-mingw32\lib
-CCDLLDIR *= $(CCLIBDIR)
-.ELSE
-CCINCDIR *= $(CCHOME)\include
-CCLIBDIR *= $(CCHOME)\lib
-CCDLLDIR *= $(CCHOME)\bin
-.ENDIF
 
 #
 # Additional compiler flags can be specified here.
@@ -319,6 +302,7 @@ USE_64_BIT_INT	*= undef
 USE_LONG_DOUBLE	*= undef
 USE_NO_REGISTRY	*= undef
 
+
 .IF "$(USE_IMP_SYS)" == "define"
 PERL_MALLOC	= undef
 .ENDIF
@@ -361,13 +345,36 @@ GCCTARGET	*= $(shell gcc -dumpmachine 2>NUL & exit /b 0)
 #do we have a GCC?
 .IF "$(GCCTARGET)" != ""
 CCTYPE		= GCC
-else
+.ELSE
 #use var to capture 1st line only, not 8th token of lines 2 & 3 in cl.exe output
 MSVCVER		:= $(shell (set MSVCVER=) & (for /f "tokens=8 delims=.^ " \
 	%i in ('cl ^2^>^&1') do @if not defined MSVCVER set /A "MSVCVER=%i-6"))
 CCTYPE		:= MSVC$(MSVCVER)0
-endif
-endif
+.ENDIF
+.ENDIF
+
+
+.IF "$(CCHOME)" == ""
+.IF "$(CCTYPE)" == "GCC"
+CCHOME		*= C:\MinGW
+.ELSE
+CCHOME		*= $(MSVCDIR)
+.ENDIF
+.ENDIF
+
+#
+# Following sets $Config{incpath} and $Config{libpth}
+#
+
+.IF "$(GCCCROSS)" == "define"
+CCINCDIR *= $(CCHOME)\x86_64-w64-mingw32\include
+CCLIBDIR *= $(CCHOME)\x86_64-w64-mingw32\lib
+CCDLLDIR *= $(CCLIBDIR)
+.ELSE
+CCINCDIR *= $(CCHOME)\include
+CCLIBDIR *= $(CCHOME)\lib
+CCDLLDIR *= $(CCHOME)\bin
+.ENDIF
 
 PROCESSOR_ARCHITECTURE *= x86
 
