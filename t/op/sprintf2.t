@@ -859,16 +859,28 @@ SKIP: {
 # x86 80-bit long-double tests for
 # rt.perl.org #128843, #128888, #128889, #128890, #128893, #128909
 SKIP: {
-    skip("non-80-bit-long-double", 15)
+    skip("non-80-bit-long-double", 17)
         unless ($Config{uselongdouble} &&
 		($Config{nvsize} == 16 || $Config{nvsize} == 12) &&
 		($Config{longdblkind} == 3 ||
 		 $Config{longdblkind} == 4));
 
-    is(sprintf("%.4a", 3e-320), "0xb.dc09p-1065", "[rt.perl.org #128843]");
-    is(sprintf("%a", eval '0x1.ffffp-2000'), "0xf.fff8p-2003", "[rt.perl.org #128843]");
-    is(sprintf("%.3a", eval '0x1.ffffp-2000'), "0x1.000p-1999", "[rt.perl.org #128843]");
-    is(sprintf("%.2a", eval '0x1.ffffp-2000'), "0x1.00p-1999", "[rt.perl.org #128843]");
+    {
+        # The last normal for this format.
+	is(sprintf("%a", eval '0x1p-16382'), "0x8p-16385", "[rt.perl.org #128843]");
+
+	# The subnormals cause "exponent underflow" warnings,
+        # but that is not why were are here.
+	local $SIG{__WARN__} = sub {
+	    die "$0: $_[0]" unless $_[0] =~ /exponent underflow/;
+	};
+
+	is(sprintf("%a", eval '0x1p-16383'), "0x4p-16382", "[rt.perl.org #128843]");
+	is(sprintf("%a", eval '0x1p-16384'), "0x2p-16382", "[rt.perl.org #128843]");
+	is(sprintf("%a", eval '0x1p-16385'), "0x1p-16382", "[rt.perl.org #128843]");
+	is(sprintf("%a", eval '0x1p-16386'), "0x8p-16386", "[rt.perl.org #128843]");
+	is(sprintf("%a", eval '0x1p-16387'), "0x4p-16386", "[rt.perl.org #128843]");
+    }
     is(sprintf("%.0a", 1.03125), "0x8p-3", "[rt.perl.org #128888]");
     is(sprintf("%.*a", -1, 1.03125), "0x8.4p-3", "[rt.perl.org #128889]");
     is(sprintf("%.1a", 0x8.18p+0), "0x8.2p+0", "[rt.perl.org #128890]");
