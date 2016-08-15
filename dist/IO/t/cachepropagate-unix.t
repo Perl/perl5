@@ -14,9 +14,20 @@ use Test::More;
 plan skip_all => "UNIX domain sockets not implemented on $^O"
   if ($^O =~ m/^(?:qnx|nto|vos|MSWin32|VMS)$/);
 
-plan tests => 15;
-
 my $socketpath = catfile(tempdir( CLEANUP => 1 ), 'testsock');
+
+# check the socketpath fits in sun_path.
+#
+# pack_sockaddr_un() just truncates the path, this may change, but how
+# it will handle such a condition is undetermined (and we might need
+# to work with older versions of Socket outside of a perl build)
+# https://rt.cpan.org/Ticket/Display.html?id=116819
+
+my $name = eval { pack_sockaddr_un($socketpath) };
+defined $name && (unpack_sockaddr_un($name))[0] eq $socketpath
+  or plan skip_all => "socketpath too long for sockaddr_un";
+
+plan tests => 15;
 
 # start testing stream sockets:
 my $listener = IO::Socket::UNIX->new(Type => SOCK_STREAM,
