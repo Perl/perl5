@@ -364,6 +364,12 @@ for unterminated strings.  [perl #128701]
 C<pack("p", ...)> used to emit its warning ("Attempt to pack pointer to
 temporary value") erroneously in some cases, but has been fixed.
 
+=item *
+
+C<@DB::args> is now exempt from "used once" warnings.  The warnings only
+occurred under B<-w>, because F<warnings.pm> itself uses C<@DB::args>
+multiple times.
+
 =back
 
 =head1 Known Problems
