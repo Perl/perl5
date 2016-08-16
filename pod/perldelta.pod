@@ -421,6 +421,12 @@ C<gethostent> and similar functions now perform a null check internally, to
 avoid crashing with torsocks.  This was a regression from 5.22.  [perl
 #128740]
 
+=item *
+
+Mentioning the same constant twice in a row (which is a syntax error) no
+longer fails an assertion under debugging builds.  This was a regression
+from 5.20.  [perl #126482]
+
 =back
 
 =head1 Known Problems
