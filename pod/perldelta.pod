@@ -354,6 +354,11 @@ partially sorted, and under some circumstances accessing C<@a> during the
 sort could crash the interpreter. Both these issues have been fixed, and
 Sort functions see the original value of C<@a>.
 
+=item *
+
+Non-ASCII string delimiters are now reported correctly in error messages
+for unterminated strings.  [perl #128701]
+
 =back
 
 =head1 Known Problems
