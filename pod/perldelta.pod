@@ -370,6 +370,14 @@ C<@DB::args> is now exempt from "used once" warnings.  The warnings only
 occurred under B<-w>, because F<warnings.pm> itself uses C<@DB::args>
 multiple times.
 
+=item *
+
+The use of built-in arrays or hash slices in a double-quoted string no
+longer issues a warning ("Possible unintended interpolation...") if the
+variable has not been mentioned before.  This affected code like
+C<qq|@DB::args|> and C<qq|@SIG{'CHLD', 'HUP'}|>.  (The special variables
+C<@-> and C<@+> were already exempt from the warning.)
+
 =back
 
 =head1 Known Problems
