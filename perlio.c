@@ -350,10 +350,11 @@ PerlIO_debug(const char *fmt, ...)
 {
     va_list ap;
     dSYS;
-    va_start(ap, fmt);
 
     if (!DEBUG_i_TEST)
         return;
+
+    va_start(ap, fmt);
 
     if (!PL_perlio_debug_fd) {
 	if (!TAINTING_get &&
