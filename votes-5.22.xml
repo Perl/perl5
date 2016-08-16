@@ -48,6 +48,8 @@ Perhaps just the removal of SETERRNO() from this.
 
 <commit votes="sprout jhi" id="b3dd0aba3d2bf0b22280303ef6f068e976e31888" ticket="128508" desc="[perl #128508] Fix line numbers with perl -x" />
 
+<commit votes="sprout" id="c82de78e3ba0184f85b5b49245e5da32d1cb3fcc" ticket="126482" desc="[perl #126482] Fix assert fail ‘a_const a_const’"/>
+
 </div>
 
 <div><h3>New Feature Fixes</h3>
