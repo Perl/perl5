@@ -384,6 +384,11 @@ C<gethostent> and similar functions now perform a null check internally, to
 avoid crashing with torsocks.  This was a regression from 5.22.  [perl
 #128740]
 
+=item *
+
+C<defined *{'!'}>, C<defined *{'['}>, and C<defined *{'-'}> no longer leak
+memory if the typeglob in question has never been accessed before.
+
 =back
 
 =head1 Known Problems
