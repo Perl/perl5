@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 151);
+plan(tests => 150);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -703,10 +703,6 @@ SKIP: {
     fresh_perl_is('Unknown->import() * Unknown->unimport(); print "ok\n"', "ok\n", {},
                   "check unknown import() methods don't corrupt the stack");
 }
-
-like runperl(prog => 'sub ub(){0} ub ub', stderr=>1), qr/Bareword found/,
- '[perl #126482] Assert failure when mentioning a constant twice in a row';
-
 
 __END__
 #FF9900

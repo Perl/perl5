@@ -7,7 +7,7 @@ use warnings;
 
 BEGIN { chdir 't' if -d 't'; require './test.pl'; }
 
-plan(tests => 26);
+plan(tests => 27);
 
 {
     no warnings 'deprecated';
@@ -217,3 +217,6 @@ fresh_perl_is(
   {},
   'foo ? require : bar [perl #128307]'
 );
+
+like runperl(prog => 'sub ub(){0} ub ub', stderr=>1), qr/Bareword found/,
+ '[perl #126482] Assert failure when mentioning a constant twice in a row';
