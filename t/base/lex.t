@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..107\n";
+print "1..109\n";
 
 $x = 'x';
 
@@ -535,3 +535,16 @@ print qq|ok $test - [perl #128478] "\$foo::\$bar"\n|; $test++;
 @bar = ("baz","bonk");
 print "not " unless "$foo::@bar" eq "barbaz bonk";
 print qq|ok $test - [perl #128478] "\$foo::\@bar"\n|; $test ++;
+
+# Test that compilation of tentative indirect method call syntax which
+# turns out not to be such does not upgrade constants to full globs in the
+# symbol table.
+sub fop() { 0 }
+sub bas() { 0 }
+{ local $SIG{__WARN__}=sub{}; eval 'fop bas'; }
+print "not " unless ref $::{fop} eq 'SCALAR';
+print "ok $test - first constant in 'const1 const2' is not upgraded\n";
+$test++;
+print "not " unless ref $::{bas} eq 'SCALAR';
+print "ok $test - second constant in 'const1 const2' is not upgraded\n";
+$test++;
