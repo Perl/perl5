@@ -554,7 +554,7 @@ S_no_op(pTHX_ const char *const what, char *s)
 STATIC void
 S_missingterm(pTHX_ char *s)
 {
-    char tmpbuf[UTF8_MAXBYTES];
+    char tmpbuf[UTF8_MAXBYTES + 1];
     char q;
     bool uni = FALSE;
     SV *sv;
