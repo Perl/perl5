@@ -415,6 +415,12 @@ Some regular expression parsing glitches could lead to assertion failures with
 regular expressions such as C</(?<=/> and C</(?<!/>.  This has now been fixed.
 L<[perl #128170]|https://rt.perl.org/Public/Bug/Display.html?id=128170>
 
+=item *
+
+C<gethostent> and similar functions now perform a null check internally, to
+avoid crashing with torsocks.  This was a regression from 5.22.  [perl
+#128740]
+
 =back
 
 =head1 Known Problems
