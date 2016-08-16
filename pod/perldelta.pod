@@ -359,6 +359,11 @@ Sort functions see the original value of C<@a>.
 Non-ASCII string delimiters are now reported correctly in error messages
 for unterminated strings.  [perl #128701]
 
+=item *
+
+C<pack("p", ...)> used to emit its warning ("Attempt to pack pointer to
+temporary value") erroneously in some cases, but has been fixed.
+
 =back
 
 =head1 Known Problems
