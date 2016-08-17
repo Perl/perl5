@@ -269,7 +269,7 @@ Perl_av_fetch(pTHX_ AV *av, SSize_t key, I32 lval)
     }
 
     if (key < 0) {
-	key += AvFILL(av) + 1;
+	key += AvFILLp(av) + 1;
 	if (key < 0)
 	    return NULL;
     }
