@@ -5,7 +5,6 @@ Digest cpan/Digest/Digest.pm 43f7f544cb11842b2f55c73e28930da50774e081
 ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t a0369c919e216fb02767a637666bb4577ad79b02
 File::Path cpan/File-Path/lib/File/Path.pm fd8ce4420a0c113d3f47dd3223859743655c1da8
 File::Path cpan/File-Path/t/Path_win32.t 94b9276557ce7f80b91f6fd9bfa7a0cd9bf9683e
-HTTP::Tiny cpan/HTTP-Tiny/lib/HTTP/Tiny.pm 5c418f455ac27283d5728ecb166707e6eb0e359c
 IO-Compress cpan/IO-Compress/bin/zipdetails 381ba2a6ae5bd21c8d2e994316e3e13f2f0a4f41
 IO-Compress cpan/IO-Compress/lib/Compress/Zlib.pm 0f93fb368d1d6af6f461b86304e8aabe0472754d
 IO-Compress cpan/IO-Compress/lib/IO/Compress/Adapter/Bzip2.pm 3acbcf5538e036a1b7907eedf038badf38254d71

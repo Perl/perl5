@@ -6,7 +6,8 @@ use warnings;
 use File::Basename;
 use Test::More 0.88;
 
-use t::Util qw[ monkey_patch ];
+use lib 't';
+use Util qw[ monkey_patch ];
 use HTTP::Tiny;
 
 BEGIN {

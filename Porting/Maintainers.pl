@@ -592,7 +592,7 @@ use File::Glob qw(:case);
     },
 
     'HTTP::Tiny' => {
-        'DISTRIBUTION' => 'DAGOLDEN/HTTP-Tiny-0.058.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/HTTP-Tiny-0.064.tar.gz',
         'FILES'        => q[cpan/HTTP-Tiny],
         'EXCLUDED'     => [
             't/00-report-prereqs.t',
@@ -602,10 +602,6 @@ use File::Glob qw(:case);
             't/210_live_ssl.t',
             qr/^eg/,
             qr/^xt/
-        ],
-        'CUSTOMIZED'   => [
-            # CVE-2016-1238
-            qw( lib/HTTP/Tiny.pm )
         ],
     },
 

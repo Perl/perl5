@@ -4,7 +4,7 @@ use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
 
-our $VERSION = '0.058_001';
+our $VERSION = '0.064';
 
 use Carp ();
 
@@ -110,7 +110,7 @@ sub new {
 
     my $self = {
         max_redirect => 5,
-        timeout      => 60,
+        timeout      => defined $args{timeout} ? $args{timeout} : 60,
         keep_alive   => 1,
         verify_SSL   => $args{verify_SSL} || $args{verify_ssl} || 0, # no verification by default
         no_proxy     => $ENV{no_proxy},
@@ -282,6 +282,15 @@ sub mirror {
     my ($self, $url, $file, $args) = @_;
     @_ == 3 || (@_ == 4 && ref $args eq 'HASH')
       or Carp::croak(q/Usage: $http->mirror(URL, FILE, [HASHREF])/ . "\n");
+
+    if ( exists $args->{headers} ) {
+        my $headers = {};
+        while ( my ($key, $value) = each %{$args->{headers} || {}} ) {
+            $headers->{lc $key} = $value;
+        }
+        $args->{headers} = $headers;
+    }
+
     if ( -e $file and my $mtime = (stat($file))[9] ) {
         $args->{headers}{'if-modified-since'} ||= $self->_http_date($mtime);
     }
@@ -1453,8 +1462,12 @@ sub write_chunked_body {
         $self->write($chunk);
     }
     $self->write("0\x0D\x0A");
-    $self->write_header_lines($request->{trailer_cb}->())
-        if ref $request->{trailer_cb} eq 'CODE';
+    if ( ref $request->{trailer_cb} eq 'CODE' ) {
+        $self->write_header_lines($request->{trailer_cb}->())
+    }
+    else {
+        $self->write("\x0D\x0A");
+    }
     return $len;
 }
 
@@ -1643,7 +1656,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.058
+version 0.064
 
 =head1 SYNOPSIS
 
@@ -2266,7 +2279,7 @@ David Golden <dagolden@cpan.org>
 
 =head1 CONTRIBUTORS
 
-=for stopwords Alan Gardner Alessandro Ghedini A. Sinan Unur Brad Gilbert brian m. carlson Chris Nehren Weyl Claes Jakobsson Clinton Gormley David Golden Dean Pearce Edward Zborowski James Raspass Jeremy Mates Jess Robinson Lukas Eklund Martin J. Evans Martin-Louis Bright Mike Doherty Olaf Alders Olivier Mengué Petr Písař SkyMarshal Sören Kornetzki Syohei YOSHIDA Tatsuhiko Miyagawa Tom Hukins Tony Cook
+=for stopwords Alan Gardner Alessandro Ghedini A. Sinan Unur Brad Gilbert brian m. carlson Chris Nehren Weyl Claes Jakobsson Clinton Gormley David Golden Dean Pearce Edward Zborowski James Raspass Jeremy Mates Jess Robinson Karen Etheridge Lukas Eklund Martin J. Evans Martin-Louis Bright Mike Doherty Olaf Alders Olivier Mengué Petr Písař SkyMarshal Sören Kornetzki Steve Grazzini Syohei YOSHIDA Tatsuhiko Miyagawa Tom Hukins Tony Cook
 
 =over 4
 
@@ -2332,6 +2345,10 @@ Jess Robinson <castaway@desert-island.me.uk>
 
 =item *
 
+Karen Etheridge <ether@cpan.org>
+
+=item *
+
 Lukas Eklund <leklund@gmail.com>
 
 =item *
@@ -2365,6 +2382,10 @@ SkyMarshal <skymarshal1729@gmail.com>
 =item *
 
 Sören Kornetzki <soeren.kornetzki@delti.com>
+
+=item *
+
+Steve Grazzini <steve.grazzini@grantstreet.com>
 
 =item *
 
