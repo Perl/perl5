@@ -1168,12 +1168,13 @@ use File::Glob qw(:case);
     },
 
     'Test::Simple' => {
-        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302049.tar.gz',
+        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302052.tar.gz',
         'FILES'        => q[cpan/Test-Simple],
         'EXCLUDED'     => [
             qr{^examples/},
             qr{^xt/},
-            qw( perltidyrc
+            qw( appveyor.yml
+                perltidyrc
                 t/00compile.t
                 t/00-report.t
                 t/zzz-check-breaks.t

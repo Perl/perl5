@@ -2,7 +2,7 @@ package Test2::API;
 use strict;
 use warnings;
 
-our $VERSION = '1.302049';
+our $VERSION = '1.302052';
 
 
 my $INST;
@@ -217,7 +217,7 @@ sub context {
         unless defined wantarray;
 
     my $stack   = $params{stack} || $STACK;
-    my $hub     = $params{hub}   || @$stack ? $stack->[-1] : $stack->top;
+    my $hub     = $params{hub}   || (@$stack ? $stack->[-1] : $stack->top);
     my $hid     = $hub->{hid};
     my $current = $CONTEXTS->{$hid};
 

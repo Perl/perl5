@@ -2,7 +2,7 @@ package Test2;
 use strict;
 use warnings;
 
-our $VERSION = '1.302049';
+our $VERSION = '1.302052';
 
 
 1;
@@ -123,6 +123,14 @@ L<Test2::Event> - Events live in this namespace.
 
 L<Test2::Hub> - All events eventually funnel through a hub. Custom hubs are how
 C<intercept()> and C<run_subtest()> are implemented.
+
+=head1 CONTACTING US
+
+Many Test2 developers and users lurk on L<irc://irc.perl.org/#perl>. We also
+have a slack team that can be joined by anyone with an C<@cpan.org> email
+address L<https://perl-test2.slack.com/> If you do not have an C<@cpan.org>
+email you can ask for a slack invite by emailing Chad Granum
+E<lt>exodist@cpan.orgE<gt>.
 
 =head1 SOURCE
 

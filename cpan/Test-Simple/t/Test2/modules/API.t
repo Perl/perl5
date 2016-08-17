@@ -236,6 +236,14 @@ sub {
 }->();
 
 
+sub {
+    my $hub = Test2::Hub->new();
+    my $ctx = context(hub => $hub);
+    is($ctx->hub,$hub, 'got the hub of context() argument');
+    $ctx->release;
+}->();
+
+
 my $sub = sub { };
 
 Test2::API::test2_add_callback_context_acquire($sub);

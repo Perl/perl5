@@ -2,7 +2,7 @@ package Test2::Util;
 use strict;
 use warnings;
 
-our $VERSION = '1.302049';
+our $VERSION = '1.302052';
 
 
 use Config qw/%Config/;
