@@ -244,6 +244,9 @@ S_adjust_index(pTHX_ AV *av, const MAGIC *mg, SSize_t *keyp)
 SV**
 Perl_av_fetch(pTHX_ AV *av, SSize_t key, I32 lval)
 {
+    SSize_t neg;
+    SSize_t size;
+
     PERL_ARGS_ASSERT_AV_FETCH;
     assert(SvTYPE(av) == SVt_PVAV);
 
@@ -268,15 +271,19 @@ Perl_av_fetch(pTHX_ AV *av, SSize_t key, I32 lval)
         }
     }
 
-    if (key < 0) {
-	key += AvFILLp(av) + 1;
-	if (UNLIKELY(key < 0))
+    neg  = (key < 0);
+    size = AvFILLp(av) + 1;
+    key += neg * size; /* handle negative index without using branch */
+
+    /* the cast from SSize_t to Size_t allows both (key < 0) and (key >= size)
+     * to be tested as a single condition */
+    if ((Size_t)key >= (Size_t)size) {
+	if (UNLIKELY(neg))
 	    return NULL;
-        assert(key <= AvFILLp(av));
-        if (!AvARRAY(av)[key])
-            goto emptyness;
+        goto emptyness;
     }
-    else if (key > AvFILLp(av) || !AvARRAY(av)[key]) {
+
+    if (!AvARRAY(av)[key]) {
       emptyness:
 	return lval ? av_store(av,key,newSV(0)) : NULL;
     }
