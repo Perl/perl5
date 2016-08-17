@@ -12076,6 +12076,7 @@ Perl_ck_each(pTHX_ OP *o)
 		    && SvTYPE(SvRV(cSVOPx_sv(kid))) != SVt_PVHV  )
 		   )
 		    goto bad;
+                /* FALLTHROUGH */
 	    default:
                 qerror(Perl_mess(aTHX_
                     "Experimental %s on scalar is now forbidden",
