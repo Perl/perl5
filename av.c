@@ -247,7 +247,7 @@ Perl_av_fetch(pTHX_ AV *av, SSize_t key, I32 lval)
     PERL_ARGS_ASSERT_AV_FETCH;
     assert(SvTYPE(av) == SVt_PVAV);
 
-    if (SvRMAGICAL(av)) {
+    if (UNLIKELY(SvRMAGICAL(av))) {
         const MAGIC * const tied_magic
 	    = mg_find((const SV *)av, PERL_MAGIC_tied);
         if (tied_magic || mg_find((const SV *)av, PERL_MAGIC_regdata)) {
@@ -270,7 +270,7 @@ Perl_av_fetch(pTHX_ AV *av, SSize_t key, I32 lval)
 
     if (key < 0) {
 	key += AvFILLp(av) + 1;
-	if (key < 0)
+	if (UNLIKELY(key < 0))
 	    return NULL;
         assert(key <= AvFILLp(av));
         if (!AvARRAY(av)[key])
@@ -281,7 +281,7 @@ Perl_av_fetch(pTHX_ AV *av, SSize_t key, I32 lval)
 	return lval ? av_store(av,key,newSV(0)) : NULL;
     }
 
-    if (AvREIFY(av) && SvIS_FREED(AvARRAY(av)[key])) {
+    if (UNLIKELY(AvREIFY(av) && SvIS_FREED(AvARRAY(av)[key]))) {
 	/* eg. @_ could have freed elts */
 	AvARRAY(av)[key] = NULL;	/* 1/2 reify */
 	goto emptyness;
