@@ -272,9 +272,11 @@ Perl_av_fetch(pTHX_ AV *av, SSize_t key, I32 lval)
 	key += AvFILLp(av) + 1;
 	if (key < 0)
 	    return NULL;
+        assert(key <= AvFILLp(av));
+        if (!AvARRAY(av)[key])
+            goto emptyness;
     }
-
-    if (key > AvFILLp(av) || !AvARRAY(av)[key]) {
+    else if (key > AvFILLp(av) || !AvARRAY(av)[key]) {
       emptyness:
 	return lval ? av_store(av,key,newSV(0)) : NULL;
     }
