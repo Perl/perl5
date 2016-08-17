@@ -65,10 +65,10 @@ my @map = (
         path	=> '/CPAN/',
         file	=> 'MIRRORING.FROM',
     },
-    {	uri	    => 'git://github.com/jib/file-fetch.git',
+    {	uri	    => 'git://github.com/Perl-Toolchain-Gang/file-fetch.git',
         scheme	=> 'git',
         host	=> 'github.com',
-        path	=> '/jib/',
+        path	=> '/Perl-Toolchain-Gang/',
         file	=> 'file-fetch.git',
     },
     {   uri     => 'http://localhost/tmp/index.txt',
@@ -203,7 +203,7 @@ for my $entry (@map) {
 {   for my $uri ( 'http://www.cpan.org/index.html',
                   'http://www.cpan.org/index.html?q=1',
                   'http://www.cpan.org/index.html?q=1&y=2',
-                  'http://user:passwd@httpbin.org/basic-auth/user/passwd',
+                  #'http://user:passwd@httpbin.org/basic-auth/user/passwd',
     ) {
         for (qw[lwp httptiny wget curl lftp fetch lynx httplite iosock]) {
             _fetch_uri( http => $uri, $_ );
@@ -234,9 +234,12 @@ for my $entry (@map) {
 }
 
 ### git:// tests ###
-{   my $uri = 'git://github.com/jib/file-fetch.git';
+{   my $uri = 'git://github.com/Perl-Toolchain-Gang/file-fetch.git';
 
     for (qw[git]) {
+        local $ENV{GIT_CONFIG_NOSYSTEM} = 1;
+        local $ENV{XDG_CONFIG_HOME};
+        local $ENV{HOME};
         _fetch_uri( git => $uri, $_ );
     }
 }

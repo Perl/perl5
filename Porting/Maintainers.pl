@@ -508,7 +508,7 @@ use File::Glob qw(:case);
     },
 
     'File::Fetch' => {
-        'DISTRIBUTION' => 'BINGOS/File-Fetch-0.50.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/File-Fetch-0.52.tar.gz',
         'FILES'        => q[cpan/File-Fetch],
     },
 
