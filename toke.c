@@ -2891,9 +2891,9 @@ S_scan_const(pTHX_ char *start)
              * Ranges entirely within Latin1 are expanded out entirely, in
              * order to avoid the significant overhead of making a swash.
              * Ranges that extend above Latin1 have to have a swash, so there
-             * is no advantage to abbreviate them here, so they are stored here
-             * as Min, ILLEGAL_UTF8_BYTE, Max.  The illegal byte signifies a
-             * hyphen without any possible ambiguity.  On EBCDIC machines, if
+             * is no advantage to abbreviating them here, so they are stored
+             * here as Min, ILLEGAL_UTF8_BYTE, Max.  The illegal byte signifies
+             * a hyphen without any possible ambiguity.  On EBCDIC machines, if
              * the range is expressed as Unicode, the Latin1 portion is
              * expanded out even if the entire range extends above Latin1.
              * This is because each code point in it has to be processed here
