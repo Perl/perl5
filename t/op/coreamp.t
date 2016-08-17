@@ -14,7 +14,6 @@ BEGIN {
     $^P |= 0x100;
 }
 
-use Hash::Util;
 no warnings 'experimental::smartmatch';
 
 sub lis($$;$) {
@@ -632,7 +631,12 @@ is &mykeys({ 1..4 }), 2, '&mykeys(\%hash) in scalar cx';
 lis [sort &mykeys({1..4})], [1,3], '&mykeys(\%hash) in list cx';
 is &mykeys([ 1..4 ]), 4, '&mykeys(\@array) in scalar cx';
 lis [&mykeys([ 1..4 ])], [0..3], '&mykeys(\@array) in list cx';
-{
+
+SKIP: {
+  skip "no Hash::Util on miniperl", 2, if is_miniperl;
+  require Hash::Util;
+  sub Hash::Util::bucket_ratio (\%);
+
   my %h = 1..2;
   &mykeys(\%h) = 1024;
   like Hash::Util::bucket_ratio(%h), qr|/1024\z|, '&mykeys = changed number of buckets allocated';

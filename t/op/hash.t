@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-use Hash::Util;
+
 # This will crash perl if it fails
 
 use constant PVBM => 'foo';
@@ -134,6 +134,9 @@ sub validate_hash {
 
   is($scalar, $count, "$desc scalar() should be the same as 0+keys() as of perl 5.25");
 
+  require Hash::Util;
+  sub Hash::Util::bucket_ratio (\%);
+
   # back compat tests, via Hash::Util::bucket_ratio();
   my $ratio = Hash::Util::bucket_ratio(%$h);
   my $expect = qr!\A(\d+)/(\d+)\z!;
@@ -212,9 +215,13 @@ sub torture_hash {
   is(scalar %$h1, scalar %$h, "scalar keys is identical on copy and original");
 }
 
-torture_hash('a .. zz', 'a' .. 'zz');
-torture_hash('0 .. 9', 0 .. 9);
-torture_hash("'Perl'", 'Rules');
+if (is_miniperl) {
+    print "# skipping torture_hash tests on miniperl because no Hash::Util\n";
+} else {
+    torture_hash('a .. zz', 'a' .. 'zz');
+    torture_hash('0 .. 9', 0 .. 9);
+    torture_hash("'Perl'", 'Rules');
+}
 
 {
     my %h = qw(a x b y c z);
