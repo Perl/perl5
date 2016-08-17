@@ -279,9 +279,8 @@ Perl_av_fetch(pTHX_ AV *av, SSize_t key, I32 lval)
 	return lval ? av_store(av,key,newSV(0)) : NULL;
     }
 
-    if (AvREIFY(av)
-	     && (!AvARRAY(av)[key]	/* eg. @_ could have freed elts */
-		 || SvIS_FREED(AvARRAY(av)[key]))) {
+    if (AvREIFY(av) && SvIS_FREED(AvARRAY(av)[key])) {
+	/* eg. @_ could have freed elts */
 	AvARRAY(av)[key] = NULL;	/* 1/2 reify */
 	goto emptyness;
     }
