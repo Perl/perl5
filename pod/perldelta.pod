@@ -389,6 +389,12 @@ avoid crashing with torsocks.  This was a regression from 5.22.  [perl
 C<defined *{'!'}>, C<defined *{'['}>, and C<defined *{'-'}> no longer leak
 memory if the typeglob in question has never been accessed before.
 
+=item *
+
+In 5.25.4 fchown() was changed not to accept negative one as an argument
+because in some platforms that is an error.  However, in some other platforms
+that is an acceptable argument.  This change has been reverted [perl #128967].
+
 =back
 
 =head1 Known Problems
