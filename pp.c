@@ -3544,18 +3544,11 @@ PP(pp_index)
 	    sv_usepvn(temp, pv, llen);
 	    little_p = SvPVX(little);
 	} else {
-	    temp = little_utf8
-		? newSVpvn(big_p, biglen) : newSVpvn(little_p, llen);
+	    temp = newSVpvn(little_p, llen);
 
 	    sv_utf8_upgrade(temp);
-	    if (little_utf8) {
-		big = temp;
-		big_utf8 = TRUE;
-		big_p = SvPV_const(big, biglen);
-	    } else {
-		little = temp;
-		little_p = SvPV_const(little, llen);
-	    }
+	    little = temp;
+	    little_p = SvPV_const(little, llen);
 	}
     }
     if (SvGAMAGIC(big)) {
