@@ -1106,7 +1106,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_FREEOP:
             a0 = ap[0];
 	    ASSERT_CURPAD_LEGAL("SAVEt_FREEOP");
-	    op_free((OP*)a0.any_ptr);
+	    op_free(a0.any_op);
 	    break;
 
 	case SAVEt_FREEPV:

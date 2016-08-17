@@ -3801,6 +3801,7 @@ union any {
     GV*         any_gv;
     AV*         any_av;
     HV*         any_hv;
+    OP*         any_op;
     char*       any_pv;
     char**      any_pvp;
     I32		any_i32;
