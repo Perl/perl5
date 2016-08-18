@@ -10,6 +10,18 @@ libswanted="$*"
 # Debian 4.0 puts ndbm in the -lgdbm_compat library.
 libswanted="$libswanted gdbm_compat"
 
+# malloc wrap works
+case "$usemallocwrap" in
+'') usemallocwrap='define' ;;
+esac
+
+# The system malloc() is about as fast and as frugal as perl's.
+# Since the system malloc() has been the default since at least
+# 5.001, we might as well leave it that way.  --AD  10 Jan 2002
+case "$usemymalloc" in
+'') usemymalloc='n' ;;
+esac
+
 case "$optimize" in
 '') optimize='-O2' ;;
 esac
@@ -20,6 +32,32 @@ case "$plibpth" in
     set X $plibpth # Collapse all entries on one line
     shift
     plibpth="$*"
+    ;;
+esac
+
+case "$libc" in
+'')
+# If you have glibc, then report the version for ./myconfig bug reporting.
+# (Configure doesn't need to know the specific version since it just uses
+# gcc to load the library for all tests.)
+# We don't use __GLIBC__ and  __GLIBC_MINOR__ because they
+# are insufficiently precise to distinguish things like
+# libc-2.0.6 and libc-2.0.7.
+    for p in $plibpth
+    do
+        for trylib in libc.so.0.3 libc.so
+        do
+            if $test -e $p/$trylib; then
+                libc=`ls -l $p/$trylib | awk '{print $NF}'`
+                if $test "X$libc" != X; then
+                    break
+                fi
+            fi
+        done
+        if $test "X$libc" != X; then
+            break
+        fi
+    done
     ;;
 esac
 
