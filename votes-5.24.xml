@@ -78,6 +78,33 @@ Perhaps just the removal of SETERRNO() from this.
 
 <commit votes="jhi" id="dd1dbff095629118e73a48a2a6008f03418a07f6" ticket="128967" desc="#128967: Inconsistency between doc and code for chown using negative argument: -1"/>
 
+NOTE from jhi: the following cluster of hexfp-related fixes
+(in ascending time order) only makes sense as a unit, they all touch
+the same code. I tried cherry-picking these onto maint-5.24, and only
+the first one required manual backporting (available on request).
+
+<commit votes="jhi" id="b6d9b423fab1963346eb79e83b356114396b1f2e" ticket="128843" desc="printf %a mishandles subnormals"/>
+<commit votes="jhi" id="94d00769fba240ffb86f18b3d66341fb1d24ae6c" ticket="128843" desc="Add rt.perl.org reference for b6d9b423"/>
+<commit votes="jhi" id="520f3e58c346a7bc3ef0509dfe0db206dae454ee" ticket="128843" desc="Comment fix for b6d9b423"/>
+<commit votes="jhi" id="82229f9f47d9a169b59715582fb5a09b5a4ac0ff" ticket="128888" desc="printf %a mishandles zero precision"/>
+<commit votes="jhi" id="a9ce335538454d590920dab8d62db84948f1fb83" ticket="128889" desc="printf %a mishandles negative pseudo-precision"/>
+<commit votes="jhi" id="75326c485e9d40be5c22d508f581cdea68b244ce" ticket="128890" desc="printf %a rounds incorrectly"/>
+<commit votes="jhi" id="be93048a43d87d317acca5b37619111b6a5f8c44" ticket="128893" desc="printf %a botches 0 flag for negative values"/>
+<commit votes="jhi" id="749d85343f3cdb65891a5fe3b9f55ef3a5b03ca8" ticket="" desc="The new tests are valid only for IEEE 754 64-bit doubles."/>
+<commit votes="jhi" id="5208a0305e9e82c534fa034515d54a0409dfcc77" ticket="" desc="Fix on top of 75326c48."/>
+<commit votes="jhi" id="e3f7a67e8485950fdf5fd9c7131d0a78b6c8cf32" ticket="" desc="Test new hexfp fixes also on (x86 80-bit) long doubles."/>
+<commit votes="jhi" id="44348173fce5aaf28fdf59ba6ace73ea435d9380" ticket="" desc="Bogus skip count."/>
+<commit votes="jhi" id="ee58923a8531731f8acb98ab130abf41f75ebdc7" ticket="128909" desc="printf %a mishandles exponent-crossing rounding with long double"/>
+<commit votes="jhi" id="9e67a8c1b21482ed5fada053dd462eb23320dc86" ticket="" desc="Avoid test noise on non-longdouble."/>
+<commit votes="jhi" id="a149d1180209525972d84fd1a62f488da83e568a" ticket="128919" desc="limited exponent range in hex fp literal with long double"/>
+<commit votes="jhi" id="7301378635b35757b228e07c14276afaf06a4728" ticket="" desc="7301378635b35757b228e07c14276afaf06a4728"/>
+<commit votes="jhi" id="f5a466613ec0b74a224adb5b7da6da0a74713596" ticket="" desc="Use library testing for subnormality"/>
+<commit votes="jhi" id="f40ac91c3b9891b83f3d253861009c290584b646" ticket="" desc="Handle subnormals of x86 80-bit"/>
+<commit votes="jhi" id="b28053d1f063cb783e73b0596d1f58a21681fda6" ticket="" desc="Define Perl_fp_class() for quadmath"/>
+<commit votes="jhi" id="de1a8b537348227e83c8efd15d3cb36d9ac646f5" ticket="" desc="Test subnormals with quadmath"/>
+<commit votes="jhi" id="dd1645173d8209e05c419b0f3edc9b1c0f9643a8" ticket="" desc="Do not deploy the fractional matching without fractions"/>
+<commit votes="jhi" id="1bee6aebe39da1a4d681e8ea1b9d0329898a8407" ticket="" desc="Test data mistake was masked by mistaken fractional matching"/>
+
 </div>
 
 <div><h3>New Feature Fixes</h3>
