@@ -6,9 +6,8 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc( qw(. ../lib) );
+    skip_all_if_miniperl();
 }
-
-skip_all_if_miniperl();
 
 use Config;
 use File::Temp qw(tempdir);
