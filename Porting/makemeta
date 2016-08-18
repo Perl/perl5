@@ -8,6 +8,10 @@ use strict;
 use warnings;
 use Getopt::Std;
 
+# avoid unnecessary churn in x_serialization_backend in META.*
+$ENV{PERL_JSON_BACKEND} = $ENV{CPAN_META_JSON_BACKEND} = 'JSON::PP';
+$ENV{PERL_YAML_BACKEND} = 'CPAN::Meta::YAML';
+
 my $opts = {
   'META.yml'  => { version => '1.4' },
   'META.json' => { version => '2' },
