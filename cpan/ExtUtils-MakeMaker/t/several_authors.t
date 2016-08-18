@@ -52,6 +52,7 @@ END
 );
 
 # avoid environment variables interfering with our make runs
+delete @ENV{qw(PERL_JSON_BACKEND CPAN_META_JSON_BACKEND PERL_YAML_BACKEND)} if $ENV{PERL_CORE};
 delete @ENV{qw(LIB MAKEFLAGS PERL_CORE)};
 
 my $perl     = which_perl();
