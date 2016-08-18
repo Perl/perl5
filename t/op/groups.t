@@ -13,8 +13,8 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc( '../lib' );
+    skip_all_if_miniperl("no dynamic loading on miniperl, no POSIX");
 }
-skip_all_if_miniperl("no dynamic loading on miniperl, no POSIX");
 
 use 5.010;
 use strict;
