@@ -444,6 +444,16 @@ character no longer produces a garbled syntax error message or a crash.
 A regression in 5.24 with C<tr/\N{U+...}/foo/> when the code point was between
 128 and 255 has been fixed. [perl #128734].
 
+=item *
+
+Many issues relating to C<printf "%a"> of hexadecimal floating point
+were fixed.  In addition, the "subnormals" (formerly known as "denormals")
+floating point anumbers are now supported both with the plain IEEE 754
+floating point numbers (64-bit or 128-bit) and the x86 80-bit
+"extended precision".  Note that subnormal hexadecimal floating
+point literals will give a warning about "exponent underflow".
+[perl #128843, #128889, #128890, #128893, #128909, #128919]
+
 =back
 
 =head1 Known Problems
