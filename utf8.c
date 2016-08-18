@@ -841,7 +841,7 @@ C<UTF8_CHECK_ONLY> is also specified.)
 
 It is now deprecated to have very high code points (above C<IV_MAX> on the
 platforms) and this function will raise a deprecation warning for these (unless
-such warnings are turned off).  This value, is typically 0x7FFF_FFFF (2**31 -1)
+such warnings are turned off).  This value is typically 0x7FFF_FFFF (2**31 -1)
 in a 32-bit word.
 
 Code points above 0x7FFF_FFFF (2**31 - 1) were never specified in any standard,
