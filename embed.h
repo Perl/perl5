@@ -1787,7 +1787,7 @@
 #define missingterm(a)		S_missingterm(aTHX_ a)
 #define no_op(a,b)		S_no_op(aTHX_ a,b)
 #define parse_ident(a,b,c,d,e,f)	S_parse_ident(aTHX_ a,b,c,d,e,f)
-#define pending_ident(a)	S_pending_ident(aTHX_ a)
+#define pending_ident()		S_pending_ident(aTHX)
 #define scan_const(a)		S_scan_const(aTHX_ a)
 #define scan_formline(a)	S_scan_formline(aTHX_ a)
 #define scan_heredoc(a)		S_scan_heredoc(aTHX_ a)

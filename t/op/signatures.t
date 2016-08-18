@@ -1100,8 +1100,6 @@ is $@, qq{syntax error at foo line 8, near "\$a 123"\n};
 eval "#line 8 foo\nsub t097 (\$a { }) { }";
 is $@, <<EOF;
 syntax error at foo line 8, near "\$a { "
-A signature parameter must start with '\$', '\@' or '%' at foo line 8, near "{ }"
-Missing right curly or square bracket at foo line 8, at end of line
 EOF
 
 eval "#line 8 foo\nsub t098 (\$a; \$b) { }";
@@ -1113,7 +1111,7 @@ EOF
 eval "#line 8 foo\nsub t099 (\$\$) { }";
 is $@, <<EOF;
 Illegal character following sigil in a subroutine signature at foo line 8, near "(\$"
-syntax error at foo line 8, near "\$\$"
+syntax error at foo line 8, near "\$\$) "
 EOF
 
 eval "#line 8 foo\nsub t101 (\@_) { }";

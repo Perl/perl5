@@ -5433,7 +5433,7 @@ STATIC void	S_no_op(pTHX_ const char *const what, char *s);
 STATIC void	S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package, bool is_utf8, bool check_dollar);
 #define PERL_ARGS_ASSERT_PARSE_IDENT	\
 	assert(s); assert(d); assert(e)
-STATIC int	S_pending_ident(pTHX_ bool is_sig);
+STATIC int	S_pending_ident(pTHX);
 STATIC char*	S_scan_const(pTHX_ char *start)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SCAN_CONST	\

@@ -4547,8 +4547,7 @@ Perl_yylex(pTHX)
 		    PL_lex_allbrackets--;
 		next_type &= 0xffff;
 	    }
-	    return REPORT(next_type == 'p' ?  pending_ident(0)
-                        : next_type == 'P' ?  pending_ident(1) : next_type);
+	    return REPORT(next_type == 'p' ? pending_ident() : next_type);
 	}
     }
 
@@ -4810,7 +4809,7 @@ Perl_yylex(pTHX)
     PL_oldbufptr = s;
     PL_parser->saw_infix_sigil = 0;
 
-    if (PL_expect == XSIGVAR) {
+    if (PL_in_my == KEY_sigvar) {
         /* we expect the sigil and optional var name part of a
          * signature element here. Since a '$' is not necessarily
          * followed by a var name, handle it specially here; the general
@@ -4847,8 +4846,10 @@ Perl_yylex(pTHX)
                 *dest = '\0';
                 assert(PL_tokenbuf[1]); /* we have a variable name */
                 NEXTVAL_NEXTTOKE.ival = sigil;
-                force_next('P'); /* force a signature pending identifier */
+                force_next('p'); /* force a signature pending identifier */
             }
+            else
+                PL_in_my = 0;
             PL_expect = XOPERATOR;
             break;
 
@@ -4859,6 +4860,7 @@ Perl_yylex(pTHX)
             break;
 
         default:
+            PL_in_my = 0;
             yyerror("A signature parameter must start with '$', '@' or '%'");
             /* very crude error recovery: skip to likely next signature
              * element */
@@ -8555,7 +8557,7 @@ Perl_yylex(pTHX)
 */
 
 static int
-S_pending_ident(pTHX_ bool is_sig)
+S_pending_ident(pTHX)
 {
     PADOFFSET tmp = 0;
     const char pit = (char)pl_yylval.ival;
@@ -8572,7 +8574,7 @@ S_pending_ident(pTHX_ bool is_sig)
 
        if it's a legal name, the OP is a PADANY.
     */
-    if (is_sig || PL_in_my) {
+    if (PL_in_my) {
         if (PL_in_my == KEY_our) {	/* "our" is merely analogous to "my" */
             if (has_colon)
                 yyerror_pv(Perl_form(aTHX_ "No package name allowed for "
@@ -8594,7 +8596,7 @@ S_pending_ident(pTHX_ bool is_sig)
                 GCC_DIAG_RESTORE;
             }
 
-            if (is_sig) {
+            if (PL_in_my == KEY_sigvar) {
                 /* A signature 'padop' needs in addition, an op_first to
                  * point to a child sigdefelem, and an extra field to hold
                  * the signature index. We can achieve both by using an
@@ -8608,15 +8610,14 @@ S_pending_ident(pTHX_ bool is_sig)
                 o->op_private |= (  PL_tokenbuf[0] == '$' ? OPpARGELEM_SV
                                   : PL_tokenbuf[0] == '@' ? OPpARGELEM_AV
                                   :                         OPpARGELEM_HV);
-                /* make allocmy() warnings be for 'my', not 'state' */
-                PL_in_my = KEY_my;
             }
             else
                 o = newOP(OP_PADANY, 0);
             o->op_targ = allocmy(PL_tokenbuf, tokenbuf_len,
                                                         UTF ? SVf_UTF8 : 0);
-            if (is_sig)
+            if (PL_in_my == KEY_sigvar)
                 PL_in_my = 0;
+
             pl_yylval.opval = o;
 	    return PRIVATEREF;
         }

@@ -898,7 +898,10 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 	    /* diag_listed_as: "%s" variable %s masks earlier declaration in same %s */
 	    Perl_warner(aTHX_ packWARN(WARN_MISC),
 		"\"%s\" %s %"PNf" masks earlier declaration in same %s",
-		(is_our ? "our" : PL_parser->in_my == KEY_my ? "my" : "state"),
+		(   is_our                         ? "our"   :
+                    PL_parser->in_my == KEY_my     ? "my"    :
+                    PL_parser->in_my == KEY_sigvar ? "my"    :
+                                                     "state" ),
 		*PadnamePV(sv) == '&' ? "subroutine" : "variable",
 		PNfARG(sv),
 		(COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO

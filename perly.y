@@ -638,10 +638,10 @@ myattrlist:	COLONATTR THING
  */
 
 /* the '' or 'foo' part of a '$' or '@foo' etc signature variable  */
-sigvarname:   /* NULL */
-			{ $$ = (OP*)NULL; }
+sigvarname:     /* NULL */
+			{ parser->in_my = 0; $$ = (OP*)NULL; }
         |       PRIVATEREF
-                        { $$ = $1; }
+                        { parser->in_my = 0; $$ = $1; }
 	;
 
 sigslurpsigil:
@@ -746,9 +746,9 @@ sigscalarelem:
 
 /* subroutine signature element: e.g. '$x = $default' or '%h' */
 sigelem:        sigscalarelem
-                        { parser->expect = XSIGVAR; $$ = $1; }
+                        { parser->in_my = KEY_sigvar; $$ = $1; }
         |       sigslurpelem
-                        { parser->expect = XSIGVAR; $$ = $1; }
+                        { parser->in_my = KEY_sigvar; $$ = $1; }
 	;
 
 /* list of subroutine signature elements */
@@ -779,7 +779,7 @@ subsignature:	'('
                             parser->sig_elems    = 0;
                             parser->sig_optelems = 0;
                             parser->sig_slurpy   = 0;
-                            parser->expect = XSIGVAR;
+                            parser->in_my        = KEY_sigvar;
                         }
                 siglistornull
                 ')'
@@ -811,6 +811,7 @@ subsignature:	'('
                                                 sigops,
                                                 newSTATEOP(0, NULL, NULL));
 
+                            parser->in_my = 0;
                             parser->expect = XATTRBLOCK;
                             LEAVE;
 			}

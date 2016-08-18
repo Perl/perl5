@@ -5327,10 +5327,11 @@ typedef enum {
     XTERMBLOCK,
     XBLOCKTERM,
     XPOSTDEREF,
-    XSIGVAR,     /* expecting a var in a sub  signature */
     XTERMORDORDOR /* evil hack */
     /* update exp_name[] in toke.c if adding to this enum */
 } expectation;
+
+#define KEY_sigvar 0xFFFF /* fake keyword representing a signature var */
 
 /* Hints are now stored in a dedicated U32, so the bottom 8 bits are no longer
    special and there is no need for HINT_PRIVATE_MASK for COPs
