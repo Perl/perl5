@@ -401,6 +401,16 @@ Mentioning the same constant twice in a row (which is a syntax error) no
 longer fails an assertion under debugging builds.  This was a regression
 from 5.20.  [perl #126482]
 
+=item *
+
+Many issues relating to C<printf "%a"> of hexadecimal floating point
+were fixed.  In addition, the "subnormals" (formerly known as "denormals")
+floating point anumbers are now supported both with the plain IEEE 754
+floating point numbers (64-bit or 128-bit) and the x86 80-bit
+"extended precision".  Note that subnormal hexadecimal floating
+point literals will give a warning about "exponent underflow".
+[perl #128843, #128889, #128890, #128893, #128909, #128919]
+
 =back
 
 =head1 Known Problems
