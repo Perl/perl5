@@ -76,6 +76,8 @@ Perhaps just the removal of SETERRNO() from this.
 
 <commit votes="sprout" id="c82de78e3ba0184f85b5b49245e5da32d1cb3fcc" ticket="126482" desc="[perl #126482] Fix assert fail ‘a_const a_const’"/>
 
+<commit votes="jhi" id="dd1dbff095629118e73a48a2a6008f03418a07f6" ticket="128967" desc="#128967: Inconsistency between doc and code for chown using negative argument: -1"/>
+
 </div>
 
 <div><h3>New Feature Fixes</h3>
