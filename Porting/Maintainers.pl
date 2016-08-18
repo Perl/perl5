@@ -305,14 +305,12 @@ use File::Glob qw(:case);
     # Note: When updating CPAN-Meta the META.* files will need to be regenerated
     # perl -Icpan/CPAN-Meta/lib Porting/makemeta
     'CPAN::Meta' => {
-        'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-2.150005.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-2.150010.tar.gz',
         'FILES'        => q[cpan/CPAN-Meta],
         'EXCLUDED'     => [
             qw[t/00-report-prereqs.t
                t/00-report-prereqs.dd
-               t/data-test/x_deprecated-META.json
-               t/data-valid/x_deprecated-META.yml
-               t/README-data.txt],
+              ],
             qr{^xt},
             qr{^history},
         ],
@@ -896,16 +894,6 @@ use File::Glob qw(:case);
     'parent' => {
         'DISTRIBUTION' => 'CORION/parent-0.234.tar.gz',
         'FILES'        => q[cpan/parent],
-    },
-
-    'Parse::CPAN::Meta' => {
-        'DISTRIBUTION' => 'DAGOLDEN/Parse-CPAN-Meta-1.4422.tar.gz',
-        'FILES'        => q[cpan/Parse-CPAN-Meta],
-        'EXCLUDED'     => [
-            qw[t/00-report-prereqs.dd],
-            qw[t/00-report-prereqs.t],
-            qr{^xt},
-        ],
     },
 
     'PathTools' => {

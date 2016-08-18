@@ -1,9 +1,10 @@
 use 5.008001;
 use strict;
+use warnings;
 package Parse::CPAN::Meta;
 # ABSTRACT: Parse META.yml and META.json CPAN metadata files
 
-our $VERSION = '1.4422';
+our $VERSION = '2.150010';
 
 use Exporter;
 use Carp 'croak';
@@ -59,7 +60,7 @@ sub load_json_string {
 }
 
 sub yaml_backend {
-  if (! defined $ENV{PERL_YAML_BACKEND} ) {
+  if ($ENV{PERL_CORE} or not defined $ENV{PERL_YAML_BACKEND} ) {
     _can_load( 'CPAN::Meta::YAML', 0.011 )
       or croak "CPAN::Meta::YAML 0.011 is not available\n";
     return "CPAN::Meta::YAML";
@@ -75,6 +76,11 @@ sub yaml_backend {
 }
 
 sub json_decoder {
+  if ($ENV{PERL_CORE}) {
+    _can_load( 'JSON::PP' => 2.27300 )
+      or croak "JSON::PP 2.27300 is not available\n";
+    return 'JSON::PP';
+  }
   if (my $decoder = $ENV{CPAN_META_JSON_DECODER}) {
     _can_load( $decoder )
       or croak "Could not load CPAN_META_JSON_DECODER '$decoder'\n";
@@ -86,6 +92,11 @@ sub json_decoder {
 }
 
 sub json_backend {
+  if ($ENV{PERL_CORE}) {
+    _can_load( 'JSON::PP' => 2.27300 )
+      or croak "JSON::PP 2.27300 is not available\n";
+    return 'JSON::PP';
+  }
   if (my $backend = $ENV{CPAN_META_JSON_BACKEND}) {
     _can_load( $backend )
       or croak "Could not load CPAN_META_JSON_BACKEND '$backend'\n";
@@ -114,7 +125,7 @@ sub _slurp {
   $content = Encode::decode('UTF-8', $content, Encode::PERLQQ());
   return $content;
 }
-  
+
 sub _can_load {
   my ($module, $version) = @_;
   (my $file = $module) =~ s{::}{/}g;
@@ -158,27 +169,27 @@ Parse::CPAN::Meta - Parse META.yml and META.json CPAN metadata files
 
 =head1 VERSION
 
-version 1.4422
+version 2.150010
 
 =head1 SYNOPSIS
 
     #############################################
     # In your file
-    
+
     ---
     name: My-Distribution
     version: 1.23
     resources:
       homepage: "http://example.com/dist/My-Distribution"
-    
-    
+
+
     #############################################
     # In your program
-    
+
     use Parse::CPAN::Meta;
-    
+
     my $distmeta = Parse::CPAN::Meta->load_file('META.yml');
-    
+
     # Reading properties
     my $name     = $distmeta->{name};
     my $version  = $distmeta->{version};
@@ -234,7 +245,7 @@ C<load_yaml_string>.
 
   my $metadata_structure = Parse::CPAN::Meta->load_json_string($json_string);
 
-This method deserializes the given string of JSON and the result.  
+This method deserializes the given string of JSON and the result.
 If the source was UTF-8 encoded, the string must be decoded before calling
 C<load_json_string>.
 
@@ -331,72 +342,13 @@ as a module to use for deserialization.  The given module must be installed,
 must load correctly and must implement the C<Load()> function or an exception
 will be thrown.
 
-=for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders metacpan
-
-=head1 SUPPORT
-
-=head2 Bugs / Feature Requests
-
-Please report any bugs or feature requests through the issue tracker
-at L<https://github.com/Perl-Toolchain-Gang/Parse-CPAN-Meta/issues>.
-You will be notified automatically of any progress on your issue.
-
-=head2 Source Code
-
-This is open source software.  The code repository is available for
-public review and contribution under the terms of the license.
-
-L<https://github.com/Perl-Toolchain-Gang/Parse-CPAN-Meta>
-
-  git clone https://github.com/Perl-Toolchain-Gang/Parse-CPAN-Meta.git
-
 =head1 AUTHORS
 
 =over 4
 
 =item *
 
-Adam Kennedy <adamk@cpan.org>
-
-=item *
-
 David Golden <dagolden@cpan.org>
-
-=back
-
-=head1 CONTRIBUTORS
-
-=for stopwords Andreas Koenig David Golden Graham Knop Joshua ben Jore Karen Etheridge Matt S Trout Neil Bowers Ricardo Signes Steffen Mueller
-
-=over 4
-
-=item *
-
-Andreas Koenig <andk@cpan.org>
-
-=item *
-
-David Golden <xdg@xdg.me>
-
-=item *
-
-Graham Knop <haarg@haarg.org>
-
-=item *
-
-Joshua ben Jore <jjore@cpan.org>
-
-=item *
-
-Karen Etheridge <ether@cpan.org>
-
-=item *
-
-Matt S Trout <mst@shadowcat.co.uk>
-
-=item *
-
-Neil Bowers <neil@bowers.com>
 
 =item *
 
@@ -404,13 +356,13 @@ Ricardo Signes <rjbs@cpan.org>
 
 =item *
 
-Steffen Mueller <smueller@cpan.org>
+Adam Kennedy <adamk@cpan.org>
 
 =back
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2016 by Adam Kennedy and Contributors.
+This software is copyright (c) 2010 by David Golden, Ricardo Signes, Adam Kennedy and Contributors.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

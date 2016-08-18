@@ -67,7 +67,7 @@ my $json_meta = catfile( test_data_directory(), 'json.meta' );
 
 ### YAML tests
 {
-  local $ENV{PERL_YAML_BACKEND}; # ensure we get CPAN::META::YAML
+  local $ENV{PERL_YAML_BACKEND} if not $ENV{PERL_CORE}; # ensure we always get CPAN::META::YAML
 
   is(Parse::CPAN::Meta->yaml_backend(), 'CPAN::Meta::YAML', 'yaml_backend(): CPAN::Meta::YAML');
   my $from_yaml = Parse::CPAN::Meta->load_file( $meta_yaml );
@@ -75,7 +75,7 @@ my $json_meta = catfile( test_data_directory(), 'json.meta' );
 }
 
 {
-  local $ENV{PERL_YAML_BACKEND}; # ensure we get CPAN::META::YAML
+  local $ENV{PERL_YAML_BACKEND} if not $ENV{PERL_CORE}; # ensure we always get CPAN::META::YAML
 
   note '';
   is(Parse::CPAN::Meta->yaml_backend(), 'CPAN::Meta::YAML', 'yaml_backend(): CPAN::Meta::YAML');
@@ -84,7 +84,7 @@ my $json_meta = catfile( test_data_directory(), 'json.meta' );
 }
 
 {
-  local $ENV{PERL_YAML_BACKEND}; # ensure we get CPAN::META::YAML
+  local $ENV{PERL_YAML_BACKEND} if not $ENV{PERL_CORE}; # ensure we always get CPAN::META::YAML
 
   note '';
   is(Parse::CPAN::Meta->yaml_backend(), 'CPAN::Meta::YAML', 'yaml_backend(): CPAN::Meta::YAML');
@@ -93,7 +93,7 @@ my $json_meta = catfile( test_data_directory(), 'json.meta' );
 }
 
 {
-  local $ENV{PERL_YAML_BACKEND}; # ensure we get CPAN::META::YAML
+  local $ENV{PERL_YAML_BACKEND} if not $ENV{PERL_CORE}; # ensure we always get CPAN::META::YAML
 
   note '';
   is(Parse::CPAN::Meta->yaml_backend(), 'CPAN::Meta::YAML', 'yaml_backend(): CPAN::Meta::YAML');
@@ -102,7 +102,7 @@ my $json_meta = catfile( test_data_directory(), 'json.meta' );
 }
 
 {
-  local $ENV{PERL_YAML_BACKEND}; # ensure we get CPAN::META::YAML
+  local $ENV{PERL_YAML_BACKEND} if not $ENV{PERL_CORE}; # ensure we always get CPAN::META::YAML
 
   note '';
   is(Parse::CPAN::Meta->yaml_backend(), 'CPAN::Meta::YAML', 'yaml_backend(): CPAN::Meta::YAML');
@@ -112,7 +112,7 @@ my $json_meta = catfile( test_data_directory(), 'json.meta' );
 }
 
 {
-  local $ENV{PERL_YAML_BACKEND}; # ensure we get CPAN::META::YAML
+  local $ENV{PERL_YAML_BACKEND} if not $ENV{PERL_CORE}; # ensure we always get CPAN::META::YAML
 
   note '';
   is(Parse::CPAN::Meta->yaml_backend(), 'CPAN::Meta::YAML', 'yaml_backend(): CPAN::Meta::YAML');
@@ -123,6 +123,7 @@ my $json_meta = catfile( test_data_directory(), 'json.meta' );
 
 SKIP: {
   note '';
+  skip 'these tests are for cpan builds only', 2 if $ENV{PERL_CORE};
   skip "YAML module not installed", 2
     unless eval "require YAML; 1";
   local $ENV{PERL_YAML_BACKEND} = 'YAML';
@@ -136,7 +137,7 @@ SKIP: {
 ### JSON tests
 {
   # JSON tests with JSON::PP
-  local $ENV{PERL_JSON_BACKEND}; # ensure we get JSON::PP
+  local $ENV{PERL_JSON_BACKEND} if not $ENV{PERL_CORE}; # ensure we always get JSON::PP
 
   note '';
   is(Parse::CPAN::Meta->json_backend(), 'JSON::PP', 'json_backend(): JSON::PP');
@@ -146,7 +147,7 @@ SKIP: {
 
 {
   # JSON tests with JSON::PP
-  local $ENV{PERL_JSON_BACKEND}; # ensure we get JSON::PP
+  local $ENV{PERL_JSON_BACKEND} if not $ENV{PERL_CORE}; # ensure we always get JSON::PP
 
   note '';
   is(Parse::CPAN::Meta->json_backend(), 'JSON::PP', 'json_backend(): JSON::PP');
@@ -156,7 +157,7 @@ SKIP: {
 
 {
   # JSON tests with JSON::PP
-  local $ENV{PERL_JSON_BACKEND}; # ensure we get JSON::PP
+  local $ENV{PERL_JSON_BACKEND} if not $ENV{PERL_CORE}; # ensure we always get JSON::PP
 
   note '';
   is(Parse::CPAN::Meta->json_backend(), 'JSON::PP', 'json_backend(): JSON::PP');
@@ -167,7 +168,7 @@ SKIP: {
 
 {
   # JSON tests with JSON::PP, take 2
-  local $ENV{PERL_JSON_BACKEND} = 0; # request JSON::PP
+  local $ENV{PERL_JSON_BACKEND} = 0 if not $ENV{PERL_CORE}; # request JSON::PP
 
   note '';
   is(Parse::CPAN::Meta->json_backend(), 'JSON::PP', 'json_backend(): JSON::PP');
@@ -178,7 +179,7 @@ SKIP: {
 
 {
   # JSON tests with JSON::PP, take 3
-  local $ENV{PERL_JSON_BACKEND} = 'JSON::PP'; # request JSON::PP
+  local $ENV{PERL_JSON_BACKEND} = 'JSON::PP' if not $ENV{PERL_CORE}; # request JSON::PP
 
   note '';
   is(Parse::CPAN::Meta->json_backend(), 'JSON::PP', 'json_backend(): JSON::PP');
@@ -187,14 +188,17 @@ SKIP: {
   is_deeply($from_json, $want, "load_json_string with PERL_JSON_BACKEND = 'JSON::PP'");
 }
 
-{
+SKIP: {
   # JSON tests with fake backend
+
+  note '';
+  skip 'these tests are for cpan builds only', 2 if $ENV{PERL_CORE};
+
   { package MyJSONThingy; $INC{'MyJSONThingy.pm'} = __FILE__; require JSON::PP;
     sub decode_json { JSON::PP::decode_json(@_) } }
 
   local $ENV{CPAN_META_JSON_DECODER} = 'MyJSONThingy'; # request fake backend
 
-  note '';
   is(Parse::CPAN::Meta->json_decoder(), 'MyJSONThingy', 'json_decoder(): MyJSONThingy');
   my $json   = load_ok( $meta_json, $meta_json, 100, ":encoding(UTF-8)");
   my $from_json = Parse::CPAN::Meta->load_json_string( $json );
@@ -203,6 +207,7 @@ SKIP: {
 
 SKIP: {
   note '';
+  skip 'these tests are for cpan builds only', 2 if $ENV{PERL_CORE};
   skip "JSON module version 2.5 not installed", 2
     unless eval "require JSON; JSON->VERSION(2.5); 1";
   local $ENV{PERL_JSON_BACKEND} = 1;

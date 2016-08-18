@@ -292,6 +292,13 @@ cpan/CPAN/t/02nox.t		See if CPAN::Nox works
 cpan/CPAN/t/03pkgs.t		See if CPAN::Version works
 cpan/CPAN/t/10version.t		See if CPAN the module works
 cpan/CPAN/t/11mirroredby.t		See if CPAN::Mirrored::By works
+cpan/CPAN-Meta/corpus/BadMETA.yml
+cpan/CPAN-Meta/corpus/bareyaml.meta
+cpan/CPAN-Meta/corpus/CL018_yaml.meta
+cpan/CPAN-Meta/corpus/json.meta
+cpan/CPAN-Meta/corpus/META-VR.json
+cpan/CPAN-Meta/corpus/META-VR.yml
+cpan/CPAN-Meta/corpus/yaml.meta
 cpan/CPAN-Meta/lib/CPAN/Meta.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/Converter.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/Feature.pm
@@ -305,6 +312,7 @@ cpan/CPAN-Meta/lib/CPAN/Meta/Merge.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/Prereqs.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/Spec.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/Validator.pm
+cpan/CPAN-Meta/lib/Parse/CPAN/Meta.pm
 cpan/CPAN-Meta/t/converter.t
 cpan/CPAN-Meta/t/converter-bad.t
 cpan/CPAN-Meta/t/converter-fail.t
@@ -351,21 +359,31 @@ cpan/CPAN-Meta/t/data-test/unicode.yml
 cpan/CPAN-Meta/t/data-test/version-not-normal.json
 cpan/CPAN-Meta/t/data-test/version-ranges-1_4.yml
 cpan/CPAN-Meta/t/data-test/version-ranges-2.json
+cpan/CPAN-Meta/t/data-test/x_deprecated-META.json
 cpan/CPAN-Meta/t/data-valid/1122575719-META.yml
 cpan/CPAN-Meta/t/data-valid/1206545041-META.yml
 cpan/CPAN-Meta/t/data-valid/1985684504-META.yml
 cpan/CPAN-Meta/t/data-valid/476602558-META.yml
 cpan/CPAN-Meta/t/data-valid/META-1_0.yml
 cpan/CPAN-Meta/t/data-valid/META-1_1.yml
+cpan/CPAN-Meta/t/data-valid/META-1_4.yml
+cpan/CPAN-Meta/t/data-valid/META-2.json
 cpan/CPAN-Meta/t/data-valid/scalar-meta-spec.yml
+cpan/CPAN-Meta/t/data-valid/x_deprecated-META.yml
+cpan/CPAN-Meta/t/lib/Parse/CPAN/Meta/Test.pm
 cpan/CPAN-Meta/t/load-bad.t
 cpan/CPAN-Meta/t/merge.t
 cpan/CPAN-Meta/t/meta-obj.t
 cpan/CPAN-Meta/t/no-index.t
 cpan/CPAN-Meta/t/optional_feature-merge.t
+cpan/CPAN-Meta/t/parse-cpan-meta/02_api.t
+cpan/CPAN-Meta/t/parse-cpan-meta/03_functions.t
+cpan/CPAN-Meta/t/parse-cpan-meta/04_export.t
+cpan/CPAN-Meta/t/parse-cpan-meta/05_errors.t
 cpan/CPAN-Meta/t/prereqs.t
 cpan/CPAN-Meta/t/prereqs-finalize.t
 cpan/CPAN-Meta/t/prereqs-merge.t
+cpan/CPAN-Meta/t/README-data.txt
 cpan/CPAN-Meta/t/repository.t
 cpan/CPAN-Meta/t/save-load.t
 cpan/CPAN-Meta/t/validator.t
@@ -1872,19 +1890,6 @@ cpan/parent/t/parent-classfromclassfile.t	tests for parent.pm
 cpan/parent/t/parent-classfromfile.t		tests for parent.pm
 cpan/parent/t/parent-pmc.t			tests for parent.pm
 cpan/parent/t/parent-returns-false.t		tests for parent.pm
-cpan/Parse-CPAN-Meta/corpus/BadMETA.yml
-cpan/Parse-CPAN-Meta/corpus/bareyaml.meta
-cpan/Parse-CPAN-Meta/corpus/CL018_yaml.meta
-cpan/Parse-CPAN-Meta/corpus/json.meta
-cpan/Parse-CPAN-Meta/corpus/META-VR.json
-cpan/Parse-CPAN-Meta/corpus/META-VR.yml
-cpan/Parse-CPAN-Meta/corpus/yaml.meta
-cpan/Parse-CPAN-Meta/lib/Parse/CPAN/Meta.pm
-cpan/Parse-CPAN-Meta/t/02_api.t
-cpan/Parse-CPAN-Meta/t/03_functions.t
-cpan/Parse-CPAN-Meta/t/04_export.t
-cpan/Parse-CPAN-Meta/t/05_errors.t
-cpan/Parse-CPAN-Meta/t/lib/Parse/CPAN/Meta/Test.pm
 cpan/Perl-OSType/lib/Perl/OSType.pm			Perl::OSType
 cpan/Perl-OSType/t/OSType.t			Perl::OSType
 cpan/perlfaq/lib/perlfaq.pm	Perl frequently asked questions
