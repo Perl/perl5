@@ -69,7 +69,7 @@ the first one required manual backporting (available on request).
 <commit votes="jhi" id="ee58923a8531731f8acb98ab130abf41f75ebdc7" ticket="128909" desc="printf %a mishandles exponent-crossing rounding with long double"/>
 <commit votes="jhi" id="9e67a8c1b21482ed5fada053dd462eb23320dc86" ticket="" desc="Avoid test noise on non-longdouble."/>
 <commit votes="jhi" id="a149d1180209525972d84fd1a62f488da83e568a" ticket="128919" desc="limited exponent range in hex fp literal with long double"/>
-<commit votes="jhi" id="7301378635b35757b228e07c14276afaf06a4728" ticket="" desc="7301378635b35757b228e07c14276afaf06a4728"/>
+<commit votes="jhi" id="7301378635b35757b228e07c14276afaf06a4728" ticket="" desc="Follow-up on a149d11"/>
 <commit votes="jhi" id="f5a466613ec0b74a224adb5b7da6da0a74713596" ticket="" desc="Use library testing for subnormality"/>
 <commit votes="jhi" id="f40ac91c3b9891b83f3d253861009c290584b646" ticket="" desc="Handle subnormals of x86 80-bit"/>
 <commit votes="jhi" id="b28053d1f063cb783e73b0596d1f58a21681fda6" ticket="" desc="Define Perl_fp_class() for quadmath"/>
