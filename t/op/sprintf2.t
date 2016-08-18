@@ -894,4 +894,24 @@ SKIP: {
     is(sprintf("%.0a", 1.9999999999999999999), "0x1p+1");
 }
 
+# quadmath tests for rt.perl.org #128843
+SKIP: {
+    skip "need quadmath", 7, unless $Config{usequadmath};
+
+    is(sprintf("%a", eval '0x1p-16382'), '0x1p-16382');  # last normal
+
+    local $SIG{__WARN__} = sub {
+        die "$0: $_[0]" unless $_[0] =~ /exponent underflow/;
+    };
+
+    is(sprintf("%a", eval '0x1p-16383'), '0x1p-16383');
+    is(sprintf("%a", eval '0x1p-16384'), '0x1p-16384');
+
+    is(sprintf("%a", eval '0x1p-16491'), '0x1p-16491');
+    is(sprintf("%a", eval '0x1p-16492'), '0x1p-16492');
+    is(sprintf("%a", eval '0x1p-16493'), '0x1p-16493'); # last denormal
+
+    is(sprintf("%a", eval '0x1p-16494'), '0x1p-16494'); # underflow
+}
+
 done_testing();
