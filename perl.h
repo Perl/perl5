@@ -2022,6 +2022,12 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #   define Perl_isinf(x) isinfq(x)
 #   define Perl_isnan(x) isnanq(x)
 #   define Perl_isfinite(x) !(isnanq(x) || isinfq(x))
+#   define Perl_fp_class(x) ((x) == 0.0Q ? 0 : isinfq(x) ? 3 : isnanq(x) ? 4 : PERL_ABS(x) < FLT128_MIN ? 2 : 1)
+#   define Perl_fp_class_inf(x)    (Perl_fp_class(x) == 3)
+#   define Perl_fp_class_nan(x)    (Perl_fp_class(x) == 4)
+#   define Perl_fp_class_norm(x)   (Perl_fp_class(x) == 1)
+#   define Perl_fp_class_denorm(x) (Perl_fp_class(x) == 2)
+#   define Perl_fp_class_zero(x)   (Perl_fp_class(x) == 0)
 #else
 #   define NV_DIG DBL_DIG
 #   ifdef DBL_MANT_DIG
