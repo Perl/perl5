@@ -8,10 +8,11 @@ BEGIN {
     # We're not going to chdir() into 't' because we don't know if
     # chdir() works!  Instead, we'll hedge our bets and put both
     # possibilities into @INC.
-    unshift @INC, qw(t . lib ../lib);
-    require "test.pl";
-    plan(tests => 47);
+    require "./test.pl";
+    set_up_inc(qw(t . lib ../lib));
 }
+
+plan(tests => 47);
 
 use Config;
 use Errno qw(ENOENT EBADF EINVAL);

@@ -9,16 +9,14 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = qw(../lib);
+    require './test.pl';
+    set_up_inc( qw(../lib) );
 }
 
 use strict;
 
-BEGIN {
-    require './test.pl';
-    skip_all_without_config(qw(d_pipe d_fork d_waitpid d_getppid));
-    plan (8);
-}
+skip_all_without_config(qw(d_pipe d_fork d_waitpid d_getppid));
+plan (8);
 
 # No, we don't want any zombies. kill 0, $ppid spots zombies :-(
 $SIG{CHLD} = 'IGNORE';

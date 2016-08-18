@@ -4,8 +4,8 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
     require './test.pl';
+    set_up_inc('../lib');
 }   
 
 # We'll run 12 extra tests (see below) if $Q is false.
@@ -298,7 +298,7 @@ for my $i (1, 3, 5, 10) {
 # Used to mangle PL_sv_undef
 fresh_perl_like(
     'print sprintf "xxx%n\n"; print undef',
-    qr/Modification of a read-only value attempted at - line 1\./,
+    qr/Modification of a read-only value attempted at\b/,
     { switches => [ '-w' ] },
     q(%n should not be able to modify read-only constants),
 );

@@ -2,10 +2,10 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = ('../lib', '.');
+    require './test.pl';
+    set_up_inc('../lib', '.');
 }   
 # Avoid using eq_array below as it uses .. internally.
-require './test.pl';
 
 use Config;
 

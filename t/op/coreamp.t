@@ -9,9 +9,9 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = qw(. ../lib ../dist/if);
     require "./test.pl"; require './charset_tools.pl';
     $^P |= 0x100;
+    set_up_inc( qw(. ../lib ../dist/if) );
 }
 
 no warnings 'experimental::smartmatch';

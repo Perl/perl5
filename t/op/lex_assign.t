@@ -5,8 +5,8 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
     require './test.pl';
+    set_up_inc('../lib');
 }
 
 $| = 1;
@@ -102,12 +102,13 @@ EOE
 {				# Check calling STORE
   note('Tied variables, calling STORE');
   my $sc = 0;
-  sub B::TIESCALAR {bless [11], 'B'}
-  sub B::FETCH { -(shift->[0]) }
-  sub B::STORE { $sc++; my $o = shift; $o->[0] = 17 + shift }
+  # do not use B:: namespace
+  sub BB::TIESCALAR {bless [11], 'BB'}
+  sub BB::FETCH { -(shift->[0]) }
+  sub BB::STORE { $sc++; my $o = shift; $o->[0] = 17 + shift }
 
   my $m;
-  tie $m, 'B';
+  tie $m, 'BB';
   $m = 100;
 
   is( $sc, 1, 'STORE called when assigning scalar to tied variable' );

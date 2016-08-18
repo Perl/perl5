@@ -2,11 +2,11 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
     require Config; import Config;
     require './test.pl';
     require './charset_tools.pl';
     require './loc_tools.pl';
+    set_up_inc( '../lib' );
 }
 
 plan(tests => 215);

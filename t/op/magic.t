@@ -3,9 +3,9 @@
 BEGIN {
     $| = 1;
     chdir 't' if -d 't';
-    @INC = '../lib';
     require './test.pl';
-    plan (tests => 192);
+    set_up_inc( '../lib' );
+    plan (tests => 192); # some tests are run in BEGIN block
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -61,6 +61,7 @@ $PERL =
     $Is_VMS     ? $^X      :
     $Is_MSWin32 ? '.\perl' :
                   './perl');
+
 
 sub env_is {
     my ($key, $val, $desc) = @_;
@@ -705,6 +706,7 @@ is ++${^MPEN}, 1, '${^MPEN} can be incremented';
     sub TIESCALAR { bless {}; }
     sub FETCH { push @RT12608::G::ISA, "RT12608::H"; "RT12608::Y"; }
 }
+
 
 # ^^^^^^^^^ New tests go here ^^^^^^^^^
 

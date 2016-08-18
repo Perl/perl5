@@ -12,7 +12,7 @@ BEGIN {
     require './test.pl';
 # turn warnings into fatal errors
     $SIG{__WARN__} = sub { die "WARNING: @_" } ;
-
+    set_up_inc('../lib');
     skip_all_if_miniperl("no dynamic loading on miniperl, no Fcntl");
     require Fcntl;
 }

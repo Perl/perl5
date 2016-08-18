@@ -7,7 +7,7 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    @INC = '../lib';
+    set_up_inc('../lib');
 }
 
 # Hack to allow test counts to be specified piecemeal
@@ -19,6 +19,7 @@ plan (tests => $tests);
 use tests 2; # First make sure that %! %- %+ do not load extra modules.
 map %{"foo::$_"}, qw< ! - + >;
 ok !exists $INC{'Errno.pm'}, '$swext::! does not load Errno';
+
 ok !exists $INC{'Tie/Hash/NamedCapture.pm'},
   '$foo::+ and $foo::- do not load Tie::Hash::NamedCapture';
 

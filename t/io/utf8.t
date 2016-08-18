@@ -2,10 +2,10 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
     require './test.pl'; require './charset_tools.pl';
-    skip_all_without_perlio();
+    set_up_inc('../lib');
 }
+skip_all_without_perlio();
 
 no utf8; # needed for use utf8 not griping about the raw octets
 

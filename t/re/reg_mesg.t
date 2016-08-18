@@ -4,11 +4,12 @@ $|=1;   # outherwise things get mixed up in output
 
 BEGIN {
 	chdir 't' if -d 't';
-	@INC = qw '../lib ../ext/re';
 	require './test.pl';
-	skip_all_without_unicode_tables();
+    set_up_inc( qw '../lib ../ext/re' );
 	eval 'require Config'; # assume defaults if this fails
 }
+
+skip_all_without_unicode_tables();
 
 use strict;
 use open qw(:utf8 :std);

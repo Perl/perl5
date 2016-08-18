@@ -10,13 +10,14 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = qw '../lib ../cpan/version/lib';
+    require './test.pl';
+    set_up_inc(qw '../lib ../cpan/version/lib');
 }
 use warnings;
 use version;
 use Config;
 use strict;
-require './test.pl';
+
 
 my @tests = ();
 my ($template, $data, $result, $comment, $w, $x, $evalData, $n, $p);

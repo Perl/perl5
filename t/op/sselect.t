@@ -3,11 +3,10 @@
 my $hires;
 BEGIN {
     chdir 't' if -d 't';
-    @INC = ('.', '../lib');
+    require './test.pl';
+    set_up_inc('.', '../lib');
     $hires = eval 'use Time::HiResx "time"; 1';
 }
-
-require './test.pl';
 
 skip_all("Win32 miniperl has no socket select")
   if $^O eq "MSWin32" && is_miniperl();

@@ -6,8 +6,8 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = qw(. ../lib lib ../dist/base/lib);
     require "./test.pl";
+    set_up_inc( qw(. ../lib lib ../dist/base/lib) );
 }
 
 use strict;
@@ -543,7 +543,7 @@ like $@,
      qr/^Can't call method "squeak" on unblessed reference/,
     'method call on \*typeglob';
 *stdout2 = *STDOUT;  # stdout2 now stringifies as *main::STDOUT
-sub IO::Handle::self { $_[0] }
+ sub IO::Handle::self { $_[0] }
 # This used to stringify the glob:
 is *stdout2->self, (\*stdout2)->self,
   '*glob->method is equiv to (\*glob)->method';

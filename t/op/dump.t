@@ -4,11 +4,11 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = qw(. ../lib);
     require './test.pl';
-
-    skip_all_if_miniperl();
+    set_up_inc( qw(. ../lib) );
 }
+
+skip_all_if_miniperl();
 
 use Config;
 use File::Temp qw(tempdir);

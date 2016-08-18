@@ -15,13 +15,13 @@ $| = 1;
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = ('../lib','.','../ext/re');
     require Config; import Config;
     require './test.pl'; require './charset_tools.pl';
     require './loc_tools.pl';
+    set_up_inc('../lib', '.', '../ext/re');
+}
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
-}
 
 plan tests => 799;  # Update this when adding/deleting tests.
 

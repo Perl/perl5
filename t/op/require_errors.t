@@ -3,7 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    @INC="../lib";
+    set_up_inc( qw(../lib) );
 }
 
 use strict;
@@ -12,8 +12,6 @@ use warnings;
 plan(tests => 20);
 
 my $nonfile = tempfile();
-
-@INC = qw(Perl Rules);
 
 # The tests for ' ' and '.h' never did fail, but previously the error reporting
 # code would read memory before the start of the SV's buffer
@@ -133,7 +131,7 @@ like $@, qr/^Can't locate strict\.pm\\0invalid: /, 'do nul check';
 
   $WARN = '';
   local @INC = @INC;
-  unshift @INC, "lib\0invalid";
+  set_up_inc( "lib\0invalid" );
   eval { require "unknown.pm" };
   like $WARN, qr{^Invalid \\0 character in \@INC entry for require: lib\\0invalid at }, 'nul warning';
 }

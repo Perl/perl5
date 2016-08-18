@@ -8,16 +8,15 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
     require './test.pl';
-    skip_all_without_dynamic_extension('Fcntl');
+    set_up_inc('../lib');
 }
+
+skip_all_without_dynamic_extension('Fcntl');
 
 use warnings;
 use strict;
 use Config;
-
-require './test.pl';
 
 my $piped;
 eval {
