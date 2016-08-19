@@ -1779,9 +1779,6 @@ S_incline(pTHX_ const char *s)
     CopLINE_set(PL_curcop, line_num);
 }
 
-#define skipspace(s) skipspace_flags(s, 0)
-
-
 STATIC void
 S_update_debugger_info(pTHX_ SV *orig_sv, const char *const buf, STRLEN len)
 {
@@ -1812,6 +1809,8 @@ S_update_debugger_info(pTHX_ SV *orig_sv, const char *const buf, STRLEN len)
  * Called to gobble the appropriate amount and type of whitespace.
  * Skips comments as well.
  */
+
+#define skipspace(s) skipspace_flags(s, 0)
 
 STATIC char *
 S_skipspace_flags(pTHX_ char *s, U32 flags)
