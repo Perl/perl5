@@ -621,8 +621,9 @@ perl_destruct(pTHXx)
         PerlIO *stdo = PerlIO_stdout();
         if (*stdo && PerlIO_flush(stdo)) {
             PerlIO_restore_errno(stdo);
-            PerlIO_printf(PerlIO_stderr(), "Unable to flush stdout: %s",
-                          Strerror(errno));
+            if (errno)
+                PerlIO_printf(PerlIO_stderr(), "Unable to flush stdout: %s",
+                    Strerror(errno));
             if (!STATUS_UNIX)
                 STATUS_ALL_FAILURE;
         }
