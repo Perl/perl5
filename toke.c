@@ -3531,7 +3531,7 @@ S_scan_const(pTHX_ char *start)
 			    sv_utf8_upgrade_flags_grow(
                                     sv,
                                     SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-				    UVCHR_SKIP(uv) + (STRLEN)(send - e) + 1);
+				    OFFUNISKIP(uv) + (STRLEN)(send - e) + 1);
 			    d = SvPVX(sv) + SvCUR(sv);
 			    has_utf8 = TRUE;
 			}
