@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.997";
+our $VERSION   = "0.998";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -604,21 +604,33 @@ our %hints; # used to display each COP's op_hints values
 @hints{0x1000,0x2000,0x4000,0x8000,0x10000} = ('I', 'F', 'B', 'S', 'R');
 # taint and eval
 @hints{0x100000,0x200000} = ('T', 'E');
-# filetest access, UTF-0x8
-@hints{0x400000,0x800000} = ('X', 'U');
+# filetest access, use utf8, unicode_strings feature
+@hints{0x400000,0x800000,0x800} = ('X', 'U', 'us');
 
-sub _flags {
-    my($hash, $x) = @_;
+# pick up the feature hints constants.
+# Note that we're relying on non-API parts of feature.pm,
+# but its less naughty than just blindly copying those constants into
+# this src file.
+#
+require feature;
+
+sub hints_flags {
+    my($x) = @_;
     my @s;
-    for my $flag (sort {$b <=> $a} keys %$hash) {
-	if ($hash->{$flag} and $x & $flag and $x >= $flag) {
+    for my $flag (sort {$b <=> $a} keys %hints) {
+	if ($hints{$flag} and $x & $flag and $x >= $flag) {
 	    $x -= $flag;
-	    push @s, $hash->{$flag};
+	    push @s, $hints{$flag};
 	}
     }
-    push @s, $x if $x;
+    if ($x & $feature::hint_mask) {
+        push @s, "fea=" . (($x & $feature::hint_mask) >> $feature::hint_shift);
+        $x &= ~$feature::hint_mask;
+    }
+    push @s, sprintf "0x%x", $x if $x;
     return join(",", @s);
 }
+
 
 # return a string like 'LVINTRO,1' for the op $name with op_private
 # value $x
@@ -675,11 +687,6 @@ sub private_flags {
 
     push @flags, $x if $x; # display unknown bits numerically
     return join ",", @flags;
-}
-
-sub hints_flags {
-    my($x) = @_;
-    _flags(\%hints, $x);
 }
 
 sub concise_sv {
@@ -1596,6 +1603,9 @@ string if this is not a COP. Here are the symbols used:
     E eval
     X filetest access
     U utf-8
+
+    us      use feature 'unicode_strings'
+    fea=NNN feature bundle number
 
 =item B<#hintsval>
 
