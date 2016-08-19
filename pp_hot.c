@@ -830,7 +830,7 @@ PP(pp_aelemfast)
     /* inlined av_fetch() for simple cases ... */
     if (!SvRMAGICAL(av) && key >= 0 && key <= AvFILLp(av)) {
         sv = AvARRAY(av)[key];
-        if (sv && !SvIS_FREED(sv)) {
+        if (sv) {
             PUSHs(sv);
             RETURN;
         }
