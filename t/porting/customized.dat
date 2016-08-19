@@ -105,3 +105,4 @@ bignum cpan/bignum/lib/bigrat.pm b8fcffd8e60bfa9f32ccb9ab8c0fa5726d6392f8
 bignum cpan/bignum/lib/Math/BigFloat/Trace.pm 1ec133b0c03687fd621cc35946c465c66e38127a
 bignum cpan/bignum/lib/Math/BigInt/Trace.pm 3e1cc7726c55f9d5f4db6e5ec41c5fd266fcb289
 version cpan/version/lib/version.pm a032a751524bdd07a93c945d2a1703abe7ad8ef0
+Encode cpan/Encode/Encode.xs dba310bf3d362b1ade421b1a741875511d84809a
