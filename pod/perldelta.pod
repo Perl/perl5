@@ -411,6 +411,24 @@ floating point numbers (64-bit or 128-bit) and the x86 80-bit
 point literals will give a warning about "exponent underflow".
 [perl #128843, #128889, #128890, #128893, #128909, #128919]
 
+=item *
+
+A regression in 5.24 with C<tr/\N{U+...}/foo/> when the code point was between
+128 and 255 has been fixed. [perl #128734].
+
+=item *
+
+A regression from the previous development release, 5.23.3, where
+compiling a regular expression could crash the interpreter has been
+fixed. [perl #128686].
+
+=item *
+
+Use of a string delimiter whose code point is above 2**32 is now
+supported on platforms that allow this.  Note that this is non-portable,
+and is based on Perl's extension to UTF-8, and is probably not
+displayable nor enterable by any editor. [perl #128738]
+
 =back
 
 =head1 Known Problems
