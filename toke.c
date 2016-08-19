@@ -1808,6 +1808,7 @@ S_update_debugger_info(pTHX_ SV *orig_sv, const char *const buf, STRLEN len)
  * S_skipspace
  * Called to gobble the appropriate amount and type of whitespace.
  * Skips comments as well.
+ * Returns the next character after the whitespace that is skipped.
  */
 
 #define skipspace(s) skipspace_flags(s, 0)
