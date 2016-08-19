@@ -595,17 +595,17 @@ require B::Op_private;
 our %hints; # used to display each COP's op_hints values
 
 # strict refs, subs, vars
-@hints{2,512,1024,32,64,128} = ('$', '&', '*', 'x$', 'x&', 'x*');
+@hints{0x2,0x200,0x400,0x20,0x40,0x80} = ('$', '&', '*', 'x$', 'x&', 'x*');
 # integers, locale, bytes
-@hints{1,4,8,16} = ('i', 'l', 'b');
+@hints{0x1,0x4,0x8,0x10} = ('i', 'l', 'b');
 # block scope, localise %^H, $^OPEN (in), $^OPEN (out)
-@hints{256,131072,262144,524288} = ('{','%','<','>');
+@hints{0x100,0x20000,0x40000,0x80000} = ('{','%','<','>');
 # overload new integer, float, binary, string, re
-@hints{4096,8192,16384,32768,65536} = ('I', 'F', 'B', 'S', 'R');
+@hints{0x1000,0x2000,0x4000,0x8000,0x10000} = ('I', 'F', 'B', 'S', 'R');
 # taint and eval
-@hints{1048576,2097152} = ('T', 'E');
-# filetest access, UTF-8
-@hints{4194304,8388608} = ('X', 'U');
+@hints{0x100000,0x200000} = ('T', 'E');
+# filetest access, UTF-0x8
+@hints{0x400000,0x800000} = ('X', 'U');
 
 sub _flags {
     my($hash, $x) = @_;
