@@ -3207,8 +3207,7 @@ S_scan_const(pTHX_ char *start)
 	    if (!esc)
 		in_charclass = TRUE;
 	}
-
-	else if (*s == ']' && PL_lex_inpat &&  in_charclass) {
+	else if (*s == ']' && PL_lex_inpat && in_charclass) {
 	    char *s1 = s-1;
 	    int esc = 0;
 	    while (s1 >= start && *s1-- == '\\')
@@ -3409,26 +3408,28 @@ S_scan_const(pTHX_ char *start)
                             SvUTF8_on(sv);
                         }
                         else {
-			SvCUR_set(sv, d - SvPVX_const(sv));
-			SvPOK_on(sv);
-			*d = '\0';
+                            SvCUR_set(sv, d - SvPVX_const(sv));
+                            SvPOK_on(sv);
+                            *d = '\0';
 
-			sv_utf8_upgrade_flags_grow(
-                                       sv,
-                                       SV_GMAGIC|SV_FORCE_UTF8_UPGRADE
-                                                  /* Above-latin1 in string
-                                                   * implies no encoding */
-                                                  |SV_UTF8_NO_ENCODING,
+                            sv_utf8_upgrade_flags_grow(
+                                           sv,
+                                           SV_GMAGIC|SV_FORCE_UTF8_UPGRADE
+                                                      /* Above-latin1 in string
+                                                       * implies no encoding */
+                                                      |SV_UTF8_NO_ENCODING,
+
                                            /* Since we're having to grow here,
                                             * make sure we have enough room for
                                             * this escape and a NUL, so the
                                             * code immediately below won't have
                                             * to actually grow again */
-                                       UVCHR_SKIP(uv) + (STRLEN)(send - s) + 1);
-			d = SvPVX(sv) + SvCUR(sv);
+                                          UVCHR_SKIP(uv)
+                                        + (STRLEN)(send - s) + 1);
+                            d = SvPVX(sv) + SvCUR(sv);
                         }
 
-			has_utf8 = TRUE;
+                        has_utf8 = TRUE;
                     }
 
                     if (! has_utf8) {
@@ -3585,11 +3586,11 @@ S_scan_const(pTHX_ char *start)
                                 d = SvCUR(sv) + SvGROW(sv, SvCUR(sv) + extra);
                             }
                             else {
-			    sv_utf8_upgrade_flags_grow(
-                                    sv,
-                                    SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-				    extra);
-			    d = SvPVX(sv) + SvCUR(sv);
+                                sv_utf8_upgrade_flags_grow(
+                                               sv,
+                                               SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
+                                               extra);
+                                d = SvPVX(sv) + SvCUR(sv);
                             }
 
 			    has_utf8 = TRUE;
@@ -3762,10 +3763,10 @@ S_scan_const(pTHX_ char *start)
                                 d = SvCUR(sv) + SvGROW(sv, SvCUR(sv) + extra);
                             }
                             else {
-			    sv_utf8_upgrade_flags_grow(sv,
+                                sv_utf8_upgrade_flags_grow(sv,
 						SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
 						extra);
-			    d = SvPVX(sv) + SvCUR(sv);
+                                d = SvPVX(sv) + SvCUR(sv);
                             }
 			    has_utf8 = TRUE;
 			} else if (len > (STRLEN)(e - s + 4)) { /* I _guess_ 4 is \N{} --jhi */
@@ -3880,10 +3881,10 @@ S_scan_const(pTHX_ char *start)
                     d = SvCUR(sv) + SvGROW(sv, SvCUR(sv) + need);
                 }
                 else {
-		sv_utf8_upgrade_flags_grow(sv,
-					SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-					need);
-		d = SvPVX(sv) + SvCUR(sv);
+                    sv_utf8_upgrade_flags_grow(sv,
+                                               SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
+                                               need);
+                    d = SvPVX(sv) + SvCUR(sv);
                 }
 		has_utf8 = TRUE;
 	    } else if (need > len) {
