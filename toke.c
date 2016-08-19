@@ -2856,6 +2856,11 @@ S_scan_const(pTHX_ char *start)
                                            when the source isn't utf8, as for
                                            example when it is entirely composed
                                            of hex constants */
+    STRLEN utf8_variant_count = 0;      /* When not in UTF-8, this counts the
+                                           number of characters found so far
+                                           that will expand (into 2 bytes)
+                                           should we have to convert to
+                                           UTF-8) */
     SV *res;		                /* result from charnames */
     STRLEN offset_to_max;   /* The offset in the output to where the range
                                high-end character is temporarily placed */
@@ -3396,14 +3401,18 @@ S_scan_const(pTHX_ char *start)
 		}
 		else {
 		    if (!has_utf8 && uv > 255) {
-			/* Might need to recode whatever we have accumulated so
-			 * far if it contains any chars variant in utf8 or
-			 * utf-ebcdic. */
 
+                        /* Here, 'uv' won't fit unless we convert to UTF-8.
+                         * If we've only seen invariants so far, all we have to
+                         * do is turn on the flag */
+                        if (utf8_variant_count == 0) {
+                            SvUTF8_on(sv);
+                        }
+                        else {
 			SvCUR_set(sv, d - SvPVX_const(sv));
 			SvPOK_on(sv);
 			*d = '\0';
-			/* See Note on sizing above.  */
+
 			sv_utf8_upgrade_flags_grow(
                                        sv,
                                        SV_GMAGIC|SV_FORCE_UTF8_UPGRADE
@@ -3417,11 +3426,14 @@ S_scan_const(pTHX_ char *start)
                                             * to actually grow again */
                                        UVCHR_SKIP(uv) + (STRLEN)(send - s) + 1);
 			d = SvPVX(sv) + SvCUR(sv);
+                        }
+
 			has_utf8 = TRUE;
                     }
 
                     if (! has_utf8) {
 		        *d++ = (char)uv;
+                        utf8_variant_count++;
                     }
 		    else {
                        /* Usually, there will already be enough room in 'sv'
@@ -3561,15 +3573,25 @@ S_scan_const(pTHX_ char *start)
 			if (! has_utf8 && (   uv > 0xFF
                                            || PL_lex_inwhat != OP_TRANS))
                         {
+			    /* See Note on sizing above.  */
+                            const STRLEN extra = OFFUNISKIP(uv) + (send - e) + 1;
+
 			    SvCUR_set(sv, d - SvPVX_const(sv));
 			    SvPOK_on(sv);
 			    *d = '\0';
-			    /* See Note on sizing above.  */
+
+                            if (utf8_variant_count == 0) {
+                                SvUTF8_on(sv);
+                                d = SvCUR(sv) + SvGROW(sv, SvCUR(sv) + extra);
+                            }
+                            else {
 			    sv_utf8_upgrade_flags_grow(
                                     sv,
                                     SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-				    OFFUNISKIP(uv) + (STRLEN)(send - e) + 1);
+				    extra);
 			    d = SvPVX(sv) + SvCUR(sv);
+                            }
+
 			    has_utf8 = TRUE;
 			}
 
@@ -3728,14 +3750,23 @@ S_scan_const(pTHX_ char *start)
                          /* Upgrade destination to be utf8 if this new
                           * component is */
 			if (! has_utf8 && SvUTF8(res)) {
+			    /* See Note on sizing above.  */
+                            const STRLEN extra = len + (send - s) + 1;
+
 			    SvCUR_set(sv, d - SvPVX_const(sv));
 			    SvPOK_on(sv);
 			    *d = '\0';
-			    /* See Note on sizing above.  */
+
+                            if (utf8_variant_count == 0) {
+                                SvUTF8_on(sv);
+                                d = SvCUR(sv) + SvGROW(sv, SvCUR(sv) + extra);
+                            }
+                            else {
 			    sv_utf8_upgrade_flags_grow(sv,
 						SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-						len + (STRLEN)(send - s) + 1);
+						extra);
 			    d = SvPVX(sv) + SvCUR(sv);
+                            }
 			    has_utf8 = TRUE;
 			} else if (len > (STRLEN)(e - s + 4)) { /* I _guess_ 4 is \N{} --jhi */
 
@@ -3807,11 +3838,16 @@ S_scan_const(pTHX_ char *start)
          * to/from UTF-8.
          *
          * If the input has the same representation in UTF-8 as not, it will be
-         * a single byte, and we don't care about UTF8ness; or if neither
-         * source nor output is UTF-8, just copy the byte */
-        if (NATIVE_BYTE_IS_INVARIANT((U8)(*s)) || (! this_utf8 && ! has_utf8))
-        {
+         * a single byte, and we don't care about UTF8ness; just copy the byte */
+        if (NATIVE_BYTE_IS_INVARIANT((U8)(*s))) {
 	    *d++ = *s++;
+        }
+        else if (! this_utf8 && ! has_utf8) {
+            /* If neither source nor output is UTF-8, is also a single byte,
+             * just copy it; but this byte counts should we later have to
+             * convert to UTF-8 */
+	    *d++ = *s++;
+            utf8_variant_count++;
         }
         else if (this_utf8 && has_utf8) {   /* Both UTF-8, can just copy */
 	    const STRLEN len = UTF8SKIP(s);
@@ -3829,16 +3865,26 @@ S_scan_const(pTHX_ char *start)
 	    const UV nextuv   = (this_utf8)
                                 ? utf8n_to_uvchr((U8*)s, send - s, &len, 0)
                                 : (UV) ((U8) *s);
-	    const STRLEN need = UVCHR_SKIP(nextuv);
+	    STRLEN need = UVCHR_SKIP(nextuv);
+
 	    if (!has_utf8) {
 		SvCUR_set(sv, d - SvPVX_const(sv));
 		SvPOK_on(sv);
 		*d = '\0';
-		/* See Note on sizing above.  */
+
+                /* See Note on sizing above. */
+                need += (STRLEN)(send - s) + 1;
+
+                if (utf8_variant_count == 0) {
+                    SvUTF8_on(sv);
+                    d = SvCUR(sv) + SvGROW(sv, SvCUR(sv) + need);
+                }
+                else {
 		sv_utf8_upgrade_flags_grow(sv,
 					SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-					need + (STRLEN)(send - s) + 1);
+					need);
 		d = SvPVX(sv) + SvCUR(sv);
+                }
 		has_utf8 = TRUE;
 	    } else if (need > len) {
 		/* encoded value larger than old, may need extra space (NOTE:
