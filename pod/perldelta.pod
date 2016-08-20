@@ -432,6 +432,12 @@ in inconsistent behaviour.  Note that this is non-portable,
 and is based on Perl's extension to UTF-8, and is probably not
 displayable nor enterable by any editor. [perl #128738]
 
+=item *
+
+C<@{x> followed by a newline where C<x> represents a control or non-ASCII
+character no longer produces a garbled syntax error message or a crash.
+[perl #128951]
+
 =back
 
 =head1 Known Problems
