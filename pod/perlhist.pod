@@ -596,6 +596,7 @@ the strings?).
  Sawyer X  5.25.1       2016-May-20
  Matthew   5.25.2       2016-Jun-20
  Steve     5.25.3       2016-Jul-20
+ BinGOs    5.25.4       2016-Aug-20
 
 =head2 SELECTED RELEASE SIZES
 
