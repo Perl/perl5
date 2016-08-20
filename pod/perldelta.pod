@@ -40,6 +40,20 @@ old-style C<my ($a, $b, @c) = @_>.
 
 =back
 
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+=head3 L<perlcall>
+
+=over 4
+
+=item *
+
+Removed redundant C<dSP> from an example.
+
+=back
+
 =head1 Modules and Pragmata
 
 XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
