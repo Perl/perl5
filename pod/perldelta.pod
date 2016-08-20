@@ -424,8 +424,11 @@ fixed. [perl #128686].
 
 =item *
 
-Use of a string delimiter whose code point is above 2**32 is now
-supported on platforms that allow this.  Note that this is non-portable,
+Use of a string delimiter whose code point is above 2**31 now works
+correctly on platforms that allow this.  Previously, certain characters,
+due to truncation, would be confused with other delimiter characters
+with special meaning (such as C<?> in C<m?...?>), resulting
+in inconsistent behaviour.  Note that this is non-portable,
 and is based on Perl's extension to UTF-8, and is probably not
 displayable nor enterable by any editor. [perl #128738]
 
