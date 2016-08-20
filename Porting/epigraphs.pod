@@ -17,6 +17,37 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.25.4 - Terry Pratchett, "Truckers"
+
+L<Announced on 2016-08-20 by Chris 'BinGOs' Williams|http://www.nntp.perl.org/group/perl.perl5.porters/2016/08/msg239191.html>
+
+  Concerning Nomes and Time
+
+  Nomes are small. On the whole, small creatures don't live for a long
+  time. But perhaps they do live fast.
+
+  Let me explain.
+
+  One of the shortest-lived creatures on the planet Earth is the adult
+  common mayfly. It lasts for one day. The longest-living things are
+  bristlecone pine trees, at 4,700 years and still counting.
+
+  This may seem tough on the mayflies. But the important thing is not
+  how long your life is, but how long it seems.
+
+  To a mayfly, a single hour may last as long as a century. Perhaps
+  old mayflies sit around complaining about how life this minute isn't a
+  patch on the good old minutes of long ago, when the world was
+  young and the sun seemed so much brighter and larvae showed you a
+  bit of respect. Whereas the trees, which are not famous to their
+  quick reactions, may just have time to notice the way the sky keeps
+  flickering before the dry rot and woodworm set in.
+
+  It's all a sort of relativity. The faster you live, the more time
+  stretches out. To a nome, a year lasts as long as ten years does to a
+  human. Remember it. Don't let it concern you. They don't. They don't
+  even know.
+
 =head2 v5.25.3 - Edward Lear, ed. Vivien Noakes, "The Complete Nonsense and Other Verse": The Dong with a Luminous Nose
 
 L<Announced on 2016-07-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2016/07/msg238158.html>
