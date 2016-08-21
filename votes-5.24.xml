@@ -55,6 +55,7 @@ This one needs the version in ext/POSIX/lib/POSIX.pm bumped to 1.65_01:
 <commit votes="sprout" id="d80a6052a64d2df61ee61888853ef5f3872c0e34" ticket="128763" desc="[perl #128763] Fix POSIX.xs longdbl assertion"/>
 
 <commit votes="sprout" id="d35c1b5e43e773f353239d9182ddccb41cdab3d6" ticket="128740" desc="[perl #128740] Check for null in pp_ghostent et al."/>
+<commit votes="sprout" id="bf8a9a15ea4a7b7ebcde5ba48aafe397c549eff2" ticket="128951" desc="[perl #128951] Fix ASan error with @{\327"/>
 
 <commit votes="" id="" ticket="123878" desc="OPEN: Infinite recursion (+segfault) on die() after goto-ing out of __DIE__ handler"/>
 
