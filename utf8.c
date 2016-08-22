@@ -439,13 +439,12 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
     while (x < send) {
         STRLEN len = isUTF8_CHAR(x, send);
         if (UNLIKELY(! len)) {
-            goto out;
+            break;
         }
         x += len;
         outlen++;
     }
 
- out:
     if (el)
         *el = outlen;
 
