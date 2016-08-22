@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-plan(tests => 41);
+plan(tests => 42);
 
 
 # heredoc without newline (#65838)
@@ -97,6 +97,15 @@ HEREDOC
         qr/^Number found where operator expected at - line 1, near "<<""0"\s+\(Missing operator/,
         {},
         "don't use an invalid oldoldbufptr"
+    );
+
+    # also read freed memory, but got an invalid oldoldbufptr in a different way
+    fresh_perl_like(
+        qq(<<\n\$          \n),
+        # valgrind and asan reports an error between these two lines
+        qr/^Use of bare << to mean <<"" is deprecated at - line 1\.\s+Final \$/,
+        {},
+        "don't use an invalid oldoldbufptr (some more)"
     );
 
     # [perl #125540] this asserted or crashed
