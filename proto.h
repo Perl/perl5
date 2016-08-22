@@ -1606,7 +1606,7 @@ PERL_CALLCONV bool	Perl_is_utf8_string(const U8 *s, STRLEN len);
 #ifndef NO_MATHOMS
 PERL_CALLCONV bool	Perl_is_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep);
 #define PERL_ARGS_ASSERT_IS_UTF8_STRING_LOC	\
-	assert(s)
+	assert(s); assert(ep)
 #endif
 PERL_CALLCONV bool	Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el);
 #define PERL_ARGS_ASSERT_IS_UTF8_STRING_LOCLEN	\

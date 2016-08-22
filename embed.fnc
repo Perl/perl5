@@ -736,7 +736,7 @@ AmpdR	|bool	|is_ascii_string|NN const U8 *s|STRLEN len
 AnpdD	|STRLEN	|is_utf8_char	|NN const U8 *s
 Abmnpd	|STRLEN	|is_utf8_char_buf|NN const U8 *buf|NN const U8 *buf_end
 Anpd	|bool	|is_utf8_string	|NN const U8 *s|STRLEN len
-Anpdmb	|bool	|is_utf8_string_loc|NN const U8 *s|STRLEN len|NULLOK const U8 **ep
+Anpdmb	|bool	|is_utf8_string_loc|NN const U8 *s|STRLEN len|NN const U8 **ep
 Anpd	|bool	|is_utf8_string_loclen|NN const U8 *s|STRLEN len|NULLOK const U8 **ep|NULLOK STRLEN *el
 AMpR	|bool	|_is_uni_FOO|const U8 classnum|const UV c
 AMpR	|bool	|_is_utf8_FOO|const U8 classnum|NN const U8 *p
