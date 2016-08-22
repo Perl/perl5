@@ -982,13 +982,9 @@ Perl_valid_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
 	return uv;
     }
 
-#ifdef EBCDIC
-    uv = NATIVE_UTF8_TO_I8(uv);
-#endif
-
     /* Remove the leading bits that indicate the number of bytes, leaving just
      * the bits that are part of the value */
-    uv &= UTF_START_MASK(expectlen);
+    uv = NATIVE_UTF8_TO_I8(uv) & UTF_START_MASK(expectlen);
 
     /* Now, loop through the remaining bytes, accumulating each into the
      * working total as we go.  (I khw tried unrolling the loop for up to 4
