@@ -959,45 +959,6 @@ Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 			  ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
 }
 
-/* Like L</utf8_to_uvchr_buf>(), but should only be called when it is known that
- * the next character in the input UTF-8 string C<s> is well-formed (I<e.g.>,
- * it passes C<L</isUTF8_CHAR()>>.  Surrogates, non-character code points, and
- * non-Unicode code points are allowed. */
-
-UV
-Perl_valid_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
-{
-    UV expectlen = UTF8SKIP(s);
-    const U8* send = s + expectlen;
-    UV uv = *s;
-
-    PERL_ARGS_ASSERT_VALID_UTF8_TO_UVCHR;
-    PERL_UNUSED_CONTEXT;
-
-    if (retlen) {
-        *retlen = expectlen;
-    }
-
-    /* An invariant is trivially returned */
-    if (expectlen == 1) {
-	return uv;
-    }
-
-    /* Remove the leading bits that indicate the number of bytes, leaving just
-     * the bits that are part of the value */
-    uv = NATIVE_UTF8_TO_I8(uv) & UTF_START_MASK(expectlen);
-
-    /* Now, loop through the remaining bytes, accumulating each into the
-     * working total as we go.  (I khw tried unrolling the loop for up to 4
-     * bytes, but there was no performance improvement) */
-    for (++s; s < send; s++) {
-        uv = UTF8_ACCUMULATE(uv, *s);
-    }
-
-    return UNI_TO_NATIVE(uv);
-
-}
-
 /*
 =for apidoc utf8_to_uvuni_buf
 

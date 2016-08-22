@@ -734,7 +734,7 @@
 #define uvoffuni_to_utf8_flags(a,b,c)	Perl_uvoffuni_to_utf8_flags(aTHX_ a,b,c)
 #define uvuni_to_utf8(a,b)	Perl_uvuni_to_utf8(aTHX_ a,b)
 #define uvuni_to_utf8_flags(a,b,c)	Perl_uvuni_to_utf8_flags(aTHX_ a,b,c)
-#define valid_utf8_to_uvchr(a,b)	Perl_valid_utf8_to_uvchr(aTHX_ a,b)
+#define valid_utf8_to_uvchr	Perl_valid_utf8_to_uvchr
 #define valid_utf8_to_uvuni(a,b)	Perl_valid_utf8_to_uvuni(aTHX_ a,b)
 #define vcmp(a,b)		Perl_vcmp(aTHX_ a,b)
 #define vcroak(a,b)		Perl_vcroak(aTHX_ a,b)

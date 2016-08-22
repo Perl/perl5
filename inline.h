@@ -256,6 +256,10 @@ GCC_DIAG_RESTORE /* Intentionally left semicolonless. */
 
 /* ------------------------------- utf8.h ------------------------------- */
 
+/*
+=head1 Unicode Support
+*/
+
 PERL_STATIC_INLINE void
 S_append_utf8_from_native_byte(const U8 byte, U8** dest)
 {
@@ -300,6 +304,50 @@ S__is_utf8_char_slow(const U8 *s, const U8 *e)
     utf8n_to_uvchr(s, e - s, &actual_len, UTF8_CHECK_ONLY);
 
     return (actual_len == (STRLEN) -1) ? 0 : actual_len;
+}
+
+/*
+=for apidoc valid_utf8_to_uvchr
+Like L</utf8_to_uvchr_buf>(), but should only be called when it is known that
+the next character in the input UTF-8 string C<s> is well-formed (I<e.g.>,
+it passes C<L</isUTF8_CHAR>>.  Surrogates, non-character code points, and
+non-Unicode code points are allowed.
+
+=cut
+
+ */
+
+PERL_STATIC_INLINE UV
+Perl_valid_utf8_to_uvchr(const U8 *s, STRLEN *retlen)
+{
+    UV expectlen = UTF8SKIP(s);
+    const U8* send = s + expectlen;
+    UV uv = *s;
+
+    PERL_ARGS_ASSERT_VALID_UTF8_TO_UVCHR;
+
+    if (retlen) {
+        *retlen = expectlen;
+    }
+
+    /* An invariant is trivially returned */
+    if (expectlen == 1) {
+	return uv;
+    }
+
+    /* Remove the leading bits that indicate the number of bytes, leaving just
+     * the bits that are part of the value */
+    uv = NATIVE_UTF8_TO_I8(uv) & UTF_START_MASK(expectlen);
+
+    /* Now, loop through the remaining bytes, accumulating each into the
+     * working total as we go.  (I khw tried unrolling the loop for up to 4
+     * bytes, but there was no performance improvement) */
+    for (++s; s < send; s++) {
+        uv = UTF8_ACCUMULATE(uv, *s);
+    }
+
+    return UNI_TO_NATIVE(uv);
+
 }
 
 /* ------------------------------- perl.h ----------------------------- */
@@ -768,9 +816,6 @@ S_cx_popgiven(pTHX_ PERL_CONTEXT *cx)
     cx->blk_givwhen.defsv_save = NULL;
     SvREFCNT_dec(sv);
 }
-
-
-
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
