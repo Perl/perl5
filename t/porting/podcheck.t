@@ -2099,7 +2099,8 @@ foreach my $filename (@files) {
                     $diagnostic .= " " if $problem_count == 1;
                     $diagnostic .= "\n$indent$indent";
                     $diagnostic .= "$problem->{parameter}" if $problem->{parameter};
-                    $diagnostic .= " near line $problem->{-line}";
+                    $diagnostic .= " near line $problem->{-line} of "
+                                   . $filename;
                     $diagnostic .= " $problem->{comment}" if $problem->{comment};
                 }
                 $diagnostic .= "\n";
