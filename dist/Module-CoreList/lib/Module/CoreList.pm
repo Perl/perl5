@@ -297,6 +297,7 @@ sub changes_between {
     5.025001 => '2016-05-20',
     5.025002 => '2016-06-20',
     5.025003 => '2016-07-20',
+    5.025004 => '????-??-??',
     5.024001 => '????-??-??',
   );
 
@@ -12814,6 +12815,18 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.025004 => {
+        delta_from => 5.025003,
+        changed => {
+            'B::Op_private'         => '5.025004',
+            'Config'                => '5.025004',
+            'Module::CoreList'      => '5.20160820',
+            'Module::CoreList::TieHashDelta'=> '5.20160820',
+            'Module::CoreList::Utils'=> '5.20160820',
+        },
+        removed => {
+        }
+    },
     5.024001 => {
         delta_from => 5.024,
         changed => {
@@ -13661,6 +13674,13 @@ for my $version (sort { $a <=> $b } keys %delta) {
     },
     5.025003 => {
         delta_from => 5.025002,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.025004 => {
+        delta_from => 5.025003,
         changed => {
         },
         removed => {
