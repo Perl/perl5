@@ -5704,6 +5704,10 @@ Note that C<size> is the full size of the destination buffer and
 the result is guaranteed to be C<NUL>-terminated if there is room.  Note that
 room for the C<NUL> should be included in C<size>.
 
+The return value is the total length that C<dst> would have if C<size> is
+sufficiently large.  Thus it is the initial length of C<dst> plus the length of
+C<src>.  If C<size> is smaller than the return, the excess was not appended.
+
 =cut
 
 Description stolen from http://www.openbsd.org/cgi-bin/man.cgi?query=strlcat
@@ -5734,6 +5738,9 @@ This operates on C C<NUL>-terminated strings.
 
 C<my_strlcpy()> copies up to S<C<size - 1>> characters from the string C<src>
 to C<dst>, C<NUL>-terminating the result if C<size> is not 0.
+
+The return value is the total length C<src> would be if the copy completely
+succeeded.  If it is larger than C<size>, the excess was not copied.
 
 =cut
 
