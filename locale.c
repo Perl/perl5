@@ -1462,15 +1462,13 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
      * This will give as good as possible results on strings that don't
      * otherwise contain that character, but otherwise there may be
      * less-than-perfect results with that character and NUL.  This is
-     * unavoidable unless we replace strxfrm with our own implementation.
-     *
-     * This is one of the few places in the perl core, where we can use
-     * standard functions like strlen() and strcat().  It's because we're
-     * looking for NULs. */
+     * unavoidable unless we replace strxfrm with our own implementation. */
     if (s_strlen < len) {
         char * e = s + len;
         char * sans_nuls;
         STRLEN cur_min_char_len;
+        STRLEN sans_nuls_len;
+        STRLEN sans_nuls_pos;
         int try_non_controls;
 
         /* If we don't know what control character sorts lowest for this
@@ -1576,16 +1574,22 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
          * character in it is NUL.  Multiply that by the length of each
          * replacement, and allow for a trailing NUL */
         cur_min_char_len = strlen(PL_strxfrm_min_char);
-        Newx(sans_nuls, (len * cur_min_char_len) + 1, char);
+        sans_nuls_len = (len * cur_min_char_len) + 1;
+        Newx(sans_nuls, sans_nuls_len, char);
         *sans_nuls = '\0';
+        sans_nuls_pos = 0;
 
         /* Replace each NUL with the lowest collating control.  Loop until have
          * exhausted all the NULs */
         while (s + s_strlen < e) {
-            strcat(sans_nuls, s);
+            sans_nuls_pos = my_strlcat(sans_nuls + sans_nuls_pos,
+                                       s,
+                                       sans_nuls_len);
 
             /* Do the actual replacement */
-            strcat(sans_nuls, PL_strxfrm_min_char);
+            sans_nuls_pos = my_strlcat(sans_nuls + sans_nuls_pos,
+                                       PL_strxfrm_min_char,
+                                       sans_nuls_len);
 
             /* Move past the input NUL */
             s += s_strlen + 1;
@@ -1593,7 +1597,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
         }
 
         /* And add anything that trails the final NUL */
-        strcat(sans_nuls, s);
+        my_strlcat(sans_nuls + sans_nuls_pos, s, sans_nuls_len);
 
         /* Switch so below we transform this modified string */
         s = sans_nuls;
