@@ -7509,7 +7509,9 @@ Perl_yylex(pTHX)
 			      1, &len);
 		if (len && (len != 4 || strNE(PL_tokenbuf+1, "CORE"))
 		 && !keyword(PL_tokenbuf + 1, len, 0)) {
+                    SSize_t off = s-SvPVX(PL_linestr);
 		    d = skipspace(d);
+                    s = SvPVX(PL_linestr)+off;
 		    if (*d == '(') {
 			force_ident_maybe_lex('&');
 			s = d;
@@ -8285,8 +8287,9 @@ Perl_yylex(pTHX)
 		const int key = tmp;
                 SV *format_name = NULL;
 
-		d = s;
+                SSize_t off = s-SvPVX(PL_linestr);
 		s = skipspace(s);
+                d = SvPVX(PL_linestr)+off;
 
 		if (isIDFIRST_lazy_if(s,UTF)
                     || *s == '\''

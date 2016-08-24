@@ -7,7 +7,7 @@ use warnings;
 
 BEGIN { chdir 't' if -d 't'; require './test.pl'; }
 
-plan(tests => 28);
+plan(tests => 30);
 
 {
     no warnings 'deprecated';
@@ -227,3 +227,17 @@ fresh_perl_is(
 
 like runperl(prog => 'sub ub(){0} ub ub', stderr=>1), qr/Bareword found/,
  '[perl #126482] Assert failure when mentioning a constant twice in a row';
+
+fresh_perl_is(
+    "do\0"."000000",
+    "",
+    {},
+    '[perl #129069] - no output and valgrind clean'
+);
+
+fresh_perl_is(
+    "00my sub\0",
+    "Missing name in \"my sub\" at - line 1.\n",
+    {},
+    '[perl #129069] - "Missing name" warning and valgrind clean'
+);
