@@ -514,10 +514,14 @@ like $out, qr/$end/, 'OP_AND->op_other points correctly';
 
     my @hints = $out =~ /nextstate\([^)]+\) (.*) ->/g;
 
+    # handle test script run with PERL_UNICODE=""
+    s/>,<,// for @hints;
+    s/%,// for @hints;
+
     is(scalar(@hints), 3, "3 hints");
     is($hints[0], 'v:{',                           "hints[0]");
     is($hints[1], 'v:*,&,{,x*,x&,x$,$',            "hints[1]");
-    is($hints[2], 'v:%,us,*,&,{,x*,x&,x$,$,fea=7', "hints[2]");
+    is($hints[2], 'v:us,*,&,{,x*,x&,x$,$,fea=7', "hints[2]");
 }
 
 __END__
