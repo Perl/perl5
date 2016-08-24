@@ -234,7 +234,7 @@ Perl_deb_stack_all(pTHX)
 		PerlIO_printf(Perl_debug_log, "\n");
 	    else {
 
-		/* Find the the current context's stack range by searching
+		/* Find the current context's stack range by searching
 		 * forward for any higher contexts using this stack; failing
 		 * that, it will be equal to the size of the stack for old
 		 * stacks, or PL_stack_sp for the current stack
@@ -244,13 +244,14 @@ Perl_deb_stack_all(pTHX)
 		const PERL_CONTEXT *cx_n = NULL;
 		const PERL_SI *si_n;
 
-		/* there's a separate stack per SI, so only search
-		 * this one */
+                /* there's a separate argument stack per SI, so only
+                 * search this one */
 
 		for (i=ix+1; i<=si->si_cxix; i++) {
-		    if (CxTYPE(cx) == CXt_SUBST)
+                    const PERL_CONTEXT *this_cx = &(si->si_cxstack[i]);
+                    if (CxTYPE(this_cx) == CXt_SUBST)
 			continue;
-		    cx_n = &(si->si_cxstack[i]);
+		    cx_n = this_cx;
 		    break;
 		}
 
@@ -266,8 +267,8 @@ Perl_deb_stack_all(pTHX)
 		    stack_max = AvFILLp(si->si_stack);
 		}
 
-		/* for the other stack types, there's only one stack
-		 * shared between all SIs */
+                /* for the markstack, there's only one stack shared
+                 * between all SIs */
 
 		si_n = si;
 		i = ix;
