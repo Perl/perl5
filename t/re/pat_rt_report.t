@@ -20,7 +20,7 @@ use warnings;
 use 5.010;
 use Config;
 
-plan tests => 2500;  # Update this when adding/deleting tests.
+plan tests => 2501;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1113,6 +1113,16 @@ EOP
 	my $s = "\x{1ff}" . "f" x 32;
 	ok($s =~ /\x{1ff}[[:alpha:]]+/gca, "POSIXA pointer wrap");
     }
+
+    {
+        # RT #129012 heap-buffer-overflow Perl_fbm_instr.
+        # This test is unlikely to not pass, but it used to fail
+        # ASAN/valgrind
+
+        my $s ="\x{100}0000000";
+        ok($s !~ /00000?\x80\x80\x80/, "RT #129012");
+    }
+
 } # End of sub run_tests
 
 1;

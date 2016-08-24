@@ -1051,6 +1051,8 @@ Perl_re_intuit_start(pTHX_
             char *from = s;
             char *to   = last + SvCUR(must) - (SvTAIL(must)!=0);
 
+            if (to > strend)
+                to = strend;
             if (from > to) {
                 s = NULL;
                 DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
