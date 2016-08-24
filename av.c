@@ -272,7 +272,8 @@ Perl_av_fetch(pTHX_ AV *av, SSize_t key, I32 lval)
     }
 
     neg  = (key < 0);
-    size = AvFILLp(av) + 1;
+    /* XXX tmp restore old behaviour to make Variable::Magic pass */
+    size = (neg ? AvFILL(av): AvFILLp(av)) + 1;
     key += neg * size; /* handle negative index without using branch */
 
     /* the cast from SSize_t to Size_t allows both (key < 0) and (key >= size)
