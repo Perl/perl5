@@ -522,7 +522,14 @@ Free_t   Perl_mfree (Malloc_t where)
 
 #endif
 
-/* copy a string up to some (non-backslashed) delimiter, if any */
+/* copy a string up to some (non-backslashed) delimiter, if any.
+ * With allow_escape, converts \<delimiter> to <delimiter>, while leaves
+ * \<non-delimiter> as-is.
+ * Returns the position in the src string of the closing delimiter, if
+ * any, or returns fromend otherwise.
+ * This is the internal implementation for Perl_delimcpy and
+ * Perl_delimcpy_no_escape.
+ */
 
 static char *
 S_delimcpy(char *to, const char *toend, const char *from,
@@ -534,7 +541,7 @@ S_delimcpy(char *to, const char *toend, const char *from,
     PERL_ARGS_ASSERT_DELIMCPY;
 
     for (tolen = 0; from < fromend; from++, tolen++) {
-	if (allow_escape && *from == '\\') {
+	if (allow_escape && *from == '\\' && from + 1 < fromend) {
 	    if (from[1] != delim) {
 		if (to < toend)
 		    *to++ = *from;

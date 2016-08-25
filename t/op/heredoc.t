@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-plan(tests => 42);
+plan(tests => 43);
 
 
 # heredoc without newline (#65838)
@@ -115,4 +115,14 @@ HEREDOC
 	{},
 	"Don't assert parsing a here-doc if we hit EOF early"
     );
+
+    # [perl #129064] heap-buffer-overflow S_scan_heredoc
+    fresh_perl_like(
+        qq(<<`\\),
+        # valgrind and asan reports an error between these two lines
+        qr/^Unterminated delimiter for here document/,
+        {},
+        "delimcpy(): handle last char being backslash properly"
+    );
+
 }
