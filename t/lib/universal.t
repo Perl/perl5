@@ -14,9 +14,11 @@ for my $arg ('', 'q[]', qw( 1 undef )) {
 sub tryit { eval shift or warn \$@ }
 tryit "&Internals::SvREADONLY($arg)";
 tryit "&Internals::SvREFCNT($arg)";
+tryit "&Internals::hv_clear_placeholders($arg)";
 ----
 Usage: Internals::SvREADONLY(SCALAR[, ON]) at (eval 1) line 1.
 Usage: Internals::SvREFCNT(SCALAR[, REFCOUNT]) at (eval 2) line 1.
+Usage: Internals::hv_clear_placeholders(hv) at (eval 3) line 1.
 ====
 }
 
