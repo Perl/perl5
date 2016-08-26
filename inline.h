@@ -375,6 +375,9 @@ L</is_utf8_string_loc>().
 bool
 Perl_is_utf8_string(const U8 *s, STRLEN len)
 {
+    /* This is now marked pure in embed.fnc, because isUTF8_CHAR now is pure.
+     * Be aware of possible changes to that */
+
     const U8* const send = s + (len ? len : strlen((const char *)s));
     const U8* x = s;
 
