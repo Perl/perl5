@@ -3348,6 +3348,7 @@ dist/Filter-Simple/t/lib/Filter/Simple/ExportTest.pm		Helper file for Filter::Si
 dist/Filter-Simple/t/lib/Filter/Simple/FilterOnlyTest.pm	Helper file for Filter::Simple tests
 dist/Filter-Simple/t/lib/Filter/Simple/FilterTest.pm		Helper file for Filter::Simple tests
 dist/Filter-Simple/t/lib/Filter/Simple/ImportTest.pm		Helper file for Filter::Simple tests
+dist/Filter-Simple/t/no.t					See if Filter::Simple works
 dist/I18N-Collate/lib/I18N/Collate.pm		Routines to do strxfrm-based collation
 dist/I18N-Collate/t/I18N-Collate.t		See if I18N::Collate works
 dist/I18N-LangTags/ChangeLog			I18N::LangTags
