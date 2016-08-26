@@ -268,6 +268,14 @@ explicitly forbidden, and the shortest possible encoding should always be used
  * for more */
 #define QUESTION_MARK_CTRL   LATIN1_TO_NATIVE(0x9F)
 
+/* Any I8 string larger than this will overflow the word if it were converted into a UV */
+#if defined(UV_IS_QUAD)
+#   define HIGHEST_REPRESENTABLE_UTF8  "\xFF\xAF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF"
+#else
+#   define HIGHEST_REPRESENTABLE_UTF8  "\xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA3\xBF\xBF\xBF\xBF\xBF\xBF"
+#endif
+
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */
