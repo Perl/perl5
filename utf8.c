@@ -956,9 +956,8 @@ Perl_utf8_to_uvuni_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 
     assert(send > s);
 
-    /* Call the low level routine asking for checks */
-    return NATIVE_TO_UNI(Perl_utf8n_to_uvchr(aTHX_ s, send -s, retlen,
-			       ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY));
+    /* Call the low level routine, asking for checks */
+    return NATIVE_TO_UNI(utf8_to_uvchr_buf(s, send, retlen));
 }
 
 /*
