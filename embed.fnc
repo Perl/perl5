@@ -731,7 +731,7 @@ ADMpPR	|bool	|is_uni_lower_lc|UV c
 ADMpPR	|bool	|is_uni_print_lc|UV c
 ADMpPR	|bool	|is_uni_punct_lc|UV c
 ADMpPR	|bool	|is_uni_xdigit_lc|UV c
-AnpdRP	|bool	|is_utf8_invariant_string|NN const U8* const s|STRLEN const len
+AnidRP	|bool	|is_utf8_invariant_string|NN const U8* const s|STRLEN const len
 AmnpdRP	|bool	|is_ascii_string|NN const U8* const s|const STRLEN len
 AmnpdRP	|bool	|is_invariant_string|NN const U8* const s|const STRLEN len
 AnpdD	|STRLEN	|is_utf8_char	|NN const U8 *s

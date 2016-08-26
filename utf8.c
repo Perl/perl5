@@ -52,43 +52,6 @@ within non-zero characters.
 */
 
 /*
-=for apidoc is_utf8_invariant_string
-
-Returns true iff the first C<len> bytes of the string C<s> are the same
-regardless of the UTF-8 encoding of the string (or UTF-EBCDIC encoding on
-EBCDIC machines).  That is, if they are UTF-8 invariant.  On ASCII-ish
-machines, all the ASCII characters and only the ASCII characters fit this
-definition.  On EBCDIC machines, the ASCII-range characters are invariant, but
-so also are the C1 controls and C<\c?> (which isn't in the ASCII range on
-EBCDIC).
-
-If C<len> is 0, it will be calculated using C<strlen(s)>, (which means if you
-use this option, that C<s> can't have embedded C<NUL> characters and has to
-have a terminating C<NUL> byte).
-
-See also L</is_utf8_string>(), L</is_utf8_string_loclen>(), and
-L</is_utf8_string_loc>().
-
-=cut
-*/
-
-bool
-Perl_is_utf8_invariant_string(const U8 *s, STRLEN len)
-{
-    const U8* const send = s + (len ? len : strlen((const char *)s));
-    const U8* x = s;
-
-    PERL_ARGS_ASSERT_IS_UTF8_INVARIANT_STRING;
-
-    for (; x < send; ++x) {
-	if (!UTF8_IS_INVARIANT(*x))
-	    return FALSE;
-    }
-
-    return TRUE;
-}
-
-/*
 =for apidoc uvoffuni_to_utf8_flags
 
 THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
