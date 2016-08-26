@@ -2121,16 +2121,17 @@ localeconv()
 		    (void) hv_store(RETVAL,
                         strings->name,
                         strlen(strings->name),
-                        newSVpvn_utf8(value,
-                                      strlen(value),
+                        newSVpvn_utf8(
+                                value,
+                                strlen(value),
 
-                                      /* We mark it as UTF-8 if a utf8 locale
-                                       * and is valid and variant under UTF-8 */
-                                      is_utf8_locale
-                                        && ! is_invariant_string((U8 *) value, 0)
-                                        && is_utf8_string((U8 *) value, 0)),
-                        0);
-                }
+                                /* We mark it as UTF-8 if a utf8 locale and is
+                                 * valid and variant under UTF-8 */
+                                     is_utf8_locale
+                                && ! is_utf8_invariant_string((U8 *) value, 0)
+                                &&   is_utf8_string((U8 *) value, 0)),
+                    0);
+            }
                 strings++;
 	    }
 
@@ -3567,7 +3568,7 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
                 STRLEN len = strlen(buf);
 		sv_usepvn_flags(sv, buf, len, SV_HAS_TRAILING_NUL);
 		if (SvUTF8(fmt)
-                    || (! is_invariant_string((U8*) buf, len)
+                    || (! is_utf8_invariant_string((U8*) buf, len)
                         && is_utf8_string((U8*) buf, len)
 #ifdef USE_LOCALE_TIME
                         && _is_cur_LC_category_utf8(LC_TIME)

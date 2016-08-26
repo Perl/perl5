@@ -3555,7 +3555,7 @@ PP(pp_fttext)
 #endif
 
     assert(len);
-    if (! is_invariant_string((U8 *) s, len)) {
+    if (! is_utf8_invariant_string((U8 *) s, len)) {
         const U8 *ep;
 
         /* Here contains a variant under UTF-8 .  See if the entire string is

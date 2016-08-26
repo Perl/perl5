@@ -3765,7 +3765,6 @@ Perl_sv_utf8_decode(pTHX_ SV *const sv)
 
     if (SvPOKp(sv)) {
         const U8 *start, *c;
-        const U8 *e;
 
 	/* The octets may have got themselves encoded - get them back as
 	 * bytes
@@ -3779,13 +3778,8 @@ Perl_sv_utf8_decode(pTHX_ SV *const sv)
         c = start = (const U8 *) SvPVX_const(sv);
 	if (!is_utf8_string(c, SvCUR(sv)))
 	    return FALSE;
-        e = (const U8 *) SvEND(sv);
-        while (c < e) {
-	    const U8 ch = *c++;
-            if (!UTF8_IS_INVARIANT(ch)) {
-		SvUTF8_on(sv);
-		break;
-	    }
+        if (! is_utf8_invariant_string(c, SvCUR(sv))) {
+            SvUTF8_on(sv);
         }
 	if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 	    /* XXX Is this dead code?  XS_utf8_decode calls SvSETMAGIC
