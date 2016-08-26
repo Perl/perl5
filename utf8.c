@@ -940,6 +940,9 @@ Code points above the platform's C<IV_MAX> will raise a deprecation warning,
 unless those are turned off.
 
 =cut
+
+Also implemented as a macro in utf8.h
+
 */
 
 
@@ -952,7 +955,8 @@ Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 			  ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
 }
 
-/*
+/* This is marked as deprecated
+ *
 =for apidoc utf8_to_uvuni_buf
 
 Only in very rare circumstances should code need to be dealing in Unicode
