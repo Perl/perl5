@@ -84,9 +84,10 @@
 :
 :   i  Static inline: function in source code has a S_ prefix:
 :
-:         proto.h: function is declared as S_foo rather than foo,
+:         proto.h: function is declared as S_foo rather than foo unless the 'p'
+:		   flag is also given in which case 'Perl_foo' is used,
 :                PERL_STATIC_INLINE is added to declaration;
-:         embed.h: "#define foo S_foo" entries added
+:         embed.h: "#define foo S_foo" or Perl_foo entries added
 :
 :   M  May change:
 :
