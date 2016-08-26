@@ -198,6 +198,7 @@ sub gen_filter_import {
                     if ($terminator{terminator} &&
                         m/$terminator{terminator}/) {
                         $lastline = $_;
+                        $count++;
                         last;
                     }
                     $data .= $_;
