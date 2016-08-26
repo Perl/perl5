@@ -9648,7 +9648,9 @@ S_scan_heredoc(pTHX_ char *s)
 	       might think.  Odd syntax errors like s;@{<<; can gobble up
 	       the implicit semicolon at the end of a flie, causing the
 	       file handle to be closed even when we are not in a string
-	       eval.  So shared may be null in that case.  */
+	       eval.  So shared may be null in that case.
+               (Closing '}' here to balance the earlier open brace for
+               editors that look for matched pairs.) */
 	    if (UNLIKELY(!shared))
 		goto interminable;
 	    /* A LEXSHARED struct with a null ls_prev pointer is the outer-
@@ -9809,8 +9811,8 @@ S_scan_heredoc(pTHX_ char *s)
 }
 
 /* scan_inputsymbol
-   takes: current position in input buffer
-   returns: new position in input buffer
+   takes: position of first '<' in input buffer
+   returns: position of first char following the last '>' in input buffer
    side-effects: pl_yylval and lex_op are set.
 
    This code handles:
