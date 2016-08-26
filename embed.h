@@ -242,7 +242,6 @@
 #define intro_my()		Perl_intro_my(aTHX)
 #define isALNUM_lazy(a)		Perl_isALNUM_lazy(aTHX_ a)
 #define isIDFIRST_lazy(a)	Perl_isIDFIRST_lazy(aTHX_ a)
-#define is_invariant_string	Perl_is_invariant_string
 #define is_lvalue_sub()		Perl_is_lvalue_sub(aTHX)
 #define is_uni_alnum(a)		Perl_is_uni_alnum(aTHX_ a)
 #define is_uni_alnum_lc(a)	Perl_is_uni_alnum_lc(aTHX_ a)
@@ -285,6 +284,7 @@
 #define is_utf8_graph(a)	Perl_is_utf8_graph(aTHX_ a)
 #define is_utf8_idcont(a)	Perl_is_utf8_idcont(aTHX_ a)
 #define is_utf8_idfirst(a)	Perl_is_utf8_idfirst(aTHX_ a)
+#define is_utf8_invariant_string	Perl_is_utf8_invariant_string
 #define is_utf8_lower(a)	Perl_is_utf8_lower(aTHX_ a)
 #define is_utf8_mark(a)		Perl_is_utf8_mark(aTHX_ a)
 #define is_utf8_perl_space(a)	Perl_is_utf8_perl_space(aTHX_ a)

@@ -50,14 +50,21 @@ Search for the string "utf8" in this document.
 
 =for apidoc is_ascii_string
 
-This is a misleadingly-named synonym for L</is_invariant_string>.
+This is a misleadingly-named synonym for L</is_utf8_invariant_string>.
 On ASCII-ish platforms, the name isn't misleading: the ASCII-range characters
 are exactly the UTF-8 invariants.  But EBCDIC machines have more invariants
-than just the ASCII characters, so C<is_invariant_string> is preferred.
+than just the ASCII characters, so C<is_utf8_invariant_string> is preferred.
+
+=for apidoc is_invariant_string
+
+This is a somewhat misleadingly-named synonym for L</is_utf8_invariant_string>.
+C<is_utf8_invariant_string> is preferred, as it indicates under what conditions
+the string is invariant.
 
 =cut
 */
-#define is_ascii_string(s, len)     is_invariant_string(s, len)
+#define is_ascii_string(s, len)     is_utf8_invariant_string(s, len)
+#define is_invariant_string(s, len) is_utf8_invariant_string(s, len)
 
 #define uvchr_to_utf8(a,b)          uvchr_to_utf8_flags(a,b,0)
 #define uvchr_to_utf8_flags(d,uv,flags)                                        \

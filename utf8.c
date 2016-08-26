@@ -52,7 +52,7 @@ within non-zero characters.
 */
 
 /*
-=for apidoc is_invariant_string
+=for apidoc is_utf8_invariant_string
 
 Returns true iff the first C<len> bytes of the string C<s> are the same
 regardless of the UTF-8 encoding of the string (or UTF-EBCDIC encoding on
@@ -66,18 +66,19 @@ If C<len> is 0, it will be calculated using C<strlen(s)>, (which means if you
 use this option, that C<s> can't have embedded C<NUL> characters and has to
 have a terminating C<NUL> byte).
 
-See also L</is_utf8_string>(), L</is_utf8_string_loclen>(), and L</is_utf8_string_loc>().
+See also L</is_utf8_string>(), L</is_utf8_string_loclen>(), and
+L</is_utf8_string_loc>().
 
 =cut
 */
 
 bool
-Perl_is_invariant_string(const U8 *s, STRLEN len)
+Perl_is_utf8_invariant_string(const U8 *s, STRLEN len)
 {
     const U8* const send = s + (len ? len : strlen((const char *)s));
     const U8* x = s;
 
-    PERL_ARGS_ASSERT_IS_INVARIANT_STRING;
+    PERL_ARGS_ASSERT_IS_UTF8_INVARIANT_STRING;
 
     for (; x < send; ++x) {
 	if (!UTF8_IS_INVARIANT(*x))
@@ -380,7 +381,8 @@ using C<strlen(s)> (which means if you use this option, that C<s> can't have
 embedded C<NUL> characters and has to have a terminating C<NUL> byte).  Note
 that all characters being ASCII constitute 'a valid UTF-8 string'.
 
-See also L</is_invariant_string>(), L</is_utf8_string_loclen>(), and L</is_utf8_string_loc>().
+See also L</is_utf8_invariant_string>(), L</is_utf8_string_loclen>(), and
+L</is_utf8_string_loc>().
 
 =cut
 */
