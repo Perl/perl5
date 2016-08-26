@@ -1002,62 +1002,6 @@ Perl_utf8_length(pTHX_ const U8 *s, const U8 *e)
 }
 
 /*
-=for apidoc utf8_distance
-
-Returns the number of UTF-8 characters between the UTF-8 pointers C<a>
-and C<b>.
-
-WARNING: use only if you *know* that the pointers point inside the
-same UTF-8 buffer.
-
-=cut
-*/
-
-IV
-Perl_utf8_distance(pTHX_ const U8 *a, const U8 *b)
-{
-    PERL_ARGS_ASSERT_UTF8_DISTANCE;
-
-    return (a < b) ? -1 * (IV) utf8_length(a, b) : (IV) utf8_length(b, a);
-}
-
-/*
-=for apidoc utf8_hop
-
-Return the UTF-8 pointer C<s> displaced by C<off> characters, either
-forward or backward.
-
-WARNING: do not use the following unless you *know* C<off> is within
-the UTF-8 data pointed to by C<s> *and* that on entry C<s> is aligned
-on the first byte of character or just after the last byte of a character.
-
-=cut
-*/
-
-U8 *
-Perl_utf8_hop(const U8 *s, SSize_t off)
-{
-    PERL_ARGS_ASSERT_UTF8_HOP;
-
-    /* Note: cannot use UTF8_IS_...() too eagerly here since e.g
-     * the bitops (especially ~) can create illegal UTF-8.
-     * In other words: in Perl UTF-8 is not just for Unicode. */
-
-    if (off >= 0) {
-	while (off--)
-	    s += UTF8SKIP(s);
-    }
-    else {
-	while (off++) {
-	    s--;
-	    while (UTF8_IS_CONTINUATION(*s))
-		s--;
-	}
-    }
-    return (U8 *)s;
-}
-
-/*
 =for apidoc bytes_cmp_utf8
 
 Compares the sequence of characters (stored as octets) in C<b>, C<blen> with the
