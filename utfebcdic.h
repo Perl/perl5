@@ -185,8 +185,36 @@ U+40000000..U+FFFFFFFF ttuuuuuvvvvvwwwwwzzzzzyyyyyxxxxx 11111111 10100000 101000
 For 32-bit words, the 2nd through 7th bytes effectively function as leading
 zeros.  Above 32 bits, these fill up, with each byte yielding 5 bits of
 information, so that with 13 continuation bytes, we can handle 65 bits, just
-above what a 64 bit word can hold */
+above what a 64 bit word can hold
 
+ The following table gives the I8:
+
+   I8 Code Points      1st Byte  2nd Byte  3rd     4th     5th     6th     7th       8th  9th-14th
+
+   0x0000..0x00BF       00..BF
+   0x00A0..0x00FF     * C5..C7    A0..BF
+   U+0100..U+03FF       C8..DF    A0..BF
+   U+0400..U+3FFF     * E1..EF    A0..BF  A0..BF
+   U+4000..U+7FFF       F0      * B0..BF  A0..BF  A0..BF
+   U+8000..U+D7FF       F1        A0..B5  A0..BF  A0..BF
+   U+D800..U+DFFF       F1        B6..B7  A0..BF  A0..BF (surrogates)
+   U+E000..U+FFFF       F1        B8..BF  A0..BF  A0..BF
+  U+10000..U+3FFFF	F2..F7    A0..BF  A0..BF  A0..BF
+  U+40000..U+FFFFF	F8      * A8..BF  A0..BF  A0..BF  A0..BF
+ U+100000..U+10FFFF	F9        A0..A1  A0..BF  A0..BF  A0..BF
+    Below are above-Unicode code points
+ U+110000..U+1FFFFF	F9      * A2..BF  A0..BF  A0..BF  A0..BF
+ U+200000..U+3FFFFF	FA..FB    A0..BF  A0..BF  A0..BF  A0..BF
+ U+400000..U+1FFFFFF	FC      * A4..BF  A0..BF  A0..BF  A0..BF  A0..BF
+U+2000000..U+3FFFFFF	FD        A0..BF  A0..BF  A0..BF  A0..BF  A0..BF
+U+4000000..U+3FFFFFFF   FE      * A2..BF  A0..BF  A0..BF  A0..BF  A0..BF  A0..BF
+U+40000000..            FF        A0..BF  A0..BF  A0..BF  A0..BF  A0..BF  A0..BF  * A1..BF  A0..BF
+
+Note the gaps before several of the byte entries above marked by '*'.  These are
+caused by legal UTF-8 avoiding non-shortest encodings: it is technically
+possible to UTF-8-encode a single code point in different ways, but that is
+explicitly forbidden, and the shortest possible encoding should always be used
+(and that is what Perl does). */
 
 /* This is a fundamental property of UTF-EBCDIC */
 #define OFFUNI_IS_INVARIANT(c) (((UV)(c)) <  0xA0)

@@ -176,24 +176,30 @@ END_EXTERN_C
 
 /*
 
- The following table is from Unicode 3.2.
+ The following table is from Unicode 3.2, plus the Perl extensions for above
+ U+10FFFF
 
- Code Points		1st Byte  2nd Byte  3rd Byte  4th Byte
+ Code Points		1st Byte  2nd Byte  3rd    4th     5th     6th       7th   8th-13th
 
    U+0000..U+007F	00..7F
    U+0080..U+07FF     * C2..DF    80..BF
-   U+0800..U+0FFF	E0      * A0..BF    80..BF
-   U+1000..U+CFFF       E1..EC    80..BF    80..BF
-   U+D000..U+D7FF       ED        80..9F    80..BF
-   U+D800..U+DFFF       ED        A0..BF    80..BF  (surrogates)
-   U+E000..U+FFFF       EE..EF    80..BF    80..BF
-  U+10000..U+3FFFF	F0      * 90..BF    80..BF    80..BF
-  U+40000..U+FFFFF	F1..F3    80..BF    80..BF    80..BF
- U+100000..U+10FFFF	F4        80..8F    80..BF    80..BF
-    Below are non-Unicode code points
- U+110000..U+13FFFF	F4        90..BF    80..BF    80..BF
- U+110000..U+1FFFFF	F5..F7    80..BF    80..BF    80..BF
- U+200000..:            F8..    * 88..BF    80..BF    80..BF    80..BF
+   U+0800..U+0FFF	E0      * A0..BF  80..BF
+   U+1000..U+CFFF       E1..EC    80..BF  80..BF
+   U+D000..U+D7FF       ED        80..9F  80..BF
+   U+D800..U+DFFF       ED        A0..BF  80..BF  (surrogates)
+   U+E000..U+FFFF       EE..EF    80..BF  80..BF
+  U+10000..U+3FFFF	F0      * 90..BF  80..BF  80..BF
+  U+40000..U+FFFFF	F1..F3    80..BF  80..BF  80..BF
+ U+100000..U+10FFFF	F4        80..8F  80..BF  80..BF
+    Below are above-Unicode code points
+ U+110000..U+13FFFF	F4        90..BF  80..BF  80..BF
+ U+110000..U+1FFFFF	F5..F7    80..BF  80..BF  80..BF
+ U+200000..U+FFFFFF     F8      * 88..BF  80..BF  80..BF  80..BF
+U+1000000..U+3FFFFFF    F9..FB    80..BF  80..BF  80..BF  80..BF
+U+4000000..U+3FFFFFFF    FC     * 84..BF  80..BF  80..BF  80..BF  80..BF
+U+40000000..U+7FFFFFFF   FD       80..BF  80..BF  80..BF  80..BF  80..BF
+U+80000000..U+FFFFFFFFF  FE     * 82..BF  80..BF  80..BF  80..BF  80..BF    80..BF
+U+1000000000..           FF       80..BF  80..BF  80..BF  80..BF  80..BF  * 81..BF  80..BF
 
 Note the gaps before several of the byte entries above marked by '*'.  These are
 caused by legal UTF-8 avoiding non-shortest encodings: it is technically
@@ -654,12 +660,14 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
  * BE AWARE that this test doesn't rule out malformed code points, in
  * particular overlongs */
 #ifdef EBCDIC /* Both versions assume well-formed UTF8 */
-#   define UTF8_IS_SUPER(s, e) (NATIVE_UTF8_TO_I8(* (U8*) (s)) >= 0xF9          \
-                         && (NATIVE_UTF8_TO_I8(* (U8*) (s)) > 0xF9              \
-                             || (NATIVE_UTF8_TO_I8(* ((U8*) (s) + 1)) >= 0xA2)))
+#   define UTF8_IS_SUPER(s, e)                                              \
+                    (        NATIVE_UTF8_TO_I8(* (U8*)  (s)) >= 0xF9        \
+                     && (    NATIVE_UTF8_TO_I8(* (U8*)  (s)) >  0xF9        \
+                         || (NATIVE_UTF8_TO_I8(* ((U8*) (s) + 1)) >= 0xA2)))
 #else
-#   define UTF8_IS_SUPER(s, e) (*(U8*) (s) >= 0xF4                              \
-                           && (*(U8*) (s) > 0xF4 || (*((U8*) (s) + 1) >= 0x90)))
+#   define UTF8_IS_SUPER(s, e)                                              \
+                    (    *(U8*) (s) >= 0xF4                                 \
+                     && (*(U8*) (s) >  0xF4 || (*((U8*) (s) + 1) >= 0x90)))
 #endif
 
 /* These are now machine generated, and the 'given' clause is no longer
