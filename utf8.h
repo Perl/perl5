@@ -826,13 +826,24 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 
 =for apidoc Am|STRLEN|isUTF8_CHAR|const U8 *s|const U8 *e
 
-Returns the number of bytes beginning at C<s> which form a legal UTF-8 (or
-UTF-EBCDIC) encoded character, looking no further than S<C<e - s>> bytes into
-C<s>.  Returns 0 if the sequence starting at C<s> through S<C<e - 1>> is not
-well-formed UTF-8.
+Evaluates to non-zero if the first few bytes of the string starting at C<s> and
+looking no further than S<C<e - 1>> are well-formed UTF-8 that represents some
+code point; otherwise it evaluates to 0.  If non-zero, the value gives how many
+many bytes starting at C<s> comprise the code point's representation.
 
-Note that an INVARIANT character (i.e. ASCII on non-EBCDIC
-machines) is a valid UTF-8 character.
+The code point can be any that will fit in a UV on this machine, using Perl's
+extension to official UTF-8 to represent those higher than the Unicode maximum
+of 0x10FFFF.  That means that this macro is used to efficiently decide if the
+next few bytes in C<s> is legal UTF-8 for a single character.  Use
+L</is_utf8_string>(), L</is_utf8_string_loclen>(), and
+L</is_utf8_string_loc>() to check entire strings.
+
+Note that it is deprecated to use code points higher than what will fit in an
+IV.  This macro does not raise any warnings for such code points, treating them
+as valid.
+
+Note also that a UTF-8 INVARIANT character (i.e. ASCII on non-EBCDIC machines)
+is a valid UTF-8 character.
 
 =cut
 */
@@ -845,7 +856,7 @@ machines) is a valid UTF-8 character.
                                  ? 0                                        \
                                  : LIKELY(IS_UTF8_CHAR_FAST(UTF8SKIP(s)))   \
                                    ? is_UTF8_CHAR_utf8_no_length_checks(s)  \
-                                   : _is_utf8_char_slow(s, e))
+                                   : _is_utf8_char_slow(s, UTF8SKIP(s)))
 
 #define is_utf8_char_buf(buf, buf_end) isUTF8_CHAR(buf, buf_end)
 

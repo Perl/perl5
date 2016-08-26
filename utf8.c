@@ -337,6 +337,118 @@ Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 
 /*
 
+A helper function for the macro isUTF8_CHAR(), which should be used instead of
+this function.  The macro will handle smaller code points directly saving time,
+using this function as a fall-back for higher code points.  This function
+assumes that it is not called with an invariant character, and that
+'s + len - 1' is within bounds of the string 's'.
+
+Tests if the string C<s> of at least length 'len' is a valid variant UTF-8
+character.  0 is returned if not, otherwise, 'len' is returned.
+
+*/
+
+STRLEN
+Perl__is_utf8_char_slow(const U8 * const s, const STRLEN len)
+{
+    const U8 *e;
+    const U8 *x, *y;
+
+    PERL_ARGS_ASSERT__IS_UTF8_CHAR_SLOW;
+
+    if (UNLIKELY(! UTF8_IS_START(*s))) {
+        return 0;
+    }
+
+    e = s + len;
+
+    for (x = s + 1; x < e; x++) {
+        if (UNLIKELY(! UTF8_IS_CONTINUATION(*x))) {
+            return 0;
+        }
+    }
+
+#ifndef EBCDIC
+
+    /* Here is syntactically valid.  Make sure this isn't the start of an
+     * overlong.  These values were found by manually inspecting the UTF-8
+     * patterns.  See the tables in utf8.h and utfebcdic.h */
+
+    /* This is not needed on modern perls where C0 and C1 are not considered
+     * start bytes. */
+#if 0
+    if (UNLIKELY(*s < 0xC2)) {
+        return 0;
+    }
+#endif
+
+    if (len > 1) {
+        if (   (*s == 0xE0 && UNLIKELY(s[1] < 0xA0))
+            || (*s == 0xF0 && UNLIKELY(s[1] < 0x90))
+            || (*s == 0xF8 && UNLIKELY(s[1] < 0x88))
+            || (*s == 0xFC && UNLIKELY(s[1] < 0x84))
+            || (*s == 0xFE && UNLIKELY(s[1] < 0x82)))
+        {
+            return 0;
+        }
+        if ((len > 6 && UNLIKELY(*s == 0xFF) && UNLIKELY(s[6] < 0x81))) {
+            return 0;
+        }
+    }
+
+#else   /* For EBCDIC, we use I8, which is the same on all code pages */
+    {
+        const U8 s0 = NATIVE_UTF8_TO_I8(*s);
+
+        /* On modern perls C0-C4 aren't considered start bytes */
+        if ( /* s0 < 0xC5 || */ s0 == 0xE0) {
+            return 0;
+        }
+
+        if (len >= 1) {
+            const U8 s1 = NATIVE_UTF8_TO_I8(s[1]);
+
+            if (   (s0 == 0xF0 && UNLIKELY(s1 < 0xB0))
+                || (s0 == 0xF8 && UNLIKELY(s1 < 0xA8))
+                || (s0 == 0xFC && UNLIKELY(s1 < 0xA4))
+                || (s0 == 0xFE && UNLIKELY(s1 < 0x82)))
+            {
+                return 0;
+            }
+            if ((len > 7 && UNLIKELY(s0 == 0xFF) && UNLIKELY(s[7] < 0xA1))) {
+                return 0;
+            }
+        }
+    }
+
+#endif
+
+    /* Now see if this would overflow a UV on this platform.  See if the UTF8
+     * for this code point is larger than that for the highest representable
+     * code point */
+    y = (const U8 *) HIGHEST_REPRESENTABLE_UTF8;
+
+    for (x = s; x < e; x++, y++) {
+
+        /* If the same at this byte, go on to the next */
+        if (UNLIKELY(NATIVE_UTF8_TO_I8(*x) == *y)) {
+            continue;
+        }
+
+        /* If this is larger, it overflows */
+        if (UNLIKELY(NATIVE_UTF8_TO_I8(*x) > *y)) {
+            return 0;
+        }
+
+        /* But if smaller, it won't */
+        break;
+    }
+
+    return len;
+}
+
+/*
+
 =for apidoc utf8n_to_uvchr
 
 THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.

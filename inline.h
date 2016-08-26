@@ -277,36 +277,6 @@ S_append_utf8_from_native_byte(const U8 byte, U8** dest)
 }
 
 /*
-
-A helper function for the macro isUTF8_CHAR(), which should be used instead of
-this function.  The macro will handle smaller code points directly saving time,
-using this function as a fall-back for higher code points.
-
-Tests if the first bytes of string C<s> form a valid UTF-8 character.  0 is
-returned if the bytes starting at C<s> up to but not including C<e> do not form a
-complete well-formed UTF-8 character; otherwise the number of bytes in the
-character is returned.
-
-Note that an INVARIANT (i.e. ASCII on non-EBCDIC) character is a valid UTF-8
-character.
-
-=cut */
-PERL_STATIC_INLINE STRLEN
-S__is_utf8_char_slow(const U8 *s, const U8 *e)
-{
-    dTHX;   /* The function called below requires thread context */
-
-    STRLEN actual_len;
-
-    PERL_ARGS_ASSERT__IS_UTF8_CHAR_SLOW;
-
-    assert(e >= s);
-    utf8n_to_uvchr(s, e - s, &actual_len, UTF8_CHECK_ONLY);
-
-    return (actual_len == (STRLEN) -1) ? 0 : actual_len;
-}
-
-/*
 =for apidoc valid_utf8_to_uvchr
 Like L</utf8_to_uvchr_buf>(), but should only be called when it is known that
 the next character in the input UTF-8 string C<s> is well-formed (I<e.g.>,

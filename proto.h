@@ -3800,10 +3800,11 @@ STATIC SV *	S_incpush_if_exists(pTHX_ AV *const av, SV *dir, SV *const stem);
 #  endif
 #endif
 #if !defined(PERL_NO_INLINE_FUNCTIONS)
-PERL_STATIC_INLINE STRLEN	S__is_utf8_char_slow(const U8 *s, const U8 *e)
-			__attribute__warn_unused_result__;
+PERL_CALLCONV STRLEN	Perl__is_utf8_char_slow(const U8 * const s, const STRLEN len)
+			__attribute__warn_unused_result__
+			__attribute__pure__;
 #define PERL_ARGS_ASSERT__IS_UTF8_CHAR_SLOW	\
-	assert(s); assert(e)
+	assert(s)
 
 PERL_STATIC_INLINE void	S_append_utf8_from_native_byte(const U8 byte, U8** dest);
 #define PERL_ARGS_ASSERT_APPEND_UTF8_FROM_NATIVE_BYTE	\
