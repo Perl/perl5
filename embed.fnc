@@ -731,9 +731,9 @@ ADMpPR	|bool	|is_uni_lower_lc|UV c
 ADMpPR	|bool	|is_uni_print_lc|UV c
 ADMpPR	|bool	|is_uni_punct_lc|UV c
 ADMpPR	|bool	|is_uni_xdigit_lc|UV c
-AnpdR	|bool	|is_utf8_invariant_string|NN const U8 *s|STRLEN len
-AmnpdR	|bool	|is_ascii_string|NN const U8 *s|STRLEN len
-AmnpdR	|bool	|is_invariant_string|NN const U8 *s|STRLEN len
+AnpdRP	|bool	|is_utf8_invariant_string|NN const U8* const s|STRLEN const len
+AmnpdRP	|bool	|is_ascii_string|NN const U8* const s|const STRLEN len
+AmnpdRP	|bool	|is_invariant_string|NN const U8* const s|const STRLEN len
 AnpdD	|STRLEN	|is_utf8_char	|NN const U8 *s
 Abmnpd	|STRLEN	|is_utf8_char_buf|NN const U8 *buf|NN const U8 *buf_end
 Anpd	|bool	|is_utf8_string	|NN const U8 *s|STRLEN len
