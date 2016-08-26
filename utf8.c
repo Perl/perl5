@@ -82,10 +82,10 @@ Perl_is_utf8_invariant_string(const U8 *s, STRLEN len)
 
     for (; x < send; ++x) {
 	if (!UTF8_IS_INVARIANT(*x))
-	    break;
+	    return FALSE;
     }
 
-    return x == send;
+    return TRUE;
 }
 
 /*
