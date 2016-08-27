@@ -33,22 +33,22 @@ my $token :shared = 0;
 my @threads;
 
 push @threads, threads->create(sub {
-    $st->down();
+    $st->down_timed(3);
     is($token++, 1, 'Thread 1 got semaphore');
     $sm->up();
 
-    $st->down(4);
+    $st->down_timed(3, 4);
     is($token, 5, 'Thread 1 done');
     $sm->up();
 });
 
 push @threads, threads->create(sub {
-    $st->down(2);
+    $st->down_timed(3, 2);
     is($token++, 3, 'Thread 2 got semaphore');
     $sm->up();
 
-    $st->down(4);
-    is($token, 5, 'Thread 2 done');
+    # Force timeout by asking for more than will ever show up
+    ok(! $st->down_timed(1, 10), 'Thread 2 timed out');
     $sm->up();
 });
 
@@ -62,7 +62,7 @@ $st->up(2);
 
 $sm->down();
 is($token++, 4, 'Main re-got semaphore');
-$st->up(9);
+$st->up(5);
 
 $sm->down(2);
 $st->down();

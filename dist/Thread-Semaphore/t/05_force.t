@@ -51,10 +51,9 @@ $st->up();
 $sm->down();
 is($token, 4, 'Main re-got semaphore');
 
-ok(1, 'Main done');
-threads::yield();
-
 $thread->join;
+
+ok(1, 'Main done');
 
 exit(0);
 
