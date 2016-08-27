@@ -5710,7 +5710,7 @@ C<src>.  If C<size> is smaller than the return, the excess was not appended.
 
 =cut
 
-Description stolen from http://www.openbsd.org/cgi-bin/man.cgi?query=strlcat
+Description stolen from http://man.openbsd.org/strlcat.3
 */
 #ifndef HAS_STRLCAT
 Size_t
@@ -5744,7 +5744,7 @@ succeeded.  If it is larger than C<size>, the excess was not copied.
 
 =cut
 
-Description stolen from http://www.openbsd.org/cgi-bin/man.cgi?query=strlcpy
+Description stolen from http://man.openbsd.org/strlcpy.3
 */
 #ifndef HAS_STRLCPY
 Size_t
