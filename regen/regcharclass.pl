@@ -1630,11 +1630,11 @@ REPLACEMENT: Unicode REPLACEMENT CHARACTER
 0xFFFD
 
 NONCHAR: Non character code points
-=> UTF8 :fast
+=> UTF8 :safe
 \p{_Perl_Nchar}
 
 SURROGATE: Surrogate characters
-=> UTF8 :fast
+=> UTF8 :safe
 \p{_Perl_Surrogate}
 
 # This program was run with this enabled, and the results copied to utf8.h;

@@ -652,35 +652,81 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UTF8_ALLOW_DEFAULT		(ckWARN(WARN_UTF8) ? 0 : \
 					 UTF8_ALLOW_ANYUV)
 
-/* Several of the macros below have a second parameter that is currently
- * unused; but could be used in the future to make sure that the input is
- * well-formed. */
+/*
+=for apidoc Am|bool|UTF8_IS_SURROGATE|const U8 *s|const U8 *e
 
-#define UTF8_IS_SURROGATE(s, e) cBOOL(is_SURROGATE_utf8(s))
-#define UTF8_IS_REPLACEMENT(s, send) cBOOL(is_REPLACEMENT_utf8_safe(s,send))
+Evaluates to non-zero if the first few bytes of the string starting at C<s> and
+looking no further than S<C<e - 1>> are well-formed UTF-8 that represents one
+of the Unicode surrogate code points; otherwise it evaluates to 0.  If
+non-zero, the value gives how many bytes starting at C<s> comprise the code
+point's representation.
 
-/*		  ASCII		     EBCDIC I8
+=cut
+ */
+#define UTF8_IS_SURROGATE(s, e)      is_SURROGATE_utf8_safe(s, e)
+
+
+#define UTF8_IS_REPLACEMENT(s, send) is_REPLACEMENT_utf8_safe(s,send)
+
+/*
+=for apidoc Am|bool|UTF8_IS_SUPER|const U8 *s|const U8 *e
+
+Recall that Perl recognizes an extension to UTF-8 that can encode code
+points larger than the ones defined by Unicode, which are 0..0x10FFFF.
+
+This macro evaluates to non-zero if the first few bytes of the string starting
+at C<s> and looking no further than S<C<e - 1>> are from this UTF-8 extension;
+otherwise it evaluates to 0.  If non-zero, the value gives how many bytes
+starting at C<s> comprise the code point's representation.
+
+0 is returned if the bytes are not well-formed extended UTF-8, or if they
+represent a code point that cannot fit in a UV on the current platform.  Hence
+this macro can give different results when run on a 64-bit word machine than on
+one with a 32-bit word size.
+
+Note that it is deprecated to have code points that are larger than what can
+fit in an IV on the current machine.
+
+=cut
+
+ *		  ASCII		     EBCDIC I8
  * U+10FFFF: \xF4\x8F\xBF\xBF	\xF9\xA1\xBF\xBF\xBF	max legal Unicode
  * U+110000: \xF4\x90\x80\x80	\xF9\xA2\xA0\xA0\xA0
  * U+110001: \xF4\x90\x80\x81	\xF9\xA2\xA0\xA0\xA1
- *
- * BE AWARE that this test doesn't rule out malformed code points, in
- * particular overlongs */
-#ifdef EBCDIC /* Both versions assume well-formed UTF8 */
+ */
+#ifdef EBCDIC
 #   define UTF8_IS_SUPER(s, e)                                              \
-                    (        NATIVE_UTF8_TO_I8(* (U8*)  (s)) >= 0xF9        \
-                     && (    NATIVE_UTF8_TO_I8(* (U8*)  (s)) >  0xF9        \
-                         || (NATIVE_UTF8_TO_I8(* ((U8*) (s) + 1)) >= 0xA2)))
+                  ((    LIKELY((e) > (s) + 4)                               \
+                    &&      NATIVE_UTF8_TO_I8(*(s)) >= 0xF9                 \
+                    && (    NATIVE_UTF8_TO_I8(*(s)) >  0xF9                 \
+                        || (NATIVE_UTF8_TO_I8(*(s) + 1) >= 0xA2))           \
+                    &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                   \
+                    ? _is_utf8_char_slow(s, UTF8SKIP(s)) : 0)
 #else
 #   define UTF8_IS_SUPER(s, e)                                              \
-                    (    *(U8*) (s) >= 0xF4                                 \
-                     && (*(U8*) (s) >  0xF4 || (*((U8*) (s) + 1) >= 0x90)))
+                   ((    LIKELY((e) > (s) + 3)                              \
+                     &&  (*(U8*) (s)) >= 0xF4                               \
+                     && ((*(U8*) (s)) >  0xF4 || (*((U8*) (s) + 1) >= 0x90))\
+                     &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                  \
+                    ? _is_utf8_char_slow(s, UTF8SKIP(s)) : 0)
 #endif
 
 /* These are now machine generated, and the 'given' clause is no longer
  * applicable */
 #define UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s, e)          \
-                                                    cBOOL(is_NONCHAR_utf8(s))
+                                            cBOOL(is_NONCHAR_utf8_safe(s,e))
+
+/*
+=for apidoc Am|bool|UTF8_IS_NONCHAR|const U8 *s|const U8 *e
+
+Evaluates to non-zero if the first few bytes of the string starting at C<s> and
+looking no further than S<C<e - 1>> are well-formed UTF-8 that represents one
+of the Unicode non-character code points; otherwise it evaluates to 0.  If
+non-zero, the value gives how many bytes starting at C<s> comprise the code
+point's representation.
+
+=cut
+ */
 #define UTF8_IS_NONCHAR(s, e)                                                  \
                 UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s, e)
 
