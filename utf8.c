@@ -346,6 +346,10 @@ assumes that it is not called with an invariant character, and that
 Tests if the string C<s> of at least length 'len' is a valid variant UTF-8
 character.  0 is returned if not, otherwise, 'len' is returned.
 
+It is written in such a way that if 'len' is set to less than a full
+character's length, it will test if the bytes ending there form the legal
+beginning of partial character.
+
 */
 
 STRLEN

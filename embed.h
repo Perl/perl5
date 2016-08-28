@@ -296,6 +296,7 @@
 #define is_utf8_string		Perl_is_utf8_string
 #define is_utf8_string_loclen	Perl_is_utf8_string_loclen
 #define is_utf8_upper(a)	Perl_is_utf8_upper(aTHX_ a)
+#define is_utf8_valid_partial_char	S_is_utf8_valid_partial_char
 #define is_utf8_xdigit(a)	Perl_is_utf8_xdigit(aTHX_ a)
 #define is_utf8_xidcont(a)	Perl_is_utf8_xidcont(aTHX_ a)
 #define is_utf8_xidfirst(a)	Perl_is_utf8_xidfirst(aTHX_ a)

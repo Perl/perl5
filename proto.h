@@ -1625,6 +1625,11 @@ PERL_CALLCONV bool	Perl_is_utf8_upper(pTHX_ const U8 *p)
 #define PERL_ARGS_ASSERT_IS_UTF8_UPPER	\
 	assert(p)
 
+PERL_STATIC_INLINE bool	S_is_utf8_valid_partial_char(const U8 * const s, const U8 * const e)
+			__attribute__pure__;
+#define PERL_ARGS_ASSERT_IS_UTF8_VALID_PARTIAL_CHAR	\
+	assert(s); assert(e)
+
 PERL_CALLCONV bool	Perl_is_utf8_xdigit(pTHX_ const U8 *p)
 			__attribute__deprecated__
 			__attribute__warn_unused_result__;

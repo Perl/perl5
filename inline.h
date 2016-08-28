@@ -501,6 +501,41 @@ Perl_utf8_hop(const U8 *s, SSize_t off)
     return (U8 *)s;
 }
 
+/*
+
+=for apidoc is_utf8_valid_partial_char
+
+Returns 1 if the first few bytes of the string starting at C<s> and
+looking no further than S<C<e - 1>> are legal initial bytes of
+well-formed UTF-8; otherwise it returns 0.
+
+This is useful when some fixed-length buffer is being tested for being
+well-formed UTF-8, but the final few bytes in it are fewer than necessary to
+fully determine what code point they might mean.  (Presumably when the buffer
+is refreshed with the next chunk of data, the new first bytes will complete the
+partial code point.)   This function is used to verify that the final bytes in
+the current buffer are in fact the legal beginning of some code point, so that
+if they aren't, the failure can be signalled without having to wait for the
+next read.
+
+If the bytes terminated at S<C<e - 1>> are a full character (or more), 0 is
+returned.
+
+=cut
+*/
+bool
+S_is_utf8_valid_partial_char(const U8 * const s, const U8 * const e)
+{
+
+    PERL_ARGS_ASSERT_IS_UTF8_VALID_PARTIAL_CHAR;
+
+    if (s >= e || s + UTF8SKIP(s) >= e) {
+        return FALSE;
+    }
+
+    return cBOOL(_is_utf8_char_slow(s, e - s));
+}
+
 /* ------------------------------- perl.h ----------------------------- */
 
 /*
