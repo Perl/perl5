@@ -6,9 +6,10 @@ BEGIN {
     set_up_inc('../lib');
     require Config; import Config;
     require './charset_tools.pl';
+    require './loc_tools.pl';
 }
 
-plan( tests => 268 );
+plan( tests => 269 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -1084,4 +1085,21 @@ SKIP: {
     # RT #126602 double free if the value being modified is freed in the replacement
     fresh_perl_is('s//*_=0;s|0||;00.y0/e; print qq(ok\n)', "ok\n", { stderr => 1 },
                   "[perl #126602] s//*_=0;s|0||/e crashes");
+}
+
+SKIP: {
+    if (! locales_enabled('LC_CTYPE')) {
+        skip "Can't test locale", 1;
+    }
+
+    #  To cause breakeage, we need a locale in which \xff matches whatever
+    #  POSIX class is used in the pattern.  Easiest is C, with \W.
+    fresh_perl_is('    use POSIX qw(locale_h);
+                       setlocale(&POSIX::LC_CTYPE, "C");
+                       my $s = "\xff";
+                       $s =~ s/\W//l;
+                       print qq(ok$s\n)',
+                   "ok\n",
+                   {stderr => 1 },
+                   '[perl #129038 ] s/\xff//l no longer crashes');
 }
