@@ -28,6 +28,30 @@ print $out_fh <<END;
  *  "_TAIL"       if instead it represents all but the first byte.  This, and
  *                with no additional suffix are both string constants */
 
+/*
+=head1 Unicode Support
+
+=for apidoc AmU|placeholder|BOM_UTF8
+
+This is a macro that evaluates to a string constant of the  UTF-8 bytes that
+define the Unicode BYTE ORDER MARK (U+FEFF) for the platform that perl
+is compiled on.  This allows code to use a mnemonic for this character that
+works on both ASCII and EBCDIC platforms.
+S<C<sizeof(BOM_UTF8) - 1>> can be used to get its length in
+bytes.
+
+=for apidoc AmU|placeholder|REPLACEMENT_CHARACTER_UTF8
+
+This is a macro that evaluates to a string constant of the  UTF-8 bytes that
+define the Unicode REPLACEMENT CHARACTER (U+FFFD) for the platform that perl
+is compiled on.  This allows code to use a mnemonic for this character that
+works on both ASCII and EBCDIC platforms.
+S<C<sizeof(REPLACEMENT_CHARACTER_UTF8) - 1>> can be used to get its length in
+bytes.
+
+=cut
+*/
+
 END
 
 my $version = Unicode::UCD::UnicodeVersion();
@@ -180,6 +204,9 @@ read_only_bottom_close_and_rename($out_fh);
 
 # DATA FORMAT
 #
+# Note that any apidoc comments you want in the file need to be added to one
+# of the prints above
+#
 # A blank line is output as-is.
 # Comments (lines whose first non-blank is a '#') are converted to C-style,
 # though empty comments are converted to blank lines.  Otherwise, each line
@@ -227,6 +254,10 @@ U+0131 string
 U+2010 string
 BOM first
 BOM tail
+
+BOM string
+
+U+FFFD string
 
 NBSP native
 NBSP string
