@@ -2839,6 +2839,7 @@ S_lvref(pTHX_ OP *o, I32 type)
 		      ? "do block"
 		      : OP_DESC(o),
 		     PL_op_desc[type]));
+	return;
     }
     OpTYPE_set(o, OP_LVREF);
     o->op_private &=
