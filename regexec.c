@@ -813,8 +813,9 @@ Perl_re_intuit_start(pTHX_
                     /* Now should match s[0..slen-2] */
                     slen--;
                 }
-                if (slen && (*SvPVX_const(check) != *s
-                    || (slen > 1 && memNE(SvPVX_const(check), s, slen))))
+                if (slen && (strend - s < slen
+                    || *SvPVX_const(check) != *s
+                    || (slen > 1 && (memNE(SvPVX_const(check), s, slen)))))
                 {
                     DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
                                     "  String not equal...\n"));

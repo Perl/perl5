@@ -20,7 +20,7 @@ use warnings;
 use 5.010;
 use Config;
 
-plan tests => 2501;  # Update this when adding/deleting tests.
+plan tests => 2502;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1121,6 +1121,13 @@ EOP
 
         my $s ="\x{100}0000000";
         ok($s !~ /00000?\x80\x80\x80/, "RT #129012");
+    }
+
+    {
+        # RT #129085 heap-buffer-overflow Perl_re_intuit_start
+        # this did fail under ASAN, but didn't under valgrind
+        my $s = "\x{f2}\x{140}\x{fe}\x{ff}\x{ff}\x{ff}";
+        ok($s !~ /^0000.\34500\376\377\377\377/, "RT #129085");
     }
 
 } # End of sub run_tests
