@@ -655,7 +655,7 @@ And here is the function from F<op.c>:
     18     return o;
     19 }
 
-One particularly interesting aspect is that if the op has no kids (e.g.,
+One particularly interesting aspect is that if the op has no kids (i.e.,
 C<readline()> or C<< <> >>) the op is freed and replaced with an entirely
 new one that references C<*ARGV> (lines 12-16).
 
