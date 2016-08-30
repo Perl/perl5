@@ -362,8 +362,10 @@ Perl_av_store(pTHX_ AV *av, SSize_t key, SV *val)
     ary = AvARRAY(av);
     if (AvFILLp(av) < key) {
 	if (!AvREAL(av)) {
-	    if (av == PL_curstack && key > PL_stack_sp - PL_stack_base)
-		PL_stack_sp = PL_stack_base + key;	/* XPUSH in disguise */
+	    if (av == PL_rcurstack && key > PL_rstack_sp - PL_rstack_base)
+		PL_rstack_sp = PL_rstack_base + key;	/* XPUSH in disguise */
+	    else if (av == PL_curstack && key > PL_stack_sp - PL_stack_base)
+		PL_stack_sp = PL_stack_base + key;
 	    do {
 		ary[++AvFILLp(av)] = NULL;
 	    } while (AvFILLp(av) < key);
