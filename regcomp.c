@@ -15081,8 +15081,8 @@ redo_curchar:
                 }
 
                 /* Stack the position of this undealt-with left paren */
-                fence = top_index + 1;
                 av_push(fence_stack, newSViv(fence));
+                fence = top_index + 1;
                 break;
 
             case '\\':
@@ -15163,6 +15163,11 @@ redo_curchar:
                     vFAIL("Unexpected ')'");
                 }
 
+                /* If nothing after the fence, is missing an operand */
+                if (top_index - fence < 0) {
+                    RExC_parse++;
+                    goto bad_syntax;
+                }
                 /* If at least two things on the stack, treat this as an
                   * operator */
                 if (top_index - fence >= 1) {
