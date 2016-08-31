@@ -15163,7 +15163,7 @@ redo_curchar:
                     vFAIL("Unexpected ')'");
                 }
 
-                 /* If at least two thing on the stack, treat this as an
+                /* If at least two things on the stack, treat this as an
                   * operator */
                 if (top_index - fence >= 1) {
                     goto join_operators;
