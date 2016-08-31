@@ -14984,6 +14984,12 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
 
 redo_curchar:
 
+#ifdef ENABLE_REGEX_SETS_DEBUGGING
+                    /* Enable with -Accflags=-DENABLE_REGEX_SETS_DEBUGGING */
+        DEBUG_U(dump_regex_sets_structures(pRExC_state,
+                                           stack, fence, fence_stack));
+#endif
+
         top_index = av_tindex_nomg(stack);
 
         switch (curchar) {
@@ -15517,6 +15523,61 @@ redo_curchar:
     Set_Node_Length(node, RExC_parse - oregcomp_parse + 1); /* MJD */
     return node;
 }
+
+#ifdef ENABLE_REGEX_SETS_DEBUGGING
+
+STATIC void
+S_dump_regex_sets_structures(pTHX_ RExC_state_t *pRExC_state,
+                             AV * stack, const IV fence, AV * fence_stack)
+{   /* Dumps the stacks in handle_regex_sets() */
+
+    const SSize_t stack_top = av_tindex_nomg(stack);
+    const SSize_t fence_stack_top = av_tindex_nomg(fence_stack);
+    SSize_t i;
+
+    PERL_ARGS_ASSERT_DUMP_REGEX_SETS_STRUCTURES;
+
+    PerlIO_printf(Perl_debug_log, "\nParse position is:%s\n", RExC_parse);
+
+    if (stack_top < 0) {
+        PerlIO_printf(Perl_debug_log, "Nothing on stack\n");
+    }
+    else {
+        PerlIO_printf(Perl_debug_log, "Stack: (fence=%d)\n", (int) fence);
+        for (i = stack_top; i >= 0; i--) {
+            SV ** element_ptr = av_fetch(stack, i, FALSE);
+            if (! element_ptr) {
+            }
+
+            if (IS_OPERATOR(*element_ptr)) {
+                PerlIO_printf(Perl_debug_log, "[%d]: %c\n",
+                                            (int) i, (int) SvIV(*element_ptr));
+            }
+            else {
+                PerlIO_printf(Perl_debug_log, "[%d] ", (int) i);
+                sv_dump(*element_ptr);
+            }
+        }
+    }
+
+    if (fence_stack_top < 0) {
+        PerlIO_printf(Perl_debug_log, "Nothing on fence_stack\n");
+    }
+    else {
+        PerlIO_printf(Perl_debug_log, "Fence_stack: \n");
+        for (i = fence_stack_top; i >= 0; i--) {
+            SV ** element_ptr = av_fetch(fence_stack, i, FALSE);
+            if (! element_ptr) {
+            }
+
+            PerlIO_printf(Perl_debug_log, "[%d]: %d\n",
+                                            (int) i, (int) SvIV(*element_ptr));
+        }
+    }
+}
+
+#endif
+
 #undef IS_OPERATOR
 #undef IS_OPERAND
 

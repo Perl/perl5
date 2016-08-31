@@ -4056,6 +4056,13 @@ STATIC void	S_print_collxfrm_input_and_return(pTHX_ const char * const s, const 
 	assert(s); assert(e)
 #  endif
 #endif
+#if defined(DEBUGGING) && defined(ENABLE_REGEX_SETS_DEBUGGING)
+#  if defined(PERL_IN_REGCOMP_C)
+STATIC void	S_dump_regex_sets_structures(pTHX_ RExC_state_t *pRExC_state, AV * stack, const IV fence, AV * fence_stack);
+#define PERL_ARGS_ASSERT_DUMP_REGEX_SETS_STRUCTURES	\
+	assert(pRExC_state); assert(stack); assert(fence_stack)
+#  endif
+#endif
 #if defined(DEBUG_LEAKING_SCALARS_FORK_DUMP)
 PERL_CALLCONV void	Perl_dump_sv_child(pTHX_ SV *sv);
 #define PERL_ARGS_ASSERT_DUMP_SV_CHILD	\

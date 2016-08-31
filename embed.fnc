@@ -2257,6 +2257,12 @@ Es	|regnode*|handle_regex_sets|NN RExC_state_t *pRExC_state \
 				|NULLOK SV ** return_invlist            \
 				|NN I32 *flagp|U32 depth                \
 				|NN char * const oregcomp_parse
+#if defined(DEBUGGING) && defined(ENABLE_REGEX_SETS_DEBUGGING)
+Es	|void	|dump_regex_sets_structures				    \
+				|NN RExC_state_t *pRExC_state		    \
+				|NN AV * stack				    \
+				|const IV fence|NN AV * fence_stack
+#endif
 Es	|void|parse_lparen_question_flags|NN RExC_state_t *pRExC_state
 Es	|regnode*|reg_node	|NN RExC_state_t *pRExC_state|U8 op
 Es	|regnode*|regpiece	|NN RExC_state_t *pRExC_state \

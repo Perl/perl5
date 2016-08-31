@@ -1004,6 +1004,11 @@
 #endif
 #    endif
 #  endif
+#  if defined(DEBUGGING) && defined(ENABLE_REGEX_SETS_DEBUGGING)
+#    if defined(PERL_IN_REGCOMP_C)
+#define dump_regex_sets_structures(a,b,c,d)	S_dump_regex_sets_structures(aTHX_ a,b,c,d)
+#    endif
+#  endif
 #  if defined(PERL_ANY_COW)
 #define sv_setsv_cow(a,b)	Perl_sv_setsv_cow(aTHX_ a,b)
 #  endif
