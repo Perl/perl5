@@ -122,7 +122,7 @@ Perl_set_numeric_radix(pTHX)
 		sv_setpv(PL_numeric_radix_sv, lc->decimal_point);
 	    else
 		PL_numeric_radix_sv = newSVpv(lc->decimal_point, 0);
-            if (! is_invariant_string((U8 *) lc->decimal_point, 0)
+            if (! is_utf8_invariant_string((U8 *) lc->decimal_point, 0)
                 && is_utf8_string((U8 *) lc->decimal_point, 0)
                 && _is_cur_LC_category_utf8(LC_NUMERIC))
             {
@@ -2190,7 +2190,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
         lc = localeconv();
         if (! lc
             || ! lc->currency_symbol
-            || is_invariant_string((U8 *) lc->currency_symbol, 0))
+            || is_utf8_invariant_string((U8 *) lc->currency_symbol, 0))
         {
             DEBUG_L(PerlIO_printf(Perl_debug_log, "Couldn't get currency symbol for %s, or contains only ASCII; can't use for determining if UTF-8 locale\n", save_input_locale));
             only_ascii = TRUE;
@@ -2270,7 +2270,9 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
         for (i = 0; i < 7 + 12; i++) {  /* 7 days; 12 months */
             formatted_time = my_strftime("%A %B %Z %p",
                                     0, 0, hour, dom, month, 112, 0, 0, is_dst);
-            if (! formatted_time || is_invariant_string((U8 *) formatted_time, 0)) {
+            if ( ! formatted_time
+                || is_utf8_invariant_string((U8 *) formatted_time, 0))
+            {
 
                 /* Here, we didn't find a non-ASCII.  Try the next time through
                  * with the complemented dst and am/pm, and try with the next
@@ -2371,7 +2373,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                 break;
             }
             errmsg = savepv(errmsg);
-            if (! is_invariant_string((U8 *) errmsg, 0)) {
+            if (! is_utf8_invariant_string((U8 *) errmsg, 0)) {
                 non_ascii = TRUE;
                 is_utf8 = is_utf8_string((U8 *) errmsg, 0);
                 break;

@@ -44,8 +44,8 @@ sub full_name ($$) { # Returns the function name with potentially the
 		     # prefixes 'S_' or 'Perl_'
     my ($func, $flags) = @_;
 
-    return "S_$func" if $flags =~ /[si]/;
     return "Perl_$func" if $flags =~ /p/;
+    return "S_$func" if $flags =~ /[si]/;
     return $func;
 }
 
@@ -92,12 +92,8 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	    warn "It is nonsensical to require the return value of a void function ($plain_func) to be checked";
 	}
 
-	my $scope_type_flag_count = 0;
-	$scope_type_flag_count++ if $flags =~ /s/;
-	$scope_type_flag_count++ if $flags =~ /i/;
-	$scope_type_flag_count++ if $flags =~ /p/;
-	warn "$plain_func: i, p, and s flags are all mutually exclusive"
-						   if $scope_type_flag_count > 1;
+	warn "$plain_func: s flag is mutually exclusive from the i and p plags"
+					    if $flags =~ /s/ && $flags =~ /[ip]/;
 	my $splint_flags = "";
 	if ( $SPLINT && !$commented_out ) {
 	    $splint_flags .= '/*@noreturn@*/ ' if $never_returns;

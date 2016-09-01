@@ -1321,13 +1321,13 @@ PERL_CALLCONV bool	Perl_isIDFIRST_lazy(pTHX_ const char* p)
 #define PERL_ARGS_ASSERT_ISIDFIRST_LAZY	\
 	assert(p)
 
-/* PERL_CALLCONV bool	Perl_is_ascii_string(pTHX_ const U8 *s, STRLEN len)
-			__attribute__warn_unused_result__; */
+/* PERL_CALLCONV bool	Perl_is_ascii_string(const U8* const s, const STRLEN len)
+			__attribute__warn_unused_result__
+			__attribute__pure__; */
 
-PERL_CALLCONV bool	Perl_is_invariant_string(const U8 *s, STRLEN len)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_IS_INVARIANT_STRING	\
-	assert(s)
+/* PERL_CALLCONV bool	Perl_is_invariant_string(const U8* const s, const STRLEN len)
+			__attribute__warn_unused_result__
+			__attribute__pure__; */
 
 PERL_CALLCONV I32	Perl_is_lvalue_sub(pTHX)
 			__attribute__warn_unused_result__;
@@ -1552,6 +1552,12 @@ PERL_CALLCONV bool	Perl_is_utf8_idfirst(pTHX_ const U8 *p)
 #define PERL_ARGS_ASSERT_IS_UTF8_IDFIRST	\
 	assert(p)
 
+PERL_STATIC_INLINE bool	S_is_utf8_invariant_string(const U8* const s, STRLEN const len)
+			__attribute__warn_unused_result__
+			__attribute__pure__;
+#define PERL_ARGS_ASSERT_IS_UTF8_INVARIANT_STRING	\
+	assert(s)
+
 PERL_CALLCONV bool	Perl_is_utf8_lower(pTHX_ const U8 *p)
 			__attribute__deprecated__
 			__attribute__warn_unused_result__;
@@ -1600,15 +1606,17 @@ PERL_CALLCONV bool	Perl_is_utf8_space(pTHX_ const U8 *p)
 #define PERL_ARGS_ASSERT_IS_UTF8_SPACE	\
 	assert(p)
 
-PERL_CALLCONV bool	Perl_is_utf8_string(const U8 *s, STRLEN len);
+PERL_STATIC_INLINE bool	Perl_is_utf8_string(const U8 *s, STRLEN len)
+			__attribute__pure__;
 #define PERL_ARGS_ASSERT_IS_UTF8_STRING	\
 	assert(s)
+
 #ifndef NO_MATHOMS
 PERL_CALLCONV bool	Perl_is_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep);
 #define PERL_ARGS_ASSERT_IS_UTF8_STRING_LOC	\
-	assert(s)
+	assert(s); assert(ep)
 #endif
-PERL_CALLCONV bool	Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el);
+PERL_STATIC_INLINE bool	Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el);
 #define PERL_ARGS_ASSERT_IS_UTF8_STRING_LOCLEN	\
 	assert(s)
 PERL_CALLCONV bool	Perl_is_utf8_upper(pTHX_ const U8 *p)
@@ -1616,6 +1624,11 @@ PERL_CALLCONV bool	Perl_is_utf8_upper(pTHX_ const U8 *p)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_UTF8_UPPER	\
 	assert(p)
+
+PERL_STATIC_INLINE bool	S_is_utf8_valid_partial_char(const U8 * const s, const U8 * const e)
+			__attribute__pure__;
+#define PERL_ARGS_ASSERT_IS_UTF8_VALID_PARTIAL_CHAR	\
+	assert(s); assert(e)
 
 PERL_CALLCONV bool	Perl_is_utf8_xdigit(pTHX_ const U8 *p)
 			__attribute__deprecated__
@@ -3446,13 +3459,13 @@ PERL_CALLCONV U8*	Perl_utf16_to_utf8(pTHX_ U8* p, U8 *d, I32 bytelen, I32 *newle
 PERL_CALLCONV U8*	Perl_utf16_to_utf8_reversed(pTHX_ U8* p, U8 *d, I32 bytelen, I32 *newlen);
 #define PERL_ARGS_ASSERT_UTF16_TO_UTF8_REVERSED	\
 	assert(p); assert(d); assert(newlen)
-PERL_CALLCONV IV	Perl_utf8_distance(pTHX_ const U8 *a, const U8 *b)
+PERL_STATIC_INLINE IV	Perl_utf8_distance(pTHX_ const U8 *a, const U8 *b)
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 #define PERL_ARGS_ASSERT_UTF8_DISTANCE	\
 	assert(a); assert(b)
 
-PERL_CALLCONV U8*	Perl_utf8_hop(const U8 *s, SSize_t off)
+PERL_STATIC_INLINE U8*	Perl_utf8_hop(const U8 *s, SSize_t off)
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 #define PERL_ARGS_ASSERT_UTF8_HOP	\
@@ -3503,9 +3516,11 @@ PERL_CALLCONV U8*	Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv);
 PERL_CALLCONV U8*	Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags);
 #define PERL_ARGS_ASSERT_UVUNI_TO_UTF8_FLAGS	\
 	assert(d)
-PERL_CALLCONV UV	Perl_valid_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen);
+PERL_STATIC_INLINE UV	Perl_valid_utf8_to_uvchr(const U8 *s, STRLEN *retlen)
+			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_VALID_UTF8_TO_UVCHR	\
 	assert(s)
+
 PERL_CALLCONV UV	Perl_valid_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
 			__attribute__deprecated__;
 #define PERL_ARGS_ASSERT_VALID_UTF8_TO_UVUNI	\
@@ -3792,10 +3807,11 @@ STATIC SV *	S_incpush_if_exists(pTHX_ AV *const av, SV *dir, SV *const stem);
 #  endif
 #endif
 #if !defined(PERL_NO_INLINE_FUNCTIONS)
-PERL_STATIC_INLINE STRLEN	S__is_utf8_char_slow(const U8 *s, const U8 *e)
-			__attribute__warn_unused_result__;
+PERL_CALLCONV STRLEN	Perl__is_utf8_char_slow(const U8 * const s, const STRLEN len)
+			__attribute__warn_unused_result__
+			__attribute__pure__;
 #define PERL_ARGS_ASSERT__IS_UTF8_CHAR_SLOW	\
-	assert(s); assert(e)
+	assert(s)
 
 PERL_STATIC_INLINE void	S_append_utf8_from_native_byte(const U8 byte, U8** dest);
 #define PERL_ARGS_ASSERT_APPEND_UTF8_FROM_NATIVE_BYTE	\
