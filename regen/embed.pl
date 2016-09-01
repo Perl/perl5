@@ -481,9 +481,11 @@ END
 
 for $sym (@globvar) {
     print $em "#ifdef OS2\n" if $sym eq 'sh_path';
+    print $em "#ifdef __VMS\n" if $sym eq 'perllib_sep';
     print $em multon($sym,   'G','my_vars->');
     print $em multon("G$sym",'', 'my_vars->');
     print $em "#endif\n" if $sym eq 'sh_path';
+    print $em "#endif\n" if $sym eq 'perllib_sep';
 }
 
 print $em <<'END';

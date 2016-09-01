@@ -149,6 +149,8 @@ END_EXTERN_C
 #define PL_perlio_fd_refcnt_size	(*Perl_Gperlio_fd_refcnt_size_ptr(NULL))
 #undef  PL_perlio_mutex
 #define PL_perlio_mutex		(*Perl_Gperlio_mutex_ptr(NULL))
+#undef  PL_perllib_sep
+#define PL_perllib_sep		(*Perl_Gperllib_sep_ptr(NULL))
 #undef  PL_ppaddr
 #define PL_ppaddr		(*Perl_Gppaddr_ptr(NULL))
 #undef  PL_sh_path

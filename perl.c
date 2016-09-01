@@ -4655,8 +4655,8 @@ S_init_perllib(pTHX)
 #if defined(DOSISH) || defined(__SYMBIAN32__)
 #    define PERLLIB_SEP ';'
 #else
-#  if defined(VMS)
-#    define PERLLIB_SEP '|'
+#  if defined(__VMS)
+#    define PERLLIB_SEP PL_perllib_sep
 #  else
 #    define PERLLIB_SEP ':'
 #  endif

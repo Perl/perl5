@@ -305,9 +305,17 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item VMS
 
-XXX
+=over 4
+
+=item *
+
+The path separator for the C<PERL5LIB> and C<PERLLIB> environment entries is
+now a colon (C<:>) when running under a Unix shell. There is no change when
+running under DCL (it's still C<|>).
+
+=back
 
 =back
 

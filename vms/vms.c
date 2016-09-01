@@ -13986,6 +13986,9 @@ vmsperl_set_features(void)
 	 vms_unlink_all_versions = 0;
     }
 
+    /* The path separator in PERL5LIB is '|' unless running under a Unix shell. */
+    PL_perllib_sep = '|';
+
     /* Detect running under GNV Bash or other UNIX like shell */
     gnv_unix_shell = 0;
     status = simple_trnlnm("GNV$UNIX_SHELL", val_str, sizeof(val_str));
@@ -14000,6 +14003,7 @@ vmsperl_set_features(void)
 	 /* Reverse default ordering of PERL_ENV_TABLES. */
 	 defenv[0] = &crtlenvdsc;
 	 defenv[1] = &fildevdsc;
+	 PL_perllib_sep = ':';
     }
     /* Some reasonable defaults that are not CRTL defaults */
     set_feature_default("DECC$EFS_CASE_PRESERVE", 1);

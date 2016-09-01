@@ -414,6 +414,10 @@
 #define PL_Gperlio_fd_refcnt_size	(my_vars->Gperlio_fd_refcnt_size)
 #define PL_perlio_mutex		(my_vars->Gperlio_mutex)
 #define PL_Gperlio_mutex	(my_vars->Gperlio_mutex)
+#ifdef __VMS
+#define PL_perllib_sep		(my_vars->Gperllib_sep)
+#define PL_Gperllib_sep		(my_vars->Gperllib_sep)
+#endif
 #define PL_ppaddr		(my_vars->Gppaddr)
 #define PL_Gppaddr		(my_vars->Gppaddr)
 #ifdef OS2

@@ -206,6 +206,7 @@ if ($ARGS{PLATFORM} ne 'os2') {
         ++$skip{Perl_my_symlink} unless $Config{d_symlink};
     } else {
 	++$skip{PL_statusvalue_vms};
+	++$skip{PL_perllib_sep};
 	if ($ARGS{PLATFORM} ne 'aix') {
 	    ++$skip{$_} foreach qw(
 				PL_DBcv
