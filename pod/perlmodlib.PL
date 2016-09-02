@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-$ENV{LC_ALL} = 'C';
+local $ENV{LC_ALL} = 'C';
 
 my $Quiet;
 @ARGV = grep { not($_ eq '-q' and $Quiet = 1) } @ARGV;
