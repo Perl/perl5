@@ -1588,6 +1588,10 @@ not very widely implemented:
     addr        address of faulting instruction or memory
                 reference for SIGILL, SIGFPE, SIGSEGV or SIGBUS
 
+Additional non-standard fields include:
+
+    fd          file descriptor number for SIGPOLL
+
 A third argument is also passed to the handler, which contains a copy
 of the raw binary contents of the C<siginfo> structure: if a system has
 some non-POSIX fields, this third argument is where to C<unpack()> them

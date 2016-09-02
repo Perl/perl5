@@ -3417,6 +3417,9 @@ Perl_sighandler(int sig)
 #ifdef HAS_SIGINFO_SI_BAND
 		   (void)hv_stores(sih, "band",       newSViv(sip->si_band));
 #endif
+#ifdef HAS_SIGINFO_SI_FD
+		   (void)hv_stores(sih, "fd",         newSViv(sip->si_fd));
+#endif
 		   EXTEND(SP, 2);
 		   PUSHs(rv);
 		   mPUSHp((char *)sip, sizeof(*sip));
