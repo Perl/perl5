@@ -103,6 +103,9 @@ the first one required manual backporting (available on request).
 
 <div><h3>Documentation Fixes</h3>
 
+<commit votes="jkeenan" id="177f0db9b219c09ca9541c325f9309b8cca12ac4" desc="perlfunc: provide link for one instance of 'eval' under 'die' (RT #129168)"/>
+<commit votes="jkeenan" id="7c280bee056f2462f4b4aa2150a160fb9176601e" desc="perlfunc: correction to 'map' documentation (RT #129169)"/>
+
 </div>
 
 </data>
