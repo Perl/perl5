@@ -1987,6 +1987,37 @@ PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 	    SETERRNO(EINVAL, LIB_INVARG);
 	    return -1;
 	}
+#ifdef EBCDIC
+	{
+        /* The mode variable contains one positional parameter followed by
+         * optional keyword parameters.  The positional parameters must be
+         * passed as lowercase characters.  The keyword parameters can be
+         * passed in mixed case. They must be separated by commas. Only one
+         * instance of a keyword can be specified.  */
+	int comma = 0;
+	while (*mode) {
+	    switch (*mode++) {
+	    case '+':
+		if(!comma)
+		  l->flags |= PERLIO_F_CANREAD | PERLIO_F_CANWRITE;
+		break;
+	    case 'b':
+		if(!comma)
+		  l->flags &= ~PERLIO_F_CRLF;
+		break;
+	    case 't':
+		if(!comma)
+		  l->flags |= PERLIO_F_CRLF;
+		break;
+	    case ',':
+		comma = 1;
+		break;
+	    default:
+		break;
+	    }
+	}
+	}
+#else
 	while (*mode) {
 	    switch (*mode++) {
 	    case '+':
@@ -2003,6 +2034,7 @@ PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 		return -1;
 	    }
 	}
+#endif
     }
     else {
 	if (l->next) {
