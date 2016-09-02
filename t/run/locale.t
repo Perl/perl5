@@ -358,7 +358,7 @@ EOF
             use 5.008;
             print setlocale(LC_NUMERIC);
 EOF
-	 "C", { },
+	 "C", { stderr => 'devnull' },
          "No compile error on v-strings when setting the locale to non-dot radix at compile time when default environment has non-dot radix");
     }
 
@@ -377,7 +377,7 @@ EOF
             }
             print \$i, "\n";
 EOF
-            "1,5\n1.5", {}, "Radix print properly in locale scope, and without");
+            "1,5\n1.5", { stderr => 'devnull' }, "Radix print properly in locale scope, and without");
 
         fresh_perl_is(<<"EOF",
             my \$i = 1.5;   # Should be exactly representable as a base 2
@@ -389,7 +389,7 @@ EOF
             \$i += 1;
             print \$i, "\n";
 EOF
-            "1,5\n2,5", {}, "Can do math when radix is a comma"); # [perl 115800]
+            "1,5\n2,5", { stderr => 'devnull' }, "Can do math when radix is a comma"); # [perl 115800]
 
         unless ($have_strtod) {
             skip("no strtod()", 1);
@@ -402,7 +402,7 @@ EOF
                 \$one_point_5 =~ s/0+\$//;  # Remove any trailing zeros
                 print \$one_point_5, "\n";
 EOF
-            "1.5", {}, "POSIX::strtod() uses underlying locale");
+            "1.5", { stderr => 'devnull' }, "POSIX::strtod() uses underlying locale");
         }
     }
 } # SKIP
@@ -415,7 +415,7 @@ EOF
                 print "h" =~ /[g\\w]/i || 0;
                 print "\\n";
 EOF
-            1, {}, "/il matching of [bracketed] doesn't skip POSIX class if fails individ char");
+            1, { stderr => 'devnull' }, "/il matching of [bracketed] doesn't skip POSIX class if fails individ char");
     }
 
     {
@@ -426,7 +426,7 @@ EOF
                 print "0" =~ /[\\d[:punct:]]/l || 0;
                 print "\\n";
 EOF
-            1, {}, "/l matching of [bracketed] doesn't skip non-first POSIX class");
+            1, { stderr => 'devnull' }, "/l matching of [bracketed] doesn't skip non-first POSIX class");
 
     }
 
