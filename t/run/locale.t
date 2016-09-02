@@ -28,7 +28,7 @@ my @locales = eval { find_locales( [ &LC_ALL, &LC_CTYPE, &LC_NUMERIC ],
 skip_all("no locales available") unless @locales;
 
 # reset the locale environment
-local @ENV{'LANG', (grep /^LC_/, keys %ENV)};
+delete local @ENV{'LANG', (grep /^LC_/, keys %ENV)};
 
 plan tests => &last;
 
