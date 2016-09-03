@@ -372,7 +372,7 @@ L</is_utf8_string_loc>().
 =cut
 */
 
-bool
+PERL_STATIC_INLINE bool
 Perl_is_utf8_string(const U8 *s, STRLEN len)
 {
     /* This is now marked pure in embed.fnc, because isUTF8_CHAR now is pure.
@@ -417,7 +417,7 @@ See also L</is_utf8_string_loc>() and L</is_utf8_string>().
 =cut
 */
 
-bool
+PERL_STATIC_INLINE bool
 Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 {
     const U8* const send = s + (len ? len : strlen((const char *)s));
@@ -527,7 +527,7 @@ returned.
 
 =cut
 */
-bool
+PERL_STATIC_INLINE bool
 S_is_utf8_valid_partial_char(const U8 * const s, const U8 * const e)
 {
 
