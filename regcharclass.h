@@ -183,7 +183,7 @@
 	: ( ( ( ( 0xF4 == ((U8*)s)[0] ) && ( 0x8F == ((U8*)s)[1] ) ) && ( 0xBF == ((U8*)s)[2] ) ) && ( ( ((U8*)s)[3] & 0xFE ) == 0xBE ) ) ? 4 : 0 ) : 0 )
 
 /*
-	SURROGATE: Surrogate characters
+	SURROGATE: Surrogate code points
 
 	\p{_Perl_Surrogate}
 */
@@ -780,7 +780,7 @@
 	: ( ( ( ( ( 0xEE == ((U8*)s)[0] ) && ( 0x42 == ((U8*)s)[1] ) ) && ( 0x73 == ((U8*)s)[2] ) ) && ( 0x73 == ((U8*)s)[3] ) ) && ( ( ((U8*)s)[4] & 0xFE ) == 0x72 ) ) ? 5 : 0 ) : 0 )
 
 /*
-	SURROGATE: Surrogate characters
+	SURROGATE: Surrogate code points
 
 	\p{_Perl_Surrogate}
 */
@@ -1392,7 +1392,7 @@
 	: ( ( ( ( ( 0xEE == ((U8*)s)[0] ) && ( 0x42 == ((U8*)s)[1] ) ) && ( 0x72 == ((U8*)s)[2] ) ) && ( 0x72 == ((U8*)s)[3] ) ) && ( 0x71 == ((U8*)s)[4] || 0x72 == ((U8*)s)[4] ) ) ? 5 : 0 ) : 0 )
 
 /*
-	SURROGATE: Surrogate characters
+	SURROGATE: Surrogate code points
 
 	\p{_Perl_Surrogate}
 */
@@ -1898,6 +1898,6 @@
  * 5c7eb94310e2aaa15702fd6bed24ff0e7ab5448f9a8231d8c49ca96c9e941089 lib/unicore/mktables
  * cdecb300baad839a6f62791229f551a4fa33f3cbdca08e378dc976466354e778 lib/unicore/version
  * 913d2f93f3cb6cdf1664db888bf840bc4eb074eef824e082fceda24a9445e60c regen/charset_translations.pl
- * 863deb27147ca9d19f764755eafddf26d6227b007b1f5b6b87662bcb46cf491c regen/regcharclass.pl
+ * 76075c280f7e89bb2b15672be32b6cf0375bc68ef8e557c17b2e8e9d97fa86b2 regen/regcharclass.pl
  * 393f8d882713a3ba227351ad0f00ea4839fda74fcf77dcd1cdf31519925adba5 regen/regcharclass_multi_char_folds.pl
  * ex: set ro: */

@@ -1633,7 +1633,7 @@ NONCHAR: Non character code points
 => UTF8 :safe
 \p{_Perl_Nchar}
 
-SURROGATE: Surrogate characters
+SURROGATE: Surrogate code points
 => UTF8 :safe
 \p{_Perl_Surrogate}
 
