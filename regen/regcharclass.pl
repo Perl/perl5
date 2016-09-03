@@ -1637,35 +1637,29 @@ SURROGATE: Surrogate code points
 => UTF8 :safe
 \p{_Perl_Surrogate}
 
-# This program was run with this enabled, and the results copied to utf8.h;
-# then this was commented out because it takes so long to figure out these 2
-# million code points.  The results would not change unless utf8.h decides it
-# wants a maximum other than 4 bytes, or this program creates better
+# This program was run with this enabled, and the results copied to utf8.h and
+# utfebcdic.h; then this was commented out because it takes so long to figure
+# out these 2 million code points.  The results would not change unless utf8.h
+# decides it wants a different maximum, or this program creates better
 # optimizations.  Trying with 5 bytes used too much memory to calculate.
 #
 # We don't generate code for invariants here because the EBCDIC form is too
 # complicated and would slow things down; instead the user should test for
 # invariants first.
 #
-# NOTE: The number of bytes generated here must match the value in
-# IS_UTF8_CHAR_FAST in utf8.h
+# 0x1FFFFF was chosen because for both UTF-8 and UTF-EBCDIC, its start byte
+# is the same as 0x10FFFF, and it includes all the above-Unicode code points
+# that have that start byte.  In other words, it is the natural stopping place
+# that includes all Unicode code points.
 #
-#UTF8_CHAR: Matches legal UTF-8 encoded characters from 2 through 4 bytes
+#UTF8_CHAR: Matches legal UTF-8 variant code points up through the 0x1FFFFFF
 #=> UTF8 :no_length_checks only_ascii_platform
 #0x80 - 0x1FFFFF
 
-# This hasn't been commented out, but the number of bytes it works on has been
-# cut down to 3, so it doesn't cover the full legal Unicode range.  Making it
-# 5 bytes would cover beyond the full range, but takes quite a bit of time and
-# memory to calculate.  The generated table varies depending on the EBCDIC
-# code page.
+#UTF8_CHAR: Matches legal UTF-EBCDIC variant code points up through 0x1FFFFFF
+#=> UTF8 :no_length_checks only_ebcdic_platform
+#0xA0 - 0x1FFFFF
 
-# NOTE: The number of bytes generated here must match the value in
-# IS_UTF8_CHAR_FAST in utf8.h
-#
-UTF8_CHAR: Matches legal UTF-EBCDIC encoded characters from 2 through 3 bytes
-=> UTF8 :no_length_checks only_ebcdic_platform
-0xA0 - 0x3FFF
 
 QUOTEMETA: Meta-characters that \Q should quote
 => high :fast
