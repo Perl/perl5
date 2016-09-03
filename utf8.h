@@ -238,9 +238,17 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * being encoded in UTF-8 or not? */
 #define OFFUNI_IS_INVARIANT(cp)     isASCII(cp)
 
-/* Is the representation of the code point 'cp' the same regardless of
- * being encoded in UTF-8 or not?  'cp' is native if < 256; Unicode otherwise
- * */
+/*
+=for apidoc Am|bool|UVCHR_IS_INVARIANT|UV cp
+
+Evaluates to 1 if the representation of code point C<cp> is the same whether or
+not it is encoded in UTF-8; otherwise evaluates to 0.  UTF-8 invariant
+characters can be copied as-is when converting to/from UTF-8, saving time.
+C<cp> is Unicode if above 255; otherwise is platform-native.
+
+=cut
+ */
+
 #define UVCHR_IS_INVARIANT(cp)      OFFUNI_IS_INVARIANT(cp)
 
 /* This defines the bits that are to be in the continuation bytes of a multi-byte
@@ -487,13 +495,27 @@ only) byte is pointed to by C<s>.
  * through 255 */
 #define UNI_IS_INVARIANT(cp)   UVCHR_IS_INVARIANT(cp)
 
-/* Is the byte 'c' the same character when encoded in UTF-8 as when not.  This
- * works on both UTF-8 encoded strings and non-encoded, as it returns TRUE in
- * each for the exact same set of bit patterns.  It is valid on a subset of
- * what UVCHR_IS_INVARIANT is valid on, so can just use that; and the compiler
- * should optimize out anything extraneous given the implementation of the
- * latter.  The |0 makes sure this isn't mistakenly called with a ptr argument.
- * */
+/*
+=for apidoc Am|bool|UTF8_IS_INVARIANT|char c
+
+Evaluates to 1 if the byte C<c> represents the same character when encoded in
+UTF-8 as when not; otherwise evaluates to 0.  UTF-8 invariant characters can be
+copied as-is when converting to/from UTF-8, saving time.
+
+In spite of the name, this macro gives the correct result if the input string
+from which C<c> comes is not encoded in UTF-8.
+
+See C<L</UVCHR_IS_INVARIANT>> for checking if a UV is invariant.
+
+=cut
+
+The reason it works on both UTF-8 encoded strings and non-UTF-8 encoded, is
+that it returns TRUE in each for the exact same set of bit patterns.  It is
+valid on a subset of what UVCHR_IS_INVARIANT is valid on, so can just use that;
+and the compiler should optimize out anything extraneous given the
+implementation of the latter.  The |0 makes sure this isn't mistakenly called
+with a ptr argument.
+*/
 #define UTF8_IS_INVARIANT(c)	UVCHR_IS_INVARIANT((c) | 0)
 
 /* Like the above, but its name implies a non-UTF8 input, which as the comments
