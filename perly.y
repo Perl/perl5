@@ -788,7 +788,9 @@ subsignature:	'('
                             UNOP_AUX_item *aux;
                             OP            *check;
 
-                            assert(FEATURE_SIGNATURES_IS_ENABLED);
+                            if (!parser->error_count) {
+                                assert(FEATURE_SIGNATURES_IS_ENABLED);
+                            }
 
                             /* We shouldn't get here otherwise */
                             Perl_ck_warner_d(aTHX_
