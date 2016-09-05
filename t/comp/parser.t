@@ -544,7 +544,10 @@ eval "grep+grep";
 eval 'BEGIN {$^H=-1} \eval=time';
 
 # Used to fail an assertion [perl #129073]
-eval '${p{};sub p}()';
+{
+ local $SIG{__WARN__} = sub{};
+ eval '${p{};sub p}()';
+}
 
 # RT #124207 syntax error during stringify can leave stringify op
 # with multiple children and assertion failures
