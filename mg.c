@@ -1212,8 +1212,8 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 		char tmpbuf[256];
 		Stat_t st;
 		I32 i;
-#ifdef VMS  /* Hmm.  How do we get $Config{path_sep} from C? */
-		const char path_sep = '|';
+#ifdef __VMS  /* Hmm.  How do we get $Config{path_sep} from C? */
+		const char path_sep = PL_perllib_sep;
 #else
 		const char path_sep = ':';
 #endif
@@ -1221,8 +1221,11 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 			     s, strend, path_sep, &i);
 		s++;
 		if (i >= (I32)sizeof tmpbuf   /* too long -- assume the worst */
-#ifdef VMS
-		      || !strchr(tmpbuf, ':') /* no colon thus no device name -- assume relative path */
+#ifdef __VMS
+		      /* no colon thus no device name -- assume relative path */
+		      || (PL_perllib_sep != ':' && !strchr(tmpbuf, ':'))
+		      /* Using Unix separator, e.g. under bash, so act line Unix */
+		      || (PL_perllib_sep == ':' && *tmpbuf != '/')
 #else
 		      || *tmpbuf != '/'       /* no starting slash -- assume relative path */
 #endif
