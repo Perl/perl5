@@ -1936,7 +1936,12 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	do_hv_dump(level, file, "  COMP_STASH", CvSTASH(sv));
 	if (!CvISXSUB(sv)) {
 	    if (CvSTART(sv)) {
-		Perl_dump_indent(aTHX_ level, file,
+                if (CvSLABBED(sv))
+                    Perl_dump_indent(aTHX_ level, file,
+				 "  SLAB = 0x%"UVxf"\n",
+				 PTR2UV(CvSTART(sv)));
+                else
+                    Perl_dump_indent(aTHX_ level, file,
 				 "  START = 0x%"UVxf" ===> %"IVdf"\n",
 				 PTR2UV(CvSTART(sv)),
 				 (IV)sequence_num(CvSTART(sv)));
