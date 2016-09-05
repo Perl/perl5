@@ -3272,7 +3272,8 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
         o->op_flags |= OPf_MOD;
 
     if (type == OP_AASSIGN || type == OP_SASSIGN)
-	o->op_flags |= OPf_SPECIAL|OPf_REF;
+	o->op_flags |= OPf_SPECIAL
+		      |(o->op_type == OP_ENTERSUB ? 0 : OPf_REF);
     else if (!type) { /* local() */
 	switch (localize) {
 	case 1:
@@ -3288,7 +3289,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	}
     }
     else if (type != OP_GREPSTART && type != OP_ENTERSUB
-             && type != OP_LEAVESUBLV)
+             && type != OP_LEAVESUBLV && o->op_type != OP_ENTERSUB)
 	o->op_flags |= OPf_REF;
     return o;
 }
