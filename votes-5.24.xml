@@ -107,7 +107,7 @@ the first one required manual backporting (available on request).
 <commit votes="jhi" id="1bee6aebe39da1a4d681e8ea1b9d0329898a8407" ticket="" desc="Test data mistake was masked by mistaken fractional matching"/>
 
 <commit votes="khw" id="1d4ea287e9a924ad1eaef98145b6d6c3b6219e80" ticket="128929" desc="Add casts to silence new in 5.23 Win32 warnings"/>
-<commit votes="khw" id="c333712c4a550eeb3146b964d8508f772e294a49" ticket="129122" desc="regex sets compilation error"/>
+<commit votes="khw sprout" id="c333712c4a550eeb3146b964d8508f772e294a49" ticket="129122" desc="regex sets compilation error"/>
 </div>
 
 <div><h3>New Feature Fixes</h3>
