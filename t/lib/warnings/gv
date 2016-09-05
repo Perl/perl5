@@ -43,6 +43,8 @@ sub Other::AUTOLOAD { 1 } sub Other::fred {}
 @ISA = qw(Other) ;
 use warnings 'deprecated' ;
 fred() ;
+my $x = \&barney;
+(bless[])->barney;
 EXPECT
 Use of inherited AUTOLOAD for non-method main::fred() is deprecated at - line 5.
 ########
