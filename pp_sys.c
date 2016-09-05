@@ -3635,6 +3635,7 @@ PP(pp_chdir)
 	HV * const table = GvHVn(PL_envgv);
 	SV **svp;
 
+        EXTEND(SP, 1);
         if (    (svp = hv_fetchs(table, "HOME", FALSE))
              || (svp = hv_fetchs(table, "LOGDIR", FALSE))
 #ifdef VMS
