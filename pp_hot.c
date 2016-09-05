@@ -3817,7 +3817,10 @@ PP(pp_entersub)
 	else {
           try_autoload:
 	    autogv = gv_autoload_pvn(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
-				   GvNAMEUTF8(gv) ? SVf_UTF8 : 0);
+                                     (GvNAMEUTF8(gv) ? SVf_UTF8 : 0)
+                                    |(PL_op->op_flags & OPf_REF
+                                       ? GV_AUTOLOAD_ISMETHOD
+                                       : 0));
             cv = autogv ? GvCV(autogv) : NULL;
 	}
 	if (!cv) {
