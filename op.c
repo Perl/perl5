@@ -8290,9 +8290,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
         if ( ps_utf8 ) SvUTF8_on(MUTABLE_SV(cv));
     }
 
-    if (!block)
-	goto attrs;
-
+    if (block) {
     /* If we assign an optree to a PVCV, then we've defined a subroutine that
        the debugger could be able to set a breakpoint in, so signal to
        pp_entereval that it should not throw away any saved lines at scope
@@ -8317,6 +8315,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     /* now that optimizer has done its work, adjust pad values */
 
     pad_tidy(CvCLONE(cv) ? padtidy_SUBCLONE : padtidy_SUB);
+    }
 
   attrs:
     if (attrs) {
@@ -8767,9 +8766,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
         if ( ps_utf8 ) SvUTF8_on(MUTABLE_SV(cv));
     }
 
-    if (!block)
-	goto attrs;
-
+    if (block) {
     /* If we assign an optree to a PVCV, then we've defined a subroutine that
        the debugger could be able to set a breakpoint in, so signal to
        pp_entereval that it should not throw away any saved lines at scope
@@ -8794,6 +8791,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     /* now that optimizer has done its work, adjust pad values */
 
     pad_tidy(CvCLONE(cv) ? padtidy_SUBCLONE : padtidy_SUB);
+    }
 
   attrs:
     if (attrs) {
