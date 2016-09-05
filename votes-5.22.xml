@@ -25,6 +25,8 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Security Fixes</h3>
 
+<commit votes="sprout" id="ba0a4150f6f1604df236035adf6df18bd43de88e" ticket="" desc="Fix checks for tainted dir in $ENV{PATH}"/>
+
 </div>
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
@@ -33,6 +35,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="sprout" id="d35c1b5e43e773f353239d9182ddccb41cdab3d6" ticket="128740" desc="[perl #128740] Check for null in pp_ghostent et al."/>
 <commit votes="sprout" id="bf8a9a15ea4a7b7ebcde5ba48aafe397c549eff2" ticket="128951" desc="[perl #128951] Fix ASan error with @{\327"/>
+
+<commit votes="sprout" id="9bde56224e82f20e7a65b3469b1ffb6b9f6d4df8" ticket="129196" desc="[perl #129196] Crash/bad read with ‘evalbytes S’"/>
+<commit votes="sprout" id="a6128716d2cc20147851e0a37768376647bd3242" ticket="129196" desc="Regression test for RT #129196"/>
 
 <commit votes="" id="" ticket="123878" desc=""/>
 
