@@ -5320,6 +5320,13 @@ test_isUTF8_POSSIBLY_PROBLEMATIC(char ch)
     OUTPUT:
         RETVAL
 
+STRLEN
+test_isUTF8_CHAR(char *s, STRLEN len)
+    CODE:
+        RETVAL = isUTF8_CHAR((U8 *) s, (U8 *) s + len);
+    OUTPUT:
+        RETVAL
+
 UV
 test_toLOWER(UV ord)
     CODE:

@@ -391,13 +391,35 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     undef @warnings;
 
     my $display_flags = sprintf "0x%x", $this_utf8_flags;
-    my $ret_ref = test_utf8n_to_uvchr($bytes, $len, $this_utf8_flags);
     my $display_bytes = display_bytes($bytes);
+    my $ret_ref = test_utf8n_to_uvchr($bytes, $len, $this_utf8_flags);
     is($ret_ref->[0], $n, "Verify utf8n_to_uvchr($display_bytes, $display_flags) returns $hex_n");
     is($ret_ref->[1], $len, "Verify utf8n_to_uvchr() for $hex_n returns expected length");
 
     unless (is(scalar @warnings, 0,
                "Verify utf8n_to_uvchr() for $hex_n generated no warnings"))
+    {
+        diag "The warnings were: " . join(", ", @warnings);
+    }
+
+    undef @warnings;
+
+    my $ret = test_isUTF8_CHAR($bytes, $len);
+    is($ret, $len, "Verify isUTF8_CHAR($display_bytes) returns expected length");
+
+    unless (is(scalar @warnings, 0,
+               "Verify isUTF8_CHAR() for $hex_n generated no warnings"))
+    {
+        diag "The warnings were: " . join(", ", @warnings);
+    }
+
+    undef @warnings;
+
+    $ret = test_isUTF8_CHAR($bytes, $len - 1);
+    is($ret, 0, "Verify isUTF8_CHAR() with too short length parameter returns 0");
+
+    unless (is(scalar @warnings, 0,
+               "Verify isUTF8_CHAR() generated no warnings"))
     {
         diag "The warnings were: " . join(", ", @warnings);
     }
@@ -430,7 +452,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
 
     undef @warnings;
 
-    my $ret = test_uvchr_to_utf8_flags($n, $this_uvchr_flags);
+    $ret = test_uvchr_to_utf8_flags($n, $this_uvchr_flags);
     ok(defined $ret, "Verify uvchr_to_utf8_flags($hex_n, $display_flags) returned success");
     is($ret, $bytes, "Verify uvchr_to_utf8_flags($hex_n, $display_flags) returns correct bytes");
 
@@ -496,6 +518,17 @@ foreach my $test (@malformations) {
     my ($testname, $bytes, $length, $allow_flags, $allowed_uv, $expected_len, $message ) = @$test;
 
     next if ! ok(length($bytes) >= $length, "$testname: Make sure won't read beyond buffer: " . length($bytes) . " >= $length");
+
+    undef @warnings;
+
+    my $ret = test_isUTF8_CHAR($bytes, $length);
+    is($ret, 0, "$testname: isUTF8_CHAR returns 0");
+    unless (is(scalar @warnings, 0,
+               "$testname: isUTF8_CHAR() generated no warnings"))
+    {
+        diag "The warnings were: " . join(", ", @warnings);
+    }
+
 
     # Test what happens when this malformation is not allowed
     undef @warnings;
@@ -930,6 +963,24 @@ foreach my $test (@tests) {
 
     my $length = length $bytes;
     my $will_overflow = $testname =~ /overflow/;
+
+    {
+        use warnings;
+        undef @warnings;
+        my $ret = test_isUTF8_CHAR($bytes, $length);
+        if ($will_overflow) {
+            is($ret, 0, "isUTF8_CHAR() $testname: returns 0");
+        }
+        else {
+            is($ret, $length,
+               "isUTF8_CHAR() $testname: returns expected length: $length");
+        }
+        unless (is(scalar @warnings, 0,
+                "isUTF8_CHAR() $testname: generated no warnings"))
+        {
+            diag "The warnings were: " . join(", ", @warnings);
+        }
+    }
 
     # This is more complicated than the malformations tested earlier, as there
     # are several orthogonal variables involved.  We test all the subclasses
