@@ -447,4 +447,25 @@ package P126257 {
     ::is $@, "", "RT 126257 sub";
 }
 
+# RT #129099
+# Setting an attribute on a BEGIN prototype causes
+#       BEGIN { require "attributes"; ... }
+# to be compiled, which caused problems with ops being prematurely
+# freed when CvSTART was transferred from the old BEGIN to the new BEGIN
+
+is runperl(
+       prog => 'package Foo; sub MODIFY_CODE_ATTRIBUTES {()} '
+             . 'sub BEGIN :Foo; print q{OK}',
+       stderr => 1,
+   ),
+   "OK",
+  'RT #129099 BEGIN';
+is runperl(
+       prog => 'package Foo; sub MODIFY_CODE_ATTRIBUTES {()} '
+             . 'no warnings q{prototype}; sub BEGIN() :Foo; print q{OK}',
+       stderr => 1,
+   ),
+   "OK",
+  'RT #129099 BEGIN()';
+
 done_testing();
