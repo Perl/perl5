@@ -2498,7 +2498,7 @@ $     EOD
 $   ENDIF
 $   IF F$TYPE(privlib) .NES. ""
 $   THEN dflt = privlib
-$   ELSE dflt = "''vms_prefix':[lib]"
+$   ELSE dflt = "/''vms_prefix'/lib"
 $   ENDIF
 $   rp = "Pathname where the private library files will reside? " 
 $   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
@@ -2567,7 +2567,7 @@ $     EOD
 $   ENDIF
 $   IF F$TYPE(archlib) .NES. ""
 $   THEN dflt = archlib
-$   ELSE dflt = privlib - "]" + "." + archname + "." + version + "]"
+$   ELSE dflt = privlib + "/" + archname + "/" + version
 $   ENDIF
 $   rp = "Where do you want to put the public architecture-dependent libraries? "
 $   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
@@ -2596,7 +2596,7 @@ $     EOD
 $   ENDIF
 $   IF F$TYPE(sitelib) .NES. ""
 $   THEN dflt = sitelib
-$   ELSE dflt = privlib - "]" + ".SITE_PERL]"
+$   ELSE dflt = privlib + "/site_perl"
 $   ENDIF
 $   rp = "Pathname for the site-specific library files? "
 $   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
@@ -2614,7 +2614,7 @@ $     EOD
 $   ENDIF
 $   IF F$TYPE(sitearch) .NES. ""
 $   THEN dflt = sitearch
-$   ELSE dflt = sitelib - "]" + "." + archname + "]"
+$   ELSE dflt = sitelib + "/" + archname
 $   ENDIF
 $   rp = "Pathname for the site-specific architecture-dependent library files? "
 $   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
@@ -2626,7 +2626,6 @@ $!
 $!: determine where public executables go
 $   IF F$TYPE(bin) .NES. ""
 $   THEN dflt = bin
-$!   ELSE dflt = prefix - ".]" + ".BIN]"
 $   ELSE dflt = "/''vms_prefix'"
 $   ENDIF
 $   rp = "Pathname where the public executables will reside? "
@@ -2637,7 +2636,7 @@ $!
 $!: determine where add-on public executables go
 $   IF F$TYPE(sitebin) .NES. ""
 $   THEN dflt = sitebin
-$   ELSE dflt = "''vms_prefix':[bin.''archname']"
+$   ELSE dflt = "/''vms_prefix'/bin/''archname'"
 $   ENDIF
 $   rp = "Pathname where the add-on public executables should be installed? "
 $   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
@@ -2653,58 +2652,58 @@ $!: see what memory models we can support
 $!
 $ ELSE ! skipping "where install" questions, we must set some symbols
 $   IF F$TYPE(archlib).EQS."" THEN -
-      archlib="''vms_prefix':[lib.''archname'.''version']"
+      archlib="/''vms_prefix'/lib/''archname'/''version'"
 $   IF F$TYPE(bin) .EQS. "" THEN -
       bin="/''vms_prefix'"
 $   IF F$TYPE(privlib) .EQS. "" THEN -
-      privlib ="''vms_prefix':[lib]"
+      privlib ="/''vms_prefix'/lib"
 $   IF F$TYPE(sitearch) .EQS. "" THEN -
-      sitearch="''vms_prefix':[lib.site_perl.''archname']"
+      sitearch="/''vms_prefix'/lib/site_perl/''archname'"
 $   IF F$TYPE(sitelib) .EQS. "" THEN -
-      sitelib ="''vms_prefix':[lib.site_perl]"
+      sitelib ="/''vms_prefix'/lib/site_perl"
 $   IF F$TYPE(sitebin) .EQS. "" THEN -
-      sitebin="''vms_prefix':[bin.''archname']"
+      sitebin="/''vms_prefix'/bin/''archname'"
 $ ENDIF !%Config-I-VMS, skip "where install" questions
 $!
 $! These derived locations can be set whether we've opted to
 $! skip the where install questions or not.
 $!
 $ IF F$TYPE(archlibexp) .EQS. "" THEN -
-    archlibexp="''vms_prefix':[lib.''archname'.''version']"
+    archlibexp="/''vms_prefix'/lib/''archname'/''version'"
 $ IF F$TYPE(binexp) .EQS. "" THEN -
-    binexp ="''vms_prefix':[000000]"
+    binexp ="/''vms_prefix'"
 $ IF F$TYPE(builddir) .EQS. "" THEN -
-    builddir ="''vms_prefix':[000000]"
+    builddir ="/''vms_prefix'"
 $ IF F$TYPE(installarchlib) .EQS. "" THEN -
-    installarchlib="''vms_prefix':[lib.''archname'.''version']"
+    installarchlib="/''vms_prefix'/lib/''archname'/''version'"
 $ IF F$TYPE(installbin) .EQS. "" THEN -
-    installbin ="''vms_prefix':[000000]"
+    installbin ="/''vms_prefix'"
 $ IF F$TYPE(installscript) .EQS. "" THEN -
-    installscript ="''vms_prefix':[utils]"
+    installscript ="/''vms_prefix'/utils"
 $ IF F$TYPE(installman1dir) .EQS. "" THEN -
-    installman1dir ="''vms_prefix':[man.man1]"
+    installman1dir ="/''vms_prefix'/man/man1"
 $ IF F$TYPE(installman3dir) .EQS. "" THEN -
-    installman3dir ="''vms_prefix':[man.man3]"
+    installman3dir ="/''vms_prefix'/man/man3"
 $ IF F$TYPE(installprivlib) .EQS. "" THEN -
-    installprivlib ="''vms_prefix':[lib]"
+    installprivlib ="/''vms_prefix'/lib"
 $ IF F$TYPE(installsitearch) .EQS. "" THEN -
-    installsitearch="''vms_prefix':[lib.site_perl.''archname']"
+    installsitearch="/''vms_prefix'/lib/site_perl/''archname'"
 $ IF F$TYPE(installsitelib) .EQS. "" THEN -
-    installsitelib ="''vms_prefix':[lib.site_perl]"
+    installsitelib ="/''vms_prefix'/lib/site_perl"
 $ IF F$TYPE(oldarchlib) .EQS. "" THEN -
-    oldarchlib="''vms_prefix':[lib.''archname']"
+    oldarchlib="/''vms_prefix'/lib/''archname'"
 $ IF F$TYPE(oldarchlibexp) .EQS. "" THEN -
-    oldarchlibexp="''vms_prefix':[lib.''archname']"
+    oldarchlibexp="/''vms_prefix'/lib/''archname'"
 $ IF F$TYPE(privlibexp) .EQS. "" THEN -
-    privlibexp ="''vms_prefix':[lib]"
+    privlibexp ="/''vms_prefix'/lib"
 $ IF F$TYPE(scriptdir) .EQS. "" THEN -
-    scriptdir ="''vms_prefix':[utils]"
+    scriptdir ="/''vms_prefix'/utils"
 $ IF F$TYPE(sitearchexp) .EQS. "" THEN -
-    sitearchexp ="''vms_prefix':[lib.site_perl.''archname']"
+    sitearchexp ="/''vms_prefix'/lib/site_perl/''archname'"
 $ IF F$TYPE(sitelib_stem) .EQS. "" THEN -
-    sitelib_stem ="''vms_prefix':[lib.site_perl]"
+    sitelib_stem ="/''vms_prefix'/lib/site_perl"
 $ IF F$TYPE(sitelibexp) .EQS. "" THEN -
-    sitelibexp ="''vms_prefix':[lib.site_perl]"
+    sitelibexp ="/''vms_prefix'/lib/site_perl"
 $!
 $! determine whether to use malloc wrapping
 $ echo ""
@@ -6585,7 +6584,7 @@ $ WC "installbin='" + installbin + "'"
 $ WC "installman1dir='" + installman1dir + "'"
 $ WC "installman3dir='" + installman3dir + "'"
 $ WC "installprefix='" + vms_prefix + "'"
-$ WC "installprefixexp='" + vms_prefix + ":'"
+$ WC "installprefixexp='/" + vms_prefix + "'"
 $ WC "installprivlib='" + installprivlib + "'"
 $ WC "installscript='" + installscript + "'"
 $ WC "installsitearch='" + installsitearch + "'"
@@ -6678,7 +6677,7 @@ $ WC "perl_verb='" + perl_verb + "'"      ! VMS specific
 $ WC "pgflquota='" + pgflquota + "'"
 $ WC "pidtype='" + pidtype + "'"
 $ WC "prefix='" + vms_prefix + "'"
-$ WC "prefixexp='" + vms_prefix + ":'"
+$ WC "prefixexp='/" + vms_prefix + "'"
 $ WC "privlib='" + privlib + "'"
 $ WC "privlibexp='" + privlibexp + "'"
 $ WC "procselfexe=' '"
@@ -6748,7 +6747,7 @@ $ WC "sitelib='" + sitelib + "'"
 $ WC "sitelib_stem='" + sitelib_stem + "'"
 $ WC "sitelibexp='" + sitelibexp + "'"
 $ WC "siteprefix='" + vms_prefix + "'"
-$ WC "siteprefixexp='" + vms_prefix + ":'"
+$ WC "siteprefixexp='/" + vms_prefix + "'"
 $ WC "sizesize='" + sizesize + "'"
 $ WC "sizetype='size_t'"
 $ WC "so='" + so + "'"
