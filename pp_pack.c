@@ -2587,7 +2587,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		if (in_bytes) auv = auv % 0x100;
 		if (utf8) {
 		  W_utf8:
-		    if (cur > end) {
+		    if (cur >= end) {
 			*cur = '\0';
 			SvCUR_set(cat, cur - start);
 

@@ -12,7 +12,7 @@ my $no_endianness = $] > 5.009 ? '' :
 my $no_signedness = $] > 5.009 ? '' :
   "Signed/unsigned pack modifiers not available on this perl";
 
-plan tests => 14712;
+plan tests => 14713;
 
 use strict;
 use warnings qw(FATAL all);
@@ -2046,4 +2046,15 @@ ok(1, "argument underflow did not crash");
        "check pack H zero fills (utf8 none)");
     is(pack("H40", $up_nul), $twenty_nuls,
        "check pack H zero fills (utf8 source)");
+}
+
+{
+    # [perl #129149] the code below would write one past the end of the output
+    # buffer, only detected by ASAN, not by valgrind
+    $Config{ivsize} >= 8
+      or skip "[perl #129149] need 64-bit for this test", 1;
+    fresh_perl_is(<<'EOS', "ok\n", { stderr => 1 }, "pack W overflow");
+print pack("ucW", "0000", 0, 140737488355327) eq "\$,#`P,```\n\0\x{7fffffffffff}"
+ ? "ok\n" : "not ok\n";
+EOS
 }
