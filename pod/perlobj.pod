@@ -624,7 +624,7 @@ this idiom in the wild combined with a call to C<can>:
       $object->$meth();
   }
 
-=head3 Deferencing Method Call
+=head3 Dereferencing Method Call
 
 Perl also lets you use a dereferenced scalar reference in a method
 call. That's a mouthful, so let's look at some code:
