@@ -6,16 +6,20 @@
 # Alternatively, you can say the hell with this and use h2xs.
 
 use ExtUtils::MakeMaker;
+use ExtUtils::MM_Unix;
 eval 'use ExtUtils::MakeMaker::Coverage';
 
 $PACKAGE = 'XSLoader';
 ($PACKAGE_FILE = $PACKAGE) =~ s|::|/|g;
 $LAST_API_CHANGE = 0;
 
+$CURRENT_VERSION = ${$PACKAGE.'::VERSION'};
+$NEW_VERSION     = ExtUtils::MM_Unix->parse_version("XSLoader_pm.PL");
+
 eval "require $PACKAGE";
 
 unless ($@) { # Make sure we did find the module.
-    print <<"CHANGE_WARN" if ${$PACKAGE.'::VERSION'} < $LAST_API_CHANGE;
+    print <<"CHANGE_WARN" if $CURRENT_VERSION < $LAST_API_CHANGE;
 
 NOTE: There have been API changes between this version and any older
 than version $LAST_API_CHANGE!  Please read the Changes file if you
@@ -69,7 +73,7 @@ WriteMakefile(
         provides    => {
             'XSLoader'  => {
                 file        => 'XSLoader_pm.PL',
-                version     => ${$PACKAGE.'::VERSION'},
+                version     => $NEW_VERSION,
             },
         },
     },
