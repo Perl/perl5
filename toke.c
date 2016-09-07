@@ -5621,18 +5621,13 @@ Perl_yylex(pTHX)
 		sv = newSVpvn_flags(s, len, UTF ? SVf_UTF8 : 0);
 		if (*d == '(') {
 		    d = scan_str(d,TRUE,TRUE,FALSE,NULL);
-		    COPLINE_SET_FROM_MULTI_END;
 		    if (!d) {
-			/* MUST advance bufptr here to avoid bogus
-			   "at end of line" context messages from yyerror().
-			 */
-			PL_bufptr = s + len;
-			yyerror("Unterminated attribute parameter in attribute list");
 			if (attrs)
 			    op_free(attrs);
 			sv_free(sv);
-			return REPORT(0);	/* EOF indicator */
+                        Perl_croak(aTHX_ "Unterminated attribute parameter in attribute list");
 		    }
+		    COPLINE_SET_FROM_MULTI_END;
 		}
 		if (PL_lex_stuff) {
 		    sv_catsv(sv, PL_lex_stuff);
