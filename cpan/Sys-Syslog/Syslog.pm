@@ -15,7 +15,7 @@ require 5.005;
 
 
 {   no strict 'vars';
-    $VERSION = '0.34_01';
+    $VERSION = '0.35';
 
     %EXPORT_TAGS = (
         standard => [qw(openlog syslog closelog setlogmask)],
@@ -144,9 +144,9 @@ if ($^O eq "freebsd" or $^O eq "linux") {
 # And on Win32 systems, we try to use the native mechanism for this 
 # platform, the events logger, available through Win32::EventLog.
 EVENTLOG: {
-    my $is_Win32 = $^O =~ /Win32/i;
+    my $verbose_if_Win32 = $^O =~ /Win32/i;
 
-    if (can_load("Sys::Syslog::Win32", $is_Win32)) {
+    if (can_load_sys_syslog_win32($verbose_if_Win32)) {
         unshift @connectMethods, 'eventlog';
     }
 }
@@ -236,7 +236,7 @@ my %mechanism = (
         check   => sub { 1 },
     },
     eventlog => {
-        check   => sub { return can_load("Win32::EventLog") },
+        check   => sub { return can_load_sys_syslog_win32() },
         err_msg => "no Win32 API available",
     },
     inet => {
@@ -904,23 +904,22 @@ sub disconnect_log {
 
 
 #
-# Wrappers around eval() that makes sure that nobody, and I say NOBODY, 
-# ever knows that I wanted to test if something was here or not. 
-# It is needed because some applications are trying to be too smart,
-# do it wrong, and it ends up in EPIC FAIL. 
-# Yes I'm speaking of YOU, SpamAssassin.
+# Wrappers around eval() that makes sure that nobody, ever knows that
+# we wanted to poke & test if something was here or not. This is needed
+# because some applications are trying to be too smart, install their
+# own __DIE__ handler, and mysteriously, things are starting to fail
+# when they shouldn't. SpamAssassin among them.
 #
 sub silent_eval (&) {
     local($SIG{__DIE__}, $SIG{__WARN__}, $@);
     return eval { $_[0]->() }
 }
 
-sub can_load {
-    my ($module, $verbose) = @_;
+sub can_load_sys_syslog_win32 {
+    my ($verbose) = @_;
     local($SIG{__DIE__}, $SIG{__WARN__}, $@);
-    local @INC = @INC;
-    pop @INC if $INC[-1] eq '.';
-    my $loaded = eval "use $module; 1";
+    (my $module_path = __FILE__) =~ s:Syslog.pm$:Syslog/Win32.pm:;
+    my $loaded = eval { require $module_path } ? 1 : 0;
     warn $@ if not $loaded and $verbose;
     return $loaded
 }
@@ -936,7 +935,7 @@ Sys::Syslog - Perl interface to the UNIX syslog(3) calls
 
 =head1 VERSION
 
-This is the documentation of version 0.34
+This is the documentation of version 0.35
 
 =head1 SYNOPSIS
 
@@ -1023,18 +1022,20 @@ opened when the first message is logged).
 =item *
 
 C<noeol> - When set to true, no end of line character (C<\n>) will be
-appended to the message. This can be useful for some buggy syslog daemons.
+appended to the message. This can be useful for some syslog daemons.
+Added in C<Sys::Syslog> 0.29.
 
 =item *
 
 C<nofatal> - When set to true, C<openlog()> and C<syslog()> will only 
 emit warnings instead of dying if the connection to the syslog can't 
-be established. 
+be established. Added in C<Sys::Syslog> 0.15.
 
 =item *
 
 C<nonul> - When set to true, no C<NUL> character (C<\0>) will be
-appended to the message. This can be useful for some buggy syslog daemons.
+appended to the message. This can be useful for some syslog daemons.
+Added in C<Sys::Syslog> 0.29.
 
 =item *
 
@@ -1045,7 +1046,7 @@ process, so this option has no effect on Linux.)
 =item *
 
 C<perror> - Write the message to standard error output as well to the
-system log (added in C<Sys::Syslog> 0.22).
+system log. Added in C<Sys::Syslog> 0.22.
 
 =item *
 
@@ -1587,8 +1588,11 @@ Perl and C<Sys::Syslog> versions.
        0.06         5.8.7
        0.13         5.8.8
        0.22         5.10.0
-       0.27         5.8.9, 5.10.1 ~ 5.14.2
-       0.29         5.16.0, 5.16.1
+       0.27         5.8.9, 5.10.1 ~ 5.14.*
+       0.29         5.16.*
+       0.32         5.18.*
+       0.33         5.20.*
+       0.33         5.22.*
 
 
 =head1 SEE ALSO
@@ -1605,31 +1609,34 @@ L<Log::Report> - Report a problem, with exceptions and language support
 
 L<syslog(3)>
 
-SUSv3 issue 6, IEEE Std 1003.1, 2004 edition, 
+SUSv3 issue 6, IEEE Std 1003.1, 2004 edition,
 L<http://www.opengroup.org/onlinepubs/000095399/basedefs/syslog.h.html>
 
-GNU C Library documentation on syslog, 
+GNU C Library documentation on syslog,
 L<http://www.gnu.org/software/libc/manual/html_node/Syslog.html>
 
-Solaris 10 documentation on syslog, 
-L<http://docs.sun.com/app/docs/doc/816-5168/syslog-3c?a=view>
+FreeBSD documentation on syslog,
+L<https://www.freebsd.org/cgi/man.cgi?query=syslog>
+
+Solaris 11 documentation on syslog,
+L<https://docs.oracle.com/cd/E53394_01/html/E54766/syslog-3c.html>
 
 Mac OS X documentation on syslog,
 L<http://developer.apple.com/documentation/Darwin/Reference/ManPages/man3/syslog.3.html>
 
-IRIX 6.5 documentation on syslog,
-L<http://techpubs.sgi.com/library/tpl/cgi-bin/getdoc.cgi?coll=0650&db=man&fname=3c+syslog>
+IRIX documentation on syslog,
+L<http://nixdoc.net/man-pages/IRIX/man3/syslog.3c.html>
 
-AIX 5L 5.3 documentation on syslog, 
+AIX 5L 5.3 documentation on syslog,
 L<http://publib.boulder.ibm.com/infocenter/pseries/v5r3/index.jsp?topic=/com.ibm.aix.basetechref/doc/basetrf2/syslog.htm>
 
-HP-UX 11i documentation on syslog, 
+HP-UX 11i documentation on syslog,
 L<http://docs.hp.com/en/B2355-60130/syslog.3C.html>
 
-Tru64 5.1 documentation on syslog, 
-L<http://h30097.www3.hp.com/docs/base_doc/DOCUMENTATION/V51_HTML/MAN/MAN3/0193____.HTM>
+Tru64 documentation on syslog,
+L<http://nixdoc.net/man-pages/Tru64/man3/syslog.3.html>
 
-Stratus VOS 15.1, 
+Stratus VOS 15.1,
 L<http://stratadoc.stratus.com/vos/15.1.1/r502-01/wwhelp/wwhimpl/js/html/wwhelp.htm?context=r502-01&file=ch5r502-01bi.html>
 
 =head2 RFCs

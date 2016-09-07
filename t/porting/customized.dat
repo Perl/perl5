@@ -47,7 +47,6 @@ Scalar-List-Utils cpan/Scalar-List-Utils/lib/Sub/Util.pm b984c0a2935bd5f5cf1733d
 Scalar-List-Utils cpan/Scalar-List-Utils/ListUtil.xs 362a247c65878265fd8acae607b207400628ef3b
 Socket cpan/Socket/Socket.pm 98e38176d745c38282907f391c077298f5a3d0ba
 Socket cpan/Socket/Socket.xs edd4fed212785f11c5c2095a75941dad27d586d9
-Sys::Syslog cpan/Sys-Syslog/Syslog.pm 1cbcaaf58302bf803570546d8ced83190d3e5581
 Test::Harness cpan/Test-Harness/bin/prove 9b2866928cb1125de2c68f9773b25723e02c54c0
 Test::Harness cpan/Test-Harness/lib/App/Prove.pm a312bbbc97860d5051f06056eb30b985b15ee57c
 Test::Harness cpan/Test-Harness/lib/App/Prove/State.pm f4f7d11878eae1fd81d9c3d82097ddfd43b679a1
