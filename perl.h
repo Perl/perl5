@@ -6002,7 +6002,8 @@ typedef struct am_table_short AMTS;
 
 /* Returns TRUE if the plain locale pragma without a parameter is in effect
  */
-#   define IN_LOCALE_RUNTIME	cBOOL(CopHINTS_get(PL_curcop) & HINT_LOCALE)
+#   define IN_LOCALE_RUNTIME	(PL_curcop \
+                                && CopHINTS_get(PL_curcop) & HINT_LOCALE)
 
 /* Returns TRUE if either form of the locale pragma is in effect */
 #   define IN_SOME_LOCALE_FORM_RUNTIME   \
@@ -6023,7 +6024,7 @@ typedef struct am_table_short AMTS;
 
 #   define IN_LC_PARTIAL_COMPILETIME   cBOOL(PL_hints & HINT_LOCALE_PARTIAL)
 #   define IN_LC_PARTIAL_RUNTIME  \
-                        cBOOL(CopHINTS_get(PL_curcop) & HINT_LOCALE_PARTIAL)
+               (PL_curcop && CopHINTS_get(PL_curcop) & HINT_LOCALE_PARTIAL)
 
 #   define IN_LC_COMPILETIME(category)                                       \
        (IN_LC_ALL_COMPILETIME || (IN_LC_PARTIAL_COMPILETIME                  \
