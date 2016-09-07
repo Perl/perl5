@@ -9724,7 +9724,7 @@ S_scan_heredoc(pTHX_ char *s)
     {
       SV *linestr_save;
       char *oldbufptr_save;
-      char **oldoldbufptr_save;
+      char *oldoldbufptr_save;
      streaming:
       sv_setpvs(tmpstr,"");   /* avoid "uninitialized" warning */
       term = PL_tokenbuf[1];
