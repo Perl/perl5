@@ -532,7 +532,7 @@ Free_t   Perl_mfree (Malloc_t where)
  */
 
 static char *
-S_delimcpy(char *to, const char *toend, const char *from,
+S_delimcpy_intern(char *to, const char *toend, const char *from,
 	   const char *fromend, int delim, I32 *retlen,
 	   const bool allow_escape)
 {
@@ -565,7 +565,7 @@ Perl_delimcpy(char *to, const char *toend, const char *from, const char *fromend
 {
     PERL_ARGS_ASSERT_DELIMCPY;
 
-    return S_delimcpy(to, toend, from, fromend, delim, retlen, 1);
+    return S_delimcpy_intern(to, toend, from, fromend, delim, retlen, 1);
 }
 
 char *
@@ -574,7 +574,7 @@ Perl_delimcpy_no_escape(char *to, const char *toend, const char *from,
 {
     PERL_ARGS_ASSERT_DELIMCPY_NO_ESCAPE;
 
-    return S_delimcpy(to, toend, from, fromend, delim, retlen, 0);
+    return S_delimcpy_intern(to, toend, from, fromend, delim, retlen, 0);
 }
 
 /*
