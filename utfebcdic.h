@@ -203,7 +203,7 @@ above what a 64 bit word can hold
   U+40000..U+FFFFF	F8      * A8..BF  A0..BF  A0..BF  A0..BF
  U+100000..U+10FFFF	F9        A0..A1  A0..BF  A0..BF  A0..BF
     Below are above-Unicode code points
- U+110000..U+1FFFFF	F9      * A2..BF  A0..BF  A0..BF  A0..BF
+ U+110000..U+1FFFFF	F9        A2..BF  A0..BF  A0..BF  A0..BF
  U+200000..U+3FFFFF	FA..FB    A0..BF  A0..BF  A0..BF  A0..BF
  U+400000..U+1FFFFFF	FC      * A4..BF  A0..BF  A0..BF  A0..BF  A0..BF
 U+2000000..U+3FFFFFF	FD        A0..BF  A0..BF  A0..BF  A0..BF  A0..BF
