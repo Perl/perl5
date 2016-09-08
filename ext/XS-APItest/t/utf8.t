@@ -14,6 +14,7 @@ my $pound_sign = chr utf8::unicode_to_native(163);
 sub isASCII { ord "A" == 65 }
 
 sub display_bytes {
+    use bytes;
     my $string = shift;
     return   '"'
            . join("", map { sprintf("\\x%02x", ord $_) } split "", $string)
@@ -215,10 +216,18 @@ my %code_points = (
 
 if ($is64bit) {
     no warnings qw(overflow portable);
-    $code_points{0x100000000}        = (isASCII) ? "\xfe\x84\x80\x80\x80\x80\x80" : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0");
-    $code_points{0x1000000000 - 1}   = (isASCII) ? "\xfe\xbf\xbf\xbf\xbf\xbf\xbf" : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa1\xbf\xbf\xbf\xbf\xbf\xbf\xbf");
-    $code_points{0x1000000000}       = (isASCII) ? "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80" : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0\xa0");
-    $code_points{0xFFFFFFFFFFFFFFFF} = (isASCII) ? "\xff\x80\x8f\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf" : I8_to_native("\xff\xaf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf");
+    $code_points{0x100000000}        = (isASCII)
+                                        ?              "\xfe\x84\x80\x80\x80\x80\x80"
+                                        : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0");
+    $code_points{0x1000000000 - 1}   = (isASCII)
+                                        ?              "\xfe\xbf\xbf\xbf\xbf\xbf\xbf"
+                                        : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa1\xbf\xbf\xbf\xbf\xbf\xbf\xbf");
+    $code_points{0x1000000000}       = (isASCII)
+                                        ?              "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80"
+                                        : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0\xa0");
+    $code_points{0xFFFFFFFFFFFFFFFF} = (isASCII)
+                                        ?              "\xff\x80\x8f\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
+                                        : I8_to_native("\xff\xaf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf");
 }
 
 # Now add in entries for each of code points 0-255, which require special
@@ -394,7 +403,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     my $display_bytes = display_bytes($bytes);
     my $ret_ref = test_utf8n_to_uvchr($bytes, $len, $this_utf8_flags);
     is($ret_ref->[0], $n, "Verify utf8n_to_uvchr($display_bytes, $display_flags) returns $hex_n");
-    is($ret_ref->[1], $len, "Verify utf8n_to_uvchr() for $hex_n returns expected length");
+    is($ret_ref->[1], $len, "Verify utf8n_to_uvchr() for $hex_n returns expected length: $len");
 
     unless (is(scalar @warnings, 0,
                "Verify utf8n_to_uvchr() for $hex_n generated no warnings"))
@@ -405,7 +414,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     undef @warnings;
 
     my $ret = test_isUTF8_CHAR($bytes, $len);
-    is($ret, $len, "Verify isUTF8_CHAR($display_bytes) returns expected length");
+    is($ret, $len, "Verify isUTF8_CHAR($display_bytes) returns expected length: $len");
 
     unless (is(scalar @warnings, 0,
                "Verify isUTF8_CHAR() for $hex_n generated no warnings"))
@@ -428,7 +437,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
 
     $ret_ref = test_valid_utf8_to_uvchr($bytes);
     is($ret_ref->[0], $n, "Verify valid_utf8_to_uvchr($display_bytes) returns $hex_n");
-    is($ret_ref->[1], $len, "Verify valid_utf8_to_uvchr() for $hex_n returns expected length");
+    is($ret_ref->[1], $len, "Verify valid_utf8_to_uvchr() for $hex_n returns expected length: $len");
 
     unless (is(scalar @warnings, 0,
                "Verify valid_utf8_to_uvchr() for $hex_n generated no warnings"))
@@ -478,8 +487,8 @@ my @malformations = (
         qr/unexpected continuation byte/
     ],
     [ "premature next character malformation (immediate)",
-        (isASCII) ? "\xc2a" : I8_to_native("\xc5") ."a",
-        2,
+        (isASCII) ? "\xc2\xc2\x80" : I8_to_native("\xc5\xc5\xa0"),
+        3,
         $UTF8_ALLOW_NON_CONTINUATION, $REPLACEMENT, 1,
         qr/unexpected non-continuation byte.*immediately after start byte/
     ],
@@ -534,7 +543,7 @@ foreach my $test (@malformations) {
     undef @warnings;
     my $ret_ref = test_utf8n_to_uvchr($bytes, $length, 0);
     is($ret_ref->[0], 0, "$testname: disallowed: Returns 0");
-    is($ret_ref->[1], $expected_len, "$testname: disallowed: Returns expected length");
+    is($ret_ref->[1], $expected_len, "$testname: utf8n_to_uvchr(), disallowed: Returns expected length: $expected_len");
     if (is(scalar @warnings, 1, "$testname: disallowed: Got a single warning ")) {
         like($warnings[0], $message, "$testname: disallowed: Got expected warning");
     }
@@ -548,9 +557,9 @@ foreach my $test (@malformations) {
         undef @warnings;
         no warnings 'utf8';
         my $ret_ref = test_utf8n_to_uvchr($bytes, $length, 0);
-        is($ret_ref->[0], 0, "$testname: disallowed: no warnings 'utf8': Returns 0");
-        is($ret_ref->[1], $expected_len, "$testname: disallowed: no warnings 'utf8': Returns expected length");
-        if (!is(scalar @warnings, 0, "$testname: disallowed: no warnings 'utf8': no warnings generated")) {
+        is($ret_ref->[0], 0, "$testname: utf8n_to_uvchr(), disallowed: no warnings 'utf8': Returns 0");
+        is($ret_ref->[1], $expected_len, "$testname: utf8n_to_uvchr(), disallowed: no warnings 'utf8': Returns expected length: $expected_len");
+        if (!is(scalar @warnings, 0, "$testname: utf8n_to_uvchr(), disallowed: no warnings 'utf8': no warnings generated")) {
             diag "The warnings were: " . join(", ", @warnings);
         }
     }
@@ -559,7 +568,7 @@ foreach my $test (@malformations) {
     undef @warnings;
     $ret_ref = test_utf8n_to_uvchr($bytes, $length, $UTF8_CHECK_ONLY);
     is($ret_ref->[0], 0, "$testname: CHECK_ONLY: Returns 0");
-    is($ret_ref->[1], -1, "$testname: CHECK_ONLY: returns expected length");
+    is($ret_ref->[1], -1, "$testname: CHECK_ONLY: returns -1 for length");
     if (! is(scalar @warnings, 0, "$testname: CHECK_ONLY: no warnings generated")) {
         diag "The warnings were: " . join(", ", @warnings);
     }
@@ -569,9 +578,9 @@ foreach my $test (@malformations) {
     # Test when the malformation is allowed
     undef @warnings;
     $ret_ref = test_utf8n_to_uvchr($bytes, $length, $allow_flags);
-    is($ret_ref->[0], $allowed_uv, "$testname: allowed: Returns expected uv");
-    is($ret_ref->[1], $expected_len, "$testname: allowed: Returns expected length");
-    if (!is(scalar @warnings, 0, "$testname: allowed: no warnings generated"))
+    is($ret_ref->[0], $allowed_uv, "$testname: utf8n_to_uvchr(), allowed: Returns expected uv: " . sprintf("0x%04X", $allowed_uv));
+    is($ret_ref->[1], $expected_len, "$testname: utf8n_to_uvchr(), allowed: Returns expected length: $expected_len");
+    if (!is(scalar @warnings, 0, "$testname: utf8n_to_uvchr(), allowed: no warnings generated"))
     {
         diag "The warnings were: " . join(", ", @warnings);
     }
@@ -890,10 +899,10 @@ my @tests = (
         # since we have no reports of failures with it.
        (($is64bit)
         ? ((isASCII)
-           ? "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
+           ?              "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
            : I8_to_native("\xff\xB0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"))
         : ((isASCII)
-           ? "\xfe\x86\x80\x80\x80\x80\x80"
+           ?              "\xfe\x86\x80\x80\x80\x80\x80"
            : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0"))),
 
         # We include both warning categories to make sure the ABOVE_31_BIT one
@@ -911,7 +920,7 @@ if ($is64bit) {
     push @tests,
         [ "More than 32 bits",
             (isASCII)
-            ? "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80"
+            ?              "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80"
             : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
             $UTF8_WARN_ABOVE_31_BIT, $UTF8_DISALLOW_ABOVE_31_BIT,
             'utf8', 0x1000000000, (isASCII) ? 13 : 14,
@@ -1030,13 +1039,14 @@ foreach my $test (@tests) {
                     }
                     else {
                         unless (is($ret_ref->[0], $allowed_uv,
-                                            "$this_name: Returns expected uv"))
+                                   "$this_name: Returns expected uv: "
+                                 . sprintf("0x%04X", $allowed_uv)))
                         {
                             diag $call;
                         }
                     }
                     unless (is($ret_ref->[1], $expected_len,
-                                    "$this_name: Returns expected length"))
+                        "$this_name: Returns expected length: $expected_len"))
                     {
                         diag $call;
                     }
@@ -1109,7 +1119,7 @@ foreach my $test (@tests) {
                             diag $call;
                         }
                         unless (is($ret_ref->[1], -1,
-                            "$this_name: CHECK_ONLY: returns expected length"))
+                            "$this_name: CHECK_ONLY: returns -1 for length"))
                         {
                             diag $call;
                         }
