@@ -9812,7 +9812,8 @@ S_scan_heredoc(pTHX_ char *s)
 
 /* scan_inputsymbol
    takes: position of first '<' in input buffer
-   returns: position of first char following the last '>' in input buffer
+   returns: position of first char following the matching '>' in
+	    input buffer
    side-effects: pl_yylval and lex_op are set.
 
    This code handles:
