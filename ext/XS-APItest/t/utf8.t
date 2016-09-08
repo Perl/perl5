@@ -228,6 +228,18 @@ if ($is64bit) {
     $code_points{0xFFFFFFFFFFFFFFFF} = (isASCII)
                                         ?              "\xff\x80\x8f\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
                                         : I8_to_native("\xff\xaf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf");
+    if (isASCII) {  # These could falsely show as overlongs in a naive implementation
+        $code_points{0x40000000000}  = "\xff\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80\x80";
+        $code_points{0x1000000000000} = "\xff\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80\x80\x80";
+        $code_points{0x40000000000000} = "\xff\x80\x80\x81\x80\x80\x80\x80\x80\x80\x80\x80\x80";
+        $code_points{0x1000000000000000} = "\xff\x80\x81\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80";
+        # overflows
+        #$code_points{0xfoo}     = "\xff\x81\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80";
+    }
+}
+elsif (! isASCII) { # 32-bit EBCDIC.  64-bit is clearer to handle, so doesn't need this test case
+    no warnings qw(overflow portable);
+    $code_points{0x40000000} = I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0");
 }
 
 # Now add in entries for each of code points 0-255, which require special
@@ -504,24 +516,189 @@ my @malformations = (
         $UTF8_ALLOW_SHORT, $REPLACEMENT, 2,
         qr/2 bytes, need 4/
     ],
-    [ "overlong malformation", I8_to_native("\xc0$c"), 2,
+    [ "overlong malformation, lowest 2-byte",
+        (isASCII) ? "\xc0\x80" : I8_to_native("\xc0\xa0"),
+        2,
         $UTF8_ALLOW_LONG,
         0,   # NUL
         2,
         qr/2 bytes, need 1/
     ],
-    [ "overflow malformation",
-                    # These are the smallest overflowing on 64 byte machines:
-                    # 2**64
-        (isASCII) ? "\xff\x80\x90\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"
-                  : I8_to_native("\xff\xB0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-        (isASCII) ? 13 : 14,
-        0,  # There is no way to allow this malformation
-        $REPLACEMENT,
-        (isASCII) ? 13 : 14,
-        qr/overflow/
+    [ "overlong malformation, highest 2-byte",
+        (isASCII) ? "\xc1\xbf" : I8_to_native("\xc4\xbf"),
+        2,
+        $UTF8_ALLOW_LONG,
+        (isASCII) ? 0x7F : utf8::unicode_to_native(0xBF),
+        2,
+        qr/2 bytes, need 1/
+    ],
+    [ "overlong malformation, lowest 3-byte",
+        (isASCII) ? "\xe0\x80\x80" : I8_to_native("\xe0\xa0\xa0"),
+        3,
+        $UTF8_ALLOW_LONG,
+        0,   # NUL
+        3,
+        qr/3 bytes, need 1/
+    ],
+    [ "overlong malformation, highest 3-byte",
+        (isASCII) ? "\xe0\x9f\xbf" : I8_to_native("\xe0\xbf\xbf"),
+        3,
+        $UTF8_ALLOW_LONG,
+        (isASCII) ? 0x7FF : 0x3FF,
+        3,
+        qr/3 bytes, need 2/
+    ],
+    [ "overlong malformation, lowest 4-byte",
+        (isASCII) ? "\xf0\x80\x80\x80" : I8_to_native("\xf0\xa0\xa0\xa0"),
+        4,
+        $UTF8_ALLOW_LONG,
+        0,   # NUL
+        4,
+        qr/4 bytes, need 1/
+    ],
+    [ "overlong malformation, highest 4-byte",
+        (isASCII) ? "\xf0\x8F\xbf\xbf" : I8_to_native("\xf0\xaf\xbf\xbf"),
+        4,
+        $UTF8_ALLOW_LONG,
+        (isASCII) ? 0xFFFF : 0x3FFF,
+        4,
+        qr/4 bytes, need 3/
+    ],
+    [ "overlong malformation, lowest 5-byte",
+        (isASCII)
+         ?              "\xf8\x80\x80\x80\x80"
+         : I8_to_native("\xf8\xa0\xa0\xa0\xa0"),
+        5,
+        $UTF8_ALLOW_LONG,
+        0,   # NUL
+        5,
+        qr/5 bytes, need 1/
+    ],
+    [ "overlong malformation, highest 5-byte",
+        (isASCII)
+         ?              "\xf8\x87\xbf\xbf\xbf"
+         : I8_to_native("\xf8\xa7\xbf\xbf\xbf"),
+        5,
+        $UTF8_ALLOW_LONG,
+        (isASCII) ? 0x1FFFFF : 0x3FFFF,
+        5,
+        qr/5 bytes, need 4/
+    ],
+    [ "overlong malformation, lowest 6-byte",
+        (isASCII)
+         ?              "\xfc\x80\x80\x80\x80\x80"
+         : I8_to_native("\xfc\xa0\xa0\xa0\xa0\xa0"),
+        6,
+        $UTF8_ALLOW_LONG,
+        0,   # NUL
+        6,
+        qr/6 bytes, need 1/
+    ],
+    [ "overlong malformation, highest 6-byte",
+        (isASCII)
+         ?              "\xfc\x83\xbf\xbf\xbf\xbf"
+         : I8_to_native("\xfc\xa3\xbf\xbf\xbf\xbf"),
+        6,
+        $UTF8_ALLOW_LONG,
+        (isASCII) ? 0x3FFFFFF : 0x3FFFFF,
+        6,
+        qr/6 bytes, need 5/
+    ],
+    [ "overlong malformation, lowest 7-byte",
+        (isASCII)
+         ?              "\xfe\x80\x80\x80\x80\x80\x80"
+         : I8_to_native("\xfe\xa0\xa0\xa0\xa0\xa0\xa0"),
+        7,
+        $UTF8_ALLOW_LONG,
+        0,   # NUL
+        7,
+        qr/7 bytes, need 1/
+    ],
+    [ "overlong malformation, highest 7-byte",
+        (isASCII)
+         ?              "\xfe\x81\xbf\xbf\xbf\xbf\xbf"
+         : I8_to_native("\xfe\xa1\xbf\xbf\xbf\xbf\xbf"),
+        7,
+        $UTF8_ALLOW_LONG,
+        (isASCII) ? 0x7FFFFFFF : 0x3FFFFFF,
+        7,
+        qr/7 bytes, need 6/
     ],
 );
+
+if (isASCII && ! $is64bit) {    # 32-bit ASCII platform
+    no warnings 'portable';
+    push @malformations,
+        [ "overflow malformation",
+            "\xfe\x84\x80\x80\x80\x80\x80",  # Represents 2**32
+            7,
+            0,  # There is no way to allow this malformation
+            $REPLACEMENT,
+            7,
+            qr/overflow/
+        ],
+        [ "overflow malformation, can tell on first byte",
+            "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80",
+            13,
+            0,  # There is no way to allow this malformation
+            $REPLACEMENT,
+            13,
+            qr/overflow/
+        ];
+}
+else {
+    # On EBCDIC platforms, another overlong test is needed even on 32-bit
+    # systems, whereas it doesn't happen on ASCII except on 64-bit ones.
+
+    no warnings 'portable';
+    no warnings 'overflow'; # Doesn't run on 32-bit systems, but compiles
+    push @malformations,
+        [ "overlong malformation, lowest max-byte",
+            (isASCII)
+             ?              "\xff\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80"
+             : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+            (isASCII) ? 13 : 14,
+            $UTF8_ALLOW_LONG,
+            0,   # NUL
+            (isASCII) ? 13 : 14,
+            qr/1[34] bytes, need 1/,    # 1[34] to work on either ASCII or EBCDIC
+        ],
+        [ "overlong malformation, highest max-byte",
+            (isASCII)    # 2**36-1 on ASCII; 2**30-1 on EBCDIC
+             ?              "\xff\x80\x80\x80\x80\x80\x80\xbf\xbf\xbf\xbf\xbf\xbf"
+             : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xbf\xbf\xbf\xbf\xbf\xbf"),
+            (isASCII) ? 13 : 14,
+            $UTF8_ALLOW_LONG,
+            (isASCII) ? 0xFFFFFFFFF : 0x3FFFFFFF,
+            (isASCII) ? 13 : 14,
+            qr/1[34] bytes, need 7/,
+        ];
+
+    if (! $is64bit) {   # 32-bit EBCDIC
+        push @malformations,
+        [ "overflow malformation",
+            I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0"),
+            14,
+            0,  # There is no way to allow this malformation
+            $REPLACEMENT,
+            14,
+            qr/overflow/
+        ];
+    }
+    else {  # 64-bit
+        push @malformations,
+            [ "overflow malformation",
+               (isASCII)
+                ?              "\xff\x80\x90\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"
+                : I8_to_native("\xff\xb0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+                (isASCII) ? 13 : 14,
+                0,  # There is no way to allow this malformation
+                $REPLACEMENT,
+                (isASCII) ? 13 : 14,
+                qr/overflow/
+            ];
+    }
+}
 
 foreach my $test (@malformations) {
     my ($testname, $bytes, $length, $allow_flags, $allowed_uv, $expected_len, $message ) = @$test;
@@ -614,6 +791,14 @@ my @tests = (
         (isASCII) ? "\xf4\x90\x80\x80" : I8_to_native("\xf9\xa2\xa0\xa0\xa0"),
         $UTF8_WARN_SUPER, $UTF8_DISALLOW_SUPER,
         'non_unicode', 0x110000,
+        (isASCII) ? 4 : 5,
+        qr/not Unicode.* may not be portable/
+    ],
+    [ "non_unicode whose first byte tells that",
+        (isASCII) ? "\xf5\x80\x80\x80" : I8_to_native("\xfa\xa0\xa0\xa0\xa0"),
+        $UTF8_WARN_SUPER, $UTF8_DISALLOW_SUPER,
+        'non_unicode',
+        (isASCII) ? 0x140000 : 0x200000,
         (isASCII) ? 4 : 5,
         qr/not Unicode.* may not be portable/
     ],
