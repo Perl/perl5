@@ -5327,6 +5327,15 @@ test_isUTF8_CHAR(char *s, STRLEN len)
     OUTPUT:
         RETVAL
 
+IV
+test_is_utf8_valid_partial_char_flags(char *s, STRLEN len, U32 flags)
+    CODE:
+        /* RETVAL should be bool, but making it IV allows us to test it
+         * returning 0 or 1 */
+        RETVAL = is_utf8_valid_partial_char_flags((U8 *) s, (U8 *) s + len, flags);
+    OUTPUT:
+        RETVAL
+
 UV
 test_toLOWER(UV ord)
     CODE:

@@ -338,7 +338,26 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
         "Verify UTF8_SKIP(chr $hex_n) is $uvchr_skip_should_be");
 
     use bytes;
-    for (my $j = 0; $j < length $n_chr; $j++) {
+    my $byte_length = length $n_chr;
+    for (my $j = 0; $j < $byte_length; $j++) {
+        undef @warnings;
+
+        if ($j == $byte_length - 1) {
+            my $ret = test_is_utf8_valid_partial_char_flags($n_chr, $byte_length, 0);
+            is($ret, 0, "   Verify is_utf8_valid_partial_char_flags(" . display_bytes($n_chr) . ") returns 0 for full character");
+        }
+        else {
+            my $bytes_so_far = substr($n_chr, 0, $j + 1);
+            my $ret = test_is_utf8_valid_partial_char_flags($bytes_so_far, $j + 1, 0);
+            is($ret, 1, "   Verify is_utf8_valid_partial_char_flags(" . display_bytes($bytes_so_far) . ") returns 1");
+        }
+
+        unless (is(scalar @warnings, 0,
+                "   Verify is_utf8_valid_partial_char_flags generated no warnings"))
+        {
+            diag "The warnings were: " . join(", ", @warnings);
+        }
+
         my $b = substr($n_chr, $j, 1);
         my $hex_b = sprintf("\"\\x%02x\"", ord $b);
 
@@ -713,6 +732,52 @@ foreach my $test (@malformations) {
                "$testname: isUTF8_CHAR() generated no warnings"))
     {
         diag "The warnings were: " . join(", ", @warnings);
+    }
+
+    for my $j (1 .. $length - 1) {
+        my $partial = substr($bytes, 0, $j);
+
+        undef @warnings;
+
+        $ret = test_is_utf8_valid_partial_char_flags($bytes, $j, 0);
+        my $ret_should_be = 0;
+        my $comment = "";
+        if ($testname =~ /premature|short/ && $j < 2) {
+            $ret_should_be = 1;
+            $comment = ", but need 2 bytes to discern:";
+        }
+        elsif ($testname =~ /overlong/ && $length > 2) {
+            if ($length <= 7 && $j < 2) {
+                $ret_should_be = 1;
+                $comment = ", but need 2 bytes to discern:";
+            }
+            elsif ($length > 7 && $j < 7) {
+                $ret_should_be = 1;
+                $comment = ", but need 7 bytes to discern:";
+            }
+        }
+        elsif ($testname =~ /overflow/ && $testname !~ /first byte/) {
+            if (isASCII) {
+                if ($j < (($is64bit) ? 3 : 2)) {
+                    $comment = ", but need $j bytes to discern:";
+                    $ret_should_be = 1;
+                }
+            }
+            else {
+                if ($j < (($is64bit) ? 2 : 8)) {
+                    $comment = ", but need $j bytes to discern:";
+                    $ret_should_be = 1;
+                }
+            }
+        }
+        is($ret, $ret_should_be, "$testname: is_utf8_valid_partial_char_flags("
+                                . display_bytes($partial)
+                                . ")$comment returns $ret_should_be");
+        unless (is(scalar @warnings, 0,
+                "$testname: is_utf8_valid_partial_char_flags() generated no warnings"))
+        {
+            diag "The warnings were: " . join(", ", @warnings);
+        }
     }
 
 
@@ -1173,6 +1238,59 @@ foreach my $test (@tests) {
                 "isUTF8_CHAR() $testname: generated no warnings"))
         {
             diag "The warnings were: " . join(", ", @warnings);
+        }
+
+        # Test partial character handling, for each byte not a full character
+        for my $j (1.. $length - 1) {
+
+            # Skip the test for the interaction between overflow and above-31
+            # bit.  It is really testing other things than the partial
+            # character tests, for which other tests in this file are
+            # sufficient
+            last if $testname =~ /overflow/;
+
+            foreach my $disallow_flag (0, $disallow_flags) {
+                my $partial = substr($bytes, 0, $j);
+                my $ret_should_be;
+                my $comment;
+                if ($disallow_flag) {
+                    $ret_should_be = 0;
+                    $comment = "disallowed";
+                }
+                else {
+                    $ret_should_be = 1;
+                    $comment = "allowed";
+                }
+
+                if ($disallow_flag) {
+                    if ($testname =~ /non-character/) {
+                        $ret_should_be = 1;
+                        $comment .= ", but but need full char to discern";
+                    }
+                    elsif ($testname =~ /surrogate/) {
+                        if ($j < 2) {
+                            $ret_should_be = 1;
+                            $comment .= ", but need 2 bytes to discern";
+                        }
+                    }
+                    elsif ($testname =~ /first non_unicode/ && $j < 2) {
+                        $ret_should_be = 1;
+                        $comment .= ", but need 2 bytes to discern";
+                    }
+                }
+
+                undef @warnings;
+
+                $ret = test_is_utf8_valid_partial_char_flags($partial, $j, $disallow_flag);
+                is($ret, $ret_should_be, "$testname: is_utf8_valid_partial_char_flags("
+                                        . display_bytes($partial)
+                                        . "), $comment: returns $ret_should_be");
+                unless (is(scalar @warnings, 0,
+                        "$testname: is_utf8_valid_partial_char_flags() generated no warnings"))
+                {
+                    diag "The warnings were: " . join(", ", @warnings);
+                }
+            }
         }
     }
 
