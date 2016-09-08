@@ -4276,13 +4276,14 @@ S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv)
     }
 
     if (*start == '$') {
+        SSize_t start_off = start - SvPVX(PL_linestr);
 	if (cv || PL_last_lop_op == OP_PRINT || PL_last_lop_op == OP_SAY
             || isUPPER(*PL_tokenbuf))
 	    return 0;
         /* this could be $# */
         if (isSPACE(*s))
             s = skipspace(s);
-	PL_bufptr = start;
+	PL_bufptr = SvPVX(PL_linestr) + start_off;
 	PL_expect = XREF;
 	return *s == '(' ? FUNCMETH : METHOD;
     }
@@ -7262,17 +7263,24 @@ Perl_yylex(pTHX)
                                                                == OA_FILEREF))
 		{
 		    bool immediate_paren = *s == '(';
+                    SSize_t s_off;
 
 		    /* (Now we can afford to cross potential line boundary.) */
 		    s = skipspace(s);
 
+                    /* intuit_method() can indirectly call lex_next_chunk(),
+                     * invalidating s
+                     */
+                    s_off = s - SvPVX(PL_linestr);
 		    /* Two barewords in a row may indicate method call. */
 	            if (   (   isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)
                             || *s == '$')
                         && (tmp = intuit_method(s, lex ? NULL : sv, cv)))
                     {
+                        /* the code at method: doesn't use s */
 			goto method;
 		    }
+                    s = SvPVX(PL_linestr) + s_off;
 
 		    /* If not a declared subroutine, it's an indirect object. */
 		    /* (But it's an indir obj regardless for sort.) */

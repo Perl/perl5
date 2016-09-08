@@ -7,7 +7,7 @@ use warnings;
 
 BEGIN { chdir 't' if -d 't'; require './test.pl'; }
 
-plan(tests => 35);
+plan(tests => 36);
 
 {
     no warnings 'deprecated';
@@ -285,3 +285,6 @@ EOM
     {},
     "[perl #129273] heap use after free or overflow"
 );
+
+fresh_perl_like('flock  _$', qr/Not enough arguments for flock/, {stderr => 1},
+                "[perl #129190] intuit_method() invalidates PL_bufptr");
