@@ -8686,7 +8686,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     }
 
     /* don't copy new BEGIN CV to old BEGIN CV - RT #129099 */
-    if (name && *name == 'B' && strEQ(name, "BEGIN"))
+    if (name && cv && *name == 'B' && strEQ(name, "BEGIN"))
         cv = NULL;
 
     if (cv) {				/* must reuse cv if autoloaded */
