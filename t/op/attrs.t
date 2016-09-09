@@ -455,17 +455,17 @@ package P126257 {
 
 is runperl(
        prog => 'package Foo; sub MODIFY_CODE_ATTRIBUTES {()} '
-             . 'sub BEGIN :Foo; print q{OK}',
+             . 'sub BEGIN :Foo; print qq{OK\n}',
        stderr => 1,
    ),
-   "OK",
+   "OK\n",
   'RT #129099 BEGIN';
 is runperl(
        prog => 'package Foo; sub MODIFY_CODE_ATTRIBUTES {()} '
-             . 'no warnings q{prototype}; sub BEGIN() :Foo; print q{OK}',
+             . 'no warnings q{prototype}; sub BEGIN() :Foo; print qq{OK\n}',
        stderr => 1,
    ),
-   "OK",
+   "OK\n",
   'RT #129099 BEGIN()';
 
 
