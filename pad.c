@@ -2376,6 +2376,7 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
 	    PADNAME **names = namepad;
 	    PADOFFSET i = ix;
 	    while (PadnameOUTER(name)) {
+		assert(SvTYPE(cv) == SVt_PVCV);
 		cv = CvOUTSIDE(cv);
 		names = PadlistNAMESARRAY(CvPADLIST(cv));
 		i = PARENT_PAD_INDEX(name);
@@ -2406,6 +2407,7 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
 	    assert(SvWEAKREF(rv));
 	    innercv = (CV *)SvRV(rv);
 	    assert(!CvWEAKOUTSIDE(innercv));
+	    assert(CvOUTSIDE(innercv) == old_cv);
 	    SvREFCNT_dec(CvOUTSIDE(innercv));
 	    CvOUTSIDE(innercv) = (CV *)SvREFCNT_inc_simple_NN(new_cv);
 	  }
