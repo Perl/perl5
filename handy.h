@@ -493,6 +493,11 @@ Returns zero if non-equal, or non-zero if equal.
 	(sizeof(s2)-1 == l && memEQ(s1, ("" s2 ""), (sizeof(s2)-1)))
 #define memNEs(s1, l, s2) !memEQs(s1, l, s2)
 
+#define memLT(s1,s2,l) (memcmp(s1,s2,l) < 0)
+#define memLE(s1,s2,l) (memcmp(s1,s2,l) <= 0)
+#define memGT(s1,s2,l) (memcmp(s1,s2,l) > 0)
+#define memGE(s1,s2,l) (memcmp(s1,s2,l) >= 0)
+
 /*
  * Character classes.
  *
