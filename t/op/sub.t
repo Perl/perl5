@@ -415,3 +415,17 @@ sub curpm {
 }
 "a" =~ /(.)/;
 is(curpm(), 'c', 'return and PL_curpm');
+
+# [perl #129090] Crashes and hangs
+watchdog 10;
+{ no warnings;
+  eval '$a=qq|a$a|;my sub b;%c;sub c{sub b;sub c}';
+}
+eval '
+   ()= %d;
+   {my ($a,$b,$c,$d,$e,$f,$g,$h,$i,$j,$k,$l,$m,$n,$o,$p,$q,$r,$s,$t,$u);}
+   {my ($a,$b,$c,$d,$e,$f,$g,$h,$i,$j,$k,$l,$m,$n,$o,$p,$q,$r,$s,$t,$u);}
+   {my ($a,$b,$c,$d,$e,$f,$g,$h,$i,$j,$k,$l,$m,$n,$o,$p,$q,$r,$s,$t,$u);}
+   CORE::state sub b; sub d { sub b {} sub d }
+ ';
+eval '()=%e; sub e { sub e; eval q|$x| } e;';
