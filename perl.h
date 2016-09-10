@@ -1041,9 +1041,8 @@ EXTERN_C int usleep(unsigned int);
 #    endif
 #  endif
 #else
-#   ifndef memcmp
-#	define memcmp 	my_memcmp
-#   endif
+#   undef memcmp
+#   define memcmp   my_memcmp
 #endif /* HAS_MEMCMP && HAS_SANE_MEMCMP */
 
 #ifndef memzero
