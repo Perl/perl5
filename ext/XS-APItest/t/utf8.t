@@ -884,6 +884,45 @@ if ($is64bit) {
             'utf8', 0x1000000000, (isASCII) ? 13 : 14,
             qr/Code point 0x.* is not Unicode, and not portable/
         ];
+    if (! isASCII) {
+        push @tests,   # These could falsely show wrongly in a naive implementation
+            [ "requires at least 32 bits",
+                I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+                $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
+                'utf8', 0x800000000, 14,
+                qr/Code point 0x800000000 is not Unicode, and not portable/
+            ],
+            [ "requires at least 32 bits",
+                I8_to_native("\xff\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+                $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
+                'utf8', 0x10000000000, 14,
+                qr/Code point 0x10000000000 is not Unicode, and not portable/
+            ],
+            [ "requires at least 32 bits",
+                I8_to_native("\xff\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+                $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
+                'utf8', 0x200000000000, 14,
+                qr/Code point 0x200000000000 is not Unicode, and not portable/
+            ],
+            [ "requires at least 32 bits",
+                I8_to_native("\xff\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+                $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
+                'utf8', 0x4000000000000, 14,
+                qr/Code point 0x4000000000000 is not Unicode, and not portable/
+            ],
+            [ "requires at least 32 bits",
+                I8_to_native("\xff\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+                $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
+                'utf8', 0x80000000000000, 14,
+                qr/Code point 0x80000000000000 is not Unicode, and not portable/
+            ],
+            [ "requires at least 32 bits",
+                I8_to_native("\xff\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+                $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
+                'utf8', 0x1000000000000000, 14,
+                qr/Code point 0x1000000000000000 is not Unicode, and not portable/
+            ];
+    }
 }
 
 foreach my $test (@tests) {

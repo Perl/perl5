@@ -342,6 +342,87 @@ Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
     return uvchr_to_utf8_flags(d, uv, flags);
 }
 
+PERL_STATIC_INLINE bool
+S_is_utf8_cp_above_31_bits(const U8 * const s, const U8 * const e)
+{
+    /* Returns TRUE if the first code point represented by the Perl-extended-
+     * UTF-8-encoded string starting at 's', and looking no further than 'e -
+     * 1' doesn't fit into 31 bytes.  That is, that if it is >= 2**31.
+     *
+     * The function handles the case where the input bytes do not include all
+     * the ones necessary to represent a full character.  That is, they may be
+     * the intial bytes of the representation of a code point, but possibly
+     * the final ones necessary for the complete representation may be beyond
+     * 'e - 1'.
+     *
+     * The function assumes that the sequence is well-formed UTF-8 as far as it
+     * goes, and is for a UTF-8 variant code point.  If the sequence is
+     * incomplete, the function returns FALSE if there is any well-formed
+     * UTF-8 byte sequence that can complete it in such a way that a code point
+     * < 2**31 is produced; otherwise it returns TRUE.
+     *
+     * Getting this exactly right is slightly tricky, and has to be done in
+     * several places in this file, so is centralized here.  It is based on the
+     * following table:
+     *
+     * U+7FFFFFFF (2 ** 31 - 1)
+     *      ASCII: \xFD\xBF\xBF\xBF\xBF\xBF
+     *   IBM-1047: \xFE\x41\x41\x41\x41\x41\x41\x42\x73\x73\x73\x73\x73\x73
+     *    IBM-037: \xFE\x41\x41\x41\x41\x41\x41\x42\x72\x72\x72\x72\x72\x72
+     *   POSIX-BC: \xFE\x41\x41\x41\x41\x41\x41\x42\x75\x75\x75\x75\x75\x75
+     *         I8: \xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA1\xBF\xBF\xBF\xBF\xBF\xBF
+     * U+80000000 (2 ** 31):
+     *      ASCII: \xFE\x82\x80\x80\x80\x80\x80
+     *              [0] [1] [2] [3] [4] [5] [6] [7] [8] [9] 10  11  12  13
+     *   IBM-1047: \xFE\x41\x41\x41\x41\x41\x41\x43\x41\x41\x41\x41\x41\x41
+     *    IBM-037: \xFE\x41\x41\x41\x41\x41\x41\x43\x41\x41\x41\x41\x41\x41
+     *   POSIX-BC: \xFE\x41\x41\x41\x41\x41\x41\x43\x41\x41\x41\x41\x41\x41
+     *         I8: \xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA2\xA0\xA0\xA0\xA0\xA0\xA0
+     */
+
+#ifdef EBCDIC
+
+        /* [0] is start byte    [1] [2] [3] [4] [5] [6] [7] */
+    const U8 * const prefix = "\x41\x41\x41\x41\x41\x41\x42";
+    const STRLEN prefix_len = sizeof(prefix) - 1;
+    const STRLEN len = e - s;
+    const cmp_len = MIN(prefix_len, len - 1);
+
+#else
+
+    PERL_UNUSED_ARG(e);
+
+#endif
+
+    PERL_ARGS_ASSERT_IS_UTF8_CP_ABOVE_31_BITS;
+
+    assert(! UTF8_IS_INVARIANT(*s));
+
+#ifndef EBCDIC
+
+    /* Technically, a start byte of FE can be for a code point that fits into
+     * 31 bytes, but not for well-formed UTF-8: doing that requires an overlong
+     * malformation. */
+    return (*s >= 0xFE);
+
+#else
+
+    /* On the EBCDIC code pages we handle, only 0xFE can mean a 32-bit or
+     * larger code point (0xFF is an invariant).  For 0xFE, we need at least 2
+     * bytes, and maybe up through 8 bytes, to be sure if the value is above 31
+     * bits. */
+    if (*s != 0xFE || len == 1) {
+        return FALSE;
+    }
+
+    /* Note that in UTF-EBCDIC, the two lowest possible continuation bytes are
+     * \x41 and \x42. */
+    return cBOOL(memGT(s + 1, prefix, cmp_len));
+
+#endif
+
+}
+
 /*
 
 A helper function for the macro isUTF8_CHAR(), which should be used instead of
@@ -801,35 +882,14 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
             /* The maximum code point ever specified by a standard was
              * 2**31 - 1.  Anything larger than that is a Perl extension that
              * very well may not be understood by other applications (including
-             * earlier perl versions on EBCDIC platforms).  On ASCII platforms,
-             * these code points are indicated by the first UTF-8 byte being
-             * 0xFE or 0xFF.  We test for these after the regular SUPER ones,
-             * and before possibly bailing out, so that the slightly more dire
-             * warning will override the regular one. */
-            if (
-#ifndef EBCDIC
-                (*s0 & 0xFE) == 0xFE	/* matches both FE, FF */
-#else
-                 /* The I8 for 2**31 (U+80000000) is
-                  *   \xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA2\xA0\xA0\xA0\xA0\xA0\xA0
-                  * and it turns out that on all EBCDIC pages recognized that
-                  * the UTF-EBCDIC for that code point is
-                  *   \xFE\x41\x41\x41\x41\x41\x41\x43\x41\x41\x41\x41\x41\x41
-                  * For the next lower code point, the 1047 UTF-EBCDIC is
-                  *   \xFE\x41\x41\x41\x41\x41\x41\x42\x73\x73\x73\x73\x73\x73
-                  * The other code pages differ only in the bytes following
-                  * \x42.  Thus the following works (the minimum continuation
-                  * byte is \x41). */
-                *s0 == 0xFE && send - s0 > 7 && (   s0[1] > 0x41
-                                                 || s0[2] > 0x41
-                                                 || s0[3] > 0x41
-                                                 || s0[4] > 0x41
-                                                 || s0[5] > 0x41
-                                                 || s0[6] > 0x41
-                                                 || s0[7] > 0x42)
-#endif
-                && (flags & (UTF8_WARN_ABOVE_31_BIT|UTF8_WARN_SUPER
-                            |UTF8_DISALLOW_ABOVE_31_BIT)))
+             * earlier perl versions on EBCDIC platforms).  We test for these
+             * after the regular SUPER ones, and before possibly bailing out,
+             * so that the slightly more dire warning will override the regular
+             * one. */
+            if (   (flags & (UTF8_WARN_ABOVE_31_BIT
+                            |UTF8_WARN_SUPER
+                            |UTF8_DISALLOW_ABOVE_31_BIT))
+                && UNLIKELY(is_utf8_cp_above_31_bits(s0, send)))
             {
                 if (  ! (flags & UTF8_CHECK_ONLY)
                     &&  (flags & (UTF8_WARN_ABOVE_31_BIT|UTF8_WARN_SUPER))
@@ -3972,24 +4032,18 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 	    if (UTF8_IS_SUPER(s, e)) {
                 if (   ckWARN_d(WARN_NON_UNICODE)
                     || (   ckWARN_d(WARN_DEPRECATED)
-#if defined(UV_IS_QUAD)
+#ifndef UV_IS_QUAD
+                        && UNLIKELY(is_utf8_cp_above_31_bits(s, e))
+#else   /* Below is 64-bit words */
                         /* 2**63 and up meet these conditions provided we have
                          * a 64-bit word. */
 #   ifdef EBCDIC
-                        && *s == 0xFE && e - s >= UTF8_MAXBYTES
-                        && s[1] >= 0x49
+                        && *s == 0xFE
+                        && NATIVE_UTF8_TO_I8(s[1]) >= 0xA8
 #   else
-                        && *s == 0xFF && e -s >= UTF8_MAXBYTES
+                        && *s == 0xFF
+                           /* s[1] being above 0x80 overflows */
                         && s[2] >= 0x88
-#   endif
-#else   /* Below is 32-bit words */
-                        /* 2**31 and above meet these conditions on all EBCDIC
-                         * pages recognized for 32-bit platforms */
-#   ifdef EBCDIC
-                        && *s == 0xFE && e - s >= UTF8_MAXBYTES
-                        && s[6] >= 0x43
-#   else
-                        && *s >= 0xFE
 #   endif
 #endif
                 )) {
