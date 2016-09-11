@@ -4140,7 +4140,7 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 	}
 	if (UNLIKELY(isUTF8_POSSIBLY_PROBLEMATIC(*s))) {
 	    STRLEN char_len;
-	    if (UTF8_IS_SUPER(s, e)) {
+	    if (UNLIKELY(UTF8_IS_SUPER(s, e))) {
                 if (   ckWARN_d(WARN_NON_UNICODE)
                     || (   ckWARN_d(WARN_DEPRECATED)
 #ifndef UV_IS_QUAD
@@ -4163,7 +4163,7 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
                     ok = FALSE;
                 }
 	    }
-	    else if (UTF8_IS_SURROGATE(s, e)) {
+	    else if (UNLIKELY(UTF8_IS_SURROGATE(s, e))) {
 		if (ckWARN_d(WARN_SURROGATE)) {
                     /* This has a different warning than the one the called
                      * function would output, so can't just call it, unlike we
@@ -4174,7 +4174,7 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 		    ok = FALSE;
 		}
 	    }
-	    else if ((UTF8_IS_NONCHAR(s, e)) && (ckWARN_d(WARN_NONCHAR))) {
+	    else if (UNLIKELY(UTF8_IS_NONCHAR(s, e)) && (ckWARN_d(WARN_NONCHAR))) {
                 /* A side effect of this function will be to warn */
                 (void) utf8n_to_uvchr(s, e - s, &char_len, UTF8_WARN_NONCHAR);
 		ok = FALSE;
