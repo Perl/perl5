@@ -223,7 +223,11 @@ As you can see, the continuation bytes all begin with C<10>, and the
 leading bits of the start byte tell how many bytes there are in the
 encoded character.
 
-Perl's extended UTF-8 means we can have start bytes up to FF.
+Perl's extended UTF-8 means we can have start bytes up through FF, though any
+beginning with FF yields a code point that is too large for 32-bit ASCII
+platforms.  FF signals to use 13 bytes for the encoded character.  This breaks
+the paradigm that the number of leading bits gives how many total bytes there
+are in the character.
 
 */
 
@@ -914,12 +918,12 @@ is a valid UTF-8 character.
     (UNLIKELY((e) <= (s))                                                   \
     ? 0                                                                     \
     : (UTF8_IS_INVARIANT(*s))                                               \
-    ? 1                                                                     \
-    : UNLIKELY(((e) - (s)) < UTF8SKIP(s))                                   \
-      ? 0                                                                   \
-      : LIKELY(NATIVE_UTF8_TO_I8(*s) <= _IS_UTF8_CHAR_HIGHEST_START_BYTE)   \
-      ? is_UTF8_CHAR_utf8_no_length_checks(s)                               \
-      : _is_utf8_char_helper(s, e, 0))
+      ? 1                                                                   \
+      : UNLIKELY(((e) - (s)) < UTF8SKIP(s))                                 \
+        ? 0                                                                 \
+        : LIKELY(NATIVE_UTF8_TO_I8(*s) <= _IS_UTF8_CHAR_HIGHEST_START_BYTE) \
+          ? is_UTF8_CHAR_utf8_no_length_checks(s)                           \
+          : _is_utf8_char_helper(s, e, 0))
 
 #define is_utf8_char_buf(buf, buf_end) isUTF8_CHAR(buf, buf_end)
 
