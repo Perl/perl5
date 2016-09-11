@@ -460,60 +460,76 @@ Perl__is_utf8_char_slow(const U8 * const s, const STRLEN len)
         }
     }
 
-#ifndef EBCDIC
-
-    /* Here is syntactically valid.  Make sure this isn't the start of an
-     * overlong.  These values were found by manually inspecting the UTF-8
-     * patterns.  See the tables in utf8.h and utfebcdic.h */
-
-    /* This is not needed on modern perls where C0 and C1 are not considered
-     * start bytes. */
-#if 0
-    if (UNLIKELY(*s < 0xC2)) {
-        return 0;
-    }
-#endif
+    /* Here is syntactically valid.  Next, make sure this isn't the start of an
+     * overlong.  Overlongs can occur whenever the number of continuation bytes
+     * changes.  That means whenever the number of leading 1 bits in a start
+     * byte increases from the next lower start byte.  That happens for start
+     * bytes C0, E0, F0, F8, FC, FE, and FF.  On modern perls, the following
+     * illegal start bytes have already been excluded, so don't need to be
+     * tested here;
+     * ASCII platforms: C0, C1
+     * EBCDIC platforms C0, C1, C2, C3, C4, E0
+     *
+     * At least a second byte is required to determine if other sequences will
+     * be an overlong. */
 
     if (len > 1) {
-        if (   (*s == 0xE0 && UNLIKELY(s[1] < 0xA0))
-            || (*s == 0xF0 && UNLIKELY(s[1] < 0x90))
-            || (*s == 0xF8 && UNLIKELY(s[1] < 0x88))
-            || (*s == 0xFC && UNLIKELY(s[1] < 0x84))
-            || (*s == 0xFE && UNLIKELY(s[1] < 0x82)))
+        const U8 s0 = NATIVE_UTF8_TO_I8(s[0]);
+        const U8 s1 = NATIVE_UTF8_TO_I8(s[1]);
+
+        /* Each platform has overlongs after the start bytes given above
+         * (expressed in I8 for EBCDIC).  What constitutes an overlong varies
+         * by platform, but the logic is the same, except the E0 overlong has
+         * already been excluded on EBCDIC platforms.   The  values below were
+         * found by manually inspecting the UTF-8 patterns.  See the tables in
+         * utf8.h and utfebcdic.h */
+
+#       ifdef EBCDIC
+#           define F0_ABOVE_OVERLONG 0xB0
+#           define F8_ABOVE_OVERLONG 0xA8
+#           define FC_ABOVE_OVERLONG 0xA4
+#           define FE_ABOVE_OVERLONG 0xA2
+#           define FF_OVERLONG_PREFIX "\xfe\x41\x41\x41\x41\x41\x41\x41"
+                                      /* I8(0xfe) is FF */
+#       else
+
+        if (s0 == 0xE0 && UNLIKELY(s1 < 0xA0)) {
+            return 0;       /* Overlong */
+        }
+
+#           define F0_ABOVE_OVERLONG 0x90
+#           define F8_ABOVE_OVERLONG 0x88
+#           define FC_ABOVE_OVERLONG 0x84
+#           define FE_ABOVE_OVERLONG 0x82
+#           define FF_OVERLONG_PREFIX "\xff\x80\x80\x80\x80\x80\x80"
+#       endif
+
+
+        if (   (s0 == 0xF0 && UNLIKELY(s1 < F0_ABOVE_OVERLONG))
+            || (s0 == 0xF8 && UNLIKELY(s1 < F8_ABOVE_OVERLONG))
+            || (s0 == 0xFC && UNLIKELY(s1 < FC_ABOVE_OVERLONG))
+            || (s0 == 0xFE && UNLIKELY(s1 < FE_ABOVE_OVERLONG)))
         {
-            return 0;
-        }
-        if ((len > 6 && UNLIKELY(*s == 0xFF) && UNLIKELY(s[6] < 0x81))) {
-            return 0;
-        }
-    }
-
-#else   /* For EBCDIC, we use I8, which is the same on all code pages */
-    {
-        const U8 s0 = NATIVE_UTF8_TO_I8(*s);
-
-        /* On modern perls C0-C4 aren't considered start bytes */
-        if ( /* s0 < 0xC5 || */ s0 == 0xE0) {
-            return 0;
+            return 0;       /* Overlong */
         }
 
-        if (len >= 1) {
-            const U8 s1 = NATIVE_UTF8_TO_I8(s[1]);
+#   if defined(UV_IS_QUAD) || defined(EBCDIC)
 
-            if (   (s0 == 0xF0 && UNLIKELY(s1 < 0xB0))
-                || (s0 == 0xF8 && UNLIKELY(s1 < 0xA8))
-                || (s0 == 0xFC && UNLIKELY(s1 < 0xA4))
-                || (s0 == 0xFE && UNLIKELY(s1 < 0x82)))
-            {
-                return 0;
-            }
-            if ((len > 7 && UNLIKELY(s0 == 0xFF) && UNLIKELY(s[7] < 0xA1))) {
-                return 0;
-            }
+        /* Check for the FF overlong.  This happens only if all these bytes
+         * match; what comes after them doesn't matter.  See tables in utf8.h,
+         * utfebcdic.h.  (Can't happen on ASCII 32-bit platforms, as overflows
+         * instead.) */
+
+        if (   len >= sizeof(FF_OVERLONG_PREFIX) - 1
+            && UNLIKELY(memEQ(s, FF_OVERLONG_PREFIX,
+                                               sizeof(FF_OVERLONG_PREFIX) - 1)))
+        {
+            return 0;       /* Overlong */
         }
-    }
 
 #endif
+
+    }
 
     /* Finally, see if this would overflow a UV on this platform.  See if the
      * UTF8 for this code point is larger than that for the highest
