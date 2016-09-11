@@ -533,7 +533,7 @@ S_is_utf8_valid_partial_char(const U8 * const s, const U8 * const e)
 
     PERL_ARGS_ASSERT_IS_UTF8_VALID_PARTIAL_CHAR;
 
-    if (s >= e || s + UTF8SKIP(s) < e) {
+    if (s >= e || s + UTF8SKIP(s) <= e) {
         return FALSE;
     }
 
