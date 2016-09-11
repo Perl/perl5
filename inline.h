@@ -505,25 +505,24 @@ Perl_utf8_hop(const U8 *s, SSize_t off)
 
 =for apidoc is_utf8_valid_partial_char
 
-Returns 1 if there exists some sequence of bytes, call it C<s'>, that when
-appended to the sequence from C<s> through S<C<e - 1>> causes the entire
-sequence starting at C<s> (including C<s'>) to be the well-formed UTF-8 of
-some code point; otherwise returns 0.
+Returns 0 if the sequence of bytes starting at C<s> and looking no further than
+S<C<e - 1>> is the UTF-8 encoding, as extended by Perl, for one or more code
+points.  Otherwise, it returns 1 if there exists at least one non-empty
+sequence of bytes that when appended to sequence C<s>, starting at position
+C<e> causes the entire sequence to be the well-formed UTF-8 of some code point;
+otherwise returns 0.
 
-In other words this returns TRUE if C<s> points to the beginning, but partial,
-sequence of the UTF-8 for some code point.
+In other words this returns TRUE if C<s> points to a partial UTF-8-encoded code
+point.
 
-This is useful when some fixed-length buffer is being tested for being
-well-formed UTF-8, but the final few bytes in it don't comprise a full
-character: it is split somewhere in the middle of its UTF-8 representation.
-(Presumably when the buffer is refreshed with the next chunk of data, the new
-first bytes will complete the partial code point.)   This function is used to
-verify that the final bytes in the current buffer are in fact the legal
-beginning of some code point, so that if they aren't, the failure can be
-signalled without having to wait for the next read.
-
-If the bytes terminated at S<C<e - 1>> are a full character (or more), 0 is
-returned.
+This is useful when a fixed-length buffer is being tested for being well-formed
+UTF-8, but the final few bytes in it don't comprise a full character; that is,
+it is split somewhere in the middle of the final code point's UTF-8
+representation.  (Presumably when the buffer is refreshed with the next chunk
+of data, the new first bytes will complete the partial code point.)   This
+function is used to verify that the final bytes in the current buffer are in
+fact the legal beginning of some code point, so that if they aren't, the
+failure can be signalled without having to wait for the next read.
 
 =cut
 */
