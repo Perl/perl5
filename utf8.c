@@ -515,14 +515,17 @@ Perl__is_utf8_char_slow(const U8 * const s, const STRLEN len)
 
 #endif
 
-    /* Now see if this would overflow a UV on this platform.  See if the UTF8
-     * for this code point is larger than that for the highest representable
-     * code point */
+    /* Finally, see if this would overflow a UV on this platform.  See if the
+     * UTF8 for this code point is larger than that for the highest
+     * representable code point.  (For ASCII platforms, we could use memcmp()
+     * because we don't have to convert each byte to I8, but it's very rare
+     * input indeed that would approach overflow, so the loop below will likely
+     * only get executed once */
     y = (const U8 *) HIGHEST_REPRESENTABLE_UTF8;
 
     for (x = s; x < e; x++, y++) {
 
-        /* If the same at this byte, go on to the next */
+        /* If the same as this byte, go on to the next */
         if (UNLIKELY(NATIVE_UTF8_TO_I8(*x) == *y)) {
             continue;
         }
