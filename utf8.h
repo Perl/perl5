@@ -755,14 +755,14 @@ fit in an IV on the current machine.
                     && (    NATIVE_UTF8_TO_I8(*(s)) >  0xF9                 \
                         || (NATIVE_UTF8_TO_I8(*(s) + 1) >= 0xA2))           \
                     &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                   \
-                    ? _is_utf8_char_slow(s, UTF8SKIP(s)) : 0)
+                    ? _is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0)
 #else
 #   define UTF8_IS_SUPER(s, e)                                              \
                    ((    LIKELY((e) > (s) + 3)                              \
                      &&  (*(U8*) (s)) >= 0xF4                               \
                      && ((*(U8*) (s)) >  0xF4 || (*((U8*) (s) + 1) >= 0x90))\
                      &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                  \
-                    ? _is_utf8_char_slow(s, UTF8SKIP(s)) : 0)
+                    ? _is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0)
 #endif
 
 /* These are now machine generated, and the 'given' clause is no longer
@@ -919,7 +919,7 @@ is a valid UTF-8 character.
       ? 0                                                                   \
       : LIKELY(NATIVE_UTF8_TO_I8(*s) <= _IS_UTF8_CHAR_HIGHEST_START_BYTE)   \
       ? is_UTF8_CHAR_utf8_no_length_checks(s)                               \
-      : _is_utf8_char_slow(s, UTF8SKIP(s)))
+      : _is_utf8_char_helper(s, e, 0))
 
 #define is_utf8_char_buf(buf, buf_end) isUTF8_CHAR(buf, buf_end)
 

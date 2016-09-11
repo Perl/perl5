@@ -537,7 +537,7 @@ S_is_utf8_valid_partial_char(const U8 * const s, const U8 * const e)
         return FALSE;
     }
 
-    return cBOOL(_is_utf8_char_slow(s, e - s));
+    return cBOOL(_is_utf8_char_helper(s, e, 0));
 }
 
 /* ------------------------------- perl.h ----------------------------- */
