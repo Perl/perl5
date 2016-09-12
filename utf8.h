@@ -334,6 +334,55 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
 /* The above macro handles UTF-8 that has this start byte as the maximum */
 #define _IS_UTF8_CHAR_HIGHEST_START_BYTE 0xF7
 
+/* A helper macro for isSTRICT_UTF8_CHAR, so use that one instead of this.
+ * Like is_UTF8_CHAR_utf8_no_length_checks(), this was moved here and LIKELYs
+ * added manually.
+ *
+	STRICT_UTF8_CHAR: Matches legal Unicode UTF-8 variant code points, no
+                          surrrogates nor non-character code points
+*/
+/*** GENERATED CODE ***/
+#define is_STRICT_UTF8_CHAR_utf8_no_length_checks(s)                        \
+( ( 0xC2 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xDF ) ?                          \
+    ( LIKELY( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) ? 2 : 0 )                          \
+: ( 0xE0 == ((U8*)s)[0] ) ?                                                 \
+    ( LIKELY( ( ( ((U8*)s)[1] & 0xE0 ) == 0xA0 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
+: ( ( 0xE1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xEC ) || 0xEE == ((U8*)s)[0] ) ?\
+    ( ( ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
+: ( 0xED == ((U8*)s)[0] ) ?                                                 \
+    ( LIKELY( ( ( ((U8*)s)[1] & 0xE0 ) == 0x80 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
+: ( 0xEF == ((U8*)s)[0] ) ?                                                 \
+    ( ( ( 0x80 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0xB6 ) || ( 0xB8 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0xBE ) ) ?\
+	( LIKELY( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ? 3 : 0 )                      \
+    : ( 0xB7 == ((U8*)s)[1] ) ?                                             \
+	( LIKELY( ( ((U8*)s)[2] & 0xF0 ) == 0x80 || ( ((U8*)s)[2] & 0xF0 ) == 0xB0 ) ? 3 : 0 )\
+    : ( ( 0xBF == ((U8*)s)[1] ) && ( 0x80 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0xBD ) ) ? 3 : 0 )\
+: ( 0xF0 == ((U8*)s)[0] ) ?                                                 \
+    ( ( ( 0x90 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0x9E ) || ( 0xA0 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0xAE ) || ( 0xB0 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0xBE ) ) ?\
+	( LIKELY( ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
+    : ( ((U8*)s)[1] == 0x9F || ( ( ((U8*)s)[1] & 0xEF ) == 0xAF ) ) ?       \
+	( ( 0x80 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0xBE ) ?                  \
+	    ( LIKELY( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ? 4 : 0 )                  \
+	: LIKELY( ( 0xBF == ((U8*)s)[2] ) && ( 0x80 <= ((U8*)s)[3] && ((U8*)s)[3] <= 0xBD ) ) ? 4 : 0 )\
+    : 0 )                                                                   \
+: ( 0xF1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xF3 ) ?                          \
+    ( ( ( ( ((U8*)s)[1] & 0xC8 ) == 0x80 ) || ( ( ((U8*)s)[1] & 0xCC ) == 0x88 ) || ( ( ((U8*)s)[1] & 0xCE ) == 0x8C ) || ( ( ((U8*)s)[1] & 0xCF ) == 0x8E ) ) ?\
+	( LIKELY( ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
+    : ( ( ((U8*)s)[1] & 0xCF ) == 0x8F ) ?                                  \
+	( ( 0x80 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0xBE ) ?                  \
+	    ( LIKELY( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ? 4 : 0 )                  \
+	: LIKELY( ( 0xBF == ((U8*)s)[2] ) && ( 0x80 <= ((U8*)s)[3] && ((U8*)s)[3] <= 0xBD ) ) ? 4 : 0 )\
+    : 0 )                                                                   \
+: ( 0xF4 == ((U8*)s)[0] ) ?                                                 \
+    ( ( 0x80 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0x8E ) ?                      \
+	( LIKELY( ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
+    : ( 0x8F == ((U8*)s)[1] ) ?                                             \
+	( ( 0x80 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0xBE ) ?                  \
+	    ( LIKELY( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ? 4 : 0 )                  \
+	: LIKELY( ( 0xBF == ((U8*)s)[2] ) && ( 0x80 <= ((U8*)s)[3] && ((U8*)s)[3] <= 0xBD ) ) ? 4 : 0 )\
+    : 0 )                                                                   \
+: 0 )
+
 #endif /* EBCDIC vs ASCII */
 
 /* 2**UTF_ACCUMULATION_SHIFT - 1 */
@@ -885,9 +934,6 @@ point's representation.
 
 #define SHARP_S_SKIP 2
 
-/* If you want to exclude surrogates, and beyond legal Unicode, see the blame
- * log for earlier versions which gave details for these */
-
 /*
 
 =for apidoc Am|STRLEN|isUTF8_CHAR|const U8 *s|const U8 *e
@@ -927,6 +973,35 @@ is a valid UTF-8 character.
           : _is_utf8_char_helper(s, e, 0))
 
 #define is_utf8_char_buf(buf, buf_end) isUTF8_CHAR(buf, buf_end)
+
+/*
+
+=for apidoc Am|STRLEN|isSTRICT_UTF8_CHAR|const U8 *s|const U8 *e
+
+Evaluates to non-zero if the first few bytes of the string starting at C<s> and
+looking no further than S<C<e - 1>> are well-formed UTF-8 that represents some
+Unicode code point completely acceptable for open interchange between all
+applications; otherwise it evaluates to 0.  If non-zero, the value gives how
+many bytes starting at C<s> comprise the code point's representation.
+
+The largest acceptable code point is the Unicode maximum 0x10FFFF, and must not
+be a surrogate nor a non-character code point.  Thus this excludes any code
+point from Perl's extended UTF-8.
+
+This is used to efficiently decide if the next few bytes in C<s> is
+legal Unicode-acceptable UTF-8 for a single character.
+
+=cut
+*/
+
+#define isSTRICT_UTF8_CHAR(s, e)                                            \
+    (UNLIKELY((e) <= (s))                                                   \
+    ? 0                                                                     \
+    : (UTF8_IS_INVARIANT(*s))                                               \
+      ? 1                                                                   \
+      : UNLIKELY(((e) - (s)) < UTF8SKIP(s))                                 \
+        ? 0                                                                 \
+        : is_STRICT_UTF8_CHAR_utf8_no_length_checks(s))
 
 /* Do not use; should be deprecated.  Use isUTF8_CHAR() instead; this is
  * retained solely for backwards compatibility */
