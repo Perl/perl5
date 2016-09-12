@@ -893,9 +893,10 @@ point's representation.
 =for apidoc Am|STRLEN|isUTF8_CHAR|const U8 *s|const U8 *e
 
 Evaluates to non-zero if the first few bytes of the string starting at C<s> and
-looking no further than S<C<e - 1>> are well-formed UTF-8 that represents some
-code point; otherwise it evaluates to 0.  If non-zero, the value gives how many
-many bytes starting at C<s> comprise the code point's representation.
+looking no further than S<C<e - 1>> are well-formed UTF-8, as extended by Perl,
+that represents some code point; otherwise it evaluates to 0.  If non-zero, the
+value gives how many bytes starting at C<s> comprise the code point's
+representation.
 
 The code point can be any that will fit in a UV on this machine, using Perl's
 extension to official UTF-8 to represent those higher than the Unicode maximum
