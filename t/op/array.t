@@ -558,4 +558,21 @@ is $#foo, 3, 'assigning to arylen aliased in foreach(scalar $#arylen)';
 sub { undef *_; shift }->(); # This would crash; no ok() necessary.
 sub { undef *_; pop   }->();
 
+# [perl #129164], [perl #129166], [perl #129167]
+# splice() with null array entries
+# These used to crash.
+$#a = -1; $#a++;
+() = 0-splice @a; # subtract
+$#a = -1; $#a++;
+() =  -splice @a; # negate
+$#a = -1; $#a++;
+() = 0+splice @a; # add
+# And with array expansion, too
+$#a = -1; $#a++;
+() = 0-splice @a, 0, 1, 1, 1;
+$#a = -1; $#a++;
+() =  -splice @a, 0, 1, 1, 1;
+$#a = -1; $#a++;
+() = 0+splice @a, 0, 1, 1, 1;
+
 "We're included by lib/Tie/Array/std.t so we need to return something true";
