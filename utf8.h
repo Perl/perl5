@@ -383,6 +383,28 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
     : 0 )                                                                   \
 : 0 )
 
+/*  Similarly,
+        C9_STRICT_UTF8_CHAR: Matches legal Unicode UTF-8 variant code
+                                     points, no surrogates
+	0x0080 - 0xD7FF
+	0xE000 - 0x10FFFF
+*/
+/*** GENERATED CODE ***/
+#define is_C9_STRICT_UTF8_CHAR_utf8_no_length_checks(s)                     \
+( ( 0xC2 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xDF ) ?                          \
+    ( LIKELY( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) ? 2 : 0 )                    \
+: ( 0xE0 == ((U8*)s)[0] ) ?                                                 \
+    ( LIKELY( ( ( ((U8*)s)[1] & 0xE0 ) == 0xA0 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
+: ( ( 0xE1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xEC ) || ( ((U8*)s)[0] & 0xFE ) == 0xEE ) ?\
+    ( LIKELY( ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
+: ( 0xED == ((U8*)s)[0] ) ?                                                 \
+    ( LIKELY( ( ( ((U8*)s)[1] & 0xE0 ) == 0x80 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
+: ( 0xF0 == ((U8*)s)[0] ) ?                                                 \
+    ( LIKELY( ( ( 0x90 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0xBF ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
+: ( 0xF1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xF3 ) ?                          \
+    ( LIKELY( ( ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
+: LIKELY( ( ( ( 0xF4 == ((U8*)s)[0] ) && ( ( ((U8*)s)[1] & 0xF0 ) == 0x80 ) ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )
+
 #endif /* EBCDIC vs ASCII */
 
 /* 2**UTF_ACCUMULATION_SHIFT - 1 */
@@ -989,7 +1011,8 @@ be a surrogate nor a non-character code point.  Thus this excludes any code
 point from Perl's extended UTF-8.
 
 This is used to efficiently decide if the next few bytes in C<s> is
-legal Unicode-acceptable UTF-8 for a single character.
+legal Unicode-acceptable UTF-8 for a single character.  Use
+C<L</isC9_STRICT_UTF8_CHAR>> to also accept non-character code points.
 
 =cut
 */
@@ -1002,6 +1025,36 @@ legal Unicode-acceptable UTF-8 for a single character.
       : UNLIKELY(((e) - (s)) < UTF8SKIP(s))                                 \
         ? 0                                                                 \
         : is_STRICT_UTF8_CHAR_utf8_no_length_checks(s))
+
+/*
+
+=for apidoc Am|STRLEN|isC9_STRICT_UTF8_CHAR|const U8 *s|const U8 *e
+
+Evaluates to non-zero if the first few bytes of the string starting at C<s> and
+looking no further than S<C<e - 1>> are well-formed UTF-8 that represents some
+Unicode non-surrogate code point; otherwise it evaluates to 0.  If non-zero,
+the value gives how many bytes starting at C<s> comprise the code point's
+representation.
+
+The largest acceptable code point is the Unicode maximum 0x10FFFF.  This
+differs from C<L</isSTRICT_UTF8_CHAR>> only in that it accepts non-character
+code points.  This corresponds to
+L<Unicode Corrigendum #9|http://www.unicode.org/versions/corrigendum9.html>.
+which said that non-character code points are merely discouraged rather than
+completely forbidden in open interchange.  See
+L<perlunicode/Noncharacter code points>.
+
+=cut
+*/
+
+#define isC9_STRICT_UTF8_CHAR(s, e)                                         \
+    (UNLIKELY((e) <= (s))                                                   \
+    ? 0                                                                     \
+    : (UTF8_IS_INVARIANT(*s))                                               \
+      ? 1                                                                   \
+      : UNLIKELY(((e) - (s)) < UTF8SKIP(s))                                 \
+        ? 0                                                                 \
+        : is_C9_STRICT_UTF8_CHAR_utf8_no_length_checks(s))
 
 /* Do not use; should be deprecated.  Use isUTF8_CHAR() instead; this is
  * retained solely for backwards compatibility */

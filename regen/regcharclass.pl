@@ -1704,6 +1704,16 @@ SURROGATE: Surrogate code points
 #0xF0000 - 0xFFFFD
 #0x100000 - 0x10FFFD
 
+#C9_STRICT_UTF8_CHAR: Matches legal Unicode UTF-8 variant code points, no surrogates
+#=> UTF8 :no_length_checks only_ascii_platform
+#0x0080 - 0xD7FF
+#0xE000 - 0x10FFFF
+#
+#C9_STRICT_UTF8_CHAR: Matches legal Unicode UTF-8 variant code points including non-character code points, no surrogates
+#=> UTF8 :no_length_checks only_ebcdic_platform
+#0x00A0 - 0xD7FF
+#0xE000 - 0x10FFFF
+
 QUOTEMETA: Meta-characters that \Q should quote
 => high :fast
 \p{_Perl_Quotemeta}

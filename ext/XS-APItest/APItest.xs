@@ -5334,6 +5334,13 @@ test_isSTRICT_UTF8_CHAR(char *s, STRLEN len)
     OUTPUT:
         RETVAL
 
+STRLEN
+test_isC9_STRICT_UTF8_CHAR(char *s, STRLEN len)
+    CODE:
+        RETVAL = isC9_STRICT_UTF8_CHAR((U8 *) s, (U8 *) s + len);
+    OUTPUT:
+        RETVAL
+
 IV
 test_is_utf8_valid_partial_char_flags(char *s, STRLEN len, U32 flags)
     CODE:
