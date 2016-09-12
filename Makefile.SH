@@ -143,26 +143,6 @@ true)
         esac
 
 	case "$osname" in
-	linux)
-	    # If there is a pre-existing $libperl from a previous
-	    # installation, Linux needs to use LD_PRELOAD to
-	    # override the LD_LIBRARY_PATH setting.  See the
-	    # INSTALL file, under "Building a shared perl library".
-	    # If there is no pre-existing $libperl, we don't need
-	    # to do anything further.
-	    if test -f $archlib/CORE/$libperl; then
-		rm -f preload
-		cat <<'EOT' > preload
-#! /bin/sh
-lib=$1
-shift
-test -r $lib && export LD_PRELOAD="$lib $LD_PRELOAD"
-exec "$@"
-EOT
-		chmod 755 preload
-		ldlibpth="$ldlibpth `pwd`/preload `pwd`/$libperl"
-	    fi
-	    ;;
 	os390)	test -f /bin/env && ldlibpth="/bin/env $ldlibpth"
 		;;
 	esac
