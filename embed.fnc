@@ -744,7 +744,10 @@ Abmnpd	|STRLEN	|is_utf8_char_buf|NN const U8 *buf|NN const U8 *buf_end
 AnipdP	|bool	|is_utf8_string	|NN const U8 *s|STRLEN len
 Anpdmb	|bool	|is_utf8_string_loc|NN const U8 *s|STRLEN len|NN const U8 **ep
 Anipd	|bool	|is_utf8_string_loclen|NN const U8 *s|STRLEN len|NULLOK const U8 **ep|NULLOK STRLEN *el
-AnidP	|bool	|is_utf8_valid_partial_char|NN const U8 * const s|NN const U8 * const e
+AmndP	|bool	|is_utf8_valid_partial_char				    \
+		|NN const U8 * const s|NN const U8 * const e
+AnidP	|bool	|is_utf8_valid_partial_char_flags			    \
+		|NN const U8 * const s|NN const U8 * const e|const U32 flags
 AMpR	|bool	|_is_uni_FOO|const U8 classnum|const UV c
 AMpR	|bool	|_is_utf8_FOO|const U8 classnum|NN const U8 *p
 ADMpR	|bool	|is_utf8_alnum	|NN const U8 *p

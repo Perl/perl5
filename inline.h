@@ -526,17 +526,42 @@ failure can be signalled without having to wait for the next read.
 
 =cut
 */
-PERL_STATIC_INLINE bool
-S_is_utf8_valid_partial_char(const U8 * const s, const U8 * const e)
-{
+#define is_utf8_valid_partial_char(s, e) is_utf8_valid_partial_char_flags(s, e, 0)
 
-    PERL_ARGS_ASSERT_IS_UTF8_VALID_PARTIAL_CHAR;
+/*
+
+=for apidoc is_utf8_valid_partial_char_flags
+
+Like C<L</is_utf8_valid_partial_char>>, it returns a boolean giving whether
+or not the input is a valid UTF-8 encoded partial character, but it takes an
+extra parameter, C<flags>, which can further restrict which code points are
+considered valid.
+
+If C<flags> is 0, this behaves identically to
+C<L</is_utf8_valid_partial_char>>.  Otherwise C<flags> can be any combination
+of the C<UTF8_DISALLOW_I<foo>> flags accepted by C<L</utf8n_to_uvchr>>.  If
+there is any sequence of bytes that can complete the input partial character in
+such a way that a non-prohibited character is formed, the function returns
+TRUE; otherwise FALSE.  Non characters cannot be determined based on partial
+character input.  But many  of the other possible excluded types can be
+determined from just the first one or two bytes.
+
+=cut
+ */
+
+PERL_STATIC_INLINE bool
+S_is_utf8_valid_partial_char_flags(const U8 * const s, const U8 * const e, const U32 flags)
+{
+    PERL_ARGS_ASSERT_IS_UTF8_VALID_PARTIAL_CHAR_FLAGS;
+
+    assert(0 == (flags & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+                          |UTF8_DISALLOW_ABOVE_31_BIT)));
 
     if (s >= e || s + UTF8SKIP(s) <= e) {
         return FALSE;
     }
 
-    return cBOOL(_is_utf8_char_helper(s, e, 0));
+    return cBOOL(_is_utf8_char_helper(s, e, flags));
 }
 
 /* ------------------------------- perl.h ----------------------------- */
