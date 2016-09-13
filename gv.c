@@ -1011,7 +1011,7 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
     const char * const origname = name;
     const char * const name_end = name + len;
     const char *nend;
-    const char *nsplit = NULL;
+    const char *last_separator = NULL;
     GV* gv;
     HV* ostash = stash;
     SV *const error_report = MUTABLE_SV(stash);
@@ -1024,38 +1024,38 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
     if (SvTYPE(stash) < SVt_PVHV)
 	stash = NULL;
     else {
-	/* The only way stash can become NULL later on is if nsplit is set,
+	/* The only way stash can become NULL later on is if last_separator is set,
 	   which in turn means that there is no need for a SVt_PVHV case
 	   the error reporting code.  */
     }
 
     for (nend = name; *nend || nend != name_end; nend++) {
 	if (*nend == '\'') {
-	    nsplit = nend;
+	    last_separator = nend;
 	    name = nend + 1;
 	}
 	else if (*nend == ':' && *(nend + 1) == ':') {
-	    nsplit = nend++;
+	    last_separator = nend++;
 	    name = nend + 1;
 	}
     }
-    if (nsplit) {
-	if ((nsplit - origname) == 5 && memEQ(origname, "SUPER", 5)) {
+    if (last_separator) {
+	if ((last_separator - origname) == 5 && memEQ(origname, "SUPER", 5)) {
 	    /* ->SUPER::method should really be looked up in original stash */
 	    stash = CopSTASH(PL_curcop);
 	    flags |= GV_SUPER;
 	    DEBUG_o( Perl_deb(aTHX_ "Treating %s as %s::%s\n",
 			 origname, HvENAME_get(stash), name) );
 	}
-	else if ((nsplit - origname) >= 7 &&
-		 strnEQ(nsplit - 7, "::SUPER", 7)) {
+	else if ((last_separator - origname) >= 7 &&
+		 strnEQ(last_separator - 7, "::SUPER", 7)) {
             /* don't autovifify if ->NoSuchStash::SUPER::method */
-	    stash = gv_stashpvn(origname, nsplit - origname - 7, is_utf8);
+	    stash = gv_stashpvn(origname, last_separator - origname - 7, is_utf8);
 	    if (stash) flags |= GV_SUPER;
 	}
 	else {
             /* don't autovifify if ->NoSuchStash::method */
-            stash = gv_stashpvn(origname, nsplit - origname, is_utf8);
+            stash = gv_stashpvn(origname, last_separator - origname, is_utf8);
 	}
 	ostash = stash;
     }
@@ -1098,8 +1098,8 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 	    else {
                 SV* packnamesv;
 
-		if (nsplit) {
-		    packnamesv = newSVpvn_flags(origname, nsplit - origname,
+		if (last_separator) {
+		    packnamesv = newSVpvn_flags(origname, last_separator - origname,
                                                     SVs_TEMP | is_utf8);
 		} else {
 		    packnamesv = error_report;
