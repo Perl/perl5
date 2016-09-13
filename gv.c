@@ -1009,6 +1009,7 @@ GV *
 Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN len, U32 flags)
 {
     const char *nend;
+    const char * const name_end= name + len;
     const char *nsplit = NULL;
     GV* gv;
     HV* ostash = stash;
@@ -1028,15 +1029,15 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 	   the error reporting code.  */
     }
 
-    for (nend = name; *nend || nend != (origname + len); nend++) {
+    for (nend = name; nend < name_end && *nend; nend++) {
 	if (*nend == '\'') {
 	    nsplit = nend;
 	    name = nend + 1;
 	}
-	else if (*nend == ':' && *(nend + 1) == ':') {
-	    nsplit = nend++;
-	    name = nend + 1;
-	}
+        else if (*nend == ':' && nend+1 < name_end && *(nend + 1) == ':') {
+            nsplit = nend++;
+            name = nend + 1;
+        }
     }
     if (nsplit) {
 	if ((nsplit - origname) == 5 && memEQ(origname, "SUPER", 5)) {
