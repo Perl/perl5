@@ -1010,7 +1010,6 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 {
     const char * const origname = name;
     const char * const name_end = name + len;
-    const char *nend;
     const char *last_separator = NULL;
     GV* gv;
     HV* ostash = stash;
@@ -1029,16 +1028,33 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 	   the error reporting code.  */
     }
 
-    for (nend = name; *nend || nend != name_end; nend++) {
-	if (*nend == '\'') {
-	    last_separator = nend;
-	    name = nend + 1;
-	}
-	else if (*nend == ':' && *(nend + 1) == ':') {
-	    last_separator = nend++;
-	    name = nend + 1;
-	}
+    {
+        /* check if the method name is fully qualified or
+         * not, and separate the package name from the actual
+         * method name.
+         *
+         * leaves last_separator pointing to the beginning of the
+         * last package separator (either ' or ::) or 0
+         * if none was found.
+         *
+         * leaves name pointing at the beginning of the
+         * method name.
+         */
+        const char *name_cursor = name;
+        const char * const name_em1 = name_end - 1; /* name_end minus 1 */
+        for (name_cursor = name; name_cursor < name_end ; name_cursor++) {
+            if (*name_cursor == '\'') {
+                last_separator = name_cursor;
+                name = name_cursor + 1;
+            }
+            else if (name_cursor < name_em1 && *name_cursor == ':' && name_cursor[1] == ':') {
+                last_separator = name_cursor++;
+                name = name_cursor + 1;
+            }
+        }
     }
+
+    /* did we find a separator? */
     if (last_separator) {
 	if ((last_separator - origname) == 5 && memEQ(origname, "SUPER", 5)) {
 	    /* ->SUPER::method should really be looked up in original stash */
