@@ -1008,7 +1008,7 @@ Perl_gv_fetchmethod_pv_flags(pTHX_ HV *stash, const char *name, U32 flags)
 GV *
 Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN len, U32 flags)
 {
-    const char *name_cursor;
+    const char *nend;
     const char * const name_end= name + len;
     const char *nsplit = NULL;
     GV* gv;
@@ -1029,14 +1029,14 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 	   the error reporting code.  */
     }
 
-    for (name_cursor = name; name_cursor < name_end && *name_cursor; name_cursor++) {
-	if (*name_cursor == '\'') {
-	    nsplit = name_cursor;
-	    name = name_cursor + 1;
+    for (nend = name; nend < name_end && *nend; nend++) {
+	if (*nend == '\'') {
+	    nsplit = nend;
+	    name = nend + 1;
 	}
-        else if (*name_cursor == ':' && name_cursor+1 < name_end && *(name_cursor + 1) == ':') {
-            nsplit = name_cursor++;
-            name = name_cursor + 1;
+        else if (*nend == ':' && nend+1 < name_end && *(nend + 1) == ':') {
+            nsplit = nend++;
+            name = nend + 1;
         }
     }
     if (nsplit) {
@@ -1060,7 +1060,7 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 	ostash = stash;
     }
 
-    gv = gv_fetchmeth_pvn(stash, name, name_cursor - name, 0, flags);
+    gv = gv_fetchmeth_pvn(stash, name, nend - name, 0, flags);
     if (!gv) {
 	/* This is the special case that exempts Foo->import and
 	   Foo->unimport from being an error even if there's no
@@ -1069,7 +1069,7 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 	    gv = MUTABLE_GV(&PL_sv_yes);
 	else if (autoload)
 	    gv = gv_autoload_pvn(
-		ostash, name, name_cursor - name, GV_AUTOLOAD_ISMETHOD|flags
+		ostash, name, nend - name, GV_AUTOLOAD_ISMETHOD|flags
 	    );
 	if (!gv && do_croak) {
 	    /* Right now this is exclusively for the benefit of S_method_common
@@ -1085,14 +1085,14 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 				       HV_FETCH_ISEXISTS, NULL, 0)
 		) {
 		    require_pv("IO/File.pm");
-		    gv = gv_fetchmeth_pvn(stash, name, name_cursor - name, 0, flags);
+		    gv = gv_fetchmeth_pvn(stash, name, nend - name, 0, flags);
 		    if (gv)
 			return gv;
 		}
 		Perl_croak(aTHX_
 			   "Can't locate object method \"%"UTF8f
 			   "\" via package \"%"HEKf"\"",
-			            UTF8fARG(is_utf8, name_cursor - name, name),
+			            UTF8fARG(is_utf8, nend - name, name),
                                     HEKfARG(HvNAME_HEK(stash)));
 	    }
 	    else {
@@ -1109,7 +1109,7 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 			   "Can't locate object method \"%"UTF8f
 			   "\" via package \"%"SVf"\""
 			   " (perhaps you forgot to load \"%"SVf"\"?)",
-			   UTF8fARG(is_utf8, name_cursor - name, name),
+			   UTF8fARG(is_utf8, nend - name, name),
                            SVfARG(packnamesv), SVfARG(packnamesv));
 	    }
 	}
