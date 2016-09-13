@@ -1014,7 +1014,6 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
     const char *nsplit = NULL;
     GV* gv;
     HV* ostash = stash;
-    const char * const origname = name;
     SV *const error_report = MUTABLE_SV(stash);
     const U32 autoload = flags & GV_AUTOLOAD;
     const U32 do_croak = flags & GV_CROAK;
