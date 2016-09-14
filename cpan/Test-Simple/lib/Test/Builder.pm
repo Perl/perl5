@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302052';
+our $VERSION = '1.302056';
 
 BEGIN {
     if( $] < 5.008 ) {
@@ -623,13 +623,6 @@ sub ok {
     $hub->{_meta}->{+__PACKAGE__}->{Test_Results}[ $hub->{count} ] = $result;
 
     my $orig_name = $name;
-
-    # The regex form is ~250ms, the index form is ~50ms
-    #$name && $name =~ m/(?:#|\n)/ && ($name =~ s|#|\\#|g, $name =~ s{\n}{\n# }sg);
-    $name && (
-        (index($name, "#" ) >= 0 && $name =~ s|#|\\#|g),
-        (index($name, "\n") >= 0 && $name =~ s{\n}{\n# }sg)
-    );
 
     my @attrs;
     my $subevents  = delete $self->{subevents};

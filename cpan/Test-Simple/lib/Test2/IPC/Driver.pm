@@ -2,7 +2,7 @@ package Test2::IPC::Driver;
 use strict;
 use warnings;
 
-our $VERSION = '1.302052';
+our $VERSION = '1.302056';
 
 
 use Carp qw/confess longmess/;

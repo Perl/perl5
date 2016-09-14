@@ -80,18 +80,6 @@ tests "Failing TODO" => sub {
 };
 
 tests init => sub {
-    like(
-        exception { Test2::Event::Ok->new(trace => $trace, pass => 1, name => "foo#foo") },
-        qr/'foo#foo' is not a valid name, names must not contain '#' or newlines/,
-        "Some characters do not belong in a name"
-    );
-
-    like(
-        exception { Test2::Event::Ok->new(trace => $trace, pass => 1, name => "foo\nfoo") },
-        qr/'foo\nfoo' is not a valid name, names must not contain '#' or newlines/,
-        "Some characters do not belong in a name"
-    );
-
     my $ok = Test2::Event::Ok->new(
         trace => $trace,
         pass  => 1,

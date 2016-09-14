@@ -2,7 +2,7 @@ package Test2;
 use strict;
 use warnings;
 
-our $VERSION = '1.302052';
+our $VERSION = '1.302056';
 
 
 1;
@@ -22,10 +22,58 @@ Test2 - Framework for writing test tools that all work together.
 Test2 is a new testing framework produced by forking L<Test::Builder>,
 completely refactoring it, adding many new features and capabilities.
 
+=head2 WHAT IS NEW?
+
+=over 4
+
+=item Easier to test new testing tools.
+
+From the beginning Test2 was built with introspection capabilities. With
+Test::Builder it was difficult at best to capture test tool output for
+verification. Test2 Makes it easy with C<Test2::API::intercept()>.
+
+=item Better diagnostics capabilities.
+
+Test2 uses an L<Test2::API::Context> object to track filename, line number, and
+tool details. This object greatly simplifies tracking for where errors should
+be reported.
+
+=item Event driven.
+
+Test2 based tools produce events which get passed through a processing system
+before being output by a formatter. This event system allows for rich plugin
+and extension support.
+
+=item More complete API.
+
+Test::Builder only provided a handful of methods for generating lines of TAP.
+Test2 took inventory of everything people were doing with Test::Builder that
+required hacking it up. Test2 made public API functions for nearly all the
+desired functionality people didn't previously have.
+
+=item Support for output other than TAP.
+
+Test::Builder assumed everything would end up as TAP. Test2 makes no such
+assumption. Test2 provides ways for you to specify alternative and custom
+formatters.
+
+=item Subtest implementation is more sane.
+
+The Test::Builder implementation of subtests was certifiably insane. Test2 uses
+a stacked event hub system that greatly improves how subtests are implemented.
+
+=item Support for threading/forking.
+
+Test2 support for forking and threading can be turned on using L<Test2::IPC>.
+Once turned on threading and forking operate sanely and work as one would
+expect.
+
+=back
+
 =head1 GETTING STARTED
 
 If you are interested in writing tests using new tools then you should look at
-L<Test2::Suite>. L<Test::Suite> is a separate cpan distribution that contains
+L<Test2::Suite>. L<Test2::Suite> is a separate cpan distribution that contains
 many tools implemented on Test2.
 
 If you are interested in writing new tools you should take a look at

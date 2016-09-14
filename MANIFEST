@@ -2708,6 +2708,7 @@ cpan/Test-Simple/t/lib/MyOverload.pm
 cpan/Test-Simple/t/lib/MyTest.pm
 cpan/Test-Simple/t/lib/NoExporter.pm
 cpan/Test-Simple/t/lib/SigDie.pm
+cpan/Test-Simple/t/lib/SkipAll.pm
 cpan/Test-Simple/t/lib/SmallTest.pm
 cpan/Test-Simple/t/lib/Test/Builder/NoOutput.pm
 cpan/Test-Simple/t/lib/Test/Simple/Catch.pm
@@ -2732,6 +2733,7 @@ cpan/Test-Simple/t/regression/642_persistent_end.t
 cpan/Test-Simple/t/regression/662-tbt-no-plan.t
 cpan/Test-Simple/t/regression/684-nested_todo_diag.t
 cpan/Test-Simple/t/regression/694_note_diag_return_values.t
+cpan/Test-Simple/t/regression/696-intercept_skip_all.t
 cpan/Test-Simple/t/regression/no_name_in_subtest.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_done_testing.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_fork.t
@@ -2745,6 +2747,7 @@ cpan/Test-Simple/t/Test2/behavior/init_croak.t
 cpan/Test-Simple/t/Test2/behavior/nested_context_exception.t
 cpan/Test-Simple/t/Test2/behavior/no_load_api.t
 cpan/Test-Simple/t/Test2/behavior/run_subtest_inherit.t
+cpan/Test-Simple/t/Test2/behavior/special_names.t
 cpan/Test-Simple/t/Test2/behavior/Subtest_buffer_formatter.t
 cpan/Test-Simple/t/Test2/behavior/Subtest_events.t
 cpan/Test-Simple/t/Test2/behavior/Subtest_plan.t

@@ -10,6 +10,6 @@ ok($one->isa('Test2::Hub'), "inheritence");;
 
 my $e = exception { $one->terminate(55) };
 ok($e->isa('Test2::Hub::Interceptor::Terminator'), "exception type");
-is($$e, 55, "Scalar reference value");
+like($$e, 'Label not found for "last T2_SUBTEST_WRAPPER"', "Could not find label");
 
 done_testing;

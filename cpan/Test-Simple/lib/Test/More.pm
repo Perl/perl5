@@ -17,7 +17,7 @@ sub _carp {
     return warn @_, " at $file line $line\n";
 }
 
-our $VERSION = '1.302052';
+our $VERSION = '1.302056';
 
 use Test::Builder::Module;
 our @ISA    = qw(Test::Builder::Module);
@@ -125,6 +125,8 @@ the end.
 
   done_testing( $number_of_tests_run );
 
+B<NOTE> C<done_testing()> should never be called in an C<END { ... }> block.
+
 Sometimes you really don't know how many tests were run, or it's too
 difficult to calculate.  In which case you can leave off
 $number_of_tests_run.
@@ -231,6 +233,10 @@ you ran doesn't matter, just the fact that your tests ran to
 conclusion.
 
 This is safer than and replaces the "no_plan" plan.
+
+B<Note:> You must never put C<done_testing()> inside an C<END { ... }> block.
+The plan is there to ensure your test does not exit before testing has
+completed. If you use an END block you completely bypass this protection.
 
 =back
 
@@ -1063,6 +1069,20 @@ improve in the future.
 
 L<Test::Differences> and L<Test::Deep> provide more in-depth functionality
 along these lines.
+
+B<NOTE> is_deeply() has limitations when it comes to comparing strings and
+refs:
+
+    my $path = path('.');
+    my $hash = {};
+    is_deeply( $path, "$path" ); # ok
+    is_deeply( $hash, "$hash" ); # fail
+
+This happens because is_deeply will unoverload all arguments unconditionally.
+It is probably best not to use is_deeply with overloading. For legacy reasons
+this is not likely to ever be fixed. If you would like a much better tool for
+this you should see L<Test2::Suite> Specifically L<Test2::Tools::Compare> has
+an C<is()> function that works like C<is_deeply> with many improvements.
 
 =cut
 

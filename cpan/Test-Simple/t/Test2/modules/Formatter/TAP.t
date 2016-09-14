@@ -201,6 +201,76 @@ tests note => sub {
     );
 };
 
+tests special_characters => sub {
+    my $ok = Test2::Event::Ok->new(
+        trace => $trace,
+        name  => 'nothing special',
+        pass  => 1,
+    );
+
+    is_deeply(
+        [$fmt->event_tap($ok, 1)],
+        [[OUT_STD, "ok 1 - nothing special\n"]],
+        "Got regular ok"
+    );
+
+    $ok = Test2::Event::Ok->new(
+        trace => $trace,
+        name  => 'just a \\ slash',
+        pass  => 1,
+    );
+
+    is_deeply(
+        [$fmt->event_tap($ok, 1)],
+        [[OUT_STD, "ok 1 - just a \\ slash\n"]],
+        "Do not escape slashes without a '#'"
+    );
+
+    $ok = Test2::Event::Ok->new(
+        trace => $trace,
+        name  => 'a \\ slash and a # hash',
+        pass  => 1,
+    );
+
+    is_deeply(
+        [$fmt->event_tap($ok, 1)],
+        [[OUT_STD, "ok 1 - a \\\\ slash and a \\# hash\n"]],
+        "Escape # and any slashes already present"
+    );
+
+    $ok = Test2::Event::Ok->new(
+        trace => $trace,
+        name  => "a \\ slash and a # hash\nand \\ some # newlines\nlike this # \\",
+        pass  => 1,
+    );
+
+    is_deeply(
+        [$fmt->event_tap($ok, 1)],
+        [
+            [OUT_STD, "ok 1 - a \\\\ slash and a \\# hash\n"],
+            [OUT_STD, "#      and \\ some # newlines\n"],
+            [OUT_STD, "#      like this # \\\n"],
+        ],
+        "Escape # and any slashes already present, and split newlines, do not escape the newlines"
+    );
+
+    $ok = Test2::Event::Ok->new(
+        trace => $trace,
+        name  => "Nothing special until the end \\\nfoo \\ bar",
+        pass  => 1,
+    );
+
+    is_deeply(
+        [$fmt->event_tap($ok, 1)],
+        [
+            [OUT_STD, "ok 1 - Nothing special until the end \\\\\n"],
+            [OUT_STD, "#      foo \\ bar\n"],
+        ],
+        "Special case, escape things if last character of the first line is a \\"
+    );
+
+};
+
 for my $pass (1, 0) {
     local $ENV{HARNESS_IS_VERBOSE} = 1;
     tests name_and_number => sub {

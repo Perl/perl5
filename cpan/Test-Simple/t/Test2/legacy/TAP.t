@@ -12,6 +12,7 @@ BEGIN { require "t/tools.pl" };
 #########################
 
 use Test2::API qw/test2_stack/;
+use Test::Builder::Formatter;
 
 sub capture(&) {
     my $code = shift;
@@ -52,11 +53,6 @@ sub tm_ok($;$) {
     my ($bool, $name) = @_;
     my $ctx = context;
 
-    $name && (
-        (index($name, "#" ) >= 0 && $name =~ s|#|\\#|g),
-        (index($name, "\n") >= 0 && $name =~ s{\n}{\n# }sg)
-    );
-
     my $ok = bless {
         pass => $bool,
         name => $name,
@@ -66,6 +62,7 @@ sub tm_ok($;$) {
     # Do not call init
 
     $ctx->hub->send($ok);
+
     $ctx->release;
     return $bool;
 }

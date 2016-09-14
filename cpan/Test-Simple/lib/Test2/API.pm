@@ -2,7 +2,7 @@ package Test2::API;
 use strict;
 use warnings;
 
-our $VERSION = '1.302052';
+our $VERSION = '1.302056';
 
 
 my $INST;
@@ -389,11 +389,17 @@ sub intercept(&) {
     $ctx->stack->top; # Make sure there is a top hub before we begin.
     $ctx->stack->push($hub);
 
-    # Do not use 'try' cause it localizes __DIE__
-    my ($ok, $err);
-    {
+    my ($ok, $err) = (1, undef);
+    T2_SUBTEST_WRAPPER: {
+        # Do not use 'try' cause it localizes __DIE__
         $ok = eval { $code->(hub => $hub, context => $ctx->snapshot); 1 };
         $err = $@;
+
+        # They might have done 'BEGIN { skip_all => "whatever" }'
+        if (!$ok && $err =~ m/Label not found for "last T2_SUBTEST_WRAPPER"/ || (blessed($err) && $err->isa('Test2::Hub::Interceptor::Terminator'))) {
+            $ok  = 1;
+            $err = undef;
+        }
     }
 
     $hub->cull;
@@ -402,8 +408,7 @@ sub intercept(&) {
     my $trace = $ctx->trace;
     $ctx->release;
 
-    die $err unless $ok
-        || (blessed($err) && $err->isa('Test2::Hub::Interceptor::Terminator'));
+    die $err unless $ok;
 
     $hub->finalize($trace, 1)
         if $ok
