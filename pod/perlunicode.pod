@@ -1534,7 +1534,7 @@ became generally reliable) through v5.18.  The difference is that Perl
 treated all C<\p{}> matches as failing, but all C<\P{}> matches as
 succeeding.
 
-One problem with this is that it leads to unexpected, and confusting
+One problem with this is that it leads to unexpected, and confusing
 results in some cases:
 
  chr(0x110000) =~ \p{ASCII_Hex_Digit=True}      # Failed on <= v5.18
