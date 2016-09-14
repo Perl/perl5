@@ -414,8 +414,10 @@ the perldelta of a previous release.
 
 =head1 Obituary
 
-XXX If any significant core contributor has died, we've added a short obituary
-here.
+Jon Portnoy (AVENJ), a prolific Perl author and admired Gentoo community
+member, has passed away on August 10, 2016. He will be remembered and
+missed by all those with which he came in contact and enriched with his
+intellect, wit, and spirit.
 
 =head1 Acknowledgements
 
