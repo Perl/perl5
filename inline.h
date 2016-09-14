@@ -290,7 +290,7 @@ non-Unicode code points are allowed.
 PERL_STATIC_INLINE UV
 Perl_valid_utf8_to_uvchr(const U8 *s, STRLEN *retlen)
 {
-    UV expectlen = UTF8SKIP(s);
+    const UV expectlen = UTF8SKIP(s);
     const U8* send = s + expectlen;
     UV uv = *s;
 
@@ -373,7 +373,7 @@ L</is_utf8_string_loc>().
 */
 
 PERL_STATIC_INLINE bool
-Perl_is_utf8_string(const U8 *s, STRLEN len)
+Perl_is_utf8_string(const U8 *s, const STRLEN len)
 {
     /* This is now marked pure in embed.fnc, because isUTF8_CHAR now is pure.
      * Be aware of possible changes to that */
@@ -384,11 +384,11 @@ Perl_is_utf8_string(const U8 *s, STRLEN len)
     PERL_ARGS_ASSERT_IS_UTF8_STRING;
 
     while (x < send) {
-        STRLEN len = isUTF8_CHAR(x, send);
-        if (UNLIKELY(! len)) {
+        const STRLEN cur_len = isUTF8_CHAR(x, send);
+        if (UNLIKELY(! cur_len)) {
             return FALSE;
         }
-        x += len;
+        x += cur_len;
     }
 
     return TRUE;
@@ -418,7 +418,7 @@ See also L</is_utf8_string_loc>() and L</is_utf8_string>().
 */
 
 PERL_STATIC_INLINE bool
-Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
+Perl_is_utf8_string_loclen(const U8 *s, const STRLEN len, const U8 **ep, STRLEN *el)
 {
     const U8* const send = s + (len ? len : strlen((const char *)s));
     const U8* x = s;
@@ -427,11 +427,11 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
     PERL_ARGS_ASSERT_IS_UTF8_STRING_LOCLEN;
 
     while (x < send) {
-        STRLEN len = isUTF8_CHAR(x, send);
-        if (UNLIKELY(! len)) {
+        const STRLEN cur_len = isUTF8_CHAR(x, send);
+        if (UNLIKELY(! cur_len)) {
             break;
         }
-        x += len;
+        x += cur_len;
         outlen++;
     }
 

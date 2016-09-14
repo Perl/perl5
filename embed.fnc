@@ -741,9 +741,9 @@ AmnpdRP	|bool	|is_ascii_string|NN const U8* const s|const STRLEN len
 AmnpdRP	|bool	|is_invariant_string|NN const U8* const s|const STRLEN len
 AnpdD	|STRLEN	|is_utf8_char	|NN const U8 *s
 Abmnpd	|STRLEN	|is_utf8_char_buf|NN const U8 *buf|NN const U8 *buf_end
-AnipdP	|bool	|is_utf8_string	|NN const U8 *s|STRLEN len
-Anpdmb	|bool	|is_utf8_string_loc|NN const U8 *s|STRLEN len|NN const U8 **ep
-Anipd	|bool	|is_utf8_string_loclen|NN const U8 *s|STRLEN len|NULLOK const U8 **ep|NULLOK STRLEN *el
+AnipdP	|bool	|is_utf8_string	|NN const U8 *s|const STRLEN len
+Anpdmb	|bool	|is_utf8_string_loc|NN const U8 *s|const STRLEN len|NN const U8 **ep
+Anipd	|bool	|is_utf8_string_loclen|NN const U8 *s|const STRLEN len|NULLOK const U8 **ep|NULLOK STRLEN *el
 AmndP	|bool	|is_utf8_valid_partial_char				    \
 		|NN const U8 * const s|NN const U8 * const e
 AnidP	|bool	|is_utf8_valid_partial_char_flags			    \

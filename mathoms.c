@@ -690,7 +690,7 @@ Perl_init_i18nl14n(pTHX_ int printwarn)
 }
 
 bool
-Perl_is_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep)
+Perl_is_utf8_string_loc(const U8 *s, const STRLEN len, const U8 **ep)
 {
     PERL_ARGS_ASSERT_IS_UTF8_STRING_LOC;
 
