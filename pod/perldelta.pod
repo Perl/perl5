@@ -360,6 +360,11 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 Invalid assignments to a reference constructor (e.g., C<\eval=time>) could
 sometimes crash in addition to giving a syntax error.  [perl #125679]
 
+=item *
+
+The parser could sometimes crash if a bareword came after C<evalbytes>.
+[perl #129196]
+
 =back
 
 =head1 Known Problems
