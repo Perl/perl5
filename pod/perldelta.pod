@@ -454,6 +454,11 @@ floating point numbers (64-bit or 128-bit) and the x86 80-bit
 point literals will give a warning about "exponent underflow".
 [perl #128843, #128889, #128890, #128893, #128909, #128919]
 
+=item *
+
+The parser could sometimes crash if a bareword came after C<evalbytes>.
+[perl #129196]
+
 =back
 
 =head1 Known Problems
