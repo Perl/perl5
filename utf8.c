@@ -488,9 +488,10 @@ C<retlen> to C<-1> (cast to C<STRLEN>) and return zero.
 
 Note that this API requires disambiguation between successful decoding a C<NUL>
 character, and an error return (unless the C<UTF8_CHECK_ONLY> flag is set), as
-in both cases, 0 is returned.  To disambiguate, upon a zero return, see if the
-first byte of C<s> is 0 as well.  If so, the input was a C<NUL>; if not, the
-input had an error.
+in both cases, 0 is returned, and, depending on the malformation, C<retlen> may
+be set to 1.  To disambiguate, upon a zero return, see if the first byte of
+C<s> is 0 as well.  If so, the input was a C<NUL>; if not, the input had an
+error.
 
 Certain code points are considered problematic.  These are Unicode surrogates,
 Unicode non-characters, and code points above the Unicode maximum of 0x10FFFF.
