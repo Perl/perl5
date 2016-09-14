@@ -2571,6 +2571,9 @@ gv_fetchmethod_flags_type(stash, methname, type, flags)
                gv = gv_fetchmethod_pvn_flags(stash, name, len, flags | SvUTF8(methname));
                break;
             }
+           case 4:
+               gv = gv_fetchmethod_pvn_flags(stash, SvPV_nolen(methname),
+                                             flags, SvUTF8(methname));
         }
 	XPUSHs( gv ? (SV*)gv : &PL_sv_undef);
 
