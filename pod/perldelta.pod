@@ -378,6 +378,11 @@ A sub containing with a "forward" declaration with the same name (e.g.,
 C<sub c { sub c; }>) could sometimes crash or loop infinitely.  [perl
 #129090]
 
+=item *
+
+The use of C<splice> on arrays with nonexistent elements could cause other
+operators to crash.  [perl #129164]
+
 =back
 
 =head1 Known Problems
