@@ -350,7 +350,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Invalid assignments to a reference constructor (e.g., C<\eval=time>) could
+sometimes crash in addition to giving a syntax error.  [perl #125679]
 
 =back
 
