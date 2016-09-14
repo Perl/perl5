@@ -296,7 +296,14 @@ contain these.
 
 The flag C<UNICODE_WARN_ILLEGAL_INTERCHANGE> selects all three of
 the above WARN flags; and C<UNICODE_DISALLOW_ILLEGAL_INTERCHANGE> selects all
-three DISALLOW flags.
+three DISALLOW flags.  C<UNICODE_DISALLOW_ILLEGAL_INTERCHANGE> restricts the
+allowed inputs to the strict UTF-8 traditionally defined by Unicode.
+Similarly, C<UNICODE_WARN_ILLEGAL_C9_INTERCHANGE> and
+C<UNICODE_DISALLOW_ILLEGAL_C9_INTERCHANGE> are shortcuts to select the
+above-Unicode and surrogate flags, but not the non-character ones, as
+defined in
+L<Unicode Corrigendum #9|http://www.unicode.org/versions/corrigendum9.html>.
+See L<perlunicode/Noncharacter code points>.
 
 Code points above 0x7FFF_FFFF (2**31 - 1) were never specified in any standard,
 so using them is more problematic than other above-Unicode code points.  Perl
@@ -496,13 +503,22 @@ error.
 Certain code points are considered problematic.  These are Unicode surrogates,
 Unicode non-characters, and code points above the Unicode maximum of 0x10FFFF.
 By default these are considered regular code points, but certain situations
-warrant special handling for them.  If C<flags> contains
-C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>, all three classes are treated as
-malformations and handled as such.  The flags C<UTF8_DISALLOW_SURROGATE>,
-C<UTF8_DISALLOW_NONCHAR>, and C<UTF8_DISALLOW_SUPER> (meaning above the legal
-Unicode maximum) can be set to disallow these categories individually.
+warrant special handling for them, which can be specified using the C<flags>
+parameter.  If C<flags> contains C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>, all
+three classes are treated as malformations and handled as such.  The flags
+C<UTF8_DISALLOW_SURROGATE>, C<UTF8_DISALLOW_NONCHAR>, and
+C<UTF8_DISALLOW_SUPER> (meaning above the legal Unicode maximum) can be set to
+disallow these categories individually.  C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>
+restricts the allowed inputs to the strict UTF-8 traditionally defined by
+Unicode.  Use C<UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE> to use the strictness
+definition given by
+L<Unicode Corrigendum #9|http://www.unicode.org/versions/corrigendum9.html>.
+The difference between traditional strictness and C9 strictness is that the
+latter does not forbid non-character code points.  (They are still discouraged,
+however.)  For more discussion see L<perlunicode/Noncharacter code points>.
 
-The flags C<UTF8_WARN_ILLEGAL_INTERCHANGE>, C<UTF8_WARN_SURROGATE>,
+The flags C<UTF8_WARN_ILLEGAL_INTERCHANGE>,
+C<UTF8_WARN_ILLEGAL_C9_INTERCHANGE>, C<UTF8_WARN_SURROGATE>,
 C<UTF8_WARN_NONCHAR>, and C<UTF8_WARN_SUPER> will cause warning messages to be
 raised for their respective categories, but otherwise the code points are
 considered valid (not malformations).  To get a category to both be treated as

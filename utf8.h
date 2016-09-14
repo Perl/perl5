@@ -638,11 +638,16 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UTF8_ALLOW_FFFF 0
 #define UTF8_ALLOW_SURROGATE 0
 
+/* C9 refers to Unicode Corrigendum #9: allows but discourages non-chars */
+#define UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE                                    \
+                                 (UTF8_DISALLOW_SUPER|UTF8_DISALLOW_SURROGATE)
+#define UTF8_WARN_ILLEGAL_C9_INTERCHANGE (UTF8_WARN_SUPER|UTF8_WARN_SURROGATE)
+
 #define UTF8_DISALLOW_ILLEGAL_INTERCHANGE                                       \
-                       ( UTF8_DISALLOW_SUPER|UTF8_DISALLOW_NONCHAR              \
-                        |UTF8_DISALLOW_SURROGATE)
+                  (UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE|UTF8_DISALLOW_NONCHAR)
 #define UTF8_WARN_ILLEGAL_INTERCHANGE \
-                         (UTF8_WARN_SUPER|UTF8_WARN_NONCHAR|UTF8_WARN_SURROGATE)
+                          (UTF8_WARN_ILLEGAL_C9_INTERCHANGE|UTF8_WARN_NONCHAR)
+
 #define UTF8_ALLOW_ANY                                                          \
 	    (~( UTF8_DISALLOW_ILLEGAL_INTERCHANGE|UTF8_DISALLOW_ABOVE_31_BIT    \
                |UTF8_WARN_ILLEGAL_INTERCHANGE|UTF8_WARN_ABOVE_31_BIT))
@@ -747,10 +752,14 @@ point's representation.
 #define UNICODE_DISALLOW_NONCHAR      0x0020
 #define UNICODE_DISALLOW_SUPER        0x0040
 #define UNICODE_DISALLOW_ABOVE_31_BIT 0x0080
+#define UNICODE_WARN_ILLEGAL_C9_INTERCHANGE                                   \
+                                  (UNICODE_WARN_SURROGATE|UNICODE_WARN_SUPER)
 #define UNICODE_WARN_ILLEGAL_INTERCHANGE                                      \
-            (UNICODE_WARN_SURROGATE|UNICODE_WARN_NONCHAR|UNICODE_WARN_SUPER)
+                   (UNICODE_WARN_ILLEGAL_C9_INTERCHANGE|UNICODE_WARN_NONCHAR)
+#define UNICODE_DISALLOW_ILLEGAL_C9_INTERCHANGE                               \
+                          (UNICODE_DISALLOW_SURROGATE|UNICODE_DISALLOW_SUPER)
 #define UNICODE_DISALLOW_ILLEGAL_INTERCHANGE                                  \
- (UNICODE_DISALLOW_SURROGATE|UNICODE_DISALLOW_NONCHAR|UNICODE_DISALLOW_SUPER)
+           (UNICODE_DISALLOW_ILLEGAL_C9_INTERCHANGE|UNICODE_DISALLOW_NONCHAR)
 
 /* For backward source compatibility, as are now the default */
 #define UNICODE_ALLOW_SURROGATE 0
