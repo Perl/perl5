@@ -365,6 +365,13 @@ sometimes crash in addition to giving a syntax error.  [perl #125679]
 The parser could sometimes crash if a bareword came after C<evalbytes>.
 [perl #129196]
 
+=item *
+
+Autoloading via a method call would warn erroneously ("Use of inherited
+AUTOLOAD for non-method") if there was a stub present in the package into
+which the invocant had been blessed.  The warning is no longer emitted in
+such circumstances.  [perl #47047]
+
 =back
 
 =head1 Known Problems
