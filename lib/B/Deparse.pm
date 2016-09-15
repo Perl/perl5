@@ -16,6 +16,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER OPpREPEAT_DOLIST
 	 OPpSORT_REVERSE OPpMULTIDEREF_EXISTS OPpMULTIDEREF_DELETE
+         OPpSPLIT_ASSIGN OPpSPLIT_LEX
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
 	 SVs_PADTMP SVpad_TYPED
          CVf_METHOD CVf_LVALUE
@@ -46,7 +47,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.38';
+$VERSION = '1.39';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -5630,7 +5631,7 @@ sub matchop {
     my($op, $cx, $name, $delim) = @_;
     my $kid = $op->first;
     my ($binop, $var, $re) = ("", "", "");
-    if ($op->flags & OPf_STACKED) {
+    if ($op->name ne 'split' && $op->flags & OPf_STACKED) {
 	$binop = 1;
 	$var = $self->deparse($kid, 20);
 	$kid = $kid->sibling;
@@ -5669,7 +5670,13 @@ sub matchop {
     } elsif (!$have_kid) {
 	$re = re_uninterp(escape_re(re_unback($op->precomp)));
     } elsif ($kid->name ne 'regcomp') {
-	carp("found ".$kid->name." where regcomp expected");
+        if ($op->name eq 'split') {
+            # split has other kids, not just regcomp
+            $re = re_uninterp(escape_re(re_unback($op->precomp)));
+        }
+        else {
+            carp("found ".$kid->name." where regcomp expected");
+        }
     } else {
 	($re, $quote) = $self->regcomp($kid, 21);
     }
@@ -5709,64 +5716,55 @@ sub matchop {
 }
 
 sub pp_match { matchop(@_, "m", "/") }
-sub pp_pushre { matchop(@_, "m", "/") }
 sub pp_qr { matchop(@_, "qr", "") }
 
 sub pp_runcv { unop(@_, "__SUB__"); }
 
 sub pp_split {
-    maybe_targmy(@_, \&split);
-}
-sub split {
     my $self = shift;
     my($op, $cx) = @_;
     my($kid, @exprs, $ary, $expr);
-    $kid = $op->first;
-
-    # For our kid (an OP_PUSHRE), pmreplroot is never actually the
-    # root of a replacement; it's either empty, or abused to point to
-    # the GV for an array we split into (an optimization to save
-    # assignment overhead). Depending on whether we're using ithreads,
-    # this OP* holds either a GV* or a PADOFFSET. Luckily, B.xs
-    # figures out for us which it is.
-    my $replroot = $kid->pmreplroot;
-    my $gv = 0;
     my $stacked = $op->flags & OPf_STACKED;
-    if (ref($replroot) eq "B::GV") {
-	$gv = $replroot;
-    } elsif (!ref($replroot) and $replroot > 0) {
-	$gv = $self->padval($replroot);
-    } elsif ($kid->targ) {
-	$ary = $self->padname($kid->targ)
-    } elsif ($stacked) {
-	$ary = $self->deparse($op->last, 7);
-    }
-    $ary = $self->maybe_local(@_,
-			      $self->stash_variable('@',
-						     $self->gv_name($gv),
-						     $cx))
-	if $gv;
 
-    # Skip the last kid when OPf_STACKED is set, since it is the array
-    # on the left.
-    for (; !null($stacked ? $kid->sibling : $kid); $kid = $kid->sibling) {
+    $kid = $op->first;
+    $kid = $kid->sibling if $kid->name eq 'regcomp';
+    for (; !null($kid); $kid = $kid->sibling) {
 	push @exprs, $self->deparse($kid, 6);
     }
 
-    # handle special case of split(), and split(' ') that compiles to /\s+/
-    # Under 5.10, the reflags may be undef if the split regexp isn't a constant
-    # Under 5.17.5-5.17.9, the special flag is on split itself.
-    $kid = $op->first;
-    if ( $op->flags & OPf_SPECIAL
-         or (
-            $kid->flags & OPf_SPECIAL
-            and ( $] < 5.009 ? $kid->pmflags & PMf_SKIPWHITE()
-                             : ($kid->reflags || 0) & RXf_SKIPWHITE()
-            )
-         )
-    ) {
-	$exprs[0] = "' '";
+    unshift @exprs, $self->matchop($op, $cx, "m", "/");
+
+    if ($op->private & OPpSPLIT_ASSIGN) {
+        # With C<@array = split(/pat/, str);>,
+        #  array is stored in split's pmreplroot; either
+        # as an integer index into the pad (for a lexical array)
+        # or as GV for a package array (which will be a pad index
+        # on threaded builds)
+        # With my/our @array = split(/pat/, str), the array is instead
+        # accessed via an extra padav/rv2av op at the end of the
+        # split's kid ops.
+
+        if ($stacked) {
+            $ary = pop @exprs;
+        }
+        else {
+            if ($op->private & OPpSPLIT_LEX) {
+                $ary = $self->padname($op->pmreplroot);
+            }
+            else {
+                # union with op_pmtargetoff, op_pmtargetgv
+                my $gv = $op->pmreplroot;
+                $gv = $self->padval($gv) if !ref($gv);
+                $ary = $self->maybe_local(@_,
+			      $self->stash_variable('@',
+						     $self->gv_name($gv),
+						     $cx))
+            }
+        }
     }
+
+    # handle special case of split(), and split(' ') that compiles to /\s+/
+    $exprs[0] = q{' '} if ($op->reflags // 0) & RXf_SKIPWHITE();
 
     $expr = "split(" . join(", ", @exprs) . ")";
     if ($ary) {

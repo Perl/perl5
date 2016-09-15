@@ -123,7 +123,6 @@ Deprecated.  Use C<GIMME_V> instead.
 				/*  On OP_NULL, saw a "do". */
 				/*  On OP_EXISTS, treat av as av, not avhv.  */
 				/*  On OP_(ENTER|LEAVE)EVAL, don't clear $@ */
-                                /*  On pushre, rx is used as part of split, e.g. split " " */
 				/*  On regcomp, "use re 'eval'" was in scope */
 				/*  On RV2[ACGHS]V, don't create GV--in
 				    defined()*/
@@ -261,11 +260,8 @@ struct pmop {
     U32         op_pmflags;
     union {
 	OP *	op_pmreplroot;		/* For OP_SUBST */
-#ifdef USE_ITHREADS
-	PADOFFSET  op_pmtargetoff;	/* For OP_PUSHRE */
-#else
-	GV *	op_pmtargetgv;
-#endif
+	PADOFFSET op_pmtargetoff;	/* For OP_SPLIT lex ary or thr GV */
+	GV *	op_pmtargetgv;	        /* For OP_SPLIT non-threaded GV */
     }	op_pmreplrootu;
     union {
 	OP *	op_pmreplstart;	/* Only used in OP_SUBST */

@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 131;
+plan tests => 135;
 
 $FS = ':';
 
@@ -523,3 +523,18 @@ is "@a", '1 2 3', 'assignment to split-to-array (pmtarget/package array)';
 }
 (@{\@a} = split //, "abc") = 1..10;
 is "@a", '1 2 3', 'assignment to split-to-array (stacked)';
+
+# check that re-evals work
+
+{
+    my $c = 0;
+    @a = split /-(?{ $c++ })/, "a-b-c";
+    is "@a", "a b c", "compile-time re-eval";
+    is $c, 2, "compile-time re-eval count";
+
+    my $sep = '-';
+    $c = 0;
+    @a = split /$sep(?{ $c++ })/, "a-b-c";
+    is "@a", "a b c", "run-time re-eval";
+    is $c, 2, "run-time re-eval count";
+}

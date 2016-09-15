@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.37";
+$VERSION = "1.38";
 
 use Carp;
 use Exporter ();
@@ -409,7 +409,7 @@ These are a hotchpotch of opcodes still waiting to be considered
     bless -- could be used to change ownership of objects
 	     (reblessing)
 
-    pushre regcmaybe regcreset regcomp subst substcont
+     regcmaybe regcreset regcomp subst substcont
 
     sprintf prtf -- can core dump
 

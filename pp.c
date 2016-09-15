@@ -5708,14 +5708,16 @@ PP(pp_reverse)
 PP(pp_split)
 {
     dSP; dTARG;
-    AV *ary = PL_op->op_flags & OPf_STACKED ? (AV *)POPs : NULL;
+    AV *ary = (   (PL_op->op_private & OPpSPLIT_ASSIGN)
+               && (PL_op->op_flags & OPf_STACKED))
+               ? (AV *)POPs : NULL;
     IV limit = POPi;			/* note, negative is forever */
     SV * const sv = POPs;
     STRLEN len;
     const char *s = SvPV_const(sv, len);
     const bool do_utf8 = DO_UTF8(sv);
     const char *strend = s + len;
-    PMOP *pm;
+    PMOP *pm = cPMOPx(PL_op);
     REGEXP *rx;
     SV *dstr;
     const char *m;
@@ -5736,33 +5738,26 @@ PP(pp_split)
     bool multiline = 0;
     MAGIC *mg = NULL;
 
-#ifdef DEBUGGING
-    Copy(&LvTARGOFF(POPs), &pm, 1, PMOP*);
-#else
-    pm = (PMOP*)POPs;
-#endif
-    if (!pm)
-	DIE(aTHX_ "panic: pp_split, pm=%p, s=%p", pm, s);
     rx = PM_GETRE(pm);
 
     TAINT_IF(get_regex_charset(RX_EXTFLAGS(rx)) == REGEX_LOCALE_CHARSET &&
              (RX_EXTFLAGS(rx) & (RXf_WHITE | RXf_SKIPWHITE)));
 
+    if (PL_op->op_private & OPpSPLIT_ASSIGN) {
+        if (!(PL_op->op_flags & OPf_STACKED)) {
+            if (PL_op->op_private & OPpSPLIT_LEX)
+                ary = (AV *)PAD_SVl(pm->op_pmreplrootu.op_pmtargetoff);
+            else {
+                GV *gv =
 #ifdef USE_ITHREADS
-    if (pm->op_pmreplrootu.op_pmtargetoff) {
-	ary = GvAVn(MUTABLE_GV(PAD_SVl(pm->op_pmreplrootu.op_pmtargetoff)));
-	goto have_av;
-    }
+                        MUTABLE_GV(PAD_SVl(pm->op_pmreplrootu.op_pmtargetoff));
 #else
-    if (pm->op_pmreplrootu.op_pmtargetgv) {
-	ary = GvAVn(pm->op_pmreplrootu.op_pmtargetgv);
-	goto have_av;
-    }
+                        pm->op_pmreplrootu.op_pmtargetgv;
 #endif
-    else if (pm->op_targ)
-	ary = (AV *)PAD_SVl(pm->op_targ);
-    if (ary) {
-	have_av:
+                ary = GvAVn(gv);
+            }
+        }
+
 	realarray = 1;
 	PUTBACK;
 	av_extend(ary,0);
@@ -5786,6 +5781,7 @@ PP(pp_split)
 	    make_mortal = 0;
 	}
     }
+
     base = SP - PL_stack_base;
     orig = s;
     if (RX_EXTFLAGS(rx) & RXf_SKIPWHITE) {

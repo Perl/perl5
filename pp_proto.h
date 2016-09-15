@@ -198,7 +198,6 @@ PERL_CALLCONV OP *Perl_pp_prototype(pTHX);
 PERL_CALLCONV OP *Perl_pp_prtf(pTHX);
 PERL_CALLCONV OP *Perl_pp_push(pTHX);
 PERL_CALLCONV OP *Perl_pp_pushmark(pTHX);
-PERL_CALLCONV OP *Perl_pp_pushre(pTHX);
 PERL_CALLCONV OP *Perl_pp_qr(pTHX);
 PERL_CALLCONV OP *Perl_pp_quotemeta(pTHX);
 PERL_CALLCONV OP *Perl_pp_rand(pTHX);

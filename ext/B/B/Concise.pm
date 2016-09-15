@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.998";
+our $VERSION   = "0.999";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -28,6 +28,8 @@ our %EXPORT_TAGS =
 # use #6
 use B qw(class ppname main_start main_root main_cv cstring svref_2object
 	 SVf_IOK SVf_NOK SVf_POK SVf_IVisUV SVf_FAKE OPf_KIDS OPf_SPECIAL
+         OPf_STACKED
+         OPpSPLIT_ASSIGN OPpSPLIT_LEX
 	 CVf_ANON PAD_FAKELEX_ANON PAD_FAKELEX_MULTI SVf_ROK);
 
 my %style =
@@ -845,22 +847,34 @@ sub concise_op {
 		$extra = " replstart->" . seq($op->pmreplstart);
 	    }
 	}
-	elsif ($op->name eq 'pushre') {
-	    # with C<@stash_array = split(/pat/, str);>,
-	    #  *stash_array is stored in /pat/'s pmreplroot.
-	    my $gv = $op->pmreplroot;
-	    if (!ref($gv)) {
-		# threaded: the value is actually a pad offset for where
-		# the GV is kept (op_pmtargetoff)
-		if ($gv) {
-		    $gv = (($curcv->PADLIST->ARRAY)[1]->ARRAY)[$gv]->NAME;
-		}
-	    }
-	    else {
-		# unthreaded: its a GV (if it exists)
-		$gv = (ref($gv) eq "B::GV") ? $gv->NAME : undef;
-	    }
-	    $extra = " => \@$gv" if $gv;
+	elsif ($op->name eq 'split') {
+            if (    ($op->private & OPpSPLIT_ASSIGN)
+                 && (not $op->flags & OPf_STACKED))
+            {
+                # with C<@array = split(/pat/, str);>,
+                #  array is stored in /pat/'s pmreplroot; either
+                # as an integer index into the pad (for a lexical array)
+                # or as GV for a package array (which will be a pad index
+                # on threaded builds)
+
+                if ($op->private & $B::Op_private::defines{'OPpSPLIT_LEX'}) {
+                    my $off = $op->pmreplroot; # union with op_pmtargetoff
+                    $extra = " => t$off";
+                }
+                else {
+                    # union with op_pmtargetoff, op_pmtargetgv
+                    my $gv = $op->pmreplroot;
+                    if (!ref($gv)) {
+                        # the value is actually a pad offset
+                        $gv = (($curcv->PADLIST->ARRAY)[1]->ARRAY)[$gv]->NAME;
+                    }
+                    else {
+                        # unthreaded: its a GV
+                        $gv = $gv->NAME;
+                    }
+                    $extra = " => \@$gv";
+                }
+            }
 	}
 	$h{arg} = "($precomp$extra)";
     } elsif ($h{class} eq "PVOP" and $h{name} !~ '^transr?\z') {

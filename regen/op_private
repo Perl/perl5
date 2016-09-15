@@ -397,8 +397,8 @@ addbits($_, 7 => qw(OPpLVALUE LV)) for qw(leave leaveloop);
 
 
 # Pattern coming in on the stack
-addbits($_, 6 => qw(OPpRUNTIME RTIME))
-    for qw(match subst substcont qr pushre);
+addbits($_, 5 => qw(OPpRUNTIME RTIME))
+    for qw(match subst substcont qr split);
 
 
 
@@ -731,8 +731,13 @@ addbits('coreargs',
 
 
 
-addbits('split', 7 => qw(OPpSPLIT_IMPLIM IMPLIM)); # implicit limit
-
+addbits('split',
+    7 => qw(OPpSPLIT_IMPLIM IMPLIM), # implicit limit
+    # @a = split() has been replaced with  split() where split itself
+    # does the array assign
+    4 => qw(OPpSPLIT_ASSIGN ASSIGN), 
+    3 => qw(OPpSPLIT_LEX LEX),  # the OPpSPLIT_ASSIGN is a lexical array
+);
 
 
 addbits($_,

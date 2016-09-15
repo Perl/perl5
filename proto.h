@@ -2473,7 +2473,7 @@ PERL_CALLCONV int	perl_run(PerlInterpreter *my_perl);
 #define PERL_ARGS_ASSERT_PERL_RUN	\
 	assert(my_perl)
 PERL_CALLCONV void	Perl_pmop_dump(pTHX_ PMOP* pm);
-PERL_CALLCONV OP*	Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, bool isreg, I32 floor);
+PERL_CALLCONV OP*	Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor);
 #define PERL_ARGS_ASSERT_PMRUNTIME	\
 	assert(o); assert(expr)
 PERL_CALLCONV void	Perl_pop_scope(pTHX);

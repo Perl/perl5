@@ -104,18 +104,6 @@ PP(pp_regcomp)
     assert (re != (REGEXP*) &PL_sv_undef);
     eng = re ? RX_ENGINE(re) : current_re_engine();
 
-    /*
-     In the below logic: these are basically the same - check if this regcomp is part of a split.
-
-    (PL_op->op_pmflags & PMf_split )
-    (PL_op->op_next->op_type == OP_PUSHRE)
-
-    We could add a new mask for this and copy the PMf_split, if we did
-    some bit definition fiddling first.
-
-    For now we leave this
-    */
-
     new_re = (eng->op_comp
 		    ? eng->op_comp
 		    : &Perl_re_op_compile
