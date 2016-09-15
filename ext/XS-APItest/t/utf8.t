@@ -70,6 +70,10 @@ my $UTF8_WARN_SUPER             = 0x0400;
 my $UTF8_DISALLOW_ABOVE_31_BIT  = 0x0800;
 my $UTF8_WARN_ABOVE_31_BIT      = 0x1000;
 my $UTF8_CHECK_ONLY             = 0x2000;
+my $UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE
+                             = $UTF8_DISALLOW_SUPER|$UTF8_DISALLOW_SURROGATE;
+my $UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+              = $UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE|$UTF8_DISALLOW_NONCHAR;
 
 # Test uvchr_to_utf8().
 my $UNICODE_WARN_SURROGATE        = 0x0001;
@@ -472,6 +476,28 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
 
     undef @warnings;
 
+    $ret = test_isUTF8_CHAR_flags($bytes, $len, 0);
+    is($ret, $len, "Verify isUTF8_CHAR_flags($display_bytes, 0) returns expected length: $len");
+
+    unless (is(scalar @warnings, 0,
+               "Verify isUTF8_CHAR_flags() for $hex_n generated no warnings"))
+    {
+        diag "The warnings were: " . join(", ", @warnings);
+    }
+
+    undef @warnings;
+
+    $ret = test_isUTF8_CHAR_flags($bytes, $len - 1, 0);
+    is($ret, 0, "Verify isUTF8_CHAR_flags() with too short length parameter returns 0");
+
+    unless (is(scalar @warnings, 0,
+               "Verify isUTF8_CHAR_flags() generated no warnings"))
+    {
+        diag "The warnings were: " . join(", ", @warnings);
+    }
+
+    undef @warnings;
+
     $ret = test_isSTRICT_UTF8_CHAR($bytes, $len);
     my $expected_len = ($valid_under_strict) ? $len : 0;
     is($ret, $expected_len, "Verify isSTRICT_UTF8_CHAR($display_bytes) returns expected length: $expected_len");
@@ -493,6 +519,19 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
         diag "The warnings were: " . join(", ", @warnings);
     }
 
+    undef @warnings;
+
+    $ret = test_isUTF8_CHAR_flags($bytes, $len, $UTF8_DISALLOW_ILLEGAL_INTERCHANGE);
+    is($ret, $expected_len, "Verify isUTF8_CHAR_flags('DISALLOW_ILLEGAL_INTERCHANGE') acts like isSTRICT_UTF8_CHAR");
+
+    unless (is(scalar @warnings, 0,
+               "Verify isUTF8_CHAR() for $hex_n generated no warnings"))
+    {
+        diag "The warnings were: " . join(", ", @warnings);
+    }
+
+    undef @warnings;
+
     $ret = test_isC9_STRICT_UTF8_CHAR($bytes, $len);
     $expected_len = ($valid_under_c9strict) ? $len : 0;
     is($ret, $expected_len, "Verify isC9_STRICT_UTF8_CHAR($display_bytes) returns expected length: $len");
@@ -510,6 +549,17 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
 
     unless (is(scalar @warnings, 0,
                "Verify isC9_STRICT_UTF8_CHAR() generated no warnings"))
+    {
+        diag "The warnings were: " . join(", ", @warnings);
+    }
+
+    undef @warnings;
+
+    $ret = test_isUTF8_CHAR_flags($bytes, $len, $UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE);
+    is($ret, $expected_len, "Verify isUTF8_CHAR_flags('DISALLOW_ILLEGAL_C9_INTERCHANGE') acts like isC9_STRICT_UTF8_CHAR");
+
+    unless (is(scalar @warnings, 0,
+               "Verify isUTF8_CHAR() for $hex_n generated no warnings"))
     {
         diag "The warnings were: " . join(", ", @warnings);
     }
@@ -778,6 +828,16 @@ foreach my $test (@malformations) {
 
     my $ret = test_isUTF8_CHAR($bytes, $length);
     is($ret, 0, "$testname: isUTF8_CHAR returns 0");
+    unless (is(scalar @warnings, 0,
+               "$testname: isUTF8_CHAR() generated no warnings"))
+    {
+        diag "The warnings were: " . join(", ", @warnings);
+    }
+
+    undef @warnings;
+
+    $ret = test_isUTF8_CHAR_flags($bytes, $length, 0);
+    is($ret, 0, "$testname: isUTF8_CHAR_flags returns 0");
     unless (is(scalar @warnings, 0,
                "$testname: isUTF8_CHAR() generated no warnings"))
     {
@@ -1293,15 +1353,19 @@ foreach my $test (@tests) {
         use warnings;
         undef @warnings;
         my $ret = test_isUTF8_CHAR($bytes, $length);
+        my $ret_flags = test_isUTF8_CHAR_flags($bytes, $length, 0);
         if ($will_overflow) {
             is($ret, 0, "isUTF8_CHAR() $testname: returns 0");
+            is($ret_flags, 0, "isUTF8_CHAR_flags() $testname: returns 0");
         }
         else {
             is($ret, $length,
                "isUTF8_CHAR() $testname: returns expected length: $length");
+            is($ret_flags, $length,
+               "isUTF8_CHAR_flags(...,0) $testname: returns expected length: $length");
         }
         unless (is(scalar @warnings, 0,
-                "isUTF8_CHAR() $testname: generated no warnings"))
+                "isUTF8_CHAR() and isUTF8_CHAR()_flags $testname: generated no warnings"))
         {
             diag "The warnings were: " . join(", ", @warnings);
         }
@@ -1318,9 +1382,13 @@ foreach my $test (@tests) {
                                : $length;
             is($ret, $expected_ret,
                "isSTRICT_UTF8_CHAR() $testname: returns expected length: $expected_ret");
+            $ret = test_isUTF8_CHAR_flags($bytes, $length,
+                                          $UTF8_DISALLOW_ILLEGAL_INTERCHANGE);
+            is($ret, $expected_ret,
+               "isUTF8_CHAR_flags('DISALLOW_ILLEGAL_INTERCHANGE') acts like isSTRICT_UTF8_CHAR");
         }
         unless (is(scalar @warnings, 0,
-                "isSTRICT_UTF8_CHAR() $testname: generated no warnings"))
+                "isSTRICT_UTF8_CHAR() and isUTF8_CHAR_flags $testname: generated no warnings"))
         {
             diag "The warnings were: " . join(", ", @warnings);
         }
@@ -1337,9 +1405,13 @@ foreach my $test (@tests) {
                                : $length;
             is($ret, $expected_ret,
                "isC9_STRICT_UTF8_CHAR() $testname: returns expected length: $expected_ret");
+            $ret = test_isUTF8_CHAR_flags($bytes, $length,
+                                          $UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE);
+            is($ret, $expected_ret,
+               "isUTF8_CHAR_flags('DISALLOW_ILLEGAL_C9_INTERCHANGE') acts like isC9_STRICT_UTF8_CHAR");
         }
         unless (is(scalar @warnings, 0,
-                "isC9_STRICT_UTF8_CHAR() $testname: generated no warnings"))
+                "isC9_STRICT_UTF8_CHAR() and isUTF8_CHAR_flags $testname: generated no warnings"))
         {
             diag "The warnings were: " . join(", ", @warnings);
         }

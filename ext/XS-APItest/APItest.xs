@@ -5328,6 +5328,13 @@ test_isUTF8_CHAR(char *s, STRLEN len)
         RETVAL
 
 STRLEN
+test_isUTF8_CHAR_flags(char *s, STRLEN len, U32 flags)
+    CODE:
+        RETVAL = isUTF8_CHAR_flags((U8 *) s, (U8 *) s + len, flags);
+    OUTPUT:
+        RETVAL
+
+STRLEN
 test_isSTRICT_UTF8_CHAR(char *s, STRLEN len)
     CODE:
         RETVAL = isSTRICT_UTF8_CHAR((U8 *) s, (U8 *) s + len);

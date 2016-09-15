@@ -1056,6 +1056,40 @@ L<perlunicode/Noncharacter code points>.
         ? 0                                                                 \
         : is_C9_STRICT_UTF8_CHAR_utf8_no_length_checks(s))
 
+/*
+
+=for apidoc Am|STRLEN|isUTF8_CHAR_flags|const U8 *s|const U8 *e| const U32 flags
+
+Evaluates to non-zero if the first few bytes of the string starting at C<s> and
+looking no further than S<C<e - 1>> are well-formed UTF-8, as extended by Perl,
+that represents some code point, subject to the restrictions given by C<flags>;
+otherwise it evaluates to 0.  If non-zero, the value gives how many bytes
+starting at C<s> comprise the code point's representation.
+
+If C<flags> is 0, this gives the same results as C<L</isUTF8_CHAR>>;
+if C<flags> is C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>, this gives the same results
+as C<L</isSTRICT_UTF8_CHAR>>;
+and if C<flags> is C<UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE>, this gives
+the same results as C<L</isC9_STRICT_UTF8_CHAR>>.
+Otherwise C<flags> may be any combination of the C<UTF8_DISALLOW_I<foo>> flags
+understood by C<L</utf8n_to_uvchr>>, with the same meanings.
+
+The three alternative macros are for the most commonly needed validations; they
+are likely to run somewhat faster than this more general one, as they can be
+inlined into your code.
+
+=cut
+*/
+
+#define isUTF8_CHAR_flags(s, e, flags)                                      \
+    (UNLIKELY((e) <= (s))                                                   \
+    ? 0                                                                     \
+    : (UTF8_IS_INVARIANT(*s))                                               \
+      ? 1                                                                   \
+      : UNLIKELY(((e) - (s)) < UTF8SKIP(s))                                 \
+        ? 0                                                                 \
+        : _is_utf8_char_helper(s, e, flags))
+
 /* Do not use; should be deprecated.  Use isUTF8_CHAR() instead; this is
  * retained solely for backwards compatibility */
 #define IS_UTF8_CHAR(p, n)      (isUTF8_CHAR(p, (p) + (n)) == n)
