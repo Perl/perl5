@@ -1,3 +1,10 @@
+Fri Sep 16 01:32:59 2016 +0200 Reini Urban <rurban@cpanel.net>
+    Version 3.01c
+
+        * Added warn_security("Movable-Type CVE-2015-1592 Storable metasploit attack")
+          when detecting the third destructive metasploit vector,
+          thawing bless \"mt-config.cgi", "CGITempFile".
+
 Thu Mar 31 17:10:27 2016 +0200 Reini Urban <rurban@cpanel.net>
     Version 3.00c
 
