@@ -3749,11 +3749,11 @@ Perl_sv_utf8_encode(pTHX_ SV *const sv)
 /*
 =for apidoc sv_utf8_decode
 
-If the PV of the SV is an octet sequence in UTF-8
+If the PV of the SV is an octet sequence in Perl's extended UTF-8
 and contains a multiple-byte character, the C<SvUTF8> flag is turned on
 so that it looks like a character.  If the PV contains only single-byte
 characters, the C<SvUTF8> flag stays off.
-Scans PV for validity and returns false if the PV is invalid UTF-8.
+Scans PV for validity and returns FALSE if the PV is invalid UTF-8.
 
 =cut
 */
