@@ -398,7 +398,6 @@ Perl_is_utf8_string(const U8 *s, const STRLEN len)
 }
 
 /*
-Implemented as a macro in utf8.h
 
 =for apidoc is_utf8_string_loc
 
@@ -407,6 +406,13 @@ case of "utf8ness failure") or the location C<s>+C<len> (in the case of
 "utf8ness success") in the C<ep> pointer.
 
 See also C<L</is_utf8_string_loclen>>.
+
+=cut
+*/
+
+#define is_utf8_string_loc(s, len, ep)  is_utf8_string_loclen(s, len, ep, 0)
+
+/*
 
 =for apidoc is_utf8_string_loclen
 
