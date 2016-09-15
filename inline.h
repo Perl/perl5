@@ -323,13 +323,12 @@ Perl_valid_utf8_to_uvchr(const U8 *s, STRLEN *retlen)
 /*
 =for apidoc is_utf8_invariant_string
 
-Returns true iff the first C<len> bytes of the string C<s> are the same
+Returns TRUE if the first C<len> bytes of the string C<s> are the same
 regardless of the UTF-8 encoding of the string (or UTF-EBCDIC encoding on
-EBCDIC machines).  That is, if they are UTF-8 invariant.  On ASCII-ish
-machines, all the ASCII characters and only the ASCII characters fit this
-definition.  On EBCDIC machines, the ASCII-range characters are invariant, but
-so also are the C1 controls and C<\c?> (which isn't in the ASCII range on
-EBCDIC).
+EBCDIC machines); otherwise it returns FALSE.  That is, it returns TRUE if they
+are UTF-8 invariant.  On ASCII-ish machines, all the ASCII characters and only
+the ASCII characters fit this definition.  On EBCDIC machines, the ASCII-range
+characters are invariant, but so also are the C1 controls.
 
 If C<len> is 0, it will be calculated using C<strlen(s)>, (which means if you
 use this option, that C<s> can't have embedded C<NUL> characters and has to
@@ -360,11 +359,14 @@ S_is_utf8_invariant_string(const U8* const s, const STRLEN len)
 /*
 =for apidoc is_utf8_string
 
-Returns true if the first C<len> bytes of string C<s> form a valid
-UTF-8 string, false otherwise.  If C<len> is 0, it will be calculated
-using C<strlen(s)> (which means if you use this option, that C<s> can't have
-embedded C<NUL> characters and has to have a terminating C<NUL> byte).  Note
-that all characters being ASCII constitute 'a valid UTF-8 string'.
+Returns TRUE if the first C<len> bytes of string C<s> form a valid
+Perl-extended-UTF-8 string; returns FALSE otherwise.  If C<len> is 0, it will
+be calculated using C<strlen(s)> (which means if you use this option, that C<s>
+can't have embedded C<NUL> characters and has to have a terminating C<NUL>
+byte).  Note that all characters being ASCII constitute 'a valid UTF-8 string'.
+
+Code points above Unicode, surrogates, and non-character code points are
+considered valid by this function.
 
 See also L</is_utf8_invariant_string>(), L</is_utf8_string_loclen>(), and
 L</is_utf8_string_loc>().
@@ -401,7 +403,7 @@ Implemented as a macro in utf8.h
 
 Like L</is_utf8_string> but stores the location of the failure (in the
 case of "utf8ness failure") or the location C<s>+C<len> (in the case of
-"utf8ness success") in the C<ep>.
+"utf8ness success") in the C<ep> pointer.
 
 See also L</is_utf8_string_loclen>() and L</is_utf8_string>().
 
@@ -410,7 +412,7 @@ See also L</is_utf8_string_loclen>() and L</is_utf8_string>().
 Like L</is_utf8_string>() but stores the location of the failure (in the
 case of "utf8ness failure") or the location C<s>+C<len> (in the case of
 "utf8ness success") in the C<ep>, and the number of UTF-8
-encoded characters in the C<el>.
+encoded characters in the C<el> pointer.
 
 See also L</is_utf8_string_loc>() and L</is_utf8_string>().
 
