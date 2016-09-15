@@ -2480,7 +2480,7 @@ sortcmp(const void *a, const void *b)
 static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 {
 	dVAR;
-	UV len = HvTOTALKEYS(hv);
+	UV len = (UV)HvTOTALKEYS(hv);
 	Size_t i;
 	int ret = 0;
 	I32 riter;
@@ -5174,7 +5174,7 @@ static SV *get_lstring(pTHX_ stcxt_t *cxt, UV len, int isutf8, const char *cname
 
 	sv = NEWSV(10002, len);
 	stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
-	SEEN_NN(sv, stash, 0);	/* Associate this new scalar with tag "tagnum" */
+        SEEN_NN(sv, stash, 0);	/* Associate this new scalar with tag "tagnum" */
 
 	if (len ==  0) {
 	    sv_setpvn(sv, "", 0);
@@ -5196,6 +5196,13 @@ static SV *get_lstring(pTHX_ stcxt_t *cxt, UV len, int isutf8, const char *cname
 	(void) SvPOK_only(sv);			/* Validate string pointer */
 	if (cxt->s_tainted)			/* Is input source tainted? */
 		SvTAINT(sv);			/* External data cannot be trusted */
+
+        /* Check for CVE-215-1592 */
+        if (cname && len == 13 && strEQc(cname, "CGITempFile")
+                               && strEQc(SvPVX(sv), "mt-config.cgi")) {
+		Perl_warn_security(aTHX_
+                    "Movable-Type CVE-2015-1592 Storable metasploit attack");
+        }
 
 	if (isutf8) {
 		TRACEME(("large utf8 string len %"UVuf" '%s'", len, SvPVX(sv)));
