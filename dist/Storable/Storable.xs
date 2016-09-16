@@ -2920,7 +2920,7 @@ static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags)
 	UV ix = 0;
 	HE** array;
 #ifdef DEBUGME
-	UV len = HvTOTALKEYS(hv);
+	UV len = (UV)HvTOTALKEYS(hv);
 #endif
 	if (hash_flags) {
 		TRACEME(("store_hash (0x%"UVxf") (flags %x)", PTR2UV(hv),
@@ -2928,7 +2928,7 @@ static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags)
 	} else {
 		TRACEME(("store_hash (0x%"UVxf")", PTR2UV(hv)));
 	}
-	TRACEME(("size = %"UVuf", used = %"UVuf, len, HvUSEDKEYS(hv)));
+	TRACEME(("size = %"UVuf", used = %"UVuf, len, (UV)HvUSEDKEYS(hv)));
 
 	array = HvARRAY(hv);
 	for (i = 0; i <= (Size_t)HvMAX(hv); i++) {
