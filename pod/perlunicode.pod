@@ -1746,7 +1746,7 @@ it, which changes the rules from ASCII to Unicode.  As an
 example, consider the following program and its output:
 
  $ perl -le'
-     no feature 'unicode_strings';
+     no feature "unicode_strings";
      $s1 = "\xC2";
      $s2 = "\x{2660}";
      for ($s1, $s2, $s1.$s2) {
