@@ -512,7 +512,14 @@ is, characters that carry a special meaning like C<.>, C<*>, or C<(>) lose
 their special meaning and can be used inside a character class without
 the need to escape them. For instance, C<[()]> matches either an opening
 parenthesis, or a closing parenthesis, and the parens inside the character
-class don't group or capture.
+class don't group or capture.  Be aware that, unless the pattern is
+evaluated in single-quotish context, variable interpolation will take
+place before the bracketed class is parsed:
+
+ $, = "\t| ";
+ $a =~ m'[$,]';        # single-quotish: matches '$' or ','
+ $a =~ q{[$,]}'        # same
+ $a =~ m/[$,]/;        # double-quotish: matches "\t", "|", or " "
 
 Characters that may carry a special meaning inside a character class are:
 C<\>, C<^>, C<->, C<[> and C<]>, and are discussed below. They can be
