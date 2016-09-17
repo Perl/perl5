@@ -1604,7 +1604,7 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
 	else {
 	    s = (char*)safemalloc(newlen);
 	    if (SvPVX_const(sv) && SvCUR(sv)) {
-	        Move(SvPVX_const(sv), s, (newlen < SvCUR(sv)) ? newlen : SvCUR(sv), char);
+                Move(SvPVX_const(sv), s, SvCUR(sv), char);
 	    }
 	}
 	SvPV_set(sv, s);
