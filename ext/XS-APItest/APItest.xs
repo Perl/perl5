@@ -4219,6 +4219,18 @@ CODE:
     } else
         Perl_croak(aTHX_ "load_module can't yet support %"IVdf" items", (IV)items);
 
+SV *
+string_without_null(SV *sv)
+    CODE:
+    {
+        STRLEN len;
+        const char *s = SvPV(sv, len);
+        RETVAL = newSVpvn_flags(s, len, SvUTF8(sv));
+        *SvEND(RETVAL) = 0xff;
+    }
+    OUTPUT:
+        RETVAL
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int

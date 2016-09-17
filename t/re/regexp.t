@@ -98,7 +98,8 @@ sub convert_from_ascii {
 use strict;
 use warnings FATAL=>"all";
 use vars qw($bang $ffff $nulnul); # used by the tests
-use vars qw($qr $skip_amp $qr_embed $qr_embed_thr $regex_sets); # set by our callers
+use vars qw($qr $skip_amp $qr_embed $qr_embed_thr $regex_sets
+            $no_null); # set by our callers
 
 
 
@@ -363,6 +364,7 @@ foreach (@tests) {
 	# Need to make a copy, else the utf8::upgrade of an already studied
 	# scalar confuses things.
 	my $subject = $subject;
+	$subject = XS::APItest::string_without_null($subject) if $no_null;
 	my $c = $iters;
 	my ($code, $match, $got);
         if ($repl eq 'pos') {
