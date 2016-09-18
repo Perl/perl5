@@ -137,6 +137,22 @@ L<Thread::Semaphore> has been upgraded from 2.12 to 2.13.
 
 Added the C<down_timed> method.
 
+=item *
+
+L<Sys::Syslog> has been upgraded from version 0.34 to 0.35.
+
+=item *
+
+L<XSLoader> has been upgraded from version 0.22 to 0.24.
+
+=item *
+
+L<Locale-Codes> has been upgraded from 3.39 to 3.40.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302052 to 1.302056
+
 =back
 
 =head2 Removed Modules and Pragmata
@@ -456,6 +472,52 @@ was marked as utf8 internally.  Many code paths (system calls, regexp
 compilation) still expect there to be a null byte in the string buffer
 just past the end of the logical string.  An assertion failure was the
 result.  [perl #129287]
+
+=item *
+
+check C<pack_sockaddr_un()>'s return value
+
+C<pack_sockaddr_un()> silently truncates the supplied path if it won't
+fit into the C<sun_path> member of C<sockaddr_un>. This may change in
+the future, but for now check the path in theC<sockaddr> matches the
+desired path, and skip if it doesn't. [perl #128095]
+
+=item *
+
+Preserve C<PL_oldoldbufptr> is preserved in C<scan_heredoc()>. In some
+cases this is used in building error messages. [perl #128988]
+
+=item *
+
+Check for null PL_curcop in IN_LC() [perl #129106]
+
+or, rather, in macros that it calls.
+
+When exiting a string eval, the current cop may be freed, so PL_curcop
+gets set to null.  With the -DC option, we may end up printfing NVs
+during scope exit, so the locale macros used to make sure that the
+locale is sane before converting the numbers to strings need to make
+sure not to read PL_curcop->cop_hints when PL_curcop is null.
+
+This used to crash with: ./miniperl -DC -e'eval "l/A"'
+
+I’m not sure how to write a test for this, or even whether it’s worth
+writing a test for -D, which often changes behaviour depending on
+porters’ whims.
+
+=item *
+
+fix errror handling for ':attr(foo' with no ')'
+
+=item *
+
+Fix C<Perl_delimcpy()> to handle a backslash as last char, this
+actually fixed two bugs, [perl #129064] and [perl #129176].
+
+=item *
+
+[perl #129267] rework gv_fetchmethod_pvn_flags separator parsing to
+prevent possible string overrun with invalid len in gv.c
 
 =back
 
