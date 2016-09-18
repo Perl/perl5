@@ -1582,14 +1582,14 @@ and someone has been calling it with an array or expression
 returning a list:
 
     func(@foo);
-    func( split /:/ );
+    func( $text =~ /\w+/g );
 
 Then you've just supplied an automatic C<scalar> in front of their
 argument, which can be more than a bit surprising.  The old C<@foo>
 which used to hold one thing doesn't get passed in.  Instead,
 C<func()> now gets passed in a C<1>; that is, the number of elements
-in C<@foo>.  And the C<split> gets called in scalar context so it
-starts scribbling on your C<@_> parameter list.  Ouch!
+in C<@foo>.  And the C<m//g> gets called in scalar context so instead of a
+list of words it returns a boolean result and advances C<pos($text)>.  Ouch!
 
 If a sub has both a PROTO and a BLOCK, the prototype is not applied
 until after the BLOCK is completely defined.  This means that a recursive
