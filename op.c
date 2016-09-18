@@ -6578,87 +6578,87 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
             /* don't do twice, e.g. @b = (@a = split) */
             && !(right->op_private & OPpSPLIT_ASSIGN))
         {
-                    OP *gvop = NULL;
+            OP *gvop = NULL;
 
-		    if (!(left->op_private & OPpLVAL_INTRO) &&
-		        ( (left->op_type == OP_RV2AV &&
-			  (gvop=((UNOP*)left)->op_first)->op_type==OP_GV)
-		        || left->op_type == OP_PADAV )
-			)
-                    {
-                        /* @pkg or @lex, but not 'local @pkg' nor 'my @lex' */
-                        OP *tmpop;
-                        PMOP * const pm = (PMOP*)right;
-			if (gvop) {
+            if (!(left->op_private & OPpLVAL_INTRO) &&
+                ( (left->op_type == OP_RV2AV &&
+                  (gvop=((UNOP*)left)->op_first)->op_type==OP_GV)
+                || left->op_type == OP_PADAV )
+                )
+            {
+                /* @pkg or @lex, but not 'local @pkg' nor 'my @lex' */
+                OP *tmpop;
+                PMOP * const pm = (PMOP*)right;
+                if (gvop) {
 #ifdef USE_ITHREADS
-			    pm->op_pmreplrootu.op_pmtargetoff
-			        = cPADOPx(gvop)->op_padix;
-			    cPADOPx(gvop)->op_padix = 0;	/* steal it */
+                    pm->op_pmreplrootu.op_pmtargetoff
+                        = cPADOPx(gvop)->op_padix;
+                    cPADOPx(gvop)->op_padix = 0;	/* steal it */
 #else
-			    pm->op_pmreplrootu.op_pmtargetgv
-			        = MUTABLE_GV(cSVOPx(gvop)->op_sv);
-			    cSVOPx(gvop)->op_sv = NULL;	/* steal it */
+                    pm->op_pmreplrootu.op_pmtargetgv
+                        = MUTABLE_GV(cSVOPx(gvop)->op_sv);
+                    cSVOPx(gvop)->op_sv = NULL;	/* steal it */
 #endif
-			    right->op_private |=
-			        left->op_private & OPpOUR_INTRO;
-			}
-			else {
-                            pm->op_pmreplrootu.op_pmtargetoff = left->op_targ;
-                            left->op_targ = 0;	/* steal it */
-			    right->op_private |= OPpSPLIT_LEX;
-			}
+                    right->op_private |=
+                        left->op_private & OPpOUR_INTRO;
+                }
+                else {
+                    pm->op_pmreplrootu.op_pmtargetoff = left->op_targ;
+                    left->op_targ = 0;	/* steal it */
+                    right->op_private |= OPpSPLIT_LEX;
+                }
 
-		      detach_split:
-			tmpop = cUNOPo->op_first;	/* to list (nulled) */
-			tmpop = ((UNOP*)tmpop)->op_first; /* to pushmark */
-                        assert(OpSIBLING(tmpop) == right);
-                        assert(!OpHAS_SIBLING(right));
-                        /* detach the split subtreee from the o tree,
-                         * then free the residual o tree */
-                        op_sibling_splice(cUNOPo->op_first, tmpop, 1, NULL);
-			op_free(o);			/* blow off assign */
-                        right->op_private |= OPpSPLIT_ASSIGN;
-			right->op_flags &= ~OPf_WANT;
-				/* "I don't know and I don't care." */
-			return right;
-		    }
-		    else if (left->op_type == OP_RV2AV
-			  || left->op_type == OP_PADAV)
-		    {
-                        /* 'local @pkg' or 'my @lex' */
+              detach_split:
+                tmpop = cUNOPo->op_first;	/* to list (nulled) */
+                tmpop = ((UNOP*)tmpop)->op_first; /* to pushmark */
+                assert(OpSIBLING(tmpop) == right);
+                assert(!OpHAS_SIBLING(right));
+                /* detach the split subtreee from the o tree,
+                 * then free the residual o tree */
+                op_sibling_splice(cUNOPo->op_first, tmpop, 1, NULL);
+                op_free(o);			/* blow off assign */
+                right->op_private |= OPpSPLIT_ASSIGN;
+                right->op_flags &= ~OPf_WANT;
+                        /* "I don't know and I don't care." */
+                return right;
+            }
+            else if (left->op_type == OP_RV2AV
+                  || left->op_type == OP_PADAV)
+            {
+                /* 'local @pkg' or 'my @lex' */
 
-                        OP *pushop = cUNOPx(cBINOPo->op_last)->op_first;
-                        assert(OpSIBLING(pushop) == left);
-			/* Detach the array ...  */
-			op_sibling_splice(cBINOPo->op_last, pushop, 1, NULL);
-			/* ... and attach it to the split.  */
-			op_sibling_splice(right, cLISTOPx(right)->op_last,
-					  0, left);
-			right->op_flags |= OPf_STACKED;
-			/* Detach split and expunge aassign as above.  */
-			goto detach_split;
-		    }
-		    else if (PL_modcount < RETURN_UNLIMITED_NUMBER &&
-			    ((LISTOP*)right)->op_last->op_type == OP_CONST)
-		    {
-                        /* convert split(...,0) to split(..., PL_modcount+1) */
-			SV ** const svp =
-			    &((SVOP*)((LISTOP*)right)->op_last)->op_sv;
-			SV * const sv = *svp;
-			if (SvIOK(sv) && SvIVX(sv) == 0)
-			{
-			  if (right->op_private & OPpSPLIT_IMPLIM) {
-			    /* our own SV, created in ck_split */
-			    SvREADONLY_off(sv);
-			    sv_setiv(sv, PL_modcount+1);
-			  }
-			  else {
-			    /* SV may belong to someone else */
-			    SvREFCNT_dec(sv);
-			    *svp = newSViv(PL_modcount+1);
-			  }
-			}
-		    }
+                OP *pushop = cUNOPx(cBINOPo->op_last)->op_first;
+                assert(OpSIBLING(pushop) == left);
+                /* Detach the array ...  */
+                op_sibling_splice(cBINOPo->op_last, pushop, 1, NULL);
+                /* ... and attach it to the split.  */
+                op_sibling_splice(right, cLISTOPx(right)->op_last,
+                                  0, left);
+                right->op_flags |= OPf_STACKED;
+                /* Detach split and expunge aassign as above.  */
+                goto detach_split;
+            }
+            else if (PL_modcount < RETURN_UNLIMITED_NUMBER &&
+                    ((LISTOP*)right)->op_last->op_type == OP_CONST)
+            {
+                /* convert split(...,0) to split(..., PL_modcount+1) */
+                SV ** const svp =
+                    &((SVOP*)((LISTOP*)right)->op_last)->op_sv;
+                SV * const sv = *svp;
+                if (SvIOK(sv) && SvIVX(sv) == 0)
+                {
+                  if (right->op_private & OPpSPLIT_IMPLIM) {
+                    /* our own SV, created in ck_split */
+                    SvREADONLY_off(sv);
+                    sv_setiv(sv, PL_modcount+1);
+                  }
+                  else {
+                    /* SV may belong to someone else */
+                    SvREFCNT_dec(sv);
+                    *svp = newSViv(PL_modcount+1);
+                  }
+                }
+            }
 	}
 	return o;
     }
