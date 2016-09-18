@@ -131,6 +131,12 @@ L<Filter::Simple> has been upgraded from version 0.92 to 0.93.
 It no longer treats C<no MyFilter> immediately following C<use MyFilter> as
 end-of-file.  [perl #107726]
 
+=item *
+
+L<Thread::Semaphore> has been upgraded from 2.12 to 2.13.
+
+Added the C<down_timed> method.
+
 =back
 
 =head2 Removed Modules and Pragmata
@@ -170,6 +176,10 @@ section.
 
 L<perlinterp> has been expanded to give a more detailed example of how to
 hunt around in the parser to how a given operator is handled.
+
+=item *
+
+L<perlinterp> now has an expanded op-tree section.
 
 =back
 
@@ -326,6 +336,27 @@ The path separator for the C<PERL5LIB> and C<PERLLIB> environment entries is
 now a colon (C<:>) when running under a Unix shell. There is no change when
 running under DCL (it's still C<|>).
 
+=item *
+
+Remove some VMS-specific hacks from C<showlex.t>. These were added 15 years
+ago, and are no longer necessary for any VMS version now supported.
+
+=back
+
+=back
+
+=over 4
+
+=item Win32
+
+=over 4
+
+=item *
+
+Tweaks for Win32 VC vs GCC detection makefile code. This fixes issue that CCHOME
+depends on CCTYPE, which in auto detect mode is set after CCHOME, so CCHOME uses
+the uninit CCTYPE var. Also fix else vs .ELSE in makefile.mk
+
 =back
 
 =back
@@ -345,6 +376,13 @@ well.
 Several macros and functions have been added to the public API for
 dealing with Unicode and UTF-8-encoded strings.  See
 L<perlapi/Unicode Support>.
+
+=item *
+
+Use C<my_strlcat()> in C<locale.c>. While C<strcat()> is safe in this context,
+some compilers were optimizing this to C<strcpy()> causing a porting test to
+fail that looks for unsafe code. Rather than fighting this, we just use
+C<my_strlcat()> instead.
 
 =back
 
@@ -384,6 +422,33 @@ C<sub c { sub c; }>) could sometimes crash or loop infinitely.  [perl
 
 The use of C<splice> on arrays with nonexistent elements could cause other
 operators to crash.  [perl #129164]
+
+=item *
+
+Fixed case where C<re_untuit_start> will overshoot the length of a utf8
+string. [perl #129012]
+
+=item *
+
+Handle C<CXt_SUBST> better in C<Perl_deb_stack_all>, previously it wasn't
+checking that the I<current> C<cx> is the right type, and instead was always
+checking the base C<cx> (effectively a noop). [perl #129029]
+
+=item *
+
+Fixed two possible use-after-free bugs in C<Perl_yylex>. C<Perl_yylex>
+maintains up to two pointers into the parser buffer, one of which can
+become stale under the right conditions. [perl #129069]
+
+=item *
+
+Fixed a crash with C<s///l> where it thought it was dealing with UTF-8
+when it wasn't. [perl #129038]
+
+=item *
+
+Fixed place where regex was not setting the syntax error correctly.
+[perl #129122]
 
 =back
 
