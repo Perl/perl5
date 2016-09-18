@@ -342,7 +342,9 @@ well.
 
 =item *
 
-XXX
+Several macros and functions have been added to the public API for
+dealing with Unicode and UTF-8-encoded strings.  See
+L<perlapi/Unicode Support>.
 
 =back
 
