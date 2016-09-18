@@ -817,8 +817,8 @@ pack/unpack to convert to/from Unicode.
 If you have a sequence of bytes you B<know> is valid UTF-8,
 but Perl doesn't know it yet, you can make Perl a believer, too:
 
-    use Encode 'decode_utf8';
-    $Unicode = decode_utf8($bytes);
+    $Unicode = $bytes;
+    utf8::decode($Unicode);
 
 or:
 
