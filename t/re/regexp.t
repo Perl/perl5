@@ -146,6 +146,11 @@ foreach (@tests) {
     $pat =~ s/\\n/\n/g unless $regex_sets;
     $pat = convert_from_ascii($pat) if ord("A") != 65;
 
+    my $no_null_pat;
+    if ($no_null && $pat =~ /^'(.*)'\z/) {
+       $no_null_pat = XS::APItest::string_without_null($1);
+    }
+
     $subject = convert_from_ascii($subject) if ord("A") != 65;
     $subject = eval qq("$subject"); die $@ if $@;
 
@@ -369,10 +374,12 @@ foreach (@tests) {
 	my $c = $iters;
 	my ($code, $match, $got);
         if ($repl eq 'pos') {
+            my $patcode = defined $no_null_pat ? '/$no_null_pat/g'
+                                               : "m${pat}g";
             $code= <<EOFCODE;
                 $study
                 pos(\$subject)=0;
-                \$match = ( \$subject =~ m${pat}g );
+                \$match = ( \$subject =~ $patcode );
                 \$got = pos(\$subject);
 EOFCODE
         }
@@ -391,6 +398,15 @@ EOFCODE
                 my \$RE = threads->new(sub {qr$pat})->join();
                 $study
                 \$match = (\$subject =~ /(?:)\$RE(?:)/) while \$c--;
+                \$got = "$repl";
+EOFCODE
+        }
+        elsif ($no_null) {
+            my $patcode = defined $no_null_pat ? '/$no_null_pat/'
+                                               :  $pat;
+            $code= <<EOFCODE;
+                $study
+                \$match = (\$subject =~ $OP$pat) while \$c--;
                 \$got = "$repl";
 EOFCODE
         }
