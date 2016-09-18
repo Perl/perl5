@@ -6090,7 +6090,7 @@ Note the I<characters>: depending on the status of the socket, either
 (8-bit) bytes or characters are received.  By default all sockets
 operate on bytes, but for example if the socket has been changed using
 L<C<binmode>|/binmode FILEHANDLE, LAYER> to operate with the
-C<:encoding(utf8)> I/O layer (see the L<open> pragma), the I/O will
+C<:encoding(UTF-8)> I/O layer (see the L<open> pragma), the I/O will
 operate on UTF8-encoded Unicode
 characters, not bytes.  Similarly for the C<:encoding> layer: in that
 case pretty much any characters can be read.
@@ -6650,7 +6650,7 @@ of the file) from the L<Fcntl> module.  Returns C<1> on success, false
 otherwise.
 
 Note the emphasis on bytes: even if the filehandle has been set to operate
-on characters (for example using the C<:encoding(utf8)> I/O layer), the
+on characters (for example using the C<:encoding(UTF-8)> I/O layer), the
 L<C<seek>|/seek FILEHANDLE,POSITION,WHENCE>,
 L<C<tell>|/tell FILEHANDLE>, and
 L<C<sysseek>|/sysseek FILEHANDLE,POSITION,WHENCE>
@@ -6889,7 +6889,7 @@ Note the I<characters>: depending on the status of the socket, either
 (8-bit) bytes or characters are sent.  By default all sockets operate
 on bytes, but for example if the socket has been changed using
 L<C<binmode>|/binmode FILEHANDLE, LAYER> to operate with the
-C<:encoding(utf8)> I/O layer (see L<C<open>|/open FILEHANDLE,EXPR>, or
+C<:encoding(UTF-8)> I/O layer (see L<C<open>|/open FILEHANDLE,EXPR>, or
 the L<open> pragma), the I/O will operate on UTF-8
 encoded Unicode characters, not bytes.  Similarly for the C<:encoding>
 layer: in that case pretty much any characters can be sent.
@@ -8535,7 +8535,7 @@ to the current position plus POSITION; and C<2> to set it to EOF plus
 POSITION, typically negative.
 
 Note the emphasis on bytes: even if the filehandle has been set to operate
-on characters (for example using the C<:encoding(utf8)> I/O layer), the
+on characters (for example using the C<:encoding(UTF-8)> I/O layer), the
 L<C<seek>|/seek FILEHANDLE,POSITION,WHENCE>,
 L<C<tell>|/tell FILEHANDLE>, and
 L<C<sysseek>|/sysseek FILEHANDLE,POSITION,WHENCE>
@@ -8702,7 +8702,7 @@ the actual filehandle.  If FILEHANDLE is omitted, assumes the file
 last read.
 
 Note the emphasis on bytes: even if the filehandle has been set to operate
-on characters (for example using the C<:encoding(utf8)> I/O layer), the
+on characters (for example using the C<:encoding(UTF-8)> I/O layer), the
 L<C<seek>|/seek FILEHANDLE,POSITION,WHENCE>,
 L<C<tell>|/tell FILEHANDLE>, and
 L<C<sysseek>|/sysseek FILEHANDLE,POSITION,WHENCE>

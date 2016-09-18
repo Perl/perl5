@@ -1121,7 +1121,7 @@ A pseudolayer that enables a flag in the layer below to tell Perl
 that output should be in utf8 and that input should be regarded as
 already in valid utf8 form. B<WARNING: It does not check for validity and as such
 should be handled with extreme caution for input, because security violations
-can occur with non-shortest UTF-8 encodings, etc.> Generally C<:encoding(utf8)> is
+can occur with non-shortest UTF-8 encodings, etc.> Generally C<:encoding(UTF-8)> is
 the best option when reading UTF-8 encoded data.
 
 =item :win32
