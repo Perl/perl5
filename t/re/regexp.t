@@ -5,8 +5,9 @@
 # There are five columns, separated by tabs.
 # An optional sixth column is used to give a reason, only when skipping tests
 #
-# Column 1 contains the pattern, optionally enclosed in C<''>.
-# Modifiers can be put after the closing C<'>.
+# Column 1 contains the pattern, optionally enclosed in C<''> C<::> or
+# C<//>.  Modifiers can be put after the closing delimiter.  C<''> will
+# automatically be added to any other patterns.
 #
 # Column 2 contains the string to be matched.
 #
