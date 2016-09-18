@@ -234,8 +234,8 @@ C<binmode> as described later below.
  or
      $ export PERL_UNICODE=A
  or
-    use Encode qw(decode_utf8);
-    @ARGV = map { decode_utf8($_, 1) } @ARGV;
+    use Encode qw(decode);
+    @ARGV = map { decode('UTF-8', $_, 1) } @ARGV;
 
 =head2 ℞ 14: Decode program arguments as locale encoding
 
@@ -289,8 +289,8 @@ Files opened without an encoding argument will be in UTF-8:
      $ export PERL_UNICODE=SDA
  or
      use open qw(:std :utf8);
-     use Encode qw(decode_utf8);
-     @ARGV = map { decode_utf8($_, 1) } @ARGV;
+     use Encode qw(decode);
+     @ARGV = map { decode('UTF-8', $_, 1) } @ARGV;
 
 =head2 ℞ 19: Open file with specific encoding
 

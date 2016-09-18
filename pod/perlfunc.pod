@@ -3763,8 +3763,8 @@ many elements these have.  For that, use C<scalar @array> and C<scalar keys
 Like all Perl character operations, L<C<length>|/length EXPR> normally
 deals in logical
 characters, not physical bytes.  For how many bytes a string encoded as
-UTF-8 would take up, use C<length(Encode::encode_utf8(EXPR))> (you'll have
-to C<use Encode> first).  See L<Encode> and L<perlunicode>.
+UTF-8 would take up, use C<length(Encode::encode('UTF-8', EXPR))>
+(you'll have to C<use Encode> first).  See L<Encode> and L<perlunicode>.
 
 =item __LINE__
 X<__LINE__>

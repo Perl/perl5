@@ -752,12 +752,12 @@ How Do I Detect Data That's Not Valid In a Particular Encoding?
 Use the C<Encode> package to try converting it.
 For example,
 
-    use Encode 'decode_utf8';
+    use Encode 'decode';
 
-    if (eval { decode_utf8($string, Encode::FB_CROAK); 1 }) {
-        # $string is valid utf8
+    if (eval { decode('UTF-8', $string, Encode::FB_CROAK); 1 }) {
+        # $string is valid UTF-8
     } else {
-        # $string is not valid utf8
+        # $string is not valid UTF-8
     }
 
 Or use C<unpack> to try decoding it:

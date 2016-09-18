@@ -3407,7 +3407,7 @@ the variable, C<%s>, part of the message.
 
 One possible cause is that you set the UTF8 flag yourself for data that
 you thought to be in UTF-8 but it wasn't (it was for example legacy
-8-bit data).  To guard against this, you can use Encode::decode_utf8.
+8-bit data).  To guard against this, you can use C<Encode::decode('UTF-8', ...)>.
 
 If you use the C<:encoding(UTF-8)> PerlIO layer for input, invalid byte
 sequences are handled gracefully, but if you use C<:utf8>, the flag is

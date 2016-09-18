@@ -1904,7 +1904,7 @@ check the documentation to verify if this is still true.
 
   if ($] > 5.008) {
     require Encode;
-    $val = Encode::encode_utf8($val); # make octets
+    $val = Encode::encode("UTF-8", $val); # make octets
   }
 
 =item *
@@ -1916,7 +1916,7 @@ want the UTF8 flag restored:
 
   if ($] > 5.008) {
     require Encode;
-    $val = Encode::decode_utf8($val);
+    $val = Encode::decode("UTF-8", $val);
   }
 
 =item *
@@ -2017,8 +2017,8 @@ Perl's internal representation like so:
     sub my_escape_html ($) {
         my($what) = shift;
         return unless defined $what;
-        Encode::decode_utf8(Foo::Bar::escape_html(
-                                         Encode::encode_utf8($what)));
+        Encode::decode("UTF-8", Foo::Bar::escape_html(
+                                     Encode::encode("UTF-8", $what)));
     }
 
 Sometimes, when the extension does not convert data but just stores

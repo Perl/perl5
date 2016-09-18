@@ -668,9 +668,10 @@ Usually you'll want to pack or unpack UTF-8 strings:
    my @hebrew = unpack( 'U*', $utf );
 
 Please note: in the general case, you're better off using
-Encode::decode_utf8 to decode a UTF-8 encoded byte string to a Perl
-Unicode string, and Encode::encode_utf8 to encode a Perl Unicode string
-to UTF-8 bytes. These functions provide means of handling invalid byte
+L<C<Encode::decode('UTF-8', $utf)>|Encode/decode> to decode a UTF-8
+encoded byte string to a Perl Unicode string, and
+L<C<Encode::encode('UTF-8', $str)>|Encode/encode> to encode a Perl Unicode
+string to UTF-8 bytes. These functions provide means of handling invalid byte
 sequences and generally have a friendlier interface.
 
 =head2 Another Portable Binary Encoding
