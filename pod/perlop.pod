@@ -1268,16 +1268,19 @@ The only operators with lower precedence are the logical operators
 C<"and">, C<"or">, and C<"not">, which may be used to evaluate calls to list
 operators without the need for parentheses:
 
-    open HANDLE, "< :utf8", "filename" or die "Can't open: $!\n";
+    open HANDLE, "< :encoding(UTF-8)", "filename"
+        or die "Can't open: $!\n";
 
 However, some people find that code harder to read than writing
 it with parentheses:
 
-    open(HANDLE, "< :utf8", "filename") or die "Can't open: $!\n";
+    open(HANDLE, "< :encoding(UTF-8)", "filename")
+        or die "Can't open: $!\n";
 
 in which case you might as well just use the more customary C<"||"> operator:
 
-    open(HANDLE, "< :utf8", "filename") || die "Can't open: $!\n";
+    open(HANDLE, "< :encoding(UTF-8)", "filename")
+        || die "Can't open: $!\n";
 
 See also discussion of list operators in L</Terms and List Operators (Leftward)>.
 
