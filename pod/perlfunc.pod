@@ -7406,6 +7406,8 @@ X<split>
 
 Splits the string EXPR into a list of strings and returns the
 list in list context, or the size of the list in scalar context.
+(Prior to Perl 5.11, it also overwrote C<@_> with the list in
+void and scalar context. If you target old perls, beware.)
 
 If only PATTERN is given, EXPR defaults to L<C<$_>|perlvar/$_>.
 
