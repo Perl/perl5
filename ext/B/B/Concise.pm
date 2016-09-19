@@ -764,6 +764,50 @@ sub fill_srclines {
     $srclines{$fullnm} = \@l;
 }
 
+# Given a pad target, return the pad var's name and cop range /
+# fakeness, or failing that, its target number.
+# e.g.
+#   ('$i', '$i:5,7')
+# or
+#   ('$i', '$i:fake:a')
+# or
+#   ('t5', 't5')
+
+sub padname {
+    my ($targ) = @_;
+
+    my ($targarg, $targarglife);
+    my $padname = (($curcv->PADLIST->ARRAY)[0]->ARRAY)[$targ];
+    if (defined $padname and class($padname) ne "SPECIAL" and
+        $padname->LEN)
+    {
+        $targarg  = $padname->PVX;
+        if ($padname->FLAGS & SVf_FAKE) {
+            # These changes relate to the jumbo closure fix.
+            # See changes 19939 and 20005
+            my $fake = '';
+            $fake .= 'a'
+                if $padname->PARENT_FAKELEX_FLAGS & PAD_FAKELEX_ANON;
+            $fake .= 'm'
+                if $padname->PARENT_FAKELEX_FLAGS & PAD_FAKELEX_MULTI;
+            $fake .= ':' . $padname->PARENT_PAD_INDEX
+                if $curcv->CvFLAGS & CVf_ANON;
+            $targarglife = "$targarg:FAKE:$fake";
+        }
+        else {
+            my $intro = $padname->COP_SEQ_RANGE_LOW - $cop_seq_base;
+            my $finish = int($padname->COP_SEQ_RANGE_HIGH) - $cop_seq_base;
+            $finish = "end" if $finish == 999999999 - $cop_seq_base;
+            $targarglife = "$targarg:$intro,$finish";
+        }
+    } else {
+        $targarglife = $targarg = "t" . $targ;
+    }
+    return $targarg, $targarglife;
+}
+
+
+
 sub concise_op {
     my ($op, $level, $format) = @_;
     my %h;
@@ -796,33 +840,7 @@ sub concise_op {
             : 1;
 	my (@targarg, @targarglife);
 	for my $i (0..$count-1) {
-	    my ($targarg, $targarglife);
-	    my $padname = (($curcv->PADLIST->ARRAY)[0]->ARRAY)[$h{targ}+$i];
-	    if (defined $padname and class($padname) ne "SPECIAL" and
-		$padname->LEN)
-	    {
-		$targarg  = $padname->PVX;
-		if ($padname->FLAGS & SVf_FAKE) {
-		    # These changes relate to the jumbo closure fix.
-		    # See changes 19939 and 20005
-		    my $fake = '';
-		    $fake .= 'a'
-			if $padname->PARENT_FAKELEX_FLAGS & PAD_FAKELEX_ANON;
-		    $fake .= 'm'
-			if $padname->PARENT_FAKELEX_FLAGS & PAD_FAKELEX_MULTI;
-		    $fake .= ':' . $padname->PARENT_PAD_INDEX
-			if $curcv->CvFLAGS & CVf_ANON;
-		    $targarglife = "$targarg:FAKE:$fake";
-		}
-		else {
-		    my $intro = $padname->COP_SEQ_RANGE_LOW - $cop_seq_base;
-		    my $finish = int($padname->COP_SEQ_RANGE_HIGH) - $cop_seq_base;
-		    $finish = "end" if $finish == 999999999 - $cop_seq_base;
-		    $targarglife = "$targarg:$intro,$finish";
-		}
-	    } else {
-		$targarglife = $targarg = "t" . ($h{targ}+$i);
-	    }
+	    my ($targarg, $targarglife) = padname($h{targ} + $i);
 	    push @targarg,     $targarg;
 	    push @targarglife, $targarglife;
 	}
@@ -859,7 +877,8 @@ sub concise_op {
 
                 if ($op->private & $B::Op_private::defines{'OPpSPLIT_LEX'}) {
                     my $off = $op->pmreplroot; # union with op_pmtargetoff
-                    $extra = " => t$off";
+                    my ($name, $full) = padname($off);
+                    $extra = " => $full";
                 }
                 else {
                     # union with op_pmtargetoff, op_pmtargetgv
