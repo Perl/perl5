@@ -147,7 +147,7 @@ L<XSLoader> has been upgraded from version 0.22 to 0.24.
 
 =item *
 
-L<Locale-Codes> has been upgraded from 3.39 to 3.40.
+L<Locale::Codes> has been upgraded from 3.39 to 3.40.
 
 =item *
 
