@@ -446,6 +446,15 @@ when it wasn't. [perl #129038]
 Fixed place where regex was not setting the syntax error correctly.
 [perl #129122]
 
+=item *
+
+The C<&.> operator (and the C<&> operator, when it treats its arguments as
+strings) were failing to append a trailing null byte if at least one string
+was marked as utf8 internally.  Many code paths (system calls, regexp
+compilation) still expect there to be a null byte in the string buffer
+just past the end of the logical string.  An assertion failure was the
+result.  [perl #129287]
+
 =back
 
 =head1 Known Problems
