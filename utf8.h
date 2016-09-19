@@ -964,14 +964,22 @@ Evaluates to non-zero if the first few bytes of the string starting at C<s> and
 looking no further than S<C<e - 1>> are well-formed UTF-8, as extended by Perl,
 that represents some code point; otherwise it evaluates to 0.  If non-zero, the
 value gives how many bytes starting at C<s> comprise the code point's
-representation.
+representation.  Any bytes remaining before C<e>, but beyond the ones needed to
+form the first code point in C<s>, are not examined.
 
 The code point can be any that will fit in a UV on this machine, using Perl's
 extension to official UTF-8 to represent those higher than the Unicode maximum
 of 0x10FFFF.  That means that this macro is used to efficiently decide if the
-next few bytes in C<s> is legal UTF-8 for a single character.  Use
-L</is_utf8_string>(), L</is_utf8_string_loclen>(), and
-L</is_utf8_string_loc>() to check entire strings.
+next few bytes in C<s> is legal UTF-8 for a single character.
+
+Use C<L</isSTRICT_UTF8_CHAR>> to restrict the acceptable code points to those
+defined by Unicode to be fully interchangeable across applications;
+C<L</isC9_STRICT_UTF8_CHAR>> to use the L<Unicode Corrigendum
+#9|http://www.unicode.org/versions/corrigendum9.html> definition of allowable
+code points; and C<L</isUTF8_CHAR_flags>> for a more customized definition.
+
+Use C<L</is_utf8_string>>, C<L</is_utf8_string_loc>>, and
+C<L</is_utf8_string_loclen>> to check entire strings.
 
 Note that it is deprecated to use code points higher than what will fit in an
 IV.  This macro does not raise any warnings for such code points, treating them
@@ -1004,15 +1012,21 @@ Evaluates to non-zero if the first few bytes of the string starting at C<s> and
 looking no further than S<C<e - 1>> are well-formed UTF-8 that represents some
 Unicode code point completely acceptable for open interchange between all
 applications; otherwise it evaluates to 0.  If non-zero, the value gives how
-many bytes starting at C<s> comprise the code point's representation.
+many bytes starting at C<s> comprise the code point's representation.  Any
+bytes remaining before C<e>, but beyond the ones needed to form the first code
+point in C<s>, are not examined.
 
 The largest acceptable code point is the Unicode maximum 0x10FFFF, and must not
 be a surrogate nor a non-character code point.  Thus this excludes any code
 point from Perl's extended UTF-8.
 
 This is used to efficiently decide if the next few bytes in C<s> is
-legal Unicode-acceptable UTF-8 for a single character.  Use
-C<L</isC9_STRICT_UTF8_CHAR>> to also accept non-character code points.
+legal Unicode-acceptable UTF-8 for a single character.
+
+Use C<L</isC9_STRICT_UTF8_CHAR>> to use the L<Unicode Corrigendum
+#9|http://www.unicode.org/versions/corrigendum9.html> definition of allowable
+code points; C<L</isUTF8_CHAR>> to check for Perl's extended UTF-8;
+and C<L</isUTF8_CHAR_flags>> for a more customized definition.
 
 =cut
 */
@@ -1034,7 +1048,8 @@ Evaluates to non-zero if the first few bytes of the string starting at C<s> and
 looking no further than S<C<e - 1>> are well-formed UTF-8 that represents some
 Unicode non-surrogate code point; otherwise it evaluates to 0.  If non-zero,
 the value gives how many bytes starting at C<s> comprise the code point's
-representation.
+representation.  Any bytes remaining before C<e>, but beyond the ones needed to
+form the first code point in C<s>, are not examined.
 
 The largest acceptable code point is the Unicode maximum 0x10FFFF.  This
 differs from C<L</isSTRICT_UTF8_CHAR>> only in that it accepts non-character
@@ -1043,6 +1058,9 @@ L<Unicode Corrigendum #9|http://www.unicode.org/versions/corrigendum9.html>.
 which said that non-character code points are merely discouraged rather than
 completely forbidden in open interchange.  See
 L<perlunicode/Noncharacter code points>.
+
+Use C<L</isUTF8_CHAR>> to check for Perl's extended UTF-8; and
+C<L</isUTF8_CHAR_flags>> for a more customized definition.
 
 =cut
 */
@@ -1064,7 +1082,9 @@ Evaluates to non-zero if the first few bytes of the string starting at C<s> and
 looking no further than S<C<e - 1>> are well-formed UTF-8, as extended by Perl,
 that represents some code point, subject to the restrictions given by C<flags>;
 otherwise it evaluates to 0.  If non-zero, the value gives how many bytes
-starting at C<s> comprise the code point's representation.
+starting at C<s> comprise the code point's representation.  Any bytes remaining
+before C<e>, but beyond the ones needed to form the first code point in C<s>,
+are not examined.
 
 If C<flags> is 0, this gives the same results as C<L</isUTF8_CHAR>>;
 if C<flags> is C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>, this gives the same results

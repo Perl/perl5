@@ -278,7 +278,7 @@ S_append_utf8_from_native_byte(const U8 byte, U8** dest)
 
 /*
 =for apidoc valid_utf8_to_uvchr
-Like L</utf8_to_uvchr_buf>(), but should only be called when it is known that
+Like C<L</utf8_to_uvchr_buf>>, but should only be called when it is known that
 the next character in the input UTF-8 string C<s> is well-formed (I<e.g.>,
 it passes C<L</isUTF8_CHAR>>.  Surrogates, non-character code points, and
 non-Unicode code points are allowed.
@@ -365,7 +365,8 @@ be calculated using C<strlen(s)> (which means if you use this option, that C<s>
 can't have embedded C<NUL> characters and has to have a terminating C<NUL>
 byte).  Note that all characters being ASCII constitute 'a valid UTF-8 string'.
 
-Code points above Unicode, surrogates, and non-character code points are
+This function considers Perl's extended UTF-8 to be valid.  That means that
+code points above Unicode, surrogates, and non-character code points are
 considered valid by this function.
 
 See also L</is_utf8_invariant_string>(), L</is_utf8_string_loclen>(), and
@@ -401,20 +402,20 @@ Implemented as a macro in utf8.h
 
 =for apidoc is_utf8_string_loc
 
-Like L</is_utf8_string> but stores the location of the failure (in the
+Like C<L</is_utf8_string>> but stores the location of the failure (in the
 case of "utf8ness failure") or the location C<s>+C<len> (in the case of
 "utf8ness success") in the C<ep> pointer.
 
-See also L</is_utf8_string_loclen>() and L</is_utf8_string>().
+See also C<L</is_utf8_string_loclen>>.
 
 =for apidoc is_utf8_string_loclen
 
-Like L</is_utf8_string>() but stores the location of the failure (in the
+Like C<L</is_utf8_string>> but stores the location of the failure (in the
 case of "utf8ness failure") or the location C<s>+C<len> (in the case of
 "utf8ness success") in the C<ep>, and the number of UTF-8
 encoded characters in the C<el> pointer.
 
-See also L</is_utf8_string_loc>() and L</is_utf8_string>().
+See also C<L</is_utf8_string_loc>>.
 
 =cut
 */
@@ -528,7 +529,8 @@ failure can be signalled without having to wait for the next read.
 
 =cut
 */
-#define is_utf8_valid_partial_char(s, e) is_utf8_valid_partial_char_flags(s, e, 0)
+#define is_utf8_valid_partial_char(s, e)                                    \
+                                is_utf8_valid_partial_char_flags(s, e, 0)
 
 /*
 
@@ -544,8 +546,8 @@ C<L</is_utf8_valid_partial_char>>.  Otherwise C<flags> can be any combination
 of the C<UTF8_DISALLOW_I<foo>> flags accepted by C<L</utf8n_to_uvchr>>.  If
 there is any sequence of bytes that can complete the input partial character in
 such a way that a non-prohibited character is formed, the function returns
-TRUE; otherwise FALSE.  Non characters cannot be determined based on partial
-character input.  But many  of the other possible excluded types can be
+TRUE; otherwise FALSE.  Non character code points cannot be determined based on
+partial character input.  But many  of the other possible excluded types can be
 determined from just the first one or two bytes.
 
 =cut
