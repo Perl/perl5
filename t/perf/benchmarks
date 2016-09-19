@@ -993,6 +993,11 @@
         setup   => 'my $s = "abc:def"; my $r = []',
         code    => '@$r = split /:/, $s, 2;',
     },
+    'func::split::arraylist' => {
+        desc    => 'split into an array with extra arg',
+        setup   => 'my @a; my $s = "abc:def";',
+        code    => '@a = (split(/:/, $s, 2), 1);',
+    },
 
 
     'loop::block' => {

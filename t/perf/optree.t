@@ -10,7 +10,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan 54;
+plan 59;
 
 use v5.10; # state
 use B qw(svref_2object
@@ -74,6 +74,11 @@ for my $test (
     [ "---", '(undef,$x) = f()', 'single scalar on LHS' ],
     [ "---", '($x,$y) = ($x)', 'single scalar on RHS, no AGG' ],
     [ "--A", '($x,@b) = ($x)', 'single scalar on RHS' ],
+    [ "--A", 'my @a; @a = (@a = split())',      'split a/a'   ],
+    [ "--A", 'my (@a,@b); @a = (@b = split())', 'split a/b'   ],
+    [ "---", 'my @a; @a = (split(), 1)',        '(split(),1)' ],
+    [ "---", '@a = (split(//, @a), 1)',         'split(@a)'   ],
+    [ "--A", 'my @a; my $ar = @a; @a = (@$ar = split())', 'a/ar split'  ],
 ) {
     my ($exp, $code, $desc) = @$test;
     my $sub = eval "sub { $code }"

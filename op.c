@@ -12520,6 +12520,7 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, bool top, int *scalars_p)
     case OP_PADAV:
     case OP_PADHV:
         (*scalars_p) += 2;
+        /* if !top, could be e.g. @a[0,1] */
         if (top && (o->op_flags & OPf_REF))
             return (o->op_private & OPpLVAL_INTRO)
                 ? AAS_MY_AGG : AAS_LEX_AGG;
@@ -12540,6 +12541,7 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, bool top, int *scalars_p)
         if (cUNOPx(o)->op_first->op_type != OP_GV)
             return AAS_DANGEROUS; /* @{expr}, %{expr} */
         /* @pkg, %pkg */
+        /* if !top, could be e.g. @a[0,1] */
         if (top && (o->op_flags & OPf_REF))
             return AAS_PKG_AGG;
         return AAS_DANGEROUS;
@@ -12553,17 +12555,32 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, bool top, int *scalars_p)
         return AAS_PKG_SCALAR; /* $pkg */
 
     case OP_SPLIT:
-        if (1) { /* XXX this condition is wrong - fix later
-        if (cLISTOPo->op_first->op_type == OP_PUSHRE) {
-        */
-            /* "@foo = split... " optimises away the aassign and stores its
-             * destination array in the OP_PUSHRE that precedes it.
-             * A flattened array is always dangerous.
+        if (o->op_private & OPpSPLIT_ASSIGN) {
+            /* the assign in @a = split() has been optimised away
+             * and the @a attached directly to the split op
+             * Treat the array as appearing on the RHS, i.e.
+             *    ... = (@a = split)
+             * is treated like
+             *    ... = @a;
              */
+
+            if (o->op_flags & OPf_STACKED)
+                /* @{expr} = split() - the array expression is tacked
+                 * on as an extra child to split - process kid */
+                return S_aassign_scan(aTHX_ cLISTOPo->op_last, rhs,
+                                        top, scalars_p);
+
+            /* ... else array is directly attached to split op */
             (*scalars_p) += 2;
-            return AAS_DANGEROUS;
+            if (PL_op->op_private & OPpSPLIT_LEX)
+                return (o->op_private & OPpLVAL_INTRO)
+                    ? AAS_MY_AGG : AAS_LEX_AGG;
+            else
+                return AAS_PKG_AGG;
         }
-        break;
+        (*scalars_p)++;
+        /* other args of split can't be returned */
+        return AAS_SAFE_SCALAR;
 
     case OP_UNDEF:
         /* undef counts as a scalar on the RHS:
