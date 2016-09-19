@@ -484,7 +484,7 @@ desired path, and skip if it doesn't. [perl #128095]
 
 =item *
 
-Preserve C<PL_oldoldbufptr> is preserved in C<scan_heredoc()>. In some
+Make sure C<PL_oldoldbufptr> is preserved in C<scan_heredoc()>. In some
 cases this is used in building error messages. [perl #128988]
 
 =item *
