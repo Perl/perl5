@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 135;
+plan tests => 159;
 
 $FS = ':';
 
@@ -537,4 +537,76 @@ is "@a", '1 2 3', 'assignment to split-to-array (stacked)';
     @a = split /$sep(?{ $c++ })/, "a-b-c";
     is "@a", "a b c", "run-time re-eval";
     is $c, 2, "run-time re-eval count";
+}
+
+# check that that my/local @array = split works
+
+{
+    my $s = "a:b:c";
+
+    local @a = qw(x y z);
+    {
+        local @a = split /:/, $s;
+        is "@a", "a b c", "local split inside";
+    }
+    is "@a", "x y z", "local split outside";
+
+    my @b = qw(x y z);
+    {
+        my @b = split /:/, $s;
+        is "@b", "a b c", "my split inside";
+    }
+    is "@b", "x y z", "my split outside";
+}
+
+# check that the (@a = split) optimisation works in scalar/list context
+
+{
+    my $s = "a:b:c:d:e";
+    my @outer;
+    my $outer;
+    my @lex;
+    local our @pkg;
+
+    $outer = (@lex = split /:/, $s);
+    is "@lex",   "a b c d e", "array split: scalar cx lex: inner";
+    is $outer,   5,           "array split: scalar cx lex: outer";
+
+    @outer = (@lex = split /:/, $s);
+    is "@lex",   "a b c d e", "array split: list cx lex: inner";
+    is "@outer", "a b c d e", "array split: list cx lex: outer";
+
+    $outer = (@pkg = split /:/, $s);
+    is "@pkg",   "a b c d e", "array split: scalar cx pkg inner";
+    is $outer,   5,           "array split: scalar cx pkg outer";
+
+    @outer = (@pkg = split /:/, $s);
+    is "@pkg",   "a b c d e", "array split: list cx pkg inner";
+    is "@outer", "a b c d e", "array split: list cx pkg outer";
+
+    $outer = (my @a1 = split /:/, $s);
+    is "@a1",    "a b c d e", "array split: scalar cx my lex: inner";
+    is $outer,   5,           "array split: scalar cx my lex: outer";
+
+    @outer = (my @a2 = split /:/, $s);
+    is "@a2",    "a b c d e", "array split: list cx my lex: inner";
+    is "@outer", "a b c d e", "array split: list cx my lex: outer";
+
+    $outer = (local @pkg = split /:/, $s);
+    is "@pkg",   "a b c d e", "array split: scalar cx local pkg inner";
+    is $outer,   5,           "array split: scalar cx local pkg outer";
+
+    @outer = (local @pkg = split /:/, $s);
+    is "@pkg",   "a b c d e", "array split: list cx local pkg inner";
+    is "@outer", "a b c d e", "array split: list cx local pkg outer";
+
+    $outer = (@{\@lex} = split /:/, $s);
+    is "@lex",   "a b c d e", "array split: scalar cx lexref inner";
+    is $outer,   5,           "array split: scalar cx lexref outer";
+
+    @outer = (@{\@pkg} = split /:/, $s);
+    is "@pkg",   "a b c d e", "array split: list cx pkgref inner";
+    is "@outer", "a b c d e", "array split: list cx pkgref outer";
+
+
 }

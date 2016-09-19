@@ -983,11 +983,15 @@
         setup   => 'my @a; my $s = "abc:def";',
         code    => '@a = split /:/, $s, 2;',
     },
-
     'func::split::myarray' => {
         desc    => 'split into a lexical array declared in the assign',
         setup   => 'my $s = "abc:def";',
         code    => 'my @a = split /:/, $s, 2;',
+    },
+    'func::split::arrayexpr' => {
+        desc    => 'split into an @{$expr} ',
+        setup   => 'my $s = "abc:def"; my $r = []',
+        code    => '@$r = split /:/, $s, 2;',
     },
 
 

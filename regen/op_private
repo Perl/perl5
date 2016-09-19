@@ -300,7 +300,7 @@ for (qw(nextstate dbstate)) {
 #   my $x
 
 addbits($_, 7 => qw(OPpLVAL_INTRO LVINTRO))
-    for qw(gvsv rv2sv rv2hv rv2gv rv2av aelem helem aslice
+    for qw(gvsv rv2sv rv2hv rv2gv rv2av aelem helem aslice split
            hslice delete padsv padav padhv enteriter entersub padrange
            pushmark cond_expr refassign lvref lvrefslice lvavref multideref),
            'list', # this gets set in my_attrs() for some reason
@@ -732,11 +732,11 @@ addbits('coreargs',
 
 
 addbits('split',
-    7 => qw(OPpSPLIT_IMPLIM IMPLIM), # implicit limit
     # @a = split() has been replaced with  split() where split itself
     # does the array assign
     4 => qw(OPpSPLIT_ASSIGN ASSIGN), 
     3 => qw(OPpSPLIT_LEX LEX),  # the OPpSPLIT_ASSIGN is a lexical array
+    2 => qw(OPpSPLIT_IMPLIM IMPLIM), # implicit limit
 );
 
 

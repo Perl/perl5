@@ -20,7 +20,7 @@ BEGIN {
 use warnings;
 use strict;
 
-plan 2256;
+plan 2261;
 
 use B ();
 
@@ -324,4 +324,29 @@ test_opcount(0, 'barewords can be constant-folded',
                  });
 
 
+}
+
+# in-place assign optimisation for @a = split
+
+{
+    local our @pkg;
+    my @lex;
+
+    for (['@pkg',       0, ],
+         ['local @pkg', 0, ],
+         ['@lex',       0, ],
+         ['my @a',      0, ],
+         ['@{[]}',      1, ],
+    ){
+        # partial implies that the aassign has been optimised away, but
+        # not the rv2av
+        my ($code, $partial) = @$_;
+        test_opcount(0, "in-place assignment for split: $code",
+                eval qq{sub { $code = split }},
+                {
+                    padav   => 0,
+                    rv2av   => $partial,
+                    aassign => 0,
+                });
+    }
 }

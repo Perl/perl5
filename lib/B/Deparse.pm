@@ -5760,6 +5760,9 @@ sub pp_split {
 						     $self->gv_name($gv),
 						     $cx))
             }
+            if ($op->private & OPpLVAL_INTRO) {
+                $ary = $op->private & OPpSPLIT_LEX ? "my $ary" : "local $ary";
+            }
         }
     }
 

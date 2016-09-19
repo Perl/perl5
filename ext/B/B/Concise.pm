@@ -848,8 +848,8 @@ sub concise_op {
 	    }
 	}
 	elsif ($op->name eq 'split') {
-            if (    ($op->private & OPpSPLIT_ASSIGN)
-                 && (not $op->flags & OPf_STACKED))
+            if (    ($op->private & OPpSPLIT_ASSIGN) # @array  = split
+                 && (not $op->flags & OPf_STACKED))  # @{expr} = split
             {
                 # with C<@array = split(/pat/, str);>,
                 #  array is stored in /pat/'s pmreplroot; either

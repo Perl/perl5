@@ -5708,8 +5708,8 @@ PP(pp_reverse)
 PP(pp_split)
 {
     dSP; dTARG;
-    AV *ary = (   (PL_op->op_private & OPpSPLIT_ASSIGN)
-               && (PL_op->op_flags & OPf_STACKED))
+    AV *ary = (   (PL_op->op_private & OPpSPLIT_ASSIGN) /* @a = split */
+               && (PL_op->op_flags & OPf_STACKED))      /* @{expr} = split */
                ? (AV *)POPs : NULL;
     IV limit = POPi;			/* note, negative is forever */
     SV * const sv = POPs;
@@ -5733,7 +5733,7 @@ PP(pp_split)
     I32 base;
     const U8 gimme = GIMME_V;
     bool gimme_scalar;
-    const I32 oldsave = PL_savestack_ix;
+    I32 oldsave = PL_savestack_ix;
     U32 make_mortal = SVs_TEMP;
     bool multiline = 0;
     MAGIC *mg = NULL;
@@ -5743,10 +5743,14 @@ PP(pp_split)
     TAINT_IF(get_regex_charset(RX_EXTFLAGS(rx)) == REGEX_LOCALE_CHARSET &&
              (RX_EXTFLAGS(rx) & (RXf_WHITE | RXf_SKIPWHITE)));
 
+    /* handle @ary = split(...) optimisation */
     if (PL_op->op_private & OPpSPLIT_ASSIGN) {
         if (!(PL_op->op_flags & OPf_STACKED)) {
-            if (PL_op->op_private & OPpSPLIT_LEX)
+            if (PL_op->op_private & OPpSPLIT_LEX) {
+                if (PL_op->op_private & OPpLVAL_INTRO)
+                    SAVECLEARSV(PAD_SVl(pm->op_pmreplrootu.op_pmtargetoff));
                 ary = (AV *)PAD_SVl(pm->op_pmreplrootu.op_pmtargetoff);
+            }
             else {
                 GV *gv =
 #ifdef USE_ITHREADS
@@ -5754,8 +5758,13 @@ PP(pp_split)
 #else
                         pm->op_pmreplrootu.op_pmtargetgv;
 #endif
-                ary = GvAVn(gv);
+                if (PL_op->op_private & OPpLVAL_INTRO)
+                    ary = save_ary(gv);
+                else
+                    ary = GvAVn(gv);
             }
+            /* skip anything pushed by OPpLVAL_INTRO above */
+            oldsave = PL_savestack_ix;
         }
 
 	realarray = 1;
