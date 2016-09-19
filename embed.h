@@ -242,7 +242,11 @@
 #define intro_my()		Perl_intro_my(aTHX)
 #define isALNUM_lazy(a)		Perl_isALNUM_lazy(aTHX_ a)
 #define isIDFIRST_lazy(a)	Perl_isIDFIRST_lazy(aTHX_ a)
+#define is_c9strict_utf8_string	S_is_c9strict_utf8_string
+#define is_c9strict_utf8_string_loclen	S_is_c9strict_utf8_string_loclen
 #define is_lvalue_sub()		Perl_is_lvalue_sub(aTHX)
+#define is_strict_utf8_string	S_is_strict_utf8_string
+#define is_strict_utf8_string_loclen	S_is_strict_utf8_string_loclen
 #define is_uni_alnum(a)		Perl_is_uni_alnum(aTHX_ a)
 #define is_uni_alnum_lc(a)	Perl_is_uni_alnum_lc(aTHX_ a)
 #define is_uni_alnumc(a)	Perl_is_uni_alnumc(aTHX_ a)
@@ -294,7 +298,9 @@
 #define is_utf8_punct(a)	Perl_is_utf8_punct(aTHX_ a)
 #define is_utf8_space(a)	Perl_is_utf8_space(aTHX_ a)
 #define is_utf8_string		Perl_is_utf8_string
+#define is_utf8_string_flags	S_is_utf8_string_flags
 #define is_utf8_string_loclen	Perl_is_utf8_string_loclen
+#define is_utf8_string_loclen_flags	S_is_utf8_string_loclen_flags
 #define is_utf8_upper(a)	Perl_is_utf8_upper(aTHX_ a)
 #define is_utf8_valid_partial_char_flags	S_is_utf8_valid_partial_char_flags
 #define is_utf8_xdigit(a)	Perl_is_utf8_xdigit(aTHX_ a)

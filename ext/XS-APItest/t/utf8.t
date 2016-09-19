@@ -353,9 +353,16 @@ my @warnings;
 use warnings 'utf8';
 local $SIG{__WARN__} = sub { push @warnings, @_ };
 
-# This set of tests looks for basic sanity, and lastly tests the bottom level
-# decode routine for the given code point.  If the earlier tests for that code
-# point fail, that one probably will too.  Malformations are tested in later
+my %restriction_types;
+
+$restriction_types{""}{'valid_strings'} = "";
+$restriction_types{"c9strict"}{'valid_strings'} = "";
+$restriction_types{"strict"}{'valid_strings'} = "";
+$restriction_types{"fits_in_31_bits"}{'valid_strings'} = "";
+
+# This set of tests looks for basic sanity, and lastly tests various routines
+# for the given code point.  If the earlier tests for that code point fail,
+# the later ones probably will too.  Malformations are tested in later
 # segments of code.
 for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
           keys %code_points)
@@ -490,6 +497,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
 
     my $valid_under_strict = 1;
     my $valid_under_c9strict = 1;
+    my $valid_for_fits_in_31_bits = 1;
     if ($n > 0x10FFFF) {
         $this_utf8_flags &= ~($UTF8_DISALLOW_SUPER|$UTF8_WARN_SUPER);
         $valid_under_strict = 0;
@@ -497,6 +505,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
         if ($n > 2 ** 31 - 1) {
             $this_utf8_flags &=
                             ~($UTF8_DISALLOW_ABOVE_31_BIT|$UTF8_WARN_ABOVE_31_BIT);
+            $valid_for_fits_in_31_bits = 0;
         }
     }
     elsif (($n >= 0xFDD0 && $n <= 0xFDEF) || ($n & 0xFFFE) == 0xFFFE) {
@@ -675,12 +684,263 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     {
         diag "The warnings were: " . join(", ", @warnings);
     }
+
+    # Now append this code point to a string that we will test various
+    # versions of is_foo_utf8_string_bar on, and keep a count of how many code
+    # points are in it.  All the code points in this loop are valid in Perl's
+    # extended UTF-8, but some are not valid under various restrictions.  A
+    # string and count is kept separately that is entirely valid for each
+    # restriction.  And, for each restriction, we note the first occurrence in
+    # the unrestricted string where we find something not in the restricted
+    # string.
+    $restriction_types{""}{'valid_strings'} .= $bytes;
+    $restriction_types{""}{'valid_counts'}++;
+
+    if ($valid_under_c9strict) {
+        $restriction_types{"c9strict"}{'valid_strings'} .= $bytes;
+        $restriction_types{"c9strict"}{'valid_counts'}++;
+    }
+    elsif (! exists $restriction_types{"c9strict"}{'first_invalid_offset'}) {
+        $restriction_types{"c9strict"}{'first_invalid_offset'}
+                    = length $restriction_types{"c9strict"}{'valid_strings'};
+        $restriction_types{"c9strict"}{'first_invalid_count'}
+                            = $restriction_types{"c9strict"}{'valid_counts'};
+    }
+
+    if ($valid_under_strict) {
+        $restriction_types{"strict"}{'valid_strings'} .= $bytes;
+        $restriction_types{"strict"}{'valid_counts'}++;
+    }
+    elsif (! exists $restriction_types{"strict"}{'first_invalid_offset'}) {
+        $restriction_types{"strict"}{'first_invalid_offset'}
+                        = length $restriction_types{"strict"}{'valid_strings'};
+        $restriction_types{"strict"}{'first_invalid_count'}
+                                = $restriction_types{"strict"}{'valid_counts'};
+    }
+
+    if ($valid_for_fits_in_31_bits) {
+        $restriction_types{"fits_in_31_bits"}{'valid_strings'} .= $bytes;
+        $restriction_types{"fits_in_31_bits"}{'valid_counts'}++;
+    }
+    elsif (! exists
+                $restriction_types{"fits_in_31_bits"}{'first_invalid_offset'})
+    {
+        $restriction_types{"fits_in_31_bits"}{'first_invalid_offset'}
+                = length $restriction_types{"fits_in_31_bits"}{'valid_strings'};
+        $restriction_types{"fits_in_31_bits"}{'first_invalid_count'}
+                        = $restriction_types{"fits_in_31_bits"}{'valid_counts'};
+    }
+}
+
+my $I8c = (isASCII) ? "\x80" : "\xa0";    # A continuation byte
+my $cont_byte = I8_to_native($I8c);
+my $p = (isASCII) ? "\xe1\x80" : I8_to_native("\xE4\xA0");  # partial
+
+# The loop above tested the single or partial character functions/macros,
+# while building up strings to test the string functions, which we do now.
+
+for my $restriction (sort keys %restriction_types) {
+    use bytes;
+
+    for my $use_flags ("", "_flags") {
+
+        # For each restriction, we test it in both the is_foo_flags functions
+        # and the specially named foo function.  But not if there isn't such a
+        # specially named function.  Currently, this is the only tested
+        # restriction that doesn't have a specially named function
+        next if $use_flags eq "" && $restriction eq "fits_in_31_bits";
+
+        # Start building up the name of the function we will test.
+        my $name = "is_";
+
+        if (! $use_flags  && $restriction ne "") {
+            $name .= $restriction . "_";
+        }
+        $name .= "utf8_string";
+
+            # We test each version of the function
+            for my $function ("_loclen", "_loc", "") {
+
+                # We test each function against
+                #   a) valid input
+                #   b) invalid input created by appending an out-of-place
+                #      continuation character to the valid string
+                #   c) invalid input created by appending a partial character
+                #   d) invalid input created by calling a function that is
+                #      expecting a restricted form of the input using the string
+                #      that's valid when unrestricted
+                for my $error_type (0, $cont_byte, $p, $restriction) {
+                    #diag "restriction=$restriction, use_flags=$use_flags, function=$function, error_type=" . display_bytes($error_type);
+
+                    # If there is no restriction, the error type will be "",
+                    # which is redundant with 0.
+                    next if $error_type eq "";
+
+                    my $this_name = "$name$function$use_flags";
+                    my $bytes
+                            = $restriction_types{$restriction}{'valid_strings'};
+                    my $expected_offset = length $bytes;
+                    my $expected_count
+                            = $restriction_types{$restriction}{'valid_counts'};
+                    my $test_name_suffix = "";
+
+                    my $this_error_type = $error_type;
+                    if ($this_error_type) {
+
+                        # Appending a bare continuation byte or a partial
+                        # character makes it invalid, but the character count
+                        # and offset remain the same.  But in the other cases,
+                        # we have saved where the failures should occur, so
+                        # use those.
+                        if ($this_error_type eq $cont_byte || $this_error_type eq $p) {
+                            $bytes .= $this_error_type;
+                            if ($this_error_type eq $cont_byte) {
+                                $test_name_suffix
+                                            = " for an unexpected continuation";
+                            }
+                            else {
+                                $test_name_suffix
+                                        = " if ends with a partial character";
+                            }
+                        }
+                        else {
+                            $test_name_suffix
+                                        = " if contains forbidden code points";
+                            if ($this_error_type eq "c9strict") {
+                                $bytes = $restriction_types{""}{'valid_strings'};
+                                $expected_offset
+                                 = $restriction_types{"c9strict"}
+                                                     {'first_invalid_offset'};
+                                $expected_count
+                                  = $restriction_types{"c9strict"}
+                                                      {'first_invalid_count'};
+                            }
+                            elsif ($this_error_type eq "strict") {
+                                $bytes = $restriction_types{""}{'valid_strings'};
+                                $expected_offset
+                                  = $restriction_types{"strict"}
+                                                      {'first_invalid_offset'};
+                                $expected_count
+                                  = $restriction_types{"strict"}
+                                                      {'first_invalid_count'};
+
+                            }
+                            elsif ($this_error_type eq "fits_in_31_bits") {
+                                $bytes = $restriction_types{""}{'valid_strings'};
+                                $expected_offset
+                                  = $restriction_types{"fits_in_31_bits"}
+                                                      {'first_invalid_offset'};
+                                $expected_count
+                                    = $restriction_types{"fits_in_31_bits"}
+                                                        {'first_invalid_count'};
+                            }
+                            else {
+                                fail("Internal test error: Unknown error type "
+                                . "'$this_error_type'");
+                                next;
+                            }
+                        }
+                    }
+
+                    my $length = length $bytes;
+                    my $ret_ref;
+
+                    my $test = "\$ret_ref = test_$this_name(\$bytes, $length";
+
+                    # If using the _flags functions, we have to figure out what
+                    # flags to pass.  This is done to match the restriction.
+                    if ($use_flags eq "_flags") {
+                        if (! $restriction) {
+                            $test .= ", 0";     # The flag
+
+                            # Indicate the kind of flag in the test name.
+                            $this_name .= "(0)";
+                        }
+                        else {
+                            $this_name .= "($restriction)";
+                            if ($restriction eq "c9strict") {
+                                $test
+                                  .= ", $UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE";
+                            }
+                            elsif ($restriction eq "strict") {
+                                $test .= ", $UTF8_DISALLOW_ILLEGAL_INTERCHANGE";
+                            }
+                            elsif ($restriction eq "fits_in_31_bits") {
+                                $test .= ", $UTF8_DISALLOW_ABOVE_31_BIT";
+                            }
+                            else {
+                                fail("Internal test error: Unknown restriction "
+                                . "'$restriction'");
+                                next;
+                            }
+                        }
+                    }
+                    $test .= ")";
+
+                    # Actually run the test
+                    eval $test;
+                    if ($@) {
+                        fail($test);
+                        diag $@;
+                        next;
+                    }
+
+                    my $ret;
+                    my $error_offset;
+                    my $cp_count;
+
+                    if ($function eq "") {
+                        $ret = $ret_ref;    # For plain function, there's only a
+                                            # single return value
+                    }
+                    else {  # Otherwise, the multiple values come in an array.
+                        $ret = shift @$ret_ref ;
+                        $error_offset = shift @$ret_ref;
+                        $cp_count = shift@$ret_ref if $function eq "_loclen";
+                    }
+
+                    if ($this_error_type) {
+                        is($ret, 0,
+                           "Verify $this_name is FALSE$test_name_suffix");
+                    }
+                    else {
+                        unless(is($ret, 1,
+                                  "Verify $this_name is TRUE for valid input"
+                                . "$test_name_suffix"))
+                        {
+                            diag("The bytes starting at offset"
+                               . " $error_offset are"
+                               . display_bytes(substr(
+                                          $restriction_types{$restriction}
+                                                            {'valid_strings'},
+                                          $error_offset)));
+                            next;
+                        }
+                    }
+
+                    if ($function ne "") {
+                        unless (is($error_offset, $expected_offset,
+                                   "\tAnd returns the correct offset"))
+                        {
+                            my $min = ($error_offset < $expected_offset)
+                                    ? $error_offset
+                                    : $expected_offset;
+                            diag display_bytes(substr($bytes, $min));
+                        }
+
+                        if ($function eq '_loclen') {
+                            is($cp_count, $expected_count,
+                               "\tAnd returns the correct character count");
+                        }
+                    }
+                }
+            }
+    }
 }
 
 my $REPLACEMENT = 0xFFFD;
 
 # Now test the malformations.  All these raise category utf8 warnings.
-my $I8c = (isASCII) ? "\x80" : "\xa0";    # A continuation byte
 my @malformations = (
     [ "zero length string malformation", "", 0,
         $UTF8_ALLOW_EMPTY, 0, 0,

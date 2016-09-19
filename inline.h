@@ -334,8 +334,20 @@ If C<len> is 0, it will be calculated using C<strlen(s)>, (which means if you
 use this option, that C<s> can't have embedded C<NUL> characters and has to
 have a terminating C<NUL> byte).
 
-See also L</is_utf8_string>(), L</is_utf8_string_loclen>(), and
-L</is_utf8_string_loc>().
+See also
+C<L</is_utf8_string>>,
+C<L</is_utf8_string_flags>>,
+C<L</is_utf8_string_loc>>,
+C<L</is_utf8_string_loc_flags>>,
+C<L</is_utf8_string_loclen>>,
+C<L</is_utf8_string_loclen_flags>>,
+C<L</is_strict_utf8_string>>,
+C<L</is_strict_utf8_string_loc>>,
+C<L</is_strict_utf8_string_loclen>>,
+C<L</is_c9strict_utf8_string>>,
+C<L</is_c9strict_utf8_string_loc>>,
+and
+C<L</is_c9strict_utf8_string_loclen>>.
 
 =cut
 */
@@ -367,10 +379,14 @@ byte).  Note that all characters being ASCII constitute 'a valid UTF-8 string'.
 
 This function considers Perl's extended UTF-8 to be valid.  That means that
 code points above Unicode, surrogates, and non-character code points are
-considered valid by this function.
+considered valid by this function.  Use C<L</is_strict_utf8_string>>,
+C<L</is_c9strict_utf8_string>>, or C<L</is_utf8_string_flags>> to restrict what
+code points are considered valid.
 
-See also L</is_utf8_invariant_string>(), L</is_utf8_string_loclen>(), and
-L</is_utf8_string_loc>().
+See also
+C<L</is_utf8_invariant_string>>,
+C<L</is_utf8_string_loc>>,
+C<L</is_utf8_string_loclen>>,
 
 =cut
 */
@@ -388,6 +404,187 @@ Perl_is_utf8_string(const U8 *s, const STRLEN len)
 
     while (x < send) {
         const STRLEN cur_len = isUTF8_CHAR(x, send);
+        if (UNLIKELY(! cur_len)) {
+            return FALSE;
+        }
+        x += cur_len;
+    }
+
+    return TRUE;
+}
+
+/*
+=for apidoc is_strict_utf8_string
+
+Returns TRUE if the first C<len> bytes of string C<s> form a valid
+UTF-8-encoded string that is fully interchangeable by any application using
+Unicode rules; otherwise it returns FALSE.  If C<len> is 0, it will be
+calculated using C<strlen(s)> (which means if you use this option, that C<s>
+can't have embedded C<NUL> characters and has to have a terminating C<NUL>
+byte).  Note that all characters being ASCII constitute 'a valid UTF-8 string'.
+
+This function returns FALSE for strings containing any
+code points above the Unicode max of 0x10FFFF, surrogate code points, or
+non-character code points.
+
+See also
+C<L</is_utf8_invariant_string>>,
+C<L</is_utf8_string>>,
+C<L</is_utf8_string_flags>>,
+C<L</is_utf8_string_loc>>,
+C<L</is_utf8_string_loc_flags>>,
+C<L</is_utf8_string_loclen>>,
+C<L</is_utf8_string_loclen_flags>>,
+C<L</is_strict_utf8_string_loc>>,
+C<L</is_strict_utf8_string_loclen>>,
+C<L</is_c9strict_utf8_string>>,
+C<L</is_c9strict_utf8_string_loc>>,
+and
+C<L</is_c9strict_utf8_string_loclen>>.
+
+=cut
+*/
+
+PERL_STATIC_INLINE bool
+S_is_strict_utf8_string(const U8 *s, const STRLEN len)
+{
+    const U8* const send = s + (len ? len : strlen((const char *)s));
+    const U8* x = s;
+
+    PERL_ARGS_ASSERT_IS_STRICT_UTF8_STRING;
+
+    while (x < send) {
+        const STRLEN cur_len = isSTRICT_UTF8_CHAR(x, send);
+        if (UNLIKELY(! cur_len)) {
+            return FALSE;
+        }
+        x += cur_len;
+    }
+
+    return TRUE;
+}
+
+/*
+=for apidoc is_c9strict_utf8_string
+
+Returns TRUE if the first C<len> bytes of string C<s> form a valid
+UTF-8-encoded string that conforms to
+L<Unicode Corrigendum #9|http://www.unicode.org/versions/corrigendum9.html>;
+otherwise it returns FALSE.  If C<len> is 0, it will be calculated using
+C<strlen(s)> (which means if you use this option, that C<s> can't have embedded
+C<NUL> characters and has to have a terminating C<NUL> byte).  Note that all
+characters being ASCII constitute 'a valid UTF-8 string'.
+
+This function returns FALSE for strings containing any code points above the
+Unicode max of 0x10FFFF or surrogate code points, but accepts non-character
+code points per
+L<Corrigendum #9|http://www.unicode.org/versions/corrigendum9.html>.
+
+See also
+C<L</is_utf8_invariant_string>>,
+C<L</is_utf8_string>>,
+C<L</is_utf8_string_flags>>,
+C<L</is_utf8_string_loc>>,
+C<L</is_utf8_string_loc_flags>>,
+C<L</is_utf8_string_loclen>>,
+C<L</is_utf8_string_loclen_flags>>,
+C<L</is_strict_utf8_string>>,
+C<L</is_strict_utf8_string_loc>>,
+C<L</is_strict_utf8_string_loclen>>,
+C<L</is_c9strict_utf8_string_loc>>,
+and
+C<L</is_c9strict_utf8_string_loclen>>.
+
+=cut
+*/
+
+PERL_STATIC_INLINE bool
+S_is_c9strict_utf8_string(const U8 *s, const STRLEN len)
+{
+    const U8* const send = s + (len ? len : strlen((const char *)s));
+    const U8* x = s;
+
+    PERL_ARGS_ASSERT_IS_C9STRICT_UTF8_STRING;
+
+    while (x < send) {
+        const STRLEN cur_len = isC9_STRICT_UTF8_CHAR(x, send);
+        if (UNLIKELY(! cur_len)) {
+            return FALSE;
+        }
+        x += cur_len;
+    }
+
+    return TRUE;
+}
+
+/* The above 3 functions could have been moved into the more general one just
+ * below, and made #defines that call it with the right 'flags'.  They are
+ * currently kept separate to increase their chances of getting inlined */
+
+/*
+=for apidoc is_utf8_string_flags
+
+Returns TRUE if the first C<len> bytes of string C<s> form a valid
+UTF-8 string, subject to the restrictions imposed by C<flags>;
+returns FALSE otherwise.  If C<len> is 0, it will be calculated
+using C<strlen(s)> (which means if you use this option, that C<s> can't have
+embedded C<NUL> characters and has to have a terminating C<NUL> byte).  Note
+that all characters being ASCII constitute 'a valid UTF-8 string'.
+
+If C<flags> is 0, this gives the same results as C<L</is_utf8_string>>; if
+C<flags> is C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>, this gives the same results
+as C<L</is_strict_utf8_string>>; and if C<flags> is
+C<UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE>, this gives the same results as
+C<L</is_c9strict_utf8_string>>.  Otherwise C<flags> may be any
+combination of the C<UTF8_DISALLOW_I<foo>> flags understood by
+C<L</utf8n_to_uvchr>>, with the same meanings.
+
+See also
+C<L</is_utf8_invariant_string>>,
+C<L</is_utf8_string>>,
+C<L</is_utf8_string_loc>>,
+C<L</is_utf8_string_loc_flags>>,
+C<L</is_utf8_string_loclen>>,
+C<L</is_utf8_string_loclen_flags>>,
+C<L</is_strict_utf8_string>>,
+C<L</is_strict_utf8_string_loc>>,
+C<L</is_strict_utf8_string_loclen>>,
+C<L</is_c9strict_utf8_string>>,
+C<L</is_c9strict_utf8_string_loc>>,
+and
+C<L</is_c9strict_utf8_string_loclen>>.
+
+=cut
+*/
+
+PERL_STATIC_INLINE bool
+S_is_utf8_string_flags(const U8 *s, const STRLEN len, const U32 flags)
+{
+    const U8* const send = s + (len ? len : strlen((const char *)s));
+    const U8* x = s;
+
+    PERL_ARGS_ASSERT_IS_UTF8_STRING_FLAGS;
+    assert(0 == (flags & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+                          |UTF8_DISALLOW_ABOVE_31_BIT)));
+
+    if (flags == 0) {
+        return is_utf8_string(s, len);
+    }
+
+    if ((flags & ~UTF8_DISALLOW_ABOVE_31_BIT)
+                                        == UTF8_DISALLOW_ILLEGAL_INTERCHANGE)
+    {
+        return is_strict_utf8_string(s, len);
+    }
+
+    if ((flags & ~UTF8_DISALLOW_ABOVE_31_BIT)
+                                       == UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE)
+    {
+        return is_c9strict_utf8_string(s, len);
+    }
+
+    while (x < send) {
+        STRLEN cur_len = isUTF8_CHAR_flags(x, send, flags);
         if (UNLIKELY(! cur_len)) {
             return FALSE;
         }
@@ -418,7 +615,7 @@ See also C<L</is_utf8_string_loclen>>.
 
 Like C<L</is_utf8_string>> but stores the location of the failure (in the
 case of "utf8ness failure") or the location C<s>+C<len> (in the case of
-"utf8ness success") in the C<ep>, and the number of UTF-8
+"utf8ness success") in the C<ep> pointer, and the number of UTF-8
 encoded characters in the C<el> pointer.
 
 See also C<L</is_utf8_string_loc>>.
@@ -437,6 +634,203 @@ Perl_is_utf8_string_loclen(const U8 *s, const STRLEN len, const U8 **ep, STRLEN 
 
     while (x < send) {
         const STRLEN cur_len = isUTF8_CHAR(x, send);
+        if (UNLIKELY(! cur_len)) {
+            break;
+        }
+        x += cur_len;
+        outlen++;
+    }
+
+    if (el)
+        *el = outlen;
+
+    if (ep) {
+        *ep = x;
+    }
+
+    return (x == send);
+}
+
+/*
+
+=for apidoc is_strict_utf8_string_loc
+
+Like C<L</is_strict_utf8_string>> but stores the location of the failure (in the
+case of "utf8ness failure") or the location C<s>+C<len> (in the case of
+"utf8ness success") in the C<ep> pointer.
+
+See also C<L</is_strict_utf8_string_loclen>>.
+
+=cut
+*/
+
+#define is_strict_utf8_string_loc(s, len, ep)                               \
+                                is_strict_utf8_string_loclen(s, len, ep, 0)
+
+/*
+
+=for apidoc is_strict_utf8_string_loclen
+
+Like C<L</is_strict_utf8_string>> but stores the location of the failure (in the
+case of "utf8ness failure") or the location C<s>+C<len> (in the case of
+"utf8ness success") in the C<ep> pointer, and the number of UTF-8
+encoded characters in the C<el> pointer.
+
+See also C<L</is_strict_utf8_string_loc>>.
+
+=cut
+*/
+
+PERL_STATIC_INLINE bool
+S_is_strict_utf8_string_loclen(const U8 *s, const STRLEN len, const U8 **ep, STRLEN *el)
+{
+    const U8* const send = s + (len ? len : strlen((const char *)s));
+    const U8* x = s;
+    STRLEN outlen = 0;
+
+    PERL_ARGS_ASSERT_IS_STRICT_UTF8_STRING_LOCLEN;
+
+    while (x < send) {
+        const STRLEN cur_len = isSTRICT_UTF8_CHAR(x, send);
+        if (UNLIKELY(! cur_len)) {
+            break;
+        }
+        x += cur_len;
+        outlen++;
+    }
+
+    if (el)
+        *el = outlen;
+
+    if (ep) {
+        *ep = x;
+    }
+
+    return (x == send);
+}
+
+/*
+
+=for apidoc is_c9strict_utf8_string_loc
+
+Like C<L</is_c9strict_utf8_string>> but stores the location of the failure (in
+the case of "utf8ness failure") or the location C<s>+C<len> (in the case of
+"utf8ness success") in the C<ep> pointer.
+
+See also C<L</is_c9strict_utf8_string_loclen>>.
+
+=cut
+*/
+
+#define is_c9strict_utf8_string_loc(s, len, ep)	                            \
+                            is_c9strict_utf8_string_loclen(s, len, ep, 0)
+
+/*
+
+=for apidoc is_c9strict_utf8_string_loclen
+
+Like C<L</is_c9strict_utf8_string>> but stores the location of the failure (in
+the case of "utf8ness failure") or the location C<s>+C<len> (in the case of
+"utf8ness success") in the C<ep> pointer, and the number of UTF-8 encoded
+characters in the C<el> pointer.
+
+See also C<L</is_c9strict_utf8_string_loc>>.
+
+=cut
+*/
+
+PERL_STATIC_INLINE bool
+S_is_c9strict_utf8_string_loclen(const U8 *s, const STRLEN len, const U8 **ep, STRLEN *el)
+{
+    const U8* const send = s + (len ? len : strlen((const char *)s));
+    const U8* x = s;
+    STRLEN outlen = 0;
+
+    PERL_ARGS_ASSERT_IS_C9STRICT_UTF8_STRING_LOCLEN;
+
+    while (x < send) {
+        const STRLEN cur_len = isC9_STRICT_UTF8_CHAR(x, send);
+        if (UNLIKELY(! cur_len)) {
+            break;
+        }
+        x += cur_len;
+        outlen++;
+    }
+
+    if (el)
+        *el = outlen;
+
+    if (ep) {
+        *ep = x;
+    }
+
+    return (x == send);
+}
+
+/*
+
+=for apidoc is_utf8_string_loc_flags
+
+Like C<L</is_utf8_string_flags>> but stores the location of the failure (in the
+case of "utf8ness failure") or the location C<s>+C<len> (in the case of
+"utf8ness success") in the C<ep> pointer.
+
+See also C<L</is_utf8_string_loclen_flags>>.
+
+=cut
+*/
+
+#define is_utf8_string_loc_flags(s, len, ep, flags)                         \
+                        is_utf8_string_loclen_flags(s, len, ep, 0, flags)
+
+
+/* The above 3 actual functions could have been moved into the more general one
+ * just below, and made #defines that call it with the right 'flags'.  They are
+ * currently kept separate to increase their chances of getting inlined */
+
+/*
+
+=for apidoc is_utf8_string_loclen_flags
+
+Like C<L</is_utf8_string_flags>> but stores the location of the failure (in the
+case of "utf8ness failure") or the location C<s>+C<len> (in the case of
+"utf8ness success") in the C<ep> pointer, and the number of UTF-8
+encoded characters in the C<el> pointer.
+
+See also C<L</is_utf8_string_loc_flags>>.
+
+=cut
+*/
+
+PERL_STATIC_INLINE bool
+S_is_utf8_string_loclen_flags(const U8 *s, const STRLEN len, const U8 **ep, STRLEN *el, const U32 flags)
+{
+    const U8* const send = s + (len ? len : strlen((const char *)s));
+    const U8* x = s;
+    STRLEN outlen = 0;
+
+    PERL_ARGS_ASSERT_IS_UTF8_STRING_LOCLEN_FLAGS;
+    assert(0 == (flags & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+                          |UTF8_DISALLOW_ABOVE_31_BIT)));
+
+    if (flags == 0) {
+        return is_utf8_string_loclen(s, len, ep, el);
+    }
+
+    if ((flags & ~UTF8_DISALLOW_ABOVE_31_BIT)
+                                        == UTF8_DISALLOW_ILLEGAL_INTERCHANGE)
+    {
+        return is_strict_utf8_string_loclen(s, len, ep, el);
+    }
+
+    if ((flags & ~UTF8_DISALLOW_ABOVE_31_BIT)
+                                    == UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE)
+    {
+        return is_c9strict_utf8_string_loclen(s, len, ep, el);
+    }
+
+    while (x < send) {
+        const STRLEN cur_len = isUTF8_CHAR_flags(x, send, flags);
         if (UNLIKELY(! cur_len)) {
             break;
         }

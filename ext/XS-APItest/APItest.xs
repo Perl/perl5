@@ -5351,9 +5351,149 @@ test_isC9_STRICT_UTF8_CHAR(char *s, STRLEN len)
 IV
 test_is_utf8_valid_partial_char_flags(char *s, STRLEN len, U32 flags)
     CODE:
-        /* RETVAL should be bool, but making it IV allows us to test it
-         * returning 0 or 1 */
+        /* RETVAL should be bool (here and in tests below), but making it IV
+         * allows us to test it returning 0 or 1 */
         RETVAL = is_utf8_valid_partial_char_flags((U8 *) s, (U8 *) s + len, flags);
+    OUTPUT:
+        RETVAL
+
+IV
+test_is_utf8_string(char *s, STRLEN len)
+    CODE:
+        RETVAL = is_utf8_string((U8 *) s, len);
+    OUTPUT:
+        RETVAL
+
+AV *
+test_is_utf8_string_loc(char *s, STRLEN len)
+    PREINIT:
+        AV *av;
+        const U8 * ep;
+    CODE:
+        av = newAV();
+        av_push(av, newSViv(is_utf8_string_loc((U8 *) s, len, &ep)));
+        av_push(av, newSViv(ep - (U8 *) s));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
+AV *
+test_is_utf8_string_loclen(char *s, STRLEN len)
+    PREINIT:
+        AV *av;
+        STRLEN ret_len;
+        const U8 * ep;
+    CODE:
+        av = newAV();
+        av_push(av, newSViv(is_utf8_string_loclen((U8 *) s, len, &ep, &ret_len)));
+        av_push(av, newSViv(ep - (U8 *) s));
+        av_push(av, newSVuv(ret_len));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
+IV
+test_is_utf8_string_flags(char *s, STRLEN len, U32 flags)
+    CODE:
+        RETVAL = is_utf8_string_flags((U8 *) s, len, flags);
+    OUTPUT:
+        RETVAL
+
+AV *
+test_is_utf8_string_loc_flags(char *s, STRLEN len, U32 flags)
+    PREINIT:
+        AV *av;
+        const U8 * ep;
+    CODE:
+        av = newAV();
+        av_push(av, newSViv(is_utf8_string_loc_flags((U8 *) s, len, &ep, flags)));
+        av_push(av, newSViv(ep - (U8 *) s));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
+AV *
+test_is_utf8_string_loclen_flags(char *s, STRLEN len, U32 flags)
+    PREINIT:
+        AV *av;
+        STRLEN ret_len;
+        const U8 * ep;
+    CODE:
+        av = newAV();
+        av_push(av, newSViv(is_utf8_string_loclen_flags((U8 *) s, len, &ep, &ret_len, flags)));
+        av_push(av, newSViv(ep - (U8 *) s));
+        av_push(av, newSVuv(ret_len));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
+IV
+test_is_strict_utf8_string(char *s, STRLEN len)
+    CODE:
+        RETVAL = is_strict_utf8_string((U8 *) s, len);
+    OUTPUT:
+        RETVAL
+
+AV *
+test_is_strict_utf8_string_loc(char *s, STRLEN len)
+    PREINIT:
+        AV *av;
+        const U8 * ep;
+    CODE:
+        av = newAV();
+        av_push(av, newSViv(is_strict_utf8_string_loc((U8 *) s, len, &ep)));
+        av_push(av, newSViv(ep - (U8 *) s));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
+AV *
+test_is_strict_utf8_string_loclen(char *s, STRLEN len)
+    PREINIT:
+        AV *av;
+        STRLEN ret_len;
+        const U8 * ep;
+    CODE:
+        av = newAV();
+        av_push(av, newSViv(is_strict_utf8_string_loclen((U8 *) s, len, &ep, &ret_len)));
+        av_push(av, newSViv(ep - (U8 *) s));
+        av_push(av, newSVuv(ret_len));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
+IV
+test_is_c9strict_utf8_string(char *s, STRLEN len)
+    CODE:
+        RETVAL = is_c9strict_utf8_string((U8 *) s, len);
+    OUTPUT:
+        RETVAL
+
+AV *
+test_is_c9strict_utf8_string_loc(char *s, STRLEN len)
+    PREINIT:
+        AV *av;
+        const U8 * ep;
+    CODE:
+        av = newAV();
+        av_push(av, newSViv(is_c9strict_utf8_string_loc((U8 *) s, len, &ep)));
+        av_push(av, newSViv(ep - (U8 *) s));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
+AV *
+test_is_c9strict_utf8_string_loclen(char *s, STRLEN len)
+    PREINIT:
+        AV *av;
+        STRLEN ret_len;
+        const U8 * ep;
+    CODE:
+        av = newAV();
+        av_push(av, newSViv(is_c9strict_utf8_string_loclen((U8 *) s, len, &ep, &ret_len)));
+        av_push(av, newSViv(ep - (U8 *) s));
+        av_push(av, newSVuv(ret_len));
+        RETVAL = av;
     OUTPUT:
         RETVAL
 

@@ -1025,6 +1025,9 @@ Use C<L</isC9_STRICT_UTF8_CHAR>> to use the L<Unicode Corrigendum
 code points; C<L</isUTF8_CHAR>> to check for Perl's extended UTF-8;
 and C<L</isUTF8_CHAR_flags>> for a more customized definition.
 
+Use C<L</is_strict_utf8_string>>, C<L</is_strict_utf8_string_loc>>, and
+C<L</is_strict_utf8_string_loclen>> to check entire strings.
+
 =cut
 */
 
@@ -1058,6 +1061,9 @@ L<perlunicode/Noncharacter code points>.
 
 Use C<L</isUTF8_CHAR>> to check for Perl's extended UTF-8; and
 C<L</isUTF8_CHAR_flags>> for a more customized definition.
+
+Use C<L</is_c9strict_utf8_string>>, C<L</is_c9strict_utf8_string_loc>>, and
+C<L</is_c9strict_utf8_string_loclen>> to check entire strings.
 
 =cut
 */
@@ -1094,6 +1100,9 @@ understood by C<L</utf8n_to_uvchr>>, with the same meanings.
 The three alternative macros are for the most commonly needed validations; they
 are likely to run somewhat faster than this more general one, as they can be
 inlined into your code.
+
+Use L</is_utf8_string_flags>, L</is_utf8_string_loc_flags>, and
+L</is_utf8_string_loclen_flags> to check entire strings.
 
 =cut
 */
