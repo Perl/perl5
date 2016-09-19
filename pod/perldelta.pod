@@ -275,7 +275,9 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+F<t/re/regexp_nonull.t> has been added to test that the regular expression
+engine can handle scalars that do not have a null byte just past the end of
+the string.
 
 =back
 
