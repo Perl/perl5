@@ -175,11 +175,7 @@ section.
 =item *
 
 L<perlinterp> has been expanded to give a more detailed example of how to
-hunt around in the parser to how a given operator is handled.
-
-=item *
-
-L<perlinterp> now has an expanded op-tree section.
+hunt around in the parser for how a given operator is handled.
 
 =back
 
