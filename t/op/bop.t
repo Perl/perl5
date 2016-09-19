@@ -19,7 +19,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 192 + (10*13*2) + 5 + 29;
+plan tests => 192 + (10*13*2) + 5 + 30;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -664,3 +664,15 @@ is $^A, "123", '~v0 clears vstring magic on retval';
         is(-1 >> $w + 1, -1, "IV -1 right shift $w + 1 == -1");
     }
 }
+
+# [perl #129287] UTF8 & was not providing a trailing null byte.
+# This test is a bit convoluted, as we want to make sure that the string
+# allocated for &’s target contains memory initialised to something other
+# than a null byte.  Uninitialised memory does not make for a reliable
+# test.  So we do &. on a longer non-utf8 string first.
+for (["aaa","aaa"],[substr ("a\x{100}",0,1), "a"]) {
+    use feature "bitwise";
+    no warnings "experimental::bitwise", "pack";
+    $byte = substr unpack("P2", pack "P", $$_[0] &. $$_[1]), -1;
+}
+is $byte, "\0", "utf8 &. appends null byte";

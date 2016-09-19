@@ -1093,6 +1093,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	    if (sv == left || sv == right)
 		(void)sv_usepvn(sv, dcorig, needlen);
 	    SvCUR_set(sv, dc - dcorig);
+	    *SvEND(sv) = 0;
 	    break;
 	case OP_BIT_XOR:
 	    while (lulen && rulen) {
