@@ -424,7 +424,7 @@ S_is_utf8_cp_above_31_bits(const U8 * const s, const U8 * const e)
 }
 
 STRLEN
-Perl__is_utf8_char_helper(const U8 * const s, const U8 * const e, const U32 flags)
+Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
 {
     STRLEN len;
     const U8 *x, *y;
@@ -470,6 +470,11 @@ Perl__is_utf8_char_helper(const U8 * const s, const U8 * const e, const U32 flag
     /* A variant char must begin with a start byte */
     if (UNLIKELY(! UTF8_IS_START(*s))) {
         return 0;
+    }
+
+    /* Examine a maximum of a single whole code point */
+    if (e - s > UTF8SKIP(s)) {
+        e = s + UTF8SKIP(s);
     }
 
     len = e - s;

@@ -3813,7 +3813,7 @@ STATIC SV *	S_incpush_if_exists(pTHX_ AV *const av, SV *dir, SV *const stem);
 #  endif
 #endif
 #if !defined(PERL_NO_INLINE_FUNCTIONS)
-PERL_CALLCONV STRLEN	Perl__is_utf8_char_helper(const U8 * const s, const U8 * const e, const U32 flags)
+PERL_CALLCONV STRLEN	Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 #define PERL_ARGS_ASSERT__IS_UTF8_CHAR_HELPER	\
