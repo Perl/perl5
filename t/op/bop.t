@@ -567,6 +567,8 @@ for (
     }
 }
 
+delete $SIG{__WARN__};
+
 my $strval;
 
 {
