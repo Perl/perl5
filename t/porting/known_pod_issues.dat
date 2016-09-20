@@ -359,7 +359,7 @@ pod/perlsolaris.pod	Verbatim line length including indents exceeds 79 by	13
 pod/perltie.pod	Verbatim line length including indents exceeds 79 by	3
 pod/perltru64.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlwin32.pod	Verbatim line length including indents exceeds 79 by	7
-porting/epigraphs.pod	Verbatim line length including indents exceeds 79 by	16
+porting/epigraphs.pod	Verbatim line length including indents exceeds 79 by	17
 porting/release_managers_guide.pod	Verbatim line length including indents exceeds 79 by	1
 porting/todo.pod	? Should you be using F<...> or maybe L<...> instead of	1
 utils/ptar	Verbatim paragraph in NAME section	1
