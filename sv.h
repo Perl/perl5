@@ -1894,7 +1894,7 @@ Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
 #ifdef PERL_COPY_ON_WRITE
 #   define SvCANCOW(sv)					    \
 	(SvIsCOW(sv)					     \
-	 ? SvLEN(sv) ? CowREFCNT(sv) != SV_COW_REFCNT_MAX : 1 \
+	 ? 1 \
 	 : (SvFLAGS(sv) & CAN_COW_MASK) == CAN_COW_FLAGS       \
 			    && SvCUR(sv)+1 < SvLEN(sv))
    /* Note: To allow 256 COW "copies", a refcnt of 0 means 1. */
@@ -1902,6 +1902,7 @@ Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
 #   define SV_COW_REFCNT_MAX	((1 << sizeof(U8)*8) - 1)
 #   define CAN_COW_MASK	(SVf_POK|SVf_ROK|SVp_POK|SVf_FAKE| \
 			 SVf_OOK|SVf_BREAK|SVf_READONLY|SVf_PROTECT)
+#   define COW_STATIC SV_COW_REFCNT_MAX
 #endif
 
 #define CAN_COW_FLAGS	(SVp_POK|SVf_POK)
