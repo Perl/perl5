@@ -1,0 +1,326 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5255delta - what is new for perl v5.25.5
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.25.4 release and the 5.25.5
+release.
+
+If you are upgrading from an earlier release such as 5.25.3, first read
+L<perl5254delta>, which describes differences between 5.25.3 and 5.25.4.
+
+=head1 Security
+
+=head2 "Escaped" colons and relative paths in PATH
+
+On Unix systems, Perl treats any relative paths in the PATH environment
+variable as tainted when starting a new process.  Previously, it was
+allowing a backslash to escape a colon (unlike the OS), consequently
+allowing relative paths to be considered safe if the PATH was set to
+something like C</\:.>.  The check has been fixed to treat C<.> as tainted
+in that example.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Filter::Simple> has been upgraded from version 0.92 to 0.93.
+
+It no longer treats C<no MyFilter> immediately following C<use MyFilter> as
+end-of-file.  [perl #107726]
+
+=item *
+
+L<Locale::Codes> has been upgraded from 3.39 to 3.40.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20160820 to 5.20160920.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.71 to 1.72.
+
+=item *
+
+L<Sys::Syslog> has been upgraded from version 0.34_01 to 0.35.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302052 to 1.302056.
+
+=item *
+
+L<Thread::Semaphore> has been upgraded from 2.12 to 2.13.
+
+Added the C<down_timed> method.
+
+=item *
+
+L<XSLoader> has been upgraded from version 0.22 to 0.24.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+=head3 L<perlinterp>
+
+=over 4
+
+=item *
+
+L<perlinterp> has been expanded to give a more detailed example of how to
+hunt around in the parser for how a given operator is handled.
+
+=back
+
+=head1 Testing
+
+=over 4
+
+=item *
+
+F<t/re/regexp_nonull.t> has been added to test that the regular expression
+engine can handle scalars that do not have a null byte just past the end of
+the string.
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item VMS
+
+=over 4
+
+=item *
+
+The path separator for the C<PERL5LIB> and C<PERLLIB> environment entries is
+now a colon (C<:>) when running under a Unix shell. There is no change when
+running under DCL (it's still C<|>).
+
+=item *
+
+Remove some VMS-specific hacks from C<showlex.t>. These were added 15 years
+ago, and are no longer necessary for any VMS version now supported.
+
+=back
+
+=back
+
+=over 4
+
+=item Win32
+
+=over 4
+
+=item *
+
+Tweaks for Win32 VC vs GCC detection makefile code. This fixes issue that CCHOME
+depends on CCTYPE, which in auto detect mode is set after CCHOME, so CCHOME uses
+the uninit CCTYPE var. Also fix else vs .ELSE in makefile.mk
+
+=back
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+Several macros and functions have been added to the public API for
+dealing with Unicode and UTF-8-encoded strings.  See
+L<perlapi/Unicode Support>.
+
+=item *
+
+Use C<my_strlcat()> in C<locale.c>. While C<strcat()> is safe in this context,
+some compilers were optimizing this to C<strcpy()> causing a porting test to
+fail that looks for unsafe code. Rather than fighting this, we just use
+C<my_strlcat()> instead.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Invalid assignments to a reference constructor (e.g., C<\eval=time>) could
+sometimes crash in addition to giving a syntax error.  [perl #125679]
+
+=item *
+
+The parser could sometimes crash if a bareword came after C<evalbytes>.
+[perl #129196]
+
+=item *
+
+Autoloading via a method call would warn erroneously ("Use of inherited
+AUTOLOAD for non-method") if there was a stub present in the package into
+which the invocant had been blessed.  The warning is no longer emitted in
+such circumstances.  [perl #47047]
+
+=item *
+
+A sub containing with a "forward" declaration with the same name (e.g.,
+C<sub c { sub c; }>) could sometimes crash or loop infinitely.  [perl
+#129090]
+
+=item *
+
+The use of C<splice> on arrays with nonexistent elements could cause other
+operators to crash.  [perl #129164]
+
+=item *
+
+Fixed case where C<re_untuit_start> will overshoot the length of a utf8
+string. [perl #129012]
+
+=item *
+
+Handle C<CXt_SUBST> better in C<Perl_deb_stack_all>, previously it wasn't
+checking that the I<current> C<cx> is the right type, and instead was always
+checking the base C<cx> (effectively a noop). [perl #129029]
+
+=item *
+
+Fixed two possible use-after-free bugs in C<Perl_yylex>. C<Perl_yylex>
+maintains up to two pointers into the parser buffer, one of which can
+become stale under the right conditions. [perl #129069]
+
+=item *
+
+Fixed a crash with C<s///l> where it thought it was dealing with UTF-8
+when it wasn't. [perl #129038]
+
+=item *
+
+Fixed place where regex was not setting the syntax error correctly.
+[perl #129122]
+
+=item *
+
+The C<&.> operator (and the C<&> operator, when it treats its arguments as
+strings) were failing to append a trailing null byte if at least one string
+was marked as utf8 internally.  Many code paths (system calls, regexp
+compilation) still expect there to be a null byte in the string buffer
+just past the end of the logical string.  An assertion failure was the
+result.  [perl #129287]
+
+=item *
+
+Check C<pack_sockaddr_un()>'s return value because C<pack_sockaddr_un()>
+silently truncates the supplied path if it won't fit into the C<sun_path>
+member of C<sockaddr_un>. This may change in the future, but for now
+check the path in theC<sockaddr> matches the desired path, and skip if
+it doesn't. [perl #128095]
+
+=item *
+
+Make sure C<PL_oldoldbufptr> is preserved in C<scan_heredoc()>. In some
+cases this is used in building error messages. [perl #128988]
+
+=item *
+
+Check for null PL_curcop in IN_LC() [perl #129106]
+
+=item *
+
+Fixed the parser error handling for an 'C<:attr(foo>' that does not have
+an ending 'C<)>'.
+
+=item *
+
+Fix C<Perl_delimcpy()> to handle a backslash as last char, this
+actually fixed two bugs, [perl #129064] and [perl #129176].
+
+=item *
+
+[perl #129267] rework gv_fetchmethod_pvn_flags separator parsing to
+prevent possible string overrun with invalid len in gv.c
+
+=back
+
+=head1 Obituary
+
+Jon Portnoy (AVENJ), a prolific Perl author and admired Gentoo community
+member, has passed away on August 10, 2016. He will be remembered and
+missed by all those with which he came in contact and enriched with his
+intellect, wit, and spirit.
+
+=head1 Acknowledgements
+
+Perl 5.25.5 represents approximately 4 weeks of development since Perl 5.25.4
+and contains approximately 67,000 lines of changes across 230 files from 25
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 62,000 lines of changes to 160 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.25.5:
+
+Aaron Crane, Aristotle Pagaltzis, Chris 'BinGOs' Williams, Craig A. Berry,
+Dagfinn Ilmari Mannsåker, Dan Collins, Daniel Dragan, Dave Cross, David
+Mitchell, E. Choroba, Father Chrysostomos, James E Keenan, Jerry D. Hedden,
+Karl Williamson, Lukas Mai, Ricardo Signes, Rick Delaney, Sawyer X, Stevan
+Little, Steve Hay, Sullivan Beck, Theo Buehler, Tony Cook, Yaroslav Kuzmin,
+Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
