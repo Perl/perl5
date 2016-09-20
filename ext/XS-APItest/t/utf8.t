@@ -149,51 +149,117 @@ my %code_points = (
     # as of this writing, considers potentially problematic on ASCII
     0xD000     => (isASCII) ? "\xed\x80\x80" : I8_to_native("\xf1\xb4\xa0\xa0"),
 
-    # Bracket the surrogates
+    # Bracket the surrogates, and include several surrogates
     0xD7FF	=> (isASCII) ? "\xed\x9f\xbf" : I8_to_native("\xf1\xb5\xbf\xbf"),
+    0xD800	=> (isASCII) ? "\xed\xa0\x80" : I8_to_native("\xf1\xb6\xa0\xa0"),
+    0xDC00      => (isASCII) ? "\xed\xb0\x80" : I8_to_native("\xf1\xb7\xa0\xa0"),
+    0xDFFF	=> (isASCII) ? "\xee\x80\x80" : I8_to_native("\xf1\xb8\xa0\xa0"),
+    0xDFFF      => (isASCII) ? "\xed\xbf\xbf" : I8_to_native("\xf1\xb7\xbf\xbf"),
     0xE000	=> (isASCII) ? "\xee\x80\x80" : I8_to_native("\xf1\xb8\xa0\xa0"),
 
-    # Bracket the 32 contiguous non characters
+    # Include the 32 contiguous non characters, and surrounding code points
     0xFDCF	=> (isASCII) ? "\xef\xb7\x8f" : I8_to_native("\xf1\xbf\xae\xaf"),
+    0xFDD0	=> (isASCII) ? "\xef\xb7\x90" : I8_to_native("\xf1\xbf\xae\xb0"),
+    0xFDD1	=> (isASCII) ? "\xef\xb7\x91" : I8_to_native("\xf1\xbf\xae\xb1"),
+    0xFDD2	=> (isASCII) ? "\xef\xb7\x92" : I8_to_native("\xf1\xbf\xae\xb2"),
+    0xFDD3	=> (isASCII) ? "\xef\xb7\x93" : I8_to_native("\xf1\xbf\xae\xb3"),
+    0xFDD4	=> (isASCII) ? "\xef\xb7\x94" : I8_to_native("\xf1\xbf\xae\xb4"),
+    0xFDD5	=> (isASCII) ? "\xef\xb7\x95" : I8_to_native("\xf1\xbf\xae\xb5"),
+    0xFDD6	=> (isASCII) ? "\xef\xb7\x96" : I8_to_native("\xf1\xbf\xae\xb6"),
+    0xFDD7	=> (isASCII) ? "\xef\xb7\x97" : I8_to_native("\xf1\xbf\xae\xb7"),
+    0xFDD8	=> (isASCII) ? "\xef\xb7\x98" : I8_to_native("\xf1\xbf\xae\xb8"),
+    0xFDD9	=> (isASCII) ? "\xef\xb7\x99" : I8_to_native("\xf1\xbf\xae\xb9"),
+    0xFDDA	=> (isASCII) ? "\xef\xb7\x9a" : I8_to_native("\xf1\xbf\xae\xba"),
+    0xFDDB	=> (isASCII) ? "\xef\xb7\x9b" : I8_to_native("\xf1\xbf\xae\xbb"),
+    0xFDDC	=> (isASCII) ? "\xef\xb7\x9c" : I8_to_native("\xf1\xbf\xae\xbc"),
+    0xFDDD	=> (isASCII) ? "\xef\xb7\x9d" : I8_to_native("\xf1\xbf\xae\xbd"),
+    0xFDDE	=> (isASCII) ? "\xef\xb7\x9e" : I8_to_native("\xf1\xbf\xae\xbe"),
+    0xFDDF	=> (isASCII) ? "\xef\xb7\x9f" : I8_to_native("\xf1\xbf\xae\xbf"),
+    0xFDE0	=> (isASCII) ? "\xef\xb7\xa0" : I8_to_native("\xf1\xbf\xaf\xa0"),
+    0xFDE1	=> (isASCII) ? "\xef\xb7\xa1" : I8_to_native("\xf1\xbf\xaf\xa1"),
+    0xFDE2	=> (isASCII) ? "\xef\xb7\xa2" : I8_to_native("\xf1\xbf\xaf\xa2"),
+    0xFDE3	=> (isASCII) ? "\xef\xb7\xa3" : I8_to_native("\xf1\xbf\xaf\xa3"),
+    0xFDE4	=> (isASCII) ? "\xef\xb7\xa4" : I8_to_native("\xf1\xbf\xaf\xa4"),
+    0xFDE5	=> (isASCII) ? "\xef\xb7\xa5" : I8_to_native("\xf1\xbf\xaf\xa5"),
+    0xFDE6	=> (isASCII) ? "\xef\xb7\xa6" : I8_to_native("\xf1\xbf\xaf\xa6"),
+    0xFDE7	=> (isASCII) ? "\xef\xb7\xa7" : I8_to_native("\xf1\xbf\xaf\xa7"),
+    0xFDE8	=> (isASCII) ? "\xef\xb7\xa8" : I8_to_native("\xf1\xbf\xaf\xa8"),
+    0xFDEa	=> (isASCII) ? "\xef\xb7\x99" : I8_to_native("\xf1\xbf\xaf\xa9"),
+    0xFDEA	=> (isASCII) ? "\xef\xb7\xaa" : I8_to_native("\xf1\xbf\xaf\xaa"),
+    0xFDEB	=> (isASCII) ? "\xef\xb7\xab" : I8_to_native("\xf1\xbf\xaf\xab"),
+    0xFDEC	=> (isASCII) ? "\xef\xb7\xac" : I8_to_native("\xf1\xbf\xaf\xac"),
+    0xFDED	=> (isASCII) ? "\xef\xb7\xad" : I8_to_native("\xf1\xbf\xaf\xad"),
+    0xFDEE	=> (isASCII) ? "\xef\xb7\xae" : I8_to_native("\xf1\xbf\xae\xae"),
+    0xFDEF	=> (isASCII) ? "\xef\xb7\xaf" : I8_to_native("\xf1\xbf\xaf\xaf"),
     0xFDF0      => (isASCII) ? "\xef\xb7\xb0" : I8_to_native("\xf1\xbf\xaf\xb0"),
 
-    # Mostly bracket non-characters, but some are transitions to longer
-    # strings
+    # Mostly around non-characters, but some are transitions to longer strings
     0xFFFD	=> (isASCII) ? "\xef\xbf\xbd" : I8_to_native("\xf1\xbf\xbf\xbd"),
     0x10000 - 1 => (isASCII) ? "\xef\xbf\xbf" : I8_to_native("\xf1\xbf\xbf\xbf"),
     0x10000     => (isASCII) ? "\xf0\x90\x80\x80" : I8_to_native("\xf2\xa0\xa0\xa0"),
     0x1FFFD     => (isASCII) ? "\xf0\x9f\xbf\xbd" : I8_to_native("\xf3\xbf\xbf\xbd"),
+    0x1FFFE     => (isASCII) ? "\xf0\x9f\xbf\xbe" : I8_to_native("\xf3\xbf\xbf\xbe"),
+    0x1FFFF     => (isASCII) ? "\xf0\x9f\xbf\xbf" : I8_to_native("\xf3\xbf\xbf\xbf"),
     0x20000     => (isASCII) ? "\xf0\xa0\x80\x80" : I8_to_native("\xf4\xa0\xa0\xa0"),
     0x2FFFD     => (isASCII) ? "\xf0\xaf\xbf\xbd" : I8_to_native("\xf5\xbf\xbf\xbd"),
+    0x2FFFE     => (isASCII) ? "\xf0\xaf\xbf\xbe" : I8_to_native("\xf5\xbf\xbf\xbe"),
+    0x2FFFF     => (isASCII) ? "\xf0\xaf\xbf\xbf" : I8_to_native("\xf5\xbf\xbf\xbf"),
     0x30000     => (isASCII) ? "\xf0\xb0\x80\x80" : I8_to_native("\xf6\xa0\xa0\xa0"),
     0x3FFFD     => (isASCII) ? "\xf0\xbf\xbf\xbd" : I8_to_native("\xf7\xbf\xbf\xbd"),
+    0x3FFFE     => (isASCII) ? "\xf0\xbf\xbf\xbe" : I8_to_native("\xf7\xbf\xbf\xbe"),
     0x40000 - 1 => (isASCII) ? "\xf0\xbf\xbf\xbf" : I8_to_native("\xf7\xbf\xbf\xbf"),
     0x40000     => (isASCII) ? "\xf1\x80\x80\x80" : I8_to_native("\xf8\xa8\xa0\xa0\xa0"),
     0x4FFFD	=> (isASCII) ? "\xf1\x8f\xbf\xbd" : I8_to_native("\xf8\xa9\xbf\xbf\xbd"),
+    0x4FFFE	=> (isASCII) ? "\xf1\x8f\xbf\xbe" : I8_to_native("\xf8\xa9\xbf\xbf\xbe"),
+    0x4FFFF	=> (isASCII) ? "\xf1\x8f\xbf\xbf" : I8_to_native("\xf8\xa9\xbf\xbf\xbf"),
     0x50000     => (isASCII) ? "\xf1\x90\x80\x80" : I8_to_native("\xf8\xaa\xa0\xa0\xa0"),
     0x5FFFD	=> (isASCII) ? "\xf1\x9f\xbf\xbd" : I8_to_native("\xf8\xab\xbf\xbf\xbd"),
+    0x5FFFE	=> (isASCII) ? "\xf1\x9f\xbf\xbe" : I8_to_native("\xf8\xab\xbf\xbf\xbe"),
+    0x5FFFF	=> (isASCII) ? "\xf1\x9f\xbf\xbf" : I8_to_native("\xf8\xab\xbf\xbf\xbf"),
     0x60000     => (isASCII) ? "\xf1\xa0\x80\x80" : I8_to_native("\xf8\xac\xa0\xa0\xa0"),
     0x6FFFD	=> (isASCII) ? "\xf1\xaf\xbf\xbd" : I8_to_native("\xf8\xad\xbf\xbf\xbd"),
+    0x6FFFE	=> (isASCII) ? "\xf1\xaf\xbf\xbe" : I8_to_native("\xf8\xad\xbf\xbf\xbe"),
+    0x6FFFF	=> (isASCII) ? "\xf1\xaf\xbf\xbf" : I8_to_native("\xf8\xad\xbf\xbf\xbf"),
     0x70000     => (isASCII) ? "\xf1\xb0\x80\x80" : I8_to_native("\xf8\xae\xa0\xa0\xa0"),
     0x7FFFD	=> (isASCII) ? "\xf1\xbf\xbf\xbd" : I8_to_native("\xf8\xaf\xbf\xbf\xbd"),
+    0x7FFFE	=> (isASCII) ? "\xf1\xbf\xbf\xbe" : I8_to_native("\xf8\xaf\xbf\xbf\xbe"),
+    0x7FFFF	=> (isASCII) ? "\xf1\xbf\xbf\xbf" : I8_to_native("\xf8\xaf\xbf\xbf\xbf"),
     0x80000     => (isASCII) ? "\xf2\x80\x80\x80" : I8_to_native("\xf8\xb0\xa0\xa0\xa0"),
     0x8FFFD	=> (isASCII) ? "\xf2\x8f\xbf\xbd" : I8_to_native("\xf8\xb1\xbf\xbf\xbd"),
+    0x8FFFE	=> (isASCII) ? "\xf2\x8f\xbf\xbe" : I8_to_native("\xf8\xb1\xbf\xbf\xbe"),
+    0x8FFFF	=> (isASCII) ? "\xf2\x8f\xbf\xbf" : I8_to_native("\xf8\xb1\xbf\xbf\xbf"),
     0x90000     => (isASCII) ? "\xf2\x90\x80\x80" : I8_to_native("\xf8\xb2\xa0\xa0\xa0"),
     0x9FFFD	=> (isASCII) ? "\xf2\x9f\xbf\xbd" : I8_to_native("\xf8\xb3\xbf\xbf\xbd"),
+    0x9FFFE	=> (isASCII) ? "\xf2\x9f\xbf\xbe" : I8_to_native("\xf8\xb3\xbf\xbf\xbe"),
+    0x9FFFF	=> (isASCII) ? "\xf2\x9f\xbf\xbf" : I8_to_native("\xf8\xb3\xbf\xbf\xbf"),
     0xA0000     => (isASCII) ? "\xf2\xa0\x80\x80" : I8_to_native("\xf8\xb4\xa0\xa0\xa0"),
     0xAFFFD	=> (isASCII) ? "\xf2\xaf\xbf\xbd" : I8_to_native("\xf8\xb5\xbf\xbf\xbd"),
+    0xAFFFE	=> (isASCII) ? "\xf2\xaf\xbf\xbe" : I8_to_native("\xf8\xb5\xbf\xbf\xbe"),
+    0xAFFFF	=> (isASCII) ? "\xf2\xaf\xbf\xbf" : I8_to_native("\xf8\xb5\xbf\xbf\xbf"),
     0xB0000     => (isASCII) ? "\xf2\xb0\x80\x80" : I8_to_native("\xf8\xb6\xa0\xa0\xa0"),
     0xBFFFD	=> (isASCII) ? "\xf2\xbf\xbf\xbd" : I8_to_native("\xf8\xb7\xbf\xbf\xbd"),
+    0xBFFFE	=> (isASCII) ? "\xf2\xbf\xbf\xbe" : I8_to_native("\xf8\xb7\xbf\xbf\xbe"),
+    0xBFFFF	=> (isASCII) ? "\xf2\xbf\xbf\xbf" : I8_to_native("\xf8\xb7\xbf\xbf\xbf"),
     0xC0000     => (isASCII) ? "\xf3\x80\x80\x80" : I8_to_native("\xf8\xb8\xa0\xa0\xa0"),
     0xCFFFD	=> (isASCII) ? "\xf3\x8f\xbf\xbd" : I8_to_native("\xf8\xb9\xbf\xbf\xbd"),
+    0xCFFFE	=> (isASCII) ? "\xf3\x8f\xbf\xbe" : I8_to_native("\xf8\xb9\xbf\xbf\xbe"),
+    0xCFFFF	=> (isASCII) ? "\xf3\x8f\xbf\xbf" : I8_to_native("\xf8\xb9\xbf\xbf\xbf"),
     0xD0000     => (isASCII) ? "\xf3\x90\x80\x80" : I8_to_native("\xf8\xba\xa0\xa0\xa0"),
     0xDFFFD	=> (isASCII) ? "\xf3\x9f\xbf\xbd" : I8_to_native("\xf8\xbb\xbf\xbf\xbd"),
+    0xDFFFE	=> (isASCII) ? "\xf3\x9f\xbf\xbe" : I8_to_native("\xf8\xbb\xbf\xbf\xbe"),
+    0xDFFFF	=> (isASCII) ? "\xf3\x9f\xbf\xbf" : I8_to_native("\xf8\xbb\xbf\xbf\xbf"),
     0xE0000     => (isASCII) ? "\xf3\xa0\x80\x80" : I8_to_native("\xf8\xbc\xa0\xa0\xa0"),
     0xEFFFD	=> (isASCII) ? "\xf3\xaf\xbf\xbd" : I8_to_native("\xf8\xbd\xbf\xbf\xbd"),
+    0xEFFFE	=> (isASCII) ? "\xf3\xaf\xbf\xbe" : I8_to_native("\xf8\xbd\xbf\xbf\xbe"),
+    0xEFFFF	=> (isASCII) ? "\xf3\xaf\xbf\xbf" : I8_to_native("\xf8\xbd\xbf\xbf\xbf"),
     0xF0000     => (isASCII) ? "\xf3\xb0\x80\x80" : I8_to_native("\xf8\xbe\xa0\xa0\xa0"),
     0xFFFFD	=> (isASCII) ? "\xf3\xbf\xbf\xbd" : I8_to_native("\xf8\xbf\xbf\xbf\xbd"),
+    0xFFFFE	=> (isASCII) ? "\xf3\xbf\xbf\xbe" : I8_to_native("\xf8\xbf\xbf\xbf\xbe"),
+    0xFFFFF	=> (isASCII) ? "\xf3\xbf\xbf\xbf" : I8_to_native("\xf8\xbf\xbf\xbf\xbf"),
     0x100000    => (isASCII) ? "\xf4\x80\x80\x80" : I8_to_native("\xf9\xa0\xa0\xa0\xa0"),
     0x10FFFD	=> (isASCII) ? "\xf4\x8f\xbf\xbd" : I8_to_native("\xf9\xa1\xbf\xbf\xbd"),
+    0x10FFFE	=> (isASCII) ? "\xf4\x8f\xbf\xbe" : I8_to_native("\xf9\xa1\xbf\xbf\xbe"),
+    0x10FFFF	=> (isASCII) ? "\xf4\x8f\xbf\xbf" : I8_to_native("\xf9\xa1\xbf\xbf\xbf"),
     0x110000    => (isASCII) ? "\xf4\x90\x80\x80" : I8_to_native("\xf9\xa2\xa0\xa0\xa0"),
 
     # Things that would be noncharacters if they were in Unicode, and might be
@@ -421,10 +487,6 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     # later section of the code tests for these kinds of things.
     my $this_utf8_flags = $look_for_everything_utf8n_to;
     my $len = length $bytes;
-    if ($n > 2 ** 31 - 1) {
-        $this_utf8_flags &=
-                        ~($UTF8_DISALLOW_ABOVE_31_BIT|$UTF8_WARN_ABOVE_31_BIT);
-    }
 
     my $valid_under_strict = 1;
     my $valid_under_c9strict = 1;
@@ -432,9 +494,18 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
         $this_utf8_flags &= ~($UTF8_DISALLOW_SUPER|$UTF8_WARN_SUPER);
         $valid_under_strict = 0;
         $valid_under_c9strict = 0;
+        if ($n > 2 ** 31 - 1) {
+            $this_utf8_flags &=
+                            ~($UTF8_DISALLOW_ABOVE_31_BIT|$UTF8_WARN_ABOVE_31_BIT);
+        }
     }
-    elsif (($n & 0xFFFE) == 0xFFFE) {
+    elsif (($n >= 0xFDD0 && $n <= 0xFDEF) || ($n & 0xFFFE) == 0xFFFE) {
         $this_utf8_flags &= ~($UTF8_DISALLOW_NONCHAR|$UTF8_WARN_NONCHAR);
+        $valid_under_strict = 0;
+    }
+    elsif ($n >= 0xD800 && $n <= 0xDFFF) {
+        $this_utf8_flags &= ~($UTF8_DISALLOW_SURROGATE|$UTF8_WARN_SURROGATE);
+        $valid_under_c9strict = 0;
         $valid_under_strict = 0;
     }
 
@@ -585,8 +656,11 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     if ($n > 0x10FFFF) {
         $this_uvchr_flags &= ~($UNICODE_DISALLOW_SUPER|$UNICODE_WARN_SUPER);
     }
-    elsif (($n & 0xFFFE) == 0xFFFE) {
+    elsif (($n >= 0xFDD0 && $n <= 0xFDEF) || ($n & 0xFFFE) == 0xFFFE) {
         $this_uvchr_flags &= ~($UNICODE_DISALLOW_NONCHAR|$UNICODE_WARN_NONCHAR);
+    }
+    elsif ($n >= 0xD800 && $n <= 0xDFFF) {
+        $this_uvchr_flags &= ~($UNICODE_DISALLOW_SURROGATE|$UNICODE_WARN_SURROGATE);
     }
     $display_flags = sprintf "0x%x", $this_uvchr_flags;
 
