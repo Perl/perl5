@@ -5744,7 +5744,13 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, bool isreg, I32 floor)
 		SSize_t i = 0;
 		assert(PadnamelistMAXNAMED(PL_comppad_name) == 0);
 		while (++i <= AvFILLp(PL_comppad)) {
+#  ifdef USE_PAD_RESET
+                    /* under USE_PAD_RESET, pad swipe replaces a swiped
+                     * folded constant with a fresh padtmp */
+		    assert(!PL_curpad[i] || SvPADTMP(PL_curpad[i]));
+#  else
 		    assert(!PL_curpad[i]);
+#  endif
 		}
 #endif
 		/* But we know that one op is using this CV's slab. */

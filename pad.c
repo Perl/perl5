@@ -756,7 +756,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 	    sv = *av_fetch(PL_comppad, retval, TRUE);
 	    if (!(SvFLAGS(sv) &
 #ifdef USE_PAD_RESET
-		    (konst ? SVs_PADTMP : 0))
+		    (konst ? SVs_PADTMP : 0)
 #else
 		    SVs_PADTMP
 #endif
