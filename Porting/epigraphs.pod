@@ -17,6 +17,19 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.25.5 - Philip K. Dick, VALIS
+
+L<Announced on 2016-09-20 by Stevan Little|http://www.nntp.perl.org/group/perl.perl5.porters/2016/09/msg239887.html>
+
+  We hypostatize information into objects. Rearrangement of objects is
+  change in the content of the information; the message has changed.
+  This is a language which we have lost the ability to read. We ourselves
+  are a part of this language; changes in us are changes in the content
+  of the information. We ourselves are information-rich; information
+  enters us, is processed and is then projected outward once more, now
+  in an altered form. We are not aware that we are doing this, that in
+  fact this is all we are doing
+
 =head2 v5.25.4 - Terry Pratchett, "Truckers"
 
 L<Announced on 2016-08-20 by Chris 'BinGOs' Williams|http://www.nntp.perl.org/group/perl.perl5.porters/2016/08/msg239191.html>
