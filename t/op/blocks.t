@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 10;
+plan tests => 11;
 
 my @expect = qw(
 b1
@@ -156,3 +156,6 @@ TODO: {
     local $TODO = 'RT #2917: INIT{} in eval is wrongly considered too late';
     fresh_perl_is('eval "INIT { print qq(in init); };";', 'in init', {}, 'RT #2917: No constraint on how late INIT blocks can run');
 }
+
+fresh_perl_is('eval "BEGIN {goto end}"; end:', '', {}, 'RT #113934: goto out of BEGIN causes assertion failure');
+
