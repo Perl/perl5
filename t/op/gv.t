@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan(tests => 277 );
+plan(tests => 280);
 
 # type coercion on assignment
 $foo = 'foo';
@@ -1168,6 +1168,23 @@ SKIP: {
     runperl(prog => 'open my $fh, q|>|, \$buf;'
                    .'my $sub = eval q|sub {exit 0}|; $sub->()');
     is ($? & 127, 0,"[perl #128597] No crash when gp_free calls ckWARN_d");
+}
+
+# test gv_try_downgrade()
+# If a GV can be stored in a stash in a compact, non-GV form, then
+# whenever ops are freed which reference the GV, an attempt is made to
+# downgrade the GV to something simpler. Made sure this happens.
+
+package GV_DOWNGRADE {
+    use constant FOO => 1;
+
+    ::like "$GV_DOWNGRADE::{FOO}", qr/SCALAR/, "gv_downgrade: pre";
+    eval q{
+        my $x = \&FOO; # upgrades compact to full GV
+        ::like "$GV_DOWNGRADE::{FOO}", qr/^\*/, "gv_downgrade: full";
+    };
+    # after the eval's ops are freed, the GV should get downgraded again
+    ::like "$GV_DOWNGRADE::{FOO}", qr/SCALAR/, "gv_downgrade: post";
 }
 
 __END__
