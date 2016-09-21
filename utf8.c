@@ -381,6 +381,9 @@ S_is_utf8_cp_above_31_bits(const U8 * const s, const U8 * const e)
      */
 
 #ifdef EBCDIC
+#  ifndef MIN
+#    define MIN(a,b) ((a) < (b) ? (a) : (b))
+#  endif
 
         /* [0] is start byte    [1] [2] [3] [4] [5] [6] [7] */
     const U8 * const prefix = "\x41\x41\x41\x41\x41\x41\x42";
