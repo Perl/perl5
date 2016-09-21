@@ -203,7 +203,7 @@ PerlIOEncode_get_base(pTHX_ PerlIO * f)
 	e->base.bufsiz = 1024;
     if (!e->bufsv) {
 	e->bufsv = newSV(e->base.bufsiz);
-	sv_setpvn(e->bufsv, "", 0);
+	sv_setpvs(e->bufsv, "");
     }
     e->base.buf = (STDCHAR *) SvPVX(e->bufsv);
     if (!e->base.ptr)

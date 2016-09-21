@@ -10075,7 +10075,7 @@ Perl_sv_ref(pTHX_ SV *dst, const SV *const sv, const int ob)
     if (ob && SvOBJECT(sv)) {
 	HvNAME_get(SvSTASH(sv))
                     ? sv_sethek(dst, HvNAME_HEK(SvSTASH(sv)))
-                    : sv_setpvn(dst, "__ANON__", 8);
+                    : sv_setpvs(dst, "__ANON__");
     }
     else {
         const char * reftype = sv_reftype(sv, 0);

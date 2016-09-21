@@ -10,7 +10,7 @@
 package Data::Dumper;
 
 BEGIN {
-    $VERSION = '2.161'; # Don't forget to set version and release
+    $VERSION = '2.162'; # Don't forget to set version and release
 }               # date in POD below!
 
 #$| = 1;
@@ -1472,7 +1472,7 @@ modify it under the same terms as Perl itself.
 
 =head1 VERSION
 
-Version 2.161  (July 11 2016)
+Version 2.162  (September 21 2016)
 
 =head1 SEE ALSO
 

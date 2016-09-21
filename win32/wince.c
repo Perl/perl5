@@ -1368,7 +1368,7 @@ win32_str_os_error(void *sv, DWORD dwErr)
 {
   dTHX;
 
-  sv_setpvn((SV*)sv, "Error", 5);
+  sv_setpvs((SV*)sv, "Error");
 }
 
 

@@ -3502,7 +3502,7 @@ asctime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = -1)
 		if (result == (time_t)-1)
 		    SvOK_off(TARG);
 		else if (result == 0)
-		    sv_setpvn(TARG, "0 but true", 10);
+		    sv_setpvs(TARG, "0 but true");
 		else
 		    sv_setiv(TARG, (IV)result);
 	    } else {

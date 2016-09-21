@@ -2632,7 +2632,7 @@ XS(XS_OS2_Errors2Drive)
 	if (DOS_suppression_state > 0)
 	    sv_setpvn(ST(0), &DOS_suppression_state, 1);
 	else if (DOS_suppression_state == 0)
-	    sv_setpvn(ST(0), "", 0);
+	    sv_setpvs(ST(0), "");
 	DOS_suppression_state = drive;
     }
     XSRETURN(1);

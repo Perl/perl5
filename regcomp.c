@@ -18901,7 +18901,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
     PERL_ARGS_ASSERT_REGPROP;
 
-    sv_setpvn(sv, "", 0);
+    sv_setpvs(sv, "");
 
     if (OP(o) > REGNODE_MAX)		/* regnode.type is unsigned */
 	/* It would be nice to FAIL() here, but this may be called from

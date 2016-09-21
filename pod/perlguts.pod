@@ -186,7 +186,7 @@ sv_insert() or sv_insert_flags().
 If you don't need the existing content of the SV, you can avoid some
 copying with:
 
-    sv_setpvn(sv, "", 0);
+    sv_setpvs(sv, "");
     s = SvGROW(sv, needlen + 1);
     /* something that modifies up to needlen bytes at s, but modifies
        newlen bytes

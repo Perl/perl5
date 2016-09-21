@@ -1525,7 +1525,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    }
 		    else {
 			STRLEN nchars;
-			sv_setpvn(name, "$", 1);
+			sv_setpvs(name, "$");
 			sv_catsv(name, varname);
 			nchars = my_snprintf(tmpbuf, sizeof(tmpbuf), "%"IVdf, (IV)(i+1));
 			sv_catpvn(name, tmpbuf, nchars);
@@ -1575,7 +1575,7 @@ Data_Dumper_Dumpxs(href, ...)
 			sv_catpvs(retval, ";");
                         sv_catsv(retval, style.sep);
 		    }
-		    sv_setpvn(valstr, "", 0);
+		    sv_setpvs(valstr, "");
 		    if (gimme == G_ARRAY) {
 			XPUSHs(sv_2mortal(retval));
 			if (i < imax)	/* not the last time thro ? */
