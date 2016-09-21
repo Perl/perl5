@@ -147,6 +147,7 @@ Should we not just backport 2d41a263 instead? And does 5.22 need this, too? --sp
 <commit votes="khw sprout" id="8df98a270ad3d8791a954ebf97837b721b1c144a" desc="perlop: Fix important typo"/>
 <commit votes="jkeenan" id="177f0db9b219c09ca9541c325f9309b8cca12ac4" desc="perlfunc: provide link for one instance of 'eval' under 'die' (RT #129168)"/>
 <commit votes="jkeenan sprout" id="7c280bee056f2462f4b4aa2150a160fb9176601e" desc="perlfunc: correction to 'map' documentation (RT #129169)"/>
+<commit votes="jkeenan" id="2c4188f3fe3f46d4ebe3f23a094a7cf96ebe87f1" desc="perlrun: spelling correction in documentation of '-c' switch (RT #129313)"/>
      
 
 
