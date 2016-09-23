@@ -7,7 +7,7 @@ use warnings;
 
 BEGIN { chdir 't' if -d 't'; require './test.pl'; }
 
-plan(tests => 30);
+plan(tests => 31);
 
 {
     no warnings 'deprecated';
@@ -240,4 +240,11 @@ fresh_perl_is(
     "Missing name in \"my sub\" at - line 1.\n",
     {},
     '[perl #129069] - "Missing name" warning and valgrind clean'
+);
+
+fresh_perl_like(
+    "#!perl -i u\nprint 'OK'",
+    qr/OK/,
+    {},
+    '[perl #129336] - #!perl -i argument handling'
 );

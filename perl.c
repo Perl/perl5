@@ -3349,11 +3349,6 @@ Perl_moreswitches(pTHX_ const char *s)
 
 	    PL_inplace = savepvn(start, s - start);
 	}
-	if (*s) {
-	    ++s;
-	    if (*s == '-')	/* Additional switches on #! line. */
-		s++;
-	}
 	return s;
     case 'I':	/* -I handled both here and in parse_body() */
 	forbid_setid('I', FALSE);
