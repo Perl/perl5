@@ -3,7 +3,7 @@ use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use version;
-$VERSION = '5.20160920';
+$VERSION = '5.20161020';
 
 sub _undelta {
     my ($delta) = @_;
