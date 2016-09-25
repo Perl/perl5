@@ -189,11 +189,13 @@ esac
 # From http://ftp.netbsd.org/pub/pkgsrc/current/pkgsrc/mk/platform/Darwin.mk
 # and https://trac.macports.org/wiki/XcodeVersionInfo
 # and https://trac.macports.org/wiki/UsingTheRightCompiler
+# and https://gist.github.com/yamaya/2924292
+# and http://opensource.apple.com/source/clang/
 #
-# OS, Kernel, Xcode Version
-# Note that Xcode gets updates on older systems sometimes.
-# pkgsrc generally expects that the most up-to-date xcode available for
-# an OS version is installed
+# Note that Xcode gets updates on older systems sometimes, and in
+# general that the OS levels and XCode levels are not synchronized
+# since new releases of XCode usually support both some new and some
+# old OS releases.
 #
 # Note that Apple hijacks the clang preprocessor symbols __clang_major__
 # and __clang_minor__ so they cannot be used (easily) to detect the
@@ -243,7 +245,8 @@ esac
 #                                 7.1   (clang 3.7 as 7.0/700.1.76)
 #                                 7.2   (clang 3.7 as 7.0.2/700.1.81)
 #                                 7.2.1 (clang 3.7 as 7.0.2/700.1.81)
-#                                 7.3   (clang 3.7 as 7.3.0/703.0.29)
+#                                 7.3   (clang 3.8 as 7.3.0/703.0.29)
+# Sierra          10.12.x 16.x.y  8.0.0 (clang 3.8 as 8.0/800.0.38)
 #
 
 # Processors Supported
