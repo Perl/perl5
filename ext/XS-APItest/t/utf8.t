@@ -680,13 +680,13 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
 my $REPLACEMENT = 0xFFFD;
 
 # Now test the malformations.  All these raise category utf8 warnings.
-my $c = (isASCII) ? "\x80" : "\xa0";    # A continuation byte
+my $I8c = (isASCII) ? "\x80" : "\xa0";    # A continuation byte
 my @malformations = (
     [ "zero length string malformation", "", 0,
         $UTF8_ALLOW_EMPTY, 0, 0,
         qr/empty string/
     ],
-    [ "orphan continuation byte malformation", I8_to_native("${c}a"),
+    [ "orphan continuation byte malformation", I8_to_native("${I8c}a"),
         2,
         $UTF8_ALLOW_CONTINUATION, $REPLACEMENT, 1,
         qr/unexpected continuation byte/
@@ -698,12 +698,12 @@ my @malformations = (
         qr/unexpected non-continuation byte.*immediately after start byte/
     ],
     [ "premature next character malformation (non-immediate)",
-        I8_to_native("\xf0${c}a"),
+        I8_to_native("\xf0${I8c}a"),
         3,
         $UTF8_ALLOW_NON_CONTINUATION, $REPLACEMENT, 2,
         qr/unexpected non-continuation byte .* 2 bytes after start byte/
     ],
-    [ "too short malformation", I8_to_native("\xf0${c}a"), 2,
+    [ "too short malformation", I8_to_native("\xf0${I8c}a"), 2,
         # Having the 'a' after this, but saying there are only 2 bytes also
         # tests that we pay attention to the passed in length
         $UTF8_ALLOW_SHORT, $REPLACEMENT, 2,
