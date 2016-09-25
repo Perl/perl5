@@ -1,5 +1,10 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9740 [2016-09-25]
+  - the ext3/ext2 filesystems do not have subsecond resolution,
+    therefore skip the t/utime.t test
+    [rt.cpan.org #116127]
+
 1.9739 [2016-06-28]
   - the upcoming macOS 10.12 (Sierra, the operating system formerly
     known as OS X, or Darwin) has implemented the clock_gettime()
