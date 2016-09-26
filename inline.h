@@ -341,6 +341,9 @@ C<L</is_utf8_string_loc>>,
 C<L</is_utf8_string_loc_flags>>,
 C<L</is_utf8_string_loclen>>,
 C<L</is_utf8_string_loclen_flags>>,
+C<L</is_utf8_fixed_width_buf_flags>>,
+C<L</is_utf8_fixed_width_buf_loc_flags>>,
+C<L</is_utf8_fixed_width_buf_loclen_flags>>,
 C<L</is_strict_utf8_string>>,
 C<L</is_strict_utf8_string_loc>>,
 C<L</is_strict_utf8_string_loclen>>,
@@ -387,6 +390,9 @@ See also
 C<L</is_utf8_invariant_string>>,
 C<L</is_utf8_string_loc>>,
 C<L</is_utf8_string_loclen>>,
+C<L</is_utf8_fixed_width_buf_flags>>,
+C<L</is_utf8_fixed_width_buf_loc_flags>>,
+C<L</is_utf8_fixed_width_buf_loclen_flags>>,
 
 =cut
 */
@@ -435,6 +441,9 @@ C<L</is_utf8_string_loc>>,
 C<L</is_utf8_string_loc_flags>>,
 C<L</is_utf8_string_loclen>>,
 C<L</is_utf8_string_loclen_flags>>,
+C<L</is_utf8_fixed_width_buf_flags>>,
+C<L</is_utf8_fixed_width_buf_loc_flags>>,
+C<L</is_utf8_fixed_width_buf_loclen_flags>>,
 C<L</is_strict_utf8_string_loc>>,
 C<L</is_strict_utf8_string_loclen>>,
 C<L</is_c9strict_utf8_string>>,
@@ -488,6 +497,9 @@ C<L</is_utf8_string_loc>>,
 C<L</is_utf8_string_loc_flags>>,
 C<L</is_utf8_string_loclen>>,
 C<L</is_utf8_string_loclen_flags>>,
+C<L</is_utf8_fixed_width_buf_flags>>,
+C<L</is_utf8_fixed_width_buf_loc_flags>>,
+C<L</is_utf8_fixed_width_buf_loclen_flags>>,
 C<L</is_strict_utf8_string>>,
 C<L</is_strict_utf8_string_loc>>,
 C<L</is_strict_utf8_string_loclen>>,
@@ -546,6 +558,9 @@ C<L</is_utf8_string_loc>>,
 C<L</is_utf8_string_loc_flags>>,
 C<L</is_utf8_string_loclen>>,
 C<L</is_utf8_string_loclen_flags>>,
+C<L</is_utf8_fixed_width_buf_flags>>,
+C<L</is_utf8_fixed_width_buf_loc_flags>>,
+C<L</is_utf8_fixed_width_buf_loclen_flags>>,
 C<L</is_strict_utf8_string>>,
 C<L</is_strict_utf8_string_loc>>,
 C<L</is_strict_utf8_string_loclen>>,
@@ -966,6 +981,80 @@ S_is_utf8_valid_partial_char_flags(const U8 * const s, const U8 * const e, const
     }
 
     return cBOOL(_is_utf8_char_helper(s, e, flags));
+}
+
+/*
+
+=for apidoc is_utf8_fixed_width_buf_flags
+
+Returns TRUE if the fixed-width buffer starting at C<s> with length C<len>
+is entirely valid UTF-8, subject to the restrictions given by C<flags>;
+otherwise it returns FALSE.
+
+If C<flags> is 0, any well-formed UTF-8, as extended by Perl, is accepted
+without restriction.  If the final few bytes of the buffer do not form a
+complete code point, this will return TRUE anyway, provided that
+C<L</is_utf8_valid_partial_char_flags>> returns TRUE for them.
+
+If C<flags> in non-zero, it can be any combination of the
+C<UTF8_DISALLOW_I<foo>> flags accepted by C<L</utf8n_to_uvchr>>, and with the
+same meanings.
+
+This function differs from C<L</is_utf8_string_flags>> only in that the latter
+returns FALSE if the final few bytes of the string don't form a complete code
+point.
+
+=cut
+ */
+#define is_utf8_fixed_width_buf_flags(s, len, flags)                        \
+                is_utf8_fixed_width_buf_loclen_flags(s, len, 0, 0, flags)
+
+/*
+
+=for apidoc is_utf8_fixed_width_buf_loc_flags
+
+Like C<L</is_utf8_fixed_width_buf_flags>> but stores the location of the
+failure in the C<ep> pointer.  If the function returns TRUE, C<*ep> will point
+to the beginning of any partial character at the end of the buffer; if there is
+no partial character C<*ep> will contain C<s>+C<len>.
+
+See also C<L</is_utf8_fixed_width_buf_loclen_flags>>.
+
+=cut
+*/
+
+#define is_utf8_fixed_width_buf_loc_flags(s, len, loc, flags)               \
+                is_utf8_fixed_width_buf_loclen_flags(s, len, loc, 0, flags)
+
+/*
+
+=for apidoc is_utf8_fixed_width_buf_loclen_flags
+
+Like C<L</is_utf8_fixed_width_buf_loc_flags>> but stores the number of
+complete, valid characters found in the C<el> pointer.
+
+=cut
+*/
+
+PERL_STATIC_INLINE bool
+S_is_utf8_fixed_width_buf_loclen_flags(const U8 * const s,
+                                       const STRLEN len,
+                                       const U8 **ep,
+                                       STRLEN *el,
+                                       const U32 flags)
+{
+    const U8 * maybe_partial;
+
+    PERL_ARGS_ASSERT_IS_UTF8_FIXED_WIDTH_BUF_LOCLEN_FLAGS;
+
+    if (! ep) {
+        ep  = &maybe_partial;
+    }
+
+    /* If it's entirely valid, return that; otherwise see if the only error is
+     * that the final few bytes are for a partial character */
+    return    is_utf8_string_loclen_flags(s, len, ep, el, flags)
+           || is_utf8_valid_partial_char_flags(*ep, s + len, flags);
 }
 
 /* ------------------------------- perl.h ----------------------------- */

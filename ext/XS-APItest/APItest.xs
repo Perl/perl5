@@ -5497,6 +5497,41 @@ test_is_c9strict_utf8_string_loclen(char *s, STRLEN len)
     OUTPUT:
         RETVAL
 
+IV
+test_is_utf8_fixed_width_buf_flags(char *s, STRLEN len, U32 flags)
+    CODE:
+        RETVAL = is_utf8_fixed_width_buf_flags((U8 *) s, len, flags);
+    OUTPUT:
+        RETVAL
+
+AV *
+test_is_utf8_fixed_width_buf_loc_flags(char *s, STRLEN len, U32 flags)
+    PREINIT:
+        AV *av;
+        const U8 * ep;
+    CODE:
+        av = newAV();
+        av_push(av, newSViv(is_utf8_fixed_width_buf_loc_flags((U8 *) s, len, &ep, flags)));
+        av_push(av, newSViv(ep - (U8 *) s));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
+AV *
+test_is_utf8_fixed_width_buf_loclen_flags(char *s, STRLEN len, U32 flags)
+    PREINIT:
+        AV *av;
+        STRLEN ret_len;
+        const U8 * ep;
+    CODE:
+        av = newAV();
+        av_push(av, newSViv(is_utf8_fixed_width_buf_loclen_flags((U8 *) s, len, &ep, &ret_len, flags)));
+        av_push(av, newSViv(ep - (U8 *) s));
+        av_push(av, newSVuv(ret_len));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
 UV
 test_toLOWER(UV ord)
     CODE:

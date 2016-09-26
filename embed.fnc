@@ -767,6 +767,14 @@ Anid	|bool	|is_strict_utf8_string_loclen				    \
 Anid	|bool	|is_c9strict_utf8_string_loclen				    \
 		|NN const U8 *s|const STRLEN len|NULLOK const U8 **ep	    \
 		|NULLOK STRLEN *el
+Amnd	|bool	|is_utf8_fixed_width_buf_flags				    \
+		|NN const U8 * const s|const STRLEN len|const U32 flags
+Amnd	|bool	|is_utf8_fixed_width_buf_loc_flags			    \
+		|NN const U8 * const s|const STRLEN len			    \
+		|NULLOK const U8 **ep|const U32 flags
+Anid	|bool	|is_utf8_fixed_width_buf_loclen_flags			    \
+		|NN const U8 * const s|const STRLEN len			    \
+		|NULLOK const U8 **ep|NULLOK STRLEN *el|const U32 flags
 AmndP	|bool	|is_utf8_valid_partial_char				    \
 		|NN const U8 * const s|NN const U8 * const e
 AnidP	|bool	|is_utf8_valid_partial_char_flags			    \

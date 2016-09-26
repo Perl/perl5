@@ -3556,14 +3556,10 @@ PP(pp_fttext)
 
     assert(len);
     if (! is_utf8_invariant_string((U8 *) s, len)) {
-        const U8 *ep;
 
         /* Here contains a variant under UTF-8 .  See if the entire string is
-         * UTF-8.  But the buffer may end in a partial character, so if it
-         * failed, see if the failure was due just to that */
-        if (   is_utf8_string_loc((U8 *) s, len, &ep)
-            || is_utf8_valid_partial_char(ep, (U8 *) s + len))
-        {
+         * UTF-8. */
+        if (is_utf8_fixed_width_buf_flags((U8 *) s, len, 0)) {
             if (PL_op->op_type == OP_FTTEXT) {
                 FT_RETURNYES;
             }

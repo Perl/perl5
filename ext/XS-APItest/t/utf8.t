@@ -751,12 +751,20 @@ for my $restriction (sort keys %restriction_types) {
         next if $use_flags eq "" && $restriction eq "fits_in_31_bits";
 
         # Start building up the name of the function we will test.
-        my $name = "is_";
+        my $base_name = "is_";
 
         if (! $use_flags  && $restriction ne "") {
-            $name .= $restriction . "_";
+            $base_name .= $restriction . "_";
         }
-        $name .= "utf8_string";
+
+        # We test both "is_utf8_string_foo" and "is_fixed_width_buf" functions
+        foreach my $operand ('string', 'fixed_width_buf') {
+
+            # Currently, the only fixed_width_buf functions have the '_flags'
+            # suffix.
+            next if $operand eq 'fixed_width_buf' && $use_flags eq "";
+
+            my $name = "${base_name}utf8_$operand";
 
             # We test each version of the function
             for my $function ("_loclen", "_loc", "") {
@@ -765,7 +773,9 @@ for my $restriction (sort keys %restriction_types) {
                 #   a) valid input
                 #   b) invalid input created by appending an out-of-place
                 #      continuation character to the valid string
-                #   c) invalid input created by appending a partial character
+                #   c) input created by appending a partial character.  This
+                #      is valid in the 'fixed_width' functions, but invalid in
+                #   the 'string' ones
                 #   d) invalid input created by calling a function that is
                 #      expecting a restricted form of the input using the string
                 #      that's valid when unrestricted
@@ -788,10 +798,12 @@ for my $restriction (sort keys %restriction_types) {
                     if ($this_error_type) {
 
                         # Appending a bare continuation byte or a partial
-                        # character makes it invalid, but the character count
-                        # and offset remain the same.  But in the other cases,
-                        # we have saved where the failures should occur, so
-                        # use those.
+                        # character doesn't change the character count or
+                        # offset.  But in the other cases, we have saved where
+                        # the failures should occur, so use those.  Appending
+                        # a continuation byte makes it invalid; appending a
+                        # partial character makes the 'string' form invalid,
+                        # but not the 'fixed_width_buf' form.
                         if ($this_error_type eq $cont_byte || $this_error_type eq $p) {
                             $bytes .= $this_error_type;
                             if ($this_error_type eq $cont_byte) {
@@ -801,6 +813,8 @@ for my $restriction (sort keys %restriction_types) {
                             else {
                                 $test_name_suffix
                                         = " if ends with a partial character";
+                                $this_error_type
+                                        = 0 if $operand eq "fixed_width_buf";
                             }
                         }
                         else {
@@ -935,6 +949,7 @@ for my $restriction (sort keys %restriction_types) {
                     }
                 }
             }
+        }
     }
 }
 
