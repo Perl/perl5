@@ -85,9 +85,15 @@ PERL_PADSEQ_INTRO to indicate various stages:
  PERL_PADSEQ_INTRO            0   variable not yet introduced:
                                   { my ($x
  valid-seq#   PERL_PADSEQ_INTRO   variable in scope:
-                                  { my ($x)
+                                  { my ($x);
  valid-seq#          valid-seq#   compilation of scope complete:
-                                  { my ($x) }
+                                  { my ($x); .... }
+
+When a lexical var hasn't yet been introduced, it already exists from the
+perspective of duplicate declarations, but not for variable lookups, e.g.
+
+    my ($x, $x); # '"my" variable $x masks earlier declaration'
+    my $x = $x;  # equal to my $x = $::x;
 
 For typed lexicals C<PadnameTYPE> points at the type stash.  For C<our>
 lexicals, C<PadnameOURSTASH> points at the stash of the associated global (so
