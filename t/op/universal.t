@@ -11,7 +11,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 143;
+plan tests => 147;
 
 $a = {};
 bless $a, "Bob";
@@ -162,9 +162,9 @@ ok $a->isa("UNIVERSAL");
 my $sub2 = join ' ', sort grep { defined &{"UNIVERSAL::$_"} } keys %UNIVERSAL::;
 # XXX import being here is really a bug
 if ('a' lt 'A') {
-    is $sub2, "can import isa DOES VERSION";
+    is $sub2, "can isa DOES VERSION";
 } else {
-    is $sub2, "DOES VERSION can import isa";
+    is $sub2, "DOES VERSION can isa";
 }
 
 eval 'sub UNIVERSAL::sleep {}';
@@ -263,17 +263,30 @@ use warnings "deprecated";
     my $m;
     local $SIG{__WARN__} = sub { $m = $_[0] };
     eval "use UNIVERSAL 'can'";
-    like($@, qr/^UNIVERSAL does not export anything\b/,
+    like($@, qr/^Can't locate object method "import" via package "UNIVERSAL"/,
 	"error for UNIVERSAL->import('can')");
     is($m, undef,
-	"no deprecation warning for UNIVERSAL->import('can')");
+	"no warnings for UNIVERSAL->import('can')");
+    undef $m;
 
-	  undef $m;
-    eval "use UNIVERSAL";
-    is($@, "",
-	"no error for UNIVERSAL->import");
+    eval "no UNIVERSAL 'can'";
+    like($@, qr/^Can't locate object method "unimport" via package "UNIVERSAL"/,
+	"error for UNIVERSAL->unimport('can')");
     is($m, undef,
-	"no deprecation warning for UNIVERSAL->import");
+	"no warnings for UNIVERSAL->import('can')");
+    undef $m;
+
+    eval "use UNIVERSAL";
+    like($@, qr/^Can't locate object method "import" via package "UNIVERSAL"/,
+	"error for UNIVERSAL->import");
+    is($m, undef,
+	"no warnings for UNIVERSAL->import");
+
+    eval "no UNIVERSAL";
+    like($@, qr/^Can't locate object method "unimport" via package "UNIVERSAL"/,
+	"error for UNIVERSAL->unimport");
+    is($m, undef,
+	"no warnings for UNIVERSAL->unimport");
 }
 
 # Test: [perl #66112]: change @ISA inside  sub isa

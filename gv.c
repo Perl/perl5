@@ -1081,9 +1081,23 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 	/* This is the special case that exempts Foo->import and
 	   Foo->unimport from being an error even if there's no
 	  import/unimport subroutine */
-	if (strEQ(name,"import") || strEQ(name,"unimport"))
-	    gv = MUTABLE_GV(&PL_sv_yes);
-	else if (autoload)
+	if (strEQ(name,"import") || strEQ(name,"unimport")) {
+	    if (stash) {
+		const char *stash_name = HvNAME_get(stash);
+		if (stash_name && memEQs(stash_name, HvNAMELEN_get(stash), "UNIVERSAL")) {
+		    /* In previous versions of Perl the UNIVERSAL
+		      package had an import. Then for a while it did
+		      but it croaked. Implementing this here means
+		      "use UNIVERSAL ()" won't make
+		      $pkg->can("import") true everywhere for any
+		      value of $pkg. */
+		} else {
+		    gv = MUTABLE_GV(&PL_sv_yes);
+		}
+	    } else {
+		gv = MUTABLE_GV(&PL_sv_yes);
+	    }
+	} else if (autoload)
 	    gv = gv_autoload_pvn(
 		ostash, name, name_end - name, GV_AUTOLOAD_ISMETHOD|flags
 	    );
