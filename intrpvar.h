@@ -490,8 +490,8 @@ PERLVAR(I, compiling,	COP)		/* compiling/done executing marker */
 
 PERLVAR(I, compcv,	CV *)		/* currently compiling subroutine */
 PERLVAR(I, comppad_name, PADNAMELIST *)	/* variable names for "my" variables */
-PERLVAR(I, comppad_name_fill,	I32)	/* last "introduced" variable offset */
-PERLVAR(I, comppad_name_floor,	I32)	/* start of vars in innermost block */
+PERLVAR(I, comppad_name_fill,	PADOFFSET)/* last "introduced" variable offset */
+PERLVAR(I, comppad_name_floor,	PADOFFSET)/* start of vars in innermost block */
 
 #ifdef HAVE_INTERP_INTERN
 PERLVAR(I, sys_intern,	struct interp_intern)
@@ -550,14 +550,14 @@ PERLVARI(I, runops,	runops_proc_t, RUNOPS_DEFAULT)
 PERLVAR(I, subname,	SV *)		/* name of current subroutine */
 
 PERLVAR(I, subline,	I32)		/* line this subroutine began on */
-PERLVAR(I, min_intro_pending, I32)	/* start of vars to introduce */
+PERLVAR(I, min_intro_pending, PADOFFSET)/* start of vars to introduce */
 
-PERLVAR(I, max_intro_pending, I32)	/* end of vars to introduce */
-PERLVAR(I, padix,	I32)		/* lowest unused index - 1
+PERLVAR(I, max_intro_pending, PADOFFSET)/* end of vars to introduce */
+PERLVAR(I, padix,	PADOFFSET)	/* lowest unused index - 1
 					   in current "register" pad */
-PERLVAR(I, constpadix,	I32)		/* lowest unused for constants */
+PERLVAR(I, constpadix,	PADOFFSET)	/* lowest unused for constants */
 
-PERLVAR(I, padix_floor,	I32)		/* how low may inner block reset padix */
+PERLVAR(I, padix_floor,	PADOFFSET)	/* how low may inner block reset padix */
 
 #ifdef USE_LOCALE_COLLATE
 PERLVAR(I, collation_name, char *)	/* Name of current collation */
