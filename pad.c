@@ -18,12 +18,6 @@
  *     [p.23 of _The Lord of the Rings_, I/i: "A Long-Expected Party"]
  */
 
-/* XXX DAPM
- * As of Sept 2002, this file is new and may be in a state of flux for
- * a while. I've marked things I intent to come back and look at further
- * with an 'XXX DAPM' comment.
- */
-
 /*
 =head1 Pad Data Structures
 
@@ -202,12 +196,6 @@ Perl_pad_new(pTHX_ int flags)
 
     ASSERT_CURPAD_LEGAL("pad_new");
 
-    /* XXX DAPM really need a new SAVEt_PAD which restores all or most
-     * vars (based on flags) rather than storing vals + addresses for
-     * each individually. Also see pad_block_start.
-     * XXX DAPM Try to see whether all these conditionals are required
-     */
-
     /* save existing state, ... */
 
     if (flags & padnew_SAVE) {
@@ -225,8 +213,6 @@ Perl_pad_new(pTHX_ int flags)
 	    }
 	}
     }
-    /* XXX DAPM interestingly, PL_comppad_name_floor never seems to be
-     * saved - check at some pt that this is okay */
 
     /* ... create new pad ... */
 
@@ -234,11 +220,6 @@ Perl_pad_new(pTHX_ int flags)
     pad		= newAV();
 
     if (flags & padnew_CLONE) {
-	/* XXX DAPM  I dont know why cv_clone needs it
-	 * doing differently yet - perhaps this separate branch can be
-	 * dispensed with eventually ???
-	 */
-
         AV * const a0 = newAV();			/* will be @_ */
 	av_store(pad, 0, MUTABLE_SV(a0));
 	AvREIFY_only(a0);
@@ -401,8 +382,6 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
 	/* detach any '&' anon children in the pad; if afterwards they
 	 * are still live, fix up their CvOUTSIDEs to point to our outside,
 	 * bypassing us. */
-	/* XXX DAPM for efficiency, we should only do this if we know we have
-	 * children, or integrate this loop with general cleanup */
 
 	if (PL_phase != PERL_PHASE_DESTRUCT) { /* don't bother during global destruction */
 	    CV * const outercv = CvOUTSIDE(&cvbody);
@@ -713,9 +692,6 @@ but is used for debugging.
 =cut
 */
 
-/* XXX DAPM integrate alloc(), add_name() and add_anon(),
- * or at least rationalise ??? */
-
 PADOFFSET
 Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 {
@@ -824,7 +800,6 @@ Perl_pad_add_anon(pTHX_ CV* func, I32 optype)
     assert(COP_SEQ_RANGE_HIGH(name) != PERL_PADSEQ_INTRO);
     ix = pad_alloc(optype, SVs_PADMY);
     padnamelist_store(PL_comppad_name, ix, name);
-    /* XXX DAPM use PL_curpad[] ? */
     av_store(PL_comppad, ix, (SV*)func);
 
     /* to avoid ref loops, we never have parent + child referencing each
@@ -1414,12 +1389,6 @@ Update the pad compilation state variables on entry to a new block.
 =cut
 */
 
-/* XXX DAPM perhaps:
- * 	- integrate this in general state-saving routine ???
- * 	- combine with the state-saving going on in pad_new ???
- * 	- introduce a new SAVE type that does all this in one go ?
- */
-
 void
 Perl_pad_block_start(pTHX_ int full)
 {
@@ -1656,11 +1625,6 @@ the kind of subroutine:
 =cut
 */
 
-/* XXX DAPM surely most of this stuff should be done properly
- * at the right time beforehand, rather than going around afterwards
- * cleaning up our mistakes ???
- */
-
 void
 Perl_pad_tidy(pTHX_ padtidy_type type)
 {
@@ -1728,7 +1692,6 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 	}
     }
     else if (type == padtidy_SUB) {
-	/* XXX DAPM this same bit of code keeps appearing !!! Rationalise? */
 	AV * const av = newAV();			/* Will be @_ */
 	av_store(PL_comppad, 0, MUTABLE_SV(av));
 	AvREIFY_only(av);
@@ -1773,7 +1736,6 @@ Free the SV at offset po in the current pad.
 =cut
 */
 
-/* XXX DAPM integrate with pad_swipe ???? */
 void
 Perl_pad_free(pTHX_ PADOFFSET po)
 {
