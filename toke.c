@@ -2493,7 +2493,7 @@ S_sublex_done(pTHX)
 	}
 	if (SvTYPE(PL_linestr) >= SVt_PVNV) {
 	    CopLINE(PL_curcop) +=
-		((XPVNV*)SvANY(PL_linestr))->xnv_u.xpad_cop_seq.xlow
+		((XPVNV*)SvANY(PL_linestr))->xnv_u.xnv_lines
 		 + PL_parser->herelines;
 	    PL_parser->herelines = 0;
 	}
@@ -9429,7 +9429,7 @@ S_scan_subst(pTHX_ char *start)
     }
     if (CopLINE(PL_curcop) != first_line) {
 	sv_upgrade(PL_parser->lex_sub_repl, SVt_PVNV);
-	((XPVNV*)SvANY(PL_parser->lex_sub_repl))->xnv_u.xpad_cop_seq.xlow =
+	((XPVNV*)SvANY(PL_parser->lex_sub_repl))->xnv_u.xnv_lines =
 	    CopLINE(PL_curcop) - first_line;
 	CopLINE_set(PL_curcop, first_line);
     }

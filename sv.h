@@ -487,10 +487,7 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 union _xnvu {
     NV	    xnv_nv;		/* numeric value, if any */
     HV *    xgv_stash;
-    struct {
-	U32 xlow;
-	U32 xhigh;
-    }	    xpad_cop_seq;	/* used by pad.c for cop_sequence */
+    line_t  xnv_lines;           /* used internally by S_scan_subst() */
 };
 
 union _xivu {
