@@ -760,7 +760,13 @@ addbits('multideref',
 
 
 
-addbits('avhvswitch', '0..1' => { });
+addbits('avhvswitch',
+    '0..1' => {
+                   mask_def  => 'OPpAVHVSWITCH_MASK',
+                   label     => 'offset',
+    }
+);
+
 
 addbits('argelem',
    '1..2' =>  {

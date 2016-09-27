@@ -175,6 +175,8 @@ my @bf = (
         bitmask   => 3,
     },
     {
+        label     => 'offset',
+        mask_def  => 'OPpAVHVSWITCH_MASK',
         bitmin    => 0,
         bitmax    => 1,
         bitmask   => 3,
@@ -594,6 +596,7 @@ our %defines = (
     OPpASSIGN_COMMON_RC1     =>  32,
     OPpASSIGN_COMMON_SCALAR  =>  64,
     OPpASSIGN_CV_TO_GV       => 128,
+    OPpAVHVSWITCH_MASK       =>   3,
     OPpCONST_BARE            =>  64,
     OPpCONST_ENTERED         =>  16,
     OPpCONST_NOVER           =>   2,

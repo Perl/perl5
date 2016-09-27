@@ -2216,6 +2216,7 @@ END_EXTERN_C
 #define OPpSORT_INTEGER         0x02
 #define OPpTRANS_TO_UTF         0x02
 #define OPpARG2_MASK            0x03
+#define OPpAVHVSWITCH_MASK      0x03
 #define OPpARGELEM_HV           0x04
 #define OPpCONST_SHORTCIRCUIT   0x04
 #define OPpDONT_INIT_GV         0x04
@@ -2407,6 +2408,7 @@ EXTCONST char PL_op_private_labels[] = {
     'T','A','R','G','M','Y','\0',
     'U','N','I','\0',
     'U','T','F','\0',
+    'o','f','f','s','e','t','\0',
 
 };
 
@@ -2425,7 +2427,7 @@ EXTCONST char PL_op_private_labels[] = {
 EXTCONST I16 PL_op_private_bitfields[] = {
     0, 8, -1,
     0, 8, -1,
-    0, -1, -1,
+    0, 530, -1,
     0, 8, -1,
     0, 8, -1,
     0, 8, -1,
@@ -3313,7 +3315,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* ONCE       */ (OPpARG1_MASK),
     /* CUSTOM     */ (0xff),
     /* COREARGS   */ (OPpCOREARGS_DEREF1|OPpCOREARGS_DEREF2|OPpCOREARGS_SCALARMOD|OPpCOREARGS_PUSHMARK),
-    /* AVHVSWITCH */ (3|OPpMAYBE_LVSUB),
+    /* AVHVSWITCH */ (OPpAVHVSWITCH_MASK|OPpMAYBE_LVSUB),
     /* RUNCV      */ (OPpOFFBYONE),
     /* FC         */ (OPpARG1_MASK),
     /* PADCV      */ (0),
