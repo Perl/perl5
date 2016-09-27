@@ -322,7 +322,9 @@ well.
 
 =item *
 
-XXX
+The C<PADOFFSET> type has changed from being unsigned to signed, and
+several pad-related variables such as C<PL_padix> have changed from being
+of type C<I32> to type C<PADOFFSET>.
 
 =back
 
