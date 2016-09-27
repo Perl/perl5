@@ -546,7 +546,8 @@ sub select_a_perl {
 
 
 # Validate the list of perl=label (+ cmdline options) on the command line.
-# Return a list of [ exe, label, cmdline-options ] tuples, ie PUTs
+# Return a list of [ exe, label, cmdline-options ] tuples, i.e.
+# 'perl-under-test's (PUTs)
 
 sub process_puts {
     my @res_puts; # returned, each item is [ perlexe, label, @putargs ]
@@ -559,7 +560,7 @@ sub process_puts {
         my ($perl, $label, $env) = split /[=:,]/, $p, 3;
         $label //= $perl;
         $label = $perl.$label if $label =~ /^\+/;
-        die "$label cannot be used on 2 different PUTs\n" if $seen{$label}++;
+        die "$label cannot be used on 2 different perls under test\n" if $seen{$label}++;
 
         my %env;
         if ($env) {
@@ -572,7 +573,7 @@ sub process_puts {
             warn "Added Perl-Under-Test: [ @{[@{$res_puts[-1]}]} ]\n"
                 if $OPTS{verbose};
 	} else {
-            warn "PUT-args: @putargs + a not-perl: $p $r\n"
+            warn "perl-under-test args: @putargs + a not-perl: $p $r\n"
                 if $OPTS{verbose};
             push @putargs, $p; # not-perl
 	}
