@@ -2219,7 +2219,24 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
     }
     else if (SvPOKp(sv)) {
 	UV value;
-	const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
+	int numtype;
+        const char *s = SvPVX_const(sv);
+        const STRLEN cur = SvCUR(sv);
+
+        /* short-cut for a single digit string like "1" */
+
+        if (cur == 1) {
+            char c = *s;
+            if (isDIGIT(c)) {
+                if (SvTYPE(sv) < SVt_PVIV)
+                    sv_upgrade(sv, SVt_PVIV);
+                (void)SvIOK_on(sv);
+                SvIV_set(sv, (IV)(c - '0'));
+                return FALSE;
+            }
+        }
+
+	numtype = grok_number(s, cur, &value);
 	/* We want to avoid a possible problem when we cache an IV/ a UV which
 	   may be later translated to an NV, and the resulting NV is not
 	   the same as the direct translation of the initial string

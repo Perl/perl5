@@ -812,6 +812,17 @@
         setup   => 'my ($x,$y); ($x,$y,$z) = (1, 2.2, 3.3);',
         code    => '$z = $x + $y',
     },
+    'expr::arith::add_lex_ss' => {
+        desc    => 'add two short strings and assign to a lexical var',
+        setup   => 'my ($x,$y,$z) = ("1", "2", 1);',
+        code    => '$z = $x + $y; $x = "1"; ',
+    },
+
+    'expr::arith::add_lex_ll' => {
+        desc    => 'add two long strings and assign to a lexical var',
+        setup   => 'my ($x,$y,$z) = ("12345", "23456", 1);',
+        code    => '$z = $x + $y; $x = "12345"; ',
+    },
 
     'expr::arith::sub_lex_ii' => {
         desc    => 'subtract two integers and assign to a lexical var',
