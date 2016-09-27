@@ -196,7 +196,7 @@ my @bf = (
         bitmask   => 15,
     },
     {
-        label     => '-',
+        label     => 'range',
         mask_def  => 'OPpPADRANGE_COUNTMASK',
         bitcount_def => 'OPpPADRANGE_COUNTSHIFT',
         bitmin    => 0,
@@ -204,7 +204,7 @@ my @bf = (
         bitmask   => 127,
     },
     {
-        label     => '-',
+        label     => 'key',
         bitmin    => 0,
         bitmax    => 7,
         bitmask   => 255,

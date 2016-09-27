@@ -593,7 +593,7 @@ addbits('substr', 4 => qw(OPpSUBSTR_REPL_FIRST REPL1ST));
 addbits('padrange',
     # bits 0..6 hold target range
     '0..6' =>  {
-            label         => '-',
+            label         => 'range',
             mask_def      => 'OPpPADRANGE_COUNTMASK',
             bitcount_def  => 'OPpPADRANGE_COUNTSHIFT',
           }
@@ -605,7 +605,7 @@ addbits('padrange',
 for (qw(aelemfast aelemfast_lex)) {
     addbits($_,
         '0..7' =>  {
-                label     => '-',
+                label     => 'key',
               }
     );
 }
