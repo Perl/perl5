@@ -210,7 +210,7 @@ value is non-null before dereferencing it to a C<SV*>.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for
 more information on how to use this function on tied arrays. 
 
-The rough perl equivalent is C<$myarray[$idx]>.
+The rough perl equivalent is C<$myarray[$key]>.
 
 =cut
 */
@@ -305,7 +305,7 @@ Note that the caller is responsible for suitably incrementing the reference
 count of C<val> before the call, and decrementing it if the function
 returned C<NULL>.
 
-Approximate Perl equivalent: C<$myarray[$key] = $val;>.
+Approximate Perl equivalent: C<splice(@myarray, $key, 1, $val)>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for
 more information on how to use this function on tied arrays.
@@ -573,7 +573,7 @@ Perl_av_create_and_push(pTHX_ AV **const avp, SV *const val)
 Pushes an SV (transferring control of one reference count) onto the end of the
 array.  The array will grow automatically to accommodate the addition.
 
-Perl equivalent: C<push @myarray, $elem;>.
+Perl equivalent: C<push @myarray, $val;>.
 
 =cut
 */
@@ -661,10 +661,9 @@ Perl_av_create_and_unshift_one(pTHX_ AV **const avp, SV *const val)
 =for apidoc av_unshift
 
 Unshift the given number of C<undef> values onto the beginning of the
-array.  The array will grow automatically to accommodate the addition.  You
-must then use C<av_store> to assign values to these new elements.
+array.  The array will grow automatically to accommodate the addition.
 
-Perl equivalent: S<C<unshift @myarray, ( (undef) x $n );>>
+Perl equivalent: S<C<unshift @myarray, ((undef) x $num);>>
 
 =cut
 */
@@ -848,11 +847,13 @@ Perl_av_fill(pTHX_ AV *av, SSize_t fill)
 /*
 =for apidoc av_delete
 
-Deletes the element indexed by C<key> from the array, makes the element mortal,
-and returns it.  If C<flags> equals C<G_DISCARD>, the element is freed and null
-is returned.  Perl equivalent: S<C<my $elem = delete($myarray[$idx]);>> for the
-non-C<G_DISCARD> version and a void-context S<C<delete($myarray[$idx]);>> for the
-C<G_DISCARD> version.
+Deletes the element indexed by C<key> from the array, makes the element
+mortal, and returns it.  If C<flags> equals C<G_DISCARD>, the element is
+freed and NULL is returned. NULL is also returned if C<key> is out of
+range.
+
+Perl equivalent: S<C<splice(@myarray, $key, 1, undef)>> (with the
+C<splice> in void context if C<G_DISCARD> is present).
 
 =cut
 */
