@@ -19,7 +19,7 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 35;
+use Test::More tests => 37;
 BEGIN { use_ok ('Pod::Man') }
 
 # Test whether we can use binmode to set encoding.
@@ -591,4 +591,27 @@ earlier, italic was terminated with \ef(\s-1CW,\s0 which didn't properly stop it
 .ie n .IP """tar \fIletter\fP... [\fIargument\fP]... [\fIoption\fP]... [\fIname\fP]...""" 2
 .el .IP "\f(CWtar \f(CIletter\f(CW... [\f(CIargument\f(CW]... [\f(CIoption\f(CW]... [\f(CIname\f(CW]...\fR" 2
 .IX Item "tar letter... [argument]... [option]... [name]..."
+###
+
+###
+=head1 TRUE (1)
+
+podlators prior to 4.08 misrendered TRUE (1) and FALSE (0) with escaped nroff
+in the output because it tried to apply both small caps and man page reference
+code and got it wrong.
+###
+.SH "TRUE (1)"
+.IX Header "TRUE (1)"
+podlators prior to 4.08 misrendered \s-1TRUE\s0 (1) and \s-1FALSE\s0 (0) with escaped nroff
+in the output because it tried to apply both small caps and man page reference
+code and got it wrong.
+###
+
+###
+=pod
+
+Not a man page reference: \s0(1)
+###
+.PP
+Not a man page reference: \es0(1)
 ###

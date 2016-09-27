@@ -80,8 +80,6 @@ LINKS
 
     "Section "with" *other markup*" in foo|bar
 
-    Nested <http://www.perl.org/>
-
 OVER AND ITEMS
     Taken from Pod::Parser tests, this is a test to ensure that multiline
     =item paragraphs get indented appropriately.

@@ -278,7 +278,7 @@ sub test_snippet {
     }
     if ($data_ref->{exception} || $exception) {
         if ($exception) {
-            $exception =~ s{ [ ] at [ ] .* }{}xms;
+            $exception =~ s{ [ ] at [ ] .* }{\n}xms;
         }
         is($exception, $data_ref->{exception}, "$data_ref->{name}: exception");
     }

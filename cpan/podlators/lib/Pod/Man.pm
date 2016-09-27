@@ -43,7 +43,7 @@ BEGIN {
 
 @ISA = qw(Pod::Simple);
 
-$VERSION = '4.07';
+$VERSION = '4.08';
 
 # Set the debugging level.  If someone has inserted a debug function into this
 # class already, use that.  Otherwise, use any Pod::Simple debug function
@@ -216,12 +216,13 @@ sub init_fonts {
 }
 
 # Initialize the quotes that we'll be using for C<> text.  This requires some
-# special handling, both to parse the user parameter if given and to make sure
-# that the quotes will be safe against *roff.  Sets the internal hash keys
-# LQUOTE and RQUOTE.
+# special handling, both to parse the user parameters if given and to make
+# sure that the quotes will be safe against *roff.  Sets the internal hash
+# keys LQUOTE and RQUOTE.
 sub init_quotes {
     my ($self) = (@_);
 
+    # Handle the quotes option first, which sets both quotes at once.
     $$self{quotes} ||= '"';
     if ($$self{quotes} eq 'none') {
         $$self{LQUOTE} = $$self{RQUOTE} = '';
@@ -233,6 +234,14 @@ sub init_quotes {
         $$self{RQUOTE} = substr ($$self{quotes}, $length);
     } else {
         croak(qq(Invalid quote specification "$$self{quotes}"))
+    }
+
+    # Now handle the lquote and rquote options.
+    if (defined $$self{lquote}) {
+        $$self{LQUOTE} = $$self{lquote} eq 'none' ? q{} : $$self{lquote};
+    }
+    if (defined $$self{rquote}) {
+        $$self{RQUOTE} = $$self{rquote} eq 'none' ? q{} : $$self{rquote};
     }
 
     # Double the first quote; note that this should not be s///g as two double
@@ -514,9 +523,9 @@ sub guesswork {
     # entire warranty disclaimers in man page output into small caps.
     if ($$self{MAGIC_SMALLCAPS}) {
         s{
-            ( ^ | [\s\(\"\'\`\[\{<>] | \\[ ]  )                     # (1)
-            ( [A-Z] [A-Z] (?: [/A-Z+:\d_\$&] | \\- | [.,\"\s] )* )  # (2)
-            (?= [\s>\}\]\(\)\'\".?!,;] | \\*\(-- | \\[ ] | $ )      # (3)
+            ( ^ | [\s\(\"\'\`\[\{<>] | \\[ ]  )                           # (1)
+            ( [A-Z] [A-Z] (?: \s? [/A-Z+:\d_\$&] | \\- | \s? [.,\"] )* )  # (2)
+            (?= [\s>\}\]\(\)\'\".?!,;] | \\*\(-- | \\[ ] | $ )            # (3)
         } {
             $1 . '\s-1' . $2 . '\s0'
         }egx;
@@ -549,6 +558,7 @@ sub guesswork {
     if ($$self{MAGIC_MANREF}) {
         s{
             ( \b | \\s-1 )
+            (?<! \\ )                                   # rule out \s0(1)
             ( [A-Za-z_] (?:[.:\w] | \\- | \\s-?[01])+ )
             ( \( \d [a-z]* \) )
         } {
@@ -854,12 +864,16 @@ sub devise_title {
 
     # If Pod::Parser gave us an IO::File reference as the source file name,
     # convert that to the empty string as well.  Then, if we don't have a
-    # valid name, emit a warning and convert it to STDIN.
+    # valid name, convert it to STDIN.
+    #
+    # In podlators 4.00 through 4.07, this also produced a warning, but that
+    # was surprising to a lot of programs that had expected to be able to pipe
+    # POD through pod2man without specifying the name.  In the name of
+    # backward compatibility, just quietly set STDIN as the page title.
     if ($name =~ /^IO::File(?:=\w+)\(0x[\da-f]+\)$/i) {
         $name = '';
     }
     if ($name eq '') {
-        $self->whine (1, 'No name given for document');
         $name = 'STDIN';
     }
 
@@ -1632,7 +1646,7 @@ __END__
 =for stopwords
 en em ALLCAPS teeny fixedbold fixeditalic fixedbolditalic stderr utf8
 UTF-8 Allbery Sean Burke Ossanna Solaris formatters troff uppercased
-Christiansen nourls parsers Kernighan
+Christiansen nourls parsers Kernighan lquote rquote
 
 =head1 NAME
 
@@ -1743,6 +1757,20 @@ Pod::Man doesn't assume you have this, and defaults to C<CB>.  Some
 systems (such as Solaris) have this font available as C<CX>.  Only matters
 for B<troff> output.
 
+=item lquote
+
+=item rquote
+
+Sets the quote marks used to surround CE<lt>> text.  C<lquote> sets the
+left quote mark and C<rquote> sets the right quote mark.  Either may also
+be set to the special value C<none>, in which case no quote mark is added
+on that side of CE<lt>> text (but the font is still changed for troff
+output).
+
+Also see the C<quotes> option, which can be used to set both quotes at once.
+If both C<quotes> and one of the other options is set, C<lquote> or C<rquote>
+overrides C<quotes>.
+
 =item name
 
 Set the name of the manual page for the C<.TH> macro.  Without this
@@ -1752,9 +1780,9 @@ parsed to see if it is a Perl module path.  If it is, a path like
 C<.../lib/Pod/Man.pm> is converted into a name like C<Pod::Man>.  This
 option, if given, overrides any automatic determination of the name.
 
-If generating a manual page from standard input, this option is required,
-since there's otherwise no way for Pod::Man to know what to use for the
-manual page name.
+If generating a manual page from standard input, the name will be set to
+C<STDIN> if this option is not provided.  Providing this option is strongly
+recommended to set a meaningful manual page name.
 
 =item nourls
 
@@ -1782,6 +1810,10 @@ quote and the second is used as the right quote.
 This may also be set to the special value C<none>, in which case no quote
 marks are added around CE<lt>> text (but the font is still changed for troff
 output).
+
+Also see the C<lquote> and C<rquote> options, which can be used to set the
+left and right quotes independently.  If both C<quotes> and one of the other
+options is set, C<lquote> or C<rquote> overrides C<quotes>.
 
 =item release
 

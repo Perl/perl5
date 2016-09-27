@@ -80,8 +80,6 @@ LLIINNKKSS
 
     "Section "with" _o_t_h_e_r_ _m_a_r_k_u_p" in foo|bar
 
-    Nested <http://www.perl.org/>
-
 OOVVEERR  AANNDD  IITTEEMMSS
     Taken from Pod::Parser tests, this is a test to ensure that multiline
     =item paragraphs get indented appropriately.

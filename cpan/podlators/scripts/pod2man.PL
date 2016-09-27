@@ -76,8 +76,9 @@ my %options;
 Getopt::Long::config ('bundling_override');
 GetOptions (\%options, 'center|c=s', 'date|d=s', 'errors=s', 'fixed=s',
             'fixedbold=s', 'fixeditalic=s', 'fixedbolditalic=s', 'help|h',
-            'lax|l', 'name|n=s', 'nourls', 'official|o', 'quotes|q=s',
-            'release|r=s', 'section|s=s', 'stderr', 'verbose|v', 'utf8|u')
+            'lax|l', 'lquote=s', 'name|n=s', 'nourls', 'official|o',
+            'quotes|q=s', 'release|r=s', 'rquote=s', 'section|s=s', 'stderr',
+            'verbose|v', 'utf8|u')
     or exit 1;
 pod2usage (0) if $options{help};
 
@@ -125,7 +126,7 @@ __END__
 =for stopwords
 en em --stderr stderr --utf8 UTF-8 overdo markup MT-LEVEL Allbery Solaris
 URL troff troff-specific formatters uppercased Christiansen --nourls UTC
-prepend
+prepend lquote rquote
 
 =head1 NAME
 
@@ -136,9 +137,9 @@ pod2man - Convert POD data to formatted *roff input
 pod2man [B<--center>=I<string>] [B<--date>=I<string>] [B<--errors>=I<style>]
     [B<--fixed>=I<font>] [B<--fixedbold>=I<font>] [B<--fixeditalic>=I<font>]
     [B<--fixedbolditalic>=I<font>] [B<--name>=I<name>] [B<--nourls>]
-    [B<--official>] [B<--quotes>=I<quotes>] [B<--release>=I<version>]
-    [B<--section>=I<manext>] [B<--stderr>] [B<--utf8>] [B<--verbose>]
-    [I<input> [I<output>] ...]
+    [B<--official>] [B<--release>=I<version>] [B<--section>=I<manext>]
+    [B<--quotes>=I<quotes>] [B<--lquote>=I<quote>] [B<--rquote>=I<quote>]
+    [B<--stderr>] [B<--utf8>] [B<--verbose>] [I<input> [I<output>] ...]
 
 pod2man B<--help>
 
@@ -236,6 +237,20 @@ No longer used.  B<pod2man> used to check its input for validity as a
 manual page, but this should now be done by L<podchecker(1)> instead.
 Accepted for backward compatibility; this option no longer does anything.
 
+=item B<--lquote>=I<quote>
+
+=item B<--rquote>=I<quote>
+
+Sets the quote marks used to surround CE<lt>> text.  B<--lquote> sets the
+left quote mark and B<--rquote> sets the right quote mark.  Either may also
+be set to the special value C<none>, in which case no quote mark is added
+on that side of CE<lt>> text (but the font is still changed for troff
+output).
+
+Also see the B<--quotes> option, which can be used to set both quotes at once.
+If both B<--quotes> and one of the other options is set, B<--lquote> or
+B<--rquote> overrides B<--quotes>.
+
 =item B<-n> I<name>, B<--name>=I<name>
 
 Set the name of the manual page for the C<.TH> macro to I<name>.  Without
@@ -252,9 +267,9 @@ in all-uppercase, even if the command isn't.
 This option is probably not useful when converting multiple POD files at
 once.
 
-When converting POD source from standard input, this option is required,
-since there's otherwise no way to know what to use as the name of the
-manual page.
+When converting POD source from standard input, the name will be set to
+C<STDIN> if this option is not provided.  Providing this option is strongly
+recommended to set a meaningful manual page name.
 
 =item B<--nourls>
 
@@ -286,6 +301,10 @@ is used as the left quote and the second is used as the right quote.
 I<quotes> may also be set to the special value C<none>, in which case no
 quote marks are added around CE<lt>> text (but the font is still changed for
 troff output).
+
+Also see the B<--lquote> and B<--rquote> options, which can be used to set the
+left and right quotes independently.  If both B<--quotes> and one of the other
+options is set, B<--lquote> or B<--rquote> overrides B<--quotes>.
 
 =item B<-r> I<version>, B<--release>=I<version>
 

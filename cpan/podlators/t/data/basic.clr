@@ -80,8 +80,6 @@
 
     "Section "with" [33m[1mother[0m markup[0m" in foo|bar
 
-    Nested <http://www.perl.org/>
-
 [1mOVER AND ITEMS[0m
     Taken from Pod::Parser tests, this is a test to ensure that multiline
     =item paragraphs get indented appropriately.

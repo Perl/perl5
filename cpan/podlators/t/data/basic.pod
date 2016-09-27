@@ -93,8 +93,6 @@ L<foo/I<Italic> text>
 
 L<fooE<verbar>barZ<>/Section C<with> I<B<other> markup>>
 
-L<Nested L<http://www.perl.org/>|fooE<sol>bar>
-
 =head1 OVER AND ITEMS
 
 Taken from Pod::Parser tests, this is a test to ensure that multiline

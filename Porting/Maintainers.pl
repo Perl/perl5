@@ -978,7 +978,7 @@ use File::Glob qw(:case);
     },
 
     'podlators' => {
-        'DISTRIBUTION' => 'RRA/podlators-4.07.tar.gz',
+        'DISTRIBUTION' => 'RRA/podlators-4.08.tar.gz',
         'FILES'        => q[cpan/podlators pod/perlpodstyle.pod],
 
         'MAP' => {

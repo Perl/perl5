@@ -2220,7 +2220,20 @@ cpan/podlators/t/data/basic.ovr			podlators test
 cpan/podlators/t/data/basic.pod			podlators test
 cpan/podlators/t/data/basic.txt			podlators test
 cpan/podlators/t/data/perl.conf			podlators test
+cpan/podlators/t/data/snippets/man/bullet-after-nonbullet
 cpan/podlators/t/data/snippets/man/cpp			podlators test
+cpan/podlators/t/data/snippets/man/error-die
+cpan/podlators/t/data/snippets/man/error-none
+cpan/podlators/t/data/snippets/man/error-normal
+cpan/podlators/t/data/snippets/man/error-pod
+cpan/podlators/t/data/snippets/man/error-stderr
+cpan/podlators/t/data/snippets/man/error-stderr-opt
+cpan/podlators/t/data/snippets/man/fixed-font
+cpan/podlators/t/data/snippets/man/long-quote
+cpan/podlators/t/data/snippets/man/lquote-and-quote
+cpan/podlators/t/data/snippets/man/lquote-rquote
+cpan/podlators/t/data/snippets/man/nourls
+cpan/podlators/t/data/snippets/man/rquote-none
 cpan/podlators/t/data/snippets/man/utf8-nonbreaking			podlators test
 cpan/podlators/t/data/snippets/man/utf8-verbatim			podlators test
 cpan/podlators/t/data/snippets/README			podlators test
