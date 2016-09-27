@@ -2248,21 +2248,21 @@ PP(pp_leaveloop)
 {
     PERL_CONTEXT *cx;
     U8 gimme;
+    SV **base;
     SV **oldsp;
-    SV **mark;
 
     cx = CX_CUR();
     assert(CxTYPE_is_LOOP(cx));
-    mark = PL_stack_base + cx->blk_oldsp;
-    oldsp = CxTYPE(cx) == CXt_LOOP_LIST
+    oldsp = PL_stack_base + cx->blk_oldsp;
+    base = CxTYPE(cx) == CXt_LOOP_LIST
                 ? PL_stack_base + cx->blk_loop.state_u.stack.basesp
-                : mark;
+                : oldsp;
     gimme = cx->blk_gimme;
 
     if (gimme == G_VOID)
-        PL_stack_sp = oldsp;
+        PL_stack_sp = base;
     else
-        leave_adjust_stacks(MARK, oldsp, gimme,
+        leave_adjust_stacks(oldsp, base, gimme,
                                 PL_op->op_private & OPpLVALUE ? 3 : 1);
 
     CX_LEAVE_SCOPE(cx);
