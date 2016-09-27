@@ -35,7 +35,9 @@
 #include <float.h>
 #endif
 #ifdef I_FENV
+#if !(defined(__vax__) && defined(__NetBSD__))
 #include <fenv.h>
+#endif
 #endif
 #ifdef I_LIMITS
 #include <limits.h>
