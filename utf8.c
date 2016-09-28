@@ -33,8 +33,9 @@
 #include "perl.h"
 #include "invlist_inline.h"
 
+static const char malformed_text[] = "Malformed UTF-8 character";
 static const char unees[] =
-    "Malformed UTF-8 character (unexpected end of string)";
+                        "Malformed UTF-8 character (unexpected end of string)";
 static const char cp_above_legal_max[] =
  "Use of code point 0x%"UVXf" is deprecated; the permissible max is 0x%"UVXf"";
 
@@ -655,6 +656,23 @@ Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
 #undef FE_ABOVE_OVERLONG
 #undef FF_OVERLONG_PREFIX
 
+PERL_STATIC_INLINE char *
+S_unexpected_non_continuation_text(pTHX_ const U8 * const s, const STRLEN len)
+{
+    /* Return the malformation warning text for an unexpected continuation
+     * byte. */
+
+    const char * const where = (len == 1)
+                               ? "immediately"
+                               : Perl_form(aTHX_ "%d bytes", (int) len);
+
+    PERL_ARGS_ASSERT_UNEXPECTED_NON_CONTINUATION_TEXT;
+
+    return Perl_form(aTHX_ "%s (unexpected non-continuation byte 0x%02x,"
+                           " %s after start byte 0x%02x)",
+                           malformed_text, *(s + len), where, *s);
+}
+
 /*
 
 =for apidoc utf8n_to_uvchr
@@ -776,7 +794,6 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     bool overflowed = FALSE;
     bool do_overlong_test = TRUE;   /* May have to skip this test */
 
-    const char* const malformed_text = "Malformed UTF-8 character";
 
     PERL_ARGS_ASSERT_UTF8N_TO_UVCHR;
 
@@ -906,12 +923,8 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     if (UNLIKELY(unexpected_non_continuation)) {
 	if (!(flags & UTF8_ALLOW_NON_CONTINUATION)) {
 	    if (! (flags & UTF8_CHECK_ONLY)) {
-		if (curlen == 1) {
-		    sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s (unexpected non-continuation byte 0x%02x, immediately after start byte 0x%02x)", malformed_text, *s, *s0));
-		}
-		else {
-		    sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s (unexpected non-continuation byte 0x%02x, %d bytes after start byte 0x%02x, expected %d bytes)", malformed_text, *s, (int) curlen, *s0, (int)expectlen));
-		}
+                sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s",
+                                unexpected_non_continuation_text(s0, curlen)));
 	    }
 	    goto malformed;
 	}
@@ -1263,14 +1276,12 @@ Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen)
 		    if (UTF8_IS_CONTINUATION(c1)) {
 			c = EIGHT_BIT_UTF8_TO_NATIVE(c, c1);
 		    } else {
+                        /* diag_listed_as: Malformed UTF-8 character (%s) */
 			Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
-					 "Malformed UTF-8 character "
-					 "(unexpected non-continuation byte 0x%02x"
-					 ", immediately after start byte 0x%02x)"
-					 /* Dear diag.t, it's in the pod.  */
-					 "%s%s", c1, c,
-					 PL_op ? " in " : "",
-					 PL_op ? OP_DESC(PL_op) : "");
+                                    "%s %s%s",
+                                    unexpected_non_continuation_text(u - 1, 1),
+                                    PL_op ? " in " : "",
+                                    PL_op ? OP_DESC(PL_op) : "");
 			return -2;
 		    }
 		} else {

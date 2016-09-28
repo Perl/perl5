@@ -5604,6 +5604,11 @@ STATIC SV*	S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 STATIC U8	S_to_lower_latin1(const U8 c, U8 *p, STRLEN *lenp)
 			__attribute__warn_unused_result__;
 
+STATIC char *	S_unexpected_non_continuation_text(pTHX_ const U8 * const s, const STRLEN len)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_UNEXPECTED_NON_CONTINUATION_TEXT	\
+	assert(s)
+
 #endif
 #if defined(PERL_IN_UTF8_C) || defined(PERL_IN_PP_C)
 PERL_CALLCONV UV	Perl__to_upper_title_latin1(pTHX_ const U8 c, U8 *p, STRLEN *lenp, const char S_or_s);
