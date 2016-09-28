@@ -2186,3 +2186,11 @@ use warnings 'uninitialized';
 my $x = "" . open my $fh, "<", "no / such / file";
 EXPECT
 Use of uninitialized value in concatenation (.) or string at - line 3.
+########
+# RT #123910
+# undef's arg being undef doesn't trigger warnings - any warning will be
+# from tied/magic vars
+use warnings 'uninitialized';
+undef $0;
+EXPECT
+Use of uninitialized value in undef operator at - line 5.
