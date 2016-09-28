@@ -964,7 +964,7 @@ is("@{[unpack('U*', pack('U*', 100, 200))]}", "100 200");
         my $bad = pack("U0C", 202);
         local $SIG{__WARN__} = sub { $@ = "@_" };
         my @null = unpack('U0U', $bad);
-        like($@, qr/^Malformed UTF-8 character /);
+        like($@, qr/^Malformed UTF-8 character: /);
     }
 }
 

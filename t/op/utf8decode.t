@@ -141,29 +141,29 @@ __DATA__
 3.3.10 n -	5	fd:bf:bf:bf:bf	-	5 bytes, need 6
 3.4	Concatenation of incomplete sequences
 3.4.1 N10 -	30	c0:e0:80:f0:80:80:f8:80:80:80:fc:80:80:80:80:df:ef:bf:f7:bf:bf:fb:bf:bf:bf:fd:bf:bf:bf:bf	-	unexpected non-continuation byte 0xe0, immediately after start byte 0xc0
-3.5	Impossible bytes
-3.5.1 n -	1	fe	-	byte 0xfe
-3.5.2 n -	1	ff	-	byte 0xff
+3.5	Impossible bytes (but not with Perl's extended UTF-8)
+3.5.1 n -	1	fe	-	1 byte, need 7
+3.5.2 n -	1	ff	-	1 byte, need 13
 3.5.3 N4 -	4	fe:fe:ff:ff	-	byte 0xfe
 4	Overlong sequences
 4.1	Examples of an overlong ASCII character
-4.1.1 n -	2	c0:af	-	2 bytes, need 1
-4.1.2 n -	3	e0:80:af	-	3 bytes, need 1
-4.1.3 n -	4	f0:80:80:af	-	4 bytes, need 1
-4.1.4 n -	5	f8:80:80:80:af	-	5 bytes, need 1
-4.1.5 n -	6	fc:80:80:80:80:af	-	6 bytes, need 1
+4.1.1 n -	2	c0:af	-	overlong
+4.1.2 n -	3	e0:80:af	-	overlong
+4.1.3 n -	4	f0:80:80:af	-	overlong
+4.1.4 n -	5	f8:80:80:80:af	-	overlong
+4.1.5 n -	6	fc:80:80:80:80:af	-	overlong
 4.2	Maximum overlong sequences
-4.2.1 n -	2	c1:bf	-	2 bytes, need 1
-4.2.2 n -	3	e0:9f:bf	-	3 bytes, need 2
-4.2.3 n -	4	f0:8f:bf:bf	-	4 bytes, need 3
-4.2.4 n -	5	f8:87:bf:bf:bf	-	5 bytes, need 4
-4.2.5 n -	6	fc:83:bf:bf:bf:bf	-	6 bytes, need 5
+4.2.1 n -	2	c1:bf	-	overlong
+4.2.2 n -	3	e0:9f:bf	-	overlong
+4.2.3 n -	4	f0:8f:bf:bf	-	overlong
+4.2.4 n -	5	f8:87:bf:bf:bf	-	overlong
+4.2.5 n -	6	fc:83:bf:bf:bf:bf	-	overlong
 4.3	Overlong representation of the NUL character
-4.3.1 n -	2	c0:80	-	2 bytes, need 1
-4.3.2 n -	3	e0:80:80	-	3 bytes, need 1
-4.3.3 n -	4	f0:80:80:80	-	4 bytes, need 1
-4.3.4 n -	5	f8:80:80:80:80	-	5 bytes, need 1
-4.3.5 n -	6	fc:80:80:80:80:80	-	6 bytes, need 1
+4.3.1 n -	2	c0:80	-	overlong
+4.3.2 n -	3	e0:80:80	-	overlong
+4.3.3 n -	4	f0:80:80:80	-	overlong
+4.3.4 n -	5	f8:80:80:80:80	-	overlong
+4.3.5 n -	6	fc:80:80:80:80:80	-	overlong
 5	Illegal code positions
 5.1	Single UTF-16 surrogates
 5.1.1 y d800	3	ed:a0:80	1	UTF-16 surrogate 0xd800

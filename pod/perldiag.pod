@@ -3346,8 +3346,11 @@ so the signature was instead interpreted as a bad prototype.
 
 =item Malformed UTF-8 character (%s)
 
-(S utf8)(F) Perl detected a string that didn't comply with UTF-8
-encoding rules, even though it had the UTF8 flag on.
+(S utf8)(F) Perl detected a string that should be UTF-8, but didn't
+comply with UTF-8 encoding rules, or represents a code point whose
+ordinal integer value doesn't fit into the word size of the current
+platform (overflows).  Details as to the exact malformation are given in
+the variable, C<%s>, part of the message.
 
 One possible cause is that you set the UTF8 flag yourself for data that
 you thought to be in UTF-8 but it wasn't (it was for example legacy

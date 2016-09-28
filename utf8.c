@@ -656,21 +656,85 @@ Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
 #undef FE_ABOVE_OVERLONG
 #undef FF_OVERLONG_PREFIX
 
+STATIC char *
+S__byte_dump_string(pTHX_ const U8 * s, const STRLEN len)
+{
+    /* Returns a mortalized C string that is a displayable copy of the 'len'
+     * bytes starting at 's', each in a \xXY format. */
+
+    const STRLEN output_len = 4 * len + 1;  /* 4 bytes per each input, plus a
+                                               trailing NUL */
+    const U8 * const e = s + len;
+    char * output;
+    char * d;
+
+    PERL_ARGS_ASSERT__BYTE_DUMP_STRING;
+
+    Newx(output, output_len, char);
+    SAVEFREEPV(output);
+
+    d = output;
+    for (; s < e; s++) {
+        const unsigned high_nibble = (*s & 0xF0) >> 4;
+        const unsigned low_nibble =  (*s & 0x0F);
+
+        *d++ = '\\';
+        *d++ = 'x';
+
+        if (high_nibble < 10) {
+            *d++ = high_nibble + '0';
+        }
+        else {
+            *d++ = high_nibble - 10 + 'a';
+        }
+
+        if (low_nibble < 10) {
+            *d++ = low_nibble + '0';
+        }
+        else {
+            *d++ = low_nibble - 10 + 'a';
+        }
+    }
+
+    *d = '\0';
+    return output;
+}
+
 PERL_STATIC_INLINE char *
-S_unexpected_non_continuation_text(pTHX_ const U8 * const s, const STRLEN len)
+S_unexpected_non_continuation_text(pTHX_ const U8 * const s,
+
+                                         /* How many bytes to print */
+                                         const STRLEN print_len,
+
+                                         /* Which one is the non-continuation */
+                                         const STRLEN non_cont_byte_pos,
+
+                                         /* How many bytes should there be? */
+                                         const STRLEN expect_len)
 {
     /* Return the malformation warning text for an unexpected continuation
      * byte. */
 
-    const char * const where = (len == 1)
+    const char * const where = (non_cont_byte_pos == 1)
                                ? "immediately"
-                               : Perl_form(aTHX_ "%d bytes", (int) len);
+                               : Perl_form(aTHX_ "%d bytes",
+                                                 (int) non_cont_byte_pos);
 
     PERL_ARGS_ASSERT_UNEXPECTED_NON_CONTINUATION_TEXT;
 
-    return Perl_form(aTHX_ "%s (unexpected non-continuation byte 0x%02x,"
-                           " %s after start byte 0x%02x)",
-                           malformed_text, *(s + len), where, *s);
+    /* We don't need to pass this parameter, but since it has already been
+     * calculated, it's likely faster to pass it; verify under DEBUGGING */
+    assert(expect_len == UTF8SKIP(s));
+
+    return Perl_form(aTHX_ "%s: %s (unexpected non-continuation byte 0x%02x,"
+                           " %s after start byte 0x%02x; need %d bytes, got %d)",
+                           malformed_text,
+                           _byte_dump_string(s, print_len),
+                           *(s + non_cont_byte_pos),
+                           where,
+                           *s,
+                           (int) expect_len,
+                           (int) non_cont_byte_pos);
 }
 
 /*
@@ -782,7 +846,6 @@ UV
 Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 {
     const U8 * const s0 = s;
-    U8 overflow_byte = '\0';	/* Save byte in case of overflow */
     U8 * send;
     UV uv = *s;
     STRLEN expectlen;
@@ -827,7 +890,8 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	    return 0;
 	}
 	if (! (flags & UTF8_CHECK_ONLY)) {
-	    sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s (empty string)", malformed_text));
+	    sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s (empty string)",
+                                                malformed_text));
 	}
 	goto malformed;
     }
@@ -857,7 +921,11 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	}
 
 	if (! (flags & UTF8_CHECK_ONLY)) {
-	    sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s (unexpected continuation byte 0x%02x, with no preceding start byte)", malformed_text, *s0));
+	    sv = sv_2mortal(Perl_newSVpvf(aTHX_
+                            "%s: %s (unexpected continuation byte 0x%02x,"
+                            " with no preceding start byte)",
+                            malformed_text,
+                            _byte_dump_string(s0, 1), *s0));
 	}
 	curlen = 1;
 	goto malformed;
@@ -887,7 +955,6 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 		 * Set a flag, but keep going in the loop, so that we absorb
 		 * the rest of the bytes that comprise the character. */
 		overflowed = TRUE;
-		overflow_byte = *s; /* Save for warning message's use */
 	    }
 	    uv = UTF8_ACCUMULATE(uv, *s);
 	}
@@ -924,7 +991,10 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	if (!(flags & UTF8_ALLOW_NON_CONTINUATION)) {
 	    if (! (flags & UTF8_CHECK_ONLY)) {
                 sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s",
-                                unexpected_non_continuation_text(s0, curlen)));
+                                unexpected_non_continuation_text(s0,
+                                                             send - s0,
+                                                             s - s0,
+                                                             (int) expectlen)));
 	    }
 	    goto malformed;
 	}
@@ -940,7 +1010,13 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     else if (UNLIKELY(curlen < expectlen)) {
 	if (! (flags & UTF8_ALLOW_SHORT)) {
 	    if (! (flags & UTF8_CHECK_ONLY)) {
-		sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s (%d byte%s, need %d, after start byte 0x%02x)", malformed_text, (int)curlen, curlen == 1 ? "" : "s", (int)expectlen, *s0));
+		sv = sv_2mortal(Perl_newSVpvf(aTHX_
+                                "%s: %s (too short; got %d byte%s, need %d)",
+                                malformed_text,
+                                _byte_dump_string(s0, send - s0),
+                                (int)curlen,
+                                curlen == 1 ? "" : "s",
+                                (int)expectlen));
 	    }
 	    goto malformed;
 	}
@@ -952,7 +1028,9 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     }
 
     if (UNLIKELY(overflowed)) {
-	sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s (overflow at byte 0x%02x, after start byte 0x%02x)", malformed_text, overflow_byte, *s0));
+        sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s: %s (overflows)",
+                                            malformed_text,
+                                            _byte_dump_string(s0, send - s0)));
 	goto malformed;
     }
 
@@ -965,7 +1043,16 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	 * value, instead of the replacement character.  This is because this
 	 * value is actually well-defined. */
 	if (! (flags & UTF8_CHECK_ONLY)) {
-	    sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s (%d byte%s, need %d, after start byte 0x%02x)", malformed_text, (int)expectlen, expectlen == 1 ? "": "s", OFFUNISKIP(uv), *s0));
+            U8 tmpbuf[UTF8_MAXBYTES+1];
+            const U8 * const e = uvchr_to_utf8(tmpbuf, uv);
+            sv = sv_2mortal(Perl_newSVpvf(aTHX_
+                  "%s: %s (overlong; instead use %s to represent U+%0*"UVXf")",
+                  malformed_text,
+                  _byte_dump_string(s0, send - s0),
+                  _byte_dump_string(tmpbuf, e - tmpbuf),
+                  ((uv < 256) ? 2 : 4), /* Field width of 2 for small code
+                                           points */
+                  uv));
 	}
 	goto malformed;
     }
@@ -1279,7 +1366,7 @@ Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen)
                         /* diag_listed_as: Malformed UTF-8 character (%s) */
 			Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
                                     "%s %s%s",
-                                    unexpected_non_continuation_text(u - 1, 1),
+                                    unexpected_non_continuation_text(u - 1, 2, 1, 2),
                                     PL_op ? " in " : "",
                                     PL_op ? OP_DESC(PL_op) : "");
 			return -2;

@@ -5572,6 +5572,9 @@ STATIC bool	S_isa_lookup(pTHX_ HV *stash, const char * const name, STRLEN len, U
 	assert(stash); assert(name)
 #endif
 #if defined(PERL_IN_UTF8_C)
+STATIC char *	S__byte_dump_string(pTHX_ const U8 * s, const STRLEN len);
+#define PERL_ARGS_ASSERT__BYTE_DUMP_STRING	\
+	assert(s)
 STATIC UV	S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, const char *normal, const char *special);
 #define PERL_ARGS_ASSERT__TO_UTF8_CASE	\
 	assert(p); assert(ustrp); assert(swashp); assert(normal)
@@ -5604,7 +5607,7 @@ STATIC SV*	S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 STATIC U8	S_to_lower_latin1(const U8 c, U8 *p, STRLEN *lenp)
 			__attribute__warn_unused_result__;
 
-STATIC char *	S_unexpected_non_continuation_text(pTHX_ const U8 * const s, const STRLEN len)
+STATIC char *	S_unexpected_non_continuation_text(pTHX_ const U8 * const s, const STRLEN print_len, const STRLEN non_cont_byte_pos, const STRLEN expect_len)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_UNEXPECTED_NON_CONTINUATION_TEXT	\
 	assert(s)

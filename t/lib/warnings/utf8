@@ -30,8 +30,8 @@ my $a = "snøstorm" ;
     my $a = "snøstorm";
 }
 EXPECT
-Malformed UTF-8 character (unexpected non-continuation byte 0x73, immediately after start byte 0xf8) at - line 9.
-Malformed UTF-8 character (unexpected non-continuation byte 0x73, immediately after start byte 0xf8) at - line 14.
+Malformed UTF-8 character: \xf8\x73\x74\x6f\x72 (unexpected non-continuation byte 0x73, immediately after start byte 0xf8; need 5 bytes, got 1) at - line 9.
+Malformed UTF-8 character: \xf8\x73\x74\x6f\x72 (unexpected non-continuation byte 0x73, immediately after start byte 0xf8; need 5 bytes, got 1) at - line 14.
 ########
 use warnings 'utf8';
 my $d7ff  = uc(chr(0xD7FF));
@@ -766,4 +766,4 @@ BEGIN{
     }
 {};$^H=2**400}Â
 EXPECT
-Malformed UTF-8 character (unexpected non-continuation byte 0x0a, immediately after start byte 0xc2) at - line 6.
+Malformed UTF-8 character: \xc2\x0a (unexpected non-continuation byte 0x0a, immediately after start byte 0xc2; need 2 bytes, got 1) at - line 6.

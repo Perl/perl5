@@ -1674,7 +1674,11 @@ ApdD	|UV	|to_utf8_case	|NN const U8 *p					\
 				NULLOK const char *special
 #if defined(PERL_IN_UTF8_C)
 sMR	|char *	|unexpected_non_continuation_text			\
-		|NN const U8 * const s|const STRLEN len
+		|NN const U8 * const s					\
+		|const STRLEN print_len					\
+		|const STRLEN non_cont_byte_pos				\
+		|const STRLEN expect_len
+sM	|char *	|_byte_dump_string|NN const U8 * s|const STRLEN len
 s	|UV	|_to_utf8_case  |const UV uv1					\
 				|NN const U8 *p					\
 				|NN U8* ustrp					\
