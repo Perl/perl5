@@ -130,7 +130,7 @@ PP(pp_sassign)
     */
     SV *left = POPs; SV *right = TOPs;
 
-    if (PL_op->op_private & OPpASSIGN_BACKWARDS) {
+    if (PL_op->op_private & OPpASSIGN_BACKWARDS) { /* {or,and,dor}assign */
 	SV * const temp = left;
 	left = right; right = temp;
     }

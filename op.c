@@ -2661,7 +2661,9 @@ S_finalize_op(pTHX_ OP* o)
                 assert(kid->op_sibparent == o);
             }
 #  else
-            if (has_last && !OpHAS_SIBLING(kid))
+            if (has_last && !OpHAS_SIBLING(kid)
+            /* {and,or,xor}assign use a hackish unop'y sassign without last */
+                && (OP_TYPE_ISNT(o, OP_SASSIGN) || cLISTOPo->op_last))
                 assert(kid == cLISTOPo->op_last);
 #  endif
         }
@@ -6509,7 +6511,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	if (optype == OP_ANDASSIGN || optype == OP_ORASSIGN || optype == OP_DORASSIGN) {
 	    return newLOGOP(optype, 0,
 		op_lvalue(scalar(left), optype),
-		newUNOP(OP_SASSIGN, 0, scalar(right)));
+		newBINOP(OP_SASSIGN, OPpASSIGN_BACKWARDS<<8, scalar(right), NULL));
 	}
 	else {
 	    return newBINOP(optype, OPf_STACKED,
@@ -6983,9 +6985,6 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    CopLINE_set(PL_curcop, oldline);
 	}
     }
-
-    if (type == OP_ANDASSIGN || type == OP_ORASSIGN || type == OP_DORASSIGN)
-	other->op_private |= OPpASSIGN_BACKWARDS;  /* other is an OP_SASSIGN */
 
     /* optimize AND and OR ops that have NOTs as children */
     if (first->op_type == OP_NOT
