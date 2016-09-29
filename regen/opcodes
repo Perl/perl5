@@ -94,9 +94,8 @@ trans		transliteration (tr///)	ck_match	is"	S
 transr		transliteration (tr///)	ck_match	is"	S
 
 # Lvalue operators.
-# sassign is special-cased for op class
 
-sassign		scalar assignment	ck_sassign	s0
+sassign		scalar assignment	ck_sassign	s2	S S
 aassign		list assignment		ck_null		t2	L L
 
 chop		chop			ck_spair	mts%	L
