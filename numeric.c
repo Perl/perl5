@@ -574,6 +574,7 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
 {
     const char* s = *sp;
     int flags = 0;
+#if defined(NV_INF) || defined(NV_NAN)
     bool odh = FALSE; /* one-dot-hash: 1.#INF */
 
     PERL_ARGS_ASSERT_GROK_INFNAN;
@@ -798,6 +799,9 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
     while (s < send && isSPACE(*s))
         s++;
 
+#else
+    PERL_UNUSED_ARG(send);
+#endif /* #if defined(NV_INF) || defined(NV_NAN) */
     *sp = s;
     return flags;
 }
@@ -1422,11 +1426,13 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 /* the max number we can accumulate in a UV, and still safely do 10*N+9 */
 #define MAX_ACCUMULATE ( (UV) ((UV_MAX - 9)/10))
 
+#if defined(NV_INF) || defined(NV_NAN)
     {
         const char* endp;
         if ((endp = S_my_atof_infnan(aTHX_ s, negative, send, value)))
             return (char*)endp;
     }
+#endif
 
     /* we accumulate digits into an integer; when this becomes too
      * large, we add the total to NV and start again */
@@ -1549,6 +1555,7 @@ This is also the logical inverse of Perl_isfinite().
 bool
 Perl_isinfnan(NV nv)
 {
+  PERL_UNUSED_ARG(nv);
 #ifdef Perl_isinf
     if (Perl_isinf(nv))
         return TRUE;

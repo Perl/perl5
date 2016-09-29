@@ -2965,7 +2965,11 @@ PP(pp_sin)
     {
       SV * const arg = TOPs;
       const NV value = SvNV_nomg(arg);
+#ifdef NV_NAN
       NV result = NV_NAN;
+#else
+      NV result = 0.0;
+#endif
       if (neg_report) { /* log or sqrt */
 	  if (
 #if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
