@@ -1046,9 +1046,7 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	}
 
 	if (sv) {
-            outlier_ret = uv;   /* Note we don't bother to convert to native,
-                                   as all the outlier code points are the same
-                                   in both ASCII and EBCDIC */
+            outlier_ret = UNI_TO_NATIVE(uv);
 	    goto do_warn;
 	}
 
