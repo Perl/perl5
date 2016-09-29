@@ -5721,125 +5721,9 @@ EXTCONST bool PL_valid_types_NV_set[];
  * In C89 we need to initialize the member declared first.
  *
  * With the U8_NV version you will want to have inner braces,
- * while with the NV_U8 use just the NV.*/
+ * while with the NV_U8 use just the NV. */
 #define INFNAN_U8_NV_DECL EXTCONST union { U8 u8[NVSIZE]; NV nv; }
 #define INFNAN_NV_U8_DECL EXTCONST union { NV nv; U8 u8[NVSIZE]; }
-
-#ifdef DOINIT
-
-/* PL_inf and PL_nan initialization.
- *
- * For inf and nan initialization the ultimate fallback is dividing
- * one or zero by zero: however, some compilers will warn or even fail
- * on divide-by-zero, but hopefully something earlier will work.
- *
- * If you are thinking of using HUGE_VAL for infinity, or using
- * <math.h> functions to generate NV_INF (e.g. exp(1e9), log(-1.0)),
- * stop.  Neither will work portably: HUGE_VAL can be just DBL_MAX,
- * and the math functions might be just generating DBL_MAX, or even zero.
- *
- * Also, do NOT try doing NV_NAN based on NV_INF and trying (NV_INF-NV_INF).
- * Though logically correct, some compilers (like Visual C 2003)
- * falsely misoptimize that to zero (x-x is always zero, right?)
- *
- * Finally, note that not all floating point formats define Inf (or NaN).
- * For the infinity a large number may be used instead.  Operations that
- * under the IEEE floating point would return Inf or NaN may return
- * either large numbers (positive or negative), or they may cause
- * a floating point exception or some other fault.
- */
-
-/* The quadmath literals are anon structs which -Wc++-compat doesn't like. */
-GCC_DIAG_IGNORE(-Wc++-compat)
-
-#  ifdef USE_QUADMATH
-/* Cannot use HUGE_VALQ for PL_inf because not a compile-time
- * constant. */
-INFNAN_NV_U8_DECL PL_inf = { 1.0Q/0.0Q };
-#  elif NVSIZE == LONG_DOUBLESIZE && defined(LONGDBLINFBYTES)
-INFNAN_U8_NV_DECL PL_inf = { { LONGDBLINFBYTES } };
-#  elif NVSIZE == DOUBLESIZE && defined(DOUBLEINFBYTES)
-INFNAN_U8_NV_DECL PL_inf = { { DOUBLEINFBYTES } };
-#  else
-#    if NVSIZE == LONG_DOUBLESIZE && defined(USE_LONG_DOUBLE)
-#      if defined(LDBL_INFINITY)
-INFNAN_NV_U8_DECL PL_inf = { LDBL_INFINITY };
-#      elif defined(LDBL_INF)
-INFNAN_NV_U8_DECL PL_inf = { LDBL_INF };
-#      elif defined(INFINITY)
-INFNAN_NV_U8_DECL PL_inf = { (NV)INFINITY };
-#      elif defined(INF)
-INFNAN_NV_U8_DECL PL_inf = { (NV)INF };
-#      else
-INFNAN_NV_U8_DECL PL_inf = { 1.0L/0.0L }; /* keep last */
-#      endif
-#    else
-#      if defined(DBL_INFINITY)
-INFNAN_NV_U8_DECL PL_inf = { DBL_INFINITY };
-#      elif defined(DBL_INF)
-INFNAN_NV_U8_DECL PL_inf = { DBL_INF };
-#      elif defined(INFINITY) /* C99 */
-INFNAN_NV_U8_DECL PL_inf = { (NV)INFINITY };
-#      elif defined(INF)
-INFNAN_NV_U8_DECL PL_inf = { (NV)INF };
-#      else
-INFNAN_NV_U8_DECL PL_inf = { 1.0/0.0 }; /* keep last */
-#      endif
-#    endif
-#  endif
-
-#  ifdef USE_QUADMATH
-/* Cannot use nanq("0") for PL_nan because not a compile-time
- * constant. */
-INFNAN_NV_U8_DECL PL_nan = { 0.0Q/0.0Q };
-#  elif NVSIZE == LONG_DOUBLESIZE && defined(LONGDBLNANBYTES)
-INFNAN_U8_NV_DECL PL_nan = { { LONGDBLNANBYTES } };
-#  elif NVSIZE == DOUBLESIZE && defined(DOUBLENANBYTES)
-INFNAN_U8_NV_DECL PL_nan = { { DOUBLENANBYTES } };
-#  else
-#    if NVSIZE == LONG_DOUBLESIZE && defined(USE_LONG_DOUBLE)
-#      if defined(LDBL_NAN)
-INFNAN_NV_U8_DECL PL_nan = { LDBL_NAN };
-#      elif defined(LDBL_QNAN)
-INFNAN_NV_U8_DECL PL_nan = { LDBL_QNAN };
-#      elif defined(NAN)
-INFNAN_NV_U8_DECL PL_nan = { (NV)NAN };
-#      else
-INFNAN_NV_U8_DECL PL_nan = { 0.0L/0.0L }; /* keep last */
-#      endif
-#    else
-#      if defined(DBL_NAN)
-INFNAN_NV_U8_DECL PL_nan = { DBL_NAN };
-#      elif defined(DBL_QNAN)
-INFNAN_NV_U8_DECL PL_nan = { DBL_QNAN };
-#      elif defined(NAN) /* C99 */
-INFNAN_NV_U8_DECL PL_nan = { (NV)NAN };
-#      else
-INFNAN_NV_U8_DECL PL_nan = { 0.0/0.0 }; /* keep last */
-#      endif
-#    endif
-#  endif
-
-GCC_DIAG_RESTORE
-
-#else
-
-INFNAN_NV_U8_DECL PL_inf;
-INFNAN_NV_U8_DECL PL_nan;
-
-#endif
-
-/* If you have not defined NV_INF/NV_NAN (like for example win32/win32.h),
- * we will define NV_INF/NV_NAN as the nv part of the global const
- * PL_inf/PL_nan.  Note, however, that the preexisting NV_INF/NV_NAN
- * might not be a compile-time constant, in which case it cannot be
- * used to initialize PL_inf/PL_nan above. */
-#ifndef NV_INF
-#  define NV_INF PL_inf.nv
-#endif
-#ifndef NV_NAN
-#  define NV_NAN PL_nan.nv
-#endif
 
 /* if these never got defined, they need defaults */
 #ifndef PERL_SET_CONTEXT
@@ -6963,6 +6847,122 @@ extern void moncontrol(int);
 #endif
 
 #ifdef DOUBLE_HAS_NAN
+
+#ifdef DOINIT
+
+/* PL_inf and PL_nan initialization.
+ *
+ * For inf and nan initialization the ultimate fallback is dividing
+ * one or zero by zero: however, some compilers will warn or even fail
+ * on divide-by-zero, but hopefully something earlier will work.
+ *
+ * If you are thinking of using HUGE_VAL for infinity, or using
+ * <math.h> functions to generate NV_INF (e.g. exp(1e9), log(-1.0)),
+ * stop.  Neither will work portably: HUGE_VAL can be just DBL_MAX,
+ * and the math functions might be just generating DBL_MAX, or even zero.
+ *
+ * Also, do NOT try doing NV_NAN based on NV_INF and trying (NV_INF-NV_INF).
+ * Though logically correct, some compilers (like Visual C 2003)
+ * falsely misoptimize that to zero (x-x is always zero, right?)
+ *
+ * Finally, note that not all floating point formats define Inf (or NaN).
+ * For the infinity a large number may be used instead.  Operations that
+ * under the IEEE floating point would return Inf or NaN may return
+ * either large numbers (positive or negative), or they may cause
+ * a floating point exception or some other fault.
+ */
+
+/* The quadmath literals are anon structs which -Wc++-compat doesn't like. */
+GCC_DIAG_IGNORE(-Wc++-compat)
+
+#  ifdef USE_QUADMATH
+/* Cannot use HUGE_VALQ for PL_inf because not a compile-time
+ * constant. */
+INFNAN_NV_U8_DECL PL_inf = { 1.0Q/0.0Q };
+#  elif NVSIZE == LONG_DOUBLESIZE && defined(LONGDBLINFBYTES)
+INFNAN_U8_NV_DECL PL_inf = { { LONGDBLINFBYTES } };
+#  elif NVSIZE == DOUBLESIZE && defined(DOUBLEINFBYTES)
+INFNAN_U8_NV_DECL PL_inf = { { DOUBLEINFBYTES } };
+#  else
+#    if NVSIZE == LONG_DOUBLESIZE && defined(USE_LONG_DOUBLE)
+#      if defined(LDBL_INFINITY)
+INFNAN_NV_U8_DECL PL_inf = { LDBL_INFINITY };
+#      elif defined(LDBL_INF)
+INFNAN_NV_U8_DECL PL_inf = { LDBL_INF };
+#      elif defined(INFINITY)
+INFNAN_NV_U8_DECL PL_inf = { (NV)INFINITY };
+#      elif defined(INF)
+INFNAN_NV_U8_DECL PL_inf = { (NV)INF };
+#      else
+INFNAN_NV_U8_DECL PL_inf = { 1.0L/0.0L }; /* keep last */
+#      endif
+#    else
+#      if defined(DBL_INFINITY)
+INFNAN_NV_U8_DECL PL_inf = { DBL_INFINITY };
+#      elif defined(DBL_INF)
+INFNAN_NV_U8_DECL PL_inf = { DBL_INF };
+#      elif defined(INFINITY) /* C99 */
+INFNAN_NV_U8_DECL PL_inf = { (NV)INFINITY };
+#      elif defined(INF)
+INFNAN_NV_U8_DECL PL_inf = { (NV)INF };
+#      else
+INFNAN_NV_U8_DECL PL_inf = { 1.0/0.0 }; /* keep last */
+#      endif
+#    endif
+#  endif
+
+#  ifdef USE_QUADMATH
+/* Cannot use nanq("0") for PL_nan because not a compile-time
+ * constant. */
+INFNAN_NV_U8_DECL PL_nan = { 0.0Q/0.0Q };
+#  elif NVSIZE == LONG_DOUBLESIZE && defined(LONGDBLNANBYTES)
+INFNAN_U8_NV_DECL PL_nan = { { LONGDBLNANBYTES } };
+#  elif NVSIZE == DOUBLESIZE && defined(DOUBLENANBYTES)
+INFNAN_U8_NV_DECL PL_nan = { { DOUBLENANBYTES } };
+#  else
+#    if NVSIZE == LONG_DOUBLESIZE && defined(USE_LONG_DOUBLE)
+#      if defined(LDBL_NAN)
+INFNAN_NV_U8_DECL PL_nan = { LDBL_NAN };
+#      elif defined(LDBL_QNAN)
+INFNAN_NV_U8_DECL PL_nan = { LDBL_QNAN };
+#      elif defined(NAN)
+INFNAN_NV_U8_DECL PL_nan = { (NV)NAN };
+#      else
+INFNAN_NV_U8_DECL PL_nan = { 0.0L/0.0L }; /* keep last */
+#      endif
+#    else
+#      if defined(DBL_NAN)
+INFNAN_NV_U8_DECL PL_nan = { DBL_NAN };
+#      elif defined(DBL_QNAN)
+INFNAN_NV_U8_DECL PL_nan = { DBL_QNAN };
+#      elif defined(NAN) /* C99 */
+INFNAN_NV_U8_DECL PL_nan = { (NV)NAN };
+#      else
+INFNAN_NV_U8_DECL PL_nan = { 0.0/0.0 }; /* keep last */
+#      endif
+#    endif
+#  endif
+
+GCC_DIAG_RESTORE
+
+#else
+
+INFNAN_NV_U8_DECL PL_inf;
+INFNAN_NV_U8_DECL PL_nan;
+
+#endif
+
+/* If you have not defined NV_INF/NV_NAN (like for example win32/win32.h),
+ * we will define NV_INF/NV_NAN as the nv part of the global const
+ * PL_inf/PL_nan.  Note, however, that the preexisting NV_INF/NV_NAN
+ * might not be a compile-time constant, in which case it cannot be
+ * used to initialize PL_inf/PL_nan above. */
+#ifndef NV_INF
+#  define NV_INF PL_inf.nv
+#endif
+#ifndef NV_NAN
+#  define NV_NAN PL_nan.nv
+#endif
 
 /* NaNs (not-a-numbers) can carry payload bits, in addition to
  * "nan-ness".  Part of the payload is the quiet/signaling bit.
