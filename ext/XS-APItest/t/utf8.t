@@ -523,8 +523,12 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     my $display_flags = sprintf "0x%x", $this_utf8_flags;
     my $display_bytes = display_bytes($bytes);
     my $ret_ref = test_utf8n_to_uvchr($bytes, $len, $this_utf8_flags);
-    is($ret_ref->[0], $n, "Verify utf8n_to_uvchr($display_bytes, $display_flags) returns $hex_n");
-    is($ret_ref->[1], $len, "Verify utf8n_to_uvchr() for $hex_n returns expected length: $len");
+
+    # Rest of tests likely meaningless if it gets the wrong code point.
+    next unless is($ret_ref->[0], $n,
+       "Verify utf8n_to_uvchr($display_bytes, $display_flags) returns $hex_n");
+    is($ret_ref->[1], $len,
+       "Verify utf8n_to_uvchr() for $hex_n returns expected length: $len");
 
     unless (is(scalar @warnings, 0,
                "Verify utf8n_to_uvchr() for $hex_n generated no warnings"))
