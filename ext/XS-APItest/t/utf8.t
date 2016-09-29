@@ -189,7 +189,7 @@ my %code_points = (
     0xFDEB	=> (isASCII) ? "\xef\xb7\xab" : I8_to_native("\xf1\xbf\xaf\xab"),
     0xFDEC	=> (isASCII) ? "\xef\xb7\xac" : I8_to_native("\xf1\xbf\xaf\xac"),
     0xFDED	=> (isASCII) ? "\xef\xb7\xad" : I8_to_native("\xf1\xbf\xaf\xad"),
-    0xFDEE	=> (isASCII) ? "\xef\xb7\xae" : I8_to_native("\xf1\xbf\xae\xae"),
+    0xFDEE	=> (isASCII) ? "\xef\xb7\xae" : I8_to_native("\xf1\xbf\xaf\xae"),
     0xFDEF	=> (isASCII) ? "\xef\xb7\xaf" : I8_to_native("\xf1\xbf\xaf\xaf"),
     0xFDF0      => (isASCII) ? "\xef\xb7\xb0" : I8_to_native("\xf1\xbf\xaf\xb0"),
 
