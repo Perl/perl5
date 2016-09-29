@@ -279,6 +279,11 @@ sub try {
       print "# Timeout\n";
       print "not ok $N\n"; $N++;
       print "not ok $N\n"; $N++;
+      if (defined $len) {
+        # Fail the tests in the recursive call as well
+        print "not ok $N\n"; $N++;
+        print "not ok $N\n"; $N++;
+      }
       return;
     } else {
       $@ = $err;
