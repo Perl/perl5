@@ -2651,7 +2651,6 @@ S_finalize_op(pTHX_ OP* o)
               || type == OP_CUSTOM
               || type == OP_NULL /* new_logop does this */
               );
-        if (type == OP_SASSIGN) has_last = 0; /* XXX tmp hack for unary assign */
 
         for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid)) {
 #  ifdef PERL_OP_PARENT
@@ -2661,9 +2660,7 @@ S_finalize_op(pTHX_ OP* o)
                 assert(kid->op_sibparent == o);
             }
 #  else
-            if (has_last && !OpHAS_SIBLING(kid)
-            /* {and,or,xor}assign use a hackish unop'y sassign without last */
-                && (OP_TYPE_ISNT(o, OP_SASSIGN) || cLISTOPo->op_last))
+            if (has_last && !OpHAS_SIBLING(kid))
                 assert(kid == cLISTOPo->op_last);
 #  endif
         }
@@ -6509,9 +6506,10 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 
     if (optype) {
 	if (optype == OP_ANDASSIGN || optype == OP_ORASSIGN || optype == OP_DORASSIGN) {
+            right = scalar(right);
 	    return newLOGOP(optype, 0,
 		op_lvalue(scalar(left), optype),
-		newBINOP(OP_SASSIGN, OPpASSIGN_BACKWARDS<<8, scalar(right), NULL));
+		newBINOP(OP_SASSIGN, OPpASSIGN_BACKWARDS<<8, right, right));
 	}
 	else {
 	    return newBINOP(optype, OPf_STACKED,
