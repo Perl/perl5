@@ -46,9 +46,18 @@ my @i8_to_native = (    # Only code page 1047 so far.
 0xDC,0xDD,0xDE,0xDF,0xE1,0xEA,0xEB,0xEC,0xED,0xEE,0xEF,0xFA,0xFB,0xFC,0xFD,0xFE,
 );
 
+my @native_to_i8;
+for (my $i = 0; $i < 256; $i++) {
+    $native_to_i8[$i8_to_native[$i]] = $i;
+}
+
 *I8_to_native = (isASCII)
                     ? sub { return shift }
                     : sub { return join "", map { chr $i8_to_native[ord $_] }
+                                            split "", shift };
+*native_to_I8 = (isASCII)
+                    ? sub { return shift }
+                    : sub { return join "", map { chr $native_to_i8[ord $_] }
                                             split "", shift };
 
 my $is64bit = length sprintf("%x", ~0) > 8;
@@ -1805,6 +1814,14 @@ foreach my $test (@tests) {
                     elsif ($testname =~ /first non_unicode/ && $j < 2) {
                         $ret_should_be = 1;
                         $comment .= ", but need 2 bytes to discern";
+                    }
+                    elsif (   ! isASCII
+                           && $testname =~ /requires at least 32 bits/)
+                    {
+                        # On EBCDIC, the boundary between 31 and 32 bits is
+                        # more complicated.
+                        $ret_should_be = 1 if native_to_I8($partial) le
+                     "\xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA1\xBF\xBF\xBF\xBF\xBF\xBF";
                     }
                 }
 
