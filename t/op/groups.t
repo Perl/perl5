@@ -117,7 +117,7 @@ sub Test {
         }
 
         unless ( $ok1 ) {
-
+            print "nok 1 (perl's `\$(' disagrees with `${groups_command}'\n";
         }
     }
 
