@@ -5719,11 +5719,18 @@ EXTCONST bool PL_valid_types_NV_set[];
 
 /* In C99 we could use designated (named field) union initializers.
  * In C89 we need to initialize the member declared first.
+ * In C++ we need extern C initializers.
  *
  * With the U8_NV version you will want to have inner braces,
  * while with the NV_U8 use just the NV. */
+
+#ifdef __cplusplus
+#define INFNAN_U8_NV_DECL EXTERN_C const union { U8 u8[NVSIZE]; NV nv; }
+#define INFNAN_NV_U8_DECL EXTERN_C const union { NV nv; U8 u8[NVSIZE]; }
+#else
 #define INFNAN_U8_NV_DECL EXTCONST union { U8 u8[NVSIZE]; NV nv; }
 #define INFNAN_NV_U8_DECL EXTCONST union { NV nv; U8 u8[NVSIZE]; }
+#endif
 
 /* if these never got defined, they need defaults */
 #ifndef PERL_SET_CONTEXT
