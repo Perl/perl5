@@ -1234,6 +1234,9 @@ foreach my $test (@malformations) {
             $ret_should_be = 1;
             $comment = ", but need 2 bytes to discern:";
         }
+        elsif ($testname =~ /overlong/ && ! isASCII && $length == 3) {
+            # 3-byte overlongs on EBCDIC are determinable on the first byte
+        }
         elsif ($testname =~ /overlong/ && $length > 2) {
             if ($length <= 7 && $j < 2) {
                 $ret_should_be = 1;
