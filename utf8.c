@@ -1071,7 +1071,7 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
             || (   UNLIKELY(uv > MAX_NON_DEPRECATED_CP)
                 && ckWARN_d(WARN_DEPRECATED))))
     {
-	if (UNICODE_IS_SURROGATE(uv)) {
+	if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
 
             /* By adding UTF8_CHECK_ONLY to the test, we avoid unnecessary
              * generation of the sv, since no warnings are raised under CHECK */
@@ -1085,7 +1085,7 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 		goto disallowed;
 	    }
 	}
-	else if ((uv > PERL_UNICODE_MAX)) {
+	else if (UNLIKELY(uv > PERL_UNICODE_MAX)) {
 	    if ((flags & (UTF8_WARN_SUPER|UTF8_CHECK_ONLY)) == UTF8_WARN_SUPER
                 && ckWARN_d(WARN_NON_UNICODE))
 	    {
@@ -1133,7 +1133,7 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
                 pack_warn = packWARN(WARN_DEPRECATED);
             }
 	}
-	else if (UNICODE_IS_NONCHAR(uv)) {
+	else if (UNLIKELY(UNICODE_IS_NONCHAR(uv))) {
 	    if ((flags & (UTF8_WARN_NONCHAR|UTF8_CHECK_ONLY)) == UTF8_WARN_NONCHAR
 		&& ckWARN_d(WARN_NONCHAR))
 	    {
