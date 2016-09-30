@@ -386,7 +386,7 @@ S_is_utf8_cp_above_31_bits(const U8 * const s, const U8 * const e)
     const U8 * const prefix = "\x41\x41\x41\x41\x41\x41\x42";
     const STRLEN prefix_len = sizeof(prefix) - 1;
     const STRLEN len = e - s;
-    const cmp_len = MIN(prefix_len, len - 1);
+    const STRLEN cmp_len = MIN(prefix_len, len - 1);
 
 #else
 
