@@ -92,11 +92,15 @@ END
 #endif
                            '});
 
-push @names,
-  {name=>"INFINITY", type=>"NV", value=>"NV_INF", not_constant=>1},
-  {name=>"NAN", type=>"NV", value=>"NV_NAN", not_constant=>1},
-  {name=>"Inf", type=>"NV", value=>"NV_INF", not_constant=>1},
-  {name=>"NaN", type=>"NV", value=>"NV_NAN", not_constant=>1};
+unless ($Config{doublekind} == 9 ||
+        $Config{doublekind} == 10 ||
+        $Config{doublekind} == 11) {
+    push @names,
+        {name=>"INFINITY", type=>"NV", value=>"NV_INF", not_constant=>1},
+        {name=>"NAN", type=>"NV", value=>"NV_NAN", not_constant=>1},
+        {name=>"Inf", type=>"NV", value=>"NV_INF", not_constant=>1},
+        {name=>"NaN", type=>"NV", value=>"NV_NAN", not_constant=>1};
+}
 
 push @names, {name=>$_, type=>"UV"}
   foreach (qw(SA_NOCLDSTOP SA_NOCLDWAIT SA_NODEFER SA_ONSTACK SA_RESETHAND
