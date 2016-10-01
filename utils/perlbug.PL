@@ -1207,7 +1207,7 @@ EOF
     if ( close(SENDMAIL) ) {
         print "\nMessage sent\n";
     } else {
-        warn "\nSendmail returned status '", $? >> 8, "'\n";
+        die "Sendmail returned status '", $? >> 8, "'\n";
     }
 }
 
