@@ -1,5 +1,8 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9740_01 [2016-10-01]
+  - explicit cast to clockid_t needed for C++11 (gcc 6, clang 3.9)
+
 1.9740 [2016-09-25]
   - the ext3/ext2 filesystems do not have subsecond resolution,
     therefore skip the t/utime.t test

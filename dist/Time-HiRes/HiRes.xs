@@ -1439,7 +1439,7 @@ clock_gettime(clock_id = CLOCK_REALTIME)
 #ifdef TIME_HIRES_CLOCK_GETTIME_SYSCALL
 	status = syscall(SYS_clock_gettime, clock_id, &ts);
 #else
-	status = clock_gettime(clock_id, &ts);
+	status = clock_gettime((clockid_t)clock_id, &ts);
 #endif
 	RETVAL = status == 0 ? ts.tv_sec + (NV) ts.tv_nsec / NV_1E9 : -1;
 
@@ -1472,7 +1472,7 @@ clock_getres(clock_id = CLOCK_REALTIME)
 #ifdef TIME_HIRES_CLOCK_GETRES_SYSCALL
 	status = syscall(SYS_clock_getres, clock_id, &ts);
 #else
-	status = clock_getres(clock_id, &ts);
+	status = clock_getres((clockid_t)clock_id, &ts);
 #endif
 	RETVAL = status == 0 ? ts.tv_sec + (NV) ts.tv_nsec / NV_1E9 : -1;
 
