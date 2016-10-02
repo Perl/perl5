@@ -803,7 +803,9 @@ static int darwin_time_init() {
 }
 
 #ifdef TIME_HIRES_CLOCK_GETTIME_EMULATION
-static int clock_gettime(int clock_id, struct timespec *ts) {
+typedef int clockid_t;
+
+static int clock_gettime(clockid_t clock_id, struct timespec *ts) {
   if (darwin_time_init() && timebase_info.denom) {
     switch (clock_id) {
       case CLOCK_REALTIME:
