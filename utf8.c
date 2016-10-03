@@ -498,14 +498,15 @@ Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
 
 #ifdef EBCDIC   /* On EBCDIC, these are actually I8 bytes */
 #  define FIRST_START_BYTE_THAT_IS_DEFINITELY_SUPER  0xFA
-#  define IS_SUPER_2_BYTE(s0, s1)                ((s0) == 0xF9 && (s1) >= 0xA2)
+#  define IS_UTF8_2_BYTE_SUPER(s0, s1)           ((s0) == 0xF9 && (s1) >= 0xA2)
 
-                                                               /* B6 and B7 */
-#  define IS_SURROGATE(s0, s1)         ((s0) == 0xF1 && ((s1) & 0xFE ) == 0xB6)
+#  define IS_UTF8_2_BYTE_SURROGATE(s0, s1)       ((s0) == 0xF1              \
+                                                       /* B6 and B7 */      \
+                                              && ((s1) & 0xFE ) == 0xB6)
 #else
 #  define FIRST_START_BYTE_THAT_IS_DEFINITELY_SUPER  0xF5
-#  define IS_SUPER_2_BYTE(s0, s1)                ((s0) == 0xF4 && (s1) >= 0x90)
-#  define IS_SURROGATE(s0, s1)                   ((s0) == 0xED && (s1) >= 0xA0)
+#  define IS_UTF8_2_BYTE_SUPER(s0, s1)           ((s0) == 0xF4 && (s1) >= 0x90)
+#  define IS_UTF8_2_BYTE_SURROGATE(s0, s1)       ((s0) == 0xED && (s1) >= 0xA0)
 #endif
 
         if (  (flags & UTF8_DISALLOW_SUPER)
@@ -523,13 +524,13 @@ Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
             const U8 s1 = NATIVE_UTF8_TO_I8(s[1]);
 
             if (   (flags & UTF8_DISALLOW_SUPER)
-                &&  UNLIKELY(IS_SUPER_2_BYTE(s0, s1)))
+                &&  UNLIKELY(IS_UTF8_2_BYTE_SUPER(s0, s1)))
             {
                 return 0;       /* Above Unicode */
             }
 
             if (   (flags & UTF8_DISALLOW_SURROGATE)
-                &&  UNLIKELY(IS_SURROGATE(s0, s1)))
+                &&  UNLIKELY(IS_UTF8_2_BYTE_SURROGATE(s0, s1)))
             {
                 return 0;       /* Surrogate */
             }
@@ -647,9 +648,6 @@ Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
     return UTF8SKIP(s);
 }
 
-#undef FIRST_START_BYTE_THAT_IS_DEFINITELY_SUPER
-#undef IS_SUPER_2_BYTE
-#undef IS_SURROGATE
 #undef F0_ABOVE_OVERLONG
 #undef F8_ABOVE_OVERLONG
 #undef FC_ABOVE_OVERLONG
