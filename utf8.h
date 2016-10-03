@@ -731,27 +731,27 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 /* Overlong sequence; i.e., the code point can be specified in fewer bytes. */
 #define UTF8_ALLOW_LONG                 0x0010
 
-#define UTF8_DISALLOW_SURROGATE		0x0020	/* Unicode surrogates */
-#define UTF8_WARN_SURROGATE		0x0040
+#define UTF8_DISALLOW_SURROGATE		0x0040	/* Unicode surrogates */
+#define UTF8_WARN_SURROGATE		0x0080
 
-#define UTF8_DISALLOW_NONCHAR           0x0080	/* Unicode non-character */
-#define UTF8_WARN_NONCHAR               0x0100	/*  code points */
+#define UTF8_DISALLOW_NONCHAR           0x0100	/* Unicode non-character */
+#define UTF8_WARN_NONCHAR               0x0200	/*  code points */
 
-#define UTF8_DISALLOW_SUPER		0x0200	/* Super-set of Unicode: code */
-#define UTF8_WARN_SUPER		        0x0400	/* points above the legal max */
+#define UTF8_DISALLOW_SUPER		0x0400	/* Super-set of Unicode: code */
+#define UTF8_WARN_SUPER		        0x0800	/* points above the legal max */
 
 /* Code points which never were part of the original UTF-8 standard, which only
  * went up to 2 ** 31 - 1.  Note that these all overflow a signed 32-bit word,
  * The first byte of these code points is FE or FF on ASCII platforms.  If the
  * first byte is FF, it will overflow a 32-bit word. */
-#define UTF8_DISALLOW_ABOVE_31_BIT      0x0800
-#define UTF8_WARN_ABOVE_31_BIT          0x1000
+#define UTF8_DISALLOW_ABOVE_31_BIT      0x1000
+#define UTF8_WARN_ABOVE_31_BIT          0x2000
 
 /* For back compat, these old names are misleading for UTF_EBCDIC */
 #define UTF8_DISALLOW_FE_FF             UTF8_DISALLOW_ABOVE_31_BIT
 #define UTF8_WARN_FE_FF                 UTF8_WARN_ABOVE_31_BIT
 
-#define UTF8_CHECK_ONLY			0x2000
+#define UTF8_CHECK_ONLY			0x4000
 
 /* For backwards source compatibility.  They do nothing, as the default now
  * includes what they used to mean.  The first one's meaning was to allow the
