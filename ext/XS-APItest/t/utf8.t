@@ -21,6 +21,10 @@ sub display_bytes {
            . '"';
 }
 
+sub output_warnings(@) {
+    diag "The warnings were:\n" . join("", @_);
+}
+
 # This  test file can't use byte_utf8a_to_utf8n() from t/charset_tools.pl
 # because that uses the same functions we are testing here.  So UTF-EBCDIC
 # strings are hard-coded as I8 strings in this file instead, and we use array
@@ -445,7 +449,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
         unless (is(scalar @warnings, 0,
                 "   Verify is_utf8_valid_partial_char_flags generated no warnings"))
         {
-            diag "The warnings were: " . join(", ", @warnings);
+            output_warnings(@warnings);
         }
 
         my $b = substr($n_chr, $j, 1);
@@ -546,7 +550,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     unless (is(scalar @warnings, 0,
                "Verify utf8n_to_uvchr() for $hex_n generated no warnings"))
     {
-        diag "The warnings were: " . join(", ", @warnings);
+        output_warnings(@warnings);
     }
 
     undef @warnings;
@@ -557,7 +561,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     unless (is(scalar @warnings, 0,
                "Verify isUTF8_CHAR() for $hex_n generated no warnings"))
     {
-        diag "The warnings were: " . join(", ", @warnings);
+        output_warnings(@warnings);
     }
 
     undef @warnings;
@@ -568,7 +572,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     unless (is(scalar @warnings, 0,
                "Verify isUTF8_CHAR() generated no warnings"))
     {
-        diag "The warnings were: " . join(", ", @warnings);
+        output_warnings(@warnings);
     }
 
     undef @warnings;
@@ -579,7 +583,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     unless (is(scalar @warnings, 0,
                "Verify isUTF8_CHAR_flags() for $hex_n generated no warnings"))
     {
-        diag "The warnings were: " . join(", ", @warnings);
+        output_warnings(@warnings);
     }
 
     undef @warnings;
@@ -590,7 +594,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     unless (is(scalar @warnings, 0,
                "Verify isUTF8_CHAR_flags() generated no warnings"))
     {
-        diag "The warnings were: " . join(", ", @warnings);
+        output_warnings(@warnings);
     }
 
     undef @warnings;
@@ -602,7 +606,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     unless (is(scalar @warnings, 0,
                "Verify isSTRICT_UTF8_CHAR() for $hex_n generated no warnings"))
     {
-        diag "The warnings were: " . join(", ", @warnings);
+        output_warnings(@warnings);
     }
 
     undef @warnings;
@@ -613,7 +617,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     unless (is(scalar @warnings, 0,
                "Verify isSTRICT_UTF8_CHAR() generated no warnings"))
     {
-        diag "The warnings were: " . join(", ", @warnings);
+        output_warnings(@warnings);
     }
 
     undef @warnings;
@@ -624,7 +628,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     unless (is(scalar @warnings, 0,
                "Verify isUTF8_CHAR() for $hex_n generated no warnings"))
     {
-        diag "The warnings were: " . join(", ", @warnings);
+        output_warnings(@warnings);
     }
 
     undef @warnings;
@@ -636,7 +640,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     unless (is(scalar @warnings, 0,
                "Verify isC9_STRICT_UTF8_CHAR() for $hex_n generated no warnings"))
     {
-        diag "The warnings were: " . join(", ", @warnings);
+        output_warnings(@warnings);
     }
 
     undef @warnings;
@@ -647,7 +651,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     unless (is(scalar @warnings, 0,
                "Verify isC9_STRICT_UTF8_CHAR() generated no warnings"))
     {
-        diag "The warnings were: " . join(", ", @warnings);
+        output_warnings(@warnings);
     }
 
     undef @warnings;
@@ -658,7 +662,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     unless (is(scalar @warnings, 0,
                "Verify isUTF8_CHAR() for $hex_n generated no warnings"))
     {
-        diag "The warnings were: " . join(", ", @warnings);
+        output_warnings(@warnings);
     }
 
     undef @warnings;
@@ -670,7 +674,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     unless (is(scalar @warnings, 0,
                "Verify valid_utf8_to_uvchr() for $hex_n generated no warnings"))
     {
-        diag "The warnings were: " . join(", ", @warnings);
+        output_warnings(@warnings);
     }
 
     # Similarly for uvchr_to_utf8
@@ -699,7 +703,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     unless (is(scalar @warnings, 0,
         "Verify uvchr_to_utf8_flags($hex_n, $display_flags) for $hex_n generated no warnings"))
     {
-        diag "The warnings were: " . join(", ", @warnings);
+        output_warnings(@warnings);
     }
 
     # Now append this code point to a string that we will test various
@@ -1197,7 +1201,7 @@ foreach my $test (@malformations) {
     unless (is(scalar @warnings, 0,
                "$testname: isUTF8_CHAR() generated no warnings"))
     {
-        diag "The warnings were: " . join(", ", @warnings);
+        output_warnings(@warnings);
     }
 
     undef @warnings;
@@ -1207,7 +1211,7 @@ foreach my $test (@malformations) {
     unless (is(scalar @warnings, 0,
                "$testname: isUTF8_CHAR() generated no warnings"))
     {
-        diag "The warnings were: " . join(", ", @warnings);
+        output_warnings(@warnings);
     }
 
     $ret = test_isSTRICT_UTF8_CHAR($bytes, $length);
@@ -1215,7 +1219,7 @@ foreach my $test (@malformations) {
     unless (is(scalar @warnings, 0,
                "$testname: isSTRICT_UTF8_CHAR() generated no warnings"))
     {
-        diag "The warnings were: " . join(", ", @warnings);
+        output_warnings(@warnings);
     }
 
     $ret = test_isC9_STRICT_UTF8_CHAR($bytes, $length);
@@ -1223,7 +1227,7 @@ foreach my $test (@malformations) {
     unless (is(scalar @warnings, 0,
                "$testname: isC9_STRICT_UTF8_CHAR() generated no warnings"))
     {
-        diag "The warnings were: " . join(", ", @warnings);
+        output_warnings(@warnings);
     }
 
     for my $j (1 .. $length - 1) {
@@ -1271,7 +1275,7 @@ foreach my $test (@malformations) {
         unless (is(scalar @warnings, 0,
                 "$testname: is_utf8_valid_partial_char_flags() generated no warnings"))
         {
-            diag "The warnings were: " . join(", ", @warnings);
+            output_warnings(@warnings);
         }
     }
 
@@ -1286,7 +1290,7 @@ foreach my $test (@malformations) {
     }
     else {
         if (scalar @warnings) {
-            diag "The warnings were: " . join(", ", @warnings);
+            output_warnings(@warnings);
         }
     }
 
@@ -1297,7 +1301,7 @@ foreach my $test (@malformations) {
         is($ret_ref->[0], 0, "$testname: utf8n_to_uvchr(), disallowed: no warnings 'utf8': Returns 0");
         is($ret_ref->[1], $expected_len, "$testname: utf8n_to_uvchr(), disallowed: no warnings 'utf8': Returns expected length: $expected_len");
         if (!is(scalar @warnings, 0, "$testname: utf8n_to_uvchr(), disallowed: no warnings 'utf8': no warnings generated")) {
-            diag "The warnings were: " . join(", ", @warnings);
+            output_warnings(@warnings);
         }
     }
 
@@ -1307,7 +1311,7 @@ foreach my $test (@malformations) {
     is($ret_ref->[0], 0, "$testname: CHECK_ONLY: Returns 0");
     is($ret_ref->[1], -1, "$testname: CHECK_ONLY: returns -1 for length");
     if (! is(scalar @warnings, 0, "$testname: CHECK_ONLY: no warnings generated")) {
-        diag "The warnings were: " . join(", ", @warnings);
+        output_warnings(@warnings);
     }
 
     next if $allow_flags == 0;    # Skip if can't allow this malformation
@@ -1319,7 +1323,7 @@ foreach my $test (@malformations) {
     is($ret_ref->[1], $expected_len, "$testname: utf8n_to_uvchr(), allowed: Returns expected length: $expected_len");
     if (!is(scalar @warnings, 0, "$testname: utf8n_to_uvchr(), allowed: no warnings generated"))
     {
-        diag "The warnings were: " . join(", ", @warnings);
+        output_warnings(@warnings);
     }
 }
 
@@ -1736,7 +1740,7 @@ foreach my $test (@tests) {
         unless (is(scalar @warnings, 0,
                 "isUTF8_CHAR() and isUTF8_CHAR()_flags $testname: generated no warnings"))
         {
-            diag "The warnings were: " . join(", ", @warnings);
+            output_warnings(@warnings);
         }
 
         undef @warnings;
@@ -1759,7 +1763,7 @@ foreach my $test (@tests) {
         unless (is(scalar @warnings, 0,
                 "isSTRICT_UTF8_CHAR() and isUTF8_CHAR_flags $testname: generated no warnings"))
         {
-            diag "The warnings were: " . join(", ", @warnings);
+            output_warnings(@warnings);
         }
 
         undef @warnings;
@@ -1782,7 +1786,7 @@ foreach my $test (@tests) {
         unless (is(scalar @warnings, 0,
                 "isC9_STRICT_UTF8_CHAR() and isUTF8_CHAR_flags $testname: generated no warnings"))
         {
-            diag "The warnings were: " . join(", ", @warnings);
+            output_warnings(@warnings);
         }
 
         # Test partial character handling, for each byte not a full character
@@ -1845,7 +1849,7 @@ foreach my $test (@tests) {
                 unless (is(scalar @warnings, 0,
                         "$testname: is_utf8_valid_partial_char_flags() generated no warnings"))
                 {
-                    diag "The warnings were: " . join(", ", @warnings);
+                    output_warnings(@warnings);
                 }
             }
         }
@@ -1918,7 +1922,7 @@ foreach my $test (@tests) {
                                             "$this_name: No warnings generated"))
                         {
                             diag $call;
-                            diag "The warnings were: " . join(", ", @warnings);
+                            output_warnings(@warnings);
                         }
                     }
                     elsif ($will_overflow
@@ -1941,10 +1945,7 @@ foreach my $test (@tests) {
                         }
                         else {
                             diag $call;
-                            if (scalar @warnings) {
-                                diag "The warnings were: "
-                                                        . join(", ", @warnings);
-                            }
+                            output_warnings(@warnings) if scalar @warnings;
                         }
                     }
                     elsif ($warn_flag
@@ -1962,8 +1963,7 @@ foreach my $test (@tests) {
                         else {
                             diag $call;
                             if (scalar @warnings) {
-                                diag "The warnings were: "
-                                                        . join(", ", @warnings);
+                                output_warnings(@warnings);
                             }
                         }
                     }
@@ -1987,7 +1987,7 @@ foreach my $test (@tests) {
                             "$this_name, CHECK_ONLY: no warnings generated"))
                         {
                             diag $call;
-                            diag "The warnings were: " . join(", ", @warnings);
+                            output_warnings(@warnings);
                         }
                     }
 
@@ -2082,7 +2082,7 @@ foreach my $test (@tests) {
                                             "$this_name: No warnings generated"))
                         {
                             diag $call;
-                            diag "The warnings were: " . join(", ", @warnings);
+                            output_warnings(@warnings);
                         }
                     }
                     elsif ($uvchr_warn_flag
@@ -2099,10 +2099,7 @@ foreach my $test (@tests) {
                         }
                         else {
                             diag $call;
-                            if (scalar @warnings) {
-                                diag "The warnings were: "
-                                                        . join(", ", @warnings);
-                            }
+                            output_warnings(@warnings) if scalar @warnings;
                         }
                     }
                 }
