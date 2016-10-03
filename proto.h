@@ -5583,6 +5583,12 @@ STATIC UV	S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV res
 #define PERL_ARGS_ASSERT_CHECK_LOCALE_BOUNDARY_CROSSING	\
 	assert(p); assert(ustrp); assert(lenp)
 
+PERL_STATIC_INLINE bool	S_does_utf8_overflow(const U8 * const s, const U8 * e)
+			__attribute__warn_unused_result__
+			__attribute__pure__;
+#define PERL_ARGS_ASSERT_DOES_UTF8_OVERFLOW	\
+	assert(s); assert(e)
+
 PERL_STATIC_INLINE bool	S_is_utf8_common(pTHX_ const U8 *const p, SV **swash, const char * const swashname, SV* const invlist)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_UTF8_COMMON	\
@@ -5593,6 +5599,12 @@ PERL_STATIC_INLINE bool	S_is_utf8_cp_above_31_bits(const U8 * const s, const U8 
 			__attribute__pure__;
 #define PERL_ARGS_ASSERT_IS_UTF8_CP_ABOVE_31_BITS	\
 	assert(s); assert(e)
+
+PERL_STATIC_INLINE bool	S_is_utf8_overlong_given_start_byte_ok(const U8 * const s, const STRLEN len)
+			__attribute__warn_unused_result__
+			__attribute__pure__;
+#define PERL_ARGS_ASSERT_IS_UTF8_OVERLONG_GIVEN_START_BYTE_OK	\
+	assert(s)
 
 STATIC U8*	S_swash_scan_list_line(pTHX_ U8* l, U8* const lend, UV* min, UV* max, UV* val, const bool wants_value, const U8* const typestr)
 			__attribute__warn_unused_result__;

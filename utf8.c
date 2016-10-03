@@ -424,11 +424,133 @@ S_is_utf8_cp_above_31_bits(const U8 * const s, const U8 * const e)
 
 }
 
+PERL_STATIC_INLINE bool
+S_does_utf8_overflow(const U8 * const s, const U8 * e)
+{
+    const U8 *x;
+    const U8 * y = (const U8 *) HIGHEST_REPRESENTABLE_UTF8;
+
+    /* Returns a boolean as to if this UTF-8 string would overflow a UV on this
+     * platform, that is if it represents a code point larger than the highest
+     * representable code point.  (For ASCII platforms, we could use memcmp()
+     * because we don't have to convert each byte to I8, but it's very rare
+     * input indeed that would approach overflow, so the loop below will likely
+     * only get executed once.
+     *
+     * 'e' must not be beyond a full character.  If it is less than a full
+     * character, the function returns FALSE if there is any input beyond 'e'
+     * that could result in a non-overflowing code point */
+
+    PERL_ARGS_ASSERT_DOES_UTF8_OVERFLOW;
+    assert(s + UTF8SKIP(s) >= e);
+
+    for (x = s; x < e; x++, y++) {
+
+        /* If this byte is larger than the corresponding highest UTF-8 byte, it
+         * overflows */
+        if (UNLIKELY(NATIVE_UTF8_TO_I8(*x) > *y)) {
+            return TRUE;
+        }
+
+        /* If not the same as this byte, it must be smaller, doesn't overflow */
+        if (LIKELY(NATIVE_UTF8_TO_I8(*x) != *y)) {
+            return FALSE;
+        }
+    }
+
+    /* Got to the end and all bytes are the same.  If the input is a whole
+     * character, it doesn't overflow.  And if it is a partial character,
+     * there's not enough information to tell, so assume doesn't overflow */
+    return FALSE;
+}
+
+PERL_STATIC_INLINE bool
+S_is_utf8_overlong_given_start_byte_ok(const U8 * const s, const STRLEN len)
+{
+    /* Overlongs can occur whenever the number of continuation bytes
+     * changes.  That means whenever the number of leading 1 bits in a start
+     * byte increases from the next lower start byte.  That happens for start
+     * bytes C0, E0, F0, F8, FC, FE, and FF.  On modern perls, the following
+     * illegal start bytes have already been excluded, so don't need to be
+     * tested here;
+     * ASCII platforms: C0, C1
+     * EBCDIC platforms C0, C1, C2, C3, C4, E0
+     *
+     * At least a second byte is required to determine if other sequences will
+     * be an overlong. */
+
+    const U8 s0 = NATIVE_UTF8_TO_I8(s[0]);
+    const U8 s1 = NATIVE_UTF8_TO_I8(s[1]);
+
+    PERL_ARGS_ASSERT_IS_UTF8_OVERLONG_GIVEN_START_BYTE_OK;
+    assert(len > 1 && UTF8_IS_START(*s));
+
+    /* Each platform has overlongs after the start bytes given above (expressed
+     * in I8 for EBCDIC).  What constitutes an overlong varies by platform, but
+     * the logic is the same, except the E0 overlong has already been excluded
+     * on EBCDIC platforms.   The  values below were found by manually
+     * inspecting the UTF-8 patterns.  See the tables in utf8.h and
+     * utfebcdic.h. */
+
+#       ifdef EBCDIC
+#           define F0_ABOVE_OVERLONG 0xB0
+#           define F8_ABOVE_OVERLONG 0xA8
+#           define FC_ABOVE_OVERLONG 0xA4
+#           define FE_ABOVE_OVERLONG 0xA2
+#           define FF_OVERLONG_PREFIX "\xfe\x41\x41\x41\x41\x41\x41\x41"
+                                    /* I8(0xfe) is FF */
+#       else
+
+    if (s0 == 0xE0 && UNLIKELY(s1 < 0xA0)) {
+        return TRUE;
+    }
+
+#           define F0_ABOVE_OVERLONG 0x90
+#           define F8_ABOVE_OVERLONG 0x88
+#           define FC_ABOVE_OVERLONG 0x84
+#           define FE_ABOVE_OVERLONG 0x82
+#           define FF_OVERLONG_PREFIX "\xff\x80\x80\x80\x80\x80\x80"
+#       endif
+
+
+    if (   (s0 == 0xF0 && UNLIKELY(s1 < F0_ABOVE_OVERLONG))
+        || (s0 == 0xF8 && UNLIKELY(s1 < F8_ABOVE_OVERLONG))
+        || (s0 == 0xFC && UNLIKELY(s1 < FC_ABOVE_OVERLONG))
+        || (s0 == 0xFE && UNLIKELY(s1 < FE_ABOVE_OVERLONG)))
+    {
+        return TRUE;
+    }
+
+#   if defined(UV_IS_QUAD) || defined(EBCDIC)
+
+    /* Check for the FF overlong.  This happens only if all these bytes match;
+     * what comes after them doesn't matter.  See tables in utf8.h,
+     * utfebcdic.h.  (Can't happen on ASCII 32-bit platforms, as overflows
+     * instead.) */
+
+    if (   len >= sizeof(FF_OVERLONG_PREFIX) - 1
+        && UNLIKELY(memEQ(s, FF_OVERLONG_PREFIX,
+                                            sizeof(FF_OVERLONG_PREFIX) - 1)))
+    {
+        return TRUE;
+    }
+
+#endif
+
+    return FALSE;
+}
+
+#undef F0_ABOVE_OVERLONG
+#undef F8_ABOVE_OVERLONG
+#undef FC_ABOVE_OVERLONG
+#undef FE_ABOVE_OVERLONG
+#undef FF_OVERLONG_PREFIX
+
 STRLEN
 Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
 {
     STRLEN len;
-    const U8 *x, *y;
+    const U8 *x;
 
     /* A helper function that should not be called directly.
      *
@@ -551,108 +673,19 @@ Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
     }
 
     /* Here is syntactically valid.  Next, make sure this isn't the start of an
-     * overlong.  Overlongs can occur whenever the number of continuation bytes
-     * changes.  That means whenever the number of leading 1 bits in a start
-     * byte increases from the next lower start byte.  That happens for start
-     * bytes C0, E0, F0, F8, FC, FE, and FF.  On modern perls, the following
-     * illegal start bytes have already been excluded, so don't need to be
-     * tested here;
-     * ASCII platforms: C0, C1
-     * EBCDIC platforms C0, C1, C2, C3, C4, E0
-     *
-     * At least a second byte is required to determine if other sequences will
-     * be an overlong. */
-
-    if (len > 1) {
-        const U8 s0 = NATIVE_UTF8_TO_I8(s[0]);
-        const U8 s1 = NATIVE_UTF8_TO_I8(s[1]);
-
-        /* Each platform has overlongs after the start bytes given above
-         * (expressed in I8 for EBCDIC).  What constitutes an overlong varies
-         * by platform, but the logic is the same, except the E0 overlong has
-         * already been excluded on EBCDIC platforms.   The  values below were
-         * found by manually inspecting the UTF-8 patterns.  See the tables in
-         * utf8.h and utfebcdic.h */
-
-#       ifdef EBCDIC
-#           define F0_ABOVE_OVERLONG 0xB0
-#           define F8_ABOVE_OVERLONG 0xA8
-#           define FC_ABOVE_OVERLONG 0xA4
-#           define FE_ABOVE_OVERLONG 0xA2
-#           define FF_OVERLONG_PREFIX "\xfe\x41\x41\x41\x41\x41\x41\x41"
-                                      /* I8(0xfe) is FF */
-#       else
-
-        if (s0 == 0xE0 && UNLIKELY(s1 < 0xA0)) {
-            return 0;       /* Overlong */
-        }
-
-#           define F0_ABOVE_OVERLONG 0x90
-#           define F8_ABOVE_OVERLONG 0x88
-#           define FC_ABOVE_OVERLONG 0x84
-#           define FE_ABOVE_OVERLONG 0x82
-#           define FF_OVERLONG_PREFIX "\xff\x80\x80\x80\x80\x80\x80"
-#       endif
-
-
-        if (   (s0 == 0xF0 && UNLIKELY(s1 < F0_ABOVE_OVERLONG))
-            || (s0 == 0xF8 && UNLIKELY(s1 < F8_ABOVE_OVERLONG))
-            || (s0 == 0xFC && UNLIKELY(s1 < FC_ABOVE_OVERLONG))
-            || (s0 == 0xFE && UNLIKELY(s1 < FE_ABOVE_OVERLONG)))
-        {
-            return 0;       /* Overlong */
-        }
-
-#   if defined(UV_IS_QUAD) || defined(EBCDIC)
-
-        /* Check for the FF overlong.  This happens only if all these bytes
-         * match; what comes after them doesn't matter.  See tables in utf8.h,
-         * utfebcdic.h.  (Can't happen on ASCII 32-bit platforms, as overflows
-         * instead.) */
-
-        if (   len >= sizeof(FF_OVERLONG_PREFIX) - 1
-            && UNLIKELY(memEQ(s, FF_OVERLONG_PREFIX,
-                                               sizeof(FF_OVERLONG_PREFIX) - 1)))
-        {
-            return 0;       /* Overlong */
-        }
-
-#endif
-
+     * overlong. */
+    if (len > 1 && is_utf8_overlong_given_start_byte_ok(s, len)) {
+        return 0;
     }
 
-    /* Finally, see if this would overflow a UV on this platform.  See if the
-     * UTF8 for this code point is larger than that for the highest
-     * representable code point.  (For ASCII platforms, we could use memcmp()
-     * because we don't have to convert each byte to I8, but it's very rare
-     * input indeed that would approach overflow, so the loop below will likely
-     * only get executed once */
-    y = (const U8 *) HIGHEST_REPRESENTABLE_UTF8;
-
-    for (x = s; x < e; x++, y++) {
-
-        /* If the same as this byte, go on to the next */
-        if (UNLIKELY(NATIVE_UTF8_TO_I8(*x) == *y)) {
-            continue;
-        }
-
-        /* If this is larger, it overflows */
-        if (UNLIKELY(NATIVE_UTF8_TO_I8(*x) > *y)) {
-            return 0;
-        }
-
-        /* But if smaller, it won't */
-        break;
+    /* And finally, that the code point represented fits in a word on this
+     * platform */
+    if (does_utf8_overflow(s, e)) {
+        return 0;
     }
 
     return UTF8SKIP(s);
 }
-
-#undef F0_ABOVE_OVERLONG
-#undef F8_ABOVE_OVERLONG
-#undef FC_ABOVE_OVERLONG
-#undef FE_ABOVE_OVERLONG
-#undef FF_OVERLONG_PREFIX
 
 STATIC char *
 S__byte_dump_string(pTHX_ const U8 * s, const STRLEN len)
