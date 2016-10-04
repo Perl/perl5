@@ -703,7 +703,8 @@ Perl_re_intuit_start(pTHX_
     reginfo->poscache_maxiter = 0;
 
     if (utf8_target) {
-	if (!prog->check_utf8 && prog->check_substr)
+        if ((!prog->anchored_utf8 && prog->anchored_substr)
+                || (!prog->float_utf8 && prog->float_substr))
 	    to_utf8_substr(prog);
 	check = prog->check_utf8;
     } else {
