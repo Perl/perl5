@@ -860,25 +860,6 @@ PP(pp_join)
     RETURN;
 }
 
-PP(pp_pushre)
-{
-    dSP;
-#ifdef DEBUGGING
-    /*
-     * We ass_u_me that LvTARGOFF() comes first, and that two STRLENs
-     * will be enough to hold an OP*.
-     */
-    SV* const sv = sv_newmortal();
-    sv_upgrade(sv, SVt_PVLV);
-    LvTYPE(sv) = '/';
-    Copy(&PL_op, &LvTARGOFF(sv), 1, OP*);
-    XPUSHs(sv);
-#else
-    XPUSHs(MUTABLE_SV(PL_op));
-#endif
-    RETURN;
-}
-
 /* Oversized hot code. */
 
 /* also used for: pp_say() */

@@ -785,11 +785,37 @@ print $_ foreach (reverse 1, 2..5);
 our @ary;
 @ary = split(' ', 'foo', 0);
 ####
+my @ary;
+@ary = split(' ', 'foo', 0);
+####
 # Split to our array
 our @array = split(//, 'foo', 0);
 ####
 # Split to my array
 my @array  = split(//, 'foo', 0);
+####
+our @array;
+my $c;
+@array = split(/x(?{ $c++; })y/, 'foo', 0);
+####
+my($x, $y, $p);
+our $c;
+($x, $y) = split(/$p(?{ $c++; })y/, 'foo', 2);
+####
+our @ary;
+my $pat;
+@ary = split(/$pat/, 'foo', 0);
+####
+my @ary;
+our $pat;
+@ary = split(/$pat/, 'foo', 0);
+####
+our @array;
+my $pat;
+local @array = split(/$pat/, 'foo', 0);
+####
+our $pat;
+my @array  = split(/$pat/, 'foo', 0);
 ####
 # bug #40055
 do { () }; 

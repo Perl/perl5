@@ -908,6 +908,7 @@
     },
 
 
+
     'func::sort::num' => {
         desc    => 'plain numeric sort',
         setup   => 'my (@a, @b); @a = reverse 1..10;',
@@ -968,6 +969,34 @@
         desc    => 'function string sort in-place',
         setup   => 'sub f { ($a . "") cmp ($b . "") } my @a = reverse  "a".."j";',
         code    => '@a = sort f @a',
+    },
+
+
+    'func::split::vars' => {
+        desc    => 'split into two lexical vars',
+        setup   => 'my $s = "abc:def";',
+        code    => 'my ($x, $y) = split /:/, $s, 2;',
+    },
+
+    'func::split::array' => {
+        desc    => 'split into a lexical array',
+        setup   => 'my @a; my $s = "abc:def";',
+        code    => '@a = split /:/, $s, 2;',
+    },
+    'func::split::myarray' => {
+        desc    => 'split into a lexical array declared in the assign',
+        setup   => 'my $s = "abc:def";',
+        code    => 'my @a = split /:/, $s, 2;',
+    },
+    'func::split::arrayexpr' => {
+        desc    => 'split into an @{$expr} ',
+        setup   => 'my $s = "abc:def"; my $r = []',
+        code    => '@$r = split /:/, $s, 2;',
+    },
+    'func::split::arraylist' => {
+        desc    => 'split into an array with extra arg',
+        setup   => 'my @a; my $s = "abc:def";',
+        code    => '@a = (split(/:/, $s, 2), 1);',
     },
 
 

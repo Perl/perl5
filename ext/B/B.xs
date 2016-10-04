@@ -542,7 +542,7 @@ walkoptree(pTHX_ OP *o, const char *method, SV *ref)
 	    ref = walkoptree(aTHX_ kid, method, ref);
 	}
     }
-    if (o && (cc_opclass(aTHX_ o) == OPc_PMOP) && o->op_type != OP_PUSHRE
+    if (o && (cc_opclass(aTHX_ o) == OPc_PMOP) && o->op_type != OP_SPLIT
            && (kid = PMOP_pmreplroot(cPMOPo)))
     {
 	ref = walkoptree(aTHX_ kid, method, ref);
@@ -1128,16 +1128,19 @@ next(o)
 		}
 		break;
 	    case 34: /* B::PMOP::pmreplroot */
-		if (cPMOPo->op_type == OP_PUSHRE) {
-#ifdef USE_ITHREADS
+		if (cPMOPo->op_type == OP_SPLIT) {
 		    ret = sv_newmortal();
-		    sv_setiv(ret, cPMOPo->op_pmreplrootu.op_pmtargetoff);
-#else
-		    GV *const target = cPMOPo->op_pmreplrootu.op_pmtargetgv;
-		    ret = sv_newmortal();
-		    sv_setiv(newSVrv(ret, target ?
-				     svclassnames[SvTYPE((SV*)target)] : "B::SV"),
-			     PTR2IV(target));
+#ifndef USE_ITHREADS
+                    if (o->op_private & OPpSPLIT_LEX)
+#endif
+                        sv_setiv(ret, cPMOPo->op_pmreplrootu.op_pmtargetoff);
+#ifndef USE_ITHREADS
+                    else {
+                        GV *const target = cPMOPo->op_pmreplrootu.op_pmtargetgv;
+                        sv_setiv(newSVrv(ret, target ?
+                                         svclassnames[SvTYPE((SV*)target)] : "B::SV"),
+                                 PTR2IV(target));
+                    }
 #endif
 		}
 		else {

@@ -351,9 +351,8 @@ and check for NULL.
  */
 
 /*
-  Set in Perl_pmruntime if op_flags & OPf_SPECIAL, i.e. split. Will
-  be used by regex engines to check whether they should set
-  RXf_SKIPWHITE
+  Set in Perl_pmruntime for a split. Will be used by regex engines to
+  check whether they should set RXf_SKIPWHITE
 */
 #define RXf_SPLIT   RXf_PMf_SPLIT
 

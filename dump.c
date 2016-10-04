@@ -670,10 +670,17 @@ Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
 	     (pm->op_private & OPpRUNTIME) ? " (RUNTIME)" : "");
     else
 	Perl_dump_indent(aTHX_ level, file, "PMf_PRE (RUNTIME)\n");
-    if (pm->op_type != OP_PUSHRE && pm->op_pmreplrootu.op_pmreplroot) {
-	Perl_dump_indent(aTHX_ level, file, "PMf_REPL = ");
-	op_dump(pm->op_pmreplrootu.op_pmreplroot);
+
+    if (pm->op_type == OP_SPLIT)
+        Perl_dump_indent(aTHX_ level, file, "TARGOFF/GV = 0x%"UVxf"\n",
+                PTR2UV(pm->op_pmreplrootu.op_pmtargetgv));
+    else {
+        if (pm->op_pmreplrootu.op_pmreplroot) {
+            Perl_dump_indent(aTHX_ level, file, "PMf_REPL = ");
+            op_dump(pm->op_pmreplrootu.op_pmreplroot);
+        }
     }
+
     if (pm->op_code_list) {
 	if (pm->op_pmflags & PMf_CODELIST_PRIVATE) {
 	    Perl_dump_indent(aTHX_ level, file, "CODE_LIST =\n");
@@ -1043,7 +1050,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	else
 	    PerlIO_printf(file, "DONE\n");
 	break;
-    case OP_PUSHRE:
+    case OP_SPLIT:
     case OP_MATCH:
     case OP_QR:
     case OP_SUBST:

@@ -56,19 +56,19 @@ my $is_thread = $Config{use5005threads} && $Config{use5005threads} eq 'define';
 if ($is_thread) {
     $b=<<EOF;
 leave enter nextstate label leaveloop enterloop null and defined null
-threadsv readline gv lineseq nextstate aassign null pushmark split pushre
+threadsv readline gv lineseq nextstate aassign null pushmark split
 threadsv const null pushmark rvav gv nextstate subst const unstack
 EOF
 } elsif ($] >= 5.021005) {
   $b=<<EOF;
 leave enter nextstate label leaveloop enterloop null and defined null null
-gvsv readline gv lineseq nextstate split pushre null
+gvsv readline gv lineseq nextstate split null
 gvsv const nextstate subst const unstack
 EOF
 } else {
   $b=<<EOF;
 leave enter nextstate label leaveloop enterloop null and defined null null
-gvsv readline gv lineseq nextstate aassign null pushmark split pushre null
+gvsv readline gv lineseq nextstate aassign null pushmark split null
 gvsv const null pushmark rvav gv nextstate subst const unstack
 EOF
 }

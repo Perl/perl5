@@ -57,8 +57,6 @@ padav		private array		ck_null		d0
 padhv		private hash		ck_null		d0
 padany		private value		ck_null		d0
 
-pushre		push regexp		ck_null		d/
-
 # References and stuff.
 
 rv2gv		ref-to-glob cast	ck_rvconst	ds1	
@@ -253,7 +251,7 @@ multideref	array or hash lookup	ck_null		ds+
 
 unpack		unpack			ck_fun		u@	S S?
 pack		pack			ck_fun		fmst@	S L
-split		split			ck_split	t@	S S S
+split		split			ck_split	t/	S S S
 join		join or string		ck_join		fmst@	S L
 
 # List operators.

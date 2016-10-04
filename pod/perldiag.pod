@@ -4430,10 +4430,6 @@ able to initialize properly.
 
 (P) Failed an internal consistency check trying to compile a grep.
 
-=item panic: ck_split, type=%u
-
-(P) Failed an internal consistency check trying to compile a split.
-
 =item panic: corrupt saved stack index %ld
 
 (P) The savestack was requested to restore more localized values than
@@ -4559,10 +4555,6 @@ and freeing temporaries and lexicals from.
 
 (P) The internal pp_match() routine was called with invalid operational
 data.
-
-=item panic: pp_split, pm=%p, s=%p
-
-(P) Something terrible went wrong in setting up for the split.
 
 =item panic: realloc, %s
 
