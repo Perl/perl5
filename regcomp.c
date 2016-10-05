@@ -5218,15 +5218,21 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			    However, this time it's not a subexpression
 			    we care about, but the expression itself. */
 			 && (maxcount == REG_INFTY)
-			 && data && ++data->whilem_c < 16) {
+			 && data) {
 		    /* This stays as CURLYX, we can put the count/of pair. */
 		    /* Find WHILEM (as in regexec.c) */
 		    regnode *nxt = oscan + NEXT_OFF(oscan);
 
 		    if (OP(PREVOPER(nxt)) == NOTHING) /* LONGJMP */
 			nxt += ARG(nxt);
-		    PREVOPER(nxt)->flags = (U8)(data->whilem_c
-			| (RExC_whilem_seen << 4)); /* On WHILEM */
+                    nxt = PREVOPER(nxt);
+                    if (nxt->flags & 0xf) {
+                        /* we've already set whilem count on this node */
+                    } else if (++data->whilem_c < 16) {
+                        assert(data->whilem_c <= RExC_whilem_seen);
+                        nxt->flags = (U8)(data->whilem_c
+                            | (RExC_whilem_seen << 4)); /* On WHILEM */
+                    }
 		}
 		if (data && fl & (SF_HAS_PAR|SF_IN_PAR))
 		    pars++;

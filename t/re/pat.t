@@ -1909,7 +1909,6 @@ EOP
     }
     {
         # [perl #129281] buffer write overflow, detected by ASAN, valgrind
-        local $::TODO = "whilem_c  bumped too much";
         fresh_perl_is('/0(?0)|^*0(?0)|^*(^*())0|/', '', {}, "don't bump whilem_c too much");
     }
 } # End of sub run_tests
