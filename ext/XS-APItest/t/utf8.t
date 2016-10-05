@@ -1818,7 +1818,11 @@ foreach my $test (@tests) {
                             $comment .= ", but need 2 bytes to discern";
                         }
                     }
-                    elsif ($testname =~ /first non_unicode/ && $j < 2) {
+                    elsif (   ($disallow_flags & $UTF8_DISALLOW_SUPER)
+                           && $j < 2
+                           && ord(native_to_I8(substr($bytes, 0, 1)))
+                               lt ((isASCII) ? 0xF5 : 0xFA))
+                    {
                         $ret_should_be = 1;
                         $comment .= ", but need 2 bytes to discern";
                     }
