@@ -382,8 +382,8 @@ S_is_utf8_cp_above_31_bits(const U8 * const s, const U8 * const e)
 
 #ifdef EBCDIC
 
-        /* [0] is start byte    [1] [2] [3] [4] [5] [6] [7] */
-    const U8 * const prefix = "\x41\x41\x41\x41\x41\x41\x42";
+        /* [0] is start byte           [1] [2] [3] [4] [5] [6] [7] */
+    const U8 * const prefix = (U8 *) "\x41\x41\x41\x41\x41\x41\x42";
     const STRLEN prefix_len = sizeof(prefix) - 1;
     const STRLEN len = e - s;
     const STRLEN cmp_len = MIN(prefix_len, len - 1);
