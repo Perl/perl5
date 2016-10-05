@@ -1473,3 +1473,19 @@ print "b is $b\n";
 EXPECT
 a is 3
 b is 7
+########
+# when assigning to array/hash, ensure get magic is processed first
+use Tie::Hash;
+my %tied;
+tie %tied, "Tie::StdHash";
+%tied = qw(a foo);
+my @a = values %tied;
+%tied = qw(b bar); # overwrites @a's contents unless magic was called
+print "$a[0]\n";
+my %h = ("x", values %tied);
+%tied = qw(c baz); # overwrites @a's contents unless magic was called
+print "$h{x}\n";
+
+EXPECT
+foo
+bar

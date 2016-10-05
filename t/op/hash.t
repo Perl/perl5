@@ -230,4 +230,25 @@ if (is_miniperl) {
     is(join(':', %h), 'x:', 'hash self-assign');
 }
 
+# magic keys and values should be evaluated before the hash on the LHS is
+# cleared
+
+package Magic {
+    my %inner;
+    sub TIEHASH { bless [] }
+    sub FETCH { $inner{$_[1]} }
+    sub STORE { $inner{$_[1]} = $_[2]; }
+    sub CLEAR { %inner = () }
+
+    my (%t1, %t2);
+    tie %t1, 'Magic';
+    tie %t2, 'Magic';
+
+    %inner = qw(a x b y);
+    %t1 = (@t2{'a','b'});
+    ::is(join( ':', %inner), "x:y", "magic keys");
+}
+
+
+
 done_testing();

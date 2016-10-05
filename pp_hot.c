@@ -1250,14 +1250,10 @@ PP(pp_aassign)
     SV **relem;
     SV **lelem;
 
-    SV *sv;
     AV *ary;
 
     U8 gimme;
     HV *hash;
-    SSize_t i;
-    int magic;
-    U32 lval;
     /* PL_delaymagic is restored by JUMPENV_POP on dieing, so we
      * only need to save locally, not on the save stack */
     U16 old_delaymagic = PL_delaymagic;
@@ -1286,7 +1282,7 @@ PP(pp_aassign)
             if (PL_op->op_private & OPpASSIGN_COMMON_RC1) {
                 /* skip the scan if all scalars have a ref count of 1 */
                 for (lelem = firstlelem; lelem <= lastlelem; lelem++) {
-                    sv = *lelem;
+                    SV *sv = *lelem;
                     if (!sv || SvREFCNT(sv) == 1)
                         continue;
                     if (SvTYPE(sv) != SVt_PVAV && SvTYPE(sv) != SVt_PVAV)
@@ -1318,241 +1314,461 @@ PP(pp_aassign)
 #endif
 
     gimme = GIMME_V;
-    lval = (gimme == G_ARRAY) ? (PL_op->op_flags & OPf_MOD || LVRET) : 0;
-
     relem = firstrelem;
     lelem = firstlelem;
     ary = NULL;
     hash = NULL;
 
+    if (relem > lastrelem)
+        goto no_relems;
+
+    /* first lelem loop while there are still relems */
     while (LIKELY(lelem <= lastlelem)) {
 	bool alias = FALSE;
-	TAINT_NOT;		/* Each item stands on its own, taintwise. */
-	sv = *lelem++;
-	if (UNLIKELY(!sv)) {
+	SV *lsv = *lelem++;
+
+        assert(relem <= lastrelem);
+	if (UNLIKELY(!lsv)) {
 	    alias = TRUE;
-	    sv = *lelem++;
-	    ASSUME(SvTYPE(sv) == SVt_PVAV);
+	    lsv = *lelem++;
+	    ASSUME(SvTYPE(lsv) == SVt_PVAV);
 	}
-	switch (SvTYPE(sv)) {
+
+	switch (SvTYPE(lsv)) {
 	case SVt_PVAV: {
-            bool already_copied = FALSE;
-	    ary = MUTABLE_AV(sv);
-	    magic = SvMAGICAL(ary) != 0;
-	    ENTER;
-	    SAVEFREESV(SvREFCNT_inc_simple_NN(sv));
+            SV **svp;
+            SSize_t i;
+            SSize_t tmps_base;
+            SSize_t nelems = lastrelem - relem + 1;
 
-            /* We need to clear ary. The is a danger that if we do this,
-             * elements on the RHS may be prematurely freed, e.g.
-             *   @a = ($a[0]);
-             * In the case of possible commonality, make a copy of each
-             * RHS SV *before* clearing the array, and add a reference
-             * from the tmps stack, so that it doesn't leak on death.
-             * Otherwise, make a copy of each RHS SV only as we're storing
-             * it into the array - that way we don't have to worry about
-             * it being leaked if we die, but don't incur the cost of
-             * mortalising everything.
-             */
+	    ary = MUTABLE_AV(lsv);
 
-            if (   (PL_op->op_private & OPpASSIGN_COMMON_AGG)
-                && (relem <= lastrelem)
-                && (magic || AvFILL(ary) != -1))
-            {
-                SV **svp;
-                EXTEND_MORTAL(lastrelem - relem + 1);
+            /* Assigning to an aggregate is tricky. First there is the
+             * issue of commonality, e.g. @a = ($a[0]). Since the
+             * stack isn't refcounted, clearing @a prior to storing
+             * elements will free $a[0]. Similarly with
+             *    sub FETCH { $status[$_[1]] } @status = @tied[0,1];
+             *
+             * The way to avoid these issues is to make the copy of each
+             * SV (and we normally store a *copy* in the array) *before*
+             * clearing the array. But this has a problem in that
+             * if the code croaks during copying, the not-yet-stored copies
+             * could leak. One way to avoid this is to make all the copies
+             * mortal, but that's quite expensive.
+             *
+             * The current solution to these issues is to use a chunk
+             * of the tmps stack as a temporary refcounted-stack. SVs
+             * will be put on there during processing to avoid leaks,
+             * but will be removed again before the end of this block,
+             * so free_tmps() is never normally called. Also, the
+             * sv_refcnt of the SVs doesn't have to be manipulated, since
+             * the ownership of 1 reference count is transferred directly
+             * from the tmps stack to the AV when the SV is stored.
+             *
+             * We disarm slots in the temps stack by storing PL_sv_undef
+             * there: it doesn't matter if that SV's refcount is
+             * repeatedly decremented during a croak. But usually this is
+             * only an interim measure. By the end of this code block
+             * we try where possible to not leave any PL_sv_undef's on the
+             * tmps stack e.g. by shuffling newer entries down.
+             *
+             * There is one case where we don't copy: non-magical
+             * SvTEMP(sv)'s with a ref count of 1. The only owner of these
+             * is on the tmps stack, so its safe to directly steal the SV
+             * rather than copying. This is common in things like function
+             * returns, map etc, which all return a list of such SVs.
+             *
+             * Note however something like @a = (f())[0,0], where there is
+             * a danger of the same SV being shared:  this avoided because
+             * when the SV is stored as $a[0], its ref count gets bumped,
+             * so the RC==1 test fails and the second element is copied
+             * instead.
+             *
+             * We also use one slot in the tmps stack to hold an extra
+             * ref to the array, to ensure it doesn't get prematurely
+             * freed. Again, this is removed before the end of this block.
+             *
+             * Note that OPpASSIGN_COMMON_AGG is used to flag a possible
+             * @a = ($a[0]) case, but the current implementation uses the
+             * same algorithm regardless, so ignores that flag. (It *is*
+             * used in the hash branch below, however).
+            */
+
+            /* Reserve slots for ary, plus the elems we're about to copy,
+             * then protect ary and temporarily void the remaining slots
+             * with &PL_sv_undef */
+            EXTEND_MORTAL(nelems + 1);
+            PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple_NN(ary);
+            tmps_base = PL_tmps_ix + 1;
+            for (i = 0; i < nelems; i++)
+                PL_tmps_stack[tmps_base + i] = &PL_sv_undef;
+            PL_tmps_ix += nelems;
+
+            /* Make a copy of each RHS elem and save on the tmps_stack
+             * (or pass through where we can optimise away the copy) */
+
+            if (UNLIKELY(alias)) {
+                U32 lval = (gimme == G_ARRAY)
+                                ? (PL_op->op_flags & OPf_MOD || LVRET) : 0;
                 for (svp = relem; svp <= lastrelem; svp++) {
-                    /* see comment in S_aassign_copy_common about SV_NOSTEAL */
-                    *svp = sv_mortalcopy_flags(*svp,
-                            SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL);
-                    TAINT_NOT;
+                    SV *rsv = *svp;
+
+                    SvGETMAGIC(rsv);
+                    if (!SvROK(rsv))
+                        DIE(aTHX_ "Assigned value is not a reference");
+                    if (SvTYPE(SvRV(rsv)) > SVt_PVLV)
+                   /* diag_listed_as: Assigned value is not %s reference */
+                        DIE(aTHX_
+                           "Assigned value is not a SCALAR reference");
+                    if (lval)
+                        *svp = rsv = sv_mortalcopy(rsv);
+                    /* XXX else check for weak refs?  */
+                    rsv = SvREFCNT_inc_NN(SvRV(rsv));
+                    assert(tmps_base <= PL_tmps_max);
+                    PL_tmps_stack[tmps_base++] = rsv;
                 }
-                already_copied = TRUE;
             }
+            else {
+                for (svp = relem; svp <= lastrelem; svp++) {
+                    SV *rsv = *svp;
 
-            av_clear(ary);
-	    if (relem <= lastrelem)
-                av_extend(ary, lastrelem - relem);
-
-	    i = 0;
-	    while (relem <= lastrelem) {	/* gobble up all the rest */
-		SV **didstore;
-		if (LIKELY(!alias)) {
-                    if (already_copied)
-                        sv = *relem;
+                    if (SvTEMP(rsv) && !SvGMAGICAL(rsv) && SvREFCNT(rsv) == 1) {
+                        /* can skip the copy */
+                        SvREFCNT_inc_simple_void_NN(rsv);
+                        SvTEMP_off(rsv);
+                    }
                     else {
-                        if (LIKELY(*relem))
-                            /* before newSV, in case it dies */
-                            SvGETMAGIC(*relem);
-                        sv = newSV(0);
+                        SV *nsv;
+                        /* do get before newSV, in case it dies and leaks */
+                        SvGETMAGIC(rsv);
+                        nsv = newSV(0);
                         /* see comment in S_aassign_copy_common about
                          * SV_NOSTEAL */
-                        sv_setsv_flags(sv, *relem,
-                                    (SV_DO_COW_SVSETSV|SV_NOSTEAL));
-                        *relem = sv;
+                        sv_setsv_flags(nsv, rsv,
+                                (SV_DO_COW_SVSETSV|SV_NOSTEAL));
+                        rsv = *svp = nsv;
                     }
-		}
-		else {
-                    if (!already_copied)
-                        SvGETMAGIC(*relem);
-		    if (!SvROK(*relem))
-			DIE(aTHX_ "Assigned value is not a reference");
-		    if (SvTYPE(SvRV(*relem)) > SVt_PVLV)
-		   /* diag_listed_as: Assigned value is not %s reference */
-			DIE(aTHX_
-			   "Assigned value is not a SCALAR reference");
-		    if (lval && !already_copied)
-			*relem = sv_mortalcopy(*relem);
-		    /* XXX else check for weak refs?  */
-		    sv = SvREFCNT_inc_NN(SvRV(*relem));
-		}
-		relem++;
-                if (already_copied)
-                    SvREFCNT_inc_simple_void_NN(sv); /* undo mortal free */
-		didstore = av_store(ary,i++,sv);
-		if (magic) {
-		    if (!didstore)
-			sv_2mortal(sv);
-		    if (SvSMAGICAL(sv))
-			mg_set(sv);
-		}
-		TAINT_NOT;
-	    }
+
+                    assert(tmps_base <= PL_tmps_max);
+                    PL_tmps_stack[tmps_base++] = rsv;
+                }
+            }
+
+            if (SvRMAGICAL(ary) || AvFILLp(ary) >= 0) /* may be non-empty */
+                av_clear(ary);
+
+            /* store in the array, the SVs that are in the tmps stack */
+
+            tmps_base -= nelems;
+
+            if (SvRMAGICAL(ary) || SvREADONLY(ary) || !AvREAL(ary)) {
+                /* for arrays we can't cheat with, use the official API */
+                av_extend(ary, nelems - 1);
+                for (i = 0; i < nelems; i++) {
+                    SV **svp = &(PL_tmps_stack[tmps_base + i]);
+                    SV *rsv = *svp;
+                    /* A tied store won't take ownership of rsv, so keep
+                     * the 1 refcnt on the tmps stack; otherwise disarm
+                     * the tmps stack entry */
+                    if (av_store(ary, i, rsv))
+                        *svp = &PL_sv_undef;
+                    /* av_store() may have added set magic to rsv */;
+                    SvSETMAGIC(rsv);
+                }
+                /* disarm ary refcount: see comments below about leak */
+                PL_tmps_stack[tmps_base - 1] = &PL_sv_undef;
+            }
+            else {
+                /* directly access/set the guts of the AV */
+                SSize_t fill = nelems - 1;
+                if (fill > AvMAX(ary))
+                    av_extend_guts(ary, fill, &AvMAX(ary), &AvALLOC(ary),
+                                    &AvARRAY(ary));
+                AvFILLp(ary) = fill;
+                Copy(&(PL_tmps_stack[tmps_base]), AvARRAY(ary), nelems, SV*);
+                /* Quietly remove all the SVs from the tmps stack slots,
+                 * since ary has now taken ownership of the refcnt.
+                 * Also remove ary: which will now leak if we die before
+                 * the SvREFCNT_dec_NN(ary) below */
+                if (UNLIKELY(PL_tmps_ix >= tmps_base + nelems))
+                    Move(&PL_tmps_stack[tmps_base + nelems],
+                         &PL_tmps_stack[tmps_base - 1],
+                         PL_tmps_ix - (tmps_base + nelems) + 1,
+                         SV*);
+                PL_tmps_ix -= (nelems + 1);
+            }
+
 	    if (UNLIKELY(PL_delaymagic & DM_ARRAY_ISA))
+                /* its assumed @ISA set magic can't die and leak ary */
 		SvSETMAGIC(MUTABLE_SV(ary));
-	    LEAVE;
-	    break;
+            SvREFCNT_dec_NN(ary);
+
+            relem = lastrelem + 1;
+	    goto no_relems;
         }
 
 	case SVt_PVHV: {				/* normal hash */
-		SV *tmpstr;
-                int odd;
-                int duplicates = 0;
-		SV** topelem = relem;
-                SV **firsthashrelem = relem;
-                bool already_copied = FALSE;
 
-		hash = MUTABLE_HV(sv);
-		magic = SvMAGICAL(hash) != 0;
+            SV **svp;
+            bool dirty_tmps;
+            SSize_t i;
+            SSize_t tmps_base;
+            SSize_t nelems = lastrelem - relem + 1;
 
-                odd = ((lastrelem - firsthashrelem)&1)? 0 : 1;
-                if (UNLIKELY(odd)) {
-                    do_oddball(lastrelem, firsthashrelem);
-                    /* we have firstlelem to reuse, it's not needed anymore
-		     */
-                    *(lastrelem+1) = &PL_sv_undef;
+	    hash = MUTABLE_HV(lsv);
+
+            if (UNLIKELY(nelems & 1)) {
+                do_oddball(lastrelem, relem);
+                /* we have firstlelem to reuse, it's not needed any more */
+                *++lastrelem = &PL_sv_undef;
+                nelems++;
+            }
+
+            /* See the SVt_PVAV branch above for a long description of
+             * how the following all works. The main difference for hashes
+             * is that we treat keys and values separately (and have
+             * separate loops for them): as for arrays, values are always
+             * copied (except for the SvTEMP optimisation), since they
+             * need to be stored in the hash; while keys are only
+             * processed where they might get prematurely freed or
+             * whatever. */
+
+            /* tmps stack slots:
+             * * reserve a slot for the hash keepalive;
+             * * reserve slots for the hash values we're about to copy;
+             * * preallocate for the keys we'll possibly copy or refcount bump
+             *   later;
+             * then protect hash and temporarily void the remaining
+             * value slots with &PL_sv_undef */
+            EXTEND_MORTAL(nelems + 1);
+
+             /* convert to number of key/value pairs */
+             nelems >>= 1;
+
+            PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple_NN(hash);
+            tmps_base = PL_tmps_ix + 1;
+            for (i = 0; i < nelems; i++)
+                PL_tmps_stack[tmps_base + i] = &PL_sv_undef;
+            PL_tmps_ix += nelems;
+
+            /* Make a copy of each RHS hash value and save on the tmps_stack
+             * (or pass through where we can optimise away the copy) */
+
+            for (svp = relem + 1; svp <= lastrelem; svp += 2) {
+                SV *rsv = *svp;
+
+                if (SvTEMP(rsv) && !SvGMAGICAL(rsv) && SvREFCNT(rsv) == 1) {
+                    /* can skip the copy */
+                    SvREFCNT_inc_simple_void_NN(rsv);
+                    SvTEMP_off(rsv);
+                }
+                else {
+                    SV *nsv;
+                    /* do get before newSV, in case it dies and leaks */
+                    SvGETMAGIC(rsv);
+                    nsv = newSV(0);
+                    /* see comment in S_aassign_copy_common about
+                     * SV_NOSTEAL */
+                    sv_setsv_flags(nsv, rsv,
+                            (SV_DO_COW_SVSETSV|SV_NOSTEAL));
+                    rsv = *svp = nsv;
                 }
 
-		ENTER;
-		SAVEFREESV(SvREFCNT_inc_simple_NN(sv));
+                assert(tmps_base <= PL_tmps_max);
+                PL_tmps_stack[tmps_base++] = rsv;
+            }
+            tmps_base -= nelems;
 
-                /* We need to clear hash. The is a danger that if we do this,
-                 * elements on the RHS may be prematurely freed, e.g.
-                 *   %h = (foo => $h{bar});
-                 * In the case of possible commonality, make a copy of each
-                 * RHS SV *before* clearing the hash, and add a reference
-                 * from the tmps stack, so that it doesn't leak on death.
+
+            /* possibly protect keys */
+
+            if (UNLIKELY(gimme == G_ARRAY)) {
+                /* handle e.g.
+                *     @a = ((%h = ($$r, 1)), $r = "x");
+                *     $_++ for %h = (1,2,3,4);
+                */
+                EXTEND_MORTAL(nelems);
+                for (svp = relem; svp <= lastrelem; svp += 2)
+                    *svp = sv_mortalcopy_flags(*svp,
+                                SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL);
+            }
+            else if (PL_op->op_private & OPpASSIGN_COMMON_AGG) {
+                /* for possible commonality, e.g.
+                 *       %h = ($h{a},1)
+                 * avoid premature freeing RHS keys by mortalising
+                 * them.
+                 * For a magic element, make a copy so that its magic is
+                 * called *before* the hash is emptied (which may affect
+                 * a tied value for example).
+                 * In theory we should check for magic keys in all
+                 * cases, not just under OPpASSIGN_COMMON_AGG, but in
+                 * practice, !OPpASSIGN_COMMON_AGG implies only
+                 * constants or padtmps on the RHS.
                  */
-
-                if (   (PL_op->op_private & OPpASSIGN_COMMON_AGG)
-                    && (relem <= lastrelem)
-                    && (magic || HvUSEDKEYS(hash)))
-                {
-                    SV **svp;
-                    EXTEND_MORTAL(lastrelem - relem + 1);
-                    for (svp = relem; svp <= lastrelem; svp++) {
+                EXTEND_MORTAL(nelems);
+                for (svp = relem; svp <= lastrelem; svp += 2) {
+                    SV *rsv = *svp;
+                    if (UNLIKELY(SvGMAGICAL(rsv))) {
+                        SSize_t n;
                         *svp = sv_mortalcopy_flags(*svp,
                                 SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL);
-                        TAINT_NOT;
+                        /* allow other branch to continue pushing
+                         * onto tmps stack without checking each time */
+                        n = (lastrelem - relem) >> 1;
+                        EXTEND_MORTAL(n);
                     }
-                    already_copied = TRUE;
+                    else
+                        PL_tmps_stack[++PL_tmps_ix] =
+                                    SvREFCNT_inc_simple_NN(rsv);
                 }
+            }
 
-		hv_clear(hash);
+            if (SvRMAGICAL(hash) || HvUSEDKEYS(hash))
+                hv_clear(hash);
 
-		while (LIKELY(relem < lastrelem+odd)) {	/* gobble up all the rest */
-		    HE *didstore;
-                    assert(*relem);
-		    /* Copy the key if aassign is called in lvalue context,
-		       to avoid having the next op modify our rhs.  Copy
-		       it also if it is gmagical, lest it make the
-		       hv_store_ent call below croak, leaking the value. */
-		    sv = (lval || SvGMAGICAL(*relem)) && !already_copied
-			 ? sv_mortalcopy(*relem)
-			 : *relem;
-		    relem++;
-                    assert(*relem);
-                    if (already_copied)
-                        tmpstr = *relem++;
-                    else {
-                        SvGETMAGIC(*relem);
-                        tmpstr = newSV(0);
-                        sv_setsv_nomg(tmpstr,*relem++);	/* value */
+            /* now assign the keys and values to the hash */
+
+            dirty_tmps = FALSE;
+
+            if (UNLIKELY(gimme == G_ARRAY)) {
+                /* @a = (%h = (...)) etc */
+                SV **svp;
+                SV **topelem = relem;
+
+                for (i = 0, svp = relem; svp <= lastrelem; i++, svp++) {
+                    SV *key = *svp++;
+                    SV *val = *svp;
+                    /* remove duplicates from list we return */
+                    if (!hv_exists_ent(hash, key, 0)) {
+                        /* copy key back: possibly to an earlier
+                         * stack location if we encountered dups earlier,
+                         * The values will be updated later
+                         */
+                        *topelem = key;
+                        topelem += 2;
                     }
-
-		    if (gimme == G_ARRAY) {
-			if (hv_exists_ent(hash, sv, 0))
-			    /* key overwrites an existing entry */
-			    duplicates += 2;
-			else {
-			    /* copy element back: possibly to an earlier
-			     * stack location if we encountered dups earlier,
-			     * possibly to a later stack location if odd */
-			    *topelem++ = sv;
-			    *topelem++ = tmpstr;
-			}
-		    }
-                    if (already_copied)
-                        SvREFCNT_inc_simple_void_NN(tmpstr); /* undo mortal free */
-		    didstore = hv_store_ent(hash,sv,tmpstr,0);
-		    if (magic) {
-			if (!didstore) sv_2mortal(tmpstr);
-			SvSETMAGIC(tmpstr);
-                    }
-		    TAINT_NOT;
-		}
-		LEAVE;
-                if (duplicates && gimme == G_ARRAY) {
+                    /* A tied store won't take ownership of val, so keep
+                     * the 1 refcnt on the tmps stack; otherwise disarm
+                     * the tmps stack entry */
+                    if (hv_store_ent(hash, key, val, 0))
+                        PL_tmps_stack[tmps_base + i] = &PL_sv_undef;
+                    else
+                        dirty_tmps = TRUE;
+                    /* hv_store_ent() may have added set magic to val */;
+                    SvSETMAGIC(val);
+                }
+                if (topelem < svp) {
                     /* at this point we have removed the duplicate key/value
                      * pairs from the stack, but the remaining values may be
                      * wrong; i.e. with (a 1 a 2 b 3) on the stack we've removed
                      * the (a 2), but the stack now probably contains
                      * (a <freed> b 3), because { hv_save(a,1); hv_save(a,2) }
                      * obliterates the earlier key. So refresh all values. */
-                    lastrelem -= duplicates;
-                    relem = firsthashrelem;
-                    while (relem < lastrelem+odd) {
+                    lastrelem = topelem - 1;
+                    while (relem < lastrelem) {
                         HE *he;
                         he = hv_fetch_ent(hash, *relem++, 0, 0);
                         *relem++ = (he ? HeVAL(he) : &PL_sv_undef);
                     }
                 }
-                if (odd && gimme == G_ARRAY) lastrelem++;
-	    }
-	    break;
-	default:
-	    if (SvIMMORTAL(sv)) {
-		if (relem <= lastrelem)
-		    relem++;
-		break;
-	    }
-	    if (relem <= lastrelem) {
-		if (UNLIKELY(
-		  SvTEMP(sv) && !SvSMAGICAL(sv) && SvREFCNT(sv) == 1 &&
-		  (!isGV_with_GP(sv) || SvFAKE(sv)) && ckWARN(WARN_MISC)
-		))
-		    Perl_warner(aTHX_
-		       packWARN(WARN_MISC),
-		      "Useless assignment to a temporary"
-		    );
-		sv_setsv(sv, *relem);
-		*(relem++) = sv;
-	    }
-	    else
-		sv_setsv(sv, &PL_sv_undef);
-	    SvSETMAGIC(sv);
-	    break;
+            }
+            else {
+                SV **svp;
+                for (i = 0, svp = relem; svp <= lastrelem; i++, svp++) {
+                    SV *key = *svp++;
+                    SV *val = *svp;
+                    if (hv_store_ent(hash, key, val, 0))
+                        PL_tmps_stack[tmps_base + i] = &PL_sv_undef;
+                    else
+                        dirty_tmps = TRUE;
+                    /* hv_store_ent() may have added set magic to val */;
+                    SvSETMAGIC(val);
+                }
+            }
+
+            if (dirty_tmps) {
+                /* there are still some 'live' recounts on the tmps stack
+                 * - usually caused by storing into a tied hash. So let
+                 * free_tmps() do the proper but slow job later.
+                 * Just disarm hash refcount: see comments below about leak
+                 */
+                PL_tmps_stack[tmps_base - 1] = &PL_sv_undef;
+            }
+            else {
+                /* Quietly remove all the SVs from the tmps stack slots,
+                 * since hash has now taken ownership of the refcnt.
+                 * Also remove hash: which will now leak if we die before
+                 * the SvREFCNT_dec_NN(hash) below */
+                if (UNLIKELY(PL_tmps_ix >= tmps_base + nelems))
+                    Move(&PL_tmps_stack[tmps_base + nelems],
+                         &PL_tmps_stack[tmps_base - 1],
+                         PL_tmps_ix - (tmps_base + nelems) + 1,
+                         SV*);
+                PL_tmps_ix -= (nelems + 1);
+            }
+
+            SvREFCNT_dec_NN(hash);
+
+            relem = lastrelem + 1;
+	    goto no_relems;
 	}
-    }
+
+	default:
+	    if (!SvIMMORTAL(lsv)) {
+                if (UNLIKELY(
+                  SvTEMP(lsv) && !SvSMAGICAL(lsv) && SvREFCNT(lsv) == 1 &&
+                  (!isGV_with_GP(lsv) || SvFAKE(lsv)) && ckWARN(WARN_MISC)
+                ))
+                    Perl_warner(aTHX_
+                       packWARN(WARN_MISC),
+                      "Useless assignment to a temporary"
+                    );
+                sv_setsv(lsv, *relem);
+                *relem = lsv;
+                SvSETMAGIC(lsv);
+            }
+            if (++relem > lastrelem)
+                goto no_relems;
+	    break;
+        } /* switch */
+    } /* while */
+
+
+  no_relems:
+
+    /* simplified lelem loop for when there are no relems left */
+    while (LIKELY(lelem <= lastlelem)) {
+	SV *lsv = *lelem++;
+	if (UNLIKELY(!lsv)) {
+	    lsv = *lelem++;
+	    ASSUME(SvTYPE(lsv) == SVt_PVAV);
+	}
+
+	switch (SvTYPE(lsv)) {
+	case SVt_PVAV:
+	    ary = MUTABLE_AV(lsv);
+            if (SvRMAGICAL(ary) || AvFILLp(ary) >= 0) {
+                av_clear(ary);
+                if (UNLIKELY(PL_delaymagic & DM_ARRAY_ISA))
+                    SvSETMAGIC(MUTABLE_SV(ary));
+            }
+            break;
+
+	case SVt_PVHV:
+	    hash = MUTABLE_HV(lsv);
+            if (SvRMAGICAL(hash) || HvUSEDKEYS(hash))
+                hv_clear(hash);
+            break;
+
+	default:
+	    if (!SvIMMORTAL(lsv)) {
+                sv_setsv(lsv, &PL_sv_undef);
+                SvSETMAGIC(lsv);
+            }
+	    break;
+        } /* switch */
+    } /* while */
+
     if (UNLIKELY(PL_delaymagic & ~DM_DELAY)) {
 	/* Will be used to set PL_tainting below */
 	Uid_t tmp_uid  = PerlProc_getuid();
@@ -1647,7 +1863,7 @@ PP(pp_aassign)
     else if (gimme == G_SCALAR) {
 	dTARGET;
 	SP = firstrelem;
-	SETi(lastrelem - firstrelem + 1);
+	SETi(firstlelem - firstrelem);
     }
     else {
 	if (ary || hash)

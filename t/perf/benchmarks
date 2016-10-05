@@ -418,6 +418,21 @@
         setup   => 'my ($x, @a) = 1..4;',
         code    => '($x, @a) = ()',
     },
+    'expr::aassign::mh_empty' => {
+        desc    => 'my hash assigned empty',
+        setup   => '',
+        code    => 'my %h = ()',
+    },
+    'expr::aassign::lhx_empty' => {
+        desc    => 'non-empty lexical hash assigned empty',
+        setup   => 'my %h = 1..4;',
+        code    => '%h = ()',
+    },
+    'expr::aassign::llhx_empty' => {
+        desc    => 'non-empty lexical var and hash assigned empty',
+        setup   => 'my ($x, %h) = 1..5;',
+        code    => '($x, %h) = ()',
+    },
     'expr::aassign::3m_empty' => {
         desc    => 'three my vars assigned empty',
         setup   => '',
@@ -460,6 +475,21 @@
         desc    => 'non-empty lexical var and array assigned 3 consts',
         setup   => 'my ($x, @a) = 1..4;',
         code    => '($x, @a) = (1,2,3)',
+    },
+    'expr::aassign::mh_4c' => {
+        desc    => 'my hash assigned 4 consts',
+        setup   => '',
+        code    => 'my %h = qw(a 1 b 2)',
+    },
+    'expr::aassign::lhx_4c' => {
+        desc    => 'non-empty lexical hash assigned 4 consts',
+        setup   => 'my %h = qw(a 1 b 2);',
+        code    => '%h = qw(c 3 d 4)',
+    },
+    'expr::aassign::llhx_5c' => {
+        desc    => 'non-empty lexical var and array assigned 5 consts',
+        setup   => 'my ($x, %h) = (1, qw(a 1 b 2));',
+        code    => '($x, %h) = (10, qw(c 3 d 4))',
     },
     'expr::aassign::3m_3c' => {
         desc    => 'three my vars assigned 3 consts',
@@ -779,6 +809,52 @@
         desc    => 'undef and single lexical RHS',
         setup   => 'my $x = 1;',
         code    => '($x,$x) = (undef, $x)',
+    },
+
+    # array assign of strings
+
+    'expr::aassign::la_3s' => {
+        desc    => 'assign 3 strings to empty lexical array',
+        setup   => 'my @a',
+        code    => '@a = (); @a = qw(abc defg hijkl);',
+    },
+    'expr::aassign::la_3ts' => {
+        desc    => 'assign 3 temp strings to empty lexical array',
+        setup   => 'my @a',
+        code    => '@a = (); @a = map $_, qw(abc defg hijkl);',
+    },
+    'expr::aassign::lan_3s' => {
+        desc    => 'assign 3 strings to non-empty lexical array',
+        setup   => 'my @a = qw(abc defg hijkl)',
+        code    => '@a = qw(abc defg hijkl);',
+    },
+    'expr::aassign::lan_3ts' => {
+        desc    => 'assign 3 temp strings to non-empty lexical array',
+        setup   => 'my @a = qw(abc defg hijkl)',
+        code    => '@a = map $_, qw(abc defg hijkl);',
+    },
+
+    # hash assign of strings
+
+    'expr::aassign::lh_2s' => {
+        desc    => 'assign 2 strings to empty lexical hash',
+        setup   => 'my %h',
+        code    => '%h = (); %h = qw(k1 abc k2 defg);',
+    },
+    'expr::aassign::lh_2ts' => {
+        desc    => 'assign 2 temp strings to empty lexical hash',
+        setup   => 'my %h',
+        code    => '%h = (); %h = map $_, qw(k1 abc k2 defg);',
+    },
+    'expr::aassign::lhn_2s' => {
+        desc    => 'assign 2 strings to non-empty lexical hash',
+        setup   => 'my %h = qw(k1 abc k2 defg);',
+        code    => '%h = qw(k1 abc k2 defg);',
+    },
+    'expr::aassign::lhn_2ts' => {
+        desc    => 'assign 2 temp strings to non-empty lexical hash',
+        setup   => 'my %h = qw(k1 abc k2 defg);',
+        code    => '%h = map $_, qw(k1 abc k2 defg);',
     },
 
 

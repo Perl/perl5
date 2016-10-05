@@ -147,7 +147,7 @@ sub FETCHSIZE { -1 }
 
 package main;
   
-plan(tests => 69);
+plan(tests => 73);
 
 {my @ary;
 
@@ -298,3 +298,35 @@ untie @ary;
 }
 
 is($seen{'DESTROY'}, 3);
+
+{
+    # check that a tied element assigned to an array doesn't remain tied
+
+    package Magical;
+
+    my $i = 10;
+
+    sub TIEARRAY { bless [1] }
+    sub TIEHASH  { bless [1] }
+    sub FETCHSIZE { 1; }
+    sub FETCH { $i++ }
+    sub STORE { $_[0][0] = $_[1]; }
+    sub FIRSTKEY { 0 }
+    sub NEXTKEY { }
+
+    package main;
+
+    my (@a, @b);
+    tie @a, 'Magical';
+    @b = @a;
+    is ($b[0],  10, "Magical array fetch 1");
+    $b[0] = 100;
+    is ($b[0], 100, "Magical array fetch 2");
+
+    my (%a, %b);
+    tie %a, 'Magical';
+    %b = %a;
+    is ($b{0},  11, "Magical hash fetch 1");
+    $b{0} = 100;
+    is ($b{0}, 100, "Magical hash fetch 2");
+}
