@@ -802,8 +802,10 @@ static int darwin_time_init() {
   return success;
 }
 
+typedef int clockid_t; /* to conform with POSIX prototypes */
+
 #ifdef TIME_HIRES_CLOCK_GETTIME_EMULATION
-static int clock_gettime(int clock_id, struct timespec *ts) {
+static int clock_gettime(clockid_t clock_id, struct timespec *ts) {
   if (darwin_time_init() && timebase_info.denom) {
     switch (clock_id) {
       case CLOCK_REALTIME:
@@ -837,7 +839,7 @@ static int clock_gettime(int clock_id, struct timespec *ts) {
 #endif /* TIME_HIRES_CLOCK_GETTIME_EMULATION */
 
 #ifdef TIME_HIRES_CLOCK_GETRES_EMULATION
-static int clock_getres(int clock_id, struct timespec *ts) {
+static int clock_getres(clockid_t clock_id, struct timespec *ts) {
   if (darwin_time_init() && timebase_info.denom) {
     switch (clock_id) {
       case CLOCK_REALTIME:
@@ -859,7 +861,7 @@ static int clock_getres(int clock_id, struct timespec *ts) {
 #endif /* TIME_HIRES_CLOCK_GETRES_EMULATION */
 
 #ifdef TIME_HIRES_CLOCK_NANOSLEEP_EMULATION
-static int clock_nanosleep(int clock_id, int flags,
+static int clock_nanosleep(clockid_t clock_id, int flags,
 			   const struct timespec *rqtp,
 			   struct timespec *rmtp) {
   if (darwin_time_init()) {
