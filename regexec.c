@@ -5343,6 +5343,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     regnode *next;
     U32 n = 0;	/* general value; init to avoid compiler warning */
     SSize_t ln = 0; /* len or last;  init to avoid compiler warning */
+    SSize_t endref = 0; /* offset of end of backref when ln is start */
     char *locinput = startpos;
     char *pushinput; /* where to continue after a PUSH */
     I32 nextchr;   /* is always set to UCHARAT(locinput), or -1 at EOS */
@@ -6673,10 +6674,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 	  do_nref_ref_common:
 	    ln = rex->offs[n].start;
+	    endref = rex->offs[n].end;
 	    reginfo->poscache_iter = reginfo->poscache_maxiter; /* Void cache */
-	    if (rex->lastparen < n || ln == -1)
+	    if (rex->lastparen < n || ln == -1 || endref == -1)
 		sayNO;			/* Do not match unless seen CLOSEn. */
-	    if (ln == rex->offs[n].end)
+	    if (ln == endref)
 		break;
 
 	    s = reginfo->strbeg + ln;
@@ -6690,7 +6692,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     * not going off the end given by reginfo->strend, and
                     * returns in <limit> upon success, how much of the
                     * current input was matched */
-		if (! foldEQ_utf8_flags(s, NULL, rex->offs[n].end - ln, utf8_target,
+		if (! foldEQ_utf8_flags(s, NULL, endref - ln, utf8_target,
 				    locinput, &limit, 0, utf8_target, utf8_fold_flags))
 		{
 		    sayNO;
@@ -6705,7 +6707,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		(type == REF ||
 		 UCHARAT(s) != fold_array[nextchr]))
 		sayNO;
-	    ln = rex->offs[n].end - ln;
+	    ln = endref - ln;
 	    if (locinput + ln > reginfo->strend)
 		sayNO;
 	    if (ln > 1 && (type == REF

@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 834;  # Update this when adding/deleting tests.
+plan tests => 835;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1886,6 +1886,20 @@ EOF_CODE
             no warnings qw/uninitialized/;
             is($target =~ $re, $result, "[perl #130522] with target '$disp'");
         }
+    }
+    {
+	# [perl #129377] backref to an unmatched capture should not cause
+	# reading before start of string.
+	SKIP: {
+	    skip "no re-debug under miniperl" if is_miniperl;
+	    my $prog = <<'EOP';
+use re qw(Debug EXECUTE);
+"x" =~ m{ () y | () \1 }x;
+EOP
+	    fresh_perl_like($prog, qr{
+		\A (?! .* ^ \s+ - )
+	    }msx, { stderr => 1 }, "Offsets in debug output are not negative");
+	}
     }
 } # End of sub run_tests
 
