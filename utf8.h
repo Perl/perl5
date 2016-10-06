@@ -526,13 +526,6 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
                                    | ((NATIVE_UTF8_TO_I8((U8)new))             \
                                        & UTF_CONTINUATION_MASK))
 
-/* If a value is anded with this, and the result is non-zero, then using the
- * original value in UTF8_ACCUMULATE will overflow, shifting bits off the left
- * */
-#define UTF_ACCUMULATION_OVERFLOW_MASK					\
-    (((UV) UTF_CONTINUATION_MASK) << ((sizeof(UV) * CHARBITS)           \
-           - UTF_ACCUMULATION_SHIFT))
-
 /* This works in the face of malformed UTF-8. */
 #define UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, e) (UTF8_IS_DOWNGRADEABLE_START(*s) \
                                                && ( (e) - (s) > 1)             \
@@ -718,26 +711,37 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 
 
 #define UTF8_ALLOW_EMPTY		0x0001	/* Allow a zero length string */
+#define UTF8_GOT_EMPTY                  UTF8_ALLOW_EMPTY
 
 /* Allow first byte to be a continuation byte */
 #define UTF8_ALLOW_CONTINUATION		0x0002
+#define UTF8_GOT_CONTINUATION		UTF8_ALLOW_CONTINUATION
 
-/* Allow second... bytes to be non-continuation bytes */
+/* Unexpected continuation byte */
 #define UTF8_ALLOW_NON_CONTINUATION	0x0004
+#define UTF8_GOT_NON_CONTINUATION	UTF8_ALLOW_NON_CONTINUATION
 
 /* expecting more bytes than were available in the string */
 #define UTF8_ALLOW_SHORT		0x0008
+#define UTF8_GOT_SHORT		        UTF8_ALLOW_SHORT
 
 /* Overlong sequence; i.e., the code point can be specified in fewer bytes. */
 #define UTF8_ALLOW_LONG                 0x0010
+#define UTF8_GOT_LONG                   UTF8_ALLOW_LONG
+
+/* Currently no way to allow overflow */
+#define UTF8_GOT_OVERFLOW               0x0020
 
 #define UTF8_DISALLOW_SURROGATE		0x0040	/* Unicode surrogates */
+#define UTF8_GOT_SURROGATE		UTF8_DISALLOW_SURROGATE
 #define UTF8_WARN_SURROGATE		0x0080
 
 #define UTF8_DISALLOW_NONCHAR           0x0100	/* Unicode non-character */
+#define UTF8_GOT_NONCHAR                UTF8_DISALLOW_NONCHAR
 #define UTF8_WARN_NONCHAR               0x0200	/*  code points */
 
 #define UTF8_DISALLOW_SUPER		0x0400	/* Super-set of Unicode: code */
+#define UTF8_GOT_SUPER		        UTF8_DISALLOW_SUPER
 #define UTF8_WARN_SUPER		        0x0800	/* points above the legal max */
 
 /* Code points which never were part of the original UTF-8 standard, which only
@@ -745,6 +749,7 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
  * The first byte of these code points is FE or FF on ASCII platforms.  If the
  * first byte is FF, it will overflow a 32-bit word. */
 #define UTF8_DISALLOW_ABOVE_31_BIT      0x1000
+#define UTF8_GOT_ABOVE_31_BIT           UTF8_DISALLOW_ABOVE_31_BIT
 #define UTF8_WARN_ABOVE_31_BIT          0x2000
 
 /* For back compat, these old names are misleading for UTF_EBCDIC */

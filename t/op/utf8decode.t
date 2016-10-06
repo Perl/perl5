@@ -123,28 +123,28 @@ __DATA__
 3.1.8 N7 -		7	80:bf:80:bf:80:bf:80	-	unexpected continuation byte 0x80
 3.1.9 N64 -	64	80:81:82:83:84:85:86:87:88:89:8a:8b:8c:8d:8e:8f:90:91:92:93:94:95:96:97:98:99:9a:9b:9c:9d:9e:9f:a0:a1:a2:a3:a4:a5:a6:a7:a8:a9:aa:ab:ac:ad:ae:af:b0:b1:b2:b3:b4:b5:b6:b7:b8:b9:ba:bb:bc:bd:be:bf	-	unexpected continuation byte 0x80
 3.2	Lonely start characters
-3.2.1 N32 -	64 	c0:20:c1:20:c2:20:c3:20:c4:20:c5:20:c6:20:c7:20:c8:20:c9:20:ca:20:cb:20:cc:20:cd:20:ce:20:cf:20:d0:20:d1:20:d2:20:d3:20:d4:20:d5:20:d6:20:d7:20:d8:20:d9:20:da:20:db:20:dc:20:dd:20:de:20:df:20	-	unexpected non-continuation byte 0x20, immediately after start byte 0xc0
+3.2.1 N34 -	64 	c0:20:c1:20:c2:20:c3:20:c4:20:c5:20:c6:20:c7:20:c8:20:c9:20:ca:20:cb:20:cc:20:cd:20:ce:20:cf:20:d0:20:d1:20:d2:20:d3:20:d4:20:d5:20:d6:20:d7:20:d8:20:d9:20:da:20:db:20:dc:20:dd:20:de:20:df:20	-	unexpected non-continuation byte 0x20, immediately after start byte 0xc0
 3.2.2 N16 -	32	e0:20:e1:20:e2:20:e3:20:e4:20:e5:20:e6:20:e7:20:e8:20:e9:20:ea:20:eb:20:ec:20:ed:20:ee:20:ef:20	-	unexpected non-continuation byte 0x20, immediately after start byte 0xe0
 3.2.3 N8 -	16	f0:20:f1:20:f2:20:f3:20:f4:20:f5:20:f6:20:f7:20	-	unexpected non-continuation byte 0x20, immediately after start byte 0xf0
 3.2.4 N4 -	8	f8:20:f9:20:fa:20:fb:20	-	unexpected non-continuation byte 0x20, immediately after start byte 0xf8
 3.2.5 N2 -	4	fc:20:fd:20	-	unexpected non-continuation byte 0x20, immediately after start byte 0xfc
 3.3	Sequences with last continuation byte missing
-3.3.1 n -	1	c0	-	1 byte, need 2
-3.3.2 n -	2	e0:80	-	2 bytes, need 3
-3.3.3 n -	3	f0:80:80	-	3 bytes, need 4
-3.3.4 n -	4	f8:80:80:80	-	4 bytes, need 5
-3.3.5 n -	5	fc:80:80:80:80	-	5 bytes, need 6
+3.3.1 N2 -	1	c0	-	1 byte, need 2
+3.3.2 N2 -	2	e0:80	-	2 bytes, need 3
+3.3.3 N2 -	3	f0:80:80	-	3 bytes, need 4
+3.3.4 N2 -	4	f8:80:80:80	-	4 bytes, need 5
+3.3.5 N2 -	5	fc:80:80:80:80	-	5 bytes, need 6
 3.3.6 n -	1	df	-	1 byte, need 2
 3.3.7 n -	2	ef:bf	-	2 bytes, need 3
 3.3.8 n -	3	f7:bf:bf	-	3 bytes, need 4
 3.3.9 n -	4	fb:bf:bf:bf	-	4 bytes, need 5
 3.3.10 n -	5	fd:bf:bf:bf:bf	-	5 bytes, need 6
 3.4	Concatenation of incomplete sequences
-3.4.1 N10 -	30	c0:e0:80:f0:80:80:f8:80:80:80:fc:80:80:80:80:df:ef:bf:f7:bf:bf:fb:bf:bf:bf:fd:bf:bf:bf:bf	-	unexpected non-continuation byte 0xe0, immediately after start byte 0xc0
+3.4.1 N15 -	30	c0:e0:80:f0:80:80:f8:80:80:80:fc:80:80:80:80:df:ef:bf:f7:bf:bf:fb:bf:bf:bf:fd:bf:bf:bf:bf	-	unexpected non-continuation byte 0xe0, immediately after start byte 0xc0
 3.5	Impossible bytes (but not with Perl's extended UTF-8)
 3.5.1 n -	1	fe	-	1 byte, need 7
 3.5.2 n -	1	ff	-	1 byte, need 13
-3.5.3 N4 -	4	fe:fe:ff:ff	-	byte 0xfe
+3.5.3 N5 -	4	fe:fe:ff:ff	-	byte 0xfe
 4	Overlong sequences
 4.1	Examples of an overlong ASCII character
 4.1.1 n -	2	c0:af	-	overlong

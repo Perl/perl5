@@ -782,10 +782,13 @@ C<curlen> bytes; C<*retlen> (if C<retlen> isn't NULL) will be set to
 the length, in bytes, of that character.
 
 The value of C<flags> determines the behavior when C<s> does not point to a
-well-formed UTF-8 character.  If C<flags> is 0, when a malformation is found,
-zero is returned and C<*retlen> is set so that (S<C<s> + C<*retlen>>) is the
-next possible position in C<s> that could begin a non-malformed character.
-Also, if UTF-8 warnings haven't been lexically disabled, a warning is raised.
+well-formed UTF-8 character.  If C<flags> is 0, encountering a malformation
+causes zero to be returned and C<*retlen> is set so that (S<C<s> + C<*retlen>>)
+is the next possible position in C<s> that could begin a non-malformed
+character.  Also, if UTF-8 warnings haven't been lexically disabled, a warning
+is raised.  Some UTF-8 input sequences may contain multiple malformations.
+This function tries to find every possible one in each call, so multiple
+warnings can be raised for each sequence.
 
 Various ALLOW flags can be set in C<flags> to allow (and not warn on)
 individual types of malformations, such as the sequence being overlong (that
@@ -877,17 +880,21 @@ UV
 Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 {
     const U8 * const s0 = s;
-    U8 * send;
+    U8 * send = NULL;           /* (initialized to silence compilers' wrong
+                                   warning) */
+    U32 possible_problems = 0;  /* A bit is set here for each potential problem
+                                   found as we go along */
     UV uv = *s;
-    STRLEN expectlen;
-    SV* sv = NULL;
-    UV outlier_ret = 0;	/* return value when input is in error or problematic
-			 */
-    UV pack_warn = 0;	/* Save result of packWARN() for later */
-    bool unexpected_non_continuation = FALSE;
-    bool overflowed = FALSE;
-    bool do_overlong_test = TRUE;   /* May have to skip this test */
+    STRLEN expectlen   = 0;     /* How long should this sequence be?
+                                   (initialized to silence compilers' wrong
+                                   warning) */
 
+    /* The below are used only if there is both an overlong malformation and a
+     * too short one.  Otherwise the first two are set to 's0' and 'send', and
+     * the third not used at all */
+    U8 * adjusted_s0 = (U8 *) s0;
+    U8 * adjusted_send;
+    UV uv_so_far = 0;   /* (Initialized to silence compilers' wrong warning) */
 
     PERL_ARGS_ASSERT_UTF8N_TO_UVCHR;
 
@@ -909,22 +916,21 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
      * returning to the caller C<*retlen> pointing to the very next byte (one
      * which is actually part of of the overflowing sequence), that could look
      * legitimate to the caller, which could discard the initial partial
-     * sequence and process the rest, inappropriately */
+     * sequence and process the rest, inappropriately.
+     *
+     * Some possible input sequences are malformed in more than one way.  This
+     * function goes to lengths to try to find all of them.  This is necessary
+     * for correctness, as the inputs may allow one malformation but not
+     * another, and if we abandon searching for others after finding the
+     * allowed one, we could allow in something that shouldn't have been.
+     */
 
-    /* Zero length strings, if allowed, of necessity are zero */
     if (UNLIKELY(curlen == 0)) {
-	if (retlen) {
-	    *retlen = 0;
-	}
-
-	if (flags & UTF8_ALLOW_EMPTY) {
-	    return 0;
-	}
-	if (! (flags & UTF8_CHECK_ONLY)) {
-	    sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s (empty string)",
-                                                malformed_text));
-	}
-	goto malformed;
+        possible_problems |= UTF8_GOT_EMPTY;
+        curlen = 0;
+        uv = 0; /* XXX It could be argued that this should be
+                   UNICODE_REPLACEMENT? */
+	goto ready_to_handle_errors;
     }
 
     expectlen = UTF8SKIP(s);
@@ -944,22 +950,10 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 
     /* A continuation character can't start a valid sequence */
     if (UNLIKELY(UTF8_IS_CONTINUATION(uv))) {
-	if (flags & UTF8_ALLOW_CONTINUATION) {
-	    if (retlen) {
-		*retlen = 1;
-	    }
-	    return UNICODE_REPLACEMENT;
-	}
-
-	if (! (flags & UTF8_CHECK_ONLY)) {
-	    sv = sv_2mortal(Perl_newSVpvf(aTHX_
-                            "%s: %s (unexpected continuation byte 0x%02x,"
-                            " with no preceding start byte)",
-                            malformed_text,
-                            _byte_dump_string(s0, 1), *s0));
-	}
-	curlen = 1;
-	goto malformed;
+	possible_problems |= UTF8_GOT_CONTINUATION;
+        curlen = 1;
+        uv = UNICODE_REPLACEMENT;
+	goto ready_to_handle_errors;
     }
 
     /* Here is not a continuation byte, nor an invariant.  The only thing left
@@ -973,124 +967,103 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     /* Now, loop through the remaining bytes in the character's sequence,
      * accumulating each into the working value as we go.  Be sure to not look
      * past the end of the input string */
-    send =  (U8*) s0 + ((expectlen <= curlen) ? expectlen : curlen);
-
+    send = adjusted_send
+                    = (U8*) s0 + ((expectlen <= curlen) ? expectlen : curlen);
     for (s = s0 + 1; s < send; s++) {
 	if (LIKELY(UTF8_IS_CONTINUATION(*s))) {
-	    if (uv & UTF_ACCUMULATION_OVERFLOW_MASK) {
-
-		/* The original implementors viewed this malformation as more
-		 * serious than the others (though I, khw, don't understand
-		 * why, since other malformations also give very very wrong
-		 * results), so there is no way to turn off checking for it.
-		 * Set a flag, but keep going in the loop, so that we absorb
-		 * the rest of the bytes that comprise the character. */
-		overflowed = TRUE;
-	    }
 	    uv = UTF8_ACCUMULATE(uv, *s);
-	}
-	else {
-	    /* Here, found a non-continuation before processing all expected
-	     * bytes.  This byte begins a new character, so quit, even if
-	     * allowing this malformation. */
-	    unexpected_non_continuation = TRUE;
-	    break;
-	}
+            continue;
+        }
+
+        /* Here, found a non-continuation before processing all expected bytes.
+         * This byte indicates the beginning of a new character, so quit, even
+         * if allowing this malformation. */
+        curlen = s - s0;    /* Save how many bytes we actually got */
+        possible_problems |= UTF8_GOT_NON_CONTINUATION;
+        goto finish_short;
     } /* End of loop through the character's bytes */
 
     /* Save how many bytes were actually in the character */
     curlen = s - s0;
 
-    /* The loop above finds two types of malformations: non-continuation and/or
-     * overflow.  The non-continuation malformation is really a too-short
-     * malformation, as it means that the current character ended before it was
-     * expected to (being terminated prematurely by the beginning of the next
-     * character, whereas in the too-short malformation there just are too few
-     * bytes available to hold the character.  In both cases, the check below
-     * that we have found the expected number of bytes would fail if executed.)
-     * Thus the non-continuation malformation is really unnecessary, being a
-     * subset of the too-short malformation.  But there may be existing
-     * applications that are expecting the non-continuation type, so we retain
-     * it, and return it in preference to the too-short malformation.  (If this
-     * code were being written from scratch, the two types might be collapsed
-     * into one.)  I, khw, am also giving priority to returning the
-     * non-continuation and too-short malformations over overflow when multiple
-     * ones are present.  I don't know of any real reason to prefer one over
-     * the other, except that it seems to me that multiple-byte errors trumps
-     * errors from a single byte */
-    if (UNLIKELY(unexpected_non_continuation)) {
-	if (!(flags & UTF8_ALLOW_NON_CONTINUATION)) {
-	    if (! (flags & UTF8_CHECK_ONLY)) {
-                sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s",
-                                unexpected_non_continuation_text(s0,
-                                                             send - s0,
-                                                             s - s0,
-                                                             (int) expectlen)));
-	    }
-	    goto malformed;
-	}
-	uv = UNICODE_REPLACEMENT;
+    /* Did we get all the continuation bytes that were expected?  Note that we
+     * know this result even without executing the loop above.  But we had to
+     * do the loop to see if there are unexpected non-continuations. */
+    if (UNLIKELY(curlen < expectlen)) {
+	possible_problems |= UTF8_GOT_SHORT;
 
-	/* Skip testing for overlongs, as the REPLACEMENT may not be the same
-	 * as what the original expectations were. */
-	do_overlong_test = FALSE;
-	if (retlen) {
-	    *retlen = curlen;
-	}
-    }
-    else if (UNLIKELY(curlen < expectlen)) {
-	if (! (flags & UTF8_ALLOW_SHORT)) {
-	    if (! (flags & UTF8_CHECK_ONLY)) {
-		sv = sv_2mortal(Perl_newSVpvf(aTHX_
-                                "%s: %s (too short; got %d byte%s, need %d)",
-                                malformed_text,
-                                _byte_dump_string(s0, send - s0),
-                                (int)curlen,
-                                curlen == 1 ? "" : "s",
-                                (int)expectlen));
-	    }
-	    goto malformed;
-	}
-	uv = UNICODE_REPLACEMENT;
-	do_overlong_test = FALSE;
-	if (retlen) {
-	    *retlen = curlen;
-	}
+      finish_short:
+        uv_so_far = uv;
+        uv = UNICODE_REPLACEMENT;
     }
 
-    if (UNLIKELY(overflowed)) {
-        sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s: %s (overflows)",
-                                            malformed_text,
-                                            _byte_dump_string(s0, send - s0)));
-	goto malformed;
+    /* Note that there are two types of too-short malformation.  One is when
+     * there is actual wrong data before the normal termination of the
+     * sequence.  The other is that the sequence wasn't complete before the end
+     * of the data we are allowed to look at, based on the input 'curlen'.
+     * This means that we were passed data for a partial character, but it is
+     * valid as far as we saw.  The other is definitely invalid.  This
+     * distinction could be important to a caller, so the two types are kept
+     * separate. */
+
+    /* Check for overflow */
+    if (UNLIKELY(does_utf8_overflow(s0, send))) {
+        possible_problems |= UTF8_GOT_OVERFLOW;
+        uv = UNICODE_REPLACEMENT;
     }
 
-    if (do_overlong_test
-	&& expectlen > (STRLEN) OFFUNISKIP(uv)
-	&& ! (flags & UTF8_ALLOW_LONG))
+    /* Check for overlong.  If no problems so far, 'uv' is the correct code
+     * point value.  Simply see if it is expressible in fewer bytes.  Otherwise
+     * we must look at the UTF-8 byte sequence itself to see if it is for an
+     * overlong */
+    if (     (   LIKELY(! possible_problems)
+              && UNLIKELY(expectlen > (STRLEN) OFFUNISKIP(uv)))
+        || (   UNLIKELY(  possible_problems)
+            && (   UNLIKELY(! UTF8_IS_START(*s0))
+                || (   curlen > 1
+                    && UNLIKELY(is_utf8_overlong_given_start_byte_ok(s0,
+                                                                send - s0))))))
     {
-	/* The overlong malformation has lower precedence than the others.
-	 * Note that if this malformation is allowed, we return the actual
-	 * value, instead of the replacement character.  This is because this
-	 * value is actually well-defined. */
-	if (! (flags & UTF8_CHECK_ONLY)) {
-            U8 tmpbuf[UTF8_MAXBYTES+1];
-            const U8 * const e = uvchr_to_utf8(tmpbuf, uv);
-            sv = sv_2mortal(Perl_newSVpvf(aTHX_
-                  "%s: %s (overlong; instead use %s to represent U+%0*"UVXf")",
-                  malformed_text,
-                  _byte_dump_string(s0, send - s0),
-                  _byte_dump_string(tmpbuf, e - tmpbuf),
-                  ((uv < 256) ? 2 : 4), /* Field width of 2 for small code
-                                           points */
-                  uv));
-	}
-	goto malformed;
+        possible_problems |= UTF8_GOT_LONG;
+
+        /* A convenience macro that matches either of the too-short conditions.
+         * */
+#       define UTF8_GOT_TOO_SHORT (UTF8_GOT_SHORT|UTF8_GOT_NON_CONTINUATION)
+
+        if (UNLIKELY(possible_problems & UTF8_GOT_TOO_SHORT)) {
+            UV min_uv = uv_so_far;
+            STRLEN i;
+
+            /* Here, the input is both overlong and is missing some trailing
+             * bytes.  There is no single code point it could be for, but there
+             * may be enough information present to determine if what we have
+             * so far is for an unallowed code point, such as for a surrogate.
+             * The code below has the intelligence to determine this, but just
+             * for non-overlong UTF-8 sequences.  What we do here is calculate
+             * the smallest code point the input could represent if there were
+             * no too short malformation.  Then we compute and save the UTF-8
+             * for that, which is what the code below looks at instead of the
+             * raw input.  It turns out that the smallest such code point is
+             * all we need. */
+            for (i = curlen; i < expectlen; i++) {
+                min_uv = UTF8_ACCUMULATE(min_uv,
+                                     I8_TO_NATIVE_UTF8(UTF_CONTINUATION_MARK));
+            }
+
+            Newx(adjusted_s0, OFFUNISKIP(min_uv) + 1, U8);
+            SAVEFREEPV((U8 *) adjusted_s0);    /* Needed because we may not get
+                                                  to free it ourselves if
+                                                  warnings are made fatal */
+            adjusted_send = uvoffuni_to_utf8_flags(adjusted_s0, min_uv, 0);
+        }
     }
 
-    /* Here, the input is considered to be well-formed, but it still could be a
-     * problematic code point that is not allowed by the input parameters. */
-    if (uv >= UNICODE_SURROGATE_FIRST /* isn't problematic if < this */
+    /* Now check that the input isn't for a problematic code point not allowed
+     * by the input parameters. */
+                                              /* isn't problematic if < this */
+    if (   (   (   LIKELY(! possible_problems) && uv >= UNICODE_SURROGATE_FIRST)
+            || (   UNLIKELY(possible_problems)
+                && isUTF8_POSSIBLY_PROBLEMATIC(*adjusted_s0)))
 	&& ((flags & ( UTF8_DISALLOW_NONCHAR
                       |UTF8_DISALLOW_SURROGATE
                       |UTF8_DISALLOW_SUPER
@@ -1099,151 +1072,386 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
                       |UTF8_WARN_SURROGATE
                       |UTF8_WARN_SUPER
                       |UTF8_WARN_ABOVE_31_BIT))
+                   /* In case of a malformation, 'uv' is not valid, and has
+                    * been changed to something in the Unicode range.
+                    * Currently we don't output a deprecation message if there
+                    * is already a malformation, so we don't have to special
+                    * case the test immediately below */
             || (   UNLIKELY(uv > MAX_NON_DEPRECATED_CP)
                 && ckWARN_d(WARN_DEPRECATED))))
     {
-	if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
+        /* If there were no malformations, or the only malformation is an
+         * overlong, 'uv' is valid */
+        if (LIKELY(! (possible_problems & ~UTF8_GOT_LONG))) {
+            if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
+                possible_problems |= UTF8_GOT_SURROGATE;
+            }
+            else if (UNLIKELY(uv > PERL_UNICODE_MAX)) {
+                possible_problems |= UTF8_GOT_SUPER;
+            }
+            else if (UNLIKELY(UNICODE_IS_NONCHAR(uv))) {
+                possible_problems |= UTF8_GOT_NONCHAR;
+            }
+        }
+        else {  /* Otherwise, need to look at the source UTF-8, possibly
+                   adjusted to be non-overlong */
 
-            /* By adding UTF8_CHECK_ONLY to the test, we avoid unnecessary
-             * generation of the sv, since no warnings are raised under CHECK */
-	    if ((flags & (UTF8_WARN_SURROGATE|UTF8_CHECK_ONLY)) == UTF8_WARN_SURROGATE
-		&& ckWARN_d(WARN_SURROGATE))
-	    {
-		sv = sv_2mortal(Perl_newSVpvf(aTHX_ "UTF-16 surrogate U+%04"UVXf"", uv));
-		pack_warn = packWARN(WARN_SURROGATE);
-	    }
-	    if (flags & UTF8_DISALLOW_SURROGATE) {
-		goto disallowed;
-	    }
-	}
-	else if (UNLIKELY(uv > PERL_UNICODE_MAX)) {
-	    if ((flags & (UTF8_WARN_SUPER|UTF8_CHECK_ONLY)) == UTF8_WARN_SUPER
-                && ckWARN_d(WARN_NON_UNICODE))
-	    {
-		sv = sv_2mortal(Perl_newSVpvf(aTHX_
-                   "Code point 0x%04"UVXf" is not Unicode, may not be portable",
-                   uv));
-		pack_warn = packWARN(WARN_NON_UNICODE);
-	    }
-
-            /* The maximum code point ever specified by a standard was
-             * 2**31 - 1.  Anything larger than that is a Perl extension that
-             * very well may not be understood by other applications (including
-             * earlier perl versions on EBCDIC platforms).  We test for these
-             * after the regular SUPER ones, and before possibly bailing out,
-             * so that the slightly more dire warning will override the regular
-             * one. */
-            if (   (flags & (UTF8_WARN_ABOVE_31_BIT
-                            |UTF8_WARN_SUPER
-                            |UTF8_DISALLOW_ABOVE_31_BIT))
-                && UNLIKELY(is_utf8_cp_above_31_bits(s0, send)))
+            if (UNLIKELY(NATIVE_UTF8_TO_I8(*adjusted_s0)
+                                >= FIRST_START_BYTE_THAT_IS_DEFINITELY_SUPER))
             {
-                if (  ! (flags & UTF8_CHECK_ONLY)
-                    &&  (flags & (UTF8_WARN_ABOVE_31_BIT|UTF8_WARN_SUPER))
-                    &&  ckWARN_d(WARN_UTF8))
+                possible_problems |= UTF8_GOT_SUPER;
+            }
+            else if (curlen > 1) {
+                if (UNLIKELY(IS_UTF8_2_BYTE_SUPER(
+                                      NATIVE_UTF8_TO_I8(*adjusted_s0),
+                                      NATIVE_UTF8_TO_I8(*(adjusted_s0 + 1)))))
                 {
-                    sv = sv_2mortal(Perl_newSVpvf(aTHX_
-                        "Code point 0x%"UVXf" is not Unicode, and not portable",
-                        uv));
-                    pack_warn = packWARN(WARN_UTF8);
+                    possible_problems |= UTF8_GOT_SUPER;
                 }
-                if (flags & UTF8_DISALLOW_ABOVE_31_BIT) {
-                    goto disallowed;
+                else if (UNLIKELY(IS_UTF8_2_BYTE_SURROGATE(
+                                      NATIVE_UTF8_TO_I8(*adjusted_s0),
+                                      NATIVE_UTF8_TO_I8(*(adjusted_s0 + 1)))))
+                {
+                    possible_problems |= UTF8_GOT_SURROGATE;
                 }
             }
 
-	    if (flags & UTF8_DISALLOW_SUPER) {
-		goto disallowed;
-	    }
+            /* We need a complete well-formed UTF-8 character to discern
+             * non-characters, so can't look for them here */
+        }
+    }
 
-            /* The deprecated warning overrides any non-deprecated one */
-            if (UNLIKELY(uv > MAX_NON_DEPRECATED_CP) && ckWARN_d(WARN_DEPRECATED))
-            {
-                sv = sv_2mortal(Perl_newSVpvf(aTHX_ cp_above_legal_max,
-                                              uv, MAX_NON_DEPRECATED_CP));
-                pack_warn = packWARN(WARN_DEPRECATED);
+  ready_to_handle_errors:
+
+    /* At this point:
+     * curlen               contains the number of bytes in the sequence that
+     *                      this call should advance the input by.
+     * possible_problems'   is 0 if there weren't any problems; otherwise a bit
+     *                      is set in it for each potential problem found.
+     * uv                   contains the code point the input sequence
+     *                      represents; or if there is a problem that prevents
+     *                      a well-defined value from being computed, it is
+     *                      some subsitute value, typically the REPLACEMENT
+     *                      CHARACTER.
+     * s0                   points to the first byte of the character
+     * send                 points to just after where that (potentially
+     *                      partial) character ends
+     * adjusted_s0          normally is the same as s0, but in case of an
+     *                      overlong for which the UTF-8 matters below, it is
+     *                      the first byte of the shortest form representation
+     *                      of the input.
+     * adjusted_send        normally is the same as 'send', but if adjusted_s0
+     *                      is set to something other than s0, this points one
+     *                      beyond its end
+     */
+
+    if (UNLIKELY(possible_problems)) {
+        bool disallowed = FALSE;
+        const U32 orig_problems = possible_problems;
+
+        while (possible_problems) { /* Handle each possible problem */
+            UV pack_warn = 0;
+            char * message = NULL;
+
+            /* Each 'if' clause handles one problem.  They are ordered so that
+             * the first ones' messages will be displayed before the later
+             * ones; this is kinda in decreasing severity order */
+            if (possible_problems & UTF8_GOT_OVERFLOW) {
+
+                /* Overflow means also got a super and above 31 bits, but we
+                 * handle all three cases here */
+                possible_problems
+                  &= ~(UTF8_GOT_OVERFLOW|UTF8_GOT_SUPER|UTF8_GOT_ABOVE_31_BIT);
+
+                disallowed = TRUE;
+
+                /* The warnings code explicitly says it doesn't handle the case
+                 * of packWARN2 and two categories which have parent-child
+                 * relationship.  Even if it works now to raise the warning if
+                 * either is enabled, it wouldn't necessarily do so in the
+                 * future.  We output (only) the most dire warning*/
+                if (! (flags & UTF8_CHECK_ONLY)) {
+                    if (ckWARN_d(WARN_UTF8)) {
+                        pack_warn = packWARN(WARN_UTF8);
+                    }
+                    else if (ckWARN_d(WARN_NON_UNICODE)) {
+                        pack_warn = packWARN(WARN_NON_UNICODE);
+                    }
+                    if (pack_warn) {
+                        message = Perl_form(aTHX_ "%s: %s (overflows)",
+                                        malformed_text,
+                                        _byte_dump_string(s0, send - s0));
+                    }
+                }
             }
-	}
-	else if (UNLIKELY(UNICODE_IS_NONCHAR(uv))) {
-	    if ((flags & (UTF8_WARN_NONCHAR|UTF8_CHECK_ONLY)) == UTF8_WARN_NONCHAR
-		&& ckWARN_d(WARN_NONCHAR))
-	    {
-		sv = sv_2mortal(Perl_newSVpvf(aTHX_ "Unicode non-character U+%04"UVXf" is not recommended for open interchange", uv));
-		pack_warn = packWARN(WARN_NONCHAR);
-	    }
-	    if (flags & UTF8_DISALLOW_NONCHAR) {
-		goto disallowed;
-	    }
-	}
+            else if (possible_problems & UTF8_GOT_EMPTY) {
+                possible_problems &= ~UTF8_GOT_EMPTY;
 
-	if (sv) {
-            outlier_ret = UNI_TO_NATIVE(uv);
-	    goto do_warn;
-	}
+                if (! (flags & UTF8_ALLOW_EMPTY)) {
+                    disallowed = TRUE;
+                    if (ckWARN_d(WARN_UTF8) && ! (flags & UTF8_CHECK_ONLY)) {
+                        pack_warn = packWARN(WARN_UTF8);
+                        message = Perl_form(aTHX_ "%s (empty string)",
+                                                   malformed_text);
+                    }
+                }
+            }
+            else if (possible_problems & UTF8_GOT_CONTINUATION) {
+                possible_problems &= ~UTF8_GOT_CONTINUATION;
 
-	/* Here, this is not considered a malformed character, so drop through
-	 * to return it */
+                if (! (flags & UTF8_ALLOW_CONTINUATION)) {
+                    disallowed = TRUE;
+                    if (ckWARN_d(WARN_UTF8) && ! (flags & UTF8_CHECK_ONLY)) {
+                        pack_warn = packWARN(WARN_UTF8);
+                        message = Perl_form(aTHX_
+                                "%s: %s (unexpected continuation byte 0x%02x,"
+                                " with no preceding start byte)",
+                                malformed_text,
+                                _byte_dump_string(s0, 1), *s0);
+                    }
+                }
+            }
+            else if (possible_problems & UTF8_GOT_NON_CONTINUATION) {
+                possible_problems &= ~UTF8_GOT_NON_CONTINUATION;
+
+                if (! (flags & UTF8_ALLOW_NON_CONTINUATION)) {
+                    disallowed = TRUE;
+                    if (ckWARN_d(WARN_UTF8) && ! (flags & UTF8_CHECK_ONLY)) {
+                        pack_warn = packWARN(WARN_UTF8);
+                        message = Perl_form(aTHX_ "%s",
+                            unexpected_non_continuation_text(s0,
+                                                            send - s0,
+                                                            s - s0,
+                                                            (int) expectlen));
+                    }
+                }
+            }
+            else if (possible_problems & UTF8_GOT_SHORT) {
+                possible_problems &= ~UTF8_GOT_SHORT;
+
+                if (! (flags & UTF8_ALLOW_SHORT)) {
+                    disallowed = TRUE;
+                    if (ckWARN_d(WARN_UTF8) && ! (flags & UTF8_CHECK_ONLY)) {
+                        pack_warn = packWARN(WARN_UTF8);
+                        message = Perl_form(aTHX_
+                                "%s: %s (too short; got %d byte%s, need %d)",
+                                malformed_text,
+                                _byte_dump_string(s0, send - s0),
+                                (int)curlen,
+                                curlen == 1 ? "" : "s",
+                                (int)expectlen);
+                    }
+                }
+
+            }
+            else if (possible_problems & UTF8_GOT_LONG) {
+                possible_problems &= ~UTF8_GOT_LONG;
+
+                if (! (flags & UTF8_ALLOW_LONG)) {
+                    disallowed = TRUE;
+
+                    if (ckWARN_d(WARN_UTF8) && ! (flags & UTF8_CHECK_ONLY)) {
+                        pack_warn = packWARN(WARN_UTF8);
+
+                        /* These error types cause 'uv' to be something that
+                         * isn't what was intended, so can't use it in the
+                         * message.  The other error types either can't
+                         * generate an overlong, or else the 'uv' is valid */
+                        if (orig_problems &
+                                        (UTF8_GOT_TOO_SHORT|UTF8_GOT_OVERFLOW))
+                        {
+                            message = Perl_form(aTHX_
+                                    "%s: %s (any UTF-8 sequence that starts"
+                                    " with \"%s\" is overlong which can and"
+                                    " should be represented with a"
+                                    " different, shorter sequence)",
+                                    malformed_text,
+                                    _byte_dump_string(s0, send - s0),
+                                    _byte_dump_string(s0, curlen));
+                        }
+                        else {
+                            U8 tmpbuf[UTF8_MAXBYTES+1];
+                            const U8 * const e = uvoffuni_to_utf8_flags(tmpbuf,
+                                                                        uv, 0);
+                            message = Perl_form(aTHX_
+                                "%s: %s (overlong; instead use %s to represent"
+                                " U+%0*"UVXf")",
+                                malformed_text,
+                                _byte_dump_string(s0, send - s0),
+                                _byte_dump_string(tmpbuf, e - tmpbuf),
+                                ((uv < 256) ? 2 : 4), /* Field width of 2 for
+                                                         small code points */
+                                uv);
+                        }
+                    }
+                }
+            }
+            else if (possible_problems & UTF8_GOT_SURROGATE) {
+                possible_problems &= ~UTF8_GOT_SURROGATE;
+
+                /* By adding UTF8_CHECK_ONLY to the test, we avoid unnecessary
+                 * generation of the format, since no warnings are raised under
+                 * CHECK */
+                if (   (flags & (UTF8_WARN_SURROGATE|UTF8_CHECK_ONLY))
+                                                        == UTF8_WARN_SURROGATE
+                    && ckWARN_d(WARN_SURROGATE))
+                {
+                        pack_warn = packWARN(WARN_SURROGATE);
+
+                        /* These are the only errors that can occur with a
+                        * surrogate when the 'uv' isn't valid */
+                        if (orig_problems & UTF8_GOT_TOO_SHORT) {
+                            message = Perl_form(aTHX_
+                                    "UTF-16 surrogate (any UTF-8 sequence that"
+                                    " starts with \"%s\" is for a surrogate)",
+                                    _byte_dump_string(s0, curlen));
+                        }
+                        else {
+                            message = Perl_form(aTHX_
+                                            "UTF-16 surrogate U+%04"UVXf"", uv);
+                        }
+                }
+
+                if (flags & UTF8_DISALLOW_SURROGATE) {
+                    disallowed = TRUE;
+                }
+            }
+            else if (possible_problems & UTF8_GOT_SUPER) {
+                possible_problems &= ~UTF8_GOT_SUPER;
+
+                if (   (flags & (UTF8_WARN_SUPER|UTF8_CHECK_ONLY))
+                                                            == UTF8_WARN_SUPER
+                    && ckWARN_d(WARN_NON_UNICODE))
+                {
+                        pack_warn = packWARN(WARN_NON_UNICODE);
+
+                        if (orig_problems & UTF8_GOT_TOO_SHORT) {
+                            message = Perl_form(aTHX_
+                                    "Any UTF-8 sequence that starts with"
+                                    " \"%s\" is for a non-Unicode code point,"
+                                    " may not be portable",
+                                    _byte_dump_string(s0, curlen));
+                        }
+                        else {
+                            message = Perl_form(aTHX_
+                                                "Code point 0x%04"UVXf" is not"
+                                                " Unicode, may not be portable",
+                                                uv);
+                        }
+                }
+
+                /* The maximum code point ever specified by a standard was
+                 * 2**31 - 1.  Anything larger than that is a Perl extension
+                 * that very well may not be understood by other applications
+                 * (including earlier perl versions on EBCDIC platforms).  We
+                 * test for these after the regular SUPER ones, and before
+                 * possibly bailing out, so that the slightly more dire warning
+                 * will override the regular one. */
+                if (   (flags & (UTF8_WARN_ABOVE_31_BIT
+                                |UTF8_WARN_SUPER
+                                |UTF8_DISALLOW_ABOVE_31_BIT))
+                    && (   (   UNLIKELY(orig_problems & UTF8_GOT_TOO_SHORT)
+                            && UNLIKELY(is_utf8_cp_above_31_bits(
+                                                                adjusted_s0,
+                                                                adjusted_send)))
+                        || (   LIKELY(! (orig_problems & UTF8_GOT_TOO_SHORT))
+                            && UNLIKELY(UNICODE_IS_ABOVE_31_BIT(uv)))))
+                {
+                    if (  ! (flags & UTF8_CHECK_ONLY)
+                        &&  (flags & (UTF8_WARN_ABOVE_31_BIT|UTF8_WARN_SUPER))
+                        &&  ckWARN_d(WARN_UTF8))
+                    {
+                        pack_warn = packWARN(WARN_UTF8);
+
+                        if (orig_problems & UTF8_GOT_TOO_SHORT) {
+                            message = Perl_form(aTHX_
+                                        "Any UTF-8 sequence that starts with"
+                                        " \"%s\" is for a non-Unicode code"
+                                        " point, and is not portable",
+                                        _byte_dump_string(s0, curlen));
+                        }
+                        else {
+                            message = Perl_form(aTHX_
+                                        "Code point 0x%"UVXf" is not Unicode,"
+                                        " and not portable",
+                                         uv);
+                        }
+                    }
+
+                    if (flags & UTF8_DISALLOW_ABOVE_31_BIT) {
+                        disallowed = TRUE;
+                    }
+                }
+
+                if (flags & UTF8_DISALLOW_SUPER) {
+                    disallowed = TRUE;
+                }
+
+                /* The deprecated warning overrides any non-deprecated one.  If
+                 * there are other problems, a deprecation message is not
+                 * really helpful, so don't bother to raise it in that case.
+                 * This also keeps the code from having to handle the case
+                 * where 'uv' is not valid. */
+                if (   ! (orig_problems
+                                    & (UTF8_GOT_TOO_SHORT|UTF8_GOT_OVERFLOW))
+                    && UNLIKELY(uv > MAX_NON_DEPRECATED_CP)
+                    && ckWARN_d(WARN_DEPRECATED))
+                {
+                    message = Perl_form(aTHX_ cp_above_legal_max,
+                                              uv, MAX_NON_DEPRECATED_CP);
+                    pack_warn = packWARN(WARN_DEPRECATED);
+                }
+            }
+            else if (possible_problems & UTF8_GOT_NONCHAR) {
+                possible_problems &= ~UTF8_GOT_NONCHAR;
+
+                if (  (flags & (UTF8_WARN_NONCHAR|UTF8_CHECK_ONLY))
+                                                        == UTF8_WARN_NONCHAR
+                    && ckWARN_d(WARN_NONCHAR))
+                {
+                        /* The code above should have guaranteed that we don't
+                         * get here with errors other than overlong */
+                        assert (! (orig_problems
+                                        & ~(UTF8_GOT_LONG|UTF8_GOT_NONCHAR)));
+
+                        pack_warn = packWARN(WARN_NONCHAR);
+                        message = Perl_form(aTHX_ "Unicode non-character"
+                                                " U+%04"UVXf" is not recommended"
+                                                " for open interchange", uv);
+                }
+
+                if (flags & UTF8_DISALLOW_NONCHAR) {
+                    disallowed = TRUE;
+                }
+            } /* End of looking through the possible flags */
+
+            /* Display the message (if any) for the problem being handled in
+             * this iteration of the loop */
+            if (message) {
+                if (PL_op)
+                    Perl_warner(aTHX_ pack_warn, "%s in %s", message,
+                                                 OP_DESC(PL_op));
+                else
+                    Perl_warner(aTHX_ pack_warn, "%s", message);
+            }
+        }   /* End of 'while (possible_problems) {' */
+
+        /* Since there was a possible problem, the returned length may need to
+         * be changed from the one stored at the beginning of this function.
+         * Instead of trying to figure out if that's needed, just do it. */
+        if (retlen) {
+            *retlen = curlen;
+        }
+
+        if (disallowed) {
+            if (flags & UTF8_CHECK_ONLY && retlen) {
+                *retlen = ((STRLEN) -1);
+            }
+            return 0;
+        }
     }
 
     return UNI_TO_NATIVE(uv);
-
-    /* There are three cases which get to beyond this point.  In all 3 cases:
-     * <sv>	    if not null points to a string to print as a warning.
-     * <curlen>	    is what <*retlen> should be set to if UTF8_CHECK_ONLY isn't
-     *		    set.
-     * <outlier_ret> is what return value to use if UTF8_CHECK_ONLY isn't set.
-     *		    This is done by initializing it to 0, and changing it only
-     *		    for case 1).
-     * The 3 cases are:
-     * 1)   The input is valid but problematic, and to be warned about.  The
-     *	    return value is the resultant code point; <*retlen> is set to
-     *	    <curlen>, the number of bytes that comprise the code point.
-     *	    <pack_warn> contains the result of packWARN() for the warning
-     *	    types.  The entry point for this case is the label <do_warn>;
-     * 2)   The input is a valid code point but disallowed by the parameters to
-     *	    this function.  The return value is 0.  If UTF8_CHECK_ONLY is set,
-     *	    <*relen> is -1; otherwise it is <curlen>, the number of bytes that
-     *	    comprise the code point.  <pack_warn> contains the result of
-     *	    packWARN() for the warning types.  The entry point for this case is
-     *	    the label <disallowed>.
-     * 3)   The input is malformed.  The return value is 0.  If UTF8_CHECK_ONLY
-     *	    is set, <*relen> is -1; otherwise it is <curlen>, the number of
-     *	    bytes that comprise the malformation.  All such malformations are
-     *	    assumed to be warning type <utf8>.  The entry point for this case
-     *	    is the label <malformed>.
-     */
-
-  malformed:
-
-    if (sv && ckWARN_d(WARN_UTF8)) {
-	pack_warn = packWARN(WARN_UTF8);
-    }
-
-  disallowed:
-
-    if (flags & UTF8_CHECK_ONLY) {
-	if (retlen)
-	    *retlen = ((STRLEN) -1);
-	return 0;
-    }
-
-  do_warn:
-
-    if (pack_warn) {	/* <pack_warn> was initialized to 0, and changed only
-			   if warnings are to be raised. */
-	const char * const string = SvPVX_const(sv);
-
-	if (PL_op)
-	    Perl_warner(aTHX_ pack_warn, "%s in %s", string,  OP_DESC(PL_op));
-	else
-	    Perl_warner(aTHX_ pack_warn, "%s", string);
-    }
-
-    if (retlen) {
-	*retlen = curlen;
-    }
-
-    return outlier_ret;
 }
 
 /*
@@ -1394,7 +1602,7 @@ Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen)
 		    if (UTF8_IS_CONTINUATION(c1)) {
 			c = EIGHT_BIT_UTF8_TO_NATIVE(c, c1);
 		    } else {
-                        /* diag_listed_as: Malformed UTF-8 character (%s) */
+                        /* diag_listed_as: Malformed UTF-8 character%s */
 			Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
                                     "%s %s%s",
                                     unexpected_non_continuation_text(u - 1, 2, 1, 2),

@@ -328,6 +328,13 @@ The C<PADOFFSET> type has changed from being unsigned to signed, and
 several pad-related variables such as C<PL_padix> have changed from being
 of type C<I32> to type C<PADOFFSET>.
 
+=item *
+
+The function C<L<perlapi/utf8n_to_uvchr>> has been changed to not
+abandon searching for other malformations when the first one is
+encountered.  A call to it thus can generate multiple diagnostics,
+instead of just one.
+
 =back
 
 =head1 Selected Bug Fixes

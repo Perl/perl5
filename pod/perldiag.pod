@@ -3344,7 +3344,7 @@ Perhaps the function's author was trying to write a subroutine signature
 but didn't enable that feature first (C<use feature 'signatures'>),
 so the signature was instead interpreted as a bad prototype.
 
-=item Malformed UTF-8 character (%s)
+=item Malformed UTF-8 character%s
 
 (S utf8)(F) Perl detected a string that should be UTF-8, but didn't
 comply with UTF-8 encoding rules, or represents a code point whose

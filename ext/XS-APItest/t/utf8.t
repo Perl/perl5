@@ -63,6 +63,26 @@ for (my $i = 0; $i < 256; $i++) {
                     ? sub { return shift }
                     : sub { return join "", map { chr $native_to_i8[ord $_] }
                                             split "", shift };
+sub start_byte_to_cont($) {
+
+    # Extract the code point information from the input UTF-8 start byte, and
+    # return a continuation byte containing the same information.  This is
+    # used in constructing an overlong malformation from valid input.
+
+    my $byte = shift;
+    my $len = test_UTF8_SKIP($byte);
+    if ($len < 2) {
+        die "";
+    }
+
+    $byte = ord native_to_I8($byte);
+
+    # Copied from utf8.h.  This gets rid of the leading 1 bits.
+    $byte &= ((($len) >= 7) ? 0x00 : (0x1F >> (($len)-2)));
+
+    $byte |= (isASCII) ? 0x80 : ord I8_to_native("\xA0");
+    return chr $byte;
+}
 
 my $is64bit = length sprintf("%x", ~0) > 8;
 
@@ -1339,6 +1359,23 @@ foreach my $test (@malformations) {
     }
 }
 
+sub nonportable_regex ($) {
+
+    # Returns a pattern that matches the non-portable message raised either
+    # for the specific input code point, or the one generated when there
+    # is some malformation that precludes the message containing the specific
+    # code point
+
+    my $code_point = shift;
+
+    my $string = sprintf '(Code point 0x%x is not Unicode, and'
+                       . '|Any UTF-8 sequence that starts with'
+                       . ' "(\\\x[[:xdigit:]]{2})+" is for a'
+                       . ' non-Unicode code point, and is) not portable',
+                    $code_point;
+    return qr/$string/;
+}
+
 # Now test the cases where a legal code point is generated, but may or may not
 # be allowed/warned on.
 my @tests = (
@@ -1368,7 +1405,7 @@ my @tests = (
         $UTF8_WARN_SUPER, $UTF8_DISALLOW_SUPER,
         'non_unicode', 0x110000,
         (isASCII) ? 4 : 5,
-        qr/not Unicode.* may not be portable/
+        qr/(not Unicode|for a non-Unicode code point).* may not be portable/
     ],
     [ "non_unicode whose first byte tells that",
         (isASCII) ? "\xf5\x80\x80\x80" : I8_to_native("\xfa\xa0\xa0\xa0\xa0"),
@@ -1376,7 +1413,7 @@ my @tests = (
         'non_unicode',
         (isASCII) ? 0x140000 : 0x200000,
         (isASCII) ? 4 : 5,
-        qr/not Unicode.* may not be portable/
+        qr/(not Unicode|for a non-Unicode code point).* may not be portable/
     ],
     [ "first of 32 consecutive non-character code points",
         (isASCII) ? "\xef\xb7\x90" : I8_to_native("\xf1\xbf\xae\xb0"),
@@ -1639,7 +1676,7 @@ my @tests = (
         # 32-bit machines
         $UTF8_WARN_ABOVE_31_BIT, $UTF8_DISALLOW_ABOVE_31_BIT,
         'utf8', 0x80000000, (isASCII) ? 7 :14,
-        qr/Code point 0x80000000 is not Unicode, and not portable/
+        nonportable_regex(0x80000000)
     ],
     [ "requires at least 32 bits, and use SUPER-type flags, instead of ABOVE_31_BIT",
         (isASCII)
@@ -1647,7 +1684,7 @@ my @tests = (
          : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
         $UTF8_WARN_SUPER, $UTF8_DISALLOW_SUPER,
         'utf8', 0x80000000, (isASCII) ? 7 :14,
-        qr/Code point 0x80000000 is not Unicode, and not portable/
+        nonportable_regex(0x80000000)
     ],
     [ "overflow with warnings/disallow for more than 31 bits",
         # This tests the interaction of WARN_ABOVE_31_BIT/DISALLOW_ABOVE_31_BIT
@@ -1685,7 +1722,7 @@ if ($is64bit) {
             : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
             $UTF8_WARN_ABOVE_31_BIT, $UTF8_DISALLOW_ABOVE_31_BIT,
             'utf8', 0x1000000000, (isASCII) ? 13 : 14,
-            qr/Code point 0x.* is not Unicode, and not portable/
+            qr/and( is)? not portable/
         ];
     if (! isASCII) {
         push @tests,   # These could falsely show wrongly in a naive implementation
@@ -1693,37 +1730,38 @@ if ($is64bit) {
                 I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 'utf8', 0x800000000, 14,
-                qr/Code point 0x800000000 is not Unicode, and not portable/
+                nonportable_regex(0x80000000)
             ],
             [ "requires at least 32 bits",
                 I8_to_native("\xff\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 'utf8', 0x10000000000, 14,
-                qr/Code point 0x10000000000 is not Unicode, and not portable/
+                nonportable_regex(0x10000000000)
             ],
             [ "requires at least 32 bits",
                 I8_to_native("\xff\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 'utf8', 0x200000000000, 14,
-                qr/Code point 0x200000000000 is not Unicode, and not portable/
+                nonportable_regex(0x20000000000)
             ],
             [ "requires at least 32 bits",
                 I8_to_native("\xff\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 'utf8', 0x4000000000000, 14,
-                qr/Code point 0x4000000000000 is not Unicode, and not portable/
+                nonportable_regex(0x4000000000000)
             ],
             [ "requires at least 32 bits",
                 I8_to_native("\xff\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 'utf8', 0x80000000000000, 14,
-                qr/Code point 0x80000000000000 is not Unicode, and not portable/
+                nonportable_regex(0x80000000000000)
             ],
             [ "requires at least 32 bits",
                 I8_to_native("\xff\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+                   #IBM-1047  \xFE\x41\x41\x41\x41\x41\x41\x43\x41\x41\x41\x41\x41\x41
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 'utf8', 0x1000000000000000, 14,
-                qr/Code point 0x1000000000000000 is not Unicode, and not portable/
+                nonportable_regex(0x1000000000000000)
             ];
     }
 }
@@ -1732,7 +1770,7 @@ foreach my $test (@tests) {
     my ($testname, $bytes, $warn_flags, $disallow_flags, $category, $allowed_uv, $expected_len, $message ) = @$test;
 
     my $length = length $bytes;
-    my $will_overflow = $testname =~ /overflow/;
+    my $will_overflow = $testname =~ /overflow/ ? 'overflow' : "";
 
     {
         use warnings;
@@ -1875,6 +1913,83 @@ foreach my $test (@tests) {
         foreach my $warn_flag (0, $warn_flags) {
             foreach my $disallow_flag (0, $disallow_flags) {
                 foreach my $do_warning (0, 1) {
+
+                    # We try each of the above with various combinations of
+                    # malformations that can occur on the same input sequence.
+                    foreach my $short ("",
+                                       "short",
+                                       "unexpected non-continuation")
+                    {
+                        # The non-characters can't be discerned with a short
+                        # malformation
+                        next if $short && $testname =~ /non-character/;
+
+                        foreach my $overlong ("", "overlong") {
+
+                            # Our hard-coded overlong starts with \xFE, so
+                            # can't handle anything larger.
+                            next if $overlong
+                            && ord native_to_I8(substr($bytes, 0, 1)) >= 0xFE;
+
+                            my @malformations;
+                            push @malformations, $short if $short;
+                            push @malformations, $overlong if $overlong;
+
+                            # The overflow malformation test in the input
+                            # array is coerced into being treated like one of
+                            # the others.
+                            push @malformations, 'overflow' if $will_overflow;
+
+                            my $malformations_name = join "/", @malformations;
+                            $malformations_name .= " malformation"
+                                                        if $malformations_name;
+                            $malformations_name .= "s" if @malformations > 1;
+                            my $this_bytes = $bytes;
+                            my $this_length = $length;
+                            my $expected_uv = $allowed_uv;
+                            my $this_expected_len = $expected_len;
+                            if ($malformations_name) {
+                                $expected_uv = 0;
+
+                                # Coerce the input into the desired
+                                # malformation
+                                if ($malformations_name =~ /overlong/) {
+
+                                    # For an overlong, we convert the original
+                                    # start byte into a continuation byte with
+                                    # the same data bits as originally. ...
+                                    substr($this_bytes, 0, 1)
+                                        = start_byte_to_cont(substr($this_bytes,
+                                                                    0, 1));
+
+                                    # ... Then we prepend it with a known
+                                    # overlong sequence.  This should evaluate
+                                    # to the exact same code point as the
+                                    # original.
+                                    $this_bytes = "\xfe"
+                                               . ("\x80"
+                                                   x ( 6 - length($this_bytes)))
+                                               . $this_bytes;
+                                    $this_length = length($this_bytes);
+                                    $this_expected_len = 7;
+                                }
+                                if ($malformations_name =~ /short/) {
+
+                                    # Just tell the test to not look far
+                                    # enough into the input.
+                                    $this_length--;
+                                    $this_expected_len--;
+                                }
+                                elsif ($malformations_name
+                                                        =~ /non-continuation/)
+                                {
+                                    # Change the final continuation byte into
+                                    # a non one.
+                                    substr($this_bytes, -1, 1) = '?';
+                                    $this_expected_len--;
+                                }
+                            }
+
                             my $eval_warn = $do_warning
                                         ? "use warnings '$warning'"
                                         : $warning eq "utf8"
@@ -1882,17 +1997,18 @@ foreach my $test (@tests) {
                                             : ( "use warnings 'utf8';"
                                               . " no warnings '$warning'");
 
-                            # is effectively disallowed if will overflow, even
-                            # if the flag indicates it is allowed, fix up test
-                            # name to indicate this as well
-                            my $disallowed = $disallow_flag || $will_overflow;
-
+                            # Is effectively disallowed if we've set up a
+                            # malformation, even if the flag indicates it is
+                            # allowed.  Fix up test name to indicate this as
+                            # well
+                            my $disallowed = $disallow_flag
+                                          || $malformations_name;
                             my $this_name = "utf8n_to_uvchr() $testname: "
-                                          . (($disallow_flag)
-                                             ? 'disallowed'
-                                             : ($disallowed)
-                                               ? 'ABOVE_31_BIT allowed'
-                                               : 'allowed');
+                                                        . (($disallow_flag)
+                                                            ? 'disallowed'
+                                                            : $disallowed
+                                                            ? $disallowed
+                                                            : 'allowed');
                             $this_name .= ", $eval_warn";
                             $this_name .= ", " . (($warn_flag)
                                                 ? 'with warning flag'
@@ -1900,13 +2016,15 @@ foreach my $test (@tests) {
 
                             undef @warnings;
                             my $ret_ref;
-                            my $display_bytes = display_bytes($bytes);
+                            my $display_bytes = display_bytes($this_bytes);
                             my $call = "Call was: $eval_warn; \$ret_ref"
                                      . " = test_utf8n_to_uvchr('$display_bytes'"
-                                     . ", $length, $warn_flag|$disallow_flag)";
+                                     . ", $this_length, $warn_flag"
+                                     . "|$disallow_flag)";
                             my $eval_text =      "$eval_warn; \$ret_ref"
-                                     . " = test_utf8n_to_uvchr('$bytes',"
-                                     . " $length, $warn_flag|$disallow_flag)";
+                                     . " = test_utf8n_to_uvchr('$this_bytes',"
+                                     . " $this_length, $warn_flag"
+                                     . "|$disallow_flag)";
                             eval "$eval_text";
                             if (! ok ("$@ eq ''",
                                 "$this_name: eval succeeded"))
@@ -1922,49 +2040,50 @@ foreach my $test (@tests) {
                                 }
                             }
                             else {
-                                unless (is($ret_ref->[0], $allowed_uv,
+                                unless (is($ret_ref->[0], $expected_uv,
                                         "$this_name: Returns expected uv: "
-                                        . sprintf("0x%04X", $allowed_uv)))
+                                        . sprintf("0x%04X", $expected_uv)))
                                 {
                                     diag $call;
                                 }
                             }
-                            unless (is($ret_ref->[1], $expected_len,
+                            unless (is($ret_ref->[1], $this_expected_len,
                                 "$this_name: Returns expected length:"
-                              . " $expected_len"))
+                              . " $this_expected_len"))
                             {
                                 diag $call;
                             }
 
-                            if ($will_overflow) {
+                            if (@malformations) {
                                 if (! $do_warning && $warning eq 'utf8') {
                                     goto no_warnings_expected;
                                 }
 
-                                # Will get the overflow message instead of the
-                                # expected message under these circumstances,
-                                # as they would otherwise accept an overflowed
-                                # value, which the code should not allow, so
-                                # falls back to overflow.
-                                if (is(scalar @warnings, 1,
-                                    "$this_name: Got a single warning "))
-                                {
-                                    unless (like($warnings[0], qr/overflow/,
-                                                "$this_name: Got overflow"
-                                              . " warning"))
-                                    {
-                                        diag $call;
+                                # Check that each malformation generates a
+                                # warning, removing that warning if found
+                              MALFORMATION:
+                                foreach my $malformation (@malformations) {
+                                    foreach (my $i = 0; $i < @warnings; $i++) {
+                                        if ($warnings[$i] =~ /$malformation/) {
+                                            pass("Expected and got"
+                                               . "'$malformation' warning");
+                                            splice @warnings, $i, 1;
+                                            next MALFORMATION;
+                                        }
                                     }
-                                }
-                                else {
-                                    diag $call;
-                                    output_warnings(@warnings)
-                                                            if scalar @warnings;
+                                    fail("Expected '$malformation' warning"
+                                       . "but didn't get it");
+
                                 }
                             }
-                            elsif (       ! $do_warning
-                                   && (   $warning eq 'utf8'
-                                       || $warning eq $category))
+
+                            # Any overflow will override any super or above-31
+                            # warnings.
+                            goto no_warnings_expected if $will_overflow;
+
+                            if (    ! $do_warning
+                                && (   $warning eq 'utf8'
+                                    || $warning eq $category))
                             {
                                 goto no_warnings_expected;
                             }
@@ -2000,8 +2119,9 @@ foreach my $test (@tests) {
                             # not just when the $disallow_flag is set
                             if ($disallowed) {
                                 undef @warnings;
-                                $ret_ref = test_utf8n_to_uvchr($bytes, $length,
-                                                $disallow_flag|$UTF8_CHECK_ONLY);
+                                $ret_ref = test_utf8n_to_uvchr(
+                                               $this_bytes, $this_length,
+                                               $disallow_flag|$UTF8_CHECK_ONLY);
                                 unless (is($ret_ref->[0], 0,
                                         "$this_name, CHECK_ONLY: Returns 0"))
                                 {
@@ -2024,8 +2144,9 @@ foreach my $test (@tests) {
 
                             # Now repeat some of the above, but for
                             # uvchr_to_utf8_flags().  Since this comes from an
-                            # existing code point, it hasn't overflowed.
-                            next if $will_overflow;
+                            # existing code point, it hasn't overflowed, and
+                            # isn't malformed.
+                            next if @malformations;
 
                             # The warning and disallow flags passed in are for
                             # utf8n_to_uvchr().  Convert them for
@@ -2155,6 +2276,8 @@ foreach my $test (@tests) {
                                                         if scalar @warnings;
                                 }
                             }
+                        }
+                    }
                 }
             }
         }
