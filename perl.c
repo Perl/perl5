@@ -378,12 +378,14 @@ perl_construct(pTHXx)
     /* Note that strtab is a rather special HV.  Assumptions are made
        about not iterating on it, and not adding tie magic to it.
        It is properly deallocated in perl_destruct() */
-    PL_strtab = newHV();
-
-    /* SHAREKEYS tells us that the hash has its keys shared with PL_strtab,
-     * which is not the case with PL_strtab itself */
-    HvSHAREKEYS_off(PL_strtab);			/* mandatory */
-    hv_ksplit(PL_strtab, 1 << 11);
+    
+    if (!PL_strtab) {
+        PL_strtab = newHV();
+        /* SHAREKEYS tells us that the hash has its keys shared with PL_strtab,
+        * which is not the case with PL_strtab itself */
+        HvSHAREKEYS_off(PL_strtab);			/* mandatory */
+        hv_ksplit(PL_strtab, 1 << 11);
+    }
 
     Zero(PL_sv_consts, SV_CONSTS_COUNT, SV*);
 
