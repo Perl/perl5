@@ -1192,7 +1192,13 @@ else {
 foreach my $test (@malformations) {
     my ($testname, $bytes, $length, $allow_flags, $allowed_uv, $expected_len, $message ) = @$test;
 
-    next if ! ok(length($bytes) >= $length, "$testname: Make sure won't read beyond buffer: " . length($bytes) . " >= $length");
+    if (length($bytes) < $length) {
+        fail("Internal test error: actual buffer length (" . length($bytes)
+           . ") must be at least as high as how far we are allowed to read"
+           . " into it ($length)");
+        diag($testname);
+        next;
+    }
 
     undef @warnings;
 
