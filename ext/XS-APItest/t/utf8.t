@@ -1921,20 +1921,10 @@ foreach my $test (@tests) {
                         diag $call;
                     }
 
-                    if (! $do_warning
-                        && ($warning eq 'utf8' || $warning eq $category))
-                    {
-                        if (!is(scalar @warnings, 0,
-                                            "$this_name: No warnings generated"))
-                        {
-                            diag $call;
-                            output_warnings(@warnings);
+                    if ($will_overflow) {
+                        if (! $do_warning && $warning eq 'utf8') {
+                            goto no_warnings_expected;
                         }
-                    }
-                    elsif ($will_overflow
-                           && ! $disallow_flag
-                           && $warning eq 'utf8')
-                    {
 
                         # Will get the overflow message instead of the expected
                         # message under these circumstances, as they would
@@ -1954,9 +1944,12 @@ foreach my $test (@tests) {
                             output_warnings(@warnings) if scalar @warnings;
                         }
                     }
-                    elsif ($warn_flag
+                    elsif (   ! $do_warning
                            && ($warning eq 'utf8' || $warning eq $category))
                     {
+                        goto no_warnings_expected;
+                    }
+                    elsif ($warn_flag) {
                         if (is(scalar @warnings, 1,
                                "$this_name: Got a single warning "))
                         {
@@ -1971,6 +1964,15 @@ foreach my $test (@tests) {
                             if (scalar @warnings) {
                                 output_warnings(@warnings);
                             }
+                        }
+                    }
+                    else {
+                      no_warnings_expected:
+                        unless (is(scalar @warnings, 0,
+                                  "$this_name: Got no warnings"))
+                        {
+                            diag $call;
+                            output_warnings(@warnings);
                         }
                     }
 
