@@ -21,7 +21,7 @@ BEGIN {
         # is available in other operating systems,
         # but then we need other methods for detecting
         # the filesystem type of the tempfiles.
-        my ($fh, $fn) = File::Temp::tempfile(UNLINK => 1);
+        my ($fh, $fn) = File::Temp::tempfile( "Time-HiRes-utime-XXXXXXXXX", UNLINK => 1);
         sub getfstype {
             my ($fn) = @_;
             my $cmd = "df $fn";
