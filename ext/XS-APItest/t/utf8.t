@@ -994,12 +994,12 @@ my @malformations = (
         qr/unexpected non-continuation byte.*immediately after start byte/
     ],
     [ "premature next character malformation (non-immediate)",
-        I8_to_native("\xf0${I8c}a"),
+        I8_to_native("\xf1${I8c}a"),
         3,
         $UTF8_ALLOW_NON_CONTINUATION, $REPLACEMENT, 2,
         qr/unexpected non-continuation byte .* 2 bytes after start byte/
     ],
-    [ "too short malformation", I8_to_native("\xf0${I8c}a"), 2,
+    [ "too short malformation", I8_to_native("\xf1${I8c}a"), 2,
         # Having the 'a' after this, but saying there are only 2 bytes also
         # tests that we pay attention to the passed in length
         $UTF8_ALLOW_SHORT, $REPLACEMENT, 2,
@@ -1244,9 +1244,15 @@ foreach my $test (@malformations) {
         $ret = test_is_utf8_valid_partial_char_flags($bytes, $j, 0);
         my $ret_should_be = 0;
         my $comment = "";
-        if ($testname =~ /premature|short/ && $j < 2) {
-            $ret_should_be = 1;
-            $comment = ", but need 2 bytes to discern:";
+        if ($testname =~ /premature|short/ && $j < 3) {
+
+            # The tests are hard-coded so these relationships hold
+            my $cut_off = 2;
+            $cut_off = 3 if $testname =~ /non-immediate/;
+            if ($j < $cut_off) {
+                $ret_should_be = 1;
+                $comment = ", but need $cut_off bytes to discern:";
+            }
         }
         elsif ($testname =~ /overlong/ && ! isASCII && $length == 3) {
             # 3-byte overlongs on EBCDIC are determinable on the first byte
