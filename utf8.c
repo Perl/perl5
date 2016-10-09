@@ -877,7 +877,7 @@ warn.
 */
 
 UV
-Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
+Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags)
 {
     const U8 * const s0 = s;
     U8 * send = NULL;           /* (initialized to silence compilers' wrong
