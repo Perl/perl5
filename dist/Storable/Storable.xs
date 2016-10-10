@@ -6726,9 +6726,9 @@ static SV *do_retrieve(
 
 	ASSERT(sizeof(sv_old_retrieve) == sizeof(sv_retrieve),
 		("old and new retrieve dispatch table have same size"));
-	ASSERT(sv_old_retrieve[SX_ERROR] == retrieve_other,
+	ASSERT(sv_old_retrieve[(int)SX_ERROR] == retrieve_other,
 		("SX_ERROR entry correctly initialized in old dispatch table"));
-	ASSERT(sv_retrieve[SX_ERROR] == retrieve_other,
+	ASSERT(sv_retrieve[(int)SX_ERROR] == retrieve_other,
 		("SX_ERROR entry correctly initialized in new dispatch table"));
 
 	/*
