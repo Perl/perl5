@@ -1152,7 +1152,7 @@ sub sorted_test_names {
     unless ($OPTS{average}) {
         if (defined $OPTS{'sort-field'}) {
             my ($field, $perlix) = @OPTS{'sort-field', 'sort-perl'};
-            my $perl = $perls->[$perlix][0];
+            my $perl = $perls->[$perlix][1];
             @names = sort
                 {
                         $results->{$a}{$perl}{$field}
@@ -1336,7 +1336,7 @@ sub grind_print_compact {
     for my $test_name (@test_names) {
         my $doing_ave = ($test_name eq 'AVERAGE');
         my $res = $doing_ave ? $averages : $results->{$test_name};
-        $res = $res->{$perls->[$which_perl][0]};
+        $res = $res->{$perls->[$which_perl][1]};
 
         for my $field (@fields) {
             my $p = $res->{$field};
