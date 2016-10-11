@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 3 );
+    plan(tests => 4);
 }
 
 use overload '""' => sub { 'stringvalue' }, fallback => 1;
@@ -33,3 +33,16 @@ my $value = bless \(my $dummy = 1), __PACKAGE__;
 print ++$value;
 EOC
 }
+
+{
+    my $warned = 0;
+    local $SIG{__WARN__} = sub { $warned++; };
+
+    eval q{
+        use overload '${}', 'fallback';
+        no overload '${}', 'fallback';
+    };
+
+    ok($warned == 0, 'no overload should not warn');
+}
+

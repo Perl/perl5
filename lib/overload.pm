@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.27';
+our $VERSION = '1.28';
 
 %ops = (
     with_assign         => "+ - * / % ** << >> x .",
@@ -63,7 +63,7 @@ sub unimport {
   *{$package . "::(("} = \&nil;
   for (@_) {
       warnings::warnif("overload arg '$_' is invalid")
-        unless $ops_seen{$_};
+        unless exists $ops_seen{$_};
       delete $ {$package . "::"}{$_ eq 'fallback' ? '()' : "(" .$_};
   }
 }
