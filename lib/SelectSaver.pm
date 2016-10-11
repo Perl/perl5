@@ -1,6 +1,6 @@
 package SelectSaver;
 
-our $VERSION = '1.03';
+our $VERSION = '1.02';
 
 =head1 NAME
 
@@ -35,10 +35,11 @@ that was selected when it was created.
 =cut
 
 require 5.000;
-use Symbol q{qualify};
+use Carp;
+use Symbol;
 
 sub new {
-    @_ >= 1 && @_ <= 2 or do { require Carp; Carp::croak('usage: SelectSaver->new( [FILEHANDLE] )') };
+    @_ >= 1 && @_ <= 2 or croak 'usage: SelectSaver->new( [FILEHANDLE] )';
     my $fh = select;
     my $self = bless \$fh, $_[0];
     select qualify($_[1], caller) if @_ > 1;
