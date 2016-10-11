@@ -811,7 +811,7 @@ character, and an error return (unless the C<UTF8_CHECK_ONLY> flag is set), as
 in both cases, 0 is returned, and, depending on the malformation, C<retlen> may
 be set to 1.  To disambiguate, upon a zero return, see if the first byte of
 C<s> is 0 as well.  If so, the input was a C<NUL>; if not, the input had an
-error.
+error.  Or you can use C<L</utf8n_to_uvchr_error>>.
 
 Certain code points are considered problematic.  These are Unicode surrogates,
 Unicode non-characters, and code points above the Unicode maximum of 0x10FFFF.
@@ -874,10 +874,112 @@ use and those yet to be assigned, are never considered malformed and never
 warn.
 
 =cut
+
+Also implemented as a macro in utf8.h
 */
 
 UV
-Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 flags)
+Perl_utf8n_to_uvchr(pTHX_ const U8 *s,
+                          STRLEN curlen,
+                          STRLEN *retlen,
+                          const U32 flags)
+{
+    PERL_ARGS_ASSERT_UTF8N_TO_UVCHR;
+
+    return utf8n_to_uvchr_error(s, curlen, retlen, flags, NULL);
+}
+
+/*
+
+=for apidoc utf8n_to_uvchr_error
+
+THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
+Most code should use L</utf8_to_uvchr_buf>() rather than call this directly.
+
+This function is for code that needs to know what the precise malformation(s)
+are when an error is found.
+
+It is like C<L</utf8n_to_uvchr>> but it takes an extra parameter placed after
+all the others, C<errors>.  If this parameter is 0, this function behaves
+identically to C<L</utf8n_to_uvchr>>.  Otherwise, C<errors> should be a pointer
+to a C<U32> variable, which this function sets to indicate any errors found.
+Upon return, if C<*errors> is 0, there were no errors found.  Otherwise,
+C<*errors> is the bit-wise C<OR> of the bits described in the list below.  Some
+of these bits will be set if a malformation is found, even if the input
+C<flags> parameter indicates that the given malformation is allowed; the
+exceptions are noted:
+
+=over 4
+
+=item C<UTF8_GOT_ABOVE_31_BIT>
+
+The code point represented by the input UTF-8 sequence occupies more than 31
+bits.
+This bit is set only if the input C<flags> parameter contains either the
+C<UTF8_DISALLOW_ABOVE_31_BIT> or the C<UTF8_WARN_ABOVE_31_BIT> flags.
+
+=item C<UTF8_GOT_CONTINUATION>
+
+The input sequence was malformed in that the first byte was a a UTF-8
+continuation byte.
+
+=item C<UTF8_GOT_EMPTY>
+
+The input C<curlen> parameter was 0.
+
+=item C<UTF8_GOT_LONG>
+
+The input sequence was malformed in that there is some other sequence that
+evaluates to the same code point, but that sequence is shorter than this one.
+
+=item C<UTF8_GOT_NONCHAR>
+
+The code point represented by the input UTF-8 sequence is for a Unicode
+non-character code point.
+This bit is set only if the input C<flags> parameter contains either the
+C<UTF8_DISALLOW_NONCHAR> or the C<UTF8_WARN_NONCHAR> flags.
+
+=item C<UTF8_GOT_NON_CONTINUATION>
+
+The input sequence was malformed in that a non-continuation type byte was found
+in a position where only a continuation type one should be.
+
+=item C<UTF8_GOT_OVERFLOW>
+
+The input sequence was malformed in that it is for a code point that is not
+representable in the number of bits available in a UV on the current platform.
+
+=item C<UTF8_GOT_SHORT>
+
+The input sequence was malformed in that C<curlen> is smaller than required for
+a complete sequence.  In other words, the input is for a partial character
+sequence.
+
+=item C<UTF8_GOT_SUPER>
+
+The input sequence was malformed in that it is for a non-Unicode code point;
+that is, one above the legal Unicode maximum.
+This bit is set only if the input C<flags> parameter contains either the
+C<UTF8_DISALLOW_SUPER> or the C<UTF8_WARN_SUPER> flags.
+
+=item C<UTF8_GOT_SURROGATE>
+
+The input sequence was malformed in that it is for a -Unicode UTF-16 surrogate
+code point.
+This bit is set only if the input C<flags> parameter contains either the
+C<UTF8_DISALLOW_SURROGATE> or the C<UTF8_WARN_SURROGATE> flags.
+
+=back
+
+=cut
+*/
+
+UV
+Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
+                                STRLEN curlen,
+                                STRLEN *retlen,
+                                const U32 flags,
+                                U32 * errors)
 {
     const U8 * const s0 = s;
     U8 * send = NULL;           /* (initialized to silence compilers' wrong
@@ -888,6 +990,8 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 
     STRLEN expectlen   = 0;     /* How long should this sequence be?
                                    (initialized to silence compilers' wrong
                                    warning) */
+    U32 discard_errors = 0;     /* Used to save branches when 'errors' is NULL;
+                                   this gets set and discarded */
 
     /* The below are used only if there is both an overlong malformation and a
      * too short one.  Otherwise the first two are set to 's0' and 'send', and
@@ -896,7 +1000,14 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 
     U8 * adjusted_send;
     UV uv_so_far = 0;   /* (Initialized to silence compilers' wrong warning) */
 
-    PERL_ARGS_ASSERT_UTF8N_TO_UVCHR;
+    PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_ERROR;
+
+    if (errors) {
+        *errors = 0;
+    }
+    else {
+        errors = &discard_errors;
+    }
 
     /* The order of malformation tests here is important.  We should consume as
      * few bytes as possible in order to not skip any valid character.  This is
@@ -1162,6 +1273,15 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 
                  * handle all three cases here */
                 possible_problems
                   &= ~(UTF8_GOT_OVERFLOW|UTF8_GOT_SUPER|UTF8_GOT_ABOVE_31_BIT);
+                *errors |= UTF8_GOT_OVERFLOW;
+
+                /* But the API says we flag all errors found */
+                if (flags & (UTF8_WARN_SUPER|UTF8_DISALLOW_SUPER)) {
+                    *errors |= UTF8_GOT_SUPER;
+                }
+                if (flags & (UTF8_WARN_ABOVE_31_BIT|UTF8_DISALLOW_ABOVE_31_BIT)) {
+                    *errors |= UTF8_GOT_ABOVE_31_BIT;
+                }
 
                 disallowed = TRUE;
 
@@ -1186,6 +1306,7 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 
             }
             else if (possible_problems & UTF8_GOT_EMPTY) {
                 possible_problems &= ~UTF8_GOT_EMPTY;
+                *errors |= UTF8_GOT_EMPTY;
 
                 if (! (flags & UTF8_ALLOW_EMPTY)) {
                     disallowed = TRUE;
@@ -1198,6 +1319,7 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 
             }
             else if (possible_problems & UTF8_GOT_CONTINUATION) {
                 possible_problems &= ~UTF8_GOT_CONTINUATION;
+                *errors |= UTF8_GOT_CONTINUATION;
 
                 if (! (flags & UTF8_ALLOW_CONTINUATION)) {
                     disallowed = TRUE;
@@ -1213,6 +1335,7 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 
             }
             else if (possible_problems & UTF8_GOT_NON_CONTINUATION) {
                 possible_problems &= ~UTF8_GOT_NON_CONTINUATION;
+                *errors |= UTF8_GOT_NON_CONTINUATION;
 
                 if (! (flags & UTF8_ALLOW_NON_CONTINUATION)) {
                     disallowed = TRUE;
@@ -1228,6 +1351,7 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 
             }
             else if (possible_problems & UTF8_GOT_SHORT) {
                 possible_problems &= ~UTF8_GOT_SHORT;
+                *errors |= UTF8_GOT_SHORT;
 
                 if (! (flags & UTF8_ALLOW_SHORT)) {
                     disallowed = TRUE;
@@ -1246,6 +1370,7 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 
             }
             else if (possible_problems & UTF8_GOT_LONG) {
                 possible_problems &= ~UTF8_GOT_LONG;
+                *errors |= UTF8_GOT_LONG;
 
                 if (! (flags & UTF8_ALLOW_LONG)) {
                     disallowed = TRUE;
@@ -1289,13 +1414,12 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 
             else if (possible_problems & UTF8_GOT_SURROGATE) {
                 possible_problems &= ~UTF8_GOT_SURROGATE;
 
-                /* By adding UTF8_CHECK_ONLY to the test, we avoid unnecessary
-                 * generation of the format, since no warnings are raised under
-                 * CHECK */
-                if (   (flags & (UTF8_WARN_SURROGATE|UTF8_CHECK_ONLY))
-                                                        == UTF8_WARN_SURROGATE
-                    && ckWARN_d(WARN_SURROGATE))
-                {
+                if (flags & UTF8_WARN_SURROGATE) {
+                    *errors |= UTF8_GOT_SURROGATE;
+
+                    if (   ! (flags & UTF8_CHECK_ONLY)
+                        && ckWARN_d(WARN_SURROGATE))
+                    {
                         pack_warn = packWARN(WARN_SURROGATE);
 
                         /* These are the only errors that can occur with a
@@ -1310,19 +1434,23 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 
                             message = Perl_form(aTHX_
                                             "UTF-16 surrogate U+%04"UVXf"", uv);
                         }
+                    }
                 }
 
                 if (flags & UTF8_DISALLOW_SURROGATE) {
                     disallowed = TRUE;
+                    *errors |= UTF8_GOT_SURROGATE;
                 }
             }
             else if (possible_problems & UTF8_GOT_SUPER) {
                 possible_problems &= ~UTF8_GOT_SUPER;
 
-                if (   (flags & (UTF8_WARN_SUPER|UTF8_CHECK_ONLY))
-                                                            == UTF8_WARN_SUPER
-                    && ckWARN_d(WARN_NON_UNICODE))
-                {
+                if (flags & UTF8_WARN_SUPER) {
+                    *errors |= UTF8_GOT_SUPER;
+
+                    if (   ! (flags & UTF8_CHECK_ONLY)
+                        && ckWARN_d(WARN_NON_UNICODE))
+                    {
                         pack_warn = packWARN(WARN_NON_UNICODE);
 
                         if (orig_problems & UTF8_GOT_TOO_SHORT) {
@@ -1338,6 +1466,7 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 
                                                 " Unicode, may not be portable",
                                                 uv);
                         }
+                    }
                 }
 
                 /* The maximum code point ever specified by a standard was
@@ -1378,12 +1507,17 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 
                         }
                     }
 
-                    if (flags & UTF8_DISALLOW_ABOVE_31_BIT) {
-                        disallowed = TRUE;
+                    if (flags & (UTF8_WARN_ABOVE_31_BIT|UTF8_DISALLOW_ABOVE_31_BIT)) {
+                        *errors |= UTF8_GOT_ABOVE_31_BIT;
+
+                        if (flags & UTF8_DISALLOW_ABOVE_31_BIT) {
+                            disallowed = TRUE;
+                        }
                     }
                 }
 
                 if (flags & UTF8_DISALLOW_SUPER) {
+                    *errors |= UTF8_GOT_SUPER;
                     disallowed = TRUE;
                 }
 
@@ -1405,10 +1539,12 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 
             else if (possible_problems & UTF8_GOT_NONCHAR) {
                 possible_problems &= ~UTF8_GOT_NONCHAR;
 
-                if (  (flags & (UTF8_WARN_NONCHAR|UTF8_CHECK_ONLY))
-                                                        == UTF8_WARN_NONCHAR
-                    && ckWARN_d(WARN_NONCHAR))
-                {
+                if (flags & UTF8_WARN_NONCHAR) {
+                    *errors |= UTF8_GOT_NONCHAR;
+
+                    if (  ! (flags & UTF8_CHECK_ONLY)
+                        && ckWARN_d(WARN_NONCHAR))
+                    {
                         /* The code above should have guaranteed that we don't
                          * get here with errors other than overlong */
                         assert (! (orig_problems
@@ -1418,10 +1554,12 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, const U32 
                         message = Perl_form(aTHX_ "Unicode non-character"
                                                 " U+%04"UVXf" is not recommended"
                                                 " for open interchange", uv);
+                    }
                 }
 
                 if (flags & UTF8_DISALLOW_NONCHAR) {
                     disallowed = TRUE;
+                    *errors |= UTF8_GOT_NONCHAR;
                 }
             } /* End of looking through the possible flags */
 

@@ -72,6 +72,8 @@ the string is invariant.
 #define utf8_to_uvchr_buf(s, e, lenp)                                          \
                      utf8n_to_uvchr(s, (U8*)(e) - (U8*)(s), lenp,              \
                                     ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY)
+#define utf8n_to_uvchr(s, len, lenp, flags)                                    \
+                                utf8n_to_uvchr_error(s, len, lenp, flags, 0)
 
 #define to_uni_fold(c, p, lenp) _to_uni_fold_flags(c, p, lenp, FOLD_FLAGS_FULL)
 #define to_utf8_fold(c, p, lenp) _to_utf8_fold_flags(c, p, lenp, FOLD_FLAGS_FULL)

@@ -335,6 +335,14 @@ abandon searching for other malformations when the first one is
 encountered.  A call to it thus can generate multiple diagnostics,
 instead of just one.
 
+=item *
+
+A new function, C<L<perlapi/utf8n_to_uvchr_error>>, has been added for
+use by modules that need to know the details of UTF-8 malformations
+beyond pass/fail.  Previously, the only ways to know why a sequence was
+ill-formed was to capture and parse the generated diagnostics, or to do
+your own analysis.
+
 =back
 
 =head1 Selected Bug Fixes

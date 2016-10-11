@@ -1362,7 +1362,7 @@ bytes_cmp_utf8(bytes, utf8)
 	RETVAL
 
 AV *
-test_utf8n_to_uvchr(s, len, flags)
+test_utf8n_to_uvchr_error(s, len, flags)
 
         SV *s
         SV *len
@@ -1371,20 +1371,25 @@ test_utf8n_to_uvchr(s, len, flags)
         STRLEN retlen;
         UV ret;
         STRLEN slen;
+        U32 errors;
 
     CODE:
-        /* Call utf8n_to_uvchr() with the inputs.  It always asks for the
-         * actual length to be returned
+        /* Now that utf8n_to_uvchr() is a trivial wrapper for
+         * utf8n_to_uvchr_error(), call the latter with the inputs.  It always
+         * asks for the actual length to be returned and errors to be returned
          *
          * Length to assume <s> is; not checked, so could have buffer overflow
          */
         RETVAL = newAV();
         sv_2mortal((SV*)RETVAL);
 
-        ret
-         = utf8n_to_uvchr((U8*) SvPV(s, slen), SvUV(len), &retlen, SvUV(flags));
+        ret = utf8n_to_uvchr_error((U8*) SvPV(s, slen),
+                                         SvUV(len),
+                                         &retlen,
+                                         SvUV(flags),
+                                         &errors);
 
-        /* Returns the return value in [0]; <retlen> in [1] */
+        /* Returns the return value in [0]; <retlen> in [1], <errors> in [2] */
         av_push(RETVAL, newSVuv(ret));
         if (retlen == (STRLEN) -1) {
             av_push(RETVAL, newSViv(-1));
@@ -1392,6 +1397,7 @@ test_utf8n_to_uvchr(s, len, flags)
         else {
             av_push(RETVAL, newSVuv(retlen));
         }
+        av_push(RETVAL, newSVuv(errors));
 
     OUTPUT:
         RETVAL
