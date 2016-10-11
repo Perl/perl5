@@ -5,6 +5,12 @@ use vars qw($VERSION);
 $VERSION = '2.22_01';
 $VERSION = eval $VERSION;
 
+# simplest way to avoid indexing of the package: no package statement
+sub base::__inc_scope_guard::DESTROY {
+	my $noop = $_[0][0];
+	ref $_ and $_ == $noop and $_ = '.' for @INC;
+}
+
 # constant.pm is slow
 sub SUCCESS () { 1 }
 
@@ -90,15 +96,15 @@ sub import {
 
         next if grep $_->isa($base), ($inheritor, @bases);
 
-        # Following blocks help isolate $SIG{__DIE__} changes
+        # Following blocks help isolate $SIG{__DIE__} and @INC changes
         {
             my $sigdie;
             {
                 local $SIG{__DIE__};
                 my $fn = _module_to_filename($base);
-                local @INC = @INC;
-                pop @INC if my $dotty = $INC[-1] eq '.';
+                my $dotty = $INC[-1] eq '.' && ( $INC[-1] = sub {()} );
                 eval {
+                    my $redotty = $dotty && bless [ $dotty ], 'base::__inc_scope_guard';
                     require $fn
                 };
                 # Only ignore "Can't locate" errors from our eval require.
