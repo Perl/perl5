@@ -138,6 +138,40 @@ L<Announced on 2016-05-09 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   To find that the utmost reward
     Of daring should be still to dare.
 
+=head2 v5.24.1-RC4 - John Milton, ed. Gordon Campbell, "Paradise Lost", Book II
+
+L<Announced on 2016-10-12 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2016/10/msg240224.html>
+
+    Before the gates there sat
+  On either side a formidable shape;
+  The one seemed woman to the waste, and fair,
+  But ended foul in many a scaly fold,
+  Voluminous and vast -- a serpent armed
+  With mortal sting; about her middle round
+  A cry of hell hounds never ceasing barked
+  With wide Cerberean mouths full loud, and rung
+  A hideous peal; yet, when they list, would creep,
+  If aught disturbed their noise, into her womb,
+  And kennel there; yet there still barked and howled
+  Within unseen. Far less abhorred than these
+  Vexed Scylla, bathing in the sea that parts
+  Calabria from the hoarse Trinacrian shore;
+  Nor uglier follow the night-hag, when, called
+  In secret, riding through the air she comes,
+  Lured with the smell of infant blood, to dance
+  With Lapland witches, while the labouring moon
+  Eclipses at their charms. The other shape --
+  If shape it might be called that shape had none
+  Distinguishable in member, joint, or limb;
+  Or substance might be called that shadow seemed,
+  For each seemed either -- black it stood as night,
+  Fierce as ten Furies, terrible as hell,
+  And shook a dreadful dart: what seemed his head
+  The likeness of a kingly crown had on.
+  Satan was now at hand, and from his seat
+  The monster moving onward came as fast
+  With horrid strides; hell trembled as he strode.
+
 =head2 v5.24.1-RC3 - Dante Alighieri, trans. Dorothy L. Sayers and Barbara Reynolds, "The Divine Comedy", Cantica III: Paradise, Canto XXIII
 
 L<Announced on 2016-08-11 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2016/08/msg238909.html>
@@ -573,6 +607,44 @@ L<Announced on 2015-06-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   To be just like them
   They sing while you slave and I just get bored
   I ain't gonna work on Maggie's farm no more
+
+=head2 v5.22.3-RC4 - John Milton, ed. Gordon Campbell, "Paradise Lost", Book II
+
+L<Announced on 2016-10-12 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2016/10/msg240223.html>
+
+  Far off from these, a slow and silent stream,
+  Lethe, the river of oblivion, rolls
+  Her watery labyrinth, whereof who drinks
+  Forthwith his former state and being forgets --
+  Forgets both joy and grief, pleasure and pain.
+  Beyond this flood a frozen continent
+  Lies dark and wild, beat with perpetual storms
+  Of Whirlwind and dire hail, which on firm land
+  Thaws not, but gathers heap, and ruin seems
+  Of ancient pile; all else deep snow and ice,
+  A gulf profound as that Serbonian bog
+  Betwixt Damiata and Mount Casius old,
+  Where armies whole have sunk: the parching air
+  Burns frore, and cold performs the effect of fire.
+  Thither, by harpy-footed Furies haled,
+  At certain revolutions all the damned
+  Are brought; and feel by turns the bitter change
+  Of fierce extremes, extremes by change more fierce,
+  From beds of raging fire to starve in ice
+  Their soft ethereal warmth, and there to pine
+  Immovable, infixed, and frozen round
+  Periods of time -- thence hurried back to fire.
+  They ferry over this Lethean sound
+  Both to and fro, their sorrow to augment,
+  And wish and struggle, as they pass, to reach
+  The tempting stream, with one small drop to lose
+  In sweet forgetfulness all pain and woe,
+  All in one moment, and so near the brink;
+  But fate withstands, and, to oppose the attempt,
+  Medusa with Gorgonian terror guards
+  The ford, and of itself the water flies
+  All taste of living wight, as once it fled
+  The lip of Tantalus.
 
 =head2 v5.22.3-RC3 - Dante Alighieri, trans. Dorothy L. Sayers and Barbara Reynolds, "The Divine Comedy", Cantica III: Paradise, Canto IV
 
