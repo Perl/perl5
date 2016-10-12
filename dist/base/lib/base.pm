@@ -120,11 +120,12 @@ sub import {
                           || $@ =~ /Compilation failed in require at .* line [0-9]+(?:, <[^>]*> (?:line|chunk) [0-9]+)?\.\n\z/;
                 unless (%{"$base\::"}) {
                     require Carp;
+                    my @inc = $dotty ? @INC[0..$#INC-1] : @INC;
                     local $" = " ";
                     my $e = <<ERROR;
 Base class package "$base" is empty.
     (Perhaps you need to 'use' the module which defines that package first,
-    or make that module available in \@INC (\@INC contains: @INC).
+    or make that module available in \@INC (\@INC contains: @inc).
 ERROR
                     if ($dotty && -e $fn) {
                         $e .= <<ERROS;
