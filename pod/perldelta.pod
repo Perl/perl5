@@ -191,7 +191,7 @@ L<Memoize> has been upgraded from version 1.03 to 1.03_01.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20160506 to 5.20160903_24.
+L<Module::CoreList> has been upgraded from version 5.20160506 to 5.20161019_24.
 
 =item *
 
