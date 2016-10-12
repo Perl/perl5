@@ -349,10 +349,10 @@ sub module_version {
     print $msg,"\n";
 
     if( defined $ret and exists $Opts{u} ) {
-        my $upsream = $Module::CoreList::upstream{$mod};
-        $upsream = 'undef' unless $upsream;
-        print "upstream: $upsream\n";
-        if ( $upsream ne 'blead' ) {
+        my $upstream = $Module::CoreList::upstream{$mod};
+        $upstream = 'undef' unless $upstream;
+        print "upstream: $upstream\n";
+        if ( $upstream ne 'blead' ) {
             my $bugtracker = $Module::CoreList::bug_tracker{$mod};
             $bugtracker = 'unknown' unless $bugtracker;
             print "bug tracker: $bugtracker\n";
