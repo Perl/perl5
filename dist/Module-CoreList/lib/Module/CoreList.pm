@@ -13163,7 +13163,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         }
     },
     5.024001 => {
-        delta_from => 5.024,
+        delta_from => 5.024000,
         changed => {
             'App::Cpan'             => '1.63_01',
             'App::Prove'            => '3.36_01',
@@ -14029,7 +14029,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
         }
     },
     5.024001 => {
-        delta_from => 5.024000,
+        delta_from => 5.024,
         changed => {
         },
         removed => {
@@ -14698,7 +14698,7 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'Net::SMTP'             => undef,
     'Net::Time'             => undef,
     'Params::Check'         => undef,
-    'Parse::CPAN::Meta'     => 'https://github.com/Perl-Toolchain-Gang/Parse-CPAN-Meta/issues',
+    'Parse::CPAN::Meta'     => 'https://github.com/Perl-Toolchain-Gang/CPAN-Meta/issues',
     'Perl::OSType'          => 'https://github.com/Perl-Toolchain-Gang/Perl-OSType/issues',
     'PerlIO::via::QuotedPrint'=> undef,
     'Pod::Checker'          => undef,
@@ -14825,7 +14825,7 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'Text::Tabs'            => undef,
     'Text::Wrap'            => undef,
     'Tie::RefHash'          => undef,
-    'Time::Local'           => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=Time-Local',
+    'Time::Local'           => 'http://rt.cpan.org/Public/Dist/Display.html?Name=Time-Local',
     'Time::Piece'           => undef,
     'Time::Seconds'         => undef,
     'Unicode::Collate'      => undef,
