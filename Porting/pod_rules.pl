@@ -33,6 +33,7 @@ if (ord("A") == 193) {
            );
 
 require 'Porting/pod_lib.pl';
+require 'Porting/manifest_lib.pl';
 sub my_die;
 
 # process command-line switches

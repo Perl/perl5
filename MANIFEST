@@ -5004,6 +5004,7 @@ Porting/make_snapshot.pl	Make a tgz snapshot of our tree with a .patch file in i
 Porting/makemeta		Create the top-level META.yml
 Porting/makerel			Release making utility
 Porting/manicheck		Check against MANIFEST
+Porting/manifest_lib.pl		Library for checking and sorting the MANIFEST
 Porting/manisort		Sort the MANIFEST
 Porting/new-perldelta.pl	Generate a new perldelta
 Porting/newtests-perldelta.pl	Generate Perldelta stub for newly added tests

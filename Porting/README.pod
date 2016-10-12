@@ -250,6 +250,10 @@ web page to use to generate the snapshot files.
 This script outputs a list of files in F<MANIFEST> which don't exist and a
 list of files that exist and aren't in F<MANIFEST>.
 
+=head2 F<manifest_lib.pl>
+
+This library provides functions used in checking and sorting the F<MANIFEST>.
+
 =head2 F<manisort>
 
 This script sorts the files in F<MANIFEST>.
