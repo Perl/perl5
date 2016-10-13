@@ -2097,8 +2097,8 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 		require_tie_mod(gv, '!', "Errno", 5, 1);
 
 	    break;
-	case '-':		/* $- */
-	case '+':		/* $+ */
+	case '-':		/* $-, %-, @- */
+	case '+':		/* $+, %+, @+ */
 	GvMULTI_on(gv); /* no used once warnings here */
         {
             AV* const av = GvAVn(gv);
