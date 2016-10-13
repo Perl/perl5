@@ -114,6 +114,7 @@ CODE:
         XSRETURN_UNDEF;
 
     retsv = ST(0);
+    SvGETMAGIC(retsv);
     magic = SvAMAGIC(retsv);
     if(!magic)
       retval = slu_sv_value(retsv);
@@ -121,6 +122,7 @@ CODE:
     for(index = 1 ; index < items ; index++) {
         SV *stacksv = ST(index);
         SV *tmpsv;
+        SvGETMAGIC(stacksv);
         if((magic || SvAMAGIC(stacksv)) && (tmpsv = amagic_call(retsv, stacksv, gt_amg, 0))) {
              if(SvTRUE(tmpsv) ? !ix : ix) {
                   retsv = stacksv;
@@ -174,6 +176,7 @@ CODE:
         }
 
     sv    = ST(0);
+    SvGETMAGIC(sv);
     switch((accum = accum_type(sv))) {
     case ACC_SV:
         retsv = TARG;
@@ -189,6 +192,7 @@ CODE:
 
     for(index = 1 ; index < items ; index++) {
         sv = ST(index);
+        SvGETMAGIC(sv);
         if(accum < ACC_SV && SvAMAGIC(sv)){
             if(!retsv)
                 retsv = TARG;
@@ -389,6 +393,7 @@ CODE:
     GvSV(agv) = ret;
     SvSetMagicSV(ret, args[1]);
 #ifdef dMULTICALL
+    assert(cv);
     if(!CvISXSUB(cv)) {
         dMULTICALL;
         I32 gimme = G_SCALAR;
@@ -444,6 +449,7 @@ CODE:
 
     SAVESPTR(GvSV(PL_defgv));
 #ifdef dMULTICALL
+    assert(cv);
     if(!CvISXSUB(cv)) {
         dMULTICALL;
         I32 gimme = G_SCALAR;
@@ -515,6 +521,7 @@ PPCODE:
 
     SAVESPTR(GvSV(PL_defgv));
 #ifdef dMULTICALL
+    assert(cv);
     if(!CvISXSUB(cv)) {
         dMULTICALL;
         I32 gimme = G_SCALAR;
@@ -697,6 +704,7 @@ PPCODE:
     SAVESPTR(GvSV(agv));
     SAVESPTR(GvSV(bgv));
 #ifdef dMULTICALL
+    assert(cv);
     if(!CvISXSUB(cv)) {
         /* Since MULTICALL is about to move it */
         SV **stack = PL_stack_base + ax;
@@ -781,6 +789,7 @@ PPCODE:
     SAVESPTR(GvSV(agv));
     SAVESPTR(GvSV(bgv));
 #ifdef dMULTICALL
+    assert(cv);
     if(!CvISXSUB(cv)) {
         /* Since MULTICALL is about to move it */
         SV **stack = PL_stack_base + ax;
@@ -871,6 +880,7 @@ PPCODE:
  * Skip it on those versions (RT#87857)
  */
 #if defined(dMULTICALL) && (PERL_BCDVERSION > 0x5010000 || PERL_BCDVERSION < 0x5008009)
+    assert(cv);
     if(!CvISXSUB(cv)) {
         /* Since MULTICALL is about to move it */
         SV **stack = PL_stack_base + ax;

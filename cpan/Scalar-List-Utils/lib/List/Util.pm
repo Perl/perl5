@@ -15,7 +15,7 @@ our @EXPORT_OK  = qw(
   all any first min max minstr maxstr none notall product reduce sum sum0 shuffle uniq uniqnum uniqstr
   pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
-our $VERSION    = "1.45_01";
+our $VERSION    = "1.46";
 our $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
 
@@ -50,9 +50,9 @@ List::Util - A selection of general-utility list subroutines
 
       max maxstr min minstr product sum sum0
 
-      pairs pairkeys pairvalues pairfirst pairgrep pairmap
+      pairs unpairs pairkeys pairvalues pairfirst pairgrep pairmap
 
-      shuffle uniqnum uniqstr
+      shuffle uniq uniqnum uniqstr
     );
 
 =head1 DESCRIPTION
@@ -516,6 +516,10 @@ compares equal to zero but additionally produces a warning if such warnings
 are enabled (C<use warnings 'uninitialized';>). In addition, an C<undef> in
 the returned list is coerced into a numerical zero, so that the entire list of
 values returned by C<uniqnum> are well-behaved as numbers.
+
+Note also that multiple IEEE C<NaN> values are treated as duplicates of
+each other, regardless of any differences in their payloads, and despite
+the fact that C<< 0+'NaN' == 0+'NaN' >> yields false.
 
 =head2 uniqstr
 
