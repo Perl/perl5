@@ -2,7 +2,7 @@ package Test2::API::Context;
 use strict;
 use warnings;
 
-our $VERSION = '1.302056';
+our $VERSION = '1.302059';
 
 
 use Carp qw/confess croak longmess/;
@@ -66,9 +66,13 @@ sub DESTROY {
 
     # Do not show the warning if it looks like an exception has been thrown, or
     # if the context is not local to this process or thread.
-    if($self->{+EVAL_ERROR} eq $@ && $hub->is_local) {
-        my $frame = $self->{+_IS_SPAWN} || $self->{+TRACE}->frame;
-        warn <<"        EOT";
+    {
+        # Sometimes $@ is uninitialized, not a problem in this case so do not
+        # show the warning about using eq.
+        no warnings 'uninitialized';
+        if($self->{+EVAL_ERROR} eq $@ && $hub->is_local) {
+            my $frame = $self->{+_IS_SPAWN} || $self->{+TRACE}->frame;
+            warn <<"            EOT";
 A context appears to have been destroyed without first calling release().
 Based on \$@ it does not look like an exception was thrown (this is not always
 a reliable test)
@@ -84,7 +88,8 @@ release():
   Tool: $frame->[3]
 
 Cleaning up the CONTEXT stack...
-        EOT
+            EOT
+        }
     }
 
     return if $self->{+_IS_SPAWN};

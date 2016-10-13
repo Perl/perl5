@@ -6,7 +6,7 @@ use List::Util qw/shuffle/;
 use strict;
 use warnings;
 
-sub capture(&) {
+sub simple_capture(&) {
     my $code = shift;
 
     my ($err, $out) = ("", "");
@@ -136,7 +136,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     my @lines;
     my $file = __FILE__;
 
-    my $out = capture {
+    my $out = simple_capture {
         local $ENV{T2_KEEP_TEMPDIR} = 1;
 
         my $ipc = Test2::IPC::Driver::Files->new();
@@ -175,7 +175,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     like($out->{STDERR}, qr/^IPC Fatal Error: File for hub '12345-1-1' already exists/m, "Got message for duplicate hub");
     like($out->{STDERR}, qr/^IPC Fatal Error: File for hub '12345-1-1' does not exist/m, "Cannot remove hub twice");
 
-    $out = capture {
+    $out = simple_capture {
         my $ipc = Test2::IPC::Driver::Files->new();
         $ipc->add_hub($hid);
         my $trace = Test2::Util::Trace->new(frame => [__PACKAGE__, __FILE__, __LINE__, 'foo']);
@@ -190,7 +190,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     like($out->{STDERR}, qr/Origin PID:\s+$$/, "Got pid");
     like($out->{STDERR}, qr/Error: Can't store GLOB items/, "Got cause");
 
-    $out = capture {
+    $out = simple_capture {
         my $ipc = Test2::IPC::Driver::Files->new();
         local $@;
         eval { $ipc->send($hid, bless({ foo => 1 }, 'Foo')) };
@@ -199,7 +199,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     };
     like($out->{STDERR}, qr/IPC Fatal Error: hub '12345-1-1' is not available, failed to send event!/, "Cannot send to missing hub");
 
-    $out = capture {
+    $out = simple_capture {
         my $ipc = Test2::IPC::Driver::Files->new();
         $tmpdir = $ipc->tempdir;
         $ipc->add_hub($hid);
@@ -212,7 +212,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     like($out->{STDERR}, qr/IPC Fatal Error: Not all files from hub '12345-1-1' have been collected/, "Leftover files");
     like($out->{STDERR}, qr/IPC Fatal Error: Leftover files in the directory \(.*\.ready\)/, "What file");
 
-    $out = capture {
+    $out = simple_capture {
         my $ipc = Test2::IPC::Driver::Files->new();
         $ipc->add_hub($hid);
 
@@ -233,7 +233,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     close($fh);
 
     Storable::store({}, $fn);
-    $out = capture { eval { $ipc->read_event_file($fn) } };
+    $out = simple_capture { eval { $ipc->read_event_file($fn) } };
     like(
         $out->{STDERR},
         qr/IPC Fatal Error: Got an unblessed object: 'HASH\(.*\)'/,
@@ -241,7 +241,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     );
 
     Storable::store(bless({}, 'Test2::Event::FakeEvent'), $fn);
-    $out = capture { eval { $ipc->read_event_file($fn) } };
+    $out = simple_capture { eval { $ipc->read_event_file($fn) } };
     like(
         $out->{STDERR},
         qr{IPC Fatal Error: Event has unknown type \(Test2::Event::FakeEvent\), tried to load 'Test2/Event/FakeEvent\.pm' but failed: Can't locate Test2/Event/FakeEvent\.pm},
@@ -249,7 +249,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     );
 
     Storable::store(bless({}, 'Test2::API'), $fn);
-    $out = capture { eval { $ipc->read_event_file($fn) } };
+    $out = simple_capture { eval { $ipc->read_event_file($fn) } };
     like(
         $out->{STDERR},
         qr{'Test2::API=HASH\(.*\)' is not a 'Test2::Event' object},
@@ -257,7 +257,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     );
 
     Storable::store(bless({}, 'Foo'), $fn);
-    $out = capture {
+    $out = simple_capture {
         local @INC;
         push @INC => ('t/lib', 'lib');
         eval { $ipc->read_event_file($fn) };

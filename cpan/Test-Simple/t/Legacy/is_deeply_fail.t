@@ -25,7 +25,7 @@ package main;
 
 
 my $TB = Test::Builder->create;
-$TB->plan(tests => 100);
+$TB->plan(tests => 102);
 
 # Utility testing functions.
 sub ok ($;$) {
@@ -418,4 +418,12 @@ ERR
     is( $out,                  "not ok 40 - {x => 0} != {x => undef}\n" );
     ok !is_deeply( {x => ''}, {x => undef}, "{x => ''} != {x => undef}" );
     is( $out,                   "not ok 41 - {x => ''} != {x => undef}\n" );
+}
+
+# this will also happily fail before 5.10, even though there's no VSTRING ref type
+{
+    my $version1 = v1.2.3;
+    my $version2 = v1.2.4;
+    ok !is_deeply( [\\$version1], [\\$version2], "version objects");
+    is( $out, "not ok 42 - version objects\n" );
 }

@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302056';
+our $VERSION = '1.302059';
 
 BEGIN {
     if( $] < 5.008 ) {
@@ -197,6 +197,7 @@ sub child {
     $meta->{Test_Results} = [];
     $meta->{subevents} = $subevents;
     $meta->{subtest_id} = $hub->id;
+    $meta->{subtest_buffered} = $parent->format ? 0 : 1;
 
     $self->_add_ts_hooks;
 
@@ -269,6 +270,7 @@ FAIL
         else {
             $parent->{subevents}  = $meta->{subevents};
             $parent->{subtest_id} = $meta->{subtest_id};
+            $parent->{subtest_buffered} = $meta->{subtest_buffered};
             $parent->ok( $chub->is_passing, $meta->{Name} );
         }
     }
@@ -627,10 +629,11 @@ sub ok {
     my @attrs;
     my $subevents  = delete $self->{subevents};
     my $subtest_id = delete $self->{subtest_id};
+    my $subtest_buffered = delete $self->{subtest_buffered};
     my $epkg = 'Test2::Event::Ok';
     if ($subevents) {
         $epkg = 'Test2::Event::Subtest';
-        push @attrs => (subevents => $subevents, subtest_id => $subtest_id);
+        push @attrs => (subevents => $subevents, subtest_id => $subtest_id, buffered => $subtest_buffered);
     }
 
     my $e = bless {

@@ -1,7 +1,7 @@
 package Test::Builder::Tester::Color;
 
 use strict;
-our $VERSION = '1.302056';
+our $VERSION = '1.302059';
 
 require Test::Builder::Tester;
 

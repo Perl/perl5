@@ -18,7 +18,7 @@ require Exporter;
 
 use vars qw( @ISA @EXPORT );
 
-our $VERSION = '1.302056';
+our $VERSION = '1.302059';
 
 @EXPORT = qw( run_tests check_tests check_test cmp_results show_space );
 @ISA = qw( Exporter );
@@ -42,8 +42,9 @@ my $reset = '';
 
 if (my $want_colour = $ENV{TESTTESTERCOLOUR} || $ENV{TESTTESTERCOLOR})
 {
-	if (eval "require Term::ANSIColor")
+	if (eval { require Term::ANSIColor; 1 })
 	{
+		eval { require Win32::Console::ANSI } if 'MSWin32' eq $^O;  # support color on windows platforms
 		my ($f, $b) = split(",", $want_colour);
 		$colour = Term::ANSIColor::color($f).Term::ANSIColor::color("on_$b");
 		$reset = Term::ANSIColor::color("reset");

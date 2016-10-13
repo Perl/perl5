@@ -12,38 +12,6 @@ BEGIN { require "t/tools.pl" };
 
 use Test2::API qw/test2_stack/;
 
-sub capture(&) {
-    my $code = shift;
-
-    my ($err, $out) = ("", "");
-
-    my $handles = test2_stack->top->format->handles;
-    my ($ok, $e);
-    {
-        my ($out_fh, $err_fh);
-
-        ($ok, $e) = try {
-            open($out_fh, '>', \$out) or die "Failed to open a temporary STDOUT: $!";
-            open($err_fh, '>', \$err) or die "Failed to open a temporary STDERR: $!";
-
-            test2_stack->top->format->set_handles([$out_fh, $err_fh, $out_fh]);
-
-            $code->();
-        };
-    }
-    test2_stack->top->format->set_handles($handles);
-
-    die $e unless $ok;
-
-    $err =~ s/ $/_/mg;
-    $out =~ s/ $/_/mg;
-
-    return {
-        STDOUT => $out,
-        STDERR => $err,
-    };
-}
-
 # Ensure the top hub is generated
 test2_stack->top;
 

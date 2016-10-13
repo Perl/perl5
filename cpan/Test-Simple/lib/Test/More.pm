@@ -17,7 +17,7 @@ sub _carp {
     return warn @_, " at $file line $line\n";
 }
 
-our $VERSION = '1.302056';
+our $VERSION = '1.302059';
 
 use Test::Builder::Module;
 our @ISA    = qw(Test::Builder::Module);
@@ -1184,7 +1184,7 @@ sub _type {
 
     return '' if !ref $thing;
 
-    for my $type (qw(Regexp ARRAY HASH REF SCALAR GLOB CODE)) {
+    for my $type (qw(Regexp ARRAY HASH REF SCALAR GLOB CODE VSTRING)) {
         return $type if UNIVERSAL::isa( $thing, $type );
     }
 
@@ -1976,7 +1976,7 @@ the perl-qa gang.
 
 =head1 BUGS
 
-See F<http://rt.cpan.org> to report and view bugs.
+See F<https://github.com/Test-More/test-more/issues> to report and view bugs.
 
 
 =head1 SOURCE

@@ -2,7 +2,7 @@ package Test2::API;
 use strict;
 use warnings;
 
-our $VERSION = '1.302056';
+our $VERSION = '1.302059';
 
 
 my $INST;
@@ -446,6 +446,14 @@ sub run_subtest {
             my $hide = $format->can('hide_buffered') ? $format->hide_buffered : 1;
             $hub->format(undef) if $hide;
         }
+    }
+    elsif (! $parent->format) {
+        # If our parent has no format that means we're in a buffered subtest
+        # and now we're trying to run a streaming subtest. There's really no
+        # way for that to work, so we need to force the use of a buffered
+        # subtest here as
+        # well. https://github.com/Test-More/test-more/issues/721
+        $buffered = 1;
     }
 
     if ($inherit_trace) {
