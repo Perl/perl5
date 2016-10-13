@@ -1890,6 +1890,7 @@ cpan/parent/t/parent-classfromclassfile.t	tests for parent.pm
 cpan/parent/t/parent-classfromfile.t		tests for parent.pm
 cpan/parent/t/parent-pmc.t			tests for parent.pm
 cpan/parent/t/parent-returns-false.t		tests for parent.pm
+cpan/parent/t/rt62341.t.disabled		test files for parent.pm
 cpan/Perl-OSType/lib/Perl/OSType.pm			Perl::OSType
 cpan/Perl-OSType/t/OSType.t			Perl::OSType
 cpan/perlfaq/lib/perlfaq.pm	Perl frequently asked questions
