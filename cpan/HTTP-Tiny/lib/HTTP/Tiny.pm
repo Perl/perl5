@@ -4,9 +4,9 @@ use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
 
-our $VERSION = '0.068';
+our $VERSION = '0.070';
 
-use Carp ();
+sub _croak { require Carp; Carp::croak(@_) }
 
 #pod =method new
 #pod
@@ -207,7 +207,7 @@ for my $sub_name ( qw/get head put post delete/ ) {
     sub $sub_name {
         my (\$self, \$url, \$args) = \@_;
         \@_ == 2 || (\@_ == 3 && ref \$args eq 'HASH')
-        or Carp::croak(q/Usage: \$http->$sub_name(URL, [HASHREF])/ . "\n");
+        or _croak(q/Usage: \$http->$sub_name(URL, [HASHREF])/ . "\n");
         return \$self->request('$req_method', \$url, \$args || {});
     }
 HERE
@@ -236,7 +236,7 @@ HERE
 sub post_form {
     my ($self, $url, $data, $args) = @_;
     (@_ == 3 || @_ == 4 && ref $args eq 'HASH')
-        or Carp::croak(q/Usage: $http->post_form(URL, DATAREF, [HASHREF])/ . "\n");
+        or _croak(q/Usage: $http->post_form(URL, DATAREF, [HASHREF])/ . "\n");
 
     my $headers = {};
     while ( my ($key, $value) = each %{$args->{headers} || {}} ) {
@@ -281,7 +281,7 @@ sub post_form {
 sub mirror {
     my ($self, $url, $file, $args) = @_;
     @_ == 3 || (@_ == 4 && ref $args eq 'HASH')
-      or Carp::croak(q/Usage: $http->mirror(URL, FILE, [HASHREF])/ . "\n");
+      or _croak(q/Usage: $http->mirror(URL, FILE, [HASHREF])/ . "\n");
 
     if ( exists $args->{headers} ) {
         my $headers = {};
@@ -298,16 +298,16 @@ sub mirror {
 
     require Fcntl;
     sysopen my $fh, $tempfile, Fcntl::O_CREAT()|Fcntl::O_EXCL()|Fcntl::O_WRONLY()
-       or Carp::croak(qq/Error: Could not create temporary file $tempfile for downloading: $!\n/);
+       or _croak(qq/Error: Could not create temporary file $tempfile for downloading: $!\n/);
     binmode $fh;
     $args->{data_callback} = sub { print {$fh} $_[0] };
     my $response = $self->request('GET', $url, $args);
     close $fh
-        or Carp::croak(qq/Error: Caught error closing temporary file $tempfile: $!\n/);
+        or _croak(qq/Error: Caught error closing temporary file $tempfile: $!\n/);
 
     if ( $response->{success} ) {
         rename $tempfile, $file
-            or Carp::croak(qq/Error replacing $file with $tempfile: $!\n/);
+            or _croak(qq/Error replacing $file with $tempfile: $!\n/);
         my $lm = $response->{headers}{'last-modified'};
         if ( $lm and my $mtime = $self->_parse_http_date($lm) ) {
             utime $mtime, $mtime, $file;
@@ -417,7 +417,7 @@ my %idempotent = map { $_ => 1 } qw/GET HEAD PUT DELETE OPTIONS TRACE/;
 sub request {
     my ($self, $method, $url, $args) = @_;
     @_ == 3 || (@_ == 4 && ref $args eq 'HASH')
-      or Carp::croak(q/Usage: $http->request(METHOD, URL, [HASHREF])/ . "\n");
+      or _croak(q/Usage: $http->request(METHOD, URL, [HASHREF])/ . "\n");
     $args ||= {}; # we keep some state in this during _request
 
     # RFC 2616 Section 8.1.4 mandates a single retry on broken socket
@@ -470,13 +470,13 @@ sub request {
 sub www_form_urlencode {
     my ($self, $data) = @_;
     (@_ == 2 && ref $data)
-        or Carp::croak(q/Usage: $http->www_form_urlencode(DATAREF)/ . "\n");
+        or _croak(q/Usage: $http->www_form_urlencode(DATAREF)/ . "\n");
     (ref $data eq 'HASH' || ref $data eq 'ARRAY')
-        or Carp::croak("form data must be a hash or array reference\n");
+        or _croak("form data must be a hash or array reference\n");
 
     my @params = ref $data eq 'HASH' ? %$data : @$data;
     @params % 2 == 0
-        or Carp::croak("form data reference must have an even number of terms\n");
+        or _croak("form data reference must have an even number of terms\n");
 
     my @terms;
     while( @params ) {
@@ -694,14 +694,14 @@ sub _proxy_connect {
 
     my @proxy_vars;
     if ( $request->{scheme} eq 'https' ) {
-        Carp::croak(qq{No https_proxy defined}) unless $self->{https_proxy};
+        _croak(qq{No https_proxy defined}) unless $self->{https_proxy};
         @proxy_vars = $self->_split_proxy( https_proxy => $self->{https_proxy} );
         if ( $proxy_vars[0] eq 'https' ) {
-            Carp::croak(qq{Can't proxy https over https: $request->{uri} via $self->{https_proxy}});
+            _croak(qq{Can't proxy https over https: $request->{uri} via $self->{https_proxy}});
         }
     }
     else {
-        Carp::croak(qq{No http_proxy defined}) unless $self->{http_proxy};
+        _croak(qq{No http_proxy defined}) unless $self->{http_proxy};
         @proxy_vars = $self->_split_proxy( http_proxy => $self->{http_proxy} );
     }
 
@@ -733,7 +733,7 @@ sub _split_proxy {
         defined($scheme) && length($scheme) && length($host) && length($port)
         && $path_query eq '/'
     ) {
-        Carp::croak(qq{$type URL must be in format http[s]://[auth@]<host>:<port>/\n});
+        _croak(qq{$type URL must be in format http[s]://[auth@]<host>:<port>/\n});
     }
 
     return ($scheme, $host, $port, $auth);
@@ -882,7 +882,7 @@ sub _validate_cookie_jar {
 
     # duck typing
     for my $method ( qw/add cookie_header/ ) {
-        Carp::croak(qq/Cookie jar must provide the '$method' method\n/)
+        _croak(qq/Cookie jar must provide the '$method' method\n/)
             unless ref($jar) && ref($jar)->can($method);
     }
 
@@ -1658,7 +1658,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.068
+version 0.070
 
 =head1 SYNOPSIS
 
@@ -2281,7 +2281,7 @@ David Golden <dagolden@cpan.org>
 
 =head1 CONTRIBUTORS
 
-=for stopwords Alan Gardner Alessandro Ghedini A. Sinan Unur Brad Gilbert brian m. carlson Chris Nehren Weyl Claes Jakobsson Clinton Gormley Craig Berry David Golden Dean Pearce Edward Zborowski James Raspass Jeremy Mates Jess Robinson Karen Etheridge Lukas Eklund Martin J. Evans Martin-Louis Bright Mike Doherty Olaf Alders Olivier Mengué Petr Písař SkyMarshal Sören Kornetzki Steve Grazzini Syohei YOSHIDA Tatsuhiko Miyagawa Tom Hukins Tony Cook
+=for stopwords Alan Gardner Alessandro Ghedini A. Sinan Unur Brad Gilbert brian m. carlson Chris Nehren Weyl Claes Jakobsson Clinton Gormley Craig Berry David Golden Dean Pearce Edward Zborowski James Raspass Jeremy Mates Jess Robinson Karen Etheridge Lukas Eklund Martin J. Evans Martin-Louis Bright Mike Doherty Nicolas Rochelemagne Olaf Alders Olivier Mengué Petr Písař SkyMarshal Sören Kornetzki Steve Grazzini Syohei YOSHIDA Tatsuhiko Miyagawa Tom Hukins Tony Cook
 
 =over 4
 
@@ -2368,6 +2368,10 @@ Martin-Louis Bright <mlbright@gmail.com>
 =item *
 
 Mike Doherty <doherty@cpan.org>
+
+=item *
+
+Nicolas Rochelemagne <rochelemagne@cpanel.net>
 
 =item *
 
