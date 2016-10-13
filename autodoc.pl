@@ -110,11 +110,14 @@ HDR_DOC:
 	    my $docs = "";
 DOC:
 	    while (defined($doc = $get_next_line->())) {
-		last DOC if $doc =~ /^=\w+/;
+
+                # Other pod commands are considered part of the current
+                # function's docs, so can have lists, etc.
+                last DOC if $doc =~ /^=(cut|for\s+apidoc|head)/;
 		if ($doc =~ m:^\*/$:) {
 		    warn "=cut missing? $file:$line:$doc";;
 		    last DOC;
-		}
+                }
 		$docs .= $doc;
 	    }
 	    $docs = "\n$docs" if $docs and $docs !~ /^\n/;
