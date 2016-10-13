@@ -848,7 +848,7 @@ Code points above 0x7FFF_FFFF (2**31 - 1) were never specified in any standard,
 so using them is more problematic than other above-Unicode code points.  Perl
 invented an extension to UTF-8 to represent the ones above 2**36-1, so it is
 likely that non-Perl languages will not be able to read files that contain
-these that written by the perl interpreter; nor would Perl understand files
+these; nor would Perl understand files
 written by something that uses a different extension.  For these reasons, there
 is a separate set of flags that can warn and/or disallow these extremely high
 code points, even if other above-Unicode ones are accepted.  These are the
