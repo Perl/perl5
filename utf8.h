@@ -779,9 +779,7 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UTF8_ALLOW_ANY                                                          \
 	    (~( UTF8_DISALLOW_ILLEGAL_INTERCHANGE|UTF8_DISALLOW_ABOVE_31_BIT    \
                |UTF8_WARN_ILLEGAL_INTERCHANGE|UTF8_WARN_ABOVE_31_BIT))
-#define UTF8_ALLOW_ANYUV                                                        \
-         (UTF8_ALLOW_EMPTY                                                      \
-	  & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE|UTF8_WARN_ILLEGAL_INTERCHANGE))
+#define UTF8_ALLOW_ANYUV  UTF8_ALLOW_EMPTY
 #define UTF8_ALLOW_DEFAULT		(ckWARN(WARN_UTF8) ? 0 : \
 					 UTF8_ALLOW_ANYUV)
 
