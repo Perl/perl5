@@ -167,19 +167,15 @@ Opening bracket on a callback.  See C<L</LEAVE>> and L<perlcall>.
 =for apidoc Ams||LEAVE
 Closing bracket on a callback.  See C<L</ENTER>> and L<perlcall>.
 
-=over
+=for apidoc Ams||ENTER_with_name(name)
 
-=item ENTER_with_name(name)
-
-Same as C<ENTER>, but when debugging is enabled it also associates the
+Same as C<L</ENTER>>, but when debugging is enabled it also associates the
 given literal string with the new scope.
 
-=item LEAVE_with_name(name)
+=for apidoc Ams||LEAVE_with_name(name)
 
-Same as C<LEAVE>, but when debugging is enabled it first checks that the
+Same as C<L</LEAVE>>, but when debugging is enabled it first checks that the
 scope has the given name. C<name> must be a C<NUL>-terminated literal string.
-
-=back
 
 =cut
 */
