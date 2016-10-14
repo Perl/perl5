@@ -393,11 +393,19 @@ except call your Perl program.   Compiled programs are not subject to the
 kernel bug that plagues set-id scripts.  Here's a simple wrapper, written
 in C:
 
+    #include <unistd.h>
+    #include <stdio.h>
+    #include <string.h>
+    #include <errno.h>
+
     #define REAL_PATH "/path/to/script"
-    main(ac, av)
-	char **av;
+
+    int main(int argc, char **argv)
     {
-	execv(REAL_PATH, av);
+        execv(REAL_PATH, argv);
+        fprintf(stderr, "%s: %s: %s\n",
+                        argv[0], REAL_PATH, strerror(errno));
+        return 127;
     }
 
 Compile this wrapper into a binary executable and then make I<it> rather
