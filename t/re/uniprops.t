@@ -3,9 +3,13 @@ use warnings;
 no warnings 'once';
 
 if ($^O eq 'dec_osf') {
-   print "1..0 # $^O cannot handle this test\n";
-   exit(0);
+    print "1..0 # $^O cannot handle this test\n";
+    exit(0);
 }
+
+# TODO: it would be good to have watchdog(5 * 60) in here
+# for slow machines, but unfortunately we cannot trivially
+# use test.pl because the TestProp.pl avoids using that.
 
 # This is a wrapper for a generated file.  Assumes being run from 't'
 # directory.
