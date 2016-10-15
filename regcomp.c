@@ -8432,9 +8432,9 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
 STATIC void
 S_invlist_replace_list_destroys_src(pTHX_ SV * dest, SV * src)
 {
-    /* Replaces the inversion list in 'src' with the one in 'dest'.  It steals
-     * the list from 'src', so 'src' is made to have a NULL list.  This is
-     * similar to what SvSetMagicSV() would do, if it were implemented on
+    /* Replaces the inversion list in 'dest' with the one from 'src'.  It
+     * steals the list from 'src', so 'src' is made to have a NULL list.  This
+     * is similar to what SvSetMagicSV() would do, if it were implemented on
      * inversion lists, though this routine avoids a copy */
 
     const UV src_len          = _invlist_len(src);
@@ -8941,13 +8941,13 @@ void
 Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
                                          const bool complement_b, SV** output)
 {
-    /* Take the union of two inversion lists and point <output> to it.  *output
+    /* Take the union of two inversion lists and point 'output. to it.  *output
      * SHOULD BE DEFINED upon input, and if it points to one of the two lists,
      * the reference count to that list will be decremented if not already a
      * temporary (mortal); otherwise just its contents will be modified to be
-     * the union.  The first list, <a>, may be NULL, in which case a copy of
-     * the second list is returned.  If <complement_b> is TRUE, the union is
-     * taken of the complement (inversion) of <b> instead of b itself.
+     * the union.  The first list, 'a., may be NULL, in which case a copy of
+     * the second list is returned.  If 'complement_b. is TRUE, the union is
+     * taken of the complement (inversion) of 'b. instead of b itself.
      *
      * The basis for this comes from "Unicode Demystified" Chapter 13 by
      * Richard Gillam, published by Addison-Wesley, and explained at some
@@ -8985,15 +8985,15 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
     len_b = _invlist_len(b);
     if (len_b == 0) {
 
-        /* Here, 'b' is empty.  If the output is the complement of 'b', the
-         * union is all possible code points, and we need not even look at 'a'.
-         * It's easiest to create a new inversion list that matches everything.
-         * */
+        /* Here, 'b' is empty, hence it's complement is all possible code
+         * points.  So if the union includes the complement of 'b', it includes
+         * everything, and we need not even look at 'a'.  It's easiest to
+         * create a new inversion list that matches everything.  */
         if (complement_b) {
             SV* everything = _add_range_to_invlist(NULL, 0, UV_MAX);
 
-            /* If the output didn't exist, just point it at the new list */
-            if (*output == NULL) {
+            if (*output == NULL) { /* If the output didn't exist, just point it
+                                      at the new list */
                 *output = everything;
                 return;
             }
@@ -9004,7 +9004,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
             return;
         }
 
-        /* Here, we don't want the complement of 'b', and since it is empty,
+        /* Here, we don't want the complement of 'b', and since 'b' is empty,
          * the union will come entirely from 'a'.  If 'a' is NULL or empty, the
          * output will be empty */
 
@@ -9040,6 +9040,8 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 
         return;
     }
+
+    /* Here 'b' is not empty.  See about 'a' */
 
     if (a == NULL || ((len_a = _invlist_len(a)) == 0)) {
 
@@ -9112,8 +9114,8 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
     array_u = _invlist_array_init(u, (    len_a > 0 && array_a[0] == 0)
                                       || (len_b > 0 && array_b[0] == 0));
 
-    /* Go through each input list item by item, stopping when exhausted one of
-     * them */
+    /* Go through each input list item by item, stopping when have exhausted
+     * one of them */
     while (i_a < len_a && i_b < len_b) {
 	UV cp;	    /* The element to potentially add to the union's array */
 	bool cp_in_set;   /* is it in the the input list's set or not */
@@ -9249,14 +9251,14 @@ void
 Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
                                                const bool complement_b, SV** i)
 {
-    /* Take the intersection of two inversion lists and point <i> to it.  *i
+    /* Take the intersection of two inversion lists and point 'i' to it.  *i
      * SHOULD BE DEFINED upon input, and if it points to one of the two lists,
      * the reference count to that list will be decremented if not already a
      * temporary (mortal); otherwise just its contents will be modified to be
-     * the intersection.  The first list, <a>, may be NULL, in which case an
-     * empty list is returned.  If <complement_b> is TRUE, the result will be
-     * the intersection of <a> and the complement (or inversion) of <b> instead
-     * of <b> directly.
+     * the intersection.  The first list, 'a', may be NULL, in which case an
+     * empty list is returned.  If 'complement_b' is TRUE, the result will be
+     * the intersection of 'a' and the complement (or inversion) of 'b' instead
+     * of 'b' directly.
      *
      * The basis for this comes from "Unicode Demystified" Chapter 13 by
      * Richard Gillam, published by Addison-Wesley, and explained at some
@@ -9360,7 +9362,7 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
     array_r = _invlist_array_init(r,    len_a > 0 && array_a[0] == 0
                                      && len_b > 0 && array_b[0] == 0);
 
-    /* Go through each list item by item, stopping when exhausted one of
+    /* Go through each list item by item, stopping when have exhausted one of
      * them */
     while (i_a < len_a && i_b < len_b) {
 	UV cp;	    /* The element to potentially add to the intersection's
