@@ -14,6 +14,8 @@ $|=1;
     my $ordwide = ord($wide);
     printf "# under use bytes ord(v256) = 0x%02x\n", $ordwide;
     skip_all('UTF-8-centric tests (not valid for UTF-EBCDIC)') if $ordwide == 140;
+    # This could be ported to EBCDIC, but a lot of trouble.
+    # ext/XS-APItest/t/utf8.t contains comprehensive tests for both platforms
 
     if ($ordwide != 196) {
 	printf "# v256 starts with 0x%02x\n", $ordwide;
@@ -22,12 +24,22 @@ $|=1;
 
 no utf8;
 
+my $is64bit = length sprintf("%x", ~0) > 8;
+
 foreach (<DATA>) {
     if (/^(?:\d+(?:\.\d+)?)\s/ || /^#/) {
 	# print "# $_\n";
     } elsif (my ($id, $okay, $Unicode, $byteslen, $hex, $charslen, $experr)
 	     = /^(\d+\.\d+\.\d+[bu]?)   # ID
-		\s+(y|n|N-?\d+)         # expect to pass or fail
+		\s+(y|n|N-?\d+(?:,\d+)?)  # expect to pass or fail
+                                          # 'n' means expect one diagnostic
+                                          # 'N\d+'     means expect this
+                                          #            number of diagnostics
+                                          # 'N\d+,\d+' means expect the first
+                                          #            number of diagnostics
+                                          #            on a 32-bit system; the
+                                          #            second number on a
+                                          #            64-bit one
                 \s+([0-9a-f]{1,8}(?:,[0-9a-f]{1,8})*|-) # Unicode characters
                 \s+(\d+)                # number of octets
                 \s+([0-9a-f]{2}(?::[0-9a-f]{2})*)       # octets in hex
@@ -49,10 +61,12 @@ foreach (<DATA>) {
 	    isnt($experr, '', "Expected warning for $id provided");
 	    warnings_like(sub {unpack 'C0U*', $octets}, [qr/$experr/],
 			 "Only expected warning for $id");
-	} elsif ($okay !~ /^N(-?\d+)/) {
+	} elsif ($okay !~ /^N-?(\d+)(?:,(\d+))?/) {
 	    is($okay, 'n', "Confused test description for $id");
 	} else {
-	    my $expect = $1;
+	    my $expect32 = $1;
+            my $expect64 = $2 // $expect32;
+            my $expect = ($is64bit) ? $expect64 : $expect32;
 	    my @warnings;
 
 	    {
@@ -63,16 +77,26 @@ foreach (<DATA>) {
 		unpack 'C0U*', $octets;
 	    }
 
+	    unless (is(scalar @warnings, $expect, "Expected number of warnings for $id seen")) {
+                note(join "", "Got:\n", @warnings);
+            }
 	    isnt($experr, '', "Expected first warning for $id provided");
-	    like($warnings[0], qr/$experr/, "Expected first warning for $id seen");
+
+            my $message;
+            if ($expect64 != $expect32 && ! $is64bit) {
+                like($warnings[0], qr/overflow/, "overflow warning for $id seen");
+                shift @warnings;
+                $message = "Expected first warning after overflow for $id seen";
+            }
+            else {
+                $message = "Expected first warning for $id seen";
+            }
+	    like($warnings[0], qr/$experr/, $message);
 	    local $::TODO;
 	    if ($expect < 0) {
 		$expect = -$expect;
 		$::TODO = "Markus Kuhn states that $expect invalid sequences should be signalled";
 	    }
-	    unless (is(scalar @warnings, $expect, "Expected number of warnings for $id seen")) {
-                note(join "", "Got:\n", @warnings);
-            }
 
 	}
     } else {
@@ -85,6 +109,8 @@ done_testing();
 # This table is based on Markus Kuhn's UTF-8 Decode Stress Tester,
 # http://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt,
 # version dated 2015-08-28.
+#
+# See the code that parses these lines for comments as to the column meanings
 
 __DATA__
 1	Correct UTF-8
@@ -143,8 +169,8 @@ __DATA__
 3.4.1 N15 -	30	c0:e0:80:f0:80:80:f8:80:80:80:fc:80:80:80:80:df:ef:bf:f7:bf:bf:fb:bf:bf:bf:fd:bf:bf:bf:bf	-	unexpected non-continuation byte 0xe0, immediately after start byte 0xc0
 3.5	Impossible bytes (but not with Perl's extended UTF-8)
 3.5.1 n -	1	fe	-	1 byte, need 7
-3.5.2 n -	1	ff	-	1 byte, need 13
-3.5.3 N5 -	4	fe:fe:ff:ff	-	byte 0xfe
+3.5.2 N2,1 -	1	ff	-	1 byte, need 13
+3.5.3 N8,5 -	4	fe:fe:ff:ff	-	byte 0xfe
 4	Overlong sequences
 4.1	Examples of an overlong ASCII character
 4.1.1 n -	2	c0:af	-	overlong
