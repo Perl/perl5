@@ -997,7 +997,8 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
      * too short one.  Otherwise the first two are set to 's0' and 'send', and
      * the third not used at all */
     U8 * adjusted_s0 = (U8 *) s0;
-    U8 * adjusted_send;
+    U8 * adjusted_send = NULL;  /* (Initialized to silence compilers' wrong
+                                   warning) */
     UV uv_so_far = 0;   /* (Initialized to silence compilers' wrong warning) */
 
     PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_ERROR;
