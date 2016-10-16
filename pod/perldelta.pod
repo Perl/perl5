@@ -80,16 +80,19 @@ as an updated module in the L</Modules and Pragmata> section.
 
 =head1 Performance Enhancements
 
-XXX Changes which enhance performance without changing behaviour go here.
-There may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+Converting a single-digit string to a number is now substantially faster.
+
+=item *
+
+The internal op implementing the C<split> builtin has been simplified and
+sped up. Firstly, it no longer requires a subsidiary internal C<pushre> op
+to do its work. Secondly, code of the form C<my @x = split(...)> is now
+optimised in the same way as C<@x = split(...)>, and is therefore a few
+percent faster.
 
 =back
 
@@ -116,6 +119,11 @@ XXX
 =head2 Updated Modules and Pragmata
 
 =over 4
+
+=item *
+
+L<B::Concise> now produces output that is more descriptive for C<op_private>
+flags.
 
 =item *
 
@@ -208,6 +216,12 @@ Details as to the exact problem have been added to the diagnostics that
 occur when malformed UTF-8 is encountered when trying to convert to a
 code point.
 
+=item *
+
+Executing C<undef $x> where C<$x> is tied or magical no longer incorrectly
+blames the variable for an uninitialized-value warning encountered by the
+tied/magical code.
+
 =back
 
 =head1 Utility Changes
@@ -242,7 +256,8 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+Builds using C<USE_PAD_RESET> now work again; this configuration had
+bit-rotted.
 
 =back
 
@@ -260,7 +275,11 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+Some parts of the test suite that try to exhaustively test edge cases in the
+regex implementation have been restricted to running for a maximum of five
+minutes. On slow systems they could otherwise take several hours, without
+significantly improving our understanding of the correctness of the code
+under test.
 
 =back
 
@@ -275,9 +294,11 @@ changes as paragraphs below it. ]
 
 =over 4
 
-=item XXX-some-platform
+=item NetBSD/VAX
 
-XXX
+Perl now compiles (again?) under NetBSD on VAX machines (though it's not
+possible for that platform to implement floating-point infinities and NaNs
+compatibly with most systems).
 
 =back
 
@@ -339,6 +360,33 @@ beyond pass/fail.  Previously, the only ways to know why a sequence was
 ill-formed was to capture and parse the generated diagnostics, or to do
 your own analysis.
 
+=item *
+
+Several new functions for handling Unicode have been added to the API:
+C<L<perlapi/is_strict_utf8_string>>,
+C<L<perlapi/is_c9strict_utf8_string>>,
+C<L<perlapi/is_utf8_string_flags>>,
+C<L<perlapi/is_strict_utf8_string_loc>>,
+C<L<perlapi/is_strict_utf8_string_loclen>>,
+C<L<perlapi/is_c9strict_utf8_string_loc>>,
+C<L<perlapi/is_c9strict_utf8_string_loclen>>,
+C<L<perlapi/is_utf8_string_loc_flags>>,
+C<L<perlapi/is_utf8_string_loclen_flags>>,
+C<L<perlapi/is_utf8_fixed_width_buf_flags>>,
+C<L<perlapi/is_utf8_fixed_width_buf_loc_flags>>,
+C<L<perlapi/is_utf8_fixed_width_buf_loclen_flags>>.
+
+These functions are all extensions of the C<is_utf8_string_*()> functions,
+that apply various restrictions to the UTF-8 recognized as valid.
+
+=item *
+
+All parts of the internals now agree that the C<sassign> op is a C<BINOP>;
+previously it was listed as a C<BASEOP> in F<regen/opcodes>, which meant
+that several parts of the internals had to be special-cased to accommodate
+it. This oddity's original motivation was to handle code like C<$x ||= 1>;
+that is now handled in a simpler way.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -355,6 +403,17 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 A sub containing a "forward" declaration with the same name (e.g.,
 C<sub c { sub c; }>) could sometimes crash or loop infinitely.  [perl
 #129090]
+
+=item *
+
+A crash in executing a regex with a floating UTF-8 substring against a
+target string that also used UTF-8 has been fixed. [perl #129350]
+
+=item *
+
+Previously, a shebang line like C<#!perl -i u> could be erroneously
+interpreted as requesting the C<-u> option. This has been fixed. [perl
+#129336]
 
 =back
 
