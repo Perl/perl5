@@ -273,10 +273,6 @@ changes as paragraphs below it. ]
 
 =head2 New Platforms
 
-A sub containing a "forward" declaration with the same name (e.g.,
-C<sub c { sub c; }>) could sometimes crash or loop infinitely.  [perl
-#129090]
-
 =over 4
 
 =item XXX-some-platform
@@ -356,7 +352,9 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+A sub containing a "forward" declaration with the same name (e.g.,
+C<sub c { sub c; }>) could sometimes crash or loop infinitely.  [perl
+#129090]
 
 =back
 
