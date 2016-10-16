@@ -2051,7 +2051,7 @@ S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack)
 	    }
 	}
 	NEXTVAL_NEXTTOKE.opval
-	    = (OP*)newSVOP(OP_CONST,0,
+            = newSVOP(OP_CONST,0,
 			   S_newSV_maybe_utf8(aTHX_ PL_tokenbuf, len));
 	NEXTVAL_NEXTTOKE.opval->op_private |= OPpCONST_BARE;
 	force_next(token);
@@ -2075,7 +2075,7 @@ S_force_ident(pTHX_ const char *s, int kind)
 
     if (s[0]) {
 	const STRLEN len = s[1] ? strlen(s) : 1; /* s = "\"" see yylex */
-	OP* const o = (OP*)newSVOP(OP_CONST, 0, newSVpvn_flags(s, len,
+        OP* const o = newSVOP(OP_CONST, 0, newSVpvn_flags(s, len,
                                                                 UTF ? SVf_UTF8 : 0));
 	NEXTVAL_NEXTTOKE.opval = o;
 	force_next(BAREWORD);
@@ -2316,7 +2316,7 @@ S_sublex_start(pTHX)
 	    SvREFCNT_dec(sv);
 	    sv = nsv;
 	}
-	pl_yylval.opval = (OP*)newSVOP(op_type, 0, sv);
+        pl_yylval.opval = newSVOP(op_type, 0, sv);
 	return THING;
     }
 
@@ -2454,7 +2454,7 @@ S_sublex_done(pTHX)
 	if (SvUTF8(PL_linestr))
 	    SvUTF8_on(sv);
 	PL_expect = XOPERATOR;
-	pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
+        pl_yylval.opval = newSVOP(OP_CONST, 0, sv);
 	return THING;
     }
 
@@ -3861,7 +3861,7 @@ S_scan_const(pTHX_ char *start)
 	    sv = S_new_constant(aTHX_ start, s - start, key, keylen, sv, NULL,
 				type, typelen);
 	}
-	pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
+        pl_yylval.opval = newSVOP(OP_CONST, 0, sv);
     }
     LEAVE_with_name("scan_const");
     return s;
@@ -4112,7 +4112,7 @@ S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv)
 	    if ((PL_bufend - s) >= 2 && *s == '=' && *(s+1) == '>')
 		return 0;	/* no assumptions -- "=>" quotes bareword */
       bare_package:
-	    NEXTVAL_NEXTTOKE.opval = (OP*)newSVOP(OP_CONST, 0,
+            NEXTVAL_NEXTTOKE.opval = newSVOP(OP_CONST, 0,
 						  S_newSV_maybe_utf8(aTHX_ tmpbuf, len));
 	    NEXTVAL_NEXTTOKE.opval->op_private = OPpCONST_BARE;
 	    PL_expect = XTERM;
@@ -4745,7 +4745,7 @@ Perl_yylex(pTHX)
 	    else sv = newSVpvn(PL_parser->lex_shared->re_eval_start,
 			 PL_bufptr - PL_parser->lex_shared->re_eval_start);
 	    NEXTVAL_NEXTTOKE.opval =
-		    (OP*)newSVOP(OP_CONST, 0,
+                    newSVOP(OP_CONST, 0,
 				 sv);
 	    force_next(THING);
 	    PL_parser->lex_shared->re_eval_start = NULL;
@@ -4767,7 +4767,7 @@ Perl_yylex(pTHX)
 	if (SvIVX(PL_linestr) == '\'' && !PL_lex_inpat) {
 	    SV *sv = newSVsv(PL_linestr);
 	    sv = tokeq(sv);
-	    pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
+            pl_yylval.opval = newSVOP(OP_CONST, 0, sv);
 	    s = PL_bufend;
 	}
 	else {
@@ -6753,7 +6753,7 @@ Perl_yylex(pTHX)
 	  fat_arrow:
 	    CLINE;
 	    pl_yylval.opval
-		= (OP*)newSVOP(OP_CONST, 0,
+                = newSVOP(OP_CONST, 0,
 			       S_newSV_maybe_utf8(aTHX_ PL_tokenbuf, len));
 	    pl_yylval.opval->op_private = OPpCONST_BARE;
 	    TERM(BAREWORD);
@@ -6989,7 +6989,7 @@ Perl_yylex(pTHX)
 
 		/* Presume this is going to be a bareword of some sort. */
 		CLINE;
-		pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
+                pl_yylval.opval = newSVOP(OP_CONST, 0, sv);
 		pl_yylval.opval->op_private = OPpCONST_BARE;
 
 		/* And if "Foo::", then that's what it certainly is. */
@@ -7162,7 +7162,7 @@ Perl_yylex(pTHX)
 
 		    op_free(pl_yylval.opval);
 		    pl_yylval.opval =
-			off ? (OP *)newCVREF(0, rv2cv_op) : rv2cv_op;
+                        off ? newCVREF(0, rv2cv_op) : rv2cv_op;
 		    pl_yylval.opval->op_private |= OPpENTERSUB_NOPAREN;
 		    PL_last_lop = PL_oldbufptr;
 		    PL_last_lop_op = OP_ENTERSUB;
@@ -7277,18 +7277,18 @@ Perl_yylex(pTHX)
 
 	case KEY___FILE__:
 	    FUN0OP(
-		(OP*)newSVOP(OP_CONST, 0, newSVpv(CopFILE(PL_curcop),0))
+                newSVOP(OP_CONST, 0, newSVpv(CopFILE(PL_curcop),0))
 	    );
 
 	case KEY___LINE__:
 	    FUN0OP(
-        	(OP*)newSVOP(OP_CONST, 0,
+                newSVOP(OP_CONST, 0,
 		    Perl_newSVpvf(aTHX_ "%"IVdf, (IV)CopLINE(PL_curcop)))
 	    );
 
 	case KEY___PACKAGE__:
 	    FUN0OP(
-		(OP*)newSVOP(OP_CONST, 0,
+                newSVOP(OP_CONST, 0,
 					(PL_curstash
 					 ? newSVhek(HvNAME_HEK(PL_curstash))
 					 : &PL_sv_undef))
@@ -8330,7 +8330,7 @@ Perl_yylex(pTHX)
 		if (key == KEY_format) {
 		    if (format_name) {
                         NEXTVAL_NEXTTOKE.opval
-                            = (OP*)newSVOP(OP_CONST,0, format_name);
+                            = newSVOP(OP_CONST,0, format_name);
                         NEXTVAL_NEXTTOKE.opval->op_private |= OPpCONST_BARE;
                         force_next(BAREWORD);
                     }
@@ -8368,7 +8368,7 @@ Perl_yylex(pTHX)
 
 		if (have_proto) {
 		    NEXTVAL_NEXTTOKE.opval =
-			(OP*)newSVOP(OP_CONST, 0, PL_lex_stuff);
+                        newSVOP(OP_CONST, 0, PL_lex_stuff);
 		    PL_lex_stuff = NULL;
 		    force_next(THING);
 		}
@@ -8641,7 +8641,7 @@ S_pending_ident(pTHX)
 		SV *  const sym = newSVhek(stashname);
                 sv_catpvs(sym, "::");
                 sv_catpvn_flags(sym, PL_tokenbuf+1, tokenbuf_len - 1, (UTF ? SV_CATUTF8 : SV_CATBYTES ));
-                pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, sym);
+                pl_yylval.opval = newSVOP(OP_CONST, 0, sym);
                 pl_yylval.opval->op_private = OPpCONST_ENTERED;
                 if (pit != '&')
                   gv_fetchsv(sym,
@@ -8683,7 +8683,7 @@ S_pending_ident(pTHX)
     }
 
     /* build ops for a bareword */
-    pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0,
+    pl_yylval.opval = newSVOP(OP_CONST, 0,
 				   newSVpvn_flags(PL_tokenbuf + 1,
 						      tokenbuf_len - 1,
                                                       UTF ? SVf_UTF8 : 0 ));
@@ -9923,10 +9923,10 @@ S_scan_inputsymbol(pTHX_ char *start)
 		    OP * const o = newOP(OP_PADSV, 0);
 		    o->op_targ = tmp;
 		    PL_lex_op = readline_overriden
-			? (OP*)newUNOP(OP_ENTERSUB, OPf_STACKED,
+                        ? newUNOP(OP_ENTERSUB, OPf_STACKED,
 				op_append_elem(OP_LIST, o,
 				    newCVREF(0, newGVOP(OP_GV,0,gv_readline))))
-			: (OP*)newUNOP(OP_READLINE, 0, o);
+                        : newUNOP(OP_READLINE, 0, o);
 		}
 	    }
 	    else {
@@ -9937,11 +9937,11 @@ S_scan_inputsymbol(pTHX_ char *start)
 				GV_ADDMULTI | ( UTF ? SVf_UTF8 : 0 ),
 				SVt_PV);
 		PL_lex_op = readline_overriden
-		    ? (OP*)newUNOP(OP_ENTERSUB, OPf_STACKED,
+                    ? newUNOP(OP_ENTERSUB, OPf_STACKED,
 			    op_append_elem(OP_LIST,
 				newUNOP(OP_RV2SV, 0, newGVOP(OP_GV, 0, gv)),
 				newCVREF(0, newGVOP(OP_GV, 0, gv_readline))))
-		    : (OP*)newUNOP(OP_READLINE, 0,
+                    : newUNOP(OP_READLINE, 0,
 			    newUNOP(OP_RV2SV, 0,
 				newGVOP(OP_GV, 0, gv)));
 	    }
@@ -9954,11 +9954,11 @@ S_scan_inputsymbol(pTHX_ char *start)
 	else {
 	    GV * const gv = gv_fetchpv(d, GV_ADD | ( UTF ? SVf_UTF8 : 0 ), SVt_PVIO);
 	    PL_lex_op = readline_overriden
-		? (OP*)newUNOP(OP_ENTERSUB, OPf_STACKED,
+                ? newUNOP(OP_ENTERSUB, OPf_STACKED,
 			op_append_elem(OP_LIST,
 			    newGVOP(OP_GV, 0, gv),
 			    newCVREF(0, newGVOP(OP_GV, 0, gv_readline))))
-		: (OP*)newUNOP(OP_READLINE, nomagicopen ? OPf_SPECIAL : 0, newGVOP(OP_GV, 0, gv));
+                : newUNOP(OP_READLINE, nomagicopen ? OPf_SPECIAL : 0, newGVOP(OP_GV, 0, gv));
 	    pl_yylval.ival = OP_NULL;
 	}
     }
@@ -10944,7 +10944,7 @@ S_scan_formline(pTHX_ char *s)
 	    if (UTF && is_utf8_string((U8*)SvPVX_const(stuff), SvCUR(stuff)))
 		SvUTF8_on(stuff);
 	}
-	NEXTVAL_NEXTTOKE.opval = (OP*)newSVOP(OP_CONST, 0, stuff);
+        NEXTVAL_NEXTTOKE.opval = newSVOP(OP_CONST, 0, stuff);
 	force_next(THING);
     }
     else {
