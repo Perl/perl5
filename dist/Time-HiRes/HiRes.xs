@@ -87,6 +87,10 @@ extern "C" {
 #   undef ITIMER_REALPROF
 #endif
 
+#ifndef TIME_HIRES_CLOCKID_T
+typedef int clockid_t;
+#endif
+
 #if defined(TIME_HIRES_CLOCK_GETTIME) && defined(_STRUCT_ITIMERSPEC)
 
 /* HP-UX has CLOCK_XXX values but as enums, not as defines.
@@ -801,8 +805,6 @@ static int darwin_time_init() {
 #endif
   return success;
 }
-
-typedef int clockid_t; /* to conform with POSIX prototypes */
 
 #ifdef TIME_HIRES_CLOCK_GETTIME_EMULATION
 static int clock_gettime(clockid_t clock_id, struct timespec *ts) {

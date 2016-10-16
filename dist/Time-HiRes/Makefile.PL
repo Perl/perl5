@@ -389,6 +389,22 @@ int main(int argc, char** argv)
 EOM
 }
 
+sub has_clockid_t{
+    return 1 if
+    try_compile_and_link(<<EOM);
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+#include <sys/time.h>
+#include <fcntl.h>
+int main(int argc, char** argv)
+{
+    clockid_t id = CLOCK_REALTIME;
+    exit(id == CLOCK_REALTIME ? 1 : 0);
+}
+EOM
+}
+
 sub DEFINE {
     my ($def, $val) = @_;
     my $define = defined $val ? "$def=$val" : $def ;
@@ -567,6 +583,16 @@ EOD
 	my $nt = ($^O eq 'os2' ? '' : 'not');
         print "You can$nt mix subsecond sleeps with signals.\n";
         print "(It would not be portable anyway.)\n";
+    }
+
+    print "Looking for clockid_t... ";
+    my $has_clockid_t;
+    if (has_clockid_t()) {
+	print "found.\n";
+        $has_clockid_t++;
+	$DEFINE .= ' -DTIME_HIRES_CLOCKID_T';
+    } else {
+	print "NOT found, will use int.\n";
     }
 
     print "Looking for clock_gettime()... ";
