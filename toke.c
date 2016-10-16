@@ -6907,12 +6907,10 @@ Perl_yylex(pTHX)
       reserved_word:
 	switch (tmp) {
 
-	default:			/* not a keyword */
 	    /* Trade off - by using this evil construction we can pull the
 	       variable gv into the block labelled keylookup. If not, then
 	       we have to give it function scope so that the goto from the
 	       earlier ':' case doesn't bypass the initialisation.  */
-	    if (0) {
 	    just_a_word_zero_gv:
 		sv = NULL;
 		cv = NULL;
@@ -6922,7 +6920,7 @@ Perl_yylex(pTHX)
 		orig_keyword = 0;
 		lex = 0;
 		off = 0;
-	    }
+	default:			/* not a keyword */
 	  just_a_word: {
 		int pkgname = 0;
 		const char lastchar = (PL_bufptr == PL_oldoldbufptr ? 0 : PL_bufptr[-1]);
