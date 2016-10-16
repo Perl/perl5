@@ -296,9 +296,12 @@ changes as paragraphs below it. ]
 
 =item NetBSD/VAX
 
-Perl now compiles (again?) under NetBSD on VAX machines (though it's not
-possible for that platform to implement floating-point infinities and NaNs
-compatibly with most systems).
+Perl now compiles under NetBSD on VAX machines.  However, it's not
+possible for that platform to implement floating-point infinities and
+NaNs compatibly with most modern systems, which implement the IEEE-754
+floating point standard.  The hexadecimal floating point (C<0x...p[+-]n>
+literals, C<printf %a>) is not implemented, either.
+The C<make test> passes 98% of tests.
 
 =back
 
