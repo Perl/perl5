@@ -186,6 +186,11 @@ This file is built by F<metaconfig>. This file contains a description of all
 the shell variables whose value is determined by the Configure script. 
 It later gets incorporated into the pod for F<Config.pm>.
 
+=head2 F<harness-timer-report.pl>
+
+For analyzing the output of "env HARNESS_TIMER=1 make test", to find
+outliers of test execution times.
+
 =head2 F<how_to_write_a_perldelta.pod> 
 
 This file contains a specification as to how to write a perldelta pod.

@@ -47,6 +47,7 @@ Porting/corecpan.pl
 Porting/corelist-perldelta.pl
 Porting/corelist.pl
 Porting/expand-macro.pl
+Porting/harness-timer-report.pl
 Porting/findrfuncs
 Porting/makerel
 Porting/make_dot_patch.pl
