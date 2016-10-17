@@ -10161,6 +10161,11 @@ int main() {
     printf("9\n");
     exit(0);
   }
+  if (b[0] == 0xC0 && b[3] == 0x9A) {
+    /* IBM single 32-bit */
+    printf("12\n");
+    exit(0);
+  }
 #endif
 #if DOUBLESIZE == 8
   if (b[0] == 0x9A && b[7] == 0xBF) {
@@ -10195,6 +10200,16 @@ int main() {
   if (b[0] == 0xD9 && b[7] == 0x99) {
    /* VAX format G, 64-bit PDP-style mixed endian. */
     printf("11\n");
+    exit(0);
+  }
+  if (b[0] == 0xC0 && b[7] == 0x9A) {
+    /* IBM double 64-bit */
+    printf("13\n");
+    exit(0);
+  }
+  if (b[0] == 0xBF && b[7] == 0xCD) {
+    /* CRAY single 64-bit */
+    printf("14\n");
     exit(0);
   }
 #endif
@@ -10234,7 +10249,10 @@ case "$doublekind" in
 9) echo "You have VAX format F 32-bit PDP-style mixed endian doubles." >&4 ;;
 10) echo "You have VAX format D 64-bit PDP-style mixed endian doubles." >&4 ;;
 11) echo "You have VAX format G 64-bit PDP-style mixed endian doubles." >&4 ;;
-*) echo "Cannot figure out your double.  You CRAY, or something?" >&4 ;;
+12) echo "You have IBM short 32-bit doubles." >&4 ;;
+13) echo "You have IBM long 64-bit doubles." >&4 ;;
+14) echo "You have Cray single 64-bit doubles." >&4 ;;
+*) echo "Cannot figure out your double.  You Cyber, or something?" >&4 ;;
 esac
 $rm_try
 
