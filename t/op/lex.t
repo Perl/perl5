@@ -7,7 +7,7 @@ use warnings;
 
 BEGIN { chdir 't' if -d 't'; require './test.pl'; }
 
-plan(tests => 31);
+plan(tests => 32);
 
 {
     no warnings 'deprecated';
@@ -247,4 +247,11 @@ fresh_perl_like(
     qr/OK/,
     {},
     '[perl #129336] - #!perl -i argument handling'
+);
+fresh_perl_is(
+    "BEGIN{\$^H=hex ~0}\xF3",
+    "Integer overflow in hexadecimal number at - line 1.\n" .
+    "Malformed UTF-8 character: \\xf3 (too short; got 1 byte, need 4) at - line 1.",
+    {},
+    '[perl #128996] - use of PL_op after op is freed'
 );
