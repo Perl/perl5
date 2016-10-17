@@ -5725,7 +5725,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	case TRIE_next_fail: /* we failed - try next alternative */
         {
             U8 *uc;
-            if ( ST.jump) {
+            if ( ST.jump ) {
                 REGCP_UNWIND(ST.cp);
                 UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
 	    }
@@ -5759,7 +5759,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 no_final = 0;
             }
 
-            if ( ST.jump) {
+            if ( ST.jump ) {
                 ST.lastparen = rex->lastparen;
                 ST.lastcloseparen = rex->lastcloseparen;
 	        REGCP_SET(ST.cp);
