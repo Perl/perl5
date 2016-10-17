@@ -3947,6 +3947,9 @@
  *	DOUBLE_IS_VAX_F_FLOAT
  *	DOUBLE_IS_VAX_D_FLOAT
  *	DOUBLE_IS_VAX_G_FLOAT
+ *	DOUBLE_IS_IBM_SINGLE_32_BIT
+ *	DOUBLE_IS_IBM_DOUBLE_64_BIT
+ *	DOUBLE_IS_CRAY_SINGLE_64_BIT
  *	DOUBLE_IS_UNKNOWN_FORMAT
  */
 #define DOUBLEKIND 3		/**/
@@ -3961,6 +3964,9 @@
 #define DOUBLE_IS_VAX_F_FLOAT	9
 #define DOUBLE_IS_VAX_D_FLOAT	10
 #define DOUBLE_IS_VAX_G_FLOAT	11
+#define DOUBLE_IS_IBM_SINGLE_32_BIT	12
+#define DOUBLE_IS_IBM_DOUBLE_64_BIT	13
+#define DOUBLE_IS_CRAY_SINGLE_64_BIT	14
 #define DOUBLE_IS_UNKNOWN_FORMAT		-1
 /*#define PERL_PRIfldbl	"llf"	/ **/
 /*#define PERL_PRIgldbl	"llg"	/ **/
@@ -5273,6 +5279,6 @@
 #endif
 
 /* Generated from:
- * 42be1deadbcceadd92a1463d6c11c441bad7c83fe2a4cd1c2ebec7742bb5e8a3 config_h.SH
+ * 6b650d833a54250188bb71d659ae15d31148e6b005c50a63ef8e3599668a1c43 config_h.SH
  * 0fca2bf99ac976bba919b593a18bacd059c581dbe6c8638dc0861b1e613b8406 uconfig.sh
  * ex: set ro: */
