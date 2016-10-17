@@ -2933,6 +2933,9 @@ doublekind (longdblfio.U):
 	9 = VAX 32bit little endian F float format
 	10 = VAX 64bit little endian D float format
 	11 = VAX 64bit little endian G float format
+	12 = IBM 32bit format
+	13 = IBM 64bit format
+	14 = Cray 64bit format
 	-1 = unknown format.
 
 doublemantbits (mantbits.U):

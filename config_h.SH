@@ -3982,6 +3982,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	DOUBLE_IS_VAX_F_FLOAT
  *	DOUBLE_IS_VAX_D_FLOAT
  *	DOUBLE_IS_VAX_G_FLOAT
+ *	DOUBLE_IS_IBM_SINGLE_32_BIT
+ *	DOUBLE_IS_IBM_DOUBLE_64_BIT
+ *	DOUBLE_IS_CRAY_SINGLE_64_BIT
  *	DOUBLE_IS_UNKNOWN_FORMAT
  */
 #define DOUBLEKIND $doublekind		/**/
@@ -3996,6 +3999,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define DOUBLE_IS_VAX_F_FLOAT	9
 #define DOUBLE_IS_VAX_D_FLOAT	10
 #define DOUBLE_IS_VAX_G_FLOAT	11
+#define DOUBLE_IS_IBM_SINGLE_32_BIT	12
+#define DOUBLE_IS_IBM_DOUBLE_64_BIT	13
+#define DOUBLE_IS_CRAY_SINGLE_64_BIT	14
 #define DOUBLE_IS_UNKNOWN_FORMAT		-1
 #$d_PRIfldbl PERL_PRIfldbl	$sPRIfldbl	/**/
 #$d_PRIgldbl PERL_PRIgldbl	$sPRIgldbl	/**/
