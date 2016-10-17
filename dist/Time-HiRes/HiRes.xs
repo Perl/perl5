@@ -1435,7 +1435,7 @@ utime(accessed, modified, ...)
 
 NV
 clock_gettime(clock_id = CLOCK_REALTIME)
-	int clock_id
+	clockid_t clock_id
     PREINIT:
 	struct timespec ts;
 	int status = -1;
@@ -1443,7 +1443,7 @@ clock_gettime(clock_id = CLOCK_REALTIME)
 #ifdef TIME_HIRES_CLOCK_GETTIME_SYSCALL
 	status = syscall(SYS_clock_gettime, clock_id, &ts);
 #else
-	status = clock_gettime((clockid_t)clock_id, &ts);
+	status = clock_gettime(clock_id, &ts);
 #endif
 	RETVAL = status == 0 ? ts.tv_sec + (NV) ts.tv_nsec / NV_1E9 : -1;
 
@@ -1454,7 +1454,7 @@ clock_gettime(clock_id = CLOCK_REALTIME)
 
 NV
 clock_gettime(clock_id = 0)
-	int clock_id
+	clockid_t clock_id
     CODE:
 	PERL_UNUSED_ARG(clock_id);
         croak("Time::HiRes::clock_gettime(): unimplemented in this platform");
@@ -1468,7 +1468,7 @@ clock_gettime(clock_id = 0)
 
 NV
 clock_getres(clock_id = CLOCK_REALTIME)
-	int clock_id
+	clockid_t clock_id
     PREINIT:
 	int status = -1;
 	struct timespec ts;
@@ -1476,7 +1476,7 @@ clock_getres(clock_id = CLOCK_REALTIME)
 #ifdef TIME_HIRES_CLOCK_GETRES_SYSCALL
 	status = syscall(SYS_clock_getres, clock_id, &ts);
 #else
-	status = clock_getres((clockid_t)clock_id, &ts);
+	status = clock_getres(clock_id, &ts);
 #endif
 	RETVAL = status == 0 ? ts.tv_sec + (NV) ts.tv_nsec / NV_1E9 : -1;
 
@@ -1487,7 +1487,7 @@ clock_getres(clock_id = CLOCK_REALTIME)
 
 NV
 clock_getres(clock_id = 0)
-	int clock_id
+	clockid_t clock_id
     CODE:
 	PERL_UNUSED_ARG(clock_id);
         croak("Time::HiRes::clock_getres(): unimplemented in this platform");
@@ -1501,7 +1501,7 @@ clock_getres(clock_id = 0)
 
 NV
 clock_nanosleep(clock_id, nsec, flags = 0)
-	int clock_id
+	clockid_t clock_id
 	NV  nsec
 	int flags
     PREINIT:
@@ -1522,7 +1522,7 @@ clock_nanosleep(clock_id, nsec, flags = 0)
 
 NV
 clock_nanosleep(clock_id, nsec, flags = 0)
-	int clock_id
+	clockid_t clock_id
 	NV  nsec
 	int flags
     CODE:
