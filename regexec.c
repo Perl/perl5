@@ -3615,6 +3615,14 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
      * above-mentioned test suite tests to succeed.  The common theme
      * on those tests seems to be returning null fields from matches.
      * --jhi updated by dapm */
+
+    /* After encountering a variant of the issue mentioned above I think
+     * the point Ilya was making is that if we properly unwind whenever
+     * we set lastparen to a smaller value then we should not need to do
+     * this every time, only when needed. So if we have tests that fail if
+     * we remove this, then it suggests somewhere else we are improperly
+     * unwinding the lastparen/paren buffers. See UNWIND_PARENS() and
+     * places it is called, and related regcp() routines. - Yves */
 #if 1
     if (prog->nparens) {
 	regexp_paren_pair *pp = prog->offs;
