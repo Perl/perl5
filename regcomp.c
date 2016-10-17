@@ -8941,13 +8941,13 @@ void
 Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
                                          const bool complement_b, SV** output)
 {
-    /* Take the union of two inversion lists and point 'output. to it.  *output
-     * SHOULD BE DEFINED upon input, and if it points to one of the two lists,
-     * the reference count to that list will be decremented if not already a
-     * temporary (mortal); otherwise just its contents will be modified to be
-     * the union.  The first list, 'a., may be NULL, in which case a copy of
-     * the second list is returned.  If 'complement_b. is TRUE, the union is
-     * taken of the complement (inversion) of 'b. instead of b itself.
+    /* Take the union of two inversion lists and point '*output' to it.  On
+     * input, '*output' MUST POINT TO NULL OR TO AN SV* INVERSION LIST (possibly
+     * even 'a' or 'b').  If to an inversion list, the contents of the original
+     * list will be replaced by the union.  The first list, 'a', may be
+     * NULL, in which case a copy of the second list is placed in '*output'.
+     * If 'complement_b' is TRUE, the union is taken of the complement
+     * (inversion) of 'b' instead of b itself.
      *
      * The basis for this comes from "Unicode Demystified" Chapter 13 by
      * Richard Gillam, published by Addison-Wesley, and explained at some
@@ -8981,6 +8981,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 
     PERL_ARGS_ASSERT__INVLIST_UNION_MAYBE_COMPLEMENT_2ND;
     assert(a != b);
+    assert(*output == NULL || SvTYPE(*output) == SVt_INVLIST);
 
     len_b = _invlist_len(b);
     if (len_b == 0) {
@@ -8995,12 +8996,12 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
             if (*output == NULL) { /* If the output didn't exist, just point it
                                       at the new list */
                 *output = everything;
-                return;
+            }
+            else { /* Otherwise, replace its contents with the new list */
+                invlist_replace_list_destroys_src(*output, everything);
+                SvREFCNT_dec_NN(everything);
             }
 
-            /* Otherwise, replace its contents with the new list */
-            invlist_replace_list_destroys_src(*output, everything);
-            SvREFCNT_dec_NN(everything);
             return;
         }
 
@@ -9008,32 +9009,31 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
          * the union will come entirely from 'a'.  If 'a' is NULL or empty, the
          * output will be empty */
 
-        if (a == NULL) {
-            *output = _new_invlist(0);
-            return;
-        }
-
-        if (_invlist_len(a) == 0) {
-            invlist_clear(*output);
-            return;
-        }
-
-        /* Here, 'a' is not empty, and entirely determines the union.  If the
-         * output is not to overwrite 'b', we can just return 'a'. */
-        if (*output != b) {
-
-            /* If the output is to overwrite 'a', we have a no-op, as it's
-             * already in 'a' */
-            if (*output == a) {
-                return;
+        if (a == NULL || _invlist_len(a) == 0) {
+            if (*output == NULL) {
+                *output = _new_invlist(0);
             }
+            else {
+                invlist_clear(*output);
+            }
+            return;
+        }
 
-            /* But otherwise we have to copy 'a' to the output */
+        /* Here, 'a' is not empty, but 'b' is, so 'a' entirely determines the
+         * union.  We can just return a copy of 'a' if '*output' doesn't point
+         * to an existing list */
+        if (*output == NULL) {
             *output = invlist_clone(a);
             return;
         }
 
-        /* Here, 'b' is to be overwritten by the output, which will be 'a' */
+        /* If the output is to overwrite 'a', we have a no-op, as it's
+         * already in 'a' */
+        if (*output == a) {
+            return;
+        }
+
+        /* Here, '*output' is to be overwritten by 'a' */
         u = invlist_clone(a);
         invlist_replace_list_destroys_src(*output, u);
         SvREFCNT_dec_NN(u);
@@ -9046,38 +9046,19 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
     if (a == NULL || ((len_a = _invlist_len(a)) == 0)) {
 
         /* Here, 'a' is empty (and b is not).  That means the union will come
-         * entirely from 'b'.  If the output is not to overwrite 'a', we can
-         * just return what's in 'b'.  */
-        if (*output != a) {
+         * entirely from 'b'.  If '*output' is NULL, we can directly return a
+         * clone of 'b'.  Otherwise, we replace the contents of '*output' with
+         * the clone */
 
-            /* If the output is to overwrite 'b', it's already in 'b', but
-             * otherwise we have to copy 'b' to the output */
-            if (*output != b) {
-                *output = invlist_clone(b);
-            }
-
-            /* And if the output is to be the inversion of 'b', do that */
-            if (complement_b) {
-                _invlist_invert(*output);
-            }
-
-            return;
+        SV ** dest = (*output == NULL) ? output : &u;
+        *dest = invlist_clone(b);
+        if (complement_b) {
+            _invlist_invert(*dest);
         }
 
-        /* Here, 'a', which is empty or even NULL, is to be overwritten by the
-         * output, which will either be 'b' or the complement of 'b' */
-
-        if (a == NULL) {
-            *output = invlist_clone(b);
-        }
-        else {
-            u = invlist_clone(b);
+        if (dest == &u) {
             invlist_replace_list_destroys_src(*output, u);
             SvREFCNT_dec_NN(u);
-	}
-
-        if (complement_b) {
-            _invlist_invert(*output);
         }
 
 	return;
@@ -9218,30 +9199,17 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 	array_u = invlist_array(u);
     }
 
-    /* If the output is not to overwrite either of the inputs, just return the
-     * calculated union */
-    if (a != *output && b != *output) {
+    if (*output == NULL) {  /* Simply return the new inversion list */
         *output = u;
     }
     else {
-        /*  Here, the output is to be the same as one of the input scalars,
-         *  hence replacing it.  The simple thing to do is to free the input
-         *  scalar, making it instead be the output one.  But experience has
-         *  shown [perl #127392] that if the input is a mortal, we can get a
-         *  huge build-up of these during regex compilation before they get
-         *  freed.  So for that case, replace just the input's interior with
-         *  the union's, and then free the union */
-
-        assert(! invlist_is_iterating(*output));
-
-        if (! SvTEMP(*output)) {
-            SvREFCNT_dec_NN(*output);
-            *output = u;
-        }
-        else {
-            invlist_replace_list_destroys_src(*output, u);
-            SvREFCNT_dec_NN(u);
-        }
+        /* Otherwise, overwrite the inversion list that was in '*output'.  We
+         * could instead free '*output', and then set it to 'u', but experience
+         * has shown [perl #127392] that if the input is a mortal, we can get a
+         * huge build-up of these during regex compilation before they get
+         * freed. */
+        invlist_replace_list_destroys_src(*output, u);
+        SvREFCNT_dec_NN(u);
     }
 
     return;
@@ -9251,14 +9219,13 @@ void
 Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
                                                const bool complement_b, SV** i)
 {
-    /* Take the intersection of two inversion lists and point 'i' to it.  *i
-     * SHOULD BE DEFINED upon input, and if it points to one of the two lists,
-     * the reference count to that list will be decremented if not already a
-     * temporary (mortal); otherwise just its contents will be modified to be
-     * the intersection.  The first list, 'a', may be NULL, in which case an
-     * empty list is returned.  If 'complement_b' is TRUE, the result will be
-     * the intersection of 'a' and the complement (or inversion) of 'b' instead
-     * of 'b' directly.
+    /* Take the intersection of two inversion lists and point '*i' to it.  On
+     * input, '*i' MUST POINT TO NULL OR TO AN SV* INVERSION LIST (possibly
+     * even 'a' or 'b').  If to an inversion list, the contents of the original
+     * list will be replaced by the intersection.  The first list, 'a', may be
+     * NULL, in which case '*i' will be an empty list.  If 'complement_b' is
+     * TRUE, the result will be the intersection of 'a' and the complement (or
+     * inversion) of 'b' instead of 'b' directly.
      *
      * The basis for this comes from "Unicode Demystified" Chapter 13 by
      * Richard Gillam, published by Addison-Wesley, and explained at some
@@ -9292,6 +9259,7 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 
     PERL_ARGS_ASSERT__INVLIST_INTERSECTION_MAYBE_COMPLEMENT_2ND;
     assert(a != b);
+    assert(*i == NULL || SvTYPE(*i) == SVt_INVLIST);
 
     /* Special case if either one is empty */
     len_a = (a == NULL) ? 0 : _invlist_len(a);
@@ -9307,13 +9275,11 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
                 return;
             }
 
-            /* If not overwriting either input, just make a copy of 'a' */
-            if (*i != b) {
+            if (*i == NULL) {
                 *i = invlist_clone(a);
                 return;
             }
 
-            /* Here we are overwriting 'b' with 'a's contents */
             r = invlist_clone(a);
             invlist_replace_list_destroys_src(*i, r);
             SvREFCNT_dec_NN(r);
@@ -9467,47 +9433,21 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 	array_r = invlist_array(r);
     }
 
-    /* Finish outputting any remaining */
-    if (count >= 2) { /* At most one will have a non-zero copy count */
-	IV copy_count;
-	if ((copy_count = len_a - i_a) > 0) {
-	    Copy(array_a + i_a, array_r + i_r, copy_count, UV);
-	}
-	else if ((copy_count = len_b - i_b) > 0) {
-	    Copy(array_b + i_b, array_r + i_r, copy_count, UV);
-	}
-    }
-
-    /* If the output is not to overwrite either of the inputs, just return the
-     * calculated intersection */
-    if (a != *i && b != *i) {
+    if (*i == NULL) { /* Simply return the calculated intersection */
         *i = r;
     }
-    else {
-        /*  Here, the output is to be the same as one of the input scalars,
-         *  hence replacing it.  The simple thing to do is to free the input
-         *  scalar, making it instead be the output one.  But experience has
-         *  shown [perl #127392] that if the input is a mortal, we can get a
-         *  huge build-up of these during regex compilation before they get
-         *  freed.  So for that case, replace just the input's interior with
-         *  the output's, and then free the output.  A short-cut in this case
-         *  is if the output is empty, we can just set the input to be empty */
-
-        assert(! invlist_is_iterating(*i));
-
-        if (! SvTEMP(*i)) {
-            SvREFCNT_dec_NN(*i);
-            *i = r;
+    else { /* Otherwise, replace the existing inversion list in '*i'.  We could
+              instead free '*i', and then set it to 'r', but experience has
+              shown [perl #127392] that if the input is a mortal, we can get a
+              huge build-up of these during regex compilation before they get
+              freed. */
+        if (len_r) {
+            invlist_replace_list_destroys_src(*i, r);
         }
         else {
-            if (len_r) {
-                invlist_replace_list_destroys_src(*i, r);
-            }
-            else {
-                invlist_clear(*i);
-            }
-            SvREFCNT_dec_NN(r);
+            invlist_clear(*i);
         }
+        SvREFCNT_dec_NN(r);
     }
 
     return;
@@ -15318,17 +15258,12 @@ redo_curchar:
                     {
                         SV* i = NULL;
                         SV* u = NULL;
-                        SV* element;
 
                         _invlist_union(lhs, rhs, &u);
                         _invlist_intersection(lhs, rhs, &i);
-                        /* _invlist_subtract will overwrite rhs
-                            without freeing what it already contains */
-                        element = rhs;
                         _invlist_subtract(u, i, &rhs);
                         SvREFCNT_dec_NN(i);
                         SvREFCNT_dec_NN(u);
-                        SvREFCNT_dec_NN(element);
                         break;
                     }
                 }

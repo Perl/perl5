@@ -199,6 +199,11 @@ for my $char ("٠", "٥", "٩") {
     unlike("g", qr/$pat/, "'g' doesn't match /$pat/");
 }
 
+{   # [perl #129322 ]  This crashed perl, so keep after the ones that don't
+    my $pat = '(?[[!]&[0]^[!]&[0]+[a]])';
+    like("a", qr/$pat/, "/$pat/ compiles and matches 'a'");
+}
+
 done_testing();
 
 1;
