@@ -1130,8 +1130,8 @@
 #define isSB(a,b,c,d,e,f)	S_isSB(aTHX_ a,b,c,d,e,f)
 #define isWB(a,b,c,d,e,f,g)	S_isWB(aTHX_ a,b,c,d,e,f,g)
 #define reg_check_named_buff_matched	S_reg_check_named_buff_matched
-#define regcppop(a,b)		S_regcppop(aTHX_ a,b)
-#define regcppush(a,b,c)	S_regcppush(aTHX_ a,b,c)
+#define regcppop(a,b,c)		S_regcppop(aTHX_ a,b,c)
+#define regcppush(a,b,c,d)	S_regcppush(aTHX_ a,b,c,d)
 #define reghop3			S_reghop3
 #define reghop4			S_reghop4
 #define reghopmaybe3		S_reghopmaybe3

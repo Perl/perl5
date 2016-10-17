@@ -2407,9 +2407,9 @@ ERs	|bool	|reginclass	|NULLOK regexp * const prog  \
 				|NN const U8 * const p_end   \
 				|bool const utf8_target
 Es	|CHECKPOINT|regcppush	|NN const regexp *rex|I32 parenfloor\
-				|U32 maxopenparen
+				|U32 maxopenparen|int depth
 Es	|void	|regcppop	|NN regexp *rex\
-				|NN U32 *maxopenparen_p
+				|NN U32 *maxopenparen_p|int depth
 ERsn	|U8*	|reghop3	|NN U8 *s|SSize_t off|NN const U8 *lim
 ERsn	|U8*	|reghop4	|NN U8 *s|SSize_t off|NN const U8 *llim \
 				|NN const U8 *rlim
