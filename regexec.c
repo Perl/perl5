@@ -5819,7 +5819,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    );
 	    });
 
-	    if (ST.accepted > 1 || has_cutgroup) {
+	    if ( ST.accepted > 1 || has_cutgroup || ST.jump ) {
 		PUSH_STATE_GOTO(TRIE_next, scan, (char*)uc);
 		NOT_REACHED; /* NOTREACHED */
 	    }
