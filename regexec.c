@@ -272,7 +272,7 @@ static regmatch_state * S_push_slab(pTHX);
  * are needed for the regexp context stack bookkeeping. */
 
 STATIC CHECKPOINT
-S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen)
+S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen, int depth)
 {
     const int retval = PL_savestack_ix;
     const int paren_elems_to_push =
@@ -300,9 +300,10 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen)
     
     DEBUG_BUFFERS_r(
 	if ((int)maxopenparen > (int)parenfloor)
-            Perl_re_printf( aTHX_
+            Perl_re_exec_indentf( aTHX_
 		"rex=0x%"UVxf" offs=0x%"UVxf": saving capture indices:\n",
-		PTR2UV(rex),
+		depth,
+                PTR2UV(rex),
 		PTR2UV(rex->offs)
 	    );
     );
@@ -311,9 +312,10 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen)
 	SSPUSHIV(rex->offs[p].end);
 	SSPUSHIV(rex->offs[p].start);
 	SSPUSHINT(rex->offs[p].start_tmp);
-        DEBUG_BUFFERS_r(Perl_re_printf( aTHX_
+        DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_
 	    "    \\%"UVuf": %"IVdf"(%"IVdf")..%"IVdf"\n",
-	    (UV)p,
+	    depth,
+            (UV)p,
 	    (IV)rex->offs[p].start,
 	    (IV)rex->offs[p].start_tmp,
 	    (IV)rex->offs[p].end
@@ -356,7 +358,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen)
 
 
 STATIC void
-S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p)
+S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p, int depth)
 {
     UV i;
     U32 paren;
@@ -376,9 +378,10 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p)
     /* Now restore the parentheses context. */
     DEBUG_BUFFERS_r(
 	if (i || rex->lastparen + 1 <= rex->nparens)
-            Perl_re_printf( aTHX_
+            Perl_re_exec_indentf( aTHX_
 		"rex=0x%"UVxf" offs=0x%"UVxf": restoring capture indices to:\n",
-		PTR2UV(rex),
+		depth,
+                PTR2UV(rex),
 		PTR2UV(rex->offs)
 	    );
     );
@@ -390,9 +393,10 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p)
 	tmps = SSPOPIV;
 	if (paren <= rex->lastparen)
 	    rex->offs[paren].end = tmps;
-        DEBUG_BUFFERS_r( Perl_re_printf( aTHX_
+        DEBUG_BUFFERS_r( Perl_re_exec_indentf( aTHX_
 	    "    \\%"UVuf": %"IVdf"(%"IVdf")..%"IVdf"%s\n",
-	    (UV)paren,
+	    depth,
+            (UV)paren,
 	    (IV)rex->offs[paren].start,
 	    (IV)rex->offs[paren].start_tmp,
 	    (IV)rex->offs[paren].end,
@@ -414,9 +418,10 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p)
 	if (i > *maxopenparen_p)
 	    rex->offs[i].start = -1;
 	rex->offs[i].end = -1;
-        DEBUG_BUFFERS_r( Perl_re_printf( aTHX_
+        DEBUG_BUFFERS_r( Perl_re_exec_indentf( aTHX_
 	    "    \\%"UVuf": %s   ..-1 undeffing\n",
-	    (UV)i,
+	    depth,
+            (UV)i,
 	    (i > *maxopenparen_p) ? "-1" : "  "
 	));
     }
@@ -427,11 +432,11 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p)
  * but without popping the stack */
 
 STATIC void
-S_regcp_restore(pTHX_ regexp *rex, I32 ix, U32 *maxopenparen_p)
+S_regcp_restore(pTHX_ regexp *rex, I32 ix, U32 *maxopenparen_p, int depth)
 {
     I32 tmpix = PL_savestack_ix;
     PL_savestack_ix = ix;
-    regcppop(rex, maxopenparen_p);
+    S_regcppop(aTHX_ rex, maxopenparen_p, depth);
     PL_savestack_ix = tmpix;
 }
 
@@ -3126,9 +3131,10 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         swap = prog->offs;
         /* do we need a save destructor here for eval dies? */
         Newxz(prog->offs, (prog->nparens + 1), regexp_paren_pair);
-        DEBUG_BUFFERS_r(Perl_re_printf( aTHX_
+        DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_
 	    "rex=0x%"UVxf" saving  offs: orig=0x%"UVxf" new=0x%"UVxf"\n",
-	    PTR2UV(prog),
+	    0,
+            PTR2UV(prog),
 	    PTR2UV(swap),
 	    PTR2UV(prog->offs)
 	));
@@ -3510,9 +3516,10 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     DEBUG_BUFFERS_r(
 	if (swap)
-            Perl_re_printf( aTHX_
+            Perl_re_exec_indentf( aTHX_
 		"rex=0x%"UVxf" freeing offs: 0x%"UVxf"\n",
-		PTR2UV(prog),
+		0,
+                PTR2UV(prog),
 		PTR2UV(swap)
 	    );
     );
@@ -3547,9 +3554,10 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     if (swap) {
         /* we failed :-( roll it back */
-        DEBUG_BUFFERS_r(Perl_re_printf( aTHX_
+        DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_
 	    "rex=0x%"UVxf" rolling back offs: freeing=0x%"UVxf" restoring=0x%"UVxf"\n",
-	    PTR2UV(prog),
+	    0,
+            PTR2UV(prog),
 	    PTR2UV(prog->offs),
 	    PTR2UV(swap)
 	));
@@ -5400,15 +5408,17 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
     PERL_ARGS_ASSERT_REGMATCH;
 
-    DEBUG_OPTIMISE_r( DEBUG_EXECUTE_r({
-            Perl_re_printf( aTHX_ "regmatch start\n");
-    }));
-
     st = PL_regmatch_state;
 
     /* Note that nextchr is a byte even in UTF */
     SET_nextchr;
     scan = prog;
+
+    DEBUG_OPTIMISE_r( DEBUG_EXECUTE_r({
+            DUMP_EXEC_POS( locinput, scan, utf8_target, depth );
+            Perl_re_printf( aTHX_ "regmatch start\n" );
+    }));
+
     while (scan != NULL) {
 
 
@@ -5649,9 +5659,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 		    DEBUG_TRIE_EXECUTE_r({
                                 DUMP_EXEC_POS( (char *)uc, scan, utf8_target, depth );
-                                Perl_re_exec_indentf( aTHX_
-                                    "%sState: %4"UVxf" Accepted: %c ",
-                                    depth, PL_colors[4],
+                                /* HERE */
+                                PerlIO_printf( aTHX_ Perl_debug_log,
+                                    "%*s%sState: %4"UVxf" Accepted: %c ",
+                                    INDENT_CHARS(depth), "", PL_colors[4],
 			            (UV)state, (accepted ? 'Y' : 'N'));
 		    });
 
@@ -6749,7 +6760,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
 
             /* Save all the positions seen so far. */
-            ST.cp = regcppush(rex, 0, maxopenparen);
+            ST.cp = S_regcppush(aTHX_ rex, 0, maxopenparen, depth);
             REGCP_SET(ST.lastcp);
 
             /* and then jump to the code we share with EVAL */
@@ -6774,7 +6785,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		CV *newcv;
 
 		/* save *all* paren positions */
-		regcppush(rex, 0, maxopenparen);
+		S_regcppush(aTHX_ rex, 0, maxopenparen, depth);
 		REGCP_SET(runops_cp);
 
 		if (!caller_cv)
@@ -6940,7 +6951,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		 * in the regexp code uses the pad ! */
 		PL_op = oop;
 		PL_curcop = ocurcop;
-		S_regcp_restore(aTHX_ rex, runops_cp, &maxopenparen);
+		S_regcp_restore(aTHX_ rex, runops_cp, &maxopenparen, depth);
 		PL_curpm = PL_reg_curpm;
 
 		if (logical != 2)
@@ -7008,7 +7019,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                              * close_paren only for GOSUB */
                 ST.prev_recurse_locinput= NULL; /* only used for GOSUB */
                 /* Save all the seen positions so far. */
-                ST.cp = regcppush(rex, 0, maxopenparen);
+                ST.cp = S_regcppush(aTHX_ rex, 0, maxopenparen, depth);
                 REGCP_SET(ST.lastcp);
                 /* and set maxopenparen to 0, since we are starting a "fresh" match */
                 maxopenparen = 0;
@@ -7108,7 +7119,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    rexi = RXi_GET(rex); 
 
 	    REGCP_UNWIND(ST.lastcp);
-	    regcppop(rex, &maxopenparen);
+	    S_regcppop(aTHX_ rex, &maxopenparen, depth);
 	    cur_eval = ST.prev_eval;
 	    cur_curlyx = ST.prev_curlyx;
 
@@ -7126,8 +7137,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    rex->offs[n].start_tmp = locinput - reginfo->strbeg;
 	    if (n > maxopenparen)
 		maxopenparen = n;
-            DEBUG_BUFFERS_r(Perl_re_printf( aTHX_
+            DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_
 		"rex=0x%"UVxf" offs=0x%"UVxf": \\%"UVuf": set %"IVdf" tmp; maxopenparen=%"UVuf"\n",
+                depth,
 		PTR2UV(rex),
 		PTR2UV(rex->offs),
 		(UV)n,
@@ -7141,8 +7153,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 #define CLOSE_CAPTURE                                                      \
     rex->offs[n].start = rex->offs[n].start_tmp;                           \
     rex->offs[n].end = locinput - reginfo->strbeg;                         \
-    DEBUG_BUFFERS_r(Perl_re_printf( aTHX_                                              \
+    DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_                            \
         "rex=0x%"UVxf" offs=0x%"UVxf": \\%"UVuf": set %"IVdf"..%"IVdf"\n", \
+        depth,                                                             \
         PTR2UV(rex),                                                       \
         PTR2UV(rex->offs),                                                 \
         (UV)n,                                                             \
@@ -7379,8 +7392,8 @@ NULL
 	    /* First just match a string of min A's. */
 
 	    if (n < min) {
-		ST.cp = regcppush(rex, cur_curlyx->u.curlyx.parenfloor,
-                                    maxopenparen);
+		ST.cp = S_regcppush(aTHX_ rex, cur_curlyx->u.curlyx.parenfloor,
+                                    maxopenparen, depth);
 		cur_curlyx->u.curlyx.lastloc = locinput;
 		REGCP_SET(ST.lastcp);
 
@@ -7490,8 +7503,8 @@ NULL
 	    if (cur_curlyx->u.curlyx.minmod) {
 		ST.save_curlyx = cur_curlyx;
 		cur_curlyx = cur_curlyx->u.curlyx.prev_curlyx;
-		ST.cp = regcppush(rex, ST.save_curlyx->u.curlyx.parenfloor,
-                            maxopenparen);
+		ST.cp = S_regcppush(aTHX_ rex, ST.save_curlyx->u.curlyx.parenfloor,
+                            maxopenparen, depth);
 		REGCP_SET(ST.lastcp);
 		PUSH_YES_STATE_GOTO(WHILEM_B_min, ST.save_curlyx->u.curlyx.B,
                                     locinput);
@@ -7501,8 +7514,8 @@ NULL
 	    /* Prefer A over B for maximal matching. */
 
 	    if (n < max) { /* More greed allowed? */
-		ST.cp = regcppush(rex, cur_curlyx->u.curlyx.parenfloor,
-                            maxopenparen);
+		ST.cp = S_regcppush(aTHX_ rex, cur_curlyx->u.curlyx.parenfloor,
+                            maxopenparen, depth);
 		cur_curlyx->u.curlyx.lastloc = locinput;
 		REGCP_SET(ST.lastcp);
 		PUSH_STATE_GOTO(WHILEM_A_max, A, locinput);
@@ -7529,7 +7542,7 @@ NULL
 	    /* FALLTHROUGH */
 	case WHILEM_A_pre_fail: /* just failed to match even minimal A */
 	    REGCP_UNWIND(ST.lastcp);
-	    regcppop(rex, &maxopenparen);
+	    S_regcppop(aTHX_ rex, &maxopenparen, depth);
 	    cur_curlyx->u.curlyx.lastloc = ST.save_lastloc;
 	    cur_curlyx->u.curlyx.count--;
 	    CACHEsayNO;
@@ -7537,7 +7550,7 @@ NULL
 
 	case WHILEM_A_max_fail: /* just failed to match A in a maximal match */
 	    REGCP_UNWIND(ST.lastcp);
-	    regcppop(rex, &maxopenparen); /* Restore some previous $<digit>s? */
+	    S_regcppop(aTHX_ rex, &maxopenparen, depth); /* Restore some previous $<digit>s? */
             DEBUG_EXECUTE_r(Perl_re_exec_indentf( aTHX_  "whilem: failed, trying continuation...\n",
                 depth)
 	    );
@@ -7563,7 +7576,7 @@ NULL
 	case WHILEM_B_min_fail: /* just failed to match B in a minimal match */
 	    cur_curlyx = ST.save_curlyx;
 	    REGCP_UNWIND(ST.lastcp);
-	    regcppop(rex, &maxopenparen);
+	    S_regcppop(aTHX_ rex, &maxopenparen, depth);
 
 	    if (cur_curlyx->u.curlyx.count >= /*max*/ARG2(cur_curlyx->u.curlyx.me)) {
 		/* Maximum greed exceeded */
@@ -7585,8 +7598,8 @@ NULL
 	    );
 	    /* Try grabbing another A and see if it helps. */
 	    cur_curlyx->u.curlyx.lastloc = locinput;
-	    ST.cp = regcppush(rex, cur_curlyx->u.curlyx.parenfloor,
-                            maxopenparen);
+	    ST.cp = S_regcppush(aTHX_ rex, cur_curlyx->u.curlyx.parenfloor,
+                            maxopenparen, depth);
 	    REGCP_SET(ST.lastcp);
 	    PUSH_STATE_GOTO(WHILEM_A_min,
 		/*A*/ NEXTOPER(ST.save_curlyx->u.curlyx.me) + EXTRA_STEP_2ARGS,
@@ -8166,7 +8179,7 @@ NULL
 		st->u.eval.prev_rex = rex_sv;		/* inner */
 
                 /* Save *all* the positions. */
-		st->u.eval.cp = regcppush(rex, 0, maxopenparen);
+		st->u.eval.cp = S_regcppush(aTHX_ rex, 0, maxopenparen, depth);
                 rex_sv = CUR_EVAL.prev_rex;
 		is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(rex_sv));
 		SET_reg_curpm(rex_sv);
@@ -8181,7 +8194,7 @@ NULL
 		/* Restore parens of the outer rex without popping the
 		 * savestack */
                 S_regcp_restore(aTHX_ rex, CUR_EVAL.lastcp,
-                                        &maxopenparen);
+                                        &maxopenparen, depth);
 
 		st->u.eval.prev_eval = cur_eval;
                 cur_eval = CUR_EVAL.prev_eval;
