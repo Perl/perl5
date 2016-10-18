@@ -6916,6 +6916,13 @@ separated by commas, not just aligned on a line.
 it may skip items, or visit items more than once.  Consider using
 C<keys()> instead of C<each()>.
 
+=item Use of the empty pattern inside of a regex code block is forbidden
+
+(F) You tried to use the empty pattern inside of a regex code block,
+for instance C</(?{ s!!! })/>. Currently for implementation reasons
+this is forbidden. Generally you can rewrite code that uses the empty
+pattern with the appropriate use of C<qr//>.
+
 =item Use of := for an empty attribute list is not allowed
 
 (F) The construction C<my $x := 42> used to parse as equivalent to
