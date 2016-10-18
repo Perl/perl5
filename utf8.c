@@ -1079,8 +1079,9 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
     /* Now, loop through the remaining bytes in the character's sequence,
      * accumulating each into the working value as we go.  Be sure to not look
      * past the end of the input string */
-    send = adjusted_send
-                    = (U8*) s0 + ((expectlen <= curlen) ? expectlen : curlen);
+    send = adjusted_send = (U8*) s0 + ((expectlen <= curlen)
+                                       ? expectlen
+                                       : curlen);
     for (s = s0 + 1; s < send; s++) {
 	if (LIKELY(UTF8_IS_CONTINUATION(*s))) {
 	    uv = UTF8_ACCUMULATE(uv, *s);
