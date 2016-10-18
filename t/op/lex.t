@@ -7,7 +7,7 @@ use warnings;
 
 BEGIN { chdir 't' if -d 't'; require './test.pl'; }
 
-plan(tests => 32);
+plan(tests => 33);
 
 {
     no warnings 'deprecated';
@@ -254,4 +254,10 @@ fresh_perl_is(
     "Malformed UTF-8 character: \\xf3 (too short; got 1 byte, need 4) at - line 1.",
     {},
     '[perl #128996] - use of PL_op after op is freed'
+);
+fresh_perl_like(
+    qq(BEGIN{\$0="";\$^H=-hex join""=>1}""\xFF),
+    qr/Malformed UTF-8 character: \\xff \(too short; got 1 byte, need 13\) at - line 1\./,
+    {},
+    '[perl #128997] - buffer read overflow'
 );

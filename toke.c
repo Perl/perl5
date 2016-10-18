@@ -4901,11 +4901,18 @@ Perl_yylex(pTHX)
 	}
     {
         SV *dsv = newSVpvs_flags("", SVs_TEMP);
-        const char *c = UTF ? sv_uni_display(dsv, newSVpvn_flags(s,
-                                                    UTF8SKIP(s),
-                                                    SVs_TEMP | SVf_UTF8),
-                                            10, UNI_DISPLAY_ISPRINT)
-                            : Perl_form(aTHX_ "\\x%02X", (unsigned char)*s);
+        const char *c;
+        if (UTF) {
+            STRLEN skiplen = UTF8SKIP(s);
+            STRLEN stravail = PL_bufend - s;
+            c = sv_uni_display(dsv, newSVpvn_flags(s,
+                                                   skiplen > stravail ? stravail : skiplen,
+                                                   SVs_TEMP | SVf_UTF8),
+                               10, UNI_DISPLAY_ISPRINT);
+        }
+        else {
+            c = Perl_form(aTHX_ "\\x%02X", (unsigned char)*s);
+        }
         len = UTF ? Perl_utf8_length(aTHX_ (U8 *) PL_linestart, (U8 *) s) : (STRLEN) (s - PL_linestart);
         if (len > UNRECOGNIZED_PRECEDE_COUNT) {
             d = UTF ? (char *) utf8_hop((U8 *) s, -UNRECOGNIZED_PRECEDE_COUNT) : s - UNRECOGNIZED_PRECEDE_COUNT;
