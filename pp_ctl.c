@@ -162,8 +162,13 @@ PP(pp_regcomp)
 #if !defined(USE_ITHREADS)
     /* can't change the optree at runtime either */
     /* PMf_KEEP is handled differently under threads to avoid these problems */
-    if (!RX_PRELEN(PM_GETRE(pm)) && PL_curpm)
+    /* Handle empty pattern */
+    if (!RX_PRELEN(PM_GETRE(pm)) && PL_curpm) {
+        if (PL_curpm == PL_reg_curpm)
+            croak("Use of the empty pattern inside of "
+                  "a regex code block is forbidden");
 	pm = PL_curpm;
+    }
     if (pm->op_pmflags & PMf_KEEP) {
 	pm->op_private &= ~OPpRUNTIME;	/* no point compiling again */
 	cLOGOP->op_first->op_next = PL_op->op_next;
