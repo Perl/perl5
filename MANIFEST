@@ -3468,7 +3468,9 @@ dist/Module-CoreList/t/pod.t			Module::CoreList tests
 dist/Module-CoreList/t/utils.t			Module::CoreList tests
 dist/Net-Ping/Changes			Net::Ping
 dist/Net-Ping/lib/Net/Ping.pm		Hello, anybody home?
-dist/Net-Ping/t/100_load.t		Ping Net::Ping
+dist/Net-Ping/t/000_load.t
+dist/Net-Ping/t/001_new.t
+dist/Net-Ping/t/010_pingecho.t
 dist/Net-Ping/t/110_icmp_inst.t		Ping Net::Ping
 dist/Net-Ping/t/120_udp_inst.t		Ping Net::Ping
 dist/Net-Ping/t/130_tcp_inst.t		Ping Net::Ping

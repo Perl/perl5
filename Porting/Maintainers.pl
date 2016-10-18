@@ -876,8 +876,14 @@ use File::Glob qw(:case);
     },
 
     'Net::Ping' => {
-        'DISTRIBUTION' => 'SMPETERS/Net-Ping-2.41.tar.gz',
+        'DISTRIBUTION' => 'RURBAN/Net-Ping-2.51.tar.gz',
         'FILES'        => q[dist/Net-Ping],
+        'EXCLUDED'     => [
+            qw(t/020_external.t),
+            qw(t/600_pod.t),
+            qw(t/601_pod-coverage.t),
+        ],
+
     },
 
     'NEXT' => {

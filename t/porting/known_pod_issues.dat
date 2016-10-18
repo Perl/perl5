@@ -324,6 +324,7 @@ YAML::Syck
 YAML::Tiny
 dist/data-dumper/changes	Verbatim line length including indents exceeds 79 by	1
 dist/data-dumper/dumper.pm	? Should you be using L<...> instead of	1
+dist/net-ping/lib/net/ping.pm	Apparent broken link	1
 ext/amiga-exec/exec.pm	Verbatim line length including indents exceeds 79 by	1
 ext/dynaloader/dynaloader.pm	Verbatim line length including indents exceeds 79 by	1
 ext/hash-util/lib/hash/util.pm	Verbatim line length including indents exceeds 79 by	2
@@ -362,7 +363,6 @@ pod/perlwin32.pod	Verbatim line length including indents exceeds 79 by	7
 porting/epigraphs.pod	Verbatim line length including indents exceeds 79 by	-1
 porting/release_managers_guide.pod	Verbatim line length including indents exceeds 79 by	1
 porting/todo.pod	? Should you be using F<...> or maybe L<...> instead of	1
-utils/ptar	Verbatim paragraph in NAME section	1
 lib/benchmark.pm	Verbatim line length including indents exceeds 79 by	2
 lib/config.pod	? Should you be using L<...> instead of	-1
 lib/perl5db.pl	? Should you be using L<...> instead of	1
