@@ -283,6 +283,9 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen, int depth
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_REGCPPUSH;
+#ifndef DEBUGGING
+    PERL_UNUSED_ARG(depth);
+#endif
 
     if (paren_elems_to_push < 0)
         Perl_croak(aTHX_ "panic: paren_elems_to_push, %i < 0, maxopenparen: %i parenfloor: %i REGCP_PAREN_ELEMS: %u",
@@ -365,6 +368,9 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p, int depth)
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_REGCPPOP;
+#ifndef DEBUGGING
+    PERL_UNUSED_ARG(depth);
+#endif
 
     /* Pop REGCP_OTHER_ELEMS before the parentheses loop starts. */
     i = SSPOPUV;
