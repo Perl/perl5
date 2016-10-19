@@ -1301,7 +1301,7 @@ prime_env_iter(void)
   envhv = GvHVn(PL_envgv);
   /* Perform a dummy fetch as an lval to insure that the hash table is
    * set up.  Otherwise, the hv_store() will turn into a nullop. */
-  (void) hv_fetch(envhv,"DEFAULT",7,TRUE);
+  (void) hv_fetchs(envhv,"DEFAULT",TRUE);
 
   for (i = 0; env_tables[i]; i++) {
      if (!have_sym && (tmpdsc.dsc$a_pointer = env_tables[i]->dsc$a_pointer) &&
