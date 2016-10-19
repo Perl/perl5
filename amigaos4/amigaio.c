@@ -668,7 +668,7 @@ static I32 S_do_amigaos_exec3(pTHX_ const char *incmd, int fd, int do_report)
 	if (*cmd == '.' && isSPACE(cmd[1]))
 		goto doshell;
 
-	if (strnEQ(cmd, "exec", 4) && isSPACE(cmd[4]))
+	if (strEQs(cmd, "exec") && isSPACE(cmd[4]))
 		goto doshell;
 
 	s = cmd;
