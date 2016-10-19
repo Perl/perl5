@@ -84,7 +84,7 @@ Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
     {
 	*where = newSV_type(type);
 	    if (type == SVt_PVAV && GvNAMELEN(gv) == 3
-	     && strnEQ(GvNAME(gv), "ISA", 3))
+	     && strEQs(GvNAME(gv), "ISA"))
 	    sv_magic(*where, (SV *)gv, PERL_MAGIC_isa, NULL, 0);
     }
     return gv;
@@ -770,7 +770,7 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
         }
 	else if (stash == cachestash
 	      && len > 1 /* shortest is uc */ && HvNAMELEN_get(stash) == 4
-              && strnEQ(hvname, "CORE", 4)
+              && strEQs(hvname, "CORE")
               && S_maybe_add_coresub(aTHX_ NULL,topgv,name,len))
 	    goto have_gv;
     }
@@ -797,7 +797,7 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
         if (!gvp) {
             if (len > 1 && HvNAMELEN_get(cstash) == 4) {
                 const char *hvname = HvNAME(cstash); assert(hvname);
-                if (strnEQ(hvname, "CORE", 4)
+                if (strEQs(hvname, "CORE")
                  && (candidate =
                       S_maybe_add_coresub(aTHX_ cstash,NULL,name,len)
                     ))
@@ -1340,7 +1340,7 @@ S_require_tie_mod(pTHX_ GV *gv, const char varname, const char * name,
 
       ENTER;
 
-#define HV_FETCH_TIE_FUNC (GV **)hv_fetch(stash, "_tie_it", 7, 0)
+#define HV_FETCH_TIE_FUNC (GV **)hv_fetchs(stash, "_tie_it", 0)
 
       /* Load the module if it is not loaded.  */
       if (!(stash = gv_stashpvn(name, len, 0))
@@ -1640,8 +1640,8 @@ S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name,
                     *stash = GvHV(*gv) = newHV();
                     if (!HvNAME_get(*stash)) {
                         if (GvSTASH(*gv) == PL_defstash && *len == 6
-                            && strnEQ(*name, "CORE", 4))
-                            hv_name_set(*stash, "CORE", 4, 0);
+                            && strEQs(*name, "CORE"))
+                            hv_name_sets(*stash, "CORE", 0);
                         else
                             hv_name_set(
                                 *stash, nambeg, name_cursor-nambeg, is_utf8
@@ -1885,7 +1885,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 	if (len > 1 /* shortest is uc */ && HvNAMELEN_get(stash) == 4) {
 	  /* Avoid null warning: */
 	  const char * const stashname = HvNAME(stash); assert(stashname);
-	  if (strnEQ(stashname, "CORE", 4))
+	  if (strEQs(stashname, "CORE"))
 	    S_maybe_add_coresub(aTHX_ 0, gv, name, len);
 	}
     }
