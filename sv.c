@@ -4875,6 +4875,35 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 #endif
 
 /*
+=for apidoc sv_setpv_bufsize
+
+Sets the SV to be a string of cur bytes length, with at least
+len bytes available. Ensures that there is a null byte at SvEND.
+Returns a char * pointer to the SvPV buffer.
+
+=cut
+*/
+
+char *
+Perl_sv_setpv_bufsize(pTHX_ SV *const sv, const STRLEN cur, const STRLEN len)
+{
+    char *pv;
+
+    PERL_ARGS_ASSERT_SV_SETPV_BUFSIZE;
+
+    SV_CHECK_THINKFIRST_COW_DROP(sv);
+    SvUPGRADE(sv, SVt_PV);
+    pv = SvGROW(sv, len + 1);
+    SvCUR_set(sv, cur);
+    *(SvEND(sv))= '\0';
+    (void)SvPOK_only_UTF8(sv);                /* validate pointer */
+
+    SvTAINT(sv);
+    if (SvTYPE(sv) == SVt_PVCV) CvAUTOLOAD_off(sv);
+    return pv;
+}
+
+/*
 =for apidoc sv_setpvn
 
 Copies a string (possibly containing embedded C<NUL> characters) into an SV.

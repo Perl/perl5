@@ -669,6 +669,7 @@
 #define sv_setnv(a,b)		Perl_sv_setnv(aTHX_ a,b)
 #define sv_setnv_mg(a,b)	Perl_sv_setnv_mg(aTHX_ a,b)
 #define sv_setpv(a,b)		Perl_sv_setpv(aTHX_ a,b)
+#define sv_setpv_bufsize(a,b,c)	Perl_sv_setpv_bufsize(aTHX_ a,b,c)
 #define sv_setpv_mg(a,b)	Perl_sv_setpv_mg(aTHX_ a,b)
 #ifndef PERL_IMPLICIT_CONTEXT
 #define sv_setpvf		Perl_sv_setpvf
