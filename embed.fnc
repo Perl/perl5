@@ -144,6 +144,13 @@
 :
 :         (currently no effect)
 :
+:   W  Add a _pDEPTH argument to function prototypes, and an _aDEPTH
+:      argument to the function calls. This means that under DEBUGGING
+:      a depth argument is added to the functions, which is used for
+:      example by the regex engine for debugging and trace output.
+:      A non DEBUGGING build will not pass the unused argument.
+:      Currently restricted to functions with at least one argument.
+:
 :   X  Explicitly exported:
 :
 :         add entry to the list of exported symbols, unless x or m
@@ -2402,21 +2409,20 @@ Es	|U8	|regtail_study	|NN RExC_state_t *pRExC_state \
 ERs	|bool	|isFOO_lc	|const U8 classnum|const U8 character
 ERs	|bool	|isFOO_utf8_lc	|const U8 classnum|NN const U8* character
 ERs	|SSize_t|regmatch	|NN regmatch_info *reginfo|NN char *startpos|NN regnode *prog
-ERs	|I32	|regrepeat	|NN regexp *prog|NN char **startposp \
+WERs	|I32	|regrepeat	|NN regexp *prog|NN char **startposp \
 				|NN const regnode *p \
 				|NN regmatch_info *const reginfo \
-				|I32 max \
-				|int depth
+				|I32 max
 ERs	|bool	|regtry		|NN regmatch_info *reginfo|NN char **startposp
 ERs	|bool	|reginclass	|NULLOK regexp * const prog  \
 				|NN const regnode * const n  \
 				|NN const U8 * const p       \
 				|NN const U8 * const p_end   \
 				|bool const utf8_target
-Es	|CHECKPOINT|regcppush	|NN const regexp *rex|I32 parenfloor\
-				|U32 maxopenparen|int depth
-Es	|void	|regcppop	|NN regexp *rex\
-				|NN U32 *maxopenparen_p|int depth
+WEs	|CHECKPOINT|regcppush	|NN const regexp *rex|I32 parenfloor\
+				|U32 maxopenparen
+WEs	|void	|regcppop	|NN regexp *rex|NN U32 *maxopenparen_p
+WEs	|void	|regcp_restore	|NN regexp *rex|I32 ix|NN U32 *maxopenparen_p
 ERsn	|U8*	|reghop3	|NN U8 *s|SSize_t off|NN const U8 *lim
 ERsn	|U8*	|reghop4	|NN U8 *s|SSize_t off|NN const U8 *llim \
 				|NN const U8 *rlim

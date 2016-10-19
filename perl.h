@@ -11,6 +11,16 @@
 #ifndef H_PERL
 #define H_PERL 1
 
+/* this is used for functions which take a depth trailing
+ * argument under debugging */
+#ifdef DEBUGGING
+#define _pDEPTH ,U32 depth
+#define _aDEPTH ,depth
+#else
+#define _pDEPTH
+#define _aDEPTH
+#endif
+
 #ifdef PERL_FOR_X2P
 /*
  * This file is being used for x2p stuff.
@@ -7327,6 +7337,7 @@ INFNAN_NV_U8_DECL PL_nan;
 #endif
 
 #endif /* DOUBLE_HAS_NAN */
+
 
 /*
 

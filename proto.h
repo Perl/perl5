@@ -5284,10 +5284,13 @@ STATIC I32	S_reg_check_named_buff_matched(const regexp *rex, const regnode *scan
 #define PERL_ARGS_ASSERT_REG_CHECK_NAMED_BUFF_MATCHED	\
 	assert(rex); assert(scan)
 
-STATIC void	S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p, int depth);
+STATIC void        S_regcp_restore(pTHX_ regexp *rex, I32 ix, U32 *maxopenparen_p _pDEPTH);
+#define PERL_ARGS_ASSERT_REGCP_RESTORE        \
+        assert(rex); assert(maxopenparen_p)
+STATIC void        S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p _pDEPTH);
 #define PERL_ARGS_ASSERT_REGCPPOP	\
 	assert(rex); assert(maxopenparen_p)
-STATIC CHECKPOINT	S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen, int depth);
+STATIC CHECKPOINT        S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH);
 #define PERL_ARGS_ASSERT_REGCPPUSH	\
 	assert(rex)
 STATIC U8*	S_reghop3(U8 *s, SSize_t off, const U8 *lim)
@@ -5315,7 +5318,7 @@ STATIC SSize_t	S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode 
 #define PERL_ARGS_ASSERT_REGMATCH	\
 	assert(reginfo); assert(startpos); assert(prog)
 
-STATIC I32	S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p, regmatch_info *const reginfo, I32 max, int depth)
+STATIC I32        S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p, regmatch_info *const reginfo, I32 max _pDEPTH)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_REGREPEAT	\
 	assert(prog); assert(startposp); assert(p); assert(reginfo)
