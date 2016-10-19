@@ -899,7 +899,7 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 		    const char *star = strchr(PL_inplace, '*');
 		    if (star) {
 			const char *begin = PL_inplace;
-			sv_setpvs(sv, "");
+                        SvPVCLEAR(sv);
 			do {
 			    sv_catpvn(sv, begin, star - begin);
 			    sv_catpvn(sv, PL_oldname, oldlen);
@@ -1435,7 +1435,7 @@ Perl_my_stat_flags(pTHX_ const U32 flags)
         do_fstat_have_io:
         PL_laststype = OP_STAT;
         PL_statgv = gv ? gv : (GV *)io;
-        sv_setpvs(PL_statname, "");
+        SvPVCLEAR(PL_statname);
         if (io) {
 	    if (IoIFP(io)) {
                 int fd = PerlIO_fileno(IoIFP(io));
@@ -1639,7 +1639,7 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
     {
         char flags[PERL_FLAGS_MAX];
 	if (strnEQ(cmd,PL_cshname,PL_cshlen) &&
-	    strnEQ(cmd+PL_cshlen," -c",3)) {
+	    strEQs(cmd+PL_cshlen," -c")) {
           my_strlcpy(flags, "-c", PERL_FLAGS_MAX);
 	  s = cmd+PL_cshlen+3;
 	  if (*s == 'f') {
@@ -1675,7 +1675,7 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
     if (*cmd == '.' && isSPACE(cmd[1]))
 	goto doshell;
 
-    if (strnEQ(cmd,"exec",4) && isSPACE(cmd[4]))
+    if (strEQs(cmd,"exec") && isSPACE(cmd[4]))
 	goto doshell;
 
     s = cmd;
@@ -2389,7 +2389,7 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
 
     /* suppress warning when reading into undef var --jhi */
     if (! SvOK(mstr))
-	sv_setpvs(mstr, "");
+        SvPVCLEAR(mstr);
     msize = SvIVx(*++mark);
     mtype = (long)SvIVx(*++mark);
     flags = SvIVx(*++mark);
@@ -2500,7 +2500,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 	SvGETMAGIC(mstr);
 	SvUPGRADE(mstr, SVt_PV);
 	if (! SvOK(mstr))
-	    sv_setpvs(mstr, "");
+            SvPVCLEAR(mstr);
 	SvPOK_only(mstr);
 	mbuf = SvGROW(mstr, (STRLEN)msize+1);
 
