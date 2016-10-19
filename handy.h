@@ -505,8 +505,14 @@ Returns zero if non-equal, or non-zero if equal.
 
 /* memEQ and memNE where second comparand is a string constant */
 #define memEQs(s1, l, s2) \
-	(sizeof(s2)-1 == l && memEQ(s1, ("" s2 ""), (sizeof(s2)-1)))
+        (((sizeof(s2)-1) == (l)) && memEQ((s1), ("" s2 ""), (sizeof(s2)-1)))
 #define memNEs(s1, l, s2) !memEQs(s1, l, s2)
+
+/* memEQ and memNE where second comparand is a string constant
+ * and we can assume the length of s1 is at least that of the string */
+#define _memEQs(s1, s2) \
+        (memEQ((s1), ("" s2 ""), (sizeof(s2)-1)))
+#define _memNEs(s1, s2) (memNE((s1),("" s2 ""),(sizeof(s2)-1)))
 
 #define memLT(s1,s2,l) (memcmp(s1,s2,l) < 0)
 #define memLE(s1,s2,l) (memcmp(s1,s2,l) <= 0)
