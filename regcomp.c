@@ -18893,7 +18893,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
     PERL_ARGS_ASSERT_REGPROP;
 
-    sv_setpvs(sv, "");
+    SvPVCLEAR(sv);
 
     if (OP(o) > REGNODE_MAX)		/* regnode.type is unsigned */
 	/* It would be nice to FAIL() here, but this may be called from
@@ -20536,7 +20536,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 #endif
 	    const regnode *nextbranch= NULL;
 	    I32 word_idx;
-            sv_setpvs(sv, "");
+            SvPVCLEAR(sv);
 	    for (word_idx= 0; word_idx < (I32)trie->wordcount; word_idx++) {
 		SV ** const elem_ptr = av_fetch(trie_words,word_idx,0);
 
