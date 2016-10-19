@@ -23,6 +23,7 @@ if ($Config::Config{ccflags} =~ /(?:^|\s)-DPERL_DEBUG_READONLY_COW\b/) {
     exit;
 }
 
+$::TESTCHUNK=5;
 do '../lib/unicore/TestProp.pl';
 
 # Since TestProp.pl explicitly exits, we will only get here if it

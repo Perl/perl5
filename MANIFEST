@@ -5713,7 +5713,16 @@ t/re/subst.t			See if substitution works
 t/re/subst_amp.t		See if $&-related substitution works
 t/re/subst_wamp.t		See if substitution works with $& present
 t/re/substT.t			See if substitution works with -T
-t/re/uniprops.t			Test unicode \p{} regex constructs
+t/re/uniprops01.t		Test unicode \p{} regex constructs
+t/re/uniprops02.t		Test unicode \p{} regex constructs
+t/re/uniprops03.t		Test unicode \p{} regex constructs
+t/re/uniprops04.t		Test unicode \p{} regex constructs
+t/re/uniprops05.t		Test unicode \p{} regex constructs
+t/re/uniprops06.t		Test unicode \p{} regex constructs
+t/re/uniprops07.t		Test unicode \p{} regex constructs
+t/re/uniprops08.t		Test unicode \p{} regex constructs
+t/re/uniprops09.t		Test unicode \p{} regex constructs
+t/re/uniprops10.t		Test unicode \p{} regex constructs
 t/README			Instructions for regression tests
 t/run/cloexec.t			Test close-on-exec.
 t/run/dtrace.pl			For dtrace.t
