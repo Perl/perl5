@@ -10851,7 +10851,7 @@ Perl_sv_vsetpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 {
     PERL_ARGS_ASSERT_SV_VSETPVFN;
 
-    sv_setpvs(sv, "");
+    SvPVCLEAR(sv);
     sv_vcatpvfn_flags(sv, pat, patlen, args, svargs, svmax, maybe_tainted, 0);
 }
 
@@ -11794,7 +11794,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		 * vectorize happen normally
 		 */
 		if (sv_isobject(vecsv) && sv_derived_from(vecsv, "version")) {
-		    if ( hv_exists(MUTABLE_HV(SvRV(vecsv)), "alpha", 5 ) ) {
+		    if ( hv_existss(MUTABLE_HV(SvRV(vecsv)), "alpha") ) {
 			Perl_ck_warner_d(aTHX_ packWARN(WARN_PRINTF),
 			"vector argument not supported with alpha versions");
 			goto vdblank;
@@ -15074,9 +15074,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* magical thingies */
 
-    sv_setpvs(PERL_DEBUG_PAD(0), "");	/* For regex debugging. */
-    sv_setpvs(PERL_DEBUG_PAD(1), "");	/* ext/re needs these */
-    sv_setpvs(PERL_DEBUG_PAD(2), "");	/* even without DEBUGGING. */
+    SvPVCLEAR(PERL_DEBUG_PAD(0));        /* For regex debugging. */
+    SvPVCLEAR(PERL_DEBUG_PAD(1));        /* ext/re needs these */
+    SvPVCLEAR(PERL_DEBUG_PAD(2));        /* even without DEBUGGING. */
 
    
     /* Clone the regex array */
