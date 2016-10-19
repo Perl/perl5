@@ -162,7 +162,7 @@ VXS(universal_version)
 	}
 
 	if ( VCMP( req, sv ) > 0 ) {
-	    if ( hv_exists(MUTABLE_HV(SvRV(req)), "qv", 2 ) ) {
+	    if ( hv_existss(MUTABLE_HV(SvRV(req)), "qv") ) {
 		req = VNORMAL(req);
 		sv  = VNORMAL(sv);
 	    }
