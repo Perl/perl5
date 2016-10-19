@@ -165,7 +165,7 @@ PP(pp_regcomp)
     /* Handle empty pattern */
     if (!RX_PRELEN(PM_GETRE(pm)) && PL_curpm) {
         if (PL_curpm == PL_reg_curpm)
-            croak("Use of the empty pattern inside of "
+            Perl_croak(aTHX_ "Use of the empty pattern inside of "
                   "a regex code block is forbidden");
 	pm = PL_curpm;
     }

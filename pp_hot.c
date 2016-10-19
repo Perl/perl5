@@ -1765,7 +1765,7 @@ PP(pp_match)
        possible, except for qr// */
     if (!ReANY(rx)->mother_re && !RX_PRELEN(rx) && PL_curpm) {
         if (PL_curpm == PL_reg_curpm)
-            croak("Use of the empty pattern inside of "
+            Perl_croak(aTHX_ "Use of the empty pattern inside of "
                   "a regex code block is forbidden");
 	pm = PL_curpm;
 	rx = PM_GETRE(pm);
@@ -2965,7 +2965,7 @@ PP(pp_subst)
     /* handle the empty pattern */
     if (!RX_PRELEN(rx) && PL_curpm && !ReANY(rx)->mother_re) {
         if (PL_curpm == PL_reg_curpm)
-            croak("Use of the empty pattern inside of "
+            Perl_croak(aTHX_ "Use of the empty pattern inside of "
                   "a regex code block is forbidden");
 	pm = PL_curpm;
 	rx = PM_GETRE(pm);
