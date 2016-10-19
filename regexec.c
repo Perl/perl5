@@ -5668,7 +5668,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    DEBUG_TRIE_EXECUTE_r({
                                 DUMP_EXEC_POS( (char *)uc, scan, utf8_target, depth );
                                 /* HERE */
-                                PerlIO_printf( aTHX_ Perl_debug_log,
+                                PerlIO_printf( Perl_debug_log,
                                     "%*s%sState: %4"UVxf" Accepted: %c ",
                                     INDENT_CHARS(depth), "", PL_colors[4],
 			            (UV)state, (accepted ? 'Y' : 'N'));
