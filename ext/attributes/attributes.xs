@@ -44,7 +44,7 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 	case SVt_PVCV:
 	    switch ((int)len) {
 	    case 5:
-		if (memEQ(name, "const", 5)) {
+		if (_memEQs(name, "const")) {
 		    if (negated)
 			CvANONCONST_off(sv);
 		    else {
@@ -60,7 +60,7 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 	    case 6:
 		switch (name[3]) {
 		case 'l':
-		    if (memEQ(name, "lvalue", 6)) {
+		    if (_memEQs(name, "lvalue")) {
 			bool warn =
 			    !CvISXSUB(MUTABLE_CV(sv))
 			 && CvROOT(MUTABLE_CV(sv))
@@ -74,7 +74,7 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 		    }
 		    break;
 		case 'h':
-		    if (memEQ(name, "method", 6)) {
+		    if (_memEQs(name, "method")) {
 			if (negated)
 			    CvFLAGS(MUTABLE_CV(sv)) &= ~CVf_METHOD;
 			else
@@ -85,7 +85,7 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 		}
 		break;
 	    default:
-		if (len > 10 && memEQ(name, "prototype(", 10)) {
+		if (len > 10 && _memEQs(name, "prototype(")) {
 		    SV * proto = newSVpvn(name+10,len-11);
 		    HEK *const hek = CvNAME_HEK((CV *)sv);
 		    SV *subname;
