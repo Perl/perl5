@@ -665,19 +665,19 @@ XS(XS_PerlIO_get_layers)
 
 		  switch (*key) {
 		  case 'i':
-		       if (klen == 5 && memEQ(key, "input", 5)) {
+                       if (memEQs(key, klen, "input")) {
 			    input = SvTRUE(*valp);
 			    break;
 		       }
 		       goto fail;
 		  case 'o': 
-		       if (klen == 6 && memEQ(key, "output", 6)) {
+                       if (memEQs(key, klen, "output")) {
 			    input = !SvTRUE(*valp);
 			    break;
 		       }
 		       goto fail;
 		  case 'd':
-		       if (klen == 7 && memEQ(key, "details", 7)) {
+                       if (memEQs(key, klen, "details")) {
 			    details = SvTRUE(*valp);
 			    break;
 		       }
