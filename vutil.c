@@ -491,10 +491,10 @@ Perl_new_version(pTHX_ SV *ver)
 	    ver = SvRV(ver);
 
 	/* Begin copying all of the elements */
-	if ( hv_exists(MUTABLE_HV(ver), "qv", 2) )
+	if ( hv_existss(MUTABLE_HV(ver), "qv") )
 	    (void)hv_stores(MUTABLE_HV(hv), "qv", newSViv(1));
 
-	if ( hv_exists(MUTABLE_HV(ver), "alpha", 5) )
+	if ( hv_existss(MUTABLE_HV(ver), "alpha") )
 	    (void)hv_stores(MUTABLE_HV(hv), "alpha", newSViv(1));
 	{
 	    SV ** svp = hv_fetchs(MUTABLE_HV(ver), "width", FALSE);
@@ -840,7 +840,7 @@ Perl_vnumify(pTHX_ SV *vs)
 	Perl_croak(aTHX_ "Invalid version object");
 
     /* see if various flags exist */
-    if ( hv_exists(MUTABLE_HV(vs), "alpha", 5 ) )
+    if ( hv_existss(MUTABLE_HV(vs), "alpha") )
 	alpha = TRUE;
 
     if (alpha) {
@@ -974,7 +974,7 @@ Perl_vstringify(pTHX_ SV *vs)
 	    return &PL_sv_undef;
     }
     else {
-	if ( hv_exists(MUTABLE_HV(vs), "qv", 2) )
+	if ( hv_existss(MUTABLE_HV(vs), "qv") )
 	    return VNORMAL(vs);
 	else
 	    return VNUMIFY(vs);
