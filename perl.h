@@ -1277,7 +1277,7 @@ EXTERN_C char *crypt(const char *, const char *);
 	*svp = newSVpvs("");						\
     } else {								\
 	SV *const errsv = *svp;						\
-	sv_setpvs(errsv, "");						\
+        SvPVCLEAR(errsv);                                                \
 	SvPOK_only(errsv);						\
 	if (SvMAGICAL(errsv)) {						\
 	    mg_free(errsv);						\
