@@ -680,7 +680,7 @@ Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
 	++mark;
     }
 
-    sv_setpvs(sv, "");
+    SvPVCLEAR(sv);
     /* sv_setpv retains old UTF8ness [perl #24846] */
     SvUTF8_off(sv);
 
@@ -1008,7 +1008,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     PERL_ARGS_ASSERT_DO_VOP;
 
     if (sv != left || (optype != OP_BIT_AND && !SvOK(sv)))
-        sv_setpvs(sv, "");        /* avoid undef warning on |= and ^= */
+        SvPVCLEAR(sv);        /* avoid undef warning on |= and ^= */
     if (sv == left) {
 	lsave = lc = SvPV_force_nomg(left, leftlen);
     }
