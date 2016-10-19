@@ -1213,8 +1213,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                 {
                 char **e;
                 for (e = environ; *e; e++) {
-                    if (strnEQ(*e, "LC_", 3)
-                            && strnNE(*e, "LC_ALL=", 7)
+                    if (strEQs(*e, "LC_")
+                            && strNEs(*e, "LC_ALL=")
                             && (p = strchr(*e, '=')))
                         PerlIO_printf(Perl_error_log, "\t%.*s = \"%s\",\n",
                                         (int)(p - *e), *e, p + 1);
