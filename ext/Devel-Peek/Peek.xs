@@ -181,46 +181,46 @@ _mstats_to_hv(HV *hv, const struct mstats_buffer *b, int level)
     SV **svp;
     int type;
 
-    svp = hv_fetch(hv, "topbucket", 9, 1);
+    svp = hv_fetchs(hv, "topbucket", 1);
     sv_setiv(*svp, b->buffer.topbucket);
 
-    svp = hv_fetch(hv, "topbucket_ev", 12, 1);
+    svp = hv_fetchs(hv, "topbucket_ev", 1);
     sv_setiv(*svp, b->buffer.topbucket_ev);
 
-    svp = hv_fetch(hv, "topbucket_odd", 13, 1);
+    svp = hv_fetchs(hv, "topbucket_odd", 1);
     sv_setiv(*svp, b->buffer.topbucket_odd);
 
-    svp = hv_fetch(hv, "totfree", 7, 1);
+    svp = hv_fetchs(hv, "totfree", 1);
     sv_setiv(*svp, b->buffer.totfree);
 
-    svp = hv_fetch(hv, "total", 5, 1);
+    svp = hv_fetchs(hv, "total", 1);
     sv_setiv(*svp, b->buffer.total);
 
-    svp = hv_fetch(hv, "total_chain", 11, 1);
+    svp = hv_fetchs(hv, "total_chain", 1);
     sv_setiv(*svp, b->buffer.total_chain);
 
-    svp = hv_fetch(hv, "total_sbrk", 10, 1);
+    svp = hv_fetchs(hv, "total_sbrk", 1);
     sv_setiv(*svp, b->buffer.total_sbrk);
 
-    svp = hv_fetch(hv, "sbrks", 5, 1);
+    svp = hv_fetchs(hv, "sbrks", 1);
     sv_setiv(*svp, b->buffer.sbrks);
 
-    svp = hv_fetch(hv, "sbrk_good", 9, 1);
+    svp = hv_fetchs(hv, "sbrk_good", 1);
     sv_setiv(*svp, b->buffer.sbrk_good);
 
-    svp = hv_fetch(hv, "sbrk_slack", 10, 1);
+    svp = hv_fetchs(hv, "sbrk_slack", 1);
     sv_setiv(*svp, b->buffer.sbrk_slack);
 
-    svp = hv_fetch(hv, "start_slack", 11, 1);
+    svp = hv_fetchs(hv, "start_slack", 1);
     sv_setiv(*svp, b->buffer.start_slack);
 
-    svp = hv_fetch(hv, "sbrked_remains", 14, 1);
+    svp = hv_fetchs(hv, "sbrked_remains", 1);
     sv_setiv(*svp, b->buffer.sbrked_remains);
     
-    svp = hv_fetch(hv, "minbucket", 9, 1);
+    svp = hv_fetchs(hv, "minbucket", 1);
     sv_setiv(*svp, b->buffer.minbucket);
     
-    svp = hv_fetch(hv, "nbuckets", 8, 1);
+    svp = hv_fetchs(hv, "nbuckets", 1);
     sv_setiv(*svp, b->buffer.nbuckets);
 
     if (_NBUCKETS < b->buffer.nbuckets) 
