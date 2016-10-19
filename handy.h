@@ -417,14 +417,7 @@ a string/length pair.
     Perl_gv_fetchpvn_flags(aTHX_ namebeg, len, add, sv_type)
 #define sv_catxmlpvs(dsv, str, utf8) \
     Perl_sv_catxmlpvn(aTHX_ dsv, STR_WITH_LEN(str), utf8)
-#define hv_fetchs(hv,key,lval)						\
-  ((SV **)Perl_hv_common(aTHX_ (hv), NULL, STR_WITH_LEN(key), 0,	\
-			 (lval) ? (HV_FETCH_JUST_SV | HV_FETCH_LVALUE)	\
-			 : HV_FETCH_JUST_SV, NULL, 0))
 
-#define hv_stores(hv,key,val)						\
-  ((SV **)Perl_hv_common(aTHX_ (hv), NULL, STR_WITH_LEN(key), 0,	\
-			 (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), (val), 0))
 
 #define lex_stuff_pvs(pv,flags) Perl_lex_stuff_pvn(aTHX_ STR_WITH_LEN(pv), flags)
 

@@ -475,6 +475,8 @@ C<SV*>.
 			      (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV),	\
 			      (val), (hash)))
 
+
+
 #define hv_exists(hv, key, klen)					\
     (hv_common_key_len((hv), (key), (klen), HV_FETCH_ISEXISTS, NULL, 0) \
      ? TRUE : FALSE)
@@ -487,6 +489,24 @@ C<SV*>.
 #define hv_delete(hv, key, klen, flags)					\
     (MUTABLE_SV(hv_common_key_len((hv), (key), (klen),			\
 				  (flags) | HV_DELETE, NULL, 0)))
+
+/* Provide 's' suffix subs for constant strings (and avoid needing to count
+ * chars). See STR_WITH_LEN in handy.h - because these are macros we cant use
+ * STR_WITH_LEN to do the work, we have to unroll it. */
+#define hv_existss(hv, key) \
+    hv_exists((hv), ("" key ""), (sizeof(key)-1))
+
+#define hv_fetchs(hv, key, lval) \
+    hv_fetch((hv), ("" key ""), (sizeof(key)-1), (lval))
+
+#define hv_deletes(hv, key, flags) \
+    hv_delete((hv), ("" key ""), (sizeof(key)-1), (flags))
+
+#define hv_name_sets(hv, name, flags) \
+    hv_name_set((hv),("" name ""),(sizeof(name)-1), flags)
+
+#define hv_stores(hv, key, val) \
+    hv_store((hv), ("" key ""), (sizeof(key)-1), (val), 0)
 
 #ifdef PERL_CORE
 # define hv_storehek(hv, hek, val) \
