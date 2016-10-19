@@ -289,7 +289,7 @@ PP(pp_concat)
                 && ckWARN(WARN_UNINITIALIZED)
                 )
                 report_uninit(left);
-	    sv_setpvs(left, "");
+            SvPVCLEAR(left);
 	}
         else {
             SvPV_force_nomg_nolen(left);
