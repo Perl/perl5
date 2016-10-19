@@ -1056,22 +1056,23 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 
     /* did we find a separator? */
     if (last_separator) {
-	if ((last_separator - origname) == 5 && memEQ(origname, "SUPER", 5)) {
+        STRLEN sep_len= last_separator - origname;
+        if ( memEQs(origname, sep_len, "SUPER")) {
 	    /* ->SUPER::method should really be looked up in original stash */
 	    stash = CopSTASH(PL_curcop);
 	    flags |= GV_SUPER;
 	    DEBUG_o( Perl_deb(aTHX_ "Treating %s as %s::%s\n",
 			 origname, HvENAME_get(stash), name) );
 	}
-	else if ((last_separator - origname) >= 7 &&
-		 strnEQ(last_separator - 7, "::SUPER", 7)) {
+        else if ( sep_len >= 7 &&
+		 strEQs(last_separator - 7, "::SUPER")) {
             /* don't autovifify if ->NoSuchStash::SUPER::method */
-	    stash = gv_stashpvn(origname, last_separator - origname - 7, is_utf8);
+            stash = gv_stashpvn(origname, sep_len - 7, is_utf8);
 	    if (stash) flags |= GV_SUPER;
 	}
 	else {
             /* don't autovifify if ->NoSuchStash::method */
-            stash = gv_stashpvn(origname, last_separator - origname, is_utf8);
+            stash = gv_stashpvn(origname, sep_len, is_utf8);
 	}
 	ostash = stash;
     }
