@@ -1171,11 +1171,11 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 			if (buf[1] == '!')
 			    s = buf + 2;
 		    } else if (buf[0] == 'e') {
-			if (strnEQ(buf, "extproc", 7) 
+			if (strEQs(buf, "extproc")
 			    && isSPACE(buf[7]))
 			    s = buf + 8;
 		    } else if (buf[0] == 'E') {
-			if (strnEQ(buf, "EXTPROC", 7)
+			if (strEQs(buf, "EXTPROC")
 			    && isSPACE(buf[7]))
 			    s = buf + 8;
 		    }
@@ -1372,7 +1372,7 @@ do_spawn3(pTHX_ char *cmd, int execf, int flag)
     while (*cmd && isSPACE(*cmd))
 	cmd++;
 
-    if (strnEQ(cmd,"/bin/sh",7) && isSPACE(cmd[7])) {
+    if (strEQs(cmd,"/bin/sh") && isSPACE(cmd[7])) {
 	STRLEN l = strlen(PL_sh_path);
 	
 	Newx(news, strlen(cmd) - 7 + l + 1, char);
@@ -1387,7 +1387,7 @@ do_spawn3(pTHX_ char *cmd, int execf, int flag)
     if (*cmd == '.' && isSPACE(cmd[1]))
 	goto doshell;
 
-    if (strnEQ(cmd,"exec",4) && isSPACE(cmd[4]))
+    if (strEQs(cmd,"exec") && isSPACE(cmd[4]))
 	goto doshell;
 
     for (s = cmd; *s && isALPHA(*s); s++) ;	/* catch VAR=val gizmo */
@@ -2632,7 +2632,7 @@ XS(XS_OS2_Errors2Drive)
 	if (DOS_suppression_state > 0)
 	    sv_setpvn(ST(0), &DOS_suppression_state, 1);
 	else if (DOS_suppression_state == 0)
-	    sv_setpvs(ST(0), "");
+            SvPVCLEAR(ST(0));
 	DOS_suppression_state = drive;
     }
     XSRETURN(1);
@@ -4103,7 +4103,7 @@ XS(XS_OS2_pipe)
 	if (!pszName || !*pszName)
 	    Perl_croak(aTHX_ "OS2::pipe(): empty pipe name");
 	s = SvPV(OpenMode, len);
-	if (len == 4 && strEQ(s, "wait")) {	/* DosWaitNPipe() */
+	if (memEQs(s, len, "wait")) {	/* DosWaitNPipe() */
 	    ULONG ms = 0xFFFFFFFF, ret = ERROR_INTERRUPT; /* Indefinite */
 
 	    if (items == 3) {
@@ -4121,7 +4121,7 @@ XS(XS_OS2_pipe)
 	    os2cp_croak(ret, "DosWaitNPipe()");
 	    XSRETURN_YES;
 	}
-	if (len == 4 && strEQ(s, "call")) {	/* DosCallNPipe() */
+	if (memEQs(s, len, "call")) {	/* DosCallNPipe() */
 	    ULONG ms = 0xFFFFFFFF, got; /* Indefinite */
 	    STRLEN l;
 	    char *s;
@@ -4200,9 +4200,9 @@ XS(XS_OS2_pipe)
 	    connect = -1;			/* no wait */
 	else if (SvTRUE(ST(2))) {
 	    s = SvPV(ST(2), len);
-	    if (len == 6 && strEQ(s, "nowait"))
+	    if (memEQs(s, len, "nowait"))
 		connect = -1;			/* no wait */
-	    else if (len == 4 && strEQ(s, "wait"))
+	    else if (memEQs(s, len, "wait"))
 		connect = 1;			/* wait */
 	    else
 		Perl_croak(aTHX_ "OS2::pipe(): unknown connect argument: `%s'", s);
