@@ -894,11 +894,11 @@ CODE:
  int i; 
  IV  result = -1;
  ST(0) = sv_newmortal();
- if (strncmp(name,"pp_",3) == 0)
+ if (strEQs(name,"pp_"))
    name += 3;
  for (i = 0; i < PL_maxo; i++)
   {
-   if (strcmp(name, PL_op_name[i]) == 0)
+   if (strEQ(name, PL_op_name[i]))
     {
      result = i;
      break;
