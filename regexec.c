@@ -435,6 +435,8 @@ STATIC void
 S_regcp_restore(pTHX_ regexp *rex, I32 ix, U32 *maxopenparen_p _pDEPTH)
 {
     I32 tmpix = PL_savestack_ix;
+    PERL_ARGS_ASSERT_REGCP_RESTORE;
+
     PL_savestack_ix = ix;
     regcppop(rex, maxopenparen_p);
     PL_savestack_ix = tmpix;
