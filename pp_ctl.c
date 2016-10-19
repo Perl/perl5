@@ -1139,7 +1139,7 @@ PP(pp_flip)
 		RETURNOP(((LOGOP*)cUNOP->op_first)->op_other);
 	    }
 	}
-	sv_setpvs(TARG, "");
+        SvPVCLEAR(TARG);
 	SETs(targ);
 	RETURN;
     }
