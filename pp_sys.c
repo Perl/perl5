@@ -320,7 +320,7 @@ PP(pp_backtick)
 	    ENTER_with_name("backtick");
 	    SAVESPTR(PL_rs);
 	    PL_rs = &PL_sv_undef;
-	    sv_setpvs(TARG, "");	/* note that this preserves previous buffer */
+            SvPVCLEAR(TARG);        /* note that this preserves previous buffer */
 	    while (sv_gets(TARG, fp, SvCUR(TARG)) != NULL)
 		NOOP;
 	    LEAVE_with_name("backtick");
@@ -1684,7 +1684,7 @@ PP(pp_sysread)
 	goto say_undef;
     bufsv = *++MARK;
     if (! SvOK(bufsv))
-	sv_setpvs(bufsv, "");
+        SvPVCLEAR(bufsv);
     length = SvIVx(*++MARK);
     if (length < 0)
 	DIE(aTHX_ "Negative length");
@@ -2895,7 +2895,7 @@ PP(pp_stat)
 	    havefp = FALSE;
 	    PL_laststype = OP_STAT;
 	    PL_statgv = gv ? gv : (GV *)io;
-	    sv_setpvs(PL_statname, "");
+            SvPVCLEAR(PL_statname);
             if(gv) {
                 io = GvIO(gv);
 	    }
@@ -3455,7 +3455,7 @@ PP(pp_fttext)
 	}
 	else {
 	    PL_statgv = gv;
-	    sv_setpvs(PL_statname, "");
+            SvPVCLEAR(PL_statname);
 	    io = GvIO(PL_statgv);
 	}
 	PL_laststatval = -1;
