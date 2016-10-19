@@ -1575,7 +1575,7 @@ Data_Dumper_Dumpxs(href, ...)
 			sv_catpvs(retval, ";");
                         sv_catsv(retval, style.sep);
 		    }
-		    sv_setpvs(valstr, "");
+		    SvPVCLEAR(valstr);
 		    if (gimme == G_ARRAY) {
 			XPUSHs(sv_2mortal(retval));
 			if (i < imax)	/* not the last time thro ? */
