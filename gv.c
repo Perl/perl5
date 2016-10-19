@@ -1370,6 +1370,13 @@ S_require_tie_mod(pTHX_ GV *gv, const char varname, const char * name,
     }
 }
 
+/* add a require_tie_mod_s - the _s suffix is similar to pvs type suffixes,
+ * IOW it means we do STR_WITH_LEN() ourselves and the user should pass in
+ * a true string WITHOUT a len.
+ */
+#define require_tie_mod_s(gv, varname, name, flags) \
+    S_require_tie_mod(aTHX_ gv, varname, STR_WITH_LEN(name), flags)
+
 /*
 =for apidoc gv_stashpv
 
@@ -2092,9 +2099,9 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 
 	    sv_magic(GvSVn(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, name, len);
 
-            /* magicalization must be done before require_tie_mod is called */
+            /* magicalization must be done before require_tie_mod_s is called */
 	    if (sv_type == SVt_PVHV || sv_type == SVt_PVGV)
-		require_tie_mod(gv, '!', "Errno", 5, 1);
+                require_tie_mod_s(gv, '!', "Errno", 1);
 
 	    break;
 	case '-':		/* $-, %-, @- */
@@ -2111,7 +2118,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
             SvREADONLY_on(av);
 
             if (sv_type == SVt_PVHV || sv_type == SVt_PVGV)
-                require_tie_mod(gv, *name, "Tie::Hash::NamedCapture",23,0);
+                require_tie_mod_s(gv, *name, "Tie::Hash::NamedCapture",0);
 
             break;
 	}
@@ -2131,7 +2138,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 	case '[':		/* $[ */
 	    if ((sv_type == SVt_PV || sv_type == SVt_PVGV)
 	     && FEATURE_ARYBASE_IS_ENABLED) {
-		require_tie_mod(gv,'[',"arybase",7,0);
+                require_tie_mod_s(gv,'[',"arybase",0);
 	    }
 	    else goto magicalize;
             break;
@@ -2225,9 +2232,9 @@ S_maybe_multimagic_gv(pTHX_ GV *gv, const char *name, const svtype sv_type)
 
     if (sv_type == SVt_PVHV || sv_type == SVt_PVGV) {
         if (*name == '!')
-            require_tie_mod(gv, '!', "Errno", 5, 1);
+            require_tie_mod_s(gv, '!', "Errno", 1);
         else if (*name == '-' || *name == '+')
-            require_tie_mod(gv, *name, "Tie::Hash::NamedCapture", 23, 0);
+            require_tie_mod_s(gv, *name, "Tie::Hash::NamedCapture", 0);
     } else if (sv_type == SVt_PV) {
         if (*name == '*' || *name == '#') {
             /* diag_listed_as: $* is no longer supported */
@@ -2239,7 +2246,7 @@ S_maybe_multimagic_gv(pTHX_ GV *gv, const char *name, const svtype sv_type)
     if (sv_type==SVt_PV || sv_type==SVt_PVGV) {
       switch (*name) {
       case '[':
-          require_tie_mod(gv,'[',"arybase",7,0);
+          require_tie_mod_s(gv,'[',"arybase",0);
           break;
 #ifdef PERL_SAWAMPERSAND
       case '`':
