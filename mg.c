@@ -714,7 +714,7 @@ Perl_emulate_cop_io(pTHX_ const COP *const c, SV *const sv)
     if (!(CopHINTS_get(c) & (HINT_LEXICAL_IO_IN|HINT_LEXICAL_IO_OUT)))
 	sv_setsv(sv, &PL_sv_undef);
     else {
-	sv_setpvs(sv, "");
+        SvPVCLEAR(sv);
 	SvUTF8_off(sv);
 	if ((CopHINTS_get(c) & HINT_LEXICAL_IO_IN)) {
 	    SV *const value = cop_hints_fetch_pvs(c, "open<", 0);
@@ -829,7 +829,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             if (sys$getmsg(vaxc$errno,&msgdsc.dsc$w_length,&msgdsc,0,0) & 1)
                 sv_setpvn(sv,msgdsc.dsc$a_pointer,msgdsc.dsc$w_length);
             else
-                sv_setpvs(sv,"");
+                SvPVCLEAR(sv);
         }
 #elif defined(OS2)
         if (!(_emx_env & 0x200)) {	/* Under DOS */
@@ -856,7 +856,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
                 fixup_errno_string(sv);
             }
             else
-                sv_setpvs(sv, "");
+                SvPVCLEAR(sv);
             SetLastError(dwErr);
         }
 #   else
@@ -882,7 +882,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             else
 #endif
             if (! errno) {
-                sv_setpvs(sv, "");
+                SvPVCLEAR(sv);
             }
             else {
 
@@ -1179,7 +1179,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
     if (TAINTING_get) {
 	MgTAINTEDDIR_off(mg);
 #ifdef VMS
-	if (s && klen == 8 && strEQ(key, "DCL$PATH")) {
+	if (s && memEQs(key, klen, "DCL$PATH")) {
 	    char pathbuf[256], eltbuf[256], *cp, *elt;
 	    int i = 0, j = 0;
 
@@ -1205,7 +1205,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 	    } while (my_trnlnm(s, pathbuf, i++) && (elt = pathbuf));
 	}
 #endif /* VMS */
-	if (s && klen == 4 && strEQ(key,"PATH")) {
+	if (s && memEQs(key, klen, "PATH")) {
 	    const char * const strend = s + len;
 
             /* set MGf_TAINTEDDIR if any component of the new path is
