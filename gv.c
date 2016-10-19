@@ -1854,25 +1854,28 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 	   and VERSION. All the others apply only to the main stash or to
 	   CORE (which is checked right after this). */
 	if (len) {
-	    const char * const name2 = name + 1;
 	    switch (*name) {
 	    case 'E':
-		if (strnEQ(name2, "XPORT", 5))
+                if (memEQs(name, len, "EXPORT")
+                    ||memEQs(name, len, "EXPORT_OK")
+                    ||memEQs(name, len, "EXPORT_FAIL")
+                )
 		    GvMULTI_on(gv);
 		break;
 	    case 'I':
-		if (strEQ(name2, "SA"))
+                if (memEQs(name, len, "ISA"))
 		    gv_magicalize_isa(gv);
 		break;
 	    case 'V':
-		if (strEQ(name2, "ERSION"))
+                if (memEQs(name, len, "VERSION"))
 		    GvMULTI_on(gv);
 		break;
 	    case 'a':
-		if (stash == PL_debstash && len==4 && strEQ(name2,"rgs")) {
+                if (stash == PL_debstash && memEQs(name, len, "args")) {
 		    GvMULTI_on(gv_AVadd(gv));
 		    break;
-		}
+                }
+                /* FALLTHROUGH */
 	    case 'b':
 		if (len == 1 && sv_type == SVt_PV)
 		    GvMULTI_on(gv);
@@ -1907,27 +1910,26 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 	} else
 #endif
 	{
-	    const char * name2 = name + 1;
 	    switch (*name) {
 	    case 'A':
-		if (strEQ(name2, "RGV")) {
+                if (memEQs(name, len, "ARGV")) {
 		    IoFLAGS(GvIOn(gv)) |= IOf_ARGV|IOf_START;
 		}
-		else if (strEQ(name2, "RGVOUT")) {
+                else if (memEQs(name, len, "ARGVOUT")) {
 		    GvMULTI_on(gv);
 		}
 		break;
 	    case 'E':
-		if (strnEQ(name2, "XPORT", 5))
+                if (memEQs(name, len, "EXPORT"))
 		    GvMULTI_on(gv);
 		break;
 	    case 'I':
-		if (strEQ(name2, "SA")) {
+                if (memEQs(name, len, "ISA")) {
 		    gv_magicalize_isa(gv);
 		}
 		break;
 	    case 'S':
-		if (strEQ(name2, "IG")) {
+                if (memEQs(name, len, "SIG")) {
 		    HV *hv;
 		    I32 i;
 		    if (!PL_psig_name) {
@@ -1958,62 +1960,62 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 		}
 		break;
 	    case 'V':
-		if (strEQ(name2, "ERSION"))
+                if (memEQs(name, len, "VERSION"))
 		    GvMULTI_on(gv);
 		break;
             case '\003':        /* $^CHILD_ERROR_NATIVE */
-		if (strEQ(name2, "HILD_ERROR_NATIVE"))
+                if (memEQs(name, len, "\003HILD_ERROR_NATIVE"))
 		    goto magicalize;
 		break;
 	    case '\005':	/* $^ENCODING */
-		if (strEQ(name2, "NCODING"))
+                if (memEQs(name, len, "\005NCODING"))
 		    goto magicalize;
 		break;
 	    case '\007':	/* $^GLOBAL_PHASE */
-		if (strEQ(name2, "LOBAL_PHASE"))
+                if (memEQs(name, len, "\007LOBAL_PHASE"))
 		    goto ro_magicalize;
 		break;
 	    case '\014':	/* $^LAST_FH */
-		if (strEQ(name2, "AST_FH"))
+                if (memEQs(name, len, "\014AST_FH"))
 		    goto ro_magicalize;
 		break;
             case '\015':        /* $^MATCH */
-                if (strEQ(name2, "ATCH")) {
+                if (memEQs(name, len, "\015ATCH")) {
                     paren = RX_BUFF_IDX_CARET_FULLMATCH;
                     goto storeparen;
                 }
                 break;
 	    case '\017':	/* $^OPEN */
-		if (strEQ(name2, "PEN"))
+                if (memEQs(name, len, "\017PEN"))
 		    goto magicalize;
 		break;
 	    case '\020':        /* $^PREMATCH  $^POSTMATCH */
-                if (strEQ(name2, "REMATCH")) {
+                if (memEQs(name, len, "\020REMATCH")) {
                     paren = RX_BUFF_IDX_CARET_PREMATCH;
                     goto storeparen;
                 }
-	        if (strEQ(name2, "OSTMATCH")) {
+                if (memEQs(name, len, "\020OSTMATCH")) {
                     paren = RX_BUFF_IDX_CARET_POSTMATCH;
                     goto storeparen;
                 }
 		break;
 	    case '\024':	/* ${^TAINT} */
-		if (strEQ(name2, "AINT"))
+                if (memEQs(name, len, "\024AINT"))
 		    goto ro_magicalize;
 		break;
 	    case '\025':	/* ${^UNICODE}, ${^UTF8LOCALE} */
-		if (strEQ(name2, "NICODE"))
+                if (memEQs(name, len, "\025NICODE"))
 		    goto ro_magicalize;
-		if (strEQ(name2, "TF8LOCALE"))
+                if (memEQs(name, len, "\025TF8LOCALE"))
 		    goto ro_magicalize;
-		if (strEQ(name2, "TF8CACHE"))
+                if (memEQs(name, len, "\025TF8CACHE"))
 		    goto magicalize;
 		break;
 	    case '\027':	/* $^WARNING_BITS */
-		if (strEQ(name2, "ARNING_BITS"))
+                if (memEQs(name, len, "\027ARNING_BITS"))
 		    goto magicalize;
 #ifdef WIN32
-		else if (strEQ(name2, "IN32_SLOPPY_STAT"))
+                else if (memEQs(name, len, "\027IN32_SLOPPY_STAT"))
 		    goto magicalize;
 #endif
 		break;
@@ -2338,7 +2340,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
                 maybe_multimagic_gv(gv, name, sv_type);
 	    }
 	    else if (len == 3 && sv_type == SVt_PVAV
-	          && strnEQ(name, "ISA", 3)
+	          && strEQs(name, "ISA")
 	          && (!GvAV(gv) || !SvSMAGICAL(GvAV(gv))))
 		gv_magicalize_isa(gv);
 	}
