@@ -18931,7 +18931,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         Perl_sv_catpvf(aTHX_ sv, "-%s",PL_reg_name[o->flags]);
         DEBUG_TRIE_COMPILE_r({
           if (trie->jump)
-            sv_catpvs(aTHX_ sv, "(JUMP)");
+            sv_catpvs(sv, "(JUMP)");
           Perl_sv_catpvf(aTHX_ sv,
             "<S:%"UVuf"/%"IVdf" W:%"UVuf" L:%"UVuf"/%"UVuf" C:%"UVuf"/%"UVuf">",
             (UV)trie->startstate,
