@@ -431,8 +431,8 @@ mro_is_universal(...)
     he = hv_fetch_ent(PL_isarev, classname, 0, 0);
     isarev = he ? MUTABLE_HV(HeVAL(he)) : NULL;
 
-    if((classname_len == 9 && strEQ(classname_pv, "UNIVERSAL"))
-        || (isarev && hv_exists(isarev, "UNIVERSAL", 9)))
+    if((memEQs(classname_pv, classname_len, "UNIVERSAL"))
+        || (isarev && hv_existss(isarev, "UNIVERSAL")))
         XSRETURN_YES;
     else
         XSRETURN_NO;
@@ -566,7 +566,7 @@ mro__nextcan(...)
 
             subname++;
             subname_len = fq_subname_len - (subname - fq_subname);
-            if(subname_len == 8 && strEQ(subname, "__ANON__")) {
+            if(memEQs(subname, subname_len, "__ANON__")) {
                 cxix = __dopoptosub_at(ccstack, cxix - 1);
                 continue;
             }
