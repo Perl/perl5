@@ -4693,7 +4693,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV f
 
     PERL_ARGS_ASSERT_PV_UNI_DISPLAY;
 
-    sv_setpvs(dsv, "");
+    SvPVCLEAR(dsv);
     SvUTF8_off(dsv);
     for (s = (const char *)spv, e = s + len; s < e; s += UTF8SKIP(s)) {
 	 UV u;
