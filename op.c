@@ -8205,7 +8205,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    CvSTASH_set(cv, PL_curstash);
 	    *spot = cv;
 	}
-	sv_setpvs(MUTABLE_SV(cv), "");  /* prototype is "" */
+        SvPVCLEAR(MUTABLE_SV(cv));  /* prototype is "" */
 	CvXSUBANY(cv).any_ptr = const_sv;
 	CvXSUB(cv) = const_sv_xsub;
 	CvCONST_on(cv);
@@ -8657,7 +8657,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	if (cv) {
 	    assert(!CvROOT(cv) && !CvCONST(cv));
 	    cv_forget_slab(cv);
-	    sv_setpvs(MUTABLE_SV(cv), "");  /* prototype is "" */
+            SvPVCLEAR(MUTABLE_SV(cv));  /* prototype is "" */
 	    CvXSUBANY(cv).any_ptr = const_sv;
 	    CvXSUB(cv) = const_sv_xsub;
 	    CvCONST_on(cv);
@@ -10162,7 +10162,7 @@ Perl_ck_fun(pTHX_ OP *o)
 				if (want_dollar && *name != '$')
 				    sv_setpvs(namesv, "$");
 				else
-				    sv_setpvs(namesv, "");
+                                    SvPVCLEAR(namesv);
 				sv_catpvn(namesv, name, len);
                                 if ( name_utf8 ) SvUTF8_on(namesv);
 			    }
