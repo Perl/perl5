@@ -1249,11 +1249,7 @@ PP(pp_aassign)
 
     SV **relem;
     SV **lelem;
-
-    AV *ary;
-
     U8 gimme;
-    HV *hash;
     /* PL_delaymagic is restored by JUMPENV_POP on dieing, so we
      * only need to save locally, not on the save stack */
     U16 old_delaymagic = PL_delaymagic;
@@ -1316,8 +1312,6 @@ PP(pp_aassign)
     gimme = GIMME_V;
     relem = firstrelem;
     lelem = firstlelem;
-    ary = NULL;
-    hash = NULL;
 
     if (relem > lastrelem)
         goto no_relems;
@@ -1340,8 +1334,7 @@ PP(pp_aassign)
             SSize_t i;
             SSize_t tmps_base;
             SSize_t nelems = lastrelem - relem + 1;
-
-	    ary = MUTABLE_AV(lsv);
+            AV *ary = MUTABLE_AV(lsv);
 
             /* Assigning to an aggregate is tricky. First there is the
              * issue of commonality, e.g. @a = ($a[0]). Since the
@@ -1514,8 +1507,7 @@ PP(pp_aassign)
             SSize_t i;
             SSize_t tmps_base;
             SSize_t nelems = lastrelem - relem + 1;
-
-	    hash = MUTABLE_HV(lsv);
+            HV *hash = MUTABLE_HV(lsv);
 
             if (UNLIKELY(nelems & 1)) {
                 do_oddball(lastrelem, relem);
@@ -1746,24 +1738,23 @@ PP(pp_aassign)
 
 	switch (SvTYPE(lsv)) {
 	case SVt_PVAV:
-	    ary = MUTABLE_AV(lsv);
-            if (SvRMAGICAL(ary) || AvFILLp(ary) >= 0) {
-                av_clear(ary);
+            if (SvRMAGICAL(lsv) || AvFILLp((SV*)lsv) >= 0) {
+                av_clear((AV*)lsv);
                 if (UNLIKELY(PL_delaymagic & DM_ARRAY_ISA))
-                    SvSETMAGIC(MUTABLE_SV(ary));
+                    SvSETMAGIC(lsv);
             }
             break;
 
 	case SVt_PVHV:
-	    hash = MUTABLE_HV(lsv);
-            if (SvRMAGICAL(hash) || HvUSEDKEYS(hash))
-                hv_clear(hash);
+            if (SvRMAGICAL(lsv) || HvUSEDKEYS((HV*)lsv))
+                hv_clear((HV*)lsv);
             break;
 
 	default:
 	    if (!SvIMMORTAL(lsv)) {
                 sv_setsv(lsv, &PL_sv_undef);
                 SvSETMAGIC(lsv);
+                *relem++ = lsv;
             }
 	    break;
         } /* switch */
@@ -1863,20 +1854,11 @@ PP(pp_aassign)
     else if (gimme == G_SCALAR) {
 	dTARGET;
 	SP = firstrelem;
+        EXTEND(SP,1);
 	SETi(firstlelem - firstrelem);
     }
-    else {
-	if (ary || hash)
-	    /* note that in this case *firstlelem may have been overwritten
-	       by sv_undef in the odd hash case */
-	    SP = lastrelem;
-	else {
-	    SP = firstrelem + (lastlelem - firstlelem);
-            lelem = firstlelem + (relem - firstrelem);
-            while (relem <= SP)
-                *relem++ = (lelem <= lastlelem) ? *lelem++ : &PL_sv_undef;
-        }
-    }
+    else
+        SP = relem - 1;
 
     RETURN;
 }

@@ -482,4 +482,75 @@ SKIP: {
     is(join(' ', sort values %a), "v1 v2", "double hash non-empty A values");
 }
 
+#  list and lval context: filling of missing elements, returning correct
+#  lvalues.
+#  ( Note that these partially duplicate some tests in hashassign.t which
+#  I didn't spot at first - DAPM)
+
+{
+    my ($x, $y, $z);
+    my (@a, %h);
+
+    sub lval {
+        my $n    = shift;
+        my $desc = shift;
+        is($x, $n >= 1 ? "assign1" : undef, "lval: X pre $n $desc");
+        is($y, $n >= 2 ? "assign2" : undef, "lval: Y pre $n $desc");
+        is($z,                       undef, "lval: Z pre $n $desc");
+
+        my $i = 0;
+        for (@_) {
+            $_ = "lval$i";
+            $i++;
+        }
+        is($x, "lval0", "lval: a post $n $desc");
+        is($y, "lval1", "lval: b post $n $desc");
+        is($z, "lval2", "lval: c post $n $desc");
+    }
+    lval(0, "XYZ", (($x,$y,$z) = ()));
+    lval(1, "XYZ", (($x,$y,$z) = (qw(assign1))));
+    lval(2, "XYZ", (($x,$y,$z) = (qw(assign1 assign2))));
+
+    lval(0, "XYZA", (($x,$y,$z,@a) = ()));
+    lval(1, "XYZA", (($x,$y,$z,@a) = (qw(assign1))));
+    lval(2, "XYZA", (($x,$y,$z,@a) = (qw(assign1 assign2))));
+
+    lval(0, "XYAZ", (($x,$y,@a,$z) = ()));
+    lval(1, "XYAZ", (($x,$y,@a,$z) = (qw(assign1))));
+    lval(2, "XYAZ", (($x,$y,@a,$z) = (qw(assign1 assign2))));
+
+    lval(0, "XYZH", (($x,$y,$z,%h) = ()));
+    lval(1, "XYZH", (($x,$y,$z,%h) = (qw(assign1))));
+    lval(2, "XYZH", (($x,$y,$z,%h) = (qw(assign1 assign2))));
+
+    lval(0, "XYHZ", (($x,$y,%h,$z) = ()));
+    lval(1, "XYHZ", (($x,$y,%h,$z) = (qw(assign1))));
+    lval(2, "XYHZ", (($x,$y,%h,$z) = (qw(assign1 assign2))));
+
+    # odd number of hash elements
+
+    {
+        no warnings 'misc';
+        @a = ((%h) = qw(X));
+        is (join(":", map $_ // "u", @a), "X:u",      "lval odd singleton");
+        @a = (($x, $y, %h) = qw(X Y K));
+        is (join(":", map $_ // "u", @a), "X:Y:K:u",   "lval odd");
+        @a = (($x, $y, %h, $z) = qw(X Y K));
+        is (join(":", map $_ // "u", @a), "X:Y:K:u:u", "lval odd with z");
+    }
+
+    # undef on LHS uses RHS as lvalue instead
+    # Note this this just codifies existing behaviour - it may not be
+    # correct. See http://nntp.perl.org/group/perl.perl5.porters/240358.
+
+    {
+        ($x, $y, $z)  = (0, 10, 20);
+        $_++ for ((undef, $x) = ($y, $z));
+        is "$x:$y:$z", "21:11:20", "undef as lvalue";
+    }
+
+}
+
+
+
 done_testing();
