@@ -600,6 +600,7 @@ the strings?).
  Steve     5.25.3       2016-Jul-20
  BinGOs    5.25.4       2016-Aug-20
  Stevan    5.25.5       2016-Sep-20
+ Aaron     5.25.6       2016-Oct-20
 
 =head2 SELECTED RELEASE SIZES
 
