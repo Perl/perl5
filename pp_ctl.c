@@ -3692,6 +3692,10 @@ S_require_file(pTHX_ SV *const sv)
         DIE(aTHX_ "Missing or undefined argument to require");
 
     if (!IS_SAFE_PATHNAME(name, len, "require")) {
+        if (PL_op->op_type != OP_REQUIRE) {
+            CLEAR_ERRSV();
+            RETPUSHUNDEF;
+        }
         DIE(aTHX_ "Can't locate %s:   %s",
             pv_escape(newSVpvs_flags("",SVs_TEMP),name,len,len*2,
                       NULL, SvUTF8(sv)?PERL_PV_ESCAPE_UNI:0),

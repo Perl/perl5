@@ -1280,14 +1280,13 @@ EXTERN_C char *crypt(const char *, const char *);
 #define CLEAR_ERRSV() STMT_START {					\
     SV ** const svp = &GvSV(PL_errgv);					\
     if (!*svp) {							\
-	goto clresv_newemptypv;						\
+        *svp = newSVpvs("");                                            \
     } else if (SvREADONLY(*svp)) {					\
 	SvREFCNT_dec_NN(*svp);						\
-	clresv_newemptypv:						\
 	*svp = newSVpvs("");						\
     } else {								\
 	SV *const errsv = *svp;						\
-        SvPVCLEAR(errsv);                                                \
+        SvPVCLEAR(errsv);                                               \
 	SvPOK_only(errsv);						\
 	if (SvMAGICAL(errsv)) {						\
 	    mg_free(errsv);						\
