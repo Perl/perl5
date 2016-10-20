@@ -290,7 +290,6 @@ sub has_clock_xxx_syscall {
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#include <time.h>
 #include <$SYSCALL_H>
 int main(int argc, char** argv)
 {
@@ -310,7 +309,6 @@ sub has_clock_xxx {
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#include <time.h>
 int main(int argc, char** argv)
 {
     struct timespec ts;
