@@ -3347,7 +3347,7 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
     }
     else {
 	PL_hints = saveop->op_private & OPpEVAL_COPHH
-		     ? oldcurcop->cop_hints : saveop->op_targ;
+		     ? oldcurcop->cop_hints : (U32)saveop->op_targ;
 
         /* making 'use re eval' not be in scope when compiling the
          * qr/mabye_has_runtime_code_block/ ensures that we don't get
