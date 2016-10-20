@@ -1685,7 +1685,7 @@ inRP	|bool	|does_utf8_overflow|NN const U8 * const s|NN const U8 * e
 inRP	|bool	|is_utf8_overlong_given_start_byte_ok|NN const U8 * const s|const STRLEN len
 sMR	|char *	|unexpected_non_continuation_text			\
 		|NN const U8 * const s					\
-		|const STRLEN print_len					\
+		|STRLEN print_len					\
 		|const STRLEN non_cont_byte_pos				\
 		|const STRLEN expect_len
 sM	|char *	|_byte_dump_string|NN const U8 * s|const STRLEN len

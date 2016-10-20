@@ -5635,7 +5635,7 @@ STATIC SV*	S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 STATIC U8	S_to_lower_latin1(const U8 c, U8 *p, STRLEN *lenp)
 			__attribute__warn_unused_result__;
 
-STATIC char *	S_unexpected_non_continuation_text(pTHX_ const U8 * const s, const STRLEN print_len, const STRLEN non_cont_byte_pos, const STRLEN expect_len)
+STATIC char *	S_unexpected_non_continuation_text(pTHX_ const U8 * const s, STRLEN print_len, const STRLEN non_cont_byte_pos, const STRLEN expect_len)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_UNEXPECTED_NON_CONTINUATION_TEXT	\
 	assert(s)

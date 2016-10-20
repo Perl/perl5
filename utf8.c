@@ -735,7 +735,7 @@ PERL_STATIC_INLINE char *
 S_unexpected_non_continuation_text(pTHX_ const U8 * const s,
 
                                          /* How many bytes to print */
-                                         const STRLEN print_len,
+                                         STRLEN print_len,
 
                                          /* Which one is the non-continuation */
                                          const STRLEN non_cont_byte_pos,
@@ -750,12 +750,25 @@ S_unexpected_non_continuation_text(pTHX_ const U8 * const s,
                                ? "immediately"
                                : Perl_form(aTHX_ "%d bytes",
                                                  (int) non_cont_byte_pos);
+    unsigned int i;
 
     PERL_ARGS_ASSERT_UNEXPECTED_NON_CONTINUATION_TEXT;
 
     /* We don't need to pass this parameter, but since it has already been
      * calculated, it's likely faster to pass it; verify under DEBUGGING */
     assert(expect_len == UTF8SKIP(s));
+
+    /* It is possible that utf8n_to_uvchr() was called incorrectly, with a
+     * length that is larger than is actually available in the buffer.  If we
+     * print all the bytes based on that length, we will read past the buffer
+     * end.  Often, the strings are NUL terminated, so to lower the chances of
+     * this happening, print the malformed bytes only up through any NUL. */
+    for (i = 1; i < print_len; i++) {
+        if (*(s + i) == '\0') {
+            print_len = i + 1;  /* +1 gets the NUL printed */
+            break;
+        }
+    }
 
     return Perl_form(aTHX_ "%s: %s (unexpected non-continuation byte 0x%02x,"
                            " %s after start byte 0x%02x; need %d bytes, got %d)",
