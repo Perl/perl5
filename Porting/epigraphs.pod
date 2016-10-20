@@ -17,6 +17,32 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.25.6 - Alan Warner, "The Sopranos"
+
+L<Announced on 2016-10-10 by Aaron Crane|http://www.nntp.perl.org/group/perl.perl5.porters/2016/10/msg240406.html>
+
+  I'm up on all the pop trivia, says the guy with the stud in his tongue.
+      Are you?
+      Yes. Do you know who he lead singer of Echo and the Bunnymen is?
+      Let me guess, is he called Echo?
+      Good guess but no, anyway when they played Glastonbury it was so
+  muddy he had two roadies to hold up a binliner on each of his legs so
+  they wouldn't get covered in mud.
+      That's what being rich and famous is all about, having someone
+  else hold up your binliners on each leg when you're wandering across
+  a sea of shite.
+      Do you know what Sammy Davis Junior said being black and famous in
+  America meant?
+      No.
+      He said being black and famous in America meant he could be
+  refused entry to exclusive clubs and restaurants that other people
+  could only ever dream of going to. Do you know Michael Stipe likes to
+  send his remote control toy cars onto stage while his support band are
+  playing to freak them out?
+      Who's Michael Stipe?
+      You're not really a pop trivia person, are you, Kylah?
+      No, I'm not, Stephen.
+
 =head2 v5.25.5 - Philip K. Dick, VALIS
 
 L<Announced on 2016-09-20 by Stevan Little|http://www.nntp.perl.org/group/perl.perl5.porters/2016/09/msg239887.html>
