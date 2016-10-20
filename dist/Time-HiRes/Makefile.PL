@@ -290,6 +290,7 @@ sub has_clock_xxx_syscall {
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include <time.h>
 #include <$SYSCALL_H>
 int main(int argc, char** argv)
 {
@@ -309,6 +310,7 @@ sub has_clock_xxx {
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include <time.h>
 int main(int argc, char** argv)
 {
     struct timespec ts;
@@ -325,6 +327,7 @@ sub has_clock {
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include <time.h>
 int main(int argc, char** argv)
 {
     clock_t tictoc;
@@ -360,7 +363,7 @@ sub has_futimens {
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#include <sys/time.h>
+#include <sys/stat.h>
 int main(int argc, char** argv)
 {
     int ret;
@@ -377,7 +380,7 @@ sub has_utimensat{
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#include <sys/time.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 int main(int argc, char** argv)
 {
@@ -395,8 +398,7 @@ sub has_clockid_t{
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#include <sys/time.h>
-#include <fcntl.h>
+#include <time.h>
 int main(int argc, char** argv)
 {
     clockid_t id = CLOCK_REALTIME;
