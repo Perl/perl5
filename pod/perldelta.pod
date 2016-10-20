@@ -190,7 +190,11 @@ and New Warnings
 
 =item *
 
-XXX L<message|perldiag/"message">
+Using the empty pattern (which re-executes the last successfully-matched
+pattern) inside a code block in another regex, as in C</(?{ s!!new! })/>, has
+always previously yielded a segfault. It now produces an error: L<Use of the
+empty pattern inside of a regex code block is forbidden|perldiag/"Use of the
+empty pattern inside of a regex code block is forbidden">.
 
 =back
 
@@ -280,6 +284,14 @@ regex implementation have been restricted to running for a maximum of five
 minutes. On slow systems they could otherwise take several hours, without
 significantly improving our understanding of the correctness of the code
 under test.
+
+In addition, some of those test cases have been split into more files, to
+allow them to be run in parallel on suitable systems.
+
+=item *
+
+A new internal facility allows analysing the time taken by the individual
+tests in Perl's own test suite; see F<Porting/harness-timer-report.pl>.
 
 =back
 
@@ -384,11 +396,41 @@ that apply various restrictions to the UTF-8 recognized as valid.
 
 =item *
 
+A new API function C<sv_setvpv_bufsize()> allows simultaneously setting the
+length and allocated size of the buffer in an C<SV>, growing the buffer if
+necessary.
+
+=item *
+
+A new API macro C<SvPVCLEAR()> sets its C<SV> argument to an empty string,
+like Perl-space C<$x = ''>, but with several optimisations.
+
+=item *
+
 All parts of the internals now agree that the C<sassign> op is a C<BINOP>;
 previously it was listed as a C<BASEOP> in F<regen/opcodes>, which meant
 that several parts of the internals had to be special-cased to accommodate
 it. This oddity's original motivation was to handle code like C<$x ||= 1>;
 that is now handled in a simpler way.
+
+=item *
+
+Several new internal C macros have been added that take a string literal as
+arguments, alongside existing routines that take the equivalent value as two
+arguments, a character pointer and a length. The advantage of this is that
+the length of the string is calculated automatically, rather than having to
+be done manually. These routines are now used where appropriate across the
+entire codebase.
+
+=item *
+
+The code in F<gv.c> that determines whether a variable has a special meaning
+to Perl has been simplified.
+
+=item *
+
+The C<DEBUGGING>-mode output for regex compilation and execution has been
+enhanced.
 
 =back
 
@@ -417,6 +459,19 @@ target string that also used UTF-8 has been fixed. [perl #129350]
 Previously, a shebang line like C<#!perl -i u> could be erroneously
 interpreted as requesting the C<-u> option. This has been fixed. [perl
 #129336]
+
+=item *
+
+The regex engine was previously producing incorrect results in some rare
+situations when backtracking past a trie that matches only one thing; this
+showed up as capture buffers (C<$1>, C<$2>, etc) erroneously containing data
+from regex execution paths that weren't actually executed for the final
+match.  [perl #129897]
+
+=item *
+
+Certain regexes making use of the experimental C<regex_sets> feature could
+trigger an assertion failure. This has been fixed. [perl #129322]
 
 =back
 
