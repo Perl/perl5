@@ -129,7 +129,7 @@ if (defined $nm_style) {
     }
 }
 
-if ($^O eq 'linux' && $Config{archname} !~ /^x86/) {
+if ($^O eq 'linux' && $Config{archname} !~ /^(?:x|i6)86/) {
     # For example in ppc most (but not all!) code symbols are placed
     # in 'D' (data), not in ' T '.  We cannot work under such conditions.
     skip_all "linux but archname $Config{archname} not x86*";
