@@ -1,0 +1,413 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5256delta - what is new for perl v5.25.6
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.25.5 release and the 5.25.6
+release.
+
+If you are upgrading from an earlier release such as 5.25.4, first read
+L<perl5255delta>, which describes differences between 5.25.4 and 5.25.5.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+Converting a single-digit string to a number is now substantially faster.
+
+=item *
+
+The internal op implementing the C<split> builtin has been simplified and
+sped up. Firstly, it no longer requires a subsidiary internal C<pushre> op
+to do its work. Secondly, code of the form C<my @x = split(...)> is now
+optimised in the same way as C<@x = split(...)>, and is therefore a few
+percent faster.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Archive::Tar> has been upgraded from version 2.10 to 2.14.
+
+=item *
+
+L<attributes> has been upgraded from version 0.27 to 0.28.
+
+=item *
+
+L<B> has been upgraded from version 1.63 to 1.64.
+
+=item *
+
+L<B::Concise> has been upgraded from version 0.998 to 0.999.
+
+Its output is now more descriptive for C<op_private> flags.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.38 to 1.39.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.161 to 2.162.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.24 to 1.25.
+
+=item *
+
+L<HTTP::Tiny> has been upgraded from version 0.064 to 0.070.
+
+Internal 599-series errors now include the redirect history.
+
+=item *
+
+L<List::Util> has been upgraded from version 1.45_01 to 1.46.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20160920 to 5.20161020.
+
+=item *
+
+L<mro> has been upgraded from version 1.18 to 1.19.
+
+=item *
+
+L<Net::Ping> has been upgraded from version 2.44 to 2.51.
+
+IPv6 addresses and C<AF_INET6> sockets are now supported, along with several
+other enhancements.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.37 to 1.38.
+
+=item *
+
+L<overload> has been upgraded from version 1.26 to 1.27.
+
+Its compilation speed has been improved slightly.
+
+=item *
+
+L<parent> has been upgraded from version 0.234 to 0.236.
+
+=item *
+
+L<PerlIO::encoding> has been upgraded from version 0.24 to 0.25.
+
+=item *
+
+podlators has been upgraded from version 4.07 to 4.08.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.72 to 1.73.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.45_01 to 1.46.
+
+=item *
+
+L<Storable> has been upgraded from version 2.57 to 2.58.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302056 to 1.302059.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9739 to 1.9740_01.
+
+It now builds on systems with C++11 compilers (such as G++ 6 and Clang++
+3.9).
+
+=item *
+
+L<VMS::Stdio> has been upgraded from version 2.41 to 2.42.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+Using the empty pattern (which re-executes the last successfully-matched
+pattern) inside a code block in another regex, as in C</(?{ s!!new! })/>, has
+always previously yielded a segfault. It now produces an error: L<Use of the
+empty pattern inside of a regex code block is forbidden|perldiag/"Use of the
+empty pattern inside of a regex code block is forbidden">.
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+Details as to the exact problem have been added to the diagnostics that
+occur when malformed UTF-8 is encountered when trying to convert to a
+code point.
+
+=item *
+
+Executing C<undef $x> where C<$x> is tied or magical no longer incorrectly
+blames the variable for an uninitialized-value warning encountered by the
+tied/magical code.
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+Builds using C<USE_PAD_RESET> now work again; this configuration had
+bit-rotted.
+
+=back
+
+=head1 Testing
+
+=over 4
+
+=item *
+
+Some parts of the test suite that try to exhaustively test edge cases in the
+regex implementation have been restricted to running for a maximum of five
+minutes. On slow systems they could otherwise take several hours, without
+significantly improving our understanding of the correctness of the code
+under test.
+
+In addition, some of those test cases have been split into more files, to
+allow them to be run in parallel on suitable systems.
+
+=item *
+
+A new internal facility allows analysing the time taken by the individual
+tests in Perl's own test suite; see F<Porting/harness-timer-report.pl>.
+
+=back
+
+=head1 Platform Support
+
+=head2 New Platforms
+
+=over 4
+
+=item NetBSD/VAX
+
+Perl now compiles under NetBSD on VAX machines.  However, it's not
+possible for that platform to implement floating-point infinities and
+NaNs compatibly with most modern systems, which implement the IEEE-754
+floating point standard.  The hexadecimal floating point (C<0x...p[+-]n>
+literals, C<printf %a>) is not implemented, either.
+The C<make test> passes 98% of tests.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The C<PADOFFSET> type has changed from being unsigned to signed, and
+several pad-related variables such as C<PL_padix> have changed from being
+of type C<I32> to type C<PADOFFSET>.
+
+=item *
+
+The function C<L<perlapi/utf8n_to_uvchr>> has been changed to not
+abandon searching for other malformations when the first one is
+encountered.  A call to it thus can generate multiple diagnostics,
+instead of just one.
+
+=item *
+
+A new function, C<L<perlapi/utf8n_to_uvchr_error>>, has been added for
+use by modules that need to know the details of UTF-8 malformations
+beyond pass/fail.  Previously, the only ways to know why a sequence was
+ill-formed was to capture and parse the generated diagnostics, or to do
+your own analysis.
+
+=item *
+
+Several new functions for handling Unicode have been added to the API:
+C<L<perlapi/is_strict_utf8_string>>,
+C<L<perlapi/is_c9strict_utf8_string>>,
+C<L<perlapi/is_utf8_string_flags>>,
+C<L<perlapi/is_strict_utf8_string_loc>>,
+C<L<perlapi/is_strict_utf8_string_loclen>>,
+C<L<perlapi/is_c9strict_utf8_string_loc>>,
+C<L<perlapi/is_c9strict_utf8_string_loclen>>,
+C<L<perlapi/is_utf8_string_loc_flags>>,
+C<L<perlapi/is_utf8_string_loclen_flags>>,
+C<L<perlapi/is_utf8_fixed_width_buf_flags>>,
+C<L<perlapi/is_utf8_fixed_width_buf_loc_flags>>,
+C<L<perlapi/is_utf8_fixed_width_buf_loclen_flags>>.
+
+These functions are all extensions of the C<is_utf8_string_*()> functions,
+that apply various restrictions to the UTF-8 recognized as valid.
+
+=item *
+
+A new API function C<sv_setvpv_bufsize()> allows simultaneously setting the
+length and allocated size of the buffer in an C<SV>, growing the buffer if
+necessary.
+
+=item *
+
+A new API macro C<SvPVCLEAR()> sets its C<SV> argument to an empty string,
+like Perl-space C<$x = ''>, but with several optimisations.
+
+=item *
+
+All parts of the internals now agree that the C<sassign> op is a C<BINOP>;
+previously it was listed as a C<BASEOP> in F<regen/opcodes>, which meant
+that several parts of the internals had to be special-cased to accommodate
+it. This oddity's original motivation was to handle code like C<$x ||= 1>;
+that is now handled in a simpler way.
+
+=item *
+
+Several new internal C macros have been added that take a string literal as
+arguments, alongside existing routines that take the equivalent value as two
+arguments, a character pointer and a length. The advantage of this is that
+the length of the string is calculated automatically, rather than having to
+be done manually. These routines are now used where appropriate across the
+entire codebase.
+
+=item *
+
+The code in F<gv.c> that determines whether a variable has a special meaning
+to Perl has been simplified.
+
+=item *
+
+The C<DEBUGGING>-mode output for regex compilation and execution has been
+enhanced.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+A sub containing a "forward" declaration with the same name (e.g.,
+C<sub c { sub c; }>) could sometimes crash or loop infinitely.  [perl
+#129090]
+
+=item *
+
+A crash in executing a regex with a floating UTF-8 substring against a
+target string that also used UTF-8 has been fixed. [perl #129350]
+
+=item *
+
+Previously, a shebang line like C<#!perl -i u> could be erroneously
+interpreted as requesting the C<-u> option. This has been fixed. [perl
+#129336]
+
+=item *
+
+The regex engine was previously producing incorrect results in some rare
+situations when backtracking past a trie that matches only one thing; this
+showed up as capture buffers (C<$1>, C<$2>, etc) erroneously containing data
+from regex execution paths that weren't actually executed for the final
+match.  [perl #129897]
+
+=item *
+
+Certain regexes making use of the experimental C<regex_sets> feature could
+trigger an assertion failure. This has been fixed. [perl #129322]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.25.6 represents approximately 4 weeks of development since Perl 5.25.5
+and contains approximately 16,000 lines of changes across 300 files from 23
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 10,000 lines of changes to 190 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.25.6:
+
+Aaron Crane, Andy Lester, Chris 'BinGOs' Williams, Dagfinn Ilmari Mannsåker,
+Dan Collins, David Mitchell, François Perrad, Hugo van der Sanden, James E
+Keenan, James Raspass, Jarkko Hietaniemi, Karl Williamson, Lukas Mai, Nicolas
+R., Reini Urban, Sawyer X, Sergey Aleynikov, Stevan Little, Steve Hay, Steven
+Humphrey, Thomas Sibley, Tony Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
