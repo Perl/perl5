@@ -478,6 +478,6 @@ fresh_perl_like(
     qr/^Unterminated attribute parameter in attribute list at - line 1\.$/,
     { stderr => 1 },
     'RT #129086 attr(00000'
-),
+);
 
 done_testing();
