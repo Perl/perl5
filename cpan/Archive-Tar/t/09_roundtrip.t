@@ -9,6 +9,31 @@ use File::Temp qw( tempfile );
 
 use Archive::Tar;
 
+BEGIN {
+  eval { require IPC::Cmd; };
+  unless ( $@ ) {
+    diag('Using IPC::Cmd');
+    *can_run = \&IPC::Cmd::can_run;
+  }
+  else {
+    diag('Using fallback');
+    *can_run = sub {
+        require ExtUtils::MakeMaker;
+        my $cmd = shift;
+        my $_cmd = $cmd;
+        return $_cmd if (-x $_cmd or $_cmd = MM->maybe_command($_cmd));
+        require Config;
+        for my $dir ((split /$Config::Config{path_sep}/, $ENV{PATH}), '.') {
+          next if $dir eq '';
+          require File::Spec;
+          my $abs = File::Spec->catfile($dir, $cmd);
+          return $abs if (-x $abs or $abs = MM->maybe_command($abs));
+        }
+        return;
+    };
+  }
+}
+
 # Identify tarballs available for testing
 # Some contain only files
 # Others contain both files and directories
@@ -81,7 +106,10 @@ for my $archive_name (@file_only_archives) {
 # what we'll get when round-tripping on an archive which contains one or more
 # entries for directories.
 
-for my $archive_name (@file_and_directory_archives) {
+SKIP: {
+  skip 'No tar command found', scalar @file_and_directory_archives unless can_run('tar');
+
+  for my $archive_name (@file_and_directory_archives) {
     my @contents;
     if ($archive_name =~ m/\.tar$/) {
         @contents = qx{tar tvf $archive_name};
@@ -131,4 +159,5 @@ for my $archive_name (@file_and_directory_archives) {
         [ @oldfiles ],
         "$archive_name roundtrip on file names"
     );
+  }
 }
