@@ -351,7 +351,8 @@ int main(int argc, char** argv)
     struct timespec ts2;
     ts1.tv_sec  = 0;
     ts1.tv_nsec = 750000000;;
-    ret = clock_nanosleep(CLOCK_MONOTONIC, 0, &ts1, &ts2);
+    /* All implementations are supposed to support CLOCK_REALTIME. */
+    ret = clock_nanosleep(CLOCK_REALTIME, 0, &ts1, &ts2);
     ret == 0 ? exit(0) : exit(errno ? errno : -1);
 }
 EOM
