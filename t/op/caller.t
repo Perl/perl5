@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
-    plan( tests => 97 ); # some tests are run in a BEGIN block
+    plan( tests => 100 ); # some tests are run in a BEGIN block
 }
 
 my @c;
@@ -352,3 +352,17 @@ EOP
 $::testing_caller = 1;
 
 do './op/caller.pl' or die $@;
+
+{
+    package RT129239;
+    BEGIN {
+        my ($pkg, $file, $line) = caller;
+        ::is $file, 'virtually/op/caller.t', "BEGIN block sees correct caller filename";
+        ::is $line, 12345,                   "BEGIN block sees correct caller line";
+        TODO: {
+            local $::TODO = "BEGIN blocks have wrong caller package [perl #129239]";
+            ::is $pkg, 'RT129239',               "BEGIN block sees correct caller package";
+        }
+#line 12345 "virtually/op/caller.t"
+    }
+}
