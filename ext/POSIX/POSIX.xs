@@ -837,7 +837,11 @@ static NV my_tgamma(NV x)
 #endif
 #ifdef NV_INF
   if (x == 0.0 || x == NV_INF)
+#ifdef DOUBLE_IS_IEEE_FORMAT
     return x == -0.0 ? -NV_INF : NV_INF;
+#else
+    return NV_INF;
+#endif
 #endif
 
   /* The function domain is split into three intervals:
