@@ -18802,7 +18802,7 @@ $cat >try.c <<EOCP
 int main(int argc, char **argv)
 {
     NV x = 0.0;
-    NV y = -0.0;
+    NV y = -1.0;
     if ((signbit(x) == 0) && (signbit(y) != 0))
 	return 0;
     else
