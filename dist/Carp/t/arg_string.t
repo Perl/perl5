@@ -22,7 +22,7 @@ like lm(3), qr/main::lm\(3\)/;
 like lm(substr("3\x{2603}", 0, 1)), qr/main::lm\(3\)/;
 like lm(-3), qr/main::lm\(-3\)/;
 like lm(-3.5), qr/main::lm\(-3\.5\)/;
-like lm(-3.5e100), qr/main::lm\(-3\.5[eE]\+?100\)/;
+like lm(-3.5e30), qr/main::lm\(-3\.5[eE]\+?30\)/;
 like lm(""), qr/main::lm\(""\)/;
 like lm("foo"), qr/main::lm\("foo"\)/;
 like lm("a\$b\@c\\d\"e"), qr/main::lm\("a\\\$b\\\@c\\\\d\\\"e"\)/;
