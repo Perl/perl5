@@ -2660,6 +2660,7 @@ getpayload(nv)
 	RETVAL = S_getpayload(nv);
 #else
         PERL_UNUSED_VAR(nv);
+        RETVAL = 0.0;
 	not_here("getpayload");
 #endif
     OUTPUT:
@@ -2704,6 +2705,7 @@ issignaling(nv)
 	RETVAL = Perl_isnan(nv) && NV_NAN_IS_SIGNALING(&nv);
 #else
         PERL_UNUSED_VAR(nv);
+        RETVAL = 0.0;
 	not_here("issignaling");
 #endif
     OUTPUT:
@@ -2934,6 +2936,7 @@ nan(payload = 0)
 #ifdef NV_NAN
 	    RETVAL = NV_NAN;
 #else            
+            RETVAL = 0.0;
             not_here("nan");
 #endif
           } else {
