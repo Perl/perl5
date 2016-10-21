@@ -2027,9 +2027,9 @@ foreach my $test (@tests) {
                                     # to the exact same code point as the
                                     # original.
                                     $this_bytes = "\xfe"
-                                               . ("\x80"
-                                                   x ( 6 - length($this_bytes)))
-                                               . $this_bytes;
+                                             . (I8_to_native(chr $first_continuation)
+                                                  x ( 6 - length($this_bytes)))
+                                             . $this_bytes;
                                     $this_length = length($this_bytes);
                                     $this_expected_len = 7;
                                     push @expected_errors, $UTF8_GOT_LONG;
