@@ -120,14 +120,20 @@ SKIP: {
     near(log2(8), 3, "log2", 1e-9);
     is(signbit(2), 0, "signbit 2"); # zero
     ok(signbit(-2), "signbit -2"); # non-zero
+    is(signbit(0), 0, "signbit 0"); # zero
+    is(signbit(0.5), 0, "signbit 0.5"); # zero
+    ok(signbit(-0.5), "signbit -0.5"); # non-zero
     is(round(2.25), 2, "round 2.25");
     is(round(-2.25), -2, "round -2.25");
     is(round(2.5), 3, "round 2.5");
     is(round(-2.5), -3, "round -2.5");
     is(round(2.75), 3, "round 2.75");
     is(round(-2.75), -3, "round 2.75");
-    is(lround(-2.75), -3, "lround -0.25");
-    is(signbit(lround(-0.25)), 0, "lround -0.25 -> +0"); # unlike round()
+    is(lround(-2.75), -3, "lround -2.75");
+    is(lround(-0.25), 0, "lround -0.25");
+    is(lround(-0.50), -1, "lround -0.50");
+    is(signbit(lround(-0.25)), 0, "signbit lround -0.25 zero");
+    ok(signbit(lround(-0.50)), "signbit lround -0.50 non-zero"); # non-zero
     is(trunc(2.25), 2, "trunc 2.25");
     is(trunc(-2.25), -2, "trunc -2.25");
     is(trunc(2.5), 2, "trunc 2.5");
