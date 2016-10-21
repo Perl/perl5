@@ -6,6 +6,8 @@ BEGIN {
     set_up_inc('../lib');
 }
 
+plan(tests => 75);
+
 my %seen;
 
 package Implement;
@@ -135,9 +137,8 @@ sub FETCHSIZE { -1 }
 
 package main;
 
-plan(tests => 73);
-
 {
+    $seen{'DESTROY'} = 0;
     my @ary;
 
     {
@@ -164,6 +165,7 @@ plan(tests => 73);
         @thing = @ary;
         is(join(':',@thing), '1:2:3');
     }
+    is($seen{'DESTROY'}, 1, "thing freed");
 
     is(pop(@ary), 3);
     is($seen{'POP'}, 1);
@@ -228,6 +230,7 @@ plan(tests => 73);
 
     untie @ary;
 }
+is($seen{'DESTROY'}, 2, "ary freed");
 
 # 20020401 mjd-perl-patch+@plover.com
 # Thanks to Dave Mitchell for the small test case and the fix
@@ -249,6 +252,8 @@ plan(tests => 73);
 
 # 20020220 mjd-perl-patch+@plover.com
 {
+    $seen{'DESTROY'} = 0;
+
     my @n;
     tie @n => 'NegIndex', ('A' .. 'E');
 
@@ -279,6 +284,7 @@ plan(tests => 73);
         is(exists($n[$_]), '');
     }
 }
+is($seen{'DESTROY'}, 1, "n freed");
 
 {
     tie my @dummy, "NegFetchsize";
@@ -286,8 +292,6 @@ plan(tests => 73);
     like($@, qr/^FETCHSIZE returned a negative value/,
 	 " - croak on negative FETCHSIZE");
 }
-
-is($seen{'DESTROY'}, 3);
 
 {
     # check that a tied element assigned to an array doesn't remain tied
