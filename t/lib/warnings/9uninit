@@ -668,7 +668,18 @@ Use of uninitialized value in sort at - line 14.
 Use of uninitialized value in sort at - line 21.
 Use of uninitialized value in sort at - line 22.
 ########
-my $nan = sin 9**9**9;
+use Config;
+my $non_ieee_fp = ($Config{doublekind} == 9 ||
+                   $Config{doublekind} == 10 ||
+                   $Config{doublekind} == 11);
+if ($non_ieee_fp) {
+    print <<EOM ;
+SKIPPED
+# No nan support
+EOM
+    exit ;
+}
+my $nan = eval 'sin 9**9**9';
 if ($nan == $nan) {
     print <<EOM ;
 SKIPPED
@@ -681,8 +692,8 @@ use warnings 'uninitialized';
 @sort = sort { ($a)[0] <=> $b } 1, $nan;
 @sort = sort {  $a     <=> $b } 1, $nan;
 EXPECT
-Use of uninitialized value in sort at - line 11.
-Use of uninitialized value in sort at - line 12.
+Use of uninitialized value in sort at - line 22.
+Use of uninitialized value in sort at - line 23.
 ########
 use warnings 'uninitialized';
 my ($m1, $m2, $v);
