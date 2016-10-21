@@ -55,13 +55,15 @@ between(0.76, tanh(1), 0.77, 'tanh(1)');
 between(-0.77, tanh(-1), -0.76, 'tanh(-1)');
 cmp_ok(tanh(1), '==', -tanh(-1), 'tanh(1) == -tanh(-1)');
 
+my $non_ieee_fp = ($Config{doublekind} == 9 ||
+                   $Config{doublekind} == 10 ||
+                   $Config{doublekind} == 11);
+
 SKIP: {
     skip "no fpclassify", 4 unless $Config{d_fpclassify};
     is(fpclassify(1), FP_NORMAL, "fpclassify 1");
     is(fpclassify(0), FP_ZERO, "fpclassify 0");
-    skip("no inf/nan", 2) if ($Config{doublekind} == 9 ||
-                              $Config{doublekind} == 10 ||
-                              $Config{doublekind} == 11);
+    skip("no inf/nan", 2) if $non_ieee_fp;
     is(fpclassify(INFINITY), FP_INFINITE, "fpclassify INFINITY");
     is(fpclassify(NAN), FP_NAN, "fpclassify NAN");
 }
@@ -102,9 +104,7 @@ SKIP: {
     ok(!isinf(42), "isinf 42");
     ok(!isnan(42), "isnan Inf");
   SKIP: {
-      skip("no inf/nan", 9) if ($Config{doublekind} == 9 ||
-                                $Config{doublekind} == 10 ||
-                                $Config{doublekind} == 11);
+      skip("no inf/nan", 9) if $non_ieee_fp;
       ok(!isfinite(Inf), "isfinite Inf");
       ok(!isfinite(NaN), "isfinite NaN");
       ok(isinf(INFINITY), "isinf INFINITY");
@@ -147,9 +147,7 @@ SKIP: {
     ok(islessequal(1, 1), "islessequal 1 1");
 
   SKIP: {
-      skip("no inf/nan", 2) if ($Config{doublekind} == 9 ||
-                                $Config{doublekind} == 10 ||
-                                $Config{doublekind} == 11);
+      skip("no inf/nan", 2) if $non_ieee_fp;
       ok(!isless(1, NaN), "isless 1 NaN");
       ok(isunordered(1, NaN), "isunordered 1 NaN");
     }
@@ -171,9 +169,8 @@ SKIP: {
     near(lgamma(9), 10.6046029027452, "lgamma 9", 1.5e-7);
 
   SKIP: {
-      skip("no inf/nan", 19) if ($Config{doublekind} == 9 ||
-                                $Config{doublekind} == 10 ||
-                                $Config{doublekind} == 11);
+      skip("no inf/nan", 19) if $non_ieee_fp;
+
       # These don't work on old mips/hppa platforms
       # because nan with payload zero == Inf (or == -Inf).
       # ok(isnan(setpayload(0)), "setpayload zero");
