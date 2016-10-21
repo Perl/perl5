@@ -103,6 +103,14 @@ my @groks =
    [ "nanx", PERL_SCAN_TRAILING, undef, IS_NUMBER_NAN | IS_NUMBER_NOT_INT | IS_NUMBER_TRAILING ],
   );
 
+my $non_ieee_fp = ($Config{doublekind} == 9 ||
+                   $Config{doublekind} == 10 ||
+                   $Config{doublekind} == 11);
+
+if ($non_ieee_fp) {
+    @groks = grep { $_->[0] !~ /^(?:inf|nan)/i } @groks;
+}
+
 for my $grok (@groks) {
   my ($out_flags, $out_uv) = grok_number_flags($grok->[0], $grok->[1]);
   is($out_uv,    $grok->[2], "'$grok->[0]' flags $grok->[1] - check number");
