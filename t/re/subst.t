@@ -1120,7 +1120,9 @@ SKIP: {
                    '[perl #129038 ] s/\xff//l no longer crashes');
 }
 
-{
+ SKIP: {
+    skip("no Tie::Hash::NamedCapture under miniperl", 3) if is_miniperl;
+
     # RT #23624 scoping of @+/@- when used with tie()
     #! /usr/bin/perl -w
 
@@ -1130,6 +1132,7 @@ SKIP: {
 
     package main;
 
+    eval <<'__EOF__';
     tie my %pre, 'Tie::Prematch';
     my $foo = 'foobar';
     $foo =~ s/.ob/$pre{ $foo }/;
@@ -1146,4 +1149,5 @@ SKIP: {
 
     undef *Tie::Prematch::TIEHASH;
     undef *Tie::Prematch::FETCH;
+__EOF__
 }
