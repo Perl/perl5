@@ -34,7 +34,9 @@ IO-Compress cpan/IO-Compress/lib/IO/Uncompress/Inflate.pm c75aa1ec1f2a6138ef9ae6
 IO-Compress cpan/IO-Compress/lib/IO/Uncompress/RawInflate.pm 8f30a77bcda7123300ef5a8d02c2160ebb72f013
 IO-Compress cpan/IO-Compress/lib/IO/Uncompress/Unzip.pm 321a55011a1f11fe73b005e33942eb27fed6d046
 JSON::PP cpan/JSON-PP/bin/json_pp a7b8de6c201ef177ee82624ee4ca6a47cc1a3b4f
-JSON::PP cpan/JSON-PP/lib/JSON/PP.pm c8762a306740d0b32c099faf7118f2c1a391d9db
+JSON::PP cpan/JSON-PP/lib/JSON/PP.pm 86f697dae482106270fdd659b18c95a54af764ba
+JSON::PP cpan/JSON-PP/t/011_pc_expo.t e4c896d5f06ca380ddb6b4d6cd5714ea3003ada6
+JSON::PP cpan/JSON-PP/t/018_json_checker.t 6c3615e1a55f76b1635c62d3d36c5686a3ae8d30
 Locale::Maketext::Simple cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm 57ed38905791a17c150210cd6f42ead22a7707b6
 Memoize cpan/Memoize/Memoize.pm 902092ff91cdec9c7b4bd06202eb179e1ce26ca2
 Net::Ping dist/Net-Ping/t/001_new.t 521264cd85cfa06ecaa29ae28cdd7728d58da6f1
