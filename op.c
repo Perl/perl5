@@ -4371,7 +4371,7 @@ S_op_integerize(pTHX_ OP *o)
 }
 
 static OP *
-S_fold_constants(pTHX_ OP *o)
+S_fold_constants(pTHX_ OP *const o)
 {
     dVAR;
     OP * VOL curop;
