@@ -564,9 +564,13 @@ is($x->bsstr(), '105e+13',	# not 1.05e+15
 $z = 1e+129;			# definitely a float (may fail on UTS)
 # don't compare to $z, since some Perl versions stringify $z into something
 # like '1.e+129' or something equally ugly
+SKIP:{
+my $vax_float = (pack("d",1) =~ /^[\x80\x10]\x40/);
+skip("vax float range smaller", 1) if $vax_float;
 $x = $CLASS->new($z);
 is($x->bsstr(), '1e+129',
    qq|\$x = $CLASS->new($z); \$x->bsstr() = "1e+129"|);
+}
 
 ###############################################################################
 # test for whitespace including newlines to be handled correctly
