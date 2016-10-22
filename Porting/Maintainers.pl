@@ -700,8 +700,8 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'MAKAMAKA/JSON-PP-2.27400.tar.gz',
         'FILES'        => q[cpan/JSON-PP],
         'CUSTOMIZED'   => [
-            # CVE-2016-1238
-            qw( bin/json_pp lib/JSON/PP.pm ),
+            'bin/json_pp',    # CVE-2016-1238
+            'lib/JSON/PP.pm', # CVE-2016-1238
         ],
     },
 
