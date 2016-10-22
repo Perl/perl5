@@ -701,7 +701,9 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/JSON-PP],
         'CUSTOMIZED'   => [
             'bin/json_pp',    # CVE-2016-1238
-            'lib/JSON/PP.pm', # CVE-2016-1238
+            'lib/JSON/PP.pm', # CVE-2016-1238, CPAN RT 118469
+            't/011_pc_expo.t',      # CPAN RT 118469
+            't/018_json_checker.t', # CPAN RT 118469
         ],
     },
 
