@@ -937,6 +937,7 @@ d_wcstombs=''
 d_wcsxfrm=''
 d_wctomb=''
 d_writev=''
+default_inc_excludes_dot=''
 dlext=''
 bin_ELF=''
 cccdlflags=''
@@ -20625,6 +20626,28 @@ EOCP
 	;;
 esac
 
+: Include . in @INC
+$cat <<EOM
+
+Historically Perl has provided a final fallback of the current working
+directory '.' when searching for a library. This, however, can lead to
+problems when a Perl program which loads optional modules is called from
+a shared directory. This can lead to executing unexpected code.
+
+EOM
+
+case "$default_inc_excludes_dot" in
+    $define|true|[yY]*) dflt="n" ;;
+    *)                  dflt='y' ;;
+esac
+
+rp='Provide '.' in @INC by default? '
+. ./myread
+case "$ans" in
+    [nN]*|define) default_inc_excludes_dot="$define" ;;
+    *)            default_inc_excludes_dot="$undef"  ;;
+esac
+
 : Check what kind of inf/nan your system has
 $echo "Checking the kind of infinities and nans you have..." >&4
 $echo "(The following tests may crash.  That's okay.)" >&4
@@ -24913,6 +24936,7 @@ db_prefixtype='$db_prefixtype'
 db_version_major='$db_version_major'
 db_version_minor='$db_version_minor'
 db_version_patch='$db_version_patch'
+default_inc_excludes_dot='$default_inc_excludes_dot'
 direntrytype='$direntrytype'
 dlext='$dlext'
 dlsrc='$dlsrc'
