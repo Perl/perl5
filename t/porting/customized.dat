@@ -2,6 +2,7 @@ CPAN cpan/CPAN/lib/App/Cpan.pm 3cef68c2a44a4996b432bc25622e3a544a188aa5
 CPAN cpan/CPAN/lib/CPAN.pm 4616a44963045f7bd07bb7f8e5f99bbd789af4e5
 CPAN cpan/CPAN/scripts/cpan 22610ed0301d48a269d1739afd2f7f84359d956f
 Digest cpan/Digest/Digest.pm 43f7f544cb11842b2f55c73e28930da50774e081
+Encode cpan/Encode/Encode.xs dba310bf3d362b1ade421b1a741875511d84809a
 ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t a0369c919e216fb02767a637666bb4577ad79b02
 File::Path cpan/File-Path/lib/File/Path.pm fd8ce4420a0c113d3f47dd3223859743655c1da8
 File::Path cpan/File-Path/t/Path_win32.t 94b9276557ce7f80b91f6fd9bfa7a0cd9bf9683e
@@ -36,6 +37,8 @@ JSON::PP cpan/JSON-PP/bin/json_pp a7b8de6c201ef177ee82624ee4ca6a47cc1a3b4f
 JSON::PP cpan/JSON-PP/lib/JSON/PP.pm c8762a306740d0b32c099faf7118f2c1a391d9db
 Locale::Maketext::Simple cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm 57ed38905791a17c150210cd6f42ead22a7707b6
 Memoize cpan/Memoize/Memoize.pm 902092ff91cdec9c7b4bd06202eb179e1ce26ca2
+Net::Ping dist/Net-Ping/t/001_new.t 521264cd85cfa06ecaa29ae28cdd7728d58da6f1
+Net::Ping dist/Net-Ping/t/010_pingecho.t 2e7340ee0e9f6119b889016fc8b89e6bcd4a8fe2
 Pod::Checker cpan/Pod-Checker/t/pod/contains_bad_pod.xr 73538fd80dfe6e19ad561fe034009b44460208f6
 Pod::Checker cpan/Pod-Checker/t/pod/selfcheck.t 8ce3cfd38e4b9bcf5bc7fe7f2a14195e49aed7d8
 Pod::Checker cpan/Pod-Checker/t/pod/testcmp.pl a0cd5c8eca775c7753f4464eee96fa916e3d8a16
@@ -99,4 +102,3 @@ bignum cpan/bignum/lib/bigrat.pm b8fcffd8e60bfa9f32ccb9ab8c0fa5726d6392f8
 bignum cpan/bignum/lib/Math/BigFloat/Trace.pm 1ec133b0c03687fd621cc35946c465c66e38127a
 bignum cpan/bignum/lib/Math/BigInt/Trace.pm 3e1cc7726c55f9d5f4db6e5ec41c5fd266fcb289
 version cpan/version/lib/version.pm a032a751524bdd07a93c945d2a1703abe7ad8ef0
-Encode cpan/Encode/Encode.xs dba310bf3d362b1ade421b1a741875511d84809a

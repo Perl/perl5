@@ -1,6 +1,13 @@
 use warnings;
 use strict;
 
+BEGIN {
+  unless (my $port = getservbyname('echo', 'tcp')) {
+    print "1..0 \# Skip: no echo port\n";
+    exit;
+  }
+}
+
 use Test::More qw(no_plan);
 BEGIN {use_ok('Net::Ping')};
 
