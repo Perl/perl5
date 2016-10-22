@@ -38,10 +38,19 @@ else {
 }
 
 
+my $vax_float = (pack("d",1) =~ /^[\x80\x10]\x40/);
 
-$js  = q|[1.01e+67]|; # 30 -> 67 ... patched by H.Merijn Brand
-$obj = $pc->decode($js);
-is($obj->[0], 1.01e+67, 'digit 1.01e+67');
-$js = $pc->encode($obj);
-like($js,qr/\[1.01[Ee]\+0?67\]/, 'digit 1.01e+67');
-
+if ($vax_float) {
+    # VAX has smaller float range.
+    $js  = q|[1.01e+37]|;
+    $obj = $pc->decode($js);
+    is($obj->[0], eval '1.01e+37', 'digit 1.01e+37');
+    $js = $pc->encode($obj);
+    like($js,qr/\[1.01[Ee]\+0?37\]/, 'digit 1.01e+37');
+} else {
+    $js  = q|[1.01e+67]|; # 30 -> 67 ... patched by H.Merijn Brand
+    $obj = $pc->decode($js);
+    is($obj->[0], eval '1.01e+67', 'digit 1.01e+67');
+    $js = $pc->encode($obj);
+    like($js,qr/\[1.01[Ee]\+0?67\]/, 'digit 1.01e+67');
+}
