@@ -16,6 +16,8 @@ use JSON::PP;
 
 my $json = JSON::PP->new->utf8->max_depth(32)->canonical;
 
+my $vax_float = (pack("d",1) =~ /^[\x80\x10]\x40/);
+
 binmode DATA;
 my $num = 1;
 for (;;) {
@@ -118,7 +120,7 @@ break"]
         "real": -9876.543210,
         "e": 0.123456789e-12,
         "E": 1.234567890E+34,
-        "":  23456789012E66,
+        "":  23456789012E20,
         "zero": 0,
         "one": 1,
         "space": " ",
