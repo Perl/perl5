@@ -280,7 +280,7 @@ YYY: print "OK\n";
 EOT
 close $f;
 
-$r = runperl(prog => 'use Op_goto01; print qq[DONE\n]');
+$r = runperl(prog => 'BEGIN { unshift @INC, q[.] } use Op_goto01; print qq[DONE\n]');
 is($r, "OK\nDONE\n", "goto within use-d file"); 
 unlink_all "Op_goto01.pm";
 

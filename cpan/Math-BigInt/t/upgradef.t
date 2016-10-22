@@ -67,4 +67,4 @@ is($z, 321,
    . q| $z = $x->badd($y); $z|);
 
 # not yet:
-#require 't/upgrade.inc';	# all tests here for sharing
+#require './t/upgrade.inc';	# all tests here for sharing

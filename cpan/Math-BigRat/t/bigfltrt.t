@@ -16,4 +16,4 @@ $CALC  = "Math::BigInt::Calc";
 pass();
 
 # fails still too many tests
-#require 't/bigfltpm.inc';		# all tests here for sharing
+#require './t/bigfltpm.inc';		# all tests here for sharing

@@ -22,7 +22,7 @@ use IO::Select;
 use Config;
 use Time::HiRes qw( gettimeofday tv_interval );
 
-require 'devel/devtools.pl';
+require './devel/devtools.pl';
 
 our %opt = (
   debug   => 0,

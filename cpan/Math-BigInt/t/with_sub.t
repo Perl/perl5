@@ -19,4 +19,4 @@ $CALC  = "Math::BigInt::Calc";          # backend
 is(Math::BigFloat->config()->{with}, 'Math::BigInt::Calc',
    'Math::BigFloat->config()->{with}');
 
-require 't/bigfltpm.inc';	# all tests here for sharing
+require './t/bigfltpm.inc';	# all tests here for sharing

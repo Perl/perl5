@@ -1,8 +1,8 @@
 use v5.16.0;
 use strict;
 use warnings;
-require 'regen/regen_lib.pl';
-require 'regen/charset_translations.pl';
+require './regen/regen_lib.pl';
+require './regen/charset_translations.pl';
 use Unicode::UCD;
 use charnames qw(:loose);
 

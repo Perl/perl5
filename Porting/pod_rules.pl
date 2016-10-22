@@ -32,8 +32,8 @@ if (ord("A") == 193) {
             # plan9 =>  'plan9/mkfile',
            );
 
-require 'Porting/pod_lib.pl';
-require 'Porting/manifest_lib.pl';
+require './Porting/pod_lib.pl';
+require './Porting/manifest_lib.pl';
 sub my_die;
 
 # process command-line switches

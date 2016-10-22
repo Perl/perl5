@@ -17,7 +17,7 @@
 use strict;
 use Getopt::Long;
 
-require 'parts/ppptools.pl';
+require './parts/ppptools.pl';
 
 our %opt = (
   mode    => 'check',

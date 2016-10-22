@@ -33,4 +33,4 @@ SKIP: {
     is(ref($e->{_e}->[0]), '', '$e->{_e}->[0] is a scalar');
 }
 
-require 't/bigfltpm.inc';	# all tests here for sharing
+require './t/bigfltpm.inc';	# all tests here for sharing

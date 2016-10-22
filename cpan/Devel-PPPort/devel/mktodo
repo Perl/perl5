@@ -17,7 +17,7 @@
 use strict;
 use Getopt::Long;
 
-require 'devel/devtools.pl';
+require './devel/devtools.pl';
 
 our %opt = (
   base    => 0,

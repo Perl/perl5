@@ -8,8 +8,8 @@ BEGIN {
 use TestInit qw(T A); # T is chdir to the top level, A makes paths absolute
 use strict;
 
-require 'regen/regen_lib.pl';
-require 't/test.pl';
+require './regen/regen_lib.pl';
+require './t/test.pl';
 $::NO_ENDING = $::NO_ENDING = 1;
 
 if ( $^O eq "VMS" ) {
@@ -86,7 +86,7 @@ OUTER: foreach my $file (@files) {
 }
 
 foreach (@progs) {
-    my $command = "$^X $_ --tap";
+    my $command = "$^X -I. $_ --tap";
     system $command
         and die "Failed to run $command: $?";
 }

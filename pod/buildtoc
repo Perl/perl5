@@ -14,7 +14,7 @@ no locale;
 BEGIN {
   my $Top = File::Spec->catdir($FindBin::Bin, File::Spec->updir);
   chdir $Top or die "Can't chdir to $Top: $!";
-  require 'Porting/pod_lib.pl';
+  require './Porting/pod_lib.pl';
 }
 
 die "$0: Usage: $0 [--quiet]\n"

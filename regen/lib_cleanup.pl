@@ -1,7 +1,7 @@
 #!perl -w
 use strict;
-require 'regen/regen_lib.pl';
-require 'Porting/pod_lib.pl';
+require './regen/regen_lib.pl';
+require './Porting/pod_lib.pl';
 use vars qw($TAP $Verbose);
 
 # For processing later

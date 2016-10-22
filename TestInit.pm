@@ -47,7 +47,7 @@ sub import {
 	} elsif ($_ eq 'T') {
 	    $chdir = '..'
 		unless -f 't/TEST' && -f 'MANIFEST' && -d 'lib' && -d 'ext';
-	    @INC = 'lib';
+	    @INC = qw/ lib . /;
 	    $setopt = 1;
 	} else {
 	    die "Unknown option '$_'";

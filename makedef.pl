@@ -70,7 +70,7 @@ BEGIN {
 }
 use constant PLATFORM => $ARGS{PLATFORM};
 
-require "$ARGS{TARG_DIR}regen/embed_lib.pl";
+require "./$ARGS{TARG_DIR}regen/embed_lib.pl";
 
 # Is the following guard strictly necessary? Added during refactoring
 # to keep the same behaviour when merging other code into here.

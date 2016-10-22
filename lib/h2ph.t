@@ -1,5 +1,4 @@
 #!./perl
-use strict;
 
 # quickie tests to see if h2ph actually runs and does more or less what is
 # expected

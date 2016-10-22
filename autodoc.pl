@@ -29,8 +29,8 @@ if (@ARGV) {
     chdir $workdir
         or die "Couldn't chdir to '$workdir': $!";
 }
-require 'regen/regen_lib.pl';
-require 'regen/embed_lib.pl';
+require './regen/regen_lib.pl';
+require './regen/embed_lib.pl';
 
 #
 # See database of global and static function prototypes in embed.fnc

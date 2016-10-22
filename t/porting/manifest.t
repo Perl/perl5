@@ -30,7 +30,7 @@ BEGIN {
 }
 use TestInit qw(T); # T is chdir to the top level
 
-require 't/test.pl';
+require './t/test.pl';
 
 skip_all("Cross-compiling, the entire source might not be available")
     if $Config{usecrosscompile};

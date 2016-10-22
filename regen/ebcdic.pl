@@ -1,8 +1,11 @@
 use v5.16.0;
 use strict;
 use warnings;
-require 'regen/regen_lib.pl';
-require 'regen/charset_translations.pl';
+
+BEGIN { unshift @INC, '.' }
+
+require './regen/regen_lib.pl';
+require './regen/charset_translations.pl';
 
 # Generates the EBCDIC translation tables that were formerly hard-coded into
 # utfebcdic.h

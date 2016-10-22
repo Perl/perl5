@@ -20,7 +20,7 @@ require 5.004;
 
 BEGIN {
     # Get function prototypes
-    require 'regen/regen_lib.pl';
+    require './regen/regen_lib.pl';
 }
 
 my %mg =

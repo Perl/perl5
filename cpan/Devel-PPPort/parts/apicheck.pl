@@ -15,7 +15,7 @@
 ################################################################################
 
 use strict;
-require 'parts/ppptools.pl';
+require './parts/ppptools.pl';
 
 if (@ARGV) {
   my $file = pop @ARGV;
