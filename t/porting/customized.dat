@@ -41,6 +41,8 @@ Locale::Maketext::Simple cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.
 Math::BigInt cpan/Math-BigInt/lib/Math/BigInt.pm cf3d21a81acc2210c08f8b7fd00c41e17c47aaee
 Math::BigInt cpan/Math-BigInt/t/bigintpm.inc db9a17f607c95b9888df373a02f80ae9e507a199
 Math::Complex cpan/Math-Complex/lib/Math/Complex.pm 198ea6c6c584f5ea79a0fd7e9d411d0878f3b2af
+Math::Complex cpan/Math-Complex/t/Complex.t 4f307ed6fc59f1e5fb0e6b11103fc631b6bdb335
+Math::Complex cpan/Math-Complex/t/Trig.t 2682526e23a161d54732c2a66393fe4a234d1865
 Memoize cpan/Memoize/Memoize.pm 902092ff91cdec9c7b4bd06202eb179e1ce26ca2
 Net::Ping dist/Net-Ping/t/001_new.t 521264cd85cfa06ecaa29ae28cdd7728d58da6f1
 Net::Ping dist/Net-Ping/t/010_pingecho.t 2e7340ee0e9f6119b889016fc8b89e6bcd4a8fe2
