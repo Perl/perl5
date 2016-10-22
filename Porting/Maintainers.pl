@@ -827,6 +827,11 @@ use File::Glob qw(:case);
     'Math::Complex' => {
         'DISTRIBUTION' => 'ZEFRAM/Math-Complex-1.59.tar.gz',
         'FILES'        => q[cpan/Math-Complex],
+        'CUSTOMIZED'   => [
+            'lib/Math/Complex.pm', # CPAN RT 118467
+            't/Complex.t',         # CPAN RT 118467
+            't/Trig.t',            # CPAN RT 118467
+        ],
         'EXCLUDED'     => [
             qw( t/pod.t
                 t/pod-coverage.t
