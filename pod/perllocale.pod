@@ -909,11 +909,12 @@ pattern matching using the C<i> modifier.
 Starting in v5.20, Perl supports UTF-8 locales for C<LC_CTYPE>, but
 otherwise Perl only supports single-byte locales, such as the ISO 8859
 series.  This means that wide character locales, for example for Asian
-languages, are not well-supported.  (If the platform has the capability
-for Perl to detect such a locale, starting in Perl v5.22,
-L<Perl will warn, default enabled|warnings/Category Hierarchy>,
-using the C<locale> warning category, whenever such a locale is switched
-into.)  The UTF-8 locale support is actually a
+languages, are not well-supported.  Use of these locales may cause core
+dumps.  If the platform has the capability for Perl to detect such a
+locale, starting in Perl v5.22, L<Perl will warn, default
+enabled|warnings/Category Hierarchy>, using the C<locale> warning
+category, whenever such a locale is switched into.  The UTF-8 locale
+support is actually a
 superset of POSIX locales, because it is really full Unicode behavior
 as if no C<LC_CTYPE> locale were in effect at all (except for tainting;
 see L</SECURITY>).  POSIX locales, even UTF-8 ones,
