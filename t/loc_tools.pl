@@ -41,6 +41,9 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
         $plays_well = 0 if $_[0] =~ /Locale .* may not work well/i
     };
 
+    # Incompatible locales aren't warned about unless using locales.
+    use locale;
+
     foreach my $category (@$categories) {
         return unless setlocale($category, $locale);
         return if $only_plays_well && ! $plays_well;
