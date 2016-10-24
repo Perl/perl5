@@ -911,6 +911,17 @@ closedir() attempted on invalid dirhandle $ｆｏｏ at - line 23.
 ########
 
 # pp_sys.c [pp_gmtime]
+use Config;
+my $non_ieee_fp = ($Config{doublekind} == 9 ||
+                   $Config{doublekind} == 10 ||
+                   $Config{doublekind} == 11);
+if ($non_ieee_fp) {
+    print <<EOM ;
+SKIPPED
+# No nan support
+EOM
+    exit ;
+}
 gmtime("NaN");
 localtime("NaN");
 use warnings "overflow";
@@ -918,10 +929,10 @@ gmtime("NaN");
 localtime("NaN");
 
 EXPECT
-gmtime(NaN) too large at - line 6.
-gmtime(NaN) failed at - line 6.
-localtime(NaN) too large at - line 7.
-localtime(NaN) failed at - line 7.
+gmtime(NaN) too large at - line 17.
+gmtime(NaN) failed at - line 17.
+localtime(NaN) too large at - line 18.
+localtime(NaN) failed at - line 18.
 
 ########
 # pp_sys.c [pp_alarm]
