@@ -675,7 +675,7 @@ my $non_ieee_fp = ($Config{doublekind} == 9 ||
 if ($non_ieee_fp) {
     print <<EOM ;
 SKIPPED
-# No nan support
+# No inf/nan support
 EOM
     exit ;
 }

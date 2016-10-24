@@ -2042,6 +2042,17 @@ EXPECT
 Negative repeat count does nothing at - line 3.
 Negative repeat count does nothing at - line 4.
 ########
+use Config;
+my $non_ieee_fp = ($Config{doublekind} == 9 ||
+                   $Config{doublekind} == 10 ||
+                   $Config{doublekind} == 11);
+if ($non_ieee_fp) {
+    print <<EOM ;
+SKIPPED
+# No inf/nan support
+EOM
+    exit ;
+}
 my $a = "inf" + 0;
 my $b = -$a;
 my $c = "nan" + 0;
@@ -2055,9 +2066,9 @@ my $y = "y" x $b;
 my $z = "z" x $c;
 no warnings 'numeric';
 EXPECT
-Non-finite repeat count does nothing at - line 5.
-Non-finite repeat count does nothing at - line 6.
-Non-finite repeat count does nothing at - line 7.
+Non-finite repeat count does nothing at - line 16.
+Non-finite repeat count does nothing at - line 17.
+Non-finite repeat count does nothing at - line 18.
 ########
 # NAME warn on stat @array
 @foo = ("op/stat.t");
