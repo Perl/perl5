@@ -19,13 +19,13 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
     # Adds the locale given by the first parameter to the list given by the
     # 3rd iff the platform supports the locale in each of the categories given
     # by the 2nd parameter, which is either a single category or a reference
-    # to a list of categories The 4th parameter is true if to reject locales
+    # to a list of categories The 4th parameter is true if to accept locales
     # that aren't apparently fully compatible with Perl.
 
     my $locale = shift;
     my $categories = shift;
     my $list = shift;
-    my $only_plays_well = shift;
+    my $allow_incompatible = shift;
 
     return if ! $locale || grep { $locale eq $_ } @$list;
 
@@ -46,7 +46,7 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
 
     foreach my $category (@$categories) {
         return unless setlocale($category, $locale);
-        return if $only_plays_well && ! $plays_well;
+        return if ! $plays_well && ! $allow_incompatible;
     }
 
     if ($badutf8) {
@@ -186,14 +186,16 @@ sub locales_enabled(;$) {
 
 sub find_locales ($;$) {  # Returns an array of all the locales we found on the
                           # system.  If the optional 2nd parameter is
-                          # non-zero, the list is restricted to those locales
-                          # that play well with Perl.
+                          # non-zero, the list includes all found locales;
+                          # otherwise it is restricted to those locales
+                          # that play well with Perl, as far as we can
+                          # easily determine.
                           # The first parameter is either a single locale
                           # category or a reference to a list of categories to
                           # find valid locales for it (or in the case of
                           # multiple) for all of them.
     my $categories = shift;
-    my $only_plays_well = shift // 0;
+    my $allow_incompatible = shift // 0;
 
     return unless locales_enabled($categories);
 
@@ -209,16 +211,16 @@ sub find_locales ($;$) {  # Returns an array of all the locales we found on the
     # UWIN seems to loop after taint tests, just skip for now
     return if ($^O =~ /^uwin/);
 
-    _trylocale("C", $categories, \@Locale, $only_plays_well);
-    _trylocale("POSIX", $categories, \@Locale, $only_plays_well);
+    _trylocale("C", $categories, \@Locale, $allow_incompatible);
+    _trylocale("POSIX", $categories, \@Locale, $allow_incompatible);
     foreach (0..15) {
-        _trylocale("ISO8859-$_", $categories, \@Locale, $only_plays_well);
-        _trylocale("iso8859$_", $categories, \@Locale, $only_plays_well);
-        _trylocale("iso8859-$_", $categories, \@Locale, $only_plays_well);
-        _trylocale("iso_8859_$_", $categories, \@Locale, $only_plays_well);
-        _trylocale("isolatin$_", $categories, \@Locale, $only_plays_well);
-        _trylocale("isolatin-$_", $categories, \@Locale, $only_plays_well);
-        _trylocale("iso_latin_$_", $categories, \@Locale, $only_plays_well);
+        _trylocale("ISO8859-$_", $categories, \@Locale, $allow_incompatible);
+        _trylocale("iso8859$_", $categories, \@Locale, $allow_incompatible);
+        _trylocale("iso8859-$_", $categories, \@Locale, $allow_incompatible);
+        _trylocale("iso_8859_$_", $categories, \@Locale, $allow_incompatible);
+        _trylocale("isolatin$_", $categories, \@Locale, $allow_incompatible);
+        _trylocale("isolatin-$_", $categories, \@Locale, $allow_incompatible);
+        _trylocale("iso_latin_$_", $categories, \@Locale, $allow_incompatible);
     }
 
     # Sanitize the environment so that we can run the external 'locale'
@@ -239,7 +241,7 @@ sub find_locales ($;$) {  # Returns an array of all the locales we found on the
             # locales will cause all IO hadles to default to (assume) utf8
             next unless utf8::valid($_);
             chomp;
-            _trylocale($_, $categories, \@Locale, $only_plays_well);
+            _trylocale($_, $categories, \@Locale, $allow_incompatible);
         }
         close(LOCALES);
     } elsif ($^O eq 'VMS'
@@ -251,7 +253,7 @@ sub find_locales ($;$) {  # Returns an array of all the locales we found on the
         opendir(LOCALES, "SYS\$I18N_LOCALE:");
         while ($_ = readdir(LOCALES)) {
             chomp;
-            _trylocale($_, $categories, \@Locale, $only_plays_well);
+            _trylocale($_, $categories, \@Locale, $allow_incompatible);
         }
         close(LOCALES);
     } elsif (($^O eq 'openbsd' || $^O eq 'bitrig' ) && -e '/usr/share/locale') {
@@ -263,7 +265,7 @@ sub find_locales ($;$) {  # Returns an array of all the locales we found on the
         opendir(LOCALES, '/usr/share/locale');
         while ($_ = readdir(LOCALES)) {
             chomp;
-            _trylocale($_, $categories, \@Locale, $only_plays_well);
+            _trylocale($_, $categories, \@Locale, $allow_incompatible);
         }
         close(LOCALES);
     } else { # Final fallback.  Try our list of locales hard-coded here
@@ -287,31 +289,31 @@ sub find_locales ($;$) {  # Returns an array of all the locales we found on the
                 split /:/, $line;
             my @enc = _decode_encodings($encodings);
             foreach my $loc (split(/ /, $locale_name)) {
-                _trylocale($loc, $categories, \@Locale, $only_plays_well);
+                _trylocale($loc, $categories, \@Locale, $allow_incompatible);
                 foreach my $enc (@enc) {
                     _trylocale("$loc.$enc", $categories, \@Locale,
-                                                            $only_plays_well);
+                                                            $allow_incompatible);
                 }
                 $loc = lc $loc;
                 foreach my $enc (@enc) {
                     _trylocale("$loc.$enc", $categories, \@Locale,
-                                                            $only_plays_well);
+                                                            $allow_incompatible);
                 }
             }
             foreach my $lang (split(/ /, $language_codes)) {
-                _trylocale($lang, $categories, \@Locale, $only_plays_well);
+                _trylocale($lang, $categories, \@Locale, $allow_incompatible);
                 foreach my $country (split(/ /, $country_codes)) {
                     my $lc = "${lang}_${country}";
-                    _trylocale($lc, $categories, \@Locale, $only_plays_well);
+                    _trylocale($lc, $categories, \@Locale, $allow_incompatible);
                     foreach my $enc (@enc) {
                         _trylocale("$lc.$enc", $categories, \@Locale,
-                                                            $only_plays_well);
+                                                            $allow_incompatible);
                     }
                     my $lC = "${lang}_\U${country}";
-                    _trylocale($lC, $categories, \@Locale, $only_plays_well);
+                    _trylocale($lC, $categories, \@Locale, $allow_incompatible);
                     foreach my $enc (@enc) {
                         _trylocale("$lC.$enc", $categories, \@Locale,
-                                                            $only_plays_well);
+                                                            $allow_incompatible);
                     }
                 }
             }
@@ -381,9 +383,7 @@ sub find_utf8_ctype_locale (;$) { # Return the name of a locale that core Perl
 
     if (! defined $locales_ref) {
 
-        my @locales = find_locales(&POSIX::LC_CTYPE(),
-                                   1 # Reject iffy locales.
-                                  );
+        my @locales = find_locales(&POSIX::LC_CTYPE());
         $locales_ref = \@locales;
     }
 

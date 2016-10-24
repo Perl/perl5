@@ -14,8 +14,7 @@ BEGIN {
 }
 
 SKIP: { # perl #127708
-    my @locales = grep { $_ !~ / ^ C \b | POSIX /x } find_locales('LC_MESSAGES',
-                                                        'non-problematic-only');
+    my @locales = grep { $_ !~ / ^ C \b | POSIX /x } find_locales('LC_MESSAGES');
     skip("No valid locale to test with", 1) unless @locales;
 
     # reset the locale environment
