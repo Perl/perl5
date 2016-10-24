@@ -14,6 +14,42 @@
 eval { require POSIX; import POSIX 'locale_h'; };
 $has_locale_h = ! $@;
 
+# LC_ALL can be -1 on some platforms.  And, in fact the implementors could
+# legally use any integer to represent any category.  But it makes the most
+# sense for them to have used small integers.  Below, we create new locale
+# numbers for ones missing from this machine.  We make them very negative,
+# hopefully more negative than anything likely to be a valid category on the
+# platform, but also below is a check to be sure that our guess is valid.
+my $max_bad_category_number = -1000000;
+
+# Initialize this hash so that it looks like e.g.,
+#   6 => 'CTYPE',
+# where 6 is the value of &POSIX::LC_CTYPE
+my %category_name;
+unless ($@) {
+    my $number_for_missing_category = $max_bad_category_number;
+    foreach my $name (qw(ALL COLLATE CTYPE MESSAGES MONETARY NUMERIC TIME)) {
+        my $number = eval "&POSIX::LC_$name";
+
+        if ($@) {
+            # Use a negative number (smaller than any legitimate category
+            # number) if the platform doesn't support this category, so we
+            # have an entry for all the ones that might be specified in calls
+            # to us.
+            $number = $number_for_missing_category-- if $@;
+        }
+        elsif (   $number !~ / ^ -? \d+ $ /x
+               || $number <=  $max_bad_category_number)
+        {
+            # We think this should be an int.  And it has to be larger than
+            # any of our synthetic numbers.
+            die "Unexpected locale category number '$number' for LC_$name"
+        }
+
+        $category_name{$number} = "$name";
+    }
+}
+
 sub _trylocale ($$$$) { # For use only by other functions in this file!
 
     # Adds the locale given by the first parameter to the list given by the
@@ -81,42 +117,6 @@ sub _decode_encodings { # For use only by other functions in this file!
     push @enc, "65001"; # Windows UTF-8
 
     return @enc;
-}
-
-# LC_ALL can be -1 on some platforms.  And, in fact the implementors could
-# legally use any integer to represent any category.  But it makes the most
-# sense for them to have used small integers.  Below, we create new locale
-# numbers for ones missing from this machine.  We make them very negative,
-# hopefully more negative than anything likely to be a valid category on the
-# platform, but also below is a check to be sure that our guess is valid.
-my $max_bad_category_number = -1000000;
-
-# Initialize this hash so that it looks like e.g.,
-#   6 => 'CTYPE',
-# where 6 is the value of &POSIX::LC_CTYPE
-my %category_name;
-unless ($@) {
-    my $number_for_missing_category = $max_bad_category_number;
-    foreach my $name (qw(ALL COLLATE CTYPE MESSAGES MONETARY NUMERIC TIME)) {
-        my $number = eval "&POSIX::LC_$name";
-
-        if ($@) {
-            # Use a negative number (smaller than any legitimate category
-            # number) if the platform doesn't support this category, so we
-            # have an entry for all the ones that might be specified in calls
-            # to us.
-            $number = $number_for_missing_category-- if $@;
-        }
-        elsif (   $number !~ / ^ -? \d+ $ /x
-               || $number <=  $max_bad_category_number)
-        {
-            # We think this should be an int.  And it has to be larger than
-            # any of our synthetic numbers.
-            die "Unexpected locale category number '$number' for LC_$name"
-        }
-
-        $category_name{$number} = "$name";
-    }
 }
 
 sub locales_enabled(;$) {
