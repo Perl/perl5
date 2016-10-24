@@ -751,6 +751,45 @@ debug "Scanning for locales...\n";
 require POSIX; import POSIX ':locale_h';
 
 my @Locale = find_locales([ 'LC_CTYPE', 'LC_NUMERIC', 'LC_ALL' ]);
+my @include_incompatible_locales = find_locales('LC_CTYPE',
+                                                'even incompatible locales');
+
+# The locales included in the incompatible list that aren't in the compatible
+# one.
+my @incompatible_locales;
+
+if (@Locale < @include_incompatible_locales) {
+    my %seen;
+    @seen{@Locale} = ();
+
+    foreach my $item (@include_incompatible_locales) {
+        push @incompatible_locales, $item unless exists $seen{$item};
+    }
+
+    # For each bad locale, switch into it to find out why it's incompatible
+    for my $bad_locale (@incompatible_locales) {
+        my @warnings;
+
+        use warnings 'locale';
+
+        local $SIG{__WARN__} = sub {
+            my $warning = $_[0];
+            chomp $warning;
+            push @warnings, ($warning =~ s/\n/\n# /sgr);
+        };
+
+        setlocale(&POSIX::LC_CTYPE, $bad_locale);
+
+        my $message = "testing of locale '$bad_locale' is skipped";
+        if (@warnings) {
+            skip $message . ":\n# " . join "\n# ", @warnings;
+        }
+        else {
+            fail $message . ", because it is was found to be incompatible with"
+                          . " Perl, but could not discern reason";
+        }
+    }
+}
 
 debug "Locales =\n";
 for ( @Locale ) {
@@ -940,7 +979,8 @@ sub report_multi_result {
     report_result($Locale, $i, @$results_ref == 0, $message);
 }
 
-my $first_locales_test_number = $final_without_setlocale + 1;
+my $first_locales_test_number = $final_without_setlocale
+                              + 1 + @incompatible_locales;
 my $locales_test_number;
 my $not_necessarily_a_problem_test_number;
 my $first_casing_test_number;
