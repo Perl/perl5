@@ -103,6 +103,14 @@ sub ok {
     return ($result) ? 1 : 0;
 }
 
+sub skip {
+    return ok 1, "skipped: " . shift;
+}
+
+sub fail {
+    return ok 0, shift;
+}
+
 # First we'll do a lot of taint checking for locales.
 # This is the easiest to test, actually, as any locale,
 # even the default locale will taint under 'use locale'.
