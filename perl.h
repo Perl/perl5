@@ -4274,21 +4274,30 @@ Gid_t getegid (void);
      /* Temporarily turn off memory debugging in case the a
       * does memory allocation, either directly or indirectly. */
 #  define DEBUG_m(a)  \
-    STMT_START {							\
-        if (PERL_GET_INTERP) { dTHX; if (DEBUG_m_TEST) {PL_debug&=~DEBUG_m_FLAG; a; PL_debug|=DEBUG_m_FLAG;} } \
+    STMT_START {					                \
+        if (PERL_GET_INTERP) {                                          \
+                                dTHX;                                   \
+                                if (DEBUG_m_TEST) {                     \
+                                    PL_debug &= ~DEBUG_m_FLAG;          \
+                                    a;                                  \
+                                    PL_debug |= DEBUG_m_FLAG;           \
+                                }                                       \
+                              }                                         \
     } STMT_END
 
-#  define DEBUG__(t, a) \
-	STMT_START { \
-		if (t) STMT_START {a;} STMT_END; \
-	} STMT_END
+#  define DEBUG__(t, a)                                                 \
+        STMT_START {                                                    \
+                if (t) STMT_START {a;} STMT_END;                        \
+        } STMT_END
 
 #  define DEBUG_f(a) DEBUG__(DEBUG_f_TEST, a)
+
 #ifndef PERL_EXT_RE_BUILD
 #  define DEBUG_r(a) DEBUG__(DEBUG_r_TEST, a)
 #else
 #  define DEBUG_r(a) STMT_START {a;} STMT_END
 #endif /* PERL_EXT_RE_BUILD */
+
 #  define DEBUG_x(a) DEBUG__(DEBUG_x_TEST, a)
 #  define DEBUG_u(a) DEBUG__(DEBUG_u_TEST, a)
 #  define DEBUG_U(a) DEBUG__(DEBUG_U_TEST, a)
