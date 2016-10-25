@@ -742,7 +742,7 @@ debug "Scanning for locales...\n";
 
 require POSIX; import POSIX ':locale_h';
 
-my @Locale = find_locales([ &POSIX::LC_CTYPE, &POSIX::LC_NUMERIC, &POSIX::LC_ALL ]);
+my @Locale = find_locales([ 'LC_CTYPE', 'LC_NUMERIC', 'LC_ALL' ]);
 
 debug "Locales =\n";
 for ( @Locale ) {

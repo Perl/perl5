@@ -28,6 +28,7 @@ my $max_bad_category_number = -1000000;
 #   6 => 'CTYPE',
 # where 6 is the value of &POSIX::LC_CTYPE
 my %category_name;
+my %category_number;
 unless ($@) {
     my $number_for_missing_category = $max_bad_category_number;
     foreach my $name (qw(ALL COLLATE CTYPE MESSAGES MONETARY NUMERIC TIME)) {
@@ -49,16 +50,23 @@ unless ($@) {
         }
 
         $category_name{$number} = "$name";
+        $category_number{$name} = $number;
     }
 }
 
 sub _trylocale ($$$$) { # For use only by other functions in this file!
 
     # Adds the locale given by the first parameter to the list given by the
-    # 3rd iff the platform supports the locale in each of the categories given
-    # by the 2nd parameter, which is either a single category or a reference
-    # to a list of categories The 4th parameter is true if to accept locales
-    # that aren't apparently fully compatible with Perl.
+    # 3rd iff the platform supports the locale in each of the category numbers
+    # given by the 2nd parameter, which is either a single category or a
+    # reference to a list of categories.  The list must be sorted so that
+    # CTYPE is first, COLLATE is last unless ALL is present, in which case
+    # that comes after COLLATE.  This is because locale.c detects bad locales
+    # only with CTYPE, and COLLATE on some platforms can core dump if it is a
+    # bad locale.
+    #
+    # The 4th parameter is true if to accept locales that aren't apparently
+    # fully compatible with Perl.
 
     my $locale = shift;
     my $categories = shift;
@@ -83,6 +91,9 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
     use locale;
 
     foreach my $category (@$categories) {
+        die "category '$category' must instead be a number"
+                                            unless $category =~ / ^ -? \d+ $ /x;
+
         return unless setlocale($category, $locale);
         return if ! $plays_well && ! $allow_incompatible;
     }
@@ -126,17 +137,22 @@ sub locales_enabled(;$) {
     # 1.
     #
     # The optional parameter is a reference to a list of individual POSIX
-    # locale categories.  If present, this function also returns 0 if any of
-    # them are individually not available on this platform; otherwise 1.
-    # Actually, it is acceptable for the list to be just a simple scalar
-    # denoting a single category.
+    # locale categories.  If any of the individual categories specified by the
+    # optional parameter is all digits (and an optional leading minus), it is
+    # taken to be the C enum for the category (e.g., &POSIX::LC_CTYPE).
+    # Otherwise it should be a string name of the category, like 'LC_TIME'.
+    # The initial 'LC_' is optional.  It is a fatal error to call this with
+    # something that isn't a known category to the platform.
     #
-    # If any of the individual categories specified by the optional parameter
-    # is all digits (and an optional leading minus), it is taken to be the C
-    # enum for the category (e.g., &POSIX::LC_CTYPE).  Otherwise it should be
-    # a string name of the category, like 'LC_TIME'.  The initial 'LC_' is
-    # optional.  It is a fatal error to call this with something that isn't a
-    # known category
+    # This optional parameter denotes which POSIX locale categories must be
+    # available on the platform.  If any aren't available, this function
+    # returns 0; otherwise it returns 1 and changes the list for the caller so
+    # that any category names are converted into their equivalent numbers, and
+    # sorts it to match the expectations of _trylocale.
+    #
+    # It is acceptable for the second parameter to be just a simple scalar
+    # denoting a single category (either name or number).  No conversion into
+    # a number is done in this case.
 
     use Config;
 
@@ -148,10 +164,24 @@ sub locales_enabled(;$) {
 
     # Done with the global possibilities.  Now check if any passed in category
     # is disabled.
+
     my $categories_ref = shift;
+    my $return_categories_numbers = 0;
+    my @categories_numbers;
+    my $has_LC_ALL = 0;
+    my $has_LC_COLLATE = 0;
+
     if (defined $categories_ref) {
-        $categories_ref = [ $categories_ref ] if ! ref $categories_ref;
-        my @local_categories_copy = @$categories_ref;
+        my @local_categories_copy;
+
+        if (ref $categories_ref) {
+            @local_categories_copy = @$$categories_ref;
+            $return_categories_numbers = 1;
+        }
+        else {  # Single category passed in
+            @local_categories_copy = $categories_ref;
+        }
+
         for my $category_name_or_number (@local_categories_copy) {
             my $name;
             my $number;
@@ -179,27 +209,60 @@ sub locales_enabled(;$) {
 
             eval "defined &POSIX::LC_$name";
             return 0 if $@;
+
+            if ($return_categories_numbers) {
+                if ($name eq 'CTYPE') {
+                    unshift @categories_numbers, $number;   # Always first
+                }
+                elsif ($name eq 'ALL') {
+                    $has_LC_ALL = 1;
+                }
+                elsif ($name eq 'COLLATE') {
+                    $has_LC_COLLATE = 1;
+                }
+                else {
+                    push @categories_numbers, $number;
+                }
+            }
         }
+    }
+
+    if ($return_categories_numbers) {
+
+        # COLLATE comes after all other locales except ALL, which comes last
+        if ($has_LC_COLLATE) {
+            push @categories_numbers, $category_number{'COLLATE'};
+        }
+        if ($has_LC_ALL) {
+            push @categories_numbers, $category_number{'ALL'};
+        }
+        $$categories_ref = \@categories_numbers;
     }
 
     return 1;
 }
 
 
-sub find_locales ($;$) {  # Returns an array of all the locales we found on the
-                          # system.  If the optional 2nd parameter is
-                          # non-zero, the list includes all found locales;
-                          # otherwise it is restricted to those locales
-                          # that play well with Perl, as far as we can
-                          # easily determine.
-                          # The first parameter is either a single locale
-                          # category or a reference to a list of categories to
-                          # find valid locales for it (or in the case of
-                          # multiple) for all of them.
+sub find_locales ($;$) {
+
+    # Returns an array of all the locales we found on the system.  If the
+    # optional 2nd parameter is non-zero, the list includes all found locales;
+    # otherwise it is restricted to those locales that play well with Perl, as
+    # far as we can easily determine.
+    #
+    # The first parameter is either a single locale category or a reference to
+    # a list of categories to find valid locales for it (or in the case of
+    # multiple) for all of them.  Each category can be a name (like 'LC_ALL'
+    # or simply 'ALL') or the C enum value for the category.
+
     my $categories = shift;
     my $allow_incompatible = shift // 0;
 
-    return unless locales_enabled($categories);
+    $categories = [ $categories ] unless ref $categories;
+    return unless locales_enabled(\$categories);
+
+    # Note, the subroutine call above converts the $categories into a form
+    # suitable for _trylocale().
 
     # Visual C's CRT goes silly on strings of the form "en_US.ISO8859-1"
     # and mingw32 uses said silly CRT

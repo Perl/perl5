@@ -21,7 +21,7 @@ BEGIN {
 }
 use Config;
 my $have_strtod = $Config{d_strtod} eq 'define';
-my @locales = eval { find_locales( [ &LC_ALL, &LC_CTYPE, &LC_NUMERIC ]) };
+my @locales = find_locales( [ 'LC_ALL', 'LC_CTYPE', 'LC_NUMERIC' ]);
 skip_all("no locales available") unless @locales;
 
 # reset the locale environment
