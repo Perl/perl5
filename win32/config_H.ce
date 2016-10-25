@@ -2672,6 +2672,32 @@
  */
 #define DOUBLESIZE 8		/**/
 
+/* DOUBLE_STYLE_IEEE
+ *	This symbol, if defined, indicates that the double is
+ *	the 64-bit IEEE 754.
+ */
+/* DOUBLE_HAS_INF
+ *	This symbol, if defined, indicates that the double has
+ *	the infinity.
+ */
+/* DOUBLE_HAS_NAN
+ *	This symbol, if defined, indicates that the double has
+ *	the not-a-number.
+ */
+/* DOUBLE_HAS_NEGATIVE_ZERO
+ *	This symbol, if defined, indicates that the double has
+ *	the negative_zero.
+ */
+/* DOUBLE_HAS_SUBNORMALS
+ *	This symbol, if defined, indicates that the double has
+ *	the subnormals (denormals).
+ */
+#define DOUBLE_STYLE_IEEE
+#define DOUBLE_HAS_INF
+#define DOUBLE_HAS_INF
+#define DOUBLE_HAS_NEGATIVE_ZERO
+#define DOUBLE_HAS_SUBNORMALS
+
 /* DOUBLEINFBYTES:
  *	This symbol, if defined, is a comma-separated list of
  *	hexadecimal bytes for the double precision infinity.

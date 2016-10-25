@@ -1946,6 +1946,30 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	LONG_DOUBLE_IS_UNKNOWN_FORMAT
  *	It is only defined if the system supports long doubles.
  */
+/* LONG_DOUBLE_STYLE_IEEE
+ *	This symbol, if defined, indicates that the long double
+ *	is any of the IEEE 754 style long doubles:
+ *	LONG_DOUBLE_STYLE_IEEE_STD, LONG_DOUBLE_STYLE_IEEE_EXTENDED,
+ *	LONG_DOUBLE_STYLE_IEEE_DOUBLEDOUBLE.
+ */
+/* LONG_DOUBLE_STYLE_IEEE_DOUBLEDOUBLE
+ *	This symbol, if defined, indicates that the long double is
+ *	the 128-bit double-double.
+ */
+/* LONG_DOUBLE_STYLE_IEEE_EXTENDED
+ *	This symbol, if defined, indicates that the long double is
+ *	the 80-bit IEEE 754. Note that despite the 'extended' this
+ *	is less than the 'std', since this is an extension of
+ *	the double precision.
+ */
+/* LONG_DOUBLE_STYLE_IEEE_STD
+ *	This symbol, if defined, indicates that the long double is
+ *	the 128-bit IEEE 754.
+ */
+/* LONG_DOUBLE_STYLE_VAX
+ *	This symbol, if defined, indicates that the long double is
+ *	the 128-bit VAX format H.
+ */
 #$d_ldexpl  HAS_LDEXPL		/**/
 #$d_longdbl HAS_LONG_DOUBLE		/**/
 #ifdef HAS_LONG_DOUBLE
@@ -1964,6 +1988,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define LONG_DOUBLE_IS_UNKNOWN_FORMAT			-1
 #define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LE_LE /* back-compat */
 #define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_BE /* back-compat */
+#$d_long_double_style_ieee LONG_DOUBLE_STYLE_IEEE
+#$d_long_double_style_ieee_doubledouble LONG_DOUBLE_STYLE_IEEE_DOUBLEDOUBLE
+#$d_long_double_style_ieee_extended LONG_DOUBLE_STYLE_IEEE_EXTENDED
+#$d_long_double_style_ieee_std LONG_DOUBLE_STYLE_IEEE_STD
+#$d_long_double_style_vax LONG_DOUBLE_STYLE_VAX
 #endif
 
 /* HAS_LONG_LONG:
@@ -3987,6 +4016,38 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	DOUBLE_IS_CRAY_SINGLE_64_BIT
  *	DOUBLE_IS_UNKNOWN_FORMAT
  */
+/* DOUBLE_HAS_INF
+ *	This symbol, if defined, indicates that the double has
+ *	the infinity.
+ */
+/* DOUBLE_HAS_NAN
+ *	This symbol, if defined, indicates that the double has
+ *	the not-a-number.
+ */
+/* DOUBLE_HAS_NEGATIVE_ZERO
+ *	This symbol, if defined, indicates that the double has
+ *	the negative_zero.
+ */
+/* DOUBLE_HAS_SUBNORMALS
+ *	This symbol, if defined, indicates that the double has
+ *	the subnormals (denormals).
+ */
+/* DOUBLE_STYLE_CRAY
+ *	This symbol, if defined, indicates that the double is
+ *	the 64-bit CRAY mainframe format.
+ */
+/* DOUBLE_STYLE_IBM
+ *	This symbol, if defined, indicates that the double is
+ *	the 64-bit IBM mainframe format.
+ */
+/* DOUBLE_STYLE_IEEE
+ *	This symbol, if defined, indicates that the double is
+ *	the 64-bit IEEE 754.
+ */
+/* DOUBLE_STYLE_VAX
+ *	This symbol, if defined, indicates that the double is
+ *	the 64-bit VAX format D or G.
+ */
 #define DOUBLEKIND $doublekind		/**/
 #define DOUBLE_IS_IEEE_754_32_BIT_LITTLE_ENDIAN	1
 #define DOUBLE_IS_IEEE_754_32_BIT_BIG_ENDIAN	2
@@ -4007,6 +4068,14 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_PRIgldbl PERL_PRIgldbl	$sPRIgldbl	/**/
 #$d_PRIeldbl PERL_PRIeldbl	$sPRIeldbl	/**/
 #$d_SCNfldbl PERL_SCNfldbl	$sSCNfldbl	/**/
+#$d_double_has_inf DOUBLE_HAS_INF
+#$d_double_has_nan DOUBLE_HAS_INF
+#$d_double_has_negative_zero DOUBLE_HAS_NEGATIVE_ZERO
+#$d_double_has_subnormals DOUBLE_HAS_SUBNORMALS
+#$d_double_style_cray DOUBLE_STYLE_CRAY
+#$d_double_style_ibm DOUBLE_STYLE_IBM
+#$d_double_style_ieee DOUBLE_STYLE_IEEE
+#$d_double_style_vax DOUBLE_STYLE_VAX
 
 /* DOUBLEMANTBITS:
  *	This symbol, if defined, tells how many mantissa bits
