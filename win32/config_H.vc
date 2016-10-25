@@ -2631,6 +2631,32 @@
  */
 #define DOUBLESIZE 8		/**/
 
+/* DOUBLE_STYLE_IEEE
+ *	This symbol, if defined, indicates that the double is
+ *	the 64-bit IEEE 754.
+ */
+/* DOUBLE_HAS_INF
+ *	This symbol, if defined, indicates that the double has
+ *	the infinity.
+ */
+/* DOUBLE_HAS_NAN
+ *	This symbol, if defined, indicates that the double has
+ *	the not-a-number.
+ */
+/* DOUBLE_HAS_NEGATIVE_ZERO
+ *	This symbol, if defined, indicates that the double has
+ *	the negative_zero.
+ */
+/* DOUBLE_HAS_SUBNORMALS
+ *	This symbol, if defined, indicates that the double has
+ *	the subnormals (denormals).
+ */
+#define DOUBLE_STYLE_IEEE
+#define DOUBLE_HAS_INF
+#define DOUBLE_HAS_INF
+#define DOUBLE_HAS_NEGATIVE_ZERO
+#define DOUBLE_HAS_SUBNORMALS
+
 /* DOUBLEINFBYTES:
  *	This symbol, if defined, is a comma-separated list of
  *	hexadecimal bytes for the double precision infinity.
@@ -2670,6 +2696,21 @@
  *	an implicit bit.
  */
 #define LONGDBLMANTBITS 52
+
+/* LONG_DOUBLE_STYLE_IEEE
+ *	This symbol, if defined, indicates that the long double
+ *	is any of the IEEE 754 style long doubles:
+ *	LONG_DOUBLE_STYLE_IEEE_STD, LONG_DOUBLE_STYLE_IEEE_EXTENDED,
+ *	LONG_DOUBLE_STYLE_IEEE_DOUBLEDOUBLE.
+ */
+/* LONG_DOUBLE_STYLE_IEEE_EXTENDED
+ *	This symbol, if defined, indicates that the long double is
+ *	the 80-bit IEEE 754. Note that despite the 'extended' this
+ *	is less than the 'std', since this is an extension of
+ *	the double precision.
+ */
+#define LONG_DOUBLE_STYLE_IEEE
+#define LONG_DOUBLE_STYLE_IEEE_EXTENDED
 
 /* EBCDIC:
  *	This symbol, if defined, indicates that this system uses

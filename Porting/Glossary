@@ -694,6 +694,38 @@ d_dlsymun (d_dlsymun.U):
 	indicates that we need to prepend an underscore to the symbol
 	name before calling dlsym().
 
+d_double_has_inf (infnan.U):
+	This variable conditionally defines the symbol DOUBLE_HAS_INF
+	which indicates that the double type has an infinity.
+
+d_double_has_nan (infnan.U):
+	This variable conditionally defines the symbol DOUBLE_HAS_INF
+	which indicates that the double type has a not-a-number.
+
+d_double_has_negative_zero (infnan.U):
+	This variable conditionally defines the symbol DOUBLE_HAS_NEGATIVE_ZERO
+	which indicates that the double type has a negative zero.
+
+d_double_has_subnormals (infnan.U):
+	This variable conditionally defines the symbol DOUBLE_HAS_SUBNORMALS
+	which indicates that the double type has subnormals (denormals).
+
+d_double_style_cray (longdblfio.U):
+	This variable conditionally defines the symbol DOUBLE_STYLE_CRAY
+	which indicates that the double is the 64-bit CRAY mainframe format.
+
+d_double_style_ibm (longdblfio.U):
+	This variable conditionally defines the symbol DOUBLE_STYLE_IBM,
+	which indicates that the double is the 64-bit IBM mainframe format.
+
+d_double_style_ieee (longdblfio.U):
+	This variable conditionally defines the symbol DOUBLE_STYLE_IEEE,
+	which indicates that the double is the 64-bit IEEE 754.
+
+d_double_style_vax (longdblfio.U):
+	This variable conditionally defines the symbol DOUBLE_STYLE_VAX,
+	which indicates that the double is the 64-bit VAX format D or G.
+
 d_dosuid (d_dosuid.U):
 	This variable conditionally defines the symbol DOSUID, which
 	tells the C program that it should insert setuid emulation code
@@ -1554,6 +1586,30 @@ d_logb (d_logb.U):
 d_longdbl (d_longdbl.U):
 	This variable conditionally defines HAS_LONG_DOUBLE if
 	the long double type is supported.
+
+d_long_double_style_ieee (d_longdbl.U):
+	This variable conditionally defines LONG_DOUBLE_STYLE_IEEE
+	if the long double is any of the IEEE 754 style long doubles:
+	LONG_DOUBLE_STYLE_IEEE_STD, LONG_DOUBLE_STYLE_IEEE_EXTENDED,
+	LONG_DOUBLE_STYLE_IEEE_DOUBLEDOUBLE.
+
+d_long_double_style_ieee_doubledouble (d_longdbl.U):
+	This variable conditionally defines LONG_DOUBLE_STYLE_IEEE_DOUBLEDOUBLE
+	if the long double is the 128-bit IEEE 754 double-double.
+
+d_long_double_style_ieee_extended (d_longdbl.U):
+	This variable conditionally defines LONG_DOUBLE_STYLE_IEEE_EXTENDED
+	if the long double is the 80-bit IEEE 754 extended precision.
+	Note that despite the 'extended' this is less than the 'std',
+	since thisis an extension of the double precision.
+
+d_long_double_style_ieee_std (d_longdbl.U):
+	This variable conditionally defines LONG_DOUBLE_STYLE_IEEE_STD
+	if the long double is the 128-bit IEEE 754.
+
+d_long_double_style_vax (d_longdbl.U):
+	This variable conditionally defines LONG_DOUBLE_STYLE_VAX
+	if the long double is the 128-bit VAX format H.
 
 d_longlong (d_longlong.U):
 	This variable conditionally defines HAS_LONG_LONG if

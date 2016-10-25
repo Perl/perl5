@@ -438,6 +438,14 @@ d_dlerror=''
 d_dlopen=''
 d_dlsymun=''
 d_dosuid=''
+d_double_has_inf=''
+d_double_has_nan=''
+d_double_has_negative_zero=''
+d_double_has_subnormals=''
+d_double_style_cray=''
+d_double_style_ibm=''
+d_double_style_ieee=''
+d_double_style_vax=''
 d_suidsafe=''
 d_drand48_r=''
 drand48_r_proto=''
@@ -636,6 +644,11 @@ d_log2=''
 d_logb=''
 d_ldexpl=''
 d_longdbl=''
+d_long_double_style_ieee=''
+d_long_double_style_ieee_doubledouble=''
+d_long_double_style_ieee_extended=''
+d_long_double_style_ieee_std=''
+d_long_double_style_vax=''
 longdblkind=''
 longdblsize=''
 d_longlong=''
@@ -7078,8 +7091,28 @@ case "$longdblkind" in
 6) echo "You have 128-bit fully big-endian double-double long doubles (64-bit BEs in BE)." >& 4 ;;
 7) echo "You have 128-bit mixed-endian double-double long doubles (64-bit LEs in BE)." >& 4 ;;
 8) echo "You have 128-bit mixed-endian double-double long doubles (64-bit BEs in LE)." >& 4 ;;
-9) echo "You have 128-bit PDP-style mixed-endian long doubles." >& 4 ;;
+9) echo "You have 128-bit PDP-style mixed-endian long doubles (VAX format H)." >& 4 ;;
 *) echo "Cannot figure out your long double." >&4 ;;
+esac
+d_long_double_style_ieee=$undef
+d_long_double_style_ieee_std=$undef
+d_long_double_style_ieee_extended=$undef
+d_long_double_style_ieee_doubledouble=$undef
+d_long_double_style_vax=$undef
+case "$longdblkind" in
+1|2|3|4|5|6|7|8) d_long_double_style_ieee=$define ;;
+esac
+case "$longdblkind" in
+1|2) d_long_double_style_ieee_std=$define ;;
+esac
+case "$longdblkind" in
+3|4) d_long_double_style_ieee_extended=$define ;;
+esac
+case "$longdblkind" in
+5|6|7|8) d_long_double_style_ieee_doubledouble=$define ;;
+esac
+case "$longdblkind" in
+9) d_long_double_style_vax=$define ;;
 esac
 $rm_try
 
@@ -10253,6 +10286,30 @@ case "$doublekind" in
 13) echo "You have IBM long 64-bit doubles." >&4 ;;
 14) echo "You have Cray single 64-bit doubles." >&4 ;;
 *) echo "Cannot figure out your double.  You Cyber, or something?" >&4 ;;
+esac
+d_double_style_ieee=$undef
+d_double_style_vax=$undef
+d_double_style_ibm=$undef
+d_double_style_cray=$undef
+case "$doublekind" in
+1|2|3|4|5|6|7|8) d_double_style_ieee=$define ;;
+9|10|11) d_double_style_vax=$define ;;
+12|13) d_double_style_ibm=$define ;;
+14) double_style_cray=$define ;;
+esac
+case "$d_double_style_ieee" in
+$define)
+    d_double_has_inf=$define
+    d_double_has_nan=$define
+    d_double_has_negative_zero=$define
+    d_double_has_subnormals=$define
+    ;;
+*)
+    d_double_has_inf=$undef
+    d_double_has_nan=$undef
+    d_double_has_negative_zero=$undef
+    d_double_has_subnormals=$undef
+    ;;
 esac
 $rm_try
 
@@ -20592,6 +20649,11 @@ $cat >try.c <<EOP
  * 0x7f, 0xf4, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
  * (respectively) as opposed to the more usual
  * 0x7f, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+ *
+ * Pre-IEEE-754 floating point format do not even have inf/nan support
+ * at all.  They might have a "max" value (DBL_MAX), which may be deadly
+ * to even mention, causing immediate SIGFPE or equivalent: this is
+ * the case with VAX floating point, for example.
  */
 static void bytes(unsigned char *p, unsigned int n) {
   int i;
@@ -20671,6 +20733,10 @@ else
        doubleinfbytes='0x00, 0x00, 0x00, 0x00, 0x7f, 0xf0, 0x00, 0x00'
        doublenanbytes='0x00, 0x00, 0x00, 0x00, 0x7f, 0xf8, 0x00, 0x00'
        ;;
+    9|10|11|12|13|14) # VAX/Cray/IBM floating point formats, no inf/nan.
+       doubleinfbytes=$undef
+       doublenanbytes=$undef
+       ;;
     *) # No idea.
        doubleinfbytes=$undef
        doublenanbytes=$undef
@@ -20733,12 +20799,29 @@ else
        longdblinfbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7f, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
        longdblnanbytes='0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7f, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00'
        ;;
+    9|10|11|12|13|14) # VAX/Cray/IBM floating point formats, no inf/nan.
+       longdblinfbytes=$undef
+       longdblnanbytes=$undef
+       ;;
     *) # No idea.
        longdblinfbytes=$undef
        longdblnanbytes=$undef
        ;;
     esac
 fi
+# In case the program crashed the values are empty, turn them undef.
+case "$dblinfbytes" in
+'') dblinfbytes=$undef ;;
+esac
+case "$dblnanbytes" in
+'') dblnanbytes=$undef ;;
+esac
+case "$ldblinfbytes" in
+'') ldblinfbytes=$undef ;;
+esac
+case "$ldblnanbytes" in
+'') ldblnanbytes=$undef ;;
+esac
 $rm_try
 
 : Check the length of the double mantissa
@@ -24357,6 +24440,14 @@ d_dlerror='$d_dlerror'
 d_dlopen='$d_dlopen'
 d_dlsymun='$d_dlsymun'
 d_dosuid='$d_dosuid'
+d_double_has_inf='$d_double_has_inf'
+d_double_has_nan='$d_double_has_nan'
+d_double_has_negative_zero='$d_double_has_negative_zero'
+d_double_has_subnormals='$d_double_has_subnormals'
+d_double_style_cray='$d_double_style_cray'
+d_double_style_ibm='$d_double_style_ibm'
+d_double_style_ieee='$d_double_style_ieee'
+d_double_style_vax='$d_double_style_vax'
 d_drand48_r='$d_drand48_r'
 d_drand48proto='$d_drand48proto'
 d_dup2='$d_dup2'
@@ -24538,6 +24629,11 @@ d_log2='$d_log2'
 d_logb='$d_logb'
 d_longdbl='$d_longdbl'
 d_longlong='$d_longlong'
+d_long_double_style_ieee='$d_long_double_style_ieee'
+d_long_double_style_ieee_doubledouble='$d_long_double_style_ieee_doubledouble'
+d_long_double_style_ieee_extended='$d_long_double_style_ieee_extended'
+d_long_double_style_ieee_std='$d_long_double_style_ieee_std'
+d_long_double_style_vax='$d_long_double_style_vax'
 d_lrint='$d_lrint'
 d_lrintl='$d_lrintl'
 d_lround='$d_lround'
