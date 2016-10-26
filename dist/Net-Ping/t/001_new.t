@@ -51,7 +51,7 @@ like($@, qr/Data for ping must be from/, "new() errors for invalid data size");
 
 # force failures for tcp
 SKIP: {
-    diag "Checking icmp";
+    note "Checking icmp";
     eval { $p = Net::Ping->new('icmp'); };
     if($> and $^O ne 'VMS' and $^O ne 'cygwin') {
         like($@, qr/icmp ping requires root privilege/, "Need root for icmp");

@@ -895,7 +895,7 @@ use File::Glob qw(:case);
             qw(t/601_pod-coverage.t),
         ],
         'CUSTOMIZED'   => [
-            qw( t/001_new.t t/010_pingecho.t ),
+            qw( t/000_load.t t/001_new.t t/010_pingecho.t ),
         ],
 
     },
