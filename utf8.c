@@ -535,6 +535,10 @@ S_is_utf8_overlong_given_start_byte_ok(const U8 * const s, const STRLEN len)
         return TRUE;
     }
 
+#else
+
+    PERL_UNUSED_ARG(len);
+
 #endif
 
     return FALSE;
