@@ -89,7 +89,12 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Array and hash assignment are now faster, e.g.
+
+    (..., @a) = (...);
+    (..., %h) = (...);
+
+especially when the RHS is empty.
 
 =back
 
@@ -338,7 +343,17 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+List assignment in list context where the LHS contained aggregates and
+where there were not enough RHS elements, used to skip scalar lvalues.
+Previously, C<(($a,$b,@c,$d) = (1))> in list context returned C<($a)>; now
+it returns C<($a,$b,$d)>. C<(($a,$b,$c) = (1))> is unchanged: it still
+returns <($a,$b,$c)>. This can be seen in the following:
+
+    sub inc { $_++ for @_ }
+    inc(($a,$b,@c,$d) = (10))
+
+Formerly, the values of C<($a,$b,$d)> would be left as C<(11,undef,undef)>;
+now they are C<(11,1,1)>.
 
 =back
 
