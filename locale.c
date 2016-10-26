@@ -328,8 +328,9 @@ Perl_new_ctype(pTHX_ const char *newctype)
          * NUL */
         char bad_chars_list[ (94 * 4) + (3 * 5) + 1 ];
 
-        bool check_for_problems = ckWARN_d(WARN_LOCALE); /* No warnings means
-                                                            no check */
+        /* Don't check for problems if we are suppressing the warnings */
+        bool check_for_problems = ckWARN_d(WARN_LOCALE)
+                               || UNLIKELY(DEBUG_L_TEST);
         bool multi_byte_locale = FALSE;     /* Assume is a single-byte locale
                                                to start */
         unsigned int bad_count = 0;         /* Count of bad characters */
@@ -418,11 +419,12 @@ Perl_new_ctype(pTHX_ const char *newctype)
                               ? bad_chars_list
                               : ""
                             );
-            /* If we are actually in the scope of the locale, output the
-             * message now.  Otherwise we save it to be output at the first
-             * operation using this locale, if that actually happens.  Most
-             * programs don't use locales, so they are immune to bad ones */
-            if (IN_LC(LC_CTYPE)) {
+            /* If we are actually in the scope of the locale or are debugging,
+             * output the message now.  Otherwise we save it to be output at
+             * the first operation using this locale, if that actually happens.
+             * Most programs don't use locales, so they are immune to bad ones.
+             * */
+            if (IN_LC(LC_CTYPE) || UNLIKELY(DEBUG_L_TEST)) {
 
                 /* We have to save 'newctype' because the setlocale() just
                  * below may destroy it.  The next setlocale() further down
