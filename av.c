@@ -409,13 +409,18 @@ Perl_av_make(pTHX_ SSize_t size, SV **strp)
     if (size) {		/* "defined" was returning undef for size==0 anyway. */
         SV** ary;
         SSize_t i;
+        SSize_t orig_ix;
+
 	Newx(ary,size,SV*);
 	AvALLOC(av) = ary;
 	AvARRAY(av) = ary;
 	AvMAX(av) = size - 1;
 	AvFILLp(av) = -1;
-	ENTER;
-	SAVEFREESV(av);
+        /* avoid av being leaked if croak when calling magic below */
+        EXTEND_MORTAL(1);
+        PL_tmps_stack[++PL_tmps_ix] = (SV*)av;
+        orig_ix = PL_tmps_ix;
+
 	for (i = 0; i < size; i++) {
 	    assert (*strp);
 
@@ -430,8 +435,11 @@ Perl_av_make(pTHX_ SSize_t size, SV **strp)
 			   SV_DO_COW_SVSETSV|SV_NOSTEAL);
 	    strp++;
 	}
-	SvREFCNT_inc_simple_void_NN(av);
-	LEAVE;
+        /* disarm av's leak guard */
+        if (LIKELY(PL_tmps_ix == orig_ix))
+            PL_tmps_ix--;
+        else
+            PL_tmps_stack[orig_ix] = &PL_sv_undef;
     }
     return av;
 }
@@ -457,6 +465,7 @@ Perl_av_clear(pTHX_ AV *av)
 {
     SSize_t extra;
     bool real;
+    SSize_t orig_ix = 0;
 
     PERL_ARGS_ASSERT_AV_CLEAR;
     assert(SvTYPE(av) == SVt_PVAV);
@@ -482,11 +491,15 @@ Perl_av_clear(pTHX_ AV *av)
     if (AvMAX(av) < 0)
 	return;
 
-    if ((real = !!AvREAL(av))) {
+    if ((real = cBOOL(AvREAL(av)))) {
 	SV** const ary = AvARRAY(av);
 	SSize_t index = AvFILLp(av) + 1;
-	ENTER;
-	SAVEFREESV(SvREFCNT_inc_simple_NN(av));
+
+        /* avoid av being freed when calling destructors below */
+        EXTEND_MORTAL(1);
+        PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple_NN(av);
+        orig_ix = PL_tmps_ix;
+
 	while (index) {
 	    SV * const sv = ary[--index];
 	    /* undef the slot before freeing the value, because a
@@ -501,7 +514,14 @@ Perl_av_clear(pTHX_ AV *av)
 	AvARRAY(av) = AvALLOC(av);
     }
     AvFILLp(av) = -1;
-    if (real) LEAVE;
+    if (real) {
+        /* disarm av's premature free guard */
+        if (LIKELY(PL_tmps_ix == orig_ix))
+            PL_tmps_ix--;
+        else
+            PL_tmps_stack[orig_ix] = &PL_sv_undef;
+        SvREFCNT_dec_NN(av);
+    }
 }
 
 /*
@@ -522,6 +542,7 @@ void
 Perl_av_undef(pTHX_ AV *av)
 {
     bool real;
+    SSize_t orig_ix;
 
     PERL_ARGS_ASSERT_AV_UNDEF;
     assert(SvTYPE(av) == SVt_PVAV);
@@ -530,10 +551,14 @@ Perl_av_undef(pTHX_ AV *av)
     if (SvTIED_mg((const SV *)av, PERL_MAGIC_tied)) 
 	av_fill(av, -1);
 
-    if ((real = !!AvREAL(av))) {
+    if ((real = cBOOL(AvREAL(av)))) {
 	SSize_t key = AvFILLp(av) + 1;
-	ENTER;
-	SAVEFREESV(SvREFCNT_inc_simple_NN(av));
+
+        /* avoid av being freed when calling destructors below */
+        EXTEND_MORTAL(1);
+        PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple_NN(av);
+        orig_ix = PL_tmps_ix;
+
 	while (key)
 	    SvREFCNT_dec(AvARRAY(av)[--key]);
     }
@@ -544,7 +569,14 @@ Perl_av_undef(pTHX_ AV *av)
     AvMAX(av) = AvFILLp(av) = -1;
 
     if(SvRMAGICAL(av)) mg_clear(MUTABLE_SV(av));
-    if(real) LEAVE;
+    if (real) {
+        /* disarm av's premature free guard */
+        if (LIKELY(PL_tmps_ix == orig_ix))
+            PL_tmps_ix--;
+        else
+            PL_tmps_stack[orig_ix] = &PL_sv_undef;
+        SvREFCNT_dec_NN(av);
+    }
 }
 
 /*

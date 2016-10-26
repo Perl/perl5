@@ -1696,6 +1696,8 @@ void
 Perl_hv_clear(pTHX_ HV *hv)
 {
     dVAR;
+    SSize_t orig_ix;
+
     XPVHV* xhv;
     if (!hv)
 	return;
@@ -1704,8 +1706,10 @@ Perl_hv_clear(pTHX_ HV *hv)
 
     xhv = (XPVHV*)SvANY(hv);
 
-    ENTER;
-    SAVEFREESV(SvREFCNT_inc_simple_NN(hv));
+    /* avoid hv being freed when calling destructors below */
+    EXTEND_MORTAL(1);
+    PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple_NN(hv);
+    orig_ix = PL_tmps_ix;
     if (SvREADONLY(hv) && HvARRAY(hv) != NULL) {
 	/* restricted hash: convert all keys to placeholders */
 	STRLEN i;
@@ -1743,7 +1747,12 @@ Perl_hv_clear(pTHX_ HV *hv)
             mro_isa_changed_in(hv);
 	HvEITER_set(hv, NULL);
     }
-    LEAVE;
+    /* disarm hv's premature free guard */
+    if (LIKELY(PL_tmps_ix == orig_ix))
+        PL_tmps_ix--;
+    else
+        PL_tmps_stack[orig_ix] = &PL_sv_undef;
+    SvREFCNT_dec_NN(hv);
 }
 
 /*
@@ -1926,10 +1935,11 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 {
     XPVHV* xhv;
     bool save;
+    SSize_t orig_ix;
 
     if (!hv)
 	return;
-    save = !!SvREFCNT(hv);
+    save = cBOOL(SvREFCNT(hv));
     DEBUG_A(Perl_hv_assert(aTHX_ hv));
     xhv = (XPVHV*)SvANY(hv);
 
@@ -1952,8 +1962,10 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 	hv_name_set(hv, NULL, 0, 0);
     }
     if (save) {
-	ENTER;
-	SAVEFREESV(SvREFCNT_inc_simple_NN(hv));
+        /* avoid hv being freed when calling destructors below */
+        EXTEND_MORTAL(1);
+        PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple_NN(hv);
+        orig_ix = PL_tmps_ix;
     }
     hfreeentries(hv);
     if (SvOOK(hv)) {
@@ -2012,7 +2024,15 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 
     if (SvRMAGICAL(hv))
 	mg_clear(MUTABLE_SV(hv));
-    if (save) LEAVE;
+
+    if (save) {
+        /* disarm hv's premature free guard */
+        if (LIKELY(PL_tmps_ix == orig_ix))
+            PL_tmps_ix--;
+        else
+            PL_tmps_stack[orig_ix] = &PL_sv_undef;
+        SvREFCNT_dec_NN(hv);
+    }
 }
 
 /*
