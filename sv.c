@@ -1205,7 +1205,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
     const struct body_details *new_type_details;
     const struct body_details *old_type_details
 	= bodies_by_type + old_type;
-    SV *referant = NULL;
+    SV *referent = NULL;
 
     PERL_ARGS_ASSERT_SV_UPGRADE;
 
@@ -1270,7 +1270,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 	break;
     case SVt_IV:
 	if (SvROK(sv)) {
-	    referant = SvRV(sv);
+	    referent = SvRV(sv);
 	    old_type_details = &fake_rv;
 	    if (new_type == SVt_NV)
 		new_type = SVt_PVNV;
@@ -1465,9 +1465,9 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 	if (UNLIKELY(new_type == SVt_REGEXP))
 	    sv->sv_u.svu_rx = (regexp *)new_body;
 	else if (old_type < SVt_PV) {
-	    /* referant will be NULL unless the old type was SVt_IV emulating
+	    /* referent will be NULL unless the old type was SVt_IV emulating
 	       SVt_RV */
-	    sv->sv_u.svu_rv = referant;
+	    sv->sv_u.svu_rv = referent;
 	}
 	break;
     default:

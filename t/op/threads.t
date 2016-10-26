@@ -323,7 +323,7 @@ use threads;
     # During cloning 'look' at the object
     sub CLONE {
         foreach my $id (keys(%reg)) {
-            # This triggers SvREFCNT_inc() then SvREFCNT_dec() on the referant.
+            # This triggers SvREFCNT_inc() then SvREFCNT_dec() on the referent.
             my $obj = $reg{$id};
         }
     }
