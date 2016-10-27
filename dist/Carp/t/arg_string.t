@@ -1,6 +1,8 @@
 use warnings;
 use strict;
 
+# confirm that stack args are displayed correctly by longmess()
+
 use Test::More tests => 32;
 
 use Carp ();
@@ -22,7 +24,11 @@ like lm(3), qr/main::lm\(3\)/;
 like lm(substr("3\x{2603}", 0, 1)), qr/main::lm\(3\)/;
 like lm(-3), qr/main::lm\(-3\)/;
 like lm(-3.5), qr/main::lm\(-3\.5\)/;
-like lm(-3.5e30), qr/main::lm\(-3\.5[eE]\+?30\)/;
+like lm(-3.5e30),
+            qr/main::lm\(
+                -3500000000000000000000000000000
+              | -3\.5[eE]\+?0?30\)
+            /x;
 like lm(""), qr/main::lm\(""\)/;
 like lm("foo"), qr/main::lm\("foo"\)/;
 like lm("a\$b\@c\\d\"e"), qr/main::lm\("a\\\$b\\\@c\\\\d\\\"e"\)/;
