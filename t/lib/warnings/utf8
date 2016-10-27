@@ -764,6 +764,11 @@ BEGIN{
         print "SKIPPED\n# ebcdic platforms generates different Malformed UTF-8 warnings.";
         exit 0;
     }
-{};$^H=2**400}Â
+    use Config;
+    unless ($Double{double_style_ieee}) {
+        print "SKIPPED\n# non-IEEE fp range.";
+        exit 0;
+    }
+{};$^H=eval'2**400'}Â
 EXPECT
-Malformed UTF-8 character: \xc2\x0a (unexpected non-continuation byte 0x0a, immediately after start byte 0xc2; need 2 bytes, got 1) at - line 6.
+Malformed UTF-8 character: \xc2\x0a (unexpected non-continuation byte 0x0a, immediately after start byte 0xc2; need 2 bytes, got 1) at - line 11.
