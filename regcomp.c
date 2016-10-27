@@ -2426,6 +2426,21 @@ is the recommended Unicode-aware way of saying
            : ( state==1 ? special : 0 )					\
       )
 
+#define TRIE_BITMAP_SET_FOLDED(trie, uvc, folder)           \
+STMT_START {                                                \
+    TRIE_BITMAP_SET(trie, uvc);                             \
+    /* store the folded codepoint */                        \
+    if ( folder )                                           \
+        TRIE_BITMAP_SET(trie, folder[(U8) uvc ]);           \
+                                                            \
+    if ( !UTF ) {                                           \
+        /* store first byte of utf8 representation of */    \
+        /* variant codepoints */                            \
+        if (! UVCHR_IS_INVARIANT(uvc)) {                    \
+            TRIE_BITMAP_SET(trie, UTF8_TWO_BYTE_HI(uvc));   \
+        }                                                   \
+    }                                                       \
+} STMT_END
 #define MADE_TRIE       1
 #define MADE_JUMP_TRIE  2
 #define MADE_EXACT_TRIE 4
@@ -2656,18 +2671,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 if ( set_bit ) {
 		    /* store the codepoint in the bitmap, and its folded
 		     * equivalent. */
-                    TRIE_BITMAP_SET(trie, uvc);
-
-		    /* store the folded codepoint */
-                    if ( folder ) TRIE_BITMAP_SET(trie, folder[(U8) uvc ]);
-
-		    if ( !UTF ) {
-			/* store first byte of utf8 representation of
-			   variant codepoints */
-			if (! UVCHR_IS_INVARIANT(uvc)) {
-			    TRIE_BITMAP_SET(trie, UTF8_TWO_BYTE_HI(uvc));
-			}
-		    }
+                    TRIE_BITMAP_SET_FOLDED(trie, uvc, folder);
                     set_bit = 0; /* We've done our bit :-) */
                 }
             } else {
@@ -3261,31 +3265,14 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 				    SV ** const tmp = av_fetch( revcharmap, idx, 0);
 				    const U8 * const ch = (U8*)SvPV_nolen_const( *tmp );
 
-                                    TRIE_BITMAP_SET(trie,*ch);
-                                    if ( folder )
-                                        TRIE_BITMAP_SET(trie, folder[ *ch ]);
-                                    if ( !UTF ) {
-                                        /* store first byte of utf8 representation of
-                                           variant codepoints */
-                                        if (! UVCHR_IS_INVARIANT(*ch)) {
-                                            TRIE_BITMAP_SET(trie, UTF8_TWO_BYTE_HI(*ch));
-                                        }
-                                    }
+                                    TRIE_BITMAP_SET_FOLDED(trie,*ch,folder);
                                     DEBUG_OPTIMISE_r(
                                         Perl_re_printf( aTHX_  "%s", (char*)ch)
                                     );
 				}
 			    }
-			    TRIE_BITMAP_SET(trie,*ch);
-			    if ( folder )
-				TRIE_BITMAP_SET(trie,folder[ *ch ]);
-                            if ( !UTF ) {
-                                /* store first byte of utf8 representation of
-                                   variant codepoints */
-                                if (! UVCHR_IS_INVARIANT(*ch)) {
-                                    TRIE_BITMAP_SET(trie, UTF8_TWO_BYTE_HI(*ch));
-                                }
-                            }
+                            /* store the current firstchar in the bitmap */
+                            TRIE_BITMAP_SET_FOLDED(trie,*ch,folder);
                             DEBUG_OPTIMISE_r(Perl_re_printf( aTHX_ "%s", ch));
 			}
                         idx = ofs;
