@@ -3248,6 +3248,10 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
            split out as an EXACT and put in front of the TRIE node.  */
         trie->startstate= 1;
         if ( trie->bitmap && !widecharmap && !trie->jump  ) {
+            /* we want to find the first state that has more than
+             * one transition, if that state is not the first state
+             * then we have a common prefix which we can remove.
+             */
             U32 state;
             for ( state = 1 ; state < trie->statecount-1 ; state++ ) {
                 U32 ofs = 0;
@@ -3256,6 +3260,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 U32 count = 0;
                 const U32 base = trie->states[ state ].trans.base;
 
+                /* does this state terminate an alternation? */
                 if ( trie->states[state].wordnum )
                         count = 1;
 
@@ -3265,13 +3270,20 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                          trie->trans[ base + ofs - trie->uniquecharcount ].check == state )
                     {
                         if ( ++count > 1 ) {
+                            /* we have more than one transition */
                             SV **tmp;
                             U8 *ch;
+                            /* if this is the first state there is no common prefix
+                             * to extract, so we can exit */
                             if ( state == 1 ) break;
                             tmp = av_fetch( revcharmap, ofs, 0);
                             ch = (U8*)SvPV_nolen_const( *tmp );
 
+                            /* if we are on count 2 then we need to initialize the
+                             * bitmap, and store the previous char if there was one
+                             * in it*/
                             if ( count == 2 ) {
+                                /* clear the bitmap */
                                 Zero(trie->bitmap, ANYOF_BITMAP_SIZE, char);
                                 DEBUG_OPTIMISE_r(
                                     Perl_re_indentf( aTHX_  "New Start State=%"UVuf" Class: [",
@@ -3295,6 +3307,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 		    }
                 }
                 if ( count == 1 ) {
+                    /* This state has only one transition, its transition is part
+                     * of a common prefix - we need to concatenate the char it
+                     * represents to what we have so far. */
                     SV **tmp = av_fetch( revcharmap, first_ofs, 0);
                     STRLEN len;
                     char *ch = SvPV( *tmp, len );
