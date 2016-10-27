@@ -528,10 +528,8 @@ for my $num (0, -1, 1) {
     }
 }
 
-my $vax_float = (pack("d", 1) =~ /^[\x80\x10]\x40/);
-
 SKIP: {
-    if ($vax_float) { skip "VAX float has no Inf or NaN", 3 }
+    unless ($Config{d_double_has_inf} && $Config{d_double_has_nan}) { skip "no Inf or NaN in doublekind $Config{doublekind}", 3 }
     # test that %f doesn't panic with +Inf, -Inf, NaN [perl #45383]
     foreach my $n ('2**1e100', '-2**1e100', '2**1e100/2**1e100') { # +Inf, -Inf, NaN
         eval { my $f = sprintf("%f", eval $n); };
@@ -600,7 +598,7 @@ is $o::count,    0, 'sprintf %d string overload count is 0';
 is $o::numcount, 1, 'sprintf %d number overload count is 1';
 
 SKIP: {  # hexfp
-    if ($vax_float) { skip "VAX float no hexfp", scalar @hexfloat }
+    unless ($Config{d_double_style_ieee}) { skip "no IEEE, no hexfp", scalar @hexfloat }
 
 my $ppc_linux = $Config{archname} =~ /^(?:ppc|power(?:pc)?)(?:64)?-linux/;
 my $irix_ld   = $Config{archname} =~ /^IP\d+-irix-ld$/;
@@ -696,8 +694,7 @@ SKIP: {
     skip("uselongdouble=" . ($Config{uselongdouble} ? 'define' : 'undef')
          . " longdblkind=$Config{longdblkind} os=$^O", 6)
         unless ($Config{uselongdouble} &&
-                ($Config{longdblkind} == 5 ||
-                 $Config{longdblkind} == 6)
+                ($Config{long_double_style_ieee_doubledouble})
                 # Gating on 'linux' (ppc) here is due to the differing
                 # double-double implementations: other (also big-endian)
                 # double-double platforms (e.g. AIX on ppc or IRIX on mips)
@@ -862,8 +859,7 @@ SKIP: {
     skip("non-80-bit-long-double", 17)
         unless ($Config{uselongdouble} &&
 		($Config{nvsize} == 16 || $Config{nvsize} == 12) &&
-		($Config{longdblkind} == 3 ||
-		 $Config{longdblkind} == 4));
+		($Config{long_double_style_ieee_extended}));
 
     {
         # The last normal for this format.

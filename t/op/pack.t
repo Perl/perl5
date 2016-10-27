@@ -50,8 +50,6 @@ for my $size ( 16, 32, 64 ) {
 my $IsTwosComplement = pack('i', -1) eq "\xFF" x $Config{intsize};
 print "# \$IsTwosComplement = $IsTwosComplement\n";
 
-my $vax_float = (pack("d", 1) =~ /^[\x80\x10]\x40/);
-
 sub is_valid_error
 {
   my $err = shift;
@@ -297,7 +295,7 @@ sub list_eq ($$) {
     # Is this a stupid thing to do on VMS, VOS and other unusual platforms?
 
     skip("-- the IEEE infinity model is unavailable in this configuration.", 1)
-       if (($^O eq 'VMS') && !defined($Config{useieee}) || $vax_float);
+       if (($^O eq 'VMS') && !defined($Config{useieee}) || !$Config{d_double_has_inf});
 
     skip("-- $^O has serious fp indigestion on w-packed infinities", 1)
        if (
@@ -322,7 +320,7 @@ sub list_eq ($$) {
  SKIP: {
 
     skip("-- the full range of an IEEE double may not be available in this configuration.", 3)
-       if (($^O eq 'VMS') && !defined($Config{useieee}) || $vax_float);
+       if (($^O eq 'VMS') && !defined($Config{useieee}) || !$Config{d_double_style_ieee});
 
     skip("-- $^O does not like 2**1023", 3)
        if (($^O eq 'ultrix'));
@@ -1534,7 +1532,7 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
     is($x[1], $y[1], "checksum advance ok");
 
     SKIP: {
-        skip("-- VAX float", 1) if $vax_float;
+        skip("-- non-IEEE float", 1) if !$Config{d_double_style_ieee};
         # verify that the checksum is not overflowed with C0
         is(unpack("C0%128U", "abcd"), unpack("U0%128U", "abcd"), "checksum not overflowed");
     }

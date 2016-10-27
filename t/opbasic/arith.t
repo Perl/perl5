@@ -427,12 +427,11 @@ if ($^O eq 'VMS') {
   eval {require Config; import Config};
   $vms_no_ieee = 1 unless defined($Config{useieee});
 }
-my $vax_float = (pack("d",1) =~ /^[\x80\x10]\x40/);
 
 if ($^O eq 'vos') {
   print "not ok ", $T++, " # TODO VOS raises SIGFPE instead of producing infinity.\n";
 }
-elsif ($vms_no_ieee || $vax_float) {
+elsif ($vms_no_ieee || !$Config{d_double_has_inf}) {
  print "ok ", $T++, " # SKIP -- the IEEE infinity model is unavailable in this configuration.\n"
 }
 elsif ($^O eq 'ultrix') {
@@ -462,8 +461,8 @@ else {
 # [perl #120426]
 # small numbers shouldn't round to zero if they have extra floating digits
 
-if ($vax_float) {
-for (1..8) { print "ok ", $T++, " # SKIP -- VAX not IEEE\n" }
+unless ($Config{d_double_style_ieee}) {
+for (1..8) { print "ok ", $T++, " # SKIP -- not IEEE\n" }
 } else {
 try $T++,  0.153e-305 != 0.0,              '0.153e-305';
 try $T++,  0.1530e-305 != 0.0,             '0.1530e-305';

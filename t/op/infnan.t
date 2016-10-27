@@ -16,9 +16,7 @@ BEGIN {
         # but Inf is completely broken (e.g. Inf + 0 -> NaN).
         skip_all "$^O with long doubles does not have sane inf/nan";
     }
-    if ($Config{doublekind} == 9 ||
-        $Config{doublekind} == 10 ||
-        $Config{doublekind} == 11) {
+    unless ($Config{d_double_has_inf} && $Config{d_double_has_nan}) {
         skip_all "the doublekind $Config{doublekind} does not have inf/nan";
     }
 }
