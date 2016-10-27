@@ -3265,9 +3265,12 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                          trie->trans[ base + ofs - trie->uniquecharcount ].check == state )
                     {
                         if ( ++count > 1 ) {
-                            SV **tmp = av_fetch( revcharmap, ofs, 0);
-			    const U8 *ch = (U8*)SvPV_nolen_const( *tmp );
+                            SV **tmp;
+                            U8 *ch;
                             if ( state == 1 ) break;
+                            tmp = av_fetch( revcharmap, ofs, 0);
+                            ch = (U8*)SvPV_nolen_const( *tmp );
+
                             if ( count == 2 ) {
                                 Zero(trie->bitmap, ANYOF_BITMAP_SIZE, char);
                                 DEBUG_OPTIMISE_r(
