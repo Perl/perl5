@@ -3251,7 +3251,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
             U32 state;
             for ( state = 1 ; state < trie->statecount-1 ; state++ ) {
                 U32 ofs = 0;
-                I32 idx = -1;
+                I32 first_ofs = -1; /* keeps track of the ofs of the first
+                                       transition, -1 means none */
                 U32 count = 0;
                 const U32 base = trie->states[ state ].trans.base;
 
@@ -3273,8 +3274,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                                     Perl_re_indentf( aTHX_  "New Start State=%"UVuf" Class: [",
                                         depth+1,
                                         (UV)state));
-				if (idx >= 0) {
-				    SV ** const tmp = av_fetch( revcharmap, idx, 0);
+                                if (first_ofs >= 0) {
+                                    SV ** const tmp = av_fetch( revcharmap, first_ofs, 0);
 				    const U8 * const ch = (U8*)SvPV_nolen_const( *tmp );
 
                                     TRIE_BITMAP_SET_FOLDED(trie,*ch,folder);
@@ -3287,18 +3288,18 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                             TRIE_BITMAP_SET_FOLDED(trie,*ch,folder);
                             DEBUG_OPTIMISE_r(Perl_re_printf( aTHX_ "%s", ch));
 			}
-                        idx = ofs;
+                        first_ofs = ofs;
 		    }
                 }
                 if ( count == 1 ) {
-                    SV **tmp = av_fetch( revcharmap, idx, 0);
+                    SV **tmp = av_fetch( revcharmap, first_ofs, 0);
                     STRLEN len;
                     char *ch = SvPV( *tmp, len );
                     DEBUG_OPTIMISE_r({
                         SV *sv=sv_newmortal();
-                        Perl_re_indentf( aTHX_  "Prefix State: %"UVuf" Idx:%"UVuf" Char='%s'\n",
+                        Perl_re_indentf( aTHX_  "Prefix State: %"UVuf" Ofs:%"UVuf" Char='%s'\n",
                             depth+1,
-                            (UV)state, (UV)idx,
+                            (UV)state, (UV)first_ofs,
                             pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), 6,
 	                        PL_colors[0], PL_colors[1],
 	                        (SvUTF8(*tmp) ? PERL_PV_ESCAPE_UNI : 0) |
