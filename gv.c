@@ -1856,10 +1856,12 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 	if (len) {
 	    switch (*name) {
 	    case 'E':
-                if (memEQs(name, len, "EXPORT")
+                if (
+                    len >= 6 && name[1] == 'X' &&
+                    (memEQs(name, len, "EXPORT")
                     ||memEQs(name, len, "EXPORT_OK")
                     ||memEQs(name, len, "EXPORT_FAIL")
-                    ||memEQs(name, len, "EXPORT_TAGS")
+                    ||memEQs(name, len, "EXPORT_TAGS"))
                 )
 		    GvMULTI_on(gv);
 		break;
@@ -1921,10 +1923,12 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 		}
 		break;
 	    case 'E':
-                if (memEQs(name, len, "EXPORT")
+                if (
+                    len >= 6 && name[1] == 'X' &&
+                    (memEQs(name, len, "EXPORT")
                     ||memEQs(name, len, "EXPORT_OK")
                     ||memEQs(name, len, "EXPORT_FAIL")
-                    ||memEQs(name, len, "EXPORT_TAGS")
+                    ||memEQs(name, len, "EXPORT_TAGS"))
                 )
 		    GvMULTI_on(gv);
 		break;
