@@ -2574,7 +2574,15 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 noper= noper_next;
         }
 
-        if ( noper < tail && ( OP(noper) == flags || ( flags == EXACTFU && OP(noper) == EXACTFU_SS ) ) ) {
+        if ( noper < tail &&
+                (
+                    OP(noper) == flags ||
+                    (
+                        flags == EXACTFU &&
+                        OP(noper) == EXACTFU_SS
+                    )
+                )
+        ) {
             uc= (U8*)STRING(noper);
             e= uc + STR_LEN(noper);
         } else {
@@ -2591,6 +2599,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 TRIE_BITMAP_SET(trie, LATIN_SMALL_LETTER_SHARP_S);
             }
         }
+
         for ( ; uc < e ; uc += len ) {  /* Look at each char in the current
                                            branch */
             TRIE_CHARCOUNT(trie)++;
