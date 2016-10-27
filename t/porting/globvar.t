@@ -61,12 +61,10 @@ foreach my $file (map {$_ . $Config{_o}} qw(globals regcomp)) {
     close $fh or die "Problem running nm $file";
 }
 
-my $non_ieee_fp = ($Config{doublekind} == 9 ||
-                   $Config{doublekind} == 10 ||
-                   $Config{doublekind} == 11);
-
-if ($non_ieee_fp) {
+unless ($Config{d_double_has_inf}) {
     $skip{PL_inf}++;
+}
+unless ($Config{d_double_has_nan}) {
     $skip{PL_nan}++;
 }
 

@@ -55,17 +55,18 @@ between(0.76, tanh(1), 0.77, 'tanh(1)');
 between(-0.77, tanh(-1), -0.76, 'tanh(-1)');
 cmp_ok(tanh(1), '==', -tanh(-1), 'tanh(1) == -tanh(-1)');
 
-my $non_ieee_fp = ($Config{doublekind} == 9 ||
-                   $Config{doublekind} == 10 ||
-                   $Config{doublekind} == 11);
-
 SKIP: {
     skip "no fpclassify", 4 unless $Config{d_fpclassify};
     is(fpclassify(1), FP_NORMAL, "fpclassify 1");
     is(fpclassify(0), FP_ZERO, "fpclassify 0");
-    skip("no inf/nan", 2) if $non_ieee_fp;
-    is(fpclassify(INFINITY), FP_INFINITE, "fpclassify INFINITY");
-    is(fpclassify(NAN), FP_NAN, "fpclassify NAN");
+    SKIP: {
+        skip("no inf", 1) unless $Config{d_double_has_inf};
+        is(fpclassify(INFINITY), FP_INFINITE, "fpclassify INFINITY");
+    }
+    SKIP: {
+        skip("no nan", 1) unless $Config{d_double_has_nan};
+        is(fpclassify(NAN), FP_NAN, "fpclassify NAN");
+    }
 }
 
 sub near {
@@ -104,15 +105,18 @@ SKIP: {
     ok(!isinf(42), "isinf 42");
     ok(!isnan(42), "isnan Inf");
   SKIP: {
-      skip("no inf/nan", 9) if $non_ieee_fp;
+      skip("no inf", 4) unless $Config{d_double_has_inf};
       ok(!isfinite(Inf), "isfinite Inf");
-      ok(!isfinite(NaN), "isfinite NaN");
       ok(isinf(INFINITY), "isinf INFINITY");
       ok(isinf(Inf), "isinf Inf");
+      ok(!isnan(Inf), "isnan Inf");
+    }
+  SKIP: {
+      skip("no nan", 5) unless $Config{d_double_has_nan};
+      ok(!isfinite(NaN), "isfinite NaN");
       ok(!isinf(NaN), "isinf NaN");
       ok(isnan(NAN), "isnan NAN");
       ok(isnan(NaN), "isnan NaN");
-      ok(!isnan(Inf), "isnan Inf");
       cmp_ok(nan(), '!=', nan(), 'nan');
     }
     near(log1p(2), 1.09861228866811, "log1p", 1e-9);
@@ -147,7 +151,7 @@ SKIP: {
     ok(islessequal(1, 1), "islessequal 1 1");
 
   SKIP: {
-      skip("no inf/nan", 2) if $non_ieee_fp;
+      skip("no nan", 2) unless $Config{d_double_has_nan};
       ok(!isless(1, NaN), "isless 1 NaN");
       ok(isunordered(1, NaN), "isunordered 1 NaN");
     }
@@ -169,7 +173,7 @@ SKIP: {
     near(lgamma(9), 10.6046029027452, "lgamma 9", 1.5e-7);
 
   SKIP: {
-      skip("no inf/nan", 19) if $non_ieee_fp;
+      skip("no inf/nan", 19) unless $Config{d_double_has_inf} && $Config{d_double_has_nan};
 
       # These don't work on old mips/hppa platforms
       # because nan with payload zero == Inf (or == -Inf).
