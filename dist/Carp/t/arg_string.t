@@ -26,9 +26,11 @@ like lm(-3), qr/main::lm\(-3\)/;
 like lm(-3.5), qr/main::lm\(-3\.5\)/;
 like lm(-3.5e30),
             qr/main::lm\(
+              (
                 -3500000000000000000000000000000
-              | -3\.5[eE]\+?0?30\)
-            /x;
+              | -3\.5[eE]\+?0?30
+              )
+              \) /x;
 like lm(""), qr/main::lm\(""\)/;
 like lm("foo"), qr/main::lm\("foo"\)/;
 like lm("a\$b\@c\\d\"e"), qr/main::lm\("a\\\$b\\\@c\\\\d\\\"e"\)/;
