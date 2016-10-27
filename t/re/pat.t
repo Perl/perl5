@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 800;  # Update this when adding/deleting tests.
+plan tests => 802;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1799,7 +1799,14 @@ EOP
     TODO: {
         local $::TODO = "RT #21491: m'' interpolates escape sequences";
         is(0+("\n" =~ m'\n'), 0, q|RT #21491: m'\n' should not interpolate|);
-    }
+        }
+
+        {
+            my $str = "a\xE4";
+            ok( $str =~ m{^(a|a\x{e4})$}, "fix [perl #129950] - latin1 case" );
+            utf8::upgrade($str);
+            ok( $str =~ m{^(a|a\x{e4})$}, "fix [perl #129950] - utf8 case" );
+        }
 } # End of sub run_tests
 
 1;

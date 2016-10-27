@@ -3264,6 +3264,13 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                                     TRIE_BITMAP_SET(trie,*ch);
                                     if ( folder )
                                         TRIE_BITMAP_SET(trie, folder[ *ch ]);
+                                    if ( !UTF ) {
+                                        /* store first byte of utf8 representation of
+                                           variant codepoints */
+                                        if (! UVCHR_IS_INVARIANT(*ch)) {
+                                            TRIE_BITMAP_SET(trie, UTF8_TWO_BYTE_HI(*ch));
+                                        }
+                                    }
                                     DEBUG_OPTIMISE_r(
                                         Perl_re_printf( aTHX_  "%s", (char*)ch)
                                     );
@@ -3272,6 +3279,13 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 			    TRIE_BITMAP_SET(trie,*ch);
 			    if ( folder )
 				TRIE_BITMAP_SET(trie,folder[ *ch ]);
+                            if ( !UTF ) {
+                                /* store first byte of utf8 representation of
+                                   variant codepoints */
+                                if (! UVCHR_IS_INVARIANT(*ch)) {
+                                    TRIE_BITMAP_SET(trie, UTF8_TWO_BYTE_HI(*ch));
+                                }
+                            }
                             DEBUG_OPTIMISE_r(Perl_re_printf( aTHX_ "%s", ch));
 			}
                         idx = ofs;
