@@ -2566,6 +2566,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                                                bitmap?*/
 
         if (OP(noper) == NOTHING) {
+            /* skip past a NOTHING at the start of an alternation
+             * eg, /(?:)a|(?:b)/ should be the same as /a|b/
+             */
             regnode *noper_next= regnext(noper);
             if (noper_next < tail)
                 noper= noper_next;
