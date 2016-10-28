@@ -1985,10 +1985,10 @@ foreach my $test (@tests) {
 
                         foreach my $overlong ("", "overlong") {
 
-                            # Our hard-coded overlong starts with \xFE, so
+                            # If we're already at the longest possible, we
+                            # can't create an overlong (which would be longer)
                             # can't handle anything larger.
-                            next if $overlong
-                            && ord native_to_I8(substr($bytes, 0, 1)) >= 0xFE;
+                            next if $overlong && $expected_len >= $max_bytes;
 
                             my @malformations;
                             my @expected_errors;
@@ -2030,12 +2030,12 @@ foreach my $test (@tests) {
                                     # to the exact same code point as the
                                     # original.
                                     $this_bytes
-                                    = I8_to_native("\xfe")
+                                    = I8_to_native("\xff")
                                     . (I8_to_native(chr $first_continuation)
-                                       x ( 6 - length($this_bytes)))
+                                       x ( $max_bytes - 1 - length($this_bytes)))
                                     . $this_bytes;
                                     $this_length = length($this_bytes);
-                                    $this_expected_len = 7;
+                                    $this_expected_len = $max_bytes;
                                     push @expected_errors, $UTF8_GOT_LONG;
                                 }
                                 if ($malformations_name =~ /short/) {
