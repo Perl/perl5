@@ -1051,7 +1051,7 @@ my @malformations = (
         (isASCII) ? "\xc1\xbf" : I8_to_native("\xc4\xbf"),
         2,
         $UTF8_ALLOW_LONG, $UTF8_GOT_LONG,
-        (isASCII) ? 0x7F : utf8::unicode_to_native(0xBF),
+        (isASCII) ? 0x7F : utf8::unicode_to_native(0x9F),
         2,
         qr/overlong/
     ],
