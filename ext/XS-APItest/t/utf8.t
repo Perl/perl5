@@ -2030,10 +2030,10 @@ foreach my $test (@tests) {
                                     # to the exact same code point as the
                                     # original.
                                     $this_bytes
-                                              = I8_to_native("\xfe")
-                                             . (I8_to_native(chr $first_continuation)
-                                                  x ( 6 - length($this_bytes)))
-                                             . $this_bytes;
+                                    = I8_to_native("\xfe")
+                                    . (I8_to_native(chr $first_continuation)
+                                       x ( 6 - length($this_bytes)))
+                                    . $this_bytes;
                                     $this_length = length($this_bytes);
                                     $this_expected_len = 7;
                                     push @expected_errors, $UTF8_GOT_LONG;
@@ -2073,10 +2073,10 @@ foreach my $test (@tests) {
                                           || $malformations_name;
                             my $this_name = "utf8n_to_uvchr_error() $testname: "
                                                         . (($disallow_flag)
-                                                            ? 'disallowed'
-                                                            : $disallowed
-                                                            ? $disallowed
-                                                            : 'allowed');
+                                                           ? 'disallowed'
+                                                           : $disallowed
+                                                             ? $disallowed
+                                                             : 'allowed');
                             $this_name .= ", $eval_warn";
                             $this_name .= ", " . (($warn_flag)
                                                 ? 'with warning flag'
@@ -2167,7 +2167,7 @@ foreach my $test (@tests) {
                                         }
                                     }
                                     fail("Expected '$malformation' warning"
-                                       . "but didn't get it");
+                                       . " but didn't get it");
 
                                 }
                             }
