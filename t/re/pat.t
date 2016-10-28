@@ -1802,10 +1802,10 @@ EOP
         }
 
         {
-            my $str = "a\xE4";
-            ok( $str =~ m{^(a|a\x{e4})$}, "fix [perl #129950] - latin1 case" );
+            my $str = "a\xB6";
+            ok( $str =~ m{^(a|a\x{b6})$}, "fix [perl #129950] - latin1 case" );
             utf8::upgrade($str);
-            ok( $str =~ m{^(a|a\x{e4})$}, "fix [perl #129950] - utf8 case" );
+            ok( $str =~ m{^(a|a\x{b6})$}, "fix [perl #129950] - utf8 case" );
         }
 } # End of sub run_tests
 
