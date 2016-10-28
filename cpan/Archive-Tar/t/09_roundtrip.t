@@ -26,7 +26,7 @@ BEGIN {
         for my $dir ((split /$Config::Config{path_sep}/, $ENV{PATH}), '.') {
           next if $dir eq '';
           require File::Spec;
-          my $abs = File::Spec->catfile($dir, $cmd);
+          my $abs = File::Spec->catfile($dir, $cmd, $Config::Config{exe_ext});
           return $abs if (-x $abs or $abs = MM->maybe_command($abs));
         }
         return;
@@ -106,19 +106,77 @@ for my $archive_name (@file_only_archives) {
 # what we'll get when round-tripping on an archive which contains one or more
 # entries for directories.
 
+# Divine whether the external tar command can do gzip/bzip2
+# from the output of 'tar --help'.
+# GNU tar:
+# ...
+# -j, --bzip2                filter the archive through bzip2
+# -z, --gzip, --gunzip, --ungzip   filter the archive through gzip
+#
+# BSD tar:
+# ....
+#   -z, -j, -J, --lzma  Compress archive with gzip/bzip2/xz/lzma
+# ...
+#
+# BSD tar (older)
+# tar: unknown option -- help
+# usage: tar [-]{crtux}[-befhjklmopqvwzHOPSXZ014578] [archive] [blocksize]
+# ...
+
+sub can_tar_gzip {
+  my ($tar_help) = @_;
+  $tar_help =~ /-z, --gzip|-z,.+gzip/;
+}
+
+sub can_tar_bzip2 {
+  my ($tar_help) = @_;
+  $tar_help =~ /-j, --bzip2|-j,+bzip2/;
+}
+
+# The name of the external tar executable.
+my $TAR_EXE;
+
 SKIP: {
-  skip 'No tar command found', scalar @file_and_directory_archives unless can_run('tar');
+  my $skip_count = scalar @file_and_directory_archives;
+
+  # The preferred 'tar' command may not be called tar,:
+  # especially on legacy unix systems.  Test first various
+  # alternative names that are more likely to work for us.
+  #
+  my @TRY_TAR = qw[gtar gnutar bsdtar tar];
+  my $can_tar_gzip;
+  my $can_tar_bzip2;
+  for my $tar_try (@TRY_TAR) {
+    if (can_run($tar_try)) {
+      print "# Found tar executable '$tar_try'\n";
+      my $tar_help = qx{$tar_try --help};
+      $can_tar_gzip  = can_tar_gzip($tar_help);
+      $can_tar_bzip2 = can_tar_bzip2($tar_help);
+      printf "# can_tar_gzip  = %d\n", $can_tar_gzip;
+      printf "# can_tar_bzip2 = %d\n", $can_tar_bzip2;
+      # We could dance more intricately and handle the case
+      # of only either of gzip and bzip2 being supported,
+      # or neither, but let's keep this simple.
+      if ($can_tar_gzip && $can_tar_bzip2) {
+        $TAR_EXE = $tar_try;
+        last;
+      }
+    }
+  }
+  unless (defined $TAR_EXE) {
+    skip("No suitable tar command found (tried: @TRY_TAR)", $skip_count);
+  }
 
   for my $archive_name (@file_and_directory_archives) {
     my @contents;
     if ($archive_name =~ m/\.tar$/) {
-        @contents = qx{tar tvf $archive_name};
+        @contents = qx{$TAR_EXE tvf $archive_name};
     }
     elsif ($archive_name =~ m/\.tgz$/) {
-        @contents = qx{tar tzvf $archive_name};
+        @contents = qx{$TAR_EXE tzvf $archive_name};
     }
     elsif ($archive_name =~ m/\.tbz$/) {
-        @contents = qx{tar tjvf $archive_name};
+        @contents = qx{$TAR_EXE tjvf $archive_name};
     }
     chomp(@contents);
     my @directory_or_not;
