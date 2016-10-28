@@ -2029,7 +2029,8 @@ foreach my $test (@tests) {
                                     # overlong sequence.  This should evaluate
                                     # to the exact same code point as the
                                     # original.
-                                    $this_bytes = "\xfe"
+                                    $this_bytes
+                                              = I8_to_native("\xfe")
                                              . (I8_to_native(chr $first_continuation)
                                                   x ( 6 - length($this_bytes)))
                                              . $this_bytes;
