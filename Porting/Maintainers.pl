@@ -126,6 +126,8 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [
             qw(t/07_ptardiff.t),
         ],
+        # CPAN RT 118476
+        'CUSTOMIZED'   => [ 'lib/Archive/Tar.pm', 't/09_roundtrip.t' ],
     },
 
     'Attribute::Handlers' => {
