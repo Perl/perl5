@@ -380,6 +380,9 @@ my $first_continuation = (isASCII) ? 0x80 : 0xA0;
 my $final_continuation = 0xBF;
 my $start = (isASCII) ? 0xC2 : 0xC5;
 
+my $max_bytes = (isASCII) ? 13 : 14; # Max number of bytes in a UTF-8 sequence
+                                     # representing a single code point
+
 my $continuation = $first_continuation - 1;
 
 while ($cp < 255) {
@@ -429,7 +432,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
                 $u < 0x200000       ? 4 :
                 $u < 0x4000000      ? 5 :
                 $u < 0x80000000     ? 6 : (($is64bit)
-                                        ? ($u < 0x1000000000 ? 7 : 13)
+                                        ? ($u < 0x1000000000 ? 7 : $max_bytes)
                                         : 7)
               )
             : ($u < 0xA0        ? 1 :
@@ -438,7 +441,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
                $u < 0x40000     ? 4 :
                $u < 0x400000    ? 5 :
                $u < 0x4000000   ? 6 :
-               $u < 0x40000000  ? 7 : 14 );
+               $u < 0x40000000  ? 7 : $max_bytes );
     }
 
     # If this test fails, subsequent ones are meaningless.
@@ -1163,11 +1166,11 @@ if (isASCII && ! $is64bit) {    # 32-bit ASCII platform
         ],
         [ "overflow malformation, can tell on first byte",
             "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80",
-            13,
+            $max_bytes,
             0,  # There is no way to allow this malformation
             $UTF8_GOT_OVERFLOW,
             $REPLACEMENT,
-            13,
+            $max_bytes,
             qr/overflows/
         ];
 }
@@ -1182,20 +1185,20 @@ else {
             (isASCII)
              ?              "\xff\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80"
              : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-            (isASCII) ? 13 : 14,
+            $max_bytes,
             $UTF8_ALLOW_LONG, $UTF8_GOT_LONG,
             0,   # NUL
-            (isASCII) ? 13 : 14,
+            $max_bytes,
             qr/overlong/,
         ],
         [ "overlong malformation, highest max-byte",
             (isASCII)    # 2**36-1 on ASCII; 2**30-1 on EBCDIC
              ?              "\xff\x80\x80\x80\x80\x80\x80\xbf\xbf\xbf\xbf\xbf\xbf"
              : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xbf\xbf\xbf\xbf\xbf\xbf"),
-            (isASCII) ? 13 : 14,
+            $max_bytes,
             $UTF8_ALLOW_LONG, $UTF8_GOT_LONG,
             (isASCII) ? 0xFFFFFFFFF : 0x3FFFFFFF,
-            (isASCII) ? 13 : 14,
+            $max_bytes,
             qr/overlong/,
         ];
 
@@ -1203,11 +1206,11 @@ else {
         push @malformations,
         [ "overflow malformation",
             I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0"),
-            14,
+            $max_bytes,
             0,  # There is no way to allow this malformation
             $UTF8_GOT_OVERFLOW,
             $REPLACEMENT,
-            14,
+            $max_bytes,
             qr/overflows/
         ];
     }
@@ -1217,11 +1220,11 @@ else {
                (isASCII)
                 ?              "\xff\x80\x90\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"
                 : I8_to_native("\xff\xb0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-                (isASCII) ? 13 : 14,
+                $max_bytes,
                 0,  # There is no way to allow this malformation
                 $UTF8_GOT_OVERFLOW,
                 $REPLACEMENT,
-                (isASCII) ? 13 : 14,
+                $max_bytes,
                 qr/overflows/
             ];
     }
@@ -1725,7 +1728,7 @@ my @tests = (
         # 32-bit machines
         $UTF8_WARN_ABOVE_31_BIT, $UTF8_DISALLOW_ABOVE_31_BIT,
         $UTF8_GOT_ABOVE_31_BIT,
-        'utf8', 0x80000000, (isASCII) ? 7 :14,
+        'utf8', 0x80000000, (isASCII) ? 7 : $max_bytes,
         nonportable_regex(0x80000000)
     ],
     [ "requires at least 32 bits, and use SUPER-type flags, instead of ABOVE_31_BIT",
@@ -1733,7 +1736,7 @@ my @tests = (
          ? "\xfe\x82\x80\x80\x80\x80\x80"
          : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
         $UTF8_WARN_SUPER, $UTF8_DISALLOW_SUPER, $UTF8_GOT_SUPER,
-        'utf8', 0x80000000, (isASCII) ? 7 :14,
+        'utf8', 0x80000000, (isASCII) ? 7 : $max_bytes,
         nonportable_regex(0x80000000)
     ],
     [ "overflow with warnings/disallow for more than 31 bits",
@@ -1756,7 +1759,7 @@ my @tests = (
         $UTF8_DISALLOW_ABOVE_31_BIT,
         $UTF8_GOT_ABOVE_31_BIT,
         'utf8', 0,
-        (! isASCII) ? 14 : ($is64bit) ? 13 : 7,
+        (! isASCII) ? $max_bytes : ($is64bit) ? $max_bytes : 7,   # XXX
         qr/overflows/
     ],
 );
@@ -1770,7 +1773,7 @@ if ($is64bit) {
             : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
             $UTF8_WARN_ABOVE_31_BIT, $UTF8_DISALLOW_ABOVE_31_BIT,
             $UTF8_GOT_ABOVE_31_BIT,
-            'utf8', 0x1000000000, (isASCII) ? 13 : 14,
+            'utf8', 0x1000000000, $max_bytes,
             qr/and( is)? not portable/
         ];
     if (! isASCII) {
@@ -1779,35 +1782,35 @@ if ($is64bit) {
                 I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 $UTF8_GOT_ABOVE_31_BIT,
-                'utf8', 0x800000000, 14,
+                'utf8', 0x800000000, $max_bytes,
                 nonportable_regex(0x80000000)
             ],
             [ "requires at least 32 bits",
                 I8_to_native("\xff\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 $UTF8_GOT_ABOVE_31_BIT,
-                'utf8', 0x10000000000, 14,
+                'utf8', 0x10000000000, $max_bytes,
                 nonportable_regex(0x10000000000)
             ],
             [ "requires at least 32 bits",
                 I8_to_native("\xff\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 $UTF8_GOT_ABOVE_31_BIT,
-                'utf8', 0x200000000000, 14,
+                'utf8', 0x200000000000, $max_bytes,
                 nonportable_regex(0x20000000000)
             ],
             [ "requires at least 32 bits",
                 I8_to_native("\xff\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 $UTF8_GOT_ABOVE_31_BIT,
-                'utf8', 0x4000000000000, 14,
+                'utf8', 0x4000000000000, $max_bytes,
                 nonportable_regex(0x4000000000000)
             ],
             [ "requires at least 32 bits",
                 I8_to_native("\xff\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 $UTF8_GOT_ABOVE_31_BIT,
-                'utf8', 0x80000000000000, 14,
+                'utf8', 0x80000000000000, $max_bytes,
                 nonportable_regex(0x80000000000000)
             ],
             [ "requires at least 32 bits",
@@ -1815,7 +1818,7 @@ if ($is64bit) {
                    #IBM-1047  \xFE\x41\x41\x41\x41\x41\x41\x43\x41\x41\x41\x41\x41\x41
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 $UTF8_GOT_ABOVE_31_BIT,
-                'utf8', 0x1000000000000000, 14,
+                'utf8', 0x1000000000000000, $max_bytes,
                 nonportable_regex(0x1000000000000000)
             ];
     }
