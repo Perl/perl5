@@ -169,6 +169,9 @@ SKIP: {
 
   for my $archive_name (@file_and_directory_archives) {
     my @contents;
+    if ($^O eq 'VMS' && $TAR_EXE =~ m/gnutar$/i) {
+      $archive_name = VMS::Filespec::unixify($archive_name);
+    }
     if ($archive_name =~ m/\.tar$/) {
         @contents = qx{$TAR_EXE tvf $archive_name};
     }
