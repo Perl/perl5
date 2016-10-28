@@ -168,57 +168,63 @@ SKIP: {
   }
 
   for my $archive_name (@file_and_directory_archives) {
-    my @contents;
     if ($^O eq 'VMS' && $TAR_EXE =~ m/gnutar$/i) {
       $archive_name = VMS::Filespec::unixify($archive_name);
     }
+    my $command;
     if ($archive_name =~ m/\.tar$/) {
-        @contents = qx{$TAR_EXE tvf $archive_name};
+      $command = "$TAR_EXE tvf $archive_name";
     }
     elsif ($archive_name =~ m/\.tgz$/) {
-        @contents = qx{$TAR_EXE tzvf $archive_name};
+      $command = "$TAR_EXE tzvf $archive_name";
     }
     elsif ($archive_name =~ m/\.tbz$/) {
-        @contents = qx{$TAR_EXE tjvf $archive_name};
+      $command = "$TAR_EXE tjvf $archive_name";
     }
-    chomp(@contents);
-    my @directory_or_not;
-    for my $entry (@contents) {
+    print "# command = '$command'\n";
+    my @contents = qx{$command};
+    if ($?) {
+      fail("Failed running '$command'");
+    } else {
+      chomp(@contents);
+      my @directory_or_not;
+      for my $entry (@contents) {
         my $perms = (split(/\s+/ => $entry))[0];
         my @chars = split('' => $perms);
-        push @directory_or_not,
-            ($chars[0] eq 'd' ? 1 : 0);
-    }
+            push @directory_or_not,
+          ($chars[0] eq 'd' ? 1 : 0);
+      }
 
-    # create a new tarball with the same content as the old one
-    my $old = Archive::Tar->new($archive_name);
-    my $new = Archive::Tar->new();
-    $new->add_files( $old->get_files );
+      # create a new tarball with the same content as the old one
+      my $old = Archive::Tar->new($archive_name);
+      my $new = Archive::Tar->new();
+      $new->add_files( $old->get_files );
 
-    # save differently if compressed
-    my $ext = ( split /\./, $archive_name )[-1];
-    my @compress =
+      # save differently if compressed
+      my $ext = ( split /\./, $archive_name )[-1];
+      my @compress =
         $ext =~ /t?gz$/       ? (COMPRESS_GZIP)
-      : $ext =~ /(tbz|bz2?)$/ ? (COMPRESS_BZIP)
-      : ();
+          : $ext =~ /(tbz|bz2?)$/ ? (COMPRESS_BZIP)
+          : ();
 
-    my ( $fh, $filename ) = tempfile( UNLINK => 1 );
-    $new->write( $filename, @compress );
+      my ( $fh, $filename ) = tempfile( UNLINK => 1 );
+      $new->write( $filename, @compress );
 
-    # read the archive again from disk
-    $new = Archive::Tar->new($filename);
+      # read the archive again from disk
+      $new = Archive::Tar->new($filename);
 
-    # Adjust our expectations of
-    my @oldfiles = $old->list_files;
-    for (my $i = 0; $i <= $#oldfiles; $i++) {
+      # Adjust our expectations of
+      my @oldfiles = $old->list_files;
+      for (my $i = 0; $i <= $#oldfiles; $i++) {
         chop $oldfiles[$i] if $directory_or_not[$i];
-    }
+      }
 
-    # compare list of files
-    is_deeply(
-        [ $new->list_files ],
-        [ @oldfiles ],
-        "$archive_name roundtrip on file names"
-    );
+      # compare list of files
+      is_deeply(
+                [ $new->list_files ],
+                [ @oldfiles ],
+                "$archive_name roundtrip on file names"
+               );
+    }
   }
 }
