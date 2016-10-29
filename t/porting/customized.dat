@@ -1,3 +1,5 @@
+Archive::Tar cpan/Archive-Tar/lib/Archive/Tar.pm 89bcdfaed6b1716915a8cb46bc3b89a231e5a19e
+Archive::Tar cpan/Archive-Tar/t/09_roundtrip.t 25278e593cc6b4a691d7d57e8cad938f6ac18a3b
 CPAN cpan/CPAN/lib/App/Cpan.pm 3cef68c2a44a4996b432bc25622e3a544a188aa5
 CPAN cpan/CPAN/lib/CPAN.pm 4616a44963045f7bd07bb7f8e5f99bbd789af4e5
 CPAN cpan/CPAN/scripts/cpan 22610ed0301d48a269d1739afd2f7f84359d956f
