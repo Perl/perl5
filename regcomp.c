@@ -182,9 +182,8 @@ struct RExC_state_t {
     I32		recode_x_to_native;
 #endif
     I32		in_multi_char_class;
-    struct reg_code_block *code_blocks;	/* positions of literal (?{})
+    struct reg_code_blocks *code_blocks;/* positions of literal (?{})
 					    within pattern */
-    int		num_code_blocks;	/* size of code_blocks[] */
     int		code_index;		/* next code_blocks[] slot */
     SSize_t     maxlen;                        /* mininum possible number of chars in string to match */
     scan_frame *frame_head;
@@ -6129,6 +6128,36 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 rx_flags)
 }
 
 
+static void
+S_free_codeblocks(pTHX_ struct reg_code_blocks *cbs)
+{
+    int n;
+
+    if (cbs->attached)
+        return;
+    for (n = 0; n < cbs->count; n++)
+        SvREFCNT_dec(cbs->cb[n].src_regex);
+    Safefree(cbs->cb);
+    Safefree(cbs);
+}
+
+
+static struct reg_code_blocks *
+S_alloc_code_blocks(pTHX_  int ncode)
+{
+     struct reg_code_blocks *cbs;
+    Newx(cbs, 1, struct reg_code_blocks);
+    cbs->count = ncode;
+    cbs->attached = FALSE;
+    SAVEDESTRUCTOR_X(S_free_codeblocks, cbs);
+    if (ncode)
+        Newx(cbs->cb, ncode, struct reg_code_block);
+    else
+        cbs->cb = NULL;
+    return cbs;
+}
+
+
 /* upgrade pattern pat_p of length plen_p to UTF8, and if there are code
  * blocks, recalculate the indices. Update pat_p and plen_p in-place to
  * point to the realloced string and length.
@@ -6156,13 +6185,13 @@ S_pat_upgrade_to_utf8(pTHX_ RExC_state_t * const pRExC_state,
     while (s < *plen_p) {
         append_utf8_from_native_byte(src[s], &d);
         if (n < num_code_blocks) {
-            if (!do_end && pRExC_state->code_blocks[n].start == s) {
-                pRExC_state->code_blocks[n].start = d - dst - 1;
+            if (!do_end && pRExC_state->code_blocks->cb[n].start == s) {
+                pRExC_state->code_blocks->cb[n].start = d - dst - 1;
                 assert(*(d - 1) == '(');
                 do_end = 1;
             }
-            else if (do_end && pRExC_state->code_blocks[n].end == s) {
-                pRExC_state->code_blocks[n].end = d - dst - 1;
+            else if (do_end && pRExC_state->code_blocks->cb[n].end == s) {
+                pRExC_state->code_blocks->cb[n].end = d - dst - 1;
                 assert(*(d - 1) == ')');
                 do_end = 0;
                 n++;
@@ -6282,10 +6311,10 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
             if (oplist->op_type == OP_NULL
                 && (oplist->op_flags & OPf_SPECIAL))
             {
-                assert(n < pRExC_state->num_code_blocks);
-                pRExC_state->code_blocks[n].start = pat ? SvCUR(pat) : 0;
-                pRExC_state->code_blocks[n].block = oplist;
-                pRExC_state->code_blocks[n].src_regex = NULL;
+                assert(n < pRExC_state->code_blocks->count);
+                pRExC_state->code_blocks->cb[n].start = pat ? SvCUR(pat) : 0;
+                pRExC_state->code_blocks->cb[n].block = oplist;
+                pRExC_state->code_blocks->cb[n].src_regex = NULL;
                 n++;
                 code = 1;
                 oplist = OpSIBLING(oplist); /* skip CONST */
@@ -6315,7 +6344,8 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
             sv_setsv(pat, sv);
             /* overloading involved: all bets are off over literal
              * code. Pretend we haven't seen it */
-            pRExC_state->num_code_blocks -= n;
+            if (n)
+                pRExC_state->code_blocks->count -= n;
             n = 0;
         }
         else  {
@@ -6365,7 +6395,7 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
             }
 
             if (code)
-                pRExC_state->code_blocks[n-1].end = SvCUR(pat)-1;
+                pRExC_state->code_blocks->cb[n-1].end = SvCUR(pat)-1;
         }
 
         /* extract any code blocks within any embedded qr//'s */
@@ -6374,25 +6404,30 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
         {
 
             RXi_GET_DECL(ReANY((REGEXP *)rx), ri);
-            if (ri->num_code_blocks) {
+            if (ri->code_blocks && ri->code_blocks->count) {
                 int i;
                 /* the presence of an embedded qr// with code means
                  * we should always recompile: the text of the
                  * qr// may not have changed, but it may be a
                  * different closure than last time */
                 *recompile_p = 1;
-                Renew(pRExC_state->code_blocks,
-                    pRExC_state->num_code_blocks + ri->num_code_blocks,
-                    struct reg_code_block);
-                pRExC_state->num_code_blocks += ri->num_code_blocks;
+                if (pRExC_state->code_blocks) {
+                    pRExC_state->code_blocks->count += ri->code_blocks->count;
+                    Renew(pRExC_state->code_blocks->cb,
+                            pRExC_state->code_blocks->count,
+                            struct reg_code_block);
+                }
+                else
+                    pRExC_state->code_blocks = S_alloc_code_blocks(aTHX_
+                                                    ri->code_blocks->count);
 
-                for (i=0; i < ri->num_code_blocks; i++) {
+                for (i=0; i < ri->code_blocks->count; i++) {
                     struct reg_code_block *src, *dst;
                     STRLEN offset =  orig_patlen
                         + ReANY((REGEXP *)rx)->pre_prefix;
-                    assert(n < pRExC_state->num_code_blocks);
-                    src = &ri->code_blocks[i];
-                    dst = &pRExC_state->code_blocks[n];
+                    assert(n < pRExC_state->code_blocks->count);
+                    src = &ri->code_blocks->cb[i];
+                    dst = &pRExC_state->code_blocks->cb[n];
                     dst->start	    = src->start + offset;
                     dst->end	    = src->end   + offset;
                     dst->block	    = src->block;
@@ -6427,10 +6462,11 @@ S_has_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
     PERL_UNUSED_CONTEXT;
 
     for (s = 0; s < plen; s++) {
-	if (n < pRExC_state->num_code_blocks
-	    && s == pRExC_state->code_blocks[n].start)
+	if (   pRExC_state->code_blocks
+            && n < pRExC_state->code_blocks->count
+	    && s == pRExC_state->code_blocks->cb[n].start)
 	{
-	    s = pRExC_state->code_blocks[n].end;
+	    s = pRExC_state->code_blocks->cb[n].end;
 	    n++;
 	    continue;
 	}
@@ -6505,12 +6541,13 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 	*p++ = 'q'; *p++ = 'r'; *p++ = '\'';
 
 	for (s = 0; s < plen; s++) {
-	    if (n < pRExC_state->num_code_blocks
-		&& s == pRExC_state->code_blocks[n].start)
+	    if (   pRExC_state->code_blocks
+	        && n < pRExC_state->code_blocks->count
+		&& s == pRExC_state->code_blocks->cb[n].start)
 	    {
 		/* blank out literal code block */
 		assert(pat[s] == '(');
-		while (s <= pRExC_state->code_blocks[n].end) {
+		while (s <= pRExC_state->code_blocks->cb[n].end) {
 		    *p++ = '_';
 		    s++;
 		}
@@ -6554,11 +6591,8 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 	{
 	    SV * const errsv = ERRSV;
 	    if (SvTRUE_NN(errsv))
-	    {
-		Safefree(pRExC_state->code_blocks);
                 /* use croak_sv ? */
-		Perl_croak_nocontext("%" SVf, SVfARG(errsv));
-	    }
+		Perl_croak_nocontext("%"SVf, SVfARG(errsv));
 	}
 	assert(SvROK(qr_ref));
 	qr = SvRV(qr_ref);
@@ -6590,42 +6624,46 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 	struct reg_code_block *new_block, *dst;
 	RExC_state_t * const r1 = pRExC_state; /* convenient alias */
 	int i1 = 0, i2 = 0;
+        int r1c, r2c;
 
-	if (!r2->num_code_blocks) /* we guessed wrong */
+	if (!r2->code_blocks || !r2->code_blocks->count) /* we guessed wrong */
 	{
 	    SvREFCNT_dec_NN(qr);
 	    return 1;
 	}
 
-	Newx(new_block,
-	    r1->num_code_blocks + r2->num_code_blocks,
-	    struct reg_code_block);
+        if (!r1->code_blocks)
+            r1->code_blocks = S_alloc_code_blocks(aTHX_ 0);
+
+        r1c = r1->code_blocks->count;
+        r2c = r2->code_blocks->count;
+
+	Newx(new_block, r1c + r2c, struct reg_code_block);
+
 	dst = new_block;
 
-	while (    i1 < r1->num_code_blocks
-		|| i2 < r2->num_code_blocks)
-	{
+	while (i1 < r1c || i2 < r2c) {
 	    struct reg_code_block *src;
 	    bool is_qr = 0;
 
-	    if (i1 == r1->num_code_blocks) {
-		src = &r2->code_blocks[i2++];
+	    if (i1 == r1c) {
+		src = &r2->code_blocks->cb[i2++];
 		is_qr = 1;
 	    }
-	    else if (i2 == r2->num_code_blocks)
-		src = &r1->code_blocks[i1++];
-	    else if (  r1->code_blocks[i1].start
-	             < r2->code_blocks[i2].start)
+	    else if (i2 == r2c)
+		src = &r1->code_blocks->cb[i1++];
+	    else if (  r1->code_blocks->cb[i1].start
+	             < r2->code_blocks->cb[i2].start)
 	    {
-		src = &r1->code_blocks[i1++];
-		assert(src->end < r2->code_blocks[i2].start);
+		src = &r1->code_blocks->cb[i1++];
+		assert(src->end < r2->code_blocks->cb[i2].start);
 	    }
 	    else {
-		assert(  r1->code_blocks[i1].start
-		       > r2->code_blocks[i2].start);
-		src = &r2->code_blocks[i2++];
+		assert(  r1->code_blocks->cb[i1].start
+		       > r2->code_blocks->cb[i2].start);
+		src = &r2->code_blocks->cb[i2++];
 		is_qr = 1;
-		assert(src->end < r1->code_blocks[i1].start);
+		assert(src->end < r1->code_blocks->cb[i1].start);
 	    }
 
 	    assert(pat[src->start] == '(');
@@ -6637,9 +6675,9 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 				    : src->src_regex;
 	    dst++;
 	}
-	r1->num_code_blocks += r2->num_code_blocks;
-	Safefree(r1->code_blocks);
-	r1->code_blocks = new_block;
+	r1->code_blocks->count += r2c;
+	Safefree(r1->code_blocks->cb);
+	r1->code_blocks->cb = new_block;
     }
 
     SvREFCNT_dec_NN(qr);
@@ -6758,7 +6796,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     SSize_t minlen = 0;
     U32 rx_flags;
     SV *pat;
-    SV *code_blocksv = NULL;
     SV** new_patternp = patternp;
 
     /* these are all flags - maybe they should be turned
@@ -6816,7 +6853,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     pRExC_state->warn_text = NULL;
     pRExC_state->code_blocks = NULL;
-    pRExC_state->num_code_blocks = 0;
 
     if (is_bare_re)
 	*is_bare_re = FALSE;
@@ -6830,10 +6866,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	for (o = cLISTOPx(expr)->op_first; o; o = OpSIBLING(o))
 	    if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL))
 		ncode++; /* count of DO blocks */
-	if (ncode) {
-	    pRExC_state->num_code_blocks = ncode;
-	    Newx(pRExC_state->code_blocks, ncode, struct reg_code_block);
-	}
+
+	if (ncode)
+            pRExC_state->code_blocks = S_alloc_code_blocks(aTHX_ ncode);
     }
 
     if (!pat_count) {
@@ -6877,7 +6912,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     /* set expr to the first arg op */
 
-    if (pRExC_state->num_code_blocks
+    if (pRExC_state->code_blocks && pRExC_state->code_blocks->count
          && expr->op_type != OP_CONST)
     {
             expr = cLISTOPx(expr)->op_first;
@@ -6899,7 +6934,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             if (is_bare_re)
                 *is_bare_re = TRUE;
             SvREFCNT_inc(re);
-            Safefree(pRExC_state->code_blocks);
             DEBUG_PARSE_r(Perl_re_printf( aTHX_
                 "Precompiled pattern%s\n",
                     orig_rx_flags & RXf_SPLIT ? " for split" : ""));
@@ -6919,7 +6953,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	    pat = newSVpvn_flags(exp, plen, SVs_TEMP |
 					(IN_BYTES ? 0 : SvUTF8(pat)));
 	}
-	Safefree(pRExC_state->code_blocks);
 	return CALLREGCOMP_ENG(eng, pat, orig_rx_flags);
     }
 
@@ -6974,7 +7007,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         && memEQ(RX_PRECOMP(old_re), exp, plen)
 	&& !runtime_code /* with runtime code, always recompile */ )
     {
-        Safefree(pRExC_state->code_blocks);
         return old_re;
     }
 
@@ -7003,7 +7035,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	    /* whoops, we have a non-utf8 pattern, whilst run-time code
 	     * got compiled as utf8. Try again with a utf8 pattern */
             S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &exp, &plen,
-                                    pRExC_state->num_code_blocks);
+                pRExC_state->code_blocks ? pRExC_state->code_blocks->count : 0);
             goto redo_first_pass;
 	}
     }
@@ -7059,17 +7091,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         RExC_lastnum=0;
         RExC_lastparse=NULL;
     );
-    /* reg may croak on us, not giving us a chance to free
-       pRExC_state->code_blocks.  We cannot SAVEFREEPV it now, as we may
-       need it to survive as long as the regexp (qr/(?{})/).
-       We must check that code_blocksv is not already set, because we may
-       have jumped back to restart the sizing pass. */
-    if (pRExC_state->code_blocks && !code_blocksv) {
-	code_blocksv = newSV_type(SVt_PV);
-	SAVEFREESV(code_blocksv);
-	SvPV_set(code_blocksv, (char *)pRExC_state->code_blocks);
-	SvLEN_set(code_blocksv, 1); /*sufficient to make sv_clear free it*/
-    }
+
     if (reg(pRExC_state, 0, &flags,1) == NULL) {
         /* It's possible to write a regexp in ascii that represents Unicode
         codepoints outside of the byte range, such as via \x{100}. If we
@@ -7082,7 +7104,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         if (flags & RESTART_PASS1) {
             if (flags & NEED_UTF8) {
                 S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &exp, &plen,
-                                    pRExC_state->num_code_blocks);
+                pRExC_state->code_blocks ? pRExC_state->code_blocks->count : 0);
             }
             else {
                 DEBUG_PARSE_r(Perl_re_printf( aTHX_
@@ -7093,8 +7115,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         }
         Perl_croak(aTHX_ "panic: reg returned NULL to re_op_compile for sizing pass, flags=%#" UVxf, (UV) flags);
     }
-    if (code_blocksv)
-	SvLEN_set(code_blocksv,0); /* no you can't have it, sv_clear */
 
     DEBUG_PARSE_r({
         Perl_re_printf( aTHX_
@@ -7147,16 +7167,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     if (pm_flags & PMf_IS_QR) {
 	ri->code_blocks = pRExC_state->code_blocks;
-	ri->num_code_blocks = pRExC_state->num_code_blocks;
-    }
-    else
-    {
-	int n;
-	for (n = 0; n < pRExC_state->num_code_blocks; n++)
-	    if (pRExC_state->code_blocks[n].src_regex)
-		SAVEFREESV(pRExC_state->code_blocks[n].src_regex);
-	if(pRExC_state->code_blocks)
-	    SAVEFREEPV(pRExC_state->code_blocks); /* often null */
+	if (ri->code_blocks)
+            /* disarm earlier SAVEDESTRUCTOR_X */
+            ri->code_blocks->attached = TRUE;
     }
 
     {
@@ -7435,7 +7448,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             !sawlookahead &&
 	    (OP(first) == STAR &&
 	    PL_regkind[OP(NEXTOPER(first))] == REG_ANY) &&
-            !(r->intflags & PREGf_ANCH) && !pRExC_state->num_code_blocks)
+            !(r->intflags & PREGf_ANCH) && !pRExC_state->code_blocks)
 	{
 	    /* turn .* into ^.* with an implied $*=1 */
 	    const int type =
@@ -7448,7 +7461,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	}
         if (sawplus && !sawminmod && !sawlookahead
             && (!sawopen || !RExC_sawback)
-	    && !pRExC_state->num_code_blocks) /* May examine pos and $& */
+	    && !pRExC_state->code_blocks) /* May examine pos and $& */
 	    /* x+ must match at the 1st pos of run of x's */
 	    r->intflags |= PREGf_SKIP;
 
@@ -7704,7 +7717,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     if (RExC_seen & REG_LOOKBEHIND_SEEN)
         r->extflags |= RXf_NO_INPLACE_SUBST; /* inplace might break the
                                                 lookbehind */
-    if (pRExC_state->num_code_blocks)
+    if (pRExC_state->code_blocks)
 	r->extflags |= RXf_EVAL_SEEN;
     if (RExC_seen & REG_VERBARG_SEEN)
     {
@@ -11004,9 +11017,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 
 		RExC_seen_zerolen++;
 
-		if (   !pRExC_state->num_code_blocks
-		    || pRExC_state->code_index >= pRExC_state->num_code_blocks
-		    || pRExC_state->code_blocks[pRExC_state->code_index].start
+		if (   !pRExC_state->code_blocks
+		    || pRExC_state->code_index
+                                        >= pRExC_state->code_blocks->count
+		    || pRExC_state->code_blocks->cb[pRExC_state->code_index].start
 			!= (STRLEN)((RExC_parse -3 - (is_logical ? 1 : 0))
 			    - RExC_start)
 		) {
@@ -11015,7 +11029,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    FAIL("Eval-group not allowed at runtime, use re 'eval'");
 		}
 		/* this is a pre-compiled code block (?{...}) */
-		cb = &pRExC_state->code_blocks[pRExC_state->code_index];
+		cb = &pRExC_state->code_blocks->cb[pRExC_state->code_index];
 		RExC_parse = RExC_start + cb->end;
 		if (!SIZE_ONLY) {
 		    OP *o = cb->block;
@@ -19508,10 +19522,8 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
         Safefree(ri->u.offsets);             /* 20010421 MJD */
 #endif
     if (ri->code_blocks) {
-	int n;
-	for (n = 0; n < ri->num_code_blocks; n++)
-	    SvREFCNT_dec(ri->code_blocks[n].src_regex);
-	Safefree(ri->code_blocks);
+        ri->code_blocks->attached = FALSE;
+        S_free_codeblocks(aTHX_ ri->code_blocks);
     }
 
     if (ri->data) {
@@ -19729,16 +19741,18 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
     Copy(ri->program, reti->program, len+1, regnode);
 
 
-    reti->num_code_blocks = ri->num_code_blocks;
     if (ri->code_blocks) {
 	int n;
-	Newxc(reti->code_blocks, ri->num_code_blocks, struct reg_code_block,
-		struct reg_code_block);
-	Copy(ri->code_blocks, reti->code_blocks, ri->num_code_blocks,
-		struct reg_code_block);
-	for (n = 0; n < ri->num_code_blocks; n++)
-	     reti->code_blocks[n].src_regex = (REGEXP*)
-		    sv_dup_inc((SV*)(ri->code_blocks[n].src_regex), param);
+	Newx(reti->code_blocks, 1, struct reg_code_blocks);
+	Newx(reti->code_blocks->cb, ri->code_blocks->count,
+                    struct reg_code_block);
+	Copy(ri->code_blocks->cb, reti->code_blocks->cb,
+             ri->code_blocks->count, struct reg_code_block);
+	for (n = 0; n < ri->code_blocks->count; n++)
+	     reti->code_blocks->cb[n].src_regex = (REGEXP*)
+		    sv_dup_inc((SV*)(ri->code_blocks->cb[n].src_regex), param);
+        reti->code_blocks->count = ri->code_blocks->count;
+        reti->code_blocks->attached = TRUE;
     }
     else
 	reti->code_blocks = NULL;

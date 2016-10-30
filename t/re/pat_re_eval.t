@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 527;  # Update this when adding/deleting tests.
+plan tests => 528;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1231,6 +1231,19 @@ sub run_tests {
 	is "$&", "foo"x1000 . "bar"x1000,
 	    'padtmp swiping does not affect "$a$b" =~ /(??{})/'
     }
+
+    {
+        # [perl #129140]
+        # this used to cause a double-free of the code_block struct
+        # when re-running the compilation after spotting utf8.
+        # This test doesn't catch it, but might panic, or fail under
+        # valgrind etc
+
+        my $s = '';
+        /$s(?{})\x{100}/ for '', '';
+        pass "RT #129140";
+    }
+
 
 } # End of sub run_tests
 

@@ -107,8 +107,7 @@
                                    Used to make it easier to clone and free arbitrary
                                    data that the regops need. Often the ARG field of
                                    a regop is an index into this structure */
-	struct reg_code_block *code_blocks;/* positions of literal (?{}) */
-	int num_code_blocks;	/* size of code_blocks[] */
+	struct reg_code_blocks *code_blocks;/* positions of literal (?{}) */
 	regnode program[1];	/* Unwarranted chumminess with compiler. */
 } regexp_internal;
 
