@@ -356,11 +356,16 @@ sources:
 
 =item *
 
-8-wide tabs (no exceptions!)
+4-wide indents for code, 2-wide indents for nested CPP C<#define>s,
+with 8-wide tabstops.
 
 =item *
 
-4-wide indents for code, 2-wide indents for nested CPP #defines
+Use spaces for indentation, not tab characters.
+
+The codebase is a mixture of tabs and spaces for indentation, and we
+are moving to spaces only.  Converting lines you're patching from 8-wide
+tabs to spaces will help this migration.
 
 =item *
 
