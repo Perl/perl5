@@ -733,6 +733,9 @@
 #define utf16_to_utf8_reversed(a,b,c,d)	Perl_utf16_to_utf8_reversed(aTHX_ a,b,c,d)
 #define utf8_distance(a,b)	Perl_utf8_distance(aTHX_ a,b)
 #define utf8_hop		Perl_utf8_hop
+#define utf8_hop_back		Perl_utf8_hop_back
+#define utf8_hop_forward	Perl_utf8_hop_forward
+#define utf8_hop_safe		Perl_utf8_hop_safe
 #define utf8_length(a,b)	Perl_utf8_length(aTHX_ a,b)
 #define utf8_to_bytes(a,b)	Perl_utf8_to_bytes(aTHX_ a,b)
 #define utf8_to_uvchr(a,b)	Perl_utf8_to_uvchr(aTHX_ a,b)

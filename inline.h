@@ -920,6 +920,117 @@ Perl_utf8_hop(const U8 *s, SSize_t off)
 }
 
 /*
+=for apidoc utf8_hop_forward
+
+Return the UTF-8 pointer C<s> displaced by up to C<off> characters,
+forward.
+
+C<off> must be non-negative.
+
+C<s> must be before or equal to C<end>.
+
+When moving forward it will not move beyond C<end>.
+
+Will not exceed this limit even if the string is not valid "UTF-8".
+
+=cut
+*/
+
+PERL_STATIC_INLINE U8 *
+Perl_utf8_hop_forward(const U8 *s, SSize_t off, const U8 *end)
+{
+    PERL_ARGS_ASSERT_UTF8_HOP_FORWARD;
+
+    /* Note: cannot use UTF8_IS_...() too eagerly here since e.g
+     * the bitops (especially ~) can create illegal UTF-8.
+     * In other words: in Perl UTF-8 is not just for Unicode. */
+
+    assert(s <= end);
+    assert(off >= 0);
+
+    while (off--) {
+        STRLEN skip = UTF8SKIP(s);
+        if ((STRLEN)(end - s) <= skip)
+            return (U8 *)end;
+        s += skip;
+    }
+
+    return (U8 *)s;
+}
+
+/*
+=for apidoc utf8_hop_back
+
+Return the UTF-8 pointer C<s> displaced by up to C<off> characters,
+backward.
+
+C<off> must be non-positive.
+
+C<s> must be after or equal to C<start>.
+
+When moving backward it will not move before C<start>.
+
+Will not exceed this limit even if the string is not valid "UTF-8".
+
+=cut
+*/
+
+PERL_STATIC_INLINE U8 *
+Perl_utf8_hop_back(const U8 *s, SSize_t off, const U8 *start)
+{
+    PERL_ARGS_ASSERT_UTF8_HOP_BACK;
+
+    /* Note: cannot use UTF8_IS_...() too eagerly here since e.g
+     * the bitops (especially ~) can create illegal UTF-8.
+     * In other words: in Perl UTF-8 is not just for Unicode. */
+
+    assert(start <= s);
+    assert(off <= 0);
+
+    while (off++ && s > start) {
+        s--;
+        while (UTF8_IS_CONTINUATION(*s) && s > start)
+            s--;
+    }
+    
+    return (U8 *)s;
+}
+
+/*
+=for apidoc utf8_hop_safe
+
+Return the UTF-8 pointer C<s> displaced by up to C<off> characters,
+either forward or backward.
+
+When moving backward it will not move before C<start>.
+
+When moving forward it will not move beyond C<end>.
+
+Will not exceed those limits even if the string is not valid "UTF-8".
+
+=cut
+*/
+
+PERL_STATIC_INLINE U8 *
+Perl_utf8_hop_safe(const U8 *s, SSize_t off, const U8 *start, const U8 *end)
+{
+    PERL_ARGS_ASSERT_UTF8_HOP_SAFE;
+
+    /* Note: cannot use UTF8_IS_...() too eagerly here since e.g
+     * the bitops (especially ~) can create illegal UTF-8.
+     * In other words: in Perl UTF-8 is not just for Unicode. */
+
+    assert(start <= s && s <= end);
+
+    if (off >= 0) {
+        return utf8_hop_forward(s, off, end);
+    }
+    else {
+        return utf8_hop_back(s, off, start);
+    }
+}
+
+/*
 
 =for apidoc is_utf8_valid_partial_char
 

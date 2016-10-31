@@ -5562,6 +5562,19 @@ test_is_utf8_fixed_width_buf_loclen_flags(char *s, STRLEN len, U32 flags)
     OUTPUT:
         RETVAL
 
+IV
+test_utf8_hop_safe(SV *s_sv, STRLEN s_off, IV off)
+    PREINIT:
+        STRLEN len;
+        U8 *p;
+        U8 *r;
+    CODE:
+        p = (U8 *)SvPV(s_sv, len);
+        r = utf8_hop_safe(p + s_off, off, p, p + len);
+        RETVAL = r - p;
+    OUTPUT:
+        RETVAL
+
 UV
 test_toLOWER(UV ord)
     CODE:
