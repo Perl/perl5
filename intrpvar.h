@@ -73,6 +73,7 @@ PERLVAR(I, multideref_pc, UNOP_AUX_item *)
 
 /* Fields used by magic variables such as $@, $/ and so on */
 PERLVAR(I, curpm,	PMOP *)		/* what to do \ interps in REs from */
+PERLVAR(I, curpm_under,        PMOP *)                /* what to do \ interps in REs from */
 
 PERLVAR(I, tainting,	bool)		/* doing taint checks */
 PERLVARI(I, tainted,	bool, FALSE)	/* using variables controlled by $< */

@@ -6916,12 +6916,12 @@ separated by commas, not just aligned on a line.
 it may skip items, or visit items more than once.  Consider using
 C<keys()> instead of C<each()>.
 
-=item Use of the empty pattern inside of a regex code block is forbidden
+=item Infinite recursion via empty pattern
 
 (F) You tried to use the empty pattern inside of a regex code block,
-for instance C</(?{ s!!! })/>. Currently for implementation reasons
-this is forbidden. Generally you can rewrite code that uses the empty
-pattern with the appropriate use of C<qr//>.
+for instance C</(?{ s!!! })/>, which resulted in re-executing
+the same pattern, which is an infinite loop which is broken by
+throwing an exception.
 
 =item Use of := for an empty attribute list is not allowed
 

@@ -109,6 +109,7 @@
 #define PL_curcopdb		(vTHX->Icurcopdb)
 #define PL_curpad		(vTHX->Icurpad)
 #define PL_curpm		(vTHX->Icurpm)
+#define PL_curpm_under		(vTHX->Icurpm_under)
 #define PL_curstack		(vTHX->Icurstack)
 #define PL_curstackinfo		(vTHX->Icurstackinfo)
 #define PL_curstash		(vTHX->Icurstash)

@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 821;  # Update this when adding/deleting tests.
+plan tests => 827;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1829,6 +1829,37 @@ EOP
             ok( $str =~ m{^(a|a\x{b6})$}, "fix [perl #129950] - latin1 case" );
             utf8::upgrade($str);
             ok( $str =~ m{^(a|a\x{b6})$}, "fix [perl #129950] - utf8 case" );
+        }
+        {
+            my $got= run_perl( switches => [ '-l' ], prog => <<'EOF_CODE' );
+            my $died= !eval {
+                $_=qq(ab);
+                print;
+                my $p=qr/(?{ s!!x! })/;
+                /$p/;
+                print;
+                /a/;
+                /$p/;
+                print;
+                /b/;
+                /$p/;
+                print;
+                //;
+                1;
+            };
+            $error = $died ? ($@ || qq(Zombie)) : qq(none);
+            print $died ? qq(died) : qq(lived);
+            print qq(Error: $@);
+EOF_CODE
+            my @got= split /\n/, $got;
+            is($got[0],"ab","empty pattern in regex codeblock: got expected start string");
+            is($got[1],"xab",
+                "empty pattern in regex codeblock: first subst with no last-match worked right");
+            is($got[2],"xxb","empty pattern in regex codeblock: second subst worked right");
+            is($got[3],"xxx","empty pattern in regex codeblock: third subst worked right");
+            is($got[4],"died","empty pattern in regex codeblock: died as expected");
+            like($got[5],qr/Error: Infinite recursion via empty pattern/,
+           "empty pattern in regex codeblock: produced the right exception message" );
         }
 } # End of sub run_tests
 

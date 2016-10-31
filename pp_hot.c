@@ -1959,14 +1959,20 @@ PP(pp_match)
 	goto nope;
     }
 
-    /* empty pattern special-cased to use last successful pattern if
-       possible, except for qr// */
-    if (!ReANY(rx)->mother_re && !RX_PRELEN(rx) && PL_curpm) {
-        if (PL_curpm == PL_reg_curpm)
-            Perl_croak(aTHX_ "Use of the empty pattern inside of "
-                  "a regex code block is forbidden");
-	pm = PL_curpm;
-	rx = PM_GETRE(pm);
+    /* handle the empty pattern */
+    if (!RX_PRELEN(rx) && PL_curpm && !ReANY(rx)->mother_re) {
+        if (PL_curpm == PL_reg_curpm) {
+            if (PL_curpm_under) {
+                if (PL_curpm_under == PL_reg_curpm) {
+                    Perl_croak(aTHX_ "Infinite recursion via empty pattern");
+                } else {
+                    pm = PL_curpm_under;
+                }
+            }
+        } else {
+            pm = PL_curpm;
+        }
+        rx = PM_GETRE(pm);
     }
 
     if (RX_MINLEN(rx) >= 0 && (STRLEN)RX_MINLEN(rx) > len) {
@@ -3162,11 +3168,18 @@ PP(pp_subst)
 
     /* handle the empty pattern */
     if (!RX_PRELEN(rx) && PL_curpm && !ReANY(rx)->mother_re) {
-        if (PL_curpm == PL_reg_curpm)
-            Perl_croak(aTHX_ "Use of the empty pattern inside of "
-                  "a regex code block is forbidden");
-	pm = PL_curpm;
-	rx = PM_GETRE(pm);
+        if (PL_curpm == PL_reg_curpm) {
+            if (PL_curpm_under) {
+                if (PL_curpm_under == PL_reg_curpm) {
+                    Perl_croak(aTHX_ "Infinite recursion via empty pattern");
+                } else {
+                    pm = PL_curpm_under;
+                }
+            }
+        } else {
+            pm = PL_curpm;
+        }
+        rx = PM_GETRE(pm);
     }
 
 #ifdef PERL_SAWAMPERSAND

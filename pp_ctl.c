@@ -159,16 +159,24 @@ PP(pp_regcomp)
         RX_TAINT_on(new_re);
     }
 
+    /* handle the empty pattern */
+    if (!RX_PRELEN(PM_GETRE(pm)) && PL_curpm) {
+        if (PL_curpm == PL_reg_curpm) {
+            if (PL_curpm_under) {
+                if (PL_curpm_under == PL_reg_curpm) {
+                    Perl_croak(aTHX_ "Infinite recursion via empty pattern");
+                } else {
+                    pm = PL_curpm_under;
+                }
+            }
+        } else {
+            pm = PL_curpm;
+        }
+    }
+
 #if !defined(USE_ITHREADS)
     /* can't change the optree at runtime either */
     /* PMf_KEEP is handled differently under threads to avoid these problems */
-    /* Handle empty pattern */
-    if (!RX_PRELEN(PM_GETRE(pm)) && PL_curpm) {
-        if (PL_curpm == PL_reg_curpm)
-            Perl_croak(aTHX_ "Use of the empty pattern inside of "
-                  "a regex code block is forbidden");
-	pm = PL_curpm;
-    }
     if (pm->op_pmflags & PMf_KEEP) {
 	pm->op_private &= ~OPpRUNTIME;	/* no point compiling again */
 	cLOGOP->op_first->op_next = PL_op->op_next;

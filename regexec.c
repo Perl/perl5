@@ -6963,7 +6963,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		PL_op = oop;
 		PL_curcop = ocurcop;
                 regcp_restore(rex, runops_cp, &maxopenparen);
-		PL_curpm = PL_reg_curpm;
+                PL_curpm_under = PL_curpm;
+                PL_curpm = PL_reg_curpm;
 
 		if (logical != 2)
 		    break;
@@ -9532,6 +9533,7 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
     }
     SET_reg_curpm(reginfo->prog);
     eval_state->curpm = PL_curpm;
+    PL_curpm_under = PL_curpm;
     PL_curpm = PL_reg_curpm;
     if (RXp_MATCH_COPIED(rex)) {
         /*  Here is a serious problem: we cannot rewrite subbeg,
