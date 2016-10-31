@@ -895,15 +895,39 @@ find uses of these problematic match variables in your code.
 =over 8
 
 =item $<I<digits>> ($1, $2, ...)
-X<$1> X<$2> X<$3>
+X<$1> X<$2> X<$3> X<$I<digits>>
 
 Contains the subpattern from the corresponding set of capturing
 parentheses from the last successful pattern match, not counting patterns
 matched in nested blocks that have been exited already.
 
+Note there is a distinction between a capture buffer which matches
+the empty string a capture buffer which is optional. Eg, C<(x?)> and
+C<(x)?> The latter may be undef, the former not.
+
 These variables are read-only and dynamically-scoped.
 
 Mnemonic: like \digits.
+
+=item @{^CAPTURE}
+X<@{^CAPTURE}> X<@^CAPTURE>
+
+An array which contains the capture buffers, if any, of the last
+successful pattern match, not counting patterns matched
+in nested blocks that have been exited already.
+
+Note that the 0 index of @{^CAPTURE} is equivalent to $1, the 1 index
+is equivalent to $2, etc.
+
+    if ("foal"=~/(.)(.)(.)(.)/) {
+        print join "-", @{^CAPTURE};
+    }
+
+should output "f-o-a-l".
+
+See also L</$I<digits>>, L</%{^CAPTURE}> and L</%{^CAPTURE_ALL}>.
+
+This variable was added in 5.25.7
 
 =item $MATCH
 
@@ -1063,10 +1087,12 @@ examples given for the C<@-> variable.
 
 This variable was added in Perl v5.6.0.
 
+=item %{^CAPTURE}
+
 =item %LAST_PAREN_MATCH
 
 =item %+
-X<%+> X<%LAST_PAREN_MATCH>
+X<%+> X<%LAST_PAREN_MATCH> X<%{^CAPTURE}>
 
 Similar to C<@+>, the C<%+> hash allows access to the named capture
 buffers, should they exist, in the last successful match in the
@@ -1088,7 +1114,8 @@ iterative access to them via C<each> may have unpredictable results.
 Likewise, if the last successful match changes, then the results may be
 surprising.
 
-This variable was added in Perl v5.10.0.
+This variable was added in Perl v5.10.0. The C<%{^CAPTURE}> alias was
+added in 5.25.7.
 
 This variable is read-only and dynamically-scoped.
 
@@ -1136,6 +1163,9 @@ After a match against some variable C<$var>:
 
 This variable was added in Perl v5.6.0.
 
+=item %{^CAPTURE_ALL}
+X<%{^CAPTURE_ALL}>
+
 =item %-
 X<%->
 
@@ -1180,7 +1210,8 @@ iterative access to them via C<each> may have unpredictable results.
 Likewise, if the last successful match changes, then the results may be
 surprising.
 
-This variable was added in Perl v5.10.0.
+This variable was added in Perl v5.10.0. The C<%{^CAPTURE_ALL}> alias was
+added in 5.25.7.
 
 This variable is read-only and dynamically-scoped.
 

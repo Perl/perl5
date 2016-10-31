@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 802;  # Update this when adding/deleting tests.
+plan tests => 821;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -638,9 +638,11 @@ sub run_tests {
     }
 
     {
-        my $message = '@- and @+ tests';
+        my $message = '@- and @+ and @{^CAPTURE} tests';
 
-        /a(?=.$)/;
+        $_= "ace";
+        /c(?=.$)/;
+        is($#{^CAPTURE}, -1, $message);
         is($#+, 0, $message);
         is($#-, 0, $message);
         is($+ [0], 2, $message);
@@ -648,66 +650,87 @@ sub run_tests {
         ok(!defined $+ [1] && !defined $- [1] &&
            !defined $+ [2] && !defined $- [2], $message);
 
-        /a(a)(a)/;
+        /a(c)(e)/;
+        is($#{^CAPTURE}, 1, $message); # one less than $#-
         is($#+, 2, $message);
         is($#-, 2, $message);
         is($+ [0], 3, $message);
         is($- [0], 0, $message);
+        is(${^CAPTURE}[0], "c", $message);
         is($+ [1], 2, $message);
         is($- [1], 1, $message);
+        is(${^CAPTURE}[1], "e", $message);
         is($+ [2], 3, $message);
         is($- [2], 2, $message);
         ok(!defined $+ [3] && !defined $- [3] &&
+           !defined ${^CAPTURE}[2] && !defined ${^CAPTURE}[3] &&
            !defined $+ [4] && !defined $- [4], $message);
 
         # Exists has a special check for @-/@+ - bug 45147
         ok(exists $-[0], $message);
         ok(exists $+[0], $message);
+        ok(exists ${^CAPTURE}[0], $message);
+        ok(exists ${^CAPTURE}[1], $message);
         ok(exists $-[2], $message);
         ok(exists $+[2], $message);
+        ok(!exists ${^CAPTURE}[2], $message);
         ok(!exists $-[3], $message);
         ok(!exists $+[3], $message);
+        ok(exists ${^CAPTURE}[-1], $message);
+        ok(exists ${^CAPTURE}[-2], $message);
         ok(exists $-[-1], $message);
         ok(exists $+[-1], $message);
         ok(exists $-[-3], $message);
         ok(exists $+[-3], $message);
         ok(!exists $-[-4], $message);
         ok(!exists $+[-4], $message);
+        ok(!exists ${^CAPTURE}[-3], $message);
 
-        /.(a)(b)?(a)/;
+
+        /.(c)(b)?(e)/;
+        is($#{^CAPTURE}, 2, $message); # one less than $#-
         is($#+, 3, $message);
         is($#-, 3, $message);
+        is(${^CAPTURE}[0], "c", $message);
+        is(${^CAPTURE}[2], "e", $message . "[$1 $3]");
         is($+ [1], 2, $message);
         is($- [1], 1, $message);
         is($+ [3], 3, $message);
         is($- [3], 2, $message);
         ok(!defined $+ [2] && !defined $- [2] &&
-           !defined $+ [4] && !defined $- [4], $message);
+           !defined $+ [4] && !defined $- [4] &&
+           !defined ${^CAPTURE}[1], $message);
 
-        /.(a)/;
+        /.(c)/;
+        is($#{^CAPTURE}, 0, $message); # one less than $#-
         is($#+, 1, $message);
         is($#-, 1, $message);
+        is(${^CAPTURE}[0], "c", $message);
         is($+ [0], 2, $message);
         is($- [0], 0, $message);
         is($+ [1], 2, $message);
         is($- [1], 1, $message);
         ok(!defined $+ [2] && !defined $- [2] &&
-           !defined $+ [3] && !defined $- [3], $message);
+           !defined $+ [3] && !defined $- [3] &&
+           !defined ${^CAPTURE}[1], $message);
 
-        /.(a)(ba*)?/;
+        /.(c)(ba*)?/;
+        is($#{^CAPTURE}, 0, $message); # one less than $#-
         is($#+, 2, $message);
         is($#-, 1, $message);
 
         # Check that values don’t stick
         "     "=~/()()()(.)(..)/;
-        my($m,$p) = (\$-[5], \$+[5]);
-        () = "$$_" for $m, $p; # FETCH (or eqv.)
+        my($m,$p,$q) = (\$-[5], \$+[5], \${^CAPTURE}[4]);
+        () = "$$_" for $m, $p, $q; # FETCH (or eqv.)
         " " =~ /()/;
         is $$m, undef, 'values do not stick to @- elements';
         is $$p, undef, 'values do not stick to @+ elements';
+        is $$q, undef, 'values do not stick to @{^CAPTURE} elements';
     }
 
     foreach ('$+[0] = 13', '$-[0] = 13', '@+ = (7, 6, 5)',
+             '${^CAPTURE}[0] = 13',
 	     '@- = qw (foo bar)', '$^N = 42') {
 	is(eval $_, undef);
         like($@, qr/^Modification of a read-only value attempted/,

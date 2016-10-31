@@ -1087,8 +1087,9 @@ referring to 'U' magic rather than C<PERL_MAGIC_uvar> for example.
 The C<obj> argument is stored in the C<mg_obj> field of the C<MAGIC>
 structure.  If it is not the same as the C<sv> argument, the reference
 count of the C<obj> object is incremented.  If it is the same, or if
-the C<how> argument is C<PERL_MAGIC_arylen>, or if it is a NULL pointer,
-then C<obj> is merely stored, without the reference count being incremented.
+the C<how> argument is C<PERL_MAGIC_arylen>, C<PERL_MAGIC_regdatum>,
+C<PERL_MAGIC_regdata>, or if it is a NULL pointer, then C<obj> is merely
+stored, without the reference count being incremented.
 
 See also C<sv_magicext> in L<perlapi> for a more flexible way to add magic
 to an SV.

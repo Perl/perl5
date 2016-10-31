@@ -1975,6 +1975,22 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
             case '\003':        /* $^CHILD_ERROR_NATIVE */
                 if (memEQs(name, len, "\003HILD_ERROR_NATIVE"))
 		    goto magicalize;
+                                /* @{^CAPTURE} %{^CAPTURE} */
+                if (memEQs(name, len, "\003APTURE")) {
+                    AV* const av = GvAVn(gv);
+                    UV uv= *name;
+
+                    sv_magic(MUTABLE_SV(av), (SV*)uv, PERL_MAGIC_regdata, NULL, 0);
+                    SvREADONLY_on(av);
+
+                    if (sv_type == SVt_PVHV || sv_type == SVt_PVGV)
+                        require_tie_mod_s(gv, '-', "Tie::Hash::NamedCapture",0);
+
+                } else          /* %{^CAPTURE_ALL} */
+                if (memEQs(name, len, "\003APTURE_ALL")) {
+                    if (sv_type == SVt_PVHV || sv_type == SVt_PVGV)
+                        require_tie_mod_s(gv, '+', "Tie::Hash::NamedCapture",0);
+                }
 		break;
 	    case '\005':	/* $^ENCODING */
                 if (memEQs(name, len, "\005NCODING"))
@@ -2118,22 +2134,24 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 	    break;
 	case '-':		/* $-, %-, @- */
 	case '+':		/* $+, %+, @+ */
-	GvMULTI_on(gv); /* no used once warnings here */
-        {
-            AV* const av = GvAVn(gv);
-	    SV* const avc = (*name == '+') ? MUTABLE_SV(av) : NULL;
+            GvMULTI_on(gv); /* no used once warnings here */
+            {   /* $- $+ */
+                sv_magic(GvSVn(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, name, len);
+                if (*name == '+')
+                    SvREADONLY_on(GvSVn(gv));
+            }
+            {   /* %- %+ */
+                if (sv_type == SVt_PVHV || sv_type == SVt_PVGV)
+                    require_tie_mod_s(gv, *name, "Tie::Hash::NamedCapture",0);
+            }
+            {   /* @- @+ */
+                AV* const av = GvAVn(gv);
+                const UV uv = (UV)*name;
 
-	    sv_magic(MUTABLE_SV(av), avc, PERL_MAGIC_regdata, NULL, 0);
-            sv_magic(GvSVn(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, name, len);
-            if (avc)
-                SvREADONLY_on(GvSVn(gv));
-            SvREADONLY_on(av);
-
-            if (sv_type == SVt_PVHV || sv_type == SVt_PVGV)
-                require_tie_mod_s(gv, *name, "Tie::Hash::NamedCapture",0);
-
+                sv_magic(MUTABLE_SV(av), (SV*)uv, PERL_MAGIC_regdata, NULL, 0);
+                SvREADONLY_on(av);
+            }
             break;
-	}
 	case '*':		/* $* */
 	case '#':		/* $# */
 	    if (sv_type == SVt_PV)

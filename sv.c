@@ -5657,7 +5657,9 @@ Perl_sv_magicext(pTHX_ SV *const sv, SV *const obj, const int how,
     */
     if (!obj || obj == sv ||
 	how == PERL_MAGIC_arylen ||
-	how == PERL_MAGIC_symtab ||
+        how == PERL_MAGIC_regdata ||
+        how == PERL_MAGIC_regdatum ||
+        how == PERL_MAGIC_symtab ||
 	(SvTYPE(obj) == SVt_PVGV &&
 	    (GvSV(obj) == sv || GvHV(obj) == (const HV *)sv
 	     || GvAV(obj) == (const AV *)sv || GvCV(obj) == (const CV *)sv
@@ -13372,7 +13374,10 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *const param)
 				? SvREFCNT_inc(av_dup_inc((const AV *)
 						    nmg->mg_obj, param))
 				: sv_dup_inc(nmg->mg_obj, param)
-			  : sv_dup(nmg->mg_obj, param);
+                          : (nmg->mg_type == PERL_MAGIC_regdatum ||
+                             nmg->mg_type == PERL_MAGIC_regdata)
+                                  ? nmg->mg_obj
+                                  : sv_dup(nmg->mg_obj, param);
 
 	if (nmg->mg_ptr && nmg->mg_type != PERL_MAGIC_regex_global) {
 	    if (nmg->mg_len > 0) {
