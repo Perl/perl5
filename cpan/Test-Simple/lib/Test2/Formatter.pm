@@ -2,7 +2,7 @@ package Test2::Formatter;
 use strict;
 use warnings;
 
-our $VERSION = '1.302059';
+our $VERSION = '1.302062';
 
 
 my %ADDED;
@@ -15,6 +15,10 @@ sub import {
 }
 
 sub hide_buffered { 1 }
+
+sub terminate { }
+
+sub finalize { }
 
 1;
 
@@ -48,6 +52,10 @@ A formatter is any package or object with a C<write($event, $num)> method.
 
     sub hide_buffered { 1 }
 
+    sub terminate { }
+
+    sub finalize { }
+
     1;
 
 The C<write> method is a method, so it either gets a class or instance. The two
@@ -60,6 +68,32 @@ The C<hide_buffered()> method must return a boolean. This is used to tell
 buffered subtests whether or not to send it events as they are being buffered.
 See L<Test2::API/"run_subtest(...)"> for more information.
 
+The C<terminate> and C<finalize> methods are optional methods called that you
+can implement if the format you're generating needs to handle these cases, for
+example if you are generating XML and need close open tags.
+
+The C<terminate> method is called when an event's C<terminate> method returns
+true, for example when a L<Test2::Event::Plan> has a C<'skip_all'> plan, or
+when a L<Test2::Event::Bail> event is sent. The C<terminate> method is passed
+a single argument, the L<Test2::Event> object which triggered the terminate.
+
+The C<finalize> method is always the last thing called on the formatter, I<<
+except when C<terminate> is called for a Bail event >>. It is passed the
+following arguments:
+
+=over 4
+
+=item * The number of tests that were planned
+
+=item * The number of tests actually seen
+
+=item * The number of tests which failed
+
+=item * A boolean indicating whether or not the test suite passed
+
+=item * A boolean indicating whether or not this call is for a subtest
+
+=back
 
 =head1 SOURCE
 

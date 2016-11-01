@@ -1,3 +1,4 @@
+# HARNESS-NO-PRELOAD
 use strict;
 use warnings;
 use Data::Dumper;

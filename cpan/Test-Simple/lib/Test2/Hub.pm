@@ -2,7 +2,7 @@ package Test2::Hub;
 use strict;
 use warnings;
 
-our $VERSION = '1.302059';
+our $VERSION = '1.302062';
 
 
 use Carp qw/carp croak confess/;
@@ -53,6 +53,8 @@ sub init {
         $ipc->add_hub($self->{+HID});
     }
 }
+
+sub is_subtest { 0 }
 
 sub reset_state {
     my $self = shift;
@@ -300,7 +302,10 @@ sub process {
     return $e if $is_ok || $no_fail;
 
     my $code = $e->terminate;
-    $self->terminate($code, $e) if defined $code;
+    if (defined $code) {
+        $self->{+_FORMATTER}->terminate($e) if $self->{+_FORMATTER};
+        $self->terminate($code, $e);
+    }
 
     return $e;
 }
@@ -332,8 +337,11 @@ sub finalize {
     my $failed = $self->{+FAILED};
     my $active = $self->{+ACTIVE};
 
-    # return if NOTHING was done.
-    return unless $active || $do_plan || defined($plan) || $count || $failed;
+	# return if NOTHING was done.
+	unless ($active || $do_plan || defined($plan) || $count || $failed) {
+		$self->{+_FORMATTER}->finalize($plan, $count, $failed, 0, $self->is_subtest) if $self->{+_FORMATTER};
+		return;
+	}
 
     unless ($self->{+ENDED}) {
         if ($self->{+_FOLLOW_UPS}) {
@@ -369,7 +377,11 @@ Second End: $sfile line $sline
     }
 
     $self->{+ENDED} = $frame;
-    $self->is_passing(); # Generate the final boolean.
+    my $pass = $self->is_passing(); # Generate the final boolean.
+
+	$self->{+_FORMATTER}->finalize($plan, $count, $failed, $pass, $self->is_subtest) if $self->{+_FORMATTER};
+
+    return $pass;
 }
 
 sub is_passing {

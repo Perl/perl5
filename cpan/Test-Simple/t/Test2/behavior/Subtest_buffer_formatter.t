@@ -8,14 +8,20 @@ use Test2::API qw/run_subtest intercept test2_stack/;
 {
     package Formatter::Hide;
     sub write { }
-    sub hide_buffered { 1 };
+    sub hide_buffered { 1 }
+    sub terminate { }
+    sub finalize { }
 
     package Formatter::Show;
     sub write { }
-    sub hide_buffered { 0 };
+    sub hide_buffered { 0 }
+    sub terminate { }
+    sub finalize { }
 
     package Formatter::NA;
     sub write { }
+    sub terminate { }
+    sub finalize { }
 }
 
 my %HAS_FORMATTER;

@@ -1,3 +1,4 @@
+# HARNESS-NO-PRELOAD
 BEGIN {
     if( $ENV{PERL_CORE} ) {
         chdir 't';

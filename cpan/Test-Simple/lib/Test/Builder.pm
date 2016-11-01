@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302059';
+our $VERSION = '1.302062';
 
 BEGIN {
     if( $] < 5.008 ) {
@@ -339,7 +339,7 @@ sub subtest {
         $st_ctx->diag('No tests run!');
     }
 
-    $child->finalize($ok);
+    $child->finalize($st_ctx->trace);
 
     $ctx->release;
 
@@ -1146,7 +1146,7 @@ BEGIN {
 
             my $ctx = $self->ctx;
             my $format = $ctx->hub->format;
-            unless ($format && $format->isa('Test2::Formatter::TAP') && $format->can($set)) {
+            unless ($format && $format->can($set)) {
                 warn "The current formatter does not support '$method'" if $format;
                 $ctx->release;
                 return
