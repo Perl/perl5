@@ -795,11 +795,15 @@ my @subnormals = (
 
 SKIP: {
     # [rt.perl.org #128843]
-    skip("non-IEEE-754-non-64-bit", scalar @subnormals + 34)
+    my $skip_count = scalar @subnormals + 34;
+    skip("non-IEEE-754-non-64-bit", $skip_count)
         unless ($Config{nvsize} == 8 &&
 		$Config{nv_preserves_uv_bits} == 53 &&
 		($Config{doublekind} == 3 ||
 		 $Config{doublekind} == 4));
+    if ($^O eq 'dec_osf') {
+        skip("$^O subnormals", $skip_count);
+    }
 
     for my $t (@subnormals) {
 	# Note that "0x1p+2" is not considered numeric,
