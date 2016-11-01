@@ -41,7 +41,7 @@ our $AUTOLOAD;
 # against circular module loading (not that we load any modules, but
 # consistency is good).
 BEGIN {
-    $VERSION = '4.05';
+    $VERSION = '4.06';
 
     # All of the basic supported constants, used in %EXPORT_TAGS.
     my @colorlist = qw(
@@ -62,7 +62,7 @@ BEGIN {
 
     # 256-color constants, used in %EXPORT_TAGS.
     my @colorlist256 = (
-        (map { ("ANSI$_", "ON_ANSI$_") } 0 .. 15),
+        (map { ("ANSI$_", "ON_ANSI$_") } 0 .. 255),
         (map { ("GREY$_", "ON_GREY$_") } 0 .. 23),
     );
     for my $r (0 .. 5) {
@@ -145,8 +145,8 @@ our %ATTRIBUTES = (
 # Generating the 256-color codes involves a lot of codes and offsets that are
 # not helped by turning them into constants.
 
-# The first 16 256-color codes are duplicates of the 16 ANSI colors,
-# included for completeness.
+# The first 16 256-color codes are duplicates of the 16 ANSI colors.  The rest
+# are RBG and greyscale values.
 for my $code (0 .. 15) {
     $ATTRIBUTES{"ansi$code"}    = "38;5;$code";
     $ATTRIBUTES{"on_ansi$code"} = "48;5;$code";
@@ -175,6 +175,15 @@ for my $n (0 .. 23) {
 our %ATTRIBUTES_R;
 for my $attr (reverse sort keys %ATTRIBUTES) {
     $ATTRIBUTES_R{ $ATTRIBUTES{$attr} } = $attr;
+}
+
+# Provide ansiN names for all 256 characters to provide a convenient flat
+# namespace if one doesn't want to mess with the RGB and greyscale naming.  Do
+# this after creating %ATTRIBUTES_R since we want to use the canonical names
+# when reversing a color.
+for my $code (16 .. 255) {
+    $ATTRIBUTES{"ansi$code"}    = "38;5;$code";
+    $ATTRIBUTES{"on_ansi$code"} = "48;5;$code";
 }
 
 # Import any custom colors set in the environment.
@@ -695,10 +704,12 @@ sixteen-color emulators but use the 256-color escape syntax, C<grey0>
 through C<grey23> ranging from nearly black to nearly white, and a set of
 RGB colors.  The RGB colors are of the form C<rgbI<RGB>> where I<R>, I<G>,
 and I<B> are numbers from 0 to 5 giving the intensity of red, green, and
-blue.  C<on_> variants of all of these colors are also provided.  These
-colors may be ignored completely on non-256-color terminals or may be
-misinterpreted and produce random behavior.  Additional attributes such as
-blink, italic, or bold may not work with the 256-color palette.
+blue.  The grey and RGB colors are also available as C<ansi16> through
+C<ansi255> if you want simple names for all 256 colors.  C<on_> variants
+of all of these colors are also provided.  These colors may be ignored
+completely on non-256-color terminals or may be misinterpreted and produce
+random behavior.  Additional attributes such as blink, italic, or bold may
+not work with the 256-color palette.
 
 There is unfortunately no way to know whether the current emulator
 supports more than eight colors, which makes the choice of colors
@@ -744,13 +755,13 @@ The recognized bright background color attributes (colors 8 to 15) are:
 
 For 256-color terminals, the recognized foreground colors are:
 
-  ansi0 .. ansi15
+  ansi0 .. ansi255
   grey0 .. grey23
 
 plus C<rgbI<RGB>> for I<R>, I<G>, and I<B> values from 0 to 5, such as
 C<rgb000> or C<rgb515>.  Similarly, the recognized background colors are:
 
-  on_ansi0 .. on_ansi15
+  on_ansi0 .. on_ansi255
   on_grey0 .. on_grey23
 
 plus C<on_rgbI<RGB>> for I<R>, I<G>, and I<B> values from 0 to 5.
@@ -801,7 +812,9 @@ $Term::ANSIColor::EACHLINE to C<"\n"> to use this feature.
 
 uncolor() performs the opposite translation as color(), turning escape
 sequences into a list of strings corresponding to the attributes being set
-by those sequences.
+by those sequences.  uncolor() will never return C<ansi16> through
+C<ansi255>, instead preferring the C<grey> and C<rgb> names (and likewise
+for C<on_ansi16> through C<on_ansi255>).
 
 =item colorstrip(STRING[, STRING ...])
 
@@ -875,12 +888,12 @@ described above since a background color is being used.)
 If you import C<:constants256>, you can use the following constants
 directly:
 
-  ANSI0 .. ANSI15
+  ANSI0 .. ANSI255
   GREY0 .. GREY23
 
   RGBXYZ (for X, Y, and Z values from 0 to 5, like RGB000 or RGB515)
 
-  ON_ANSI0 .. ON_ANSI15
+  ON_ANSI0 .. ON_ANSI255
   ON_GREY0 .. ON_GREY23
 
   ON_RGBXYZ (for X, Y, and Z values from 0 to 5)
@@ -1122,6 +1135,10 @@ $Term::ANSIColor::AUTOLOCAL was changed to take precedence over
 $Term::ANSIColor::AUTORESET, rather than the other way around, in
 Term::ANSIColor 4.00, included in Perl 5.17.8.
 
+C<ansi16> through C<ansi255>, as aliases for the C<rgb> and C<grey>
+colors, and the corresponding C<on_ansi> names and C<ANSI> and C<ON_ANSI>
+constants, were added in Term::ANSIColor 4.06.
+
 =head1 RESTRICTIONS
 
 It would be nice if one could leave off the commas around the constants
@@ -1233,6 +1250,8 @@ The CPAN module L<Term::ExtendedColor> provides a different and more
 comprehensive interface for 256-color emulators that may be more
 convenient.  The CPAN module L<Win32::Console::ANSI> provides ANSI color
 (and other escape sequence) support in the Win32 Console environment.
+The CPAN module L<Term::Chrome> provides a different interface using
+objects and operator overloading.
 
 ECMA-048 is available on-line (at least at the time of this writing) at
 L<http://www.ecma-international.org/publications/standards/Ecma-048.htm>.
@@ -1247,7 +1266,7 @@ L<http://invisible-island.net/xterm/ctlseqs/ctlseqs.html> (search for
 256-color).
 
 The current version of this module is always available from its web site
-at L<http://www.eyrie.org/~eagle/software/ansicolor/>.  It is also part of
-the Perl core distribution as of 5.6.0.
+at L<https://www.eyrie.org/~eagle/software/ansicolor/>.  It is also part
+of the Perl core distribution as of 5.6.0.
 
 =cut
