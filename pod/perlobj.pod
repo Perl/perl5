@@ -489,8 +489,8 @@ As you can see, we've stored the path and file data in the object
 itself. Remember, under the hood, this object is still just a hash.
 Later, we'll write accessors to manipulate this data.
 
-For our File::MP3 class, we can check to make sure that the path we're
-given ends with ".mp3":
+For our C<File::MP3> class, we can check to make sure that the path
+we're given ends with ".mp3":
 
   package File::MP3;
 
