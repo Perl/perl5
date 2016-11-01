@@ -540,6 +540,19 @@ inplace editing.
 
 Mnemonic: value of B<-i> switch.
 
+=item @ISA
+X<@ISA>
+
+Each package contains a special array called C<@ISA> which contains a list
+of that class's parent classes, if any. This array is simply a list of
+scalars, each of which is a string that corresponds to a package name. The
+array is examined when Perl does method resolution, which is covered in
+L<perlobj>.
+
+It is possible to manually set C<@ISA>, or you can use L<parent> to load
+and declare parent classes. Alternatively there is the L<base> pragma, but
+that is discouraged unless you're also using the L<fields> pragma.
+
 =item $^M
 X<$^M>
 
