@@ -5,14 +5,14 @@ use warnings;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '1.14';
+our $VERSION = '1.17';
 
 my $PL_EXT  = '.pl';
 
 my %LocaleFile = map { ($_, $_) } qw(
-   af ar as az be bg bn ca cs cy da ee eo es et fa fi fil fo fr
+   af ar as az be bn ca cs cy da ee eo es et fa fi fil fo fr
    gu ha haw hi hr hu hy ig is ja kk kl kn ko kok ln lt lv
-   mk ml mr mt nb nn nso om or pa pl ro ru sa se si sk sl sq
+   mk ml mr mt nb nn nso om or pa pl ro sa se si sk sl sq
    sr sv ta te th tn to tr uk ur vi wae wo yo zh
 );
    $LocaleFile{'default'} = '';
@@ -26,6 +26,7 @@ my %LocaleFile = map { ($_, $_) } qw(
    $LocaleFile{'fi__phonebook'}   = 'fi_phone';
    $LocaleFile{'si__dictionary'}  = 'si_dict';
    $LocaleFile{'sv__reformed'}    = 'sv_refo';
+   $LocaleFile{'ug_Cyrl'}         = 'ug_cyrl';
    $LocaleFile{'zh__big5han'}     = 'zh_big5';
    $LocaleFile{'zh__gb2312han'}   = 'zh_gb';
    $LocaleFile{'zh__pinyin'}      = 'zh_pin';
@@ -124,97 +125,6 @@ sub new {
 
 1;
 __END__
-
-MEMORANDA for developing
-
-locale            based CLDR
-----------------------------------------------------------------------------
-af                22.1 = 1.8.1
-ar                22.1 = 1.9.0
-as                22.1 = 1.8.1
-az                22.1 = 1.8.1 (type="standard")
-be                22.1 = 1.9.0
-bg                22.1 = 1.9.0
-bn                22.1 = 2.0.1 (type="standard")
-bs                22.1 = 1.9.0 (alias source="hr")
-bs_Cyrl           22.1 = 22    (alias source="sr")
-ca                22.1 = 1.8.1 (alt="proposed" type="standard")
-cs                22.1 = 1.8.1 (type="standard")
-cy                22.1 = 1.8.1
-da                22.1 = 1.8.1 (type="standard") [mod aA to pass CLDR test]
-de__phonebook     22.1 = 2.0   (type="phonebook")
-ee                22.1 = 22
-eo                22.1 = 1.8.1
-es                22.1 = 1.9.0 (type="standard")
-es__traditional   22.1 = 1.8.1 (type="traditional")
-et                22.1 = 1.8.1
-fa                22.1 = 1.8.1
-fi                22.1 = 1.8.1 (type="standard" alt="proposed")
-fi__phonebook     22.1 = 1.8.1 (type="phonebook")
-fil               22.1 = 1.9.0 (type="standard") = 1.8.1
-fo                22.1 = 1.8.1 (alt="proposed" type="standard")
-fr                22.1 = 1.9.0 (fr_CA, backwards="on")
-gu                22.1 = 1.9.0 (type="standard")
-ha                22.1 = 1.9.0
-haw               22.1 = 1.8.1
-hi                22.1 = 1.9.0 (type="standard")
-hr                22.1 = 1.9.0 (type="standard")
-hu                22.1 = 1.8.1 (alt="proposed" type="standard")
-hy                22.1 = 1.8.1
-ig                22.1 = 1.8.1
-is                22.1 = 1.8.1 (type="standard")
-ja                22.1 = 1.8.1 (type="standard")
-kk                22.1 = 1.9.0
-kl                22.1 = 1.8.1 (type="standard")
-kn                22.1 = 1.9.0 (type="standard")
-ko                22.1 = 1.8.1 (type="standard")
-kok               22.1 = 1.8.1
-ln                22.1 = 2.0   (type="standard") = 1.8.1
-lt                22.1 = 1.9.0
-lv                22.1 = 1.9.0 (type="standard") = 1.8.1
-mk                22.1 = 1.9.0
-ml                22.1 = 1.9.0
-mr                22.1 = 1.8.1
-mt                22.1 = 1.9.0
-nb                22.1 = 2.0   (type="standard")
-nn                22.1 = 2.0   (type="standard")
-nso               22.1 = 1.8.1
-om                22.1 = 1.8.1
-or                22.1 = 1.9.0
-pa                22.1 = 1.8.1
-pl                22.1 = 1.8.1
-ro                22.1 = 1.9.0 (type="standard")
-ru                22.1 = 1.9.0
-sa                1.9.1 = 1.8.1 (type="standard" alt="proposed") [now /seed]
-se                22.1 = 1.8.1 (type="standard")
-si                22.1 = 1.9.0 (type="standard")
-si__dictionary    22.1 = 1.9.0 (type="dictionary")
-sk                22.1 = 1.9.0 (type="standard")
-sl                22.1 = 1.8.1 (type="standard" alt="proposed")
-sq                22.1 = 1.8.1 (alt="proposed" type="standard")
-sr                22.1 = 1.9.0 (type="standard")
-sr_Latn           22.1 = 1.8.1 (alias source="hr")
-sv                22.1 = 1.9.0 (type="standard")
-sv__reformed      22.1 = 1.8.1 (type="reformed")
-ta                22.1 = 1.9.0
-te                22.1 = 1.9.0
-th                22.1 = 22
-tn                22.1 = 1.8.1
-to                22.1 = 22
-tr                22.1 = 1.8.1 (type="standard")
-uk                22.1 = 21
-ur                22.1 = 1.9.0
-vi                22.1 = 1.8.1
-wae               22.1 = 2.0
-wo                1.9.1 = 1.8.1 [now /seed]
-yo                22.1 = 1.8.1
-zh                22.1 = 1.8.1 (type="standard")
-zh__big5han       22.1 = 1.8.1 (type="big5han")
-zh__gb2312han     22.1 = 1.8.1 (type="gb2312han")
-zh__pinyin        22.1 = 2.0   (type='pinyin' alt='short')
-zh__stroke        22.1 = 1.9.1 (type='stroke' alt='short')
-zh__zhuyin        22.1 = 22    (type='zhuyin' alt='short')
-----------------------------------------------------------------------------
 
 =head1 NAME
 
@@ -339,9 +249,8 @@ a combination of return values from C<getlocale> and C<locale_version>.
       as                Assamese
       az                Azerbaijani (Azeri)
       be                Belarusian
-      bg                Bulgarian
       bn                Bengali
-      bs                Bosnian
+      bs                Bosnian (tailored as Croatian)
       bs_Cyrl           Bosnian in Cyrillic (tailored as Serbian)
       ca                Catalan
       cs                Czech
@@ -389,7 +298,6 @@ a combination of return values from C<getlocale> and C<locale_version>.
       pa                Punjabi
       pl                Polish
       ro                Romanian
-      ru                Russian
       sa                Sanskrit
       se                Northern Sami
       si                Sinhala
@@ -407,6 +315,7 @@ a combination of return values from C<getlocale> and C<locale_version>.
       tn                Tswana
       to                Tonga
       tr                Turkish
+      ug_Cyrl           Uyghur in Cyrillic
       uk                Ukrainian
       ur                Urdu
       vi                Vietnamese
@@ -422,19 +331,21 @@ a combination of return values from C<getlocale> and C<locale_version>.
     --------------------------------------------------------------
 
 Locales according to the default UCA rules include
-chr (Cherokee),
+am (Amharic) without C<[reorder Ethi]>,
+bg (Bulgarian) without C<[reorder Cyrl]>,
+chr (Cherokee) without C<[reorder Cher]>,
 de (German),
 en (English),
 ga (Irish),
 id (Indonesian),
 it (Italian),
-ka (Georgian),
+ka (Georgian) without C<[reorder Geor]>,
+mn (Mongolian) without C<[reorder Cyrl Mong]>,
 ms (Malay),
 nl (Dutch),
 pt (Portuguese),
-st (Southern Sotho),
+ru (Russian) without C<[reorder Cyrl]>,
 sw (Swahili),
-xh (Xhosa),
 zu (Zulu).
 
 B<Note>
@@ -477,11 +388,102 @@ Thus C<(normalization =E<gt> undef)> is less preferred.
 
 =back
 
+=head2 Reference
+
+      locale            based CLDR or other reference
+    --------------------------------------------------------------------
+      af                22.1 = 1.8.1
+      ar                22.1 = 1.9.0
+      as                22.1 = 1.8.1
+      az                22.1 = 1.8.1 (type="standard")
+      be                30 = 28 (type="standard" without [reorder Cyrl])
+      bn                22.1 = 2.0.1 (type="standard")
+      bs                30 = 28 (type="standard": [import hr])
+      bs_Cyrl           30 = 28 (type="standard": [import sr])
+      ca                22.1 = 1.8.1 (alt="proposed" type="standard")
+      cs                22.1 = 1.8.1 (type="standard")
+      cy                22.1 = 1.8.1
+      da                22.1 = 1.8.1 (type="standard")
+      de__phonebook     22.1 = 2.0   (type="phonebook")
+      ee                22.1 = 22
+      eo                22.1 = 1.8.1
+      es                22.1 = 1.9.0 (type="standard")
+      es__traditional   22.1 = 1.8.1 (type="traditional")
+      et                22.1 = 1.8.1
+      fa                22.1 = 1.8.1
+      fi                22.1 = 1.8.1 (type="standard" alt="proposed")
+      fi__phonebook     22.1 = 1.8.1 (type="phonebook")
+      fil               22.1 = 1.9.0 (type="standard") = 1.8.1
+      fo                22.1 = 1.8.1 (alt="proposed" type="standard")
+      fr                22.1 = 1.9.0 (fr_CA, backwards="on")
+      gu                22.1 = 1.9.0 (type="standard")
+      ha                22.1 = 1.9.0
+      haw               22.1 = 1.8.1
+      hi                22.1 = 1.9.0 (type="standard")
+      hr                22.1 = 1.9.0 (type="standard")
+      hu                22.1 = 1.8.1 (alt="proposed" type="standard")
+      hy                22.1 = 1.8.1
+      ig                22.1 = 1.8.1
+      is                22.1 = 1.8.1 (type="standard")
+      ja                22.1 = 1.8.1 (type="standard")
+      kk                30 = 28 (type="standard" without [reorder Cyrl])
+      kl                22.1 = 1.8.1 (type="standard")
+      kn                22.1 = 1.9.0 (type="standard")
+      ko                22.1 = 1.8.1 (type="standard")
+      kok               22.1 = 1.8.1
+      ln                22.1 = 2.0   (type="standard") = 1.8.1
+      lt                22.1 = 1.9.0
+      lv                22.1 = 1.9.0 (type="standard") = 1.8.1
+      mk                30 = 28 (type="standard" without [reorder Cyrl])
+      ml                22.1 = 1.9.0
+      mr                22.1 = 1.8.1
+      mt                22.1 = 1.9.0
+      nb                22.1 = 2.0   (type="standard")
+      nn                22.1 = 2.0   (type="standard")
+      nso               22.1 = 1.8.1
+      om                22.1 = 1.8.1
+      or                22.1 = 1.9.0
+      pa                22.1 = 1.8.1
+      pl                22.1 = 1.8.1
+      ro                22.1 = 1.9.0 (type="standard")
+      sa                1.9.1 = 1.8.1 (type="standard" alt="proposed")
+                                      [now in /seed]
+      se                22.1 = 1.8.1 (type="standard")
+      si                22.1 = 1.9.0 (type="standard")
+      si__dictionary    22.1 = 1.9.0 (type="dictionary")
+      sk                22.1 = 1.9.0 (type="standard")
+      sl                22.1 = 1.8.1 (type="standard" alt="proposed")
+      sq                22.1 = 1.8.1 (alt="proposed" type="standard")
+      sr                30 = 28 (type="standard" without [reorder Cyrl])
+      sr_Latn           30 = 28 (type="standard": [import hr])
+      sv                22.1 = 1.9.0 (type="standard")
+      sv__reformed      22.1 = 1.8.1 (type="reformed")
+      ta                22.1 = 1.9.0
+      te                22.1 = 1.9.0
+      th                22.1 = 22
+      tn                22.1 = 1.8.1
+      to                22.1 = 22
+      tr                22.1 = 1.8.1 (type="standard")
+      uk                30 = 28 (type="standard" without [reorder Cyrl])
+      ug_Cyrl           https://en.wikipedia.org/wiki/Uyghur_Cyrillic_alphabet
+      ur                22.1 = 1.9.0
+      vi                22.1 = 1.8.1
+      wae               22.1 = 2.0
+      wo                1.9.1 = 1.8.1 [now in /seed]
+      yo                22.1 = 1.8.1
+      zh                22.1 = 1.8.1 (type="standard")
+      zh__big5han       22.1 = 1.8.1 (type="big5han")
+      zh__gb2312han     22.1 = 1.8.1 (type="gb2312han")
+      zh__pinyin        22.1 = 2.0   (type='pinyin' alt='short')
+      zh__stroke        22.1 = 1.9.1 (type='stroke' alt='short')
+      zh__zhuyin        22.1 = 22    (type='zhuyin' alt='short')
+    --------------------------------------------------------------------
+
 =head1 AUTHOR
 
 The Unicode::Collate::Locale module for perl was written
 by SADAHIRO Tomoyuki, <SADAHIRO@cpan.org>.
-This module is Copyright(C) 2004-2013, SADAHIRO Tomoyuki. Japan.
+This module is Copyright(C) 2004-2016, SADAHIRO Tomoyuki. Japan.
 All rights reserved.
 
 This module is free software; you can redistribute it and/or
