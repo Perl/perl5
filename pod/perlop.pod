@@ -1676,8 +1676,8 @@ X<qr> X</i> X</m> X</o> X</s> X</x> X</p>
 
 This operator quotes (and possibly compiles) its I<STRING> as a regular
 expression.  I<STRING> is interpolated the same way as I<PATTERN>
-in C<m/I<PATTERN>/>.  If C<"'"> is used as the delimiter, no interpolation
-is done.  Returns a Perl value which may be used instead of the
+in C<m/I<PATTERN>/>.  If C<"'"> is used as the delimiter, no variable
+interpolation is done.  Returns a Perl value which may be used instead of the
 corresponding C</I<STRING>/msixpodualn> expression.  The returned value is a
 normalized version of the original pattern.  It magically differs from
 a string containing the same characters: C<ref(qr/x/)> returns "Regexp";
@@ -1786,7 +1786,7 @@ as delimiters.  This is particularly useful for matching path names
 that contain C<"/">, to avoid LTS (leaning toothpick syndrome).  If C<"?"> is
 the delimiter, then a match-only-once rule applies,
 described in C<m?I<PATTERN>?> below.  If C<"'"> (single quote) is the delimiter,
-no interpolation is performed on the I<PATTERN>.
+no variable interpolation is performed on the I<PATTERN>.
 When using a delimiter character valid in an identifier, whitespace is required
 after the C<m>.
 
@@ -2070,7 +2070,7 @@ the string specified must be a scalar variable, an array element, a
 hash element, or an assignment to one of those; that is, some sort of
 scalar lvalue.
 
-If the delimiter chosen is a single quote, no interpolation is
+If the delimiter chosen is a single quote, no variable interpolation is
 done on either the I<PATTERN> or the I<REPLACEMENT>.  Otherwise, if the
 I<PATTERN> contains a C<$> that looks like a variable rather than an
 end-of-string test, the variable will be interpolated into the pattern
@@ -2382,8 +2382,8 @@ must have its own pair of quotes, which may or may not be bracketing
 quotes; for example, C<tr[aeiouy][yuoiea]> or C<tr(+\-*/)/ABCD/>.
 
 Characters may be literals or any of the escape sequences accepted in
-double-quoted strings.  But there is no interpolation, so C<"$"> and
-C<"@"> are treated as literals.  A hyphen at the beginning or end, or
+double-quoted strings.  But there is no variable interpolation, so C<"$">
+and C<"@"> are treated as literals.  A hyphen at the beginning or end, or
 preceded by a backslash is considered a literal.  Escape sequence
 details are in L<the table near the beginning of this section|/Quote and
 Quote-like Operators>.

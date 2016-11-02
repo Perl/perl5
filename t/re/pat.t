@@ -1819,9 +1819,8 @@ EOP
             like("sS", qr/\N{}Ss|/i, "\N{} with empty branch alternation works");
         }
 
-    TODO: {
-        local $::TODO = "RT #21491: m'' interpolates escape sequences";
-        is(0+("\n" =~ m'\n'), 0, q|RT #21491: m'\n' should not interpolate|);
+        {
+            is(0+("\n" =~ m'\n'), 1, q|m'\n' should interpolate escapes|);
         }
 
         {
