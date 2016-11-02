@@ -1731,6 +1731,15 @@ my @tests = (
         'utf8', 0x80000000, (isASCII) ? 7 : $max_bytes,
         nonportable_regex(0x80000000)
     ],
+    [ "highest 32 bit code point",
+        (isASCII)
+         ? "\xfe\x83\xbf\xbf\xbf\xbf\xbf"
+         : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa3\xbf\xbf\xbf\xbf\xbf\xbf"),
+        $UTF8_WARN_ABOVE_31_BIT, $UTF8_DISALLOW_ABOVE_31_BIT,
+        $UTF8_GOT_ABOVE_31_BIT,
+        'utf8', 0xFFFFFFFF, (isASCII) ? 7 : $max_bytes,
+        nonportable_regex(0xffffffff)
+    ],
     [ "requires at least 32 bits, and use SUPER-type flags, instead of ABOVE_31_BIT",
         (isASCII)
          ? "\xfe\x82\x80\x80\x80\x80\x80"
@@ -1764,7 +1773,20 @@ my @tests = (
     ],
 );
 
-if ($is64bit) {
+if (! $is64bit) {
+    if (isASCII) {
+        no warnings qw{portable overflow};
+        push @tests,
+            [ "Lowest 33 bit code point: overflow",
+                "\xFE\x84\x80\x80\x80\x80\x80",
+                $UTF8_WARN_ABOVE_31_BIT, $UTF8_DISALLOW_ABOVE_31_BIT,
+                $UTF8_GOT_ABOVE_31_BIT,
+                'utf8', 0x100000000, 7,
+                qr/and( is)? not portable/
+            ];
+    }
+}
+else {
     no warnings qw{portable overflow};
     push @tests,
         [ "More than 32 bits",

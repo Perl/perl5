@@ -1683,6 +1683,7 @@ ApdD	|UV	|to_utf8_case	|NN const U8 *p					\
 #if defined(PERL_IN_UTF8_C)
 inRP	|bool	|does_utf8_overflow|NN const U8 * const s|NN const U8 * e
 inRP	|bool	|is_utf8_overlong_given_start_byte_ok|NN const U8 * const s|const STRLEN len
+inRP	|bool	|isFF_OVERLONG	|NN const U8 * const s|const STRLEN len
 sMR	|char *	|unexpected_non_continuation_text			\
 		|NN const U8 * const s					\
 		|STRLEN print_len					\
