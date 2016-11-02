@@ -1,8 +1,40 @@
 CHANGES
 -------
-2.51  Mon Oct 17 16:11:03 2016 +0200 (rurban)
+2.55  Thu Oct 20 09:16:06  2016 +0200 (rurban)
+
+       Bugfixes
+       - Skip sudo for t/500_ping_icmp.t if a prompt is required
+         [RT #118451]
+
+2.54  Thu Oct 20 09:16:06  2016 +0200 (rurban)
+
+       Bugfixes
+       - Fixed ping_external argument type, either packed ip or hostname.
+         [RT #113825]
+       - Fixed wrong skip message in t/020_external.t
+
+2.53  Thu Oct 20 09:16:06  2016 +0200 (rurban)
+
+       Bugfixes
+       - Relax icmp tests on local firewalls, eg. as here on windows reported
+         by kmx. [RT #118441]
+
+       Internals
+       - Enhanced .travis.yml
+
+2.52  Tue Oct 18 16:29:29 2016 +0200 (rurban)
        version in cperl since 5.25.2c
 
+       Bugfixes
+       - Fixed _pack_sockaddr_in for a proper 2nd argument type, hash or packed address.
+       - Improved 500_ping_icmp.t to try sudo.
+       
+       Internals
+       - Converted all hash string keys to bare.
+
+2.51  Mon Oct 17 16:11:03 2016 +0200 (rurban)
+       version in cperl since 5.25.2c
+ 
        Bugfixes
        - Fixed missing _unpack_sockaddr_in family, which took AF_INET6 for
          a AF_INET addr in t/500_ping_icmp.t and t/500_ping_icmp_ttl.t.

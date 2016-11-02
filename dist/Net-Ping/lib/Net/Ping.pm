@@ -21,7 +21,7 @@ use Time::HiRes;
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
 @EXPORT_OK = qw(wakeonlan);
-$VERSION = "2.51";
+$VERSION = "2.55";
 
 # Globals
 
@@ -130,16 +130,16 @@ sub new
   $proto = $def_proto unless $proto;          # Determine the protocol
   croak('Protocol for ping must be "icmp", "icmpv6", "udp", "tcp", "syn", "stream" or "external"')
     unless $proto =~ m/^(icmp|icmpv6|udp|tcp|syn|stream|external)$/;
-  $self->{"proto"} = $proto;
+  $self->{proto} = $proto;
 
   $timeout = $def_timeout unless $timeout;    # Determine the timeout
   croak("Default timeout for ping must be greater than 0 seconds")
     if $timeout <= 0;
-  $self->{"timeout"} = $timeout;
+  $self->{timeout} = $timeout;
 
-  $self->{"device"} = $device;
+  $self->{device} = $device;
 
-  $self->{"tos"} = $tos;
+  $self->{tos} = $tos;
 
   if ($self->{'host'}) {
     my $host = $self->{'host'};
@@ -167,75 +167,75 @@ sub new
   if ($family) {
     if ($family =~ $qr_family) {
       if ($family =~ $qr_family4) {
-        $self->{"family"} = AF_INET;
+        $self->{family} = AF_INET;
       } else {
-        $self->{"family"} = $AF_INET6;
+        $self->{family} = $AF_INET6;
       }
     } else {
       croak('Family must be "ipv4" or "ipv6"')
     }
   } else {
-    $self->{"family"} = $def_family;
+    $self->{family} = $def_family;
   }
 
   $min_datasize = ($proto eq "udp") ? 1 : 0;  # Determine data size
   $data_size = $min_datasize unless defined($data_size) && $proto ne "tcp";
   croak("Data for ping must be from $min_datasize to $max_datasize bytes")
     if ($data_size < $min_datasize) || ($data_size > $max_datasize);
-  $data_size-- if $self->{"proto"} eq "udp";  # We provide the first byte
-  $self->{"data_size"} = $data_size;
+  $data_size-- if $self->{proto} eq "udp";  # We provide the first byte
+  $self->{data_size} = $data_size;
 
-  $self->{"data"} = "";                       # Construct data bytes
-  for ($cnt = 0; $cnt < $self->{"data_size"}; $cnt++)
+  $self->{data} = "";                       # Construct data bytes
+  for ($cnt = 0; $cnt < $self->{data_size}; $cnt++)
   {
-    $self->{"data"} .= chr($cnt % 256);
+    $self->{data} .= chr($cnt % 256);
   }
 
   # Default exponential backoff rate
-  $self->{"retrans"} = $def_factor unless exists $self->{"retrans"};
+  $self->{retrans} = $def_factor unless exists $self->{retrans};
   # Default Connection refused behavior
-  $self->{"econnrefused"} = undef unless exists $self->{"econnrefused"};
+  $self->{econnrefused} = undef unless exists $self->{econnrefused};
 
-  $self->{"seq"} = 0;                         # For counting packets
-  if ($self->{"proto"} eq "udp")              # Open a socket
+  $self->{seq} = 0;                         # For counting packets
+  if ($self->{proto} eq "udp")              # Open a socket
   {
-    $self->{"proto_num"} = eval { (getprotobyname('udp'))[2] } ||
+    $self->{proto_num} = eval { (getprotobyname('udp'))[2] } ||
       croak("Can't udp protocol by name");
-    $self->{"port_num"} = $self->{"port"}
+    $self->{port_num} = $self->{port}
       || (getservbyname('echo', 'udp'))[2]
       || croak("Can't get udp echo port by name");
-    $self->{"fh"} = FileHandle->new();
-    socket($self->{"fh"}, PF_INET, SOCK_DGRAM,
-           $self->{"proto_num"}) ||
+    $self->{fh} = FileHandle->new();
+    socket($self->{fh}, PF_INET, SOCK_DGRAM,
+           $self->{proto_num}) ||
              croak("udp socket error - $!");
     $self->_setopts();
   }
-  elsif ($self->{"proto"} eq "icmp")
+  elsif ($self->{proto} eq "icmp")
   {
     croak("icmp ping requires root privilege") if !_isroot();
-    $self->{"proto_num"} = eval { (getprotobyname('icmp'))[2] } ||
+    $self->{proto_num} = eval { (getprotobyname('icmp'))[2] } ||
       croak("Can't get icmp protocol by name");
-    $self->{"pid"} = $$ & 0xffff;           # Save lower 16 bits of pid
-    $self->{"fh"} = FileHandle->new();
-    socket($self->{"fh"}, PF_INET, SOCK_RAW, $self->{"proto_num"}) ||
+    $self->{pid} = $$ & 0xffff;           # Save lower 16 bits of pid
+    $self->{fh} = FileHandle->new();
+    socket($self->{fh}, PF_INET, SOCK_RAW, $self->{proto_num}) ||
       croak("icmp socket error - $!");
     $self->_setopts();
     if ($self->{'ttl'}) {
-      setsockopt($self->{"fh"}, IPPROTO_IP, IP_TTL, pack("I*", $self->{'ttl'}))
+      setsockopt($self->{fh}, IPPROTO_IP, IP_TTL, pack("I*", $self->{'ttl'}))
         or croak "error configuring ttl to $self->{'ttl'} $!";
     }
   }
-  elsif ($self->{"proto"} eq "icmpv6")
+  elsif ($self->{proto} eq "icmpv6")
   {
     croak("icmpv6 ping requires root privilege") if !_isroot();
     croak("Wrong family $self->{family} for icmpv6 protocol")
-      if $self->{"family"} and $self->{"family"} != $AF_INET6;
-    $self->{"family"} = $AF_INET6;
-    $self->{"proto_num"} = eval { (getprotobyname('ipv6-icmp'))[2] } ||
+      if $self->{family} and $self->{family} != $AF_INET6;
+    $self->{family} = $AF_INET6;
+    $self->{proto_num} = eval { (getprotobyname('ipv6-icmp'))[2] } ||
       croak("Can't get ipv6-icmp protocol by name"); # 58
-    $self->{"pid"} = $$ & 0xffff;           # Save lower 16 bits of pid
-    $self->{"fh"} = FileHandle->new();
-    socket($self->{"fh"}, $AF_INET6, SOCK_RAW, $self->{"proto_num"}) ||
+    $self->{pid} = $$ & 0xffff;           # Save lower 16 bits of pid
+    $self->{fh} = FileHandle->new();
+    socket($self->{fh}, $AF_INET6, SOCK_RAW, $self->{proto_num}) ||
       croak("icmp socket error - $!");
     $self->_setopts();
     if ($self->{'gateway'}) {
@@ -247,60 +247,60 @@ sub new
       $ip->{family} eq $AF_INET6
         or croak("gateway address needs to be IPv6");
       my $IPV6_NEXTHOP = eval { Socket::IPV6_NEXTHOP() } || 48; # IPV6_3542NEXTHOP, or 21
-      setsockopt($self->{"fh"}, $IPPROTO_IPV6, $IPV6_NEXTHOP, _pack_sockaddr_in($ip))
+      setsockopt($self->{fh}, $IPPROTO_IPV6, $IPV6_NEXTHOP, _pack_sockaddr_in($ip))
         or croak "error configuring gateway to $g NEXTHOP $!";
     }
     if (exists $self->{IPV6_USE_MIN_MTU}) {
       my $IPV6_USE_MIN_MTU = eval { Socket::IPV6_USE_MIN_MTU() } || 42;
-      setsockopt($self->{"fh"}, $IPPROTO_IPV6, $IPV6_USE_MIN_MTU,
+      setsockopt($self->{fh}, $IPPROTO_IPV6, $IPV6_USE_MIN_MTU,
                  pack("I*", $self->{'IPV6_USE_MIN_MT'}))
         or croak "error configuring IPV6_USE_MIN_MT} $!";
     }
     if (exists $self->{IPV6_RECVPATHMTU}) {
       my $IPV6_RECVPATHMTU = eval { Socket::IPV6_RECVPATHMTU() } || 43;
-      setsockopt($self->{"fh"}, $IPPROTO_IPV6, $IPV6_RECVPATHMTU,
+      setsockopt($self->{fh}, $IPPROTO_IPV6, $IPV6_RECVPATHMTU,
                  pack("I*", $self->{'RECVPATHMTU'}))
         or croak "error configuring IPV6_RECVPATHMTU $!";
     }
     if ($self->{'tos'}) {
       my $proto = $self->{family} == AF_INET ? IPPROTO_IP : $IPPROTO_IPV6;
-      setsockopt($self->{"fh"}, $proto, IP_TOS, pack("I*", $self->{'tos'}))
+      setsockopt($self->{fh}, $proto, IP_TOS, pack("I*", $self->{'tos'}))
         or croak "error configuring tos to $self->{'tos'} $!";
     }
     if ($self->{'ttl'}) {
       my $proto = $self->{family} == AF_INET ? IPPROTO_IP : $IPPROTO_IPV6;
-      setsockopt($self->{"fh"}, $proto, IP_TTL, pack("I*", $self->{'ttl'}))
+      setsockopt($self->{fh}, $proto, IP_TTL, pack("I*", $self->{'ttl'}))
         or croak "error configuring ttl to $self->{'ttl'} $!";
     }
   }
-  elsif ($self->{"proto"} eq "tcp" || $self->{"proto"} eq "stream")
+  elsif ($self->{proto} eq "tcp" || $self->{proto} eq "stream")
   {
-    $self->{"proto_num"} = eval { (getprotobyname('tcp'))[2] } ||
+    $self->{proto_num} = eval { (getprotobyname('tcp'))[2] } ||
       croak("Can't get tcp protocol by name");
-    $self->{"port_num"} = $self->{"port"}
+    $self->{port_num} = $self->{port}
       || (getservbyname('echo', 'tcp'))[2]
       ||  croak("Can't get tcp echo port by name");
-    $self->{"fh"} = FileHandle->new();
+    $self->{fh} = FileHandle->new();
   }
-  elsif ($self->{"proto"} eq "syn")
+  elsif ($self->{proto} eq "syn")
   {
-    $self->{"proto_num"} = eval { (getprotobyname('tcp'))[2] } ||
+    $self->{proto_num} = eval { (getprotobyname('tcp'))[2] } ||
       croak("Can't get tcp protocol by name");
-    $self->{"port_num"} = (getservbyname('echo', 'tcp'))[2] ||
+    $self->{port_num} = (getservbyname('echo', 'tcp'))[2] ||
       croak("Can't get tcp echo port by name");
     if ($syn_forking) {
-      $self->{"fork_rd"} = FileHandle->new();
-      $self->{"fork_wr"} = FileHandle->new();
-      pipe($self->{"fork_rd"}, $self->{"fork_wr"});
-      $self->{"fh"} = FileHandle->new();
-      $self->{"good"} = {};
-      $self->{"bad"} = {};
+      $self->{fork_rd} = FileHandle->new();
+      $self->{fork_wr} = FileHandle->new();
+      pipe($self->{fork_rd}, $self->{fork_wr});
+      $self->{fh} = FileHandle->new();
+      $self->{good} = {};
+      $self->{bad} = {};
     } else {
-      $self->{"wbits"} = "";
-      $self->{"bad"} = {};
+      $self->{wbits} = "";
+      $self->{bad} = {};
     }
-    $self->{"syn"} = {};
-    $self->{"stop_time"} = 0;
+    $self->{syn} = {};
+    $self->{stop_time} = 0;
   }
 
   return($self);
@@ -319,17 +319,17 @@ sub bind
       );
 
   croak("Usage: \$p->bind(\$local_addr)") unless @_ == 2;
-  croak("already bound") if defined($self->{"local_addr"}) &&
-    ($self->{"proto"} eq "udp" || $self->{"proto"} eq "icmp");
+  croak("already bound") if defined($self->{local_addr}) &&
+    ($self->{proto} eq "udp" || $self->{proto} eq "icmp");
 
   $ip = $self->_resolv($local_addr);
   croak("nonexistent local address $local_addr") unless defined($ip);
-  $self->{"local_addr"} = $ip;
+  $self->{local_addr} = $ip;
 
-  if (($self->{"proto"} ne "udp") && 
-      ($self->{"proto"} ne "icmp") && 
-      ($self->{"proto"} ne "tcp") && 
-      ($self->{"proto"} ne "syn"))
+  if (($self->{proto} ne "udp") && 
+      ($self->{proto} ne "icmp") && 
+      ($self->{proto} ne "tcp") && 
+      ($self->{proto} ne "syn"))
   {
     croak("Unknown protocol \"$self->{proto}\" in bind()");
   }
@@ -385,8 +385,8 @@ sub source_verify
 sub service_check
 {
   my $self = shift;
-  $self->{"econnrefused"} = 1 unless defined
-    ($self->{"econnrefused"} = shift());
+  $self->{econnrefused} = 1 unless defined
+    ($self->{econnrefused} = shift());
 }
 
 sub tcp_service_check
@@ -401,7 +401,7 @@ sub tcp_service_check
 sub retrans
 {
   my $self = shift;
-  $self->{"retrans"} = shift;
+  $self->{retrans} = shift;
 }
 
 sub _IsAdminUser {
@@ -441,10 +441,10 @@ sub IPV6_REACHCONF
       carp "IPV6_REACHCONF requires root permissions";
       return 0;
     }
-    $self->{"IPV6_REACHCONF"} = 1;
+    $self->{IPV6_REACHCONF} = 1;
   }
   else {
-    return $self->{"IPV6_REACHCONF"};
+    return $self->{IPV6_REACHCONF};
   }
 }
 
@@ -460,13 +460,13 @@ sub IPV6_USE_MIN_MTU
     #  carp "IPV6_USE_MIN_MTU not supported on this platform";
     #  return 0;
     #}
-    $self->{"IPV6_USE_MIN_MTU"} = $on ? 1 : 0;
-    setsockopt($self->{"fh"}, $IPPROTO_IPV6, $IPV6_USE_MIN_MTU,
+    $self->{IPV6_USE_MIN_MTU} = $on ? 1 : 0;
+    setsockopt($self->{fh}, $IPPROTO_IPV6, $IPV6_USE_MIN_MTU,
                pack("I*", $self->{'IPV6_USE_MIN_MT'}))
       or croak "error configuring IPV6_USE_MIN_MT} $!";
   }
   else {
-    return $self->{"IPV6_USE_MIN_MTU"};
+    return $self->{IPV6_USE_MIN_MTU};
   }
 }
 
@@ -482,13 +482,13 @@ sub IPV6_RECVPATHMTU
     #  carp "IPV6_RECVPATHMTU not supported on this platform";
     #  return 0;
     #}
-    $self->{"IPV6_RECVPATHMTU"} = 1;
-    setsockopt($self->{"fh"}, $IPPROTO_IPV6, $IPV6_RECVPATHMTU,
+    $self->{IPV6_RECVPATHMTU} = 1;
+    setsockopt($self->{fh}, $IPPROTO_IPV6, $IPV6_RECVPATHMTU,
                pack("I*", $self->{'IPV6_RECVPATHMTU'}))
       or croak "error configuring IPV6_RECVPATHMTU} $!";
   }
   else {
-    return $self->{"IPV6_RECVPATHMTU"};
+    return $self->{IPV6_RECVPATHMTU};
   }
 }
 
@@ -555,21 +555,21 @@ sub ping
 
   $host = $self->{host} if !defined $host and $self->{host};
   croak("Usage: \$p->ping([ \$host [, \$timeout [, \$family]]])") if @_ > 4 or !$host;
-  $timeout = $self->{"timeout"} unless $timeout;
+  $timeout = $self->{timeout} unless $timeout;
   croak("Timeout must be greater than 0 seconds") if $timeout <= 0;
 
   if ($family) {
     if ($family =~ $qr_family) {
       if ($family =~ $qr_family4) {
-        $self->{"family_local"} = AF_INET;
+        $self->{family_local} = AF_INET;
       } else {
-        $self->{"family_local"} = $AF_INET6;
+        $self->{family_local} = $AF_INET6;
       }
     } else {
       croak('Family must be "ipv4" or "ipv6"')
     }
   } else {
-    $self->{"family_local"} = $self->{"family"};
+    $self->{family_local} = $self->{family};
   }
   
   $ip = $self->_resolv($host);
@@ -577,25 +577,25 @@ sub ping
 
   # Dispatch to the appropriate routine.
   $ping_time = &time();
-  if ($self->{"proto"} eq "external") {
+  if ($self->{proto} eq "external") {
     $ret = $self->ping_external($ip, $timeout);
   }
-  elsif ($self->{"proto"} eq "udp") {
+  elsif ($self->{proto} eq "udp") {
     $ret = $self->ping_udp($ip, $timeout);
   }
-  elsif ($self->{"proto"} eq "icmp") {
+  elsif ($self->{proto} eq "icmp") {
     $ret = $self->ping_icmp($ip, $timeout);
   }
-  elsif ($self->{"proto"} eq "icmpv6") {
+  elsif ($self->{proto} eq "icmpv6") {
     $ret = $self->ping_icmpv6($ip, $timeout);
   }
-  elsif ($self->{"proto"} eq "tcp") {
+  elsif ($self->{proto} eq "tcp") {
     $ret = $self->ping_tcp($ip, $timeout);
   }
-  elsif ($self->{"proto"} eq "stream") {
+  elsif ($self->{proto} eq "stream") {
     $ret = $self->ping_stream($ip, $timeout);
   }
-  elsif ($self->{"proto"} eq "syn") {
+  elsif ($self->{proto} eq "syn") {
     $ret = $self->ping_syn($host, $ip, $ping_time, $ping_time+$timeout);
   } else {
     croak("Unknown protocol \"$self->{proto}\" in ping()");
@@ -614,10 +614,13 @@ sub ping_external {
 
   $ip = $self->{host} if !defined $ip and $self->{host};
   $timeout = $self->{timeout} if !defined $timeout and $self->{timeout};
+  my @addr = exists $ip->{addr_in}
+    ? ('ip' => $ip->{addr_in})
+    : ('host' => $ip->{host});
 
   eval { require Net::Ping::External; }
     or croak('Protocol "external" not supported on your system: Net::Ping::External not found');
-  return Net::Ping::External::ping(ip => $ip->{host}, timeout => $timeout,
+  return Net::Ping::External::ping(@addr, timeout => $timeout,
                                    family => $family);
 }
 
@@ -669,44 +672,44 @@ sub ping_icmp
   $ip = $self->{host} if !defined $ip and $self->{host};
   $timeout = $self->{timeout} if !defined $timeout and $self->{timeout};
 
-  socket($self->{"fh"}, $ip->{"family"}, SOCK_RAW, $self->{"proto_num"}) ||
+  socket($self->{fh}, $ip->{family}, SOCK_RAW, $self->{proto_num}) ||
     croak("icmp socket error - $!");
 
-  if (defined $self->{"local_addr"} &&
-      !CORE::bind($self->{"fh"}, _pack_sockaddr_in(0, $self->{"local_addr"}))) {
+  if (defined $self->{local_addr} &&
+      !CORE::bind($self->{fh}, _pack_sockaddr_in(0, $self->{local_addr}))) {
     croak("icmp bind error - $!");
   }
   $self->_setopts();
 
-  $self->{"seq"} = ($self->{"seq"} + 1) % 65536; # Increment sequence
+  $self->{seq} = ($self->{seq} + 1) % 65536; # Increment sequence
   $checksum = 0;                          # No checksum for starters
-  if ($ip->{"family"} == AF_INET) {
-    $msg = pack(ICMP_STRUCT . $self->{"data_size"}, ICMP_ECHO, SUBCODE,
-                $checksum, $self->{"pid"}, $self->{"seq"}, $self->{"data"});
+  if ($ip->{family} == AF_INET) {
+    $msg = pack(ICMP_STRUCT . $self->{data_size}, ICMP_ECHO, SUBCODE,
+                $checksum, $self->{pid}, $self->{seq}, $self->{data});
   } else {
                                           # how to get SRC
-    my $pseudo_header = pack('a16a16Nnn', $ip->{"addr_in"}, $ip->{"addr_in"}, 8+length($self->{"data"}), "\0", 0x003a);
-    $msg = pack(ICMP_STRUCT . $self->{"data_size"}, ICMPv6_ECHO, SUBCODE,
-                $checksum, $self->{"pid"}, $self->{"seq"}, $self->{"data"});
+    my $pseudo_header = pack('a16a16Nnn', $ip->{addr_in}, $ip->{addr_in}, 8+length($self->{data}), "\0", 0x003a);
+    $msg = pack(ICMP_STRUCT . $self->{data_size}, ICMPv6_ECHO, SUBCODE,
+                $checksum, $self->{pid}, $self->{seq}, $self->{data});
     $msg = $pseudo_header.$msg
   }
   $checksum = Net::Ping->checksum($msg);
-  if ($ip->{"family"} == AF_INET) {
-    $msg = pack(ICMP_STRUCT . $self->{"data_size"}, ICMP_ECHO, SUBCODE,
-                $checksum, $self->{"pid"}, $self->{"seq"}, $self->{"data"});
+  if ($ip->{family} == AF_INET) {
+    $msg = pack(ICMP_STRUCT . $self->{data_size}, ICMP_ECHO, SUBCODE,
+                $checksum, $self->{pid}, $self->{seq}, $self->{data});
   } else {
-    $msg = pack(ICMP_STRUCT . $self->{"data_size"}, ICMPv6_ECHO, SUBCODE,
-                $checksum, $self->{"pid"}, $self->{"seq"}, $self->{"data"});
+    $msg = pack(ICMP_STRUCT . $self->{data_size}, ICMPv6_ECHO, SUBCODE,
+                $checksum, $self->{pid}, $self->{seq}, $self->{data});
   }
   $len_msg = length($msg);
   $saddr = _pack_sockaddr_in(ICMP_PORT, $ip);
-  $self->{"from_ip"} = undef;
-  $self->{"from_type"} = undef;
-  $self->{"from_subcode"} = undef;
-  send($self->{"fh"}, $msg, ICMP_FLAGS, $saddr); # Send the message
+  $self->{from_ip} = undef;
+  $self->{from_type} = undef;
+  $self->{from_subcode} = undef;
+  send($self->{fh}, $msg, ICMP_FLAGS, $saddr); # Send the message
 
   $rbits = "";
-  vec($rbits, $self->{"fh"}->fileno(), 1) = 1;
+  vec($rbits, $self->{fh}->fileno(), 1) = 1;
   $ret = 0;
   $done = 0;
   $finish_time = &time() + $timeout;      # Must be done by this time
@@ -724,8 +727,8 @@ sub ping_icmp
       $recv_msg = "";
       $from_pid = -1;
       $from_seq = -1;
-      $from_saddr = recv($self->{"fh"}, $recv_msg, 1500, ICMP_FLAGS);
-      ($from_port, $from_ip) = _unpack_sockaddr_in($from_saddr, $ip->{"family"});
+      $from_saddr = recv($self->{fh}, $recv_msg, 1500, ICMP_FLAGS);
+      ($from_port, $from_ip) = _unpack_sockaddr_in($from_saddr, $ip->{family});
       ($from_type, $from_subcode) = unpack("C2", substr($recv_msg, 20, 2));
       if ($from_type == ICMP_ECHOREPLY) {
         ($from_pid, $from_seq) = unpack("n3", substr($recv_msg, 24, 4))
@@ -737,11 +740,11 @@ sub ping_icmp
         ($from_pid, $from_seq) = unpack("n3", substr($recv_msg, 52, 4))
           if length $recv_msg >= 56;
       }
-      $self->{"from_ip"} = $from_ip;
-      $self->{"from_type"} = $from_type;
-      $self->{"from_subcode"} = $from_subcode;
-      next if ($from_pid != $self->{"pid"});
-      next if ($from_seq != $self->{"seq"});
+      $self->{from_ip} = $from_ip;
+      $self->{from_type} = $from_type;
+      $self->{from_subcode} = $from_subcode;
+      next if ($from_pid != $self->{pid});
+      next if ($from_seq != $self->{seq});
       if (! $source_verify || ($self->ntop($from_ip) eq $self->ntop($ip))) { # Does the packet check out?
         if (($from_type == ICMP_ECHOREPLY) || ($from_type == ICMPv6_ECHOREPLY)) {
           $ret = 1;
@@ -767,9 +770,9 @@ sub ping_icmpv6
 
 sub icmp_result {
   my ($self) = @_;
-  my $addr = $self->{"from_ip"} || "";
+  my $addr = $self->{from_ip} || "";
   $addr = "\0\0\0\0" unless 4 == length $addr;
-  return ($self->ntop($addr),($self->{"from_type"} || 0), ($self->{"from_subcode"} || 0));
+  return ($self->ntop($addr),($self->{from_type} || 0), ($self->{from_subcode} || 0));
 }
 
 # Description:  Do a checksum on the message.  Basically sum all of
@@ -823,11 +826,11 @@ sub ping_tcp
 
   $! = 0;
   $ret = $self -> tcp_connect( $ip, $timeout);
-  if (!$self->{"econnrefused"} &&
+  if (!$self->{econnrefused} &&
       $! == ECONNREFUSED) {
     $ret = 1;  # "Connection refused" means reachable
   }
-  $self->{"fh"}->close();
+  $self->{fh}->close();
   return $ret;
 }
 
@@ -842,33 +845,33 @@ sub tcp_connect
   $ip = $self->{host} if !defined $ip and $self->{host};
   $timeout = $self->{timeout} if !defined $timeout and $self->{timeout};
 
-  $saddr = _pack_sockaddr_in($self->{"port_num"}, $ip);
+  $saddr = _pack_sockaddr_in($self->{port_num}, $ip);
 
   my $ret = 0;            # Default to unreachable
 
   my $do_socket = sub {
-    socket($self->{"fh"}, $ip->{"family"}, SOCK_STREAM, $self->{"proto_num"}) ||
+    socket($self->{fh}, $ip->{family}, SOCK_STREAM, $self->{proto_num}) ||
       croak("tcp socket error - $!");
-    if (defined $self->{"local_addr"} &&
-        !CORE::bind($self->{"fh"}, _pack_sockaddr_in(0, $self->{"local_addr"}))) {
+    if (defined $self->{local_addr} &&
+        !CORE::bind($self->{fh}, _pack_sockaddr_in(0, $self->{local_addr}))) {
       croak("tcp bind error - $!");
     }
     $self->_setopts();
   };
   my $do_connect = sub {
-    $self->{"ip"} = $ip->{"addr_in"};
+    $self->{ip} = $ip->{addr_in};
     # ECONNREFUSED is 10061 on MSWin32. If we pass it as child error through $?,
     # we'll get (10061 & 255) = 77, so we cannot check it in the parent process.
-    return ($ret = connect($self->{"fh"}, $saddr) || ($! == ECONNREFUSED && !$self->{"econnrefused"}));
+    return ($ret = connect($self->{fh}, $saddr) || ($! == ECONNREFUSED && !$self->{econnrefused}));
   };
   my $do_connect_nb = sub {
     # Set O_NONBLOCK property on filehandle
-    $self->socket_blocking_mode($self->{"fh"}, 0);
+    $self->socket_blocking_mode($self->{fh}, 0);
 
     # start the connection attempt
-    if (!connect($self->{"fh"}, $saddr)) {
+    if (!connect($self->{fh}, $saddr)) {
       if ($! == ECONNREFUSED) {
-        $ret = 1 unless $self->{"econnrefused"};
+        $ret = 1 unless $self->{econnrefused};
       } elsif ($! != EINPROGRESS && ($^O ne 'MSWin32' || $! != EWOULDBLOCK)) {
         # EINPROGRESS is the expected error code after a connect()
         # on a non-blocking socket.  But if the kernel immediately
@@ -882,7 +885,7 @@ sub tcp_connect
         # Just wait for connection completion...
         my ($wbits, $wout, $wexc);
         $wout = $wexc = $wbits = "";
-        vec($wbits, $self->{"fh"}->fileno, 1) = 1;
+        vec($wbits, $self->{fh}->fileno, 1) = 1;
 
         my $nfound = mselect(undef,
 			    ($wout = $wbits),
@@ -890,12 +893,12 @@ sub tcp_connect
 			    $timeout);
         warn("select: $!") unless defined $nfound;
 
-        if ($nfound && vec($wout, $self->{"fh"}->fileno, 1)) {
+        if ($nfound && vec($wout, $self->{fh}->fileno, 1)) {
           # the socket is ready for writing so the connection
           # attempt completed. test whether the connection
           # attempt was successful or not
 
-          if (getpeername($self->{"fh"})) {
+          if (getpeername($self->{fh})) {
             # Connection established to remote host
             $ret = 1;
           } else {
@@ -904,10 +907,10 @@ sub tcp_connect
 
             # This should set $! to the correct error.
             my $char;
-            sysread($self->{"fh"},$char,1);
+            sysread($self->{fh},$char,1);
             $! = ECONNREFUSED if ($! == EAGAIN && $^O =~ /cygwin/i);
 
-            $ret = 1 if (!$self->{"econnrefused"}
+            $ret = 1 if (!$self->{econnrefused}
                          && $! == ECONNREFUSED);
           }
         } else {
@@ -918,8 +921,8 @@ sub tcp_connect
 	      # winsock reports ECONNREFUSED as an exception, and we
 	      # need to fetch the socket-level error code via getsockopt()
 	      # instead of using the thread-level error code that is in $!.
-	      if ($nfound && vec($wexc, $self->{"fh"}->fileno, 1)) {
-		  $! = unpack("i", getsockopt($self->{"fh"}, SOL_SOCKET,
+	      if ($nfound && vec($wexc, $self->{fh}->fileno, 1)) {
+		  $! = unpack("i", getsockopt($self->{fh}, SOL_SOCKET,
 			                      SO_ERROR));
 	      }
 	  }
@@ -931,8 +934,8 @@ sub tcp_connect
     }
 
     # Unset O_NONBLOCK property on filehandle
-    $self->socket_blocking_mode($self->{"fh"}, 1);
-    $self->{"ip"} = $ip->{"addr_in"};
+    $self->socket_blocking_mode($self->{fh}, 1);
+    $self->{ip} = $ip->{addr_in};
     return $ret;
   };
 
@@ -956,7 +959,7 @@ sub tcp_connect
       # Try a slow blocking connect() call
       # and report the status to the parent.
       if ( &{ $do_connect }() ) {
-        $self->{"fh"}->close();
+        $self->{fh}->close();
         # No error
         exit 0;
       } else {
@@ -981,7 +984,7 @@ sub tcp_connect
     } while &time() < $patience && $child != $self->{'tcp_chld'};
 
     if ($child == $self->{'tcp_chld'}) {
-      if ($self->{"proto"} eq "stream") {
+      if ($self->{proto} eq "stream") {
         # We need the socket connected here, in parent
         # Should be safe to connect because the child finished
         # within the timeout
@@ -1038,18 +1041,18 @@ sub tcp_echo
   eval <<'EOM';
     do {
       my $rin = "";
-      vec($rin, $self->{"fh"}->fileno(), 1) = 1;
+      vec($rin, $self->{fh}->fileno(), 1) = 1;
 
       my $rout = undef;
       if($wrstr) {
         $rout = "";
-        vec($rout, $self->{"fh"}->fileno(), 1) = 1;
+        vec($rout, $self->{fh}->fileno(), 1) = 1;
       }
 
       if(mselect($rin, $rout, undef, ($time + $timeout) - &time())) {
 
-        if($rout && vec($rout,$self->{"fh"}->fileno(),1)) {
-          my $num = syswrite($self->{"fh"}, $wrstr, length $wrstr);
+        if($rout && vec($rout,$self->{fh}->fileno(),1)) {
+          my $num = syswrite($self->{fh}, $wrstr, length $wrstr);
           if($num) {
             # If it was a partial write, update and try again.
             $wrstr = substr($wrstr,$num);
@@ -1059,9 +1062,9 @@ sub tcp_echo
           }
         }
 
-        if(vec($rin,$self->{"fh"}->fileno(),1)) {
+        if(vec($rin,$self->{fh}->fileno(),1)) {
           my $reply;
-          if(sysread($self->{"fh"},$reply,length($pingstring)-length($rdstr))) {
+          if(sysread($self->{fh},$reply,length($pingstring)-length($rdstr))) {
             $rdstr .= $reply;
             $ret = 1 if $rdstr eq $pingstring;
           } else {
@@ -1089,12 +1092,12 @@ sub ping_stream
       ) = @_;
 
   # Open the stream if it's not already open
-  if(!defined $self->{"fh"}->fileno()) {
+  if(!defined $self->{fh}->fileno()) {
     $self->tcp_connect($ip, $timeout) or return 0;
   }
 
   croak "tried to switch servers while stream pinging"
-    if $self->{"ip"} ne $ip->{"addr_in"};
+    if $self->{ip} ne $ip->{addr_in};
 
   return $self->tcp_echo($timeout, $pingstring);
 }
@@ -1115,22 +1118,22 @@ sub open
   if ($family) {
     if ($family =~ $qr_family) {
       if ($family =~ $qr_family4) {
-        $self->{"family_local"} = AF_INET;
+        $self->{family_local} = AF_INET;
       } else {
-        $self->{"family_local"} = $AF_INET6;
+        $self->{family_local} = $AF_INET6;
       }
     } else {
       croak('Family must be "ipv4" or "ipv6"')
     }
   } else {
-    $self->{"family_local"} = $self->{"family"};
+    $self->{family_local} = $self->{family};
   }
 
   $ip = $self->_resolv($host);
-  $timeout = $self->{"timeout"} unless $timeout;
+  $timeout = $self->{timeout} unless $timeout;
 
-  if($self->{"proto"} eq "stream") {
-    if(defined($self->{"fh"}->fileno())) {
+  if($self->{proto} eq "stream") {
+    if(defined($self->{fh}->fileno())) {
       croak("socket is already open");
     } else {
       $self->tcp_connect($ip, $timeout);
@@ -1144,7 +1147,7 @@ sub _dontfrag {
   my $IP_DONTFRAG = eval { Socket::IP_DONTFRAG() };
   if ($IP_DONTFRAG) {
     my $i = 1;
-    setsockopt($self->{"fh"}, IPPROTO_IP, $IP_DONTFRAG, pack("I*", $i))
+    setsockopt($self->{fh}, IPPROTO_IP, $IP_DONTFRAG, pack("I*", $i))
       or croak "error configuring IP_DONTFRAG $!";
     # Linux needs more: Path MTU Discovery as defined in RFC 1191
     # For non SOCK_STREAM sockets it is the user's responsibility to packetize
@@ -1153,7 +1156,7 @@ sub _dontfrag {
     # MTU if this flag is set (with EMSGSIZE).
     if ($^O eq 'linux') {
       my $i = 2; # IP_PMTUDISC_DO
-      setsockopt($self->{"fh"}, IPPROTO_IP, IP_MTU_DISCOVER, pack("I*", $i))
+      setsockopt($self->{fh}, IPPROTO_IP, IP_MTU_DISCOVER, pack("I*", $i))
         or croak "error configuring IP_MTU_DISCOVER $!";
     }
   }
@@ -1163,11 +1166,11 @@ sub _dontfrag {
 sub _setopts {
   my $self = shift;
   if ($self->{'device'}) {
-    setsockopt($self->{"fh"}, SOL_SOCKET, SO_BINDTODEVICE, pack("Z*", $self->{'device'}))
+    setsockopt($self->{fh}, SOL_SOCKET, SO_BINDTODEVICE, pack("Z*", $self->{'device'}))
       or croak "error binding to device $self->{'device'} $!";
   }
   if ($self->{'tos'}) { # need to re-apply ToS (RT #6706)
-    setsockopt($self->{"fh"}, IPPROTO_IP, IP_TOS, pack("I*", $self->{'tos'}))
+    setsockopt($self->{fh}, IPPROTO_IP, IP_TOS, pack("I*", $self->{'tos'}))
       or croak "error applying tos to $self->{'tos'} $!";
   }
   if ($self->{'dontfrag'}) {
@@ -1206,23 +1209,23 @@ sub ping_udp
       $from_ip            # Packed IP number of sender
       );
 
-  $saddr = _pack_sockaddr_in($self->{"port_num"}, $ip);
-  $self->{"seq"} = ($self->{"seq"} + 1) % 256;    # Increment sequence
-  $msg = chr($self->{"seq"}) . $self->{"data"};   # Add data if any
+  $saddr = _pack_sockaddr_in($self->{port_num}, $ip);
+  $self->{seq} = ($self->{seq} + 1) % 256;    # Increment sequence
+  $msg = chr($self->{seq}) . $self->{data};   # Add data if any
 
-  socket($self->{"fh"}, $ip->{"family"}, SOCK_DGRAM,
-         $self->{"proto_num"}) ||
+  socket($self->{fh}, $ip->{family}, SOCK_DGRAM,
+         $self->{proto_num}) ||
            croak("udp socket error - $!");
 
-  if (defined $self->{"local_addr"} &&
-      !CORE::bind($self->{"fh"}, _pack_sockaddr_in(0, $self->{"local_addr"}))) {
+  if (defined $self->{local_addr} &&
+      !CORE::bind($self->{fh}, _pack_sockaddr_in(0, $self->{local_addr}))) {
     croak("udp bind error - $!");
   }
 
   $self->_setopts();
 
-  if ($self->{"connected"}) {
-    if ($self->{"connected"} ne $saddr) {
+  if ($self->{connected}) {
+    if ($self->{connected} ne $saddr) {
       # Still connected to wrong destination.
       # Need to flush out the old one.
       $flush = 1;
@@ -1241,24 +1244,24 @@ sub ping_udp
   if ($flush) {
     # Need to socket() again to flush the descriptor
     # This will disconnect from the old saddr.
-    socket($self->{"fh"}, $ip->{"family"}, SOCK_DGRAM,
-           $self->{"proto_num"});
+    socket($self->{fh}, $ip->{family}, SOCK_DGRAM,
+           $self->{proto_num});
     $self->_setopts();
   }
   # Connect the socket if it isn't already connected
   # to the right destination.
   if ($flush || $connect) {
-    connect($self->{"fh"}, $saddr);               # Tie destination to socket
-    $self->{"connected"} = $saddr;
+    connect($self->{fh}, $saddr);               # Tie destination to socket
+    $self->{connected} = $saddr;
   }
-  send($self->{"fh"}, $msg, UDP_FLAGS);           # Send it
+  send($self->{fh}, $msg, UDP_FLAGS);           # Send it
 
   $rbits = "";
-  vec($rbits, $self->{"fh"}->fileno(), 1) = 1;
+  vec($rbits, $self->{fh}->fileno(), 1) = 1;
   $ret = 0;                   # Default to unreachable
   $done = 0;
   my $retrans = 0.01;
-  my $factor = $self->{"retrans"};
+  my $factor = $self->{retrans};
   $finish_time = &time() + $timeout;       # Ping needs to be done by then
   while (!$done && $timeout > 0)
   {
@@ -1279,10 +1282,10 @@ sub ping_udp
     elsif ($nfound)         # A packet is waiting
     {
       $from_msg = "";
-      $from_saddr = recv($self->{"fh"}, $from_msg, 1500, UDP_FLAGS);
+      $from_saddr = recv($self->{fh}, $from_msg, 1500, UDP_FLAGS);
       if (!$from_saddr) {
         # For example an unreachable host will make recv() fail.
-        if (!$self->{"econnrefused"} &&
+        if (!$self->{econnrefused} &&
             ($! == ECONNREFUSED ||
              $! == ECONNRESET)) {
           # "Connection refused" means reachable
@@ -1291,10 +1294,10 @@ sub ping_udp
         }
         $done = 1;
       } else {
-        ($from_port, $from_ip) = _unpack_sockaddr_in($from_saddr, $ip->{"family"});
+        ($from_port, $from_ip) = _unpack_sockaddr_in($from_saddr, $ip->{family});
         if (!$source_verify ||
             (($from_ip eq $ip) &&        # Does the packet check out?
-             ($from_port == $self->{"port_num"}) &&
+             ($from_port == $self->{port_num}) &&
              ($from_msg eq $msg)))
         {
           $ret = 1;       # It's a winner
@@ -1309,12 +1312,12 @@ sub ping_udp
     else
     {
       # Send another in case the last one dropped
-      if (send($self->{"fh"}, $msg, UDP_FLAGS)) {
+      if (send($self->{fh}, $msg, UDP_FLAGS)) {
         # Another send worked?  The previous udp packet
         # must have gotten lost or is still in transit.
         # Hopefully this new packet will arrive safely.
       } else {
-        if (!$self->{"econnrefused"} &&
+        if (!$self->{econnrefused} &&
             $! == ECONNREFUSED) {
           # "Connection refused" means reachable
           # Good, continue
@@ -1341,15 +1344,15 @@ sub ping_syn
   }
 
   my $fh = FileHandle->new();
-  my $saddr = _pack_sockaddr_in($self->{"port_num"}, $ip);
+  my $saddr = _pack_sockaddr_in($self->{port_num}, $ip);
 
   # Create TCP socket
-  if (!socket ($fh, $ip->{"family"}, SOCK_STREAM, $self->{"proto_num"})) {
+  if (!socket ($fh, $ip->{family}, SOCK_STREAM, $self->{proto_num})) {
     croak("tcp socket error - $!");
   }
 
-  if (defined $self->{"local_addr"} &&
-      !CORE::bind($fh, _pack_sockaddr_in(0, $self->{"local_addr"}))) {
+  if (defined $self->{local_addr} &&
+      !CORE::bind($fh, _pack_sockaddr_in(0, $self->{local_addr}))) {
     croak("tcp bind error - $!");
   }
 
@@ -1372,16 +1375,16 @@ sub ping_syn
     } else {
       # Just save the error and continue on.
       # The ack() can check the status later.
-      $self->{"bad"}->{$host} = $!;
+      $self->{bad}->{$host} = $!;
     }
   }
 
   my $entry = [ $host, $ip, $fh, $start_time, $stop_time ];
-  $self->{"syn"}->{$fh->fileno} = $entry;
-  if ($self->{"stop_time"} < $stop_time) {
-    $self->{"stop_time"} = $stop_time;
+  $self->{syn}->{$fh->fileno} = $entry;
+  if ($self->{stop_time} < $stop_time) {
+    $self->{stop_time} = $stop_time;
   }
-  vec($self->{"wbits"}, $fh->fileno, 1) = 1;
+  vec($self->{wbits}, $fh->fileno, 1) = 1;
 
   return 1;
 }
@@ -1397,21 +1400,21 @@ sub ping_syn_fork {
     if ($pid) {
       # Parent process
       my $entry = [ $host, $ip, $pid, $start_time, $stop_time ];
-      $self->{"syn"}->{$pid} = $entry;
-      if ($self->{"stop_time"} < $stop_time) {
-        $self->{"stop_time"} = $stop_time;
+      $self->{syn}->{$pid} = $entry;
+      if ($self->{stop_time} < $stop_time) {
+        $self->{stop_time} = $stop_time;
       }
     } else {
       # Child process
-      my $saddr = _pack_sockaddr_in($self->{"port_num"}, $ip);
+      my $saddr = _pack_sockaddr_in($self->{port_num}, $ip);
 
       # Create TCP socket
-      if (!socket ($self->{"fh"}, $ip->{"family"}, SOCK_STREAM, $self->{"proto_num"})) {
+      if (!socket ($self->{fh}, $ip->{family}, SOCK_STREAM, $self->{proto_num})) {
         croak("tcp socket error - $!");
       }
 
-      if (defined $self->{"local_addr"} &&
-          !CORE::bind($self->{"fh"}, _pack_sockaddr_in(0, $self->{"local_addr"}))) {
+      if (defined $self->{local_addr} &&
+          !CORE::bind($self->{fh}, _pack_sockaddr_in(0, $self->{local_addr}))) {
         croak("tcp bind error - $!");
       }
 
@@ -1419,13 +1422,13 @@ sub ping_syn_fork {
 
       $!=0;
       # Try to connect (could take a long time)
-      connect($self->{"fh"}, $saddr);
+      connect($self->{fh}, $saddr);
       # Notify parent of connect error status
       my $err = $!+0;
       my $wrstr = "$$ $err";
       # Force to 16 chars including \n
       $wrstr .= " "x(15 - length $wrstr). "\n";
-      syswrite($self->{"fork_wr"}, $wrstr, length $wrstr);
+      syswrite($self->{fork_wr}, $wrstr, length $wrstr);
       exit;
     }
   } else {
@@ -1442,7 +1445,7 @@ sub ack
 {
   my $self = shift;
 
-  if ($self->{"proto"} eq "syn") {
+  if ($self->{proto} eq "syn") {
     if ($syn_forking) {
       my @answer = $self->ack_unfork(shift);
       return wantarray ? @answer : $answer[0];
@@ -1452,11 +1455,11 @@ sub ack
     if (my $host = shift or $self->{host}) {
       # Host passed as arg or as option to new
       $host = $self->{host} unless defined $host;
-      if (exists $self->{"bad"}->{$host}) {
-        if (!$self->{"econnrefused"} &&
-            $self->{"bad"}->{ $host } &&
+      if (exists $self->{bad}->{$host}) {
+        if (!$self->{econnrefused} &&
+            $self->{bad}->{ $host } &&
             (($! = ECONNREFUSED)>0) &&
-            $self->{"bad"}->{ $host } eq "$!") {
+            $self->{bad}->{ $host } eq "$!") {
           # "Connection refused" means reachable
           # Good, continue
         } else {
@@ -1465,8 +1468,8 @@ sub ack
         }
       }
       my $host_fd = undef;
-      foreach my $fd (keys %{ $self->{"syn"} }) {
-        my $entry = $self->{"syn"}->{$fd};
+      foreach my $fd (keys %{ $self->{syn} }) {
+        my $entry = $self->{syn}->{$fd};
         if ($entry->[0] eq $host) {
           $host_fd = $fd;
           $stop_time = $entry->[4]
@@ -1480,9 +1483,9 @@ sub ack
     } else {
       # No $host passed so scan all hosts
       # Use the latest stop_time
-      $stop_time = $self->{"stop_time"};
+      $stop_time = $self->{stop_time};
       # Use all the bits
-      $wbits = $self->{"wbits"};
+      $wbits = $self->{wbits};
     }
 
     while ($wbits !~ /^\0*\z/) {
@@ -1498,8 +1501,8 @@ sub ack
         if (vec($wout, $fd, 1)) {
           # Wipe it from future scanning.
           vec($wout, $fd, 1) = 0;
-          if (my $entry = $self->{"syn"}->{$fd}) {
-            if ($self->{"bad"}->{ $entry->[0] }) {
+          if (my $entry = $self->{syn}->{$fd}) {
+            if ($self->{bad}->{ $entry->[0] }) {
               $winner_fd = $fd;
               last;
             }
@@ -1520,15 +1523,15 @@ sub ack
             $fd++;
           }
         }
-        if (my $entry = $self->{"syn"}->{$fd}) {
+        if (my $entry = $self->{syn}->{$fd}) {
           # Wipe it from future scanning.
-          delete $self->{"syn"}->{$fd};
-          vec($self->{"wbits"}, $fd, 1) = 0;
+          delete $self->{syn}->{$fd};
+          vec($self->{wbits}, $fd, 1) = 0;
           vec($wbits, $fd, 1) = 0;
-          if (!$self->{"econnrefused"} &&
-              $self->{"bad"}->{ $entry->[0] } &&
+          if (!$self->{econnrefused} &&
+              $self->{bad}->{ $entry->[0] } &&
               (($! = ECONNREFUSED)>0) &&
-              $self->{"bad"}->{ $entry->[0] } eq "$!") {
+              $self->{bad}->{ $entry->[0] } eq "$!") {
             # "Connection refused" means reachable
             # Good, continue
           } elsif (getpeername($entry->[2])) {
@@ -1542,8 +1545,8 @@ sub ack
             my $char;
             sysread($entry->[2],$char,1);
             # Store the excuse why the connection failed.
-            $self->{"bad"}->{$entry->[0]} = $!;
-            if (!$self->{"econnrefused"} &&
+            $self->{bad}->{$entry->[0]} = $!;
+            if (!$self->{econnrefused} &&
                 (($! == ECONNREFUSED) ||
                  ($! == EAGAIN && $^O =~ /cygwin/i))) {
               # "Connection refused" means reachable
@@ -1560,23 +1563,23 @@ sub ack
         } else {
           warn "Corrupted SYN entry: unknown fd [$fd] ready!";
           vec($wbits, $fd, 1) = 0;
-          vec($self->{"wbits"}, $fd, 1) = 0;
+          vec($self->{wbits}, $fd, 1) = 0;
         }
       } elsif (defined $nfound) {
         # Timed out waiting for ACK
-        foreach my $fd (keys %{ $self->{"syn"} }) {
+        foreach my $fd (keys %{ $self->{syn} }) {
           if (vec($wbits, $fd, 1)) {
-            my $entry = $self->{"syn"}->{$fd};
-            $self->{"bad"}->{$entry->[0]} = "Timed out";
+            my $entry = $self->{syn}->{$fd};
+            $self->{bad}->{$entry->[0]} = "Timed out";
             vec($wbits, $fd, 1) = 0;
-            vec($self->{"wbits"}, $fd, 1) = 0;
-            delete $self->{"syn"}->{$fd};
+            vec($self->{wbits}, $fd, 1) = 0;
+            delete $self->{syn}->{$fd};
           }
         }
       } else {
         # Weird error occurred with select()
         warn("select: $!");
-        $self->{"syn"} = {};
+        $self->{syn} = {};
         $wbits = "";
       }
     }
@@ -1586,11 +1589,11 @@ sub ack
 
 sub ack_unfork {
   my ($self,$host) = @_;
-  my $stop_time = $self->{"stop_time"};
+  my $stop_time = $self->{stop_time};
   if ($host) {
     # Host passed as arg
-    if (my $entry = $self->{"good"}->{$host}) {
-      delete $self->{"good"}->{$host};
+    if (my $entry = $self->{good}->{$host}) {
+      delete $self->{good}->{$host};
       return ($entry->[0], &time() - $entry->[3], $self->ntop($entry->[1]));
     }
   }
@@ -1598,9 +1601,9 @@ sub ack_unfork {
   my $rbits = "";
   my $timeout;
 
-  if (keys %{ $self->{"syn"} }) {
+  if (keys %{ $self->{syn} }) {
     # Scan all hosts that are left
-    vec($rbits, fileno($self->{"fork_rd"}), 1) = 1;
+    vec($rbits, fileno($self->{fork_rd}), 1) = 1;
     $timeout = $stop_time - &time();
     # Force a minimum of 10 ms timeout.
     $timeout = 0.01 if $timeout < 0.01;
@@ -1611,10 +1614,10 @@ sub ack_unfork {
 
   if ($timeout > 0) {
     my $nfound;
-    while ( keys %{ $self->{"syn"} } and
+    while ( keys %{ $self->{syn} } and
            $nfound = mselect((my $rout=$rbits), undef, undef, $timeout)) {
       # Done waiting for one of the ACKs
-      if (!sysread($self->{"fork_rd"}, $_, 16)) {
+      if (!sysread($self->{fork_rd}, $_, 16)) {
         # Socket closed, which means all children are done.
         return ();
       }
@@ -1622,16 +1625,16 @@ sub ack_unfork {
       if ($pid) {
         # Flush the zombie
         waitpid($pid, 0);
-        if (my $entry = $self->{"syn"}->{$pid}) {
+        if (my $entry = $self->{syn}->{$pid}) {
           # Connection attempt to remote host is done
-          delete $self->{"syn"}->{$pid};
+          delete $self->{syn}->{$pid};
           if (!$how || # If there was no error connecting
-              (!$self->{"econnrefused"} &&
+              (!$self->{econnrefused} &&
                $how == ECONNREFUSED)) {  # "Connection refused" means reachable
             if ($host && $entry->[0] ne $host) {
               # A good connection, but not the host we need.
               # Move it from the "syn" hash to the "good" hash.
-              $self->{"good"}->{$entry->[0]} = $entry;
+              $self->{good}->{$entry->[0]} = $entry;
               # And wait for the next winner
               next;
             }
@@ -1652,7 +1655,7 @@ sub ack_unfork {
       warn("select: $!");
     }
   }
-  if (my @synners = keys %{ $self->{"syn"} }) {
+  if (my @synners = keys %{ $self->{syn} }) {
     # Kill all the synners
     kill 9, @synners;
     foreach my $pid (@synners) {
@@ -1661,7 +1664,7 @@ sub ack_unfork {
       waitpid($pid, 0);
     }
   }
-  $self->{"syn"} = {};
+  $self->{syn} = {};
   return ();
 }
 
@@ -1669,7 +1672,7 @@ sub ack_unfork {
 sub nack {
   my $self = shift;
   my $host = shift || croak('Usage> nack($failed_ack_host)');
-  return $self->{"bad"}->{$host} || undef;
+  return $self->{bad}->{$host} || undef;
 }
 
 # Description:  Close the connection.
@@ -1678,14 +1681,14 @@ sub close
 {
   my ($self) = @_;
 
-  if ($self->{"proto"} eq "syn") {
-    delete $self->{"syn"};
-  } elsif ($self->{"proto"} eq "tcp") {
+  if ($self->{proto} eq "syn") {
+    delete $self->{syn};
+  } elsif ($self->{proto} eq "tcp") {
     # The connection will already be closed
-  } elsif ($self->{"proto"} eq "external") {
+  } elsif ($self->{proto} eq "external") {
     # Nothing to close
   } else {
-    $self->{"fh"}->close();
+    $self->{fh}->close();
   }
 }
 
@@ -1755,10 +1758,10 @@ sub _resolv {
 
   my %h;
   $h{name} = $name;
-  my $family = $self->{"family"};
+  my $family = $self->{family};
 
-  if (defined($self->{"family_local"})) {
-    $family = $self->{"family_local"}
+  if (defined($self->{family_local})) {
+    $family = $self->{family_local}
   }
 
 # START - host:port
@@ -1875,13 +1878,14 @@ sub _resolv {
 
 sub _pack_sockaddr_in($$) {
   my ($port,
-      $addr,
+      $ip,
       ) = @_;
 
-  if ($addr->{"family"} == AF_INET) {
-    return Socket::pack_sockaddr_in($port, $addr->{"addr_in"});
+  my $addr = ref($ip) eq "HASH" ? $ip->{addr_in} : $ip;
+  if (length($addr) <= 4 ) {
+    return Socket::pack_sockaddr_in($port, $addr);
   } else {
-    return Socket::pack_sockaddr_in6($port, $addr->{"addr_in"});
+    return Socket::pack_sockaddr_in6($port, $addr);
   }
 }
 
