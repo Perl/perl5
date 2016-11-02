@@ -349,6 +349,14 @@ EOM
       exit 1
     esac
 
+    # The X in 10.X
+    prodvers_minor=$(echo $prodvers|awk -F. '{print $2}')
+
+    # macOS (10.12) deprecated syscall().
+    if [ "$prodvers_minor" -ge 12 ]; then
+        d_syscall='undef'
+    fi
+
    lddlflags="${ldflags} -bundle -undefined dynamic_lookup"
    ;;
 esac
