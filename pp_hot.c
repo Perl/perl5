@@ -1321,6 +1321,8 @@ PP(pp_aassign)
 	bool alias = FALSE;
 	SV *lsv = *lelem++;
 
+        TAINT_NOT; /* Each item stands on its own, taintwise. */
+
         assert(relem <= lastrelem);
 	if (UNLIKELY(!lsv)) {
 	    alias = TRUE;
@@ -1731,6 +1733,9 @@ PP(pp_aassign)
     /* simplified lelem loop for when there are no relems left */
     while (LIKELY(lelem <= lastlelem)) {
 	SV *lsv = *lelem++;
+
+        TAINT_NOT; /* Each item stands on its own, taintwise. */
+
 	if (UNLIKELY(!lsv)) {
 	    lsv = *lelem++;
 	    ASSUME(SvTYPE(lsv) == SVt_PVAV);
@@ -1759,6 +1764,8 @@ PP(pp_aassign)
 	    break;
         } /* switch */
     } /* while */
+
+    TAINT_NOT; /* result of list assign isn't tainted */
 
     if (UNLIKELY(PL_delaymagic & ~DM_DELAY)) {
 	/* Will be used to set PL_tainting below */
