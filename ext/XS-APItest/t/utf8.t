@@ -1420,7 +1420,7 @@ sub nonportable_regex ($) {
 
     my $code_point = shift;
 
-    my $string = sprintf '(Code point 0x%x is not Unicode, and'
+    my $string = sprintf '(Code point 0x%X is not Unicode, and'
                        . '|Any UTF-8 sequence that starts with'
                        . ' "(\\\x[[:xdigit:]]{2})+" is for a'
                        . ' non-Unicode code point, and is) not portable',
