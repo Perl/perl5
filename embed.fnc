@@ -2607,7 +2607,7 @@ s	|void	|force_ident_maybe_lex|char pit
 s	|void	|incline	|NN const char *s
 s	|int	|intuit_method	|NN char *s|NULLOK SV *ioname|NULLOK CV *cv
 s	|int	|intuit_more	|NN char *s
-s	|I32	|lop		|I32 f|int x|NN char *s
+s	|I32	|lop		|I32 f|U8 x|NN char *s
 rs	|void	|missingterm	|NULLOK char *s
 s	|void	|no_op		|NN const char *const what|NULLOK char *s
 s	|int	|pending_ident

@@ -5488,7 +5488,7 @@ STATIC int	S_intuit_method(pTHX_ char *s, SV *ioname, CV *cv);
 STATIC int	S_intuit_more(pTHX_ char *s);
 #define PERL_ARGS_ASSERT_INTUIT_MORE	\
 	assert(s)
-STATIC I32	S_lop(pTHX_ I32 f, int x, char *s);
+STATIC I32	S_lop(pTHX_ I32 f, U8 x, char *s);
 #define PERL_ARGS_ASSERT_LOP	\
 	assert(s)
 PERL_STATIC_NO_RET void	S_missingterm(pTHX_ char *s)
