@@ -45,9 +45,10 @@ struct he {
 struct hek {
     U32		hek_hash;	/* hash of key */
     I32		hek_len;	/* length of hash key */
-    char        hek_flags;      /* The flags associated with this key */
     char	hek_key[1];	/* variable-length hash key */
     /* the hash-key is \0-terminated */
+    /* after the \0 there is a byte for flags, such as whether the key
+       is UTF-8 */
 };
 
 struct shared_he {
@@ -396,7 +397,7 @@ C<SV*>.
 #define HEK_HASH(hek)		(hek)->hek_hash
 #define HEK_LEN(hek)		(hek)->hek_len
 #define HEK_KEY(hek)		(hek)->hek_key
-#define HEK_FLAGS(hek)                (hek)->hek_flags
+#define HEK_FLAGS(hek)	(*((unsigned char *)(HEK_KEY(hek))+HEK_LEN(hek)+1))
 
 #define HVhek_UTF8	0x01 /* Key is utf8 encoded. */
 #define HVhek_WASUTF8	0x02 /* Key is bytes here, but was supplied as utf8. */

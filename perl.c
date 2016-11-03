@@ -322,18 +322,6 @@ perl_construct(pTHXx)
     }
 #endif /* #if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT) */
 
-    /* Afaik, this is good as anywhere else to assert
-     * that our HEK structure is properly sized.
-     * We expect that the char used for the flags is
-     * not padded and the bytes for the key continue right
-     * after. (For now, perhaps we should just make the flags
-     * a U32, and leave the beginning of key buffer aligned)
-     * - Yves
-     */
-    STATIC_ASSERT_STMT(  sizeof(((struct hek *)0)->hek_flags) ==
-                         (offsetof(struct hek, hek_key)
-                          - offsetof(struct hek, hek_flags)));
-
     /* Note that strtab is a rather special HV.  Assumptions are made
        about not iterating on it, and not adding tie magic to it.
        It is properly deallocated in perl_destruct() */
