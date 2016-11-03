@@ -12,18 +12,9 @@ BEGIN {
   unless ($Config{d_getpbyname}) {
     plan skip_all => 'no getprotobyname';
   }
-  require Net::Ping;
-  if (!Net::Ping::_isroot()) {
-    my $file = __FILE__;
-    my $lib = $ENV{PERL_CORE} ? '-I../../lib' : '-Mblib';
-    # -n prevents from asking for a password. rather fail then
-    if (system("sudo -n \"$^X\" $lib $file") == 0) {
-      exit;
-    } else {
-      plan skip_all => 'no sudo/failed';
-    }
-  }
 }
+
+BEGIN {use_ok('Net::Ping')};
 
 SKIP: {
   skip "icmp ping requires root privileges.", 1
