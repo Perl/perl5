@@ -292,7 +292,7 @@ TODO: {
     local $::TODO = 'RT #3054: Recursive operator overloading overflows the C stack';
     # XXX this test is expected to SEGV, and can produce
     #    sh: line 1:  5106 Segmentation fault
-    # on SDTERR. So just compeltelyt disable for now
+    # on STDERR. So just completely disable for now
     todo_skip($::TODO);
     fresh_perl_is(<<'EOP', "ok\n", {}, 'RT #3054: Recursive operator overloading should not crash the interpreter');
     use overload '""' => sub { "$_[0]" };
