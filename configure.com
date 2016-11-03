@@ -1331,35 +1331,12 @@ $!
 $ GOSUB List_Parse
 $ IF .NOT.silent THEN echo ""
 $ echo "Default ""cc"" is ''line' ''archsufx' ''F$GETSYI("VERSION")'" 
-$ IF F$LOCATE("VAX",line).NE.F$LENGTH(line) 
+$ IF (F$LOCATE("VSI",line).NE.F$LENGTH(line)) -
+  .or.(F$LOCATE("HP",F$EDIT(line,"UPCASE")).NE.F$LENGTH(line)) -
+  .or.(F$LOCATE("Compaq",line).NE.F$LENGTH(line))
 $ THEN 
-$   IF .NOT.silent
-$   THEN 
-$     echo "Will try cc/decc..."
-$   ENDIF
-$   SET NOON
-$   DEFINE/USER_MODE SYS$ERROR NL:
-$   DEFINE/USER_MODE SYS$OUTPUT NL:
-$   cc/decc/NoObj/list=ccvms.lis ccvms.c
-$   tmp = $status
-$   SET ON
-$   IF (silent) THEN GOSUB Shut_up
-$   IF tmp.NE.%X10B90001
-$   THEN
-$     echo "Apparently you don't have that one."
-$   ELSE
-$     GOSUB List_parse
-$     echo "You also have: ''line' ''archsufx' ''F$GETSYI("VERSION")'"
-$     vms_cc_available = vms_cc_available + "cc/decc "
-$   ENDIF
-$ ELSE
-$   IF (F$LOCATE("DEC",line).NE.F$LENGTH(line)).or.(F$LOCATE("Compaq",line).NE.F$LENGTH(line)) -
-    .or.(F$LOCATE("HP",F$EDIT(line,"UPCASE")).NE.F$LENGTH(line)) -
-    .or.(F$LOCATE("VSI",F$EDIT(line,"UPCASE")).NE.F$LENGTH(line))
-$   THEN 
-$     vms_cc_dflt = "/decc"
-$     vms_cc_available = vms_cc_available + "cc/decc "
-$   ENDIF
+$   vms_cc_dflt = "/decc"
+$   vms_cc_available = vms_cc_available + "cc/decc "
 $ ENDIF
 $!
 $Gcc_initial_check:
