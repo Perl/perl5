@@ -43,12 +43,18 @@ struct he {
 
 /* hash key -- defined separately for use as shared pointer */
 struct hek {
-    U32		hek_hash;	/* hash of key */
-    I32		hek_len;	/* length of hash key */
-    char	hek_key[1];	/* variable-length hash key */
+    U32         hek_hash;        /* computed hash of key */
+    I32         hek_len;        /* length of the hash key */
+    /* Be careful! Sometimes we store a pointer in the hek_key
+     * buffer, which means it must be 8 byte aligned or things
+     * dont work on aligned platforms like HPUX
+     * Also beware, the last byte of the hek_key buffer is a
+     * hidden flags byte about the key. */
+     */
+     char       hek_key[1];        /* variable-length hash key */
     /* the hash-key is \0-terminated */
     /* after the \0 there is a byte for flags, such as whether the key
-       is UTF-8 */
+       is UTF-8 or WAS-UTF-8, or an SV */
 };
 
 struct shared_he {
