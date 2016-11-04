@@ -93,7 +93,19 @@ typedef struct {
 
 START_MY_CXT
 
+int
+S_myset_set(pTHX_ SV* sv, MAGIC* mg)
+{
+    SV *isv = (SV*)mg->mg_ptr;
+
+    PERL_UNUSED_ARG(sv);
+    SvIVX(isv)++;
+    return 0;
+}
+
 MGVTBL vtbl_foo, vtbl_bar;
+MGVTBL vtbl_myset = { 0, S_myset_set, 0, 0, 0, 0, 0, 0 };
+
 
 /* indirect functions to test the [pa]MY_CXT macros */
 
@@ -4338,6 +4350,18 @@ test_get_vtbl()
 	RETVAL = PTR2UV(get_vtbl(-1));
     OUTPUT:
 	RETVAL
+
+
+    # attach ext magic to the SV pointed to by rsv that only has set magic,
+    # where that magic's job is to increment thingy
+
+void
+sv_magic_myset(SV *rsv, SV *thingy)
+CODE:
+    sv_magicext(SvRV(rsv), NULL, PERL_MAGIC_ext, &vtbl_myset,
+        (const char *)thingy, 0);
+
+
 
 bool
 test_isBLANK_uni(UV ord)

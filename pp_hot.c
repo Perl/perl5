@@ -1456,7 +1456,7 @@ PP(pp_aassign)
 
             tmps_base -= nelems;
 
-            if (SvRMAGICAL(ary) || SvREADONLY(ary) || !AvREAL(ary)) {
+            if (SvMAGICAL(ary) || SvREADONLY(ary) || !AvREAL(ary)) {
                 /* for arrays we can't cheat with, use the official API */
                 av_extend(ary, nelems - 1);
                 for (i = 0; i < nelems; i++) {
