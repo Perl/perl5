@@ -2057,6 +2057,8 @@ $     ENDIF
 $   ELSE
 $     usethreads = "undef"
 $   ENDIF
+$ ELSE
+$   usethreads = "undef"
 $ ENDIF
 $ IF F$TYPE(usethreadupcalls) .EQS. "" THEN usethreadupcalls = "undef"
 $ IF F$TYPE(usekernelthreads) .EQS. "" THEN usekernelthreads = "undef"
