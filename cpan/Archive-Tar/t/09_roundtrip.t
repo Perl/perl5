@@ -149,7 +149,7 @@ SKIP: {
   for my $tar_try (@TRY_TAR) {
     if (can_run($tar_try)) {
       print "# Found tar executable '$tar_try'\n";
-      my $tar_help = qx{$tar_try --help};
+      my $tar_help = qx{$tar_try --help 2>&1};
       $can_tar_gzip  = can_tar_gzip($tar_help);
       $can_tar_bzip2 = can_tar_bzip2($tar_help);
       printf "# can_tar_gzip  = %d\n", $can_tar_gzip;
