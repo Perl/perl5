@@ -452,7 +452,7 @@ S_does_utf8_overflow(const U8 * const s, const U8 * e)
     if (isFF_OVERLONG(s, e - s)) {
         const U8 max_32_bit_overlong[] = "\xFF\x80\x80\x80\x80\x80\x80\x84";
         return memGE(s, max_32_bit_overlong,
-                                    MIN(e - s, sizeof(max_32_bit_overlong)));
+                                MIN(e - s, sizeof(max_32_bit_overlong) - 1));
     }
 
 #endif
