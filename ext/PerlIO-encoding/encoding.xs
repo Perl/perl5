@@ -339,7 +339,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	    }
 	    }
 	    SvPV_set(e->dataSV, (char *) ptr);
-	    SvLEN_set(e->dataSV, 0);  /* Hands off sv.c - it isn't yours */
+	    SvLEN_set(e->dataSV, 0);  /* Hands off sv.c - it isn't yours (XXX: PERL_ANY_COW)*/
 	    SvCUR_set(e->dataSV,use);
 	    SvPOK_only(e->dataSV);
 	}

@@ -713,6 +713,7 @@
 #define sv_vsetpvf(a,b,c)	Perl_sv_vsetpvf(aTHX_ a,b,c)
 #define sv_vsetpvf_mg(a,b,c)	Perl_sv_vsetpvf_mg(aTHX_ a,b,c)
 #define sv_vsetpvfn(a,b,c,d,e,f,g)	Perl_sv_vsetpvfn(aTHX_ a,b,c,d,e,f,g)
+#define svtypename		Perl_svtypename
 #define swash_fetch(a,b,c)	Perl_swash_fetch(aTHX_ a,b,c)
 #define swash_init(a,b,c,d,e)	Perl_swash_init(aTHX_ a,b,c,d,e)
 #define sync_locale()		Perl_sync_locale(aTHX)
@@ -1010,6 +1011,7 @@
 #    endif
 #  endif
 #  if defined(PERL_ANY_COW)
+#define sv_cow_meta_setup(a)	Perl_sv_cow_meta_setup(aTHX_ a)
 #define sv_setsv_cow(a,b)	Perl_sv_setsv_cow(aTHX_ a,b)
 #  endif
 #  if defined(PERL_CORE) || defined (PERL_EXT)

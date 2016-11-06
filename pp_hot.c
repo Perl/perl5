@@ -3422,7 +3422,7 @@ PP(pp_subst)
 	       than the regexp malloc()ing a buffer and copying our original,
 	       only for us to throw it away here during the substitution.  */
 	    if (SvIsCOW(TARG)) {
-		sv_force_normal_flags(TARG, SV_COW_DROP_PV);
+                sv_force_normal_flags(TARG, SV_COW_DROP_PV);
 	    } else
 #endif
 	    {

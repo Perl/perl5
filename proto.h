@@ -3407,6 +3407,7 @@ PERL_CALLCONV void	Perl_sv_vsetpvf_mg(pTHX_ SV *const sv, const char *const pat,
 PERL_CALLCONV void	Perl_sv_vsetpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen, va_list *const args, SV **const svargs, const I32 svmax, bool *const maybe_tainted);
 #define PERL_ARGS_ASSERT_SV_VSETPVFN	\
 	assert(sv); assert(pat)
+PERL_CALLCONV char*	Perl_svtypename(svtype svt, U32 flags);
 PERL_CALLCONV UV	Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8);
 #define PERL_ARGS_ASSERT_SWASH_FETCH	\
 	assert(swash); assert(ptr)
@@ -4125,6 +4126,9 @@ PERL_CALLCONV MEM_SIZE	Perl_malloced_size(void *p)
 
 #endif
 #if defined(PERL_ANY_COW)
+PERL_CALLCONV SV*	Perl_sv_cow_meta_setup(pTHX_ SV* sstr);
+#define PERL_ARGS_ASSERT_SV_COW_META_SETUP	\
+	assert(sstr)
 PERL_CALLCONV SV*	Perl_sv_setsv_cow(pTHX_ SV* dstr, SV* sstr);
 #define PERL_ARGS_ASSERT_SV_SETSV_COW	\
 	assert(sstr)

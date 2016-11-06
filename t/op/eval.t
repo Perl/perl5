@@ -497,6 +497,8 @@ END_EVAL_TEST
     is($tombstone, "Done\n", 'Program completed successfully');
 
     $first =~ s/p?[NI]OK,//g;
+    $first =~ s/^\s*COW_\w+ = \S+\n//mg;
+    $first =~ s/,IsCOW//;
     s/ PV = 0x[0-9a-f]+/ PV = 0x/ foreach $first, $second;
     s/ LEN = [0-9]+/ LEN = / foreach $first, $second;
     # Dump may double newlines through pipes, though not files

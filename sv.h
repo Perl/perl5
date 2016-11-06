@@ -173,7 +173,7 @@ typedef enum {
    so never reaches the clause at the end that uses sv_type_details->body_size
    to determine whether to call safefree(). Hence body_size can be set
    non-zero to record the size of HEs, without fear of bogus frees.  */
-#if defined(PERL_IN_HV_C) || defined(PERL_IN_XS_APITEST)
+#if defined(PERL_IN_HV_C) || defined(PERL_IN_XS_APITEST) || defined(PERL_IN_SV_C)
 #define HE_SVSLOT	SVt_NULL
 #endif
 #ifdef PERL_IN_SV_C
@@ -473,13 +473,22 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 #define SVprv_WEAKREF   0x80000000  /* Weak reference */
 /* pad name vars only */
 
+struct cow_meta {
+    U32     cm_flags;
+    U32     cm_refcnt;
+    STRLEN  cm_len;
+};
+
+typedef struct cow_meta COW_META;
+
 #define _XPV_HEAD							\
     HV*		xmg_stash;	/* class package */			\
     union _xmgu	xmg_u;							\
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */    \
     union {								\
-	STRLEN	xpvlenu_len; 	/* allocated size */			\
-	char *	xpvlenu_pv;	/* regexp string */			\
+        STRLEN       xpvlenu_len;        /* allocated size */           \
+        char *       xpvlenu_pv;         /* regexp string */            \
+        COW_META * xpvlenu_cow_meta; /* ref to refcount struct */   \
     } xpv_len_u	
 
 #define xpv_len	xpv_len_u.xpvlenu_len
@@ -1178,13 +1187,19 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #  define SvPVX(sv) SvPVX_mutable(sv)
 #  endif
 #  define SvCUR(sv) (0 + ((XPV*) SvANY(sv))->xpv_cur)
-#  define SvLEN(sv) (0 + ((XPV*) SvANY(sv))->xpv_len)
+#  define SvCOW_META(sv) (0 + ((XPV*) SvANY(sv))->xpv_len_u.xpvlenu_cow_meta)
+#  define SvLEN_cow_meta(sv) (SvCOW_META(sv) ? SvCOW_META(sv)->cm_len : 0)
+#  define SvLEN_len(sv) (0 + ((XPV*) SvANY(sv))->xpv_len_u.xpvlenu_len)
+#  define SvLEN(sv) ((SvIsCOW(sv) && SvCOW_META(sv)) ? SvLEN_cow_meta(sv) : SvLEN_len(sv))
 #  define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
 
 #  define SvMAGIC(sv)	(0 + *(assert_(SvTYPE(sv) >= SVt_PVMG) &((XPVMG*)  SvANY(sv))->xmg_u.xmg_magic))
 #  define SvSTASH(sv)	(0 + *(assert_(SvTYPE(sv) >= SVt_PVMG) &((XPVMG*)  SvANY(sv))->xmg_stash))
-#else
-#  define SvLEN(sv) ((XPV*) SvANY(sv))->xpv_len
+#else /* ! PERL_DEBUG_COW */
+#  define SvCOW_META(sv) (((XPV*) SvANY(sv))->xpv_len_u.xpvlenu_cow_meta)
+#  define SvLEN_cow_meta(sv) (SvCOW_META(sv) ? SvCOW_META(sv)->cm_len : 0)
+#  define SvLEN_len(sv) (((XPV*) SvANY(sv))->xpv_len_u.xpvlenu_len)
+#  define SvLEN(sv) ((SvIsCOW(sv) && SvCOW_META(sv)) ? SvLEN_cow_meta(sv) : SvLEN_len(sv))
 #  define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
 
 #  if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
@@ -1336,19 +1351,33 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 		assert(!(SvTYPE(sv) == SVt_PVIO		\
 		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
 		(((XPV*)  SvANY(sv))->xpv_cur = (val)); } STMT_END
-#define SvLEN_set(sv, val) \
+#define SvCOW_META_set(sv, val) \
 	STMT_START { \
 		assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]);	\
 		assert(!isGV_with_GP(sv));	\
 		assert(!(SvTYPE(sv) == SVt_PVIO		\
 		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
-		(((XPV*)  SvANY(sv))->xpv_len = (val)); } STMT_END
+                (((XPV*)  SvANY(sv))->xpv_len_u.xpvlenu_cow_meta = (val)); } STMT_END
+#define SvLEN_set(sv, val)                                              \
+        STMT_START {                                                    \
+                assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]);      \
+                assert(!isGV_with_GP(sv));                                \
+                assert(!(SvTYPE(sv) == SVt_PVIO                                \
+                     && !(IoFLAGS(sv) & IOf_FAKE_DIRP)));               \
+                /*Maybe we should just forbid SvIsCOW() here... */      \
+                if (SvIsCOW(sv))                                        \
+                    SvCOW_META(sv)->cm_len = (val);                     \
+                else                                                    \
+                    ((XPV*)SvANY(sv))->xpv_len_u.xpvlenu_len = (val);  \
+        } STMT_END
 #define SvEND_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
 		SvCUR_set(sv, (val) - SvPVX(sv)); } STMT_END
 
 #define SvPV_renew(sv,n) \
-	STMT_START { SvLEN_set(sv, n); \
+        STMT_START { \
+                assert(!SvIsCOW(sv)); \
+                SvLEN_set(sv, n); \
 		SvPV_set((sv), (MEM_WRAP_CHECK_(n,char)			\
 				(char*)saferealloc((Malloc_t)SvPVX(sv), \
 						   (MEM_SIZE)((n)))));  \
@@ -1884,14 +1913,18 @@ Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
 				    sv_force_normal_flags(sv, SV_COW_DROP_PV)
 
 #ifdef PERL_COPY_ON_WRITE
-#   define SvCANCOW(sv)					    \
-	(SvIsCOW(sv)					     \
-	 ? SvLEN(sv) ? CowREFCNT(sv) != SV_COW_REFCNT_MAX : 1 \
-	 : (SvFLAGS(sv) & CAN_COW_MASK) == CAN_COW_FLAGS       \
-			    && SvCUR(sv)+1 < SvLEN(sv))
-   /* Note: To allow 256 COW "copies", a refcnt of 0 means 1. */
-#   define CowREFCNT(sv)	(*(U8 *)(SvPVX(sv)+SvLEN(sv)-1))
-#   define SV_COW_REFCNT_MAX	((1 << sizeof(U8)*8) - 1)
+#   define SvCANCOW(sv)                                             \
+        (SvIsCOW(sv)                                                \
+         ? (!SvCOW_META(sv) || CowREFCNT(sv) != SV_COW_REFCNT_MAX)  \
+         : ((SvFLAGS(sv) & CAN_COW_MASK) == CAN_COW_FLAGS))
+
+   /* Note: cm_refcnt is the number of times the string is shared
+    * not the number of times it is referenced. So it starts at 0
+    * not 1. */
+#   define CowREFCNT(sv)        (SvCOW_META(sv)->cm_refcnt)
+#   define SvCOW_REFCNT(sv)        (SvCOW_META(sv)->cm_refcnt)
+#   define SvCOW_FLAGS(sv)        (SvCOW_META(sv)->cm_flags)
+#   define SV_COW_REFCNT_MAX        (U32_MAX)
 #   define CAN_COW_MASK	(SVf_POK|SVf_ROK|SVp_POK|SVf_FAKE| \
 			 SVf_OOK|SVf_BREAK|SVf_READONLY|SVf_PROTECT)
 #endif

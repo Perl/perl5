@@ -68,6 +68,16 @@ static const char* const svshorttypenames[SVt_LAST] = {
     "IO"
 };
 
+char *
+Perl_svtypename(svtype svt, U32 flags)
+{
+    if (flags) {
+        return (char *)svshorttypenames[svt];
+    } else {
+        return (char *)svtypenames[svt];
+    }
+}
+
 struct flag_to_name {
     U32 flag;
     const char *name;
@@ -1642,9 +1652,14 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		Perl_dump_indent(aTHX_ level, file, "  LEN = %"IVdf"\n",
 				       (IV)SvLEN(sv));
 #ifdef PERL_COPY_ON_WRITE
-	    if (SvIsCOW(sv) && SvLEN(sv))
-		Perl_dump_indent(aTHX_ level, file, "  COW_REFCNT = %d\n",
-				       CowREFCNT(sv));
+            if (SvIsCOW(sv) && SvLEN(sv)) {
+                Perl_dump_indent(aTHX_ level, file, "  COW_META = 0x%"UVxf"\n",
+                                       PTR2UV(SvCOW_META(sv)));
+                Perl_dump_indent(aTHX_ level, file, "  COW_FLAGS = 0x%"UVxf"\n",
+                                       (UV)SvCOW_FLAGS(sv));
+                Perl_dump_indent(aTHX_ level, file, "  COW_REFCNT = %"UVuf"\n",
+                                       (UV)CowREFCNT(sv));
+            }
 #endif
 	}
 	else
@@ -2201,11 +2216,17 @@ void
 Perl_sv_dump(pTHX_ SV *sv)
 {
     PERL_ARGS_ASSERT_SV_DUMP;
+    if (PL_in_sv_dump)
+        return;
+    else
+        PL_in_sv_dump = 1;
 
     if (SvROK(sv))
 	do_sv_dump(0, Perl_debug_log, sv, 0, 4, 0, 0);
     else
 	do_sv_dump(0, Perl_debug_log, sv, 0, 0, 0, 0);
+
+    PL_in_sv_dump = 0;
 }
 
 int

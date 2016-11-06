@@ -672,6 +672,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    continue;
 	if (HeKLEN(entry) != (I32)klen)
 	    continue;
+        /* how does the following line work when the entry holds an SV?!! */
 	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
 	if ((HeKFLAGS(entry) ^ masked_flags) & HVhek_UTF8)

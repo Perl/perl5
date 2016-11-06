@@ -12049,9 +12049,12 @@ Perl_ck_svconst(pTHX_ OP *o)
        already copy-on-write scalars.  To allow $_ = "hello" to do COW with
        that constant, mark the constant as COWable here, if it is not
        already read-only. */
-    if (!SvREADONLY(sv) && !SvIsCOW(sv) && SvCANCOW(sv)) {
-	SvIsCOW_on(sv);
-	CowREFCNT(sv) = 0;
+    if (
+        !SvREADONLY(sv) &&
+        !SvIsCOW(sv) &&
+        SvCANCOW(sv)
+    ) {
+        sv_cow_meta_setup(sv);
 # ifdef PERL_DEBUG_READONLY_COW
 	sv_buf_to_ro(sv);
 # endif
