@@ -4804,8 +4804,8 @@ Perl_sv_setsv_mg(pTHX_ SV *const dstr, SV *const sstr)
 /* temporarily swipe the HE arena code from hv.c */
 #ifdef PURIFY
 
-#define new_HE() (HE*)safemalloc(sizeof(HE))
-#define del_HE(p) safefree((char*)p)
+#define new_COW_META() (HE*)safemalloc(sizeof(COW_META))
+#define del_COW_META(p) safefree((char*)p)
 
 #else
 
