@@ -120,14 +120,12 @@ use File::Glob qw(:case);
 %Modules = (
 
     'Archive::Tar' => {
-        'DISTRIBUTION' => 'BINGOS/Archive-Tar-2.14.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Archive-Tar-2.18.tar.gz',
         'FILES'        => q[cpan/Archive-Tar],
         'BUGS'         => 'bug-archive-tar@rt.cpan.org',
         'EXCLUDED'     => [
             qw(t/07_ptardiff.t),
         ],
-        # CPAN RT 118476
-        'CUSTOMIZED'   => [ 'lib/Archive/Tar.pm', 't/09_roundtrip.t' ],
     },
 
     'Attribute::Handlers' => {

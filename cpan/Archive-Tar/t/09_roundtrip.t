@@ -12,11 +12,9 @@ use Archive::Tar;
 BEGIN {
   eval { require IPC::Cmd; };
   unless ( $@ ) {
-    diag('Using IPC::Cmd');
     *can_run = \&IPC::Cmd::can_run;
   }
   else {
-    diag('Using fallback');
     *can_run = sub {
         require ExtUtils::MakeMaker;
         my $cmd = shift;
