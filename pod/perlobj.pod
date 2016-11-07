@@ -179,10 +179,12 @@ Each package contains a special array called C<@ISA>. The C<@ISA> array
 contains a list of that class's parent classes, if any. This array is
 examined when Perl does method resolution, which we will cover later.
 
-It is possible to manually set C<@ISA>, and you may see this in older
-Perl code. Much older code also uses the L<base> pragma. For new code,
-we recommend that you use the L<parent> pragma to declare your parents.
-This pragma will take care of setting C<@ISA>.
+Calling methods from a package means it must be loaded, of course, so
+you will often want to load a module and add it to C<@ISA> at the same
+time. You can do so in a single step using the L<parent> pragma.
+(In older code you may encounter the L<base> pragma, which is nowadays
+discouraged except when you have to work with the equally discouraged
+L<fields> pragma.)
 
 However the parent classes are set, the package's C<@ISA> variable will
 contain a list of those parents. This is simply a list of scalars, each
