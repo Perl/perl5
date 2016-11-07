@@ -182,9 +182,7 @@ examined when Perl does method resolution, which we will cover later.
 It is possible to manually set C<@ISA>, and you may see this in older
 Perl code. Much older code also uses the L<base> pragma. For new code,
 we recommend that you use the L<parent> pragma to declare your parents.
-This pragma will take care of setting C<@ISA>. It will also load the
-parent classes and make sure that the package doesn't inherit from
-itself.
+This pragma will take care of setting C<@ISA>.
 
 However the parent classes are set, the package's C<@ISA> variable will
 contain a list of those parents. This is simply a list of scalars, each
