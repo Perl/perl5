@@ -549,9 +549,9 @@ scalars, each of which is a string that corresponds to a package name. The
 array is examined when Perl does method resolution, which is covered in
 L<perlobj>.
 
-It is possible to manually set C<@ISA>, or you can use L<parent> to load
-and declare parent classes. Alternatively there is the L<base> pragma, but
-that is discouraged unless you're also using the L<fields> pragma.
+To load packages while adding them to C<@ISA>, see the L<parent> pragma. The
+discouraged L<base> pragma does this as well, but should not be used except
+when compatibility with the discouraged L<fields> pragma is required.
 
 =item $^M
 X<$^M>
