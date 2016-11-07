@@ -19,7 +19,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 192 + (10*13*2) + 5 + 30;
+plan tests => 192 + (10*13*2) + 5 + 31;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -678,3 +678,7 @@ for (["aaa","aaa"],[substr ("a\x{100}",0,1), "a"]) {
     $byte = substr unpack("P2", pack "P", $$_[0] &. $$_[1]), -1;
 }
 is $byte, "\0", "utf8 &. appends null byte";
+
+# only visible under sanitize
+fresh_perl_is('$x = "UUUUUUUV"; $y = "xxxxxxx"; $x |= $y; print $x',
+              '}}}}}}}V', {}, "[perl #129995] access to freed memory");

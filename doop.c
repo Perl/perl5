@@ -1218,8 +1218,17 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	    len = lensave;
 	    if (rightlen > len)
 		sv_catpvn_nomg(sv, rsave + len, rightlen - len);
-	    else if (leftlen > (STRLEN)len)
-		sv_catpvn_nomg(sv, lsave + len, leftlen - len);
+	    else if (leftlen > (STRLEN)len) {
+                if (sv == left) {
+                    /* sv_catpvn() might move the source from under us,
+                       and the data is already in place, just adjust to
+                       include it */
+                    SvCUR_set(sv, leftlen);
+                    *SvEND(sv) = '\0';
+                }
+                else
+                    sv_catpvn_nomg(sv, lsave + len, leftlen - len);
+            }
 	    else
 		*SvEND(sv) = '\0';
 	    break;
