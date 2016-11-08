@@ -1163,8 +1163,7 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
                 lcount = -1;
                 lelem--; /* no need to unmark this element */
             }
-            else if (!(do_rc1 && SvREFCNT(svl) == 1) && svl != &PL_sv_undef) {
-                assert(!SvIMMORTAL(svl));
+            else if (!(do_rc1 && SvREFCNT(svl) == 1) && !SvIMMORTAL(svl)) {
                 SvFLAGS(svl) |= SVf_BREAK;
                 marked = TRUE;
             }

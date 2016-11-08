@@ -551,6 +551,13 @@ SKIP: {
 
 }
 
+{
+    # [perl #129991] assert failure in S_aassign_copy_common
+    # the LHS of a list assign can be aliased to an immortal SV;
+    # we used to assert that this couldn't happen
+    eval { ($_,$0)=(1,0) for 0 gt 0 };
+    like($@, qr//, "RT #129991");
+}
 
 
 done_testing();
