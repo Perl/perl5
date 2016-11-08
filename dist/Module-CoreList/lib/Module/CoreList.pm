@@ -299,6 +299,7 @@ sub changes_between {
     5.025003 => '2016-07-20',
     5.025004 => '2016-08-20',
     5.025005 => '2016-09-20',
+    5.025006 => '????-??-??',
     5.022003 => '????-??-??',
   );
 
@@ -13162,6 +13163,20 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.025006 => {
+        delta_from => 5.025005,
+        changed => {
+            'B::Op_private'         => '5.025006',
+            'Config'                => '5.025006',
+            'Data::Dumper'          => '2.162',
+            'OS2::DLL'              => '1.07',
+            'POSIX'                 => '1.73',
+            'PerlIO::encoding'      => '0.25',
+            'Storable'              => '2.58',
+        },
+        removed => {
+        }
+    },
     5.022003 => {
         delta_from => 5.022002,
         changed => {
@@ -14021,6 +14036,13 @@ for my $version (sort { $a <=> $b } keys %delta) {
     },
     5.025005 => {
         delta_from => 5.025004,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.025006 => {
+        delta_from => 5.025005,
         changed => {
         },
         removed => {
