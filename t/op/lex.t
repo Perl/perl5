@@ -248,22 +248,27 @@ fresh_perl_like(
     {},
     '[perl #129336] - #!perl -i argument handling'
 );
-fresh_perl_is(
-    "BEGIN{\$^H=hex ~0}\xF3",
-    "Integer overflow in hexadecimal number at - line 1.\n" .
-    "Malformed UTF-8 character: \\xf3 (too short; got 1 byte, need 4) at - line 1.",
-    {},
-    '[perl #128996] - use of PL_op after op is freed'
-);
-fresh_perl_like(
-    qq(BEGIN{\$0="";\$^H=-hex join""=>1}""\xFF),
-    qr/Malformed UTF-8 character: \\xff \(too short; got 1 byte, need 13\) at - line 1\./,
-    {},
-    '[perl #128997] - buffer read overflow'
-);
-fresh_perl_like(
-    qq(BEGIN{\$^H=0x800000}\n   0m 0\xB5\xB500\xB5\0),
-    qr/Unrecognized character \\x\{0\}; marked by <-- HERE after    0m.*<-- HERE near column 12 at - line 2./,
-    {},
-    '[perl #129000] read before buffer'
-);
+SKIP:
+{
+    ord("A") == 65
+      or skip "These tests won't work on EBCIDIC", 3;
+    fresh_perl_is(
+        "BEGIN{\$^H=hex ~0}\xF3",
+        "Integer overflow in hexadecimal number at - line 1.\n" .
+        "Malformed UTF-8 character: \\xf3 (too short; got 1 byte, need 4) at - line 1.",
+        {},
+        '[perl #128996] - use of PL_op after op is freed'
+    );
+    fresh_perl_like(
+        qq(BEGIN{\$0="";\$^H=-hex join""=>1}""\xFF),
+        qr/Malformed UTF-8 character: \\xff \(too short; got 1 byte, need 13\) at - line 1\./,
+        {},
+        '[perl #128997] - buffer read overflow'
+    );
+    fresh_perl_like(
+        qq(BEGIN{\$^H=0x800000}\n   0m 0\xB5\xB500\xB5\0),
+        qr/Unrecognized character \\x\{0\}; marked by <-- HERE after    0m.*<-- HERE near column 12 at - line 2./,
+        {},
+        '[perl #129000] read before buffer'
+    );
+}
