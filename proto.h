@@ -4136,6 +4136,9 @@ PERL_CALLCONV MEM_SIZE	Perl_malloced_size(void *p)
 
 #endif
 #if defined(PERL_ANY_COW)
+PERL_CALLCONV SV*	Perl_sv_cow_meta_setup(pTHX_ SV* sstr);
+#define PERL_ARGS_ASSERT_SV_COW_META_SETUP	\
+	assert(sstr)
 PERL_CALLCONV SV*	Perl_sv_setsv_cow(pTHX_ SV* dstr, SV* sstr);
 #define PERL_ARGS_ASSERT_SV_SETSV_COW	\
 	assert(sstr)
