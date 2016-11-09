@@ -88,7 +88,7 @@ sub do_test {
 	    $pattern =~ s/\$RV/
 		($] < 5.011) ? 'RV' : 'IV';
 	    /mge;
-	    $pattern =~ s/^\h+COW_REFCNT = .*\n//mg
+	    $pattern =~ s/^\h+COW_ = .*\n//mg
 		if $Config{ccflags} =~
 			/-DPERL_(?:OLD_COPY_ON_WRITE|NO_COW)\b/
 			    || $] < 5.019003;
@@ -130,8 +130,10 @@ do_test('assignment of immediate constant (string)',
   PV = $ADDR "foo"\\\0
   CUR = 3
   LEN = \\d+
+(?:  COW_META = $ADDR
+  COW_FLAGS = $ADDR
   COW_REFCNT = 1
-');
+)?');
 
 do_test('immediate constant (string)',
         "bar",
@@ -142,6 +144,8 @@ do_test('immediate constant (string)',
   PV = $ADDR "bar"\\\0
   CUR = 3
   LEN = \\d+
+  COW_META = $ADDR
+  COW_FLAGS = $ADDR
   COW_REFCNT = 0
 ');
 
@@ -231,8 +235,10 @@ do_test('reference to scalar',
     PV = $ADDR "foo"\\\0
     CUR = 3
     LEN = \\d+
+(?:    COW_META = $ADDR
+    COW_FLAGS = $ADDR
     COW_REFCNT = 1
-');
+)?');
 
 my $c_pattern;
 if ($type eq 'N') {
@@ -495,6 +501,8 @@ do_test('string with Unicode',
   PV = $ADDR "\\\214\\\101\\\0\\\235\\\101"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+
+  COW_META = $ADDR					# $] < 5.019007
+  COW_FLAGS = $ADDR					# $] < 5.019007
   COW_REFCNT = 1					# $] < 5.019007
 ');
 } else {
@@ -507,6 +515,8 @@ do_test('string with Unicode',
   PV = $ADDR "\\\304\\\200\\\0\\\310\\\200"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+
+  COW_META = $ADDR					# $] < 5.019007
+  COW_FLAGS = $ADDR					# $] < 5.019007
   COW_REFCNT = 1					# $] < 5.019007
 ');
 }
@@ -533,6 +543,8 @@ do_test('reference to hash containing Unicode',
       PV = $ADDR "\\\235\\\101"\\\0 \[UTF8 "\\\x\{200\}"\]
       CUR = 2
       LEN = \\d+
+      COW_META = $ADDR				# $] < 5.019007
+      COW_FLAGS = $ADDR				# $] < 5.019007
       COW_REFCNT = 1				# $] < 5.019007
 ',      '',
 	$] >= 5.015
@@ -560,6 +572,8 @@ do_test('reference to hash containing Unicode',
       PV = $ADDR "\\\310\\\200"\\\0 \[UTF8 "\\\x\{200\}"\]
       CUR = 2
       LEN = \\d+
+      COW_META = $ADDR				# $] < 5.019007
+      COW_FLAGS = $ADDR				# $] < 5.019007
       COW_REFCNT = 1				# $] < 5.019007
 ',      '',
 	$] >= 5.015
@@ -579,6 +593,8 @@ do_test('scalar with pos magic',
   PV = $ADDR ""\\\0
   CUR = 0
   LEN = \d+
+  COW_META = $ADDR
+  COW_FLAGS = $ADDR
   COW_REFCNT = [12]
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_mglob
@@ -678,6 +694,8 @@ do_test('constant subroutine',
       PV = $ADDR "Perl rules"\\\0
       CUR = 10
       LEN = \\d+
+      COW_META = $ADDR
+      COW_FLAGS = $ADDR
       COW_REFCNT = 0
     GVGV::GV = $ADDR\\t"main" :: "const"
     FILE = ".*\\b(?i:peek\\.t)"
@@ -864,8 +882,10 @@ do_test('small hash',
       PV = $ADDR "(?:Rules|Foamy)"\\\0
       CUR = \d+
       LEN = \d+
+(?:      COW_META = $ADDR
+      COW_FLAGS = $ADDR
       COW_REFCNT = 1
-){2}');
+)?){2}');
 
 $b = keys %small;
 
@@ -894,8 +914,10 @@ do_test('small hash after keys',
       PV = $ADDR "(?:Rules|Foamy)"\\\0
       CUR = \d+
       LEN = \d+
+(?:      COW_META = $ADDR
+      COW_FLAGS = $ADDR
       COW_REFCNT = 1
-){2}');
+)?){2}');
 
 $b = %small;
 
@@ -924,8 +946,10 @@ do_test('small hash after keys and scalar',
       PV = $ADDR "(?:Rules|Foamy)"\\\0
       CUR = \d+
       LEN = \d+
+(?:      COW_META = $ADDR
+      COW_FLAGS = $ADDR
       COW_REFCNT = 1
-){2}');
+)?){2}');
 
 # Dump with arrays, hashes, and operator return values
 @array = 1..3;
@@ -1043,6 +1067,8 @@ unless ($Config{useithreads}) {
   PV = $ADDR "rule"\\\0
   CUR = 4
   LEN = \d+
+  COW_META = $ADDR
+  COW_FLAGS = $ADDR
   COW_REFCNT = 0
 ');
 
@@ -1059,6 +1085,8 @@ unless ($Config{useithreads}) {
   PV = $ADDR "rule"\\\0
   CUR = 4
   LEN = \d+
+  COW_META = $ADDR
+  COW_FLAGS = $ADDR
   COW_REFCNT = 0
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_regexp
@@ -1079,6 +1107,8 @@ unless ($Config{useithreads}) {
   PV = $ADDR "rule"\\\0
   CUR = 4
   LEN = \d+
+  COW_META = $ADDR
+  COW_FLAGS = $ADDR
   COW_REFCNT = 0
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_regexp
@@ -1098,6 +1128,8 @@ unless ($Config{useithreads}) {
   PV = $ADDR "foam"\\\0
   CUR = 4
   LEN = \d+
+  COW_META = $ADDR
+  COW_FLAGS = $ADDR
   COW_REFCNT = 0
 ');
 
@@ -1110,6 +1142,8 @@ unless ($Config{useithreads}) {
   PV = $ADDR "foam"\\\0
   CUR = 4
   LEN = \d+
+  COW_META = $ADDR
+  COW_FLAGS = $ADDR
   COW_REFCNT = 0
 ');
 
@@ -1119,6 +1153,8 @@ unless ($Config{useithreads}) {
   PV = $ADDR "foam"\\\0
   CUR = 4
   LEN = \d+
+  COW_META = $ADDR
+  COW_FLAGS = $ADDR
   COW_REFCNT = 0
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_regexp
@@ -1146,8 +1182,10 @@ unless ($Config{useithreads}) {
   PV = $ADDR "good"\\\0
   CUR = 4
   LEN = \d+
+(?:  COW_META = $ADDR
+  COW_FLAGS = $ADDR
   COW_REFCNT = 1
-');
+)?');
 }
 
 # (One block of study tests removed when study was made a no-op.)

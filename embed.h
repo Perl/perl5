@@ -1014,6 +1014,7 @@
 #    endif
 #  endif
 #  if defined(PERL_ANY_COW)
+#define sv_cow_meta_setup(a)	Perl_sv_cow_meta_setup(aTHX_ a)
 #define sv_setsv_cow(a,b)	Perl_sv_setsv_cow(aTHX_ a,b)
 #  endif
 #  if defined(PERL_CORE) || defined (PERL_EXT)

@@ -2727,6 +2727,7 @@ Apn	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]
 Apn	|int	|my_dirfd	|NULLOK DIR* dir
 #ifdef PERL_ANY_COW
 : Used in pp_hot.c and regexec.c
+pMXE	|SV*	|sv_cow_meta_setup|NN SV* sstr
 pMXE	|SV*	|sv_setsv_cow	|NULLOK SV* dstr|NN SV* sstr
 #endif
 
