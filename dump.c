@@ -68,6 +68,16 @@ static const char* const svshorttypenames[SVt_LAST] = {
     "IO"
 };
 
+char *
+Perl_svtypename(svtype svt, U32 flags)
+{
+    if (flags) {
+        return (char *)svshorttypenames[svt];
+    } else {
+        return (char *)svtypenames[svt];
+    }
+}
+
 struct flag_to_name {
     U32 flag;
     const char *name;

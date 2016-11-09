@@ -2742,9 +2742,12 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
     if (flags & REXEC_COPY_STR) {
 #ifdef PERL_ANY_COW
         if (SvCANCOW(sv)) {
-            DEBUG_C(Perl_re_printf( aTHX_
-                              "Copy on write: regexp capture, type %d\n",
-                                    (int) SvTYPE(sv)));
+            if(DEBUG_C_TEST){
+                Perl_re_printf( aTHX_
+                              "Copy on write: regexp capture, type %s saved_copy %p\n",
+                                    svtypename(SvTYPE(sv),0), prog->saved_copy);
+                sv_dump(sv);
+            };
             /* Create a new COW SV to share the match string and store
              * in saved_copy, unless the current COW SV in saved_copy
              * is valid and suitable for our purpose */
