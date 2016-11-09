@@ -4715,13 +4715,12 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
             } else
 #endif
             {
-                    /* SvIsCOW_shared_hash */
-                    DEBUG_C(PerlIO_printf(Perl_debug_log,
-                                          "Copy on write: Sharing hash\n"));
+                /* SvIsCOW_shared_hash */
+                DEBUG_C(PerlIO_printf(Perl_debug_log,
+                                      "Copy on write: Sharing hash key\n"));
 
-		    assert (SvTYPE(dstr) >= SVt_PV);
-                    SvPV_set(dstr,
-			     HEK_KEY(share_hek_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sstr)))));
+                assert (SvTYPE(dstr) >= SVt_PV);
+                SvPV_set(dstr, HEK_KEY(share_hek_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sstr)))));
                 SvLEN_raw_set(dstr, len); /* note len == 0 here */
 	    }
 	    SvCUR_set(dstr, cur);
@@ -4753,7 +4752,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 		SvRMAGICAL_on(dstr);
 	    }
 	}
-    }
+    } /* end SVp_POK */
     else if (sflags & (SVp_IOK|SVp_NOK)) {
 	(void)SvOK_off(dstr);
 	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_IVisUV|SVf_NOK|SVp_NOK);
@@ -4862,7 +4861,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 		      (void*)sstr, (void*)dstr);
 	sv_dump(sstr);
 	if (dstr)
-		    sv_dump(dstr);
+            sv_dump(dstr);
     }
 
     if (dstr) {
