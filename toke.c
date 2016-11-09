@@ -4915,7 +4915,7 @@ Perl_yylex(pTHX)
         }
         len = UTF ? Perl_utf8_length(aTHX_ (U8 *) PL_linestart, (U8 *) s) : (STRLEN) (s - PL_linestart);
         if (len > UNRECOGNIZED_PRECEDE_COUNT) {
-            d = UTF ? (char *) utf8_hop((U8 *) s, -UNRECOGNIZED_PRECEDE_COUNT) : s - UNRECOGNIZED_PRECEDE_COUNT;
+            d = UTF ? (char *) utf8_hop_back((U8 *) s, -UNRECOGNIZED_PRECEDE_COUNT, (U8 *)PL_linestart) : s - UNRECOGNIZED_PRECEDE_COUNT;
         } else {
             d = PL_linestart;
         }

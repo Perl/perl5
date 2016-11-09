@@ -7,7 +7,7 @@ use warnings;
 
 BEGIN { chdir 't' if -d 't'; require './test.pl'; }
 
-plan(tests => 33);
+plan(tests => 34);
 
 {
     no warnings 'deprecated';
@@ -260,4 +260,10 @@ fresh_perl_like(
     qr/Malformed UTF-8 character: \\xff \(too short; got 1 byte, need 13\) at - line 1\./,
     {},
     '[perl #128997] - buffer read overflow'
+);
+fresh_perl_like(
+    qq(BEGIN{\$^H=0x800000}\n   0m 0\xB5\xB500\xB5\0),
+    qr/Unrecognized character \\x\{0\}; marked by <-- HERE after    0m.*<-- HERE near column 12 at - line 2./,
+    {},
+    '[perl #129000] read before buffer'
 );
