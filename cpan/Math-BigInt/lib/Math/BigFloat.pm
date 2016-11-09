@@ -19,7 +19,7 @@ use warnings;
 use Carp ();
 use Math::BigInt ();
 
-our $VERSION = '1.999726';
+our $VERSION = '1.999727';
 $VERSION = eval $VERSION;
 
 require Exporter;
@@ -272,6 +272,7 @@ sub DESTROY {
 }
 
 sub AUTOLOAD {
+    # make fxxx and bxxx both work by selectively mapping fxxx() to MBF::bxxx()
     my $name = $AUTOLOAD;
 
     $name =~ s/(.*):://;        # split package

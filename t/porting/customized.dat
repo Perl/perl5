@@ -38,8 +38,6 @@ JSON::PP cpan/JSON-PP/lib/JSON/PP.pm 86f697dae482106270fdd659b18c95a54af764ba
 JSON::PP cpan/JSON-PP/t/011_pc_expo.t e4c896d5f06ca380ddb6b4d6cd5714ea3003ada6
 JSON::PP cpan/JSON-PP/t/018_json_checker.t 6c3615e1a55f76b1635c62d3d36c5686a3ae8d30
 Locale::Maketext::Simple cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm 57ed38905791a17c150210cd6f42ead22a7707b6
-Math::BigInt cpan/Math-BigInt/lib/Math/BigInt.pm cf3d21a81acc2210c08f8b7fd00c41e17c47aaee
-Math::BigInt cpan/Math-BigInt/t/bigintpm.inc db9a17f607c95b9888df373a02f80ae9e507a199
 Math::Complex cpan/Math-Complex/lib/Math/Complex.pm 198ea6c6c584f5ea79a0fd7e9d411d0878f3b2af
 Math::Complex cpan/Math-Complex/t/Complex.t 4f307ed6fc59f1e5fb0e6b11103fc631b6bdb335
 Math::Complex cpan/Math-Complex/t/Trig.t 2682526e23a161d54732c2a66393fe4a234d1865

@@ -20,7 +20,7 @@ use warnings;
 
 use Carp ();
 
-our $VERSION = '1.999726_01';
+our $VERSION = '1.999727';
 $VERSION = eval $VERSION;
 
 our @ISA = qw(Exporter);
@@ -4272,7 +4272,7 @@ If the string can not be interpreted, NaN is returned.
 
 Octal numbers are typically prefixed by "0", but since leading zeros are
 stripped, these methods can not automatically recognize octal numbers, so use
-the constructor from_oct() to intepret octal strings.
+the constructor from_oct() to interpret octal strings.
 
 Some examples of valid string input
 
