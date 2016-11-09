@@ -3398,6 +3398,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 		/* Add the passed-in inversion list, which invalidates the one
 		 * already stored in the swash */
 		invlist_in_swash_is_valid = FALSE;
+                SvREADONLY_off(swash_invlist);  /* Turned on again below */
 		_invlist_union(invlist, swash_invlist, &swash_invlist);
 	    }
 	    else {
