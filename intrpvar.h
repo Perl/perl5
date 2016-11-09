@@ -810,6 +810,8 @@ PERLVAR(I, random_state, PL_RANDOM_STATE_TYPE)
 
 PERLVARI(I, dump_re_max_len, STRLEN, 0)
 
+PERLVARI(I, in_sv_dump, bool, FALSE)
+
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
 
