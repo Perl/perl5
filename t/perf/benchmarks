@@ -53,7 +53,7 @@
 # try C<perl Porting/bench.pl --help> for more info
 
 
-[
+my $old= [
     'call::sub::empty' => {
         desc    => 'function call with no args or body',
         setup   => 'sub f { }',
@@ -1253,3 +1253,50 @@
     },
 
 ];
+    [
+        'sassign1' => {
+            desc   => 'assign string length 1',
+            setup   => 'my $s = "x" x 1; my $t;',
+            code    => '$t = $s; $t = ""',
+        },
+
+        'sassign10' => {
+            desc   => 'assign string length 10',
+            setup   => 'my $s = "x" x 10; my $t;',
+            code    => '$t = $s; $t = ""',
+        },
+
+        'sassign100' => {
+            desc   => 'assign string length 100',
+            setup   => 'my $s = "x" x 100; my $t;',
+            code    => '$t = $s; $t = ""',
+        },
+        'sassign101' => {
+            desc   => 'assign string length 101',
+            setup   => 'my $s = "x" x 101; my $t;',
+            code    => '$t = $s; $t = ""',
+        },
+        'sassign500' => {
+            desc   => 'assign string length 500',
+            setup   => 'my $s = "x" x 500; my $t;',
+            code    => '$t = $s; $t = ""',
+        },
+
+        'sassign1k' => {
+            desc   => 'assign string length 1000',
+            setup   => 'my $s = "x" x 1_000; my $t;',
+            code    => '$t = $s; $t = ""',
+        },
+        'sassign10k' => {
+            desc   => 'assign string length 10_000',
+            setup   => 'my $s = "x" x 10_000; my $t;',
+            code    => '$t = $s; $t = ""',
+        },
+
+        'sassign100k' => {
+            desc   => 'assign string length 100_000',
+            setup   => 'my $s = "x" x 100_000; my $t;',
+            code    => '$t = $s; $t = ""',
+        },
+
+    ];
