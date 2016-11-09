@@ -368,10 +368,10 @@ C<SV*>.
 #define HeKEY(he)		HEK_KEY(HeKEY_hek(he))
 #define HeKEY_sv(he)		(*(SV**)HeKEY(he))
 #define HeKLEN(he)		HEK_LEN(HeKEY_hek(he))
-#define HeKUTF8(he)  HEK_UTF8(HeKEY_hek(he))
-#define HeKWASUTF8(he)  HEK_WASUTF8(HeKEY_hek(he))
-#define HeKLEN_UTF8(he)  (HeKUTF8(he) ? -HeKLEN(he) : HeKLEN(he))
-#define HeKFLAGS(he)  HEK_FLAGS(HeKEY_hek(he))
+#define HeKUTF8(he)             HEK_UTF8(HeKEY_hek(he))
+#define HeKWASUTF8(he)          HEK_WASUTF8(HeKEY_hek(he))
+#define HeKLEN_UTF8(he)         (HeKUTF8(he) ? -HeKLEN(he) : HeKLEN(he))
+#define HeKFLAGS(he)            HEK_FLAGS(HeKEY_hek(he))
 #define HeVAL(he)		(he)->he_valu.hent_val
 #define HeHASH(he)		HEK_HASH(HeKEY_hek(he))
 #define HePV(he,lp)		((HeKLEN(he) == HEf_SVKEY) ?		\
