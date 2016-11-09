@@ -211,6 +211,9 @@ Also notice that no matter what arguments you pass to perl_parse(),
 PERL_SYS_INIT3() must be invoked on the C main() argc, argv and env and
 only once.
 
+Mind that argv[argc] must be NULL, same as those passed to a main
+function in C.
+
 Now compile this program (I'll call it I<interp.c>) into an executable:
 
     % cc -o interp interp.c `perl -MExtUtils::Embed -e ccopts -e ldopts`
