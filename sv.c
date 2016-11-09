@@ -4652,11 +4652,11 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
                      && CHECK_COWBUF_THRESHOLD(cur,len)
                     )
                  ) &&
-                 !(sflags & SVf_OOK) &&   /* and not involved in OOK hack? */
-	         (!(flags & SV_NOSTEAL)) &&
-					/* and we're allowed to steal temps */
-                 SvREFCNT(sstr) == 1 &&   /* and no other references to it? */
-                 len)             /* and really is a string */
+                 !(sflags & SVf_OOK) &&     /* and not involved in OOK hack? */
+                 !(flags & SV_NOSTEAL) &&
+                                            /* and we're allowed to steal temps */
+                 SvREFCNT(sstr) == 1 &&     /* and no other references to it? */
+                 len)                       /* and really is a string */
 	{	/* Passes the swipe test.  */
 	    if (SvPVX_const(dstr))	/* we know that dtype >= SVt_PV */
 		SvPV_free(dstr);
