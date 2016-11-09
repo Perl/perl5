@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 use warnings;
-BEGIN { $| = 1; print "1..14\n"; }
+BEGIN { $| = 1; print "1..17\n"; }
 my $count = 0;
 sub ok ($;$) {
     my $p = my $r = shift;
@@ -64,3 +64,11 @@ ok($objFil->eq("n\x{303}", pack('U', 0xF1)));
 ok($objFil->eq("N\x{303}", pack('U', 0xD1)));
 
 # 14
+
+$objFil->change(upper_before_lower => 1);
+
+ok($objFil->gt("ng", "Ng"));
+ok($objFil->gt("Ng", "NG"));
+ok($objFil->gt("n\x{303}", "N\x{303}"));
+
+# 17

@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 use warnings;
-BEGIN { $| = 1; print "1..12\n"; }
+BEGIN { $| = 1; print "1..8\n"; }
 my $count = 0;
 sub ok ($;$) {
     my $p = my $r = shift;
@@ -33,29 +33,21 @@ ok(1);
 
 #########################
 
-my $objHi = Unicode::Collate::Locale->
-    new(locale => 'HI', normalization => undef);
+my $objFrCa = Unicode::Collate::Locale->
+    new(locale => 'FR-CA', normalization => undef);
 
-ok($objHi->getlocale, 'hi');
+ok($objFrCa->getlocale, 'fr_CA');
 
-$objHi->change(level => 2);
+$objFrCa->change(level => 2);
 
-ok($objHi->lt("\x{902}", "\x{901}"));
+ok($objFrCa->lt("a\x{300}a", "aa\x{300}"));
+ok($objFrCa->gt("Ca\x{300}ca\x{302}", "ca\x{302}ca\x{300}"));
+ok($objFrCa->gt("ca\x{300}ca\x{302}", "Ca\x{302}ca\x{300}"));
 
-$objHi->change(level => 1);
+$objFrCa->change(backwards => undef);
 
-ok($objHi->eq("\x{902}", "\x{901}"));
+ok($objFrCa->gt("a\x{300}a", "aa\x{300}"));
+ok($objFrCa->lt("Ca\x{300}ca\x{302}", "ca\x{302}ca\x{300}"));
+ok($objFrCa->lt("ca\x{300}ca\x{302}", "Ca\x{302}ca\x{300}"));
 
-# 4
-
-for my $h (0, 1) {
-    no warnings 'utf8';
-    my $t = $h ? pack('U', 0xFFFF) : 'z';
-
-    ok($objHi->lt("\x{950}$t", "\x{902}"));
-    ok($objHi->lt("\x{902}$t", "\x{903}"));
-    ok($objHi->lt("\x{903}$t", "\x{A8FD}"));
-    ok($objHi->lt("\x{903}$t", "\x{972}"));
-}
-
-# 12
+# 8

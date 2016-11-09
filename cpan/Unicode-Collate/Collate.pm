@@ -17,7 +17,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '1.17';
+our $VERSION = '1.18';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
@@ -1116,7 +1116,7 @@ The following revisions are supported.  The default is 32.
      30             7.0.0               7.0.0 (7.0.0)
      32             8.0.0               8.0.0 (8.0.0)
 
-* See below C<long_contraction> with C<UCA_Version> 22 and 24.
+* See below for C<long_contraction> with C<UCA_Version> 22 and 24.
 
 * Noncharacters (e.g. U+FFFF) are not ignored, and can be overridden
 since C<UCA_Version> 22.
@@ -1231,7 +1231,7 @@ table beforehand.
 
 =item highestFFFF
 
--- see 5.14 Collation Elements, UTS #35.
+-- see 2.4 Tailored noncharacter weights, UTS #35 (LDML) Part 5: Collation.
 
 If the parameter is made true, C<U+FFFF> has a highest primary weight.
 When a boolean of C<$coll-E<gt>ge($str, "abc")> and
@@ -1375,7 +1375,7 @@ contraction C<0FB2 0F71> prohibits C<0FB2 0F71 0F80> from being detected.
 
 =item minimalFFFE
 
--- see 5.14 Collation Elements, UTS #35.
+-- see 1.1.1 U+FFFE, UTS #35 (LDML) Part 5: Collation.
 
 If the parameter is made true, C<U+FFFE> has a minimal primary weight.
 The comparison between C<"$a1\x{FFFE}$a2"> and C<"$b1\x{FFFE}$b2">
@@ -1652,8 +1652,7 @@ rewriting lines on reading an unmodified table every time.
 
 =item suppress
 
--- see suppress contractions in 5.14.11 Special-Purpose Commands,
-UTS #35 (LDML).
+-- see 3.12 Special-Purpose Commands, UTS #35 (LDML) Part 5: Collation.
 
 Contractions beginning with the specified characters are suppressed,
 even if those contractions are defined in C<table>.
@@ -1711,7 +1710,7 @@ specified as a comment (following C<#>) on each line.
 
 =item undefName
 
--- see 6.3.4 Reducing the Repertoire, UTS #10.
+-- see 6.3.3 Reducing the Repertoire, UTS #10.
 
 Undefines the collation element as if it were unassigned in the C<table>.
 This reduces the size of the table.

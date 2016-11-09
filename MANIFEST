@@ -2907,6 +2907,7 @@ cpan/Unicode-Collate/Collate/Locale/ca.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/cs.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/cy.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/da.pl			Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/de_at_ph.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/de_phone.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/ee.pl
 cpan/Unicode-Collate/Collate/Locale/eo.pl			Unicode::Collate
@@ -2918,7 +2919,7 @@ cpan/Unicode-Collate/Collate/Locale/fi.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/fi_phone.pl	Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/fil.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/fo.pl			Unicode::Collate
-cpan/Unicode-Collate/Collate/Locale/fr.pl			Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/fr_ca.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/gu.pl	Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/ha.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/haw.pl			Unicode::Collate
@@ -3018,6 +3019,7 @@ cpan/Unicode-Collate/t/loc_cy.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_cyrl.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_da.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_de.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_deat.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_deph.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_ee.t
 cpan/Unicode-Collate/t/loc_eo.t			Unicode::Collate
@@ -3030,6 +3032,7 @@ cpan/Unicode-Collate/t/loc_fil.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_fiph.t	Unicode::Collate
 cpan/Unicode-Collate/t/loc_fo.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_fr.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_frca.t		Unicode::Collate
 cpan/Unicode-Collate/t/loc_gu.t	Unicode::Collate
 cpan/Unicode-Collate/t/loc_ha.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_haw.t			Unicode::Collate
