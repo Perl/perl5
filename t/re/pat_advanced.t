@@ -2433,6 +2433,15 @@ EOF
                         'No segfault [perl #126886]');
     }
 
+    {
+        # [perl 130010]  Downstream application texinfo started to report panics
+        # as of commit a5540cf.
+
+        runperl( prog => 'A::xx(); package A; sub InFullwidth{ return qq|\n| } sub xx { split /[^\s\p{InFullwidth}]/, q|x| }' );
+        ok(! $?, "User-defined pattern did not cause panic [perl 130010]");
+    }
+
+
     # !!! NOTE that tests that aren't at all likely to crash perl should go
     # a ways above, above these last ones.  There's a comment there that, like
     # this comment, contains the word 'NOTE'
