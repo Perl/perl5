@@ -88,6 +88,11 @@ Individual members of C<PL_parser> have their own documentation.
 #  define PL_nexttype		(PL_parser->nexttype)
 #  define PL_nextval		(PL_parser->nextval)
 
+
+#define SvEVALED(sv) \
+    (SvTYPE(sv) >= SVt_PVNV \
+    && ((XPVIV*)SvANY(sv))->xiv_u.xivu_eval_seen)
+
 static const char* const ident_too_long = "Identifier too long";
 
 #  define NEXTVAL_NEXTTOKE PL_nextval[PL_nexttoke]
@@ -9370,6 +9375,7 @@ S_scan_subst(pTHX_ char *start)
     PMOP *pm;
     I32 first_start;
     line_t first_line;
+    line_t linediff = 0;
     I32 es = 0;
     char charset = '\0';    /* character set modifier */
     unsigned int x_mod_count = 0;
@@ -9433,15 +9439,24 @@ S_scan_subst(pTHX_ char *start)
 	sv_catpvs(repl, "{");
 	sv_catsv(repl, PL_parser->lex_sub_repl);
 	sv_catpvs(repl, "}");
-	SvEVALED_on(repl);
+	((XPVIV*)SvANY(PL_parser->lex_sub_repl))->xiv_u.xivu_eval_seen = 1;
 	SvREFCNT_dec(PL_parser->lex_sub_repl);
 	PL_parser->lex_sub_repl = repl;
+        es = 1;
     }
-    if (CopLINE(PL_curcop) != first_line) {
-	sv_upgrade(PL_parser->lex_sub_repl, SVt_PVNV);
-	((XPVNV*)SvANY(PL_parser->lex_sub_repl))->xnv_u.xnv_lines =
-	    CopLINE(PL_curcop) - first_line;
+
+
+    linediff = CopLINE(PL_curcop) - first_line;
+    if (linediff)
 	CopLINE_set(PL_curcop, first_line);
+
+    if (linediff || es) {
+        /* the IVX field indicates that the replacement string is a s///e;
+         * the NVX field indicates how many src code lines the replacement
+         * spreads over */
+        sv_upgrade(PL_parser->lex_sub_repl, SVt_PVNV);
+        ((XPVNV*)SvANY(PL_parser->lex_sub_repl))->xnv_u.xnv_lines = 0;
+        ((XPVIV*)SvANY(PL_parser->lex_sub_repl))->xiv_u.xivu_eval_seen = es;
     }
 
     PL_lex_op = (OP*)pm;
