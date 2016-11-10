@@ -14150,7 +14150,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 	    case CXt_EVAL:
 		ncx->blk_eval.old_namesv = sv_dup_inc(ncx->blk_eval.old_namesv,
 						      param);
-                /* XXX should this sv_dup_inc? Or only if SvSCREAM ???? */
+                /* XXX should this sv_dup_inc? Or only if CxEVAL_TXT_REFCNTED ???? */
 		ncx->blk_eval.cur_text	= sv_dup(ncx->blk_eval.cur_text, param);
 		ncx->blk_eval.cv = cv_dup(ncx->blk_eval.cv, param);
                 /* XXX what do do with cur_top_env ???? */

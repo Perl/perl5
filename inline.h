@@ -1490,9 +1490,9 @@ S_cx_pusheval(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv)
     cx->blk_eval.cv            = NULL; /* later set by doeval_compile() */
     cx->blk_eval.cur_top_env   = PL_top_env;
 
-    assert(!(PL_in_eval     & ~ 0x7F));
+    assert(!(PL_in_eval     & ~ 0x3F));
     assert(!(PL_op->op_type & ~0x1FF));
-    cx->blk_u16 = (PL_in_eval & 0x7F) | ((U16)PL_op->op_type << 7);
+    cx->blk_u16 = (PL_in_eval & 0x3F) | ((U16)PL_op->op_type << 7);
 }
 
 
@@ -1505,9 +1505,10 @@ S_cx_popeval(pTHX_ PERL_CONTEXT *cx)
     assert(CxTYPE(cx) == CXt_EVAL);
 
     PL_in_eval = CxOLD_IN_EVAL(cx);
+    assert(!(PL_in_eval & 0xc0));
     PL_eval_root = cx->blk_eval.old_eval_root;
     sv = cx->blk_eval.cur_text;
-    if (sv && SvSCREAM(sv)) {
+    if (sv && CxEVAL_TXT_REFCNTED(cx)) {
         cx->blk_eval.cur_text = NULL;
         SvREFCNT_dec_NN(sv);
     }

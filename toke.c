@@ -9716,7 +9716,7 @@ S_scan_heredoc(pTHX_ char *s)
             && cx->blk_eval.cur_text == linestr)
         {
 	    cx->blk_eval.cur_text = newSVsv(linestr);
-	    SvSCREAM_on(cx->blk_eval.cur_text);
+	    cx->blk_u16 |= 0x40; /* indicate cur_text is ref counted */
 	}
 	/* Copy everything from s onwards back to d. */
 	Move(s,d,bufend-s + 1,char);
