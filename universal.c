@@ -184,6 +184,10 @@ The SV can be a Perl object or the name of a Perl class.
 
 #include "XSUB.h"
 
+/* a special string address whose value is "isa", but whicb perl knows
+ * to treat as if it were really "DOES" */
+char PL_isa_DOES[] = "isa";
+
 bool
 Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
 {
@@ -222,11 +226,14 @@ Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
     PUSHs(namesv);
     PUTBACK;
 
-    methodname = newSVpvs_flags("isa", SVs_TEMP);
-    /* ugly hack: use the SvSCREAM flag so S_method_common
-     * can figure out we're calling DOES() and not isa(),
-     * and report eventual errors correctly. --rgs */
-    SvSCREAM_on(methodname);
+    /* create a PV with value "isa", but with a special address
+     * so that perl knows were' realling doing "DOES" instead */
+    methodname = newSV_type(SVt_PV);
+    SvLEN(methodname) = 0;
+    SvCUR(methodname) = strlen(PL_isa_DOES);
+    SvPVX(methodname) = PL_isa_DOES;
+    SvPOK_on(methodname);
+    sv_2mortal(methodname);
     call_sv(methodname, G_SCALAR | G_METHOD);
     SPAGAIN;
 
