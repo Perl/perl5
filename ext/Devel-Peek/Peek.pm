@@ -3,7 +3,7 @@
 
 package Devel::Peek;
 
-$VERSION = '1.25';
+$VERSION = '1.26';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -354,7 +354,6 @@ The output:
             ARRAY = 0xc7e820
             FILL = 0
             MAX = 0
-            ARYLEN = 0x0
             FLAGS = (REAL)
             Elt No. 0
             SV = IV(0xc70f88) at 0xc70f98
@@ -386,7 +385,6 @@ The output:
             ARRAY = 0x1585820
             FILL = 1
             MAX = 1
-            ARYLEN = 0x0
             FLAGS = (REAL)
             Elt No. 0
             SV = IV(0x1577f88) at 0x1577f98

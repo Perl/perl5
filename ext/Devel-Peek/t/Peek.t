@@ -262,7 +262,6 @@ do_test('reference to array',
     ARRAY = $ADDR
     FILL = 1
     MAX = 1
-    ARYLEN = 0x0
     FLAGS = \\(REAL\\)
     Elt No. 0
     SV = IV\\($ADDR\\) at $ADDR
@@ -936,7 +935,6 @@ SV = PVAV\($ADDR\) at $ADDR
   ARRAY = $ADDR
   FILL = 2
   MAX = 3
-  ARYLEN = 0x0
   FLAGS = \(REAL\)
   Elt No. 0
   SV = IV\($ADDR\) at $ADDR
@@ -962,7 +960,6 @@ SV = PVAV\($ADDR\) at $ADDR
   ARRAY = $ADDR
   FILL = 2
   MAX = 3
-  ARYLEN = 0x0
   FLAGS = \(REAL\)
   Elt No. 0
   SV = IV\($ADDR\) at $ADDR
