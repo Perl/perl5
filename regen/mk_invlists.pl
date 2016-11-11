@@ -8,8 +8,8 @@ use Unicode::UCD qw(prop_aliases
                     prop_invlist
                     prop_invmap search_invlist
                    );
-require 'regen/regen_lib.pl';
-require 'regen/charset_translations.pl';
+require './regen/regen_lib.pl';
+require './regen/charset_translations.pl';
 
 # This program outputs charclass_invlists.h, which contains various inversion
 # lists in the form of C arrays that are to be used as-is for inversion lists.

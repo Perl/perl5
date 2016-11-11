@@ -27,7 +27,7 @@ use TestInit qw(T); # T is chdir to the top level
 use strict;
 use File::Spec;
 
-require 't/test.pl';
+require './t/test.pl';
 find_git_or_skip('all');
 
 my $devnull = File::Spec->devnull;

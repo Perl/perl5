@@ -19,4 +19,4 @@ is(Math::BigInt->upgrade(), "Math::BigFloat",
 is(Math::BigInt->downgrade() || "", "",
    qq/Math::BigInt->downgrade() || ""/);
 
-require 't/upgrade.inc';	# all tests here for sharing
+require './t/upgrade.inc';	# all tests here for sharing

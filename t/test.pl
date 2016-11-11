@@ -652,7 +652,7 @@ sub _create_runperl { # Create the string to qx in runperl().
 	$runperl = "$ENV{PERL_RUNPERL_DEBUG} $runperl";
     }
     unless ($args{nolib}) {
-	$runperl = $runperl . ' "-I../lib"'; # doublequotes because of VMS
+	$runperl = $runperl . ' "-I../lib" "-I." '; # doublequotes because of VMS
     }
     if ($args{switches}) {
 	local $Level = 2;
@@ -1261,6 +1261,7 @@ sub run_multiple_progs {
 	open my $fh, '>', $tmpfile or die "Cannot open >$tmpfile: $!";
 	print $fh q{
         BEGIN {
+            push @INC, '.';
             open STDERR, '>&', STDOUT
               or die "Can't dup STDOUT->STDERR: $!;";
         }

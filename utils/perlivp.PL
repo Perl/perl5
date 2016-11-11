@@ -231,7 +231,7 @@ if (defined($Config{'extensions'})) {
         next if $_ eq 'XS/APItest';
         next if $_ eq 'XS/Typemap';
            # VMS$ perl  -e "eval ""require \""Devel/DProf.pm\"";"" print $@"
-           # \NT> perl  -e "eval \"require 'Devel/DProf.pm'\"; print $@"
+           # \NT> perl  -e "eval \"require './Devel/DProf.pm'\"; print $@"
            # DProf: run perl with -d to use DProf.
            # Compilation failed in require at (eval 1) line 1.
         eval " require \"$_.pm\"; ";

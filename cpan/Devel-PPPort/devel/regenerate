@@ -20,7 +20,7 @@ use File::Copy;
 use Getopt::Long;
 use Pod::Usage;
 
-require 'devel/devtools.pl';
+require './devel/devtools.pl';
 
 our %opt = (
   check   => 1,

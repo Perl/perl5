@@ -6,7 +6,7 @@ use TestInit qw(T);
 use strict;
 use Config;
 
-require 't/test.pl';
+require './t/test.pl';
 
 plan(tests => 6);
 

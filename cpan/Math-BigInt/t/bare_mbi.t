@@ -15,4 +15,4 @@ our ($CLASS, $CALC);
 $CLASS = "Math::BigInt";
 $CALC  = "Math::BigInt::BareCalc";      # backend
 
-require 't/bigintpm.inc';               # perform same tests as bigintpm.t
+require './t/bigintpm.inc';               # perform same tests as bigintpm.t

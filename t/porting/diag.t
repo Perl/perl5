@@ -9,7 +9,7 @@ use warnings;
 use strict;
 use Config;
 
-require 't/test.pl';
+require './t/test.pl';
 
 if ( $Config{usecrosscompile} ) {
   skip_all( "Not all files are available during cross-compilation" );
@@ -26,7 +26,7 @@ plan('no_plan');
 my $make_exceptions_list = ($ARGV[0]||'') eq '--make-exceptions-list'
   and shift;
 
-require 'regen/embed_lib.pl';
+require './regen/embed_lib.pl';
 
 # Look for functions that look like they could be diagnostic ones.
 my @functions;

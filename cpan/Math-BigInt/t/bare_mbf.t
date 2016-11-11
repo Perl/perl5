@@ -13,4 +13,4 @@ our ($CLASS, $CALC);
 $CLASS = "Math::BigFloat";
 $CALC  = "Math::BigInt::BareCalc";      # backend
 
-require 't/bigfltpm.inc';	        # all tests here for sharing
+require './t/bigfltpm.inc';	        # all tests here for sharing

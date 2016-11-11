@@ -4644,8 +4644,13 @@ S_init_perllib(pTHX)
 #endif
 #endif /* !PERL_IS_MINIPERL */
 
-    if (!TAINTING_get)
-	S_incpush(aTHX_ STR_WITH_LEN("."), 0);
+    if (!TAINTING_get) {
+#if !defined(PERL_IS_MINIPERL) && defined(DEFAULT_INC_EXCLUDES_DOT)
+        const char * const unsafe = PerlEnv_getenv("PERL_USE_UNSAFE_INC");
+        if (unsafe && strEQ(unsafe, "1"))
+#endif
+          S_incpush(aTHX_ STR_WITH_LEN("."), 0);
+    }
 }
 
 #if defined(DOSISH) || defined(__SYMBIAN32__)

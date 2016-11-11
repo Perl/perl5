@@ -20,7 +20,7 @@ use strict;
 
 BEGIN {
     # Get function prototypes
-    require 'regen/regen_lib.pl';
+    require './regen/regen_lib.pl';
 }
 
 my $oc = open_new('opcode.h', '>',
@@ -924,7 +924,7 @@ package main;
 # which define what bits in op_private have what meanings for each op.
 # It populates %LABELS, %DEFINES, %FLAGS, %BITFIELDS.
 
-require 'regen/op_private';
+require './regen/op_private';
 
 #use Data::Dumper;
 #print Dumper \%LABELS, \%DEFINES, \%FLAGS, \%BITFIELDS;

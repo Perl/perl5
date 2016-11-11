@@ -1453,6 +1453,7 @@ END { print "in end\n"; }
 print "in mainline\n";
 1;
 --FILE--
+BEGIN { unshift @INC, '.' }
 require abc;
 do "abc.pm";
 EXPECT

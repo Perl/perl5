@@ -2959,6 +2959,9 @@ db_version_patch (i_db.U):
 	Berkeley DB found in the <db.h> header file.
 	For DB version 1 this is always 0.
 
+default_inc_excludes_dot (defaultincdot.U):
+	When defined, remove the legacy '.' from @INC
+
 direntrytype (i_dirent.U):
 	This symbol is set to 'struct direct' or 'struct dirent' depending on
 	whether dirent is available or not. You should use this pseudo type to

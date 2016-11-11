@@ -11,7 +11,7 @@
 # This script is normally invoked from regen.pl.
 
 BEGIN {
-    require 'regen/regen_lib.pl';
+    require './regen/regen_lib.pl';
     push @INC, './lib';
 }
 use strict ;

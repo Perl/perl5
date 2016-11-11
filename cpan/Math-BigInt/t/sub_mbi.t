@@ -14,7 +14,7 @@ our ($CLASS, $CALC);
 $CLASS = "Math::BigInt::Subclass";
 $CALC  = "Math::BigInt::Calc";          # backend
 
-require 't/bigintpm.inc';	        # perform same tests as bigintpm
+require './t/bigintpm.inc';	        # perform same tests as bigintpm
 
 ###############################################################################
 # Now do custom tests for Subclass itself

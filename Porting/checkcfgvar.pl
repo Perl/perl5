@@ -36,7 +36,7 @@ GetOptions (
 
 $default and $default =~ s/^'(.*)'$/$1/; # Will be quoted on generation
 
-require 'regen/regen_lib.pl' if $opt_r;
+require './regen/regen_lib.pl' if $opt_r;
 
 my $MASTER_CFG = "config_h.SH";
 # Inclusive bounds on the main part of the file, $section == 1 below:

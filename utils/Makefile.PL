@@ -13,7 +13,7 @@ if (@ARGV) {
 # attempting to move the work from them to the extension directories and
 # ExtUtils::MakeMaker.
 
-require 'regen/regen_lib.pl';
+require './regen/regen_lib.pl';
 
 my $target = 'utils/Makefile';
 print "Extracting $target (with variable substitutions)\n";

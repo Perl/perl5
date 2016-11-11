@@ -4,7 +4,7 @@ use TestInit qw(T);
 use strict;
 use Config;
 
-require 't/test.pl';
+require './t/test.pl';
 
 skip_all("Code to read symbols not ported to $^O")
     if $^O eq 'VMS' or $^O eq 'MSWin32';
