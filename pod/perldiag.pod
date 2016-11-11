@@ -2733,6 +2733,26 @@ parent '%s'
 C3-consistent, and you have enabled the C3 MRO for this class.  See the C3
 documentation in L<mro> for more information.
 
+=item Indentation on line %d of here-doc doesn't match delimiter
+
+(F) You have an indented here-document where one or more of its lines
+have whitespace at the beginning that does not match the closing
+delimiter.
+
+For example, line 2 below is wrong because it does not have at least
+2 spaces, but lines 1 and 3 are fine because they have at least 2:
+
+    if ($something) {
+      print <<~EOF;
+        Line 1
+       Line 2 not
+          Line 3
+        EOF
+    }
+
+Note that tabs and spaces are compared strictly, meaning 1 tab will
+not match 8 spaces.
+
 =item Infinite recursion in regex
 
 (F) You used a pattern that references itself without consuming any input

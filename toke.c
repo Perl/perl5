@@ -9560,6 +9560,9 @@ S_scan_heredoc(pTHX_ char *s)
     char *d;
     char *e;
     char *peek;
+    char *indent = 0;
+    I32 indent_len = 0;
+    bool indented = FALSE;
     const bool infile = PL_rsfp || PL_parser->filtered;
     const line_t origline = CopLINE(PL_curcop);
     LEXSHARED *shared = PL_parser->lex_shared;
@@ -9571,6 +9574,10 @@ S_scan_heredoc(pTHX_ char *s)
     e = PL_tokenbuf + sizeof PL_tokenbuf - 1;
     *PL_tokenbuf = '\n';
     peek = s;
+    if (*peek == '~') {
+	indented = TRUE;
+	peek++; s++;
+    }
     while (SPACE_OR_TAB(*peek))
 	peek++;
     if (*peek == '`' || *peek == '\'' || *peek =='"') {
@@ -9693,12 +9700,45 @@ S_scan_heredoc(pTHX_ char *s)
 	linestr = shared->ls_linestr;
 	bufend = SvEND(linestr);
 	d = s;
-	while (s < bufend - len + 1
-               && memNE(s,PL_tokenbuf,len) )
-        {
-	    if (*s++ == '\n')
-		++PL_parser->herelines;
+	if (indented) {
+	    char *myolds = s;
+
+	    while (s < bufend - len + 1) {
+		if (*s++ == '\n')
+		    ++PL_parser->herelines;
+
+		if (memEQ(s, PL_tokenbuf + 1, len - 1)) {
+		    char *backup = s;
+		    indent_len = 0;
+
+		    /* Only valid if it's preceded by whitespace only */
+		    while (backup != myolds && --backup >= myolds) {
+			if (*backup != ' ' && *backup != '\t') {
+			    break;
+			}
+
+			indent_len++;
+		    }
+
+		    /* No whitespace or all! */
+		    if (backup == s || *backup == '\n') {
+			Newxz(indent, indent_len + 1, char);
+			memcpy(indent, backup + 1, indent_len);
+			s--; /* before our delimiter */
+			PL_parser->herelines--; /* this line doesn't count */
+			break;
+		    }
+		}
+	    }
+	} else {
+	    while (s < bufend - len + 1
+	           && memNE(s,PL_tokenbuf,len) )
+	    {
+		if (*s++ == '\n')
+		    ++PL_parser->herelines;
+	    }
 	}
+
 	if (s >= bufend - len + 1) {
 	    goto interminable;
 	}
@@ -9800,23 +9840,103 @@ S_scan_heredoc(pTHX_ char *s)
 	else if (PL_bufend - PL_linestart == 1 && PL_bufend[-1] == '\r')
 	    PL_bufend[-1] = '\n';
 #endif
-	if (*s == term && PL_bufend-s >= len
-	 && memEQ(s,PL_tokenbuf + 1,len)) {
-	    SvREFCNT_dec(PL_linestr);
-	    PL_linestr = linestr_save;
-	    PL_linestart = SvPVX(linestr_save);
-	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-            PL_oldbufptr = oldbufptr_save;
-            PL_oldoldbufptr = oldoldbufptr_save;
-	    s = d;
-	    break;
-	}
-	else {
+	if (indented && (PL_bufend-s) >= len) {
+	    char * found = ninstr(s, PL_bufend, (PL_tokenbuf + 1), (PL_tokenbuf +1 + len));
+
+	    if (found) {
+		char *backup = found;
+		indent_len = 0;
+
+		/* Only valid if it's preceded by whitespace only */
+		while (backup != s && --backup >= s) {
+		    if (*backup != ' ' && *backup != '\t') {
+			break;
+		    }
+		    indent_len++;
+		}
+
+		/* All whitespace or none! */
+		if (backup == found || *backup == ' ' || *backup == '\t') {
+		    Newxz(indent, indent_len + 1, char);
+		    memcpy(indent, backup, indent_len);
+		    SvREFCNT_dec(PL_linestr);
+		    PL_linestr = linestr_save;
+		    PL_linestart = SvPVX(linestr_save);
+		    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
+		    PL_oldbufptr = oldbufptr_save;
+		    PL_oldoldbufptr = oldoldbufptr_save;
+		    s = d;
+		    break;
+		}
+	    }
+
+	    /* Didn't find it */
 	    sv_catsv(tmpstr,PL_linestr);
+	} else {
+	    if (*s == term && PL_bufend-s >= len
+	        && memEQ(s,PL_tokenbuf + 1,len))
+	    {
+		SvREFCNT_dec(PL_linestr);
+		PL_linestr = linestr_save;
+		PL_linestart = SvPVX(linestr_save);
+		PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
+		PL_oldbufptr = oldbufptr_save;
+		PL_oldoldbufptr = oldoldbufptr_save;
+		s = d;
+		break;
+	    } else {
+		sv_catsv(tmpstr,PL_linestr);
+	    }
 	}
       }
     }
     PL_multi_end = origline + PL_parser->herelines;
+    if (indented && indent) {
+	STRLEN linecount = 1;
+	STRLEN herelen = SvCUR(tmpstr);
+	char *ss = SvPVX(tmpstr);
+	char *se = ss + herelen;
+	SV *newstr = newSVpvs("");
+	SvGROW(newstr, herelen);
+
+	/* Trim leading whitespace */
+	while (ss < se) {
+	    /* newline only? Copy and move on */
+	    if (*ss == '\n') {
+		sv_catpv(newstr,"\n");
+		ss++;
+
+	    /* Found our indentation? Strip it */
+	    } else if (se - ss >= indent_len
+	               && memEQ(ss, indent, indent_len))
+	    {
+		STRLEN le = 0;
+
+		ss += indent_len;
+
+		while ((ss + le) < se && *(ss + le) != '\n')
+		    le++;
+
+		sv_catpvn(newstr, ss, le);
+
+		ss += le;
+
+	    /* Line doesn't begin with our indentation? Croak */
+	    } else {
+		Perl_croak(aTHX_
+		    "Indentation on line %d of here-doc doesn't match delimiter",
+		    (int)linecount
+		);
+	    }
+
+	    linecount++;
+	}
+
+	sv_setsv(tmpstr,newstr);
+
+	Safefree(indent);
+	SvREFCNT_dec_NN(newstr);
+    }
     if (SvCUR(tmpstr) + 5 < SvLEN(tmpstr)) {
 	SvPV_shrink_to_cur(tmpstr);
     }

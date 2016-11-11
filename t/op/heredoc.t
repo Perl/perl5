@@ -7,8 +7,7 @@ BEGIN {
 }
 
 use strict;
-plan(tests => 43);
-
+plan(tests => 136);
 
 # heredoc without newline (#65838)
 {
@@ -124,5 +123,106 @@ HEREDOC
         {},
         "delimcpy(): handle last char being backslash properly"
     );
+}
 
+
+# indented here-docs
+{
+    my $string = 'some data';
+
+    my %delimiters = (
+        q{EOF}     => "EOF",
+        q{'EOF'}   => "EOF",
+        q{"EOF"}   => "EOF",
+        q{\EOF}    => "EOF",
+        q{' EOF'}  => " EOF",
+        q{'EOF '}  => "EOF ",
+        q{' EOF '} => " EOF ",
+        q{" EOF"}  => " EOF",
+        q{"EOF "}  => "EOF ",
+        q{" EOF "} => " EOF ",
+        q{''}      => "",
+        q{""}      => "",
+    );
+
+    my @modifiers = ("~", "~ ");
+
+    my @script_ends = ("", "\n");
+
+    my @tests;
+
+    for my $start_delim (sort keys %delimiters) {
+        my $end_delim = $delimiters{$start_delim};
+
+        for my $modifier (@modifiers) {
+            # For now, "<<~ EOF" and "<<~ \EOF" aren't allowed
+            next if $modifier =~ /\s/ && $start_delim !~ /('|")/n;
+
+            for my $script_end (@script_ends) {
+                # Normal heredoc
+                my $test =   "print <<$modifier$start_delim\n  $string\n"
+                           . "  $end_delim$script_end";
+                unshift @tests, [
+                    $test,
+                    $string,
+                    "Indented here-doc:  $test",
+                ];
+
+                # Eval'd heredoc
+                my $safe_start_delim = $start_delim =~ s/'/\\'/gr;
+                my $eval = "
+                    \$_ = '';
+                    eval 's//<<$modifier$safe_start_delim.\"\"/e; print
+                        $string
+                        $end_delim$script_end'
+                    or die \$\@
+                ";
+                push @tests, [
+                    $eval,
+                    $string,
+                    "Eval'd Indented here-doc: $eval",
+                ];
+            }
+        }
+    }
+
+    push @tests, [
+        "print <<~EOF;\n\t \t$string\n\t \tEOF\n",
+        $string,
+        "indented here-doc with tabs and spaces",
+    ];
+
+    push @tests, [
+        "print <<~EOF;\n\t \tx EOF\n\t \t$string\n\t \tEOF\n",
+         "x EOF\n$string",
+        "Embedded delimiter ignored",
+    ];
+
+    push @tests, [
+        "print <<~EOF;\n\t \t$string\n\t \tTEOF",
+        "Can't find string terminator \"EOF\" anywhere before EOF at - line 1.",
+        "indented here-doc missing terminator error is correct"
+    ];
+
+    push @tests, [
+        "print <<~EOF;\n $string\n$string\n   $string\n $string\n   EOF",
+        "Indentation on line 1 of here-doc doesn't match delimiter at - line 1.\n",
+        "indented here-doc with bad indentation"
+    ];
+
+    # If our delim is " EOF ", make sure other spaced version don't match
+    push @tests, [
+        "print <<~' EOF ';\n $string\n EOF\nEOF \n  EOF  \n EOF \n",
+        " $string\n EOF\nEOF \n  EOF  \n",
+        "intented here-doc matches final delimiter correctly"
+    ];
+
+    for my $test (@tests) {
+        fresh_perl_is(
+            $test->[0],
+            $test->[1],
+            { switches => ['-w'], stderr => 1 },
+            $test->[2],
+        );
+    }
 }
