@@ -597,9 +597,23 @@ C<$Module::CoreList::Utils::VERSION> should always be equal to
 C<$Module::CoreList::VERSION>. If necessary, bump those two versions to match
 before proceeding.
 
-The files to modify are: F<dist/Module-CoreList/lib/Module/CoreList.pm>,
-F<dist/Module-CoreList/lib/Module/CoreList/Utils.pm> and
-F<dist/Module-CoreList/lib/Module/CoreList/TieHashDelta.pm>.
+The files to modify are:
+
+=over 4
+
+=item *
+
+F<dist/Module-CoreList/lib/Module/CoreList.pm>
+
+=item *
+
+F<dist/Module-CoreList/lib/Module/CoreList/Utils.pm>
+
+=item *
+
+F<dist/Module-CoreList/lib/Module/CoreList/TieHashDelta.pm>
+
+=back
 
 =head4 Update C<Module::CoreList> with module version data for the new release.
 
