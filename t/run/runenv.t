@@ -285,7 +285,7 @@ is ($err, '', 'No errors when determining @INC');
 
 my @default_inc = split /\n/, $out;
 
-ok ! grep { $_ eq '.' } @default_inc, '. is not in @INC';
+ok !(grep { $_ eq '.' } @default_inc), '. is not in @INC';
 #is ($default_inc[-1], '.', '. is last in @INC');
 
 my $sep = $Config{path_sep};
