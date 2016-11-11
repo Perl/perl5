@@ -11,6 +11,7 @@
  * in Configure, this is the way to force them into availability.
  *
  * BOOTSTRAP_CHARSET
+ * DEFAULT_INC_EXCLUDES_DOT
  * DOUBLEKIND
  * HAS_ACOSH
  * HAS_ASCTIME64
