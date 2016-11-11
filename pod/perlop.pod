@@ -2511,6 +2511,9 @@ syntax.  Following a C<< << >> you specify a string to terminate
 the quoted material, and all lines following the current line down to
 the terminating string are the value of the item.
 
+Prefixing the terminating string with a C<~> specifies that you
+want to use L</Indented Here-docs> (see below).
+
 The terminating string may be either an identifier (a word), or some
 quoted text.  An unquoted identifier works like double quotes.
 There may not be a space between the C<< << >> and the identifier,
@@ -2571,6 +2574,55 @@ the results of the execution returned.
        print << `EOC`; # execute command and get results
     echo hi there
     EOC
+
+=back
+
+=over 4
+
+=item Indented Here-docs
+
+The here-doc modifier C<~> allows you to indent your here-docs to make
+the code more readable:
+
+    if ($some_var) {
+      print <<~EOF;
+        This is a here-doc
+        EOF
+    }
+
+This will print...
+
+    This is a here-doc
+
+...with no leading whitespace.
+
+The delimiter is used to determine the B<exact> whitespace to
+remove from the beginning of each line.  All lines B<must> have
+at least the same starting whitespace (except lines only
+containing a newline) or perl will croak.  Tabs and spaces can
+be mixed, but are matched exactly.  One tab will not be equal to
+8 spaces!
+
+Additional beginning whitespace (beyond what preceded the
+delimiter) will be preserved:
+
+    print <<~EOF;
+      This text is not indented
+        This text is indented with two spaces
+      		This text is indented with two tabs
+      EOF
+
+Finally, the modifier may be used with all of the forms
+mentioned above:
+
+    <<~\EOF;
+    <<~'EOF'
+    <<~"EOF"
+    <<~`EOF`
+
+And whitespace may be used between the C<~> and quoted delimiters:
+
+    <<~ 'EOF'; # ... "EOF", `EOF`
 
 =back
 
