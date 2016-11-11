@@ -3548,11 +3548,12 @@ can vary from one line to the next.
 (S syntax) This is an educated guess made in conjunction with the message
 "%s found where operator expected".  Often the missing operator is a comma.
 
-=item Missing or undefined argument to require
+=item Missing or undefined argument to %s
 
-(F) You tried to call require with no argument or with an undefined
+(F) You tried to call require or do with no argument or with an undefined
 value as an argument.  Require expects either a package name or a
-file-specification as an argument.  See L<perlfunc/require>.
+file-specification as an argument; do expects a filename.  See
+L<perlfunc/require EXPR> and L<perlfunc/do EXPR>.
 
 =item Missing right brace on \%c{} in regex; marked by S<<-- HERE> in m/%s/
 

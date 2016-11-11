@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan(tests => 23);
+plan(tests => 27);
 
 my $nonfile = tempfile();
 
@@ -131,7 +131,7 @@ like $@, qr/^Can't locate strict\.pm\\0invalid: /, 'require nul check [perl #117
     is $exc, '',    'do nulstring clears $@';
     $! = $err;
     ok $!{ENOENT},  'do nulstring fails with ENOENT';
-    like $WARN, qr{^Invalid \\0 character in pathname for require: strict\.pm\\0invalid at }, 'do nulstring warning';
+    like $WARN, qr{^Invalid \\0 character in pathname for do: strict\.pm\\0invalid at }, 'do nulstring warning';
   }
 
   $WARN = '';
@@ -156,3 +156,15 @@ like $@, qr/^Can't locate \(\?\^:\\0\):/,
 eval { no strict; no warnings 'syscalls'; require *{"\0a"} };
 like $@, qr/^Can't locate \*main::\\0a:/,
     'require ref that stringifies with embedded null';
+
+eval { require undef };
+like $@, qr/^Missing or undefined argument to require /;
+
+eval { do undef };
+like $@, qr/^Missing or undefined argument to do /;
+
+eval { require "" };
+like $@, qr/^Missing or undefined argument to require /;
+
+eval { do "" };
+like $@, qr/^Missing or undefined argument to do /;

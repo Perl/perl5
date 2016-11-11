@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 826;
+plan tests => 828;
 
 $| = 1;
 
@@ -1159,6 +1159,7 @@ violates_taint(sub { link $TAINT, '' }, 'link');
 {
     my $foo = "imaginary library" . $TAINT;
     violates_taint(sub { require $foo }, 'require');
+    violates_taint(sub { do $foo }, 'do');
 
     my $filename = tempfile();	# NB: $filename isn't tainted!
     $foo = $filename . $TAINT;

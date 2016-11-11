@@ -3692,15 +3692,19 @@ S_require_file(pTHX_ SV *const sv)
     int saved_errno;
     bool path_searchable;
     I32 old_savestack_ix;
+    const bool op_is_require = PL_op->op_type == OP_REQUIRE;
+    const char *const op_name = op_is_require ? "require" : "do";
+
+    assert(op_is_require || PL_op->op_type == OP_DOFILE);
 
     if (!SvOK(sv))
-        DIE(aTHX_ "Missing or undefined argument to require");
+        DIE(aTHX_ "Missing or undefined argument to %s", op_name);
     name = SvPV_nomg_const(sv, len);
     if (!(name && len > 0 && *name))
-        DIE(aTHX_ "Missing or undefined argument to require");
+        DIE(aTHX_ "Missing or undefined argument to %s", op_name);
 
-    if (!IS_SAFE_PATHNAME(name, len, "require")) {
-        if (PL_op->op_type != OP_REQUIRE) {
+    if (!IS_SAFE_PATHNAME(name, len, op_name)) {
+        if (!op_is_require) {
             CLEAR_ERRSV();
             RETPUSHUNDEF;
         }
@@ -3709,7 +3713,7 @@ S_require_file(pTHX_ SV *const sv)
                       NULL, SvUTF8(sv)?PERL_PV_ESCAPE_UNI:0),
             Strerror(ENOENT));
     }
-    TAINT_PROPER("require");
+    TAINT_PROPER(op_name);
 
     path_searchable = path_is_searchable(name);
 
@@ -3736,7 +3740,7 @@ S_require_file(pTHX_ SV *const sv)
 	unixname = (char *) name;
 	unixlen = len;
     }
-    if (PL_op->op_type == OP_REQUIRE) {
+    if (op_is_require) {
 	SV * const * const svp = hv_fetch(GvHVn(PL_incgv),
 					  unixname, unixlen, 0);
 	if ( svp ) {
@@ -3951,7 +3955,7 @@ S_require_file(pTHX_ SV *const sv)
 			dirlen = 0;
 		    }
 
-		    if (!IS_SAFE_SYSCALL(dir, dirlen, "@INC entry", "require"))
+		    if (!IS_SAFE_SYSCALL(dir, dirlen, "@INC entry", op_name))
 			continue;
 #ifdef VMS
 		    if ((unixdir =
@@ -4002,7 +4006,7 @@ S_require_file(pTHX_ SV *const sv)
 		    }
 #  endif
 #endif
-		    TAINT_PROPER("require");
+		    TAINT_PROPER(op_name);
 		    tryname = SvPVX_const(namesv);
 		    tryrsfp = doopen_pm(namesv);
 		    if (tryrsfp) {
@@ -4028,7 +4032,7 @@ S_require_file(pTHX_ SV *const sv)
     saved_errno = errno; /* sv_2mortal can realloc things */
     sv_2mortal(namesv);
     if (!tryrsfp) {
-	if (PL_op->op_type == OP_REQUIRE) {
+	if (op_is_require) {
 	    if(saved_errno == EMFILE || saved_errno == EACCES) {
 		/* diag_listed_as: Can't locate %s */
 		DIE(aTHX_ "Can't locate %s:   %s: %s",
