@@ -438,14 +438,6 @@ d_dlerror=''
 d_dlopen=''
 d_dlsymun=''
 d_dosuid=''
-d_double_has_inf=''
-d_double_has_nan=''
-d_double_has_negative_zero=''
-d_double_has_subnormals=''
-d_double_style_cray=''
-d_double_style_ibm=''
-d_double_style_ieee=''
-d_double_style_vax=''
 d_suidsafe=''
 d_drand48_r=''
 drand48_r_proto=''
@@ -643,12 +635,12 @@ d_log1p=''
 d_log2=''
 d_logb=''
 d_ldexpl=''
-d_longdbl=''
 d_long_double_style_ieee=''
 d_long_double_style_ieee_doubledouble=''
 d_long_double_style_ieee_extended=''
 d_long_double_style_ieee_std=''
 d_long_double_style_vax=''
+d_longdbl=''
 longdblkind=''
 longdblsize=''
 d_longlong=''
@@ -1133,6 +1125,14 @@ d_PRIeldbl=''
 d_PRIfldbl=''
 d_PRIgldbl=''
 d_SCNfldbl=''
+d_double_has_inf=''
+d_double_has_nan=''
+d_double_has_negative_zero=''
+d_double_has_subnormals=''
+d_double_style_cray=''
+d_double_style_ibm=''
+d_double_style_ieee=''
+d_double_style_vax=''
 doublekind=''
 sPRIEUldbl=''
 sPRIFUldbl=''
@@ -10295,7 +10295,7 @@ case "$doublekind" in
 1|2|3|4|5|6|7|8) d_double_style_ieee=$define ;;
 9|10|11) d_double_style_vax=$define ;;
 12|13) d_double_style_ibm=$define ;;
-14) double_style_cray=$define ;;
+14) d_double_style_cray=$define ;;
 esac
 case "$d_double_style_ieee" in
 $define)
@@ -20810,17 +20810,17 @@ else
     esac
 fi
 # In case the program crashed the values are empty, turn them undef.
-case "$dblinfbytes" in
-'') dblinfbytes=$undef ;;
+case "$doubleinfbytes" in
+'') doubleinfbytes=$undef ;;
 esac
-case "$dblnanbytes" in
-'') dblnanbytes=$undef ;;
+case "$doublenanbytes" in
+'') doublenanbytes=$undef ;;
 esac
-case "$ldblinfbytes" in
-'') ldblinfbytes=$undef ;;
+case "$longdblinfbytes" in
+'') longdblinfbytes=$undef ;;
 esac
-case "$ldblnanbytes" in
-'') ldblnanbytes=$undef ;;
+case "$longdblnanbytes" in
+'') longdblnanbytes=$undef ;;
 esac
 $rm_try
 
@@ -24627,13 +24627,13 @@ d_lockf='$d_lockf'
 d_log1p='$d_log1p'
 d_log2='$d_log2'
 d_logb='$d_logb'
-d_longdbl='$d_longdbl'
-d_longlong='$d_longlong'
 d_long_double_style_ieee='$d_long_double_style_ieee'
 d_long_double_style_ieee_doubledouble='$d_long_double_style_ieee_doubledouble'
 d_long_double_style_ieee_extended='$d_long_double_style_ieee_extended'
 d_long_double_style_ieee_std='$d_long_double_style_ieee_std'
 d_long_double_style_vax='$d_long_double_style_vax'
+d_longdbl='$d_longdbl'
+d_longlong='$d_longlong'
 d_lrint='$d_lrint'
 d_lrintl='$d_lrintl'
 d_lround='$d_lround'
