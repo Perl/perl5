@@ -490,8 +490,8 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # handled by Unicode::Normalize, nor will it compile when presented a version
 # that has them.  However, you can trivially get it to compile by simply
 # ignoring those decompositions, by changing the croak to a carp.  At the time
-# of this writing, the line (in cpan/Unicode-Normalize/Normalize.pm or
-# cpan/Unicode-Normalize/mkheader) reads
+# of this writing, the line (in dist/Unicode-Normalize/Normalize.pm or
+# dist/Unicode-Normalize/mkheader) reads
 #
 #   croak("Weird Canonical Decomposition of U+$h");
 #

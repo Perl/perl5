@@ -73,7 +73,7 @@ my %temp_no_core =
      '../cpan/Test-Simple' => 1,
      '../cpan/Tie-RefHash' => 1,
      '../cpan/Unicode-Collate' => 1,
-     '../cpan/Unicode-Normalize' => 1,
+     '../dist/Unicode-Normalize' => 1,
     );
 
 # delete env vars that may influence the results

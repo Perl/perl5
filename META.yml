@@ -49,6 +49,7 @@ no_index:
     - dist/threads-shared
     - dist/Tie-File
     - dist/Time-HiRes
+    - dist/Unicode-Normalize
     - dist/XSLoader
     - lib/perl5db
     - win32

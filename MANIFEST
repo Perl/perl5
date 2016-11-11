@@ -3112,22 +3112,6 @@ cpan/Unicode-Collate/t/trailwt.t		Unicode::Collate
 cpan/Unicode-Collate/t/variable.t		Unicode::Collate
 cpan/Unicode-Collate/t/version.t		Unicode::Collate
 cpan/Unicode-Collate/t/view.t			Unicode::Collate
-cpan/Unicode-Normalize/Makefile.PL	Unicode::Normalize
-cpan/Unicode-Normalize/mkheader		Unicode::Normalize
-cpan/Unicode-Normalize/Normalize.pm	Unicode::Normalize
-cpan/Unicode-Normalize/Normalize.xs	Unicode::Normalize
-cpan/Unicode-Normalize/t/fcdc.t		Unicode::Normalize
-cpan/Unicode-Normalize/t/form.t		Unicode::Normalize
-cpan/Unicode-Normalize/t/func.t		Unicode::Normalize
-cpan/Unicode-Normalize/t/illegal.t	Unicode::Normalize
-cpan/Unicode-Normalize/t/norm.t		Unicode::Normalize
-cpan/Unicode-Normalize/t/null.t		Unicode::Normalize
-cpan/Unicode-Normalize/t/partial1.t		Unicode::Normalize
-cpan/Unicode-Normalize/t/partial2.t		Unicode::Normalize
-cpan/Unicode-Normalize/t/proto.t	Unicode::Normalize
-cpan/Unicode-Normalize/t/split.t	Unicode::Normalize
-cpan/Unicode-Normalize/t/test.t		Unicode::Normalize
-cpan/Unicode-Normalize/t/tie.t		Unicode::Normalize
 cpan/version/lib/version.pm		Support for version objects
 cpan/version/lib/version.pod		Documentation of the version module
 cpan/version/lib/version/Internals.pod	Description of the internals of version objects
@@ -3783,6 +3767,22 @@ dist/Time-HiRes/t/usleep.t		Test for Time::HiRes
 dist/Time-HiRes/t/utime.t		Test for Time::HiRes
 dist/Time-HiRes/t/Watchdog.pm		Test for Time::HiRes
 dist/Time-HiRes/typemap			Time::HiRes extension
+dist/Unicode-Normalize/Makefile.PL	Unicode::Normalize
+dist/Unicode-Normalize/mkheader		Unicode::Normalize
+dist/Unicode-Normalize/Normalize.pm	Unicode::Normalize
+dist/Unicode-Normalize/Normalize.xs	Unicode::Normalize
+dist/Unicode-Normalize/t/fcdc.t		Unicode::Normalize
+dist/Unicode-Normalize/t/form.t		Unicode::Normalize
+dist/Unicode-Normalize/t/func.t		Unicode::Normalize
+dist/Unicode-Normalize/t/illegal.t	Unicode::Normalize
+dist/Unicode-Normalize/t/norm.t		Unicode::Normalize
+dist/Unicode-Normalize/t/null.t		Unicode::Normalize
+dist/Unicode-Normalize/t/partial1.t		Unicode::Normalize
+dist/Unicode-Normalize/t/partial2.t		Unicode::Normalize
+dist/Unicode-Normalize/t/proto.t	Unicode::Normalize
+dist/Unicode-Normalize/t/split.t	Unicode::Normalize
+dist/Unicode-Normalize/t/test.t		Unicode::Normalize
+dist/Unicode-Normalize/t/tie.t		Unicode::Normalize
 dist/XSLoader/Makefile.PL	Dynamic Loader makefile writer
 dist/XSLoader/t/XSLoader.t	See if XSLoader works
 dist/XSLoader/XSLoader_pm.PL	Simple XS Loader perl module
