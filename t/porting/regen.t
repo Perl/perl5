@@ -35,6 +35,13 @@ my %skip = ("regen_perly.pl"    => [qw(perly.act perly.h perly.tab)],
             "regen/regcharclass.pl" => [qw(regcharclass.h)],
            );
 
+my %other_requirement = (
+    "regen_perly.pl"        => "requires bison",
+    "regen/keywords.pl"     => "requires Devel::Tokenizer::C",
+    "regen/mk_invlists.pl"  => "needs the Perl you've just built",
+    "regen/regcharclass.pl" => "needs the Perl you've just built",
+);
+
 my @files = map {@$_} sort values %skip;
 
 open my $fh, '<', 'regen.pl'
@@ -83,6 +90,10 @@ OUTER: foreach my $file (@files) {
 	push @bad, $2 unless $digest eq $1;
     }
     is("@bad", '', "generated $file is up to date");
+    for (@bad) {
+        my $reason = delete $other_requirement{$_} || next;
+        diag("Note: $_ must be run manually, because it $reason");
+    }
 }
 
 foreach (@progs) {
