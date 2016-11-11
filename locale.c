@@ -1931,7 +1931,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
 
 #ifdef DEBUGGING
 
-void
+STATIC void
 S_print_collxfrm_input_and_return(pTHX_
                                   const char * const s,
                                   const char * const e,
