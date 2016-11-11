@@ -807,12 +807,14 @@ then configure and build perl so that you have a Makefile and porting tools:
 For the first RC for a MAINT release, copy in the latest
 F<pod/perlhist.pod> from blead; this will include details of newer
 releases in all branches. In theory, blead's version should be a strict
-superset of the one in this branch, but it's probably safest to diff them
-first to ensure that there's nothing in this branch that was forgotten
-from blead:
+superset of the one in this branch, but it's probably safest to examine the
+changes first, to ensure that there's nothing in this branch that was
+forgotten from blead. An easy way to do that is with C<< git checkout -p >>,
+to selectively apply any changes from the blead version to your current
+branch:
 
-    $ diff pod/perlhist.pod ..../blead/pod/perlhist.pod
-    $ cp  ..../blead/pod/perlhist.pod pod/
+    $ git fetch origin
+    $ git checkout -p origin/blead pod/perlhist.pod
     $ git commit -m 'sync perlhist from blead' pod/perlhist.pod
 
 =head3 update perlhist.pod
