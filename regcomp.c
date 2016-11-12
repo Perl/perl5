@@ -6677,7 +6677,11 @@ S_setup_longest(pTHX_ RExC_state_t *pRExC_state, SV* sv_longest,
         calculate it.*/
     ml = minlen ? *(minlen) : (SSize_t)longest_length;
     *rx_end_shift = ml - offset
-        - longest_length + (SvTAIL(sv_longest) != 0)
+        - longest_length
+            /* XXX SvTAIL is always false here - did you mean FBMcf_TAIL
+             * intead? - DAPM
+            + (SvTAIL(sv_longest) != 0)
+            */
         + lookbehind;
 
     t = (eol/* Can't have SEOL and MULTI */
