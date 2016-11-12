@@ -160,9 +160,7 @@ typedef enum {
 #define SVt_MASK 0xf	/* smallest bitmask that covers all types */
 
 #ifndef PERL_CORE
-/* Although Fast Boyer Moore tables are now being stored in PVGVs, for most
-   purposes external code wanting to consider PVBM probably needs to think of
-   PVMG instead.  */
+/* Fast Boyer Moore tables are now stored in magic attached to PVMGs */
 #  define SVt_PVBM	SVt_PVMG
 /* Anything wanting to create a reference from clean should ensure that it has
    a scalar of type SVt_IV now:  */
@@ -437,25 +435,10 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 /* Some private flags. */
 
 
-/* The SVp_SCREAM|SVpbm_VALID (0x40008000) combination is up for grabs.
-   Formerly it was used for pad names, but now it is available.  The core
-   is careful to avoid setting both flags.
-
-   SVf_POK, SVp_POK also set:
-   0x00004400   Normal
-   0x40004400   FBM compiled (SvVALID)
-   0x4000C400   *** Formerly used for pad names ***
-
-   0x00008000   GV with GP
-   0x00008800   RV with PCS imported
-*/
 /* PVAV */
 #define SVpav_REAL	0x40000000  /* free old entries */
 /* PVHV */
 #define SVphv_LAZYDEL	0x40000000  /* entry in xhv_eiter must be deleted */
-/* This is only set true on a PVGV when it's playing "PVBM", but is tested for
-   on any regular scalar (anything <= PVLV) */
-#define SVpbm_VALID	0x40000000
 
 /* IV, PVIV, PVNV, PVMG, PVGV and (I assume) PVLV  */
 #define SVf_IVisUV	0x80000000  /* use XPVUV instead of XPVIV */
@@ -558,8 +541,8 @@ struct xpvinvlist {
                                    the list, merely toggle this flag  */
 };
 
-/* This structure works in 3 ways - regular scalar, GV with GP, or fast
-   Boyer-Moore.  */
+/* This structure works in 2 ways - regular scalar, or GV with GP */
+
 struct xpvgv {
     _XPV_HEAD;
     union _xivu xiv_u;
@@ -1119,37 +1102,27 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #  define SvCOMPILED_off(sv)
 #endif
 
-#if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
-#  define SvVALID(sv)		({ const SV *const _svvalid = (const SV*)(sv); \
-				   if (SvFLAGS(_svvalid) & SVpbm_VALID && !SvSCREAM(_svvalid)) \
-				       assert(!isGV_with_GP(_svvalid));	\
-				   (SvFLAGS(_svvalid) & SVpbm_VALID);	\
-				})
-#  define SvVALID_on(sv)	({ SV *const _svvalid = MUTABLE_SV(sv);	\
-				   assert(!isGV_with_GP(_svvalid));	\
-				   assert(!SvSCREAM(_svvalid));		\
-				   (SvFLAGS(_svvalid) |= SVpbm_VALID);	\
-				})
-#  define SvVALID_off(sv)	({ SV *const _svvalid = MUTABLE_SV(sv);	\
-				   assert(!isGV_with_GP(_svvalid));	\
-				   assert(!SvSCREAM(_svvalid));		\
-				   (SvFLAGS(_svvalid) &= ~SVpbm_VALID);	\
-				})
 
+#if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define SvTAIL(sv)	({ const SV *const _svtail = (const SV *)(sv);	\
 			    assert(SvTYPE(_svtail) != SVt_PVAV);	\
 			    assert(SvTYPE(_svtail) != SVt_PVHV);	\
-			    assert((SvFLAGS(_svtail) & SVpbm_VALID));   \
 			    assert(!(SvFLAGS(_svtail) & (SVf_NOK|SVp_NOK))); \
+			    assert(SvVALID(_svtail));                        \
                             ((XPVNV*)SvANY(_svtail))->xnv_u.xnv_bm_tail;     \
 			})
 #else
-#  define SvVALID(sv)		((SvFLAGS(sv) & SVpbm_VALID) && !SvSCREAM(sv))
-#  define SvVALID_on(sv)	(SvFLAGS(sv) |= SVpbm_VALID)
-#  define SvVALID_off(sv)	(SvFLAGS(sv) &= ~SVpbm_VALID)
 #  define SvTAIL(_svtail)  (((XPVNV*)SvANY(_svtail))->xnv_u.xnv_bm_tail)
-
 #endif
+
+/* Does the SV have a Boyer-Moore table attached as magic?
+ * 'VALID' is a poor name, but is kept for historical reasons.  */
+#define SvVALID(_svvalid) (                                  \
+               SvSMAGICAL(_svvalid)                          \
+            && SvMAGIC(_svvalid)                             \
+            && (SvMAGIC(_svvalid)->mg_type == PERL_MAGIC_bm  \
+                || mg_find(_svvalid, PERL_MAGIC_bm))         \
+        )
 
 #define SvRVx(sv) SvRV(sv)
 

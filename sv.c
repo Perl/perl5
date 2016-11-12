@@ -4741,8 +4741,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	}
 	if (sflags & SVp_IOK) {
 	    SvIV_set(dstr, SvIVX(sstr));
-	    /* Must do this otherwise some other overloaded use of 0x80000000
-	       gets confused. I guess SVpbm_VALID */
 	    if (sflags & SVf_IVisUV)
 		SvIsUV_on(dstr);
 	}

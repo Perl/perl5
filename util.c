@@ -731,21 +731,8 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     SvUPGRADE(sv, SVt_PVMG);
     SvIOK_off(sv);
     SvNOK_off(sv);
-    SvVALID_on(sv);
 
-    /* "deep magic", the comment used to add. The use of MAGIC itself isn't
-       really. MAGIC was originally added in 79072805bf63abe5 (perl 5.0 alpha 2)
-       to call SvVALID_off() if the scalar was assigned to.
-
-       The comment itself (and "deeper magic" below) date back to
-       378cc40b38293ffc (perl 2.0). "deep magic" was an annotation on
-       str->str_pok |= 2;
-       where the magic (presumably) was that the scalar had a BM table hidden
-       inside itself.
-
-       As MAGIC is always present on BMs [in Perl 5 :-)], we can use it to store
-       the table instead of the previous (somewhat hacky) approach of co-opting
-       the string buffer and storing it after the string.  */
+    /* add PERL_MAGIC_bm magic holding the FBM lookup table */
 
     assert(!mg_find(sv, PERL_MAGIC_bm));
     mg = sv_magicext(sv, NULL, PERL_MAGIC_bm, &PL_vtbl_bm, NULL, 0);

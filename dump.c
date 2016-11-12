@@ -1508,17 +1508,11 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    }
 	}
 	/* FALLTHROUGH */
+    case SVt_PVMG:
     default:
-    do_uv:
 	if (SvIsUV(sv) && !(flags & SVf_ROK))	sv_catpv(d, "IsUV,");
 	break;
-    case SVt_PVMG:
-	if (SvVALID(sv)) {
-            sv_catpv(d, "VALID,");
-            if (SvTAIL(sv))
-                sv_catpv(d, "TAIL,");
-            }
-	goto do_uv;
+
     case SVt_PVAV:
 	break;
     }

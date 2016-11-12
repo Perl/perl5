@@ -2443,12 +2443,9 @@ Perl_magic_setregexp(pTHX_ SV *sv, MAGIC *mg)
 
     PERL_ARGS_ASSERT_MAGIC_SETREGEXP;
 
-    if (type == PERL_MAGIC_qr) {
-    } else if (type == PERL_MAGIC_bm) {
-	SvVALID_off(sv);
-    } else {
-	assert(type == PERL_MAGIC_fm);
-    }
+    assert(    type == PERL_MAGIC_fm
+            || type == PERL_MAGIC_qr
+            || type == PERL_MAGIC_bm);
     return sv_unmagic(sv, type);
 }
 
