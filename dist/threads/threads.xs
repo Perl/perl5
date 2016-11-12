@@ -1083,16 +1083,16 @@ ithread_create(...)
         if (specs) {
             SV **svp;
             /* stack_size */
-            if ((svp = hv_fetch(specs, "stack", 5, 0))) {
+            if ((svp = hv_fetchs(specs, "stack", 0))) {
                 stack_size = SvIV(*svp);
-            } else if ((svp = hv_fetch(specs, "stacksize", 9, 0))) {
+            } else if ((svp = hv_fetchs(specs, "stacksize", 0))) {
                 stack_size = SvIV(*svp);
-            } else if ((svp = hv_fetch(specs, "stack_size", 10, 0))) {
+            } else if ((svp = hv_fetchs(specs, "stack_size", 0))) {
                 stack_size = SvIV(*svp);
             }
 
             /* context */
-            if ((svp = hv_fetch(specs, "context", 7, 0))) {
+            if ((svp = hv_fetchs(specs, "context", 0))) {
                 str = (char *)SvPV_nolen(*svp);
                 switch (*str) {
                     case 'a':
@@ -1112,26 +1112,26 @@ ithread_create(...)
                     default:
                         Perl_croak(aTHX_ "Invalid context: %s", str);
                 }
-            } else if ((svp = hv_fetch(specs, "array", 5, 0))) {
+            } else if ((svp = hv_fetchs(specs, "array", 0))) {
                 if (SvTRUE(*svp)) {
                     context = G_ARRAY;
                 }
-            } else if ((svp = hv_fetch(specs, "list", 4, 0))) {
+            } else if ((svp = hv_fetchs(specs, "list", 0))) {
                 if (SvTRUE(*svp)) {
                     context = G_ARRAY;
                 }
-            } else if ((svp = hv_fetch(specs, "scalar", 6, 0))) {
+            } else if ((svp = hv_fetchs(specs, "scalar", 0))) {
                 if (SvTRUE(*svp)) {
                     context = G_SCALAR;
                 }
-            } else if ((svp = hv_fetch(specs, "void", 4, 0))) {
+            } else if ((svp = hv_fetchs(specs, "void", 0))) {
                 if (SvTRUE(*svp)) {
                     context = G_VOID;
                 }
             }
 
             /* exit => thread_only */
-            if ((svp = hv_fetch(specs, "exit", 4, 0))) {
+            if ((svp = hv_fetchs(specs, "exit", 0))) {
                 str = (char *)SvPV_nolen(*svp);
                 exit_opt = (*str == 't' || *str == 'T')
                                     ? PERL_ITHR_THREAD_EXIT_ONLY : 0;

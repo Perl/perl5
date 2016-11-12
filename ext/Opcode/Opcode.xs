@@ -434,7 +434,7 @@ CODE:
 
     if (!SvROK(safe) || !SvOBJECT(SvRV(safe)) || SvTYPE(SvRV(safe))!=SVt_PVHV)
 	croak("Not a Safe object");
-    mask = *hv_fetch((HV*)SvRV(safe), "Mask",4, 1);
+    mask = *hv_fetchs((HV*)SvRV(safe), "Mask", 1);
     if (ONLY_THESE)	/* *_only = new mask, else edit current	*/
 	sv_setsv(mask, sv_2mortal(new_opset(aTHX_ PERMITING ? opset_all : Nullsv)));
     else
