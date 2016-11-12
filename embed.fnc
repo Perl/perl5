@@ -2683,7 +2683,6 @@ so	|SV*	|new_constant	|NULLOK const char *s|STRLEN len \
 				|NN const char *key|STRLEN keylen|NN SV *sv \
 				|NULLOK SV *pv|NULLOK const char *type \
 				|STRLEN typelen
-s	|int	|deprecate_commaless_var_list
 s	|int	|ao		|int toketype
 s	|void|parse_ident|NN char **s|NN char **d \
                      |NN char * const e|int allow_package \

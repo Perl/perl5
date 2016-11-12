@@ -4,8 +4,6 @@ toke.c	AOK
 
  
  		$a = <<;
- 		Use of comma-less variable list is deprecated. Its use will be fatal in Perl 5.28
-		(called 3 times via depcom)
 
      \1 better written as $1 
  	use warnings 'syntax' ;
@@ -125,21 +123,6 @@ toke.c	AOK
         *foo *foo
 
 __END__
-# toke.c 
-format STDOUT =
-@<<<  @|||  @>>>  @>>>
-$a    $b    "abc" 'def'
-.
-no warnings 'deprecated' ;
-format STDOUT =
-@<<<  @|||  @>>>  @>>>
-$a    $b    "abc" 'def'
-.
-EXPECT
-Use of comma-less variable list is deprecated. Its use will be fatal in Perl 5.28 at - line 4.
-Use of comma-less variable list is deprecated. Its use will be fatal in Perl 5.28 at - line 4.
-Use of comma-less variable list is deprecated. Its use will be fatal in Perl 5.28 at - line 4.
-########
 # toke.c
 $a = <<;
 

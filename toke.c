@@ -464,13 +464,6 @@ S_printbuf(pTHX_ const char *const fmt, const char *const s)
 
 #endif
 
-static int
-S_deprecate_commaless_var_list(pTHX) {
-    PL_expect = XTERM;
-    deprecate_fatal_in("5.28", "Use of comma-less variable list is deprecated");
-    return REPORT(','); /* grandfather non-comma-format format */
-}
-
 /*
  * S_ao
  *
@@ -6563,12 +6556,7 @@ Perl_yylex(pTHX)
     case '$':
 	CLINE;
 
-	if (PL_expect == XOPERATOR) {
-	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
-		return deprecate_commaless_var_list();
-	    }
-	}
-	else if (PL_expect == XPOSTDEREF) {
+        if (PL_expect == XPOSTDEREF) {
 	    if (s[1] == '#') {
 		s++;
 		POSTDEREF(DOLSHARP);
@@ -6858,10 +6846,6 @@ Perl_yylex(pTHX)
 	TERM(THING);
 
     case '\'':
-	if (   PL_expect == XOPERATOR
-	    && (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack))
-		return deprecate_commaless_var_list();
-
 	s = scan_str(s,FALSE,FALSE,FALSE,NULL);
 	if (!s)
 	    missingterm(NULL);
@@ -6874,10 +6858,6 @@ Perl_yylex(pTHX)
 	TERM(sublex_start());
 
     case '"':
-	if (   PL_expect == XOPERATOR
-	    && (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack))
-		return deprecate_commaless_var_list();
-
 	s = scan_str(s,FALSE,FALSE,FALSE,NULL);
 	DEBUG_T( {
 	    if (s)
