@@ -3427,6 +3427,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	    else SvREFCNT_inc_simple_void_NN(swash_invlist);
 	}
 
+        /* The result is immutable.  Forbid attempts to change it. */
         SvREADONLY_on(swash_invlist);
 
         /* Use the inversion list stand-alone if small enough */
