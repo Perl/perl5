@@ -67,7 +67,10 @@ wrap {
 my $end_ctx;
 { # Simulate an END block...
     local *END = sub { local *__ANON__ = 'END'; context() };
-    my $ctx = END(); $frame = [ __PACKAGE__, __FILE__, __LINE__, 'main::END' ];
+    my $ctx = END();
+    $frame = [ __PACKAGE__, __FILE__, __LINE__ - 1, 'main::END' ];
+    # "__LINE__ - 1" on the preceding line forces the value to be an IV
+    # (even though __LINE__ on its own is a PV), just as (caller)[2] is.
     $end_ctx = $ctx->snapshot;
     $ctx->release;
 }
