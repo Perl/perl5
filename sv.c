@@ -5291,10 +5291,10 @@ S_sv_uncow(pTHX_ SV * const sv, const U32 flags)
         COW_META *cm = SvCOW_META(sv);
 
         if (DEBUG_C_TEST) {
-                PerlIO_printf(Perl_debug_log,
-                              "Copy on write: Force normal %ld\n",
-                              (long) flags);
-                sv_dump(sv);
+            PerlIO_printf(Perl_debug_log,
+                          "Copy on write: force normal %ld\n",
+                          (long) flags);
+            sv_dump(sv);
         }
         SvIsCOW_off(sv);
 # ifdef PERL_COPY_ON_WRITE
