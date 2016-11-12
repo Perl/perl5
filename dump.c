@@ -657,12 +657,8 @@ Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
 
     PERL_ARGS_ASSERT_DO_PMOP_DUMP;
 
-    if (!pm) {
-	Perl_dump_indent(aTHX_ level, file, "{}\n");
+    if (!pm)
 	return;
-    }
-    Perl_dump_indent(aTHX_ level, file, "{\n");
-    level++;
     if (pm->op_pmflags & PMf_ONCE)
 	ch = '?';
     else
@@ -698,8 +694,6 @@ Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
 	Perl_dump_indent(aTHX_ level, file, "PMFLAGS = (%s)\n", SvCUR(tmpsv) ? SvPVX_const(tmpsv) + 1 : "");
 	SvREFCNT_dec_NN(tmpsv);
     }
-
-    Perl_dump_indent(aTHX_ level-1, file, "}\n");
 }
 
 const struct flag_to_name pmflags_flags_names[] = {
