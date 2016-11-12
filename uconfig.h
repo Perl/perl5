@@ -3705,7 +3705,7 @@
  *	This symbol, if defined, removes the legacy default behavior of
  *	including '.' at the end of @INC.
  */
-# DEFAULT_INC_EXCLUDES_DOT	/**/
+/*#define DEFAULT_INC_EXCLUDES_DOT	/ **/
 
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
@@ -5355,5 +5355,5 @@
 
 /* Generated from:
  * a0cea6273c16c1c5d8625665c84bda01926ce960c26873d4e5596b5b02a53e92 config_h.SH
- * 0413c6aa363e543b4bfdf09337a7ebf8319009504ac71e1168e74a23141bfe3c uconfig.sh
+ * 11b88f5ce6ae96a83aed1222d95e35af447da4e7b7ac21d5956040f3fcf942ab uconfig.sh
  * ex: set ro: */
