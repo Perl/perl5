@@ -143,7 +143,9 @@ CODE:
     STRLEN ulen;
     STRLEN resultbuflen;
     U8 *resultbuf;
-    U8 *s = (U8 *)SvPVbyte(str,ulen);
+    U8 *s = (check & ENCODE_LEAVE_SRC)
+        ? (U8 *) SvPV(str, ulen)        /* we wont be modifying the string */
+        : (U8 *) SvPV_force(str, ulen); /* make sure we have a writable copy */
     U8 *e = (U8 *)SvEND(str);
     /* Optimise for the common case of being called from PerlIOEncode_fill()
        with a standard length buffer. In this case the result SV's buffer is
