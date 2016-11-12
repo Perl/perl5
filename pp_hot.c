@@ -291,29 +291,34 @@ PP(pp_concat)
                 report_uninit(left);
             SvPVCLEAR(left);
 	}
-        else {
-            SvPV_force_nomg_nolen(left);
+        else if (!SvPOK_cow_ok_nogthink(left)) {
+            sv_pvn_force_flags(left, 0, 0);
         }
 	lbyte = !DO_UTF8(left);
 	if (IN_BYTES)
 	    SvUTF8_off(left);
     }
-
     if (!rcopied) {
-	rpv = SvPV_nomg_const(right, rlen);
-	rbyte = !DO_UTF8(right);
+        rpv = SvPV_nomg_const(right, rlen);
+        rbyte = !DO_UTF8(right);
     }
     if (lbyte != rbyte) {
 	if (lbyte)
 	    sv_utf8_upgrade_nomg(TARG);
-	else {
+        else if (rlen) {
 	    if (!rcopied)
 		right = newSVpvn_flags(rpv, rlen, SVs_TEMP);
 	    sv_utf8_upgrade_nomg(right);
 	    rpv = SvPV_nomg_const(right, rlen);
 	}
+        goto docat;
     }
-    sv_catpvn_nomg(TARG, rpv, rlen);
+    if (rlen) {
+      docat:
+        sv_catpvn_nomg(TARG, rpv, rlen);
+    } else if (SvTAINTED(right)) {
+        SvTAINTED_on(TARG);
+    }
 
     SETTARG;
     RETURN;

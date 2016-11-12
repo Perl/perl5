@@ -408,6 +408,9 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 #define SVf_THINKFIRST	(SVf_READONLY|SVf_PROTECT|SVf_ROK|SVf_FAKE \
 			|SVs_RMG|SVf_IsCOW)
 
+#define SVf_THINKFIRST_COW_OK	(SVf_READONLY|SVf_PROTECT|SVf_ROK|SVf_FAKE \
+			|SVs_RMG)
+
 #define SVf_OK		(SVf_IOK|SVf_NOK|SVf_POK|SVf_ROK| \
 			 SVp_IOK|SVp_NOK|SVp_POK|SVpgv_GP)
 
@@ -981,6 +984,9 @@ in gv.h: */
 #define SvPOK_byte_nog(sv)	((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVs_GMG)) == SVf_POK)
 #define SvPOK_byte_nogthink(sv)	((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVf_THINKFIRST|SVs_GMG)) == SVf_POK)
 
+#define SvPOK_cow_ok_nogthink(sv) \
+    ((SvFLAGS(sv) & (SVf_POK|SVf_IOK|SVf_NOK|SVf_ROK|SVpgv_GP|SVf_THINKFIRST_COW_OK|SVs_GMG)) == SVf_POK)
+
 #define SvPOK_pure_nogthink(sv) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_IOK|SVf_NOK|SVf_ROK|SVpgv_GP|SVf_THINKFIRST|SVs_GMG)) == SVf_POK)
 #define SvPOK_utf8_pure_nogthink(sv) \
@@ -1044,6 +1050,7 @@ C<sv_force_normal> does nothing.
 */
 
 #define SvTHINKFIRST(sv)	(SvFLAGS(sv) & SVf_THINKFIRST)
+#define SvTHINKFIRST_COW_OK(sv)	(SvFLAGS(sv) & SVf_THINKFIRST_COW_OK)
 
 #define SVs_PADMY		0
 #define SvPADMY(sv)		!(SvFLAGS(sv) & SVs_PADTMP)
@@ -1653,6 +1660,10 @@ Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
 
 #define SvPV_force_nomg(sv, lp) SvPV_force_flags(sv, lp, 0)
 #define SvPV_force_nomg_nolen(sv) SvPV_force_flags_nolen(sv, 0)
+
+#define SvPV_cow_ok_force_flags(sv, lp, flags) \
+    (SvPOK_cow_ok_nogthink(sv) \
+     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvn_force_flags(sv, &lp, flags))
 
 #define SvPV_force_flags(sv, lp, flags) \
     (SvPOK_pure_nogthink(sv) \
