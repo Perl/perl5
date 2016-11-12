@@ -49,61 +49,61 @@
 #endif
 
 #ifndef SV_COW_THRESHOLD
-#    define SV_COW_THRESHOLD                    0   /* COW iff len > K */
-#endif
-#ifndef SV_COWBUF_THRESHOLD
-#    define SV_COWBUF_THRESHOLD                 1250 /* COW iff len > K */
+#    define SV_COW_THRESHOLD                    1   /* COW iff cur >= K */
 #endif
 #ifndef SV_COW_MAX_WASTE_THRESHOLD
 #    define SV_COW_MAX_WASTE_THRESHOLD          80   /* COW iff (len - cur) < K */
 #endif
-#ifndef SV_COWBUF_WASTE_THRESHOLD
-#    define SV_COWBUF_WASTE_THRESHOLD           80   /* COW iff (len - cur) < K */
-#endif
 #ifndef SV_COW_MAX_WASTE_FACTOR_THRESHOLD
 #    define SV_COW_MAX_WASTE_FACTOR_THRESHOLD   2    /* COW iff len < (cur * K) */
 #endif
-#ifndef SV_COWBUF_WASTE_FACTOR_THRESHOLD
-#    define SV_COWBUF_WASTE_FACTOR_THRESHOLD    2    /* COW iff len < (cur * K) */
-#endif
-/* Work around compiler warnings about unsigned >= THRESHOLD when thres-
-   hold is 0. */
+/* Work around compiler warnings about unsigned >= THRESHOLD when
+   THRESHOLD is 0. */
 #if SV_COW_THRESHOLD
 # define GE_COW_THRESHOLD(cur) ((cur) >= SV_COW_THRESHOLD)
 #else
 # define GE_COW_THRESHOLD(cur) 1
-#endif
-#if SV_COWBUF_THRESHOLD
-# define GE_COWBUF_THRESHOLD(cur) ((cur) >= SV_COWBUF_THRESHOLD)
-#else
-# define GE_COWBUF_THRESHOLD(cur) 1
 #endif
 #if SV_COW_MAX_WASTE_THRESHOLD
 # define GE_COW_MAX_WASTE_THRESHOLD(cur,len) (((len)-(cur)) < SV_COW_MAX_WASTE_THRESHOLD)
 #else
 # define GE_COW_MAX_WASTE_THRESHOLD(cur,len) 1
 #endif
-#if SV_COWBUF_WASTE_THRESHOLD
-# define GE_COWBUF_WASTE_THRESHOLD(cur,len) (((len)-(cur)) < SV_COWBUF_WASTE_THRESHOLD)
-#else
-# define GE_COWBUF_WASTE_THRESHOLD(cur,len) 1
-#endif
 #if SV_COW_MAX_WASTE_FACTOR_THRESHOLD
 # define GE_COW_MAX_WASTE_FACTOR_THRESHOLD(cur,len) ((len) < SV_COW_MAX_WASTE_FACTOR_THRESHOLD * (cur))
 #else
 # define GE_COW_MAX_WASTE_FACTOR_THRESHOLD(cur,len) 1
+#endif
+#define CHECK_COW_THRESHOLD(cur,len) (\
+    GE_COW_THRESHOLD((cur)) && \
+    GE_COW_MAX_WASTE_THRESHOLD((cur),(len)) && \
+    GE_COW_MAX_WASTE_FACTOR_THRESHOLD((cur),(len)) \
+)
+
+#ifndef SV_COWBUF_THRESHOLD
+#    define SV_COWBUF_THRESHOLD                 1 /* COW iff cur >= K */
+#endif
+#ifndef SV_COWBUF_WASTE_THRESHOLD
+#    define SV_COWBUF_WASTE_THRESHOLD           80   /* COW iff (len - cur) < K */
+#endif
+#ifndef SV_COWBUF_WASTE_FACTOR_THRESHOLD
+#    define SV_COWBUF_WASTE_FACTOR_THRESHOLD    2    /* COW iff len < (cur * K) */
+#endif
+#if SV_COWBUF_THRESHOLD
+# define GE_COWBUF_THRESHOLD(cur) ((cur) >= SV_COWBUF_THRESHOLD)
+#else
+# define GE_COWBUF_THRESHOLD(cur) 1
+#endif
+#if SV_COWBUF_WASTE_THRESHOLD
+# define GE_COWBUF_WASTE_THRESHOLD(cur,len) (((len)-(cur)) < SV_COWBUF_WASTE_THRESHOLD)
+#else
+# define GE_COWBUF_WASTE_THRESHOLD(cur,len) 1
 #endif
 #if SV_COWBUF_WASTE_FACTOR_THRESHOLD
 # define GE_COWBUF_WASTE_FACTOR_THRESHOLD(cur,len) ((len) < SV_COWBUF_WASTE_FACTOR_THRESHOLD * (cur))
 #else
 # define GE_COWBUF_WASTE_FACTOR_THRESHOLD(cur,len) 1
 #endif
-
-#define CHECK_COW_THRESHOLD(cur,len) (\
-    GE_COW_THRESHOLD((cur)) && \
-    GE_COW_MAX_WASTE_THRESHOLD((cur),(len)) && \
-    GE_COW_MAX_WASTE_FACTOR_THRESHOLD((cur),(len)) \
-)
 #define CHECK_COWBUF_THRESHOLD(cur,len) (\
     GE_COWBUF_THRESHOLD((cur)) && \
     GE_COWBUF_WASTE_THRESHOLD((cur),(len)) && \
