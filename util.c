@@ -825,11 +825,12 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
     const unsigned char *little = (const unsigned char *)SvPV_const(littlestr,l);
     STRLEN littlelen = l;
     const I32 multiline = flags & FBMrf_MULTILINE;
+    bool tail = SvVALID(littlestr) ? cBOOL(SvTAIL(littlestr)) : FALSE;
 
     PERL_ARGS_ASSERT_FBM_INSTR;
 
     if ((STRLEN)(bigend - big) < littlelen) {
-	if ( SvTAIL(littlestr)
+	if (     tail
 	     && ((STRLEN)(bigend - big) == littlelen - 1)
 	     && (littlelen == 1
 		 || (*big == *little &&
@@ -843,19 +844,19 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
 	return (char*)big;		/* Cannot be SvTAIL! */
 
     case 1:
-	    if (SvTAIL(littlestr) && !multiline) /* Anchor only! */
+	    if (tail && !multiline) /* Anchor only! */
 		/* [-1] is safe because we know that bigend != big.  */
 		return (char *) (bigend - (bigend[-1] == '\n'));
 
 	    s = (unsigned char *)memchr((void*)big, *little, bigend-big);
             if (s)
                 return (char *)s;
-	    if (SvTAIL(littlestr))
+	    if (tail)
 		return (char *) bigend;
 	    return NULL;
 
     case 2:
-	if (SvTAIL(littlestr) && !multiline) {
+	if (tail && !multiline) {
             /* a littlestr with SvTAIL must be of the form "X\n" (where X
              * is a single char). It is anchored, and can only match
              * "....X\n"  or  "....X" */
@@ -933,7 +934,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
 
             /* failed to find 2 chars; try anchored match at end without
              * the \n */
-            if (SvTAIL(littlestr) && bigend[0] == little[0])
+            if (tail && bigend[0] == little[0])
                 return (char *)bigend;
             return NULL;
         }
@@ -942,7 +943,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
 	break; /* Only lengths 0 1 and 2 have special-case code.  */
     }
 
-    if (SvTAIL(littlestr) && !multiline) {	/* tail anchored? */
+    if (tail && !multiline) {	/* tail anchored? */
 	s = bigend - littlelen;
 	if (s >= big && bigend[-1] == '\n' && *s == *little
 	    /* Automatically of length > 2 */
@@ -963,7 +964,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
 	char * const b = ninstr((char*)big,(char*)bigend,
 			 (char*)little, (char*)little + littlelen);
 
-	if (!b && SvTAIL(littlestr)) {	/* Automatically multiline!  */
+	if (!b && tail) {	/* Automatically multiline!  */
 	    /* Chop \n from littlestr: */
 	    s = bigend - littlelen + 1;
 	    if (*s == *little
@@ -1035,7 +1036,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
 	}
       check_end:
 	if ( s == bigend
-	     && SvTAIL(littlestr)
+	     && tail
 	     && memEQ((char *)(bigend - littlelen),
 		      (char *)(oldlittle - littlelen), littlelen) )
 	    return (char*)bigend - littlelen;

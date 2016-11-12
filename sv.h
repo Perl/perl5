@@ -1140,6 +1140,7 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 			    assert(SvTYPE(_svtail) != SVt_PVAV);	\
 			    assert(SvTYPE(_svtail) != SVt_PVHV);	\
 			    assert(!SvSCREAM(_svtail));			\
+			    assert((SvFLAGS(sv) & SVpbm_VALID));    	\
 			    (SvFLAGS(sv) & (SVpbm_TAIL|SVpbm_VALID))	\
 				== (SVpbm_TAIL|SVpbm_VALID);		\
 			})
