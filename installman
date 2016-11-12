@@ -161,6 +161,9 @@ sub pod2man {
         print "  $xmanpage\n" unless $opts{silent};
         if (!$opts{notify} && $parser->parse_from_file($mod, $tmp)) {
             if (-s $tmp) {
+                # We've already emitted a progress message for this file, if
+                # needed, so ensure safe_rename() doesn't emit another one.
+                local $opts{silent} = 1;
                 if (safe_rename($tmp, $manpage)) {
                     $packlist->{$xmanpage} = { type => 'file' };
                     next;
