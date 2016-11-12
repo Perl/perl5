@@ -463,8 +463,6 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 #define SVpav_REIFY 	0x80000000  /* can become real */
 /* PVHV */
 #define SVphv_HASKFLAGS	0x80000000  /* keys have flag byte after hash */
-/* PVGV when SVpbm_VALID is true */
-#define SVpbm_TAIL	0x80000000  /* string has a fake "\n" appended */
 /* RV upwards. However, SVf_ROK and SVp_IOK are exclusive  */
 #define SVprv_WEAKREF   0x80000000  /* Weak reference */
 /* pad name vars only */
@@ -484,6 +482,7 @@ union _xnvu {
     NV	    xnv_nv;		/* numeric value, if any */
     HV *    xgv_stash;
     line_t  xnv_lines;           /* used internally by S_scan_subst() */
+    bool    xnv_bm_tail;        /* an SvVALID (BM) SV has an implicit "\n" */
 };
 
 union _xivu {
@@ -491,6 +490,7 @@ union _xivu {
     UV	    xivu_uv;
     HEK *   xivu_namehek;	/* xpvlv, xpvgv: GvNAME */
     bool    xivu_eval_seen;     /* used internally by S_scan_subst() */
+
 };
 
 union _xmgu {
@@ -1139,21 +1139,17 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #  define SvTAIL(sv)	({ const SV *const _svtail = (const SV *)(sv);	\
 			    assert(SvTYPE(_svtail) != SVt_PVAV);	\
 			    assert(SvTYPE(_svtail) != SVt_PVHV);	\
-			    assert(!SvSCREAM(_svtail));			\
-			    assert((SvFLAGS(sv) & SVpbm_VALID));    	\
-			    (SvFLAGS(sv) & (SVpbm_TAIL|SVpbm_VALID))	\
-				== (SVpbm_TAIL|SVpbm_VALID);		\
+			    assert((SvFLAGS(_svtail) & SVpbm_VALID));   \
+			    assert(!(SvFLAGS(_svtail) & (SVf_NOK|SVp_NOK))); \
+                            ((XPVNV*)SvANY(_svtail))->xnv_u.xnv_bm_tail;     \
 			})
 #else
 #  define SvVALID(sv)		((SvFLAGS(sv) & SVpbm_VALID) && !SvSCREAM(sv))
 #  define SvVALID_on(sv)	(SvFLAGS(sv) |= SVpbm_VALID)
 #  define SvVALID_off(sv)	(SvFLAGS(sv) &= ~SVpbm_VALID)
-#  define SvTAIL(sv)	    ((SvFLAGS(sv) & (SVpbm_TAIL|SVpbm_VALID))	\
-			     == (SVpbm_TAIL|SVpbm_VALID))
+#  define SvTAIL(_svtail)  (((XPVNV*)SvANY(_svtail))->xnv_u.xnv_bm_tail)
 
 #endif
-#define SvTAIL_on(sv)		(SvFLAGS(sv) |= SVpbm_TAIL)
-#define SvTAIL_off(sv)		(SvFLAGS(sv) &= ~SVpbm_TAIL)
 
 #define SvRVx(sv) SvRV(sv)
 
