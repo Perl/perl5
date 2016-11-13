@@ -9,6 +9,10 @@ use warnings;
 use strict;
 use Config;
 
+# Uncomment the following to get easier to read output
+# when piping to less or something like that.
+#$|++; select((select(STDERR),$|++)[0]);
+
 require './t/test.pl';
 
 if ( $Config{usecrosscompile} ) {
@@ -16,7 +20,6 @@ if ( $Config{usecrosscompile} ) {
 }
 
 plan('no_plan');
-
 # --make-exceptions-list outputs the list of strings that don't have
 # perldiag.pod entries to STDERR without TAP formatting, so they can
 # easily be put in the __DATA__ section of this file.  This was done
@@ -117,9 +120,12 @@ while (<$diagfh>) {
         # Can have multiple categories separated by commas
         ( $category_re (?: , $category_re)* )? \) /x)
     {
-      $entries{$cur_entry}{severity} = $1;
+      my $severity= $1;
+      my $category= $2;
+      #warn "severity: $severity, category: $category from $_";
+      $entries{$cur_entry}{severity} = $severity;
       $entries{$cur_entry}{category} =
-        $2 && join ", ", sort split " ", $2 =~ y/,//dr;
+        $category && join ", ", sort split " ", $category =~ y/,//dr;
 
       # Record it also for other messages sharing the same description
       @$_{qw<severity category>} =
@@ -337,7 +343,11 @@ sub check_file {
     # a severe/default warning or no by the _d suffix.  In the case of
     # other warn functions we cannot tell, because Perl_warner may be pre-
     # ceded by if(ckWARN) or if(ckWARN_d).
+    # Insofar as we have packWARN() extracted as category here I dont see
+    # why we dont use it for severity. In fact, I don't get the category/severity
+    # distinction.
     my $severity = !$routine                   ? '[PFX]'
+                 :  ($category && $category=~/WARN_DEPRECATED/) ? 'D'
                  :  $routine =~ /warn.*_d\z/   ? '[DS]'
                  :  $routine =~ /ck_warn/      ?  'W'
                  :  $routine =~ /warner/       ? '[WDS]'
