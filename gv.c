@@ -1003,8 +1003,6 @@ Perl_gv_fetchmethod_pv_flags(pTHX_ HV *stash, const char *name, U32 flags)
     return gv_fetchmethod_pvn_flags(stash, name, strlen(name), flags);
 }
 
-/* Don't merge this yet, as it's likely to get a len parameter, and possibly
-   even a U32 hash */
 GV *
 Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN len, U32 flags)
 {
