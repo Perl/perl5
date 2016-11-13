@@ -1541,10 +1541,9 @@ makes it spring into existence the first time that it is called; see
 L<perlsub>.
 
 Use of L<C<defined>|/defined EXPR> on aggregates (hashes and arrays) is
-deprecated.  It
-used to report whether memory for that aggregate had ever been
-allocated.  This behavior may disappear in future versions of Perl.
-You should instead use a simple test for size:
+no longer supported. It used to report whether memory for that
+aggregate had ever been allocated.  You should instead use a simple
+test for size:
 
     if (@an_array) { print "has array elements\n" }
     if (%a_hash)   { print "has hash members\n"   }
