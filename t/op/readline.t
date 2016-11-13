@@ -274,7 +274,10 @@ is tell, tell *foom, 'readline *$glob_copy sets PL_last_in_gv';
 
 # PL_last_in_gv should not point to &PL_sv_undef, either.
 # This used to fail an assertion or return a scalar ref.
-readline undef;
+{
+    no strict 'refs';
+    readline undef;
+}
 is ${^LAST_FH}, undef, '${^LAST_FH} after readline undef';
 
 {

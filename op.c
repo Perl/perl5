@@ -10133,10 +10133,13 @@ Perl_ck_fun(pTHX_ OP *o)
 			    }
 			}
                         scalar(kid);
-                        kid = S_op_sibling_newUNOP(aTHX_ o, prev_kid,
-                                    OP_RV2GV, flags);
-                        kid->op_targ = targ;
-                        kid->op_private |= priv;
+                        if (type != OP_READLINE) {
+                            /* <> can be overloaded; don't force GV */
+                            kid = S_op_sibling_newUNOP(aTHX_ o, prev_kid,
+                                        OP_RV2GV, flags);
+                            kid->op_targ = targ;
+                            kid->op_private |= priv;
+                        }
 		    }
 		}
                 if (type != OP_DELETE) scalar(kid);
@@ -10377,6 +10380,7 @@ Perl_ck_readline(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_CK_READLINE;
 
+    o = ck_fun(o);
     if (o->op_flags & OPf_KIDS) {
 	 OP *kid = cLISTOPo->op_first;
 	 if (kid->op_type == OP_RV2GV) kid->op_private |= OPpALLOW_FAKE;
