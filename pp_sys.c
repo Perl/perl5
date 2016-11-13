@@ -952,10 +952,23 @@ PP(pp_tie)
 	 * (Sorry obfuscation writers. You're not going to be given this one.)
 	 */
        stash = gv_stashsv(*MARK, 0);
-       if (!stash || !(gv = gv_fetchmethod(stash, methname))) {
-	    DIE(aTHX_ "Can't locate object method \"%s\" via package \"%"SVf"\"",
-		 methname, SVfARG(SvOK(*MARK) ? *MARK : &PL_sv_no));
-	}
+       if (!stash) {
+           SV *stashname = SvOK(*MARK) ? *MARK : &PL_sv_no;
+           if (!SvCUR(*MARK)) {
+               stashname = sv_2mortal(newSVpvs("main"));
+           }
+           DIE(aTHX_ "Can't locate object method \"%s\" via package \"%"SVf"\""
+               " (perhaps you forgot to load \"%"SVf"\"?)",
+               methname, SVfARG(stashname), SVfARG(stashname));
+       }
+       else if (!(gv = gv_fetchmethod(stash, methname))) {
+           /* The effective name can only be NULL for stashes that have
+            * been deleted from the symbol table, which this one can't
+            * be, since we just looked it up by name.
+            */
+           DIE(aTHX_ "Can't locate object method \"%s\" via package \"%"HEKf"\"",
+               methname, HvENAME_HEK_NN(stash));
+       }
 	ENTER_with_name("call_TIE");
 	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
