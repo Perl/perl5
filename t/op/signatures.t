@@ -1455,6 +1455,28 @@ is scalar(t145()), undef;
     }
 }
 
+my @introspection_cases = (
+    # sig                        min  max      slurpiness
+    ['',                           0, 0+'Inf', '@'],
+    ['()',                         0, 0,       ''],
+    ['($x)',                       1, 1,       ''],
+    ['($x, $y = undef)',           1, 2,       ''],
+    ['(@x)',                       0, 0+'Inf', '@'],
+    ['(%x)',                       0, 0+'Inf', '%'],
+    ['($x, @y)',                   1, 0+'Inf', '@'],
+    ['($x, %y)',                   1, 0+'Inf', '%'],
+    ['($x, $y = undef, @z)',       1, 0+'Inf', '@'],
+    ['($x, $y = undef, %z)',       1, 0+'Inf', '%'],
+);
+
+for my $case (@introspection_cases) {
+    my ($sig, $min, $max, $slurpy) = @$case;
+    my $cv = eval "sub $sig {}";
+    is Internals::cv_min_arity($cv), $min, "min arity for sub $sig {}";
+    is Internals::cv_max_arity($cv), $max, "max arity for sub $sig {}";
+    is Internals::cv_slurpy($cv), $slurpy, "slurpiness for sub $sig {}";
+}
+
 {
     my $w;
     local $SIG{__WARN__} = sub { $w .= "@_" };

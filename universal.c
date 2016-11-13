@@ -634,6 +634,93 @@ XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
 
 }
 
+
+STATIC UNOP_AUX_item *
+S_find_cv_argcheck_aux(pTHX_ CV *cv)
+{
+    OP *root, *child, *grandchild, *argcheck;
+
+    /* XSUBs have no ops, and therefore no argcheck op that encodes the
+     * signature */
+    if (CvISXSUB(cv))
+        return 0;
+
+    root = CvROOT(cv);
+    if (!OP_TYPE_IS_OR_WAS(root, OP_LEAVESUB))
+        return 0;
+
+    child = cUNOPx(root)->op_first;
+    if (!OP_TYPE_IS_OR_WAS(child, OP_LINESEQ))
+        return 0;
+
+    grandchild = cUNOPx(child)->op_first;
+    if (!OP_TYPE_IS_OR_WAS(grandchild, OP_NEXTSTATE)
+        || !OP_TYPE_IS(OpSIBLING(grandchild), OP_ARGCHECK))
+        return 0;
+
+    argcheck = OpSIBLING(grandchild);
+    return cUNOP_AUXx(argcheck)->op_aux;
+}
+
+XS(XS_Internals_cv_max_arity); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Internals_cv_max_arity)
+{
+    dXSARGS;
+
+    if (items != 1 || !SvROK(ST(0)) || SvTYPE(SvRV(ST(0))) != SVt_PVCV)
+	croak_xs_usage(cv, "cv");
+    else {
+        CV *const subject = (CV*) SvRV(ST(0));
+        UNOP_AUX_item *aux = S_find_cv_argcheck_aux(aTHX_ subject);
+        SV *ret = !aux || (char)(aux[2].iv)
+            ? newSVnv(PL_inf.nv)
+            : newSViv(aux[0].iv);
+
+        ST(0) = sv_2mortal(ret);
+        XSRETURN(1);
+    }
+}
+
+XS(XS_Internals_cv_min_arity); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Internals_cv_min_arity)
+{
+    dXSARGS;
+
+    if (items != 1 || !SvROK(ST(0)) || SvTYPE(SvRV(ST(0))) != SVt_PVCV)
+	croak_xs_usage(cv, "cv");
+    else {
+        CV *const subject = (CV*) SvRV(ST(0));
+        UNOP_AUX_item *aux = S_find_cv_argcheck_aux(aTHX_ subject);
+
+        /*             params    - opt_params */
+        IV ret = aux ? aux[0].iv - aux[1].iv : 0;
+
+        ST(0) = sv_2mortal(newSViv(ret));
+        XSRETURN(1);
+    }
+}
+
+XS(XS_Internals_cv_slurpy); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Internals_cv_slurpy)
+{
+    dXSARGS;
+
+    if (items != 1 || !SvROK(ST(0)) || SvTYPE(SvRV(ST(0))) != SVt_PVCV)
+	croak_xs_usage(cv, "cv");
+    else {
+        CV *const subject = (CV*) SvRV(ST(0));
+        UNOP_AUX_item *aux = S_find_cv_argcheck_aux(aTHX_ subject);
+        char slurpy = aux ? (char)aux[2].iv : '@';
+
+        if (!slurpy)
+            XSRETURN_NO;
+
+        ST(0) = sv_2mortal(newSVpvn(&slurpy, 1));
+        XSRETURN(1);
+    }
+}
+
+
 XS(XS_Internals_hv_clear_placehold); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Internals_hv_clear_placehold)
 {
@@ -1023,6 +1110,9 @@ static const struct xsub_details details[] = {
     {"utf8::unicode_to_native", XS_utf8_unicode_to_native, NULL},
     {"Internals::SvREADONLY", XS_Internals_SvREADONLY, "\\[$%@];$"},
     {"Internals::SvREFCNT", XS_Internals_SvREFCNT, "\\[$%@];$"},
+    {"Internals::cv_max_arity", XS_Internals_cv_max_arity, NULL},
+    {"Internals::cv_min_arity", XS_Internals_cv_min_arity, NULL},
+    {"Internals::cv_slurpy", XS_Internals_cv_slurpy, NULL},
     {"Internals::hv_clear_placeholders", XS_Internals_hv_clear_placehold, "\\%"},
     {"constant::_make_const", XS_constant__make_const, "\\[$@]"},
     {"PerlIO::get_layers", XS_PerlIO_get_layers, "*;@"},
