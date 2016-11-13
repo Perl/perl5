@@ -3073,7 +3073,7 @@ L<perlrebackslash/\b{}, \b, \B{}, \B>.
 
 =item %s() is deprecated on :utf8 handles
 
-(W deprecated) The sysread(), recv(), syswrite() and send() operators are
+(D deprecated) The sysread(), recv(), syswrite() and send() operators are
 deprecated on handles that have the C<:utf8> layer, either explicitly, or
 implicitly, eg., with the C<:encoding(UTF-16LE)> layer.
 
