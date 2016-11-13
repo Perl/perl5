@@ -10015,59 +10015,15 @@ Perl_ck_fun(pTHX_ OP *o)
 
 	    numargs++;
 	    switch (oa & 7) {
-	    case OA_SCALAR:
-		/* list seen where single (scalar) arg expected? */
-		if (numargs == 1 && !(oa >> 4)
-		    && kid->op_type == OP_LIST && type != OP_SCALAR)
-		{
-		    return too_many_arguments_pv(o,PL_op_desc[type], 0);
-		}
-		if (type != OP_DELETE) scalar(kid);
-		break;
-	    case OA_LIST:
-		if (oa < 16) {
-		    kid = 0;
-		    continue;
-		}
-		else
-		    list(kid);
-		break;
-	    case OA_AVREF:
-		if ((type == OP_PUSH || type == OP_UNSHIFT)
-		    && !OpHAS_SIBLING(kid))
-		    Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-				   "Useless use of %s with no values",
-				   PL_op_desc[type]);
-
-		if (kid->op_type == OP_CONST
-		      && (  !SvROK(cSVOPx_sv(kid)) 
-		         || SvTYPE(SvRV(cSVOPx_sv(kid))) != SVt_PVAV  )
-		        )
-		    bad_type_pv(numargs, "array", o, kid);
-		else if (kid->op_type != OP_RV2AV && kid->op_type != OP_PADAV) {
-                    yyerror_pv(Perl_form(aTHX_ "Experimental %s on scalar is now forbidden",
-                                         PL_op_desc[type]), 0);
-		}
-                else {
-                    op_lvalue(kid, type);
+            case OA_SCALAR:
+            case OA_FILEREF:
+                /* list seen where single (scalar) arg expected? */
+                if (numargs == 1 && !(oa >> 4)
+                    && kid->op_type == OP_LIST && type != OP_SCALAR)
+                {
+                    return too_many_arguments_pv(o,PL_op_desc[type], 0);
                 }
-		break;
-	    case OA_HVREF:
-		if (kid->op_type != OP_RV2HV && kid->op_type != OP_PADHV)
-		    bad_type_pv(numargs, "hash", o, kid);
-		op_lvalue(kid, type);
-		break;
-	    case OA_CVREF:
-		{
-                    /* replace kid with newop in chain */
-		    OP * const newop =
-                        S_op_sibling_newUNOP(aTHX_ o, prev_kid, OP_NULL, 0);
-		    newop->op_next = newop;
-		    kid = newop;
-		}
-		break;
-	    case OA_FILEREF:
-		if (kid->op_type != OP_GV && kid->op_type != OP_RV2GV) {
+                if ((oa & 7) == OA_FILEREF && kid->op_type != OP_GV && kid->op_type != OP_RV2GV) {
 		    if (kid->op_type == OP_CONST &&
 			(kid->op_private & OPpCONST_BARE))
 		    {
@@ -10183,7 +10139,49 @@ Perl_ck_fun(pTHX_ OP *o)
                         kid->op_private |= priv;
 		    }
 		}
-		scalar(kid);
+                if (type != OP_DELETE) scalar(kid);
+                break;
+            case OA_LIST:
+                if (oa < 16) {
+                    kid = 0;
+                    continue;
+                }
+                else
+                    list(kid);
+                break;
+            case OA_AVREF:
+                if ((type == OP_PUSH || type == OP_UNSHIFT)
+                    && !OpHAS_SIBLING(kid))
+                    Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
+                                   "Useless use of %s with no values",
+                                   PL_op_desc[type]);
+
+                if (kid->op_type == OP_CONST
+                      && (  !SvROK(cSVOPx_sv(kid))
+                         || SvTYPE(SvRV(cSVOPx_sv(kid))) != SVt_PVAV  )
+                        )
+                    bad_type_pv(numargs, "array", o, kid);
+                else if (kid->op_type != OP_RV2AV && kid->op_type != OP_PADAV) {
+                    yyerror_pv(Perl_form(aTHX_ "Experimental %s on scalar is now forbidden",
+                                         PL_op_desc[type]), 0);
+                }
+                else {
+                    op_lvalue(kid, type);
+                }
+                break;
+            case OA_HVREF:
+                if (kid->op_type != OP_RV2HV && kid->op_type != OP_PADHV)
+                    bad_type_pv(numargs, "hash", o, kid);
+                op_lvalue(kid, type);
+                break;
+            case OA_CVREF:
+                {
+                    /* replace kid with newop in chain */
+                    OP * const newop =
+                        S_op_sibling_newUNOP(aTHX_ o, prev_kid, OP_NULL, 0);
+                    newop->op_next = newop;
+                    kid = newop;
+                }
 		break;
 	    case OA_SCALARREF:
 		if ((type == OP_UNDEF || type == OP_POS)
