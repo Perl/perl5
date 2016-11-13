@@ -3694,9 +3694,6 @@ Perl_re_exec_indentf(pTHX_ const char *fmt, U32 depth, ...)
 STATIC regmatch_state *
 S_push_slab(pTHX)
 {
-#if PERL_VERSION < 9 && !defined(PERL_CORE)
-    dMY_CXT;
-#endif
     regmatch_slab *s = PL_regmatch_slab->next;
     if (!s) {
 	Newx(s, 1, regmatch_slab);
@@ -5328,10 +5325,6 @@ S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos,
 STATIC SSize_t
 S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 {
-
-#if PERL_VERSION < 9 && !defined(PERL_CORE)
-    dMY_CXT;
-#endif
     dVAR;
     const bool utf8_target = reginfo->is_utf8_target;
     const U32 uniflags = UTF8_ALLOW_DEFAULT;
