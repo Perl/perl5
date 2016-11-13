@@ -9439,7 +9439,6 @@ S_scan_subst(pTHX_ char *start)
 	sv_catpvs(repl, "{");
 	sv_catsv(repl, PL_parser->lex_sub_repl);
 	sv_catpvs(repl, "}");
-	((XPVIV*)SvANY(PL_parser->lex_sub_repl))->xiv_u.xivu_eval_seen = 1;
 	SvREFCNT_dec(PL_parser->lex_sub_repl);
 	PL_parser->lex_sub_repl = repl;
         es = 1;
