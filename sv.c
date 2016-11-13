@@ -2449,8 +2449,8 @@ Perl_sv_2iv_flags(pTHX_ SV *const sv, const I32 flags)
     }
 
     if (SvVALID(sv) || isREGEXP(sv)) {
-	/* FBMs use the space for SvIVX and SvNVX for other purposes, and use
-	   the same flag bit as SVf_IVisUV, so must not let them cache IVs.
+        /* FBMs use the space for SvIVX and SvNVX for other purposes, so
+           must not let them cache IVs.
 	   In practice they are extremely unlikely to actually get anywhere
 	   accessible by user Perl code - the only way that I'm aware of is when
 	   a constant subroutine which is used as the second argument to index.
@@ -6626,7 +6626,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		/* If we're in a stash, we don't own a reference to it.
 		 * However it does have a back reference to us, which
 		 * needs to be cleared.  */
-		if (!SvVALID(sv) && (stash = GvSTASH(sv)))
+		if ((stash = GvSTASH(sv)))
 			sv_del_backref(MUTABLE_SV(stash), sv);
 	    }
 	    /* FIXME. There are probably more unreferenced pointers to SVs

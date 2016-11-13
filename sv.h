@@ -1118,7 +1118,8 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 /* Does the SV have a Boyer-Moore table attached as magic?
  * 'VALID' is a poor name, but is kept for historical reasons.  */
 #define SvVALID(_svvalid) (                                  \
-               SvSMAGICAL(_svvalid)                          \
+               SvPOKp(_svvalid)                              \
+            && SvSMAGICAL(_svvalid)                          \
             && SvMAGIC(_svvalid)                             \
             && (SvMAGIC(_svvalid)->mg_type == PERL_MAGIC_bm  \
                 || mg_find(_svvalid, PERL_MAGIC_bm))         \
