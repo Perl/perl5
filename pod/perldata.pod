@@ -212,12 +212,12 @@ example is C<${^GLOBAL_PHASE}>.
 
 =item 5.
 
-A sigil, followed by any single character in the range C<[\x80-\xFF]>
+A sigil, followed by any single character in the range C<[\xA1-\xAC\xAE-\xFF]>
 when not under C<S<"use utf8">>.  (Under C<S<"use utf8">>, the normal
 identifier rules given earlier in this section apply.)  Use of
 non-graphic characters (the C1 controls, the NO-BREAK SPACE, and the
-SOFT HYPHEN) is deprecated and will be forbidden in a future Perl
-version.  The use of the other characters is unwise, as these are all
+SOFT HYPHEN) has been disallowed since v5.26.0.
+The use of the other characters is unwise, as these are all
 reserved to have special meaning to Perl, and none of them currently
 do have special meaning, though this could change without notice.
 
@@ -236,9 +236,9 @@ where the first character is any one of the characters in the range
 C<[\x80-\xFF]> followed by ASCII word characters up to the trailing
 brace.
 
-The same caveats as the previous form apply:  The non-graphic characters
-are deprecated, it is unwise to use this form at all, and utf8ness makes
-a big difference.
+The same caveats as the previous form apply:  The non-graphic
+characters are no longer allowed with S<"use utf8">, it is unwise
+to use this form at all, and utf8ness makes a big difference.
 
 =back
 
