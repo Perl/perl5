@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.66';
+our $VERSION = '0.67';
 
 require Exporter;
 
@@ -3174,7 +3174,7 @@ future - directly, as with
       $name{$cp} = $name unless $cp =~ m/ /;
   }
 
-You ought to use L</prop_invmap> like this:
+You ought to use L</prop_invmap()> like this:
 
   my (%name, %cp, %cps, $n);
   # All codepoints
