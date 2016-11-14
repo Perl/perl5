@@ -413,7 +413,12 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 
 #define PRIVSHIFT 4	/* (SVp_?OK >> PRIVSHIFT) == SVf_?OK */
 
-/* Note that SVf_AMAGIC is now only set on stashes.  */
+/* SVf_AMAGIC means that the stash *may* have have overload methods. It's
+ * set each time a function is compiled into a stash, and is reset by the
+ * overload code when called for the first time and finds that there are
+ * no overload methods. Note that this used to be set on the object; but
+ * is now only set on stashes.
+ */
 #define SVf_AMAGIC	0x10000000  /* has magical overloaded methods */
 #define SVf_IsCOW	0x10000000  /* copy on write (shared hash key if
 				       SvLEN == 0) */
