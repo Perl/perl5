@@ -153,7 +153,7 @@ Deprecated.  Use C<GIMME_V> instead.
 /* There is no room in op_flags for this one, so it has its own bit-
    field member (op_folded) instead.  The flag is only used to tell
    op_convert_list to set op_folded.  */
-#define OPf_FOLDED      1<<16
+#define OPf_FOLDED      (1<<16)
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST
