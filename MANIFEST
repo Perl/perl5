@@ -4942,6 +4942,7 @@ pod/perldebguts.pod		Perl debugging guts and tips
 pod/perldebtut.pod		Perl debugging tutorial
 pod/perldebug.pod		Perl debugging
 pod/perldelta.pod		Perl changes since previous version
+pod/perldeprecation.pod		Perl deprecations
 pod/perldiag.pod		Perl diagnostic messages
 pod/perldsc.pod			Perl data structures intro
 pod/perldtrace.pod		Perl's support for DTrace

@@ -6976,11 +6976,6 @@ For speed and efficiency reasons, Perl internally does not do full
 reference-counting of iterated items, hence deleting such an item in the
 middle of an iteration causes Perl to see a freed value.
 
-=item Use of *glob{FILEHANDLE} is deprecated
-
-(D deprecated) You are now encouraged to use the shorter *glob{IO} form
-to access the filehandle slot within a typeglob.
-
 =item Use of /g modifier is meaningless in split
 
 (W regexp) You used the /g modifier on the pattern for a C<split>

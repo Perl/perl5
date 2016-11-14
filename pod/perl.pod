@@ -98,6 +98,7 @@ aux c2ph h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perlpodspec 	Perl plain old documentation format specification
     perlpodstyle	Perl POD style guide
     perldiag		Perl diagnostic messages
+    perldeprecation     Perl deprecations
     perllexwarn 	Perl warnings and their control
     perldebug		Perl debugging
     perlvar		Perl predefined variables
