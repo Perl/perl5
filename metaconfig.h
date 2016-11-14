@@ -9,4 +9,7 @@
  * implies that noone can use them unless they are available and
  * they won't be available unless used. When new symbols are probed
  * in Configure, this is the way to force them into availability.
+ *
+ * Symbols should only be here temporarily. Once they are actually used,
+ * they should be removed from here.
  */
