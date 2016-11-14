@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan tests => 21;
+plan tests => 24;
 
 sub list_context {
     my ($func) = @_;
@@ -24,6 +24,7 @@ for my $func (qw(
     fileno
     getc
     lstat
+    readline
     stat
     tell
 )) {
@@ -33,7 +34,8 @@ for my $func (qw(
     local $::TODO = "XXX stat/lstat check is still broken" if $func =~ /\Al?stat\z/;
     my $code = "$func(0,1,2)";
     is eval("() = $code; 1"), undef, "$code errors";
-    like $@, qr/^Too many arguments for \Q$func\E at/, "$code message is 'Too many arguments'";
+    my $name = $func eq 'readline' ? '<HANDLE>' : $func;
+    like $@, qr/^Too many arguments for \Q$name\E at/, "$code message is 'Too many arguments'";
 }
 
 __DATA__
