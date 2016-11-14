@@ -35,6 +35,22 @@ entries in L<POSIX> for more information.
 The functions were deprecated in perl 5.20.0, and removed in perl 5.24.0.
 
 
+=head2 Perl 5.16
+
+=head3 Use of %s on a handle without * is deprecated
+
+It used to be possible to use C<tie>, C<tied> or C<untie> on a scalar
+while the scalar holds a typeglob. This caused its filehandle to be
+tied. It left no way to tie the scalar itself when it held a typeglob,
+and no way to untie a scalar that had had a typeglob assigned to it.
+
+This was deprecated in perl 5.14.0, and the bug was fixed in perl 5.16.0.
+
+So now C<tie $scalar> will always tie the scalar, not the handle it holds.
+To tie the handle, use C<tie *$scalar> (with an explicit asterisk).  The same
+applies to C<tied *$scalar> and C<untie *$scalar>.
+
+
 =head1 SEE ALSO
 
 L<warnings>, L<diagnostics>.

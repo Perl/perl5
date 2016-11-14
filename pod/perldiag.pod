@@ -7018,17 +7018,6 @@ old way has bad side effects.
 it already went past any symlink you are presumably trying to look for.
 The operation returned C<undef>.  Use a filename instead.
 
-=item Use of %s on a handle without * is deprecated
-
-(D deprecated) You used C<tie>, C<tied> or C<untie> on a scalar but that scalar
-happens to hold a typeglob, which means its filehandle will be tied.  If
-you mean to tie a handle, use an explicit * as in C<tie *$handle>.
-
-This was a long-standing bug that was removed in Perl 5.16, as there was
-no way to tie the scalar itself when it held a typeglob, and no way to
-untie a scalar that had had a typeglob assigned to it.  If you see this
-message, you must be using an older version.
-
 =item Use of reference "%s" as array index
 
 (W misc) You tried to use a reference as an array index; this probably
