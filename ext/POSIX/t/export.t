@@ -90,8 +90,7 @@ my %expect = (
             fgets floor fmod fopen fpathconf fprintf fputc fputs fread
             free freopen frexp fscanf fseek fsetpos fstat fsync ftell
             fwrite getchar getcwd getegid getenv geteuid getgid getgroups
-            getpid gets getuid isalnum isalpha isatty iscntrl isdigit
-            isgraph islower isprint ispunct isspace isupper isxdigit labs
+            getpid gets getuid isatty labs
             ldexp ldiv localeconv log10 longjmp lseek malloc mblen
             mbstowcs mbtowc memchr memcmp memcpy memmove memset mkfifo
             mktime modf offsetof pathconf pause perror pow putc putchar
@@ -103,7 +102,7 @@ my %expect = (
             strncpy strpbrk strrchr strspn strstr strtod strtok strtol
             strtoul strxfrm sysconf tan tanh tcdrain tcflow tcflush
             tcgetattr tcgetpgrp tcsendbreak tcsetattr tcsetpgrp tmpfile
-            tmpnam tolower toupper ttyname tzname tzset uname ungetc
+            tmpnam ttyname tzname tzset uname ungetc
             vfprintf vprintf vsprintf wcstombs wctomb
         ),
         # this stuff was added in 5.21

@@ -162,9 +162,6 @@ SKIP: {
     cmp_ok($present, '<=', $future, 'time');
 }
 
-is(POSIX::tolower('Perl Rules'), 'perl rules', 'tolower');
-is(POSIX::toupper('oi!'), 'OI!', 'toupper');
-
 is(-e NOT_HERE, undef, NOT_HERE . ' does not exist');
 
 foreach ([undef, 0, 'chdir', NOT_HERE],

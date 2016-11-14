@@ -18,7 +18,7 @@ for my $list ([qw(errno fork getchar getegid geteuid getgid getgroups getlogin
 	      [qw(abs alarm assert chdir closedir cos exit exp fabs fstat getc
 		  getenv getgrgid getgrnam getpwnam getpwuid gmtime isatty
 		  localtime log opendir raise readdir remove rewind rewinddir
-		  rmdir sin sleep sqrt stat strerror system tolower toupper
+		  rmdir sin sleep sqrt stat strerror system
 		  umask unlink)],
 	      [qw(atan2 chmod creat kill link mkdir pow rename strstr waitpid)],
 	      [qw(chown fcntl utime)]) {
