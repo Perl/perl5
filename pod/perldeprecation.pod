@@ -23,9 +23,9 @@ C<< bsd_glob >>. However, its prototype is different from the prototype
 of C<< CORE::glob >>, and hence, C<< File::Glob::glob >> should not
 be used.
 
-C<< File::Glob::glob() >> was deprecated in perl 5.8.0. A deprecation
-message was issued from perl 5.26.0 onwards, and the function will
-disappear in perl 5.30.0.
+C<< File::Glob::glob() >> was deprecated in perl 5.8. A deprecation
+message was issued from perl 5.26 onwards, and the function will
+disappear in perl 5.30.
 
 Code using C<< File::Glob::glob() >> should call
 C<< File::Glob::bsd_glob() >> instead.
@@ -34,11 +34,11 @@ C<< File::Glob::bsd_glob() >> instead.
 
 =head3 Use of C<< *glob{FILEHANDLE} >>
 
-The use of C<< *glob{FILEHANDLE} >> was deprecated in perl 5.008.
+The use of C<< *glob{FILEHANDLE} >> was deprecated in perl 5.8.
 The intention was to use C<< *glob{IO} >> instead, for which 
 C<< *glob{FILEHANDLE} >> is an alias.
 
-However, this feature was undeprecated in perl 5.24.0.
+However, this feature was undeprecated in perl 5.24.
 
 =head3 Calling POSIX::%s() is deprecated
 
@@ -48,7 +48,7 @@ C<isprint>, C<ispunct>, C<isspace>, C<isupper>, and C<isxdigit>.  The
 functions are buggy and don't work on UTF-8 encoded strings.  See their
 entries in L<POSIX> for more information.
 
-The functions were deprecated in perl 5.20.0, and removed in perl 5.24.0.
+The functions were deprecated in perl 5.20, and removed in perl 5.24.
 
 
 =head2 Perl 5.16
@@ -60,7 +60,7 @@ while the scalar holds a typeglob. This caused its filehandle to be
 tied. It left no way to tie the scalar itself when it held a typeglob,
 and no way to untie a scalar that had had a typeglob assigned to it.
 
-This was deprecated in perl 5.14.0, and the bug was fixed in perl 5.16.0.
+This was deprecated in perl 5.14, and the bug was fixed in perl 5.16.
 
 So now C<tie $scalar> will always tie the scalar, not the handle it holds.
 To tie the handle, use C<tie *$scalar> (with an explicit asterisk).  The same
