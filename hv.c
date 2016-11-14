@@ -34,8 +34,11 @@ holds the key and hash value.
 #define PERL_HASH_INTERNAL_ACCESS
 #include "perl.h"
 
-#define DO_HSPLIT(xhv) ((xhv)->xhv_keys > (xhv)->xhv_max) /* HvTOTALKEYS(hv) > HvMAX(hv) */
-#define HV_FILL_THRESHOLD 31
+#define HV_LOAD_SHIFT 6
+#define HV_GROW_SHIFT 1
+#define SHOULD_HSPLIT(xhv) (((xhv)->xhv_keys >> HV_LOAD_SHIFT) > (xhv)->xhv_max)
+                           /* HvTOTALKEYS(hv) > HvMAX(hv) << HV_LOAD */
+#define HSPLIT(hv, xhv) hsplit((hv), (xhv)->xhv_max+1, ((xhv)->xhv_max+1) << HV_GROW_SHIFT)
 
 static const char S_strtab_error[]
     = "Cannot modify shared string table in hv_%s";
@@ -798,6 +801,9 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     }
 
     /* Welcome to hv_store...  */
+    /* HvTOTALKEYS(hv) == HV_MAX_KEYS */
+    if (xhv->xhv_keys == HV_MAX_KEYS)
+        Perl_croak(aTHX_ "panic: too many keys in hash!");
 
     if (!HvARRAY(hv)) {
 	/* Not sure if we can get here.  I think the only case of oentry being
@@ -877,8 +883,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	HvHASKFLAGS_on(hv);
 
     xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
-    if ( DO_HSPLIT(xhv) ) {
-        const STRLEN oldsize = xhv->xhv_max + 1;
+    if ( SHOULD_HSPLIT(xhv) ) {
         const U32 items = (U32)HvPLACEHOLDERS_get(hv);
 
         if (items /* hash has placeholders  */
@@ -894,10 +899,10 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                If we're lucky, then we may clear sufficient placeholders to
                avoid needing to split the hash at all.  */
             clear_placeholders(hv, items);
-            if (DO_HSPLIT(xhv))
-                hsplit(hv, oldsize, oldsize * 2);
+            if (SHOULD_HSPLIT(xhv))
+                HSPLIT(hv, xhv);
         } else
-            hsplit(hv, oldsize, oldsize * 2);
+            HSPLIT(hv, xhv);
     }
 
     if (return_svp) {
@@ -3025,6 +3030,9 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
 	   and put the HEK straight after the HE. This way we can find the
 	   HE directly from the HEK.
 	*/
+        /* HvTOTALKEYS(hv) == HV_MAX_KEYS */
+        if (xhv->xhv_keys == HV_MAX_KEYS)
+            Perl_croak(aTHX_ "panic: too many keys in hash!");
 
 	Newx(k, STRUCT_OFFSET(struct shared_he,
 				shared_he_hek.hek_key[0]) + len + 2, char);
@@ -3046,10 +3054,8 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
 	*head = entry;
 
 	xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
-	if (!next) {			/* initial entry? */
-	} else if ( DO_HSPLIT(xhv) ) {
-            const STRLEN oldsize = xhv->xhv_max + 1;
-            hsplit(PL_strtab, oldsize, oldsize * 2);
+        if ( next && SHOULD_HSPLIT(xhv) ) {
+            HSPLIT(PL_strtab, xhv);
 	}
     }
 

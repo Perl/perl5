@@ -53,7 +53,7 @@
 # try C<perl Porting/bench.pl --help> for more info
 
 
-[
+my $normal= [
     'call::sub::empty' => {
         desc    => 'function call with no args or body',
         setup   => 'sub f { }',
@@ -1253,3 +1253,35 @@
     },
 
 ];
+
+package main {
+our @base_keys= map { sprintf "%07d", $_  } 1..4096;
+
+our @hit_keys= map { "h" . $_ } @base_keys;
+our @miss_keys= map { "m" . $_ } @miss_keys;
+
+our %hits; $hits{$_}++ for @hit_keys;
+};
+
+[
+    read_hit => {
+        desc => "read a key that exists",
+        setup => '',
+        code  => '$sum += $::hits{$_} for @::hit_keys',
+    },
+    read_miss => {
+        desc => "read a key that does not exist",
+        setup => '',
+        code  => '$sum += !$::hits{$_} for @::miss_keys',
+    },
+    insert_hash => {
+        desc => "build a hash from empty",
+        setup => 'my %h;',
+        code  => 'warn $_, $h{$_}++ for @::hit_keys',
+    },
+    update_hash => {
+        desc => "update keys in a hash",
+        setup => '',
+        code => '$::hits{$_}++ for @::hits_keys',
+    },
+]

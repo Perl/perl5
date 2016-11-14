@@ -679,12 +679,14 @@ sub _bucket_stats_formatted_bars {
     my $bar_width= $max_width / $total;
 
     my $str= "";
-    if ( @$ary < 10) {
-        for my $idx ($start_idx .. $#$ary) {
-            $str .= $idx x sprintf("%.0f", ($ary->[$idx] * $bar_width));
+    for my $idx ($start_idx .. $#$ary) {
+        my $chars = sprintf("%.0f", ($ary->[$idx] * $bar_width));
+        if ($chars) {
+            $str .= $idx x $chars;
+        } else {
+            $str .= "*";
+            last;
         }
-    } else {
-        $str= "-" x $max_width;
     }
     $return .= sprintf "%-7s         %6d [%s]\n",$title, $total, $str;
 

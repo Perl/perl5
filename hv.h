@@ -135,9 +135,11 @@ struct xpvhv_aux {
 struct xpvhv {
     HV*		xmg_stash;	/* class package */
     union _xmgu	xmg_u;
-    STRLEN      xhv_keys;       /* total keys, including placeholders */
-    STRLEN      xhv_max;        /* subscript of last element of xhv_array */
+    U32         xhv_keys;       /* total keys, including placeholders */
+    U32         xhv_max;        /* subscript of last element of xhv_array */
 };
+
+#define HV_MAX_KEYS 0xFFFFFFFF
 
 /*
 =head1 Hash Manipulation Functions
