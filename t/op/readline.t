@@ -214,6 +214,7 @@ SKIP: {
     pipe $in, $out;
     binmode $out, ':utf8';
     binmode $in,  ':utf8';
+    no warnings qw(deprecated);
     syswrite $out, "...\n";
     $line .= readline $in;
 
@@ -226,6 +227,7 @@ SKIP: {
     pipe $in, $out;
     binmode $out, ':utf8';
     binmode $in,  ':utf8';
+    no warnings qw(deprecated);
     syswrite $out, "\x{2080}...\n";
     $line .= readline $in;
 

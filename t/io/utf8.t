@@ -313,6 +313,7 @@ is($failed, undef);
     # [perl #23428] Somethings rotten in unicode semantics
     open F, ">$a_file";
     binmode F, ":utf8";
+    no warnings qw(deprecated);
     syswrite(F, $a = chr(0x100));
     close F;
     is( ord($a), 0x100, '23428 syswrite should not downgrade scalar' );
