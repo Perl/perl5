@@ -1054,6 +1054,7 @@ PERLIO_FUNCS_DECL(PerlIO_remove) = {
     NULL,                       /* get_ptr */
     NULL,                       /* get_cnt */
     NULL,                       /* set_ptrcnt */
+    NULL,
 };
 
 PerlIO_list_t *
@@ -1857,6 +1858,7 @@ PERLIO_FUNCS_DECL(PerlIO_utf8) = {
     NULL,                       /* get_ptr */
     NULL,                       /* get_cnt */
     NULL,                       /* set_ptrcnt */
+    NULL,
 };
 
 PERLIO_FUNCS_DECL(PerlIO_byte) = {
@@ -1888,6 +1890,7 @@ PERLIO_FUNCS_DECL(PerlIO_byte) = {
     NULL,                       /* get_ptr */
     NULL,                       /* get_cnt */
     NULL,                       /* set_ptrcnt */
+    NULL,
 };
 
 PERLIO_FUNCS_DECL(PerlIO_raw) = {
@@ -1919,6 +1922,7 @@ PERLIO_FUNCS_DECL(PerlIO_raw) = {
     NULL,                       /* get_ptr */
     NULL,                       /* get_cnt */
     NULL,                       /* set_ptrcnt */
+    NULL,
 };
 /*--------------------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------------------*/
@@ -2874,6 +2878,7 @@ PERLIO_FUNCS_DECL(PerlIO_unix) = {
     NULL,                       /* get_ptr */
     NULL,                       /* get_cnt */
     NULL,                       /* set_ptrcnt */
+    PerlIOBase_readdelim,
 };
 
 /*--------------------------------------------------------------------------------------*/
@@ -3747,6 +3752,7 @@ PERLIO_FUNCS_DECL(PerlIO_stdio) = {
     NULL,
     NULL,
 #endif /* USE_STDIO_PTR */
+    PerlIOBase_readdelim,
 };
 
 /* Note that calls to PerlIO_exportFILE() are reversed using
@@ -4094,6 +4100,50 @@ PerlIOBuf_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
     return 0;
 }
 
+/* this is a helper funcion that returns the buffer count, an tries to refill if it's empty */
+STATIC SSize_t
+fill_count(pTHX_ PerlIO* f) {
+    Size_t cnt = PerlIO_get_cnt(f);
+    if (!cnt && PerlIO_fill(f) == 0)
+        cnt = PerlIO_get_cnt(f);
+    return cnt;
+}
+
+SSize_t
+PerlIOBuf_readdelim(pTHX_ PerlIO *f, STDCHAR *vbuf, Size_t count, STDCHAR delim)
+{
+    SSize_t read = 0;
+    Size_t avail = fill_count(aTHX_ f);
+    STDCHAR* ptr = (STDCHAR*)PerlIO_get_ptr(f);
+    Size_t len = MIN(avail, count);
+    STDCHAR *found = (STDCHAR*)memchr(ptr, delim, len);
+    if (avail == 0)
+        return PerlIO_error(f) ? -1 : 0;
+    if (found) {
+        Size_t offered = found + 1 - ptr;
+        memcpy(vbuf + read, ptr, offered);
+        read += offered;
+        PerlIO_set_ptrcnt(f, found + 1, avail - offered);
+    }
+    else {
+        memcpy(vbuf + read, ptr, len);
+        read += len;
+        PerlIO_set_ptrcnt(f, ptr + len, avail - len);
+
+        if (count - read) {
+            SSize_t next;
+            next = PerlIO_readdelim(f, vbuf + read, count - read, delim);
+            if (next >= 0)
+                return read + next;
+            else if (read > 0)
+                return read;
+            else
+                return next; /* XXX */
+        }
+    }
+    return read;
+}
+
 SSize_t
 PerlIOBuf_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
@@ -4371,6 +4421,7 @@ PERLIO_FUNCS_DECL(PerlIO_perlio) = {
     PerlIOBuf_get_ptr,
     PerlIOBuf_get_cnt,
     PerlIOBuf_set_ptrcnt,
+    PerlIOBuf_readdelim,
 };
 
 /*--------------------------------------------------------------------------------------*/
@@ -4494,6 +4545,7 @@ PERLIO_FUNCS_DECL(PerlIO_pending) = {
     PerlIOBuf_get_ptr,
     PerlIOBuf_get_cnt,
     PerlIOPending_set_ptrcnt,
+    PerlIOBuf_readdelim,
 };
 
 
@@ -4853,6 +4905,7 @@ PERLIO_FUNCS_DECL(PerlIO_crlf) = {
     PerlIOBuf_get_ptr,
     PerlIOCrlf_get_cnt,
     PerlIOCrlf_set_ptrcnt,
+    PerlIOBuf_readdelim,
 };
 
 PerlIO *

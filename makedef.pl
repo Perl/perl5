@@ -625,6 +625,7 @@ my @layer_syms = qw(
 		    PerlIOBuf_tell
 		    PerlIOBuf_unread
 		    PerlIOBuf_write
+		    PerlIOBuf_readdelim
 		    PerlIO_allocate
 		    PerlIO_apply_layera
 		    PerlIO_apply_layers

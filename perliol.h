@@ -202,6 +202,7 @@ PERL_CALLCONV PerlIO *  PerlIOBuf_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *
 PERL_CALLCONV IV        PerlIOBuf_popped(pTHX_ PerlIO *f);
 PERL_CALLCONV IV        PerlIOBuf_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab);
 PERL_CALLCONV SSize_t   PerlIOBuf_read(pTHX_ PerlIO *f, void *vbuf, Size_t count);
+PERL_CALLCONV SSize_t   PerlIOBuf_readdelim(pTHX_ PerlIO *f, STDCHAR *vbuf, Size_t count, STDCHAR delim);
 PERL_CALLCONV IV        PerlIOBuf_seek(pTHX_ PerlIO *f, Off_t offset, int whence);
 PERL_CALLCONV void      PerlIOBuf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt);
 PERL_CALLCONV Off_t     PerlIOBuf_tell(pTHX_ PerlIO *f);
