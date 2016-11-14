@@ -1211,7 +1211,7 @@ sub bidi_types {
 =head2 B<compexcl()>
 
 WARNING: Unicode discourages the use of this function or any of the
-alternative mechanisms listed in this section (the documention of
+alternative mechanisms listed in this section (the documentation of
 C<compexcl()>), except internally in implementations of the Unicode
 Normalization Algorithm.  You should be using L<Unicode::Normalize> directly
 instead of these.  Using these will likely lead to half-baked results.
@@ -3155,10 +3155,46 @@ return C<undef> if called with one of those.
 The returned values for the Perl extension properties, such as C<Any> and
 C<Greek> are somewhat misleading.  The values are either C<"Y"> or C<"N>".
 All Unicode properties are bipartite, so you can actually use the C<"Y"> or
-C<"N>" in a Perl regular rexpression for these, like C<qr/\p{ID_Start=Y/}> or
+C<"N>" in a Perl regular expression for these, like C<qr/\p{ID_Start=Y/}> or
 C<qr/\p{Upper=N/}>.  But the Perl extensions aren't specified this way, only
 like C</qr/\p{Any}>, I<etc>.  You can't actually use the C<"Y"> and C<"N>" in
 them.
+
+=head3 Getting every available name
+
+Instead of reading the Unicode Database directly from files, as you were able
+to do for a long time, you are encouraged to use the supplied functions. So,
+instead of reading C<Name.pl> as with
+
+  my (%name, %cp);
+  for (split m/\s*\n/ => do "unicore/Name.pl") {
+      my ($cp, $name) = split m/\t/ => $_;
+      $cp{$name} = $cp;
+      $name{$cp} = $name unless $cp =~ m/ /;
+  }
+
+You ought to use L</prop_invmap> like this:
+
+  my (%name, %cp, %cps, $n);
+  # All codepoints
+  foreach my $cat (qw( Name Name_Alias )) {
+      my ($codepoints, $names, $format, $default) = prop_invmap($cat);
+      # $format => "n", $default => ""
+      foreach my $i (0 .. @$codepoints - 2) {
+          my ($cp, $n) = ($codepoints->[$i], $names->[$i]);
+          # If $n is a ref, the same codepoint has multiple names
+          foreach my $name (ref $n ? @$n : $n) {
+              $name{$cp} //= $name;
+              $cp{$name} //= $cp;
+          }
+      }
+  }
+  # Named sequences
+  {   my %ns = namedseq();
+      foreach my $name (sort { $ns{$a} cmp $ns{$b} } keys %ns) {
+          $cp{$name} //= [ map { ord } split "" => $ns{$name} ];
+      }
+  }
 
 =cut
 
