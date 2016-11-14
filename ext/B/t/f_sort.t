@@ -516,7 +516,7 @@ checkOptree(name   => q{Compound sort/map Expression },
 # b      <;> nextstate(main 608 (eval 34):2) v:{
 # c      <0> pushmark s
 # d      <#> gvsv[*_] s
-# e      </> match(/"=(\\d+)"/) l/RTIME
+# e      </> match(/"=(\\d+)"/) l
 # f      <#> gvsv[*_] s
 # g      <1> uc[t17] sK/1
 # h      <@> anonlist sK*/1
@@ -546,7 +546,7 @@ EOT_EOT
 # b      <;> nextstate(main 608 (eval 34):2) v:{
 # c      <0> pushmark s
 # d      <$> gvsv(*_) s
-# e      </> match(/"=(\\d+)"/) l/RTIME
+# e      </> match(/"=(\\d+)"/) l
 # f      <$> gvsv(*_) s
 # g      <1> uc[t9] sK/1
 # h      <@> anonlist sK*/1

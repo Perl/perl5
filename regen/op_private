@@ -396,12 +396,6 @@ addbits($_, 7 => qw(OPpLVALUE LV)) for qw(leave leaveloop);
 
 
 
-# Pattern coming in on the stack
-addbits($_, 5 => qw(OPpRUNTIME RTIME))
-    for qw(match subst substcont qr split);
-
-
-
 # autovivify: Want ref to something
 for (qw(rv2gv rv2sv padsv aelem helem entersub)) {
     addbits($_, '4..5' => {

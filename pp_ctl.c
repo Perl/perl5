@@ -178,7 +178,6 @@ PP(pp_regcomp)
     /* can't change the optree at runtime either */
     /* PMf_KEEP is handled differently under threads to avoid these problems */
     if (pm->op_pmflags & PMf_KEEP) {
-	pm->op_private &= ~OPpRUNTIME;	/* no point compiling again */
 	cLOGOP->op_first->op_next = PL_op->op_next;
     }
 #endif

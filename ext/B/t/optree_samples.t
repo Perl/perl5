@@ -431,7 +431,7 @@ checkOptree ( name	=> '@foo = grep(!/^\#/, @bar)',
 # 5  <1> rv2av[t4] lKM/1
 # 6  <@> grepstart lK
 # 7  <|> grepwhile(other->8)[t5] lK
-# 8      </> match(/"^#"/) s/RTIME
+# 8      </> match(/"^#"/) s
 # 9      <1> not sK/1
 #            goto 7
 # a  <0> pushmark s
@@ -447,7 +447,7 @@ EOT_EOT
 # 5  <1> rv2av[t2] lKM/1
 # 6  <@> grepstart lK
 # 7  <|> grepwhile(other->8)[t3] lK
-# 8      </> match(/"^\\#"/) s/RTIME
+# 8      </> match(/"^\\#"/) s
 # 9      <1> not sK/1
 #            goto 7
 # a  <0> pushmark s

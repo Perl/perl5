@@ -10556,8 +10556,6 @@ Perl_ck_match(pTHX_ OP *o)
     PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_CK_MATCH;
 
-    if (o->op_type == OP_MATCH || o->op_type == OP_QR)
-	o->op_private |= OPpRUNTIME;
     return o;
 }
 
@@ -11192,8 +11190,7 @@ Perl_ck_split(pTHX_ OP *o)
     op_sibling_splice(kid, cLISTOPx(kid)->op_last, 0, sibs); /* and reattach */
     OpTYPE_set(kid, OP_SPLIT);
     kid->op_flags   = (o->op_flags | (kid->op_flags & OPf_KIDS));
-    assert(!(kid->op_private & ~OPpRUNTIME));
-    kid->op_private = (o->op_private | (kid->op_private & OPpRUNTIME));
+    kid->op_private = o->op_private;
     op_free(o);
     o = kid;
     kid = sibs; /* kid is now the string arg of the split */
