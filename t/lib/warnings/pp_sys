@@ -950,23 +950,25 @@ EXPECT
 sleep() with negative argument at - line 2.
 ########
 # NAME sysread() deprecated on :utf8
-use warnings 'deprecated';
 open my $fh, "<:raw", "../harness" or die "# $!";
 my $buf;
 sysread $fh, $buf, 10;
 binmode $fh, ':utf8';
 sysread $fh, $buf, 10;
+no warnings 'deprecated';
+sysread $fh, $buf, 10;
 EXPECT
-sysread() is deprecated on :utf8 handles at - line 6.
+sysread() is deprecated on :utf8 handles at - line 5.
 ########
 # NAME syswrite() deprecated on :utf8
 my $file = "syswwarn.tmp";
-use warnings 'deprecated';
 open my $fh, ">:raw", $file or die "# $!";
 syswrite $fh, 'ABC';
 binmode $fh, ':utf8';
 syswrite $fh, 'ABC';
+no warnings 'deprecated';
+syswrite $fh, 'ABC';
 close $fh;
 unlink $file;
 EXPECT
-syswrite() is deprecated on :utf8 handles at - line 6.
+syswrite() is deprecated on :utf8 handles at - line 5.

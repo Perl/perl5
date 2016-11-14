@@ -1705,9 +1705,9 @@ PP(pp_sysread)
 
     if ((fp_utf8 = PerlIO_isutf8(IoIFP(io))) && !IN_BYTES) {
         if (PL_op->op_type == OP_SYSREAD || PL_op->op_type == OP_RECV) {
-            Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
-                           "%s() is deprecated on :utf8 handles",
-                           OP_DESC(PL_op));
+            Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+                             "%s() is deprecated on :utf8 handles",
+                             OP_DESC(PL_op));
         }
 	buffer = SvPVutf8_force(bufsv, blen);
 	/* UTF-8 may not have been set if they are all low bytes */
@@ -1968,9 +1968,9 @@ PP(pp_syswrite)
     doing_utf8 = DO_UTF8(bufsv);
 
     if (PerlIO_isutf8(IoIFP(io))) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
-                       "%s() is deprecated on :utf8 handles",
-                       OP_DESC(PL_op));
+        Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+                         "%s() is deprecated on :utf8 handles",
+                         OP_DESC(PL_op));
 	if (!SvUTF8(bufsv)) {
 	    /* We don't modify the original scalar.  */
 	    tmpbuf = bytes_to_utf8((const U8*) buffer, &blen);
