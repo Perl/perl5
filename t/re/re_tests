@@ -1478,7 +1478,10 @@ abc\N	abc\n	n
 [\N{U+}]	-	c	-	Invalid hexadecimal number
 \N{U+4AG3}	-	c	-	Invalid hexadecimal number
 [\N{U+4AG3}]	-	c	-	Invalid hexadecimal number
-abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
+abc\N{def}	-	c	-	\\N{NAME} must be resolved by the lexer
+abc\N{U+4AG3	-	c	-	Missing right brace on \\N{}
+abc\N{def	-	c	-	Missing right brace on \\N{}
+abc\N{	-	c	-	Missing right brace on \\N{}
 
 # Verify that under /x that still cant have space before left brace
 /abc\N {U+41}/x	-	c	-	Missing braces
