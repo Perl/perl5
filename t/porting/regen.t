@@ -42,6 +42,12 @@ my %other_requirement = (
     "regen/regcharclass.pl" => "needs the Perl you've just built",
 );
 
+my %skippable_script_for_target;
+for my $script (keys %other_requirement) {
+    $skippable_script_for_target{$_} = $script
+        for @{ $skip{$script} };
+}
+
 my @files = map {@$_} sort values %skip;
 
 open my $fh, '<', 'regen.pl'
@@ -90,9 +96,10 @@ OUTER: foreach my $file (@files) {
 	push @bad, $2 unless $digest eq $1;
     }
     is("@bad", '', "generated $file is up to date");
-    for (@bad) {
-        my $reason = delete $other_requirement{$_} || next;
-        diag("Note: $_ must be run manually, because it $reason");
+    if (@bad && (my $skippable_script = $skippable_script_for_target{$file})) {
+        my $reason = delete $other_requirement{$skippable_script};
+        diag("Note: $skippable_script must be run manually, because it $reason")
+            if $reason;
     }
 }
 
