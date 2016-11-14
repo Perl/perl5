@@ -17,9 +17,8 @@ BEGIN {
 
 use 5.006_001;
 require Exporter;
-require overload;
 
-use Carp;
+use Carp ();
 
 BEGIN {
     @ISA = qw(Exporter);
@@ -70,7 +69,7 @@ $Maxrecurse = 1000      unless defined $Maxrecurse;
 sub new {
   my($c, $v, $n) = @_;
 
-  croak "Usage:  PACKAGE->new(ARRAYREF, [ARRAYREF])"
+  Carp::croak("Usage:  PACKAGE->new(ARRAYREF, [ARRAYREF])")
     unless (defined($v) && (ref($v) eq 'ARRAY'));
   $n = [] unless (defined($n) && (ref($n) eq 'ARRAY'));
 
@@ -170,11 +169,11 @@ sub Seen {
           $s->{seen}{$id} = [$k, $v];
         }
         else {
-          carp "Only refs supported, ignoring non-ref item \$$k";
+          Carp::carp("Only refs supported, ignoring non-ref item \$$k");
         }
       }
       else {
-        carp "Value of ref must be defined; ignoring undefined item \$$k";
+        Carp::carp("Value of ref must be defined; ignoring undefined item \$$k");
       }
     }
     return $s;
@@ -195,7 +194,7 @@ sub Values {
       return $s;
     }
     else {
-      croak "Argument to Values, if provided, must be array ref";
+      Carp::croak("Argument to Values, if provided, must be array ref");
     }
   }
   else {
@@ -214,7 +213,7 @@ sub Names {
       return $s;
     }
     else {
-      croak "Argument to Names, if provided, must be array ref";
+      Carp::croak("Argument to Names, if provided, must be array ref");
     }
   }
   else {
@@ -438,7 +437,7 @@ sub _dump {
         if (ref($s->{sortkeys}) eq 'CODE') {
           $keys = $s->{sortkeys}($val);
           unless (ref($keys) eq 'ARRAY') {
-            carp "Sortkeys subroutine did not return ARRAYREF";
+            Carp::carp("Sortkeys subroutine did not return ARRAYREF");
             $keys = [];
           }
         }
@@ -491,11 +490,11 @@ sub _dump {
       }
       else {
         $out .= 'sub { "DUMMY" }';
-        carp "Encountered CODE ref, using dummy placeholder" if $s->{purity};
+        Carp::carp("Encountered CODE ref, using dummy placeholder") if $s->{purity};
       }
     }
     else {
-      croak "Can't handle '$realtype' type";
+      Carp::croak("Can't handle '$realtype' type");
     }
 
     if ($realpack and !$no_bless) { # we have a blessed ref
@@ -1466,7 +1465,7 @@ modify it under the same terms as Perl itself.
 
 =head1 VERSION
 
-Version 2.164  (November 12 2016)
+Version 2.164  (November 14 2016)
 
 =head1 SEE ALSO
 
