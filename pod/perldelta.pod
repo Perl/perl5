@@ -27,6 +27,38 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Indented Here-documents
+
+This adds a new modifier '~' to here-docs that tells the parser
+that it should look for /^\s*$DELIM\n/ as the closing delimiter.
+
+These syntaxes are all supported:
+
+    <<~EOF;
+    <<~\EOF;
+    <<~'EOF';
+    <<~"EOF";
+    <<~`EOF`;
+    <<~ 'EOF';
+    <<~ "EOF";
+    <<~ `EOF`;
+
+The '~' modifier will strip, from each line in the here-doc, the
+same whitespace that appears before the delimiter.
+
+Newlines will be copied as is, and lines that don't include the
+proper beginning whitespace will cause perl to croak.
+
+For example:
+
+    if (1) {
+      print <<~EOF;
+        Hello there
+        EOF
+    }
+
+prints "Hello there\n" with no leading whitespace.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
