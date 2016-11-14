@@ -638,6 +638,7 @@ static PERLIO_FUNCS_DECL(PerlIO_encode) = {
     PerlIOBuf_get_ptr,
     PerlIOBuf_get_cnt,
     PerlIOBuf_set_ptrcnt,
+    PerlIOBuf_readdelim,
 };
 #endif				/* encode layer */
 
