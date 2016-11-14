@@ -3164,7 +3164,8 @@ them.
 
 Instead of reading the Unicode Database directly from files, as you were able
 to do for a long time, you are encouraged to use the supplied functions. So,
-instead of reading C<Name.pl> as with
+instead of reading C<Name.pl> - which may disappear without notice in the
+future - directly, as with
 
   my (%name, %cp);
   for (split m/\s*\n/ => do "unicore/Name.pl") {
