@@ -807,7 +807,7 @@ static int darwin_time_init() {
 }
 
 #ifdef TIME_HIRES_CLOCK_GETTIME_EMULATION
-static int clock_gettime(clockid_t clock_id, struct timespec *ts) {
+static int th_clock_gettime(clockid_t clock_id, struct timespec *ts) {
   if (darwin_time_init() && timebase_info.denom) {
     switch (clock_id) {
       case CLOCK_REALTIME:
@@ -838,10 +838,13 @@ static int clock_gettime(clockid_t clock_id, struct timespec *ts) {
   SETERRNO(EINVAL, LIB_INVARG);
   return -1;
 }
+
+#define clock_gettime(clock_id, ts) th_clock_gettime((clock_id), (ts))
+
 #endif /* TIME_HIRES_CLOCK_GETTIME_EMULATION */
 
 #ifdef TIME_HIRES_CLOCK_GETRES_EMULATION
-static int clock_getres(clockid_t clock_id, struct timespec *ts) {
+static int th_clock_getres(clockid_t clock_id, struct timespec *ts) {
   if (darwin_time_init() && timebase_info.denom) {
     switch (clock_id) {
       case CLOCK_REALTIME:
@@ -860,10 +863,12 @@ static int clock_getres(clockid_t clock_id, struct timespec *ts) {
   SETERRNO(EINVAL, LIB_INVARG);
   return -1;
 }
+
+#define clock_getres(clock_id, ts) th_clock_getres((clock_id), (ts))
 #endif /* TIME_HIRES_CLOCK_GETRES_EMULATION */
 
 #ifdef TIME_HIRES_CLOCK_NANOSLEEP_EMULATION
-static int clock_nanosleep(clockid_t clock_id, int flags,
+static int th_clock_nanosleep(clockid_t clock_id, int flags,
 			   const struct timespec *rqtp,
 			   struct timespec *rmtp) {
   if (darwin_time_init()) {
@@ -900,6 +905,10 @@ static int clock_nanosleep(clockid_t clock_id, int flags,
   SETERRNO(EINVAL, LIB_INVARG);
   return -1;
 }
+
+#define clock_nanosleep(clock_id, flags, rqtp, rmtp) \
+  th_clock_nanosleep((clock_id), (flags), (rqtp), (rmtp))
+
 #endif /* TIME_HIRES_CLOCK_NANOSLEEP_EMULATION */
 
 #endif /* PERL_DARWIN */
