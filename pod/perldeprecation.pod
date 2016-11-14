@@ -14,6 +14,22 @@ features are available.
 The deprecated features will be grouped by the version of Perl in
 which they will be removed.
 
+=head2 Perl 5.30
+
+=head3 C<< File::Glob::glob() >> will disappear
+
+C<< File::Glob >> has a function called C<< glob >>, which just calls
+C<< bsd_glob >>. However, its prototype is different from the prototype
+of C<< CORE::glob >>, and hence, C<< File::Glob::glob >> should not
+be used.
+
+C<< File::Glob::glob() >> was deprecated in perl 5.8.0. A deprecation
+message was issued from perl 5.26.0 onwards, and the function will
+disappear in perl 5.30.0.
+
+Code using C<< File::Glob::glob() >> should call
+C<< File::Glob::bsd_glob() >> instead.
+
 =head2 Perl 5.24
 
 =head3 Use of C<< *glob{FILEHANDLE} >>

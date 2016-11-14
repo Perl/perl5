@@ -2320,6 +2320,20 @@ which can't encode values above 63.  So there is no point in asking for
 a line length bigger than that.  Perl will behave as if you specified
 C<u63> as the format.
 
+=item File::Glob::glob() will disappear in perl 5.30. Use File::Glob::bsd_glob() instead.
+
+(D deprecated) C<< File::Glob >> has a function called C<< glob >>, which
+just calls C<< bsd_glob >>. However, its prototype is different from the
+prototype of C<< CORE::glob >>, and hence, C<< File::Glob::glob >> should
+not be used.
+
+C<< File::Glob::glob() >> was deprecated in perl 5.8.0. A deprecation
+message was issued from perl 5.26.0 onwards, and the function will
+disappear in perl 5.30.0.
+
+Code using C<< File::Glob::glob() >> should call
+C<< File::Glob::bsd_glob() >> instead.
+
 =item Filehandle %s opened only for input
 
 (W io) You tried to write on a read-only filehandle.  If you intended

@@ -37,7 +37,7 @@ pop @{$EXPORT_TAGS{bsd_glob}}; # no "glob"
 
 @EXPORT_OK   = (@{$EXPORT_TAGS{'glob'}}, 'csh_glob');
 
-$VERSION = '1.27';
+$VERSION = '1.28';
 
 sub import {
     require Exporter;
@@ -75,6 +75,12 @@ if ($^O =~ /^(?:MSWin32|VMS|os2|dos|riscos)$/) {
 # File::Glob::glob() is deprecated because its prototype is different from
 # CORE::glob() (use bsd_glob() instead)
 sub glob {
+    use 5.024;
+    use warnings ();
+    warnings::warnif (deprecated =>
+         "File::Glob::glob() will disappear in perl 5.30. " .
+         "Use File::Glob::bsd_glob() instead.") unless state $warned ++;
+
     splice @_, 1; # no flags
     goto &bsd_glob;
 }
