@@ -24,6 +24,17 @@ C<< *glob{FILEHANDLE} >> is an alias.
 
 However, this feature was undeprecated in perl 5.24.0.
 
+=head3 Calling POSIX::%s() is deprecated
+
+The following functions in the C<POSIX> module are no longer available:
+C<isalnum>, C<isalpha>, C<iscntrl>, C<isdigit>, C<isgraph>, C<islower>,  
+C<isprint>, C<ispunct>, C<isspace>, C<isupper>, and C<isxdigit>.  The 
+functions are buggy and don't work on UTF-8 encoded strings.  See their
+entries in L<POSIX> for more information.
+
+The functions were deprecated in perl 5.20.0, and removed in perl 5.24.0.
+
+
 =head1 SEE ALSO
 
 L<warnings>, L<diagnostics>.

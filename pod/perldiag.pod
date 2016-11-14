@@ -666,11 +666,6 @@ checking.  Alternatively, if you are certain that you're calling the
 function correctly, you may put an ampersand before the name to avoid
 the warning.  See L<perlsub>.
 
-=item Calling POSIX::%s() is deprecated
-
-(D deprecated) You called a function whose use is deprecated.  See
-the function's name in L<POSIX> for details.
-
 =item Cannot chr %f
 
 (F) You passed an invalid number (like an infinity or not-a-number) to C<chr>.
