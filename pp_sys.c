@@ -294,18 +294,23 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 
 PP(pp_backtick)
 {
-    dSP; dTARGET;
+    dSP; dMARK; dTARGET;
+    const U32 items = SP - MARK;
     PerlIO *fp;
-    const char * const tmps = POPpconstx;
     const U8 gimme = GIMME_V;
-    const char *mode = "r";
+    const char *const mode =
+        (PL_op->op_private & OPpOPEN_IN_RAW)  ? "rb" :
+        (PL_op->op_private & OPpOPEN_IN_CRLF) ? "rt" :
+        "r";
 
     TAINT_PROPER("``");
-    if (PL_op->op_private & OPpOPEN_IN_RAW)
-	mode = "rb";
-    else if (PL_op->op_private & OPpOPEN_IN_CRLF)
-	mode = "rt";
-    fp = PerlProc_popen(tmps, mode);
+    if (items <= 1) {
+        const char *const tmps = items ? POPpconstx : SvPV_nolen_const(DEFSV);
+        fp = PerlProc_popen(tmps, mode);
+    } else {
+        fp = PerlProc_popen_list(mode, items, MARK + 1);
+        sp -= items;
+    }
     if (fp) {
         const char * const type = Perl_PerlIO_context_layers(aTHX_ NULL);
 	if (type && *type)

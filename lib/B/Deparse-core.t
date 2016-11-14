@@ -36,7 +36,7 @@ BEGIN {
 
 use strict;
 use Test::More;
-plan tests => 3886;
+plan tests => 3938;
 
 use feature (sprintf(":%vd", $^V)); # to avoid relying on the feature
                                     # logic to add CORE::
@@ -61,7 +61,7 @@ sub testit {
     # lex=2:   () = foo(my $a,$b,$c)
     for my $lex (0, 1, 2) {
 	if ($lex) {
-	    next if $keyword =~ /local|our|state|my/;
+            next if $keyword =~ /\A(?:local|our|state|my)\z/;
 	}
 	my $vars = $lex == 1 ? 'my($a, $b, $c, $d, $e);' . "\n    " : "";
 
@@ -286,7 +286,7 @@ testit push     => 'CORE::push @foo, 1, 2;',     'CORE::push(@foo, 1, 2);';
 
 testit readline => 'CORE::readline $a . $b;';
 
-testit readpipe => 'CORE::readpipe $a + $b;';
+testit readpipe => 'CORE::readpipe($a + $b);';
 
 testit reverse  => 'CORE::reverse sort(@foo);';
 
@@ -588,7 +588,7 @@ read             34    p
 readdir          1     -
 # readline handled specially
 readlink         01    $
-# readpipe handled specially
+readpipe         @     p$
 recv             4     p
 # redo handled specially
 ref              01    $

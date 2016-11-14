@@ -72,7 +72,7 @@ bless		bless			ck_fun		s@	S S?
 
 # Pushy I/O.
 
-backtick	quoted execution (``, qx)	ck_backtick	tu%	S?
+backtick	quoted execution (``, qx)	ck_backtick	mtu@	L
 # glob defaults its first arg to $_
 glob		glob			ck_glob		t@	S?
 readline	<HANDLE>		ck_readline	t%	F?

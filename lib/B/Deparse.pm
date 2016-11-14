@@ -47,7 +47,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.39';
+$VERSION = '1.40';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -5103,17 +5103,7 @@ sub dq {
     }
 }
 
-sub pp_backtick {
-    my $self = shift;
-    my($op, $cx) = @_;
-    # skip pushmark if it exists (readpipe() vs ``)
-    my $child = $op->first->sibling->isa('B::NULL')
-	? $op->first : $op->first->sibling;
-    if ($self->pure_string($child)) {
-	return single_delim("qx", '`', $self->dq($child, 1), $self);
-    }
-    unop($self, @_, "readpipe");
-}
+sub pp_backtick { listop(@_, "readpipe") }
 
 sub dquote {
     my $self = shift;

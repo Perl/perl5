@@ -36,7 +36,7 @@ $ENV{LANGUAGE} = 'C';		# Ditto in GNU.
 my $Is_VMS   = $^O eq 'VMS';
 my $Is_Win32 = $^O eq 'MSWin32';
 
-plan(tests => 25);
+plan(tests => 27);
 
 my $Perl = which_perl();
 
@@ -126,6 +126,9 @@ END
 is( <<~`END`,                   "ok\n",     '<<~`HEREDOC`' );
   $Perl -le "print 'ok'"
   END
+
+is( readpipe(qq{$Perl -le "print 'ok'"}),  "ok\n", 'basic readpipe' );
+is( readpipe($Perl, '-le', "print('ok')"), "ok\n", 'multi-argument readpipe' );
 
 {
     local $_ = qq($Perl -le "print 'ok'");

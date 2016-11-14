@@ -1617,6 +1617,55 @@ CORE::use strict;
 CORE::when ($1 ~~ $2) { die; }
 CORE::while ($1) { die; }
 die CORE::while $1;
+>>>>
+my sub default;
+my sub else;
+my sub elsif;
+my sub for;
+my sub foreach;
+my sub given;
+my sub if;
+my sub m;
+my sub no;
+my sub package;
+my sub q;
+my sub qq;
+my sub qr;
+my sub qx;
+my sub require;
+my sub s;
+my sub sub;
+my sub tr;
+my sub unless;
+my sub until;
+my sub use;
+my sub when;
+my sub while;
+CORE::default { die; }
+CORE::if ($1) { die; }
+CORE::if ($1) { die; }
+CORE::elsif ($1) { die; }
+CORE::else { die; }
+CORE::for (die; $1; die) { die; }
+CORE::foreach $_ (1 .. 10) { die; }
+die CORE::foreach (1);
+CORE::given ($1) { die; }
+CORE::m[/];
+CORE::m?/?;
+CORE::package foo;
+CORE::no strict;
+() = (CORE::q['], CORE::qq["$_], CORE::qr//, readpipe('`'));
+CORE::require 1;
+CORE::s///;
+() = CORE::sub { die; } ;
+CORE::tr///;
+CORE::unless ($1) { die; }
+CORE::until ($1) { die; }
+die CORE::until $1;
+CORE::use strict;
+CORE::when ($1 ~~ $2) { die; }
+CORE::while ($1) { die; }
+die CORE::while $1;
 ####
 # Feature hints
 use feature 'current_sub', 'evalbytes';

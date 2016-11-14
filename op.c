@@ -9505,22 +9505,29 @@ OP *
 Perl_ck_backtick(pTHX_ OP *o)
 {
     GV *gv;
-    OP *newop = NULL;
-    OP *sibl;
+    OP *const first = cLISTOPo->op_first;
     PERL_ARGS_ASSERT_CK_BACKTICK;
-    /* qx and `` have a null pushmark; CORE::readpipe has only one kid. */
-    if (o->op_flags & OPf_KIDS && (sibl = OpSIBLING(cUNOPo->op_first))
-     && (gv = gv_override("readpipe",8)))
+    assert(o->op_flags & OPf_KIDS);
+    assert(first != NULL);
+    assert(first->op_type == OP_PUSHMARK || (
+        first->op_type == OP_NULL &&
+        first->op_targ == OP_PUSHMARK &&
+        OpSIBLING(first)->op_type == OP_COREARGS)
+    );
+
+    if (!OpSIBLING(first)) {
+        op_sibling_splice(o, first, 0, newDEFSVOP());
+    }
+    listkids(o);
+
+    /* qx, ``, and <<`EOF` are SPECIAL */
+    if ((o->op_flags & OPf_SPECIAL) && (gv = gv_override("readpipe", 8)))
     {
         /* detach rest of siblings from o and its first child */
-        op_sibling_splice(o, cUNOPo->op_first, -1, NULL);
-	newop = S_new_entersubop(aTHX_ gv, sibl);
-    }
-    else if (!(o->op_flags & OPf_KIDS))
-	newop = newUNOP(OP_BACKTICK, 0,	newDEFSVOP());
-    if (newop) {
-	op_free(o);
-	return newop;
+        OP *const newop = S_new_entersubop(aTHX_ gv,
+            op_sibling_splice(o, first, -1, NULL));
+        op_free(o);
+        return newop;
     }
     S_io_hints(aTHX_ o);
     return o;

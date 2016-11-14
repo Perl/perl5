@@ -193,7 +193,7 @@ read (*\$$;$)
 readdir (*)
 readline (;*)
 readlink (_)
-readpipe (_)
+readpipe (@)
 recv (*\$$$)
 redo undef
 ref (_)

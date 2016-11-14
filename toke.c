@@ -6653,7 +6653,7 @@ Perl_yylex(pTHX)
 	    no_op("Backticks",s);
 	if (!s)
 	    missingterm(NULL);
-	pl_yylval.ival = OP_BACKTICK;
+        pl_yylval.ival = -OP_BACKTICK;
 	TERM(sublex_start());
 
     case '\\':
@@ -8081,7 +8081,7 @@ Perl_yylex(pTHX)
 	    s = scan_str(s,FALSE,FALSE,FALSE,NULL);
 	    if (!s)
 		missingterm(NULL);
-	    pl_yylval.ival = OP_BACKTICK;
+            pl_yylval.ival = -OP_BACKTICK;
 	    TERM(sublex_start());
 
 	case KEY_return:
@@ -8144,7 +8144,7 @@ Perl_yylex(pTHX)
 	    UNIDOR(OP_READLINE);
 
 	case KEY_readpipe:
-	    UNIDOR(OP_BACKTICK);
+            LOP(OP_BACKTICK,XTERM);
 
 	case KEY_rewinddir:
 	    UNI(OP_REWINDDIR);
@@ -9644,7 +9644,7 @@ S_scan_heredoc(pTHX_ char *s)
 	SvIV_set(tmpstr, -1);
     }
     else if (term == '`') {
-	op_type = OP_BACKTICK;
+        op_type = -OP_BACKTICK;
 	SvIV_set(tmpstr, '\\');
     }
 
