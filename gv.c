@@ -2153,13 +2153,6 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                 SvREADONLY_on(av);
             }
             break;
-	case '*':		/* $* */
-	case '#':		/* $# */
-	    if (sv_type == SVt_PV)
-		/* diag_listed_as: $* is no longer supported */
-		Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-				 "$%c is no longer supported", *name);
-	    break;
 	case '\010':	/* $^H */
 	    {
 		HV *const hv = GvHVn(gv);
@@ -2266,13 +2259,6 @@ S_maybe_multimagic_gv(pTHX_ GV *gv, const char *name, const svtype sv_type)
             require_tie_mod_s(gv, '!', "Errno", 1);
         else if (*name == '-' || *name == '+')
             require_tie_mod_s(gv, *name, "Tie::Hash::NamedCapture", 0);
-    } else if (sv_type == SVt_PV) {
-        if (*name == '*' || *name == '#') {
-            /* diag_listed_as: $* is no longer supported */
-            Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED,
-                                             WARN_SYNTAX),
-                             "$%c is no longer supported", *name);
-        }
     }
     if (sv_type==SVt_PV || sv_type==SVt_PVGV) {
       switch (*name) {

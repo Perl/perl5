@@ -361,19 +361,21 @@ Use of uninitialized value $c in scalar chop at - line 9.
 ########
 
 # Check that deprecation warnings are not implicitly disabled by use
-$*;
+our $foo :unique;
 use warnings "void";
-$#;
+our $bar :unique;
+$*;
 EXPECT
-$* is no longer supported at - line 3.
-$# is no longer supported at - line 5.
-Useless use of a variable in void context at - line 5.
+Attribute "unique" is deprecated, and will disappear in Perl 5.28 at - line 3.
+Attribute "unique" is deprecated, and will disappear in Perl 5.28 at - line 5.
+Useless use of a variable in void context at - line 6.
 ########
 
 # Check that deprecation warnings are not implicitly disabled by no
-$*;
+our $foo :unique;
 no warnings "void";
-$#;
+our $bar :unique;
+$*;
 EXPECT
-$* is no longer supported at - line 3.
-$# is no longer supported at - line 5.
+Attribute "unique" is deprecated, and will disappear in Perl 5.28 at - line 3.
+Attribute "unique" is deprecated, and will disappear in Perl 5.28 at - line 5.

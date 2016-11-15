@@ -3128,24 +3128,6 @@ You specified a character that has the given plainer way of writing it,
 and which is also portable to platforms running with different character
 sets.
 
-=item $* is no longer supported
-
-(D deprecated, syntax) The special variable C<$*>, deprecated in older
-perls, has been removed as of 5.10.0 and is no longer supported.  In
-previous versions of perl the use of C<$*> enabled or disabled multi-line
-matching within a string.
-
-Instead of using C<$*> you should use the C</m> (and maybe C</s>) regexp
-modifiers.  You can enable C</m> for a lexical scope (even a whole file)
-with C<use re '/m'>.  (In older versions: when C<$*> was set to a true value
-then all regular expressions behaved as if they were written using C</m>.)
-
-=item $# is no longer supported
-
-(D deprecated, syntax) The special variable C<$#>, deprecated in older
-perls, has been removed as of 5.10.0 and is no longer supported.  You
-should use the printf/sprintf functions instead.
-
 =item '%s' is not a code reference
 
 (W overload) The second (fourth, sixth, ...) argument of

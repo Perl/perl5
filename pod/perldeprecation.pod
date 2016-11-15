@@ -81,6 +81,39 @@ To tie the handle, use C<tie *$scalar> (with an explicit asterisk).  The same
 applies to C<tied *$scalar> and C<untie *$scalar>.
 
 
+=head2 Perl 5.10
+
+=head3 $* is no longer supported
+
+C<$*> was once a magic variable. C<$*> enabled or disabled
+multi-line matching within a string. Deprecated since Perl 5.000,
+its special meaning was removed in Perl 5.10. Aftwards, an
+deprecation message was issued when using this variable; this message
+was discontinued in Perl 5.26.
+
+Instead of using C<$*> you should use the C</m> (and maybe C</s>) regexp
+modifiers.  You can enable C</m> for a lexical scope (even a whole file)
+with C<use re '/m'>.  (In older versions: when C<$*> was set to a true value
+then all regular expressions behaved as if they were written using C</m>.)
+
+Although you can use C<$*> as a normal variable, you are discouraged 
+from doing so.
+
+=head3 $# is no longer supported
+
+C<$#> was once a magic variable. C<$#> could be used to format
+printed numbers. Deprecated since Perl 5.000,
+its special meaning was removed in Perl 5.10. Aftwards, an
+deprecation message was issued when using this variable; this message
+was discontinued in Perl 5.26.
+
+Instead of using C<$#>, you should be using C<(s)printf> to format
+your numbers.
+
+Although you can use C<$*> as a normal variable, you are discouraged 
+from doing so.
+
+
 =head1 SEE ALSO
 
 L<warnings>, L<diagnostics>.
