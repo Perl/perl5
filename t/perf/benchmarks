@@ -199,34 +199,6 @@
         code    => '$h{$k1}[$i]{$k2}',
     },
 
-
-    'expr::assign::scalar_lex_int' => {
-        desc    => 'lexical $x = 1',
-        setup   => 'my $x',
-        code    => '$x = 1',
-    },
-    'expr::assign::scalar_lex_str' => {
-        desc    => 'lexical $x = "abc"',
-        setup   => 'my $x',
-        code    => '$x = "abc"',
-    },
-    'expr::assign::scalar_lex_strint' => {
-        desc    => 'lexical $x = 1 where $x was previously a string',
-        setup   => 'my $x = "abc"',
-        code    => '$x = 1',
-    },
-    'expr::assign::scalar_lex_intstr' => {
-        desc    => 'lexical $x = "abc" where $x was previously an int',
-        setup   => 'my $x = 1;',
-        code    => '$x = "abc"',
-    },
-    'expr::assign::2list_lex' => {
-        desc    => 'lexical ($x, $y) = (1, 2)',
-        setup   => 'my ($x, $y)',
-        code    => '($x, $y) = (1, 2)',
-    },
-
-
     'expr::hash::lex_1const' => {
         desc    => 'lexical $hash{const}',
         setup   => 'my %h = ("foo" => 1)',
@@ -716,6 +688,12 @@
         code    => '($x,$x) = (undef, $x)',
     },
 
+    'expr::aassign::2list_lex' => {
+        desc    => 'lexical ($x, $y) = (1, 2)',
+        setup   => 'my ($x, $y)',
+        code    => '($x, $y) = (1, 2)',
+    },
+
     # array assign of strings
 
     'expr::aassign::la_3s' => {
@@ -886,6 +864,32 @@
         desc    => '$x--',
         setup   => 'my $x = 1; my $y',
         code    => '$y = $x--', # scalar context so not optimised to --$x
+    },
+
+
+
+    # scalar assign, OP_SASSIGN
+   
+
+    'expr::sassign::scalar_lex_int' => {
+        desc    => 'lexical $x = 1',
+        setup   => 'my $x',
+        code    => '$x = 1',
+    },
+    'expr::sassign::scalar_lex_str' => {
+        desc    => 'lexical $x = "abc"',
+        setup   => 'my $x',
+        code    => '$x = "abc"',
+    },
+    'expr::sassign::scalar_lex_strint' => {
+        desc    => 'lexical $x = 1 where $x was previously a string',
+        setup   => 'my $x = "abc"',
+        code    => '$x = 1',
+    },
+    'expr::sassign::scalar_lex_intstr' => {
+        desc    => 'lexical $x = "abc" where $x was previously an int',
+        setup   => 'my $x = 1;',
+        code    => '$x = "abc"',
     },
 
 
