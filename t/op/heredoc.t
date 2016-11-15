@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-plan(tests => 136);
+plan(tests => 137);
 
 # heredoc without newline (#65838)
 {
@@ -207,6 +207,12 @@ HEREDOC
     push @tests, [
         "print <<~EOF;\n $string\n$string\n   $string\n $string\n   EOF",
         "Indentation on line 1 of here-doc doesn't match delimiter at - line 1.\n",
+        "indented here-doc with bad indentation"
+    ];
+
+    push @tests, [
+        "print <<~EOF;\n   $string\n   $string\n$string\n $string\n   EOF",
+        "Indentation on line 3 of here-doc doesn't match delimiter at - line 1.\n",
         "indented here-doc with bad indentation"
     ];
 
