@@ -891,6 +891,16 @@
         setup   => 'my $x = 1;',
         code    => '$x = "abc"',
     },
+    'expr::sassign::lex_rv' => {
+        desc    => 'lexical $ref1 = $ref2;',
+        setup   => 'my $r1 = []; my $r = $r1;',
+        code    => '$r = $r1;',
+    },
+    'expr::sassign::lex_rv1' => {
+        desc    => 'lexical $ref1 = $ref2; where $$ref1 gets freed',
+        setup   => 'my $r1 = []; my $r',
+        code    => '$r = []; $r = $r1;',
+    },
 
 
 

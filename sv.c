@@ -4280,12 +4280,17 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
          * special-casing */
         U32 sflags;
         U32 new_dflags;
+        SV *old_rv = NULL;
 
         /* minimal subset of SV_CHECK_THINKFIRST_COW_DROP(dstr) */
         if (SvREADONLY(dstr))
             Perl_croak_no_modify();
-        if (SvROK(dstr))
-            sv_unref_flags(dstr, 0);
+        if (SvROK(dstr)) {
+            if (SvWEAKREF(dstr))
+                sv_unref_flags(dstr, 0);
+            else
+                old_rv = SvRV(dstr);
+        }
 
         assert(!SvGMAGICAL(sstr));
         assert(!SvGMAGICAL(dstr));
@@ -4315,6 +4320,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
             new_dflags = dtype; /* turn off everything except the type */
         }
         SvFLAGS(dstr) = new_dflags;
+        SvREFCNT_dec(old_rv);
 
         return;
     }
