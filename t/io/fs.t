@@ -211,14 +211,14 @@ SKIP: {
 SKIP: {
     skip "no fchown", 3 unless ($Config{d_fchown} || "") eq "define";
     open(my $fh, "<", "a");
-    is(chown($<, $(, $fh), 1, "fchown");
+    is(chown(-1, -1, $fh), 1, "fchown");
 
     # [perl #122703]
     # chown() behaved correctly, but there was no test for the chown()
     # on closed handle case
     close $fh;
     $! = 0;
-    ok(!chown($<, $(, $fh), "chown on closed handle fails");
+    ok(!chown(-1, -1, $fh), "chown on closed handle fails");
     isnt($!+0, 0, "and errno was set");
 }
 
