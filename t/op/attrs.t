@@ -177,7 +177,8 @@ foreach my $value (\&foo, \$scalar, \@array, \%hash) {
 	    my $attribute = $negate . $attr;
 	    eval "use attributes __PACKAGE__, \$value, '$attribute'";
 	    if ($deprecated{$type}{$attr}) {
-		like $@, qr/^Attribute "$attr" is deprecated at \(eval \d+\)/,
+		like $@, qr/^Attribute "$attr" is deprecated, (?#:
+                            )and will disappear in Perl 5.28 at \(eval \d+\)/,
 		    "$type attribute $attribute deprecated";
 	    } elsif ($valid{$type}{$attr}) {
 		if ($attribute eq '-shared') {

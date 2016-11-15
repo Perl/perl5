@@ -1236,10 +1236,10 @@ sub ker_plop :locked {
 sub swa_a_p ($) : locked {
 }
 EXPECT
-Use of :unique is deprecated at - line 2.
-Use of :locked is deprecated at - line 3.
-Use of :locked is deprecated at - line 4.
-Use of :locked is deprecated at - line 6.
+Attribute "unique" is deprecated, and will disappear in Perl 5.28 at - line 2.
+Attribute "locked" is deprecated, and will disappear in Perl 5.28 at - line 3.
+Attribute "locked" is deprecated, and will disappear in Perl 5.28 at - line 4.
+Attribute "locked" is deprecated, and will disappear in Perl 5.28 at - line 6.
 ########
 # toke.c
 use warnings "syntax";

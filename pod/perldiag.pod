@@ -418,12 +418,12 @@ assigning through that reference.  For example
 used as an lvalue, which is pretty strange.  Perhaps you forgot to
 dereference it first.  See L<perlfunc/substr>.
 
-=item Attribute "locked" is deprecated
+=item Attribute "locked" is deprecated, and will disappear in Perl 5.28
 
 (D deprecated) You have used the attributes pragma to modify the
 "locked" attribute on a code reference.  The :locked attribute is
 obsolete, has had no effect since 5005 threads were removed, and
-will be removed in a future release of Perl 5.
+will be removed in a Perl 5.28.
 
 =item Attribute prototype(%s) discards earlier prototype attribute in same sub
 
@@ -431,12 +431,12 @@ will be removed in a future release of Perl 5.
 example.  Since each sub can only have one prototype, the earlier
 declaration(s) are discarded while the last one is applied.
 
-=item Attribute "unique" is deprecated
+=item Attribute "unique" is deprecated, and will disappear in Perl 5.28
 
 (D deprecated) You have used the attributes pragma to modify
 the "unique" attribute on an array, hash or scalar reference.
 The :unique attribute has had no effect since Perl 5.8.8, and
-will be removed in a future release of Perl 5.
+will be removed in a Perl 5.28.
 
 =item av_reify called on tied array
 

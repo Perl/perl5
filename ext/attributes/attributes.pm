@@ -1,6 +1,6 @@
 package attributes;
 
-our $VERSION = 0.28;
+our $VERSION = 0.29;
 
 @EXPORT_OK = qw(get reftype);
 @EXPORT = ();
@@ -38,7 +38,8 @@ sub _modify_attrs_and_deprecate {
     grep {
 	$deprecated{$svtype} && /$deprecated{$svtype}/ ? do {
 	    require warnings;
-	    warnings::warnif('deprecated', "Attribute \"$1\" is deprecated");
+	    warnings::warnif('deprecated', "Attribute \"$1\" is deprecated, " .
+                                           "and will disappear in Perl 5.28");
 	    0;
 	} : $svtype eq 'CODE' && exists $msg{$_} ? do {
 	    require warnings;
@@ -258,7 +259,8 @@ attribute will be sanity checked at compile time.
 =item locked
 
 The "locked" attribute is deprecated, and has no effect in 5.10.0 and later.
-It was used as part of the now-removed "Perl 5.005 threads".
+It was used as part of the now-removed "Perl 5.005 threads". It will
+disappear in Perl 5.28, after which its use will be fatal.
 
 =item const
 
@@ -283,7 +285,8 @@ when used in conjunction with the L<threads> and L<threads::shared> modules.
 The "unique" attribute is deprecated, and has no effect in 5.10.0 and later.
 It used to indicate that a single copy of an C<our> variable was to be used by
 all interpreters should the program happen to be running in a
-multi-interpreter environment.
+multi-interpreter environment. It will disappear in 5.28, after which its
+use will be fatal.
 
 =back
 
