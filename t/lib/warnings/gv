@@ -64,7 +64,7 @@ $a = ${^E_NCODING};
 ${^ENCODING} = 1;
 ${^E_NCODING} = 1; # We pretend this variable never existed.
 EXPECT
-${^ENCODING} is no longer supported at - line 4.
+${^ENCODING} is no longer supported. Its use will be fatal in Perl 5.28 at - line 4.
 ########
 # gv.c
 use warnings 'syntax' ;

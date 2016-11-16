@@ -2109,10 +2109,12 @@ unlikely to be what you want.
 described in L<perlunicode> and L<perlre>.  You used C<\p> or C<\P> in
 a regular expression without specifying the property name.
 
-=item ${^ENCODING} is no longer supported
+=item ${^ENCODING} is no longer supported. Its use will be fatal in Perl 5.28
 
 (D deprecated) The special variable C<${^ENCODING}>, formerly used to implement
 the C<encoding> pragma, is no longer supported as of Perl 5.26.0.
+
+Setting this variable will become a fatal error in Perl 5.28.
 
 =item entering effective %s failed
 

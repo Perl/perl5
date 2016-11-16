@@ -110,5 +110,5 @@ ${^ENCODING} = 42;
 ${^ENCODING} = undef;
 { local ${^ENCODING} = 37; }
 EXPECT
-${^ENCODING} is no longer supported at - line 1.
-${^ENCODING} is no longer supported at - line 4.
+${^ENCODING} is no longer supported. Its use will be fatal in Perl 5.28 at - line 1.
+${^ENCODING} is no longer supported. Its use will be fatal in Perl 5.28 at - line 4.

@@ -44,6 +44,16 @@ then result in a syntax error. Since the attributes do not do anything,
 removing them from your code fixes the deprecation warning; and removing
 them will not influence the behaviour of your code.
 
+
+=head3 ${^ENCODING} is no longer supported.
+
+The special variable C<${^ENCODING}> was used to implement
+the C<encoding> pragma. Setting this variable to anything other
+than C<undef> was deprecated in Perl 5.22. Full deprecation
+of the variable happened in Perl 5.25.3.
+
+Setting this variable will become a fatal error in Perl 5.28.
+
 =head2 Perl 5.24
 
 =head3 Use of C<< *glob{FILEHANDLE} >>

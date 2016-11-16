@@ -2709,8 +2709,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	else {
             if (strEQ(mg->mg_ptr + 1, "NCODING") && SvOK(sv))
                         if (PL_localizing != 2) {
-                            Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-                                    "${^ENCODING} is no longer supported");
+                            deprecate_fatal_in("5.28",
+                               "${^ENCODING} is no longer supported");
                         }
         }
 	break;

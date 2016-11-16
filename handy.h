@@ -2480,6 +2480,9 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #  define deprecate_disappears_in(when,message) \
               Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),    \
                                message ", and will disappear in Perl " when)
+#  define deprecate_fatal_in(when,message) \
+              Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),    \
+                               message ". Its use will be fatal in Perl " when)
 #endif
 
 /* Internal macros to deal with gids and uids */
