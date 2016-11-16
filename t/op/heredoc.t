@@ -165,7 +165,7 @@ HEREDOC
                 unshift @tests, [
                     $test,
                     $string,
-                    "Indented here-doc:  $test",
+                    "Indented here-doc: <<$modifier$start_delim with end delim '$end_delim'" . ($script_end ? "\\n" : ""),
                 ];
 
                 # Eval'd heredoc
@@ -180,7 +180,8 @@ HEREDOC
                 push @tests, [
                     $eval,
                     $string,
-                    "Eval'd Indented here-doc: $eval",
+                    "Eval'd Indented here-doc: <<$modifier$start_delim with end delim '$end_delim'" . ($script_end ? "\\n" : ""),
+
                 ];
             }
         }
