@@ -120,7 +120,7 @@ was discontinued in Perl 5.26.
 Instead of using C<$#>, you should be using C<(s)printf> to format
 your numbers.
 
-Although you can use C<$*> as a normal variable, you are discouraged 
+Although you can use C<$#> as a normal variable, you are discouraged 
 from doing so.
 
 
