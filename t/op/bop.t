@@ -681,4 +681,5 @@ is $byte, "\0", "utf8 &. appends null byte";
 
 # only visible under sanitize
 fresh_perl_is('$x = "UUUUUUUV"; $y = "xxxxxxx"; $x |= $y; print $x',
-              '}}}}}}}V', {}, "[perl #129995] access to freed memory");
+              ( $::IS_EBCDIC) ? 'XXXXXXXV' : '}}}}}}}V',
+              {}, "[perl #129995] access to freed memory");
