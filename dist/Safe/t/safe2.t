@@ -143,16 +143,4 @@ if ($@) {
 }
 close(NOSUCH);
 
-#my $rdo_file = "tmp_rdo.tpl";
-#if (open X,">$rdo_file") {
-#    print X "999\n";
-#    close X;
-#    $cpt->permit_only('const', 'leaveeval');
-#    $cpt->rdo($rdo_file) == 999 ? "ok $t\n" : "not ok $t\n"; $t++;
-#    unlink $rdo_file;
-#}
-#else {
-#    print "# test $t skipped, can't open file: $!\nok $t\n"; $t++;
-#}
-
 done_testing();
