@@ -1130,7 +1130,7 @@ PerlIO_push(pTHX_ PerlIO *f, PERLIO_FUNCS_DECL(*tab), const char *mode, SV *arg)
     VERIFY_HEAD(f);
     if (tab->fsize != sizeof(PerlIO_funcs)) {
 	Perl_croak( aTHX_
-	    "%s (%"UVuf") does not match %s (%"UVuf")",
+	    "%s (%" UVuf ") does not match %s (%" UVuf ")",
 	    "PerlIO layer function table size", (UV)tab->fsize,
 	    "size expected by this perl", (UV)sizeof(PerlIO_funcs) );
     }
@@ -1138,7 +1138,7 @@ PerlIO_push(pTHX_ PerlIO *f, PERLIO_FUNCS_DECL(*tab), const char *mode, SV *arg)
 	PerlIOl *l;
 	if (tab->size < sizeof(PerlIOl)) {
 	    Perl_croak( aTHX_
-		"%s (%"UVuf") smaller than %s (%"UVuf")",
+		"%s (%" UVuf ") smaller than %s (%" UVuf ")",
 		"PerlIO layer instance size", (UV)tab->size,
 		"size expected by this perl", (UV)sizeof(PerlIOl) );
 	}

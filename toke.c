@@ -413,12 +413,12 @@ S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp)
 	else if (!rv)
 	    sv_catpvs(report, "EOF");
 	else
-	    Perl_sv_catpvf(aTHX_ report, "?? %"IVdf, (IV)rv);
+	    Perl_sv_catpvf(aTHX_ report, "?? %" IVdf, (IV)rv);
 	switch (type) {
 	case TOKENTYPE_NONE:
 	    break;
 	case TOKENTYPE_IVAL:
-	    Perl_sv_catpvf(aTHX_ report, "(ival=%"IVdf")", (IV)lvalp->ival);
+	    Perl_sv_catpvf(aTHX_ report, "(ival=%" IVdf ")", (IV)lvalp->ival);
 	    break;
 	case TOKENTYPE_OPNUM:
 	    Perl_sv_catpvf(aTHX_ report, "(ival=op_%s)",
@@ -534,13 +534,13 @@ S_no_op(pTHX_ const char *const what, char *s)
 		NOOP;
 	    if (t < PL_bufptr && isSPACE(*t))
 		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-			"\t(Do you need to predeclare %"UTF8f"?)\n",
+			"\t(Do you need to predeclare %" UTF8f "?)\n",
 		      UTF8fARG(UTF, t - PL_oldoldbufptr, PL_oldoldbufptr));
 	}
 	else {
 	    assert(s >= oldbp);
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-		    "\t(Missing operator before %"UTF8f"?)\n",
+		    "\t(Missing operator before %" UTF8f "?)\n",
 		     UTF8fARG(UTF, s - oldbp, oldbp));
 	}
     }
@@ -590,7 +590,7 @@ S_missingterm(pTHX_ char *s)
     sv = sv_2mortal(newSVpv(s,0));
     if (uni)
 	SvUTF8_on(sv);
-    Perl_croak(aTHX_ "Can't find string terminator %c%"SVf
+    Perl_croak(aTHX_ "Can't find string terminator %c%" SVf
 		     "%c anywhere before EOF",q,SVfARG(sv),q);
 }
 
@@ -1634,19 +1634,19 @@ Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn)
 
 	if (proto_after_greedy_proto)
 	    Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
-			"Prototype after '%c' for %"SVf" : %s",
+			"Prototype after '%c' for %" SVf " : %s",
 			greedy_proto, SVfARG(name), p);
 	if (in_brackets)
 	    Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
-			"Missing ']' in prototype for %"SVf" : %s",
+			"Missing ']' in prototype for %" SVf " : %s",
 			SVfARG(name), p);
 	if (bad_proto)
 	    Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
-			"Illegal character in prototype for %"SVf" : %s",
+			"Illegal character in prototype for %" SVf " : %s",
 			SVfARG(name), p);
 	if (bad_proto_after_underscore)
 	    Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
-			"Illegal character after '_' in prototype for %"SVf" : %s",
+			"Illegal character after '_' in prototype for %" SVf " : %s",
 			SVfARG(name), p);
     }
 
@@ -1872,7 +1872,7 @@ S_check_uni(pTHX)
 	return;
 
     Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
-		     "Warning: Use of \"%"UTF8f"\" without parentheses is ambiguous",
+		     "Warning: Use of \"%" UTF8f "\" without parentheses is ambiguous",
 		     UTF8fARG(UTF, (int)(s - PL_last_uni), PL_last_uni));
 }
 
@@ -3026,7 +3026,7 @@ S_scan_const(pTHX_ char *start)
                     else if (convert_unicode) {
                         /* diag_listed_as: Invalid range "%s" in transliteration operator */
                         Perl_croak(aTHX_
-			       "Invalid range \"\\N{U+%04"UVXf"}-\\N{U+%04"UVXf"}\""
+			       "Invalid range \"\\N{U+%04" UVXf "}-\\N{U+%04" UVXf "}\""
                                " in transliteration operator",
 			       range_min, range_max);
                     }
@@ -3034,7 +3034,7 @@ S_scan_const(pTHX_ char *start)
                     else {
                         /* diag_listed_as: Invalid range "%s" in transliteration operator */
                         Perl_croak(aTHX_
-			       "Invalid range \"\\x{%04"UVXf"}-\\x{%04"UVXf"}\""
+			       "Invalid range \"\\x{%04" UVXf "}-\\x{%04" UVXf "}\""
                                " in transliteration operator",
 			       range_min, range_max);
                     }
@@ -3821,8 +3821,8 @@ S_scan_const(pTHX_ char *start)
     *d = '\0';
     SvCUR_set(sv, d - SvPVX_const(sv));
     if (SvCUR(sv) >= SvLEN(sv))
-	Perl_croak(aTHX_ "panic: constant overflowed allocated space, %"UVuf
-		   " >= %"UVuf, (UV)SvCUR(sv), (UV)SvLEN(sv));
+	Perl_croak(aTHX_ "panic: constant overflowed allocated space, %" UVuf
+		   " >= %" UVuf, (UV)SvCUR(sv), (UV)SvLEN(sv));
 
     SvPOK_on(sv);
     if (has_utf8) {
@@ -4534,7 +4534,7 @@ Perl_yylex(pTHX)
 
     DEBUG_T( {
 	SV* tmp = newSVpvs("");
-	PerlIO_printf(Perl_debug_log, "### %"IVdf":LEX_%s/X%s %s\n",
+	PerlIO_printf(Perl_debug_log, "### %" IVdf ":LEX_%s/X%s %s\n",
 	    (IV)CopLINE(PL_curcop),
 	    lex_state_names[PL_lex_state],
 	    exp_name[PL_expect],
@@ -4924,7 +4924,7 @@ Perl_yylex(pTHX)
         } else {
             d = PL_linestart;
         }
-        Perl_croak(aTHX_  "Unrecognized character %s; marked by <-- HERE after %"UTF8f"<-- HERE near column %d", c,
+        Perl_croak(aTHX_  "Unrecognized character %s; marked by <-- HERE after %" UTF8f "<-- HERE near column %d", c,
                           UTF8fARG(UTF, (s - d), d),
                          (int) len + 1);
     }
@@ -6381,7 +6381,7 @@ Perl_yylex(pTHX)
 			    while (t < PL_bufend && *t != ']')
 				t++;
 			    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-					"Multidimensional syntax %"UTF8f" not supported",
+					"Multidimensional syntax %" UTF8f " not supported",
                                         UTF8fARG(UTF,(int)((t - PL_bufptr) + 1), PL_bufptr));
 			}
 		    }
@@ -6405,7 +6405,7 @@ Perl_yylex(pTHX)
 				if (*t == ';'
                                        && get_cvn_flags(tmpbuf, len, UTF ? SVf_UTF8 : 0))
 				    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-					"You need to quote \"%"UTF8f"\"",
+					"You need to quote \"%" UTF8f "\"",
 					 UTF8fARG(UTF, len, tmpbuf));
 			    }
 			}
@@ -6951,7 +6951,7 @@ Perl_yylex(pTHX)
 		    s = scan_word(s, PL_tokenbuf + len, sizeof PL_tokenbuf - len,
 				  TRUE, &morelen);
 		    if (!morelen)
-			Perl_croak(aTHX_ "Bad name after %"UTF8f"%s",
+			Perl_croak(aTHX_ "Bad name after %" UTF8f "%s",
 				UTF8fARG(UTF, len, PL_tokenbuf),
 				*s == '\'' ? "'" : "::");
 		    len += morelen;
@@ -6979,8 +6979,9 @@ Perl_yylex(pTHX)
 		    if (ckWARN(WARN_BAREWORD)
 			&& ! gv_fetchpvn_flags(PL_tokenbuf, len, UTF ? SVf_UTF8 : 0, SVt_PVHV))
 			Perl_warner(aTHX_ packWARN(WARN_BAREWORD),
-		  	  "Bareword \"%"UTF8f"\" refers to nonexistent package",
-			   UTF8fARG(UTF, len, PL_tokenbuf));
+                                    "Bareword \"%" UTF8f
+                                    "\" refers to nonexistent package",
+                                    UTF8fARG(UTF, len, PL_tokenbuf));
 		    len -= 2;
 		    PL_tokenbuf[len] = '\0';
 		    gv = NULL;
@@ -7281,7 +7282,7 @@ Perl_yylex(pTHX)
 		if ((lastchar == '*' || lastchar == '%' || lastchar == '&')
 		 && saw_infix_sigil) {
 		    Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
-				     "Operator or semicolon missing before %c%"UTF8f,
+				     "Operator or semicolon missing before %c%" UTF8f,
 				     lastchar,
 				     UTF8fARG(UTF, strlen(PL_tokenbuf),
 					      PL_tokenbuf));
@@ -7300,7 +7301,7 @@ Perl_yylex(pTHX)
 	case KEY___LINE__:
 	    FUN0OP(
                 newSVOP(OP_CONST, 0,
-		    Perl_newSVpvf(aTHX_ "%"IVdf, (IV)CopLINE(PL_curcop)))
+		    Perl_newSVpvf(aTHX_ "%" IVdf, (IV)CopLINE(PL_curcop)))
 	    );
 
 	case KEY___PACKAGE__:
@@ -7405,7 +7406,7 @@ Perl_yylex(pTHX)
 		    goto just_a_word;
 		}
 		if (!tmp)
-		    Perl_croak(aTHX_ "CORE::%"UTF8f" is not a keyword",
+		    Perl_croak(aTHX_ "CORE::%" UTF8f " is not a keyword",
 				      UTF8fARG(UTF, len, PL_tokenbuf));
 		if (tmp < 0)
 		    tmp = -tmp;
@@ -7950,7 +7951,7 @@ Perl_yylex(pTHX)
 		    && !keyword(s, d-s, 0)
 		) {
 		    Perl_warner(aTHX_ packWARN(WARN_PRECEDENCE),
-		       "Precedence problem: open %"UTF8f" should be open(%"UTF8f")",
+		       "Precedence problem: open %" UTF8f " should be open(%" UTF8f ")",
 			UTF8fARG(UTF, d-s, s), UTF8fARG(UTF, d-s, s));
 		}
 	    }
@@ -8380,7 +8381,7 @@ Perl_yylex(pTHX)
 		    if (!have_name)
 			Perl_croak(aTHX_ "Illegal declaration of anonymous subroutine");
 		    else if (*s != ';' && *s != '}')
-			Perl_croak(aTHX_ "Illegal declaration of subroutine %"SVf, SVfARG(PL_subname));
+			Perl_croak(aTHX_ "Illegal declaration of subroutine %" SVf, SVfARG(PL_subname));
 		}
 
 		if (have_proto) {
@@ -8693,7 +8694,7 @@ S_pending_ident(pTHX)
         {
             /* Downgraded from fatal to warning 20000522 mjd */
             Perl_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
-			"Possible unintended interpolation of %"UTF8f
+			"Possible unintended interpolation of %" UTF8f
 			" in string",
 			UTF8fARG(UTF, tokenbuf_len, PL_tokenbuf));
         }
@@ -9174,7 +9175,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
                     orig_copline = CopLINE(PL_curcop);
                     CopLINE_set(PL_curcop, tmp_copline);
 		    Perl_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
-			"Ambiguous use of %c{%"SVf"} resolved to %c%"SVf,
+			"Ambiguous use of %c{%" SVf "} resolved to %c%" SVf,
 			funny, SVfARG(tmp), funny, SVfARG(tmp));
                     CopLINE_set(PL_curcop, orig_copline);
 		}
@@ -11220,32 +11221,32 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
 	    Perl_sv_catpvf(aTHX_ where_sv, "\\%03o", yychar & 255);
     }
     msg = newSVpvn_flags(s, len, (flags & SVf_UTF8) | SVs_TEMP);
-    Perl_sv_catpvf(aTHX_ msg, " at %s line %"IVdf", ",
+    Perl_sv_catpvf(aTHX_ msg, " at %s line %" IVdf ", ",
         OutCopFILE(PL_curcop),
         (IV)(PL_parser->preambling == NOLINE
                ? CopLINE(PL_curcop)
                : PL_parser->preambling));
     if (context)
-	Perl_sv_catpvf(aTHX_ msg, "near \"%"UTF8f"\"\n",
+	Perl_sv_catpvf(aTHX_ msg, "near \"%" UTF8f "\"\n",
 			     UTF8fARG(UTF, contlen, context));
     else
-	Perl_sv_catpvf(aTHX_ msg, "%"SVf"\n", SVfARG(where_sv));
+	Perl_sv_catpvf(aTHX_ msg, "%" SVf "\n", SVfARG(where_sv));
     if (PL_multi_start < PL_multi_end && (U32)(CopLINE(PL_curcop) - PL_multi_end) <= 1) {
         Perl_sv_catpvf(aTHX_ msg,
-        "  (Might be a runaway multi-line %c%c string starting on line %"IVdf")\n",
+        "  (Might be a runaway multi-line %c%c string starting on line %" IVdf ")\n",
                 (int)PL_multi_open,(int)PL_multi_close,(IV)PL_multi_start);
         PL_multi_end = 0;
     }
     if (PL_in_eval & EVAL_WARNONLY) {
 	PL_in_eval &= ~EVAL_WARNONLY;
-	Perl_ck_warner_d(aTHX_ packWARN(WARN_SYNTAX), "%"SVf, SVfARG(msg));
+	Perl_ck_warner_d(aTHX_ packWARN(WARN_SYNTAX), "%" SVf, SVfARG(msg));
     }
     else
 	qerror(msg);
     if (PL_error_count >= 10) {
 	SV * errsv;
 	if (PL_in_eval && ((errsv = ERRSV), SvCUR(errsv)))
-	    Perl_croak(aTHX_ "%"SVf"%s has too many errors.\n",
+	    Perl_croak(aTHX_ "%" SVf "%s has too many errors.\n",
 		       SVfARG(errsv), OutCopFILE(PL_curcop));
 	else
 	    Perl_croak(aTHX_ "%s has too many errors.\n",
@@ -11368,10 +11369,10 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 	Perl_croak(aTHX_ "panic: utf16_textfilter called in block mode (for %d characters)", maxlen);
     }
     if (status < 0) {
-	Perl_croak(aTHX_ "panic: utf16_textfilter called after error (status=%"IVdf")", status);
+	Perl_croak(aTHX_ "panic: utf16_textfilter called after error (status=%" IVdf ")", status);
     }
     DEBUG_P(PerlIO_printf(Perl_debug_log,
-			  "utf16_textfilter(%p,%ce): idx=%d maxlen=%d status=%"IVdf" utf16=%"UVuf" utf8=%"UVuf"\n",
+			  "utf16_textfilter(%p,%ce): idx=%d maxlen=%d status=%" IVdf " utf16=%" UVuf " utf8=%" UVuf "\n",
 			  FPTR2DPTR(void *, S_utf16_textfilter),
 			  reverse ? 'l' : 'b', idx, maxlen, status,
 			  (UV)SvCUR(utf16_buffer), (UV)SvCUR(utf8_buffer)));
@@ -11426,7 +11427,7 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 
 	    status = FILTER_READ(idx + 1, utf16_buffer,
 				 160 + (SvCUR(utf16_buffer) & 1));
-	    DEBUG_P(PerlIO_printf(Perl_debug_log, "utf16_textfilter status=%"IVdf" SvCUR(sv)=%"UVuf"\n", status, (UV)SvCUR(utf16_buffer)));
+	    DEBUG_P(PerlIO_printf(Perl_debug_log, "utf16_textfilter status=%" IVdf " SvCUR(sv)=%" UVuf "\n", status, (UV)SvCUR(utf16_buffer)));
 	    DEBUG_P({ sv_dump(utf16_buffer); sv_dump(utf8_buffer);});
 	    if (status < 0) {
 		/* Error */
@@ -11462,7 +11463,7 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 	}
     }
     DEBUG_P(PerlIO_printf(Perl_debug_log,
-			  "utf16_textfilter: returns, status=%"IVdf" utf16=%"UVuf" utf8=%"UVuf"\n",
+			  "utf16_textfilter: returns, status=%" IVdf " utf16=%" UVuf " utf8=%" UVuf "\n",
 			  status,
 			  (UV)SvCUR(utf16_buffer), (UV)SvCUR(utf8_buffer)));
     DEBUG_P({ sv_dump(utf8_buffer); sv_dump(sv);});

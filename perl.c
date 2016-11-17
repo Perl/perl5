@@ -644,11 +644,11 @@ perl_destruct(pTHXx)
     PerlIO_printf(Perl_debug_log, "Trace of all OPs executed:\n");
     for (i = 0; i <= OP_max; ++i) {
         if (PL_op_exec_cnt[i])
-            PerlIO_printf(Perl_debug_log, "  %s: %"UVuf"\n", PL_op_name[i], PL_op_exec_cnt[i]);
+            PerlIO_printf(Perl_debug_log, "  %s: %" UVuf "\n", PL_op_name[i], PL_op_exec_cnt[i]);
     }
     /* Utility slot for easily doing little tracing experiments in the runloop: */
     if (PL_op_exec_cnt[OP_max+1] != 0)
-        PerlIO_printf(Perl_debug_log, "  SPECIAL: %"UVuf"\n", PL_op_exec_cnt[OP_max+1]);
+        PerlIO_printf(Perl_debug_log, "  SPECIAL: %" UVuf "\n", PL_op_exec_cnt[OP_max+1]);
     PerlIO_printf(Perl_debug_log, "\n");
  no_trace_out:
 #endif
@@ -1284,8 +1284,8 @@ perl_destruct(pTHXx)
 		    PerlIO_printf(Perl_debug_log, "leaked: sv=0x%p"
 			" flags=0x%"UVxf
 			" refcnt=%"UVuf pTHX__FORMAT "\n"
-			"\tallocated at %s:%d %s %s (parent 0x%"UVxf");"
-			"serial %"UVuf"\n",
+			"\tallocated at %s:%d %s %s (parent 0x%" UVxf ");"
+			"serial %" UVuf "\n",
 			(void*)sv, (UV)sv->sv_flags, (UV)sv->sv_refcnt
 			pTHX__VALUE,
 			sv->sv_debug_file ? sv->sv_debug_file : "(unknown)",
@@ -2179,7 +2179,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
                it should be reported immediately as a build failure.  */
 	    (void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
 						 Perl_newSVpvf(aTHX_
-		"BEGIN { my $f = q%c%s%"SVf"/buildcustomize.pl%c; "
+		"BEGIN { my $f = q%c%s%" SVf "/buildcustomize.pl%c; "
 			"do {local $!; -f $f }"
 			" and do $f || die $@ || qq '$f: $!' }",
                                 0, (TAINTING_get ? "./" : ""), SVfARG(*inc0), 0));
@@ -3581,7 +3581,7 @@ S_minus_v(pTHX)
 		"\nThis is perl "	STRINGIFY(PERL_REVISION)
 		", version "		STRINGIFY(PERL_VERSION)
 		", subversion "		STRINGIFY(PERL_SUBVERSION)
-		" (%"SVf") built for "	ARCHNAME, SVfARG(level)
+		" (%" SVf ") built for "	ARCHNAME, SVfARG(level)
 		);
 	    SvREFCNT_dec_NN(level);
 	}
@@ -3875,7 +3875,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
     if (!rsfp) {
 	/* PSz 16 Sep 03  Keep neat error message */
 	if (PL_e_script)
-	    Perl_croak(aTHX_ "Can't open "BIT_BUCKET": %s\n", Strerror(errno));
+	    Perl_croak(aTHX_ "Can't open " BIT_BUCKET ": %s\n", Strerror(errno));
 	else
 	    Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
 		    CopFILE(PL_curcop), Strerror(errno));
@@ -5033,7 +5033,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 		while (PL_scopestack_ix > oldscope)
 		    LEAVE;
 		JMPENV_POP;
-		Perl_croak(aTHX_ "%"SVf"", SVfARG(atsv));
+		Perl_croak(aTHX_ "%" SVf, SVfARG(atsv));
 	    }
 	    break;
 	case 1:

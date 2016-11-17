@@ -923,7 +923,7 @@ hash(sv)
 	U32 hash = 0;
 	const char *s = SvPVbyte(sv, len);
 	PERL_HASH(hash, s, len);
-	ST(0) = sv_2mortal(Perl_newSVpvf(aTHX_ "0x%"UVxf, (UV)hash));
+	ST(0) = sv_2mortal(Perl_newSVpvf(aTHX_ "0x%" UVxf, (UV)hash));
 
 #define cast_I32(foo) (I32)foo
 IV
@@ -1337,12 +1337,12 @@ string(o, cv)
             break;
 
         case OP_ARGELEM:
-            ret = sv_2mortal(Perl_newSVpvf(aTHX_ "%"IVdf,
+            ret = sv_2mortal(Perl_newSVpvf(aTHX_ "%" IVdf,
                             PTR2IV(aux)));
             break;
 
         case OP_ARGCHECK:
-            ret = Perl_newSVpvf(aTHX_ "%"IVdf",%"IVdf, aux[0].iv, aux[1].iv);
+            ret = Perl_newSVpvf(aTHX_ "%" IVdf ",%" IVdf, aux[0].iv, aux[1].iv);
             if (aux[2].iv)
                 Perl_sv_catpvf(aTHX_ ret, ",%c", (char)aux[2].iv);
             ret = sv_2mortal(ret);

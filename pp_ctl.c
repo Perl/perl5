@@ -1573,7 +1573,7 @@ Perl_qerror(pTHX_ SV *err)
 
     if (PL_in_eval) {
 	if (PL_in_eval & EVAL_KEEPERR) {
-		Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %"SVf,
+		Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %" SVf,
                                                     SVfARG(err));
 	}
 	else
@@ -1582,7 +1582,7 @@ Perl_qerror(pTHX_ SV *err)
     else if (PL_errors)
 	sv_catsv(PL_errors, err);
     else
-	Perl_warn(aTHX_ "%"SVf, SVfARG(err));
+	Perl_warn(aTHX_ "%" SVf, SVfARG(err));
     if (PL_parser)
 	++PL_parser->error_count;
 }
@@ -1622,12 +1622,12 @@ S_pop_eval_context_maybe_croak(pTHX_ PERL_CONTEXT *cx, SV *errsv, int action)
 
         if (action == 1) {
             (void)hv_delete(inc_hv, key, klen, G_DISCARD);
-            fmt = "%"SVf" did not return a true value";
+            fmt = "%" SVf " did not return a true value";
             errsv = namesv;
         }
         else {
             (void)hv_store(inc_hv, key, klen, &PL_sv_undef, 0);
-            fmt = "%"SVf"Compilation failed in require";
+            fmt = "%" SVf "Compilation failed in require";
             if (!errsv)
                 errsv = newSVpvs_flags("Unknown error\n", SVs_TEMP);
         }
@@ -1691,7 +1691,7 @@ Perl_die_unwind(pTHX_ SV *msv)
                         (SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL));
 
 	if (in_eval & EVAL_KEEPERR) {
-	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %"SVf,
+	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %" SVf,
 			   SVfARG(exceptsv));
 	}
 
@@ -2522,7 +2522,7 @@ S_unwind_loop(pTHX)
         cxix = dopoptolabel(label, label_len, label_flags);
 	if (cxix < 0)
 	    /* diag_listed_as: Label not found for "last %s" */
-	    Perl_croak(aTHX_ "Label not found for \"%s %"SVf"\"",
+	    Perl_croak(aTHX_ "Label not found for \"%s %" SVf "\"",
 				       OP_NAME(PL_op),
                                        SVfARG(PL_op->op_flags & OPf_STACKED
                                               && !SvGMAGICAL(TOPp1s)
@@ -2708,7 +2708,7 @@ PP(pp_goto)
 			continue;
 		    tmpstr = sv_newmortal();
 		    gv_efullname3(tmpstr, gv, NULL);
-		    DIE(aTHX_ "Goto undefined subroutine &%"SVf"", SVfARG(tmpstr));
+		    DIE(aTHX_ "Goto undefined subroutine &%" SVf, SVfARG(tmpstr));
 		}
 		DIE(aTHX_ "Goto undefined subroutine");
 	    }
@@ -2779,7 +2779,7 @@ PP(pp_goto)
 		if (gv) {
 		    SV * const tmpstr = sv_newmortal();
 		    gv_efullname3(tmpstr, gv, NULL);
-		    DIE(aTHX_ "Goto undefined subroutine &%"SVf"",
+		    DIE(aTHX_ "Goto undefined subroutine &%" SVf,
 			       SVfARG(tmpstr));
 		}
 		DIE(aTHX_ "Goto undefined subroutine");
@@ -2994,7 +2994,7 @@ PP(pp_goto)
 	    PL_lastgotoprobe = gotoprobe;
 	}
 	if (!retop)
-	    DIE(aTHX_ "Can't find label %"UTF8f, 
+	    DIE(aTHX_ "Can't find label %" UTF8f,
 		       UTF8fARG(label_flags, label_len, label));
 
 	/* if we're leaving an eval, check before we pop any frames
@@ -3608,7 +3608,7 @@ S_require_version(pTHX_ SV *sv)
         upg_version(PL_patchlevel, TRUE);
     if (cUNOP->op_first->op_type == OP_CONST && cUNOP->op_first->op_private & OPpCONST_NOVER) {
         if ( vcmp(sv,PL_patchlevel) <= 0 )
-            DIE(aTHX_ "Perls since %"SVf" too modern--this is %"SVf", stopped",
+            DIE(aTHX_ "Perls since %" SVf " too modern--this is %" SVf ", stopped",
                 SVfARG(sv_2mortal(vnormal(sv))),
                 SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
             );
@@ -3629,8 +3629,8 @@ S_require_version(pTHX_ SV *sv)
                 || av_tindex(lav) > 1            /* FP with > 3 digits */
                 || strstr(SvPVX(pv),".0")        /* FP with leading 0 */
                ) {
-                DIE(aTHX_ "Perl %"SVf" required--this is only "
-                    "%"SVf", stopped",
+                DIE(aTHX_ "Perl %" SVf " required--this is only "
+                    "%" SVf ", stopped",
                     SVfARG(sv_2mortal(vnormal(req))),
                     SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
                 );
@@ -3647,8 +3647,8 @@ S_require_version(pTHX_ SV *sv)
                                        (int)first, (int)second);
                 upg_version(hintsv, TRUE);
 
-                DIE(aTHX_ "Perl %"SVf" required (did you mean %"SVf"?)"
-                    "--this is only %"SVf", stopped",
+                DIE(aTHX_ "Perl %" SVf " required (did you mean %" SVf "?)"
+                    "--this is only %" SVf ", stopped",
                     SVfARG(sv_2mortal(vnormal(req))),
                     SVfARG(sv_2mortal(vnormal(sv_2mortal(hintsv)))),
                     SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
@@ -3770,7 +3770,7 @@ S_require_file(pTHX_ SV *const sv)
                    that the generated filename ends .pm  */
                 if (!path_searchable || len < 3 || name[0] == '.'
                     || !memEQ(name + package_len, ".pm", 3))
-                    DIE(aTHX_ "Bareword in require maps to disallowed filename \"%"SVf"\"", sv);
+                    DIE(aTHX_ "Bareword in require maps to disallowed filename \"%" SVf "\"", sv);
                 if (memchr(name, 0, package_len)) {
                     /* diag_listed_as: Bareword in require contains "%s" */
                     DIE(aTHX_ "Bareword in require contains \"\\0\"");
@@ -3825,7 +3825,7 @@ S_require_file(pTHX_ SV *const sv)
 			SvGETMAGIC(loader);
 		    }
 
-		    Perl_sv_setpvf(aTHX_ namesv, "/loader/0x%"UVxf"/%s",
+		    Perl_sv_setpvf(aTHX_ namesv, "/loader/0x%" UVxf "/%s",
 				   PTR2UV(SvRV(dirsv)), name);
 		    tryname = SvPVX_const(namesv);
 		    tryrsfp = NULL;
@@ -4224,7 +4224,7 @@ PP(pp_entereval)
 
     if (PERLDB_NAMEEVAL && CopLINE(PL_curcop)) {
 	SV * const temp_sv = sv_newmortal();
-	Perl_sv_setpvf(aTHX_ temp_sv, "_<(eval %lu)[%s:%"IVdf"]",
+	Perl_sv_setpvf(aTHX_ temp_sv, "_<(eval %lu)[%s:%" IVdf "]",
 		       (unsigned long)++PL_evalseq,
 		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
 	tmpbuf = SvPVX(temp_sv);

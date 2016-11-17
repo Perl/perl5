@@ -100,7 +100,7 @@ yysymprint(pTHX_ PerlIO * const yyoutput, int yytype, const YYSTYPE * const yyva
 #   ifdef YYPRINT
 	YYPRINT (yyoutput, yytoknum[yytype], *yyvaluep);
 #   else
-	YYFPRINTF (yyoutput, "0x%"UVxf, (UV)yyvaluep->ival);
+	YYFPRINTF (yyoutput, "0x%" UVxf, (UV)yyvaluep->ival);
 #   endif
     }
     else
@@ -146,10 +146,10 @@ yy_stack_print (pTHX_ const yy_parser *parser)
 	    );
 	    break;
 	case toketype_ival:
-	    PerlIO_printf(Perl_debug_log, " %8"IVdf, (IV)ps->val.ival);
+	    PerlIO_printf(Perl_debug_log, " %8" IVdf, (IV)ps->val.ival);
 	    break;
 	default:
-	    PerlIO_printf(Perl_debug_log, " %8"UVxf, (UV)ps->val.ival);
+	    PerlIO_printf(Perl_debug_log, " %8" UVxf, (UV)ps->val.ival);
 	}
     }
     PerlIO_printf(Perl_debug_log, "\n\n");

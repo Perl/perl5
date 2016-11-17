@@ -301,7 +301,7 @@ A specialised variant of C<croak()> for emitting the usage message for xsubs
 works out the package name and subroutine name from C<cv>, and then calls
 C<croak()>.  Hence if C<cv> is C<&ouch::awk>, it would call C<croak> as:
 
- Perl_croak(aTHX_ "Usage: %"SVf"::%"SVf"(%s)", "ouch" "awk",
+ Perl_croak(aTHX_ "Usage: %" SVf "::%" SVf "(%s)", "ouch" "awk",
                                                      "eee_yow");
 
 =cut
@@ -320,13 +320,13 @@ Perl_croak_xs_usage(const CV *const cv, const char *const params)
 
 	if (HvNAME_get(stash))
 	    /* diag_listed_as: SKIPME */
-	    Perl_croak_nocontext("Usage: %"HEKf"::%"HEKf"(%s)",
+	    Perl_croak_nocontext("Usage: %" HEKf "::%" HEKf "(%s)",
                                 HEKfARG(HvNAME_HEK(stash)),
                                 HEKfARG(GvNAME_HEK(gv)),
                                 params);
 	else
 	    /* diag_listed_as: SKIPME */
-	    Perl_croak_nocontext("Usage: %"HEKf"(%s)",
+	    Perl_croak_nocontext("Usage: %" HEKf "(%s)",
                                 HEKfARG(GvNAME_HEK(gv)), params);
     } else {
         dTHX;
@@ -334,7 +334,7 @@ Perl_croak_xs_usage(const CV *const cv, const char *const params)
 
 	/* Pants. I don't think that it should be possible to get here. */
 	/* diag_listed_as: SKIPME */
-	Perl_croak(aTHX_ "Usage: CODE(0x%"UVxf")(%s)", PTR2UV(cv), params);
+	Perl_croak(aTHX_ "Usage: CODE(0x%" UVxf ")(%s)", PTR2UV(cv), params);
     }
 }
 
@@ -744,7 +744,7 @@ XS(XS_PerlIO_get_layers)
 		  }
 		  else {
 		       if (namok && argok)
-			    PUSHs(sv_2mortal(Perl_newSVpvf(aTHX_ "%"SVf"(%"SVf")",
+			    PUSHs(sv_2mortal(Perl_newSVpvf(aTHX_ "%" SVf "(%" SVf ")",
 						 SVfARG(*namsvp),
 						 SVfARG(*argsvp))));
 		       else if (namok)

@@ -5971,8 +5971,8 @@ typedef struct am_table_short AMTS;
 	STMT_START {                                                        \
             if (! PL_in_utf8_CTYPE_locale && ckWARN(WARN_LOCALE)) {         \
                 Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
-                                        "Wide character (U+%"UVXf") in %s", \
-                                        (UV) cp, OP_DESC(PL_op));           \
+                                       "Wide character (U+%" UVXf ") in %s",\
+                                       (UV) cp, OP_DESC(PL_op));            \
             }                                                               \
         }  STMT_END
 
@@ -5981,7 +5981,7 @@ typedef struct am_table_short AMTS;
             if (! PL_in_utf8_CTYPE_locale && ckWARN(WARN_LOCALE)) {         \
                 UV cp = utf8_to_uvchr_buf((U8 *) s, (U8 *) send, NULL);     \
                 Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
-                    "Wide character (U+%"UVXf") in %s",                     \
+                    "Wide character (U+%" UVXf ") in %s",                   \
                     (cp == 0)                                               \
                      ? UNICODE_REPLACEMENT                                  \
                      : (UV) cp,                                             \

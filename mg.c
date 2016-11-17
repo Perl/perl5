@@ -1127,7 +1127,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
                 Newx(gary, num_groups, Groups_t);
                 num_groups = getgroups(num_groups, gary);
                 for (i = 0; i < num_groups; i++)
-                    Perl_sv_catpvf(aTHX_ sv, " %"IVdf, (IV)gary[i]);
+                    Perl_sv_catpvf(aTHX_ sv, " %" IVdf, (IV)gary[i]);
                 Safefree(gary);
             }
 	}
@@ -2002,7 +2002,7 @@ Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
 
     /* The magic ptr/len for the debugger's hash should always be an SV.  */
     if (UNLIKELY(mg->mg_len != HEf_SVKEY)) {
-        Perl_croak(aTHX_ "panic: magic_setdbline len=%"IVdf", ptr='%s'",
+        Perl_croak(aTHX_ "panic: magic_setdbline len=%" IVdf ", ptr='%s'",
                    (IV)mg->mg_len, mg->mg_ptr);
     }
 
@@ -3246,7 +3246,7 @@ Perl_sighandler(int sig)
 			   : cv && CvGV(cv) ? GvENAME_HEK(CvGV(cv)) : NULL;
 	if (hek)
 	    Perl_ck_warner(aTHX_ packWARN(WARN_SIGNAL),
-				"SIG%s handler \"%"HEKf"\" not defined.\n",
+				"SIG%s handler \"%" HEKf "\" not defined.\n",
 			         PL_sig_name[sig], HEKfARG(hek));
 	     /* diag_listed_as: SIG%s handler "%s" not defined */
 	else Perl_ck_warner(aTHX_ packWARN(WARN_SIGNAL),

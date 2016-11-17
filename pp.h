@@ -63,7 +63,7 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 	    mark_stack_entry = markstack_grow();                      \
         *mark_stack_entry  = (I32)((p) - PL_stack_base);              \
         DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,                 \
-                "MARK push %p %"IVdf"\n",                             \
+                "MARK push %p %" IVdf "\n",                           \
                 PL_markstack_ptr, (IV)*mark_stack_entry)));           \
     } STMT_END
 
@@ -73,7 +73,7 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 #define INCMARK \
     STMT_START {                                                      \
         DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,                 \
-                "MARK inc  %p %"IVdf"\n",                             \
+                "MARK inc  %p %" IVdf "\n",                           \
                 (PL_markstack_ptr+1), (IV)*(PL_markstack_ptr+1))));   \
         PL_markstack_ptr++;                                           \
     } STMT_END

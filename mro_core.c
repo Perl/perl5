@@ -241,7 +241,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
 
     if (level > 100)
         Perl_croak(aTHX_
-		  "Recursive inheritance detected in package '%"HEKf"'",
+		  "Recursive inheritance detected in package '%" HEKf "'",
 		   HEKfARG(stashhek));
 
     meta = HvMROMETA(stash);
@@ -954,7 +954,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 		STRLEN len;
 		const char *name = SvPVx_const(*svp, len);
 		if(PL_stashcache) {
-                    DEBUG_o(Perl_deb(aTHX_ "mro_gather_and_rename clearing PL_stashcache for '%"SVf"'\n",
+                    DEBUG_o(Perl_deb(aTHX_ "mro_gather_and_rename clearing PL_stashcache for '%" SVf "'\n",
                                      SVfARG(*svp)));
 		   (void)hv_delete(PL_stashcache, name, name_utf8 ? -(I32)len : (I32)len, G_DISCARD);
                 }
@@ -1369,7 +1369,7 @@ Perl_mro_set_mro(pTHX_ struct mro_meta *const meta, SV *const name)
     PERL_ARGS_ASSERT_MRO_SET_MRO;
 
     if (!which)
-        Perl_croak(aTHX_ "Invalid mro name: '%"SVf"'", name);
+        Perl_croak(aTHX_ "Invalid mro name: '%" SVf "'", name);
 
     if(meta->mro_which != which) {
 	if (meta->mro_linear_current && !meta->mro_linear_all) {
@@ -1415,7 +1415,7 @@ XS(XS_mro_method_changed_in)
     classname = ST(0);
 
     class_stash = gv_stashsv(classname, 0);
-    if(!class_stash) Perl_croak(aTHX_ "No such class: '%"SVf"'!", SVfARG(classname));
+    if(!class_stash) Perl_croak(aTHX_ "No such class: '%" SVf "'!", SVfARG(classname));
 
     mro_method_changed_in(class_stash);
 

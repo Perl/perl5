@@ -258,8 +258,8 @@ Perl_pad_new(pTHX_ int flags)
     }
 
     DEBUG_X(PerlIO_printf(Perl_debug_log,
-	  "Pad 0x%"UVxf"[0x%"UVxf"] new:       compcv=0x%"UVxf
-	      " name=0x%"UVxf" flags=0x%"UVxf"\n",
+	  "Pad 0x%" UVxf "[0x%" UVxf "] new:       compcv=0x%" UVxf
+	      " name=0x%" UVxf " flags=0x%" UVxf "\n",
 	  PTR2UV(PL_comppad), PTR2UV(PL_curpad), PTR2UV(PL_compcv),
 	      PTR2UV(padname), (UV)flags
 	)
@@ -300,7 +300,7 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
     PERL_ARGS_ASSERT_CV_UNDEF_FLAGS;
 
     DEBUG_X(PerlIO_printf(Perl_debug_log,
-	  "CV undef: cv=0x%"UVxf" comppad=0x%"UVxf"\n",
+	  "CV undef: cv=0x%" UVxf " comppad=0x%" UVxf "\n",
 	    PTR2UV(cv), PTR2UV(PL_comppad))
     );
 
@@ -375,7 +375,7 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
 	   subs to the outer of this cv.  */
 
 	DEBUG_X(PerlIO_printf(Perl_debug_log,
-			      "Pad undef: cv=0x%"UVxf" padlist=0x%"UVxf" comppad=0x%"UVxf"\n",
+			      "Pad undef: cv=0x%" UVxf " padlist=0x%" UVxf " comppad=0x%" UVxf "\n",
 			      PTR2UV(cv), PTR2UV(padlist), PTR2UV(PL_comppad))
 		);
 
@@ -623,7 +623,7 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
 	sv_upgrade(PL_curpad[offset], SVt_PVCV);
     assert(SvPADMY(PL_curpad[offset]));
     DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-			   "Pad addname: %ld \"%s\" new lex=0x%"UVxf"\n",
+			   "Pad addname: %ld \"%s\" new lex=0x%" UVxf "\n",
 			   (long)offset, PadnamePV(name),
 			   PTR2UV(PL_curpad[offset])));
 
@@ -756,7 +756,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
     PL_curpad = AvARRAY(PL_comppad);
 
     DEBUG_X(PerlIO_printf(Perl_debug_log,
-	  "Pad 0x%"UVxf"[0x%"UVxf"] alloc:   %ld for %s\n",
+	  "Pad 0x%" UVxf "[0x%" UVxf "] alloc:   %ld for %s\n",
 	  PTR2UV(PL_comppad), PTR2UV(PL_curpad), (long) retval,
 	  PL_op_name[optype]));
 #ifdef DEBUG_LEAKING_SCALARS
@@ -876,7 +876,7 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 		break; /* "our" masking "our" */
 	    /* diag_listed_as: "%s" variable %s masks earlier declaration in same %s */
 	    Perl_warner(aTHX_ packWARN(WARN_MISC),
-		"\"%s\" %s %"PNf" masks earlier declaration in same %s",
+		"\"%s\" %s %" PNf " masks earlier declaration in same %s",
 		(   is_our                         ? "our"   :
                     PL_parser->in_my == KEY_my     ? "my"    :
                     PL_parser->in_my == KEY_sigvar ? "my"    :
@@ -902,7 +902,7 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
 		&& memEQ(PadnamePV(sv), PadnamePV(name), PadnameLEN(name)))
 	    {
 		Perl_warner(aTHX_ packWARN(WARN_MISC),
-		    "\"our\" variable %"PNf" redeclared", PNfARG(sv));
+		    "\"our\" variable %" PNf " redeclared", PNfARG(sv));
 		if (off <= PL_comppad_name_floor)
 		    Perl_warner(aTHX_ packWARN(WARN_MISC),
 			"\t(Did you mean \"local\" instead of \"our\"?)\n");
@@ -1084,7 +1084,7 @@ S_unavailable(pTHX_ PADNAME *name)
 {
     /* diag_listed_as: Variable "%s" is not available */
     Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
-			"%se \"%"PNf"\" is not available",
+			"%se \"%" PNf "\" is not available",
 			 *PadnamePV(name) == '&'
 					 ? "Subroutin"
 					 : "Variabl",
@@ -1111,7 +1111,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
     *out_flags = 0;
 
     DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-	"Pad findlex cv=0x%"UVxf" searching \"%.*s\" seq=%d%s\n",
+	"Pad findlex cv=0x%" UVxf " searching \"%.*s\" seq=%d%s\n",
 			   PTR2UV(cv), (int)namelen, namepv, (int)seq,
 	out_capture ? " capturing" : "" ));
 
@@ -1155,7 +1155,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 				? PAD_FAKELEX_MULTI : 0;
 
 		DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-		    "Pad findlex cv=0x%"UVxf" matched: offset=%ld (%lu,%lu)\n",
+		    "Pad findlex cv=0x%" UVxf " matched: offset=%ld (%lu,%lu)\n",
 		    PTR2UV(cv), (long)offset,
 		    (unsigned long)COP_SEQ_RANGE_LOW(*out_name),
 		    (unsigned long)COP_SEQ_RANGE_HIGH(*out_name)));
@@ -1165,7 +1165,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 		*out_name = name_p[offset]; /* return the name */
 		*out_flags = PARENT_FAKELEX_FLAGS(*out_name);
 		DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-		    "Pad findlex cv=0x%"UVxf" matched: offset=%ld flags=0x%lx index=%lu\n",
+		    "Pad findlex cv=0x%" UVxf " matched: offset=%ld flags=0x%lx index=%lu\n",
 		    PTR2UV(cv), (long)offset, (unsigned long)*out_flags,
 		    (unsigned long) PARENT_PAD_INDEX(*out_name) 
 		));
@@ -1203,7 +1203,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			/* diag_listed_as: Variable "%s" will not stay
 					   shared */
 			Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
-			    "%se \"%"UTF8f"\" will not stay shared",
+			    "%se \"%" UTF8f "\" will not stay shared",
 			     *namepv == '&' ? "Subroutin" : "Variabl",
 			     UTF8fARG(1, namelen, namepv));
 		    }
@@ -1214,7 +1214,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			PADNAME *n;
 			/* not yet caught - look further up */
 			DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-			    "Pad findlex cv=0x%"UVxf" chasing lex in outer pad\n",
+			    "Pad findlex cv=0x%" UVxf " chasing lex in outer pad\n",
 			    PTR2UV(cv)));
 			n = *out_name;
 			(void) pad_findlex(namepv, namelen, flags, CvOUTSIDE(cv),
@@ -1227,7 +1227,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 		    *out_capture = AvARRAY(PadlistARRAY(padlist)[
 				    CvDEPTH(cv) ? CvDEPTH(cv) : 1])[offset];
 		    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-			"Pad findlex cv=0x%"UVxf" found lex=0x%"UVxf"\n",
+			"Pad findlex cv=0x%" UVxf " found lex=0x%" UVxf "\n",
 			PTR2UV(cv), PTR2UV(*out_capture)));
 
 		    if (SvPADSTALE(*out_capture)
@@ -1316,7 +1316,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 	    /* But also note the offset, as newMYSUB needs it */
 	    PARENT_PAD_INDEX_set(new_name, offset);
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-		"Pad findlex cv=0x%"UVxf" saved captured sv 0x%"UVxf" at offset %ld\n",
+		"Pad findlex cv=0x%" UVxf " saved captured sv 0x%" UVxf " at offset %ld\n",
 		PTR2UV(cv), PTR2UV(*new_capturep), (long)new_offset));
 	}
 	*out_name = new_name;
@@ -1348,7 +1348,7 @@ Perl_pad_sv(pTHX_ PADOFFSET po)
     if (!po)
 	Perl_croak(aTHX_ "panic: pad_sv po");
     DEBUG_X(PerlIO_printf(Perl_debug_log,
-	"Pad 0x%"UVxf"[0x%"UVxf"] sv:      %ld sv=0x%"UVxf"\n",
+	"Pad 0x%" UVxf "[0x%" UVxf "] sv:      %ld sv=0x%" UVxf "\n",
 	PTR2UV(PL_comppad), PTR2UV(PL_curpad), (long)po, PTR2UV(PL_curpad[po]))
     );
     return PL_curpad[po];
@@ -1371,7 +1371,7 @@ Perl_pad_setsv(pTHX_ PADOFFSET po, SV* sv)
     ASSERT_CURPAD_ACTIVE("pad_setsv");
 
     DEBUG_X(PerlIO_printf(Perl_debug_log,
-	"Pad 0x%"UVxf"[0x%"UVxf"] setsv:   %ld sv=0x%"UVxf"\n",
+	"Pad 0x%" UVxf "[0x%" UVxf "] setsv:   %ld sv=0x%" UVxf "\n",
 	PTR2UV(PL_comppad), PTR2UV(PL_curpad), (long)po, PTR2UV(sv))
     );
     PL_curpad[po] = sv;
@@ -1489,7 +1489,7 @@ Perl_pad_leavemy(pTHX)
 	    const PADNAME * const name = svp[off];
 	    if (name && PadnameLEN(name) && !PadnameOUTER(name))
 		Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
-				      "%"PNf" never introduced",
+				      "%" PNf " never introduced",
 				       PNfARG(name));
 	}
     }
@@ -1544,7 +1544,7 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
 		   (long)po, (long)AvFILLp(PL_comppad));
 
     DEBUG_X(PerlIO_printf(Perl_debug_log,
-		"Pad 0x%"UVxf"[0x%"UVxf"] swipe:   %ld\n",
+		"Pad 0x%" UVxf "[0x%" UVxf "] swipe:   %ld\n",
 		PTR2UV(PL_comppad), PTR2UV(PL_curpad), (long)po));
 
     if (refadjust)
@@ -1595,7 +1595,7 @@ S_pad_reset(pTHX)
 		   AvARRAY(PL_comppad), PL_curpad);
 
     DEBUG_X(PerlIO_printf(Perl_debug_log,
-	    "Pad 0x%"UVxf"[0x%"UVxf"] reset:     padix %ld -> %ld",
+	    "Pad 0x%" UVxf "[0x%" UVxf "] reset:     padix %ld -> %ld",
 	    PTR2UV(PL_comppad), PTR2UV(PL_curpad),
 		(long)PL_padix, (long)PL_padix_floor
 	    )
@@ -1654,7 +1654,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 		break; /* no need to mark already-compiled code */
 	    if (CvANON(cv)) {
 		DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-		    "Pad clone on cv=0x%"UVxf"\n", PTR2UV(cv)));
+		    "Pad clone on cv=0x%" UVxf "\n", PTR2UV(cv)));
 		CvCLONE_on(cv);
 	    }
 	    CvHASEVAL_on(cv);
@@ -1750,7 +1750,7 @@ Perl_pad_free(pTHX_ PADOFFSET po)
 	Perl_croak(aTHX_ "panic: pad_free po");
 
     DEBUG_X(PerlIO_printf(Perl_debug_log,
-	    "Pad 0x%"UVxf"[0x%"UVxf"] free:    %ld\n",
+	    "Pad 0x%" UVxf "[0x%" UVxf "] free:    %ld\n",
 	    PTR2UV(PL_comppad), PTR2UV(PL_curpad), (long)po)
     );
 
@@ -1791,7 +1791,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
     pname = PadnamelistARRAY(pad_name);
     ppad = AvARRAY(pad);
     Perl_dump_indent(aTHX_ level, file,
-	    "PADNAME = 0x%"UVxf"(0x%"UVxf") PAD = 0x%"UVxf"(0x%"UVxf")\n",
+	    "PADNAME = 0x%" UVxf "(0x%" UVxf ") PAD = 0x%" UVxf "(0x%" UVxf ")\n",
 	    PTR2UV(pad_name), PTR2UV(pname), PTR2UV(pad), PTR2UV(ppad)
     );
 
@@ -1803,7 +1803,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 	if (namesv) {
 	    if (PadnameOUTER(namesv))
 		Perl_dump_indent(aTHX_ level+1, file,
-		    "%2d. 0x%"UVxf"<%lu> FAKE \"%s\" flags=0x%lx index=%lu\n",
+		    "%2d. 0x%" UVxf "<%lu> FAKE \"%s\" flags=0x%lx index=%lu\n",
 		    (int) ix,
 		    PTR2UV(ppad[ix]),
 		    (unsigned long) (ppad[ix] ? SvREFCNT(ppad[ix]) : 0),
@@ -1814,7 +1814,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 		);
 	    else
 		Perl_dump_indent(aTHX_ level+1, file,
-		    "%2d. 0x%"UVxf"<%lu> (%lu,%lu) \"%s\"\n",
+		    "%2d. 0x%" UVxf "<%lu> (%lu,%lu) \"%s\"\n",
 		    (int) ix,
 		    PTR2UV(ppad[ix]),
 		    (unsigned long) (ppad[ix] ? SvREFCNT(ppad[ix]) : 0),
@@ -1825,7 +1825,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 	}
 	else if (full) {
 	    Perl_dump_indent(aTHX_ level+1, file,
-		"%2d. 0x%"UVxf"<%lu>\n",
+		"%2d. 0x%" UVxf "<%lu>\n",
 		(int) ix,
 		PTR2UV(ppad[ix]),
 		(unsigned long) (ppad[ix] ? SvREFCNT(ppad[ix]) : 0)
@@ -1853,7 +1853,7 @@ S_cv_dump(pTHX_ const CV *cv, const char *title)
     PERL_ARGS_ASSERT_CV_DUMP;
 
     PerlIO_printf(Perl_debug_log,
-		  "  %s: CV=0x%"UVxf" (%s), OUTSIDE=0x%"UVxf" (%s)\n",
+		  "  %s: CV=0x%" UVxf " (%s), OUTSIDE=0x%" UVxf " (%s)\n",
 		  title,
 		  PTR2UV(cv),
 		  (CvANON(cv) ? "ANON"
@@ -1869,7 +1869,7 @@ S_cv_dump(pTHX_ const CV *cv, const char *title)
 		   : CvGV(outside) ? GvNAME(CvGV(outside)) : "UNDEFINED"));
 
     PerlIO_printf(Perl_debug_log,
-		    "    PADLIST = 0x%"UVxf"\n", PTR2UV(padlist));
+		    "    PADLIST = 0x%" UVxf "\n", PTR2UV(padlist));
     do_dump_pad(1, Perl_debug_log, padlist, 1);
 }
 

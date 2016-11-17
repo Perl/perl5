@@ -622,7 +622,7 @@ S_bad_type_gv(pTHX_ I32 n, GV *gv, const OP *kid, const char *t)
     SV * const namesv = cv_name((CV *)gv, NULL, 0);
     PERL_ARGS_ASSERT_BAD_TYPE_GV;
  
-    yyerror_pv(Perl_form(aTHX_ "Type of arg %d to %"SVf" must be %s (not %s)",
+    yyerror_pv(Perl_form(aTHX_ "Type of arg %d to %" SVf " must be %s (not %s)",
 		 (int)n, SVfARG(namesv), t, OP_DESC(kid)), SvUTF8(namesv));
 }
 
@@ -632,7 +632,7 @@ S_no_bareword_allowed(pTHX_ OP *o)
     PERL_ARGS_ASSERT_NO_BAREWORD_ALLOWED;
 
     qerror(Perl_mess(aTHX_
-		     "Bareword \"%"SVf"\" not allowed while \"strict subs\" in use",
+		     "Bareword \"%" SVf "\" not allowed while \"strict subs\" in use",
 		     SVfARG(cSVOPo_sv)));
     o->op_private &= ~OPpCONST_STRICT; /* prevent warning twice about the same OP */
 }
@@ -1726,15 +1726,15 @@ S_scalar_slice_warning(pTHX_ const OP *o)
     if (key)
        /* diag_listed_as: Scalar value @%s[%s] better written as $%s[%s] */
 	Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-		   "Scalar value @%"SVf"%c%s%c better written as $%"SVf
+		   "Scalar value @%" SVf "%c%s%c better written as $%" SVf
 		   "%c%s%c",
 		    SVfARG(name), lbrack, key, rbrack, SVfARG(name),
 		    lbrack, key, rbrack);
     else
        /* diag_listed_as: Scalar value @%s[%s] better written as $%s[%s] */
 	Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-		   "Scalar value @%"SVf"%c%"SVf"%c better written as $%"
-		    SVf"%c%"SVf"%c",
+		   "Scalar value @%" SVf "%c%" SVf "%c better written as $%"
+		    SVf "%c%" SVf "%c",
 		    SVfARG(name), lbrack, SVfARG(keysv), rbrack,
 		    SVfARG(name), lbrack, SVfARG(keysv), rbrack);
 }
@@ -1839,15 +1839,15 @@ Perl_scalar(pTHX_ OP *o)
 	if (key)
   /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-		       "%%%"SVf"%c%s%c in scalar context better written "
-		       "as $%"SVf"%c%s%c",
+		       "%%%" SVf "%c%s%c in scalar context better written "
+		       "as $%" SVf "%c%s%c",
 			SVfARG(name), lbrack, key, rbrack, SVfARG(name),
 			lbrack, key, rbrack);
 	else
   /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-		       "%%%"SVf"%c%"SVf"%c in scalar context better "
-		       "written as $%"SVf"%c%"SVf"%c",
+		       "%%%" SVf "%c%" SVf "%c in scalar context better "
+		       "written as $%" SVf "%c%" SVf "%c",
 			SVfARG(name), lbrack, SVfARG(keysv), rbrack,
 			SVfARG(name), lbrack, SVfARG(keysv), rbrack);
     }
@@ -2056,7 +2056,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
                         SvREFCNT_dec_NN(dsv);
                     }
                     else if (SvOK(sv)) {
-                        useless_sv = Perl_newSVpvf(aTHX_ "a constant (%"SVf")", SVfARG(sv));
+                        useless_sv = Perl_newSVpvf(aTHX_ "a constant (%" SVf ")", SVfARG(sv));
                     }
                     else
                         useless = "a constant (undef)";
@@ -2210,7 +2210,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
         if (useless_sv) {
             /* mortalise it, in case warnings are fatal.  */
             Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
-                           "Useless use of %"SVf" in void context",
+                           "Useless use of %" SVf " in void context",
                            SVfARG(sv_2mortal(useless_sv)));
         }
         else if (useless) {
@@ -2438,8 +2438,8 @@ S_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op)
         if (   check_fields
             && !hv_fetch_ent(GvHV(*fields), *svp, FALSE, 0))
         {
-            Perl_croak(aTHX_ "No such class field \"%"SVf"\" "
-                        "in variable %"PNf" of type %"HEKf,
+            Perl_croak(aTHX_ "No such class field \"%" SVf "\" "
+                        "in variable %" PNf " of type %" HEKf,
                         SVfARG(*svp), PNfARG(lexname),
                         HEKfARG(HvNAME_HEK(PadnameTYPE(lexname))));
         }
@@ -2532,7 +2532,7 @@ S_finalize_op(pTHX_ OP* o)
 		SV * const sv = sv_newmortal();
 		gv_efullname3(sv, gv, NULL);
 		Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE),
-		    "%"SVf"() called too early to check prototype",
+		    "%" SVf "() called too early to check prototype",
 		    SVfARG(sv));
 	    }
 	}
@@ -2904,7 +2904,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 		    if (kid->op_type != OP_NULL || kid->op_targ != OP_LIST)
 			Perl_croak(aTHX_
 				"panic: unexpected lvalue entersub "
-				"args: type/targ %ld:%"UVuf,
+				"args: type/targ %ld:%" UVuf,
 				(long)kid->op_type, (UV)kid->op_targ);
 		    kid = kLISTOP->op_first;
 		}
@@ -2920,7 +2920,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 		if (kid->op_type == OP_NULL)
 		    Perl_croak(aTHX_
 			       "Unexpected constant lvalue entersub "
-			       "entry via type/targ %ld:%"UVuf,
+			       "entry via type/targ %ld:%" UVuf,
 			       (long)kid->op_type, (UV)kid->op_targ);
 		if (kid->op_type != OP_GV) {
 		    break;
@@ -2941,7 +2941,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 
                 namesv = cv_name(cv, NULL, 0);
                 yyerror_pv(Perl_form(aTHX_ "Can't modify non-lvalue "
-                                     "subroutine call of &%"SVf" in %s",
+                                     "subroutine call of &%" SVf " in %s",
                                      SVfARG(namesv), PL_op_desc[type]),
                            SvUTF8(namesv));
                 return o;
@@ -3094,7 +3094,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_PADSV:
 	PL_modcount++;
 	if (!type) /* local() */
-	    Perl_croak(aTHX_ "Can't localize lexical variable %"PNf,
+	    Perl_croak(aTHX_ "Can't localize lexical variable %" PNf,
 			      PNfARG(PAD_COMPNAME(o->op_targ)));
 	if (!(o->op_private & OPpLVAL_INTRO)
 	 || (  type != OP_SASSIGN && type != OP_AASSIGN
@@ -3662,7 +3662,7 @@ S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name)
                         STRLEN new_len;
                         const char * newp = SvPV(cSVOPo_sv, new_len);
                         Perl_warner(aTHX_ packWARN(WARN_MISC),
-                            "Attribute prototype(%"UTF8f") discards earlier prototype attribute in same sub",
+                            "Attribute prototype(%" UTF8f ") discards earlier prototype attribute in same sub",
                             UTF8fARG(SvUTF8(cSVOPo_sv), new_len, newp));
                         op_free(new_proto);
                     }
@@ -3703,8 +3703,8 @@ S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name)
             const char * newp = SvPV(cSVOPx_sv(new_proto), new_len);
 
             Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE),
-                "Prototype '%"UTF8f"' overridden by attribute 'prototype(%"UTF8f")'"
-                " in %"SVf,
+                "Prototype '%" UTF8f "' overridden by attribute 'prototype(%" UTF8f ")'"
+                " in %" SVf,
                 UTF8fARG(SvUTF8(cSVOPx_sv(*proto)), old_len, oldp),
                 UTF8fARG(SvUTF8(cSVOPx_sv(new_proto)), new_len, newp),
                 SVfARG(svname));
@@ -3889,7 +3889,7 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
 	S_op_varname(aTHX_ left);
       if (name)
 	Perl_warner(aTHX_ packWARN(WARN_MISC),
-             "Applying %s to %"SVf" will act on scalar(%"SVf")",
+             "Applying %s to %" SVf " will act on scalar(%" SVf ")",
              desc, SVfARG(name), SVfARG(name));
       else {
 	const char * const sample = (isary
@@ -7890,19 +7890,19 @@ Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
     }
     sv_setpvs(msg, "Prototype mismatch:");
     if (name)
-	Perl_sv_catpvf(aTHX_ msg, " sub %"SVf, SVfARG(name));
+	Perl_sv_catpvf(aTHX_ msg, " sub %" SVf, SVfARG(name));
     if (cvp)
-	Perl_sv_catpvf(aTHX_ msg, " (%"UTF8f")", 
+	Perl_sv_catpvf(aTHX_ msg, " (%" UTF8f ")",
 	    UTF8fARG(SvUTF8(cv),clen,cvp)
 	);
     else
 	sv_catpvs(msg, ": none");
     sv_catpvs(msg, " vs ");
     if (p)
-	Perl_sv_catpvf(aTHX_ msg, "(%"UTF8f")", UTF8fARG(flags & SVf_UTF8,len,p));
+	Perl_sv_catpvf(aTHX_ msg, "(%" UTF8f ")", UTF8fARG(flags & SVf_UTF8,len,p));
     else
 	sv_catpvs(msg, "none");
-    Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "%"SVf, SVfARG(msg));
+    Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "%" SVf, SVfARG(msg));
 }
 
 static void const_sv_xsub(pTHX_ CV* cv);
@@ -8471,7 +8471,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	has_name = TRUE;
     } else if (PERLDB_NAMEANON && CopLINE(PL_curcop)) {
 	SV * const sv = sv_newmortal();
-	Perl_sv_setpvf(aTHX_ sv, "%s[%s:%"IVdf"]",
+	Perl_sv_setpvf(aTHX_ sv, "%s[%s:%" IVdf "]",
 		       PL_curstash ? "__ANON__" : "__ANON__::__ANON__",
 		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
 	gv = gv_fetchsv(sv, gv_fetch_flags, SVt_PVCV);
@@ -8527,7 +8527,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
                     SV * const errsv = ERRSV;
 		    /* force display of errors found but not reported */
 		    sv_catpvs(errsv, "BEGIN not safe after errors--compilation aborted");
-		    Perl_croak_nocontext("%"SVf, SVfARG(errsv));
+		    Perl_croak_nocontext("%" SVf, SVfARG(errsv));
 		}
 	    }
 	}
@@ -8626,7 +8626,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		   || sv_cmp(SvRV(gv), const_sv)  ))) {
                 assert(cSVOPo);
 		Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
-			  "Constant subroutine %"SVf" redefined",
+			  "Constant subroutine %" SVf " redefined",
 			  SVfARG(cSVOPo->op_sv));
             }
 
@@ -9256,7 +9256,7 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 		CopLINE_set(PL_curcop, PL_parser->copline);
 	    if (o) {
 		Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
-			    "Format %"SVf" redefined", SVfARG(cSVOPo->op_sv));
+			    "Format %" SVf " redefined", SVfARG(cSVOPo->op_sv));
 	    } else {
 		/* diag_listed_as: Format %s redefined */
 		Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
@@ -9850,7 +9850,7 @@ Perl_ck_rvconst(pTHX_ OP *o)
 	    }
 	    if (badthing)
 		Perl_croak(aTHX_
-			   "Can't use bareword (\"%"SVf"\") as %s ref while \"strict refs\" in use",
+			   "Can't use bareword (\"%" SVf "\") as %s ref while \"strict refs\" in use",
 			   SVfARG(kidsv), badthing);
 	}
 	/*
@@ -11247,7 +11247,7 @@ Perl_ck_join(pTHX_ OP *o)
                                             SVs_TEMP | ( RX_UTF8(re) ? SVf_UTF8 : 0 ) )
                     : newSVpvs_flags( "STRING", SVs_TEMP );
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-			"/%"SVf"/ should probably be written as \"%"SVf"\"",
+			"/%" SVf "/ should probably be written as \"%" SVf "\"",
 			SVfARG(msg), SVfARG(msg));
 	}
     }
@@ -11491,7 +11491,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	if (proto >= proto_end)
 	{
 	    SV * const namesv = cv_name((CV *)namegv, NULL, 0);
-	    yyerror_pv(Perl_form(aTHX_ "Too many arguments for %"SVf,
+	    yyerror_pv(Perl_form(aTHX_ "Too many arguments for %" SVf,
 					SVfARG(namesv)), SvUTF8(namesv));
 	    return entersubop;
 	}
@@ -11653,7 +11653,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 		continue;
 	    default:
 	    oops: {
-		Perl_croak(aTHX_ "Malformed prototype for %"SVf": %"SVf,
+		Perl_croak(aTHX_ "Malformed prototype for %" SVf ": %" SVf,
 				  SVfARG(cv_name((CV *)namegv, NULL, 0)),
 				  SVfARG(protosv));
             }
@@ -11671,7 +11671,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	(*proto != '@' && *proto != '%' && *proto != ';' && *proto != '_'))
     {
 	SV * const namesv = cv_name((CV *)namegv, NULL, 0);
-	yyerror_pv(Perl_form(aTHX_ "Not enough arguments for %"SVf,
+	yyerror_pv(Perl_form(aTHX_ "Not enough arguments for %" SVf,
 				    SVfARG(namesv)), SvUTF8(namesv));
     }
     return entersubop;
@@ -11739,7 +11739,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	case 'L': return newSVOP(
 	                   OP_CONST, 0,
                            Perl_newSVpvf(aTHX_
-	                     "%"IVdf, (IV)CopLINE(PL_curcop)
+	                     "%" IVdf, (IV)CopLINE(PL_curcop)
 	                   )
 	                 );
 	case 'P': return newSVOP(OP_CONST, 0,
@@ -12185,7 +12185,7 @@ Perl_ck_length(pTHX_ OP *o)
             }
             if (name)
                 Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-                    "length() used on %"SVf" (did you mean \"scalar(%s%"SVf
+                    "length() used on %" SVf " (did you mean \"scalar(%s%" SVf
                     ")\"?)",
                     SVfARG(name), hash ? "keys " : "", SVfARG(name)
                 );
@@ -15002,8 +15002,8 @@ Perl_report_redefined_cv(pTHX_ const SV *name, const CV *old_cv,
     )
 	Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
 			  is_const
-			    ? "Constant subroutine %"SVf" redefined"
-			    : "Subroutine %"SVf" redefined",
+			    ? "Constant subroutine %" SVf " redefined"
+			    : "Subroutine %" SVf " redefined",
 			  SVfARG(name));
 }
 

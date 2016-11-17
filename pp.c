@@ -492,7 +492,7 @@ PP(pp_prototype)
 	if (strnEQ(s, "CORE::", 6)) {
 	    const int code = keyword(s + 6, SvCUR(TOPs) - 6, 1);
 	    if (!code)
-		DIE(aTHX_ "Can't find an opnumber for \"%"UTF8f"\"",
+		DIE(aTHX_ "Can't find an opnumber for \"%" UTF8f "\"",
 		   UTF8fARG(SvFLAGS(TOPs) & SVf_UTF8, SvCUR(TOPs)-6, s+6));
 	    {
 		SV * const sv = core_prototype(NULL, s + 6, code, NULL);
@@ -983,7 +983,7 @@ PP(pp_undef)
     case SVt_PVCV:
 	if (cv_const_sv((const CV *)sv))
 	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
-                          "Constant subroutine %"SVf" undefined",
+                          "Constant subroutine %" SVf " undefined",
 			   SVfARG(CvANON((const CV *)sv)
                              ? newSVpvs_flags("(anonymous)", SVs_TEMP)
                              : sv_2mortal(newSVhek(
@@ -2977,7 +2977,7 @@ PP(pp_sin)
 	      (op_type == OP_LOG ? (value <= 0.0) : (value < 0.0))) {
 	      SET_NUMERIC_STANDARD();
 	      /* diag_listed_as: Can't take log of %g */
-	      DIE(aTHX_ "Can't take %s of %"NVgf, neg_report, value);
+	      DIE(aTHX_ "Can't take %s of %" NVgf, neg_report, value);
 	  }
       }
       switch (op_type) {
@@ -3643,7 +3643,7 @@ PP(pp_chr)
     if (UNLIKELY(SvAMAGIC(top)))
 	top = sv_2num(top);
     if (UNLIKELY(isinfnansv(top)))
-        Perl_croak(aTHX_ "Cannot chr %"NVgf, SvNV(top));
+        Perl_croak(aTHX_ "Cannot chr %" NVgf, SvNV(top));
     else {
         if (!IN_BYTES /* under bytes, chr(-1) eq chr(0xff), etc. */
             && ((SvIOKp(top) && !SvIsUV(top) && SvIV_nomg(top) < 0)
@@ -3658,7 +3658,7 @@ PP(pp_chr)
 		    top = top2;
 		}
                 Perl_warner(aTHX_ packWARN(WARN_UTF8),
-                            "Invalid negative number (%"SVf") in chr", SVfARG(top));
+                            "Invalid negative number (%" SVf ") in chr", SVfARG(top));
             }
             value = UNICODE_REPLACEMENT;
         } else {

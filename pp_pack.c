@@ -1585,7 +1585,8 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		    if (++bytes >= sizeof(UV)) {	/* promote to string */
 			const char *t;
 
-			sv = Perl_newSVpvf(aTHX_ "%.*"UVuf, (int)TYPE_DIGITS(UV), auv);
+			sv = Perl_newSVpvf(aTHX_ "%.*" UVuf,
+                                                 (int)TYPE_DIGITS(UV), auv);
 			while (s < strend) {
 			    ch = SHIFT_BYTE(utf8, s, strend, datumtype);
 			    sv = mul128(sv, (U8)(ch & 0x7f));
@@ -2063,9 +2064,9 @@ S_sv_check_infnan(pTHX_ SV *sv, I32 datumtype)
 	const I32 c = TYPE_NO_MODIFIERS(datumtype);
 	const NV nv = SvNV_nomg(sv);
 	if (c == 'w')
-	    Perl_croak(aTHX_ "Cannot compress %"NVgf" in pack", nv);
+	    Perl_croak(aTHX_ "Cannot compress %" NVgf " in pack", nv);
 	else
-	    Perl_croak(aTHX_ "Cannot pack %"NVgf" with '%c'", nv, (int) c);
+	    Perl_croak(aTHX_ "Cannot pack %" NVgf " with '%c'", nv, (int) c);
     }
     return sv;
 }
@@ -2355,7 +2356,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		if (!S_utf8_to_bytes(aTHX_ &aptr, end, cur, fromlen,
 				  datumtype | TYPE_IS_PACK))
 		    Perl_croak(aTHX_ "panic: predicted utf8 length not available, "
-			       "for '%c', aptr=%p end=%p cur=%p, fromlen=%"UVuf,
+			       "for '%c', aptr=%p end=%p cur=%p, fromlen=%" UVuf,
 			       (int)datumtype, aptr, end, cur, (UV)fromlen);
 		cur += fromlen;
 		len -= fromlen;

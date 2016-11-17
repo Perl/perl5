@@ -83,12 +83,12 @@ Perl_debstackptrs(pTHX)
 {
 #ifdef DEBUGGING
     PerlIO_printf(Perl_debug_log,
-		  "%8"UVxf" %8"UVxf" %8"IVdf" %8"IVdf" %8"IVdf"\n",
+		  "%8" UVxf " %8" UVxf " %8" IVdf " %8" IVdf " %8" IVdf "\n",
 		  PTR2UV(PL_curstack), PTR2UV(PL_stack_base),
 		  (IV)*PL_markstack_ptr, (IV)(PL_stack_sp-PL_stack_base),
 		  (IV)(PL_stack_max-PL_stack_base));
     PerlIO_printf(Perl_debug_log,
-		  "%8"UVxf" %8"UVxf" %8"UVuf" %8"UVuf" %8"UVuf"\n",
+		  "%8" UVxf " %8" UVxf " %8" UVuf " %8" UVuf " %8" UVuf "\n",
 		  PTR2UV(PL_mainstack), PTR2UV(AvARRAY(PL_curstack)),
 		  PTR2UV(PL_mainstack), PTR2UV(AvFILLp(PL_curstack)),
 		  PTR2UV(AvMAX(PL_curstack)));
@@ -219,14 +219,14 @@ Perl_deb_stack_all(pTHX)
             si_name_ix < C_ARRAY_LENGTH(si_names) ?
             si_names[si_name_ix] : "????";
 	I32 ix;
-	PerlIO_printf(Perl_debug_log, "STACK %"IVdf": %s\n",
+	PerlIO_printf(Perl_debug_log, "STACK %" IVdf ": %s\n",
 						(IV)si_ix, si_name);
 
 	for (ix=0; ix<=si->si_cxix; ix++) {
 
 	    const PERL_CONTEXT * const cx = &(si->si_cxstack[ix]);
 	    PerlIO_printf(Perl_debug_log,
-		    "  CX %"IVdf": %-6s => ",
+		    "  CX %" IVdf ": %-6s => ",
 		    (IV)ix, PL_block_type[CxTYPE(cx)]
 	    );
 	    /* substitution contexts don't save stack pointers etc) */

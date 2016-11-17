@@ -1214,7 +1214,7 @@ static void S_setpayload(NV* nvp, NV_PAYLOAD_TYPE payload, bool signaling)
   {
     NV t1 = c99_trunc(payload); /* towards zero (drop fractional) */
 #ifdef NV_PAYLOAD_DEBUG
-    Perl_warn(aTHX_ "t1 = %"NVgf" (payload %"NVgf")\n", t1, payload);
+    Perl_warn(aTHX_ "t1 = %" NVgf " (payload %" NVgf ")\n", t1, payload);
 #endif
     if (t1 <= UV_MAX) {
       a[0] = (UV)t1;  /* Fast path, also avoids rounding errors (right?) */
@@ -1244,7 +1244,7 @@ static void S_setpayload(NV* nvp, NV_PAYLOAD_TYPE payload, bool signaling)
 #endif
 #ifdef NV_PAYLOAD_DEBUG
   for (i = 0; i < (int)C_ARRAY_LENGTH(a); i++) {
-    Perl_warn(aTHX_ "a[%d] = 0x%"UVxf"\n", i, a[i]);
+    Perl_warn(aTHX_ "a[%d] = 0x%" UVxf "\n", i, a[i]);
   }
 #endif
   for (i = 0; i < (int)sizeof(p); i++) {
@@ -1255,7 +1255,9 @@ static void S_setpayload(NV* nvp, NV_PAYLOAD_TYPE payload, bool signaling)
       ((U8 *)(nvp))[i] &= ~m[i]; /* For NaNs with non-zero payload bits. */
       ((U8 *)(nvp))[i] |= b;
 #ifdef NV_PAYLOAD_DEBUG
-      Perl_warn(aTHX_ "set p[%2d] = %02x (i = %d, m = %02x, s = %2d, b = %02x, u = %08"UVxf")\n", i, ((U8 *)(nvp))[i], i, m[i], s, b, u);
+      Perl_warn(aTHX_
+                "set p[%2d] = %02x (i = %d, m = %02x, s = %2d, b = %02x, u = %08"
+                UVxf ")\n", i, ((U8 *)(nvp))[i], i, m[i], s, b, u);
 #endif
       a[p[i] / UVSIZE] &= ~u;
     }
@@ -1272,7 +1274,7 @@ static void S_setpayload(NV* nvp, NV_PAYLOAD_TYPE payload, bool signaling)
 #endif
   for (i = 0; i < (int)C_ARRAY_LENGTH(a); i++) {
     if (a[i]) {
-      Perl_warn(aTHX_ "payload lost bits (%"UVxf")", a[i]);
+      Perl_warn(aTHX_ "payload lost bits (%" UVxf ")", a[i]);
       break;
     }
   }
@@ -1303,7 +1305,7 @@ static NV_PAYLOAD_TYPE S_getpayload(NV nv)
   }
   for (i = (int)C_ARRAY_LENGTH(a) - 1; i >= 0; i--) {
 #ifdef NV_PAYLOAD_DEBUG
-    Perl_warn(aTHX_ "a[%d] = %"UVxf"\n", i, a[i]);
+    Perl_warn(aTHX_ "a[%d] = %" UVxf "\n", i, a[i]);
 #endif
     payload *= UV_MAX;
     payload += a[i];

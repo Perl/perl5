@@ -766,7 +766,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     if (!entry && SvREADONLY(hv) && !(action & HV_FETCH_ISEXISTS)) {
 	hv_notallowed(flags, key, klen,
-			"Attempt to access disallowed key '%"SVf"' in"
+			"Attempt to access disallowed key '%" SVf "' in"
 			" a restricted hash");
     }
     if (!(action & (HV_FETCH_LVALUE|HV_FETCH_ISSTORE))) {
@@ -1168,7 +1168,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	}
 	if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
 	    hv_notallowed(k_flags, key, klen,
-			    "Attempt to delete readonly key '%"SVf"' from"
+			    "Attempt to delete readonly key '%" SVf "' from"
 			    " a restricted hash");
 	}
         if (k_flags & HVhek_FREEKEY)
@@ -1317,7 +1317,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
   not_found:
     if (SvREADONLY(hv)) {
 	hv_notallowed(k_flags, key, klen,
-			"Attempt to delete disallowed key '%"SVf"' from"
+			"Attempt to delete disallowed key '%" SVf "' from"
 			" a restricted hash");
     }
 
@@ -1723,7 +1723,7 @@ Perl_hv_clear(pTHX_ HV *hv)
 			if (SvREADONLY(HeVAL(entry))) {
 			    SV* const keysv = hv_iterkeysv(entry);
 			    Perl_croak_nocontext(
-				"Attempt to delete readonly key '%"SVf"' from a restricted hash",
+				"Attempt to delete readonly key '%" SVf "' from a restricted hash",
 				(void*)keysv);
 			}
 			SvREFCNT_dec_NN(HeVAL(entry));
@@ -1957,7 +1957,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
     if (PL_phase != PERL_PHASE_DESTRUCT && HvNAME(hv)) {
         if (PL_stashcache) {
             DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for '%"
-                             HEKf"'\n", HEKfARG(HvNAME_HEK(hv))));
+                             HEKf "'\n", HEKfARG(HvNAME_HEK(hv))));
 	    (void)hv_deletehek(PL_stashcache, HvNAME_HEK(hv), G_DISCARD);
         }
 	hv_name_set(hv, NULL, 0, 0);
@@ -1978,7 +1978,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 	    mro_isa_changed_in(hv);
         if (PL_stashcache) {
             DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for effective name '%"
-                             HEKf"'\n", HEKfARG(HvENAME_HEK(hv))));
+                             HEKf "'\n", HEKfARG(HvENAME_HEK(hv))));
 	    (void)hv_deletehek(PL_stashcache, HvENAME_HEK(hv), G_DISCARD);
         }
       }
@@ -1989,7 +1989,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
       if (flags & HV_NAME_SETALL ? !!HvAUX(hv)->xhv_name_u.xhvnameu_name : !!name) {
         if (name && PL_stashcache) {
             DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for name '%"
-                             HEKf"'\n", HEKfARG(HvNAME_HEK(hv))));
+                             HEKf "'\n", HEKfARG(HvNAME_HEK(hv))));
 	    (void)hv_deletehek(PL_stashcache, HvNAME_HEK(hv), G_DISCARD);
         }
 	hv_name_set(hv, NULL, 0, flags);
@@ -2293,7 +2293,7 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
     PERL_ARGS_ASSERT_HV_NAME_SET;
 
     if (len > I32_MAX)
-	Perl_croak(aTHX_ "panic: hv name too long (%"UVuf")", (UV) len);
+	Perl_croak(aTHX_ "panic: hv name too long (%" UVuf ")", (UV) len);
 
     if (SvOOK(hv)) {
 	iter = HvAUX(hv);
@@ -2400,7 +2400,7 @@ Perl_hv_ename_add(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
     PERL_ARGS_ASSERT_HV_ENAME_ADD;
 
     if (len > I32_MAX)
-	Perl_croak(aTHX_ "panic: hv name too long (%"UVuf")", (UV) len);
+	Perl_croak(aTHX_ "panic: hv name too long (%" UVuf ")", (UV) len);
 
     PERL_HASH(hash, name, len);
 
@@ -2462,7 +2462,7 @@ Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
     PERL_ARGS_ASSERT_HV_ENAME_DELETE;
 
     if (len > I32_MAX)
-	Perl_croak(aTHX_ "panic: hv name too long (%"UVuf")", (UV) len);
+	Perl_croak(aTHX_ "panic: hv name too long (%" UVuf ")", (UV) len);
 
     if (!SvOOK(hv)) return;
 
@@ -3142,7 +3142,7 @@ S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
 	    SvUTF8_on(value);
 	break;
     default:
-	Perl_croak(aTHX_ "panic: refcounted_he_value bad flags %"UVxf,
+	Perl_croak(aTHX_ "panic: refcounted_he_value bad flags %" UVxf,
 		   (UV)he->refcounted_he_data[0]);
     }
     return value;
@@ -3165,7 +3165,7 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain, U32 flags)
     U32 placeholders, max;
 
     if (flags)
-	Perl_croak(aTHX_ "panic: refcounted_he_chain_2hv bad flags %"UVxf,
+	Perl_croak(aTHX_ "panic: refcounted_he_chain_2hv bad flags %" UVxf,
 	    (UV)flags);
 
     /* We could chase the chain once to get an idea of the number of keys,
@@ -3279,7 +3279,7 @@ Perl_refcounted_he_fetch_pvn(pTHX_ const struct refcounted_he *chain,
     PERL_ARGS_ASSERT_REFCOUNTED_HE_FETCH_PVN;
 
     if (flags & ~(REFCOUNTED_HE_KEY_UTF8|REFCOUNTED_HE_EXISTS))
-	Perl_croak(aTHX_ "panic: refcounted_he_fetch_pvn bad flags %"UVxf,
+	Perl_croak(aTHX_ "panic: refcounted_he_fetch_pvn bad flags %" UVxf,
 	    (UV)flags);
     if (!chain)
 	goto ret;
@@ -3380,7 +3380,7 @@ Perl_refcounted_he_fetch_sv(pTHX_ const struct refcounted_he *chain,
     STRLEN keylen;
     PERL_ARGS_ASSERT_REFCOUNTED_HE_FETCH_SV;
     if (flags & REFCOUNTED_HE_KEY_UTF8)
-	Perl_croak(aTHX_ "panic: refcounted_he_fetch_sv bad flags %"UVxf,
+	Perl_croak(aTHX_ "panic: refcounted_he_fetch_sv bad flags %" UVxf,
 	    (UV)flags);
     keypv = SvPV_const(key, keylen);
     if (SvUTF8(key))
@@ -3568,7 +3568,7 @@ Perl_refcounted_he_new_sv(pTHX_ struct refcounted_he *parent,
     STRLEN keylen;
     PERL_ARGS_ASSERT_REFCOUNTED_HE_NEW_SV;
     if (flags & REFCOUNTED_HE_KEY_UTF8)
-	Perl_croak(aTHX_ "panic: refcounted_he_new_sv bad flags %"UVxf,
+	Perl_croak(aTHX_ "panic: refcounted_he_new_sv bad flags %" UVxf,
 	    (UV)flags);
     keypv = SvPV_const(key, keylen);
     if (SvUTF8(key))

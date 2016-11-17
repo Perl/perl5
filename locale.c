@@ -1947,7 +1947,7 @@ S_print_collxfrm_input_and_return(pTHX_
     PerlIO_printf(Perl_debug_log, "_mem_collxfrm[%u]: returning ",
                                                             PL_collation_ix);
     if (xlen) {
-        PerlIO_printf(Perl_debug_log, "%"UVuf"", (UV) *xlen);
+        PerlIO_printf(Perl_debug_log, "%" UVuf, (UV) *xlen);
     }
     else {
         PerlIO_printf(Perl_debug_log, "NULL");
@@ -1970,7 +1970,7 @@ S_print_collxfrm_input_and_return(pTHX_
             if (! first_time) {
                 PerlIO_printf(Perl_debug_log, " ");
             }
-            PerlIO_printf(Perl_debug_log, "%02"UVXf"", cp);
+            PerlIO_printf(Perl_debug_log, "%02" UVXf, cp);
             prev_was_printable = FALSE;
         }
         t += (is_utf8) ? UTF8SKIP(t) : 1;
