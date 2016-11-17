@@ -80,8 +80,8 @@ sub start_byte_to_cont($) {
     # Copied from utf8.h.  This gets rid of the leading 1 bits.
     $byte &= ((($len) >= 7) ? 0x00 : (0x1F >> (($len)-2)));
 
-    $byte |= (isASCII) ? 0x80 : ord I8_to_native("\xA0");
-    return chr $byte;
+    $byte |= (isASCII) ? 0x80 : 0xA0;
+    return I8_to_native(chr $byte);
 }
 
 my $is64bit = length sprintf("%x", ~0) > 8;
