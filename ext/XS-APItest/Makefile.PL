@@ -59,7 +59,8 @@ sub MY::postamble
 DTRACE_D = ../../perldtrace.d
 
 dtrace\$(OBJ_EXT): \$(DTRACE_D) core\$(OBJ_EXT)
-	$Config{dtrace} -G -s \$(DTRACE_D) -o dtrace\$(OBJ_EXT) core\$(OBJ_EXT)
+	$Config{dtrace} -G -s \$(DTRACE_D) -o dtrace\$(OBJ_EXT) core\$(OBJ_EXT) || \\
+	  ( \$(ECHO) >dtrace.c && \$(CCCMD) \$(CCCDLFLAGS) dtrace.c && rm -f dtrace.c )
 POSTAMBLE
 
     return $post;
