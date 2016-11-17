@@ -866,7 +866,11 @@ $(DTRACE_PERLLIB_O): perldtrace.d $(perllib_objs_nodt)
 	$(DTRACE) -G -s perldtrace.d -o $(DTRACE_PERLLIB_O) $(perllib_objs_nodt)
 
 $(DTRACE_MAIN_O): perldtrace.d perlmain$(OBJ_EXT)
-	$(DTRACE) -G -s perldtrace.d -o $(DTRACE_MAIN_O) perlmain$(OBJ_EXT)
+	$(DTRACE) -G -s perldtrace.d -o $(DTRACE_MAIN_O) perlmain$(OBJ_EXT) ||		      \
+	  ( $(ECHO) "No probes in perlmain$(OBJ_EXT), generating a dummy $(DTRACE_MAIN_O)" && \
+	    $(ECHO) >dtrace_main.c &&							      \
+	    `$(CCCMD)` $(PLDLFLAGS) dtrace_main.c &&					      \
+	     rm -f dtrace_main.c )
 
 !NO!SUBS!
 		;;
