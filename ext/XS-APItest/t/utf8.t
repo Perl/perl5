@@ -72,7 +72,7 @@ sub start_byte_to_cont($) {
     my $byte = shift;
     my $len = test_UTF8_SKIP($byte);
     if ($len < 2) {
-        die "";
+        die "start_byte_to_cont() is expecting a UTF-8 variant";
     }
 
     $byte = ord native_to_I8($byte);
