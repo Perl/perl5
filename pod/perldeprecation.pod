@@ -45,6 +45,18 @@ removing them from your code fixes the deprecation warning; and removing
 them will not influence the behaviour of your code.
 
 
+=head3 Using the same symbol to open a filehandle and a dirhandle
+
+It used to be legal to use C<open()> to associate both a
+filehandle and a dirhandle to the same symbol (glob or scalar).
+This idiom is likely to be confusing, and it was deprecated in
+Perl 5.10.
+
+Using the same symbol to C<open()> a filehandle and a dirhandle
+will be a fatal error in Perl 5.28.
+
+You should be using two different symbols instead.
+
 =head3 ${^ENCODING} is no longer supported.
 
 The special variable C<${^ENCODING}> was used to implement

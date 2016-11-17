@@ -771,8 +771,8 @@ no warnings qw(io deprecated);
 open FOO, "../harness";
 open $foo, "../harness";
 EXPECT
-Opening dirhandle FOO also as a file at - line 5.
-Opening dirhandle $foo also as a file at - line 6.
+Opening dirhandle FOO also as a file. This will be a fatal error in Perl 5.28 at - line 5.
+Opening dirhandle $foo also as a file. This will be a fatal error in Perl 5.28 at - line 6.
 ########
 
 # pp_sys.c [pp_open]
@@ -787,8 +787,8 @@ no warnings qw(io deprecated);
 open ＦＯＯ, "../harness";
 open $ｆｏｏ, "../harness";
 EXPECT
-Opening dirhandle ＦＯＯ also as a file at - line 8.
-Opening dirhandle $ｆｏｏ also as a file at - line 9.
+Opening dirhandle ＦＯＯ also as a file. This will be a fatal error in Perl 5.28 at - line 8.
+Opening dirhandle $ｆｏｏ also as a file. This will be a fatal error in Perl 5.28 at - line 9.
 ########
 # pp_sys.c [pp_open_dir]
 use warnings;
@@ -800,8 +800,8 @@ no warnings qw(io deprecated);
 opendir FOO, ".";
 opendir $foo, ".";
 EXPECT
-Opening filehandle FOO also as a directory at - line 5.
-Opening filehandle $foo also as a directory at - line 6.
+Opening filehandle FOO also as a directory. This will be a fatal error in Perl 5.28 at - line 5.
+Opening filehandle $foo also as a directory. This will be a fatal error in Perl 5.28 at - line 6.
 ########
 
 # pp_sys.c [pp_open_dir]
@@ -817,8 +817,8 @@ no warnings qw(io deprecated);
 opendir ＦＯＯ, ".";
 opendir $ｆｏｏ, ".";
 EXPECT
-Opening filehandle ＦＯＯ also as a directory at - line 9.
-Opening filehandle $ｆｏｏ also as a directory at - line 10.
+Opening filehandle ＦＯＯ also as a directory. This will be a fatal error in Perl 5.28 at - line 9.
+Opening filehandle $ｆｏｏ also as a directory. This will be a fatal error in Perl 5.28 at - line 10.
 ########
 # pp_sys.c [pp_*dir]
 use Config ;

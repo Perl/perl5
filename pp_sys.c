@@ -630,7 +630,7 @@ PP(pp_open)
 
 	if (IoDIRP(io))
 	    Perl_ck_warner_d(aTHX_ packWARN2(WARN_IO, WARN_DEPRECATED),
-			     "Opening dirhandle %" HEKf " also as a file",
+			     "Opening dirhandle %" HEKf " also as a file. This will be a fatal error in Perl 5.28",
 			     HEKfARG(GvENAME_HEK(gv)));
 
 	mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
@@ -4008,7 +4008,7 @@ PP(pp_open_dir)
 
     if ((IoIFP(io) || IoOFP(io)))
 	Perl_ck_warner_d(aTHX_ packWARN2(WARN_IO, WARN_DEPRECATED),
-			 "Opening filehandle %" HEKf " also as a directory",
+			 "Opening filehandle %" HEKf " also as a directory. This will be a fatal error in Perl 5.28",
 			     HEKfARG(GvENAME_HEK(gv)) );
     if (IoDIRP(io))
 	PerlDir_close(IoDIRP(io));
