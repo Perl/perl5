@@ -2900,7 +2900,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
                     if (val <= 0) {
                         tmpsv= &PL_sv_undef;
                         Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-                            "Setting $/ to a reference to %s as a form of slurp is deprecated, treating as undef",
+                            "Setting $/ to a reference to %s as a form of slurp is deprecated, treating as undef. This will be fatal in Perl 5.28",
                             SvIV(SvRV(sv)) < 0 ? "a negative integer" : "zero"
                         );
                     }

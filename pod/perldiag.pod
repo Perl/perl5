@@ -5517,7 +5517,7 @@ didn't think so.
 forget to check the return value of your socket() call?  See
 L<perlfunc/setsockopt>.
 
-=item Setting $/ to a reference to %s as a form of slurp is deprecated, treating as undef
+=item Setting $/ to a reference to %s as a form of slurp is deprecated, treating as undef. This will be fatal in Perl 5.28
 
 (D deprecated) You assigned a reference to a scalar to C<$/> where the
 referenced item is not a positive integer.  In older perls this B<appeared>
@@ -5530,8 +5530,8 @@ setting C<$/> to undef, with the exception that this warning would be
 thrown.
 
 You are recommended to change your code to set C<$/> to C<undef> explicitly
-if you wish to slurp the file.  In future versions of Perl assigning
-a reference to will throw a fatal error.
+if you wish to slurp the file.  In Perl 5.28 assigning C<$/> to a 
+reference to an integer which isn't positive will throw a fatal error.
 
 =item Setting $/ to %s reference is forbidden
 

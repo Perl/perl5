@@ -45,6 +45,24 @@ removing them from your code fixes the deprecation warning; and removing
 them will not influence the behaviour of your code.
 
 
+=head3 Setting $/ to a reference to a non-positive integer
+
+You assigned a reference to a scalar to C<$/> where the
+referenced item is not a positive integer.  In older perls this B<appeared>
+to work the same as setting it to C<undef> but was in fact internally
+different, less efficient and with very bad luck could have resulted in
+your file being split by a stringified form of the reference.
+
+In Perl 5.20.0 this was changed so that it would be B<exactly> the same as
+setting C<$/> to undef, with the exception that this warning would be
+thrown.
+
+In Perl 5.28, this will throw a fatal error.
+
+You are recommended to change your code to set C<$/> to C<undef> explicitly
+if you wish to slurp the file.
+
+
 =head3 Using the same symbol to open a filehandle and a dirhandle
 
 It used to be legal to use C<open()> to associate both a

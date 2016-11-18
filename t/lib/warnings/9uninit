@@ -411,7 +411,7 @@ chomp ($x, $y); chop ($x, $y);
 EXPECT
 Use of uninitialized value $m1 in scalar assignment at - line 4.
 Use of uninitialized value $m1 in scalar assignment at - line 4.
-Setting $/ to a reference to zero as a form of slurp is deprecated, treating as undef at - line 4.
+Setting $/ to a reference to zero as a form of slurp is deprecated, treating as undef. This will be fatal in Perl 5.28 at - line 4.
 Use of uninitialized value $y in chop at - line 8.
 ########
 use warnings 'uninitialized';

@@ -3,7 +3,7 @@
   No such signal: SIG%s
     $SIG{FRED} = sub {}
 
-  Setting $/ to a reference to zero as a form of slurp is deprecated, treating as undef
+  Setting $/ to a reference to zero as a form of slurp is deprecated, treating as undef. This will be fatal in Perl 5.28
 
   SIG%s handler \"%s\" not defined.
     $SIG{"INT"} = "ok3"; kill "INT",$$;
@@ -25,19 +25,19 @@ EXPECT
 # warnable code, warnings enabled via command line switch
 $/ = \0;
 EXPECT
-Setting $/ to a reference to zero as a form of slurp is deprecated, treating as undef at - line 3.
+Setting $/ to a reference to zero as a form of slurp is deprecated, treating as undef. This will be fatal in Perl 5.28 at - line 3.
 ########
 -w
 # warnable code, warnings enabled via command line switch
 $/ = \-1;
 EXPECT
-Setting $/ to a reference to a negative integer as a form of slurp is deprecated, treating as undef at - line 3.
+Setting $/ to a reference to a negative integer as a form of slurp is deprecated, treating as undef. This will be fatal in Perl 5.28 at - line 3.
 ########
 $/ = \-1;
 no warnings 'deprecated';
 $/ = \-1;
 EXPECT
-Setting $/ to a reference to a negative integer as a form of slurp is deprecated, treating as undef at - line 1.
+Setting $/ to a reference to a negative integer as a form of slurp is deprecated, treating as undef. This will be fatal in Perl 5.28 at - line 1.
 ########
 # mg.c
 use warnings 'signal' ;
