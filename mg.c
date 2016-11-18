@@ -2890,11 +2890,13 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
             if (SvROK(sv)) {
                 SV *referent= SvRV(sv);
                 const char *reftype= sv_reftype(referent, 0);
-                /* XXX: dodgy type check: This leaves me feeling dirty, but the alternative
-                 * is to copy pretty much the entire sv_reftype() into this routine, or to do
-                 * a full string comparison on the return of sv_reftype() both of which
-                 * make me feel worse! NOTE, do not modify this comment without reviewing the
-                 * corresponding comment in sv_reftype(). - Yves */
+                /* XXX: dodgy type check: This leaves me feeling dirty, but
+                 * the alternative is to copy pretty much the entire
+                 * sv_reftype() into this routine, or to do a full string
+                 * comparison on the return of sv_reftype() both of which
+                 * make me feel worse! NOTE, do not modify this comment
+                 * without reviewing the corresponding comment in
+                 * sv_reftype(). - Yves */
                 if (reftype[0] == 'S' || reftype[0] == 'L') {
                     IV val= SvIV(referent);
                     if (val <= 0) {
