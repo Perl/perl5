@@ -424,7 +424,7 @@ int Perl_getcwd_sv(pTHX_ SV *sv)
 #endif
 
 #if USE_MY_CXT
-# define MY_CXT_KEY "Cwd::_guts"XS_VERSION
+# define MY_CXT_KEY "Cwd::_guts" XS_VERSION
 typedef struct {
     SV *empty_string_sv, *slash_string_sv;
 } my_cxt_t;

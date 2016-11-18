@@ -1,5 +1,11 @@
 Revision history for Perl distribution PathTools.
 
+3.66 - Sat Nov 19 10:30:19 MST 2016
+- white space change so can compile under C++11
+
+3.65 - Mon, 25 Jul 2016 23:15:33 -0700
+- (perl #127384)(CVE-2016-1238)
+
 3.64 - Tue May 24 10:00:19 MST 2016
 - just minor pod changes to silence Pod::Checker
 
