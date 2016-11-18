@@ -557,8 +557,15 @@ sub myconfig {
 local *_ = \my $a;
 $_ = <<'!END!';
 EOT
-
-$heavy_txt .= join('', sort @v_others) . "!END!\n";
+#proper lexicographical order of the keys
+$heavy_txt .= join('',
+    map { $_->[-1] }
+    sort {$a->[0] cmp $b->[0] }
+    map {
+        /^([^=]+)/ ? [ $1, $_ ]
+                   : [ $_, $_ ] # shouldnt happen
+    } @v_others
+) . "!END!\n";
 
 # Only need the dynamic byteorder code in Config.pm if 'byteorder' is one of
 # the precached keys
