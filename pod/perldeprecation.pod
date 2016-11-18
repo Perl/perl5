@@ -63,6 +63,16 @@ You are recommended to change your code to set C<$/> to C<undef> explicitly
 if you wish to slurp the file.
 
 
+
+=head3 Use of C<\N{}>
+
+Use of C<\N{}> with nothing between the braces was deprecated in
+Perl 5.24, and will throw a fatal error in Perl 5.28.
+
+Since such a construct is equivalent to using an empty string,
+you are recommended to remove such C<\N{}> constructs.
+
+
 =head3 Using the same symbol to open a filehandle and a dirhandle
 
 It used to be legal to use C<open()> to associate both a

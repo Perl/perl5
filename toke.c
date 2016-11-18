@@ -2563,8 +2563,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
     PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME;
 
     if (!SvCUR(res)) {
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-                       "Unknown charname '' is deprecated");
+        deprecate_fatal_in("5.28", "Unknown charname '' is deprecated");
         return res;
     }
 

@@ -6437,11 +6437,11 @@ exactly, regardless of whether C<:loose> is used or not.)  This error may
 also happen if the C<\N{}> is not in the scope of the corresponding
 C<S<use charnames>>.
 
-=item Unknown charname '' is deprecated
+=item Unknown charname '' is deprecated. Its use will be fatal in Perl 5.28
 
 (D deprecated) You had a C<\N{}> with nothing between the braces.  This
-usage is deprecated, and will be made a syntax error in a future Perl
-version.
+usage was deprecated in Perl 5.24, and will be made a syntax error in 
+in Perl 5.28.
 
 =item Unknown error
 
