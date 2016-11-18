@@ -147,7 +147,7 @@ no warnings 'deprecated' ;
 $a = <<;
 
 EXPECT
-Use of bare << to mean <<"" is deprecated at - line 2.
+Use of bare << to mean <<"" is deprecated. Its use will be fatal in Perl 5.28 at - line 2.
 ########
 # toke.c
 $a = <<~;
@@ -155,8 +155,8 @@ $a = <<~;
 $a = <<~ ;
 
 EXPECT
-Use of bare << to mean <<"" is deprecated at - line 2.
-Use of bare << to mean <<"" is deprecated at - line 4.
+Use of bare << to mean <<"" is deprecated. Its use will be fatal in Perl 5.28 at - line 2.
+Use of bare << to mean <<"" is deprecated. Its use will be fatal in Perl 5.28 at - line 4.
 ########
 # toke.c
 $a =~ m/$foo/eq;

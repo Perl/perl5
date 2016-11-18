@@ -102,7 +102,7 @@ HEREDOC
     fresh_perl_like(
         qq(<<\n\$          \n),
         # valgrind and asan reports an error between these two lines
-        qr/^Use of bare << to mean <<"" is deprecated at - line 1\.\s+Final \$/,
+        qr/^Use of bare << to mean <<"" is deprecated\. Its use will be fatal in Perl 5\.28 at - line 1\.\s+Final \$/,
         {},
         "don't use an invalid oldoldbufptr (some more)"
     );

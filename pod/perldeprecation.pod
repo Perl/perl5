@@ -45,6 +45,21 @@ removing them from your code fixes the deprecation warning; and removing
 them will not influence the behaviour of your code.
 
 
+=head3 Bare here-document terminators
+
+Perl has allowed you to use a bare here-document terminator to have the
+here-document end at the first empty line. This practise was deprecated
+in Perl 5.000, and this will be a fatal error in Perl 5.28.
+
+You are encouraged to use the explictly quoted form if you wish to
+use an empty line as the terminator of the here-document:
+
+  print <<"";
+    Print this line.
+
+  # Previous blank line ends the here-document.
+
+
 =head3 Setting $/ to a reference to a non-positive integer
 
 You assigned a reference to a scalar to C<$/> where the

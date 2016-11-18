@@ -6883,11 +6883,14 @@ returns no useful value.  See L<perlmod>.
 (D deprecated) The C<$[> variable (index of the first element in an array)
 is deprecated.  See L<perlvar/"$[">.
 
-=item Use of bare << to mean <<"" is deprecated
+=item Use of bare << to mean <<"" is deprecated. Its use will be fatal in Perl 5.28
 
 (D deprecated) You are now encouraged to use the explicitly quoted
 form if you wish to use an empty line as the terminator of the
 here-document.
+
+Use of a bare terminator was deprecated in Perl 5.000, and
+will be a fatal error in Perl 5.28.
 
 =item Use of /c modifier is meaningless in s///
 
