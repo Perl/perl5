@@ -7214,7 +7214,7 @@ front of your variable.
 (F) Lookbehind is allowed only for subexpressions whose length is fixed and
 known at compile time.  For positive lookbehind, you can use the C<\K>
 regex construct as a way to get the equivalent functionality.  See
-L<perlre/(?<=pattern) \K>.
+L<(?<=pattern) and \K in perlre|perlre/\K>.
 
 There are non-obvious Unicode rules under C</i> that can match variably,
 but which you might not think could.  For example, the substring C<"ss">

@@ -1056,12 +1056,6 @@ pair of parentheses with a question mark as the first thing within
 the parentheses.  The character after the question mark indicates
 the extension.
 
-The stability of these extensions varies widely.  Some have been
-part of the core language for many years.  Others are experimental
-and may change without warning or be completely removed.  Check
-the documentation on an individual feature to verify its current
-status.
-
 A question mark was chosen for this and for the minimal-matching
 construct because 1) question marks are rare in older regular
 expressions, and 2) whenever you see one, you should stop and
@@ -1089,7 +1083,8 @@ One or more embedded pattern-match modifiers, to be turned on (or
 turned off, if preceded by C<"-">) for the remainder of the pattern or
 the remainder of the enclosing pattern group (if any).
 
-This is particularly useful for dynamic patterns, such as those read in from a
+This is particularly useful for dynamically-generated patterns,
+such as those read in from a
 configuration file, taken from an argument, or specified in a table
 somewhere.  Consider the case where some patterns want to be
 case-sensitive and some do not:  The case-insensitive ones merely need to
@@ -1148,11 +1143,13 @@ C<"()">, but doesn't make backreferences as C<"()"> does.  So
 
     @fields = split(/\b(?:a|b|c)\b/)
 
-is like
+matches the same field delimiters as
 
     @fields = split(/\b(a|b|c)\b/)
 
-but doesn't spit out extra fields.  It's also cheaper not to capture
+but doesn't spit out the delimiters themselves as extra fields (even though
+that's the behaviour of L<perlfunc/split> when its pattern contains capturing
+groups).  It's also cheaper not to capture
 characters if you don't need to.
 
 Any letters between C<"?"> and C<":"> act as flags modifiers as with
@@ -1237,8 +1234,8 @@ in the same order, in each of the alternations:
 Not doing so may lead to surprises:
 
   "12" =~ /(?| (?<a> \d+ ) | (?<b> \D+))/x;
-  say $+ {a};   # Prints '12'
-  say $+ {b};   # *Also* prints '12'.
+  say $+{a};    # Prints '12'
+  say $+{b};    # *Also* prints '12'.
 
 The problem here is that both the group named C<< a >> and the group
 named C<< b >> are aliases for the group belonging to C<< $1 >>.
@@ -1273,7 +1270,9 @@ will not do what you want.  That's because the C<(?!foo)> is just saying that
 the next thing cannot be "foo"--and it's not, it's a "bar", so "foobar" will
 match.  Use lookbehind instead (see below).
 
-=item C<(?<=pattern)> C<\K>
+=item C<(?<=pattern)>
+
+=item C<\K>
 X<(?<=)> X<look-behind, positive> X<lookbehind, positive> X<\K>
 
 A zero-width positive lookbehind assertion.  For example, C</(?<=\t)\w+/>
@@ -1307,9 +1306,9 @@ only for fixed-width lookbehind.
 
 =back
 
-=item C<(?'NAME'pattern)>
-
 =item C<< (?<NAME>pattern) >>
+
+=item C<(?'NAME'pattern)>
 X<< (?<NAME>) >> X<(?'NAME')> X<named capture> X<capture>
 
 A named capture group. Identical in every respect to normal capturing
@@ -1677,23 +1676,28 @@ Here's a summary of the possible predicates:
 =item C<(1)> C<(2)> ...
 
 Checks if the numbered capturing group has matched something.
+Full syntax: C<< (?(1)then|else) >>
 
 =item C<(E<lt>I<NAME>E<gt>)> C<('I<NAME>')>
 
 Checks if a group with the given name has matched something.
+Full syntax: C<< (?(<name>)then|else) >>
 
 =item C<(?=...)> C<(?!...)> C<(?<=...)> C<(?<!...)>
 
 Checks whether the pattern matches (or does not match, for the C<"!">
 variants).
+Full syntax: C<< (?(?=lookahead)then|else) >>
 
 =item C<(?{ I<CODE> })>
 
 Treats the return value of the code block as the condition.
+Full syntax: C<< (?(?{ code })then|else) >>
 
 =item C<(R)>
 
 Checks if the expression has been evaluated inside of recursion.
+Full syntax: C<< (?(R)then|else) >>
 
 =item C<(R1)> C<(R2)> ...
 
@@ -1704,18 +1708,22 @@ inside of the n-th capture group. This check is the regex equivalent of
 
 In other words, it does not check the full recursion stack.
 
+Full syntax: C<< (?(R1)then|else) >>
+
 =item C<(R&I<NAME>)>
 
 Similar to C<(R1)>, this predicate checks to see if we're executing
 directly inside of the leftmost group with a given name (this is the same
 logic used by C<(?&I<NAME>)> to disambiguate). It does not check the full
 stack, but only the name of the innermost active recursion.
+Full syntax: C<< (?(R&name)then|else) >>
 
 =item C<(DEFINE)>
 
 In this case, the yes-pattern is never directly executed, and no
 no-pattern is allowed. Similar in spirit to C<(?{0})> but more efficient.
 See below for details.
+Full syntax: C<< (?(DEFINE)definitions...) >>
 
 =back
 
@@ -1881,6 +1889,9 @@ to inside of one of these constructs. The following equivalences apply:
 
 See L<perlrecharclass/Extended Bracketed Character Classes>.
 
+Note that this feature is currently L<experimental|perlpolicy/experimental>;
+using it yields a warning in the C<experimental::regex_sets> category.
+
 =back
 
 =head2 Backtracking
@@ -1893,8 +1904,8 @@ see L</Combining RE Pieces>.
 
 A fundamental feature of regular expression matching involves the
 notion called I<backtracking>, which is currently used (when needed)
-by all regular non-possessive expression quantifiers, namely C<"*">, C<"*?">, C<"+">,
-C<"+?">, C<{n,m}>, and C<{n,m}?>.  Backtracking is often optimized
+by all regular non-possessive expression quantifiers, namely C<*>, C<*?>, C<+>,
+C<+?>, C<{n,m}>, and C<{n,m}?>.  Backtracking is often optimized
 internally, but the general principle outlined here is valid.
 
 For a regular expression to match, the I<entire> regular expression must
@@ -2115,7 +2126,10 @@ C<(*MARK:NAME)> verb below for more details.
 B<NOTE:> C<$REGERROR> and C<$REGMARK> are not magic variables like C<$1>
 and most other regex-related variables. They are not local to a scope, nor
 readonly, but instead are volatile package variables similar to C<$AUTOLOAD>.
-Use C<local> to localize changes to them to a specific scope if necessary.
+They are set in the package containing the code that I<executed> the regex
+(rather than the one that compiled it, where those differ).  If necessary, you
+can use C<local> to localize changes to these variables to a specific scope
+before executing a regex.
 
 If a pattern does not contain a special backtracking verb that allows an
 argument, then C<$REGERROR> and C<$REGMARK> are not touched at all.
@@ -2130,7 +2144,7 @@ argument, then C<$REGERROR> and C<$REGMARK> are not touched at all.
 X<(*PRUNE)> X<(*PRUNE:NAME)>
 
 This zero-width pattern prunes the backtracking tree at the current point
-when backtracked into on failure. Consider the pattern C<I<A> (*PRUNE) I<B>>,
+when backtracked into on failure. Consider the pattern C</I<A> (*PRUNE) I<B>/>,
 where I<A> and I<B> are complex patterns. Until the C<(*PRUNE)> verb is reached,
 I<A> may backtrack as necessary to match. Once it is reached, matching
 continues in I<B>, which may also backtrack as necessary; however, should B
