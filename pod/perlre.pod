@@ -2115,7 +2115,10 @@ C<(*MARK:NAME)> verb below for more details.
 B<NOTE:> C<$REGERROR> and C<$REGMARK> are not magic variables like C<$1>
 and most other regex-related variables. They are not local to a scope, nor
 readonly, but instead are volatile package variables similar to C<$AUTOLOAD>.
-Use C<local> to localize changes to them to a specific scope if necessary.
+They are set in the package containing the code that I<executed> the regex
+(rather than the one that compiled it, where those differ).  If necessary, you
+can use C<local> to localize changes to these variables to a specific scope
+before executing a regex.
 
 If a pattern does not contain a special backtracking verb that allows an
 argument, then C<$REGERROR> and C<$REGMARK> are not touched at all.
