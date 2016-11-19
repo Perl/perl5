@@ -9,7 +9,7 @@ require ExtUtils::Constant::XS;
 use ExtUtils::Constant::Utils qw(C_stringify);
 use ExtUtils::Constant::XS qw(%XS_TypeSet);
 
-$VERSION = '0.08';
+$VERSION = '0.09';
 @ISA = 'ExtUtils::Constant::XS';
 
 %type_to_struct =
@@ -632,7 +632,8 @@ EOA
 	} else
 #endif
 	{
-	    sv = newSVpvf("%"SVf" is not a valid $package_sprintf_safe macro at %"
+	    sv = newSVpvf("%" SVf
+                          " is not a valid $package_sprintf_safe macro at %"
 			  COP_FILE_F " line %" UVuf "\\n",
 			  sv, COP_FILE(cop), (UV)CopLINE(cop));
 	}
@@ -670,7 +671,7 @@ $xs_subname(sv)
 	} else
 #endif
 	{
-	    sv = newSVpvf("%"SVf" is not a valid $package_sprintf_safe macro",
+	    sv = newSVpvf("%" SVf " is not a valid $package_sprintf_safe macro",
 			  sv);
 	}
 	PUSHs(sv_2mortal(sv));
