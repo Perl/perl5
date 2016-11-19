@@ -17,7 +17,8 @@ L<perl5256delta>, which describes differences between 5.25.5 and 5.25.6.
 
 =head1 Notice
 
-XXX Any important notices here
+Name.pl will be going away in the near future, documentation and warnings to
+this fact has been introduced.
 
 =head1 Core Enhancements
 
@@ -59,6 +60,69 @@ For example:
 
 prints "Hello there\n" with no leading whitespace.
 
+=head2 '.' and @INC
+
+Perl now provides a way to build perl without C<.> in @INC by default. If you
+want this feature, you can build with -Ddefault_inc_excludes_dot
+
+Because the testing / make process for perl modules do not function well with
+C<.> missing from @INC, Perl now supports the environment variable
+PERL_USE_UNSAFE_INC=1 which makes Perl behave as it previously did, returning
+C<.> to @INC in all child processes.
+
+WARNING: PERL_USE_UNSAFE_INC has been provided during the perl 5.25 development
+cycle and is not guaranteed to function in perl 5.26.
+
+=head2 create a safer utf8_hop() called utf8_hop_safe()
+
+Unlike utf8_hop(), utf8_hop_safe() won't navigate before the beginning or after
+the end of the supplied buffer.
+
+=head2 Fix taint handling in list assignment
+
+commit v5.25.6-79-gb09ed99 reworked list assignment, and
+accidentally broke taint handling at the same time.
+
+=head2 @{^CAPTURE}, %{^CAPTURE}, and %{^CAPTURE_ALL}
+
+@{^CAPTURE} exposes the capture buffers of the last match as an array. So $1 is
+${^CAPTURE}[0].
+
+%{^CAPTURE} is the equivalent to %+ (ie named captures)
+
+%{^CAPTURE_ALL} is the equivalent to %- (ie all named captures).
+
+=head2 Enhancements and fixes for locale code
+
+locale.c and t/loc_tools.pl were updated:
+
+Fix not catching incompatible locales, and other minor updates.
+
+Use meaningful initialization msg.
+
+Output warning if debugging and 'no warnings'.
+
+=head2 hv.h: rework HEK_FLAGS to a proper member in struct hek
+
+Move the store of HEK_FLAGS off the end of the allocated hek_key into the hek
+struct, simplifying access and providing clarity to the code.
+
+=head2 op.c: silence compiler warning in fold_constants()
+
+    op.c: In function ‘S_fold_constants’:
+    op.c:4374:28: warning: argument ‘o’ might be clobbered by ‘longjmp’ or ‘vfork’ [-Wclobbered]
+     S_fold_constants(pTHX_ OP *o)
+                                ^
+
+This warning has been silenced.
+
+=head2 White space changed to avoid C++ deprecation warning
+
+C++11 requires space between the end of a string literal and a macro, so that a
+feature can unambiguously be added to the language.  Starting in g++ 6.2, the
+compiler emits a warning when there isn't a space (presumably so that future
+versions can support C++11)
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -76,6 +140,41 @@ XXX For a release on a stable branch, this section aspires to be:
     report.  See L</Reporting Bugs> below.
 
 [ List each incompatible change as a =head2 entry ]
+
+=head2 Eliminate OPpRUNTIME private PMOP flag
+
+This flag was added in 5.004 and even then it didn't seem to be used for
+anything. It gets set and unset in various places, but is never tested.
+
+=head2 Eliminate SVpbm_VALID flag
+
+This flag is set on an SV to indicate that it has PERL_MAGIC_bm (fast
+Boyer-Moore) magic attached. Instead just directly check whether it has such
+magic.
+
+=head2 Eliminate SVpbm_TAIL/SvTAIL_on()/SvTAIL_off()
+
+This flag is only set on SVs that have Boyer-Moore magic attached. Such SVs
+already re-purpose the unused IVX slot of that  SV to store BmUSEFUL. This
+commit repurposes the unused NVX slot to store this boolean value instead.
+
+=head2 Eliminate SVrepl_EVAL and SvEVALED()
+
+This flag is only used to indicate that the SV holding the text of the
+replacement part of a s/// has seen at least one /e.  Instead, set the IVX
+field in the SV to a true value. (We already set the NVX field on that SV to
+indicate a multi-src-line substitution).
+
+=head2 metaconfig.h
+
+Document that symbols should be removed from metaconfig.h
+
+Remove almost-all symbols from metaconfig.h
+
+=head2 Change hv_fetch(…, "…", …, …) to hv_fetchs(…, "…", …)
+
+The dual-life dists all use Devel::PPPort, so they can use this function even
+though it was only added in 5.10.
 
 =head1 Deprecations
 
@@ -121,12 +220,47 @@ There may well be none in a stable release.
 
 =item *
 
+Reduce cost of SvVALID().
+
+=item *
+
+C<$ref1 = $ref2> has been optimized.
+
+=item *
+
 Array and hash assignment are now faster, e.g.
 
     (..., @a) = (...);
     (..., %h) = (...);
 
 especially when the RHS is empty.
+
+=item *
+
+Reduce the number of odd special cases for the SvSCREAM flag.
+
+=item *
+
+Aavoid sv_catpvn() in do_vop() when unneeded.
+
+=item *
+
+Enhancements in Regex concat COW implementation.
+
+=item *
+
+Add branch predictors for DEBUG statements
+
+It is unlikely that any given debug flag will be set in any given run, even
+under DEBUGGING builds.
+
+=item *
+
+Speed up AV and HV clearing/undeffing.
+
+=item *
+
+Better optimise array and hash assignment
 
 =back
 
@@ -153,6 +287,78 @@ XXX
 =head2 Updated Modules and Pragmata
 
 =over 4
+
+=item *
+
+L<Time::HiRes> has been updated to use clockid_t.
+
+=item *
+
+L<Data::Dumper> the XS implementation now supports Deparse.
+
+=item *
+
+L<Unicode::Normalize> is now maintained by p5p and has been moved to dist/
+
+=item *
+
+L<Errno> Document that using C<%!> loads Errno for you.
+
+=item *
+
+L<Unicode::Collate> has been upgraded from version 1.14 to 1.18.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999726(_01) to 1.999727.
+
+There have also been some core customizations.
+
+=item *
+
+L<podlators> has been upgraded from version 4.08 to 4.09.
+
+=item *
+
+L<Archive::Tar> has been upgraded from version 2.16 to 2.18.
+
+Capture STDERR when necessary.
+
+Several minor updates.
+
+=item *
+
+L<Net::Ping> remove sudo from 500_ping_icmp.t.
+
+Upgrade from version 2.51 to 2.55.
+
+Avoid stderr noise in tests
+
+Check for echo in new Net::Ping tests.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302059 to 1.302062.
+
+=item *
+
+L<Term::ANSIColor> has been upgraded from version 4.05 to 4.06.
+
+=item *
+
+L<Scalar::Utils> and L<List::Utils> have been customized in core.
+
+=item *
+
+L<Math::Complex> has been customized in core.
+
+=item *
+
+L<JSON::PP> Customized in core.
+
+=item *
+
+L<POSIX> Version Bump
 
 =item *
 
@@ -189,6 +395,29 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+Defined on aggregates is no longer allowed. Perlfunc was still reporting it as
+deprecated, and that it will be deleted in the future.
+
+=back
+
+=head3 L<perldata>
+
+=over 4
+
+=item *
+
+Use of single character variables, with the variable name a non printable
+character in the range \x80-\xFF is no longer allowed. Update the docs to
+reflect this.
+
+=back
+
 =head3 L<perlobj>
 
 =over 4
@@ -196,6 +425,113 @@ section.
 =item *
 
 Added a section on calling methods using their fully qualified names.
+
+=item *
+
+Do not discourage manual @ISA.
+
+=back
+
+=head3 L<perlop>
+
+=over 4
+
+=item *
+
+Clarify behavior single quote regexps.
+
+=back
+
+=head3 L<perllocale>
+
+=over 4
+
+=item *
+
+Add caution about incompatible locales. Some locales aren't compatible with
+Perl. Note the potential bad consequences of using them.
+
+=back
+
+=head3 L<perldiag>
+
+=over 4
+
+=item *
+
+Deprecations are to be marked with a D.
+C<"%s() is deprecated on :utf8 handles"> use a deprecation message, and as
+such, such be marked C<"(D deprecated)"> and not C<"(W deprecated)">.
+
+=back
+
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+add pTHX_ to magic method examples.
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+Document @ISA. Was documented other places, not not in perlvar.
+
+=back
+
+=head3 L<perlootut>
+
+=over 4
+
+=item *
+
+Tidy the document.
+
+=item *
+
+Mention Moo more.
+
+=back
+
+=head3 L<perlhack>
+
+=over 4
+
+=item *
+
+Document Tab VS Space.
+
+=back
+
+=head3 L<perlre>
+
+=over 4
+
+=item *
+
+Don't impugn the stability of all (?…) constructs.
+
+=item *
+
+Summarise full syntax for (?(cond)then|else) constructs.
+
+=item *
+
+Minor tweaks and formatting changes.
+
+=item *
+
+perlre: regularise list items
+
+=item *
+
+Document the package for C<$REGMARK> and C<$REGERROR>.
 
 =back
 
@@ -241,7 +577,18 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+Improve error for missing tie() package/method. This brings the error messages
+in line with the ones used for normal method calls, despite not using
+call_method().
+
+=item *
+
+Make the sysread()/syswrite/() etc :utf8 handle warnings default. These
+warnings were under 'deprecated' previously.
+
+=item *
+
+'do' errors now refer to 'do' (not 'require').
 
 =back
 
@@ -260,7 +607,35 @@ Use L<XXX> with program names to get proper documentation linking. ]
 
 =item *
 
-XXX
+Porting/pod_lib.pl
+
+Removed spurious executable bit.
+
+Account for possibility of DOS file endings.
+
+=item *
+
+perf/benchmarks
+
+Tidy file, rename some symbols.
+
+=item *
+
+Porting/checkAUTHORS.pl
+
+Replace obscure character range with \w.
+
+=item *
+
+t/porting/regen.t
+
+try to be more helpful when tests fail.
+
+=item *
+
+utils/h2xs.PL
+
+Avoid infinite loop for enums.
 
 =back
 
@@ -277,7 +652,31 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+Remove "Warning: perl appears in your path"
+
+This install warning is more or less obsolete, since most platforms already
+*will* have a /usr/bin/perl or similar provided by the OS.
+
+=item *
+
+Reduce verbosity of "make install.man"
+
+Previously, two progress messages were emitted for each manpage: one by
+installman itself, and one by the function in install_lib.pl that it calls to
+actually install the file. Disabling the second of those in each case saves
+over 750 lines of unhelpful output.
+
+=item *
+
+Cleanup for clang -Weverything support. [perl 129961]
+
+=item *
+
+Configure: signbit scan was assuming too much, stop assuming negative 0.
+
+=item *
+
+Various compiler warnings have been silenced.
 
 =back
 
@@ -295,7 +694,7 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+XS-APItest/t/utf8.t: Several small fixes and enhancements.
 
 =back
 
@@ -321,11 +720,78 @@ XXX
 
 =back
 
+=item Darwin
+
+don't treat -Dprefix=/usr as special, instead require an extra option
+-Ddarwin_distribution to produce the same results.
+
+=item POSIX
+
+Finish removing POSIX deprecated functions.
+
+=item OS X
+
+OS X El Capitan doesn't implement the clock_gettime() or clock_getrez() APIs,
+emulate them as necessary.
+
+=item macOS
+
+Deprecated syscall(2) on macOS 10.12.
+
+=item EBCDIC
+
+Several tests have been updated to work (or be skipped) on EBCDIC platforms.
+
+=item HP-UX
+
+L<Net::Ping> UDP test is skipped on HP-UX.
+
+=item VMS
+
+Move _pDEPTH and _aDEPTH after config.h otherwise DEBUGGING may not be defined
+yet.
+
+=item VMS And Win32
+
+Fix some breakage, add 'undef' value for default_inc_excludes_dot in build
+scripts.
+
+=item Linux
+
+Drop support for Linux a.out Linux has used ELF for over twenty years.
+
+=item NetBSD-VAX
+
+Test fixes and minor updates.
+
+Account for lack of C<inf>, C<nan>, and C<-0.0> support.
+
+=item Win32
+
+fp definitions have been updated.
+
+=item OpenBSD 6
+
+OpenBSD 6 still does not support returning pid, gid or uid with SA_SIGINFO.
+Make sure this is accounted for.
+
+=item FreeBSD
+
+t/uni/overload.t: Skip hanging test on FreeBSD.
+
+=back
+
 =head2 Discontinued Platforms
 
 XXX List any platforms that this version of perl no longer compiles on.
 
 =over 4
+
+=item VMS
+
+VAXC has not been a possibility for a good long while, and the versions of the
+DEC/Compaq/HP/VSI C compiler that report themselves as "DEC" in a listing file
+are 15 years or more out-of-date and can be safely desupported.
 
 =item XXX-some-platform
 
@@ -375,6 +841,36 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
+Handle SvIMMORTALs in LHS of list assign. [perl #129991]
+
+=item *
+
+[perl #130010] a5540cf breaks texinfo
+
+When a regular expression is compiled that contains user-defined properties,
+the subroutine the user must furnish to implement those properties may not yet
+be defined.  To cope with this possibility, the regex pattern compiler stores
+the name and package of the subroutine, and this is to be expanded the first
+time the property is actually used during execution.  Once expanded, the
+property should be immutable, and so the scalar containing the expansion is
+marked read-only.  It turns out that prior to the blamed commit, that
+read-only-ness was being bypassed in some instances simply by freeing the
+scalar, replaced by a new one.  The commit changed that.  The pattern may
+contain components both known at compile time, and deferred until runtime.  The
+two are combined at the time of expansion, but that was now running afoul of
+the read-only setting.  This commit simply turns off the read-only flag at the
+time of expansion, and it's turned on again afterwards.
+
+=item *
+
+Fix error message for unclosed \N{ in regcomp.
+
+An unclosed C<\N{> that made it through to the regex engine rather than being
+handled by the lexer would erroneously trigger the error for
+C<"\N{NAME} must be resolved by the lexer">.
+
+=item *
+
 List assignment in list context where the LHS contained aggregates and
 where there were not enough RHS elements, used to skip scalar lvalues.
 Previously, C<(($a,$b,@c,$d) = (1))> in list context returned C<($a)>; now
@@ -386,6 +882,39 @@ returns <($a,$b,$c)>. This can be seen in the following:
 
 Formerly, the values of C<($a,$b,$d)> would be left as C<(11,undef,undef)>;
 now they are C<(11,1,1)>.
+
+=item *
+
+[perl 129903]
+
+The basic problem is that code like this: /(?{ s!!! })/ can trigger infinite
+recursion on the C stack (not the normal perl stack) when the last successful
+pattern in scope is itself. Since the C stack overflows this manifests as an
+untrappable error/segfault, which then kills perl.
+
+We avoid the segfault by simply forbidding the use of the empty pattern when it
+would resolve to the currently executing pattern.
+
+=item *
+
+[perl 128997] Avoid reading beyond the end of the line buffer when there's a
+short UTF-8 character at the end.
+
+=item *
+
+[perl 129950] fix firstchar bitmap under utf8 with prefix optimisation.
+
+=item *
+
+[perl 129954] Carp/t/arg_string.t: be liberal in f/p formats.
+
+=item *
+
+[perl 129928] make do "a\0b" fail silently instead of throwing.
+
+=item *
+
+[perl 129130] make chdir allocate the stack it needs.
 
 =back
 
