@@ -1056,12 +1056,6 @@ pair of parentheses with a question mark as the first thing within
 the parentheses.  The character after the question mark indicates
 the extension.
 
-The stability of these extensions varies widely.  Some have been
-part of the core language for many years.  Others are experimental
-and may change without warning or be completely removed.  Check
-the documentation on an individual feature to verify its current
-status.
-
 A question mark was chosen for this and for the minimal-matching
 construct because 1) question marks are rare in older regular
 expressions, and 2) whenever you see one, you should stop and
@@ -1894,6 +1888,9 @@ to inside of one of these constructs. The following equivalences apply:
 =item C<(?[ ])>
 
 See L<perlrecharclass/Extended Bracketed Character Classes>.
+
+Note that this feature is currently L<experimental|perlpolicy/experimental>;
+using it yields a warning in the C<experimental::regex_sets> category.
 
 =back
 
