@@ -1491,7 +1491,9 @@ ithread_kill(...)
         MUTEX_UNLOCK(&thread->mutex);
 
         if (no_handler) {
-            Perl_croak(aTHX_ "Signal %s received in thread %"UVuf", but no signal handler set.", sig_name, thread->tid);
+            Perl_croak(aTHX_ "Signal %s received in thread %" UVuf
+                             ", but no signal handler set.",
+                             sig_name, thread->tid);
         }
 
         /* Return the thread to allow for method chaining */
