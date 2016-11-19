@@ -626,7 +626,7 @@ SVf(x)
         SV *x
         PPCODE:
 #if { VERSION >= 5.004 }
-                x = sv_2mortal(newSVpvf("[%"SVf"]", SVfARG(x)));
+                x = sv_2mortal(newSVpvf("[%" SVf "]", SVfARG(x)));
 #endif
                 XPUSHs(x);
                 XSRETURN(1);
