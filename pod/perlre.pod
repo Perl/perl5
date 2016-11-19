@@ -1089,7 +1089,8 @@ One or more embedded pattern-match modifiers, to be turned on (or
 turned off, if preceded by C<"-">) for the remainder of the pattern or
 the remainder of the enclosing pattern group (if any).
 
-This is particularly useful for dynamic patterns, such as those read in from a
+This is particularly useful for dynamically-generated patterns,
+such as those read in from a
 configuration file, taken from an argument, or specified in a table
 somewhere.  Consider the case where some patterns want to be
 case-sensitive and some do not:  The case-insensitive ones merely need to
@@ -1148,11 +1149,13 @@ C<"()">, but doesn't make backreferences as C<"()"> does.  So
 
     @fields = split(/\b(?:a|b|c)\b/)
 
-is like
+matches the same field delimiters as
 
     @fields = split(/\b(a|b|c)\b/)
 
-but doesn't spit out extra fields.  It's also cheaper not to capture
+but doesn't spit out the delimiters themselves as extra fields (even though
+that's the behaviour of L<perlfunc/split> when its pattern contains capturing
+groups).  It's also cheaper not to capture
 characters if you don't need to.
 
 Any letters between C<"?"> and C<":"> act as flags modifiers as with
@@ -1237,8 +1240,8 @@ in the same order, in each of the alternations:
 Not doing so may lead to surprises:
 
   "12" =~ /(?| (?<a> \d+ ) | (?<b> \D+))/x;
-  say $+ {a};   # Prints '12'
-  say $+ {b};   # *Also* prints '12'.
+  say $+{a};    # Prints '12'
+  say $+{b};    # *Also* prints '12'.
 
 The problem here is that both the group named C<< a >> and the group
 named C<< b >> are aliases for the group belonging to C<< $1 >>.
@@ -1895,8 +1898,8 @@ see L</Combining RE Pieces>.
 
 A fundamental feature of regular expression matching involves the
 notion called I<backtracking>, which is currently used (when needed)
-by all regular non-possessive expression quantifiers, namely C<"*">, C<"*?">, C<"+">,
-C<"+?">, C<{n,m}>, and C<{n,m}?>.  Backtracking is often optimized
+by all regular non-possessive expression quantifiers, namely C<*>, C<*?>, C<+>,
+C<+?>, C<{n,m}>, and C<{n,m}?>.  Backtracking is often optimized
 internally, but the general principle outlined here is valid.
 
 For a regular expression to match, the I<entire> regular expression must
@@ -2135,7 +2138,7 @@ argument, then C<$REGERROR> and C<$REGMARK> are not touched at all.
 X<(*PRUNE)> X<(*PRUNE:NAME)>
 
 This zero-width pattern prunes the backtracking tree at the current point
-when backtracked into on failure. Consider the pattern C<I<A> (*PRUNE) I<B>>,
+when backtracked into on failure. Consider the pattern C</I<A> (*PRUNE) I<B>/>,
 where I<A> and I<B> are complex patterns. Until the C<(*PRUNE)> verb is reached,
 I<A> may backtrack as necessary to match. Once it is reached, matching
 continues in I<B>, which may also backtrack as necessary; however, should B
