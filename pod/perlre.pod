@@ -1682,23 +1682,28 @@ Here's a summary of the possible predicates:
 =item C<(1)> C<(2)> ...
 
 Checks if the numbered capturing group has matched something.
+Full syntax: C<< (?(1)then|else) >>
 
 =item C<(E<lt>I<NAME>E<gt>)> C<('I<NAME>')>
 
 Checks if a group with the given name has matched something.
+Full syntax: C<< (?(<name>)then|else) >>
 
 =item C<(?=...)> C<(?!...)> C<(?<=...)> C<(?<!...)>
 
 Checks whether the pattern matches (or does not match, for the C<"!">
 variants).
+Full syntax: C<< (?(?=lookahead)then|else) >>
 
 =item C<(?{ I<CODE> })>
 
 Treats the return value of the code block as the condition.
+Full syntax: C<< (?(?{ code })then|else) >>
 
 =item C<(R)>
 
 Checks if the expression has been evaluated inside of recursion.
+Full syntax: C<< (?(R)then|else) >>
 
 =item C<(R1)> C<(R2)> ...
 
@@ -1709,18 +1714,22 @@ inside of the n-th capture group. This check is the regex equivalent of
 
 In other words, it does not check the full recursion stack.
 
+Full syntax: C<< (?(R1)then|else) >>
+
 =item C<(R&I<NAME>)>
 
 Similar to C<(R1)>, this predicate checks to see if we're executing
 directly inside of the leftmost group with a given name (this is the same
 logic used by C<(?&I<NAME>)> to disambiguate). It does not check the full
 stack, but only the name of the innermost active recursion.
+Full syntax: C<< (?(R&name)then|else) >>
 
 =item C<(DEFINE)>
 
 In this case, the yes-pattern is never directly executed, and no
 no-pattern is allowed. Similar in spirit to C<(?{0})> but more efficient.
 See below for details.
+Full syntax: C<< (?(DEFINE)definitions...) >>
 
 =back
 
