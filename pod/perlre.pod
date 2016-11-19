@@ -1273,7 +1273,9 @@ will not do what you want.  That's because the C<(?!foo)> is just saying that
 the next thing cannot be "foo"--and it's not, it's a "bar", so "foobar" will
 match.  Use lookbehind instead (see below).
 
-=item C<(?<=pattern)> C<\K>
+=item C<(?<=pattern)>
+
+=item C<\K>
 X<(?<=)> X<look-behind, positive> X<lookbehind, positive> X<\K>
 
 A zero-width positive lookbehind assertion.  For example, C</(?<=\t)\w+/>
@@ -1307,9 +1309,9 @@ only for fixed-width lookbehind.
 
 =back
 
-=item C<(?'NAME'pattern)>
-
 =item C<< (?<NAME>pattern) >>
+
+=item C<(?'NAME'pattern)>
 X<< (?<NAME>) >> X<(?'NAME')> X<named capture> X<capture>
 
 A named capture group. Identical in every respect to normal capturing
