@@ -20702,6 +20702,7 @@ int main(int argc, char *argv[]) {
 # if LONG_DOUBLEKIND == 3 || LONG_DOUBLEKIND == 4
 /* the 80-bit long doubles might have garbage in their excess bytes */
     memset((char *)&ldinf + 10, '\0', LONG_DOUBLESIZE - 10);
+    memset((char *)&ldnan + 10, '\0', LONG_DOUBLESIZE - 10);
 # endif
   if (argc == 2) {
     switch (argv[1][0]) {
