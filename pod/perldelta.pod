@@ -15,11 +15,6 @@ release.
 If you are upgrading from an earlier release such as 5.25.5, first read
 L<perl5256delta>, which describes differences between 5.25.5 and 5.25.6.
 
-=head1 Notice
-
-Name.pl will be going away in the near future, documentation and warnings to
-this fact has been introduced.
-
 =head1 Core Enhancements
 
 XXX New core language features go here.  Summarize user-visible core language
@@ -91,16 +86,6 @@ ${^CAPTURE}[0].
 %{^CAPTURE} is the equivalent to %+ (ie named captures)
 
 %{^CAPTURE_ALL} is the equivalent to %- (ie all named captures).
-
-=head2 Enhancements and fixes for locale code
-
-locale.c and t/loc_tools.pl were updated:
-
-Fix not catching incompatible locales, and other minor updates.
-
-Use meaningful initialization msg.
-
-Output warning if debugging and 'no warnings'.
 
 =head2 hv.h: rework HEK_FLAGS to a proper member in struct hek
 
@@ -249,13 +234,6 @@ Enhancements in Regex concat COW implementation.
 
 =item *
 
-Add branch predictors for DEBUG statements
-
-It is unlikely that any given debug flag will be set in any given run, even
-under DEBUGGING builds.
-
-=item *
-
 Speed up AV and HV clearing/undeffing.
 
 =item *
@@ -362,6 +340,13 @@ L<POSIX> Version Bump
 
 =item *
 
+L<Unicode::UCD> has had its documentation updated to give a recipe for
+using it to get the information contained in F<unicore/Name.pl>.  It has
+long been deprecated to use any file from F<unicore/>, and their
+contents or even existence may change at any time without notice.
+
+=item *
+
 L<XXX> has been upgraded from version A.xx to B.yy.
 
 =back
@@ -448,8 +433,8 @@ Clarify behavior single quote regexps.
 
 =item *
 
-Add caution about incompatible locales. Some locales aren't compatible with
-Perl. Note the potential bad consequences of using them.
+Some locales aren't compatible with Perl.  Note the potential bad
+consequences of using them.
 
 =back
 
@@ -696,6 +681,10 @@ that they represent may be covered elsewhere.
 
 XS-APItest/t/utf8.t: Several small fixes and enhancements.
 
+=item *
+
+Tests for locales were erroneously using locales incompatible with Perl.
+
 =back
 
 =head1 Platform Support
@@ -847,26 +836,13 @@ Handle SvIMMORTALs in LHS of list assign. [perl #129991]
 
 [perl #130010] a5540cf breaks texinfo
 
-When a regular expression is compiled that contains user-defined properties,
-the subroutine the user must furnish to implement those properties may not yet
-be defined.  To cope with this possibility, the regex pattern compiler stores
-the name and package of the subroutine, and this is to be expanded the first
-time the property is actually used during execution.  Once expanded, the
-property should be immutable, and so the scalar containing the expansion is
-marked read-only.  It turns out that prior to the blamed commit, that
-read-only-ness was being bypassed in some instances simply by freeing the
-scalar, replaced by a new one.  The commit changed that.  The pattern may
-contain components both known at compile time, and deferred until runtime.  The
-two are combined at the time of expansion, but that was now running afoul of
-the read-only setting.  This commit simply turns off the read-only flag at the
-time of expansion, and it's turned on again afterwards.
+This involved user-defined Unicode properties.
 
 =item *
 
-Fix error message for unclosed \N{ in regcomp.
+Fix error message for unclosed C<\N{> in regcomp.
 
-An unclosed C<\N{> that made it through to the regex engine rather than being
-handled by the lexer would erroneously trigger the error for
+An unclosed C<\N{> could give the wrong error message
 C<"\N{NAME} must be resolved by the lexer">.
 
 =item *
