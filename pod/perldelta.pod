@@ -138,23 +138,51 @@ Better optimise array and hash assignment
 
 =item *
 
-L<Time::HiRes> has been updated to use clockid_t.
+L<podlators> has been upgraded from version 4.08 to 4.09.
 
 =item *
 
-L<Data::Dumper> the XS implementation now supports Deparse.
+L<Archive::Tar> has been upgraded from version 2.14 to 2.18.
 
 =item *
 
-L<Unicode::Normalize> is now maintained by p5p and has been moved to dist/
+L<B> has been upgraded from version 1.64 to 1.65.
 
 =item *
 
-L<Errno> Document that using C<%!> loads Errno for you.
+L<Data::Dumper> has been upgraded from version 2.162 to 2.165.
+
+The XS implementation now supports Deparse.
 
 =item *
 
-L<Unicode::Collate> has been upgraded from version 1.14 to 1.18.
+L<Devel::Peek> has been upgraded from version 1.25 to 1.26.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.39 to 1.40.
+
+=item *
+
+L<Errno> has been upgraded from version 1.26 to 1.27.
+
+Document that using C<%!> loads Errno for you.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.65 to 3.66.
+
+=item *
+
+L<Hash::Util> has been upgraded from version 0.21 to 0.22.
+
+=item *
+
+L<JSON::PP> has been upgraded from version 2.27400_01 to 2.27400_02.
+
+=item *
+
+L<List::Util> has been upgraded from version 1.46 to 1.46_02.
 
 =item *
 
@@ -164,21 +192,21 @@ There have also been some core customizations.
 
 =item *
 
-L<podlators> has been upgraded from version 4.08 to 4.09.
+L<Math::Complex> has been upgraded from version 1.59 to 1.5901.
 
 =item *
 
-L<Archive::Tar> has been upgraded from version 2.16 to 2.18.
-
-Capture STDERR when necessary.
-
-Several minor updates.
+L<Module::CoreList> has been upgraded from version 5.20161020 to 5.20161120.
 
 =item *
 
-L<Net::Ping> remove sudo from 500_ping_icmp.t.
+L<mro> has been upgraded from version 1.19 to 1.20.
 
-Upgrade from version 2.51 to 2.55.
+=item *
+
+L<Net::Ping> has been upgraded from version 2.51 to 2.55.
+
+Remove sudo from 500_ping_icmp.t.
 
 Avoid stderr noise in tests
 
@@ -186,7 +214,19 @@ Check for echo in new Net::Ping tests.
 
 =item *
 
-L<Test::Simple> has been upgraded from version 1.302059 to 1.302062.
+L<Opcode> has been upgraded from version 1.38 to 1.39.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.73 to 1.75.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.46 to 1.46_02.
+
+=item *
+
+L<Storable> has been upgraded from version 2.58 to 2.59.
 
 =item *
 
@@ -194,26 +234,33 @@ L<Term::ANSIColor> has been upgraded from version 4.05 to 4.06.
 
 =item *
 
-L<Scalar::Utils> and L<List::Utils> have been customized in core.
+L<Test::Simple> has been upgraded from version 1.302059 to 1.302062.
 
 =item *
 
-L<Math::Complex> has been customized in core.
+L<threads> has been upgraded from version 2.09 to 2.10.
 
 =item *
 
-L<JSON::PP> Customized in core.
+L<Time::HiRes> has been upgraded from version 1.9740_01 to 1.9740_03.
+
+Now uses clockid_t.
 
 =item *
 
-L<POSIX> Version Bump
+L<Unicode::Collate> has been upgraded from version 1.14 to 1.18.
 
 =item *
 
-L<Unicode::UCD> has had its documentation updated to give a recipe for
-using it to get the information contained in F<unicore/Name.pl>.  It has
-long been deprecated to use any file from F<unicore/>, and their
-contents or even existence may change at any time without notice.
+L<Unicode::Normalize> is now maintained by p5p and has been moved to dist/
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.66 to 0.67.
+
+=item *
+
+L<XS::Typemap> has been upgraded from version 0.14 to 0.15.
 
 =back
 
@@ -581,7 +628,7 @@ List assignment in list context where the LHS contained aggregates and
 where there were not enough RHS elements, used to skip scalar lvalues.
 Previously, C<(($a,$b,@c,$d) = (1))> in list context returned C<($a)>; now
 it returns C<($a,$b,$d)>. C<(($a,$b,$c) = (1))> is unchanged: it still
-returns <($a,$b,$c)>. This can be seen in the following:
+returns C<($a,$b,$c)>. This can be seen in the following:
 
     sub inc { $_++ for @_ }
     inc(($a,$b,@c,$d) = (10))
