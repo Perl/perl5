@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.45';
+our $VERSION = '1.46';
 
 our %feature = (
     fc              => 'feature_fc',
@@ -174,7 +174,9 @@ potentially using Unicode in your program, the
 C<use feature 'unicode_strings'> subpragma is B<strongly> recommended.
 
 This feature is available starting with Perl 5.12; was almost fully
-implemented in Perl 5.14; and extended in Perl 5.16 to cover C<quotemeta>.
+implemented in Perl 5.14; and extended in Perl 5.16 to cover C<quotemeta>;
+and extended further in Perl 5.26 to cover L<the range
+operator|perlop/Range Operators>.
 
 =head2 The 'unicode_eval' and 'evalbytes' features
 

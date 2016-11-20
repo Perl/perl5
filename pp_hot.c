@@ -2883,6 +2883,8 @@ PP(pp_iter)
            It has SvPVX of "" and SvCUR of 0, which is what we want.  */
         STRLEN maxlen = 0;
         const char *max = SvPV_const(end, maxlen);
+        if (DO_UTF8(end) && IN_UNI_8_BIT)
+            maxlen = sv_len_utf8_nomg(end);
         if (UNLIKELY(SvNIOK(cur) || SvCUR(cur) > maxlen))
             goto retno;
 

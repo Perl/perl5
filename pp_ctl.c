@@ -1222,6 +1222,8 @@ PP(pp_flop)
 	    const char * const tmps = SvPV_nomg_const(right, len);
 
 	    SV *sv = newSVpvn_flags(lpv, llen, SvUTF8(left)|SVs_TEMP);
+            if (DO_UTF8(right) && IN_UNI_8_BIT)
+                len = sv_len_utf8_nomg(right);
 	    while (!SvNIOKp(sv) && SvCUR(sv) <= len) {
 		XPUSHs(sv);
 	        if (strEQ(SvPVX_const(sv),tmps))

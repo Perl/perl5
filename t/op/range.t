@@ -9,7 +9,7 @@ BEGIN {
 
 use Config;
 
-plan (141);
+plan (145);
 
 is(join(':',1..5), '1:2:3:4:5');
 
@@ -41,6 +41,20 @@ is($x, 'abcdefghijklmnopqrstuvwxyz');
 
 @x = 'A'..'ZZ';
 is (scalar @x, 27 * 26);
+
+foreach (0, 1) {
+    use feature 'unicode_strings';
+    $s = "a";
+    $e = "\xFF";
+    utf8::upgrade($e) if $_;
+    @x = $s .. $e;
+    is (scalar @x, 26, "list-context range with rhs 0xFF, utf8=$_");
+    @y = ();
+    foreach ($s .. $e) {
+        push @y, $_;
+    }
+    is(join(",", @y), join(",", @x), "foreach range with rhs 0xFF, utf8=$_");
+}
 
 @x = '09' .. '08';  # should produce '09', '10',... '99' (strange but true)
 is(join(",", @x), join(",", map {sprintf "%02d",$_} 9..99));

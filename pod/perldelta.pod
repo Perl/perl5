@@ -507,6 +507,13 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 Under C<use utf8>, the entire Perl program is now checked that the UTF-8
 is wellformed.  This resolves [perl #126310].
 
+=item *
+
+The range operator C<..> on strings now handles its arguments correctly when in
+the scope of the L<< C<unicode_strings>|feature/"The 'unicode_strings' feature" >>
+feature. The previous behaviour was sufficiently unexpected that we believe no
+correct program could have made use of it.
+
 =back
 
 =head1 Known Problems

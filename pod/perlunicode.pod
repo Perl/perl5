@@ -1814,6 +1814,16 @@ Prior to that, or outside its scope, no code points above 127 are quoted
 in UTF-8 encoded strings, but in byte encoded strings, code points
 between 128-255 are always quoted.
 
+=item *
+
+In the C<..> or L<range|perlop/Range Operators> operator.
+
+Starting in Perl 5.26.0, the range operator on strings treats their lengths
+consistently within the scope of C<unicode_strings>. Prior to that, or
+outside its scope, it could produce strings whose length in characters
+exceeded that of the right-hand side, where the right-hand side took up more
+bytes than the correct range endpoint.
+
 =back
 
 You can see from the above that the effect of C<unicode_strings>

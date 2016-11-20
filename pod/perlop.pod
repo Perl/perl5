@@ -1074,6 +1074,12 @@ If the final value specified is not in the sequence that the magical
 increment would produce, the sequence goes until the next value would
 be longer than the final value specified.
 
+As of Perl 5.26, the list-context range operator on strings works as expected
+in the scope of L<< S<C<"use feature 'unicode_strings">>|feature/The
+'unicode_strings' feature >>. In previous versions, and outside the scope of
+that feature, it exhibits L<perlunicode/The "Unicode Bug">: its behavior
+depends on the internal encoding of the range endpoint.
+
 If the initial value specified isn't part of a magical increment
 sequence (that is, a non-empty string matching C</^[a-zA-Z]*[0-9]*\z/>),
 only the initial value will be returned.  So the following will only
