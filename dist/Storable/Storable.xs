@@ -1175,7 +1175,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 	STMT_START {							\
 		SV *ref;						\
 		if (cxt->flags & FLAG_BLESS_OK) {			\
-			TRACEME(("blessing 0x%"UVxf" in %s", PTR2UV(s), (HvNAME_get(stash)))); \
+			TRACEME(("blessing 0x%" UVxf " in %s", PTR2UV(s), (HvNAME_get(stash)))); \
 			ref = newRV_noinc(s);				\
 			if (cxt->in_retrieve_overloaded && Gv_AMG(stash)) { \
 				cxt->in_retrieve_overloaded = 0;	\
@@ -1186,7 +1186,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 			SvREFCNT_dec(ref);				\
 		}							\
 		else {							\
-			TRACEME(("not blessing 0x%"UVxf" in %s", PTR2UV(s), \
+			TRACEME(("not blessing 0x%" UVxf " in %s", PTR2UV(s), \
 				 (HvNAME_get(stash))));		\
 		}							\
 	} STMT_END
@@ -2301,7 +2301,7 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
 			WRITE(&iv, sizeof(iv));
 		}
 
-		TRACEME(("ok (integer 0x%"UVxf", value = %" IVdf ")", PTR2UV(sv), iv));
+		TRACEME(("ok (integer 0x%" UVxf ", value = %" IVdf ")", PTR2UV(sv), iv));
 	} else if (flags & SVf_NOK) {
 		NV nv;
 #if (PATCHLEVEL <= 6)
@@ -2532,7 +2532,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 	} else {
 		I32 l = (I32)len;
 		if (flagged_hash) {
-			TRACEME(("store_hash (0x%" UVxf") (flags %x)", PTR2UV(hv),
+			TRACEME(("store_hash (0x%" UVxf ") (flags %x)", PTR2UV(hv),
 				 (unsigned int)hash_flags));
 			PUTMARK(SX_FLAG_HASH);
 			PUTMARK(hash_flags);
@@ -2849,7 +2849,7 @@ static int store_hentry(pTHX_ stcxt_t *cxt, HV* hv, UV i, HE *he, unsigned char 
 	 * Store value first.
 	 */
 
-	TRACEME(("(#%d) value 0x%"UVxf, (int)i, PTR2UV(val)));
+	TRACEME(("(#%d) value 0x%" UVxf, (int)i, PTR2UV(val)));
 
 	{
 		HEK* hek = HeKEY_hek(he);
@@ -2927,12 +2927,12 @@ static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags)
 	UV len = (UV)HvTOTALKEYS(hv);
 #endif
 	if (hash_flags) {
-		TRACEME(("store_hash (0x%"UVxf") (flags %x)", PTR2UV(hv),
+		TRACEME(("store_hash (0x%" UVxf ") (flags %x)", PTR2UV(hv),
 			 (int) hash_flags));
 	} else {
-		TRACEME(("store_hash (0x%"UVxf")", PTR2UV(hv)));
+		TRACEME(("store_hash (0x%" UVxf ")", PTR2UV(hv)));
 	}
-	TRACEME(("size = %"UVuf", used = %"UVuf, len, (UV)HvUSEDKEYS(hv)));
+	TRACEME(("size = %" UVuf ", used = %" UVuf, len, (UV)HvUSEDKEYS(hv)));
 
 	array = HvARRAY(hv);
 	for (i = 0; i <= (Size_t)HvMAX(hv); i++) {
@@ -3153,14 +3153,12 @@ static int store_tied_item(pTHX_ stcxt_t *cxt, SV *sv)
 	if (mg->mg_ptr) {
 		TRACEME(("store_tied_item: storing a ref to a tied hash item"));
 		PUTMARK(SX_TIED_KEY);
-		TRACEME(("store_tied_item: storing OBJ 0x%" UVxf,
-                         PTR2UV(mg->mg_obj)));
+		TRACEME(("store_tied_item: storing OBJ 0x%" UVxf, PTR2UV(mg->mg_obj)));
 
 		if ((ret = store(aTHX_ cxt, mg->mg_obj)))		/* Extra () for -Wall, grr... */
 			return ret;
 
-		TRACEME(("store_tied_item: storing PTR 0x%" UVxf,
-                         PTR2UV(mg->mg_ptr)));
+		TRACEME(("store_tied_item: storing PTR 0x%" UVxf, PTR2UV(mg->mg_ptr)));
 
 		if ((ret = store(aTHX_ cxt, (SV *) mg->mg_ptr)))	/* Idem, for -Wall */
 			return ret;
@@ -3169,8 +3167,7 @@ static int store_tied_item(pTHX_ stcxt_t *cxt, SV *sv)
 
 		TRACEME(("store_tied_item: storing a ref to a tied array item "));
 		PUTMARK(SX_TIED_IDX);
-		TRACEME(("store_tied_item: storing OBJ 0x%" UVxf,
-                         PTR2UV(mg->mg_obj)));
+		TRACEME(("store_tied_item: storing OBJ 0x%" UVxf, PTR2UV(mg->mg_obj)));
 
 		if ((ret = store(aTHX_ cxt, mg->mg_obj)))		/* Idem, for -Wall */
 			return ret;
@@ -3426,8 +3423,7 @@ static int store_hook(
 			goto sv_seen;		/* Avoid moving code too far to the right */
 #endif
 
-		TRACEME(("listed object %d at 0x%" UVxf " is unknown",
-                         i-1, PTR2UV(xsv)));
+		TRACEME(("listed object %d at 0x%" UVxf " is unknown", i-1, PTR2UV(xsv)));
 
 		/*
 		 * We need to recurse to store that object and get it to be known
@@ -3630,8 +3626,8 @@ check_done:
 					(svt == SVt_PVAV) ? "array" : "scalar"));
 		}
 
-		TRACEME(("handling the magic object 0x%" UVxf " part of 0x%"
-                         UVxf, PTR2UV(mg->mg_obj), PTR2UV(sv)));
+		TRACEME(("handling the magic object 0x%" UVxf " part of 0x%" UVxf,
+			PTR2UV(mg->mg_obj), PTR2UV(sv)));
 
 		/*
 		 * [<magic object>]
@@ -3941,8 +3937,7 @@ static int store(pTHX_ stcxt_t *cxt, SV *sv)
 		tagval = htonl(LOW_32BITS(*svh));
 #endif
 
-		TRACEME(("object 0x%" UVxf " seen as #%d",
-                         PTR2UV(sv), ntohl(tagval)));
+		TRACEME(("object 0x%" UVxf " seen as #%d", PTR2UV(sv), ntohl(tagval)));
 
 		PUTMARK(SX_OBJECT);
 		WRITE_I32(tagval);
@@ -4287,8 +4282,7 @@ static SV *retrieve_idx_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 
 	sva = av_fetch(cxt->aclass, idx, FALSE);
 	if (!sva)
-		CROAK(("Class name #%" IVdf " should have been seen already",
-                       (IV) idx));
+		CROAK(("Class name #%" IVdf " should have been seen already", (IV) idx));
 
 	classname = SvPVX(*sva);	/* We know it's a PV, by construction */
 
@@ -4495,8 +4489,8 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 
 		sva = av_fetch(cxt->aclass, idx, FALSE);
 		if (!sva)
-			CROAK(("Class name #%" IVdf
-                               " should have been seen already", (IV) idx));
+			CROAK(("Class name #%" IVdf " should have been seen already",
+				(IV) idx));
 
 		classname = SvPVX(*sva);	/* We know it's a PV, by construction */
 		TRACEME(("class ID %d => %s", (int)idx, classname));
@@ -4616,9 +4610,8 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 					xsv = &PL_sv_undef;
 					svh = &xsv;
 				} else {
-					CROAK(("Object #%" IVdf
-                                        " should have been retrieved already",
-                                        (IV) tag));
+					CROAK(("Object #%" IVdf " should have been retrieved already",
+					       (IV) tag));
 				}
 			}
 			xsv = *svh;
@@ -5433,7 +5426,7 @@ static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname)
 	GETMARK(type);
 	TRACEME(("object type %d", type));
 	READ(&len, 8);
-	TRACEME(("wlen %"UVuf, len));
+	TRACEME(("wlen %" UVuf, len));
 	switch (type) {
 	case SX_LSCALAR:
 		sv = get_lstring(aTHX_ cxt, len, 0, cname);
@@ -5456,7 +5449,7 @@ static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname)
 		CROAK(("Unexpected type %d in retrieve_lobject\n", type));
 	}
 
-	TRACEME(("ok (retrieve_lobject at 0x%"UVxf")", PTR2UV(sv)));
+	TRACEME(("ok (retrieve_lobject at 0x%" UVxf ")", PTR2UV(sv)));
 	return sv;
 }
 
@@ -5738,7 +5731,7 @@ static SV *get_larray(pTHX_ stcxt_t *cxt, UV len, const char *cname)
 	}
 	if (seen_null) av_fill(av, len-1);
 
-	TRACEME(("ok (get_larray at 0x%"UVxf")", PTR2UV(av)));
+	TRACEME(("ok (get_larray at 0x%" UVxf ")", PTR2UV(av)));
 
 	return (SV *) av;
 }
@@ -5821,7 +5814,7 @@ static SV *get_lhash(pTHX_ stcxt_t *cxt, UV len, int hash_flags, const char *cna
 			return (SV *) 0;
 	}
 
-	TRACEME(("ok (get_lhash at 0x%"UVxf")", PTR2UV(hv)));
+	TRACEME(("ok (get_lhash at 0x%" UVxf ")", PTR2UV(hv)));
 	return (SV *) hv;
 }
 
@@ -6581,8 +6574,7 @@ static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname)
 
 			svh = av_fetch(cxt->aseen, tagn, FALSE);
 			if (!svh)
-				CROAK(("Object #%" IVdf
-                                       " should have been retrieved already",
+				CROAK(("Object #%" IVdf " should have been retrieved already",
 					(IV) tagn));
 			sv = *svh;
 			TRACEME(("has retrieved #%d at 0x%" UVxf, (int)tagn, PTR2UV(sv)));
@@ -6623,8 +6615,7 @@ static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname)
 		tag = ntohl(tag);
 		svh = av_fetch(cxt->aseen, tag, FALSE);
 		if (!svh)
-			CROAK(("Object #%" IVdf
-                               " should have been retrieved already",
+			CROAK(("Object #%" IVdf " should have been retrieved already",
 				(IV) tag));
 		sv = *svh;
 		TRACEME(("had retrieved #%d at 0x%" UVxf, (int)tag, PTR2UV(sv)));
