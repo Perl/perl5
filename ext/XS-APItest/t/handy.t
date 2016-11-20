@@ -453,6 +453,8 @@ foreach my $name (sort keys %to_properties) {
 }
 
 # This is primarily to make sure that no non-Unicode warnings get generated
-is(scalar @warnings, 0, "No warnings were generated " . join ", ", @warnings);
+unless (is(scalar @warnings, 0, "No warnings were generated")) {
+    diag @warnings;
+}
 
 done_testing;
