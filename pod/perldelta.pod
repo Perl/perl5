@@ -707,8 +707,6 @@ source tree.
 
 XXX
 
-=back
-
 =item Darwin
 
 don't treat -Dprefix=/usr as special, instead require an extra option
