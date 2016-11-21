@@ -1768,7 +1768,7 @@ my @tests = (
         $UTF8_DISALLOW_ABOVE_31_BIT,
         $UTF8_GOT_ABOVE_31_BIT,
         'utf8', 0,
-        (! isASCII) ? $max_bytes : ($is64bit) ? $max_bytes : 7,   # XXX
+        (! isASCII || $is64bit) ? $max_bytes : 7,   # XXX
         qr/overflows/
     ],
 );
