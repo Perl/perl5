@@ -13788,7 +13788,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     skip_to_be_ignored_text(pRExC_state, &RExC_parse,
                                             FALSE /* Don't force to /x */ );
     if (PASS2 && *RExC_parse == '{' && OP(ret) != SBOL && ! regcurly(RExC_parse)) {
-        ckWARNregdep(RExC_parse + 1, "Unescaped left brace in regex is deprecated here, passed through");
+        ckWARNregdep(RExC_parse + 1, "Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through");
     }
 
     return(ret);

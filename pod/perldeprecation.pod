@@ -30,6 +30,32 @@ disappear in Perl 5.30.
 Code using C<< File::Glob::glob() >> should call
 C<< File::Glob::bsd_glob() >> instead.
 
+
+=head3 Unescaped left braces in regular expressions
+
+The simple rule to remember, if you want to match a literal C<{>
+character (U+007B C<LEFT CURLY BRACKET>) in a regular expression
+pattern, is to escape each literal instance of it in some way.
+Generally easiest is to precede it with a backslash, like C<\{>
+or enclose it in square brackets (C<[{]>).  If the pattern
+delimiters are also braces, any matching right brace (C<}>) should
+also be escaped to avoid confusing the parser, for example,
+
+ qr{abc\{def\}ghi}
+
+Forcing literal C<{> characters to be escaped will enable the Perl
+language to be extended in various ways in future releases.  To avoid
+needlessly breaking existing code, the restriction is is not enforced in
+contexts where there are unlikely to ever be extensions that could
+conflict with the use there of C<{> as a literal.
+
+Literal uses of C<{> were deprecated in Perl 5.20, and some uses of it
+started to give deprecation warnings since. These cases were made fatal
+in Perl 5.26. Due to an oversight, not all cases of a use of a literal
+C<{> got a deprecation warning. These cases started warning in Perl 5.26,
+and they will be fatal by Perl 5.30.
+
+
 =head2 Perl 5.28
 
 =head3 Attribute "%s" is deprecated, and will disappear in 5.28
