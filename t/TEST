@@ -154,7 +154,7 @@ if (-f 'TEST' && -f 'harness' && -d '../lib') {
     @INC = '../lib';
 }
 
-die "You need to run \"make test\" first to set things up.\n"
+die "You need to run \"make test_prep\" first to set things up.\n"
   unless -e 'perl' or -e 'perl.exe' or -e 'perl.pm';
 
 # check leakage for embedders
