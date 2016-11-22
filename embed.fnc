@@ -691,28 +691,28 @@ XopR	|I32	|was_lvalue_sub
 #ifndef PERL_NO_INLINE_FUNCTIONS
 ApMRnP	|STRLEN	|_is_utf8_char_helper|NN const U8 * const s|NN const U8 * e|const U32 flags
 #endif
-ADMpPR	|U32	|to_uni_upper_lc|U32 c
-ADMpPR	|U32	|to_uni_title_lc|U32 c
-ADMpPR	|U32	|to_uni_lower_lc|U32 c
-ADMpPR	|bool	|is_uni_alnum	|UV c
-ADMpPR	|bool	|is_uni_alnumc	|UV c
-ADMpPR	|bool	|is_uni_idfirst	|UV c
-ADMpPR	|bool	|is_uni_alpha	|UV c
+ADMpR	|U32	|to_uni_upper_lc|U32 c
+ADMpR	|U32	|to_uni_title_lc|U32 c
+ADMpR	|U32	|to_uni_lower_lc|U32 c
+ADMpR	|bool	|is_uni_alnum	|UV c
+ADMpR	|bool	|is_uni_alnumc	|UV c
+ADMpR	|bool	|is_uni_idfirst	|UV c
+ADMpR	|bool	|is_uni_alpha	|UV c
 ADMpPR	|bool	|is_uni_ascii	|UV c
 ADMpPR	|bool	|is_uni_blank	|UV c
 ADMpPR	|bool	|is_uni_space	|UV c
 ADMpPR	|bool	|is_uni_cntrl	|UV c
-ADMpPR	|bool	|is_uni_graph	|UV c
-ADMpPR	|bool	|is_uni_digit	|UV c
-ADMpPR	|bool	|is_uni_upper	|UV c
-ADMpPR	|bool	|is_uni_lower	|UV c
-ADMpPR	|bool	|is_uni_print	|UV c
-ADMpPR	|bool	|is_uni_punct	|UV c
+ADMpR	|bool	|is_uni_graph	|UV c
+ADMpR	|bool	|is_uni_digit	|UV c
+ADMpR	|bool	|is_uni_upper	|UV c
+ADMpR	|bool	|is_uni_lower	|UV c
+ADMpR	|bool	|is_uni_print	|UV c
+ADMpR	|bool	|is_uni_punct	|UV c
 ADMpPR	|bool	|is_uni_xdigit	|UV c
 AMp	|UV	|to_uni_upper	|UV c|NN U8 *p|NN STRLEN *lenp
 AMp	|UV	|to_uni_title	|UV c|NN U8 *p|NN STRLEN *lenp
-ADMpPR	|bool	|isIDFIRST_lazy	|NN const char* p
-ADMpPR	|bool	|isALNUM_lazy	|NN const char* p
+ADMpR	|bool	|isIDFIRST_lazy	|NN const char* p
+ADMpR	|bool	|isALNUM_lazy	|NN const char* p
 #ifdef PERL_IN_UTF8_C
 snR	|U8	|to_lower_latin1|const U8 c|NULLOK U8 *p|NULLOK STRLEN *lenp
 inPR	|bool	|is_utf8_cp_above_31_bits|NN const U8 * const s|NN const U8 * const e
@@ -726,22 +726,22 @@ p	|UV	|_to_upper_title_latin1|const U8 c|NN U8 *p|NN STRLEN *lenp|const char S_o
 AMp	|UV	|to_uni_lower	|UV c|NN U8 *p|NN STRLEN *lenp
 AMmp	|UV	|to_uni_fold	|UV c|NN U8 *p|NN STRLEN *lenp
 AMp	|UV	|_to_uni_fold_flags|UV c|NN U8 *p|NN STRLEN *lenp|U8 flags
-ADMpPR	|bool	|is_uni_alnum_lc|UV c
-ADMpPR	|bool	|is_uni_alnumc_lc|UV c
-ADMpPR	|bool	|is_uni_idfirst_lc|UV c
+ADMpR	|bool	|is_uni_alnum_lc|UV c
+ADMpR	|bool	|is_uni_alnumc_lc|UV c
+ADMpR	|bool	|is_uni_idfirst_lc|UV c
 AMpR	|bool	|_is_uni_perl_idcont|UV c
 AMpR	|bool	|_is_uni_perl_idstart|UV c
-ADMpPR	|bool	|is_uni_alpha_lc|UV c
+ADMpR	|bool	|is_uni_alpha_lc|UV c
 ADMpPR	|bool	|is_uni_ascii_lc|UV c
 ADMpPR	|bool	|is_uni_space_lc|UV c
 ADMpPR	|bool	|is_uni_blank_lc|UV c
 ADMpPR	|bool	|is_uni_cntrl_lc|UV c
-ADMpPR	|bool	|is_uni_graph_lc|UV c
-ADMpPR	|bool	|is_uni_digit_lc|UV c
-ADMpPR	|bool	|is_uni_upper_lc|UV c
-ADMpPR	|bool	|is_uni_lower_lc|UV c
-ADMpPR	|bool	|is_uni_print_lc|UV c
-ADMpPR	|bool	|is_uni_punct_lc|UV c
+ADMpR	|bool	|is_uni_graph_lc|UV c
+ADMpR	|bool	|is_uni_digit_lc|UV c
+ADMpR	|bool	|is_uni_upper_lc|UV c
+ADMpR	|bool	|is_uni_lower_lc|UV c
+ADMpR	|bool	|is_uni_print_lc|UV c
+ADMpR	|bool	|is_uni_punct_lc|UV c
 ADMpPR	|bool	|is_uni_xdigit_lc|UV c
 AnidRP	|bool	|is_utf8_invariant_string|NN const U8* const s|STRLEN const len
 AmnpdRP	|bool	|is_ascii_string|NN const U8* const s|const STRLEN len
@@ -1210,9 +1210,9 @@ ApdO	|HV*	|get_hv		|NN const char *name|I32 flags
 ApdO	|CV*	|get_cv		|NN const char* name|I32 flags
 Apd	|CV*	|get_cvn_flags	|NN const char* name|STRLEN len|I32 flags
 #ifdef WIN32
-ApPM	|char*	|my_setlocale	|int category|NULLOK const char* locale
+ApM	|char*	|my_setlocale	|int category|NULLOK const char* locale
 #else
-AmPM	|char*	|my_setlocale	|int category|NULLOK const char* locale
+AmM	|char*	|my_setlocale	|int category|NULLOK const char* locale
 #endif
 ApOM	|int	|init_i18nl10n	|int printwarn
 ApOM	|int	|init_i18nl14n	|int printwarn
@@ -2660,7 +2660,7 @@ s	|void	|print_collxfrm_input_and_return		\
     && (defined(PERL_IN_LOCALE_C) || defined (PERL_EXT_POSIX))
 ApM	|bool	|_is_cur_LC_category_utf8|int category
 #	ifdef DEBUGGING
-AMnPpR	|char *	|_setlocale_debug_string|const int category		    \
+AMnpR	|char *	|_setlocale_debug_string|const int category		    \
 					|NULLOK const char* const locale    \
 					|NULLOK const char* const retval
 #	endif

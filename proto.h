@@ -1316,15 +1316,13 @@ PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, GV *gv, bool not_implicit, bool w
 	assert(io)
 PERL_CALLCONV bool	Perl_isALNUM_lazy(pTHX_ const char* p)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_ISALNUM_LAZY	\
 	assert(p)
 
 PERL_CALLCONV bool	Perl_isIDFIRST_lazy(pTHX_ const char* p)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_ISIDFIRST_LAZY	\
 	assert(p)
 
@@ -1361,33 +1359,27 @@ PERL_STATIC_INLINE bool	S_is_strict_utf8_string_loclen(const U8 *s, const STRLEN
 	assert(s)
 PERL_CALLCONV bool	Perl_is_uni_alnum(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_alnum_lc(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_alnumc(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_alnumc_lc(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_alpha(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_alpha_lc(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_ascii(pTHX_ UV c)
 			__attribute__deprecated__
@@ -1421,63 +1413,51 @@ PERL_CALLCONV bool	Perl_is_uni_cntrl_lc(pTHX_ UV c)
 
 PERL_CALLCONV bool	Perl_is_uni_digit(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_digit_lc(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_graph(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_graph_lc(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_idfirst(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_idfirst_lc(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_lower(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_lower_lc(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_print(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_print_lc(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_punct(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_punct_lc(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_space(pTHX_ UV c)
 			__attribute__deprecated__
@@ -1491,13 +1471,11 @@ PERL_CALLCONV bool	Perl_is_uni_space_lc(pTHX_ UV c)
 
 PERL_CALLCONV bool	Perl_is_uni_upper(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_upper_lc(pTHX_ UV c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV bool	Perl_is_uni_xdigit(pTHX_ UV c)
 			__attribute__deprecated__
@@ -3450,24 +3428,21 @@ PERL_CALLCONV UV	Perl_to_uni_lower(pTHX_ UV c, U8 *p, STRLEN *lenp);
 	assert(p); assert(lenp)
 PERL_CALLCONV U32	Perl_to_uni_lower_lc(pTHX_ U32 c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV UV	Perl_to_uni_title(pTHX_ UV c, U8 *p, STRLEN *lenp);
 #define PERL_ARGS_ASSERT_TO_UNI_TITLE	\
 	assert(p); assert(lenp)
 PERL_CALLCONV U32	Perl_to_uni_title_lc(pTHX_ U32 c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV UV	Perl_to_uni_upper(pTHX_ UV c, U8 *p, STRLEN *lenp);
 #define PERL_ARGS_ASSERT_TO_UNI_UPPER	\
 	assert(p); assert(lenp)
 PERL_CALLCONV U32	Perl_to_uni_upper_lc(pTHX_ U32 c)
 			__attribute__deprecated__
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV UV	Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, const char *normal, const char *special)
 			__attribute__deprecated__;
@@ -3741,10 +3716,7 @@ PERL_CALLCONV void*	Perl_my_cxt_init(pTHX_ int *index, size_t size);
 #  endif
 #endif
 #if !(defined(WIN32))
-/* PERL_CALLCONV char*	my_setlocale(pTHX_ int category, const char* locale)
-			__attribute__warn_unused_result__
-			__attribute__pure__; */
-
+/* PERL_CALLCONV char*	my_setlocale(pTHX_ int category, const char* locale); */
 #endif
 #if !(defined(_MSC_VER))
 PERL_CALLCONV_NO_RET int	Perl_magic_regdatum_set(pTHX_ SV* sv, MAGIC* mg)
@@ -4081,8 +4053,7 @@ STATIC int	S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp);
 #  endif
 #  if defined(USE_LOCALE)     && (defined(PERL_IN_LOCALE_C) || defined (PERL_EXT_POSIX))
 PERL_CALLCONV char *	Perl__setlocale_debug_string(const int category, const char* const locale, const char* const retval)
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+			__attribute__warn_unused_result__;
 
 #  endif
 #  if defined(USE_LOCALE) && defined(PERL_IN_LOCALE_C)
@@ -5938,10 +5909,7 @@ PERL_CALLCONV const char*	Perl_quadmath_format_single(const char* format);
 	assert(format)
 #endif
 #if defined(WIN32)
-PERL_CALLCONV char*	Perl_my_setlocale(pTHX_ int category, const char* locale)
-			__attribute__warn_unused_result__
-			__attribute__pure__;
-
+PERL_CALLCONV char*	Perl_my_setlocale(pTHX_ int category, const char* locale);
 PERL_CALLCONV_NO_RET void	win32_croak_not_implemented(const char * fname)
 			__attribute__noreturn__;
 #define PERL_ARGS_ASSERT_WIN32_CROAK_NOT_IMPLEMENTED	\
