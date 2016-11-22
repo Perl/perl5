@@ -12635,6 +12635,11 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, bool top, int *scalars_p)
         break;
     }
 
+    /* XXX this assumes that all other ops are "transparent" - i.e. that
+     * they can return some of their children. While this true for e.g.
+     * sort and grep, it's not true for e.g. map. We really need a
+     * 'transparent' flag added to regen/opcodes
+     */
     if (o->op_flags & OPf_KIDS) {
         OP *kid;
         for (kid = cUNOPo->op_first; kid; kid = OpSIBLING(kid))
@@ -14605,6 +14610,17 @@ Perl_rpeep(pTHX_ OP *o)
                         NOOP;
                     }
                     else if (r  & (AAS_PKG_SCALAR|AAS_PKG_AGG|AAS_DANGEROUS))
+                        /* if there are only lexicals on the LHS and no
+                         * common ones on the RHS, then we assume that the
+                         * only way those lexicals could also get
+                         * on the RHS is via some sort of dereffing or
+                         * closure, e.g.
+                         *    $r = \$lex;
+                         *    ($lex, $x) = (1, $$r)
+                         * and in this case we assume the var must have
+                         *  a bumped ref count. So if its ref count is 1,
+                         *  it must only be on the LHS.
+                         */
                         o->op_private |= OPpASSIGN_COMMON_RC1;
                 }
             }

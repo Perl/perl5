@@ -559,5 +559,39 @@ SKIP: {
     like($@, qr//, "RT #129991");
 }
 
+{
+    # [perl #130132]
+    # lexical refs on LHS, dereffed on the RHS
+
+    my $fill;
+
+    my $sref = do { my $tmp = 2; \$tmp };
+    ($sref, $fill) = (1, $$sref);
+    is ($sref, 1, "RT #130132 scalar 1");
+    is ($fill, 2, "RT #130132 scalar 2");
+
+    my $x = 1;
+    $sref = \$x;
+    ($sref, $$sref) = (2, 3);
+    is ($sref, 2, "RT #130132 scalar derefffed 1");
+    is ($x,    3, "RT #130132 scalar derefffed 2");
+
+    $x = 1;
+    $sref = \$x;
+    ($sref, $$sref) = (2);
+    is ($sref, 2,     "RT #130132 scalar undef 1");
+    is ($x,    undef, "RT #130132 scalar undef 2");
+
+    my @a;
+    $sref = do { my $tmp = 2; \$tmp };
+    @a = (($sref) = (1, $$sref));
+    is ($sref, 1,     "RT #130132 scalar list cxt 1");
+    is ($a[0], 1,     "RT #130132 scalar list cxt a[0]");
+
+    my $aref = [ 1, 2 ];
+    ($aref, $fill) = @$aref;
+    is ($aref, 1, "RT #130132 array 1");
+    is ($fill, 2, "RT #130132 array 2");
+}
 
 done_testing();

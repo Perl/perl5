@@ -694,6 +694,19 @@
         code    => '($x, $y) = (1, 2)',
     },
 
+    'expr::aassign::lex_rv' => {
+        desc    => 'lexical ($ref1, $ref2) = ($ref3, $ref4)',
+        setup   => 'my ($r1, $r2, $r3, $r4);
+                    ($r1, $r2) = (($r3, $r4) = ([],  []));',
+        code    => '($r1, $r2) = ($r3, $r4)',
+    },
+
+    'expr::aassign::lex_rv1' => {
+        desc    => 'lexical ($ref1, $ref2) = ($ref3, $ref4) where ref1,2 are freed',
+        setup   => 'my ($r1, $r2);',
+        code    => '($r1, $r2) = ([], []);',
+    },
+
     # array assign of strings
 
     'expr::aassign::la_3s' => {

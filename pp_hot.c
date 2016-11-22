@@ -1708,6 +1708,8 @@ PP(pp_aassign)
 
 	default:
 	    if (!SvIMMORTAL(lsv)) {
+                SV *ref;
+
                 if (UNLIKELY(
                   SvTEMP(lsv) && !SvSMAGICAL(lsv) && SvREFCNT(lsv) == 1 &&
                   (!isGV_with_GP(lsv) || SvFAKE(lsv)) && ckWARN(WARN_MISC)
@@ -1716,6 +1718,24 @@ PP(pp_aassign)
                        packWARN(WARN_MISC),
                       "Useless assignment to a temporary"
                     );
+
+                /* avoid freeing $$lsv if it might be needed for further
+                 * elements, e.g. ($ref, $foo) = (1, $$ref) */
+                if (   SvROK(lsv)
+                    && ( ((ref = SvRV(lsv)), SvREFCNT(ref)) == 1)
+                    && lelem <= lastlelem
+                ) {
+                    SSize_t ix;
+                    SvREFCNT_inc_simple_void_NN(ref);
+                    /* an unrolled sv_2mortal */
+                    ix = ++PL_tmps_ix;
+                    if (UNLIKELY(ix >= PL_tmps_max))
+                        /* speculatively grow enough to cover other
+                         * possible refs */
+                        ix = tmps_grow_p(ix + (lastlelem - lelem));
+                    PL_tmps_stack[ix] = ref;
+                }
+
                 sv_setsv(lsv, *relem);
                 *relem = lsv;
                 SvSETMAGIC(lsv);
