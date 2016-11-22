@@ -116,7 +116,7 @@
 :
 :         embed.h: suppress "#define foo Perl_foo"
 :
-:   P  Pure function: no effects except the return value;
+:   P  Pure function: Also implies "R". No effects except the return value;
 :      return value depends only on params and/or globals:
 :
 :         proto.h: add __attribute__pure__
@@ -126,7 +126,7 @@
 :         proto.h: function is declared as Perl_foo rather than foo
 :         embed.h: "#define foo Perl_foo" entries added
 :
-:   R  Return value must not be ignored (also implied by 'a' flag):
+:   R  Return value must not be ignored (also implied by 'a' and 'P' flags):
 :
 :        proto.h: add __attribute__warn_unused_result__
 :
