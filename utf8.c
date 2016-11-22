@@ -1385,7 +1385,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                     if (ckWARN_d(WARN_UTF8) && ! (flags & UTF8_CHECK_ONLY)) {
                         pack_warn = packWARN(WARN_UTF8);
                         message = Perl_form(aTHX_
-                                "%s: %s (too short; got %d byte%s, need %d)",
+                                "%s: %s (too short; %d byte%s available, need %d)",
                                 malformed_text,
                                 _byte_dump_string(s0, send - s0),
                                 (int)curlen,

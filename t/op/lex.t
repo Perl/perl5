@@ -255,13 +255,13 @@ SKIP:
     fresh_perl_is(
         "BEGIN{\$^H=hex ~0}\xF3",
         "Integer overflow in hexadecimal number at - line 1.\n" .
-        "Malformed UTF-8 character: \\xf3 (too short; got 1 byte, need 4) at - line 1.",
+        "Malformed UTF-8 character: \\xf3 (too short; 1 byte available, need 4) at - line 1.",
         {},
         '[perl #128996] - use of PL_op after op is freed'
     );
     fresh_perl_like(
         qq(BEGIN{\$0="";\$^H=-hex join""=>1}""\xFF),
-        qr/Malformed UTF-8 character: \\xff \(too short; got 1 byte, need 13\) at - line 1\./,
+        qr/Malformed UTF-8 character: \\xff \(too short; 1 byte available, need 13\) at - line 1\./,
         {},
         '[perl #128997] - buffer read overflow'
     );
