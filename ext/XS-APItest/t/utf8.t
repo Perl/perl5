@@ -980,7 +980,7 @@ for my $restriction (sort keys %restriction_types) {
                                   "Verify $this_name is TRUE for valid input"
                                 . "$test_name_suffix"))
                         {
-                            diag("The bytes starting at offset"
+                            diag("    The bytes starting at offset"
                                . " $error_offset are"
                                . display_bytes(substr(
                                           $restriction_types{$restriction}
@@ -997,7 +997,8 @@ for my $restriction (sort keys %restriction_types) {
                             my $min = ($error_offset < $expected_offset)
                                     ? $error_offset
                                     : $expected_offset;
-                            diag display_bytes(substr($bytes, $min));
+                            diag("    The bytes starting at offset" . $min
+                              . " are " . display_bytes(substr($bytes, $min)));
                         }
 
                         if ($function eq '_loclen') {
@@ -2107,7 +2108,7 @@ foreach my $test (@tests) {
                             undef @warnings;
                             my $ret_ref;
                             my $display_bytes = display_bytes($this_bytes);
-                            my $call = "Call was: $eval_warn; \$ret_ref"
+                            my $call = "    Call was: $eval_warn; \$ret_ref"
                                      . " = test_utf8n_to_uvchr_error("
                                      . "'$display_bytes', $this_length,"
                                      . "$warn_flag"
@@ -2336,7 +2337,7 @@ foreach my $test (@tests) {
                             my $warn_flag = sprintf "0x%x", $uvchr_warn_flag;
                             my $disallow_flag = sprintf "0x%x",
                                                         $uvchr_disallow_flag;
-                            $call = sprintf("call was: $eval_warn; \$ret"
+                            $call = sprintf("    Call was: $eval_warn; \$ret"
                                           . " = test_uvchr_to_utf8_flags("
                                           . " 0x%x, $warn_flag|$disallow_flag)",
                                         $allowed_uv);
