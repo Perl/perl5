@@ -1016,6 +1016,8 @@ my $REPLACEMENT = 0xFFFD;
 
 # Now test the malformations.  All these raise category utf8 warnings.
 my @malformations = (
+    # ($testname, $bytes, $length, $allow_flags, $expected_error_flags,
+    #  $allowed_uv, $expected_len, $message )
     [ "zero length string malformation", "", 0,
         $UTF8_ALLOW_EMPTY, $UTF8_GOT_EMPTY, 0, 0,
         qr/empty string/
@@ -1175,7 +1177,7 @@ if (isASCII && ! $is64bit) {    # 32-bit ASCII platform
             qr/overflows/
         ];
 }
-else {
+else { # 64-bit ASCII, or EBCDIC of any size.
     # On EBCDIC platforms, another overlong test is needed even on 32-bit
     # systems, whereas it doesn't happen on ASCII except on 64-bit ones.
 
@@ -1215,7 +1217,7 @@ else {
             qr/overflows/
         ];
     }
-    else {  # 64-bit
+    else {  # 64-bit, either ASCII or EBCDIC
         push @malformations,
             [ "overflow malformation",
                (isASCII)
@@ -1432,6 +1434,8 @@ sub nonportable_regex ($) {
 # Now test the cases where a legal code point is generated, but may or may not
 # be allowed/warned on.
 my @tests = (
+     # ($testname, $bytes, $warn_flags, $disallow_flags, $expected_error_flags,
+     #  $category, $allowed_uv, $expected_len, $message )
     [ "lowest surrogate",
         (isASCII) ? "\xed\xa0\x80" : I8_to_native("\xf1\xb6\xa0\xa0"),
         $UTF8_WARN_SURROGATE, $UTF8_DISALLOW_SURROGATE, $UTF8_GOT_SURROGATE,
@@ -1769,7 +1773,7 @@ my @tests = (
         $UTF8_DISALLOW_ABOVE_31_BIT,
         $UTF8_GOT_ABOVE_31_BIT,
         'utf8', 0,
-        (! isASCII || $is64bit) ? $max_bytes : 7,   # XXX
+        (! isASCII || $is64bit) ? $max_bytes : 7,
         qr/overflows/
     ],
 );
