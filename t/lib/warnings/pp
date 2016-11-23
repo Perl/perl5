@@ -139,7 +139,7 @@ $_ = ~ "\x{100}";
 EXPECT
 OPTION regex
 Use of strings with code points over 0xFF as arguments to 1's complement \(~\) operator is deprecated at - line \d+.
-Use of code point 0xFF+EFF is deprecated; the permissible max is 0x7F+ at - line \d+.
+Use of code point 0xFF+EFF is deprecated; the permissible max is 0x7F+\. This will be fatal in Perl 5\.28 at - line \d+.
 ########
 # NAME chr -1
 use warnings 'utf8';

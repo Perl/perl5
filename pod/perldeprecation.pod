@@ -104,6 +104,23 @@ You are recommended to change your code to set C<$/> to C<undef> explicitly
 if you wish to slurp the file.
 
 
+=head3 Limit on the value of Unicode code points.
+
+Unicode only allows code points up to 0x10FFFF, but Perl allows much
+larger ones. However, using code points exceeding the maximum value
+of an integer (C<IV_MAX>) may break the perl interpreter in some constructs,
+including causing it to hang in a few cases.  The known problem areas
+are in C<tr///>, regular expression pattern matching using quantifiers,
+as quote delimiters in C<qI<X>...I<X>> (where I<X> is the C<chr()> of a large
+code point), and as the upper limits in loops.
+
+The use of out of range code points was deprecated in Perl 5.24, and
+it will be a fatal error in Perl 5.28.
+
+If your code is to run on various platforms, keep in mind that the upper
+limit depends on the platform.  It is much larger on 64-bit word sizes
+than 32-bit ones.
+
 
 =head3 Use of C<\N{}>
 
