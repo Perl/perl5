@@ -3285,7 +3285,8 @@ Also, unlike most named operators, this has the same precedence as
 assignment.
 
 Use of C<goto LABEL> or C<goto EXPR> to jump into a construct is
-deprecated and will issue a warning.  Even then, it may not be used to
+deprecated and will issue a warning; it will be a fatal error in
+Perl 5.28. Even then, it may not be used to
 go into any construct that requires initialization, such as a
 subroutine or a C<foreach> loop.  It also can't be used to go into a
 construct that is optimized away.

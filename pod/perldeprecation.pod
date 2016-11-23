@@ -151,6 +151,32 @@ will be a fatal error in Perl 5.28.
 
 You should be using two different symbols instead.
 
+
+
+=head3 Use of "goto" to jump into a construct.
+
+Use of C<goto> to jump from an outer scope into an inner scope was
+deprecated in Perl 5.12, and it will be a fatal error in Perl 5.28.
+
+This means, you should not write constructs like:
+
+   $x = 1;
+   while ($x) {
+       $foo = 1;
+     LABEL:
+       $bar = 1;
+   }
+   goto LABEL;
+
+This will jump into the block belonging to C<while>. Not only has 
+been this a cause of subtle bugs in the past, it's generally
+considered to lead to hard to understand programs.
+
+This means, soon it's not possible anymore to write
+L<Duff's device|https://www.lysator.liu.se/c/duffs-device.html> in pure Perl.
+But you never wanted to do this anyway.
+
+
 =head3 ${^ENCODING} is no longer supported.
 
 The special variable C<${^ENCODING}> was used to implement
