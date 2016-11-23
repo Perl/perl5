@@ -1999,420 +1999,424 @@ foreach my $test (@tests) {
     # of utf8 warnings to verify they work with and without the utf8 class,
     # and don't have effects on other sublass warnings
     foreach my $warning ('utf8', 'surrogate', 'nonchar', 'non_unicode') {
-        foreach my $warn_flag (0, $warn_flags) {
-            foreach my $disallow_flag (0, $disallow_flags) {
-                foreach my $do_warning (0, 1) {
+      foreach my $warn_flag (0, $warn_flags) {
+        foreach my $disallow_flag (0, $disallow_flags) {
+          foreach my $do_warning (0, 1) {
 
-                    # We try each of the above with various combinations of
-                    # malformations that can occur on the same input sequence.
-                    foreach my $short ("", "short") {
-                    foreach my $unexpected_noncont ("", "unexpected non-continuation")
+            # We try each of the above with various combinations of
+            # malformations that can occur on the same input sequence.
+            foreach my $short ("", "short") {
+              foreach my $unexpected_noncont ("",
+                                              "unexpected non-continuation")
+              {
+                foreach my $overlong ("", "overlong") {
+
+                    # If we're already at the longest possible, we
+                    # can't create an overlong (which would be longer)
+                    # can't handle anything larger.
+                    next if $overlong && $expected_len >= $max_bytes;
+
+                    my @malformations;
+                    my @expected_errors;
+                    push @malformations, $short if $short;
+                    push @malformations, $unexpected_noncont
+                                                      if $unexpected_noncont;
+                    push @malformations, $overlong if $overlong;
+
+                    # The overflow malformation test in the input
+                    # array is coerced into being treated like one of
+                    # the others.
+                    if ($will_overflow) {
+                        push @malformations, 'overflow';
+                        push @expected_errors, $UTF8_GOT_OVERFLOW;
+                    }
+
+                    my $malformations_name = join "/", @malformations;
+                    $malformations_name .= " malformation"
+                                                if $malformations_name;
+                    $malformations_name .= "s" if @malformations > 1;
+                    my $this_bytes = $bytes;
+                    my $this_length = $length;
+                    my $expected_uv = $allowed_uv;
+                    my $this_expected_len = $expected_len;
+                    my $this_needed_to_discern_len = $needed_to_discern_len;
+                    if ($malformations_name) {
+                        $expected_uv = 0;
+
+                        # Coerce the input into the desired
+                        # malformation
+                        if ($malformations_name =~ /overlong/) {
+
+                            # For an overlong, we convert the original
+                            # start byte into a continuation byte with
+                            # the same data bits as originally. ...
+                            substr($this_bytes, 0, 1)
+                                = start_byte_to_cont(substr($this_bytes,
+                                                            0, 1));
+
+                            # ... Then we prepend it with a known
+                            # overlong sequence.  This should evaluate
+                            # to the exact same code point as the
+                            # original.
+                            $this_bytes
+                            = I8_to_native("\xff")
+                            . (I8_to_native(chr $first_continuation)
+                            x ( $max_bytes - 1 - length($this_bytes)))
+                            . $this_bytes;
+                            $this_length = length($this_bytes);
+                            $this_needed_to_discern_len
+                                 = $max_bytes - ($this_expected_len
+                                               - $this_needed_to_discern_len);
+                            $this_expected_len = $max_bytes;
+                            push @expected_errors, $UTF8_GOT_LONG;
+                        }
+                        if ($malformations_name =~ /short/) {
+
+                            # Just tell the test to not look far
+                            # enough into the input.
+                            $this_length--;
+                            $this_expected_len--;
+                            push @expected_errors, $UTF8_GOT_SHORT;
+                        }
+                        if ($malformations_name
+                                                =~ /non-continuation/)
+                        {
+                            # Change the final continuation byte into
+                            # a non one.
+                            my $pos = ($short) ? -2 : -1;
+                            substr($this_bytes, $pos, 1) = '?';
+                            $this_expected_len--;
+                            push @expected_errors,
+                                            $UTF8_GOT_NON_CONTINUATION;
+                        }
+                    }
+
+                    my $eval_warn = $do_warning
+                                ? "use warnings '$warning'"
+                                : $warning eq "utf8"
+                                    ? "no warnings 'utf8'"
+                                    : ( "use warnings 'utf8';"
+                                    . " no warnings '$warning'");
+
+                    # Is effectively disallowed if we've set up a
+                    # malformation, even if the flag indicates it is
+                    # allowed.  Fix up test name to indicate this as
+                    # well
+                    my $disallowed = $disallow_flag
+                                || $malformations_name;
+                    my $this_name = "utf8n_to_uvchr_error() $testname: "
+                                                . (($disallow_flag)
+                                                ? 'disallowed'
+                                                : $disallowed
+                                                    ? $disallowed
+                                                    : 'allowed');
+                    $this_name .= ", $eval_warn";
+                    $this_name .= ", " . (($warn_flag)
+                                        ? 'with warning flag'
+                                        : 'no warning flag');
+
+                    undef @warnings;
+                    my $ret_ref;
+                    my $display_bytes = display_bytes($this_bytes);
+                    my $call = "    Call was: $eval_warn; \$ret_ref"
+                            . " = test_utf8n_to_uvchr_error("
+                            . "'$display_bytes', $this_length,"
+                            . "$warn_flag"
+                            . "|$disallow_flag)";
+                    my $eval_text =      "$eval_warn; \$ret_ref"
+                            . " = test_utf8n_to_uvchr_error("
+                            . "'$this_bytes',"
+                            . " $this_length, $warn_flag"
+                            . "|$disallow_flag)";
+                    eval "$eval_text";
+                    if (! ok ("$@ eq ''",
+                        "$this_name: eval succeeded"))
                     {
-                        foreach my $overlong ("", "overlong") {
+                        diag "\$!='$!'; eval'd=\"$call\"";
+                        next;
+                    }
+                    if ($disallowed) {
+                        unless (is($ret_ref->[0], 0,
+                                "$this_name: Returns 0"))
+                        {
+                            diag $call;
+                        }
+                    }
+                    else {
+                        unless (is($ret_ref->[0], $expected_uv,
+                                "$this_name: Returns expected uv: "
+                                . sprintf("0x%04X", $expected_uv)))
+                        {
+                            diag $call;
+                        }
+                    }
+                    unless (is($ret_ref->[1], $this_expected_len,
+                        "$this_name: Returns expected length:"
+                    . " $this_expected_len"))
+                    {
+                        diag $call;
+                    }
 
-                            # If we're already at the longest possible, we
-                            # can't create an overlong (which would be longer)
-                            # can't handle anything larger.
-                            next if $overlong && $expected_len >= $max_bytes;
+                    my $errors = $ret_ref->[2];
 
-                            my @malformations;
-                            my @expected_errors;
-                            push @malformations, $short if $short;
-                            push @malformations, $unexpected_noncont if $unexpected_noncont;
-                            push @malformations, $overlong if $overlong;
+                    for (my $i = @expected_errors - 1; $i >= 0; $i--) {
+                        if (ok($expected_errors[$i] & $errors,
+                            "Expected and got error bit return"
+                            . " for $malformations[$i] malformation"))
+                        {
+                            $errors &= ~$expected_errors[$i];
+                        }
+                        splice @expected_errors, $i, 1;
+                    }
+                    unless (is(scalar @expected_errors, 0,
+                            "Got all the expected malformation errors"))
+                    {
+                        diag Dumper \@expected_errors;
+                    }
 
-                            # The overflow malformation test in the input
-                            # array is coerced into being treated like one of
-                            # the others.
-                            if ($will_overflow) {
-                                push @malformations, 'overflow';
-                                push @expected_errors, $UTF8_GOT_OVERFLOW;
-                            }
+                    if (   $this_expected_len >= $this_needed_to_discern_len
+                        && ($warn_flag || $disallow_flag))
+                    {
+                        unless (is($errors, $expected_error_flags,
+                                "Got the correct error flag"))
+                        {
+                            diag $call;
+                        }
+                    }
+                    else {
+                        is($errors, 0, "Got no other error flag");
+                    }
 
-                            my $malformations_name = join "/", @malformations;
-                            $malformations_name .= " malformation"
-                                                        if $malformations_name;
-                            $malformations_name .= "s" if @malformations > 1;
-                            my $this_bytes = $bytes;
-                            my $this_length = $length;
-                            my $expected_uv = $allowed_uv;
-                            my $this_expected_len = $expected_len;
-                            my $this_needed_to_discern_len = $needed_to_discern_len;
-                            if ($malformations_name) {
-                                $expected_uv = 0;
+                    if (@malformations) {
+                        if (! $do_warning && $warning eq 'utf8') {
+                            goto no_warnings_expected;
+                        }
 
-                                # Coerce the input into the desired
-                                # malformation
-                                if ($malformations_name =~ /overlong/) {
-
-                                    # For an overlong, we convert the original
-                                    # start byte into a continuation byte with
-                                    # the same data bits as originally. ...
-                                    substr($this_bytes, 0, 1)
-                                        = start_byte_to_cont(substr($this_bytes,
-                                                                    0, 1));
-
-                                    # ... Then we prepend it with a known
-                                    # overlong sequence.  This should evaluate
-                                    # to the exact same code point as the
-                                    # original.
-                                    $this_bytes
-                                    = I8_to_native("\xff")
-                                    . (I8_to_native(chr $first_continuation)
-                                       x ( $max_bytes - 1 - length($this_bytes)))
-                                    . $this_bytes;
-                                    $this_length = length($this_bytes);
-                                    $this_needed_to_discern_len = $max_bytes - ($this_expected_len - $this_needed_to_discern_len);
-                                    $this_expected_len = $max_bytes;
-                                    push @expected_errors, $UTF8_GOT_LONG;
-                                }
-                                if ($malformations_name =~ /short/) {
-
-                                    # Just tell the test to not look far
-                                    # enough into the input.
-                                    $this_length--;
-                                    $this_expected_len--;
-                                    push @expected_errors, $UTF8_GOT_SHORT;
-                                }
-                                if ($malformations_name
-                                                        =~ /non-continuation/)
-                                {
-                                    # Change the final continuation byte into
-                                    # a non one.
-                                    my $pos = ($short) ? -2 : -1;
-                                    substr($this_bytes, $pos, 1) = '?';
-                                    $this_expected_len--;
-                                    push @expected_errors,
-                                                    $UTF8_GOT_NON_CONTINUATION;
+                        # Check that each malformation generates a
+                        # warning, removing that warning if found
+                    MALFORMATION:
+                        foreach my $malformation (@malformations) {
+                            foreach (my $i = 0; $i < @warnings; $i++) {
+                                if ($warnings[$i] =~ /$malformation/) {
+                                    pass("Expected and got"
+                                    . "'$malformation' warning");
+                                    splice @warnings, $i, 1;
+                                    next MALFORMATION;
                                 }
                             }
+                            fail("Expected '$malformation' warning"
+                            . " but didn't get it");
 
-                            my $eval_warn = $do_warning
-                                        ? "use warnings '$warning'"
-                                        : $warning eq "utf8"
-                                            ? "no warnings 'utf8'"
-                                            : ( "use warnings 'utf8';"
-                                              . " no warnings '$warning'");
+                        }
+                    }
 
-                            # Is effectively disallowed if we've set up a
-                            # malformation, even if the flag indicates it is
-                            # allowed.  Fix up test name to indicate this as
-                            # well
-                            my $disallowed = $disallow_flag
-                                          || $malformations_name;
-                            my $this_name = "utf8n_to_uvchr_error() $testname: "
-                                                        . (($disallow_flag)
-                                                           ? 'disallowed'
-                                                           : $disallowed
-                                                             ? $disallowed
-                                                             : 'allowed');
-                            $this_name .= ", $eval_warn";
-                            $this_name .= ", " . (($warn_flag)
-                                                ? 'with warning flag'
-                                                : 'no warning flag');
+                    # Any overflow will override any super or above-31
+                    # warnings.
+                    goto no_warnings_expected
+                                if $will_overflow || $this_expected_len
+                                        < $this_needed_to_discern_len;
 
-                            undef @warnings;
-                            my $ret_ref;
-                            my $display_bytes = display_bytes($this_bytes);
-                            my $call = "    Call was: $eval_warn; \$ret_ref"
-                                     . " = test_utf8n_to_uvchr_error("
-                                     . "'$display_bytes', $this_length,"
-                                     . "$warn_flag"
-                                     . "|$disallow_flag)";
-                            my $eval_text =      "$eval_warn; \$ret_ref"
-                                     . " = test_utf8n_to_uvchr_error("
-                                     . "'$this_bytes',"
-                                     . " $this_length, $warn_flag"
-                                     . "|$disallow_flag)";
-                            eval "$eval_text";
-                            if (! ok ("$@ eq ''",
-                                "$this_name: eval succeeded"))
-                            {
-                                diag "\$!='$!'; eval'd=\"$call\"";
-                                next;
-                            }
-                            if ($disallowed) {
-                                unless (is($ret_ref->[0], 0,
-                                           "$this_name: Returns 0"))
-                                {
-                                    diag $call;
-                                }
-                            }
-                            else {
-                                unless (is($ret_ref->[0], $expected_uv,
-                                        "$this_name: Returns expected uv: "
-                                        . sprintf("0x%04X", $expected_uv)))
-                                {
-                                    diag $call;
-                                }
-                            }
-                            unless (is($ret_ref->[1], $this_expected_len,
-                                "$this_name: Returns expected length:"
-                              . " $this_expected_len"))
+                    if (    ! $do_warning
+                        && (   $warning eq 'utf8'
+                            || $warning eq $category))
+                    {
+                        goto no_warnings_expected;
+                    }
+                    elsif ($warn_flag) {
+                        if (is(scalar @warnings, 1,
+                            "$this_name: Got a single warning "))
+                        {
+                            unless (like($warnings[0], $message,
+                                    "$this_name: Got expected warning"))
                             {
                                 diag $call;
                             }
-
-                            my $errors = $ret_ref->[2];
-
-                            for (my $i = @expected_errors - 1; $i >= 0; $i--) {
-                                if (ok($expected_errors[$i] & $errors,
-                                       "Expected and got error bit return"
-                                     . " for $malformations[$i] malformation"))
-                                {
-                                    $errors &= ~$expected_errors[$i];
-                                }
-                                splice @expected_errors, $i, 1;
-                            }
-                            unless (is(scalar @expected_errors, 0,
-                                    "Got all the expected malformation errors"))
-                            {
-                                diag Dumper \@expected_errors;
-                            }
-
-                            if (   $this_expected_len >= $this_needed_to_discern_len
-                                && ($warn_flag || $disallow_flag))
-                            {
-                                unless (is($errors, $expected_error_flags,
-                                           "Got the correct error flag"))
-                                {
-                                    diag $call;
-                                }
-                            }
-                            else {
-                                is($errors, 0, "Got no other error flag");
-                            }
-
-                            if (@malformations) {
-                                if (! $do_warning && $warning eq 'utf8') {
-                                    goto no_warnings_expected;
-                                }
-
-                                # Check that each malformation generates a
-                                # warning, removing that warning if found
-                              MALFORMATION:
-                                foreach my $malformation (@malformations) {
-                                    foreach (my $i = 0; $i < @warnings; $i++) {
-                                        if ($warnings[$i] =~ /$malformation/) {
-                                            pass("Expected and got"
-                                               . "'$malformation' warning");
-                                            splice @warnings, $i, 1;
-                                            next MALFORMATION;
-                                        }
-                                    }
-                                    fail("Expected '$malformation' warning"
-                                       . " but didn't get it");
-
-                                }
-                            }
-
-                            # Any overflow will override any super or above-31
-                            # warnings.
-                            goto no_warnings_expected
-                                        if $will_overflow || $this_expected_len
-                                                 < $this_needed_to_discern_len;
-
-                            if (    ! $do_warning
-                                && (   $warning eq 'utf8'
-                                    || $warning eq $category))
-                            {
-                                goto no_warnings_expected;
-                            }
-                            elsif ($warn_flag) {
-                                if (is(scalar @warnings, 1,
-                                    "$this_name: Got a single warning "))
-                                {
-                                    unless (like($warnings[0], $message,
-                                            "$this_name: Got expected warning"))
-                                    {
-                                        diag $call;
-                                    }
-                                }
-                                else {
-                                    diag $call;
-                                    if (scalar @warnings) {
-                                        output_warnings(@warnings);
-                                    }
-                                }
-                            }
-                            else {
-                              no_warnings_expected:
-                                unless (is(scalar @warnings, 0,
-                                        "$this_name: Got no warnings"))
-                                {
-                                    diag $call;
-                                    output_warnings(@warnings);
-                                }
-                            }
-
-                            # Check CHECK_ONLY results when the input is
-                            # disallowed.  Do this when actually disallowed,
-                            # not just when the $disallow_flag is set
-                            if ($disallowed) {
-                                undef @warnings;
-                                $ret_ref = test_utf8n_to_uvchr_error(
-                                               $this_bytes, $this_length,
-                                               $disallow_flag|$UTF8_CHECK_ONLY);
-                                unless (is($ret_ref->[0], 0,
-                                        "$this_name, CHECK_ONLY: Returns 0"))
-                                {
-                                    diag $call;
-                                }
-                                unless (is($ret_ref->[1], -1,
-                                    "$this_name: CHECK_ONLY: returns -1 for"
-                                  . " length"))
-                                {
-                                    diag $call;
-                                }
-                                if (! is(scalar @warnings, 0,
-                                    "$this_name, CHECK_ONLY: no warnings"
-                                  . " generated"))
-                                {
-                                    diag $call;
-                                    output_warnings(@warnings);
-                                }
-                            }
-
-                            # Now repeat some of the above, but for
-                            # uvchr_to_utf8_flags().  Since this comes from an
-                            # existing code point, it hasn't overflowed, and
-                            # isn't malformed.
-                            next if @malformations;
-
-                            # The warning and disallow flags passed in are for
-                            # utf8n_to_uvchr_error().  Convert them for
-                            # uvchr_to_utf8_flags().
-                            my $uvchr_warn_flag = 0;
-                            my $uvchr_disallow_flag = 0;
-                            if ($warn_flag) {
-                                if ($warn_flag == $UTF8_WARN_SURROGATE) {
-                                    $uvchr_warn_flag = $UNICODE_WARN_SURROGATE
-                                }
-                                elsif ($warn_flag == $UTF8_WARN_NONCHAR) {
-                                    $uvchr_warn_flag = $UNICODE_WARN_NONCHAR
-                                }
-                                elsif ($warn_flag == $UTF8_WARN_SUPER) {
-                                    $uvchr_warn_flag = $UNICODE_WARN_SUPER
-                                }
-                                elsif ($warn_flag == $UTF8_WARN_ABOVE_31_BIT) {
-                                    $uvchr_warn_flag
-                                                   = $UNICODE_WARN_ABOVE_31_BIT;
-                                }
-                                else {
-                                    fail(sprintf "Unexpected warn flag: %x",
-                                        $warn_flag);
-                                    next;
-                                }
-                            }
-                            if ($disallow_flag) {
-                                if ($disallow_flag == $UTF8_DISALLOW_SURROGATE)
-                                {
-                                    $uvchr_disallow_flag
-                                                = $UNICODE_DISALLOW_SURROGATE;
-                                }
-                                elsif ($disallow_flag == $UTF8_DISALLOW_NONCHAR)
-                                {
-                                    $uvchr_disallow_flag
-                                                = $UNICODE_DISALLOW_NONCHAR;
-                                }
-                                elsif ($disallow_flag == $UTF8_DISALLOW_SUPER) {
-                                    $uvchr_disallow_flag
-                                                  = $UNICODE_DISALLOW_SUPER;
-                                }
-                                elsif ($disallow_flag
-                                                == $UTF8_DISALLOW_ABOVE_31_BIT)
-                                {
-                                    $uvchr_disallow_flag =
-                                                $UNICODE_DISALLOW_ABOVE_31_BIT;
-                                }
-                                else {
-                                    fail(sprintf "Unexpected disallow flag: %x",
-                                        $disallow_flag);
-                                    next;
-                                }
-                            }
-
-                            $disallowed = $uvchr_disallow_flag;
-
-                            $this_name = "uvchr_to_utf8_flags() $testname: "
-                                                    . (($uvchr_disallow_flag)
-                                                        ? 'disallowed'
-                                                        : ($disallowed)
-                                                        ? 'ABOVE_31_BIT allowed'
-                                                        : 'allowed');
-                            $this_name .= ", $eval_warn";
-                            $this_name .= ", " . (($uvchr_warn_flag)
-                                                ? 'with warning flag'
-                                                : 'no warning flag');
-
-                            undef @warnings;
-                            my $ret;
-                            my $warn_flag = sprintf "0x%x", $uvchr_warn_flag;
-                            my $disallow_flag = sprintf "0x%x",
-                                                        $uvchr_disallow_flag;
-                            $call = sprintf("    Call was: $eval_warn; \$ret"
-                                          . " = test_uvchr_to_utf8_flags("
-                                          . " 0x%x, $warn_flag|$disallow_flag)",
-                                        $allowed_uv);
-                            $eval_text = "$eval_warn; \$ret ="
-                                       . " test_uvchr_to_utf8_flags("
-                                       . "$allowed_uv, $warn_flag|"
-                                       . "$disallow_flag)";
-                            eval "$eval_text";
-                            if (! ok ("$@ eq ''", "$this_name: eval succeeded"))
-                            {
-                                diag "\$!='$!'; eval'd=\"$eval_text\"";
-                                next;
-                            }
-                            if ($disallowed) {
-                                unless (is($ret, undef,
-                                        "$this_name: Returns undef"))
-                                {
-                                    diag $call;
-                                }
-                            }
-                            else {
-                                unless (is($ret, $bytes,
-                                        "$this_name: Returns expected string"))
-                                {
-                                    diag $call;
-                                }
-                            }
-                            if (! $do_warning
-                                && ($warning eq 'utf8' || $warning eq $category))
-                            {
-                                if (!is(scalar @warnings, 0,
-                                        "$this_name: No warnings generated"))
-                                {
-                                    diag $call;
-                                    output_warnings(@warnings);
-                                }
-                            }
-                            elsif (       $uvchr_warn_flag
-                                   && (   $warning eq 'utf8'
-                                       || $warning eq $category))
-                            {
-                                if (is(scalar @warnings, 1,
-                                    "$this_name: Got a single warning "))
-                                {
-                                    unless (like($warnings[0], $message,
-                                            "$this_name: Got expected warning"))
-                                    {
-                                        diag $call;
-                                    }
-                                }
-                                else {
-                                    diag $call;
-                                    output_warnings(@warnings)
-                                                        if scalar @warnings;
-                                }
+                        }
+                        else {
+                            diag $call;
+                            if (scalar @warnings) {
+                                output_warnings(@warnings);
                             }
                         }
                     }
+                    else {
+                    no_warnings_expected:
+                        unless (is(scalar @warnings, 0,
+                                "$this_name: Got no warnings"))
+                        {
+                            diag $call;
+                            output_warnings(@warnings);
+                        }
+                    }
+
+                    # Check CHECK_ONLY results when the input is
+                    # disallowed.  Do this when actually disallowed,
+                    # not just when the $disallow_flag is set
+                    if ($disallowed) {
+                        undef @warnings;
+                        $ret_ref = test_utf8n_to_uvchr_error(
+                                    $this_bytes, $this_length,
+                                    $disallow_flag|$UTF8_CHECK_ONLY);
+                        unless (is($ret_ref->[0], 0,
+                                "$this_name, CHECK_ONLY: Returns 0"))
+                        {
+                            diag $call;
+                        }
+                        unless (is($ret_ref->[1], -1,
+                            "$this_name: CHECK_ONLY: returns -1 for"
+                        . " length"))
+                        {
+                            diag $call;
+                        }
+                        if (! is(scalar @warnings, 0,
+                            "$this_name, CHECK_ONLY: no warnings"
+                        . " generated"))
+                        {
+                            diag $call;
+                            output_warnings(@warnings);
+                        }
+                    }
+
+                    # Now repeat some of the above, but for
+                    # uvchr_to_utf8_flags().  Since this comes from an
+                    # existing code point, it hasn't overflowed, and
+                    # isn't malformed.
+                    next if @malformations;
+
+                    # The warning and disallow flags passed in are for
+                    # utf8n_to_uvchr_error().  Convert them for
+                    # uvchr_to_utf8_flags().
+                    my $uvchr_warn_flag = 0;
+                    my $uvchr_disallow_flag = 0;
+                    if ($warn_flag) {
+                        if ($warn_flag == $UTF8_WARN_SURROGATE) {
+                            $uvchr_warn_flag = $UNICODE_WARN_SURROGATE
+                        }
+                        elsif ($warn_flag == $UTF8_WARN_NONCHAR) {
+                            $uvchr_warn_flag = $UNICODE_WARN_NONCHAR
+                        }
+                        elsif ($warn_flag == $UTF8_WARN_SUPER) {
+                            $uvchr_warn_flag = $UNICODE_WARN_SUPER
+                        }
+                        elsif ($warn_flag == $UTF8_WARN_ABOVE_31_BIT) {
+                            $uvchr_warn_flag
+                                        = $UNICODE_WARN_ABOVE_31_BIT;
+                        }
+                        else {
+                            fail(sprintf "Unexpected warn flag: %x",
+                                $warn_flag);
+                            next;
+                        }
+                    }
+                    if ($disallow_flag) {
+                        if ($disallow_flag == $UTF8_DISALLOW_SURROGATE)
+                        {
+                            $uvchr_disallow_flag
+                                        = $UNICODE_DISALLOW_SURROGATE;
+                        }
+                        elsif ($disallow_flag == $UTF8_DISALLOW_NONCHAR)
+                        {
+                            $uvchr_disallow_flag
+                                        = $UNICODE_DISALLOW_NONCHAR;
+                        }
+                        elsif ($disallow_flag == $UTF8_DISALLOW_SUPER) {
+                            $uvchr_disallow_flag
+                                        = $UNICODE_DISALLOW_SUPER;
+                        }
+                        elsif ($disallow_flag
+                                        == $UTF8_DISALLOW_ABOVE_31_BIT)
+                        {
+                            $uvchr_disallow_flag =
+                                        $UNICODE_DISALLOW_ABOVE_31_BIT;
+                        }
+                        else {
+                            fail(sprintf "Unexpected disallow flag: %x",
+                                $disallow_flag);
+                            next;
+                        }
+                    }
+
+                    $disallowed = $uvchr_disallow_flag;
+
+                    $this_name = "uvchr_to_utf8_flags() $testname: "
+                                            . (($uvchr_disallow_flag)
+                                                ? 'disallowed'
+                                                : ($disallowed)
+                                                ? 'ABOVE_31_BIT allowed'
+                                                : 'allowed');
+                    $this_name .= ", $eval_warn";
+                    $this_name .= ", " . (($uvchr_warn_flag)
+                                        ? 'with warning flag'
+                                        : 'no warning flag');
+
+                    undef @warnings;
+                    my $ret;
+                    my $warn_flag = sprintf "0x%x", $uvchr_warn_flag;
+                    my $disallow_flag = sprintf "0x%x",
+                                                $uvchr_disallow_flag;
+                    $call = sprintf("    Call was: $eval_warn; \$ret"
+                                . " = test_uvchr_to_utf8_flags("
+                                . " 0x%x, $warn_flag|$disallow_flag)",
+                                $allowed_uv);
+                    $eval_text = "$eval_warn; \$ret ="
+                            . " test_uvchr_to_utf8_flags("
+                            . "$allowed_uv, $warn_flag|"
+                            . "$disallow_flag)";
+                    eval "$eval_text";
+                    if (! ok ("$@ eq ''", "$this_name: eval succeeded"))
+                    {
+                        diag "\$!='$!'; eval'd=\"$eval_text\"";
+                        next;
+                    }
+                    if ($disallowed) {
+                        unless (is($ret, undef,
+                                "$this_name: Returns undef"))
+                        {
+                            diag $call;
+                        }
+                    }
+                    else {
+                        unless (is($ret, $bytes,
+                                "$this_name: Returns expected string"))
+                        {
+                            diag $call;
+                        }
+                    }
+                    if (! $do_warning
+                        && ($warning eq 'utf8' || $warning eq $category))
+                    {
+                        if (!is(scalar @warnings, 0,
+                                "$this_name: No warnings generated"))
+                        {
+                            diag $call;
+                            output_warnings(@warnings);
+                        }
+                    }
+                    elsif (       $uvchr_warn_flag
+                        && (   $warning eq 'utf8'
+                            || $warning eq $category))
+                    {
+                        if (is(scalar @warnings, 1,
+                            "$this_name: Got a single warning "))
+                        {
+                            unless (like($warnings[0], $message,
+                                    "$this_name: Got expected warning"))
+                            {
+                                diag $call;
+                            }
+                        }
+                        else {
+                            diag $call;
+                            output_warnings(@warnings)
+                                                if scalar @warnings;
+                        }
                     }
                 }
+              }
             }
+          }
         }
+      }
     }
 }
 
