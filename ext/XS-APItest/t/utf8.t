@@ -1034,7 +1034,7 @@ my @malformations = (
         qr/unexpected non-continuation byte.*immediately after start byte/
     ],
     [ "premature next character malformation (non-immediate)",
-        I8_to_native("\xf1${I8c}a"),
+        I8_to_native("\xef${I8c}a"),
         3,
         $UTF8_ALLOW_NON_CONTINUATION, $UTF8_GOT_NON_CONTINUATION, $REPLACEMENT, 2,
         qr/unexpected non-continuation byte .* 2 bytes after start byte/
