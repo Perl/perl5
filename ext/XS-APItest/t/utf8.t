@@ -2005,9 +2005,8 @@ foreach my $test (@tests) {
 
                     # We try each of the above with various combinations of
                     # malformations that can occur on the same input sequence.
-                    foreach my $short ("",
-                                       "short",
-                                       "unexpected non-continuation")
+                    foreach my $short ("", "short") {
+                    foreach my $unexpected_noncont ("", "unexpected non-continuation")
                     {
                         foreach my $overlong ("", "overlong") {
 
@@ -2019,6 +2018,7 @@ foreach my $test (@tests) {
                             my @malformations;
                             my @expected_errors;
                             push @malformations, $short if $short;
+                            push @malformations, $unexpected_noncont if $unexpected_noncont;
                             push @malformations, $overlong if $overlong;
 
                             # The overflow malformation test in the input
@@ -2074,12 +2074,13 @@ foreach my $test (@tests) {
                                     $this_expected_len--;
                                     push @expected_errors, $UTF8_GOT_SHORT;
                                 }
-                                elsif ($malformations_name
+                                if ($malformations_name
                                                         =~ /non-continuation/)
                                 {
                                     # Change the final continuation byte into
                                     # a non one.
-                                    substr($this_bytes, -1, 1) = '?';
+                                    my $pos = ($short) ? -2 : -1;
+                                    substr($this_bytes, $pos, 1) = '?';
                                     $this_expected_len--;
                                     push @expected_errors,
                                                     $UTF8_GOT_NON_CONTINUATION;
@@ -2407,6 +2408,7 @@ foreach my $test (@tests) {
                                 }
                             }
                         }
+                    }
                     }
                 }
             }

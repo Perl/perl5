@@ -1015,6 +1015,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
     STRLEN expectlen   = 0;     /* How long should this sequence be?
                                    (initialized to silence compilers' wrong
                                    warning) */
+    STRLEN avail_len   = 0;     /* When input is too short, gives what that is */
     U32 discard_errors = 0;     /* Used to save branches when 'errors' is NULL;
                                    this gets set and discarded */
 
@@ -1101,12 +1102,21 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
      * sequence, leaving just the bits that are part of the value.  */
     uv = NATIVE_UTF8_TO_I8(uv) & UTF_START_MASK(expectlen);
 
+    /* Setup the loop end point, making sure to not look past the end of the
+     * input string, and flag it as too short if the size isn't big enough. */
+    send = (U8*) s0;
+    if (UNLIKELY(curlen < expectlen)) {
+        possible_problems |= UTF8_GOT_SHORT;
+        avail_len = curlen;
+        send += curlen;
+    }
+    else {
+        send += expectlen;
+    }
+    adjusted_send = send;
+
     /* Now, loop through the remaining bytes in the character's sequence,
-     * accumulating each into the working value as we go.  Be sure to not look
-     * past the end of the input string */
-    send = adjusted_send = (U8*) s0 + ((expectlen <= curlen)
-                                       ? expectlen
-                                       : curlen);
+     * accumulating each into the working value as we go. */
     for (s = s0 + 1; s < send; s++) {
 	if (LIKELY(UTF8_IS_CONTINUATION(*s))) {
 	    uv = UTF8_ACCUMULATE(uv, *s);
@@ -1116,21 +1126,17 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
         /* Here, found a non-continuation before processing all expected bytes.
          * This byte indicates the beginning of a new character, so quit, even
          * if allowing this malformation. */
-        curlen = s - s0;    /* Save how many bytes we actually got */
         possible_problems |= UTF8_GOT_NON_CONTINUATION;
-        goto finish_short;
+        break;
     } /* End of loop through the character's bytes */
 
     /* Save how many bytes were actually in the character */
     curlen = s - s0;
 
-    /* Did we get all the continuation bytes that were expected?  Note that we
-     * know this result even without executing the loop above.  But we had to
-     * do the loop to see if there are unexpected non-continuations. */
-    if (UNLIKELY(curlen < expectlen)) {
-	possible_problems |= UTF8_GOT_SHORT;
+    /* A convenience macro that matches either of the too-short conditions.  */
+#   define UTF8_GOT_TOO_SHORT (UTF8_GOT_SHORT|UTF8_GOT_NON_CONTINUATION)
 
-      finish_short:
+    if (UNLIKELY(possible_problems & UTF8_GOT_TOO_SHORT)) {
         uv_so_far = uv;
         uv = UNICODE_REPLACEMENT;
     }
@@ -1163,10 +1169,6 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                                                                 send - s0))))))
     {
         possible_problems |= UTF8_GOT_LONG;
-
-        /* A convenience macro that matches either of the too-short conditions.
-         * */
-#       define UTF8_GOT_TOO_SHORT (UTF8_GOT_SHORT|UTF8_GOT_NON_CONTINUATION)
 
         if (UNLIKELY(possible_problems & UTF8_GOT_TOO_SHORT)) {
             UV min_uv = uv_so_far;
@@ -1264,6 +1266,9 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
     /* At this point:
      * curlen               contains the number of bytes in the sequence that
      *                      this call should advance the input by.
+     * avail_len            gives the available number of bytes passed in, but
+     *                      only if this is less than the expected number of
+     *                      bytes, based on the code point's start byte.
      * possible_problems'   is 0 if there weren't any problems; otherwise a bit
      *                      is set in it for each potential problem found.
      * uv                   contains the code point the input sequence
@@ -1360,6 +1365,25 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                     }
                 }
             }
+            else if (possible_problems & UTF8_GOT_SHORT) {
+                possible_problems &= ~UTF8_GOT_SHORT;
+                *errors |= UTF8_GOT_SHORT;
+
+                if (! (flags & UTF8_ALLOW_SHORT)) {
+                    disallowed = TRUE;
+                    if (ckWARN_d(WARN_UTF8) && ! (flags & UTF8_CHECK_ONLY)) {
+                        pack_warn = packWARN(WARN_UTF8);
+                        message = Perl_form(aTHX_
+                                "%s: %s (too short; %d byte%s available, need %d)",
+                                malformed_text,
+                                _byte_dump_string(s0, send - s0),
+                                (int)avail_len,
+                                avail_len == 1 ? "" : "s",
+                                (int)expectlen);
+                    }
+                }
+
+            }
             else if (possible_problems & UTF8_GOT_NON_CONTINUATION) {
                 possible_problems &= ~UTF8_GOT_NON_CONTINUATION;
                 *errors |= UTF8_GOT_NON_CONTINUATION;
@@ -1375,25 +1399,6 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                                                             (int) expectlen));
                     }
                 }
-            }
-            else if (possible_problems & UTF8_GOT_SHORT) {
-                possible_problems &= ~UTF8_GOT_SHORT;
-                *errors |= UTF8_GOT_SHORT;
-
-                if (! (flags & UTF8_ALLOW_SHORT)) {
-                    disallowed = TRUE;
-                    if (ckWARN_d(WARN_UTF8) && ! (flags & UTF8_CHECK_ONLY)) {
-                        pack_warn = packWARN(WARN_UTF8);
-                        message = Perl_form(aTHX_
-                                "%s: %s (too short; %d byte%s available, need %d)",
-                                malformed_text,
-                                _byte_dump_string(s0, send - s0),
-                                (int)curlen,
-                                curlen == 1 ? "" : "s",
-                                (int)expectlen);
-                    }
-                }
-
             }
             else if (possible_problems & UTF8_GOT_LONG) {
                 possible_problems &= ~UTF8_GOT_LONG;
