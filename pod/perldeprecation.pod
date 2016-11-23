@@ -122,6 +122,14 @@ limit depends on the platform.  It is much larger on 64-bit word sizes
 than 32-bit ones.
 
 
+=head3 Use of comma-less variable list in formats.
+
+It's allowed to use a list of variables in a format, without
+separating them with commas. This usage has been deprecated
+for a long time, and it will be a fatal error in Perl 5.28.
+
+
+
 =head3 Use of C<\N{}>
 
 Use of C<\N{}> with nothing between the braces was deprecated in

@@ -467,7 +467,7 @@ S_printbuf(pTHX_ const char *const fmt, const char *const s)
 static int
 S_deprecate_commaless_var_list(pTHX) {
     PL_expect = XTERM;
-    deprecate("comma-less variable list");
+    deprecate_fatal_in("5.28", "Use of comma-less variable list is deprecated");
     return REPORT(','); /* grandfather non-comma-format format */
 }
 

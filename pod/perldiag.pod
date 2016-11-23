@@ -6923,10 +6923,12 @@ than 32-bit ones.
 The use of out of range code points was deprecated in Perl 5.24, and
 it will be a fatal error in Perl 5.28.
 
-=item Use of comma-less variable list is deprecated
+=item Use of comma-less variable list is deprecated. Its use will be fatal in Perl 5.28
 
 (D deprecated) The values you give to a format should be
 separated by commas, not just aligned on a line.
+
+This usage will be fatal in Perl 5.28.
 
 =item Use of each() on hash after insertion without resetting hash iterator results in undefined behavior
 
