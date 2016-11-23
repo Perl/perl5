@@ -685,7 +685,7 @@ Usage: VMS::Filespec::unixrealpath(spec)
 Usage: VMS::Filespec::vmsify(spec)
 Usage: VMS::Filespec::vmspath(spec)
 Usage: VMS::Filespec::vmsrealpath(spec)
-Use of inherited AUTOLOAD for non-method %s::%s() is deprecated
+Use of inherited AUTOLOAD for non-method %s::%s() is deprecated. This will be fatal in Perl 5.28
 utf8 "\x%X" does not map to Unicode
 Value of logical "%s" too long. Truncating to %i bytes
 waitpid: process %x is not a child of process %x

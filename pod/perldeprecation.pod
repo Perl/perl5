@@ -186,6 +186,32 @@ of the variable happened in Perl 5.25.3.
 
 Setting this variable will become a fatal error in Perl 5.28.
 
+
+
+=head3 Use of inherited AUTOLOAD for non-method %s() is deprecated
+
+As an (ahem) accidental feature, C<AUTOLOAD> subroutines are looked
+up as methods (using the C<@ISA> hierarchy) even when the subroutines
+to be autoloaded were called as plain functions (e.g. C<Foo::bar()>),
+not as methods (e.g. C<< Foo->bar() >> or C<< $obj->bar() >>).
+
+This bug will be rectified in future by using method lookup only for
+methods' C<AUTOLOAD>s.
+
+The simple rule is:  Inheritance will not work when autoloading
+non-methods.  The simple fix for old code is:  In any module that used
+to depend on inheriting C<AUTOLOAD> for non-methods from a base class
+named C<BaseClass>, execute C<*AUTOLOAD = \&BaseClass::AUTOLOAD> during
+startup.
+
+In code that currently says C<use AutoLoader; @ISA = qw(AutoLoader);>
+you should remove AutoLoader from @ISA and change C<use AutoLoader;> to
+C<use AutoLoader 'AUTOLOAD';>.
+
+This feature was deprecated in Perl 5.004, and will be fatal in Perl 5.28.
+
+
+
 =head2 Perl 5.24
 
 =head3 Use of C<< *glob{FILEHANDLE} >>

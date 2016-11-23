@@ -46,7 +46,7 @@ fred() ;
 my $x = \&barney;
 (bless[])->barney;
 EXPECT
-Use of inherited AUTOLOAD for non-method main::fred() is deprecated at - line 5.
+Use of inherited AUTOLOAD for non-method main::fred() is deprecated. This will be fatal in Perl 5.28 at - line 5.
 ########
 # gv.c
 use utf8;
@@ -56,7 +56,7 @@ sub Oᕞʀ::AUTOLOAD { 1 } sub Oᕞʀ::fᕃƌ {}
 use warnings 'deprecated' ;
 fᕃƌ() ;
 EXPECT
-Use of inherited AUTOLOAD for non-method main::fᕃƌ() is deprecated at - line 7.
+Use of inherited AUTOLOAD for non-method main::fᕃƌ() is deprecated. This will be fatal in Perl 5.28 at - line 7.
 ########
 # gv.c
 $a = ${^ENCODING};

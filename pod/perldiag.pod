@@ -6987,7 +6987,7 @@ scope is deprecated and should be avoided.
 
 This was deprecated in Perl 5.12, and will be a fatal error in Perl 5.28.
 
-=item Use of inherited AUTOLOAD for non-method %s() is deprecated
+=item Use of inherited AUTOLOAD for non-method %s() is deprecated. This will be fatal in Perl 5.28
 
 (D deprecated) As an (ahem) accidental feature, C<AUTOLOAD>
 subroutines are looked up as methods (using the C<@ISA> hierarchy)
@@ -7010,6 +7010,8 @@ startup.
 In code that currently says C<use AutoLoader; @ISA = qw(AutoLoader);>
 you should remove AutoLoader from @ISA and change C<use AutoLoader;> to
 C<use AutoLoader 'AUTOLOAD';>.
+
+This feature was deprecated in Perl 5.004, and will be fatal in Perl 5.28.
 
 =item Use of %s in printf format not supported
 
