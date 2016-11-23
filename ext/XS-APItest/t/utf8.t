@@ -1017,32 +1017,34 @@ my $REPLACEMENT = 0xFFFD;
 # Now test the malformations.  All these raise category utf8 warnings.
 my @malformations = (
     # ($testname, $bytes, $length, $allow_flags, $expected_error_flags,
-    #  $allowed_uv, $expected_len, $message )
+    #  $allowed_uv, $expected_len, $needed_to_discern_len, $message )
     [ "zero length string malformation", "", 0,
-        $UTF8_ALLOW_EMPTY, $UTF8_GOT_EMPTY, 0, 0,
+        $UTF8_ALLOW_EMPTY, $UTF8_GOT_EMPTY, 0, 0, 0,
         qr/empty string/
     ],
-    [ "orphan continuation byte malformation", I8_to_native("${I8c}a"),
-        2,
-        $UTF8_ALLOW_CONTINUATION, $UTF8_GOT_CONTINUATION, $REPLACEMENT, 1,
+    [ "orphan continuation byte malformation", I8_to_native("${I8c}a"), 2,
+        $UTF8_ALLOW_CONTINUATION, $UTF8_GOT_CONTINUATION, $REPLACEMENT,
+        1, 1,
         qr/unexpected continuation byte/
     ],
     [ "premature next character malformation (immediate)",
         (isASCII) ? "\xc2\xc2\x80" : I8_to_native("\xc5\xc5\xa0"),
         3,
-        $UTF8_ALLOW_NON_CONTINUATION, $UTF8_GOT_NON_CONTINUATION, $REPLACEMENT, 1,
+        $UTF8_ALLOW_NON_CONTINUATION, $UTF8_GOT_NON_CONTINUATION, $REPLACEMENT,
+        1, 2,
         qr/unexpected non-continuation byte.*immediately after start byte/
     ],
     [ "premature next character malformation (non-immediate)",
-        I8_to_native("\xef${I8c}a"),
-        3,
-        $UTF8_ALLOW_NON_CONTINUATION, $UTF8_GOT_NON_CONTINUATION, $REPLACEMENT, 2,
+        I8_to_native("\xef${I8c}a"), 3,
+        $UTF8_ALLOW_NON_CONTINUATION, $UTF8_GOT_NON_CONTINUATION, $REPLACEMENT,
+        2, 3,
         qr/unexpected non-continuation byte .* 2 bytes after start byte/
     ],
     [ "too short malformation", I8_to_native("\xf1${I8c}a"), 2,
         # Having the 'a' after this, but saying there are only 2 bytes also
         # tests that we pay attention to the passed in length
-        $UTF8_ALLOW_SHORT, $UTF8_GOT_SHORT, $REPLACEMENT, 2,
+        $UTF8_ALLOW_SHORT, $UTF8_GOT_SHORT, $REPLACEMENT,
+        2, 2,
         qr/2 bytes available, need 4/
     ],
     [ "overlong malformation, lowest 2-byte",
@@ -1050,7 +1052,7 @@ my @malformations = (
         2,
         $UTF8_ALLOW_LONG, $UTF8_GOT_LONG,
         0,   # NUL
-        2,
+        2, 1,
         qr/overlong/
     ],
     [ "overlong malformation, highest 2-byte",
@@ -1058,7 +1060,7 @@ my @malformations = (
         2,
         $UTF8_ALLOW_LONG, $UTF8_GOT_LONG,
         (isASCII) ? 0x7F : utf8::unicode_to_native(0x9F),
-        2,
+        2, 1,
         qr/overlong/
     ],
     [ "overlong malformation, lowest 3-byte",
@@ -1066,7 +1068,7 @@ my @malformations = (
         3,
         $UTF8_ALLOW_LONG, $UTF8_GOT_LONG,
         0,   # NUL
-        3,
+        3, (isASCII) ? 2 : 1,
         qr/overlong/
     ],
     [ "overlong malformation, highest 3-byte",
@@ -1074,7 +1076,7 @@ my @malformations = (
         3,
         $UTF8_ALLOW_LONG, $UTF8_GOT_LONG,
         (isASCII) ? 0x7FF : 0x3FF,
-        3,
+        3, (isASCII) ? 2 : 1,
         qr/overlong/
     ],
     [ "overlong malformation, lowest 4-byte",
@@ -1082,7 +1084,7 @@ my @malformations = (
         4,
         $UTF8_ALLOW_LONG, $UTF8_GOT_LONG,
         0,   # NUL
-        4,
+        4, 2,
         qr/overlong/
     ],
     [ "overlong malformation, highest 4-byte",
@@ -1090,7 +1092,7 @@ my @malformations = (
         4,
         $UTF8_ALLOW_LONG, $UTF8_GOT_LONG,
         (isASCII) ? 0xFFFF : 0x3FFF,
-        4,
+        4, 2,
         qr/overlong/
     ],
     [ "overlong malformation, lowest 5-byte",
@@ -1100,7 +1102,7 @@ my @malformations = (
         5,
         $UTF8_ALLOW_LONG, $UTF8_GOT_LONG,
         0,   # NUL
-        5,
+        5, 2,
         qr/overlong/
     ],
     [ "overlong malformation, highest 5-byte",
@@ -1110,7 +1112,7 @@ my @malformations = (
         5,
         $UTF8_ALLOW_LONG, $UTF8_GOT_LONG,
         (isASCII) ? 0x1FFFFF : 0x3FFFF,
-        5,
+        5, 2,
         qr/overlong/
     ],
     [ "overlong malformation, lowest 6-byte",
@@ -1120,7 +1122,7 @@ my @malformations = (
         6,
         $UTF8_ALLOW_LONG, $UTF8_GOT_LONG,
         0,   # NUL
-        6,
+        6, 2,
         qr/overlong/
     ],
     [ "overlong malformation, highest 6-byte",
@@ -1130,7 +1132,7 @@ my @malformations = (
         6,
         $UTF8_ALLOW_LONG, $UTF8_GOT_LONG,
         (isASCII) ? 0x3FFFFFF : 0x3FFFFF,
-        6,
+        6, 2,
         qr/overlong/
     ],
     [ "overlong malformation, lowest 7-byte",
@@ -1140,7 +1142,7 @@ my @malformations = (
         7,
         $UTF8_ALLOW_LONG, $UTF8_GOT_LONG,
         0,   # NUL
-        7,
+        7, 2,
         qr/overlong/
     ],
     [ "overlong malformation, highest 7-byte",
@@ -1150,7 +1152,7 @@ my @malformations = (
         7,
         $UTF8_ALLOW_LONG, $UTF8_GOT_LONG,
         (isASCII) ? 0x7FFFFFFF : 0x3FFFFFF,
-        7,
+        7, 2,
         qr/overlong/
     ],
 );
@@ -1164,16 +1166,16 @@ if (isASCII && ! $is64bit) {    # 32-bit ASCII platform
             0,  # There is no way to allow this malformation
             $UTF8_GOT_OVERFLOW,
             $REPLACEMENT,
-            7,
+            7, 2,
             qr/overflows/
         ],
-        [ "overflow malformation, can tell on first byte",
+        [ "overflow malformation",
             "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80",
             $max_bytes,
             0,  # There is no way to allow this malformation
             $UTF8_GOT_OVERFLOW,
             $REPLACEMENT,
-            $max_bytes,
+            $max_bytes, 1,
             qr/overflows/
         ];
 }
@@ -1191,7 +1193,7 @@ else { # 64-bit ASCII, or EBCDIC of any size.
             $max_bytes,
             $UTF8_ALLOW_LONG, $UTF8_GOT_LONG,
             0,   # NUL
-            $max_bytes,
+            $max_bytes, (isASCII) ? 7 : 8,
             qr/overlong/,
         ],
         [ "overlong malformation, highest max-byte",
@@ -1201,7 +1203,7 @@ else { # 64-bit ASCII, or EBCDIC of any size.
             $max_bytes,
             $UTF8_ALLOW_LONG, $UTF8_GOT_LONG,
             (isASCII) ? 0xFFFFFFFFF : 0x3FFFFFFF,
-            $max_bytes,
+            $max_bytes, (isASCII) ? 7 : 8,
             qr/overlong/,
         ];
 
@@ -1213,7 +1215,7 @@ else { # 64-bit ASCII, or EBCDIC of any size.
             0,  # There is no way to allow this malformation
             $UTF8_GOT_OVERFLOW,
             $REPLACEMENT,
-            $max_bytes,
+            $max_bytes, 8,
             qr/overflows/
         ];
     }
@@ -1227,7 +1229,7 @@ else { # 64-bit ASCII, or EBCDIC of any size.
                 0,  # There is no way to allow this malformation
                 $UTF8_GOT_OVERFLOW,
                 $REPLACEMENT,
-                $max_bytes,
+                $max_bytes, (isASCII) ? 3 : 2,
                 qr/overflows/
             ];
     }
@@ -1235,7 +1237,7 @@ else { # 64-bit ASCII, or EBCDIC of any size.
 
 foreach my $test (@malformations) {
     my ($testname, $bytes, $length, $allow_flags, $expected_error_flags,
-        $allowed_uv, $expected_len, $message ) = @$test;
+        $allowed_uv, $expected_len, $needed_to_discern_len, $message ) = @$test;
 
     if (length($bytes) < $length) {
         fail("Internal test error: actual buffer length (" . length($bytes)
@@ -1287,45 +1289,14 @@ foreach my $test (@malformations) {
         undef @warnings;
 
         $ret = test_is_utf8_valid_partial_char_flags($bytes, $j, 0);
+
         my $ret_should_be = 0;
         my $comment = "";
-        if ($testname =~ /premature|short/ && $j < 3) {
+        if ($j < $needed_to_discern_len) {
+            $ret_should_be = 1;
+            $comment = ", but need $needed_to_discern_len bytes to discern:";
+        }
 
-            # The tests are hard-coded so these relationships hold
-            my $cut_off = 2;
-            $cut_off = 3 if $testname =~ /non-immediate/;
-            if ($j < $cut_off) {
-                $ret_should_be = 1;
-                $comment = ", but need $cut_off bytes to discern:";
-            }
-        }
-        elsif ($testname =~ /overlong/ && ! isASCII && $length == 3) {
-            # 3-byte overlongs on EBCDIC are determinable on the first byte
-        }
-        elsif ($testname =~ /overlong/ && $length > 2) {
-            if ($length <= 7 && $j < 2) {
-                $ret_should_be = 1;
-                $comment = ", but need 2 bytes to discern:";
-            }
-            elsif ($length > 7 && $j < 7) {
-                $ret_should_be = 1;
-                $comment = ", but need 7 bytes to discern:";
-            }
-        }
-        elsif ($testname =~ /overflow/ && $testname !~ /first byte/) {
-            if (isASCII) {
-                if ($j < (($is64bit) ? 3 : 2)) {
-                    $comment = ", but need $j bytes to discern:";
-                    $ret_should_be = 1;
-                }
-            }
-            else {
-                if ($j < (($is64bit) ? 2 : 8)) {
-                    $comment = ", but need $j bytes to discern:";
-                    $ret_should_be = 1;
-                }
-            }
-        }
         is($ret, $ret_should_be, "$testname: is_utf8_valid_partial_char_flags("
                                 . display_bytes($partial)
                                 . ")$comment returns $ret_should_be");
@@ -1435,12 +1406,13 @@ sub nonportable_regex ($) {
 # be allowed/warned on.
 my @tests = (
      # ($testname, $bytes, $warn_flags, $disallow_flags, $expected_error_flags,
-     #  $category, $allowed_uv, $expected_len, $message )
+     #  $category, $allowed_uv, $expected_len, $needed_to_discern_len, $message )
     [ "lowest surrogate",
         (isASCII) ? "\xed\xa0\x80" : I8_to_native("\xf1\xb6\xa0\xa0"),
         $UTF8_WARN_SURROGATE, $UTF8_DISALLOW_SURROGATE, $UTF8_GOT_SURROGATE,
         'surrogate', 0xD800,
         (isASCII) ? 3 : 4,
+        2,
         qr/surrogate/
     ],
     [ "a middle surrogate",
@@ -1448,6 +1420,7 @@ my @tests = (
         $UTF8_WARN_SURROGATE, $UTF8_DISALLOW_SURROGATE, $UTF8_GOT_SURROGATE,
         'surrogate', 0xD90D,
         (isASCII) ? 3 : 4,
+        2,
         qr/surrogate/
     ],
     [ "highest surrogate",
@@ -1455,6 +1428,7 @@ my @tests = (
         $UTF8_WARN_SURROGATE, $UTF8_DISALLOW_SURROGATE, $UTF8_GOT_SURROGATE,
         'surrogate', 0xDFFF,
         (isASCII) ? 3 : 4,
+        2,
         qr/surrogate/
     ],
     [ "first non_unicode",
@@ -1462,6 +1436,7 @@ my @tests = (
         $UTF8_WARN_SUPER, $UTF8_DISALLOW_SUPER, $UTF8_GOT_SUPER,
         'non_unicode', 0x110000,
         (isASCII) ? 4 : 5,
+        2,
         qr/(not Unicode|for a non-Unicode code point).* may not be portable/
     ],
     [ "non_unicode whose first byte tells that",
@@ -1470,12 +1445,14 @@ my @tests = (
         'non_unicode',
         (isASCII) ? 0x140000 : 0x200000,
         (isASCII) ? 4 : 5,
+        1,
         qr/(not Unicode|for a non-Unicode code point).* may not be portable/
     ],
     [ "first of 32 consecutive non-character code points",
         (isASCII) ? "\xef\xb7\x90" : I8_to_native("\xf1\xbf\xae\xb0"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0xFDD0,
+        (isASCII) ? 3 : 4,
         (isASCII) ? 3 : 4,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
@@ -1484,12 +1461,14 @@ my @tests = (
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0xFDE0,
         (isASCII) ? 3 : 4,
+        (isASCII) ? 3 : 4,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "final of 32 consecutive non-character code points",
         (isASCII) ? "\xef\xb7\xaf" : I8_to_native("\xf1\xbf\xaf\xaf"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0xFDEF,
+        (isASCII) ? 3 : 4,
         (isASCII) ? 3 : 4,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
@@ -1498,6 +1477,7 @@ my @tests = (
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0xFFFE,
         (isASCII) ? 3 : 4,
+        (isASCII) ? 3 : 4,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+FFFF",
@@ -1505,48 +1485,56 @@ my @tests = (
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0xFFFF,
         (isASCII) ? 3 : 4,
+        (isASCII) ? 3 : 4,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+1FFFE",
         (isASCII) ? "\xf0\x9f\xbf\xbe" : I8_to_native("\xf3\xbf\xbf\xbe"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
-        'nonchar', 0x1FFFE, 4,
+        'nonchar', 0x1FFFE,
+        4, 4,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+1FFFF",
         (isASCII) ? "\xf0\x9f\xbf\xbf" : I8_to_native("\xf3\xbf\xbf\xbf"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
-        'nonchar', 0x1FFFF, 4,
+        'nonchar', 0x1FFFF,
+        4, 4,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+2FFFE",
         (isASCII) ? "\xf0\xaf\xbf\xbe" : I8_to_native("\xf5\xbf\xbf\xbe"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
-        'nonchar', 0x2FFFE, 4,
+        'nonchar', 0x2FFFE,
+        4, 4,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+2FFFF",
         (isASCII) ? "\xf0\xaf\xbf\xbf" : I8_to_native("\xf5\xbf\xbf\xbf"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
-        'nonchar', 0x2FFFF, 4,
+        'nonchar', 0x2FFFF,
+        4, 4,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+3FFFE",
         (isASCII) ? "\xf0\xbf\xbf\xbe" : I8_to_native("\xf7\xbf\xbf\xbe"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
-        'nonchar', 0x3FFFE, 4,
+        'nonchar', 0x3FFFE,
+        4, 4,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+3FFFF",
         (isASCII) ? "\xf0\xbf\xbf\xbf" : I8_to_native("\xf7\xbf\xbf\xbf"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
-        'nonchar', 0x3FFFF, 4,
+        'nonchar', 0x3FFFF,
+        4, 4,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+4FFFE",
         (isASCII) ? "\xf1\x8f\xbf\xbe" : I8_to_native("\xf8\xa9\xbf\xbf\xbe"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0x4FFFE,
+        (isASCII) ? 4 : 5,
         (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
@@ -1555,12 +1543,14 @@ my @tests = (
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0x4FFFF,
         (isASCII) ? 4 : 5,
+        (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+5FFFE",
         (isASCII) ? "\xf1\x9f\xbf\xbe" : I8_to_native("\xf8\xab\xbf\xbf\xbe"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0x5FFFE,
+        (isASCII) ? 4 : 5,
         (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
@@ -1569,12 +1559,14 @@ my @tests = (
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0x5FFFF,
         (isASCII) ? 4 : 5,
+        (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+6FFFE",
         (isASCII) ? "\xf1\xaf\xbf\xbe" : I8_to_native("\xf8\xad\xbf\xbf\xbe"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0x6FFFE,
+        (isASCII) ? 4 : 5,
         (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
@@ -1583,12 +1575,14 @@ my @tests = (
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0x6FFFF,
         (isASCII) ? 4 : 5,
+        (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+7FFFE",
         (isASCII) ? "\xf1\xbf\xbf\xbe" : I8_to_native("\xf8\xaf\xbf\xbf\xbe"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0x7FFFE,
+        (isASCII) ? 4 : 5,
         (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
@@ -1597,12 +1591,14 @@ my @tests = (
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0x7FFFF,
         (isASCII) ? 4 : 5,
+        (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+8FFFE",
         (isASCII) ? "\xf2\x8f\xbf\xbe" : I8_to_native("\xf8\xb1\xbf\xbf\xbe"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0x8FFFE,
+        (isASCII) ? 4 : 5,
         (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
@@ -1611,12 +1607,14 @@ my @tests = (
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0x8FFFF,
         (isASCII) ? 4 : 5,
+        (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+9FFFE",
         (isASCII) ? "\xf2\x9f\xbf\xbe" : I8_to_native("\xf8\xb3\xbf\xbf\xbe"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0x9FFFE,
+        (isASCII) ? 4 : 5,
         (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
@@ -1625,12 +1623,14 @@ my @tests = (
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0x9FFFF,
         (isASCII) ? 4 : 5,
+        (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+AFFFE",
         (isASCII) ? "\xf2\xaf\xbf\xbe" : I8_to_native("\xf8\xb5\xbf\xbf\xbe"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0xAFFFE,
+        (isASCII) ? 4 : 5,
         (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
@@ -1639,12 +1639,14 @@ my @tests = (
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0xAFFFF,
         (isASCII) ? 4 : 5,
+        (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+BFFFE",
         (isASCII) ? "\xf2\xbf\xbf\xbe" : I8_to_native("\xf8\xb7\xbf\xbf\xbe"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0xBFFFE,
+        (isASCII) ? 4 : 5,
         (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
@@ -1653,12 +1655,14 @@ my @tests = (
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0xBFFFF,
         (isASCII) ? 4 : 5,
+        (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+CFFFE",
         (isASCII) ? "\xf3\x8f\xbf\xbe" : I8_to_native("\xf8\xb9\xbf\xbf\xbe"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0xCFFFE,
+        (isASCII) ? 4 : 5,
         (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
@@ -1667,12 +1671,14 @@ my @tests = (
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0xCFFFF,
         (isASCII) ? 4 : 5,
+        (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+DFFFE",
         (isASCII) ? "\xf3\x9f\xbf\xbe" : I8_to_native("\xf8\xbb\xbf\xbf\xbe"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0xDFFFE,
+        (isASCII) ? 4 : 5,
         (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
@@ -1681,12 +1687,14 @@ my @tests = (
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0xDFFFF,
         (isASCII) ? 4 : 5,
+        (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+EFFFE",
         (isASCII) ? "\xf3\xaf\xbf\xbe" : I8_to_native("\xf8\xbd\xbf\xbf\xbe"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0xEFFFE,
+        (isASCII) ? 4 : 5,
         (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
@@ -1695,12 +1703,14 @@ my @tests = (
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0xEFFFF,
         (isASCII) ? 4 : 5,
+        (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+FFFFE",
         (isASCII) ? "\xf3\xbf\xbf\xbe" : I8_to_native("\xf8\xbf\xbf\xbf\xbe"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0xFFFFE,
+        (isASCII) ? 4 : 5,
         (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
@@ -1709,6 +1719,7 @@ my @tests = (
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0xFFFFF,
         (isASCII) ? 4 : 5,
+        (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+10FFFE",
@@ -1716,12 +1727,14 @@ my @tests = (
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0x10FFFE,
         (isASCII) ? 4 : 5,
+        (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+10FFFF",
         (isASCII) ? "\xf4\x8f\xbf\xbf" : I8_to_native("\xf9\xa1\xbf\xbf\xbf"),
         $UTF8_WARN_NONCHAR, $UTF8_DISALLOW_NONCHAR, $UTF8_GOT_NONCHAR,
         'nonchar', 0x10FFFF,
+        (isASCII) ? 4 : 5,
         (isASCII) ? 4 : 5,
         qr/Unicode non-character.*is not recommended for open interchange/
     ],
@@ -1733,7 +1746,9 @@ my @tests = (
         # 32-bit machines
         $UTF8_WARN_ABOVE_31_BIT, $UTF8_DISALLOW_ABOVE_31_BIT,
         $UTF8_GOT_ABOVE_31_BIT,
-        'utf8', 0x80000000, (isASCII) ? 7 : $max_bytes,
+        'utf8', 0x80000000,
+        (isASCII) ? 7 : $max_bytes,
+        (isASCII) ? 1 : 8,
         nonportable_regex(0x80000000)
     ],
     [ "highest 32 bit code point",
@@ -1742,7 +1757,9 @@ my @tests = (
          : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa3\xbf\xbf\xbf\xbf\xbf\xbf"),
         $UTF8_WARN_ABOVE_31_BIT, $UTF8_DISALLOW_ABOVE_31_BIT,
         $UTF8_GOT_ABOVE_31_BIT,
-        'utf8', 0xFFFFFFFF, (isASCII) ? 7 : $max_bytes,
+        'utf8', 0xFFFFFFFF,
+        (isASCII) ? 7 : $max_bytes,
+        (isASCII) ? 1 : 8,
         nonportable_regex(0xffffffff)
     ],
     [ "requires at least 32 bits, and use SUPER-type flags, instead of ABOVE_31_BIT",
@@ -1750,7 +1767,9 @@ my @tests = (
          ? "\xfe\x82\x80\x80\x80\x80\x80"
          : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
         $UTF8_WARN_SUPER, $UTF8_DISALLOW_SUPER, $UTF8_GOT_SUPER,
-        'utf8', 0x80000000, (isASCII) ? 7 : $max_bytes,
+        'utf8', 0x80000000,
+        (isASCII) ? 7 : $max_bytes,
+        (isASCII) ? 1 : 8,
         nonportable_regex(0x80000000)
     ],
     [ "overflow with warnings/disallow for more than 31 bits",
@@ -1774,6 +1793,7 @@ my @tests = (
         $UTF8_GOT_ABOVE_31_BIT,
         'utf8', 0,
         (! isASCII || $is64bit) ? $max_bytes : 7,
+        (isASCII || $is64bit) ? 2 : 8,
         qr/overflows/
     ],
 );
@@ -1786,7 +1806,8 @@ if (! $is64bit) {
                 "\xFE\x84\x80\x80\x80\x80\x80",
                 $UTF8_WARN_ABOVE_31_BIT, $UTF8_DISALLOW_ABOVE_31_BIT,
                 $UTF8_GOT_ABOVE_31_BIT,
-                'utf8', 0x100000000, 7,
+                'utf8', 0x100000000,
+                7, 1,
                 qr/and( is)? not portable/
             ];
     }
@@ -1800,7 +1821,8 @@ else {
             : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
             $UTF8_WARN_ABOVE_31_BIT, $UTF8_DISALLOW_ABOVE_31_BIT,
             $UTF8_GOT_ABOVE_31_BIT,
-            'utf8', 0x1000000000, $max_bytes,
+            'utf8', 0x1000000000,
+            $max_bytes, (isASCII) ? 1 : 7,
             qr/and( is)? not portable/
         ];
     if (! isASCII) {
@@ -1809,35 +1831,40 @@ else {
                 I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 $UTF8_GOT_ABOVE_31_BIT,
-                'utf8', 0x800000000, $max_bytes,
+                'utf8', 0x800000000,
+                $max_bytes, 7,
                 nonportable_regex(0x80000000)
             ],
             [ "requires at least 32 bits",
                 I8_to_native("\xff\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 $UTF8_GOT_ABOVE_31_BIT,
-                'utf8', 0x10000000000, $max_bytes,
+                'utf8', 0x10000000000,
+                $max_bytes, 6,
                 nonportable_regex(0x10000000000)
             ],
             [ "requires at least 32 bits",
                 I8_to_native("\xff\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 $UTF8_GOT_ABOVE_31_BIT,
-                'utf8', 0x200000000000, $max_bytes,
+                'utf8', 0x200000000000,
+                $max_bytes, 5,
                 nonportable_regex(0x20000000000)
             ],
             [ "requires at least 32 bits",
                 I8_to_native("\xff\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 $UTF8_GOT_ABOVE_31_BIT,
-                'utf8', 0x4000000000000, $max_bytes,
+                'utf8', 0x4000000000000,
+                $max_bytes, 4,
                 nonportable_regex(0x4000000000000)
             ],
             [ "requires at least 32 bits",
                 I8_to_native("\xff\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 $UTF8_GOT_ABOVE_31_BIT,
-                'utf8', 0x80000000000000, $max_bytes,
+                'utf8', 0x80000000000000,
+                $max_bytes, 3,
                 nonportable_regex(0x80000000000000)
             ],
             [ "requires at least 32 bits",
@@ -1845,7 +1872,8 @@ else {
                    #IBM-1047  \xFE\x41\x41\x41\x41\x41\x41\x43\x41\x41\x41\x41\x41\x41
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 $UTF8_GOT_ABOVE_31_BIT,
-                'utf8', 0x1000000000000000, $max_bytes,
+                'utf8', 0x1000000000000000,
+                $max_bytes, 2,
                 nonportable_regex(0x1000000000000000)
             ];
     }
@@ -1853,7 +1881,7 @@ else {
 
 foreach my $test (@tests) {
     my ($testname, $bytes, $warn_flags, $disallow_flags, $expected_error_flags,
-        $category, $allowed_uv, $expected_len, $message ) = @$test;
+        $category, $allowed_uv, $expected_len, $needed_to_discern_len, $message ) = @$test;
 
     my $length = length $bytes;
     my $will_overflow = $testname =~ /overflow/ ? 'overflow' : "";
@@ -1941,39 +1969,14 @@ foreach my $test (@tests) {
                 if ($disallow_flag) {
                     $ret_should_be = 0;
                     $comment = "disallowed";
+                    if ($j < $needed_to_discern_len) {
+                        $ret_should_be = 1;
+                        $comment .= ", but need $needed_to_discern_len bytes to discern:";
+                    }
                 }
                 else {
                     $ret_should_be = 1;
                     $comment = "allowed";
-                }
-
-                if ($disallow_flag) {
-                    if ($testname =~ /non-character/) {
-                        $ret_should_be = 1;
-                        $comment .= ", but but need full char to discern";
-                    }
-                    elsif ($testname =~ /surrogate/) {
-                        if ($j < 2) {
-                            $ret_should_be = 1;
-                            $comment .= ", but need 2 bytes to discern";
-                        }
-                    }
-                    elsif (   ($disallow_flags & $UTF8_DISALLOW_SUPER)
-                           && $j < 2
-                           && ord(native_to_I8(substr($bytes, 0, 1)))
-                               lt ((isASCII) ? 0xF5 : 0xFA))
-                    {
-                        $ret_should_be = 1;
-                        $comment .= ", but need 2 bytes to discern";
-                    }
-                    elsif (   ! isASCII
-                           && $testname =~ /requires at least 32 bits/)
-                    {
-                        # On EBCDIC, the boundary between 31 and 32 bits is
-                        # more complicated.
-                        $ret_should_be = 1 if native_to_I8($partial) le
-                     "\xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA1\xBF\xBF\xBF\xBF\xBF\xBF";
-                    }
                 }
 
                 undef @warnings;
@@ -2006,10 +2009,6 @@ foreach my $test (@tests) {
                                        "short",
                                        "unexpected non-continuation")
                     {
-                        # The non-characters can't be discerned with a short
-                        # malformation
-                        next if $short && $testname =~ /non-character/;
-
                         foreach my $overlong ("", "overlong") {
 
                             # If we're already at the longest possible, we
@@ -2038,6 +2037,7 @@ foreach my $test (@tests) {
                             my $this_length = $length;
                             my $expected_uv = $allowed_uv;
                             my $this_expected_len = $expected_len;
+                            my $this_needed_to_discern_len = $needed_to_discern_len;
                             if ($malformations_name) {
                                 $expected_uv = 0;
 
@@ -2062,6 +2062,7 @@ foreach my $test (@tests) {
                                        x ( $max_bytes - 1 - length($this_bytes)))
                                     . $this_bytes;
                                     $this_length = length($this_bytes);
+                                    $this_needed_to_discern_len = $max_bytes - ($this_expected_len - $this_needed_to_discern_len);
                                     $this_expected_len = $max_bytes;
                                     push @expected_errors, $UTF8_GOT_LONG;
                                 }
@@ -2168,9 +2169,14 @@ foreach my $test (@tests) {
                                 diag Dumper \@expected_errors;
                             }
 
-                            if ($warn_flag || $disallow_flag) {
-                                is($errors, $expected_error_flags,
-                                   "Got the correct error flag");
+                            if (   $this_expected_len >= $this_needed_to_discern_len
+                                && ($warn_flag || $disallow_flag))
+                            {
+                                unless (is($errors, $expected_error_flags,
+                                           "Got the correct error flag"))
+                                {
+                                    diag $call;
+                                }
                             }
                             else {
                                 is($errors, 0, "Got no other error flag");
@@ -2201,7 +2207,9 @@ foreach my $test (@tests) {
 
                             # Any overflow will override any super or above-31
                             # warnings.
-                            goto no_warnings_expected if $will_overflow;
+                            goto no_warnings_expected
+                                        if $will_overflow || $this_expected_len
+                                                 < $this_needed_to_discern_len;
 
                             if (    ! $do_warning
                                 && (   $warning eq 'utf8'
