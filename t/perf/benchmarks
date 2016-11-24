@@ -320,6 +320,11 @@
         setup   => 'my ($x,$y,$z)',
         code    => '($x,$y,$z) = ()',
     },
+    'expr::aassign::3lref_empty' => {
+        desc    => 'three lexical ref vars assigned empty',
+        setup   => 'my ($x,$y,$z); my $r = []; ',
+        code    => '($x,$y,$z) = ($r,$r,$r); ($x,$y,$z) = ()',
+    },
     'expr::aassign::pa_empty' => {
         desc    => 'package array assigned empty',
         setup   => '',

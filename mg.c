@@ -725,7 +725,7 @@ Perl_emulate_cop_io(pTHX_ const COP *const c, SV *const sv)
     PERL_ARGS_ASSERT_EMULATE_COP_IO;
 
     if (!(CopHINTS_get(c) & (HINT_LEXICAL_IO_IN|HINT_LEXICAL_IO_OUT)))
-	sv_setsv(sv, &PL_sv_undef);
+	sv_set_undef(sv);
     else {
         SvPVCLEAR(sv);
 	SvUTF8_off(sv);
@@ -800,9 +800,9 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
         if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
           do_numbuf_fetch:
             CALLREG_NUMBUF_FETCH(rx,paren,sv);
-        } else {
-            sv_setsv(sv,&PL_sv_undef);
         }
+        else
+            goto set_undef;
         return 0;
     }
 
@@ -810,7 +810,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     switch (*mg->mg_ptr) {
     case '\001':		/* ^A */
 	if (SvOK(PL_bodytarget)) sv_copypv(sv, PL_bodytarget);
-	else sv_setsv(sv, &PL_sv_undef);
+	else
+            sv_set_undef(sv);
 	if (SvTAINTED(PL_bodytarget))
 	    SvTAINTED_on(sv);
 	break;
@@ -994,8 +995,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	        sv_setpvn(sv, WARN_NONEstring, WARNsize) ;
 	    }
 	    else if (PL_compiling.cop_warnings == pWARN_STD) {
-		sv_setsv(sv, &PL_sv_undef);
-		break;
+                goto set_undef;
 	    }
             else if (PL_compiling.cop_warnings == pWARN_ALL) {
 		/* Get the bit mask for $warnings::Bits{all}, because
@@ -1024,16 +1024,14 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    if (paren)
                 goto do_numbuf_fetch;
 	}
-	sv_setsv(sv,&PL_sv_undef);
-	break;
+        goto set_undef;
     case '\016':		/* ^N */
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    paren = RX_LASTCLOSEPAREN(rx);
 	    if (paren)
                 goto do_numbuf_fetch;
 	}
-	sv_setsv(sv,&PL_sv_undef);
-	break;
+        goto set_undef;
     case '.':
 	if (GvIO(PL_last_in_gv)) {
 	    sv_setiv(sv, (IV)IoLINES(GvIOp(PL_last_in_gv)));
@@ -1092,7 +1090,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	if (PL_ors_sv)
 	    sv_copypv(sv, PL_ors_sv);
 	else
-	    sv_setsv(sv, &PL_sv_undef);
+            goto set_undef;
 	break;
     case '$': /* $$ */
 	{
@@ -1137,6 +1135,10 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '0':
 	break;
     }
+    return 0;
+
+  set_undef:
+    sv_set_undef(sv);
     return 0;
 }
 
@@ -1341,7 +1343,7 @@ Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
     	    if(sigstate == (Sighandler_t) SIG_IGN)
     	    	sv_setpvs(sv,"IGNORE");
     	    else
-    	    	sv_setsv(sv,&PL_sv_undef);
+                sv_set_undef(sv);
 	    PL_psig_ptr[i] = SvREFCNT_inc_simple_NN(sv);
     	    SvTEMP_off(sv);
     	}
@@ -2189,7 +2191,7 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
 	    negrem ? -(IV)rem  : (IV)rem,  !negrem, &offs, &rem
     )) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR), "substr outside of string");
-	sv_setsv_nomg(sv, &PL_sv_undef);
+        sv_set_undef(sv);
 	return 0;
     }
 

@@ -8139,7 +8139,7 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
         }
     } else {
       ret_undef:
-        sv_setsv(sv,&PL_sv_undef);
+        sv_set_undef(sv);
         return;
     }
 }

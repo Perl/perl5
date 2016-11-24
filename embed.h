@@ -664,6 +664,7 @@
 #define sv_report_used()	Perl_sv_report_used(aTHX)
 #define sv_reset(a,b)		Perl_sv_reset(aTHX_ a,b)
 #define sv_rvweaken(a)		Perl_sv_rvweaken(aTHX_ a)
+#define sv_set_undef(a)		Perl_sv_set_undef(aTHX_ a)
 #define sv_setiv(a,b)		Perl_sv_setiv(aTHX_ a,b)
 #define sv_setiv_mg(a,b)	Perl_sv_setiv_mg(aTHX_ a,b)
 #define sv_setnv(a,b)		Perl_sv_setnv(aTHX_ a,b)

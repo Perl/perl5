@@ -4782,6 +4782,64 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	SvTAINT(dstr);
 }
 
+
+/*
+=for apidoc sv_set_undef
+
+Equivalent to C<sv_setsv(sv, &PL_sv_undef)>, but more efficient.
+Doesn't handle set magic.
+
+The perl equivalent is C<$sv = undef;>. Note that it doesn't free any string
+buffer, unlike C<undef $sv>.
+
+Introduced in perl 5.26.0.
+
+=cut
+*/
+
+void
+Perl_sv_set_undef(pTHX_ SV *sv)
+{
+    U32 type = SvTYPE(sv);
+
+    PERL_ARGS_ASSERT_SV_SET_UNDEF;
+
+    /* shortcut, NULL, IV, RV */
+
+    if (type <= SVt_IV) {
+        assert(!SvGMAGICAL(sv));
+        if (SvREADONLY(sv))
+            Perl_croak_no_modify();
+
+        if (SvROK(sv)) {
+            if (SvWEAKREF(sv))
+                sv_unref_flags(sv, 0);
+            else {
+                SV *rv = SvRV(sv);
+                SvFLAGS(sv) = type; /* quickly turn off all flags */
+                SvREFCNT_dec_NN(rv);
+                return;
+            }
+        }
+        SvFLAGS(sv) = type; /* quickly turn off all flags */
+        return;
+    }
+
+    if (SvIS_FREED(sv))
+        Perl_croak(aTHX_ "panic: attempt to undefine a freed scalar %p",
+            (void *)sv);
+
+    SV_CHECK_THINKFIRST_COW_DROP(sv);
+
+    if (isGV_with_GP(sv))
+        Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
+                       "Undefined value assigned to typeglob");
+
+    SvOK_off(sv);
+}
+
+
+
 /*
 =for apidoc sv_setsv_mg
 
@@ -10272,7 +10330,7 @@ Perl_sv_setref_pv(pTHX_ SV *const rv, const char *const classname, void *const p
     PERL_ARGS_ASSERT_SV_SETREF_PV;
 
     if (!pv) {
-	sv_setsv(rv, &PL_sv_undef);
+	sv_set_undef(rv);
 	SvSETMAGIC(rv);
     }
     else

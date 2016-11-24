@@ -3224,6 +3224,9 @@ PERL_CALLCONV void	Perl_sv_resetpvn(pTHX_ const char* s, STRLEN len, HV *const s
 PERL_CALLCONV SV*	Perl_sv_rvweaken(pTHX_ SV *const sv);
 #define PERL_ARGS_ASSERT_SV_RVWEAKEN	\
 	assert(sv)
+PERL_CALLCONV void	Perl_sv_set_undef(pTHX_ SV *sv);
+#define PERL_ARGS_ASSERT_SV_SET_UNDEF	\
+	assert(sv)
 PERL_CALLCONV void	Perl_sv_sethek(pTHX_ SV *const sv, const HEK *const hek);
 #define PERL_ARGS_ASSERT_SV_SETHEK	\
 	assert(sv)

@@ -323,7 +323,8 @@ well.
 
 =item *
 
-XXX
+A new API function, C<sv_set_undef(sv)>, has been added. This is
+equivalent to C<sv_setsv(sv, &PL_sv_undef)>, but is more efficient.
 
 =back
 

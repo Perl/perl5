@@ -4083,8 +4083,8 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, in
 
 
 #define SV_CWD_RETURN_UNDEF \
-sv_setsv(sv, &PL_sv_undef); \
-return FALSE
+    sv_set_undef(sv); \
+    return FALSE
 
 #define SV_CWD_ISDOT(dp) \
     (dp->d_name[0] == '.' && (dp->d_name[1] == '\0' || \
@@ -4128,8 +4128,7 @@ Perl_getcwd_sv(pTHX_ SV *sv)
 	    return TRUE;
 	}
 	else {
-	    sv_setsv(sv, &PL_sv_undef);
-	    return FALSE;
+	    SV_CWD_RETURN_UNDEF;
 	}
     }
 
