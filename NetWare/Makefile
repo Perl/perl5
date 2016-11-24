@@ -661,7 +661,6 @@ UTILS		=			\
 		..\utils\splain		\
 		..\utils\perlbug	\
 		..\utils\pl2pm 		\
-		..\utils\c2ph		\
 		..\utils\h2xs		\
 		..\utils\perldoc	\
 		..\pod\pod2html		\
@@ -1349,7 +1348,7 @@ distclean: clean nwclean
 	-del /f /q $(PODDIR)\*.html
 	-del /f /q $(PODDIR)\*.bat
 	cd ..\utils
-	-del /f /q h2ph splain perlbug pl2pm c2ph h2xs perldoc
+	-del /f /q h2ph splain perlbug pl2pm h2xs perldoc
 	-del /f /q *.bat
 	cd ..\netware
 	-del /f /q ..\config.sh ..\splittree.pl dlutils.c config.h.new

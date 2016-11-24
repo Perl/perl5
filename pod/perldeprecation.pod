@@ -221,6 +221,11 @@ using this option did not do anything other than producing a warning.
 The C<< --libpods >> option is no longer recognized in Perl 5.26.
 
 
+=head3 The utilities C<< c2ph >> and C<< pstruct >>
+
+These old, perl3-era utilities have been deprecated in favour of
+C<< h2xs >> for a long time. In Perl 5.26, they have been removed.
+
 
 =head2 Perl 5.24
 

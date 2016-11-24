@@ -231,7 +231,6 @@ prctl(2)
 printenv(1)
 printf(3)
 provide
-pstruct
 ptar(1)
 ptargrep(1)
 pwd_mkdb(8)

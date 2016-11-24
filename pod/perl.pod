@@ -44,7 +44,7 @@ path perlglossary            cpan/perlfaq/lib/
 path perlxs(?:tut|typemap)?  dist/ExtUtils-ParseXS/lib/
 path perldoc                 cpan/Pod-Perldoc/
 
-aux c2ph h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
+aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
 
 =end buildtoc
 

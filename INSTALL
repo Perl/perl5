@@ -2239,8 +2239,6 @@ make install will install the following:
 
 	cppstdin	This is used by the deprecated switch perl -P,
 			if your cc -E can't read from stdin.
-	c2ph, pstruct	Scripts for handling C structures in header
-                        files.
 	corelist	Shows versions of modules that come with
                         different
 			versions of perl.
