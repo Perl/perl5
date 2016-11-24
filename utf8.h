@@ -320,15 +320,15 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
 */
 /*** GENERATED CODE ***/
 #define is_UTF8_CHAR_utf8_no_length_checks(s)                               \
-( ( 0xC2 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xDF ) ?                          \
-    ( LIKELY( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) ? 2 : 0 )                    \
-: ( 0xE0 == ((U8*)s)[0] ) ?                                                 \
-    ( LIKELY( ( ( ((U8*)s)[1] & 0xE0 ) == 0xA0 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
-: ( 0xE1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xEF ) ?                          \
-    ( LIKELY( ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
-: ( 0xF0 == ((U8*)s)[0] ) ?                                                 \
-    ( LIKELY( ( ( 0x90 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0xBF ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
-: ( ( ( ( 0xF1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xF7 ) && LIKELY( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) ) && LIKELY( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) && LIKELY( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )
+( ( 0xC2 <= ((const U8*)s)[0] && ((const U8*)s)[0] <= 0xDF ) ?                          \
+    ( LIKELY( ( ((const U8*)s)[1] & 0xC0 ) == 0x80 ) ? 2 : 0 )                    \
+: ( 0xE0 == ((const U8*)s)[0] ) ?                                                 \
+    ( LIKELY( ( ( ((const U8*)s)[1] & 0xE0 ) == 0xA0 ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
+: ( 0xE1 <= ((const U8*)s)[0] && ((const U8*)s)[0] <= 0xEF ) ?                          \
+    ( LIKELY( ( ( ((const U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
+: ( 0xF0 == ((const U8*)s)[0] ) ?                                                 \
+    ( LIKELY( ( ( 0x90 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0xBF ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((const U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
+: ( ( ( ( 0xF1 <= ((const U8*)s)[0] && ((const U8*)s)[0] <= 0xF7 ) && LIKELY( ( ((const U8*)s)[1] & 0xC0 ) == 0x80 ) ) && LIKELY( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) && LIKELY( ( ((const U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )
 
 /* The above macro handles UTF-8 that has this start byte as the maximum */
 #define _IS_UTF8_CHAR_HIGHEST_START_BYTE 0xF7
@@ -342,43 +342,43 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
 */
 /*** GENERATED CODE ***/
 #define is_STRICT_UTF8_CHAR_utf8_no_length_checks(s)                        \
-( ( 0xC2 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xDF ) ?                          \
-    ( LIKELY( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) ? 2 : 0 )                          \
-: ( 0xE0 == ((U8*)s)[0] ) ?                                                 \
-    ( LIKELY( ( ( ((U8*)s)[1] & 0xE0 ) == 0xA0 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
-: ( ( 0xE1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xEC ) || 0xEE == ((U8*)s)[0] ) ?\
-    ( ( ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
-: ( 0xED == ((U8*)s)[0] ) ?                                                 \
-    ( LIKELY( ( ( ((U8*)s)[1] & 0xE0 ) == 0x80 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
-: ( 0xEF == ((U8*)s)[0] ) ?                                                 \
-    ( ( ( 0x80 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0xB6 ) || ( 0xB8 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0xBE ) ) ?\
-	( LIKELY( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ? 3 : 0 )                      \
-    : ( 0xB7 == ((U8*)s)[1] ) ?                                             \
-	( LIKELY( ( ((U8*)s)[2] & 0xF0 ) == 0x80 || ( ((U8*)s)[2] & 0xF0 ) == 0xB0 ) ? 3 : 0 )\
-    : ( ( 0xBF == ((U8*)s)[1] ) && ( 0x80 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0xBD ) ) ? 3 : 0 )\
-: ( 0xF0 == ((U8*)s)[0] ) ?                                                 \
-    ( ( ( 0x90 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0x9E ) || ( 0xA0 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0xAE ) || ( 0xB0 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0xBE ) ) ?\
-	( LIKELY( ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
-    : ( ((U8*)s)[1] == 0x9F || ( ( ((U8*)s)[1] & 0xEF ) == 0xAF ) ) ?       \
-	( ( 0x80 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0xBE ) ?                  \
-	    ( LIKELY( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ? 4 : 0 )                  \
-	: LIKELY( ( 0xBF == ((U8*)s)[2] ) && ( 0x80 <= ((U8*)s)[3] && ((U8*)s)[3] <= 0xBD ) ) ? 4 : 0 )\
+( ( 0xC2 <= ((const U8*)s)[0] && ((const U8*)s)[0] <= 0xDF ) ?                          \
+    ( LIKELY( ( ((const U8*)s)[1] & 0xC0 ) == 0x80 ) ? 2 : 0 )                          \
+: ( 0xE0 == ((const U8*)s)[0] ) ?                                                 \
+    ( LIKELY( ( ( ((const U8*)s)[1] & 0xE0 ) == 0xA0 ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
+: ( ( 0xE1 <= ((const U8*)s)[0] && ((const U8*)s)[0] <= 0xEC ) || 0xEE == ((const U8*)s)[0] ) ?\
+    ( ( ( ( ((const U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
+: ( 0xED == ((const U8*)s)[0] ) ?                                                 \
+    ( LIKELY( ( ( ((const U8*)s)[1] & 0xE0 ) == 0x80 ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
+: ( 0xEF == ((const U8*)s)[0] ) ?                                                 \
+    ( ( ( 0x80 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0xB6 ) || ( 0xB8 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0xBE ) ) ?\
+	( LIKELY( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ? 3 : 0 )                      \
+    : ( 0xB7 == ((const U8*)s)[1] ) ?                                             \
+	( LIKELY( ( ((const U8*)s)[2] & 0xF0 ) == 0x80 || ( ((const U8*)s)[2] & 0xF0 ) == 0xB0 ) ? 3 : 0 )\
+    : ( ( 0xBF == ((const U8*)s)[1] ) && ( 0x80 <= ((const U8*)s)[2] && ((const U8*)s)[2] <= 0xBD ) ) ? 3 : 0 )\
+: ( 0xF0 == ((const U8*)s)[0] ) ?                                                 \
+    ( ( ( 0x90 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0x9E ) || ( 0xA0 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0xAE ) || ( 0xB0 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0xBE ) ) ?\
+	( LIKELY( ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) && ( ( ((const U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
+    : ( ((const U8*)s)[1] == 0x9F || ( ( ((const U8*)s)[1] & 0xEF ) == 0xAF ) ) ?       \
+	( ( 0x80 <= ((const U8*)s)[2] && ((const U8*)s)[2] <= 0xBE ) ?                  \
+	    ( LIKELY( ( ((const U8*)s)[3] & 0xC0 ) == 0x80 ) ? 4 : 0 )                  \
+	: LIKELY( ( 0xBF == ((const U8*)s)[2] ) && ( 0x80 <= ((const U8*)s)[3] && ((const U8*)s)[3] <= 0xBD ) ) ? 4 : 0 )\
     : 0 )                                                                   \
-: ( 0xF1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xF3 ) ?                          \
-    ( ( ( ( ((U8*)s)[1] & 0xC8 ) == 0x80 ) || ( ( ((U8*)s)[1] & 0xCC ) == 0x88 ) || ( ( ((U8*)s)[1] & 0xCE ) == 0x8C ) || ( ( ((U8*)s)[1] & 0xCF ) == 0x8E ) ) ?\
-	( LIKELY( ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
-    : ( ( ((U8*)s)[1] & 0xCF ) == 0x8F ) ?                                  \
-	( ( 0x80 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0xBE ) ?                  \
-	    ( LIKELY( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ? 4 : 0 )                  \
-	: LIKELY( ( 0xBF == ((U8*)s)[2] ) && ( 0x80 <= ((U8*)s)[3] && ((U8*)s)[3] <= 0xBD ) ) ? 4 : 0 )\
+: ( 0xF1 <= ((const U8*)s)[0] && ((const U8*)s)[0] <= 0xF3 ) ?                          \
+    ( ( ( ( ((const U8*)s)[1] & 0xC8 ) == 0x80 ) || ( ( ((const U8*)s)[1] & 0xCC ) == 0x88 ) || ( ( ((const U8*)s)[1] & 0xCE ) == 0x8C ) || ( ( ((const U8*)s)[1] & 0xCF ) == 0x8E ) ) ?\
+	( LIKELY( ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) && ( ( ((const U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
+    : ( ( ((const U8*)s)[1] & 0xCF ) == 0x8F ) ?                                  \
+	( ( 0x80 <= ((const U8*)s)[2] && ((const U8*)s)[2] <= 0xBE ) ?                  \
+	    ( LIKELY( ( ((const U8*)s)[3] & 0xC0 ) == 0x80 ) ? 4 : 0 )                  \
+	: LIKELY( ( 0xBF == ((const U8*)s)[2] ) && ( 0x80 <= ((const U8*)s)[3] && ((const U8*)s)[3] <= 0xBD ) ) ? 4 : 0 )\
     : 0 )                                                                   \
-: ( 0xF4 == ((U8*)s)[0] ) ?                                                 \
-    ( ( 0x80 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0x8E ) ?                      \
-	( LIKELY( ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
-    : ( 0x8F == ((U8*)s)[1] ) ?                                             \
-	( ( 0x80 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0xBE ) ?                  \
-	    ( LIKELY( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ? 4 : 0 )                  \
-	: LIKELY( ( 0xBF == ((U8*)s)[2] ) && ( 0x80 <= ((U8*)s)[3] && ((U8*)s)[3] <= 0xBD ) ) ? 4 : 0 )\
+: ( 0xF4 == ((const U8*)s)[0] ) ?                                                 \
+    ( ( 0x80 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0x8E ) ?                      \
+	( LIKELY( ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) && ( ( ((const U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
+    : ( 0x8F == ((const U8*)s)[1] ) ?                                             \
+	( ( 0x80 <= ((const U8*)s)[2] && ((const U8*)s)[2] <= 0xBE ) ?                  \
+	    ( LIKELY( ( ((const U8*)s)[3] & 0xC0 ) == 0x80 ) ? 4 : 0 )                  \
+	: LIKELY( ( 0xBF == ((const U8*)s)[2] ) && ( 0x80 <= ((const U8*)s)[3] && ((const U8*)s)[3] <= 0xBD ) ) ? 4 : 0 )\
     : 0 )                                                                   \
 : 0 )
 
@@ -390,19 +390,19 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
 */
 /*** GENERATED CODE ***/
 #define is_C9_STRICT_UTF8_CHAR_utf8_no_length_checks(s)                     \
-( ( 0xC2 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xDF ) ?                          \
-    ( LIKELY( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) ? 2 : 0 )                    \
-: ( 0xE0 == ((U8*)s)[0] ) ?                                                 \
-    ( LIKELY( ( ( ((U8*)s)[1] & 0xE0 ) == 0xA0 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
-: ( ( 0xE1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xEC ) || ( ((U8*)s)[0] & 0xFE ) == 0xEE ) ?\
-    ( LIKELY( ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
-: ( 0xED == ((U8*)s)[0] ) ?                                                 \
-    ( LIKELY( ( ( ((U8*)s)[1] & 0xE0 ) == 0x80 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
-: ( 0xF0 == ((U8*)s)[0] ) ?                                                 \
-    ( LIKELY( ( ( 0x90 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0xBF ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
-: ( 0xF1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xF3 ) ?                          \
-    ( LIKELY( ( ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
-: LIKELY( ( ( ( 0xF4 == ((U8*)s)[0] ) && ( ( ((U8*)s)[1] & 0xF0 ) == 0x80 ) ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )
+( ( 0xC2 <= ((const U8*)s)[0] && ((const U8*)s)[0] <= 0xDF ) ?                          \
+    ( LIKELY( ( ((const U8*)s)[1] & 0xC0 ) == 0x80 ) ? 2 : 0 )                    \
+: ( 0xE0 == ((const U8*)s)[0] ) ?                                                 \
+    ( LIKELY( ( ( ((const U8*)s)[1] & 0xE0 ) == 0xA0 ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
+: ( ( 0xE1 <= ((const U8*)s)[0] && ((const U8*)s)[0] <= 0xEC ) || ( ((const U8*)s)[0] & 0xFE ) == 0xEE ) ?\
+    ( LIKELY( ( ( ((const U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
+: ( 0xED == ((const U8*)s)[0] ) ?                                                 \
+    ( LIKELY( ( ( ((const U8*)s)[1] & 0xE0 ) == 0x80 ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
+: ( 0xF0 == ((const U8*)s)[0] ) ?                                                 \
+    ( LIKELY( ( ( 0x90 <= ((const U8*)s)[1] && ((const U8*)s)[1] <= 0xBF ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((const U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
+: ( 0xF1 <= ((const U8*)s)[0] && ((const U8*)s)[0] <= 0xF3 ) ?                          \
+    ( LIKELY( ( ( ( ((const U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((const U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
+: LIKELY( ( ( ( 0xF4 == ((const U8*)s)[0] ) && ( ( ((const U8*)s)[1] & 0xF0 ) == 0x80 ) ) && ( ( ((const U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((const U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )
 
 #endif /* EBCDIC vs ASCII */
 
