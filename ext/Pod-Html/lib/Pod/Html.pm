@@ -3,7 +3,7 @@ use strict;
 require Exporter;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION = 1.2201;
+$VERSION = 1.2202;
 @ISA = qw(Exporter);
 @EXPORT = qw(pod2html htmlify);
 @EXPORT_OK = qw(anchorify);
@@ -486,7 +486,7 @@ sub parse_command_line {
     my ($opt_backlink,$opt_cachedir,$opt_css,$opt_flush,$opt_header,
         $opt_help,$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,
         $opt_outfile,$opt_poderrors,$opt_podpath,$opt_podroot,
-        $opt_quiet,$opt_recurse,$opt_title,$opt_verbose,$opt_libpods);
+        $opt_quiet,$opt_recurse,$opt_title,$opt_verbose);
 
     unshift @ARGV, split ' ', $Config{pod2html} if $Config{pod2html};
     my $result = GetOptions(
@@ -500,7 +500,6 @@ sub parse_command_line {
                        'htmlroot=s' => \$opt_htmlroot,
                        'index!'     => \$opt_index,
                        'infile=s'   => \$opt_infile,
-                       'libpods=s'  => \$opt_libpods, # deprecated
                        'outfile=s'  => \$opt_outfile,
                        'poderrors!' => \$opt_poderrors,
                        'podpath=s'  => \$opt_podpath,
@@ -516,7 +515,6 @@ sub parse_command_line {
     $opt_help = "";                     # just to make -w shut-up.
 
     @Podpath  = split(":", $opt_podpath) if defined $opt_podpath;
-    warn "--libpods is no longer supported" if defined $opt_libpods;
 
     $Backlink  =          $opt_backlink   if defined $opt_backlink;
     $Cachedir  = _unixify($opt_cachedir)  if defined $opt_cachedir;

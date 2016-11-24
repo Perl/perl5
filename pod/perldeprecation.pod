@@ -211,6 +211,16 @@ C<use AutoLoader 'AUTOLOAD';>.
 This feature was deprecated in Perl 5.004, and will be fatal in Perl 5.28.
 
 
+=head2 Perl 5.26
+
+=head3 C<< --libpods >> in C<< Pod::Html >>
+
+Since Perl 5.18, the option C<< --libpods >> has been deprecated, and
+using this option did not do anything other than producing a warning.
+
+The C<< --libpods >> option is no longer recognized in Perl 5.26.
+
+
 
 =head2 Perl 5.24
 
