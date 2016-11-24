@@ -118,7 +118,7 @@
 
 #if (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678) && U32SIZE == 4
   /* CPU endian matches murmurhash algorithm, so read 32-bit word directly */
-  #define U8TO32_LE(ptr)   (*((U32*)(ptr)))
+  #define U8TO32_LE(ptr)   (*((const U32*)(ptr)))
 #elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
   /* TODO: Add additional cases below where a compiler provided bswap32 is available */
   #if defined(__GNUC__) && (__GNUC__>4 || (__GNUC__==4 && __GNUC_MINOR__>=3))
@@ -210,8 +210,8 @@ S_perl_hash_siphash_2_4(const unsigned char * const seed, const unsigned char *i
   U64 v3 = UINT64_C(0x7465646279746573);
 
   U64 b;
-  U64 k0 = ((U64*)seed)[0];
-  U64 k1 = ((U64*)seed)[1];
+  U64 k0 = ((const U64*)seed)[0];
+  U64 k1 = ((const U64*)seed)[1];
   U64 m;
   const int left = inlen & 7;
   const U8 *end = in + inlen - left;
@@ -269,7 +269,7 @@ S_perl_hash_siphash_2_4(const unsigned char * const seed, const unsigned char *i
 
 PERL_STATIC_INLINE U32
 S_perl_hash_superfast(const unsigned char * const seed, const unsigned char *str, STRLEN len) {
-    U32 hash = *((U32*)seed) + (U32)len;
+    U32 hash = *((const U32*)seed) + (U32)len;
     U32 tmp;
     int rem= len & 3;
     len >>= 2;
@@ -373,7 +373,7 @@ S_perl_hash_superfast(const unsigned char * const seed, const unsigned char *str
 /* now we create the hash function */
 PERL_STATIC_INLINE U32
 S_perl_hash_murmur3(const unsigned char * const seed, const unsigned char *ptr, STRLEN len) {
-    U32 h1 = *((U32*)seed);
+    U32 h1 = *((const U32*)seed);
     U32 k1;
     U32 carry = 0;
 
@@ -467,7 +467,7 @@ S_perl_hash_murmur3(const unsigned char * const seed, const unsigned char *ptr, 
 PERL_STATIC_INLINE U32
 S_perl_hash_djb2(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
     const unsigned char * const end = (const unsigned char *)str + len;
-    U32 hash = *((U32*)seed) + (U32)len;
+    U32 hash = *((const U32*)seed) + (U32)len;
     while (str < end) {
         hash = ((hash << 5) + hash) + *str++;
     }
@@ -477,7 +477,7 @@ S_perl_hash_djb2(const unsigned char * const seed, const unsigned char *str, con
 PERL_STATIC_INLINE U32
 S_perl_hash_sdbm(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
     const unsigned char * const end = (const unsigned char *)str + len;
-    U32 hash = *((U32*)seed) + (U32)len;
+    U32 hash = *((const U32*)seed) + (U32)len;
     while (str < end) {
         hash = (hash << 6) + (hash << 16) - hash + *str++;
     }
@@ -503,7 +503,7 @@ S_perl_hash_sdbm(const unsigned char * const seed, const unsigned char *str, con
 PERL_STATIC_INLINE U32
 S_perl_hash_one_at_a_time(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
     const unsigned char * const end = (const unsigned char *)str + len;
-    U32 hash = *((U32*)seed) + (U32)len;
+    U32 hash = *((const U32*)seed) + (U32)len;
     while (str < end) {
         hash += *str++;
         hash += (hash << 10);
@@ -518,7 +518,7 @@ S_perl_hash_one_at_a_time(const unsigned char * const seed, const unsigned char 
 PERL_STATIC_INLINE U32
 S_perl_hash_one_at_a_time_hard(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
     const unsigned char * const end = (const unsigned char *)str + len;
-    U32 hash = *((U32*)seed) + (U32)len;
+    U32 hash = *((const U32*)seed) + (U32)len;
     
     while (str < end) {
         hash += (hash << 10);
@@ -553,7 +553,7 @@ S_perl_hash_one_at_a_time_hard(const unsigned char * const seed, const unsigned 
 PERL_STATIC_INLINE U32
 S_perl_hash_old_one_at_a_time(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
     const unsigned char * const end = (const unsigned char *)str + len;
-    U32 hash = *((U32*)seed);
+    U32 hash = *((const U32*)seed);
     while (str < end) {
         hash += *str++;
         hash += (hash << 10);
@@ -581,7 +581,7 @@ S_perl_hash_murmur_hash_64a (const unsigned char * const seed, const unsigned ch
 {
         const U64 m = UINT64_C(0xc6a4a7935bd1e995);
         const int r = 47;
-        U64 h = *((U64*)seed) ^ len;
+        U64 h = *((const U64*)seed) ^ len;
         const U64 * data = (const U64 *)str;
         const U64 * end = data + (len/8);
         const unsigned char * data2;
