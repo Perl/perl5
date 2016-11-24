@@ -374,6 +374,15 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 				       subroutine in another package. Set the
 				       GvIMPORTED_CV_on() if it needs to be
 				       expanded to a real GV */
+
+/* SVf_PROTECT is what SVf_READONLY should have been: i.e. modifying
+ * this SV is completely illegal. However, SVf_READONLY (via
+ * Internals::SvREADONLY()) has come to be seen as a flag that can be
+ * temporarily set and unset by the user to indicate e.g. whether a hash
+ * is "locked". Now, Hash::Util et al only set SVf_READONLY, while core
+ * sets both (SVf_READONLY|SVf_PROTECT) to indicate both to core and user
+ * code that this SV should not be messed with.
+ */
 #define SVf_PROTECT	0x00010000  /* very read-only */
 #define SVs_PADTMP	0x00020000  /* in use as tmp */
 #define SVs_PADSTALE	0x00040000  /* lexical has gone out of scope;
