@@ -7018,12 +7018,6 @@ This feature was deprecated in Perl 5.004, and will be fatal in Perl 5.28.
 (F) You attempted to use a feature of printf that is accessible from
 only C.  This usually means there's a better way to do it in Perl.
 
-=item Use of %s is deprecated
-
-(D deprecated) The construct indicated is no longer recommended for use,
-generally because there's a better way to do it, and also because the
-old way has bad side effects.
-
 =item Use of -l on filehandle%s
 
 (W io) A filehandle represents an opened file, and when you opened the file
