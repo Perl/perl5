@@ -1,6 +1,6 @@
 package B::Terse;
 
-our $VERSION = '1.06';
+our $VERSION = '1.07';
 
 use strict;
 use B qw(class @specialsv_name);
@@ -33,7 +33,7 @@ sub indent {
 # Don't use this, at least on OPs in subroutines: it has no way of
 # getting to the pad, and will give wrong answers or crash.
 sub B::OP::terse {
-    carp "B::OP::terse is deprecated; use B::Concise instead";
+    carp "B::OP::terse is deprecated and will go away in Perl 5.28; use B::Concise instead";
     B::Concise::b_terse(@_);
 }
 
