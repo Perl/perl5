@@ -390,8 +390,13 @@ VG_TEST  ?= ./perl -e 1 2>/dev/null
 	;;
 esac
 
+case "$dtracexnolibs" in
+define) xnolibs=-xnolibs ;;
+*) xnolibs= ;;
+esac
+
 $spitshell >>$Makefile <<!GROK!THIS!
-DTRACE = $dtrace
+DTRACE = $dtrace $xnolibs
 DTRACE_H = $dtrace_h
 
 DTRACE_PERLLIB_O = $dtrace_perllib_o # "dtrace -G" output for perllib_objs

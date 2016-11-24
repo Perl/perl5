@@ -949,6 +949,7 @@ lddlflags=''
 usedl=''
 doublesize=''
 dtraceobject=''
+dtracexnolibs=''
 ebcdic=''
 fflushNULL=''
 fflushall=''
@@ -8202,10 +8203,19 @@ while $test 1 ; do
 
 	if $test -f $dtrace
 	then
-		if $dtrace -h -s ../perldtrace.d \
+		if $dtrace -h -xnolibs -s ../perldtrace.d \
 			-o perldtrace.tmp >/dev/null 2>&1 \
 			&& rm -f perldtrace.tmp
 		then
+			default_xnolibs=$define
+			echo " "
+			echo "Good: your $dtrace knows about the -h flag"
+			echo "and apparently the -xnolibs flag."
+		elif $dtrace -h -s ../perldtrace.d \
+			-o perldtrace.tmp >/dev/null 2>&1 \
+			&& rm -f perldtrace.tmp
+		then
+			default_xnolibs=$undef
 			echo " "
 			echo "Good: your $dtrace knows about the -h flag."
 		else
@@ -8219,6 +8229,17 @@ while $test 1 ; do
 EOM
 			exit 1
 		fi
+		case "$dtracexnolibs" in
+		$define|true|[yY]*)
+			dtracxnolibs=$define
+			;;
+		''|' ')
+		        dtracexnolibs=$default_xnolibs
+			;;
+		*)
+			dtracexnolibs=$undef
+			;;
+		esac
 		break;
 	fi
 
@@ -20971,7 +20992,11 @@ $define)
         dtraceobject=$define
         ;;
     ' '|'')
-        $dtrace -h -s ../perldtrace.d -o perldtrace.h
+        case "$dtracexnolibs" in
+        $define) xnolibs_option=-xnolibs ;;
+        *) xnolibs_option= ;;
+        esac
+        $dtrace -h $xnolibs_option -s ../perldtrace.d -o perldtrace.h
         $cat >try.c <<EOM
 #include "perldtrace.h"
 int main(void) {
@@ -20981,14 +21006,14 @@ int main(void) {
 EOM
         dtraceobject=$undef
         if $cc -c -o try.o $optimize $ccflags try.c \
-                    && $dtrace -G -s ../perldtrace.d try.o >/dev/null 2>&1; then
+                    && $dtrace -G $xnolibs_option -s ../perldtrace.d try.o >/dev/null 2>&1; then
                 dtraceobject=$define
             echo "Your dtrace builds an object file"
         fi
-        $rm -f try.c try.o perldtrace.o
         ;;
     *) dtraceobject=$undef ;;
     esac
+    $rm -f try.c try.o perldtrace.o perldtrace.h
 esac
 
 : Determine if this is an EBCDIC system
@@ -24954,6 +24979,7 @@ drand01='$drand01'
 drand48_r_proto='$drand48_r_proto'
 dtrace='$dtrace'
 dtraceobject='$dtraceobject'
+dtracexnolibs='$dtracexnolibs'
 dynamic_ext='$dynamic_ext'
 eagain='$eagain'
 ebcdic='$ebcdic'
