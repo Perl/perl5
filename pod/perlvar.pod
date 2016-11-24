@@ -659,13 +659,12 @@ or a C<die()>.  The C<__DIE__> handler is explicitly disabled during
 the call, so that you can die from a C<__DIE__> handler.  Similarly
 for C<__WARN__>.
 
-Due to an implementation glitch, the C<$SIG{__DIE__}> hook is called
-even inside an C<eval()>.  Do not use this to rewrite a pending
-exception in C<$@>, or as a bizarre substitute for overriding
-C<CORE::GLOBAL::die()>.  This strange action at a distance may be fixed
-in a future release so that C<$SIG{__DIE__}> is only called if your
-program is about to exit, as was the original intent.  Any other use is
-deprecated.
+The C<$SIG{__DIE__}> hook is called even inside an C<eval()>. It was
+never intended to happen this way, but an implementation glitch made
+this possible. This used to be deprecated, as it allowed strange action
+at a distance like rewriting a pending exception in C<$@>. Plans to
+rectify this have been scrapped, as users found that rewriting a 
+pending exception is actually a useful feature, and not a bug.
 
 C<__DIE__>/C<__WARN__> handlers are very special in one respect: they
 may be called to report (probable) errors found by the parser.  In such

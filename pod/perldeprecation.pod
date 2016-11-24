@@ -227,6 +227,20 @@ These old, perl3-era utilities have been deprecated in favour of
 C<< h2xs >> for a long time. In Perl 5.26, they have been removed.
 
 
+=head3 Trapping C<< $SIG {__DIE__} >> other than during program exit.
+
+The C<$SIG{__DIE__}> hook is called even inside an C<eval()>. It was
+never intended to happen this way, but an implementation glitch made
+this possible. This used to be deprecated, as it allowed strange action
+at a distance like rewriting a pending exception in C<$@>. Plans to
+rectify this have been scrapped, as users found that rewriting a
+pending exception is actually a useful feature, and not a bug.
+
+Perl never issued a deprecation warning for this; the deprecation
+was by documentation policy only. But this deprecation has been 
+lifted in Perl 5.26.
+
+
 =head2 Perl 5.24
 
 =head3 Use of C<< *glob{FILEHANDLE} >>
