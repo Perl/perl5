@@ -132,6 +132,10 @@ PERLVAR(I, sv_count,	IV)		/* how many SV* are currently allocated */
 PERLVAR(I, sv_root,	SV *)		/* storage for SVs belonging to interp */
 PERLVAR(I, sv_arenaroot, SV *)		/* list of areas for garbage collection */
 
+PERLVARI(I, cow_meta_arena_first, COW_META_ARENA *, NULL) /* first cow_meta structure */
+PERLVARI(I, cow_meta_arena_next, COW_META_ARENA *, NULL) /* next cow_meta structure */
+PERLVARI(I, cow_meta_arena_free, COW_META_ARENA *, NULL) /* first free cow_meta structure */
+
 /* fake PMOP that PL_curpm points to while in (?{}) so $1 et al are visible */
 PERLVARI(I, reg_curpm, PMOP*, NULL)
 

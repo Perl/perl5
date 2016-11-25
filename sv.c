@@ -4698,14 +4698,19 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
             ) {
             /* Either it's a shared hash key, or it's suitable for
                copy-on-write.  */
-            if (DEBUG_C_TEST) {
-                PerlIO_printf(Perl_debug_log, "Copy on write: sstr --> dstr\n");
-                sv_dump(sstr);
-                sv_dump(dstr);
-            }
 #ifdef PERL_ANY_COW
             if (!is_cow) {
+                if (DEBUG_C_TEST) {
+                    PerlIO_printf(Perl_debug_log, "Copy on write: encow: sstr --> dstr\n");
+                }
                 sv_cow_meta_setup(sstr);
+            } else if (DEBUG_C_TEST) {
+                PerlIO_printf(Perl_debug_log, "Copy on write: recow: sstr --> dstr\n");
+            }
+
+            if (DEBUG_C_TEST_DUMP) {
+                sv_dump(sstr);
+                sv_dump(dstr);
             }
 #endif
 	    if (SvPVX_const(dstr)) {	/* we know that dtype >= SVt_PV */
@@ -4864,27 +4869,35 @@ Perl_sv_setsv_mg(pTHX_ SV *const dstr, SV *const sstr)
 #define del_COW_META(p) safefree((char*)p)
 
 #else
+#define COW_META_ARENA_ELEMENTS 1024
 
-STATIC COW_META*
+PERL_STATIC_INLINE COW_META*
 S_new_COW_META(pTHX)
 {
-    HE* he;
-    void ** const root = &PL_body_roots[HE_SVSLOT];
-    assert(sizeof(COW_META) <= sizeof(HE));
-
-    if (!*root)
-        Perl_more_bodies(aTHX_ HE_SVSLOT, sizeof(HE), PERL_ARENA_SIZE);
-    he = (HE*) *root;
-    assert(he);
-    *root = HeNEXT(he);
-    return (COW_META*)he;
+    COW_META_ARENA *ret = PL_cow_meta_arena_free;
+    if (ret)
+    {
+        PL_cow_meta_arena_free = ret->u.prev_free;
+    }
+    else {
+        if ( PL_cow_meta_arena_next <= PL_cow_meta_arena_first  )
+        {
+            COW_META_ARENA *new_arena;
+            Newx(new_arena, COW_META_ARENA_ELEMENTS, COW_META_ARENA);
+            new_arena->u.prev_arena= PL_cow_meta_arena_first;
+            PL_cow_meta_arena_first= new_arena;
+            PL_cow_meta_arena_next= new_arena + (COW_META_ARENA_ELEMENTS-1);
+        }
+        ret= PL_cow_meta_arena_next--;
+    }
+    return (COW_META *)ret;
 }
 
 #define new_COW_META() S_new_COW_META(aTHX)
 #define del_COW_META(p) \
     STMT_START { \
-        HeNEXT((HE*)p) = (HE*)(PL_body_roots[HE_SVSLOT]);        \
-        PL_body_roots[HE_SVSLOT] = p; \
+        ((COW_META_ARENA *)p)->u.prev_free = PL_cow_meta_arena_free; \
+        PL_cow_meta_arena_free = (COW_META_ARENA *)p; \
     } STMT_END
 #endif
 
@@ -5003,7 +5016,7 @@ Perl_sv_setpv_bufsize(pTHX_ SV *const sv, const STRLEN cur, const STRLEN len)
 
     if (DEBUG_C_TEST && SvIsCOW(sv)) {
         PerlIO_printf(Perl_debug_log, "Copy on write: sv_setpv_bufsize\n");
-        sv_dump(sv);
+        if (DEBUG_C_TEST_DUMP) sv_dump(sv);
     }
     SV_CHECK_THINKFIRST_COW_DROP(sv);
     SvUPGRADE(sv, SVt_PV);
@@ -5292,9 +5305,9 @@ S_sv_uncow(pTHX_ SV * const sv, const U32 flags)
 
         if (DEBUG_C_TEST) {
             PerlIO_printf(Perl_debug_log,
-                          "Copy on write: force normal %ld\n",
+                          "Copy on write: sv_uncow, flags = %ld\n",
                           (long) flags);
-            sv_dump(sv);
+            if (DEBUG_C_TEST_DUMP) sv_dump(sv);
         }
         SvIsCOW_off(sv);
 # ifdef PERL_COPY_ON_WRITE
@@ -5332,9 +5345,6 @@ S_sv_uncow(pTHX_ SV * const sv, const U32 flags)
 	    } else {
 		unshare_hek(SvSHARED_HEK_FROM_PV(pvx));
 	    }
-            if (DEBUG_C_TEST) {
-                sv_dump(sv);
-            }
 	}
 #else
 	    const char * const pvx = SvPVX_const(sv);
@@ -6789,15 +6799,14 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP)))
 	    {
                 STRLEN len = SvLEN(sv);
-                int was_cow = 0;
 		if (SvIsCOW(sv)) {
-                    was_cow = 1;
-		    if (DEBUG_C_TEST) {
-			PerlIO_printf(Perl_debug_log, "Copy on write: clear\n");
-			sv_dump(sv);
-		    }
                     if ( len ) {
                         COW_META *cm= SvCOW_META(sv);
+                        if (DEBUG_C_TEST) {
+                            PerlIO_printf(Perl_debug_log, "Copy on write: %s clear\n",
+                                cm->cm_refcnt ? "release in" : "uncow in");
+                            if (DEBUG_C_TEST_DUMP) sv_dump(sv);
+                        }
                         SvIsCOW_off(sv);
                         if (cm->cm_refcnt > 0) {
                             cm->cm_refcnt--;
@@ -6808,6 +6817,11 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
                             SvLEN_set(sv, len);
                         }
 		    } else {
+                        if (DEBUG_C_TEST) {
+                            PerlIO_printf(Perl_debug_log,
+                                "Copy on write: uncow shared hek in clear\n");
+                            if (DEBUG_C_TEST_DUMP) sv_dump(sv);
+                        }
 			unshare_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sv)));
                         SvIsCOW_off(sv);
 		    }
@@ -14902,7 +14916,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_body_arenas = NULL;
     Zero(&PL_body_roots, 1, PL_body_roots);
-    
+
+    PL_cow_meta_arena_free = NULL;
+    PL_cow_meta_arena_first = NULL;
+    PL_cow_meta_arena_next = NULL;
+
     PL_sv_count		= 0;
     PL_sv_root		= NULL;
     PL_sv_arenaroot	= NULL;

@@ -464,13 +464,23 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 #define SVprv_WEAKREF   0x80000000  /* Weak reference */
 /* pad name vars only */
 
+#define DEBUG_C_TEST_DUMP (DEBUG_C_TEST && 1)
+
 struct cow_meta {
     U32     cm_flags;
     U32     cm_refcnt;
     STRLEN  cm_len;
 };
-
 typedef struct cow_meta COW_META;
+struct cow_meta_arena {
+    union {
+        struct cow_meta_arena *prev_arena;
+        struct cow_meta_arena *prev_free;
+        COW_META cm;
+    } u;
+};
+typedef struct cow_meta_arena COW_META_ARENA;
+
 
 #define _XPV_HEAD							\
     HV*		xmg_stash;	/* class package */			\
