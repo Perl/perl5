@@ -4405,9 +4405,9 @@ argument being L<C<undef>|/undef EXPR>:
 
     open(my $tmp, "+>", undef) or die ...
 
-opens a filehandle to an anonymous temporary file.  Also using C<< +< >>
-works for symmetry, but you really should consider writing something
-to the temporary file first.  You will need to
+opens a filehandle to a newly created empty anonymous temporary file.
+(This happens under any mode, which makes C<< +> >> the only useful and
+sensible mode to use.)  You will need to
 L<C<seek>|/seek FILEHANDLE,POSITION,WHENCE> to do the reading.
 
 Perl is built using PerlIO by default.  Unless you've
