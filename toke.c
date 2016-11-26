@@ -9897,8 +9897,8 @@ S_scan_heredoc(pTHX_ char *s)
 	STRLEN herelen = SvCUR(tmpstr);
 	char *ss = SvPVX(tmpstr);
 	char *se = ss + herelen;
-	SV *newstr = newSVpvs("");
-	SvGROW(newstr, herelen);
+        SV *newstr = newSV(herelen+1);
+        SvPOK_on(newstr);
 
 	/* Trim leading whitespace */
 	while (ss < se) {
@@ -9931,9 +9931,8 @@ S_scan_heredoc(pTHX_ char *s)
 		);
 	    }
 	}
-
-	sv_setsv(tmpstr,newstr);
-
+        /* avoid sv_setsv() as we dont wan't to COW here */
+        sv_setpvn(tmpstr,SvPVX(newstr),SvCUR(newstr));
 	Safefree(indent);
 	SvREFCNT_dec_NN(newstr);
     }
