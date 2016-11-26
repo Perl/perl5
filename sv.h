@@ -466,11 +466,14 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 
 #define DEBUG_C_TEST_DUMP (DEBUG_C_TEST && 1)
 
+#define COW_META_FLAG_BITS 1
+
 struct cow_meta {
-    U32     cm_flags;
-    U32     cm_refcnt;
+    UV      cm_flags  : COW_META_FLAG_BITS;
+    UV      cm_refcnt : ( sizeof(UV) * 8 - COW_META_FLAG_BITS );
     STRLEN  cm_len;
 };
+
 typedef struct cow_meta COW_META;
 struct cow_meta_arena {
     union {
@@ -1917,7 +1920,7 @@ Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
 #   define CowREFCNT(sv)        (SvCOW_META(sv)->cm_refcnt)
 #   define SvCOW_REFCNT(sv)        (SvCOW_META(sv)->cm_refcnt)
 #   define SvCOW_FLAGS(sv)        (SvCOW_META(sv)->cm_flags)
-#   define SV_COW_REFCNT_MAX        (U32_MAX)
+#   define SV_COW_REFCNT_MAX        (UV_MAX >> COW_META_FLAG_BITS)
 #   define CAN_COW_MASK	(SVf_POK|SVf_ROK|SVp_POK|SVf_FAKE| \
 			 SVf_OOK|SVf_BREAK|SVf_READONLY|SVf_PROTECT)
 #endif
