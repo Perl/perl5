@@ -57,6 +57,7 @@
 #ifndef SV_COW_MAX_WASTE_FACTOR_THRESHOLD
 #    define SV_COW_MAX_WASTE_FACTOR_THRESHOLD   2    /* COW iff len < (cur * K) */
 #endif
+
 /* Work around compiler warnings about unsigned >= THRESHOLD when
    THRESHOLD is 0. */
 #if SV_COW_THRESHOLD
@@ -78,36 +79,6 @@
     GE_COW_THRESHOLD((cur)) && \
     GE_COW_MAX_WASTE_THRESHOLD((cur),(len)) && \
     GE_COW_MAX_WASTE_FACTOR_THRESHOLD((cur),(len)) \
-)
-
-#ifndef SV_COWBUF_THRESHOLD
-#    define SV_COWBUF_THRESHOLD                 1 /* COW iff cur >= K */
-#endif
-#ifndef SV_COWBUF_WASTE_THRESHOLD
-#    define SV_COWBUF_WASTE_THRESHOLD           80   /* COW iff (len - cur) < K */
-#endif
-#ifndef SV_COWBUF_WASTE_FACTOR_THRESHOLD
-#    define SV_COWBUF_WASTE_FACTOR_THRESHOLD    2    /* COW iff len < (cur * K) */
-#endif
-#if SV_COWBUF_THRESHOLD
-# define GE_COWBUF_THRESHOLD(cur) ((cur) >= SV_COWBUF_THRESHOLD)
-#else
-# define GE_COWBUF_THRESHOLD(cur) 1
-#endif
-#if SV_COWBUF_WASTE_THRESHOLD
-# define GE_COWBUF_WASTE_THRESHOLD(cur,len) (((len)-(cur)) < SV_COWBUF_WASTE_THRESHOLD)
-#else
-# define GE_COWBUF_WASTE_THRESHOLD(cur,len) 1
-#endif
-#if SV_COWBUF_WASTE_FACTOR_THRESHOLD
-# define GE_COWBUF_WASTE_FACTOR_THRESHOLD(cur,len) ((len) < SV_COWBUF_WASTE_FACTOR_THRESHOLD * (cur))
-#else
-# define GE_COWBUF_WASTE_FACTOR_THRESHOLD(cur,len) 1
-#endif
-#define CHECK_COWBUF_THRESHOLD(cur,len) (\
-    GE_COWBUF_THRESHOLD((cur)) && \
-    GE_COWBUF_WASTE_THRESHOLD((cur),(len)) && \
-    GE_COWBUF_WASTE_FACTOR_THRESHOLD((cur),(len)) \
 )
 
 #ifdef PERL_UTF8_CACHE_ASSERT
@@ -4647,6 +4618,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	(void)SvPOK_only(dstr);
 
 	if (
+                 len                 &&     /* and really is a string */
+                 SvREFCNT(sstr) == 1 &&     /* and no other references to it? */
                  (              /* Either ... */
 				/* slated for free anyway (and not COW)? */
                     (sflags & (SVs_TEMP|SVf_IsCOW)) == SVs_TEMP
@@ -4655,15 +4628,12 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
                            (SVs_PADTMP|SVf_READONLY|SVf_PROTECT|SVf_IsCOW))
                        == SVs_PADTMP
                                 /* whose buffer is worth stealing */
-                     && CHECK_COWBUF_THRESHOLD(cur,len)
+                     && CHECK_COW_THRESHOLD(cur,len)
                     )
                  ) &&
                  !(sflags & SVf_OOK) &&     /* and not involved in OOK hack? */
-                 !(flags & SV_NOSTEAL) &&
-                                            /* and we're allowed to steal temps */
-                 SvREFCNT(sstr) == 1 &&     /* and no other references to it? */
-                 len)                       /* and really is a string */
-	{	/* Passes the swipe test.  */
+                 !(flags & SV_NOSTEAL)      /* and we're allowed to steal temps */
+        ){        /* Passes the swipe test.  */
 	    if (SvPVX_const(dstr))	/* we know that dtype >= SVt_PV */
 		SvPV_free(dstr);
 	    SvPV_set(dstr, SvPVX_mutable(sstr));
@@ -4682,14 +4652,13 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 #ifdef PERL_COPY_ON_WRITE
 		 (is_cow
 		   ? (!len ||
-                       (  (CHECK_COWBUF_THRESHOLD(cur,len) || SvLEN(dstr) < cur+1)
-			  /* If this is a regular (non-hek) COW, only so
-			     many COW "copies" are possible. */
-		       && CowREFCNT(sstr) != SV_COW_REFCNT_MAX  ))
+                       /* If this is a regular (non-hek) COW, only so
+                         many COW "copies" are possible. */
+                       ( CowREFCNT(sstr) != SV_COW_REFCNT_MAX )
+                     )
 		   : (  (sflags & CAN_COW_MASK) == CAN_COW_FLAGS
 		     && !(SvFLAGS(dstr) & SVf_BREAK)
                      && CHECK_COW_THRESHOLD(cur,len)
-                     && (CHECK_COWBUF_THRESHOLD(cur,len) || SvLEN(dstr) < cur+1)
 		    ))
 #else
 		 is_cow
