@@ -18830,23 +18830,14 @@ EOF_CODE
             (map {"Test_SB('$_');\n"} @SB_tests),
             (map {"Test_WB('$_');\n"} @WB_tests);
 
-    @output= map {
-        map s/^/    /mgr,
-        map "$_;\n",
-        split /;\n/, $_
-    } @output;
-
-    my @output_chunked;
-    my $chunk_count=0;
-    my $chunk_size= int(@output/10)+1;
-    while (@output) {
-        $chunk_count++;
-        my @chunk= splice @output, 0, $chunk_size;
-        push @output_chunked,
-            "if (!\$::TESTCHUNK or \$::TESTCHUNK == $chunk_count){\n",
-            @chunk,
-            "}\n";
-    }
+    @output= map { s/^/    /mgr } @output;
+    my $chunks= 10;
+    my @output_chunked= map {
+        my $ofs= $_ - 1;
+        "if (!\$::TESTCHUNK or \$::TESTCHUNK == $_){\n",
+        ( map { $output[($_ * $chunks)+$ofs] // () } 0 .. int(@output/$chunks+1) ),
+        "}\n";
+    } 1 .. $chunks;
 
     &write($t_path,
            0,           # Not utf8;
