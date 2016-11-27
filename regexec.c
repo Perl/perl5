@@ -119,7 +119,6 @@ static const char* const non_utf8_target_but_utf8_required
  */
 
 #define CHR_SVLEN(sv) (utf8_target ? sv_len_utf8(sv) : SvCUR(sv))
-#define CHR_DIST(a,b) (reginfo->is_utf8_target ? utf8_distance(a,b) : a - b)
 
 #define HOPc(pos,off) \
 	(char *)(reginfo->is_utf8_target \
