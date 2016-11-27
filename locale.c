@@ -1465,16 +1465,15 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
      * otherwise contain that character, but otherwise there may be
      * less-than-perfect results with that character and NUL.  This is
      * unavoidable unless we replace strxfrm with our own implementation. */
-    if (s_strlen < len) {
+    if (s_strlen < len) {   /* Only execute if there is an embedded NUL */
         char * e = s + len;
         char * sans_nuls;
         STRLEN cur_min_char_len;
         STRLEN sans_nuls_len;
         STRLEN sans_nuls_pos;
         int try_non_controls;
-
-        /* If we don't know what control character sorts lowest for this
-         * locale, find it */
+        /* If we don't know what non-NUL control character sorts lowest for
+         * this locale, find it */
         if (*PL_strxfrm_min_char == '\0') {
             int j;
 #ifdef DEBUGGING
@@ -1487,7 +1486,13 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
             DEBUG_Lv(PerlIO_printf(Perl_debug_log, "Looking to replace NUL\n"));
 
             /* Unlikely, but it may be that no control will work to replace
-             * NUL, in which case we instead look for any character */
+             * NUL, in which case we instead look for any character.  Controls
+             * are preferred because collation order is, in general, context
+             * sensitive, with adjoining characters affecting the order, and
+             * controls are less likely to have such interactions, allowing the
+             * NUL-replacement to stand on its own.  (Another way to look at it
+             * is to imagine what would happen if the NUL were replaced by a
+             * combining character; it wouldn't work out all that well.) */
             for (try_non_controls = 0;
                  try_non_controls < 2;
                  try_non_controls++)
@@ -1522,7 +1527,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                     x = _mem_collxfrm(cur_source, trial_len, &x_len,
                                       PL_in_utf8_COLLATE_locale);
 
-                    /* Ignore any character that didn't successfully transform
+                    /* Ignore any character that didn't successfully transform.
                      * */
                     if (! x) {
                         continue;
@@ -1545,8 +1550,9 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                     else {
                         Safefree(x);
                     }
-                } /* end of loop through all bytes */
+                } /* end of loop through all 255 characters */
 
+                /* Stop looking if found */
                 if (cur_min_x) {
                     break;
                 }
@@ -1556,7 +1562,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                  * character that works */
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                 "_mem_collxfrm: No control worked.  Trying non-controls\n"));
-            }
+            } /* End of loop to try first the controls, then any char */
 
             if (! cur_min_x) {
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
@@ -1570,6 +1576,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                     "0x%02X\n", PL_collation_name, cur_min_cp));
 
             Safefree(cur_min_x);
+        } /* End of determining the character that is to replace NULs */
         }
 
         /* The worst case length for the replaced string would be if every
@@ -1604,7 +1611,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
         /* Switch so below we transform this modified string */
         s = sans_nuls;
         len = strlen(s);
-    }
+    } /* End of replacing NULs */
 
     /* Make sure the UTF8ness of the string and locale match */
     if (utf8 != PL_in_utf8_COLLATE_locale) {
