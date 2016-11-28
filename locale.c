@@ -514,7 +514,7 @@ Perl_new_collate(pTHX_ const char *newcoll)
 	PL_collxfrm_base = 0;
 	PL_collxfrm_mult = 2;
         PL_in_utf8_COLLATE_locale = FALSE;
-        PL_strxfrm_min_char = '\0';
+        PL_strxfrm_NUL_replacement = '\0';
         PL_strxfrm_max_cp = 0;
 	return;
     }
@@ -530,7 +530,7 @@ Perl_new_collate(pTHX_ const char *newcoll)
         }
 
         PL_in_utf8_COLLATE_locale = _is_cur_LC_category_utf8(LC_COLLATE);
-        PL_strxfrm_min_char = '\0';
+        PL_strxfrm_NUL_replacement = '\0';
         PL_strxfrm_max_cp = 0;
 
         /* A locale collation definition includes primary, secondary, tertiary,
@@ -1478,7 +1478,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
 
         /* If we don't know what non-NUL control character sorts lowest for
          * this locale, find it */
-        if (PL_strxfrm_min_char == '\0') {
+        if (PL_strxfrm_NUL_replacement == '\0') {
             int j;
             char * cur_min_x = NULL;    /* The min_char's xfrm, (except it also
                                            includes the collation index
@@ -1530,7 +1530,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                         || strLT(x         + COLLXFRM_HDR_LEN,
                                  cur_min_x + COLLXFRM_HDR_LEN))
                     {
-                        PL_strxfrm_min_char = j;
+                        PL_strxfrm_NUL_replacement = j;
                         cur_min_x = x;
                     }
                     else {
@@ -1559,20 +1559,22 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
 
             DEBUG_L(PerlIO_printf(Perl_debug_log,
                     "_mem_collxfrm: Replacing embedded NULs in locale %s with "
-                    "0x%02X\n", PL_collation_name, PL_strxfrm_min_char));
+                    "0x%02X\n", PL_collation_name, PL_strxfrm_NUL_replacement));
 
             Safefree(cur_min_x);
         } /* End of determining the character that is to replace NULs */
 
         /* If the replacement is variant under UTF-8, it must match the
          * UTF8-ness as the original */
-        if ( ! UVCHR_IS_INVARIANT(PL_strxfrm_min_char) && utf8) {
-            this_replacement_char[0] = UTF8_EIGHT_BIT_HI(PL_strxfrm_min_char);
-            this_replacement_char[1] = UTF8_EIGHT_BIT_LO(PL_strxfrm_min_char);
+        if ( ! UVCHR_IS_INVARIANT(PL_strxfrm_NUL_replacement) && utf8) {
+            this_replacement_char[0] =
+                                UTF8_EIGHT_BIT_HI(PL_strxfrm_NUL_replacement);
+            this_replacement_char[1] =
+                                UTF8_EIGHT_BIT_LO(PL_strxfrm_NUL_replacement);
             this_replacement_len = 2;
         }
         else {
-            this_replacement_char[0] = PL_strxfrm_min_char;
+            this_replacement_char[0] = PL_strxfrm_NUL_replacement;
             /* this_replacement_char[1] = '\0' was done at initialization */
             this_replacement_len = 1;
         }

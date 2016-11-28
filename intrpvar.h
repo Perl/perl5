@@ -565,8 +565,7 @@ PERLVAR(I, collation_name, char *)	/* Name of current collation */
 PERLVAR(I, collxfrm_base, Size_t)	/* Basic overhead in *xfrm() */
 PERLVARI(I, collxfrm_mult,Size_t, 2)	/* Expansion factor in *xfrm() */
 PERLVARI(I, collation_ix, U32,	0)	/* Collation generation index */
-PERLVARI(I, strxfrm_min_char, U8, 0)    /* Code point that sorts earliest in
-                                           locale */
+PERLVARI(I, strxfrm_NUL_replacement, U8, 0)  /* Code point to replace NULs */
 PERLVARI(I, strxfrm_is_behaved, bool, TRUE)
                             /* Assume until proven otherwise that it works */
 PERLVARI(I, strxfrm_max_cp, U8, 0)      /* Highest collating cp in locale */
