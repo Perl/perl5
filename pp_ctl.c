@@ -1530,6 +1530,12 @@ Perl_dounwind(pTHX_ I32 cxix)
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
 	    CX_POPSUBST(cx);
+            /* CXt_SUBST is not a block context type, so skip the
+             * cx_popblock(cx) below */
+            if (cxstack_ix == cxix + 1) {
+                cxstack_ix--;
+                return;
+            }
 	    break;
 	case CXt_SUB:
 	    cx_popsub(cx);

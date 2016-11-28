@@ -11,7 +11,7 @@ BEGIN {
     require './loc_tools.pl';
 }
 
-plan( tests => 274 );
+plan(tests => 275);
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -1151,3 +1151,18 @@ SKIP: {
     undef *Tie::Prematch::FETCH;
 __EOF__
 }
+
+# [perl #130188] crash on return from substitution in subroutine
+# make sure returning from s///e doesn't SEGV
+{
+    my $f = sub {
+        my $x = 'a';
+        $x =~ s/./return;/e;
+    };
+    my $x = $f->();
+    pass("RT #130188");
+}
+
+
+
+
