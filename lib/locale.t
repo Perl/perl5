@@ -1806,10 +1806,16 @@ foreach my $Locale (@Locale) {
 
         ++$locales_test_number;
         $test_names{$locales_test_number}
-                            = 'Verify that \0 sorts before any other control';
-        my $ok = $sorted_controls[0] eq "\0";
-        report_result($Locale, $locales_test_number, $ok);
-        shift @sorted_controls;
+                = 'Skip in locales where \0 is not considered a control;'
+                . ' otherwise verify that \0 sorts before any other control';
+        if ("\0" !~ /[[:cntrl:]]/) {
+            report_result($Locale, $locales_test_number, 1);
+        }
+        else {
+            my $ok = $sorted_controls[0] eq "\0";
+            report_result($Locale, $locales_test_number, $ok);
+            shift @sorted_controls;
+        }
         my $lowest_control = $sorted_controls[0];
 
         ++$locales_test_number;
@@ -1827,7 +1833,7 @@ foreach my $Locale (@Locale) {
         ++$locales_test_number;
         $test_names{$locales_test_number}
                             = 'Verify that strings with embedded NUL collate';
-        $ok = "a\0a\0a" lt "a${lowest_control}a${lowest_control}a";
+        my $ok = "a\0a\0a" lt "a${lowest_control}a${lowest_control}a";
         report_result($Locale, $locales_test_number, $ok);
 
         ++$locales_test_number;
