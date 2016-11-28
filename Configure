@@ -949,6 +949,7 @@ lddlflags=''
 usedl=''
 doublesize=''
 dtraceobject=''
+dtracexnolibs=''
 ebcdic=''
 fflushNULL=''
 fflushall=''
@@ -20966,12 +20967,38 @@ randseedtype=U32
 : object file that uses at least one of the probes defined in the .d file
 case "$usedtrace" in
 $define)
+    case "$dtracexnolibs" in
+    $define|true|[yY]*)
+        dtracexnolibs=$define
+	$dtrace -h -xnolibs -s ../perldtrace.d -o perldtrace.h
+	;;
+    ' '|'')
+        if $dtrace -h -xnolibs -s ../perldtrace.d -o perldtrace.h 2>&1 ; then
+	     dtracexnolibs=$define
+	     echo "Your dtrace accepts -xnolibs"
+	elif $dtrace -h -s ../perldtrace.d -o perldtrace.h 2>&1 ; then
+	     dtracexnolibs=$undef
+	     echo "Your dtrace doesn't accept -xnolibs"
+	else
+             echo "Your dtrace doesn't work at all, try building without dtrace support" >&4
+	     exit 1
+	fi
+	;;
+    *)
+        dtracexnolibs=$undef
+	$dtrace -h -s ../perldtrace.d -o perldtrace.h
+	;;
+    esac
+    case $dtracexnolibs in
+    $define) xnolibs=-xnolibs ;;
+    *) xnolibs= ;;
+    esac
+
     case "$dtraceobject" in
     $define|true|[yY]*)
         dtraceobject=$define
         ;;
     ' '|'')
-        $dtrace -h -s ../perldtrace.d -o perldtrace.h
         $cat >try.c <<EOM
 #include "perldtrace.h"
 int main(void) {
@@ -20981,14 +21008,14 @@ int main(void) {
 EOM
         dtraceobject=$undef
         if $cc -c -o try.o $optimize $ccflags try.c \
-                    && $dtrace -G -s ../perldtrace.d try.o >/dev/null 2>&1; then
+                    && $dtrace -G $xnolibs -s ../perldtrace.d try.o >/dev/null 2>&1; then
                 dtraceobject=$define
             echo "Your dtrace builds an object file"
         fi
-        $rm -f try.c try.o perldtrace.o
         ;;
     *) dtraceobject=$undef ;;
     esac
+    $rm -f try.c try.o perldtrace.o perldtrace.h
 esac
 
 : Determine if this is an EBCDIC system
@@ -24954,6 +24981,7 @@ drand01='$drand01'
 drand48_r_proto='$drand48_r_proto'
 dtrace='$dtrace'
 dtraceobject='$dtraceobject'
+dtracexnolibs='$dtracexnolibs'
 dynamic_ext='$dynamic_ext'
 eagain='$eagain'
 ebcdic='$ebcdic'
