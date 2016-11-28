@@ -514,7 +514,7 @@ Perl_new_collate(pTHX_ const char *newcoll)
 	PL_collxfrm_base = 0;
 	PL_collxfrm_mult = 2;
         PL_in_utf8_COLLATE_locale = FALSE;
-        *PL_strxfrm_min_char = '\0';
+        PL_strxfrm_min_char = '\0';
         PL_strxfrm_max_cp = 0;
 	return;
     }
@@ -530,7 +530,7 @@ Perl_new_collate(pTHX_ const char *newcoll)
         }
 
         PL_in_utf8_COLLATE_locale = _is_cur_LC_category_utf8(LC_COLLATE);
-        *PL_strxfrm_min_char = '\0';
+        PL_strxfrm_min_char = '\0';
         PL_strxfrm_max_cp = 0;
 
         /* A locale collation definition includes primary, secondary, tertiary,
@@ -1468,18 +1468,19 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
     if (s_strlen < len) {   /* Only execute if there is an embedded NUL */
         char * e = s + len;
         char * sans_nuls;
-        STRLEN cur_min_char_len;
         STRLEN sans_nuls_len;
         STRLEN sans_nuls_pos;
         int try_non_controls;
+        char this_replacement_char[] = "?\0";   /* Room for a two-byte string,
+                                                   making sure 2nd byte is NUL.
+                                                 */
+        STRLEN this_replacement_len;
+
         /* If we don't know what non-NUL control character sorts lowest for
          * this locale, find it */
-        if (*PL_strxfrm_min_char == '\0') {
+        if (PL_strxfrm_min_char == '\0') {
             int j;
-#ifdef DEBUGGING
-            U8     cur_min_cp = 1; /* The code point that sorts lowest, so far */
-#endif
-            char * cur_min_x = NULL;    /* And its xfrm, (except it also
+            char * cur_min_x = NULL;    /* The min_char's xfrm, (except it also
                                            includes the collation index
                                            prefixed. */
 
@@ -1503,29 +1504,19 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                     STRLEN x_len;   /* length of 'x' */
                     STRLEN trial_len = 1;
 
-                    /* Create a 1 byte string of the current code point, but
-                     * with room to be 2 bytes */
-                    char cur_source[] = { (char) j, '\0' , '\0' };
+                    /* Create a 1 byte string of the current code point */
+                    char cur_source[] = { (char) j, '\0' };
 
-                    if (PL_in_utf8_COLLATE_locale) {
-                        if (! try_non_controls && ! isCNTRL_L1(j)) {
-                            continue;
-                        }
-
-                        /* If needs to be 2 bytes, find them */
-                        if (! UVCHR_IS_INVARIANT(j)) {
-                            char * d = cur_source;
-                            append_utf8_from_native_byte((U8) j, (U8 **) &d);
-                            trial_len = 2;
-                        }
-                    }
-                    else if (! try_non_controls && ! isCNTRL_LC(j)) {
+                    if (! try_non_controls && (PL_in_utf8_COLLATE_locale)
+                                               ? ! isCNTRL_L1(j)
+                                               : ! isCNTRL_LC(j))
+                    {
                         continue;
                     }
 
                     /* Then transform it */
                     x = _mem_collxfrm(cur_source, trial_len, &x_len,
-                                      PL_in_utf8_COLLATE_locale);
+                                      0 /* The string is not in UTF-8 */);
 
                     /* Ignore any character that didn't successfully transform.
                      * */
@@ -1539,13 +1530,8 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                         || strLT(x         + COLLXFRM_HDR_LEN,
                                  cur_min_x + COLLXFRM_HDR_LEN))
                     {
-                        PL_strxfrm_min_char[0] = cur_source[0];
-                        PL_strxfrm_min_char[1] = cur_source[1];
-                        PL_strxfrm_min_char[2] = cur_source[2];
+                        PL_strxfrm_min_char = j;
                         cur_min_x = x;
-#ifdef DEBUGGING
-                        cur_min_cp = j;
-#endif
                     }
                     else {
                         Safefree(x);
@@ -1573,17 +1559,28 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
 
             DEBUG_L(PerlIO_printf(Perl_debug_log,
                     "_mem_collxfrm: Replacing embedded NULs in locale %s with "
-                    "0x%02X\n", PL_collation_name, cur_min_cp));
+                    "0x%02X\n", PL_collation_name, PL_strxfrm_min_char));
 
             Safefree(cur_min_x);
         } /* End of determining the character that is to replace NULs */
+
+        /* If the replacement is variant under UTF-8, it must match the
+         * UTF8-ness as the original */
+        if ( ! UVCHR_IS_INVARIANT(PL_strxfrm_min_char) && utf8) {
+            this_replacement_char[0] = UTF8_EIGHT_BIT_HI(PL_strxfrm_min_char);
+            this_replacement_char[1] = UTF8_EIGHT_BIT_LO(PL_strxfrm_min_char);
+            this_replacement_len = 2;
+        }
+        else {
+            this_replacement_char[0] = PL_strxfrm_min_char;
+            /* this_replacement_char[1] = '\0' was done at initialization */
+            this_replacement_len = 1;
         }
 
         /* The worst case length for the replaced string would be if every
          * character in it is NUL.  Multiply that by the length of each
          * replacement, and allow for a trailing NUL */
-        cur_min_char_len = strlen(PL_strxfrm_min_char);
-        sans_nuls_len = (len * cur_min_char_len) + 1;
+        sans_nuls_len = (len * this_replacement_len) + 1;
         Newx(sans_nuls, sans_nuls_len, char);
         *sans_nuls = '\0';
         sans_nuls_pos = 0;
@@ -1597,7 +1594,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
 
             /* Do the actual replacement */
             sans_nuls_pos = my_strlcat(sans_nuls + sans_nuls_pos,
-                                       PL_strxfrm_min_char,
+                                       this_replacement_char,
                                        sans_nuls_len);
 
             /* Move past the input NUL */
