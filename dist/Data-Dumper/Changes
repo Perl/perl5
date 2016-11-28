@@ -6,15 +6,19 @@ Changes - public release history for Data::Dumper
 
 =over 8
 
-=item NEXT
-
-The XS implementation now handles the C<Deparse> option, so using it no
-longer forces use of the pure-Perl version.
-
-=item 2.162 (Nov 14 2016)
+=item 2,166 (Nov 29 2016)
 
 Reduce memory usage by not importing from Carp
 Reduce memory usage by removing unused overload require.
+
+=item 2.165 (Nov 20 2016)
+
+Remove impediment to compiling under C++11.
+
+=item 2.164 (Nov 12 2016)
+
+The XS implementation now handles the C<Deparse> option, so using it no
+longer forces use of the pure-Perl version.
 
 =item 2.161 (Jul 11 2016)
 
