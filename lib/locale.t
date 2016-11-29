@@ -1797,25 +1797,36 @@ foreach my $Locale (@Locale) {
 
         use locale;
 
-        my @sorted_controls = sort @{$posixes{'cntrl'}};
-        my $output = "";
-        for my $control (@sorted_controls) {
-            $output .= " " . disp_chars($control);
-        }
-        debug "sorted :cntrl: = $output\n";
+        my @sorted_controls;
 
         ++$locales_test_number;
         $test_names{$locales_test_number}
-                = 'Skip in locales where \0 is not considered a control;'
-                . ' otherwise verify that \0 sorts before any other control';
-        if ("\0" !~ /[[:cntrl:]]/) {
+                = 'Skip in locales where there are no controls;'
+                . ' otherwise verify that \0 sorts before any (other) control';
+        if (! $posixes{'cntrl'}) {
             report_result($Locale, $locales_test_number, 1);
+
+            # We use all code points for the tests below since there aren't
+            # any controls
+            push @sorted_controls, chr $_ for 1..255;
+            @sorted_controls = sort @sorted_controls;
         }
         else {
+            @sorted_controls = @{$posixes{'cntrl'}};
+            push @sorted_controls, "\0",
+                                unless grep { $_ eq "\0" } @sorted_controls;
+            @sorted_controls = sort @sorted_controls;
+            my $output = "";
+            for my $control (@sorted_controls) {
+                $output .= " " . disp_chars($control);
+            }
+            debug "sorted :cntrl: (plus NUL) = $output\n";
             my $ok = $sorted_controls[0] eq "\0";
             report_result($Locale, $locales_test_number, $ok);
-            shift @sorted_controls;
+
+            shift @sorted_controls if $ok;
         }
+
         my $lowest_control = $sorted_controls[0];
 
         ++$locales_test_number;
