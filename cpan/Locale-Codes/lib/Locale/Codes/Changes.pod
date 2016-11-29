@@ -22,7 +22,29 @@ September, December). I will also check on request, so if a code
 changes that you use, feel free to contact me.  Any time there are new
 codes, I will add them to the module and release a new version.
 
-=head1 VERSION 3.41  (planned 2016-12-01; sbeck)
+=head1 VERSION 3.46  (planned 2017-12-01; sbeck)
+
+=head1 VERSION 3.45  (planned 2017-09-01; sbeck)
+
+=head1 VERSION 3.44  (planned 2017-06-01; sbeck)
+
+=head1 VERSION 3.43  (planned 2017-03-01; sbeck)
+
+=head1 VERSION 3.42  (2016-11-30; sbeck)
+
+=over 4
+
+=item B<Added Czech republic aliases back in>
+
+Common Czech republic aliases disappeared from the standards, so I added
+them back in.  Rob Emery
+
+=back
+
+=head1 VERSION 3.41  (2016-11-18; sbeck)
+
+NEW CODE(s) (Jiri Bohac noted that they were needed so this was release a
+couple weeks earlier than planned)
 
 =head1 VERSION 3.40  (2016-09-01; sbeck)
 
