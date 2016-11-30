@@ -8271,17 +8271,18 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 
     assert (RExC_parse <= RExC_end);
     if (RExC_parse == RExC_end) NOOP;
-    else if (isIDFIRST_lazy_if(RExC_parse, UTF)) {
+    else if (isIDFIRST_lazy_if_safe(RExC_parse, RExC_end, UTF)) {
          /* Note that the code here assumes well-formed UTF-8.  Skip IDFIRST by
           * using do...while */
 	if (UTF)
 	    do {
 		RExC_parse += UTF8SKIP(RExC_parse);
-	    } while (isWORDCHAR_utf8((U8*)RExC_parse));
+	    } while (   RExC_parse < RExC_end
+                     && isWORDCHAR_utf8_safe((U8*)RExC_parse, (U8*) RExC_end));
 	else
 	    do {
 		RExC_parse++;
-	    } while (isWORDCHAR(*RExC_parse));
+	    } while (RExC_parse < RExC_end && isWORDCHAR(*RExC_parse));
     } else {
         RExC_parse++; /* so the <- from the vFAIL is after the offending
                          character */

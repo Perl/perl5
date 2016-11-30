@@ -652,11 +652,12 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 		   (UV)flags);
 
     /* complain about "my $<special_var>" etc etc */
-    if (len &&
-	!(is_our ||
-	  isALPHA(name[1]) ||
-	  ((flags & SVf_UTF8) && isIDFIRST_utf8((U8 *)name+1)) ||
-	  (name[1] == '_' && len > 2)))
+    if (   len
+        && !(  is_our
+            || isALPHA(name[1])
+            || (   (flags & SVf_UTF8)
+                && isIDFIRST_utf8_safe((U8 *)name+1, name + len))
+            || (name[1] == '_' && len > 2)))
     {
 	if (!(flags & SVf_UTF8 && UTF8_IS_START(name[1]))
 	 && isASCII(name[1])
