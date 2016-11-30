@@ -1037,18 +1037,14 @@ and looking at the resulting graph, what does it tell about the
 execution and data flows.  As a matter of fact, this is exactly how C
 compilers know to give warnings about dubious code.
 
-=head2 lint, splint
+=head2 lint
 
 The good old C code quality inspector, C<lint>, is available in several
 platforms, but please be aware that there are several different
 implementations of it by different vendors, which means that the flags
 are not identical across different platforms.
 
-There is a lint variant called C<splint> (Secure Programming Lint)
-available from http://www.splint.org/ that should compile on any
-Unix-like platform.
-
-There are C<lint> and <splint> targets in Makefile, but you may have to
+There is a C<lint> target in Makefile, but you may have to
 diddle with the flags (see above).
 
 =head2 Coverity

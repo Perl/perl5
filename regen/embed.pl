@@ -30,7 +30,6 @@ BEGIN {
     require './regen/embed_lib.pl';
 }
 
-my $SPLINT = 0; # Turn true for experimental splint support http://www.splint.org
 my $unflagged_pointers;
 
 #
@@ -95,13 +94,6 @@ my ($embed, $core, $ext, $api) = setup_embed();
 
 	warn "$plain_func: s flag is mutually exclusive from the i and p plags"
 					    if $flags =~ /s/ && $flags =~ /[ip]/;
-	my $splint_flags = "";
-	if ( $SPLINT && !$commented_out ) {
-	    $splint_flags .= '/*@noreturn@*/ ' if $never_returns;
-	    if ($can_ignore && ($retval ne 'void') && ($retval !~ /\*/)) {
-		$retval .= " /*\@alt void\@*/";
-	    }
-	}
 
 	if ($flags =~ /([si])/) {
 	    my $type;
@@ -111,14 +103,14 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	    else {
 		$type = $1 eq 's' ? "STATIC" : "PERL_STATIC_INLINE";
 	    }
-	    $retval = "$type $splint_flags$retval";
+	    $retval = "$type $retval";
 	}
 	else {
 	    if ($never_returns) {
-		$retval = "PERL_CALLCONV_NO_RET $splint_flags$retval";
+		$retval = "PERL_CALLCONV_NO_RET $retval";
 	    }
 	    else {
-		$retval = "PERL_CALLCONV $splint_flags$retval";
+		$retval = "PERL_CALLCONV $retval";
 	    }
 	}
 	$func = full_name($plain_func, $flags);
@@ -149,9 +141,6 @@ my ($embed, $core, $ext, $api) = setup_embed();
 		if ( ($temp_arg ne "...")
 		     && ($temp_arg !~ /\w+\s+(\w+)(?:\[\d+\])?\s*$/) ) {
 		    warn "$func: $arg ($n) doesn't have a name\n";
-		}
-		if ( $SPLINT && $nullok && !$commented_out ) {
-		    $arg = '/*@null@*/ ' . $arg;
 		}
 		if (defined $1 && $nn && !($commented_out && !$binarycompat)) {
 		    push @names_of_nn, $1;
