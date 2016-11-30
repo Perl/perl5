@@ -6095,7 +6095,7 @@ PP(pp_split)
 	    while (iters > 0 && (!TOPs || !SvANY(TOPs) || SvCUR(TOPs) == 0)) {
 		if (TOPs && !make_mortal)
 		    sv_2mortal(TOPs);
-		*SP-- = &PL_sv_undef;
+		*SP-- = NULL;
 		iters--;
 	    }
 	}

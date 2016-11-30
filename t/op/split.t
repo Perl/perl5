@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 159;
+plan tests => 161;
 
 $FS = ':';
 
@@ -609,4 +609,15 @@ is "@a", '1 2 3', 'assignment to split-to-array (stacked)';
     is "@outer", "a b c d e", "array split: list cx pkgref outer";
 
 
+}
+
+# splitting directly to an array wasn't filling unused AvARRAY slots with
+# NULL
+
+{
+    my @a;
+    @a = split(/-/,"-");
+    $a[1] = 'b';
+    ok eval { $a[0] = 'a'; 1; }, "array split filling AvARRAY: assign 0";
+    is "@a", "a b", "array split filling AvARRAY: result";
 }
