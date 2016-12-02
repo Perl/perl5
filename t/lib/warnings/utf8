@@ -15,6 +15,7 @@
 
 __END__
 # utf8.c [utf8_to_uvchr_buf] -W
+# NAME Malformed under 'use utf8' in double-quoted string
 BEGIN {
     if (ord('A') == 193) {
         print "SKIPPED\n# ebcdic platforms generates different Malformed UTF-8 warnings.";
@@ -22,16 +23,25 @@ BEGIN {
     }
 }
 use utf8 ;
+no warnings;    # Malformed is a fatal error, so gets output anyway.
 my $a = "snøstorm" ;
-{
-    no warnings 'utf8' ;
-    my $a = "snøstorm";
-    use warnings 'utf8' ;
-    my $a = "snøstorm";
+EXPECT
+Malformed UTF-8 character: \xf8\x73\x74\x6f\x72 (unexpected non-continuation byte 0x73, immediately after start byte 0xf8; need 5 bytes, got 1) at - line 10.
+Malformed UTF-8 character (fatal) at - line 10.
+########
+# NAME Malformed under 'use utf8' in single-quoted string
+BEGIN {
+    if (ord('A') == 193) {
+        print "SKIPPED\n# ebcdic platforms generates different Malformed UTF-8 warnings.";
+        exit 0;
+    }
 }
+use utf8 ;
+no warnings;    # Malformed is a fatal error, so gets output anyway.
+my $a = 'snøstorm' ;
 EXPECT
 Malformed UTF-8 character: \xf8\x73\x74\x6f\x72 (unexpected non-continuation byte 0x73, immediately after start byte 0xf8; need 5 bytes, got 1) at - line 9.
-Malformed UTF-8 character: \xf8\x73\x74\x6f\x72 (unexpected non-continuation byte 0x73, immediately after start byte 0xf8; need 5 bytes, got 1) at - line 14.
+Malformed UTF-8 character (fatal) at - line 9.
 ########
 use warnings 'utf8';
 my $d7ff  = uc(chr(0xD7FF));

@@ -343,7 +343,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Under C<use utf8>, the entire Perl program is now checked that the UTF-8
+is wellformed.  This resolves [perl #126310].
 
 =back
 
