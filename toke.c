@@ -302,6 +302,12 @@ static const char* const lex_state_names[] = {
 	    PL_parser->herelines = 0;		  \
     } STMT_END
 
+#define TYPEFLAG_BRACKNEW (1<<24)
+#define TYPEFLAG_BRACKPLUS (2<<24)
+#define TYPEFLAG_BRACKMINUS (4<<24)
+#define TYPEFLAGS (TYPEFLAG_BRACKNEW | TYPEFLAG_BRACKPLUS | TYPEFLAG_BRACKMINUS)
+#define TYPEBRACK(rv) ((rv >> 16) & 0xff)
+#define BRACKNEW(brack) (TYPEFLAG_BRACKNEW | (brack << 16))
 
 /* A file-local structure for passing around information about subroutines and
  * related definable words */
@@ -453,9 +459,12 @@ S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp)
 	enum token_type type = TOKENTYPE_NONE;
 	const struct debug_tokens *p;
 	SV* const report = newSVpvs("<== ");
+        int typeflag = rv & TYPEFLAGS;
+        int typebrack = TYPEBRACK(rv);
+        int token = rv & 0xffff;
 
 	for (p = debug_tokens; p->token; p++) {
-	    if (p->token == (int)rv) {
+	    if (p->token == token) {
 		name = p->name;
 		type = p->type;
 		break;
@@ -463,16 +472,26 @@ S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp)
 	}
 	if (name)
 	    Perl_sv_catpv(aTHX_ report, name);
-	else if (isGRAPH(rv))
+	else if (isGRAPH(token))
 	{
-	    Perl_sv_catpvf(aTHX_ report, "'%c'", (char)rv);
-	    if ((char)rv == 'p')
+	    Perl_sv_catpvf(aTHX_ report, "'%c'", (char)token);
+	    if ((char)token == 'p')
 		sv_catpvs(report, " (pending identifier)");
 	}
-	else if (!rv)
+	else if (!token)
 	    sv_catpvs(report, "EOF");
 	else
-	    Perl_sv_catpvf(aTHX_ report, "?? %" IVdf, (IV)rv);
+	    Perl_sv_catpvf(aTHX_ report, "?? %" IVdf, (IV)token);
+
+        if (typeflag) {
+            if (typeflag & TYPEFLAG_BRACKNEW)
+                Perl_sv_catpvf(aTHX_ report, " BRACKNEW('%c')", typebrack);
+            if (typeflag & TYPEFLAG_BRACKPLUS)
+                Perl_sv_catpvf(aTHX_ report, " BRACKPLUS");
+            if (typeflag & TYPEFLAG_BRACKMINUS)
+                Perl_sv_catpvf(aTHX_ report, " BRACKMINUS");
+        }
+
 	switch (type) {
 	case TOKENTYPE_NONE:
 	    break;
@@ -2092,10 +2111,10 @@ Perl_yyunlex(pTHX)
 	    if (yyc == PERLY_BRACE_OPEN || yyc == HASHBRACK || yyc == PERLY_BRACKET_OPEN) {
 		PL_lex_allbrackets--;
 		PL_lex_brackets--;
-		yyc |= (3<<24) | (PL_lex_brackstack[PL_lex_brackets] << 16);
+		yyc |= TYPEFLAG_BRACKPLUS | BRACKNEW(PL_lex_brackstack[PL_lex_brackets]);
 	    } else if (yyc == PERLY_PAREN_OPEN) {
 		PL_lex_allbrackets--;
-		yyc |= (2<<24);
+		yyc |= TYPEFLAG_BRACKPLUS;
 	    }
 	    force_next(yyc);
 	}
@@ -5421,7 +5440,7 @@ yyl_interpcasemod(pTHX_ char *s)
             PL_lex_casestack[PL_lex_casemods] = '\0';
             PL_lex_state = LEX_INTERPCONCAT;
             NEXTVAL_NEXTTOKE.ival = 0;
-            force_next((2<<24)|PERLY_PAREN_OPEN);
+            force_next(TYPEFLAG_BRACKPLUS | PERLY_PAREN_OPEN);
             if (*s == 'l')
                 NEXTVAL_NEXTTOKE.ival = OP_LCFIRST;
             else if (*s == 'u')
@@ -9278,16 +9297,16 @@ Perl_yylex(pTHX)
 	{
 	    I32 next_type;
 	    next_type = PL_nexttype[PL_nexttoke];
-	    if (next_type & (7<<24)) {
-		if (next_type & (1<<24)) {
+	    if (next_type & TYPEFLAGS) {
+		if (next_type & TYPEFLAG_BRACKNEW) {
 		    if (PL_lex_brackets > 100)
 			Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
 		    PL_lex_brackstack[PL_lex_brackets++] =
-			(char) ((next_type >> 16) & 0xff);
+			(char) TYPEBRACK(next_type);
 		}
-		if (next_type & (2<<24))
+		if (next_type & TYPEFLAG_BRACKPLUS)
 		    PL_lex_allbrackets++;
-		if (next_type & (4<<24))
+		if (next_type & TYPEFLAG_BRACKMINUS)
 		    PL_lex_allbrackets--;
 		next_type &= 0xffff;
 	    }
@@ -9330,7 +9349,7 @@ Perl_yylex(pTHX)
 	    NEXTVAL_NEXTTOKE.ival = 0;
 	    force_next(PERLY_DOLLAR);
 	    NEXTVAL_NEXTTOKE.ival = 0;
-	    force_next((2<<24)|PERLY_PAREN_OPEN);
+	    force_next(TYPEFLAG_BRACKPLUS | PERLY_PAREN_OPEN);
 	    NEXTVAL_NEXTTOKE.ival = OP_JOIN;	/* emulate join($", ...) */
 	    force_next(FUNC);
 	}
