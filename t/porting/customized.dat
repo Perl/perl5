@@ -109,9 +109,4 @@ Test::Harness cpan/Test-Harness/lib/TAP/Parser/YAMLish/Writer.pm bf1fbfff9720330
 Test::Harness cpan/Test-Harness/lib/Test/Harness.pm da2d76ba673372da129060c9d0adb8cf0d91f9f7
 autodie cpan/autodie/t/mkdir.t 9e70d2282a3cc7d76a78bf8144fccba20fb37dac
 base dist/base/lib/base.pm 9575442273694d41c8e86cb1d86fa1935a07c8a8
-bignum cpan/bignum/lib/bigint.pm b901044cb5ecd8b331495769f547350da5d4ed60
-bignum cpan/bignum/lib/bignum.pm 9903bb25a330e0af73016000c0fba147bb990afd
-bignum cpan/bignum/lib/bigrat.pm b8fcffd8e60bfa9f32ccb9ab8c0fa5726d6392f8
-bignum cpan/bignum/lib/Math/BigFloat/Trace.pm 1ec133b0c03687fd621cc35946c465c66e38127a
-bignum cpan/bignum/lib/Math/BigInt/Trace.pm 3e1cc7726c55f9d5f4db6e5ec41c5fd266fcb289
 version cpan/version/lib/version.pm a032a751524bdd07a93c945d2a1703abe7ad8ef0
