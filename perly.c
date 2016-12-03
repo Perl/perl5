@@ -293,7 +293,11 @@ Perl_yyparse (pTHX_ int gramtype)
 `------------------------------------------------------------*/
   yynewstate:
 
+
     while (1) {
+
+        /* shift a token, or quit when it's possible to reduce */
+
         yystate = ps->state;
 
         YYDPRINTF ((Perl_debug_log, "Entering state %d\n", yystate));
@@ -327,7 +331,7 @@ Perl_yyparse (pTHX_ int gramtype)
 
         yyn = yypact[yystate];
         if (yyn == YYPACT_NINF)
-            break;
+            goto yydefault;
 
         /* Not known => get a lookahead token if don't already have one.  */
 
@@ -360,15 +364,21 @@ Perl_yyparse (pTHX_ int gramtype)
          * Casting yyn to unsigned allows a >=0 test to be included as
          * part of the  <=YYLAST test for speed */
         yyn += yytoken;
-        if ((unsigned int)yyn > YYLAST || yycheck[yyn] != yytoken)
-            break;
+        if ((unsigned int)yyn > YYLAST || yycheck[yyn] != yytoken) {
+          yydefault:
+            /* do the default action for the current state. */
+            yyn = yydefact[yystate];
+            if (yyn == 0)
+                goto yyerrlab;
+            break; /* time to reduce */
+        }
 
         yyn = yytable[yyn];
         if (yyn <= 0) {
             if (yyn == 0 || yyn == YYTABLE_NINF)
                 goto yyerrlab;
             yyn = -yyn;
-            goto yyreduce;
+            break; /* time to reduce */
         }
 
         if (yyn == YYFINAL)
@@ -397,18 +407,8 @@ Perl_yyparse (pTHX_ int gramtype)
 
     }
 
+    /* Do a reduction */
 
-  /*-----------------------------------------------------------.
-  | do the default action for the current state.  |
-  `-----------------------------------------------------------*/
-    yyn = yydefact[yystate];
-    if (yyn == 0)
-	goto yyerrlab;
-
-  /*-----------------------------.
-  | yyreduce -- Do a reduction.  |
-  `-----------------------------*/
-  yyreduce:
     /* yyn is the number of a rule to reduce with.  */
     parser->yylen = yyr2[yyn];
 
