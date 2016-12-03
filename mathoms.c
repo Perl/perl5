@@ -1688,6 +1688,7 @@ Perl_is_utf8_char_buf(const U8 *buf, const U8* buf_end)
 UV
 Perl_valid_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
 {
+    PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_VALID_UTF8_TO_UVUNI;
 
     return NATIVE_TO_UNI(valid_utf8_to_uvchr(s, retlen));
@@ -1750,6 +1751,7 @@ See L</utf8n_to_uvchr> for details on when the REPLACEMENT CHARACTER is returned
 UV
 Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
 {
+    PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_UTF8_TO_UVUNI;
 
     return NATIVE_TO_UNI(valid_utf8_to_uvchr(s, retlen));

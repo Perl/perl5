@@ -10360,11 +10360,13 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 	case OP_PADAV:
 	    Perl_croak(aTHX_ "Can't use 'defined(@array)'"
 			     " (Maybe you should just omit the defined()?)");
-	break;
+            NOT_REACHED;
+            break;
 	case OP_RV2HV:
 	case OP_PADHV:
 	    Perl_croak(aTHX_ "Can't use 'defined(%%hash)'"
 			     " (Maybe you should just omit the defined()?)");
+            NOT_REACHED;
 	    break;
 	default:
 	    /* no warning */
@@ -14459,7 +14461,7 @@ Perl_rpeep(pTHX_ OP *o)
             oldop    = ourlast;
             o        = oldop->op_next;
             goto redo;
-	    
+            NOT_REACHED;
 	    break;
 	}
 
