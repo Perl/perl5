@@ -294,106 +294,106 @@ Perl_yyparse (pTHX_ int gramtype)
   yynewstate:
 
     while (1) {
-    yystate = ps->state;
+        yystate = ps->state;
 
-    YYDPRINTF ((Perl_debug_log, "Entering state %d\n", yystate));
+        YYDPRINTF ((Perl_debug_log, "Entering state %d\n", yystate));
 
-    parser->yylen = 0;
+        parser->yylen = 0;
 
-    {
-	/* grow the stack? We always leave 1 spare slot,
-	 * in case of a '' -> 'foo' reduction.
-         * Note that stack_max1 points to the (top-1)th allocated stack
-         * element to make this check fast */
+        {
+            /* grow the stack? We always leave 1 spare slot,
+             * in case of a '' -> 'foo' reduction.
+             * Note that stack_max1 points to the (top-1)th allocated stack
+             * element to make this check fast */
 
-	if (ps >= parser->stack_max1) {
-            Size_t pos = ps - parser->stack;
-            Size_t newsize = 2 * (parser->stack_max1 + 2 - parser->stack);
-	    /* this will croak on insufficient memory */
-	    Renew(parser->stack, newsize, yy_stack_frame);
-	    ps = parser->ps = parser->stack + pos;
-	    parser->stack_max1 = parser->stack + newsize - 1;
+            if (ps >= parser->stack_max1) {
+                Size_t pos = ps - parser->stack;
+                Size_t newsize = 2 * (parser->stack_max1 + 2 - parser->stack);
+                /* this will croak on insufficient memory */
+                Renew(parser->stack, newsize, yy_stack_frame);
+                ps = parser->ps = parser->stack + pos;
+                parser->stack_max1 = parser->stack + newsize - 1;
 
-	    YYDPRINTF((Perl_debug_log,
-			    "parser stack size increased to %lu frames\n",
-			    (unsigned long int)newsize));
-	}
-    }
+                YYDPRINTF((Perl_debug_log,
+                                "parser stack size increased to %lu frames\n",
+                                (unsigned long int)newsize));
+            }
+        }
 
-/* Do appropriate processing given the current state.  */
-/* Read a lookahead token if we need one and don't already have one.  */
+    /* Do appropriate processing given the current state.  */
+    /* Read a lookahead token if we need one and don't already have one.  */
 
-    /* First try to decide what to do without reference to lookahead token.  */
+        /* First try to decide what to do without reference to lookahead token.  */
 
-    yyn = yypact[yystate];
-    if (yyn == YYPACT_NINF)
-	break;
+        yyn = yypact[yystate];
+        if (yyn == YYPACT_NINF)
+            break;
 
-    /* Not known => get a lookahead token if don't already have one.  */
+        /* Not known => get a lookahead token if don't already have one.  */
 
-    /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
-    if (parser->yychar == YYEMPTY) {
-	YYDPRINTF ((Perl_debug_log, "Reading a token:\n"));
-	parser->yychar = yylex();
-    }
+        /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
+        if (parser->yychar == YYEMPTY) {
+            YYDPRINTF ((Perl_debug_log, "Reading a token:\n"));
+            parser->yychar = yylex();
+        }
 
-    if (parser->yychar <= YYEOF) {
-	parser->yychar = yytoken = YYEOF;
-	YYDPRINTF ((Perl_debug_log, "Now at end of input.\n"));
-    }
-    else {
-        /* perly.tab is shipped based on an ASCII system, so need to index it
-         * with characters translated to ASCII.  Although it's not designed for
-         * this purpose, we can use NATIVE_TO_UNI here.  It returns its
-         * argument on ASCII platforms, and on EBCDIC translates native to
-         * ascii in the 0-255 range, leaving everything else unchanged.  This
-         * jibes with yylex() returning some bare characters in that range, but
-         * all tokens it returns are either 0, or above 255.  There could be a
-         * problem if NULs weren't 0, or were ever returned as raw chars by
-         * yylex() */
-        yytoken = YYTRANSLATE (NATIVE_TO_UNI(parser->yychar));
-	YYDSYMPRINTF ("Next token is", yytoken, &parser->yylval);
-    }
+        if (parser->yychar <= YYEOF) {
+            parser->yychar = yytoken = YYEOF;
+            YYDPRINTF ((Perl_debug_log, "Now at end of input.\n"));
+        }
+        else {
+            /* perly.tab is shipped based on an ASCII system, so need to index it
+             * with characters translated to ASCII.  Although it's not designed for
+             * this purpose, we can use NATIVE_TO_UNI here.  It returns its
+             * argument on ASCII platforms, and on EBCDIC translates native to
+             * ascii in the 0-255 range, leaving everything else unchanged.  This
+             * jibes with yylex() returning some bare characters in that range, but
+             * all tokens it returns are either 0, or above 255.  There could be a
+             * problem if NULs weren't 0, or were ever returned as raw chars by
+             * yylex() */
+            yytoken = YYTRANSLATE (NATIVE_TO_UNI(parser->yychar));
+            YYDSYMPRINTF ("Next token is", yytoken, &parser->yylval);
+        }
 
-    /* If the proper action on seeing token YYTOKEN is to reduce or to
-     * detect an error, take that action.
-     * Casting yyn to unsigned allows a >=0 test to be included as
-     * part of the  <=YYLAST test for speed */
-    yyn += yytoken;
-    if ((unsigned int)yyn > YYLAST || yycheck[yyn] != yytoken)
-	break;
+        /* If the proper action on seeing token YYTOKEN is to reduce or to
+         * detect an error, take that action.
+         * Casting yyn to unsigned allows a >=0 test to be included as
+         * part of the  <=YYLAST test for speed */
+        yyn += yytoken;
+        if ((unsigned int)yyn > YYLAST || yycheck[yyn] != yytoken)
+            break;
 
-    yyn = yytable[yyn];
-    if (yyn <= 0) {
-	if (yyn == 0 || yyn == YYTABLE_NINF)
-	    goto yyerrlab;
-	yyn = -yyn;
-	goto yyreduce;
-    }
+        yyn = yytable[yyn];
+        if (yyn <= 0) {
+            if (yyn == 0 || yyn == YYTABLE_NINF)
+                goto yyerrlab;
+            yyn = -yyn;
+            goto yyreduce;
+        }
 
-    if (yyn == YYFINAL)
-	YYACCEPT;
+        if (yyn == YYFINAL)
+            YYACCEPT;
 
-    /* Shift the lookahead token.  */
-    YYDPRINTF ((Perl_debug_log, "Shifting token %s, ", yytname[yytoken]));
+        /* Shift the lookahead token.  */
+        YYDPRINTF ((Perl_debug_log, "Shifting token %s, ", yytname[yytoken]));
 
-    /* Discard the token being shifted unless it is eof.  */
-    if (parser->yychar != YYEOF)
-	parser->yychar = YYEMPTY;
+        /* Discard the token being shifted unless it is eof.  */
+        if (parser->yychar != YYEOF)
+            parser->yychar = YYEMPTY;
 
-    YYPUSHSTACK;
-    ps->state   = yyn;
-    ps->val     = parser->yylval;
-    ps->compcv  = (CV*)SvREFCNT_inc(PL_compcv);
-    ps->savestack_ix = PL_savestack_ix;
+        YYPUSHSTACK;
+        ps->state   = yyn;
+        ps->val     = parser->yylval;
+        ps->compcv  = (CV*)SvREFCNT_inc(PL_compcv);
+        ps->savestack_ix = PL_savestack_ix;
 #ifdef DEBUGGING
-    ps->name    = (const char *)(yytname[yytoken]);
+        ps->name    = (const char *)(yytname[yytoken]);
 #endif
 
-    /* Count tokens shifted since error; after three, turn off error
-	  status.  */
-    if (parser->yyerrstatus)
-	parser->yyerrstatus--;
+        /* Count tokens shifted since error; after three, turn off error
+              status.  */
+        if (parser->yyerrstatus)
+            parser->yyerrstatus--;
 
     }
 
