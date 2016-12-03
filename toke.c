@@ -3775,9 +3775,17 @@ S_scan_const(pTHX_ char *start)
 	} /* end if (backslash) */
 
     default_action:
-	/* If we started with encoded form, or already know we want it,
-	   then encode the next character */
-	if (! NATIVE_BYTE_IS_INVARIANT((U8)(*s)) && (this_utf8 || has_utf8)) {
+        /* Just copy the input to the output, though we may have to convert
+         * to/from UTF-8.
+         *
+         * If the input has the same representation in UTF-8 as not, it will be
+         * a single byte, and we don't care about UTF8ness; or if neither
+         * source nor output is UTF-8, just copy the byte */
+        if (NATIVE_BYTE_IS_INVARIANT((U8)(*s)) || (! this_utf8 && ! has_utf8))
+        {
+	    *d++ = *s++;
+        }
+        else {
 	    STRLEN len  = 1;
 
 	    /* One might think that it is wasted effort in the case of the
@@ -3811,9 +3819,6 @@ S_scan_const(pTHX_ char *start)
 	    s += len;
 
 	    d = (char*)uvchr_to_utf8((U8*)d, nextuv);
-	}
-	else {
-	    *d++ = *s++;
 	}
     } /* while loop to process each character */
 
