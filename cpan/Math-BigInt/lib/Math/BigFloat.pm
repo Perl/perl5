@@ -19,7 +19,7 @@ use warnings;
 use Carp ();
 use Math::BigInt ();
 
-our $VERSION = '1.999727';
+our $VERSION = '1.999802';
 $VERSION = eval $VERSION;
 
 require Exporter;
@@ -218,7 +218,7 @@ $div_scale  = 40;
 $upgrade = undef;
 $downgrade = undef;
 # the package we are using for our private parts, defaults to:
-# Math::BigInt->config()->{lib}
+# Math::BigInt->config('lib')
 my $MBI = 'Math::BigInt::Calc';
 
 # are NaNs ok? (otherwise it dies when encountering an NaN) set w/ config()
@@ -481,7 +481,7 @@ sub new {
             if ($zeros != 0) {
                 my $z = $MBI->_new($zeros);
                 # turn '120e2' into '12e3'
-                $MBI->_rsft($self->{_m}, $z, 10);
+                $self->{_m} = $MBI->_rsft($self->{_m}, $z, 10);
                 ($self->{_e}, $self->{_es}) =
                   _e_add($self->{_e}, $z, $self->{_es}, '+');
             }
@@ -776,7 +776,7 @@ sub bzero {
     my $class   = $selfref || $self;
 
     $self->import() if $IMPORT == 0;            # make require work
-    return if $self->modify('bzero');
+    return if $selfref && $self->modify('bzero');
 
     $self = bless {}, $class unless $selfref;
 
@@ -815,7 +815,7 @@ sub bone {
     my $class   = $selfref || $self;
 
     $self->import() if $IMPORT == 0;            # make require work
-    return if $self->modify('bone');
+    return if $selfref && $self->modify('bone');
 
     my $sign = shift;
     $sign = defined $sign && $sign =~ /^\s*-/ ? "-" : "+";
@@ -866,7 +866,7 @@ sub binf {
     }
 
     $self->import() if $IMPORT == 0;            # make require work
-    return if $self->modify('binf');
+    return if $selfref && $self->modify('binf');
 
     my $sign = shift;
     $sign = defined $sign && $sign =~ /^\s*-/ ? "-" : "+";
@@ -902,7 +902,7 @@ sub bnan {
     }
 
     $self->import() if $IMPORT == 0;            # make require work
-    return if $self->modify('bnan');
+    return if $selfref && $self->modify('bnan');
 
     $self = bless {}, $class unless $selfref;
 
@@ -1127,9 +1127,9 @@ sub as_number {
 
     my $z = $MBI->_copy($x->{_m});
     if ($x->{_es} eq '-') {                     # < 0
-        $MBI->_rsft($z, $x->{_e}, 10);
+        $z = $MBI->_rsft($z, $x->{_e}, 10);
     } elsif (! $MBI->_is_zero($x->{_e})) {      # > 0
-        $MBI->_lsft($z, $x->{_e}, 10);
+        $z = $MBI->_lsft($z, $x->{_e}, 10);
     }
     $z = Math::BigInt->new($x->{sign} . $MBI->_str($z));
     $z;
@@ -1317,8 +1317,8 @@ sub bcmp {
 
     # Now we can normalize the exponents by adding lengths of the mantissas.
 
-    $MBI->_add($ex, $MBI->_new($mxl));
-    $MBI->_add($ey, $MBI->_new($myl));
+    $ex = $MBI->_add($ex, $MBI->_new($mxl));
+    $ey = $MBI->_add($ey, $MBI->_new($myl));
 
     # We're done if the exponents are different.
 
@@ -1469,10 +1469,10 @@ sub binc {
     }
     # now $x->{_e} == 0
     if ($x->{sign} eq '+') {
-        $MBI->_inc($x->{_m});
+        $x->{_m} = $MBI->_inc($x->{_m});
         return $x->bnorm()->bround(@r);
     } elsif ($x->{sign} eq '-') {
-        $MBI->_dec($x->{_m});
+        $x->{_m} = $MBI->_dec($x->{_m});
         $x->{sign} = '+' if $MBI->_is_zero($x->{_m}); # -1 +1 => -0 => +0
         return $x->bnorm()->bround(@r);
     }
@@ -1499,14 +1499,14 @@ sub bdec {
     my $zero = $x->is_zero();
     # <= 0
     if (($x->{sign} eq '-') || $zero) {
-        $MBI->_inc($x->{_m});
+        $x->{_m} = $MBI->_inc($x->{_m});
         $x->{sign} = '-' if $zero;                # 0 => 1 => -1
         $x->{sign} = '+' if $MBI->_is_zero($x->{_m}); # -1 +1 => -0 => +0
         return $x->bnorm()->round(@r);
     }
     # > 0
     elsif ($x->{sign} eq '+') {
-        $MBI->_dec($x->{_m});
+        $x->{_m} = $MBI->_dec($x->{_m});
         return $x->bnorm()->round(@r);
     }
     # inf, nan handling etc
@@ -1571,11 +1571,11 @@ sub badd {
 
     if ($es eq '-')             # < 0
     {
-        $MBI->_lsft($x->{_m}, $e, 10);
+        $x->{_m} = $MBI->_lsft($x->{_m}, $e, 10);
         ($x->{_e}, $x->{_es}) = _e_add($x->{_e}, $e, $x->{_es}, $es);
     } elsif (!$MBI->_is_zero($e)) # > 0
     {
-        $MBI->_lsft($add, $e, 10);
+        $add = $MBI->_lsft($add, $e, 10);
     }
     # else: both e are the same, so just leave them
 
@@ -1655,7 +1655,7 @@ sub bmul {
       ((!$x->isa($class)) || (!$y->isa($class)));
 
     # aEb * cEd = (a*c)E(b+d)
-    $MBI->_mul($x->{_m}, $y->{_m});
+    $x->{_m} = $MBI->_mul($x->{_m}, $y->{_m});
     ($x->{_e}, $x->{_es}) = _e_add($x->{_e}, $y->{_e}, $x->{_es}, $y->{_es});
 
     $r[3] = $y;                 # no push!
@@ -1692,7 +1692,7 @@ sub bmuladd {
       ((!$x->isa($class)) || (!$y->isa($class)));
 
     # aEb * cEd = (a*c)E(b+d)
-    $MBI->_mul($x->{_m}, $y->{_m});
+    $x->{_m} = $MBI->_mul($x->{_m}, $y->{_m});
     ($x->{_e}, $x->{_es}) = _e_add($x->{_e}, $y->{_e}, $x->{_es}, $y->{_es});
 
     $r[3] = $y;                 # no push!
@@ -1716,11 +1716,11 @@ sub bmuladd {
 
     if ($es eq '-')             # < 0
     {
-        $MBI->_lsft($x->{_m}, $e, 10);
+        $x->{_m} = $MBI->_lsft($x->{_m}, $e, 10);
         ($x->{_e}, $x->{_es}) = _e_add($x->{_e}, $e, $x->{_es}, $es);
     } elsif (!$MBI->_is_zero($e)) # > 0
     {
-        $MBI->_lsft($add, $e, 10);
+        $add = $MBI->_lsft($add, $e, 10);
     }
     # else: both e are the same, so just leave them
 
@@ -1889,8 +1889,8 @@ sub bdiv {
 
             # calculate the result to $scale digits and then round it
             # a * 10 ** b / c * 10 ** d => a/c * 10 ** (b-d)
-            $MBI->_lsft($x->{_m}, $MBI->_new($scale), 10);
-            $MBI->_div($x->{_m}, $y->{_m}); # a/c
+            $x->{_m} = $MBI->_lsft($x->{_m}, $MBI->_new($scale), 10);
+            $x->{_m} = $MBI->_div($x->{_m}, $y->{_m}); # a/c
 
             # correct exponent of $x
             ($x->{_e}, $x->{_es}) = _e_sub($x->{_e}, $y->{_e}, $x->{_es}, $y->{_es});
@@ -1991,7 +1991,7 @@ sub bmod {
     my $ym = $MBI->_copy($y->{_m});
 
     # 2e1 => 20
-    $MBI->_lsft($ym, $y->{_e}, 10)
+    $ym = $MBI->_lsft($ym, $y->{_e}, 10)
       if $y->{_es} eq '+' && !$MBI->_is_zero($y->{_e});
 
     # if $y has digits after dot
@@ -2000,7 +2000,7 @@ sub bmod {
     {
         # 123 % 2.5 => 1230 % 25 => 5 => 0.5
         $shifty = $MBI->_num($y->{_e});  # no more digits after dot
-        $MBI->_lsft($x->{_m}, $y->{_e}, 10); # 123 => 1230, $y->{_m} is already 25
+        $x->{_m} = $MBI->_lsft($x->{_m}, $y->{_e}, 10); # 123 => 1230, $y->{_m} is already 25
     }
     # $ym is now mantissa of $y based on exponent 0
 
@@ -2009,17 +2009,17 @@ sub bmod {
     {
         # 123.4 % 20 => 1234 % 200
         $shiftx = $MBI->_num($x->{_e}); # no more digits after dot
-        $MBI->_lsft($ym, $x->{_e}, 10); # 123 => 1230
+        $ym = $MBI->_lsft($ym, $x->{_e}, 10); # 123 => 1230
     }
     # 123e1 % 20 => 1230 % 20
     if ($x->{_es} eq '+' && !$MBI->_is_zero($x->{_e})) {
-        $MBI->_lsft($x->{_m}, $x->{_e}, 10); # es => '+' here
+        $x->{_m} = $MBI->_lsft($x->{_m}, $x->{_e}, 10); # es => '+' here
     }
 
     $x->{_e} = $MBI->_new($shiftx);
     $x->{_es} = '+';
     $x->{_es} = '-' if $shiftx != 0 || $shifty != 0;
-    $MBI->_add($x->{_e}, $MBI->_new($shifty)) if $shifty != 0;
+    $x->{_e} = $MBI->_add($x->{_e}, $MBI->_new($shifty)) if $shifty != 0;
 
     # now mantissas are equalized, exponent of $x is adjusted, so calc result
 
@@ -2126,7 +2126,7 @@ sub bpow {
 }
 
 sub blog {
-    my ($class, $x, $base, $a, $p, $r) = ref($_[0]) ? (ref($_[0]), @_) : objectify(1, @_);
+    my ($class, $x, $base, $a, $p, $r) = ref($_[0]) ? (ref($_[0]), @_) : objectify(2, @_);
 
     # If called as $x -> blog() or $x -> blog(undef), don't objectify the
     # undefined base, since undef signals that the base is Euler's number.
@@ -2243,7 +2243,7 @@ sub blog {
     # stop right here.
     if (defined $base && $base->is_int() && $x->is_int()) {
         my $i = $MBI->_copy($x->{_m});
-        $MBI->_lsft($i, $x->{_e}, 10) unless $MBI->_is_zero($x->{_e});
+        $i = $MBI->_lsft($i, $x->{_e}, 10) unless $MBI->_is_zero($x->{_e});
         my $int = Math::BigInt->bzero();
         $int->{value} = $i;
         $int->blog($base->as_number());
@@ -2705,7 +2705,7 @@ sub batan {
         $self->{_es} = $pi->{_es};
         # -y => -PI/2, +y => PI/2
         $self->{sign} = substr($self->{sign}, 0, 1); # "+inf" => "+"
-        $MBI->_div($self->{_m}, $MBI->_new(2));
+        $self -> {_m} = $MBI->_div($self->{_m}, $MBI->_new(2));
         return $self;
     }
 
@@ -2734,7 +2734,7 @@ sub batan {
         $self->{_e} = $pi->{_e};
         $self->{_es} = $pi->{_es};
         # leave the sign of $self alone (+1 => +PI/4, -1 => -PI/4)
-        $MBI->_div($self->{_m}, $MBI->_new(4));
+        $self->{_m} = $MBI->_div($self->{_m}, $MBI->_new(4));
         return $self;
     }
 
@@ -2745,7 +2745,7 @@ sub batan {
     if ($self->bacmp($self->copy()->bone) >= 0) {
         # calculate PI/2
         $pi = $class->bpi($scale - 3);
-        $MBI->_div($pi->{_m}, $MBI->_new(2));
+        $pi->{_m} = $MBI->_div($pi->{_m}, $MBI->_new(2));
         # calculate 1/$self:
         my $self_copy = $self->copy();
         # modify $self in place
@@ -2968,7 +2968,7 @@ sub bsqrt {
     local $Math::BigInt::upgrade = undef; # should be really parent class vs MBI
 
     my $i = $MBI->_copy($x->{_m});
-    $MBI->_lsft($i, $x->{_e}, 10) unless $MBI->_is_zero($x->{_e});
+    $i = $MBI->_lsft($i, $x->{_e}, 10) unless $MBI->_is_zero($x->{_e});
     my $xas = Math::BigInt->bzero();
     $xas->{value} = $i;
 
@@ -3030,7 +3030,7 @@ sub bsqrt {
     # after the dot (the result is still odd or even digits long).
     $s2++ if $MBI->_is_odd($x->{_e});
 
-    $MBI->_lsft($y1, $MBI->_new($s2), 10);
+    $y1 = $MBI->_lsft($y1, $MBI->_new($s2), 10);
 
     # now take the square root and truncate to integer
     $y1 = $MBI->_sqrt($y1);
@@ -3160,7 +3160,7 @@ sub broot {
         my $done = 0;           # not yet
         if ($y->is_int() && $x->is_int()) {
             my $i = $MBI->_copy($x->{_m});
-            $MBI->_lsft($i, $x->{_e}, 10) unless $MBI->_is_zero($x->{_e});
+            $i = $MBI->_lsft($i, $x->{_e}, 10) unless $MBI->_is_zero($x->{_e});
             my $int = Math::BigInt->bzero();
             $int->{value} = $i;
             $int->broot($y->as_number());
@@ -3217,11 +3217,11 @@ sub bfac {
 
     # use BigInt's bfac() for faster calc
     if (! $MBI->_is_zero($x->{_e})) {
-        $MBI->_lsft($x->{_m}, $x->{_e}, 10); # change 12e1 to 120e0
+        $x->{_m} = $MBI->_lsft($x->{_m}, $x->{_e}, 10); # change 12e1 to 120e0
         $x->{_e} = $MBI->_zero();           # normalize
         $x->{_es} = '+';
     }
-    $MBI->_fac($x->{_m});       # calculate factorial
+    $x->{_m} = $MBI->_fac($x->{_m});       # calculate factorial
     $x->bnorm()->round(@r);     # norm again and round result
 }
 
@@ -3531,7 +3531,6 @@ sub bfloor {
     my ($class, $x, $a, $p, $r) = ref($_[0]) ? (ref($_[0]), @_) : objectify(1, @_);
 
     return $x if $x->modify('bfloor');
-
     return $x if $x->{sign} !~ /^[+-]$/; # nan, +inf, -inf
 
     # if $x has digits after dot
@@ -3539,7 +3538,7 @@ sub bfloor {
         $x->{_m} = $MBI->_rsft($x->{_m}, $x->{_e}, 10); # cut off digits after dot
         $x->{_e} = $MBI->_zero();                     # trunc/norm
         $x->{_es} = '+';                              # abs e
-        $MBI->_inc($x->{_m}) if $x->{sign} eq '-';    # increment if negative
+        $x->{_m} = $MBI->_inc($x->{_m}) if $x->{sign} eq '-';    # increment if negative
     }
     $x->round($a, $p, $r);
 }
@@ -3557,7 +3556,7 @@ sub bceil {
         $x->{_e} = $MBI->_zero();                     # trunc/norm
         $x->{_es} = '+';                              # abs e
         if ($x->{sign} eq '+') {
-            $MBI->_inc($x->{_m}); # increment if positive
+            $x->{_m} = $MBI->_inc($x->{_m}); # increment if positive
         } else {
             $x->{sign} = '+' if $MBI->_is_zero($x->{_m}); # avoid -0
         }
@@ -3590,43 +3589,53 @@ sub bgcd {
     # (BINT or num_str, BINT or num_str) return BINT
     # does not modify arguments, but returns new object
 
-    my $y = shift;
-    $y = __PACKAGE__->new($y) if !ref($y);
-    my $class = ref($y);
-    my $x = $y->copy()->babs(); # keep arguments
+    unshift @_, __PACKAGE__
+      unless ref($_[0]) || $_[0] =~ /^[a-z]\w*(?:::[a-z]\w*)*$/i;
 
-    return $x->bnan() if $x->{sign} !~ /^[+-]$/ # x NaN?
-      || !$x->is_int();                         # only for integers now
+    my ($class, @args) = objectify(0, @_);
 
-    while (@_) {
-        my $t = shift;
-        $t = $class->new($t) if !ref($t);
-        $y = $t->copy()->babs();
+    my $x = shift @args;
+    $x = ref($x) && $x -> isa($class) ? $x -> copy() : $class -> new($x);
+    return $class->bnan() unless $x -> is_int();
 
-        return $x->bnan() if $y->{sign} !~ /^[+-]$/ # y NaN?
-          || !$y->is_int();                         # only for integers now
+    while (@args) {
+        my $y = shift @args;
+        $y = $class->new($y) unless ref($y) && $y -> isa($class);
+        return $class->bnan() unless $y -> is_int();
 
         # greatest common divisor
         while (! $y->is_zero()) {
             ($x, $y) = ($y->copy(), $x->copy()->bmod($y));
         }
 
-        last if $x->is_one();
+        last if $x -> is_one();
     }
-    $x;
+    return $x -> babs();
 }
 
 sub blcm {
     # (BFLOAT or num_str, BFLOAT or num_str) return BFLOAT
     # does not modify arguments, but returns new object
-    # Lowest Common Multiplicator
+    # Least Common Multiple
 
-    my ($class, @arg) = objectify(0, @_);
-    my $x = $class->new(shift @arg);
-    while (@arg) {
-        $x = Math::BigInt::__lcm($x, shift @arg);
+    unshift @_, __PACKAGE__
+      unless ref($_[0]) || $_[0] =~ /^[a-z]\w*(?:::[a-z]\w*)*$/i;
+
+    my ($class, @args) = objectify(0, @_);
+
+    my $x = shift @args;
+    $x = ref($x) && $x -> isa($class) ? $x -> copy() : $class -> new($x);
+    return $class->bnan() if $x->{sign} !~ /^[+-]$/;    # x NaN?
+
+    while (@args) {
+        my $y = shift @args;
+        $y = $class -> new($y) unless ref($y) && $y -> isa($class);
+        return $x->bnan() unless $y -> is_int();
+        my $gcd = $x -> bgcd($y);
+        $x -> bdiv($gcd) -> bmul($y);
     }
-    $x;
+
+    return $x -> babs();
 }
 
 ###############################################################################
@@ -3871,10 +3880,10 @@ my $dot = '.';
             if ($e <= -$len) {
                 my $r = abs($e) - $len;
                 $es = '0.'. ('0' x $r) . $es;
-$cad = -($len+$r);
+                $cad = -($len+$r);
             } else {
                 substr($es, $e, 0) = '.';
-$cad = $MBI->_num($x->{_e});
+                $cad = $MBI->_num($x->{_e});
                 $cad = -$cad if $x->{_es} eq '-';
             }
         } elsif ($e > 0) {
@@ -3990,7 +3999,7 @@ sub as_hex {
 
     my $z = $MBI->_copy($x->{_m});
     if (! $MBI->_is_zero($x->{_e})) {   # > 0
-        $MBI->_lsft($z, $x->{_e}, 10);
+        $z = $MBI->_lsft($z, $x->{_e}, 10);
     }
     $z = Math::BigInt->new($x->{sign} . $MBI->_num($z));
     $z->as_hex();
@@ -4007,7 +4016,7 @@ sub as_oct {
 
     my $z = $MBI->_copy($x->{_m});
     if (! $MBI->_is_zero($x->{_e})) {   # > 0
-        $MBI->_lsft($z, $x->{_e}, 10);
+        $z = $MBI->_lsft($z, $x->{_e}, 10);
     }
     $z = Math::BigInt->new($x->{sign} . $MBI->_num($z));
     $z->as_oct();
@@ -4024,7 +4033,7 @@ sub as_bin {
 
     my $z = $MBI->_copy($x->{_m});
     if (! $MBI->_is_zero($x->{_e})) {   # > 0
-        $MBI->_lsft($z, $x->{_e}, 10);
+        $z = $MBI->_lsft($z, $x->{_e}, 10);
     }
     $z = Math::BigInt->new($x->{sign} . $MBI->_num($z));
     $z->as_bin();
@@ -4091,7 +4100,7 @@ my @a;
 
     $lib =~ tr/a-zA-Z0-9,://cd; # restrict to sane characters
     # let use Math::BigInt lib => 'GMP'; use Math::BigFloat; still work
-    my $mbilib = eval { Math::BigInt->config()->{lib} };
+    my $mbilib = eval { Math::BigInt->config('lib') };
     if ((defined $mbilib) && ($MBI eq 'Math::BigInt::Calc')) {
         # MBI already loaded
         Math::BigInt->import($lib_kind, "$lib, $mbilib", 'objectify');
@@ -4111,7 +4120,7 @@ my @a;
         Carp::croak("Couldn't load $lib: $! $@");
     }
     # find out which one was actually loaded
-    $MBI = Math::BigInt->config()->{lib};
+    $MBI = Math::BigInt->config('lib');
 
     # register us with MBI to get notified of future lib changes
     Math::BigInt::_register_callback($class, sub { $MBI = $_[0]; });
@@ -4794,7 +4803,7 @@ If the string can not be interpreted, NaN is returned.
 
 Octal numbers are typically prefixed by "0", but since leading zeros are
 stripped, these methods can not automatically recognize octal numbers, so use
-the constructor from_oct() to intepret octal strings.
+the constructor from_oct() to interpret octal strings.
 
 Some examples of valid string input
 

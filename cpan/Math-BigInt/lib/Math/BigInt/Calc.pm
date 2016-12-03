@@ -4,8 +4,13 @@ use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '1.999727';
+use Carp;
+use Math::BigInt::Lib;
+
+our $VERSION = '1.999802';
 $VERSION = eval $VERSION;
+
+our @ISA = ('Math::BigInt::Lib');
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -43,9 +48,8 @@ sub _base_len {
     # Set/get the BASE_LEN and assorted other, related values.
     # Used only by the testsuite, the set variant is used only by the BEGIN
     # block below:
-    shift;
 
-    my ($b, $int) = @_;
+    my ($class, $b, $int) = @_;
     if (defined $b) {
         # avoid redefinitions
         undef &_mul;
@@ -99,7 +103,7 @@ sub _new {
     # of integers, where each integer represents a chunk of the original input
     # integer.
 
-    my ($proto, $str) = @_;
+    my ($class, $str) = @_;
     #unless ($str =~ /^([1-9]\d*|0)\z/) {
     #    require Carp;
     #    Carp::croak("Invalid input string '$str'");
@@ -108,13 +112,14 @@ sub _new {
     my $input_len = length($str) - 1;
 
     # Shortcut for small numbers.
-    return [ $str ] if $input_len < $BASE_LEN;
+    return bless [ $str ], $class if $input_len < $BASE_LEN;
 
     my $format = "a" . (($input_len % $BASE_LEN) + 1);
     $format .= $] < 5.008 ? "a$BASE_LEN" x int($input_len / $BASE_LEN)
                           : "(a$BASE_LEN)*";
 
-    [ reverse(map { 0 + $_ } unpack($format, $str)) ];
+    my $self = [ reverse(map { 0 + $_ } unpack($format, $str)) ];
+    return bless $self, $class;
 }
 
 BEGIN {
@@ -131,7 +136,7 @@ BEGIN {
     # the test should be able to find the proper $e automatically
     $e = 5 if $^O =~ /^uts/;    # UTS get's some special treatment
     $e = 5 if $^O =~ /^unicos/; # unicos is also problematic (6 seems to work
-    # there, but we play safe)
+                                # there, but we play safe)
 
     my $int = 0;
     if ($e > 7) {
@@ -149,7 +154,7 @@ BEGIN {
         }
     }
 
-    __PACKAGE__ -> _base_len($e, $int); # set and store
+    __PACKAGE__ -> _base_len($e, $int);        # set and store
 
     use integer;
     # find out how many bits _and, _or and _xor can take (old default = 16)
@@ -207,36 +212,43 @@ BEGIN {
 
 sub _zero {
     # create a zero
-    [ 0 ];
+    my $class = shift;
+    return bless [ 0 ], $class;
 }
 
 sub _one {
     # create a one
-    [ 1 ];
+    my $class = shift;
+    return bless [ 1 ], $class;
 }
 
 sub _two {
-    # create a two (used internally for shifting)
-    [ 2 ];
+    # create a two
+    my $class = shift;
+    return bless [ 2 ], $class;
 }
 
 sub _ten {
-    # create a 10 (used internally for shifting)
-    [ 10 ];
+    # create a 10
+    my $class = shift;
+    bless [ 10 ], $class;
 }
 
 sub _1ex {
     # create a 1Ex
-    my $rem   = $_[1] % $BASE_LEN;      # remainder
-    my $parts = $_[1] / $BASE_LEN;      # parts
+    my $class = shift;
+
+    my $rem   = $_[0] % $BASE_LEN;      # remainder
+    my $parts = $_[0] / $BASE_LEN;      # parts
 
     # 000000, 000000, 100
-    [ (0) x $parts, '1' . ('0' x $rem) ];
+    bless [ (0) x $parts, '1' . ('0' x $rem) ], $class;
 }
 
 sub _copy {
     # make a true copy
-    [ @{$_[1]} ];
+    my $class = shift;
+    return bless [ @{ $_[0] } ], $class;
 }
 
 # catch and throw away
@@ -260,13 +272,11 @@ sub _str {
     # Handle first one differently, since it should not have any leading zeros.
     my $ret = int($ary->[$idx]);
     if ($idx > 0) {
-        $idx--;
         # Interestingly, the pre-padd method uses more time.
         # The old grep variant takes longer (14 vs. 10 sec).
         my $z = '0' x ($BASE_LEN - 1);
-        while ($idx >= 0) {
+        while (--$idx >= 0) {
             $ret .= substr($z . $ary->[$idx], -$BASE_LEN);
-            $idx--;
         }
     }
     $ret;
@@ -502,7 +512,7 @@ sub _mul_use_div_64 {
     return $xv if ( ((@$xv == 1) && ($xv->[0] == 0)) );
 
     # since multiplying $x with $x fails, make copy in this case
-    $yv = [ @$xv ] if $xv == $yv; # same references?
+    $yv = $c->_copy($xv) if $xv == $yv; # same references?
 
     my @prod = ();
     my ($prod, $car, $cty, $xi, $yi);
@@ -562,7 +572,7 @@ sub _mul_use_div {
     return $xv if ( ((@$xv == 1) && ($xv->[0] == 0)) );
 
     # since multiplying $x with $x fails, make copy in this case
-    $yv = [ @$xv ] if $xv == $yv; # same references?
+    $yv = $c->_copy($xv) if $xv == $yv; # same references?
 
     my @prod = ();
     my ($prod, $car, $cty, $xi, $yi);
@@ -602,9 +612,10 @@ sub _div_use_mul {
     if (@$x == 1 && @$yorg == 1) {
         # shortcut, $yorg and $x are two small numbers
         if (wantarray) {
-            my $r = [ $x->[0] % $yorg->[0] ];
+            my $rem = [ $x->[0] % $yorg->[0] ];
+            bless $rem, $c;
             $x->[0] = int($x->[0] / $yorg->[0]);
-            return ($x, $r);
+            return ($x, $rem);
         } else {
             $x->[0] = int($x->[0] / $yorg->[0]);
             return $x;
@@ -614,7 +625,7 @@ sub _div_use_mul {
     # if x has more than one, but y has only one element:
     if (@$yorg == 1) {
         my $rem;
-        $rem = _mod($c, [ @$x ], $yorg) if wantarray;
+        $rem = $c->_mod($c->_copy($x), $yorg) if wantarray;
 
         # shortcut, $y is < $BASE
         my $j = @$x;
@@ -636,7 +647,7 @@ sub _div_use_mul {
     # check whether y has more elements than x, if yet, the result will be 0
     if (@$yorg > @$x) {
         my $rem;
-        $rem = [ @$x ] if wantarray;    # make copy
+        $rem = $c->_copy($x) if wantarray;    # make copy
         @$x = 0;                        # set to 0
         return ($x, $rem) if wantarray; # including remainder?
         return $x;                      # only x, which is [0] now
@@ -644,11 +655,11 @@ sub _div_use_mul {
     # check whether the numbers have the same number of elements, in that case
     # the result will fit into one element and can be computed efficiently
     if (@$yorg == @$x) {
-        my $rem;
+
         # if $yorg has more digits than $x (it's leading element is longer than
         # the one from $x), the result will also be 0:
         if (length(int($yorg->[-1])) > length(int($x->[-1]))) {
-            $rem = [ @$x ] if wantarray;        # make copy
+            my $rem = $c->_copy($x) if wantarray;        # make copy
             @$x = 0;                            # set to 0
             return ($x, $rem) if wantarray;     # including remainder?
             return $x;
@@ -667,8 +678,9 @@ sub _div_use_mul {
             # $a contains the result of the compare between X and Y
             # a < 0: x < y, a == 0: x == y, a > 0: x > y
             if ($a <= 0) {
-                $rem = [ 0 ];              # a = 0 => x == y => rem 0
-                $rem = [ @$x ] if $a != 0; # a < 0 => x < y => rem = x
+                # a = 0 => x == y => rem 0
+                # a < 0 => x < y => rem = x
+                my $rem = $a == 0 ? $c->_zero() : $c->_copy($x);
                 @$x = 0;             # if $a < 0
                 $x->[0] = 1 if $a == 0;  # $x == $y
                 return ($x, $rem) if wantarray;
@@ -680,7 +692,7 @@ sub _div_use_mul {
 
     # all other cases:
 
-    my $y = [ @$yorg ];         # always make copy to preserve
+    my $y = $c->_copy($yorg);         # always make copy to preserve
 
     my ($car, $bar, $prd, $dd, $xi, $yi, @q, $v2, $v1, @d, $tmp, $q, $u2, $u1, $u0);
 
@@ -729,19 +741,18 @@ sub _div_use_mul {
         unshift(@q, $q);
     }
     if (wantarray) {
-        @d = ();
+        my $d = bless [], $c;
         if ($dd != 1) {
             $car = 0;
             for $xi (reverse @$x) {
                 $prd = $car * $BASE + $xi;
                 $car = $prd - ($tmp = int($prd / $dd)) * $dd; # see USE_MUL
-                unshift(@d, $tmp);
+                unshift(@$d, $tmp);
             }
         } else {
-            @d = @$x;
+            @$d = @$x;
         }
         @$x = @q;
-        my $d = \@d;
         __strip_zeros($x);
         __strip_zeros($d);
         return ($x, $d);
@@ -768,9 +779,10 @@ sub _div_use_div_64 {
     if (@$x == 1 && @$yorg == 1) {
         # shortcut, $yorg and $x are two small numbers
         if (wantarray) {
-            my $r = [ $x->[0] % $yorg->[0] ];
+            my $rem = [ $x->[0] % $yorg->[0] ];
+            bless $rem, $c;
             $x->[0] = int($x->[0] / $yorg->[0]);
-            return ($x, $r);
+            return ($x, $rem);
         } else {
             $x->[0] = int($x->[0] / $yorg->[0]);
             return $x;
@@ -779,7 +791,7 @@ sub _div_use_div_64 {
     # if x has more than one, but y has only one element:
     if (@$yorg == 1) {
         my $rem;
-        $rem = _mod($c, [ @$x ], $yorg) if wantarray;
+        $rem = $c->_mod($c->_copy($x), $yorg) if wantarray;
 
         # shortcut, $y is < $BASE
         my $j = @$x;
@@ -800,7 +812,7 @@ sub _div_use_div_64 {
     # check whether y has more elements than x, if yet, the result will be 0
     if (@$yorg > @$x) {
         my $rem;
-        $rem = [ @$x ] if wantarray;    # make copy
+        $rem = $c->_copy($x) if wantarray;    # make copy
         @$x = 0;                        # set to 0
         return ($x, $rem) if wantarray; # including remainder?
         return $x;                      # only x, which is [0] now
@@ -812,7 +824,7 @@ sub _div_use_div_64 {
         # if $yorg has more digits than $x (it's leading element is longer than
         # the one from $x), the result will also be 0:
         if (length(int($yorg->[-1])) > length(int($x->[-1]))) {
-            $rem = [ @$x ] if wantarray;     # make copy
+            $rem = $c->_copy($x) if wantarray;     # make copy
             @$x = 0;                          # set to 0
             return ($x, $rem) if wantarray; # including remainder?
             return $x;
@@ -832,21 +844,20 @@ sub _div_use_div_64 {
             # $a contains the result of the compare between X and Y
             # a < 0: x < y, a == 0: x == y, a > 0: x > y
             if ($a <= 0) {
-                $rem = [ 0 ];                  # a = 0 => x == y => rem 0
-                $rem = [ @$x ] if $a != 0;       # a < 0 => x < y => rem = x
+                $rem = $c->_zero();                  # a = 0 => x == y => rem 0
+                $rem = $c->_copy($x) if $a != 0;       # a < 0 => x < y => rem = x
                 @$x = 0;                       # if $a < 0
                 $x->[0] = 1 if $a == 0;        # $x == $y
                 return ($x, $rem) if wantarray; # including remainder?
                 return $x;
             }
             # $x >= $y, so proceed normally
-
         }
     }
 
     # all other cases:
 
-    my $y = [ @$yorg ];         # always make copy to preserve
+    my $y = $c->_copy($yorg);         # always make copy to preserve
 
     my ($car, $bar, $prd, $dd, $xi, $yi, @q, $v2, $v1, @d, $tmp, $q, $u2, $u1, $u0);
 
@@ -899,19 +910,18 @@ sub _div_use_div_64 {
         unshift(@q, $q);
     }
     if (wantarray) {
-        @d = ();
+        my $d = bless [], $c;
         if ($dd != 1) {
             $car = 0;
             for $xi (reverse @$x) {
                 $prd = $car * $BASE + $xi;
                 $car = $prd - ($tmp = int($prd / $dd)) * $dd;
-                unshift(@d, $tmp);
+                unshift(@$d, $tmp);
             }
         } else {
-            @d = @$x;
+            @$d = @$x;
         }
         @$x = @q;
-        my $d = \@d;
         __strip_zeros($x);
         __strip_zeros($d);
         return ($x, $d);
@@ -936,9 +946,10 @@ sub _div_use_div {
     if (@$x == 1 && @$yorg == 1) {
         # shortcut, $yorg and $x are two small numbers
         if (wantarray) {
-            my $r = [ $x->[0] % $yorg->[0] ];
+            my $rem = [ $x->[0] % $yorg->[0] ];
+            bless $rem, $c;
             $x->[0] = int($x->[0] / $yorg->[0]);
-            return ($x, $r);
+            return ($x, $rem);
         } else {
             $x->[0] = int($x->[0] / $yorg->[0]);
             return $x;
@@ -947,7 +958,7 @@ sub _div_use_div {
     # if x has more than one, but y has only one element:
     if (@$yorg == 1) {
         my $rem;
-        $rem = _mod($c, [ @$x ], $yorg) if wantarray;
+        $rem = $c->_mod($c->_copy($x), $yorg) if wantarray;
 
         # shortcut, $y is < $BASE
         my $j = @$x;
@@ -968,7 +979,7 @@ sub _div_use_div {
     # check whether y has more elements than x, if yet, the result will be 0
     if (@$yorg > @$x) {
         my $rem;
-        $rem = [ @$x ] if wantarray;    # make copy
+        $rem = $c->_copy($x) if wantarray;    # make copy
         @$x = 0;                        # set to 0
         return ($x, $rem) if wantarray; # including remainder?
         return $x;                      # only x, which is [0] now
@@ -980,7 +991,7 @@ sub _div_use_div {
         # if $yorg has more digits than $x (it's leading element is longer than
         # the one from $x), the result will also be 0:
         if (length(int($yorg->[-1])) > length(int($x->[-1]))) {
-            $rem = [ @$x ] if wantarray;        # make copy
+            $rem = $c->_copy($x) if wantarray;        # make copy
             @$x = 0;                            # set to 0
             return ($x, $rem) if wantarray;     # including remainder?
             return $x;
@@ -1000,8 +1011,8 @@ sub _div_use_div {
             # $a contains the result of the compare between X and Y
             # a < 0: x < y, a == 0: x == y, a > 0: x > y
             if ($a <= 0) {
-                $rem = [ 0 ];                   # a = 0 => x == y => rem 0
-                $rem = [ @$x ] if $a != 0;      # a < 0 => x < y => rem = x
+                $rem = $c->_zero();                   # a = 0 => x == y => rem 0
+                $rem = $c->_copy($x) if $a != 0;      # a < 0 => x < y => rem = x
                 @$x = 0;
                 $x->[0] = 0;                    # if $a < 0
                 $x->[0] = 1 if $a == 0;         # $x == $y
@@ -1015,7 +1026,7 @@ sub _div_use_div {
 
     # all other cases:
 
-    my $y = [ @$yorg ];         # always make copy to preserve
+    my $y = $c->_copy($yorg);         # always make copy to preserve
 
     my ($car, $bar, $prd, $dd, $xi, $yi, @q, $v2, $v1, @d, $tmp, $q, $u2, $u1, $u0);
 
@@ -1068,19 +1079,18 @@ sub _div_use_div {
         unshift(@q, $q);
     }
     if (wantarray) {
-        @d = ();
+        my $d = bless [], $c;
         if ($dd != 1) {
             $car = 0;
             for $xi (reverse @$x) {
                 $prd = $car * $BASE + $xi;
                 $car = $prd - ($tmp = int($prd / $dd)) * $dd;
-                unshift(@d, $tmp);
+                unshift(@$d, $tmp);
             }
         } else {
-            @d = @$x;
+            @$d = @$x;
         }
         @$x = @q;
-        my $d = \@d;
         __strip_zeros($x);
         __strip_zeros($d);
         return ($x, $d);
@@ -1237,11 +1247,21 @@ sub __strip_zeros {
 
 sub _check {
     # used by the test suite
-    my $x = $_[1];
+    my ($class, $x) = @_;
 
-    return "Undefined" unless defined $x;
-    return "$x is not a reference" unless ref($x);
-    return "Not an ARRAY reference" unless ref($x) eq 'ARRAY';
+    my $msg = $class -> SUPER::_check($x);
+    return $msg if $msg;
+
+    my $n;
+    eval { $n = @$x };
+    return "Not an array reference" unless $@ eq '';
+
+    return "Reference to an empty array" unless $n > 0;
+
+    # The following fails with Math::BigInt::FastCalc because a
+    # Math::BigInt::FastCalc "object" is an unblessed array ref.
+    #
+    #return 0 unless ref($x) eq $class;
 
     for (my $i = 0 ; $i <= $#$x ; ++ $i) {
         my $e = $x -> [$i];
@@ -1253,17 +1273,14 @@ sub _check {
           "', which is not a scalar"
           unless ref($e) eq "";
 
+        # It would be better to use the regex /^([1-9]\d*|0)\z/, but that fails
+        # in Math::BigInt::FastCalc, because it sometimes creates array
+        # elements like "000000".
         return "Element at index $i is '$e', which does not look like an" .
-          " normal integer"
-            #unless $e =~ /^([1-9]\d*|0)\z/;
-            unless $e =~ /^\d+\z/;
-
-        return "Element at index $i is '$e', which is negative"
-          if $e < 0;
+          " normal integer" unless $e =~ /^\d+\z/;
 
         return "Element at index $i is '$e', which is not smaller than" .
-          " the base '$BASE'"
-            if $e >= $BASE;
+          " the base '$BASE'" if $e >= $BASE;
 
         return "Element at index $i (last element) is zero"
           if $#$x > 0 && $i == $#$x && $e == 0;
@@ -1280,7 +1297,7 @@ sub _mod {
 
     # slow way since $y too big
     if (@$yo > 1) {
-        my ($xo, $rem) = _div($c, $x, $yo);
+        my ($xo, $rem) = $c->_div($x, $yo);
         @$x = @$rem;
         return $x;
     }
@@ -1337,14 +1354,14 @@ sub _rsft {
     my ($c, $x, $y, $n) = @_;
 
     if ($n != 10) {
-        $n = _new($c, $n);
-        return scalar _div($c, $x, _pow($c, $n, $y));
+        $n = $c->_new($n);
+        return scalar $c->_div($x, $c->_pow($n, $y));
     }
 
     # shortcut (faster) for shifting by 10)
     # multiples of $BASE_LEN
     my $dst = 0;                # destination
-    my $src = _num($c, $y);     # as normal int
+    my $src = $c->_num($y);     # as normal int
     my $xlen = (@$x - 1) * $BASE_LEN + length(int($x->[-1]));
     if ($src >= $xlen or ($src == $xlen and !defined $x->[1])) {
         # 12345 67890 shifted right by more than 10 digits => 0
@@ -1379,7 +1396,7 @@ sub _rsft {
 sub _lsft {
     my ($c, $x, $n, $b) = @_;
 
-    return $x if _is_zero($c, $x);
+    return $x if $c->_is_zero($x);
 
     # Handle the special case when the base is a power of 10. Don't check
     # whether log($b)/log(10) is an integer, because log(1000)/log(10) is not
@@ -1388,12 +1405,12 @@ sub _lsft {
     my $log10 = sprintf "%.0f", log($b) / log(10);
     if ($b == 10 ** $log10) {
         $b = 10;
-        $n = _mul($c, $n, _new($c, $log10));
+        $n = $c->_mul($n, $c->_new($log10));
 
         # shortcut (faster) for shifting by 10) since we are in base 10eX
         # multiples of $BASE_LEN:
         my $src = @$x;                      # source
-        my $len = _num($c, $n);             # shift-len as normal int
+        my $len = $c->_num($n);             # shift-len as normal int
         my $rem = $len % $BASE_LEN;         # remainder to shift
         my $dst = $src + int($len / $BASE_LEN); # destination
         my $vd;                                 # further speedup
@@ -1418,9 +1435,9 @@ sub _lsft {
         splice @$x, -1 if $x->[-1] == 0;
         return $x;
     } else {
-        $b = _new($c, $b);
+        $b = $c->_new($b);
         #print $c->_str($b);
-        return _mul($c, $x, _pow($c, $b, $n));
+        return $c->_mul($x, $c->_pow($b, $n));
     }
 }
 
@@ -1447,17 +1464,17 @@ sub _pow {
         return $cx;
     }
 
-    my $pow2 = _one();
+    my $pow2 = $c->_one();
 
-    my $y_bin = _as_bin($c, $cy);
+    my $y_bin = $c->_as_bin($cy);
     $y_bin =~ s/^0b//;
     my $len = length($y_bin);
     while (--$len > 0) {
-        _mul($c, $pow2, $cx) if substr($y_bin, $len, 1) eq '1'; # is odd?
-        _mul($c, $cx, $cx);
+        $c->_mul($pow2, $cx) if substr($y_bin, $len, 1) eq '1'; # is odd?
+        $c->_mul($cx, $cx);
     }
 
-    _mul($c, $cx, $pow2);
+    $c->_mul($cx, $pow2);
     $cx;
 }
 
@@ -1472,9 +1489,9 @@ sub _nok {
     # nok(n, n-k), to minimize the number if iterations in the loop.
 
     {
-        my $twok = _mul($c, _two($c), _copy($c, $k)); # 2 * k
-        if (_acmp($c, $twok, $n) > 0) {               # if 2*k > n
-            $k = _sub($c, _copy($c, $n), $k);         # k = n - k
+        my $twok = $c->_mul($c->_two(), $c->_copy($k)); # 2 * k
+        if ($c->_acmp($twok, $n) > 0) {               # if 2*k > n
+            $k = $c->_sub($c->_copy($n), $k);         # k = n - k
         }
     }
 
@@ -1484,37 +1501,37 @@ sub _nok {
     # |   | = --------- =  --------------- = --------- = 5 * - * -
     # \ 3 /   (7-3)! 3!    1*2*3*4 * 1*2*3   1 * 2 * 3       2   3
 
-    if (_is_zero($c, $k)) {
+    if ($c->_is_zero($k)) {
         @$n = 1;
     } else {
 
         # Make a copy of the original n, since we'll be modifying n in-place.
 
-        my $n_orig = _copy($c, $n);
+        my $n_orig = $c->_copy($n);
 
         # n = 5, f = 6, d = 2 (cf. example above)
 
-        _sub($c, $n, $k);
-        _inc($c, $n);
+        $c->_sub($n, $k);
+        $c->_inc($n);
 
-        my $f = _copy($c, $n);
-        _inc($c, $f);
+        my $f = $c->_copy($n);
+        $c->_inc($f);
 
-        my $d = _two($c);
+        my $d = $c->_two();
 
         # while f <= n (the original n, that is) ...
 
-        while (_acmp($c, $f, $n_orig) <= 0) {
+        while ($c->_acmp($f, $n_orig) <= 0) {
 
             # n = (n * f / d) == 5 * 6 / 2 (cf. example above)
 
-            _mul($c, $n, $f);
-            _div($c, $n, $d);
+            $c->_mul($n, $f);
+            $c->_div($n, $d);
 
             # f = 7, d = 3 (cf. example above)
 
-            _inc($c, $f);
-            _inc($c, $d);
+            $c->_inc($f);
+            $c->_inc($d);
         }
 
     }
@@ -1561,7 +1578,7 @@ sub _fac {
         my $zero_elements = 0;
 
         # If n is even, set n = n -1
-        my $k = _num($c, $cx);
+        my $k = $c->_num($cx);
         my $even = 1;
         if (($k & 1) == 0) {
             $even = $k;
@@ -1576,13 +1593,13 @@ sub _fac {
         my $sum = 1;
         my $i = $k - 1;
         # keep reference to x
-        my $new_x = _new($c, $k * $even);
+        my $new_x = $c->_new($k * $even);
         @$cx = @$new_x;
         if ($cx->[0] == 0) {
             $zero_elements ++;
             shift @$cx;
         }
-        #  print STDERR "x = ", _str($c, $cx), "\n";
+        #  print STDERR "x = ", $c->_str($cx), "\n";
         my $BASE2 = int(sqrt($BASE))-1;
         my $j = 1;
         while ($j <= $i) {
@@ -1598,15 +1615,15 @@ sub _fac {
                 #      print STDERR "\n k2 $k2 m $m sum $sum odd $odd\n"; sleep(1);
             }
             if ($m < $BASE) {
-                _mul($c, $cx, [$m]);
+                $c->_mul($cx, [$m]);
             } else {
-                _mul($c, $cx, $c->_new($m));
+                $c->_mul($cx, $c->_new($m));
             }
             if ($cx->[0] == 0) {
                 $zero_elements ++;
                 shift @$cx;
             }
-            #    print STDERR "Calculate $k2 - $sum = $m (x = ", _str($c, $cx), ")\n";
+            #    print STDERR "Calculate $k2 - $sum = $m (x = ", $c->_str($cx), ")\n";
         }
         # multiply in the zeros again
         unshift @$cx, (0) x $zero_elements;
@@ -1637,7 +1654,7 @@ sub _fac {
     if (@$cx == 1) {
         $n = $cx->[0];
     } else {
-        $n = _copy($c, $cx);
+        $n = $c->_copy($cx);
     }
 
     # Set $cx to the last result below $BASE (but keep ref to $x)
@@ -1661,16 +1678,16 @@ sub _fac {
             }
             my $b = $step * ($step + 1);
             $step += 2;
-            _mul($c, $cx, [$b]);
+            $c->_mul($cx, [$b]);
         }
         $step = [$step];
-        while (_acmp($c, $step, $n) <= 0) {
+        while ($c->_acmp($step, $n) <= 0) {
             if ($cx->[0] == 0) {
                 $zero_elements ++;
                 shift @$cx;
             }
-            _mul($c, $cx, $step);
-            _inc($c, $step);
+            $c->_mul($cx, $step);
+            $c->_inc($step);
         }
     } else {
         # Yes, so we can speed it up slightly
@@ -1689,7 +1706,7 @@ sub _fac {
             $step += 2;
             $b *= $step * ($step + 1);
             $step += 2;
-            _mul($c, $cx, [$b]);
+            $c->_mul($cx, [$b]);
         }
         my $base_2 = int(sqrt($BASE)) - 1;
         my $n2 = $n - 2;
@@ -1701,11 +1718,11 @@ sub _fac {
             }
             my $b = $step * ($step + 1);
             $step += 2;
-            _mul($c, $cx, [$b]);
+            $c->_mul($cx, [$b]);
         }
         # do what's left over
         while ($step <= $n) {
-            _mul($c, $cx, [$step]);
+            $c->_mul($cx, [$step]);
             $step++;
             if ($cx->[0] == 0) {
                 $zero_elements ++;
@@ -1735,7 +1752,7 @@ sub _log_int {
         return $x, 1;
     }
 
-    my $cmp = _acmp($c, $x, $base);
+    my $cmp = $c->_acmp($x, $base);
 
     # X == BASE => 1 (is exact)
     if ($cmp == 0) {
@@ -1749,11 +1766,11 @@ sub _log_int {
         return $x, 0;
     }
 
-    my $x_org = _copy($c, $x);  # preserve x
+    my $x_org = $c->_copy($x);  # preserve x
 
     # Compute a guess for the result based on:
     # $guess = int ( length_in_base_10(X) / ( log(base) / log(10) ) )
-    my $len = _len($c, $x_org);
+    my $len = $c->_len($x_org);
     my $log = log($base->[-1]) / log(10);
 
     # for each additional element in $base, we add $BASE_LEN to the result,
@@ -1765,8 +1782,8 @@ sub _log_int {
     my $res = int($len / $log);
 
     @$x = $res;
-    my $trial = _pow($c, _copy($c, $base), $x);
-    my $acmp = _acmp($c, $trial, $x_org);
+    my $trial = $c->_pow($c->_copy($base), $x);
+    my $acmp = $c->_acmp($trial, $x_org);
 
     # Did we get the exact result?
 
@@ -1775,17 +1792,17 @@ sub _log_int {
     # Too small?
 
     while ($acmp < 0) {
-        _mul($c, $trial, $base);
-        _inc($c, $x);
-        $acmp = _acmp($c, $trial, $x_org);
+        $c->_mul($trial, $base);
+        $c->_inc($x);
+        $acmp = $c->_acmp($trial, $x_org);
     }
 
     # Too big?
 
     while ($acmp > 0) {
-        _div($c, $trial, $base);
-        _dec($c, $x);
-        $acmp = _acmp($c, $trial, $x_org);
+        $c->_div($trial, $base);
+        $c->_dec($x);
+        $acmp = $c->_acmp($trial, $x_org);
     }
 
     return $x, 1 if $acmp == 0;         # result is exact
@@ -1808,10 +1825,10 @@ sub _sqrt {
         $x->[0] = int(sqrt($x->[0]));
         return $x;
     }
-    my $y = _copy($c, $x);
+    my $y = $c->_copy($x);
     # hopefully _len/2 is < $BASE, the -1 is to always undershot the guess
     # since our guess will "grow"
-    my $l = int((_len($c, $x)-1) / 2);
+    my $l = int(($c->_len($x)-1) / 2);
 
     my $lastelem = $x->[-1];    # for guess
     my $elems = @$x - 1;
@@ -1826,7 +1843,7 @@ sub _sqrt {
         print "$lastelem\n" if DEBUG;
     }
 
-    # construct $x (instead of _lsft($c, $x, $l, 10)
+    # construct $x (instead of $c->_lsft($x, $l, 10)
     my $r = $l % $BASE_LEN;     # 10000 00000 00000 00000 ($BASE_LEN=5)
     $l = int($l / $BASE_LEN);
     print "l =  $l " if DEBUG;
@@ -1853,112 +1870,239 @@ sub _sqrt {
     # an even better guess. Not implemented yet. Does it improve performance?
     $x->[$l--] = 0 while ($l >= 0); # all other digits of guess are zero
 
-    print "start x= ", _str($c, $x), "\n" if DEBUG;
-    my $two = _two();
-    my $last = _zero();
-    my $lastlast = _zero();
+    print "start x= ", $c->_str($x), "\n" if DEBUG;
+    my $two = $c->_two();
+    my $last = $c->_zero();
+    my $lastlast = $c->_zero();
     $steps = 0 if DEBUG;
-    while (_acmp($c, $last, $x) != 0 && _acmp($c, $lastlast, $x) != 0) {
+    while ($c->_acmp($last, $x) != 0 && $c->_acmp($lastlast, $x) != 0) {
         $steps++ if DEBUG;
-        $lastlast = _copy($c, $last);
-        $last = _copy($c, $x);
-        _add($c, $x, _div($c, _copy($c, $y), $x));
-        _div($c, $x, $two );
-        print " x= ", _str($c, $x), "\n" if DEBUG;
+        $lastlast = $c->_copy($last);
+        $last = $c->_copy($x);
+        $c->_add($x, $c->_div($c->_copy($y), $x));
+        $c->_div($x, $two );
+        print " x= ", $c->_str($x), "\n" if DEBUG;
     }
     print "\nsteps in sqrt: $steps, " if DEBUG;
-    _dec($c, $x) if _acmp($c, $y, _mul($c, _copy($c, $x), $x)) < 0; # overshot?
+    $c->_dec($x) if $c->_acmp($y, $c->_mul($c->_copy($x), $x)) < 0; # overshot?
     print " final ", $x->[-1], "\n" if DEBUG;
     $x;
 }
 
 sub _root {
-    # take n'th root of $x in place (n >= 3)
+    # Take n'th root of $x in place (n >= 2)
+
     my ($c, $x, $n) = @_;
 
-    if (@$x == 1) {
-        if (@$n > 1) {
-            # result will always be smaller than 2 so trunc to 1 at once
-            $x->[0] = 1;
-        } else {
-            # fits into one Perl scalar, so result can be computed directly
-            # cannot use int() here, because it rounds wrongly (try
-            # (81 ** 3) ** (1/3) to see what I mean)
-            #$x->[0] = int( $x->[0] ** (1 / $n->[0]) );
-            # round to 8 digits, then truncate result to integer
-            $x->[0] = int ( sprintf ("%.8f", $x->[0] ** (1 / $n->[0]) ) );
-        }
+    # Small numbers.
+
+    if (@$x == 1 && @$n == 1) {
+        # Result can be computed directly. Adjust initial result for numerical
+        # errors, e.g., int(1000**(1/3)) is 2, not 3.
+        my $y = int($x->[0] ** (1 / $n->[0]));
+        my $yp1 = $y + 1;
+        $y = $yp1 if $yp1 ** $n->[0] == $x->[0];
+        $x->[0] = $y;
         return $x;
     }
 
-    # we know now that X is more than one element long
+    # If x <= n, the result is always (truncated to) 1.
 
-    # if $n is a power of two, we can repeatedly take sqrt($X) and find the
-    # proper result, because sqrt(sqrt($x)) == root($x, 4)
-    my $b = _as_bin($c, $n);
+    if ((@$x > 1 || $x -> [0] > 0) &&           # if x is non-zero ...
+        $c -> _acmp($x, $n) <= 0)               # ... and x <= n
+    {
+        my $one = $x -> _one();
+        @$x = @$one;
+        return $x;
+    }
+
+    # If $n is a power of two, we take sqrt($x) repeatedly and find the proper
+    # result, because, e.g., sqrt(sqrt($x)) == root($x, 4)
+
+    my $b = $c -> _as_bin($n);
     if ($b =~ /0b1(0+)$/) {
-        my $count = CORE::length($1); # 0b100 => len('00') => 2
+        my $count = length($1);       # 0b100 => len('00') => 2
         my $cnt = $count;             # counter for loop
-        unshift (@$x, 0);             # add one element, together with one
-        # more below in the loop this makes 2
+        unshift @$x, 0;               # add one element, together with one
+                                      #   more below in the loop this makes 2
         while ($cnt-- > 0) {
-            # 'inflate' $X by adding one element, basically computing
-            # $x * $BASE * $BASE. This gives us more $BASE_LEN digits for result
-            # since len(sqrt($X)) approx == len($x) / 2.
-            unshift (@$x, 0);
-            # calculate sqrt($x), $x is now one element to big, again. In the next
-            # round we make that two, again.
-            _sqrt($c, $x);
+            # 'Inflate' $x by adding one element, basically computing
+            # $x * $BASE * $BASE. This gives us more $BASE_LEN digits for
+            # result since len(sqrt($X)) approx == len($x) / 2.
+            unshift @$x, 0;
+            # Calculate sqrt($x), $x is now one element to big, again. In the
+            # next round we make that two, again.
+            $c -> _sqrt($x);
         }
-        # $x is now one element to big, so truncate result by removing it
+
+        # $x is now one element too big, so truncate result by removing it.
         shift @$x;
-    } else {
-        # trial computation by starting with 2, 4, 8, 16 etc until we overstep
-        my $step;
-        my $trial = _two();
 
-        # while still to do more than X steps
-        do {
-            $step = _two();
-            while (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) < 0) {
-                _mul ($c, $step, [2]);
-                _add ($c, $trial, $step);
+        return $x;
+    }
+
+    my $DEBUG = 0;
+
+    # Now the general case. This works by finding an initial guess. If this
+    # guess is incorrect, a relatively small delta is chosen. This delta is
+    # used to find a lower and upper limit for the correct value. The delta is
+    # doubled in each iteration. When a lower and upper limit is found,
+    # bisection is applied to narrow down the region until we have the correct
+    # value.
+
+    # Split x into mantissa and exponent in base 10, so that
+    #
+    #   x = xm * 10^xe, where 0 < xm < 1 and xe is an integer
+
+    my $x_str = $c -> _str($x);
+    my $xm    = "." . $x_str;
+    my $xe    = length($x_str);
+
+    # From this we compute the base 10 logarithm of x
+    #
+    #   log_10(x) = log_10(xm) + log_10(xe^10)
+    #             = log(xm)/log(10) + xe
+    #
+    # and then the base 10 logarithm of y, where y = x^(1/n)
+    #
+    #   log_10(y) = log_10(x)/n
+
+    my $log10x = log($xm) / log(10) + $xe;
+    my $log10y = $log10x / $c -> _num($n);
+
+    # And from this we compute ym and ye, the mantissa and exponent (in
+    # base 10) of y, where 1 < ym <= 10 and ye is an integer.
+
+    my $ye = int $log10y;
+    my $ym = 10 ** ($log10y - $ye);
+
+    # Finally, we scale the mantissa and exponent to incraese the integer
+    # part of ym, before building the string representing our guess of y.
+
+    if ($DEBUG) {
+        print "\n";
+        print "xm     = $xm\n";
+        print "xe     = $xe\n";
+        print "log10x = $log10x\n";
+        print "log10y = $log10y\n";
+        print "ym     = $ym\n";
+        print "ye     = $ye\n";
+        print "\n";
+    }
+
+    my $d = $ye < 15 ? $ye : 15;
+    $ym *= 10 ** $d;
+    $ye -= $d;
+
+    my $y_str = sprintf('%.0f', $ym) . "0" x $ye;
+    my $y = $c -> _new($y_str);
+
+    if ($DEBUG) {
+        print "ym     = $ym\n";
+        print "ye     = $ye\n";
+        print "\n";
+        print "y_str  = $y_str (initial guess)\n";
+        print "\n";
+    }
+
+    # See if our guess y is correct.
+
+    my $trial = $c -> _pow($c -> _copy($y), $n);
+    my $acmp  = $c -> _acmp($trial, $x);
+
+    if ($acmp == 0) {
+        @$x = @$y;
+        return $x;
+    }
+
+    # Find a lower and upper limit for the correct value of y. Start off with a
+    # delta value that is approximately the size of the accuracy of the guess.
+
+    my $lower;
+    my $upper;
+
+    my $delta = $c -> _new("1" . ("0" x $ye));
+    my $two   = $c -> _two();
+
+    if ($acmp < 0) {
+        $lower = $y;
+        while ($acmp < 0) {
+            $upper = $c -> _add($c -> _copy($lower), $delta);
+
+            if ($DEBUG) {
+                print "lower  = $lower\n";
+                print "upper  = $upper\n";
+                print "delta  = $delta\n";
+                print "\n";
             }
-
-            # hit exactly?
-            if (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) == 0) {
-                @$x = @$trial;  # make copy while preserving ref to $x
+            $acmp  = $c -> _acmp($c -> _pow($c -> _copy($upper), $n), $x);
+            if ($acmp == 0) {
+                @$x = @$upper;
                 return $x;
             }
-            # overstepped, so go back on step
-            _sub($c, $trial, $step);
-        } while (@$step > 1 || $step->[0] > 128);
-
-        # reset step to 2
-        $step = _two();
-        # add two, because $trial cannot be exactly the result (otherwise we would
-        # already have found it)
-        _add($c, $trial, $step);
-
-        # and now add more and more (2, 4, 6, 8, 10 etc)
-        while (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) < 0) {
-            _add ($c, $trial, $step);
+            $delta = $c -> _mul($delta, $two);
         }
-
-        # hit not exactly? (overstepped)
-        if (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) > 0) {
-            _dec($c, $trial);
-        }
-
-        # hit not exactly? (overstepped)
-        # 80 too small, 81 slightly too big, 82 too big
-        if (_acmp($c, _pow($c, _copy($c, $trial), $n), $x) > 0) {
-            _dec ($c, $trial);
-        }
-
-        @$x = @$trial;          # make copy while preserving ref to $x
-        return $x;
     }
+
+    elsif ($acmp > 0) {
+        $upper = $y;
+        my $zero = $c -> _zero();
+        while ($acmp > 0) {
+            if ($c -> _acmp($upper, $delta) <= 0) {
+                $lower = $c -> _zero();
+                last;
+            }
+            $lower = $c -> _sub($c -> _copy($upper), $delta);
+
+            if ($DEBUG) {
+                print "lower  = $lower\n";
+                print "upper  = $upper\n";
+                print "delta  = $delta\n";
+                print "\n";
+            }
+            $acmp  = $c -> _acmp($c -> _pow($c -> _copy($lower), $n), $x);
+            if ($acmp == 0) {
+                @$x = @$lower;
+                return $x;
+            }
+            $delta = $c -> _mul($delta, $two);
+        }
+    }
+
+    # Use bisection to narrow down the interval.
+
+    my $one = $c -> _one();
+    {
+
+        $delta = $c -> _sub($c -> _copy($upper), $lower);
+        if ($c -> _acmp($delta, $one) <= 0) {
+            @$x = @$lower;
+            return $x;
+        }
+
+        if ($DEBUG) {
+            print "lower  = $lower\n";
+            print "upper  = $upper\n";
+            print "delta   = $delta\n";
+            print "\n";
+        }
+
+        $delta = $c -> _div($delta, $two);
+        my $middle = $c -> _add($c -> _copy($lower), $delta);
+
+        $acmp  = $c -> _acmp($c -> _pow($c -> _copy($middle), $n), $x);
+        if ($acmp < 0) {
+            $lower = $middle;
+        } elsif ($acmp > 0) {
+            $upper = $middle;
+        } else {
+            @$x = @$middle;
+            return $x;
+        }
+
+        redo;
+    }
+
     $x;
 }
 
@@ -1971,23 +2115,23 @@ sub _and {
     # the shortcut makes equal, large numbers _really_ fast, and makes only a
     # very small performance drop for small numbers (e.g. something with less
     # than 32 bit) Since we optimize for large numbers, this is enabled.
-    return $x if _acmp($c, $x, $y) == 0; # shortcut
+    return $x if $c->_acmp($x, $y) == 0; # shortcut
 
-    my $m = _one();
+    my $m = $c->_one();
     my ($xr, $yr);
     my $mask = $AND_MASK;
 
-    my $x1 = _copy($c, $x);
-    my $y1 = _copy($c, $y);
-    my $z  = _zero($c);
+    my $x1 = $c->_copy($x);
+    my $y1 = $c->_copy($y);
+    my $z  = $c->_zero();
 
     use integer;
-    until (_is_zero($c, $x1) || _is_zero($c, $y1)) {
-        ($x1, $xr) = _div($c, $x1, $mask);
-        ($y1, $yr) = _div($c, $y1, $mask);
+    until ($c->_is_zero($x1) || $c->_is_zero($y1)) {
+        ($x1, $xr) = $c->_div($x1, $mask);
+        ($y1, $yr) = $c->_div($y1, $mask);
 
-        _add($c, $z, _mul($c, [ 0 + $xr->[0] & 0 + $yr->[0] ], $m));
-        _mul($c, $m, $mask);
+        $c->_add($z, $c->_mul([ 0 + $xr->[0] & 0 + $yr->[0] ], $m));
+        $c->_mul($m, $mask);
     }
 
     @$x = @$z;
@@ -1997,33 +2141,33 @@ sub _and {
 sub _xor {
     my ($c, $x, $y) = @_;
 
-    return _zero() if _acmp($c, $x, $y) == 0; # shortcut (see -and)
+    return $c->_zero() if $c->_acmp($x, $y) == 0; # shortcut (see -and)
 
-    my $m = _one();
+    my $m = $c->_one();
     my ($xr, $yr);
     my $mask = $XOR_MASK;
 
-    my $x1 = _copy($c, $x);
-    my $y1 = _copy($c, $y);      # make copy
-    my $z  = _zero($c);
+    my $x1 = $c->_copy($x);
+    my $y1 = $c->_copy($y);      # make copy
+    my $z  = $c->_zero();
 
     use integer;
-    until (_is_zero($c, $x1) || _is_zero($c, $y1)) {
-        ($x1, $xr) = _div($c, $x1, $mask);
-        ($y1, $yr) = _div($c, $y1, $mask);
+    until ($c->_is_zero($x1) || $c->_is_zero($y1)) {
+        ($x1, $xr) = $c->_div($x1, $mask);
+        ($y1, $yr) = $c->_div($y1, $mask);
         # make ints() from $xr, $yr (see _and())
         #$b = 1; $xrr = 0; foreach (@$xr) { $xrr += $_ * $b; $b *= $BASE; }
         #$b = 1; $yrr = 0; foreach (@$yr) { $yrr += $_ * $b; $b *= $BASE; }
-        #_add($c, $x, _mul($c, _new( $c, ($xrr ^ $yrr) ), $m) );
+        #$c->_add($x, $c->_mul($c->_new($xrr ^ $yrr)), $m) );
 
-        _add($c, $z, _mul($c, [ 0 + $xr->[0] ^ 0 + $yr->[0] ], $m));
-        _mul($c, $m, $mask);
+        $c->_add($z, $c->_mul([ 0 + $xr->[0] ^ 0 + $yr->[0] ], $m));
+        $c->_mul($m, $mask);
     }
     # the loop stops when the shorter of the two numbers is exhausted
     # the remainder of the longer one will survive bit-by-bit, so we simple
     # multiply-add it in
-    _add($c, $z, _mul($c, $x1, $m) ) if !_is_zero($c, $x1);
-    _add($c, $z, _mul($c, $y1, $m) ) if !_is_zero($c, $y1);
+    $c->_add($z, $c->_mul($x1, $m) ) if !$c->_is_zero($x1);
+    $c->_add($z, $c->_mul($y1, $m) ) if !$c->_is_zero($y1);
 
     @$x = @$z;
     return $x;
@@ -2032,33 +2176,33 @@ sub _xor {
 sub _or {
     my ($c, $x, $y) = @_;
 
-    return $x if _acmp($c, $x, $y) == 0; # shortcut (see _and)
+    return $x if $c->_acmp($x, $y) == 0; # shortcut (see _and)
 
-    my $m = _one();
+    my $m = $c->_one();
     my ($xr, $yr);
     my $mask = $OR_MASK;
 
-    my $x1 = _copy($c, $x);
-    my $y1 = _copy($c, $y);      # make copy
-    my $z  = _zero($c);
+    my $x1 = $c->_copy($x);
+    my $y1 = $c->_copy($y);      # make copy
+    my $z  = $c->_zero();
 
     use integer;
-    until (_is_zero($c, $x1) || _is_zero($c, $y1)) {
-        ($x1, $xr) = _div($c, $x1, $mask);
-        ($y1, $yr) = _div($c, $y1, $mask);
+    until ($c->_is_zero($x1) || $c->_is_zero($y1)) {
+        ($x1, $xr) = $c->_div($x1, $mask);
+        ($y1, $yr) = $c->_div($y1, $mask);
         # make ints() from $xr, $yr (see _and())
         #    $b = 1; $xrr = 0; foreach (@$xr) { $xrr += $_ * $b; $b *= $BASE; }
         #    $b = 1; $yrr = 0; foreach (@$yr) { $yrr += $_ * $b; $b *= $BASE; }
-        #    _add($c, $x, _mul($c, _new( $c, ($xrr | $yrr) ), $m) );
+        #    $c->_add($x, $c->_mul(_new( $c, ($xrr | $yrr) ), $m) );
 
-        _add($c, $z, _mul($c, [ 0 + $xr->[0] | 0 + $yr->[0] ], $m));
-        _mul($c, $m, $mask);
+        $c->_add($z, $c->_mul([ 0 + $xr->[0] | 0 + $yr->[0] ], $m));
+        $c->_mul($m, $mask);
     }
     # the loop stops when the shorter of the two numbers is exhausted
     # the remainder of the longer one will survive bit-by-bit, so we simple
     # multiply-add it in
-    _add($c, $z, _mul($c, $x1, $m) ) if !_is_zero($c, $x1);
-    _add($c, $z, _mul($c, $y1, $m) ) if !_is_zero($c, $y1);
+    $c->_add($z, $c->_mul($x1, $m) ) if !$c->_is_zero($x1);
+    $c->_add($z, $c->_mul($y1, $m) ) if !$c->_is_zero($y1);
 
     @$x = @$z;
     return $x;
@@ -2071,7 +2215,7 @@ sub _as_hex {
     # fits into one element (handle also 0x0 case)
     return sprintf("0x%x", $x->[0]) if @$x == 1;
 
-    my $x1 = _copy($c, $x);
+    my $x1 = $c->_copy($x);
 
     my $es = '';
     my ($xr, $h, $x10000);
@@ -2084,7 +2228,7 @@ sub _as_hex {
     }
     while (@$x1 != 1 || $x1->[0] != 0) # _is_zero()
     {
-        ($x1, $xr) = _div($c, $x1, $x10000);
+        ($x1, $xr) = $c->_div($x1, $x10000);
         $es .= unpack($h, pack('V', $xr->[0]));
     }
     $es = reverse $es;
@@ -2106,7 +2250,7 @@ sub _as_bin {
         my $t = sprintf("0b%b", $x->[0]);
         return $t;
     }
-    my $x1 = _copy($c, $x);
+    my $x1 = $c->_copy($x);
 
     my $es = '';
     my ($xr, $b, $x10000);
@@ -2119,7 +2263,7 @@ sub _as_bin {
     }
     while (!(@$x1 == 1 && $x1->[0] == 0)) # _is_zero()
     {
-        ($x1, $xr) = _div($c, $x1, $x10000);
+        ($x1, $xr) = $c->_div($x1, $x10000);
         $es .= unpack($b, pack('v', $xr->[0]));
     }
     $es = reverse $es;
@@ -2134,14 +2278,14 @@ sub _as_oct {
     # fits into one element (handle also 0 case)
     return sprintf("0%o", $x->[0]) if @$x == 1;
 
-    my $x1 = _copy($c, $x);
+    my $x1 = $c->_copy($x);
 
     my $es = '';
     my $xr;
     my $x1000 = [ 0100000 ];
     while (@$x1 != 1 || $x1->[0] != 0) # _is_zero()
     {
-        ($x1, $xr) = _div($c, $x1, $x1000);
+        ($x1, $xr) = $c->_div($x1, $x1000);
         $es .= reverse sprintf("%05o", $xr->[0]);
     }
     $es = reverse $es;
@@ -2157,20 +2301,20 @@ sub _from_oct {
     my $m = [ 0100000 ];
     my $d = 5;                  # 5 digits at a time
 
-    my $mul = _one();
-    my $x = _zero();
+    my $mul = $c->_one();
+    my $x = $c->_zero();
 
-    my $len = int((length($os) - 1) / $d); # $d digit parts, w/o the '0'
+    my $len = int((length($os) - 1) / $d);      # $d digit parts, w/o the '0'
     my $val;
     my $i = -$d;
     while ($len >= 0) {
-        $val = substr($os, $i, $d); # get oct digits
+        $val = substr($os, $i, $d);             # get oct digits
         $val = CORE::oct($val);
         $i -= $d;
         $len --;
         my $adder = [ $val ];
-        _add($c, $x, _mul($c, $adder, $mul)) if $val != 0;
-        _mul($c, $mul, $m ) if $len >= 0; # skip last mul
+        $c->_add($x, $c->_mul($adder, $mul)) if $val != 0;
+        $c->_mul($mul, $m) if $len >= 0;        # skip last mul
     }
     $x;
 }
@@ -2179,16 +2323,10 @@ sub _from_hex {
     # convert a hex number to decimal (string, return ref to array)
     my ($c, $hs) = @_;
 
-    my $m = _new($c, 0x10000000); # 28 bit at a time (<32 bit!)
+    my $m = $c->_new(0x10000000); # 28 bit at a time (<32 bit!)
     my $d = 7;                    # 7 digits at a time
-    if ($] <= 5.006) {
-        # for older Perls, play safe
-        $m = [ 0x10000 ];       # 16 bit at a time (<32 bit!)
-        $d = 4;                 # 4 digits at a time
-    }
-
-    my $mul = _one();
-    my $x = _zero();
+    my $mul = $c->_one();
+    my $x = $c->_zero();
 
     my $len = int((length($hs) - 2) / $d); # $d digit parts, w/o the '0x'
     my $val;
@@ -2203,10 +2341,10 @@ sub _from_hex {
         # if the resulting number was to big to fit into one element, create a
         # two-element version (bug found by Mark Lakata - Thanx!)
         if (CORE::length($val) > $BASE_LEN) {
-            $adder = _new($c, $val);
+            $adder = $c->_new($val);
         }
-        _add($c, $x, _mul($c, $adder, $mul)) if $val != 0;
-        _mul($c, $mul, $m) if $len >= 0; # skip last mul
+        $c->_add($x, $c->_mul($adder, $mul)) if $val != 0;
+        $c->_mul($mul, $m) if $len >= 0; # skip last mul
     }
     $x;
 }
@@ -2235,39 +2373,39 @@ sub _modinv {
     my ($c, $x, $y) = @_;
 
     # modulo zero
-    if (_is_zero($c, $y)) {
-        return (undef, undef);
+    if ($c->_is_zero($y)) {
+        return undef, undef;
     }
 
     # modulo one
-    if (_is_one($c, $y)) {
-        return (_zero($c), '+');
+    if ($c->_is_one($y)) {
+        return $c->_zero(), '+';
     }
 
-    my $u = _zero($c);
-    my $v = _one($c);
-    my $a = _copy($c, $y);
-    my $b = _copy($c, $x);
+    my $u = $c->_zero();
+    my $v = $c->_one();
+    my $a = $c->_copy($y);
+    my $b = $c->_copy($x);
 
     # Euclid's Algorithm for bgcd(), only that we calc bgcd() ($a) and the result
     # ($u) at the same time. See comments in BigInt for why this works.
     my $q;
     my $sign = 1;
     {
-        ($a, $q, $b) = ($b, _div($c, $a, $b)); # step 1
-        last if _is_zero($c, $b);
+        ($a, $q, $b) = ($b, $c->_div($a, $b));          # step 1
+        last if $c->_is_zero($b);
 
-        my $t = _add($c,                           # step 2:
-                     _mul($c, _copy($c, $v), $q) , #  t =   v * q
-                     $u );                         #      + u
-        $u = $v;                                   #  u = v
-        $v = $t;                                   #  v = t
+        my $t = $c->_add(                               # step 2:
+                         $c->_mul($c->_copy($v), $q),   #  t =   v * q
+                         $u);                           #      + u
+        $u = $v;                                        #  u = v
+        $v = $t;                                        #  v = t
         $sign = -$sign;
         redo;
     }
 
     # if the gcd is not 1, then return NaN
-    return (undef, undef) unless _is_one($c, $a);
+    return (undef, undef) unless $c->_is_one($a);
 
     ($v, $sign == 1 ? '+' : '-');
 }
@@ -2277,15 +2415,15 @@ sub _modpow {
     my ($c, $num, $exp, $mod) = @_;
 
     # a^b (mod 1) = 0 for all a and b
-    if (_is_one($c, $mod)) {
+    if ($c->_is_one($mod)) {
         @$num = 0;
         return $num;
     }
 
     # 0^a (mod m) = 0 if m != 0, a != 0
     # 0^0 (mod m) = 1 if m != 0
-    if (_is_zero($c, $num)) {
-        if (_is_zero($c, $exp)) {
+    if ($c->_is_zero($num)) {
+        if ($c->_is_zero($exp)) {
             @$num = 1;
         } else {
             @$num = 0;
@@ -2293,21 +2431,21 @@ sub _modpow {
         return $num;
     }
 
-    #  $num = _mod($c, $num, $mod);   # this does not make it faster
+    #  $num = $c->_mod($num, $mod);   # this does not make it faster
 
-    my $acc = _copy($c, $num);
-    my $t = _one();
+    my $acc = $c->_copy($num);
+    my $t = $c->_one();
 
-    my $expbin = _as_bin($c, $exp);
+    my $expbin = $c->_as_bin($exp);
     $expbin =~ s/^0b//;
     my $len = length($expbin);
     while (--$len >= 0) {
         if (substr($expbin, $len, 1) eq '1') { # is_odd
-            _mul($c, $t, $acc);
-            $t = _mod($c, $t, $mod);
+            $t = $c->_mul($t, $acc);
+            $t = $c->_mod($t, $mod);
         }
-        _mul($c, $acc, $acc);
-        $acc = _mod($c, $acc, $mod);
+        $acc = $c->_mul($acc, $acc);
+        $acc = $c->_mod($acc, $mod);
     }
     @$num = @$t;
     $num;
@@ -2336,11 +2474,11 @@ sub _gcd {
 
         # Compute remainder.
 
-        _mod($c, $x, $y);
+        $c->_mod($x, $y);
 
         # Swap $x and $y.
 
-        my $tmp = [ @$x ];
+        my $tmp = $c->_copy($x);
         @$x = @$y;
         $y = $tmp;              # no deref here; that would modify input $y
     }
@@ -2363,514 +2501,36 @@ Math::BigInt::Calc - Pure Perl module to support Math::BigInt
 
 =head1 SYNOPSIS
 
-This library provides support for big integer calculations. It is not
-intended to be used by other modules. Other modules which support the same
-API (see below) can also be used to support Math::BigInt, like
-Math::BigInt::GMP and Math::BigInt::Pari.
+    # to use it with Math::BigInt
+    use Math::BigInt lib => 'Calc';
+
+    # to use it with Math::BigFloat
+    use Math::BigFloat lib => 'Calc';
+
+    # to use it with Math::BigRat
+    use Math::BigRat lib => 'Calc';
 
 =head1 DESCRIPTION
 
-In this library, the numbers are represented in base B = 10**N, where N is
-the largest possible value that does not cause overflow in the intermediate
+Math::BigInt::Calc inherits from Math::BigInt::Lib.
+
+In this library, the numbers are represented in base B = 10**N, where N is the
+largest possible value that does not cause overflow in the intermediate
 computations. The base B elements are stored in an array, with the least
 significant element stored in array element zero. There are no leading zero
 elements, except a single zero element when the number is zero.
 
 For instance, if B = 10000, the number 1234567890 is represented internally
-as [3456, 7890, 12].
-
-=head1 THE Math::BigInt API
-
-In order to allow for multiple big integer libraries, Math::BigInt was
-rewritten to use a plug-in library for core math routines. Any module which
-conforms to the API can be used by Math::BigInt by using this in your program:
-
-        use Math::BigInt lib => 'libname';
-
-'libname' is either the long name, like 'Math::BigInt::Pari', or only the short
-version, like 'Pari'.
-
-=head2 General Notes
-
-A library only needs to deal with unsigned big integers. Testing of input
-parameter validity is done by the caller, so there is no need to worry about
-underflow (e.g., in C<_sub()> and C<_dec()>) nor about division by zero (e.g.,
-in C<_div()>) or similar cases.
-
-For some methods, the first parameter can be modified. That includes the
-possibility that you return a reference to a completely different object
-instead. Although keeping the reference and just changing its contents is
-preferred over creating and returning a different reference.
-
-Return values are always objects, strings, Perl scalars, or true/false for
-comparison routines.
-
-=head2 API version 1
-
-The following methods must be defined in order to support the use by
-Math::BigInt v1.70 or later.
-
-=head3 API version
-
-=over 4
-
-=item I<api_version()>
-
-Return API version as a Perl scalar, 1 for Math::BigInt v1.70, 2 for
-Math::BigInt v1.83.
-
-=back
-
-=head3 Constructors
-
-=over 4
-
-=item I<_new(STR)>
-
-Convert a string representing an unsigned decimal number to an object
-representing the same number. The input is normalize, i.e., it matches
-C<^(0|[1-9]\d*)$>.
-
-=item I<_zero()>
-
-Return an object representing the number zero.
-
-=item I<_one()>
-
-Return an object representing the number one.
-
-=item I<_two()>
-
-Return an object representing the number two.
-
-=item I<_ten()>
-
-Return an object representing the number ten.
-
-=item I<_from_bin(STR)>
-
-Return an object given a string representing a binary number. The input has a
-'0b' prefix and matches the regular expression C<^0[bB](0|1[01]*)$>.
-
-=item I<_from_oct(STR)>
-
-Return an object given a string representing an octal number. The input has a
-'0' prefix and matches the regular expression C<^0[1-7]*$>.
-
-=item I<_from_hex(STR)>
-
-Return an object given a string representing a hexadecimal number. The input
-has a '0x' prefix and matches the regular expression
-C<^0x(0|[1-9a-fA-F][\da-fA-F]*)$>.
-
-=back
-
-=head3 Mathematical functions
-
-Each of these methods may modify the first input argument, except I<_bgcd()>,
-which shall not modify any input argument, and I<_sub()> which may modify the
-second input argument.
-
-=over 4
-
-=item I<_add(OBJ1, OBJ2)>
-
-Returns the result of adding OBJ2 to OBJ1.
-
-=item I<_mul(OBJ1, OBJ2)>
-
-Returns the result of multiplying OBJ2 and OBJ1.
-
-=item I<_div(OBJ1, OBJ2)>
-
-Returns the result of dividing OBJ1 by OBJ2 and truncating the result to an
-integer.
-
-=item I<_sub(OBJ1, OBJ2, FLAG)>
-
-=item I<_sub(OBJ1, OBJ2)>
-
-Returns the result of subtracting OBJ2 by OBJ1. If C<flag> is false or omitted,
-OBJ1 might be modified. If C<flag> is true, OBJ2 might be modified.
-
-=item I<_dec(OBJ)>
-
-Decrement OBJ by one.
-
-=item I<_inc(OBJ)>
-
-Increment OBJ by one.
-
-=item I<_mod(OBJ1, OBJ2)>
-
-Return OBJ1 modulo OBJ2, i.e., the remainder after dividing OBJ1 by OBJ2.
-
-=item I<_sqrt(OBJ)>
-
-Return the square root of the object, truncated to integer.
-
-=item I<_root(OBJ, N)>
-
-Return Nth root of the object, truncated to int. N is E<gt>= 3.
-
-=item I<_fac(OBJ)>
-
-Return factorial of object (1*2*3*4*...).
-
-=item I<_pow(OBJ1, OBJ2)>
-
-Return OBJ1 to the power of OBJ2. By convention, 0**0 = 1.
-
-=item I<_modinv(OBJ1, OBJ2)>
-
-Return modular multiplicative inverse, i.e., return OBJ3 so that
-
-    (OBJ3 * OBJ1) % OBJ2 = 1 % OBJ2
-
-The result is returned as two arguments. If the modular multiplicative
-inverse does not exist, both arguments are undefined. Otherwise, the
-arguments are a number (object) and its sign ("+" or "-").
-
-The output value, with its sign, must either be a positive value in the
-range 1,2,...,OBJ2-1 or the same value subtracted OBJ2. For instance, if the
-input arguments are objects representing the numbers 7 and 5, the method
-must either return an object representing the number 3 and a "+" sign, since
-(3*7) % 5 = 1 % 5, or an object representing the number 2 and "-" sign,
-since (-2*7) % 5 = 1 % 5.
-
-=item I<_modpow(OBJ1, OBJ2, OBJ3)>
-
-Return modular exponentiation, (OBJ1 ** OBJ2) % OBJ3.
-
-=item I<_rsft(OBJ, N, B)>
-
-Shift object N digits right in base B and return the resulting object. This is
-equivalent to performing integer division by B**N and discarding the remainder,
-except that it might be much faster, depending on how the number is represented
-internally.
-
-For instance, if the object $obj represents the hexadecimal number 0xabcde,
-then C<_rsft($obj, 2, 16)> returns an object representing the number 0xabc. The
-"remainer", 0xde, is discarded and not returned.
-
-=item I<_lsft(OBJ, N, B)>
-
-Shift the object N digits left in base B. This is equivalent to multiplying by
-B**N, except that it might be much faster, depending on how the number is
-represented internally.
-
-=item I<_log_int(OBJ, B)>
-
-Return integer log of OBJ to base BASE. This method has two output arguments,
-the OBJECT and a STATUS. The STATUS is Perl scalar; it is 1 if OBJ is the exact
-result, 0 if the result was truncted to give OBJ, and undef if it is unknown
-whether OBJ is the exact result.
-
-=item I<_gcd(OBJ1, OBJ2)>
-
-Return the greatest common divisor of OBJ1 and OBJ2.
-
-=back
-
-=head3 Bitwise operators
-
-Each of these methods may modify the first input argument.
-
-=over 4
-
-=item I<_and(OBJ1, OBJ2)>
-
-Return bitwise and. If necessary, the smallest number is padded with leading
-zeros.
-
-=item I<_or(OBJ1, OBJ2)>
-
-Return bitwise or. If necessary, the smallest number is padded with leading
-zeros.
-
-=item I<_xor(OBJ1, OBJ2)>
-
-Return bitwise exclusive or. If necessary, the smallest number is padded
-with leading zeros.
-
-=back
-
-=head3 Boolean operators
-
-=over 4
-
-=item I<_is_zero(OBJ)>
-
-Returns a true value if OBJ is zero, and false value otherwise.
-
-=item I<_is_one(OBJ)>
-
-Returns a true value if OBJ is one, and false value otherwise.
-
-=item I<_is_two(OBJ)>
-
-Returns a true value if OBJ is two, and false value otherwise.
-
-=item I<_is_ten(OBJ)>
-
-Returns a true value if OBJ is ten, and false value otherwise.
-
-=item I<_is_even(OBJ)>
-
-Return a true value if OBJ is an even integer, and a false value otherwise.
-
-=item I<_is_odd(OBJ)>
-
-Return a true value if OBJ is an even integer, and a false value otherwise.
-
-=item I<_acmp(OBJ1, OBJ2)>
-
-Compare OBJ1 and OBJ2 and return -1, 0, or 1, if OBJ1 is less than, equal
-to, or larger than OBJ2, respectively.
-
-=back
-
-=head3 String conversion
-
-=over 4
-
-=item I<_str(OBJ)>
-
-Return a string representing the object. The returned string should have no
-leading zeros, i.e., it should match C<^(0|[1-9]\d*)$>.
-
-=item I<_as_bin(OBJ)>
-
-Return the binary string representation of the number. The string must have a
-'0b' prefix.
-
-=item I<_as_oct(OBJ)>
-
-Return the octal string representation of the number. The string must have
-a '0x' prefix.
-
-Note: This method was required from Math::BigInt version 1.78, but the required
-API version number was not incremented, so there are older libraries that
-support API version 1, but do not support C<_as_oct()>.
-
-=item I<_as_hex(OBJ)>
-
-Return the hexadecimal string representation of the number. The string must
-have a '0x' prefix.
-
-=back
-
-=head3 Numeric conversion
-
-=over 4
-
-=item I<_num(OBJ)>
-
-Given an object, return a Perl scalar number (int/float) representing this
-number.
-
-=back
-
-=head3 Miscellaneous
-
-=over 4
-
-=item I<_copy(OBJ)>
-
-Return a true copy of the object.
-
-=item I<_len(OBJ)>
-
-Returns the number of the decimal digits in the number. The output is a
-Perl scalar.
-
-=item I<_zeros(OBJ)>
-
-Return the number of trailing decimal zeros. The output is a Perl scalar.
-
-=item I<_digit(OBJ, N)>
-
-Return the Nth digit as a Perl scalar. N is a Perl scalar, where zero refers to
-the rightmost (least significant) digit, and negative values count from the
-left (most significant digit). If $obj represents the number 123, then
-I<_digit($obj, 0)> is 3 and I<_digit(123, -1)> is 1.
-
-=item I<_check(OBJ)>
-
-Return a true value if the object is OK, and a false value otherwise. This is a
-check routine to test the internal state of the object for corruption.
-
-=back
-
-=head2 API version 2
-
-The following methods are required for an API version of 2 or greater.
-
-=head3 Constructors
-
-=over 4
-
-=item I<_1ex(N)>
-
-Return an object representing the number 10**N where N E<gt>= 0 is a Perl
-scalar.
-
-=back
-
-=head3 Mathematical functions
-
-=over 4
-
-=item I<_nok(OBJ1, OBJ2)>
-
-Return the binomial coefficient OBJ1 over OBJ1.
-
-=back
-
-=head3 Miscellaneous
-
-=over 4
-
-=item I<_alen(OBJ)>
-
-Return the approximate number of decimal digits of the object. The output is
-one Perl scalar.
-
-=back
-
-=head2 API optional methods
-
-The following methods are optional, and can be defined if the underlying lib
-has a fast way to do them. If undefined, Math::BigInt will use pure Perl (hence
-slow) fallback routines to emulate these:
-
-=head3 Signed bitwise operators.
-
-Each of these methods may modify the first input argument.
-
-=over 4
-
-=item I<_signed_or(OBJ1, OBJ2, SIGN1, SIGN2)>
-
-Return the signed bitwise or.
-
-=item I<_signed_and(OBJ1, OBJ2, SIGN1, SIGN2)>
-
-Return the signed bitwise and.
-
-=item I<_signed_xor(OBJ1, OBJ2, SIGN1, SIGN2)>
-
-Return the signed bitwise exclusive or.
-
-=back
-
-=head1 WRAP YOUR OWN
-
-If you want to port your own favourite c-lib for big numbers to the
-Math::BigInt interface, you can take any of the already existing modules as a
-rough guideline. You should really wrap up the latest Math::BigInt and
-Math::BigFloat testsuites with your module, and replace in them any of the
-following:
-
-        use Math::BigInt;
-
-by this:
-
-        use Math::BigInt lib => 'yourlib';
-
-This way you ensure that your library really works 100% within Math::BigInt.
-
-=head1 BUGS
-
-Please report any bugs or feature requests to
-C<bug-math-bigint at rt.cpan.org>, or through the web interface at
-L<https://rt.cpan.org/Ticket/Create.html?Queue=Math-BigInt>
-(requires login).
-We will be notified, and then you'll automatically be notified of progress on
-your bug as I make changes.
-
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
-    perldoc Math::BigInt::Calc
-
-You can also look for information at:
-
-=over 4
-
-=item * RT: CPAN's request tracker
-
-L<https://rt.cpan.org/Public/Dist/Display.html?Name=Math-BigInt>
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/Math-BigInt>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/dist/Math-BigInt>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/Math-BigInt/>
-
-=item * CPAN Testers Matrix
-
-L<http://matrix.cpantesters.org/?dist=Math-BigInt>
-
-=item * The Bignum mailing list
-
-=over 4
-
-=item * Post to mailing list
-
-C<bignum at lists.scsys.co.uk>
-
-=item * View mailing list
-
-L<http://lists.scsys.co.uk/pipermail/bignum/>
-
-=item * Subscribe/Unsubscribe
-
-L<http://lists.scsys.co.uk/cgi-bin/mailman/listinfo/bignum>
-
-=back
-
-=back
-
-=head1 LICENSE
-
-This program is free software; you may redistribute it and/or modify it under
-the same terms as Perl itself.
-
-=head1 AUTHORS
-
-=over 4
-
-=item *
-
-Original math code by Mark Biggar, rewritten by Tels L<http://bloodgate.com/>
-in late 2000.
-
-=item *
-
-Separated from BigInt and shaped API with the help of John Peacock.
-
-=item *
-
-Fixed, speed-up, streamlined and enhanced by Tels 2001 - 2007.
-
-=item *
-
-API documentation corrected and extended by Peter John Acklam,
-E<lt>pjacklam@online.noE<gt>
-
-=back
+as [7890, 3456, 12].
 
 =head1 SEE ALSO
 
-L<Math::BigInt>, L<Math::BigFloat>, L<Math::BigInt::GMP>,
-L<Math::BigInt::FastCalc> and L<Math::BigInt::Pari>.
+L<Math::BigInt::Lib> for a description of the API.
+
+Alternative libraries L<Math::BigInt::FastCalc>, L<Math::BigInt::GMP>, and
+L<Math::BigInt::Pari>.
+
+Some of the modules that use these libraries L<Math::BigInt>,
+L<Math::BigFloat>, and L<Math::BigRat>.
 
 =cut

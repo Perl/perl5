@@ -9,13 +9,13 @@ use warnings;
 use Test::More tests => 712             # tests in require'd file
                         + 26;           # tests in this file
 
-use Math::BigInt lib => 'Calc';
+use Math::BigInt only => 'Calc';
 use Math::BigFloat;
 
 our $mbi = 'Math::BigInt';
 our $mbf = 'Math::BigFloat';
 
-require './t/mbimbf.inc';
+require 't/mbimbf.inc';
 
 # some tests that won't work with subclasses, since the things are only
 # guaranteed in the Math::Big(Int|Float) (unless subclass chooses to support

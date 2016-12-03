@@ -1248,7 +1248,7 @@ foreach my $class ($mbi, $mbf) {
 
 my ($got, $f, $a, $p, $xp, $yp, $xa, $ya, $try, $want, @args);
 
-my $CALC = Math::BigInt->config()->{lib};
+my $CALC = Math::BigInt->config('lib');
 
 while (<DATA>) {
     s/#.*$//;                   # remove comments

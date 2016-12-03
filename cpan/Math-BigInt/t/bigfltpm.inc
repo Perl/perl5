@@ -5,7 +5,7 @@ use warnings;
 
 our ($CLASS, $CALC);
 
-is($CLASS->config()->{lib}, $CALC, "$CLASS->config()->{lib}");
+is($CLASS->config('lib'), $CALC, "$CLASS->config('lib')");
 
 my ($x, $y, $z, @args, $try, $want, $got);
 my ($f, $setup);

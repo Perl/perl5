@@ -1684,6 +1684,7 @@ cpan/Math-BigInt/lib/Math/BigFloat.pm		An arbitrary precision floating-point ari
 cpan/Math-BigInt/lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
 cpan/Math-BigInt/lib/Math/BigInt/Calc.pm	Pure Perl module to support Math::BigInt
 cpan/Math-BigInt/lib/Math/BigInt/CalcEmu.pm	Pure Perl module to support Math::BigInt
+cpan/Math-BigInt/lib/Math/BigInt/Lib.pm
 cpan/Math-BigInt/t/_e_math.t		Helper routine in BigFloat for _e math
 cpan/Math-BigInt/t/alias.inc		Support for BigInt tests
 cpan/Math-BigInt/t/bare_mbf.t		Test MBF under Math::BigInt::BareCalc
@@ -1725,6 +1726,7 @@ cpan/Math-BigInt/t/isa.t		Test for Math::BigInt inheritance
 cpan/Math-BigInt/t/lib_load.t		Test sane lib names
 cpan/Math-BigInt/t/Math/BigFloat/Subclass.pm	Empty subclass of BigFloat for test
 cpan/Math-BigInt/t/Math/BigInt/BareCalc.pm	Bigint's simulation of Calc
+cpan/Math-BigInt/t/Math/BigInt/Lib/Minimal.pm
 cpan/Math-BigInt/t/Math/BigInt/Lib/TestUtil.pm	Test Math::BigInt
 cpan/Math-BigInt/t/Math/BigInt/Scalar.pm	Pure Perl module to support Math::BigInt
 cpan/Math-BigInt/t/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test

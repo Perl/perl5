@@ -11,7 +11,7 @@ our ($CLASS, $CALC);
 package Math::Foo;
 
 use Math::BigInt lib => $main::CALC;
-our @ISA = (qw/Math::BigInt/);
+our @ISA = qw/Math::BigInt/;
 
 use overload
   # customized overload for sub, since original does not use swap there
@@ -33,7 +33,7 @@ sub _swap {
 ##############################################################################
 package main;
 
-is($CLASS->config()->{lib}, $CALC, "$CLASS->config()->{lib}");
+is($CLASS->config('lib'), $CALC, "$CLASS->config('lib')");
 
 my ($x, $y, $z, @args, $try, $got, $want);
 my ($f, $round_mode, $expected_class);
@@ -118,7 +118,7 @@ while (<DATA>) {
         } elsif ($f eq "bdiv") {
             $try .= ' $x->bdiv($y);';
         } elsif ($f eq "bdiv-list") {
-            $try .= ' join (",", $x->bdiv($y));';
+            $try .= ' join(",", $x->bdiv($y));';
         } elsif ($f eq "btdiv") {
             $try .= ' $x->btdiv($y);';
         } elsif ($f eq "btdiv-list") {
@@ -210,7 +210,7 @@ while (<DATA>) {
     }
     # check internal state of number objects
     is_valid($got, $f) if ref $got;
-}                               # endwhile data tests
+}                               # end while data tests
 close DATA;
 
 # test whether self-multiplication works correctly (result is 2**64)
@@ -2598,7 +2598,7 @@ abc:+0:NaN
 abc:abc:NaN
 abc:+0:NaN
 +0:abc:NaN
-+0:+0:NaN
++0:+0:0
 +1:+0:0
 +0:+1:0
 +27:+90:270

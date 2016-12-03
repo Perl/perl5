@@ -15,8 +15,8 @@ our ($CLASS, $CALC);
 $CLASS = "Math::BigFloat";
 $CALC  = "Math::BigInt::Calc";          # backend
 
-# the with argument is ignored
+# the "with" argument should be ignored
 is(Math::BigFloat->config()->{with}, 'Math::BigInt::Calc',
-   'Math::BigFloat->config()->{with}');
+   "Math::BigFloat->config()->{with}");
 
-require './t/bigfltpm.inc';	# all tests here for sharing
+require 't/bigfltpm.inc';	# all tests here for sharing

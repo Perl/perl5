@@ -117,4 +117,3 @@ infinity:inf
 #+inf:NaN
 #-inf:NaN
 0b.p+0:NaN
-

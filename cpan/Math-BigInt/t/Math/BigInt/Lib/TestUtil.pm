@@ -1,9 +1,11 @@
 #!perl
 
+package Math::BigInt::Lib::TestUtil;
+
 use strict;
 use warnings;
 
-package Math::BigInt::Lib::TestUtil;
+use Exporter;
 
 our @ISA       = qw< Exporter >;
 our @EXPORT_OK = qw< randstr >;

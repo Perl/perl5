@@ -4,7 +4,7 @@ use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '1.999727';
+our $VERSION = '1.999802';
 $VERSION = eval $VERSION;
 
 package Math::BigInt;
@@ -15,7 +15,7 @@ my $CALC_EMU;
 
 BEGIN
   {
-  $CALC_EMU = Math::BigInt->config()->{'lib'};
+  $CALC_EMU = Math::BigInt->config('lib');
   # register us with MBI to get notified of future lib changes
   Math::BigInt::_register_callback( __PACKAGE__, sub { $CALC_EMU = $_[0]; } );
   }

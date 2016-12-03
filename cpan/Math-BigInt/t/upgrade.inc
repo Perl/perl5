@@ -47,7 +47,7 @@ sub _swap {
 ##############################################################################
 package main;
 
-is($CLASS->config()->{lib}, $CALC, "$CLASS->config()->{lib}");
+is($CLASS->config('lib'), $CALC, "$CLASS->config('lib')");
 
 my ($x, $y, $z, @args, $a, $m, $e, $try, $got, $want, $exp);
 my ($f, $round_mode, $expected_class);
@@ -1041,7 +1041,7 @@ abc:+0:NaN
 abc:abc:NaN
 abc:+0:NaN
 +0:abc:NaN
-+0:+0:NaN
++0:+0:0
 +1:+0:0
 +0:+1:0
 +27:+90:270
