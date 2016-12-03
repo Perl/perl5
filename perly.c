@@ -355,9 +355,11 @@ Perl_yyparse (pTHX_ int gramtype)
     }
 
     /* If the proper action on seeing token YYTOKEN is to reduce or to
-	  detect an error, take that action.  */
+     * detect an error, take that action.
+     * Casting yyn to unsigned allows a >=0 test to be included as
+     * part of the  <=YYLAST test for speed */
     yyn += yytoken;
-    if (yyn < 0 || YYLAST < yyn || yycheck[yyn] != yytoken)
+    if ((unsigned int)yyn > YYLAST || yycheck[yyn] != yytoken)
 	goto yydefault;
     yyn = yytable[yyn];
     if (yyn <= 0) {
