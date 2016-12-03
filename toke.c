@@ -3795,16 +3795,19 @@ S_scan_const(pTHX_ char *start)
         {
 	    *d++ = *s++;
         }
-        else {
-	    STRLEN len  = 1;
+        else if (this_utf8 && has_utf8) {   /* Both UTF-8, can just copy */
+	    const STRLEN len = UTF8SKIP(s);
 
-	    /* One might think that it is wasted effort in the case of the
-	     * source being utf8 (this_utf8 == TRUE) to take the next character
-	     * in the source, convert it to an unsigned value, and then convert
-	     * it back again.  But the source has not been validated here.  The
-	     * routine that does the conversion checks for errors like
-	     * malformed utf8 */
+            /* We expect the source to have already been checked for
+             * malformedness */
+            assert(isUTF8_CHAR((U8 *) s, (U8 *) send));
 
+            Copy(s, d, len, U8);
+            d += len;
+            s += len;
+        }
+        else { /* UTF8ness matters and doesn't match, need to convert */
+	    STRLEN len = 1;
 	    const UV nextuv   = (this_utf8)
                                 ? utf8n_to_uvchr((U8*)s, send - s, &len, 0)
                                 : (UV) ((U8) *s);
