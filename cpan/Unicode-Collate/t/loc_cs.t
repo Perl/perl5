@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 use warnings;
-BEGIN { $| = 1; print "1..34\n"; }
+BEGIN { $| = 1; print "1..37\n"; }
 my $count = 0;
 sub ok ($;$) {
     my $p = my $r = shift;
@@ -87,3 +87,11 @@ ok($objCs->eq("z\x{30C}", "\x{17E}"));
 ok($objCs->eq("Z\x{30C}", "\x{17D}"));
 
 # 34
+
+$objCs->change(upper_before_lower => 1);
+
+ok($objCs->gt("ch", "cH"));
+ok($objCs->gt("cH", "Ch"));
+ok($objCs->gt("Ch", "CH"));
+
+# 37

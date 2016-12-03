@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.18,
+   locale_version => 1.19,
    entry => <<'ENTRY', # for DUCET v8.0.0
 0491      ; [.1FB2.0020.0002] # CYRILLIC SMALL LETTER GHE WITH UPTURN
 0490      ; [.1FB2.0020.0008] # CYRILLIC CAPITAL LETTER GHE WITH UPTURN

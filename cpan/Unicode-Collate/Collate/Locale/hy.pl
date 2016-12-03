@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.18,
+   locale_version => 1.19,
    entry => <<'ENTRY', # for DUCET v8.0.0
 0587      ; [.222E.0020.0002][.FFF1.0000.0000] # ARMENIAN SMALL LIGATURE ECH YIWN
 0584      ; [.222E.0020.0002][.FFF0.0000.0000] # ARMENIAN SMALL LETTER KEH

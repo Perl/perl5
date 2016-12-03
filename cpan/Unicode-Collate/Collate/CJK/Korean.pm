@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.18';
+our $VERSION = '1.19';
 
 my %jamo2prim = (
     '1100', 0x3A5E,   '1101', 0x3A5F,   '1102', 0x3A60,   '1103', 0x3A61,

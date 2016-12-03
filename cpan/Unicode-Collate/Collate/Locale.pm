@@ -5,15 +5,15 @@ use warnings;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '1.18';
+our $VERSION = '1.19';
 
 my $PL_EXT  = '.pl';
 
 my %LocaleFile = map { ($_, $_) } qw(
    af ar as az be bn ca cs cy da ee eo es et fa fi fil fo
-   gu ha haw hi hr hu hy ig is ja kk kl kn ko kok ln lt lv
+   gu ha haw he hi hr hu hy ig is ja kk kl kn ko kok ln lt lv
    mk ml mr mt nb nn nso om or pa pl ro sa se si sk sl sq
-   sr sv ta te th tn to tr uk ur vi wae wo yo zh
+   sr sv ta te th tn to tr uk ur vi vo wae wo yo zh
 );
    $LocaleFile{'default'} = '';
 # aliases
@@ -168,8 +168,8 @@ For example, C<Unicode::Collate::Locale-E<gt>new(locale =E<gt> 'ES')>
 returns a collator tailored for Spanish.
 
 C<$locale_name> may be suffixed with a Unicode script code (four-letter),
-a Unicode region code, a Unicode language variant code. These codes are
-case-insensitive, and separated with C<'_'> or C<'-'>.
+a Unicode region (territory) code, a Unicode language variant code.
+These codes are case-insensitive, and separated with C<'_'> or C<'-'>.
 E.g. C<en_US> for English in USA,
 C<az_Cyrl> for Azerbaijani in the Cyrillic script,
 C<es_ES_traditional> for Spanish in Spain (Traditional).
@@ -211,7 +211,7 @@ if such a tailoring is passed to C<new()>.
 However C<change()> inherited from C<Unicode::Collate> allows
 such a tailoring that is reserved by C<locale>. Examples:
 
-    new(locale => 'ca')->change(backwards => undef)
+    new(locale => 'fr_ca')->change(backwards => undef)
     new(locale => 'da')->change(upper_before_lower => 0)
     new(locale => 'ja')->change(overrideCJK => undef)
 
@@ -259,7 +259,7 @@ a combination of return values from C<getlocale> and C<locale_version>.
       cy                Welsh
       da                Danish
       de__phonebook     German (umlaut as 'ae', 'oe', 'ue')
-      de_AT_phonebook   German in Austria (umlaut primary greater)
+      de_AT_phonebook   Austrian German (umlaut primary greater)
       ee                Ewe
       eo                Esperanto
       es                Spanish
@@ -270,10 +270,11 @@ a combination of return values from C<getlocale> and C<locale_version>.
       fi__phonebook     Finnish (v and w as separate characters)
       fil               Filipino
       fo                Faroese
-      fr_CA             French in Canada
+      fr_CA             Canadian French
       gu                Gujarati
       ha                Hausa
       haw               Hawaiian
+      he                Hebrew
       hi                Hindi
       hr                Croatian
       hu                Hungarian
@@ -322,6 +323,7 @@ a combination of return values from C<getlocale> and C<locale_version>.
       uk                Ukrainian
       ur                Urdu
       vi                Vietnamese
+      vo                Volapuk
       wae               Walser
       wo                Wolof
       yo                Yoruba
@@ -392,7 +394,7 @@ Thus C<(normalization =E<gt> undef)> is less preferred.
 
 =item Collation reordering is not supported
 
-The order of any groups including scripts are not changed.
+The order of any groups including scripts is not changed.
 
 =back
 
@@ -403,13 +405,13 @@ The order of any groups including scripts are not changed.
       af                30 = 1.8.1
       ar                22.1 = 1.9.0
       as                30 = 28 (without [reorder Beng..]) = 23
-      az                22.1 = 1.8.1 (type="standard")
+      az                30 = 24 (type="standard" without [reorder Latn Cyrl])
       be                30 = 28 (without [reorder Cyrl])
       bn                30 = 28 (type="standard" wo [reorder Beng..]) = 2.0.1
       bs                30 = 28 (type="standard": [import hr])
       bs_Cyrl           30 = 28 (type="standard": [import sr])
       ca                30 = 23 (alt="proposed" type="standard")
-      cs                22.1 = 1.8.1 (type="standard")
+      cs                30 = 1.8.1 (type="standard")
       cy                30 = 1.8.1
       da                22.1 = 1.8.1 (type="standard")
       de__phonebook     30 = 2.0 (type="phonebook")
@@ -418,7 +420,7 @@ The order of any groups including scripts are not changed.
       eo                30 = 1.8.1
       es                30 = 1.9.0 (type="standard")
       es__traditional   30 = 1.8.1 (type="traditional")
-      et                22.1 = 1.8.1
+      et                30 = 26
       fa                22.1 = 1.8.1
       fi                22.1 = 1.8.1 (type="standard" alt="proposed")
       fi__phonebook     22.1 = 1.8.1 (type="phonebook")
@@ -426,13 +428,14 @@ The order of any groups including scripts are not changed.
       fo                22.1 = 1.8.1 (alt="proposed" type="standard")
       fr_CA             30 = 1.9.0
       gu                30 = 28 (type="standard" wo [reorder Gujr..]) = 1.9.0
-      ha                22.1 = 1.9.0
-      haw               22.1 = 1.8.1
+      ha                30 = 1.9.0
+      haw               30 = 24
+      he                30 = 28 (without [reorder Hebr]) = 23
       hi                30 = 28 (without [reorder Deva..]) = 1.9.0
       hr                22.1 = 1.9.0 (type="standard")
       hu                22.1 = 1.8.1 (alt="proposed" type="standard")
       hy                30 = 28 (without [reorder Armn]) = 1.8.1
-      ig                22.1 = 1.8.1
+      ig                30 = 1.8.1
       is                22.1 = 1.8.1 (type="standard")
       ja                22.1 = 1.8.1 (type="standard")
       kk                30 = 28 (without [reorder Cyrl])
@@ -449,14 +452,13 @@ The order of any groups including scripts are not changed.
       mt                22.1 = 1.9.0
       nb                22.1 = 2.0   (type="standard")
       nn                22.1 = 2.0   (type="standard")
-      nso               26 = 1.8.1
+      nso           [*] 26 = 1.8.1
       om                22.1 = 1.8.1
       or                30 = 28 (without [reorder Orya..]) = 1.9.0
       pa                22.1 = 1.8.1
       pl                30 = 1.8.1
       ro                30 = 1.9.0 (type="standard")
-      sa                1.9.1 = 1.8.1 (type="standard" alt="proposed")
-                                      [now in /seed]
+      sa            [*] 1.9.1 = 1.8.1 (type="standard" alt="proposed")
       se                22.1 = 1.8.1 (type="standard")
       si                30 = 28 (type="standard" wo [reorder Sinh..]) = 1.9.0
       si__dictionary    30 = 28 (type="dictionary" wo [reorder Sinh..]) = 1.9.0
@@ -470,15 +472,16 @@ The order of any groups including scripts are not changed.
       ta                22.1 = 1.9.0
       te                30 = 28 (without [reorder Telu..]) = 1.9.0
       th                22.1 = 22
-      tn                26 = 1.8.1
+      tn            [*] 26 = 1.8.1
       to                22.1 = 22
       tr                22.1 = 1.8.1 (type="standard")
       uk                30 = 28 (without [reorder Cyrl])
       ug_Cyrl           https://en.wikipedia.org/wiki/Uyghur_Cyrillic_alphabet
       ur                22.1 = 1.9.0
       vi                22.1 = 1.8.1
-      wae               22.1 = 2.0
-      wo                1.9.1 = 1.8.1 [now in /seed]
+      vo                30 = 25
+      wae               30 = 2.0
+      wo            [*] 1.9.1 = 1.8.1
       yo                30 = 1.8.1
       zh                22.1 = 1.8.1 (type="standard")
       zh__big5han       22.1 = 1.8.1 (type="big5han")
@@ -487,6 +490,8 @@ The order of any groups including scripts are not changed.
       zh__stroke        22.1 = 1.9.1 (type='stroke' alt='short')
       zh__zhuyin        22.1 = 22    (type='zhuyin' alt='short')
     --------------------------------------------------------------------
+
+[*] http://www.unicode.org/repos/cldr/tags/latest/seed/collation/
 
 =head1 AUTHOR
 

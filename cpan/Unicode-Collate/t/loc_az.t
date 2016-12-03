@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 use warnings;
-BEGIN { $| = 1; print "1..72\n"; }
+BEGIN { $| = 1; print "1..75\n"; }
 my $count = 0;
 sub ok ($;$) {
     my $p = my $r = shift;
@@ -65,8 +65,9 @@ ok($objAz->lt("h", "x"));
 ok($objAz->lt("hz","x"));
 ok($objAz->gt("I","x"));
 ok($objAz->gt("i","x"));
+ok($objAz->lt("z", "w"));
 
-# 24
+# 25
 
 $objAz->change(level => 2);
 
@@ -80,8 +81,9 @@ ok($objAz->eq("u\x{308}", "U\x{308}"));
 ok($objAz->eq("q", "Q"));
 ok($objAz->eq("\x{259}", "\x{18F}"));
 ok($objAz->eq("x", "X"));
+ok($objAz->eq("z", "Z"));
 
-# 34
+# 36
 
 $objAz->change(level => 3);
 
@@ -92,11 +94,12 @@ ok($objAz->gt("\x{130}", "i"));
 ok($objAz->lt("o\x{308}", "O\x{308}"));
 ok($objAz->lt("s\x{327}", "S\x{327}"));
 ok($objAz->lt("u\x{308}", "U\x{308}"));
-ok($objAz->lt("k", "K"));
+ok($objAz->lt("q", "Q"));
 ok($objAz->lt("\x{259}", "\x{18F}"));
 ok($objAz->lt("x", "X"));
+ok($objAz->lt("z", "Z"));
 
-# 44
+# 47
 
 ok($objAz->eq("c\x{327}", pack('U', 0xE7)));
 ok($objAz->eq("C\x{327}", pack('U', 0xC7)));
@@ -111,7 +114,7 @@ ok($objAz->eq("I\x{306}", "\x{12C}"));
 ok($objAz->eq("I\x{328}", "\x{12E}"));
 ok($objAz->eq("I\x{307}", "\x{130}"));
 
-# 56
+# 59
 
 ok($objAz->eq("o\x{308}", pack('U', 0xF6)));
 ok($objAz->eq("O\x{308}", pack('U', 0xD6)));
@@ -130,4 +133,4 @@ ok($objAz->eq("U\x{308}\x{304}", "\x{1D5}"));
 ok($objAz->eq("u\x{308}\x{30C}", "\x{1DA}"));
 ok($objAz->eq("U\x{308}\x{30C}", "\x{1D9}"));
 
-# 72
+# 75

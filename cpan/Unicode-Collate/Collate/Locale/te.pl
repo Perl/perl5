@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.18,
+   locale_version => 1.19,
    entry => <<'ENTRY', # for DUCET v8.0.0
 0C01      ; [.2775.0020.0002][.FFF1.0000.0000] # TELUGU SIGN CANDRABINDU
 0C02      ; [.2775.0020.0002][.FFF2.0000.0000] # TELUGU SIGN ANUSVARA

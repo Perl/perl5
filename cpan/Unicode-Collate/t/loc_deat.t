@@ -49,14 +49,14 @@ ok($objDeAtPhone->getlocale, 'de_AT_phonebook');
 
 $objDeAtPhone->change(level => 1);
 
-ok($objDeAtPhone->gt($auml, 'az'));
-ok($objDeAtPhone->lt($auml, 'b'));
-ok($objDeAtPhone->gt($ouml, 'oz'));
-ok($objDeAtPhone->lt($ouml, 'p'));
-ok($objDeAtPhone->gt($uuml, 'uz'));
-ok($objDeAtPhone->lt($uuml, 'v'));
-ok($objDeAtPhone->gt($eses, 'ssz'));
-ok($objDeAtPhone->lt($eses, 'st'));
+ok($objDeAtPhone->gt($auml, "az"));
+ok($objDeAtPhone->lt($auml, "b"));
+ok($objDeAtPhone->gt($ouml, "oz"));
+ok($objDeAtPhone->lt($ouml, "p"));
+ok($objDeAtPhone->gt($uuml, "uz"));
+ok($objDeAtPhone->lt($uuml, "v"));
+ok($objDeAtPhone->gt($eses, "ssz"));
+ok($objDeAtPhone->lt($eses, "st"));
 
 # 10
 

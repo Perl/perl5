@@ -1,0 +1,7 @@
++{
+   locale_version => 1.19,
+   entry => <<'ENTRY', # for DUCET v8.0.0
+05F3      ; [*02FE.001F.0002] # HEBREW PUNCTUATION GERESH
+05F4      ; [*0305.001F.0002] # HEBREW PUNCTUATION GERSHAYIM
+ENTRY
+};

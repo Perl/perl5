@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.18,
+   locale_version => 1.19,
    entry => <<'ENTRY', # for DUCET v8.0.0
 0101      ; [.1BC2.001C.0002] # LATIN SMALL LETTER A WITH MACRON
 0061 0304 ; [.1BC2.001C.0002] # LATIN SMALL LETTER A WITH MACRON

@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.18,
+   locale_version => 1.19,
    entry => <<'ENTRY', # for DUCET v8.0.0
 0109      ; [.1BF6.0020.0002] # LATIN SMALL LETTER C WITH CIRCUMFLEX
 0063 0302 ; [.1BF6.0020.0002] # LATIN SMALL LETTER C WITH CIRCUMFLEX

@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.18,
+   locale_version => 1.19,
    entry => <<'ENTRY', # for DUCET v8.0.0
 0A82      ; [.26AC.0020.0002][.FFF1.0000.0000] # GUJARATI SIGN ANUSVARA
 0A81      ; [.26AC.0021.0002][.FFF1.0000.0000] # GUJARATI SIGN CANDRABINDU

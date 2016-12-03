@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.18,
+   locale_version => 1.19,
    entry => <<'ENTRY', # for DUCET v8.0.0
 006E 0067 ; [.1D35.0020.0002] # <LATIN SMALL LETTER N, LATIN SMALL LETTER G>
 004E 0067 ; [.1D35.0020.0007] # <LATIN CAPITAL LETTER N, LATIN SMALL LETTER G>
