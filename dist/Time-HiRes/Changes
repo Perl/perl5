@@ -1,7 +1,18 @@
 Revision history for the Perl extension Time::HiRes.
 
-1.9740_01 [2016-10-01]
-  - explicit cast to clockid_t needed for C++11 (gcc 6, clang 3.9)
+1.9741 [2016-11-20]
+  - C++11 compatibility: blead a914236c
+  - El Capitan compatibility: blead 45bbc013
+  - use CLOCK_REALTIME for clock_nanosleep scan: blead 56ed632c
+  - include file consistency in scans: blead 605b4dbe
+  - use clockid_t consistently: blead 2979fdf3
+  - use hv_fetchs(): blead 07e4dd7a
+  - scan for clockid_t (needed for macos Sierra): blead 69d1f2c2
+  - darwin lacks clockid_t: blead d1e7b5aa
+    [rt.cpan.org #129789]
+  - provide template for tempfile: blead 91dca83e
+  - explicit cast for clockid_t in C++11: blead 1c566547
+  - upgrade to a newer ppport (3.35)
 
 1.9740 [2016-09-25]
   - the ext3/ext2 filesystems do not have subsecond resolution,
