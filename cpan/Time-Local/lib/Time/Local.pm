@@ -2,11 +2,10 @@ package Time::Local;
 
 use strict;
 
-use Carp;
-use Config;
+use Carp ();
 use Exporter;
 
-our $VERSION = '1.24';
+our $VERSION = '1.25';
 
 use parent 'Exporter';
 
@@ -31,14 +30,20 @@ use constant SECS_PER_DAY    => 86400;
 
 my $MaxDay;
 if ( $] < 5.012000 ) {
+    require Config;
+    ## no critic (Variables::ProhibitPackageVars)
+
     my $MaxInt;
     if ( $^O eq 'MacOS' ) {
 
         # time_t is unsigned...
-        $MaxInt = ( 1 << ( 8 * $Config{ivsize} ) ) - 1;
+        $MaxInt = ( 1 << ( 8 * $Config::Config{ivsize} ) )
+            - 1;    ## no critic qw(ProhibitPackageVars)
     }
     else {
-        $MaxInt = ( ( 1 << ( 8 * $Config{ivsize} - 2 ) ) - 1 ) * 2 + 1;
+        $MaxInt
+            = ( ( 1 << ( 8 * $Config::Config{ivsize} - 2 ) ) - 1 ) * 2
+            + 1;    ## no critic qw(ProhibitPackageVars)
     }
 
     $MaxDay = int( ( $MaxInt - ( SECS_PER_DAY / 2 ) ) / SECS_PER_DAY ) - 1;
@@ -83,8 +88,7 @@ sub _daygm {
                 + int( $year / 4 )
                     - int( $year / 100 )
                     + int( $year / 400 )
-                    + int( ( ( $month * 306 ) + 5 ) / 10 ) )
-                - $Epoc;
+                    + int( ( ( $month * 306 ) + 5 ) / 10 ) ) - $Epoc;
             }
     );
 }
@@ -109,7 +113,7 @@ sub timegm {
     }
 
     unless ( $Options{no_range_check} ) {
-        croak "Month '$month' out of range 0..11"
+        Carp::croak("Month '$month' out of range 0..11")
             if $month > 11
             or $month < 0;
 
@@ -117,10 +121,14 @@ sub timegm {
         ++$md
             if $month == 1 && _is_leap_year( $year + 1900 );
 
-        croak "Day '$mday' out of range 1..$md"  if $mday > $md or $mday < 1;
-        croak "Hour '$hour' out of range 0..23"  if $hour > 23  or $hour < 0;
-        croak "Minute '$min' out of range 0..59" if $min > 59   or $min < 0;
-        croak "Second '$sec' out of range 0..59" if $sec >= 60  or $sec < 0;
+        Carp::croak("Day '$mday' out of range 1..$md")
+            if $mday > $md or $mday < 1;
+        Carp::croak("Hour '$hour' out of range 0..23")
+            if $hour > 23 or $hour < 0;
+        Carp::croak("Minute '$min' out of range 0..59")
+            if $min > 59 or $min < 0;
+        Carp::croak("Second '$sec' out of range 0..59")
+            if $sec >= 60 or $sec < 0;
     }
 
     my $days = _daygm( undef, undef, undef, $mday, $month, $year );
@@ -133,7 +141,7 @@ sub timegm {
         $msg
             .= "Cannot handle date ($sec, $min, $hour, $mday, $month, $year)";
 
-        croak $msg;
+        Carp::croak($msg);
     }
 
     return
@@ -214,7 +222,7 @@ Time::Local - Efficiently compute time from local and GMT time
 
 =head1 VERSION
 
-version 1.24
+version 1.25
 
 =head1 SYNOPSIS
 
@@ -370,23 +378,36 @@ The current version was written by Graham Barr.
 
 The whole scheme for interpreting two-digit years can be considered a bug.
 
-Bugs may be submitted through L<the RT bug tracker|http://rt.cpan.org/Public/Dist/Display.html?Name=Time-Local>
-(or L<bug-time-local@rt.cpan.org|mailto:bug-time-local@rt.cpan.org>).
+Bugs may be submitted through L<https://github.com/houseabsolute/Time-Local/issues>.
 
 There is a mailing list available for users of this distribution,
 L<mailto:datetime@perl.org>.
 
-I am also usually active on IRC as 'drolsky' on C<irc://irc.perl.org>.
+I am also usually active on IRC as 'autarch' on C<irc://irc.perl.org>.
 
 =head1 AUTHOR
 
 Dave Rolsky <autarch@urth.org>
 
-=head1 CONTRIBUTOR
+=head1 CONTRIBUTORS
 
-=for stopwords Florian Ragwitz
+=for stopwords Florian Ragwitz J. Nick Koston Unknown
+
+=over 4
+
+=item *
 
 Florian Ragwitz <rafl@debian.org>
+
+=item *
+
+J. Nick Koston <nick@cpanel.net>
+
+=item *
+
+Unknown <unknown@example.com>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
