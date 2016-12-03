@@ -705,8 +705,8 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
     PL_parser = parser;
 
     parser->stack = NULL;
+    parser->stack_max1 = NULL;
     parser->ps = NULL;
-    parser->stack_size = 0;
 
     /* on scope exit, free this parser and restore any outer one */
     SAVEPARSER(parser);

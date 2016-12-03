@@ -42,9 +42,9 @@ typedef struct yy_parser {
     /* Number of tokens to shift before error messages enabled.  */
     int		    yyerrstatus;
 
-    int		    stack_size;
     int		    yylen;	/* length of active reduction */
     yy_stack_frame  *stack;	/* base of stack */
+    yy_stack_frame  *stack_max1;/* (top-1)th element of alloacted stack */
     yy_stack_frame  *ps;	/* current stack frame */
 
     /* lexer state */

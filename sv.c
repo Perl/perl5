@@ -13130,7 +13130,7 @@ Perl_parser_dup(pTHX_ const yy_parser *const proto, CLONE_PARAMS *const param)
     parser->old_parser = NULL;
     parser->stack = NULL;
     parser->ps = NULL;
-    parser->stack_size = 0;
+    parser->stack_max1 = 0;
     /* XXX parser->stack->state = 0; */
 
     /* XXX eventually, just Copy() most of the parser struct ? */

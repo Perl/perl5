@@ -273,17 +273,17 @@ Perl_yyparse (pTHX_ int gramtype)
     SAVEPPTR(parser->yylval.pval);
     SAVEINT(parser->yychar);
     SAVEINT(parser->yyerrstatus);
-    SAVEINT(parser->stack_size);
     SAVEINT(parser->yylen);
     SAVEVPTR(parser->stack);
+    SAVEVPTR(parser->stack_max1);
     SAVEVPTR(parser->ps);
 
     /* initialise state for this parse */
     parser->yychar = gramtype;
     parser->yyerrstatus = 0;
-    parser->stack_size = YYINITDEPTH;
     parser->yylen = 0;
     Newx(parser->stack, YYINITDEPTH, yy_stack_frame);
+    parser->stack_max1 = parser->stack + YYINITDEPTH - 1;
     ps = parser->ps = parser->stack;
     ps->state = 0;
     SAVEDESTRUCTOR_X(S_clear_yystack, parser);
@@ -300,20 +300,22 @@ Perl_yyparse (pTHX_ int gramtype)
     parser->yylen = 0;
 
     {
-	size_t size = ps - parser->stack + 1;
-
 	/* grow the stack? We always leave 1 spare slot,
-	 * in case of a '' -> 'foo' reduction */
+	 * in case of a '' -> 'foo' reduction.
+         * Note that stack_max1 points to the (top-1)th allocated stack
+         * element to make this check fast */
 
-	if (size >= (size_t)parser->stack_size - 1) {
+	if (ps >= parser->stack_max1) {
+            Size_t pos = ps - parser->stack;
+            Size_t newsize = 2 * (parser->stack_max1 + 2 - parser->stack);
 	    /* this will croak on insufficient memory */
-	    parser->stack_size *= 2;
-	    Renew(parser->stack, parser->stack_size, yy_stack_frame);
-	    ps = parser->ps = parser->stack + size -1;
+	    Renew(parser->stack, newsize, yy_stack_frame);
+	    ps = parser->ps = parser->stack + pos;
+	    parser->stack_max1 = parser->stack + newsize - 1;
 
 	    YYDPRINTF((Perl_debug_log,
 			    "parser stack size increased to %lu frames\n",
-			    (unsigned long int)parser->stack_size));
+			    (unsigned long int)newsize));
 	}
     }
 
