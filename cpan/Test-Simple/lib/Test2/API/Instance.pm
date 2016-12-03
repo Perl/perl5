@@ -2,7 +2,7 @@ package Test2::API::Instance;
 use strict;
 use warnings;
 
-our $VERSION = '1.302062';
+our $VERSION = '1.302067';
 
 
 our @CARP_NOT = qw/Test2::API Test2::API::Instance Test2::IPC::Driver Test2::Formatter/;
@@ -304,6 +304,13 @@ sub ipc_enable_shm {
     $self->{+_TID} = get_tid() unless defined $self->{+_TID};
 
     my ($ok, $err) = try {
+        # SysV IPC can be available but not enabled.
+        #
+        # In some systems (*BSD) accessing the SysV IPC APIs without
+        # them being enabled can cause a SIGSYS.  We suppress the SIGSYS
+        # and then get ENOSYS from the calls.
+        local $SIG{SYS} = 'IGNORE';
+
         require IPC::SysV;
 
         my $ipc_key = IPC::SysV::IPC_PRIVATE();
@@ -488,6 +495,7 @@ This is not a supported configuration, you will have problems.
             $root->finalize($trace) unless $root->ended;
             $_->($ctx, $exit, \$new_exit) for @{$self->{+EXIT_CALLBACKS}};
             $new_exit ||= $root->failed;
+            $new_exit ||= 255 unless $root->is_passing;
         }
     }
 

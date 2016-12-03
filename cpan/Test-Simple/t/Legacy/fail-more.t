@@ -440,16 +440,13 @@ ERR
 not ok - undef ne empty string
 OUT
 
-    TODO: {
-        local $::TODO = 'cmp_ok() gives the wrong "expected" for undef';
-
-        $TB->is_eq( $err->read, <<ERR );
+    $TB->is_eq( $err->read, <<ERR );
 #   Failed test 'undef ne empty string'
 #   at $0 line 437.
-#          got: undef
-#     expected: ''
+#     undef
+#         ne
+#     ''
 ERR
-    }
 
     My::Test::like(
         $warnings,

@@ -9,7 +9,7 @@ use Test2::Event::Bail;
 {
 
 	package Formatter::Subclass;
-	use parent 'Test2::Formatter';
+	use base 'Test2::Formatter';
 	use Test2::Util::HashBase qw{f t};
 
     sub init {

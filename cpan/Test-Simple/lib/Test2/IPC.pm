@@ -2,7 +2,7 @@ package Test2::IPC;
 use strict;
 use warnings;
 
-our $VERSION = '1.302062';
+our $VERSION = '1.302067';
 
 
 use Test2::API::Instance;
@@ -14,6 +14,7 @@ use Test2::API qw{
     test2_pid
     test2_stack
     test2_tid
+    context
 };
 
 use Carp qw/confess/;

@@ -5,6 +5,7 @@ BEGIN { require "t/tools.pl" };
 
 use Test2::Event::Info;
 use Test2::Util::Trace;
+use Test2::API qw/intercept/;
 
 my @got;
 
@@ -41,5 +42,10 @@ like(
     qr/'renderer' is a required attribute at foo\.pl line 42/,
     "Got expected error"
 );
+
+# For #727
+$info = intercept { ok(0, 'xxx', sub { 'xxx-yyy' }); }->[-1];
+ok($info->isa('Test2::Event::Info'), "Got an Info event");
+is($info->render, 'xxx-yyy', "Got rendered info");
 
 done_testing;

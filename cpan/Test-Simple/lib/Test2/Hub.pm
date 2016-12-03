@@ -2,11 +2,11 @@ package Test2::Hub;
 use strict;
 use warnings;
 
-our $VERSION = '1.302062';
+our $VERSION = '1.302067';
 
 
 use Carp qw/carp croak confess/;
-use Test2::Util qw/get_tid/;
+use Test2::Util qw/get_tid ipc_separator/;
 
 use Scalar::Util qw/weaken/;
 
@@ -39,7 +39,7 @@ sub init {
 
     $self->{+PID} = $$;
     $self->{+TID} = get_tid();
-    $self->{+HID} = join '-', $self->{+PID}, $self->{+TID}, $ID_POSTFIX++;
+    $self->{+HID} = join ipc_separator, $self->{+PID}, $self->{+TID}, $ID_POSTFIX++;
 
     $self->{+COUNT}    = 0;
     $self->{+FAILED}   = 0;
@@ -285,9 +285,11 @@ sub process {
     my $is_ok = $type eq 'Test2::Event::Ok';
     my $no_fail = $type eq 'Test2::Event::Diag' || $type eq 'Test2::Event::Note';
     my $causes_fail = $is_ok ? !$e->{effective_pass} : $no_fail ? 0 : $e->causes_fail;
+    my $counted = $is_ok || (!$no_fail && $e->increments_count);
 
-    $self->{+COUNT}++  if $is_ok || (!$no_fail && $e->increments_count);
-    $self->{+FAILED}++ and $self->{+_PASSING} = 0 if $causes_fail;
+    $self->{+COUNT}++      if $counted;
+    $self->{+FAILED}++     if $causes_fail && $counted;
+    $self->{+_PASSING} = 0 if $causes_fail;
 
     my $callback = $e->callback($self) unless $is_ok || $no_fail;
 
@@ -390,7 +392,7 @@ sub is_passing {
     ($self->{+_PASSING}) = @_ if @_;
 
     # If we already failed just return 0.
-    my $pass = $self->{+_PASSING} || return 0;
+    my $pass = $self->{+_PASSING} or return 0;
     return $self->{+_PASSING} = 0 if $self->{+FAILED};
 
     my $count = $self->{+COUNT};

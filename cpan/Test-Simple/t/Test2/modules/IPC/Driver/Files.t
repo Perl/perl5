@@ -1,5 +1,5 @@
 BEGIN { require "t/tools.pl" };
-use Test2::Util qw/get_tid USE_THREADS try/;
+use Test2::Util qw/get_tid USE_THREADS try ipc_separator/;
 use File::Temp qw/tempfile/;
 use File::Spec qw/catfile/;
 use List::Util qw/shuffle/;
@@ -41,10 +41,10 @@ ok(-d $ipc->tempdir, "created temp dir");
 is($ipc->pid, $$, "stored pid");
 is($ipc->tid, get_tid(), "stored the tid");
 
-my $hid = '12345-1-1';
+my $hid = join ipc_separator, qw'12345 1 1';
 
 $ipc->add_hub($hid);
-my $hubfile = File::Spec->catfile($ipc->tempdir, "HUB-$hid");
+my $hubfile = File::Spec->catfile($ipc->tempdir, "HUB" . ipc_separator . $hid);
 ok(-f $hubfile, "wrote hub file");
 if(ok(open(my $fh, '<', $hubfile), "opened hub file")) {
     my @lines = <$fh>;
@@ -64,8 +64,9 @@ if(ok(open(my $fh, '<', $hubfile), "opened hub file")) {
 $ipc->send($hid, bless({ foo => 1 }, 'Foo'));
 $ipc->send($hid, bless({ bar => 1 }, 'Foo'));
 
+my $sep = ipc_separator;
 opendir(my $dh, $ipc->tempdir) || die "Could not open tempdir: !?";
-my @files = grep { $_ !~ m/^\.+$/ && $_ !~ m/^HUB-$hid/ } readdir($dh);
+my @files = grep { $_ !~ m/^\.+$/ && $_ !~ m/^HUB${sep}$hid/ } readdir($dh);
 closedir($dh);
 is(@files, 2, "2 files added to the IPC directory");
 
@@ -77,7 +78,7 @@ is_deeply(
 );
 
 opendir($dh, $ipc->tempdir) || die "Could not open tempdir: !?";
-@files = grep { $_ !~ m/^\.+$/ && $_ !~ m/^HUB-$hid/ } readdir($dh);
+@files = grep { $_ !~ m/^\.+$/ && $_ !~ m/^HUB$sep$hid/ } readdir($dh);
 closedir($dh);
 is(@files, 0, "All files collected");
 
@@ -172,8 +173,8 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     like($out->{STDERR}, qr/IPC Temp Dir: \Q$tmpdir\E/m, "Got temp dir path");
     like($out->{STDERR}, qr/^# Not removing temp dir: \Q$tmpdir\E$/m, "Notice about not closing tempdir");
 
-    like($out->{STDERR}, qr/^IPC Fatal Error: File for hub '12345-1-1' already exists/m, "Got message for duplicate hub");
-    like($out->{STDERR}, qr/^IPC Fatal Error: File for hub '12345-1-1' does not exist/m, "Cannot remove hub twice");
+    like($out->{STDERR}, qr/^IPC Fatal Error: File for hub '$hid' already exists/m, "Got message for duplicate hub");
+    like($out->{STDERR}, qr/^IPC Fatal Error: File for hub '$hid' does not exist/m, "Cannot remove hub twice");
 
     $out = simple_capture {
         my $ipc = Test2::IPC::Driver::Files->new();
@@ -186,7 +187,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
 
     like($out->{STDERR}, qr/IPC Fatal Error:/, "Got fatal error");
     like($out->{STDERR}, qr/There was an error writing an event/, "Explanation");
-    like($out->{STDERR}, qr/Destination: 12345-1-1/, "Got dest");
+    like($out->{STDERR}, qr/Destination: $hid/, "Got dest");
     like($out->{STDERR}, qr/Origin PID:\s+$$/, "Got pid");
     like($out->{STDERR}, qr/Error: Can't store GLOB items/, "Got cause");
 
@@ -197,7 +198,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
         print STDERR $@ unless $@ =~ m/^255/;
         $ipc = undef;
     };
-    like($out->{STDERR}, qr/IPC Fatal Error: hub '12345-1-1' is not available, failed to send event!/, "Cannot send to missing hub");
+    like($out->{STDERR}, qr/IPC Fatal Error: hub '$hid' is not available, failed to send event!/, "Cannot send to missing hub");
 
     $out = simple_capture {
         my $ipc = Test2::IPC::Driver::Files->new();
@@ -209,7 +210,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
         print STDERR $@ unless $@ =~ m/^255/;
     };
     $cleanup->();
-    like($out->{STDERR}, qr/IPC Fatal Error: Not all files from hub '12345-1-1' have been collected/, "Leftover files");
+    like($out->{STDERR}, qr/IPC Fatal Error: Not all files from hub '$hid' have been collected/, "Leftover files");
     like($out->{STDERR}, qr/IPC Fatal Error: Leftover files in the directory \(.*\.ready\)/, "What file");
 
     $out = simple_capture {
@@ -347,7 +348,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     my $ipc = 'Test2::IPC::Driver::Files';
 
     is_deeply(
-        $ipc->parse_event_filename('GLOBAL-123-456-789-Event-Type-Foo.ready.complete'),
+        $ipc->parse_event_filename(join ipc_separator, qw'GLOBAL 123 456 789 Event Type Foo.ready.complete'),
         {
             ready    => 1,
             complete => 1,
@@ -362,7 +363,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     );
 
     is_deeply(
-        $ipc->parse_event_filename('GLOBAL-123-456-789-Event-Type-Foo.ready'),
+        $ipc->parse_event_filename(join ipc_separator, qw'GLOBAL 123 456 789 Event Type Foo.ready'),
         {
             ready    => 1,
             complete => 0,
@@ -377,7 +378,7 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     );
 
     is_deeply(
-        $ipc->parse_event_filename('GLOBAL-123-456-789-Event-Type-Foo'),
+        $ipc->parse_event_filename(join ipc_separator, qw'GLOBAL 123 456 789 Event Type Foo'),
         {
             ready    => 0,
             complete => 0,
@@ -392,13 +393,13 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     );
 
     is_deeply(
-        $ipc->parse_event_filename('1-1-1-123-456-789-Event-Type-Foo.ready.complete'),
+        $ipc->parse_event_filename(join ipc_separator, qw'1 1 1 123 456 789 Event Type Foo.ready.complete'),
         {
             ready    => 1,
             complete => 1,
             global   => 0,
             type     => "Event::Type::Foo",
-            hid      => "1-1-1",
+            hid      => "1${sep}1${sep}1",
             pid      => "123",
             tid      => "456",
             eid      => "789",
@@ -407,13 +408,13 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     );
 
     is_deeply(
-        $ipc->parse_event_filename('1-2-3-123-456-789-Event-Type-Foo.ready'),
+        $ipc->parse_event_filename(join ipc_separator, qw'1 2 3 123 456 789 Event Type Foo.ready'),
         {
             ready    => 1,
             complete => 0,
             global   => 0,
             type     => "Event::Type::Foo",
-            hid      => "1-2-3",
+            hid      => "1${sep}2${sep}3",
             pid      => "123",
             tid      => "456",
             eid      => "789",
@@ -422,13 +423,13 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     );
 
     is_deeply(
-        $ipc->parse_event_filename('3-2-11-123-456-789-Event'),
+        $ipc->parse_event_filename(join ipc_separator, qw'3 2 11 123 456 789 Event'),
         {
             ready    => 0,
             complete => 0,
             global   => 0,
             type     => "Event",
-            hid      => "3-2-11",
+            hid      => "3${sep}2${sep}11",
             pid      => "123",
             tid      => "456",
             eid      => "789",
@@ -440,83 +441,83 @@ ok(!-d $tmpdir, "cleaned up temp dir");
 {
     my $ipc = Test2::IPC::Driver::Files->new();
 
-    my $hid = "1-1-1";
+    my $hid = join ipc_separator, qw"1 1 1";
 
     is_deeply(
-        $ipc->should_read_event($hid, "GLOBAL-123-456-789-Event-Type-Foo.ready.complete") ? 1 : 0,
+        $ipc->should_read_event($hid, join ipc_separator, qw"GLOBAL 123 456 789 Event Type Foo.ready.complete") ? 1 : 0,
         0,
         "Do not read complete global"
     );
 
     is_deeply(
-        $ipc->should_read_event($hid, "GLOBAL-123-456-789-Event-Type-Foo.ready") ? 1 : 0,
+        $ipc->should_read_event($hid, join ipc_separator, qw"GLOBAL 123 456 789 Event Type Foo.ready") ? 1 : 0,
         1,
         "Should read ready global the first time"
     );
     is_deeply(
-        $ipc->should_read_event($hid, "GLOBAL-123-456-789-Event-Type-Foo.ready") ? 1 : 0,
+        $ipc->should_read_event($hid, join ipc_separator, qw"GLOBAL 123 456 789 Event Type Foo.ready") ? 1 : 0,
         0,
         "Should not read ready global again"
     );
 
     is_deeply(
-        $ipc->should_read_event($hid, "GLOBAL-123-456-789-Event-Type-Foo") ? 1 : 0,
+        $ipc->should_read_event($hid, join ipc_separator, qw"GLOBAL 123 456 789 Event Type Foo") ? 1 : 0,
         0,
         "Should not read un-ready global"
     );
 
     is_deeply(
-        $ipc->should_read_event($hid, "$hid-123-456-789-Event-Type-Foo.ready.complete") ? 1 : 0,
+        $ipc->should_read_event($hid, join ipc_separator, $hid, qw"123 456 789 Event Type Foo.ready.complete") ? 1 : 0,
         0,
         "Do not read complete our hid"
     );
 
     is_deeply(
-        $ipc->should_read_event($hid, "$hid-123-456-789-Event-Type-Foo.ready") ? 1 : 0,
+        $ipc->should_read_event($hid, join ipc_separator, $hid, qw"123 456 789 Event Type Foo.ready") ? 1 : 0,
         1,
         "Should read ready our hid"
     );
 
     is_deeply(
-        $ipc->should_read_event($hid, "$hid-123-456-789-Event-Type-Foo.ready") ? 1 : 0,
+        $ipc->should_read_event($hid, join ipc_separator, $hid, qw"123 456 789 Event Type Foo.ready") ? 1 : 0,
         1,
         "Should read ready our hid (again, no duplicate checking)"
     );
 
     is_deeply(
-        $ipc->should_read_event($hid, "$hid-123-456-789-Event-Type-Foo") ? 1 : 0,
+        $ipc->should_read_event($hid, join ipc_separator, $hid, qw"123 456 789 Event Type Foo") ? 1 : 0,
         0,
         "Should not read un-ready our hid"
     );
 
     is_deeply(
-        $ipc->should_read_event($hid, "1-2-3-123-456-789-Event-Type-Foo.ready.complete") ? 1 : 0,
+        $ipc->should_read_event($hid, join ipc_separator, qw"1 2 3 123 456 789 Event Type Foo.ready.complete") ? 1 : 0,
         0,
         "Not ours - complete"
     );
 
     is_deeply(
-        $ipc->should_read_event($hid, "1-2-3-123-456-789-Event-Type-Foo.ready") ? 1 : 0,
+        $ipc->should_read_event($hid, join ipc_separator, qw"1 2 3 123 456 789 Event Type Foo.ready") ? 1 : 0,
         0,
         "Not ours - ready"
     );
 
     is_deeply(
-        $ipc->should_read_event($hid, "1-2-3-123-456-789-Event-Type-Foo") ? 1 : 0,
+        $ipc->should_read_event($hid, join ipc_separator, qw"1 2 3 123 456 789 Event Type Foo") ? 1 : 0,
         0,
         "Not ours - unready"
     );
 
-    my @got = $ipc->should_read_event($hid, "$hid-123-456-789-Event-Type-Foo");
+    my @got = $ipc->should_read_event($hid, join ipc_separator, $hid, qw"123 456 789 Event Type Foo");
     ok(!@got, "return empty list for false");
 
-    @got = $ipc->should_read_event($hid, "$hid-123-456-789-Event-Type-Foo.ready");
+    @got = $ipc->should_read_event($hid, join ipc_separator, $hid, qw"123 456 789 Event Type Foo.ready");
     is(@got, 1, "got 1 item on true");
 
-    like(delete $got[0]->{full_path}, qr{^.+\Q$hid\E-123-456-789-Event-Type-Foo\.ready$}, "Got full path");
+    like(delete $got[0]->{full_path}, qr{^.+\Q$hid\E${sep}123${sep}456${sep}789${sep}Event${sep}Type${sep}Foo\.ready$}, "Got full path");
     is_deeply(
         $got[0],
-        $ipc->parse_event_filename("$hid-123-456-789-Event-Type-Foo.ready"),
+        $ipc->parse_event_filename(join ipc_separator, $hid, qw"123 456 789 Event Type Foo.ready"),
         "Apart from full_path we get entire parsed filename"
     );
 

@@ -2,7 +2,7 @@ package Test2::IPC::Driver::Files;
 use strict;
 use warnings;
 
-our $VERSION = '1.302062';
+our $VERSION = '1.302067';
 
 
 BEGIN { require Test2::IPC::Driver; our @ISA = qw(Test2::IPC::Driver) }
@@ -15,7 +15,7 @@ use Storable();
 use File::Spec();
 use POSIX();
 
-use Test2::Util qw/try get_tid pkg_to_file IS_WIN32/;
+use Test2::Util qw/try get_tid pkg_to_file IS_WIN32 ipc_separator/;
 use Test2::API qw/test2_ipc_set_pending/;
 
 BEGIN {
@@ -72,7 +72,7 @@ sub init {
     my $self = shift;
 
     my $tmpdir = File::Temp::tempdir(
-        $ENV{T2_TEMPDIR_TEMPLATE} || "test2-$$-XXXXXX",
+        $ENV{T2_TEMPDIR_TEMPLATE} || "test2" . ipc_separator . $$ . ipc_separator . "XXXXXX",
         CLEANUP => 0,
         TMPDIR => 1,
     );
@@ -98,7 +98,7 @@ sub hub_file {
     my $self = shift;
     my ($hid) = @_;
     my $tdir = $self->{+TEMPDIR};
-    return File::Spec->catfile($tdir, "HUB-$hid");
+    return File::Spec->catfile($tdir, "HUB" . ipc_separator . $hid);
 }
 
 sub event_file {
@@ -112,7 +112,7 @@ sub event_file {
         unless $type->isa('Test2::Event');
 
     my @type = split '::', $type;
-    my $name = join('-', $hid, $$, get_tid(), $self->{+EVENT_ID}++, @type);
+    my $name = join(ipc_separator, $hid, $$, get_tid(), $self->{+EVENT_ID}++, @type);
 
     return File::Spec->catfile($tempdir, $name);
 }
@@ -296,8 +296,8 @@ sub parse_event_filename {
     my $complete = substr($file, -9, 9) eq '.complete' || 0 and substr($file, -9, 9, "");
     my $ready    = substr($file, -6, 6) eq '.ready'    || 0 and substr($file, -6, 6, "");
 
-    my @parts = split '-', $file;
-    my ($global, $hid) = $parts[0] eq 'GLOBAL' ? (1, shift @parts) : (0, join '-' => splice(@parts, 0, 3));
+    my @parts = split ipc_separator, $file;
+    my ($global, $hid) = $parts[0] eq 'GLOBAL' ? (1, shift @parts) : (0, join ipc_separator, splice(@parts, 0, 3));
     my ($pid, $tid, $eid) = splice(@parts, 0, 3);
     my $type = join '::' => @parts;
 
@@ -398,7 +398,8 @@ sub DESTROY {
         next if $file =~ m/\.complete$/;
         my $full = File::Spec->catfile($tempdir, $file);
 
-        if ($file =~ m/^(GLOBAL|HUB-)/) {
+        my $sep = ipc_separator;
+        if ($file =~ m/^(GLOBAL|HUB$sep)/) {
             $full =~ m/^(.*)$/;
             $full = $1; # Untaint it
             next if $ENV{T2_KEEP_TEMPDIR};

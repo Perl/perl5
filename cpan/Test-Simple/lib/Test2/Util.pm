@@ -2,7 +2,7 @@ package Test2::Util;
 use strict;
 use warnings;
 
-our $VERSION = '1.302062';
+our $VERSION = '1.302067';
 
 
 use Config qw/%Config/;
@@ -18,6 +18,8 @@ our @EXPORT_OK = qw{
     CAN_FORK
 
     IS_WIN32
+
+    ipc_separator
 };
 BEGIN { require Exporter; our @ISA = qw(Exporter) }
 
@@ -138,6 +140,8 @@ sub pkg_to_file {
     $file .= '.pm';
     return $file;
 }
+
+sub ipc_separator() { "~" }
 
 1;
 

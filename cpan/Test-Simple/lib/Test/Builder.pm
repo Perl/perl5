@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302062';
+our $VERSION = '1.302067';
 
 BEGIN {
     if( $] < 5.008 ) {
@@ -238,6 +238,7 @@ sub finalize {
     my $plan   = $chub->plan || 0;
     my $count  = $chub->count;
     my $failed = $chub->failed;
+    my $passed = $chub->is_passing;
 
     my $num_extra = $plan =~ m/\D/ ? 0 : $count - $plan;
     if ($count && $num_extra != 0) {
@@ -254,6 +255,12 @@ FAIL
 
         $st_ctx->diag(<<"FAIL");
 Looks like you failed $failed test$s of $count$qualifier.
+FAIL
+    }
+
+    if (!$passed && !$failed && $count && !$num_extra) {
+        $st_ctx->diag(<<"FAIL");
+All assertions inside the subtest passed, but errors were encountered.
 FAIL
     }
 
@@ -919,7 +926,20 @@ END
             $self->_is_diag( $got, $type, $expect );
         }
         elsif( $type =~ /^(ne|!=)$/ ) {
-            $self->_isnt_diag( $got, $type );
+            no warnings;
+            my $eq = ($got eq $expect || $got == $expect)
+                && (
+                    (defined($got) xor defined($expect))
+                 || (length($got)  !=  length($expect))
+                );
+            use warnings;
+
+            if ($eq) {
+                $self->_cmp_diag( $got, $type, $expect );
+            }
+            else {
+                $self->_isnt_diag( $got, $type );
+            }
         }
         else {
             $self->_cmp_diag( $got, $type, $expect );
@@ -1550,6 +1570,7 @@ sub _ending {
     my $plan  = $hub->plan;
     my $count = $hub->count;
     my $failed = $hub->failed;
+    my $passed = $hub->is_passing;
     return unless $plan || $count || $failed;
 
     # Ran tests but never declared a plan or hit done_testing
@@ -1622,11 +1643,20 @@ Looks like you failed $failed test$s of $count$qualifier.
 FAIL
     }
 
+    if (!$passed && !$failed && $count && !$num_extra) {
+        $ctx->diag(<<"FAIL");
+All assertions passed, but errors were encountered.
+FAIL
+    }
+
     my $exit_code = 0;
     if ($failed) {
         $exit_code = $failed <= 254 ? $failed : 254;
     }
     elsif ($num_extra != 0) {
+        $exit_code = 255;
+    }
+    elsif (!$passed) {
         $exit_code = 255;
     }
 

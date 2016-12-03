@@ -17,7 +17,7 @@ sub _carp {
     return warn @_, " at $file line $line\n";
 }
 
-our $VERSION = '1.302062';
+our $VERSION = '1.302067';
 
 use Test::Builder::Module;
 our @ISA    = qw(Test::Builder::Module);
@@ -976,7 +976,10 @@ sub use_ok ($;@) {
     @imports = () unless @imports;
     my $tb = Test::More->builder;
 
-    my( $pack, $filename, $line ) = caller;
+    my %caller;
+    @caller{qw/pack file line sub args want eval req strict warn/} = caller(0);
+
+    my ($pack, $filename, $line, $warn) = @caller{qw/pack file line warn/};
     $filename =~ y/\n\r/_/; # so it doesn't run off the "#line $line $f" line
 
     my $code;
@@ -985,7 +988,7 @@ sub use_ok ($;@) {
         # for it to work with non-Exporter based modules.
         $code = <<USE;
 package $pack;
-
+BEGIN { \${^WARNING_BITS} = \$args[-1] if defined \$args[-1] }
 #line $line $filename
 use $module $imports[0];
 1;
@@ -994,14 +997,14 @@ USE
     else {
         $code = <<USE;
 package $pack;
-
+BEGIN { \${^WARNING_BITS} = \$args[-1] if defined \$args[-1] }
 #line $line $filename
 use $module \@{\$args[0]};
 1;
 USE
     }
 
-    my( $eval_result, $eval_error ) = _eval( $code, \@imports );
+    my ($eval_result, $eval_error) = _eval($code, \@imports, $warn);
     my $ok = $tb->ok( $eval_result, "use $module;" );
 
     unless($ok) {

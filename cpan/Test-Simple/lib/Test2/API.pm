@@ -2,7 +2,12 @@ package Test2::API;
 use strict;
 use warnings;
 
-our $VERSION = '1.302062';
+BEGIN {
+    $ENV{TEST_ACTIVE} ||= 1;
+    $ENV{TEST2_ACTIVE} = 1;
+}
+
+our $VERSION = '1.302067';
 
 
 my $INST;

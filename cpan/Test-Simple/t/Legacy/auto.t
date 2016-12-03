@@ -3,7 +3,7 @@ use warnings;
 
 use lib 't/lib';
 
-use Test::Tester tests => 5;
+use Test::Tester tests => 6;
 
 use SmallTest;
 
@@ -28,3 +28,9 @@ use MyTest;
 }
 
 is_eq(ref(SmallTest::getTest()), "Test::Tester::Delegate");
+
+is_eq(
+	SmallTest::getTest()->can('ok'),
+	Test::Builder->can('ok'),
+	"Delegate->can() returns the sub from the inner object",
+);

@@ -2704,6 +2704,8 @@ cpan/Test-Simple/t/Legacy/plan_shouldnt_import.t
 cpan/Test-Simple/t/Legacy/plan_skip_all.t
 cpan/Test-Simple/t/Legacy/Regression/637.t
 cpan/Test-Simple/t/Legacy/Regression/683_thread_todo.t
+cpan/Test-Simple/t/Legacy/Regression/6_cmp_ok.t
+cpan/Test-Simple/t/Legacy/Regression/736_use_ok.t
 cpan/Test-Simple/t/Legacy/require_ok.t
 cpan/Test-Simple/t/Legacy/run_test.t
 cpan/Test-Simple/t/Legacy/simple.t
@@ -2748,6 +2750,7 @@ cpan/Test-Simple/t/Legacy/useing.t
 cpan/Test-Simple/t/Legacy/utf8.t
 cpan/Test-Simple/t/Legacy/versions.t
 cpan/Test-Simple/t/Legacy_And_Test2/builder_loaded_late.t
+cpan/Test-Simple/t/Legacy_And_Test2/hidden_warnings.t
 cpan/Test-Simple/t/lib/Dev/Null.pm
 cpan/Test-Simple/t/lib/Dummy.pm
 cpan/Test-Simple/t/lib/MyOverload.pm

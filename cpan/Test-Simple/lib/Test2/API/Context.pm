@@ -2,11 +2,11 @@ package Test2::API::Context;
 use strict;
 use warnings;
 
-our $VERSION = '1.302062';
+our $VERSION = '1.302067';
 
 
 use Carp qw/confess croak longmess/;
-use Scalar::Util qw/weaken/;
+use Scalar::Util qw/weaken blessed/;
 use Test2::Util qw/get_tid try pkg_to_file get_tid/;
 
 use Test2::Util::Trace();
@@ -25,7 +25,7 @@ my %LOADED = (
 use Test2::Util::ExternalMeta qw/meta get_meta set_meta delete_meta/;
 use Test2::Util::HashBase qw{
     stack hub trace _on_release _depth _is_canon _is_spawn _aborted
-    errno eval_error child_error
+    errno eval_error child_error thrown
 };
 
 # Private, not package vars
@@ -114,6 +114,8 @@ Cleaning up the CONTEXT stack...
 sub release {
     my ($self) = @_;
 
+    ($!, $@, $?) = @$self{+ERRNO, +EVAL_ERROR, +CHILD_ERROR} and return if $self->{+THROWN};
+
     ($!, $@, $?) = @$self{+ERRNO, +EVAL_ERROR, +CHILD_ERROR} and return $self->{+_IS_SPAWN} = undef
         if $self->{+_IS_SPAWN};
 
@@ -189,6 +191,7 @@ sub done_testing {
 
 sub throw {
     my ($self, $msg) = @_;
+    $self->{+THROWN} = 1;
     ${$self->{+_ABORTED}}++ if $self->{+_ABORTED};
     $self->release if $self->{+_IS_CANON} || $self->{+_IS_SPAWN};
     $self->trace->throw($msg);
@@ -248,7 +251,7 @@ sub ok {
 
     if ($on_fail && @$on_fail) {
         for my $of (@$on_fail) {
-            if (ref($of)) {
+            if (ref($of) eq 'CODE' || (blessed($of) && $of->can('render'))) {
                 $self->info($of, diagnostics => 1);
             }
             else {
