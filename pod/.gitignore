@@ -17,7 +17,6 @@
 /perllinux.pod
 /perlmacos.pod
 /perlmacosx.pod
-/perlmodlib.pod
 /perlnetware.pod
 /perlopenbsd.pod
 /perlos2.pod
@@ -29,10 +28,8 @@
 /perlsolaris.pod
 /perlsymbian.pod
 /perlsynology.pod
-/perltoc.pod
 /perltru64.pod
 /perltw.pod
-/perluniprops.pod
 /perlvms.pod
 /perlvos.pod
 /perlwin32.pod
@@ -56,6 +53,9 @@
 /perl5258delta.pod
 /perlapi.pod
 /perlintern.pod
+/perlmodlib.pod
+/perltoc.pod
+/perluniprops.pod
 *.html
 *.man
 /perlfunc/
