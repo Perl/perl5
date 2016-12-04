@@ -289,6 +289,8 @@ Perl_yyparse (pTHX_ int gramtype)
 
     /* initialise state for this parse */
     parser->yychar = gramtype;
+    yytoken = YYTRANSLATE(NATIVE_TO_UNI(parser->yychar));
+
     parser->yyerrstatus = 0;
     parser->yylen = 0;
     Newx(parser->stack, YYINITDEPTH, yy_stack_frame);
@@ -325,40 +327,44 @@ Perl_yyparse (pTHX_ int gramtype)
 
             parser->yylen = 0;
 
-        /* Do appropriate processing given the current state.  */
-        /* Read a lookahead token if we need one and don't already have one.  */
+            /* Do appropriate processing given the current state. Read a
+             * lookahead token if we need one and don't already have one.
+             * */
 
-            /* First try to decide what to do without reference to lookahead token.  */
+            /* First try to decide what to do without reference to
+             * lookahead token. */
 
             yyn = yypact[yystate];
             if (yyn == YYPACT_NINF)
                 goto yydefault;
 
-            /* Not known => get a lookahead token if don't already have one.  */
+            /* Not known => get a lookahead token if don't already have
+             * one.  YYCHAR is either YYEMPTY or YYEOF or a valid
+             * lookahead symbol. */
 
-            /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
             if (parser->yychar == YYEMPTY) {
                 YYDPRINTF ((Perl_debug_log, "Reading a token:\n"));
                 parser->yychar = yylex();
+                assert(parser->yychar >= 0);
+                if (parser->yychar == YYEOF)
+                    YYDPRINTF ((Perl_debug_log, "Now at end of input.\n"));
+                /* perly.tab is shipped based on an ASCII system, so need
+                 * to index it with characters translated to ASCII.
+                 * Although it's not designed for this purpose, we can use
+                 * NATIVE_TO_UNI here.  It returns its argument on ASCII
+                 * platforms, and on EBCDIC translates native to ascii in
+                 * the 0-255 range, leaving everything else unchanged.
+                 * This jibes with yylex() returning some bare characters
+                 * in that range, but all tokens it returns are either 0,
+                 * or above 255.  There could be a problem if NULs weren't
+                 * 0, or were ever returned as raw chars by yylex() */
+                yytoken = YYTRANSLATE(NATIVE_TO_UNI(parser->yychar));
             }
 
-            if (parser->yychar <= YYEOF) {
-                parser->yychar = yytoken = YYEOF;
-                YYDPRINTF ((Perl_debug_log, "Now at end of input.\n"));
-            }
-            else {
-                /* perly.tab is shipped based on an ASCII system, so need to index it
-                 * with characters translated to ASCII.  Although it's not designed for
-                 * this purpose, we can use NATIVE_TO_UNI here.  It returns its
-                 * argument on ASCII platforms, and on EBCDIC translates native to
-                 * ascii in the 0-255 range, leaving everything else unchanged.  This
-                 * jibes with yylex() returning some bare characters in that range, but
-                 * all tokens it returns are either 0, or above 255.  There could be a
-                 * problem if NULs weren't 0, or were ever returned as raw chars by
-                 * yylex() */
-                yytoken = YYTRANSLATE (NATIVE_TO_UNI(parser->yychar));
-                YYDSYMPRINTF ("Next token is", yytoken, &parser->yylval);
-            }
+            /* make sure no-ones changed yychar since the last call to yylex */
+            assert(yytoken == YYTRANSLATE(NATIVE_TO_UNI(parser->yychar)));
+            YYDSYMPRINTF("lookahead token is", yytoken, &parser->yylval);
+
 
             /* If the proper action on seeing token YYTOKEN is to reduce or to
              * detect an error, take that action.

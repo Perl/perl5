@@ -143,7 +143,7 @@ grammar	:	GRAMPROG
 			  PL_eval_root = $3;
 			  $$ = 0;
 			  yyunlex();
-			  parser->yychar = YYEOF;
+			  parser->yychar = yytoken = YYEOF;
 			}
 	|	GRAMBARESTMT
 			{
@@ -155,7 +155,7 @@ grammar	:	GRAMPROG
 			  PL_eval_root = $3;
 			  $$ = 0;
 			  yyunlex();
-			  parser->yychar = YYEOF;
+			  parser->yychar = yytoken = YYEOF;
 			}
 	|	GRAMFULLSTMT
 			{
@@ -167,7 +167,7 @@ grammar	:	GRAMPROG
 			  PL_eval_root = $3;
 			  $$ = 0;
 			  yyunlex();
-			  parser->yychar = YYEOF;
+			  parser->yychar = yytoken = YYEOF;
 			}
 	|	GRAMSTMTSEQ
 			{
