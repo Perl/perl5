@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 162;
+plan tests => 163;
 
 $FS = ':';
 
@@ -629,3 +629,7 @@ is "@a", '1 2 3', 'assignment to split-to-array (stacked)';
     my @a = split ' ', $s;
     is (+@a, 0, "empty utf8 string");
 }
+
+fresh_perl_is(<<'CODE', '', {}, "scalar split stack overflow");
+map{int"";split//.0>60for"0000000000000000"}split// for"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+CODE
