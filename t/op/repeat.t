@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc( '../lib' );
 }
 
-plan(tests => 48);
+plan(tests => 49);
 
 # compile time
 
@@ -183,3 +183,12 @@ fresh_perl_like(
   {  },
  '(1) x ~1',
 );
+
+# [perl #130247] Perl_rpeep(OP *): Assertion `oldop' failed
+# 
+# the 'x 0' optimising code in rpeep didn't expect the repeat expression
+# to occur on the op_other side of an op_next chain.
+# This used to give an assertion failure
+
+eval q{() = (() or ((0) x 0)); 1};
+is($@, "", "RT #130247");
