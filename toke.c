@@ -4465,7 +4465,7 @@ static void
 S_check_scalar_slice(pTHX_ char *s)
 {
     s++;
-    while (*s == ' ' || *s == '\t') s++;
+    while (SPACE_OR_TAB(*s)) s++;
     if (*s == 'q' && s[1] == 'w' && !isWORDCHAR_lazy_if_safe(s+2,
                                                              PL_bufend,
                                                              UTF))
@@ -9781,7 +9781,7 @@ S_scan_heredoc(pTHX_ char *s)
 
 		    /* Only valid if it's preceded by whitespace only */
 		    while (backup != myolds && --backup >= myolds) {
-			if (*backup != ' ' && *backup != '\t') {
+			if (! SPACE_OR_TAB(*backup)) {
 			    break;
 			}
 
@@ -9917,14 +9917,14 @@ S_scan_heredoc(pTHX_ char *s)
 
 		/* Only valid if it's preceded by whitespace only */
 		while (backup != s && --backup >= s) {
-		    if (*backup != ' ' && *backup != '\t') {
+		    if (! SPACE_OR_TAB(*backup)) {
 			break;
 		    }
 		    indent_len++;
 		}
 
 		/* All whitespace or none! */
-		if (backup == found || *backup == ' ' || *backup == '\t') {
+		if (backup == found || SPACE_OR_TAB(*backup)) {
 		    Newxz(indent, indent_len + 1, char);
 		    memcpy(indent, backup, indent_len);
 		    SvREFCNT_dec(PL_linestr);
@@ -11145,8 +11145,8 @@ S_scan_formline(pTHX_ char *s)
 	PL_expect = XSTATE;
 	if (needargs) {
 	    const char *s2 = s;
-	    while (*s2 == '\r' || *s2 == ' ' || *s2 == '\t' || *s2 == '\f'
-		|| *s2 == '\v')
+	    while (   *s2 == '\r' || SPACE_OR_TAB(*s2) || *s2 == '\f'
+                   || *s2 == '\v')
 		s2++;
 	    if (*s2 == '{') {
 		PL_expect = XTERMBLOCK;
