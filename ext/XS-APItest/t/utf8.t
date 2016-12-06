@@ -1769,7 +1769,7 @@ my @tests = (
         $UTF8_WARN_SUPER, $UTF8_DISALLOW_SUPER, $UTF8_GOT_SUPER,
         'utf8', 0x80000000,
         (isASCII) ? 7 : $max_bytes,
-        (isASCII) ? 1 : 8,
+        1,
         nonportable_regex(0x80000000)
     ],
     [ "overflow with warnings/disallow for more than 31 bits",
