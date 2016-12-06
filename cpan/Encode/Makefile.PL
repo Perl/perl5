@@ -1,16 +1,26 @@
 #
-# $Id: Makefile.PL,v 2.17 2016/08/04 03:15:58 dankogai Exp $
+# $Id: Makefile.PL,v 2.18 2016/11/29 23:29:23 dankogai Exp dankogai $
 #
 use 5.007003;
 use strict;
 use warnings;
 use ExtUtils::MakeMaker;
 use File::Spec;
+use Config;
 
 # Just for sure :)
 my %ARGV = map { my @r = split /=/,$_; defined $r[1] or $r[1]=1; @r } @ARGV;
 $ARGV{DEBUG} and warn "$_ => $ARGV{$_}\n" for sort keys  %ARGV;
 $ENV{PERL_CORE} ||= $ARGV{PERL_CORE} if $ARGV{PERL_CORE};
+# similar strictness as in core
+my $ccflags = $Config{ccflags};
+if (!$ENV{PERL_CORE}) {
+  if ($Config{gccversion}) {
+    $ccflags .= ' -Werror=declaration-after-statement';
+    $ccflags .= ' -Wpointer-sign' unless $Config{d_cplusplus};
+    $ccflags .= ' -fpermissive' if $Config{d_cplusplus};
+  }
+}
 
 my %tables = 
     (
@@ -45,6 +55,7 @@ WriteMakefile(
         SUFFIX       => 'gz',
         DIST_DEFAULT => 'all tardist',
     },
+    CCFLAGS     => $ccflags,
     INC         => '-I' . File::Spec->catfile( '.', 'Encode' ),
     LICENSE     => 'perl',
     PREREQ_PM   => {

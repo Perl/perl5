@@ -4,7 +4,7 @@ use strict;
 use warnings;
 no warnings 'redefine';
 
-our $VERSION = do { my @r = ( q$Revision: 2.15 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.15_01 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load( __PACKAGE__, $VERSION );

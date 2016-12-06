@@ -968,6 +968,7 @@ cpan/Encode/t/jisx0212.utf		test data
 cpan/Encode/t/jperl.t			test script
 cpan/Encode/t/ksc5601.enc		test data
 cpan/Encode/t/ksc5601.utf		test data
+cpan/Encode/t/magic.t			test script
 cpan/Encode/t/mime-header.t		test script
 cpan/Encode/t/mime-name.t		test script
 cpan/Encode/t/mime_header_iso2022jp.t	test script
@@ -975,6 +976,11 @@ cpan/Encode/t/Mod_EUCJP.pm		module that t/enc_module.enc uses
 cpan/Encode/t/perlio.t			test script
 cpan/Encode/t/piconv.t			Test for piconv.t
 cpan/Encode/t/rt.pl			test script
+cpan/Encode/t/rt113164.t		test script
+cpan/Encode/t/rt65541.t			test script
+cpan/Encode/t/rt76824.t			test script
+cpan/Encode/t/rt85489.t			test script
+cpan/Encode/t/rt86327.t			test script
 cpan/Encode/t/taint.t
 cpan/Encode/t/unibench.pl		benchmark script
 cpan/Encode/t/Unicode.t			test script

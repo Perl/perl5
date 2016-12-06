@@ -5,7 +5,7 @@ use warnings;
 use utf8 ();
 
 use vars qw($VERSION);
-$VERSION = do { my @r = ( q$Revision: 2.7 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+$VERSION = do { my @r = ( q$Revision: 2.8 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use Encode qw(:fallbacks);
 
@@ -49,7 +49,8 @@ sub decode ($$;$) {
         else {        # GB mode; the byte ranges are as in RFC 1843.
             no warnings 'uninitialized';
             if ( $str =~ s/^((?:[\x21-\x77][\x21-\x7E])+)// ) {
-                $ret .= $GB->decode( $1, $chk );
+                my $prefix = $1;
+                $ret .= $GB->decode( $prefix, $chk );
             }
             elsif ( $str =~ s/^\x7E\x7D// ) {    # '~}'
                 $in_ascii = 1;

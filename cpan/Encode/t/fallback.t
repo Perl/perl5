@@ -35,7 +35,7 @@ for my $i (0x80..0xff){
     $uo   .= chr($i);
     $residue    .= chr($i);
     $af .= '?';
-    $uf .= "\x{FFFD}";
+    $uf .= "\x{FFFD}" if $i < 0xfd;
     $ap .= sprintf("\\x{%04x}", $i);
     $up .= sprintf("\\x%02X", $i);
     $ah .= sprintf("&#%d;", $i);

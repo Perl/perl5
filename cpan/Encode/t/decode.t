@@ -1,9 +1,9 @@
 #
-# $Id: decode.t,v 1.2 2016/08/04 03:15:58 dankogai Exp $
+# $Id: decode.t,v 1.3 2016/10/28 05:03:52 dankogai Exp $
 #
 use strict;
 use Encode qw(decode_utf8 FB_CROAK find_encoding decode);
-use Test::More tests => 5;
+use Test::More tests => 17;
 
 sub croak_ok(&) {
     my $code = shift;
@@ -31,4 +31,56 @@ SKIP: {
     skip "Perl Version ($]) is older than v5.16", 1 if $] < 5.016;
     *a = $orig;
     is($latin1->decode(*a), '*main::'.$orig, '[cpan #115168] passing typeglobs to decode');
+}
+
+$orig = "\x80";
+$orig =~ /(.)/;
+is($latin1->decode($1), "\N{U+0080}", 'passing magic regex to latin1 decode');
+
+$orig = "\x80";
+*a = $orig;
+is($latin1->decode(*a), "*main::\N{U+0080}", 'passing typeglob to latin1 decode');
+
+$orig = "\N{U+0080}";
+$orig =~ /(.)/;
+is($latin1->encode($1), "\x80", 'passing magic regex to latin1 encode');
+
+$orig = "\xC3\x80";
+$orig =~ /(..)/;
+is(Encode::decode_utf8($1), "\N{U+C0}", 'passing magic regex to Encode::decode_utf8');
+
+$orig = "\xC3\x80";
+*a = $orig;
+is(Encode::decode_utf8(*a), "*main::\N{U+C0}", 'passing typeglob to Encode::decode_utf8');
+
+$orig = "\N{U+C0}";
+$orig =~ /(.)/;
+is(Encode::encode_utf8($1), "\xC3\x80", 'passing magic regex to Encode::encode_utf8');
+
+$orig = "\xC3\x80";
+$orig =~ /(..)/;
+is(Encode::decode('utf-8', $1), "\N{U+C0}", 'passing magic regex to UTF-8 decode');
+
+$orig = "\xC3\x80";
+*a = $orig;
+is(Encode::decode('utf-8', *a), "*main::\N{U+C0}", 'passing typeglob to UTF-8 decode');
+
+$orig = "\N{U+C0}";
+$orig =~ /(.)/;
+is(Encode::encode('utf-8', $1), "\xC3\x80", 'passing magic regex to UTF-8 encode');
+
+SKIP: {
+    skip "Perl Version ($]) is older than v5.16", 3 if $] < 5.016;
+
+    $orig = "\N{U+0080}";
+    *a = $orig;
+    is($latin1->encode(*a), "*main::\x80", 'passing typeglob to latin1 encode');
+
+    $orig = "\N{U+C0}";
+    *a = $orig;
+    is(Encode::encode_utf8(*a), "*main::\xC3\x80", 'passing typeglob to Encode::encode_utf8');
+
+    $orig = "\N{U+C0}";
+    *a = $orig;
+    is(Encode::encode('utf-8', *a), "*main::\xC3\x80", 'passing typeglob to UTF-8 encode');
 }

@@ -2,7 +2,7 @@ CPAN cpan/CPAN/lib/App/Cpan.pm 3cef68c2a44a4996b432bc25622e3a544a188aa5
 CPAN cpan/CPAN/lib/CPAN.pm 4616a44963045f7bd07bb7f8e5f99bbd789af4e5
 CPAN cpan/CPAN/scripts/cpan 22610ed0301d48a269d1739afd2f7f84359d956f
 Digest cpan/Digest/Digest.pm 43f7f544cb11842b2f55c73e28930da50774e081
-Encode cpan/Encode/Encode.xs dba310bf3d362b1ade421b1a741875511d84809a
+Encode cpan/Encode/Unicode/Unicode.pm 9749692c67f7d69083034de9184a93f070ab4799
 ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t a0369c919e216fb02767a637666bb4577ad79b02
 File::Path cpan/File-Path/lib/File/Path.pm fd8ce4420a0c113d3f47dd3223859743655c1da8
 File::Path cpan/File-Path/t/Path_win32.t 94b9276557ce7f80b91f6fd9bfa7a0cd9bf9683e

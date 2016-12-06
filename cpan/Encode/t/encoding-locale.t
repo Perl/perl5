@@ -22,5 +22,5 @@ SKIP: {
     ok(defined $enc, 'encoding returned is supported')
 	or diag("Encoding: ", explain($locale_encoding));
     isa_ok($enc, 'Encode::Encoding');
-    note($locale_encoding, ' => ', $enc->name);
+    eval { note($locale_encoding, ' => ', $enc->name); };
 }

@@ -25,7 +25,7 @@ my @character_set = ('0'..'9', 'A'..'Z', 'a'..'z');
 my @source = qw(ascii iso8859-1 cp1250);
 my @destiny = qw(cp1047 cp37 posix-bc);
 my @ebcdic_sets = qw(cp1047 cp37 posix-bc);
-plan tests => 38+$n*@encodings + 2*@source*@destiny*@character_set + 2*@ebcdic_sets*256 + 6 + 5 + 2;
+plan tests => 38+$n*@encodings + 2*@source*@destiny*@character_set + 2*@ebcdic_sets*256 + 6 + 3 + 3*8 + 2;
 
 my $str = join('',map(chr($_),0x20..0x7E));
 my $cpy = $str;
@@ -156,15 +156,49 @@ ok(encode(utf8   => Encode::Dummy->new("foobar")), "foobar");
 ok(decode_utf8(*1), "*main::1");
 
 # hash keys
-my $key = (keys %{{ "whatever\x{100}" => '' }})[0];
-my $kopy = $key;
-encode("UTF-16LE", $kopy, Encode::FB_CROAK);
-is $key, "whatever\x{100}", 'encode with shared hash key scalars';
-undef $key;
-$key = (keys %{{ "whatever" => '' }})[0];
-$kopy = $key;
-decode("UTF-16LE", $kopy, Encode::FB_CROAK);
-is $key, "whatever", 'decode with shared hash key scalars';
+foreach my $name ("UTF-16LE", "UTF-8", "Latin1") {
+  my $key = (keys %{{ "whatever\x{CA}" => '' }})[0];
+  my $kopy = $key;
+  encode($name, $kopy, Encode::FB_CROAK);
+  is $key, "whatever\x{CA}", "encode $name with shared hash key scalars";
+  undef $key;
+  $key = (keys %{{ "whatever\x{CA}" => '' }})[0];
+  $kopy = $key;
+  encode($name, $kopy, Encode::FB_CROAK | Encode::LEAVE_SRC);
+  is $key, "whatever\x{CA}", "encode $name with LEAVE_SRC and shared hash key scalars";
+  undef $key;
+  $key = (keys %{{ "whatever" => '' }})[0];
+  $kopy = $key;
+  decode($name, $kopy, Encode::FB_CROAK);
+  is $key, "whatever", "decode $name with shared hash key scalars";
+  undef $key;
+  $key = (keys %{{ "whatever" => '' }})[0];
+  $kopy = $key;
+  decode($name, $kopy, Encode::FB_CROAK | Encode::LEAVE_SRC);
+  is $key, "whatever", "decode $name with LEAVE_SRC and shared hash key scalars";
+
+  my $enc = find_encoding($name);
+  undef $key;
+  $key = (keys %{{ "whatever\x{CA}" => '' }})[0];
+  $kopy = $key;
+  $enc->encode($kopy, Encode::FB_CROAK);
+  is $key, "whatever\x{CA}", "encode obj $name with shared hash key scalars";
+  undef $key;
+  $key = (keys %{{ "whatever\x{CA}" => '' }})[0];
+  $kopy = $key;
+  $enc->encode($kopy, Encode::FB_CROAK | Encode::LEAVE_SRC);
+  is $key, "whatever\x{CA}", "encode obj $name with LEAVE_SRC and shared hash key scalars";
+  undef $key;
+  $key = (keys %{{ "whatever" => '' }})[0];
+  $kopy = $key;
+  $enc->decode($kopy, Encode::FB_CROAK);
+  is $key, "whatever", "decode obj $name with shared hash key scalars";
+  undef $key;
+  $key = (keys %{{ "whatever" => '' }})[0];
+  $kopy = $key;
+  $enc->decode($kopy, Encode::FB_CROAK | Encode::LEAVE_SRC);
+  is $key, "whatever", "decode obj $name with LEAVE_SRC and shared hash key scalars";
+}
 
 my $latin1 = find_encoding('latin1');
 my $orig = "\316";
