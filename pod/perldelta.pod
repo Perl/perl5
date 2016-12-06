@@ -27,6 +27,16 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 New Hash Function For 64-bit Builds
+
+We have switched to a hybrid hash function to better balance
+performance for short and long keys.
+
+For short keys, 16 bytes and under, we use an optimised variant of
+One At A Time Hard, and for longer keys we use Siphash 1-3. For very
+long keys this is a big improvement in performance. For shorter keys
+there is a modest improvement.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -87,9 +97,10 @@ There may well be none in a stable release.
 
 =over 4
 
-=item *
+=item * New Faster Hash Function on 64 bit builds
 
-XXX
+We use a different hash function for short and long keys. This should
+improve performance and security, especially for long keys.
 
 =back
 
