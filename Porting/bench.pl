@@ -29,10 +29,10 @@ perls.
 
     bench.pl [options] --write=blead.time -- ./perl=blead
     # hack hack hack
-    bench.pl [options] --read=blead.time -- ./perl=hacked
+    bench.pl --read=blead.time -- ./perl=hacked
 
     # You can also combine --read with --write
-    bench.pl [options] --read=blead.time --write=last.time -- ./perl=hacked
+    bench.pl --read=blead.time --write=last.time -- ./perl=hacked
 
 =head1 DESCRIPTION
 
