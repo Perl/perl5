@@ -598,6 +598,7 @@ david\100justatheory.com                david\100wheeler.net
 +                                       david\100kineticode.com
 +                                       david\100wheeler.com
 +                                       david\100wheeler.net
+whatever\100davidnicol.com              davidnicol\100gmail.com
 dennis\100booking.com                   dennis\100camel.ams6.corp.booking.com
 +					dennis.kaarsemaker\100booking.com
 +                                       dennis\100kaarsemaker.net
