@@ -4651,7 +4651,6 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 	    return FALSE;
 	}
 	if (UNLIKELY(isUTF8_POSSIBLY_PROBLEMATIC(*s))) {
-	    STRLEN char_len;
 	    if (UNLIKELY(UTF8_IS_SUPER(s, e))) {
                 if (   ckWARN_d(WARN_NON_UNICODE)
                     || (   ckWARN_d(WARN_DEPRECATED)
@@ -4671,7 +4670,7 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 #endif
                 )) {
                     /* A side effect of this function will be to warn */
-                    (void) utf8n_to_uvchr(s, e - s, &char_len, UTF8_WARN_SUPER);
+                    (void) utf8n_to_uvchr(s, e - s, NULL, UTF8_WARN_SUPER);
                     ok = FALSE;
                 }
 	    }
@@ -4680,7 +4679,7 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
                     /* This has a different warning than the one the called
                      * function would output, so can't just call it, unlike we
                      * do for the non-chars and above-unicodes */
-		    UV uv = utf8_to_uvchr_buf(s, e, &char_len);
+		    UV uv = utf8_to_uvchr_buf(s, e, NULL);
 		    Perl_warner(aTHX_ packWARN(WARN_SURROGATE),
 			"Unicode surrogate U+%04" UVXf " is illegal in UTF-8", uv);
 		    ok = FALSE;
@@ -4688,7 +4687,7 @@ Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 	    }
 	    else if (UNLIKELY(UTF8_IS_NONCHAR(s, e)) && (ckWARN_d(WARN_NONCHAR))) {
                 /* A side effect of this function will be to warn */
-                (void) utf8n_to_uvchr(s, e - s, &char_len, UTF8_WARN_NONCHAR);
+                (void) utf8n_to_uvchr(s, e - s, NULL, UTF8_WARN_NONCHAR);
 		ok = FALSE;
 	    }
 	}
