@@ -25,6 +25,15 @@ perls.
 
     bench.pl --action=selftest
 
+    # Run bench on blead, which is then modified and timed again
+
+    bench.pl [options] --write=blead.time -- ./perl=blead
+    # hack hack hack
+    bench.pl [options] --read=blead.time -- ./perl=hacked
+
+    # You can also combine --read with --write
+    bench.pl [options] --read=blead.time --write=last.time -- ./perl=hacked
+
 =head1 DESCRIPTION
 
 By default, F<bench.pl> will run code snippets found in
@@ -42,10 +51,14 @@ measurements, such as instruction reads, conditional branch misses etc.
 
 There are options to write the raw data to a file, and to read it back.
 This means that you can view the same run data in different views with
-different selection and sort options.
+different selection and sort options. You can also use this mechanism
+to save the results of timing one perl, and then read it back while timing
+a modification, so that you dont have rerun the same tests on the same
+perl over and over, or have two perls built at the same time.
 
 The optional C<=label> after each perl executable is used in the display
-output.
+output. If you are doing a two step benchmark then you should provide
+a label for at least the "base" perl.
 
 =head1 OPTIONS
 
@@ -264,7 +277,9 @@ Display progress information.
 --write=I<file>
 
 Save the raw data to the specified file. It can be read back later with
-C<--read>.
+C<--read>. If combined with C<--read> then the output file will be
+the merge of the file read and any additional perls added on the command
+line.
 
 Requires C<JSON::PP> to be available.
 
@@ -385,10 +400,6 @@ my %OPTS = (
     usage if $OPTS{help};
 
 
-    if (defined $OPTS{read} and defined $OPTS{write}) {
-        die "Error: can't specify both --read and --write options\n";
-    }
-
     if (defined $OPTS{read} or defined $OPTS{write}) {
         # fail early if it's not present
         require JSON::PP;
@@ -438,21 +449,6 @@ my %OPTS = (
         die "Error: Can't specify both --bisect and --write\n"
                                                 if defined $OPTS{write};
     }
-    elsif (defined $OPTS{read}) {
-        if (@ARGV) {
-            die "Error: no perl executables may be specified with --read\n"
-        }
-    }
-    elsif ($OPTS{raw}) {
-        unless (@ARGV) {
-            die "Error: at least one perl executable must be specified\n";
-        }
-    }
-    else {
-        unless (@ARGV >= 2) {
-            die "Error: at least two perl executables must be specified\n";
-        }
-    }
 
     if ($OPTS{action} eq 'grind') {
         do_grind(\@ARGV);
@@ -494,6 +490,7 @@ sub filter_tests {
             delete $tests->{$_} unless exists $t{$_};
         }
     }
+    die "Error: no tests to run\n" unless %$tests;
 }
 
 
@@ -550,8 +547,9 @@ sub select_a_perl {
 # 'perl-under-test's (PUTs)
 
 sub process_puts {
+    my $read_perls= shift;
     my @res_puts; # returned, each item is [ perlexe, label, @putargs ]
-    my %seen;
+    my %seen= map { $_->[1] => 1 } @$read_perls;
     my @putargs; # collect not-perls into args per PUT
 
     for my $p (reverse @_) {
@@ -674,9 +672,9 @@ sub do_grind {
             if $bisect_min > $bisect_max;
     }
 
-    if (defined $OPTS{read}) {
+    if ($OPTS{read}) {
         open my $in, '<:encoding(UTF-8)', $OPTS{read}
-            or die " Error: can't open $OPTS{read} for reading: $!\n";
+            or die " Error: can't open '$OPTS{read}' for reading: $!\n";
         my $data = do { local $/; <$in> };
         close $in;
 
@@ -695,21 +693,23 @@ sub do_grind {
             $order = [ sort keys %$tests ];
         }
     }
-    else {
-        # How many times to execute the loop for the two trials. The lower
-        # value is intended to do the loop enough times that branch
-        # prediction has taken hold; the higher loop allows us to see the
-        # branch misses after that
-        $loop_counts = [10, 20];
 
-        ($tests, $order) = read_tests_file($OPTS{benchfile});
-        die "Error: only a single test may be specified with --bisect\n"
-            if defined $OPTS{bisect} and keys %$tests != 1;
+    if (@$perl_args) {
+        unless ($loop_counts) {
+            # How many times to execute the loop for the two trials. The lower
+            # value is intended to do the loop enough times that branch
+            # prediction has taken hold; the higher loop allows us to see the
+            # branch misses after that
+            $loop_counts = [10, 20];
 
-        $perls = [ process_puts(@$perl_args) ];
+            ($tests, $order) = read_tests_file($OPTS{benchfile});
+            die "Error: only a single test may be specified with --bisect\n"
+                if defined $OPTS{bisect} and keys %$tests != 1;
+        }
 
-
-        $results = grind_run($tests, $order, $perls, $loop_counts);
+        my @run_perls= process_puts($perls, @$perl_args);
+        push @$perls, @run_perls;
+        $results = grind_run($tests, $order, \@run_perls, $loop_counts, $results);
     }
 
     # now that we have a list of perls, use it to process the
@@ -740,7 +740,7 @@ sub do_grind {
         print $out $json or die "Error: writing to file '$OPTS{write}': $!\n";
         close $out       or die "Error: closing file '$OPTS{write}': $!\n";
     }
-    else {
+    if (@$perls>1) {
         my ($processed, $averages) =
                     grind_process($results, $perls, $loop_counts);
 
@@ -773,7 +773,7 @@ sub do_grind {
 # Return a hash ref suitable for input to grind_process()
 
 sub grind_run {
-    my ($tests, $order, $perls, $counts) = @_;
+    my ($tests, $order, $perls, $counts, $results) = @_;
 
     # Build a list of all the jobs to run
 
@@ -837,7 +837,6 @@ sub grind_run {
     my $running  = 0; # count of executing jobs
     my %pids;         # map pids to jobs
     my %fds;          # map fds  to jobs
-    my %results;
     my $select = IO::Select->new();
 
     while (@jobs or $running) {
@@ -938,7 +937,7 @@ sub grind_run {
                     . "Output\n$o";
             }
 
-            $results{$j->{test}}{$j->{plabel}}[$j->{active}][$j->{loopix}]
+            $results->{$j->{test}}{$j->{plabel}}[$j->{active}][$j->{loopix}]
                     = parse_cachegrind($output, $j->{id}, $j->{perl});
         }
 
@@ -961,7 +960,7 @@ sub grind_run {
         }
     }
 
-    return \%results;
+    return $results;
 }
 
 
