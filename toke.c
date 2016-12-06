@@ -1363,7 +1363,6 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
                                     PL_parser->bufend - PL_parser->bufptr,
                                     &first_bad_char_loc))
     {
-
         _force_out_malformed_utf8_message(first_bad_char_loc,
                                           (U8 *) PL_parser->bufend,
                                           0,
@@ -2455,7 +2454,7 @@ S_sublex_push(pTHX)
     if (is_heredoc)
 	CopLINE_set(PL_curcop, (line_t)PL_multi_start);
     PL_copline = NOLINE;
-    
+
     Newxz(shared, 1, LEXSHARED);
     shared->ls_prev = PL_parser->lex_shared;
     PL_parser->lex_shared = shared;
@@ -2870,7 +2869,7 @@ S_scan_const(pTHX_ char *start)
      * the needed size, SvGROW() is called.  Its size parameter each time is
      * based on the best guess estimate at the time, namely the length used so
      * far, plus the length the current construct will occupy, plus room for
-     * the trailing NUL, plus one byte for every input byte still unscanned */ 
+     * the trailing NUL, plus one byte for every input byte still unscanned */
 
     UV uv = UV_MAX; /* Initialize to weird value to try to catch any uses
                        before set */
@@ -3399,7 +3398,7 @@ S_scan_const(pTHX_ char *start)
 			/* Might need to recode whatever we have accumulated so
 			 * far if it contains any chars variant in utf8 or
 			 * utf-ebcdic. */
-			  
+
 			SvCUR_set(sv, d - SvPVX_const(sv));
 			SvPOK_on(sv);
 			*d = '\0';
@@ -3488,7 +3487,7 @@ S_scan_const(pTHX_ char *start)
                  * braces */
 		s++;
 		if (*s != '{') {
-		    yyerror("Missing braces on \\N{}"); 
+		    yyerror("Missing braces on \\N{}");
 		    continue;
 		}
 		s++;
@@ -4222,7 +4221,7 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 		STRLEN const last_lop_pos =
 		    PL_parser->last_lop ? PL_parser->last_lop - buf : 0;
 		av_push(PL_rsfp_filters, linestr);
-		PL_parser->linestr = 
+		PL_parser->linestr =
 		    newSVpvn(SvPVX(linestr), ++s-SvPVX(linestr));
 		buf = SvPVX(PL_parser->linestr);
 		PL_parser->bufend = buf + SvCUR(PL_parser->linestr);
@@ -6447,11 +6446,15 @@ Perl_yylex(pTHX)
 					      &len);
 				while (isSPACE(*t))
 				    t++;
-				if (*t == ';'
-                                       && get_cvn_flags(tmpbuf, len, UTF ? SVf_UTF8 : 0))
+                                if (  *t == ';'
+                                    && get_cvn_flags(tmpbuf, len, UTF
+                                                                  ? SVf_UTF8
+                                                                  : 0))
+                                {
 				    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 					"You need to quote \"%" UTF8f "\"",
 					 UTF8fARG(UTF, len, tmpbuf));
+                                }
 			    }
 			}
 		}
@@ -8164,7 +8167,7 @@ Perl_yylex(pTHX)
 		orig_keyword = 0;
 		pl_yylval.ival = 1;
 	    }
-	    else 
+	    else
 		pl_yylval.ival = 0;
 	    PL_expect = PL_nexttoke ? XOPERATOR : XTERM;
 	    PL_bufptr = s;
@@ -8980,7 +8983,8 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
 
 PERL_STATIC_INLINE void
 S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
-                    bool is_utf8, bool check_dollar) {
+                    bool is_utf8, bool check_dollar)
+{
     PERL_ARGS_ASSERT_PARSE_IDENT;
 
     for (;;) {
@@ -9209,7 +9213,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
             s2 = peekspace(s);
         else
             s2 = s;
-	    
+
         /* Expect to find a closing } after consuming any trailing whitespace.
          */
         if (*s2 == '}') {
@@ -9416,7 +9420,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
     /* issue a warning if /c is specified,but /g is not */
     if ((pm->op_pmflags & PMf_CONTINUE) && !(pm->op_pmflags & PMf_GLOBAL))
     {
-        Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), 
+        Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),
 		       "Use of /c modifier is meaningless without /g" );
     }
 
