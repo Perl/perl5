@@ -4634,9 +4634,7 @@ Perl_yylex(pTHX)
                 if (strnEQ(s, "L\\u", 3) || strnEQ(s, "U\\l", 3))
                     tmp = *s, *s = s[2], s[2] = (char)tmp;	/* misordered... */
 		if ((*s == 'L' || *s == 'U' || *s == 'F')
-                    && (strchr(PL_lex_casestack, 'L')
-                        || strchr(PL_lex_casestack, 'U')
-                        || strchr(PL_lex_casestack, 'F')))
+                    && (strpbrk(PL_lex_casestack, "LUF")))
                 {
 		    PL_lex_casestack[--PL_lex_casemods] = '\0';
 		    PL_lex_allbrackets--;
