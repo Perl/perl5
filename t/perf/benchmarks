@@ -1284,5 +1284,18 @@
         setup   => 'my $i = 0;',
         code    => 'while (++$i % 4) {}',
     },
-
+    (
+        map {
+            sprintf('hash::set1k::len_%04d',$_) => {
+                desc    => 'hash keys length '. $_,
+                setup   => 'my $i = "A" x ' . $_ . '; my @s= map { $i++ } 1..1000;',
+                code    => 'my %h; @h{@s}=();',
+            },
+        } (
+            1..24,
+            50,
+            100,
+            1000,
+        )
+    ),
 ];
