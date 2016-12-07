@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '0.44';
+our $VERSION = '0.45';
 
 use Exporter;
 our @ISA            = qw( Exporter );
@@ -775,6 +775,24 @@ to compare them to the results under -Mbignum or -Mbigrat:
         perl -Mbigint=a,65 -le 'print 2 ** 0.2'
         perl -Mbignum=a,65,l,GMP -le 'print 7 ** 7777'
 
+=head1 BUGS
+
+For information about bugs and how to report them, see the BUGS section in the
+documentation available with the perldoc command.
+
+    perldoc bignum
+
+=head1 SUPPORT
+
+You can find documentation for this module with the perldoc command.
+
+    perldoc bigint
+
+For more information, see the SUPPORT section in the documentation available
+with the perldoc command.
+
+    perldoc bignum
+
 =head1 LICENSE
 
 This program is free software; you may redistribute it and/or modify it under
@@ -782,14 +800,23 @@ the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-Especially L<bigrat> as in C<perl -Mbigrat -le 'print 1/3+1/4'> and
-L<bignum> as in C<perl -Mbignum -le 'print sqrt(2)'>.
+L<bignum> and L<bigrat>.
 
-L<Math::BigInt>, L<Math::BigRat> and L<Math::Big> as well
-as L<Math::BigInt::Pari> and  L<Math::BigInt::GMP>.
+L<Math::BigInt>, L<Math::BigFloat>, L<Math::BigRat> and L<Math::Big> as well as
+L<Math::BigInt::FastCalc>, L<Math::BigInt::Pari> and L<Math::BigInt::GMP>.
 
 =head1 AUTHORS
 
+=over 4
+
+=item *
+
 (C) by Tels L<http://bloodgate.com/> in early 2002 - 2007.
+
+=item *
+
+Maintained by Peter John Acklam E<lt>pjacklam@gmail.com<gt>, 2014-.
+
+=back
 
 =cut

@@ -9,13 +9,13 @@ use warnings;
 use Exporter;
 use Math::BigFloat;
 
-our ($PACKAGE, @EXPORT_OK, $accuracy, $precision, $round_mode, $div_scale);
+our ($accuracy, $precision, $round_mode, $div_scale);
 
 our @ISA = qw(Exporter Math::BigFloat);
 
-our $VERSION = '0.44';
+our $VERSION = '0.45';
 
-use overload;                   # inherit overload from BigFloat
+use overload;                   # inherit overload from Math::BigFloat
 
 # Globals
 $accuracy = $precision = undef;
