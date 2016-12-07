@@ -330,6 +330,7 @@ usage: $0 [options] -- perl[=label] ...
                        [default: 0].
   --perlargs=foo     Optional command-line args to pass to each perl to run.
   --raw              Display raw data counts rather than percentages.
+  --show             Show results even though we are going to write results.
   --sort=field:perl  Sort the tests based on the value of 'field' in the
                        column 'perl'. The perl value is as per --norm.
   -r|--read=file     Read in previously saved data from the specified file.
@@ -366,6 +367,7 @@ my %OPTS = (
     perlargs  => '',
     raw       => 0,
     read      => undef,
+    show      => 0,
     sort      => undef,
     tests     => undef,
     verbose   => 0,
@@ -391,6 +393,7 @@ my %OPTS = (
         'perlargs=s'  => \$OPTS{perlargs},
         'raw'         => \$OPTS{raw},
         'read|r=s'    => \$OPTS{read},
+        'show!'       => \$OPTS{show},
         'sort=s'      => \$OPTS{sort},
         'tests=s'     => \$OPTS{tests},
         'verbose'     => \$OPTS{verbose},
@@ -523,7 +526,7 @@ sub read_tests_file {
 
 sub select_a_perl {
     my ($perl, $perls, $who) = @_;
-
+    $perls||=[];
     if ($perl =~ /^[0-9]$/) {
         die "Error: $who value $perl outside range 0.." . $#$perls . "\n"
                                         unless $perl < @$perls;
@@ -709,9 +712,14 @@ sub do_grind {
 
         my @run_perls= process_puts($perls, @$perl_args);
         push @$perls, @run_perls;
+        die "Error: Not enough perls to run a report, and --write not specified.\n"
+            if @$perls < 2 and !$OPTS{write};
         $results = grind_run($tests, $order, \@run_perls, $loop_counts, $results);
     }
 
+    if (!$perls or !@$perls) {
+        die "Error: nothing to do: no perls to run, no data to read.\n";
+    }
     # now that we have a list of perls, use it to process the
     # 'perl' component of the --norm and --sort args
 
@@ -736,11 +744,14 @@ sub do_grind {
                 });
 
         open my $out, '>:encoding(UTF-8)', $OPTS{write}
-            or die " Error: can't open $OPTS{write} for writing: $!\n";
+            or die "Error: can't open '$OPTS{write}' for writing: $!\n";
         print $out $json or die "Error: writing to file '$OPTS{write}': $!\n";
         close $out       or die "Error: closing file '$OPTS{write}': $!\n";
     }
-    if (@$perls>1) {
+    if (!$OPTS{write} or $OPTS{show}) {
+        if (@$perls < 2) {
+            die "Error: need more than one perl to do a report.\n";
+        }
         my ($processed, $averages) =
                     grind_process($results, $perls, $loop_counts);
 
