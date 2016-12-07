@@ -51,6 +51,33 @@
 #
 # Currently the only tool that uses this file is Porting/bench.pl;
 # try C<perl Porting/bench.pl --help> for more info
+#
+# ------
+#
+# Note: for the cachegrind variant, an entry like
+#    'foo::bar' => {
+#     setup   => 'SETUP',
+#     code    => 'CODE',
+#   }
+# creates two temporary perl sources looking like:
+#
+#        package foo::bar;
+#        BEGIN { srand(0) }
+#        SETUP;
+#        for my $__loop__ (1..$ARGV[0]) {
+#            1;
+#        }
+# and as above, but with the '1;' in the loop  body replaced with:
+#            CODE;
+#
+# It then pipes each of the two sources into
+#     PERL_HASH_SEED=0 valgrind [options] someperl [options] - N
+# where N is set to 10 and then 20,
+# then uses the result of those four runs to subtract out the perl startup
+# and loop overhead. So only what's in SETUP and CODE can affect the
+# benchmark, and if the loop leaves state changed (such as storing a value
+# in a hash), then the benchmark result of running CODE with the
+# hash populated.
 
 
 [
