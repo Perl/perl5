@@ -20,8 +20,7 @@ use Carp ();
 
 use Math::BigFloat '1.999718';
 
-our $VERSION = '0.260805';
-$VERSION = eval $VERSION;
+our $VERSION = '0.2609';
 
 our @ISA = qw(Math::BigFloat);
 
@@ -2751,8 +2750,16 @@ L<Math::BigInt::FastCalc>, L<Math::BigInt::GMP>, and L<Math::BigInt::Pari>.
 
 =head1 AUTHORS
 
-(C) by Tels L<http://bloodgate.com/> 2001 - 2009.
+=over 4
 
-Currently maintained by Peter John Acklam <pjacklam@online.no>.
+=item *
+
+Tels L<http://bloodgate.com/> 2001-2009.
+
+=item *
+
+Maintained by Peter John Acklam <pjacklam@online.no> 2011-
+
+=back
 
 =cut
