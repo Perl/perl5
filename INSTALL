@@ -2721,6 +2721,12 @@ F<mathoms.c> will not be compiled in. Those functions are no longer used
 by perl itself; for source compatibility reasons, though, they weren't
 completely removed.
 
+=head2 C<-DNO_PERL_INTERNAL_RAND_SEED>
+X<PERL_INTERNAL_RAND_SEED>
+
+If you configure perl with C<-Accflags=-DNO_PERL_INTERNAL_RAND_SEED>,
+perl will ignore the C<PERL_INTERNAL_RAND_SEED> enviroment variable.
+
 =head1 DOCUMENTATION
 
 Read the manual entries before running perl.  The main documentation
