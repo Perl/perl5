@@ -263,7 +263,6 @@
         code    => '($r||0)->{foo}{bar}{baz}',
     },
 
-
     'expr::hash::pkg_1const' => {
         desc    => 'package $hash{const}',
         setup   => '%h = ("foo" => 1)',
@@ -301,6 +300,38 @@
         setup   => 'my ($k1,$k2) = qw(foo bar); my %h = ($k1 => { $k2 => 1 });',
         code    => 'exists $h{$k1}{$k2}',
     },
+
+    (
+        map {
+            sprintf('expr::hash::notexists_lex_keylen%04d',$_) => {
+                desc    => 'exists on non-key of length '. $_,
+                setup   => 'my %h; my $key = "A" x ' . $_ . '; $h{$key."x"} = 1;',
+                code    => 'exists $h{$key}',
+            },
+        } (
+            1 .. 24,
+            # 1,2,3,7,8,9,14,15,16,20,24,
+            50,
+            100,
+            1000,
+        )
+    ),
+    (
+        map {
+            sprintf('expr::hash::exists_lex_keylen%04d',$_) => {
+                desc    => 'exists on existing key of length '. $_,
+                setup   => 'my %h; my $key = "A" x ' . $_ . '; $h{$key} = 1;',
+                code    => 'exists $h{$key}',
+            },
+        } (
+            1 .. 24,
+            # 1,2,3,7,8,9,14,15,16,20,24,
+            50,
+            100,
+            1000,
+        )
+    ),
+
     'expr::hash::delete_lex_2var' => {
         desc    => 'lexical delete $hash{$k1}{$k2}',
         setup   => 'my ($k1,$k2) = qw(foo bar); my %h = ($k1 => { $k2 => 1 });',
@@ -1317,18 +1348,4 @@
         setup   => 'my $i = 0;',
         code    => 'while (++$i % 4) {}',
     },
-    (
-        map {
-            sprintf('hash::set1k::len_%04d',$_) => {
-                desc    => 'hash keys length '. $_,
-                setup   => 'my $i = "A" x ' . $_ . '; my @s= map { $i++ } 1..1000;',
-                code    => 'my %h; @h{@s}=();',
-            },
-        } (
-            1..24,
-            50,
-            100,
-            1000,
-        )
-    ),
 ];
