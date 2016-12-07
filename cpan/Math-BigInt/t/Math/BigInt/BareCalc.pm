@@ -5,7 +5,7 @@ package Math::BigInt::BareCalc;
 use strict;
 use warnings;
 
-our $VERSION = '1.999801';
+our $VERSION = '1.999803';
 
 # Package to to test Bigint's simulation of Calc
 

@@ -19,8 +19,7 @@ use warnings;
 use Carp ();
 use Math::BigInt ();
 
-our $VERSION = '1.999802';
-$VERSION = eval $VERSION;
+our $VERSION = '1.999803';
 
 require Exporter;
 our @ISA        = qw/Math::BigInt/;
