@@ -346,8 +346,9 @@ Perl_yyparse (pTHX_ int gramtype)
                 YYDPRINTF ((Perl_debug_log, "Reading a token:\n"));
                 parser->yychar = yylex();
                 assert(parser->yychar >= 0);
-                if (parser->yychar == YYEOF)
+                if (parser->yychar == YYEOF) {
                     YYDPRINTF ((Perl_debug_log, "Now at end of input.\n"));
+                }
                 /* perly.tab is shipped based on an ASCII system, so need
                  * to index it with characters translated to ASCII.
                  * Although it's not designed for this purpose, we can use
