@@ -204,74 +204,87 @@ try({PERL5LIB => "foo",
     '',
     '');
 
-try({PERL_HASH_SEED_DEBUG => 1},
-    ['-e','1'],
-    '',
-    qr/HASH_FUNCTION =/);
+SKIP:
+{
+    skip "NO_PERL_HASH_SEED_DEBUG set", 4
+      if $Config{ccflags} =~ /-DNO_PERL_HASH_SEED_DEBUG\b/;
 
-try({PERL_HASH_SEED_DEBUG => 1},
-    ['-e','1'],
-    '',
-    qr/HASH_SEED =/);
+    try({PERL_HASH_SEED_DEBUG => 1},
+        ['-e','1'],
+        '',
+        qr/HASH_FUNCTION =/);
 
-# special case, seed "0" implies disabled hash key traversal randomization
-try({PERL_HASH_SEED_DEBUG => 1, PERL_HASH_SEED => "0"},
-    ['-e','1'],
-    '',
-    qr/PERTURB_KEYS = 0/);
+    try({PERL_HASH_SEED_DEBUG => 1},
+        ['-e','1'],
+        '',
+        qr/HASH_SEED =/);
+}
 
-# check that setting it to a different value with the same logical value
-# triggers the normal "deterministic mode".
-try({PERL_HASH_SEED_DEBUG => 1, PERL_HASH_SEED => "0x0"},
-    ['-e','1'],
-    '',
-    qr/PERTURB_KEYS = 2/);
+SKIP:
+{
+    skip "NO_PERL_HASH_ENV or NO_PERL_HASH_SEED_DEBUG set", 16
+      if $Config{ccflags} =~ /-DNO_PERL_HASH_ENV\b/ ||
+         $Config{ccflags} =~ /-DNO_PERL_HASH_SEED_DEBUG\b/;
 
-try({PERL_HASH_SEED_DEBUG => 1, PERL_PERTURB_KEYS => "0"},
-    ['-e','1'],
-    '',
-    qr/PERTURB_KEYS = 0/);
+    # special case, seed "0" implies disabled hash key traversal randomization
+    try({PERL_HASH_SEED_DEBUG => 1, PERL_HASH_SEED => "0"},
+        ['-e','1'],
+        '',
+        qr/PERTURB_KEYS = 0/);
 
-try({PERL_HASH_SEED_DEBUG => 1, PERL_PERTURB_KEYS => "1"},
-    ['-e','1'],
-    '',
-    qr/PERTURB_KEYS = 1/);
+    # check that setting it to a different value with the same logical value
+    # triggers the normal "deterministic mode".
+    try({PERL_HASH_SEED_DEBUG => 1, PERL_HASH_SEED => "0x0"},
+        ['-e','1'],
+        '',
+        qr/PERTURB_KEYS = 2/);
 
-try({PERL_HASH_SEED_DEBUG => 1, PERL_PERTURB_KEYS => "2"},
-    ['-e','1'],
-    '',
-    qr/PERTURB_KEYS = 2/);
+    try({PERL_HASH_SEED_DEBUG => 1, PERL_PERTURB_KEYS => "0"},
+        ['-e','1'],
+        '',
+        qr/PERTURB_KEYS = 0/);
 
-try({PERL_HASH_SEED_DEBUG => 1, PERL_HASH_SEED => "12345678"},
-    ['-e','1'],
-    '',
-    qr/HASH_SEED = 0x12345678/);
+    try({PERL_HASH_SEED_DEBUG => 1, PERL_PERTURB_KEYS => "1"},
+        ['-e','1'],
+        '',
+        qr/PERTURB_KEYS = 1/);
 
-try({PERL_HASH_SEED_DEBUG => 1, PERL_HASH_SEED => "12"},
-    ['-e','1'],
-    '',
-    qr/HASH_SEED = 0x12000000/);
+    try({PERL_HASH_SEED_DEBUG => 1, PERL_PERTURB_KEYS => "2"},
+        ['-e','1'],
+        '',
+        qr/PERTURB_KEYS = 2/);
 
-try({PERL_HASH_SEED_DEBUG => 1, PERL_HASH_SEED => "123456789"},
-    ['-e','1'],
-    '',
-    qr/HASH_SEED = 0x12345678/);
+    try({PERL_HASH_SEED_DEBUG => 1, PERL_HASH_SEED => "12345678"},
+        ['-e','1'],
+        '',
+        qr/HASH_SEED = 0x12345678/);
 
-# Test that PERL_PERTURB_KEYS works as expected.  We check that we get the same
-# results if we use PERL_PERTURB_KEYS = 0 or 2 and we reuse the seed from previous run.
-my @print_keys = ( '-e', '@_{"A".."Z"}=(); print keys %_');
-for my $mode ( 0,1, 2 ) { # disabled and deterministic respectively
-    my %base_opts = ( PERL_PERTURB_KEYS => $mode, PERL_HASH_SEED_DEBUG => 1 ),
-    my ($out, $err) = runperl_and_capture( { %base_opts }, [ @print_keys ]);
-    if ($err=~/HASH_SEED = (0x[a-f0-9]+)/) {
-        my $seed = $1;
-        my($out2, $err2) = runperl_and_capture( { %base_opts, PERL_HASH_SEED => $seed }, [ @print_keys ]);
-        if ( $mode == 1 ) {
-            isnt ($out,$out2,"PERL_PERTURB_KEYS = $mode results in different key order with the same key");
-        } else {
-            is ($out,$out2,"PERL_PERTURB_KEYS = $mode allows one to recreate a random hash");
+    try({PERL_HASH_SEED_DEBUG => 1, PERL_HASH_SEED => "12"},
+        ['-e','1'],
+        '',
+        qr/HASH_SEED = 0x12000000/);
+
+    try({PERL_HASH_SEED_DEBUG => 1, PERL_HASH_SEED => "123456789"},
+        ['-e','1'],
+        '',
+        qr/HASH_SEED = 0x12345678/);
+
+    # Test that PERL_PERTURB_KEYS works as expected.  We check that we get the same
+    # results if we use PERL_PERTURB_KEYS = 0 or 2 and we reuse the seed from previous run.
+    my @print_keys = ( '-e', '@_{"A".."Z"}=(); print keys %_');
+    for my $mode ( 0,1, 2 ) { # disabled and deterministic respectively
+        my %base_opts = ( PERL_PERTURB_KEYS => $mode, PERL_HASH_SEED_DEBUG => 1 ),
+          my ($out, $err) = runperl_and_capture( { %base_opts }, [ @print_keys ]);
+        if ($err=~/HASH_SEED = (0x[a-f0-9]+)/) {
+            my $seed = $1;
+            my($out2, $err2) = runperl_and_capture( { %base_opts, PERL_HASH_SEED => $seed }, [ @print_keys ]);
+            if ( $mode == 1 ) {
+                isnt ($out,$out2,"PERL_PERTURB_KEYS = $mode results in different key order with the same key");
+            } else {
+                is ($out,$out2,"PERL_PERTURB_KEYS = $mode allows one to recreate a random hash");
+            }
+            is ($err,$err2,"Got the same debug output when we set PERL_HASH_SEED and PERL_PERTURB_KEYS");
         }
-        is ($err,$err2,"Got the same debug output when we set PERL_HASH_SEED and PERL_PERTURB_KEYS");
     }
 }
 
