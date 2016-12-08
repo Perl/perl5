@@ -2425,16 +2425,12 @@ S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
      * character without reading beyond the end, and pass that number on to the
      * validating routine */
     if (! isUTF8_CHAR(p, p + UTF8SKIP(p))) {
-        if (ckWARN_d(WARN_UTF8)) {
-            Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED,WARN_UTF8),
-		    "Passing malformed UTF-8 to \"%s\" is deprecated", swashname);
-            if (ckWARN(WARN_UTF8)) {    /* This will output details as to the
-                                           what the malformation is */
-                utf8_to_uvchr_buf(p, p + UTF8SKIP(p), NULL);
-            }
-        }
-        return FALSE;
+        _force_out_malformed_utf8_message(p, p + UTF8SKIP(p),
+                                          0,
+                                          1 /* Die */ );
+        NOT_REACHED; /* NOTREACHED */
     }
+
     if (!*swash) {
         U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
         *swash = _core_swash_init("utf8",

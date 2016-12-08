@@ -327,7 +327,8 @@ well.
 
 =item *
 
-XXX
+Calling macros like C<isALPHA_utf8> on malformed UTF-8 have issued a
+deprecation warning since Perl v5.18.  They now die.
 
 =back
 

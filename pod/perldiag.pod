@@ -4671,17 +4671,6 @@ Remember that "my", "our", "local" and "state" bind tighter than comma.
 (F) Parsing code supplied by an extension violated the parser's API in
 a detectable way.
 
-=item Passing malformed UTF-8 to "%s" is deprecated
-
-(D deprecated, utf8) This message indicates a bug either in the Perl
-core or in XS code.  Such code was trying to find out if a character,
-allegedly stored internally encoded as UTF-8, was of a given type, such
-as being punctuation or a digit.  But the character was not encoded in
-legal UTF-8.  The C<%s> is replaced by a string that can be used by
-knowledgeable people to determine what the type being checked against
-was.  If C<utf8> warnings are enabled, a further message is raised,
-giving details of the malformation.
-
 =item Pattern subroutine nesting without pos change exceeded limit in regex
 
 (F) You used a pattern that uses too many nested subpattern calls without
