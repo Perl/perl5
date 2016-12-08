@@ -470,6 +470,27 @@ $     EXIT !2 !$STATUS = "%X00000002" (error)
 $   ENDIF
 $Beyond_depth_check:
 $!
+$ escape_extended_chars: subroutine
+$   string = 'p1' ! It's the name of the symbol
+$   chars_to_escape = p2
+$   sindex = 0
+$   slength = f$length(string)
+$   loop_over_chars:
+$     if sindex .eq. slength then goto end_loop_over_chars
+$     char = f$extract(sindex, 1, string)
+$     if f$locate(char, chars_to_escape) .lt. f$length(chars_to_escape)
+$     then
+$       string = f$extract(0, sindex, string) + "^" + f$extract(sindex, slength, string)
+$       slength = slength + 1 ! we've increased overall length by 1
+$       sindex = sindex + 1   ! don't check the char we just escaped again
+$     endif
+$     sindex = sindex + 1
+$     goto loop_over_chars
+$ end_loop_over_chars:
+$ 'p1' == string
+$!
+$ endsubroutine
+$!
 $! after finding MANIFEST let's create (but not yet enter) the UU subdirectory
 $!
 $   IF (manifestfound .NES. "")
@@ -511,6 +532,9 @@ $       line = F$EDIT(line,"TRIM, COMPRESS")
 $       file_2_find = F$EXTRACT(0,F$LOCATE(" ",line),line) 
 $       IF F$LOCATE("/",file_2_find) .NE. F$LENGTH(file_2_find) 
 $       THEN 
+$         escaped_fname == file_2_find
+$         call escape_extended_chars escaped_fname "~!#&\'`()+@{},;[]%^=\"
+$         file_2_find = escaped_fname
 $Re_strip_line_manifest:
 $         loca = F$LOCATE("/",file_2_find)
 $         ante = F$EXTRACT(0,loca,file_2_find)
