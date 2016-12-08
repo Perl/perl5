@@ -242,6 +242,10 @@ foreach my $name (sort keys %properties) {
                 my $truth = truth($matches && (utf8::native_to_unicode($i) < 128 || $i > 255));
                 is ($ret, $truth, "is${function}_LC_utf8( $display_name ) == $truth (C locale)");
             }
+        }
+
+        if ($name ne 'vertws' && defined $utf8_locale) {
+            use locale;
 
             POSIX::setlocale( &POSIX::LC_ALL, $utf8_locale);
             $ret = truth eval "test_is${function}_LC_utf8('$char')";
