@@ -52,6 +52,54 @@ within non-zero characters.
 =cut
 */
 
+void
+Perl__force_out_malformed_utf8_message(pTHX_
+            const U8 *const p,      /* First byte in UTF-8 sequence */
+            const U8 * const e,     /* Final byte in sequence (may include
+                                       multiple chars */
+            const U32 flags,        /* Flags to pass to utf8n_to_uvchr(),
+                                       usually 0, or some DISALLOW flags */
+            const bool die_here)    /* If TRUE, this function does not return */
+{
+    /* This core-only function is to be called when a malformed UTF-8 character
+     * is found, in order to output the detailed information about the
+     * malformation before dieing.  The reason it exists is for the occasions
+     * when such a malformation is fatal, but warnings might be turned off, so
+     * that normally they would not be actually output.  This ensures that they
+     * do get output.  Because a sequence may be malformed in more than one
+     * way, multiple messages may be generated, so we can't make them fatal, as
+     * that would cause the first one to die.
+     *
+     * Instead we pretend -W was passed to perl, then die afterwards.  The
+     * flexibility is here to return to the caller so they can finish up and
+     * die themselves */
+    U32 errors;
+
+    PERL_ARGS_ASSERT__FORCE_OUT_MALFORMED_UTF8_MESSAGE;
+
+    ENTER;
+    SAVESPTR(PL_dowarn);
+    SAVESPTR(PL_curcop);
+
+    PL_dowarn = G_WARN_ALL_ON|G_WARN_ON;
+    if (PL_curcop) {
+        PL_curcop->cop_warnings = pWARN_ALL;
+    }
+
+    (void) utf8n_to_uvchr_error(p, e - p, NULL, flags & ~UTF8_CHECK_ONLY, &errors);
+
+    LEAVE;
+
+    if (! errors) {
+	Perl_croak(aTHX_ "panic: _force_out_malformed_utf8_message should"
+                         " be called only when there are errors found");
+    }
+
+    if (die_here) {
+        Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
+    }
+}
+
 /*
 =for apidoc uvoffuni_to_utf8_flags
 

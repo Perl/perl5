@@ -27,6 +27,7 @@
 /* Hide global symbols */
 
 #define Gv_AMupdate(a,b)	Perl_Gv_AMupdate(aTHX_ a,b)
+#define _force_out_malformed_utf8_message(a,b,c,d)	Perl__force_out_malformed_utf8_message(aTHX_ a,b,c,d)
 #define _is_in_locale_category(a,b)	Perl__is_in_locale_category(aTHX_ a,b)
 #define _is_uni_FOO(a,b)	Perl__is_uni_FOO(aTHX_ a,b)
 #define _is_uni_perl_idcont(a)	Perl__is_uni_perl_idcont(aTHX_ a)
