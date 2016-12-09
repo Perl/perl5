@@ -18,7 +18,7 @@
         || defined(PERL_HASH_FUNC_HYBRID_OAATHU_SIPHASH13) \
         || defined(PERL_HASH_FUNC_ONE_AT_A_TIME_HARD) \
     )
-#ifdef HAS_QUAD
+#if IVSIZE == 8
 #define PERL_HASH_FUNC_HYBRID_OAATHU_SIPHASH13
 #else
 #define PERL_HASH_FUNC_ONE_AT_A_TIME_HARD
