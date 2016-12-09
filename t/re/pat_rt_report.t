@@ -510,11 +510,13 @@ sub run_tests {
   SKIP:
     {
         skip "In EBCDIC and unclear what would trigger this bug there" if $::IS_EBCDIC;
-        no warnings 'utf8';
-        $_ = pack 'U0C2', 0xa2, 0xf8;  # Ill-formed UTF-8
-        my $ret = 0;
-        is(do {!($ret = s/[\0]+//g)}, 1,
-	   "Ill-formed UTF-8 doesn't match NUL in class; Bug 37836");
+        fresh_perl_like(
+            'no warnings "utf8";
+             $_ = pack "U0C2", 0xa2, 0xf8;  # Ill-formed UTF-8
+             my $ret = 0;
+             do {!($ret = s/[a\0]+//g)}',
+             qr/Malformed UTF-8/,
+             {}, "Ill-formed UTF-8 doesn't match NUL in class; Bug 37836");
     }
 
     {
