@@ -9215,10 +9215,8 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
      * UTF8_IS_INVARIANT() works even if not in UTF-8 */
     if (! UTF8_IS_INVARIANT(c) && utf8_target) {
         STRLEN c_len = 0;
-	c = utf8n_to_uvchr(p, p_end - p, &c_len,
-		(UTF8_ALLOW_DEFAULT & UTF8_ALLOW_ANYUV)
-		| UTF8_CHECK_ONLY);
-		/* see [perl #37836] for UTF8_ALLOW_ANYUV; */
+	c = utf8n_to_uvchr(p, p_end - p, &c_len, (  UTF8_ALLOW_DEFAULT
+                                                  | UTF8_CHECK_ONLY));
 	if (c_len == (STRLEN)-1)
 	    Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
         if (c > 255 && OP(n) == ANYOFL && ! ANYOFL_UTF8_LOCALE_REQD(flags)) {
