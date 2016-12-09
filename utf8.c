@@ -698,7 +698,8 @@ Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
 #endif
 
         if (  (flags & UTF8_DISALLOW_SUPER)
-            && UNLIKELY(s0 >= FIRST_START_BYTE_THAT_IS_DEFINITELY_SUPER)) {
+            && UNLIKELY(s0 >= FIRST_START_BYTE_THAT_IS_DEFINITELY_SUPER))
+        {
             return 0;           /* Above Unicode */
         }
 
@@ -1151,7 +1152,9 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
     }
 
     /* Here is not a continuation byte, nor an invariant.  The only thing left
-     * is a start byte (possibly for an overlong) */
+     * is a start byte (possibly for an overlong).  (We can't use UTF8_IS_START
+     * because it excludes start bytes like \xC0 that always lead to
+     * overlongs.) */
 
     /* Convert to I8 on EBCDIC (no-op on ASCII), then remove the leading bits
      * that indicate the number of bytes in the character's whole UTF-8
@@ -1373,7 +1376,9 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                 if (flags & (UTF8_WARN_SUPER|UTF8_DISALLOW_SUPER)) {
                     *errors |= UTF8_GOT_SUPER;
                 }
-                if (flags & (UTF8_WARN_ABOVE_31_BIT|UTF8_DISALLOW_ABOVE_31_BIT)) {
+                if (flags
+                        & (UTF8_WARN_ABOVE_31_BIT|UTF8_DISALLOW_ABOVE_31_BIT))
+                {
                     *errors |= UTF8_GOT_ABOVE_31_BIT;
                 }
 
@@ -1393,24 +1398,25 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                     ||   (flags & (UTF8_WARN_SUPER|UTF8_WARN_ABOVE_31_BIT)))
                 {
 
-                /* The warnings code explicitly says it doesn't handle the case
-                 * of packWARN2 and two categories which have parent-child
-                 * relationship.  Even if it works now to raise the warning if
-                 * either is enabled, it wouldn't necessarily do so in the
-                 * future.  We output (only) the most dire warning*/
-                if (! (flags & UTF8_CHECK_ONLY)) {
-                    if (ckWARN_d(WARN_UTF8)) {
-                        pack_warn = packWARN(WARN_UTF8);
+                    /* The warnings code explicitly says it doesn't handle the
+                     * case of packWARN2 and two categories which have
+                     * parent-child relationship.  Even if it works now to
+                     * raise the warning if either is enabled, it wouldn't
+                     * necessarily do so in the future.  We output (only) the
+                     * most dire warning*/
+                    if (! (flags & UTF8_CHECK_ONLY)) {
+                        if (ckWARN_d(WARN_UTF8)) {
+                            pack_warn = packWARN(WARN_UTF8);
+                        }
+                        else if (ckWARN_d(WARN_NON_UNICODE)) {
+                            pack_warn = packWARN(WARN_NON_UNICODE);
+                        }
+                        if (pack_warn) {
+                            message = Perl_form(aTHX_ "%s: %s (overflows)",
+                                            malformed_text,
+                                            _byte_dump_string(s0, send - s0));
+                        }
                     }
-                    else if (ckWARN_d(WARN_NON_UNICODE)) {
-                        pack_warn = packWARN(WARN_NON_UNICODE);
-                    }
-                    if (pack_warn) {
-                        message = Perl_form(aTHX_ "%s: %s (overflows)",
-                                        malformed_text,
-                                        _byte_dump_string(s0, send - s0));
-                    }
-                }
                 }
             }
             else if (possible_problems & UTF8_GOT_EMPTY) {
@@ -1632,7 +1638,9 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                         }
                     }
 
-                    if (flags & (UTF8_WARN_ABOVE_31_BIT|UTF8_DISALLOW_ABOVE_31_BIT)) {
+                    if (flags & ( UTF8_WARN_ABOVE_31_BIT
+                                 |UTF8_DISALLOW_ABOVE_31_BIT))
+                    {
                         *errors |= UTF8_GOT_ABOVE_31_BIT;
 
                         if (flags & UTF8_DISALLOW_ABOVE_31_BIT) {
@@ -1697,7 +1705,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                 else
                     Perl_warner(aTHX_ pack_warn, "%s", message);
             }
-        }   /* End of 'while (possible_problems) {' */
+        }   /* End of 'while (possible_problems)' */
 
         /* Since there was a possible problem, the returned length may need to
          * be changed from the one stored at the beginning of this function.
@@ -1749,7 +1757,7 @@ Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
     assert(s < send);
 
     return utf8n_to_uvchr(s, send - s, retlen,
-			  ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
+                     ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
 }
 
 /* This is marked as deprecated
