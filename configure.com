@@ -5557,10 +5557,9 @@ $ IF use64bitint .OR. use64bitint .EQS. "define"
 $ THEN
 $   ivtype = "''i64type'"
 $   uvtype = "''u64type'"
-$ ELSE
-$   i64size="undef"
-$   u64size="undef"
 $ ENDIF
+$ i64size="8"
+$ u64size="8"
 $!
 $ doublemantbits = "52"
 $ IF uselongdouble .OR. uselongdouble .EQS. "define"
@@ -5574,7 +5573,6 @@ $!
 $ tmp = "''ivtype'"
 $ GOSUB type_size_check
 $ ivsize = tmp
-$ IF use64bitint .OR. use64bitint .EQS. "define" THEN i64size = tmp
 $ IF ivtype .eqs. "long"
 $ THEN longsize = tmp
 $ ELSE
@@ -5586,7 +5584,6 @@ $!
 $ tmp = "''uvtype'"
 $ GOSUB type_size_check
 $ uvsize = tmp
-$ IF use64bitint .OR. use64bitint .EQS. "define" THEN u64size = tmp
 $!
 $ tmp = "''i8type'"
 $ GOSUB type_size_check
