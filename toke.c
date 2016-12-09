@@ -1032,13 +1032,11 @@ Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
 		} else if (UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(p, e)) {
 		    p++;
 		    highhalf++;
-		} else if (! UTF8_IS_INVARIANT(c)) {
-		    /* malformed UTF-8 */
-		    ENTER;
-		    SAVESPTR(PL_warnhook);
-		    PL_warnhook = PERL_WARNHOOK_FATAL;
-		    utf8n_to_uvchr((U8*)p, e-p, NULL, 0);
-		    LEAVE;
+                } else if (! UTF8_IS_INVARIANT(c)) {
+                    _force_out_malformed_utf8_message((U8 *) p, (U8 *) e,
+                                                      0,
+                                                      1 /* 1 means die */ );
+                    NOT_REACHED; /* NOTREACHED */
 		}
 	    }
 	    if (!highhalf)
@@ -1428,12 +1426,11 @@ Perl_lex_peek_unichar(pTHX_ U32 flags)
 	}
 	unichar = utf8n_to_uvchr((U8*)s, bufend-s, &retlen, UTF8_CHECK_ONLY);
 	if (retlen == (STRLEN)-1) {
-	    /* malformed UTF-8 */
-	    ENTER;
-	    SAVESPTR(PL_warnhook);
-	    PL_warnhook = PERL_WARNHOOK_FATAL;
-	    utf8n_to_uvchr((U8*)s, bufend-s, NULL, 0);
-	    LEAVE;
+            _force_out_malformed_utf8_message((U8 *) s,
+                                              (U8 *) bufend,
+                                              0,
+                                              1 /* 1 means die */ );
+            NOT_REACHED; /* NOTREACHED */
 	}
 	return unichar;
     } else {
@@ -2554,15 +2551,10 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
                                      e - backslash_ptr,
                                      &first_bad_char_loc))
     {
-        /* If warnings are on, this will print a more detailed analysis of what
-         * is wrong than the error message below */
-        utf8n_to_uvchr(first_bad_char_loc,
-                       e - ((char *) first_bad_char_loc),
-                       NULL, 0);
-
-        /* We deliberately don't try to print the malformed character, which
-         * might not print very well; it also may be just the first of many
-         * malformations, so don't print what comes after it */
+        _force_out_malformed_utf8_message(first_bad_char_loc,
+                                          (U8 *) PL_parser->bufend,
+                                          0,
+                                          0 /* 0 means don't die */ );
         yyerror_pv(Perl_form(aTHX_
             "Malformed UTF-8 character immediately after '%.*s'",
             (int) (first_bad_char_loc - (U8 *) backslash_ptr), backslash_ptr),
@@ -2695,15 +2687,10 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         STRLEN len;
         const char* const str = SvPV_const(res, len);
         if (! is_utf8_string_loc((U8 *) str, len, &first_bad_char_loc)) {
-            /* If warnings are on, this will print a more detailed analysis of
-             * what is wrong than the error message below */
-            utf8n_to_uvchr(first_bad_char_loc,
-                           (char *) first_bad_char_loc - str,
-                           NULL, 0);
-
-            /* We deliberately don't try to print the malformed character,
-             * which might not print very well; it also may be just the first
-             * of many malformations, so don't print what comes after it */
+            _force_out_malformed_utf8_message(first_bad_char_loc,
+                                              (U8 *) PL_parser->bufend,
+                                              0,
+                                              0 /* 0 means don't die */ );
             yyerror_pv(
               Perl_form(aTHX_
                 "Malformed UTF-8 returned by %.*s immediately after '%.*s'",
@@ -4902,11 +4889,10 @@ Perl_yylex(pTHX)
     default:
 	if (UTF) {
             if (! isUTF8_CHAR((U8 *) s, (U8 *) PL_bufend)) {
-                ENTER;
-                SAVESPTR(PL_warnhook);
-                PL_warnhook = PERL_WARNHOOK_FATAL;
-                utf8n_to_uvchr((U8*)s, PL_bufend-s, NULL, 0);
-                LEAVE;
+                _force_out_malformed_utf8_message((U8 *) s, (U8 *) PL_bufend,
+                                                  0,
+                                                  1 /* 1 means die */ );
+                NOT_REACHED; /* NOTREACHED */
             }
             if (isIDFIRST_utf8((U8*)s)) {
                 goto keylookup;
