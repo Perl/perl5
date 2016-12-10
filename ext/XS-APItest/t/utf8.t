@@ -479,11 +479,9 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
             is($ret, 1, "   Verify is_utf8_valid_partial_char_flags(" . display_bytes($bytes_so_far) . ") returns 1");
         }
 
-        unless (is(scalar @warnings, 0,
-                "   Verify is_utf8_valid_partial_char_flags generated no warnings"))
-        {
-            output_warnings(@warnings);
-        }
+        is(scalar @warnings, 0, "   Verify is_utf8_valid_partial_char_flags"
+                              . " generated no warnings")
+          or output_warnings(@warnings);
 
         my $b = substr($n_chr, $j, 1);
         my $hex_b = sprintf("\"\\x%02x\"", ord $b);
@@ -606,33 +604,25 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     $ret = test_isUTF8_CHAR($bytes, $len - 1);
     is($ret, 0, "Verify isUTF8_CHAR() with too short length parameter returns 0");
 
-    unless (is(scalar @warnings, 0,
-               "Verify isUTF8_CHAR() generated no warnings"))
-    {
-        output_warnings(@warnings);
-    }
+    is(scalar @warnings, 0, "Verify isUTF8_CHAR() generated no warnings")
+      or output_warnings(@warnings);
 
     undef @warnings;
 
     $ret = test_isUTF8_CHAR_flags($bytes, $len, 0);
     is($ret, $len, "Verify isUTF8_CHAR_flags($display_bytes, 0) returns expected length: $len");
 
-    unless (is(scalar @warnings, 0,
-               "Verify isUTF8_CHAR_flags() for $hex_n generated no warnings"))
-    {
-        output_warnings(@warnings);
-    }
+    is(scalar @warnings, 0,
+               "Verify isUTF8_CHAR_flags() for $hex_n generated no warnings")
+      or output_warnings(@warnings);
 
     undef @warnings;
 
     $ret = test_isUTF8_CHAR_flags($bytes, $len - 1, 0);
     is($ret, 0, "Verify isUTF8_CHAR_flags() with too short length parameter returns 0");
 
-    unless (is(scalar @warnings, 0,
-               "Verify isUTF8_CHAR_flags() generated no warnings"))
-    {
-        output_warnings(@warnings);
-    }
+    is(scalar @warnings, 0, "Verify isUTF8_CHAR_flags() generated no warnings")
+      or output_warnings(@warnings);
 
     undef @warnings;
 
@@ -640,33 +630,26 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     my $expected_len = ($valid_under_strict) ? $len : 0;
     is($ret, $expected_len, "Verify isSTRICT_UTF8_CHAR($display_bytes) returns expected length: $expected_len");
 
-    unless (is(scalar @warnings, 0,
-               "Verify isSTRICT_UTF8_CHAR() for $hex_n generated no warnings"))
-    {
-        output_warnings(@warnings);
-    }
+    is(scalar @warnings, 0,
+               "Verify isSTRICT_UTF8_CHAR() for $hex_n generated no warnings")
+      or output_warnings(@warnings);
 
     undef @warnings;
 
     $ret = test_isSTRICT_UTF8_CHAR($bytes, $len - 1);
     is($ret, 0, "Verify isSTRICT_UTF8_CHAR() with too short length parameter returns 0");
 
-    unless (is(scalar @warnings, 0,
-               "Verify isSTRICT_UTF8_CHAR() generated no warnings"))
-    {
-        output_warnings(@warnings);
-    }
+    is(scalar @warnings, 0, "Verify isSTRICT_UTF8_CHAR() generated no warnings")
+      or output_warnings(@warnings);
 
     undef @warnings;
 
     $ret = test_isUTF8_CHAR_flags($bytes, $len, $UTF8_DISALLOW_ILLEGAL_INTERCHANGE);
     is($ret, $expected_len, "Verify isUTF8_CHAR_flags('DISALLOW_ILLEGAL_INTERCHANGE') acts like isSTRICT_UTF8_CHAR");
 
-    unless (is(scalar @warnings, 0,
-               "Verify isUTF8_CHAR() for $hex_n generated no warnings"))
-    {
-        output_warnings(@warnings);
-    }
+    is(scalar @warnings, 0,
+               "Verify isUTF8_CHAR() for $hex_n generated no warnings")
+      or output_warnings(@warnings);
 
     undef @warnings;
 
@@ -674,33 +657,27 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     $expected_len = ($valid_under_c9strict) ? $len : 0;
     is($ret, $expected_len, "Verify isC9_STRICT_UTF8_CHAR($display_bytes) returns expected length: $len");
 
-    unless (is(scalar @warnings, 0,
-               "Verify isC9_STRICT_UTF8_CHAR() for $hex_n generated no warnings"))
-    {
-        output_warnings(@warnings);
-    }
+    is(scalar @warnings, 0,
+            "Verify isC9_STRICT_UTF8_CHAR() for $hex_n generated no warnings")
+      or output_warnings(@warnings);
 
     undef @warnings;
 
     $ret = test_isC9_STRICT_UTF8_CHAR($bytes, $len - 1);
     is($ret, 0, "Verify isC9_STRICT_UTF8_CHAR() with too short length parameter returns 0");
 
-    unless (is(scalar @warnings, 0,
-               "Verify isC9_STRICT_UTF8_CHAR() generated no warnings"))
-    {
-        output_warnings(@warnings);
-    }
+    is(scalar @warnings, 0,
+               "Verify isC9_STRICT_UTF8_CHAR() generated no warnings")
+      or output_warnings(@warnings);
 
     undef @warnings;
 
     $ret = test_isUTF8_CHAR_flags($bytes, $len, $UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE);
     is($ret, $expected_len, "Verify isUTF8_CHAR_flags('DISALLOW_ILLEGAL_C9_INTERCHANGE') acts like isC9_STRICT_UTF8_CHAR");
 
-    unless (is(scalar @warnings, 0,
-               "Verify isUTF8_CHAR() for $hex_n generated no warnings"))
-    {
-        output_warnings(@warnings);
-    }
+    is(scalar @warnings, 0,
+               "Verify isUTF8_CHAR() for $hex_n generated no warnings")
+      or output_warnings(@warnings);
 
     undef @warnings;
 
@@ -708,11 +685,9 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     is($ret_ref->[0], $n, "Verify valid_utf8_to_uvchr($display_bytes) returns $hex_n");
     is($ret_ref->[1], $len, "Verify valid_utf8_to_uvchr() for $hex_n returns expected length: $len");
 
-    unless (is(scalar @warnings, 0,
-               "Verify valid_utf8_to_uvchr() for $hex_n generated no warnings"))
-    {
-        output_warnings(@warnings);
-    }
+    is(scalar @warnings, 0,
+               "Verify valid_utf8_to_uvchr() for $hex_n generated no warnings")
+      or output_warnings(@warnings);
 
     # Similarly for uvchr_to_utf8
     my $this_uvchr_flags = $look_for_everything_uvchr_to;
@@ -737,11 +712,10 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     ok(defined $ret, "Verify uvchr_to_utf8_flags($hex_n, $display_flags) returned success");
     is($ret, $bytes, "Verify uvchr_to_utf8_flags($hex_n, $display_flags) returns correct bytes");
 
-    unless (is(scalar @warnings, 0,
-        "Verify uvchr_to_utf8_flags($hex_n, $display_flags) for $hex_n generated no warnings"))
-    {
-        output_warnings(@warnings);
-    }
+    is(scalar @warnings, 0,
+                "Verify uvchr_to_utf8_flags($hex_n, $display_flags) for $hex_n"
+              . " generated no warnings")
+      or output_warnings(@warnings);
 
     # Now append this code point to a string that we will test various
     # versions of is_foo_utf8_string_bar on, and keep a count of how many code
@@ -1251,37 +1225,27 @@ foreach my $test (@malformations) {
 
     my $ret = test_isUTF8_CHAR($bytes, $length);
     is($ret, 0, "$testname: isUTF8_CHAR returns 0");
-    unless (is(scalar @warnings, 0,
-               "$testname: isUTF8_CHAR() generated no warnings"))
-    {
-        output_warnings(@warnings);
-    }
+    is(scalar @warnings, 0, "$testname: isUTF8_CHAR() generated no warnings")
+      or output_warnings(@warnings);
 
     undef @warnings;
 
     $ret = test_isUTF8_CHAR_flags($bytes, $length, 0);
     is($ret, 0, "$testname: isUTF8_CHAR_flags returns 0");
-    unless (is(scalar @warnings, 0,
-               "$testname: isUTF8_CHAR() generated no warnings"))
-    {
-        output_warnings(@warnings);
-    }
+    is(scalar @warnings, 0, "$testname: isUTF8_CHAR() generated no warnings")
+      or output_warnings(@warnings);
 
     $ret = test_isSTRICT_UTF8_CHAR($bytes, $length);
     is($ret, 0, "$testname: isSTRICT_UTF8_CHAR returns 0");
-    unless (is(scalar @warnings, 0,
-               "$testname: isSTRICT_UTF8_CHAR() generated no warnings"))
-    {
-        output_warnings(@warnings);
-    }
+    is(scalar @warnings, 0,
+                    "$testname: isSTRICT_UTF8_CHAR() generated no warnings")
+      or output_warnings(@warnings);
 
     $ret = test_isC9_STRICT_UTF8_CHAR($bytes, $length);
     is($ret, 0, "$testname: isC9_STRICT_UTF8_CHAR returns 0");
-    unless (is(scalar @warnings, 0,
-               "$testname: isC9_STRICT_UTF8_CHAR() generated no warnings"))
-    {
-        output_warnings(@warnings);
-    }
+    is(scalar @warnings, 0,
+               "$testname: isC9_STRICT_UTF8_CHAR() generated no warnings")
+      or output_warnings(@warnings);
 
     for my $j (1 .. $length - 1) {
         my $partial = substr($bytes, 0, $j);
@@ -1300,11 +1264,10 @@ foreach my $test (@malformations) {
         is($ret, $ret_should_be, "$testname: is_utf8_valid_partial_char_flags("
                                 . display_bytes($partial)
                                 . ")$comment returns $ret_should_be");
-        unless (is(scalar @warnings, 0,
-                "$testname: is_utf8_valid_partial_char_flags() generated no warnings"))
-        {
-            output_warnings(@warnings);
-        }
+        is(scalar @warnings, 0,
+                "$testname: is_utf8_valid_partial_char_flags() generated"
+              . " no warnings")
+          or output_warnings(@warnings);
     }
 
 
@@ -1901,11 +1864,10 @@ foreach my $test (@tests) {
             is($ret_flags, $length,
                "isUTF8_CHAR_flags(...,0) $testname: returns expected length: $length");
         }
-        unless (is(scalar @warnings, 0,
-                "isUTF8_CHAR() and isUTF8_CHAR()_flags $testname: generated no warnings"))
-        {
-            output_warnings(@warnings);
-        }
+        is(scalar @warnings, 0,
+                "isUTF8_CHAR() and isUTF8_CHAR()_flags $testname: generated"
+              . " no warnings")
+          or output_warnings(@warnings);
 
         undef @warnings;
         $ret = test_isSTRICT_UTF8_CHAR($bytes, $length);
@@ -1924,11 +1886,10 @@ foreach my $test (@tests) {
             is($ret, $expected_ret,
                "isUTF8_CHAR_flags('DISALLOW_ILLEGAL_INTERCHANGE') acts like isSTRICT_UTF8_CHAR");
         }
-        unless (is(scalar @warnings, 0,
-                "isSTRICT_UTF8_CHAR() and isUTF8_CHAR_flags $testname: generated no warnings"))
-        {
-            output_warnings(@warnings);
-        }
+        is(scalar @warnings, 0,
+                "isSTRICT_UTF8_CHAR() and isUTF8_CHAR_flags $testname:"
+              . " generated no warnings")
+          or output_warnings(@warnings);
 
         undef @warnings;
         $ret = test_isC9_STRICT_UTF8_CHAR($bytes, $length);
@@ -1947,11 +1908,10 @@ foreach my $test (@tests) {
             is($ret, $expected_ret,
                "isUTF8_CHAR_flags('DISALLOW_ILLEGAL_C9_INTERCHANGE') acts like isC9_STRICT_UTF8_CHAR");
         }
-        unless (is(scalar @warnings, 0,
-                "isC9_STRICT_UTF8_CHAR() and isUTF8_CHAR_flags $testname: generated no warnings"))
-        {
-            output_warnings(@warnings);
-        }
+        is(scalar @warnings, 0,
+                "isC9_STRICT_UTF8_CHAR() and isUTF8_CHAR_flags $testname:"
+              . " generated no warnings")
+          or output_warnings(@warnings);
 
         # Test partial character handling, for each byte not a full character
         for my $j (1.. $length - 1) {
@@ -1985,11 +1945,10 @@ foreach my $test (@tests) {
                 is($ret, $ret_should_be, "$testname: is_utf8_valid_partial_char_flags("
                                         . display_bytes($partial)
                                         . "), $comment: returns $ret_should_be");
-                unless (is(scalar @warnings, 0,
-                        "$testname: is_utf8_valid_partial_char_flags() generated no warnings"))
-                {
-                    output_warnings(@warnings);
-                }
+                is(scalar @warnings, 0,
+                        "$testname: is_utf8_valid_partial_char_flags()"
+                      . " generated no warnings")
+                  or output_warnings(@warnings);
             }
         }
     }
@@ -2136,26 +2095,19 @@ foreach my $test (@tests) {
                         next;
                     }
                     if ($disallowed) {
-                        unless (is($ret_ref->[0], 0,
-                                "$this_name: Returns 0"))
-                        {
-                            diag $call;
-                        }
+                        is($ret_ref->[0], 0, "$this_name: Returns 0")
+                          or diag $call;
                     }
                     else {
-                        unless (is($ret_ref->[0], $expected_uv,
+                        is($ret_ref->[0], $expected_uv,
                                 "$this_name: Returns expected uv: "
-                                . sprintf("0x%04X", $expected_uv)))
-                        {
-                            diag $call;
-                        }
+                                . sprintf("0x%04X", $expected_uv))
+                          or diag $call;
                     }
-                    unless (is($ret_ref->[1], $this_expected_len,
-                        "$this_name: Returns expected length:"
-                    . " $this_expected_len"))
-                    {
-                        diag $call;
-                    }
+                    is($ret_ref->[1], $this_expected_len,
+                                        "$this_name: Returns expected length:"
+                                      . " $this_expected_len")
+                      or diag $call;
 
                     my $errors = $ret_ref->[2];
 
@@ -2168,20 +2120,16 @@ foreach my $test (@tests) {
                         }
                         splice @expected_errors, $i, 1;
                     }
-                    unless (is(scalar @expected_errors, 0,
-                            "Got all the expected malformation errors"))
-                    {
-                        diag Dumper \@expected_errors;
-                    }
+                    is(scalar @expected_errors, 0,
+                            "Got all the expected malformation errors")
+                      or diag Dumper \@expected_errors;
 
                     if (   $this_expected_len >= $this_needed_to_discern_len
                         && ($warn_flag || $disallow_flag))
                     {
-                        unless (is($errors, $expected_error_flags,
-                                "Got the correct error flag"))
-                        {
-                            diag $call;
-                        }
+                        is($errors, $expected_error_flags,
+                                "Got the correct error flag")
+                          or diag $call;
                     }
                     else {
                         is($errors, 0, "Got no other error flag");
@@ -2226,11 +2174,9 @@ foreach my $test (@tests) {
                         if (is(scalar @warnings, 1,
                             "$this_name: Got a single warning "))
                         {
-                            unless (like($warnings[0], $message,
-                                    "$this_name: Got expected warning"))
-                            {
-                                diag $call;
-                            }
+                            like($warnings[0], $message,
+                                    "$this_name: Got expected warning")
+                                or diag $call;
                         }
                         else {
                             diag $call;
@@ -2257,17 +2203,12 @@ foreach my $test (@tests) {
                         $ret_ref = test_utf8n_to_uvchr_error(
                                     $this_bytes, $this_length,
                                     $disallow_flag|$UTF8_CHECK_ONLY);
-                        unless (is($ret_ref->[0], 0,
-                                "$this_name, CHECK_ONLY: Returns 0"))
-                        {
-                            diag $call;
-                        }
-                        unless (is($ret_ref->[1], -1,
-                            "$this_name: CHECK_ONLY: returns -1 for"
-                        . " length"))
-                        {
-                            diag $call;
-                        }
+                        is($ret_ref->[0], 0,
+                                        "$this_name, CHECK_ONLY: Returns 0")
+                          or diag $call;
+                        is($ret_ref->[1], -1,
+                            "$this_name: CHECK_ONLY: returns -1 for length")
+                          or diag $call;
                         if (! is(scalar @warnings, 0,
                             "$this_name, CHECK_ONLY: no warnings"
                         . " generated"))
@@ -2369,18 +2310,12 @@ foreach my $test (@tests) {
                         next;
                     }
                     if ($disallowed) {
-                        unless (is($ret, undef,
-                                "$this_name: Returns undef"))
-                        {
-                            diag $call;
-                        }
+                        is($ret, undef, "$this_name: Returns undef")
+                          or diag $call;
                     }
                     else {
-                        unless (is($ret, $bytes,
-                                "$this_name: Returns expected string"))
-                        {
-                            diag $call;
-                        }
+                        is($ret, $bytes, "$this_name: Returns expected string")
+                          or diag $call;
                     }
                     if (! $do_warning
                         && ($warning eq 'utf8' || $warning eq $category))
@@ -2399,11 +2334,9 @@ foreach my $test (@tests) {
                         if (is(scalar @warnings, 1,
                             "$this_name: Got a single warning "))
                         {
-                            unless (like($warnings[0], $message,
-                                    "$this_name: Got expected warning"))
-                            {
-                                diag $call;
-                            }
+                            like($warnings[0], $message,
+                                    "$this_name: Got expected warning")
+                                or diag $call;
                         }
                         else {
                             diag $call;
