@@ -56,12 +56,12 @@ for (my $i = 0; $i < 256; $i++) {
 }
 
 *I8_to_native = (isASCII)
-                    ? sub { return shift }
-                    : sub { return join "", map { chr $i8_to_native[ord $_] }
+                ? sub { return shift }
+                : sub { return join "", map { chr $i8_to_native[ord $_] }
                                             split "", shift };
 *native_to_I8 = (isASCII)
-                    ? sub { return shift }
-                    : sub { return join "", map { chr $native_to_i8[ord $_] }
+                ? sub { return shift }
+                : sub { return join "", map { chr $native_to_i8[ord $_] }
                                             split "", shift };
 sub start_byte_to_cont($) {
 
@@ -156,8 +156,10 @@ foreach ([0, '', '', 'empty'],
 	 [1, 'NN', 'N', '1 char substring'],
 	 [-2, 'Perl', 'Rules', 'different'],
 	 [0, $pound_sign, $pound_sign, 'pound sign'],
-	 [1, $pound_sign . 10, $pound_sign . 1, '10 pounds is more than 1 pound'],
-	 [1, $pound_sign . $pound_sign, $pound_sign, '2 pound signs are more than 1'],
+	 [1, $pound_sign . 10, $pound_sign . 1,
+                                            '10 pounds is more than 1 pound'],
+	 [1, $pound_sign . $pound_sign, $pound_sign,
+                                            '2 pound signs are more than 1'],
 	 [-2, ' $!', " \x{1F42B}!", 'Camels are worth more than 1 dollar'],
 	 [-1, '!', "!\x{1F42A}", 'Initial substrings match'],
 	) {
@@ -197,166 +199,344 @@ my %code_points = (
     0xD000     => (isASCII) ? "\xed\x80\x80" : I8_to_native("\xf1\xb4\xa0\xa0"),
 
     # Bracket the surrogates, and include several surrogates
-    0xD7FF	=> (isASCII) ? "\xed\x9f\xbf" : I8_to_native("\xf1\xb5\xbf\xbf"),
-    0xD800	=> (isASCII) ? "\xed\xa0\x80" : I8_to_native("\xf1\xb6\xa0\xa0"),
-    0xDC00      => (isASCII) ? "\xed\xb0\x80" : I8_to_native("\xf1\xb7\xa0\xa0"),
-    0xDFFF	=> (isASCII) ? "\xee\x80\x80" : I8_to_native("\xf1\xb8\xa0\xa0"),
-    0xDFFF      => (isASCII) ? "\xed\xbf\xbf" : I8_to_native("\xf1\xb7\xbf\xbf"),
-    0xE000	=> (isASCII) ? "\xee\x80\x80" : I8_to_native("\xf1\xb8\xa0\xa0"),
+    0xD7FF     => (isASCII) ? "\xed\x9f\xbf" : I8_to_native("\xf1\xb5\xbf\xbf"),
+    0xD800     => (isASCII) ? "\xed\xa0\x80" : I8_to_native("\xf1\xb6\xa0\xa0"),
+    0xDC00     => (isASCII) ? "\xed\xb0\x80" : I8_to_native("\xf1\xb7\xa0\xa0"),
+    0xDFFF     => (isASCII) ? "\xee\x80\x80" : I8_to_native("\xf1\xb8\xa0\xa0"),
+    0xDFFF     => (isASCII) ? "\xed\xbf\xbf" : I8_to_native("\xf1\xb7\xbf\xbf"),
+    0xE000     => (isASCII) ? "\xee\x80\x80" : I8_to_native("\xf1\xb8\xa0\xa0"),
 
     # Include the 32 contiguous non characters, and surrounding code points
-    0xFDCF	=> (isASCII) ? "\xef\xb7\x8f" : I8_to_native("\xf1\xbf\xae\xaf"),
-    0xFDD0	=> (isASCII) ? "\xef\xb7\x90" : I8_to_native("\xf1\xbf\xae\xb0"),
-    0xFDD1	=> (isASCII) ? "\xef\xb7\x91" : I8_to_native("\xf1\xbf\xae\xb1"),
-    0xFDD2	=> (isASCII) ? "\xef\xb7\x92" : I8_to_native("\xf1\xbf\xae\xb2"),
-    0xFDD3	=> (isASCII) ? "\xef\xb7\x93" : I8_to_native("\xf1\xbf\xae\xb3"),
-    0xFDD4	=> (isASCII) ? "\xef\xb7\x94" : I8_to_native("\xf1\xbf\xae\xb4"),
-    0xFDD5	=> (isASCII) ? "\xef\xb7\x95" : I8_to_native("\xf1\xbf\xae\xb5"),
-    0xFDD6	=> (isASCII) ? "\xef\xb7\x96" : I8_to_native("\xf1\xbf\xae\xb6"),
-    0xFDD7	=> (isASCII) ? "\xef\xb7\x97" : I8_to_native("\xf1\xbf\xae\xb7"),
-    0xFDD8	=> (isASCII) ? "\xef\xb7\x98" : I8_to_native("\xf1\xbf\xae\xb8"),
-    0xFDD9	=> (isASCII) ? "\xef\xb7\x99" : I8_to_native("\xf1\xbf\xae\xb9"),
-    0xFDDA	=> (isASCII) ? "\xef\xb7\x9a" : I8_to_native("\xf1\xbf\xae\xba"),
-    0xFDDB	=> (isASCII) ? "\xef\xb7\x9b" : I8_to_native("\xf1\xbf\xae\xbb"),
-    0xFDDC	=> (isASCII) ? "\xef\xb7\x9c" : I8_to_native("\xf1\xbf\xae\xbc"),
-    0xFDDD	=> (isASCII) ? "\xef\xb7\x9d" : I8_to_native("\xf1\xbf\xae\xbd"),
-    0xFDDE	=> (isASCII) ? "\xef\xb7\x9e" : I8_to_native("\xf1\xbf\xae\xbe"),
-    0xFDDF	=> (isASCII) ? "\xef\xb7\x9f" : I8_to_native("\xf1\xbf\xae\xbf"),
-    0xFDE0	=> (isASCII) ? "\xef\xb7\xa0" : I8_to_native("\xf1\xbf\xaf\xa0"),
-    0xFDE1	=> (isASCII) ? "\xef\xb7\xa1" : I8_to_native("\xf1\xbf\xaf\xa1"),
-    0xFDE2	=> (isASCII) ? "\xef\xb7\xa2" : I8_to_native("\xf1\xbf\xaf\xa2"),
-    0xFDE3	=> (isASCII) ? "\xef\xb7\xa3" : I8_to_native("\xf1\xbf\xaf\xa3"),
-    0xFDE4	=> (isASCII) ? "\xef\xb7\xa4" : I8_to_native("\xf1\xbf\xaf\xa4"),
-    0xFDE5	=> (isASCII) ? "\xef\xb7\xa5" : I8_to_native("\xf1\xbf\xaf\xa5"),
-    0xFDE6	=> (isASCII) ? "\xef\xb7\xa6" : I8_to_native("\xf1\xbf\xaf\xa6"),
-    0xFDE7	=> (isASCII) ? "\xef\xb7\xa7" : I8_to_native("\xf1\xbf\xaf\xa7"),
-    0xFDE8	=> (isASCII) ? "\xef\xb7\xa8" : I8_to_native("\xf1\xbf\xaf\xa8"),
-    0xFDEa	=> (isASCII) ? "\xef\xb7\x99" : I8_to_native("\xf1\xbf\xaf\xa9"),
-    0xFDEA	=> (isASCII) ? "\xef\xb7\xaa" : I8_to_native("\xf1\xbf\xaf\xaa"),
-    0xFDEB	=> (isASCII) ? "\xef\xb7\xab" : I8_to_native("\xf1\xbf\xaf\xab"),
-    0xFDEC	=> (isASCII) ? "\xef\xb7\xac" : I8_to_native("\xf1\xbf\xaf\xac"),
-    0xFDED	=> (isASCII) ? "\xef\xb7\xad" : I8_to_native("\xf1\xbf\xaf\xad"),
-    0xFDEE	=> (isASCII) ? "\xef\xb7\xae" : I8_to_native("\xf1\xbf\xaf\xae"),
-    0xFDEF	=> (isASCII) ? "\xef\xb7\xaf" : I8_to_native("\xf1\xbf\xaf\xaf"),
-    0xFDF0      => (isASCII) ? "\xef\xb7\xb0" : I8_to_native("\xf1\xbf\xaf\xb0"),
+    0xFDCF     => (isASCII) ? "\xef\xb7\x8f" : I8_to_native("\xf1\xbf\xae\xaf"),
+    0xFDD0     => (isASCII) ? "\xef\xb7\x90" : I8_to_native("\xf1\xbf\xae\xb0"),
+    0xFDD1     => (isASCII) ? "\xef\xb7\x91" : I8_to_native("\xf1\xbf\xae\xb1"),
+    0xFDD2     => (isASCII) ? "\xef\xb7\x92" : I8_to_native("\xf1\xbf\xae\xb2"),
+    0xFDD3     => (isASCII) ? "\xef\xb7\x93" : I8_to_native("\xf1\xbf\xae\xb3"),
+    0xFDD4     => (isASCII) ? "\xef\xb7\x94" : I8_to_native("\xf1\xbf\xae\xb4"),
+    0xFDD5     => (isASCII) ? "\xef\xb7\x95" : I8_to_native("\xf1\xbf\xae\xb5"),
+    0xFDD6     => (isASCII) ? "\xef\xb7\x96" : I8_to_native("\xf1\xbf\xae\xb6"),
+    0xFDD7     => (isASCII) ? "\xef\xb7\x97" : I8_to_native("\xf1\xbf\xae\xb7"),
+    0xFDD8     => (isASCII) ? "\xef\xb7\x98" : I8_to_native("\xf1\xbf\xae\xb8"),
+    0xFDD9     => (isASCII) ? "\xef\xb7\x99" : I8_to_native("\xf1\xbf\xae\xb9"),
+    0xFDDA     => (isASCII) ? "\xef\xb7\x9a" : I8_to_native("\xf1\xbf\xae\xba"),
+    0xFDDB     => (isASCII) ? "\xef\xb7\x9b" : I8_to_native("\xf1\xbf\xae\xbb"),
+    0xFDDC     => (isASCII) ? "\xef\xb7\x9c" : I8_to_native("\xf1\xbf\xae\xbc"),
+    0xFDDD     => (isASCII) ? "\xef\xb7\x9d" : I8_to_native("\xf1\xbf\xae\xbd"),
+    0xFDDE     => (isASCII) ? "\xef\xb7\x9e" : I8_to_native("\xf1\xbf\xae\xbe"),
+    0xFDDF     => (isASCII) ? "\xef\xb7\x9f" : I8_to_native("\xf1\xbf\xae\xbf"),
+    0xFDE0     => (isASCII) ? "\xef\xb7\xa0" : I8_to_native("\xf1\xbf\xaf\xa0"),
+    0xFDE1     => (isASCII) ? "\xef\xb7\xa1" : I8_to_native("\xf1\xbf\xaf\xa1"),
+    0xFDE2     => (isASCII) ? "\xef\xb7\xa2" : I8_to_native("\xf1\xbf\xaf\xa2"),
+    0xFDE3     => (isASCII) ? "\xef\xb7\xa3" : I8_to_native("\xf1\xbf\xaf\xa3"),
+    0xFDE4     => (isASCII) ? "\xef\xb7\xa4" : I8_to_native("\xf1\xbf\xaf\xa4"),
+    0xFDE5     => (isASCII) ? "\xef\xb7\xa5" : I8_to_native("\xf1\xbf\xaf\xa5"),
+    0xFDE6     => (isASCII) ? "\xef\xb7\xa6" : I8_to_native("\xf1\xbf\xaf\xa6"),
+    0xFDE7     => (isASCII) ? "\xef\xb7\xa7" : I8_to_native("\xf1\xbf\xaf\xa7"),
+    0xFDE8     => (isASCII) ? "\xef\xb7\xa8" : I8_to_native("\xf1\xbf\xaf\xa8"),
+    0xFDEa     => (isASCII) ? "\xef\xb7\x99" : I8_to_native("\xf1\xbf\xaf\xa9"),
+    0xFDEA     => (isASCII) ? "\xef\xb7\xaa" : I8_to_native("\xf1\xbf\xaf\xaa"),
+    0xFDEB     => (isASCII) ? "\xef\xb7\xab" : I8_to_native("\xf1\xbf\xaf\xab"),
+    0xFDEC     => (isASCII) ? "\xef\xb7\xac" : I8_to_native("\xf1\xbf\xaf\xac"),
+    0xFDED     => (isASCII) ? "\xef\xb7\xad" : I8_to_native("\xf1\xbf\xaf\xad"),
+    0xFDEE     => (isASCII) ? "\xef\xb7\xae" : I8_to_native("\xf1\xbf\xaf\xae"),
+    0xFDEF     => (isASCII) ? "\xef\xb7\xaf" : I8_to_native("\xf1\xbf\xaf\xaf"),
+    0xFDF0     => (isASCII) ? "\xef\xb7\xb0" : I8_to_native("\xf1\xbf\xaf\xb0"),
 
     # Mostly around non-characters, but some are transitions to longer strings
-    0xFFFD	=> (isASCII) ? "\xef\xbf\xbd" : I8_to_native("\xf1\xbf\xbf\xbd"),
-    0x10000 - 1 => (isASCII) ? "\xef\xbf\xbf" : I8_to_native("\xf1\xbf\xbf\xbf"),
-    0x10000     => (isASCII) ? "\xf0\x90\x80\x80" : I8_to_native("\xf2\xa0\xa0\xa0"),
-    0x1FFFD     => (isASCII) ? "\xf0\x9f\xbf\xbd" : I8_to_native("\xf3\xbf\xbf\xbd"),
-    0x1FFFE     => (isASCII) ? "\xf0\x9f\xbf\xbe" : I8_to_native("\xf3\xbf\xbf\xbe"),
-    0x1FFFF     => (isASCII) ? "\xf0\x9f\xbf\xbf" : I8_to_native("\xf3\xbf\xbf\xbf"),
-    0x20000     => (isASCII) ? "\xf0\xa0\x80\x80" : I8_to_native("\xf4\xa0\xa0\xa0"),
-    0x2FFFD     => (isASCII) ? "\xf0\xaf\xbf\xbd" : I8_to_native("\xf5\xbf\xbf\xbd"),
-    0x2FFFE     => (isASCII) ? "\xf0\xaf\xbf\xbe" : I8_to_native("\xf5\xbf\xbf\xbe"),
-    0x2FFFF     => (isASCII) ? "\xf0\xaf\xbf\xbf" : I8_to_native("\xf5\xbf\xbf\xbf"),
-    0x30000     => (isASCII) ? "\xf0\xb0\x80\x80" : I8_to_native("\xf6\xa0\xa0\xa0"),
-    0x3FFFD     => (isASCII) ? "\xf0\xbf\xbf\xbd" : I8_to_native("\xf7\xbf\xbf\xbd"),
-    0x3FFFE     => (isASCII) ? "\xf0\xbf\xbf\xbe" : I8_to_native("\xf7\xbf\xbf\xbe"),
-    0x40000 - 1 => (isASCII) ? "\xf0\xbf\xbf\xbf" : I8_to_native("\xf7\xbf\xbf\xbf"),
-    0x40000     => (isASCII) ? "\xf1\x80\x80\x80" : I8_to_native("\xf8\xa8\xa0\xa0\xa0"),
-    0x4FFFD	=> (isASCII) ? "\xf1\x8f\xbf\xbd" : I8_to_native("\xf8\xa9\xbf\xbf\xbd"),
-    0x4FFFE	=> (isASCII) ? "\xf1\x8f\xbf\xbe" : I8_to_native("\xf8\xa9\xbf\xbf\xbe"),
-    0x4FFFF	=> (isASCII) ? "\xf1\x8f\xbf\xbf" : I8_to_native("\xf8\xa9\xbf\xbf\xbf"),
-    0x50000     => (isASCII) ? "\xf1\x90\x80\x80" : I8_to_native("\xf8\xaa\xa0\xa0\xa0"),
-    0x5FFFD	=> (isASCII) ? "\xf1\x9f\xbf\xbd" : I8_to_native("\xf8\xab\xbf\xbf\xbd"),
-    0x5FFFE	=> (isASCII) ? "\xf1\x9f\xbf\xbe" : I8_to_native("\xf8\xab\xbf\xbf\xbe"),
-    0x5FFFF	=> (isASCII) ? "\xf1\x9f\xbf\xbf" : I8_to_native("\xf8\xab\xbf\xbf\xbf"),
-    0x60000     => (isASCII) ? "\xf1\xa0\x80\x80" : I8_to_native("\xf8\xac\xa0\xa0\xa0"),
-    0x6FFFD	=> (isASCII) ? "\xf1\xaf\xbf\xbd" : I8_to_native("\xf8\xad\xbf\xbf\xbd"),
-    0x6FFFE	=> (isASCII) ? "\xf1\xaf\xbf\xbe" : I8_to_native("\xf8\xad\xbf\xbf\xbe"),
-    0x6FFFF	=> (isASCII) ? "\xf1\xaf\xbf\xbf" : I8_to_native("\xf8\xad\xbf\xbf\xbf"),
-    0x70000     => (isASCII) ? "\xf1\xb0\x80\x80" : I8_to_native("\xf8\xae\xa0\xa0\xa0"),
-    0x7FFFD	=> (isASCII) ? "\xf1\xbf\xbf\xbd" : I8_to_native("\xf8\xaf\xbf\xbf\xbd"),
-    0x7FFFE	=> (isASCII) ? "\xf1\xbf\xbf\xbe" : I8_to_native("\xf8\xaf\xbf\xbf\xbe"),
-    0x7FFFF	=> (isASCII) ? "\xf1\xbf\xbf\xbf" : I8_to_native("\xf8\xaf\xbf\xbf\xbf"),
-    0x80000     => (isASCII) ? "\xf2\x80\x80\x80" : I8_to_native("\xf8\xb0\xa0\xa0\xa0"),
-    0x8FFFD	=> (isASCII) ? "\xf2\x8f\xbf\xbd" : I8_to_native("\xf8\xb1\xbf\xbf\xbd"),
-    0x8FFFE	=> (isASCII) ? "\xf2\x8f\xbf\xbe" : I8_to_native("\xf8\xb1\xbf\xbf\xbe"),
-    0x8FFFF	=> (isASCII) ? "\xf2\x8f\xbf\xbf" : I8_to_native("\xf8\xb1\xbf\xbf\xbf"),
-    0x90000     => (isASCII) ? "\xf2\x90\x80\x80" : I8_to_native("\xf8\xb2\xa0\xa0\xa0"),
-    0x9FFFD	=> (isASCII) ? "\xf2\x9f\xbf\xbd" : I8_to_native("\xf8\xb3\xbf\xbf\xbd"),
-    0x9FFFE	=> (isASCII) ? "\xf2\x9f\xbf\xbe" : I8_to_native("\xf8\xb3\xbf\xbf\xbe"),
-    0x9FFFF	=> (isASCII) ? "\xf2\x9f\xbf\xbf" : I8_to_native("\xf8\xb3\xbf\xbf\xbf"),
-    0xA0000     => (isASCII) ? "\xf2\xa0\x80\x80" : I8_to_native("\xf8\xb4\xa0\xa0\xa0"),
-    0xAFFFD	=> (isASCII) ? "\xf2\xaf\xbf\xbd" : I8_to_native("\xf8\xb5\xbf\xbf\xbd"),
-    0xAFFFE	=> (isASCII) ? "\xf2\xaf\xbf\xbe" : I8_to_native("\xf8\xb5\xbf\xbf\xbe"),
-    0xAFFFF	=> (isASCII) ? "\xf2\xaf\xbf\xbf" : I8_to_native("\xf8\xb5\xbf\xbf\xbf"),
-    0xB0000     => (isASCII) ? "\xf2\xb0\x80\x80" : I8_to_native("\xf8\xb6\xa0\xa0\xa0"),
-    0xBFFFD	=> (isASCII) ? "\xf2\xbf\xbf\xbd" : I8_to_native("\xf8\xb7\xbf\xbf\xbd"),
-    0xBFFFE	=> (isASCII) ? "\xf2\xbf\xbf\xbe" : I8_to_native("\xf8\xb7\xbf\xbf\xbe"),
-    0xBFFFF	=> (isASCII) ? "\xf2\xbf\xbf\xbf" : I8_to_native("\xf8\xb7\xbf\xbf\xbf"),
-    0xC0000     => (isASCII) ? "\xf3\x80\x80\x80" : I8_to_native("\xf8\xb8\xa0\xa0\xa0"),
-    0xCFFFD	=> (isASCII) ? "\xf3\x8f\xbf\xbd" : I8_to_native("\xf8\xb9\xbf\xbf\xbd"),
-    0xCFFFE	=> (isASCII) ? "\xf3\x8f\xbf\xbe" : I8_to_native("\xf8\xb9\xbf\xbf\xbe"),
-    0xCFFFF	=> (isASCII) ? "\xf3\x8f\xbf\xbf" : I8_to_native("\xf8\xb9\xbf\xbf\xbf"),
-    0xD0000     => (isASCII) ? "\xf3\x90\x80\x80" : I8_to_native("\xf8\xba\xa0\xa0\xa0"),
-    0xDFFFD	=> (isASCII) ? "\xf3\x9f\xbf\xbd" : I8_to_native("\xf8\xbb\xbf\xbf\xbd"),
-    0xDFFFE	=> (isASCII) ? "\xf3\x9f\xbf\xbe" : I8_to_native("\xf8\xbb\xbf\xbf\xbe"),
-    0xDFFFF	=> (isASCII) ? "\xf3\x9f\xbf\xbf" : I8_to_native("\xf8\xbb\xbf\xbf\xbf"),
-    0xE0000     => (isASCII) ? "\xf3\xa0\x80\x80" : I8_to_native("\xf8\xbc\xa0\xa0\xa0"),
-    0xEFFFD	=> (isASCII) ? "\xf3\xaf\xbf\xbd" : I8_to_native("\xf8\xbd\xbf\xbf\xbd"),
-    0xEFFFE	=> (isASCII) ? "\xf3\xaf\xbf\xbe" : I8_to_native("\xf8\xbd\xbf\xbf\xbe"),
-    0xEFFFF	=> (isASCII) ? "\xf3\xaf\xbf\xbf" : I8_to_native("\xf8\xbd\xbf\xbf\xbf"),
-    0xF0000     => (isASCII) ? "\xf3\xb0\x80\x80" : I8_to_native("\xf8\xbe\xa0\xa0\xa0"),
-    0xFFFFD	=> (isASCII) ? "\xf3\xbf\xbf\xbd" : I8_to_native("\xf8\xbf\xbf\xbf\xbd"),
-    0xFFFFE	=> (isASCII) ? "\xf3\xbf\xbf\xbe" : I8_to_native("\xf8\xbf\xbf\xbf\xbe"),
-    0xFFFFF	=> (isASCII) ? "\xf3\xbf\xbf\xbf" : I8_to_native("\xf8\xbf\xbf\xbf\xbf"),
-    0x100000    => (isASCII) ? "\xf4\x80\x80\x80" : I8_to_native("\xf9\xa0\xa0\xa0\xa0"),
-    0x10FFFD	=> (isASCII) ? "\xf4\x8f\xbf\xbd" : I8_to_native("\xf9\xa1\xbf\xbf\xbd"),
-    0x10FFFE	=> (isASCII) ? "\xf4\x8f\xbf\xbe" : I8_to_native("\xf9\xa1\xbf\xbf\xbe"),
-    0x10FFFF	=> (isASCII) ? "\xf4\x8f\xbf\xbf" : I8_to_native("\xf9\xa1\xbf\xbf\xbf"),
-    0x110000    => (isASCII) ? "\xf4\x90\x80\x80" : I8_to_native("\xf9\xa2\xa0\xa0\xa0"),
+    0xFFFD     => (isASCII) ? "\xef\xbf\xbd" : I8_to_native("\xf1\xbf\xbf\xbd"),
+    0x10000 - 1 => (isASCII)
+                   ?              "\xef\xbf\xbf"
+                   : I8_to_native("\xf1\xbf\xbf\xbf"),
+    0x10000     => (isASCII)
+                   ?              "\xf0\x90\x80\x80"
+                   : I8_to_native("\xf2\xa0\xa0\xa0"),
+    0x1FFFD     => (isASCII)
+                   ?              "\xf0\x9f\xbf\xbd"
+                   : I8_to_native("\xf3\xbf\xbf\xbd"),
+    0x1FFFE     => (isASCII)
+                   ?              "\xf0\x9f\xbf\xbe"
+                   : I8_to_native("\xf3\xbf\xbf\xbe"),
+    0x1FFFF     => (isASCII)
+                   ?              "\xf0\x9f\xbf\xbf"
+                   : I8_to_native("\xf3\xbf\xbf\xbf"),
+    0x20000     => (isASCII)
+                   ?              "\xf0\xa0\x80\x80"
+                   : I8_to_native("\xf4\xa0\xa0\xa0"),
+    0x2FFFD     => (isASCII)
+                   ?              "\xf0\xaf\xbf\xbd"
+                   : I8_to_native("\xf5\xbf\xbf\xbd"),
+    0x2FFFE     => (isASCII)
+                   ?              "\xf0\xaf\xbf\xbe"
+                   : I8_to_native("\xf5\xbf\xbf\xbe"),
+    0x2FFFF     => (isASCII)
+                   ?              "\xf0\xaf\xbf\xbf"
+                   : I8_to_native("\xf5\xbf\xbf\xbf"),
+    0x30000     => (isASCII)
+                   ?              "\xf0\xb0\x80\x80"
+                   : I8_to_native("\xf6\xa0\xa0\xa0"),
+    0x3FFFD     => (isASCII)
+                   ?              "\xf0\xbf\xbf\xbd"
+                   : I8_to_native("\xf7\xbf\xbf\xbd"),
+    0x3FFFE     => (isASCII)
+                   ?              "\xf0\xbf\xbf\xbe"
+                   : I8_to_native("\xf7\xbf\xbf\xbe"),
+    0x40000 - 1 => (isASCII)
+                   ?              "\xf0\xbf\xbf\xbf"
+                   : I8_to_native("\xf7\xbf\xbf\xbf"),
+    0x40000     => (isASCII)
+                   ?              "\xf1\x80\x80\x80"
+                   : I8_to_native("\xf8\xa8\xa0\xa0\xa0"),
+    0x4FFFD	=> (isASCII)
+                   ?              "\xf1\x8f\xbf\xbd"
+                   : I8_to_native("\xf8\xa9\xbf\xbf\xbd"),
+    0x4FFFE	=> (isASCII)
+                   ?              "\xf1\x8f\xbf\xbe"
+                   : I8_to_native("\xf8\xa9\xbf\xbf\xbe"),
+    0x4FFFF	=> (isASCII)
+                   ?              "\xf1\x8f\xbf\xbf"
+                   : I8_to_native("\xf8\xa9\xbf\xbf\xbf"),
+    0x50000     => (isASCII)
+                   ?              "\xf1\x90\x80\x80"
+                   : I8_to_native("\xf8\xaa\xa0\xa0\xa0"),
+    0x5FFFD	=> (isASCII)
+                   ?              "\xf1\x9f\xbf\xbd"
+                   : I8_to_native("\xf8\xab\xbf\xbf\xbd"),
+    0x5FFFE	=> (isASCII)
+                   ?              "\xf1\x9f\xbf\xbe"
+                   : I8_to_native("\xf8\xab\xbf\xbf\xbe"),
+    0x5FFFF	=> (isASCII)
+                   ?              "\xf1\x9f\xbf\xbf"
+                   : I8_to_native("\xf8\xab\xbf\xbf\xbf"),
+    0x60000     => (isASCII)
+                   ?              "\xf1\xa0\x80\x80"
+                   : I8_to_native("\xf8\xac\xa0\xa0\xa0"),
+    0x6FFFD	=> (isASCII)
+                   ?              "\xf1\xaf\xbf\xbd"
+                   : I8_to_native("\xf8\xad\xbf\xbf\xbd"),
+    0x6FFFE	=> (isASCII)
+                   ?              "\xf1\xaf\xbf\xbe"
+                   : I8_to_native("\xf8\xad\xbf\xbf\xbe"),
+    0x6FFFF	=> (isASCII)
+                   ?              "\xf1\xaf\xbf\xbf"
+                   : I8_to_native("\xf8\xad\xbf\xbf\xbf"),
+    0x70000     => (isASCII)
+                   ?              "\xf1\xb0\x80\x80"
+                   : I8_to_native("\xf8\xae\xa0\xa0\xa0"),
+    0x7FFFD	=> (isASCII)
+                   ?              "\xf1\xbf\xbf\xbd"
+                   : I8_to_native("\xf8\xaf\xbf\xbf\xbd"),
+    0x7FFFE	=> (isASCII)
+                   ?              "\xf1\xbf\xbf\xbe"
+                   : I8_to_native("\xf8\xaf\xbf\xbf\xbe"),
+    0x7FFFF	=> (isASCII)
+                   ?              "\xf1\xbf\xbf\xbf"
+                   : I8_to_native("\xf8\xaf\xbf\xbf\xbf"),
+    0x80000     => (isASCII)
+                   ?              "\xf2\x80\x80\x80"
+                   : I8_to_native("\xf8\xb0\xa0\xa0\xa0"),
+    0x8FFFD	=> (isASCII)
+                   ?              "\xf2\x8f\xbf\xbd"
+                   : I8_to_native("\xf8\xb1\xbf\xbf\xbd"),
+    0x8FFFE	=> (isASCII)
+                   ?              "\xf2\x8f\xbf\xbe"
+                   : I8_to_native("\xf8\xb1\xbf\xbf\xbe"),
+    0x8FFFF	=> (isASCII)
+                   ?              "\xf2\x8f\xbf\xbf"
+                   : I8_to_native("\xf8\xb1\xbf\xbf\xbf"),
+    0x90000     => (isASCII)
+                   ?              "\xf2\x90\x80\x80"
+                   : I8_to_native("\xf8\xb2\xa0\xa0\xa0"),
+    0x9FFFD	=> (isASCII)
+                   ?              "\xf2\x9f\xbf\xbd"
+                   : I8_to_native("\xf8\xb3\xbf\xbf\xbd"),
+    0x9FFFE	=> (isASCII)
+                   ?              "\xf2\x9f\xbf\xbe"
+                   : I8_to_native("\xf8\xb3\xbf\xbf\xbe"),
+    0x9FFFF	=> (isASCII)
+                   ?              "\xf2\x9f\xbf\xbf"
+                   : I8_to_native("\xf8\xb3\xbf\xbf\xbf"),
+    0xA0000     => (isASCII)
+                   ?              "\xf2\xa0\x80\x80"
+                   : I8_to_native("\xf8\xb4\xa0\xa0\xa0"),
+    0xAFFFD	=> (isASCII)
+                   ?              "\xf2\xaf\xbf\xbd"
+                   : I8_to_native("\xf8\xb5\xbf\xbf\xbd"),
+    0xAFFFE	=> (isASCII)
+                   ?              "\xf2\xaf\xbf\xbe"
+                   : I8_to_native("\xf8\xb5\xbf\xbf\xbe"),
+    0xAFFFF	=> (isASCII)
+                   ?              "\xf2\xaf\xbf\xbf"
+                   : I8_to_native("\xf8\xb5\xbf\xbf\xbf"),
+    0xB0000     => (isASCII)
+                   ?              "\xf2\xb0\x80\x80"
+                   : I8_to_native("\xf8\xb6\xa0\xa0\xa0"),
+    0xBFFFD	=> (isASCII)
+                   ?              "\xf2\xbf\xbf\xbd"
+                   : I8_to_native("\xf8\xb7\xbf\xbf\xbd"),
+    0xBFFFE	=> (isASCII)
+                   ?              "\xf2\xbf\xbf\xbe"
+                   : I8_to_native("\xf8\xb7\xbf\xbf\xbe"),
+    0xBFFFF	=> (isASCII)
+                   ?               "\xf2\xbf\xbf\xbf"
+                   : I8_to_native("\xf8\xb7\xbf\xbf\xbf"),
+    0xC0000     => (isASCII)
+                   ?               "\xf3\x80\x80\x80"
+                   : I8_to_native("\xf8\xb8\xa0\xa0\xa0"),
+    0xCFFFD	=> (isASCII)
+                   ?               "\xf3\x8f\xbf\xbd"
+                   : I8_to_native("\xf8\xb9\xbf\xbf\xbd"),
+    0xCFFFE	=> (isASCII)
+                   ?               "\xf3\x8f\xbf\xbe"
+                   : I8_to_native("\xf8\xb9\xbf\xbf\xbe"),
+    0xCFFFF	=> (isASCII)
+                   ?               "\xf3\x8f\xbf\xbf"
+                   : I8_to_native("\xf8\xb9\xbf\xbf\xbf"),
+    0xD0000     => (isASCII)
+                   ?               "\xf3\x90\x80\x80"
+                   : I8_to_native("\xf8\xba\xa0\xa0\xa0"),
+    0xDFFFD	=> (isASCII)
+                   ?               "\xf3\x9f\xbf\xbd"
+                   : I8_to_native("\xf8\xbb\xbf\xbf\xbd"),
+    0xDFFFE	=> (isASCII)
+                   ?               "\xf3\x9f\xbf\xbe"
+                   : I8_to_native("\xf8\xbb\xbf\xbf\xbe"),
+    0xDFFFF	=> (isASCII)
+                   ?               "\xf3\x9f\xbf\xbf"
+                   : I8_to_native("\xf8\xbb\xbf\xbf\xbf"),
+    0xE0000     => (isASCII)
+                   ?               "\xf3\xa0\x80\x80"
+                   : I8_to_native("\xf8\xbc\xa0\xa0\xa0"),
+    0xEFFFD	=> (isASCII)
+                   ?               "\xf3\xaf\xbf\xbd"
+                   : I8_to_native("\xf8\xbd\xbf\xbf\xbd"),
+    0xEFFFE	=> (isASCII)
+                   ?               "\xf3\xaf\xbf\xbe"
+                   : I8_to_native("\xf8\xbd\xbf\xbf\xbe"),
+    0xEFFFF	=> (isASCII)
+                   ?               "\xf3\xaf\xbf\xbf"
+                   : I8_to_native("\xf8\xbd\xbf\xbf\xbf"),
+    0xF0000     => (isASCII)
+                   ?               "\xf3\xb0\x80\x80"
+                   : I8_to_native("\xf8\xbe\xa0\xa0\xa0"),
+    0xFFFFD	=> (isASCII)
+                   ?               "\xf3\xbf\xbf\xbd"
+                   : I8_to_native("\xf8\xbf\xbf\xbf\xbd"),
+    0xFFFFE	=> (isASCII)
+                   ?               "\xf3\xbf\xbf\xbe"
+                   : I8_to_native("\xf8\xbf\xbf\xbf\xbe"),
+    0xFFFFF	=> (isASCII)
+                   ?               "\xf3\xbf\xbf\xbf"
+                   : I8_to_native("\xf8\xbf\xbf\xbf\xbf"),
+    0x100000    => (isASCII)
+                   ?               "\xf4\x80\x80\x80"
+                   : I8_to_native("\xf9\xa0\xa0\xa0\xa0"),
+    0x10FFFD	=> (isASCII)
+                   ?               "\xf4\x8f\xbf\xbd"
+                   : I8_to_native("\xf9\xa1\xbf\xbf\xbd"),
+    0x10FFFE	=> (isASCII)
+                   ?               "\xf4\x8f\xbf\xbe"
+                   : I8_to_native("\xf9\xa1\xbf\xbf\xbe"),
+    0x10FFFF	=> (isASCII)
+                   ?               "\xf4\x8f\xbf\xbf"
+                   : I8_to_native("\xf9\xa1\xbf\xbf\xbf"),
+    0x110000    => (isASCII)
+                   ?               "\xf4\x90\x80\x80"
+                   : I8_to_native("\xf9\xa2\xa0\xa0\xa0"),
 
     # Things that would be noncharacters if they were in Unicode, and might be
     # mistaken, if the C code is bad, to be nonchars
-    0x11FFFE    => (isASCII) ? "\xf4\x9f\xbf\xbe" : I8_to_native("\xf9\xa3\xbf\xbf\xbe"),
-    0x11FFFF    => (isASCII) ? "\xf4\x9f\xbf\xbf" : I8_to_native("\xf9\xa3\xbf\xbf\xbf"),
-    0x20FFFE    => (isASCII) ? "\xf8\x88\x8f\xbf\xbe" : I8_to_native("\xfa\xa1\xbf\xbf\xbe"),
-    0x20FFFF    => (isASCII) ? "\xf8\x88\x8f\xbf\xbf" : I8_to_native("\xfa\xa1\xbf\xbf\xbf"),
+    0x11FFFE    => (isASCII)
+                   ?               "\xf4\x9f\xbf\xbe"
+                    : I8_to_native("\xf9\xa3\xbf\xbf\xbe"),
+    0x11FFFF    => (isASCII)
+                   ?               "\xf4\x9f\xbf\xbf"
+                    : I8_to_native("\xf9\xa3\xbf\xbf\xbf"),
+    0x20FFFE    => (isASCII)
+                   ?               "\xf8\x88\x8f\xbf\xbe"
+                    : I8_to_native("\xfa\xa1\xbf\xbf\xbe"),
+    0x20FFFF    => (isASCII)
+                   ?               "\xf8\x88\x8f\xbf\xbf"
+                    : I8_to_native("\xfa\xa1\xbf\xbf\xbf"),
 
-    0x200000 - 1 => (isASCII) ? "\xf7\xbf\xbf\xbf" : I8_to_native("\xf9\xbf\xbf\xbf\xbf"),
-    0x200000     => (isASCII) ? "\xf8\x88\x80\x80\x80" : I8_to_native("\xfa\xa0\xa0\xa0\xa0"),
-    0x400000 - 1 => (isASCII) ? "\xf8\x8f\xbf\xbf\xbf" : I8_to_native("\xfb\xbf\xbf\xbf\xbf"),
-    0x400000     => (isASCII) ? "\xf8\x90\x80\x80\x80" : I8_to_native("\xfc\xa4\xa0\xa0\xa0\xa0"),
-    0x4000000 - 1 => (isASCII) ? "\xfb\xbf\xbf\xbf\xbf" : I8_to_native("\xfd\xbf\xbf\xbf\xbf\xbf"),
-    0x4000000     => (isASCII) ? "\xfc\x84\x80\x80\x80\x80" : I8_to_native("\xfe\xa2\xa0\xa0\xa0\xa0\xa0"),
-    0x4000000 - 1 => (isASCII) ? "\xfb\xbf\xbf\xbf\xbf" : I8_to_native("\xfd\xbf\xbf\xbf\xbf\xbf"),
-    0x4000000     => (isASCII) ? "\xfc\x84\x80\x80\x80\x80" : I8_to_native("\xfe\xa2\xa0\xa0\xa0\xa0\xa0"),
-    0x40000000 - 1 => (isASCII) ? "\xfc\xbf\xbf\xbf\xbf\xbf" : I8_to_native("\xfe\xbf\xbf\xbf\xbf\xbf\xbf"),
-    0x40000000     => (isASCII) ? "\xfd\x80\x80\x80\x80\x80" : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0"),
-    0x80000000 - 1 => (isASCII) ? "\xfd\xbf\xbf\xbf\xbf\xbf" : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa1\xbf\xbf\xbf\xbf\xbf\xbf"),
-    0x80000000     => (isASCII) ? "\xfe\x82\x80\x80\x80\x80\x80" : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
-    0xFFFFFFFF     => (isASCII) ? "\xfe\x83\xbf\xbf\xbf\xbf\xbf" : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa3\xbf\xbf\xbf\xbf\xbf\xbf"),
+    0x200000 - 1 => (isASCII)
+                    ?              "\xf7\xbf\xbf\xbf"
+                    : I8_to_native("\xf9\xbf\xbf\xbf\xbf"),
+    0x200000     => (isASCII)
+                    ?              "\xf8\x88\x80\x80\x80"
+                    : I8_to_native("\xfa\xa0\xa0\xa0\xa0"),
+    0x400000 - 1 => (isASCII)
+                    ?              "\xf8\x8f\xbf\xbf\xbf"
+                    : I8_to_native("\xfb\xbf\xbf\xbf\xbf"),
+    0x400000     => (isASCII)
+                    ?              "\xf8\x90\x80\x80\x80"
+                    : I8_to_native("\xfc\xa4\xa0\xa0\xa0\xa0"),
+    0x4000000 - 1 => (isASCII)
+                     ?              "\xfb\xbf\xbf\xbf\xbf"
+                     : I8_to_native("\xfd\xbf\xbf\xbf\xbf\xbf"),
+    0x4000000     => (isASCII)
+                     ?              "\xfc\x84\x80\x80\x80\x80"
+                     : I8_to_native("\xfe\xa2\xa0\xa0\xa0\xa0\xa0"),
+    0x4000000 - 1 => (isASCII)
+                     ?              "\xfb\xbf\xbf\xbf\xbf"
+                     : I8_to_native("\xfd\xbf\xbf\xbf\xbf\xbf"),
+    0x4000000     => (isASCII)
+                     ?              "\xfc\x84\x80\x80\x80\x80"
+                     : I8_to_native("\xfe\xa2\xa0\xa0\xa0\xa0\xa0"),
+    0x40000000 - 1 => (isASCII)
+                      ?              "\xfc\xbf\xbf\xbf\xbf\xbf"
+                      : I8_to_native("\xfe\xbf\xbf\xbf\xbf\xbf\xbf"),
+    0x40000000     =>
+    (isASCII) ?    "\xfd\x80\x80\x80\x80\x80"
+    : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0"),
+    0x80000000 - 1 =>
+    (isASCII) ?    "\xfd\xbf\xbf\xbf\xbf\xbf"
+    : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa1\xbf\xbf\xbf\xbf\xbf\xbf"),
+    0x80000000     =>
+    (isASCII) ?    "\xfe\x82\x80\x80\x80\x80\x80"
+    : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
+    0xFFFFFFFF     =>
+    (isASCII) ?    "\xfe\x83\xbf\xbf\xbf\xbf\xbf"
+    : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa3\xbf\xbf\xbf\xbf\xbf\xbf"),
 );
 
 if ($is64bit) {
     no warnings qw(overflow portable);
-    $code_points{0x100000000}        = (isASCII)
-                                        ?              "\xfe\x84\x80\x80\x80\x80\x80"
-                                        : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0");
-    $code_points{0x1000000000 - 1}   = (isASCII)
-                                        ?              "\xfe\xbf\xbf\xbf\xbf\xbf\xbf"
-                                        : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa1\xbf\xbf\xbf\xbf\xbf\xbf\xbf");
-    $code_points{0x1000000000}       = (isASCII)
-                                        ?              "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80"
-                                        : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0\xa0");
-    $code_points{0xFFFFFFFFFFFFFFFF} = (isASCII)
-                                        ?              "\xff\x80\x8f\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
-                                        : I8_to_native("\xff\xaf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf");
-    if (isASCII) {  # These could falsely show as overlongs in a naive implementation
-        $code_points{0x40000000000}  = "\xff\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80\x80";
-        $code_points{0x1000000000000} = "\xff\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80\x80\x80";
-        $code_points{0x40000000000000} = "\xff\x80\x80\x81\x80\x80\x80\x80\x80\x80\x80\x80\x80";
-        $code_points{0x1000000000000000} = "\xff\x80\x81\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80";
+    $code_points{0x100000000}
+     = (isASCII)
+     ?              "\xfe\x84\x80\x80\x80\x80\x80"
+     : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0");
+    $code_points{0x1000000000 - 1}
+     = (isASCII)
+     ?              "\xfe\xbf\xbf\xbf\xbf\xbf\xbf"
+     : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa1\xbf\xbf\xbf\xbf\xbf\xbf\xbf");
+    $code_points{0x1000000000}
+     = (isASCII)
+     ?              "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80"
+     : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0\xa0");
+    $code_points{0xFFFFFFFFFFFFFFFF}
+     = (isASCII)
+     ?              "\xff\x80\x8f\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
+     : I8_to_native("\xff\xaf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf");
+    if (isASCII) {  # These could falsely show as overlongs in a naive
+                    # implementation
+        $code_points{0x40000000000}
+                      = "\xff\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80\x80";
+        $code_points{0x1000000000000}
+                      = "\xff\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80\x80\x80";
+        $code_points{0x40000000000000}
+                      = "\xff\x80\x80\x81\x80\x80\x80\x80\x80\x80\x80\x80\x80";
+        $code_points{0x1000000000000000}
+                      = "\xff\x80\x81\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80";
         # overflows
-        #$code_points{0xfoo}     = "\xff\x81\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80";
+        #$code_points{0xfoo}
+        #           = "\xff\x81\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80";
     }
 }
-elsif (! isASCII) { # 32-bit EBCDIC.  64-bit is clearer to handle, so doesn't need this test case
+elsif (! isASCII) { # 32-bit EBCDIC.  64-bit is clearer to handle, so doesn't
+                    # need this test case
     no warnings qw(overflow portable);
-    $code_points{0x40000000} = I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0");
+    $code_points{0x40000000} = I8_to_native(
+                    "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0");
 }
 
 # Now add in entries for each of code points 0-255, which require special
@@ -470,13 +650,19 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
         undef @warnings;
 
         if ($j == $byte_length - 1) {
-            my $ret = test_is_utf8_valid_partial_char_flags($n_chr, $byte_length, 0);
-            is($ret, 0, "   Verify is_utf8_valid_partial_char_flags(" . display_bytes($n_chr) . ") returns 0 for full character");
+            my $ret
+              = test_is_utf8_valid_partial_char_flags($n_chr, $byte_length, 0);
+            is($ret, 0, "   Verify is_utf8_valid_partial_char_flags("
+                      . display_bytes($n_chr)
+                      . ") returns 0 for full character");
         }
         else {
             my $bytes_so_far = substr($n_chr, 0, $j + 1);
-            my $ret = test_is_utf8_valid_partial_char_flags($bytes_so_far, $j + 1, 0);
-            is($ret, 1, "   Verify is_utf8_valid_partial_char_flags(" . display_bytes($bytes_so_far) . ") returns 1");
+            my $ret
+             = test_is_utf8_valid_partial_char_flags($bytes_so_far, $j + 1, 0);
+            is($ret, 1, "   Verify is_utf8_valid_partial_char_flags("
+                      . display_bytes($bytes_so_far)
+                      . ") returns 1");
         }
 
         is(scalar @warnings, 0, "   Verify is_utf8_valid_partial_char_flags"
@@ -552,7 +738,7 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
         $valid_under_c9strict = 0;
         if ($n > 2 ** 31 - 1) {
             $this_utf8_flags &=
-                            ~($UTF8_DISALLOW_ABOVE_31_BIT|$UTF8_WARN_ABOVE_31_BIT);
+                        ~($UTF8_DISALLOW_ABOVE_31_BIT|$UTF8_WARN_ABOVE_31_BIT);
             $valid_for_fits_in_31_bits = 0;
         }
     }
@@ -591,7 +777,8 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     undef @warnings;
 
     my $ret = test_isUTF8_CHAR($bytes, $len);
-    is($ret, $len, "Verify isUTF8_CHAR($display_bytes) returns expected length: $len");
+    is($ret, $len,
+            "Verify isUTF8_CHAR($display_bytes) returns expected length: $len");
 
     unless (is(scalar @warnings, 0,
                "Verify isUTF8_CHAR() for $hex_n generated no warnings"))
@@ -602,7 +789,8 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     undef @warnings;
 
     $ret = test_isUTF8_CHAR($bytes, $len - 1);
-    is($ret, 0, "Verify isUTF8_CHAR() with too short length parameter returns 0");
+    is($ret, 0,
+            "Verify isUTF8_CHAR() with too short length parameter returns 0");
 
     is(scalar @warnings, 0, "Verify isUTF8_CHAR() generated no warnings")
       or output_warnings(@warnings);
@@ -610,7 +798,8 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     undef @warnings;
 
     $ret = test_isUTF8_CHAR_flags($bytes, $len, 0);
-    is($ret, $len, "Verify isUTF8_CHAR_flags($display_bytes, 0) returns expected length: $len");
+    is($ret, $len, "Verify isUTF8_CHAR_flags($display_bytes, 0)"
+                 . " returns expected length: $len");
 
     is(scalar @warnings, 0,
                "Verify isUTF8_CHAR_flags() for $hex_n generated no warnings")
@@ -619,7 +808,8 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     undef @warnings;
 
     $ret = test_isUTF8_CHAR_flags($bytes, $len - 1, 0);
-    is($ret, 0, "Verify isUTF8_CHAR_flags() with too short length parameter returns 0");
+    is($ret, 0,
+        "Verify isUTF8_CHAR_flags() with too short length parameter returns 0");
 
     is(scalar @warnings, 0, "Verify isUTF8_CHAR_flags() generated no warnings")
       or output_warnings(@warnings);
@@ -628,7 +818,8 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
 
     $ret = test_isSTRICT_UTF8_CHAR($bytes, $len);
     my $expected_len = ($valid_under_strict) ? $len : 0;
-    is($ret, $expected_len, "Verify isSTRICT_UTF8_CHAR($display_bytes) returns expected length: $expected_len");
+    is($ret, $expected_len, "Verify isSTRICT_UTF8_CHAR($display_bytes)"
+                          . " returns expected length: $expected_len");
 
     is(scalar @warnings, 0,
                "Verify isSTRICT_UTF8_CHAR() for $hex_n generated no warnings")
@@ -637,15 +828,19 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     undef @warnings;
 
     $ret = test_isSTRICT_UTF8_CHAR($bytes, $len - 1);
-    is($ret, 0, "Verify isSTRICT_UTF8_CHAR() with too short length parameter returns 0");
+    is($ret, 0,
+       "Verify isSTRICT_UTF8_CHAR() with too short length parameter returns 0");
 
     is(scalar @warnings, 0, "Verify isSTRICT_UTF8_CHAR() generated no warnings")
       or output_warnings(@warnings);
 
     undef @warnings;
 
-    $ret = test_isUTF8_CHAR_flags($bytes, $len, $UTF8_DISALLOW_ILLEGAL_INTERCHANGE);
-    is($ret, $expected_len, "Verify isUTF8_CHAR_flags('DISALLOW_ILLEGAL_INTERCHANGE') acts like isSTRICT_UTF8_CHAR");
+    $ret = test_isUTF8_CHAR_flags($bytes, $len,
+                                            $UTF8_DISALLOW_ILLEGAL_INTERCHANGE);
+    is($ret, $expected_len,
+                    "Verify isUTF8_CHAR_flags('DISALLOW_ILLEGAL_INTERCHANGE')"
+                  . " acts like isSTRICT_UTF8_CHAR");
 
     is(scalar @warnings, 0,
                "Verify isUTF8_CHAR() for $hex_n generated no warnings")
@@ -655,7 +850,8 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
 
     $ret = test_isC9_STRICT_UTF8_CHAR($bytes, $len);
     $expected_len = ($valid_under_c9strict) ? $len : 0;
-    is($ret, $expected_len, "Verify isC9_STRICT_UTF8_CHAR($display_bytes) returns expected length: $len");
+    is($ret, $expected_len, "Verify isC9_STRICT_UTF8_CHAR($display_bytes)"
+                          . " returns expected length: $len");
 
     is(scalar @warnings, 0,
             "Verify isC9_STRICT_UTF8_CHAR() for $hex_n generated no warnings")
@@ -664,7 +860,8 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     undef @warnings;
 
     $ret = test_isC9_STRICT_UTF8_CHAR($bytes, $len - 1);
-    is($ret, 0, "Verify isC9_STRICT_UTF8_CHAR() with too short length parameter returns 0");
+    is($ret, 0,
+    "Verify isC9_STRICT_UTF8_CHAR() with too short length parameter returns 0");
 
     is(scalar @warnings, 0,
                "Verify isC9_STRICT_UTF8_CHAR() generated no warnings")
@@ -672,8 +869,11 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
 
     undef @warnings;
 
-    $ret = test_isUTF8_CHAR_flags($bytes, $len, $UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE);
-    is($ret, $expected_len, "Verify isUTF8_CHAR_flags('DISALLOW_ILLEGAL_C9_INTERCHANGE') acts like isC9_STRICT_UTF8_CHAR");
+    $ret = test_isUTF8_CHAR_flags($bytes, $len,
+                                        $UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE);
+    is($ret, $expected_len,
+                   "Verify isUTF8_CHAR_flags('DISALLOW_ILLEGAL_C9_INTERCHANGE')"
+                  ." acts like isC9_STRICT_UTF8_CHAR");
 
     is(scalar @warnings, 0,
                "Verify isUTF8_CHAR() for $hex_n generated no warnings")
@@ -682,8 +882,10 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
     undef @warnings;
 
     $ret_ref = test_valid_utf8_to_uvchr($bytes);
-    is($ret_ref->[0], $n, "Verify valid_utf8_to_uvchr($display_bytes) returns $hex_n");
-    is($ret_ref->[1], $len, "Verify valid_utf8_to_uvchr() for $hex_n returns expected length: $len");
+    is($ret_ref->[0], $n,
+                   "Verify valid_utf8_to_uvchr($display_bytes) returns $hex_n");
+    is($ret_ref->[1], $len,
+       "Verify valid_utf8_to_uvchr() for $hex_n returns expected length: $len");
 
     is(scalar @warnings, 0,
                "Verify valid_utf8_to_uvchr() for $hex_n generated no warnings")
@@ -702,15 +904,18 @@ for my $u (sort { utf8::unicode_to_native($a) <=> utf8::unicode_to_native($b) }
         $this_uvchr_flags &= ~($UNICODE_DISALLOW_NONCHAR|$UNICODE_WARN_NONCHAR);
     }
     elsif ($n >= 0xD800 && $n <= 0xDFFF) {
-        $this_uvchr_flags &= ~($UNICODE_DISALLOW_SURROGATE|$UNICODE_WARN_SURROGATE);
+        $this_uvchr_flags
+                     &= ~($UNICODE_DISALLOW_SURROGATE|$UNICODE_WARN_SURROGATE);
     }
     $display_flags = sprintf "0x%x", $this_uvchr_flags;
 
     undef @warnings;
 
     $ret = test_uvchr_to_utf8_flags($n, $this_uvchr_flags);
-    ok(defined $ret, "Verify uvchr_to_utf8_flags($hex_n, $display_flags) returned success");
-    is($ret, $bytes, "Verify uvchr_to_utf8_flags($hex_n, $display_flags) returns correct bytes");
+    ok(defined $ret,
+        "Verify uvchr_to_utf8_flags($hex_n, $display_flags) returned success");
+    is($ret, $bytes,
+    "Verify uvchr_to_utf8_flags($hex_n, $display_flags) returns correct bytes");
 
     is(scalar @warnings, 0,
                 "Verify uvchr_to_utf8_flags($hex_n, $display_flags) for $hex_n"
@@ -836,7 +1041,9 @@ for my $restriction (sort keys %restriction_types) {
                         # a continuation byte makes it invalid; appending a
                         # partial character makes the 'string' form invalid,
                         # but not the 'fixed_width_buf' form.
-                        if ($this_error_type eq $cont_byte || $this_error_type eq $p) {
+                        if (   $this_error_type eq $cont_byte
+                            || $this_error_type eq $p)
+                        {
                             $bytes .= $this_error_type;
                             if ($this_error_type eq $cont_byte) {
                                 $test_name_suffix
@@ -1162,8 +1369,9 @@ else { # 64-bit ASCII, or EBCDIC of any size.
     push @malformations,
         [ "overlong malformation, lowest max-byte",
             (isASCII)
-             ?              "\xff\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80"
-             : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+             ?      "\xff\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80"
+             : I8_to_native(
+                    "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
             $max_bytes,
             $UTF8_ALLOW_LONG, $UTF8_GOT_LONG,
             0,   # NUL
@@ -1172,8 +1380,9 @@ else { # 64-bit ASCII, or EBCDIC of any size.
         ],
         [ "overlong malformation, highest max-byte",
             (isASCII)    # 2**36-1 on ASCII; 2**30-1 on EBCDIC
-             ?              "\xff\x80\x80\x80\x80\x80\x80\xbf\xbf\xbf\xbf\xbf\xbf"
-             : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xbf\xbf\xbf\xbf\xbf\xbf"),
+             ?      "\xff\x80\x80\x80\x80\x80\x80\xbf\xbf\xbf\xbf\xbf\xbf"
+             : I8_to_native(
+                    "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xbf\xbf\xbf\xbf\xbf\xbf"),
             $max_bytes,
             $UTF8_ALLOW_LONG, $UTF8_GOT_LONG,
             (isASCII) ? 0xFFFFFFFFF : 0x3FFFFFFF,
@@ -1184,7 +1393,8 @@ else { # 64-bit ASCII, or EBCDIC of any size.
     if (! $is64bit) {   # 32-bit EBCDIC
         push @malformations,
         [ "overflow malformation",
-            I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0"),
+            I8_to_native(
+                    "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0"),
             $max_bytes,
             0,  # There is no way to allow this malformation
             $UTF8_GOT_OVERFLOW,
@@ -1197,8 +1407,9 @@ else { # 64-bit ASCII, or EBCDIC of any size.
         push @malformations,
             [ "overflow malformation",
                (isASCII)
-                ?              "\xff\x80\x90\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"
-                : I8_to_native("\xff\xb0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+                ?   "\xff\x80\x90\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"
+                : I8_to_native(
+                    "\xff\xb0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $max_bytes,
                 0,  # There is no way to allow this malformation
                 $UTF8_GOT_OVERFLOW,
@@ -1319,7 +1530,9 @@ foreach my $test (@malformations) {
     $ret_ref = test_utf8n_to_uvchr_error($bytes, $length, $UTF8_CHECK_ONLY);
     is($ret_ref->[0], 0, "$testname: CHECK_ONLY: Returns 0");
     is($ret_ref->[1], -1, "$testname: CHECK_ONLY: returns -1 for length");
-    if (! is(scalar @warnings, 0, "$testname: CHECK_ONLY: no warnings generated")) {
+    if (! is(scalar @warnings, 0,
+                               "$testname: CHECK_ONLY: no warnings generated"))
+    {
         output_warnings(@warnings);
     }
     is($ret_ref->[2], $expected_error_flags,
@@ -1703,8 +1916,9 @@ my @tests = (
     ],
     [ "requires at least 32 bits",
         (isASCII)
-         ? "\xfe\x82\x80\x80\x80\x80\x80"
-         : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
+         ?  "\xfe\x82\x80\x80\x80\x80\x80"
+         : I8_to_native(
+            "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
         # This code point is chosen so that it is representable in a UV on
         # 32-bit machines
         $UTF8_WARN_ABOVE_31_BIT, $UTF8_DISALLOW_ABOVE_31_BIT,
@@ -1716,8 +1930,9 @@ my @tests = (
     ],
     [ "highest 32 bit code point",
         (isASCII)
-         ? "\xfe\x83\xbf\xbf\xbf\xbf\xbf"
-         : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa3\xbf\xbf\xbf\xbf\xbf\xbf"),
+         ?  "\xfe\x83\xbf\xbf\xbf\xbf\xbf"
+         : I8_to_native(
+            "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa3\xbf\xbf\xbf\xbf\xbf\xbf"),
         $UTF8_WARN_ABOVE_31_BIT, $UTF8_DISALLOW_ABOVE_31_BIT,
         $UTF8_GOT_ABOVE_31_BIT,
         'utf8', 0xFFFFFFFF,
@@ -1725,10 +1940,12 @@ my @tests = (
         (isASCII) ? 1 : 8,
         nonportable_regex(0xffffffff)
     ],
-    [ "requires at least 32 bits, and use SUPER-type flags, instead of ABOVE_31_BIT",
+    [ "requires at least 32 bits, and use SUPER-type flags, instead of"
+    . " ABOVE_31_BIT",
         (isASCII)
          ? "\xfe\x82\x80\x80\x80\x80\x80"
-         : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
+         : I8_to_native(
+           "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
         $UTF8_WARN_SUPER, $UTF8_DISALLOW_SUPER, $UTF8_GOT_SUPER,
         'utf8', 0x80000000,
         (isASCII) ? 7 : $max_bytes,
@@ -1746,11 +1963,13 @@ my @tests = (
         # since we have no reports of failures with it.
        (($is64bit)
         ? ((isASCII)
-           ?              "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
-           : I8_to_native("\xff\xB0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"))
+           ?    "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
+           : I8_to_native(
+                "\xff\xB0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"))
         : ((isASCII)
-           ?              "\xfe\x86\x80\x80\x80\x80\x80"
-           : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0"))),
+           ?    "\xfe\x86\x80\x80\x80\x80\x80"
+           : I8_to_native(
+                "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0"))),
         $UTF8_WARN_ABOVE_31_BIT,
         $UTF8_DISALLOW_ABOVE_31_BIT,
         $UTF8_GOT_ABOVE_31_BIT,
@@ -1780,8 +1999,9 @@ else {
     push @tests,
         [ "More than 32 bits",
             (isASCII)
-            ?              "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80"
-            : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+            ?       "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80"
+            : I8_to_native(
+                    "\xff\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
             $UTF8_WARN_ABOVE_31_BIT, $UTF8_DISALLOW_ABOVE_31_BIT,
             $UTF8_GOT_ABOVE_31_BIT,
             'utf8', 0x1000000000,
@@ -1789,9 +2009,11 @@ else {
             qr/and( is)? not portable/
         ];
     if (! isASCII) {
-        push @tests,   # These could falsely show wrongly in a naive implementation
+        push @tests,   # These could falsely show wrongly in a naive
+                       # implementation
             [ "requires at least 32 bits",
-                I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+                I8_to_native(
+                    "\xff\xa0\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 $UTF8_GOT_ABOVE_31_BIT,
                 'utf8', 0x800000000,
@@ -1799,7 +2021,8 @@ else {
                 nonportable_regex(0x80000000)
             ],
             [ "requires at least 32 bits",
-                I8_to_native("\xff\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+                I8_to_native(
+                    "\xff\xa0\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 $UTF8_GOT_ABOVE_31_BIT,
                 'utf8', 0x10000000000,
@@ -1807,7 +2030,8 @@ else {
                 nonportable_regex(0x10000000000)
             ],
             [ "requires at least 32 bits",
-                I8_to_native("\xff\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+                I8_to_native(
+                    "\xff\xa0\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 $UTF8_GOT_ABOVE_31_BIT,
                 'utf8', 0x200000000000,
@@ -1815,7 +2039,8 @@ else {
                 nonportable_regex(0x20000000000)
             ],
             [ "requires at least 32 bits",
-                I8_to_native("\xff\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+                I8_to_native(
+                    "\xff\xa0\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 $UTF8_GOT_ABOVE_31_BIT,
                 'utf8', 0x4000000000000,
@@ -1823,7 +2048,8 @@ else {
                 nonportable_regex(0x4000000000000)
             ],
             [ "requires at least 32 bits",
-                I8_to_native("\xff\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
+                I8_to_native(
+                    "\xff\xa0\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 $UTF8_GOT_ABOVE_31_BIT,
                 'utf8', 0x80000000000000,
@@ -1831,8 +2057,8 @@ else {
                 nonportable_regex(0x80000000000000)
             ],
             [ "requires at least 32 bits",
-                I8_to_native("\xff\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
-                   #IBM-1047  \xFE\x41\x41\x41\x41\x41\x41\x43\x41\x41\x41\x41\x41\x41
+                I8_to_native(
+                    "\xff\xa1\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $UTF8_WARN_ABOVE_31_BIT,$UTF8_DISALLOW_ABOVE_31_BIT,
                 $UTF8_GOT_ABOVE_31_BIT,
                 'utf8', 0x1000000000000000,
@@ -1844,7 +2070,8 @@ else {
 
 foreach my $test (@tests) {
     my ($testname, $bytes, $warn_flags, $disallow_flags, $expected_error_flags,
-        $category, $allowed_uv, $expected_len, $needed_to_discern_len, $message ) = @$test;
+        $category, $allowed_uv, $expected_len, $needed_to_discern_len, $message
+       ) = @$test;
 
     my $length = length $bytes;
     my $will_overflow = $testname =~ /overflow/ ? 'overflow' : "";
@@ -1861,8 +2088,8 @@ foreach my $test (@tests) {
         else {
             is($ret, $length,
                "isUTF8_CHAR() $testname: returns expected length: $length");
-            is($ret_flags, $length,
-               "isUTF8_CHAR_flags(...,0) $testname: returns expected length: $length");
+            is($ret_flags, $length, "isUTF8_CHAR_flags(...,0) $testname:"
+                                  . " returns expected length: $length");
         }
         is(scalar @warnings, 0,
                 "isUTF8_CHAR() and isUTF8_CHAR()_flags $testname: generated"
@@ -1879,12 +2106,13 @@ foreach my $test (@tests) {
                                 || $allowed_uv > 0x10FFFF)
                                ? 0
                                : $length;
-            is($ret, $expected_ret,
-               "isSTRICT_UTF8_CHAR() $testname: returns expected length: $expected_ret");
+            is($ret, $expected_ret, "isSTRICT_UTF8_CHAR() $testname: returns"
+                                  . " expected length: $expected_ret");
             $ret = test_isUTF8_CHAR_flags($bytes, $length,
                                           $UTF8_DISALLOW_ILLEGAL_INTERCHANGE);
             is($ret, $expected_ret,
-               "isUTF8_CHAR_flags('DISALLOW_ILLEGAL_INTERCHANGE') acts like isSTRICT_UTF8_CHAR");
+                            "isUTF8_CHAR_flags('DISALLOW_ILLEGAL_INTERCHANGE')"
+                          . " acts like isSTRICT_UTF8_CHAR");
         }
         is(scalar @warnings, 0,
                 "isSTRICT_UTF8_CHAR() and isUTF8_CHAR_flags $testname:"
@@ -1901,12 +2129,13 @@ foreach my $test (@tests) {
                                 || $allowed_uv > 0x10FFFF)
                                ? 0
                                : $length;
-            is($ret, $expected_ret,
-               "isC9_STRICT_UTF8_CHAR() $testname: returns expected length: $expected_ret");
+            is($ret, $expected_ret, "isC9_STRICT_UTF8_CHAR() $testname:"
+                                   ." returns expected length: $expected_ret");
             $ret = test_isUTF8_CHAR_flags($bytes, $length,
                                           $UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE);
             is($ret, $expected_ret,
-               "isUTF8_CHAR_flags('DISALLOW_ILLEGAL_C9_INTERCHANGE') acts like isC9_STRICT_UTF8_CHAR");
+                          "isUTF8_CHAR_flags('DISALLOW_ILLEGAL_C9_INTERCHANGE')"
+                        . " acts like isC9_STRICT_UTF8_CHAR");
         }
         is(scalar @warnings, 0,
                 "isC9_STRICT_UTF8_CHAR() and isUTF8_CHAR_flags $testname:"
@@ -1931,7 +2160,8 @@ foreach my $test (@tests) {
                     $comment = "disallowed";
                     if ($j < $needed_to_discern_len) {
                         $ret_should_be = 1;
-                        $comment .= ", but need $needed_to_discern_len bytes to discern:";
+                        $comment .= ", but need $needed_to_discern_len bytes"
+                                 .  " to discern:";
                     }
                 }
                 else {
@@ -1941,8 +2171,10 @@ foreach my $test (@tests) {
 
                 undef @warnings;
 
-                $ret = test_is_utf8_valid_partial_char_flags($partial, $j, $disallow_flag);
-                is($ret, $ret_should_be, "$testname: is_utf8_valid_partial_char_flags("
+                $ret = test_is_utf8_valid_partial_char_flags($partial, $j,
+                                                             $disallow_flag);
+                is($ret, $ret_should_be,
+                                "$testname: is_utf8_valid_partial_char_flags("
                                         . display_bytes($partial)
                                         . "), $comment: returns $ret_should_be");
                 is(scalar @warnings, 0,
