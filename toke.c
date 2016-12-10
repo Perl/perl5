@@ -923,10 +923,18 @@ Perl_lex_grow_linestr(pTHX_ STRLEN len)
     char *buf;
     STRLEN bufend_pos, bufptr_pos, oldbufptr_pos, oldoldbufptr_pos;
     STRLEN linestart_pos, last_uni_pos, last_lop_pos, re_eval_start_pos;
+    bool current;
+
     linestr = PL_parser->linestr;
     buf = SvPVX(linestr);
     if (len <= SvLEN(linestr))
 	return buf;
+
+    /* Is the lex_shared linestr SV the same as the current linestr SV?
+     * Only in this case does re_eval_start need adjusting, since it
+     * points within lex_shared->ls_linestr's buffer */
+    current = (linestr == PL_parser->lex_shared->ls_linestr);
+
     bufend_pos = PL_parser->bufend - buf;
     bufptr_pos = PL_parser->bufptr - buf;
     oldbufptr_pos = PL_parser->oldbufptr - buf;
@@ -934,7 +942,7 @@ Perl_lex_grow_linestr(pTHX_ STRLEN len)
     linestart_pos = PL_parser->linestart - buf;
     last_uni_pos = PL_parser->last_uni ? PL_parser->last_uni - buf : 0;
     last_lop_pos = PL_parser->last_lop ? PL_parser->last_lop - buf : 0;
-    re_eval_start_pos = PL_parser->lex_shared->re_eval_start ?
+    re_eval_start_pos = (current && PL_parser->lex_shared->re_eval_start) ?
                             PL_parser->lex_shared->re_eval_start - buf : 0;
 
     buf = sv_grow(linestr, len);
@@ -948,7 +956,7 @@ Perl_lex_grow_linestr(pTHX_ STRLEN len)
 	PL_parser->last_uni = buf + last_uni_pos;
     if (PL_parser->last_lop)
 	PL_parser->last_lop = buf + last_lop_pos;
-    if (PL_parser->lex_shared->re_eval_start)
+    if (current && PL_parser->lex_shared->re_eval_start)
         PL_parser->lex_shared->re_eval_start  = buf + re_eval_start_pos;
     return buf;
 }
