@@ -346,6 +346,15 @@ passing a string length of 0 is now asserted against in DEBUGGING
 builds, and otherwise returns the Unicode REPLACEMENT CHARACTER.   If
 you have nothing to decode, you shouldn't call the decode function.
 
+=item *
+
+The functions C<utf8n_to_uvchr> and its derivatives now return the
+Unicode REPLACEMENT CHARACTER if called with UTF-8 that has the overlong
+malformation, and that malformation is allowed by the input parameters.
+This malformation is where the UTF-8 looks valid syntactically, but
+there is a shorter sequence that yields the same code point.  This has
+been forbidden since Unicode version 3.1.
+
 =back
 
 =head1 Selected Bug Fixes

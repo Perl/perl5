@@ -98,6 +98,7 @@ my $UTF8_GOT_NON_CONTINUATION   = $UTF8_ALLOW_NON_CONTINUATION;
 my $UTF8_ALLOW_SHORT            = 0x0008;
 my $UTF8_GOT_SHORT              = $UTF8_ALLOW_SHORT;
 my $UTF8_ALLOW_LONG             = 0x0010;
+my $UTF8_ALLOW_LONG_AND_ITS_VALUE = $UTF8_ALLOW_LONG|0x0020;
 my $UTF8_GOT_LONG               = $UTF8_ALLOW_LONG;
 my $UTF8_GOT_OVERFLOW           = 0x0080;
 my $UTF8_DISALLOW_SURROGATE     = 0x0100;
@@ -1421,6 +1422,29 @@ else { # 64-bit ASCII, or EBCDIC of any size.
             ];
     }
 }
+
+# For each overlong malformation in the list, we modify it, so that there are
+# two tests.  The first one returns the replacement character given the input
+# flags, and the second test adds a flag that causes the actual code point the
+# malformation represents to be returned.
+my @added_overlongs;
+foreach my $test (@malformations) {
+    my ($testname, $bytes, $length, $allow_flags, $expected_error_flags,
+        $allowed_uv, $expected_len, $needed_to_discern_len, $message ) = @$test;
+    next unless $testname =~ /overlong/;
+
+    $test->[0] .= "; use REPLACEMENT CHAR";
+    $test->[5] = $REPLACEMENT;
+
+    push @added_overlongs,
+        [ $testname . "; use actual value",
+          $bytes, $length,
+          $allow_flags | $UTF8_ALLOW_LONG_AND_ITS_VALUE,
+          $expected_error_flags, $allowed_uv, $expected_len,
+          $needed_to_discern_len, $message
+        ];
+}
+push @malformations, @added_overlongs;
 
 foreach my $test (@malformations) {
     my ($testname, $bytes, $length, $allow_flags, $expected_error_flags,

@@ -738,8 +738,11 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UTF8_ALLOW_SHORT		0x0008
 #define UTF8_GOT_SHORT		        UTF8_ALLOW_SHORT
 
-/* Overlong sequence; i.e., the code point can be specified in fewer bytes. */
+/* Overlong sequence; i.e., the code point can be specified in fewer bytes.
+ * First one will convert the overlong to the REPLACEMENT CHARACTER; second
+ * will return what the overlong evaluates to */
 #define UTF8_ALLOW_LONG                 0x0010
+#define UTF8_ALLOW_LONG_AND_ITS_VALUE   (UTF8_ALLOW_LONG|0x0020)
 #define UTF8_GOT_LONG                   UTF8_ALLOW_LONG
 
 /* Currently no way to allow overflow */
