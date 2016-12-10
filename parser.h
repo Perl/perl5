@@ -44,9 +44,7 @@ typedef struct yy_parser {
 
     int		    yylen;	/* length of active reduction */
     yy_stack_frame  *stack;	/* base of stack */
-    yy_stack_frame  *stack_maxbase;/* (stack + alloced size - YY_MAXRULE)
-                                    * it's offset by -YY_MAXRULE to make
-                                    * overflow checks quicker */
+    yy_stack_frame  *stack_max1;/* (top-1)th element of allocated stack */
     yy_stack_frame  *ps;	/* current stack frame */
 
     /* lexer state */

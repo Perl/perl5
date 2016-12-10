@@ -58,15 +58,6 @@ typedef signed char yysigned_char;
 
 # define YYSIZE_T size_t
 
-/* the max number of RHS shifted elements that can make up a rule.
- * This should really be auto-generated from the max value in yyr2[]
- * but that involves extra work, so set it slightly higher than the
- * current max, and assert each time yyr2[] is accessed.
- * Used to determine if the parse stack needs extending.
- */
-
-#define YY_MAXRULE 15
-
 #define YYEOF		0
 #define YYTERROR	1
 
@@ -284,7 +275,7 @@ Perl_yyparse (pTHX_ int gramtype)
     SAVEINT(parser->yyerrstatus);
     SAVEINT(parser->yylen);
     SAVEVPTR(parser->stack);
-    SAVEVPTR(parser->stack_maxbase);
+    SAVEVPTR(parser->stack_max1);
     SAVEVPTR(parser->ps);
 
     /* initialise state for this parse */
@@ -294,7 +285,7 @@ Perl_yyparse (pTHX_ int gramtype)
     parser->yyerrstatus = 0;
     parser->yylen = 0;
     Newx(parser->stack, YYINITDEPTH, yy_stack_frame);
-    parser->stack_maxbase = parser->stack + YYINITDEPTH - YY_MAXRULE;
+    parser->stack_max1 = parser->stack + YYINITDEPTH - 1;
     ps = parser->ps = parser->stack;
     ps->state = 0;
     SAVEDESTRUCTOR_X(S_clear_yystack, parser);
@@ -302,30 +293,32 @@ Perl_yyparse (pTHX_ int gramtype)
     while (1) {
         /* main loop: shift some tokens, then reduce when possible */
 
-        /* grow the stack to accommodate longest possible rule */
-        if (ps >= parser->stack_maxbase) {
-            Size_t pos = ps - parser->stack;
-            Size_t newsize = 2 * (parser->stack_maxbase + YY_MAXRULE
-                                    - parser->stack);
-            /* this will croak on insufficient memory */
-            Renew(parser->stack, newsize, yy_stack_frame);
-            ps = parser->ps = parser->stack + pos;
-            parser->stack_maxbase = parser->stack + newsize - YY_MAXRULE;
-
-            YYDPRINTF((Perl_debug_log,
-                            "parser stack size increased to %lu frames\n",
-                            (unsigned long int)newsize));
-        }
-
         while (1) {
             /* shift a token, or quit when it's possible to reduce */
 
-            assert(ps < parser->stack_maxbase + YY_MAXRULE);
             yystate = ps->state;
 
             YYDPRINTF ((Perl_debug_log, "Entering state %d\n", yystate));
 
             parser->yylen = 0;
+
+            /* Grow the stack? We always leave 1 spare slot, in case of a
+             * '' -> 'foo' reduction.
+             * Note that stack_max1 points to the (top-1)th allocated stack
+             * element to make this check faster */
+
+            if (ps >= parser->stack_max1) {
+                Size_t pos = ps - parser->stack;
+                Size_t newsize = 2 * (parser->stack_max1 + 2 - parser->stack);
+                /* this will croak on insufficient memory */
+                Renew(parser->stack, newsize, yy_stack_frame);
+                ps = parser->ps = parser->stack + pos;
+                parser->stack_max1 = parser->stack + newsize - 1;
+
+                YYDPRINTF((Perl_debug_log,
+                                "parser stack size increased to %lu frames\n",
+                                (unsigned long int)newsize));
+            }
 
             /* Do appropriate processing given the current state. Read a
              * lookahead token if we need one and don't already have one.
@@ -419,7 +412,6 @@ Perl_yyparse (pTHX_ int gramtype)
 
         /* yyn is the number of a rule to reduce with.  */
         parser->yylen = yyr2[yyn];
-        assert(parser->yylen <= YY_MAXRULE); /* see defn of YY_MAXRULE above */
 
         /* If YYLEN is nonzero, implement the default value of the action:
           "$$ = $1".

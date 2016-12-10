@@ -8,7 +8,7 @@ BEGIN {
     chdir 't' if -d 't';
 }
 
-print "1..186\n";
+print "1..187\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -590,6 +590,14 @@ is $@, "", 'substr keys assignment';
     like $@, qr/Can't find string terminator "." anywhere before EOF/,
         'RT 128952';
 }
+
+# RT #130311: many parser shifts before a reduce
+
+{
+    eval '[' . ('{' x 300);
+    like $@, qr/Missing right curly or square bracket/, 'RT #130311';
+}
+
 
 # Add new tests HERE (above this line)
 
