@@ -787,12 +787,16 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UTF8_WARN_ILLEGAL_INTERCHANGE \
                           (UTF8_WARN_ILLEGAL_C9_INTERCHANGE|UTF8_WARN_NONCHAR)
 
-#define UTF8_ALLOW_ANY                                                          \
-	    (~( UTF8_DISALLOW_ILLEGAL_INTERCHANGE|UTF8_DISALLOW_ABOVE_31_BIT    \
-               |UTF8_WARN_ILLEGAL_INTERCHANGE|UTF8_WARN_ABOVE_31_BIT))
-#define UTF8_ALLOW_ANYUV  UTF8_ALLOW_EMPTY
-#define UTF8_ALLOW_DEFAULT		(ckWARN(WARN_UTF8) ? 0 : \
-					 UTF8_ALLOW_ANYUV)
+#define UTF8_ALLOW_ANY ( UTF8_ALLOW_CONTINUATION                                \
+                        |UTF8_ALLOW_NON_CONTINUATION                            \
+                        |UTF8_ALLOW_SHORT                                       \
+                        |UTF8_ALLOW_LONG)
+
+/* Accept any Perl-extended UTF-8 that evaluates to any UV on the platform, but
+ * not any malformed.  This is the default.  (Note that UVs above IV_MAX are
+ * deprecated. */
+#define UTF8_ALLOW_ANYUV   0
+#define UTF8_ALLOW_DEFAULT UTF8_ALLOW_ANYUV
 
 /*
 =for apidoc Am|bool|UTF8_IS_SURROGATE|const U8 *s|const U8 *e
