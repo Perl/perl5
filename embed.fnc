@@ -3212,6 +3212,8 @@ Apdh	|void	|PerlIO_set_ptrcnt	|NULLOK PerlIO *f|NULLOK STDCHAR *ptr \
 Apdh	|void	|PerlIO_setlinebuf	|NULLOK PerlIO *f
 Apdh	|SSize_t|PerlIO_read		|NULLOK PerlIO *f|NN void *vbuf \
 					|Size_t count
+Ap	|SSize_t|PerlIO_readdelim	|NULLOK PerlIO *f|NN STDCHAR *vbuf \
+					|Size_t count|STDCHAR delim
 Apdh	|SSize_t|PerlIO_write		|NULLOK PerlIO *f|NN const void *vbuf \
 					|Size_t count
 Ap	|SSize_t|PerlIO_unread		|NULLOK PerlIO *f|NN const void *vbuf \
