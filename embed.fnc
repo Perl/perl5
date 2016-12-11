@@ -1262,7 +1262,7 @@ ApM	|SV*	|regclass_swash	|NULLOK const regexp *prog \
 				|NN const struct regnode *node|bool doinit \
 				|NULLOK SV **listsvp|NULLOK SV **altsvp
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
-AMpR	|SV*	|_new_invlist_C_array|NN const UV* const list
+EXpR	|SV*	|_new_invlist_C_array|NN const UV* const list
 EXMp	|bool	|_invlistEQ	|NN SV* const a|NN SV* const b|const bool complement_b
 #endif
 Ap	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
@@ -1609,8 +1609,8 @@ Apd	|void	|sv_vsetpvfn	|NN SV *const sv|NN const char *const pat|const STRLEN pa
 				|NULLOK va_list *const args|NULLOK SV **const svargs \
 				|const I32 svmax|NULLOK bool *const maybe_tainted
 ApR	|NV	|str_to_version	|NN SV *sv
-ApRM	|SV*	|swash_init	|NN const char* pkg|NN const char* name|NN SV* listsv|I32 minbits|I32 none
-ApM	|UV	|swash_fetch	|NN SV *swash|NN const U8 *ptr|bool do_utf8
+EpRM	|SV*	|swash_init	|NN const char* pkg|NN const char* name|NN SV* listsv|I32 minbits|I32 none
+EpM	|UV	|swash_fetch	|NN SV *swash|NN const U8 *ptr|bool do_utf8
 #ifdef PERL_IN_REGCOMP_C
 EiMR	|SV*	|add_cp_to_invlist	|NULLOK SV* invlist|const UV cp
 EiM	|void	|invlist_set_len|NN SV* const invlist|const UV len|const bool offset
@@ -1670,7 +1670,7 @@ EXMpR	|SV*	|_get_swash_invlist|NN SV* const swash
 EXMpR	|HV*	|_swash_inversion_hash	|NN SV* const swash
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
-ApM	|SV*	|_get_regclass_nonbitmap_data				   \
+EXpM	|SV*	|_get_regclass_nonbitmap_data				   \
 				|NULLOK const regexp *prog		   \
 				|NN const struct regnode *node		   \
 				|bool doinit				   \
@@ -2718,7 +2718,7 @@ sRM	|U8*	|swash_scan_list_line|NN U8* l|NN U8* const lend|NN UV* min \
 #endif
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-AiMn	|void	|append_utf8_from_native_byte|const U8 byte|NN U8** dest
+EXiMn	|void	|append_utf8_from_native_byte|const U8 byte|NN U8** dest
 #endif
 
 Apd	|void	|sv_set_undef	|NN SV *sv

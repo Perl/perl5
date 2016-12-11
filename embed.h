@@ -714,8 +714,6 @@
 #define sv_vsetpvf(a,b,c)	Perl_sv_vsetpvf(aTHX_ a,b,c)
 #define sv_vsetpvf_mg(a,b,c)	Perl_sv_vsetpvf_mg(aTHX_ a,b,c)
 #define sv_vsetpvfn(a,b,c,d,e,f,g)	Perl_sv_vsetpvfn(aTHX_ a,b,c,d,e,f,g)
-#define swash_fetch(a,b,c)	Perl_swash_fetch(aTHX_ a,b,c)
-#define swash_init(a,b,c,d,e)	Perl_swash_init(aTHX_ a,b,c,d,e)
 #define sync_locale()		Perl_sync_locale(aTHX)
 #define taint_env()		Perl_taint_env(aTHX)
 #define taint_proper(a,b)	Perl_taint_proper(aTHX_ a,b)
@@ -800,7 +798,6 @@
 #endif
 #if !defined(PERL_NO_INLINE_FUNCTIONS)
 #define _is_utf8_char_helper	Perl__is_utf8_char_helper
-#define append_utf8_from_native_byte	S_append_utf8_from_native_byte
 #define av_top_index(a)		S_av_top_index(aTHX_ a)
 #define cx_popblock(a)		S_cx_popblock(aTHX_ a)
 #define cx_popeval(a)		S_cx_popeval(aTHX_ a)
@@ -864,12 +861,6 @@
 #define sv_setpvf_nocontext	Perl_sv_setpvf_nocontext
 #define warn_nocontext		Perl_warn_nocontext
 #define warner_nocontext	Perl_warner_nocontext
-#endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
-#define _new_invlist_C_array(a)	Perl__new_invlist_C_array(aTHX_ a)
-#endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
-#define _get_regclass_nonbitmap_data(a,b,c,d,e,f)	Perl__get_regclass_nonbitmap_data(aTHX_ a,b,c,d,e,f)
 #endif
 #if defined(PERL_OP_PARENT)
 #define op_parent		Perl_op_parent
@@ -962,6 +953,8 @@
 #define reg_temp_copy(a,b)	Perl_reg_temp_copy(aTHX_ a,b)
 #define report_uninit(a)	Perl_report_uninit(aTHX_ a)
 #define sv_magicext_mglob(a)	Perl_sv_magicext_mglob(aTHX_ a)
+#define swash_fetch(a,b,c)	Perl_swash_fetch(aTHX_ a,b,c)
+#define swash_init(a,b,c,d,e)	Perl_swash_init(aTHX_ a,b,c,d,e)
 #define validate_proto(a,b,c)	Perl_validate_proto(aTHX_ a,b,c)
 #define vivify_defelem(a)	Perl_vivify_defelem(aTHX_ a)
 #define yylex()			Perl_yylex(aTHX)
@@ -980,6 +973,7 @@
 #    endif
 #  endif
 #  if !defined(PERL_NO_INLINE_FUNCTIONS)
+#define append_utf8_from_native_byte	S_append_utf8_from_native_byte
 #define sv_only_taint_gmagic	S_sv_only_taint_gmagic
 #  endif
 #  if defined(DEBUGGING)
@@ -1087,8 +1081,10 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
 #define _invlistEQ(a,b,c)	Perl__invlistEQ(aTHX_ a,b,c)
+#define _new_invlist_C_array(a)	Perl__new_invlist_C_array(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+#define _get_regclass_nonbitmap_data(a,b,c,d,e,f)	Perl__get_regclass_nonbitmap_data(aTHX_ a,b,c,d,e,f)
 #define _load_PL_utf8_foldclosures()	Perl__load_PL_utf8_foldclosures(aTHX)
 #ifndef PERL_IMPLICIT_CONTEXT
 #define re_printf		Perl_re_printf
