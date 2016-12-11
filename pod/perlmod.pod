@@ -34,16 +34,19 @@ mechanisms for protecting code from having its variables stomped on by
 other code: lexically scoped variables created with C<my> or C<state> and
 namespaced global variables, which are exposed via the C<vars> pragma,
 or the C<our> keyword. Any global variable is considered to
-be part of a namespace and can be accessed via a "fully qualified form",
-and conversly any lexically scoped variable is considered to be part of
+be part of a namespace and can be accessed via a "fully qualified form".
+Conversely, any lexically scoped variable is considered to be part of
 that lexical-scope, and does not have a "fully qualified form".
+
 In perl namespaces are called "packages" and
-the C<package> declaration instructs the compiler as to which
-namespace to prefix to C<our> variables and unqualified dynamic names, which both protects
+the C<package> declaration tells the compiler which
+namespace to prefix to C<our> variables and unqualified dynamic names.
+This both protects
 against accidental stomping and provides an interface for deliberately
 clobbering global dynamic variables declared and used in other scopes or
 packages, when that is what you want to do.
-The scope of the package declaration is from the
+
+The scope of the C<package> declaration is from the
 declaration itself through the end of the enclosing block, C<eval>,
 or file, whichever comes first (the same scope as the my(), our(), state(), and
 local() operators, and also the effect
@@ -51,11 +54,12 @@ of the experimental "reference aliasing," which may change), or until
 the next C<package> declaration.  Unqualified dynamic identifiers will be in
 this namespace, except for those few identifiers that, if unqualified,
 default to the main package instead of the current one as described
-below.  A package statement affects only dynamic global
+below.  A C<package> statement affects only dynamic global
 symbols, including subroutine names, and variables you've used local()
 on, but I<not> lexical variables created with my(), our() or state().
-Typically it is the first declaration in a file
-included by the C<do>, C<require>, or C<use> operators.  You can
+
+Typically, a C<package> statement is the first declaration in a file
+included in a program by one of the C<do>, C<require>, or C<use> operators.  You can
 switch into a package in more than one place: C<package> has no
 effect beyond specifying which symbol table the compiler will use for
 dynamic symbols for the rest of that block or until the next C<package> statement.
