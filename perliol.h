@@ -49,6 +49,7 @@ struct _PerlIO_funcs {
     STDCHAR *(*Get_ptr) (pTHX_ PerlIO *f);
      SSize_t(*Get_cnt) (pTHX_ PerlIO *f);
     void (*Set_ptrcnt) (pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt);
+    IV (*Readdelim) (pTHX_ PerlIO* f, STDCHAR* buffer, Size_t count, STDCHAR delim);
 };
 
 /*--------------------------------------------------------------------------------------*/
@@ -184,6 +185,7 @@ PERL_CALLCONV IV        PerlIOBase_popped(pTHX_ PerlIO *f);
 PERL_CALLCONV IV        PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab);
 PERL_CALLCONV PerlIO *  PerlIOBase_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const char *mode, int fd, int imode, int perm, PerlIO *old, int narg, SV **args);
 PERL_CALLCONV SSize_t   PerlIOBase_read(pTHX_ PerlIO *f, void *vbuf, Size_t count);
+PERL_CALLCONV SSize_t   PerlIOBase_readdelim(pTHX_ PerlIO *f, STDCHAR *vbuf, Size_t count, STDCHAR delim);
 PERL_CALLCONV void      PerlIOBase_setlinebuf(pTHX_ PerlIO *f);
 PERL_CALLCONV SSize_t   PerlIOBase_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count);
 

@@ -1578,6 +1578,14 @@ Perl_PerlIO_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 }
 
 SSize_t
+Perl_PerlIO_readdelim(pTHX_ PerlIO*f, STDCHAR* vbuf, Size_t count, STDCHAR delim)
+{
+     PERL_ARGS_ASSERT_PERLIO_READDELIM;
+
+     Perl_PerlIO_or_Base(f, Readdelim, readdelim, -1, (aTHX_ f, vbuf, count, delim));
+}
+
+SSize_t
 Perl_PerlIO_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
      PERL_ARGS_ASSERT_PERLIO_UNREAD;
@@ -2107,6 +2115,20 @@ PerlIOBase_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
         return (buf - (STDCHAR *) vbuf);
     }
     return 0;
+}
+
+SSize_t
+PerlIOBase_readdelim(pTHX_ PerlIO* f, STDCHAR* buffer, Size_t count, STDCHAR delim)
+{
+   /*The slow and stupid way. */
+    const STDCHAR * const bpe = buffer + count;
+    STDCHAR *bp = buffer;
+    int i;
+    while ((i = PerlIO_getc(f)) != EOF && (*bp++ = (STDCHAR)i) != delim && bp < bpe)
+        ; /* keep reading */
+    if (bp - buffer == 0 && PerlIO_error(f))
+        return -1;
+    return bp - buffer;
 }
 
 IV

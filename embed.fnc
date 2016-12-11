@@ -3385,6 +3385,8 @@ Apdh	|SSize_t|PerlIO_read		|NULLOK PerlIO *f|NN void *vbuf \
 					|Size_t count
 Apdh	|SSize_t|PerlIO_write		|NULLOK PerlIO *f|NN const void *vbuf \
 					|Size_t count
+Ap	|SSize_t|PerlIO_readdelim	|NULLOK PerlIO *f|NN STDCHAR *vbuf \
+					|Size_t count|STDCHAR delim
 Ap	|SSize_t|PerlIO_unread		|NULLOK PerlIO *f|NN const void *vbuf \
 					|Size_t count
 Apdh	|Off_t	|PerlIO_tell		|NULLOK PerlIO *f

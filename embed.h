@@ -929,6 +929,7 @@
 #define PerlIO_get_cnt(a)	Perl_PerlIO_get_cnt(aTHX_ a)
 #define PerlIO_get_ptr(a)	Perl_PerlIO_get_ptr(aTHX_ a)
 #define PerlIO_read(a,b,c)	Perl_PerlIO_read(aTHX_ a,b,c)
+#define PerlIO_readdelim(a,b,c,d)	Perl_PerlIO_readdelim(aTHX_ a,b,c,d)
 #define PerlIO_seek(a,b,c)	Perl_PerlIO_seek(aTHX_ a,b,c)
 #define PerlIO_set_cnt(a,b)	Perl_PerlIO_set_cnt(aTHX_ a,b)
 #define PerlIO_set_ptrcnt(a,b,c)	Perl_PerlIO_set_ptrcnt(aTHX_ a,b,c)

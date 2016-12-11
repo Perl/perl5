@@ -6967,6 +6967,9 @@ PERL_CALLCONV STDCHAR *	Perl_PerlIO_get_ptr(pTHX_ PerlIO *f);
 PERL_CALLCONV SSize_t	Perl_PerlIO_read(pTHX_ PerlIO *f, void *vbuf, Size_t count);
 #define PERL_ARGS_ASSERT_PERLIO_READ	\
 	assert(vbuf)
+PERL_CALLCONV SSize_t	Perl_PerlIO_readdelim(pTHX_ PerlIO *f, STDCHAR *vbuf, Size_t count, STDCHAR delim);
+#define PERL_ARGS_ASSERT_PERLIO_READDELIM	\
+	assert(vbuf)
 PERL_CALLCONV void	Perl_PerlIO_restore_errno(pTHX_ PerlIO *f);
 #define PERL_ARGS_ASSERT_PERLIO_RESTORE_ERRNO
 PERL_CALLCONV void	Perl_PerlIO_save_errno(pTHX_ PerlIO *f);

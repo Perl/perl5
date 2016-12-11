@@ -8554,10 +8554,11 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
     const char *rsptr;
     STRLEN rslen;
     STDCHAR rslast;
-    STDCHAR *bp;
     SSize_t cnt;
     int i = 0;
     int rspara = 0;
+    STDCHAR buf[8192];
+
 
     PERL_ARGS_ASSERT_SV_GETS;
 
@@ -8663,318 +8664,46 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
         }
     }
 
-    /* See if we know enough about I/O mechanism to cheat it ! */
-
-    /* This used to be #ifdef test - it is made run-time test for ease
-       of abstracting out stdio interface. One call should be cheap
-       enough here - and may even be a macro allowing compile
-       time optimization.
-     */
-
-    if (PerlIO_fast_gets(fp)) {
-    /*
-     * We can do buffer based IO operations on this filehandle.
-     *
-     * This means we can bypass a lot of subcalls and process
-     * the buffer directly, it also means we know the upper bound
-     * on the amount of data we might read of the current buffer
-     * into our sv. Knowing this allows us to preallocate the pv
-     * to be able to hold that maximum, which allows us to simplify
-     * a lot of logic. */
-
-    /*
-     * We're going to steal some values from the stdio struct
-     * and put EVERYTHING in the innermost loop into registers.
-     */
-    STDCHAR *ptr;       /* pointer into fp's read-ahead buffer */
-    STRLEN bpx;         /* length of the data in the target sv
-                           used to fix pointers after a SvGROW */
-    I32 shortbuffered;  /* If the pv buffer is shorter than the amount
-                           of data left in the read-ahead buffer.
-                           If 0 then the pv buffer can hold the full
-                           amount left, otherwise this is the amount it
-                           can hold. */
-
-    /* Here is some breathtakingly efficient cheating */
-
-    /* When you read the following logic resist the urge to think
-     * of record separators that are 1 byte long. They are an
-     * uninteresting special (simple) case.
-     *
-     * Instead think of record separators which are at least 2 bytes
-     * long, and keep in mind that we need to deal with such
-     * separators when they cross a read-ahead buffer boundary.
-     *
-     * Also consider that we need to gracefully deal with separators
-     * that may be longer than a single read ahead buffer.
-     *
-     * Lastly do not forget we want to copy the delimiter as well. We
-     * are copying all data in the file _up_to_and_including_ the separator
-     * itself.
-     *
-     * Now that you have all that in mind here is what is happening below:
-     *
-     * 1. When we first enter the loop we do some memory book keeping to see
-     * how much free space there is in the target SV. (This sub assumes that
-     * it is operating on the same SV most of the time via $_ and that it is
-     * going to be able to reuse the same pv buffer each call.) If there is
-     * "enough" room then we set "shortbuffered" to how much space there is
-     * and start reading forward.
-     *
-     * 2. When we scan forward we copy from the read-ahead buffer to the target
-     * SV's pv buffer. While we go we watch for the end of the read-ahead buffer,
-     * and the end of the of pv, as well as for the "rslast", which is the last
-     * char of the separator.
-     *
-     * 3. When scanning forward if we see rslast then we jump backwards in *pv*
-     * (which has a "complete" record up to the point we saw rslast) and check
-     * it to see if it matches the separator. If it does we are done. If it doesn't
-     * we continue on with the scan/copy.
-     *
-     * 4. If we run out of read-ahead buffer (cnt goes to 0) then we have to get
-     * the IO system to read the next buffer. We do this by doing a getc(), which
-     * returns a single char read (or EOF), and prefills the buffer, and also
-     * allows us to find out how full the buffer is.  We use this information to
-     * SvGROW() the sv to the size remaining in the buffer, after which we copy
-     * the returned single char into the target sv, and then go back into scan
-     * forward mode.
-     *
-     * 5. If we run out of write-buffer then we SvGROW() it by the size of the
-     * remaining space in the read-buffer.
-     *
-     * Note that this code despite its twisty-turny nature is pretty darn slick.
-     * It manages single byte separators, multi-byte cross boundary separators,
-     * and cross-read-buffer separators cleanly and efficiently at the cost
-     * of potentially greatly overallocating the target SV.
-     *
-     * Yves
-     */
-
-
-    /* get the number of bytes remaining in the read-ahead buffer
-     * on first call on a given fp this will return 0.*/
-    cnt = PerlIO_get_cnt(fp);
-
-    /* make sure we have the room */
-    if ((I32)(SvLEN(sv) - append) <= cnt + 1) {
-        /* Not room for all of it
-           if we are looking for a separator and room for some
-         */
-        if (rslen && cnt > 80 && (I32)SvLEN(sv) > append) {
-            /* just process what we have room for */
-            shortbuffered = cnt - SvLEN(sv) + append + 1;
-            cnt -= shortbuffered;
-        }
-        else {
-            /* ensure that the target sv has enough room to hold
-             * the rest of the read-ahead buffer */
-            shortbuffered = 0;
-            /* remember that cnt can be negative */
-            SvGROW(sv, (STRLEN)(append + (cnt <= 0 ? 2 : (cnt + 1))));
-        }
-    }
-    else {
-        /* we have enough room to hold the full buffer, lets scream */
-        shortbuffered = 0;
-    }
-
-    /* extract the pointer to sv's string buffer, offset by append as necessary */
-    bp = (STDCHAR*)SvPVX_const(sv) + append;  /* move these two too to registers */
-    /* extract the point to the read-ahead buffer */
-    ptr = (STDCHAR*)PerlIO_get_ptr(fp);
-
-    /* some trace debug output */
-    DEBUG_P(PerlIO_printf(Perl_debug_log,
-        "Screamer: entering, ptr=%" UVuf ", cnt=%ld\n",PTR2UV(ptr),(long)cnt));
-    DEBUG_P(PerlIO_printf(Perl_debug_log,
-        "Screamer: entering: PerlIO * thinks ptr=%" UVuf ", cnt=%" IVdf ", base=%"
-         UVuf "\n",
-               PTR2UV(PerlIO_get_ptr(fp)), (IV)PerlIO_get_cnt(fp),
-               PTR2UV(PerlIO_has_base(fp) ? PerlIO_get_base(fp) : 0)));
-
-    for (;;) {
       screamer:
-        /* if there is stuff left in the read-ahead buffer */
-        if (cnt > 0) {
-            /* if there is a separator */
-            if (rslen) {
-                /* find next rslast */
-                STDCHAR *p;
+    if (rslen)
+        cnt = PerlIO_readdelim(fp, buf, sizeof(buf), rslast);
+    else
+        cnt = PerlIO_read(fp,(char*)buf, sizeof(buf));
 
-                /* shortcut common case of blank line */
-                cnt--;
-                if ((*bp++ = *ptr++) == rslast)
-                    goto thats_all_folks;
+    /* Accommodate broken VAXC compiler, which applies U8 cast to
+     * both args of ?: operator, causing EOF to change into 255
+     */
+    if (cnt > 0)
+        i = (U8)buf[cnt - 1];
+    else
+        i = EOF;
 
-                p = (STDCHAR *)memchr(ptr, rslast, cnt);
-                if (p) {
-                    SSize_t got = p - ptr + 1;
-                    Copy(ptr, bp, got, STDCHAR);
-                    ptr += got;
-                    bp  += got;
-                    cnt -= got;
-                    goto thats_all_folks;
-                }
-                Copy(ptr, bp, cnt, STDCHAR);
-                ptr += cnt;
-                bp  += cnt;
-                cnt = 0;
-            }
-            else {
-                /* no separator, slurp the full buffer */
-                Copy(ptr, bp, cnt, char);	     /* this     |  eat */
-                bp += cnt;			     /* screams  |  dust */
-                ptr += cnt;			     /* louder   |  sed :-) */
-                cnt = 0;
-                assert (!shortbuffered);
-                goto cannot_be_shortbuffered;
-            }
-        }
+    if (cnt < 0)
+        cnt = 0;  /* we do need to re-set the sv even when cnt <= 0 */
+    if (append)
+        sv_catpvn_nomg(sv, (char *) buf, cnt);
+    else
+        sv_setpvn(sv, (char *) buf, cnt);   /* "nomg" is implied */
 
-        if (shortbuffered) {		/* oh well, must extend */
-            /* we didnt have enough room to fit the line into the target buffer
-             * so we must extend the target buffer and keep going */
-            cnt = shortbuffered;
-            shortbuffered = 0;
-            bpx = bp - (STDCHAR*)SvPVX_const(sv); /* box up before relocation */
-            SvCUR_set(sv, bpx);
-            /* extned the target sv's buffer so it can hold the full read-ahead buffer */
-            SvGROW(sv, SvLEN(sv) + append + cnt + 2);
-            bp = (STDCHAR*)SvPVX_const(sv) + bpx; /* unbox after relocation */
-            continue;
-        }
-
-    cannot_be_shortbuffered:
-        /* we need to refill the read-ahead buffer if possible */
-
-        DEBUG_P(PerlIO_printf(Perl_debug_log,
-                             "Screamer: going to getc, ptr=%" UVuf ", cnt=%" IVdf "\n",
-                              PTR2UV(ptr),(IV)cnt));
-        PerlIO_set_ptrcnt(fp, (STDCHAR*)ptr, cnt); /* deregisterize cnt and ptr */
-
-        DEBUG_Pv(PerlIO_printf(Perl_debug_log,
-           "Screamer: pre: FILE * thinks ptr=%" UVuf ", cnt=%" IVdf ", base=%" UVuf "\n",
-            PTR2UV(PerlIO_get_ptr(fp)), (IV)PerlIO_get_cnt(fp),
-            PTR2UV(PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0)));
-
-        /*
-            call PerlIO_getc() to let it prefill the lookahead buffer
-
-            This used to call 'filbuf' in stdio form, but as that behaves like
-            getc when cnt <= 0 we use PerlIO_getc here to avoid introducing
-            another abstraction.
-
-            Note we have to deal with the char in 'i' if we are not at EOF
-        */
-        bpx = bp - (STDCHAR*)SvPVX_const(sv);
-        /* signals might be called here, possibly modifying sv */
-        i   = PerlIO_getc(fp);		/* get more characters */
-        bp = (STDCHAR*)SvPVX_const(sv) + bpx;
-
-        DEBUG_Pv(PerlIO_printf(Perl_debug_log,
-           "Screamer: post: FILE * thinks ptr=%" UVuf ", cnt=%" IVdf ", base=%" UVuf "\n",
-            PTR2UV(PerlIO_get_ptr(fp)), (IV)PerlIO_get_cnt(fp),
-            PTR2UV(PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0)));
-
-        /* find out how much is left in the read-ahead buffer, and rextract its pointer */
-        cnt = PerlIO_get_cnt(fp);
-        ptr = (STDCHAR*)PerlIO_get_ptr(fp);	/* reregisterize cnt and ptr */
-        DEBUG_P(PerlIO_printf(Perl_debug_log,
-            "Screamer: after getc, ptr=%" UVuf ", cnt=%" IVdf "\n",
-            PTR2UV(ptr),(IV)cnt));
-
-        if (i == EOF)			/* all done for ever? */
-            goto thats_really_all_folks;
-
-        /* make sure we have enough space in the target sv */
-        bpx = bp - (STDCHAR*)SvPVX_const(sv);	/* box up before relocation */
-        SvCUR_set(sv, bpx);
-        SvGROW(sv, bpx + cnt + 2);
-        bp = (STDCHAR*)SvPVX_const(sv) + bpx;	/* unbox after relocation */
-
-        /* copy of the char we got from getc() */
-        *bp++ = (STDCHAR)i;		/* store character from PerlIO_getc */
-
-        /* make sure we deal with the i being the last character of a separator */
-        if (rslen && (STDCHAR)i == rslast)  /* all done for now? */
-            goto thats_all_folks;
-    }
-
-  thats_all_folks:
-    /* check if we have actually found the separator - only really applies
-     * when rslen > 1 */
-    if ((rslen > 1 && (STRLEN)(bp - (STDCHAR*)SvPVX_const(sv)) < rslen) ||
-          memNE((char*)bp - rslen, rsptr, rslen))
-        goto screamer;				/* go back to the fray */
-  thats_really_all_folks:
-    if (shortbuffered)
-        cnt += shortbuffered;
-    DEBUG_P(PerlIO_printf(Perl_debug_log,
-         "Screamer: quitting, ptr=%" UVuf ", cnt=%" IVdf "\n",PTR2UV(ptr),(IV)cnt));
-    PerlIO_set_ptrcnt(fp, (STDCHAR*)ptr, cnt);	/* put these back or we're in trouble */
-    DEBUG_P(PerlIO_printf(Perl_debug_log,
-        "Screamer: end: FILE * thinks ptr=%" UVuf ", cnt=%" IVdf ", base=%" UVuf
-        "\n",
-        PTR2UV(PerlIO_get_ptr(fp)), (IV)PerlIO_get_cnt(fp),
-        PTR2UV(PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0)));
-    *bp = '\0';
-    SvCUR_set(sv, bp - (STDCHAR*)SvPVX_const(sv));	/* set length */
-    DEBUG_P(PerlIO_printf(Perl_debug_log,
-        "Screamer: done, len=%ld, string=|%.*s|\n",
-        (long)SvCUR(sv),(int)SvCUR(sv),SvPVX_const(sv)));
-    }
-   else
+    if (cnt > 0 &&			/* joy */
+        (!rslen ||
+         SvCUR(sv) < rslen ||
+         memNE(SvPVX_const(sv) + SvCUR(sv) - rslen, rsptr, rslen)))
     {
-       /*The big, slow, and stupid way. */
-        STDCHAR buf[8192];
-
-      screamer2:
-        if (rslen) {
-            const STDCHAR * const bpe = buf + sizeof(buf);
-            bp = buf;
-            while ((i = PerlIO_getc(fp)) != EOF && (*bp++ = (STDCHAR)i) != rslast && bp < bpe)
-                ; /* keep reading */
-            cnt = bp - buf;
-        }
-        else {
-            cnt = PerlIO_read(fp,(char*)buf, sizeof(buf));
-            /* Accommodate broken VAXC compiler, which applies U8 cast to
-             * both args of ?: operator, causing EOF to change into 255
-             */
-            if (cnt > 0)
-                 i = (U8)buf[cnt - 1];
-            else
-                 i = EOF;
-        }
-
-        if (cnt < 0)
-            cnt = 0;  /* we do need to re-set the sv even when cnt <= 0 */
-        if (append)
-            sv_catpvn_nomg(sv, (char *) buf, cnt);
-        else
-            sv_setpvn(sv, (char *) buf, cnt);   /* "nomg" is implied */
-
-        if (i != EOF &&			/* joy */
-            (!rslen ||
-             SvCUR(sv) < rslen ||
-             memNE(SvPVX_const(sv) + SvCUR(sv) - rslen, rsptr, rslen)))
-        {
-            append = -1;
-            /*
-             * If we're reading from a TTY and we get a short read,
-             * indicating that the user hit his EOF character, we need
-             * to notice it now, because if we try to read from the TTY
-             * again, the EOF condition will disappear.
-             *
-             * The comparison of cnt to sizeof(buf) is an optimization
-             * that prevents unnecessary calls to feof().
-             *
-             * - jik 9/25/96
-             */
-            if (!(cnt < (I32)sizeof(buf) && PerlIO_eof(fp)))
-                goto screamer2;
-        }
-
+        append = -1;
+        /*
+         * If we're reading from a TTY and we get a short read,
+         * indicating that the user hit his EOF character, we need
+         * to notice it now, because if we try to read from the TTY
+         * again, the EOF condition will disappear.
+         *
+         * The comparison of cnt to sizeof(buf) is an optimization
+         * that prevents unnecessary calls to feof().
+         *
+         * - jik 9/25/96
+         */
+        if (!(cnt < (I32)sizeof(buf) && PerlIO_eof(fp)))
+            goto screamer;
     }
 
     if (rspara) {		/* have to do this both before and after */
