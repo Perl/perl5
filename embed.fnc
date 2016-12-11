@@ -1,12 +1,22 @@
 : BEGIN{die "You meant to run regen/embed.pl"} # Stop early if fed to perl.
 :
 : This file is processed by regen/embed.pl and autodoc.pl
+: It is used to declare the interfaces to the functions defined by perl.  All
+: non-static functions must have entries here.  Static functions need not, but
+: there is benefit to declaring them here, as it generally handles the thread
+: context parameter invisibly, as well as making sure a PERL_ARGS_ASSERT_foo
+: macro is defined, which can save you debugging time.
 :
 : Lines are of the form:
 :    flags|return_type|function_name|arg1|arg2|...|argN
 :
 : A line may be continued on another by ending it with a backslash.
 : Leading and trailing whitespace will be ignored in each component.
+:
+: The default without flags is to declare a function for internal perl-core use
+: only, not visible to XS code nor to Perl extensions.  Use the A and E flags to
+: modify this.  Most non-static functions should have the 'p' flag to avoid
+: namespace clashes with programs that embed perl.
 :
 : flags are single letters with following meanings:
 :
@@ -55,7 +65,7 @@
 :      This flag effectively causes nothing to happen if the perl interpreter
 :      is compiled with -DNO_MATHOMS; otherwise these happen:
 :         add entry to the list of exported symbols;
-:         create PERL_ARGS_ASSERT_FOO;
+:         create PERL_ARGS_ASSERT_foo;
 :	  add embed.h entry (unless overridden by the 'm' flag)
 :
 :   D  Function is deprecated:
@@ -75,7 +85,7 @@
 :	  1) must be static to its containing file ("i" or "s" flag); or
 :         2) be combined with the "X" flag.
 :
-:   f  Function takes a format string. If the function name /strftime/
+:   f  Function takes a format string. If the function name =~ qr/strftime/
 :      then its assumed to take a strftime-style format string as 1st arg;
 :      otherwise it's assumed to be a printf style format string, varargs
 :      (hence any entry that would otherwise go in embed.h is suppressed):
@@ -116,8 +126,10 @@
 :
 :         embed.h: suppress "#define foo Perl_foo"
 :
-:   P  Pure function: Also implies "R". No effects except the return value;
-:      return value depends only on params and/or globals:
+:   P  Pure function:
+:
+:      A pure function has no effects except the return value, and the return
+:      value depends only on params and/or globals.  Also implies "R":
 :
 :         proto.h: add __attribute__pure__
 :
