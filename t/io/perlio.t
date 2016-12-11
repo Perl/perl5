@@ -189,7 +189,7 @@ SKIP: {
     }
 
 
-    { local $TODO = 'fails well back into 5.8.x';
+    {
 
 	
       sub read_fh_and_return_final_rv {
