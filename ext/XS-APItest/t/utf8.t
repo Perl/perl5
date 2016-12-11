@@ -100,7 +100,8 @@ my $UTF8_GOT_SHORT              = $UTF8_ALLOW_SHORT;
 my $UTF8_ALLOW_LONG             = 0x0010;
 my $UTF8_ALLOW_LONG_AND_ITS_VALUE = $UTF8_ALLOW_LONG|0x0020;
 my $UTF8_GOT_LONG               = $UTF8_ALLOW_LONG;
-my $UTF8_GOT_OVERFLOW           = 0x0080;
+my $UTF8_ALLOW_OVERFLOW         = 0x0080;
+my $UTF8_GOT_OVERFLOW           = $UTF8_ALLOW_OVERFLOW;
 my $UTF8_DISALLOW_SURROGATE     = 0x0100;
 my $UTF8_GOT_SURROGATE          = $UTF8_DISALLOW_SURROGATE;
 my $UTF8_WARN_SURROGATE         = 0x0200;
@@ -1347,8 +1348,7 @@ if (isASCII && ! $is64bit) {    # 32-bit ASCII platform
         [ "overflow malformation",
             "\xfe\x84\x80\x80\x80\x80\x80",  # Represents 2**32
             7,
-            0,  # There is no way to allow this malformation
-            $UTF8_GOT_OVERFLOW,
+            $UTF8_ALLOW_OVERFLOW, $UTF8_GOT_OVERFLOW,
             $REPLACEMENT,
             7, 2,
             qr/overflows/
@@ -1356,8 +1356,7 @@ if (isASCII && ! $is64bit) {    # 32-bit ASCII platform
         [ "overflow malformation",
             "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80",
             $max_bytes,
-            0,  # There is no way to allow this malformation
-            $UTF8_GOT_OVERFLOW,
+            $UTF8_ALLOW_OVERFLOW, $UTF8_GOT_OVERFLOW,
             $REPLACEMENT,
             $max_bytes, 1,
             qr/overflows/
@@ -1399,8 +1398,7 @@ else { # 64-bit ASCII, or EBCDIC of any size.
             I8_to_native(
                     "\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa4\xa0\xa0\xa0\xa0\xa0\xa0"),
             $max_bytes,
-            0,  # There is no way to allow this malformation
-            $UTF8_GOT_OVERFLOW,
+            $UTF8_ALLOW_OVERFLOW, $UTF8_GOT_OVERFLOW,
             $REPLACEMENT,
             $max_bytes, 8,
             qr/overflows/
@@ -1414,8 +1412,7 @@ else { # 64-bit ASCII, or EBCDIC of any size.
                 : I8_to_native(
                     "\xff\xb0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0"),
                 $max_bytes,
-                0,  # There is no way to allow this malformation
-                $UTF8_GOT_OVERFLOW,
+                $UTF8_ALLOW_OVERFLOW, $UTF8_GOT_OVERFLOW,
                 $REPLACEMENT,
                 $max_bytes, (isASCII) ? 3 : 2,
                 qr/overflows/

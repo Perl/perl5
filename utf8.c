@@ -1259,6 +1259,12 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                                               /* isn't problematic if < this */
     if (   (   (   LIKELY(! possible_problems) && uv >= UNICODE_SURROGATE_FIRST)
             || (   UNLIKELY(possible_problems)
+
+                          /* if overflow, we know without looking further
+                           * precisely which of the problematic types it is,
+                           * and we deal with those in the overflow handling
+                           * code */
+                && LIKELY(! (possible_problems & UTF8_GOT_OVERFLOW))
                 && isUTF8_POSSIBLY_PROBLEMATIC(*adjusted_s0)))
 	&& ((flags & ( UTF8_DISALLOW_NONCHAR
                       |UTF8_DISALLOW_SURROGATE
@@ -1371,7 +1377,21 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                     *errors |= UTF8_GOT_ABOVE_31_BIT;
                 }
 
-                disallowed = TRUE;
+                /* Disallow if any of the three categories say to */
+                if ( ! (flags & UTF8_ALLOW_OVERFLOW)
+                    || (flags & ( UTF8_DISALLOW_SUPER
+                                 |UTF8_DISALLOW_ABOVE_31_BIT)))
+                {
+                    disallowed = TRUE;
+                }
+
+
+                /* Likewise, warn if any say to, plus if deprecation warnings
+                 * are on, because this code point is above IV_MAX */
+                if (  ckWARN_d(WARN_DEPRECATED)
+                    || ! (flags & UTF8_ALLOW_OVERFLOW)
+                    ||   (flags & (UTF8_WARN_SUPER|UTF8_WARN_ABOVE_31_BIT)))
+                {
 
                 /* The warnings code explicitly says it doesn't handle the case
                  * of packWARN2 and two categories which have parent-child
@@ -1390,6 +1410,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                                         malformed_text,
                                         _byte_dump_string(s0, send - s0));
                     }
+                }
                 }
             }
             else if (possible_problems & UTF8_GOT_EMPTY) {

@@ -355,6 +355,17 @@ This malformation is where the UTF-8 looks valid syntactically, but
 there is a shorter sequence that yields the same code point.  This has
 been forbidden since Unicode version 3.1.
 
+=item *
+
+The functions C<utf8n_to_uvchr> and its derivatives now accept an input
+flag to allow the overflow malformation.  This malformation is when the
+UTF-8 may be syntactically valid, but the code point it represents is
+not capable of being represented in the word length on the platform.
+What "allowed" means in this case is that the function doesn't return an
+error, and advances the parse pointer to beyond the UTF-8 in question,
+but it returns the Unicode REPLACEMENT CHARACTER as the value of the
+code point (since the real value is not representable).
+
 =back
 
 =head1 Selected Bug Fixes

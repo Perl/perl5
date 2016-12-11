@@ -745,8 +745,8 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UTF8_ALLOW_LONG_AND_ITS_VALUE   (UTF8_ALLOW_LONG|0x0020)
 #define UTF8_GOT_LONG                   UTF8_ALLOW_LONG
 
-/* Currently no way to allow overflow */
-#define UTF8_GOT_OVERFLOW               0x0080
+#define UTF8_ALLOW_OVERFLOW             0x0080
+#define UTF8_GOT_OVERFLOW               UTF8_ALLOW_OVERFLOW
 
 #define UTF8_DISALLOW_SURROGATE		0x0100	/* Unicode surrogates */
 #define UTF8_GOT_SURROGATE		UTF8_DISALLOW_SURROGATE
@@ -790,10 +790,15 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UTF8_WARN_ILLEGAL_INTERCHANGE \
                           (UTF8_WARN_ILLEGAL_C9_INTERCHANGE|UTF8_WARN_NONCHAR)
 
+/* This is used typically for code that is willing to accept inputs of
+ * illformed UTF-8 sequences, for whatever reason.  However, all such sequences
+ * evaluate to the REPLACEMENT CHARACTER unless other flags overriding this are
+ * also present. */
 #define UTF8_ALLOW_ANY ( UTF8_ALLOW_CONTINUATION                                \
                         |UTF8_ALLOW_NON_CONTINUATION                            \
                         |UTF8_ALLOW_SHORT                                       \
-                        |UTF8_ALLOW_LONG)
+                        |UTF8_ALLOW_LONG                                        \
+                        |UTF8_ALLOW_OVERFLOW)
 
 /* Accept any Perl-extended UTF-8 that evaluates to any UV on the platform, but
  * not any malformed.  This is the default.  (Note that UVs above IV_MAX are
