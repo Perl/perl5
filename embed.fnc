@@ -739,7 +739,7 @@ ADMpR	|bool	|isIDFIRST_lazy	|NN const char* p
 ADMpR	|bool	|isALNUM_lazy	|NN const char* p
 #ifdef PERL_IN_UTF8_C
 snR	|U8	|to_lower_latin1|const U8 c|NULLOK U8 *p|NULLOK STRLEN *lenp
-inPR	|bool	|is_utf8_cp_above_31_bits|NN const U8 * const s|NN const U8 * const e
+inR	|bool	|is_utf8_cp_above_31_bits|NN const U8 * const s|NN const U8 * const e
 #endif
 #if defined(PERL_IN_UTF8_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 EXp	|UV        |_to_fold_latin1|const U8 c|NN U8 *p|NN STRLEN *lenp|const unsigned int flags
@@ -767,16 +767,16 @@ ADMpR	|bool	|is_uni_lower_lc|UV c
 ADMpR	|bool	|is_uni_print_lc|UV c
 ADMpR	|bool	|is_uni_punct_lc|UV c
 ADMpPR	|bool	|is_uni_xdigit_lc|UV c
-AnidRP	|bool	|is_utf8_invariant_string|NN const U8* const s|STRLEN const len
+AnidR	|bool	|is_utf8_invariant_string|NN const U8* const s|STRLEN const len
 AmnpdRP	|bool	|is_ascii_string|NN const U8* const s|const STRLEN len
 AmnpdRP	|bool	|is_invariant_string|NN const U8* const s|const STRLEN len
 AnpdD	|STRLEN	|is_utf8_char	|NN const U8 *s
 Abmnpd	|STRLEN	|is_utf8_char_buf|NN const U8 *buf|NN const U8 *buf_end
-AnipdP	|bool	|is_utf8_string	|NN const U8 *s|const STRLEN len
-AnidP	|bool	|is_utf8_string_flags					    \
+AnipdR	|bool	|is_utf8_string	|NN const U8 *s|const STRLEN len
+AnidR	|bool	|is_utf8_string_flags					    \
 		|NN const U8 *s|const STRLEN len|const U32 flags
-AnidP	|bool	|is_strict_utf8_string|NN const U8 *s|const STRLEN len
-AnidP	|bool	|is_c9strict_utf8_string|NN const U8 *s|const STRLEN len
+AnidR	|bool	|is_strict_utf8_string|NN const U8 *s|const STRLEN len
+AnidR	|bool	|is_c9strict_utf8_string|NN const U8 *s|const STRLEN len
 Anpdmb	|bool	|is_utf8_string_loc					    \
 		|NN const U8 *s|const STRLEN len|NN const U8 **ep
 Andm	|bool	|is_utf8_string_loc_flags				    \
@@ -808,7 +808,7 @@ Anid	|bool	|is_utf8_fixed_width_buf_loclen_flags			    \
 		|NULLOK const U8 **ep|NULLOK STRLEN *el|const U32 flags
 AmndP	|bool	|is_utf8_valid_partial_char				    \
 		|NN const U8 * const s|NN const U8 * const e
-AnidP	|bool	|is_utf8_valid_partial_char_flags			    \
+AnidR	|bool	|is_utf8_valid_partial_char_flags			    \
 		|NN const U8 * const s|NN const U8 * const e|const U32 flags
 AMpR	|bool	|_is_uni_FOO|const U8 classnum|const UV c
 AMpR	|bool	|_is_utf8_FOO|const U8 classnum|NN const U8 *p
@@ -910,7 +910,7 @@ EMpRX	|bool	|grok_bslash_o	|NN char** s|NN UV* uv           \
 				|const bool utf8
 EMiR	|char*|form_short_octal_warning|NN const char * const s  \
 				|const STRLEN len
-EiPRn	|I32	|regcurly	|NN const char *s
+EiRn	|I32	|regcurly	|NN const char *s
 #endif
 Apd	|UV	|grok_hex	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 Apd	|int	|grok_infnan	|NN const char** sp|NN const char *send
@@ -1705,9 +1705,9 @@ ApdD	|UV	|to_utf8_case	|NN const U8 *p					\
 				|NN const char *normal|				\
 				NULLOK const char *special
 #if defined(PERL_IN_UTF8_C)
-inRP	|bool	|does_utf8_overflow|NN const U8 * const s|NN const U8 * e
-inRP	|bool	|is_utf8_overlong_given_start_byte_ok|NN const U8 * const s|const STRLEN len
-inRP	|bool	|isFF_OVERLONG	|NN const U8 * const s|const STRLEN len
+inR	|bool	|does_utf8_overflow|NN const U8 * const s|NN const U8 * e
+inR	|bool	|is_utf8_overlong_given_start_byte_ok|NN const U8 * const s|const STRLEN len
+inR	|bool	|isFF_OVERLONG	|NN const U8 * const s|const STRLEN len
 sMR	|char *	|unexpected_non_continuation_text			\
 		|NN const U8 * const s					\
 		|STRLEN print_len					\
@@ -1756,11 +1756,11 @@ p	|void	|utilize	|int aver|I32 floor|NULLOK OP* version|NN OP* idop|NULLOK OP* a
 Ap	|U8*	|utf16_to_utf8	|NN U8* p|NN U8 *d|I32 bytelen|NN I32 *newlen
 Ap	|U8*	|utf16_to_utf8_reversed|NN U8* p|NN U8 *d|I32 bytelen|NN I32 *newlen
 AdpPR	|STRLEN	|utf8_length	|NN const U8* s|NN const U8 *e
-AipdPR	|IV	|utf8_distance	|NN const U8 *a|NN const U8 *b
-AipdPRn	|U8*	|utf8_hop	|NN const U8 *s|SSize_t off
-AipdPRn	|U8*	|utf8_hop_back|NN const U8 *s|SSize_t off|NN const U8 *start
-AipdPRn	|U8*	|utf8_hop_forward|NN const U8 *s|SSize_t off|NN const U8 *end
-AipdPRn	|U8*	|utf8_hop_safe	|NN const U8 *s|SSize_t off|NN const U8 *start|NN const U8 *end
+AipdR	|IV	|utf8_distance	|NN const U8 *a|NN const U8 *b
+AipdRn	|U8*	|utf8_hop	|NN const U8 *s|SSize_t off
+AipdRn	|U8*	|utf8_hop_back|NN const U8 *s|SSize_t off|NN const U8 *start
+AipdRn	|U8*	|utf8_hop_forward|NN const U8 *s|SSize_t off|NN const U8 *end
+AipdRn	|U8*	|utf8_hop_safe	|NN const U8 *s|SSize_t off|NN const U8 *start|NN const U8 *end
 ApMd	|U8*	|utf8_to_bytes	|NN U8 *s|NN STRLEN *len
 Apd	|int	|bytes_cmp_utf8	|NN const U8 *b|STRLEN blen|NN const U8 *u \
 				|STRLEN ulen
@@ -2287,7 +2287,7 @@ Ei	|regnode*|handle_named_backref|NN RExC_state_t *pRExC_state	    \
 				|NN I32 *flagp				    \
 				|NN char * parse_start			    \
 				|char ch
-EsnP	|unsigned int|regex_set_precedence|const U8 my_operator
+EsnR	|unsigned int|regex_set_precedence|const U8 my_operator
 Es	|regnode*|handle_regex_sets|NN RExC_state_t *pRExC_state \
 				|NULLOK SV ** return_invlist            \
 				|NN I32 *flagp|U32 depth                \
@@ -2385,8 +2385,8 @@ Es	|I32	|make_trie	|NN RExC_state_t *pRExC_state \
 				|U32 word_count|U32 flags|U32 depth
 Es	|regnode *|construct_ahocorasick_from_trie|NN RExC_state_t *pRExC_state \
                                 |NN regnode *source|U32 depth
-EnPs	|const char *|cntrl_to_mnemonic|const U8 c
-EnPs	|int	|edit_distance	|NN const UV *src		    \
+EnsR	|const char *|cntrl_to_mnemonic|const U8 c
+EnsR	|int	|edit_distance	|NN const UV *src		    \
 				|NN const UV *tgt		    \
 				|const STRLEN x			    \
 				|const STRLEN y			    \
