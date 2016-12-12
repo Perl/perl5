@@ -1975,6 +1975,7 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 \b\z0*\x{100}	.\x{100}	n	-	-	# [perl #129350] crashed in intuit_start
 (.*?(a(a)|i(i))n)	riiaan	y	$2-$3-$4-$1	aa-a--riiaan		#  Jump trie capture buffer issue [perl #129897]
 (^(?:(\d)x)?\d$)	1	y	[$1-$2]	[1-]		#  make sure that we reset capture buffers properly (from regtry)
+(X{2,}[-X]{1,4}){3,}X{2,}	XXX-XXX-XXX--	n	-	-	# [perl #130307]
 
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab
