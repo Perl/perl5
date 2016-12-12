@@ -779,6 +779,7 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UTF8_WARN_FE_FF                 UTF8_WARN_ABOVE_31_BIT
 
 #define UTF8_CHECK_ONLY			0x10000
+#define _UTF8_NO_CONFIDENCE_IN_CURLEN   0x20000  /* Internal core use only */
 
 /* For backwards source compatibility.  They do nothing, as the default now
  * includes what they used to mean.  The first one's meaning was to allow the

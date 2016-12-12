@@ -817,25 +817,12 @@ S_unexpected_non_continuation_text(pTHX_ const U8 * const s,
                                ? "immediately"
                                : Perl_form(aTHX_ "%d bytes",
                                                  (int) non_cont_byte_pos);
-    unsigned int i;
 
     PERL_ARGS_ASSERT_UNEXPECTED_NON_CONTINUATION_TEXT;
 
     /* We don't need to pass this parameter, but since it has already been
      * calculated, it's likely faster to pass it; verify under DEBUGGING */
     assert(expect_len == UTF8SKIP(s));
-
-    /* It is possible that utf8n_to_uvchr() was called incorrectly, with a
-     * length that is larger than is actually available in the buffer.  If we
-     * print all the bytes based on that length, we will read past the buffer
-     * end.  Often, the strings are NUL terminated, so to lower the chances of
-     * this happening, print the malformed bytes only up through any NUL. */
-    for (i = 1; i < print_len; i++) {
-        if (*(s + i) == '\0') {
-            print_len = i + 1;  /* +1 gets the NUL printed */
-            break;
-        }
-    }
 
     return Perl_form(aTHX_ "%s: %s (unexpected non-continuation byte 0x%02x,"
                            " %s after start byte 0x%02x; need %d bytes, got %d)",
@@ -1480,10 +1467,17 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                 if (! (flags & UTF8_ALLOW_NON_CONTINUATION)) {
                     disallowed = TRUE;
                     if (ckWARN_d(WARN_UTF8) && ! (flags & UTF8_CHECK_ONLY)) {
+
+                        /* If we don't know for sure that the input length is
+                         * valid, avoid as much as possible reading past the
+                         * end of the buffer */
+                        int printlen = (flags & _UTF8_NO_CONFIDENCE_IN_CURLEN)
+                                       ? s - s0
+                                       : send - s0;
                         pack_warn = packWARN(WARN_UTF8);
                         message = Perl_form(aTHX_ "%s",
                             unexpected_non_continuation_text(s0,
-                                                            send - s0,
+                                                            printlen,
                                                             s - s0,
                                                             (int) expectlen));
                     }
@@ -2470,7 +2464,7 @@ S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
      * validating routine */
     if (! isUTF8_CHAR(p, p + UTF8SKIP(p))) {
         _force_out_malformed_utf8_message(p, p + UTF8SKIP(p),
-                                          0,
+                                          _UTF8_NO_CONFIDENCE_IN_CURLEN,
                                           1 /* Die */ );
         NOT_REACHED; /* NOTREACHED */
     }
