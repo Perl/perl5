@@ -849,6 +849,10 @@ d_fchmod (d_fchmod.U):
 	indicates to the C program that the fchmod() routine is available
 	to change mode of opened files.
 
+d_fchmodat (d_fchmodat.U):
+	This variable conditionally defines the HAS_FCHMODAT symbol, which
+	indicates the POSIX fchmodat() function is available.
+
 d_fchown (d_fchown.U):
 	This variable conditionally defines the HAS_FCHOWN symbol, which
 	indicates to the C program that the fchown() routine is available
@@ -1525,6 +1529,10 @@ d_link (d_link.U):
 	This variable conditionally defines HAS_LINK if link() is
 	available to create hard links.
 
+d_linkat (d_linkat.U):
+	This variable conditionally defines the HAS_LINKAT symbol, which
+	indicates the POSIX linkat() function is available.
+
 d_llrint (d_llrint.U):
 	This variable conditionally defines the HAS_LLRINT symbol, which
 	indicates to the C program that the llrint() routine is available
@@ -1897,6 +1905,10 @@ d_open3 (d_open3.U):
 	which indicates to the C program that the 3 argument version of
 	the open(2) function is available.
 
+d_openat (d_openat.U):
+	This variable conditionally defines the HAS_OPENAT symbol, which
+	indicates the POSIX openat() function is available.
+
 d_pathconf (d_pathconf.U):
 	This variable conditionally defines the HAS_PATHCONF symbol, which
 	indicates to the C program that the pathconf() routine is available
@@ -2136,6 +2148,10 @@ d_rename (d_rename.U):
 	This variable conditionally defines the HAS_RENAME symbol, which
 	indicates to the C program that the rename() routine is available
 	to rename files.
+
+d_renameat (d_renameat.U):
+	This variable conditionally defines the HAS_RENAMEAT symbol, which
+	indicates the POSIX renameat() function is available.
 
 d_rewinddir (d_readdir.U):
 	This variable conditionally defines HAS_REWINDDIR if rewinddir() is
@@ -2820,6 +2836,10 @@ d_uname (d_gethname.U):
 d_union_semun (d_union_semun.U):
 	This variable conditionally defines HAS_UNION_SEMUN if the
 	union semun is defined by including <sys/sem.h>.
+
+d_unlinkat (d_unlinkat.U):
+	This variable conditionally defines the HAS_UNLINKAT symbol, which
+	indicates the POSIX unlinkat() function isavailable.
 
 d_unordered (d_unordered.U):
 	This variable conditionally defines the HAS_UNORDERED symbol, which

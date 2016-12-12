@@ -383,6 +383,11 @@ d_alarm=''
 asctime_r_proto=''
 d_asctime_r=''
 d_asinh=''
+d_openat=''
+d_unlinkat=''
+d_renameat=''
+d_linkat=''
+d_fchmodat=''
 d_atanh=''
 d_attribute_deprecated=''
 d_attribute_format=''
@@ -19769,6 +19774,22 @@ esac
 set strxfrm d_strxfrm
 eval $inlibc
 
+: check for openat, unlinkat, renameat, linkat, fchmodat
+set openat d_openat
+eval $inlibc
+
+set unlinkat d_unlinkat
+eval $inlibc
+
+set renameat d_renameat
+eval $inlibc
+
+set linkat d_linkat
+eval $inlibc
+
+set fchmodat d_fchmodat
+eval $inlibc
+
 : see if symlink exists
 set symlink d_symlink
 eval $inlibc
@@ -24445,6 +24466,11 @@ d_asctime64='$d_asctime64'
 d_asctime_r='$d_asctime_r'
 d_asinh='$d_asinh'
 d_atanh='$d_atanh'
+d_openat='$d_openat'
+d_unlinkat='$d_unlinkat'
+d_renameat='$d_renameat'
+d_linkat='$d_linkat'
+d_fchmodat='$d_fchmodat'
 d_atolf='$d_atolf'
 d_atoll='$d_atoll'
 d_attribute_deprecated='$d_attribute_deprecated'
