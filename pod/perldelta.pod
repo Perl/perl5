@@ -102,6 +102,12 @@ There may well be none in a stable release.
 We use a different hash function for short and long keys. This should
 improve performance and security, especially for long keys.
 
+=item * readline is faster
+
+Reading from a file line-by-line with c<readline()> or C<< <> >> should
+now typically be faster due to a better implementation of the code that
+searches for the next newline character.
+
 =back
 
 =head1 Modules and Pragmata
