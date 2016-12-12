@@ -2444,7 +2444,7 @@ Es	|U8	|regtail_study	|NN RExC_state_t *pRExC_state \
 #endif
 
 #if defined(PERL_IN_REGEXEC_C)
-ERs	|bool	|isFOO_lc	|const U8 classnum|const U8 character
+EXRpM	|bool	|isFOO_lc	|const U8 classnum|const U8 character
 ERs	|bool	|isFOO_utf8_lc	|const U8 classnum|NN const U8* character
 ERs	|SSize_t|regmatch	|NN regmatch_info *reginfo|NN char *startpos|NN regnode *prog
 WERs	|I32	|regrepeat	|NN regexp *prog|NN char **startposp \
