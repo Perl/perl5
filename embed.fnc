@@ -1939,7 +1939,7 @@ Apdmb	|void	|sv_force_normal|NN SV *sv
 Apd	|void	|sv_force_normal_flags|NN SV *const sv|const U32 flags
 pX	|SSize_t|tmps_grow_p	|SSize_t ix
 Apd	|SV*	|sv_rvweaken	|NN SV *const sv
-AnpPMd	|SV*	|sv_get_backrefs|NN SV *const sv
+AnpMd	|SV*	|sv_get_backrefs|NN SV *const sv
 : This is indirectly referenced by globals.c. This is somewhat annoying.
 p	|int	|magic_killbackrefs|NN SV *sv|NN MAGIC *mg
 Ap	|OP*	|newANONATTRSUB	|I32 floor|NULLOK OP *proto|NULLOK OP *attrs|NULLOK OP *block
@@ -1992,7 +1992,7 @@ Ap	|void	|sys_intern_dup	|NN struct interp_intern* src|NN struct interp_intern* 
 #  endif
 #endif
 
-AmopP	|const XOP *	|custom_op_xop	|NN const OP *o
+Amop	|const XOP *	|custom_op_xop	|NN const OP *o
 ApR	|const char *	|custom_op_name	|NN const OP *o
 ApR	|const char *	|custom_op_desc	|NN const OP *o
 pRX	|XOPRETANY	|custom_op_get_field	|NN const OP *o|const xop_flags_enum field

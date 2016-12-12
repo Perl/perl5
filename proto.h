@@ -591,10 +591,7 @@ PERL_CALLCONV const char *	Perl_custom_op_name(pTHX_ const OP *o)
 PERL_CALLCONV void	Perl_custom_op_register(pTHX_ Perl_ppaddr_t ppaddr, const XOP *xop);
 #define PERL_ARGS_ASSERT_CUSTOM_OP_REGISTER	\
 	assert(ppaddr); assert(xop)
-/* PERL_CALLCONV const XOP *	Perl_custom_op_xop(pTHX_ const OP *o)
-			__attribute__warn_unused_result__
-			__attribute__pure__; */
-
+/* PERL_CALLCONV const XOP *	Perl_custom_op_xop(pTHX_ const OP *o); */
 PERL_CALLCONV void	Perl_cv_ckproto_len_flags(pTHX_ const CV* cv, const GV* gv, const char* p, const STRLEN len, const U32 flags);
 #define PERL_ARGS_ASSERT_CV_CKPROTO_LEN_FLAGS	\
 	assert(cv)
@@ -3071,12 +3068,9 @@ PERL_CALLCONV void	Perl_sv_free2(pTHX_ SV *const sv, const U32 refcnt);
 #define PERL_ARGS_ASSERT_SV_FREE2	\
 	assert(sv)
 PERL_CALLCONV void	Perl_sv_free_arenas(pTHX);
-PERL_CALLCONV SV*	Perl_sv_get_backrefs(SV *const sv)
-			__attribute__warn_unused_result__
-			__attribute__pure__;
+PERL_CALLCONV SV*	Perl_sv_get_backrefs(SV *const sv);
 #define PERL_ARGS_ASSERT_SV_GET_BACKREFS	\
 	assert(sv)
-
 PERL_CALLCONV char*	Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append);
 #define PERL_ARGS_ASSERT_SV_GETS	\
 	assert(sv); assert(fp)
