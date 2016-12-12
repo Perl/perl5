@@ -959,7 +959,8 @@ The input character at C<p> is assumed to be well-formed.
 =cut
 
 XXX Still undocumented isVERTWS_uvchr and _utf8; it's unclear what their names
-really should be.  Also toUPPER_LC and toFOLD_LC, which are subject to change.
+really should be.  Also toUPPER_LC and toFOLD_LC, which are subject to change,
+and aren't general purpose as they don't work on U+DF, and assert against that.
 
 Note that these macros are repeated in Devel::PPPort, so should also be
 patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
@@ -1620,11 +1621,11 @@ END_EXTERN_C
  * don't, but experiments show that gcc optimizes them out anyway. */
 
 /* Note that all ignore 'use bytes' */
-#define _generic_uvchr(classnum, above_latin1, c) ((c) < 256                    \
-                                             ? _generic_isCC(c, classnum)     \
+#define _generic_uvchr(classnum, above_latin1, c) ((c) < 256                \
+                                             ? _generic_isCC(c, classnum)   \
                                              : above_latin1(c))
-#define _generic_swash_uvchr(classnum, c) ((c) < 256                            \
-                                             ? _generic_isCC(c, classnum)     \
+#define _generic_swash_uvchr(classnum, c) ((c) < 256                        \
+                                             ? _generic_isCC(c, classnum)   \
                                              : _is_uni_FOO(classnum, c))
 #define isALPHA_uvchr(c)      _generic_swash_uvchr(_CC_ALPHA, c)
 #define isALPHANUMERIC_uvchr(c) _generic_swash_uvchr(_CC_ALPHANUMERIC, c)
@@ -1633,8 +1634,10 @@ END_EXTERN_C
 #define isCNTRL_uvchr(c)      isCNTRL_L1(c) /* All controls are in Latin1 */
 #define isDIGIT_uvchr(c)      _generic_swash_uvchr(_CC_DIGIT, c)
 #define isGRAPH_uvchr(c)      _generic_swash_uvchr(_CC_GRAPH, c)
-#define isIDCONT_uvchr(c)     _generic_uvchr(_CC_WORDCHAR, _is_uni_perl_idcont, c)
-#define isIDFIRST_uvchr(c)    _generic_uvchr(_CC_IDFIRST, _is_uni_perl_idstart, c)
+#define isIDCONT_uvchr(c)                                                   \
+                    _generic_uvchr(_CC_WORDCHAR, _is_uni_perl_idcont, c)
+#define isIDFIRST_uvchr(c)                                                  \
+                    _generic_uvchr(_CC_IDFIRST, _is_uni_perl_idstart, c)
 #define isLOWER_uvchr(c)      _generic_swash_uvchr(_CC_LOWER, c)
 #define isPRINT_uvchr(c)      _generic_swash_uvchr(_CC_PRINT, c)
 
