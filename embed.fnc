@@ -677,9 +677,9 @@ ApbmM	|SV**	|hv_store_flags	|NULLOK HV *hv|NULLOK const char *key \
 				|I32 klen|NULLOK SV *val|U32 hash|int flags
 Amd	|void	|hv_undef	|NULLOK HV *hv
 poX	|void	|hv_undef_flags	|NULLOK HV *hv|U32 flags
-Am	|I32	|ibcmp		|NN const char* a|NN const char* b|I32 len
+AmP	|I32	|ibcmp		|NN const char* a|NN const char* b|I32 len
 AnpP	|I32	|foldEQ		|NN const char* a|NN const char* b|I32 len
-Am	|I32	|ibcmp_locale	|NN const char* a|NN const char* b|I32 len
+AmP	|I32	|ibcmp_locale	|NN const char* a|NN const char* b|I32 len
 AnpP	|I32	|foldEQ_locale	|NN const char* a|NN const char* b|I32 len
 Am	|I32	|ibcmp_utf8	|NN const char *s1|NULLOK char **pe1|UV l1 \
 				|bool u1|NN const char *s2|NULLOK char **pe2 \
@@ -2934,8 +2934,8 @@ Apbm	|GV*	|gv_SVadd	|NULLOK GV *gv
 #if defined(PERL_IN_UTIL_C)
 s	|bool	|ckwarn_common	|U32 w
 #endif
-Apo	|bool	|ckwarn		|U32 w
-Apo	|bool	|ckwarn_d	|U32 w
+ApoP	|bool	|ckwarn		|U32 w
+ApoP	|bool	|ckwarn_d	|U32 w
 : FIXME - exported for ByteLoader - public or private?
 XEopMR	|STRLEN *|new_warnings_bitfield|NULLOK STRLEN *buffer \
 				|NN const char *const bits|STRLEN size
@@ -2977,7 +2977,7 @@ Apnod	|Size_t	|my_strlcat	|NULLOK char *dst|NULLOK const char *src|Size_t size
 Apnod	|Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t size
 #endif
 
-Apdn	|bool	|isinfnan	|NV nv
+APpdn	|bool	|isinfnan	|NV nv
 p	|bool	|isinfnansv	|NN SV *sv
 
 #if !defined(HAS_SIGNBIT)

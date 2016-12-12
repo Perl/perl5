@@ -521,8 +521,14 @@ PERL_CALLCONV void	Perl_ck_warner_d(pTHX_ U32 err, const char* pat, ...)
 #define PERL_ARGS_ASSERT_CK_WARNER_D	\
 	assert(pat)
 
-PERL_CALLCONV bool	Perl_ckwarn(pTHX_ U32 w);
-PERL_CALLCONV bool	Perl_ckwarn_d(pTHX_ U32 w);
+PERL_CALLCONV bool	Perl_ckwarn(pTHX_ U32 w)
+			__attribute__warn_unused_result__
+			__attribute__pure__;
+
+PERL_CALLCONV bool	Perl_ckwarn_d(pTHX_ U32 w)
+			__attribute__warn_unused_result__
+			__attribute__pure__;
+
 PERL_CALLCONV void	Perl_clear_defarray(pTHX_ AV* av, bool abandon);
 #define PERL_ARGS_ASSERT_CLEAR_DEFARRAY	\
 	assert(av)
@@ -1281,8 +1287,14 @@ PERL_CALLCONV SV**	Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, 
 #endif
 /* PERL_CALLCONV void	hv_undef(pTHX_ HV *hv); */
 PERL_CALLCONV void	Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags);
-/* PERL_CALLCONV I32	ibcmp(pTHX_ const char* a, const char* b, I32 len); */
-/* PERL_CALLCONV I32	ibcmp_locale(pTHX_ const char* a, const char* b, I32 len); */
+/* PERL_CALLCONV I32	ibcmp(pTHX_ const char* a, const char* b, I32 len)
+			__attribute__warn_unused_result__
+			__attribute__pure__; */
+
+/* PERL_CALLCONV I32	ibcmp_locale(pTHX_ const char* a, const char* b, I32 len)
+			__attribute__warn_unused_result__
+			__attribute__pure__; */
+
 /* PERL_CALLCONV I32	ibcmp_utf8(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const char *s2, char **pe2, UV l2, bool u2); */
 PERL_CALLCONV void	Perl_init_argv_symbols(pTHX_ int argc, char **argv);
 #define PERL_ARGS_ASSERT_INIT_ARGV_SYMBOLS	\
@@ -1665,7 +1677,10 @@ PERL_CALLCONV bool	Perl_is_utf8_xidfirst(pTHX_ const U8 *p)
 #define PERL_ARGS_ASSERT_IS_UTF8_XIDFIRST	\
 	assert(p)
 
-PERL_CALLCONV bool	Perl_isinfnan(NV nv);
+PERL_CALLCONV bool	Perl_isinfnan(NV nv)
+			__attribute__warn_unused_result__
+			__attribute__pure__;
+
 PERL_CALLCONV bool	Perl_isinfnansv(pTHX_ SV *sv);
 #define PERL_ARGS_ASSERT_ISINFNANSV	\
 	assert(sv)
