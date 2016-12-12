@@ -1443,7 +1443,8 @@ foreach my $test (@malformations) {
 
     $ret = test_isUTF8_CHAR_flags($bytes, $length, 0);
     is($ret, 0, "$testname: isUTF8_CHAR_flags returns 0");
-    is(scalar @warnings, 0, "$testname: isUTF8_CHAR() generated no warnings")
+    is(scalar @warnings, 0, "$testname: isUTF8_CHAR_flags() generated no"
+                          . " warnings")
       or output_warnings(@warnings);
 
     $ret = test_isSTRICT_UTF8_CHAR($bytes, $length);
