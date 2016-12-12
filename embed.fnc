@@ -128,8 +128,20 @@
 :
 :   P  Pure function:
 :
-:      A pure function has no effects except the return value, and the return
-:      value depends only on params and/or globals.  Also implies "R":
+:	A pure function has no effects except the return value, and the return
+:       value depends only on params and/or globals.  This is a hint to the
+:	compiler that it can optimize calls to this function out of common
+:	subexpressions.  Consequently if this flag is wrongly specified, it can
+:	lead to subtle bugs that vary by platform, compiler, compiler version,
+:	and optimization level.  Also, a future commit could easily change a
+:	currently-pure function without even noticing this flag.  So it should
+:	be used sparingly, only for functions that are unlikely to ever become
+:	not pure by future commits.  It should not be used for static
+:	functions, as the compiler already has the information needed to make
+:	the 'pure' determination and doesn't need any hint; so it doesn't add
+:	value in those cases, and could be dangerous if it causes the compiler
+:	to skip doing its own checks.  It should not be used on functions that
+:	touch SVs, as those can trigger unexpected magic.  Also implies "R":
 :
 :         proto.h: add __attribute__pure__
 :
