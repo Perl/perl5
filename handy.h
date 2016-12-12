@@ -549,7 +549,8 @@ ASCII character in the named class based on platform, Unicode, and Perl rules.
 If the input is a number that doesn't fit in an octet, FALSE is returned.
 
 Variant C<isFOO_A> (e.g., C<isALPHA_A()>) is identical to the base function
-with no suffix C<"_A">.
+with no suffix C<"_A">.  This variant is used to emphasize by its name that
+only ASCII-range characters can return TRUE.
 
 Variant C<isFOO_L1> imposes the Latin-1 (or EBCDIC equivlalent) character set
 onto the platform.  That is, the code points that are ASCII are unaffected,
