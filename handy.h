@@ -548,24 +548,24 @@ represented by that octet is (or on non-ASCII platforms, corresponds to) an
 ASCII character in the named class based on platform, Unicode, and Perl rules.
 If the input is a number that doesn't fit in an octet, FALSE is returned.
 
-Variant C<isFOO_A> (e.g., C<isALPHA_A()>) is identical to the base function
+Variant C<isI<FOO>_A> (e.g., C<isALPHA_A()>) is identical to the base function
 with no suffix C<"_A">.  This variant is used to emphasize by its name that
 only ASCII-range characters can return TRUE.
 
-Variant C<isFOO_L1> imposes the Latin-1 (or EBCDIC equivlalent) character set
+Variant C<isI<FOO>_L1> imposes the Latin-1 (or EBCDIC equivlalent) character set
 onto the platform.  That is, the code points that are ASCII are unaffected,
 since ASCII is a subset of Latin-1.  But the non-ASCII code points are treated
 as if they are Latin-1 characters.  For example, C<isWORDCHAR_L1()> will return
 true when called with the code point 0xDF, which is a word character in both
 ASCII and EBCDIC (though it represents different characters in each).
 
-Variant C<isFOO_uvchr> is like the C<isFOO_L1> variant, but accepts any UV code
+Variant C<isI<FOO>_uvchr> is like the C<isI<FOO>_L1> variant, but accepts any UV code
 point as input.  If the code point is larger than 255, Unicode rules are used
 to determine if it is in the character class.  For example,
 C<isWORDCHAR_uvchr(0x100)> returns TRUE, since 0x100 is LATIN CAPITAL LETTER A
 WITH MACRON in Unicode, and is a word character.
 
-Variant C<isFOO_utf8_safe> is like C<isFOO_uvchr>, but is used for UTF-8
+Variant C<isI<FOO>_utf8_safe> is like C<isI<FOO>_uvchr>, but is used for UTF-8
 encoded strings.  Each call classifies one character, even if the string
 contains many.  This variant takes two parameters.  The first, C<p>, is a
 pointer to the first byte of the character to be classified.  (Recall that it
@@ -579,19 +579,19 @@ character is malformed in some way, the program may croak, or the function may
 return FALSE, at the discretion of the implementation, and subject to change in
 future releases.
 
-Variant C<isFOO_utf8> is like C<isFOO_utf8_safe>, but takes just a single
+Variant C<isI<FOO>_utf8> is like C<isI<FOO>_utf8_safe>, but takes just a single
 parameter, C<p>, which has the same meaning as the corresponding parameter does
-in C<isFOO_utf8_safe>.  The function therefore can't check if it is reading
+in C<isI<FOO>_utf8_safe>.  The function therefore can't check if it is reading
 beyond the end of the string.  Starting in Perl v5.30, it will take a second
-parameter, becoming a synonym for C<isFOO_utf8_safe>.  At that time every
+parameter, becoming a synonym for C<isI<FOO>_utf8_safe>.  At that time every
 program that uses it will have to be changed to successfully compile.  In the
-meantime, the first runtime call to C<isFOO_utf8> from each call point in the
+meantime, the first runtime call to C<isI<FOO>_utf8> from each call point in the
 program will raise a deprecation warning, enabled by default.  You can convert
-your program now to use C<isFOO_utf8_safe>, and avoid the warnings, and get an
+your program now to use C<isI<FOO>_utf8_safe>, and avoid the warnings, and get an
 extra measure of protection, or you can wait until v5.30, when you'll be forced
 to add the C<e> parameter.
 
-Variant C<isFOO_LC> is like the C<isFOO_A> and C<isFOO_L1> variants, but the
+Variant C<isI<FOO>_LC> is like the C<isI<FOO>_A> and C<isI<FOO>_L1> variants, but the
 result is based on the current locale, which is what C<LC> in the name stands
 for.  If Perl can determine that the current locale is a UTF-8 locale, it uses
 the published Unicode rules; otherwise, it uses the C library function that
@@ -601,11 +601,11 @@ returned if the input won't fit into an octet.  On some platforms where the C
 library function is known to be defective, Perl changes its result to follow
 the POSIX standard's rules.
 
-Variant C<isFOO_LC_uvchr> is like C<isFOO_LC>, but is defined on any UV.  It
-returns the same as C<isFOO_LC> for input code points less than 256, and
+Variant C<isI<FOO>_LC_uvchr> is like C<isI<FOO>_LC>, but is defined on any UV.  It
+returns the same as C<isI<FOO>_LC> for input code points less than 256, and
 returns the hard-coded, not-affected-by-locale, Unicode results for larger ones.
 
-Variant C<isFOO_LC_utf8_safe> is like C<isFOO_LC_uvchr>, but is used for UTF-8
+Variant C<isI<FOO>_LC_utf8_safe> is like C<isI<FOO>_LC_uvchr>, but is used for UTF-8
 encoded strings.  Each call classifies one character, even if the string
 contains many.  This variant takes two parameters.  The first, C<p>, is a
 pointer to the first byte of the character to be classified.  (Recall that it
@@ -619,15 +619,15 @@ character is malformed in some way, the program may croak, or the function may
 return FALSE, at the discretion of the implementation, and subject to change in
 future releases.
 
-Variant C<isFOO_LC_utf8> is like C<isFOO_LC_utf8_safe>, but takes just a single
+Variant C<isI<FOO>_LC_utf8> is like C<isI<FOO>_LC_utf8_safe>, but takes just a single
 parameter, C<p>, which has the same meaning as the corresponding parameter does
-in C<isFOO_LC_utf8_safe>.  The function therefore can't check if it is reading
+in C<isI<FOO>_LC_utf8_safe>.  The function therefore can't check if it is reading
 beyond the end of the string.  Starting in Perl v5.30, it will take a second
-parameter, becoming a synonym for C<isFOO_LC_utf8_safe>.  At that time every
+parameter, becoming a synonym for C<isI<FOO>_LC_utf8_safe>.  At that time every
 program that uses it will have to be changed to successfully compile.  In the
-meantime, the first runtime call to C<isFOO_LC_utf8> from each call point in
+meantime, the first runtime call to C<isI<FOO>_LC_utf8> from each call point in
 the program will raise a deprecation warning, enabled by default.  You can
-convert your program now to use C<isFOO_LC_utf8_safe>, and avoid the warnings,
+convert your program now to use C<isI<FOO>_LC_utf8_safe>, and avoid the warnings,
 and get an extra measure of protection, or you can wait until v5.30, when
 you'll be forced to add the C<e> parameter.
 
