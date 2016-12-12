@@ -862,10 +862,16 @@ S_openindirtemp(pTHX_ GV *gv, SV *orig_name, SV *temp_out_name) {
     return do_openn(gv, "+>&", 3, 0, 0, 0, fp, NULL, 0);
 }
 
+#if defined(HAS_UNLINKAT) && defined(HAS_RENAMEAT) && defined(HAS_FCHMODAT) && \
+    (defined(HAS_DIRFD) || defined(HAS_DIR_DD_FD)) && !defined(NO_USE_ATFUNCTIONS)
+#  define ARGV_USE_ATFUNCTIONS
+#endif
+
 #define ARGVMG_BACKUP_NAME 0
 #define ARGVMG_TEMP_NAME 1
 #define ARGVMG_ORIG_NAME 2
 #define ARGVMG_ORIG_MODE 3
+#define ARGVMG_ORIG_DIRP 4
 
 static int
 S_argvout_free(pTHX_ SV *io, MAGIC *mg) {
@@ -879,6 +885,10 @@ S_argvout_free(pTHX_ SV *io, MAGIC *mg) {
     assert(IoTYPE(io) != IoTYPE_PIPE);
 
     if (IoIFP(io)) {
+#ifdef ARGV_USE_ATFUNCTIONS
+        SV **dir_psv;
+        DIR *dir;
+#endif
         /* if we get here the file hasn't been closed explicitly by the
            user and hadn't been closed implicitly by nextargv(), so
            abandon the edit */
@@ -887,7 +897,15 @@ S_argvout_free(pTHX_ SV *io, MAGIC *mg) {
         IoIFP(io) = IoOFP(io) = NULL;
         temp_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_TEMP_NAME, FALSE);
         assert(temp_psv && *temp_psv && SvPOK(*temp_psv));
+#ifdef ARGV_USE_ATFUNCTIONS
+        dir_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_DIRP, FALSE);
+        assert(dir_psv && *dir_psv && SvIOK(*dir_psv));
+        dir = INT2PTR(DIR *, SvIV(*dir_psv));
+        (void)unlinkat(my_dirfd(dir), SvPVX(*temp_psv), 0);
+        closedir(dir);
+#else
         (void)UNLINK(SvPVX(*temp_psv));
+#endif
     }
 
     return 0;
@@ -898,6 +916,9 @@ S_argvout_free(pTHX_ SV *io, MAGIC *mg) {
    1: name of the temp output file
    2: name of the original file
    3: file mode of the original file
+
+If we have unlinkat(), renameat(), fchmodat(), dirfd() we also keep:
+   4: the DIR * for the current directory when we open the file, stored as an IV
  */
 
 static const MGVTBL argvout_vtbl =
@@ -971,6 +992,9 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 #ifndef FLEXFILENAMES
                 int filedev;
                 int fileino;
+#endif
+#ifdef ARGV_USE_ATFUNCTIONS
+                DIR *curdir;
 #endif
                 Uid_t fileuid;
                 Gid_t filegid;
@@ -1051,6 +1075,10 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
                 av_store(magic_av, ARGVMG_TEMP_NAME, temp_name_sv);
                 av_store(magic_av, ARGVMG_ORIG_NAME, newSVsv(sv));
                 av_store(magic_av, ARGVMG_ORIG_MODE, newSVuv(PL_filemode));
+#ifdef ARGV_USE_ATFUNCTIONS
+                curdir = opendir(".");
+                av_store(magic_av, ARGVMG_ORIG_DIRP, newSViv(PTR2IV(curdir)));
+#endif
 		setdefout(PL_argvoutgv);
                 sv_magicext((SV*)GvIOp(PL_argvoutgv), (SV*)magic_av, PERL_MAGIC_uvar, &argvout_vtbl, NULL, 0);
                 SvREFCNT_dec(magic_av);
@@ -1139,6 +1167,11 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
         /* PL_oldname may have been modified by a nested ARGV use at this point */
         SV **orig_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_NAME, FALSE);
         SV **mode_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_MODE, FALSE);
+#ifdef ARGV_USE_ATFUNCTIONS
+        SV **dir_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_DIRP, FALSE);
+        DIR *dir;
+        int dfd;
+#endif
         UV mode;
         int fd;
 
@@ -1147,6 +1180,11 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
         assert(temp_psv && *temp_psv);
         assert(orig_psv && *orig_psv);
         assert(mode_psv && *mode_psv);
+#ifdef ARGV_USE_ATFUNCTIONS
+        assert(dir_psv && *dir_psv);
+        dir = INT2PTR(DIR *, SvIVX(*dir_psv));
+        dfd = my_dirfd(dir);
+#endif
 
         orig_pv = SvPVX(*orig_psv);
 
@@ -1174,11 +1212,23 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 #endif
             if (back_psv && *back_psv) {
 #if defined(HAS_LINK) && !defined(DOSISH) && !defined(__CYGWIN__) && defined(HAS_RENAME)
-                if (link(orig_pv, SvPVX(*back_psv)) < 0)
+                if (
+#  ifdef ARGV_USE_ATFUNCTIONS
+                    linkat(dfd, orig_pv, dfd, SvPVX(*back_psv), 0) < 0
+#  else
+                    link(orig_pv, SvPVX(*back_psv)) < 0
+#  endif
+                    )
 #endif
                 {
 #ifdef HAS_RENAME
-                    if (PerlLIO_rename(orig_pv, SvPVX(*back_psv)) < 0) {
+                    if (
+#  ifdef ARGV_USE_ATFUNCTIONS
+                        renameat(dfd, orig_pv, dfd, SvPVX(*back_psv)) < 0
+#  else
+                        PerlLIO_rename(orig_pv, SvPVX(*back_psv)) < 0
+#  endif
+                        ) {
                         if (!not_implicit) {
                             Perl_croak(aTHX_ "Can't rename %s to %s: %s, skipping file",
                                        SvPVX(*orig_psv), SvPVX(*back_psv), Strerror(errno));
@@ -1208,7 +1258,11 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 #endif
             if (
 #ifdef HAS_RENAME
+#  ifdef ARGV_USE_ATFUNCTIONS
+                renameat(dfd, SvPVX(*temp_psv), dfd, orig_pv) < 0
+#  else
                 PerlLIO_rename(SvPVX(*temp_psv), orig_pv) < 0
+#  endif
 #else
                 link(SvPVX(*temp_psv), orig_pv) < 0
 #endif
@@ -1226,7 +1280,11 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 #endif
         }
         else {
+#ifdef ARGV_USE_ATFUNCTIONS
+            unlinkat(dfd, SvPVX_const(*temp_psv), 0);
+#else
             UNLINK(SvPVX_const(*temp_psv));
+#endif
             if (!not_implicit) {
                 Perl_croak(aTHX_ "Failed to close in-place work file %s: %s",
                            SvPVX(*temp_psv), Strerror(errno));
