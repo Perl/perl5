@@ -48,6 +48,17 @@ sub autoload(*;@){
     goto &_load;
 }
 
+sub load_module(*;@){
+    my $mod = shift or return;
+    my $who = _who();
+
+    my $import = @_;
+    unshift(@_, $mod);
+
+    _load_mod( $mod );
+    goto &_import if $import;
+}
+
 sub load_remote($$;@){
     my ($dst, $src, @exp) = @_;
 
@@ -67,35 +78,28 @@ sub _load{
     my $mod = shift or return;
     my $who = _who();
 
+    my $import = @_ || $autoimport;
+    unshift(@_, $mod);
+
     if( _is_file( $mod ) ) {
         require $mod;
-    } else {
-        LOAD: {
-            my $err;
-            for my $flag ( qw[1 0] ) {
-                my $file = _to_file( $mod, $flag);
-                eval { require $file };
-                $@ ? $err .= $@ : last LOAD;
-            }
-            die $err if $err;
-        }
+        goto &_import if $import;
     }
 
+    _load_mod( $mod );
+    goto &_import if $import;
+}
+
+sub _import {
     ### This addresses #41883: Module::Load cannot import
     ### non-Exporter module. ->import() routines weren't
     ### properly called when load() was used.
+    my $mod = $_[0];
 
     {   no strict 'refs';
-        my $import;
+        my $import = $mod->can('import');
 
-    ((@_ or $autoimport) and (
-        $import = $mod->can('import')
-        ) and (
-        unshift(@_, $mod),
-        goto &$import,
-        return
-        )
-    );
+        $import and goto &$import;
     }
 
 }
@@ -124,6 +128,20 @@ sub _to_file{
     $file = VMS::Filespec::unixify($file) if $^O eq 'VMS';
 
     return $file;
+}
+
+sub _load_mod{
+    my $mod = shift;
+
+    LOAD: {
+        my $err;
+        for my $flag ( qw[1 0] ) {
+            my $file = _to_file( $mod, $flag);
+            eval { require $file };
+            $@ ? $err .= $@ : last LOAD;
+        }
+        die $err if $err;
+    }
 }
 
 sub _who { (caller(1))[0] }

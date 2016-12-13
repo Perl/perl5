@@ -35,21 +35,25 @@ sub _test{
 }
 
 sub is_peace_in_world{
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
     like $r, qr/(WORLD\W+)?PEACE/o, $_[0] || '.';
     goto &_reset;
 }
 
 sub isnt_peace_in_world{
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
     unlike $r, qr/(WORLD\W+)?PEACE/o, $_[0] || '.';
     goto &_reset;
 }
 
 sub isnt_def_sub{
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
     like $r, qr/Undefined\s+subroutine/io, $_[0] || '.';
     goto &_reset;
 }
 
 sub cant_locate{
+  local $Test::Builder::Level = $Test::Builder::Level + 1;
 	like $r, qr/Can't\s+locate/io, $_[0] || '.';
     goto &_reset;
 }
