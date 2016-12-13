@@ -631,6 +631,7 @@ static PERLIO_FUNCS_DECL(PerlIO_object) = {
  PerlIOVia_get_ptr,
  PerlIOVia_get_cnt,
  PerlIOVia_set_ptrcnt,
+ PerlIOBase_readdelim, // PerlIOVia_readdelim
 };
 
 
