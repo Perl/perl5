@@ -11145,8 +11145,7 @@ S_scan_formline(pTHX_ char *s)
 	PL_expect = XSTATE;
 	if (needargs) {
 	    const char *s2 = s;
-	    while (   *s2 == '\r' || SPACE_OR_TAB(*s2) || *s2 == '\f'
-                   || *s2 == '\v')
+	    while (isSPACE(*s2) && *s2 != '\n')
 		s2++;
 	    if (*s2 == '{') {
 		PL_expect = XTERMBLOCK;
