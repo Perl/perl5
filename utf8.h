@@ -830,7 +830,7 @@ fit in an IV on the current machine.
                   ((    LIKELY((e) > (s) + 4)                               \
                     &&      NATIVE_UTF8_TO_I8(*(s)) >= 0xF9                 \
                     && (    NATIVE_UTF8_TO_I8(*(s)) >  0xF9                 \
-                        || (NATIVE_UTF8_TO_I8(*(s) + 1) >= 0xA2))           \
+                        || (NATIVE_UTF8_TO_I8(*((s) + 1)) >= 0xA2))         \
                     &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                   \
                     ? _is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0)
 #else
