@@ -436,6 +436,7 @@ static PERLIO_FUNCS_DECL(PerlIO_scalar) = {
     PerlIOScalar_get_ptr,
     PerlIOScalar_get_cnt,
     PerlIOScalar_set_ptrcnt,
+    PerlIOBuf_readdelim,
 };
 
 
