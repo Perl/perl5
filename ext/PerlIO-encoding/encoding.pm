@@ -13,8 +13,11 @@ $DEBUG and warn __PACKAGE__, " called by ", join(", ", caller), "\n";
 require XSLoader;
 XSLoader::load();
 
-our $fallback =
+sub DEFAULT_FALLBACK {
     Encode::PERLQQ()|Encode::WARN_ON_ERR()|Encode::STOP_AT_PARTIAL();
+}
+
+our $fallback = DEFAULT_FALLBACK;
 
 1;
 __END__

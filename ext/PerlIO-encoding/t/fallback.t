@@ -16,7 +16,7 @@ BEGIN {
     import Encode qw(:fallback_all);
 }
 
-use Test::More tests => 10;
+use Test::More tests => 17;
 
 # $PerlIO::encoding = 0; # WARN_ON_ERR|PERLQQ;
 
@@ -77,6 +77,42 @@ close($fh);
     close($fh);
 
     like($message, qr/does not map to Unicode/o, "FB_WARN message");
+}
+
+{
+    # Make sure partials are handled correctly when reading, particularly at eof
+    #
+    # Use a moderately large file to ensure the first read doesn't hit eof,
+    # so we see both partials on buffering boundaries and at eof
+    #
+    # "\x{1e19}" encodes to 3 octets, so assuming some power-of-two buffer size
+    # we should get partials across buffering boundaries
+    my $data = "\x{1e19}" x 1_000_000;
+    utf8::encode($data);
+    substr($data, -1) = ""; # make the last character a partial
+    ok(open($fh, ">:raw", $file), "create test file as raw");
+    ok((print $fh $data), "write pre-encoded data (with partial)");
+    ok(close($fh), "closed successfully");
+    for my $test ([ Encode::PERLQQ, "PERLQQ" ], [ Encode::HTMLCREF, "HTMLCREF" ]) {
+        my ($fb, $fbname) = @$test;
+        local $PerlIO::encoding::fallback = $fb;
+        my $expected = Encode::decode("UTF-8", $data, $fb);
+        ok(open($fh, "<:encoding(UTF-8)", $file), "open file with fallback $fbname");
+        # avoid reading the whole file at once to ensure we get both non-eof and
+        # eof decodes
+        my $indata = "";
+        my $buf;
+        while (read($fh, $buf, 2048)) {
+            $indata .= $buf;
+        }
+        close $fh;
+        if (length $indata > 999_980 && length $expected > 999_980) {
+            # make mismatch reporting a little easier
+            substr($indata, 0, 999_980) = "";
+            substr($expected, 0, 999_980) = "";
+        }
+        is($indata, $expected, "check data matches between Encode::decode and :encoding for fb $fbname");
+    }
 }
 
 END {

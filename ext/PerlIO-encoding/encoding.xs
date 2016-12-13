@@ -4,7 +4,8 @@
 #include "XSUB.h"
 #define U8 U8
 
-#define OUR_DEFAULT_FB	"Encode::PERLQQ"
+#define OUR_DEFAULT_FB	"PerlIO::encoding::DEFAULT_FALLBACK"
+#define STOP_AT_PARTIAL_FB "Encode::STOP_AT_PARTIAL"
 
 #if defined(USE_PERLIO)
 
@@ -37,12 +38,17 @@
 
 #include "perliol.h"
 
+static IV default_fallback;
+static IV stop_at_partial;
+
 typedef struct {
     PerlIOBuf base;		/* PerlIOBuf stuff */
     SV *bufsv;			/* buffer seen by layers above */
     SV *dataSV;			/* data we have read from layer below */
     SV *enc;			/* the encoding object */
+    /* we need to turn STOP_AT_PARTIAL off at eof to read any partial character at eof */
     SV *chk;                    /* CHECK in Encode methods */
+    SV *chk_eof;                /* CHECK in Encode methods at eof */
     int flags;			/* Flags currently just needs lines */
     int inEncodeCall;		/* trap recursive encode calls */
 } PerlIOEncode;
@@ -94,6 +100,8 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg, PerlIO_funcs *
     dSP;
     IV  code = PerlIOBuf_pushed(aTHX_ f, mode, Nullsv,tab);
     SV *result = Nullsv;
+    IV chk_iv;
+    SV *chk;
 
     if (SvTYPE(arg) >= SVt_PVMG
 		&& mg_findext(arg, PERL_MAGIC_ext, &PerlIOEncode_tag)) {
@@ -163,7 +171,17 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg, PerlIO_funcs *
 	PerlIOBase(f)->flags |= PERLIO_F_UTF8;
     }
 
-    e->chk = newSVsv(get_sv("PerlIO::encoding::fallback", 0));
+    chk = get_sv("PerlIO::encoding::fallback", 0);
+    SvGETMAGIC(chk);
+    if (SvROK(chk)) {
+        Perl_warner(aTHX_ packWARN(WARN_IO), ":encoding fallback must be an integer");
+        chk_iv = default_fallback;
+    }
+    else {
+        chk_iv = SvIV(chk);
+    }
+    e->chk = newSViv(chk_iv | stop_at_partial);
+    e->chk_eof = newSViv(chk_iv & ~stop_at_partial);
     e->inEncodeCall = 0;
 
     FREETMPS;
@@ -190,6 +208,10 @@ PerlIOEncode_popped(pTHX_ PerlIO * f)
     }
     if (e->chk) {
 	SvREFCNT_dec(e->chk);
+	e->chk = Nullsv;
+    }
+    if (e->chk_eof) {
+	SvREFCNT_dec(e->chk_eof);
 	e->chk = Nullsv;
     }
     return 0;
@@ -268,7 +290,8 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 		avail = 0;
 	}
     }
-    if (avail > 0 || (e->flags & NEEDS_LINES)) {
+    if (avail > 0 || (e->flags & NEEDS_LINES)
+        || avail == 0 && e->dataSV && SvCUR(e->dataSV)) {
 	STDCHAR *ptr = PerlIO_get_ptr(n);
 	SSize_t use  = (avail >= 0) ? avail : 0;
 	SV *uni;
@@ -318,8 +341,8 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 		    PerlIOEncode_get_base(aTHX_ f);
 		}
 		else {
-	       use = e->base.bufsiz - SvCUR(e->dataSV);
-	    }
+                    use = e->base.bufsiz - SvCUR(e->dataSV);
+                }
 	    }
 	    sv_catpvn(e->dataSV,(char*)ptr,use);
 	}
@@ -335,8 +358,8 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 		    PerlIOEncode_get_base(aTHX_ f);
 		}
 		else {
-	       use = e->base.bufsiz;
-	    }
+                    use = e->base.bufsiz;
+                }
 	    }
 	    SvPV_set(e->dataSV, (char *) ptr);
 	    SvLEN_set(e->dataSV, 0);  /* Hands off sv.c - it isn't yours */
@@ -347,7 +370,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	PUSHMARK(sp);
 	XPUSHs(e->enc);
 	XPUSHs(e->dataSV);
-	XPUSHs(e->chk);
+	XPUSHs(PerlIO_eof(n) ? e->chk_eof : e->chk);
 	PUTBACK;
 	if (call_method("decode", G_SCALAR) != 1) {
 	    Perl_die(aTHX_ "panic: decode did not return a value");
@@ -587,6 +610,9 @@ PerlIOEncode_dup(pTHX_ PerlIO * f, PerlIO * o,
 	if (oe->chk) {
 	    fe->chk = PerlIO_sv_dup(aTHX_ oe->chk, params);
 	}
+	if (oe->chk_eof) {
+	    fe->chk_eof = PerlIO_sv_dup(aTHX_ oe->chk_eof, params);
+	}
     }
     return f;
 }
@@ -662,6 +688,7 @@ PROTOTYPES: ENABLE
 BOOT:
 {
     SV *chk = get_sv("PerlIO::encoding::fallback", GV_ADD|GV_ADDMULTI);
+    SV *def_sv;
     /*
      * we now "use Encode ()" here instead of
      * PerlIO/encoding.pm.  This avoids SEGV when ":encoding()"
@@ -684,7 +711,19 @@ BOOT:
 	    Perl_die(aTHX_ "%s did not return a value",OUR_DEFAULT_FB);
     }
     SPAGAIN;
-    sv_setsv(chk, POPs);
+    def_sv = POPs;
+    default_fallback = SvIV(def_sv);
+
+    PUSHMARK(sp);
+    PUTBACK;
+    if (call_pv(STOP_AT_PARTIAL_FB, G_SCALAR) != 1) {
+        /* should never happen */
+        Perl_die(aTHX_ "%s did not return a value",STOP_AT_PARTIAL_FB);
+    }
+    SPAGAIN;
+    def_sv = POPs;
+    stop_at_partial = SvIV(def_sv);
+
     PUTBACK;
 #ifdef PERLIO_LAYERS
     PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_encode));
