@@ -10047,7 +10047,7 @@ Perl__load_PL_utf8_foldclosures (pTHX)
         U8 dummy[UTF8_MAXBYTES_CASE+1];
 
         /* This string is just a short named one above \xff */
-        to_utf8_fold((U8*) HYPHEN_UTF8, dummy, NULL);
+        toFOLD_utf8((U8*) HYPHEN_UTF8, dummy, NULL);
         assert(PL_utf8_tofold); /* Verify that worked */
     }
     PL_utf8_foldclosures = _swash_inversion_hash(PL_utf8_tofold);
@@ -10198,7 +10198,7 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
                 }
                 else {
                     STRLEN len;
-                    to_utf8_fold(s, d, &len);
+                    toFOLD_utf8(s, d, &len);
                     d += len;
                     s += UTF8SKIP(s);
                 }
