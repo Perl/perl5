@@ -342,9 +342,9 @@ deprecation warning since Perl v5.18.  They now die.
 =item *
 
 Calling the functions C<utf8n_to_uvchr> and its derivatives, while
-passing a string length of 0, and specifying that this is allowed is now
-asserted against in DEBUGGING builds.  If you have nothing to decode,
-you shouldn't call the decode function.
+passing a string length of 0 is now asserted against in DEBUGGING
+builds, and otherwise returns the Unicode REPLACEMENT CHARACTER.   If
+you have nothing to decode, you shouldn't call the decode function.
 
 =back
 

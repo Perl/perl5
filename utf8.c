@@ -875,10 +875,9 @@ is, when there is a shorter sequence that can express the same code point;
 overlong sequences are expressly forbidden in the UTF-8 standard due to
 potential security issues).  Another malformation example is the first byte of
 a character not being a legal first byte.  See F<utf8.h> for the list of such
-flags.  For allowed 0 length strings, this function returns 0; for allowed
-overlong sequences, the computed code point is returned; for all other allowed
-malformations, the Unicode REPLACEMENT CHARACTER is returned, as these have no
-determinable reasonable value.
+flags.  For allowed overlong sequences, the computed code point is returned;
+for all other allowed malformations, the Unicode REPLACEMENT CHARACTER is
+returned.
 
 The C<UTF8_CHECK_ONLY> flag overrides the behavior when a non-allowed (by other
 flags) malformation is found.  If this flag is set, the routine assumes that
@@ -1123,8 +1122,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
     if (UNLIKELY(curlen == 0)) {
         possible_problems |= UTF8_GOT_EMPTY;
         curlen = 0;
-        uv = 0; /* XXX It could be argued that this should be
-                   UNICODE_REPLACEMENT? */
+        uv = UNICODE_REPLACEMENT;
 	goto ready_to_handle_errors;
     }
 

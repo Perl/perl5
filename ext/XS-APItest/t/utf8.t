@@ -1202,7 +1202,7 @@ my @malformations = (
 
 # Now considered a program bug, and asserted against
     #[ "zero length string malformation", "", 0,
-    #    $UTF8_ALLOW_EMPTY, $UTF8_GOT_EMPTY, 0, 0, 0,
+    #    $UTF8_ALLOW_EMPTY, $UTF8_GOT_EMPTY, $REPLACEMENT, 0, 0,
     #    qr/empty string/
     #],
     [ "orphan continuation byte malformation", I8_to_native("${I8c}a"), 2,
