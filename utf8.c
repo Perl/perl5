@@ -937,7 +937,7 @@ to a C<U32> variable, which this function sets to indicate any errors found.
 Upon return, if C<*errors> is 0, there were no errors found.  Otherwise,
 C<*errors> is the bit-wise C<OR> of the bits described in the list below.  Some
 of these bits will be set if a malformation is found, even if the input
-C<flags> parameter indicates that the given malformation is allowed; the
+C<flags> parameter indicates that the given malformation is allowed; those
 exceptions are noted:
 
 =over 4
