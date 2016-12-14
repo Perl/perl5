@@ -1888,20 +1888,16 @@ S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
 static I32
 S_sv_ncmp(pTHX_ SV *const a, SV *const b)
 {
-    const NV nv1 = SvNSIV(a);
-    const NV nv2 = SvNSIV(b);
+    I32 cmp = do_ncmp(a, b);
 
     PERL_ARGS_ASSERT_SV_NCMP;
 
-#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
-    if (Perl_isnan(nv1) || Perl_isnan(nv2)) {
-#else
-    if (nv1 != nv1 || nv2 != nv2) {
-#endif
+    if (cmp == 2) {
 	if (ckWARN(WARN_UNINITIALIZED)) report_uninit(NULL);
 	return 0;
     }
-    return nv1 < nv2 ? -1 : nv1 > nv2 ? 1 : 0;
+
+    return cmp;
 }
 
 static I32

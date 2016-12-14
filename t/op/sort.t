@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 use warnings;
-plan(tests => 196);
+plan(tests => 197);
 
 # these shouldn't hang
 {
@@ -1146,4 +1146,17 @@ pass "no crash when sort block deletes *a and *b";
     sub a { 0 };
     @a = sort { *a = sub { 1 }; $a <=> $b } 0 .. 1;
     ok(a(), "*a wasn't localized inadvertantly");
+}
+
+SKIP:
+{
+    eval { require Config; 1 }
+      or skip "Cannot load Config", 1;
+    $Config::Config{ivsize} == 8
+      or skip "this test can only fail with 64-bit integers", 1;
+    # sort's built-in numeric comparison wasn't careful enough in a world
+    # of integers with more significant digits than NVs
+    my @in = ( "0", "20000000000000001", "20000000000000000" );
+    my @out = sort { $a <=> $b } @in;
+    is($out[1], "20000000000000000", "check sort order");
 }

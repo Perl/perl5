@@ -651,8 +651,8 @@ Use of uninitialized value $m1 in sort at - line 6.
 Use of uninitialized value $g1 in sort at - line 6.
 Use of uninitialized value $m1 in sort at - line 7.
 Use of uninitialized value $g1 in sort at - line 7.
-Use of uninitialized value $m1 in sort at - line 7.
 Use of uninitialized value $g1 in sort at - line 7.
+Use of uninitialized value $m1 in sort at - line 7.
 Use of uninitialized value $a in subtraction (-) at - line 8.
 Use of uninitialized value $b in subtraction (-) at - line 8.
 Use of uninitialized value $m1 in sort at - line 9.
