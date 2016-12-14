@@ -1880,6 +1880,12 @@ _generic_utf8_safe(classnum, p, e, _is_utf8_FOO_with_len(classnum, p, e))
 #define toTITLE_utf8(p,s,l)	to_utf8_title(p,s,l)
 #define toUPPER_utf8(p,s,l)	to_utf8_upper(p,s,l)
 
+/* For internal core use only, subject to change */
+#define _toFOLD_utf8_flags(p,s,l,f)  _to_utf8_fold_flags (p,s,l,f)
+#define _toLOWER_utf8_flags(p,s,l,f) _to_utf8_lower_flags(p,s,l,f)
+#define _toTITLE_utf8_flags(p,s,l,f) _to_utf8_title_flags(p,s,l,f)
+#define _toUPPER_utf8_flags(p,s,l,f) _to_utf8_upper_flags(p,s,l,f)
+
 /* For internal core Perl use only: the base macros for defining macros like
  * isALPHA_LC_utf8.  These are like _generic_utf8, but if the first code point
  * in 'p' is within the 0-255 range, it uses locale rules from the passed-in

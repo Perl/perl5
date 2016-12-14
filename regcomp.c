@@ -3911,7 +3911,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                     }
                     else {
                         STRLEN len;
-                        _to_utf8_fold_flags(s, d, &len, FOLD_FLAGS_FULL);
+                        _toFOLD_utf8_flags(s, d, &len, FOLD_FLAGS_FULL);
                         d += len;
                     }
                     s += s_len;

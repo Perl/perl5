@@ -2428,13 +2428,13 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
 	uvchr_to_utf8(p, c);
 	return CALL_FOLD_CASE(c, p, p, lenp, flags & FOLD_FLAGS_FULL);
     }
-    else {  /* Otherwise, _to_utf8_fold_flags has the intelligence to deal with
+    else {  /* Otherwise, _toFOLD_utf8_flags has the intelligence to deal with
 	       the special flags. */
 	U8 utf8_c[UTF8_MAXBYTES + 1];
 
       needs_full_generality:
 	uvchr_to_utf8(utf8_c, c);
-	return _to_utf8_fold_flags(utf8_c, p, lenp, flags);
+	return _toFOLD_utf8_flags(utf8_c, p, lenp, flags);
     }
 }
 
@@ -5151,7 +5151,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
                     *foldbuf1 = toFOLD(*p1);
                 }
                 else if (u1) {
-                    _to_utf8_fold_flags(p1, foldbuf1, &n1, flags_for_folder);
+                    _toFOLD_utf8_flags(p1, foldbuf1, &n1, flags_for_folder);
                 }
                 else {  /* Not UTF-8, get UTF-8 fold */
                     _to_uni_fold_flags(*p1, foldbuf1, &n1, flags_for_folder);
@@ -5175,7 +5175,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
                     *foldbuf2 = toFOLD(*p2);
                 }
                 else if (u2) {
-                    _to_utf8_fold_flags(p2, foldbuf2, &n2, flags_for_folder);
+                    _toFOLD_utf8_flags(p2, foldbuf2, &n2, flags_for_folder);
                 }
                 else {
                     _to_uni_fold_flags(*p2, foldbuf2, &n2, flags_for_folder);

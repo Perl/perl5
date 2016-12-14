@@ -1500,7 +1500,7 @@ STMT_START {                                                                    
             uscan += len;                                                           \
             len=0;                                                                  \
         } else {                                                                    \
-            uvc = _to_utf8_fold_flags( (const U8*) uc, foldbuf, &foldlen, flags);   \
+            uvc = _toFOLD_utf8_flags( (const U8*) uc, foldbuf, &foldlen, flags);    \
             len = UTF8SKIP(uc);                                                     \
             skiplen = UVCHR_SKIP( uvc );                                            \
             foldlen -= skiplen;                                                     \
@@ -4133,10 +4133,10 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                     }
                     else {
                         STRLEN len;
-                        _to_utf8_fold_flags(s,
-                                            d,
-                                            &len,
-                                            FOLD_FLAGS_FULL | FOLD_FLAGS_LOCALE);
+                        _toFOLD_utf8_flags(s,
+                                           d,
+                                           &len,
+                                           FOLD_FLAGS_FULL | FOLD_FLAGS_LOCALE);
                         d += len;
                         s += UTF8SKIP(s);
                     }

@@ -3790,16 +3790,16 @@ PP(pp_ucfirst)
         ulen = UTF8SKIP(s);
         if (op_type == OP_UCFIRST) {
 #ifdef USE_LOCALE_CTYPE
-	    _to_utf8_title_flags(s, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
+	    _toTITLE_utf8_flags(s, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
 #else
-	    _to_utf8_title_flags(s, tmpbuf, &tculen, 0);
+	    _toTITLE_utf8_flags(s, tmpbuf, &tculen, 0);
 #endif
 	}
         else {
 #ifdef USE_LOCALE_CTYPE
-	    _to_utf8_lower_flags(s, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
+	    _toLOWER_utf8_flags(s, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
 #else
-	    _to_utf8_lower_flags(s, tmpbuf, &tculen, 0);
+	    _toLOWER_utf8_flags(s, tmpbuf, &tculen, 0);
 #endif
 	}
 
@@ -4090,9 +4090,9 @@ PP(pp_uc)
 
             u = UTF8SKIP(s);
 #ifdef USE_LOCALE_CTYPE
-            uv = _to_utf8_upper_flags(s, tmpbuf, &ulen, IN_LC_RUNTIME(LC_CTYPE));
+            uv = _toUPPER_utf8_flags(s, tmpbuf, &ulen, IN_LC_RUNTIME(LC_CTYPE));
 #else
-            uv = _to_utf8_upper_flags(s, tmpbuf, &ulen, 0);
+            uv = _toUPPER_utf8_flags(s, tmpbuf, &ulen, 0);
 #endif
 #define GREEK_CAPITAL_LETTER_IOTA 0x0399
 #define COMBINING_GREEK_YPOGEGRAMMENI 0x0345
@@ -4306,9 +4306,9 @@ PP(pp_lc)
 	    STRLEN ulen;
 
 #ifdef USE_LOCALE_CTYPE
-	    _to_utf8_lower_flags(s, tmpbuf, &ulen, IN_LC_RUNTIME(LC_CTYPE));
+	    _toLOWER_utf8_flags(s, tmpbuf, &ulen, IN_LC_RUNTIME(LC_CTYPE));
 #else
-	    _to_utf8_lower_flags(s, tmpbuf, &ulen, 0);
+	    _toLOWER_utf8_flags(s, tmpbuf, &ulen, 0);
 #endif
 
 	    /* Here is where we would do context-sensitive actions.  See the
@@ -4516,7 +4516,7 @@ PP(pp_fc)
             const STRLEN u = UTF8SKIP(s);
             STRLEN ulen;
 
-            _to_utf8_fold_flags(s, tmpbuf, &ulen, flags);
+            _toFOLD_utf8_flags(s, tmpbuf, &ulen, flags);
 
             if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
                 const UV o = d - (U8*)SvPVX_const(dest);
