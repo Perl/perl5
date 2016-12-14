@@ -2540,9 +2540,9 @@ Perl_my_strerror(pTHX_ const int errnum)
     dVAR;
 
 #  ifdef USE_THREAD_SAFE_LOCALE
-    locale_t save_locale;
+    locale_t save_locale = NULL;
 #  else
-    char * save_locale;
+    char * save_locale = NULL;
     bool locale_is_C = FALSE;
 
     /* We have a critical section to prevent another thread from changing the
