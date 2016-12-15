@@ -56,30 +56,27 @@ my $is_thread = $Config{use5005threads} && $Config{use5005threads} eq 'define';
 if ($is_thread) {
     $b=<<EOF;
 leave enter nextstate label leaveloop enterloop null and defined null
-threadsv readline gv lineseq nextstate aassign null pushmark split
+threadsv readline gv lineseq nextstate aassign null pushmark split pushre
 threadsv const null pushmark rvav gv nextstate subst const unstack
 EOF
 } elsif ($] >= 5.021005) {
   $b=<<EOF;
 leave enter nextstate label leaveloop enterloop null and defined null null
-gvsv readline gv lineseq nextstate split null
+gvsv readline gv lineseq nextstate split pushre null
 gvsv const nextstate subst const unstack
 EOF
 } else {
   $b=<<EOF;
 leave enter nextstate label leaveloop enterloop null and defined null null
-gvsv readline gv lineseq nextstate aassign null pushmark split null
+gvsv readline gv lineseq nextstate aassign null pushmark split pushre null
 gvsv const null pushmark rvav gv nextstate subst const unstack
 EOF
 }
-#$b .= " nextstate" if $] < 5.008001; # ??
 $b=~s/\n/ /g; $b=~s/\s+/ /g;
 $b =~ s/\s+$//;
+$b =~ s/split pushre/split/ if $] >= 5.025006;
 
-TODO: {
-  local $TODO = '5.21.5 split optimization' if $] == 5.021005;
-  is($a, $b);
-}
+is($a, $b);
 
 like(B::Debug::_printop(B::main_root),  qr/LISTOP\s+\[OP_LEAVE\]/);
 like(B::Debug::_printop(B::main_start), qr/OP\s+\[OP_ENTER\]/);

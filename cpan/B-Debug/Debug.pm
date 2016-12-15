@@ -1,6 +1,6 @@
 package B::Debug;
 
-our $VERSION = '1.23';
+our $VERSION = '1.24';
 
 use strict;
 require 5.006;
