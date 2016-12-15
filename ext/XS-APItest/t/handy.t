@@ -13,29 +13,73 @@ use XS::APItest;
 
 use Unicode::UCD qw(prop_invlist prop_invmap);
 
+my $tab = " " x 4;  # Indent subsidiary tests this much
+
 sub truth($) {  # Converts values so is() works
     return (shift) ? 1 : 0;
 }
 
-my $locale;
+my $base_locale;
 my $utf8_locale;
 if(locales_enabled('LC_ALL')) {
     require POSIX;
-    $locale = POSIX::setlocale( &POSIX::LC_ALL, "C");
-    if (defined $locale && $locale eq 'C') {
+    $base_locale = POSIX::setlocale( &POSIX::LC_ALL, "C");
+    if (defined $base_locale && $base_locale eq 'C') {
         use locale; # make \w work right in non-ASCII lands
 
         # Some locale implementations don't have the 128-255 characters all
         # mean nothing.  Skip the locale tests in that situation
         for my $i (128 .. 255) {
             if (chr(utf8::unicode_to_native($i)) =~ /[[:print:]]/) {
-                undef $locale;
+                undef $base_locale;
                 last;
             }
         }
 
-        $utf8_locale = find_utf8_ctype_locale();
+        $utf8_locale = find_utf8_ctype_locale() if $base_locale;
     }
+}
+
+sub get_display_locale_or_skip($$) {
+
+    # Helper function intimately tied to its callers.  It knows the loop
+    # iterates with a locale of "", meaning don't use locale; $base_locale
+    # meaning to use a non-UTF-8 locale; and $utf8_locale.
+    #
+    # It checks to see if the current test should be skipped or executed,
+    # returning an empty list for the former, and for the latter:
+    #   ( 'locale display name',
+    #     bool of is this a UTF-8 locale )
+    #
+    # The display name is the empty string if not using locale.  Functions
+    # with _LC in their name are skipped unless in locale, and functions
+    # without _LC are executed only outside locale.  However, if no locales at
+    # all are on the system, the _LC functions are executed outside locale.
+
+    my ($locale, $suffix) = @_;
+
+    # The test should be skipped if the input is for a non-existent locale
+    return unless defined $locale;
+
+    # Here the input is defined, either a locale name or "".  If the test is
+    # for not using locales, we want to do the test for non-LC functions,
+    # and skip it for LC ones (except if there are no locales on the system,
+    # we do it for LC ones as if they weren't LC).
+    if ($locale eq "") {
+        return ("", 0) if $suffix !~ /LC/ || ! defined $base_locale;
+        return;
+    }
+
+    # Here the input is for a real locale.  We don't test the non-LC functions
+    # for locales.
+    return if $suffix !~ /LC/;
+
+    # Here is for a LC function and a real locale.  The base locale is not
+    # UTF-8.
+    return (" ($locale locale)", 0) if $locale eq $base_locale;
+
+    # The only other possibility is that we have a UTF-8 locale
+    return (" ($locale)", 1);
 }
 
 my %properties = (
@@ -107,6 +151,10 @@ foreach my $name (sort keys %properties) {
         my $i = utf8::native_to_unicode($j);
         my $function = uc($name);
 
+        is (@warnings, 0, "Got no unexpected warnings in previous iteration")
+           or diag("@warnings");
+        undef @warnings;
+
         my $matches = Unicode::UCD::search_invlist(\@invlist, $i);
         if (! defined $matches) {
             $matches = 0;
@@ -118,143 +166,95 @@ foreach my $name (sort keys %properties) {
         my $ret;
         my $char_name = charnames::viacode($i) // "No name";
         my $display_name = sprintf "\\x{%02X, %s}", $i, $char_name;
+        my $display_call = "is${function}( $display_name )";
 
         if ($name eq 'quotemeta') { # There is only one macro for this, and is
                                     # defined only for Latin1 range
             $ret = truth eval "test_is${function}($i)";
-            if ($@) {
-                fail $@;
-            }
-            else {
+            if (is ($@, "", "$display_call didn't give error")) {
                 my $truth = truth($matches && $i < 256);
-                is ($ret, $truth, "is${function}( $display_name ) == $truth");
+                is ($ret, $truth, "${tab}And returns $truth");
             }
             next;
         }
 
-        # vertws is always all of Unicode; ALNUM_A and ALNUM_L1 are not
-        # defined as they were added later, after WORDCHAR was created to be a
-        # clearer synonym for ALNUM
-        if ($name ne 'vertws') {
-            if ($name ne 'alnum') {
-                $ret = truth eval "test_is${function}_A($i)";
-                if ($@) {
-                    fail($@);
+        foreach my $suffix (qw(_A _L1 _LC  _uni _LC_uvchr _utf8 _LC_utf8)) {
+
+            # Not all possible macros have been defined
+            if ($name eq 'vertws') {
+
+                # vertws is always all of Unicode
+                next if $suffix ne "_uni" && $suffix ne "_utf8";
+            }
+            elsif ($name eq 'alnum') {
+
+                # ALNUM_A and ALNUM_L1 are not defined as they were added
+                # later, after WORDCHAR was created to be a clearer synonym
+                # for ALNUM
+                next if $suffix eq '_A' || $suffix eq '_L1';
+            }
+
+            foreach my $locale ("", $base_locale, $utf8_locale) {
+
+                my ($display_locale, $locale_is_utf8)
+                                = get_display_locale_or_skip($locale, $suffix);
+                next unless defined $display_locale;
+
+                use if $locale, "locale";
+                POSIX::setlocale( &POSIX::LC_ALL, $locale) if $locale;
+
+                if ($suffix !~ /utf8/) {    # _utf8 has to handled specially
+                    my $display_call
+                       = "is${function}$suffix( $display_name )$display_locale";
+                    $ret = truth eval "test_is${function}$suffix($i)";
+                    if (is ($@, "", "$display_call didn't give error")) {
+                        my $truth = $matches;
+                        if ($truth) {
+
+                            # The single byte functions are false for
+                            # above-Latin1
+                            if ($i >= 256) {
+                                $truth = 0 if $suffix =~ / ^ _A | _L [1C] $ /x;
+                            }
+                            elsif (utf8::native_to_unicode($i) >= 128) {
+
+                                # The _A functions are false
+                                # for non-ASCII.  So are  _LC  functions on a
+                                # non-UTF-8 locale
+                                $truth = 0 if    $suffix eq "_A"
+                                              || (     $suffix =~ /LC/
+                                                  && ! $locale_is_utf8);
+                            }
+                        }
+
+                        is ($ret, $truth, "${tab}And correctly returns $truth");
+                    }
                 }
-                else {
-                    my $truth = truth($matches && utf8::native_to_unicode($i) < 128);
-                    is ($ret, $truth, "is${function}_A( $display_name ) == $truth");
+                else {  # _utf8 suffix
+                    my $char = chr($i);
+                    utf8::upgrade($char);
+                    $char = quotemeta $char if $char eq '\\' || $char eq "'";
+                    my $truth;
+                    if (   $suffix =~ /LC/
+                        && ! $locale_is_utf8
+                        && $i < 256
+                        && utf8::native_to_unicode($i) >= 128)
+                    {   # The C-locale _LC function returns FALSE for Latin1
+                        # above ASCII
+                        $truth = 0;
+                    }
+                    else {
+                        $truth = $matches;
+                    }
+
+                        my $display_call = "is${function}$suffix("
+                                         . " $display_name )$display_locale";
+                        $ret = truth eval "test_is${function}$suffix('$char')";
+                        if (is ($@, "", "$display_call didn't give error")) {
+                            is ($ret, $truth,
+                                "${tab}And correctly returned $truth");
+                        }
                 }
-                $ret = truth eval "test_is${function}_L1($i)";
-                if ($@) {
-                    fail($@);
-                }
-                else {
-                    my $truth = truth($matches && $i < 256);
-                    is ($ret, $truth, "is${function}_L1( $display_name ) == $truth");
-                }
-            }
-
-            if (defined $locale) {
-                use locale;
-                POSIX::setlocale( &POSIX::LC_ALL, "C");
-                $ret = truth eval "test_is${function}_LC($i)";
-                if ($@) {
-                    fail($@);
-                }
-                else {
-                    my $truth = truth($matches && utf8::native_to_unicode($i) < 128);
-                    is ($ret, $truth, "is${function}_LC( $display_name ) == $truth (C locale)");
-                }
-            }
-
-            if (defined $utf8_locale) {
-                use locale;
-
-                POSIX::setlocale( &POSIX::LC_ALL, $utf8_locale);
-                $ret = truth eval "test_is${function}_LC($i)";
-                if ($@) {
-                    fail($@);
-                }
-                else {
-
-                    # UTF-8 locale works on full range 0-255
-                    my $truth = truth($matches && $i < 256);
-                    is ($ret, $truth, "is${function}_LC( $display_name ) == $truth ($utf8_locale)");
-                }
-            }
-        }
-
-        $ret = truth eval "test_is${function}_uni($i)";
-        if ($@) {
-            fail($@);
-        }
-        else {
-            is ($ret, $matches, "is${function}_uni( $display_name ) == $matches");
-        }
-
-        if (defined $locale && $name ne 'vertws') {
-            use locale;
-            POSIX::setlocale( &POSIX::LC_ALL, "C");
-            $ret = truth eval "test_is${function}_LC_uvchr('$i')";
-            if ($@) {
-                fail($@);
-            }
-            else {
-                my $truth = truth($matches && (utf8::native_to_unicode($i) < 128 || $i > 255));
-                is ($ret, $truth, "is${function}_LC_uvchr( $display_name ) == $truth (C locale)");
-            }
-        }
-
-        if (defined $utf8_locale && $name ne 'vertws') {
-            use locale;
-
-            POSIX::setlocale( &POSIX::LC_ALL, $utf8_locale);
-            $ret = truth eval "test_is${function}_LC_uvchr('$i')";
-            if ($@) {
-                fail($@);
-            }
-            else {
-                my $truth = truth($matches);
-                is ($ret, $truth, "is${function}_LC_uvchr( $display_name ) == $truth ($utf8_locale)");
-            }
-        }
-
-        my $char = chr($i);
-        utf8::upgrade($char);
-        $char = quotemeta $char if $char eq '\\' || $char eq "'";
-        $ret = truth eval "test_is${function}_utf8('$char')";
-        if ($@) {
-            fail($@);
-        }
-        else {
-            is ($ret, $matches, "is${function}_utf8( $display_name ) == $matches");
-        }
-
-        if ($name ne 'vertws' && defined $locale) {
-            use locale;
-            POSIX::setlocale( &POSIX::LC_ALL, "C");
-            $ret = truth eval "test_is${function}_LC_utf8('$char')";
-            if ($@) {
-                fail($@);
-            }
-            else {
-                my $truth = truth($matches && (utf8::native_to_unicode($i) < 128 || $i > 255));
-                is ($ret, $truth, "is${function}_LC_utf8( $display_name ) == $truth (C locale)");
-            }
-        }
-
-        if ($name ne 'vertws' && defined $utf8_locale) {
-            use locale;
-
-            POSIX::setlocale( &POSIX::LC_ALL, $utf8_locale);
-            $ret = truth eval "test_is${function}_LC_utf8('$char')";
-            if ($@) {
-                fail($@);
-            }
-            else {
-                my $truth = truth($matches);
-                is ($ret, $truth, "is${function}_LC_utf8( $display_name ) == $truth ($utf8_locale)");
             }
         }
     }
@@ -274,7 +274,7 @@ for my $i (0 .. 256, 0x110000) {
 }
 
 my %to_properties = (
-                FOLD => 'Case_Folding',
+                FOLD  => 'Case_Folding',
                 LOWER => 'Lowercase_Mapping',
                 TITLE => 'Titlecase_Mapping',
                 UPPER => 'Uppercase_Mapping',
@@ -305,12 +305,14 @@ foreach my $name (sort keys %to_properties) {
         my $range_start = $list_ref->[$i];
         next if $range_start < 257;
         if (ref $map_ref->[$i] && $multi_char < 5)  {
-            push @code_points, $range_start - 1 if $code_points[-1] != $range_start - 1;
+            push @code_points, $range_start - 1
+                                        if $code_points[-1] != $range_start - 1;
             push @code_points, $range_start;
             $multi_char++;
         }
         elsif ($above_latins < 5) {
-            push @code_points, $range_start - 1 if $code_points[-1] != $range_start - 1;
+            push @code_points, $range_start - 1
+                                        if $code_points[-1] != $range_start - 1;
             push @code_points, $range_start;
             $above_latins++;
         }
@@ -332,69 +334,53 @@ foreach my $name (sort keys %to_properties) {
         my $char_name = charnames::viacode($j) // "No name";
         my $display_name = sprintf "\\N{U+%02X, %s}", $i, $char_name;
 
-        # Test the base function
-        $ret = eval "test_to${function}($j)";
-        if ($@) {
-            fail($@);
-        }
-        else {
-            my $should_be = ($i < 128 && $map_ref->[$index] != $missing)
-                             ? $map_ref->[$index] + $j - $list_ref->[$index]
-                             : $j;
-            is ($ret, $should_be, sprintf("to${function}( $display_name ) == 0x%02X", $should_be));
-        }
+        foreach my $suffix ("", "_L1", "_LC") {
 
-        # Test _L1
-        if ($name eq 'LOWER') {
-            $ret = eval "test_to${function}_L1($j)";
-            if ($@) {
-                fail($@);
-            }
-            else {
-                my $should_be = ($i < 256 && $map_ref->[$index] != $missing)
-                                ? $map_ref->[$index] + $j - $list_ref->[$index]
-                                : $j;
-                is ($ret, $should_be, sprintf("to${function}_L1( $display_name ) == 0x%02X", $should_be));
-            }
-        }
+            # This is the only macro defined for L1
+            next if $suffix eq "_L1" && $function ne "LOWER";
 
-        if ($name ne 'TITLE') { # Test _LC;  titlecase is not defined in locales.
-            if (defined $locale) {
-                use locale;
-                POSIX::setlocale( &POSIX::LC_ALL, "C");
-                $ret = eval "test_to${function}_LC($j)";
-                if ($@) {
-                    fail($@);
-                }
-                else {
-                    my $should_be = ($i < 128 && $map_ref->[$index] != $missing)
-                                ? $map_ref->[$index] + $j - $list_ref->[$index]
-                                : $j;
-                    is ($ret, $should_be, sprintf("to${function}_LC( $display_name ) == 0x%02X (C locale)", $should_be));
-                }
-            }
+          SKIP:
+            foreach my $locale ("", $base_locale, $utf8_locale) {
 
-            if (defined $utf8_locale) {
-                use locale;
+                # titlecase is not defined in locales.
+                next if $name eq 'TITLE' && $suffix eq "_LC";
 
-                SKIP: {
-                    skip "to${property}_LC does not work for LATIN SMALL LETTER SHARP S", 1
-                        if $j == 0xDF && ($name eq 'FOLD' || $name eq 'UPPER');
+                my ($display_locale, $locale_is_utf8)
+                                = get_display_locale_or_skip($locale, $suffix);
+                next unless defined $display_locale;
 
-                    POSIX::setlocale( &POSIX::LC_ALL, $utf8_locale);
-                    $ret = eval "test_to${function}_LC($j)";
-                    if ($@) {
-                        fail($@);
+                skip("to${name}_LC does not work for LATIN SMALL LETTER SHARP S"
+                  . "$display_locale", 1)
+                            if  $i == 0xDF && $name =~ / FOLD | UPPER /x
+                             && $suffix eq "_LC" && $locale_is_utf8;
+
+                use if $locale, "locale";
+                POSIX::setlocale( &POSIX::LC_ALL, $locale) if $locale;
+
+                my $display_call = "to${function}$suffix("
+                                 . " $display_name )$display_locale";
+                $ret = eval "test_to${function}$suffix($j)";
+                if (is ($@, "", "$display_call didn't give error")) {
+                    my $should_be;
+                    if ($i > 255) {
+                        $should_be = $j;
+                    }
+                    elsif (    $i > 127
+                            && (   $suffix eq ""
+                                || ($suffix eq "_LC" && ! $locale_is_utf8)))
+                    {
+                        $should_be = $j;
+                    }
+                    elsif ($map_ref->[$index] != $missing) {
+                        $should_be = $map_ref->[$index] + $j - $list_ref->[$index]
                     }
                     else {
-                        my $should_be = ($i < 256
-                                         && ! ref $map_ref->[$index]
-                                         && $map_ref->[$index] != $missing
-                                        )
-                                        ? $map_ref->[$index] + $j - $list_ref->[$index]
-                                        : $j;
-                        is ($ret, $should_be, sprintf("to${function}_LC( $display_name ) == 0x%02X ($utf8_locale)", $should_be));
+                        $should_be = $j;
                     }
+
+                    is ($ret, $should_be,
+                        sprintf("${tab}And correctly returned 0x%02X",
+                                                              $should_be));
                 }
             }
         }
@@ -414,7 +400,8 @@ foreach my $name (sort keys %to_properties) {
         }
         else {  # A single-char result
             $first_ord_should_be = ($map_ref->[$index] != $missing)
-                                    ? $map_ref->[$index] + $j - $list_ref->[$index]
+                                    ? $map_ref->[$index] + $j
+                                                         - $list_ref->[$index]
                                     : $j;
             $utf8_should_be = chr $first_ord_should_be;
         }
@@ -423,38 +410,40 @@ foreach my $name (sort keys %to_properties) {
         # Test _uni
         my $s;
         my $len;
+        my $display_call = "to${function}_uni( $display_name )";
         $ret = eval "test_to${function}_uni($j)";
-        if ($@) {
-            fail($@);
-        }
-        else {
-            is ($ret->[0], $first_ord_should_be, sprintf("to${function}_uni( $display_name ) == 0x%02X", $first_ord_should_be));
-            is ($ret->[1], $utf8_should_be, sprintf("utf8 of to${function}_uni( $display_name )"));
+        if (is ($@, "", "$display_call didn't give error")) {
+            is ($ret->[0], $first_ord_should_be,
+                sprintf("${tab}And correctly returned 0x%02X",
+                                                  $first_ord_should_be));
+            is ($ret->[1], $utf8_should_be, "${tab}Got correct utf8");
             use bytes;
-            is ($ret->[2], length $utf8_should_be, sprintf("number of bytes in utf8 of to${function}_uni( $display_name )"));
+            is ($ret->[2], length $utf8_should_be,
+                "${tab}Got correct number of bytes for utf8 length");
         }
 
         # Test _utf8
         my $char = chr($j);
         utf8::upgrade($char);
         $char = quotemeta $char if $char eq '\\' || $char eq "'";
-        $ret = eval "test_to${function}_utf8('$char')";
-        if ($@) {
-            fail($@);
+        {
+            my $display_call = "to${function}_utf8($display_name )";
+            $ret = eval   "test_to${function}_utf8('$char')";
+            if (is ($@, "", "$display_call didn't give error")) {
+                is ($ret->[0], $first_ord_should_be,
+                    sprintf("${tab}And correctly returned 0x%02X",
+                                                    $first_ord_should_be));
+                is ($ret->[1], $utf8_should_be, "${tab}Got correct utf8");
+                use bytes;
+                is ($ret->[2], length $utf8_should_be,
+                    "${tab}Got correct number of bytes for utf8 length");
+            }
         }
-        else {
-            is ($ret->[0], $first_ord_should_be, sprintf("to${function}_utf8( $display_name ) == 0x%02X", $first_ord_should_be));
-            is ($ret->[1], $utf8_should_be, sprintf("utf8 of to${function}_utf8( $display_name )"));
-            use bytes;
-            is ($ret->[2], length $utf8_should_be, sprintf("number of bytes in utf8 of to${function}_uni( $display_name )"));
-        }
-
     }
 }
 
 # This is primarily to make sure that no non-Unicode warnings get generated
-unless (is(scalar @warnings, 0, "No warnings were generated")) {
-    diag @warnings;
-}
+is(scalar @warnings, 0, "No unexpected warnings were generated in the tests")
+  or diag @warnings;
 
 done_testing;
