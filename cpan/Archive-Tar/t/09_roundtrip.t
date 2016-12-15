@@ -123,11 +123,13 @@ for my $archive_name (@file_only_archives) {
 
 sub can_tar_gzip {
   my ($tar_help) = @_;
+  return 0 unless can_run('gzip');
   $tar_help =~ /-z, --gzip|-z,.+gzip/;
 }
 
 sub can_tar_bzip2 {
   my ($tar_help) = @_;
+  return 0 unless can_run('bzip2');
   $tar_help =~ /-j, --bzip2|-j,+bzip2/;
 }
 

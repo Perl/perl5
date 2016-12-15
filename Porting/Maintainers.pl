@@ -120,7 +120,7 @@ use File::Glob qw(:case);
 %Modules = (
 
     'Archive::Tar' => {
-        'DISTRIBUTION' => 'BINGOS/Archive-Tar-2.18.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Archive-Tar-2.20.tar.gz',
         'FILES'        => q[cpan/Archive-Tar],
         'BUGS'         => 'bug-archive-tar@rt.cpan.org',
         'EXCLUDED'     => [
