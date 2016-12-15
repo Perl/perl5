@@ -13,7 +13,7 @@ our ($accuracy, $precision, $round_mode, $div_scale);
 
 our @ISA = qw(Exporter Math::BigFloat);
 
-our $VERSION = '0.45';
+our $VERSION = '0.47';
 
 use overload;                   # inherit overload from Math::BigFloat
 
