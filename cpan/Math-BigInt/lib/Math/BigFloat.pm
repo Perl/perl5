@@ -19,7 +19,7 @@ use warnings;
 use Carp ();
 use Math::BigInt ();
 
-our $VERSION = '1.999803';
+our $VERSION = '1.999806';
 
 require Exporter;
 our @ISA        = qw/Math::BigInt/;
@@ -517,6 +517,10 @@ sub from_hex {
     my $selfref = ref $self;
     my $class   = $selfref || $self;
 
+    # Don't modify constant (read-only) objects.
+
+    return if $selfref && $self->modify('from_hex');
+
     my $str = shift;
 
     # If called as a class method, initialize a new object.
@@ -602,6 +606,10 @@ sub from_oct {
     my $selfref = ref $self;
     my $class   = $selfref || $self;
 
+    # Don't modify constant (read-only) objects.
+
+    return if $selfref && $self->modify('from_oct');
+
     my $str = shift;
 
     # If called as a class method, initialize a new object.
@@ -683,6 +691,10 @@ sub from_bin {
     my $self    = shift;
     my $selfref = ref $self;
     my $class   = $selfref || $self;
+
+    # Don't modify constant (read-only) objects.
+
+    return if $selfref && $self->modify('from_bin');
 
     my $str = shift;
 

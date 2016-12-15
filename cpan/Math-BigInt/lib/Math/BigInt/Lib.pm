@@ -4,7 +4,7 @@ use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '1.999803';
+our $VERSION = '1.999806';
 
 use Carp;
 
@@ -589,8 +589,8 @@ sub _fac {
 
 sub _log_int {
     # calculate integer log of $x to base $base
-    # calculate integer log of $x to base $base
     # ref to array, ref to array - return ref to array
+
     my ($class, $x, $base) = @_;
 
     # X == 0 => NaN
@@ -981,8 +981,24 @@ sub _as_oct {
     return '0' . $str;          # yes, 0 becomes "00".
 }
 
+sub _as_bytes {
+    # convert a decimal number to a byte string
+    my ($class, $x) = @_;
+    my $str  = '';
+    my $tmp  = $class -> _copy($x);
+    my $base = $class -> _new("256");
+    my $rem;
+    until ($class -> _is_zero($tmp)) {
+        ($tmp, $rem) = $class -> _div($tmp, $base);
+        my $byte = pack 'C', $rem;
+        $str = $byte . $str;
+    }
+    return "\x00" unless length($str);
+    return $str;
+}
+
 sub _from_oct {
-    # convert a octal number to decimal
+    # convert a octal string to a decimal number
     my ($class, $str) = @_;
     $str =~ s/^0+//;
     my $x    = $class -> _zero();
@@ -996,7 +1012,7 @@ sub _from_oct {
 }
 
 sub _from_hex {
-    # convert a hex number to decimal
+    # convert a hexadecimal string to a decimal number
     my ($class, $str) = @_;
     $str =~ s/^0[Xx]//;
     my $x    = $class -> _zero();
@@ -1010,7 +1026,7 @@ sub _from_hex {
 }
 
 sub _from_bin {
-    # convert a hex number to decimal
+    # convert a binary string to a decimal number
     my ($class, $str) = @_;
     $str =~ s/^0[Bb]//;
     my $x    = $class -> _zero();
@@ -1019,6 +1035,20 @@ sub _from_bin {
     for (my $i = 0 ; $i < $n ; ++$i) {
         $x = $class -> _mul($x, $base);
         $x = $class -> _add($x, $class -> _new(substr($str, $i, 1)));
+    }
+    return $x;
+}
+
+sub _from_bytes {
+    # convert a byte string to a decimal number
+    my ($class, $str) = @_;
+    my $x    = $class -> _zero();
+    my $base = $class -> _new("256");
+    my $n    = length($str);
+    for (my $i = 0 ; $i < $n ; ++$i) {
+        $x = $class -> _mul($x, $base);
+        my $byteval = $class -> _new(unpack 'C', substr($str, $i, 1));
+        $x = $class -> _add($x, $byteval);
     }
     return $x;
 }
@@ -1223,7 +1253,7 @@ comparison routines.
 
 =over 4
 
-=item I<api_version()>
+=item api_version()
 
 Return API version as a Perl scalar, 1 for Math::BigInt v1.70, 2 for
 Math::BigInt v1.83.
@@ -1240,43 +1270,49 @@ However, computations will be very slow without _mul() and _div().
 
 =over 4
 
-=item I<_new(STR)>
+=item _new(STR)
 
 Convert a string representing an unsigned decimal number to an object
 representing the same number. The input is normalize, i.e., it matches
 C<^(0|[1-9]\d*)$>.
 
-=item I<_zero()>
+=item _zero()
 
 Return an object representing the number zero.
 
-=item I<_one()>
+=item _one()
 
 Return an object representing the number one.
 
-=item I<_two()>
+=item _two()
 
 Return an object representing the number two.
 
-=item I<_ten()>
+=item _ten()
 
 Return an object representing the number ten.
 
-=item I<_from_bin(STR)>
+=item _from_bin(STR)
 
 Return an object given a string representing a binary number. The input has a
 '0b' prefix and matches the regular expression C<^0[bB](0|1[01]*)$>.
 
-=item I<_from_oct(STR)>
+=item _from_oct(STR)
 
 Return an object given a string representing an octal number. The input has a
 '0' prefix and matches the regular expression C<^0[1-7]*$>.
 
-=item I<_from_hex(STR)>
+=item _from_hex(STR)
 
 Return an object given a string representing a hexadecimal number. The input
 has a '0x' prefix and matches the regular expression
 C<^0x(0|[1-9a-fA-F][\da-fA-F]*)$>.
+
+=item _from_bytes(STR)
+
+Returns an object given a byte string representing the number. The byte string
+is in big endian byte order, so the two-byte input string "\x01\x00" should
+give an output value representing the number 256.
 
 =back
 
@@ -1284,55 +1320,55 @@ C<^0x(0|[1-9a-fA-F][\da-fA-F]*)$>.
 
 =over 4
 
-=item I<_add(OBJ1, OBJ2)>
+=item _add(OBJ1, OBJ2)
 
 Returns the result of adding OBJ2 to OBJ1.
 
-=item I<_mul(OBJ1, OBJ2)>
+=item _mul(OBJ1, OBJ2)
 
 Returns the result of multiplying OBJ2 and OBJ1.
 
-=item I<_div(OBJ1, OBJ2)>
+=item _div(OBJ1, OBJ2)
 
 Returns the result of dividing OBJ1 by OBJ2 and truncating the result to an
 integer.
 
-=item I<_sub(OBJ1, OBJ2, FLAG)>
+=item _sub(OBJ1, OBJ2, FLAG)
 
-=item I<_sub(OBJ1, OBJ2)>
+=item _sub(OBJ1, OBJ2)
 
 Returns the result of subtracting OBJ2 by OBJ1. If C<flag> is false or omitted,
 OBJ1 might be modified. If C<flag> is true, OBJ2 might be modified.
 
-=item I<_dec(OBJ)>
+=item _dec(OBJ)
 
 Decrement OBJ by one.
 
-=item I<_inc(OBJ)>
+=item _inc(OBJ)
 
 Increment OBJ by one.
 
-=item I<_mod(OBJ1, OBJ2)>
+=item _mod(OBJ1, OBJ2)
 
 Return OBJ1 modulo OBJ2, i.e., the remainder after dividing OBJ1 by OBJ2.
 
-=item I<_sqrt(OBJ)>
+=item _sqrt(OBJ)
 
 Return the square root of the object, truncated to integer.
 
-=item I<_root(OBJ, N)>
+=item _root(OBJ, N)
 
 Return Nth root of the object, truncated to int. N is E<gt>= 3.
 
-=item I<_fac(OBJ)>
+=item _fac(OBJ)
 
 Return factorial of object (1*2*3*4*...).
 
-=item I<_pow(OBJ1, OBJ2)>
+=item _pow(OBJ1, OBJ2)
 
 Return OBJ1 to the power of OBJ2. By convention, 0**0 = 1.
 
-=item I<_modinv(OBJ1, OBJ2)>
+=item _modinv(OBJ1, OBJ2)
 
 Return modular multiplicative inverse, i.e., return OBJ3 so that
 
@@ -1349,11 +1385,11 @@ must either return an object representing the number 3 and a "+" sign, since
 (3*7) % 5 = 1 % 5, or an object representing the number 2 and "-" sign,
 since (-2*7) % 5 = 1 % 5.
 
-=item I<_modpow(OBJ1, OBJ2, OBJ3)>
+=item _modpow(OBJ1, OBJ2, OBJ3)
 
 Return modular exponentiation, (OBJ1 ** OBJ2) % OBJ3.
 
-=item I<_rsft(OBJ, N, B)>
+=item _rsft(OBJ, N, B)
 
 Shift object N digits right in base B and return the resulting object. This is
 equivalent to performing integer division by B**N and discarding the remainder,
@@ -1364,24 +1400,24 @@ For instance, if the object $obj represents the hexadecimal number 0xabcde,
 then C<_rsft($obj, 2, 16)> returns an object representing the number 0xabc. The
 "remainer", 0xde, is discarded and not returned.
 
-=item I<_lsft(OBJ, N, B)>
+=item _lsft(OBJ, N, B)
 
 Shift the object N digits left in base B. This is equivalent to multiplying by
 B**N, except that it might be much faster, depending on how the number is
 represented internally.
 
-=item I<_log_int(OBJ, B)>
+=item _log_int(OBJ, B)
 
 Return integer log of OBJ to base BASE. This method has two output arguments,
 the OBJECT and a STATUS. The STATUS is Perl scalar; it is 1 if OBJ is the exact
 result, 0 if the result was truncted to give OBJ, and undef if it is unknown
 whether OBJ is the exact result.
 
-=item I<_gcd(OBJ1, OBJ2)>
+=item _gcd(OBJ1, OBJ2)
 
 Return the greatest common divisor of OBJ1 and OBJ2.
 
-=item I<_lcm(OBJ1, OBJ2)>
+=item _lcm(OBJ1, OBJ2)
 
 Return the least common multiple of OBJ1 and OBJ2.
 
@@ -1393,17 +1429,17 @@ Each of these methods may modify the first input argument.
 
 =over 4
 
-=item I<_and(OBJ1, OBJ2)>
+=item _and(OBJ1, OBJ2)
 
 Return bitwise and. If necessary, the smallest number is padded with leading
 zeros.
 
-=item I<_or(OBJ1, OBJ2)>
+=item _or(OBJ1, OBJ2)
 
 Return bitwise or. If necessary, the smallest number is padded with leading
 zeros.
 
-=item I<_xor(OBJ1, OBJ2)>
+=item _xor(OBJ1, OBJ2)
 
 Return bitwise exclusive or. If necessary, the smallest number is padded
 with leading zeros.
@@ -1414,31 +1450,31 @@ with leading zeros.
 
 =over 4
 
-=item I<_is_zero(OBJ)>
+=item _is_zero(OBJ)
 
 Returns a true value if OBJ is zero, and false value otherwise.
 
-=item I<_is_one(OBJ)>
+=item _is_one(OBJ)
 
 Returns a true value if OBJ is one, and false value otherwise.
 
-=item I<_is_two(OBJ)>
+=item _is_two(OBJ)
 
 Returns a true value if OBJ is two, and false value otherwise.
 
-=item I<_is_ten(OBJ)>
+=item _is_ten(OBJ)
 
 Returns a true value if OBJ is ten, and false value otherwise.
 
-=item I<_is_even(OBJ)>
+=item _is_even(OBJ)
 
 Return a true value if OBJ is an even integer, and a false value otherwise.
 
-=item I<_is_odd(OBJ)>
+=item _is_odd(OBJ)
 
 Return a true value if OBJ is an even integer, and a false value otherwise.
 
-=item I<_acmp(OBJ1, OBJ2)>
+=item _acmp(OBJ1, OBJ2)
 
 Compare OBJ1 and OBJ2 and return -1, 0, or 1, if OBJ1 is less than, equal
 to, or larger than OBJ2, respectively.
@@ -1449,17 +1485,17 @@ to, or larger than OBJ2, respectively.
 
 =over 4
 
-=item I<_str(OBJ)>
+=item _str(OBJ)
 
 Return a string representing the object. The returned string should have no
 leading zeros, i.e., it should match C<^(0|[1-9]\d*)$>.
 
-=item I<_as_bin(OBJ)>
+=item _as_bin(OBJ)
 
 Return the binary string representation of the number. The string must have a
 '0b' prefix.
 
-=item I<_as_oct(OBJ)>
+=item _as_oct(OBJ)
 
 Return the octal string representation of the number. The string must have
 a '0x' prefix.
@@ -1468,10 +1504,16 @@ Note: This method was required from Math::BigInt version 1.78, but the required
 API version number was not incremented, so there are older libraries that
 support API version 1, but do not support C<_as_oct()>.
 
-=item I<_as_hex(OBJ)>
+=item _as_hex(OBJ)
 
 Return the hexadecimal string representation of the number. The string must
 have a '0x' prefix.
+
+=item _as_bytes(OBJ)
+
+Return a byte string representation of the number. The byte string is in big
+endian byte order, so if the object represents the number 256, the output
+should be the two-byte string "\x01\x00".
 
 =back
 
@@ -1479,7 +1521,7 @@ have a '0x' prefix.
 
 =over 4
 
-=item I<_num(OBJ)>
+=item _num(OBJ)
 
 Given an object, return a Perl scalar number (int/float) representing this
 number.
@@ -1490,29 +1532,29 @@ number.
 
 =over 4
 
-=item I<_copy(OBJ)>
+=item _copy(OBJ)
 
 Return a true copy of the object.
 
-=item I<_len(OBJ)>
+=item _len(OBJ)
 
 Returns the number of the decimal digits in the number. The output is a
 Perl scalar.
 
-=item I<_zeros(OBJ)>
+=item _zeros(OBJ)
 
 Return the number of trailing decimal zeros. The output is a Perl scalar.
 
-=item I<_digit(OBJ, N)>
+=item _digit(OBJ, N)
 
 Return the Nth digit as a Perl scalar. N is a Perl scalar, where zero refers to
 the rightmost (least significant) digit, and negative values count from the
 left (most significant digit). If $obj represents the number 123, then
 I<$obj->_digit(0)> is 3 and I<_digit(123, -1)> is 1.
 
-=item I<_check(OBJ)>
+=item _check(OBJ)
 
-Return true if the object is invalid and false otherise. Preferably, the true
+Return true if the object is invalid and false otherwise. Preferably, the true
 value is a string describing the problem with the object. This is a check
 routine to test the internal state of the object for corruption.
 
@@ -1526,7 +1568,7 @@ The following methods are required for an API version of 2 or greater.
 
 =over 4
 
-=item I<_1ex(N)>
+=item _1ex(N)
 
 Return an object representing the number 10**N where N E<gt>= 0 is a Perl
 scalar.
@@ -1537,7 +1579,7 @@ scalar.
 
 =over 4
 
-=item I<_nok(OBJ1, OBJ2)>
+=item _nok(OBJ1, OBJ2)
 
 Return the binomial coefficient OBJ1 over OBJ1.
 
@@ -1547,7 +1589,7 @@ Return the binomial coefficient OBJ1 over OBJ1.
 
 =over 4
 
-=item I<_alen(OBJ)>
+=item _alen(OBJ)
 
 Return the approximate number of decimal digits of the object. The output is a
 Perl scalar.
@@ -1564,15 +1606,15 @@ slow) fallback routines to emulate these:
 
 =over 4
 
-=item I<_signed_or(OBJ1, OBJ2, SIGN1, SIGN2)>
+=item _signed_or(OBJ1, OBJ2, SIGN1, SIGN2)
 
 Return the signed bitwise or.
 
-=item I<_signed_and(OBJ1, OBJ2, SIGN1, SIGN2)>
+=item _signed_and(OBJ1, OBJ2, SIGN1, SIGN2)
 
 Return the signed bitwise and.
 
-=item I<_signed_xor(OBJ1, OBJ2, SIGN1, SIGN2)>
+=item _signed_xor(OBJ1, OBJ2, SIGN1, SIGN2)
 
 Return the signed bitwise exclusive or.
 

@@ -1725,12 +1725,14 @@ cpan/Math-BigInt/t/dparts-mbi.t		Test Math::BigInt
 cpan/Math-BigInt/t/eparts-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/eparts-mbi.t		Test Math::BigInt
 cpan/Math-BigInt/t/from_bin-mbf.t	Test Math::BigInt
+cpan/Math-BigInt/t/from_bin-mbi.t
 cpan/Math-BigInt/t/from_hex-mbf.t	Test Math::BigInt
+cpan/Math-BigInt/t/from_hex-mbi.t
 cpan/Math-BigInt/t/from_oct-mbf.t	Test Math::BigInt
+cpan/Math-BigInt/t/from_oct-mbi.t
 cpan/Math-BigInt/t/inf_nan.t		Special tests for inf and *NaN* handling
 cpan/Math-BigInt/t/isa.t		Test for Math::BigInt inheritance
 cpan/Math-BigInt/t/lib_load.t		Test sane lib names
-cpan/Math-BigInt/t/Math/BigFloat/#Subclass.pm#
 cpan/Math-BigInt/t/Math/BigFloat/Subclass.pm	Empty subclass of BigFloat for test
 cpan/Math-BigInt/t/Math/BigInt/BareCalc.pm	Bigint's simulation of Calc
 cpan/Math-BigInt/t/Math/BigInt/Lib/Minimal.pm

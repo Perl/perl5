@@ -20,7 +20,7 @@ use warnings;
 
 use Carp ();
 
-our $VERSION = '1.999803';
+our $VERSION = '1.999806';
 
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(objectify bgcd blcm);
@@ -719,6 +719,10 @@ sub from_hex {
     my $selfref = ref $self;
     my $class   = $selfref || $self;
 
+    # Don't modify constant (read-only) objects.
+
+    return if $selfref && $self->modify('from_hex');
+
     my $str = shift;
 
     # If called as a class method, initialize a new object.
@@ -750,9 +754,8 @@ sub from_hex {
 
         # Place the sign.
 
-        if ($sign eq '-' && ! $CALC->_is_zero($self->{value})) {
-            $self->{sign} = '-';
-        }
+        $self->{sign} = $sign eq '-' && ! $CALC->_is_zero($self->{value})
+                          ? '-' : '+';
 
         return $self;
     }
@@ -769,6 +772,10 @@ sub from_oct {
     my $self    = shift;
     my $selfref = ref $self;
     my $class   = $selfref || $self;
+
+    # Don't modify constant (read-only) objects.
+
+    return if $selfref && $self->modify('from_oct');
 
     my $str = shift;
 
@@ -800,9 +807,8 @@ sub from_oct {
 
         # Place the sign.
 
-        if ($sign eq '-' && ! $CALC->_is_zero($self->{value})) {
-            $self->{sign} = '-';
-        }
+        $self->{sign} = $sign eq '-' && ! $CALC->_is_zero($self->{value})
+                          ? '-' : '+';
 
         return $self;
     }
@@ -819,6 +825,10 @@ sub from_bin {
     my $self    = shift;
     my $selfref = ref $self;
     my $class   = $selfref || $self;
+
+    # Don't modify constant (read-only) objects.
+
+    return if $selfref && $self->modify('from_bin');
 
     my $str = shift;
 
@@ -851,9 +861,8 @@ sub from_bin {
 
         # Place the sign.
 
-        if ($sign eq '-' && ! $CALC->_is_zero($self->{value})) {
-            $self->{sign} = '-';
-        }
+        $self->{sign} = $sign eq '-' && ! $CALC->_is_zero($self->{value})
+                          ? '-' : '+';
 
         return $self;
     }
@@ -862,6 +871,27 @@ sub from_bin {
     # input is invalid.
 
     return $self->bnan();
+}
+
+# Create a Math::BigInt from a byte string.
+
+sub from_bytes {
+    my $self    = shift;
+    my $selfref = ref $self;
+    my $class   = $selfref || $self;
+
+    # Don't modify constant (read-only) objects.
+
+    return if $selfref && $self->modify('from_bytes');
+
+    my $str = shift;
+
+    # If called as a class method, initialize a new object.
+
+    $self = $class -> bzero() unless $selfref;
+    $self -> {sign}  = '+';
+    $self -> {value} = $CALC -> _from_bytes($str);
+    return $self;
 }
 
 sub bzero {
@@ -878,6 +908,9 @@ sub bzero {
     my $class   = $selfref || $self;
 
     $self->import() if $IMPORT == 0;            # make require work
+
+    # Don't modify constant (read-only) objects.
+
     return if $selfref && $self->modify('bzero');
 
     $self = bless {}, $class unless $selfref;
@@ -915,6 +948,9 @@ sub bone {
     my $class   = $selfref || $self;
 
     $self->import() if $IMPORT == 0;            # make require work
+
+    # Don't modify constant (read-only) objects.
+
     return if $selfref && $self->modify('bone');
 
     my $sign = shift;
@@ -964,6 +1000,9 @@ sub binf {
     }
 
     $self->import() if $IMPORT == 0;            # make require work
+
+    # Don't modify constant (read-only) objects.
+
     return if $selfref && $self->modify('binf');
 
     my $sign = shift;
@@ -998,6 +1037,9 @@ sub bnan {
     }
 
     $self->import() if $IMPORT == 0;            # make require work
+
+    # Don't modify constant (read-only) objects.
+
     return if $selfref && $self->modify('bnan');
 
     $self = bless {}, $class unless $selfref;
@@ -3478,6 +3520,16 @@ sub as_bin {
     return $s . $CALC->_as_bin($x->{value});
 }
 
+sub as_bytes {
+    # return a byte string
+    my $x = shift;
+    $x = $class->new($x) if !ref($x);
+
+    Carp::croak("as_bytes() requires a finite, non-negative integer")
+        if $x -> is_neg() || ! $x -> is_int();
+    return $CALC->_as_bytes($x->{value});
+}
+
 ###############################################################################
 # Other conversion methods
 ###############################################################################
@@ -4219,6 +4271,7 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->as_hex();       # as signed hexadecimal string with prefixed 0x
   $x->as_bin();       # as signed binary string with prefixed 0b
   $x->as_oct();       # as signed octal string with prefixed 0
+  $x->as_bytes();     # as byte string
 
   # Other conversion methods
 
@@ -4511,6 +4564,31 @@ invalid, a NaN is returned.
 Interpret the input as a binary string. A "0b" or "b" prefix is optional. A
 single underscore character may be placed right after the prefix, if present,
 or between any two digits. If the input is invalid, a NaN is returned.
+
+=item from_bytes()
+
+    $x = Math::BigInt->from_bytes("\xf3\x6b");  # $x = 62315
+
+Interpret the input as a byte string, assuming big endian byte order. The
+output is always a non-negative, finite integer.
+
+In some special cases, from_bytes() matches the conversion done by unpack():
+
+    $b = "\x4e";                             # one char byte string
+    $x = Math::BigInt->from_bytes($b);       # = 78
+    $y = unpack "C", $b;                     # ditto, but scalar
+
+    $b = "\xf3\x6b";                         # two char byte string
+    $x = Math::BigInt->from_bytes($b);       # = 62315
+    $y = unpack "S>", $b;                    # ditto, but scalar
+
+    $b = "\x2d\xe0\x49\xad";                 # four char byte string
+    $x = Math::BigInt->from_bytes($b);       # = 769673645
+    $y = unpack "L>", $b;                    # ditto, but scalar
+
+    $b = "\x2d\xe0\x49\xad\x2d\xe0\x49\xad"; # eight char byte string
+    $x = Math::BigInt->from_bytes($b);       # = 3305723134637787565
+    $y = unpack "Q>", $b;                    # ditto, but scalar
 
 =item bzero()
 
@@ -5320,6 +5398,14 @@ prefixed by "0b".
 
 Returns a string representing the number using octal notation. The output is
 prefixed by "0".
+
+=item as_bytes()
+
+    $x = Math::BigInt->new("1667327589");
+    $s = $x->as_bytes();                    # $s = "cafe"
+
+Returns a byte string representing the number using big endian byte order. The
+invocand must be a non-negative, finite integer.
 
 =back
 

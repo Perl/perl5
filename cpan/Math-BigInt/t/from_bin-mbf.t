@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 27;
+use Test::More tests => 183;
 
 my $class;
 
@@ -16,23 +16,43 @@ while (<DATA>) {
     next unless length; # skip empty lines
 
     my ($in0, $out0) = split /:/;
-    my $x;
 
-    my $test = qq|\$x = $class -> from_bin("$in0");|;
-    my $desc = $test;
+    # As class method.
 
-    eval $test;
-    die $@ if $@;       # this should never happen
+    {
+        my $x;
+        my $test = qq|\$x = $class -> from_bin("$in0");|;
 
-    subtest $desc, sub {
-        plan tests => 2,
+        eval $test;
+        die $@ if $@;           # this should never happen
 
-        # Check output.
+        subtest $test, sub {
+            plan tests => 2,
 
-        is(ref($x), $class, "output arg is a $class");
-        is($x, $out0, 'output arg has the right value');
-    };
+            is(ref($x), $class, "output arg is a $class");
+            is($x, $out0, 'output arg has the right value');
+        };
+    }
 
+    # As instance method.
+
+    {
+        for my $str ("-1", "0", "1", "-inf", "+inf", "NaN") {
+            my $x;
+            my $test = qq|\$x = $class -> new("$str");|
+                     . qq| \$x -> from_bin("$in0");|;
+
+            eval $test;
+            die $@ if $@;       # this should never happen
+
+            subtest $test, sub {
+                plan tests => 2,
+
+                is(ref($x), $class, "output arg is a $class");
+                is($x, $out0, 'output arg has the right value');
+            };
+        }
+    }
 }
 
 __END__
