@@ -20,7 +20,7 @@ use Carp ();
 
 use Math::BigFloat '1.999718';
 
-our $VERSION = '0.2609';
+our $VERSION = '0.2611';
 
 our @ISA = qw(Math::BigFloat);
 
@@ -669,7 +669,7 @@ sub bsstr {
     my ($class, $x) = ref($_[0]) ? (undef, $_[0]) : objectify(1, @_);
 
     if ($x->{sign} !~ /^[+-]$/) {               # inf, NaN etc
-        my $s = $x->{sign}; 
+        my $s = $x->{sign};
         $s =~ s/^\+//;                          # +inf => inf
         return $s;
     }
@@ -1324,7 +1324,7 @@ sub bpow {
             ($x->{_n}, $x->{_d}) = ($x->{_d}, $x->{_n}); # swap
         }
         # correct sign; + ** + => +
- 
+
         $x->{sign} = '+' if $x->{sign} eq '-' && $LIB->_is_even($y->{_n});
         return $x->round(@r);
     }
