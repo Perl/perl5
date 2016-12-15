@@ -565,10 +565,24 @@ to determine if it is in the character class.  For example,
 C<isWORDCHAR_uvchr(0x100)> returns TRUE, since 0x100 is LATIN CAPITAL LETTER A
 WITH MACRON in Unicode, and is a word character.
 
-Variant C<isFOO_utf8> is like C<isFOO_uvchr>, but the input is a pointer to a
-(known to be well-formed) UTF-8 encoded string (C<U8*> or C<char*>, and
-possibly containing embedded C<NUL> characters).  The classification of just
-the first (possibly multi-byte) character in the string is tested.
+Variant C<isFOO_utf8_safe> is like C<isFOO_uvchr>, but is used for UTF-8
+encoded strings.  Each call classifies one character, even if the string
+contains many.  This variant takes two parameters.  The first, C<p>, is a
+pointer to the first byte of the character to be classified.  (Recall that it
+may take more than one byte to represent a character in UTF-8 strings.)  The
+second parameter, C<e>, points to anywhere in the string beyond the first
+character, up to one byte past the end of the entire string.  The suffix
+C<_safe> in the function's name indicates that it will not attempt to read
+beyond S<C<e - 1>>, provided that the constraint S<C<s E<lt> e>> is true (this
+is asserted for in C<-DDEBUGGING> builds).  If the UTF-8 for the input
+character is malformed in some way, the program may croak, or the function may
+return FALSE, at the discretion of the implementation, and subject to change in
+future releases.
+
+Variant C<isFOO_utf8> is like C<isFOO_utf8_safe>, but takes just a single
+parameter, C<p>, which has the same meaning as the corresponding parameter does
+in C<isFOO_utf8_safe>.  The function therefore can't check if it is reading
+beyond the end of the string.
 
 Variant C<isFOO_LC> is like the C<isFOO_A> and C<isFOO_L1> variants, but the
 result is based on the current locale, which is what C<LC> in the name stands
@@ -584,18 +598,32 @@ Variant C<isFOO_LC_uvchr> is like C<isFOO_LC>, but is defined on any UV.  It
 returns the same as C<isFOO_LC> for input code points less than 256, and
 returns the hard-coded, not-affected-by-locale, Unicode results for larger ones.
 
-Variant C<isFOO_LC_utf8> is like C<isFOO_LC_uvchr>, but the input is a pointer
-to a (known to be well-formed) UTF-8 encoded string (C<U8*> or C<char*>, and
-possibly containing embedded C<NUL> characters).  The classification of just
-the first (possibly multi-byte) character in the string is tested.
+Variant C<isFOO_LC_utf8_safe> is like C<isFOO_LC_uvchr>, but is used for UTF-8
+encoded strings.  Each call classifies one character, even if the string
+contains many.  This variant takes two parameters.  The first, C<p>, is a
+pointer to the first byte of the character to be classified.  (Recall that it
+may take more than one byte to represent a character in UTF-8 strings.) The
+second parameter, C<e>, points to anywhere in the string beyond the first
+character, up to one byte past the end of the entire string.  The suffix
+C<_safe> in the function's name indicates that it will not attempt to read
+beyond S<C<e - 1>>, provided that the constraint S<C<s E<lt> e>> is true (this
+is asserted for in C<-DDEBUGGING> builds).  If the UTF-8 for the input
+character is malformed in some way, the program may croak, or the function may
+return FALSE, at the discretion of the implementation, and subject to change in
+future releases.
+
+Variant C<isFOO_LC_utf8> is like C<isFOO_LC_utf8_safe>, but takes just a single
+parameter, C<p>, which has the same meaning as the corresponding parameter does
+in C<isFOO_LC_utf8_safe>.  The function therefore can't check if it is reading
+beyond the end of the string.
 
 =for apidoc Am|bool|isALPHA|char ch
 Returns a boolean indicating whether the specified character is an
 alphabetic character, analogous to C<m/[[:alpha:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isALPHA_A>, C<isALPHA_L1>, C<isALPHA_uvchr>, C<isALPHA_utf8>, C<isALPHA_LC>,
-C<isALPHA_LC_uvchr>, and C<isALPHA_LC_utf8>.
+C<isALPHA_A>, C<isALPHA_L1>, C<isALPHA_uvchr>, C<isALPHA_utf8_safe>,
+C<isALPHA_LC>, C<isALPHA_LC_uvchr>, and C<isALPHA_LC_utf8_safe>.
 
 =for apidoc Am|bool|isALPHANUMERIC|char ch
 Returns a boolean indicating whether the specified character is a either an
@@ -603,8 +631,8 @@ alphabetic character or decimal digit, analogous to C<m/[[:alnum:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
 C<isALPHANUMERIC_A>, C<isALPHANUMERIC_L1>, C<isALPHANUMERIC_uvchr>,
-C<isALPHANUMERIC_utf8>, C<isALPHANUMERIC_LC>, C<isALPHANUMERIC_LC_uvchr>, and
-C<isALPHANUMERIC_LC_utf8>.
+C<isALPHANUMERIC_utf8_safe>, C<isALPHANUMERIC_LC>, C<isALPHANUMERIC_LC_uvchr>,
+and C<isALPHANUMERIC_LC_utf8_safe>.
 
 =for apidoc Am|bool|isASCII|char ch
 Returns a boolean indicating whether the specified character is one of the 128
@@ -614,36 +642,36 @@ character corresponds to an ASCII character.  Variants C<isASCII_A()> and
 C<isASCII_L1()> are identical to C<isASCII()>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isASCII_uvchr>, C<isASCII_utf8>, C<isASCII_LC>, C<isASCII_LC_uvchr>, and
-C<isASCII_LC_utf8>.  Note, however, that some platforms do not have the C
+C<isASCII_uvchr>, C<isASCII_utf8_safe>, C<isASCII_LC>, C<isASCII_LC_uvchr>, and
+C<isASCII_LC_utf8_safe>.  Note, however, that some platforms do not have the C
 library routine C<isascii()>.  In these cases, the variants whose names contain
 C<LC> are the same as the corresponding ones without.
 
 Also note, that because all ASCII characters are UTF-8 invariant (meaning they
 have the exact same representation (always a single byte) whether encoded in
 UTF-8 or not), C<isASCII> will give the correct results when called with any
-byte in any string encoded or not in UTF-8.  And similarly C<isASCII_utf8> will
-work properly on any string encoded or not in UTF-8.
+byte in any string encoded or not in UTF-8.  And similarly C<isASCII_utf8_safe>
+will work properly on any string encoded or not in UTF-8.
 
 =for apidoc Am|bool|isBLANK|char ch
 Returns a boolean indicating whether the specified character is a
 character considered to be a blank, analogous to C<m/[[:blank:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isBLANK_A>, C<isBLANK_L1>, C<isBLANK_uvchr>, C<isBLANK_utf8>, C<isBLANK_LC>,
-C<isBLANK_LC_uvchr>, and C<isBLANK_LC_utf8>.  Note, however, that some
-platforms do not have the C library routine C<isblank()>.  In these cases, the
-variants whose names contain C<LC> are the same as the corresponding ones
-without.
+C<isBLANK_A>, C<isBLANK_L1>, C<isBLANK_uvchr>, C<isBLANK_utf8_safe>,
+C<isBLANK_LC>, C<isBLANK_LC_uvchr>, and C<isBLANK_LC_utf8_safe>.  Note,
+however, that some platforms do not have the C library routine
+C<isblank()>.  In these cases, the variants whose names contain C<LC> are
+the same as the corresponding ones without.
 
 =for apidoc Am|bool|isCNTRL|char ch
 Returns a boolean indicating whether the specified character is a
 control character, analogous to C<m/[[:cntrl:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isCNTRL_A>, C<isCNTRL_L1>, C<isCNTRL_uvchr>, C<isCNTRL_utf8>, C<isCNTRL_LC>,
-C<isCNTRL_LC_uvchr>, and C<isCNTRL_LC_utf8>
-On EBCDIC platforms, you almost always want to use the C<isCNTRL_L1> variant.
+C<isCNTRL_A>, C<isCNTRL_L1>, C<isCNTRL_uvchr>, C<isCNTRL_utf8_safe>,
+C<isCNTRL_LC>, C<isCNTRL_LC_uvchr>, and C<isCNTRL_LC_utf8_safe> On EBCDIC
+platforms, you almost always want to use the C<isCNTRL_L1> variant.
 
 =for apidoc Am|bool|isDIGIT|char ch
 Returns a boolean indicating whether the specified character is a
@@ -651,24 +679,23 @@ digit, analogous to C<m/[[:digit:]]/>.
 Variants C<isDIGIT_A> and C<isDIGIT_L1> are identical to C<isDIGIT>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isDIGIT_uvchr>, C<isDIGIT_utf8>, C<isDIGIT_LC>, C<isDIGIT_LC_uvchr>, and
-C<isDIGIT_LC_utf8>.
+C<isDIGIT_uvchr>, C<isDIGIT_utf8_safe>, C<isDIGIT_LC>, C<isDIGIT_LC_uvchr>, and
+C<isDIGIT_LC_utf8_safe>.
 
 =for apidoc Am|bool|isGRAPH|char ch
 Returns a boolean indicating whether the specified character is a
 graphic character, analogous to C<m/[[:graph:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
-variants
-C<isGRAPH_A>, C<isGRAPH_L1>, C<isGRAPH_uvchr>, C<isGRAPH_utf8>, C<isGRAPH_LC>,
-C<isGRAPH_LC_uvchr>, and C<isGRAPH_LC_utf8>.
+variants C<isGRAPH_A>, C<isGRAPH_L1>, C<isGRAPH_uvchr>, C<isGRAPH_utf8_safe>,
+C<isGRAPH_LC>, C<isGRAPH_LC_uvchr>, and C<isGRAPH_LC_utf8_safe>.
 
 =for apidoc Am|bool|isLOWER|char ch
 Returns a boolean indicating whether the specified character is a
 lowercase character, analogous to C<m/[[:lower:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isLOWER_A>, C<isLOWER_L1>, C<isLOWER_uvchr>, C<isLOWER_utf8>, C<isLOWER_LC>,
-C<isLOWER_LC_uvchr>, and C<isLOWER_LC_utf8>.
+C<isLOWER_A>, C<isLOWER_L1>, C<isLOWER_uvchr>, C<isLOWER_utf8_safe>,
+C<isLOWER_LC>, C<isLOWER_LC_uvchr>, and C<isLOWER_LC_utf8_safe>.
 
 =for apidoc Am|bool|isOCTAL|char ch
 Returns a boolean indicating whether the specified character is an
@@ -683,9 +710,8 @@ Note that the definition of what is punctuation isn't as
 straightforward as one might desire.  See L<perlrecharclass/POSIX Character
 Classes> for details.
 See the L<top of this section|/Character classification> for an explanation of
-variants
-C<isPUNCT_A>, C<isPUNCT_L1>, C<isPUNCT_uvchr>, C<isPUNCT_utf8>, C<isPUNCT_LC>,
-C<isPUNCT_LC_uvchr>, and C<isPUNCT_LC_utf8>.
+variants C<isPUNCT_A>, C<isPUNCT_L1>, C<isPUNCT_uvchr>, C<isPUNCT_utf8_safe>,
+C<isPUNCT_LC>, C<isPUNCT_LC_uvchr>, and C<isPUNCT_LC_utf8_safe>.
 
 =for apidoc Am|bool|isSPACE|char ch
 Returns a boolean indicating whether the specified character is a
@@ -698,8 +724,8 @@ in the non-locale variants, was that C<isSPACE()> did not match a vertical tab.
 (See L</isPSXSPC> for a macro that matches a vertical tab in all releases.)
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isSPACE_A>, C<isSPACE_L1>, C<isSPACE_uvchr>, C<isSPACE_utf8>, C<isSPACE_LC>,
-C<isSPACE_LC_uvchr>, and C<isSPACE_LC_utf8>.
+C<isSPACE_A>, C<isSPACE_L1>, C<isSPACE_uvchr>, C<isSPACE_utf8_safe>,
+C<isSPACE_LC>, C<isSPACE_LC_uvchr>, and C<isSPACE_LC_utf8_safe>.
 
 =for apidoc Am|bool|isPSXSPC|char ch
 (short for Posix Space)
@@ -712,24 +738,23 @@ C<isSPACE()> forms don't match a Vertical Tab, and the C<isPSXSPC()> forms do.
 Otherwise they are identical.  Thus this macro is analogous to what
 C<m/[[:space:]]/> matches in a regular expression.
 See the L<top of this section|/Character classification> for an explanation of
-variants C<isPSXSPC_A>, C<isPSXSPC_L1>, C<isPSXSPC_uvchr>, C<isPSXSPC_utf8>,
-C<isPSXSPC_LC>, C<isPSXSPC_LC_uvchr>, and C<isPSXSPC_LC_utf8>.
+variants C<isPSXSPC_A>, C<isPSXSPC_L1>, C<isPSXSPC_uvchr>, C<isPSXSPC_utf8_safe>,
+C<isPSXSPC_LC>, C<isPSXSPC_LC_uvchr>, and C<isPSXSPC_LC_utf8_safe>.
 
 =for apidoc Am|bool|isUPPER|char ch
 Returns a boolean indicating whether the specified character is an
 uppercase character, analogous to C<m/[[:upper:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
-variants
-C<isUPPER_A>, C<isUPPER_L1>, C<isUPPER_uvchr>, C<isUPPER_utf8>, C<isUPPER_LC>,
-C<isUPPER_LC_uvchr>, and C<isUPPER_LC_utf8>.
+variants C<isUPPER_A>, C<isUPPER_L1>, C<isUPPER_uvchr>, C<isUPPER_utf8_safe>,
+C<isUPPER_LC>, C<isUPPER_LC_uvchr>, and C<isUPPER_LC_utf8_safe>.
 
 =for apidoc Am|bool|isPRINT|char ch
 Returns a boolean indicating whether the specified character is a
 printable character, analogous to C<m/[[:print:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isPRINT_A>, C<isPRINT_L1>, C<isPRINT_uvchr>, C<isPRINT_utf8>, C<isPRINT_LC>,
-C<isPRINT_LC_uvchr>, and C<isPRINT_LC_utf8>.
+C<isPRINT_A>, C<isPRINT_L1>, C<isPRINT_uvchr>, C<isPRINT_utf8_safe>,
+C<isPRINT_LC>, C<isPRINT_LC_uvchr>, and C<isPRINT_LC_utf8_safe>.
 
 =for apidoc Am|bool|isWORDCHAR|char ch
 Returns a boolean indicating whether the specified character is a character
@@ -741,10 +766,10 @@ C<isALNUM()> is a synonym provided for backward compatibility, even though a
 word character includes more than the standard C language meaning of
 alphanumeric.
 See the L<top of this section|/Character classification> for an explanation of
-variants
-C<isWORDCHAR_A>, C<isWORDCHAR_L1>, C<isWORDCHAR_uvchr>, and C<isWORDCHAR_utf8>.
-C<isWORDCHAR_LC>, C<isWORDCHAR_LC_uvchr>, and C<isWORDCHAR_LC_utf8> are also as
-described there, but additionally include the platform's native underscore.
+variants C<isWORDCHAR_A>, C<isWORDCHAR_L1>, C<isWORDCHAR_uvchr>, and
+C<isWORDCHAR_utf8_safe>.  C<isWORDCHAR_LC>, C<isWORDCHAR_LC_uvchr>, and
+C<isWORDCHAR_LC_utf8_safe> are also as described there, but additionally
+include the platform's native underscore.
 
 =for apidoc Am|bool|isXDIGIT|char ch
 Returns a boolean indicating whether the specified character is a hexadecimal
@@ -752,8 +777,8 @@ digit.  In the ASCII range these are C<[0-9A-Fa-f]>.  Variants C<isXDIGIT_A()>
 and C<isXDIGIT_L1()> are identical to C<isXDIGIT()>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isXDIGIT_uvchr>, C<isXDIGIT_utf8>, C<isXDIGIT_LC>, C<isXDIGIT_LC_uvchr>, and
-C<isXDIGIT_LC_utf8>.
+C<isXDIGIT_uvchr>, C<isXDIGIT_utf8_safe>, C<isXDIGIT_LC>, C<isXDIGIT_LC_uvchr>,
+and C<isXDIGIT_LC_utf8_safe>.
 
 =for apidoc Am|bool|isIDFIRST|char ch
 Returns a boolean indicating whether the specified character can be the first
@@ -762,8 +787,8 @@ the official Unicode property C<XID_Start>.  The difference is that this
 returns true only if the input character also matches L</isWORDCHAR>.
 See the L<top of this section|/Character classification> for an explanation of
 variants
-C<isIDFIRST_A>, C<isIDFIRST_L1>, C<isIDFIRST_uvchr>, C<isIDFIRST_utf8>,
-C<isIDFIRST_LC>, C<isIDFIRST_LC_uvchr>, and C<isIDFIRST_LC_utf8>.
+C<isIDFIRST_A>, C<isIDFIRST_L1>, C<isIDFIRST_uvchr>, C<isIDFIRST_utf8_safe>,
+C<isIDFIRST_LC>, C<isIDFIRST_LC_uvchr>, and C<isIDFIRST_LC_utf8_safe>.
 
 =for apidoc Am|bool|isIDCONT|char ch
 Returns a boolean indicating whether the specified character can be the
@@ -773,8 +798,8 @@ difference is that this returns true only if the input character also matches
 L</isWORDCHAR>.  See the L<top of this section|/Character classification> for
 an
 explanation of variants C<isIDCONT_A>, C<isIDCONT_L1>, C<isIDCONT_uvchr>,
-C<isIDCONT_utf8>, C<isIDCONT_LC>, C<isIDCONT_LC_uvchr>, and
-C<isIDCONT_LC_utf8>.
+C<isIDCONT_utf8_safe>, C<isIDCONT_LC>, C<isIDCONT_LC_uvchr>, and
+C<isIDCONT_LC_utf8_safe>.
 
 =head1 Miscellaneous Functions
 
@@ -1684,14 +1709,59 @@ END_EXTERN_C
                                                                    *((p)+1 )), \
                                                 classnum)                      \
                                            : utf8)
+
+/* The "_safe" macros make sure that we don't attempt to read beyond 'e', but
+ * they don't otherwise go out of their way to look for malformed UTF-8.  If
+ * they can return accurate results without knowing if the input is otherwise
+ * malformed, they do so.  For example isASCII is accurate in spite of any
+ * non-length malformations because it looks only at a single byte. Likewise
+ * isDIGIT looks just at the first byte for code points 0-255, as all UTF-8
+ * variant ones return FALSE.  But, if the input has to be well-formed in order
+ * for the results to be accurate, the macros will test and if malformed will
+ * call a routine to die
+ *
+ * Except for toke.c, the macros do assume that e > p, asserting that on
+ * DEBUGGING builds.  Much code that calls these depends on this being true,
+ * for other reasons.  toke.c is treated specially as using the regular
+ * assertion breaks it in many ways.  All strings that these operate on there
+ * are supposed to have an extra NUL character at the end,  so that *e = \0. A
+ * bunch of code in toke.c assumes that this is true, so the assertion allows
+ * for that */
+#ifdef PERL_IN_TOKE_C
+#  define _utf8_safe_assert(p,e) ((e) > (p) || ((e) == (p) && *(p) == '\0'))
+#else
+#  define _utf8_safe_assert(p,e) ((e) > (p))
+#endif
+
+#define _generic_utf8_safe(classnum, p, e, above_latin1)                    \
+         (__ASSERT_(_utf8_safe_assert(p, e))                                \
+         (UTF8_IS_INVARIANT(*(p)))                                          \
+          ? _generic_isCC(*(p), classnum)                                   \
+          : (UTF8_IS_DOWNGRADEABLE_START(*(p))                              \
+             ? ((LIKELY((e) - (p) > 1 && UTF8_IS_CONTINUATION(*((p)+1))))   \
+                ? _generic_isCC(EIGHT_BIT_UTF8_TO_NATIVE(*(p), *((p)+1 )),  \
+                                classnum)                                   \
+                : (_force_out_malformed_utf8_message(                       \
+                                        (U8 *) (p), (U8 *) (e), 0, 1), 0))  \
+             : above_latin1))
 /* Like the above, but calls 'above_latin1(p)' to get the utf8 value.
  * 'above_latin1' can be a macro */
 #define _generic_func_utf8(classnum, above_latin1, p)  \
                                     _generic_utf8(classnum, p, above_latin1(p))
+#define _generic_func_utf8_safe(classnum, above_latin1, p, e)               \
+                    _generic_utf8_safe(classnum, p, e, above_latin1(p, e))
+#define _generic_non_swash_utf8_safe(classnum, above_latin1, p, e)          \
+          _generic_utf8_safe(classnum, p, e,                                \
+                             (UNLIKELY((e) - (p) < UTF8SKIP(p))             \
+                              ? (_force_out_malformed_utf8_message(         \
+                                      (U8 *) (p), (U8 *) (e), 0, 1), 0)     \
+                              : above_latin1(p)))
 /* Like the above, but passes classnum to _isFOO_utf8(), instead of having an
  * 'above_latin1' parameter */
 #define _generic_swash_utf8(classnum, p)  \
                       _generic_utf8(classnum, p, _is_utf8_FOO(classnum, p))
+#define _generic_swash_utf8_safe(classnum, p, e)                            \
+_generic_utf8_safe(classnum, p, e, _is_utf8_FOO_with_len(classnum, p, e))
 
 /* Like the above, but should be used only when it is known that there are no
  * characters in the upper-Latin1 range (128-255 on ASCII platforms) which the
@@ -1703,6 +1773,14 @@ END_EXTERN_C
                                          : (UTF8_IS_ABOVE_LATIN1(*(p)))        \
                                            ? above_latin1                      \
                                            : 0)
+
+#define _generic_utf8_safe_no_upper_latin1(classnum, p, e, above_latin1)    \
+         (__ASSERT_(_utf8_safe_assert(p, e))                                \
+         (UTF8_IS_INVARIANT(*(p)))                                          \
+          ? _generic_isCC(*(p), classnum)                                   \
+          : (UTF8_IS_DOWNGRADEABLE_START(*(p)))                             \
+             ? 0 /* Note that doesn't check validity for latin1 */          \
+             : above_latin1)
 
 /* NOTE that some of these macros have very similar ones in regcharclass.h.
  * For example, there is (at the time of this writing) an 'is_SPACE_utf8()'
@@ -1719,12 +1797,25 @@ END_EXTERN_C
                                              */
 #define isBLANK_utf8(p)        _generic_func_utf8(_CC_BLANK, is_HORIZWS_high, p)
 
+#define isALPHA_utf8_safe(p, e)  _generic_swash_utf8_safe(_CC_ALPHA, p, e)
+#define isALPHANUMERIC_utf8_safe(p, e)                                      \
+                        _generic_swash_utf8_safe(_CC_ALPHANUMERIC, p, e)
+#define isASCII_utf8_safe(p, e)                                             \
+    /* Because ASCII is invariant under utf8, the non-utf8 macro            \
+    * works */                                                              \
+    (__ASSERT_(_utf8_safe_assert(p, e)) isASCII(*(p)))
+#define isBLANK_utf8_safe(p, e)                                             \
+        _generic_non_swash_utf8_safe(_CC_BLANK, is_HORIZWS_high, p, e)
+
 #ifdef EBCDIC
     /* Because all controls are UTF-8 invariants in EBCDIC, we can use this
      * more efficient macro instead of the more general one */
 #   define isCNTRL_utf8(p)      isCNTRL_L1(*(p))
+#   define isCNTRL_utf8_safe(p, e)                                          \
+                    (__ASSERT_(_utf8_safe_assert(p, e)) isCNTRL_L1(*(p))
 #else
-#   define isCNTRL_utf8(p)      _generic_utf8(_CC_CNTRL, p, 0)
+#   define isCNTRL_utf8(p)          _generic_utf8(_CC_CNTRL, p, 0)
+#   define isCNTRL_utf8_safe(p, e)  _generic_utf8_safe(_CC_CNTRL, p, e, 0)
 #endif
 
 #define isDIGIT_utf8(p)         _generic_utf8_no_upper_latin1(_CC_DIGIT, p,   \
@@ -1732,6 +1823,12 @@ END_EXTERN_C
 #define isGRAPH_utf8(p)         _generic_swash_utf8(_CC_GRAPH, p)
 #define isIDCONT_utf8(p)        _generic_func_utf8(_CC_WORDCHAR,              \
                                                   _is_utf8_perl_idcont, p)
+#define isDIGIT_utf8_safe(p, e)                                             \
+            _generic_utf8_safe_no_upper_latin1(_CC_DIGIT, p, e,             \
+                                    _is_utf8_FOO_with_len(_CC_DIGIT, p, e))
+#define isGRAPH_utf8_safe(p, e)    _generic_swash_utf8_safe(_CC_GRAPH, p, e)
+#define isIDCONT_utf8_safe(p, e)   _generic_func_utf8_safe(_CC_WORDCHAR,    \
+                                     _is_utf8_perl_idcont_with_len, p, e)
 
 /* To prevent S_scan_word in toke.c from hanging, we have to make sure that
  * IDFIRST is an alnum.  See
@@ -1752,6 +1849,27 @@ END_EXTERN_C
 #define isWORDCHAR_utf8(p)  _generic_swash_utf8(_CC_WORDCHAR, p)
 #define isXDIGIT_utf8(p)    _generic_utf8_no_upper_latin1(_CC_XDIGIT, p,     \
                                                           is_XDIGIT_high(p))
+#define isIDFIRST_utf8_safe(p, e)                                           \
+    _generic_func_utf8_safe(_CC_IDFIRST,                                    \
+                    _is_utf8_perl_idstart_with_len, (U8 *) (p), (U8 *) (e))
+
+#define isLOWER_utf8_safe(p, e)     _generic_swash_utf8_safe(_CC_LOWER, p, e)
+#define isPRINT_utf8_safe(p, e)     _generic_swash_utf8_safe(_CC_PRINT, p, e)
+#define isPSXSPC_utf8_safe(p, e)     isSPACE_utf8_safe(p, e)
+#define isPUNCT_utf8_safe(p, e)     _generic_swash_utf8_safe(_CC_PUNCT, p, e)
+#define isSPACE_utf8_safe(p, e)                                             \
+    _generic_non_swash_utf8_safe(_CC_SPACE, is_XPERLSPACE_high, p, e)
+#define isUPPER_utf8_safe(p, e)  _generic_swash_utf8_safe(_CC_UPPER, p, e)
+#define isVERTWS_utf8_safe(p, e)                                            \
+        _generic_non_swash_utf8_safe(_CC_VERTSPACE, is_VERTWS_high, p, e)
+#define isWORDCHAR_utf8_safe(p, e)                                          \
+                             _generic_swash_utf8_safe(_CC_WORDCHAR, p, e)
+#define isXDIGIT_utf8_safe(p, e)                                            \
+                   _generic_utf8_safe_no_upper_latin1(_CC_XDIGIT, p, e,     \
+                             (UNLIKELY((e) - (p) < UTF8SKIP(p))             \
+                              ? (_force_out_malformed_utf8_message(         \
+                                      (U8 *) (p), (U8 *) (e), 0, 1), 0)     \
+                              : is_XDIGIT_high(p)))
 
 #define toFOLD_utf8(p,s,l)	to_utf8_fold(p,s,l)
 #define toLOWER_utf8(p,s,l)	to_utf8_lower(p,s,l)
@@ -1798,6 +1916,71 @@ END_EXTERN_C
                                                             _CC_WORDCHAR, p)
 #define isXDIGIT_LC_utf8(p)   _generic_LC_func_utf8(isXDIGIT_LC,              \
                                                             is_XDIGIT_high, p)
+/* For internal core Perl use only: the base macros for defining macros like
+ * isALPHA_LC_utf8_safe.  These are like _generic_utf8, but if the first code
+ * point in 'p' is within the 0-255 range, it uses locale rules from the
+ * passed-in 'macro' parameter */
+#define _generic_LC_utf8_safe(macro, p, e, above_latin1)                    \
+         (__ASSERT_(_utf8_safe_assert(p, e))                                \
+         (UTF8_IS_INVARIANT(*(p)))                                          \
+          ? macro(*(p))                                                     \
+          : (UTF8_IS_DOWNGRADEABLE_START(*(p))                              \
+             ? ((LIKELY((e) - (p) > 1 && UTF8_IS_CONTINUATION(*((p)+1))))   \
+                ? macro(EIGHT_BIT_UTF8_TO_NATIVE(*(p), *((p)+1)))           \
+                : (_force_out_malformed_utf8_message(                       \
+                                        (U8 *) (p), (U8 *) (e), 0, 1), 0))  \
+              : above_latin1))
+
+#define _generic_LC_swash_utf8_safe(macro, classnum, p, e)                  \
+            _generic_LC_utf8_safe(macro, p, e,                              \
+                               _is_utf8_FOO_with_len(classnum, p, e))
+
+#define _generic_LC_func_utf8_safe(macro, above_latin1, p, e)               \
+            _generic_LC_utf8_safe(macro, p, e, above_latin1(p, e))
+
+#define _generic_LC_non_swash_utf8_safe(classnum, above_latin1, p, e)       \
+          _generic_LC_utf8_safe(classnum, p, e,                             \
+                             (UNLIKELY((e) - (p) < UTF8SKIP(p))             \
+                              ? (_force_out_malformed_utf8_message(         \
+                                      (U8 *) (p), (U8 *) (e), 0, 1), 0)     \
+                              : above_latin1(p)))
+
+#define isALPHANUMERIC_LC_utf8_safe(p, e)                                   \
+            _generic_LC_swash_utf8_safe(isALPHANUMERIC_LC,                  \
+                                        _CC_ALPHANUMERIC, p, e)
+#define isALPHA_LC_utf8_safe(p, e)                                          \
+            _generic_LC_swash_utf8_safe(isALPHA_LC, _CC_ALPHA, p, e)
+#define isASCII_LC_utf8_safe(p, e)                                          \
+                    (__ASSERT_(_utf8_safe_assert(p, e)) isASCII_LC(*(p)))
+#define isBLANK_LC_utf8_safe(p, e)                                          \
+        _generic_LC_non_swash_utf8_safe(isBLANK_LC, is_HORIZWS_high, p, e)
+#define isCNTRL_LC_utf8_safe(p, e)                                          \
+            _generic_LC_utf8_safe(isCNTRL_LC, p, e, 0)
+#define isDIGIT_LC_utf8_safe(p, e)                                          \
+            _generic_LC_swash_utf8_safe(isDIGIT_LC, _CC_DIGIT, p, e)
+#define isGRAPH_LC_utf8_safe(p, e)                                          \
+            _generic_LC_swash_utf8_safe(isGRAPH_LC, _CC_GRAPH, p, e)
+#define isIDCONT_LC_utf8_safe(p, e)                                         \
+            _generic_LC_func_utf8_safe(isIDCONT_LC,                         \
+                                _is_utf8_perl_idcont_with_len, p, e)
+#define isIDFIRST_LC_utf8_safe(p, e)                                        \
+            _generic_LC_func_utf8_safe(isIDFIRST_LC,                        \
+                                _is_utf8_perl_idstart_with_len, p, e)
+#define isLOWER_LC_utf8_safe(p, e)                                          \
+            _generic_LC_swash_utf8_safe(isLOWER_LC, _CC_LOWER, p, e)
+#define isPRINT_LC_utf8_safe(p, e)                                          \
+            _generic_LC_swash_utf8_safe(isPRINT_LC, _CC_PRINT, p, e)
+#define isPSXSPC_LC_utf8_safe(p, e)    isSPACE_LC_utf8_safe(p, e)
+#define isPUNCT_LC_utf8_safe(p, e)                                          \
+            _generic_LC_swash_utf8_safe(isPUNCT_LC, _CC_PUNCT, p, e)
+#define isSPACE_LC_utf8_safe(p, e)                                          \
+    _generic_LC_non_swash_utf8_safe(isSPACE_LC, is_XPERLSPACE_high, p, e)
+#define isUPPER_LC_utf8_safe(p, e)                                          \
+            _generic_LC_swash_utf8_safe(isUPPER_LC, _CC_UPPER, p, e)
+#define isWORDCHAR_LC_utf8_safe(p, e)                                       \
+            _generic_LC_swash_utf8_safe(isWORDCHAR_LC, _CC_WORDCHAR, p, e)
+#define isXDIGIT_LC_utf8_safe(p, e)                                         \
+        _generic_LC_non_swash_utf8_safe(isXDIGIT_LC, is_XDIGIT_high, p, e)
 
 /* Macros for backwards compatibility and for completeness when the ASCII and
  * Latin1 values are identical */

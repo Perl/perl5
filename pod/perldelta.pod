@@ -327,6 +327,15 @@ well.
 
 =item *
 
+New versions of macros like C<isALPHA_utf8> have been added, each with the
+suffix C<_safe>, like C<isSPACE_utf8_safe>.  These take an extra
+parameter, giving an upper limit of how far into the string it is safe
+to read.  Using the old versions could cause attempts to read beyond the
+end of the input buffer if the UTF-8 is not well-formed.  Details are at
+L<perlapi/Character classification>.
+
+=item *
+
 Calling macros like C<isALPHA_utf8> on malformed UTF-8 have issued a
 deprecation warning since Perl v5.18.  They now die.
 

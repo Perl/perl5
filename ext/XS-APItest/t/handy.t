@@ -104,6 +104,31 @@ sub get_display_locale_or_skip($$) {
     return (" ($locale)", 1);
 }
 
+sub try_malforming($$$)
+{
+    # Determines if the tests for malformed UTF-8 should be done.  When done,
+    # the .xs code creates malformations by pretending the length is shorter
+    # than it actually is.  Some things can't be malformed, and sometimes this
+    # test knows that the current code doesn't look for a malformation under
+    # various circumstances.
+
+    my ($i, $function, $using_locale) = @_;
+
+    # Single bytes can't be malformed
+    return 0 if $i < ((ord "A" == 65) ? 128 : 160);
+
+    # ASCII doesn't need to ever look beyond the first byte.
+    return 0 if $function eq "ASCII";
+
+    # No controls above 255, so the code doesn't look at those
+    return 0 if $i > 255 && $function eq "CNTRL";
+
+    # No non-ASCII digits below 256, except if using locales.
+    return 0 if $i < 256 && ! $using_locale && $function =~ /X?DIGIT/;
+
+    return 1;
+}
+
 my %properties = (
                    # name => Lookup-property name
                    alnum => 'Word',
@@ -131,6 +156,11 @@ my %properties = (
 my @warnings;
 local $SIG{__WARN__} = sub { push @warnings, @_ };
 
+my %utf8_param_code = (
+                        "_safe"                 =>  0,
+                        "_safe, malformed"      =>  1,
+                        "unsafe"                => -1,
+                      );
 
 foreach my $name (sort keys %properties, 'octal') {
     my @invlist;
@@ -282,13 +312,42 @@ foreach my $name (sort keys %properties, 'octal') {
                         $truth = $matches;
                     }
 
-                        my $display_call = "is${function}$suffix("
-                                         . " $display_name )$display_locale";
-                        $ret = truth eval "test_is${function}$suffix('$char')";
-                        if (is ($@, "", "$display_call didn't give error")) {
+                    foreach my $utf8_param("_safe",
+                                           "_safe, malformed",
+                                           "unsafe"
+                                          )
+                    {
+                        my $utf8_param_code = $utf8_param_code{$utf8_param};
+                        my $expect_error = $utf8_param_code > 0;
+                        next if      $expect_error
+                                && ! try_malforming($i, $function, $suffix =~ /LC/);
+
+                        my $display_call = "is${function}$suffix( $display_name"
+                                         . ", $utf8_param )$display_locale";
+                        $ret = truth eval "test_is${function}$suffix('$char',"
+                                        . " $utf8_param_code)";
+                        if ($expect_error) {
+                            isnt ($@, "",
+                                    "expected and got error in $display_call");
+                            like($@, qr/Malformed UTF-8 character/,
+                                "${tab}And got expected message");
+                            if (is (@warnings, 1,
+                                           "${tab}Got a single warning besides"))
+                            {
+                                like($warnings[0],
+                                     qr/Malformed UTF-8 character.*short/,
+                                     "${tab}Got expected warning");
+                            }
+                            else {
+                                diag("@warnings");
+                            }
+                            undef @warnings;
+                        }
+                        elsif (is ($@, "", "$display_call didn't give error")) {
                             is ($ret, $truth,
                                 "${tab}And correctly returned $truth");
                         }
+                    }
                 }
             }
         }

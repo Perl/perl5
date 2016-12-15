@@ -813,6 +813,8 @@ AnidR	|bool	|is_utf8_valid_partial_char_flags			    \
 		|NN const U8 * const s|NN const U8 * const e|const U32 flags
 AMpR	|bool	|_is_uni_FOO|const U8 classnum|const UV c
 AMpR	|bool	|_is_utf8_FOO|const U8 classnum|NN const U8 *p
+AMpR	|bool	|_is_utf8_FOO_with_len|const U8 classnum|NN const U8 *p	    \
+		|NN const U8 * const e
 ADMpR	|bool	|is_utf8_alnum	|NN const U8 *p
 ADMpR	|bool	|is_utf8_alnumc	|NN const U8 *p
 ADMpR	|bool	|is_utf8_idfirst|NN const U8 *p
@@ -823,6 +825,10 @@ AMpR	|bool	|_is_utf8_xidcont|NN const U8 *p
 AMpR	|bool	|_is_utf8_xidstart|NN const U8 *p
 AMpR	|bool	|_is_utf8_perl_idcont|NN const U8 *p
 AMpR	|bool	|_is_utf8_perl_idstart|NN const U8 *p
+AMpR	|bool	|_is_utf8_perl_idcont_with_len|NN const U8 *p		    \
+		|NN const U8 * const e
+AMpR	|bool	|_is_utf8_perl_idstart_with_len|NN const U8 *p		    \
+		|NN const U8 * const e
 ADMpR	|bool	|is_utf8_idcont	|NN const U8 *p
 ADMpR	|bool	|is_utf8_xidcont	|NN const U8 *p
 ADMpR	|bool	|is_utf8_alpha	|NN const U8 *p
@@ -2727,6 +2733,11 @@ sRM	|UV	|check_locale_boundary_crossing				    \
 		|NN U8* const ustrp					    \
 		|NN STRLEN *lenp
 iR	|bool	|is_utf8_common	|NN const U8 *const p|NN SV **swash|NN const char * const swashname|NULLOK SV* const invlist
+iR	|bool	|is_utf8_common_with_len|NN const U8 *const p		    \
+					   |NN const U8 *const e	    \
+				    |NN SV **swash			    \
+				    |NN const char * const swashname	    \
+				    |NULLOK SV* const invlist
 sR	|SV*	|swatch_get	|NN SV* swash|UV start|UV span
 sRM	|U8*	|swash_scan_list_line|NN U8* l|NN U8* const lend|NN UV* min \
 		|NN UV* max|NN UV* val|const bool wants_value		    \
