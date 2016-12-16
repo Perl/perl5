@@ -2429,7 +2429,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     if ((UTF8_IS_INVARIANT(*s)
                          && to_complement ^ cBOOL(_generic_isCC((U8) *s,
                                                                 classnum)))
-                        || (UTF8_IS_DOWNGRADEABLE_START(*s)
+                        || (   UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, strend)
                             && to_complement ^ cBOOL(
                                 _generic_isCC(EIGHT_BIT_UTF8_TO_NATIVE(*s,
                                                                       *(s + 1)),
@@ -6373,8 +6373,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 break;
             }
 
-            if (! UTF8_IS_DOWNGRADEABLE_START(nextchr)) { /* An above Latin-1 code point */
-                _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(locinput, reginfo->strend);
+            if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(locinput, reginfo->strend)) {
+                /* An above Latin-1 code point, or malformed */
+                _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(locinput,
+                                                       reginfo->strend);
                 goto utf8_posix_above_latin1;
             }
 
@@ -6458,7 +6460,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 }
                 locinput++;
             }
-            else if (UTF8_IS_DOWNGRADEABLE_START(nextchr)) {
+            else if (UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(locinput, reginfo->strend)) {
                 if (! (to_complement
                        ^ cBOOL(_generic_isCC(EIGHT_BIT_UTF8_TO_NATIVE(nextchr,
                                                                *(locinput + 1)),

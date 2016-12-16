@@ -3037,7 +3037,7 @@ S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result, U8* c
             return L1_func(*p, ustrp, lenp, L1_func_extra_param);            \
         }                                                                    \
     }                                                                        \
-    else if UTF8_IS_DOWNGRADEABLE_START(*p) {                                \
+    else if UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(p, p + UTF8SKIP(p)) {            \
         if (flags & (locale_flags)) {                                        \
             result = LC_L1_change_macro(EIGHT_BIT_UTF8_TO_NATIVE(*p,         \
                                                                  *(p+1)));   \

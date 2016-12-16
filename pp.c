@@ -4404,7 +4404,7 @@ PP(pp_quotemeta)
 			to_quote = TRUE;
 		    }
 		}
-		else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
+		else if (UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, s + len)) {
 		    if (
 #ifdef USE_LOCALE_CTYPE
 		    /* In locale, we quote all non-ASCII Latin1 chars.

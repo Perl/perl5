@@ -1723,13 +1723,14 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                 {
                     STRLEN i;
                     STRLEN d= 0;
+                    char * e = (char *) t + len;
 
                     for (i = 0; i < len; i+= UTF8SKIP(t + i)) {
                         U8 cur_char = t[i];
                         if (UTF8_IS_INVARIANT(cur_char)) {
                             s[d++] = cur_char;
                         }
-                        else if (UTF8_IS_DOWNGRADEABLE_START(cur_char)) {
+                        else if (UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(t + i, e)) {
                             s[d++] = EIGHT_BIT_UTF8_TO_NATIVE(cur_char, t[i+1]);
                         }
                         else {  /* Replace illegal cp with highest collating
