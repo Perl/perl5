@@ -153,13 +153,14 @@ my %properties = (
                    xdigit => 'XDigit',
                 );
 
+my %seen;
 my @warnings;
 local $SIG{__WARN__} = sub { push @warnings, @_ };
 
 my %utf8_param_code = (
                         "_safe"                 =>  0,
                         "_safe, malformed"      =>  1,
-                        "unsafe"                => -1,
+                        "deprecated unsafe"     => -1,
                       );
 
 foreach my $name (sort keys %properties, 'octal') {
@@ -314,13 +315,14 @@ foreach my $name (sort keys %properties, 'octal') {
 
                     foreach my $utf8_param("_safe",
                                            "_safe, malformed",
-                                           "unsafe"
+                                           "deprecated unsafe"
                                           )
                     {
                         my $utf8_param_code = $utf8_param_code{$utf8_param};
                         my $expect_error = $utf8_param_code > 0;
                         next if      $expect_error
-                                && ! try_malforming($i, $function, $suffix =~ /LC/);
+                                && ! try_malforming($i, $function,
+                                                    $suffix =~ /LC/);
 
                         my $display_call = "is${function}$suffix( $display_name"
                                          . ", $utf8_param )$display_locale";
@@ -346,6 +348,29 @@ foreach my $name (sort keys %properties, 'octal') {
                         elsif (is ($@, "", "$display_call didn't give error")) {
                             is ($ret, $truth,
                                 "${tab}And correctly returned $truth");
+                            if ($utf8_param_code < 0) {
+                                my $warnings_ok;
+                                my $unique_function = "is" . $function . $suffix;
+                                if (! $seen{$unique_function}++) {
+                                    $warnings_ok = is(@warnings, 1,
+                                        "${tab}This is first call to"
+                                      . " $unique_function; Got a single"
+                                      . " warning");
+                                    if ($warnings_ok) {
+                                        $warnings_ok = like($warnings[0],
+                qr/starting in Perl .* will require an additional parameter/,
+                                            "${tab}The warning was the expected"
+                                          . " deprecation one");
+                                    }
+                                }
+                                else {
+                                    $warnings_ok = is(@warnings, 0,
+                                        "${tab}This subsequent call to"
+                                      . " $unique_function did not warn");
+                                }
+                                $warnings_ok or diag("@warnings");
+                                undef @warnings;
+                            }
                         }
                     }
                 }

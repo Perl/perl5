@@ -582,7 +582,14 @@ future releases.
 Variant C<isFOO_utf8> is like C<isFOO_utf8_safe>, but takes just a single
 parameter, C<p>, which has the same meaning as the corresponding parameter does
 in C<isFOO_utf8_safe>.  The function therefore can't check if it is reading
-beyond the end of the string.
+beyond the end of the string.  Starting in Perl v5.30, it will take a second
+parameter, becoming a synonym for C<isFOO_utf8_safe>.  At that time every
+program that uses it will have to be changed to successfully compile.  In the
+meantime, the first runtime call to C<isFOO_utf8> from each call point in the
+program will raise a deprecation warning, enabled by default.  You can convert
+your program now to use C<isFOO_utf8_safe>, and avoid the warnings, and get an
+extra measure of protection, or you can wait until v5.30, when you'll be forced
+to add the C<e> parameter.
 
 Variant C<isFOO_LC> is like the C<isFOO_A> and C<isFOO_L1> variants, but the
 result is based on the current locale, which is what C<LC> in the name stands
@@ -615,7 +622,14 @@ future releases.
 Variant C<isFOO_LC_utf8> is like C<isFOO_LC_utf8_safe>, but takes just a single
 parameter, C<p>, which has the same meaning as the corresponding parameter does
 in C<isFOO_LC_utf8_safe>.  The function therefore can't check if it is reading
-beyond the end of the string.
+beyond the end of the string.  Starting in Perl v5.30, it will take a second
+parameter, becoming a synonym for C<isFOO_LC_utf8_safe>.  At that time every
+program that uses it will have to be changed to successfully compile.  In the
+meantime, the first runtime call to C<isFOO_LC_utf8> from each call point in
+the program will raise a deprecation warning, enabled by default.  You can
+convert your program now to use C<isFOO_LC_utf8_safe>, and avoid the warnings,
+and get an extra measure of protection, or you can wait until v5.30, when
+you'll be forced to add the C<e> parameter.
 
 =for apidoc Am|bool|isALPHA|char ch
 Returns a boolean indicating whether the specified character is an
@@ -1043,6 +1057,9 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
  * above ASCII in the latter case) */
 
 #  define _CC_SPACE             10      /* \s, [:space:] */
+#  define _CC_PSXSPC            _CC_SPACE   /* XXX Temporary, can be removed
+                                               when the deprecated isFOO_utf8()
+                                               functions are removed */
 #  define _CC_BLANK             11      /* [:blank:] */
 #  define _CC_XDIGIT            12      /* [:xdigit:] */
 #  define _CC_CNTRL             13      /* [:cntrl:] */
@@ -1061,6 +1078,9 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define _CC_NON_FINAL_FOLD           21
 #  define _CC_IS_IN_SOME_FOLD          22
 #  define _CC_MNEMONIC_CNTRL           23
+
+#  define _CC_IDCONT 24 /* XXX Temporary, can be removed when the deprecated
+                           isFOO_utf8() functions are removed */
 
 /* This next group is only used on EBCDIC platforms, so theoretically could be
  * shared with something entirely different that's only on ASCII platforms */
@@ -1701,14 +1721,14 @@ END_EXTERN_C
  * 'utf8' parameter.  This relies on the fact that ASCII characters have the
  * same representation whether utf8 or not.  Note that it assumes that the utf8
  * has been validated, and ignores 'use bytes' */
-#define _generic_utf8(classnum, p, utf8) (UTF8_IS_INVARIANT(*(p))              \
-                                         ? _generic_isCC(*(p), classnum)       \
-                                         : (UTF8_IS_DOWNGRADEABLE_START(*(p))) \
-                                           ? _generic_isCC(                    \
-                                                EIGHT_BIT_UTF8_TO_NATIVE(*(p), \
-                                                                   *((p)+1 )), \
-                                                classnum)                      \
-                                           : utf8)
+#define _base_generic_utf8(enum_name, name, p, use_locale )                 \
+    _is_utf8_FOO(CAT2(_CC_, enum_name),                                     \
+                 (const U8 *) p,                                            \
+                 "is" STRINGIFY(name) "_utf8",                              \
+                 "is" STRINGIFY(name) "_utf8_safe",                         \
+                 1, use_locale, __FILE__,__LINE__)
+
+#define _generic_utf8(name, p) _base_generic_utf8(name, name, p, 0)
 
 /* The "_safe" macros make sure that we don't attempt to read beyond 'e', but
  * they don't otherwise go out of their way to look for malformed UTF-8.  If
@@ -1746,8 +1766,6 @@ END_EXTERN_C
              : above_latin1))
 /* Like the above, but calls 'above_latin1(p)' to get the utf8 value.
  * 'above_latin1' can be a macro */
-#define _generic_func_utf8(classnum, above_latin1, p)  \
-                                    _generic_utf8(classnum, p, above_latin1(p))
 #define _generic_func_utf8_safe(classnum, above_latin1, p, e)               \
                     _generic_utf8_safe(classnum, p, e, above_latin1(p, e))
 #define _generic_non_swash_utf8_safe(classnum, above_latin1, p, e)          \
@@ -1758,8 +1776,6 @@ END_EXTERN_C
                               : above_latin1(p)))
 /* Like the above, but passes classnum to _isFOO_utf8(), instead of having an
  * 'above_latin1' parameter */
-#define _generic_swash_utf8(classnum, p)  \
-                      _generic_utf8(classnum, p, _is_utf8_FOO(classnum, p))
 #define _generic_swash_utf8_safe(classnum, p, e)                            \
 _generic_utf8_safe(classnum, p, e, _is_utf8_FOO_with_len(classnum, p, e))
 
@@ -1767,13 +1783,6 @@ _generic_utf8_safe(classnum, p, e, _is_utf8_FOO_with_len(classnum, p, e))
  * characters in the upper-Latin1 range (128-255 on ASCII platforms) which the
  * class is TRUE for.  Hence it can skip the tests for this range.
  * 'above_latin1' should include its arguments */
-#define _generic_utf8_no_upper_latin1(classnum, p, above_latin1)               \
-                                         (UTF8_IS_INVARIANT(*(p))              \
-                                         ? _generic_isCC(*(p), classnum)       \
-                                         : (UTF8_IS_ABOVE_LATIN1(*(p)))        \
-                                           ? above_latin1                      \
-                                           : 0)
-
 #define _generic_utf8_safe_no_upper_latin1(classnum, p, e, above_latin1)    \
          (__ASSERT_(_utf8_safe_assert(p, e))                                \
          (UTF8_IS_INVARIANT(*(p)))                                          \
@@ -1790,12 +1799,24 @@ _generic_utf8_safe(classnum, p, e, _is_utf8_FOO_with_len(classnum, p, e))
  * points; the regcharclass.h ones are implemented as a series of
  * "if-else-if-else ..." */
 
-#define isALPHA_utf8(p)        _generic_swash_utf8(_CC_ALPHA, p)
-#define isALPHANUMERIC_utf8(p) _generic_swash_utf8(_CC_ALPHANUMERIC, p)
-#define isASCII_utf8(p)        isASCII(*p) /* Because ASCII is invariant under
-                                               utf8, the non-utf8 macro works
-                                             */
-#define isBLANK_utf8(p)        _generic_func_utf8(_CC_BLANK, is_HORIZWS_high, p)
+#define isALPHA_utf8(p)         _generic_utf8(ALPHA, p)
+#define isALPHANUMERIC_utf8(p)  _generic_utf8(ALPHANUMERIC, p)
+#define isASCII_utf8(p)         _generic_utf8(ASCII, p)
+#define isBLANK_utf8(p)         _generic_utf8(BLANK, p)
+#define isCNTRL_utf8(p)         _generic_utf8(CNTRL, p)
+#define isDIGIT_utf8(p)         _generic_utf8(DIGIT, p)
+#define isGRAPH_utf8(p)         _generic_utf8(GRAPH, p)
+#define isIDCONT_utf8(p)        _generic_utf8(IDCONT, p)
+#define isIDFIRST_utf8(p)       _generic_utf8(IDFIRST, p)
+#define isLOWER_utf8(p)         _generic_utf8(LOWER, p)
+#define isPRINT_utf8(p)         _generic_utf8(PRINT, p)
+#define isPSXSPC_utf8(p)        _generic_utf8(PSXSPC, p)
+#define isPUNCT_utf8(p)         _generic_utf8(PUNCT, p)
+#define isSPACE_utf8(p)         _generic_utf8(SPACE, p)
+#define isUPPER_utf8(p)         _generic_utf8(UPPER, p)
+#define isVERTWS_utf8(p)        _generic_utf8(VERTSPACE, p)
+#define isWORDCHAR_utf8(p)      _generic_utf8(WORDCHAR, p)
+#define isXDIGIT_utf8(p)        _generic_utf8(XDIGIT, p)
 
 #define isALPHA_utf8_safe(p, e)  _generic_swash_utf8_safe(_CC_ALPHA, p, e)
 #define isALPHANUMERIC_utf8_safe(p, e)                                      \
@@ -1810,19 +1831,12 @@ _generic_utf8_safe(classnum, p, e, _is_utf8_FOO_with_len(classnum, p, e))
 #ifdef EBCDIC
     /* Because all controls are UTF-8 invariants in EBCDIC, we can use this
      * more efficient macro instead of the more general one */
-#   define isCNTRL_utf8(p)      isCNTRL_L1(*(p))
 #   define isCNTRL_utf8_safe(p, e)                                          \
                     (__ASSERT_(_utf8_safe_assert(p, e)) isCNTRL_L1(*(p))
 #else
-#   define isCNTRL_utf8(p)          _generic_utf8(_CC_CNTRL, p, 0)
 #   define isCNTRL_utf8_safe(p, e)  _generic_utf8_safe(_CC_CNTRL, p, e, 0)
 #endif
 
-#define isDIGIT_utf8(p)         _generic_utf8_no_upper_latin1(_CC_DIGIT, p,   \
-                                                  _is_utf8_FOO(_CC_DIGIT, p))
-#define isGRAPH_utf8(p)         _generic_swash_utf8(_CC_GRAPH, p)
-#define isIDCONT_utf8(p)        _generic_func_utf8(_CC_WORDCHAR,              \
-                                                  _is_utf8_perl_idcont, p)
 #define isDIGIT_utf8_safe(p, e)                                             \
             _generic_utf8_safe_no_upper_latin1(_CC_DIGIT, p, e,             \
                                     _is_utf8_FOO_with_len(_CC_DIGIT, p, e))
@@ -1836,19 +1850,6 @@ _generic_utf8_safe(classnum, p, e, _is_utf8_FOO_with_len(classnum, p, e))
  * ever wanted to know about.  (In the ASCII range, there isn't a difference.)
  * This used to be not the XID version, but we decided to go with the more
  * modern Unicode definition */
-#define isIDFIRST_utf8(p)   _generic_func_utf8(_CC_IDFIRST,                  \
-                                                _is_utf8_perl_idstart, p)
-
-#define isLOWER_utf8(p)     _generic_swash_utf8(_CC_LOWER, p)
-#define isPRINT_utf8(p)     _generic_swash_utf8(_CC_PRINT, p)
-#define isPSXSPC_utf8(p)    isSPACE_utf8(p)
-#define isPUNCT_utf8(p)     _generic_swash_utf8(_CC_PUNCT, p)
-#define isSPACE_utf8(p)     _generic_func_utf8(_CC_SPACE, is_XPERLSPACE_high, p)
-#define isUPPER_utf8(p)     _generic_swash_utf8(_CC_UPPER, p)
-#define isVERTWS_utf8(p)    _generic_func_utf8(_CC_VERTSPACE, is_VERTWS_high, p)
-#define isWORDCHAR_utf8(p)  _generic_swash_utf8(_CC_WORDCHAR, p)
-#define isXDIGIT_utf8(p)    _generic_utf8_no_upper_latin1(_CC_XDIGIT, p,     \
-                                                          is_XDIGIT_high(p))
 #define isIDFIRST_utf8_safe(p, e)                                           \
     _generic_func_utf8_safe(_CC_IDFIRST,                                    \
                     _is_utf8_perl_idstart_with_len, (U8 *) (p), (U8 *) (e))
@@ -1880,42 +1881,26 @@ _generic_utf8_safe(classnum, p, e, _is_utf8_FOO_with_len(classnum, p, e))
  * isALPHA_LC_utf8.  These are like _generic_utf8, but if the first code point
  * in 'p' is within the 0-255 range, it uses locale rules from the passed-in
  * 'macro' parameter */
-#define _generic_LC_utf8(macro, p, utf8)                                    \
-                         (UTF8_IS_INVARIANT(*(p))                           \
-                         ? macro(*(p))                                      \
-                         : (UTF8_IS_DOWNGRADEABLE_START(*(p)))              \
-                           ? macro(EIGHT_BIT_UTF8_TO_NATIVE(*(p), *((p)+1)))\
-                           : utf8)
+#define _generic_LC_utf8(name, p) _base_generic_utf8(name, name, p, 1)
 
-#define _generic_LC_swash_utf8(macro, classnum, p)                         \
-                    _generic_LC_utf8(macro, p, _is_utf8_FOO(classnum, p))
-#define _generic_LC_func_utf8(macro, above_latin1, p)                         \
-                              _generic_LC_utf8(macro, p, above_latin1(p))
+#define isALPHA_LC_utf8(p)         _generic_LC_utf8(ALPHA, p)
+#define isALPHANUMERIC_LC_utf8(p)  _generic_LC_utf8(ALPHANUMERIC, p)
+#define isASCII_LC_utf8(p)         _generic_LC_utf8(ASCII, p)
+#define isBLANK_LC_utf8(p)         _generic_LC_utf8(BLANK, p)
+#define isCNTRL_LC_utf8(p)         _generic_LC_utf8(CNTRL, p)
+#define isDIGIT_LC_utf8(p)         _generic_LC_utf8(DIGIT, p)
+#define isGRAPH_LC_utf8(p)         _generic_LC_utf8(GRAPH, p)
+#define isIDCONT_LC_utf8(p)        _generic_LC_utf8(IDCONT, p)
+#define isIDFIRST_LC_utf8(p)       _generic_LC_utf8(IDFIRST, p)
+#define isLOWER_LC_utf8(p)         _generic_LC_utf8(LOWER, p)
+#define isPRINT_LC_utf8(p)         _generic_LC_utf8(PRINT, p)
+#define isPSXSPC_LC_utf8(p)        _generic_LC_utf8(PSXSPC, p)
+#define isPUNCT_LC_utf8(p)         _generic_LC_utf8(PUNCT, p)
+#define isSPACE_LC_utf8(p)         _generic_LC_utf8(SPACE, p)
+#define isUPPER_LC_utf8(p)         _generic_LC_utf8(UPPER, p)
+#define isWORDCHAR_LC_utf8(p)      _generic_LC_utf8(WORDCHAR, p)
+#define isXDIGIT_LC_utf8(p)        _generic_LC_utf8(XDIGIT, p)
 
-#define isALPHANUMERIC_LC_utf8(p) _generic_LC_swash_utf8(isALPHANUMERIC_LC,   \
-                                                      _CC_ALPHANUMERIC, p)
-#define isALPHA_LC_utf8(p)    _generic_LC_swash_utf8(isALPHA_LC, _CC_ALPHA, p)
-#define isASCII_LC_utf8(p)     isASCII_LC(*p)
-#define isBLANK_LC_utf8(p)    _generic_LC_func_utf8(isBLANK_LC,               \
-                                                         is_HORIZWS_high, p)
-#define isCNTRL_LC_utf8(p)    _generic_LC_utf8(isCNTRL_LC, p, 0)
-#define isDIGIT_LC_utf8(p)    _generic_LC_swash_utf8(isDIGIT_LC, _CC_DIGIT, p)
-#define isGRAPH_LC_utf8(p)    _generic_LC_swash_utf8(isGRAPH_LC, _CC_GRAPH, p)
-#define isIDCONT_LC_utf8(p)   _generic_LC_func_utf8(isIDCONT_LC,              \
-                                                    _is_utf8_perl_idcont, p)
-#define isIDFIRST_LC_utf8(p)  _generic_LC_func_utf8(isIDFIRST_LC,             \
-                                                    _is_utf8_perl_idstart, p)
-#define isLOWER_LC_utf8(p)    _generic_LC_swash_utf8(isLOWER_LC, _CC_LOWER, p)
-#define isPRINT_LC_utf8(p)    _generic_LC_swash_utf8(isPRINT_LC, _CC_PRINT, p)
-#define isPSXSPC_LC_utf8(p)    isSPACE_LC_utf8(p)
-#define isPUNCT_LC_utf8(p)    _generic_LC_swash_utf8(isPUNCT_LC, _CC_PUNCT, p)
-#define isSPACE_LC_utf8(p)    _generic_LC_func_utf8(isSPACE_LC,               \
-                                                        is_XPERLSPACE_high, p)
-#define isUPPER_LC_utf8(p)    _generic_LC_swash_utf8(isUPPER_LC, _CC_UPPER, p)
-#define isWORDCHAR_LC_utf8(p) _generic_LC_swash_utf8(isWORDCHAR_LC,           \
-                                                            _CC_WORDCHAR, p)
-#define isXDIGIT_LC_utf8(p)   _generic_LC_func_utf8(isXDIGIT_LC,              \
-                                                            is_XDIGIT_high, p)
 /* For internal core Perl use only: the base macros for defining macros like
  * isALPHA_LC_utf8_safe.  These are like _generic_utf8, but if the first code
  * point in 'p' is within the 0-255 range, it uses locale rules from the

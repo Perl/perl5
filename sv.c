@@ -15325,6 +15325,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_GCB_invlist = sv_dup_inc(proto_perl->IGCB_invlist, param);
     PL_SB_invlist = sv_dup_inc(proto_perl->ISB_invlist, param);
     PL_WB_invlist = sv_dup_inc(proto_perl->IWB_invlist, param);
+    PL_seen_deprecated_macro = hv_dup_inc(proto_perl->Iseen_deprecated_macro, param);
     PL_utf8_mark	= sv_dup_inc(proto_perl->Iutf8_mark, param);
     PL_utf8_toupper	= sv_dup_inc(proto_perl->Iutf8_toupper, param);
     PL_utf8_totitle	= sv_dup_inc(proto_perl->Iutf8_totitle, param);

@@ -672,24 +672,30 @@ with a ptr argument.
  * beginning of a utf8 character.  Now that foo_utf8() determines that itself,
  * no need to do it again here
  */
-#define isIDFIRST_lazy_if(p,UTF) ((IN_BYTES || !UTF)                \
-				 ? isIDFIRST(*(p))                  \
-				 : isIDFIRST_utf8((const U8*)p))
-#define isWORDCHAR_lazy_if(p,UTF)   ((IN_BYTES || (!UTF))           \
-				 ? isWORDCHAR(*(p))                 \
-				 : isWORDCHAR_utf8((const U8*)p))
-#define isALNUM_lazy_if(p,UTF)   isWORDCHAR_lazy_if(p,UTF)
+#define isIDFIRST_lazy_if(p,UTF)                                            \
+            _is_utf8_FOO(_CC_IDFIRST, (const U8 *) p, "isIDFIRST_lazy_if",  \
+                         "isIDFIRST_lazy_if_safe",                          \
+                         cBOOL(UTF && ! IN_BYTES), 0, __FILE__,__LINE__)
 
 #define isIDFIRST_lazy_if_safe(p, e, UTF)                                   \
                    ((IN_BYTES || !UTF)                                      \
                      ? isIDFIRST(*(p))                                      \
                      : isIDFIRST_utf8_safe(p, e))
 
+#define isWORDCHAR_lazy_if(p,UTF)                                           \
+            _is_utf8_FOO(_CC_IDFIRST, (const U8 *) p, "isWORDCHAR_lazy_if", \
+                         "isWORDCHAR_lazy_if_safe",                         \
+                         cBOOL(UTF && ! IN_BYTES), 0, __FILE__,__LINE__)
+
 #define isWORDCHAR_lazy_if_safe(p, e, UTF)                                  \
                    ((IN_BYTES || !UTF)                                      \
                      ? isWORDCHAR(*(p))                                     \
                      : isWORDCHAR_utf8_safe((U8 *) p, (U8 *) e))
 
+#define isALNUM_lazy_if(p,UTF)                                              \
+            _is_utf8_FOO(_CC_IDFIRST, (const U8 *) p, "isALNUM_lazy_if",    \
+                         "isWORDCHAR_lazy_if_safe",                         \
+                         cBOOL(UTF && ! IN_BYTES), 0, __FILE__,__LINE__)
 
 #define UTF8_MAXLEN UTF8_MAXBYTES
 

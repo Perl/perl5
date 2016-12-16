@@ -279,6 +279,7 @@
 #define PL_scopestack_max	(vTHX->Iscopestack_max)
 #define PL_scopestack_name	(vTHX->Iscopestack_name)
 #define PL_secondgv		(vTHX->Isecondgv)
+#define PL_seen_deprecated_macro	(vTHX->Iseen_deprecated_macro)
 #define PL_sharehook		(vTHX->Isharehook)
 #define PL_sig_pending		(vTHX->Isig_pending)
 #define PL_sighandlerp		(vTHX->Isighandlerp)

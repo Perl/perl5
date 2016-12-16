@@ -54,10 +54,10 @@ PERL_CALLCONV bool	Perl__is_uni_perl_idcont(pTHX_ UV c)
 PERL_CALLCONV bool	Perl__is_uni_perl_idstart(pTHX_ UV c)
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV bool	Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p)
+PERL_CALLCONV bool	Perl__is_utf8_FOO(pTHX_ U8 classnum, const U8 * const p, const char * const name, const char * const alternative, const bool use_utf8, const bool use_locale, const char * const file, const unsigned line)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT__IS_UTF8_FOO	\
-	assert(p)
+	assert(p); assert(name); assert(alternative); assert(file)
 
 PERL_CALLCONV bool	Perl__is_utf8_FOO_with_len(pTHX_ const U8 classnum, const U8 *p, const U8 * const e)
 			__attribute__warn_unused_result__;
@@ -79,20 +79,10 @@ PERL_CALLCONV bool	Perl__is_utf8_mark(pTHX_ const U8 *p)
 #define PERL_ARGS_ASSERT__IS_UTF8_MARK	\
 	assert(p)
 
-PERL_CALLCONV bool	Perl__is_utf8_perl_idcont(pTHX_ const U8 *p)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT	\
-	assert(p)
-
 PERL_CALLCONV bool	Perl__is_utf8_perl_idcont_with_len(pTHX_ const U8 *p, const U8 * const e)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT_WITH_LEN	\
 	assert(p); assert(e)
-
-PERL_CALLCONV bool	Perl__is_utf8_perl_idstart(pTHX_ const U8 *p)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART	\
-	assert(p)
 
 PERL_CALLCONV bool	Perl__is_utf8_perl_idstart_with_len(pTHX_ const U8 *p, const U8 * const e)
 			__attribute__warn_unused_result__;
@@ -5276,9 +5266,6 @@ STATIC char*	S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, cons
 #define PERL_ARGS_ASSERT_FIND_BYCLASS	\
 	assert(prog); assert(c); assert(s); assert(strend)
 
-PERL_CALLCONV bool	Perl_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
-			__attribute__warn_unused_result__;
-
 STATIC bool	S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_ISFOO_UTF8_LC	\
@@ -5359,6 +5346,11 @@ STATIC bool	S_to_byte_substr(pTHX_ regexp * prog);
 STATIC void	S_to_utf8_substr(pTHX_ regexp * prog);
 #define PERL_ARGS_ASSERT_TO_UTF8_SUBSTR	\
 	assert(prog)
+#endif
+#if defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
+PERL_CALLCONV bool	Perl_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
+			__attribute__warn_unused_result__;
+
 #endif
 #if defined(PERL_IN_SCOPE_C)
 STATIC void	S_save_pushptri32ptr(pTHX_ void *const ptr1, const I32 i, void *const ptr2, const int type);
@@ -5672,6 +5664,9 @@ STATIC char *	S_unexpected_non_continuation_text(pTHX_ const U8 * const s, STRLE
 #define PERL_ARGS_ASSERT_UNEXPECTED_NON_CONTINUATION_TEXT	\
 	assert(s)
 
+STATIC void	S_warn_on_first_deprecated_use(pTHX_ const char * const name, const char * const alternative, const bool use_locale, const char * const file, const unsigned line);
+#define PERL_ARGS_ASSERT_WARN_ON_FIRST_DEPRECATED_USE	\
+	assert(name); assert(alternative); assert(file)
 #endif
 #if defined(PERL_IN_UTF8_C) || defined(PERL_IN_PP_C)
 PERL_CALLCONV UV	Perl__to_upper_title_latin1(pTHX_ const U8 c, U8 *p, STRLEN *lenp, const char S_or_s);

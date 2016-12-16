@@ -2523,17 +2523,125 @@ S_is_utf8_common_with_len(pTHX_ const U8 *const p, const U8 * const e, SV **swas
     return swash_fetch(*swash, p, TRUE) != 0;
 }
 
+STATIC void
+S_warn_on_first_deprecated_use(pTHX_ const char * const name,
+                                     const char * const alternative,
+                                     const bool use_locale,
+                                     const char * const file,
+                                     const unsigned line)
+{
+    const char * key;
+
+    PERL_ARGS_ASSERT_WARN_ON_FIRST_DEPRECATED_USE;
+
+    if (ckWARN_d(WARN_DEPRECATED)) {
+
+        key = Perl_form(aTHX_ "%s;%d;%s;%d", name, use_locale, file, line);
+	if (! hv_fetch(PL_seen_deprecated_macro, key, strlen(key), 0)) {
+            if (! PL_seen_deprecated_macro) {
+                PL_seen_deprecated_macro = newHV();
+            }
+            if (! hv_store(PL_seen_deprecated_macro, key,
+                           strlen(key), &PL_sv_undef, 0))
+            {
+		Perl_croak(aTHX_ "panic: hv_store() unexpectedly failed");
+            }
+
+                Perl_warner(aTHX_ WARN_DEPRECATED,
+                            "In %s, line %d, starting in Perl v5.30, %s() will"
+                            " require an additional parameter.  Avoid this"
+                            " message by converting to use %s().\n",
+                            file, line, name, alternative);
+        }
+    }
+}
+
 bool
-Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p)
+Perl__is_utf8_FOO(pTHX_       U8   classnum,
+                        const U8   *p,
+                        const char * const name,
+                        const char * const alternative,
+                        const bool use_utf8,
+                        const bool use_locale,
+                        const char * const file,
+                        const unsigned line)
 {
     PERL_ARGS_ASSERT__IS_UTF8_FOO;
 
-    assert(classnum < _FIRST_NON_SWASH_CC);
+    warn_on_first_deprecated_use(name, alternative, use_locale, file, line);
 
-    return is_utf8_common(p,
-                          &PL_utf8_swash_ptrs[classnum],
-                          swash_property_names[classnum],
-                          PL_XPosix_ptrs[classnum]);
+    if (use_utf8 && UTF8_IS_ABOVE_LATIN1(*p)) {
+        SV * invlist;
+
+        switch (classnum) {
+            case _CC_WORDCHAR:
+            case _CC_DIGIT:
+            case _CC_ALPHA:
+            case _CC_LOWER:
+            case _CC_UPPER:
+            case _CC_PUNCT:
+            case _CC_PRINT:
+            case _CC_ALPHANUMERIC:
+            case _CC_GRAPH:
+            case _CC_CASED:
+
+                return is_utf8_common(p,
+                                      &PL_utf8_swash_ptrs[classnum],
+                                      swash_property_names[classnum],
+                                      PL_XPosix_ptrs[classnum]);
+
+            case _CC_SPACE:
+                return is_XPERLSPACE_high(p);
+            case _CC_BLANK:
+                return is_HORIZWS_high(p);
+            case _CC_XDIGIT:
+                return is_XDIGIT_high(p);
+            case _CC_CNTRL:
+                return 0;
+            case _CC_ASCII:
+                return 0;
+            case _CC_VERTSPACE:
+                return is_VERTWS_high(p);
+            case _CC_IDFIRST:
+                if (! PL_utf8_perl_idstart) {
+                    invlist = _new_invlist_C_array(_Perl_IDStart_invlist);
+                }
+                return is_utf8_common(p, &PL_utf8_perl_idstart, "_Perl_IDStart", invlist);
+            case _CC_IDCONT:
+                if (! PL_utf8_perl_idcont) {
+                    invlist = _new_invlist_C_array(_Perl_IDCont_invlist);
+                }
+                return is_utf8_common(p, &PL_utf8_perl_idcont, "_Perl_IDCont", invlist);
+        }
+    }
+
+    /* idcont is the same as wordchar below 256 */
+    if (classnum == _CC_IDCONT) {
+        classnum = _CC_WORDCHAR;
+    }
+    else if (classnum == _CC_IDFIRST) {
+        if (*p == '_') {
+            return TRUE;
+        }
+        classnum = _CC_ALPHA;
+    }
+
+    if (! use_locale) {
+        if (! use_utf8 || UTF8_IS_INVARIANT(*p)) {
+            return _generic_isCC(*p, classnum);
+        }
+
+        return _generic_isCC(EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p + 1 )), classnum);
+    }
+    else {
+        if (! use_utf8 || UTF8_IS_INVARIANT(*p)) {
+            return isFOO_lc(classnum, *p);
+        }
+
+        return isFOO_lc(classnum, EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p + 1 )));
+    }
+
+    NOT_REACHED; /* NOTREACHED */
 }
 
 bool
@@ -2549,19 +2657,6 @@ Perl__is_utf8_FOO_with_len(pTHX_ const U8 classnum, const U8 *p,
                                    &PL_utf8_swash_ptrs[classnum],
                                    swash_property_names[classnum],
                                    PL_XPosix_ptrs[classnum]);
-}
-
-bool
-Perl__is_utf8_perl_idstart(pTHX_ const U8 *p)
-{
-    SV* invlist = NULL;
-
-    PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART;
-
-    if (! PL_utf8_perl_idstart) {
-        invlist = _new_invlist_C_array(_Perl_IDStart_invlist);
-    }
-    return is_utf8_common(p, &PL_utf8_perl_idstart, "_Perl_IDStart", invlist);
 }
 
 bool
@@ -2586,19 +2681,6 @@ Perl__is_utf8_xidstart(pTHX_ const U8 *p)
     if (*p == '_')
 	return TRUE;
     return is_utf8_common(p, &PL_utf8_xidstart, "XIdStart", NULL);
-}
-
-bool
-Perl__is_utf8_perl_idcont(pTHX_ const U8 *p)
-{
-    SV* invlist = NULL;
-
-    PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT;
-
-    if (! PL_utf8_perl_idcont) {
-        invlist = _new_invlist_C_array(_Perl_IDCont_invlist);
-    }
-    return is_utf8_common(p, &PL_utf8_perl_idcont, "_Perl_IDCont", invlist);
 }
 
 bool
