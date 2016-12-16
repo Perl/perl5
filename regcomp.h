@@ -851,6 +851,15 @@ typedef struct {
 typedef struct _reg_trie_state    reg_trie_state;
 typedef struct _reg_trie_trans    reg_trie_trans;
 
+#if UVSIZE == 8
+   /* read 8 chars at a time into a UV and use some logic
+    * tricks to check all 8 bytes simultaneously for certain
+    * types of char range */
+#  define PERL_FAST_BITMAP_SCAN
+   /* how many predefined chars we can look for at once */
+#  define MAX_START_CHARS 4
+#endif
+
 
 /* anything in here that needs to be freed later
    should be dealt with in pregfree.
@@ -863,6 +872,11 @@ struct _reg_trie_data {
     reg_trie_state  *states;         /* state data */
     reg_trie_trans  *trans;          /* array of transition elements */
     char            *bitmap;         /* stclass bitmap */
+#ifdef PERL_FAST_BITMAP_SCAN
+    UV              num_startchars;  /* how many slots used in startchars */
+    UV              startchars[MAX_START_CHARS]; /* bitmap has only these chars */
+    UV neededbits0, neededbits1;     /* the common 0's and 1's of all branches */
+#endif
     U16 	    *jump;           /* optional 1 indexed array of offsets before tail 
                                         for the node following a given word. */
     reg_trie_wordinfo *wordinfo;     /* array of info per word */

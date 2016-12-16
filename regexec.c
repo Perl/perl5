@@ -1459,6 +1459,154 @@ Perl_re_intuit_start(pTHX_
     return NULL;
 }
 
+#ifdef PERL_FAST_BITMAP_SCAN
+
+/* scan a string in the range s..end-1 looking for any of the chars in
+ *trie_start->startchar[]. Does it 8 chars at a time. Assumes
+ * ->startchar[] matches the same chars as ->bitmap.
+ * returns end on failure to match.
+ */
+
+static U8*
+S_fast_bitmap_scan(reg_trie_data *trie, U8* s, U8* end)
+{
+    UV *p, *pend;
+    UV mask;
+    UV ones;
+    /* XXX stuff TODO:
+    *   * pass the real end of the string as well as the maximum start
+    *     pos (which is what end is) which will allow greater numbers of
+    *     full 8-byte words to be read in.
+    *   * maybe integrate the 'partial word at beginning/end' into the
+    *     main loop -  maintain a 64-bit buffer which is a mixture of
+    *     2 words. That way the neededbits stuff can be applied near the
+    *     begin and end too.
+    *   * On architectures that allow misaligned reads, see if they
+    *     cost - otherwise it may be easiest to just do x = *(UV*)s
+    *     without all the shifting and fiddling.
+    */
+
+
+    /*XXX is bit-fiddling with a pointer legal? */
+    /*set end0 to the next 8-byte boundary following s */
+    U8 *end0 = (U8*) ((UV*)((UV)(s-1) & ~7) + 1);
+
+    if (end0 >= end)
+        goto partial_end;
+
+    /* do partial word at beginning */
+    /* XXX this currently avoided the neededbits[01] tests below.
+     * Integrate with the main loop */
+    while (s < end0) {
+        U8 c = *s;
+        if (BITMAP_TEST(trie->bitmap, c))
+            return s;
+        s++;
+    }
+
+    p = (UV*)s;
+    /* XXX check this end condition is right for all 8 positions */
+    pend = (UV*)((UV)end & ~7);
+
+    mask = 0x8080808080808080;
+    ones = 0x0101010101010101;
+
+    while (p < pend) {
+        UV c, cx, i, res, r, x;
+
+        x = *p++;
+        res = 0;
+
+        assert(trie->num_startchars > 0);
+
+        /* How it works.
+         * We want to detect at least one zero byte in c ^ x (aka cx).
+         * By subtracting 0x010101...,  a byte ends up with its top bit
+         * set if its previous value was 0x00, 0x01, 0x81..0xff (the
+         * 0x01 is included because a lower byte may have underflowed, so
+         * 2 is subtracted from 0x01).  By anding in the complements of
+         * cx and (cx << 7), we eliminate the top bit being set for
+         * 0x81..0xff  and 0x01 respectively.
+         * If we didn't care about *which* byte is zero, we could skip the
+         * (cx << 7), since an underflow will only occur if a lower byte
+         * is zero.
+         */
+        for (i = 0; i < trie->num_startchars; i++) {
+            c = trie->startchars[i];
+            cx = (c ^ x);
+            res |= ((cx - ones) & ~((cx << 7) | cx));
+        }
+        res &= mask;
+        if (!res)
+            continue;
+
+        /* found one! Determine the index 0..7 of the first match */
+        /* XXX this assumes little-endian */
+        s = (U8*)(p-1);
+        r = res;
+
+        c = (r & 0xffffffff);
+        s += (!c) << 2;
+        r >>= (32 * !c);
+
+        c = (r & 0xffff);
+        s += (!c) << 1;
+        r >>= (16 * !c);
+
+        c = (r & 0x80);
+        s += (!c);
+
+        /* need a whole extra word to do the needed calculation */
+        if (p == pend)
+            return s;
+
+        /* see whether the 8 bytes starting at the provisional match
+         * position satisfy all the "must be a zero/one bit here"
+         * conditions generates from the unions of the first 8 bytes of
+         * every alternate string
+         */
+        {
+            /* XXX lots more little-endian assumptions here */
+            UV x1 = *p;
+            UV offset = s - (U8*)(p-1);
+            
+            if (offset) {
+                res >>= 8*offset;
+                x >>= 8*offset;
+                x |= (x1 << (8 * (8 - offset)));
+            }
+            if (!(x & trie->neededbits0) & !(~x & trie->neededbits1))
+                return s;
+
+            /* try any other matching positions */
+            while (offset <= 7) {
+                offset++;
+                s++;
+                x >>= 8;
+                res >>= 8;
+                if (!(res & 0x80))
+                    continue;
+                x |= (x1 << (8 * (8 - offset)));
+                if (!(x & trie->neededbits0) & !(~x & trie->neededbits1))
+                    return s;
+            }
+        }
+    }
+
+    s = (U8*)(p--);
+
+   partial_end:
+    /* do partial-word at end */
+    while (s < end) {
+        U8 c = *s;
+        if (BITMAP_TEST(trie->bitmap, c))
+            return s;
+        s++;
+    }
+    return s;
+}
+#endif
+
 
 #define DECL_TRIE_TYPE(scan) \
     const enum { trie_plain, trie_utf8, trie_utf8_fold, trie_latin_utf8_fold,       \
@@ -2510,6 +2658,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             /* what trie are we using right now */
             reg_ac_data *aho = (reg_ac_data*)progi->data->data[ ARG( c ) ];
             reg_trie_data *trie = (reg_trie_data*)progi->data->data[ aho->trie ];
+#ifdef PERL_FAST_BITMAP_SCAN
+            reg_trie_data *trie_start = trie; /* trie contains start chars */
+#endif
             HV *widecharmap = MUTABLE_HV(progi->data->data[ aho->trie + 1 ]);
 
             const char *last_start = strend - trie->minlen;
@@ -2545,8 +2696,12 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             {
                 if (trie->bitmap)
                     bitmap=(U8*)trie->bitmap;
-                else
+                else {
                     bitmap=(U8*)ANYOF_BITMAP(c);
+#ifdef PERL_FAST_BITMAP_SCAN
+                    trie_start = NULL; /* XXX disable for now */
+#endif
+                }
             }
             /* this is the Aho-Corasick algorithm modified a touch
                to include special handling for long "unknown char" sequences.
@@ -2597,7 +2752,15 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                 while ( uc <= (U8*)last_start && !BITMAP_TEST(bitmap,*uc) ) {
                                     uc += UTF8SKIP(uc);
                                 }
-                            } else {
+                            }
+#ifdef PERL_FAST_BITMAP_SCAN
+                            else if (trie_start && trie_start->startchars[0]
+                                && (U8*)last_start - uc >= 8)
+                                uc = S_fast_bitmap_scan(trie_start,
+                                                    uc, (U8*)last_start + 1);
+#endif
+                            else {
+
                                 while ( uc <= (U8*)last_start  && !BITMAP_TEST(bitmap,*uc) ) {
                                     uc++;
                                 }

@@ -1365,4 +1365,14 @@
         setup   => '$_ = ("0" x 100) . ("a" x 100);',
         code    => '/[acgt]+/',
     },
+    'regex::branch::floating' => {
+        desc    => '/dog|cat/ where match starts at position 0',
+        setup   => '$_ = "cat" . ("0" x 100);',
+        code    => '/dog|cat/',
+    },
+    'regex::branch::floating_away' => {
+        desc    => '/dog|cat/ where match starts at position 100',
+        setup   => '$_ = ("0" x 100) . "cat";',
+        code    => '/dog|cat/',
+    },
 ];

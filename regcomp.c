@@ -2485,6 +2485,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
     PERL_UNUSED_ARG(depth);
 #endif
 
+
     switch (flags) {
         case EXACT: case EXACTL: break;
 	case EXACTFA:
@@ -2505,6 +2506,11 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 	trie->bitmap = (char *) PerlMemShared_calloc( ANYOF_BITMAP_SIZE, 1 );
     trie->wordinfo = (reg_trie_wordinfo *) PerlMemShared_calloc(
                        trie->wordcount+1, sizeof(reg_trie_wordinfo));
+#ifdef PERL_FAST_BITMAP_SCAN
+    trie->neededbits0 = ~(UV)0; /* the common 0's and 1's of all branches */
+    trie->neededbits1 = ~(UV)0;
+#endif
+
 
     DEBUG_r({
         trie_words = newAV();
@@ -2600,6 +2606,42 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 TRIE_BITMAP_SET(trie, LATIN_SMALL_LETTER_SHARP_S);
             }
         }
+
+#ifdef PERL_FAST_BITMAP_SCAN
+        /* calculate needed0 and needed1 */
+        /* XXX currently lots wrong with this - needed[01] should
+         * proably be used independently of whether we're using a bitmap.
+         * It probably does lots of things wrong with folding - perhaps
+         * under folding it should add both the folded and non-folded
+         * chars. 
+         * This should probably also be calculated *after* any common
+         * prefix has been extracted - at the moment we just quietly
+         * disable it later on
+         */
+        if (set_bit) {
+            const U8 *s, *se, *s8;
+            int i = 0;
+            U8 *n0 = (U8*)&(trie->neededbits0);
+            U8 *n1 = (U8*)&(trie->neededbits1);
+
+            s = uc;
+            s8 = s + 8;
+            se = e;
+            if (se > s8)
+                se = s8;
+            for  (; s < se; s++) {
+                U8 c = *s;
+                n0[i] &= (~c & 0xff);
+                n1[i] &= c;
+                i++;
+            }
+            for  (; s < s8; s++) {
+                n0[i] &= 0;
+                n1[i] &= 0;
+                i++;
+            }
+        }
+#endif
 
         for ( ; uc < e ; uc += len ) {  /* Look at each char in the current
                                            branch */
@@ -3299,6 +3341,14 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                                         Perl_re_printf( aTHX_  "%s", (char*)ch)
                                     );
 				}
+#ifdef PERL_FAST_BITMAP_SCAN
+                                /* XXX these were calculated before a common
+                                 * prefix was removed and are wrong -
+                                 * should really be generated *after*
+                                 * prrefix removal */
+                                trie->neededbits0 = 0;
+                                trie->neededbits1 = 1;
+#endif
 			    }
                             /* store the current firstchar in the bitmap */
                             TRIE_BITMAP_SET_FOLDED(trie,*ch,folder);
@@ -3413,6 +3463,33 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 trie->bitmap= NULL;
             } else
                 OP( convert ) = TRIE;
+
+#ifdef PERL_FAST_BITMAP_SCAN
+            trie->num_startchars = 0;
+
+            if (trie->bitmap) {
+                /* XXX what about the case above where trie is * transferred? */
+                /* XXX probably more efficient to generate these while
+                 * bitmap is being created, rather than scan whole bitmap
+                 * afterwards??? */
+                U64 c, c8;
+
+                for (c = 0; c < 256; c++) {
+                    if (!TRIE_BITMAP_TEST(trie, c))
+                        continue;
+                    trie->num_startchars++;
+                    if (trie->num_startchars > MAX_START_CHARS) {
+                        trie->num_startchars = 0;
+                        break;
+                    }
+                    /* duplicate c in every byte of the U64 var */
+                    c8 = (c  <<  8) |  c;
+                    c8 = (c8 << 16) | c8;
+                    c8 = (c8 << 32) | c8;
+                    trie->startchars[trie->num_startchars - 1] = c8;
+                }
+            }
+#endif
 
             /* store the type in the flags */
             convert->flags = nodetype;
