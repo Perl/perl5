@@ -1348,4 +1348,21 @@
         setup   => 'my $i = 0;',
         code    => 'while (++$i % 4) {}',
     },
+
+
+    'regex::anyof_plus::anchored' => {
+        desc    => '/^[acgt]+/',
+        setup   => '$_ = "a" x 100;',
+        code    => '/^[acgt]+/',
+    },
+    'regex::anyof_plus::floating' => {
+        desc    => '/[acgt]+where match starts at position 0 for 100 chars/',
+        setup   => '$_ = "a" x 100;',
+        code    => '/[acgt]+/',
+    },
+    'regex::anyof_plus::floating_away' => {
+        desc    => '/[acgt]+/ where match starts at position 100 for 100 chars',
+        setup   => '$_ = ("0" x 100) . ("a" x 100);',
+        code    => '/[acgt]+/',
+    },
 ];

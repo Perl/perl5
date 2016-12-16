@@ -1881,8 +1881,11 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             REXEC_FBC_UTF8_CLASS_SCAN(
                       reginclass(prog, c, (U8*)s, (U8*) strend, utf8_target));
         }
+        else if (ANYOF_FLAGS(c)) {
+            REXEC_FBC_CLASS_SCAN(reginclass(prog,c, (U8*)s, (U8*)s+1, 0));
+        }
         else {
-            REXEC_FBC_CLASS_SCAN(REGINCLASS(prog, c, (U8*)s, 0));
+            REXEC_FBC_CLASS_SCAN(ANYOF_BITMAP_TEST(c, *((U8*)s)));
         }
         break;
 
@@ -8892,8 +8895,14 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 		scan += UTF8SKIP(scan);
 		hardcount++;
 	    }
-	} else {
-	    while (scan < loceol && REGINCLASS(prog, p, (U8*)scan, 0))
+	}
+        else if (ANYOF_FLAGS(p)) {
+	    while (scan < loceol
+                    && reginclass(prog, p, (U8*)scan, (U8*)scan+1, 0))
+		scan++;
+        }
+        else {
+	    while (scan < loceol && ANYOF_BITMAP_TEST(p, *((U8*)scan)))
 		scan++;
 	}
 	break;
