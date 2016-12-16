@@ -127,6 +127,7 @@ the first one required manual backporting (available on request).
 
 Should we not just backport 2d41a263 instead? And does 5.22 need this, too? --sprout
 <commit votes="" id="c4a535af41823cc84534bf8dbecfdcc3eb7daa86" desc="[perl #128972] Build failure on OS X 10.12 Sierra."/>
+<commit votes="craigb" id="f6a154ae766a3404d83b81448ca6a356d30198e1" desc="Treat VSI C the same as DEC/Compaq/HP C."/>
 
 </div>
 
