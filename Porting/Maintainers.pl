@@ -1032,7 +1032,7 @@ use File::Glob qw(:case);
     },
 
     'Socket' => {
-        'DISTRIBUTION' => 'PEVANS/Socket-2.024.tar.gz',
+        'DISTRIBUTION' => 'PEVANS/Socket-2.020.tar.gz',
         'FILES'        => q[cpan/Socket],
 
         # https://rt.cpan.org/Ticket/Display.html?id=106797

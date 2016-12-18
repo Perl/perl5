@@ -56,8 +56,8 @@ Scalar-List-Utils cpan/Scalar-List-Utils/lib/Scalar/Util.pm 98af8fe390d9c9fa11a1
 Scalar-List-Utils cpan/Scalar-List-Utils/lib/Sub/Util.pm 188cf0dd95cd7ba60fd6a366f440811fb52c2c79
 Scalar-List-Utils cpan/Scalar-List-Utils/t/lln.t b7148c7f1cd9c70fd21d8153542b6d3de2b655ad
 Scalar-List-Utils cpan/Scalar-List-Utils/t/uniq.t 5de01094d2bca9cf8b2bbbca920122f7396bf11e
-Socket cpan/Socket/Socket.pm f64923f4433b3471adebe4e2b4dc0b395b26cc27
-Socket cpan/Socket/Socket.xs e1506a7380b58fe967ce402391e2cd75b56e892f
+Socket cpan/Socket/Socket.pm 98e38176d745c38282907f391c077298f5a3d0ba
+Socket cpan/Socket/Socket.xs edd4fed212785f11c5c2095a75941dad27d586d9
 Test::Harness cpan/Test-Harness/bin/prove 9b2866928cb1125de2c68f9773b25723e02c54c0
 Test::Harness cpan/Test-Harness/lib/App/Prove.pm a312bbbc97860d5051f06056eb30b985b15ee57c
 Test::Harness cpan/Test-Harness/lib/App/Prove/State.pm f4f7d11878eae1fd81d9c3d82097ddfd43b679a1

@@ -142,10 +142,6 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 L<Pod::Simple> has been upgraded from version 3.32 to 3.35.
 
-=item *
-
-L<Socket> has been upgraded from version 2.020 to 2.024.
-
 =back
 
 =head2 Removed Modules and Pragmata
