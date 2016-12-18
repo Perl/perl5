@@ -2207,13 +2207,15 @@ Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
 }
 
 STATIC U8
-S_to_lower_latin1(const U8 c, U8* p, STRLEN *lenp)
+S_to_lower_latin1(const U8 c, U8* p, STRLEN *lenp, const char dummy)
 {
     /* We have the latin1-range values compiled into the core, so just use
      * those, converting the result to UTF-8.  Since the result is always just
      * one character, we allow <p> to be NULL */
 
     U8 converted = toLOWER_LATIN1(c);
+
+    PERL_UNUSED_ARG(dummy);
 
     if (p != NULL) {
 	if (NATIVE_BYTE_IS_INVARIANT(converted)) {
@@ -2237,7 +2239,7 @@ Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
     PERL_ARGS_ASSERT_TO_UNI_LOWER;
 
     if (c < 256) {
-	return to_lower_latin1((U8) c, p, lenp);
+	return to_lower_latin1((U8) c, p, lenp, 0 /* 0 is a dummy arg */ );
     }
 
     uvchr_to_utf8(p, c);
@@ -2746,6 +2748,89 @@ S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result, U8* c
     return original;
 }
 
+/* The process for changing the case is essentially the same for the four case
+ * change types, except there are complications for folding.  Otherwise the
+ * difference is only which case to change to.  To make sure that they all do
+ * the same thing, the bodies of the functions are extracted out into the
+ * following two macros.  The functions are written with the same variable
+ * names, and these are known and used inside these macros.  It would be
+ * better, of course, to have inline functions to do it, but since different
+ * macros are called, depending on which case is being changed to, this is not
+ * feasible in C (to khw's knowledge).  Two macros are created so that the fold
+ * function can start with the common start macro, then finish with its special
+ * handling; while the other three cases can just use the common end macro.
+ *
+ * The algorithm is to use the proper (passed in) macro or function to change
+ * the case for code points that are below 256.  The macro is used if using
+ * locale rules for the case change; the function if not.  If the code point is
+ * above 255, it is computed from the input UTF-8, and another macro is called
+ * to do the conversion.  If necessary, the output is converted to UTF-8.  If
+ * using a locale, we have to check that the change did not cross the 255/256
+ * boundary, see check_locale_boundary_crossing() for further details.
+ *
+ * The macros are split with the correct case change for the below-256 case
+ * stored into 'result', and in the middle of an else clause for the above-255
+ * case.  At that point in the 'else', 'result' is not the final result, but is
+ * the input code point calculated from the UTF-8.  The fold code needs to
+ * realize all this and take it from there.
+ *
+ * If you read the two macros as sequential, it's easier to understand what's
+ * going on. */
+#define CASE_CHANGE_BODY_START(locale_flags, LC_L1_change_macro, L1_func,    \
+                               L1_func_extra_param)                          \
+    if (flags & (locale_flags)) {                                            \
+        /* Treat a UTF-8 locale as not being in locale at all */             \
+        if (IN_UTF8_CTYPE_LOCALE) {                                          \
+            flags &= ~(locale_flags);                                        \
+        }                                                                    \
+        else {                                                               \
+            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;                              \
+        }                                                                    \
+    }                                                                        \
+                                                                             \
+    if (UTF8_IS_INVARIANT(*p)) {                                             \
+        if (flags & (locale_flags)) {                                        \
+            result = LC_L1_change_macro(*p);                                 \
+        }                                                                    \
+        else {                                                               \
+            return L1_func(*p, ustrp, lenp, L1_func_extra_param);            \
+        }                                                                    \
+    }                                                                        \
+    else if UTF8_IS_DOWNGRADEABLE_START(*p) {                                \
+        if (flags & (locale_flags)) {                                        \
+            result = LC_L1_change_macro(EIGHT_BIT_UTF8_TO_NATIVE(*p,         \
+                                                                 *(p+1)));   \
+        }                                                                    \
+        else {                                                               \
+            return L1_func(EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1)),             \
+                           ustrp, lenp,  L1_func_extra_param);               \
+        }                                                                    \
+    }                                                                        \
+    else {  /* malformed UTF-8 */                                            \
+        result = valid_utf8_to_uvchr(p, NULL);                               \
+
+#define CASE_CHANGE_BODY_END(locale_flags, change_macro)                     \
+        result = change_macro(result, p, ustrp, lenp);                       \
+                                                                             \
+        if (flags & (locale_flags)) {                                        \
+            result = check_locale_boundary_crossing(p, result, ustrp, lenp); \
+        }                                                                    \
+        return result;                                                       \
+    }                                                                        \
+                                                                             \
+    /* Here, used locale rules.  Convert back to UTF-8 */                    \
+    if (UTF8_IS_INVARIANT(result)) {                                         \
+        *ustrp = (U8) result;                                                \
+        *lenp = 1;                                                           \
+    }                                                                        \
+    else {                                                                   \
+        *ustrp = UTF8_EIGHT_BIT_HI((U8) result);                             \
+        *(ustrp + 1) = UTF8_EIGHT_BIT_LO((U8) result);                       \
+        *lenp = 2;                                                           \
+    }                                                                        \
+                                                                             \
+    return result;
+
 /*
 =for apidoc to_utf8_upper
 
@@ -2764,55 +2849,10 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
 
     PERL_ARGS_ASSERT__TO_UTF8_UPPER_FLAGS;
 
-    if (flags) {
-        /* Treat a UTF-8 locale as not being in locale at all */
-        if (IN_UTF8_CTYPE_LOCALE) {
-            flags = FALSE;
-        }
-        else {
-            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
-        }
-    }
-
-    if (UTF8_IS_INVARIANT(*p)) {
-	if (flags) {
-	    result = toUPPER_LC(*p);
-	}
-	else {
-	    return _to_upper_title_latin1(*p, ustrp, lenp, 'S');
-	}
-    }
-    else if UTF8_IS_DOWNGRADEABLE_START(*p) {
-	if (flags) {
-            U8 c = EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1));
-	    result = toUPPER_LC(c);
-	}
-	else {
-	    return _to_upper_title_latin1(EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1)),
-				          ustrp, lenp, 'S');
-	}
-    }
-    else {  /* UTF-8, ord above 255 */
-	result = CALL_UPPER_CASE(valid_utf8_to_uvchr(p, NULL), p, ustrp, lenp);
-
-	if (flags) {
-	    result = check_locale_boundary_crossing(p, result, ustrp, lenp);
-	}
-	return result;
-    }
-
-    /* Here, used locale rules.  Convert back to UTF-8 */
-    if (UTF8_IS_INVARIANT(result)) {
-	*ustrp = (U8) result;
-	*lenp = 1;
-    }
-    else {
-	*ustrp = UTF8_EIGHT_BIT_HI((U8) result);
-	*(ustrp + 1) = UTF8_EIGHT_BIT_LO((U8) result);
-	*lenp = 2;
-    }
-
-    return result;
+    /* ~0 makes anything non-zero in 'flags' mean we are using locale rules */
+    /* 2nd char of uc(U+DF) is 'S' */
+    CASE_CHANGE_BODY_START(~0, toUPPER_LC, _to_upper_title_latin1, 'S');
+    CASE_CHANGE_BODY_END  (~0, CALL_UPPER_CASE);
 }
 
 /*
@@ -2835,55 +2875,9 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
 
     PERL_ARGS_ASSERT__TO_UTF8_TITLE_FLAGS;
 
-    if (flags) {
-        /* Treat a UTF-8 locale as not being in locale at all */
-        if (IN_UTF8_CTYPE_LOCALE) {
-            flags = FALSE;
-        }
-        else {
-            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
-        }
-    }
-
-    if (UTF8_IS_INVARIANT(*p)) {
-	if (flags) {
-	    result = toUPPER_LC(*p);
-	}
-	else {
-	    return _to_upper_title_latin1(*p, ustrp, lenp, 's');
-	}
-    }
-    else if UTF8_IS_DOWNGRADEABLE_START(*p) {
-	if (flags) {
-            U8 c = EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1));
-	    result = toUPPER_LC(c);
-	}
-	else {
-	    return _to_upper_title_latin1(EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1)),
-				          ustrp, lenp, 's');
-	}
-    }
-    else {  /* UTF-8, ord above 255 */
-	result = CALL_TITLE_CASE(valid_utf8_to_uvchr(p, NULL), p, ustrp, lenp);
-
-	if (flags) {
-	    result = check_locale_boundary_crossing(p, result, ustrp, lenp);
-	}
-	return result;
-    }
-
-    /* Here, used locale rules.  Convert back to UTF-8 */
-    if (UTF8_IS_INVARIANT(result)) {
-	*ustrp = (U8) result;
-	*lenp = 1;
-    }
-    else {
-	*ustrp = UTF8_EIGHT_BIT_HI((U8) result);
-	*(ustrp + 1) = UTF8_EIGHT_BIT_LO((U8) result);
-	*lenp = 2;
-    }
-
-    return result;
+    /* 2nd char of ucfirst(U+DF) is 's' */
+    CASE_CHANGE_BODY_START(~0, toUPPER_LC, _to_upper_title_latin1, 's');
+    CASE_CHANGE_BODY_END  (~0, CALL_TITLE_CASE);
 }
 
 /*
@@ -2905,56 +2899,8 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags
 
     PERL_ARGS_ASSERT__TO_UTF8_LOWER_FLAGS;
 
-    if (flags) {
-        /* Treat a UTF-8 locale as not being in locale at all */
-        if (IN_UTF8_CTYPE_LOCALE) {
-            flags = FALSE;
-        }
-        else {
-            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
-        }
-    }
-
-    if (UTF8_IS_INVARIANT(*p)) {
-	if (flags) {
-	    result = toLOWER_LC(*p);
-	}
-	else {
-	    return to_lower_latin1(*p, ustrp, lenp);
-	}
-    }
-    else if UTF8_IS_DOWNGRADEABLE_START(*p) {
-	if (flags) {
-            U8 c = EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1));
-	    result = toLOWER_LC(c);
-	}
-	else {
-	    return to_lower_latin1(EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1)),
-		                   ustrp, lenp);
-	}
-    }
-    else {  /* UTF-8, ord above 255 */
-	result = CALL_LOWER_CASE(valid_utf8_to_uvchr(p, NULL), p, ustrp, lenp);
-
-	if (flags) {
-	    result = check_locale_boundary_crossing(p, result, ustrp, lenp);
-	}
-
-	return result;
-    }
-
-    /* Here, used locale rules.  Convert back to UTF-8 */
-    if (UTF8_IS_INVARIANT(result)) {
-	*ustrp = (U8) result;
-	*lenp = 1;
-    }
-    else {
-	*ustrp = UTF8_EIGHT_BIT_HI((U8) result);
-	*(ustrp + 1) = UTF8_EIGHT_BIT_LO((U8) result);
-	*lenp = 2;
-    }
-
-    return result;
+    CASE_CHANGE_BODY_START(~0, toLOWER_LC, to_lower_latin1, 0 /* 0 is dummy */)
+    CASE_CHANGE_BODY_END  (~0, CALL_LOWER_CASE)
 }
 
 /*
@@ -2986,38 +2932,10 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
 
     assert(p != ustrp); /* Otherwise overwrites */
 
-    if (flags & FOLD_FLAGS_LOCALE) {
-        /* Treat a UTF-8 locale as not being in locale at all */
-        if (IN_UTF8_CTYPE_LOCALE) {
-            flags &= ~FOLD_FLAGS_LOCALE;
-        }
-        else {
-            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
-        }
-    }
+    CASE_CHANGE_BODY_START(FOLD_FLAGS_LOCALE, toFOLD_LC, _to_fold_latin1,
+                 ((flags) & (FOLD_FLAGS_FULL | FOLD_FLAGS_NOMIX_ASCII)));
 
-    if (UTF8_IS_INVARIANT(*p)) {
-	if (flags & FOLD_FLAGS_LOCALE) {
-	    result = toFOLD_LC(*p);
-	}
-	else {
-	    return _to_fold_latin1(*p, ustrp, lenp,
-                            flags & (FOLD_FLAGS_FULL | FOLD_FLAGS_NOMIX_ASCII));
-	}
-    }
-    else if UTF8_IS_DOWNGRADEABLE_START(*p) {
-	if (flags & FOLD_FLAGS_LOCALE) {
-            U8 c = EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1));
-	    result = toFOLD_LC(c);
-	}
-	else {
-	    return _to_fold_latin1(EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1)),
-                            ustrp, lenp,
-                            flags & (FOLD_FLAGS_FULL | FOLD_FLAGS_NOMIX_ASCII));
-	}
-    }
-    else {  /* UTF-8, ord above 255 */
-	result = CALL_FOLD_CASE(valid_utf8_to_uvchr(p, NULL), p, ustrp, lenp, flags & FOLD_FLAGS_FULL);
+	result = CALL_FOLD_CASE(result, p, ustrp, lenp, flags & FOLD_FLAGS_FULL);
 
 	if (flags & FOLD_FLAGS_LOCALE) {
 
