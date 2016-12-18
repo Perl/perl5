@@ -117,17 +117,17 @@ foreach my $name (sort keys %properties, 'octal') {
         push @invlist, ord "0", ord "8";
     }
     else {
-    my $property = $properties{$name};
-    @invlist = prop_invlist($property, '_perl_core_internal_ok');
-    if (! @invlist) {
+        my $property = $properties{$name};
+        @invlist = prop_invlist($property, '_perl_core_internal_ok');
+        if (! @invlist) {
 
-        # An empty return could mean an unknown property, or merely that it is
-        # empty.  Call in scalar context to differentiate
-        if (! prop_invlist($property, '_perl_core_internal_ok')) {
-            fail("No inversion list found for $property");
-            next;
+            # An empty return could mean an unknown property, or merely that
+            # it is empty.  Call in scalar context to differentiate
+            if (! prop_invlist($property, '_perl_core_internal_ok')) {
+                fail("No inversion list found for $property");
+                next;
+            }
         }
-    }
     }
 
     # Include all the Latin1 code points, plus 0x100.
