@@ -207,22 +207,24 @@ foreach my $name (sort keys %properties, 'octal') {
             next;
         }
 
-        foreach my $suffix ("", "_A", "_L1", "_LC", "_uni", "_LC_uvchr",
-                            "_utf8", "_LC_utf8")
+        foreach my $suffix ("", "_A", "_L1", "_LC", "_uni", "_uvchr",
+                            "_LC_uvchr", "_utf8", "_LC_utf8")
         {
 
             # Not all possible macros have been defined
             if ($name eq 'vertws') {
 
                 # vertws is always all of Unicode
-                next if $suffix ne "_uni" && $suffix ne "_utf8";
+                next if $suffix !~ / ^ _ ( uni | uvchr | utf8 ) $ /x;
             }
             elsif ($name eq 'alnum') {
 
-                # ALNUM_A and ALNUM_L1 are not defined as they were added
-                # later, after WORDCHAR was created to be a clearer synonym
-                # for ALNUM
-                next if $suffix eq '_A' || $suffix eq '_L1';
+                # ALNUM_A, ALNUM_L1, and ALNUM_uvchr are not defined as these
+                # suffixes were added later, after WORDCHAR was created to be
+                # a clearer synonym for ALNUM
+                next if    $suffix eq '_A'
+                        || $suffix eq '_L1'
+                        || $suffix eq '_uvchr';
             }
             elsif ($name eq 'octal') {
                 next if $suffix ne ""  && $suffix ne '_A' && $suffix ne '_L1';
@@ -408,10 +410,10 @@ foreach my $name (sort keys %to_properties) {
             }
         }
 
-        # The _uni and _utf8 functions return both the ordinal of the first
-        # code point of the result, and the result in utf8.  The .xs tests
-        # return these in an array, in [0] and [1] respectively, with [2] the
-        # length of the utf8 in bytes.
+        # The _uni, uvchr, and _utf8 functions return both the ordinal of the
+        # first code point of the result, and the result in utf8.  The .xs
+        # tests return these in an array, in [0] and [1] respectively, with
+        # [2] the length of the utf8 in bytes.
         my $utf8_should_be = "";
         my $first_ord_should_be;
         if (ref $map_ref->[$index]) {   # A multi-char result
@@ -430,11 +432,12 @@ foreach my $name (sort keys %to_properties) {
         }
         utf8::upgrade($utf8_should_be);
 
-        # Test _uni
+        # Test _uni, uvchr
+        foreach my $suffix ('_uni', '_uvchr') {
         my $s;
         my $len;
-        my $display_call = "to${function}_uni( $display_name )";
-        $ret = eval "test_to${function}_uni($j)";
+        my $display_call = "to${function}$suffix( $display_name )";
+        $ret = eval "test_to${function}$suffix($j)";
         if (is ($@, "", "$display_call didn't give error")) {
             is ($ret->[0], $first_ord_should_be,
                 sprintf("${tab}And correctly returned 0x%02X",
@@ -443,6 +446,7 @@ foreach my $name (sort keys %to_properties) {
             use bytes;
             is ($ret->[2], length $utf8_should_be,
                 "${tab}Got correct number of bytes for utf8 length");
+        }
         }
 
         # Test _utf8
