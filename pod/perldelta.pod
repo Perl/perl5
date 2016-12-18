@@ -265,7 +265,8 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+Zero out the alignment bytes when calculating the bytes for 80-bit C<NaN>
+and C<Inf> to make builds more reproducible. [perl #130133]
 
 =back
 
