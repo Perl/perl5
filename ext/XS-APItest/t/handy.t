@@ -197,16 +197,6 @@ foreach my $name (sort keys %properties, 'octal') {
         my $display_name = sprintf "\\x{%02X, %s}", $i, $char_name;
         my $display_call = "is${function}( $display_name )";
 
-        if ($name eq 'quotemeta') { # There is only one macro for this, and is
-                                    # defined only for Latin1 range
-            $ret = truth eval "test_is${function}($i)";
-            if (is ($@, "", "$display_call didn't give error")) {
-                my $truth = truth($matches && $i < 256);
-                is ($ret, $truth, "${tab}And returns $truth");
-            }
-            next;
-        }
-
         foreach my $suffix ("", "_A", "_L1", "_LC", "_uni", "_uvchr",
                             "_LC_uvchr", "_utf8", "_LC_utf8")
         {
@@ -228,6 +218,11 @@ foreach my $name (sort keys %properties, 'octal') {
             }
             elsif ($name eq 'octal') {
                 next if $suffix ne ""  && $suffix ne '_A' && $suffix ne '_L1';
+            }
+            elsif ($name eq 'quotemeta') {
+                # There is only one macro for this, and is defined only for
+                # Latin1 range
+                next if $suffix ne ""
             }
 
             foreach my $locale ("", $base_locale, $utf8_locale) {
@@ -253,7 +248,9 @@ foreach my $name (sort keys %properties, 'octal') {
                                 $truth = 0
                                         if $suffix=~ / ^ ( _A | _L [1C] )? $ /x;
                             }
-                            elsif (utf8::native_to_unicode($i) >= 128) {
+                            elsif (   utf8::native_to_unicode($i) >= 128
+                                   && $name ne 'quotemeta')
+                            {
 
                                 # The no-suffix and _A functions are false
                                 # for non-ASCII.  So are  _LC  functions on a
