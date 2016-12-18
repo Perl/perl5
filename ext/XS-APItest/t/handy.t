@@ -110,9 +110,15 @@ my @warnings;
 local $SIG{__WARN__} = sub { push @warnings, @_ };
 
 use charnames ();
-foreach my $name (sort keys %properties) {
+foreach my $name (sort keys %properties, 'octal') {
+    my @invlist;
+    if ($name eq 'octal') {
+        # Hand-roll an inversion list with 0-7 in it and nothing else.
+        push @invlist, ord "0", ord "8";
+    }
+    else {
     my $property = $properties{$name};
-    my @invlist = prop_invlist($property, '_perl_core_internal_ok');
+    @invlist = prop_invlist($property, '_perl_core_internal_ok');
     if (! @invlist) {
 
         # An empty return could mean an unknown property, or merely that it is
@@ -121,6 +127,7 @@ foreach my $name (sort keys %properties) {
             fail("No inversion list found for $property");
             next;
         }
+    }
     }
 
     # Include all the Latin1 code points, plus 0x100.
@@ -193,6 +200,9 @@ foreach my $name (sort keys %properties) {
                 # for ALNUM
                 next if $suffix eq '_A' || $suffix eq '_L1';
             }
+            elsif ($name eq 'octal') {
+                next if $suffix ne '_A' && $suffix ne '_L1';
+            }
 
             foreach my $locale ("", $base_locale, $utf8_locale) {
 
@@ -258,19 +268,6 @@ foreach my $name (sort keys %properties) {
             }
         }
     }
-}
-
-# Test isOCTAL()
-for my $i (0 .. 256, 0x110000) {
-    my $char_name = charnames::viacode($i) // "No name";
-    my $display_name = sprintf "\\N{U+%02X, %s}", $i, $char_name;
-    my $truth = truth($i >= ord('0') && $i <= ord('7'));
-
-    my $ret = truth test_isOCTAL_A($i);
-    is($ret, $truth, "isOCTAL_A( $display_name ) == $truth");
-
-    $ret = truth test_isOCTAL_L1($i);
-    is($ret, $truth, "isOCTAL_L1( $display_name ) == $truth");
 }
 
 my %to_properties = (
