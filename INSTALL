@@ -2370,7 +2370,7 @@ or
 
 The only difference between the two is that make distclean also removes
 your old config.sh and Policy.sh files.  (A plain 'make clean' is now
-eqivalent to 'make realclean'.)
+equivalent to 'make realclean'.)
 
 If you are upgrading from a previous version of perl, or if you
 change systems or compilers or make other significant changes, or if
