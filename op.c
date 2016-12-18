@@ -11688,6 +11688,10 @@ Perl_ck_fun(pTHX_ OP *o)
 		         || SvTYPE(SvRV(cSVOPx_sv(kid))) != SVt_PVAV  )
 		        )
 		    bad_type_pv(numargs, "array", o, kid);
+                else if (kid->op_type == OP_RV2HV || kid->op_type == OP_PADHV
+                         || kid->op_type == OP_RV2GV) {
+                    bad_type_pv(1, "array", o, kid);
+                }
 		else if (kid->op_type != OP_RV2AV && kid->op_type != OP_PADAV) {
                     yyerror_pv(Perl_form(aTHX_ "Experimental %s on scalar is now forbidden",
                                          PL_op_desc[type]), 0);
