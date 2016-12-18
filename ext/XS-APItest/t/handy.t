@@ -434,19 +434,19 @@ foreach my $name (sort keys %to_properties) {
 
         # Test _uni, uvchr
         foreach my $suffix ('_uni', '_uvchr') {
-        my $s;
-        my $len;
-        my $display_call = "to${function}$suffix( $display_name )";
-        $ret = eval "test_to${function}$suffix($j)";
-        if (is ($@, "", "$display_call didn't give error")) {
-            is ($ret->[0], $first_ord_should_be,
-                sprintf("${tab}And correctly returned 0x%02X",
-                                                  $first_ord_should_be));
-            is ($ret->[1], $utf8_should_be, "${tab}Got correct utf8");
-            use bytes;
-            is ($ret->[2], length $utf8_should_be,
-                "${tab}Got correct number of bytes for utf8 length");
-        }
+            my $s;
+            my $len;
+            my $display_call = "to${function}$suffix( $display_name )";
+            $ret = eval "test_to${function}$suffix($j)";
+            if (is ($@, "", "$display_call didn't give error")) {
+                is ($ret->[0], $first_ord_should_be,
+                    sprintf("${tab}And correctly returned 0x%02X",
+                                                    $first_ord_should_be));
+                is ($ret->[1], $utf8_should_be, "${tab}Got correct utf8");
+                use bytes;
+                is ($ret->[2], length $utf8_should_be,
+                    "${tab}Got correct number of bytes for utf8 length");
+            }
         }
 
         # Test _utf8
