@@ -207,7 +207,9 @@ foreach my $name (sort keys %properties, 'octal') {
             next;
         }
 
-        foreach my $suffix (qw(_A _L1 _LC  _uni _LC_uvchr _utf8 _LC_utf8)) {
+        foreach my $suffix ("", "_A", "_L1", "_LC", "_uni", "_LC_uvchr",
+                            "_utf8", "_LC_utf8")
+        {
 
             # Not all possible macros have been defined
             if ($name eq 'vertws') {
@@ -223,7 +225,7 @@ foreach my $name (sort keys %properties, 'octal') {
                 next if $suffix eq '_A' || $suffix eq '_L1';
             }
             elsif ($name eq 'octal') {
-                next if $suffix ne '_A' && $suffix ne '_L1';
+                next if $suffix ne ""  && $suffix ne '_A' && $suffix ne '_L1';
             }
 
             foreach my $locale ("", $base_locale, $utf8_locale) {
@@ -246,14 +248,16 @@ foreach my $name (sort keys %properties, 'octal') {
                             # The single byte functions are false for
                             # above-Latin1
                             if ($i >= 256) {
-                                $truth = 0 if $suffix =~ / ^ _A | _L [1C] $ /x;
+                                $truth = 0
+                                        if $suffix=~ / ^ ( _A | _L [1C] )? $ /x;
                             }
                             elsif (utf8::native_to_unicode($i) >= 128) {
 
-                                # The _A functions are false
+                                # The no-suffix and _A functions are false
                                 # for non-ASCII.  So are  _LC  functions on a
                                 # non-UTF-8 locale
                                 $truth = 0 if    $suffix eq "_A"
+                                              || $suffix eq ""
                                               || (     $suffix =~ /LC/
                                                   && ! $locale_is_utf8);
                             }
