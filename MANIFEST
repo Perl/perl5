@@ -2614,6 +2614,7 @@ cpan/Test-Simple/lib/Test2/API/Stack.pm
 cpan/Test-Simple/lib/Test2/Event.pm
 cpan/Test-Simple/lib/Test2/Event/Bail.pm
 cpan/Test-Simple/lib/Test2/Event/Diag.pm
+cpan/Test-Simple/lib/Test2/Event/Encoding.pm
 cpan/Test-Simple/lib/Test2/Event/Exception.pm
 cpan/Test-Simple/lib/Test2/Event/Generic.pm
 cpan/Test-Simple/lib/Test2/Event/Info.pm
@@ -2622,6 +2623,7 @@ cpan/Test-Simple/lib/Test2/Event/Ok.pm
 cpan/Test-Simple/lib/Test2/Event/Plan.pm
 cpan/Test-Simple/lib/Test2/Event/Skip.pm
 cpan/Test-Simple/lib/Test2/Event/Subtest.pm
+cpan/Test-Simple/lib/Test2/Event/TAP/Version.pm
 cpan/Test-Simple/lib/Test2/Event/Waiting.pm
 cpan/Test-Simple/lib/Test2/Formatter.pm
 cpan/Test-Simple/lib/Test2/Formatter/TAP.pm
@@ -2815,6 +2817,7 @@ cpan/Test-Simple/t/Test2/behavior/special_names.t
 cpan/Test-Simple/t/Test2/behavior/Subtest_buffer_formatter.t
 cpan/Test-Simple/t/Test2/behavior/Subtest_events.t
 cpan/Test-Simple/t/Test2/behavior/Subtest_plan.t
+cpan/Test-Simple/t/Test2/behavior/Subtest_todo.t
 cpan/Test-Simple/t/Test2/behavior/Taint.t
 cpan/Test-Simple/t/Test2/legacy/TAP.t
 cpan/Test-Simple/t/Test2/modules/API.t

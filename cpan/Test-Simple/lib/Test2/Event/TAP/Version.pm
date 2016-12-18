@@ -1,15 +1,18 @@
-package Test2::Event::Waiting;
+package Test2::Event::TAP::Version;
 use strict;
 use warnings;
 
 our $VERSION = '1.302071';
 
-
 BEGIN { require Test2::Event; our @ISA = qw(Test2::Event) }
+use Test2::Util::HashBase qw/version/;
 
-sub global { 1 };
+sub init {
+    my $self = shift;
+    defined $self->{+VERSION} or $self->trace->throw("'version' is a required attribute");
+}
 
-sub summary { "IPC is waiting for children to finish..." }
+sub summary { 'TAP version ' . $_[0]->{+VERSION} }
 
 1;
 
@@ -21,12 +24,31 @@ __END__
 
 =head1 NAME
 
-Test2::Event::Waiting - Tell all procs/threads it is time to be done
+Test2::Event::TAP::Version - Event for TAP version.
 
 =head1 DESCRIPTION
 
-This event has no data of its own. This event is sent out by the IPC system
-when the main process/thread is ready to end.
+This event is used if a TAP formatter wishes to set a version.
+
+=head1 SYNOPSIS
+
+    use Test2::API qw/context/;
+    use Test2::Event::Encoding;
+
+    my $ctx = context();
+    my $event = $ctx->send_event('TAP::Version', version => 42);
+
+=head1 METHODS
+
+Inherits from L<Test2::Event>. Also defines:
+
+=over 4
+
+=item $version = $e->version
+
+The TAP version being parsed.
+
+=back
 
 =head1 SOURCE
 

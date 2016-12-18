@@ -2,13 +2,26 @@ package Test2::Util::HashBase;
 use strict;
 use warnings;
 
-our $VERSION = '1.302067';
+#################################################################
+#                                                               #
+#  This is a generated file! Do not modify this file directly!  #
+#  Use hashbase_inc.pl script to regenerate this file.          #
+#  The script is part of the Object::HashBase distribution.     #
+#                                                               #
+#################################################################
+
+{
+    no warnings 'once';
+    $Test2::Util::HashBase::VERSION = '0.002';
+    *Test2::Util::HashBase::ATTR_SUBS = \%Object::HashBase::ATTR_SUBS;
+}
 
 
 require Carp;
-$Carp::Internal{+__PACKAGE__} = 1;
-
-my %ATTR_SUBS;
+{
+    no warnings 'once';
+    $Carp::Internal{+__PACKAGE__} = 1;
+}
 
 BEGIN {
     # these are not strictly equivalent, but for out use we don't care
@@ -24,21 +37,33 @@ BEGIN {
     }
 }
 
+my %STRIP = (
+    '^' => 1,
+    '-' => 1,
+);
+
 sub import {
     my $class = shift;
-    my $into = caller;
+    my $into  = caller;
 
-    my $isa = _isa($into);
-    my $attr_subs = $ATTR_SUBS{$into} ||= {};
-    my %subs = (
+    my $isa       = _isa($into);
+    my $attr_subs = $Test2::Util::HashBase::ATTR_SUBS{$into} ||= {};
+    my %subs      = (
         ($into->can('new') ? () : (new => \&_new)),
-        (map %{ $ATTR_SUBS{$_}||{} }, @{$isa}[1 .. $#$isa]),
-        (map {
-            my ($sub, $attr) = (uc $_, $_);
-            $sub => ($attr_subs->{$sub} = sub() { $attr }),
-            $attr => sub { $_[0]->{$attr} },
-            "set_$attr" => sub { $_[0]->{$attr} = $_[1] },
-        } @_),
+        (map %{$Test2::Util::HashBase::ATTR_SUBS{$_} || {}}, @{$isa}[1 .. $#$isa]),
+        (
+            map {
+                my $p = substr($_, 0, 1);
+                my $x = $_;
+                substr($x, 0, 1) = '' if $STRIP{$p};
+                my ($sub, $attr) = (uc $x, $x);
+                $sub => ($attr_subs->{$sub} = sub() { $attr }),
+                $attr => sub { $_[0]->{$attr} },
+                  $p eq '-' ? ("set_$attr" => sub { Carp::croak("'$attr' is read-only") })
+                : $p eq '^' ? ("set_$attr" => sub { Carp::carp("set_$attr() is deprecated"); $_[0]->{$attr} = $_[1] })
+                :             ("set_$attr" => sub { $_[0]->{$attr} = $_[1] }),
+            } @_
+        ),
     );
 
     no strict 'refs';
@@ -62,8 +87,7 @@ __END__
 
 =head1 NAME
 
-Test2::Util::HashBase - Base class for classes that use a hashref
-of a hash.
+Test2::Util::HashBase - Build hash based classes.
 
 =head1 SYNOPSIS
 
@@ -74,7 +98,7 @@ A class:
     use warnings;
 
     # Generate 3 accessors
-    use Test2::Util::HashBase qw/foo bar baz/;
+    use Test2::Util::HashBase qw/foo -bar ^baz/;
 
     # Chance to initialize defaults
     sub init {
@@ -103,7 +127,7 @@ Subclass it
 
         # We get the constants from the base class for free.
         $self->{+FOO} ||= 'SubFoo';
-        $self->{+BAT} || = 'bat';
+        $self->{+BAT} ||= 'bat';
 
         $self->SUPER::init();
     }
@@ -124,7 +148,12 @@ use it:
 
     # Setters!
     $one->set_foo('A Foo');
-    $one->set_bar('A Bar');
+
+    #'-bar' means read-only, so the setter will throw an exception (but is defined).
+    $one->set_bar('A bar');
+
+    # '^baz' means deprecated setter, this will warn about the setter being
+    # deprecated.
     $one->set_baz('A Baz');
 
     $one->{+FOO} = 'xxx';
@@ -137,6 +166,13 @@ Generated accessors will be getters, C<set_ACCESSOR> setters will also be
 generated for you. You also get constants for each accessor (all caps) which
 return the key into the hash for that accessor. Single inheritance is also
 supported.
+
+=head1 THIS IS A BUNDLED COPY OF HASHBASE
+
+This is a bundled copy of L<Object::HashBase>. This file was generated using
+the
+C</home/exodist/perl5/perlbrew/perls/main/bin/hashbase_inc.pl>
+script.
 
 =head1 METHODS
 
@@ -222,8 +258,8 @@ are added to subclasses automatically.
 
 =head1 SOURCE
 
-The source code repository for Test2 can be found at
-F<http://github.com/Test-More/test-more/>.
+The source code repository for HashBase can be found at
+F<http://github.com/Test-More/HashBase/>.
 
 =head1 MAINTAINERS
 

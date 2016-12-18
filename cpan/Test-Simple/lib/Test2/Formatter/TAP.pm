@@ -3,8 +3,7 @@ use strict;
 use warnings;
 require PerlIO;
 
-our $VERSION = '1.302067';
-
+our $VERSION = '1.302071';
 
 use Test2::Util::HashBase qw{
     no_numbers handles _encoding
@@ -18,14 +17,15 @@ use Carp qw/croak/;
 BEGIN { require Test2::Formatter; our @ISA = qw(Test2::Formatter) }
 
 my %CONVERTERS = (
-    'Test2::Event::Ok'        => 'event_ok',
-    'Test2::Event::Skip'      => 'event_skip',
-    'Test2::Event::Note'      => 'event_note',
-    'Test2::Event::Diag'      => 'event_diag',
-    'Test2::Event::Bail'      => 'event_bail',
-    'Test2::Event::Exception' => 'event_exception',
-    'Test2::Event::Subtest'   => 'event_subtest',
-    'Test2::Event::Plan'      => 'event_plan',
+    'Test2::Event::Ok'           => 'event_ok',
+    'Test2::Event::Skip'         => 'event_skip',
+    'Test2::Event::Note'         => 'event_note',
+    'Test2::Event::Diag'         => 'event_diag',
+    'Test2::Event::Bail'         => 'event_bail',
+    'Test2::Event::Exception'    => 'event_exception',
+    'Test2::Event::Subtest'      => 'event_subtest',
+    'Test2::Event::Plan'         => 'event_plan',
+    'Test2::Event::TAP::Version' => 'event_version',
 );
 
 # Initial list of converters are safe for direct hash access cause we control them.
@@ -307,6 +307,15 @@ sub event_plan {
     }
 
     return [OUT_STD, "$plan\n"];
+}
+
+sub event_version {
+    my $self = shift;
+    my ($e, $num) = @_;
+
+    my $version = $e->version;
+
+    return [OUT_STD, "TAP version $version\n"];
 }
 
 sub event_other {

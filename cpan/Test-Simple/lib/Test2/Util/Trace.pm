@@ -2,10 +2,10 @@ package Test2::Util::Trace;
 use strict;
 use warnings;
 
-our $VERSION = '1.302067';
+our $VERSION = '1.302071';
 
 
-use Test2::Util qw/get_tid/;
+use Test2::Util qw/get_tid pkg_to_file/;
 
 use Carp qw/confess/;
 
@@ -46,6 +46,21 @@ sub package { $_[0]->{+FRAME}->[0] }
 sub file    { $_[0]->{+FRAME}->[1] }
 sub line    { $_[0]->{+FRAME}->[2] }
 sub subname { $_[0]->{+FRAME}->[3] }
+
+sub from_json {
+    my $class = shift;
+	my %p     = @_;
+
+    my $trace_pkg = delete $p{__PACKAGE__};
+	require(pkg_to_file($trace_pkg));
+
+    return $trace_pkg->new(%p);
+}
+
+sub TO_JSON {
+    my $self = shift;
+    return {%$self, __PACKAGE__ => ref $self};
+}
 
 1;
 
@@ -123,6 +138,18 @@ Get the debug-info line number.
 =item $subname = $trace->subname
 
 Get the debug-info subroutine name.
+
+=item $hashref = $t->TO_JSON
+
+This returns a hashref suitable for passing to the C<<
+Test2::Util::Trace->from_json >> constructor. It is intended for use with the
+L<JSON> family of modules, which will look for a C<TO_JSON> method when
+C<convert_blessed> is true.
+
+=item $t = Test2::Util::Trace->from_json(%$hashref)
+
+Given the hash of data returned by C<< $t->TO_JSON >>, this method returns a
+new trace object of the appropriate subclass.
 
 =back
 

@@ -531,4 +531,19 @@ tests skip => sub {
     );
 };
 
+tests version => sub {
+    require Test2::Event::TAP::Version;
+    my $ver = Test2::Event::TAP::Version->new(
+        trace => $trace,
+        version => '2',
+    );
+
+    is_deeply(
+        [$fmt->event_tap($ver, 1)],
+        [[OUT_STD, "TAP version 2\n"]],
+        "Got tap"
+    );
+};
+
+
 done_testing;

@@ -172,6 +172,37 @@ sub skip_all {
     $ctx->release if $ctx;
 }
 
+sub todo {
+	my ($reason, $sub) = @_;
+	my $ctx = context();
+
+	# This code is mostly copied from Test2::Todo in the Test2-Suite
+	# distribution.
+	my $hub    = test2_stack->top;
+	my $filter = $hub->pre_filter(
+		sub {
+			my ($active_hub, $event) = @_;
+
+			# Turn a diag into a note
+			return Test2::Event::Note->new(%$event) if ref($event) eq 'Test2::Event::Diag';
+
+			# Set todo on ok's
+			if ($hub == $active_hub && $event->isa('Test2::Event::Ok')) {
+				$event->set_todo($reason);
+				$event->set_effective_pass(1);
+			}
+
+			return $event;
+		},
+		inherit => 1,
+		todo    => $reason,
+	);
+	$sub->();
+	$hub->pre_unfilter($filter);
+
+	$ctx->release if $ctx;
+}
+
 sub plan {
     my ($max) = @_;
     my $ctx = context();

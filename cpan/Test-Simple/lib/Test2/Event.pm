@@ -2,11 +2,12 @@ package Test2::Event;
 use strict;
 use warnings;
 
-our $VERSION = '1.302067';
-
+our $VERSION = '1.302071';
 
 use Test2::Util::HashBase qw/trace nested in_subtest subtest_id/;
 use Test2::Util::ExternalMeta qw/meta get_meta set_meta delete_meta/;
+use Test2::Util qw(pkg_to_file);
+use Test2::Util::Trace;
 
 sub causes_fail      { 0 }
 sub increments_count { 0 }
@@ -20,6 +21,33 @@ sub global    { () }
 sub sets_plan { () }
 
 sub summary { ref($_[0]) }
+
+sub from_json {
+    my $class = shift;
+	my %p     = @_;
+
+    my $event_pkg = delete $p{__PACKAGE__};
+	require(pkg_to_file($event_pkg));
+
+	if (exists $p{trace}) {
+		$p{trace} = Test2::Util::Trace->from_json(%{$p{trace}});
+	}
+
+	if (exists $p{subevents}) {
+		my @subevents;
+		for my $subevent (@{delete $p{subevents} || []}) {
+			push @subevents, Test2::Event->from_json(%$subevent);
+		}
+		$p{subevents} = \@subevents;
+	}
+
+    return $event_pkg->new(%p);
+}
+
+sub TO_JSON {
+    my $self = shift;
+    return {%$self, __PACKAGE__ => ref $self};
+}
 
 1;
 
@@ -173,6 +201,17 @@ If the event is inside a subtest this should have the subtest ID.
 =item $id = $e->subtest_id
 
 If the event is a final subtest event, this should contain the subtest ID.
+
+=item $hashref = $e->TO_JSON
+
+This returns a hashref suitable for passing to the C<< Test2::Event->from_json
+>> constructor. It is intended for use with the L<JSON> family of modules,
+which will look for a C<TO_JSON> method when C<convert_blessed> is true.
+
+=item $e = Test2::Event->from_json(%$hashref)
+
+Given the hash of data returned by C<< $e->TO_JSON >>, this method returns a
+new event object of the appropriate subclass.
 
 =back
 

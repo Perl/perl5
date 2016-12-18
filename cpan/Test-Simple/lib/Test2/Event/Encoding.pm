@@ -1,22 +1,18 @@
-package Test2::Event::Exception;
+package Test2::Event::Encoding;
 use strict;
 use warnings;
 
 our $VERSION = '1.302071';
 
-
 BEGIN { require Test2::Event; our @ISA = qw(Test2::Event) }
-use Test2::Util::HashBase qw{error};
+use Test2::Util::HashBase qw/encoding/;
 
-sub causes_fail { 1 }
-
-sub summary {
+sub init {
     my $self = shift;
-    chomp(my $msg = "Exception: " . $self->{+ERROR});
-    return $msg;
+    defined $self->{+ENCODING} or $self->trace->throw("'encoding' is a required attribute");
 }
 
-sub diagnostics { 1 }
+sub summary { 'Encoding set to ' . $_[0]->{+ENCODING} }
 
 1;
 
@@ -28,20 +24,22 @@ __END__
 
 =head1 NAME
 
-Test2::Event::Exception - Exception event
+Test2::Event::Encoding - Set the encoding for the output stream
 
 =head1 DESCRIPTION
 
-An exception event will display to STDERR, and will prevent the overall test
-file from passing.
+The encoding event is generated when a test file wants to specify the encoding
+to be used when formatting its output. This event is intended to be produced
+by formatter classes and used for interpreting test names, message contents,
+etc.
 
 =head1 SYNOPSIS
 
     use Test2::API qw/context/;
-    use Test2::Event::Exception;
+    use Test2::Event::Encoding;
 
     my $ctx = context();
-    my $event = $ctx->send_event('Exception', error => 'Stuff is broken');
+    my $event = $ctx->send_event('Encoding', encoding => 'UTF-8');
 
 =head1 METHODS
 
@@ -49,9 +47,9 @@ Inherits from L<Test2::Event>. Also defines:
 
 =over 4
 
-=item $reason = $e->error
+=item $encoding = $e->encoding
 
-The reason for the exception.
+The encoding being specified.
 
 =back
 
