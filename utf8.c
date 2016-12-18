@@ -3047,8 +3047,15 @@ S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result, U8* c
                            ustrp, lenp,  L1_func_extra_param);               \
         }                                                                    \
     }                                                                        \
-    else {  /* malformed UTF-8 */                                            \
-        result = valid_utf8_to_uvchr(p, NULL);                               \
+    else {  /* malformed UTF-8 or ord above 255 */                           \
+        STRLEN len_result;                                                   \
+        const U8 * e = p + UTF8SKIP(p); /* Have to assume len is valid */    \
+        result = utf8n_to_uvchr(p, e - p, &len_result, UTF8_CHECK_ONLY);     \
+        if (len_result == (STRLEN) -1) {                                     \
+            _force_out_malformed_utf8_message(p, e,                          \
+                                              _UTF8_NO_CONFIDENCE_IN_CURLEN, \
+                                              1 /* Die */ );                 \
+        }
 
 #define CASE_CHANGE_BODY_END(locale_flags, change_macro)                     \
         result = change_macro(result, p, ustrp, lenp);                       \

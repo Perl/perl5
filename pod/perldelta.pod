@@ -339,6 +339,7 @@ L<perlapi/Character classification>.
 
 Calling macros like C<isALPHA_utf8> on malformed UTF-8 have issued a
 deprecation warning since Perl v5.18.  They now die.
+Similarly, macros like C<toLOWER_utf8> on malformed UTF-8 now die.
 
 =item *
 
