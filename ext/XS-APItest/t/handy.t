@@ -11,9 +11,31 @@ use Config;
 
 use XS::APItest;
 
-use Unicode::UCD qw(prop_invlist prop_invmap);
-
 my $tab = " " x 4;  # Indent subsidiary tests this much
+
+use Unicode::UCD qw(search_invlist prop_invmap prop_invlist);
+my ($charname_list, $charname_map, $format, $default) = prop_invmap("Name Alias");
+
+sub get_charname($) {
+    my $cp = shift;
+
+    # If there is a an abbreviation for the code point name, use it
+    my $name_index = search_invlist(\@{$charname_list}, $cp);
+    if (defined $name_index) {
+        my $synonyms = $charname_map->[$name_index];
+        if (ref $synonyms) {
+            my $pat = qr/: abbreviation/;
+            my @abbreviations = grep { $_ =~ $pat } @$synonyms;
+            if (@abbreviations) {
+                return $abbreviations[0] =~ s/$pat//r;
+            }
+        }
+    }
+
+    # Otherwise, use the full name
+    use charnames ();
+    return charnames::viacode($cp) // "No name";
+}
 
 sub truth($) {  # Converts values so is() works
     return (shift) ? 1 : 0;
@@ -109,7 +131,7 @@ my %properties = (
 my @warnings;
 local $SIG{__WARN__} = sub { push @warnings, @_ };
 
-use charnames ();
+
 foreach my $name (sort keys %properties, 'octal') {
     my @invlist;
     if ($name eq 'octal') {
@@ -162,7 +184,7 @@ foreach my $name (sort keys %properties, 'octal') {
            or diag("@warnings");
         undef @warnings;
 
-        my $matches = Unicode::UCD::search_invlist(\@invlist, $i);
+        my $matches = search_invlist(\@invlist, $i);
         if (! defined $matches) {
             $matches = 0;
         }
@@ -171,7 +193,7 @@ foreach my $name (sort keys %properties, 'octal') {
         }
 
         my $ret;
-        my $char_name = charnames::viacode($i) // "No name";
+        my $char_name = get_charname($j);
         my $display_name = sprintf "\\x{%02X, %s}", $i, $char_name;
         my $display_call = "is${function}( $display_name )";
 
@@ -325,10 +347,10 @@ foreach my $name (sort keys %to_properties) {
         my $i = utf8::native_to_unicode($j);
         my $function = $name;
 
-        my $index = Unicode::UCD::search_invlist(\@{$list_ref}, $j);
+        my $index = search_invlist(\@{$list_ref}, $j);
 
         my $ret;
-        my $char_name = charnames::viacode($j) // "No name";
+        my $char_name = get_charname($j);
         my $display_name = sprintf "\\N{U+%02X, %s}", $i, $char_name;
 
         foreach my $suffix ("", "_L1", "_LC") {
