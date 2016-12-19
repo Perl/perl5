@@ -191,7 +191,7 @@ above what a 64 bit word can hold
 
    I8 Code Points      1st Byte  2nd Byte  3rd     4th     5th     6th     7th       8th  9th-14th
 
-   0x0000..0x00BF       00..BF
+   0x0000..0x009F       00..9F
    0x00A0..0x00FF     * C5..C7    A0..BF
    U+0100..U+03FF       C8..DF    A0..BF
    U+0400..U+3FFF     * E1..EF    A0..BF  A0..BF
