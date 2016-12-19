@@ -2732,6 +2732,8 @@ L</toTITLE_utf8_safe>,
 L</toLOWER_utf8_safe>,
 or L</toFOLD_utf8_safe>.
 
+This function will be removed in Perl v5.28.
+
 C<p> contains the pointer to the UTF-8 string encoding
 the character that is being converted.  This routine assumes that the character
 at C<p> is well-formed.
@@ -2763,9 +2765,19 @@ UV
 Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 			SV **swashp, const char *normal, const char *special)
 {
+    STRLEN len_cp;
+    UV cp;
+    const U8 * e = p + UTF8SKIP(p);
+
     PERL_ARGS_ASSERT_TO_UTF8_CASE;
 
-    return _to_utf8_case(valid_utf8_to_uvchr(p, NULL), p, ustrp, lenp, swashp, normal, special);
+    cp = utf8n_to_uvchr(p, e - p, &len_cp, UTF8_CHECK_ONLY);
+    if (len_cp == (STRLEN) -1) {
+        _force_out_malformed_utf8_message(p, e,
+                                   _UTF8_NO_CONFIDENCE_IN_CURLEN, 1 /* Die */ );
+    }
+
+    return _to_utf8_case(cp, p, ustrp, lenp, swashp, normal, special);
 }
 
     /* change namve uv1 to 'from' */
