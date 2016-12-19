@@ -1002,6 +1002,9 @@ C<UTF8_DISALLOW_SURROGATE> or the C<UTF8_WARN_SURROGATE> flags.
 
 =back
 
+To do your own error handling, call this function with the C<UTF8_CHECK_ONLY>
+flag to suppress any warnings, and then examine the C<*errors> return.
+
 =cut
 */
 
