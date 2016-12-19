@@ -76,10 +76,15 @@ the string is invariant.
                                 utf8n_to_uvchr_error(s, len, lenp, flags, 0)
 
 #define to_uni_fold(c, p, lenp) _to_uni_fold_flags(c, p, lenp, FOLD_FLAGS_FULL)
-#define to_utf8_fold(c, p, lenp) _to_utf8_fold_flags(c, p, lenp, FOLD_FLAGS_FULL)
-#define to_utf8_lower(a,b,c) _to_utf8_lower_flags(a,b,c,0)
-#define to_utf8_upper(a,b,c) _to_utf8_upper_flags(a,b,c,0)
-#define to_utf8_title(a,b,c) _to_utf8_title_flags(a,b,c,0)
+
+#define to_utf8_fold(s, r, lenr)                                                \
+    _to_utf8_fold_flags (s, NULL, r, lenr, FOLD_FLAGS_FULL)
+#define to_utf8_lower(s, r, lenr)                                               \
+                  _to_utf8_lower_flags(s, NULL, r ,lenr, 0)
+#define to_utf8_upper(s, r, lenr)                                               \
+                  _to_utf8_upper_flags(s, NULL, r, lenr, 0)
+#define to_utf8_title(s, r, lenr)                                               \
+                  _to_utf8_title_flags(s, NULL, r, lenr ,0)
 
 #define foldEQ_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2) \
 		    foldEQ_utf8_flags(s1, pe1, l1, u1, s2, pe2, l2, u2, 0)

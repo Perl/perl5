@@ -849,8 +849,9 @@ The first code point of the uppercased version is returned
 (but note, as explained at L<the top of this section|/Character case
 changing>, that there may be more.)
 
-=for apidoc Am|UV|toUPPER_utf8|U8* p|U8* s|STRLEN* lenp
-Converts the UTF-8 encoded character at C<p> to its uppercase version, and
+=for apidoc Am|UV|toUPPER_utf8_safe|U8* p|U8* e|U8* s|STRLEN* lenp
+Converts the first UTF-8 encoded character in the sequence starting at C<p> and
+extending no further than S<C<e - 1>> to its uppercase version, and
 stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
 that the buffer pointed to by C<s> needs to be at least C<UTF8_MAXBYTES_CASE+1>
 bytes since the uppercase version may be longer than the original character.
@@ -859,7 +860,17 @@ The first code point of the uppercased version is returned
 (but note, as explained at L<the top of this section|/Character case
 changing>, that there may be more).
 
-The input character at C<p> is assumed to be well-formed.
+The suffix C<_safe> in the function's name indicates that it will not attempt
+to read beyond S<C<e - 1>>, provided that the constraint S<C<s E<lt> e>> is
+true (this is asserted for in C<-DDEBUGGING> builds).  If the UTF-8 for the
+input character is malformed in some way, the program may croak, or the
+function may return the REPLACEMENT CHARACTER, at the discretion of the
+implementation, and subject to change in future releases.
+
+=for apidoc Am|UV|toUPPER_utf8|U8* p|U8* s|STRLEN* lenp
+This is like C<L</toUPPER_utf8_safe>>, but doesn't have the C<e>
+parameter  The function therefore can't check if it is reading
+beyond the end of the string.
 
 =for apidoc Am|U8|toFOLD|U8 ch
 Converts the specified character to foldcase.  If the input is anything but an
@@ -878,8 +889,9 @@ The first code point of the foldcased version is returned
 (but note, as explained at L<the top of this section|/Character case
 changing>, that there may be more).
 
-=for apidoc Am|UV|toFOLD_utf8|U8* p|U8* s|STRLEN* lenp
-Converts the UTF-8 encoded character at C<p> to its foldcase version, and
+=for apidoc Am|UV|toFOLD_utf8_safe|U8* p|U8* e|U8* s|STRLEN* lenp
+Converts the first UTF-8 encoded character in the sequence starting at C<p> and
+extending no further than S<C<e - 1>> to its foldcase version, and
 stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
 that the buffer pointed to by C<s> needs to be at least C<UTF8_MAXBYTES_CASE+1>
 bytes since the foldcase version may be longer than the original character.
@@ -888,7 +900,17 @@ The first code point of the foldcased version is returned
 (but note, as explained at L<the top of this section|/Character case
 changing>, that there may be more).
 
-The input character at C<p> is assumed to be well-formed.
+The suffix C<_safe> in the function's name indicates that it will not attempt
+to read beyond S<C<e - 1>>, provided that the constraint S<C<s E<lt> e>> is
+true (this is asserted for in C<-DDEBUGGING> builds).  If the UTF-8 for the
+input character is malformed in some way, the program may croak, or the
+function may return the REPLACEMENT CHARACTER, at the discretion of the
+implementation, and subject to change in future releases.
+
+=for apidoc Am|UV|toFOLD_utf8|U8* p|U8* s|STRLEN* lenp
+This is like C<L</toFOLD_utf8_safe>>, but doesn't have the C<e>
+parameter  The function therefore can't check if it is reading
+beyond the end of the string.
 
 =for apidoc Am|U8|toLOWER|U8 ch
 Converts the specified character to lowercase.  If the input is anything but an
@@ -914,8 +936,10 @@ The first code point of the lowercased version is returned
 (but note, as explained at L<the top of this section|/Character case
 changing>, that there may be more).
 
-=for apidoc Am|UV|toLOWER_utf8|U8* p|U8* s|STRLEN* lenp
-Converts the UTF-8 encoded character at C<p> to its lowercase version, and
+
+=for apidoc Am|UV|toLOWER_utf8_safe|U8* p|U8* e|U8* s|STRLEN* lenp
+Converts the first UTF-8 encoded character in the sequence starting at C<p> and
+extending no further than S<C<e - 1>> to its lowercase version, and
 stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
 that the buffer pointed to by C<s> needs to be at least C<UTF8_MAXBYTES_CASE+1>
 bytes since the lowercase version may be longer than the original character.
@@ -924,7 +948,17 @@ The first code point of the lowercased version is returned
 (but note, as explained at L<the top of this section|/Character case
 changing>, that there may be more).
 
-The input character at C<p> is assumed to be well-formed.
+The suffix C<_safe> in the function's name indicates that it will not attempt
+to read beyond S<C<e - 1>>, provided that the constraint S<C<s E<lt> e>> is
+true (this is asserted for in C<-DDEBUGGING> builds).  If the UTF-8 for the
+input character is malformed in some way, the program may croak, or the
+function may return the REPLACEMENT CHARACTER, at the discretion of the
+implementation, and subject to change in future releases.
+
+=for apidoc Am|UV|toLOWER_utf8|U8* p|U8* s|STRLEN* lenp
+This is like C<L</toLOWER_utf8_safe>>, but doesn't have the C<e>
+parameter  The function therefore can't check if it is reading
+beyond the end of the string.
 
 =for apidoc Am|U8|toTITLE|U8 ch
 Converts the specified character to titlecase.  If the input is anything but an
@@ -944,8 +978,9 @@ The first code point of the titlecased version is returned
 (but note, as explained at L<the top of this section|/Character case
 changing>, that there may be more).
 
-=for apidoc Am|UV|toTITLE_utf8|U8* p|U8* s|STRLEN* lenp
-Converts the UTF-8 encoded character at C<p> to its titlecase version, and
+=for apidoc Am|UV|toTITLE_utf8_safe|U8* p|U8* e|U8* s|STRLEN* lenp
+Converts the first UTF-8 encoded character in the sequence starting at C<p> and
+extending no further than S<C<e - 1>> to its titlecase version, and
 stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
 that the buffer pointed to by C<s> needs to be at least C<UTF8_MAXBYTES_CASE+1>
 bytes since the titlecase version may be longer than the original character.
@@ -954,7 +989,17 @@ The first code point of the titlecased version is returned
 (but note, as explained at L<the top of this section|/Character case
 changing>, that there may be more).
 
-The input character at C<p> is assumed to be well-formed.
+The suffix C<_safe> in the function's name indicates that it will not attempt
+to read beyond S<C<e - 1>>, provided that the constraint S<C<s E<lt> e>> is
+true (this is asserted for in C<-DDEBUGGING> builds).  If the UTF-8 for the
+input character is malformed in some way, the program may croak, or the
+function may return the REPLACEMENT CHARACTER, at the discretion of the
+implementation, and subject to change in future releases.
+
+=for apidoc Am|UV|toTITLE_utf8|U8* p|U8* s|STRLEN* lenp
+This is like C<L</toLOWER_utf8_safe>>, but doesn't have the C<e>
+parameter  The function therefore can't check if it is reading
+beyond the end of the string.
 
 =cut
 
@@ -1881,10 +1926,15 @@ _generic_utf8_safe(classnum, p, e, _is_utf8_FOO_with_len(classnum, p, e))
 #define toUPPER_utf8(p,s,l)	to_utf8_upper(p,s,l)
 
 /* For internal core use only, subject to change */
-#define _toFOLD_utf8_flags(p,s,l,f)  _to_utf8_fold_flags (p,s,l,f)
-#define _toLOWER_utf8_flags(p,s,l,f) _to_utf8_lower_flags(p,s,l,f)
-#define _toTITLE_utf8_flags(p,s,l,f) _to_utf8_title_flags(p,s,l,f)
-#define _toUPPER_utf8_flags(p,s,l,f) _to_utf8_upper_flags(p,s,l,f)
+#define _toFOLD_utf8_flags(p,s,l,f)  _to_utf8_fold_flags (p,NULL,s,l,f)
+#define _toLOWER_utf8_flags(p,s,l,f) _to_utf8_lower_flags(p,NULL,s,l,f)
+#define _toTITLE_utf8_flags(p,s,l,f) _to_utf8_title_flags(p,NULL,s,l,f)
+#define _toUPPER_utf8_flags(p,s,l,f) _to_utf8_upper_flags(p,NULL,s,l,f)
+
+#define toFOLD_utf8_safe(p,e,s,l)   _to_utf8_fold_flags(p,e,s,l, FOLD_FLAGS_FULL)
+#define toLOWER_utf8_safe(p,e,s,l)  _to_utf8_lower_flags(p,e,s,l, 0)
+#define toTITLE_utf8_safe(p,e,s,l)  _to_utf8_title_flags(p,e,s,l, 0)
+#define toUPPER_utf8_safe(p,e,s,l)  _to_utf8_upper_flags(p,e,s,l, 0)
 
 /* For internal core Perl use only: the base macros for defining macros like
  * isALPHA_LC_utf8.  These are like _generic_utf8, but if the first code point

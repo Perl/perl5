@@ -534,10 +534,25 @@ foreach my $name (sort keys %to_properties) {
         my $char = chr($j);
         utf8::upgrade($char);
         $char = quotemeta $char if $char eq '\\' || $char eq "'";
+        foreach my $utf8_param("_safe",
+                                "_safe, malformed",
+                                )
         {
-            my $display_call = "to${function}_utf8($display_name )";
-            $ret = eval   "test_to${function}_utf8('$char')";
-            if (is ($@, "", "$display_call didn't give error")) {
+            my $utf8_param_code = $utf8_param_code{$utf8_param};
+            my $expect_error = $utf8_param_code > 0;
+
+            # Skip if can't malform (because is a UTF-8 invariant)
+            next if $expect_error && $i < ((ord "A" == 65) ? 128 : 160);
+
+            my $display_call = "to${function}_utf8($display_name, $utf8_param )";
+            $ret = eval   "test_to${function}_utf8('$char', $utf8_param_code)";
+            if ($expect_error) {
+                isnt ($@, "", "expected and got error in $display_call");
+                like($@, qr/Malformed UTF-8 character/,
+                     "${tab}And got expected message");
+                undef @warnings;
+            }
+            elsif (is ($@, "", "$display_call didn't give error")) {
                 is ($ret->[0], $first_ord_should_be,
                     sprintf("${tab}And correctly returned 0x%02X",
                                                     $first_ord_should_be));

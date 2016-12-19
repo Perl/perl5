@@ -1738,17 +1738,17 @@ s	|UV	|_to_utf8_case  |const UV uv1					\
 				|NULLOK const char *special
 #endif
 Apbmd	|UV	|to_utf8_lower	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
-AMp	|UV	|_to_utf8_lower_flags	|NN const U8 *p|NN U8* ustrp  \
-				|NULLOK STRLEN *lenp|bool flags
+AMp	|UV	|_to_utf8_lower_flags|NN const U8 *p|NULLOK const U8* e		\
+				|NN U8* ustrp|NULLOK STRLEN *lenp|bool flags
 Apbmd	|UV	|to_utf8_upper	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
-AMp	|UV	|_to_utf8_upper_flags	|NN const U8 *p|NN U8* ustrp   \
-				|NULLOK STRLEN *lenp|bool flags
+AMp	|UV	|_to_utf8_upper_flags	|NN const U8 *p|NULLOK const U8 *e	\
+				|NN U8* ustrp|NULLOK STRLEN *lenp|bool flags
 Apbmd	|UV	|to_utf8_title	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
-AMp	|UV	|_to_utf8_title_flags	|NN const U8 *p|NN U8* ustrp   \
-				|NULLOK STRLEN *lenp|bool flags
+AMp	|UV	|_to_utf8_title_flags	|NN const U8 *p|NULLOK const U8* e	\
+				|NN U8* ustrp|NULLOK STRLEN *lenp|bool flags
 Apbmd	|UV	|to_utf8_fold	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
-AMp	|UV	|_to_utf8_fold_flags|NN const U8 *p|NN U8* ustrp       \
-				|NULLOK STRLEN *lenp|U8 flags
+AMp	|UV	|_to_utf8_fold_flags|NN const U8 *p|NULLOK const U8 *e		\
+				|NN U8* ustrp|NULLOK STRLEN *lenp|U8 flags
 #if defined(PERL_IN_MG_C) || defined(PERL_IN_PP_C)
 pn	|bool	|translate_substr_offsets|STRLEN curlen|IV pos1_iv \
 					 |bool pos1_is_uv|IV len_iv \
