@@ -1750,6 +1750,7 @@ for my $charset (get_supported_code_pages()) {
     no warnings 'qw';
                          # Ignore non-alpha in sort
     for my $prop (sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
+                             Assigned
                              ASCII
                              Cased
                              VertSpace
