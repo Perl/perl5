@@ -2434,7 +2434,7 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
 
       needs_full_generality:
 	uvchr_to_utf8(utf8_c, c);
-	return _toFOLD_utf8_flags(utf8_c, p, lenp, flags);
+	return _toFOLD_utf8_flags(utf8_c, utf8_c + sizeof(utf8_c), p, lenp, flags);
     }
 }
 
@@ -5159,7 +5159,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
                     *foldbuf1 = toFOLD(*p1);
                 }
                 else if (u1) {
-                    _toFOLD_utf8_flags(p1, foldbuf1, &n1, flags_for_folder);
+                    _toFOLD_utf8_flags(p1, e1, foldbuf1, &n1, flags_for_folder);
                 }
                 else {  /* Not UTF-8, get UTF-8 fold */
                     _to_uni_fold_flags(*p1, foldbuf1, &n1, flags_for_folder);
@@ -5183,7 +5183,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
                     *foldbuf2 = toFOLD(*p2);
                 }
                 else if (u2) {
-                    _toFOLD_utf8_flags(p2, foldbuf2, &n2, flags_for_folder);
+                    _toFOLD_utf8_flags(p2, e2, foldbuf2, &n2, flags_for_folder);
                 }
                 else {
                     _to_uni_fold_flags(*p2, foldbuf2, &n2, flags_for_folder);

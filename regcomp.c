@@ -3911,7 +3911,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                     }
                     else {
                         STRLEN len;
-                        _toFOLD_utf8_flags(s, d, &len, FOLD_FLAGS_FULL);
+                        _toFOLD_utf8_flags(s, s_end, d, &len, FOLD_FLAGS_FULL);
                         d += len;
                     }
                     s += s_len;
@@ -10047,7 +10047,9 @@ Perl__load_PL_utf8_foldclosures (pTHX)
         U8 dummy[UTF8_MAXBYTES_CASE+1];
 
         /* This string is just a short named one above \xff */
-        toFOLD_utf8((U8*) HYPHEN_UTF8, dummy, NULL);
+        toFOLD_utf8_safe((U8*) HYPHEN_UTF8,
+                         (U8 *) HYPHEN_UTF8 + sizeof(HYPHEN_UTF8),
+                         dummy, NULL);
         assert(PL_utf8_tofold); /* Verify that worked */
     }
     PL_utf8_foldclosures = _swash_inversion_hash(PL_utf8_tofold);
@@ -10198,7 +10200,7 @@ S__make_exactf_invlist(pTHX_ RExC_state_t *pRExC_state, regnode *node)
                 }
                 else {
                     STRLEN len;
-                    toFOLD_utf8(s, d, &len);
+                    toFOLD_utf8_safe(s, e, d, &len);
                     d += len;
                     s += UTF8SKIP(s);
                 }
