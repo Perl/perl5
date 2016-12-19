@@ -339,6 +339,13 @@ L<perlapi/Character classification>.
 Calling macros like C<isALPHA_utf8> on malformed UTF-8 have issued a
 deprecation warning since Perl v5.18.  They now die.
 
+=item *
+
+Calling the functions C<utf8n_to_uvchr> and its derivatives, while
+passing a string length of 0, and specifying that this is allowed is now
+asserted against in DEBUGGING builds.  If you have nothing to decode,
+you shouldn't call the decode function.
+
 =back
 
 =head1 Selected Bug Fixes

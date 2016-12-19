@@ -1398,6 +1398,12 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                 *errors |= UTF8_GOT_EMPTY;
 
                 if (! (flags & UTF8_ALLOW_EMPTY)) {
+
+                    /* This so-called malformation is now treated as a bug in
+                     * the caller.  If you have nothing to decode, skip calling
+                     * this function */
+                    assert(0);
+
                     disallowed = TRUE;
                     if (ckWARN_d(WARN_UTF8) && ! (flags & UTF8_CHECK_ONLY)) {
                         pack_warn = packWARN(WARN_UTF8);

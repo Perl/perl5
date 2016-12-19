@@ -1199,10 +1199,12 @@ my $REPLACEMENT = 0xFFFD;
 my @malformations = (
     # ($testname, $bytes, $length, $allow_flags, $expected_error_flags,
     #  $allowed_uv, $expected_len, $needed_to_discern_len, $message )
-    [ "zero length string malformation", "", 0,
-        $UTF8_ALLOW_EMPTY, $UTF8_GOT_EMPTY, 0, 0, 0,
-        qr/empty string/
-    ],
+
+# Now considered a program bug, and asserted against
+    #[ "zero length string malformation", "", 0,
+    #    $UTF8_ALLOW_EMPTY, $UTF8_GOT_EMPTY, 0, 0, 0,
+    #    qr/empty string/
+    #],
     [ "orphan continuation byte malformation", I8_to_native("${I8c}a"), 2,
         $UTF8_ALLOW_CONTINUATION, $UTF8_GOT_CONTINUATION, $REPLACEMENT,
         1, 1,
