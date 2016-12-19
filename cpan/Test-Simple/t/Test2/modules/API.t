@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test2::API;
+use Test2::API qw/context/;
 
 my ($LOADED, $INIT);
 BEGIN {
@@ -10,7 +10,7 @@ BEGIN {
 };
 
 use Test2::IPC;
-BEGIN { require "t/tools.pl" };
+use Test2::Tools::Tiny;
 use Test2::Util qw/get_tid/;
 my $CLASS = 'Test2::API';
 

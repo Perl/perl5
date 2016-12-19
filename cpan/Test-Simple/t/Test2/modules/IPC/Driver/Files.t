@@ -1,4 +1,4 @@
-BEGIN { require "t/tools.pl" };
+use Test2::Tools::Tiny;
 use Test2::Util qw/get_tid USE_THREADS try ipc_separator/;
 use File::Temp qw/tempfile/;
 use File::Spec qw/catfile/;

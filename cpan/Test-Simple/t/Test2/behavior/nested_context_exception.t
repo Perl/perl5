@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 BEGIN { $Test2::API::DO_DEPTH_CHECK = 1 }
-BEGIN { require "t/tools.pl" };
+use Test2::Tools::Tiny;
 
 use Test2::API qw/context/;
 

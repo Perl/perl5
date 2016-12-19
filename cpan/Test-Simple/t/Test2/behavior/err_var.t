@@ -3,7 +3,7 @@ use warnings;
 
 use Test2::IPC;
 
-BEGIN { require "t/tools.pl" };
+use Test2::Tools::Tiny;
 
 {
     local $! = 100;

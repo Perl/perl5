@@ -2,7 +2,7 @@ use strict;
 use warnings;
 # HARNESS-NO-FORMATTER
 
-BEGIN { require "t/tools.pl" };
+use Test2::Tools::Tiny;
 
 #########################
 #
@@ -11,11 +11,11 @@ BEGIN { require "t/tools.pl" };
 #
 #########################
 
-use Test2::API qw/test2_stack/;
+use Test2::API qw/test2_stack context/;
 use Test::Builder::Formatter;
 
-# The tools in tools.pl have some intentional differences from the Test::More
-# versions, these behave more like Test::More which is important for
+# The tools in Test2::Tools::Tiny have some intentional differences from the
+# Test::More versions, these behave more like Test::More which is important for
 # back-compat.
 sub tm_ok($;$) {
     my ($bool, $name) = @_;

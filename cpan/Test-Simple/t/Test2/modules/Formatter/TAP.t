@@ -4,8 +4,9 @@ use Test2::Formatter::TAP;
 use Test2::API qw/context/;
 use PerlIO;
 
+use Test2::Tools::Tiny;
+
 BEGIN {
-    require "t/tools.pl";
     *OUT_STD = Test2::Formatter::TAP->can('OUT_STD') or die;
     *OUT_ERR = Test2::Formatter::TAP->can('OUT_ERR') or die;
 }

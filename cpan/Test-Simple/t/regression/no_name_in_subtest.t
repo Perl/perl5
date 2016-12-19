@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-BEGIN { require "t/tools.pl" };
+use Test2::Tools::Tiny;
 
 ok(1, "");
 

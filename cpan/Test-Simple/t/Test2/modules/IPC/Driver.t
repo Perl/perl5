@@ -3,7 +3,7 @@ use warnings;
 
 use Test2::IPC::Driver::Files;
 
-BEGIN { require "t/tools.pl" };
+use Test2::Tools::Tiny;
 use Test2::API qw/context test2_ipc_drivers/;
 
 Test2::IPC::Driver::Files->import();

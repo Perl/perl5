@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use Test2::IPC;
-BEGIN { require "t/tools.pl" };
+use Test2::Tools::Tiny;
 use Test2::API::Breakage;
 my $CLASS = 'Test2::API::Breakage';
 

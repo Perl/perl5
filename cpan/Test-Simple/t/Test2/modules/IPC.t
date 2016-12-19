@@ -4,7 +4,7 @@ use warnings;
 use Test2::IPC qw/cull/;
 use Test2::API qw/context test2_ipc_drivers test2_ipc/;
 
-BEGIN { require "t/tools.pl" };
+use Test2::Tools::Tiny;
 
 test2_ipc();
 

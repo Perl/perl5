@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-BEGIN { require "t/tools.pl" }
+use Test2::Tools::Tiny;
 
 # This module's exports interfere with the ones in t/tools.pl
 use Test::More ();

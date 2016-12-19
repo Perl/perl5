@@ -42,9 +42,9 @@ my @loaded = grep { $INC{$_} } qw{
     Test2/API/Stack.pm
 };
 
-require "t/tools.pl";
+require Test2::Tools::Tiny;
 
-ok(!@loaded, "Test2::API was not loaded")
+Test2::Tools::Tiny::ok(!@loaded, "Test2::API was not loaded")
     || diag("Loaded: " . Dumper(\@loaded));
 
-done_testing();
+Test2::Tools::Tiny::done_testing();

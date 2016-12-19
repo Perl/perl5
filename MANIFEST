@@ -2634,6 +2634,7 @@ cpan/Test-Simple/lib/Test2/Hub/Subtest.pm
 cpan/Test-Simple/lib/Test2/IPC.pm
 cpan/Test-Simple/lib/Test2/IPC/Driver.pm
 cpan/Test-Simple/lib/Test2/IPC/Driver/Files.pm
+cpan/Test-Simple/lib/Test2/Tools/Tiny.pm
 cpan/Test-Simple/lib/Test2/Transition.pod
 cpan/Test-Simple/lib/Test2/Util.pm
 cpan/Test-Simple/lib/Test2/Util/ExternalMeta.pm
@@ -2845,6 +2846,7 @@ cpan/Test-Simple/t/Test2/modules/Hub/Subtest.t
 cpan/Test-Simple/t/Test2/modules/IPC.t
 cpan/Test-Simple/t/Test2/modules/IPC/Driver.t
 cpan/Test-Simple/t/Test2/modules/IPC/Driver/Files.t
+cpan/Test-Simple/t/Test2/modules/Tools/Tiny.t
 cpan/Test-Simple/t/Test2/modules/Util.t
 cpan/Test-Simple/t/Test2/modules/Util/ExternalMeta.t
 cpan/Test-Simple/t/Test2/modules/Util/HashBase.t
@@ -2852,8 +2854,6 @@ cpan/Test-Simple/t/Test2/modules/Util/Trace.t
 cpan/Test-Simple/t/Test2/regression/693_ipc_ordering.t
 cpan/Test-Simple/t/Test2/regression/gh_16.t
 cpan/Test-Simple/t/Test2/regression/ipc_files_abort_exit.t
-cpan/Test-Simple/t/tools.pl
-cpan/Test-Simple/t/tools.t
 cpan/Text-Balanced/lib/Text/Balanced.pm	Text::Balanced
 cpan/Text-Balanced/t/01_compile.t	See if Text::Balanced works
 cpan/Text-Balanced/t/02_extbrk.t	See if Text::Balanced works

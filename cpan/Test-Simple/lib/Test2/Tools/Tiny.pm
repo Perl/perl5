@@ -1,3 +1,7 @@
+package Test2::Tools::Tiny;
+use strict;
+use warnings;
+
 use Scalar::Util qw/blessed/;
 
 use Test2::Util qw/try/;
@@ -5,6 +9,14 @@ use Test2::API qw/context run_subtest test2_stack/;
 
 use Test2::Hub::Interceptor();
 use Test2::Hub::Interceptor::Terminator();
+
+our $VERSION = '1.302073';
+
+BEGIN { require Exporter; our @ISA = qw(Exporter) }
+our @EXPORT = qw{
+    ok is isnt like unlike is_deeply diag note skip_all todo plan done_testing
+    warnings exception tests capture
+};
 
 sub ok($;$@) {
     my ($bool, $name, @diag) = @_;
@@ -25,7 +37,7 @@ sub is($$;$@) {
     elsif (defined($got) xor defined($want)) {
         $bool = 0;
     }
-    else { # Both are undef
+    else {    # Both are undef
         $bool = 1;
     }
 
@@ -54,7 +66,7 @@ sub isnt($$;$@) {
     elsif (defined($got) xor defined($want)) {
         $bool = 1;
     }
-    else { # Both are undef
+    else {    # Both are undef
         $bool = 0;
     }
 
@@ -119,8 +131,8 @@ sub is_deeply($$;$@) {
     require Data::Dumper;
     local $Data::Dumper::Sortkeys = 1;
     local $Data::Dumper::Deparse  = 1;
-    local $Data::Dumper::Freezer = 'XXX';
-    local *UNIVERSAL::XXX = sub {
+    local $Data::Dumper::Freezer  = 'XXX';
+    local *UNIVERSAL::XXX         = sub {
         my ($thing) = @_;
         if (ref($thing)) {
             $thing = {%$thing}  if "$thing" =~ m/=HASH/;
@@ -136,17 +148,6 @@ sub is_deeply($$;$@) {
     my $bool = $g eq $w;
 
     my $diff;
-#    unless ($bool) {
-#        use File::Temp;
-#        my ($gFH, $fileg) = File::Temp::tempfile();
-#        my ($wFH, $filew) = File::Temp::tempfile();
-#        print $gFH $g;
-#        print $wFH $w;
-#        close($gFH) || die $!;
-#        close($wFH) || die $!;
-#        my $cmd = qq{git diff --color=always "$fileg" "$filew"};
-#        $diff = eval { `$cmd` };
-#    }
 
     $ctx->ok($bool, $name, [$diff ? $diff : ($g, $w), @diag]);
     $ctx->release;
@@ -155,13 +156,13 @@ sub is_deeply($$;$@) {
 
 sub diag {
     my $ctx = context();
-    $ctx->diag( join '', @_ );
+    $ctx->diag(join '', @_);
     $ctx->release;
 }
 
 sub note {
     my $ctx = context();
-    $ctx->note( join '', @_ );
+    $ctx->note(join '', @_);
     $ctx->release;
 }
 
@@ -173,34 +174,34 @@ sub skip_all {
 }
 
 sub todo {
-	my ($reason, $sub) = @_;
-	my $ctx = context();
+    my ($reason, $sub) = @_;
+    my $ctx = context();
 
-	# This code is mostly copied from Test2::Todo in the Test2-Suite
-	# distribution.
-	my $hub    = test2_stack->top;
-	my $filter = $hub->pre_filter(
-		sub {
-			my ($active_hub, $event) = @_;
+    # This code is mostly copied from Test2::Todo in the Test2-Suite
+    # distribution.
+    my $hub    = test2_stack->top;
+    my $filter = $hub->pre_filter(
+        sub {
+            my ($active_hub, $event) = @_;
 
-			# Turn a diag into a note
-			return Test2::Event::Note->new(%$event) if ref($event) eq 'Test2::Event::Diag';
+            # Turn a diag into a note
+            return Test2::Event::Note->new(%$event) if ref($event) eq 'Test2::Event::Diag';
 
-			# Set todo on ok's
-			if ($hub == $active_hub && $event->isa('Test2::Event::Ok')) {
-				$event->set_todo($reason);
-				$event->set_effective_pass(1);
-			}
+            # Set todo on ok's
+            if ($hub == $active_hub && $event->isa('Test2::Event::Ok')) {
+                $event->set_todo($reason);
+                $event->set_effective_pass(1);
+            }
 
-			return $event;
-		},
-		inherit => 1,
-		todo    => $reason,
-	);
-	$sub->();
-	$hub->pre_unfilter($filter);
+            return $event;
+        },
+        inherit => 1,
+        todo    => $reason,
+    );
+    $sub->();
+    $hub->pre_unfilter($filter);
 
-	$ctx->release if $ctx;
+    $ctx->release if $ctx;
 }
 
 sub plan {
@@ -278,3 +279,147 @@ sub capture(&) {
 }
 
 1;
+
+__END__
+
+=pod
+
+=encoding UTF-8
+
+=head1 NAME
+
+Test2::Tools::Tiny - Tiny set of tools for unfortunate souls who cannot use
+L<Test2::Suite>.
+
+=head1 DESCRIPTION
+
+You should really look at L<Test2::Suite>. This package is some very basic
+essential tools implemented using L<Test2>. This exists only so that L<Test2>
+and other tools required by L<Test2::Suite> can be tested. This is the package
+L<Test2> uses to test itself.
+
+=head1 USE Test2::Suite INSTEAD
+
+Use L<Test2::Suite> if at all possible.
+
+=head1 EXPORTS
+
+=over 4
+
+=item ok($bool, $name)
+
+=item ok($bool, $name, @diag)
+
+Run a simple assertion.
+
+=item is($got, $want, $name)
+
+=item is($got, $want, $name, @diag)
+
+Assert that 2 strings are the same.
+
+=item isnt($got, $do_not_want, $name)
+
+=item isnt($got, $do_not_want, $name, @diag)
+
+Assert that 2 strings are not the same.
+
+=item like($got, $regex, $name)
+
+=item like($got, $regex, $name, @diag)
+
+Check that the input string matches the regex.
+
+=item unlike($got, $regex, $name)
+
+=item unlike($got, $regex, $name, @diag)
+
+Check that the input string does not match the regex.
+
+=item is_deeply($got, $want, $name)
+
+=item is_deeply($got, $want, $name, @diag)
+
+Check 2 data structures. Please note that this is a I<DUMB> implementation that
+compares the output of L<Data::Dumper> against both structures.
+
+=item diag($msg)
+
+Issue a diagnostics message to STDERR.
+
+=item note($msg)
+
+Issue a diagnostics message to STDOUT.
+
+=item skip_all($reason)
+
+Skip all tests.
+
+=item todo $reason => sub { ... }
+
+Run a block in TODO mode.
+
+=item plan($count)
+
+Set the plan.
+
+=item done_testing()
+
+Set the plan to the current test count.
+
+=item $warnings = warnings { ... }
+
+Capture an arrayref of warnings from the block.
+
+=item $exception = exception { ... }
+
+Capture an exception.
+
+=item tests $name => sub { ... }
+
+Run a subtest.
+
+=item $output = capture { ... }
+
+Capture STDOUT and STDERR output.
+
+Result looks like this:
+
+    {
+        STDOUT => "...",
+        STDERR => "...",
+    }
+
+=back
+
+=head1 SOURCE
+
+The source code repository for Test2 can be found at
+F<http://github.com/Test-More/test-more/>.
+
+=head1 MAINTAINERS
+
+=over 4
+
+=item Chad Granum E<lt>exodist@cpan.orgE<gt>
+
+=back
+
+=head1 AUTHORS
+
+=over 4
+
+=item Chad Granum E<lt>exodist@cpan.orgE<gt>
+
+=back
+
+=head1 COPYRIGHT
+
+Copyright 2016 Chad Granum E<lt>exodist@cpan.orgE<gt>.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+See F<http://dev.perl.org/licenses/>
+
+=cut

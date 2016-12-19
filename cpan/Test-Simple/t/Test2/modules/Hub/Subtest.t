@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-BEGIN { require "t/tools.pl" };
+use Test2::Tools::Tiny;
 
 use Test2::Hub::Subtest;
 use Test2::Util qw/get_tid/;

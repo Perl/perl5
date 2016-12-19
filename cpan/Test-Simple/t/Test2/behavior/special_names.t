@@ -2,7 +2,7 @@ use strict;
 use warnings;
 # HARNESS-NO-FORMATTER
 
-BEGIN { require "t/tools.pl" };
+use Test2::Tools::Tiny;
 
 #########################
 #

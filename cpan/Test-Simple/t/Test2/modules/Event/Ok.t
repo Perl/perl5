@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-BEGIN { require "t/tools.pl" };
+use Test2::Tools::Tiny;
 use Test2::Util::Trace;
 use Test2::Event::Ok;
 use Test2::Event::Diag;
