@@ -161,6 +161,7 @@ my %utf8_param_code = (
                         "_safe"                 =>  0,
                         "_safe, malformed"      =>  1,
                         "deprecated unsafe"     => -1,
+                        "deprecated mathoms"    => -2,
                       );
 
 foreach my $name (sort keys %properties, 'octal') {
@@ -536,8 +537,14 @@ foreach my $name (sort keys %to_properties) {
         $char = quotemeta $char if $char eq '\\' || $char eq "'";
         foreach my $utf8_param("_safe",
                                 "_safe, malformed",
+                                "deprecated unsafe",
+                                "deprecated mathoms",
                                 )
         {
+            use Config;
+            next if    $utf8_param eq 'deprecated mathoms'
+                    && $Config{'ccflags'} =~ /-DNO_MATHOMS/;
+
             my $utf8_param_code = $utf8_param_code{$utf8_param};
             my $expect_error = $utf8_param_code > 0;
 
@@ -560,6 +567,33 @@ foreach my $name (sort keys %to_properties) {
                 use bytes;
                 is ($ret->[2], length $utf8_should_be,
                     "${tab}Got correct number of bytes for utf8 length");
+                if ($utf8_param_code < 0) {
+                    my $warnings_ok;
+                    if (! $seen{"${function}_utf8$utf8_param"}++) {
+                        $warnings_ok = is(@warnings, 1,
+                                                   "${tab}Got a single warning");
+                        if ($warnings_ok) {
+                            my $expected;
+                            if ($utf8_param_code == -2) {
+                                my $lc_func = lc $function;
+                                $expected
+                = qr/starting in Perl .* to_utf8_$lc_func\(\) will be removed/;
+                            }
+                            else {
+                                $expected
+                = qr/starting in Perl .* will require an additional parameter/;
+                            }
+                            $warnings_ok = like($warnings[0], $expected,
+                                      "${tab}Got expected deprecation warning");
+                        }
+                    }
+                    else {
+                        $warnings_ok = is(@warnings, 0,
+                                  "${tab}Deprecation warned only the one time");
+                    }
+                    $warnings_ok or diag("@warnings");
+                    undef @warnings;
+                }
             }
         }
     }

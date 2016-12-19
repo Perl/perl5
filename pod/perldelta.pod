@@ -332,8 +332,8 @@ been added, each with the
 suffix C<_safe>, like C<isSPACE_utf8_safe>.  These take an extra
 parameter, giving an upper limit of how far into the string it is safe
 to read.  Using the old versions could cause attempts to read beyond the
-end of the input buffer if the UTF-8 is not well-formed, and the use
-of the C<isI<FOO>_utf8> ones now raises a deprecation warning.  Details are at
+end of the input buffer if the UTF-8 is not well-formed, and ther use
+now raises a deprecation warning.  Details are at
 L<perlapi/Character classification>.
 
 =item *

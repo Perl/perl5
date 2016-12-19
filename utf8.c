@@ -2541,11 +2541,20 @@ S_warn_on_first_deprecated_use(pTHX_ const char * const name,
 		Perl_croak(aTHX_ "panic: hv_store() unexpectedly failed");
             }
 
+            if (strEQ(file, "mathoms.c")) {
+                Perl_warner(aTHX_ WARN_DEPRECATED,
+                            "In %s, line %d, starting in Perl v5.30, %s()"
+                            " will be removed.  Avoid this message by"
+                            " converting to use %s().\n",
+                            file, line, name, alternative);
+            }
+            else {
                 Perl_warner(aTHX_ WARN_DEPRECATED,
                             "In %s, line %d, starting in Perl v5.30, %s() will"
                             " require an additional parameter.  Avoid this"
                             " message by converting to use %s().\n",
                             file, line, name, alternative);
+            }
         }
     }
 }
@@ -2989,6 +2998,84 @@ S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result, U8* c
     return original;
 }
 
+STATIC U32
+S_check_and_deprecate(pTHX_ const U8 *p,
+                            const U8 **e,
+                            const unsigned int type,    /* See below */
+                            const bool use_locale,      /* Is this a 'LC_'
+                                                           macro call? */
+                            const char * const file,
+                            const unsigned line)
+{
+    /* This is a temporary function to deprecate the unsafe calls to the case
+     * changing macros and functions.  It keeps all the special stuff in just
+     * one place.
+     *
+     * It updates *e with the pointer to the end of the input string.  If using
+     * the old-style macros, *e is NULL on input, and so this function assumes
+     * the input string is long enough to hold the entire UTF-8 sequence, and
+     * sets *e accordingly, but it then returns a flag to pass the
+     * utf8n_to_uvchr(), to tell it that this size is a guess, and to avoid
+     * using the full length if possible.
+     *
+     * It also does the assert that *e > p when *e is not NULL.  This should be
+     * migrated to the callers when this function gets deleted.
+     *
+     * The 'type' parameter is used for the caller to specify which case
+     * changing function this is called from: */
+
+#       define DEPRECATE_TO_UPPER 0
+#       define DEPRECATE_TO_TITLE 1
+#       define DEPRECATE_TO_LOWER 2
+#       define DEPRECATE_TO_FOLD  3
+
+    U32 utf8n_flags = 0;
+    const char * name;
+    const char * alternative;
+
+    PERL_ARGS_ASSERT_CHECK_AND_DEPRECATE;
+
+    if (*e == NULL) {
+        utf8n_flags = _UTF8_NO_CONFIDENCE_IN_CURLEN;
+        *e = p + UTF8SKIP(p);
+
+        /* For mathoms.c calls, we use the function name we know is stored
+         * there */
+        if (type == DEPRECATE_TO_UPPER) {
+            name = strEQ(file, "mathoms.c")
+                   ? "to_utf8_upper"
+                   : "toUPPER_utf8";
+            alternative = "toUPPER_utf8_safe";
+        }
+        else if (type == DEPRECATE_TO_TITLE) {
+            name = strEQ(file, "mathoms.c")
+                   ? "to_utf8_title"
+                   : "toTITLE_utf8";
+            alternative = "toTITLE_utf8_safe";
+        }
+        else if (type == DEPRECATE_TO_LOWER) {
+            name = strEQ(file, "mathoms.c")
+                   ? "to_utf8_lower"
+                   : "toLOWER_utf8";
+            alternative = "toLOWER_utf8_safe";
+        }
+        else if (type == DEPRECATE_TO_FOLD) {
+            name = strEQ(file, "mathoms.c")
+                   ? "to_utf8_fold"
+                   : "toFOLD_utf8";
+            alternative = "toFOLD_utf8_safe";
+        }
+        else Perl_croak(aTHX_ "panic: Unexpected case change type");
+
+        warn_on_first_deprecated_use(name, alternative, use_locale, file, line);
+    }
+    else {
+        assert (p < *e);
+    }
+
+    return utf8n_flags;
+}
+
 /* The process for changing the case is essentially the same for the four case
  * change types, except there are complications for folding.  Otherwise the
  * difference is only which case to change to.  To make sure that they all do
@@ -3019,7 +3106,6 @@ S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result, U8* c
  * going on. */
 #define CASE_CHANGE_BODY_START(locale_flags, LC_L1_change_macro, L1_func,    \
                                L1_func_extra_param)                          \
-    if (e == NULL) e = p + UTF8SKIP(p);                                      \
                                                                              \
     if (flags & (locale_flags)) {                                            \
         /* Treat a UTF-8 locale as not being in locale at all */             \
@@ -3053,9 +3139,8 @@ S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result, U8* c
         STRLEN len_result;                                                   \
         result = utf8n_to_uvchr(p, e - p, &len_result, UTF8_CHECK_ONLY);     \
         if (len_result == (STRLEN) -1) {                                     \
-            _force_out_malformed_utf8_message(p, e,                          \
-                                              _UTF8_NO_CONFIDENCE_IN_CURLEN, \
-                                              1 /* Die */ );                 \
+            _force_out_malformed_utf8_message(p, e, utf8n_flags,             \
+                                                            1 /* Die */ );   \
         }
 
 #define CASE_CHANGE_BODY_END(locale_flags, change_macro)                     \
@@ -3092,9 +3177,17 @@ Instead use L</toUPPER_utf8_safe>.
  *         be used. */
 
 UV
-Perl__to_utf8_upper_flags(pTHX_ const U8 *p, const U8 *e, U8* ustrp, STRLEN *lenp, bool flags)
+Perl__to_utf8_upper_flags(pTHX_ const U8 *p,
+                                const U8 *e,
+                                U8* ustrp,
+                                STRLEN *lenp,
+                                bool flags,
+                                const char * const file,
+                                const int line)
 {
     UV result;
+    const U32 utf8n_flags = check_and_deprecate(p, &e, DEPRECATE_TO_UPPER,
+                                                cBOOL(flags), file, line);
 
     PERL_ARGS_ASSERT__TO_UTF8_UPPER_FLAGS;
 
@@ -3118,9 +3211,17 @@ Instead use L</toTITLE_utf8_safe>.
  */
 
 UV
-Perl__to_utf8_title_flags(pTHX_ const U8 *p, const U8 *e, U8* ustrp, STRLEN *lenp, bool flags)
+Perl__to_utf8_title_flags(pTHX_ const U8 *p,
+                                const U8 *e,
+                                U8* ustrp,
+                                STRLEN *lenp,
+                                bool flags,
+                                const char * const file,
+                                const int line)
 {
     UV result;
+    const U32 utf8n_flags = check_and_deprecate(p, &e, DEPRECATE_TO_TITLE,
+                                                cBOOL(flags), file, line);
 
     PERL_ARGS_ASSERT__TO_UTF8_TITLE_FLAGS;
 
@@ -3142,9 +3243,17 @@ Instead use L</toLOWER_utf8_safe>.
  */
 
 UV
-Perl__to_utf8_lower_flags(pTHX_ const U8 *p, const U8 *e, U8* ustrp, STRLEN *lenp, bool flags)
+Perl__to_utf8_lower_flags(pTHX_ const U8 *p,
+                                const U8 *e,
+                                U8* ustrp,
+                                STRLEN *lenp,
+                                bool flags,
+                                const char * const file,
+                                const int line)
 {
     UV result;
+    const U32 utf8n_flags = check_and_deprecate(p, &e, DEPRECATE_TO_LOWER,
+                                                cBOOL(flags), file, line);
 
     PERL_ARGS_ASSERT__TO_UTF8_LOWER_FLAGS;
 
@@ -3170,9 +3279,17 @@ Instead use L</toFOLD_utf8_safe>.
  */
 
 UV
-Perl__to_utf8_fold_flags(pTHX_ const U8 *p, const U8 *e, U8* ustrp, STRLEN *lenp, U8 flags)
+Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
+                               const U8 *e,
+                               U8* ustrp,
+                               STRLEN *lenp,
+                               U8 flags,
+                               const char * const file,
+                               const int line)
 {
     UV result;
+    const U32 utf8n_flags = check_and_deprecate(p, &e, DEPRECATE_TO_FOLD,
+                                                cBOOL(flags), file, line);
 
     PERL_ARGS_ASSERT__TO_UTF8_FOLD_FLAGS;
 

@@ -870,7 +870,14 @@ implementation, and subject to change in future releases.
 =for apidoc Am|UV|toUPPER_utf8|U8* p|U8* s|STRLEN* lenp
 This is like C<L</toUPPER_utf8_safe>>, but doesn't have the C<e>
 parameter  The function therefore can't check if it is reading
-beyond the end of the string.
+beyond the end of the string.  Starting in Perl v5.30, it will take the C<e>
+parameter, becoming a synonym for C<toUPPER_utf8_safe>.  At that time every
+program that uses it will have to be changed to successfully compile.  In the
+meantime, the first runtime call to C<toUPPER_utf8> from each call point in the
+program will raise a deprecation warning, enabled by default.  You can convert
+your program now to use C<toUPPER_utf8_safe>, and avoid the warnings, and get an
+extra measure of protection, or you can wait until v5.30, when you'll be forced
+to add the C<e> parameter.
 
 =for apidoc Am|U8|toFOLD|U8 ch
 Converts the specified character to foldcase.  If the input is anything but an
@@ -910,7 +917,14 @@ implementation, and subject to change in future releases.
 =for apidoc Am|UV|toFOLD_utf8|U8* p|U8* s|STRLEN* lenp
 This is like C<L</toFOLD_utf8_safe>>, but doesn't have the C<e>
 parameter  The function therefore can't check if it is reading
-beyond the end of the string.
+beyond the end of the string.  Starting in Perl v5.30, it will take the C<e>
+parameter, becoming a synonym for C<toFOLD_utf8_safe>.  At that time every
+program that uses it will have to be changed to successfully compile.  In the
+meantime, the first runtime call to C<toFOLD_utf8> from each call point in the
+program will raise a deprecation warning, enabled by default.  You can convert
+your program now to use C<toFOLD_utf8_safe>, and avoid the warnings, and get an
+extra measure of protection, or you can wait until v5.30, when you'll be forced
+to add the C<e> parameter.
 
 =for apidoc Am|U8|toLOWER|U8 ch
 Converts the specified character to lowercase.  If the input is anything but an
@@ -958,7 +972,14 @@ implementation, and subject to change in future releases.
 =for apidoc Am|UV|toLOWER_utf8|U8* p|U8* s|STRLEN* lenp
 This is like C<L</toLOWER_utf8_safe>>, but doesn't have the C<e>
 parameter  The function therefore can't check if it is reading
-beyond the end of the string.
+beyond the end of the string.  Starting in Perl v5.30, it will take the C<e>
+parameter, becoming a synonym for C<toLOWER_utf8_safe>.  At that time every
+program that uses it will have to be changed to successfully compile.  In the
+meantime, the first runtime call to C<toLOWER_utf8> from each call point in the
+program will raise a deprecation warning, enabled by default.  You can convert
+your program now to use C<toLOWER_utf8_safe>, and avoid the warnings, and get an
+extra measure of protection, or you can wait until v5.30, when you'll be forced
+to add the C<e> parameter.
 
 =for apidoc Am|U8|toTITLE|U8 ch
 Converts the specified character to titlecase.  If the input is anything but an
@@ -999,7 +1020,14 @@ implementation, and subject to change in future releases.
 =for apidoc Am|UV|toTITLE_utf8|U8* p|U8* s|STRLEN* lenp
 This is like C<L</toLOWER_utf8_safe>>, but doesn't have the C<e>
 parameter  The function therefore can't check if it is reading
-beyond the end of the string.
+beyond the end of the string.  Starting in Perl v5.30, it will take the C<e>
+parameter, becoming a synonym for C<toTITLE_utf8_safe>.  At that time every
+program that uses it will have to be changed to successfully compile.  In the
+meantime, the first runtime call to C<toTITLE_utf8> from each call point in the
+program will raise a deprecation warning, enabled by default.  You can convert
+your program now to use C<toTITLE_utf8_safe>, and avoid the warnings, and get an
+extra measure of protection, or you can wait until v5.30, when you'll be forced
+to add the C<e> parameter.
 
 =cut
 
@@ -1926,10 +1954,10 @@ _generic_utf8_safe(classnum, p, e, _is_utf8_FOO_with_len(classnum, p, e))
 #define toUPPER_utf8(p,s,l)	to_utf8_upper(p,s,l)
 
 /* For internal core use only, subject to change */
-#define _toFOLD_utf8_flags(p,e,s,l,f)  _to_utf8_fold_flags (p,e,s,l,f)
-#define _toLOWER_utf8_flags(p,e,s,l,f) _to_utf8_lower_flags(p,e,s,l,f)
-#define _toTITLE_utf8_flags(p,e,s,l,f) _to_utf8_title_flags(p,e,s,l,f)
-#define _toUPPER_utf8_flags(p,e,s,l,f) _to_utf8_upper_flags(p,e,s,l,f)
+#define _toFOLD_utf8_flags(p,e,s,l,f)  _to_utf8_fold_flags (p,e,s,l,f, "", 0)
+#define _toLOWER_utf8_flags(p,e,s,l,f) _to_utf8_lower_flags(p,e,s,l,f, "", 0)
+#define _toTITLE_utf8_flags(p,e,s,l,f) _to_utf8_title_flags(p,e,s,l,f, "", 0)
+#define _toUPPER_utf8_flags(p,e,s,l,f) _to_utf8_upper_flags(p,e,s,l,f, "", 0)
 
 #define toFOLD_utf8_safe(p,e,s,l)   _toFOLD_utf8_flags(p,e,s,l, FOLD_FLAGS_FULL)
 #define toLOWER_utf8_safe(p,e,s,l)  _toLOWER_utf8_flags(p,e,s,l, 0)

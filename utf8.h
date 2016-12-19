@@ -78,13 +78,13 @@ the string is invariant.
 #define to_uni_fold(c, p, lenp) _to_uni_fold_flags(c, p, lenp, FOLD_FLAGS_FULL)
 
 #define to_utf8_fold(s, r, lenr)                                                \
-    _to_utf8_fold_flags (s, NULL, r, lenr, FOLD_FLAGS_FULL)
+    _to_utf8_fold_flags (s, NULL, r, lenr, FOLD_FLAGS_FULL, __FILE__, __LINE__)
 #define to_utf8_lower(s, r, lenr)                                               \
-                  _to_utf8_lower_flags(s, NULL, r ,lenr, 0)
+                  _to_utf8_lower_flags(s, NULL, r ,lenr, 0, __FILE__, __LINE__)
 #define to_utf8_upper(s, r, lenr)                                               \
-                  _to_utf8_upper_flags(s, NULL, r, lenr, 0)
+                  _to_utf8_upper_flags(s, NULL, r, lenr, 0, __FILE__, __LINE__)
 #define to_utf8_title(s, r, lenr)                                               \
-                  _to_utf8_title_flags(s, NULL, r, lenr ,0)
+                  _to_utf8_title_flags(s, NULL, r, lenr ,0, __FILE__, __LINE__)
 
 #define foldEQ_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2) \
 		    foldEQ_utf8_flags(s1, pe1, l1, u1, s2, pe2, l2, u2, 0)

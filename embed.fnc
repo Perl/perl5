@@ -1729,6 +1729,13 @@ s	|void	|warn_on_first_deprecated_use				    \
 				|const bool use_locale			    \
 				|NN const char * const file		    \
 				|const unsigned line
+s	|U32	|check_and_deprecate					    \
+				|NN const U8 * p			    \
+				|NN const U8 ** e			    \
+				|const unsigned type			    \
+				|const bool use_locale			    \
+				|NN const char * const file		    \
+				|const unsigned line
 s	|UV	|_to_utf8_case  |const UV uv1					\
 				|NN const U8 *p					\
 				|NN U8* ustrp					\
@@ -1737,18 +1744,22 @@ s	|UV	|_to_utf8_case  |const UV uv1					\
 				|NN const char *normal 				\
 				|NULLOK const char *special
 #endif
-Apbmd	|UV	|to_utf8_lower	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
+ApbmdD	|UV	|to_utf8_lower	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
 AMp	|UV	|_to_utf8_lower_flags|NN const U8 *p|NULLOK const U8* e		\
-				|NN U8* ustrp|NULLOK STRLEN *lenp|bool flags
-Apbmd	|UV	|to_utf8_upper	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
+				|NN U8* ustrp|NULLOK STRLEN *lenp|bool flags	\
+				|NN const char * const file|const int line
+ApbmdD	|UV	|to_utf8_upper	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
 AMp	|UV	|_to_utf8_upper_flags	|NN const U8 *p|NULLOK const U8 *e	\
-				|NN U8* ustrp|NULLOK STRLEN *lenp|bool flags
-Apbmd	|UV	|to_utf8_title	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
+				|NN U8* ustrp|NULLOK STRLEN *lenp|bool flags	\
+				|NN const char * const file|const int line
+ApbmdD	|UV	|to_utf8_title	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
 AMp	|UV	|_to_utf8_title_flags	|NN const U8 *p|NULLOK const U8* e	\
-				|NN U8* ustrp|NULLOK STRLEN *lenp|bool flags
-Apbmd	|UV	|to_utf8_fold	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
+				|NN U8* ustrp|NULLOK STRLEN *lenp|bool flags	\
+				|NN const char * const file|const int line
+ApbmdD	|UV	|to_utf8_fold	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
 AMp	|UV	|_to_utf8_fold_flags|NN const U8 *p|NULLOK const U8 *e		\
-				|NN U8* ustrp|NULLOK STRLEN *lenp|U8 flags
+				|NN U8* ustrp|NULLOK STRLEN *lenp|U8 flags  \
+				|NN const char * const file|const int line
 #if defined(PERL_IN_MG_C) || defined(PERL_IN_PP_C)
 pn	|bool	|translate_substr_offsets|STRLEN curlen|IV pos1_iv \
 					 |bool pos1_is_uv|IV len_iv \
