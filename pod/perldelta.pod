@@ -268,6 +268,23 @@ L</Platform Support> section, instead.
 Zero out the alignment bytes when calculating the bytes for 80-bit C<NaN>
 and C<Inf> to make builds more reproducible. [perl #130133]
 
+=item *
+
+Since 5.18 for testing purposes we have included support for
+building perl with a variety of non-standard, and non-recommended
+hash functions. Since we do not recommend the use of these functions
+we have removed them and their corresponding build options. Spefically
+this includes the following build options:
+
+    PERL_HASH_FUNC_SDBM
+    PERL_HASH_FUNC_DJB2
+    PERL_HASH_FUNC_SUPERFAST
+    PERL_HASH_FUNC_MURMUR3
+    PERL_HASH_FUNC_ONE_AT_A_TIME
+    PERL_HASH_FUNC_ONE_AT_A_TIME_OLD
+    PERL_HASH_FUNC_MURMUR_HASH_64A
+    PERL_HASH_FUNC_MURMUR_HASH_64B
+
 =back
 
 =head1 Testing
