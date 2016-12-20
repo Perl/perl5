@@ -10204,15 +10204,13 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 
     /* after skipping whitespace, the next character is the terminator */
     term = *s;
-    if (!UTF) {
+    if (!UTF || UTF8_IS_INVARIANT(term)) {
 	termcode = termstr[0] = term;
 	termlen = 1;
     }
     else {
 	termcode = utf8_to_uvchr_buf((U8*)s, (U8*)PL_bufend, &termlen);
 	Copy(s, termstr, termlen, U8);
-	if (!UTF8_IS_INVARIANT(term))
-	    has_utf8 = TRUE;
     }
 
     /* mark where we are */
