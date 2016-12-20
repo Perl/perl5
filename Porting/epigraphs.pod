@@ -17,6 +17,21 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.25.8 - Langston Hughes, So long
+
+Announced on 2016-12-20 by Sawyer X.
+
+  So long
+  is in the song
+  and it's in the way you're gone
+  but it's like a foreign language
+  in my mind
+  and maybe was I blind
+  I could not see
+  and would not know
+  you're gone so long
+  so long.
+
 =head2 v5.25.7 - J.R.R. Tolkien, "The Silmarillion"
 
 L<Announced on 2016-11-20 by Chad 'Exodist' Granum|http://www.nntp.perl.org/group/perl.perl5.porters/2016/11/msg241120.html>
