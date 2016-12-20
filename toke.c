@@ -10192,6 +10192,10 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
     STRLEN termlen;		/* length of terminating string */
     line_t herelines;
 
+    /* The delimiters that have a mirror-image closing one */
+    const char * opening_delims = "([{<";
+    const char * closing_delims = ")]}>";
+
     PERL_ARGS_ASSERT_SCAN_STR;
 
     /* skip space before the delimiter */
@@ -10218,9 +10222,10 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
     PL_multi_open = termcode;
     herelines = PL_parser->herelines;
 
-    /* find corresponding closing delimiter */
-    if (term && (tmps = strchr("([{< )]}> )]}>",term)))
-	termcode = termstr[0] = term = tmps[5];
+    /* If the delimiter has a mirror-image closing one, get it */
+    if (term && (tmps = strchr(opening_delims, term))) {
+        termcode = termstr[0] = term = closing_delims[tmps - opening_delims];
+    }
 
     PL_multi_close = termcode;
 
