@@ -638,8 +638,8 @@ Starting from Perl 5.16, one can prefix the switch
 keywords with C<CORE::> to access the feature without a C<use feature>
 statement.  The keywords C<given> and
 C<when> are analogous to C<switch> and
-C<case> in other languages, so the code in the previous section could be
-rewritten as
+C<case> in other languages -- though C<continue> is not -- so the code
+in the previous section could be rewritten as
 
     use v5.10.1;
     for ($var) {
@@ -1118,7 +1118,7 @@ a C<break>.
 =head3 Fall-through
 
 You can use the C<continue> keyword to fall through from one
-case to the next:
+case to the next immediate C<when> or C<default>:
 
     given($foo) {
         when (/x/) { say '$foo contains an x'; continue }
