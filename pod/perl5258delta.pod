@@ -1,0 +1,213 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5258delta - what is new for perl v5.25.8
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.25.7 release and the 5.25.8
+release.
+
+If you are upgrading from an earlier release such as 5.25.6, first read
+L<perl5257delta>, which describes differences between 5.25.6 and 5.25.7.
+
+=head1 Core Enhancements
+
+=head2 New Hash Function For 64-bit Builds
+
+We have switched to a hybrid hash function to better balance
+performance for short and long keys.
+
+For short keys, 16 bytes and under, we use an optimised variant of
+One At A Time Hard, and for longer keys we use Siphash 1-3. For very
+long keys this is a big improvement in performance. For shorter keys
+there is a modest improvement.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item * New Faster Hash Function on 64 bit builds
+
+We use a different hash function for short and long keys. This should
+improve performance and security, especially for long keys.
+
+=item * readline is faster
+
+Reading from a file line-by-line with C<readline()> or C<< E<lt>E<gt> >> should
+now typically be faster due to a better implementation of the code that
+searches for the next newline character.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Archive::Tar> has been upgraded from version 2.18 to 2.24.
+
+=item *
+
+L<B::Debug> has been upgraded from version 1.23 to 1.24.
+
+=item *
+
+L<bignum> has been upgraded from version 0.43_01 to 0.47.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.165 to 2.166.
+
+=item *
+
+L<Encode> has been upgraded from version 2.86 to 2.88.
+
+=item *
+
+L<encoding> has been upgraded from version 2.18 to 2.19.
+
+=item *
+
+L<IO> has been upgraded from version 1.37 to 1.38.
+
+=item *
+
+L<Locale::Codes> has been upgraded from version 3.40 to 3.42.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999727 to 1.999806.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.42 to 0.5005.
+
+=item *
+
+L<Math::BigRat> has been upgraded from version 0.260804 to 0.2611.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20161120 to 5.20161220.
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.24 to 0.25.
+
+=item *
+
+L<Pod::Simple> has been upgraded from version 3.32 to 3.35.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.75 to 1.76.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302062 to 1.302073.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9740_03 to 1.9741.
+
+=item *
+
+L<Time::Local> has been upgraded from version 1.24 to 1.25.
+
+=item *
+
+L<Unicode::Collate> has been upgraded from version 1.18 to 1.19.
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+Zero out the alignment bytes when calculating the bytes for 80-bit C<NaN>
+and C<Inf> to make builds more reproducible. [perl #130133]
+
+=item *
+
+Since 5.18 for testing purposes we have included support for
+building perl with a variety of non-standard, and non-recommended
+hash functions. Since we do not recommend the use of these functions
+we have removed them and their corresponding build options. Specifically
+this includes the following build options:
+
+    PERL_HASH_FUNC_SDBM
+    PERL_HASH_FUNC_DJB2
+    PERL_HASH_FUNC_SUPERFAST
+    PERL_HASH_FUNC_MURMUR3
+    PERL_HASH_FUNC_ONE_AT_A_TIME
+    PERL_HASH_FUNC_ONE_AT_A_TIME_OLD
+    PERL_HASH_FUNC_MURMUR_HASH_64A
+    PERL_HASH_FUNC_MURMUR_HASH_64B
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.25.8 represents approximately 4 weeks of development since Perl 5.25.7
+and contains approximately 21,000 lines of changes across 500 files from 19
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 18,000 lines of changes to 340 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.25.8:
+
+Andy Lester, Aristotle Pagaltzis, Chad Granum, Chris 'BinGOs' Williams,
+Christian Hansen, Craig A. Berry, David Mitchell, Hugo van der Sanden, James E
+Keenan, J. Nick Koston, Karl Williamson, Matthew Horsfall, Niko Tyni, Petr
+Písař, Sawyer X, Steve Hay, Sullivan Beck, Tony Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
