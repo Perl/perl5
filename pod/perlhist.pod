@@ -602,6 +602,7 @@ the strings?).
  Stevan    5.25.5       2016-Sep-20
  Aaron     5.25.6       2016-Oct-20
  Chad      5.25.7       2016-Nov-20
+ Sawyer    5.25.8       2016-Dec-20
 
 =head2 SELECTED RELEASE SIZES
 
