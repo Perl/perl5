@@ -35,7 +35,7 @@ improve performance and security, especially for long keys.
 
 =item * readline is faster
 
-Reading from a file line-by-line with c<readline()> or C<< <> >> should
+Reading from a file line-by-line with C<readline()> or C<< E<lt>E<gt> >> should
 now typically be faster due to a better implementation of the code that
 searches for the next newline character.
 
@@ -139,7 +139,7 @@ and C<Inf> to make builds more reproducible. [perl #130133]
 Since 5.18 for testing purposes we have included support for
 building perl with a variety of non-standard, and non-recommended
 hash functions. Since we do not recommend the use of these functions
-we have removed them and their corresponding build options. Spefically
+we have removed them and their corresponding build options. Specifically
 this includes the following build options:
 
     PERL_HASH_FUNC_SDBM
