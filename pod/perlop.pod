@@ -1389,7 +1389,8 @@ Note, however, that this does not always work for quoting Perl code:
 is a syntax error.  The C<L<Text::Balanced>> module (standard as of v5.8,
 and from CPAN before then) is able to do this properly.
 
-There can be whitespace between the operator and the quoting
+There can (and in some cases, must) be whitespace between the operator
+and the quoting
 characters, except when C<#> is being used as the quoting character.
 C<q#foo#> is parsed as the string C<foo>, while S<C<q #foo#>> is the
 operator C<q> followed by a comment.  Its argument will be taken
@@ -1397,6 +1398,12 @@ from the next line.  This allows you to write:
 
     s {foo}  # Replace foo
       {bar}  # with bar.
+
+The cases where whitespace must be used are when the quoting character
+is a word character (meaning it matches C</\w/>):
+
+    q XfooX # Works: means the string 'foo'
+    qXfooX  # WRONG!
 
 The following escape sequences are available in constructs that interpolate,
 and in transliterations:
