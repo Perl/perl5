@@ -47,7 +47,15 @@ XXX For a release on a stable branch, this section aspires to be:
 
 =head1 Deprecations
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.
+=head2 String delimiters that aren't stand-alone graphemes are now
+deprecated
+
+In order for Perl to eventually allow string delimiters to be Unicode
+grapheme clusters (which look like a single character, but may be
+a sequence of several ones), we have to stop allowing a single char
+delimiter that isn't a grapheme by itself.  These are unlikely to exist
+in actual code, as they would typically display as attached to the
+character in front of them.
 
 =head2 Module removals
 

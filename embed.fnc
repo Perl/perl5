@@ -2465,6 +2465,11 @@ Es	|U8	|regtail_study	|NN RExC_state_t *pRExC_state \
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 EXRpM	|bool	|isFOO_lc	|const U8 classnum|const U8 character
 #endif
+
+#if defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)
+ERp	|bool	|_is_grapheme	|NN const U8 * strbeg|NN const U8 * s|NN const U8 *strend|const UV cp
+#endif
+
 #if defined(PERL_IN_REGEXEC_C)
 ERs	|bool	|isFOO_utf8_lc	|const U8 classnum|NN const U8* character
 ERs	|SSize_t|regmatch	|NN regmatch_info *reginfo|NN char *startpos|NN regnode *prog

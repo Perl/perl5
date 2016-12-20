@@ -7064,6 +7064,31 @@ arguments and at least one of them is tainted.  This used to be allowed
 but will become a fatal error in a future version of perl.  Untaint your
 arguments.  See L<perlsec>.
 
+=item Use of unassigned code point or non-standalone grapheme for a
+delimiter will be a fatal error starting in Perl v5.30
+
+(D deprecated)
+A grapheme is what appears to a native-speaker of a language to be a
+character.  In Unicode (and hence Perl) a grapheme may actually be
+several adjacent characters that together form a complete grapheme.  For
+example, there can be a base character, like "R" and an accent, like a
+circumflex "^", that appear when displayed to be a single character with
+the circumflex hovering over the "R".  Perl currently allows things like
+that circumflex to be delimiters of strings, patterns, I<etc>.  When
+displayed, the circumflex would look like it belongs to the character
+just to the left of it.  In order to move the language to be able to
+accept graphemes as delimiters, we have to deprecate the use of
+delimiters which aren't graphemes by themselves.  Also, a delimiter must
+already be assigned (or known to be never going to be assigned) to try
+to future-proof code, for otherwise code that works today would fail to
+compile if the currently unassigned delimiter ends up being something
+that isn't a stand-alone grapheme.  Because Unicode is never going to
+assign
+L<non-character code points|perlunicode/Noncharacter code points>, nor
+L<code points that are above the legal Unicode maximum|
+perlunicode/Beyond Unicode code points>, those can be delimiters, and
+their use won't raise this warning.
+
 =item Use of uninitialized value%s
 
 (W uninitialized) An undefined value was used as if it were already

@@ -9704,6 +9704,64 @@ S_to_byte_substr(pTHX_ regexp *prog)
     return TRUE;
 }
 
+bool
+Perl__is_grapheme(pTHX_ const U8 * strbeg, const U8 * s, const U8 * strend, const UV cp)
+{
+    /* Temporary helper function for toke.c.  Verify that the code point 'cp'
+     * is a stand-alone grapheme.  The UTF-8 for 'cp' begins at position 's' in
+     * the larger string bounded by 'strbeg' and 'strend'.
+     *
+     * 'cp' needs to be assigned (if not a future version of the Unicode
+     * Standard could make it something that combines with adjacent characters,
+     * so code using it would then break), and there has to be a GCB break
+     * before and after the character. */
+
+    GCB_enum cp_gcb_val, prev_cp_gcb_val, next_cp_gcb_val;
+    const U8 * prev_cp_start;
+
+    PERL_ARGS_ASSERT__IS_GRAPHEME;
+
+    /* Unassigned code points are forbidden */
+    if (UNLIKELY(! ELEMENT_RANGE_MATCHES_INVLIST(
+                                    _invlist_search(PL_Assigned_invlist, cp))))
+    {
+        return FALSE;
+    }
+
+    cp_gcb_val = getGCB_VAL_CP(cp);
+
+    /* Find the GCB value of the previous code point in the input */
+    prev_cp_start = utf8_hop_back(s, -1, strbeg);
+    if (UNLIKELY(prev_cp_start == s)) {
+        prev_cp_gcb_val = GCB_EDGE;
+    }
+    else {
+        prev_cp_gcb_val = getGCB_VAL_UTF8(prev_cp_start, strend);
+    }
+
+    /* And check that is a grapheme boundary */
+    if (! isGCB(prev_cp_gcb_val, cp_gcb_val, strbeg, s,
+                TRUE /* is UTF-8 encoded */ ))
+    {
+        return FALSE;
+    }
+
+    /* Similarly verify there is a break between the current character and the
+     * following one */
+    s += UTF8SKIP(s);
+    if (s >= strend) {
+        next_cp_gcb_val = GCB_EDGE;
+    }
+    else {
+        next_cp_gcb_val = getGCB_VAL_UTF8(s, strend);
+    }
+
+    return isGCB(cp_gcb_val, next_cp_gcb_val, strbeg, s, TRUE);
+}
+
+
+
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

@@ -10253,6 +10253,14 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
     const char * opening_delims = "([{<";
     const char * closing_delims = ")]}>";
 
+    const char * non_grapheme_msg = "Use of unassigned code point or"
+                                    " non-standalone grapheme for a delimiter"
+                                    " will be a fatal error starting in Perl"
+                                    " v5.30";
+    /* The only non-UTF character that isn't a stand alone grapheme is
+     * white-space, hence can't be a delimiter.  So can skip for non-UTF-8 */
+    bool check_grapheme = UTF && ckWARN_d(WARN_DEPRECATED);
+
     PERL_ARGS_ASSERT_SCAN_STR;
 
     /* skip space before the delimiter */
@@ -10271,6 +10279,28 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
     }
     else {
 	termcode = utf8_to_uvchr_buf((U8*)s, (U8*)PL_bufend, &termlen);
+        if (check_grapheme) {
+            if (   UNLIKELY(UNICODE_IS_SUPER(termcode))
+                || UNLIKELY(UNICODE_IS_NONCHAR(termcode)))
+            {
+                /* These are considered graphemes, and since the ending
+                 * delimiter will be the same, we don't have to check the other
+                 * end */
+                check_grapheme = FALSE;
+            }
+            else if (UNLIKELY(! _is_grapheme((U8 *) start,
+                                             (U8 *) s,
+                                             (U8 *) PL_bufend,
+                                             termcode)))
+            {
+                Perl_warner(aTHX_ packWARN(WARN_DEPRECATED), "%s", non_grapheme_msg);
+
+                /* Don't have to check the other end, as have already warned at
+                 * this one */
+                check_grapheme = FALSE;
+            }
+        }
+
 	Copy(s, termstr, termlen, U8);
     }
 
@@ -10329,6 +10359,15 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 		    if (termlen == 1)
 			break;
 		    if (s+termlen <= PL_bufend && memEQ(s, (char*)termstr, termlen))
+                        if (   check_grapheme
+                            && UNLIKELY(! _is_grapheme((U8 *) start,
+                                                              (U8 *) s,
+                                                              (U8 *) PL_bufend,
+                                                              termcode)))
+                        {
+                            Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+                                        "%s", non_grapheme_msg);
+                        }
 			break;
 		}
 		else if (!has_utf8 && !UTF8_IS_INVARIANT((U8)*s) && UTF)
@@ -10405,7 +10444,7 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 	    CopLINE_set(PL_curcop, (line_t)PL_multi_start);
 	    return NULL;
 	}
-	s = PL_bufptr;
+	s = start = PL_bufptr;
     }
 
     /* at this point, we have successfully read the delimited string */
