@@ -123,7 +123,7 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20161220 to 5.20160120.
+L<Module::CoreList> has been upgraded from version 5.20161220 to 5.20170120.
 
 =back
 
