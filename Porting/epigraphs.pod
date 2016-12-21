@@ -19,7 +19,7 @@ Consult your favorite dictionary for details.
 
 =head2 v5.25.8 - Langston Hughes, So long
 
-Announced on 2016-12-20 by Sawyer X.
+L<Announced on 2016-12-20 by Sawyer X|http://www.nntp.perl.org/group/perl.perl5.porters/2016/12/msg241739.html>
 
   So long
   is in the song
