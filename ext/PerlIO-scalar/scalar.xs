@@ -20,9 +20,8 @@ PerlIOScalar_eof(pTHX_ PerlIO * f)
 {
     if (PerlIOBase(f)->flags & PERLIO_F_CANREAD) {
         PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
-        char *p;
         STRLEN len;
-        p = SvPV(s->var, len);
+        (void)SvPV(s->var, len);
         return len - (STRLEN)(s->posn) <= 0;
     }
     return 1;
