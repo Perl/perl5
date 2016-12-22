@@ -130,7 +130,7 @@ for ( 0x0 .. 0xff ) {
                      "$name as a length-1 variable generates a syntax error");
             $tests++;
             utf8::upgrade($chr);
-            evalbytes "no strict; use utf8; \$$chr = 4;",
+            eval "no strict; \$$chr = 4;",
             like($@, qr/ syntax\ error | Unrecognized\ character /x,
                      "  ... and the same under 'use utf8'");
             $tests++;
