@@ -4541,7 +4541,7 @@ STATIC void	S_finalize_op(pTHX_ OP* o);
 STATIC void	S_find_and_forget_pmops(pTHX_ OP *o);
 #define PERL_ARGS_ASSERT_FIND_AND_FORGET_PMOPS	\
 	assert(o)
-STATIC OP*	S_fold_constants(pTHX_ OP *o);
+STATIC OP*	S_fold_constants(pTHX_ OP * const o);
 #define PERL_ARGS_ASSERT_FOLD_CONSTANTS	\
 	assert(o)
 STATIC OP*	S_force_list(pTHX_ OP* arg, bool nullit);

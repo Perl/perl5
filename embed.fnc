@@ -529,7 +529,7 @@ i	|void	|op_relocate_sv	|NN SV** svp|NN PADOFFSET* targp
 i	|OP*	|newMETHOP_internal	|I32 type|I32 flags|NULLOK OP* dynamic_meth \
 					|NULLOK SV* const_meth
 : FIXME
-s	|OP*	|fold_constants	|NN OP *o
+s	|OP*	|fold_constants	|NN OP * const o
 #endif
 Afpd	|char*	|form		|NN const char* pat|...
 Ap	|char*	|vform		|NN const char* pat|NULLOK va_list* args
