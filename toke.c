@@ -9467,7 +9467,8 @@ S_scan_subst(pTHX_ char *start)
          * spreads over */
         sv_upgrade(PL_parser->lex_sub_repl, SVt_PVNV);
         ((XPVNV*)SvANY(PL_parser->lex_sub_repl))->xnv_u.xnv_lines = 0;
-        ((XPVIV*)SvANY(PL_parser->lex_sub_repl))->xiv_u.xivu_eval_seen = es;
+        ((XPVIV*)SvANY(PL_parser->lex_sub_repl))->xiv_u.xivu_eval_seen =
+                                                                    cBOOL(es);
     }
 
     PL_lex_op = (OP*)pm;
