@@ -91515,7 +91515,7 @@ static const U8 WB_table[24][24] = {
 #endif	/* defined(PERL_IN_REGEXEC_C) */
 
 /* Generated from:
- * f1951e655fd5fa35478f641663ef164146d743362998b01378327afac5f20270 lib/Unicode/UCD.pm
+ * 59e717586b720a821ee0d7397679d5322e38b49f6fb7840545aedf669c733b70 lib/Unicode/UCD.pm
  * 47cb62a53beea6d0263e2147331c7e751853c9327225d95bbe2d9e1dc3e1aa44 lib/unicore/ArabicShaping.txt
  * 153f0a100c315f9f3945e78f57137611d36c44b3a975919c499fd403413fede8 lib/unicore/BidiBrackets.txt
  * fbe806975c1bf9fc9960bbaa39ff6290c42c7da8315f9cd459109b024cc1c485 lib/unicore/BidiMirroring.txt
@@ -91561,5 +91561,5 @@ static const U8 WB_table[24][24] = {
  * 066d6e75f95cf6794161c8ac0b1a40990277de90eefb913be2e675a7cba38d59 lib/unicore/mktables
  * cdecb300baad839a6f62791229f551a4fa33f3cbdca08e378dc976466354e778 lib/unicore/version
  * 913d2f93f3cb6cdf1664db888bf840bc4eb074eef824e082fceda24a9445e60c regen/charset_translations.pl
- * 6697977221bf632720408ca9a1a934e43d5d8e51c870532cec3ebdb3e3ba80c6 regen/mk_invlists.pl
+ * ed40040566a4f1d6b0d912dda2159c1460e0093b318d90626ab9aa513a53b15d regen/mk_invlists.pl
  * ex: set ro: */

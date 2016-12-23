@@ -1227,7 +1227,7 @@ if ($ARGS{PLATFORM} =~ /^win(?:32|ce)$/) {
 
 if ($ARGS{PLATFORM} eq 'os2') {
     my (%mapped, @missing);
-    open MAP, 'miniperl.map' or die 'Cannot read miniperl.map';
+    open MAP, '<', 'miniperl.map' or die 'Cannot read miniperl.map';
     /^\s*[\da-f:]+\s+(\w+)/i and $mapped{$1}++ foreach <MAP>;
     close MAP or die 'Cannot close miniperl.map';
 

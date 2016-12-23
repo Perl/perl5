@@ -233,7 +233,7 @@ foreach my $dir (@splithead) {
 
     # read in everything until what would have been the first =head
     # directive, patching the index as we go.
-    open(H, "<$file.html") ||
+    open(H, '<', "$file.html") ||
 	die "$0: error opening $file.html for input: $!\n";
     $/ = "";
     my @data = ();
@@ -250,7 +250,7 @@ foreach my $dir (@splithead) {
     close(H);
 
     # now rewrite the file
-    open(H, ">$file.html") ||
+    open(H, '>', "$file.html") ||
 	die "$0: error opening $file.html for output: $!\n";
     print H "@data", "\n";
     close(H);
@@ -298,7 +298,7 @@ sub create_index {
     my @files = sort(grep(/\.html?$/, readdir(DIR)));
     closedir(DIR);
 
-    open(HTML, ">$html") ||
+    open(HTML, '>', $html) ||
 	die "$0: error opening $html for output: $!\n";
 
     # for each .html file in the directory, extract the index
@@ -307,7 +307,7 @@ sub create_index {
     foreach my $file (@files) {
 
 	my $filedata = do {
-	    open(my $in, "<$dir/$file") ||
+	    open(my $in, '<', "$dir/$file") ||
 		die "$0: error opening $dir/$file for input: $!\n";
 	    local $/ = undef;
 	    <$in>;
@@ -406,7 +406,7 @@ sub splitpod {
 
     # read the file in paragraphs
     $/ = "";
-    open(SPLITIN, "<$pod") ||
+    open(SPLITIN, '<', $pod) ||
 	die "$0: error opening $pod for input: $!\n";
     @filedata = <SPLITIN>;
     close(SPLITIN) ||
@@ -462,7 +462,7 @@ sub splitpod {
 
 	# create the new .pod file
 	print "\tcreating $poddir/$file\n" if $verbose;
-	open(SPLITOUT, ">$poddir/$file") ||
+	open(SPLITOUT, '>', "$poddir/$file") ||
 	    die "$0: error opening $poddir/$file for output: $!\n";
 	$poddata[$i] =~ s,L<([^<>]*)>,
 			defined $heads{anchorify($1)} ? "L<$dir/$1>" : "L<$1>"

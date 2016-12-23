@@ -1,6 +1,6 @@
 package B::Xref;
 
-our $VERSION = '1.05';
+our $VERSION = '1.06';
 
 =head1 NAME
 
@@ -449,7 +449,7 @@ sub compile {
 	    last OPTION;
 	} elsif ($opt eq "o") {
 	    $arg ||= shift @options;
-	    open(STDOUT, ">$arg") or return "$arg: $!\n";
+	    open(STDOUT, '>', $arg) or return "$arg: $!\n";
 	} elsif ($opt eq "d") {
 	    $nodefs = 1;
 	} elsif ($opt eq "r") {

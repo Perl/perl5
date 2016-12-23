@@ -20,7 +20,7 @@ unless ($PERL_CORE or exists $Config{'i_poll'}) {
 }
 
 if ($] < 5.008 and !$PERL_CORE) {
-  open(FH,">typemap");
+  open(FH,'>','typemap');
   print FH "const char *            T_PV\n";
   close(FH);
 }

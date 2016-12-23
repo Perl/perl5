@@ -215,7 +215,7 @@ sub read_authors_files {
     return unless (@authors);
     my (%count, %raw);
     foreach my $filename (@authors) {
-        open FH, "<$filename" or die "Can't open $filename: $!";
+        open FH, '<', $filename or die "Can't open $filename: $!";
         binmode FH, ':encoding(UTF-8)';
         while (<FH>) {
             next if /^\#/;
@@ -661,6 +661,7 @@ jasons\100cs.unm.edu                    jasons\100sandy-home.arc.unm.edu
 jbuehler\100hekimian.com                jhpb\100hekimian.com
 jcromie\100100divsol.com                jcromie\100cpan.org
 +                                       jim.cromie\100gmail.com
+jd\100cpanel.net                        lightsey\100debian.org
 jdhedden\100cpan.org                    jerry\100hedden.us
 +                                       jdhedden\1001979.usna.com
 +                                       jdhedden\100gmail.com

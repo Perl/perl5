@@ -290,7 +290,7 @@ Archive::Tar->extract_archive( $new_file );
 # ensure 'make' will update all files
 my $t= time;
 for my $file (find_type_f($new_dir)) {
-    open(my $fh,">>$file") || die "Cannot write $file:$!";
+    open(my $fh,'>>',$file) || die "Cannot write $file:$!";
     close($fh);
     utime($t,$t,$file);
 };

@@ -192,7 +192,7 @@ if ($^O eq 'VMS') { # VMS is happily caseignorant
 }
 
 for (@f_names) {
-    open T, "> $_";
+    open T, '>', $_;
     close T;
 }
 

@@ -25,10 +25,10 @@ BEGIN {
         sub getfstype {
             my ($fn) = @_;
             my $cmd = "df $fn";
-            open(my $df, "$cmd |") or die "$cmd: $!";
+            open(my $df, '-|', $cmd) or die "$cmd: $!";
              my @df = <$df>;  # Assume $df[0] is header line.
              my $dev = +(split(" ", $df[1]))[0];
-             open(my $mounts, "/proc/mounts") or die "/proc/mounts: $!";
+             open(my $mounts, '<', '/proc/mounts') or die "/proc/mounts: $!";
              while (<$mounts>) {
                  my @m = split(" ");
                  if ($m[0] eq $dev) { return $m[2] }

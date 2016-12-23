@@ -186,7 +186,7 @@ use 5.009001;
 use Carp;
 $Carp::Internal{__PACKAGE__.""}++;
 
-our $VERSION = '1.35';
+our $VERSION = '1.36';
 our $DEBUG;
 our $VERBOSE;
 our $PRETTY;
@@ -231,7 +231,7 @@ CONFIG: {
 	$PRETTY = $opt_p;
     }
 
-    if (open(POD_DIAG, $PODFILE)) {
+    if (open(POD_DIAG, '<', $PODFILE)) {
 	warn "Happy happy podfile from real $PODFILE\n" if $DEBUG;
 	last CONFIG;
     } 
@@ -240,7 +240,7 @@ CONFIG: {
 	INCPATH: {
 	    for my $file ( (map { "$_/".__PACKAGE__.".pm" } @INC), $0) {
 		warn "Checking $file\n" if $DEBUG;
-		if (open(POD_DIAG, $file)) {
+		if (open(POD_DIAG, '<', $file)) {
 		    while (<POD_DIAG>) {
 			next unless
 			    /^__END__\s*# wish diag dbase were more accessible/;

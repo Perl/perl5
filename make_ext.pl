@@ -287,7 +287,7 @@ sub build_extension {
     
     if (-f $makefile) {
 	$makefile_no_minus_f = 0;
-	open my $mfh, $makefile or die "Cannot open $makefile: $!";
+	open my $mfh, '<', $makefile or die "Cannot open $makefile: $!";
 	while (<$mfh>) {
 	    # Plagiarised from CPAN::Distribution
 	    last if /MakeMaker post_initialize section/;

@@ -48,7 +48,7 @@ $relroot = defined $opts{r} ? $opts{r} : "..";
 die "Must be in root of the perl source tree.\n"
 	unless -f "./MANIFEST" and -f "patchlevel.h";
 
-open PATCHLEVEL,"<patchlevel.h" or die;
+open PATCHLEVEL, '<', 'patchlevel.h' or die;
 my @patchlevel_h = <PATCHLEVEL>;
 close PATCHLEVEL;
 my $patchlevel_h = join "", grep { /^#\s*define/ } @patchlevel_h;

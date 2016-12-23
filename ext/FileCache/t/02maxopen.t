@@ -19,7 +19,7 @@ use Test::More tests => 5;
     next unless fileno($path);
     print $path "$path 2\n";
     close($path);
-    open($path, $path);
+    open($path, '<', $path);
     <$path>;
     push @cat, <$path>;
     close($path);

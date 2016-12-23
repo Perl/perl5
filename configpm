@@ -216,7 +216,7 @@ my $quote;
 my %seen_quotes;
 {
   my ($name, $val);
-  open(CONFIG_SH, $Config_SH) || die "Can't open $Config_SH: $!";
+  open(CONFIG_SH, '<', $Config_SH) || die "Can't open $Config_SH: $!";
   while (<CONFIG_SH>) {
     next if m:^#!/bin/sh:;
 
@@ -527,7 +527,7 @@ $heavy_txt .= join('', @non_v) . "\n";
 
 # copy config summary format from the myconfig.SH script
 $heavy_txt .= "our \$summary = <<'!END!';\n";
-open(MYCONFIG,"<myconfig.SH") || die "open myconfig.SH failed: $!";
+open(MYCONFIG,'<','myconfig.SH') || die "open myconfig.SH failed: $!";
 1 while defined($_ = <MYCONFIG>) && !/^Summary of/;
 do { $heavy_txt .= $_ } until !defined($_ = <MYCONFIG>) || /^\s*$/;
 close(MYCONFIG);
@@ -632,7 +632,7 @@ foreach my $prefix (qw(libs libswanted)) {
     $heavy_txt .= "${prefix}_nolargefiles='$value'\n";
 }
 
-if (open(my $fh, "cflags")) {
+if (open(my $fh, '<', 'cflags')) {
     my $ccwarnflags;
     my $ccstdflags;
     while (<$fh>) {
@@ -838,7 +838,7 @@ tie %%Config, 'Config', {
 ENDOFTIE
 
 
-open(CONFIG_POD, ">$Config_POD") or die "Can't open $Config_POD: $!";
+open(CONFIG_POD, '>', $Config_POD) or die "Can't open $Config_POD: $!";
 print CONFIG_POD <<'ENDOFTAIL';
 =head1 NAME
 
@@ -991,7 +991,7 @@ in such cases.
 ENDOFTAIL
 
 if ($Opts{glossary}) {
-  open(GLOS, "<$Glossary") or die "Can't open $Glossary: $!";
+  open(GLOS, '<', $Glossary) or die "Can't open $Glossary: $!";
 }
 my %seen = ();
 my $text = 0;

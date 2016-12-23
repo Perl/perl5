@@ -170,7 +170,7 @@ BANG
             );
     foreach (@tests) {
         my ($why, $prog, $expect) = @$_;
-        open P, ">$progfile" or die "Can't open '$progfile': $!";
+        open P, ">", $progfile or die "Can't open '$progfile': $!";
         binmode(P, ":bytes") if $has_perlio;
 	print P $show, $prog, '; print $b'
             or die "Print to 'progfile' failed: $!";

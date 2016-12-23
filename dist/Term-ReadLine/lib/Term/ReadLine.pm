@@ -269,9 +269,8 @@ sub new {
 
     # the Windows CONIN$ needs GENERIC_WRITE mode to allow
     # a SetConsoleMode() if we end up using Term::ReadKey
-    open FIN, (  $^O eq 'MSWin32' && $console eq 'CONIN$' ) ? "+<$console" :
-                                                              "<$console";
-    open FOUT,">$consoleOUT";
+    open FIN, (( $^O eq 'MSWin32' && $console eq 'CONIN$' ) ? '+<' : '<' ), $console;
+    open FOUT,'>', $consoleOUT;
 
     #OUT->autoflush(1);		# Conflicts with debugger?
     my $sel = select(FOUT);
@@ -320,7 +319,7 @@ sub Features { \%features }
 
 package Term::ReadLine;		# So late to allow the above code be defined?
 
-our $VERSION = '1.15';
+our $VERSION = '1.16';
 
 my ($which) = exists $ENV{PERL_RL} ? split /\s+/, $ENV{PERL_RL} : undef;
 if ($which) {

@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-our $VERSION = "1.27";
+our $VERSION = "1.28";
 
 my %err = ();
 
@@ -13,7 +13,7 @@ my $IsMSWin32 = $^O eq 'MSWin32' && !$IsSymbian;
 
 unlink "Errno.pm" if -f "Errno.pm";
 unlink "Errno.tmp" if -f "Errno.tmp";
-open OUT, ">Errno.tmp" or die "Cannot open Errno.tmp: $!";
+open OUT, '>', 'Errno.tmp' or die "Cannot open Errno.tmp: $!";
 select OUT;
 my $file;
 my @files = get_files();
@@ -21,7 +21,7 @@ if ($Config{gccversion} ne '' && $^O eq 'MSWin32') {
     # MinGW complains "warning: #pragma system_header ignored outside include
     # file" if the header files are processed individually, so include them
     # all in .c file and process that instead.
-    open INCS, '>includes.c' or
+    open INCS, '>', 'includes.c' or
 	die "Cannot open includes.c";
     foreach $file (@files) {
 	next if $file eq 'errno.c';
@@ -68,7 +68,7 @@ sub process_file {
             return;
 	}     
     } else {
-	unless(open(FH,"< $file")) {
+	unless(open(FH, '<', $file)) {
 	    # This file could be a temporary file created by cppstdin
 	    # so only warn under -w, and return
             warn "Cannot open '$file'" if $^W;
@@ -149,7 +149,7 @@ sub get_files {
         $SDK =~ s!\\!/!g;
 	$file{"$SDK/epoc32/include/libc/sys/errno.h"} = 1;
     } else {
-	open(CPPI,"> errno.c") or
+	open(CPPI, '>', 'errno.c') or
 	    die "Cannot open errno.c";
 
 	if ($^O eq 'NetWare') {
@@ -200,7 +200,7 @@ sub write_errno_pm {
 
     # create the CPP input
 
-    open(CPPI,"> errno.c") or
+    open(CPPI, '>', 'errno.c') or
 	die "Cannot open errno.c";
 
     if ($^O eq 'NetWare') {

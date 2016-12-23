@@ -19,7 +19,7 @@ require Exporter;
                );
 %EXPORT_TAGS = ('ALL' => \@EXPORT_OK);
 
-$VERSION = "0.41";
+$VERSION = "0.42";
 
 sub uniq { my %seen; return grep(!($seen{$_}++), @_); } # a util function
 
@@ -460,7 +460,7 @@ interaction looks like:
 So far so good.  But suppose the way you're implementing this is:
 
           my %greetings;
-          die unless open(IN, "<in.dat");
+          die unless open(IN, "<", "in.dat");
           while(<IN>) {
             chomp;
             next unless /^([^=]+)=(.+)/s;
@@ -502,7 +502,7 @@ program with:
 
           use I18N::LangTags qw(encode_language_tag);
           my %greetings;
-          die unless open(IN, "<in.dat");
+          die unless open(IN, "<", "in.dat");
           while(<IN>) {
             chomp;
             next unless /^([^=]+)=(.+)/s;

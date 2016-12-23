@@ -90,8 +90,8 @@
 
 #!perl
 die "Usage: perl -x patchlevel.h comment ..." unless @ARGV;
-open PLIN, "patchlevel.h" or die "Couldn't open patchlevel.h : $!";
-open PLOUT, ">patchlevel.new" or die "Couldn't write on patchlevel.new : $!";
+open PLIN, "<", "patchlevel.h" or die "Couldn't open patchlevel.h : $!";
+open PLOUT, ">", "patchlevel.new" or die "Couldn't write on patchlevel.new : $!";
 my $seen=0;
 while (<PLIN>) {
     if (/\t,NULL/ and $seen) {

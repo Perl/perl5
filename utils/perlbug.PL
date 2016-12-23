@@ -20,7 +20,7 @@ chdir dirname($0);
 $file = basename($0, '.PL');
 $file .= '.com' if $^O eq 'VMS';
 
-open OUT, ">$file" or die "Can't create $file: $!";
+open OUT, ">", $file or die "Can't create $file: $!";
 
 # get patchlevel.h timestamp
 

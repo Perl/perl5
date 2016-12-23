@@ -621,7 +621,7 @@ EOD
     my $old_fh= select($guts);
     $~= "GuTS";
 
-    open my $oldguts, "pod/perldebguts.pod"
+    open my $oldguts, '<', 'pod/perldebguts.pod'
         or die "$0 cannot open pod/perldebguts.pod for reading: $!";
     while (<$oldguts>) {
         print;

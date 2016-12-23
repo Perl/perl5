@@ -42,7 +42,7 @@ ok(!$dot->rewind, "rewind on closed");
 ok(!defined($dot->read));
 }
 
-open(FH,'>X') || die "Can't create x";
+open(FH,'>','X') || die "Can't create x";
 print FH "X";
 close(FH) or die "Can't close: $!";
 

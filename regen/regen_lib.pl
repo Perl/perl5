@@ -48,9 +48,9 @@ sub open_new {
 	if (-f $name) {
 	    unlink $name or die "$name exists but can't unlink: $!";
 	}
-	open $fh, ">$name" or die "Can't create $name: $!";
+	open $fh, '>', $name or die "Can't create $name: $!";
     } elsif ($mode eq '>>') {
-	open $fh, ">>$name" or die "Can't append to $name: $!";
+	open $fh, '>>', $name or die "Can't append to $name: $!";
     } else {
         die "Unhandled open mode '$mode'";
     }
@@ -219,7 +219,7 @@ sub digest {
     require Digest::SHA;
 
     local ($/, *FH);
-    open FH, "$file" or die "Can't open $file: $!";
+    open FH, '<', $file or die "Can't open $file: $!";
     my $raw = <FH>;
     close FH or die "Can't close $file: $!";
     return Digest::SHA::sha256_hex($raw);

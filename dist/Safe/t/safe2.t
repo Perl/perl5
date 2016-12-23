@@ -131,7 +131,7 @@ like($@, qr/foo bar/);
   
 $! = 0;
 my $nosuch = '/non/existent/file.name';
-open(NOSUCH, $nosuch);
+open(NOSUCH, '<', $nosuch);
 if ($@) {
     my $errno = $!;
     die "Eek! Attempting to open $nosuch failed, but \$! is still 0" unless $!;

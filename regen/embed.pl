@@ -238,7 +238,7 @@ sub readvars {
     my ($file, $pre) = @_;
     local (*FILE, $_);
     my %seen;
-    open(FILE, "< $file")
+    open(FILE, '<', $file)
 	or die "embed.pl: Can't open $file: $!\n";
     while (<FILE>) {
 	s/[ \t]*#.*//;		# Delete comments.

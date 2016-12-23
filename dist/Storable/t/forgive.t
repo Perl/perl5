@@ -45,7 +45,7 @@ $Storable::forgive_me=1;
 my $devnull = File::Spec->devnull;
 
 open(SAVEERR, ">&STDERR");
-open(STDERR, ">$devnull") or 
+open(STDERR, '>', $devnull) or 
   ( print SAVEERR "Unable to redirect STDERR: $!\n" and exit(1) );
 
 eval {$result = store ($bad , 'store')};

@@ -71,7 +71,7 @@ local *FOO;
 
      \&dclone,                 # XS function
 
-     sub { open FOO, "/" },
+     sub { open FOO, '<', "/" },
     );
 
 $Storable::Deparse = 1;
@@ -191,7 +191,7 @@ is(prototype($thawed->[4]), prototype($obj[0]->[4]));
     my $devnull = File::Spec->devnull;
 
     open(SAVEERR, ">&STDERR");
-    open(STDERR, ">$devnull") or
+    open(STDERR, '>', $devnull) or
 	( print SAVEERR "Unable to redirect STDERR: $!\n" and exit(1) );
 
     eval { $freezed = freeze $obj[0]->[0] };

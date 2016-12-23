@@ -214,7 +214,7 @@ if ( $^O eq 'qnx' ) {
 ### the client. We'll use own source code ...
 #
 local @data;
-if( !open( SRC, "< $0")) {
+if( !open( SRC, '<', $0)) {
     print "not ok 15 - $!\n";
 } else {
     @data = <SRC>;

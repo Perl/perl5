@@ -43,14 +43,14 @@ for my $cross_partition_test (0..1) {
   }
 
   # First we create a file
-  open(F, ">file-$$") or die $!;
+  open(F, ">", "file-$$") or die $!;
   binmode F; # for DOSISH platforms, because test 3 copies to stdout
   printf F "ok\n";
   close F;
 
   copy "file-$$", "copy-$$";
 
-  open(F, "copy-$$") or die $!;
+  open(F, "<", "copy-$$") or die $!;
   my $foo = <F>;
   close(F);
 
@@ -65,16 +65,16 @@ for my $cross_partition_test (0..1) {
   $TB->current_test($TB->current_test + 1);
   unlink "copy-$$" or die "unlink: $!";
 
-  open(F,"file-$$");
+  open(F, "<", "file-$$");
   copy(*F, "copy-$$");
-  open(R, "copy-$$") or die "open copy-$$: $!"; $foo = <R>; close(R);
+  open(R, "<", "copy-$$") or die "open copy-$$: $!"; $foo = <R>; close(R);
   is $foo, "ok\n", 'copy(*F, fn): same contents';
   unlink "copy-$$" or die "unlink: $!";
 
-  open(F,"file-$$");
+  open(F, "<", "file-$$");
   copy(\*F, "copy-$$");
   close(F) or die "close: $!";
-  open(R, "copy-$$") or die; $foo = <R>; close(R) or die "close: $!";
+  open(R, "<", "copy-$$") or die; $foo = <R>; close(R) or die "close: $!";
   is $foo, "ok\n", 'copy(\*F, fn): same contents';
   unlink "copy-$$" or die "unlink: $!";
 
@@ -83,7 +83,7 @@ for my $cross_partition_test (0..1) {
   binmode $fh or die $!;
   copy("file-$$",$fh);
   $fh->close or die "close: $!";
-  open(R, "copy-$$") or die; $foo = <R>; close(R);
+  open(R, "<", "copy-$$") or die; $foo = <R>; close(R);
   is $foo, "ok\n", 'copy(fn, io): same contents';
   unlink "copy-$$" or die "unlink: $!";
 
@@ -92,7 +92,7 @@ for my $cross_partition_test (0..1) {
   binmode $fh or die $!;
   copy("file-$$",$fh);
   $fh->close;
-  open(R, "copy-$$") or die $!; $foo = <R>; close(R);
+  open(R, "<", "copy-$$") or die $!; $foo = <R>; close(R);
   is $foo, "ok\n", 'copy(fn, fh): same contents';
   unlink "file-$$" or die "unlink: $!";
 
@@ -111,7 +111,7 @@ for my $cross_partition_test (0..1) {
   ok move("copy-$$", "file-$$"), 'move';
   ok -e "file-$$",              '  destination exists';
   ok !-e "copy-$$",              '  source does not';
-  open(R, "file-$$") or die $!; $foo = <R>; close(R);
+  open(R, "<", "file-$$") or die $!; $foo = <R>; close(R);
   is $foo, "ok\n", 'contents preserved';
 
   TODO: {
@@ -126,13 +126,13 @@ for my $cross_partition_test (0..1) {
   # trick: create lib/ if not exists - not needed in Perl core
   unless (-d 'lib') { mkdir 'lib' or die $!; }
   copy "file-$$", "lib";
-  open(R, "lib/file-$$") or die $!; $foo = <R>; close(R);
+  open(R, "<", "lib/file-$$") or die $!; $foo = <R>; close(R);
   is $foo, "ok\n", 'copy(fn, dir): same contents';
   unlink "lib/file-$$" or die "unlink: $!";
 
   # Do it twice to ensure copying over the same file works.
   copy "file-$$", "lib";
-  open(R, "lib/file-$$") or die $!; $foo = <R>; close(R);
+  open(R, "<", "lib/file-$$") or die $!; $foo = <R>; close(R);
   is $foo, "ok\n", 'copy over the same file works';
   unlink "lib/file-$$" or die "unlink: $!";
 
@@ -146,7 +146,7 @@ for my $cross_partition_test (0..1) {
   }
 
   move "file-$$", "lib";
-  open(R, "lib/file-$$") or die "open lib/file-$$: $!"; $foo = <R>; close(R);
+  open(R, "<", "lib/file-$$") or die "open lib/file-$$: $!"; $foo = <R>; close(R);
   is $foo, "ok\n", 'move(fn, dir): same contents';
   ok !-e "file-$$", 'file moved indeed';
   unlink "lib/file-$$" or die "unlink: $!";
@@ -154,7 +154,7 @@ for my $cross_partition_test (0..1) {
   SKIP: {
     skip "Testing symlinks", 3 unless $Config{d_symlink};
 
-    open(F, ">file-$$") or die $!;
+    open(F, ">", "file-$$") or die $!;
     print F "dummy content\n";
     close F;
     symlink("file-$$", "symlink-$$") or die $!;
@@ -175,7 +175,7 @@ for my $cross_partition_test (0..1) {
     skip "Testing hard links", 3 
          if !$Config{d_link} or $^O eq 'MSWin32' or $^O eq 'cygwin';
 
-    open(F, ">file-$$") or die $!;
+    open(F, ">", "file-$$") or die $!;
     print F "dummy content\n";
     close F;
     link("file-$$", "hardlink-$$") or die $!;
@@ -192,13 +192,13 @@ for my $cross_partition_test (0..1) {
     unlink "file-$$" or die $!;
   }
 
-  open(F, ">file-$$") or die $!;
+  open(F, ">", "file-$$") or die $!;
   binmode F;
   print F "this is file\n";
   close F;
 
   my $copy_msg = "this is copy\n";
-  open(F, ">copy-$$") or die $!;
+  open(F, ">", "copy-$$") or die $!;
   binmode F;
   print F $copy_msg;
   close F;
@@ -216,7 +216,7 @@ for my $cross_partition_test (0..1) {
   }
 
   is -s "copy-$$", length $copy_msg, "but does not truncate the destination";
-  open(F, "copy-$$") or die $!;
+  open(F, "<", "copy-$$") or die $!;
   $foo = <F>;
   close(F);
   is $foo, $copy_msg, "nor change the destination's contents";
@@ -228,7 +228,7 @@ for my $cross_partition_test (0..1) {
 
   TODO: {
   local $TODO = 'spaces in filenames require DECC$EFS_CHARSET enabled' if $^O eq 'VMS';
-  open(F, ">file-$$") or die $!;
+  open(F, ">", "file-$$") or die $!;
   close F;
   copy "file-$$", " copy-$$";
   ok -e " copy-$$", "copy with leading whitespace";

@@ -107,7 +107,7 @@ my $HintShift;
 my $HintMask;
 my $Uni8Bit;
 
-open "perl.h", "perl.h" or die "$0 cannot open perl.h: $!";
+open "perl.h", "<", "perl.h" or die "$0 cannot open perl.h: $!";
 while (readline "perl.h") {
     next unless /#\s*define\s+(HINT_FEATURE_MASK|HINT_UNI_8_BIT)/;
     my $is_u8b = $1 =~ 8;

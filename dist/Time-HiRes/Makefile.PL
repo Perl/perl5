@@ -88,7 +88,7 @@ sub try_compile_and_link {
     my $obj_ext = $Config{obj_ext} || ".o";
     unlink("$tmp.c", "$tmp$obj_ext");
 
-    if (open(TMPC, ">$tmp.c")) {
+    if (open(TMPC, '>', "$tmp.c")) {
 	print TMPC $c;
 	close(TMPC);
 
@@ -132,7 +132,7 @@ __EOD__
 	    unless defined $cccmd;
 
        if ($^O eq 'VMS') {
-	    open( CMDFILE, ">$tmp.com" );
+	    open( CMDFILE, '>', "$tmp.com" );
 	    print CMDFILE "\$ SET MESSAGE/NOFACILITY/NOSEVERITY/NOIDENT/NOTEXT\n";
 	    print CMDFILE "\$ $cccmd\n";
 	    print CMDFILE "\$ IF \$SEVERITY .NE. 1 THEN EXIT 44\n"; # escalate
@@ -864,7 +864,7 @@ EOM
 
     if ($DEFINE) {
         $DEFINE =~ s/^\s+//;
-        if (open(XDEFINE, ">xdefine")) {
+        if (open(XDEFINE, '>', 'xdefine')) {
 	    print XDEFINE $DEFINE, "\n";
 	    close(XDEFINE);
         }
@@ -1015,8 +1015,8 @@ sub doConstants {
 	foreach $file ('const-c.inc', 'const-xs.inc') {
 	    my $fallback = File::Spec->catfile('fallback', $file);
 	    local $/;
-	    open IN, "<$fallback" or die "Can't open $fallback: $!";
-	    open OUT, ">$file" or die "Can't open $file: $!";
+	    open IN, '<', $fallback or die "Can't open $fallback: $!";
+	    open OUT, '>', $file or die "Can't open $file: $!";
 	    print OUT <IN> or die $!;
 	    close OUT or die "Can't close $file: $!";
 	    close IN or die "Can't close $fallback: $!";
@@ -1035,7 +1035,7 @@ sub main {
 	    DEFINE('SELECT_IS_BROKEN');
 	    $LIBS = [];
 	    print "System is $^O, skipping full configure...\n";
-	    open(XDEFINE, ">xdefine") or die "$0: Cannot create xdefine: $!\n";
+	    open(XDEFINE, '>', 'xdefine') or die "$0: Cannot create xdefine: $!\n";
 	    close(XDEFINE);
 	} else {
 	    init();

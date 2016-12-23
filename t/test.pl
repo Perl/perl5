@@ -978,7 +978,7 @@ sub fresh_perl {
     $runperl_args->{progfile} ||= $tmpfile;
     $runperl_args->{stderr}     = 1 unless exists $runperl_args->{stderr};
 
-    open TEST, ">$tmpfile" or die "Cannot open $tmpfile: $!";
+    open TEST, '>', $tmpfile or die "Cannot open $tmpfile: $!";
     print TEST $prog;
     close TEST or die "Cannot close $tmpfile: $!";
 

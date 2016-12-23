@@ -299,7 +299,7 @@ sub find_locales ($;$) {
     delete local @ENV{qw(IFS CDPATH ENV BASH_ENV)};
 
     if (-x "/usr/bin/locale"
-        && open(LOCALES, "/usr/bin/locale -a 2>/dev/null|"))
+        && open(LOCALES, '-|', "/usr/bin/locale -a 2>/dev/null"))
     {
         while (<LOCALES>) {
             # It seems that /usr/bin/locale steadfastly outputs 8 bit data, which

@@ -1854,7 +1854,7 @@
 #endif /* H_REGCHARCLASS */
 
 /* Generated from:
- * f1951e655fd5fa35478f641663ef164146d743362998b01378327afac5f20270 lib/Unicode/UCD.pm
+ * 59e717586b720a821ee0d7397679d5322e38b49f6fb7840545aedf669c733b70 lib/Unicode/UCD.pm
  * 47cb62a53beea6d0263e2147331c7e751853c9327225d95bbe2d9e1dc3e1aa44 lib/unicore/ArabicShaping.txt
  * 153f0a100c315f9f3945e78f57137611d36c44b3a975919c499fd403413fede8 lib/unicore/BidiBrackets.txt
  * fbe806975c1bf9fc9960bbaa39ff6290c42c7da8315f9cd459109b024cc1c485 lib/unicore/BidiMirroring.txt
@@ -1900,6 +1900,6 @@
  * 066d6e75f95cf6794161c8ac0b1a40990277de90eefb913be2e675a7cba38d59 lib/unicore/mktables
  * cdecb300baad839a6f62791229f551a4fa33f3cbdca08e378dc976466354e778 lib/unicore/version
  * 913d2f93f3cb6cdf1664db888bf840bc4eb074eef824e082fceda24a9445e60c regen/charset_translations.pl
- * cd1fd94a77ea1ce1181f72c8333f9e5bd0cd790d6e8d1f460756a3f9f3f2762d regen/regcharclass.pl
+ * 1d27ae8b75d81a082b1fc594673e08540280f8169309a7b5047015c8091a2bfb regen/regcharclass.pl
  * 393f8d882713a3ba227351ad0f00ea4839fda74fcf77dcd1cdf31519925adba5 regen/regcharclass_multi_char_folds.pl
  * ex: set ro: */

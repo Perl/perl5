@@ -234,7 +234,7 @@ explain() unless Test::Builder->new()->is_passing();
 END {
     # unlink may fail if applied directly to a large file
     # be paranoid about leaving 5 gig files lying around
-    open(BIG, ">$big0"); # truncate
+    open(BIG, '>', $big0); # truncate
     close(BIG);
 }
 

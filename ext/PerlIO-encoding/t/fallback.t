@@ -33,7 +33,7 @@ my $file = "fallback$$.txt";
     like($message, qr/does not map to iso-8859-1/o, "FB_WARN message");
 }
 
-open($fh,$file) || die "File cannot be re-opened";
+open($fh,'<',$file) || die "File cannot be re-opened";
 my $line = <$fh>;
 is($line,"\\x{20ac}0.02\n","perlqq escapes");
 close($fh);
@@ -45,14 +45,14 @@ my $str = "\x{20AC}";
 print $fh $str,"0.02\n";
 close($fh);
 
-open($fh,$file) || die "File cannot be re-opened";
+open($fh,'<',$file) || die "File cannot be re-opened";
 my $line = <$fh>;
 is($line,"&#8364;0.02\n","HTML escapes");
 close($fh);
 
 {
     no utf8;
-    open($fh,">$file") || die "File cannot be re-opened";
+    open($fh,'>',$file) || die "File cannot be re-opened";
     binmode($fh);
     print $fh "\xA30.02\n";
     close($fh);

@@ -7,7 +7,7 @@ use strict;
 
 # Package globals
 @ISA = ( 'DynaLoader' );
-$VERSION = '1.07';
+$VERSION = '1.08';
 my(%Locsyms) = ( ':ID' => 'LOCAL' );
 my(%Gblsyms) = ( ':ID' => 'GLOBAL');
 my $DoCache = 1;
@@ -105,7 +105,7 @@ sub FIRSTKEY {
   if (!$DoCache || !$Cache_set) {
     # We should eventually replace this with a C routine which walks the
     # CLI symbol table directly.  If I ever get 'hold of an I&DS manual . . .
-    open(P,'Show Symbol * |');
+    open(P, '-|', 'Show Symbol *');
     while (<P>) {
       ($name,$eqs,$val) = /^\s+(\S+) (=+) (.+)/
         or carp "VMS::DCLsym: unparseable line $_";

@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.67';
+our $VERSION = '0.68';
 
 require Exporter;
 
@@ -154,7 +154,7 @@ sub openunicode {
 	for my $d (@INC) {
 	    use File::Spec;
 	    $f = File::Spec->catfile($d, "unicore", @path);
-	    last if open($$rfh, $f);
+	    last if open($$rfh, '<', $f);
 	    undef $f;
 	}
 	croak __PACKAGE__, ": failed to find ",

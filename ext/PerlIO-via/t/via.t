@@ -44,7 +44,7 @@ is($a, $b, 'compare original data with filtered version');
     use warnings 'layer';
 
     # Find fd number we should be using
-    my $fd = open($fh,">$tmp") && fileno($fh);
+    my $fd = open($fh,'>',$tmp) && fileno($fh);
     print $fh "Hello\n";
     close($fh);
 
@@ -52,7 +52,7 @@ is($a, $b, 'compare original data with filtered version');
     like( $warnings, qr/^Cannot find package 'Unknown::Module'/,  'warn about unknown package' );
 
     # Now open normally again to see if we get right fileno
-    my $fd2 = open($fh,"<$tmp") && fileno($fh);
+    my $fd2 = open($fh,'<',$tmp) && fileno($fh);
     is($fd2,$fd,"Wrong fd number after failed open");
 
     my $data = <$fh>;

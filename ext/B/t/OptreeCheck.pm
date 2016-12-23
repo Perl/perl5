@@ -5,7 +5,7 @@ use warnings;
 use vars qw($TODO $Level $using_open);
 require "test.pl";
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 # now export checkOptree, and those test.pl functions used by tests
 our @EXPORT = qw( checkOptree plan skip skip_all pass is like unlike
@@ -1001,7 +1001,7 @@ sub OptreeCheck::processExamples {
     # turned into optreeCheck tests,
 
     foreach my $file (@files) {
-	open (my $fh, $file) or die "cant open $file: $!\n";
+	open (my $fh, '<', $file) or die "cant open $file: $!\n";
 	$/ = "";
 	my @chunks = <$fh>;
 	print preamble (scalar @chunks);

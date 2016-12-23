@@ -45,7 +45,7 @@ my $oprivpm = open_new('lib/B/Op_private.pm', '>',
 my %seen;
 my (@ops, %desc, %check, %ckname, %flags, %args, %opnum);
 
-open OPS, 'regen/opcodes' or die $!;
+open OPS, '<', 'regen/opcodes' or die $!;
 
 while (<OPS>) {
     chop;

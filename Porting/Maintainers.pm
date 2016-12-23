@@ -22,7 +22,7 @@ use vars qw(@ISA @EXPORT_OK $VERSION);
 		show_results process_options files_to_modules
 		finish_tap_output
 		reload_manifest);
-$VERSION = 0.11;
+$VERSION = 0.12;
 
 require Exporter;
 
@@ -41,7 +41,7 @@ sub reload_manifest {
         $manifest_path = "../MANIFEST";
     }
 
-    if (open(my $manfh,  $manifest_path )) {
+    if (open(my $manfh,  '<', $manifest_path )) {
 	while (<$manfh>) {
 	    if (/^(\S+)/) {
 		$MANIFEST{$1}++;

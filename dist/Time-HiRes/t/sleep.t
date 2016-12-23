@@ -8,7 +8,7 @@ BEGIN { require_ok "Time::HiRes"; }
 use Config;
 
 my $xdefine = ''; 
-if (open(XDEFINE, "xdefine")) {
+if (open(XDEFINE, "<", "xdefine")) {
     chomp($xdefine = <XDEFINE> || "");
     close(XDEFINE);
 }
