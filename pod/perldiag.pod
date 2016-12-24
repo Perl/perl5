@@ -2011,7 +2011,7 @@ than to create a dangling reference.
 
 =item Did not produce a valid header
 
-See Server error.
+See L</500 Server error>.
 
 =item %s did not return a true value
 
@@ -2044,7 +2044,7 @@ you called it with no args and C<$@> was empty.
 
 =item Document contains no data
 
-See Server error.
+See L</500 Server error>.
 
 =item %s does not define %s::VERSION--version check failed
 
@@ -3490,7 +3490,7 @@ doesn't resolve to a valid subroutine.  See L<overload>.
 
 =item Method %s not permitted
 
-See Server error.
+See L</500 Server error>.
 
 =item Might be a runaway multi-line %s string starting on line %d
 
@@ -4974,7 +4974,7 @@ of "||".
 
 =item Premature end of script headers
 
-See Server error.
+See L</500 Server error>.
 
 =item printf() on closed filehandle %s
 
@@ -5470,7 +5470,7 @@ in the regular expression the problem was discovered.
 (F) An C<(?R)> or C<(?0)> sequence in a regular expression was missing the
 final parenthesis.
 
-=item Server error (a.k.a. "500 Server error")
+=item Z<>500 Server error
 
 (A) This is the error message generally seen in a browser window
 when trying to run a CGI program (including SSI) over the web.  The
