@@ -2574,7 +2574,6 @@ Perl__is_utf8_FOO(pTHX_       U8   classnum,
     warn_on_first_deprecated_use(name, alternative, use_locale, file, line);
 
     if (use_utf8 && UTF8_IS_ABOVE_LATIN1(*p)) {
-        SV * invlist;
 
         switch (classnum) {
             case _CC_WORDCHAR:
@@ -2607,14 +2606,18 @@ Perl__is_utf8_FOO(pTHX_       U8   classnum,
                 return is_VERTWS_high(p);
             case _CC_IDFIRST:
                 if (! PL_utf8_perl_idstart) {
-                    invlist = _new_invlist_C_array(_Perl_IDStart_invlist);
+                    PL_utf8_perl_idstart
+                                = _new_invlist_C_array(_Perl_IDStart_invlist);
                 }
-                return is_utf8_common(p, &PL_utf8_perl_idstart, "_Perl_IDStart", invlist);
+                return is_utf8_common(p, &PL_utf8_perl_idstart,
+                                      "_Perl_IDStart", NULL);
             case _CC_IDCONT:
                 if (! PL_utf8_perl_idcont) {
-                    invlist = _new_invlist_C_array(_Perl_IDCont_invlist);
+                    PL_utf8_perl_idcont
+                                = _new_invlist_C_array(_Perl_IDCont_invlist);
                 }
-                return is_utf8_common(p, &PL_utf8_perl_idcont, "_Perl_IDCont", invlist);
+                return is_utf8_common(p, &PL_utf8_perl_idcont,
+                                      "_Perl_IDCont", NULL);
         }
     }
 
