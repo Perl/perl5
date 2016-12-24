@@ -2541,7 +2541,7 @@ S_warn_on_first_deprecated_use(pTHX_ const char * const name,
 		Perl_croak(aTHX_ "panic: hv_store() unexpectedly failed");
             }
 
-            if (strEQ(file, "mathoms.c")) {
+            if (instr(file, "mathoms.c")) {
                 Perl_warner(aTHX_ WARN_DEPRECATED,
                             "In %s, line %d, starting in Perl v5.30, %s()"
                             " will be removed.  Avoid this message by"
@@ -3052,27 +3052,27 @@ S_check_and_deprecate(pTHX_ const U8 *p,
         *e = p + UTF8SKIP(p);
 
         /* For mathoms.c calls, we use the function name we know is stored
-         * there */
+         * there.  It could be part of a larger path */
         if (type == DEPRECATE_TO_UPPER) {
-            name = strEQ(file, "mathoms.c")
+            name = instr(file, "mathoms.c")
                    ? "to_utf8_upper"
                    : "toUPPER_utf8";
             alternative = "toUPPER_utf8_safe";
         }
         else if (type == DEPRECATE_TO_TITLE) {
-            name = strEQ(file, "mathoms.c")
+            name = instr(file, "mathoms.c")
                    ? "to_utf8_title"
                    : "toTITLE_utf8";
             alternative = "toTITLE_utf8_safe";
         }
         else if (type == DEPRECATE_TO_LOWER) {
-            name = strEQ(file, "mathoms.c")
+            name = instr(file, "mathoms.c")
                    ? "to_utf8_lower"
                    : "toLOWER_utf8";
             alternative = "toLOWER_utf8_safe";
         }
         else if (type == DEPRECATE_TO_FOLD) {
-            name = strEQ(file, "mathoms.c")
+            name = instr(file, "mathoms.c")
                    ? "to_utf8_fold"
                    : "toFOLD_utf8";
             alternative = "toFOLD_utf8_safe";
