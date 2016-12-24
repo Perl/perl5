@@ -2915,8 +2915,8 @@ S_infnan_2pv(NV nv, char* buffer, size_t maxlen, char plus) {
       return 0;
     }
     assert((s == buffer + 3) || (s == buffer + 4));
-    *s++ = 0;
-    return s - buffer - 1; /* -1: excluding the zero byte */
+    *s = 0;
+    return s - buffer;
 }
 
 /*
