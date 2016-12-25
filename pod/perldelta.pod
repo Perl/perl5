@@ -135,7 +135,7 @@ L<B::Xref> has been upgraded from version 1.05 to 1.06.
 
 =item *
 
-L<VMS-DCLsym::DCLsym> has been upgraded from version 1.07 to 1.08.
+L<VMS::DCLsym> has been upgraded from version 1.07 to 1.08.
 
 =item *
 
@@ -171,7 +171,7 @@ L<Module::CoreList> has been upgraded from version 5.20161220 to 5.20170120.
 
 =item *
 
-L<OS2-Process::Process> has been upgraded from version 1.11 to 1.12.
+L<OS2::Process> has been upgraded from version 1.11 to 1.12.
 
 =item *
 
