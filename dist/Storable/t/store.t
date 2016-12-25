@@ -1,7 +1,7 @@
 #!./perl
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
-#  
+#
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
 #
@@ -19,7 +19,7 @@ sub BEGIN {
 
 use Storable qw(store retrieve store_fd nstore_fd fd_retrieve);
 
-use Test::More tests => 21;
+use Test::More tests => 24;
 
 $a = 'toto';
 $b = \$a;
@@ -86,6 +86,20 @@ is(&dump($r), &dump(\%a));
 
 eval { $r = fd_retrieve(::OUT); };
 isnt($@, '');
+
+{
+    my %test = (
+        old_retrieve_array => "\x70\x73\x74\x30\x01\x0a\x02\x02\x02\x02\x00\x3d\x08\x84\x08\x85\x08\x06\x04\x00\x00\x01\x1b",
+        old_retrieve_hash  => "\x70\x73\x74\x30\x01\x0a\x03\x00\xe8\x03\x00\x00\x81\x00\x00\x00\x01\x61",
+        retrieve_code      => "\x70\x73\x74\x30\x05\x0a\x19\xf0\x00\xff\xe8\x03\x1a\x0a\x0e\x01",
+    );
+
+    for my $k (sort keys %test) {
+        open my $fh, '<', \$test{$k};
+        eval { Storable::fd_retrieve($fh); };
+        is($?, 0, 'RT 130098:  no segfault in Storable::fd_retrieve()');
+    }
+}
 
 close OUT or die "Could not close: $!";
 END { 1 while unlink 'store' }
