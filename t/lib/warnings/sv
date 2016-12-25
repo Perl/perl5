@@ -341,10 +341,13 @@ Invalid conversion in sprintf: "%+2L\003" at - line 19.
 # sv.c
 use warnings 'misc' ;
 *a = undef ;
+(*c) = ();
 no warnings 'misc' ;
 *b = undef ;
+(*d) = ();
 EXPECT
 Undefined value assigned to typeglob at - line 3.
+Undefined value assigned to typeglob at - line 4.
 ########
 # sv.c
 use warnings 'numeric' ;
