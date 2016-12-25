@@ -939,7 +939,8 @@ Perl_lex_grow_linestr(pTHX_ STRLEN len)
     /* Is the lex_shared linestr SV the same as the current linestr SV?
      * Only in this case does re_eval_start need adjusting, since it
      * points within lex_shared->ls_linestr's buffer */
-    current = (linestr == PL_parser->lex_shared->ls_linestr);
+    current = (   !PL_parser->lex_shared->ls_linestr
+               || linestr == PL_parser->lex_shared->ls_linestr);
 
     bufend_pos = PL_parser->bufend - buf;
     bufptr_pos = PL_parser->bufptr - buf;
