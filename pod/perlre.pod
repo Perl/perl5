@@ -7,14 +7,15 @@ perlre - Perl regular expressions
 
 This page describes the syntax of regular expressions in Perl.
 
-If you haven't used regular expressions before, a quick-start
-introduction is available in L<perlrequick>, and a longer tutorial
-introduction is available in L<perlretut>.
+If you haven't used regular expressions before, a tutorial introduction
+is available in L<perlretut>.  If you know just a little about them,
+a quick-start introduction is available in L<perlrequick>.
 
-For reference on how regular expressions are used in matching
-operations, plus various examples of the same, see discussions of
-C<m//>, C<s///>, C<qr//> and C<"??"> in L<perlop/"Regexp Quote-Like
-Operators">.
+This page assumes you are familiar with regular expression basics, like
+what is a "pattern", what does it look like, and how is it basically used.
+For a reference on how they are used, plus various examples of the same,
+see discussions of C<m//>, C<s///>, C<qr//> and C<"??"> in
+L<perlop/"Regexp Quote-Like Operators">.
 
 New in v5.22, L<C<use re 'strict'>|re/'strict' mode> applies stricter
 rules than otherwise when compiling regular expression patterns.  It can

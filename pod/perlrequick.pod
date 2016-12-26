@@ -10,6 +10,9 @@ using regular expressions ('regexes') in Perl.
 
 =head1 The Guide
 
+This page assumes you already know things, like what a "pattern" is, and
+the basic syntax of using them.  If you don't, see L<perlretut>.
+
 =head2 Simple word matching
 
 The simplest regex is simply a word, or more generally, a string of
