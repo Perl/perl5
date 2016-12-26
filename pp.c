@@ -5794,15 +5794,15 @@ PP(pp_split)
     orig = s;
     if (RX_EXTFLAGS(rx) & RXf_SKIPWHITE) {
 	if (do_utf8) {
-	    while (isSPACE_utf8_safe(s, strend))
+	    while (s < strend && isSPACE_utf8_safe(s, strend))
 		s += UTF8SKIP(s);
 	}
 	else if (get_regex_charset(RX_EXTFLAGS(rx)) == REGEX_LOCALE_CHARSET) {
-	    while (isSPACE_LC(*s))
+	    while (s < strend && isSPACE_LC(*s))
 		s++;
 	}
 	else {
-	    while (isSPACE(*s))
+	    while (s < strend && isSPACE(*s))
 		s++;
 	}
     }

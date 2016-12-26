@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 161;
+plan tests => 162;
 
 $FS = ':';
 
@@ -620,4 +620,12 @@ is "@a", '1 2 3', 'assignment to split-to-array (stacked)';
     $a[1] = 'b';
     ok eval { $a[0] = 'a'; 1; }, "array split filling AvARRAY: assign 0";
     is "@a", "a b", "array split filling AvARRAY: result";
+}
+
+# splitting an empty utf8 string gave an assert failure
+{
+    my $s = "\x{100}";
+    chop $s;
+    my @a = split ' ', $s;
+    is (+@a, 0, "empty utf8 string");
 }
