@@ -7,16 +7,13 @@ $VERSION = '5.20170120';
 
 sub _undelta {
     my ($delta) = @_;
-    my %expanded;
-    for my $version (sort { $a cmp $b } keys %$delta) {
-        my $data = $delta->{$version};
-        my $from = $data->{delta_from};
-        my %full = (
-            ( $from ? %{$expanded{$from}} : () ),
-            %{$data->{changed} || {}},
-        );
-        delete @full{ keys %{$data->{removed}} };
-        $expanded{$version} = \%full;
+    my (%expanded, $delta_from, $base, $changed, $removed);
+    for my $v (sort keys %$delta) {
+        ($delta_from, $changed, $removed) = @{$delta->{$v}}{qw( delta_from changed removed )};
+        $base = $delta_from ? $expanded{$delta_from} : {};
+        my %full = ( %$base, %{$changed || {}} );
+        delete @full{ keys %$removed };
+        $expanded{$v} = \%full;
     }
     return %expanded;
 }
