@@ -3734,8 +3734,9 @@ S_scan_const(pTHX_ char *start)
 
 			    /* See Note on sizing above.  (NOTE: SvCUR() is not
 			     * set correctly here). */
+                            const STRLEN extra = len + (send - e) + 1;
 			    const STRLEN off = d - SvPVX_const(sv);
-			    d = off + SvGROW(sv, off + len + (STRLEN)(send - s) + 1);
+			    d = off + SvGROW(sv, off + extra);
 			}
 			Copy(str, d, len, char);
 			d += len;
@@ -3836,8 +3837,9 @@ S_scan_const(pTHX_ char *start)
 		/* encoded value larger than old, may need extra space (NOTE:
 		 * SvCUR() is not set correctly here).   See Note on sizing
 		 * above.  */
+                const STRLEN extra = need + (send - s) + 1;
 		const STRLEN off = d - SvPVX_const(sv);
-		d = SvGROW(sv, off + need + (STRLEN)(send - s) + 1) + off;
+		d = off + SvGROW(sv, off + extra);
 	    }
 	    s += len;
 
