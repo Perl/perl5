@@ -656,7 +656,15 @@ Perl_sharedsv_cond_timedwait(perl_cond *cond, perl_mutex *mut, double abs)
     abs -= (NV)ts.tv_sec;
     ts.tv_nsec = (long)(abs * 1000000000.0);
 
+    CLANG_DIAG_IGNORE(-Wthread-safety);
+    /* warning: calling function 'pthread_cond_timedwait' requires holding mutex 'mut' exclusively [-Wthread-safety-analysis] */
+
     switch (pthread_cond_timedwait(cond, mut, &ts)) {
+
+#if defined(__clang__) || defined(__clang)
+CLANG_DIAG_RESTORE;
+#endif
+
         case 0:         got_it = 1; break;
         case ETIMEDOUT:             break;
 #ifdef OEMVS

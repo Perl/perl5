@@ -195,6 +195,10 @@ L<Test> has been upgraded from version 1.29 to 1.30.
 
 =item *
 
+L<threads::shared> has been upgraded from version 1.52 to 1.53.
+
+=item *
+
 L<Unicode::UCD> has been upgraded from version 0.67 to 0.68.
 
 =item *
