@@ -2785,15 +2785,17 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
 
   In transliterations:
     characters are VERY literal, except for - not at the start or end
-    of the string, which indicates a range. If the range is in bytes,
+    of the string, which indicates a range.  However some backslash sequences
+    are recognized: \r, \n, and the like
+                    \007 \o{}, \x{}, \N{}
+    If all elements in the transliteration are below 256,
     scan_const expands the range to the full set of intermediate
     characters. If the range is in utf8, the hyphen is replaced with
     a certain range mark which will be handled by pmtrans() in op.c.
 
   In double-quoted strings:
     backslashes:
-      double-quoted style: \r and \n
-      constants: \x31, etc.
+      all those recognized in transliterations
       deprecated backrefs: \1 (in substitution replacements)
       case and quoting: \U \Q \E
     stops on @ and $
