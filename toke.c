@@ -3006,13 +3006,13 @@ S_scan_const(pTHX_ char *start)
                  * Unicode value (\N{...}), or if the range is a subset of
                  * [A-Z] or [a-z], and both ends are literal characters,
                  * like 'A', and not like \x{C1} */
-                if ((convert_unicode
-                     = cBOOL(backslash_N)   /* \N{} forces Unicode, hence
+                convert_unicode =
+                       cBOOL(backslash_N)   /* \N{} forces Unicode, hence
                                                portable range */
                       || (   ! non_portable_endpoint
                           && ((  isLOWER_A(range_min) && isLOWER_A(range_max))
-                             || (isUPPER_A(range_min) && isUPPER_A(range_max))))
-                )) {
+                             || (isUPPER_A(range_min) && isUPPER_A(range_max))));
+                if (convert_unicode) {
 
                     /* Special handling is needed for these portable ranges.
                      * They are defined to all be in Unicode terms, which
