@@ -3427,7 +3427,7 @@ S_scan_const(pTHX_ char *start)
                                             + 1;
                         if (UNLIKELY(needed > SvLEN(sv))) {
                             SvCUR_set(sv, d - SvPVX_const(sv));
-                            d = sv_grow(sv, needed) + SvCUR(sv);
+                            d = SvCUR(sv) + SvGROW(sv, needed);
                         }
 
 		        d = (char*)uvchr_to_utf8((U8*)d, uv);
