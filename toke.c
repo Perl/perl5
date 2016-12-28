@@ -3410,6 +3410,11 @@ S_scan_const(pTHX_ char *start)
                                                   /* Above-latin1 in string
                                                    * implies no encoding */
                                                   |SV_UTF8_NO_ENCODING,
+                                           /* Since we're having to grow here,
+                                            * make sure we have enough room for
+                                            * this escape and a NUL, so the
+                                            * code immediately below won't have
+                                            * to actually grow again */
                                        UVCHR_SKIP(uv) + (STRLEN)(send - s) + 1);
 			d = SvPVX(sv) + SvCUR(sv);
 			has_utf8 = TRUE;
@@ -3422,8 +3427,10 @@ S_scan_const(pTHX_ char *start)
                         * EBCDIC where \x{40000000} contains 12 bytes, and the
                         * UTF-8 for it contains 14.  And, we have to allow for
                         * a trailing NUL.  It probably can't happen on ASCII
-                        * platforms, but be safe */
-                        const STRLEN needed = d - SvPVX(sv) + UVCHR_SKIP(uv)
+                        * platforms, but be safe.  See Note on sizing above. */
+                        const STRLEN needed = d - SvPVX(sv)
+                                            + UVCHR_SKIP(uv)
+                                            + (send - s)
                                             + 1;
                         if (UNLIKELY(needed > SvLEN(sv))) {
                             SvCUR_set(sv, d - SvPVX_const(sv));
