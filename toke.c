@@ -3414,10 +3414,7 @@ S_scan_const(pTHX_ char *start)
 
                             sv_utf8_upgrade_flags_grow(
                                            sv,
-                                           SV_GMAGIC|SV_FORCE_UTF8_UPGRADE
-                                                      /* Above-latin1 in string
-                                                       * implies no encoding */
-                                                      |SV_UTF8_NO_ENCODING,
+                                           SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
 
                                            /* Since we're having to grow here,
                                             * make sure we have enough room for
@@ -3744,7 +3741,7 @@ S_scan_const(pTHX_ char *start)
                              * \N{} implies Unicode semantics, and scalars have
                              * to be in utf8 to guarantee those semantics; but
                              * not needed in tr/// */
-                            sv_utf8_upgrade_flags(res, SV_UTF8_NO_ENCODING);
+                            sv_utf8_upgrade_flags(res, 0);
                             str = SvPV_const(res, len);
                         }
 

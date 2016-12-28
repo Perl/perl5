@@ -1806,10 +1806,10 @@ Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
 #define SvSHARED_HASH(sv) (0 + SvSHARED_HEK_FROM_PV(SvPVX_const(sv))->hek_hash)
 
 /* flag values for sv_*_flags functions */
+#define SV_UTF8_NO_ENCODING	0       /* No longer used */
 #define SV_IMMEDIATE_UNREF	1
 #define SV_GMAGIC		2
 #define SV_COW_DROP_PV		4
-#define SV_UTF8_NO_ENCODING	8
 #define SV_NOSTEAL		16
 #define SV_CONST_RETURN		32
 #define SV_MUTABLE_RETURN	64
