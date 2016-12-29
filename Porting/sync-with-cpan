@@ -66,7 +66,7 @@ Restore files mentioned in C<CUSTOMIZED>
 
 =item *
 
-Adds new files to F<MANIFEST>
+Updates the contents of F<MANIFEST>
 
 =item *
 
@@ -93,10 +93,6 @@ from the filename -- but can be overwritten by the C<--version> option.
 =head1 TODO
 
 =over 4
-
-=item *
-
-Delete files from F<MANIFEST>
 
 =item *
 
@@ -454,15 +450,29 @@ if ($$info {CUSTOMIZED}) {
 }
 
 chdir "..";
-if (@commit) {
+if (@commit || @gone) {
     say "Fixing MANIFEST";
-    my $MANIFEST      = "MANIFEST";
-    my $MANIFEST_SORT = "$MANIFEST.sorted";
-    open my $fh, ">>", $MANIFEST;
-    say $fh "cpan/$pkg_dir/$_" for @commit;
-    close $fh;
-    system $^X => "Porting/manisort", '--quiet', '--output', $MANIFEST_SORT;
-    rename $MANIFEST_SORT => $MANIFEST;
+    my $MANIFEST     = "MANIFEST";
+    my $MANIFEST_NEW = "$MANIFEST.new";
+
+    open my $orig, "<", $MANIFEST
+        or die "Failed to open $MANIFEST for reading: $!\n";
+    open my $new, ">", $MANIFEST_NEW
+        or die "Failed to open $MANIFEST_NEW for writing: $!\n";
+    my %gone = map +("cpan/$pkg_dir/$_" => 1), @gone;
+    while (my $line = <$orig>) {
+        my ($file) = $line =~ /^(\S+)/
+            or die "Can't parse MANIFEST line: $line";
+        print $new $line if !$gone{$file};
+    }
+
+    say $new "cpan/$pkg_dir/$_" for @commit;
+
+    close $new or die "Can't close $MANIFEST: $!\n";
+
+    system $^X => "Porting/manisort", '--quiet', "--output=$MANIFEST", $MANIFEST_NEW;
+    unlink $MANIFEST_NEW
+        or die "Can't delete temporary $MANIFEST_NEW: $!\n";
 }
 
 
