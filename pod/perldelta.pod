@@ -135,6 +135,10 @@ L<B::Xref> has been upgraded from version 1.05 to 1.06.
 
 =item *
 
+L<Compress::Raw::Zlib> has been upgraded from version 2.069 to 2.070.
+
+=item *
+
 L<DB_File> has been upgraded from version 1.838 to 1.840.
 
 =item *
