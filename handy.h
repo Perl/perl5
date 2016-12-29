@@ -1908,7 +1908,7 @@ _generic_utf8_safe(classnum, p, e, _is_utf8_FOO_with_len(classnum, p, e))
     /* Because all controls are UTF-8 invariants in EBCDIC, we can use this
      * more efficient macro instead of the more general one */
 #   define isCNTRL_utf8_safe(p, e)                                          \
-                    (__ASSERT_(_utf8_safe_assert(p, e)) isCNTRL_L1(*(p))
+                    (__ASSERT_(_utf8_safe_assert(p, e)) isCNTRL_L1(*(p)))
 #else
 #   define isCNTRL_utf8_safe(p, e)  _generic_utf8_safe(_CC_CNTRL, p, e, 0)
 #endif
