@@ -580,8 +580,20 @@ else {
     say "Make sure you update this by hand before committing.";
 }
 
-say "$o_module is now version $new_version";
-say "Now you ought to run a make; make test ...";
+print <<"EOF";
 
+=======================================================================
+
+$o_module is now at version $new_version
+Next, you should run a "make test".
+
+Hopefully that will complete successfully, but if not, you can make any
+changes you need to get the tests to pass. Don't forget that you'll need
+a "CUSTOMIZED" entry in Porting/Maintainers.pl if you change any of the
+files under cpan/$pkg_dir.
+
+Once all tests pass, you can "git add -u" and "git commit" the changes.
+
+EOF
 
 __END__
