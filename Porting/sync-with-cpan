@@ -209,10 +209,20 @@ sub make {
 };
 
 my ($module)  = shift;
-my  $cpan_mod = @ARGV ? shift : $module;
 
+my $info = $Modules{$module};
+if (!$info) {
+    # Maybe the user said "Test-Simple" instead of "Test::Simple". See if we
+    # can fix it up.
+    (my $guess = $module) =~ s/-/::/g;
+    $info = $Modules{$guess}
+        or die "Cannot find module $module";
+    say "Guessing you meant $guess instead of $module";
+    $module = $guess;
+}
 
-my  $info         = $Modules {$module} or die "Cannot find module $module";
+my $cpan_mod = @ARGV ? shift : $module;
+
 my  $distribution = $$info {DISTRIBUTION};
 
 my @files         = glob $$info {FILES};
