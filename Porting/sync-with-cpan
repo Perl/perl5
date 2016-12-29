@@ -540,7 +540,6 @@ print "\n";
 say "Failed tests: @failed" if @failed;
 
 
-say "Attempting to update Maintainers.pl";
 chdir '..';
 
 open my $Maintainers_pl, '<', 'Porting/Maintainers.pl';
@@ -571,6 +570,7 @@ while (<$Maintainers_pl>) {
 }
 
 if ($found) {
+    say "Successfully updated Maintainers.pl";
     unlink 'Porting/Maintainers.pl';
     rename 'Maintainers.pl' => 'Porting/Maintainers.pl';
     chmod 0755 => 'Porting/Maintainers.pl';
