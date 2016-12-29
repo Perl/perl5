@@ -552,7 +552,7 @@ Variant C<isI<FOO>_A> (e.g., C<isALPHA_A()>) is identical to the base function
 with no suffix C<"_A">.  This variant is used to emphasize by its name that
 only ASCII-range characters can return TRUE.
 
-Variant C<isI<FOO>_L1> imposes the Latin-1 (or EBCDIC equivlalent) character set
+Variant C<isI<FOO>_L1> imposes the Latin-1 (or EBCDIC equivalent) character set
 onto the platform.  That is, the code points that are ASCII are unaffected,
 since ASCII is a subset of Latin-1.  But the non-ASCII code points are treated
 as if they are Latin-1 characters.  For example, C<isWORDCHAR_L1()> will return
