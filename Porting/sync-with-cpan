@@ -90,6 +90,16 @@ Runs the porting tests
 C<--tarball> should be the path to the tarball; the version is extracted
 from the filename -- but can be overwritten by the C<--version> option.
 
+=head1 OPTIONS
+
+=over 4
+
+=item C<--jobs> I<N>
+
+When running C<make>, pass a C<< -jI<N> >> option to it.
+
+=back
+
 =head1 TODO
 
 =over 4
@@ -165,6 +175,7 @@ sub usage
 
 GetOptions ('tarball=s'  =>  \my $tarball,
             'version=s'  =>  \my $version,
+            'jobs=i'     =>  \my $make_jobs,
              force       =>  \my $force,
              help        =>  sub { usage 0; },
              ) or  die "Failed to parse arguments";
@@ -193,6 +204,7 @@ sub de_exec {
 
 sub make {
     my @args= @_;
+    unshift @args, "-j$make_jobs" if defined $make_jobs;
     if( $^O eq 'MSWin32') {
         chdir "Win32";
         system "$Config{make} @args> ..\\$MAKE_LOG 2>&1"
