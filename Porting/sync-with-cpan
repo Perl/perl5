@@ -461,7 +461,7 @@ if (@commit) {
     open my $fh, ">>", $MANIFEST;
     say $fh "cpan/$pkg_dir/$_" for @commit;
     close $fh;
-    system perl => "Porting/manisort", '--output', $MANIFEST_SORT;
+    system $^X => "Porting/manisort", '--output', $MANIFEST_SORT;
     rename $MANIFEST_SORT => $MANIFEST;
 }
 
