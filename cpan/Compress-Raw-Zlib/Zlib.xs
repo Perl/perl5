@@ -1088,7 +1088,7 @@ flush(s, output, f=Z_FINISH)
     if (DO_UTF8(output) && !sv_utf8_downgrade(output, 1))
          croak("Wide character in Compress::Raw::Zlib::Deflate::flush input parameter");
 #endif         
-    if(! s->flags & FLAG_APPEND) {
+    if((s->flags & FLAG_APPEND) != FLAG_APPEND) {
         SvCUR_set(output, 0);
         /* sv_setpvn(output, "", 0); */
     }

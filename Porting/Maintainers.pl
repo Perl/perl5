@@ -217,7 +217,7 @@ use File::Glob qw(:case);
     },
 
     'Compress::Raw::Zlib' => {
-        'DISTRIBUTION' => 'PMQS/Compress-Raw-Zlib-2.069.tar.gz',
+        'DISTRIBUTION' => 'PMQS/Compress-Raw-Zlib-2.070.tar.gz',
 
         'FILES'    => q[cpan/Compress-Raw-Zlib],
         'EXCLUDED' => [
