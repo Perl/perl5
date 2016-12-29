@@ -135,15 +135,15 @@ L<B::Xref> has been upgraded from version 1.05 to 1.06.
 
 =item *
 
-L<VMS::DCLsym> has been upgraded from version 1.07 to 1.08.
-
-=item *
-
-L<diagnostics> has been upgraded from version 1.35 to 1.36.
+L<DB_File> has been upgraded from version 1.838 to 1.840.
 
 =item *
 
 L<Devel::SelfStubber> has been upgraded from version 1.05 to 1.06.
+
+=item *
+
+L<diagnostics> has been upgraded from version 1.35 to 1.36.
 
 =item *
 
@@ -200,6 +200,10 @@ L<threads::shared> has been upgraded from version 1.52 to 1.53.
 =item *
 
 L<Unicode::UCD> has been upgraded from version 0.67 to 0.68.
+
+=item *
+
+L<VMS::DCLsym> has been upgraded from version 1.07 to 1.08.
 
 =item *
 
