@@ -607,6 +607,9 @@ const DBT * key2 ;
 #ifdef AT_LEAST_DB_3_2
     PERL_UNUSED_ARG(db);
 #endif
+#ifdef AT_LEAST_DB_6_0
+    PERL_UNUSED_ARG(locp);
+#endif
 
     if (CurrentDB->in_compare) {
         tidyUp(CurrentDB);
