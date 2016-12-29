@@ -445,6 +445,8 @@ S_regcp_restore(pTHX_ regexp *rex, I32 ix, U32 *maxopenparen_p _pDEPTH)
 
 #define regcpblow(cp) LEAVE_SCOPE(cp)	/* Ignores regcppush()ed data. */
 
+#ifndef PERL_IN_XSUB_RE
+
 bool
 Perl_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
 {
@@ -485,6 +487,8 @@ Perl_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
     NOT_REACHED; /* NOTREACHED */
     return FALSE;
 }
+
+#endif
 
 STATIC bool
 S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
