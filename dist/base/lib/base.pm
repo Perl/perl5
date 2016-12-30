@@ -122,13 +122,8 @@ Base class package "$base" is empty.
 ERROR
                     if ($dotty && -e $fn) {
                         $e .= <<ERROS;
-    The file $fn does exist in the current directory.  But note
-    that base.pm, when loading a module, now ignores the current working
-    directory if it is the last entry in \@INC.  If your software worked on
-    previous versions of Perl, the best solution is to use FindBin to
-    detect the path properly and to add that path to \@INC.  As a last
-    resort, you can re-enable looking in the current working directory by
-    adding "use lib '.'" to your code.
+    If you mean to load $fn from the current directory, you may
+    want to try "use lib '.'".
 ERROS
                     }
                     $e =~ s/\n\z/)\n/;
