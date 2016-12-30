@@ -134,6 +134,7 @@ use strict;
 use warnings;
 use Getopt::Long;
 use Archive::Tar;
+use File::Basename qw( basename );
 use File::Path qw( remove_tree );
 use File::Find;
 use File::Spec::Functions qw( tmpdir );
@@ -319,7 +320,7 @@ system git => 'clean', '-dfxq', $pkg_dir;
 say "Unpacking $new_file";
 Archive::Tar->extract_archive( $new_file );
 
-(my $new_dir = $new_file) =~ s/\.tar\.gz//;
+(my $new_dir = basename($new_file)) =~ s/\.tar\.gz//;
 # ensure 'make' will update all files
 my $t= time;
 for my $file (find_type_f($new_dir)) {
