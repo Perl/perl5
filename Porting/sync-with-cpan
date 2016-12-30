@@ -146,6 +146,12 @@ use constant WIN32 => $^O eq 'MSWin32';
 die "This does not look like a top level directory"
      unless -d "cpan" && -d "Porting";
 
+# Check that there's a Makefile, if needed; otherwise, we'll do most of our
+# work only to fail when we try to run make, and the user will have to
+# either unpick everything we've done, or do the rest manually.
+die "Please run Configure before using $0\n"
+    if !WIN32 && !-f "Makefile";
+
 our @IGNORABLE;
 our %Modules;
 
