@@ -66,7 +66,7 @@ Restore files mentioned in C<CUSTOMIZED>
 
 =item *
 
-Adds new files to F<MANIFEST>
+Updates the contents of F<MANIFEST>
 
 =item *
 
@@ -90,13 +90,19 @@ Runs the porting tests
 C<--tarball> should be the path to the tarball; the version is extracted
 from the filename -- but can be overwritten by the C<--version> option.
 
-=head1 TODO
+=head1 OPTIONS
 
 =over 4
 
-=item *
+=item C<--jobs> I<N>
 
-Delete files from F<MANIFEST>
+When running C<make>, pass a C<< -jI<N> >> option to it.
+
+=back
+
+=head1 TODO
+
+=over 4
 
 =item *
 
@@ -128,14 +134,24 @@ use strict;
 use warnings;
 use Getopt::Long;
 use Archive::Tar;
+use File::Basename qw( basename );
 use File::Path qw( remove_tree );
 use File::Find;
+use File::Spec::Functions qw( tmpdir );
 use Config qw( %Config );
 
 $| = 1;
 
+use constant WIN32 => $^O eq 'MSWin32';
+
 die "This does not look like a top level directory"
      unless -d "cpan" && -d "Porting";
+
+# Check that there's a Makefile, if needed; otherwise, we'll do most of our
+# work only to fail when we try to run make, and the user will have to
+# either unpick everything we've done, or do the rest manually.
+die "Please run Configure before using $0\n"
+    if !WIN32 && !-f "Makefile";
 
 our @IGNORABLE;
 our %Modules;
@@ -144,9 +160,11 @@ use autodie;
 
 require "Porting/Maintainers.pl";
 
+my $MAKE_LOG = 'make.log';
+
 my %IGNORABLE    = map {$_ => 1} @IGNORABLE;
 
-my $tmpdir= $ENV{ TEMP } // '/tmp';
+my $tmpdir = tmpdir();
 
 my $package      = "02packages.details.txt";
 my $package_url  = "http://www.cpan.org/modules/$package";
@@ -166,6 +184,7 @@ sub usage
 
 GetOptions ('tarball=s'  =>  \my $tarball,
             'version=s'  =>  \my $version,
+            'jobs=i'     =>  \my $make_jobs,
              force       =>  \my $force,
              help        =>  sub { usage 0; },
              ) or  die "Failed to parse arguments";
@@ -194,20 +213,33 @@ sub de_exec {
 
 sub make {
     my @args= @_;
-    if( $^O eq 'MSWin32') {
+    unshift @args, "-j$make_jobs" if defined $make_jobs;
+    if (WIN32) {
         chdir "Win32";
-        system "$Config{make} @args> ..\\make.log 2>&1" and die "Running make failed, see make.log";
+        system "$Config{make} @args> ..\\$MAKE_LOG 2>&1"
+            and die "Running make failed, see $MAKE_LOG";
         chdir '..';
     } else {
-        system "$Config{make} @args> make.log 2>&1" and die "Running make failed, see make.log";
+        system "$Config{make} @args> $MAKE_LOG 2>&1"
+            and die "Running make failed, see $MAKE_LOG";
     };
 };
 
 my ($module)  = shift;
-my  $cpan_mod = @ARGV ? shift : $module;
 
+my $info = $Modules{$module};
+if (!$info) {
+    # Maybe the user said "Test-Simple" instead of "Test::Simple". See if we
+    # can fix it up.
+    (my $guess = $module) =~ s/-/::/g;
+    $info = $Modules{$guess}
+        or die "Cannot find module $module";
+    say "Guessing you meant $guess instead of $module";
+    $module = $guess;
+}
 
-my  $info         = $Modules {$module} or die "Cannot find module $module";
+my $cpan_mod = @ARGV ? shift : $module;
+
 my  $distribution = $$info {DISTRIBUTION};
 
 my @files         = glob $$info {FILES};
@@ -238,7 +270,13 @@ if ($cpan_mod =~ /-/ && $cpan_mod !~ /::/) {
 #
 my $new_file;
 my $new_version;
-unless ($tarball) {
+if (defined $tarball) {
+    die "Tarball $tarball does not exist\n" if !-e $tarball;
+    die "Tarball $tarball is not a plain file\n" if !-f _;
+    $new_file     = $tarball;
+    $new_version  = $version // ($new_file =~ /-([0-9._]+(?:-TRIAL[0-9]*)?)\.tar\.gz/) [0];
+}
+else {
     #
     # Poor man's cache
     #
@@ -273,10 +311,6 @@ unless ($tarball) {
         1
     } or system wget => $url, '-qO', $new_file;
 }
-else {
-    $new_file     = $tarball;
-    $new_version  = $version // ($new_file =~ /-([0-9._]+(?:-TRIAL[0-9]*)?)\.tar\.gz/) [0];
-}
 
 my  $old_dir      = "$pkg_dir-$old_version";
 
@@ -286,7 +320,7 @@ system git => 'clean', '-dfxq', $pkg_dir;
 say "Unpacking $new_file";
 Archive::Tar->extract_archive( $new_file );
 
-(my $new_dir = $new_file) =~ s/\.tar\.gz//;
+(my $new_dir = basename($new_file)) =~ s/\.tar\.gz//;
 # ensure 'make' will update all files
 my $t= time;
 for my $file (find_type_f($new_dir)) {
@@ -439,22 +473,57 @@ if ($$info {CUSTOMIZED}) {
 }
 
 chdir "..";
-if (@commit) {
+if (@commit || @gone) {
     say "Fixing MANIFEST";
-    my $MANIFEST      = "MANIFEST";
-    my $MANIFEST_SORT = "$MANIFEST.sorted";
-    open my $fh, ">>", $MANIFEST;
-    say $fh "cpan/$pkg_dir/$_" for @commit;
-    close $fh;
-    system perl => "Porting/manisort", '--output', $MANIFEST_SORT;
-    rename $MANIFEST_SORT => $MANIFEST;
+    my $MANIFEST     = "MANIFEST";
+    my $MANIFEST_NEW = "$MANIFEST.new";
+
+    open my $orig, "<", $MANIFEST
+        or die "Failed to open $MANIFEST for reading: $!\n";
+    open my $new, ">", $MANIFEST_NEW
+        or die "Failed to open $MANIFEST_NEW for writing: $!\n";
+    my %gone = map +("cpan/$pkg_dir/$_" => 1), @gone;
+    while (my $line = <$orig>) {
+        my ($file) = $line =~ /^(\S+)/
+            or die "Can't parse MANIFEST line: $line";
+        print $new $line if !$gone{$file};
+    }
+
+    say $new "cpan/$pkg_dir/$_" for @commit;
+
+    close $new or die "Can't close $MANIFEST: $!\n";
+
+    system $^X => "Porting/manisort", '--quiet', "--output=$MANIFEST", $MANIFEST_NEW;
+    unlink $MANIFEST_NEW
+        or die "Can't delete temporary $MANIFEST_NEW: $!\n";
 }
 
 
-print "Running a make ... ";
+print "Running a make and saving its output to $MAKE_LOG ... ";
 # Prepare for running (selected) tests
 make 'test-prep';
 print "done\n";
+
+# The build system installs code from CPAN dists into the lib/ directory,
+# creating directories as needed. This means that the cleaning-related rules
+# in the Makefile need to know which directories to clean up. The Makefile
+# is generated by Configure from Makefile.SH, so *that* file needs the list
+# of directories. regen/lib_cleanup.pl is capable of automatically updating
+# the contents of Makefile.SH (and win32/Makefile, which needs similar but
+# not identical lists of directories), so we can just run that (using the
+# newly-built Perl, as is done with the regen programs run by "make regen").
+#
+# We do this if any files at all have been added or deleted, regardless of
+# whether those changes result in any directories being added or deleted,
+# because the alternative would be to replicate the regen/lib_cleanup.pl
+# logic here. That's fine, because regen/lib_cleanup.pl is idempotent if run
+# repeatedly.
+if (@commit || @gone) {
+    say "Running regen/lib_cleanup.pl to handle potential added/deleted dirs";
+    my $exe_dir = WIN32 ? ".\\" : './';
+    system "${exe_dir}perl$Config{_exe}", "-Ilib", "regen/lib_cleanup.pl"
+        and die "regen/lib_cleanup.pl failed\n";
+}
 
 #
 # Must clean up, or else t/porting/FindExt.t will fail.
@@ -471,9 +540,10 @@ unlink "cpan/$new_file" unless $tarball;
 #
 chdir "t";
 say "Running module tests";
-my @test_files = grep { /\.t$/ } find_type_f( $pkg_dir );
-my $exe_dir= $^O =~ /MSWin/ ? "..\\" : './';
-my $output = `${exe_dir}perl$Config{_exe} TEST @test_files`;
+my @test_files = grep { /\.t$/ } find_type_f( "../cpan/$pkg_dir" );
+my $exe_dir = WIN32 ? "..\\" : './';
+$ENV{TEST_JOBS} = $_ for grep defined, $make_jobs;
+my $output = `${exe_dir}perl$Config{_exe} -I../lib harness @test_files`;
 unless ($output =~ /All tests successful/) {
     say $output;
     exit 1;
@@ -494,7 +564,6 @@ print "\n";
 say "Failed tests: @failed" if @failed;
 
 
-say "Attempting to update Maintainers.pl";
 chdir '..';
 
 open my $Maintainers_pl, '<', 'Porting/Maintainers.pl';
@@ -525,6 +594,7 @@ while (<$Maintainers_pl>) {
 }
 
 if ($found) {
+    say "Successfully updated Maintainers.pl";
     unlink 'Porting/Maintainers.pl';
     rename 'Maintainers.pl' => 'Porting/Maintainers.pl';
     chmod 0755 => 'Porting/Maintainers.pl';
@@ -534,8 +604,20 @@ else {
     say "Make sure you update this by hand before committing.";
 }
 
-say "$o_module is now version $new_version";
-say "Now you ought to run a make; make test ...";
+print <<"EOF";
 
+=======================================================================
+
+$o_module is now at version $new_version
+Next, you should run a "make test".
+
+Hopefully that will complete successfully, but if not, you can make any
+changes you need to get the tests to pass. Don't forget that you'll need
+a "CUSTOMIZED" entry in Porting/Maintainers.pl if you change any of the
+files under cpan/$pkg_dir.
+
+Once all tests pass, you can "git add -u" and "git commit" the changes.
+
+EOF
 
 __END__
