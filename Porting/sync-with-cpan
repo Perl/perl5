@@ -141,6 +141,8 @@ use Config qw( %Config );
 
 $| = 1;
 
+use constant WIN32 => $^O eq 'MSWin32';
+
 die "This does not look like a top level directory"
      unless -d "cpan" && -d "Porting";
 
@@ -205,7 +207,7 @@ sub de_exec {
 sub make {
     my @args= @_;
     unshift @args, "-j$make_jobs" if defined $make_jobs;
-    if( $^O eq 'MSWin32') {
+    if (WIN32) {
         chdir "Win32";
         system "$Config{make} @args> ..\\$MAKE_LOG 2>&1"
             and die "Running make failed, see $MAKE_LOG";
@@ -509,7 +511,7 @@ print "done\n";
 # repeatedly.
 if (@commit || @gone) {
     say "Running regen/lib_cleanup.pl to handle potential added/deleted dirs";
-    my $exe_dir = $^O eq 'MSWin32' ? ".\\" : './';
+    my $exe_dir = WIN32 ? ".\\" : './';
     system "${exe_dir}perl$Config{_exe}", "-Ilib", "regen/lib_cleanup.pl"
         and die "regen/lib_cleanup.pl failed\n";
 }
@@ -530,7 +532,7 @@ unlink "cpan/$new_file" unless $tarball;
 chdir "t";
 say "Running module tests";
 my @test_files = grep { /\.t$/ } find_type_f( "../cpan/$pkg_dir" );
-my $exe_dir= $^O =~ /MSWin/ ? "..\\" : './';
+my $exe_dir = WIN32 ? "..\\" : './';
 $ENV{TEST_JOBS} = $_ for grep defined, $make_jobs;
 my $output = `${exe_dir}perl$Config{_exe} -I../lib harness @test_files`;
 unless ($output =~ /All tests successful/) {
