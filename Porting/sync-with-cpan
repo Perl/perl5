@@ -531,7 +531,8 @@ chdir "t";
 say "Running module tests";
 my @test_files = grep { /\.t$/ } find_type_f( "../cpan/$pkg_dir" );
 my $exe_dir= $^O =~ /MSWin/ ? "..\\" : './';
-my $output = `${exe_dir}perl$Config{_exe} TEST @test_files`;
+$ENV{TEST_JOBS} = $_ for grep defined, $make_jobs;
+my $output = `${exe_dir}perl$Config{_exe} -I../lib harness @test_files`;
 unless ($output =~ /All tests successful/) {
     say $output;
     exit 1;
