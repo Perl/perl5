@@ -8,7 +8,7 @@ use Test::More tests => 2;
 
 if ($INC[-1] ne '.') { push @INC, '.' }
 
-my $inc = quotemeta "@INC[0..$#INC-1]";
+my $inc = quotemeta "@INC";
 
 eval { 'base'->import("foo") };
 like $@, qr/\@INC contains: $inc\).\)/,
