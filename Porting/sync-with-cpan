@@ -203,11 +203,19 @@ sub find_type_f {
 
 # Equivalent of `chmod a-x`
 sub de_exec {
-    for my $filename ( @_ ) {
-        my $mode= (stat $filename)[2] & 0777;
-        if( $mode & 0111 ) { # exec-bit set
-            chmod $mode & 0666, $filename;
-        };
+    my ($filename) = @_;
+    my $mode = (stat $filename)[2] & 0777;
+    if ($mode & 0111) { # exec-bit set
+        chmod $mode & 0666, $filename;
+    }
+}
+
+# Equivalent of `chmod +w`
+sub make_writable {
+    my ($filename) = @_;
+    my $mode = (stat $filename)[2] & 0777;
+    if (!($mode & 0222)) { # not writable
+        chmod $mode | (0222 & ~umask), $filename;
     }
 }
 
@@ -229,13 +237,35 @@ my ($module)  = shift;
 
 my $info = $Modules{$module};
 if (!$info) {
-    # Maybe the user said "Test-Simple" instead of "Test::Simple". See if we
-    # can fix it up.
-    (my $guess = $module) =~ s/-/::/g;
-    $info = $Modules{$guess}
-        or die "Cannot find module $module";
+    # Maybe the user said "Test-Simple" instead of "Test::Simple", or
+    # "IO::Compress" instead of "IO-Compress". See if we can fix it up.
+    my $guess = $module;
+    s/-/::/g or s/::/-/g for $guess;
+    $info = $Modules{$guess} or die <<"EOF";
+Cannot find module $module.
+The available options are listed in the %Modules hash in Porting/Maintainers.pl
+EOF
     say "Guessing you meant $guess instead of $module";
     $module = $guess;
+}
+
+if ($info->{CUSTOMIZED}) {
+    print <<"EOF";
+$module has a CUSTOMIZED entry in Porting/Maintainers.pl.
+
+This program's behaviour is to copy every CUSTOMIZED file into the version
+of the module being imported. But that might not be the right thing: in some
+cases, the new CPAN version will supersede whatever changes had previously
+been made in blead, so it would be better to import the new CPAN files.
+
+If you've checked that the CUSTOMIZED versions are still correct, you can
+proceed now. Otherwise, you should abort and investigate the situation. If
+the blead customizations are no longer needed, delete the CUSTOMIZED entry
+for $module in Porting/Maintainers.pl (and you'll also need to regenerate
+t/porting/customized.dat in that case; see t/porting/customized.t).
+
+EOF
+    print "Hit return to continue; ^C to abort "; <STDIN>;
 }
 
 my $cpan_mod = @ARGV ? shift : $module;
@@ -275,6 +305,8 @@ if (defined $tarball) {
     die "Tarball $tarball is not a plain file\n" if !-f _;
     $new_file     = $tarball;
     $new_version  = $version // ($new_file =~ /-([0-9._]+(?:-TRIAL[0-9]*)?)\.tar\.gz/) [0];
+    die "Blead and that tarball both have version $new_version of $module\n"
+        if $new_version eq $old_version;
 }
 else {
     #
@@ -298,6 +330,9 @@ else {
         $new_version = $version;
     }
     $new_file = (split '/', $new_path) [-1];
+
+    die "The latest version of $module is $new_version, but blead already has it\n"
+        if $new_version eq $old_version;
 
     my $url = "http://search.cpan.org/CPAN/authors/id/$new_path";
     say "Fetching $url";
@@ -324,8 +359,7 @@ Archive::Tar->extract_archive( $new_file );
 # ensure 'make' will update all files
 my $t= time;
 for my $file (find_type_f($new_dir)) {
-    open(my $fh,'>>',$file) || die "Cannot write $file:$!";
-    close($fh);
+    make_writable($file); # for convenience if the user later edits it
     utime($t,$t,$file);
 };
 
@@ -542,8 +576,7 @@ chdir "t";
 say "Running module tests";
 my @test_files = grep { /\.t$/ } find_type_f( "../cpan/$pkg_dir" );
 my $exe_dir = WIN32 ? "..\\" : './';
-$ENV{TEST_JOBS} = $_ for grep defined, $make_jobs;
-my $output = `${exe_dir}perl$Config{_exe} -I../lib harness @test_files`;
+my $output = `${exe_dir}perl$Config{_exe} TEST @test_files`;
 unless ($output =~ /All tests successful/) {
     say $output;
     exit 1;
@@ -585,7 +618,7 @@ while (<$Maintainers_pl>) {
             }
         }
 
-        if (/\Q$cpan_mod/) {
+        if (/\Q$module/) {
             $in_mod_section = 1;
         }
     }
