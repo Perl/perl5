@@ -159,7 +159,6 @@ Test::Harness cpan/Test-Harness/lib/TAP/Parser/YAMLish/Reader.pm 76771092dd2b87a
 Test::Harness cpan/Test-Harness/lib/TAP/Parser/YAMLish/Writer.pm bf1fbfff9720330886651f183959a5db56daeea0
 Test::Harness cpan/Test-Harness/lib/Test/Harness.pm da2d76ba673372da129060c9d0adb8cf0d91f9f7
 autodie cpan/autodie/t/mkdir.t 9e70d2282a3cc7d76a78bf8144fccba20fb37dac
-base dist/base/lib/base.pm 8db115a702f759526b031f90cc572d97086978a6
 bignum cpan/bignum/lib/bigint.pm 56330354995409dab5073ea92d749f8727e265db
 bignum cpan/bignum/lib/bignum.pm e999973f78e6be12282c11bb6328246b31a9576b
 bignum cpan/bignum/lib/bigrat.pm 7fccc9df30e43dbbae6e5ea91b26c8046545c9a9
