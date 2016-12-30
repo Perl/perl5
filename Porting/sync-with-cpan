@@ -305,6 +305,8 @@ if (defined $tarball) {
     die "Tarball $tarball is not a plain file\n" if !-f _;
     $new_file     = $tarball;
     $new_version  = $version // ($new_file =~ /-([0-9._]+(?:-TRIAL[0-9]*)?)\.tar\.gz/) [0];
+    die "Blead and that tarball both have version $new_version of $module\n"
+        if $new_version eq $old_version;
 }
 else {
     #
@@ -328,6 +330,9 @@ else {
         $new_version = $version;
     }
     $new_file = (split '/', $new_path) [-1];
+
+    die "The latest version of $module is $new_version, but blead already has it\n"
+        if $new_version eq $old_version;
 
     my $url = "http://search.cpan.org/CPAN/authors/id/$new_path";
     say "Fetching $url";
