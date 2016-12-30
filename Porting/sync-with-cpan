@@ -203,11 +203,10 @@ sub find_type_f {
 
 # Equivalent of `chmod a-x`
 sub de_exec {
-    for my $filename ( @_ ) {
-        my $mode= (stat $filename)[2] & 0777;
-        if( $mode & 0111 ) { # exec-bit set
-            chmod $mode & 0666, $filename;
-        };
+    my ($filename) = @_;
+    my $mode = (stat $filename)[2] & 0777;
+    if ($mode & 0111) { # exec-bit set
+        chmod $mode & 0666, $filename;
     }
 }
 
