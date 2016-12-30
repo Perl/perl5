@@ -229,11 +229,14 @@ my ($module)  = shift;
 
 my $info = $Modules{$module};
 if (!$info) {
-    # Maybe the user said "Test-Simple" instead of "Test::Simple". See if we
-    # can fix it up.
-    (my $guess = $module) =~ s/-/::/g;
-    $info = $Modules{$guess}
-        or die "Cannot find module $module";
+    # Maybe the user said "Test-Simple" instead of "Test::Simple", or
+    # "IO::Compress" instead of "IO-Compress". See if we can fix it up.
+    my $guess = $module;
+    s/-/::/g or s/::/-/g for $guess;
+    $info = $Modules{$guess} or die <<"EOF";
+Cannot find module $module.
+The available options are listed in the %Modules hash in Porting/Maintainers.pl
+EOF
     say "Guessing you meant $guess instead of $module";
     $module = $guess;
 }
