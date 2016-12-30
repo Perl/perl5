@@ -13683,7 +13683,6 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Test'                  => '1.28_01',
             'Test::Harness'         => '3.36_01',
             'XSLoader'              => '0.22',
-            'base'                  => '2.23_01',
             'bigint'                => '0.42_01',
             'bignum'                => '0.42_01',
             'bigrat'                => '0.42_01',
@@ -14408,7 +14407,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
         }
     },
     5.024001 => {
-        delta_from => 5.024,
+        delta_from => 5.024000,
         changed => {
         },
         removed => {
@@ -15204,7 +15203,7 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'Text::Tabs'            => undef,
     'Text::Wrap'            => undef,
     'Tie::RefHash'          => undef,
-    'Time::Local'           => 'http://rt.cpan.org/Public/Dist/Display.html?Name=Time-Local',
+    'Time::Local'           => 'https://github.com/houseabsolute/Time-Local/issues',
     'Time::Piece'           => undef,
     'Time::Seconds'         => undef,
     'Unicode::Collate'      => undef,
