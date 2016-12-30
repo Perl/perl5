@@ -245,6 +245,15 @@ have some extra changes.
 
 =head3 How to sync a CPAN module with a cpanE<sol> distro
 
+In most cases, once a new version of a distribution shipped with core has been
+uploaded to CPAN, the core version thereof can be synchronized automatically
+with the program F<Porting/sync-with-cpan>.  (But see the comments at the
+beginning of that program.  In particular, it has not yet been exercised on
+Windows as much as it has on Unix-like platforms.)
+
+If, however, F<Porting/sync-with-cpan> does not provide good results, follow
+the steps below.
+
 =over 4
 
 =item *
@@ -325,12 +334,6 @@ If everything is ok, commit the changes.
 
 For entries with a non-simple C<FILES> section, or with a C<MAP>, you
 may have to take more steps than listed above.
-
-F<Porting/sync-with-cpan> is a script that automates most of the steps
-above; but see the comments at the beginning of the file.  In particular,
-it has not yet been exercised on Windows, but will certainly require a set
-of Unix tools such as Cygwin, and steps that run C<make> will need to run
-C<nmake> instead.
 
 =head3 dual-life CPAN module stability
 
