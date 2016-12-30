@@ -270,6 +270,8 @@ if ($cpan_mod =~ /-/ && $cpan_mod !~ /::/) {
 my $new_file;
 my $new_version;
 if (defined $tarball) {
+    die "Tarball $tarball does not exist\n" if !-e $tarball;
+    die "Tarball $tarball is not a plain file\n" if !-f _;
     $new_file     = $tarball;
     $new_version  = $version // ($new_file =~ /-([0-9._]+(?:-TRIAL[0-9]*)?)\.tar\.gz/) [0];
 }
