@@ -186,10 +186,6 @@ use File::Glob qw(:case);
     'base' => {
         'DISTRIBUTION' => 'RGARCIA/base-2.18.tar.gz',
         'FILES'        => q[dist/base],
-        'CUSTOMIZED'   => [
-            # https://rt.perl.org/Ticket/Display.html?id=127834
-            qw( lib/base.pm )
-        ],
     },
 
     'bignum' => {
