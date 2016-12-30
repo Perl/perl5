@@ -238,6 +238,25 @@ if (!$info) {
     $module = $guess;
 }
 
+if ($info->{CUSTOMIZED}) {
+    print <<"EOF";
+$module has a CUSTOMIZED entry in Porting/Maintainers.pl.
+
+This program's behaviour is to copy every CUSTOMIZED file into the version
+of the module being imported. But that might not be the right thing: in some
+cases, the new CPAN version will supersede whatever changes had previously
+been made in blead, so it would be better to import the new CPAN files.
+
+If you've checked that the CUSTOMIZED versions are still correct, you can
+proceed now. Otherwise, you should abort and investigate the situation. If
+the blead customizations are no longer needed, delete the CUSTOMIZED entry
+for $module in Porting/Maintainers.pl (and you'll also need to regenerate
+t/porting/customized.dat in that case; see t/porting/customized.t).
+
+EOF
+    print "Hit return to continue; ^C to abort "; <STDIN>;
+}
+
 my $cpan_mod = @ARGV ? shift : $module;
 
 my  $distribution = $$info {DISTRIBUTION};
