@@ -10,6 +10,8 @@ use strict;
 use warnings;
 use Config;
 
+delete $ENV{PERLDB_OPTS};
+
 BEGIN {
     if (! -c "/dev/null") {
         print "1..0 # Skip: no /dev/null\n";
