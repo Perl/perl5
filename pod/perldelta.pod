@@ -123,10 +123,6 @@ L<Archive::Tar> has been upgraded from version 2.04 to 2.04_01.
 
 =item *
 
-L<base> has been upgraded from version 2.23 to 2.23_01.
-
-=item *
-
 L<bignum> has been upgraded from version 0.42 to 0.42_01.
 
 =item *
