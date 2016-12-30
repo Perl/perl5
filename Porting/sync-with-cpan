@@ -210,6 +210,15 @@ sub de_exec {
     }
 }
 
+# Equivalent of `chmod +w`
+sub make_writable {
+    my ($filename) = @_;
+    my $mode = (stat $filename)[2] & 0777;
+    if (!($mode & 0222)) { # not writable
+        chmod $mode | (0222 & ~umask), $filename;
+    }
+}
+
 sub make {
     my @args= @_;
     unshift @args, "-j$make_jobs" if defined $make_jobs;
@@ -345,8 +354,7 @@ Archive::Tar->extract_archive( $new_file );
 # ensure 'make' will update all files
 my $t= time;
 for my $file (find_type_f($new_dir)) {
-    open(my $fh,'>>',$file) || die "Cannot write $file:$!";
-    close($fh);
+    make_writable($file); # for convenience if the user later edits it
     utime($t,$t,$file);
 };
 
