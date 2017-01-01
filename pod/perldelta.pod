@@ -187,7 +187,7 @@ L<perl5db.pl> has been upgraded from version 1.50 to 1.51.
 
 =item *
 
-L<Storable> has been upgraded from version 2.59 to 2.60.
+L<Storable> has been upgraded from version 2.59 to 2.61.
 
 =item *
 
