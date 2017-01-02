@@ -130,7 +130,7 @@ for file in `$cat .clist`; do
     */*) finc="-I`echo $file | sed 's#/[^/]*$##'`" ;;
     *)   finc= ;;
     esac
-    $echo "Finding dependencies for $filebase$_o."
+    $echo "Finding dependencies for $filebase$_o"
     # Below, we strip out all but preprocessor directives.
     # We have to take care of situations like
     #       #if defined(FOO) BAR   /* comment line 1
