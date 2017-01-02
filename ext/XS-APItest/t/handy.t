@@ -75,8 +75,7 @@ sub get_display_locale_or_skip($$) {
     #
     # The display name is the empty string if not using locale.  Functions
     # with _LC in their name are skipped unless in locale, and functions
-    # without _LC are executed only outside locale.  However, if no locales at
-    # all are on the system, the _LC functions are executed outside locale.
+    # without _LC are executed only outside locale.
 
     my ($locale, $suffix) = @_;
 
@@ -85,10 +84,9 @@ sub get_display_locale_or_skip($$) {
 
     # Here the input is defined, either a locale name or "".  If the test is
     # for not using locales, we want to do the test for non-LC functions,
-    # and skip it for LC ones (except if there are no locales on the system,
-    # we do it for LC ones as if they weren't LC).
+    # and skip it for LC ones.
     if ($locale eq "") {
-        return ("", 0) if $suffix !~ /LC/ || ! defined $base_locale;
+        return ("", 0) if $suffix !~ /LC/;
         return;
     }
 
