@@ -13,7 +13,7 @@ BEGIN {
 
 use utf8;
 
-plan tests => 166;
+plan tests => 214;
 
 # Test this first before we extend the stack with other operations.
 # This caused an asan failure due to a bad write past the end of the stack.
@@ -655,5 +655,49 @@ for ("", nullrocow) {
     $string =~ tr/\N{LATIN SMALL LETTER A WITH ACUTE}/A/;
     is($string, "A", 'tr// of \N{name} works for upper-Latin1');
 }
+
+# RT #130198
+# a tr/// that is cho(m)ped, possibly with an array as arg
+
+{
+    use warnings;
+
+    my ($s, @a);
+
+    my $warn;
+    local $SIG{__WARN__ } = sub { $warn .= "@_" };
+
+    for my $c (qw(chop chomp)) {
+        for my $bind ('', '$s =~ ', '@a =~ ') {
+            for my $arg2 (qw(a b)) {
+                for my $r ('', 'r') {
+                    $warn = '';
+                    # tr/a/b/ modifies its LHS, so if the LHS is an
+                    # array, this should die. The special cases of tr/a/a/
+                    # and tr/a/b/r don't modify their LHS, so instead
+                    # we croak because cho(m)p is trying to modify it.
+                    #
+                    my $exp =
+                        ($r eq '' && $arg2 eq 'b' && $bind =~ /\@a/)
+                            ? qr/Can't modify private array in transliteration/
+                            : qr{Can't modify transliteration \(tr///\) in $c};
+
+                    my $expr = "$c(${bind}tr/a/$arg2/$r);";
+                    eval $expr;
+                    like $@, $exp, "RT #130198 eval: $expr";
+
+                    $exp =
+                        $bind =~ /\@a/
+                         ? qr{^Applying transliteration \(tr///\) to \@a will act on scalar\(\@a\)}
+                         : qr/^$/;
+                    like $warn, $exp, "RT #130198 warn: $expr";
+                }
+            }
+        }
+    }
+
+
+}
+
 
 1;

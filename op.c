@@ -3164,9 +3164,32 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    goto nomod;
 	else if (!(o->op_flags & OPf_KIDS))
 	    break;
+
 	if (o->op_targ != OP_LIST) {
-	    op_lvalue(cBINOPo->op_first, type);
-	    break;
+            OP *sib = OpSIBLING(cLISTOPo->op_first);
+            /* OP_TRANS and OP_TRANSR with argument have a weird optree
+             * that looks like
+             *
+             *   null
+             *      arg
+             *      trans
+             *
+             * compared with things like OP_MATCH which have the argument
+             * as a child:
+             *
+             *   match
+             *      arg
+             *
+             * so handle specially to correctly get "Can't modify" croaks etc
+             */
+
+            if (sib && (sib->op_type == OP_TRANS || sib->op_type == OP_TRANSR))
+            {
+                /* this should trigger a "Can't modify transliteration" err */
+                op_lvalue(sib, type);
+            }
+            op_lvalue(cBINOPo->op_first, type);
+            break;
 	}
 	/* FALLTHROUGH */
     case OP_LIST:
