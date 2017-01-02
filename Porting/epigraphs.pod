@@ -193,6 +193,24 @@ L<Announced on 2016-05-09 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   To find that the utmost reward
     Of daring should be still to dare.
 
+=head2 v5.24.1-RC5 - John Milton, ed. Gordon Campbell, "Paradise Regained", Book IV
+
+L<Announced on 2017-01-02 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2017/01/msg242016.html>
+
+  Thus passed the night so foul, till Morning fair
+  Came forth with pilgrim steps, in amice grey;
+  Who with her radiant finger stilled the roar
+  Of thunder, chased the clouds, and laid the winds,
+  And grisly spectres, which the fiend had raised
+  To tempt the Son of God with terrors dire.
+  And now the sun with more effectual beams
+  Had cheered the face of earth, and dried the wet
+  From drooping plant, or dropping tree; the birds,
+  Who all things now behold more fresh and green,
+  After a night of storm so ruinous,
+  Cleared up their choicest notes in bush and spray,
+  To gratulate the sweet return of morn.
+
 =head2 v5.24.1-RC4 - John Milton, ed. Gordon Campbell, "Paradise Lost", Book II
 
 L<Announced on 2016-10-12 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2016/10/msg240224.html>
@@ -662,6 +680,30 @@ L<Announced on 2015-06-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   To be just like them
   They sing while you slave and I just get bored
   I ain't gonna work on Maggie's farm no more
+
+=head2 v5.22.3-RC5 - John Milton, ed. Gordon Campbell, "Paradise Regained", Book II
+
+L<Announced on 2017-01-02 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2017/01/msg242017.html>
+
+  Thus wore out night; and now the herald lark
+  Left his ground-nest, high towering to descry
+  The Morn's approach, and greet her with his song;
+  As lightly from his grassy couch up rose
+  Our Saviour, and found all was but a dream;
+  Fasting he went to sleep, and fasting waked.
+  Up to a hill anon his steps he reared,
+  From whose high top to ken the prospect round,
+  If cottage were in view, sheep-cote, or herd;
+  But cottage, herd, or sheep-cote, none he saw --
+  Only in a bottom saw a pleasant grove,
+  With chant of tuneful birds resounding loud;
+  Thither he bent his way, determined there
+  To rest at noon, and entered soon the shade,
+  High-roofed and walks beneath, and alleys brown,
+  That opened in the midst a woody scene;
+  Nature's own work it seemed (Nature taught Art),
+  And, to a superstitious eye, the haunt
+  Of wood-gods and wood-nymphs.
 
 =head2 v5.22.3-RC4 - John Milton, ed. Gordon Campbell, "Paradise Lost", Book II
 
