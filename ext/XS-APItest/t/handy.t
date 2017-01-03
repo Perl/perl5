@@ -113,6 +113,7 @@ sub try_malforming($$$)
     # various circumstances.
 
     my ($i, $function, $using_locale) = @_;
+    # $i is unicode code point;
 
     # Single bytes can't be malformed
     return 0 if $i < ((ord "A" == 65) ? 128 : 160);
@@ -216,7 +217,7 @@ foreach my $name (sort keys %properties, 'octal') {
            or diag("@warnings");
         undef @warnings;
 
-        my $matches = search_invlist(\@invlist, $i);
+        my $matches = search_invlist(\@invlist, $j);
         if (! defined $matches) {
             $matches = 0;
         }
@@ -226,7 +227,7 @@ foreach my $name (sort keys %properties, 'octal') {
 
         my $ret;
         my $char_name = get_charname($j);
-        my $display_name = sprintf "\\x{%02X, %s}", $i, $char_name;
+        my $display_name = sprintf "\\x{%02X, %s}", $j, $char_name;
         my $display_call = "is${function}( $display_name )";
 
         foreach my $suffix ("", "_A", "_L1", "_LC", "_uni", "_uvchr",
@@ -269,18 +270,18 @@ foreach my $name (sort keys %properties, 'octal') {
                 if ($suffix !~ /utf8/) {    # _utf8 has to handled specially
                     my $display_call
                        = "is${function}$suffix( $display_name )$display_locale";
-                    $ret = truth eval "test_is${function}$suffix($i)";
+                    $ret = truth eval "test_is${function}$suffix($j)";
                     if (is ($@, "", "$display_call didn't give error")) {
                         my $truth = $matches;
                         if ($truth) {
 
                             # The single byte functions are false for
                             # above-Latin1
-                            if ($i >= 256) {
+                            if ($j >= 256) {
                                 $truth = 0
                                         if $suffix=~ / ^ ( _A | _L [1C] )? $ /x;
                             }
-                            elsif (   utf8::native_to_unicode($i) >= 128
+                            elsif (   $i >= 128
                                    && $name ne 'quotemeta')
                             {
 
@@ -298,14 +299,14 @@ foreach my $name (sort keys %properties, 'octal') {
                     }
                 }
                 else {  # _utf8 suffix
-                    my $char = chr($i);
+                    my $char = chr($j);
                     utf8::upgrade($char);
                     $char = quotemeta $char if $char eq '\\' || $char eq "'";
                     my $truth;
                     if (   $suffix =~ /LC/
                         && ! $locale_is_utf8
-                        && $i < 256
-                        && utf8::native_to_unicode($i) >= 128)
+                        && $j < 256
+                        && $i >= 128)
                     {   # The C-locale _LC function returns FALSE for Latin1
                         # above ASCII
                         $truth = 0;
@@ -439,7 +440,7 @@ foreach my $name (sort keys %to_properties) {
 
         my $ret;
         my $char_name = get_charname($j);
-        my $display_name = sprintf "\\N{U+%02X, %s}", $i, $char_name;
+        my $display_name = sprintf "\\N{U+%02X, %s}", $j, $char_name;
 
         foreach my $suffix ("", "_L1", "_LC") {
 
@@ -469,10 +470,10 @@ foreach my $name (sort keys %to_properties) {
                 $ret = eval "test_to${function}$suffix($j)";
                 if (is ($@, "", "$display_call didn't give error")) {
                     my $should_be;
-                    if ($i > 255) {
+                    if ($j > 255) {
                         $should_be = $j;
                     }
-                    elsif (    $i > 127
+                    elsif (     $i > 127
                             && (   $suffix eq ""
                                 || ($suffix eq "_LC" && ! $locale_is_utf8)))
                     {
