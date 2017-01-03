@@ -9323,7 +9323,14 @@ SV is set to 1.  If C<len> is zero, Perl will compute the length using
 C<strlen()>, (which means if you use this option, that C<s> can't have embedded
 C<NUL> characters and has to have a terminating C<NUL> byte).
 
-For efficiency, consider using C<newSVpvn> instead.
+This function can cause reliability issues if you are likely to pass in
+empty strings that are not null terminated, because it will run
+strlen on the string and potentially run past valid memory.
+
+Using L</newSVpvn> is a safer alternative for non C<NUL> terminated strings.
+For string literals use L</newSVpvs> instead.  This function will work fine for
+C<NUL> terminated strings, but if you want to avoid the if statement on whether
+to call C<strlen> use C<newSVpvn> instead (calling C<strlen> yourself).
 
 =cut
 */
