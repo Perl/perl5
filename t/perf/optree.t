@@ -13,13 +13,15 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan 59;
+plan 267;
 
 use v5.10; # state
 use B qw(svref_2object
          OPpASSIGN_COMMON_SCALAR
          OPpASSIGN_COMMON_RC1
          OPpASSIGN_COMMON_AGG
+         OPpTRUEBOOL
+         OPpMAYBE_TRUEBOOL
       );
 
 
@@ -193,3 +195,230 @@ for(['@pkgary'      , '@_'       ],
 # stringify with join kid --> join
 is svref_2object(sub { "@_" })->ROOT->first->last->name, 'join',
   'qq"@_" optimised from stringify(join(...)) to join(...)';
+
+
+# Check that certain ops, when in boolean context, have the
+# right private "is boolean" or "maybe boolean" flags set.
+#
+# A maybe flag is set when the context at the end of a chain of and/or/dor
+# ops isn't known till runtime, e.g.
+#   sub f { ....; ((%h || $x) || $y)) }
+# If f() is called in void context, then %h can return a boolean value;
+# if in scalar context, %h must return a key count.
+#
+# With (op && other), its ok to treat op as in bool cxt even when the &&
+# is in scalar cxt, as long as whatever op returns as a false boolean value
+# matches what it returns as a false scalar value (IV(0) in the case of
+# rv2hv etc). This is because in (A && B), A is returned only when A is
+# false.
+
+for my $ops (
+    #  op       code           op path   flag         maybe flag
+    [ 'rv2hv', '%pkg',         [],       OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
+    [ 'rv2hv', 'scalar(%pkg)', [0],      OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
+    [ 'padhv', '%lex',         [],       OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
+    [ 'padhv', 'scalar(%lex)', [0],      OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
+) {
+    my ($op_name, $op_code, $post_op_path, $bool_flag, $maybe_flag) = @$ops;
+
+    for my $test (
+        # 1st column: what to expect for each $context (void, scalar, unknown),
+        #                0: expect no flag
+        #                1: expect bool flag
+        #                2: expect maybe bool flag
+        #                9: skip test
+        #  2nd column: if true, code can be put in scalar context 
+        #  3rd column: path though the op subtree to the flagged op:
+        #                0 is first sibling, 1 is second sibling etc.
+        #                Will have @$post_op_path from above appended.
+        #  4rd column: code to execute: %s holds the code for the op
+        #
+        # [V S U]  PATH   CODE
+
+        # INNER PLAIN
+
+        [ [0,0,0], [],        '%s'                               ],
+        [ [1,9,1], [0,0],     'if (%s) {$x}'                     ],
+        [ [1,9,1], [0,0],     'if (%s) {$x} else {$y}'           ],
+        [ [1,9,2], [0,0],     'unless (%s) {$x}'                 ],
+
+        # INNER NOT
+
+        [ [1,1,1], [0],       '!%s'                              ],
+        #XXX should be bool, gives void
+        #XXX[ [1,9,1], [0,0,0],   'if (!%s) {$x}'                ],
+        [ [1,9,1], [0,0,0],   'if (!%s) {$x} else {$y}'          ],
+        #XXX should be bool, gives void
+        #XXX[ [1,9,1], [0,0,0],   'unless (!%s) {$x}'            ],
+
+        # INNER COND
+
+        [ [1,1,1], [0,0,],    '%s ? $p : $q'                     ],
+        [ [1,9,1], [0,0,0,0], 'if (%s ? $p : $q) {$x}'           ],
+        [ [1,9,1], [0,0,0,0], 'if (%s ? $p : $q) {$x} else {$y}' ],
+        [ [1,9,1], [0,0,0,0], 'unless (%s ? $p : $q) {$x}'       ],
+
+
+        # INNER OR LHS
+
+        [ [1,0,2], [0,0],     '%s || $x'                         ],
+        #XXX the not should always force bool cxt
+        #XXX[ [1,1,1], [0,0,0],   '!(%s || $x)'                  ],
+        [ [1,0,2], [0,1,0,0], '$y && (%s || $x)'                 ],
+        #XXX should be bool, gives void/maybe
+        #XXX[ [1,9,1], [0,0,0,0], 'if (%s || $x) {$x}'           ],
+        #XXX should be bool, gives void/maybe
+        #XXX[ [1,9,1], [0,0,0,0], 'if (%s || $x) {$x} else {$y}' ],
+        #XXX should be bool/maybe, gives void
+        #XXX[ [1,9,2], [0,0,0,0], 'unless (%s || $x) {$x}'       ],
+
+        # INNER OR RHS
+
+        #XXX RHS of && is in void cxt, not bool cxt
+        #XXX [ [0,0,0], [0,1], '$x || %s'                        ],
+        #XXX the not should always force bool cxt
+        #XXX[ [1,1,1], [0,0,1],   '!($x || %s)'                  ],
+        #XXX RHS of && is in void cxt, not bool cxt
+        #XXX [ [0,0,0], [0,1,0,1], '$y && ($x || %s)'            ],
+        #XXX should be bool, gives void
+        #XXX[ [1,9,1], [0,0,0,1], 'if ($x || %s) {$x}'           ],
+        #XXX should be bool, gives void
+        #XXX[ [1,9,1], [0,0,0,1], 'if ($x || %s) {$x} else {$y}' ],
+        #XXX should be bool/maybe, gives void
+        #XXX[ [1,9,2], [0,0,0,1], 'unless ($x || %s) {$x}'       ],
+
+        # INNER DOR LHS
+
+        [ [1,0,2], [0,0],     '%s // $x'                         ],
+        #XXX the not should always force bool cxt
+        #XXX[ [1,1,1], [0,0,0],   '!(%s // $x)'                  ],
+        [ [1,0,2], [0,1,0,0], '$y && (%s // $x)'                 ],
+        #XXX should be bool, gives maybe
+        #XXX[ [1,9,1], [0,0,0,0], 'if (%s // $x) {$x}'           ],
+        [ [1,9,2], [0,0,0,0], 'unless (%s // $x) {$x}'           ],
+        #XXX should be bool, gives maybe
+        #XXX[ [1,9,1], [0,0,0,0], 'if (%s // $x) {$x}'           ],
+        #XXX should be bool, gives void
+        #XXX[ [1,9,1], [0,0,0,0], 'if (%s // $x) {$x} else {$y}' ],
+        #XXX should be bool/maybe, gives void
+        #XXX[ [1,9,2], [0,0,0,0], 'unless (%s // $x) {$x}'       ],
+
+        # INNER DOR RHS
+
+        #XXX RHS of && is in void cxt, not bool cxt
+        #XXX [ [0,0,0], [0,1], '$x // %s'                        ],
+        #XXX the not should always force bool cxt
+        #XXX[ [1,1,1], [0,0,1],   '!($x // %s)'                  ],
+        #XXX RHS of && is in void cxt, not bool cxt
+        #XXX [ [0,0,0], [0,1,0,1], '$y && ($x // %s)'            ],
+        #XXX should be bool, gives void
+        #XXX[ [1,9,1], [0,0,0,1], 'if ($x // %s) {$x}'           ],
+        #XXX should be bool, gives void
+        #XXX[ [1,9,1], [0,0,0,1], 'if ($x // %s) {$x} else {$y}' ],
+        #XXX should be bool/maybe, gives void
+        #XXX[ [1,9,2], [0,0,0,1], 'unless ($x // %s) {$x}'       ],
+
+        # INNER AND LHS
+
+        [ [1,1,1], [0,0],     '%s && $x'                         ],
+        [ [1,1,1], [0,0,0],   '!(%s && $x)'                      ],
+        [ [1,1,1], [0,1,0,0], '$y || (%s && $x)'                 ],
+        [ [1,9,1], [0,0,0,0], 'if (%s && $x) {$x}'               ],
+        [ [1,9,1], [0,0,0,0], 'if (%s && $x) {$x} else {$y}'     ],
+        [ [1,9,1], [0,0,0,0], 'unless (%s && $x) {$x}'           ],
+
+        # INNER AND RHS
+
+        #XXX RHS of && is in void cxt, not bool cxt
+        #XXX [ [0,0,0], [0,1], '$x && %s'                        ],
+        #XXX the not should always force bool cxt
+        #XXX[ [1,1,1], [0,0,1],   '!($x && %s)'                  ],
+        #XXX RHS of || is in void cxt, not bool cxt
+        #XXX [ [0,0,0], [0,1,0,1], '$y || ($x && %s)'            ],
+        #XXX should be bool, gives void
+        #XXX[ [1,9,1], [0,0,0,1], 'if ($x && %s) {$x}'           ],
+        #XXX should be bool, gives void
+        #XXX[ [1,9,1], [0,0,0,1], 'if ($x && %s) {$x} else {$y}' ],
+        #XXX should be bool/maybe, gives void
+        #XXX[ [1,9,2], [0,0,0,1], 'unless ($x && %s) {$x}'       ],
+
+
+
+
+
+    ) {
+        my ($expects, $op_path, $code_fmt) = @$test;
+
+        for my $context (0,1,2) {
+            # 0: void
+            # 1: scalar
+            # 2: unknown
+            # 9: skip test (principally if() can't be in scalar context)
+
+            next if $expects->[$context] == 9;
+
+            my $base_code = sprintf $code_fmt, $op_code;
+            my $code = $base_code;
+            my @op_path = @$op_path;
+            push @op_path, @$post_op_path;
+
+            # where to find the expression in the top-level lineseq
+            my $seq_offset = -1;
+
+            if ($context == 0) {
+                $seq_offset -= 2;
+                $code .= "; 1";
+            }
+            elsif ($context == 1) {
+                $code = "\$r = ($code)";
+                unshift @op_path, 0;
+            }
+
+
+            my $sub;
+            {
+                our (%pkg);
+                my  (%lex, $p, $q, $r, $x, $y);
+
+                no warnings 'void';
+                $sub = eval "sub { $code }"
+                    or die
+                        "eval'$code' failed: this test needs to be rewritten;\n"
+                        . "Errors were:\n$@";
+            }
+
+            # find the expression subtree in the main lineseq of the sub
+            my $expr = svref_2object($sub)->ROOT->first;
+            my @ops;
+            my $next = $expr->first;
+            while ($$next) {
+                push @ops, $next;
+                $next = $next->sibling;
+            }
+            $expr = $ops[$seq_offset];
+
+            # search through the expr subtree looking for the named op -
+            # this assumes that for all the code examples above, the
+            # op is always in the LH branch
+            while (defined (my $p = shift @op_path)) {
+                $expr = $expr->first;
+                $expr = $expr->sibling while $p--;
+            }
+
+            if (!$expr || $expr->name ne $op_name) {
+                die "Can't find $op_name op in optree for '$code'; "
+                     . "this test needs to be rewritten" 
+            }
+
+            my $exp = $expects->[$context];
+            $exp =   $exp == 0 ? 0
+                   : $exp == 1 ? $bool_flag
+                   :             $maybe_flag;
+
+            my $got = ($expr->private & ($bool_flag | $maybe_flag));
+            my $cxt_name = ('void   ', 'scalar ', 'unknown')[$context];
+            is $got, $exp,  "boolean: $op_name $cxt_name '$base_code'";
+        }
+    }
+}
+
