@@ -13406,9 +13406,22 @@ S_check_for_bool_cxt(pTHX_ OP*o, U8 bool_flag, U8 maybe_flag)
         case OP_SCALAR:
             break;
 
-        /* these two never leave the original value on the stack */
+        /* these two consume the stack argument in the scalar case,
+         * and treat it as a boolean in the non linenumber case */
+        case OP_FLIP:
+        case OP_FLOP:
+            if (   ((lop->op_flags & OPf_WANT) == OPf_WANT_LIST)
+                || (lop->op_private & OPpFLIP_LINENUM))
+            {
+                lop = NULL;
+                break;
+            }
+            /* FALLTHROUGH */
+        /* these never leave the original value on the stack */
         case OP_NOT:
+        case OP_XOR:
         case OP_COND_EXPR:
+        case OP_GREPWHILE:
         /* AND may leave its original arg on the stack, but only if it's
          * false. As long as o returns a value which is both false
          * and usable in scalar context, it's safe.
@@ -13438,6 +13451,7 @@ S_check_for_bool_cxt(pTHX_ OP*o, U8 bool_flag, U8 maybe_flag)
 
         default:
             lop = NULL;
+            break;
         }
 
         if (lop)
