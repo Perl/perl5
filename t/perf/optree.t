@@ -13,7 +13,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan 267;
+plan 543;
 
 use v5.10; # state
 use B qw(svref_2object
@@ -227,13 +227,12 @@ for my $ops (
         #                1: expect bool flag
         #                2: expect maybe bool flag
         #                9: skip test
-        #  2nd column: if true, code can be put in scalar context 
-        #  3rd column: path though the op subtree to the flagged op:
-        #                0 is first sibling, 1 is second sibling etc.
+        #  2nd column: path though the op subtree to the flagged op:
+        #                0 is first child, 1 is second child etc.
         #                Will have @$post_op_path from above appended.
-        #  4rd column: code to execute: %s holds the code for the op
+        #  3rd column: code to execute: %s holds the code for the op
         #
-        # [V S U]  PATH   CODE
+        # [V S U]  PATH        CODE
 
         # INNER PLAIN
 
@@ -245,11 +244,9 @@ for my $ops (
         # INNER NOT
 
         [ [1,1,1], [0],       '!%s'                              ],
-        #XXX should be bool, gives void
-        #XXX[ [1,9,1], [0,0,0],   'if (!%s) {$x}'                ],
+        [ [1,9,1], [0,0,0],   'if (!%s) {$x}'                    ],
         [ [1,9,1], [0,0,0],   'if (!%s) {$x} else {$y}'          ],
-        #XXX should be bool, gives void
-        #XXX[ [1,9,1], [0,0,0],   'unless (!%s) {$x}'            ],
+        [ [1,9,1], [0,0,0],   'unless (!%s) {$x}'                ],
 
         # INNER COND
 
@@ -262,61 +259,40 @@ for my $ops (
         # INNER OR LHS
 
         [ [1,0,2], [0,0],     '%s || $x'                         ],
-        #XXX the not should always force bool cxt
-        #XXX[ [1,1,1], [0,0,0],   '!(%s || $x)'                  ],
+        [ [1,1,1], [0,0,0],   '!(%s || $x)'                      ],
         [ [1,0,2], [0,1,0,0], '$y && (%s || $x)'                 ],
-        #XXX should be bool, gives void/maybe
-        #XXX[ [1,9,1], [0,0,0,0], 'if (%s || $x) {$x}'           ],
-        #XXX should be bool, gives void/maybe
-        #XXX[ [1,9,1], [0,0,0,0], 'if (%s || $x) {$x} else {$y}' ],
-        #XXX should be bool/maybe, gives void
-        #XXX[ [1,9,2], [0,0,0,0], 'unless (%s || $x) {$x}'       ],
+        [ [1,9,1], [0,0,0,0], 'if (%s || $x) {$x}'               ],
+        [ [1,9,1], [0,0,0,0], 'if (%s || $x) {$x} else {$y}'     ],
+        [ [1,9,2], [0,0,0,0], 'unless (%s || $x) {$x}'           ],
 
         # INNER OR RHS
 
-        #XXX RHS of && is in void cxt, not bool cxt
-        #XXX [ [0,0,0], [0,1], '$x || %s'                        ],
-        #XXX the not should always force bool cxt
-        #XXX[ [1,1,1], [0,0,1],   '!($x || %s)'                  ],
-        #XXX RHS of && is in void cxt, not bool cxt
-        #XXX [ [0,0,0], [0,1,0,1], '$y && ($x || %s)'            ],
-        #XXX should be bool, gives void
-        #XXX[ [1,9,1], [0,0,0,1], 'if ($x || %s) {$x}'           ],
-        #XXX should be bool, gives void
-        #XXX[ [1,9,1], [0,0,0,1], 'if ($x || %s) {$x} else {$y}' ],
-        #XXX should be bool/maybe, gives void
-        #XXX[ [1,9,2], [0,0,0,1], 'unless ($x || %s) {$x}'       ],
+        [ [0,0,0], [0,1],     '$x || %s'                         ],
+        [ [1,1,1], [0,0,1],   '!($x || %s)'                      ],
+        [ [0,0,0], [0,1,0,1], '$y && ($x || %s)'                 ],
+        [ [1,9,1], [0,0,0,1], 'if ($x || %s) {$x}'               ],
+        [ [1,9,1], [0,0,0,1], 'if ($x || %s) {$x} else {$y}'     ],
+        [ [1,9,2], [0,0,0,1], 'unless ($x || %s) {$x}'           ],
 
         # INNER DOR LHS
 
         [ [1,0,2], [0,0],     '%s // $x'                         ],
-        #XXX the not should always force bool cxt
-        #XXX[ [1,1,1], [0,0,0],   '!(%s // $x)'                  ],
+        [ [1,1,1], [0,0,0],   '!(%s // $x)'                      ],
         [ [1,0,2], [0,1,0,0], '$y && (%s // $x)'                 ],
-        #XXX should be bool, gives maybe
-        #XXX[ [1,9,1], [0,0,0,0], 'if (%s // $x) {$x}'           ],
+        [ [1,9,1], [0,0,0,0], 'if (%s // $x) {$x}'               ],
         [ [1,9,2], [0,0,0,0], 'unless (%s // $x) {$x}'           ],
-        #XXX should be bool, gives maybe
-        #XXX[ [1,9,1], [0,0,0,0], 'if (%s // $x) {$x}'           ],
-        #XXX should be bool, gives void
-        #XXX[ [1,9,1], [0,0,0,0], 'if (%s // $x) {$x} else {$y}' ],
-        #XXX should be bool/maybe, gives void
-        #XXX[ [1,9,2], [0,0,0,0], 'unless (%s // $x) {$x}'       ],
+        [ [1,9,1], [0,0,0,0], 'if (%s // $x) {$x}'               ],
+        [ [1,9,1], [0,0,0,0], 'if (%s // $x) {$x} else {$y}'     ],
+        [ [1,9,2], [0,0,0,0], 'unless (%s // $x) {$x}'           ],
 
         # INNER DOR RHS
 
-        #XXX RHS of && is in void cxt, not bool cxt
-        #XXX [ [0,0,0], [0,1], '$x // %s'                        ],
-        #XXX the not should always force bool cxt
-        #XXX[ [1,1,1], [0,0,1],   '!($x // %s)'                  ],
-        #XXX RHS of && is in void cxt, not bool cxt
-        #XXX [ [0,0,0], [0,1,0,1], '$y && ($x // %s)'            ],
-        #XXX should be bool, gives void
-        #XXX[ [1,9,1], [0,0,0,1], 'if ($x // %s) {$x}'           ],
-        #XXX should be bool, gives void
-        #XXX[ [1,9,1], [0,0,0,1], 'if ($x // %s) {$x} else {$y}' ],
-        #XXX should be bool/maybe, gives void
-        #XXX[ [1,9,2], [0,0,0,1], 'unless ($x // %s) {$x}'       ],
+        [ [0,0,0], [0,1],     '$x // %s'                         ],
+        [ [1,1,1], [0,0,1],   '!($x // %s)'                      ],
+        [ [0,0,0], [0,1,0,1], '$y && ($x // %s)'                 ],
+        [ [1,9,1], [0,0,0,1], 'if ($x // %s) {$x}'               ],
+        [ [1,9,1], [0,0,0,1], 'if ($x // %s) {$x} else {$y}'     ],
+        [ [1,9,2], [0,0,0,1], 'unless ($x // %s) {$x}'           ],
 
         # INNER AND LHS
 
@@ -329,22 +305,12 @@ for my $ops (
 
         # INNER AND RHS
 
-        #XXX RHS of && is in void cxt, not bool cxt
-        #XXX [ [0,0,0], [0,1], '$x && %s'                        ],
-        #XXX the not should always force bool cxt
-        #XXX[ [1,1,1], [0,0,1],   '!($x && %s)'                  ],
-        #XXX RHS of || is in void cxt, not bool cxt
-        #XXX [ [0,0,0], [0,1,0,1], '$y || ($x && %s)'            ],
-        #XXX should be bool, gives void
-        #XXX[ [1,9,1], [0,0,0,1], 'if ($x && %s) {$x}'           ],
-        #XXX should be bool, gives void
-        #XXX[ [1,9,1], [0,0,0,1], 'if ($x && %s) {$x} else {$y}' ],
-        #XXX should be bool/maybe, gives void
-        #XXX[ [1,9,2], [0,0,0,1], 'unless ($x && %s) {$x}'       ],
-
-
-
-
+        [ [0,0,0], [0,1],     '$x && %s'                         ],
+        [ [1,1,1], [0,0,1],   '!($x && %s)'                      ],
+        [ [0,0,0], [0,1,0,1], '$y || ($x && %s)'                 ],
+        [ [1,9,1], [0,0,0,1], 'if ($x && %s) {$x}'               ],
+        [ [1,9,1], [0,0,0,1], 'if ($x && %s) {$x} else {$y}'     ],
+        [ [1,9,2], [0,0,0,1], 'unless ($x && %s) {$x}'           ],
 
     ) {
         my ($expects, $op_path, $code_fmt) = @$test;

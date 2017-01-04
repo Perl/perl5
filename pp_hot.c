@@ -1039,6 +1039,8 @@ PP(pp_rv2av)
 	      || (  PL_op->op_private & OPpMAYBE_TRUEBOOL
 		 && block_gimme() == G_VOID  ))
 	      && (!SvRMAGICAL(sv) || !mg_find(sv, PERL_MAGIC_tied)))
+            /* use newSViv(0) rather than PL_sv_no - see OP_AND comment in
+             * S_check_for_bool_cxt() */
 	    SETs(HvUSEDKEYS(sv) ? &PL_sv_yes : sv_2mortal(newSViv(0)));
 	else if (gimme == G_SCALAR) {
 	    dTARG;
