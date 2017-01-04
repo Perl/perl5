@@ -14184,16 +14184,16 @@ Perl_rpeep(pTHX_ OP *o)
             /* FALLTHROUGH */
 	case OP_PADAV:
 	case OP_PADSV:
-	/* Skip over state($x) in void context.  */
-	if (oldop && o->op_private == (OPpPAD_STATE|OPpLVAL_INTRO)
-	 && (o->op_flags & OPf_WANT) == OPf_WANT_VOID)
-	{
-	    oldop->op_next = o->op_next;
-	    goto redo_nextstate;
-	}
-	if (o->op_type != OP_PADAV)
-	    break;
-	/* FALLTHROUGH */
+            /* Skip over state($x) in void context.  */
+            if (oldop && o->op_private == (OPpPAD_STATE|OPpLVAL_INTRO)
+             && (o->op_flags & OPf_WANT) == OPf_WANT_VOID)
+            {
+                oldop->op_next = o->op_next;
+                goto redo_nextstate;
+            }
+            if (o->op_type != OP_PADAV)
+                break;
+            /* FALLTHROUGH */
 	case OP_GV:
 	    if (o->op_type == OP_PADAV || o->op_next->op_type == OP_RV2AV) {
 		OP* const pop = (o->op_type == OP_PADAV) ?
