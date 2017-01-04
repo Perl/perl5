@@ -548,6 +548,8 @@ deparsed_output(pTHX_ SV *val)
 
     FREETMPS;
 
+    PUTBACK;
+
     return text;
 }
 
