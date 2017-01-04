@@ -105,6 +105,14 @@ case "$osvers" in
 	;;
 esac
 
+case "$osvers" in
+10.*)
+	# dtrace on 10.x needs libelf symbols, but we don't know if the
+	# user is going to request usedtrace and there's no .cbu for usedtrace
+	libswanted="$libswanted elf"
+	;;
+esac
+
 # Dynamic Loading flags have not changed much, so they are separated
 # out here to avoid duplicating them everywhere.
 case "$osvers" in
