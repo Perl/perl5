@@ -3,6 +3,9 @@
 # Use B to test that optimisations are not inadvertently removed,
 # by examining particular nodes in the optree.
 
+use warnings;
+use strict;
+
 BEGIN {
     chdir 't';
     require './test.pl';
@@ -80,11 +83,18 @@ for my $test (
     [ "---", '@a = (split(//, @a), 1)',         'split(@a)'   ],
     [ "--A", 'my @a; my $ar = @a; @a = (@$ar = split())', 'a/ar split'  ],
 ) {
+
     my ($exp, $code, $desc) = @$test;
-    my $sub = eval "sub { $code }"
-        or die
-            "aassign eval('$code') failed: this test needs to be rewritten:\n"
-            . $@;
+    my $sub;
+    {
+        # package vars used in code snippets
+        our (@a, %a, @b, %b, $c, $p, $q, $x, $y, @y, @z);
+
+        $sub = eval "sub { $code }"
+            or die
+                "aassign eval('$code') failed: this test needs"
+                . "to be rewritten:\n$@"
+    }
 
     my $last_expr = svref_2object($sub)->ROOT->first->last;
     if ($last_expr->name ne 'aassign') {
