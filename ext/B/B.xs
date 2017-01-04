@@ -2064,7 +2064,7 @@ SV*
 HASH(h)
 	B::RHE h
     CODE:
-	RETVAL = newRV( (SV*)cophh_2hv(h, 0) );
+	RETVAL = newRV_noinc( (SV*)cophh_2hv(h, 0) );
     OUTPUT:
 	RETVAL
 

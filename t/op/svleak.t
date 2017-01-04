@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 138;
+plan tests => 139;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -559,4 +559,14 @@ EOF
     my $b = 'aa';
     sub f { $a =~ /[^.]+$b/; }
     ::leak(2, 0, \&f, q{use re 'strict' shouldn't leak warning strings});
+}
+
+# check that B::RHE->HASH does not leak
+{
+    package BHINT;
+    sub foo {}
+    require B;
+    my $op = B::svref_2object(\&foo)->ROOT->first;
+    sub lk { { my $d = $op->hints_hash->HASH } }
+    ::leak(3, 0, \&lk, q!B::RHE->HASH shoudln't leak!);
 }
