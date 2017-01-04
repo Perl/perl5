@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 827;  # Update this when adding/deleting tests.
+plan tests => 828;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1860,6 +1860,14 @@ EOF_CODE
             like($got[5],qr/Error: Infinite recursion via empty pattern/,
            "empty pattern in regex codeblock: produced the right exception message" );
         }
+    {
+        # [perl #130495] /x comment skipping stopped a byte short, leading
+        # to assertion failure or 'malformed utf-8 character" warning
+        fresh_perl_is(
+            "use utf8; m{a#\x{124}}x", '', {},
+            '[perl #130495] utf-8 character at end of /x comment should not misparse',
+        );
+    }
 } # End of sub run_tests
 
 1;

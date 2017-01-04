@@ -3257,7 +3257,7 @@ S_scan_const(pTHX_ char *start)
                  && !in_charclass
                  && ((PMOP*)PL_lex_inpat)->op_pmflags & RXf_PMf_EXTENDED)
         {
-	    while (s+1 < send && *s != '\n')
+	    while (s < send && *s != '\n')
 		*d++ = *s++;
 	}
 
@@ -3297,6 +3297,11 @@ S_scan_const(pTHX_ char *start)
 	}
 
 	/* End of else if chain - OP_TRANS rejoin rest */
+
+        if (UNLIKELY(s >= send)) {
+            assert(s == send);
+            break;
+        }
 
 	/* backslashes */
 	if (*s == '\\' && s+1 < send) {
