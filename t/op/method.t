@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 150);
+plan(tests => 151);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -703,6 +703,13 @@ SKIP: {
     fresh_perl_is('Unknown->import() * Unknown->unimport(); print "ok\n"', "ok\n", {},
                   "check unknown import() methods don't corrupt the stack");
 }
+
+# RT#130496: assertion failure when looking for a method of undefined name
+# on an unblessed reference
+fresh_perl_is('eval { {}->$x }; print $@;',
+              "Can't call method \"\" on unblessed reference at - line 1.",
+              {},
+              "no crash with undef method name on unblessed ref");
 
 __END__
 #FF9900

@@ -4465,7 +4465,7 @@ S_opmethod_stash(pTHX_ SV* meth)
 		     && SvOBJECT(ob))))
     {
 	Perl_croak(aTHX_ "Can't call method \"%" SVf "\" on unblessed reference",
-		   SVfARG((SvPVX(meth) == PL_isa_DOES)
+		   SVfARG((SvPOK(meth) && SvPVX(meth) == PL_isa_DOES)
                                         ? newSVpvs_flags("DOES", SVs_TEMP)
                                         : meth));
     }
