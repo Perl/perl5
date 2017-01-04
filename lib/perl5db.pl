@@ -1533,14 +1533,6 @@ We then determine what the console should be on various systems:
         undef $console;
     }
 
-=item * Unix - use F</dev/tty>.
-
-=cut
-
-    elsif ( -e "/dev/tty" ) {
-        $console = "/dev/tty";
-    }
-
 =item * Windows or MSDOS - use C<con>.
 
 =cut
@@ -1563,6 +1555,17 @@ We then determine what the console should be on various systems:
 
     elsif ($^O eq 'VMS') {
         $console = 'sys$command';
+    }
+
+# Keep this penultimate, on the grounds that it satisfies a wide variety of
+# Unix-like systems that would otherwise need to be identified individually.
+
+=item * Unix - use F</dev/tty>.
+
+=cut
+
+    elsif ( -e "/dev/tty" ) {
+        $console = "/dev/tty";
     }
 
 # Keep this last.
