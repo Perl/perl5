@@ -10101,20 +10101,9 @@ Perl__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b)
         }
     }
 
-    /* Make sure that the lengths are the same, as well as the final element
-     * before looping through the remainder.  (Thus we test the length, final,
-     * and first elements right off the bat) */
-    if (len_a != len_b || array_a[len_a-1] != array_b[len_a-1]) {
-        retval = FALSE;
-    }
-    else for (i = 0; i < len_a - 1; i++) {
-        if (array_a[i] != array_b[i]) {
-            retval = FALSE;
-            break;
-        }
-    }
+    return    len_a == len_b
+           && memEQ(array_a, array_b, len_a * sizeof(array_a[0]));
 
-    return retval;
 }
 #endif
 
