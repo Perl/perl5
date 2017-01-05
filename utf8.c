@@ -146,7 +146,7 @@ For details, see the description for L</uvchr_to_utf8_flags>.
 #define MASK    UTF_CONTINUATION_MASK
 
 U8 *
-Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
+Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, const UV flags)
 {
     PERL_ARGS_ASSERT_UVOFFUNI_TO_UTF8_FLAGS;
 
