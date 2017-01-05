@@ -2543,7 +2543,7 @@ S_sublex_done(pTHX)
     }
 }
 
-PERL_STATIC_INLINE SV*
+STATIC SV*
 S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
 {
     /* <s> points to first character of interior of \N{}, <e> to one beyond the
