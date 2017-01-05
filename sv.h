@@ -2013,6 +2013,9 @@ Returns a pointer to the character
 buffer.  SV must be of type >= C<SVt_PV>.  One
 alternative is to call C<sv_grow> if you are not sure of the type of SV.
 
+You might mistakenly think that C<len> is the number of bytes to add to the
+existing size, but instead it is the total size C<sv> should be.
+
 =for apidoc Am|char *|SvPVCLEAR|SV* sv
 Ensures that sv is a SVt_PV and that its SvCUR is 0, and that it is
 properly null terminated. Equivalent to sv_setpvs(""), but more efficient.
