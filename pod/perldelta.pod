@@ -336,7 +336,37 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+The C<dtrace> build process has further changes:
+
+=over
+
+=item *
+
+If the C<-xnolibs> is available, use that so a F<dtrace> perl can be
+built within a FreeBSD jail.
+
+=item *
+
+On systems that build a dtrace object file (FreeBSD, Solaris and
+SystemTap's dtrace emulation), copy the input objects to a separate
+directory and process them there, and use those objects in the link,
+since C<dtrace -G> also modifies these objects.
+
+=item *
+
+Add libelf to the build on FreeBSD 10.x, since dtrace adds references
+to libelf symbols.
+
+=item *
+
+Generate a dummy dtrace_main.o if C<dtrace -G> fails to build it.  A
+default build on Solaris generates probes from the unused inline
+functions, while they don't on FreeBSD, which causes C<dtrace -G> to
+fail.
+
+=back
+
+[perl #130108]
 
 =back
 
