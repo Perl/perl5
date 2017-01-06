@@ -13422,22 +13422,19 @@ S_check_for_bool_cxt(pTHX_ OP*o, U8 bool_flag, U8 maybe_flag)
         case OP_XOR:
         case OP_COND_EXPR:
         case OP_GREPWHILE:
-        /* AND may leave its original arg on the stack, but only if it's
-         * false. As long as o returns a value which is both false
-         * and usable in scalar context, it's safe.
-         */
-        case OP_AND:
             o->op_private |= bool_flag;
             lop = NULL;
             break;
 
-        /* OR and DOR leave the original arg on the stack when following
-         * the op_next route. If not in void context, we need to ensure
+        /* OR DOR and AND evaluate their arg as a boolean, but then may
+         * leave the original scalar value on the stack when following the
+         * op_next route. If not in void context, we need to ensure
          * that whatever follows consumes the arg only in boolean context
          * too.
          */
         case OP_OR:
         case OP_DOR:
+        case OP_AND:
             if ((lop->op_flags & OPf_WANT) == OPf_WANT_VOID) {
                 o->op_private |= bool_flag;
                 lop = NULL;
