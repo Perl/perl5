@@ -556,7 +556,6 @@ static const scan_data_t zero_scan_data =
 #define OOB_UNICODE		0xDEADBEEF
 
 #define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
-#define CHR_DIST(a,b) (UTF ? utf8_distance(a,b) : a - b)
 
 
 /* length of regex to show in messages that don't mark a position within */
