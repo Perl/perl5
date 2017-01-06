@@ -568,6 +568,7 @@ my @warning = (
                                                'Assuming NOT a POSIX class since no blanks are allowed in one {#} m/[[   ^   {#}:   x d i g i t   :   ]   ]\x{100}/',
                                                'Assuming NOT a POSIX class since no blanks are allowed in one {#} m/[[   ^   :   {#}x d i g i t   :   ]   ]\x{100}/',
                                                'Assuming NOT a POSIX class since no blanks are allowed in one {#} m/[[   ^   :   x d i g i t   :   ]{#}   ]\x{100}/',
+                                               $only_strict_marker . 'Unescaped literal \']\' {#} m/[[   ^   :   x d i g i t   :   ]   ]{#}\x{100}/',
                             ],
     '/[foo:lower:]]\x{100}/' => 'Assuming NOT a POSIX class since it doesn\'t start with a \'[\' {#} m/[foo{#}:lower:]]\x{100}/',
     '/[[;upper;]]\x{100}/' => [ 'Assuming NOT a POSIX class since a semi-colon was found instead of a colon {#} m/[[;{#}upper;]]\x{100}/',
@@ -618,6 +619,8 @@ my @warning_only_under_strict = (
     "/[A-$B_hex]/" => "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\" {#} m/[A-$B_hex\{#}]/",
     "/[$low_mixed_alpha-$high_mixed_alpha]/" => "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\" {#} m/[$low_mixed_alpha-$high_mixed_alpha\{#}]/",
     "/[$low_mixed_digit-$high_mixed_digit]/" => "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\" {#} m/[$low_mixed_digit-$high_mixed_digit\{#}]/",
+    '/\b<GCB}/' => 'Unescaped literal \'}\' {#} m/\b<GCB}{#}/',
+    '/[ ]def]/' => 'Unescaped literal \']\' {#} m/[ ]def]{#}/',
 );
 
 my @warning_utf8_only_under_strict = mark_as_utf8(
@@ -690,6 +693,8 @@ for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") 
     }
     else {
         for (my $i = 0; $i < @warning_only_under_strict; $i += 2) {
+
+            # (?[ ]) are always under strict
             if ($warning_only_under_strict[$i] =~ /\Q(?[/) {
                 push @warning_tests, $warning_only_under_strict[$i],  # The regex
                                     $warning_only_under_strict[$i+1];

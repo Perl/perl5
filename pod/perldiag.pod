@@ -6327,6 +6327,26 @@ as the first character following a quantifier
 
 =back
 
+=item Unescaped literal '%c' in regex; marked by <-- HERE in m/%s/
+
+(W regexp) (only under C<S<use re 'strict'>>)
+
+Within the scope of C<S<use re 'strict'>> in a regular expression
+pattern, you included an unescaped C<}> or C<]> which was interpreted
+literally.  These two characters are sometimes metacharacters, and
+sometimes literals, depending on what precedes them in the
+pattern.  This is unlike the similar C<)> which is always a
+metacharacter unless escaped.
+
+This action at a distance, perhaps a large distance, can lead to Perl
+silently misinterpreting what you meant, so when you specify that you
+want extra checking by C<S<use re 'strict'>>, this warning is generated.
+If you meant the character as a literal, simply confirm that to Perl by
+preceding the character with a backslash, or make it into a bracketed
+character class (like C<[}]>).  If you meant it as closing a
+corresponding C<[> or C<{>, you'll need to look back through the pattern
+to find out why that isn't happening.
+
 =item unexec of %s into %s failed!
 
 (F) The unexec() routine failed for some reason.  See your local FSF

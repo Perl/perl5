@@ -138,6 +138,22 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 =item *
 
+L<re> has been upgraded from version 0.33 to 0.34;
+
+This adds support for the new L<C</xx>|perlre/E<sol>x and E<sol>xx>
+regular expression pattern modifier, and a change to the L<S<C<use re
+'strict'>>|re/'strict' mode> experimental feature.  When S<C<re
+'strict'>> is enabled, a warning now will be generated for all
+unescaped uses of the two characters C<}> and C<]> in regular
+expression patterns (outside bracketed character classes) that are taken
+literally.  This brings them more in line with the C<)> character which
+is always a metacharacter unless escaped.  Being a metacharacter only
+sometimes, depending on action at a distance, can lead to silently
+having the pattern mean something quite different than was intended,
+which the S<C<re 'strict'>> mode is intended to minimize.
+
+=item *
+
 L<B::Xref> has been upgraded from version 1.05 to 1.06.
 
 =item *
