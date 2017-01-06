@@ -11593,7 +11593,7 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
 }
 
 /*
- - regpiece - something followed by possible [*+?]
+ - regpiece - something followed by possible quantifier * + ? {n,m}
  *
  * Note that the branching code sequences used for ? and the general cases
  * of * and + are somewhat optimized:  they use the same NOTHING node as
