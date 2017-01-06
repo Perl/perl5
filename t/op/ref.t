@@ -8,7 +8,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(237);
+plan(253);
 
 # Test this first before we extend the stack with other operations.
 # This caused an asan failure due to a bad write past the end of the stack.
@@ -819,6 +819,49 @@ for ("4eounthouonth") {
     is \$$aref, $aref,
 	'[perl #109746] referential identity of \literal under threads+mad'
 }
+
+# ref in boolean context
+{
+    my $false = 0;
+    my $true  = 1;
+    my $plain = [];
+    my $obj     = bless {}, "Foo";
+    my $objnull = bless [], "";
+    my $obj0    = bless [], "0";
+    my $obj00   = bless [], "00";
+    my $obj1    = bless [], "1";
+
+    is !ref $false,   1, '!ref $false';
+    is !ref $true,    1, '!ref $true';
+    is !ref $plain,   "", '!ref $plain';
+    is !ref $obj,     "", '!ref $obj';
+    is !ref $objnull, "", '!ref $objnull';
+    is !ref $obj0   , 1, '!ref $obj0';
+    is !ref $obj00,   "", '!ref $obj00';
+    is !ref $obj1,    "", '!ref $obj1';
+
+    is ref $obj || 0,               "Foo",   'ref $obj || 0';
+    is ref $obj // 0,               "Foo",   'ref $obj // 0';
+    is $true && ref $obj,           "Foo",   '$true && ref $obj';
+    is ref $obj ? "true" : "false", "true",  'ref $obj ? "true" : "false"';
+
+    my $r = 2;
+    if (ref $obj) { $r = 1 };
+    is $r, 1, 'if (ref $obj)';
+
+    $r = 2;
+    if (ref $obj0) { $r = 1 };
+    is $r, 2, 'if (ref $obj0)';
+
+    $r = 2;
+    if (ref $obj) { $r = 1 } else { $r = 0 };
+    is $r, 1, 'if (ref $obj) else';
+
+    $r = 2;
+    if (ref $obj0) { $r = 1 } else { $r = 0 };
+    is $r, 0, 'if (ref $obj0) else';
+}
+
 
 # RT#130861: heap-use-after-free in pp_rv2sv, from asan fuzzing
 SKIP: {

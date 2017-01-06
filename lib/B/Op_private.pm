@@ -137,7 +137,7 @@ $bits{$_}{7} = 'OPpLVAL_INTRO' for qw(aelem aslice cond_expr delete enteriter en
 $bits{$_}{2} = 'OPpLVREF_ELEM' for qw(lvref refassign);
 $bits{$_}{3} = 'OPpLVREF_ITER' for qw(lvref refassign);
 $bits{$_}{3} = 'OPpMAYBE_LVSUB' for qw(aassign aelem akeys aslice av2arylen avhvswitch helem hslice keys kvaslice kvhslice multideref padav padhv pos rv2av rv2gv rv2hv substr vec);
-$bits{$_}{4} = 'OPpMAYBE_TRUEBOOL' for qw(padhv rv2hv);
+$bits{$_}{4} = 'OPpMAYBE_TRUEBOOL' for qw(padhv ref rv2hv);
 $bits{$_}{7} = 'OPpOFFBYONE' for qw(caller runcv wantarray);
 $bits{$_}{5} = 'OPpOPEN_IN_CRLF' for qw(backtick open);
 $bits{$_}{4} = 'OPpOPEN_IN_RAW' for qw(backtick open);
@@ -156,7 +156,7 @@ $bits{$_}{6} = 'OPpTRANS_GROWS' for qw(trans transr);
 $bits{$_}{2} = 'OPpTRANS_IDENTICAL' for qw(trans transr);
 $bits{$_}{3} = 'OPpTRANS_SQUASH' for qw(trans transr);
 $bits{$_}{1} = 'OPpTRANS_TO_UTF' for qw(trans transr);
-$bits{$_}{5} = 'OPpTRUEBOOL' for qw(padhv rv2hv);
+$bits{$_}{5} = 'OPpTRUEBOOL' for qw(padhv ref rv2hv);
 
 my @bf = (
     {
@@ -807,7 +807,7 @@ our %ops_using = (
     OPpLVAL_INTRO            => [qw(aelem aslice cond_expr delete enteriter entersub gvsv helem hslice list lvavref lvref lvrefslice multideref padav padhv padrange padsv pushmark refassign rv2av rv2gv rv2hv rv2sv split)],
     OPpLVREF_ELEM            => [qw(lvref refassign)],
     OPpMAYBE_LVSUB           => [qw(aassign aelem akeys aslice av2arylen avhvswitch helem hslice keys kvaslice kvhslice multideref padav padhv pos rv2av rv2gv rv2hv substr vec)],
-    OPpMAYBE_TRUEBOOL        => [qw(padhv rv2hv)],
+    OPpMAYBE_TRUEBOOL        => [qw(padhv ref rv2hv)],
     OPpMULTIDEREF_DELETE     => [qw(multideref)],
     OPpOFFBYONE              => [qw(caller runcv wantarray)],
     OPpOPEN_IN_CRLF          => [qw(backtick open)],

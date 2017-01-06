@@ -436,7 +436,7 @@ addbits($_, 3 => qw(OPpMAYBE_LVSUB LVSUB))
 
 
 
-for (qw(rv2hv padhv)) {
+for (qw(rv2hv padhv ref)) {
     addbits($_,                           # e.g. %hash in (%hash || $foo) ...
         4 => qw(OPpMAYBE_TRUEBOOL BOOL?), # ... cx not known till run time
         5 => qw(OPpTRUEBOOL       BOOL),  # ... in void cxt

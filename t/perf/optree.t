@@ -13,7 +13,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan 695;
+plan 854;
 
 use v5.10; # state
 use B qw(svref_2object
@@ -212,6 +212,7 @@ for my $ops (
     [ 'rv2hv', 'scalar(%pkg)', [0],      OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
     [ 'padhv', '%lex',         [],       OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
     [ 'padhv', 'scalar(%lex)', [0],      OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
+    [ 'ref',   'ref($x)',      [],       OPpTRUEBOOL, OPpMAYBE_TRUEBOOL ],
 ) {
     my ($op_name, $op_code, $post_op_path, $bool_flag, $maybe_flag) = @$ops;
 

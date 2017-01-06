@@ -592,18 +592,49 @@ PP(pp_ref)
     SV * const sv = TOPs;
 
     SvGETMAGIC(sv);
-    if (!SvROK(sv))
+    if (!SvROK(sv)) {
 	SETs(&PL_sv_no);
-    else {
-	dTARGET;
-	SETs(TARG);
-	/* use the return value that is in a register, its the same as TARG */
-	TARG = sv_ref(TARG,SvRV(sv),TRUE);
-	SvSETMAGIC(TARG);
+        return NORMAL;
     }
 
-    return NORMAL;
+    /* op is in boolean context? */
+    if (   (PL_op->op_private & OPpTRUEBOOL)
+        || (   (PL_op->op_private & OPpMAYBE_TRUEBOOL)
+            && block_gimme() == G_VOID))
+    {
+        /* refs are always true - unless it's to an object blessed into a
+         * class with a false name, i.e. "0". So we have to check for
+         * that remote possibility. The following is is basically an
+         * unrolled SvTRUE(sv_reftype(rv)) */
+        SV * const rv = SvRV(sv);
+        if (SvOBJECT(rv)) {
+            HV *stash = SvSTASH(rv);
+            HEK *hek = HvNAME_HEK(stash);
+            if (hek) {
+                I32 len = HEK_LEN(hek);
+                /* bail out and do it the hard way? */
+                if (UNLIKELY(
+                       len == HEf_SVKEY
+                    || (len == 1 && HEK_KEY(hek)[0] == '0')
+                ))
+                    goto do_sv_ref;
+            }
+        }
+        SETs(&PL_sv_yes);
+        return NORMAL;
+    }
+
+  do_sv_ref:
+    {
+	dTARGET;
+	SETs(TARG);
+	sv_ref(TARG, SvRV(sv), TRUE);
+	assert(!SvSMAGICAL(TARG));
+	return NORMAL;
+    }
+
 }
+
 
 PP(pp_bless)
 {

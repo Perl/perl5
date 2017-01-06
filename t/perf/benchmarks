@@ -1094,6 +1094,40 @@
 
 
 
+    'func::ref::notaref_bool' => {
+        desc    => 'ref($notaref) in boolean context',
+        setup   => 'my $r = "boo"',
+        code    => '!ref $r',
+    },
+    'func::ref::ref_bool' => {
+        desc    => 'ref($ref) in boolean context',
+        setup   => 'my $r = []',
+        code    => '!ref $r',
+    },
+    'func::ref::blessedref_bool' => {
+        desc    => 'ref($blessed_ref) in boolean context',
+        setup   => 'my $r = bless []',
+        code    => '!ref $r',
+    },
+
+    'func::ref::notaref' => {
+        desc    => 'ref($notaref) in scalar context',
+        setup   => 'my $x; my $r = "boo"',
+        code    => '$x = ref $r',
+    },
+    'func::ref::ref' => {
+        desc    => 'ref($ref) in scalar context',
+        setup   => 'my $x; my $r = []',
+        code    => '$x = ref $r',
+    },
+    'func::ref::blessedref' => {
+        desc    => 'ref($blessed_ref) in scalar context',
+        setup   => 'my $x; my $r = bless []',
+        code    => '$x = ref $r',
+    },
+
+
+
     'func::sort::num' => {
         desc    => 'plain numeric sort',
         setup   => 'my (@a, @b); @a = reverse 1..10;',

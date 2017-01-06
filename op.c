@@ -14784,6 +14784,12 @@ Perl_rpeep(pTHX_ OP *o)
 	    break;
         }
 
+        case OP_REF:
+            /* see if ref() is used in boolean context */
+            if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
+                S_check_for_bool_cxt(aTHX_ o, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
+            break;
+
 	case OP_CUSTOM: {
 	    Perl_cpeep_t cpeep = 
 		XopENTRYCUSTOM(o, xop_peep);
