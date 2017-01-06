@@ -13383,6 +13383,79 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
     } /* for (pass = ...) */
 }
 
+/* See if the ops following o are such that o will always be executed in
+ * boolean context: that is, the SV which o pushes onto the stack will
+ * only ever be used by later ops with SvTRUE(sv) or similar.
+ * If so, set a suitable private flag on o. Normally this will be
+ * bool_flag; but if it's only possible to determine booleaness at run
+ * time (e.g. sub f { ....; (%h || $y) }), then set maybe_flag instead.
+ */
+
+static void
+S_check_for_bool_cxt(pTHX_ OP*o, U8 bool_flag, U8 maybe_flag)
+{
+    OP *lop;
+
+    assert((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR);
+
+    lop = o->op_next;
+
+    while (lop) {
+        switch (lop->op_type) {
+        case OP_NULL:
+        case OP_SCALAR:
+            break;
+
+        /* these two consume the stack argument in the scalar case,
+         * and treat it as a boolean in the non linenumber case */
+        case OP_FLIP:
+        case OP_FLOP:
+            if (   ((lop->op_flags & OPf_WANT) == OPf_WANT_LIST)
+                || (lop->op_private & OPpFLIP_LINENUM))
+            {
+                lop = NULL;
+                break;
+            }
+            /* FALLTHROUGH */
+        /* these never leave the original value on the stack */
+        case OP_NOT:
+        case OP_XOR:
+        case OP_COND_EXPR:
+        case OP_GREPWHILE:
+            o->op_private |= bool_flag;
+            lop = NULL;
+            break;
+
+        /* OR DOR and AND evaluate their arg as a boolean, but then may
+         * leave the original scalar value on the stack when following the
+         * op_next route. If not in void context, we need to ensure
+         * that whatever follows consumes the arg only in boolean context
+         * too.
+         */
+        case OP_OR:
+        case OP_DOR:
+        case OP_AND:
+            if ((lop->op_flags & OPf_WANT) == OPf_WANT_VOID) {
+                o->op_private |= bool_flag;
+                lop = NULL;
+            }
+            else if (!(lop->op_flags & OPf_WANT)) {
+                /* unknown context - decide at runtime */
+                o->op_private |= maybe_flag;
+                lop = NULL;
+            }
+            break;
+
+        default:
+            lop = NULL;
+            break;
+        }
+
+        if (lop)
+            lop = lop->op_next;
+    }
+}
+
 
 
 /* mechanism for deferring recursion in rpeep() */
@@ -13418,8 +13491,6 @@ Perl_rpeep(pTHX_ OP *o)
     OP** defer_queue[MAX_DEFERRED]; /* small queue of deferred branches */
     int defer_base = 0;
     int defer_ix = -1;
-    OP *fop;
-    OP *sop;
 
     if (!o || o->op_opt)
 	return;
@@ -14114,19 +14185,26 @@ Perl_rpeep(pTHX_ OP *o)
             break;
         }
 
+	case OP_RV2HV:
+	case OP_PADHV:
+            /* see if %h is used in boolean context */
+            if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
+                S_check_for_bool_cxt(aTHX_ o, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
+            if (o->op_type != OP_PADHV)
+                break;
+            /* FALLTHROUGH */
 	case OP_PADAV:
 	case OP_PADSV:
-	case OP_PADHV:
-	/* Skip over state($x) in void context.  */
-	if (oldop && o->op_private == (OPpPAD_STATE|OPpLVAL_INTRO)
-	 && (o->op_flags & OPf_WANT) == OPf_WANT_VOID)
-	{
-	    oldop->op_next = o->op_next;
-	    goto redo_nextstate;
-	}
-	if (o->op_type != OP_PADAV)
-	    break;
-	/* FALLTHROUGH */
+            /* Skip over state($x) in void context.  */
+            if (oldop && o->op_private == (OPpPAD_STATE|OPpLVAL_INTRO)
+             && (o->op_flags & OPf_WANT) == OPf_WANT_VOID)
+            {
+                oldop->op_next = o->op_next;
+                goto redo_nextstate;
+            }
+            if (o->op_type != OP_PADAV)
+                break;
+            /* FALLTHROUGH */
 	case OP_GV:
 	    if (o->op_type == OP_PADAV || o->op_next->op_type == OP_RV2AV) {
 		OP* const pop = (o->op_type == OP_PADAV) ?
@@ -14206,25 +14284,12 @@ Perl_rpeep(pTHX_ OP *o)
 
 	    break;
         
-#define HV_OR_SCALARHV(op)                                   \
-    (  (op)->op_type == OP_PADHV || (op)->op_type == OP_RV2HV \
-       ? (op)                                                  \
-       : (op)->op_type == OP_SCALAR && (op)->op_flags & OPf_KIDS \
-       && (  cUNOPx(op)->op_first->op_type == OP_PADHV          \
-          || cUNOPx(op)->op_first->op_type == OP_RV2HV)          \
-         ? cUNOPx(op)->op_first                                   \
-         : NULL)
-
         case OP_NOT:
-            if ((fop = HV_OR_SCALARHV(cUNOP->op_first)))
-                fop->op_private |= OPpTRUEBOOL;
             break;
 
         case OP_AND:
 	case OP_OR:
 	case OP_DOR:
-            fop = cLOGOP->op_first;
-            sop = OpSIBLING(fop);
 	    while (cLOGOP->op_other->op_type == OP_NULL)
 		cLOGOP->op_other = cLOGOP->op_other->op_next;
 	    while (o->op_next && (   o->op_type == o->op_next->op_type
@@ -14246,53 +14311,10 @@ Perl_rpeep(pTHX_ OP *o)
 	        o->op_next = ((LOGOP*)o->op_next)->op_other;
 	    }
 	    DEFER(cLOGOP->op_other);
-          
 	    o->op_opt = 1;
-            fop = HV_OR_SCALARHV(fop);
-            if (sop) sop = HV_OR_SCALARHV(sop);
-            if (fop || sop
-            ){	
-                OP * nop = o;
-                OP * lop = o;
-                if (!((nop->op_flags & OPf_WANT) == OPf_WANT_VOID)) {
-                    while (nop && nop->op_next) {
-                        switch (nop->op_next->op_type) {
-                            case OP_NOT:
-                            case OP_AND:
-                            case OP_OR:
-                            case OP_DOR:
-                                lop = nop = nop->op_next;
-                                break;
-                            case OP_NULL:
-                                nop = nop->op_next;
-                                break;
-                            default:
-                                nop = NULL;
-                                break;
-                        }
-                    }            
-                }
-                if (fop) {
-                    if (  (lop->op_flags & OPf_WANT) == OPf_WANT_VOID
-                      || o->op_type == OP_AND  )
-                        fop->op_private |= OPpTRUEBOOL;
-                    else if (!(lop->op_flags & OPf_WANT))
-                        fop->op_private |= OPpMAYBE_TRUEBOOL;
-                }
-                if (  (lop->op_flags & OPf_WANT) == OPf_WANT_VOID
-                   && sop)
-                    sop->op_private |= OPpTRUEBOOL;
-            }                  
-            
-	    
 	    break;
 	
 	case OP_COND_EXPR:
-	    if ((fop = HV_OR_SCALARHV(cLOGOP->op_first)))
-		fop->op_private |= OPpTRUEBOOL;
-#undef HV_OR_SCALARHV
-	    /* GERONIMO! */ /* FALLTHROUGH */
-
 	case OP_MAPWHILE:
 	case OP_GREPWHILE:
 	case OP_ANDASSIGN:

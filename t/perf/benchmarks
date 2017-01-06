@@ -301,6 +301,18 @@
         code    => 'exists $h{$k1}{$k2}',
     },
 
+    'expr::hash::bool_empty' => {
+        desc    => 'empty lexical hash in boolean context',
+        setup   => 'my %h;',
+        code    => '!%h',
+    },
+    'expr::hash::bool_full' => {
+        desc    => 'non-empty lexical hash in boolean context',
+        setup   => 'my %h = 1..10;',
+        code    => '!%h',
+    },
+
+
     (
         map {
             sprintf('expr::hash::notexists_lex_keylen%04d',$_) => {
