@@ -14,19 +14,28 @@ skip_all_without_unicode_tables();
 use strict;
 use open qw(:utf8 :std);
 
-##
+# Kind of a kludge to mark warnings to be expected only if we are testing
+# under "use re 'strict'"
+my $only_strict_marker = ':expected_only_under_strict';
+
 ## If the markers used are changed (search for "MARKER1" in regcomp.c),
 ## update only these two regexs, and leave the {#} in the @death/@warning
 ## arrays below. The {#} is a meta-marker -- it marks where the marker should
 ## go.
-##
-## Returns empty string if that is what is expected.  Otherwise, handles
-## either a scalar, turning it into a single element array; or a ref to an
-## array, adjusting each element.  If called in array context, returns an
-## array, otherwise the join of all elements
 
-sub fixup_expect {
-    my $expect_ref = shift;
+sub fixup_expect ($$) {
+
+    # Fixes up the expected results by inserting the boiler plate text.
+    # Returns empty string if that is what is expected.  Otherwise, handles
+    # either a scalar, turning it into a single element array; or a ref to an
+    # array, adjusting each element.  If called in array context, returns an
+    # array, otherwise the join of all elements.
+
+    # The string $only_strict_marker will be removed from any expect line it
+    # begins, and if $strict is not true, that expect line will be removed
+    # from the output (hence won't be expected)
+
+    my ($expect_ref, $strict) = @_;
     return "" if $expect_ref eq "";
 
     my @expect;
@@ -37,12 +46,15 @@ sub fixup_expect {
         @expect = $expect_ref;
     }
 
+    my @new_expect;
     foreach my $element (@expect) {
-        $element =~ s/{\#}/in regex; marked by <-- HERE in/;
-        $element =~ s/{\#}/ <-- HERE /;
+        $element =~ s/\{\#\}/in regex; marked by <-- HERE in/;
+        $element =~ s/\{\#\}/ <-- HERE /;
         $element .= " at ";
+        next if $element =~ s/ ^ $only_strict_marker \s* //x && ! $strict;
+        push @new_expect, $element;
     }
-    return wantarray ? @expect : join "", @expect;
+    return wantarray ? @new_expect : join "", @new_expect;
 }
 
 ## Because we don't "use utf8" in this file, we need to do some extra legwork
@@ -655,7 +667,7 @@ for my $strict ("", "use re 'strict';") {
     }
     for (my $i = 0; $i < @death; $i += 2) {
         my $regex = $death[$i];
-        my $expect = fixup_expect($death[$i+1]);
+        my $expect = fixup_expect($death[$i+1], $strict);
         no warnings 'experimental::regex_sets';
         no warnings 'experimental::re_strict';
 
@@ -716,7 +728,7 @@ for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") 
         }
         for (my $i = 0; $i < @$ref; $i += 2) {
             my $regex = $ref->[$i];
-            my @expect = fixup_expect($ref->[$i+1]);
+            my @expect = fixup_expect($ref->[$i+1], $strict);
 
             # A length-1 array with an empty warning means no warning gets
             # generated at all.
