@@ -485,10 +485,10 @@ for file do
 
     # allow variables like toke_cflags to be evaluated
 
-    if echo $file | grep -v / >/dev/null
-    then
-      eval 'eval ${'"${file}_cflags"'-""}'
-    fi
+    case "$file" in
+    */*) ;;
+    *) eval 'eval ${'"${file}_cflags"'-""}' ;;
+    esac
 
     # or customize here
 
