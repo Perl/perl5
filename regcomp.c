@@ -10068,9 +10068,6 @@ Perl__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b)
     UV len_a = _invlist_len(a);
     UV len_b = _invlist_len(b);
 
-    UV i = 0;		    /* current index into the arrays */
-    bool retval = TRUE;     /* Assume are identical until proven otherwise */
-
     PERL_ARGS_ASSERT__INVLISTEQ;
 
     /* If are to compare 'a' with the complement of b, set it
