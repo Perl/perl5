@@ -2557,7 +2557,7 @@ S_set_dollarzero(pTHX_ SV *sv)
      * the setproctitle() routine to manipulate that. */
     if (PL_origalen != 1) {
         s = SvPV_const(sv, len);
-#   if __FreeBSD_version > 410001
+#   if __FreeBSD_version > 410001 || defined(__DragonFly__)
         /* The leading "-" removes the "perl: " prefix,
          * but not the "(perl) suffix from the ps(1)
          * output, because that's what ps(1) shows if the
