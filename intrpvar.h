@@ -98,9 +98,11 @@ PERLVAR(I, in_eval,	U8)		/* trap "fatal" errors? */
 PERLVAR(I, defgv,	GV *)           /* the *_ glob */
 /*
 
-=for apidoc mn|bool|PL_dowarn
+=for apidoc mn|U8|PL_dowarn
 
-The C variable which corresponds to Perl's C<$^W> warning variable.
+The C variable that roughly corresponds to Perl's C<$^W> warning variable.
+However, C<$^W> is treated as a boolean, whereas C<PL_dowarn> is a
+collection of flag bits.
 
 =cut
 */
