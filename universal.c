@@ -184,8 +184,9 @@ The SV can be a Perl object or the name of a Perl class.
 
 #include "XSUB.h"
 
-/* a special string address whose value is "isa", but whicb perl knows
- * to treat as if it were really "DOES" */
+/* a special string address whose value is "isa", but which perl knows
+ * to treat as if it were really "DOES" when printing the method name in
+ *  the "Can't call method '%s'" error message */
 char PL_isa_DOES[] = "isa";
 
 bool
@@ -227,7 +228,7 @@ Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
     PUTBACK;
 
     /* create a PV with value "isa", but with a special address
-     * so that perl knows were' realling doing "DOES" instead */
+     * so that perl knows we're really doing "DOES" instead */
     methodname = newSV_type(SVt_PV);
     SvLEN(methodname) = 0;
     SvCUR(methodname) = strlen(PL_isa_DOES);
