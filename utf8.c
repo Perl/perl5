@@ -78,7 +78,7 @@ Perl__force_out_malformed_utf8_message(pTHX_
     PERL_ARGS_ASSERT__FORCE_OUT_MALFORMED_UTF8_MESSAGE;
 
     ENTER;
-    SAVESPTR(PL_dowarn);
+    SAVEI8(PL_dowarn);
     SAVESPTR(PL_curcop);
 
     PL_dowarn = G_WARN_ALL_ON|G_WARN_ON;
