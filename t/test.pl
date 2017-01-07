@@ -979,6 +979,7 @@ sub fresh_perl {
     $runperl_args->{stderr}     = 1 unless exists $runperl_args->{stderr};
 
     open TEST, '>', $tmpfile or die "Cannot open $tmpfile: $!";
+    binmode TEST, ':utf8' if $runperl_args->{wide_chars};
     print TEST $prog;
     close TEST or die "Cannot close $tmpfile: $!";
 

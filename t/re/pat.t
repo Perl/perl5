@@ -1864,7 +1864,7 @@ EOF_CODE
         # [perl #130495] /x comment skipping stopped a byte short, leading
         # to assertion failure or 'malformed utf-8 character" warning
         fresh_perl_is(
-            "use utf8; m{a#\x{124}}x", '', {},
+            "use utf8; m{a#\x{124}}x", '', {wide_chars => 1},
             '[perl #130495] utf-8 character at end of /x comment should not misparse',
         );
     }
