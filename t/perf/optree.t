@@ -205,12 +205,6 @@ is svref_2object(sub { "@_" })->ROOT->first->last->name, 'join',
 #   sub f { ....; ((%h || $x) || $y)) }
 # If f() is called in void context, then %h can return a boolean value;
 # if in scalar context, %h must return a key count.
-#
-# With (op && other), its ok to treat op as in bool cxt even when the &&
-# is in scalar cxt, as long as whatever op returns as a false boolean value
-# matches what it returns as a false scalar value (IV(0) in the case of
-# rv2hv etc). This is because in (A && B), A is returned only when A is
-# false.
 
 for my $ops (
     #  op       code           op path   flag         maybe flag
