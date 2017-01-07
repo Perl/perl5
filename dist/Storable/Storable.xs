@@ -1016,7 +1016,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 			PUTMARK(clen);					\
 			if (len)					\
 				WRITE(pv, ilen);			\
-		} else if (len > INT32_MAX) {				\
+		} else if (sizeof(len) > 4 && len > INT32_MAX) {        \
 			MUST_FIT_IN_UV(len);				\
 			PUTMARK(SX_LOBJECT);				\
 			PUTMARK(large);					\
@@ -2399,7 +2399,7 @@ static int store_array(pTHX_ stcxt_t *cxt, AV *av)
 		PUTMARK(SX_LOBJECT);
 		PUTMARK(SX_ARRAY);
 		W64LEN(len);
-		TRACEME(("lobject size = %lu", len));
+		TRACEME(("lobject size = %lu", (unsigned long)len));
 	} else {
 		/*
 		 * Normal array by emitting SX_ARRAY, followed by the array length.
@@ -2515,7 +2515,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 		 * We need to manually iterate over it then, unsorted. But until perl
 		 * itself cannot do that, skip that.
 		 */
-		TRACEME(("lobject size = %lu", len));
+		TRACEME(("lobject size = %lu", (unsigned long)len));
 #ifdef HAS_U64
 		PUTMARK(SX_LOBJECT);
 		if (flagged_hash) {
@@ -5699,7 +5699,7 @@ static SV *get_larray(pTHX_ stcxt_t *cxt, UV len, const char *cname)
 	HV *stash;
 	bool seen_null = FALSE;
 
-	TRACEME(("get_larray (#%d) %lu", (int)cxt->tagnum, len));
+	TRACEME(("get_larray (#%d) %lu", (int)cxt->tagnum, (unsigned long)len));
 
 	/*
 	 * allocate array, then pre-extend it.
@@ -5769,13 +5769,13 @@ static SV *get_lhash(pTHX_ stcxt_t *cxt, UV len, int hash_flags, const char *cna
 	}
 #endif
 
-	TRACEME(("size = %lu", (long)len));
+	TRACEME(("size = %lu", (unsigned long)len));
 	hv = newHV();
 	stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
 	SEEN_NN(hv, stash, 0);		/* Will return if table not allocated properly */
 	if (len == 0)
 		return (SV *) hv;	/* No data follow if table empty */
-	TRACEME(("split %lu", (long)len+1));
+	TRACEME(("split %lu", (unsigned long)len+1));
 	hv_ksplit(hv, len+1);		/* pre-extend hash to save multiple splits */
 
 	/*
@@ -6093,7 +6093,7 @@ static SV *retrieve_code(pTHX_ stcxt_t *cxt, const char *cname)
 		text = retrieve_lutf8str(aTHX_ cxt, cname);
 		break;
 	default:
-		CROAK(("Unexpected type %d in retrieve_code\n", type));
+            CROAK(("Unexpected type %d in retrieve_code\n", (int)type));
 	}
 
 	if (!text) {
