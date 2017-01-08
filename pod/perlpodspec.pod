@@ -837,7 +837,7 @@ is noncompliant behavior.)
 Authors of Pod formatters/processors should make every effort to
 avoid writing their own Pod parser.  There are already several in
 CPAN, with a wide range of interface styles -- and one of them,
-Pod::Parser, comes with modern versions of Perl.
+Pod::Simple, comes with modern versions of Perl.
 
 =item *
 
