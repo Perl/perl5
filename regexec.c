@@ -1974,10 +1974,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
          * trying that it will fail; so don't start a match past the
          * required minimum number from the far end */
         e = HOP3c(strend, -((SSize_t)ln), s);
-
-        if (reginfo->intuit && e < s) {
-            e = s;			/* Due to minlen logic of intuit() */
-        }
+        if (e < s)
+            break;
 
         c1 = *pat_string;
         c2 = fold_array[c1];
@@ -2020,10 +2018,6 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
          * match that would require us to go beyond the end of the string
          */
         e = HOP3c(strend, -((SSize_t)lnc), s);
-
-        if (reginfo->intuit && e < s) {
-            e = s;			/* Due to minlen logic of intuit() */
-        }
 
         /* XXX Note that we could recalculate e to stop the loop earlier,
          * as the worst case expansion above will rarely be met, and as we
