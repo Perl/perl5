@@ -149,6 +149,7 @@ static const char* const non_utf8_target_but_utf8_required
 #define HOP3lim(pos,off,lim) (reginfo->is_utf8_target \
     ? reghop3((U8*)(pos), off, (U8*)(lim)) \
     : (U8*)((pos + off) > lim ? lim : (pos + off)))
+#define HOP3clim(pos,off,lim) ((char*)HOP3lim(pos,off,lim))
 
 #define HOP4(pos,off,llim, rlim) (reginfo->is_utf8_target \
     ? reghop4((U8*)(pos), off, (U8*)(llim), (U8*)(rlim)) \
@@ -1291,10 +1292,10 @@ Perl_re_intuit_start(pTHX_
          */
 
 	if (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
-            endpos= HOP3c(rx_origin, (prog->minlen ? cl_l : 0), strend);
+            endpos = HOP3clim(rx_origin, (prog->minlen ? cl_l : 0), strend);
         else if (prog->float_substr || prog->float_utf8) {
 	    rx_max_float = HOP3c(check_at, -start_shift, strbeg);
-	    endpos= HOP3c(rx_max_float, cl_l, strend);
+	    endpos = HOP3clim(rx_max_float, cl_l, strend);
         }
         else 
             endpos= strend;
