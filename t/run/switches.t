@@ -12,7 +12,7 @@ BEGIN {
 
 BEGIN { require "./test.pl";  require "./loc_tools.pl"; }
 
-plan(tests => 124);
+plan(tests => 127);
 
 use Config;
 
@@ -461,6 +461,28 @@ __EOF__
     chomp(my @file4 = <$f>);
     close $f;
     is(join(":", @file4), "bar:bar", "check output");
+
+  SKIP:
+    {
+        # this needs to match how ARGV_USE_ATFUNCTIONS is defined in doio.c
+        skip "Not enough *at functions", 3
+          unless $Config{d_unlinkat} && $Config{d_renameat} && $Config{d_fchmodat}
+              && ($Config{d_dirfd} || $Config{d_dir_dd_fd})
+              && $Config{ccflags} !~ /-DNO_USE_ATFUNCTIONS\b/;
+        fresh_perl_is(<<'CODE', "ok\n", { },
+@ARGV = ("inplacetmp/foo");
+$^I = "";
+while (<>) {
+  chdir "..";
+  print "xx\n";
+}
+print "ok\n";
+CODE
+                       "chdir while in-place editing");
+        ok(open(my $fh, "<", $work), "open out file");
+        is(scalar <$fh>, "xx\n", "file successfully saved after chdir");
+        close $fh;
+    }
 
     unlink $work;
 
