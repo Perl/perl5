@@ -368,6 +368,18 @@ fail.
 
 [perl #130108]
 
+=item *
+
+You can now disable perl's use of the PERL_HASH_SEED and
+PERL_PERTURB_KEYS environment variables by configureing perl with
+C<-Accflags=NO_PERL_HASH_ENV>.
+
+=item *
+
+You can now disable perl's use of the PERL_HASH_SEED_DEBUG environment
+variable by configuring perl with
+C<-Accflags=-DNO_PERL_HASH_SEED_DEBUG>.
+
 =back
 
 =head1 Testing
