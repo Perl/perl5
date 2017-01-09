@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 828;  # Update this when adding/deleting tests.
+plan tests => 834;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1867,6 +1867,25 @@ EOF_CODE
             "use utf8; m{a#\x{124}}x", '', {wide_chars => 1},
             '[perl #130495] utf-8 character at end of /x comment should not misparse',
         );
+    }
+    {
+        # [perl #130522] causes out-of-bounds read detected by clang with
+        # address=sanitized when length of the STCLASS string is greater than
+        # length of target string.
+        my $re = qr{(?=\0z)\0?z?$}i;
+        my($yes, $no) = (1, "");
+        for my $test (
+            [ $no,  undef,   '<undef>' ],
+            [ $no,  '',      '' ],
+            [ $no,  "\0",    '\0' ],
+            [ $yes, "\0z",   '\0z' ],
+            [ $no,  "\0z\0", '\0z\0' ],
+            [ $yes, "\0z\n", '\0z\n' ],
+        ) {
+            my($result, $target, $disp) = @$test;
+            no warnings qw/uninitialized/;
+            is($target =~ $re, $result, "[perl #130522] with target '$disp'");
+        }
     }
 } # End of sub run_tests
 
