@@ -188,23 +188,23 @@ sub test_proto {
     my $more_args = $3 ? ',1' : '';
     eval " &CORE::$o(2$more_args) ";
     like $@, qr/^Type of arg 1 to &CORE::$o must be reference to one of(?x:
-                ) \[\Q$2\E] at /,
+                ) \[\Q$2\E\] at /,
         "&$o with non-ref arg";
     eval " &CORE::$o(*STDOUT{IO}$more_args) ";
     like $@, qr/^Type of arg 1 to &CORE::$o must be reference to one of(?x:
-                ) \[\Q$2\E] at /,
+                ) \[\Q$2\E\] at /,
         "&$o with ioref arg";
     my $class = ref *DATA{IO};
     eval " &CORE::$o(bless(*DATA{IO}, 'hov')$more_args) ";
     like $@, qr/^Type of arg 1 to &CORE::$o must be reference to one of(?x:
-                ) \[\Q$2\E] at /,
+                ) \[\Q$2\E\] at /,
         "&$o with ioref arg with hash overload (which does not count)";
     bless *DATA{IO}, $class;
     if (do {$2 !~ /&/}) {
       $tests++;
       eval " &CORE::$o(\\&scriggle$more_args) ";
       like $@, qr/^Type of arg 1 to &CORE::$o must be reference to one (?x:
-                  )of \[\Q$2\E] at /,
+                  )of \[\Q$2\E\] at /,
         "&$o with coderef arg";
     }    
   }

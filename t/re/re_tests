@@ -1454,8 +1454,8 @@ foo(\h)bar	foo\tbar	y	$1	\t
 
 # Verify that \ escapes the { after \N, and causes \N to match non-newline
 abc\N\{U+BEEF}	abc\n{UBEEF}	n		
-abc\N\{U+BEEF}	abc.{UBEEF}	y	$&	abc.{UBEEF}
-[abc\N\{U+BEEF}]	-	c	-	\\N in a character class must be a named character
+abc\N\{U+BEEF\}	abc.{UBEEF}	y	$&	abc.{UBEEF}
+[abc\N\{U+BEEF\}]	-	c	-	\\N in a character class must be a named character
 
 # Verify that \N can be trailing and causes \N to match non-newline
 abc\N	abcd	y	$&	abcd

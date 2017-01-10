@@ -125,8 +125,8 @@ is (scalar %ᕘ, 0);
     my $E_grave = utf8::unicode_to_native(0xc8);
     my $pat = sprintf(
         # It took a lot of experimentation to get the backslashes right (khw)
-        "Argument \"\\*main::(?:PW\\\\x\\{%x}MPF"
-                            . "|SKR\\\\x\\{%x}\\\\x\\{%x}\\\\x\\{%x})\" "
+        "Argument \"\\*main::(?:PW\\\\x\\{%x\\}MPF"
+                            . "|SKR\\\\x\\{%x\\}\\\\x\\{%x\\}\\\\x\\{%x\\})\" "
                             . "isn't numeric in sprintf",
                               $O_grave, $E_grave, $E_grave, $E_grave);
     $pat = qr/$pat/;

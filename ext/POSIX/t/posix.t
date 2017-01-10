@@ -155,7 +155,7 @@ if ( $unix_mode ) {
     $pat = qr#[\\/]POSIX$#i;
 }
 else {
-    $pat = qr/\.POSIX]/i;
+    $pat = qr/\.POSIX\]/i;
 }
 like( getcwd(), qr/$pat/, 'getcwd' );
 

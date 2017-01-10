@@ -34,12 +34,12 @@ is($_, "aBCDEFGHIJKLMNOPQRSTUVWXYz",    'partial uc');
 
 eval 'tr/a/\N{KATAKANA LETTER AINU P}/;';
 like $@,
-     qr/\\N\{KATAKANA LETTER AINU P} must not be a named sequence in transliteration operator/,
+     qr/\\N\{KATAKANA LETTER AINU P\} must not be a named sequence in transliteration operator/,
      "Illegal to tr/// named sequence";
 
 eval 'tr/\x{101}-\x{100}//;';
 like $@,
-     qr/Invalid range "\\x\{0101}-\\x\{0100}" in transliteration operator/,
+     qr/Invalid range "\\x\{0101\}-\\x\{0100\}" in transliteration operator/,
      "UTF-8 range with min > max";
 
 SKIP: {   # Test literal range end point special handling

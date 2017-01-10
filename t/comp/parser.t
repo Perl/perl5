@@ -444,7 +444,7 @@ is prototype "Hello::_he_said", '_', 'initial tick in sub declaration';
 	'literal -> after an array subscript within ""');
     @x = ['string'];
     # this used to give "string"
-    like("$x[0]-> [0]", qr/^ARRAY\([^)]*\)-> \[0]\z/,
+    like("$x[0]-> [0]", qr/^ARRAY\([^)]*\)-> \[0\]\z/,
 	'literal -> [0] after an array subscript within ""');
 }
 

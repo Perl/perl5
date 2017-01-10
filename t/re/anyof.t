@@ -333,8 +333,8 @@ while (defined (my $test = shift @tests)) {
 
         # Convert platform-independent values to what is suitable for the
         # platform
-        $test =~ s/{INFINITY}/$highest_cp/g;
-        $test =~ s/{INFINITY_minus_1}/$next_highest_cp/g;
+        $test =~ s/\{INFINITY\}/$highest_cp/g;
+        $test =~ s/\{INFINITY_minus_1\}/$next_highest_cp/g;
 
         $test = "qr/$test/";
         my $actual_test = "use re qw(Debug COMPILE); $test";

@@ -107,7 +107,7 @@ sub testit {
     use feature [^\n]+
 (?:    (?:CORE::)?state sub \w+;
 )?    \Q$vars\E\(\) = (.*)
-}/s) {
+\}/s) {
 	    ::fail($desc);
 	    ::diag("couldn't extract line from boilerplate\n");
 	    ::diag($got_text);

@@ -52,7 +52,7 @@ like $@, qr/^Invalid SCALAR attribute: ["']?plugh["']? at/;
 eval '{my $x : plugh}';
 like $@, qr/^Invalid SCALAR attribute: ["']?plugh["']? at/;
 eval '{my ($x,$y) : plugh(})}';
-like $@, qr/^Invalid SCALAR attribute: ["']?plugh\(}\)["']? at/;
+like $@, qr/^Invalid SCALAR attribute: ["']?plugh\(\}\)["']? at/;
 
 # More syntax tests from the attributes manpage
 eval 'my $x : switch(10,foo(7,3))  :  expensive;';

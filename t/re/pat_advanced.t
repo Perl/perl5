@@ -947,7 +947,7 @@ sub run_tests {
         ok "\N{LONG-STR}" =~ /^\N{LONG-STR}$/i, 'Verify under folding that long string works';
 
         eval '/(?[[\N{EMPTY-STR}]])/';
-        ok $@ && $@ =~ /Zero length \\N\{}/;
+        ok $@ && $@ =~ /Zero length \\N\{\}/;
 
         undef $w;
         {
