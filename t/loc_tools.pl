@@ -59,7 +59,7 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
     # Adds the locale given by the first parameter to the list given by the
     # 3rd iff the platform supports the locale in each of the category numbers
     # given by the 2nd parameter, which is either a single category or a
-    # reference to a list of categories.  The list must be sorted so that
+    # reference to a list of categories.  The list MUST be sorted so that
     # CTYPE is first, COLLATE is last unless ALL is present, in which case
     # that comes after COLLATE.  This is because locale.c detects bad locales
     # only with CTYPE, and COLLATE on some platforms can core dump if it is a
