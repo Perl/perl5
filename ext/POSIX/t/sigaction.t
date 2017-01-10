@@ -204,7 +204,9 @@ SKIP: {
             ||
             ($^O.$Config{osvers}) =~ /^openbsd[0-6]\./
             ||
-            ($^O eq 'gnu'));
+            ($^O eq 'gnu')
+            ||
+            ($^O eq 'dragonfly'));
     my $tests = keys %{{ %siginfo, %opt_val }};
     eval 'use POSIX qw(SA_SIGINFO); SA_SIGINFO';
     skip("no SA_SIGINFO", $tests) if $@;

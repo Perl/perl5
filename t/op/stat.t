@@ -43,10 +43,11 @@ $Is_Solaris = $^O eq 'solaris';
 $Is_VMS     = $^O eq 'VMS';
 $Is_MPRAS   = $^O =~ /svr4/ && -f '/etc/.relid';
 $Is_Android = $^O =~ /android/;
+$Is_Dfly    = $^O eq 'dragonfly';
 
 $Is_Dosish  = $Is_Dos || $Is_OS2 || $Is_MSWin32 || $Is_NetWare;
 
-$Is_UFS     = $Is_Darwin && (() = `df -t ufs . 2>/dev/null`) == 2;
+$ufs_no_ctime = ($Is_Dfly || $Is_Darwin) && (() = `df -t ufs . 2>/dev/null`) == 2;
 
 if ($Is_Cygwin && !is_miniperl) {
   require Win32;
@@ -141,8 +142,7 @@ SKIP: {
         # no ctime concept $ctime is ALWAYS == $mtime
         # expect netware to be the same ...
         skip "No ctime concept on this OS", 2
-                                     if $Is_MSWin32 || 
-                                        ($Is_Darwin && $Is_UFS);
+                                     if $Is_MSWin32 || $ufs_no_ctime;
 
         if( !ok($mtime, 'hard link mtime') ||
             !isnt($mtime, $ctime, 'hard link ctime != mtime') ) {
@@ -151,8 +151,8 @@ SKIP: {
 # has this problem.  Building on the ClearCase VOBS filesystem may also
 # cause this failure.
 #
-# Darwin's UFS doesn't have a ctime concept, and thus is expected to fail
-# this test.
+# Some UFS implementations don't have a ctime concept, and thus are
+# expected to fail this test.
 DIAG
         }
     }
