@@ -83,8 +83,8 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
     use warnings 'locale';
 
     local $SIG{__WARN__} = sub {
-        $badutf8 = 1 if $_[0] =~ /Malformed UTF-8/;
-        $plays_well = 0 if $_[0] =~ /Locale .* may not work well/i
+        $badutf8 = 1 if grep { /Malformed UTF-8/ } @_;
+        $plays_well = 0 if grep { /Locale .* may not work well/i } @_;
     };
 
     # Incompatible locales aren't warned about unless using locales.
