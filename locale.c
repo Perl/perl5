@@ -420,10 +420,10 @@ Perl_new_ctype(pTHX_ const char *newctype)
                               : ""
                             );
             /* If we are actually in the scope of the locale or are debugging,
-             * output the message now.  Otherwise we save it to be output at
-             * the first operation using this locale, if that actually happens.
-             * Most programs don't use locales, so they are immune to bad ones.
-             * */
+             * output the message now.  If not in that scope, we save the
+             * message to be output at the first operation using this locale,
+             * if that actually happens.  Most programs don't use locales, so
+             * they are immune to bad ones.  */
             if (IN_LC(LC_CTYPE) || UNLIKELY(DEBUG_L_TEST)) {
 
                 /* We have to save 'newctype' because the setlocale() just
@@ -436,10 +436,14 @@ Perl_new_ctype(pTHX_ const char *newctype)
 
                 /* The '0' below suppresses a bogus gcc compiler warning */
                 Perl_warner(aTHX_ packWARN(WARN_LOCALE), SvPVX(PL_warn_locale), 0);
+
                 setlocale(LC_CTYPE, badlocale);
                 Safefree(badlocale);
-                SvREFCNT_dec_NN(PL_warn_locale);
-                PL_warn_locale = NULL;
+
+                if (IN_LC(LC_CTYPE)) {
+                    SvREFCNT_dec_NN(PL_warn_locale);
+                    PL_warn_locale = NULL;
+                }
             }
         }
     }
