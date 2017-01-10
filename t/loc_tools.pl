@@ -95,14 +95,14 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
                                             unless $category =~ / ^ -? \d+ $ /x;
 
         return unless setlocale($category, $locale);
-        return if ! $plays_well && ! $allow_incompatible;
+        last if $badutf8 || ! $plays_well;
     }
 
     if ($badutf8) {
         ok(0, "Verify locale name doesn't contain malformed utf8");
         return;
     }
-    push @$list, $locale;
+    push @$list, $locale if $plays_well || $allow_incompatible;
 }
 
 sub _decode_encodings { # For use only by other functions in this file!
