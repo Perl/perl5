@@ -553,7 +553,7 @@ Perl_new_collate(pTHX_ const char *newcoll)
          * This has the desired effect that strcmp() will look at the secondary
          * or tertiary weights only if the strings compare equal at all higher
          * priority weights.  The spaces shown here, like in
-         *  "A¹B¹C¹ * A²B²C² "
+         *  "A¹B¹C¹ A²B²C² "
          * are not just for readability.  In the general case, these must
          * actually be bytes, which we will call here 'separator weights'; and
          * they must be smaller than any other weight value, but since these
