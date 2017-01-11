@@ -12,7 +12,7 @@ BEGIN {
 
 BEGIN { require "./test.pl";  require "./loc_tools.pl"; }
 
-plan(tests => 127);
+plan(tests => 130);
 
 use Config;
 
@@ -481,6 +481,27 @@ CODE
                        "chdir while in-place editing");
         ok(open(my $fh, "<", $work), "open out file");
         is(scalar <$fh>, "xx\n", "file successfully saved after chdir");
+        close $fh;
+    }
+
+  SKIP:
+    {
+        skip "Need threads and full perl", 3
+          if !$Config{useithreads} || is_miniperl();
+        fresh_perl_is(<<'CODE', "ok\n", { stderr => 1 },
+use threads;
+use strict;
+@ARGV = ("inplacetmp/foo");
+$^I = "";
+while (<>) {
+  threads->create(sub { })->join;
+  print "yy\n";
+}
+print "ok\n";
+CODE
+                      "threads while in-place editing");
+        ok(open(my $fh, "<", $work), "open out file");
+        is(scalar <$fh>, "yy\n", "file successfully saved after chdir");
         close $fh;
     }
 
