@@ -813,6 +813,96 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
     return FALSE;
 }
 
+/* Open a temp file in the same directory as an original name.
+*/
+
+static bool
+S_openindirtemp(pTHX_ GV *gv, SV *orig_name, SV *temp_out_name) {
+    int fd;
+    PerlIO *fp;
+    const char *p = SvPV_nolen(orig_name);
+    const char *sep;
+
+    /* look for the last directory separator */
+    sep = strrchr(p, '/');
+
+#ifdef DOSISH
+    {
+        const char *sep2;
+        if ((sep2 = strrchr(sep ? sep : p, '\\')))
+            sep = sep2;
+    }
+#endif
+#ifdef VMS
+    if (!sep) {
+        const char *openp = strchr(p, '[');
+        if (openp)
+            sep = strchr(openp, ']');
+        else {
+            sep = strchr(p, ':');
+        }
+    }
+#endif
+    if (sep) {
+        sv_setpvn(temp_out_name, p, sep - p + 1);
+        sv_catpvs(temp_out_name, "XXXXXXXX");
+    }
+    else
+        sv_setpvs(temp_out_name, "XXXXXXXX");
+
+    fd = Perl_my_mkstemp(SvPVX(temp_out_name));
+
+    if (fd < 0)
+        return FALSE;
+
+    fp = PerlIO_fdopen(fd, "w+");
+    if (!fp)
+        return FALSE;
+
+    return do_openn(gv, "+>&", 3, 0, 0, 0, fp, NULL, 0);
+}
+
+#define ARGVMG_BACKUP_NAME 0
+#define ARGVMG_TEMP_NAME 1
+#define ARGVMG_ORIG_NAME 2
+#define ARGVMG_ORIG_MODE 3
+
+static int
+S_argvout_free(pTHX_ SV *sv, MAGIC *mg) {
+    SV **temp_psv;
+
+    PERL_UNUSED_ARG(sv);
+
+    /* note this can be entered once the file has been
+       successfully deleted too */
+    assert(mg->mg_obj && SvTYPE(mg->mg_obj) == SVt_PVAV);
+    temp_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_TEMP_NAME, FALSE);
+    if (temp_psv && *temp_psv && SvOK(*temp_psv)) {
+        UNLINK(SvPVX(*temp_psv));
+    }
+
+    return 0;
+}
+
+/* Magic of this type has an AV containing the following:
+   0: name of the backup file (if any)
+   1: name of the temp output file
+   2: name of the original file
+   3: file mode of the original file
+ */
+
+static const MGVTBL argvout_vtbl =
+    {
+        NULL, /* svt_get */
+        NULL, /* svt_set */
+        NULL, /* svt_len */
+        NULL, /* svt_clear */
+        S_argvout_free, /* svt_free */
+        NULL, /* svt_copy */
+        NULL, /* svt_dup */
+        NULL  /* svt_local */
+    };
+
 PerlIO *
 Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 {
@@ -834,15 +924,14 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 				    SvREFCNT_inc_simple_NN(PL_defoutgv));
 	}
     }
-    if (PL_filemode & (S_ISUID|S_ISGID)) {
-	PerlIO_flush(IoIFP(GvIOn(PL_argvoutgv)));  /* chmod must follow last write */
-#ifdef HAS_FCHMOD
-	if (PL_lastfd != -1)
-	    (void)fchmod(PL_lastfd,PL_filemode);
-#else
-	(void)PerlLIO_chmod(PL_oldname,PL_filemode);
-#endif
+
+    {
+        IO * const io = GvIOp(PL_argvoutgv);
+        if (io && IoIFP(io) && old_out_name) {
+            do_close(PL_argvoutgv, FALSE);
+        }
     }
+
     PL_lastfd = -1;
     PL_filemode = 0;
     if (!GvAV(gv))
@@ -865,13 +954,6 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
         }
         else {
             Stat_t statbuf;
-            {
-                IO * const io = GvIOp(PL_argvoutgv);
-                if (io && IoIFP(io) && old_out_name && !io_close(io, PL_argvoutgv, FALSE, FALSE)) {
-                    Perl_croak(aTHX_ "Failed to close in-place edit file %"
-                               SVf ": %s\n", old_out_name, Strerror(errno));
-                }
-            }
             /* This very long block ends with return IoIFP(GvIOp(gv));
                Both this block and the block above fall through on open
                failure to the warning code, and then the while loop above tries
@@ -883,6 +965,8 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 #endif
                 Uid_t fileuid;
                 Gid_t filegid;
+                AV *magic_av = NULL;
+                SV *temp_name_sv = NULL;
 
 		TAINT_PROPER("inplace open");
 		if (oldlen == 1 && *PL_oldname == '-') {
@@ -904,6 +988,7 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 		    do_close(gv,FALSE);
 		    continue;
 		}
+                magic_av = newAV();
 		if (*PL_inplace && strNE(PL_inplace, "*")) {
 		    const char *star = strchr(PL_inplace, '*');
 		    if (star) {
@@ -933,71 +1018,33 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 					 "Can't do inplace edit: %"
                                          SVf " would not be unique",
 					 SVfARG(sv));
-			do_close(gv,FALSE);
-			continue;
+                        goto cleanup_argv;
 		    }
 #endif
-#ifdef HAS_RENAME
-#if !defined(DOSISH) && !defined(__CYGWIN__)
-		    if (PerlLIO_rename(PL_oldname,SvPVX_const(sv)) < 0) {
-			Perl_ck_warner_d(aTHX_ packWARN(WARN_INPLACE),
-					 "Can't rename %s to %" SVf
-                                         ": %s, skipping file",
-					 PL_oldname, SVfARG(sv),
-                                         Strerror(errno));
-			do_close(gv,FALSE);
-			continue;
-		    }
-#else
-		    do_close(gv,FALSE);
-		    (void)PerlLIO_unlink(SvPVX_const(sv));
-		    (void)PerlLIO_rename(PL_oldname,SvPVX_const(sv));
-		    do_open_raw(gv, SvPVX_const(sv), SvCUR(sv), O_RDONLY, 0, NULL);
-#endif /* DOSISH */
-#else
-		    (void)UNLINK(SvPVX_const(sv));
-		    if (link(PL_oldname,SvPVX_const(sv)) < 0) {
-			Perl_ck_warner_d(aTHX_ packWARN(WARN_INPLACE),
-					 "Can't rename %s to %" SVf ": %s, skipping file",
-					 PL_oldname, SVfARG(sv), Strerror(errno) );
-			do_close(gv,FALSE);
-			continue;
-		    }
-		    (void)UNLINK(PL_oldname);
-#endif
-		}
-		else {
-#if !defined(DOSISH) && !defined(__amigaos4__)
-#  ifndef VMS  /* Don't delete; use automatic file versioning */
-		    if (UNLINK(PL_oldname) < 0) {
-			Perl_ck_warner_d(aTHX_ packWARN(WARN_INPLACE),
-					 "Can't remove %s: %s, skipping file",
-					 PL_oldname, Strerror(errno) );
-			do_close(gv,FALSE);
-			continue;
-		    }
-#  endif
-#else
-		    Perl_croak(aTHX_ "Can't do inplace edit without backup");
-#endif
+                    av_store(magic_av, ARGVMG_BACKUP_NAME, newSVsv(sv));
 		}
 
 		sv_setpvn(sv,PL_oldname,oldlen);
 		SETERRNO(0,0);		/* in case sprintf set errno */
-		if (!Perl_do_open_raw(aTHX_ PL_argvoutgv, SvPVX_const(sv),
-                                      SvCUR(sv),
-#ifdef VMS
-                                      O_WRONLY|O_CREAT|O_TRUNC, 0,
-#else
-                                      O_WRONLY|O_CREAT|OPEN_EXCL, 0600,
-#endif
-                                      NULL)) {
-		    Perl_ck_warner_d(aTHX_ packWARN(WARN_INPLACE), "Can't do inplace edit on %s: %s",
+                temp_name_sv = newSV(0);
+                if (!S_openindirtemp(aTHX_ PL_argvoutgv, GvSV(gv), temp_name_sv)) {
+                    SvREFCNT_dec(temp_name_sv);
+                    /* diag_listed_as: Can't do inplace edit on %s: %s */
+                    Perl_ck_warner_d(aTHX_ packWARN(WARN_INPLACE), "Can't do inplace edit on %s: Cannot make temp name: %s",
 				     PL_oldname, Strerror(errno) );
-		    do_close(gv,FALSE);
-		    continue;
+#ifndef FLEXFILENAMES
+                cleanup_argv:
+#endif
+                    do_close(gv,FALSE);
+                    SvREFCNT_dec(magic_av);
+                    continue;
 		}
+                av_store(magic_av, ARGVMG_TEMP_NAME, temp_name_sv);
+                av_store(magic_av, ARGVMG_ORIG_NAME, newSVsv(sv));
+                av_store(magic_av, ARGVMG_ORIG_MODE, newSVuv(PL_filemode));
 		setdefout(PL_argvoutgv);
+                sv_magicext((SV*)GvIOp(PL_argvoutgv), (SV*)magic_av, PERL_MAGIC_uvar, &argvout_vtbl, NULL, 0);
+                SvREFCNT_dec(magic_av);
 		PL_lastfd = PerlIO_fileno(IoIFP(GvIOp(PL_argvoutgv)));
                 if (PL_lastfd >= 0) {
                     (void)PerlLIO_fstat(PL_lastfd,&statbuf);
@@ -1039,17 +1086,6 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
     if (io && (IoFLAGS(io) & IOf_ARGV))
 	IoFLAGS(io) |= IOf_START;
     if (PL_inplace) {
-        if (old_out_name) {
-            IO * const io = GvIOp(PL_argvoutgv);
-            if (io && IoIFP(io) && !io_close(io, PL_argvoutgv, FALSE, FALSE)) {
-                Perl_croak(aTHX_ "Failed to close in-place edit file %" SVf ": %s\n",
-                           old_out_name, Strerror(errno));
-            }
-        }
-        else {
-            /* maybe this is no longer wanted */
-            (void)do_close(PL_argvoutgv,FALSE);
-        }
 	if (io && (IoFLAGS(io) & IOf_ARGV)
 	    && PL_argvout_stack && AvFILLp(PL_argvout_stack) >= 0)
 	{
@@ -1069,6 +1105,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 {
     bool retval;
     IO *io;
+    MAGIC *mg;
 
     if (!gv)
 	gv = PL_argvgv;
@@ -1085,7 +1122,112 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 	}
 	return FALSE;
     }
-    retval = io_close(io, NULL, not_implicit, FALSE);
+    if ((mg = mg_findext((SV*)io, PERL_MAGIC_uvar, &argvout_vtbl))
+        && mg->mg_obj) {
+        /* handle to an in-place edit work file */
+        SV **back_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_BACKUP_NAME, FALSE);
+        SV **temp_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_TEMP_NAME, FALSE);
+        /* PL_oldname may have been modified by a nested ARGV use at this point */
+        SV **orig_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_NAME, FALSE);
+        SV **mode_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_MODE, FALSE);
+        UV mode;
+        int fd;
+
+        const char *orig_pv;
+
+        assert(temp_psv && *temp_psv);
+        assert(orig_psv && *orig_psv);
+        assert(mode_psv && *mode_psv);
+
+        orig_pv = SvPVX(*orig_psv);
+
+        mode = SvUV(*mode_psv);
+
+        if ((mode & (S_ISUID|S_ISGID)) != 0
+            && (fd = PerlIO_fileno(IoIFP(io))) >= 0) {
+            (void)PerlIO_flush(IoIFP(io));
+#ifdef HAS_FCHMOD
+            (void)fchmod(fd, mode);
+#else
+            (void)PerlLIO_chmod(orig_pv, mode);
+#endif
+        }
+
+        retval = io_close(io, NULL, not_implicit, FALSE);
+
+        if (retval) {
+#if defined(DOSISH) || defined(__CYGWIN__)
+            if (PL_argvgv && GvIOp(PL_argvgv)
+                && IoIFP(GvIOp(PL_argvgv))
+                && (IoFLAGS(GvIOp(PL_argvgv)) & (IOf_ARGV|IOf_START)) == IOf_ARGV) {
+                do_close(PL_argvgv, FALSE);
+            }
+#endif
+            if (back_psv && *back_psv) {
+#if defined(HAS_LINK) && !defined(DOSISH) && !defined(__CYGWIN__) && defined(HAS_RENAME)
+                if (link(orig_pv, SvPVX(*back_psv)) < 0)
+#endif
+                {
+#ifdef HAS_RENAME
+                    if (PerlLIO_rename(orig_pv, SvPVX(*back_psv)) < 0) {
+                        if (!not_implicit) {
+                            Perl_croak(aTHX_ "Can't rename %s to %s: %s, skipping file",
+                                       SvPVX(*orig_psv), SvPVX(*back_psv), Strerror(errno));
+                        }
+                        /* should we warn here? */
+                        goto abort_inplace;
+                    }
+#else
+                    (void)UNLINK(SvPVX(*back_psv));
+                    if (link(orig_pv, SvPVX(*back_psv))) {
+                        if (!not_implicit) {
+                            Perl_croak(aTHX_ "Can't rename %s to %s: %s, skipping file",
+                                       SvPVX(*orig_psv), SvPVX(*back_psv), Strerror(errno));
+                        }
+                        goto abort_inplace;
+                    }
+                    /* we need to use link() to get the temp into place too, and linK()
+                       fails if the new link name exists */
+                    (void)UNLINK(orig_pv);
+#endif
+                }
+            }
+#if defined(DOSISH) || defined(__CYGWIN__) || !defined(HAS_RENAME)
+            else {
+                UNLINK(orig_pv);
+            }
+#endif
+            if (
+#ifdef HAS_RENAME
+                PerlLIO_rename(SvPVX(*temp_psv), orig_pv) < 0
+#else
+                link(SvPVX(*temp_psv), orig_pv) < 0
+#endif
+                ) {
+                if (!not_implicit) {
+                    Perl_croak(aTHX_ "Can't rename in-place work file '%s' to '%s': %s\n",
+                               SvPVX(*temp_psv), SvPVX(*orig_psv), Strerror(errno));
+                }
+            abort_inplace:
+                UNLINK(SvPVX_const(*temp_psv));
+                retval = FALSE;
+            }
+#ifndef HAS_RENAME
+            UNLINK(SvPVX(*temp_psv));
+#endif
+        }
+        else {
+            UNLINK(SvPVX_const(*temp_psv));
+            if (!not_implicit) {
+                Perl_croak(aTHX_ "Failed to close in-place work file %s: %s",
+                           SvPVX(*temp_psv), Strerror(errno));
+            }
+        }
+        mg_freeext((SV*)io, PERL_MAGIC_uvar, &argvout_vtbl);
+    }
+    else {
+        retval = io_close(io, NULL, not_implicit, FALSE);
+    }
     if (not_implicit) {
 	IoLINES(io) = 0;
 	IoPAGE(io) = 0;

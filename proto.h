@@ -2006,6 +2006,9 @@ PERL_CALLCONV int	Perl_mg_free(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_mg_free_type(pTHX_ SV* sv, int how);
 #define PERL_ARGS_ASSERT_MG_FREE_TYPE	\
 	assert(sv)
+PERL_CALLCONV void	Perl_mg_freeext(pTHX_ SV* sv, int how, const MGVTBL *vtbl);
+#define PERL_ARGS_ASSERT_MG_FREEEXT	\
+	assert(sv)
 PERL_CALLCONV int	Perl_mg_get(pTHX_ SV* sv);
 #define PERL_ARGS_ASSERT_MG_GET	\
 	assert(sv)

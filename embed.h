@@ -345,6 +345,7 @@
 #define mg_findext		Perl_mg_findext
 #define mg_free(a)		Perl_mg_free(aTHX_ a)
 #define mg_free_type(a,b)	Perl_mg_free_type(aTHX_ a,b)
+#define mg_freeext(a,b,c)	Perl_mg_freeext(aTHX_ a,b,c)
 #define mg_get(a)		Perl_mg_get(aTHX_ a)
 #define mg_length(a)		Perl_mg_length(aTHX_ a)
 #define mg_magical		Perl_mg_magical
