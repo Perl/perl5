@@ -871,7 +871,8 @@ S_openindirtemp(pTHX_ GV *gv, SV *orig_name, SV *temp_out_name) {
 #define ARGVMG_TEMP_NAME 1
 #define ARGVMG_ORIG_NAME 2
 #define ARGVMG_ORIG_MODE 3
-#define ARGVMG_ORIG_DIRP 4
+#define ARGVMG_ORIG_PID 4
+#define ARGVMG_ORIG_DIRP 5
 
 static int
 S_argvout_free(pTHX_ SV *io, MAGIC *mg) {
@@ -891,23 +892,34 @@ S_argvout_free(pTHX_ SV *io, MAGIC *mg) {
         SV **dir_psv;
         DIR *dir;
 #endif
-        /* if we get here the file hasn't been closed explicitly by the
-           user and hadn't been closed implicitly by nextargv(), so
-           abandon the edit */
         PerlIO *iop = IoIFP(io);
-        (void)PerlIO_close(iop);
-        IoIFP(io) = IoOFP(io) = NULL;
-        temp_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_TEMP_NAME, FALSE);
-        assert(temp_psv && *temp_psv && SvPOK(*temp_psv));
+
+        assert(SvTYPE(mg->mg_obj) == SVt_PVAV);
+
+        pid_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_PID, FALSE);
+
+        assert(pid_psv && *pid_psv);
+
+        if (SvIV(*pid_psv) == (IV)PerlProc_getpid()) {
+            /* if we get here the file hasn't been closed explicitly by the
+               user and hadn't been closed implicitly by nextargv(), so
+               abandon the edit */
+            (void)PerlIO_close(iop);
+            IoIFP(io) = IoOFP(io) = NULL;
+            temp_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_TEMP_NAME, FALSE);
+            assert(temp_psv && *temp_psv && SvPOK(*temp_psv));
 #ifdef ARGV_USE_ATFUNCTIONS
-        dir_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_DIRP, FALSE);
-        assert(dir_psv && *dir_psv && SvIOK(*dir_psv));
-        dir = INT2PTR(DIR *, SvIV(*dir_psv));
-        (void)unlinkat(my_dirfd(dir), SvPVX(*temp_psv), 0);
-        closedir(dir);
+            dir_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_DIRP, FALSE);
+            assert(dir_psv && *dir_psv && SvIOK(*dir_psv));
+            dir = INT2PTR(DIR *, SvIV(*dir_psv));
+            if (dir) {
+                (void)unlinkat(my_dirfd(dir), SvPVX(*temp_psv), 0);
+                closedir(dir);
+            }
 #else
-        (void)UNLINK(SvPVX(*temp_psv));
+            (void)UNLINK(SvPVX(*temp_psv));
 #endif
+        }
     }
 
     return 0;
@@ -929,9 +941,11 @@ S_argvout_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param) {
    1: name of the temp output file
    2: name of the original file
    3: file mode of the original file
+   4: pid of the process we opened at, to prevent doing the renaming
+      etc in both the child and the parent after a fork
 
 If we have unlinkat(), renameat(), fchmodat(), dirfd() we also keep:
-   4: the DIR * for the current directory when we open the file, stored as an IV
+   5: the DIR * for the current directory when we open the file, stored as an IV
  */
 
 static const MGVTBL argvout_vtbl =
@@ -1089,6 +1103,7 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
                 av_store(magic_av, ARGVMG_TEMP_NAME, temp_name_sv);
                 av_store(magic_av, ARGVMG_ORIG_NAME, newSVsv(sv));
                 av_store(magic_av, ARGVMG_ORIG_MODE, newSVuv(PL_filemode));
+                av_store(magic_av, ARGVMG_ORIG_PID, newSViv((IV)PerlProc_getpid()));
 #ifdef ARGV_USE_ATFUNCTIONS
                 curdir = opendir(".");
                 av_store(magic_av, ARGVMG_ORIG_DIRP, newSViv(PTR2IV(curdir)));
@@ -1182,8 +1197,9 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
         /* PL_oldname may have been modified by a nested ARGV use at this point */
         SV **orig_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_NAME, FALSE);
         SV **mode_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_MODE, FALSE);
+        SV **pid_psv  = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_PID, FALSE);
 #ifdef ARGV_USE_ATFUNCTIONS
-        SV **dir_psv = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_DIRP, FALSE);
+        SV **dir_psv  = av_fetch((AV*)mg->mg_obj, ARGVMG_ORIG_DIRP, FALSE);
         DIR *dir;
         int dfd;
 #endif
@@ -1195,6 +1211,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
         assert(temp_psv && *temp_psv);
         assert(orig_psv && *orig_psv);
         assert(mode_psv && *mode_psv);
+        assert(pid_psv && *pid_psv);
 #ifdef ARGV_USE_ATFUNCTIONS
         assert(dir_psv && *dir_psv);
         dir = INT2PTR(DIR *, SvIVX(*dir_psv));
@@ -1202,7 +1219,6 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 #endif
 
         orig_pv = SvPVX(*orig_psv);
-
         mode = SvUV(*mode_psv);
 
         if ((mode & (S_ISUID|S_ISGID)) != 0
@@ -1216,6 +1232,12 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
         }
 
         retval = io_close(io, NULL, not_implicit, FALSE);
+
+        if (SvIV(*pid_psv) != (IV)PerlProc_getpid()) {
+            /* this is a child process, don't duplicate our rename() etc
+               processing below */
+            goto freext;
+        }
 
         if (retval) {
 #if defined(DOSISH) || defined(__CYGWIN__)
@@ -1305,6 +1327,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
                            SvPVX(*temp_psv), Strerror(errno));
             }
         }
+    freext:
         mg_freeext((SV*)io, PERL_MAGIC_uvar, &argvout_vtbl);
     }
     else {

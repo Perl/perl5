@@ -12,7 +12,7 @@ BEGIN {
 
 BEGIN { require "./test.pl";  require "./loc_tools.pl"; }
 
-plan(tests => 130);
+plan(tests => 133);
 
 use Config;
 
@@ -501,6 +501,38 @@ print "ok\n";
 CODE
                       "threads while in-place editing");
         ok(open(my $fh, "<", $work), "open out file");
+        is(scalar <$fh>, "yy\n", "file successfully saved after chdir");
+        close $fh;
+    }
+
+  SKIP:
+    {
+        skip "Need fork", 3 if !$Config{d_fork};
+        open my $fh, ">", $work
+          or die "Cannot open $work: $!";
+        # we want only a single line for this test, otherwise
+        # it attempts to close the file twice
+        print $fh "foo\n";
+        close $fh or die "Cannot close $work: $!";
+        fresh_perl_is(<<'CODE', "ok\n", { stderr => 1 },
+use strict;
+@ARGV = ("inplacetmp/foo");
+$^I = "";
+while (<>) {
+  my $pid = fork;
+  if (defined $pid && !$pid) {
+     # child
+     close ARGVOUT or die "Cannot close in child\n"; # this shouldn't do ARGVOUT magic
+     exit 0;
+  }
+  wait;
+  print "yy\n";
+  close ARGVOUT or die "Cannot close in parent\n"; # this should
+}
+print "ok\n";
+CODE
+                      "fork while in-place editing");
+        ok(open($fh, "<", $work), "open out file");
         is(scalar <$fh>, "yy\n", "file successfully saved after chdir");
         close $fh;
     }
