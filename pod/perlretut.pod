@@ -1479,7 +1479,7 @@ we can rewrite our 'extended' regexp in the more pleasing form
          |\.\d+     # mantissa of the form .b
          |\d+       # integer of the form a
       )
-      ([eE][+-]?\d+)?  # finally, optionally match an exponent
+      ( [eE] [+-]? \d+ )?  # finally, optionally match an exponent
    $/x;
 
 If whitespace is mostly irrelevant, how does one include space
@@ -1497,7 +1497,7 @@ this to our regexp as follows:
          |\.\d+     # mantissa of the form .b
          |\d+       # integer of the form a
       )
-      ([eE][+-]?\d+)?  # finally, optionally match an exponent
+      ( [eE] [+-]? \d+ )?  # finally, optionally match an exponent
    $/x;
 
 In this form, it is easier to see a way to simplify the
@@ -1513,7 +1513,7 @@ could be factored out:
           )?        # ? takes care of integers of the form a
          |\.\d+     # mantissa of the form .b
       )
-      ([eE][+-]?\d+)?  # finally, optionally match an exponent
+      ( [eE] [+-]? \d+ )?  # finally, optionally match an exponent
    $/x;
 
 or written in the compact form,
