@@ -177,7 +177,6 @@ struct RExC_state_t {
     U32         study_chunk_recursed_bytes;  /* bytes in bitmap */
     I32		in_lookbehind;
     I32		contains_locale;
-    I32		contains_i;
     I32		override_recoding;
 #ifdef EBCDIC
     I32		recode_x_to_native;
@@ -272,7 +271,6 @@ struct RExC_state_t {
                                    (pRExC_state->study_chunk_recursed_bytes)
 #define RExC_in_lookbehind	(pRExC_state->in_lookbehind)
 #define RExC_contains_locale	(pRExC_state->contains_locale)
-#define RExC_contains_i (pRExC_state->contains_i)
 #define RExC_override_recoding (pRExC_state->override_recoding)
 #ifdef EBCDIC
 #   define RExC_recode_x_to_native (pRExC_state->recode_x_to_native)
@@ -6921,7 +6919,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_uni_semantics = 0;
     RExC_seen_unfolded_sharp_s = 0;
     RExC_contains_locale = 0;
-    RExC_contains_i = 0;
     RExC_strict = cBOOL(pm_flags & RXf_PMf_STRICT);
     RExC_study_started = 0;
     pRExC_state->runtime_code_qr = NULL;
@@ -6973,9 +6970,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     rx_flags = orig_rx_flags;
 
-    if (rx_flags & PMf_FOLD) {
-        RExC_contains_i = 1;
-    }
     if (   initial_charset == REGEX_DEPENDS_CHARSET
         && (RExC_utf8 ||RExC_uni_semantics))
     {
@@ -10440,9 +10434,6 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 RExC_flags |= posflags;
                 RExC_flags &= ~negflags;
                 set_regex_charset(&RExC_flags, cs);
-                if (RExC_flags & RXf_PMf_FOLD) {
-                    RExC_contains_i = 1;
-                }
 
                 if (UNLIKELY((x_mod_count) > 1)) {
                     vFAIL("Only one /x regex modifier is allowed");
