@@ -12,7 +12,7 @@ BEGIN {
 
 BEGIN { require "./test.pl";  require "./loc_tools.pl"; }
 
-plan(tests => 134);
+plan(tests => 135);
 
 use Config;
 
@@ -552,15 +552,45 @@ CODE
         rmdir "$work.bak" or die "Cannot remove mask backup directory: $!";
     }
 
-    unlink $work;
-
     # we now use temp files for in-place editing, make sure we didn't leave
     # any behind in the above test
     opendir my $d, "inplacetmp" or die "Cannot opendir inplacetmp: $!";
-    my @names = grep !/^\.\.?$/, readdir $d;
+    my @names = grep !/^\.\.?$/ && $_ ne 'foo', readdir $d;
     closedir $d;
     is(scalar(@names), 0, "no extra files")
       or diag "Found @names, expected none";
+
+    # this test can leave the work file in the directory, since making
+    # the directory non-writable also prevents removing the work file
+  SKIP:
+    {
+        # test we handle the rename of the work to the original failing
+        # make it fail by removing write perms from the directory
+        # but first check that doesn't prevent writing
+        chmod 0500, "inplacetmp";
+        my $check = File::Spec->catfile("inplacetmp", "check");
+        my $canwrite = open my $fh, ">", $check;
+        unlink $check;
+        chmod 0700, "inplacetmp" or die "Cannot make inplacetmp writable again: $!";
+        skip "Cannot make inplacetmp read only", 1
+          if $canwrite;
+        fresh_perl_like(<<'CODE', qr/Can't rename/, { stderr => 1 }, "fail final rename");
+@ARGV = ("inplacetmp/foo");
+$^I = "";
+while (<>) {
+  chmod 0500, "inplacetmp";
+  print;
+}
+print "ok\n";
+CODE
+        chmod 0700, "inplacetmp" or die "Cannot make inplacetmp writable again: $!";
+    }
+
+    unlink $work;
+
+    opendir $d, "inplacetmp" or die "Cannot opendir inplacetmp: $!";
+    @names = grep !/^\.\.?$/, readdir $d;
+    closedir $d;
 
     # clean up in case the above failed
     unlink map File::Spec->catfile("inplacetmp", $_), @names;

@@ -1109,6 +1109,7 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
                 av_store(magic_av, ARGVMG_ORIG_DIRP, newSViv(PTR2IV(curdir)));
 #endif
 		setdefout(PL_argvoutgv);
+                sv_setsv(GvSVn(PL_argvoutgv), temp_name_sv);
                 mg = sv_magicext((SV*)GvIOp(PL_argvoutgv), (SV*)magic_av, PERL_MAGIC_uvar, &argvout_vtbl, NULL, 0);
                 mg->mg_flags |= MGf_DUP;
                 SvREFCNT_dec(magic_av);
@@ -1310,6 +1311,11 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 #endif
                 ) {
                 if (!not_implicit) {
+#ifdef ARGV_USE_ATFUNCTIONS
+                    (void)unlinkat(dfd, SvPVX_const(*temp_psv), 0);
+#else
+                    UNLINK(SvPVX(*temp_psv));
+#endif
                     Perl_croak(aTHX_ "Can't rename in-place work file '%s' to '%s': %s\n",
                                SvPVX(*temp_psv), SvPVX(*orig_psv), Strerror(errno));
                 }
