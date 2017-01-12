@@ -6054,9 +6054,14 @@ STATIC char*	S_force_version(pTHX_ char *s, int guessing);
 STATIC char*	S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack);
 #define PERL_ARGS_ASSERT_FORCE_WORD	\
 	assert(start)
-STATIC SV*	S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
+STATIC SV*	S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e, const char** error_msg)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME	\
+	assert(s); assert(e); assert(error_msg)
+
+STATIC SV*	S_get_and_check_backslash_N_name_wrapper(pTHX_ const char* s, const char* const e)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME_WRAPPER	\
 	assert(s); assert(e)
 
 STATIC void	S_incline(pTHX_ const char *s, const char *end);

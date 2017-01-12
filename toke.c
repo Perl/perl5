@@ -2591,7 +2591,25 @@ S_sublex_done(pTHX)
 }
 
 STATIC SV*
-S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
+S_get_and_check_backslash_N_name_wrapper(pTHX_ const char* s, const char* const e)
+{
+    /* This justs wraps get_and_check_backslash_N_name() to output any error
+     * message it returns. */
+
+    const char * error_msg = NULL;
+    SV * result = get_and_check_backslash_N_name(s, e, &error_msg);
+
+    PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME_WRAPPER;
+
+    if (error_msg) {
+        yyerror_pv(error_msg, UTF ? SVf_UTF8 : 0);
+    }
+
+    return result;
+}
+
+STATIC SV*
+S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e, const char ** error_msg)
 {
     /* <s> points to first character of interior of \N{}, <e> to one beyond the
      * interior, hence to the "}".  Finds what the name resolves to, returning
@@ -2612,13 +2630,13 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
     if (!SvCUR(res)) {
         SvREFCNT_dec_NN(res);
         /* diag_listed_as: Unknown charname '%s' */
-        yyerror("Unknown charname ''");
+        *error_msg = Perl_form(aTHX_ "Unknown charname ''");
         return NULL;
     }
 
     res = new_constant( NULL, 0, "charnames", res, NULL, backslash_ptr,
                         /* include the <}> */
-                        e - backslash_ptr + 1, NULL);
+                        e - backslash_ptr + 1, error_msg);
     if (! SvPOK(res)) {
         SvREFCNT_dec_NN(res);
         return NULL;
@@ -2721,14 +2739,11 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         /* diag_listed_as: charnames alias definitions may not contain
                            trailing white-space; marked by <-- HERE in %s
          */
-        yyerror_pv(
-            Perl_form(aTHX_
+        *error_msg = Perl_form(aTHX_
             "charnames alias definitions may not contain trailing "
             "white-space; marked by <-- HERE in %.*s<-- HERE %.*s",
             (int)(s - backslash_ptr + 1), backslash_ptr,
-            (int)(e - s + 1), s + 1
-            ),
-        UTF ? SVf_UTF8 : 0);
+            (int)(e - s + 1), s + 1);
         return NULL;
     }
 
@@ -2745,13 +2760,10 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
                                               0 /* 0 means don't die */ );
             /* diag_listed_as: Malformed UTF-8 returned by \N{%s}
                                immediately after '%s' */
-            yyerror_pv(
-              Perl_form(aTHX_
+            *error_msg = Perl_form(aTHX_
                 "Malformed UTF-8 returned by %.*s immediately after '%.*s'",
                  (int) (e - backslash_ptr + 1), backslash_ptr,
-                 (int) ((char *) first_bad_char_loc - str), str
-              ),
-              SVf_UTF8);
+                 (int) ((char *) first_bad_char_loc - str), str);
             return NULL;
         }
     }
@@ -2764,13 +2776,10 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
          * that this print won't run off the end of the string */
         /* diag_listed_as: Invalid character in \N{...}; marked by <-- HERE
                            in \N{%s} */
-        yyerror_pv(
-          Perl_form(aTHX_
+        *error_msg = Perl_form(aTHX_
             "Invalid character in \\N{...}; marked by <-- HERE in %.*s<-- HERE %.*s",
             (int)(s - backslash_ptr + 1), backslash_ptr,
-            (int)(e - s + 1), s + 1
-          ),
-          UTF ? SVf_UTF8 : 0);
+            (int)(e - s + 1), s + 1);
         return NULL;
     }
 
@@ -2778,14 +2787,11 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         /* diag_listed_as: charnames alias definitions may not contain a
                            sequence of multiple spaces; marked by <-- HERE
                            in %s */
-        yyerror_pv(
-          Perl_form(aTHX_
+        *error_msg = Perl_form(aTHX_
             "charnames alias definitions may not contain a sequence of "
             "multiple spaces; marked by <-- HERE in %.*s<-- HERE %.*s",
             (int)(s - backslash_ptr + 1), backslash_ptr,
-            (int)(e - s + 1), s + 1
-          ),
-          UTF ? SVf_UTF8 : 0);
+            (int)(e - s + 1), s + 1);
         return NULL;
 }
 
@@ -3764,7 +3770,7 @@ S_scan_const(pTHX_ char *start)
 		    }
 		}
 		else /* Here is \N{NAME} but not \N{U+...}. */
-                     if ((res = get_and_check_backslash_N_name(s, e)))
+                     if ((res = get_and_check_backslash_N_name_wrapper(s, e)))
                 {
                     STRLEN len;
                     const char *str = SvPV_const(res, len);
