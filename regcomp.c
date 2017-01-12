@@ -6516,8 +6516,12 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 	    *p++ = pat[s];
 	}
 	*p++ = '\'';
-	if (pRExC_state->pm_flags & RXf_PMf_EXTENDED)
+	if (pRExC_state->pm_flags & RXf_PMf_EXTENDED) {
 	    *p++ = 'x';
+            if (pRExC_state->pm_flags & RXf_PMf_EXTENDED_MORE) {
+                *p++ = 'x';
+            }
+        }
 	*p++ = '\0';
 	DEBUG_COMPILE_r({
             Perl_re_printf( aTHX_
@@ -7162,7 +7166,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                                                    == REG_RUN_ON_COMMENT_SEEN);
 	U8 reganch = (U8)((r->extflags & RXf_PMf_STD_PMMOD)
 			    >> RXf_PMf_STD_PMMOD_SHIFT);
-	const char *fptr = STD_PAT_MODS;        /*"msixn"*/
+	const char *fptr = STD_PAT_MODS;        /*"msixxn"*/
 	char *p;
 
         /* We output all the necessary flags; we never output a minus, as all
@@ -10426,18 +10430,23 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 }
                 flagsp = &negflags;
                 wastedflags = 0;  /* reset so (?g-c) warns twice */
+                x_mod_count = 0;
                 break;
             case ':':
             case ')':
+
+                if ((posflags & (RXf_PMf_EXTENDED|RXf_PMf_EXTENDED_MORE)) == RXf_PMf_EXTENDED) {
+                    negflags |= RXf_PMf_EXTENDED_MORE;
+                }
                 RExC_flags |= posflags;
+
+                if (negflags & RXf_PMf_EXTENDED) {
+                    negflags |= RXf_PMf_EXTENDED_MORE;
+                }
                 RExC_flags &= ~negflags;
                 set_regex_charset(&RExC_flags, cs);
 
-                if (UNLIKELY((x_mod_count) > 1)) {
-                    vFAIL("Only one /x regex modifier is allowed");
-                }
                 return;
-                /*NOTREACHED*/
             default:
               fail_modifiers:
                 RExC_parse += SKIP_IF_CHAR(RExC_parse);
@@ -15788,8 +15797,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                        character; used under /i */
     UV n;
     char * stop_ptr = RExC_end;    /* where to stop parsing */
-    const bool skip_white = cBOOL(ret_invlist); /* ignore unescaped white
-                                                   space? */
+
+    /* ignore unescaped whitespace? */
+    const bool skip_white = cBOOL(   ret_invlist
+                                  || (RExC_flags & RXf_PMf_EXTENDED_MORE));
 
     /* Unicode properties are stored in a swash; this holds the current one
      * being parsed.  If this swash is the only above-latin1 component of the

@@ -4230,14 +4230,6 @@ C<sysread()>ing a file, or when seeking past the end of a scalar opened
 for I/O (in anticipation of future reads and to imitate the behavior
 with real files).
 
-=item Only one /x regex modifier is allowed
-
-=item Only one /x regex modifier is allowed in regex; marked by <-- HERE in m/%s/
-
-(F) You used the C</x> regular expression pattern modifier at least twice in a
-string of modifiers.  This has been made illegal, in order to allow future
-extensions to the Perl language.
-
 =item %s() on unopened %s
 
 (W unopened) An I/O operation was attempted on a filehandle that was

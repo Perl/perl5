@@ -25,7 +25,14 @@ XXX New core language features go here.  Summarize user-visible core language
 enhancements.  Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
-[ List each enhancement as a =head2 entry ]
+=head2 New regular expression modifier C</xx>
+
+Specifying two C<x> characters to modify a regular expression pattern
+does everything that a single one does, but additionally TAB and SPACE
+characters within a bracketed character class are generally ignored and
+can be added to improve readability, like
+S<C</[ ^ A-Z d-f p-x ]/xx>>.  Details are at
+L<perlre/E<sol>x and E<sol>xx>.
 
 =head1 Security
 

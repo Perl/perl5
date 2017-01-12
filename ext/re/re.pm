@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.33";
+our $VERSION     = "0.34";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = ('regmust',
                     qw(is_regexp regexp_pattern
@@ -23,6 +23,7 @@ my %reflags = (
     s => 1 << ($PMMOD_SHIFT + 1),
     i => 1 << ($PMMOD_SHIFT + 2),
     x => 1 << ($PMMOD_SHIFT + 3),
+   xx => 1 << ($PMMOD_SHIFT + 4),
     n => 1 << ($PMMOD_SHIFT + 5),
     p => 1 << ($PMMOD_SHIFT + 6),
     strict => 1 << ($PMMOD_SHIFT + 10),
@@ -112,7 +113,6 @@ sub bits {
     my $on = shift;
     my $bits = 0;
     my $turning_all_off = ! @_ && ! $on;
-    my %seen;   # Has flag already been seen?
     if ($turning_all_off) {
 
         # Pretend were called with certain parameters, which are best dealt
@@ -180,6 +180,7 @@ sub bits {
 	} elsif ($s =~ s/^\///) {
 	    my $reflags = $^H{reflags} || 0;
 	    my $seen_charset;
+            my $x_count = 0;
 	    while ($s =~ m/( . )/gx) {
                 local $_ = $1;
 		if (/[adul]/) {
@@ -225,7 +226,19 @@ sub bits {
                                         && $^H{reflags_charset} == $reflags{$_};
 		    }
 		} elsif (exists $reflags{$_}) {
-                    $seen{$_}++;
+                    if ($_ eq 'x') {
+                        $x_count++;
+                        if ($x_count > 2) {
+			    require Carp;
+                            Carp::carp(
+                            qq 'The "x" flag may only appear a maximum of twice'
+                            );
+                        }
+                        elsif ($x_count == 2) {
+                            $_ = 'xx';  # First time through got the /x
+                        }
+                    }
+
                     $on
 		      ? $reflags |= $reflags{$_}
 		      : ($reflags &= ~$reflags{$_});
@@ -246,10 +259,6 @@ sub bits {
                        join(', ', map {qq('$_')} 'debug', 'debugcolor', sort keys %bitmask),
                        ")");
 	}
-    }
-    if (exists $seen{'x'} && $seen{'x'} > 1) {
-        require Carp;
-        Carp::croak("Only one /x regex modifier is allowed");
     }
 
     if ($turning_all_off) {

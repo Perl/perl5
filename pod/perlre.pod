@@ -86,11 +86,11 @@ inverted, which otherwise could be highly confusing.  See
 L<perlrecharclass/Bracketed Character Classes>, and
 L<perlrecharclass/Negation>.
 
-=item B<C<x>>
+=item B<C<x>> and B<C<xx>>
 X</x>
 
 Extend your pattern's legibility by permitting whitespace and comments.
-Details in L</"/x">
+Details in L</E<sol>x and  E<sol>xx>
 
 =item B<C<p>>
 X</p> X<regex, preserve> X<regexp, preserve>
@@ -164,9 +164,9 @@ the C<(?...)> construct, see L</Extended Patterns> below.
 Some of the modifiers require more explanation than given in the
 L</Overview> above.
 
-=head4 /x
+=head4 C</x> and  C</xx>
 
-C</x> tells
+A single C</x> tells
 the regular expression parser to ignore most whitespace that is neither
 backslashed nor within a bracketed character class.  You can use this to
 break up your regular expression into more readable parts.
@@ -192,6 +192,20 @@ delimiter unless escaped with a backslash.
 A common pitfall is to forget that C<#> characters begin a comment under
 C</x> and are not matched literally.  Just keep that in mind when trying
 to puzzle out why a particular C</x> pattern isn't working as expected.
+
+Starting in Perl v5.26, if the modifier has a second C<x> within it,
+it does everything that a single C</x> does, but additionally
+non-backslashed SPACE and TAB characters within bracketed character
+classes are also generally ignored, and hence can be added to make the
+classes more readable.
+
+    / [d-e g-i 3-7]/xx
+    /[ ! @ " # $ % ^ & * () = ? <> ' ]/xx
+
+may be easier to grasp than the squashed equivalents
+
+    /[d-eg-i3-7]/
+    /[!@"#$%^&*()=?<>']/
 
 Taken together, these features go a long way towards
 making Perl's regular expressions more readable.  Here's an example:
@@ -1137,7 +1151,21 @@ same scope containing the same modifier, so that
 
 matches all of C<foobar> case insensitively, but uses C</m> rules for
 only the C<foo> portion.  The C<a> flag overrides C<aa> as well;
-likewise C<aa> overrides C<a>.
+likewise C<aa> overrides C<a>.  The same goes for C<x> and C<xx>.
+Hence, in
+
+    /(?-x)foo/xx
+
+both C</x> and C</xx> are turned off during matching C<foo>.  And in
+
+    /(?x)foo/x
+
+C</x> but NOT C</xx> is turned on for matching C<foo>.  (One might
+mistakenly think that since the inner C<(?x)> is already in the scope of
+C</x>, that the result would effectively be the sum of them, yielding
+C</xx>.  It doesn't work that way.)  Similarly, doing something like
+C<(?xx-x)foo> turns off all C<x> behavior for matching C<foo>, it is not
+that you subtract 1 C<x> from 2 to get 1 C<x> remaining.
 
 Any of these modifiers can be set to apply globally to all regular
 expressions compiled within the scope of a C<use re>.  See
@@ -1193,9 +1221,10 @@ is equivalent to the more verbose
 Note that any C<()> constructs enclosed within this one will still
 capture unless the C</n> modifier is in effect.
 
-
 Like the L</(?adlupimnsx-imnsx)> construct, C<aa> and C<a> override each
-other.
+other, as do C<xx> and C<x>.  They are not additive.  So, doing
+something like C<(?xx-x:foo)> turns off all C<x> behavior for matching
+C<foo>.
 
 Starting in Perl 5.14, a C<"^"> (caret or circumflex accent) immediately
 after the C<"?"> is a shorthand equivalent to C<d-imnsx>.  Any positive

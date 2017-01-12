@@ -1977,5 +1977,17 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 (^(?:(\d)x)?\d$)	1	y	[$1-$2]	[1-]		#  make sure that we reset capture buffers properly (from regtry)
 (X{2,}[-X]{1,4}){3,}X{2,}	XXX-XXX-XXX--	n	-	-	# [perl #130307]
 
+/[a b]/x	\N{SPACE}	yS	$&	 		# Note a space char here
+/[a b]/xx	\N{SPACE}	n	-	-
+/[a\ b]/xx	\N{SPACE}	y	$&	 		# Note a space char here
+/[ ^ a b ]/xx	a	n	-	-
+/[ ^ a b ]/xx	b	n	-	-
+/[ ^ a b ]/xx	A	y	$&	A
+/(?x:[a b])/xx	\N{SPACE}	yS	$&	 	# Note a space char here
+/(?xx:[a b])/x	\N{SPACE}	n	-	-
+/(?x)[a b]/xx	\N{SPACE}	yS	$&	 	# Note a space char here
+/(?xx)[a b]/x	\N{SPACE}	n	-	-
+/(?-x:[a b])/xx	\N{SPACE}	yS	$&	 	# Note a space char here
+
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab

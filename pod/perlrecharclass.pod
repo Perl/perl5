@@ -576,6 +576,29 @@ Examples:
                       #  containing just [, and the character class is
                       #  followed by a ].
 
+=head3 Bracketed Character Classes and the C</xx> pattern modifier
+
+Normally SPACE and TAB characters have no special meaning inside a
+bracketed character class; they are just added to the list of characters
+matched by the class.  But if the L<C</xx>|perlre/E<sol>x and E<sol>xx>
+pattern modifier is in effect, they are generally ignored and can be
+added to improve readability.  They can't be added in the middle of a
+single construct:
+
+ / [ \x{10 FFFF} ] /xx  # WRONG!
+
+The SPACE in the middle of the hex constant is illegal.
+
+To specify a literal SPACE character, you can escape it with a
+backslash, like:
+
+ /[ a e i o u \  ]/xx
+
+This matches the English vowels plus the SPACE character.
+
+For clarity, you should already have been using C<\t> to specify a
+literal tab, and C<\t> is unaffected by C</xx>.
+
 =head3 Character Ranges
 
 It is not uncommon to want to match a range of characters. Luckily, instead
@@ -1016,7 +1039,7 @@ We can extend the example above:
 This matches digits that are in either the Thai or Laotian scripts.
 
 Notice the white space in these examples.  This construct always has
-the C<E<sol>x> modifier turned on within it.
+the C<E<sol>xx> modifier turned on within it.
 
 The available binary operators are:
 
@@ -1061,18 +1084,9 @@ C<\N{...}>, etc.)
 
 This last example shows the use of this construct to specify an ordinary
 bracketed character class without additional set operations.  Note the
-white space within it; a limited version of C<E<sol>x> is turned on even
-within bracketed character classes, with only the SPACE and TAB (C<\t>)
-characters allowed, and no comments.  Hence,
+white space within it.  This is allowed because C<E<sol>xx> is
+automatically turned on within this construct.
 
- (?[ [#] ])
-
-matches the literal character "#".  To specify a literal white space character,
-you can escape it with a backslash, like:
-
- /(?[ [ a e i o u \  ] ])/
-
-This matches the English vowels plus the SPACE character.
 All the other escapes accepted by normal bracketed character classes are
 accepted here as well; but unrecognized escapes that generate warnings
 in normal classes are fatal errors here.

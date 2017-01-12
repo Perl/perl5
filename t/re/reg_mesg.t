@@ -274,10 +274,10 @@ my @death =
  '/\A{/' => 'Unescaped left brace in regex is illegal here {#} m/\A{{#}/',
  '/:{4,a}/' => 'Unescaped left brace in regex is illegal here {#} m/:{{#}4,a}/',
  '/xa{3\,4}y/' => 'Unescaped left brace in regex is illegal here {#} m/xa{{#}3\,4}y/',
- '/abc/xix' => 'Only one /x regex modifier is allowed',
- '/(?xmsixp:abc)/' => 'Only one /x regex modifier is allowed {#} m/(?xmsixp{#}:abc)/',
- '/(?xmsixp)abc/' => 'Only one /x regex modifier is allowed {#} m/(?xmsixp{#})abc/',
- '/(?xxxx:abc)/' => 'Only one /x regex modifier is allowed {#} m/(?xxxx{#}:abc)/',
+ '/abc/xix' => "",
+ '/(?xmsixp:abc)/' => "",
+ '/(?xmsixp)abc/' => "",
+ '/(?xxxx:abc)/' => "",
  '/(?<=/' => 'Sequence (?... not terminated {#} m/(?<={#}/',                        # [perl #128170]
 
 );

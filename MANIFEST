@@ -5726,6 +5726,7 @@ t/porting/utils.t		Check that utility scripts still compile
 t/re/anyof.t			See if bracketed char classes [...] compile properly
 t/re/charset.t			See if regex modifiers like /d, /u work properly
 t/re/fold_grind.t		See if case folding works properly
+t/re/keep_tabs.t		Tests where \t can't be expanded.
 t/re/no_utf8_pm.t		Verify utf8.pm doesn't get loaded unless required
 t/re/overload.t		Test against string corruption in pattern matches on overloaded objects
 t/re/pat.t			See if esoteric patterns work

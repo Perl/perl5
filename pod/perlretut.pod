@@ -1516,7 +1516,25 @@ could be factored out:
       ( [eE] [+-]? \d+ )?  # finally, optionally match an exponent
    $/x;
 
-or written in the compact form,
+Starting in Perl v5.26, specifying C</xx> changes the square-bracketed
+portions of a pattern to ignore tabs and space characters unless they
+are escaped by preceding them with a backslash.  So, we could write
+
+   /^
+      [ + - ]?\ *   # first, match an optional sign
+      (             # then match integers or f.p. mantissas:
+          \d+       # start out with a ...
+          (
+              \.\d* # mantissa of the form a.b or a.
+          )?        # ? takes care of integers of the form a
+         |\.\d+     # mantissa of the form .b
+      )
+      ( [ e E ] [ + - ]? \d+ )?  # finally, optionally match an exponent
+   $/xx;
+
+This doesn't really improve the legibility of this example, but it's
+available in case you want it.  Squashing the pattern down to the
+compact form, we have
 
     /^[+-]?\ *(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$/;
 
@@ -2379,7 +2397,7 @@ enclosed in parentheses up to two levels deep.  Then the following
 regexp matches:
 
     $x = "abc(de(fg)h";  # unbalanced parentheses
-    $x =~ /\( ( [^()]+ | \([^()]*\) )+ \)/x;
+    $x =~ /\( ( [ ^ () ]+ | \( [ ^ () ]* \) )+ \)/xx;
 
 The regexp matches an open parenthesis, one or more copies of an
 alternation, and a close parenthesis.  The alternation is two-way, with
@@ -2393,7 +2411,7 @@ was no match possible.  To prevent the exponential blowup, we need to
 prevent useless backtracking at some point.  This can be done by
 enclosing the inner quantifier as an independent subexpression:
 
-    $x =~ /\( ( (?>[^()]+) | \([^()]*\) )+ \)/x;
+    $x =~ /\( ( (?> [ ^ () ]+ ) | \([ ^ () ]* \) )+ \)/xx;
 
 Here, C<< (?>[^()]+) >> breaks the degeneracy of string partitioning
 by gobbling up as much of the string as possible and keeping it.   Then
