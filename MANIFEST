@@ -3689,6 +3689,7 @@ dist/threads/t/free2.t		More ithread destruction tests
 dist/threads/t/join.t		Testing the join function
 dist/threads/t/kill.t		Tests thread signalling
 dist/threads/t/kill2.t		Tests thread signalling
+dist/threads/t/kill3.t		Tests thread signalling
 dist/threads/t/libc.t		testing libc functions for threadsafety
 dist/threads/t/list.t		Test threads->list()
 dist/threads/t/no_threads.t	threads test for non-threaded Perls
