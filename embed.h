@@ -1086,6 +1086,7 @@
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
 #define current_re_engine()	Perl_current_re_engine(aTHX)
 #define cv_ckproto_len_flags(a,b,c,d,e)	Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
+#define get_and_check_backslash_N_name(a,b,c,d)	Perl_get_and_check_backslash_N_name(aTHX_ a,b,c,d)
 #define grok_atoUV		Perl_grok_atoUV
 #define mg_find_mglob(a)	Perl_mg_find_mglob(aTHX_ a)
 #define multiconcat_stringify(a)	Perl_multiconcat_stringify(aTHX_ a)
@@ -2030,7 +2031,6 @@
 #define force_strict_version(a)	S_force_strict_version(aTHX_ a)
 #define force_version(a,b)	S_force_version(aTHX_ a,b)
 #define force_word(a,b,c,d)	S_force_word(aTHX_ a,b,c,d)
-#define get_and_check_backslash_N_name(a,b,c)	S_get_and_check_backslash_N_name(aTHX_ a,b,c)
 #define get_and_check_backslash_N_name_wrapper(a,b)	S_get_and_check_backslash_N_name_wrapper(aTHX_ a,b)
 #define incline(a,b)		S_incline(aTHX_ a,b)
 #define intuit_method(a,b,c)	S_intuit_method(aTHX_ a,b,c)

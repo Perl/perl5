@@ -2597,9 +2597,16 @@ S_get_and_check_backslash_N_name_wrapper(pTHX_ const char* s, const char* const 
      * message it returns. */
 
     const char * error_msg = NULL;
-    SV * result = get_and_check_backslash_N_name(s, e, &error_msg);
+    SV * result;
 
     PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME_WRAPPER;
+
+    /* charnames doesn't work well if there have been errors found */
+    if (PL_error_count > 0) {
+	return NULL;
+    }
+
+    result = get_and_check_backslash_N_name(s, e, cBOOL(UTF), &error_msg);
 
     if (error_msg) {
         yyerror_pv(error_msg, UTF ? SVf_UTF8 : 0);
@@ -2608,24 +2615,34 @@ S_get_and_check_backslash_N_name_wrapper(pTHX_ const char* s, const char* const 
     return result;
 }
 
-STATIC SV*
-S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e, const char ** error_msg)
+SV*
+Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
+                                          const char* const e,
+                                          const bool is_utf8,
+                                          const char ** error_msg)
 {
     /* <s> points to first character of interior of \N{}, <e> to one beyond the
      * interior, hence to the "}".  Finds what the name resolves to, returning
-     * an SV* containing it; NULL if no valid one found */
+     * an SV* containing it; NULL if no valid one found.
+     *
+     * 'is_utf8' is TRUE if we know we want the result to be UTF-8 even if it
+     * doesn't have to be. */
 
-    dVAR;
-    SV* res = newSVpvn_flags(s, e - s, UTF ? SVf_UTF8 : 0);
-
+    SV* res;
     HV * table;
     SV **cvp;
     SV *cv;
     SV *rv;
     HV *stash;
     const char* backslash_ptr = s - 3; /* Points to the <\> of \N{... */
+    dVAR;
 
     PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME;
+
+    assert(e >= s);
+    assert(s > (char *) 3);
+
+    res = newSVpvn_flags(s, e - s, (is_utf8) ? SVf_UTF8 : 0);
 
     if (!SvCUR(res)) {
         SvREFCNT_dec_NN(res);
@@ -2665,7 +2682,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e, const
      * characters that begin a character name alias are alphabetic, otherwise
      * would have to create a isCHARNAME_BEGIN macro */
 
-    if (! UTF) {
+    if (! is_utf8) {
         if (! isALPHAU(*s)) {
             goto bad_charname;
         }
@@ -9204,13 +9221,6 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
     /* We assume that this is true: */
     if (*key == 'c') { assert (strEQ(key, "charnames")); }
     assert(type || s);
-
-    /* charnames doesn't work well if there have been errors found */
-    if (PL_error_count > 0 && *key == 'c')
-    {
-	SvREFCNT_dec_NN(sv);
-	return &PL_sv_undef;
-    }
 
     sv_2mortal(sv);			/* Parent created it permanently */
     if (!table
