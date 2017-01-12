@@ -1267,6 +1267,11 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 #  endif
                         ) {
                         if (!not_implicit) {
+#  ifdef ARGV_USE_ATFUNCTIONS
+                            (void)unlinkat(dfd, SvPVX_const(*temp_psv), 0);
+#  else
+                            UNLINK(SvPVX(*temp_psv));
+#  endif
                             Perl_croak(aTHX_ "Can't rename %s to %s: %s, skipping file",
                                        SvPVX(*orig_psv), SvPVX(*back_psv), Strerror(errno));
                         }
