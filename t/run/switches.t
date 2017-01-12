@@ -547,6 +547,9 @@ CODE
     is(scalar(@names), 0, "no extra files")
       or diag "Found @names, expected none";
 
+    # clean up in case the above failed
+    unlink map File::Spec->catfile("inplacetmp", $_), @names;
+
     rmdir "inplacetmp";
 }
 
