@@ -55,6 +55,13 @@ in Perl 5.26. Due to an oversight, not all cases of a use of a literal
 C<{> got a deprecation warning. These cases started warning in Perl 5.26,
 and they will be fatal by Perl 5.30.
 
+=head3 Unqualified C<dump()>
+
+Use of C<dump()> instead of C<CORE::dump()> was deprecated in Perl 5.8,
+and an unqualified C<dump()> will no longer be available in Perl 5.30.
+
+See L<perlfunc/dump>.
+
 
 =head2 Perl 5.28
 

@@ -1078,11 +1078,28 @@ Integer overflow in octal number at - line 11.
 ########
 # toke.c
 BEGIN { $^C = 1; }
+dump;
+CORE::dump;
+EXPECT
+dump() better written as CORE::dump(). dump() will no longer be available in Perl 5.30 at - line 3.
+- syntax OK
+########
+# toke.c
+BEGIN { $^C = 1; }
+no warnings 'deprecated';
+dump;
+CORE::dump;
+EXPECT
+- syntax OK
+########
+# toke.c
+BEGIN { $^C = 1; }
+no warnings 'deprecated';
 use warnings 'misc';
 dump;
 CORE::dump;
 EXPECT
-dump() better written as CORE::dump() at - line 4.
+dump() better written as CORE::dump(). dump() will no longer be available in Perl 5.30 at - line 5.
 - syntax OK
 ########
 # toke.c

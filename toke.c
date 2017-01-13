@@ -7029,8 +7029,10 @@ Perl_yylex(pTHX)
 	    else {			/* no override */
 		tmp = -tmp;
 		if (tmp == KEY_dump) {
-		    Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
-				   "dump() better written as CORE::dump()");
+		    Perl_ck_warner_d(aTHX_ packWARN2(WARN_MISC,WARN_DEPRECATED),
+				     "dump() better written as CORE::dump(). "
+                                     "dump() will no longer be available " 
+                                     "in Perl 5.30");
 		}
 		gv = NULL;
 		gvp = 0;

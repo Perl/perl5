@@ -63,7 +63,13 @@ plan(2);
 # By do the dump in a child, the parent perl process exits back to sh with
 # a normal exit value, so sh won't complain.
 
+# An unqualified dump() will give a deprecation warning. Usually, we'd
+# do a "no warnings 'deprecated'" to shut this off, but since we have
+# chdirred to /tmp, a 'no' won't find the pragma. Hence the fiddling with
+# $SIG{__WARN__}.
+
 fresh_perl_like(<<'PROG', qr/\AA(?!B\z)/, {}, "plain dump quits");
+BEGIN {$SIG {__WARN__} = sub {1;}}
 ++$|;
 my $pid = fork;
 die "fork: $!\n" unless defined $pid;
@@ -80,6 +86,7 @@ else {
 PROG
 
 fresh_perl_like(<<'PROG', qr/A(?!B\z)/, {}, "dump with label quits");
+BEGIN {$SIG {__WARN__} = sub {1;}}
 ++$|;
 my $pid = fork;
 die "fork: $!\n" unless defined $pid;

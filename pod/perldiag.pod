@@ -2077,10 +2077,15 @@ something that isn't defined yet, you don't actually have to define the
 subroutine or package before the current location.  You can use an empty
 "sub foo;" or "package FOO;" to enter a "forward" declaration.
 
-=item dump() better written as CORE::dump()
+=item dump() better written as CORE::dump(). dump() will no longer be available in Perl 5.30
 
-(W misc) You used the obsolescent C<dump()> built-in function, without fully
-qualifying it as C<CORE::dump()>.  Maybe it's a typo.  See L<perlfunc/dump>.
+(D deprecated, misc) You used the obsolescent C<dump()> built-in function,
+without fully qualifying it as C<CORE::dump()>. Maybe it's a typo.
+
+Use of a unqualified C<dump()> was deprecated in Perl 5.30, and this
+will not be available in Perl 5.30.
+
+See L<perlfunc/dump>.
 
 =item dump is not supported
 
@@ -3127,11 +3132,10 @@ C<:utf8> layer.
 =item "%s" is more clearly written simply as "%s" in regex. This will be a fatal error in Perl 5.28; marked by S<<-- HERE> in m/%s/
 
 (W deprecated, regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
-The C<\cI<X>> construct is intended to be a way to specify non-printable
-characters.  You used it for a printable one, which is better written
-as simply itself, perhaps preceded by a backslash for non-word
-characters.  Doing it the way you did is not portable between ASCII
-and EBCDIC platforms.
+
+You specified a character that has the given plainer way of writing it,
+and which is also portable to platforms running with different character
+sets. This usage is deprecated, and will be a fatal error in Perl 5.28.
 
 =item '%s' is not a code reference
 
