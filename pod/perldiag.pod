@@ -1539,7 +1539,7 @@ Perhaps you need to copy the value to a temporary, and repeat that.
 
 Note that ASCII characters that don't map to control characters are
 discouraged, and will generate the warning (when enabled)
-L</""\c%c" is more clearly written simply as "%s"">.
+L</""\c%c" is more clearly written simply as "%s". This will be a fatal error in Perl 5.28">.
 
 =item Character following \%c must be '{' or a single-character Unicode property name in regex; marked by <-- HERE in m/%s/
 
@@ -1646,13 +1646,15 @@ See L<charnames/CUSTOM ALIASES>.
 
 (W unopened) You tried chdir() on a filehandle that was never opened.
 
-=item "\c%c" is more clearly written simply as "%s"
+=item "\c%c" is more clearly written simply as "%s". This will be a fatal error in Perl 5.28
 
-(W syntax) The C<\cI<X>> construct is intended to be a way to specify
-non-printable characters.  You used it for a printable one, which
-is better written as simply itself, perhaps preceded by a backslash
-for non-word characters.  Doing it the way you did is not portable
-between ASCII and EBCDIC platforms.
+(D deprecated, syntax) The C<\cI<X>> construct is intended to be a
+way to specify non-printable characters.  You used it for a printable
+one, which is better written as simply itself, perhaps preceded by
+a backslash for non-word characters.  Doing it the way you did is
+not portable between ASCII and EBCDIC platforms.
+
+This usage is going to result in a fatal error in Perl 5.28.
 
 =item Cloning substitution context is unimplemented
 
@@ -3122,13 +3124,14 @@ code.  To avoid this a future version of perl will throw an exception when
 any of sysread(), recv(), syswrite() or send() are called on handle with the
 C<:utf8> layer.
 
-=item "%s" is more clearly written simply as "%s" in regex; marked by S<<-- HERE> in m/%s/
+=item "%s" is more clearly written simply as "%s" in regex. This will be a fatal error in Perl 5.28; marked by S<<-- HERE> in m/%s/
 
-(W regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
-
-You specified a character that has the given plainer way of writing it,
-and which is also portable to platforms running with different character
-sets.
+(W deprecated, regexp) (only under C<S<use re 'strict'>> or within C<(?[...])>)
+The C<\cI<X>> construct is intended to be a way to specify non-printable
+characters.  You used it for a printable one, which is better written
+as simply itself, perhaps preceded by a backslash for non-word
+characters.  Doing it the way you did is not portable between ASCII
+and EBCDIC platforms.
 
 =item '%s' is not a code reference
 
