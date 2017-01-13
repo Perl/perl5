@@ -167,9 +167,13 @@ use warnings 'syntax' ;
 @a{--$_};
 @a[$_];
 @a[--$_];
+delete @a[$x];
+delete @a{$x};
 no warnings 'syntax' ;
 @a[3];
 @a{3};
+delete @a[$x];
+delete @a{$x};
 EXPECT
 Scalar value @a[3] better written as $a[3] at - line 3.
 Scalar value @a{3} better written as $a{3} at - line 4.
@@ -181,6 +185,8 @@ Scalar value @a{...} better written as $a{...} at - line 9.
 Scalar value @a{...} better written as $a{...} at - line 10.
 Scalar value @a[...] better written as $a[...] at - line 11.
 Scalar value @a[...] better written as $a[...] at - line 12.
+Scalar value @a[...] better written as $a[...] at - line 13.
+Scalar value @a{...} better written as $a{...} at - line 14.
 ########
 # op.c
 use utf8;
