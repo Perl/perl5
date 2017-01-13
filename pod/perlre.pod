@@ -144,7 +144,6 @@ L<perlretut/"Using regular expressions in Perl"> are:
   g  - globally match the pattern repeatedly in the string
 
 Substitution-specific modifiers described in
-
 L<perlop/"s/PATTERN/REPLACEMENT/msixpodualngcer"> are:
 
   e  - evaluate the right-hand side as an expression
@@ -170,7 +169,7 @@ L</Overview> above.
 C</x> tells
 the regular expression parser to ignore most whitespace that is neither
 backslashed nor within a bracketed character class.  You can use this to
-break up your regular expression into (slightly) more readable parts.
+break up your regular expression into more readable parts.
 Also, the C<"#"> character is treated as a metacharacter introducing a
 comment that runs up to the pattern's closing delimiter, or to the end
 of the current line if the pattern extends onto the next line.  Hence,
@@ -189,6 +188,10 @@ escaping the C<\n> with a backslash or C<\Q>.
 You can use L</(?#text)> to create a comment that ends earlier than the
 end of the current line, but C<text> also can't contain the closing
 delimiter unless escaped with a backslash.
+
+A common pitfall is to forget that C<#> characters begin a comment under
+C</x> and are not matched literally.  Just keep that in mind when trying
+to puzzle out why a particular C</x> pattern isn't working as expected.
 
 Taken together, these features go a long way towards
 making Perl's regular expressions more readable.  Here's an example:
@@ -553,7 +556,6 @@ In particular the following metacharacters have their standard I<egrep>-ish
 meanings:
 X<metacharacter>
 X<\> X<^> X<.> X<$> X<|> X<(> X<()> X<[> X<[]>
-
 
     \        Quote the next metacharacter
     ^        Match the beginning of the line
@@ -1075,13 +1077,30 @@ a backslash if it appears in the comment.
 
 See L</E<sol>x> for another way to have comments in patterns.
 
+Note that a comment can go just about anywhere, except in the middle of
+an escape sequence.   Examples:
+
+ qr/foo(?#comment)bar/'  # Matches 'foobar'
+
+ # The pattern below matches 'abcd', 'abccd', or 'abcccd'
+ qr/abc(?#comment between literal and its quantifier){1,3}d/
+
+ # The pattern below generates a syntax error, because the '\p' must
+ # be followed immediately by a '{'.
+ qr/\p(?#comment between \p and its property name){Any}/
+
+ # The pattern below generates a syntax error, because the initial
+ # '\(' is a literal opening parenthesis, and so there is nothing
+ # for the  closing ')' to match
+ qr/\(?#the backslash means this isn't a comment)p{Any}/
+
 =item C<(?adlupimnsx-imnsx)>
 
 =item C<(?^alupimnsx)>
 X<(?)> X<(?^)>
 
 One or more embedded pattern-match modifiers, to be turned on (or
-turned off, if preceded by C<"-">) for the remainder of the pattern or
+turned off if preceded by C<"-">) for the remainder of the pattern or
 the remainder of the enclosing pattern group (if any).
 
 This is particularly useful for dynamically-generated patterns,
@@ -1110,6 +1129,15 @@ modifier outside this group.
 These modifiers do not carry over into named subpatterns called in the
 enclosing group. In other words, a pattern such as C<((?i)(?&NAME))> does not
 change the case-sensitivity of the C<"NAME"> pattern.
+
+A modifier is overridden by later occurrences of this construct in the
+same scope containing the same modifier, so that
+
+    /((?im)foo(?-m)bar)/
+
+matches all of C<foobar> case insensitively, but uses C</m> rules for
+only the C<foo> portion.  The C<a> flag overrides C<aa> as well;
+likewise C<aa> overrides C<a>.
 
 Any of these modifiers can be set to apply globally to all regular
 expressions compiled within the scope of a C<use re>.  See
@@ -1164,6 +1192,10 @@ is equivalent to the more verbose
 
 Note that any C<()> constructs enclosed within this one will still
 capture unless the C</n> modifier is in effect.
+
+
+Like the L</(?adlupimnsx-imnsx)> construct, C<aa> and C<a> override each
+other.
 
 Starting in Perl 5.14, a C<"^"> (caret or circumflex accent) immediately
 after the C<"?"> is a shorthand equivalent to C<d-imnsx>.  Any positive
