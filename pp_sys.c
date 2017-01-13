@@ -3598,14 +3598,14 @@ PP(pp_fttext)
         }
         else
 #endif
-        if (isPRINT_A(*s)
-                   /* VT occurs so rarely in text, that we consider it odd */
-                || (isSPACE_A(*s) && *s != VT_NATIVE)
+             if (  isPRINT_A(*s)
+                    /* VT occurs so rarely in text, that we consider it odd */
+                 || (isSPACE_A(*s) && *s != VT_NATIVE)
 
                     /* But there is a fair amount of backspaces and escapes in
                      * some text */
-                || *s == '\b'
-                || *s == ESC_NATIVE)
+                 || *s == '\b'
+                 || *s == ESC_NATIVE)
         {
             continue;
         }
