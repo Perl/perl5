@@ -13699,6 +13699,18 @@ numerals.
 END
     ));
 
+    # Make sure this assumption in perl core code is valid in this Unicode
+    # release, with known exceptions
+    foreach my $range (property_ref('Numeric-Type')->table('Decimal')->ranges) {
+        next if $range->end - $range->start == 9;
+        next if $range->start == 0x1D7CE;   # This whole range was added in 3.1
+        next if $range->end == 0x19DA && $v_version eq v5.2.0;
+        next if $range->end - $range->start < 9 && $v_version le 4.0.0;
+        Carp::my_carp("Range $range unexpectedly doesn't contain 10"
+                    . " decimal digits.  Code in regcomp.c assumes it does,"
+                    . " and will have to be fixed.  Proceeding anyway.");
+    }
+
     Property->new('Legacy_Case_Folding',
                     File => "Fold",
                     Directory => $map_directory,

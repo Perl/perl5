@@ -16809,15 +16809,19 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                      * must be be all digits or all letters of the same case.
                      * Otherwise, the range is non-portable and unclear as to
                      * what it contains */
-                    if ((isPRINT_A(prevvalue) || isPRINT_A(value))
-                        && (non_portable_endpoint
-                            || ! ((isDIGIT_A(prevvalue) && isDIGIT_A(value))
-                                   || (isLOWER_A(prevvalue) && isLOWER_A(value))
-                                   || (isUPPER_A(prevvalue) && isUPPER_A(value)))))
-                    {
-                        vWARN(RExC_parse, "Ranges of ASCII printables should be some subset of \"0-9\", \"A-Z\", or \"a-z\"");
+                    if (             (isPRINT_A(prevvalue) || isPRINT_A(value))
+                        && (          non_portable_endpoint
+                            || ! (   (isDIGIT_A(prevvalue) && isDIGIT_A(value))
+                                  || (isLOWER_A(prevvalue) && isLOWER_A(value))
+                                  || (isUPPER_A(prevvalue) && isUPPER_A(value))
+                    ))) {
+                        vWARN(RExC_parse, "Ranges of ASCII printables should"
+                                          " be some subset of \"0-9\","
+                                          " \"A-Z\", or \"a-z\"");
                     }
                     else if (prevvalue >= 0x660) { /* ARABIC_INDIC_DIGIT_ZERO */
+                        SSize_t index_start;
+                        SSize_t index_final;
 
                         /* But the nature of Unicode and languages mean we
                          * can't do the same checks for above-ASCII ranges,
@@ -16825,40 +16829,68 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                          * contain only digits from the same group of 10.  The
                          * ASCII case is handled just above.  0x660 is the
                          * first digit character beyond ASCII.  Hence here, the
-                         * range could be a range of digits.  Find out.  */
-                        IV index_start = _invlist_search(PL_XPosix_ptrs[_CC_DIGIT],
-                                                         prevvalue);
-                        IV index_final = _invlist_search(PL_XPosix_ptrs[_CC_DIGIT],
-                                                         value);
+                         * range could be a range of digits.  First some
+                         * unlikely special cases.  Grandfather in that a range
+                         * ending in 19DA (NEW TAI LUE THAM DIGIT ONE) is bad
+                         * if its starting value is one of the 10 digits prior
+                         * to it.  This is because it is an alternate way of
+                         * writing 19D1, and some people may expect it to be in
+                         * that group.  But it is bad, because it won't give
+                         * the expected results.  In Unicode 5.2 it was
+                         * considered to be in that group (of 11, hence), but
+                         * this was fixed in the next version */
 
-                        /* If the range start and final points are in the same
-                         * inversion list element, it means that either both
-                         * are not digits, or both are digits in a consecutive
-                         * sequence of digits.  (So far, Unicode has kept all
-                         * such sequences as distinct groups of 10, but assert
-                         * to make sure).  If the end points are not in the
-                         * same element, neither should be a digit. */
-                        if (index_start == index_final) {
-                            assert(! ELEMENT_RANGE_MATCHES_INVLIST(index_start)
-                            || (invlist_array(PL_XPosix_ptrs[_CC_DIGIT])[index_start+1]
-                               - invlist_array(PL_XPosix_ptrs[_CC_DIGIT])[index_start]
-                               == 10)
-                               /* But actually Unicode did have one group of 11
-                                * 'digits' in 5.2, so in case we are operating
-                                * on that version, let that pass */
-                            || (invlist_array(PL_XPosix_ptrs[_CC_DIGIT])[index_start+1]
-                               - invlist_array(PL_XPosix_ptrs[_CC_DIGIT])[index_start]
-                                == 11
-                               && invlist_array(PL_XPosix_ptrs[_CC_DIGIT])[index_start]
-                                == 0x19D0)
-                            );
+                        if (UNLIKELY(value == 0x19DA && prevvalue >= 0x19D0)) {
+                            goto warn_bad_digit_range;
                         }
-                        else if ((index_start >= 0
-                                  && ELEMENT_RANGE_MATCHES_INVLIST(index_start))
-                                 || (index_final >= 0
-                                     && ELEMENT_RANGE_MATCHES_INVLIST(index_final)))
+                        else if (UNLIKELY(   prevvalue >= 0x1D7CE
+                                          &&     value <= 0x1D7FF))
                         {
-                            vWARN(RExC_parse, "Ranges of digits should be from the same group of 10");
+                            /* This is the only other case currently in Unicode
+                             * where the algorithm below fails.  The code
+                             * points just above are the end points of a single
+                             * range containing only decimal digits.  It is 5
+                             * different series of 0-9.  All other ranges of
+                             * digits currently in Unicode are just a single
+                             * series.  (And mktables will notify us if a later
+                             * Unicode version breaks this.)
+                             *
+                             * If the range being checked is at most 9 long,
+                             * and the digit values represented are in
+                             * numerical order, they are from the same series.
+                             * */
+                            if (         value - prevvalue > 9
+                                ||    (((    value - 0x1D7CE) % 10)
+                                     <= (prevvalue - 0x1D7CE) % 10))
+                            {
+                                goto warn_bad_digit_range;
+                            }
+                        }
+                        else {
+
+                            /* For all other ranges of digits in Unicode, the
+                             * algorithm is just to check if both end points
+                             * are in the same series, which is the same range.
+                             * */
+                            index_start = _invlist_search(
+                                                    PL_XPosix_ptrs[_CC_DIGIT],
+                                                    prevvalue);
+
+                            /* Warn if the range starts and ends with a digit,
+                             * and they are not in the same group of 10. */
+                            if (   index_start >= 0
+                                && ELEMENT_RANGE_MATCHES_INVLIST(index_start)
+                                && (index_final =
+                                    _invlist_search(PL_XPosix_ptrs[_CC_DIGIT],
+                                                    value)) != index_start
+                                && index_final >= 0
+                                && ELEMENT_RANGE_MATCHES_INVLIST(index_final))
+                            {
+                              warn_bad_digit_range:
+                                vWARN(RExC_parse, "Ranges of digits should be"
+                                                  " from the same group of"
+                                                  " 10");
+                            }
                         }
                     }
                 }

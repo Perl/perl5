@@ -628,6 +628,9 @@ my @warning_utf8_only_under_strict = mark_as_utf8(
  '/ネ(?[ [ ᪉ - ᪐ ] ])/; #no latin1' => "Ranges of digits should be from the same group of 10 {#} m/ネ(?[ [ ᪉ - ᪐ {#}] ])/",
  '/ネ[᧙-᧚]/; #no latin1' => "Ranges of digits should be from the same group of 10 {#} m/ネ[᧙-᧚{#}]/",
  '/ネ(?[ [ ᧙ - ᧚ ] ])/; #no latin1' => "Ranges of digits should be from the same group of 10 {#} m/ネ(?[ [ ᧙ - ᧚ {#}] ])/",
+ '/ネ(?[ [ 𝟘 - 𝟡 ] ])/; #no latin1' => "",
+ '/ネ(?[ [ 𝟧 - 𝟱 ] ])/; #no latin1' => "Ranges of digits should be from the same group of 10 {#} m/ネ(?[ [ 𝟧 - 𝟱 {#}] ])/",
+ '/ネ(?[ [ 𝟧 - 𝟰 ] ])/; #no latin1' => "Ranges of digits should be from the same group of 10 {#} m/ネ(?[ [ 𝟧 - 𝟰 {#}] ])/",
 );
 
 push @warning_only_under_strict, @warning_utf8_only_under_strict;
