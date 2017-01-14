@@ -250,7 +250,7 @@ cases such as C<#!/opt/perl64/bin/perl>.
 =head1 Acknowledgements
 
 Perl 5.24.1 represents approximately 8 months of development since Perl 5.24.0
-and contains approximately 8,000 lines of changes across 240 files from 18
+and contains approximately 8,100 lines of changes across 240 files from 18
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
