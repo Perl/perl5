@@ -3112,7 +3112,7 @@ neither as a system call nor an ioctl call (SIOCATMARK).
 Perl.  The current valid ones are given in
 L<perlrebackslash/\b{}, \b, \B{}, \B>.
 
-=item %s() is deprecated on :utf8 handles
+=item %s() is deprecated on :utf8 handles. This will be a fatal error in Perl 5.30
 
 (D deprecated) The sysread(), recv(), syswrite() and send() operators are
 deprecated on handles that have the C<:utf8> layer, either explicitly, or
@@ -3128,9 +3128,10 @@ the layer is some different encoding, such as the example above.
 
 Ideally, all of these operators would completely ignore the C<:utf8> state,
 working only with bytes, but this would result in silently breaking existing
-code.  To avoid this a future version of perl will throw an exception when
-any of sysread(), recv(), syswrite() or send() are called on handle with the
-C<:utf8> layer.
+code.
+
+In Perl 5.30, it will no longer be possible to use sysread(), recv(),
+syswrite() or send() to read or send bytes from/to :utf8 handles.
 
 =item "%s" is more clearly written simply as "%s" in regex. This will be a fatal error in Perl 5.28; marked by S<<-- HERE> in m/%s/
 

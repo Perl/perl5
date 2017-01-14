@@ -129,6 +129,30 @@ becomes
 The use of C<my()> in a false conditional has been deprecated in
 Perl 5.10, and it will become a fatal error in Perl 5.30.
 
+
+=head3 Reading/writing bytes from/to :utf8 handles.
+
+The sysread(), recv(), syswrite() and send() operators are
+deprecated on handles that have the C<:utf8> layer, either explicitly, or
+implicitly, eg., with the C<:encoding(UTF-16LE)> layer.
+
+Both sysread() and recv() currently use only the C<:utf8> flag for the stream,
+ignoring the actual layers.  Since sysread() and recv() do no UTF-8
+validation they can end up creating invalidly encoded scalars.
+
+Similarly, syswrite() and send() use only the C<:utf8> flag, otherwise ignoring
+any layers.  If the flag is set, both write the value UTF-8 encoded, even if
+the layer is some different encoding, such as the example above.
+
+Ideally, all of these operators would completely ignore the C<:utf8> state,
+working only with bytes, but this would result in silently breaking existing
+code.  To avoid this a future version of perl will throw an exception when
+any of sysread(), recv(), syswrite() or send() are called on handle with the
+C<:utf8> layer.
+
+In Perl 5.30, it will no longer be possible to use sysread(), recv(),
+syswrite() or send() to read or send bytes from/to :utf8 handles.
+
 =head2 Perl 5.28
 
 =head3 Attribute "%s" is deprecated, and will disappear in 5.28

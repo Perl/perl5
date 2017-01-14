@@ -958,7 +958,7 @@ sysread $fh, $buf, 10;
 no warnings 'deprecated';
 sysread $fh, $buf, 10;
 EXPECT
-sysread() is deprecated on :utf8 handles at - line 5.
+sysread() is deprecated on :utf8 handles. This will be a fatal error in Perl 5.30 at - line 5.
 ########
 # NAME syswrite() deprecated on :utf8
 my $file = "syswwarn.tmp";
@@ -971,4 +971,4 @@ syswrite $fh, 'ABC';
 close $fh;
 unlink $file;
 EXPECT
-syswrite() is deprecated on :utf8 handles at - line 5.
+syswrite() is deprecated on :utf8 handles. This will be a fatal error in Perl 5.30 at - line 5.
