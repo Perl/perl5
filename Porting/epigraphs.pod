@@ -193,6 +193,45 @@ L<Announced on 2016-05-09 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   To find that the utmost reward
     Of daring should be still to dare.
 
+=head2 v5.24.1 - Charles Dodgson [as "Lewis Carroll"], "The Hunting of the Snark", Fit 4: The Hunting
+
+L<Announced on 2017-01-14 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2017/01/msg242259.html>
+
+  The Bellman looked uffish, and wrinkled his brow.
+    'If only you'd spoken before!
+  It's excessively awkward to mention it now,
+    With the Snark, so to speak, at the door!
+
+  'We should all of us grieve, as you well may believe,
+    If you never were met with again -
+  But surely, my man, when the voyage began,
+    You might have suggested it then?
+
+  'It's excessively awkward to mention it now -
+    As I think I've already remarked.'
+  And the man they called 'Hi!' replied, with a sigh,
+    'I informed you the day we embarked.
+
+  'You may charge me with murder - or want of sense -
+    (We are all of us weak at times):
+  But the slightest approach to a false pretence
+    Was never among my crimes!
+
+  'I said it in Hebrew - I said it in Dutch -
+    I said it in German and Greek:
+  But I wholly forgot (and it vexes me much)
+    That English is what you speak!'
+
+  ''Tis a pitiful tale,' said the Bellman, whose face
+    Had grown longer at every word:
+  'But, now that you've stated the whole of your case,
+    More debate would be simply absurd.
+
+  'The rest of my speech' (he exclaimed to his men)
+    'You shall hear when I've leisure to speak it.
+  But the Snark is at hand, let me tell you again!
+    'Tis your glorious duty to seek it!
+
 =head2 v5.24.1-RC5 - John Milton, ed. Gordon Campbell, "Paradise Regained", Book IV
 
 L<Announced on 2017-01-02 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2017/01/msg242016.html>
@@ -680,6 +719,46 @@ L<Announced on 2015-06-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   To be just like them
   They sing while you slave and I just get bored
   I ain't gonna work on Maggie's farm no more
+
+=head2 v5.22.3 - Charles Dodgson [as "Lewis Carroll"], "Phantasmagoria", Canto 6: Discomfyture
+
+L<Announced on 2017-01-14 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2017/01/msg242258.html>
+
+  As one who strives a hill to climb,
+    Who never climbed before:
+  Who finds it, in a little time,
+  Grow every moment less sublime,
+    And votes the thing a bore:
+
+  Yet, having once begun to try,
+    Dares not desert his quest,
+  But, climbing, ever keeps his eye
+  On one small hut against the sky
+    Wherein he hopes to rest:
+
+  Who climbs till nerve and force are spent,
+    With many a puff and pant:
+  Who still, as rises the ascent,
+  In language grows more violent,
+    Although in breath more scant:
+
+  Who, climbing, gains at length the place
+    That crowns the upward track:
+  And, entering with unsteady pace,
+  Receives a buffet in the face
+    That lands him on his back:
+
+  And feels himself, like one in sleep,
+    Glide swiftly down again,
+  A helpless weight, from steep to steep,
+  Till, with a headlong giddy sweep,
+    He drops upon the plain -
+
+  So I, that had resolved to bring
+    Conviction to a ghost,
+  And found it quite a different thing
+  From any human arguing,
+    Yet dared not quit my post.
 
 =head2 v5.22.3-RC5 - John Milton, ed. Gordon Campbell, "Paradise Regained", Book II
 
