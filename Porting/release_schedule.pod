@@ -23,14 +23,16 @@ Code freezes (which happen in the 5.25.X series)
 =head2 Perl 5.24
 
   2016-05-09  5.24.0 ✓        Ricardo Signes
-  2016-07-25  5.24.1          Steve Hay
+  2017-01-14  5.24.1 ✓        Steve Hay
+  2017-02-??  5.24.2          Steve Hay
 
 =head2 Perl 5.22
 
   2015-06-01  5.22.0 ✓        Ricardo Signes
   2015-12-13  5.22.1 ✓        Steve Hay
   2016-04-29  5.22.2 ✓        Steve Hay
-  2016-07-25  5.22.3          Steve Hay
+  2017-01-14  5.22.3 ✓        Steve Hay
+  2017-02-??  5.22.4          Steve Hay
 
 =head1 DEVELOPMENT RELEASE SCHEDULE
 
