@@ -1794,7 +1794,7 @@ usually indicates a syntax error in dereferencing the constant value.
 See L<perlsub/"Constant Functions"> and L<constant>.
 
 =item Constants from lexical variables potentially modified elsewhere are
-deprecated
+deprecated. This will not be allowed in Perl 5.32
 
 (D deprecated) You wrote something like
 
@@ -1813,8 +1813,8 @@ breaks the behavior of closures, in which the subroutine captures
 the variable itself, rather than its value, so future changes to the
 variable are reflected in the subroutine's return value.
 
-This usage is deprecated, because the behavior is likely to change
-in a future version of Perl.
+This usage is deprecated, and will no longer be allowed in Perl 5.32,
+making it possible to change the behavior in the future.
 
 If you intended for the subroutine to be eligible for inlining, then
 make sure the variable is not referenced elsewhere, possibly by

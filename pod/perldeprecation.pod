@@ -14,6 +14,42 @@ features are available.
 The deprecated features will be grouped by the version of Perl in
 which they will be removed.
 
+=head2 Perl 5.32
+
+=head3 Constants from lexical variables potentially modified elsewhere
+
+You wrote something like
+
+    my $var;
+    $sub = sub () { $var };
+
+but $var is referenced elsewhere and could be modified after the C<sub>
+expression is evaluated.  Either it is explicitly modified elsewhere
+(C<$var = 3>) or it is passed to a subroutine or to an operator like
+C<printf> or C<map>, which may or may not modify the variable.
+
+Traditionally, Perl has captured the value of the variable at that
+point and turned the subroutine into a constant eligible for inlining.
+In those cases where the variable can be modified elsewhere, this
+breaks the behavior of closures, in which the subroutine captures
+the variable itself, rather than its value, so future changes to the
+variable are reflected in the subroutine's return value.
+
+If you intended for the subroutine to be eligible for inlining, then
+make sure the variable is not referenced elsewhere, possibly by
+copying it:
+
+    my $var2 = $var;
+    $sub = sub () { $var2 };
+
+If you do want this subroutine to be a closure that reflects future
+changes to the variable that it closes over, add an explicit C<return>:
+
+    my $var;
+    $sub = sub () { return $var };
+
+This usage has been deprecated, and will no longer be allowed in Perl 5.32.
+
 =head2 Perl 5.30
 
 =head3 C<< File::Glob::glob() >> will disappear
