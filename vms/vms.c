@@ -483,7 +483,6 @@ copy_expand_unix_filename_escape(char *outspec, const char *inspec, int *output_
 	return 1;
 	break;
     case '.':
-    case '~':
     case '!':
     case '#':
     case '&':
@@ -505,7 +504,7 @@ copy_expand_unix_filename_escape(char *outspec, const char *inspec, int *output_
         /* Don't escape again if following character is 
          * already something we escape.
          */
-        if (strchr(".~!#&\'`()+@{},;[]%^=_\\", *(inspec+1))) {
+        if (strchr(".!#&\'`()+@{},;[]%^=_\\", *(inspec+1))) {
 	    *outspec = *inspec;
 	    *output_cnt = 1;
 	    return 1;
@@ -8335,7 +8334,6 @@ posix_to_vmsspec_hardway(char *vmspath, int vmspath_len, const char *unixpath,
 	vmsptr += out_cnt;
 	unixptr += in_cnt;
 	break;
-    case '~':
     case ';':
     case '\\':
     case '?':
@@ -8789,7 +8787,6 @@ int_tovmsspec(const char *path, char *rslt, int dir_flag, int * utf8_flag)
 	}
 	break;
     case '\"':
-    case '~':
     case '`':
     case '!':
     case '#':
@@ -8798,7 +8795,7 @@ int_tovmsspec(const char *path, char *rslt, int dir_flag, int * utf8_flag)
         /* Don't escape again if following character is 
          * already something we escape.
          */
-        if (strchr("\"~`!#%^&()=+\'@[]{}:\\|<>_.", *(cp2+1))) {
+        if (strchr("\"`!#%^&()=+\'@[]{}:\\|<>_.", *(cp2+1))) {
 	    *(cp1++) = *(cp2++);
 	    break;
         }
