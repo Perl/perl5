@@ -305,6 +305,20 @@ was by documentation policy only. But this deprecation has been
 lifted in Perl 5.26.
 
 
+=head3 Malformed UTF-8 string in "%s"
+
+This message indicates a bug either in the Perl core or in XS
+code. Such code was trying to find out if a character, allegedly
+stored internally encoded as UTF-8, was of a given type, such as
+being punctuation or a digit.  But the character was not encoded
+in legal UTF-8.  The C<%s> is replaced by a string that can be used
+by knowledgeable people to determine what the type being checked
+against was.
+
+Passing malformed strings was deprecated in Perl 5.18, and
+became fatal in Perl 5.26.
+
+
 =head2 Perl 5.24
 
 =head3 Use of C<< *glob{FILEHANDLE} >>
