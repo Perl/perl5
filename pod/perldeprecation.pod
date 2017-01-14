@@ -334,6 +334,13 @@ error in Perl 5.28. You're recommended to just write the intended
 character instead.
 
 
+=head3 Use of code points over 0xFF in string bitwise operators
+
+The string bitwise operators, C<&>, C<|>, C<^>, and C<~>, treat
+their operands as strings of bytes. As such, values above 0xFF 
+are nonsensical. Using such code points with these operators
+was deprecated in Perl 5.24, and will be fatal in Perl 5.28.
+
 
 =head2 Perl 5.26
 

@@ -26,12 +26,12 @@ $_ = "\x{100}" & "\x{103}";
 $_ = "\x{101}" | "\x{104}";
 $_ = "\x{102}" ^ "\x{105}";
 EXPECT
-Use of strings with code points over 0xFF as arguments to bitwise and (&) operator is deprecated at - line 1.
-Use of strings with code points over 0xFF as arguments to bitwise or (|) operator is deprecated at - line 2.
-Use of strings with code points over 0xFF as arguments to bitwise xor (^) operator is deprecated at - line 3.
-Use of strings with code points over 0xFF as arguments to bitwise and (&) operator is deprecated at - line 4.
-Use of strings with code points over 0xFF as arguments to bitwise or (|) operator is deprecated at - line 5.
-Use of strings with code points over 0xFF as arguments to bitwise xor (^) operator is deprecated at - line 6.
-Use of strings with code points over 0xFF as arguments to bitwise and (&) operator is deprecated at - line 7.
-Use of strings with code points over 0xFF as arguments to bitwise or (|) operator is deprecated at - line 8.
-Use of strings with code points over 0xFF as arguments to bitwise xor (^) operator is deprecated at - line 9.
+Use of strings with code points over 0xFF as arguments to bitwise and (&) operator is deprecated. This will be a fatal error in Perl 5.28 at - line 1.
+Use of strings with code points over 0xFF as arguments to bitwise or (|) operator is deprecated. This will be a fatal error in Perl 5.28 at - line 2.
+Use of strings with code points over 0xFF as arguments to bitwise xor (^) operator is deprecated. This will be a fatal error in Perl 5.28 at - line 3.
+Use of strings with code points over 0xFF as arguments to bitwise and (&) operator is deprecated. This will be a fatal error in Perl 5.28 at - line 4.
+Use of strings with code points over 0xFF as arguments to bitwise or (|) operator is deprecated. This will be a fatal error in Perl 5.28 at - line 5.
+Use of strings with code points over 0xFF as arguments to bitwise xor (^) operator is deprecated. This will be a fatal error in Perl 5.28 at - line 6.
+Use of strings with code points over 0xFF as arguments to bitwise and (&) operator is deprecated. This will be a fatal error in Perl 5.28 at - line 7.
+Use of strings with code points over 0xFF as arguments to bitwise or (|) operator is deprecated. This will be a fatal error in Perl 5.28 at - line 8.
+Use of strings with code points over 0xFF as arguments to bitwise xor (^) operator is deprecated. This will be a fatal error in Perl 5.28 at - line 9.

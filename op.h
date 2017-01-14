@@ -1075,7 +1075,8 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 #if defined(PERL_IN_DOOP_C) || defined(PERL_IN_PP_C)
 static const char * const deprecated_above_ff_msg
     = "Use of strings with code points over 0xFF as arguments to "
-      "%s operator is deprecated";
+      "%s operator is deprecated. This will be a fatal error in "
+      "Perl 5.28";
 #endif
 
 
