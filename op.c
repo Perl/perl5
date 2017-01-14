@@ -6974,7 +6974,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 		&& !(o2->op_private & OPpPAD_STATE))
 	    {
 		Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-				 "Deprecated use of my() in false conditional");
+                                "Deprecated use of my() in false conditional. "
+                                "This will be a fatal error in Perl 5.30");
 	    }
 
 	    *otherp = NULL;

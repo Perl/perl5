@@ -1772,13 +1772,13 @@ if (my $w2) { $a=1 }
 if ($a && (my $w3 = 1)) {$a = 2}
 
 EXPECT
-Deprecated use of my() in false conditional at - line 2.
-Deprecated use of my() in false conditional at - line 3.
-Deprecated use of my() in false conditional at - line 4.
-Deprecated use of my() in false conditional at - line 5.
-Deprecated use of my() in false conditional at - line 6.
-Deprecated use of my() in false conditional at - line 7.
-Deprecated use of my() in false conditional at - line 8.
+Deprecated use of my() in false conditional. This will be a fatal error in Perl 5.30 at - line 2.
+Deprecated use of my() in false conditional. This will be a fatal error in Perl 5.30 at - line 3.
+Deprecated use of my() in false conditional. This will be a fatal error in Perl 5.30 at - line 4.
+Deprecated use of my() in false conditional. This will be a fatal error in Perl 5.30 at - line 5.
+Deprecated use of my() in false conditional. This will be a fatal error in Perl 5.30 at - line 6.
+Deprecated use of my() in false conditional. This will be a fatal error in Perl 5.30 at - line 7.
+Deprecated use of my() in false conditional. This will be a fatal error in Perl 5.30 at - line 8.
 ########
 # op.c
 $[ = 1;

@@ -63,6 +63,36 @@ and an unqualified C<dump()> will no longer be available in Perl 5.30.
 See L<perlfunc/dump>.
 
 
+=head2 Using my() in false conditional.
+
+There has been a long-standing bug in Perl that causes a lexical variable
+not to be cleared at scope exit when its declaration includes a false
+conditional.  Some people have exploited this bug to achieve a kind of
+static variable.  Since we intend to fix this bug, we don't want people
+relying on this behavior.
+
+Instead, it's recommended one uses C<state> variables to achieve the
+same effect:
+
+    use 5.10.0;
+    sub count {state $counter; return ++ $counter}
+    say count ();    # Prints 1
+    say count ();    # Prints 2
+
+C<state> variables were introduced in Perl 5.10.
+
+Alternatively, you can achieve a similar static effect by
+declaring the variable in a separate block outside the function, eg
+
+    sub f { my $x if 0; return $x++ }
+
+becomes
+
+    { my $x; sub f { return $x++ } }
+
+The use of C<my()> in a false conditional has been deprecated in
+Perl 5.10, and it will become a fatal error in Perl 5.30.
+
 =head2 Perl 5.28
 
 =head3 Attribute "%s" is deprecated, and will disappear in 5.28
