@@ -160,11 +160,13 @@ ok(!-d $tmpdir, "cleaned up temp dir");
         if (opendir(my $d, $tmpdir)) {
             for my $f (readdir($d)) {
                 next if $f =~ m/^\.+$/;
-                next unless -f "$tmpdir/$f";
-                unlink("$tmpdir/$f");
+                my $file = File::Spec->catfile($tmpdir, $f);
+                next unless -f $file;
+                1 while unlink $file;
             }
+            closedir($d);
+            rmdir($tmpdir) or warn "Could not remove temp dir '$tmpdir': $!";
         }
-        rmdir($tmpdir) or warn "Could not remove temp dir '$tmpdir': $!";
     };
     $cleanup->();
 

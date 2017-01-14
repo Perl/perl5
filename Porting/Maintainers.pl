@@ -1178,6 +1178,10 @@ use File::Glob qw(:case);
                 t/zzz-check-breaks.t
                 ),
         ],
+        'CUSTOMIZED'   => [
+            #
+            qw( t/Test2/modules/IPC/Driver/Files.t )
+        ],
     },
 
     'Text::Abbrev' => {
