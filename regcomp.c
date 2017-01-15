@@ -12311,6 +12311,12 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
                            stream */
     char* p = RExC_parse; /* Temporary */
 
+    SV * substitute_parse;
+    STRLEN len;
+    char *orig_end;
+    char *save_start;
+    I32 flags;
+
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_GROK_BSLASH_N;
@@ -12455,12 +12461,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
             RExC_parse = endbrace + 1;
             return TRUE;
         }
-        else {  /* Is a multiple character sequence */
-        SV * substitute_parse;
-        STRLEN len;
-        char *orig_end = RExC_end;
-        char *save_start = RExC_start;
-        I32 flags;
+
+        /* Here, is a multiple character sequence */
 
         /* Count the code points, if desired, in the sequence */
         if (cp_count) {
@@ -12513,16 +12515,19 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 	    vFAIL("Invalid hexadecimal number in \\N{U+...}");
 	}
 
-        RExC_parse = RExC_start = RExC_adjusted_start
-                                              = SvPV_nolen(substitute_parse);
-	RExC_end = RExC_parse + len;
-
         /* The values are Unicode, and therefore not subject to recoding, but
          * have to be converted to native on a non-Unicode (meaning non-ASCII)
          * platform. */
 #ifdef EBCDIC
         RExC_recode_x_to_native = 1;
 #endif
+
+    save_start = RExC_start;
+    orig_end = RExC_end;
+
+    RExC_parse = RExC_start = RExC_adjusted_start = SvPV(substitute_parse,
+                                                         len);
+    RExC_end = RExC_parse + len;
 
     *node_p = reg(pRExC_state, 1, &flags, depth+1);
 
@@ -12546,7 +12551,6 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
     nextchar(pRExC_state);
 
     return TRUE;
-    }
 }
 
 
