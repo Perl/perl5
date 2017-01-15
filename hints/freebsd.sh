@@ -312,7 +312,7 @@ esac
 # XXX Under FreeBSD 6.0 (and probably most other similar versions)
 # Perl_die(NULL) generates a warning:
 #    pp_sys.c:491: warning: null format string
-# Configure supposedely tests for this, but apparently the test doesn't
+# Configure supposedly tests for this, but apparently the test doesn't
 # work.  Volunteers with FreeBSD are needed to improving the Configure test.
 # Meanwhile, the following workaround should be safe on all versions
 # of FreeBSD.
