@@ -65,8 +65,8 @@ no warnings 'deprecated' ;
 $a = ${"#"};
 $a = ${"*"};
 EXPECT
-$# is no longer supported at - line 2.
-$* is no longer supported at - line 3.
+$# is no longer supported. Its use will be fatal in Perl 5.30 at - line 2.
+$* is no longer supported. Its use will be fatal in Perl 5.30 at - line 3.
 ########
 # gv.c
 $a = ${#};
@@ -75,8 +75,8 @@ no warnings 'deprecated' ;
 $a = ${#};
 $a = ${*};
 EXPECT
-$# is no longer supported at - line 2.
-$* is no longer supported at - line 3.
+$# is no longer supported. Its use will be fatal in Perl 5.30 at - line 2.
+$* is no longer supported. Its use will be fatal in Perl 5.30 at - line 3.
 ########
 # gv.c
 $a = $#;
@@ -93,12 +93,12 @@ $* = $a;
 $a = \$#;
 $a = \$*;
 EXPECT
-$# is no longer supported at - line 2.
-$* is no longer supported at - line 3.
-$# is no longer supported at - line 4.
-$* is no longer supported at - line 5.
-$# is no longer supported at - line 6.
-$* is no longer supported at - line 7.
+$# is no longer supported. Its use will be fatal in Perl 5.30 at - line 2.
+$* is no longer supported. Its use will be fatal in Perl 5.30 at - line 3.
+$# is no longer supported. Its use will be fatal in Perl 5.30 at - line 4.
+$* is no longer supported. Its use will be fatal in Perl 5.30 at - line 5.
+$# is no longer supported. Its use will be fatal in Perl 5.30 at - line 6.
+$* is no longer supported. Its use will be fatal in Perl 5.30 at - line 7.
 ########
 # gv.c
 @a = @#;
@@ -106,8 +106,8 @@ $* is no longer supported at - line 7.
 $a = $#;
 $a = $*;
 EXPECT
-$# is no longer supported at - line 4.
-$* is no longer supported at - line 5.
+$# is no longer supported. Its use will be fatal in Perl 5.30 at - line 4.
+$* is no longer supported. Its use will be fatal in Perl 5.30 at - line 5.
 ########
 # gv.c
 $a = $#;
@@ -115,8 +115,8 @@ $a = $*;
 @a = @#;
 @a = @*;
 EXPECT
-$# is no longer supported at - line 2.
-$* is no longer supported at - line 3.
+$# is no longer supported. Its use will be fatal in Perl 5.30 at - line 2.
+$* is no longer supported. Its use will be fatal in Perl 5.30 at - line 3.
 ########
 # gv.c
 $a = ${^ENCODING};

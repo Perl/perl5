@@ -52,6 +52,29 @@ This usage has been deprecated, and will no longer be allowed in Perl 5.32.
 
 =head2 Perl 5.30
 
+=head3 C<< $* >> is no longer supported
+
+Before Perl 5.10, setting C<< $* >> to a true value globally enabled
+multi-line matching within a string. This relique from the past lost
+its special meaning in 5.10. Use of this variable will be a fatal error
+in Perl 5.30, freeing the variable up for a future special meaning.
+
+To enable multiline matching one should use the C<< /m >> regexp
+modifier (possibly in combination with C<< /s >>). This can be set
+on a per match bases, or can be enabled per lexical scope (including
+a whole file) with C<< use re '/m' >>.
+
+=head3 C<< $# >> is no longer supported
+
+This variable used to have a special meaning -- it could be used
+to control how numbers were formatted when printed. This seldom
+used functionality was removed in Perl 5.10. In order to free up
+the variable for a future special meaning, its use will be a fatal
+error in Perl 5.30.
+
+To specify how numbers are formatted when printed, one is adviced
+to use C<< printf >> or C<< sprintf >> instead.
+
 =head3 C<< File::Glob::glob() >> will disappear
 
 C<< File::Glob >> has a function called C<< glob >>, which just calls

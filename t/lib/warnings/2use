@@ -365,8 +365,8 @@ $*;
 use warnings "void";
 $#;
 EXPECT
-$* is no longer supported at - line 3.
-$# is no longer supported at - line 5.
+$* is no longer supported. Its use will be fatal in Perl 5.30 at - line 3.
+$# is no longer supported. Its use will be fatal in Perl 5.30 at - line 5.
 Useless use of a variable in void context at - line 5.
 ########
 
@@ -375,5 +375,5 @@ $*;
 no warnings "void";
 $#;
 EXPECT
-$* is no longer supported at - line 3.
-$# is no longer supported at - line 5.
+$* is no longer supported. Its use will be fatal in Perl 5.30 at - line 3.
+$# is no longer supported. Its use will be fatal in Perl 5.30 at - line 5.
