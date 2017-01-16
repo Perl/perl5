@@ -650,8 +650,7 @@ all Unicode code points that lie between those end points, inclusive.
 includes the code points
 C<\N{U+03}>, C<\N{U+04}>, ..., C<\N{U+20}>.
 
-(It is planned to extend this behavior to ranges in C<tr///> in Perl
-v5.24.)
+This also works for ranges in C<tr///> starting in Perl v5.24.
 
 =item *
 
