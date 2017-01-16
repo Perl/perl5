@@ -3019,7 +3019,7 @@ PP(pp_goto)
 	if (*enterops && enterops[1]) {
 	    I32 i = enterops[1]->op_type == OP_ENTER && in_block ? 2 : 1;
 	    if (enterops[i])
-		deprecate_fatal_in("5.28", "Use of \"goto\" to jump into a construct is deprecated. Its use will be fatal in Perl 5.28");
+		deprecate("\"goto\" to jump into a construct");
 	}
 
 	/* pop unwanted frames */

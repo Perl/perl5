@@ -2475,6 +2475,8 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
    shortcut macro defined without -DPERL_CORE. Neither codesearch.google.com nor
    CPAN::Unpack show any users outside the core.  */
 #ifdef PERL_CORE
+#  define deprecate(s) Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),    \
+                                            "Use of " s " is deprecated")
 #  define deprecate_disappears_in(when,message) \
               Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),    \
                                message ", and will disappear in Perl " when)
