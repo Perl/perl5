@@ -644,6 +644,13 @@ the scope of the L<< C<unicode_strings>|feature/"The 'unicode_strings' feature" 
 feature. The previous behaviour was sufficiently unexpected that we believe no
 correct program could have made use of it.
 
+=item *
+
+The S<split> operator did not ensure enough space was allocated for
+its return value in scalar context.  It could then write a single
+pointer immediately beyond the end of the memory block allocated for
+the stack.  [perl #130262]
+
 =back
 
 =head1 Known Problems
