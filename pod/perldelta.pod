@@ -651,6 +651,13 @@ its return value in scalar context.  It could then write a single
 pointer immediately beyond the end of the memory block allocated for
 the stack.  [perl #130262]
 
+=item *
+
+Using a large code point with the C<W> pack template character with
+the current output position aligned at just the right point could
+cause a write a single zero byte immediately beyond the end of an
+allocated buffer.  [perl #129149]
+
 =back
 
 =head1 Known Problems
