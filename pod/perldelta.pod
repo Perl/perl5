@@ -317,7 +317,7 @@ XXX L<message|perldiag/"message">
 
 =head2 Changes to Existing Diagnostics
 
-As of Perl 5.26.9, all new deprecations will come with a version in
+As of Perl 5.25.9, all new deprecations will come with a version in
 which the feature will disappear. And with a few exceptions, most
 existing deprecations will state when they'll disappear. As such, most
 deprecation messages have changed.
