@@ -1569,12 +1569,9 @@ as a Unicode code point no matter what the native encoding is.  The name of the
 character in the 256th position (indexed by 0) in Unicode is
 C<LATIN CAPITAL LETTER A WITH MACRON>.
 
-There are a couple of exceptions to the above rule.  S<C<\N{U+I<hex number>}>> is
+An exception to the above rule is that S<C<\N{U+I<hex number>}>> is
 always interpreted as a Unicode code point, so that C<\N{U+0050}> is C<"P"> even
-on EBCDIC platforms.  And if C<S<L<use encoding|encoding>>> is in effect, the
-number is considered to be in that encoding, and is translated from that into
-the platform's native encoding if there is a corresponding native character;
-otherwise to Unicode.
+on EBCDIC platforms.
 
 =back
 
