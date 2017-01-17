@@ -2048,6 +2048,7 @@ ok(1, "argument underflow did not crash");
        "check pack H zero fills (utf8 source)");
 }
 
+SKIP:
 {
     # [perl #129149] the code below would write one past the end of the output
     # buffer, only detected by ASAN, not by valgrind
