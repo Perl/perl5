@@ -12,7 +12,7 @@ CPAN::HandleConfig - internal configuration handling for CPAN.pm
 
 =cut 
 
-$VERSION = "5.5007"; # see also CPAN::Config::VERSION at end of file
+$VERSION = "5.5008"; # see also CPAN::Config::VERSION at end of file
 
 %can = (
         commit   => "Commit changes to disk",
@@ -42,6 +42,7 @@ $VERSION = "5.5007"; # see also CPAN::Config::VERSION at end of file
      "bzip2",
      "cache_metadata",
      "check_sigs",
+     "cleanup_after_install",
      "colorize_debug",
      "colorize_output",
      "colorize_print",
@@ -769,7 +770,7 @@ sub prefs_lookup {
 
     use strict;
     use vars qw($AUTOLOAD $VERSION);
-    $VERSION = "5.5007";
+    $VERSION = "5.5008";
 
     # formerly CPAN::HandleConfig was known as CPAN::Config
     sub AUTOLOAD { ## no critic

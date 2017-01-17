@@ -251,7 +251,7 @@ use File::Glob qw(:case);
     },
 
     'CPAN' => {
-        'DISTRIBUTION' => 'ANDK/CPAN-2.14.tar.gz',
+        'DISTRIBUTION' => 'ANDK/CPAN-2.16-TRIAL2.tar.gz',
         'FILES'        => q[cpan/CPAN],
         'EXCLUDED'     => [
             qr{^distroprefs/},
@@ -285,12 +285,6 @@ use File::Glob qw(:case);
                 t/perlcriticrc
                 t/yaml_code.yml
                 ),
-        ],
-        'CUSTOMIZED'   => [
-            # CVE-2016-1238
-            qw(
-               lib/App/Cpan.pm lib/CPAN.pm scripts/cpan
-            )
         ],
     },
 

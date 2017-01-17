@@ -14,7 +14,7 @@ use vars qw($connect_to_internet_ok $Ua $Thesite $ThesiteURL $Themethod);
 use vars qw(
             $VERSION
 );
-$VERSION = "5.5007";
+$VERSION = "5.5008";
 
 #-> sub CPAN::FTP::ftp_statistics
 # if they want to rewrite, they need to pass in a filehandle
@@ -665,7 +665,7 @@ sub hostdleasy { #called from hostdlxxx
                 # Net::FTP can still succeed where LWP fails. So we do not
                 # skip Net::FTP anymore when LWP is available.
             }
-        } elsif ($url =~ /^http:/ && $CPAN::META->has_usable('HTTP::Tiny')) {
+        } elsif ($url =~ /^http:/i && $CPAN::META->has_usable('HTTP::Tiny')) {
             require CPAN::HTTP::Client;
             my $chc = CPAN::HTTP::Client->new(
                 proxy => $CPAN::Config->{http_proxy} || $ENV{http_proxy},

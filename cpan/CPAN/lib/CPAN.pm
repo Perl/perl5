@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '2.14_01';
+$CPAN::VERSION = '2.16';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -1064,6 +1064,16 @@ sub has_usable {
                        },
                       ],
                'Net::FTP' => [
+                            sub {
+                                my $var = $CPAN::Config->{ftp_proxy} || $ENV{ftp_proxy};
+                                if ($var and $var =~ /^http:/i) {
+                                    # rt #110833
+                                    for ("Net::FTP cannot handle http proxy") {
+                                        $CPAN::Frontend->mywarn($_);
+                                        die $_;
+                                    }
+                                }
+                            },
                             sub {require Net::FTP},
                             sub {require Net::Config},
                            ],
@@ -2111,6 +2121,9 @@ currently defined:
   bzip2              path to external prg
   cache_metadata     use serializer to cache metadata
   check_sigs         if signatures should be verified
+  cleanup_after_install
+                     remove build directory immediately after a
+                     successful install
   colorize_debug     Term::ANSIColor attributes for debugging output
   colorize_output    boolean if Term::ANSIColor should colorize output
   colorize_print     Term::ANSIColor attributes for normal output

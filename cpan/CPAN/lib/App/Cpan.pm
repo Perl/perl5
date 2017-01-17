@@ -6,7 +6,7 @@ use vars qw($VERSION);
 
 use if $] < 5.008 => 'IO::Scalar';
 
-$VERSION = '1.64_01';
+$VERSION = '1.66';
 
 =head1 NAME
 
@@ -552,12 +552,12 @@ sub DESTROY { 1 }
 # load a module without searching the default entry for the current
 # directory
 sub _safe_load_module {
-  my $name = shift;
+    my $name = shift;
 
-  local @INC = @INC;
-  pop @INC if $INC[-1] eq '.';
+    local @INC = @INC;
+    pop @INC if $INC[-1] eq '.';
 
-  eval "require $name; 1";
+    eval "require $name; 1";
 }
 
 sub _init_logger
@@ -1033,7 +1033,7 @@ sub _load_local_lib # -I
 
 	my $rc = _safe_load_module("local::lib");
 	unless( $rc ) {
-		$logger->die( "Could not load local::lib" );
+		$logger->logdie( "Could not load local::lib" );
 		}
 
 	local::lib->import;
@@ -1045,7 +1045,7 @@ sub _use_these_mirrors # -M
 	{
 	$logger->debug( "Setting per session mirrors" );
 	unless( $_[0] ) {
-		$logger->die( "The -M switch requires a comma-separated list of mirrors" );
+		$logger->logdie( "The -M switch requires a comma-separated list of mirrors" );
 		}
 
 	$CPAN::Config->{urllist} = [ split /,/, $_[0] ];
@@ -1347,7 +1347,8 @@ sub _show_out_of_date
 
 	foreach my $module ( @$modules )
 		{
-		next unless $module->inst_file;
+                next unless $module = _expand_module($module);
+                next unless $module->inst_file;
 		next if $module->uptodate;
 		printf "%-40s  %.4f  %.4f\n",
 			$module->id,
@@ -1491,7 +1492,9 @@ sub _expand_module
 	{
 	my( $module ) = @_;
 
-	my $expanded = CPAN::Shell->expand( "Module", $module );
+	my $expanded = CPAN::Shell->expandany( $module );
+        return $expanded if $expanded;
+        $expanded = CPAN::Shell->expand( "Module", $module );
 	unless( defined $expanded ) {
 		$logger->error( "Could not expand [$module]. Check the module name." );
 		my $threshold = (

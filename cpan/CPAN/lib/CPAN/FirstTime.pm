@@ -10,7 +10,7 @@ use File::Path ();
 use File::Spec ();
 use CPAN::Mirrors ();
 use vars qw($VERSION $auto_config);
-$VERSION = "5.5309";
+$VERSION = "5.5310";
 
 =head1 NAME
 
@@ -123,6 +123,14 @@ checks will be performed at all.
 
 Always try to check and verify signatures if a SIGNATURE file is in
 the package and Module::Signature is installed (yes/no)?
+
+=item cleanup_after_install
+
+Users who install modules and do not intend to look back, can free
+occupied disk space quickly by letting CPAN.pm cleanup each build
+directory immediately after a successful install.
+
+Remove build directory after a successful install? (yes/no)?
 
 =item colorize_output
 
@@ -881,6 +889,7 @@ sub init {
 
     my_dflt_prompt(index_expire => 1, $matcher);
     my_prompt_loop(scan_cache => 'atstart', $matcher, 'atstart|atexit|never');
+    my_yn_prompt(cleanup_after_install => 0, $matcher);
 
     #
     #= cache_metadata
