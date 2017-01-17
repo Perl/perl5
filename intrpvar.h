@@ -188,7 +188,6 @@ PERLVAR(I, na,		STRLEN)		/* for use in SvPV when length is
 					   Not Applicable */
 
 /* stat stuff */
-PERLVAR(I, statbuf,	Stat_t)
 PERLVAR(I, statcache,	Stat_t)		/* _ */
 PERLVAR(I, statgv,	GV *)
 PERLVARI(I, statname,	SV *,	NULL)

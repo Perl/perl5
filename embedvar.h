@@ -299,7 +299,6 @@
 #define PL_stashpad		(vTHX->Istashpad)
 #define PL_stashpadix		(vTHX->Istashpadix)
 #define PL_stashpadmax		(vTHX->Istashpadmax)
-#define PL_statbuf		(vTHX->Istatbuf)
 #define PL_statcache		(vTHX->Istatcache)
 #define PL_statgv		(vTHX->Istatgv)
 #define PL_statname		(vTHX->Istatname)

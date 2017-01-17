@@ -136,14 +136,14 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 	    Perl_croak(aTHX_ "panic: sysopen with multiple args, num_svs=%ld",
 		       (long) num_svs);
 	}
-        return do_open_raw(gv, oname, len, rawmode, rawperm);
+        return do_open_raw(gv, oname, len, rawmode, rawperm, NULL);
     }
     return do_open6(gv, oname, len, supplied_fp, svp, num_svs);
 }
 
 bool
 Perl_do_open_raw(pTHX_ GV *gv, const char *oname, STRLEN len,
-                 int rawmode, int rawperm)
+                 int rawmode, int rawperm, Stat_t *statbufp)
 {
     PerlIO *saveifp;
     PerlIO *saveofp;
@@ -207,7 +207,7 @@ Perl_do_open_raw(pTHX_ GV *gv, const char *oname, STRLEN len,
 	fp = PerlIO_openn(aTHX_ NULL, mode, -1, rawmode, rawperm, NULL, 1, &namesv);
     }
     return openn_cleanup(gv, io, fp, mode, oname, saveifp, saveofp, savefd,
-                         savetype, writing, 0, NULL);
+                         savetype, writing, 0, NULL, statbufp);
 }
 
 bool
@@ -606,7 +606,7 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
 
   say_false:
     return openn_cleanup(gv, io, fp, mode, oname, saveifp, saveofp, savefd,
-                         savetype, writing, was_fdopen, type);
+                         savetype, writing, was_fdopen, type, NULL);
 }
 
 /* Yes, this is ugly, but it's private, and I don't see a cleaner way to
@@ -614,9 +614,10 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
 static bool
 S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
                 PerlIO *saveifp, PerlIO *saveofp, int savefd, char savetype,
-                int writing, bool was_fdopen, const char *type)
+                int writing, bool was_fdopen, const char *type, Stat_t *statbufp)
 {
     int fd;
+    Stat_t statbuf;
 
     PERL_ARGS_ASSERT_OPENN_CLEANUP;
 
@@ -656,17 +657,17 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
      * otherwise unless we "know" the type probe for socket-ness.
      */
     if (IoTYPE(io) && IoTYPE(io) != IoTYPE_PIPE && IoTYPE(io) != IoTYPE_STD && fd >= 0) {
-	if (PerlLIO_fstat(fd,&PL_statbuf) < 0) {
+	if (PerlLIO_fstat(fd,&statbuf) < 0) {
 	    /* If PerlIO claims to have fd we had better be able to fstat() it. */
 	    (void) PerlIO_close(fp);
 	    goto say_false;
 	}
 #ifndef PERL_MICRO
-	if (S_ISSOCK(PL_statbuf.st_mode))
+	if (S_ISSOCK(statbuf.st_mode))
 	    IoTYPE(io) = IoTYPE_SOCKET;	/* in case a socket was passed in to us */
 #ifdef HAS_SOCKET
 	else if (
-	    !(PL_statbuf.st_mode & S_IFMT)
+	    !(statbuf.st_mode & S_IFMT)
 	    && IoTYPE(io) != IoTYPE_WRONLY  /* Dups of STD* filehandles already have */
 	    && IoTYPE(io) != IoTYPE_RDONLY  /* type so they aren't marked as sockets */
 	) {				    /* on OS's that return 0 on fstat()ed pipe */
@@ -787,7 +788,7 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
     IoFLAGS(io) &= ~IOf_NOLINE;
     if (writing) {
 	if (IoTYPE(io) == IoTYPE_SOCKET
-	    || (IoTYPE(io) == IoTYPE_WRONLY && fd >= 0 && S_ISCHR(PL_statbuf.st_mode)) ) {
+	    || (IoTYPE(io) == IoTYPE_WRONLY && fd >= 0 && S_ISCHR(statbuf.st_mode)) ) {
 	    char *s = mode;
 	    if (*s == IoTYPE_IMPLICIT || *s == IoTYPE_NUMERIC)
 	      s++;
@@ -800,6 +801,9 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
 	else
 	    IoOFP(io) = fp;
     }
+    if (statbufp)
+        *statbufp = statbuf;
+
     return TRUE;
 
   say_false:
@@ -844,7 +848,6 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
     if (!GvAV(gv))
 	return NULL;
     while (av_tindex(GvAV(gv)) >= 0) {
-	Stat_t statbuf;
 	STRLEN oldlen;
         SV *const sv = av_shift(GvAV(gv));
 	SAVEFREESV(sv);
@@ -861,6 +864,7 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
             }
         }
         else {
+            Stat_t statbuf;
             {
                 IO * const io = GvIOp(PL_argvoutgv);
                 if (io && IoIFP(io) && old_out_name && !io_close(io, PL_argvoutgv, FALSE, FALSE)) {
@@ -872,7 +876,7 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
                Both this block and the block above fall through on open
                failure to the warning code, and then the while loop above tries
                the next entry. */
-            if (do_open_raw(gv, PL_oldname, oldlen, O_RDONLY, 0)) {
+            if (do_open_raw(gv, PL_oldname, oldlen, O_RDONLY, 0, &statbuf)) {
 #ifndef FLEXFILENAMES
                 int filedev;
                 int fileino;
@@ -887,12 +891,12 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 		    return IoIFP(GvIOp(gv));
 		}
 #ifndef FLEXFILENAMES
-		filedev = PL_statbuf.st_dev;
-		fileino = PL_statbuf.st_ino;
+		filedev = statbuf.st_dev;
+		fileino = statbuf.st_ino;
 #endif
-		PL_filemode = PL_statbuf.st_mode;
-		fileuid = PL_statbuf.st_uid;
-		filegid = PL_statbuf.st_gid;
+		PL_filemode = statbuf.st_mode;
+		fileuid = statbuf.st_uid;
+		filegid = statbuf.st_gid;
 		if (!S_ISREG(PL_filemode)) {
 		    Perl_ck_warner_d(aTHX_ packWARN(WARN_INPLACE),
 				     "Can't do inplace edit: %s is not a regular file",
@@ -917,9 +921,9 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 			sv_catpv(sv,PL_inplace);
 		    }
 #ifndef FLEXFILENAMES
-		    if ((PerlLIO_stat(SvPVX_const(sv),&PL_statbuf) >= 0
-			 && PL_statbuf.st_dev == filedev
-			 && PL_statbuf.st_ino == fileino)
+		    if ((PerlLIO_stat(SvPVX_const(sv),&statbuf) >= 0
+			 && statbuf.st_dev == filedev
+			 && statbuf.st_ino == fileino)
 #ifdef DJGPP
 			|| ((_djstat_fail_bits & _STFAIL_TRUENAME)!=0)
 #endif
@@ -948,7 +952,7 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 		    do_close(gv,FALSE);
 		    (void)PerlLIO_unlink(SvPVX_const(sv));
 		    (void)PerlLIO_rename(PL_oldname,SvPVX_const(sv));
-		    do_open_raw(gv, SvPVX_const(sv), SvCUR(sv), O_RDONLY, 0);
+		    do_open_raw(gv, SvPVX_const(sv), SvCUR(sv), O_RDONLY, 0, NULL);
 #endif /* DOSISH */
 #else
 		    (void)UNLINK(SvPVX_const(sv));
@@ -983,11 +987,11 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 		if (!Perl_do_open_raw(aTHX_ PL_argvoutgv, SvPVX_const(sv),
                                       SvCUR(sv),
 #ifdef VMS
-                                      O_WRONLY|O_CREAT|O_TRUNC, 0
+                                      O_WRONLY|O_CREAT|O_TRUNC, 0,
 #else
-                                      O_WRONLY|O_CREAT|OPEN_EXCL, 0600
+                                      O_WRONLY|O_CREAT|OPEN_EXCL, 0600,
 #endif
-                        )) {
+                                      NULL)) {
 		    Perl_ck_warner_d(aTHX_ packWARN(WARN_INPLACE), "Can't do inplace edit on %s: %s",
 				     PL_oldname, Strerror(errno) );
 		    do_close(gv,FALSE);
@@ -1019,6 +1023,7 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 
         if (ckWARN_d(WARN_INPLACE)) {
             const int eno = errno;
+            Stat_t statbuf;
             if (PerlLIO_stat(PL_oldname, &statbuf) >= 0
                 && !S_ISREG(statbuf.st_mode)) {
                 Perl_warner(aTHX_ packWARN(WARN_INPLACE),

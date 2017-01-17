@@ -333,7 +333,7 @@ well.
 
 =item *
 
-XXX
+The C<PL_statbuf> interpreter variable has been removed.
 
 =back
 

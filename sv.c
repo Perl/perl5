@@ -15080,7 +15080,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_Xpv		= (XPV*)NULL;
     my_perl->Ina	= proto_perl->Ina;
 
-    PL_statbuf		= proto_perl->Istatbuf;
     PL_statcache	= proto_perl->Istatcache;
 
 #ifndef NO_TAINT_SUPPORT

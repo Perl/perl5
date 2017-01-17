@@ -1659,7 +1659,7 @@ PP(pp_sysopen)
 
     /* Need TIEHANDLE method ? */
     const char * const tmps = SvPV_const(sv, len);
-    if (do_open_raw(gv, tmps, len, mode, perm)) {
+    if (do_open_raw(gv, tmps, len, mode, perm, NULL)) {
 	IoLINES(GvIOp(gv)) = 0;
 	PUSHs(&PL_sv_yes);
     }
