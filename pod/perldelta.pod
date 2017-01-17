@@ -104,7 +104,12 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+A hash in boolean context is now sometimes faster, e.g.
+
+    if (!%h) { ... }
+
+This was already special-cased, but some cases were missed, and even the
+ones which weren't have been improved.
 
 =back
 
