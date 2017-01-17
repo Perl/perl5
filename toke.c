@@ -10591,6 +10591,15 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     bool floatit;			/* boolean: int or float? */
     const char *lastub = NULL;		/* position of last underbar */
     static const char* const number_too_long = "Number too long";
+    bool warned_about_underscore = 0;
+#define WARN_ABOUT_UNDERSCORE() \
+	do { \
+	    if (!warned_about_underscore) { \
+		warned_about_underscore = 1; \
+		Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX), \
+			       "Misplaced _ in number"); \
+	    } \
+	} while(0)
     /* Hexadecimal floating point.
      *
      * In many places (where we have quads and NV is IEEE 754 double)
@@ -10675,8 +10684,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    }
 
 	    if (*s == '_') {
-		Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-			       "Misplaced _ in number");
+		WARN_ABOUT_UNDERSCORE();
 	       lastub = s++;
 	    }
 
@@ -10699,8 +10707,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 		/* _ are ignored -- but warned about if consecutive */
 		case '_':
 		    if (lastub && s == lastub + 1)
-		        Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-				       "Misplaced _ in number");
+			WARN_ABOUT_UNDERSCORE();
 		    lastub = s++;
 		    break;
 
@@ -10785,9 +10792,8 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	  out:
 
 	    /* final misplaced underbar check */
-	    if (s[-1] == '_') {
-		Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX), "Misplaced _ in number");
-	    }
+	    if (s[-1] == '_')
+		WARN_ABOUT_UNDERSCORE();
 
             if (UNLIKELY(HEXFP_PEEK(s))) {
                 /* Do sloppy (on the underbars) but quick detection
@@ -10996,8 +11002,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    */
 	    if (*s == '_') {
 		if (lastub && s == lastub + 1)
-		    Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-				   "Misplaced _ in number");
+		    WARN_ABOUT_UNDERSCORE();
 		lastub = s++;
 	    }
 	    else {
@@ -11010,9 +11015,8 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	}
 
 	/* final misplaced underbar check */
-	if (lastub && s == lastub + 1) {
-	    Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX), "Misplaced _ in number");
-	}
+	if (lastub && s == lastub + 1)
+	    WARN_ABOUT_UNDERSCORE();
 
 	/* read a decimal portion if there is one.  avoid
 	   3..5 being interpreted as the number 3. followed
@@ -11023,8 +11027,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    *d++ = *s++;
 
 	    if (*s == '_') {
-		Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-			       "Misplaced _ in number");
+		WARN_ABOUT_UNDERSCORE();
 		lastub = s;
 	    }
 
@@ -11040,18 +11043,15 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 		    Perl_croak(aTHX_ "%s", number_too_long);
 		if (*s == '_') {
 		   if (lastub && s == lastub + 1)
-		       Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-				      "Misplaced _ in number");
+			WARN_ABOUT_UNDERSCORE();
 		   lastub = s;
 		}
 		else
 		    *d++ = *s;
 	    }
 	    /* fractional part ending in underbar? */
-	    if (s[-1] == '_') {
-		Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-			       "Misplaced _ in number");
-	    }
+	    if (s[-1] == '_')
+		WARN_ABOUT_UNDERSCORE();
 	    if (*s == '.' && isDIGIT(s[1])) {
 		/* oops, it's really a v-string, but without the "v" */
 		s = start;
@@ -11081,8 +11081,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
 	    /* stray preinitial _ */
 	    if (*s == '_') {
-		Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-			       "Misplaced _ in number");
+		WARN_ABOUT_UNDERSCORE();
 	        lastub = s++;
 	    }
 
@@ -11092,8 +11091,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
 	    /* stray initial _ */
 	    if (*s == '_') {
-		Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-			       "Misplaced _ in number");
+		WARN_ABOUT_UNDERSCORE();
 	        lastub = s++;
 	    }
 
@@ -11107,8 +11105,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 		else {
 		   if (((lastub && s == lastub + 1)
                         || (!isDIGIT(s[1]) && s[1] != '_')))
-		       Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-				      "Misplaced _ in number");
+			WARN_ABOUT_UNDERSCORE();
 		   lastub = s++;
 		}
 	    }
