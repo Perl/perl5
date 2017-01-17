@@ -1855,9 +1855,6 @@ EBCDIC platforms.  And some of the failures are real bugs.  If you
 compile and do a C<make test> on Perl, all tests on the C</cpan>
 directory are skipped.
 
-In particular, the (now deprecated) L<encoding> pragma is not supported
-under EBCDIC.
-
 L<Encode> partially works.
 
 =item *
