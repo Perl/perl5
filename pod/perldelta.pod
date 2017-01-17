@@ -245,6 +245,10 @@ L<VMS::DCLsym> has been upgraded from version 1.07 to 1.08.
 
 L<XSLoader> has been upgraded from version 0.24 to 0.26.
 
+=item *
+
+L<CPAN> has been upgraded from version 2.14_01 to 2.16.
+
 =back
 
 =head2 Removed Modules and Pragmata
