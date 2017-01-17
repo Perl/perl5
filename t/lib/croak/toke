@@ -350,3 +350,10 @@ EXPECT
 syntax error at - line 4, near "ϡ time"
   (Might be a runaway multi-line ϡϡ string starting on line 3)
 Execution of - aborted due to compilation errors.
+########
+# NAME tr/// handling of mis-formatted \o characters
+# may only fail with ASAN
+tr/\o-0//;
+EXPECT
+Missing braces on \o{} at - line 2, within string
+Execution of - aborted due to compilation errors.
