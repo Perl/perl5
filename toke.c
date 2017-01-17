@@ -41,8 +41,8 @@ Individual members of C<PL_parser> have their own documentation.
 #include "dquote_inline.h"
 #include "invlist_inline.h"
 
-#define new_constant(a,b,c,d,e,f,g)	\
-	S_new_constant(aTHX_ a,b,STR_WITH_LEN(c),d,e,f, g)
+#define new_constant(a,b,c,d,e,f,g, h)	\
+	S_new_constant(aTHX_ a,b,STR_WITH_LEN(c),d,e,f, g, h)
 
 #define pl_yylval	(PL_parser->yylval)
 
@@ -2332,7 +2332,7 @@ S_tokeq(pTHX_ SV *sv)
     SvCUR_set(sv, d - SvPVX_const(sv));
   finish:
     if ( PL_hints & HINT_NEW_STRING )
-       return new_constant(NULL, 0, "q", sv, pv, "q", 1);
+       return new_constant(NULL, 0, "q", sv, pv, "q", 1, NULL);
     return sv;
 }
 
@@ -2618,7 +2618,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
 
     res = new_constant( NULL, 0, "charnames", res, NULL, backslash_ptr,
                         /* include the <}> */
-                        e - backslash_ptr + 1);
+                        e - backslash_ptr + 1, NULL);
     if (! SvPOK(res)) {
         SvREFCNT_dec_NN(res);
         return NULL;
@@ -4118,7 +4118,7 @@ S_scan_const(pTHX_ char *start)
 	    }
 
 	    sv = S_new_constant(aTHX_ start, s - start, key, keylen, sv, NULL,
-				type, typelen);
+				type, typelen, NULL);
 	}
         pl_yylval.opval = newSVOP(OP_CONST, 0, sv);
     }
@@ -9176,11 +9176,15 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
    Best used as sv=new_constant(..., sv, ...).
    If s, pv are NULL, calls subroutine with one argument,
    and <type> is used with error messages only.
-   <type> is assumed to be well formed UTF-8 */
+   <type> is assumed to be well formed UTF-8.
+
+   If error_msg is not NULL, *error_msg will be set to any error encountered.
+   Otherwise yyerror() will be used to output it */
 
 STATIC SV *
 S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
-	       SV *sv, SV *pv, const char *type, STRLEN typelen)
+	       SV *sv, SV *pv, const char *type, STRLEN typelen,
+               const char ** error_msg)
 {
     dSP;
     HV * table = GvHV(PL_hintgv);		 /* ^H */
@@ -9256,7 +9260,12 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
                                     (type ? type: s), why1, why2, why3);
             }
         }
-	yyerror_pv(msg, UTF ? SVf_UTF8 : 0);
+        if (error_msg) {
+            *error_msg = msg;
+        }
+        else {
+            yyerror_pv(msg, UTF ? SVf_UTF8 : 0);
+        }
   	return SvREFCNT_inc_simple_NN(sv);
     }
   now_ok:
@@ -11246,9 +11255,10 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    }
 	    if (just_zero && (PL_hints & HINT_NEW_INTEGER))
 		sv = new_constant(start, s - start, "integer",
-				  sv, NULL, NULL, 0);
+				  sv, NULL, NULL, 0, NULL);
 	    else if (PL_hints & HINT_NEW_BINARY)
-		sv = new_constant(start, s - start, "binary", sv, NULL, NULL, 0);
+		sv = new_constant(start, s - start, "binary",
+                                  sv, NULL, NULL, 0, NULL);
 	}
 	break;
 
@@ -11453,7 +11463,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    const char *const key = floatit ? "float" : "integer";
 	    const STRLEN keylen = floatit ? 5 : 7;
 	    sv = S_new_constant(aTHX_ PL_tokenbuf, d - PL_tokenbuf,
-				key, keylen, sv, NULL, NULL, 0);
+				key, keylen, sv, NULL, NULL, 0, NULL);
 	}
 	break;
 

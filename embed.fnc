@@ -2786,10 +2786,11 @@ sR	|I32	|sublex_start
 sR	|char *	|filter_gets	|NN SV *sv|STRLEN append
 sR	|HV *	|find_in_my_stash|NN const char *pkgname|STRLEN len
 sR	|char *	|tokenize_use	|int is_use|NN char *s
-so	|SV*	|new_constant	|NULLOK const char *s|STRLEN len \
+so	|SV*	|new_constant	|NULLOK const char *s|STRLEN len	    \
 				|NN const char *key|STRLEN keylen|NN SV *sv \
-				|NULLOK SV *pv|NULLOK const char *type \
-				|STRLEN typelen
+				|NULLOK SV *pv|NULLOK const char *type	    \
+				|STRLEN typelen				    \
+				|NULLOK const char ** error_msg
 s	|int	|ao		|int toketype
 s	|void|parse_ident|NN char **s|NN char **d \
                      |NN char * const e|int allow_package \

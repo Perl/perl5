@@ -6074,7 +6074,7 @@ STATIC I32	S_lop(pTHX_ I32 f, U8 x, char *s);
 PERL_STATIC_NO_RET void	S_missingterm(pTHX_ char *s, STRLEN len)
 			__attribute__noreturn__;
 
-STATIC SV*	S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen, SV *sv, SV *pv, const char *type, STRLEN typelen);
+STATIC SV*	S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen, SV *sv, SV *pv, const char *type, STRLEN typelen, const char ** error_msg);
 #define PERL_ARGS_ASSERT_NEW_CONSTANT	\
 	assert(key); assert(sv)
 STATIC void	S_no_op(pTHX_ const char *const what, char *s);
