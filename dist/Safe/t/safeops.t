@@ -286,7 +286,7 @@ return		return
 last		last
 next		next
 redo		redo THIS
-dump		dump
+dump		CORE::dump
 goto		goto THERE
 exit		exit 0
 open		open FOO

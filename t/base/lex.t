@@ -360,7 +360,7 @@ print "not " if $@;
 print "ok $test - listop({$_ => 1} + 1)\n"; $test++;
 print "# $@" if $@;
 
-for(qw< require goto last next redo dump >) {
+for(qw< require goto last next redo CORE::dump >) {
     eval "sub { $_ foo << 2 }";
     print "not " if $@;
     print "ok ", $test++, " - [perl #105924] $_ WORD << ...\n";
