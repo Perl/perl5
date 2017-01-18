@@ -2993,7 +2993,7 @@ S_scan_const(pTHX_ char *start)
                  * 'offset_to_max' is the offset in 'sv' at which the character
                  *      (the range's maximum end point) before 'd'  begins.
                  */
-                const char * max_ptr = SvPVX_const(sv) + offset_to_max;
+                char * max_ptr = SvPVX(sv) + offset_to_max;
                 const char * min_ptr;
                 IV range_min;
 		IV range_max;	/* last character in range */
@@ -3016,6 +3016,19 @@ S_scan_const(pTHX_ char *start)
                     min_ptr = max_ptr - 1;
                     range_min = * (U8*) min_ptr;
                     range_max = * (U8*) max_ptr;
+                }
+
+                /* If the range is just a single code point, like tr/a-a/.../,
+                 * that code point is already in the output, twice.  We can
+                 * just back up over the second instance and avoid all the rest
+                 * of the work.  But if it is a variant character, it's been
+                 * counted twice, so decrement */
+                if (UNLIKELY(range_max == range_min)) {
+                    d = max_ptr;
+                    if (! has_utf8 && ! UVCHR_IS_INVARIANT(range_max)) {
+                        utf8_variant_count--;
+                    }
+                    goto range_done;
                 }
 
 #ifdef EBCDIC

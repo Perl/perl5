@@ -13,7 +13,7 @@ BEGIN {
 
 use utf8;
 
-plan tests => 214;
+plan tests => 215;
 
 # Test this first before we extend the stack with other operations.
 # This caused an asan failure due to a bad write past the end of the stack.
@@ -31,6 +31,9 @@ is($_, "abcdefghijklmnopqrstuvwxyz",    'lc');
 
 tr/b-y/B-Y/;
 is($_, "aBCDEFGHIJKLMNOPQRSTUVWXYz",    'partial uc');
+
+tr/a-a/AB/;
+is($_, "ABCDEFGHIJKLMNOPQRSTUVWXYz",    'single char range a-a');
 
 eval 'tr/a/\N{KATAKANA LETTER AINU P}/;';
 like $@,
