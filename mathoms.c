@@ -865,8 +865,7 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 {
     PERL_ARGS_ASSERT_HV_EXISTS_ENT;
 
-    return hv_common(hv, keysv, NULL, 0, 0, HV_FETCH_ISEXISTS, 0, hash)
-	? TRUE : FALSE;
+    return cBOOL(hv_common(hv, keysv, NULL, 0, 0, HV_FETCH_ISEXISTS, 0, hash));
 }
 
 HE *
@@ -927,8 +926,7 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen_i32)
 	klen = klen_i32;
 	flags = 0;
     }
-    return hv_common(hv, NULL, key, klen, flags, HV_FETCH_ISEXISTS, 0, 0)
-	? TRUE : FALSE;
+    return cBOOL(hv_common(hv, NULL, key, klen, flags, HV_FETCH_ISEXISTS, 0, 0));
 }
 
 SV**

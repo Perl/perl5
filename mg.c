@@ -1008,7 +1008,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
         break;
     case '\027':		/* ^W  & $^WARNING_BITS */
 	if (nextchar == '\0')
-	    sv_setiv(sv, (IV)((PL_dowarn & G_WARN_ON) ? TRUE : FALSE));
+	    sv_setiv(sv, (IV)cBOOL(PL_dowarn & G_WARN_ON));
 	else if (strEQ(remaining, "ARNING_BITS")) {
 	    if (PL_compiling.cop_warnings == pWARN_NONE) {
 	        sv_setpvn(sv, WARN_NONEstring, WARNsize) ;

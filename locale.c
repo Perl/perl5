@@ -960,9 +960,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #endif
 
 #ifdef DEBUGGING
-    DEBUG_INITIALIZATION_set((PerlEnv_getenv("PERL_DEBUG_LOCALE_INIT"))
-                           ? TRUE
-                           : FALSE);
+    DEBUG_INITIALIZATION_set(cBOOL(PerlEnv_getenv("PERL_DEBUG_LOCALE_INIT")));
 #   define DEBUG_LOCALE_INIT(category, locale, result)                      \
 	STMT_START {                                                        \
 		if (debug_initialization) {                                 \

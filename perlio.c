@@ -1314,7 +1314,7 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
 	   (for example :unix which is never going to call them)
 	   it can do the flush when it is pushed.
 	 */
-	return PerlIO_apply_layers(aTHX_ f, NULL, names) == 0 ? TRUE : FALSE;
+	return cBOOL(PerlIO_apply_layers(aTHX_ f, NULL, names) == 0);
     }
     else {
 	/* Fake 5.6 legacy of using this call to turn ON O_TEXT */
@@ -1355,7 +1355,7 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
 	/* Legacy binmode is now _defined_ as being equivalent to pushing :raw
 	   So code that used to be here is now in PerlIORaw_pushed().
 	 */
-	return PerlIO_push(aTHX_ f, PERLIO_FUNCS_CAST(&PerlIO_raw), NULL, NULL) ? TRUE : FALSE;
+	return cBOOL(PerlIO_push(aTHX_ f, PERLIO_FUNCS_CAST(&PerlIO_raw), NULL, NULL));
     }
 }
 

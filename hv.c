@@ -390,7 +390,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    flags = is_utf8 ? HVhek_UTF8 : 0;
 	}
     } else {
-	is_utf8 = ((flags & HVhek_UTF8) ? TRUE : FALSE);
+	is_utf8 = cBOOL(flags & HVhek_UTF8);
     }
 
     if (action & HV_DELETE) {
@@ -1029,7 +1029,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     HE *entry;
     HE **oentry;
     HE **first_entry;
-    bool is_utf8 = (k_flags & HVhek_UTF8) ? TRUE : FALSE;
+    bool is_utf8 = cBOOL(k_flags & HVhek_UTF8);
     int masked_flags;
     HEK *keysv_hek = NULL;
     U8 mro_changes = 0; /* 1 = isa; 2 = package moved */

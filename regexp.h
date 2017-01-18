@@ -270,7 +270,7 @@ and check for NULL.
 */
 
 #define SvRX(sv)   (Perl_get_re_arg(aTHX_ sv))
-#define SvRXOK(sv) (Perl_get_re_arg(aTHX_ sv) ? TRUE : FALSE)
+#define SvRXOK(sv) cBOOL(Perl_get_re_arg(aTHX_ sv))
 
 
 /* Flags stored in regexp->extflags

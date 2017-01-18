@@ -3793,7 +3793,7 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 #  define USEMYBINMODE /**/
 #  include <io.h> /* for setmode() prototype */
 #  define my_binmode(fp, iotype, mode) \
-            (PerlLIO_setmode(fileno(fp), mode) != -1 ? TRUE : FALSE)
+            cBOOL(PerlLIO_setmode(fileno(fp), mode) != -1)
 #endif
 
 #ifdef __CYGWIN__

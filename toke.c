@@ -2143,7 +2143,7 @@ Perl_str_to_version(pTHX_ SV *sv)
     STRLEN len;
     const char *start = SvPV_const(sv,len);
     const char * const end = start + len;
-    const bool utf = SvUTF8(sv) ? TRUE : FALSE;
+    const bool utf = cBOOL(SvUTF8(sv));
 
     PERL_ARGS_ASSERT_STR_TO_VERSION;
 
@@ -5220,7 +5220,7 @@ Perl_yylex(pTHX)
 	}
 	do {
 	    fake_eof = 0;
-	    bof = PL_rsfp ? TRUE : FALSE;
+	    bof = cBOOL(PL_rsfp);
 	    if (0) {
 	      fake_eof:
 		fake_eof = LEX_FAKE_EOF;
