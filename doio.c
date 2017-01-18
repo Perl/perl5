@@ -2080,7 +2080,7 @@ nothing in the core.
 #undef APPLY_TAINT_PROPER
 }
 
-/* Do the permissions allow some operation?  Assumes statcache already set. */
+/* Do the permissions in *statbufp allow some operation? */
 #ifndef VMS /* VMS' cando is in vms.c */
 bool
 Perl_cando(pTHX_ Mode_t mode, bool effective, const Stat_t *statbufp)

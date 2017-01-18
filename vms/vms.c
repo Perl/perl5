@@ -12031,7 +12031,7 @@ Perl_cando_by_name_int(pTHX_ I32 bit, bool effective, const char *fname, int opt
 
 }
 
-/* Do the permissions allow some operation?  Assumes PL_statcache already set. */
+/* Do the permissions in *statbufp allow some operation? */
 /* Do this via $Check_Access on VMS, since the CRTL stat() returns only a
  * subset of the applicable information.
  */
