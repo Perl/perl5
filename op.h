@@ -475,6 +475,24 @@ struct loop {
 #define kLOOP		cLOOPx(kid)
 
 
+typedef enum {
+    OPclass_NULL,     /*  0 */
+    OPclass_BASEOP,   /*  1 */
+    OPclass_UNOP,     /*  2 */
+    OPclass_BINOP,    /*  3 */
+    OPclass_LOGOP,    /*  4 */
+    OPclass_LISTOP,   /*  5 */
+    OPclass_PMOP,     /*  6 */
+    OPclass_SVOP,     /*  7 */
+    OPclass_PADOP,    /*  8 */
+    OPclass_PVOP,     /*  9 */
+    OPclass_LOOP,     /* 10 */
+    OPclass_COP,      /* 11 */
+    OPclass_METHOP,   /* 12 */
+    OPclass_UNOP_AUX  /* 13 */
+} OPclass;
+
+
 #ifdef USE_ITHREADS
 #  define	cGVOPx_gv(o)	((GV*)PAD_SVl(cPADOPx(o)->op_padix))
 #  ifndef PERL_CORE

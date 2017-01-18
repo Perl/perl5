@@ -2563,6 +2563,154 @@ Perl_debop(pTHX_ const OP *o)
     return 0;
 }
 
+
+/*
+=for apidoc op_class
+
+Given an op, determine what type of struct it has been allocated as.
+Returns one of the OPclass enums, such as OPclass_LISTOP.
+
+=cut
+*/
+
+
+OPclass
+Perl_op_class(pTHX_ const OP *o)
+{
+    bool custom = 0;
+
+    if (!o)
+	return OPclass_NULL;
+
+    if (o->op_type == 0) {
+	if (o->op_targ == OP_NEXTSTATE || o->op_targ == OP_DBSTATE)
+	    return OPclass_COP;
+	return (o->op_flags & OPf_KIDS) ? OPclass_UNOP : OPclass_BASEOP;
+    }
+
+    if (o->op_type == OP_SASSIGN)
+	return ((o->op_private & OPpASSIGN_BACKWARDS) ? OPclass_UNOP : OPclass_BINOP);
+
+    if (o->op_type == OP_AELEMFAST) {
+#ifdef USE_ITHREADS
+	    return OPclass_PADOP;
+#else
+	    return OPclass_SVOP;
+#endif
+    }
+    
+#ifdef USE_ITHREADS
+    if (o->op_type == OP_GV || o->op_type == OP_GVSV ||
+	o->op_type == OP_RCATLINE)
+	return OPclass_PADOP;
+#endif
+
+    if (o->op_type == OP_CUSTOM)
+        custom = 1;
+
+    switch (OP_CLASS(o)) {
+    case OA_BASEOP:
+	return OPclass_BASEOP;
+
+    case OA_UNOP:
+	return OPclass_UNOP;
+
+    case OA_BINOP:
+	return OPclass_BINOP;
+
+    case OA_LOGOP:
+	return OPclass_LOGOP;
+
+    case OA_LISTOP:
+	return OPclass_LISTOP;
+
+    case OA_PMOP:
+	return OPclass_PMOP;
+
+    case OA_SVOP:
+	return OPclass_SVOP;
+
+    case OA_PADOP:
+	return OPclass_PADOP;
+
+    case OA_PVOP_OR_SVOP:
+        /*
+         * Character translations (tr///) are usually a PVOP, keeping a 
+         * pointer to a table of shorts used to look up translations.
+         * Under utf8, however, a simple table isn't practical; instead,
+         * the OP is an SVOP (or, under threads, a PADOP),
+         * and the SV is a reference to a swash
+         * (i.e., an RV pointing to an HV).
+         */
+	return (!custom &&
+		   (o->op_private & (OPpTRANS_TO_UTF|OPpTRANS_FROM_UTF))
+	       )
+#if  defined(USE_ITHREADS)
+		? OPclass_PADOP : OPclass_PVOP;
+#else
+		? OPclass_SVOP : OPclass_PVOP;
+#endif
+
+    case OA_LOOP:
+	return OPclass_LOOP;
+
+    case OA_COP:
+	return OPclass_COP;
+
+    case OA_BASEOP_OR_UNOP:
+	/*
+	 * UNI(OP_foo) in toke.c returns token UNI or FUNC1 depending on
+	 * whether parens were seen. perly.y uses OPf_SPECIAL to
+	 * signal whether a BASEOP had empty parens or none.
+	 * Some other UNOPs are created later, though, so the best
+	 * test is OPf_KIDS, which is set in newUNOP.
+	 */
+	return (o->op_flags & OPf_KIDS) ? OPclass_UNOP : OPclass_BASEOP;
+
+    case OA_FILESTATOP:
+	/*
+	 * The file stat OPs are created via UNI(OP_foo) in toke.c but use
+	 * the OPf_REF flag to distinguish between OP types instead of the
+	 * usual OPf_SPECIAL flag. As usual, if OPf_KIDS is set, then we
+	 * return OPclass_UNOP so that walkoptree can find our children. If
+	 * OPf_KIDS is not set then we check OPf_REF. Without OPf_REF set
+	 * (no argument to the operator) it's an OP; with OPf_REF set it's
+	 * an SVOP (and op_sv is the GV for the filehandle argument).
+	 */
+	return ((o->op_flags & OPf_KIDS) ? OPclass_UNOP :
+#ifdef USE_ITHREADS
+		(o->op_flags & OPf_REF) ? OPclass_PADOP : OPclass_BASEOP);
+#else
+		(o->op_flags & OPf_REF) ? OPclass_SVOP : OPclass_BASEOP);
+#endif
+    case OA_LOOPEXOP:
+	/*
+	 * next, last, redo, dump and goto use OPf_SPECIAL to indicate that a
+	 * label was omitted (in which case it's a BASEOP) or else a term was
+	 * seen. In this last case, all except goto are definitely PVOP but
+	 * goto is either a PVOP (with an ordinary constant label), an UNOP
+	 * with OPf_STACKED (with a non-constant non-sub) or an UNOP for
+	 * OP_REFGEN (with goto &sub) in which case OPf_STACKED also seems to
+	 * get set.
+	 */
+	if (o->op_flags & OPf_STACKED)
+	    return OPclass_UNOP;
+	else if (o->op_flags & OPf_SPECIAL)
+	    return OPclass_BASEOP;
+	else
+	    return OPclass_PVOP;
+    case OA_METHOP:
+	return OPclass_METHOP;
+    case OA_UNOP_AUX:
+	return OPclass_UNOP_AUX;
+    }
+    Perl_warn(aTHX_ "Can't determine class of operator %s, assuming BASEOP\n",
+	 OP_NAME(o));
+    return OPclass_BASEOP;
+}
+
+
+
 STATIC CV*
 S_deb_curcv(pTHX_ I32 ix)
 {

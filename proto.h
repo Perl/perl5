@@ -2343,6 +2343,7 @@ PERL_CALLCONV OP*	Perl_oopsHV(pTHX_ OP* o)
 
 PERL_CALLCONV OP*	Perl_op_append_elem(pTHX_ I32 optype, OP* first, OP* last);
 PERL_CALLCONV OP*	Perl_op_append_list(pTHX_ I32 optype, OP* first, OP* last);
+PERL_CALLCONV OPclass	Perl_op_class(pTHX_ const OP *o);
 PERL_CALLCONV void	Perl_op_clear(pTHX_ OP* o);
 #define PERL_ARGS_ASSERT_OP_CLEAR	\
 	assert(o)

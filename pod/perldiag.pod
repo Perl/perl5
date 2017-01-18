@@ -839,6 +839,13 @@ C<foreach> loop nor a C<given> block.  (Note that this error is
 issued on exit from the C<default> block, so you won't get the
 error if you use an explicit C<continue>.)
 
+=item Can't determine class of operator %s, assuming BASEOP
+
+(S) This warning indicates something wrong in the internals of perl.
+Perl was trying to find the class (e.g. LISTOP) of a particular OP,
+and was unable to do so. This is likely to be due to a bug in the perl
+internals, or due to a bug in XS code which manipulates perl optrees.
+
 =item Can't do inplace edit: %s is not a regular file
 
 (S inplace) You tried to use the B<-i> switch on a special file, such as
