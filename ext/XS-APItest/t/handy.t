@@ -119,6 +119,9 @@ sub try_malforming($$$)
     # ASCII doesn't need to ever look beyond the first byte.
     return 0 if $function eq "ASCII";
 
+    # Nor, on EBCDIC systems, does CNTRL
+    return 0 if ord "A" != 65 && $function eq "CNTRL";
+
     # No controls above 255, so the code doesn't look at those
     return 0 if $u > 255 && $function eq "CNTRL";
 
