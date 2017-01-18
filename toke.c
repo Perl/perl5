@@ -3092,6 +3092,14 @@ S_scan_const(pTHX_ char *start)
                     }
                 }
 
+                /* If the range is exactly two code points long, they are
+                 * already both in the output */
+                if (UNLIKELY(range_min + 1 == range_max)) {
+                    goto range_done;
+                }
+
+                /* Here the range contains at least 3 code points */
+
 		if (has_utf8) {
 
                     /* If everything in the transliteration is below 256, we
