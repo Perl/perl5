@@ -490,6 +490,7 @@ PP(pp_formline)
     U8 *source;		    /* source of bytes to append */
     STRLEN to_copy;	    /* how may bytes to append */
     char trans;		    /* what chars to translate */
+    bool copied_form = false; /* have we duplicated the form? */
 
     mg = doparseform(tmpForm);
 
@@ -687,6 +688,23 @@ PP(pp_formline)
 	case FF_CHOP: /* (for ^*) chop the current item */
 	    if (sv != &PL_sv_no) {
 		const char *s = chophere;
+                if (!copied_form &&
+                    ((sv == tmpForm || SvSMAGICAL(sv))
+                     || (SvGMAGICAL(tmpForm) && !sv_only_taint_gmagic(tmpForm))) ) {
+                    /* sv and tmpForm are either the same SV, or magic might allow modification
+                       of tmpForm when sv is modified, so copy */
+                    SV *newformsv = sv_mortalcopy(formsv);
+                    U32 *new_compiled;
+
+                    f = SvPV_nolen(newformsv) + (f - SvPV_nolen(formsv));
+                    Newx(new_compiled, mg->mg_len / sizeof(U32), U32);
+                    memcpy(new_compiled, mg->mg_ptr, mg->mg_len);
+                    SAVEFREEPV(new_compiled);
+                    fpc = new_compiled + (fpc - (U32*)mg->mg_ptr);
+                    formsv = newformsv;
+
+                    copied_form = true;
+                }
 		if (chopspace) {
 		    while (isSPACE(*s))
 			s++;

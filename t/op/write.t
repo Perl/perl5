@@ -98,7 +98,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 21;
 
 # number of tests in section 3
-my $bug_tests = 66 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 11 + 4;
+my $bug_tests = 66 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 6 + 2 + 3 + 96 + 11 + 4;
 
 # number of tests in section 4
 my $hmb_tests = 37;
@@ -1636,6 +1636,23 @@ formline $zamm;
 printf ">%s<\n", ref $zamm;
 print "$zamm->[0]\n";
 EOP
+
+# [perl #129125] - detected by -fsanitize=address or valgrind
+# the compiled format would be freed when the format string was modified
+# by the chop operator
+fresh_perl_is(<<'EOP', "^", { stderr => 1 }, '#129125 - chop on format');
+my $x = '^@';
+formline$x=>$x;
+print $^A;
+EOP
+
+fresh_perl_is(<<'EOP', '<^< xx AA><xx ^<><>', { stderr => 1 }, '#129125 - chop on format, later values');
+my $x = '^< xx ^<';
+my $y = 'AA';
+formline $x => $x, $y;
+print "<$^A><$x><$y>";
+EOP
+
 
 # [perl #73690]
 
