@@ -6624,7 +6624,7 @@ Perl_get_c_backtrace_dump(pTHX_ int depth, int skip)
             sv_catpvs(dsv, "\n");
         }
 
-        Perl_free_c_backtrace(aTHX_ bt);
+        Perl_free_c_backtrace(bt);
 
         return dsv;
     }
