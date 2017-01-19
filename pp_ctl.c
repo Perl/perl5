@@ -490,7 +490,7 @@ PP(pp_formline)
     U8 *source;		    /* source of bytes to append */
     STRLEN to_copy;	    /* how may bytes to append */
     char trans;		    /* what chars to translate */
-    bool copied_form = false; /* have we duplicated the form? */
+    bool copied_form = FALSE; /* have we duplicated the form? */
 
     mg = doparseform(tmpForm);
 
@@ -703,7 +703,7 @@ PP(pp_formline)
                     fpc = new_compiled + (fpc - (U32*)mg->mg_ptr);
                     formsv = newformsv;
 
-                    copied_form = true;
+                    copied_form = TRUE;
                 }
 		if (chopspace) {
 		    while (isSPACE(*s))
