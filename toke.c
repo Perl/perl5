@@ -3202,10 +3202,12 @@ S_scan_const(pTHX_ char *start)
                 if (real_range_max) {
                     *d++ = (char) UTF8_TWO_BYTE_HI(0x100);
                     *d++ = (char) UTF8_TWO_BYTE_LO(0x100);
-                    if (real_range_max > 0x101)
-                        *d++ = (char) ILLEGAL_UTF8_BYTE;
-                    if (real_range_max > 0x100)
+                    if (real_range_max > 0x100) {
+                        if (real_range_max > 0x101) {
+                            *d++ = (char) ILLEGAL_UTF8_BYTE;
+                        }
                         d = (char*)uvchr_to_utf8((U8*)d, real_range_max);
+                    }
                 }
 #endif
 
