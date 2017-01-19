@@ -667,6 +667,12 @@ the current output position aligned at just the right point could
 cause a write a single zero byte immediately beyond the end of an
 allocated buffer.  [perl #129149]
 
+=item *
+
+Supplying the form picture argument as part of the form argument list
+where the picture specifies modifying the argument could cause an
+access to the new freed compiled form.  [perl #129125]
+
 =back
 
 =head1 Known Problems
