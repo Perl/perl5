@@ -122,7 +122,7 @@ and an unqualified C<dump()> will no longer be available in Perl 5.30.
 See L<perlfunc/dump>.
 
 
-=head2 Using my() in false conditional.
+=head3 Using my() in false conditional.
 
 There has been a long-standing bug in Perl that causes a lexical variable
 not to be cleared at scope exit when its declaration includes a false
