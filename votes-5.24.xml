@@ -64,6 +64,8 @@ This one needs the version in ext/POSIX/lib/POSIX.pm bumped to 1.65_01:
 
 <commit votes="" id="" ticket="123878" desc="OPEN: Infinite recursion (+segfault) on die() after goto-ing out of __DIE__ handler"/>
 
+<commit votes="tonyc" id="109ac342a6bc5a3a67c3b52341607100cedafdf7" ticket="129038" desc="Assertion Failure: *Perl_pp_subst *pp_hot.c:3203)"/>
+
 </div>
 
 <div><h3>Regression Fixes</h3>

@@ -41,6 +41,9 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="" id="" ticket="123878" desc=""/>
 
+Note: the following is a non-trivial backport to maint-5.22 of 109ac342a6bc5a3a67c3b52341607100cedafdf7, in branch tonyc/maint-5.22-129038-locale-match
+<commit votes="tonyc" id="5747c35638c5183ddf9e4b7f3949aa0f7414661c" ticket="129038" desc="Assertion Failure: *Perl_pp_subst *pp_hot.c:3203)"/>
+
 </div>
 
 <div><h3>Regression Fixes</h3>
