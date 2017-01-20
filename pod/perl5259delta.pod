@@ -1,0 +1,678 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5259delta - what is new for perl v5.25.9
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.25.8 release and the 5.25.9
+release.
+
+If you are upgrading from an earlier release such as 5.25.7, first read
+L<perl5258delta>, which describes differences between 5.25.7 and 5.25.8.
+
+=head1 Core Enhancements
+
+=head2 New regular expression modifier C</xx>
+
+Specifying two C<x> characters to modify a regular expression pattern
+does everything that a single one does, but additionally TAB and SPACE
+characters within a bracketed character class are generally ignored and
+can be added to improve readability, like
+S<C</[ ^ A-Z d-f p-x ]/xx>>.  Details are at
+L<perlre/E<sol>x and E<sol>xx>.
+
+=head1 Deprecations
+
+=head2 String delimiters that aren't stand-alone graphemes are now deprecated
+
+In order for Perl to eventually allow string delimiters to be Unicode
+grapheme clusters (which look like a single character, but may be
+a sequence of several ones), we have to stop allowing a single char
+delimiter that isn't a grapheme by itself.  These are unlikely to exist
+in actual code, as they would typically display as attached to the
+character in front of them.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+A hash in boolean context is now sometimes faster, e.g.
+
+    if (!%h) { ... }
+
+This was already special-cased, but some cases were missed, and even the
+ones which weren't have been improved.
+
+=item *
+
+Several other ops may now also be faster in boolean context.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<attributes> has been upgraded from version 0.28 to 0.29.
+
+The deprecation message for the C<:unique> and C<:locked> attributes
+now mention they will disappear in Perl 5.28.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.39 to 1.40.
+
+=item *
+
+L<B::Xref> has been upgraded from version 1.05 to 1.06.
+
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.069 to 2.070.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.069 to 2.070.
+
+=item *
+
+L<CPAN> has been upgraded from version 2.14_01 to 2.16.
+
+=item *
+
+L<Data::Dumper> was upgraded from version 2.166 to 2.167.
+
+This fixes a stack management bug. [perl #130487].
+
+=item *
+
+L<DB_File> has been upgraded from version 1.838 to 1.840.
+
+=item *
+
+L<Devel::SelfStubber> has been upgraded from version 1.05 to 1.06.
+
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
+=item *
+
+L<diagnostics> has been upgraded from version 1.35 to 1.36.
+
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.40 to 1.41.
+
+=item *
+
+L<Errno> has been upgraded from version 1.27 to 1.28.
+
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
+=item *
+
+L<ExtUtils::Embed> has been upgraded from version 1.33 to 1.34.
+
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
+=item *
+
+L<feature> has been upgraded from version 1.45 to 1.46.
+
+Fixes the Unicode Bug in the range operator.
+
+=item *
+
+L<File::Glob> has been upgraded from version 1.27 to 1.28.
+
+Issue a deprecation message for C<File::Glob::glob()>.
+
+=item *
+
+L<I18N::LangTags> has been upgraded from version 0.41 to 0.42.
+
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
+=item *
+
+L<lib> has been upgraded from version 0.63 to 0.64.
+
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20161220 to 5.20170120.
+
+=item *
+
+L<OS2::Process> has been upgraded from version 1.11 to 1.12.
+
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
+=item *
+
+L<overload> has been upgraded from version 1.27 to 1.28.
+
+=item *
+
+L<perl5db.pl> has been upgraded from version 1.50 to 1.51.
+
+Ignore F</dev/tty> on non-Unix systems. [perl #113960]
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.25 to 0.26.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.2201 to 1.2202.
+
+=item *
+
+L<re> has been upgraded from version 0.33 to 0.34
+
+This adds support for the new L<C<E<47>xx>|perlre/E<sol>x and E<sol>xx>
+regular expression pattern modifier, and a change to the L<S<C<use re
+'strict'>>|re/'strict' mode> experimental feature.  When S<C<re
+'strict'>> is enabled, a warning now will be generated for all
+unescaped uses of the two characters C<}> and C<]> in regular
+expression patterns (outside bracketed character classes) that are taken
+literally.  This brings them more in line with the C<)> character which
+is always a metacharacter unless escaped.  Being a metacharacter only
+sometimes, depending on action at a distance, can lead to silently
+having the pattern mean something quite different than was intended,
+which the S<C<re 'strict'>> mode is intended to minimize.
+
+=item *
+
+L<Storable> has been upgraded from version 2.59 to 2.61.
+
+Fixes [perl #130098].
+
+=item *
+
+L<Symbol> has been upgraded from version 1.07 to 1.08.
+
+=item *
+
+L<Term::ReadLine> has been upgraded from version 1.15 to 1.16.
+
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
+=item *
+
+L<Test> has been upgraded from version 1.29 to 1.30.
+
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
+=item *
+
+L<threads> has been upgraded from version 2.10 to 2.12.
+
+Fixes [perl #130469].
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.52 to 1.54.
+
+This fixes [cpan #119529], [perl #130457]
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.67 to 0.68.
+
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
+=item *
+
+L<VMS::DCLsym> has been upgraded from version 1.07 to 1.08.
+
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
+=item *
+
+L<XSLoader> has been upgraded from version 0.24 to 0.26.
+
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
+=back
+
+=head1 Documentation
+
+=head2 New Documentation
+
+=head3 L<perldeprecation>
+
+This file documents all upcoming deprecations, and some of the deprecations
+which already have been removed. The purpose of this documentation is
+two-fold: document what will disappear, and by which version, and serve
+as a guide for people dealing with code which has features that no longer
+work after an upgrade of their perl.
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Warnings
+
+=over 4
+
+=item *
+
+L<Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl v5.30|perldiag/"Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl v5.30">
+
+See L</Deprecations>
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+As of Perl 5.25.9, all new deprecations will come with a version in
+which the feature will disappear. And with a few exceptions, most
+existing deprecations will state when they'll disappear. As such, most
+deprecation messages have changed.
+
+=over 4
+
+=item *
+
+Attribute "locked" is deprecated, and will disappear in Perl 5.28
+
+=item *
+
+Attribute "unique" is deprecated, and will disappear in Perl 5.28
+
+=item *
+
+"\c%c" is more clearly written simply as "%s". This will be a fatal error
+in Perl 5.28
+
+=item *
+
+Constants from lexical variables potentially modified elsewhere are
+deprecated. This will not be allowed in Perl 5.32
+
+=item *
+
+Deprecated use of my() in false conditional. This will be a fatal error
+in Perl 5.30
+
+=item *
+
+dump() better written as CORE::dump(). dump() will no longer be available 
+in Perl 5.30
+
+=item *
+
+${^ENCODING} is no longer supported. Its use will be fatal in Perl 5.28
+
+=item *
+
+File::Glob::glob() will disappear in perl 5.30. Use File::Glob::bsd_glob()
+instead.
+
+=item *
+
+%s() is deprecated on :utf8 handles. This will be a fatal error in Perl 5.30
+
+=item *
+
+$* is no longer supported. Its use will be fatal in Perl 5.30
+
+=item *
+
+$* is no longer supported. Its use will be fatal in Perl 5.30
+
+=item *
+
+Opening dirhandle %s also as a file. This will be a fatal error in Perl 5.28
+
+=item *
+
+Opening filehandle %s also as a directory. This will be a fatal
+error in Perl 5.28
+
+=item *
+
+Setting $/ to a reference to %s as a form of slurp is deprecated,
+treating as undef. This will be fatal in Perl 5.28
+
+=item *
+
+Unescaped left brace in regex is deprecated here (and will be fatal
+in Perl 5.30), passed through in regex; marked by S<< E<lt>-- HERE >> in m/%s/
+
+=item *
+
+Unknown charname '' is deprecated. Its use will be fatal in Perl 5.28
+
+=item *
+
+Use of bare E<lt>E<lt> to mean E<lt>E<lt>"" is deprecated. Its use will be fatal in Perl 5.28
+
+=item *
+
+Use of code point 0x%s is deprecated; the permissible max is 0x%s.
+This will be fatal in Perl 5.28
+
+=item *
+
+Use of comma-less variable list is deprecated. Its use will be fatal
+in Perl 5.28
+
+=item *
+
+Use of inherited AUTOLOAD for non-method %s() is deprecated. This
+will be fatal in Perl 5.28
+
+=item * 
+
+Use of strings with code points over 0xFF as arguments to %s operator
+is deprecated. This will be a fatal error in Perl 5.28
+
+=back
+
+=head1 Utility Changes
+
+=head2 F<c2ph> and F<pstruct>
+
+=over 4
+
+=item *
+
+These old utilities have long since superceded by L<h2xs>, and are
+now gone from the distribution.
+
+=back
+
+=head2 F<Porting/sync-with-cpan>
+
+=over 4
+
+=item *
+
+Many improvements
+
+=back
+
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+The C<dtrace> build process has further changes:
+
+=over
+
+=item *
+
+If the C<-xnolibs> is available, use that so a F<dtrace> perl can be
+built within a FreeBSD jail.
+
+=item *
+
+On systems that build a dtrace object file (FreeBSD, Solaris and
+SystemTap's dtrace emulation), copy the input objects to a separate
+directory and process them there, and use those objects in the link,
+since C<dtrace -G> also modifies these objects.
+
+=item *
+
+Add libelf to the build on FreeBSD 10.x, since dtrace adds references
+to libelf symbols.
+
+=item *
+
+Generate a dummy dtrace_main.o if C<dtrace -G> fails to build it.  A
+default build on Solaris generates probes from the unused inline
+functions, while they don't on FreeBSD, which causes C<dtrace -G> to
+fail.
+
+=back
+
+[perl #130108]
+
+=item *
+
+You can now disable perl's use of the PERL_HASH_SEED and
+PERL_PERTURB_KEYS environment variables by configuring perl with
+C<-Accflags=NO_PERL_HASH_ENV>.
+
+=item *
+
+You can now disable perl's use of the PERL_HASH_SEED_DEBUG environment
+variable by configuring perl with
+C<-Accflags=-DNO_PERL_HASH_SEED_DEBUG>.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+New versions of macros like C<isALPHA_utf8> and C<toLOWER_utf8>  have
+been added, each with the
+suffix C<_safe>, like C<isSPACE_utf8_safe>.  These take an extra
+parameter, giving an upper limit of how far into the string it is safe
+to read.  Using the old versions could cause attempts to read beyond the
+end of the input buffer if the UTF-8 is not well-formed, and their use
+now raises a deprecation warning.  Details are at
+L<perlapi/Character classification>.
+
+=item *
+
+Calling macros like C<isALPHA_utf8> on malformed UTF-8 have issued a
+deprecation warning since Perl v5.18.  They now die.
+Similarly, macros like C<toLOWER_utf8> on malformed UTF-8 now die.
+
+=item *
+
+Calling the functions C<utf8n_to_uvchr> and its derivatives, while
+passing a string length of 0 is now asserted against in DEBUGGING
+builds, and otherwise returns the Unicode REPLACEMENT CHARACTER.   If
+you have nothing to decode, you shouldn't call the decode function.
+
+=item *
+
+The functions C<utf8n_to_uvchr> and its derivatives now return the
+Unicode REPLACEMENT CHARACTER if called with UTF-8 that has the overlong
+malformation, and that malformation is allowed by the input parameters.
+This malformation is where the UTF-8 looks valid syntactically, but
+there is a shorter sequence that yields the same code point.  This has
+been forbidden since Unicode version 3.1.
+
+=item *
+
+The functions C<utf8n_to_uvchr> and its derivatives now accept an input
+flag to allow the overflow malformation.  This malformation is when the
+UTF-8 may be syntactically valid, but the code point it represents is
+not capable of being represented in the word length on the platform.
+What "allowed" means in this case is that the function doesn't return an
+error, and advances the parse pointer to beyond the UTF-8 in question,
+but it returns the Unicode REPLACEMENT CHARACTER as the value of the
+code point (since the real value is not representable).
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Under C<use utf8>, the entire Perl program is now checked that the UTF-8
+is wellformed.  This resolves [perl #126310].
+
+=item *
+
+The range operator C<..> on strings now handles its arguments correctly when in
+the scope of the L<< C<unicode_strings>|feature/"The 'unicode_strings' feature" >>
+feature. The previous behaviour was sufficiently unexpected that we believe no
+correct program could have made use of it.
+
+=item *
+
+The S<split> operator did not ensure enough space was allocated for
+its return value in scalar context.  It could then write a single
+pointer immediately beyond the end of the memory block allocated for
+the stack.  [perl #130262]
+
+=item *
+
+Using a large code point with the C<W> pack template character with
+the current output position aligned at just the right point could
+cause a write a single zero byte immediately beyond the end of an
+allocated buffer.  [perl #129149]
+
+=item *
+
+Supplying the form picture argument as part of the form argument list
+where the picture specifies modifying the argument could cause an
+access to the new freed compiled form.  [perl #129125]
+
+=item *
+
+Fix a problem with sort's build-in compare, where it would not sort
+correctly with 64-bit integers, and non-long doubles. [perl #130335]
+
+=item *
+
+Fix issues with /(?{ ... E<lt>E<lt>EOF })/ that broke Method-Signatures. [perl #130398]
+
+=item * 
+
+Fix a macro which caused syntax error on an EBCDIC build.
+
+=item *
+
+Prevent tests from getting hung up on 'NonStop' option. [perl #130445]
+
+=item *
+
+Fixed an assertion failure with C<chop> and C<chomp>, which
+could be triggered by C<chop(@x =~ tr/1/1/)>. [perl #130198].
+
+=item *
+
+Fixed a comment skipping error under C</x>; it could stop skipping a
+byte early, which could be in the middle of a UTF-8 character.
+[perl #130495].
+
+=item *
+
+F<perldb> now ignores F</dev/tty> on non-Unix systems. [perl #113960];
+
+=item *
+
+Fix assertion failure for C<{}-E<gt>$x> when C<$x> isn't defined. [perl #130496].
+
+=item *
+
+DragonFly BSD now has support for setproctitle(). [perl #130068].
+
+=item *
+
+Fix an assertion error which could be triggered when lookahead string
+in patterns exceeded a minimum length. [perl #130522].
+
+=item *
+
+Only warn once per literal about a misplaced C<_>. [perl #70878].
+
+=item *
+
+Ensure range-start is set after error in C<tr///>. [perl #129342].
+
+=item *
+
+Don't read past start of string for unmatched backref; otherwise,
+we may have heap buffer overflow. [perl #129377].
+
+=item *
+
+Properly recognize mathematical digit ranges starting at U+1D7E. 
+C<use re 'strict'> is supposed to warn if you use a range whose start
+and end digit aren't from the same group of 10. It didn't do that
+for five groups of mathematical digits starting at U+1D7E.
+
+=back
+
+
+=head1 Acknowledgements
+
+Perl 5.25.9 represents approximately 4 weeks of development since Perl 5.25.8
+and contains approximately 24,000 lines of changes across 400 files from 23
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 17,000 lines of changes to 220 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.25.9:
+
+Aaron Crane, Abigail, Andreas König, Andy Lester, Aristotle Pagaltzis
+Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn Ilmari Mannsåker, Dan Collins,
+David Mitchell, Father Chrysostomos, Hugo van der Sanden, James E Keenan,
+Jerry D. Hedden, John Lightsey, Karl Williamson, Paul Marquess, Peter Avalos,
+Sawyer X, Steve Hay, Tomasz Konojacki, Tony Cook, Zefram.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
