@@ -6,7 +6,7 @@ eval { require DynaLoader };
 1 while unlink "XSLoader.pm";
 open OUT, '>', 'XSLoader.pm' or die $!;
 print OUT <<'EOT';
-# Generated from XSLoader.pm.PL (resolved %Config::Config value)
+# Generated from XSLoader_pm.PL (resolved %Config::Config value)
 # This file is unique for every OS
 
 package XSLoader;
