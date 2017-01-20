@@ -1232,6 +1232,8 @@ my %delta = (
         changed => {
         },
         removed => {
+            'c2ph'                  => 1,
+            'pstruct'               => 1,
         }
     },
 );
