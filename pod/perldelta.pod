@@ -2,9 +2,6 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file.  Any text flagged as XXX needs
-to be processed before release. ]
-
 perldelta - what is new for perl v5.25.9
 
 =head1 DESCRIPTION
@@ -15,15 +12,7 @@ release.
 If you are upgrading from an earlier release such as 5.25.7, first read
 L<perl5258delta>, which describes differences between 5.25.7 and 5.25.8.
 
-=head1 Notice
-
-XXX Any important notices here
-
 =head1 Core Enhancements
-
-XXX New core language features go here.  Summarize user-visible core language
-enhancements.  Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
 
 =head2 New regular expression modifier C</xx>
 
@@ -34,28 +23,9 @@ can be added to improve readability, like
 S<C</[ ^ A-Z d-f p-x ]/xx>>.  Details are at
 L<perlre/E<sol>x and E<sol>xx>.
 
-=head1 Security
-
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
-
-=head1 Incompatible Changes
-
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
-
-[ List each incompatible change as a =head2 entry ]
-
 =head1 Deprecations
 
-=head2 String delimiters that aren't stand-alone graphemes are now
-deprecated
+=head2 String delimiters that aren't stand-alone graphemes are now deprecated
 
 In order for Perl to eventually allow string delimiters to be Unicode
 grapheme clusters (which look like a single character, but may be
@@ -64,41 +34,7 @@ delimiter that isn't a grapheme by itself.  These are unlikely to exist
 in actual code, as they would typically display as attached to the
 character in front of them.
 
-=head2 Module removals
-
-XXX Remove this section if inapplicable.
-
-The following modules will be removed from the core distribution in a
-future release, and will at that time need to be installed from CPAN.
-Distributions on CPAN which require these modules will need to list them as
-prerequisites.
-
-The core versions of these modules will now issue C<"deprecated">-category
-warnings to alert you to this fact.  To silence these deprecation warnings,
-install the modules in question from CPAN.
-
-Note that these are (with rare exceptions) fine modules that you are encouraged
-to continue to use.  Their disinclusion from core primarily hinges on their
-necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
-not usually on concerns over their design.
-
-=over
-
-=item XXX
-
-XXX Note that deprecated modules should be listed here even if they are listed
-as an updated module in the L</Modules and Pragmata> section.
-
-=back
-
-[ List each other deprecation as a =head2 entry ]
-
 =head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here.
-There may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
 
 =over 4
 
@@ -111,17 +47,13 @@ A hash in boolean context is now sometimes faster, e.g.
 This was already special-cased, but some cases were missed, and even the
 ones which weren't have been improved.
 
+=item *
+
+Several other ops may now also be faster in boolean context.
+
 =back
 
 =head1 Modules and Pragmata
-
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-[ Within each section, list entries as a =item entry ]
 
 =head2 New Modules and Pragmata
 
@@ -171,6 +103,12 @@ L<Compress::Raw::Zlib> has been upgraded from version 2.069 to 2.070.
 
 =item *
 
+L<Data::Dumper> was upgraded from version 2.166 to 2.167.
+
+This fixes a stack management bug. [perl #130487].
+
+=item *
+
 L<DB_File> has been upgraded from version 1.838 to 1.840.
 
 =item *
@@ -195,6 +133,10 @@ L<ExtUtils::Embed> has been upgraded from version 1.33 to 1.34.
 
 =item *
 
+L<feature> has been upgraded from version 1.45 to 1.46.
+
+=item *
+
 L<I18N::LangTags> has been upgraded from version 0.41 to 0.42.
 
 =item *
@@ -216,6 +158,7 @@ L<perl5db.pl> has been upgraded from version 1.50 to 1.51.
 =item *
 
 L<Storable> has been upgraded from version 2.59 to 2.61.
+Fixes [perl #130098].
 
 =item *
 
@@ -231,7 +174,13 @@ L<Test> has been upgraded from version 1.29 to 1.30.
 
 =item *
 
+L<threads> has been upgraded from version 2.10 to 2.12.
+Fixes [perl #130469].
+
+=item *
+
 L<threads::shared> has been upgraded from version 1.52 to 1.53.
+This fixes [cpan #119529], [perl #130457]
 
 =item *
 
@@ -263,32 +212,15 @@ XXX
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
 =head2 New Documentation
 
-XXX Changes which create B<new> files in F<pod/> go here.
+=head3 L<perldeprecation>
 
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
-
-=head2 Changes to Existing Documentation
-
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
-
-=head3 L<XXX>
-
-=over 4
-
-=item *
-
-XXX Description of the change here
-
-=back
+This file documents all upcoming deprecations, and some of the deprecations
+which already have been removed. The purpose of this documentation is
+two-fold: document what will disappear, and by which version, and serve
+as a guide for people dealing with code which has features that no longer
+work after an upgrade of their perl.
 
 =head1 Diagnostics
 
@@ -296,23 +228,7 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-XXX New or changed warnings emitted by the core's C<C> code go here.  Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
 =head2 New Diagnostics
-
-XXX Newly added diagnostic messages go under here, separated into New Errors
-and New Warnings
-
-=head3 New Errors
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
 
 =head3 New Warnings
 
@@ -320,7 +236,9 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl v5.30|perldiag/"Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl v5.30">
+
+See L</Deprecations>
 
 =back
 
@@ -433,31 +351,29 @@ is deprecated. This will be a fatal error in Perl 5.28
 
 =head1 Utility Changes
 
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go here.
-Most of these are built within the directory F<utils>.
-
-[ List utility changes as a =head2 entry for each utility and =item
-entries for each change
-Use L<XXX> with program names to get proper documentation linking. ]
-
-=head2 L<XXX>
+=head2 F<c2ph> and F<pstruct>
 
 =over 4
 
 =item *
 
-XXX
+These old utilities have long since superceeded by L<h2xs>, and are
+now gone from the distribution.
 
 =back
 
+=head2 F<Porting/sync-with-cpan>
+
+=over 4
+
+=item *
+
+Many improvements
+
+=back
+
+
 =head1 Configuration and Compilation
-
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as a =item entry ].
 
 =over 4
 
@@ -509,80 +425,7 @@ C<-Accflags=-DNO_PERL_HASH_SEED_DEBUG>.
 
 =back
 
-=head1 Testing
-
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarizing, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 Platform Support
-
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not.  These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
 =head1 Internal Changes
-
-XXX Changes which affect the interface available to C<XS> code go here.  Other
-significant internal changes for future core maintainers should be noted as
-well.
-
-[ List each change as a =item entry ]
 
 =over 4
 
@@ -634,11 +477,6 @@ code point (since the real value is not representable).
 
 =head1 Selected Bug Fixes
 
-XXX Important bug fixes in the core language are summarized here.  Bug fixes in
-files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
-
-[ List each fix as a =item entry ]
-
 =over 4
 
 =item *
@@ -673,39 +511,57 @@ Supplying the form picture argument as part of the form argument list
 where the picture specifies modifying the argument could cause an
 access to the new freed compiled form.  [perl #129125]
 
-=back
+=item *
 
-=head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
-tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
-platform specific bugs also go here.
-
-[ List each fix as a =item entry ]
-
-=over 4
+Fix a problem with sort's build-in compare, where it would not sort
+correctly with 64-bit integers, and non-long doubles. [perl #130335]
 
 =item *
 
-XXX
+Fix issues with /(?{ ... <<EOF })/ that broke Method-Signatures. [perl #130398]
 
-=back
+=item * 
 
-=head1 Errata From Previous Releases
-
-=over 4
+Fix a macro which caused syntax error on an EBCDIC build.
 
 =item *
 
-XXX Add anything here that we forgot to add, or were mistaken about, in
-the perldelta of a previous release.
+Prevent tests from getting hung up on 'NonStop' option. [perl #130445]
+
+=item *
+
+Fixed an assertion failure with C<chop> and C<chomp>, which
+could be triggered by C<chop(@x =~ tr/1/1/)>. [perl #130198].
+
+=item *
+
+Fixed a comment skipping error under C</x>; it could stop skipping a
+byte early, which could be in the middle of a UTF-8 character.
+[perl #130495].
+
+=item *
+
+F<perldb> now ignores F</dev/tty> on non-Unix systems. [perl #113960];
+
+=item *
+
+Fix assertion failure for C<{}->$x> when C<$x> isn't defined. [perl #130496].
+
+=item *
+
+DragonFly BSD now has support for setproctitle(). [perl #130068].
+
+=item *
+
+Fix an assertion error which could be triggered when lookahead string
+in patterns exceeded a minimum length. [perl #130522].
+
+=item *
+
+Only warn once per literal about a misplaced C<_>. [perl #70878].
 
 =back
 
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
 
 =head1 Acknowledgements
 
