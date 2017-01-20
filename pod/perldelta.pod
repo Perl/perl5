@@ -55,43 +55,26 @@ Several other ops may now also be faster in boolean context.
 
 =head1 Modules and Pragmata
 
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<attributes> has been upgraded from version 0.28 to 0.29.
+
+The deprecation message for the C<:unique> and C<:locked> attributes
+now mention they will disappear in Perl 5.28.
 
 =item *
 
-L<re> has been upgraded from version 0.33 to 0.34;
-
-This adds support for the new L<C</xx>|perlre/E<sol>x and E<sol>xx>
-regular expression pattern modifier, and a change to the L<S<C<use re
-'strict'>>|re/'strict' mode> experimental feature.  When S<C<re
-'strict'>> is enabled, a warning now will be generated for all
-unescaped uses of the two characters C<}> and C<]> in regular
-expression patterns (outside bracketed character classes) that are taken
-literally.  This brings them more in line with the C<)> character which
-is always a metacharacter unless escaped.  Being a metacharacter only
-sometimes, depending on action at a distance, can lead to silently
-having the pattern mean something quite different than was intended,
-which the S<C<re 'strict'>> mode is intended to minimize.
+L<B::Deparse> has been upgraded from version 1.39 to 1.40.
 
 =item *
 
 L<B::Xref> has been upgraded from version 1.05 to 1.06.
+
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
 
 =item *
 
@@ -100,6 +83,10 @@ L<Compress::Raw::Bzip2> has been upgraded from version 2.069 to 2.070.
 =item *
 
 L<Compress::Raw::Zlib> has been upgraded from version 2.069 to 2.070.
+
+=item *
+
+L<CPAN> has been upgraded from version 2.14_01 to 2.16.
 
 =item *
 
@@ -115,9 +102,13 @@ L<DB_File> has been upgraded from version 1.838 to 1.840.
 
 L<Devel::SelfStubber> has been upgraded from version 1.05 to 1.06.
 
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
 =item *
 
 L<diagnostics> has been upgraded from version 1.35 to 1.36.
+
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
 
 =item *
 
@@ -127,21 +118,37 @@ L<DynaLoader> has been upgraded from version 1.40 to 1.41.
 
 L<Errno> has been upgraded from version 1.27 to 1.28.
 
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
 =item *
 
 L<ExtUtils::Embed> has been upgraded from version 1.33 to 1.34.
+
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
 
 =item *
 
 L<feature> has been upgraded from version 1.45 to 1.46.
 
+Fixes the Unicode Bug in the range operator.
+
+=item *
+
+L<File::Glob> has been upgraded from version 1.27 to 1.28.
+
+Issue a deprecation message for C<File::Glob::glob()>.
+
 =item *
 
 L<I18N::LangTags> has been upgraded from version 0.41 to 0.42.
 
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
 =item *
 
 L<lib> has been upgraded from version 0.63 to 0.64.
+
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
 
 =item *
 
@@ -151,13 +158,46 @@ L<Module::CoreList> has been upgraded from version 5.20161220 to 5.20170120.
 
 L<OS2::Process> has been upgraded from version 1.11 to 1.12.
 
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
+=item *
+
+L<overload> has been upgraded from version 1.27 to 1.28.
+
 =item *
 
 L<perl5db.pl> has been upgraded from version 1.50 to 1.51.
 
+Ignore F</dev/tty> on non-Unix systems. [perl #113960]
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.25 to 0.26.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.2201 to 1.2202.
+
+=item *
+
+L<re> has been upgraded from version 0.33 to 0.34
+
+This adds support for the new L<C<E<47>xx>|perlre/E<sol>x and E<sol>xx>
+regular expression pattern modifier, and a change to the L<S<C<use re
+'strict'>>|re/'strict' mode> experimental feature.  When S<C<re
+'strict'>> is enabled, a warning now will be generated for all
+unescaped uses of the two characters C<}> and C<]> in regular
+expression patterns (outside bracketed character classes) that are taken
+literally.  This brings them more in line with the C<)> character which
+is always a metacharacter unless escaped.  Being a metacharacter only
+sometimes, depending on action at a distance, can lead to silently
+having the pattern mean something quite different than was intended,
+which the S<C<re 'strict'>> mode is intended to minimize.
+
 =item *
 
 L<Storable> has been upgraded from version 2.59 to 2.61.
+
 Fixes [perl #130098].
 
 =item *
@@ -168,45 +208,43 @@ L<Symbol> has been upgraded from version 1.07 to 1.08.
 
 L<Term::ReadLine> has been upgraded from version 1.15 to 1.16.
 
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
 =item *
 
 L<Test> has been upgraded from version 1.29 to 1.30.
 
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
 =item *
 
 L<threads> has been upgraded from version 2.10 to 2.12.
+
 Fixes [perl #130469].
 
 =item *
 
-L<threads::shared> has been upgraded from version 1.52 to 1.53.
+L<threads::shared> has been upgraded from version 1.52 to 1.54.
+
 This fixes [cpan #119529], [perl #130457]
 
 =item *
 
 L<Unicode::UCD> has been upgraded from version 0.67 to 0.68.
 
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
 =item *
 
 L<VMS::DCLsym> has been upgraded from version 1.07 to 1.08.
+
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
 
 =item *
 
 L<XSLoader> has been upgraded from version 0.24 to 0.26.
 
-=item *
-
-L<CPAN> has been upgraded from version 2.14_01 to 2.16.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
+It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
 
 =back
 
@@ -317,7 +355,7 @@ treating as undef. This will be fatal in Perl 5.28
 =item *
 
 Unescaped left brace in regex is deprecated here (and will be fatal
-in Perl 5.30), passed through in regex; marked by S<<-- HERE> in m/%s/
+in Perl 5.30), passed through in regex; marked by S<< E<lt>-- HERE >> in m/%s/
 
 =item *
 
@@ -325,7 +363,7 @@ Unknown charname '' is deprecated. Its use will be fatal in Perl 5.28
 
 =item *
 
-Use of bare << to mean <<"" is deprecated. Its use will be fatal in Perl 5.28
+Use of bare E<lt>E<lt> to mean E<lt>E<lt>"" is deprecated. Its use will be fatal in Perl 5.28
 
 =item *
 
@@ -357,7 +395,7 @@ is deprecated. This will be a fatal error in Perl 5.28
 
 =item *
 
-These old utilities have long since superceeded by L<h2xs>, and are
+These old utilities have long since superceded by L<h2xs>, and are
 now gone from the distribution.
 
 =back
@@ -414,7 +452,7 @@ fail.
 =item *
 
 You can now disable perl's use of the PERL_HASH_SEED and
-PERL_PERTURB_KEYS environment variables by configureing perl with
+PERL_PERTURB_KEYS environment variables by configuring perl with
 C<-Accflags=NO_PERL_HASH_ENV>.
 
 =item *
@@ -436,7 +474,7 @@ been added, each with the
 suffix C<_safe>, like C<isSPACE_utf8_safe>.  These take an extra
 parameter, giving an upper limit of how far into the string it is safe
 to read.  Using the old versions could cause attempts to read beyond the
-end of the input buffer if the UTF-8 is not well-formed, and ther use
+end of the input buffer if the UTF-8 is not well-formed, and their use
 now raises a deprecation warning.  Details are at
 L<perlapi/Character classification>.
 
@@ -518,7 +556,7 @@ correctly with 64-bit integers, and non-long doubles. [perl #130335]
 
 =item *
 
-Fix issues with /(?{ ... <<EOF })/ that broke Method-Signatures. [perl #130398]
+Fix issues with /(?{ ... E<lt>E<lt>EOF })/ that broke Method-Signatures. [perl #130398]
 
 =item * 
 
@@ -545,7 +583,7 @@ F<perldb> now ignores F</dev/tty> on non-Unix systems. [perl #113960];
 
 =item *
 
-Fix assertion failure for C<{}->$x> when C<$x> isn't defined. [perl #130496].
+Fix assertion failure for C<{}-E<gt>$x> when C<$x> isn't defined. [perl #130496].
 
 =item *
 
