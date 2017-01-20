@@ -560,6 +560,22 @@ in patterns exceeded a minimum length. [perl #130522].
 
 Only warn once per literal about a misplaced C<_>. [perl #70878].
 
+=item *
+
+Ensure range-start is set after error in C<tr///>. [perl #129342].
+
+=item *
+
+Don't read past start of string for unmatched backref; otherwise,
+we may have heap buffer overflow. [perl #129377].
+
+=item *
+
+Properly recognize mathematical digit ranges starting at U+1D7E. 
+C<use re 'strict'> is supposed to warn if you use a range whose start
+and end digit aren't from the same group of 10. It didn't do that
+for five groups of mathematical digits starting at U+1D7E.
+
 =back
 
 
