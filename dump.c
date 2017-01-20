@@ -1125,25 +1125,28 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
 	if (CopLINE(cCOPo))
 	    S_opdump_indent(aTHX_ o, level, bar, file, "LINE = %" UVuf "\n",
 			     (UV)CopLINE(cCOPo));
-    if (CopSTASHPV(cCOPo)) {
-        SV* tmpsv = newSVpvs_flags("", SVs_TEMP);
-        HV *stash = CopSTASH(cCOPo);
-        const char * const hvname = HvNAME_get(stash);
-        
-	    S_opdump_indent(aTHX_ o, level, bar, file, "PACKAGE = \"%s\"\n",
-                           generic_pv_escape(tmpsv, hvname,
-                              HvNAMELEN(stash), HvNAMEUTF8(stash)));
-    }
-  if (CopLABEL(cCOPo)) {
-       SV* tmpsv = newSVpvs_flags("", SVs_TEMP);
-       STRLEN label_len;
-       U32 label_flags;
-       const char *label = CopLABEL_len_flags(cCOPo,
-                                                &label_len, &label_flags);
-       S_opdump_indent(aTHX_ o, level, bar, file, "LABEL = \"%s\"\n",
-                           generic_pv_escape( tmpsv, label, label_len,
-                                      (label_flags & SVf_UTF8)));
-   }
+
+        if (CopSTASHPV(cCOPo)) {
+            SV* tmpsv = newSVpvs_flags("", SVs_TEMP);
+            HV *stash = CopSTASH(cCOPo);
+            const char * const hvname = HvNAME_get(stash);
+
+            S_opdump_indent(aTHX_ o, level, bar, file, "PACKAGE = \"%s\"\n",
+                               generic_pv_escape(tmpsv, hvname,
+                                  HvNAMELEN(stash), HvNAMEUTF8(stash)));
+        }
+
+        if (CopLABEL(cCOPo)) {
+            SV* tmpsv = newSVpvs_flags("", SVs_TEMP);
+            STRLEN label_len;
+            U32 label_flags;
+            const char *label = CopLABEL_len_flags(cCOPo,
+                                                     &label_len, &label_flags);
+            S_opdump_indent(aTHX_ o, level, bar, file, "LABEL = \"%s\"\n",
+                                generic_pv_escape( tmpsv, label, label_len,
+                                           (label_flags & SVf_UTF8)));
+        }
+
         S_opdump_indent(aTHX_ o, level, bar, file, "SEQ = %u\n",
                          (unsigned int)cCOPo->cop_seq);
 	break;
