@@ -17,6 +17,17 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.25.9 - A. A. Milne, "Winnie-the-Pooh", 1926
+
+L<Announced on 2017-01-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2017/01/msg242405.html>
+
+  Pooh always liked a little something at eleven o'clock in the
+  morning, and he was very glad to see Rabbit getting out the plates
+  and mugs; and when Rabbit said, "Honey or condensed milk with
+  your bread?" he was so excited that he said, "Both," and then,
+  so as not to seem greedy, he added, "But don't bother about the
+  bread, please."
+
 =head2 v5.25.8 - Langston Hughes, So long
 
 L<Announced on 2016-12-20 by Sawyer X|http://www.nntp.perl.org/group/perl.perl5.porters/2016/12/msg241739.html>
