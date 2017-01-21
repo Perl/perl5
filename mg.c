@@ -171,6 +171,7 @@ Perl_mg_get(pTHX_ SV *sv)
     const I32 mgs_ix = SSNEW(sizeof(MGS));
     bool saved = FALSE;
     bool have_new = 0;
+    bool taint_only = TRUE; /* the only get method seen is taint */
     MAGIC *newmg, *head, *cur, *mg;
 
     PERL_ARGS_ASSERT_MG_GET;
@@ -189,10 +190,13 @@ Perl_mg_get(pTHX_ SV *sv)
 	if (!(mg->mg_flags & MGf_GSKIP) && vtbl && vtbl->svt_get) {
 
 	    /* taint's mg get is so dumb it doesn't need flag saving */
-	    if (!saved && mg->mg_type != PERL_MAGIC_taint) {
-		save_magic(mgs_ix, sv);
-		saved = TRUE;
-	    }
+	    if (mg->mg_type != PERL_MAGIC_taint) {
+                taint_only = FALSE;
+                if (!saved) {
+                    save_magic(mgs_ix, sv);
+                    saved = TRUE;
+                }
+            }
 
 	    vtbl->svt_get(aTHX_ sv, mg);
 
@@ -210,8 +214,23 @@ Perl_mg_get(pTHX_ SV *sv)
 		     ~(SVs_GMG|SVs_SMG|SVs_RMG);
 	}
 	else if (vtbl == &PL_vtbl_utf8) {
-	    /* get-magic can reallocate the PV */
-	    magic_setutf8(sv, mg);
+	    /* get-magic can reallocate the PV, unless there's only taint
+             * magic */
+            if (taint_only) {
+                MAGIC *mg2;
+                for (mg2 = nextmg; mg2; mg2 = mg2->mg_moremagic) {
+                    if (   mg2->mg_type != PERL_MAGIC_taint
+                        && !(mg2->mg_flags & MGf_GSKIP)
+                        && mg2->mg_virtual
+                        && mg2->mg_virtual->svt_get
+                    ) {
+                        taint_only = FALSE;
+                        break;
+                    }
+                }
+            }
+            if (!taint_only)
+                magic_setutf8(sv, mg);
 	}
 
 	mg = nextmg;
