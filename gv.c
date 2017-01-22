@@ -1663,8 +1663,15 @@ S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name,
                 name_cursor++;
             *name = name_cursor+1;
             if (*name == name_end) {
-                if (!*gv)
-                    *gv = MUTABLE_GV(*hv_fetchs(PL_defstash, "main::", TRUE));
+                if (!*gv) {
+		    *gv = MUTABLE_GV(*hv_fetchs(PL_defstash, "main::", TRUE));
+		    if (SvTYPE(*gv) != SVt_PVGV) {
+			gv_init_pvn(*gv, PL_defstash, "main::", 6,
+				    GV_ADDMULTI);
+			GvHV(*gv) =
+			    MUTABLE_HV(SvREFCNT_inc_simple(PL_defstash));
+		    }
+		}
                 return TRUE;
             }
         }

@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc( qw(../lib) );
 }
 
-plan( tests => 54 );
+plan( tests => 55 );
 
 # Used to segfault (bug #15479)
 fresh_perl_like(
@@ -349,3 +349,10 @@ is runperl(
    ),
    "ok\n",
    "[perl #128238] non-stashes in stashes";
+
+is runperl(
+    prog => '%:: = (); print *{q|::|}, qq|\n|',
+    stderr => 1,
+   ),
+   "*main::main::\n",
+   "[perl #129869] lookup %:: by name after clearing %::";
