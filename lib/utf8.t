@@ -140,6 +140,9 @@ no utf8; # Ironic, no?
           = join " . ", map {sprintf 'chr (%d)', ord $_} split //, $char;
       push @char, [$_, $char, $charsubst, $char_as_ord];
     }
+    my $malformed = $::IS_ASCII
+                    ? "\xE1\xA0"
+                    : I8_to_native("\xE6\xA0");
     # Now we've done all the UTF8 munching hopefully we're safe
     my @tests = (
              ['check our detection program works',
@@ -162,7 +165,7 @@ no utf8; # Ironic, no?
              # "out of memory" error. We really need the "" [rather than qq()
              # or q()] to get the best explosion.
              ["!Feed malformed utf8 into perl.", <<"BANG",
-    use utf8; %a = ("\xE1\xA0"=>"sterling");
+    use utf8; %a = ("$malformed" =>"sterling");
     print 'start'; printf '%x,', ord \$_ foreach keys %a; print "end\n";
 BANG
 	      qr/^Malformed UTF-8 character: .*? \(too short; \d bytes? available, need \d\).*start\d+,end$/sm
