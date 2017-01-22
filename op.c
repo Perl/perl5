@@ -4620,27 +4620,80 @@ static OP *
 S_gen_constant_list(pTHX_ OP *o)
 {
     dVAR;
-    OP *curop;
-    const SSize_t oldtmps_floor = PL_tmps_floor;
+    OP *curop, *old_next;
+    SV * const oldwarnhook = PL_warnhook;
+    SV * const olddiehook  = PL_diehook;
+    COP *old_curcop;
+    U8 oldwarn = PL_dowarn;
     SV **svp;
     AV *av;
+    I32 old_cxix;
+    COP not_compiling;
+    int ret = 0;
+    dJMPENV;
 
     list(o);
     if (PL_parser && PL_parser->error_count)
 	return o;		/* Don't attempt to run with errors */
 
     curop = LINKLIST(o);
+    old_next = o->op_next;
     o->op_next = 0;
     CALL_PEEP(curop);
     S_prune_chain_head(&curop);
     PL_op = curop;
-    Perl_pp_pushmark(aTHX);
-    CALLRUNOPS(aTHX);
-    PL_op = curop;
-    assert (!(curop->op_flags & OPf_SPECIAL));
-    assert(curop->op_type == OP_RANGE);
-    Perl_pp_anonlist(aTHX);
-    PL_tmps_floor = oldtmps_floor;
+
+    old_cxix = cxstack_ix;
+    create_eval_scope(NULL, G_FAKINGEVAL);
+
+    old_curcop = PL_curcop;
+    StructCopy(old_curcop, &not_compiling, COP);
+    PL_curcop = &not_compiling;
+    /* The above ensures that we run with all the correct hints of the
+       current COP, but that IN_PERL_RUNTIME is true. */
+    assert(IN_PERL_RUNTIME);
+    PL_warnhook = PERL_WARNHOOK_FATAL;
+    PL_diehook  = NULL;
+    JMPENV_PUSH(ret);
+
+    /* Effective $^W=1.  */
+    if ( ! (PL_dowarn & G_WARN_ALL_MASK))
+	PL_dowarn |= G_WARN_ON;
+
+    switch (ret) {
+    case 0:
+	Perl_pp_pushmark(aTHX);
+	CALLRUNOPS(aTHX);
+	PL_op = curop;
+	assert (!(curop->op_flags & OPf_SPECIAL));
+	assert(curop->op_type == OP_RANGE);
+	Perl_pp_anonlist(aTHX);
+	break;
+    case 3:
+	CLEAR_ERRSV();
+	o->op_next = old_next;
+	break;
+    default:
+	JMPENV_POP;
+	PL_warnhook = oldwarnhook;
+	PL_diehook = olddiehook;
+	Perl_croak(aTHX_ "panic: gen_constant_list JMPENV_PUSH returned %d",
+	    ret);
+    }
+
+    JMPENV_POP;
+    PL_dowarn = oldwarn;
+    PL_warnhook = oldwarnhook;
+    PL_diehook = olddiehook;
+    PL_curcop = old_curcop;
+
+    if (cxstack_ix > old_cxix) {
+        assert(cxstack_ix == old_cxix + 1);
+        assert(CxTYPE(CX_CUR()) == CXt_EVAL);
+        delete_eval_scope();
+    }
+    if (ret)
+	return o;
 
     OpTYPE_set(o, OP_RV2AV);
     o->op_flags &= ~OPf_REF;	/* treat \(1..2) like an ordinary list */
