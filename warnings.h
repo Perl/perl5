@@ -221,7 +221,8 @@ is by default enabled even if not within the scope of S<C<use warnings>>.
 #define unpackWARN4(x)		(((x) >>24) & 0xFF)
 
 #define ckDEAD(x)							\
-	   ( ! specialWARN(PL_curcop->cop_warnings) &&			\
+	   (PL_curcop &&                                                \
+            !specialWARN(PL_curcop->cop_warnings) &&			\
 	    ( isWARNf_on(PL_curcop->cop_warnings, WARN_ALL) || 		\
 	      isWARNf_on(PL_curcop->cop_warnings, unpackWARN1(x)) ||	\
 	      isWARNf_on(PL_curcop->cop_warnings, unpackWARN2(x)) ||	\
