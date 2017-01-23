@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 99;
+plan tests => 100;
 our $TODO;
 
 my $deprecated = 0;
@@ -801,3 +801,12 @@ TODO: {
   }
 EOC
 }
+
+sub revnumcmp ($$) {
+  goto FOO;
+  die;
+  FOO:
+  return $_[1] <=> $_[0];
+}
+is eval { join(":", sort revnumcmp (9,5,1,3,7)) }, "9:7:5:3:1",
+  "can goto at top level of multicalled sub";
