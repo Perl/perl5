@@ -1619,4 +1619,4 @@ BEGIN{
 use utf8;
 my $a = qr ̂foobar̂;
 EXPECT
-Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl v5.30 at - line 8.
+Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl 5.30 at - line 8.

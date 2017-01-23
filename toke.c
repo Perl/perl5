@@ -10412,7 +10412,7 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
     const char * non_grapheme_msg = "Use of unassigned code point or"
                                     " non-standalone grapheme for a delimiter"
                                     " will be a fatal error starting in Perl"
-                                    " v5.30";
+                                    " 5.30";
     /* The only non-UTF character that isn't a stand alone grapheme is
      * white-space, hence can't be a delimiter.  So can skip for non-UTF-8 */
     bool check_grapheme = UTF && ckWARN_d(WARN_DEPRECATED);

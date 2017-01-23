@@ -7112,7 +7112,7 @@ but will become a fatal error in a future version of perl.  Untaint your
 arguments.  See L<perlsec>.
 
 =item Use of unassigned code point or non-standalone grapheme for a
-delimiter will be a fatal error starting in Perl v5.30
+delimiter will be a fatal error starting in Perl 5.30
 
 (D deprecated)
 A grapheme is what appears to a native-speaker of a language to be a
