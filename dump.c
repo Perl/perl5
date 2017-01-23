@@ -1073,19 +1073,19 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
 	S_opdump_indent(aTHX_ o, level, bar, file,
                         "PADIX = %" IVdf "\n", (IV)cPADOPo->op_padix);
 #else
-	    if (cSVOPo->op_sv) {
-                STRLEN len;
-                const char * name;
-                SV * const tmpsv  = newSVpvs_flags("", SVs_TEMP);
-                SV * const tmpsv2 = newSVpvs_flags("", SVs_TEMP);
+        if (cSVOPo->op_sv) {
+            STRLEN len;
+            const char * name;
+            SV * const tmpsv  = newSVpvs_flags("", SVs_TEMP);
+            SV * const tmpsv2 = newSVpvs_flags("", SVs_TEMP);
 
-                gv_fullname3(tmpsv, MUTABLE_GV(cSVOPo->op_sv), NULL);
-                name = SvPV_const(tmpsv, len);
-                S_opdump_indent(aTHX_ o, level, bar, file, "GV = %s\n",
-                       generic_pv_escape( tmpsv2, name, len, SvUTF8(tmpsv)));
-	    }
-	    else
-		S_opdump_indent(aTHX_ o, level, bar, file, "GV = NULL\n");
+            gv_fullname3(tmpsv, MUTABLE_GV(cSVOPo->op_sv), NULL);
+            name = SvPV_const(tmpsv, len);
+            S_opdump_indent(aTHX_ o, level, bar, file, "GV = %s\n",
+                   generic_pv_escape( tmpsv2, name, len, SvUTF8(tmpsv)));
+        }
+        else
+            S_opdump_indent(aTHX_ o, level, bar, file, "GV = NULL\n");
 #endif
 	break;
 
