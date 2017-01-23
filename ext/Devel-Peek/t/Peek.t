@@ -1490,7 +1490,7 @@ dumpindent is 4 at -e line 1.
                      GV_OR_PADIX
 EODUMP
 
-    $e =~ s/GV_OR_PADIX/$threads ? "PADIX = 2" : "GV = t::DumpProg"/e;
+    $e =~ s/GV_OR_PADIX/$threads ? "PADIX = 2" : "GV = t::DumpProg (0xNNN)"/e;
     $e =~ s/SVOP/PADOP/g if $threads;
     my $out = t::runperl
                  switches => ['-Ilib'],
@@ -1498,7 +1498,7 @@ EODUMP
                  stderr=>1;
     $out =~ s/ *SEQ = .*\n//;
     $out =~ s/0x[0-9a-f]{2,}\]/${1}0xNNN]/g;
-    $out =~ s/0x[0-9a-f]{2,}\) ===/0xNNN) ===/g;
+    $out =~ s/\(0x[0-9a-f]{3,}\)/(0xNNN)/g;
     is $out, $e, "DumpProg() has no 'Attempt to free X prematurely' warning";
 }
 done_testing();
