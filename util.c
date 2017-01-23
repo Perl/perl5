@@ -1518,14 +1518,17 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
 	 * from the sibling of PL_curcop.
 	 */
 
-	const COP *cop =
-	    closest_cop(PL_curcop, OpSIBLING(PL_curcop), PL_op, FALSE);
-	if (!cop)
-	    cop = PL_curcop;
+        if (PL_curcop) {
+            const COP *cop =
+                closest_cop(PL_curcop, OpSIBLING(PL_curcop), PL_op, FALSE);
+            if (!cop)
+                cop = PL_curcop;
 
-	if (CopLINE(cop))
-	    Perl_sv_catpvf(aTHX_ sv, " at %s line %" IVdf,
-	    OutCopFILE(cop), (IV)CopLINE(cop));
+            if (CopLINE(cop))
+                Perl_sv_catpvf(aTHX_ sv, " at %s line %" IVdf,
+                                OutCopFILE(cop), (IV)CopLINE(cop));
+        }
+
 	/* Seems that GvIO() can be untrustworthy during global destruction. */
 	if (GvIO(PL_last_in_gv) && (SvTYPE(GvIOp(PL_last_in_gv)) == SVt_PVIO)
 		&& IoLINES(GvIOp(PL_last_in_gv)))
