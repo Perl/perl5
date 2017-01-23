@@ -1073,7 +1073,6 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
 	S_opdump_indent(aTHX_ o, level, bar, file,
                         "PADIX = %" IVdf "\n", (IV)cPADOPo->op_padix);
 #else
-	if ( ! (o->op_flags & OPf_SPECIAL)) { /* not lexical */
 	    if (cSVOPo->op_sv) {
                 STRLEN len;
                 const char * name;
@@ -1087,7 +1086,6 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
 	    }
 	    else
 		S_opdump_indent(aTHX_ o, level, bar, file, "GV = NULL\n");
-	}
 #endif
 	break;
 
