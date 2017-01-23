@@ -14446,8 +14446,9 @@ Perl_rpeep(pTHX_ OP *o)
                       && (  kid->op_targ == OP_NEXTSTATE
                          || kid->op_targ == OP_DBSTATE  ))
                     || kid->op_type == OP_STUB
-                    || kid->op_type == OP_ENTER);
-                nullop->op_next = kLISTOP->op_next;
+                    || kid->op_type == OP_ENTER
+                    || (PL_parser && PL_parser->error_count));
+                nullop->op_next = kid->op_next;
                 DEFER(nullop->op_next);
 	    }
 
