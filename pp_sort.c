@@ -1428,9 +1428,7 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 
 =for apidoc sortsv
 
-Sort an array.  Here is an example:
-
-    sortsv(AvARRAY(av), av_top_index(av)+1, Perl_sv_cmp_locale);
+In-place sort an array of SV pointers with the given comparison routine.
 
 Currently this always uses mergesort.  See C<L</sortsv_flags>> for a more
 flexible routine.
@@ -1449,7 +1447,8 @@ Perl_sortsv(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
 /*
 =for apidoc sortsv_flags
 
-Sort an array, with various options.
+In-place sort an array of SV pointers with the given comparison routine,
+with various SORTf_* flag options.
 
 =cut
 */
