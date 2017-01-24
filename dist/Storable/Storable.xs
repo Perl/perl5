@@ -4048,7 +4048,7 @@ static SV *retrieve_idx_blessed(pTHX_ stcxt_t *cxt, const char *cname)
  */
 static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 {
-	I32 len;
+	U32 len;
 	SV *sv;
 	char buf[LG_BLESS + 1];		/* Avoid malloc() if possible */
 	char *classname = buf;
@@ -4069,6 +4069,9 @@ static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 	if (len & 0x80) {
 		RLEN(len);
 		TRACEME(("** allocating %d bytes for class name", len+1));
+		if (len > I32_MAX) {
+			CROAK(("Corrupted classname length"));
+		}
 		New(10003, classname, len+1, char);
 		malloced_classname = classname;
 	}
@@ -4119,7 +4122,7 @@ static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, const char *cname)
  */
 static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 {
-	I32 len;
+	U32 len;
 	char buf[LG_BLESS + 1];		/* Avoid malloc() if possible */
 	char *classname = buf;
 	unsigned int flags;
@@ -4252,6 +4255,10 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 			RLEN(len);
 		else
 			GETMARK(len);
+
+		if (len > I32_MAX) {
+			CROAK(("Corrupted classname length"));
+		}
 
 		if (len > LG_BLESS) {
 			TRACEME(("** allocating %d bytes for class name", len+1));
