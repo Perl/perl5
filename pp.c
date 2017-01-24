@@ -3396,8 +3396,10 @@ PP(pp_substr)
 	tmps = SvPV_force_nomg(sv, curlen);
 	if (DO_UTF8(repl_sv) && repl_len) {
 	    if (!DO_UTF8(sv)) {
+                /* Upgrade the dest, and recalculate tmps in case the buffer
+                 * got reallocated; curlen may also have been changed */
 		sv_utf8_upgrade_nomg(sv);
-		curlen = SvCUR(sv);
+		tmps = SvPV_nomg(sv, curlen);
 	    }
 	}
 	else if (DO_UTF8(sv))

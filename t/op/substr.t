@@ -22,7 +22,7 @@ $SIG{__WARN__} = sub {
      }
 };
 
-plan(391);
+plan(393);
 
 run_tests() unless caller;
 
@@ -880,3 +880,15 @@ is($destroyed, 1, 'Timely scalar destruction with lvalue substr');
 
 # failed with ASAN
 fresh_perl_is('$0 = "/usr/bin/perl"; substr($0, 0, 0, $0)', '', {}, "(perl #129340) substr() with source in target");
+
+
+# [perl #130624] - heap-use-after-free, observable under asan
+{
+    my $x = "\xE9zzzz";
+    my $y = "\x{100}";
+    my $z = substr $x, 0, 1, $y;
+    is $z, "\xE9",        "RT#130624: heap-use-after-free in 4-arg substr (ret)";
+    is $x, "\x{100}zzzz", "RT#130624: heap-use-after-free in 4-arg substr (targ)";
+}
+
+
