@@ -326,7 +326,18 @@ well.
 
 =item *
 
-XXX
+The C<op_class()> API function has been added. This is like the existing
+C<OP_CLASS()> macro, but can more accurately determine what struct an op
+has been allocated as. For example C<OP_CLASS()> might return
+C<OA_BASEOP_OR_UNOP> indicating that ops of this type are usually
+allocated as an C<OP> or C<UNOP>; while <op_class()> will return
+C<OPclass_BASEOP> or C<OPclass_UNOP> as appropriate.
+
+=item *
+
+The output format of the C<op_dump()> function (as used by C<perl -Dx>)
+has changed: it now displays an "ASCII-art" tree structure, and shows more
+low-level details about each op, such as its address and class.
 
 =back
 
