@@ -345,6 +345,12 @@ Attempting to use the deprecated variable C<$#> as the object in an
 indirect object method call could cause a heap use after free or
 buffer overflow.  [perl #129274]
 
+=item *
+
+When checking for an indirect object method call in some rare cases
+the parser could reallocate the line buffer but then continue to use
+pointers to the old buffer.  [perl #129190]
+
 =back
 
 =head1 Known Problems
