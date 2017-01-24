@@ -3075,8 +3075,6 @@ PERL_CALLCONV bool	Perl_sv_does_sv(pTHX_ SV* sv, SV* namesv, U32 flags)
 	assert(sv); assert(namesv)
 
 PERL_CALLCONV void	Perl_sv_dump(pTHX_ SV* sv);
-#define PERL_ARGS_ASSERT_SV_DUMP	\
-	assert(sv)
 /* PERL_CALLCONV I32	sv_eq(pTHX_ SV* sv1, SV* sv2); */
 PERL_CALLCONV I32	Perl_sv_eq_flags(pTHX_ SV* sv1, SV* sv2, const U32 flags);
 #ifndef NO_MATHOMS
