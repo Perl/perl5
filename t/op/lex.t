@@ -7,7 +7,7 @@ use warnings;
 
 BEGIN { chdir 't' if -d 't'; require './test.pl'; }
 
-plan(tests => 34);
+plan(tests => 35);
 
 {
     no warnings 'deprecated';
@@ -273,3 +273,15 @@ SKIP:
         '[perl #129000] read before buffer'
     );
 }
+# probably only failed under ASAN
+fresh_perl_is(
+    "stat\tt\$#0",
+    <<'EOM',
+$# is no longer supported. Its use will be fatal in Perl 5.30 at - line 1.
+Number found where operator expected at - line 1, near "$#0"
+	(Missing operator before 0?)
+Can't call method "t" on an undefined value at - line 1.
+EOM
+    {},
+    "[perl #129273] heap use after free or overflow"
+);

@@ -4279,7 +4279,9 @@ S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv)
 	if (cv || PL_last_lop_op == OP_PRINT || PL_last_lop_op == OP_SAY
             || isUPPER(*PL_tokenbuf))
 	    return 0;
-	s = skipspace(s);
+        /* this could be $# */
+        if (isSPACE(*s))
+            s = skipspace(s);
 	PL_bufptr = start;
 	PL_expect = XREF;
 	return *s == '(' ? FUNCMETH : METHOD;
