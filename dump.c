@@ -770,7 +770,6 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o);
 static void
 S_do_pmop_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const PMOP *pm)
 {
-    char ch;
     UV kidbar;
 
     if (!pm)
@@ -778,14 +777,11 @@ S_do_pmop_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const PMOP *pm)
 
     kidbar = ((bar << 1) | cBOOL(pm->op_flags & OPf_KIDS)) << 1;
 
-    if (pm->op_pmflags & PMf_ONCE)
-	ch = '?';
-    else
-	ch = '/';
-
-    if (PM_GETRE(pm))
+    if (PM_GETRE(pm)) {
+        char ch = (pm->op_pmflags & PMf_ONCE) ? '?' : '/';
 	S_opdump_indent(aTHX_ (OP*)pm, level, bar, file, "PMf_PRE %c%.*s%c\n",
 	     ch,(int)RX_PRELEN(PM_GETRE(pm)), RX_PRECOMP(PM_GETRE(pm)), ch);
+    }
     else
 	S_opdump_indent(aTHX_ (OP*)pm, level, bar, file, "PMf_PRE (RUNTIME)\n");
 
