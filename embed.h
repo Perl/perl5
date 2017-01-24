@@ -381,6 +381,7 @@
 #define newGVREF(a,b)		Perl_newGVREF(aTHX_ a,b)
 #define newGVgen_flags(a,b)	Perl_newGVgen_flags(aTHX_ a,b)
 #define newHVREF(a)		Perl_newHVREF(aTHX_ a)
+#define newHV_type(a)		Perl_newHV_type(aTHX_ a)
 #define newHVhv(a)		Perl_newHVhv(aTHX_ a)
 #define newLISTOP(a,b,c,d)	Perl_newLISTOP(aTHX_ a,b,c,d)
 #define newLOGOP(a,b,c,d)	Perl_newLOGOP(aTHX_ a,b,c,d)
@@ -1576,7 +1577,7 @@
 #define hsplit(a,b,c)		S_hsplit(aTHX_ a,b,c)
 #define hv_auxinit(a)		S_hv_auxinit(aTHX_ a)
 #define hv_auxinit_internal	S_hv_auxinit_internal
-#define hv_delete_common(a,b,c,d,e,f,g)	S_hv_delete_common(aTHX_ a,b,c,d,e,f,g)
+#define hv_delete_common(a,b,c,d,e,f,g)	Perl_hv_delete_common(aTHX_ a,b,c,d,e,f,g)
 #define hv_free_ent_ret(a,b)	S_hv_free_ent_ret(aTHX_ a,b)
 #define hv_magic_check		S_hv_magic_check
 #define hv_notallowed(a,b,c,d)	S_hv_notallowed(aTHX_ a,b,c,d)

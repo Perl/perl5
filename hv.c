@@ -212,6 +212,34 @@ S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
 /* (klen == HEf_SVKEY) is special for MAGICAL hv entries, meaning key slot
  * contains an SV* */
 
+
+/*
+=for apidoc newHV_type
+
+    HV *hv = newHV_type(HV_VTBL *type);
+
+Creates a new HV of the given type with reference count set to 1.
+
+Setting C<type> to NULL allocates a hash table of the standard Perl
+hash type (thus C<newHV_type(NULL)> is equivalent to C<newHV()>.
+
+=cut
+*/
+
+HV *
+Perl_newHV_type(pTHX_ HV_VTBL *type)
+{
+
+    /*HV *hv = newHV();*/
+    /* FIXME just temporary for testing: */
+    HV *hv = MUTABLE_HV(newSV_type(SVt_PVHV));
+
+    XPVHV *xhv = (XPVHV*)SvANY(hv);
+    xhv->xhv_vtbl = type;
+    return hv;
+}
+
+
 /*
 =for apidoc hv_store
 
@@ -393,12 +421,24 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	is_utf8 = cBOOL(flags & HVhek_UTF8);
     }
 
+    xhv = (XPVHV*)SvANY(hv);
+
+    /* TODO: Figure out where exactly we should be dispatching to the vtbl
+     *       implementation. */
+    if (xhv->xhv_vtbl != NULL) {
+        /* Have a vtbl-implemented hash, go and dispatch to the right action: */
+        HV_VTBL *vtable = xhv->xhv_vtbl;
+        if (action & HV_DELETE) {
+	    return (void *)vtable->hvt_delete(hv, keysv, key, klen,
+						flags, action, hash);
+        }
+    }
+
     if (action & HV_DELETE) {
 	return (void *) hv_delete_common(hv, keysv, key, klen,
 					 flags, action, hash);
     }
 
-    xhv = (XPVHV*)SvANY(hv);
     if (SvMAGICAL(hv)) {
 	if (SvRMAGICAL(hv) && !(action & (HV_FETCH_ISSTORE|HV_FETCH_ISEXISTS))) {
 	    if (mg_find((const SV *)hv, PERL_MAGIC_tied)
@@ -1020,8 +1060,8 @@ value, or 0 to ask for it to be computed.
 =cut
 */
 
-STATIC SV *
-S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
+SV *
+Perl_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		   int k_flags, I32 d_flags, U32 hash)
 {
     dVAR;

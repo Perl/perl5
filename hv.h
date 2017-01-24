@@ -28,6 +28,8 @@
 #   define PERL_HASH_ITER_BUCKET(iter)      (((iter)->xhv_riter) ^ ((iter)->xhv_rand))
 #endif
 
+#include "hv_vtbl.h"
+
 /* entry in hash value chain */
 struct he {
     /* Keep hent_next first in this structure, because sv_free_arenas take
@@ -130,6 +132,7 @@ struct xpvhv_aux {
 #define HvAUXf_SCAN_STASH   0x1   /* stash is being scanned by gv_check */
 #define HvAUXf_NO_DEREF     0x2   /* @{}, %{} etc (and nomethod) not present */
 
+
 /* hash structure: */
 /* This structure must match the beginning of struct xpvmg in sv.h. */
 struct xpvhv {
@@ -137,6 +140,7 @@ struct xpvhv {
     union _xmgu	xmg_u;
     STRLEN      xhv_keys;       /* total keys, including placeholders */
     STRLEN      xhv_max;        /* subscript of last element of xhv_array */
+    HV_VTBL	*xhv_vtbl;
 };
 
 /*
@@ -648,7 +652,10 @@ Creates a new HV.  The reference count is set to 1.
 =cut
 */
 
-#define newHV()	MUTABLE_HV(newSV_type(SVt_PVHV))
+/* regular newHV implementation */
+/*#define newHV()	MUTABLE_HV(newSV_type(SVt_PVHV))*/
+/* FIXME just temporary for testing: newHV implementation for testing the no-op vtable logic */
+#define newHV()	({ HV *_p = newHV_type(&PL_mock_std_vtable); _p; })
 
 #include "hv_func.h"
 

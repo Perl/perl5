@@ -4419,6 +4419,8 @@ hints/vos.sh			Hints for named architecture
 hv.c				Hash value code
 hv.h				Hash value header
 hv_func.h			Hash value static inline function header
+hv_vtbl.c			Hash vtable code
+hv_vtbl.h			Hash vtable header
 inline.h			Static inline functions
 INSTALL				Detailed installation instructions
 install_lib.pl			functions shared between install* scripts

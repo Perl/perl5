@@ -2127,6 +2127,9 @@ PERL_CALLCONV OP*	Perl_newHVREF(pTHX_ OP* o)
 #define PERL_ARGS_ASSERT_NEWHVREF	\
 	assert(o)
 
+PERL_CALLCONV HV*	Perl_newHV_type(pTHX_ HV_VTBL *type)
+			__attribute__warn_unused_result__;
+
 PERL_CALLCONV HV*	Perl_newHVhv(pTHX_ HV *hv)
 			__attribute__warn_unused_result__;
 
@@ -4441,7 +4444,7 @@ STATIC struct xpvhv_aux*	S_hv_auxinit(pTHX_ HV *hv);
 STATIC struct xpvhv_aux*	S_hv_auxinit_internal(struct xpvhv_aux *iter);
 #define PERL_ARGS_ASSERT_HV_AUXINIT_INTERNAL	\
 	assert(iter)
-STATIC SV*	S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int k_flags, I32 d_flags, U32 hash);
+PERL_CALLCONV SV*	Perl_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int k_flags, I32 d_flags, U32 hash);
 STATIC SV*	S_hv_free_ent_ret(pTHX_ HV *hv, HE *entry);
 #define PERL_ARGS_ASSERT_HV_FREE_ENT_RET	\
 	assert(hv); assert(entry)

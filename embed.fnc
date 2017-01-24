@@ -1118,6 +1118,7 @@ ApR	|GV*	|newGVgen_flags	|NN const char* pack|U32 flags
 ApR	|OP*	|newGVREF	|I32 type|NULLOK OP* o
 ApR	|OP*	|newHVREF	|NN OP* o
 ApmdbR	|HV*	|newHV
+ApdR	|HV*	|newHV_type	|NULLOK HV_VTBL *type
 ApR	|HV*	|newHVhv	|NULLOK HV *hv
 ApRbm	|IO*	|newIO
 ApdR	|OP*	|newLISTOP	|I32 type|I32 flags|NULLOK OP* first|NULLOK OP* last
@@ -2083,7 +2084,7 @@ rs	|void	|hv_notallowed	|int flags|NN const char *key|I32 klen|NN const char *ms
 in	|U32|ptr_hash|PTRV u
 s	|struct xpvhv_aux*|hv_auxinit|NN HV *hv
 sn	|struct xpvhv_aux*|hv_auxinit_internal|NN struct xpvhv_aux *iter
-sM	|SV*	|hv_delete_common|NULLOK HV *hv|NULLOK SV *keysv \
+pM	|SV*	|hv_delete_common|NULLOK HV *hv|NULLOK SV *keysv \
 		|NULLOK const char *key|STRLEN klen|int k_flags|I32 d_flags \
 		|U32 hash
 sM	|void	|clear_placeholders	|NN HV *hv|U32 items
