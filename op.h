@@ -927,7 +927,10 @@ Return a short description of the provided OP.
 =for apidoc Am|U32|OP_CLASS|OP *o
 Return the class of the provided OP: that is, which of the *OP
 structures it uses.  For core ops this currently gets the information out
-of C<PL_opargs>, which does not always accurately reflect the type used.
+of C<PL_opargs>, which does not always accurately reflect the type used;
+in v5.26 onwards, see also the function C<L</op_class>> which can do a better
+job of determining the used type.
+
 For custom ops the type is returned from the registration, and it is up
 to the registree to ensure it is accurate.  The value returned will be
 one of the C<OA_>* constants from F<op.h>.
