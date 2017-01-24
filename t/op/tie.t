@@ -942,6 +942,24 @@ tie $foo, undef;
 EXPECT
 Can't locate object method "TIESCALAR" via package "main" at - line 2.
 ########
+# tie into nonexistent glob [RT#130623 assertion failure]
+tie $foo, *FOO;
+EXPECT
+Can't locate object method "TIESCALAR" via package "FOO" at - line 2.
+########
+# tie into glob when package exists but not method: no "*", no "main::"
+{ package PackageWithoutTIESCALAR }
+tie $foo, *PackageWithoutTIESCALAR;
+EXPECT
+Can't locate object method "TIESCALAR" via package "PackageWithoutTIESCALAR" at - line 3.
+########
+# tie into reference [RT#130623 assertion failure]
+eval { tie $foo, \"nope" };
+my $exn = $@ // "";
+print $exn =~ s/0x\w+/0xNNN/rg;
+EXPECT
+Can't locate object method "TIESCALAR" via package "SCALAR(0xNNN)" at - line 2.
+########
 #
 # STORE freeing tie'd AV
 sub TIEARRAY  { bless [] }

@@ -953,13 +953,26 @@ PP(pp_tie)
 	 */
        stash = gv_stashsv(*MARK, 0);
        if (!stash) {
-           SV *stashname = SvOK(*MARK) ? *MARK : &PL_sv_no;
-           if (!SvCUR(*MARK)) {
-               stashname = sv_2mortal(newSVpvs("main"));
+           if (SvROK(*MARK))
+               DIE(aTHX_ "Can't locate object method \"%s\" via package \"%" SVf "\"",
+                   methname, SVfARG(*MARK));
+           else if (isGV(*MARK)) {
+               /* If the glob doesn't name an existing package, using
+                * SVfARG(*MARK) would yield "*Foo::Bar" or *main::Foo. So
+                * generate the name for the error message explicitly. */
+               SV *stashname = newSV(0);
+               gv_fullname4(stashname, (GV *) *MARK, NULL, FALSE);
+               DIE(aTHX_ "Can't locate object method \"%s\" via package \"%" SVf "\"",
+                   methname, SVfARG(stashname));
            }
-           DIE(aTHX_ "Can't locate object method \"%s\" via package \"%" SVf "\""
-               " (perhaps you forgot to load \"%" SVf "\"?)",
-               methname, SVfARG(stashname), SVfARG(stashname));
+           else {
+               SV *stashname = !SvPOK(*MARK) ? &PL_sv_no
+                             : SvCUR(*MARK)  ? *MARK
+                             :                 sv_2mortal(newSVpvs("main"));
+               DIE(aTHX_ "Can't locate object method \"%s\" via package \"%" SVf "\""
+                   " (perhaps you forgot to load \"%" SVf "\"?)",
+                   methname, SVfARG(stashname), SVfARG(stashname));
+           }
        }
        else if (!(gv = gv_fetchmethod(stash, methname))) {
            /* The effective name can only be NULL for stashes that have
