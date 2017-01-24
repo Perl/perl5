@@ -341,7 +341,9 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Attempting to use the deprecated variable C<$#> as the object in an
+indirect object method call could cause a heap use after free or
+buffer overflow.  [perl #129274]
 
 =back
 
