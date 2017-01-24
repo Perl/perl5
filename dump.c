@@ -737,7 +737,7 @@ Perl_dump_eval(pTHX)
 static SV *
 S_gv_display(pTHX_ GV *gv)
 {
-    SV * const name = newSV(0);
+    SV * const name = newSVpvs_flags("", SVs_TEMP);
     if (gv) {
         SV * const raw = newSVpvs_flags("", SVs_TEMP);
         STRLEN len;
@@ -1217,6 +1217,30 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
 	    S_opdump_indent(aTHX_ o, level, bar, file,
                             "REFCNT = %" UVuf "\n", (UV)o->op_targ);
 	break;
+
+    case OP_DUMP:
+    case OP_GOTO:
+    case OP_NEXT:
+    case OP_LAST:
+    case OP_REDO:
+	if (o->op_flags & (OPf_SPECIAL|OPf_STACKED|OPf_KIDS))
+	    break;
+	/* FALLTHROUGH */
+    case OP_TRANS:
+    case OP_TRANSR:
+	if (   (o->op_type == OP_TRANS || o->op_type == OP_TRANSR)
+            && (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)))
+            break;
+
+        {
+            SV * const label = newSVpvs_flags("", SVs_TEMP);
+            generic_pv_escape(label, cPVOPo->op_pv, strlen(cPVOPo->op_pv), 0);
+            S_opdump_indent(aTHX_ o, level, bar, file,
+                            "PV = \"%" SVf "\" (0x%" UVxf ")\n",
+                            SVfARG(label), PTR2UV(cPVOPo->op_pv));
+        }
+
+
     default:
 	break;
     }
