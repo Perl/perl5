@@ -6566,10 +6566,18 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		if (!curse(sv, 1)) goto get_next_sv;
 		type = SvTYPE(sv); /* destructor may have changed it */
 	    }
-	    /* Free back-references before magic, in case the magic calls
-	     * Perl code that has weak references to sv. */
 	    if (type == SVt_PVHV) {
+                HV_VTBL *vtbl;
+                HV *hv = MUTABLE_HV(sv);
+
+                /* Free back-references before magic, in case the magic calls
+                 * Perl code that has weak references to sv. */
 		Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
+                /* TODO: Before or after invoking magic on the HV?
+                 *       I think before. */
+                vtbl = ( (XPVHV*)SvANY(hv) )->xhv_vtbl;
+                if (vtbl != NULL)
+                    vtbl->hvt_destroy(aTHX_ hv);
 		if (SvMAGIC(sv))
 		    mg_free(sv);
 	    }

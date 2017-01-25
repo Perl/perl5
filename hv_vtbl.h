@@ -8,7 +8,17 @@
  */
 
 struct hv_vtbl {
+    /* Called when allocating a new HV of this type */
+    void	(*hvt_init)(pTHX_ HV *hv);
+    /* Called before deallocating the HV in the traditional HV implementation. */
+    void	(*hvt_destroy)(pTHX_ HV *hv);
+
+    /*SV **	(*hvt_fetch)(pTHX_ HV *hv, SV *keysv, I32 is_lvalue_fetch, U32 hash);*/
+    /* Implements the various forms of hv_delete/etc */
     SV *	(*hvt_delete)(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int key_flags, I32 delete_flags, U32 hash);
+    /* exists */
+    /* store */
+    /* clear */
 };
 typedef struct hv_vtbl HV_VTBL;
 

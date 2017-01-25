@@ -14,6 +14,20 @@
 #define PERL_HASH_INTERNAL_ACCESS
 #include "perl.h"
 
+STATIC void
+S_hv_mock_std_vtable_init(pTHX_ HV *hv)
+{
+    PERL_UNUSED_CONTEXT;
+    PERL_UNUSED_ARG(hv);
+}
+
+STATIC void
+S_hv_mock_std_vtable_destroy(pTHX_ HV *hv)
+{
+    PERL_UNUSED_CONTEXT;
+    PERL_UNUSED_ARG(hv);
+}
+
 STATIC SV *
 S_hv_mock_std_vtable_delete(pTHX_ HV *hv, SV *keysv, const char *key,
                             STRLEN klen, int key_flags, I32 delete_flags,
@@ -24,6 +38,9 @@ S_hv_mock_std_vtable_delete(pTHX_ HV *hv, SV *keysv, const char *key,
 }
 
 HV_VTBL PL_mock_std_vtable = {
+        S_hv_mock_std_vtable_init,
+        S_hv_mock_std_vtable_destroy,
+        /* S_hv_mock_std_vtable_fetch, */
 	S_hv_mock_std_vtable_delete
 };
 

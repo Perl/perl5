@@ -229,13 +229,15 @@ hash type (thus C<newHV_type(NULL)> is equivalent to C<newHV()>.
 HV *
 Perl_newHV_type(pTHX_ HV_VTBL *type)
 {
-
     /*HV *hv = newHV();*/
     /* FIXME just temporary for testing: */
     HV *hv = MUTABLE_HV(newSV_type(SVt_PVHV));
 
     XPVHV *xhv = (XPVHV*)SvANY(hv);
     xhv->xhv_vtbl = type;
+
+    type->hvt_init(aTHX_ hv);
+
     return hv;
 }
 
