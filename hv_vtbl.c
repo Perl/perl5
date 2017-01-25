@@ -10,7 +10,7 @@
 /* TODO: Insert LotR quote here. */
 
 #include "EXTERN.h"
-#define PERL_IN_HV_C
+#define PERL_IN_HV_VTBL_C
 #define PERL_HASH_INTERNAL_ACCESS
 #include "perl.h"
 

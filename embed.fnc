@@ -2084,10 +2084,12 @@ rs	|void	|hv_notallowed	|int flags|NN const char *key|I32 klen|NN const char *ms
 in	|U32|ptr_hash|PTRV u
 s	|struct xpvhv_aux*|hv_auxinit|NN HV *hv
 sn	|struct xpvhv_aux*|hv_auxinit_internal|NN struct xpvhv_aux *iter
+sM	|void	|clear_placeholders	|NN HV *hv|U32 items
+#endif
+#if defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_HV_VTBL_C)
 pM	|SV*	|hv_delete_common|NULLOK HV *hv|NULLOK SV *keysv \
 		|NULLOK const char *key|STRLEN klen|int k_flags|I32 d_flags \
 		|U32 hash
-sM	|void	|clear_placeholders	|NN HV *hv|U32 items
 #endif
 
 #if defined(PERL_IN_MG_C)
