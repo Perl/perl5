@@ -1,3 +1,30 @@
+Wed Jan 25 11:27:07 2017 -0600 Reini Urban <rurban@cpanel.net>
+    Version 3.05c
+
+        * Protect against classname len overflow on the stack
+        and 2x on the heap with retrieve_bless and retrieve_hook.
+        A serious security issue with malcrafted storable files or buffers,
+        but p5p accepts no CVE on Storable attacks. See RT #130635 (detected by JD).
+        * Fix NULL ptr SEGVs with retrieve_code and retrieve_other.
+        See RT #130098(JD)
+        * Fix the remaining 2-arg open calls
+
+Sat Jan 7 09:01:29 2017 +0100 Reini Urban <rurban@cpanel.net>
+    Version 3.04c
+
+        * fix printf types and warnings, esp. for 32bit use64bitint
+        * Change sv_setpvn(…, "…", …) to sv_setpvs(…, "…")
+
+Tue Jul 26 11:49:33 2016 +1000 Tony Cook <tony@develop-help.com>
+    Version 3.03c
+
+        * remove . from @INC when loading optional modules
+
+Sun Nov 20 18:06:45 2016 +0100 Reini Urban <rurban@cpanel.net>
+    Version 3.02c
+
+        * Fix -Wc++11-compat warnings, fix -Wchar-subscripts
+
 Fri Sep 16 01:32:59 2016 +0200 Reini Urban <rurban@cpanel.net>
     Version 3.01c
 
