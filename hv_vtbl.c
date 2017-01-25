@@ -37,6 +37,23 @@ S_hv_mock_std_vtable_delete(pTHX_ HV *hv, SV *keysv, const char *key,
 		            key_flags, delete_flags, hash);
 }
 
+STATIC void
+S_hv_mock_std_vtable_clear(pTHX_ HV *hv)
+{
+    /* THIS IS PURELY FOR TESTING! */
+    XPVHV* xhv = (XPVHV *)SvANY(hv);
+    HV_VTBL *vtable = xhv->xhv_vtbl;
+
+    ENTER;
+    /* localize vtable such that hv_clear takes the normal code path */
+    SAVEPPTR(vtable);
+
+    xhv->xhv_vtbl = NULL;
+    hv_clear(hv);
+
+    LEAVE;
+}
+
 /*
 STATIC SV **
 S_hv_mock_std_vtable_fetch(pTHX_ HV *hv, SV *keysv, const char *key,
@@ -55,16 +72,21 @@ S_hv_mock_std_vtable_exists(pTHX_ HV *hv, SV *keysv, const char *key,
     bool retval;
     XPVHV* xhv = (XPVHV *)SvANY(hv);
     HV_VTBL *vtable = xhv->xhv_vtbl;
+
     ENTER;
+    /* localize vtable such that hv_clear takes the normal code path */
     SAVEPPTR(vtable);
     xhv->xhv_vtbl = NULL;
+
     if (keysv)
         retval = hv_exists_ent(hv, keysv, hash);
     else {
         I32 my_klen = (key_flags & HVhek_UTF8) ? -(I32)klen : (I32)klen;
         retval = hv_exists(hv, key, my_klen);
     }
+
     LEAVE;
+
     return retval;
 }
 
@@ -73,7 +95,8 @@ HV_VTBL PL_mock_std_vtable = {
         S_hv_mock_std_vtable_destroy,
         /* S_hv_mock_std_vtable_fetch, */
         S_hv_mock_std_vtable_exists,
-	S_hv_mock_std_vtable_delete
+	S_hv_mock_std_vtable_delete,
+	S_hv_mock_std_vtable_clear
 };
 
 /*

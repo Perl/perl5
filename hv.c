@@ -1753,6 +1753,10 @@ Perl_hv_clear(pTHX_ HV *hv)
 
     xhv = (XPVHV*)SvANY(hv);
 
+    if (xhv->xhv_vtbl != NULL) {
+        xhv->xhv_vtbl->hvt_clear(aTHX_ hv);
+    }
+
     /* avoid hv being freed when calling destructors below */
     EXTEND_MORTAL(1);
     PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple_NN(hv);

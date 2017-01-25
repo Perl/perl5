@@ -22,8 +22,8 @@ struct hv_vtbl {
     bool	(*hvt_exists)(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int key_flags, U32 hash);
     /* Implements the various forms of hv_delete/etc */
     SV *	(*hvt_delete)(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int key_flags, I32 delete_flags, U32 hash);
-
-    /* clear */
+    /* Implements the equivalent of hv_clear */
+    void	(*hvt_clear)(pTHX_ HV *hv);
 };
 typedef struct hv_vtbl HV_VTBL;
 
