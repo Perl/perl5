@@ -434,6 +434,10 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    return (void *)vtable->hvt_delete(hv, keysv, key, klen,
 						flags, action, hash);
         }
+        else if (action & HV_FETCH_ISEXISTS) {
+	    return (void *)vtable->hvt_exists(hv, keysv, key, klen,
+					        flags, hash);
+        }
     }
 
     if (action & HV_DELETE) {
