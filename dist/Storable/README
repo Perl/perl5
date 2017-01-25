@@ -1,7 +1,7 @@
-                         Storable 3.00
+                         Storable 3.05c
                Copyright (c) 1995-2000, Raphael Manfredi
                Copyright (c) 2001-2004, Larry Wall
-               Copyright (c) 2016, cPanel Inc
+               Copyright (c) 2016,2017 cPanel Inc
 
 ------------------------------------------------------------------------
     This program is free software; you can redistribute it and/or modify
@@ -48,7 +48,7 @@ To compile this extension, run:
 There is an embedded POD manual page in Storable.pm.
 
 Storable was written by Raphael Manfredi <Raphael_Manfredi@pobox.com>
-Maintenance is now done by the perl5-porters <perl5-porters@perl.org>
+Maintenance is now done by cperl, https://github.com/perl11/cperl
 
 Please e-mail us with problems, bug fixes, comments and complaints,
 although if you have complements you should send them to Raphael.
@@ -69,9 +69,10 @@ Thanks to (in chronological order):
     Marc Lehmann <pcg@opengroup.org>
     Justin Banks <justinb@wamnet.com>
     Jarkko Hietaniemi <jhi@iki.fi> (AGAIN, as perl 5.7.0 Pumpkin!)
-    Todd Rinaldo <toddr@cpanel.net>, JD Lightsey <jd@cpanel.net>
-      for optional disabling tie and bless for increased security
-    Reini Urban <rurban@cpanel.net> for the 3.00 >2G support and rewrite
+    Todd Rinaldo <toddr@cpanel.net> and JD Lightsey <jd@cpanel.net>
+      for optional disabling tie and bless for increased security.
+    Reini Urban <rurban@cpanel.net> for the 3.0x >2G support and rewrite
+    JD Lightsey <jd@cpanel.net>
 
 for their contributions.
 
@@ -108,6 +109,3 @@ bring you this Storable release:
     Tim Bunce <Tim.Bunce@pobox.com>
     VMSperlers
     Yitzchak Scott-Thoennes <sthoenna@efn.org>
-
-If I've missed you out, please accept my apologies, and e-mail your
-patch to perl5-porters@perl.org.
