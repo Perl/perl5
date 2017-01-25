@@ -653,9 +653,7 @@ Creates a new HV.  The reference count is set to 1.
 */
 
 /* regular newHV implementation */
-/*#define newHV()	MUTABLE_HV(newSV_type(SVt_PVHV))*/
-/* FIXME just temporary for testing: newHV implementation for testing the no-op vtable logic */
-#define newHV()	({ HV *_p = newHV_type(&PL_mock_std_vtable); _p; })
+#define newHV()	MUTABLE_HV(newSV_type(SVt_PVHV))
 
 #include "hv_func.h"
 

@@ -1370,6 +1370,8 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 #endif
             /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
 	    HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+            /* FIXME just temporary for testing: newHV implementation for testing the no-op vtable logic */
+            ((XPVHV*)  SvANY(sv))->xhv_vtbl = &PL_mock_std_vtable;
 	}
 
 	/* SVt_NULL isn't the only thing upgraded to AV or HV.
