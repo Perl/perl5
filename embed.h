@@ -1577,7 +1577,6 @@
 #define hsplit(a,b,c)		S_hsplit(aTHX_ a,b,c)
 #define hv_auxinit(a)		S_hv_auxinit(aTHX_ a)
 #define hv_auxinit_internal	S_hv_auxinit_internal
-#define hv_delete_common(a,b,c,d,e,f,g)	Perl_hv_delete_common(aTHX_ a,b,c,d,e,f,g)
 #define hv_free_ent_ret(a,b)	S_hv_free_ent_ret(aTHX_ a,b)
 #define hv_magic_check		S_hv_magic_check
 #define hv_notallowed(a,b,c,d)	S_hv_notallowed(aTHX_ a,b,c,d)
@@ -1587,6 +1586,9 @@
 #define save_hek_flags		S_save_hek_flags
 #define share_hek_flags(a,b,c,d)	S_share_hek_flags(aTHX_ a,b,c,d)
 #define unshare_hek_or_pvn(a,b,c,d)	S_unshare_hek_or_pvn(aTHX_ a,b,c,d)
+#  endif
+#  if defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_HV_VTBL_C)
+#define hv_delete_common(a,b,c,d,e,f,g)	Perl_hv_delete_common(aTHX_ a,b,c,d,e,f,g)
 #  endif
 #  if defined(PERL_IN_LOCALE_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_MATHOMS_C)
 #    if defined(USE_LOCALE_COLLATE)
