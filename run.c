@@ -36,10 +36,9 @@
 int
 Perl_runops_standard(pTHX)
 {
-    OP *op = PL_op;
-    PERL_DTRACE_PROBE_OP(op);
-    while ((PL_op = op = op->op_ppaddr(aTHX))) {
-        PERL_DTRACE_PROBE_OP(op);
+    PERL_DTRACE_PROBE_OP(PL_op);
+    while ((PL_op = PL_op->op_ppaddr(aTHX))) {
+        PERL_DTRACE_PROBE_OP(PL_op);
     }
     PERL_ASYNC_CHECK();
 
