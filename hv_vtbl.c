@@ -33,8 +33,22 @@ S_hv_mock_std_vtable_delete(pTHX_ HV *hv, SV *keysv, const char *key,
                             STRLEN klen, int key_flags, int delete_flags,
                             U32 hash)
 {
-    return hv_delete_common(hv, keysv, key, klen,
-		            key_flags, delete_flags, hash);
+    SV *retval;
+
+    /* THIS IS PURELY FOR TESTING! */
+    XPVHV* xhv = (XPVHV *)SvANY(hv);
+    HV_VTBL *vtable = xhv->xhv_vtbl;
+
+    ENTER;
+    /* localize vtable such that hv_common takes the normal code path */
+    SAVEPPTR(vtable);
+
+    xhv->xhv_vtbl = NULL;
+    retval = MUTABLE_SV(hv_common(hv, keysv, key, klen, key_flags, delete_flags, NULL, hash));
+
+    LEAVE;
+
+    return retval;
 }
 
 STATIC void
@@ -78,12 +92,7 @@ S_hv_mock_std_vtable_exists(pTHX_ HV *hv, SV *keysv, const char *key,
     SAVEPPTR(vtable);
     xhv->xhv_vtbl = NULL;
 
-    if (keysv)
-        retval = hv_exists_ent(hv, keysv, hash);
-    else {
-        I32 my_klen = (key_flags & HVhek_UTF8) ? -(I32)klen : (I32)klen;
-        retval = hv_exists(hv, key, my_klen);
-    }
+    retval = cBOOL(hv_common(hv, keysv, key, klen, key_flags, HV_FETCH_ISEXISTS, NULL, hash));
 
     LEAVE;
 

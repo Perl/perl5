@@ -384,6 +384,23 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     assert(SvTYPE(hv) == SVt_PVHV);
 
+    xhv = (XPVHV*)SvANY(hv);
+
+    /* TODO: Figure out where exactly we should be dispatching to the vtbl
+     *       implementation. */
+    if (xhv->xhv_vtbl != NULL) {
+        /* Have a vtbl-implemented hash, go and dispatch to the right action: */
+        HV_VTBL *vtable = xhv->xhv_vtbl;
+        if (action & HV_DELETE) {
+	    return (void *)vtable->hvt_delete(hv, keysv, key, klen,
+						flags, action, hash);
+        }
+        else if (action & HV_FETCH_ISEXISTS) {
+	    return (void *)vtable->hvt_exists(hv, keysv, key, klen,
+					        flags, hash);
+        }
+    }
+
     if (SvSMAGICAL(hv) && SvGMAGICAL(hv) && !(action & HV_DISABLE_UVAR_XKEY)) {
 	MAGIC* mg;
 	if ((mg = mg_find((const SV *)hv, PERL_MAGIC_uvar))) {
@@ -421,23 +438,6 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	}
     } else {
 	is_utf8 = cBOOL(flags & HVhek_UTF8);
-    }
-
-    xhv = (XPVHV*)SvANY(hv);
-
-    /* TODO: Figure out where exactly we should be dispatching to the vtbl
-     *       implementation. */
-    if (xhv->xhv_vtbl != NULL) {
-        /* Have a vtbl-implemented hash, go and dispatch to the right action: */
-        HV_VTBL *vtable = xhv->xhv_vtbl;
-        if (action & HV_DELETE) {
-	    return (void *)vtable->hvt_delete(hv, keysv, key, klen,
-						flags, action, hash);
-        }
-        else if (action & HV_FETCH_ISEXISTS) {
-	    return (void *)vtable->hvt_exists(hv, keysv, key, klen,
-					        flags, hash);
-        }
     }
 
     if (action & HV_DELETE) {
