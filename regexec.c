@@ -8453,7 +8453,8 @@ NULL
             assert(!NEXTCHR_IS_EOS);
             if (utf8_target) {
                 locinput += PL_utf8skip[nextchr];
-                /* locinput is allowed to go 1 char off the end, but not 2+ */
+                /* locinput is allowed to go 1 char off the end (signifying
+                 * EOS), but not 2+ */
                 if (locinput > reginfo->strend)
                     sayNO;
             }
