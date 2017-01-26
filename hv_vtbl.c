@@ -30,7 +30,7 @@ S_hv_mock_std_vtable_destroy(pTHX_ HV *hv)
 
 STATIC SV *
 S_hv_mock_std_vtable_delete(pTHX_ HV *hv, SV *keysv, const char *key,
-                            STRLEN klen, int key_flags, I32 delete_flags,
+                            STRLEN klen, int key_flags, int delete_flags,
                             U32 hash)
 {
     return hv_delete_common(hv, keysv, key, klen,
