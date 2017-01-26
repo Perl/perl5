@@ -669,7 +669,7 @@ S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 Creates and initialises a new lexer/parser state object, supplying
 a context in which to lex and parse from a new source of Perl code.
 A pointer to the new state object is placed in L</PL_parser>.  An entry
-is made on the save stack so that upon unwinding the new state object
+is made on the save stack so that upon unwinding, the new state object
 will be destroyed and the former value of L</PL_parser> will be restored.
 Nothing else need be done to clean up the parsing context.
 
