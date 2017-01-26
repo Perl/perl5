@@ -4,10 +4,13 @@ Wed Jan 25 11:27:07 2017 -0600 Reini Urban <rurban@cpanel.net>
         * Protect against classname len overflow on the stack
         and 2x on the heap with retrieve_bless and retrieve_hook.
         A serious security issue with malcrafted storable files or buffers,
-        but p5p accepts no CVE on Storable attacks. See RT #130635 (detected by JD).
+        but p5p accepts no CVE on Storable attacks. See RT #130635
+        (reported by JD).
         * Fix NULL ptr SEGVs with retrieve_code and retrieve_other.
-        See RT #130098(JD)
-        * Fix the remaining 2-arg open calls
+        See RT #130098 (reported and fixed by JD)
+        * Fix wrong huge LOBJECT support, broken since 3.00c.
+        Repro with `export PERL_TEST_MEMORY=8`
+        * Fix the few remaining 2-arg open calls.
 
 Sat Jan 7 09:01:29 2017 +0100 Reini Urban <rurban@cpanel.net>
     Version 3.04c
