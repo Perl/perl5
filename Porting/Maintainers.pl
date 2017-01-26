@@ -1011,6 +1011,7 @@ use File::Glob qw(:case);
             'lib/Sub/Util.pm',     # CPAN RT 118470
             't/lln.t',             # CPAN RT 118470
             't/uniq.t',            # CPAN RT 118470
+            't/tainted.t',         # CPAN RT 119169
         ],
     },
 
