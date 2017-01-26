@@ -25,7 +25,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Security Fixes</h3>
 
-<commit votes="sprout" id="ba0a4150f6f1604df236035adf6df18bd43de88e" ticket="" desc="Fix checks for tainted dir in $ENV{PATH}"/>
+<commit votes="sprout xsawyerx" id="ba0a4150f6f1604df236035adf6df18bd43de88e" ticket="" desc="Fix checks for tainted dir in $ENV{PATH}"/>
 
 </div>
 
@@ -33,7 +33,7 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <commit votes="sprout" id="a2637ca0a3fec01b80d7ea5ba62802354fd5e6f3" ticket="128597" desc="[perl #128597] Crash from gp_free/ckWARN_d"/>
 
-<commit votes="sprout" id="d35c1b5e43e773f353239d9182ddccb41cdab3d6" ticket="128740" desc="[perl #128740] Check for null in pp_ghostent et al."/>
+<commit votes="sprout xsawyerx" id="d35c1b5e43e773f353239d9182ddccb41cdab3d6" ticket="128740" desc="[perl #128740] Check for null in pp_ghostent et al."/>
 <commit votes="sprout" id="bf8a9a15ea4a7b7ebcde5ba48aafe397c549eff2" ticket="128951" desc="[perl #128951] Fix ASan error with @{\327"/>
 
 <commit votes="sprout" id="9bde56224e82f20e7a65b3469b1ffb6b9f6d4df8" ticket="129196" desc="[perl #129196] Crash/bad read with ‘evalbytes S’"/>
@@ -48,16 +48,16 @@ Note: the following is a non-trivial backport to maint-5.22 of 109ac342a6bc5a3a6
 
 <div><h3>Regression Fixes</h3>
 
-<commit votes="sprout" id="08f800f8519574aea9e744ff83230fb93772652b" ticket="128182" desc="Fix crash with require $nonstring"/>
+<commit votes="sprout xsawyerx" id="08f800f8519574aea9e744ff83230fb93772652b" ticket="128182" desc="Fix crash with require $nonstring"/>
 
 Perhaps just the removal of SETERRNO() from this.
 <commit votes="tonyc jhi" id="d484df69ed26120321cdca989748cd4636b276bb" ticket="125347" desc="[perl #125347] allow truncate to work on large files on Win32" />
 
 <commit votes="tonyc jhi" id="3f6b66c14467c0f8c7459e32c576618155ca89f3" ticket="128316" desc="(perl #128316) preserve errno from failed system calls" />
 
-<commit votes="sprout jhi" id="b3dd0aba3d2bf0b22280303ef6f068e976e31888" ticket="128508" desc="[perl #128508] Fix line numbers with perl -x" />
+<commit votes="sprout jhi xsawyerx" id="b3dd0aba3d2bf0b22280303ef6f068e976e31888" ticket="128508" desc="[perl #128508] Fix line numbers with perl -x" />
 
-<commit votes="sprout" id="c82de78e3ba0184f85b5b49245e5da32d1cb3fcc" ticket="126482" desc="[perl #126482] Fix assert fail ‘a_const a_const’"/>
+<commit votes="sprout xsawyerx" id="c82de78e3ba0184f85b5b49245e5da32d1cb3fcc" ticket="126482" desc="[perl #126482] Fix assert fail ‘a_const a_const’"/>
 
 NOTE from jhi: the following cluster of hexfp-related fixes
 (in ascending time order) only makes sense as a unit, they all touch
@@ -86,7 +86,7 @@ the first one required manual backporting (available on request).
 <commit votes="jhi" id="dd1645173d8209e05c419b0f3edc9b1c0f9643a8" ticket="" desc="Do not deploy the fractional matching without fractions"/>
 <commit votes="jhi" id="1bee6aebe39da1a4d681e8ea1b9d0329898a8407" ticket="" desc="Test data mistake was masked by mistaken fractional matching"/>
 
-<commit votes="sprout" id="c333712c4a550eeb3146b964d8508f772e294a49" ticket="129122" desc="regex sets compilation error"/>
+<commit votes="sprout xsawyerx" id="c333712c4a550eeb3146b964d8508f772e294a49" ticket="129122" desc="regex sets compilation error"/>
 
 </div>
 
@@ -96,8 +96,8 @@ the first one required manual backporting (available on request).
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="jhi sprout" id="d06c8f869698f7905df974ab8bafb703a5438fc1" desc="[perl #128538] [PATCH] Fix copy/paste error in Configure"/>
-<commit votes="jhi sprout" id="a2c061044c1e87ae8e777d6134191760235db0de" desc="make Configure abort if both -Duselongdouble and -Dusequadmath are requested"/>
+<commit votes="jhi sprout xsawyerx" id="d06c8f869698f7905df974ab8bafb703a5438fc1" desc="[perl #128538] [PATCH] Fix copy/paste error in Configure"/>
+<commit votes="jhi sprout xsawyerx" id="a2c061044c1e87ae8e777d6134191760235db0de" desc="make Configure abort if both -Duselongdouble and -Dusequadmath are requested"/>
 <commit votes="craigb jhi" id="f6a154ae766a3404d83b81448ca6a356d30198e1" desc="Treat VSI C the same as DEC/Compaq/HP C."/>
 
 </div>
