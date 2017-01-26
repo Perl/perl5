@@ -1620,3 +1620,20 @@ use utf8;
 my $a = qr ̂foobar̂;
 EXPECT
 Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl 5.30 at - line 8.
+########
+# NAME  [perl $130567] Assertion failure
+BEGIN {
+    if (ord('A') != 65) {
+        print "SKIPPED\n# test is ASCII-specific";
+        exit 0;
+    }
+}
+no warnings "uninitialized";
+$_= "";
+s//\3000/;
+s//"\x{180};;s\221(*$@$`\241\275";/gee;
+s//"s\221\302\302\302\302\302\302\302$@\241\275";/gee;
+EXPECT
+OPTION fatal
+Malformed UTF-8 character: \xc3\x20 (unexpected non-continuation byte 0x20, immediately after start byte 0xc3; need 2 bytes, got 1) in eval "string" at - line 11.
+Malformed UTF-8 character (fatal) at - line 11.
