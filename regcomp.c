@@ -11709,19 +11709,11 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    nextchar(pRExC_state);
             if (max < min) {    /* If can't match, warn and optimize to fail
                                    unconditionally */
-                if (SIZE_ONLY) {
-
-                    /* We can't back off the size because we have to reserve
-                     * enough space for all the things we are about to throw
-                     * away, but we can shrink it by the amount we are about
-                     * to re-use here */
-                    RExC_size += PREVOPER(RExC_size) - regarglen[(U8)OPFAIL];
-                }
-                else {
+                if (PASS2) {
                     ckWARNreg(RExC_parse, "Quantifier {n,m} with n > m can't match");
-                    RExC_emit = orig_emit;
                 }
-                ret = reganode(pRExC_state, OPFAIL, 0);
+                reginsert(pRExC_state, OPFAIL, orig_emit, depth+1);
+                NEXT_OFF(orig_emit)= regarglen[OPFAIL] + NODE_STEP_REGNODE;
                 return ret;
             }
             else if (min == max && *RExC_parse == '?')

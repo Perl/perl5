@@ -20,7 +20,7 @@ use warnings;
 use 5.010;
 use Config;
 
-plan tests => 2502;  # Update this when adding/deleting tests.
+plan tests => 2504;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1130,6 +1130,15 @@ EOP
         # this did fail under ASAN, but didn't under valgrind
         my $s = "\x{f2}\x{140}\x{fe}\x{ff}\x{ff}\x{ff}";
         ok($s !~ /^0000.\34500\376\377\377\377/, "RT #129085");
+    }
+    {
+        # rt
+        fresh_perl_is(
+            '"foo"=~/((?1)){8,0}/; print "ok"',
+            "ok", {},  'RT #130561 - allowing impossible quantifier should not cause SEGVs');
+        my $s= "foo";
+        ok($s=~/(foo){1,0}|(?1)/,
+            "RT #130561 - allowing impossible quantifier should not break recursion");
     }
 
 } # End of sub run_tests
