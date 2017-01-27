@@ -18491,6 +18491,13 @@ S_reg2Lanode(pTHX_ RExC_state_t *pRExC_state, const U8 op, const U32 arg1, const
 - reginsert - insert an operator in front of already-emitted operand
 *
 * Means relocating the operand.
+*
+* IMPORTANT NOTE - it is the *callers* responsibility to correctly
+* set up NEXT_OFF() of the inserted node if needed. Something like this:
+*
+* reginsert(pRExC, OPFAIL, orig_emit, depth+1);
+* NEXT_OFF(orig_emit)= regarglen[OPFAIL] + NODE_STEP_REGNODE;
+*
 */
 STATIC void
 S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *operand, U32 depth)
