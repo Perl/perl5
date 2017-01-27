@@ -18501,7 +18501,7 @@ S_reg2Lanode(pTHX_ RExC_state_t *pRExC_state, const U8 op, const U32 arg1, const
 * Means relocating the operand.
 */
 STATIC void
-S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
+S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *operand, U32 depth)
 {
     regnode *src;
     regnode *dst;
@@ -18535,13 +18535,13 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
             /* note, RExC_open_parens[0] is the start of the
              * regex, it can't move. RExC_close_parens[0] is the end
              * of the regex, it *can* move. */
-            if ( paren && RExC_open_parens[paren] >= opnd ) {
+            if ( paren && RExC_open_parens[paren] >= operand ) {
                 /*DEBUG_PARSE_FMT("open"," - %d",size);*/
                 RExC_open_parens[paren] += size;
             } else {
                 /*DEBUG_PARSE_FMT("open"," - %s","ok");*/
             }
-            if ( RExC_close_parens[paren] >= opnd ) {
+            if ( RExC_close_parens[paren] >= operand ) {
                 /*DEBUG_PARSE_FMT("close"," - %d",size);*/
                 RExC_close_parens[paren] += size;
             } else {
@@ -18552,7 +18552,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
     if (RExC_end_op)
         RExC_end_op += size;
 
-    while (src > opnd) {
+    while (src > operand) {
 	StructCopy(--src, --dst, regnode);
 #ifdef RE_TRACK_PATTERN_OFFSETS
         if (RExC_offsets) {     /* MJD 20010112 */
@@ -18573,7 +18573,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
     }
 
 
-    place = opnd;		/* Op node, where operand used to be. */
+    place = operand;		/* Op node, where operand used to be. */
 #ifdef RE_TRACK_PATTERN_OFFSETS
     if (RExC_offsets) {         /* MJD */
 	MJD_OFFSET_DEBUG(

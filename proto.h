@@ -5042,9 +5042,9 @@ STATIC regnode*	S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 dept
 STATIC unsigned int	S_regex_set_precedence(const U8 my_operator)
 			__attribute__warn_unused_result__;
 
-STATIC void	S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth);
+STATIC void	S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *operand, U32 depth);
 #define PERL_ARGS_ASSERT_REGINSERT	\
-	assert(pRExC_state); assert(opnd)
+	assert(pRExC_state); assert(operand)
 STATIC regnode*	S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_len, const char* const name);
 #define PERL_ARGS_ASSERT_REGNODE_GUTS	\
 	assert(pRExC_state); assert(name)
