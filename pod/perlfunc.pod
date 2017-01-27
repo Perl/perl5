@@ -7322,22 +7322,37 @@ name of the variables in the sort block :
    package main;
    my $a = "C"; # DANGER, Will Robinson, DANGER !!!
 
-   print sort { $a cmp $b }               qw(A C E G B D F H); # WRONG
+   print sort { $a cmp $b }               qw(A C E G B D F H);
+                                          # WRONG
    sub badlexi { $a cmp $b }
-   print sort badlexi                     qw(A C E G B D F H); # WRONG
-   # the above print BACFEDGH or some other incorrect ordering
+   print sort badlexi                     qw(A C E G B D F H);
+                                          # WRONG
+   # the above prints BACFEDGH or some other incorrect ordering
 
-   print sort { $::a cmp $::b }           qw(A C E G B D F H); # OK
-   print sort { our $a cmp our $b }       qw(A C E G B D F H); # also OK
-   print sort { our ($a, $b); $a cmp $b } qw(A C E G B D F H); # also OK
+   print sort { $::a cmp $::b }           qw(A C E G B D F H);
+                                          # OK
+   print sort { our $a cmp our $b }       qw(A C E G B D F H);
+                                          # also OK
+   print sort { our ($a, $b); $a cmp $b } qw(A C E G B D F H);
+                                          # also OK
    sub lexi { our $a cmp our $b }
-   print sort lexi                        qw(A C E G B D F H); # also OK
+   print sort lexi                        qw(A C E G B D F H);
+                                          # also OK
    # the above print ABCDEFGH
 
 With proper care you may mix package and my (or state) C<$a> and/or C<$b>:
 
-   my $a = { tiny => -2, small => -1, normal => 0, big => 1, huge => 2 };
-   say sort { $a->{our $a} <=> $a->{our $b} } qw{ huge normal tiny small big};
+   my $a = {
+      tiny   => -2,
+      small  => -1,
+      normal => 0,
+      big    => 1,
+      huge   => 2
+   };
+
+   say sort { $a->{our $a} <=> $a->{our $b} }
+       qw{ huge normal tiny small big};
+
    # prints tinysmallnormalbighuge
 
 C<$a> and C<$b> are implicitely local to the sort() execution and regain their
