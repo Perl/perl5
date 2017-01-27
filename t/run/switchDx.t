@@ -11,7 +11,7 @@ use Config;
 my $perlio_log = "perlio$$.txt";
 
 skip_all "DEBUGGING build required"
-  unless $::Config{ccflags} =~ /DEBUGGING/
+  unless $::Config{ccflags} =~ /(?<!\S)-DDEBUGGING(?!\S)/
          or $^O eq 'VMS' && $::Config{usedebugging_perl} eq 'Y';
 
 plan tests => 8;
