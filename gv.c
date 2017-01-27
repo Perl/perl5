@@ -736,7 +736,7 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
 
     /* check locally for a real method or a cache entry */
     he = (HE*)hv_common(
-        cachestash, meth, name, len, (flags & SVf_UTF8) ? HVhek_UTF8 : 0, create, NULL, 0
+        cachestash, meth, name, len, is_utf8 ? HVhek_UTF8 : 0, create, NULL, 0
     );
     if (he) gvp = (GV**)&HeVAL(he);
     else gvp = NULL;
