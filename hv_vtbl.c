@@ -68,15 +68,81 @@ S_hv_mock_std_vtable_clear(pTHX_ HV *hv)
     LEAVE;
 }
 
-/*
 STATIC SV **
 S_hv_mock_std_vtable_fetch(pTHX_ HV *hv, SV *keysv, const char *key,
                             STRLEN klen, int key_flags,
                             I32 is_lvalue_fetch, U32 hash)
 {
-    return NULL;
+    /* THIS IS PURELY FOR TESTING! */
+    SV **retval;
+    XPVHV* xhv = (XPVHV *)SvANY(hv);
+    HV_VTBL *vtable = xhv->xhv_vtbl;
+
+    /* Assert that this is the only flag we're getting */
+    assert((is_lvalue_fetch & ~(HV_FETCH_LVALUE) ) == 0);
+
+    ENTER;
+    /* localize vtable such that hv_common takes the normal code path */
+    SAVEPPTR(vtable);
+    xhv->xhv_vtbl = NULL;
+
+    /* Technically the hv_fetch interface only accepts char/len but not the keysv
+     * variant. I think hv_common supports both, so it seems sensible to allow
+     * both usages. TODO re-evaluate this. */
+    if (keysv) {
+        retval = (SV **)hv_common(hv, keysv, key, klen, key_flags,
+                                  is_lvalue_fetch
+                                    ? HV_FETCH_JUST_SV | HV_FETCH_LVALUE
+                                    : HV_FETCH_JUST_SV,
+                                  NULL, hash);
+    }
+    else {
+        /* reverse what hv_common_key_len does before calling hv_common... sigh */
+        I32 my_klen = (key_flags & HVhek_UTF8) ? -(I32)klen : (I32)klen;
+        retval = (SV **)hv_common_key_len(hv, key, my_klen,
+                                          is_lvalue_fetch
+                                            ? HV_FETCH_JUST_SV | HV_FETCH_LVALUE
+                                            : HV_FETCH_JUST_SV,
+                                          NULL, hash);
+    }
+
+    LEAVE;
+
+    return retval;
 }
-*/
+
+/* TODO Returning a HE* is problematic for a pluggable hash implementation
+ *      since HE's are specific to perl's default implementation. So a wildly
+ *      different hash implementation would have to fake up HE's here. Sigh.
+ *      Options? Slowly try to move all uses to use the SV-fetching variant
+ *      instead? (But I assume there's some very good reasons why many places
+ *      would fetch HE's.)
+ */
+STATIC HE *
+S_hv_mock_std_vtable_fetch_ent(pTHX_ HV *hv, SV *keysv, const char *key,
+                                STRLEN klen, int key_flags,
+                                I32 fetch_flags, U32 hash)
+{
+    /* THIS IS PURELY FOR TESTING! */
+    HE *retval;
+    XPVHV* xhv = (XPVHV *)SvANY(hv);
+    HV_VTBL *vtable = xhv->xhv_vtbl;
+
+    /* Assert that this is the only flags we're getting */
+    assert((fetch_flags & ~(HV_FETCH_LVALUE|HV_FETCH_EMPTY_HE) ) == 0);
+
+    ENTER;
+    /* localize vtable such that hv_common takes the normal code path */
+    SAVEPPTR(vtable);
+    xhv->xhv_vtbl = NULL;
+
+    retval = (HE *)hv_common(hv, keysv, key, klen, key_flags,
+                             fetch_flags, NULL, hash);
+
+    LEAVE;
+
+    return retval;
+}
 
 STATIC bool
 S_hv_mock_std_vtable_exists(pTHX_ HV *hv, SV *keysv, const char *key,
@@ -102,7 +168,8 @@ S_hv_mock_std_vtable_exists(pTHX_ HV *hv, SV *keysv, const char *key,
 HV_VTBL PL_mock_std_vtable = {
         S_hv_mock_std_vtable_init,
         S_hv_mock_std_vtable_destroy,
-        /* S_hv_mock_std_vtable_fetch, */
+        S_hv_mock_std_vtable_fetch,
+        S_hv_mock_std_vtable_fetch_ent,
         S_hv_mock_std_vtable_exists,
 	S_hv_mock_std_vtable_delete,
 	S_hv_mock_std_vtable_clear

@@ -13,8 +13,11 @@ struct hv_vtbl {
     /* Called before deallocating the HV in the traditional HV implementation. */
     void	(*hvt_destroy)(pTHX_ HV *hv);
 
-    /* Implements the various forms of hv_fetch/etc */
-    /* SV **	(*hvt_fetch)(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int key_flags, I32 is_lvalue_fetch, U32 hash); */
+    /* Implements hv_fetch (and hv_fetchs) */
+    SV **	(*hvt_fetch)(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int key_flags, I32 is_lvalue_fetch, U32 hash);
+    /* Implements hv_fetch_ent */
+    /* fetch_flags can contain at least HV_FETCH_LVALUE and HV_FETCH_EMPTY_HE */
+    HE *	(*hvt_fetch_ent)(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int key_flags, I32 fetch_flags, U32 hash);
 
     /* store */
 

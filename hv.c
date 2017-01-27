@@ -393,11 +393,34 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         HV_VTBL *vtable = xhv->xhv_vtbl;
         if (action & HV_DELETE) {
 	    return (void *)vtable->hvt_delete(hv, keysv, key, klen,
-						flags, action, hash);
+					      flags, action, hash);
         }
         else if (action & HV_FETCH_ISEXISTS) {
 	    return (void *)vtable->hvt_exists(hv, keysv, key, klen,
-					        flags, hash);
+					      flags, hash);
+        }
+        else if (action & HV_FETCH_ISSTORE) {
+            /* TODO - until then fall through */
+        }
+        else if (action & HV_FETCH_JUST_SV) {
+            assert((action & ~(HV_FETCH_JUST_SV|HV_FETCH_LVALUE)) == 0);
+	    return (void *)vtable->hvt_fetch(hv, keysv, key, klen,
+					     flags, (action & HV_FETCH_LVALUE),
+                                             hash);
+        }
+        else {
+            /* This is where things get icky. In principle, all that's left
+             * over here to handle should be "fetch hash entry/HE" cases.
+             * That seems to be true. And the perl API for fetching HEs just
+             * supports the "SV key" use case rather than charptr/len/utf_flag.
+             * It just so turns out that some places (S_gv_fetchmeth_internal
+             * I'm looking at you!) call hv_common directly and pass both
+             * a keysv and key/len/flag - presumably because its own API
+             * allows both use cases, so it just passes it through.
+             * This means that we have to support both cases in the
+             * hvt_fetch_ent API. :( */
+	    return (void *)vtable->hvt_fetch_ent(hv, keysv, key, klen, flags,
+                                                 action, hash);
         }
     }
 
