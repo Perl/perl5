@@ -4632,6 +4632,7 @@ S_gen_constant_list(pTHX_ OP *o)
     COP not_compiling;
     int ret = 0;
     dJMPENV;
+    bool op_was_null;
 
     list(o);
     if (PL_parser && PL_parser->error_count)
@@ -4640,7 +4641,12 @@ S_gen_constant_list(pTHX_ OP *o)
     curop = LINKLIST(o);
     old_next = o->op_next;
     o->op_next = 0;
+    op_was_null = o->op_type == OP_NULL;
+    if (op_was_null)
+	o->op_type = OP_CUSTOM;
     CALL_PEEP(curop);
+    if (op_was_null)
+	o->op_type = OP_NULL;
     S_prune_chain_head(&curop);
     PL_op = curop;
 
