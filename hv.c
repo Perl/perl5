@@ -388,9 +388,9 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     /* TODO: Figure out where exactly we should be dispatching to the vtbl
      *       implementation. */
-    if (xhv->xhv_vtbl != NULL) {
+    if (HvBODYHASVTBL(xhv)) {
         /* Have a vtbl-implemented hash, go and dispatch to the right action: */
-        HV_VTBL *vtable = xhv->xhv_vtbl;
+        HV_VTBL *vtable = HvBODYVTBL(xhv);
         if (action & HV_DELETE) {
 	    return (void *)vtable->hvt_delete(hv, keysv, key, klen,
 					      flags, action, hash);
@@ -1776,8 +1776,8 @@ Perl_hv_clear(pTHX_ HV *hv)
 
     xhv = (XPVHV*)SvANY(hv);
 
-    if (xhv->xhv_vtbl != NULL) {
-        xhv->xhv_vtbl->hvt_clear(aTHX_ hv);
+    if (HvBODYHASVTBL(xhv)) {
+        HvBODYVTBL(xhv)->hvt_clear(aTHX_ hv);
     }
 
     /* avoid hv being freed when calling destructors below */
