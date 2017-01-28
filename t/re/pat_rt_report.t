@@ -1134,9 +1134,10 @@ EOP
     {
         # rt
         fresh_perl_is(
-            '"foo"=~/((?1)){8,0}/; print "ok"',
+            'no warnings "regexp"; "foo"=~/((?1)){8,0}/; print "ok"',
             "ok", {},  'RT #130561 - allowing impossible quantifier should not cause SEGVs');
         my $s= "foo";
+        no warnings 'regexp';
         ok($s=~/(foo){1,0}|(?1)/,
             "RT #130561 - allowing impossible quantifier should not break recursion");
     }
