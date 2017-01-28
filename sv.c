@@ -4985,6 +4985,8 @@ Perl_sv_setpvn(pTHX_ SV *const sv, const char *const ptr, const STRLEN len)
     PERL_ARGS_ASSERT_SV_SETPVN;
 
     SV_CHECK_THINKFIRST_COW_DROP(sv);
+    if (isGV_with_GP(sv))
+	Perl_croak_no_modify();
     if (!ptr) {
 	(void)SvOK_off(sv);
 	return;
