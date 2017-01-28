@@ -32,6 +32,13 @@ typedef struct hv_vtbl HV_VTBL;
 
 extern HV_VTBL PL_mock_std_vtable;
 
+/* TODO add apidoc */
+#define HvVTBL(hv)      (((XPVHV*)SvANY((hv)))->xhv_vtbl)
+#define HvBODYVTBL(xhv) ((xhv)->xhv_vtbl)
+
+#define HvHASVTBL(hv)       (HvVTBL(hv) != NULL)
+#define HvBODYHASVTBL(xhv)  (HvBODYVTBL(xhv) != NULL)
+
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
