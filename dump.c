@@ -684,27 +684,33 @@ Perl_dump_sub(pTHX_ const GV *gv)
 void
 Perl_dump_sub_perl(pTHX_ const GV *gv, bool justperl)
 {
-    STRLEN len;
-    SV * const sv = newSVpvs_flags("", SVs_TEMP);
-    SV *tmpsv;
-    const char * name;
+    CV *cv;
 
     PERL_ARGS_ASSERT_DUMP_SUB_PERL;
 
-    if (justperl && (CvISXSUB(GvCV(gv)) || !CvROOT(GvCV(gv))))
+    cv = isGV_with_GP(gv) ? GvCV(gv) :
+	    (assert(SvROK((SV*)gv)), (CV*)SvRV((SV*)gv));
+    if (justperl && (CvISXSUB(cv) || !CvROOT(cv)))
 	return;
 
-    tmpsv = newSVpvs_flags("", SVs_TEMP);
-    gv_fullname3(sv, gv, NULL);
-    name = SvPV_const(sv, len);
-    Perl_dump_indent(aTHX_ 0, Perl_debug_log, "\nSUB %s = ",
-                     generic_pv_escape(tmpsv, name, len, SvUTF8(sv)));
-    if (CvISXSUB(GvCV(gv)))
+    if (isGV_with_GP(gv)) {
+	SV * const namesv = newSVpvs_flags("", SVs_TEMP);
+	SV *escsv = newSVpvs_flags("", SVs_TEMP);
+	const char *namepv;
+	STRLEN namelen;
+	gv_fullname3(namesv, gv, NULL);
+	namepv = SvPV_const(namesv, namelen);
+	Perl_dump_indent(aTHX_ 0, Perl_debug_log, "\nSUB %s = ",
+		     generic_pv_escape(escsv, namepv, namelen, SvUTF8(namesv)));
+    } else {
+	Perl_dump_indent(aTHX_ 0, Perl_debug_log, "\nSUB = ");
+    }
+    if (CvISXSUB(cv))
 	Perl_dump_indent(aTHX_ 0, Perl_debug_log, "(xsub 0x%" UVxf " %d)\n",
-	    PTR2UV(CvXSUB(GvCV(gv))),
-	    (int)CvXSUBANY(GvCV(gv)).any_i32);
-    else if (CvROOT(GvCV(gv)))
-	op_dump(CvROOT(GvCV(gv)));
+	    PTR2UV(CvXSUB(cv)),
+	    (int)CvXSUBANY(cv).any_i32);
+    else if (CvROOT(cv))
+	op_dump(CvROOT(cv));
     else
 	Perl_dump_indent(aTHX_ 0, Perl_debug_log, "<undef>\n");
 }
