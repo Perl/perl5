@@ -18508,7 +18508,8 @@ S_reg2Lanode(pTHX_ RExC_state_t *pRExC_state, const U8 op, const U32 arg1, const
 * set up NEXT_OFF() of the inserted node if needed. Something like this:
 *
 * reginsert(pRExC, OPFAIL, orig_emit, depth+1);
-* NEXT_OFF(orig_emit)= regarglen[OPFAIL] + NODE_STEP_REGNODE;
+* if (PASS2)
+*     NEXT_OFF(orig_emit) = regarglen[OPFAIL] + NODE_STEP_REGNODE;
 *
 */
 STATIC void
