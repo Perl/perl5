@@ -1,5 +1,5 @@
-Wed Jan 25 11:27:07 2017 -0600 Reini Urban <rurban@cpanel.net>
-    Version 3.05c
+Sun Jan 29 11:36:43 2017 +0100 Reini Urban <rurban@cpanel.net>
+    Version 3.05
 
         * Protect against classname len overflow on the stack
         and 2x on the heap with retrieve_bless and retrieve_hook.
@@ -11,6 +11,7 @@ Wed Jan 25 11:27:07 2017 -0600 Reini Urban <rurban@cpanel.net>
         * Fix wrong huge LOBJECT support, broken since 3.00c.
         Repro with `export PERL_TEST_MEMORY=8`
         * Fix the few remaining 2-arg open calls.
+        * Portability and backport fixes back to 5.6.2
 
 Sat Jan 7 09:01:29 2017 +0100 Reini Urban <rurban@cpanel.net>
     Version 3.04c

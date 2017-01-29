@@ -1,6 +1,6 @@
-/* -*-  indent-tabs-mode: t, c-basic-offset: 8 -*-
+/* -*-  c-basic-offset: 4 -*-
  *
- *  Store and retrieve mechanism.
+ *  Fast store and retrieve mechanism.
  *
  *  Copyright (c) 1995-2000, Raphael Manfredi
  *  Copyright (c) 2016, 2017 cPanel Inc
@@ -20,6 +20,8 @@
 #endif
 
 #if !defined(PERL_VERSION) || PERL_VERSION < 10 || (PERL_VERSION == 10 && PERL_SUBVERSION < 1)
+#define NEED_PL_parser
+#define NEED_sv_2pv_flags
 #define NEED_load_module
 #define NEED_vload_module
 #define NEED_newCONSTSUB
@@ -69,18 +71,22 @@
 #endif
 
 #ifndef HvRITER_get
-#  define HvRITER_get HvRITER
+#  define HvRITER_get           HvRITER
 #endif
 #ifndef HvEITER_get
-#  define HvEITER_get HvEITER
+#  define HvEITER_get           HvEITER
 #endif
 
 #ifndef HvPLACEHOLDERS_get
-#  define HvPLACEHOLDERS_get HvPLACEHOLDERS
+#  define HvPLACEHOLDERS_get    HvPLACEHOLDERS
 #endif
 
 #ifndef HvTOTALKEYS
 #  define HvTOTALKEYS(hv)	HvKEYS(hv)
+#endif
+/* 5.6 */
+#ifndef HvUSEDKEYS
+#  define HvUSEDKEYS(hv)	HvKEYS(hv)
 #endif
 
 #ifdef SVf_IsCOW
@@ -90,7 +96,7 @@
 #endif
 
 #ifndef SvPVCLEAR
-#  define SvPVCLEAR(sv) sv_setpvs((sv), "")
+#  define SvPVCLEAR(sv) sv_setpvs(sv, "")
 #endif
 
 #ifndef strEQc
@@ -109,7 +115,7 @@
 
 #define TRACEME(x)                                            \
     STMT_START {                                              \
-        if (SvTRUE(perl_get_sv("Storable::DEBUGME", GV_ADD))) \
+        if (SvTRUE(get_sv("Storable::DEBUGME", GV_ADD)))      \
             { PerlIO_stdoutf x; PerlIO_stdoutf("\n"); }       \
     } STMT_END
 #else
@@ -117,13 +123,13 @@
 #endif	/* DEBUGME */
 
 #ifdef DASSERT
-#define ASSERT(x,y)                                                     \
-    STMT_START {                                                        \
-        if (!(x)) {                                                     \
-            PerlIO_stdoutf("ASSERT FAILED (\"%s\", line %d): ",         \
-                           __FILE__, (int)__LINE__);                    \
-            PerlIO_stdoutf y; PerlIO_stdoutf("\n");                     \
-        }                                                               \
+#define ASSERT(x,y)                                              \
+    STMT_START {                                                 \
+        if (!(x)) {                                              \
+            PerlIO_stdoutf("ASSERT FAILED (\"%s\", line %d): ",  \
+                           __FILE__, (int)__LINE__);             \
+            PerlIO_stdoutf y; PerlIO_stdoutf("\n");              \
+        }                                                        \
     } STMT_END
 #else
 #define ASSERT(x,y)
@@ -405,30 +411,30 @@ static MAGIC *THX_sv_magicext(pTHX_
 }
 #endif
 
-#define NEW_STORABLE_CXT_OBJ(cxt)					\
-    STMT_START {							\
-        SV *self = newSV(sizeof(stcxt_t) - 1);                          \
-        SV *my_sv = newRV_noinc(self);                                  \
+#define NEW_STORABLE_CXT_OBJ(cxt)				\
+    STMT_START {						\
+        SV *self = newSV(sizeof(stcxt_t) - 1);                  \
+        SV *my_sv = newRV_noinc(self);                          \
         sv_magicext(self, NULL, PERL_MAGIC_ext, &vtbl_storable, NULL, 0); \
-        cxt = (stcxt_t *)SvPVX(self);                                   \
-        Zero(cxt, 1, stcxt_t);                                          \
-        cxt->my_sv = my_sv;                                             \
+        cxt = (stcxt_t *)SvPVX(self);                           \
+        Zero(cxt, 1, stcxt_t);                                  \
+        cxt->my_sv = my_sv;                                     \
     } STMT_END
 
 #if defined(MULTIPLICITY) || defined(PERL_OBJECT) || defined(PERL_CAPI)
 
 #if (PATCHLEVEL <= 4) && (SUBVERSION < 68)
-#define dSTCXT_SV					\
-    SV *perinterp_sv = perl_get_sv(MY_VERSION, 0)
+#define dSTCXT_SV                                               \
+    SV *perinterp_sv = get_sv(MY_VERSION, 0)
 #else	/* >= perl5.004_68 */
-#define dSTCXT_SV							\
-    SV *perinterp_sv = *hv_fetch(PL_modglobal,                          \
+#define dSTCXT_SV						\
+    SV *perinterp_sv = *hv_fetch(PL_modglobal,                  \
 				 MY_VERSION, sizeof(MY_VERSION)-1, TRUE)
 #endif	/* < perl5.004_68 */
 
-#define dSTCXT_PTR(T,name)						\
-    T name = ((perinterp_sv                                             \
-               && SvIOK(perinterp_sv) && SvIVX(perinterp_sv)            \
+#define dSTCXT_PTR(T,name)					\
+    T name = ((perinterp_sv                                     \
+               && SvIOK(perinterp_sv) && SvIVX(perinterp_sv)    \
                ? (T)SvPVX(SvRV(INT2PTR(SV*,SvIVX(perinterp_sv)))) : (T) 0))
 #define dSTCXT					\
     dSTCXT_SV;                                  \
@@ -442,8 +448,8 @@ static MAGIC *THX_sv_magicext(pTHX_
 
 #define SET_STCXT(x)					\
     STMT_START {					\
-        dSTCXT_SV;                                              \
-        sv_setiv(perinterp_sv, PTR2IV(x->my_sv));               \
+        dSTCXT_SV;                                      \
+        sv_setiv(perinterp_sv, PTR2IV(x->my_sv));       \
     } STMT_END
 
 #else /* !MULTIPLICITY && !PERL_OBJECT && !PERL_CAPI */
@@ -908,24 +914,6 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #define PL_sv_placeholder PL_sv_undef
 #endif
 
-#if IVSIZE > 4
-/* can read and write u64 */
-# define MUST_FIT_IN_I32(x)						\
-    STMT_START {							\
-        if ((UV)(x) > (UV)INT64_MAX) {                                  \
-            CROAK(("Storable cannot yet handle overlong strings with len >2G")); \
-        }                                                               \
-    } STMT_END
-#else
-# define MUST_FIT_IN_I32(x)						\
-    STMT_START {							\
-        if ((UV)(x) > (UV)0x7fffffffu) {                                \
-            CROAK(("Storable cannot yet handle overlong strings with len >2G")); \
-        }                                                               \
-    } STMT_END
-#endif
-#define  MUST_FIT_IN_UV(x) MUST_FIT_IN_I32(x)
-
 /*
  * Useful store shortcuts...
  */
@@ -1030,14 +1018,12 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
             if (len)                                            \
                 WRITE(pv, ilen);                                \
         } else if (sizeof(len) > 4 && len > INT32_MAX) {        \
-            MUST_FIT_IN_UV(len);                                \
             PUTMARK(SX_LOBJECT);                                \
             PUTMARK(large);                                     \
             W64LEN(len);                                        \
             WRITE(pv, len);                                     \
         } else {                                                \
             int ilen = (int) len;                               \
-            MUST_FIT_IN_I32(len);                               \
             PUTMARK(large);                                     \
             WLEN(ilen);                                         \
             WRITE(pv, ilen);                                    \
@@ -1882,7 +1868,7 @@ static SV *pkg_fetchmeth(pTHX_
 
     gv = gv_fetchmethod_autoload(pkg, method, FALSE);
     if (gv && isGV(gv)) {
-        sv = newRV((SV*) GvCV(gv));
+        sv = newRV_inc((SV*) GvCV(gv));
         TRACEME(("%s->%s: 0x%" UVxf, hvname, method, PTR2UV(sv)));
     } else {
         sv = newSVsv(&PL_sv_undef);
@@ -2007,13 +1993,13 @@ static SV *scalar_call(pTHX_
         for (i = 1; i < cnt; i++) {
             TRACEME(("pushing arg #%d (0x%" UVxf ")...",
                      (int)i, PTR2UV(ary[i])));
-            XPUSHs(sv_2mortal(newRV(ary[i])));
+            XPUSHs(sv_2mortal(newRV_inc(ary[i])));
         }
     }
     PUTBACK;
 
     TRACEME(("calling..."));
-    count = perl_call_sv(hook, flags);	/* Go back to Perl code */
+    count = call_sv(hook, flags);	/* Go back to Perl code */
     TRACEME(("count = %d", count));
 
     SPAGAIN;
@@ -2056,7 +2042,7 @@ static AV *array_call(pTHX_
     XPUSHs(sv_2mortal(newSViv(cloning)));	/* Cloning flag */
     PUTBACK;
 
-    count = perl_call_sv(hook, G_ARRAY);	/* Go back to Perl code */
+    count = call_sv(hook, G_ARRAY);	/* Go back to Perl code */
 
     SPAGAIN;
 
@@ -2371,7 +2357,6 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
         }
 #endif
 
-        MUST_FIT_IN_UV(len);
         wlen = (Size_t)len;
         if (SvUTF8 (sv))
             STORE_UTF8STR(pv, wlen);
@@ -2403,7 +2388,6 @@ static int store_array(pTHX_ stcxt_t *cxt, AV *av)
     UV i;
     int ret;
 
-    MUST_FIT_IN_UV(len);
     TRACEME(("store_array (0x%" UVxf ")", PTR2UV(av)));
 
 #ifdef HAS_U64
@@ -2517,21 +2501,24 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
                          ) ? 1 : 0);
     unsigned char hash_flags = (SvREADONLY(hv) ? SHV_RESTRICTED : 0);
 
-    MUST_FIT_IN_UV(len);
-
     /* 
      * Signal hash by emitting SX_HASH, followed by the table length.
+     * Max number of keys per perl version:
+     *    IV            - 5.12
+     *    STRLEN  5.14  - 5.24   (size_t: U32/U64)
+     *    SSize_t 5.22c - 5.24c  (I32/I64)
+     *    U32     5.25c -
      */
 
-    if (len > 0x7fffffffu) {
+    if (len > 0x7fffffffu) { /* keys > I32_MAX */
         /* 
          * Large hash: SX_LOBJECT type hashflags? U64 data
          *
          * Stupid limitation:
-         * Note that perl can store more than 2G keys, but only iterate
-         * over 2G max.
-         * We need to manually iterate over it then, unsorted. But
-         * until perl itself cannot do that, skip that.
+         * Note that perl5 can store more than 2G keys, but only iterate
+         * over 2G max. (cperl can)
+         * We need to manually iterate over it then, unsorted.
+         * But until perl itself cannot do that, skip that.
          */
         TRACEME(("lobject size = %lu", (unsigned long)len));
 #ifdef HAS_U64
@@ -2545,6 +2532,8 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
         W64LEN(len);
         return store_lhash(aTHX_ cxt, hv, hash_flags);
 #else
+        /* <5.12 you could store larger hashes, but cannot iterate over them.
+           So we reject them, it's a bug. */
         CROAK(("Cannot store large objects on a 32bit system"));
 #endif
     } else {
@@ -2590,7 +2579,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
         && (cxt->canonical == 1
             || (cxt->canonical < 0
                 && (cxt->canonical =
-                    (SvTRUE(perl_get_sv("Storable::canonical", GV_ADD))
+                    (SvTRUE(get_sv("Storable::canonical", GV_ADD))
                      ? 1 : 0))))
 	) {
         /*
@@ -2933,7 +2922,7 @@ static int store_hentry(pTHX_
  * store_lhash
  *
  * Store a overlong hash table, with >2G keys, which we cannot iterate
- * over. (xhv_eiter is only I32)
+ * over with perl5. xhv_eiter is only I32 there. (only cperl can)
  * and we also do not want to sort it.
  * So we walk the buckets and chains manually.
  *
@@ -2951,10 +2940,10 @@ static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags)
     UV len = (UV)HvTOTALKEYS(hv);
 #endif
     if (hash_flags) {
-        TRACEME(("store_hash (0x%" UVxf ") (flags %x)", PTR2UV(hv),
+        TRACEME(("store_lhash (0x%" UVxf ") (flags %x)", PTR2UV(hv),
                  (int) hash_flags));
     } else {
-        TRACEME(("store_hash (0x%" UVxf ")", PTR2UV(hv)));
+        TRACEME(("store_lhash (0x%" UVxf ")", PTR2UV(hv)));
     }
     TRACEME(("size = %" UVuf ", used = %" UVuf, len, (UV)HvUSEDKEYS(hv)));
 
@@ -3001,7 +2990,7 @@ static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
         cxt->deparse == 0 ||
         (cxt->deparse < 0 &&
          !(cxt->deparse =
-           SvTRUE(perl_get_sv("Storable::Deparse", GV_ADD)) ? 1 : 0))
+           SvTRUE(get_sv("Storable::Deparse", GV_ADD)) ? 1 : 0))
 	) {
         return store_other(aTHX_ cxt, (SV*)cv);
     }
@@ -3792,7 +3781,7 @@ static int store_other(pTHX_ stcxt_t *cxt, SV *sv)
         cxt->forgive_me == 0 ||
         (cxt->forgive_me < 0 &&
          !(cxt->forgive_me = SvTRUE
-           (perl_get_sv("Storable::forgive_me", GV_ADD)) ? 1 : 0))
+           (get_sv("Storable::forgive_me", GV_ADD)) ? 1 : 0))
 	)
         CROAK(("Can't store %s items", sv_reftype(sv, FALSE)));
 
@@ -4089,7 +4078,7 @@ static int magic_write(pTHX_ stcxt_t *cxt)
         length = sizeof (network_file_header);
     } else {
 #ifdef USE_56_INTERWORK_KLUDGE
-        if (SvTRUE(perl_get_sv("Storable::interwork_56_64bit", GV_ADD))) {
+        if (SvTRUE(get_sv("Storable::interwork_56_64bit", GV_ADD))) {
             header = file_header_56;
             length = sizeof (file_header_56);
         } else
@@ -4680,7 +4669,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
     attach = gv_fetchmethod_autoload(stash, "STORABLE_attach", FALSE);
     if (attach && isGV(attach)) {
         SV* attached;
-        SV* attach_hook = newRV((SV*) GvCV(attach));
+        SV* attach_hook = newRV_inc((SV*) GvCV(attach));
 
         if (av)
             CROAK(("STORABLE_attach called with unexpected references"));
@@ -4781,7 +4770,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
     TRACEME(("calling STORABLE_thaw on %s at 0x%" UVxf " (%" IVdf " args)",
              classname, PTR2UV(sv), (IV) AvFILLp(av) + 1));
 
-    rv = newRV(sv);
+    rv = newRV_inc(sv);
     (void) scalar_call(aTHX_ rv, hook, clone, av, G_SCALAR|G_DISCARD);
     SvREFCNT_dec(rv);
 
@@ -5262,10 +5251,10 @@ static SV *get_lstring(pTHX_ stcxt_t *cxt, UV len, int isutf8, const char *cname
         && strEQc(SvPVX(sv), "mt-config.cgi")) {
 #if defined(USE_CPERL) && defined(WARN_SECURITY)
         Perl_warn_security(aTHX_
-                           "Movable-Type CVE-2015-1592 Storable metasploit attack");
+            "Movable-Type CVE-2015-1592 Storable metasploit attack");
 #else
         Perl_warn(aTHX_
-                  "SECURITY: Movable-Type CVE-2015-1592 Storable metasploit attack");
+            "SECURITY: Movable-Type CVE-2015-1592 Storable metasploit attack");
 #endif
     }
 
@@ -5277,7 +5266,7 @@ static SV *get_lstring(pTHX_ stcxt_t *cxt, UV len, int isutf8, const char *cname
 #else
         if (cxt->use_bytes < 0)
             cxt->use_bytes
-                = (SvTRUE(perl_get_sv("Storable::drop_utf8", GV_ADD))
+                = (SvTRUE(get_sv("Storable::drop_utf8", GV_ADD))
                    ? 1 : 0);
         if (cxt->use_bytes == 0)
             UTF8_CROAK();
@@ -5476,9 +5465,12 @@ static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname)
     READ(&len, 8);
 #else
     READ(&len, 4);
+    /* little-endian: ignore lower word */
+# if (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678)
+    READ(&len, 4);
+# endif
     if (len > 0)
         CROAK(("Invalid large object for this 32bit system"));
-    READ(&len, 4);
 #endif
     TRACEME(("wlen %" UVuf, len));
     switch (type) {
@@ -5491,16 +5483,22 @@ static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname)
     case SX_ARRAY:
         sv = get_larray(aTHX_ cxt, len, cname);
         break;
-#ifdef HAS_U64
+    /* <5.12 you could store larger hashes, but cannot iterate over them.
+       So we reject them, it's a bug. */
     case SX_FLAG_HASH:
+#ifdef HAS_U64
         sv = get_lhash(aTHX_ cxt, len, 1, cname);
-        break;
-    case SX_HASH:
-        sv = get_lhash(aTHX_ cxt, len, 0, cname);
-        break;
 #else
         CROAK(("Invalid large object for this 32bit system"));
 #endif
+        break;
+    case SX_HASH:
+#ifdef HAS_U64
+        sv = get_lhash(aTHX_ cxt, len, 0, cname);
+#else
+        CROAK(("Invalid large object for this 32bit system"));
+#endif
+        break;
     default:
         CROAK(("Unexpected type %d in retrieve_lobject\n", type));
     }
@@ -5819,7 +5817,7 @@ static SV *get_lhash(pTHX_ stcxt_t *cxt, UV len, int hash_flags, const char *cna
     if (hash_flags & SHV_RESTRICTED) {
         if (cxt->derestrict < 0)
             cxt->derestrict = (SvTRUE
-                (perl_get_sv("Storable::downgrade_restricted", GV_ADD))
+                (get_sv("Storable::downgrade_restricted", GV_ADD))
                                ? 1 : 0);
         if (cxt->derestrict == 0)
             RESTRICTED_HASH_CROAK();
@@ -5985,7 +5983,7 @@ static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname)
     if (hash_flags & SHV_RESTRICTED) {
         if (cxt->derestrict < 0)
             cxt->derestrict = (SvTRUE
-                (perl_get_sv("Storable::downgrade_restricted", GV_ADD))
+                (get_sv("Storable::downgrade_restricted", GV_ADD))
                                ? 1 : 0);
         if (cxt->derestrict == 0)
             RESTRICTED_HASH_CROAK();
@@ -6056,7 +6054,7 @@ static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname)
 #else
                 if (cxt->use_bytes < 0)
                     cxt->use_bytes
-                        = (SvTRUE(perl_get_sv("Storable::drop_utf8", GV_ADD))
+                        = (SvTRUE(get_sv("Storable::drop_utf8", GV_ADD))
                            ? 1 : 0);
                 if (cxt->use_bytes == 0)
                     UTF8_CROAK();
@@ -6172,14 +6170,14 @@ static SV *retrieve_code(pTHX_ stcxt_t *cxt, const char *cname)
      */
 
     if (cxt->eval == NULL) {
-        cxt->eval = perl_get_sv("Storable::Eval", GV_ADD);
+        cxt->eval = get_sv("Storable::Eval", GV_ADD);
         SvREFCNT_inc(cxt->eval);
     }
     if (!SvTRUE(cxt->eval)) {
         if (cxt->forgive_me == 0 ||
             (cxt->forgive_me < 0 &&
              !(cxt->forgive_me = SvTRUE
-               (perl_get_sv("Storable::forgive_me", GV_ADD)) ? 1 : 0))
+               (get_sv("Storable::forgive_me", GV_ADD)) ? 1 : 0))
             ) {
             CROAK(("Can't eval, please set $Storable::Eval to a true value"));
         } else {
@@ -6512,7 +6510,7 @@ static SV *magic_check(pTHX_ stcxt_t *cxt)
                      cxt->accept_future_minor));
             if (cxt->accept_future_minor < 0)
                 cxt->accept_future_minor
-                    = (SvTRUE(perl_get_sv("Storable::accept_future_minor",
+                    = (SvTRUE(get_sv("Storable::accept_future_minor",
                                           GV_ADD))
                        ? 1 : 0);
             if (cxt->accept_future_minor == 1)
@@ -6550,7 +6548,7 @@ static SV *magic_check(pTHX_ stcxt_t *cxt)
 #ifdef USE_56_INTERWORK_KLUDGE
     /* No point in caching this in the context as we only need it once per
        retrieve, and we need to recheck it each read.  */
-    if (SvTRUE(perl_get_sv("Storable::interwork_56_64bit", GV_ADD))) {
+    if (SvTRUE(get_sv("Storable::interwork_56_64bit", GV_ADD))) {
         if ((c != (sizeof (byteorderstr_56) - 1))
             || memNE(buf, byteorderstr_56, c))
             CROAK(("Byte order is not compatible"));
@@ -6684,7 +6682,7 @@ static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname)
     } else if (type >= SX_ERROR && cxt->ver_minor > STORABLE_BIN_MINOR) {
         if (cxt->accept_future_minor < 0)
             cxt->accept_future_minor
-                = (SvTRUE(perl_get_sv("Storable::accept_future_minor",
+                = (SvTRUE(get_sv("Storable::accept_future_minor",
                                       GV_ADD))
                    ? 1 : 0);
         if (cxt->accept_future_minor == 1) {
