@@ -39,10 +39,10 @@ use Test::More;
 use Storable qw(freeze thaw store retrieve);
 
 %::weird_refs = 
-  (REF     => \(my $aref    = []),
-  VSTRING => \(my $vstring = v1.2.3),
-  'long VSTRING' => \(my $vstring = eval "v" . 0 x 300),
-  LVALUE  => \(my $substr  = substr((my $str = "foo"), 0, 3)));
+  (REF            => \(my $aref    = []),
+   VSTRING        => \(my $vstring = v1.2.3),
+   'long VSTRING' => \(my $lvstring = eval "v" . 0 x 300),
+   LVALUE         => \(my $substr  = substr((my $str = "foo"), 0, 3)));
 
 my $test = 12;
 my $tests = $test + 23 + (2 * 6 * keys %::immortals) + (3 * keys %::weird_refs);
@@ -84,7 +84,7 @@ EOC
 is($@, '');
 
 eval <<EOC;
-package ${name}_WITH_HOOK;
+package ${longname}_WITH_HOOK;
 
 \@ISA = ("SHORT_NAME_WITH_HOOK");
 EOC
@@ -97,7 +97,7 @@ for (my $i = 0; $i < 10; $i++) {
     push(@pool, SHORT_NAME->make);
     push(@pool, SHORT_NAME_WITH_HOOK->make);
     push(@pool, $longname->make);
-    push(@pool, "${name}_WITH_HOOK"->make);
+    push(@pool, "${longname}_WITH_HOOK"->make);
 }
 
 my $x = freeze \@pool;
@@ -110,14 +110,14 @@ is(scalar @{$y}, @pool);
 is(ref $y->[0], 'SHORT_NAME');
 is(ref $y->[1], 'SHORT_NAME_WITH_HOOK');
 is(ref $y->[2], $longname);
-is(ref $y->[3], "${name}_WITH_HOOK");
+is(ref $y->[3], "${longname}_WITH_HOOK");
 
 my $good = 1;
 for (my $i = 0; $i < 10; $i++) {
     do { $good = 0; last } unless ref $y->[4*$i]   eq 'SHORT_NAME';
     do { $good = 0; last } unless ref $y->[4*$i+1] eq 'SHORT_NAME_WITH_HOOK';
     do { $good = 0; last } unless ref $y->[4*$i+2] eq $longname;
-    do { $good = 0; last } unless ref $y->[4*$i+3] eq "${name}_WITH_HOOK";
+    do { $good = 0; last } unless ref $y->[4*$i+3] eq "${longname}_WITH_HOOK";
 }
 is($good, 1);
 
