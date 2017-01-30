@@ -34,6 +34,11 @@ pp_pluggable_anonhash(pTHX)
     if (he) {
         vtbl = INT2PTR(HV_VTBL *, SvIV(HeVAL(he)));
     }
+    else {
+        /* Couldn't look up vtable: Barf! */
+        Perl_croak(aTHX_ "No hash vtable for vtable name '%s'",
+                   SvPV_nolen_const(hash_type_sv));
+    }
 
     hv = newHV_type(vtbl);
     retval = sv_2mortal( newRV_noinc(MUTABLE_SV(hv)) );
