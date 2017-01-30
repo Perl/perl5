@@ -1642,3 +1642,10 @@ Malformed UTF-8 character (fatal) at - line 11.
 no warnings "uninitialized";
 BEGIN{$^H=-1};my $l; s $0[$l]  
 EXPECT
+########
+# NAME  [perl $129036] Assertion failure
+BEGIN{$0="";$^H=hex join""=>A00000}p?
+EXPECT
+OPTION fatal
+syntax error at - line 1, at EOF
+Execution of - aborted due to compilation errors.
