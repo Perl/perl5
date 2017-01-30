@@ -1551,6 +1551,7 @@ test_prep test-prep: test_prep_pre \$(MINIPERL_EXE) \$(unidatafiles) \$(PERL_EXE
 	$to ext/IPC-Open3/*
 	$to ext/Tie-Memoize/*
 	$to ext/POSIX/*
+	$to ext/Hash-Pluggable/*
 	$to dist/IO/*
 # --- These three are needed by ExtUtils::MM_Unix to verify PERL_CORE
 	$to config_h.SH

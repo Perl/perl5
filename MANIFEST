@@ -3966,6 +3966,9 @@ ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
 ext/GDBM_File/t/fatal.t		Test the fatal_func argument to gdbm_open
 ext/GDBM_File/t/gdbm.t		See if GDBM_File works
 ext/GDBM_File/typemap		GDBM extension interface types
+ext/Hash-Pluggable/lib/Hash/Pluggable.pm	Hash::Pluggable
+ext/Hash-Pluggable/Pluggable.xs	XS bits of Hash::Pluggable
+ext/Hash-Pluggable/t/01basic.t	Bais ctests for Hash::Pluggable
 ext/Hash-Util/Changes		Change history of Hash::Util
 ext/Hash-Util/lib/Hash/Util.pm	Hash::Util
 ext/Hash-Util/Makefile.PL	Makefile for Hash::Util
