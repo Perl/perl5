@@ -652,7 +652,6 @@ Creates a new HV.  The reference count is set to 1.
 =cut
 */
 
-/* regular newHV implementation */
 #define newHV()	MUTABLE_HV(newSV_type(SVt_PVHV))
 
 #include "hv_func.h"

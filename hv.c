@@ -236,7 +236,8 @@ Perl_newHV_type(pTHX_ HV_VTBL *type)
     XPVHV *xhv = (XPVHV*)SvANY(hv);
     xhv->xhv_vtbl = type;
 
-    type->hvt_init(aTHX_ hv);
+    if (type)
+        type->hvt_init(aTHX_ hv);
 
     return hv;
 }
