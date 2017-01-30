@@ -1,4 +1,9 @@
-Mon Jan 30 15:13:38 2017 +0100 Reini Urban <rurban@cpanel.net>
+Tue Jan 31 02:55:30 2017 +0100 Reini Urban <rurban@cpanel.net>
+    Version 3.05_03
+
+        * Tune t/recurse.t stack-overflow limit more.
+
+Mon Jan 30 19:50:29 2017 +0100 Reini Urban <rurban@cpanel.net>
     Version 3.05_02
 
         * Tune t/recurse.t stack-overflow limit. Small 64bit systems overflow
