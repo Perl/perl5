@@ -162,10 +162,6 @@ parse_make_hash_keyword(pTHX_ OP **op_ptr)
 
     anonhash_op->op_ppaddr = pp_pluggable_anonhash;
 
-
-    printf("----------------------------\n");
-    op_dump(anonhash_op);
-
     *op_ptr = anonhash_op;
 }
 
