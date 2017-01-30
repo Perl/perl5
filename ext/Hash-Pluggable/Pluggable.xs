@@ -24,6 +24,13 @@
  * which contains "name" => vtable pointer mappings.
  * It should generally only be accessed directly from XS extensions
  * which implement vtables rather than from Perl code directly.
+ * For now, the API to add a new vtable implementation from an
+ * XS module is assuming you have a 'HV_VTBL *my_vtable':
+ *
+ *   HV *vtable_reg = get_hv("Hash::Pluggable::VtableRegistry", GV_ADD);
+ *   hv_stores(vtable_reg, "My::Module/set", my_vtable);
+ *
+ * in the BOOT section of your XS module.
  *
  * It seems like good practice to use vtable names of the form
  *   "My::Module/fancy_vtable"
