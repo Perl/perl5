@@ -4,6 +4,39 @@
 #include "perl.h"
 #include "XSUB.h"
 
+/* In lieu of proper docs, let's outline what this is about:
+ *
+ * This module exposes the hash vtable mechanism to Perl insofar
+ * that it allows Perl programs to create hashes with alternate
+ * vtables/implementations.
+ *
+ * To do so, this module exports a new keyword "make_hash" (better
+ * naming suggestions welcome) whose first parameter indicates
+ * the type of hash implementation (which vtable) to use. The
+ * remaining parameters are used the same way as you'd initialize
+ * an anonymous hash with {}.
+ *
+ * The hash vtables is determined from the first parameter to
+ * make_hash by looking it up in a global registry. Non-existent
+ * vtable names cause an exception to be thrown.
+ * Said global registry is simply the hash
+ *   %Hash::Pluggable::VtableRegistry
+ * which contains "name" => vtable pointer mappings.
+ * It should generally only be accessed directly from XS extensions
+ * which implement vtables rather than from Perl code directly.
+ *
+ * It seems like good practice to use vtable names of the form
+ *   "My::Module/fancy_vtable"
+ * to avoid potential collisions. But this might prove too clunky
+ * in practice?
+ *
+ * At a future time, the implementation might be changed such that
+ * the vtable pointer is looked up at compile time at least for
+ * cases of constant strings used for vtable names in make_hash
+ * calls.
+ */
+
+
 /* For chaining the keyword plugin */
 int (*next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);
 /* Our anonhash-alike custom OP */
