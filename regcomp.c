@@ -119,8 +119,7 @@ typedef struct scan_frame {
 
 /* Certain characters are output as a sequence with the first being a
  * backslash. */
-#define isBACKSLASHED_PUNCT(c)                                              \
-                    ((c) == '-' || (c) == ']' || (c) == '\\' || (c) == '^')
+#define isBACKSLASHED_PUNCT(c)  strchr("-]\\^", c)
 
 
 struct RExC_state_t {
