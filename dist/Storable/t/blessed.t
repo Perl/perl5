@@ -158,6 +158,8 @@ sub STORABLE_thaw {
 
 package main;
 
+# XXX Failed tests:  15, 27, 39 with 5.12 and 5.10 threaded.
+# 15: 1 fail (y x 1), 27: 2 fail (y x 2), 39: 3 fail (y x 3)
 # $Storable::DEBUGME = 1;
 my $count;
 foreach $count (1..3) {
@@ -167,7 +169,12 @@ foreach $count (1..3) {
     my $i =  RETURNS_IMMORTALS->make ($immortal, $count);
 
     my $f = freeze ($i);
-    isnt($f, undef);
+  TODO: {
+      # ref sv_true is not always sv_true, at least in older threaded perls.
+      local $TODO = "Some 5.10/12 do not preserve ref identity with freeze \\(1 == 1)"
+        if !defined($f) and $] < 5.013 and $] > 5.009 and $immortal eq 'y';
+      isnt($f, undef);
+    }
     my $t = thaw $f;
     pass("thaw didn't crash");
   }

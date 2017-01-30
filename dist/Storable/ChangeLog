@@ -1,3 +1,18 @@
+Mon Jan 30 15:13:38 2017 +0100 Reini Urban <rurban@cpanel.net>
+    Version 3.05_02
+
+        * Tune t/recurse.t stack-overflow limit. Small 64bit systems overflow
+        even with depth 3000, where 32bit are ok.
+
+Mon Jan 30 15:13:38 2017 +0100 Reini Urban <rurban@cpanel.net>
+    Version 3.05_01
+
+        * Protect against stack overflows with nested arrays and hashes
+        [cpan #97526]. This imposes a new limit to your nested structures,
+        but JSON::XS has a limit of 512. We use a max_depth of 3000 for the
+        typical stack limit of 8k.
+
+
 Sun Jan 29 11:36:43 2017 +0100 Reini Urban <rurban@cpanel.net>
     Version 3.05
 
