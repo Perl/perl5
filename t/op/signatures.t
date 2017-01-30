@@ -1463,6 +1463,12 @@ is scalar(t145()), undef;
             "masking warning";
 }
 
+# RT #130661 a char >= 0x80 in a signature when a sigil was expected
+# was triggering an assertion
+
+eval "sub (\x80";
+like $@, qr/A signature parameter must start with/, "RT #130661";
+
 
 
 use File::Spec::Functions;

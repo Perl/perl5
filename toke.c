@@ -5037,7 +5037,7 @@ Perl_yylex(pTHX)
          * as a var; e.g. ($, ...) would be seen as the var '$,'
          */
 
-        char sigil;
+        U8 sigil;
 
         s = skipspace(s);
         sigil = *s++;
