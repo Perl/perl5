@@ -213,3 +213,7 @@ BOOT:
     XopENTRY_set(&pluggable_anonhash_op, xop_class, OA_LISTOP);
     Perl_custom_op_register(aTHX_ pp_pluggable_anonhash, &pluggable_anonhash_op);
 
+    {
+        HV *vr = get_hv("Hash::Pluggable::VtableRegistry", GV_ADD);
+        hv_stores(vr, "Hash::Pluggable/mock", newSViv(PTR2IV(&PL_mock_std_vtable)));
+    }

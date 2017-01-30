@@ -3,10 +3,11 @@ use 5.025010;
 use warnings;
 
 our $VERSION = '0.01';
-require XSLoader;
-XSLoader::load();
 
 our %VtableRegistry;
+
+require XSLoader;
+XSLoader::load();
 
 sub import {
     # Enable keywords in lexical scope (the choice of string isn't
