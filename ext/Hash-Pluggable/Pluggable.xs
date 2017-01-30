@@ -28,7 +28,7 @@ pp_pluggable_anonhash(pTHX)
     /* TODO This logic should only be executed in the cases that the vtable
      *      couldn't be resolved statically. But that's not implemented yet. */
     MARK++;
-    hash_type_sv = SvGMAGICAL(*MARK) ? sv_mortalcopy(*MARK) : *MARK;
+    hash_type_sv = *MARK;
     vtable_registry = get_hv("Hash::Pluggable::VtableRegistry", GV_ADD);
     he = hv_fetch_ent(vtable_registry, hash_type_sv, 0, 0);
     if (he) {
