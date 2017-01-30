@@ -85,7 +85,7 @@ $Storable::flags = FLAGS_COMPAT;
 $Storable::downgrade_restricted = 1;
 $Storable::accept_future_minor = 1;
 
-XSLoader::load('Storable', $Storable::VERSION);
+XSLoader::load('Storable');
 
 #
 # Determine whether locking is possible, but only when needed.
