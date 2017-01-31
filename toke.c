@@ -2866,8 +2866,6 @@ S_scan_const(pTHX_ char *start)
     bool didrange = FALSE;              /* did we just finish a range? */
     bool in_charclass = FALSE;          /* within /[...]/ */
     bool has_utf8 = FALSE;              /* Output constant is UTF8 */
-    bool has_above_latin1 = FALSE;      /* does something require special
-                                           handling in tr/// ? */
     bool  this_utf8 = cBOOL(UTF);       /* Is the source string assumed to be
                                            UTF8?  But, this can show as true
                                            when the source isn't utf8, as for
@@ -2881,6 +2879,14 @@ S_scan_const(pTHX_ char *start)
     SV *res;		                /* result from charnames */
     STRLEN offset_to_max;   /* The offset in the output to where the range
                                high-end character is temporarily placed */
+
+    /* Does something require special handling in tr/// ?  This avoids extra
+     * work in a less likely case.  As such, khw didn't feel it was worth
+     * adding any branches to the more mainline code to handle this, which
+     * means that this doesn't get set in some circumstances when things like
+     * \x{100} get expanded out.  As a result there needs to be extra testing
+     * done in the tr code */
+    bool has_above_latin1 = FALSE;
 
     /* Note on sizing:  The scanned constant is placed into sv, which is
      * initialized by newSV() assuming one byte of output for every byte of
@@ -2962,7 +2968,7 @@ S_scan_const(pTHX_ char *start)
                     /* The tests here for being above Latin1 and similar ones
                      * in the following 'else' suffice to find all such
                      * occurences in the constant, except those added by a
-                     * backslash escape sequence, like \x{100}.  And all those
+                     * backslash escape sequence, like \x{100}.  Mostly, those
                      * set 'has_above_latin1' as appropriate */
                     if (this_utf8 && UTF8_IS_ABOVE_LATIN1(*s)) {
                         has_above_latin1 = TRUE;
@@ -3026,6 +3032,13 @@ S_scan_const(pTHX_ char *start)
                     min_ptr = (char*) utf8_hop( (U8*) max_ptr, -1);
                     range_min = valid_utf8_to_uvchr( (U8*) min_ptr, NULL);
                     range_max = valid_utf8_to_uvchr( (U8*) max_ptr, NULL);
+
+                    /* This compensates for not all code setting
+                     * 'has_above_latin1', so that we don't skip stuff that
+                     * should be executed */
+                    if (range_max > 255) {
+                        has_above_latin1 = TRUE;
+                    }
                 }
                 else {
                     min_ptr = max_ptr - 1;

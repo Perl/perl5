@@ -13,7 +13,7 @@ BEGIN {
 
 use utf8;
 
-plan tests => 215;
+plan tests => 216;
 
 # Test this first before we extend the stack with other operations.
 # This caused an asan failure due to a bad write past the end of the stack.
@@ -702,5 +702,15 @@ for ("", nullrocow) {
 
 }
 
+{   # [perl #130656] This bug happens when the tr is split across lines, so
+    # that the first line causes it to go into UTF-8, and the 2nd is only
+    # things like \x
+    my $x = "\x{E235}";
+    $x =~ tr
+    [\x{E234}-\x{E342}\x{E5B5}-\x{E5DF}]
+    [\x{E5CD}-\x{E5DF}\x{EA80}-\x{EAFA}\x{EB0E}-\x{EB8E}\x{EAFB}-\x{EB0D}\x{E5B5}-\x{E5CC}];
+
+    is $x, "\x{E5CE}", '[perl #130656]';
+}
 
 1;
