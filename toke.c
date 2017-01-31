@@ -10549,6 +10549,7 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 		    if (termlen == 1)
 			break;
 		    if (s+termlen <= PL_bufend && memEQ(s, (char*)termstr, termlen))
+                    {
                         if (   check_grapheme
                             && UNLIKELY(! _is_grapheme((U8 *) start,
                                                               (U8 *) s,
@@ -10559,6 +10560,7 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
                                         "%s", non_grapheme_msg);
                         }
 			break;
+                    }
 		}
 		else if (!has_utf8 && !UTF8_IS_INVARIANT((U8)*s) && UTF)
 		    has_utf8 = TRUE;
