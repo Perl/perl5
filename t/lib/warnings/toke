@@ -1621,7 +1621,7 @@ my $a = qr ̂foobar̂;
 EXPECT
 Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl 5.30 at - line 8.
 ########
-# NAME  [perl $130567] Assertion failure
+# NAME  [perl #130567] Assertion failure
 BEGIN {
     if (ord('A') != 65) {
         print "SKIPPED\n# test is ASCII-specific";
@@ -1635,12 +1635,12 @@ s//"\x{180};;s\221(*$@$`\241\275";/gee;
 s//"s\221\302\302\302\302\302\302\302$@\241\275";/gee;
 EXPECT
 ########
-# NAME  [perl $130666] Assertion failure
+# NAME  [perl #130666] Assertion failure
 no warnings "uninitialized";
 BEGIN{$^H=-1};my $l; s $0[$l]  
 EXPECT
 ########
-# NAME  [perl $129036] Assertion failure
+# NAME  [perl #129036] Assertion failure
 BEGIN{$0="";$^H=hex join""=>A00000}p?
 EXPECT
 OPTION fatal
