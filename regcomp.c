@@ -6526,7 +6526,7 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 	int n = 0;
 	STRLEN s;
 	char *p, *newpat;
-	int newlen = plen + 6; /* allow for "qr''x\0" extra chars */
+	int newlen = plen + 7; /* allow for "qr''xx\0" extra chars */
 	SV *sv, *qr_ref;
 	dSP;
 

@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 835;  # Update this when adding/deleting tests.
+plan tests => 836;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1900,6 +1900,12 @@ EOP
 		\A (?! .* ^ \s+ - )
 	    }msx, { stderr => 1 }, "Offsets in debug output are not negative");
 	}
+    }
+    {
+        # buffer overflow
+        fresh_perl_is("BEGIN{\$^H=0x200000}\ns/[(?{//xx",
+                      "Unmatched [ in regex; marked by <-- HERE in m/[ <-- HERE (?{/ at (eval 1) line 1.\n",
+                      {}, "buffer overflow for regexp component");
     }
 } # End of sub run_tests
 
