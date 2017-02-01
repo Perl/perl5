@@ -6133,10 +6133,13 @@ S_free_codeblocks(pTHX_ struct reg_code_blocks *cbs)
 {
     int n;
 
-    if (cbs->attached)
+    if (--cbs->refcnt > 0)
         return;
-    for (n = 0; n < cbs->count; n++)
-        SvREFCNT_dec(cbs->cb[n].src_regex);
+    for (n = 0; n < cbs->count; n++) {
+        REGEXP *rx = cbs->cb[n].src_regex;
+        cbs->cb[n].src_regex = NULL;
+        SvREFCNT_dec(rx);
+    }
     Safefree(cbs->cb);
     Safefree(cbs);
 }
@@ -6148,7 +6151,7 @@ S_alloc_code_blocks(pTHX_  int ncode)
      struct reg_code_blocks *cbs;
     Newx(cbs, 1, struct reg_code_blocks);
     cbs->count = ncode;
-    cbs->attached = FALSE;
+    cbs->refcnt = 1;
     SAVEDESTRUCTOR_X(S_free_codeblocks, cbs);
     if (ncode)
         Newx(cbs->cb, ncode, struct reg_code_block);
@@ -7168,8 +7171,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     if (pm_flags & PMf_IS_QR) {
 	ri->code_blocks = pRExC_state->code_blocks;
 	if (ri->code_blocks)
-            /* disarm earlier SAVEDESTRUCTOR_X */
-            ri->code_blocks->attached = TRUE;
+            ri->code_blocks->refcnt++;
     }
 
     {
@@ -19533,10 +19535,8 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
     if (ri->u.offsets)
         Safefree(ri->u.offsets);             /* 20010421 MJD */
 #endif
-    if (ri->code_blocks) {
-        ri->code_blocks->attached = FALSE;
+    if (ri->code_blocks)
         S_free_codeblocks(aTHX_ ri->code_blocks);
-    }
 
     if (ri->data) {
 	int n = ri->data->count;
@@ -19764,7 +19764,7 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
 	     reti->code_blocks->cb[n].src_regex = (REGEXP*)
 		    sv_dup_inc((SV*)(ri->code_blocks->cb[n].src_regex), param);
         reti->code_blocks->count = ri->code_blocks->count;
-        reti->code_blocks->attached = TRUE;
+        reti->code_blocks->refcnt = 1;
     }
     else
 	reti->code_blocks = NULL;

@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 528;  # Update this when adding/deleting tests.
+plan tests => 529;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1242,6 +1242,15 @@ sub run_tests {
         my $s = '';
         /$s(?{})\x{100}/ for '', '';
         pass "RT #129140";
+    }
+
+    # RT #130650 code blocks could get double-freed during a pattern
+    # compilation croak
+
+    {
+        # this used to panic or give ASAN errors
+        eval 'qr/(?{})\6/';
+        like $@, qr/Reference to nonexistent group/, "RT #130650";
     }
 
 

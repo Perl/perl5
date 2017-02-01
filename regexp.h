@@ -88,7 +88,7 @@ struct reg_code_block {
 /* array of reg_code_block's plus header info */
 
 struct reg_code_blocks {
-    bool attached; /* we're attached to a regex (don't need freeing) */
+    int refcnt; /* we may be pointed to from a regex and from the savestack */
     int  count;    /* how many code blocks */
     struct reg_code_block *cb; /* array of reg_code_block's */
 };
