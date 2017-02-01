@@ -4179,7 +4179,7 @@ S_intuit_more(pTHX_ char *s)
 		weight -= seen[un_char] * 10;
 	        if (isWORDCHAR_lazy_if_safe(s+1, PL_bufend, UTF)) {
 		    int len;
-		    scan_ident(s, send, tmpbuf, sizeof tmpbuf, FALSE);
+		    scan_ident(s, tmpbuf, sizeof tmpbuf, FALSE);
 		    len = (int)strlen(tmpbuf);
 		    if (len > 1 && gv_fetchpvn_flags(tmpbuf, len,
                                                     UTF ? SVf_UTF8 : 0, SVt_PV))
@@ -5703,7 +5703,7 @@ Perl_yylex(pTHX)
     case '*':
 	if (PL_expect == XPOSTDEREF) POSTDEREF('*');
 	if (PL_expect != XOPERATOR) {
-	    s = scan_ident(s, PL_bufend, PL_tokenbuf, sizeof PL_tokenbuf, TRUE);
+	    s = scan_ident(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE);
 	    PL_expect = XOPERATOR;
 	    force_ident(PL_tokenbuf, '*');
 	    if (!*PL_tokenbuf)
@@ -5746,8 +5746,7 @@ Perl_yylex(pTHX)
 	}
 	else if (PL_expect == XPOSTDEREF) POSTDEREF('%');
 	PL_tokenbuf[0] = '%';
-	s = scan_ident(s, PL_bufend, PL_tokenbuf + 1,
-		sizeof PL_tokenbuf - 1, FALSE);
+	s = scan_ident(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
 	pl_yylval.ival = 0;
 	if (!PL_tokenbuf[1]) {
 	    PREREF('%');
@@ -6293,8 +6292,7 @@ Perl_yylex(pTHX)
 	}
 
 	PL_tokenbuf[0] = '&';
-	s = scan_ident(s - 1, PL_bufend, PL_tokenbuf + 1,
-		       sizeof PL_tokenbuf - 1, TRUE);
+	s = scan_ident(s - 1, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, TRUE);
 	pl_yylval.ival = (OPpENTERSUB_AMPER<<8);
 	if (PL_tokenbuf[1]) {
 	    force_ident_maybe_lex('&');
@@ -6556,7 +6554,7 @@ Perl_yylex(pTHX)
                 || strchr("{$:+-@", s[2])))
         {
 	    PL_tokenbuf[0] = '@';
-	    s = scan_ident(s + 1, PL_bufend, PL_tokenbuf + 1,
+	    s = scan_ident(s + 1, PL_tokenbuf + 1,
 			   sizeof PL_tokenbuf - 1, FALSE);
             if (PL_expect == XOPERATOR) {
                 d = s;
@@ -6574,8 +6572,7 @@ Perl_yylex(pTHX)
 	}
 
 	PL_tokenbuf[0] = '$';
-	s = scan_ident(s, PL_bufend, PL_tokenbuf + 1,
-		       sizeof PL_tokenbuf - 1, FALSE);
+	s = scan_ident(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
 	if (PL_expect == XOPERATOR) {
 	    d = s;
 	    if (PL_bufptr > s) {
@@ -6710,7 +6707,7 @@ Perl_yylex(pTHX)
         if (PL_expect == XPOSTDEREF)
             POSTDEREF('@');
 	PL_tokenbuf[0] = '@';
-	s = scan_ident(s, PL_bufend, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
+	s = scan_ident(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
 	if (PL_expect == XOPERATOR) {
             d = s;
             if (PL_bufptr > s) {
@@ -9270,7 +9267,7 @@ S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN
                             && LIKELY((U8) *(s) != LATIN1_TO_NATIVE(0xAD)))))
 
 STATIC char *
-S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck_uni)
+S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 {
     I32 herelines = PL_parser->herelines;
     SSize_t bracket = -1;
