@@ -154,24 +154,18 @@ perform_compile_time_vtable_lookup(pTHX_ OP *anonhash_op)
          * op_targ member. */
         vtable_registry = get_hv("Hash::Pluggable::VtableRegistry", GV_ADD);
         he = hv_fetch_ent(vtable_registry, op_sv, 0, 0);
-        if (he) {
+        if (he != NULL) {
+            /* If the hash entry wasn't found, he being NULL, we'll fall
+             * through to run-time evaluation. */
             vtbl = INT2PTR(HV_VTBL *, SvIV(HeVAL(he)));
-        }
-        else {
-            /* Couldn't look up vtable: Barf! */
-            /* Arguably, we could fall back to run-time evaluation? Does that
-             * alleviate the language design concern at the cost of run-time
-             * exceptions? FIXME consider. */
-            Perl_croak(aTHX_ "No hash vtable for constant vtable name '%s'",
-                       SvPV_nolen_const(op_sv));
-        }
 
-        /* First NULL out the const OP so it won't be executed. */
-        op_null(op);
+            /* First NULL out the const OP so it won't be executed. */
+            op_null(op);
 
-        /* Now set the op_targ to the vtbl pointer for the anonhash OP. */
-        assert(vtbl != NULL);
-        anonhash_op->op_targ = (PADOFFSET)vtbl;
+            /* Now set the op_targ to the vtbl pointer for the anonhash OP. */
+            assert(vtbl != NULL);
+            anonhash_op->op_targ = (PADOFFSET)vtbl;
+        }
     }
 }
 
