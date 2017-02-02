@@ -40,6 +40,21 @@ struct hv_vtbl {
 
     /* TODO also wrap all the iteration primitives! */
     /* TODO research what other primitives are missing! */
+    /* TODO what about all the hash introspection macros? HvTOTALKEYS? etc etc? */
+    /* TODO newHVhv for copying hashes? Can we provide a (potentially inefficient) default
+     *      implementation of this so that not everyone has to reimplement before they can
+     *      even test their data structure? */
+    /* TODO What about hv_fill? Should we even bother implementing that? Or provide a default
+     *      that returns 0? (IOW 'talk to the hand')? */
+    /* TODO What about the "hash name" related stuff (for stashes?)? */
+    /* TODO what about hv_magic? */
+    /* TODO what about placeholders? */
+    /* TODO hv_assert? Bother? */
+
+    /* TODO once 'everything' is wrapped, one way to test is to use the mock vtbl implementation
+     *      to 'move' or 'rotate' all struct members in some well-defined way that can be undone
+     *      by the wrapper (using SAVEDESTRUCTOR and LEAVE for example to redo it). That way,
+     *      one can test if all hash accesses are actually going through the wrappers. */
 };
 typedef struct hv_vtbl HV_VTBL;
 
