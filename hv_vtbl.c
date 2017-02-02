@@ -162,6 +162,65 @@ S_hv_mock_std_vtable_fetch_ent(pTHX_ HV *hv, SV *keysv, const char *key,
     return retval;
 }
 
+STATIC SV **
+S_hv_mock_std_vtable_store(pTHX_ HV *hv, SV *keysv,
+                            const char *key, STRLEN klen, int key_flags,
+                            SV *val, U32 hash)
+{
+    /* THIS IS PURELY FOR TESTING! */
+    SV **retval;
+    XPVHV* xhv = (XPVHV *)SvANY(hv);
+    HV_VTBL *vtable = xhv->xhv_vtbl;
+
+    ENTER;
+    /* localize vtable such that hv_common takes the normal code path */
+    SAVEPPTR(vtable);
+    xhv->xhv_vtbl = NULL;
+
+    {
+        retval = (SV **)hv_common(hv, keysv, key, klen, key_flags,
+                                  HV_FETCH_ISSTORE|HV_FETCH_JUST_SV,
+                                  val, hash);
+    }
+
+    LEAVE;
+
+    return retval;
+}
+
+
+
+/* TODO Returning a HE* is problematic for a pluggable hash implementation
+ *      since HE's are specific to perl's default implementation. So a wildly
+ *      different hash implementation would have to fake up HE's here. Sigh.
+ *      Options? Slowly try to move all uses to use the SV-fetching variant
+ *      instead? (But I assume there's some very good reasons why many places
+ *      would fetch HE's.)
+ */
+STATIC HE *
+S_hv_mock_std_vtable_store_ent(pTHX_ HV *hv, SV *keysv,
+                               const char *key, STRLEN klen, int key_flags,
+                               SV *val, U32 hash)
+{
+    /* THIS IS PURELY FOR TESTING! */
+    HE *retval;
+    XPVHV* xhv = (XPVHV *)SvANY(hv);
+    HV_VTBL *vtable = xhv->xhv_vtbl;
+
+    ENTER;
+    /* localize vtable such that hv_common takes the normal code path */
+    SAVEPPTR(vtable);
+    xhv->xhv_vtbl = NULL;
+
+    retval = (HE *)hv_common(hv, keysv, key, klen, key_flags,
+                             HV_FETCH_ISSTORE, val, hash);
+
+    LEAVE;
+
+    return retval;
+}
+
+
 STATIC bool
 S_hv_mock_std_vtable_exists(pTHX_ HV *hv, SV *keysv, const char *key,
                             STRLEN klen, int key_flags, U32 hash)
@@ -188,6 +247,8 @@ HV_VTBL PL_mock_std_vtable = {
         S_hv_mock_std_vtable_destroy,
         S_hv_mock_std_vtable_fetch,
         S_hv_mock_std_vtable_fetch_ent,
+        S_hv_mock_std_vtable_store,
+        S_hv_mock_std_vtable_store_ent,
         S_hv_mock_std_vtable_exists,
 	S_hv_mock_std_vtable_delete,
 	S_hv_mock_std_vtable_clear,

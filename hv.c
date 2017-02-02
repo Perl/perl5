@@ -401,7 +401,13 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 					      flags, hash);
         }
         else if (action & HV_FETCH_ISSTORE) {
-            /* TODO - until then fall through */
+            assert((action & ~(HV_FETCH_ISSTORE|HV_FETCH_JUST_SV)) == 0);
+            if (action & HV_FETCH_JUST_SV) {
+                return (void *)vtable->hvt_store(hv, keysv, key, klen, flags, val, hash);
+            }
+            else {
+                return (void *)vtable->hvt_store_ent(hv, keysv, key, klen, flags, val, hash);
+            }
         }
         else if (action & HV_FETCH_JUST_SV) {
             assert((action & ~(HV_FETCH_JUST_SV|HV_FETCH_LVALUE)) == 0);

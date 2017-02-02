@@ -19,7 +19,10 @@ struct hv_vtbl {
     /* fetch_flags can contain at least HV_FETCH_LVALUE and HV_FETCH_EMPTY_HE */
     HE *	(*hvt_fetch_ent)(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int key_flags, I32 fetch_flags, U32 hash);
 
-    /* TODO store */
+    /* Implements hv_store (and hv_stores) */
+    SV **	(*hvt_store)(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int key_flags, SV *val, U32 hash);
+    /* Implements hv_store_ent */
+    HE *	(*hvt_store_ent)(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int key_flags, SV *val, U32 hash);
 
     /* Implements the equivalent of hv_exists(_ent) */
     bool	(*hvt_exists)(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int key_flags, U32 hash);
