@@ -19,7 +19,7 @@ struct hv_vtbl {
     /* fetch_flags can contain at least HV_FETCH_LVALUE and HV_FETCH_EMPTY_HE */
     HE *	(*hvt_fetch_ent)(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int key_flags, I32 fetch_flags, U32 hash);
 
-    /* store */
+    /* TODO store */
 
     /* Implements the equivalent of hv_exists(_ent) */
     bool	(*hvt_exists)(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int key_flags, U32 hash);
@@ -34,6 +34,9 @@ struct hv_vtbl {
      *       significance for this much better. Is that just for stashes? But really, I'd hate to expose
      *       some internal hack. Needs more thinking! */
     void	(*hvt_undef)(pTHX_ HV *hv);
+
+    /* TODO also wrap all the iteration primitives! */
+    /* TODO research what other primitives are missing! */
 };
 typedef struct hv_vtbl HV_VTBL;
 
