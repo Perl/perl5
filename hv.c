@@ -2014,9 +2014,14 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 
     if (!hv)
 	return;
-    save = cBOOL(SvREFCNT(hv));
+
     DEBUG_A(Perl_hv_assert(aTHX_ hv));
     xhv = (XPVHV*)SvANY(hv);
+    if (HvBODYHASVTBL(xhv)) {
+        return HvBODYVTBL(xhv)->hvt_undef(aTHX_ hv);
+    }
+
+    save = cBOOL(SvREFCNT(hv));
 
     /* The name must be deleted before the call to hfreeeeentries so that
        CVs are anonymised properly. But the effective name must be pre-

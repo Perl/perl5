@@ -27,6 +27,13 @@ struct hv_vtbl {
     SV *	(*hvt_delete)(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int key_flags, int delete_flags, U32 hash);
     /* Implements the equivalent of hv_clear */
     void	(*hvt_clear)(pTHX_ HV *hv);
+
+    /* Implements the equivalent of hv_undef (which should be at least including all that hv_clear does). */
+    /* FIXME Perl_hv_undef_flags() has a flags parameter that is used when called from sv_clear, which
+     *       seems to be a "no, really do away with everything" sort of corner case. Need to understand
+     *       significance for this much better. Is that just for stashes? But really, I'd hate to expose
+     *       some internal hack. Needs more thinking! */
+    void	(*hvt_undef)(pTHX_ HV *hv);
 };
 typedef struct hv_vtbl HV_VTBL;
 

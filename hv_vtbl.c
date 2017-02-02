@@ -68,6 +68,23 @@ S_hv_mock_std_vtable_clear(pTHX_ HV *hv)
     LEAVE;
 }
 
+STATIC void
+S_hv_mock_std_vtable_undef(pTHX_ HV *hv)
+{
+    /* THIS IS PURELY FOR TESTING! */
+    XPVHV* xhv = (XPVHV *)SvANY(hv);
+    HV_VTBL *vtable = xhv->xhv_vtbl;
+
+    ENTER;
+    /* localize vtable such that hv_undef takes the normal code path */
+    SAVEPPTR(vtable);
+
+    xhv->xhv_vtbl = NULL;
+    hv_undef(hv);
+
+    LEAVE;
+}
+
 STATIC SV **
 S_hv_mock_std_vtable_fetch(pTHX_ HV *hv, SV *keysv, const char *key,
                             STRLEN klen, int key_flags,
@@ -172,7 +189,8 @@ HV_VTBL PL_mock_std_vtable = {
         S_hv_mock_std_vtable_fetch_ent,
         S_hv_mock_std_vtable_exists,
 	S_hv_mock_std_vtable_delete,
-	S_hv_mock_std_vtable_clear
+	S_hv_mock_std_vtable_clear,
+        S_hv_mock_std_vtable_undef
 };
 
 /*
