@@ -33,7 +33,7 @@ struct hv_vtbl {
      *       seems to be a "no, really do away with everything" sort of corner case. Need to understand
      *       significance for this much better. Is that just for stashes? But really, I'd hate to expose
      *       some internal hack. Needs more thinking! */
-    void	(*hvt_undef)(pTHX_ HV *hv);
+    void	(*hvt_undef)(pTHX_ HV *hv, U32 flags);
 
     /* TODO also wrap all the iteration primitives! */
     /* TODO research what other primitives are missing! */

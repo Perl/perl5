@@ -1777,9 +1777,8 @@ Perl_hv_clear(pTHX_ HV *hv)
 
     xhv = (XPVHV*)SvANY(hv);
 
-    if (HvBODYHASVTBL(xhv)) {
-        HvBODYVTBL(xhv)->hvt_clear(aTHX_ hv);
-    }
+    if (HvBODYHASVTBL(xhv))
+        return HvBODYVTBL(xhv)->hvt_clear(aTHX_ hv);
 
     /* avoid hv being freed when calling destructors below */
     EXTEND_MORTAL(1);
@@ -2018,7 +2017,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
     DEBUG_A(Perl_hv_assert(aTHX_ hv));
     xhv = (XPVHV*)SvANY(hv);
     if (HvBODYHASVTBL(xhv)) {
-        return HvBODYVTBL(xhv)->hvt_undef(aTHX_ hv);
+        return HvBODYVTBL(xhv)->hvt_undef(aTHX_ hv, flags);
     }
 
     save = cBOOL(SvREFCNT(hv));

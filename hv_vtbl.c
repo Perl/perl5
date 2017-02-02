@@ -69,7 +69,7 @@ S_hv_mock_std_vtable_clear(pTHX_ HV *hv)
 }
 
 STATIC void
-S_hv_mock_std_vtable_undef(pTHX_ HV *hv)
+S_hv_mock_std_vtable_undef(pTHX_ HV *hv, U32 flags)
 {
     /* THIS IS PURELY FOR TESTING! */
     XPVHV* xhv = (XPVHV *)SvANY(hv);
@@ -80,7 +80,8 @@ S_hv_mock_std_vtable_undef(pTHX_ HV *hv)
     SAVEPPTR(vtable);
 
     xhv->xhv_vtbl = NULL;
-    hv_undef(hv);
+    /* FIXME find a way to ditch "flags"... */
+    Perl_hv_undef_flags(pTHX_ hv, flags);
 
     LEAVE;
 }
