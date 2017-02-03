@@ -169,11 +169,10 @@ S_hv_mock_std_vtable_store(pTHX_ HV *hv, SV *keysv,
     /* THIS IS PURELY FOR TESTING! */
     SV **retval;
     XPVHV* xhv = (XPVHV *)SvANY(hv);
-    HV_VTBL *vtable = xhv->xhv_vtbl;
 
     ENTER;
     /* localize vtable such that hv_common takes the normal code path */
-    SAVEPPTR(vtable);
+    SAVEPPTR(xhv->xhv_vtbl);
     xhv->xhv_vtbl = NULL;
 
     {
@@ -204,11 +203,10 @@ S_hv_mock_std_vtable_store_ent(pTHX_ HV *hv, SV *keysv,
     /* THIS IS PURELY FOR TESTING! */
     HE *retval;
     XPVHV* xhv = (XPVHV *)SvANY(hv);
-    HV_VTBL *vtable = xhv->xhv_vtbl;
 
     ENTER;
     /* localize vtable such that hv_common takes the normal code path */
-    SAVEPPTR(vtable);
+    SAVEPPTR(xhv->xhv_vtbl);
     xhv->xhv_vtbl = NULL;
 
     retval = (HE *)hv_common(hv, keysv, key, klen, key_flags,
