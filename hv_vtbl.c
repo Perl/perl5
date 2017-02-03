@@ -228,11 +228,10 @@ S_hv_mock_std_vtable_exists(pTHX_ HV *hv, SV *keysv, const char *key,
     /* THIS IS PURELY FOR TESTING! */
     bool retval;
     XPVHV* xhv = (XPVHV *)SvANY(hv);
-    HV_VTBL *vtable = xhv->xhv_vtbl;
 
     ENTER;
-    /* localize vtable such that hv_clear takes the normal code path */
-    SAVEPPTR(vtable);
+    /* localize vtable such that hv_common takes the normal code path */
+    SAVEPPTR(xhv->xhv_vtbl);
     xhv->xhv_vtbl = NULL;
 
     retval = cBOOL(hv_common(hv, keysv, key, klen, key_flags, HV_FETCH_ISEXISTS, NULL, hash));
