@@ -242,6 +242,19 @@ S_hv_mock_std_vtable_exists(pTHX_ HV *hv, SV *keysv, const char *key,
     return retval;
 }
 
+STATIC STRLEN
+S_hv_mock_std_vtable_totalkeys(pTHX_ HV *hv)
+{
+    return ((XPVHV *)SvANY(hv))->xhv_keys;
+}
+
+STATIC STRLEN
+S_hv_mock_std_vtable_usedkeys(pTHX_ HV *hv)
+{
+    /* total keys minus placeholders */
+    return ((XPVHV *)SvANY(hv))->xhv_keys - HvPLACEHOLDERS_get(hv);
+}
+
 HV_VTBL PL_mock_std_vtable = {
         S_hv_mock_std_vtable_init,
         S_hv_mock_std_vtable_destroy,
@@ -252,7 +265,9 @@ HV_VTBL PL_mock_std_vtable = {
         S_hv_mock_std_vtable_exists,
 	S_hv_mock_std_vtable_delete,
 	S_hv_mock_std_vtable_clear,
-        S_hv_mock_std_vtable_undef
+        S_hv_mock_std_vtable_undef,
+        S_hv_mock_std_vtable_totalkeys,
+        S_hv_mock_std_vtable_usedkeys
 };
 
 /*

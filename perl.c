@@ -1238,7 +1238,14 @@ perl_destruct(pTHXx)
 
 	Safefree(array);
 	HvARRAY(PL_strtab) = 0;
-	HvTOTALKEYS(PL_strtab) = 0;
+        /* FIXME Old code was:
+         *       HvTOTALKEYS(PL_strtab) = 0;
+         *       But that assumes HvTOTALKEYS is an lvalue, which is
+         *       incorrect for vtable hashes. So we have to unroll
+         *       that for now. PL_strtab is not a vtable hash as of
+         *       this point in time, so that's safe (if awful). */
+        (((XPVHV *)SvANY(hv))->xhv_keys) = 0;
+
     }
     SvREFCNT_dec(PL_strtab);
 

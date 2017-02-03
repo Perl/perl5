@@ -1621,7 +1621,12 @@ Perl_newHVhv(pTHX_ HV *ohv)
 	}
 
 	HvMAX(hv)   = hv_max;
-	HvTOTALKEYS(hv)  = HvTOTALKEYS(ohv);
+	/* Used to do "HvTOTALKEYS(hv)  = HvTOTALKEYS(ohv);"
+         * here, but that assumes HvTOTALKEYS is an lvalue.
+         * That's no longer true due to vtable-hashes, so since
+         * this code-path is for assigning to a traditional
+         * hash only, we unroll HvTOTALKEYS on the left hand side. */
+	((XPVHV *)SvANY(hv))->xhv_keys = HvTOTALKEYS(ohv);
 	HvARRAY(hv) = ents;
     } /* not magical */
     else {
@@ -1893,7 +1898,14 @@ S_clear_placeholders(pTHX_ HV *hv, U32 items)
 		if (--items == 0) {
 		    /* Finished.  */
 		    I32 placeholders = HvPLACEHOLDERS_get(hv);
-		    HvTOTALKEYS(hv) -= (IV)placeholders;
+                    /* We used to directly modify HvTOTALKEYS here, but
+                     * with vtable hashes, that's no longer an lvalue,
+                     * so have to unroll it. */
+                    /* FIXME consider what happens with vtable hash on
+                     *       left hand side here. Eventually, locked
+                     *       hashes will hopefully live INSIDE a
+                     *       vtable? */
+		    ((XPVHV *)SvANY(hv))->xhv_keys -= (IV)placeholders;
 		    /* HvUSEDKEYS expanded */
 		    if ((HvTOTALKEYS(hv) - placeholders) == 0)
 			HvHASKFLAGS_off(hv);
@@ -3321,7 +3333,12 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain, U32 flags)
 	HeNEXT(entry) = *oentry;
 	*oentry = entry;
 
-	HvTOTALKEYS(hv)++;
+	/* FIXME HvTOTALKEYS(hv)++ assumed that HvTOTALKEYS
+         *       is an lvalue. But that's not a thing with
+         *       hash vtables. So unroll. :(
+         *       This should be safe (enough) for now since
+         *       we create the regular HV in this function. */
+        (((XPVHV *)SvANY(hv))->xhv_keys )++;
 
     next_please:
 	chain = chain->refcounted_he_next;
@@ -3329,7 +3346,10 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain, U32 flags)
 
     if (placeholders) {
 	clear_placeholders(hv, placeholders);
-	HvTOTALKEYS(hv) -= placeholders;
+	/* FIXME see comment above. Original code:
+         *   HvTOTALKEYS(hv) -= placeholders;
+         */
+        (((XPVHV *)SvANY(hv))->xhv_keys) -= placeholders;
     }
 
     /* We could check in the loop to see if we encounter any keys with key

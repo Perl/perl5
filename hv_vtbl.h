@@ -38,6 +38,16 @@ struct hv_vtbl {
      *       some internal hack. Needs more thinking! */
     void	(*hvt_undef)(pTHX_ HV *hv, U32 flags);
 
+    /* Returns the total number of keys (including placeholders) */
+    /* FIXME there's code that uses HvTOTALKEYS in lvalue context, eg. for hash cloning.
+     *       CPAN doesn't really have anything that does that legitimately, but it exists
+     *       in core.
+     *       The issue is that depending on the hash implementation, such a thing is completely
+     *       nonsensical, so simply exposing some potential HvTOTALKEYS_set API wouldn't make sense! */
+    STRLEN	(*hvt_totalkeys)(pTHX_ HV *hv);
+    /* Returns the number of keys used (ie. not including placeholders) */
+    STRLEN	(*hvt_usedkeys)(pTHX_ HV *hv);
+
     /* TODO also wrap all the iteration primitives! */
     /* TODO research what other primitives are missing! */
     /* TODO what about all the hash introspection macros? HvTOTALKEYS? etc etc? */
@@ -49,7 +59,6 @@ struct hv_vtbl {
     /* TODO What about the "hash name" related stuff (for stashes?)? */
     /* TODO what about hv_magic? */
     /* TODO what about placeholders? */
-    /* TODO hv_assert? Bother? */
 
     /* TODO once 'everything' is wrapped, one way to test is to use the mock vtbl implementation
      *      to 'move' or 'rotate' all struct members in some well-defined way that can be undone

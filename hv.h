@@ -338,8 +338,12 @@ C<SV*>.
  * (keys, excluding placeholders) and HvTOTALKEYS (including placeholders)
  */
 #define HvKEYS(hv)		HvUSEDKEYS(hv)
-#define HvUSEDKEYS(hv)		(HvTOTALKEYS(hv) - HvPLACEHOLDERS_get(hv))
-#define HvTOTALKEYS(hv)		XHvTOTALKEYS((XPVHV*)  SvANY(hv))
+#define HvUSEDKEYS(hv)		(HvHASVTBL(hv) ? \
+                                 HvVTBL(hv)->hvt_usedkeys(aTHX_ hv) : \
+                                 (HvTOTALKEYS(hv) - HvPLACEHOLDERS_get(hv)))
+#define HvTOTALKEYS(hv)		(HvHASVTBL(hv) ? \
+                                 HvVTBL(hv)->hvt_totalkeys(aTHX_ hv) : \
+                                 XHvTOTALKEYS((XPVHV*)  SvANY(hv)))
 #define HvPLACEHOLDERS(hv)	(*Perl_hv_placeholders_p(aTHX_ MUTABLE_HV(hv)))
 #define HvPLACEHOLDERS_get(hv)	(SvMAGIC(hv) ? Perl_hv_placeholders_get(aTHX_ (const HV *)hv) : 0)
 #define HvPLACEHOLDERS_set(hv,p)	Perl_hv_placeholders_set(aTHX_ MUTABLE_HV(hv), p)
