@@ -56,11 +56,10 @@ S_hv_mock_std_vtable_clear(pTHX_ HV *hv)
 {
     /* THIS IS PURELY FOR TESTING! */
     XPVHV* xhv = (XPVHV *)SvANY(hv);
-    HV_VTBL *vtable = xhv->xhv_vtbl;
 
     ENTER;
     /* localize vtable such that hv_clear takes the normal code path */
-    SAVEPPTR(vtable);
+    SAVEPPTR(xhv->xhv_vtbl);
 
     xhv->xhv_vtbl = NULL;
     hv_clear(hv);
@@ -73,11 +72,10 @@ S_hv_mock_std_vtable_undef(pTHX_ HV *hv, U32 flags)
 {
     /* THIS IS PURELY FOR TESTING! */
     XPVHV* xhv = (XPVHV *)SvANY(hv);
-    HV_VTBL *vtable = xhv->xhv_vtbl;
 
     ENTER;
     /* localize vtable such that hv_undef takes the normal code path */
-    SAVEPPTR(vtable);
+    SAVEPPTR(xhv->xhv_vtbl);
 
     xhv->xhv_vtbl = NULL;
     /* FIXME find a way to ditch "flags"... */
@@ -260,11 +258,10 @@ S_hv_mock_std_vtable_clone(pTHX_ HV *hv)
     /* THIS IS PURELY FOR TESTING! */
     HV *retval;
     XPVHV* xhv = (XPVHV *)SvANY(hv);
-    HV_VTBL *vtable = xhv->xhv_vtbl;
 
     ENTER;
-    /* localize vtable such that hv_clear takes the normal code path */
-    SAVEPPTR(vtable);
+    /* localize vtable such that newHVhv takes the normal code path */
+    SAVEPPTR(xhv->xhv_vtbl);
     xhv->xhv_vtbl = NULL;
 
     retval = newHVhv(hv);
