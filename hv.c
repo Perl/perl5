@@ -990,7 +990,7 @@ Perl_hv_bucket_ratio(pTHX_ HV *hv)
     }
 
     sv = sv_newmortal();
-    if (HvUSEDKEYS((const HV *)hv))
+    if (HvUSEDKEYS((HV *)hv))
         Perl_sv_setpvf(aTHX_ sv, "%ld/%ld",
                 (long)HvFILL(hv), (long)HvMAX(hv) + 1);
     else

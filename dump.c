@@ -1892,7 +1892,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                              (UV)aux->xhv_aux_flags);
         }
 	Perl_dump_indent(aTHX_ level, file, "  ARRAY = 0x%" UVxf, PTR2UV(HvARRAY(sv)));
-	usedkeys = HvUSEDKEYS(sv);
+	usedkeys = HvUSEDKEYS(MUTABLE_HV(sv));
 	if (HvARRAY(sv) && usedkeys) {
 	    /* Show distribution of HEs in the ARRAY */
 	    int freq[200];

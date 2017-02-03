@@ -325,7 +325,7 @@ C<SV*>.
    ((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvAUX(hv)->xhv_name_count != -1) \
 				 ? HEK_UTF8(HvENAME_HEK_NN(hv)) : 0)
 
-/* the number of keys (including any placeholders) */
+/* the number of keys (including any placeholders) - NOT PART OF THE API */
 #define XHvTOTALKEYS(xhv)	((xhv)->xhv_keys)
 
 /*
