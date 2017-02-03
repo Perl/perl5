@@ -255,6 +255,26 @@ S_hv_mock_std_vtable_usedkeys(pTHX_ HV *hv)
     return ((XPVHV *)SvANY(hv))->xhv_keys - HvPLACEHOLDERS_get(hv);
 }
 
+STATIC HV *
+S_hv_mock_std_vtable_clone(pTHX_ HV *hv)
+{
+    /* THIS IS PURELY FOR TESTING! */
+    HV *retval;
+    XPVHV* xhv = (XPVHV *)SvANY(hv);
+    HV_VTBL *vtable = xhv->xhv_vtbl;
+
+    ENTER;
+    /* localize vtable such that hv_clear takes the normal code path */
+    SAVEPPTR(vtable);
+    xhv->xhv_vtbl = NULL;
+
+    retval = newHVhv(hv);
+
+    LEAVE;
+
+    return retval;
+}
+
 HV_VTBL PL_mock_std_vtable = {
         S_hv_mock_std_vtable_init,
         S_hv_mock_std_vtable_destroy,
@@ -266,6 +286,7 @@ HV_VTBL PL_mock_std_vtable = {
 	S_hv_mock_std_vtable_delete,
 	S_hv_mock_std_vtable_clear,
         S_hv_mock_std_vtable_undef,
+        S_hv_mock_std_vtable_clone,
         S_hv_mock_std_vtable_totalkeys,
         S_hv_mock_std_vtable_usedkeys
 };

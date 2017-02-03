@@ -1572,9 +1572,13 @@ HV *
 Perl_newHVhv(pTHX_ HV *ohv)
 {
     dVAR;
-    HV * const hv = newHV();
+    HV * hv;
     STRLEN hv_max;
 
+    if (HvHASVTBL(ohv))
+        return HvVTBL(ohv)->hvt_clone(aTHX_ ohv);
+
+    hv = newHV();
     if (!ohv || (!HvTOTALKEYS(ohv) && !SvMAGICAL((const SV *)ohv)))
 	return hv;
     hv_max = HvMAX(ohv);

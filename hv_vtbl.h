@@ -38,6 +38,10 @@ struct hv_vtbl {
      *       some internal hack. Needs more thinking! */
     void	(*hvt_undef)(pTHX_ HV *hv, U32 flags);
 
+    /* Implements newHVhv. It's undocumented (and barely used in core), but it's used somewhat widely
+     * on CPAN. Sigh. Appears to be doing a "clone this hash without copying any magic". */
+    HV *        (*hvt_clone)(pTHX_ HV *hv);
+
     /* Returns the total number of keys (including placeholders) */
     /* FIXME there's code that uses HvTOTALKEYS in lvalue context, eg. for hash cloning.
      *       CPAN doesn't really have anything that does that legitimately, but it exists
@@ -50,7 +54,7 @@ struct hv_vtbl {
 
     /* TODO also wrap all the iteration primitives! */
     /* TODO research what other primitives are missing! */
-    /* TODO what about all the hash introspection macros? HvTOTALKEYS? etc etc? */
+    /* TODO what about all the hash introspection macros like HvTOTALKEYS? etc etc? */
     /* TODO newHVhv for copying hashes? Can we provide a (potentially inefficient) default
      *      implementation of this so that not everyone has to reimplement before they can
      *      even test their data structure? */
