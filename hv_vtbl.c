@@ -112,6 +112,9 @@ S_hv_mock_std_vtable_fetch(pTHX_ HV *hv, SV *keysv, const char *key,
                                   NULL, hash);
     }
     else {
+        /* FIXME if we fix the SAVEPPTR call above to do the right thing, we get segfaults
+         * by running   ./perl -Dr -e 'my $x = qr/(?{1})/; "a" =~ /a$_/ for $x, $x, $x;'
+         * which is run by t/re/recompile.t. Complete mystery as of now. */
         /* reverse what hv_common_key_len does before calling hv_common... sigh */
         I32 my_klen = (key_flags & HVhek_UTF8) ? -(I32)klen : (I32)klen;
         retval = (SV **)hv_common_key_len(hv, key, my_klen,
@@ -141,14 +144,13 @@ S_hv_mock_std_vtable_fetch_ent(pTHX_ HV *hv, SV *keysv, const char *key,
     /* THIS IS PURELY FOR TESTING! */
     HE *retval;
     XPVHV* xhv = (XPVHV *)SvANY(hv);
-    HV_VTBL *vtable = xhv->xhv_vtbl;
 
     /* Assert that this is the only flags we're getting */
     assert((fetch_flags & ~(HV_FETCH_LVALUE|HV_FETCH_EMPTY_HE) ) == 0);
 
     ENTER;
     /* localize vtable such that hv_common takes the normal code path */
-    SAVEPPTR(vtable);
+    SAVEPPTR(xhv->xhv_vtbl);
     xhv->xhv_vtbl = NULL;
 
     retval = (HE *)hv_common(hv, keysv, key, klen, key_flags,
