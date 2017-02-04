@@ -960,7 +960,7 @@ PP(pp_tie)
                /* If the glob doesn't name an existing package, using
                 * SVfARG(*MARK) would yield "*Foo::Bar" or *main::Foo. So
                 * generate the name for the error message explicitly. */
-               SV *stashname = newSV(0);
+               SV *stashname = sv_2mortal(newSV(0));
                gv_fullname4(stashname, (GV *) *MARK, NULL, FALSE);
                DIE(aTHX_ "Can't locate object method \"%s\" via package \"%" SVf "\"",
                    methname, SVfARG(stashname));
