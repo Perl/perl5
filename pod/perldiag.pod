@@ -4232,12 +4232,16 @@ the braces.
 (4294967295) and therefore non-portable between systems.  See
 L<perlport> for more on portability concerns.
 
-=item Odd name/value argument for subroutine
+=item Odd name/value argument for subroutine '%s'
 
 (F) A subroutine using a slurpy hash parameter in its signature
 received an odd number of arguments to populate the hash.  It requires
 the arguments to be paired, with the same number of keys as values.
 The caller of the subroutine is presumably at fault.
+
+The message attempts to include the name of the called subroutine. If the
+subroutine has been aliased, the subroutine's original name will be shown,
+regardless of what name the caller used.
 
 =item Odd number of arguments for overload::constant
 
@@ -6081,11 +6085,15 @@ See L<perlunicode/"User-Defined Character Properties">.
 (F) There has to be at least one argument to syscall() to specify the
 system call to call, silly dilly.
 
-=item Too few arguments for subroutine
+=item Too few arguments for subroutine '%s'
 
 (F) A subroutine using a signature received too few arguments than
 required by the signature.  The caller of the subroutine is presumably
 at fault.
+
+The message attempts to include the name of the called subroutine. If the
+subroutine has been aliased, the subroutine's original name will be shown,
+regardless of what name the caller used.
 
 =item Too late for "-%s" option
 
@@ -6117,12 +6125,15 @@ BEGIN block.
 
 (F) The function requires fewer arguments than you specified.
 
-=item Too many arguments for subroutine
+=item Too many arguments for subroutine '%s'
 
 (F) A subroutine using a signature received too many arguments than
 required by the signature.  The caller of the subroutine is presumably
 at fault.
 
+The message attempts to include the name of the called subroutine. If the
+subroutine has been aliased, the subroutine's original name will be shown,
+regardless of what name the caller used.
 
 =item Too many )'s
 

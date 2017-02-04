@@ -6800,6 +6800,26 @@ PP(pp_argdefelem)
 }
 
 
+static SV *
+S_find_runcv_name(void)
+{
+    dTHX;
+    CV *cv;
+    GV *gv;
+    SV *sv;
+
+    cv = find_runcv(0);
+    if (!cv)
+        return &PL_sv_no;
+
+    gv = CvGV(cv);
+    if (!gv)
+        return &PL_sv_no;
+
+    sv = sv_2mortal(newSV(0));
+    gv_fullname4(sv, gv, NULL, TRUE);
+    return sv;
+}
 
 /* Check a  a subs arguments - i.e. that it has the correct number of args
  * (and anything else we might think of in future). Typically used with
@@ -6822,14 +6842,15 @@ PP(pp_argcheck)
     too_few = (argc < (params - opt_params));
 
     if (UNLIKELY(too_few || (!slurpy && argc > params)))
-        /* diag_listed_as: Too few arguments for subroutine */
-        /* diag_listed_as: Too many arguments for subroutine */
-        Perl_croak_caller("Too %s arguments for subroutine",
-                            too_few ? "few" : "many");
+        /* diag_listed_as: Too few arguments for subroutine '%s' */
+        /* diag_listed_as: Too many arguments for subroutine '%s' */
+        Perl_croak_caller("Too %s arguments for subroutine '%" SVf "'",
+                          too_few ? "few" : "many", S_find_runcv_name());
 
     if (UNLIKELY(slurpy == '%' && argc > params && (argc - params) % 2))
-        Perl_croak_caller("Odd name/value argument for subroutine");
-
+        /* diag_listed_as: Odd name/value argument for subroutine '%s' */
+        Perl_croak_caller("Odd name/value argument for subroutine '%" SVf "'",
+                          S_find_runcv_name());
 
     return NORMAL;
 }
