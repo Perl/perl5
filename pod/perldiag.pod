@@ -4247,9 +4247,7 @@ L<perlport> for more on portability concerns.
 (F) A subroutine using a slurpy hash parameter in its signature
 received an odd number of arguments to populate the hash.  It requires
 the arguments to be paired, with the same number of keys as values.
-The caller of the subroutine is presumably at fault.  Inconveniently,
-this error will be reported at the location of the subroutine, not that
-of the caller.
+The caller of the subroutine is presumably at fault.
 
 =item Odd number of arguments for overload::constant
 
