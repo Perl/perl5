@@ -98,7 +98,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 21;
 
 # number of tests in section 3
-my $bug_tests = 66 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 6 + 2 + 3 + 96 + 11 + 12;
+my $bug_tests = 66 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 6 + 2 + 3 + 96 + 11 + 13;
 
 # number of tests in section 4
 my $hmb_tests = 37;
@@ -1561,6 +1561,22 @@ ok  defined *{$::{CmT}}{FORMAT}, "glob assign";
     $orig = "x" x 100 . "\n";
     formline $format, $orig, 12345;
     is $^A, ("x" x 100) . " 12345\n", "\@* doesn't overflow";
+
+    # ...nor this (RT #130703).
+    # Under 'use bytes', the two bytes (c2, 80) making up each \x80 char
+    # each get expanded to two bytes (so four in total per \x80 char); the
+    # buffer growth wasn't accounting for this doubling in size
+
+    {
+        local $^A = '';
+        my $format = "X\n\x{100}" . ("\x80" x 200);
+        my $expected = $format;
+        utf8::encode($expected);
+        use bytes;
+        formline($format);
+        is $^A, $expected, "RT #130703";
+    }
+
 
     # make sure it can cope with formats > 64k
 

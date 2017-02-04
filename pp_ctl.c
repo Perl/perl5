@@ -505,6 +505,8 @@ PP(pp_formline)
 	SvTAINTED_on(PL_formtarget);
     if (DO_UTF8(PL_formtarget))
 	targ_is_utf8 = TRUE;
+    /* this is an initial estimate of how much output buffer space
+     * to allocate. It may be exceeded later */
     linemax = (SvCUR(formsv) * (IN_BYTES ? 1 : 3) + 1);
     t = SvGROW(PL_formtarget, len + linemax + 1);
     /* XXX from now onwards, SvCUR(PL_formtarget) is invalid */
@@ -766,6 +768,7 @@ PP(pp_formline)
 
 		if (targ_is_utf8 && !item_is_utf8) {
 		    source = tmp = bytes_to_utf8(source, &to_copy);
+                    grow = to_copy;
 		} else {
 		    if (item_is_utf8 && !targ_is_utf8) {
 			U8 *s;
