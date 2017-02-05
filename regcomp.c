@@ -6193,7 +6193,9 @@ S_pat_upgrade_to_utf8(pTHX_ RExC_state_t * const pRExC_state,
 
     while (s < *plen_p) {
         append_utf8_from_native_byte(src[s], &d);
+
         if (n < num_code_blocks) {
+            assert(pRExC_state->code_blocks);
             if (!do_end && pRExC_state->code_blocks->cb[n].start == s) {
                 pRExC_state->code_blocks->cb[n].start = d - dst - 1;
                 assert(*(d - 1) == '(');
