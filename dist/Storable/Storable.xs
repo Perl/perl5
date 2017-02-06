@@ -4281,6 +4281,11 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 
 	TRACEME(("class name: %s", classname));
 
+	if (!(flags & SHF_IDX_CLASSNAME) && classname != buf) {
+                /* some execution paths can throw an exception */
+		SAVEFREEPV(classname);
+        }
+
 	/*
 	 * Decode user-frozen string length and read it in an SV.
 	 *
@@ -4400,8 +4405,6 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 		SEEN0_NN(sv, 0);
 		SvRV_set(attached, NULL);
 		SvREFCNT_dec(attached);
-		if (!(flags & SHF_IDX_CLASSNAME) && classname != buf)
-		    Safefree(classname);
 		return sv;
 	    }
 	    CROAK(("STORABLE_attach did not return a %s object", classname));
@@ -4482,8 +4485,6 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 	SvREFCNT_dec(frozen);
 	av_undef(av);
 	sv_free((SV *) av);
-	if (!(flags & SHF_IDX_CLASSNAME) && classname != buf)
-		Safefree(classname);
 
 	/*
 	 * If we had an <extra> type, then the object was not as simple, and
