@@ -1910,3 +1910,7 @@ EOP
 } # End of sub run_tests
 
 1;
+
+#
+# ex: set ts=8 sts=4 sw=4 et:
+#
