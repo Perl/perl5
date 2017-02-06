@@ -951,16 +951,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
 	char * const b = ninstr((char*)big,(char*)bigend,
 			 (char*)little, (char*)little + littlelen);
 
-	if (!b && tail) {	/* Automatically multiline!  */
-	    /* Chop \n from littlestr: */
-	    s = bigend - littlelen + 1;
-	    if (*s == *little
-		&& memEQ((char*)s + 1, (char*)little + 1, littlelen - 2))
-	    {
-		return (char*)s;
-	    }
-	    return NULL;
-	}
+        assert(!tail); /* valid => FBM; tail only set on SvVALID SVs */
 	return b;
     }
 
