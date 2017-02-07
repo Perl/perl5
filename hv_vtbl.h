@@ -51,6 +51,8 @@ struct hv_vtbl {
     STRLEN	(*hvt_totalkeys)(pTHX_ HV *hv);
     /* Returns the number of keys used (ie. not including placeholders) */
     STRLEN	(*hvt_usedkeys)(pTHX_ HV *hv);
+    /* Wraps hv_iterinit */
+    I32		(*hvt_iterinit)(pTHX_ HV *hv);
 
     /* TODO also wrap all the iteration primitives! */
     /* TODO research what other primitives are missing! */

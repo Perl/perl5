@@ -2286,7 +2286,12 @@ value, you can get it through the macro C<HvFILL(hv)>.
 I32
 Perl_hv_iterinit(pTHX_ HV *hv)
 {
+    XPVHV *xhv = (XPVHV*)SvANY(hv);
+
     PERL_ARGS_ASSERT_HV_ITERINIT;
+
+    if (HvBODYHASVTBL(xhv))
+        return HvBODYVTBL(xhv)->hvt_iterinit(aTHX_ hv);
 
     if (SvOOK(hv)) {
 	struct xpvhv_aux * iter = HvAUX(hv);
