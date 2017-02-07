@@ -31,6 +31,10 @@ if (@ARGV) {
 			 glob catfile(curdir(), "lib", $pragma_name, "*");
 }
 
+if ($::IS_EBCDIC) { # Skip Latin1 files
+    @w_files = grep { $_ !~ / _l1 $/x } @w_files
+}
+
 my ($tests, @prgs) = setup_multiple_progs(@w_files);
 
 $^X = rel2abs($^X);

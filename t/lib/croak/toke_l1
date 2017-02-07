@@ -1,0 +1,9 @@
+# File is encoded in latin-1 so can have malformed-utf8
+__END__
+# NAME [perl #129037]
+BEGIN{{};$^H=-1}0Ã
+EXPECT
+Malformed UTF-8 character: \xc3\x0a (unexpected non-continuation byte 0x0a, immediately after start byte 0xc3; need 2 bytes, got 1) at - line 1.
+Constant(0): $^H{integer} is not defined at - line 1, at end of line
+Malformed UTF-8 character (fatal) at - line 1.
+########
