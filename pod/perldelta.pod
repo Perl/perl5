@@ -362,6 +362,11 @@ When checking for an indirect object method call in some rare cases
 the parser could reallocate the line buffer but then continue to use
 pointers to the old buffer.  [perl #129190]
 
+=item *
+
+Supplying a glob as the format argument to L<perlfunc/formline> would
+cause an assertion failure.  [perl #130722]
+
 =back
 
 =head1 Known Problems
