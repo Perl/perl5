@@ -13178,6 +13178,21 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                            && (   (o->op_private & OPpDEREF) == OPpDEREF_AV
                                || (o->op_private & OPpDEREF) == OPpDEREF_HV);
 
+                /* This doesn't make much sense but is legal:
+                 *    @{ local $x[0][0] } = 1
+                 * Since scope exit will undo the autovivification,
+                 * don't bother in the first place. The OP_LEAVE
+                 * assertion is in case there are other cases of both
+                 * OPpLVAL_INTRO and OPpDEREF which don't include a scope
+                 * exit that would undo the local - in which case this
+                 * block of code would need rethinking.
+                 */
+                if (is_deref && (o->op_private & OPpLVAL_INTRO)) {
+                    assert(o->op_next->op_type == OP_LEAVE);
+                    o->op_private &= ~OPpDEREF;
+                    is_deref = FALSE;
+                }
+
                 if (is_deref) {
                     ASSUME(!(o->op_flags &
                                  ~(OPf_WANT|OPf_KIDS|OPf_MOD|OPf_PARENS)));

@@ -18,7 +18,7 @@ BEGIN {
 use warnings;
 use strict;
 
-plan 58;
+plan 60;
 
 
 # check that strict refs hint is handled
@@ -204,4 +204,16 @@ sub defer {}
     )
         or diag("eval gave: $@");
     is($warn, "", "#123609: warn");
+}
+
+# RT #130727
+# a [ah]elem op can be both OPpLVAL_INTRO and OPpDEREF. It may not make
+# much sense, but it shouldn't fail an assert.
+
+{
+    my @x;
+    eval { @{local $x[0][0]} = 1; };
+    like $@, qr/Can't use an undefined value as an ARRAY reference/,
+                    "RT #130727 error";
+    ok !defined $x[0][0],"RT #130727 array not autovivified";
 }
