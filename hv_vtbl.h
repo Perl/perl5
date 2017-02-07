@@ -58,10 +58,6 @@ struct hv_vtbl {
 
     /* TODO also wrap all the iteration primitives! */
     /* TODO research what other primitives are missing! */
-    /* TODO what about all the hash introspection macros like HvTOTALKEYS? etc etc? */
-    /* TODO newHVhv for copying hashes? Can we provide a (potentially inefficient) default
-     *      implementation of this so that not everyone has to reimplement before they can
-     *      even test their data structure? */
     /* TODO What about hv_fill? Should we even bother implementing that? Or provide a default
      *      that returns 0? (IOW 'talk to the hand')? */
     /* TODO What about the "hash name" related stuff (for stashes?)? */
