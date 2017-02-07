@@ -5162,7 +5162,7 @@ S_doparseform(pTHX_ SV *sv)
 	SV *old = mg->mg_obj;
 	if ( !(!!SvUTF8(old) ^ !!SvUTF8(sv))
 	      && len == SvCUR(old)
-	      && strnEQ(SvPVX(old), SvPVX(sv), len)
+              && strnEQ(SvPVX(old), s, len)
 	) {
 	    DEBUG_f(PerlIO_printf(Perl_debug_log,"Re-using compiled format\n"));
 	    return mg;
