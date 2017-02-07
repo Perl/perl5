@@ -1505,16 +1505,19 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                     char * x;       /* j's xfrm plus collation index */
                     STRLEN x_len;   /* length of 'x' */
                     STRLEN trial_len = 1;
+                    char cur_source[] = { '\0', '\0' };
 
-                    /* Create a 1 byte string of the current code point */
-                    char cur_source[] = { (char) j, '\0' };
-
+                    /* Skip non-controls the first time through the loop.  The
+                     * controls in a UTF-8 locale are the L1 ones */
                     if (! try_non_controls && (PL_in_utf8_COLLATE_locale)
                                                ? ! isCNTRL_L1(j)
                                                : ! isCNTRL_LC(j))
                     {
                         continue;
                     }
+
+                    /* Create a 1-char string of the current code point */
+                    cur_source[0] = (char) j;
 
                     /* Then transform it */
                     x = _mem_collxfrm(cur_source, trial_len, &x_len,
@@ -1671,9 +1674,10 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                     for (j = 1; j < 256; j++) {
                         char * x;
                         STRLEN x_len;
+                        char cur_source[] = { '\0', '\0' };
 
-                        /* Create a 1-char string of the current code point. */
-                        char cur_source[] = { (char) j, '\0' };
+                        /* Create a 1-char string of the current code point */
+                        cur_source[0] = (char) j;
 
                         /* Then transform it */
                         x = _mem_collxfrm(cur_source, 1, &x_len, FALSE);
