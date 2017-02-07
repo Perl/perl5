@@ -278,11 +278,32 @@ S_hv_mock_std_vtable_iterinit(pTHX_ HV *hv)
     I32 retval;
 
     ENTER;
-    /* localize vtable such that hv_clear takes the normal code path */
+    /* localize vtable such that hv_iterinit takes the normal code path */
     SAVEPPTR(xhv->xhv_vtbl);
 
     xhv->xhv_vtbl = NULL;
     retval = hv_iterinit(hv);
+
+    LEAVE;
+
+    return retval;
+}
+
+STATIC HE *
+S_hv_mock_std_vtable_iternext(pTHX_ HV *hv, I32 flags)
+{
+    /* THIS IS PURELY FOR TESTING! */
+    XPVHV* xhv = (XPVHV *)SvANY(hv);
+    HE *retval;
+
+    assert((flags & (~HV_ITERNEXT_WANTPLACEHOLDERS)) == 0);
+
+    ENTER;
+    /* localize vtable such that hv_iternext_flags takes the normal code path */
+    SAVEPPTR(xhv->xhv_vtbl);
+
+    xhv->xhv_vtbl = NULL;
+    retval = hv_iternext_flags(hv, flags);
 
     LEAVE;
 
@@ -303,7 +324,8 @@ HV_VTBL PL_mock_std_vtable = {
         S_hv_mock_std_vtable_clone,
         S_hv_mock_std_vtable_totalkeys,
         S_hv_mock_std_vtable_usedkeys,
-        S_hv_mock_std_vtable_iterinit
+        S_hv_mock_std_vtable_iterinit,
+        S_hv_mock_std_vtable_iternext
 };
 
 /*

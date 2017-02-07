@@ -2699,6 +2699,9 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 
     xhv = (XPVHV*)SvANY(hv);
 
+    if (HvBODYHASVTBL(xhv))
+        return HvBODYVTBL(xhv)->hvt_iternext(hv, flags);
+
     if (!SvOOK(hv)) {
 	/* Too many things (well, pp_each at least) merrily assume that you can
 	   call hv_iternext without calling hv_iterinit, so we'll have to deal
