@@ -31,12 +31,12 @@ BEGIN {
 use warnings;
 $a = qr/\c,/;
 $a = qr/[\c,]/;
-no warnings 'syntax', 'deprecated';
+no warnings 'syntax';
 $a = qr/\c,/;
 $a = qr/[\c,]/;
 EXPECT
-"\c," is more clearly written simply as "l". This will be a fatal error in Perl 5.28 at - line 9.
-"\c," is more clearly written simply as "l". This will be a fatal error in Perl 5.28 at - line 10.
+"\c," is more clearly written simply as "l" at - line 9.
+"\c," is more clearly written simply as "l" at - line 10.
 ########
 # This is because currently a different error is output under
 # use re 'strict', so can't go in reg_mesg.t
