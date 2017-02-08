@@ -367,6 +367,12 @@ pointers to the old buffer.  [perl #129190]
 Supplying a glob as the format argument to L<perlfunc/formline> would
 cause an assertion failure.  [perl #130722]
 
+=item *
+
+Code like C< $value1 =~ qr/.../ ~~ $value2 > would have the match
+converted into a qr// operator, leaving extra elements on the stack to
+confuse any surrounding expression.  [perl #130705]
+
 =back
 
 =head1 Known Problems
