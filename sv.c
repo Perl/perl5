@@ -12881,8 +12881,11 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         Perl_croak_nocontext("panic: quadmath invalid format \"%s\"", ptr);
                     elen = quadmath_snprintf(PL_efloatbuf, PL_efloatsize,
                                              qfmt, nv);
-                    if ((IV)elen == -1)
+                    if ((IV)elen == -1) {
+                        if (qfmt != qptr)
+                            SAVEFREEPV(qfmt);
                         Perl_croak_nocontext("panic: quadmath_snprintf failed, format \"%s\"", qfmt);
+                    }
                     if (qfmt != ptr)
                         Safefree(qfmt);
                 }
