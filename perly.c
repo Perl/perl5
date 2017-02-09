@@ -347,11 +347,11 @@ Perl_yyparse (pTHX_ int gramtype)
                  * Although it's not designed for this purpose, we can use
                  * NATIVE_TO_UNI here.  It returns its argument on ASCII
                  * platforms, and on EBCDIC translates native to ascii in
-                 * the 0-255 range, leaving everything else unchanged.
-                 * This jibes with yylex() returning some bare characters
-                 * in that range, but all tokens it returns are either 0,
-                 * or above 255.  There could be a problem if NULs weren't
-                 * 0, or were ever returned as raw chars by yylex() */
+                 * the 0-255 range, leaving every other possible input
+                 * unchanged.  This jibes with yylex() returning some bare
+                 * characters in that range, but all tokens it returns are
+                 * either 0, or above 255.  There could be a problem if NULs
+                 * weren't 0, or were ever returned as raw chars by yylex() */
                 yytoken = YYTRANSLATE(NATIVE_TO_UNI(parser->yychar));
             }
 
