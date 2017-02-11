@@ -251,12 +251,18 @@ STATIC U8
 utf8_to_byte(pTHX_ const char **s, const char *end, I32 datumtype)
 {
     STRLEN retlen;
-    UV val = utf8n_to_uvchr((U8 *) *s, end-*s, &retlen,
+    UV val;
+
+    if (*s >= end) {
+	goto croak;
+    }
+    val = utf8n_to_uvchr((U8 *) *s, end-*s, &retlen,
 			 ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
     /* We try to process malformed UTF-8 as much as possible (preferably with
        warnings), but these two mean we make no progress in the string and
        might enter an infinite loop */
-    if (retlen == (STRLEN) -1 || retlen == 0)
+    if (retlen == (STRLEN) -1)
+      croak:
 	Perl_croak(aTHX_ "Malformed UTF-8 string in '%c' format in unpack",
 		   (int) TYPE_NO_MODIFIERS(datumtype));
     if (val >= 0x100) {
@@ -290,7 +296,7 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, int buf_
     for (;buf_len > 0; buf_len--) {
 	if (from >= end) return FALSE;
 	val = utf8n_to_uvchr((U8 *) from, end-from, &retlen, flags);
-	if (retlen == (STRLEN) -1 || retlen == 0) {
+	if (retlen == (STRLEN) -1) {
 	    from += UTF8SKIP(from);
 	    bad |= 1;
 	} else from += retlen;
@@ -396,7 +402,7 @@ STMT_START {							\
     STRLEN retlen;						\
     if (str >= end) break;					\
     val = utf8n_to_uvchr((U8 *) str, end-str, &retlen, utf8_flags);	\
-    if (retlen == (STRLEN) -1 || retlen == 0) {			\
+    if (retlen == (STRLEN) -1) {			        \
 	*cur = '\0';						\
 	Perl_croak(aTHX_ "Malformed UTF-8 string in pack");	\
     }								\
@@ -1225,7 +1231,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		    STRLEN retlen;
 		    aint = utf8n_to_uvchr((U8 *) s, strend-s, &retlen,
 				 ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
-		    if (retlen == (STRLEN) -1 || retlen == 0)
+		    if (retlen == (STRLEN) -1)
 			Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
 		    s += retlen;
 		  }
@@ -1248,7 +1254,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		    STRLEN retlen;
 		    const UV val = utf8n_to_uvchr((U8 *) s, strend-s, &retlen,
 					 ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
-		    if (retlen == (STRLEN) -1 || retlen == 0)
+		    if (retlen == (STRLEN) -1)
 			Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
 		    s += retlen;
 		    if (!checksum)
@@ -1310,7 +1316,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
                                                        strend - s,
                                                        &retlen,
                                                        UTF8_ALLOW_DEFAULT));
-		    if (retlen == (STRLEN) -1 || retlen == 0)
+		    if (retlen == (STRLEN) -1)
 			Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
 		    s += retlen;
 		}
