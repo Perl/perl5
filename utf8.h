@@ -802,10 +802,10 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UTF8_WARN_ILLEGAL_INTERCHANGE \
                           (UTF8_WARN_ILLEGAL_C9_INTERCHANGE|UTF8_WARN_NONCHAR)
 
-/* This is used typically for code that is willing to accept inputs of
- * illformed UTF-8 sequences, for whatever reason.  However, all such sequences
- * evaluate to the REPLACEMENT CHARACTER unless other flags overriding this are
- * also present. */
+/* This is typically used for code that processes UTF-8 input and doesn't want
+ * to have to deal with any malformations that might be present.  All such will
+ * be safely replaced by the REPLACEMENT CHARACTER, unless other flags
+ * overriding this are also present. */
 #define UTF8_ALLOW_ANY ( UTF8_ALLOW_CONTINUATION                                \
                         |UTF8_ALLOW_NON_CONTINUATION                            \
                         |UTF8_ALLOW_SHORT                                       \
