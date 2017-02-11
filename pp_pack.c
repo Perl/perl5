@@ -258,9 +258,6 @@ utf8_to_byte(pTHX_ const char **s, const char *end, I32 datumtype)
     }
     val = utf8n_to_uvchr((U8 *) *s, end-*s, &retlen,
 			 ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
-    /* We try to process malformed UTF-8 as much as possible (preferably with
-       warnings), but these two mean we make no progress in the string and
-       might enter an infinite loop */
     if (retlen == (STRLEN) -1)
       croak:
 	Perl_croak(aTHX_ "Malformed UTF-8 string in '%c' format in unpack",
