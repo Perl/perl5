@@ -155,7 +155,10 @@ typedef enum {
 /* *** any alterations to the SV types above need to be reflected in
  * SVt_MASK and the various PL_valid_types_* tables.  As of this writing those
  * tables are in perl.h.  There are also two affected names tables in dump.c,
- * one in B.xs, and 'bodies_by_type[]' in sv.c */
+ * one in B.xs, and 'bodies_by_type[]' in sv.c.
+ *
+ * The bits that match 0xf0 are CURRENTLY UNUSED, except that 0xFF means a
+ * freed SV.  The bits above that are for flags, like SVf_IOK */
 
 #define SVt_MASK 0xf	/* smallest bitmask that covers all types */
 
