@@ -5239,8 +5239,10 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
             /* If the format looked promising, use it as quadmath. */
             retval = quadmath_snprintf(buffer, len, qfmt, va_arg(ap, NV));
             if (retval == -1) {
-                if (qfmt != format)
+                if (qfmt != format) {
+                    dTHX;
                     SAVEFREEPV(qfmt);
+                }
                 Perl_croak_nocontext("panic: quadmath_snprintf failed, format \"%s\"", qfmt);
             }
             quadmath_valid = TRUE;
