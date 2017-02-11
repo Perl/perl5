@@ -5397,6 +5397,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     _char_class_number classnum;
     bool is_utf8_pat = reginfo->is_utf8_pat;
     bool match = FALSE;
+    I32 orig_savestack_ix = PL_savestack_ix;
 
 /* Solaris Studio 12.3 messes up fetching PL_charclass['\n'] */
 #if (defined(__SUNPRO_C) && (__SUNPRO_C == 0x5120) && defined(__x86_64) && defined(USE_64_BIT_ALL))
@@ -6830,30 +6831,67 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    nop = (OP*)rexi->data->data[n];
 		}
 
-		/* normally if we're about to execute code from the same
-		 * CV that we used previously, we just use the existing
-		 * CX stack entry. However, its possible that in the
-		 * meantime we may have backtracked, popped from the save
-		 * stack, and undone the SAVECOMPPAD(s) associated with
-		 * PUSH_MULTICALL; in which case PL_comppad no longer
-		 * points to newcv's pad. */
+                /* Some notes about MULTICALL and the context and save stacks.
+                 *
+                 * In something like
+                 *   /...(?{ my $x)}...(?{ my $z)}...(?{ my $z)}.../
+                 * since codeblocks don't introduce a new scope (so that
+                 * local() etc accumulate), at the end of a successful
+                 * match there will be a SAVEt_CLEARSV on the savestack
+                 * for each of $x, $y, $z. If the three code blocks above
+                 * happen to have come from different CVs (e.g. via
+                 * embedded qr//s), then we must ensure that during any
+                 * savestack unwinding, PL_comppad always points to the
+                 * right pad at each moment. We achieve this by
+                 * interleaving SAVEt_COMPPAD's on the savestack whenever
+                 * there is a change of pad.
+                 * In theory whenever we call a code block, we should
+                 * push a CXt_SUB context, then pop it on return from
+                 * that code block. This causes a bit of an issue in that
+                 * normally popping a context also clears the savestack
+                 * back to cx->blk_oldsaveix, but here we specifically
+                 * don't want to clear the save stack on exit from the
+                 * code block.
+                 * Also for efficiency we don't want to keep pushing and
+                 * popping the single SUB context as we backtrack etc.
+                 * So instead, we push a single context the first time
+                 * we need, it, then hang onto it until the end of this
+                 * function. Whenever we encounter a new code block, we
+                 * update the CV etc if that's changed. During the times
+                 * in this function where we're not executing a code
+                 * block, having the SUB context still there is a bit
+                 * naughty - but we hope that no-one notices.
+                 * When the SUB context is initially pushed, we fake up
+                 * cx->blk_oldsaveix to be as if we'd pushed this context
+                 * on first entry to S_regmatch rather than at some random
+                 * point during the regexe execution. That way if we
+                 * croak, popping the context stack will ensure that
+                 * *everything* SAVEd by this function is undone and then
+                 * the context popped, rather than e.g., popping the
+                 * context (and restoring the original PL_comppad) then
+                 * popping more of the savestack and restoiring a bad
+                 * PL_comppad.
+                 */
+
+                /* If this is the first EVAL, push a MULTICALL. On
+                 * subsequent calls, if we're executing a different CV, or
+                 * if PL_comppad has got messed up from backtracking
+                 * through SAVECOMPPADs, then refresh the context.
+                 */
 		if (newcv != last_pushed_cv || PL_comppad != last_pad)
 		{
                     U8 flags = (CXp_SUB_RE |
                                 ((newcv == caller_cv) ? CXp_SUB_RE_FAKE : 0));
+                    SAVECOMPPAD();
 		    if (last_pushed_cv) {
-                        /* PUSH/POP_MULTICALL save and restore the
-                         * caller's PL_comppad; if we call multiple subs
-                         * using the same CX block, we have to save and
-                         * unwind the varying PL_comppad's ourselves,
-                         * especially restoring the right PL_comppad on
-                         * backtrack - so save it on the save stack */
-                        SAVECOMPPAD();
 			CHANGE_MULTICALL_FLAGS(newcv, flags);
 		    }
 		    else {
 			PUSH_MULTICALL_FLAGS(newcv, flags);
 		    }
+                    /* see notes above */
+                    CX_CUR()->blk_oldsaveix = orig_savestack_ix;
+
 		    last_pushed_cv = newcv;
 		}
 		else {
@@ -8643,9 +8681,12 @@ NULL
 
     if (last_pushed_cv) {
 	dSP;
+        /* see "Some notes about MULTICALL" above */
 	POP_MULTICALL;
         PERL_UNUSED_VAR(SP);
     }
+    else
+        LEAVE_SCOPE(orig_savestack_ix);
 
     assert(!result ||  locinput - reginfo->strbeg >= 0);
     return result ?  locinput - reginfo->strbeg : -1;
