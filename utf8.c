@@ -1179,14 +1179,6 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
     /* Save how many bytes were actually in the character */
     curlen = s - s0;
 
-    /* A convenience macro that matches either of the too-short conditions.  */
-#   define UTF8_GOT_TOO_SHORT (UTF8_GOT_SHORT|UTF8_GOT_NON_CONTINUATION)
-
-    if (UNLIKELY(possible_problems & UTF8_GOT_TOO_SHORT)) {
-        uv_so_far = uv;
-        uv = UNICODE_REPLACEMENT;
-    }
-
     /* Note that there are two types of too-short malformation.  One is when
      * there is actual wrong data before the normal termination of the
      * sequence.  The other is that the sequence wasn't complete before the end
@@ -1194,7 +1186,15 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
      * This means that we were passed data for a partial character, but it is
      * valid as far as we saw.  The other is definitely invalid.  This
      * distinction could be important to a caller, so the two types are kept
-     * separate. */
+     * separate.
+     *
+     * A convenience macro that matches either of the too-short conditions.  */
+#   define UTF8_GOT_TOO_SHORT (UTF8_GOT_SHORT|UTF8_GOT_NON_CONTINUATION)
+
+    if (UNLIKELY(possible_problems & UTF8_GOT_TOO_SHORT)) {
+        uv_so_far = uv;
+        uv = UNICODE_REPLACEMENT;
+    }
 
     /* Check for overflow */
     if (UNLIKELY(does_utf8_overflow(s0, send))) {
