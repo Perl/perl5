@@ -340,25 +340,6 @@ C<use AutoLoader 'AUTOLOAD';>.
 This feature was deprecated in Perl 5.004, and will be fatal in Perl 5.28.
 
 
-=head3 Use of C<< \cI<X> >> to specify a printable character.
-
-In a double quoted context, Perl has the C<< \c >> construct to write
-control characters in a readable way. For instance, the tab character
-can be written as C<< \cI >> (I<< control-I >>), and the escape 
-character can be written as C<< \c[ >>.
-
-Due to implementation details, the C<< \c >> construct can be used
-to create regular, printable, characters as well. For instance,
-C<< \c >> maps a C<< , >> to C<< l >>; that is C<< \c, >> is an
-obscure way of writing C<< l >>. And not only that, it's also not
-portable between ASCII and EBCDIC platforms.
-
-Using the C<< \c >> construct with an argument which maps to a
-printable character was deprecated in Perl 5.14, and will be a fatal
-error in Perl 5.28. You're recommended to just write the intended
-character instead.
-
-
 =head3 Use of code points over 0xFF in string bitwise operators
 
 The string bitwise operators, C<&>, C<|>, C<^>, and C<~>, treat

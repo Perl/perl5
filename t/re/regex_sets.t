@@ -165,13 +165,7 @@ for my $char ("٠", "٥", "٩") {
 	like($@, qr/^Syntax error/, '/(?[(\c]) ]\b/ should be a syntax error');
 	eval { $_ = '(?[\c[]](])'; qr/$_/ };
 	like($@, qr/^Syntax error/, '/(?[\c[]](])/ should be a syntax error');
-        {
-            # This block needs to go after 5.26, as it will be
-            # fatal in 5.28. But it's not fatal yet, so we ought
-            # to test it.
-            no warnings 'deprecated';
-            like("\c#", qr/(?[\c#])/, '\c# should match itself');
-        }
+	like("\c#", qr/(?[\c#])/, '\c# should match itself');
 	like("\c[", qr/(?[\c[])/, '\c[ should match itself');
 	like("\c\ ", qr/(?[\c\])/, '\c\ should match itself');
 	like("\c]", qr/(?[\c]])/, '\c] should match itself');
