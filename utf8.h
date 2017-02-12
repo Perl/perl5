@@ -726,12 +726,12 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
  * Is so within 'feature unicode_strings' or 'locale :not_characters', and not
  * within 'use bytes'.  UTF-8 locales are not tested for here, but perhaps
  * could be */
-#define IN_UNI_8_BIT                                                             \
-	    (((CopHINTS_get(PL_curcop) & (HINT_UNI_8_BIT))                       \
-               || (CopHINTS_get(PL_curcop) & HINT_LOCALE_PARTIAL                 \
-                   /* -1 below is for :not_characters */                         \
-                   && _is_in_locale_category(FALSE, -1)))                        \
-              && ! IN_BYTES)
+#define IN_UNI_8_BIT                                                    \
+	    ((    (      (CopHINTS_get(PL_curcop) & HINT_UNI_8_BIT))    \
+                   || (   CopHINTS_get(PL_curcop) & HINT_LOCALE_PARTIAL \
+                            /* -1 below is for :not_characters */       \
+                       && _is_in_locale_category(FALSE, -1)))           \
+              && (! IN_BYTES))
 
 
 #define UTF8_ALLOW_EMPTY		0x0001	/* Allow a zero length string */
