@@ -25,68 +25,71 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Security Fixes</h3>
 
-<commit votes="sprout xsawyerx" id="ba0a4150f6f1604df236035adf6df18bd43de88e" ticket="" desc="Fix checks for tainted dir in $ENV{PATH}"/>
+<commit votes="sprout arc xsawyerx" id="ba0a4150f6f1604df236035adf6df18bd43de88e" ticket="" desc="Fix checks for tainted dir in $ENV{PATH}"/>
 
 </div>
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="sprout" id="a2637ca0a3fec01b80d7ea5ba62802354fd5e6f3" ticket="128597" desc="[perl #128597] Crash from gp_free/ckWARN_d"/>
+<commit votes="sprout arc" id="a2637ca0a3fec01b80d7ea5ba62802354fd5e6f3" ticket="128597" desc="[perl #128597] Crash from gp_free/ckWARN_d"/>
 
-<commit votes="sprout xsawyerx" id="d35c1b5e43e773f353239d9182ddccb41cdab3d6" ticket="128740" desc="[perl #128740] Check for null in pp_ghostent et al."/>
-<commit votes="sprout" id="bf8a9a15ea4a7b7ebcde5ba48aafe397c549eff2" ticket="128951" desc="[perl #128951] Fix ASan error with @{\327"/>
+<commit votes="sprout xsawyerx arc" id="d35c1b5e43e773f353239d9182ddccb41cdab3d6" ticket="128740" desc="[perl #128740] Check for null in pp_ghostent et al."/>
+<commit votes="sprout arc" id="bf8a9a15ea4a7b7ebcde5ba48aafe397c549eff2" ticket="128951" desc="[perl #128951] Fix ASan error with @{\327"/>
 
-<commit votes="sprout" id="9bde56224e82f20e7a65b3469b1ffb6b9f6d4df8" ticket="129196" desc="[perl #129196] Crash/bad read with ‘evalbytes S’"/>
+<commit votes="sprout arc" id="9bde56224e82f20e7a65b3469b1ffb6b9f6d4df8" ticket="129196" desc="[perl #129196] Crash/bad read with ‘evalbytes S’"/>
 <commit votes="sprout" id="a6128716d2cc20147851e0a37768376647bd3242" ticket="129196" desc="Regression test for RT #129196"/>
 
 <commit votes="" id="" ticket="123878" desc=""/>
 
 Note: the following is a non-trivial backport to maint-5.22 of 109ac342a6bc5a3a67c3b52341607100cedafdf7, in branch tonyc/maint-5.22-129038-locale-match
-<commit votes="tonyc davem" id="5747c35638c5183ddf9e4b7f3949aa0f7414661c" ticket="129038" desc="Assertion Failure: *Perl_pp_subst *pp_hot.c:3203)"/>
+<commit votes="tonyc davem arc" id="5747c35638c5183ddf9e4b7f3949aa0f7414661c" ticket="129038" desc="Assertion Failure: *Perl_pp_subst *pp_hot.c:3203)"/>
 
 </div>
 
 <div><h3>Regression Fixes</h3>
 
-<commit votes="sprout xsawyerx" id="08f800f8519574aea9e744ff83230fb93772652b" ticket="128182" desc="Fix crash with require $nonstring"/>
+This was a regression in 5.12. -arc
+<commit votes="arc" id="f15d05806fb7522031b75cb5a8784727ae03b98a" ticket="127952" desc="[perl #127952] misoptimization for negated constant-ish on lhs of logop" />
+
+<commit votes="sprout xsawyerx arc" id="08f800f8519574aea9e744ff83230fb93772652b" ticket="128182" desc="Fix crash with require $nonstring"/>
 
 Perhaps just the removal of SETERRNO() from this.
-<commit votes="tonyc jhi" id="d484df69ed26120321cdca989748cd4636b276bb" ticket="125347" desc="[perl #125347] allow truncate to work on large files on Win32" />
+<commit votes="tonyc jhi arc" id="d484df69ed26120321cdca989748cd4636b276bb" ticket="125347" desc="[perl #125347] allow truncate to work on large files on Win32" />
 
-<commit votes="tonyc jhi" id="3f6b66c14467c0f8c7459e32c576618155ca89f3" ticket="128316" desc="(perl #128316) preserve errno from failed system calls" />
+<commit votes="tonyc jhi arc" id="3f6b66c14467c0f8c7459e32c576618155ca89f3" ticket="128316" desc="(perl #128316) preserve errno from failed system calls" />
 
 <commit votes="sprout jhi xsawyerx" id="b3dd0aba3d2bf0b22280303ef6f068e976e31888" ticket="128508" desc="[perl #128508] Fix line numbers with perl -x" />
 
-<commit votes="sprout xsawyerx" id="c82de78e3ba0184f85b5b49245e5da32d1cb3fcc" ticket="126482" desc="[perl #126482] Fix assert fail ‘a_const a_const’"/>
+<commit votes="sprout xsawyerx arc" id="c82de78e3ba0184f85b5b49245e5da32d1cb3fcc" ticket="126482" desc="[perl #126482] Fix assert fail ‘a_const a_const’"/>
 
 NOTE from jhi: the following cluster of hexfp-related fixes
 (in ascending time order) only makes sense as a unit, they all touch
 the same code. I tried cherry-picking these onto maint-5.22, and only
 the first one required manual backporting (available on request).
 
-<commit votes="jhi" id="b6d9b423fab1963346eb79e83b356114396b1f2e" ticket="128843" desc="printf %a mishandles subnormals"/>
-<commit votes="jhi" id="94d00769fba240ffb86f18b3d66341fb1d24ae6c" ticket="128843" desc="Add rt.perl.org reference for b6d9b423"/>
-<commit votes="jhi" id="520f3e58c346a7bc3ef0509dfe0db206dae454ee" ticket="128843" desc="Comment fix for b6d9b423"/>
-<commit votes="jhi" id="82229f9f47d9a169b59715582fb5a09b5a4ac0ff" ticket="128888" desc="printf %a mishandles zero precision"/>
-<commit votes="jhi" id="a9ce335538454d590920dab8d62db84948f1fb83" ticket="128889" desc="printf %a mishandles negative pseudo-precision"/>
-<commit votes="jhi" id="75326c485e9d40be5c22d508f581cdea68b244ce" ticket="128890" desc="printf %a rounds incorrectly"/>
-<commit votes="jhi" id="be93048a43d87d317acca5b37619111b6a5f8c44" ticket="128893" desc="printf %a botches 0 flag for negative values"/>
-<commit votes="jhi" id="749d85343f3cdb65891a5fe3b9f55ef3a5b03ca8" ticket="" desc="The new tests are valid only for IEEE 754 64-bit doubles."/>
-<commit votes="jhi" id="5208a0305e9e82c534fa034515d54a0409dfcc77" ticket="" desc="Fix on top of 75326c48."/>
-<commit votes="jhi" id="e3f7a67e8485950fdf5fd9c7131d0a78b6c8cf32" ticket="" desc="Test new hexfp fixes also on (x86 80-bit) long doubles."/>
-<commit votes="jhi" id="44348173fce5aaf28fdf59ba6ace73ea435d9380" ticket="" desc="Bogus skip count."/>
-<commit votes="jhi" id="ee58923a8531731f8acb98ab130abf41f75ebdc7" ticket="128909" desc="printf %a mishandles exponent-crossing rounding with long double"/>
-<commit votes="jhi" id="9e67a8c1b21482ed5fada053dd462eb23320dc86" ticket="" desc="Avoid test noise on non-longdouble."/>
-<commit votes="jhi" id="a149d1180209525972d84fd1a62f488da83e568a" ticket="128919" desc="limited exponent range in hex fp literal with long double"/>
-<commit votes="jhi" id="7301378635b35757b228e07c14276afaf06a4728" ticket="" desc="Follow-up on a149d11"/>
-<commit votes="jhi" id="f5a466613ec0b74a224adb5b7da6da0a74713596" ticket="" desc="Use library testing for subnormality"/>
-<commit votes="jhi" id="f40ac91c3b9891b83f3d253861009c290584b646" ticket="" desc="Handle subnormals of x86 80-bit"/>
-<commit votes="jhi" id="b28053d1f063cb783e73b0596d1f58a21681fda6" ticket="" desc="Define Perl_fp_class() for quadmath"/>
-<commit votes="jhi" id="de1a8b537348227e83c8efd15d3cb36d9ac646f5" ticket="" desc="Test subnormals with quadmath"/>
-<commit votes="jhi" id="dd1645173d8209e05c419b0f3edc9b1c0f9643a8" ticket="" desc="Do not deploy the fractional matching without fractions"/>
-<commit votes="jhi" id="1bee6aebe39da1a4d681e8ea1b9d0329898a8407" ticket="" desc="Test data mistake was masked by mistaken fractional matching"/>
+<commit votes="jhi arc" id="b6d9b423fab1963346eb79e83b356114396b1f2e" ticket="128843" desc="printf %a mishandles subnormals"/>
+<commit votes="jhi arc" id="94d00769fba240ffb86f18b3d66341fb1d24ae6c" ticket="128843" desc="Add rt.perl.org reference for b6d9b423"/>
+<commit votes="jhi arc" id="520f3e58c346a7bc3ef0509dfe0db206dae454ee" ticket="128843" desc="Comment fix for b6d9b423"/>
+<commit votes="jhi arc" id="82229f9f47d9a169b59715582fb5a09b5a4ac0ff" ticket="128888" desc="printf %a mishandles zero precision"/>
+<commit votes="jhi arc" id="a9ce335538454d590920dab8d62db84948f1fb83" ticket="128889" desc="printf %a mishandles negative pseudo-precision"/>
+<commit votes="jhi arc" id="75326c485e9d40be5c22d508f581cdea68b244ce" ticket="128890" desc="printf %a rounds incorrectly"/>
+<commit votes="jhi arc" id="be93048a43d87d317acca5b37619111b6a5f8c44" ticket="128893" desc="printf %a botches 0 flag for negative values"/>
+<commit votes="jhi arc" id="749d85343f3cdb65891a5fe3b9f55ef3a5b03ca8" ticket="" desc="The new tests are valid only for IEEE 754 64-bit doubles."/>
+<commit votes="jhi arc" id="5208a0305e9e82c534fa034515d54a0409dfcc77" ticket="" desc="Fix on top of 75326c48."/>
+<commit votes="jhi arc" id="e3f7a67e8485950fdf5fd9c7131d0a78b6c8cf32" ticket="" desc="Test new hexfp fixes also on (x86 80-bit) long doubles."/>
+<commit votes="jhi arc" id="44348173fce5aaf28fdf59ba6ace73ea435d9380" ticket="" desc="Bogus skip count."/>
+<commit votes="jhi arc" id="ee58923a8531731f8acb98ab130abf41f75ebdc7" ticket="128909" desc="printf %a mishandles exponent-crossing rounding with long double"/>
+<commit votes="jhi arc" id="9e67a8c1b21482ed5fada053dd462eb23320dc86" ticket="" desc="Avoid test noise on non-longdouble."/>
+<commit votes="jhi arc" id="a149d1180209525972d84fd1a62f488da83e568a" ticket="128919" desc="limited exponent range in hex fp literal with long double"/>
+<commit votes="jhi arc" id="7301378635b35757b228e07c14276afaf06a4728" ticket="" desc="Follow-up on a149d11"/>
+<commit votes="jhi arc" id="f5a466613ec0b74a224adb5b7da6da0a74713596" ticket="" desc="Use library testing for subnormality"/>
+<commit votes="jhi arc" id="f40ac91c3b9891b83f3d253861009c290584b646" ticket="" desc="Handle subnormals of x86 80-bit"/>
+<commit votes="jhi arc" id="b28053d1f063cb783e73b0596d1f58a21681fda6" ticket="" desc="Define Perl_fp_class() for quadmath"/>
+<commit votes="jhi arc" id="de1a8b537348227e83c8efd15d3cb36d9ac646f5" ticket="" desc="Test subnormals with quadmath"/>
+<commit votes="jhi arc" id="dd1645173d8209e05c419b0f3edc9b1c0f9643a8" ticket="" desc="Do not deploy the fractional matching without fractions"/>
+<commit votes="jhi arc" id="1bee6aebe39da1a4d681e8ea1b9d0329898a8407" ticket="" desc="Test data mistake was masked by mistaken fractional matching"/>
 
-<commit votes="sprout xsawyerx" id="c333712c4a550eeb3146b964d8508f772e294a49" ticket="129122" desc="regex sets compilation error"/>
+<commit votes="sprout xsawyerx arc" id="c333712c4a550eeb3146b964d8508f772e294a49" ticket="129122" desc="regex sets compilation error"/>
 
 </div>
 
@@ -104,7 +107,7 @@ the first one required manual backporting (available on request).
 
 <div><h3>Portability Fixes</h3>
 
-<commit votes="jhi" id="bf49eae4014ca7ff7b44362d99251f5b9f30bec8" desc="Perl_my_vsnprintf: avoid compiler warning"/>
+<commit votes="jhi arc" id="bf49eae4014ca7ff7b44362d99251f5b9f30bec8" desc="Perl_my_vsnprintf: avoid compiler warning"/>
 
 </div>
 
@@ -114,9 +117,9 @@ the first one required manual backporting (available on request).
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="jkeenan" id="177f0db9b219c09ca9541c325f9309b8cca12ac4" desc="perlfunc: provide link for one instance of 'eval' under 'die' (RT #129168)"/>
-<commit votes="jkeenan sprout" id="7c280bee056f2462f4b4aa2150a160fb9176601e" desc="perlfunc: correction to 'map' documentation (RT #129169)"/>
-<commit votes="jkeenan" id="2c4188f3fe3f46d4ebe3f23a094a7cf96ebe87f1" desc="perlrun: spelling correction in documentation of '-c' switch (RT #129313)"/>
+<commit votes="jkeenan arc" id="177f0db9b219c09ca9541c325f9309b8cca12ac4" desc="perlfunc: provide link for one instance of 'eval' under 'die' (RT #129168)"/>
+<commit votes="jkeenan sprout arc" id="7c280bee056f2462f4b4aa2150a160fb9176601e" desc="perlfunc: correction to 'map' documentation (RT #129169)"/>
+<commit votes="jkeenan arc" id="2c4188f3fe3f46d4ebe3f23a094a7cf96ebe87f1" desc="perlrun: spelling correction in documentation of '-c' switch (RT #129313)"/>
 
 </div>
 
