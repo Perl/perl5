@@ -707,7 +707,7 @@ with a ptr argument.
 /* A Unicode character can fold to up to 3 characters */
 #define UTF8_MAX_FOLD_CHAR_EXPAND 3
 
-#define IN_BYTES (CopHINTS_get(PL_curcop) & HINT_BYTES)
+#define IN_BYTES UNLIKELY(CopHINTS_get(PL_curcop) & HINT_BYTES)
 
 /*
 
