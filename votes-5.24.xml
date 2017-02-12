@@ -86,7 +86,7 @@ Perhaps just the removal of SETERRNO() from this.
 
 NOTE from jhi: so the Time-HiRes in 5.24.1 has the broken version of Time-HiRes that is broken in OS X.  Possibilities:
 [1] The smallish fix from https://rt.perl.org/Ticket/Display.html?id=128445 (blead c4a535af41823cc84534bf8dbecfdcc3eb7daa86) which upgrades 1.9734 to 1.9739
-[2] Craig Berry's fix in https://marc.info/?l=perl5-porters&m=148305290013791 which upgrades 5.24 maint to version 1.9741, which has now been out for two months, and seems to be doing well: http://matrix.cpantesters.org/?dist=Time-HiRes+1.9741
+[2] Craig Berry's fix in https://marc.info/?l=perl5-porters;m=148305290013791 which upgrades 5.24 maint to version 1.9741, which has now been out for two months, and seems to be doing well: http://matrix.cpantesters.org/?dist=Time-HiRes+1.9741
 
 <commit votes="jhi sprout" id="dd1dbff095629118e73a48a2a6008f03418a07f6" ticket="128967" desc="#128967: Inconsistency between doc and code for chown using negative argument: -1"/>
 
