@@ -747,9 +747,10 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
 
 	s = SvPV_const(line, len);
 
-        if (SvUTF8(line) && ! is_utf8_string_loc((U8 *) s,
-                                                 SvCUR(line),
-                                                 &first_bad_char_loc))
+        if (   SvUTF8(line)
+            && UNLIKELY(! is_utf8_string_loc((U8 *) s,
+                                             SvCUR(line),
+                                             &first_bad_char_loc)))
         {
             _force_out_malformed_utf8_message(first_bad_char_loc,
                                               (U8 *) s + SvCUR(line),
@@ -2724,7 +2725,9 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         const U8* first_bad_char_loc;
         STRLEN len;
         const char* const str = SvPV_const(res, len);
-        if (! is_utf8_string_loc((U8 *) str, len, &first_bad_char_loc)) {
+        if (UNLIKELY(! is_utf8_string_loc((U8 *) str, len,
+                                          &first_bad_char_loc)))
+        {
             _force_out_malformed_utf8_message(first_bad_char_loc,
                                               (U8 *) PL_parser->bufend,
                                               0,
