@@ -727,6 +727,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
     parser->lex_state = LEX_NORMAL;
     parser->expect = XSTATE;
     parser->rsfp = rsfp;
+    parser->recheck_utf8_validity = FALSE;
     parser->rsfp_filters =
       !(flags & LEX_START_SAME_FILTER) || !oparser
         ? NULL
@@ -1273,6 +1274,24 @@ Perl_lex_discard_to(pTHX_ char *ptr)
 	PL_parser->last_uni -= discard_len;
     if (PL_parser->last_lop)
 	PL_parser->last_lop -= discard_len;
+}
+
+void
+Perl_notify_parser_that_changed_to_utf8(pTHX)
+{
+    /* Called when $^H is changed to indicate that HINT_UTF8 has changed from
+     * off to on.  At compile time, this has the effect of entering a 'use
+     * utf8' section.  This means that any input was not previously checked for
+     * UTF-8 (because it was off), but now we do need to check it, or our
+     * assumptions about the input being sane could be wrong, and we could
+     * segfault.  This routine just sets a flag so that the next time we look
+     * at the input we do the well-formed UTF-8 check.  If we aren't in the
+     * proper phase, there may not be a parser object, but if there is, setting
+     * the flag is harmless */
+
+    if (PL_parser) {
+        PL_parser->recheck_utf8_validity = TRUE;
+    }
 }
 
 /*
@@ -4762,6 +4781,20 @@ Perl_yylex(pTHX)
     GV *gv = NULL;
     GV **gvp = NULL;
 
+    if (UNLIKELY(PL_parser->recheck_utf8_validity)) {
+        const U8* first_bad_char_loc;
+        if (UTF && UNLIKELY(! is_utf8_string_loc((U8 *) PL_bufptr,
+                                                        PL_bufend - PL_bufptr,
+                                                        &first_bad_char_loc)))
+        {
+            _force_out_malformed_utf8_message(first_bad_char_loc,
+                                              (U8 *) PL_bufend,
+                                              0,
+                                              1 /* 1 means die */ );
+            NOT_REACHED; /* NOTREACHED */
+        }
+        PL_parser->recheck_utf8_validity = FALSE;
+    }
     DEBUG_T( {
 	SV* tmp = newSVpvs("");
 	PerlIO_printf(Perl_debug_log, "### %" IVdf ":LEX_%s/X%s %s\n",

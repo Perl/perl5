@@ -115,6 +115,8 @@ typedef struct yy_parser {
     IV          sig_optelems;   /* number of optional signature elems seen */
     char        sig_slurpy;     /* the sigil of the slurpy var (or null) */
 
+    bool        recheck_utf8_validity;
+
     PERL_BITFIELD16	in_pod:1;      /* lexer is within a =pod section */
     PERL_BITFIELD16	filtered:1;    /* source filters in evalbytes */
     PERL_BITFIELD16	saw_infix_sigil:1; /* saw & or * or % operator */

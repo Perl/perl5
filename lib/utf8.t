@@ -168,7 +168,7 @@ no utf8; # Ironic, no?
     use utf8; %a = ("$malformed" =>"sterling");
     print 'start'; printf '%x,', ord \$_ foreach keys %a; print "end\n";
 BANG
-	      qr/^Malformed UTF-8 character: .*? \(too short; \d bytes? available, need \d\).*start\d+,end$/sm
+	      qr/^Malformed UTF-8 character: .*? \(unexpected non-continuation byte/
 	     ],
             );
     foreach (@tests) {

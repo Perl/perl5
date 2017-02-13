@@ -859,6 +859,7 @@ pP	|I32	|keyword	|NN const char *name|I32 len|bool all_keywords
 s	|void	|inplace_aassign	|NN OP* o
 #endif
 Ap	|void	|leave_scope	|I32 base
+p	|void	|notify_parser_that_changed_to_utf8
 : Public lexer API
 AMpd	|void	|lex_start	|NULLOK SV* line|NULLOK PerlIO *rsfp|U32 flags
 AMpd	|bool	|lex_bufutf8

@@ -180,9 +180,16 @@ Execution of - aborted due to compilation errors.
 # NAME Regexp constant overloading when *^H is undefined
 use overload;
 BEGIN { overload::constant qr => sub {}; undef *^H }
-/a/, m'a'
+/a/
 EXPECT
 Constant(qq) unknown at - line 3, within pattern
+Execution of - aborted due to compilation errors.
+########
+# NAME Regexp constant overloading when *^H is undefined
+use overload;
+BEGIN { overload::constant qr => sub {}; undef *^H }
+m'a'
+EXPECT
 Constant(q) unknown at - line 3, within pattern
 Execution of - aborted due to compilation errors.
 ########
@@ -232,9 +239,16 @@ Execution of - aborted due to compilation errors.
 # NAME Regexp constant overloading returning undef
 use overload;
 BEGIN { overload::constant qr => sub {} }
-/a/, m'a'
+/a/
 EXPECT
 Constant(qq): Call to &{$^H{qr}} did not return a defined value at - line 3, within pattern
+Execution of - aborted due to compilation errors.
+########
+# NAME Regexp constant overloading returning undef
+use overload;
+BEGIN { overload::constant qr => sub {} }
+m'a'
+EXPECT
 Constant(q): Call to &{$^H{qr}} did not return a defined value at - line 3, within pattern
 Execution of - aborted due to compilation errors.
 ########
