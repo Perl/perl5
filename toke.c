@@ -701,7 +701,6 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
 {
     const char *s = NULL;
     yy_parser *parser, *oparser;
-    const U8* first_bad_char_loc;
 
     if (flags && flags & ~LEX_START_FLAGS)
 	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_start");
@@ -744,6 +743,8 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
 
     if (line) {
 	STRLEN len;
+        const U8* first_bad_char_loc;
+
 	s = SvPV_const(line, len);
 
         if (SvUTF8(line) && ! is_utf8_string_loc((U8 *) s,
