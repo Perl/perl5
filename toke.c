@@ -10546,7 +10546,8 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 		else if (*s == term) {
 		    if (termlen == 1)
 			break;
-		    if (s+termlen <= PL_bufend && memEQ(s, (char*)termstr, termlen))
+                    if (   s + termlen <= PL_bufend
+                        && memEQ(s + 1, (char*)termstr + 1, termlen - 1))
                     {
                         if (   check_grapheme
                             && UNLIKELY(! _is_grapheme((U8 *) start,
