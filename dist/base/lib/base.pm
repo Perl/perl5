@@ -6,6 +6,12 @@ use vars qw($VERSION);
 $VERSION = '2.25';
 $VERSION =~ tr/_//d;
 
+# simplest way to avoid indexing of the package: no package statement
+sub base::__inc_scope_guard::DESTROY {
+	my $noop = $_[0][0];
+	ref $_ and $_ == $noop and $_ = '.' for @INC;
+}
+
 # constant.pm is slow
 sub SUCCESS () { 1 }
 
@@ -91,13 +97,17 @@ sub import {
 
         next if grep $_->isa($base), ($inheritor, @bases);
 
-        # Following blocks help isolate $SIG{__DIE__} changes
+        # Following blocks help isolate $SIG{__DIE__} and @INC changes
         {
             my $sigdie;
             {
                 local $SIG{__DIE__};
                 my $fn = _module_to_filename($base);
-                eval { require $fn };
+                my $dotty = $INC[-1] eq '.' && ( $INC[-1] = sub {()} );
+                eval {
+                    my $redotty = $dotty && bless [ $dotty ], 'base::__inc_scope_guard';
+                    require $fn
+                };
                 # Only ignore "Can't locate" errors from our eval require.
                 # Other fatal errors (syntax etc) must be reported.
                 #
@@ -111,11 +121,24 @@ sub import {
                 unless (%{"$base\::"}) {
                     require Carp;
                     local $" = " ";
-                    Carp::croak(<<ERROR);
+                    my $e = <<ERROR;
 Base class package "$base" is empty.
     (Perhaps you need to 'use' the module which defines that package first,
     or make that module available in \@INC (\@INC contains: @INC).
 ERROR
+                    if ($dotty && -e $fn) {
+                        $e .= <<ERROS;
+    The file $fn does exist in the current directory.  But note
+    that base.pm, when loading a module, now ignores the current working
+    directory if it is the last entry in \@INC.  If your software worked on
+    previous versions of Perl, the best solution is to use FindBin to
+    detect the path properly and to add that path to \@INC.  As a last
+    resort, you can re-enable looking in the current working directory by
+    adding "use lib '.'" to your code.
+ERROS
+                    }
+                    $e =~ s/\n\z/)\n/;
+                    Carp::croak($e);
                 }
                 $sigdie = $SIG{__DIE__} || undef;
             }
