@@ -6,6 +6,11 @@ use vars qw($VERSION);
 $VERSION = '2.25';
 $VERSION =~ tr/_//d;
 
+# simplest way to avoid indexing of a package: no package statement
+sub base::__inc::unhook { @INC = grep !(ref eq 'CODE' && $_ == $_[0]), @INC }
+# instance is blessed array of coderefs to be removed from @INC at scope exit
+sub base::__inc::scope_guard::DESTROY { base::__inc::unhook $_ for @{$_[0]} }
+
 # constant.pm is slow
 sub SUCCESS () { 1 }
 
@@ -91,13 +96,52 @@ sub import {
 
         next if grep $_->isa($base), ($inheritor, @bases);
 
-        # Following blocks help isolate $SIG{__DIE__} changes
+        # Following blocks help isolate $SIG{__DIE__} and @INC changes
         {
             my $sigdie;
             {
                 local $SIG{__DIE__};
                 my $fn = _module_to_filename($base);
-                eval { require $fn };
+                my $dot_hidden;
+                eval {
+                    my $guard;
+                    if ($INC[-1] eq '.' && %{"$base\::"}) {
+                        # So:  the package already exists   => this an optional load
+                        # And: there is a dot at the end of @INC  => we want to hide it
+                        # However: we only want to hide it during our *own* require()
+                        # (i.e. without affecting recursive require()s).
+                        # To achieve this overal effect, we use two hooks:
+                        # - A rear hook, which intercepts @INC traversal before the dot is
+                        #   reached by sitting immediately in front of the dot. It hides
+                        #   the dot by removing itself from @INC, which moves the dot up
+                        #   by one index, which causes it to be skipped.
+                        # - A front hook, which sits at the front of @INC and does nothing
+                        #   until it’s reached twice, which must be a recursive require.
+                        #   If that happens, it removes the rear hook from @INC to keep
+                        #   the dot visible.
+                        # Note that this setup works recursively: if a module loaded via
+                        # base.pm itself uses base.pm, there will be one layer of hooks
+                        # in @INC per base::import call frame, and they do not interfere
+                        # with each other.
+                        my ($reentrant, $front_hook, $rear_hook);
+                        unshift @INC,        $front_hook = sub { base::__inc::unhook $rear_hook if $reentrant++; () };
+                        splice  @INC, -1, 0, $rear_hook  = sub { ++$dot_hidden, &base::__inc::unhook if $reentrant == 1; () };
+                        $guard = bless [ $front_hook, $rear_hook ], 'base::__inc::scope_guard';
+                    }
+                    require $fn
+                };
+                if ($dot_hidden && (my @fn = grep -e && !( -d _ || -b _ ), $fn.'c', $fn)) {
+                    require Carp;
+                    Carp::croak(<<ERROR);
+Base class package "$base" is not empty but "$fn[0]" exists in the current directory.
+    To help avoid security issues, base.pm now refuses to load optional modules
+    from the current working directory when it is the last entry in \@INC.
+    If your software worked on previous versions of Perl, the best solution
+    is to use FindBin to detect the path properly and to add that path to
+    \@INC.  As a last resort, you can re-enable looking in the current working
+    directory by adding "use lib '.'" to your code.
+ERROR
+                }
                 # Only ignore "Can't locate" errors from our eval require.
                 # Other fatal errors (syntax etc) must be reported.
                 #
