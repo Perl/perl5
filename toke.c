@@ -1057,12 +1057,7 @@ Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
 		} else if (UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(p, e)) {
 		    p++;
 		    highhalf++;
-                } else if (! UTF8_IS_INVARIANT(c)) {
-                    _force_out_malformed_utf8_message((U8 *) p, (U8 *) e,
-                                                      0,
-                                                      1 /* 1 means die */ );
-                    NOT_REACHED; /* NOTREACHED */
-		}
+                } else assert(UTF8_IS_INVARIANT(c));
 	    }
 	    if (!highhalf)
 		goto plain_copy;
@@ -2595,7 +2590,6 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
     SV *cv;
     SV *rv;
     HV *stash;
-    const U8* first_bad_char_loc;
     const char* backslash_ptr = s - 3; /* Points to the <\> of \N{... */
 
     PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME;
@@ -2603,21 +2597,6 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
     if (!SvCUR(res)) {
         deprecate_fatal_in("5.28", "Unknown charname '' is deprecated");
         return res;
-    }
-
-    if (UTF && ! is_utf8_string_loc((U8 *) backslash_ptr,
-                                     e - backslash_ptr,
-                                     &first_bad_char_loc))
-    {
-        _force_out_malformed_utf8_message(first_bad_char_loc,
-                                          (U8 *) PL_parser->bufend,
-                                          0,
-                                          0 /* 0 means don't die */ );
-        yyerror_pv(Perl_form(aTHX_
-            "Malformed UTF-8 character immediately after '%.*s'",
-            (int) (first_bad_char_loc - (U8 *) backslash_ptr), backslash_ptr),
-                   SVf_UTF8);
-	return NULL;
     }
 
     res = new_constant( NULL, 0, "charnames", res, NULL, backslash_ptr,
@@ -5151,12 +5130,6 @@ Perl_yylex(pTHX)
     switch (*s) {
     default:
 	if (UTF) {
-            if (! isUTF8_CHAR((U8 *) s, (U8 *) PL_bufend)) {
-                _force_out_malformed_utf8_message((U8 *) s, (U8 *) PL_bufend,
-                                                  0,
-                                                  1 /* 1 means die */ );
-                NOT_REACHED; /* NOTREACHED */
-            }
             if (isIDFIRST_utf8_safe(s, PL_bufend)) {
                 goto keylookup;
             }
