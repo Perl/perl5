@@ -2268,10 +2268,9 @@ S_force_strict_version(pTHX_ char *s)
 
 /*
  * S_tokeq
- * Tokenize a quoted string passed in as an SV.  It finds the next
- * chunk, up to end of string or a backslash.  It may make a new
- * SV containing that chunk (if HINT_NEW_STRING is on).  It also
- * turns \\ into \.
+ * Turns any \\ into \ in a quoted string passed in in 'sv', returning 'sv',
+ * modified as necessary.  However, if HINT_NEW_STRING is on, 'sv' is
+ * unchanged, and a new SV containing the modified input is returned.
  */
 
 STATIC SV *
