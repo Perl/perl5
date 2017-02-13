@@ -766,6 +766,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
     } else {
 	parser->linestr = newSVpvn("\n;", rsfp ? 1 : 2);
     }
+
     parser->oldoldbufptr =
 	parser->oldbufptr =
 	parser->bufptr =
@@ -3025,7 +3026,6 @@ S_scan_const(pTHX_ char *start)
                 bool convert_unicode;
                 IV real_range_max = 0;
 #endif
-
                 /* Get the code point values of the range ends. */
                 if (has_utf8) {
                     /* We know the utf8 is valid, because we just constructed
@@ -3051,7 +3051,11 @@ S_scan_const(pTHX_ char *start)
                  * that code point is already in the output, twice.  We can
                  * just back up over the second instance and avoid all the rest
                  * of the work.  But if it is a variant character, it's been
-                 * counted twice, so decrement */
+                 * counted twice, so decrement.  (This unlikely scenario is
+                 * special cased, like the one for a range of 2 code points
+                 * below, only because the main-line code below needs a range
+                 * of 3 or more to work without special casing.  Might as well
+                 * get it out of the way now.) */
                 if (UNLIKELY(range_max == range_min)) {
                     d = max_ptr;
                     if (! has_utf8 && ! UVCHR_IS_INVARIANT(range_max)) {
@@ -10543,9 +10547,12 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 		}
 		/* terminate when run out of buffer (the for() condition), or
 		   have found the terminator */
-		else if (*s == term) {
-		    if (termlen == 1)
+		else if (*s == term) {  /* First byte of terminator matches */
+		    if (termlen == 1)   /* If is the only byte, are done */
 			break;
+
+                    /* If the remainder of the terminator matches, also are
+                     * done, after checking that is a separate grapheme */
                     if (   s + termlen <= PL_bufend
                         && memEQ(s + 1, (char*)termstr + 1, termlen - 1))
                     {
@@ -10561,8 +10568,10 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 			break;
                     }
 		}
-		else if (!has_utf8 && !UTF8_IS_INVARIANT((U8)*s) && UTF)
+		else if (!has_utf8 && !UTF8_IS_INVARIANT((U8)*s) && UTF) {
 		    has_utf8 = TRUE;
+                }
+
 		*to = *s;
 	    }
 	}
@@ -11537,8 +11546,9 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
 	PL_in_eval &= ~EVAL_WARNONLY;
 	Perl_ck_warner_d(aTHX_ packWARN(WARN_SYNTAX), "%" SVf, SVfARG(msg));
     }
-    else
+    else {
 	qerror(msg);
+    }
     if (PL_error_count >= 10) {
 	SV * errsv;
 	if (PL_in_eval && ((errsv = ERRSV), SvCUR(errsv)))
