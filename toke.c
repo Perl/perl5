@@ -11450,6 +11450,20 @@ S_yywarn(pTHX_ const char *const s, U32 flags)
     return 0;
 }
 
+void
+Perl_abort_execution(pTHX_ const char * const msg, const char * const name)
+{
+    PERL_ARGS_ASSERT_ABORT_EXECUTION;
+
+    if (PL_minus_c)
+        Perl_croak(aTHX_ "%s%s had compilation errors.\n", msg, name);
+    else {
+        Perl_croak(aTHX_
+                "%sExecution of %s aborted due to compilation errors.\n", msg, name);
+    }
+    NOT_REACHED; /* NOTREACHED */
+}
+
 int
 Perl_yyerror(pTHX_ const char *const s)
 {

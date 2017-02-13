@@ -2193,7 +2193,7 @@ variable and glob that.
 (F) The C<exec> function is not implemented on some systems, e.g., Symbian
 OS.  See L<perlport>.
 
-=item Execution of %s aborted due to compilation errors.
+=item %sExecution of %s aborted due to compilation errors.
 
 (F) The final summary message when a Perl compilation fails.
 
