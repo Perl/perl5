@@ -6,6 +6,11 @@ use vars qw($VERSION);
 $VERSION = '2.25';
 $VERSION =~ tr/_//d;
 
+# simplest way to avoid indexing of the package: no package statement
+sub base::__inc::unhook { @INC = grep !(ref eq 'CODE' && $_ == $_[0]), @INC }
+# instance is blessed array of coderefs to be removed from @INC at scope exit
+sub base::__inc::scope_guard::DESTROY { base::__inc::unhook $_ for @{$_[0]} }
+
 # constant.pm is slow
 sub SUCCESS () { 1 }
 
@@ -91,13 +96,59 @@ sub import {
 
         next if grep $_->isa($base), ($inheritor, @bases);
 
-        # Following blocks help isolate $SIG{__DIE__} changes
+        # Following blocks help isolate $SIG{__DIE__} and @INC changes
         {
             my $sigdie;
             {
                 local $SIG{__DIE__};
                 my $fn = _module_to_filename($base);
-                eval { require $fn };
+                my $dot_hidden;
+                eval {
+                    my $guard;
+                    if ($INC[-1] eq '.' && %{"$base\::"}) {
+                        # So:  the package already exists   => this an optional load
+                        # And: there is a dot at the end of @INC  => we want to hide it
+                        # However: we only want to hide it during our *own* require()
+                        # (i.e. without affecting nested require()s).
+                        # So we add a hook to @INC whose job is to hide the dot, but which
+                        # first checks checks the callstack depth, because within nested
+                        # require()s the callstack is deeper.
+                        # Since CORE::GLOBAL::require makes it unknowable in advance what
+                        # the exact relevant callstack depth will be, we have to record it
+                        # inside a hook. So we put another hook just for that at the front
+                        # of @INC, where it's guaranteed to run -- immediately.
+                        # The dot-hiding hook does its job by sitting directly in front of
+                        # the dot and removing itself from @INC when reached. This causes
+                        # the dot to move up one index in @INC, causing the loop inside
+                        # pp_require() to skip it.
+                        # Loaded coded may disturb this precise arrangement, but that's OK
+                        # because the hook is inert by that time. It is only active during
+                        # the top-level require(), when @INC is in our control. The only
+                        # possible gotcha is if other hooks already in @INC modify @INC in
+                        # some way during that initial require().
+                        # Note that this jiggery hookery works just fine recursively: if
+                        # a module loaded via base.pm uses base.pm itself, there will be
+                        # one pair of hooks in @INC per base::import call frame, but the
+                        # pairs from different nestings do not interfere with each other.
+                        my $lvl;
+                        unshift @INC,        sub { return if defined $lvl; 1 while defined caller ++$lvl; () };
+                        splice  @INC, -1, 0, sub { return if defined caller $lvl; ++$dot_hidden, &base::__inc::unhook; () };
+                        $guard = bless [ @INC[0,-2] ], 'base::__inc::scope_guard';
+                    }
+                    require $fn
+                };
+                if ($dot_hidden && (my @fn = grep -e && !( -d _ || -b _ ), $fn.'c', $fn)) {
+                    require Carp;
+                    Carp::croak(<<ERROR);
+Base class package "$base" is not empty but "$fn[0]" exists in the current directory.
+    To help avoid security issues, base.pm now refuses to load optional modules
+    from the current working directory when it is the last entry in \@INC.
+    If your software worked on previous versions of Perl, the best solution
+    is to use FindBin to detect the path properly and to add that path to
+    \@INC.  As a last resort, you can re-enable looking in the current working
+    directory by adding "use lib '.'" to your code.
+ERROR
+                }
                 # Only ignore "Can't locate" errors from our eval require.
                 # Other fatal errors (syntax etc) must be reported.
                 #
