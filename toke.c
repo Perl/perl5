@@ -1309,7 +1309,6 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
     STRLEN linestart_pos, last_uni_pos, last_lop_pos;
     bool got_some_for_debugger = 0;
     bool got_some;
-    const U8* first_bad_char_loc;
 
     if (flags & ~(LEX_KEEP_PREVIOUS|LEX_FAKE_EOF|LEX_NO_TERM))
 	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_next_chunk");
@@ -1376,15 +1375,19 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
     PL_parser->bufend = buf + new_bufend_pos;
     PL_parser->bufptr = buf + bufptr_pos;
 
-    if (UTF && ! is_utf8_string_loc((U8 *) PL_parser->bufptr,
-                                    PL_parser->bufend - PL_parser->bufptr,
-                                    &first_bad_char_loc))
-    {
-        _force_out_malformed_utf8_message(first_bad_char_loc,
-                                          (U8 *) PL_parser->bufend,
-                                          0,
-                                          1 /* 1 means die */ );
-        NOT_REACHED; /* NOTREACHED */
+    if (UTF) {
+        const U8* first_bad_char_loc;
+        if (UNLIKELY(! is_utf8_string_loc(
+                            (U8 *) PL_parser->bufptr,
+                                   PL_parser->bufend - PL_parser->bufptr,
+                                   &first_bad_char_loc)))
+        {
+            _force_out_malformed_utf8_message(first_bad_char_loc,
+                                              (U8 *) PL_parser->bufend,
+                                              0,
+                                              1 /* 1 means die */ );
+            NOT_REACHED; /* NOTREACHED */
+        }
     }
 
     PL_parser->oldbufptr = buf + oldbufptr_pos;
