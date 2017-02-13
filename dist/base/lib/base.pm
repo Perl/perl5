@@ -6,6 +6,12 @@ use vars qw($VERSION);
 $VERSION = '2.25';
 $VERSION =~ tr/_//d;
 
+# simplest way to avoid indexing of the package: no package statement
+sub base::__inc_scope_guard::DESTROY {
+    my $hook = $_[0][0];
+    ref eq 'CODE' and $_ == $hook and $_ = '.' for @INC;
+}
+
 # constant.pm is slow
 sub SUCCESS () { 1 }
 
@@ -91,13 +97,17 @@ sub import {
 
         next if grep $_->isa($base), ($inheritor, @bases);
 
-        # Following blocks help isolate $SIG{__DIE__} changes
+        # Following blocks help isolate $SIG{__DIE__} and @INC changes
         {
             my $sigdie;
             {
                 local $SIG{__DIE__};
                 my $fn = _module_to_filename($base);
-                eval { require $fn };
+                my $success = eval {
+                    my $incdot = $INC[-1] eq '.' && %{"$base\::"} # only if optional
+                        && bless [ $INC[-1] = sub {()} ], 'base::__inc_scope_guard';
+                    require $fn
+                };
                 # Only ignore "Can't locate" errors from our eval require.
                 # Other fatal errors (syntax etc) must be reported.
                 #
@@ -115,6 +125,18 @@ sub import {
 Base class package "$base" is empty.
     (Perhaps you need to 'use' the module which defines that package first,
     or make that module available in \@INC (\@INC contains: @INC).
+ERROR
+                }
+                elsif (!$success && $INC[-1] eq '.' && (my @fn = grep -e && !( -d _ || -b _ ), $fn.'c', $fn)) {
+                    require Carp;
+                    Carp::croak(<<ERROR);
+Base class package "$base" is not empty but "$fn[0]" exists in the current directory.
+    To help avoid security issues, base.pm now refuses to load optional modules
+    from the current working directory when it is the last entry in \@INC.
+    If your software worked on previous versions of Perl, the best solution
+    is to use FindBin to detect the path properly and to add that path to
+    \@INC.  As a last resort, you can re-enable looking in the current working
+    directory by adding "use lib '.'" to your code.
 ERROR
                 }
                 $sigdie = $SIG{__DIE__} || undef;
