@@ -1715,6 +1715,10 @@ ApdD	|UV	|to_utf8_case	|NN const U8 *p					\
 				|NN SV **swashp					\
 				|NN const char *normal|				\
 				NULLOK const char *special
+ApM	|char *	|_byte_dump_string					\
+				|NN const U8 * s			\
+				|const STRLEN len			\
+				|const bool format
 #if defined(PERL_IN_UTF8_C)
 inR	|bool	|does_utf8_overflow|NN const U8 * const s|NN const U8 * e
 inR	|bool	|is_utf8_overlong_given_start_byte_ok|NN const U8 * const s|const STRLEN len
@@ -1724,7 +1728,6 @@ sMR	|char *	|unexpected_non_continuation_text			\
 		|STRLEN print_len					\
 		|const STRLEN non_cont_byte_pos				\
 		|const STRLEN expect_len
-sM	|char *	|_byte_dump_string|NN const U8 * s|const STRLEN len
 s	|void	|warn_on_first_deprecated_use				    \
 				|NN const char * const name		    \
 				|NN const char * const alternative	    \

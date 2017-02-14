@@ -754,11 +754,15 @@ Perl__is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
     return UTF8SKIP(s);
 }
 
-STATIC char *
-S__byte_dump_string(pTHX_ const U8 * s, const STRLEN len)
+char *
+Perl__byte_dump_string(pTHX_ const U8 * s, const STRLEN len, const bool format)
 {
     /* Returns a mortalized C string that is a displayable copy of the 'len'
-     * bytes starting at 's', each in a \xXY format. */
+     * bytes starting at 's'.  'format' gives how to display each byte.
+     * Currently, there are only two formats, so it is currently a bool:
+     *      0   \xab
+     *      1    ab         (that is a space between two hex digit bytes)
+     */
 
     const STRLEN output_len = 4 * len + 1;  /* 4 bytes per each input, plus a
                                                trailing NUL */
@@ -776,8 +780,13 @@ S__byte_dump_string(pTHX_ const U8 * s, const STRLEN len)
         const unsigned high_nibble = (*s & 0xF0) >> 4;
         const unsigned low_nibble =  (*s & 0x0F);
 
-        *d++ = '\\';
-        *d++ = 'x';
+        if (format) {
+            *d++ = ' ';
+        }
+        else {
+            *d++ = '\\';
+            *d++ = 'x';
+        }
 
         if (high_nibble < 10) {
             *d++ = high_nibble + '0';
@@ -827,7 +836,7 @@ S_unexpected_non_continuation_text(pTHX_ const U8 * const s,
     return Perl_form(aTHX_ "%s: %s (unexpected non-continuation byte 0x%02x,"
                            " %s after start byte 0x%02x; need %d bytes, got %d)",
                            malformed_text,
-                           _byte_dump_string(s, print_len),
+                           _byte_dump_string(s, print_len, 0),
                            *(s + non_cont_byte_pos),
                            where,
                            *s,
@@ -1401,7 +1410,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                         if (pack_warn) {
                             message = Perl_form(aTHX_ "%s: %s (overflows)",
                                             malformed_text,
-                                            _byte_dump_string(s0, send - s0));
+                                            _byte_dump_string(s0, send - s0, 0));
                         }
                     }
                 }
@@ -1437,7 +1446,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                                 "%s: %s (unexpected continuation byte 0x%02x,"
                                 " with no preceding start byte)",
                                 malformed_text,
-                                _byte_dump_string(s0, 1), *s0);
+                                _byte_dump_string(s0, 1, 0), *s0);
                     }
                 }
             }
@@ -1452,7 +1461,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                         message = Perl_form(aTHX_
                                 "%s: %s (too short; %d byte%s available, need %d)",
                                 malformed_text,
-                                _byte_dump_string(s0, send - s0),
+                                _byte_dump_string(s0, send - s0, 0),
                                 (int)avail_len,
                                 avail_len == 1 ? "" : "s",
                                 (int)expectlen);
@@ -1516,8 +1525,8 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                                     " should be represented with a"
                                     " different, shorter sequence)",
                                     malformed_text,
-                                    _byte_dump_string(s0, send - s0),
-                                    _byte_dump_string(s0, curlen));
+                                    _byte_dump_string(s0, send - s0, 0),
+                                    _byte_dump_string(s0, curlen, 0));
                         }
                         else {
                             U8 tmpbuf[UTF8_MAXBYTES+1];
@@ -1527,8 +1536,8 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                                 "%s: %s (overlong; instead use %s to represent"
                                 " U+%0*" UVXf ")",
                                 malformed_text,
-                                _byte_dump_string(s0, send - s0),
-                                _byte_dump_string(tmpbuf, e - tmpbuf),
+                                _byte_dump_string(s0, send - s0, 0),
+                                _byte_dump_string(tmpbuf, e - tmpbuf, 0),
                                 ((uv < 256) ? 2 : 4), /* Field width of 2 for
                                                          small code points */
                                 uv);
@@ -1553,7 +1562,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                             message = Perl_form(aTHX_
                                     "UTF-16 surrogate (any UTF-8 sequence that"
                                     " starts with \"%s\" is for a surrogate)",
-                                    _byte_dump_string(s0, curlen));
+                                    _byte_dump_string(s0, curlen, 0));
                         }
                         else {
                             message = Perl_form(aTHX_
@@ -1583,7 +1592,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                                     "Any UTF-8 sequence that starts with"
                                     " \"%s\" is for a non-Unicode code point,"
                                     " may not be portable",
-                                    _byte_dump_string(s0, curlen));
+                                    _byte_dump_string(s0, curlen, 0));
                         }
                         else {
                             message = Perl_form(aTHX_
@@ -1622,7 +1631,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                                         "Any UTF-8 sequence that starts with"
                                         " \"%s\" is for a non-Unicode code"
                                         " point, and is not portable",
-                                        _byte_dump_string(s0, curlen));
+                                        _byte_dump_string(s0, curlen, 0));
                         }
                         else {
                             message = Perl_form(aTHX_

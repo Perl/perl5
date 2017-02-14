@@ -1908,14 +1908,12 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
 
 #ifdef DEBUGGING
     if (DEBUG_Lv_TEST || debug_initialization) {
-        Size_t i;
 
         print_collxfrm_input_and_return(s, s + len, xlen, utf8);
         PerlIO_printf(Perl_debug_log, "Its xfrm is:");
-        for (i = COLLXFRM_HDR_LEN; i < *xlen + COLLXFRM_HDR_LEN; i++) {
-            PerlIO_printf(Perl_debug_log, " %02x", (U8) xbuf[i]);
-        }
-        PerlIO_printf(Perl_debug_log, "\n");
+        PerlIO_printf(Perl_debug_log, "%s\n",
+                      _byte_dump_string((U8 *) xbuf + COLLXFRM_HDR_LEN,
+                       *xlen, 1));
     }
 #endif
 

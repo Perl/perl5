@@ -27,6 +27,7 @@
 /* Hide global symbols */
 
 #define Gv_AMupdate(a,b)	Perl_Gv_AMupdate(aTHX_ a,b)
+#define _byte_dump_string(a,b,c)	Perl__byte_dump_string(aTHX_ a,b,c)
 #define _force_out_malformed_utf8_message(a,b,c,d)	Perl__force_out_malformed_utf8_message(aTHX_ a,b,c,d)
 #define _is_in_locale_category(a,b)	Perl__is_in_locale_category(aTHX_ a,b)
 #define _is_uni_FOO(a,b)	Perl__is_uni_FOO(aTHX_ a,b)
@@ -1839,7 +1840,6 @@
 #define isa_lookup(a,b,c,d)	S_isa_lookup(aTHX_ a,b,c,d)
 #  endif
 #  if defined(PERL_IN_UTF8_C)
-#define _byte_dump_string(a,b)	S__byte_dump_string(aTHX_ a,b)
 #define _to_utf8_case(a,b,c,d,e,f,g)	S__to_utf8_case(aTHX_ a,b,c,d,e,f,g)
 #define check_and_deprecate(a,b,c,d,e,f)	S_check_and_deprecate(aTHX_ a,b,c,d,e,f)
 #define check_locale_boundary_crossing(a,b,c,d)	S_check_locale_boundary_crossing(aTHX_ a,b,c,d)
