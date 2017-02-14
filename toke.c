@@ -5021,7 +5021,16 @@ Perl_yylex(pTHX)
 	    s = PL_bufend;
 	}
 	else {
+            int save_error_count = PL_error_count;
+
 	    s = scan_const(PL_bufptr);
+
+            /* Quit if this was a pattern and there were errors.  This prevents
+             * us from trying to regex compile a broken pattern, which could
+             * lead to segfaults, etc. */
+            if (PL_lex_inpat && PL_error_count > save_error_count) {
+                yyquit();
+            }
 	    if (*s == '\\')
 		PL_lex_state = LEX_INTERPCASEMOD;
 	    else

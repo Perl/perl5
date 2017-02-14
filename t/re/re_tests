@@ -1464,13 +1464,10 @@ abc\N	abc\n	n
 # Verify get errors.  For these, we need // or else puts it in single quotes,
 # and bypasses the lexer.
 /\N{U+}/	-	c	-	Invalid hexadecimal number
-# Below currently gives a misleading message
-/[\N{U+}]/	-	Sc	-	Unmatched
-/[\N{U+}]/	-	sc	-	Syntax error in (?[...])
+/[\N{U+}]/	-	c	-	Invalid hexadecimal number
 /abc\N{def/	-	c	-	Missing right brace
 /\N{U+4AG3}/	-	c	-	Invalid hexadecimal number
-/[\N{U+4AG3}]/	-	Sc	-	Unmatched
-/[\N{U+4AG3}]/	-	sc	-	Syntax error in (?[...])
+/[\N{U+4AG3}]/	-	c	-	Invalid hexadecimal number
 
 # And verify that in single quotes which bypasses the lexer, the regex compiler
 # figures it out.
