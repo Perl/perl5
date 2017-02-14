@@ -7,7 +7,7 @@
 /* Regops and State definitions */
 
 #define REGNODE_MAX           	92
-#define REGMATCH_STATE_MAX    	132
+#define REGMATCH_STATE_MAX    	134
 
 #define	END                   	0	/* 0000 End of program. */
 #define	SUCCEED               	1	/* 0x01 Return from a subroutine, basically. */
@@ -107,44 +107,46 @@
 	/* ------------ States ------------- */
 #define	TRIE_next             	(REGNODE_MAX + 1)	/* state for TRIE */
 #define	TRIE_next_fail        	(REGNODE_MAX + 2)	/* state for TRIE */
-#define	EVAL_AB               	(REGNODE_MAX + 3)	/* state for EVAL */
-#define	EVAL_AB_fail          	(REGNODE_MAX + 4)	/* state for EVAL */
-#define	CURLYX_end            	(REGNODE_MAX + 5)	/* state for CURLYX */
-#define	CURLYX_end_fail       	(REGNODE_MAX + 6)	/* state for CURLYX */
-#define	WHILEM_A_pre          	(REGNODE_MAX + 7)	/* state for WHILEM */
-#define	WHILEM_A_pre_fail     	(REGNODE_MAX + 8)	/* state for WHILEM */
-#define	WHILEM_A_min          	(REGNODE_MAX + 9)	/* state for WHILEM */
-#define	WHILEM_A_min_fail     	(REGNODE_MAX + 10)	/* state for WHILEM */
-#define	WHILEM_A_max          	(REGNODE_MAX + 11)	/* state for WHILEM */
-#define	WHILEM_A_max_fail     	(REGNODE_MAX + 12)	/* state for WHILEM */
-#define	WHILEM_B_min          	(REGNODE_MAX + 13)	/* state for WHILEM */
-#define	WHILEM_B_min_fail     	(REGNODE_MAX + 14)	/* state for WHILEM */
-#define	WHILEM_B_max          	(REGNODE_MAX + 15)	/* state for WHILEM */
-#define	WHILEM_B_max_fail     	(REGNODE_MAX + 16)	/* state for WHILEM */
-#define	BRANCH_next           	(REGNODE_MAX + 17)	/* state for BRANCH */
-#define	BRANCH_next_fail      	(REGNODE_MAX + 18)	/* state for BRANCH */
-#define	CURLYM_A              	(REGNODE_MAX + 19)	/* state for CURLYM */
-#define	CURLYM_A_fail         	(REGNODE_MAX + 20)	/* state for CURLYM */
-#define	CURLYM_B              	(REGNODE_MAX + 21)	/* state for CURLYM */
-#define	CURLYM_B_fail         	(REGNODE_MAX + 22)	/* state for CURLYM */
-#define	IFMATCH_A             	(REGNODE_MAX + 23)	/* state for IFMATCH */
-#define	IFMATCH_A_fail        	(REGNODE_MAX + 24)	/* state for IFMATCH */
-#define	CURLY_B_min_known     	(REGNODE_MAX + 25)	/* state for CURLY */
-#define	CURLY_B_min_known_fail	(REGNODE_MAX + 26)	/* state for CURLY */
-#define	CURLY_B_min           	(REGNODE_MAX + 27)	/* state for CURLY */
-#define	CURLY_B_min_fail      	(REGNODE_MAX + 28)	/* state for CURLY */
-#define	CURLY_B_max           	(REGNODE_MAX + 29)	/* state for CURLY */
-#define	CURLY_B_max_fail      	(REGNODE_MAX + 30)	/* state for CURLY */
-#define	COMMIT_next           	(REGNODE_MAX + 31)	/* state for COMMIT */
-#define	COMMIT_next_fail      	(REGNODE_MAX + 32)	/* state for COMMIT */
-#define	MARKPOINT_next        	(REGNODE_MAX + 33)	/* state for MARKPOINT */
-#define	MARKPOINT_next_fail   	(REGNODE_MAX + 34)	/* state for MARKPOINT */
-#define	SKIP_next             	(REGNODE_MAX + 35)	/* state for SKIP */
-#define	SKIP_next_fail        	(REGNODE_MAX + 36)	/* state for SKIP */
-#define	CUTGROUP_next         	(REGNODE_MAX + 37)	/* state for CUTGROUP */
-#define	CUTGROUP_next_fail    	(REGNODE_MAX + 38)	/* state for CUTGROUP */
-#define	KEEPS_next            	(REGNODE_MAX + 39)	/* state for KEEPS */
-#define	KEEPS_next_fail       	(REGNODE_MAX + 40)	/* state for KEEPS */
+#define	EVAL_B                	(REGNODE_MAX + 3)	/* state for EVAL */
+#define	EVAL_B_fail           	(REGNODE_MAX + 4)	/* state for EVAL */
+#define	EVAL_postponed_AB     	(REGNODE_MAX + 5)	/* state for EVAL */
+#define	EVAL_postponed_AB_fail	(REGNODE_MAX + 6)	/* state for EVAL */
+#define	CURLYX_end            	(REGNODE_MAX + 7)	/* state for CURLYX */
+#define	CURLYX_end_fail       	(REGNODE_MAX + 8)	/* state for CURLYX */
+#define	WHILEM_A_pre          	(REGNODE_MAX + 9)	/* state for WHILEM */
+#define	WHILEM_A_pre_fail     	(REGNODE_MAX + 10)	/* state for WHILEM */
+#define	WHILEM_A_min          	(REGNODE_MAX + 11)	/* state for WHILEM */
+#define	WHILEM_A_min_fail     	(REGNODE_MAX + 12)	/* state for WHILEM */
+#define	WHILEM_A_max          	(REGNODE_MAX + 13)	/* state for WHILEM */
+#define	WHILEM_A_max_fail     	(REGNODE_MAX + 14)	/* state for WHILEM */
+#define	WHILEM_B_min          	(REGNODE_MAX + 15)	/* state for WHILEM */
+#define	WHILEM_B_min_fail     	(REGNODE_MAX + 16)	/* state for WHILEM */
+#define	WHILEM_B_max          	(REGNODE_MAX + 17)	/* state for WHILEM */
+#define	WHILEM_B_max_fail     	(REGNODE_MAX + 18)	/* state for WHILEM */
+#define	BRANCH_next           	(REGNODE_MAX + 19)	/* state for BRANCH */
+#define	BRANCH_next_fail      	(REGNODE_MAX + 20)	/* state for BRANCH */
+#define	CURLYM_A              	(REGNODE_MAX + 21)	/* state for CURLYM */
+#define	CURLYM_A_fail         	(REGNODE_MAX + 22)	/* state for CURLYM */
+#define	CURLYM_B              	(REGNODE_MAX + 23)	/* state for CURLYM */
+#define	CURLYM_B_fail         	(REGNODE_MAX + 24)	/* state for CURLYM */
+#define	IFMATCH_A             	(REGNODE_MAX + 25)	/* state for IFMATCH */
+#define	IFMATCH_A_fail        	(REGNODE_MAX + 26)	/* state for IFMATCH */
+#define	CURLY_B_min_known     	(REGNODE_MAX + 27)	/* state for CURLY */
+#define	CURLY_B_min_known_fail	(REGNODE_MAX + 28)	/* state for CURLY */
+#define	CURLY_B_min           	(REGNODE_MAX + 29)	/* state for CURLY */
+#define	CURLY_B_min_fail      	(REGNODE_MAX + 30)	/* state for CURLY */
+#define	CURLY_B_max           	(REGNODE_MAX + 31)	/* state for CURLY */
+#define	CURLY_B_max_fail      	(REGNODE_MAX + 32)	/* state for CURLY */
+#define	COMMIT_next           	(REGNODE_MAX + 33)	/* state for COMMIT */
+#define	COMMIT_next_fail      	(REGNODE_MAX + 34)	/* state for COMMIT */
+#define	MARKPOINT_next        	(REGNODE_MAX + 35)	/* state for MARKPOINT */
+#define	MARKPOINT_next_fail   	(REGNODE_MAX + 36)	/* state for MARKPOINT */
+#define	SKIP_next             	(REGNODE_MAX + 37)	/* state for SKIP */
+#define	SKIP_next_fail        	(REGNODE_MAX + 38)	/* state for SKIP */
+#define	CUTGROUP_next         	(REGNODE_MAX + 39)	/* state for CUTGROUP */
+#define	CUTGROUP_next_fail    	(REGNODE_MAX + 40)	/* state for CUTGROUP */
+#define	KEEPS_next            	(REGNODE_MAX + 41)	/* state for KEEPS */
+#define	KEEPS_next_fail       	(REGNODE_MAX + 42)	/* state for KEEPS */
 
 /* PL_regkind[] What type of regop or state is this. */
 
@@ -248,8 +250,10 @@ EXTCONST U8 PL_regkind[] = {
 	/* ------------ States ------------- */
 	TRIE,     	/* TRIE_next              */
 	TRIE,     	/* TRIE_next_fail         */
-	EVAL,     	/* EVAL_AB                */
-	EVAL,     	/* EVAL_AB_fail           */
+	EVAL,     	/* EVAL_B                 */
+	EVAL,     	/* EVAL_B_fail            */
+	EVAL,     	/* EVAL_postponed_AB      */
+	EVAL,     	/* EVAL_postponed_AB_fail */
 	CURLYX,   	/* CURLYX_end             */
 	CURLYX,   	/* CURLYX_end_fail        */
 	WHILEM,   	/* WHILEM_A_pre           */
@@ -592,44 +596,46 @@ EXTCONST char * const PL_reg_name[] = {
 	/* ------------ States ------------- */
 	"TRIE_next",             	/* REGNODE_MAX +0x01 */
 	"TRIE_next_fail",        	/* REGNODE_MAX +0x02 */
-	"EVAL_AB",               	/* REGNODE_MAX +0x03 */
-	"EVAL_AB_fail",          	/* REGNODE_MAX +0x04 */
-	"CURLYX_end",            	/* REGNODE_MAX +0x05 */
-	"CURLYX_end_fail",       	/* REGNODE_MAX +0x06 */
-	"WHILEM_A_pre",          	/* REGNODE_MAX +0x07 */
-	"WHILEM_A_pre_fail",     	/* REGNODE_MAX +0x08 */
-	"WHILEM_A_min",          	/* REGNODE_MAX +0x09 */
-	"WHILEM_A_min_fail",     	/* REGNODE_MAX +0x0a */
-	"WHILEM_A_max",          	/* REGNODE_MAX +0x0b */
-	"WHILEM_A_max_fail",     	/* REGNODE_MAX +0x0c */
-	"WHILEM_B_min",          	/* REGNODE_MAX +0x0d */
-	"WHILEM_B_min_fail",     	/* REGNODE_MAX +0x0e */
-	"WHILEM_B_max",          	/* REGNODE_MAX +0x0f */
-	"WHILEM_B_max_fail",     	/* REGNODE_MAX +0x10 */
-	"BRANCH_next",           	/* REGNODE_MAX +0x11 */
-	"BRANCH_next_fail",      	/* REGNODE_MAX +0x12 */
-	"CURLYM_A",              	/* REGNODE_MAX +0x13 */
-	"CURLYM_A_fail",         	/* REGNODE_MAX +0x14 */
-	"CURLYM_B",              	/* REGNODE_MAX +0x15 */
-	"CURLYM_B_fail",         	/* REGNODE_MAX +0x16 */
-	"IFMATCH_A",             	/* REGNODE_MAX +0x17 */
-	"IFMATCH_A_fail",        	/* REGNODE_MAX +0x18 */
-	"CURLY_B_min_known",     	/* REGNODE_MAX +0x19 */
-	"CURLY_B_min_known_fail",	/* REGNODE_MAX +0x1a */
-	"CURLY_B_min",           	/* REGNODE_MAX +0x1b */
-	"CURLY_B_min_fail",      	/* REGNODE_MAX +0x1c */
-	"CURLY_B_max",           	/* REGNODE_MAX +0x1d */
-	"CURLY_B_max_fail",      	/* REGNODE_MAX +0x1e */
-	"COMMIT_next",           	/* REGNODE_MAX +0x1f */
-	"COMMIT_next_fail",      	/* REGNODE_MAX +0x20 */
-	"MARKPOINT_next",        	/* REGNODE_MAX +0x21 */
-	"MARKPOINT_next_fail",   	/* REGNODE_MAX +0x22 */
-	"SKIP_next",             	/* REGNODE_MAX +0x23 */
-	"SKIP_next_fail",        	/* REGNODE_MAX +0x24 */
-	"CUTGROUP_next",         	/* REGNODE_MAX +0x25 */
-	"CUTGROUP_next_fail",    	/* REGNODE_MAX +0x26 */
-	"KEEPS_next",            	/* REGNODE_MAX +0x27 */
-	"KEEPS_next_fail",       	/* REGNODE_MAX +0x28 */
+	"EVAL_B",                	/* REGNODE_MAX +0x03 */
+	"EVAL_B_fail",           	/* REGNODE_MAX +0x04 */
+	"EVAL_postponed_AB",     	/* REGNODE_MAX +0x05 */
+	"EVAL_postponed_AB_fail",	/* REGNODE_MAX +0x06 */
+	"CURLYX_end",            	/* REGNODE_MAX +0x07 */
+	"CURLYX_end_fail",       	/* REGNODE_MAX +0x08 */
+	"WHILEM_A_pre",          	/* REGNODE_MAX +0x09 */
+	"WHILEM_A_pre_fail",     	/* REGNODE_MAX +0x0a */
+	"WHILEM_A_min",          	/* REGNODE_MAX +0x0b */
+	"WHILEM_A_min_fail",     	/* REGNODE_MAX +0x0c */
+	"WHILEM_A_max",          	/* REGNODE_MAX +0x0d */
+	"WHILEM_A_max_fail",     	/* REGNODE_MAX +0x0e */
+	"WHILEM_B_min",          	/* REGNODE_MAX +0x0f */
+	"WHILEM_B_min_fail",     	/* REGNODE_MAX +0x10 */
+	"WHILEM_B_max",          	/* REGNODE_MAX +0x11 */
+	"WHILEM_B_max_fail",     	/* REGNODE_MAX +0x12 */
+	"BRANCH_next",           	/* REGNODE_MAX +0x13 */
+	"BRANCH_next_fail",      	/* REGNODE_MAX +0x14 */
+	"CURLYM_A",              	/* REGNODE_MAX +0x15 */
+	"CURLYM_A_fail",         	/* REGNODE_MAX +0x16 */
+	"CURLYM_B",              	/* REGNODE_MAX +0x17 */
+	"CURLYM_B_fail",         	/* REGNODE_MAX +0x18 */
+	"IFMATCH_A",             	/* REGNODE_MAX +0x19 */
+	"IFMATCH_A_fail",        	/* REGNODE_MAX +0x1a */
+	"CURLY_B_min_known",     	/* REGNODE_MAX +0x1b */
+	"CURLY_B_min_known_fail",	/* REGNODE_MAX +0x1c */
+	"CURLY_B_min",           	/* REGNODE_MAX +0x1d */
+	"CURLY_B_min_fail",      	/* REGNODE_MAX +0x1e */
+	"CURLY_B_max",           	/* REGNODE_MAX +0x1f */
+	"CURLY_B_max_fail",      	/* REGNODE_MAX +0x20 */
+	"COMMIT_next",           	/* REGNODE_MAX +0x21 */
+	"COMMIT_next_fail",      	/* REGNODE_MAX +0x22 */
+	"MARKPOINT_next",        	/* REGNODE_MAX +0x23 */
+	"MARKPOINT_next_fail",   	/* REGNODE_MAX +0x24 */
+	"SKIP_next",             	/* REGNODE_MAX +0x25 */
+	"SKIP_next_fail",        	/* REGNODE_MAX +0x26 */
+	"CUTGROUP_next",         	/* REGNODE_MAX +0x27 */
+	"CUTGROUP_next_fail",    	/* REGNODE_MAX +0x28 */
+	"KEEPS_next",            	/* REGNODE_MAX +0x29 */
+	"KEEPS_next_fail",       	/* REGNODE_MAX +0x2a */
 };
 #endif /* DOINIT */
 

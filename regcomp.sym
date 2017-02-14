@@ -243,7 +243,7 @@ PSEUDO      PSEUDO,     off       ; Pseudo opcode for internal use.
 #
 #
 TRIE            next:FAIL
-EVAL            AB:FAIL
+EVAL            B,postponed_AB:FAIL
 CURLYX          end:FAIL
 WHILEM          A_pre,A_min,A_max,B_min,B_max:FAIL
 BRANCH          next:FAIL

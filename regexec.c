@@ -5391,12 +5391,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     U8 gimme = G_SCALAR;
     CV *caller_cv = NULL;	/* who called us */
     CV *last_pushed_cv = NULL;	/* most recently called (?{}) CV */
-    CHECKPOINT runops_cp;	/* savestack position before executing EVAL */
     U32 maxopenparen = 0;       /* max '(' index seen so far */
     int to_complement;  /* Invert the result? */
     _char_class_number classnum;
     bool is_utf8_pat = reginfo->is_utf8_pat;
     bool match = FALSE;
+    I32 orig_savestack_ix = PL_savestack_ix;
 
 /* Solaris Studio 12.3 messes up fetching PL_charclass['\n'] */
 #if (defined(__SUNPRO_C) && (__SUNPRO_C == 0x5120) && defined(__x86_64) && defined(USE_64_BIT_ALL))
@@ -5736,6 +5736,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         {
             U8 *uc;
             if ( ST.jump ) {
+                /* undo any captures done in the tail part of a branch,
+                 * e.g.
+                 *    /(?:X(.)(.)|Y(.)).../
+                 * where the trie just matches X then calls out to do the
+                 * rest of the branch */
                 REGCP_UNWIND(ST.cp);
                 UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
 	    }
@@ -6786,7 +6791,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             goto eval_recurse_doit;
             /* NOTREACHED */
 
-        case EVAL:  /*   /(?{A})B/   /(??{A})B/  and /(?(?{A})X|Y)B/   */        
+        case EVAL:  /*   /(?{...})B/   /(??{A})B/  and  /(?(?{...})X|Y)B/   */
             if (cur_eval && cur_eval->locinput==locinput) {
 		if ( ++nochange_depth > max_nochange_depth )
                     Perl_croak(aTHX_ "EVAL without pos change exceeded limit in regex");
@@ -6805,7 +6810,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 		/* save *all* paren positions */
                 regcppush(rex, 0, maxopenparen);
-		REGCP_SET(runops_cp);
+                REGCP_SET(ST.lastcp);
 
 		if (!caller_cv)
 		    caller_cv = find_runcv(NULL);
@@ -6830,30 +6835,67 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    nop = (OP*)rexi->data->data[n];
 		}
 
-		/* normally if we're about to execute code from the same
-		 * CV that we used previously, we just use the existing
-		 * CX stack entry. However, its possible that in the
-		 * meantime we may have backtracked, popped from the save
-		 * stack, and undone the SAVECOMPPAD(s) associated with
-		 * PUSH_MULTICALL; in which case PL_comppad no longer
-		 * points to newcv's pad. */
+                /* Some notes about MULTICALL and the context and save stacks.
+                 *
+                 * In something like
+                 *   /...(?{ my $x)}...(?{ my $z)}...(?{ my $z)}.../
+                 * since codeblocks don't introduce a new scope (so that
+                 * local() etc accumulate), at the end of a successful
+                 * match there will be a SAVEt_CLEARSV on the savestack
+                 * for each of $x, $y, $z. If the three code blocks above
+                 * happen to have come from different CVs (e.g. via
+                 * embedded qr//s), then we must ensure that during any
+                 * savestack unwinding, PL_comppad always points to the
+                 * right pad at each moment. We achieve this by
+                 * interleaving SAVEt_COMPPAD's on the savestack whenever
+                 * there is a change of pad.
+                 * In theory whenever we call a code block, we should
+                 * push a CXt_SUB context, then pop it on return from
+                 * that code block. This causes a bit of an issue in that
+                 * normally popping a context also clears the savestack
+                 * back to cx->blk_oldsaveix, but here we specifically
+                 * don't want to clear the save stack on exit from the
+                 * code block.
+                 * Also for efficiency we don't want to keep pushing and
+                 * popping the single SUB context as we backtrack etc.
+                 * So instead, we push a single context the first time
+                 * we need, it, then hang onto it until the end of this
+                 * function. Whenever we encounter a new code block, we
+                 * update the CV etc if that's changed. During the times
+                 * in this function where we're not executing a code
+                 * block, having the SUB context still there is a bit
+                 * naughty - but we hope that no-one notices.
+                 * When the SUB context is initially pushed, we fake up
+                 * cx->blk_oldsaveix to be as if we'd pushed this context
+                 * on first entry to S_regmatch rather than at some random
+                 * point during the regexe execution. That way if we
+                 * croak, popping the context stack will ensure that
+                 * *everything* SAVEd by this function is undone and then
+                 * the context popped, rather than e.g., popping the
+                 * context (and restoring the original PL_comppad) then
+                 * popping more of the savestack and restoiring a bad
+                 * PL_comppad.
+                 */
+
+                /* If this is the first EVAL, push a MULTICALL. On
+                 * subsequent calls, if we're executing a different CV, or
+                 * if PL_comppad has got messed up from backtracking
+                 * through SAVECOMPPADs, then refresh the context.
+                 */
 		if (newcv != last_pushed_cv || PL_comppad != last_pad)
 		{
                     U8 flags = (CXp_SUB_RE |
                                 ((newcv == caller_cv) ? CXp_SUB_RE_FAKE : 0));
+                    SAVECOMPPAD();
 		    if (last_pushed_cv) {
-                        /* PUSH/POP_MULTICALL save and restore the
-                         * caller's PL_comppad; if we call multiple subs
-                         * using the same CX block, we have to save and
-                         * unwind the varying PL_comppad's ourselves,
-                         * especially restoring the right PL_comppad on
-                         * backtrack - so save it on the save stack */
-                        SAVECOMPPAD();
 			CHANGE_MULTICALL_FLAGS(newcv, flags);
 		    }
 		    else {
 			PUSH_MULTICALL_FLAGS(newcv, flags);
 		    }
+                    /* see notes above */
+                    CX_CUR()->blk_oldsaveix = orig_savestack_ix;
+
 		    last_pushed_cv = newcv;
 		}
 		else {
@@ -6970,12 +7012,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		 * in the regexp code uses the pad ! */
 		PL_op = oop;
 		PL_curcop = ocurcop;
-                regcp_restore(rex, runops_cp, &maxopenparen);
+                regcp_restore(rex, ST.lastcp, &maxopenparen);
                 PL_curpm_under = PL_curpm;
                 PL_curpm = PL_reg_curpm;
 
-		if (logical != 2)
-		    break;
+		if (logical != 2) {
+                    PUSH_STATE_GOTO(EVAL_B, next, locinput);
+		    /* NOTREACHED */
+                }
 	    }
 
 		/* only /(??{})/  from now on */
@@ -7073,11 +7117,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		ST.prev_eval = cur_eval;
 		cur_eval = st;
 		/* now continue from first node in postoned RE */
-		PUSH_YES_STATE_GOTO(EVAL_AB, startpoint, locinput);
+		PUSH_YES_STATE_GOTO(EVAL_postponed_AB, startpoint, locinput);
 		NOT_REACHED; /* NOTREACHED */
 	}
 
-	case EVAL_AB: /* cleanup after a successful (??{A})B */
+	case EVAL_postponed_AB: /* cleanup after a successful (??{A})B */
             /* note: this is called twice; first after popping B, then A */
             DEBUG_STACK_r({
                 Perl_re_exec_indentf( aTHX_  "EVAL_AB cur_eval=%p prev_eval=%p\n",
@@ -7123,7 +7167,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    sayYES;
 
 
-	case EVAL_AB_fail: /* unsuccessfully ran A or B in (??{A})B */
+	case EVAL_B_fail: /* unsuccessful B in (?{...})B */
+	    REGCP_UNWIND(ST.lastcp);
+            sayNO;
+
+	case EVAL_postponed_AB_fail: /* unsuccessfully ran A or B in (??{A})B */
 	    /* note: this is called twice; first after popping B, then A */
             DEBUG_STACK_r({
                 Perl_re_exec_indentf( aTHX_  "EVAL_AB_fail cur_eval=%p prev_eval=%p\n",
@@ -7523,9 +7571,6 @@ NULL
 	    if (cur_curlyx->u.curlyx.minmod) {
 		ST.save_curlyx = cur_curlyx;
 		cur_curlyx = cur_curlyx->u.curlyx.prev_curlyx;
-                ST.cp = regcppush(rex, ST.save_curlyx->u.curlyx.parenfloor,
-                            maxopenparen);
-		REGCP_SET(ST.lastcp);
 		PUSH_YES_STATE_GOTO(WHILEM_B_min, ST.save_curlyx->u.curlyx.B,
                                     locinput);
 		NOT_REACHED; /* NOTREACHED */
@@ -7558,11 +7603,11 @@ NULL
 	    CACHEsayNO;
 	    NOT_REACHED; /* NOTREACHED */
 
-	case WHILEM_A_min_fail: /* just failed to match A in a minimal match */
-	    /* FALLTHROUGH */
 	case WHILEM_A_pre_fail: /* just failed to match even minimal A */
 	    REGCP_UNWIND(ST.lastcp);
             regcppop(rex, &maxopenparen);
+	    /* FALLTHROUGH */
+	case WHILEM_A_min_fail: /* just failed to match A in a minimal match */
 	    cur_curlyx->u.curlyx.lastloc = ST.save_lastloc;
 	    cur_curlyx->u.curlyx.count--;
 	    CACHEsayNO;
@@ -7595,8 +7640,6 @@ NULL
 
 	case WHILEM_B_min_fail: /* just failed to match B in a minimal match */
 	    cur_curlyx = ST.save_curlyx;
-	    REGCP_UNWIND(ST.lastcp);
-            regcppop(rex, &maxopenparen);
 
 	    if (cur_curlyx->u.curlyx.count >= /*max*/ARG2(cur_curlyx->u.curlyx.me)) {
 		/* Maximum greed exceeded */
@@ -7618,9 +7661,6 @@ NULL
 	    );
 	    /* Try grabbing another A and see if it helps. */
 	    cur_curlyx->u.curlyx.lastloc = locinput;
-            ST.cp = regcppush(rex, cur_curlyx->u.curlyx.parenfloor,
-                            maxopenparen);
-	    REGCP_SET(ST.lastcp);
 	    PUSH_STATE_GOTO(WHILEM_A_min,
 		/*A*/ NEXTOPER(ST.save_curlyx->u.curlyx.me) + EXTRA_STEP_2ARGS,
                 locinput);
@@ -8225,7 +8265,7 @@ NULL
 
                 SET_RECURSE_LOCINPUT("FAKE-END[after]", cur_eval->locinput);
 
-                PUSH_YES_STATE_GOTO(EVAL_AB, st->u.eval.prev_eval->u.eval.B,
+                PUSH_YES_STATE_GOTO(EVAL_postponed_AB, st->u.eval.prev_eval->u.eval.B,
                                     locinput); /* match B */
 	    }
 
@@ -8482,16 +8522,17 @@ NULL
 	    DEBUG_STACK_r({
 	        regmatch_state *cur = st;
 	        regmatch_state *curyes = yes_state;
-	        int curd = depth;
+	        U32 i;
 	        regmatch_slab *slab = PL_regmatch_slab;
-                for (;curd > -1 && (depth-curd < 3);cur--,curd--) {
+                for (i = 0; i < 3 && i <= depth; cur--,i++) {
                     if (cur < SLAB_FIRST(slab)) {
                 	slab = slab->prev;
                 	cur = SLAB_LAST(slab);
                     }
-                    Perl_re_exec_indentf( aTHX_ "#%-3d %-10s %s\n",
+                    Perl_re_exec_indentf( aTHX_ "%4s #%-3d %-10s %s\n",
                         depth,
-                        curd, PL_reg_name[cur->resume_state],
+                        i ? "    " : "push",
+                        depth - i, PL_reg_name[cur->resume_state],
                         (curyes == cur) ? "yes" : ""
                     );
                     if (curyes == cur)
@@ -8643,9 +8684,12 @@ NULL
 
     if (last_pushed_cv) {
 	dSP;
+        /* see "Some notes about MULTICALL" above */
 	POP_MULTICALL;
         PERL_UNUSED_VAR(SP);
     }
+    else
+        LEAVE_SCOPE(orig_savestack_ix);
 
     assert(!result ||  locinput - reginfo->strbeg >= 0);
     return result ?  locinput - reginfo->strbeg : -1;

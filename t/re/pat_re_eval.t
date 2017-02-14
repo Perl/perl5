@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 529;  # Update this when adding/deleting tests.
+plan tests => 533;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1251,6 +1251,44 @@ sub run_tests {
         # this used to panic or give ASAN errors
         eval 'qr/(?{})\6/';
         like $@, qr/Reference to nonexistent group/, "RT #130650";
+    }
+
+    # RT #129881
+    # on exit from a pattern with multiple code blocks from different
+    # CVs, PL_comppad wasn't being restored correctly
+
+    sub {
+        # give first few pad slots known values
+        my ($x1, $x2, $x3, $x4, $x5) = 101..105;
+        # these vars are in a separate pad
+        my $r = qr/((?{my ($y1, $y2) = 201..202; 1;})A){2}X/;
+        # the first alt fails, causing a switch to this anon
+        # sub's pad
+        "AAA" =~ /$r|(?{my ($z1, $z2) = 301..302; 1;})A/;
+        is $x1, 101, "RT #129881: x1";
+        is $x2, 102, "RT #129881: x2";
+        is $x3, 103, "RT #129881: x3";
+    }->();
+
+
+    # RT #126697
+    # savestack wasn't always being unwound on EVAL failure
+    {
+        local our $i = 0;
+        my $max = 0;
+
+        'ABC' =~ m{
+            \A
+            (?:
+                (?: AB | A | BC )
+                (?{
+                    local $i = $i + 1;
+                    $max = $i if $max < $i;
+                })
+            )*
+            \z
+        }x;
+        is $max, 2, "RT #126697";
     }
 
 
