@@ -11464,6 +11464,15 @@ Perl_abort_execution(pTHX_ const char * const msg, const char * const name)
     NOT_REACHED; /* NOTREACHED */
 }
 
+void
+Perl_yyquit(pTHX)
+{
+    /* Called, after at least one error has been found, to abort the parse now,
+     * instead of trying to forge ahead */
+
+    yyerror_pvn(NULL, 0, 0);
+}
+
 int
 Perl_yyerror(pTHX_ const char *const s)
 {

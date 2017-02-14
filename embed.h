@@ -1416,6 +1416,7 @@
 #define yyerror_pv(a,b)		Perl_yyerror_pv(aTHX_ a,b)
 #define yyerror_pvn(a,b,c)	Perl_yyerror_pvn(aTHX_ a,b,c)
 #define yyparse(a)		Perl_yyparse(aTHX_ a)
+#define yyquit()		Perl_yyquit(aTHX)
 #define yyunlex()		Perl_yyunlex(aTHX)
 #  if !(defined(DEBUGGING))
 #    if !defined(NV_PRESERVES_UV)

@@ -3701,6 +3701,7 @@ PERL_CALLCONV int	Perl_yyerror_pv(pTHX_ const char *const s, U32 flags);
 PERL_CALLCONV int	Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags);
 PERL_CALLCONV int	Perl_yylex(pTHX);
 PERL_CALLCONV int	Perl_yyparse(pTHX_ int gramtype);
+PERL_CALLCONV void	Perl_yyquit(pTHX);
 PERL_CALLCONV void	Perl_yyunlex(pTHX);
 #if !(defined(DEBUGGING))
 #  if !defined(NV_PRESERVES_UV)
