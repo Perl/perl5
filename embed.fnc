@@ -1879,7 +1879,7 @@ p	|void	|write_to_stderr|NN SV* msv
 p	|int	|yyerror	|NN const char *const s
 p	|void	|abort_execution|NN const char * const msg|NN const char * const name
 p	|int	|yyerror_pv	|NN const char *const s|U32 flags
-p	|int	|yyerror_pvn	|NN const char *const s|STRLEN len|U32 flags
+p	|int	|yyerror_pvn	|NULLOK const char *const s|STRLEN len|U32 flags
 : Used in perly.y, and by Data::Alias
 EXp	|int	|yylex
 p	|void	|yyunlex

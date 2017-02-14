@@ -11487,8 +11487,12 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
     SV * const where_sv = newSVpvs_flags("", SVs_TEMP);
     int yychar  = PL_parser->yychar;
 
-    PERL_ARGS_ASSERT_YYERROR_PVN;
+    /* Output error message 's' with length 'len'.  'flags' are SV flags that
+     * apply.  If the number of errors found is large enough, it abandons
+     * parsing.  If 's' is NULL, there is no message, and it abandons
+     * processing unconditionally */
 
+    if (s != NULL) {
     if (!yychar || (yychar == ';' && !PL_rsfp))
 	sv_catpvs(where_sv, "at EOF");
     else if (   PL_oldoldbufptr
@@ -11574,14 +11578,24 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
     else {
 	qerror(msg);
     }
-    if (PL_error_count >= 10) {
-	SV * errsv;
-	if (PL_in_eval && ((errsv = ERRSV), SvCUR(errsv)))
-	    Perl_croak(aTHX_ "%" SVf "%s has too many errors.\n",
-		       SVfARG(errsv), OutCopFILE(PL_curcop));
-	else
-	    Perl_croak(aTHX_ "%s has too many errors.\n",
-            OutCopFILE(PL_curcop));
+    }
+    if (s == NULL || PL_error_count >= 10) {
+        const char * msg = "";
+        const char * const name = OutCopFILE(PL_curcop);
+
+	if (PL_in_eval) {
+            SV * errsv = ERRSV;
+            if (SvCUR(errsv)) {
+                msg = Perl_form(aTHX_ "%" SVf, SVfARG(errsv));
+            }
+        }
+
+        if (s == NULL) {
+            abort_execution(msg, name);
+        }
+        else {
+            Perl_croak(aTHX_ "%s%s has too many errors.\n", msg, name);
+        }
     }
     PL_in_my = 0;
     PL_in_my_stash = NULL;
