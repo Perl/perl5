@@ -40,9 +40,9 @@ sub run_tests {
         # The trick is that in EBCDIC the explicit numeric range should
         # match (as also in non-EBCDIC) but the explicit alphabetic range
         # should not match.
-        ok "\x8e" =~ /[\x89-\x91]/, '"\x8e" =~ /[\x89-\x91]/';
-        ok "\xce" =~ /[\xc9-\xd1]/, '"\xce" =~ /[\xc9-\xd1]/';
-        ok "\xd0" =~ /[\xc9-\xd1]/, '"\xd0" =~ /[\xc9-\xd1]/';
+        like "\x8e", qr/[\x89-\x91]/, '"\x8e" =~ /[\x89-\x91]/';
+        like "\xce", qr/[\xc9-\xd1]/, '"\xce" =~ /[\xc9-\xd1]/';
+        like "\xd0", qr/[\xc9-\xd1]/, '"\xd0" =~ /[\xc9-\xd1]/';
 
         skip "Not an EBCDIC platform", 2 unless ord ('i') == 0x89 &&
                                                 ord ('J') == 0xd1;
@@ -57,8 +57,8 @@ sub run_tests {
     }
 
     {
-        ok "\x{ab}"   =~ /\x{ab}/,   '"\x{ab}"   =~ /\x{ab}/  ';
-        ok "\x{abcd}" =~ /\x{abcd}/, '"\x{abcd}" =~ /\x{abcd}/';
+        like "\x{ab}", qr/\x{ab}/,   '"\x{ab}"   =~ /\x{ab}/  ';
+        like "\x{abcd}", qr/\x{abcd}/, '"\x{abcd}" =~ /\x{abcd}/';
     }
 
     {
@@ -241,107 +241,107 @@ sub run_tests {
         # Check that \x## works. 5.6.1 and 5.005_03 fail some of these.
         my $x;
         $x = "\x4e" . "E";
-        ok ($x =~ /^\x4EE$/, "Check only 2 bytes of hex are matched.");
+        like ($x, qr/^\x4EE$/, "Check only 2 bytes of hex are matched.");
 
         $x = "\x4e" . "i";
-        ok ($x =~ /^\x4Ei$/, "Check that invalid hex digit stops it (2)");
+        like ($x, qr/^\x4Ei$/, "Check that invalid hex digit stops it (2)");
 
         $x = "\x4" . "j";
-        ok ($x =~ /^\x4j$/,  "Check that invalid hex digit stops it (1)");
+        like ($x, qr/^\x4j$/,  "Check that invalid hex digit stops it (1)");
 
         $x = "\x0" . "k";
-        ok ($x =~ /^\xk$/,   "Check that invalid hex digit stops it (0)");
+        like ($x, qr/^\xk$/,   "Check that invalid hex digit stops it (0)");
 
         $x = "\x0" . "x";
-        ok ($x =~ /^\xx$/, "\\xx isn't to be treated as \\0");
+        like ($x, qr/^\xx$/, "\\xx isn't to be treated as \\0");
 
         $x = "\x0" . "xa";
-        ok ($x =~ /^\xxa$/, "\\xxa isn't to be treated as \\xa");
+        like ($x, qr/^\xxa$/, "\\xxa isn't to be treated as \\xa");
 
         $x = "\x9" . "_b";
-        ok ($x =~ /^\x9_b$/, "\\x9_b isn't to be treated as \\x9b");
+        like ($x, qr/^\x9_b$/, "\\x9_b isn't to be treated as \\x9b");
 
         # and now again in [] ranges
 
         $x = "\x4e" . "E";
-        ok ($x =~ /^[\x4EE]{2}$/, "Check only 2 bytes of hex are matched.");
+        like ($x, qr/^[\x4EE]{2}$/, "Check only 2 bytes of hex are matched.");
 
         $x = "\x4e" . "i";
-        ok ($x =~ /^[\x4Ei]{2}$/, "Check that invalid hex digit stops it (2)");
+        like ($x, qr/^[\x4Ei]{2}$/, "Check that invalid hex digit stops it (2)");
 
         $x = "\x4" . "j";
-        ok ($x =~ /^[\x4j]{2}$/,  "Check that invalid hex digit stops it (1)");
+        like ($x, qr/^[\x4j]{2}$/,  "Check that invalid hex digit stops it (1)");
 
         $x = "\x0" . "k";
-        ok ($x =~ /^[\xk]{2}$/,   "Check that invalid hex digit stops it (0)");
+        like ($x, qr/^[\xk]{2}$/,   "Check that invalid hex digit stops it (0)");
 
         $x = "\x0" . "x";
-        ok ($x =~ /^[\xx]{2}$/, "\\xx isn't to be treated as \\0");
+        like ($x, qr/^[\xx]{2}$/, "\\xx isn't to be treated as \\0");
 
         $x = "\x0" . "xa";
-        ok ($x =~ /^[\xxa]{3}$/, "\\xxa isn't to be treated as \\xa");
+        like ($x, qr/^[\xxa]{3}$/, "\\xxa isn't to be treated as \\xa");
 
         $x = "\x9" . "_b";
-        ok ($x =~ /^[\x9_b]{3}$/, "\\x9_b isn't to be treated as \\x9b");
+        like ($x, qr/^[\x9_b]{3}$/, "\\x9_b isn't to be treated as \\x9b");
 
         # Check that \x{##} works. 5.6.1 fails quite a few of these.
 
         $x = "\x9b";
-        ok ($x =~ /^\x{9_b}$/, "\\x{9_b} is to be treated as \\x9b");
+        like ($x, qr/^\x{9_b}$/, "\\x{9_b} is to be treated as \\x9b");
 
         $x = "\x9b" . "y";
-        ok ($x =~ /^\x{9_b}y$/, "\\x{9_b} is to be treated as \\x9b (again)");
+        like ($x, qr/^\x{9_b}y$/, "\\x{9_b} is to be treated as \\x9b (again)");
 
         $x = "\x9b" . "y";
-        ok ($x =~ /^\x{9b_}y$/, "\\x{9b_} is to be treated as \\x9b");
+        like ($x, qr/^\x{9b_}y$/, "\\x{9b_} is to be treated as \\x9b");
 
         $x = "\x9b" . "y";
-        ok ($x =~ /^\x{9_bq}y$/, "\\x{9_bc} is to be treated as \\x9b");
+        like ($x, qr/^\x{9_bq}y$/, "\\x{9_bc} is to be treated as \\x9b");
 
         $x = "\x0" . "y";
-        ok ($x =~ /^\x{x9b}y$/, "\\x{x9b} is to be treated as \\x0");
+        like ($x, qr/^\x{x9b}y$/, "\\x{x9b} is to be treated as \\x0");
 
         $x = "\x0" . "y";
-        ok ($x =~ /^\x{0x9b}y$/, "\\x{0x9b} is to be treated as \\x0");
+        like ($x, qr/^\x{0x9b}y$/, "\\x{0x9b} is to be treated as \\x0");
 
         $x = "\x9b" . "y";
-        ok ($x =~ /^\x{09b}y$/, "\\x{09b} is to be treated as \\x9b");
+        like ($x, qr/^\x{09b}y$/, "\\x{09b} is to be treated as \\x9b");
 
         $x = "\x9b";
-        ok ($x =~ /^[\x{9_b}]$/, "\\x{9_b} is to be treated as \\x9b");
+        like ($x, qr/^[\x{9_b}]$/, "\\x{9_b} is to be treated as \\x9b");
 
         $x = "\x9b" . "y";
-        ok ($x =~ /^[\x{9_b}y]{2}$/,
+        like ($x, qr/^[\x{9_b}y]{2}$/,
                                  "\\x{9_b} is to be treated as \\x9b (again)");
 
         $x = "\x9b" . "y";
-        ok ($x =~ /^[\x{9b_}y]{2}$/, "\\x{9b_} is to be treated as \\x9b");
+        like ($x, qr/^[\x{9b_}y]{2}$/, "\\x{9b_} is to be treated as \\x9b");
 
         $x = "\x9b" . "y";
-        ok ($x =~ /^[\x{9_bq}y]{2}$/, "\\x{9_bc} is to be treated as \\x9b");
+        like ($x, qr/^[\x{9_bq}y]{2}$/, "\\x{9_bc} is to be treated as \\x9b");
 
         $x = "\x0" . "y";
-        ok ($x =~ /^[\x{x9b}y]{2}$/, "\\x{x9b} is to be treated as \\x0");
+        like ($x, qr/^[\x{x9b}y]{2}$/, "\\x{x9b} is to be treated as \\x0");
 
         $x = "\x0" . "y";
-        ok ($x =~ /^[\x{0x9b}y]{2}$/, "\\x{0x9b} is to be treated as \\x0");
+        like ($x, qr/^[\x{0x9b}y]{2}$/, "\\x{0x9b} is to be treated as \\x0");
 
         $x = "\x9b" . "y";
-        ok ($x =~ /^[\x{09b}y]{2}$/, "\\x{09b} is to be treated as \\x9b");
+        like ($x, qr/^[\x{09b}y]{2}$/, "\\x{09b} is to be treated as \\x9b");
 
     }
 
     {
         # High bit bug -- japhy
         my $x = "ab\200d";
-        ok $x =~ /.*?\200/, "High bit fine";
+        like $x, qr/.*?\200/, "High bit fine";
     }
 
     {
         # The basic character classes and Unicode
-        ok "\x{0100}" =~ /\w/, 'LATIN CAPITAL LETTER A WITH MACRON in /\w/';
-        ok "\x{0660}" =~ /\d/, 'ARABIC-INDIC DIGIT ZERO in /\d/';
-        ok "\x{1680}" =~ /\s/, 'OGHAM SPACE MARK in /\s/';
+        like "\x{0100}", qr/\w/, 'LATIN CAPITAL LETTER A WITH MACRON in /\w/';
+        like "\x{0660}", qr/\d/, 'ARABIC-INDIC DIGIT ZERO in /\d/';
+        like "\x{1680}", qr/\s/, 'OGHAM SPACE MARK in /\s/';
     }
 
     {
@@ -562,10 +562,10 @@ sub run_tests {
         # More whitespace: U+0085, U+2028, U+2029\n";
 
         # U+0085, U+00A0 need to be forced to be Unicode, the \x{100} does that.
-        ok "<\x{100}" . uni_to_native("\x{0085}") . ">" =~ /<\x{100}\s>/, '\x{0085} in \s';
-        ok        "<" . uni_to_native("\x{0085}") . ">" =~        /<\v>/, '\x{0085} in \v';
-        ok "<\x{100}" . uni_to_native("\x{00A0}") . ">" =~ /<\x{100}\s>/, '\x{00A0} in \s';
-        ok        "<" . uni_to_native("\x{00A0}") . ">" =~        /<\h>/, '\x{00A0} in \h';
+        like "<\x{100}" . uni_to_native("\x{0085}") . ">", qr/<\x{100}\s>/, '\x{0085} in \s';
+        like        "<" . uni_to_native("\x{0085}") . ">", qr/<\v>/, '\x{0085} in \v';
+        like "<\x{100}" . uni_to_native("\x{00A0}") . ">", qr/<\x{100}\s>/, '\x{00A0} in \s';
+        like        "<" . uni_to_native("\x{00A0}") . ">", qr/<\h>/, '\x{00A0} in \h';
         my @h = map {sprintf "%05x" => $_} 0x01680, 0x02000 .. 0x0200A,
                                            0x0202F, 0x0205F, 0x03000;
         my @v = map {sprintf "%05x" => $_} 0x02028, 0x02029;
@@ -577,28 +577,28 @@ sub run_tests {
 
         for my $hex (@h) {
             my $str = eval qq ["<\\x{$hex}>"];
-            ok $str =~ /<\s>/, "\\x{$hex} in \\s";
-            ok $str =~ /<\h>/, "\\x{$hex} in \\h";
-            ok $str !~ /<\v>/, "\\x{$hex} not in \\v";
+            like $str, qr/<\s>/, "\\x{$hex} in \\s";
+            like $str, qr/<\h>/, "\\x{$hex} in \\h";
+            unlike $str, qr/<\v>/, "\\x{$hex} not in \\v";
         }
 
         for my $hex (@v) {
             my $str = eval qq ["<\\x{$hex}>"];
-            ok $str =~ /<\s>/, "\\x{$hex} in \\s";
-            ok $str =~ /<\v>/, "\\x{$hex} in \\v";
-            ok $str !~ /<\h>/, "\\x{$hex} not in \\h";
+            like $str, qr/<\s>/, "\\x{$hex} in \\s";
+            like $str, qr/<\v>/, "\\x{$hex} in \\v";
+            unlike $str, qr/<\h>/, "\\x{$hex} not in \\h";
         }
 
         for my $hex (@H) {
             my $str = eval qq ["<\\x{$hex}>"];
-            ok $str =~ /<\S>/, "\\x{$hex} in \\S";
-            ok $str =~ /<\H>/, "\\x{$hex} in \\H";
+            like $str, qr/<\S>/, "\\x{$hex} in \\S";
+            like $str, qr/<\H>/, "\\x{$hex} in \\H";
         }
 
         for my $hex (@V) {
             my $str = eval qq ["<\\x{$hex}>"];
-            ok $str =~ /<\S>/, "\\x{$hex} in \\S";
-            ok $str =~ /<\V>/, "\\x{$hex} in \\V";
+            like $str, qr/<\S>/, "\\x{$hex} in \\S";
+            like $str, qr/<\V>/, "\\x{$hex} in \\V";
         }
     }
 
@@ -637,10 +637,10 @@ sub run_tests {
 
     {
         my $message = "Unicode lookbehind";
-        like("A\x{100}B"       , qr/(?<=A.)B/, $message);
+        like("A\x{100}B",        qr/(?<=A.)B/, $message);
         like("A\x{200}\x{300}B", qr/(?<=A..)B/, $message);
-        like("\x{400}AB"       , qr/(?<=\x{400}.)B/, $message);
-        like("\x{500}\x{600}B" , qr/(?<=\x{500}.)B/, $message);
+        like("\x{400}AB",       qr/(?<=\x{400}.)B/, $message);
+        like("\x{500}\x{600}B", qr/(?<=\x{500}.)B/, $message);
 
         # Original code also contained:
         # ok "\x{500\x{600}}B"  =~ /(?<=\x{500}.)B/;
@@ -767,7 +767,7 @@ sub run_tests {
     }
 
     {
-        ok "\x{100}\n" =~ /\x{100}\n$/, "UTF-8 length cache and fbm_compile";
+        like "\x{100}\n", qr/\x{100}\n$/, "UTF-8 length cache and fbm_compile";
     }
 
     {
@@ -791,7 +791,7 @@ sub run_tests {
     }
 
     {
-        ok "123\x{100}" =~ /^.*1.*23\x{100}$/,
+        like "123\x{100}", qr/^.*1.*23\x{100}$/,
            'UTF-8 + multiple floating substr';
     }
 
@@ -844,7 +844,7 @@ sub run_tests {
         $re = qr/\b$re\b/;
 
         foreach (@nums) {
-            ok $_ =~ /$re/, "Trie nums";
+            like $_, qr/$re/, "Trie nums";
         }
 
         $_ = join " ", @nums;
@@ -909,7 +909,7 @@ sub run_tests {
 	}
         use Cname;
 
-        ok 'fooB'  =~ /\N{foo}[\N{B}\N{b}]/, "Passthrough charname";
+        like 'fooB', qr/\N{foo}[\N{B}\N{b}]/, "Passthrough charname";
         my $name = "foo\xDF";
         my $result = eval "'A${name}B'  =~ /^A\\N{$name}B\$/";
         ok !$@ && $result,  "Passthrough charname of non-ASCII, Latin1";
@@ -922,32 +922,32 @@ sub run_tests {
         ok !$@ && $result && ! $w,  '\N{} returning multi-char works';
 
         undef $w;
-        eval q [ok "\0" !~ /[\N{EMPTY-STR}XY]/,
+        eval q [unlike "\0", qr/[\N{EMPTY-STR}XY]/,
                    "Zerolength charname in charclass doesn't match \\\\0"];
         ok $w && $w =~ /Ignoring zero length/,
                  'Ignoring zero length \N{} in character class warning';
         undef $w;
-        eval q [ok 'xy' =~ /x[\N{EMPTY-STR} y]/x,
+        eval q [like 'xy', qr/x[\N{EMPTY-STR} y]/x,
                     'Empty string charname in [] is ignored; finds a following character'];
         ok $w && $w =~ /Ignoring zero length/,
                  'Ignoring zero length \N{} in character class warning';
         undef $w;
-        eval q [ok 'x ' =~ /x[\N{EMPTY-STR} y]/,
+        eval q [like 'x ', qr/x[\N{EMPTY-STR} y]/,
                     'Empty string charname in [] is ignored; finds a following blank under /x'];
-        ok $w && $w =~ /Ignoring zero length/,
+        like $w, qr/Ignoring zero length/,
                  'Ignoring zero length \N{} in character class warning';
 
         ok 'AB'  =~ /(\N{EVIL})/ && $1 eq 'A', 'Charname caching $1';
-        ok 'ABC' =~ /(\N{EVIL})/,              'Charname caching $1';
-        ok 'xy'  =~ /x\N{EMPTY-STR}y/,
+        like 'ABC', qr/(\N{EVIL})/,              'Charname caching $1';
+        like 'xy',  qr/x\N{EMPTY-STR}y/,
                     'Empty string charname produces NOTHING node';
-        ok ''    =~ /\N{EMPTY-STR}/,
+        like '', qr/\N{EMPTY-STR}/,
                     'Empty string charname produces NOTHING node';
-        ok "\N{LONG-STR}" =~ /^\N{LONG-STR}$/, 'Verify that long string works';
-        ok "\N{LONG-STR}" =~ /^\N{LONG-STR}$/i, 'Verify under folding that long string works';
+        like "\N{LONG-STR}", qr/^\N{LONG-STR}$/, 'Verify that long string works';
+        like "\N{LONG-STR}", qr/^\N{LONG-STR}$/i, 'Verify under folding that long string works';
 
         eval '/(?[[\N{EMPTY-STR}]])/';
-        ok $@ && $@ =~ /Zero length \\N\{\}/;
+        like $@, qr/Zero length \\N\{\}/, 'Verify zero-length return from \N{} correctly fails';
 
         undef $w;
         {
@@ -1008,7 +1008,7 @@ sub run_tests {
         # If remove the limitation in regcomp code these should work
         # differently
         undef $w;
-        eval q [ok "\N{TOO-LONG-STR}" =~ /^\N{TOO-LONG-STR}$/, 'Verify that what once was too long a string works'];
+        eval q [like "\N{TOO-LONG-STR}" =~ /^\N{TOO-LONG-STR}$/, 'Verify that what once was too long a string works'];
         eval 'q() =~ /\N{4F}/';
         ok $@ && $@ =~ /Invalid character/, 'Verify that leading digit in name gives error';
         eval 'q() =~ /\N{COM,MA}/';
@@ -1047,24 +1047,24 @@ sub run_tests {
         my $r = eval "qr/\\N{\x{100}\x{100}}/";
         isnt $r, undef, "Generated regex for multi-char UTF-8 charname"
 	    or diag($@);
-        ok "\x{100}\x{100}" =~ $r, "which matches";
+        like "\x{100}\x{100}", $r, "which matches";
     }
 
     {
         use charnames ':full';
 
-        ok 'aabc' !~ /a\N{PLUS SIGN}b/, '/a\N{PLUS SIGN}b/ against aabc';
-        ok 'a+bc' =~ /a\N{PLUS SIGN}b/, '/a\N{PLUS SIGN}b/ against a+bc';
+        unlike 'aabc', qr/a\N{PLUS SIGN}b/, '/a\N{PLUS SIGN}b/ against aabc';
+        like 'a+bc', qr/a\N{PLUS SIGN}b/, '/a\N{PLUS SIGN}b/ against a+bc';
 
-        ok ' A B' =~ /\N{SPACE}\N{U+0041}\N{SPACE}\N{U+0042}/,
+        like ' A B', qr/\N{SPACE}\N{U+0041}\N{SPACE}\N{U+0042}/,
             'Intermixed named and unicode escapes';
-        ok "\N{SPACE}\N{U+0041}\N{SPACE}\N{U+0042}" =~
-           /\N{SPACE}\N{U+0041}\N{SPACE}\N{U+0042}/,
+        like "\N{SPACE}\N{U+0041}\N{SPACE}\N{U+0042}",
+             qr/\N{SPACE}\N{U+0041}\N{SPACE}\N{U+0042}/,
             'Intermixed named and unicode escapes';
-        ok "\N{SPACE}\N{U+0041}\N{SPACE}\N{U+0042}" =~
-           /[\N{SPACE}\N{U+0041}][\N{SPACE}\N{U+0042}]/,
+        like "\N{SPACE}\N{U+0041}\N{SPACE}\N{U+0042}",
+            qr/[\N{SPACE}\N{U+0041}][\N{SPACE}\N{U+0042}]/,
             'Intermixed named and unicode escapes';
-        ok "\0" =~ /^\N{NULL}$/, 'Verify that \N{NULL} works; is not confused with an error';
+        like "\0", qr/^\N{NULL}$/, 'Verify that \N{NULL} works; is not confused with an error';
     }
 
     {
@@ -1073,7 +1073,7 @@ sub run_tests {
             {  (?> [^{}]+ | (??{ $brackets }) )* }
         }x;
 
-        ok "{b{c}d" !~ m/^((??{ $brackets }))/, "Bracket mismatch";
+        unlike "{b{c}d", qr/^((??{ $brackets }))/, "Bracket mismatch";
 
         SKIP: {
             our @stack = ();
@@ -1160,8 +1160,8 @@ sub run_tests {
 
     {
         # \c\ followed by _
-        ok "x\c_y"    !~ /x\c\_y/,    '\_ in a pattern';
-        ok "x\c\_y"   =~ /x\c\_y/,    '\_ in a pattern';
+        unlike "x\c_y", qr/x\c\_y/,    '\_ in a pattern';
+        like "x\c\_y", qr/x\c\_y/,    '\_ in a pattern';
 
         # \c\ followed by other characters
         for my $c ("z", "\0", "!", chr(254), chr(256)) {
@@ -1252,7 +1252,7 @@ sub run_tests {
         is($count, 1, "Expect 1 with (*COMMIT)");
         is("@res", "aaab", "Adjacent (*COMMIT) works as expected");
 
-	ok("1\n2a\n" !~ /^\d+(*COMMIT)\w+/m, "COMMIT and anchors");
+	unlike("1\n2a\n", qr/^\d+(*COMMIT)\w+/m, "COMMIT and anchors");
     }
 
     {
@@ -1408,62 +1408,62 @@ sub run_tests {
 
     {
         use charnames ":full";
-        ok "\N{ROMAN NUMERAL ONE}" =~ /\p{Alphabetic}/, "I =~ Alphabetic";
-        ok "\N{ROMAN NUMERAL ONE}" =~ /\p{Uppercase}/,  "I =~ Uppercase";
-        ok "\N{ROMAN NUMERAL ONE}" !~ /\p{Lowercase}/,  "I !~ Lowercase";
-        ok "\N{ROMAN NUMERAL ONE}" =~ /\p{IDStart}/,    "I =~ ID_Start";
-        ok "\N{ROMAN NUMERAL ONE}" =~ /\p{IDContinue}/, "I =~ ID_Continue";
-        ok "\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{Alphabetic}/, "i =~ Alphabetic";
-        ok "\N{SMALL ROMAN NUMERAL ONE}" !~ /\p{Uppercase}/,  "i !~ Uppercase";
-        ok "\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{Uppercase}/i,  "i =~ Uppercase under /i";
-        ok "\N{SMALL ROMAN NUMERAL ONE}" !~ /\p{Titlecase}/,  "i !~ Titlecase";
-        ok "\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{Titlecase}/i,  "i =~ Titlecase under /i";
-        ok "\N{ROMAN NUMERAL ONE}" =~ /\p{Lowercase}/i,  "I =~ Lowercase under /i";
+        like "\N{ROMAN NUMERAL ONE}", qr/\p{Alphabetic}/, "I =~ Alphabetic";
+        like "\N{ROMAN NUMERAL ONE}", qr/\p{Uppercase}/,  "I =~ Uppercase";
+        unlike "\N{ROMAN NUMERAL ONE}", qr/\p{Lowercase}/,  "I !~ Lowercase";
+        like "\N{ROMAN NUMERAL ONE}", qr/\p{IDStart}/,    "I =~ ID_Start";
+        like "\N{ROMAN NUMERAL ONE}", qr/\p{IDContinue}/, "I =~ ID_Continue";
+        like "\N{SMALL ROMAN NUMERAL ONE}", qr/\p{Alphabetic}/, "i =~ Alphabetic";
+        unlike "\N{SMALL ROMAN NUMERAL ONE}", qr/\p{Uppercase}/,  "i !~ Uppercase";
+        like "\N{SMALL ROMAN NUMERAL ONE}", qr/\p{Uppercase}/i,  "i =~ Uppercase under /i";
+        unlike "\N{SMALL ROMAN NUMERAL ONE}", qr/\p{Titlecase}/,  "i !~ Titlecase";
+        like "\N{SMALL ROMAN NUMERAL ONE}", qr/\p{Titlecase}/i,  "i =~ Titlecase under /i";
+        like "\N{ROMAN NUMERAL ONE}", qr/\p{Lowercase}/i,  "I =~ Lowercase under /i";
 
-        ok "\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{Lowercase}/,  "i =~ Lowercase";
-        ok "\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{IDStart}/,    "i =~ ID_Start";
-        ok "\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{IDContinue}/, "i =~ ID_Continue"
+        like "\N{SMALL ROMAN NUMERAL ONE}", qr/\p{Lowercase}/,  "i =~ Lowercase";
+        like "\N{SMALL ROMAN NUMERAL ONE}", qr/\p{IDStart}/,    "i =~ ID_Start";
+        like "\N{SMALL ROMAN NUMERAL ONE}", qr/\p{IDContinue}/, "i =~ ID_Continue"
     }
 
     {   # More checking that /i works on the few properties that it makes a
         # difference.  Uppercase, Lowercase, and Titlecase were done in the
         # block above
-        ok "A" =~ /\p{PosixUpper}/,  "A =~ PosixUpper";
-        ok "A" =~ /\p{PosixUpper}/i,  "A =~ PosixUpper under /i";
-        ok "A" !~ /\p{PosixLower}/,  "A !~ PosixLower";
-        ok "A" =~ /\p{PosixLower}/i,  "A =~ PosixLower under /i";
-        ok "a" !~ /\p{PosixUpper}/,  "a !~ PosixUpper";
-        ok "a" =~ /\p{PosixUpper}/i,  "a =~ PosixUpper under /i";
-        ok "a" =~ /\p{PosixLower}/,  "a =~ PosixLower";
-        ok "a" =~ /\p{PosixLower}/i,  "a =~ PosixLower under /i";
+        like "A", qr/\p{PosixUpper}/,  "A =~ PosixUpper";
+        like "A", qr/\p{PosixUpper}/i,  "A =~ PosixUpper under /i";
+        unlike "A", qr/\p{PosixLower}/,  "A !~ PosixLower";
+        like "A", qr/\p{PosixLower}/i,  "A =~ PosixLower under /i";
+        unlike "a", qr/\p{PosixUpper}/,  "a !~ PosixUpper";
+        like "a", qr/\p{PosixUpper}/i,  "a =~ PosixUpper under /i";
+        like "a", qr/\p{PosixLower}/,  "a =~ PosixLower";
+        like "a", qr/\p{PosixLower}/i,  "a =~ PosixLower under /i";
 
-        ok uni_to_native("\xC0") =~ /\p{XPosixUpper}/,  "\\xC0 =~ XPosixUpper";
-        ok uni_to_native("\xC0") =~ /\p{XPosixUpper}/i,  "\\xC0 =~ XPosixUpper under /i";
-        ok uni_to_native("\xC0") !~ /\p{XPosixLower}/,  "\\xC0 !~ XPosixLower";
-        ok uni_to_native("\xC0") =~ /\p{XPosixLower}/i,  "\\xC0 =~ XPosixLower under /i";
-        ok uni_to_native("\xE0") !~ /\p{XPosixUpper}/,  "\\xE0 !~ XPosixUpper";
-        ok uni_to_native("\xE0") =~ /\p{XPosixUpper}/i,  "\\xE0 =~ XPosixUpper under /i";
-        ok uni_to_native("\xE0") =~ /\p{XPosixLower}/,  "\\xE0 =~ XPosixLower";
-        ok uni_to_native("\xE0") =~ /\p{XPosixLower}/i,  "\\xE0 =~ XPosixLower under /i";
+        like uni_to_native("\xC0"), qr/\p{XPosixUpper}/,  "\\xC0 =~ XPosixUpper";
+        like uni_to_native("\xC0"), qr/\p{XPosixUpper}/i,  "\\xC0 =~ XPosixUpper under /i";
+        unlike uni_to_native("\xC0"), qr/\p{XPosixLower}/,  "\\xC0 !~ XPosixLower";
+        like uni_to_native("\xC0"), qr/\p{XPosixLower}/i,  "\\xC0 =~ XPosixLower under /i";
+        unlike uni_to_native("\xE0"), qr/\p{XPosixUpper}/,  "\\xE0 !~ XPosixUpper";
+        like uni_to_native("\xE0"), qr/\p{XPosixUpper}/i,  "\\xE0 =~ XPosixUpper under /i";
+        like uni_to_native("\xE0"), qr/\p{XPosixLower}/,  "\\xE0 =~ XPosixLower";
+        like uni_to_native("\xE0"), qr/\p{XPosixLower}/i,  "\\xE0 =~ XPosixLower under /i";
 
-        ok uni_to_native("\xC0") =~ /\p{UppercaseLetter}/,  "\\xC0 =~ UppercaseLetter";
-        ok uni_to_native("\xC0") =~ /\p{UppercaseLetter}/i,  "\\xC0 =~ UppercaseLetter under /i";
-        ok uni_to_native("\xC0") !~ /\p{LowercaseLetter}/,  "\\xC0 !~ LowercaseLetter";
-        ok uni_to_native("\xC0") =~ /\p{LowercaseLetter}/i,  "\\xC0 =~ LowercaseLetter under /i";
-        ok uni_to_native("\xC0") !~ /\p{TitlecaseLetter}/,  "\\xC0 !~ TitlecaseLetter";
-        ok uni_to_native("\xC0") =~ /\p{TitlecaseLetter}/i,  "\\xC0 =~ TitlecaseLetter under /i";
-        ok uni_to_native("\xE0") !~ /\p{UppercaseLetter}/,  "\\xE0 !~ UppercaseLetter";
-        ok uni_to_native("\xE0") =~ /\p{UppercaseLetter}/i,  "\\xE0 =~ UppercaseLetter under /i";
-        ok uni_to_native("\xE0") =~ /\p{LowercaseLetter}/,  "\\xE0 =~ LowercaseLetter";
-        ok uni_to_native("\xE0") =~ /\p{LowercaseLetter}/i,  "\\xE0 =~ LowercaseLetter under /i";
-        ok uni_to_native("\xE0") !~ /\p{TitlecaseLetter}/,  "\\xE0 !~ TitlecaseLetter";
-        ok uni_to_native("\xE0") =~ /\p{TitlecaseLetter}/i,  "\\xE0 =~ TitlecaseLetter under /i";
-        ok "\x{1C5}" !~ /\p{UppercaseLetter}/,  "\\x{1C5} !~ UppercaseLetter";
-        ok "\x{1C5}" =~ /\p{UppercaseLetter}/i,  "\\x{1C5} =~ UppercaseLetter under /i";
-        ok "\x{1C5}" !~ /\p{LowercaseLetter}/,  "\\x{1C5} !~ LowercaseLetter";
-        ok "\x{1C5}" =~ /\p{LowercaseLetter}/i,  "\\x{1C5} =~ LowercaseLetter under /i";
-        ok "\x{1C5}" =~ /\p{TitlecaseLetter}/,  "\\x{1C5} =~ TitlecaseLetter";
-        ok "\x{1C5}" =~ /\p{TitlecaseLetter}/i,  "\\x{1C5} =~ TitlecaseLetter under /i";
+        like uni_to_native("\xC0"), qr/\p{UppercaseLetter}/,  "\\xC0 =~ UppercaseLetter";
+        like uni_to_native("\xC0"), qr/\p{UppercaseLetter}/i,  "\\xC0 =~ UppercaseLetter under /i";
+        unlike uni_to_native("\xC0"), qr/\p{LowercaseLetter}/,  "\\xC0 !~ LowercaseLetter";
+        like uni_to_native("\xC0"), qr/\p{LowercaseLetter}/i,  "\\xC0 =~ LowercaseLetter under /i";
+        unlike uni_to_native("\xC0"), qr/\p{TitlecaseLetter}/,  "\\xC0 !~ TitlecaseLetter";
+        like uni_to_native("\xC0"), qr/\p{TitlecaseLetter}/i,  "\\xC0 =~ TitlecaseLetter under /i";
+        unlike uni_to_native("\xE0"), qr/\p{UppercaseLetter}/,  "\\xE0 !~ UppercaseLetter";
+        like uni_to_native("\xE0"), qr/\p{UppercaseLetter}/i,  "\\xE0 =~ UppercaseLetter under /i";
+        like uni_to_native("\xE0"), qr/\p{LowercaseLetter}/,  "\\xE0 =~ LowercaseLetter";
+        like uni_to_native("\xE0"), qr/\p{LowercaseLetter}/i,  "\\xE0 =~ LowercaseLetter under /i";
+        unlike uni_to_native("\xE0"), qr/\p{TitlecaseLetter}/,  "\\xE0 !~ TitlecaseLetter";
+        like uni_to_native("\xE0"), qr/\p{TitlecaseLetter}/i,  "\\xE0 =~ TitlecaseLetter under /i";
+        unlike "\x{1C5}", qr/\p{UppercaseLetter}/,  "\\x{1C5} !~ UppercaseLetter";
+        like "\x{1C5}", qr/\p{UppercaseLetter}/i,  "\\x{1C5} =~ UppercaseLetter under /i";
+        unlike "\x{1C5}", qr/\p{LowercaseLetter}/,  "\\x{1C5} !~ LowercaseLetter";
+        like "\x{1C5}", qr/\p{LowercaseLetter}/i,  "\\x{1C5} =~ LowercaseLetter under /i";
+        like "\x{1C5}", qr/\p{TitlecaseLetter}/,  "\\x{1C5} =~ TitlecaseLetter";
+        like "\x{1C5}", qr/\p{TitlecaseLetter}/i,  "\\x{1C5} =~ TitlecaseLetter under /i";
     }
 
     {
@@ -1473,7 +1473,7 @@ sub run_tests {
             no warnings 'utf8'; # oops
             my $c = chr $u;
             my $x = sprintf '%04X', $u;
-            ok "A${c}B" =~ /A[\0-\x{10000}]B/, "Unicode range - $x";
+            like "A${c}B", qr/A[\0-\x{10000}]B/, "Unicode range - $x";
         }
     }
 
@@ -1737,7 +1737,7 @@ EOP
         my $chr_byte = chr($chr);
         my $chr_utf8 = chr($chr); utf8::upgrade($chr_utf8);
         my $rx = qr{$chr_byte|X}i;
-        ok($chr_utf8 =~ $rx, "utf8/latin, codepoint $chr");
+        like($chr_utf8, $rx, "utf8/latin, codepoint $chr");
     }
     }
 
@@ -2113,7 +2113,7 @@ EOP
         like(uni_to_native("\xC0"), qr/$p/, "Verify \"\\xC0\" =~ /[\\xE0_]/i; pattern in utf8");
     }
 
-    ok "x" =~ /\A(?>(?:(?:)A|B|C?x))\z/,
+    like "x", qr/\A(?>(?:(?:)A|B|C?x))\z/,
         "Check TRIE does not overwrite EXACT following NOTHING at start - RT #111842";
 
     {
@@ -2296,7 +2296,7 @@ EOF
     print "# Tests that follow may crash perl\n";
     {
         eval '/\k/';
-        ok $@ =~ /\QSequence \k... not terminated in regex;\E/,
+        like $@, qr/\QSequence \k... not terminated in regex;\E/,
            'Lone \k not allowed';
     }
 
