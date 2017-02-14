@@ -11493,91 +11493,96 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
      * processing unconditionally */
 
     if (s != NULL) {
-    if (!yychar || (yychar == ';' && !PL_rsfp))
-	sv_catpvs(where_sv, "at EOF");
-    else if (   PL_oldoldbufptr
-             && PL_bufptr > PL_oldoldbufptr
-             && PL_bufptr - PL_oldoldbufptr < 200
-             && PL_oldoldbufptr != PL_oldbufptr
-             && PL_oldbufptr != PL_bufptr)
-    {
-	/*
-		Only for NetWare:
-		The code below is removed for NetWare because it abends/crashes on NetWare
-		when the script has error such as not having the closing quotes like:
-		    if ($var eq "value)
-		Checking of white spaces is anyway done in NetWare code.
-	*/
+        if (!yychar || (yychar == ';' && !PL_rsfp))
+            sv_catpvs(where_sv, "at EOF");
+        else if (   PL_oldoldbufptr
+                 && PL_bufptr > PL_oldoldbufptr
+                 && PL_bufptr - PL_oldoldbufptr < 200
+                 && PL_oldoldbufptr != PL_oldbufptr
+                 && PL_oldbufptr != PL_bufptr)
+        {
+            /*
+                    Only for NetWare:
+                    The code below is removed for NetWare because it
+                    abends/crashes on NetWare when the script has error such as
+                    not having the closing quotes like:
+                        if ($var eq "value)
+                    Checking of white spaces is anyway done in NetWare code.
+            */
 #ifndef NETWARE
-	while (isSPACE(*PL_oldoldbufptr))
-	    PL_oldoldbufptr++;
+            while (isSPACE(*PL_oldoldbufptr))
+                PL_oldoldbufptr++;
 #endif
-	context = PL_oldoldbufptr;
-	contlen = PL_bufptr - PL_oldoldbufptr;
-    }
-    else if (  PL_oldbufptr
-            && PL_bufptr > PL_oldbufptr
-            && PL_bufptr - PL_oldbufptr < 200
-            && PL_oldbufptr != PL_bufptr) {
-	/*
-		Only for NetWare:
-		The code below is removed for NetWare because it abends/crashes on NetWare
-		when the script has error such as not having the closing quotes like:
-		    if ($var eq "value)
-		Checking of white spaces is anyway done in NetWare code.
-	*/
+            context = PL_oldoldbufptr;
+            contlen = PL_bufptr - PL_oldoldbufptr;
+        }
+        else if (  PL_oldbufptr
+                && PL_bufptr > PL_oldbufptr
+                && PL_bufptr - PL_oldbufptr < 200
+                && PL_oldbufptr != PL_bufptr) {
+            /*
+                    Only for NetWare:
+                    The code below is removed for NetWare because it
+                    abends/crashes on NetWare when the script has error such as
+                    not having the closing quotes like:
+                        if ($var eq "value)
+                    Checking of white spaces is anyway done in NetWare code.
+            */
 #ifndef NETWARE
-	while (isSPACE(*PL_oldbufptr))
-	    PL_oldbufptr++;
+            while (isSPACE(*PL_oldbufptr))
+                PL_oldbufptr++;
 #endif
-	context = PL_oldbufptr;
-	contlen = PL_bufptr - PL_oldbufptr;
-    }
-    else if (yychar > 255)
-	sv_catpvs(where_sv, "next token ???");
-    else if (yychar == YYEMPTY) {
-	if (PL_lex_state == LEX_NORMAL)
-	    sv_catpvs(where_sv, "at end of line");
-	else if (PL_lex_inpat)
-	    sv_catpvs(where_sv, "within pattern");
-	else
-	    sv_catpvs(where_sv, "within string");
-    }
-    else {
-	sv_catpvs(where_sv, "next char ");
-	if (yychar < 32)
-	    Perl_sv_catpvf(aTHX_ where_sv, "^%c", toCTRL(yychar));
-	else if (isPRINT_LC(yychar)) {
-	    const char string = yychar;
-	    sv_catpvn(where_sv, &string, 1);
-	}
-	else
-	    Perl_sv_catpvf(aTHX_ where_sv, "\\%03o", yychar & 255);
-    }
-    msg = newSVpvn_flags(s, len, (flags & SVf_UTF8) | SVs_TEMP);
-    Perl_sv_catpvf(aTHX_ msg, " at %s line %" IVdf ", ",
-        OutCopFILE(PL_curcop),
-        (IV)(PL_parser->preambling == NOLINE
-               ? CopLINE(PL_curcop)
-               : PL_parser->preambling));
-    if (context)
-	Perl_sv_catpvf(aTHX_ msg, "near \"%" UTF8f "\"\n",
-			     UTF8fARG(UTF, contlen, context));
-    else
-	Perl_sv_catpvf(aTHX_ msg, "%" SVf "\n", SVfARG(where_sv));
-    if (PL_multi_start < PL_multi_end && (U32)(CopLINE(PL_curcop) - PL_multi_end) <= 1) {
-        Perl_sv_catpvf(aTHX_ msg,
-        "  (Might be a runaway multi-line %c%c string starting on line %" IVdf ")\n",
-                (int)PL_multi_open,(int)PL_multi_close,(IV)PL_multi_start);
-        PL_multi_end = 0;
-    }
-    if (PL_in_eval & EVAL_WARNONLY) {
-	PL_in_eval &= ~EVAL_WARNONLY;
-	Perl_ck_warner_d(aTHX_ packWARN(WARN_SYNTAX), "%" SVf, SVfARG(msg));
-    }
-    else {
-	qerror(msg);
-    }
+            context = PL_oldbufptr;
+            contlen = PL_bufptr - PL_oldbufptr;
+        }
+        else if (yychar > 255)
+            sv_catpvs(where_sv, "next token ???");
+        else if (yychar == YYEMPTY) {
+            if (PL_lex_state == LEX_NORMAL)
+                sv_catpvs(where_sv, "at end of line");
+            else if (PL_lex_inpat)
+                sv_catpvs(where_sv, "within pattern");
+            else
+                sv_catpvs(where_sv, "within string");
+        }
+        else {
+            sv_catpvs(where_sv, "next char ");
+            if (yychar < 32)
+                Perl_sv_catpvf(aTHX_ where_sv, "^%c", toCTRL(yychar));
+            else if (isPRINT_LC(yychar)) {
+                const char string = yychar;
+                sv_catpvn(where_sv, &string, 1);
+            }
+            else
+                Perl_sv_catpvf(aTHX_ where_sv, "\\%03o", yychar & 255);
+        }
+        msg = newSVpvn_flags(s, len, (flags & SVf_UTF8) | SVs_TEMP);
+        Perl_sv_catpvf(aTHX_ msg, " at %s line %" IVdf ", ",
+            OutCopFILE(PL_curcop),
+            (IV)(PL_parser->preambling == NOLINE
+                   ? CopLINE(PL_curcop)
+                   : PL_parser->preambling));
+        if (context)
+            Perl_sv_catpvf(aTHX_ msg, "near \"%" UTF8f "\"\n",
+                                 UTF8fARG(UTF, contlen, context));
+        else
+            Perl_sv_catpvf(aTHX_ msg, "%" SVf "\n", SVfARG(where_sv));
+        if (   PL_multi_start < PL_multi_end
+            && (U32)(CopLINE(PL_curcop) - PL_multi_end) <= 1)
+        {
+            Perl_sv_catpvf(aTHX_ msg,
+            "  (Might be a runaway multi-line %c%c string starting on"
+            " line %" IVdf ")\n",
+                    (int)PL_multi_open,(int)PL_multi_close,(IV)PL_multi_start);
+            PL_multi_end = 0;
+        }
+        if (PL_in_eval & EVAL_WARNONLY) {
+            PL_in_eval &= ~EVAL_WARNONLY;
+            Perl_ck_warner_d(aTHX_ packWARN(WARN_SYNTAX), "%" SVf, SVfARG(msg));
+        }
+        else {
+            qerror(msg);
+        }
     }
     if (s == NULL || PL_error_count >= 10) {
         const char * msg = "";
