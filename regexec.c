@@ -8520,16 +8520,17 @@ NULL
 	    DEBUG_STACK_r({
 	        regmatch_state *cur = st;
 	        regmatch_state *curyes = yes_state;
-	        int curd = depth;
+	        U32 i;
 	        regmatch_slab *slab = PL_regmatch_slab;
-                for (;curd > -1 && (depth-curd < 3);cur--,curd--) {
+                for (i = 0; i < 3 && i <= depth; cur--,i++) {
                     if (cur < SLAB_FIRST(slab)) {
                 	slab = slab->prev;
                 	cur = SLAB_LAST(slab);
                     }
-                    Perl_re_exec_indentf( aTHX_ "#%-3d %-10s %s\n",
+                    Perl_re_exec_indentf( aTHX_ "%4s #%-3d %-10s %s\n",
                         depth,
-                        curd, PL_reg_name[cur->resume_state],
+                        i ? "    " : "push",
+                        depth - i, PL_reg_name[cur->resume_state],
                         (curyes == cur) ? "yes" : ""
                     );
                     if (curyes == cur)
