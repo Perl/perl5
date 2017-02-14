@@ -16,7 +16,8 @@ deemed necessary by the Pumpking.
 Code freezes (which happen in the 5.25.X series)
 
   2016-12-20  5.25.8          Contentious changes freeze
-  2017-01-20  5.25.9          User-visible changes freeze
+  2017-01-20  5.25.9          User-visible changes to correctly
+                              functioning programs freeze
   2017-02-20  5.25.10         Full code freeze
   2017-04-20  5.26.0          Stable release!
 
