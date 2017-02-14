@@ -7603,11 +7603,11 @@ NULL
 	    CACHEsayNO;
 	    NOT_REACHED; /* NOTREACHED */
 
-	case WHILEM_A_min_fail: /* just failed to match A in a minimal match */
-	    /* FALLTHROUGH */
 	case WHILEM_A_pre_fail: /* just failed to match even minimal A */
 	    REGCP_UNWIND(ST.lastcp);
             regcppop(rex, &maxopenparen);
+	    /* FALLTHROUGH */
+	case WHILEM_A_min_fail: /* just failed to match A in a minimal match */
 	    cur_curlyx->u.curlyx.lastloc = ST.save_lastloc;
 	    cur_curlyx->u.curlyx.count--;
 	    CACHEsayNO;
@@ -7661,9 +7661,6 @@ NULL
 	    );
 	    /* Try grabbing another A and see if it helps. */
 	    cur_curlyx->u.curlyx.lastloc = locinput;
-            ST.cp = regcppush(rex, cur_curlyx->u.curlyx.parenfloor,
-                            maxopenparen);
-	    REGCP_SET(ST.lastcp);
 	    PUSH_STATE_GOTO(WHILEM_A_min,
 		/*A*/ NEXTOPER(ST.save_curlyx->u.curlyx.me) + EXTRA_STEP_2ARGS,
                 locinput);

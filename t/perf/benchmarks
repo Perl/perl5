@@ -1377,4 +1377,15 @@
         setup   => '$_ = ("0" x 100) . ("a" x 100);',
         code    => '/[acgt]+/',
     },
+
+    'regex::whilem::min_captures_fail' => {
+        desc    => '/WHILEM with anon-greedy match and captures that fails',
+        setup   => '$_ = ("a" x 20)',
+        code    => '/^(?:(.)(.))*?[XY]/',
+    },
+    'regex::whilem::max_captures_fail' => {
+        desc    => '/WHILEM with a greedy match and captures that fails',
+        setup   => '$_ = ("a" x 20)',
+        code    => '/^(?:(.)(.))*[XY]/',
+    },
 ];
