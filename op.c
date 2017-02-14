@@ -5843,6 +5843,11 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
             rx_flags |= RXf_SPLIT;
         }
 
+        /* Skip compiling if parser found an error for this pattern */
+        if (pm->op_pmflags & PMf_HAS_ERROR) {
+            return o;
+        }
+
 	if (!has_code || !eng->op_comp) {
 	    /* compile-time simple constant pattern */
 

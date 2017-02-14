@@ -5029,11 +5029,11 @@ Perl_yylex(pTHX)
 
 	    s = scan_const(PL_bufptr);
 
-            /* Quit if this was a pattern and there were errors.  This prevents
-             * us from trying to regex compile a broken pattern, which could
-             * lead to segfaults, etc. */
+            /* Set flag if this was a pattern and there were errors.  op.c will
+             * refuse to compile a pattern with this flag set.  Otherwise, we
+             * could get segfaults, etc. */
             if (PL_lex_inpat && PL_error_count > save_error_count) {
-                yyquit();
+                ((PMOP*)PL_lex_inpat)->op_pmflags |= PMf_HAS_ERROR;
             }
 	    if (*s == '\\')
 		PL_lex_state = LEX_INTERPCASEMOD;

@@ -327,6 +327,10 @@ struct pmop {
  * other end instead; this preserves binary compatibility. */
 #define PMf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+2)
 
+/* Set by the parser if it discovers an error, so the regex shouldn't be
+ * compiled */
+#define PMf_HAS_ERROR	(1U<<(PMf_BASE_SHIFT+4))
+
 /* 'use re "taint"' in scope: taint $1 etc. if target tainted */
 #define PMf_RETAINT	(1U<<(PMf_BASE_SHIFT+5))
 
