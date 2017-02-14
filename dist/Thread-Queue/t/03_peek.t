@@ -13,7 +13,7 @@ use threads;
 use Thread::Queue;
 
 if ($] == 5.008) {
-    require 't/test.pl';   # Test::More work-alike for Perl 5.8.0
+    require './t/test.pl';   # Test::More work-alike for Perl 5.8.0
 } else {
     require Test::More;
 }
