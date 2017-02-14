@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 532;  # Update this when adding/deleting tests.
+plan tests => 533;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1270,6 +1270,26 @@ sub run_tests {
         is $x3, 103, "RT #129881: x3";
     }->();
 
+
+    # RT #126697
+    # savestack wasn't always being unwound on EVAL failure
+    {
+        local our $i = 0;
+        my $max = 0;
+
+        'ABC' =~ m{
+            \A
+            (?:
+                (?: AB | A | BC )
+                (?{
+                    local $i = $i + 1;
+                    $max = $i if $max < $i;
+                })
+            )*
+            \z
+        }x;
+        is $max, 2, "RT #126697";
+    }
 
 
 } # End of sub run_tests

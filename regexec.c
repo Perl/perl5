@@ -5391,7 +5391,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     U8 gimme = G_SCALAR;
     CV *caller_cv = NULL;	/* who called us */
     CV *last_pushed_cv = NULL;	/* most recently called (?{}) CV */
-    CHECKPOINT runops_cp;	/* savestack position before executing EVAL */
     U32 maxopenparen = 0;       /* max '(' index seen so far */
     int to_complement;  /* Invert the result? */
     _char_class_number classnum;
@@ -6787,7 +6786,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             goto eval_recurse_doit;
             /* NOTREACHED */
 
-        case EVAL:  /*   /(?{A})B/   /(??{A})B/  and /(?(?{A})X|Y)B/   */        
+        case EVAL:  /*   /(?{...})B/   /(??{A})B/  and  /(?(?{...})X|Y)B/   */
             if (cur_eval && cur_eval->locinput==locinput) {
 		if ( ++nochange_depth > max_nochange_depth )
                     Perl_croak(aTHX_ "EVAL without pos change exceeded limit in regex");
@@ -6806,7 +6805,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 		/* save *all* paren positions */
                 regcppush(rex, 0, maxopenparen);
-		REGCP_SET(runops_cp);
+                REGCP_SET(ST.lastcp);
 
 		if (!caller_cv)
 		    caller_cv = find_runcv(NULL);
@@ -7008,12 +7007,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		 * in the regexp code uses the pad ! */
 		PL_op = oop;
 		PL_curcop = ocurcop;
-                regcp_restore(rex, runops_cp, &maxopenparen);
+                regcp_restore(rex, ST.lastcp, &maxopenparen);
                 PL_curpm_under = PL_curpm;
                 PL_curpm = PL_reg_curpm;
 
-		if (logical != 2)
-		    break;
+		if (logical != 2) {
+                    PUSH_STATE_GOTO(EVAL_B, next, locinput);
+		    /* NOTREACHED */
+                }
 	    }
 
 		/* only /(??{})/  from now on */
@@ -7111,11 +7112,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		ST.prev_eval = cur_eval;
 		cur_eval = st;
 		/* now continue from first node in postoned RE */
-		PUSH_YES_STATE_GOTO(EVAL_AB, startpoint, locinput);
+		PUSH_YES_STATE_GOTO(EVAL_postponed_AB, startpoint, locinput);
 		NOT_REACHED; /* NOTREACHED */
 	}
 
-	case EVAL_AB: /* cleanup after a successful (??{A})B */
+	case EVAL_postponed_AB: /* cleanup after a successful (??{A})B */
             /* note: this is called twice; first after popping B, then A */
             DEBUG_STACK_r({
                 Perl_re_exec_indentf( aTHX_  "EVAL_AB cur_eval=%p prev_eval=%p\n",
@@ -7161,7 +7162,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    sayYES;
 
 
-	case EVAL_AB_fail: /* unsuccessfully ran A or B in (??{A})B */
+	case EVAL_B_fail: /* unsuccessful B in (?{...})B */
+	    REGCP_UNWIND(ST.lastcp);
+            sayNO;
+
+	case EVAL_postponed_AB_fail: /* unsuccessfully ran A or B in (??{A})B */
 	    /* note: this is called twice; first after popping B, then A */
             DEBUG_STACK_r({
                 Perl_re_exec_indentf( aTHX_  "EVAL_AB_fail cur_eval=%p prev_eval=%p\n",
@@ -8263,7 +8268,7 @@ NULL
 
                 SET_RECURSE_LOCINPUT("FAKE-END[after]", cur_eval->locinput);
 
-                PUSH_YES_STATE_GOTO(EVAL_AB, st->u.eval.prev_eval->u.eval.B,
+                PUSH_YES_STATE_GOTO(EVAL_postponed_AB, st->u.eval.prev_eval->u.eval.B,
                                     locinput); /* match B */
 	    }
 
