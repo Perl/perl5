@@ -5736,6 +5736,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         {
             U8 *uc;
             if ( ST.jump ) {
+                /* undo any captures done in the tail part of a branch,
+                 * e.g.
+                 *    /(?:X(.)(.)|Y(.)).../
+                 * where the trie just matches X then calls out to do the
+                 * rest of the branch */
                 REGCP_UNWIND(ST.cp);
                 UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
 	    }
