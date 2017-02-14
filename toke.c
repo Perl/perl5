@@ -3934,7 +3934,7 @@ S_scan_const(pTHX_ char *start)
 	    case 'c':
 		s++;
 		if (s < send) {
-		    *d++ = grok_bslash_c(*s++, 1);
+		    *d++ = grok_bslash_c(*s, 1);
 		}
 		else {
 		    yyerror("Missing control char name in \\c");
@@ -3942,7 +3942,7 @@ S_scan_const(pTHX_ char *start)
 #ifdef EBCDIC
                 non_portable_endpoint++;
 #endif
-		continue;
+                break;
 
 	    /* printf-style backslashes, formfeeds, newlines, etc */
 	    case 'b':
