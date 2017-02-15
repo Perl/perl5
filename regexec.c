@@ -6838,7 +6838,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 /* Some notes about MULTICALL and the context and save stacks.
                  *
                  * In something like
-                 *   /...(?{ my $x)}...(?{ my $z)}...(?{ my $z)}.../
+                 *   /...(?{ my $x)}...(?{ my $y)}...(?{ my $z)}.../
                  * since codeblocks don't introduce a new scope (so that
                  * local() etc accumulate), at the end of a successful
                  * match there will be a SAVEt_CLEARSV on the savestack
@@ -6873,7 +6873,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                  * *everything* SAVEd by this function is undone and then
                  * the context popped, rather than e.g., popping the
                  * context (and restoring the original PL_comppad) then
-                 * popping more of the savestack and restoiring a bad
+                 * popping more of the savestack and restoring a bad
                  * PL_comppad.
                  */
 
