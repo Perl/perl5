@@ -24,6 +24,8 @@ This one does not fix a crash, but merely fixed bad debugging output that confus
 The commit ID here is on the yves/backport_128313 branch:
 <commit votes="khw sprout yves xsawyerx arc" id="dfd347fdcdbaf5a157586b05825005dc352b0e83" ticket="128313" desc="[perl #128313] Fix memory leak regression in regexes" />
 
+<commit votes="dom" id="1050723fecc0e27677c39fadbb97cb892dfd27d2" ticket="130766" desc="avoid a leak in list assign from/to magic values" />
+
 </div>
 
 <div><h2>Other Proposed Cherry-Picks</h2>
