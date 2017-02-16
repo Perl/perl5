@@ -367,7 +367,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.46';
+our $VERSION = '1.47';
 
 FEATURES
 
@@ -490,50 +490,22 @@ operator|perlop/Range Operators>.
 
 =head2 The 'unicode_eval' and 'evalbytes' features
 
-Under the C<unicode_eval> feature, Perl's C<eval> function, when passed a
-string, will evaluate it as a string of characters, ignoring any
-C<use utf8> declarations.  C<use utf8> exists to declare the encoding of
-the script, which only makes sense for a stream of bytes, not a string of
-characters.  Source filters are forbidden, as they also really only make
-sense on strings of bytes.  Any attempt to activate a source filter will
-result in an error.
+Together, these two features are intended to replace the legacy string
+C<eval> function, which behaves problematically in some instances.  They are
+available starting with Perl 5.16, and are enabled by default by a
+S<C<use 5.16>> or higher declaration.
 
-The C<evalbytes> feature enables the C<evalbytes> keyword, which evaluates
-the argument passed to it as a string of bytes.  It dies if the string
-contains any characters outside the 8-bit range.  Source filters work
-within C<evalbytes>: they apply to the contents of the string being
-evaluated.
+C<unicode_eval> changes the behavior of plain string C<eval> to work more
+consistently, especially in the Unicode world.  Certain (mis)behaviors
+couldn't be changed without breaking some things that had come to rely on
+them, so the feature can be enabled and disabled.  Details are at
+L<perlfunc/Under the "unicode_eval" feature>.
 
-Together, these two features are intended to replace the historical C<eval>
-function, which has (at least) two bugs in it, that cannot easily be fixed
-without breaking existing programs:
-
-=over
-
-=item *
-
-C<eval> behaves differently depending on the internal encoding of the
-string, sometimes treating its argument as a string of bytes, and sometimes
-as a string of characters.
-
-=item *
-
-Source filters activated within C<eval> leak out into whichever I<file>
-scope is currently being compiled.  To give an example with the CPAN module
-L<Semi::Semicolons>:
-
-    BEGIN { eval "use Semi::Semicolons;  # not filtered here " }
-    # filtered here!
-
-C<evalbytes> fixes that to work the way one would expect:
-
-    use feature "evalbytes";
-    BEGIN { evalbytes "use Semi::Semicolons;  # filtered " }
-    # not filtered
-
-=back
-
-These two features are available starting with Perl 5.16.
+C<evalbytes> is like string C<eval>, but operating on a byte stream that is
+not UTF-8 encoded.  Details are at L<perlfunc/evalbytes EXPR>.  Without a
+S<C<use feature 'evalbytes'>> nor a S<C<use v5.16>> (or higher) declaration in
+the current scope, you can still access it by instead writing
+C<CORE::evalbytes>.
 
 =head2 The 'current_sub' feature
 

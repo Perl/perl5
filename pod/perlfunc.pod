@@ -2035,34 +2035,148 @@ X<error, handling> X<exception, handling>
 
 =for Pod::Functions catch exceptions or compile and run code
 
-In the first form, often referred to as a "string eval", the return
-value of EXPR is parsed and executed as if it
-were a little Perl program.  The value of the expression (which is itself
-determined within scalar context) is first parsed, and if there were no
-errors, executed as a block within the lexical context of the current Perl
-program.  This means, that in particular, any outer lexical variables are
-visible to it, and any package variable settings or subroutine and format
-definitions remain afterwards.
+C<eval> in all its forms is used to execute a little Perl program,
+trapping any errors encountered so they don't crash the calling program.
 
-Note that the value is parsed every time the L<C<eval>|/eval EXPR>
-executes.  If EXPR is omitted, evaluates L<C<$_>|perlvar/$_>.  This form
-is typically used to delay parsing and subsequent execution of the text
-of EXPR until run time.
+Plain C<eval> with no argument is just C<eval EXPR>, where the
+expression is understood to be contained in L<C<$_>|perlvar/$_>.  Thus
+there are only two real C<eval> forms; the one with an EXPR is often
+called "string eval".  In a string eval, the value of the expression
+(which is itself determined within scalar context) is first parsed, and
+if there were no errors, executed as a block within the lexical context
+of the current Perl program.  This form is typically used to delay
+parsing and subsequent execution of the text of EXPR until run time.
+Note that the value is parsed every time the C<eval> executes.
 
-If the
-L<C<"unicode_eval"> feature|feature/The 'unicode_eval' and 'evalbytes' features>
-is enabled (which is the default under a
-C<use 5.16> or higher declaration), EXPR or L<C<$_>|perlvar/$_> is
-treated as a string of characters, so L<C<use utf8>|utf8> declarations
-have no effect, and source filters are forbidden.  In the absence of the
-L<C<"unicode_eval"> feature|feature/The 'unicode_eval' and 'evalbytes' features>,
-will sometimes be treated as characters and sometimes as bytes,
-depending on the internal encoding, and source filters activated within
-the L<C<eval>|/eval EXPR> exhibit the erratic, but historical, behaviour
-of affecting some outer file scope that is still compiling.  See also
-the L<C<evalbytes>|/evalbytes EXPR> operator, which always treats its
-input as a byte stream and works properly with source filters, and the
-L<feature> pragma.
+The other form is called "block eval".  It is less general than string
+eval, but the code within the BLOCK is parsed only once (at the same
+time the code surrounding the C<eval> itself was parsed) and executed
+within the context of the current Perl program.  This form is typically
+used to trap exceptions more efficiently than the first, while also
+providing the benefit of checking the code within BLOCK at compile time.
+BLOCK is parsed and compiled just once.  Since errors are trapped, it
+often is used to check if a given feature is available.
+
+In both forms, the value returned is the value of the last expression
+evaluated inside the mini-program; a return statement may also be used, just
+as with subroutines.  The expression providing the return value is evaluated
+in void, scalar, or list context, depending on the context of the
+C<eval> itself.  See L<C<wantarray>|/wantarray> for more
+on how the evaluation context can be determined.
+
+If there is a syntax error or runtime error, or a L<C<die>|/die LIST>
+statement is executed, C<eval> returns
+L<C<undef>|/undef EXPR> in scalar context, or an empty list in list
+context, and L<C<$@>|perlvar/$@> is set to the error message.  (Prior to
+5.16, a bug caused L<C<undef>|/undef EXPR> to be returned in list
+context for syntax errors, but not for runtime errors.) If there was no
+error, L<C<$@>|perlvar/$@> is set to the empty string.  A control flow
+operator like L<C<last>|/last LABEL> or L<C<goto>|/goto LABEL> can
+bypass the setting of L<C<$@>|perlvar/$@>.  Beware that using
+C<eval> neither silences Perl from printing warnings to
+STDERR, nor does it stuff the text of warning messages into
+L<C<$@>|perlvar/$@>.  To do either of those, you have to use the
+L<C<$SIG{__WARN__}>|perlvar/%SIG> facility, or turn off warnings inside
+the BLOCK or EXPR using S<C<no warnings 'all'>>.  See
+L<C<warn>|/warn LIST>, L<perlvar>, and L<warnings>.
+
+Note that, because C<eval> traps otherwise-fatal errors,
+it is useful for determining whether a particular feature (such as
+L<C<socket>|/socket SOCKET,DOMAIN,TYPE,PROTOCOL> or
+L<C<symlink>|/symlink OLDFILE,NEWFILE>) is implemented.  It is also
+Perl's exception-trapping mechanism, where the L<C<die>|/die LIST>
+operator is used to raise exceptions.
+
+Before Perl 5.14, the assignment to L<C<$@>|perlvar/$@> occurred before
+restoration
+of localized variables, which means that for your code to run on older
+versions, a temporary is required if you want to mask some, but not all
+errors:
+
+ # alter $@ on nefarious repugnancy only
+ {
+    my $e;
+    {
+      local $@; # protect existing $@
+      eval { test_repugnancy() };
+      # $@ =~ /nefarious/ and die $@; # Perl 5.14 and higher only
+      $@ =~ /nefarious/ and $e = $@;
+    }
+    die $e if defined $e
+ }
+
+There are some different considerations for each form:
+
+=over 4
+
+=item String eval
+
+Since the return value of EXPR is executed as a block within the lexical
+context of the current Perl program, any outer lexical variables are
+visible to it, and any package variable settings or subroutine and
+format definitions remain afterwards.
+
+=over 4
+
+=item Under the L<C<"unicode_eval"> feature|feature/The 'unicode_eval' and 'evalbytes' features>
+
+If this feature is enabled (which is the default under a C<use 5.16> or
+higher declaration), EXPR is considered to be
+in the same encoding as the surrounding program.  Thus if
+S<L<C<use utf8>|utf8>> is in effect, the string will be treated as being
+UTF-8 encoded.  Otherwise, the string is considered to be a sequence of
+independent bytes.  Bytes that correspond to ASCII-range code points
+will have their normal meanings for operators in the string.  The
+treatment of the other bytes depends on if the
+L<C<'unicode_strings"> feature|feature/The 'unicode_strings' feature> is
+in effect.
+
+In a plain C<eval> without an EXPR argument, being in S<C<use utf8>> or
+not is irrelevant; the UTF-8ness of C<$_> itself determines the
+behavior.
+
+Any S<C<use utf8>> or S<C<no utf8>> declarations within the string have
+no effect, and source filters are forbidden.  (C<unicode_strings>,
+however, can appear within the string.  See also the
+L<C<evalbytes>|/evalbytes EXPR> operator, which works properly with
+source filters.
+
+Variables defined outside the C<eval> and used inside it retain their
+original UTF-8ness.  Everything inside the string follows the normal
+rules for a Perl program with the given state of S<C<use utf8>>.
+
+=item Outside the C<"unicode_eval"> feature
+
+In this case, the behavior is problematic and is not so easily
+described.  Here are two bugs that cannot easily be fixed without
+breaking existing programs:
+
+=over 4
+
+=item *
+
+It can lose track of whether something should be encoded as UTF-8 or
+not.
+
+=item *
+
+Source filters activated within C<eval> leak out into whichever file
+scope is currently being compiled.  To give an example with the CPAN module
+L<Semi::Semicolons>:
+
+ BEGIN { eval "use Semi::Semicolons; # not filtered" }
+ # filtered here!
+
+L<C<evalbytes>|/evalbytes EXPR> fixes that to work the way one would
+expect:
+
+ use feature "evalbytes";
+ BEGIN { evalbytes "use Semi::Semicolons; # filtered" }
+ # not filtered
+
+=back
+
+=back
 
 Problems can arise if the string expands a scalar containing a floating
 point number.  That scalar can expand to letters, such as C<"NaN"> or
@@ -2070,51 +2184,38 @@ C<"Infinity">; or, within the scope of a L<C<use locale>|locale>, the
 decimal point character may be something other than a dot (such as a
 comma).  None of these are likely to parse as you are likely expecting.
 
-In the second form, the code within the BLOCK is parsed only once--at the
-same time the code surrounding the L<C<eval>|/eval EXPR> itself was
-parsed--and executed
-within the context of the current Perl program.  This form is typically
-used to trap exceptions more efficiently than the first (see below), while
-also providing the benefit of checking the code within BLOCK at compile
-time.
+You should be especially careful to remember what's being looked at
+when:
 
-The final semicolon, if any, may be omitted from the value of EXPR or within
-the BLOCK.
+    eval $x;        # CASE 1
+    eval "$x";      # CASE 2
 
-In both forms, the value returned is the value of the last expression
-evaluated inside the mini-program; a return statement may be also used, just
-as with subroutines.  The expression providing the return value is evaluated
-in void, scalar, or list context, depending on the context of the
-L<C<eval>|/eval EXPR> itself.  See L<C<wantarray>|/wantarray> for more
-on how the evaluation context can be determined.
+    eval '$x';      # CASE 3
+    eval { $x };    # CASE 4
 
-If there is a syntax error or runtime error, or a L<C<die>|/die LIST>
-statement is executed, L<C<eval>|/eval EXPR> returns
-L<C<undef>|/undef EXPR> in scalar context or an empty list in list
-context, and L<C<$@>|perlvar/$@> is set to the error message.  (Prior to
-5.16, a bug caused L<C<undef>|/undef EXPR> to be returned in list
-context for syntax errors, but not for runtime errors.) If there was no
-error, L<C<$@>|perlvar/$@> is set to the empty string.  A control flow
-operator like L<C<last>|/last LABEL> or L<C<goto>|/goto LABEL> can
-bypass the setting of L<C<$@>|perlvar/$@>.  Beware that using
-L<C<eval>|/eval EXPR> neither silences Perl from printing warnings to
-STDERR, nor does it stuff the text of warning messages into
-L<C<$@>|perlvar/$@>.  To do either of those, you have to use the
-L<C<$SIG{__WARN__}>|perlvar/%SIG> facility, or turn off warnings inside
-the BLOCK or EXPR using S<C<no warnings 'all'>>.  See
-L<C<warn>|/warn LIST>, L<perlvar>, and L<warnings>.
+    eval "\$$x++";  # CASE 5
+    $$x++;          # CASE 6
 
-Note that, because L<C<eval>|/eval EXPR> traps otherwise-fatal errors,
-it is useful for determining whether a particular feature (such as
-L<C<socket>|/socket SOCKET,DOMAIN,TYPE,PROTOCOL> or
-L<C<symlink>|/symlink OLDFILE,NEWFILE>) is implemented.  It is also
-Perl's exception-trapping mechanism, where the L<C<die>|/die LIST>
-operator is used to raise exceptions.
+Cases 1 and 2 above behave identically: they run the code contained in
+the variable $x.  (Although case 2 has misleading double quotes making
+the reader wonder what else might be happening (nothing is).)  Cases 3
+and 4 likewise behave in the same way: they run the code C<'$x'>, which
+does nothing but return the value of $x.  (Case 4 is preferred for
+purely visual reasons, but it also has the advantage of compiling at
+compile-time instead of at run-time.)  Case 5 is a place where
+normally you I<would> like to use double quotes, except that in this
+particular situation, you can just use symbolic references instead, as
+in case 6.
 
-If you want to trap errors when loading an XS module, some problems with
-the binary interface (such as Perl version skew) may be fatal even with
-L<C<eval>|/eval EXPR> unless C<$ENV{PERL_DL_NONLAZY}> is set.  See
-L<perlrun>.
+An C<eval ''> executed within a subroutine defined
+in the C<DB> package doesn't see the usual
+surrounding lexical scope, but rather the scope of the first non-DB piece
+of code that called it.  You don't normally need to worry about this unless
+you are writing a Perl debugger.
+
+The final semicolon, if any, may be omitted from the value of EXPR.
+
+=item Block eval
 
 If the code to be executed doesn't vary, you may use the eval-BLOCK
 form to trap run-time errors without incurring the penalty of
@@ -2133,6 +2234,11 @@ Examples:
 
     # a run-time error
     eval '$answer =';   # sets $@
+
+If you want to trap errors when loading an XS module, some problems with
+the binary interface (such as Perl version skew) may be fatal even with
+C<eval> unless C<$ENV{PERL_DL_NONLAZY}> is set.  See
+L<perlrun>.
 
 Using the C<eval {}> form as an exception trap in libraries does have some
 issues.  Due to the current arguably broken state of C<__DIE__> hooks, you
@@ -2159,56 +2265,13 @@ messages:
 Because this promotes action at a distance, this counterintuitive behavior
 may be fixed in a future release.
 
-With an L<C<eval>|/eval EXPR>, you should be especially careful to
-remember what's being looked at when:
-
-    eval $x;        # CASE 1
-    eval "$x";      # CASE 2
-
-    eval '$x';      # CASE 3
-    eval { $x };    # CASE 4
-
-    eval "\$$x++";  # CASE 5
-    $$x++;          # CASE 6
-
-Cases 1 and 2 above behave identically: they run the code contained in
-the variable $x.  (Although case 2 has misleading double quotes making
-the reader wonder what else might be happening (nothing is).)  Cases 3
-and 4 likewise behave in the same way: they run the code C<'$x'>, which
-does nothing but return the value of $x.  (Case 4 is preferred for
-purely visual reasons, but it also has the advantage of compiling at
-compile-time instead of at run-time.)  Case 5 is a place where
-normally you I<would> like to use double quotes, except that in this
-particular situation, you can just use symbolic references instead, as
-in case 6.
-
-Before Perl 5.14, the assignment to L<C<$@>|perlvar/$@> occurred before
-restoration
-of localized variables, which means that for your code to run on older
-versions, a temporary is required if you want to mask some but not all
-errors:
-
-    # alter $@ on nefarious repugnancy only
-    {
-       my $e;
-       {
-         local $@; # protect existing $@
-         eval { test_repugnancy() };
-         # $@ =~ /nefarious/ and die $@; # Perl 5.14 and higher only
-         $@ =~ /nefarious/ and $e = $@;
-       }
-       die $e if defined $e
-    }
-
 C<eval BLOCK> does I<not> count as a loop, so the loop control statements
 L<C<next>|/next LABEL>, L<C<last>|/last LABEL>, or
 L<C<redo>|/redo LABEL> cannot be used to leave or restart the block.
 
-An C<eval ''> executed within a subroutine defined
-in the C<DB> package doesn't see the usual
-surrounding lexical scope, but rather the scope of the first non-DB piece
-of code that called it.  You don't normally need to worry about this unless
-you are writing a Perl debugger.
+The final semicolon, if any, may be omitted from within the BLOCK.
+
+=back
 
 =item evalbytes EXPR
 X<evalbytes>
@@ -2217,18 +2280,42 @@ X<evalbytes>
 
 =for Pod::Functions +evalbytes similar to string eval, but intend to parse a bytestream
 
-This function is like L<C<eval>|/eval EXPR> with a string argument,
-except it always parses its argument, or L<C<$_>|perlvar/$_> if EXPR is
-omitted, as a string of bytes.  A string containing characters whose
-ordinal value exceeds 255 results in an error.  Source filters activated
-within the evaluated code apply to the code itself.
+This function is similar to a L<string eval|/eval EXPR>, except it
+always parses its argument (or L<C<$_>|perlvar/$_> if EXPR is omitted)
+as a string of independent bytes.
 
-L<C<evalbytes>|/evalbytes EXPR> is available only if the
+If called when S<C<use utf8>> is in effect, the string will be assumed
+to be encoded in UTF-8, and C<evalbytes> will make a temporary
+downgraded to non-UTF-8 copy to work from.  If this is not possible
+(because one or more characters in it require UTF-8), the C<evalbytes>
+will fail with the error stored in C<$@>.
+
+Bytes that correspond to ASCII-range code points will have their normal
+meanings for operators in the string.  The treatment of the other bytes
+depends on if the L<C<'unicode_strings"> feature|feature/The
+'unicode_strings' feature> is in effect.
+
+Of course, variables that are UTF-8 and are referred to in the string
+retain that:
+
+ my $a = "\x{100}";
+ evalbytes 'print ord $a, "\n"';
+
+prints
+
+ 256
+
+and C<$@> is empty.
+
+Source filters activated within the evaluated code apply to the code
+itself.
+
+L<C<evalbytes>|/evalbytes EXPR> is available starting in Perl v5.16.  To
+access it, you must say C<CORE::evalbytes>, but you can omit the
+C<CORE::> if the
 L<C<"evalbytes"> feature|feature/The 'unicode_eval' and 'evalbytes' features>
-is enabled or if it is prefixed with C<CORE::>.  The
-L<C<"evalbytes"> feature|feature/The 'unicode_eval' and 'evalbytes' features>
-is enabled automatically with a C<use v5.16> (or higher) declaration in
-the current scope.
+is enabled.  This is enabled automatically with a C<use v5.16> (or
+higher) declaration in the current scope.
 
 =item exec LIST
 X<exec> X<execute>
