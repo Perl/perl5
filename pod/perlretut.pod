@@ -197,6 +197,14 @@ be backslashed:
 
     'C:\WIN32' =~ /C:\\WIN/;   # matches
 
+In situations where it doesn't make sense for a particular metacharacter
+to mean what it normally does, it automatically loses its
+metacharacter-ness and becomes an ordinary character that is to be
+matched literally.  For example, the C<'}'> is a metacharacter only when
+it is the mate of a C<'{'> metacharacter.  Otherwise it is treated as a
+literal RIGHT CURLY BRACKET.  This may lead to unexpected results.
+L<C<use re 'strict'>|re/'strict' mode> can catch some of these.
+
 In addition to the metacharacters, there are some ASCII characters
 which don't have printable character equivalents and are instead
 represented by I<escape sequences>.  Common examples are C<\t> for a
