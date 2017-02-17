@@ -381,9 +381,9 @@ no string left to it, so it matches 0 times.
 
 There are a few more things you might want to know about matching
 operators.
-The global modifier C<//g> allows the matching operator to match
+The global modifier C</g> allows the matching operator to match
 within a string as many times as possible.  In scalar context,
-successive matches against a string will have C<//g> jump from match
+successive matches against a string will have C</g> jump from match
 to match, keeping track of position in the string as it goes along.
 You can get or set the position with the C<pos()> function.
 For example,
@@ -401,9 +401,9 @@ prints
 
 A failed match or changing the target string resets the position.  If
 you don't want the position reset after failure to match, add the
-C<//c>, as in C</regex/gc>.
+C</c>, as in C</regex/gc>.
 
-In list context, C<//g> returns a list of matched groupings, or if
+In list context, C</g> returns a list of matched groupings, or if
 there are no groupings, a list of matches to the whole regex.  So
 
     @words = ($x =~ /(\w+)/g);  # matches,

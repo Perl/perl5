@@ -2549,7 +2549,7 @@ loops using regular expressions, with something as innocuous as:
 The C<o?> matches at the beginning of C<'foo'>, and since the position
 in the string is not moved by the match, C<o?> would match again and again
 because of the C<"*"> quantifier.  Another common way to create a similar cycle
-is with the looping modifier C<//g>:
+is with the looping modifier C</g>:
 
     @matches = ( 'foo' =~ m{ o? }xg );
 

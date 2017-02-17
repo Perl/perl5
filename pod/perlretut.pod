@@ -46,7 +46,7 @@ of strings, and to do search and replace operations.
 Regular expressions have the undeserved reputation of being abstract
 and difficult to understand.  This really stems simply because the
 notation used to express them tends to be terse and dense, and not
-because of inherent complexity.  We recommend using the C<"/x"> regular
+because of inherent complexity.  We recommend using the C</x> regular
 expression modifier (described below) along with plenty of white space
 to make them less dense, and easier to read.  Regular expressions are
 constructed using
@@ -401,7 +401,7 @@ character, or the match fails.  Then
 Now, even C<[0-9]> can be a bother to write multiple times, so in the
 interest of saving keystrokes and making regexps more readable, Perl
 has several abbreviations for common character classes, as shown below.
-Since the introduction of Unicode, unless the C<//a> modifier is in
+Since the introduction of Unicode, unless the C</a> modifier is in
 effect, these character classes match more than just a few characters in
 the ASCII range.
 
@@ -434,21 +434,21 @@ but also digits and characters from non-roman scripts
 
 =item *
 
-The period '.' matches any character but "\n" (unless the modifier C<//s> is
+The period '.' matches any character but "\n" (unless the modifier C</s> is
 in effect, as explained below).
 
 =item *
 
 \N, like the period, matches any character but "\n", but it does so
-regardless of whether the modifier C<//s> is in effect.
+regardless of whether the modifier C</s> is in effect.
 
 =back
 
-The C<//a> modifier, available starting in Perl 5.14,  is used to
+The C</a> modifier, available starting in Perl 5.14,  is used to
 restrict the matches of \d, \s, and \w to just those in the ASCII range.
 It is useful to keep your program from being needlessly exposed to full
 Unicode (and its accompanying security considerations) when all you want
-is to process English-like text.  (The "a" may be doubled, C<//aa>, to
+is to process English-like text.  (The "a" may be doubled, C</aa>, to
 provide even more restrictions, preventing case-insensitive matching of
 ASCII with non-ASCII characters; otherwise a Unicode "Kelvin Sign"
 would caselessly match a "k" or "K".)
@@ -514,7 +514,7 @@ however, we want to keep track of newlines.  We might even want C<^>
 and C<$> to anchor at the beginning and end of lines within the
 string, rather than just the beginning and end of the string.  Perl
 allows us to choose between ignoring and paying attention to newlines
-by using the C<//s> and C<//m> modifiers.  C<//s> and C<//m> stand for
+by using the C</s> and C</m> modifiers.  C</s> and C</m> stand for
 single line and multi-line and they determine whether a string is to
 be treated as one continuous string, or as a set of lines.  The two
 modifiers affect two aspects of how the regexp is interpreted: 1) how
@@ -525,33 +525,33 @@ and C<$> are able to match.  Here are the four possible combinations:
 
 =item *
 
-no modifiers (//): Default behavior.  C<'.'> matches any character
+no modifiers: Default behavior.  C<'.'> matches any character
 except C<"\n">.  C<^> matches only at the beginning of the string and
 C<$> matches only at the end or before a newline at the end.
 
 =item *
 
-s modifier (//s): Treat string as a single long line.  C<'.'> matches
+s modifier (C</s>): Treat string as a single long line.  C<'.'> matches
 any character, even C<"\n">.  C<^> matches only at the beginning of
 the string and C<$> matches only at the end or before a newline at the
 end.
 
 =item *
 
-m modifier (//m): Treat string as a set of multiple lines.  C<'.'>
+m modifier (C</m>): Treat string as a set of multiple lines.  C<'.'>
 matches any character except C<"\n">.  C<^> and C<$> are able to match
 at the start or end of I<any> line within the string.
 
 =item *
 
-both s and m modifiers (//sm): Treat string as a single long line, but
+both s and m modifiers (C</sm>): Treat string as a single long line, but
 detect multiple lines.  C<'.'> matches any character, even
 C<"\n">.  C<^> and C<$>, however, are able to match at the start or end
 of I<any> line within the string.
 
 =back
 
-Here are examples of C<//s> and C<//m> in action:
+Here are examples of C</s> and C</m> in action:
 
     $x = "There once was a girl\nWho programmed in Perl\n";
 
@@ -565,8 +565,8 @@ Here are examples of C<//s> and C<//m> in action:
     $x =~ /girl.Who/m;  # doesn't match, "." doesn't match "\n"
     $x =~ /girl.Who/sm; # matches, "." matches "\n"
 
-Most of the time, the default behavior is what is wanted, but C<//s> and
-C<//m> are occasionally very useful.  If C<//m> is being used, the start
+Most of the time, the default behavior is what is wanted, but C</s> and
+C</m> are occasionally very useful.  If C</m> is being used, the start
 of the string can still be matched with C<\A> and the end of the string
 can still be matched with the anchors C<\Z> (matches both the end and
 the newline before, like C<$>), and C<\z> (matches only the end):
@@ -1474,7 +1474,7 @@ Putting all the parts together, we get a regexp that matches numbers:
    /^[+-]?(\d+\.\d+|\d+\.|\.\d+|\d+)([eE][+-]?\d+)?$/;  # Ta da!
 
 Long regexps like this may impress your friends, but can be hard to
-decipher.  In complex situations like this, the C<//x> modifier for a
+decipher.  In complex situations like this, the C</x> modifier for a
 match is invaluable.  It allows one to put nearly arbitrary whitespace
 and comments into a regexp without affecting their meaning.  Using it,
 we can rewrite our 'extended' regexp in the more pleasing form
@@ -1586,8 +1586,8 @@ We have already introduced the matching operator in its default
 C</regexp/> and arbitrary delimiter C<m!regexp!> forms.  We have used
 the binding operator C<=~> and its negation C<!~> to test for string
 matches.  Associated with the matching operator, we have discussed the
-single line C<//s>, multi-line C<//m>, case-insensitive C<//i> and
-extended C<//x> modifiers.  There are a few more things you might
+single line C</s>, multi-line C</m>, case-insensitive C</i> and
+extended C</x> modifiers.  There are a few more things you might
 want to know about matching operators.
 
 =head3 Prohibiting substitution
@@ -1612,15 +1612,15 @@ the regexp in the I<last successful match> is used instead.  So we have
 =head3 Global matching
 
 The final two modifiers we will discuss here,
-C<//g> and C<//c>, concern multiple matches.
-The modifier C<//g> stands for global matching and allows the
+C</g> and C</c>, concern multiple matches.
+The modifier C</g> stands for global matching and allows the
 matching operator to match within a string as many times as possible.
 In scalar context, successive invocations against a string will have
-C<//g> jump from match to match, keeping track of position in the
+C</g> jump from match to match, keeping track of position in the
 string as it goes along.  You can get or set the position with the
 C<pos()> function.
 
-The use of C<//g> is shown in the following example.  Suppose we have
+The use of C</g> is shown in the following example.  Suppose we have
 a string that consists of words separated by spaces.  If we know how
 many words there are in advance, we could extract the words using
 groupings:
@@ -1632,7 +1632,7 @@ groupings:
                                            # $3 = 'house'
 
 But what if we had an indeterminate number of words? This is the sort
-of task C<//g> was made for.  To extract all words, form the simple
+of task C</g> was made for.  To extract all words, form the simple
 regexp C<(\w+)> and loop over all matches with C</(\w+)/g>:
 
     while ($x =~ /(\w+)/g) {
@@ -1647,12 +1647,12 @@ prints
 
 A failed match or changing the target string resets the position.  If
 you don't want the position reset after failure to match, add the
-C<//c>, as in C</regexp/gc>.  The current position in the string is
+C</c>, as in C</regexp/gc>.  The current position in the string is
 associated with the string, not the regexp.  This means that different
 strings have different positions and their respective positions can be
 set or read independently.
 
-In list context, C<//g> returns a list of matched groupings, or if
+In list context, C</g> returns a list of matched groupings, or if
 there are no groupings, a list of matches to the whole regexp.  So if
 we wanted just the words, we could use
 
@@ -1661,8 +1661,8 @@ we wanted just the words, we could use
                                 # $words[1] = 'dog'
                                 # $words[2] = 'house'
 
-Closely associated with the C<//g> modifier is the C<\G> anchor.  The
-C<\G> anchor matches at the point where the previous C<//g> match left
+Closely associated with the C</g> modifier is the C<\G> anchor.  The
+C<\G> anchor matches at the point where the previous C</g> match left
 off.  C<\G> allows us to easily do context-sensitive matching:
 
     $metric = 1;  # use metric units
@@ -1678,7 +1678,7 @@ off.  C<\G> allows us to easily do context-sensitive matching:
     }
     $x =~ /\G\s+(widget|sprocket)/g;  # continue processing
 
-The combination of C<//g> and C<\G> allows us to process the string a
+The combination of C</g> and C<\G> allows us to process the string a
 bit at a time and use arbitrary Perl logic to decide what to do next.
 Currently, the C<\G> anchor is only fully supported when used to anchor
 to the start of the pattern.
@@ -1728,7 +1728,7 @@ important not only to match what is desired, but to reject what is not
 desired.
 
 (There are other regexp modifiers that are available, such as
-C<//o>, but their specialized uses are beyond the
+C</o>, but their specialized uses are beyond the
 scope of this introduction.  )
 
 =head3 Search and replace
@@ -2074,7 +2074,7 @@ character classes.  These have the form C<[:name:]>, with C<name> the
 name of the POSIX class.  The POSIX classes are C<alpha>, C<alnum>,
 C<ascii>, C<cntrl>, C<digit>, C<graph>, C<lower>, C<print>, C<punct>,
 C<space>, C<upper>, and C<xdigit>, and two extensions, C<word> (a Perl
-extension to match C<\w>), and C<blank> (a GNU extension).  The C<//a>
+extension to match C<\w>), and C<blank> (a GNU extension).  The C</a>
 modifier restricts these to matching just in the ASCII range; otherwise
 they can match the same as their corresponding Perl Unicode classes:
 C<[:upper:]> is the same as C<\p{IsUpper}>, etc.  (There are some
@@ -2240,9 +2240,9 @@ example is
     /(?# Match an integer:)[+-]?\d+/;
 
 This style of commenting has been largely superseded by the raw,
-freeform commenting that is allowed with the C<//x> modifier.
+freeform commenting that is allowed with the C</x> modifier.
 
-Most modifiers, such as C<//i>, C<//m>, C<//s> and C<//x> (or any
+Most modifiers, such as C</i>, C</m>, C</s> and C</x> (or any
 combination thereof) can also be embedded in
 a regexp using C<(?i)>, C<(?m)>, C<(?s)>, and C<(?x)>.  For instance,
 
@@ -2268,7 +2268,7 @@ that must have different modifiers:
         }
     }
 
-The second advantage is that embedded modifiers (except C<//p>, which
+The second advantage is that embedded modifiers (except C</p>, which
 modifies the entire regexp) only affect the regexp
 inside the group the embedded modifier is contained in.  So grouping
 can be used to localize the modifier's effects:
@@ -2393,7 +2393,7 @@ behavior occurs with completely independent regexps:
     $x =~ /a*/g;   # matches, eats an 'a'
     $x =~ /\Gab/g; # doesn't match, no 'a' available
 
-Here C<//g> and C<\G> create a 'tag team' handoff of the string from
+Here C</g> and C<\G> create a 'tag team' handoff of the string from
 one regexp to the other.  Regexps with an independent subexpression are
 much like this, with a handoff of the string to the independent
 subexpression, and a handoff of the string back to the enclosing
@@ -2758,7 +2758,7 @@ expression.  Rather, the whole code block is parsed as perl code at the
 same time as perl is compiling the code containing the literal regexp
 pattern.
 
-The regexp without the C<//x> modifier is
+The regexp without the C</x> modifier is
 
     /^1(?:((??{ $z0 }))1(?{ $z0 = $z1; $z1 .= $^N; }))+$/
 
