@@ -173,7 +173,7 @@ need to know about.   First of all, not all characters can be used "as
 is" in a match.  Some characters, called I<metacharacters>, are reserved
 for use in regexp notation.  The metacharacters are
 
-    {}[]()^$.|*+?\
+    {}[]()^$.|*+?-\
 
 The significance of each of these will be explained
 in the rest of the tutorial, but for now, it is important only to know
