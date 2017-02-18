@@ -566,6 +566,13 @@ PP(pp_formline)
 	    arg = *fpc++;
 	    f += arg;
 	    fieldsize = arg;
+            {
+                STRLEN cur = t - SvPVX_const(PL_formtarget);
+                /* ensure there's always space for the ops which don't
+                 * 'goto append' to unconditionally append a field's
+                 * worth, e.g. FF_SPACE, FF_DECIMAL */
+                t = SvGROW(PL_formtarget, cur + fieldsize + 1) + cur;
+            }
 
 	    if (MARK < SP)
 		sv = *++MARK;
@@ -872,6 +879,10 @@ PP(pp_formline)
 	case FF_NEWLINE: /* delete trailing spaces, then append \n */
 	    f++;
 	    while (t-- > (SvPVX(PL_formtarget) + linemark) && *t == ' ') ;
+            {
+                STRLEN cur = t - SvPVX_const(PL_formtarget);
+                t = SvGROW(PL_formtarget, cur + 1 + 1) + cur;
+            }
 	    t++;
 	    *t++ = '\n';
 	    break;

@@ -98,7 +98,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 21;
 
 # number of tests in section 3
-my $bug_tests = 66 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 6 + 2 + 3 + 96 + 11 + 14;
+my $bug_tests = 66 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 6 + 2 + 3 + 96 + 11 + 15;
 
 # number of tests in section 4
 my $hmb_tests = 37;
@@ -1575,6 +1575,19 @@ ok  defined *{$::{CmT}}{FORMAT}, "glob assign";
         use bytes;
         formline($format);
         is $^A, $expected, "RT #130703";
+    }
+
+    # further buffer overflows with RT #130703
+
+    {
+        local $^A = '';
+        my $n = 200;
+        my $long = 'x' x 300;
+        my $numf = ('@###' x $n);
+        my $expected = $long . "\n" . ("   1" x $n);
+        formline("@*\n$numf", $long, ('1') x $n);
+
+        is $^A, $expected, "RT #130703 part 2";
     }
 
 
