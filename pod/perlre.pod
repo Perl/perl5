@@ -25,10 +25,10 @@ find things that, while legal, may not be what you intended.
 
 =head3 Overview
 
-Matching operations can have various modifiers.  Modifiers
-that relate to the interpretation of the regular expression inside
-are listed below.  Modifiers that alter the way a regular expression
-is used by Perl are detailed in L<perlop/"Regexp Quote-Like Operators"> and
+The default behavior for matching can be changed, using various
+modifiers.  Modifiers that relate to the interpretation of the pattern
+are listed just below.  Modifiers that alter the way a pattern is used
+by Perl are detailed in L<perlop/"Regexp Quote-Like Operators"> and
 L<perlop/"Gory details of parsing quoted constructs">.
 
 =over 4
@@ -36,7 +36,7 @@ L<perlop/"Gory details of parsing quoted constructs">.
 =item B<C<m>>
 X</m> X<regex, multiline> X<regexp, multiline> X<regular expression, multiline>
 
-Treat the string as multiple lines.  That is, change C<"^"> and C<"$"> from matching
+Treat the string being matched against as multiple lines.  That is, change C<"^"> and C<"$"> from matching
 the start of the string's first line and the end of its last line to
 matching the start and end of each line within the string.
 
@@ -451,8 +451,8 @@ compatibilities.
 
 =head4 /a (and /aa)
 
-This modifier stands for ASCII-restrict (or ASCII-safe).  This modifier,
-unlike the others, may be doubled-up to increase its effect.
+This modifier stands for ASCII-restrict (or ASCII-safe).  This modifier
+may be doubled-up to increase its effect.
 
 When it appears singly, it causes the sequences C<\d>, C<\s>, C<\w>, and
 the Posix character classes to match only in the ASCII range.  They thus
@@ -600,7 +600,10 @@ X<.> X</s>
 
 =head3 Quantifiers
 
-The following standard quantifiers are recognized:
+Quantifiers are used when a particular portion of a pattern needs to
+match a certain number (or numbers) of times.  If there isn't a
+quantifier the number of times to match is exactly one.  The following
+standard quantifiers are recognized:
 X<metacharacter> X<quantifier> X<*> X<+> X<?> X<{n}> X<{n,}> X<{n,m}>
 
     *           Match 0 or more times
@@ -610,15 +613,15 @@ X<metacharacter> X<quantifier> X<*> X<+> X<?> X<{n}> X<{n,}> X<{n,m}>
     {n,}        Match at least n times
     {n,m}       Match at least n but not more than m times
 
-(If a curly bracket occurs in a context other than one of the
-quantifiers listed above, where it does not form part of a backslashed
-sequence like C<\x{...}>, it is treated as a regular character.
-However, a deprecation warning is raised for these
-occurrences, and in Perl v5.26, literal uses of a curly bracket will be
-required to be escaped, say by preceding them with a backslash (C<"\{">)
-or enclosing them within square brackets  (C<"[{]">).  This change will
-allow for future syntax extensions (like making the lower bound of a
-quantifier optional), and better error checking of quantifiers.)
+(If a non-escaped curly bracket occurs in a context other than one of
+the quantifiers listed above, where it does not form part of a
+backslashed sequence like C<\x{...}>, it is either a fatal syntax error,
+or treated as a regular character, generally with a deprecation warning
+raised.  To escape it, you can precede it with a backslash (C<"\{">) or
+enclose it within square brackets  (C<"[{]">).
+This change will allow for future syntax extensions (like making the
+lower bound of a quantifier optional), and better error checking of
+quantifiers).
 
 The C<"*"> quantifier is equivalent to C<{0,}>, the C<"+">
 quantifier to C<{1,}>, and the C<"?"> quantifier to C<{0,1}>.  I<n> and I<m> are limited
@@ -866,7 +869,7 @@ string:
 
 =head3 Capture groups
 
-The bracketing construct C<( ... )> creates capture groups (also referred to as
+The grouping construct C<( ... )> creates capture groups (also referred to as
 capture buffers). To refer to the current contents of a group later on, within
 the same pattern, use C<\g1> (or C<\g{1}>) for the first, C<\g2> (or C<\g{2}>)
 for the second, and so on.
