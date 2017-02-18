@@ -607,9 +607,9 @@ Perl_mg_free_type(pTHX_ SV *sv, int how)
     MAGIC *mg, *prevmg, *moremg;
     PERL_ARGS_ASSERT_MG_FREE_TYPE;
     for (prevmg = NULL, mg = SvMAGIC(sv); mg; prevmg = mg, mg = moremg) {
-	MAGIC *newhead;
 	moremg = mg->mg_moremagic;
 	if (mg->mg_type == how) {
+            MAGIC *newhead;
 	    /* temporarily move to the head of the magic chain, in case
 	       custom free code relies on this historical aspect of mg_free */
 	    if (prevmg) {
@@ -1138,9 +1138,9 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 #ifdef HAS_GETGROUPS
 	{
 	    Groups_t *gary = NULL;
-	    I32 i;
             I32 num_groups = getgroups(0, gary);
             if (num_groups > 0) {
+                I32 i;
                 Newx(gary, num_groups, Groups_t);
                 num_groups = getgroups(num_groups, gary);
                 for (i = 0; i < num_groups; i++)
@@ -2149,7 +2149,6 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
     SV* const lsv = LvTARG(sv);
     SSize_t pos;
     STRLEN len;
-    STRLEN ulen = 0;
     MAGIC* found;
     const char *s;
 
@@ -2171,7 +2170,7 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
     pos = SvIV(sv);
 
     if (DO_UTF8(lsv)) {
-	ulen = sv_or_pv_len_utf8(lsv, s, len);
+        const STRLEN ulen = sv_or_pv_len_utf8(lsv, s, len);
 	if (ulen)
 	    len = ulen;
     }

@@ -3275,18 +3275,18 @@ S_scan_const(pTHX_ char *start)
 #endif
                 /* Always gets run for ASCII, and sometimes for EBCDIC. */
                 {
-                    SSize_t i;
-
                     /* Here, no conversions are necessary, which means that the
                      * first character in the range is already in 'd' and
                      * valid, so we can skip overwriting it */
                     if (has_utf8) {
+                        SSize_t i;
                         d += UTF8SKIP(d);
                         for (i = range_min + 1; i <= range_max; i++) {
                             append_utf8_from_native_byte((U8) i, (U8 **) &d);
                         }
                     }
                     else {
+                        SSize_t i;
                         d++;
                         assert(range_min + 1 <= range_max);
                         for (i = range_min + 1; i < range_max; i++) {
@@ -9040,7 +9040,6 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
 	    s++;
 	if (*s == ',') {
 	    GV* gv;
-	    PADOFFSET off;
 	    if (keyword(w, s - w, 0))
 		return;
 
@@ -9048,6 +9047,7 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
 	    if (gv && GvCVu(gv))
 		return;
 	    if (s - w <= 254) {
+                PADOFFSET off;
 		char tmpbuf[256];
 		Copy(w, tmpbuf+1, s - w, char);
 		*tmpbuf = '&';
@@ -11335,8 +11335,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 STATIC char *
 S_scan_formline(pTHX_ char *s)
 {
-    char *eol;
-    char *t;
     SV * const stuff = newSVpvs("");
     bool needargs = FALSE;
     bool eofmt = FALSE;
@@ -11344,8 +11342,9 @@ S_scan_formline(pTHX_ char *s)
     PERL_ARGS_ASSERT_SCAN_FORMLINE;
 
     while (!needargs) {
+        char *eol;
 	if (*s == '.') {
-	    t = s+1;
+            char *t = s+1;
 #ifdef PERL_STRICT_CR
 	    while (SPACE_OR_TAB(*t))
 		t++;
@@ -11362,6 +11361,7 @@ S_scan_formline(pTHX_ char *s)
 	if (!eol++)
 		eol = PL_bufend;
 	if (*s != '#') {
+            char *t;
 	    for (t = s; t < eol; t++) {
 		if (*t == '~' && t[1] == '~' && SvCUR(stuff)) {
 		    needargs = FALSE;

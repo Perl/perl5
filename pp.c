@@ -5652,8 +5652,6 @@ PP(pp_reverse)
     }
     else {
 	char *up;
-	char *down;
-	I32 tmp;
 	dTARGET;
 	STRLEN len;
 
@@ -5666,6 +5664,7 @@ PP(pp_reverse)
 
 	up = SvPV_force(TARG, len);
 	if (len > 1) {
+            char *down;
 	    if (DO_UTF8(TARG)) {	/* first reverse each character */
 		U8* s = (U8*)SvPVX(TARG);
 		const U8* send = (U8*)(s + len);
@@ -5682,9 +5681,9 @@ PP(pp_reverse)
 			down = (char*)(s - 1);
 			/* reverse this character */
 			while (down > up) {
-			    tmp = *up;
+                            const char tmp = *up;
 			    *up++ = *down;
-			    *down-- = (char)tmp;
+                            *down-- = tmp;
 			}
 		    }
 		}
@@ -5692,9 +5691,9 @@ PP(pp_reverse)
 	    }
 	    down = SvPVX(TARG) + len - 1;
 	    while (down > up) {
-		tmp = *up;
+                const char tmp = *up;
 		*up++ = *down;
-		*down-- = (char)tmp;
+                *down-- = tmp;
 	    }
 	    (void)SvPOK_only_UTF8(TARG);
 	}

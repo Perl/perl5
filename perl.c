@@ -1580,7 +1580,6 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 	 * the original argv[0].  (See below for 'contiguous', though.)
 	 * --jhi */
 	 const char *s = NULL;
-	 int i;
 	 const UV mask = ~(UV)(PTRSIZE-1);
          /* Do the mask check only if the args seem like aligned. */
 	 const UV aligned =
@@ -1596,6 +1595,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 	  * like the argv[] interleaved with some other data, we are
 	  * fine.  (Did I just evoke Murphy's Law?)  --jhi */
 	 if (PL_origargv && PL_origargc >= 1 && (s = PL_origargv[0])) {
+              int i;
 	      while (*s) s++;
 	      for (i = 1; i < PL_origargc; i++) {
 		   if ((PL_origargv[i] == s + 1
@@ -1629,6 +1629,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 		    INT2PTR(char *, PTR2UV(s + PTRSIZE) & mask)))
 		 )
 	      {
+                   int i;
 #ifndef OS2		/* ENVIRON is read by the kernel too. */
 		   s = PL_origenviron[0];
 		   while (*s) s++;

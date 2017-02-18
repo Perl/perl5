@@ -487,13 +487,13 @@ void
 Perl_opslab_force_free(pTHX_ OPSLAB *slab)
 {
     OPSLAB *slab2;
-    OPSLOT *slot;
 #ifdef DEBUGGING
     size_t savestack_count = 0;
 #endif
     PERL_ARGS_ASSERT_OPSLAB_FORCE_FREE;
     slab2 = slab;
     do {
+        OPSLOT *slot;
 	for (slot = slab2->opslab_first;
 	     slot->opslot_next;
 	     slot = slot->opslot_next) {
@@ -1865,7 +1865,6 @@ Perl_scalarvoid(pTHX_ OP *arg)
     dVAR;
     OP *kid;
     SV* sv;
-    U8 want;
     SSize_t defer_stack_alloc = 0;
     SSize_t defer_ix = -1;
     OP **defer_stack = NULL;
@@ -1874,6 +1873,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
     PERL_ARGS_ASSERT_SCALARVOID;
 
     do {
+        U8 want;
         SV *useless_sv = NULL;
         const char* useless = NULL;
 
@@ -10895,7 +10895,6 @@ Perl_ck_require(pTHX_ OP *o)
 
     if (o->op_flags & OPf_KIDS) {	/* Shall we supply missing .pm? */
 	SVOP * const kid = (SVOP*)cUNOPo->op_first;
-	HEK *hek;
 	U32 hash;
 	char *s;
 	STRLEN len;
@@ -10905,6 +10904,7 @@ Perl_ck_require(pTHX_ OP *o)
 	  if (kid->op_private & OPpCONST_BARE) {
             dVAR;
 	    const char *end;
+            HEK *hek;
 
 	    if (was_readonly) {
 		    SvREADONLY_off(sv);
@@ -10947,6 +10947,7 @@ Perl_ck_require(pTHX_ OP *o)
 	    }
 	    else {
                 dVAR;
+                HEK *hek;
 		if (was_readonly) SvREADONLY_off(sv);
 		PERL_HASH(hash, s, len);
 		hek = share_hek(s,

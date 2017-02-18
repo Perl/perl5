@@ -619,11 +619,11 @@ Perl_ninstr(const char *big, const char *bigend, const char *little, const char 
         return (char*)big;
     {
         const char first = *little;
-        const char *s, *x;
         bigend -= lend - little++;
     OUTER:
         while (big <= bigend) {
             if (*big++ == first) {
+                const char *s, *x;
                 for (x=big,s=little; s < lend; x++,s++) {
                     if (*s != *x)
                         goto OUTER;
@@ -2540,10 +2540,9 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
     if (did_pipes && pid > 0) {
 	int errkid;
 	unsigned n = 0;
-	SSize_t n1;
 
 	while (n < sizeof(int)) {
-	    n1 = PerlLIO_read(pp[0],
+            const SSize_t n1 = PerlLIO_read(pp[0],
 			      (void*)(((char*)&errkid)+n),
 			      (sizeof(int)) - n);
 	    if (n1 <= 0)
@@ -2698,10 +2697,9 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
     if (did_pipes && pid > 0) {
 	int errkid;
 	unsigned n = 0;
-	SSize_t n1;
 
 	while (n < sizeof(int)) {
-	    n1 = PerlLIO_read(pp[0],
+            const SSize_t n1 = PerlLIO_read(pp[0],
 			      (void*)(((char*)&errkid)+n),
 			      (sizeof(int)) - n);
 	    if (n1 <= 0)

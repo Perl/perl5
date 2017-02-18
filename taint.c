@@ -78,7 +78,6 @@ void
 Perl_taint_env(pTHX)
 {
     SV** svp;
-    MAGIC* mg;
     const char* const *e;
     static const char* const misc_env[] = {
 	"IFS",		/* most shells' inter-field separators */
@@ -121,6 +120,7 @@ Perl_taint_env(pTHX)
     STRLEN len = 8; /* strlen(name)  */
 
     while (1) {
+        MAGIC* mg;
 	if (i)
 	    len = my_sprintf(name,"DCL$PATH;%d", i);
 	svp = hv_fetch(GvHVn(PL_envgv), name, len, FALSE);
@@ -141,6 +141,7 @@ Perl_taint_env(pTHX)
 
     svp = hv_fetchs(GvHVn(PL_envgv),"PATH",FALSE);
     if (svp && *svp) {
+        MAGIC* mg;
 	if (SvTAINTED(*svp)) {
 	    TAINT;
 	    taint_proper("Insecure %s%s", "$ENV{PATH}");
