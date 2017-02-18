@@ -1596,9 +1596,10 @@ L<C<(?I<PARNO>)>|/(?PARNO) (?-PARNO) (?+PARNO) (?R) (?0)>
 for a different, more efficient way to accomplish
 the same task.
 
-Executing a postponed regular expression 50 times without consuming any
-input string will result in a fatal error.  The maximum depth is compiled
-into perl, so changing it requires a custom build.
+Executing a postponed regular expression too many times without
+consuming any input string will also result in a fatal error.  The depth
+at which that happens is compiled into perl, so it can be changed with a
+custom build.
 
 =item C<(?I<PARNO>)> C<(?-I<PARNO>)> C<(?+I<PARNO>)> C<(?R)> C<(?0)>
 X<(?PARNO)> X<(?1)> X<(?R)> X<(?0)> X<(?-1)> X<(?+1)> X<(?-PARNO)> X<(?+PARNO)>
@@ -1663,9 +1664,9 @@ the output produced should be the following:
     $3 = bar(baz)+baz(bop)
 
 If there is no corresponding capture group defined, then it is a
-fatal error.  Recursing deeper than 50 times without consuming any input
-string will also result in a fatal error.  The maximum depth is compiled
-into perl, so changing it requires a custom build.
+fatal error.  Recursing deeply without consuming any input string will
+also result in a fatal error.  The depth at which that happens is
+compiled into perl, so it can be changed with a custom build.
 
 The following shows how using negative indexing can make it
 easier to embed recursive patterns inside of a C<qr//> construct
