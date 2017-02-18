@@ -106,7 +106,7 @@ after the match regardless of the modifier.
 X</a> X</d> X</l> X</u>
 
 These modifiers, all new in 5.14, affect which character-set rules
-(Unicode, etc.) are used, as described below in
+(Unicode, I<etc>.) are used, as described below in
 L</Character set modifiers>.
 
 =item B<C<n>>
@@ -114,7 +114,7 @@ X</n> X<regex, non-capture> X<regexp, non-capture>
 X<regular expression, non-capture>
 
 Prevent the grouping metacharacters C<()> from capturing. This modifier,
-new in 5.22, will stop C<$1>, C<$2>, etc... from being filled in.
+new in 5.22, will stop C<$1>, C<$2>, I<etc>... from being filled in.
 
   "hello" =~ /(hi|hello)/;   # $1 is "hello"
   "hello" =~ /(hi|hello)/n;  # $1 is undef
@@ -154,7 +154,7 @@ L<perlop/"s/PATTERN/REPLACEMENT/msixpodualngcer"> are:
 =back
 
 Regular expression modifiers are usually written in documentation
-as e.g., "the C</x> modifier", even though the delimiter
+as I<e.g.>, "the C</x> modifier", even though the delimiter
 in question might not really be a slash.  The modifiers C</imnsxadlup>
 may also be embedded within the regular expression itself using
 the C<(?...)> construct, see L</Extended Patterns> below.
@@ -189,11 +189,11 @@ You can use L</(?#text)> to create a comment that ends earlier than the
 end of the current line, but C<text> also can't contain the closing
 delimiter unless escaped with a backslash.
 
-A common pitfall is to forget that C<#> characters begin a comment under
+A common pitfall is to forget that C<"#"> characters begin a comment under
 C</x> and are not matched literally.  Just keep that in mind when trying
 to puzzle out why a particular C</x> pattern isn't working as expected.
 
-Starting in Perl v5.26, if the modifier has a second C<x> within it,
+Starting in Perl v5.26, if the modifier has a second C<"x"> within it,
 it does everything that a single C</x> does, but additionally
 non-backslashed SPACE and TAB characters within bracketed character
 classes are also generally ignored, and hence can be added to make the
@@ -491,7 +491,7 @@ comes to case-insensitive matching.
 
 To forbid ASCII/non-ASCII matches (like "k" with C<\N{KELVIN SIGN}>),
 specify the C<"a"> twice, for example C</aai> or C</aia>.  (The first
-occurrence of C<"a"> restricts the C<\d>, etc., and the second occurrence
+occurrence of C<"a"> restricts the C<\d>, I<etc>., and the second occurrence
 adds the C</i> restrictions.)  But, note that code points outside the
 ASCII range will use Unicode rules for C</i> matching, so the modifier
 doesn't really restrict things to just ASCII; it just forbids the
@@ -538,7 +538,7 @@ sets the default to C</u>, overriding any plain C<use locale>.)
 Unlike the mechanisms mentioned above, these
 affect operations besides regular expressions pattern matching, and so
 give more consistent results with other operators, including using
-C<\U>, C<\l>, etc. in substitution replacements.
+C<\U>, C<\l>, I<etc>. in substitution replacements.
 
 If none of the above apply, for backwards compatibility reasons, the
 C</d> modifier is the one in effect by default.  As this can lead to
@@ -659,7 +659,7 @@ For instance,
 
    'aaaa' =~ /a++a/
 
-will never match, as the C<a++> will gobble up all the C<a>'s in the
+will never match, as the C<a++> will gobble up all the C<"a">'s in the
 string and won't leave any for the remaining part of the pattern. This
 feature can be extremely useful to give perl hints about where it
 shouldn't backtrack. For instance, the typical "match a double-quoted
@@ -880,11 +880,11 @@ X<named capture buffer> X<regular expression, named capture buffer>
 X<named capture group> X<regular expression, named capture group>
 X<%+> X<$+{name}> X<< \k<name> >>
 There is no limit to the number of captured substrings that you may use.
-Groups are numbered with the leftmost open parenthesis being number 1, etc.  If
+Groups are numbered with the leftmost open parenthesis being number 1, I<etc>.  If
 a group did not match, the associated backreference won't match either. (This
 can happen if the group is optional, or in a different branch of an
 alternation.)
-You can omit the C<"g">, and write C<"\1">, etc, but there are some issues with
+You can omit the C<"g">, and write C<"\1">, I<etc>, but there are some issues with
 this form, described below.
 
 You can also refer to capture groups relatively, by using a negative number, so
@@ -921,7 +921,7 @@ Capture group contents are dynamically scoped and available to you outside the
 pattern until the end of the enclosing block or until the next successful
 match, whichever comes first.  (See L<perlsyn/"Compound Statements">.)
 You can refer to them by absolute number (using C<"$1"> instead of C<"\g1">,
-etc); or by name via the C<%+> hash, using C<"$+{I<name>}">.
+I<etc>); or by name via the C<%+> hash, using C<"$+{I<name>}">.
 
 Braces are required in referring to named capture groups, but are optional for
 absolute or relative numbered ones.  Braces are safer when creating a regex by
@@ -932,7 +932,7 @@ is probably not what you intended.
 The C<\g> and C<\k> notations were introduced in Perl 5.10.0.  Prior to that
 there were no named nor relative numbered capture groups.  Absolute numbered
 groups were referred to using C<\1>,
-C<\2>, etc., and this notation is still
+C<\2>, I<etc>., and this notation is still
 accepted (and likely always will be).  But it leads to some ambiguities if
 there are more than 9 capture groups, as C<\10> could mean either the tenth
 capture group, or the character whose ordinal in octal is 010 (a backspace in
@@ -994,7 +994,7 @@ variable.
 X<$+> X<$^N> X<$&> X<$`> X<$'>
 
 These special variables, like the C<%+> hash and the numbered match variables
-(C<$1>, C<$2>, C<$3>, etc.) are dynamically scoped
+(C<$1>, C<$2>, C<$3>, I<etc>.) are dynamically scoped
 until the end of the enclosing block or until the next successful
 match, whichever comes first.  (See L<perlsyn/"Compound Statements">.)
 X<$+> X<$^N> X<$&> X<$`> X<$'>
@@ -1009,7 +1009,7 @@ beware that once Perl sees that you need one of C<$&>, C<$`>, or
 C<$'> anywhere in the program, it has to provide them for every
 pattern match.  This may substantially slow your program.
 
-Perl uses the same mechanism to produce C<$1>, C<$2>, etc, so you also
+Perl uses the same mechanism to produce C<$1>, C<$2>, I<etc>, so you also
 pay a price for each pattern that contains capturing parentheses.
 (To avoid this cost while retaining the grouping behaviour, use the
 extended regular expression C<(?: ... )> instead.)  But if you never
@@ -1150,8 +1150,8 @@ same scope containing the same modifier, so that
     /((?im)foo(?-m)bar)/
 
 matches all of C<foobar> case insensitively, but uses C</m> rules for
-only the C<foo> portion.  The C<a> flag overrides C<aa> as well;
-likewise C<aa> overrides C<a>.  The same goes for C<x> and C<xx>.
+only the C<foo> portion.  The C<"a"> flag overrides C<aa> as well;
+likewise C<aa> overrides C<"a">.  The same goes for C<"x"> and C<xx>.
 Hence, in
 
     /(?-x)foo/xx
@@ -1164,8 +1164,8 @@ C</x> but NOT C</xx> is turned on for matching C<foo>.  (One might
 mistakenly think that since the inner C<(?x)> is already in the scope of
 C</x>, that the result would effectively be the sum of them, yielding
 C</xx>.  It doesn't work that way.)  Similarly, doing something like
-C<(?xx-x)foo> turns off all C<x> behavior for matching C<foo>, it is not
-that you subtract 1 C<x> from 2 to get 1 C<x> remaining.
+C<(?xx-x)foo> turns off all C<"x"> behavior for matching C<foo>, it is not
+that you subtract 1 C<"x"> from 2 to get 1 C<"x"> remaining.
 
 Any of these modifiers can be set to apply globally to all regular
 expressions compiled within the scope of a C<use re>.  See
@@ -1176,15 +1176,15 @@ after the C<"?"> is a shorthand equivalent to C<d-imnsx>.  Flags (except
 C<"d">) may follow the caret to override it.
 But a minus sign is not legal with it.
 
-Note that the C<a>, C<d>, C<l>, C<p>, and C<u> modifiers are special in
-that they can only be enabled, not disabled, and the C<a>, C<d>, C<l>, and
-C<u> modifiers are mutually exclusive: specifying one de-specifies the
-others, and a maximum of one (or two C<a>'s) may appear in the
+Note that the C<"a">, C<"d">, C<"l">, C<"p">, and C<"u"> modifiers are special in
+that they can only be enabled, not disabled, and the C<"a">, C<"d">, C<"l">, and
+C<"u"> modifiers are mutually exclusive: specifying one de-specifies the
+others, and a maximum of one (or two C<"a">'s) may appear in the
 construct.  Thus, for
 example, C<(?-p)> will warn when compiled under C<use warnings>;
 C<(?-d:...)> and C<(?dl:...)> are fatal errors.
 
-Note also that the C<p> modifier is special in that its presence
+Note also that the C<"p"> modifier is special in that its presence
 anywhere in a pattern has a global effect.
 
 =item C<(?:pattern)>
@@ -1221,9 +1221,9 @@ is equivalent to the more verbose
 Note that any C<()> constructs enclosed within this one will still
 capture unless the C</n> modifier is in effect.
 
-Like the L</(?adlupimnsx-imnsx)> construct, C<aa> and C<a> override each
-other, as do C<xx> and C<x>.  They are not additive.  So, doing
-something like C<(?xx-x:foo)> turns off all C<x> behavior for matching
+Like the L</(?adlupimnsx-imnsx)> construct, C<aa> and C<"a"> override each
+other, as do C<xx> and C<"x">.  They are not additive.  So, doing
+something like C<(?xx-x:foo)> turns off all C<"x"> behavior for matching
 C<foo>.
 
 Starting in Perl 5.14, a C<"^"> (caret or circumflex accent) immediately
@@ -1279,12 +1279,12 @@ Consider the following pattern.  The numbers underneath show in
 which group the captured content will be stored.
 
 
-    # before  ---------------branch-reset----------- after        
+    # before  ---------------branch-reset----------- after
     / ( a )  (?| x ( y ) z | (p (q) r) | (t) u (v) ) ( z ) /x
-    # 1            2         2  3        2     3     4  
+    # 1            2         2  3        2     3     4
 
-Be careful when using the branch reset pattern in combination with 
-named captures. Named captures are implemented as being aliases to 
+Be careful when using the branch reset pattern in combination with
+named captures. Named captures are implemented as being aliases to
 numbered groups holding the captures, and that interferes with the
 implementation of the branch reset pattern. If you are using named
 captures in a branch reset pattern, it's best to use the same names,
@@ -1573,7 +1573,7 @@ pattern captures "A";
 
 Note that this means that  there is no way for the inner pattern to refer
 to a capture group defined outside.  (The code block itself can use C<$1>,
-etc., to refer to the enclosing pattern's capture groups.)  Thus, although
+I<etc>., to refer to the enclosing pattern's capture groups.)  Thus, although
 
     ('a' x 100)=~/(??{'(.)' x 100})/
 
@@ -1725,7 +1725,7 @@ matched);
 =item the special symbol C<(R)>
 
 (true when evaluated inside of recursion or eval).  Additionally the
-C<R> may be
+C<"R"> may be
 followed by a number, (which will be true when evaluated when recursing
 inside of the appropriate group), or by C<&NAME>, in which case it will
 be true only when evaluated during recursion in the named group.
@@ -1852,7 +1852,7 @@ give anything back" semantic is desirable.
 
 For example: C<< ^(?>a*)ab >> will never match, since C<< (?>a*) >>
 (anchored at the beginning of string, as above) will match I<all>
-characters C<a> at the beginning of string, leaving no C<a> for
+characters C<"a"> at the beginning of string, leaving no C<"a"> for
 C<ab> to match.  In contrast, C<a*ab> will match the same as C<a+b>,
 since the match of the subgroup C<a*> is influenced by the following
 group C<ab> (see L</"Backtracking">).  In particular, C<a*> inside
@@ -1904,7 +1904,7 @@ hung.  However, a tiny change to this pattern
 
 which uses C<< (?>...) >> matches exactly when the one above does (verifying
 this yourself would be a productive exercise), but finishes in a fourth
-the time when used on a similar string with 1000000 C<a>s.  Be aware,
+the time when used on a similar string with 1000000 C<"a">s.  Be aware,
 however, that, when this construct is followed by a
 quantifier, it currently triggers a warning message under
 the C<use warnings> pragma or B<-w> switch saying it
@@ -1912,7 +1912,7 @@ C<"matches null string many times in regex">.
 
 On simple groups, such as the pattern C<< (?> [^()]+ ) >>, a comparable
 effect may be achieved by negative lookahead, as in C<[^()]+ (?! [^()] )>.
-This was only 4 times slower on a string with 1000000 C<a>s.
+This was only 4 times slower on a string with 1000000 C<"a">s.
 
 The "grab all you can, and do not give anything back" semantic is desirable
 in many situations where on the first sight a simple C<()*> looks like
@@ -1967,7 +1967,7 @@ see L</Combining RE Pieces>.
 
 A fundamental feature of regular expression matching involves the
 notion called I<backtracking>, which is currently used (when needed)
-by all regular non-possessive expression quantifiers, namely C<*>, C<*?>, C<+>,
+by all regular non-possessive expression quantifiers, namely C<"*">, C<*?>, C<"+">,
 C<+?>, C<{n,m}>, and C<{n,m}?>.  Backtracking is often optimized
 internally, but the general principle outlined here is valid.
 
@@ -2402,9 +2402,9 @@ For instance:
 
   'AB' =~ /(A (A|B(*ACCEPT)|C) D)(E)/x;
 
-will match, and C<$1> will be C<AB> and C<$2> will be C<B>, C<$3> will not
+will match, and C<$1> will be C<AB> and C<$2> will be C<"B">, C<$3> will not
 be set. If another branch in the inner parentheses was matched, such as in the
-string 'ACDE', then the C<D> and C<E> would have to be matched as well.
+string 'ACDE', then the C<"D"> and C<"E"> would have to be matched as well.
 
 You can provide an argument, which will be available in the var
 C<$REGMARK> after the match completes.
@@ -2547,7 +2547,7 @@ loops using regular expressions, with something as innocuous as:
 
     'foo' =~ m{ ( o? )* }x;
 
-The C<o?> matches at the beginning of C<'foo'>, and since the position
+The C<o?> matches at the beginning of "C<foo>", and since the position
 in the string is not moved by the match, C<o?> would match again and again
 because of the C<"*"> quantifier.  Another common way to create a similar cycle
 is with the looping modifier C</g>:
@@ -2638,8 +2638,8 @@ Each of the elementary pieces of regular expressions which were described
 before (such as C<ab> or C<\Z>) could match at most one substring
 at the given position of the input string.  However, in a typical regular
 expression these elementary pieces are combined into more complicated
-patterns using combining operators C<ST>, C<S|T>, C<S*> etc.
-(in these examples C<S> and C<T> are regular subexpressions).
+patterns using combining operators C<ST>, C<S|T>, C<S*> I<etc>.
+(in these examples C<"S"> and C<"T"> are regular subexpressions).
 
 Such combinations can include alternatives, leading to a problem of choice:
 if we match a regular expression C<a|ab> against C<"abc">, will it match
@@ -2657,28 +2657,28 @@ by the question of "which matches are better, and which are worse?".
 Again, for elementary pieces there is no such question, since at most
 one match at a given position is possible.  This section describes the
 notion of better/worse for combining operators.  In the description
-below C<S> and C<T> are regular subexpressions.
+below C<"S"> and C<"T"> are regular subexpressions.
 
 =over 4
 
 =item C<ST>
 
-Consider two possible matches, C<AB> and C<A'B'>, C<A> and C<A'> are
-substrings which can be matched by C<S>, C<B> and C<B'> are substrings
-which can be matched by C<T>.
+Consider two possible matches, C<AB> and C<A'B'>, C<"A"> and C<A'> are
+substrings which can be matched by C<"S">, C<"B"> and C<B'> are substrings
+which can be matched by C<"T">.
 
-If C<A> is a better match for C<S> than C<A'>, C<AB> is a better
+If C<"A"> is a better match for C<"S"> than C<A'>, C<AB> is a better
 match than C<A'B'>.
 
-If C<A> and C<A'> coincide: C<AB> is a better match than C<AB'> if
-C<B> is a better match for C<T> than C<B'>.
+If C<"A"> and C<A'> coincide: C<AB> is a better match than C<AB'> if
+C<"B"> is a better match for C<"T"> than C<B'>.
 
 =item C<S|T>
 
-When C<S> can match, it is a better match than when only C<T> can match.
+When C<"S"> can match, it is a better match than when only C<"T"> can match.
 
-Ordering of two matches for C<S> is the same as for C<S>.  Similar for
-two matches for C<T>.
+Ordering of two matches for C<"S"> is the same as for C<"S">.  Similar for
+two matches for C<"T">.
 
 =item C<S{REPEAT_COUNT}>
 
@@ -2702,18 +2702,18 @@ Same as C<S{0,1}?>, C<S{0,BIG_NUMBER}?>, C<S{1,BIG_NUMBER}?> respectively.
 
 =item C<< (?>S) >>
 
-Matches the best match for C<S> and only that.
+Matches the best match for C<"S"> and only that.
 
 =item C<(?=S)>, C<(?<=S)>
 
-Only the best match for C<S> is considered.  (This is important only if
-C<S> has capturing parentheses, and backreferences are used somewhere
+Only the best match for C<"S"> is considered.  (This is important only if
+C<"S"> has capturing parentheses, and backreferences are used somewhere
 else in the whole regular expression.)
 
 =item C<(?!S)>, C<(?<!S)>
 
 For this grouping operator there is no need to describe the ordering, since
-only whether or not C<S> can match is important.
+only whether or not C<"S"> can match is important.
 
 =item C<(??{ EXPR })>, C<(?I<PARNO>)>
 
@@ -2775,7 +2775,7 @@ this:
     }
 
 Now C<use customre> enables the new escape in constant regular
-expressions, i.e., those without any runtime variable interpolations.
+expressions, I<i.e.>, those without any runtime variable interpolations.
 As documented in L<overload>, this conversion will work only over
 literal parts of regular expressions.  For C<\Y|$re\Y|> the variable
 part of this regular expression needs to be converted explicitly
@@ -2789,7 +2789,7 @@ part of this regular expression needs to be converted explicitly
 
 =head2 Embedded Code Execution Frequency
 
-The exact rules for how often (??{}) and (?{}) are executed in a pattern
+The exact rules for how often C<(??{})> and C<(?{})> are executed in a pattern
 are unspecified.  In the case of a successful match you can assume that
 they DWIM and will be executed in left to right order the appropriate
 number of times in the accepting path of the pattern as would any other
@@ -2847,7 +2847,7 @@ Subroutine call to a named capture group. Equivalent to C<< (?&NAME) >>.
 =head1 BUGS
 
 There are a number of issues with regard to case-insensitive matching
-in Unicode rules.  See C<i> under L</Modifiers> above.
+in Unicode rules.  See C<"i"> under L</Modifiers> above.
 
 This document varies from difficult to understand to completely
 and utterly opaque.  The wandering prose riddled with jargon is
