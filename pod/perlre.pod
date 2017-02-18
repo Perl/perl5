@@ -69,7 +69,7 @@ meaning described in this document.  A sequence of non-metacharacters
 matches the same sequence in the target string, as we saw above with
 C<m/abc/>.
 
-Only a few characters (all or them being ASCII punctuation characters)
+Only a few characters (all of them being ASCII punctuation characters)
 are metacharacters.  The most commonly used one is a dot C<".">, which
 normally matches almost any character (including a dot itself).
 

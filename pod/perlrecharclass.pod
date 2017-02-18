@@ -178,7 +178,7 @@ are generally used to add auxiliary markings to letters.
 C<\w> matches the platform's native underscore character plus whatever
 the locale considers to be alphanumeric.
 
-=item if instead, Unicode rules are in effect ...
+=item if, instead, Unicode rules are in effect ...
 
 C<\w> matches exactly what C<\p{Word}> matches.
 
@@ -236,7 +236,7 @@ in the table below.
 
 C<\s> matches whatever the locale considers to be whitespace.
 
-=item if instead, Unicode rules are in effect ...
+=item if, instead, Unicode rules are in effect ...
 
 C<\s> matches exactly the characters shown with an "s" column in the
 table below.
@@ -949,7 +949,7 @@ just the platform's native tab and space characters.
 
 =back
 
-=item if instead, Unicode rules are in effect ...
+=item if, instead, Unicode rules are in effect ...
 
 The POSIX class matches the same as the Full-range counterpart.
 
