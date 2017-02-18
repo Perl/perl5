@@ -878,7 +878,9 @@ PP(pp_formline)
 
 	case FF_NEWLINE: /* delete trailing spaces, then append \n */
 	    f++;
-	    while (t-- > (SvPVX(PL_formtarget) + linemark) && *t == ' ') ;
+	    while (t-- > (SvPVX(PL_formtarget) + linemark) && *t == ' ')
+            {}
+
             {
                 STRLEN cur = t - SvPVX_const(PL_formtarget);
                 t = SvGROW(PL_formtarget, cur + 1 + 1) + cur;
