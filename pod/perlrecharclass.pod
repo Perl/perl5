@@ -27,9 +27,11 @@ to mean just the bracketed form.  Certainly, most Perl documentation does that.
 The dot (or period), C<.> is probably the most used, and certainly
 the most well-known character class. By default, a dot matches any
 character, except for the newline. That default can be changed to
-add matching the newline by using the I<single line> modifier: either
+add matching the newline by using the I<single line> modifier:
 for the entire regular expression with the C</s> modifier, or
-locally with C<(?s)>.  (The C<L</\N>> backslash sequence, described
+locally with C<(?s)>  (and even globally within the scope of
+L<C<use re '/s'>|re/'E<sol>flags' mode>).  (The C<L</\N>> backslash
+sequence, described
 below, matches any character except newline without regard to the
 I<single line> modifier.)
 
@@ -176,7 +178,7 @@ are generally used to add auxiliary markings to letters.
 C<\w> matches the platform's native underscore character plus whatever
 the locale considers to be alphanumeric.
 
-=item if Unicode rules are in effect ...
+=item if instead, Unicode rules are in effect ...
 
 C<\w> matches exactly what C<\p{Word}> matches.
 
@@ -234,7 +236,7 @@ in the table below.
 
 C<\s> matches whatever the locale considers to be whitespace.
 
-=item if Unicode rules are in effect ...
+=item if instead, Unicode rules are in effect ...
 
 C<\s> matches exactly the characters shown with an "s" column in the
 table below.
@@ -498,10 +500,11 @@ consisting of the two characters matched against.  Like the other
 instance where a bracketed class can match multiple characters, and for
 similar reasons, the class must not be inverted, and the named sequence
 may not appear in a range, even one where it is both endpoints.  If
-these happen, it is a fatal error if the character class is within an
-extended L<C<(?[...])>|/Extended Bracketed Character Classes>
-class; and only the first code point is used (with
-a C<regexp>-type warning raised) otherwise.
+these happen, it is a fatal error if the character class is within the
+scope of L<C<use re 'strict>|re/'strict' mode>, or within an extended
+L<C<(?[...])>|/Extended Bracketed Character Classes> class; otherwise
+only the first code point is used (with a C<regexp>-type warning
+raised).
 
 =back
 
@@ -946,7 +949,7 @@ just the platform's native tab and space characters.
 
 =back
 
-=item if Unicode rules are in effect ...
+=item if instead, Unicode rules are in effect ...
 
 The POSIX class matches the same as the Full-range counterpart.
 
