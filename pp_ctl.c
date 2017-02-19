@@ -482,6 +482,7 @@ PP(pp_formline)
     NV value;
     bool gotsome = FALSE;   /* seen at least one non-blank item on this line */
     STRLEN len;             /* length of current sv */
+    STRLEN linemax;	    /* estimate of output size in bytes */
     bool item_is_utf8 = FALSE;
     bool targ_is_utf8 = FALSE;
     const char *fmt;
@@ -504,11 +505,10 @@ PP(pp_formline)
 	SvTAINTED_on(PL_formtarget);
     if (DO_UTF8(PL_formtarget))
 	targ_is_utf8 = TRUE;
-    /* Usually the output data will be the same size as the format,
-     * so this is a good first guess. Later on, @* or utf8 upgrades
-     * may trigger further growing.
-     */
-    t = SvGROW(PL_formtarget, len + SvCUR(formsv) + 1);
+    /* this is an initial estimate of how much output buffer space
+     * to allocate. It may be exceeded later */
+    linemax = (SvCUR(formsv) * (IN_BYTES ? 1 : 3) + 1);
+    t = SvGROW(PL_formtarget, len + linemax + 1);
     /* XXX from now onwards, SvCUR(PL_formtarget) is invalid */
     t += len;
     f = SvPV_const(formsv, len);
@@ -566,13 +566,6 @@ PP(pp_formline)
 	    arg = *fpc++;
 	    f += arg;
 	    fieldsize = arg;
-            {
-                STRLEN cur = t - SvPVX_const(PL_formtarget);
-                /* ensure there's always space for the ops which don't
-                 * 'goto append' to unconditionally append a field's
-                 * worth, e.g. FF_SPACE, FF_DECIMAL */
-                t = SvGROW(PL_formtarget, cur + fieldsize + 1) + cur;
-            }
 
 	    if (MARK < SP)
 		sv = *++MARK;
@@ -768,12 +761,14 @@ PP(pp_formline)
 	     * if trans, translate certain characters during the copy */
 	    {
 		U8 *tmp = NULL;
-                STRLEN cur = t - SvPVX_const(PL_formtarget);
+		STRLEN grow = 0;
 
-		SvCUR_set(PL_formtarget, cur);
+		SvCUR_set(PL_formtarget,
+			  t - SvPVX_const(PL_formtarget));
 
 		if (targ_is_utf8 && !item_is_utf8) {
 		    source = tmp = bytes_to_utf8(source, &to_copy);
+                    grow = to_copy;
 		} else {
 		    if (item_is_utf8 && !targ_is_utf8) {
 			U8 *s;
@@ -781,10 +776,14 @@ PP(pp_formline)
 			   a problem we have a simple solution for.
 			   Don't need get magic.  */
 			sv_utf8_upgrade_nomg(PL_formtarget);
-                        cur = SvCUR(PL_formtarget); /* may have changed */
 			targ_is_utf8 = TRUE;
 			/* re-calculate linemark */
 			s = (U8*)SvPVX(PL_formtarget);
+			/* the bytes we initially allocated to append the
+			 * whole line may have been gobbled up during the
+			 * upgrade, so allocate a whole new line's worth
+			 * for safety */
+			grow = linemax;
 			while (linemark--)
 			    s += UTF8SKIP(s);
 			linemark = s - (U8*)SvPVX(PL_formtarget);
@@ -792,10 +791,17 @@ PP(pp_formline)
 		    /* Easy. They agree.  */
 		    assert (item_is_utf8 == targ_is_utf8);
 		}
+		if (!trans)
+		    /* @* and ^* are the only things that can exceed
+		     * the linemax, so grow by the output size, plus
+		     * a whole new form's worth in case of any further
+		     * output */
+		    grow = linemax + to_copy;
+		if (grow)
+		    SvGROW(PL_formtarget, SvCUR(PL_formtarget) + grow + 1);
+		t = SvPVX(PL_formtarget) + SvCUR(PL_formtarget);
 
-                t = SvGROW(PL_formtarget, cur + to_copy + 1) + cur;
 		Copy(source, t, to_copy, char);
-
 		if (trans) {
 		    /* blank out ~ or control chars, depending on trans.
 		     * works on bytes not chars, so relies on not
@@ -811,7 +817,7 @@ PP(pp_formline)
 		}
 
 		t += to_copy;
-		SvCUR_set(PL_formtarget, cur + to_copy);
+		SvCUR_set(PL_formtarget, SvCUR(PL_formtarget) + to_copy);
 		if (tmp)
 		    Safefree(tmp);
 		break;
@@ -878,13 +884,7 @@ PP(pp_formline)
 
 	case FF_NEWLINE: /* delete trailing spaces, then append \n */
 	    f++;
-	    while (t-- > (SvPVX(PL_formtarget) + linemark) && *t == ' ')
-            {}
-
-            {
-                STRLEN cur = t - SvPVX_const(PL_formtarget);
-                t = SvGROW(PL_formtarget, cur + 1 + 1) + cur;
-            }
+	    while (t-- > (SvPVX(PL_formtarget) + linemark) && *t == ' ') ;
 	    t++;
 	    *t++ = '\n';
 	    break;
