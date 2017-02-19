@@ -7913,6 +7913,7 @@ Perl_yylex(pTHX)
                 && isIDFIRST_lazy_if_safe(s, PL_bufend, UTF))
             {
 		char *p = s;
+                SSize_t s_off = s - SvPVX(PL_linestr);
 
 		if ((PL_bufend - p) >= 3
                     && strEQs(p, "my") && isSPACE(*(p + 2)))
@@ -7930,6 +7931,9 @@ Perl_yylex(pTHX)
 		}
 		if (*p != '$' && *p != '\\')
 		    Perl_croak(aTHX_ "Missing $ on loop variable");
+
+                /* The buffer may have been reallocated, update s */
+                s = SvPVX(PL_linestr) + s_off;
 	    }
 	    OPERATOR(FOR);
 
