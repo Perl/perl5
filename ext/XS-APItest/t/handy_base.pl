@@ -166,7 +166,18 @@ my %utf8_param_code = (
                         "deprecated mathoms"    => -2,
                       );
 
+# This test is split into this number of files.
+my $num_test_files = $ENV{TEST_JOBS} || 1;
+$num_test_files = 10 if $num_test_files > 10;
+
+my $property_count = -1;
 foreach my $name (sort keys %properties, 'octal') {
+
+    # We test every nth property in this run so that this test is split into
+    # smaller chunks to minimize test suite elapsed time when run in parallel.
+    $property_count++;
+    next if $property_count % $num_test_files != $::TEST_CHUNK;
+
     my @invlist;
     if ($name eq 'octal') {
         # Hand-roll an inversion list with 0-7 in it and nothing else.
@@ -389,8 +400,12 @@ my %to_properties = (
                 UPPER => 'Uppercase_Mapping',
             );
 
-
+$property_count = -1;
 foreach my $name (sort keys %to_properties) {
+
+    $property_count++;
+    next if $property_count % $num_test_files != $::TEST_CHUNK;
+
     my $property = $to_properties{$name};
     my ($list_ref, $map_ref, $format, $missing)
                                       = prop_invmap($property, );

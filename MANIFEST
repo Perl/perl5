@@ -4228,7 +4228,17 @@ ext/XS-APItest/t/gv_fetchmeth.t		XS::APItest: tests for gv_fetchmeth() and varia
 ext/XS-APItest/t/gv_fetchmeth_autoload.t	XS::APItest: tests for gv_fetchmeth_autoload() and variants
 ext/XS-APItest/t/gv_fetchmethod_flags.t	XS::APItest: tests for gv_fetchmethod_flags() and variants
 ext/XS-APItest/t/gv_init.t	XS::APItest: tests for gv_init and variants
-ext/XS-APItest/t/handy.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy0.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy1.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy2.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy3.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy4.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy5.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy6.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy7.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy8.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy9.t	XS::APItest: tests for handy.h
+ext/XS-APItest/t/handy_base.pl	XS::APItest: tests for handy.h
 ext/XS-APItest/t/hash.t		XS::APItest: tests for hash related APIs
 ext/XS-APItest/t/join_with_space.t	test op_convert_list
 ext/XS-APItest/t/keyword_multiline.t	test keyword plugin parsing across lines
