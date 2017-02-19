@@ -8,7 +8,7 @@ BEGIN {
     chdir 't' if -d 't';
 }
 
-print "1..187\n";
+print "1..188\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
