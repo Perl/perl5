@@ -373,6 +373,18 @@ Code like C< $value1 =~ qr/.../ ~~ $value2 > would have the match
 converted into a qr// operator, leaving extra elements on the stack to
 confuse any surrounding expression.  [perl #130705]
 
+=item *
+
+Since 5.24.0 in some obscure cases, a regex which included code blocks
+from multiple sources (e.g. via embedded via qr// objects) could end up
+with the wrong current pad and crash or give weird results. [perl #129881]
+
+=item *
+
+Occasionally C<local()>s in a code block within a patterns weren't being
+undone when the pattern matching backtracked over the code block.
+[perl #126697]
+
 =back
 
 =head1 Known Problems
