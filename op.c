@@ -10988,7 +10988,7 @@ Perl_ck_return(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_RETURN;
 
     kid = OpSIBLING(cLISTOPo->op_first);
-    if (CvLVALUE(PL_compcv)) {
+    if (PL_compcv && CvLVALUE(PL_compcv)) {
 	for (; kid; kid = OpSIBLING(kid))
 	    op_lvalue(kid, OP_LEAVESUBLV);
     }
