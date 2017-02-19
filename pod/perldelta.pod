@@ -308,9 +308,36 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+=over 4
+
+=item *
+
+Support for compiling perl on Windows using Microsoft Visual Studio 2015
+(containing Visual C++ 14.0) has been added.
+
+This version of VC++ includes a completely rewritten C run-time library, some
+of the changes in which mean that work done to resolve a socket close() bug in
+perl #120091 and perl #118059 is not workable in its current state with this
+version of VC++.  Therefore, we have effectively reverted that bug fix for
+VS2015 onwards on the basis that being able to build with VS2015 onwards is
+more important than keeping the bug fix.  We may revisit this in the future to
+attempt to fix the bug again in a way that is compatible with VS2015.
+
+These changes do not affect compilation with GCC or with Visual Studio versions
+up to and including VS2013, i.e. the bug fix is retained (unchanged) for those
+compilers.
+
+Note that you may experience compatibility problems if you mix a perl built
+with GCC or VS E<lt>= VS2013 with XS modules built with VS2015, or if you mix a
+perl built with VS2015 with XS modules built with GCC or VS E<lt>= VS2013.
+Some incompatibility may arise because of the bug fix that has been reverted
+for VS2015 builds of perl, but there may well be incompatibility anyway because
+of the rewritten CRT in VS2015 (e.g. see discussion at
+http://stackoverflow.com/questions/30412951).
+
+=back
 
 =back
 
@@ -330,7 +357,7 @@ The C<op_class()> API function has been added. This is like the existing
 C<OP_CLASS()> macro, but can more accurately determine what struct an op
 has been allocated as. For example C<OP_CLASS()> might return
 C<OA_BASEOP_OR_UNOP> indicating that ops of this type are usually
-allocated as an C<OP> or C<UNOP>; while <op_class()> will return
+allocated as an C<OP> or C<UNOP>; while C<op_class()> will return
 C<OPclass_BASEOP> or C<OPclass_UNOP> as appropriate.
 
 =item *
