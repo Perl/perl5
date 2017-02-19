@@ -262,13 +262,13 @@ typedef unsigned short	mode_t;
 #define snprintf	_snprintf
 #define vsnprintf	_vsnprintf
 
-/* on VC2003, msvcrt.lib is missing these symbols */
+/* on VS2003, msvcrt.lib is missing these symbols */
 #if _MSC_VER >= 1300 && _MSC_VER < 1400
 #  pragma intrinsic(_rotl64,_rotr64)
 #endif
 
-#  pragma warning(push)
-#  pragma warning(disable:4756;disable:4056)
+#pragma warning(push)
+#pragma warning(disable:4756;disable:4056)
 PERL_STATIC_INLINE
 double S_Infinity() {
     /* this is a real C literal which can get further constant folded
@@ -277,8 +277,8 @@ double S_Infinity() {
        folding INF is creating -INF */
     return (DBL_MAX+DBL_MAX);
 }
-#  pragma warning(pop)
-#  define NV_INF S_Infinity()
+#pragma warning(pop)
+#define NV_INF S_Infinity()
 
 /* selectany allows duplicate and unused data symbols to be removed by
    VC linker, if this were static, each translation unit will have its own,
@@ -290,9 +290,63 @@ double S_Infinity() {
    that DLL actually uses __PL_nan_u */
 extern const __declspec(selectany) union { unsigned __int64 __q; double __d; }
 __PL_nan_u = { 0x7FF8000000000000UI64 };
-#  define NV_NAN ((NV)__PL_nan_u.__d)
+#define NV_NAN ((NV)__PL_nan_u.__d)
+
+/* The CRT was rewritten in VS2015. */
+#if _MSC_VER >= 1900
+
+/* No longer declared in stdio.h */
+char *gets(char* buffer);
+
+#define tzname _tzname
+
+/* From corecrt_internal_stdio.h: */
+typedef struct
+{
+    union
+    {
+        FILE  _public_file;
+        char* _ptr;
+    };
+
+    char*            _base;
+    int              _cnt;
+    long             _flags;
+    long             _file;
+    int              _charbuf;
+    int              _bufsiz;
+    char*            _tmpfname;
+    CRITICAL_SECTION _lock;
+} __crt_stdio_stream_data;
+
+#define PERLIO_FILE_flag_RD 0x0001 /* _IOREAD   */
+#define PERLIO_FILE_flag_WR 0x0002 /* _IOWRITE  */
+#define PERLIO_FILE_flag_RW 0x0004 /* _IOUPDATE */
+#define PERLIO_FILE_ptr(f)  (((__crt_stdio_stream_data*)(f))->_ptr)
+#define PERLIO_FILE_base(f) (((__crt_stdio_stream_data*)(f))->_base)
+#define PERLIO_FILE_cnt(f)  (((__crt_stdio_stream_data*)(f))->_cnt)
+#define PERLIO_FILE_flag(f) ((int)(((__crt_stdio_stream_data*)(f))->_flags))
+#define PERLIO_FILE_file(f) ((int)(((__crt_stdio_stream_data*)(f))->_file))
+
+#endif
 
 #endif /* _MSC_VER */
+
+#if (!defined(_MSC_VER)) || (defined(_MSC_VER) && _MSC_VER < 1900)
+
+/* Note: PERLIO_FILE_ptr/base/cnt are not actually used for GCC or <VS2015
+ * since FILE_ptr/base/cnt do the same thing anyway but it doesn't hurt to
+ * define them all here for completeness. */
+#define PERLIO_FILE_flag_RD _IOREAD /* 0x001 */
+#define PERLIO_FILE_flag_WR _IOWRT  /* 0x002 */
+#define PERLIO_FILE_flag_RW _IORW   /* 0x080 */
+#define PERLIO_FILE_ptr(f)  ((f)->_ptr)
+#define PERLIO_FILE_base(f) ((f)->_base)
+#define PERLIO_FILE_cnt(f)  ((f)->_cnt)
+#define PERLIO_FILE_flag(f) ((f)->_flag)
+#define PERLIO_FILE_file(f) ((f)->_file)
+
+#endif
 
 #ifdef __MINGW32__		/* Minimal Gnu-Win32 */
 
@@ -545,21 +599,31 @@ void win32_wait_for_children(pTHX);
 #  define PERL_WAIT_FOR_CHILDREN win32_wait_for_children(aTHX)
 #endif
 
+/* The following ioinfo struct manipulations had been removed but were
+ * reinstated to fix RT#120091/118059. However, they do not work with
+ * the rewritten CRT in VS2015 so they are removed once again for VS2015
+ * onwards, which will therefore suffer from the reintroduction of the
+ * close socket bug. */
+#if (!defined(_MSC_VER)) || (defined(_MSC_VER) && _MSC_VER < 1900)
+
 #ifdef PERL_CORE
+
 /* C doesn't like repeat struct definitions */
 #if defined(__MINGW32__) && (__MINGW32_MAJOR_VERSION>=3)
-#undef _CRTIMP
+#  undef _CRTIMP
 #endif
 #ifndef _CRTIMP
-#define _CRTIMP __declspec(dllimport)
+#  define _CRTIMP __declspec(dllimport)
 #endif
 
 
-/* VV 2005 has multiple ioinfo struct definitions through VC 2005's release life
- * VC 2008-2012 have been stable but do not assume future VCs will have the
+/* VS2005 has multiple ioinfo struct definitions through VS2005's release life
+ * VS2008-2012 have been stable but do not assume future VSs will have the
  * same ioinfo struct, just because past struct stability. If research is done
- * on the CRTs of future VS, the version check can be bumped up so the newer
- * VC uses a fixed ioinfo size.
+ * on the CRTs of future VSs, the version check can be bumped up so the newer
+ * VS uses a fixed ioinfo size. (Actually, only VS2013 (_MSC_VER 1800) hasn't
+ * been looked at; after that we cannot use the ioinfo struct anyway (see the
+ * #if above).)
  */
 #if ! (_MSC_VER < 1400 || (_MSC_VER >= 1500 && _MSC_VER <= 1700) \
   || defined(__MINGW32__))
@@ -582,7 +646,7 @@ typedef struct {
 #  if _MSC_VER >= 1400 && _MSC_VER < 1500
 #    error "This ioinfo struct is incomplete for Visual C 2005"
 #  endif
-/* VC 2005 CRT has at least 3 different definitions of this struct based on the
+/* VS2005 CRT has at least 3 different definitions of this struct based on the
  * CRT DLL's build number. */
 #  if _MSC_VER >= 1500
 #    ifndef _SAFECRT_IMPL
@@ -636,8 +700,11 @@ EXTERN_C _CRTIMP ioinfo* __pioinfo[];
 #endif
 
 /* since we are not doing a dup2(), this works fine */
-#  define _set_osfhnd(fh, osfh) (void)(_osfhnd(fh) = (intptr_t)osfh)
+#define _set_osfhnd(fh, osfh) (void)(_osfhnd(fh) = (intptr_t)osfh)
+
 #endif /* PERL_CORE */
+
+#endif /* !defined(_MSC_VER) || _MSC_VER<1900 */
 
 /* IO.xs and POSIX.xs define PERLIO_NOT_STDIO to 1 */
 #if defined(PERL_EXT_IO) || defined(PERL_EXT_POSIX)

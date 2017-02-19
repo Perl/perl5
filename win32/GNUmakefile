@@ -173,6 +173,10 @@ USE_LARGE_FILES	:= define
 #CCTYPE		:= MSVC120
 # Visual C++ 2013 Express Edition (aka Visual C++ 12.0) (free version)
 #CCTYPE		:= MSVC120FREE
+# Visual C++ 2015 (aka Visual C++ 14.0) (full version)
+#CCTYPE		:= MSVC140
+# Visual C++ 2015 Express Edition (aka Visual C++ 14.0) (free version)
+#CCTYPE		:= MSVC140FREE
 # MinGW or mingw-w64 with gcc-3.4.5 or later
 #CCTYPE		:= GCC
 
@@ -619,7 +623,13 @@ DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 CXX_FLAG	= -TP -EHsc
 
+ifeq ($(CCTYPE),MSVC140)
+LIBC		= ucrt.lib
+else ifeq ($(CCTYPE),MSVC140FREE)
+LIBC		= ucrt.lib
+else
 LIBC		= msvcrt.lib
+endif
 
 ifeq ($(CFG),Debug)
 OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
@@ -628,7 +638,13 @@ else ifeq ($(CFG),DebugSymbols)
 OPTIMIZE	= -Od -MD -Zi
 LINK_DBG	= -debug
 else ifeq ($(CFG),DebugFull)
+ifeq ($(CCTYPE),MSVC140)
+LIBC		= ucrtd.lib
+else ifeq ($(CCTYPE),MSVC140FREE)
+LIBC		= ucrtd.lib
+else
 LIBC		= msvcrtd.lib
+endif
 OPTIMIZE	= -Od -MDd -Zi -D_DEBUG -DDEBUGGING
 LINK_DBG	= -debug
 else
@@ -661,6 +677,13 @@ ifeq ($(PREMSVC80),undef)
 DEFINES		+= -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 endif
 
+# Likewise for deprecated Winsock APIs in VC++ 14.0 for now.
+ifeq ($(CCTYPE),MSVC140)
+DEFINES		= $(DEFINES) -D_WINSOCK_DEPRECATED_NO_WARNINGS
+else ifeq ($(CCTYPE),MSVC140FREE)
+DEFINES		= $(DEFINES) -D_WINSOCK_DEPRECATED_NO_WARNINGS
+endif
+
 # In VS 2005 (VC++ 8.0) Microsoft changes time_t from 32-bit to
 # 64-bit, even in 32-bit mode.  It also provides the _USE_32BIT_TIME_T
 # preprocessor option to revert back to the old functionality for
@@ -679,6 +702,20 @@ LIBBASEFILES	= oldnames.lib kernel32.lib user32.lib gdi32.lib winspool.lib \
 	comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib \
 	netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib version.lib \
 	odbc32.lib odbccp32.lib comctl32.lib
+
+ifeq ($(CCTYPE),MSVC140)
+ifeq ($(CFG),DebugFull)
+LIBBASEFILES	+= msvcrtd.lib vcruntimed.lib
+else
+LIBBASEFILES	+= msvcrt.lib vcruntime.lib
+endif
+else ifeq ($(CCTYPE),MSVC140FREE)
+ifeq ($(CFG),DebugFull)
+LIBBASEFILES	+= msvcrtd.lib vcruntimed.lib
+else
+LIBBASEFILES	+= msvcrt.lib vcruntime.lib
+endif
+endif
 
 # Avoid __intel_new_proc_init link error for libircmt.
 # libmmd is /MD equivelent, other variants exist.
@@ -1240,6 +1277,27 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #undef NVff&& \
 	echo #undef NVgf&& \
 	echo #undef USE_LONG_DOUBLE)>> config.h
+ifeq ($(CCTYPE),MSVC140)
+	@(echo #undef FILE_ptr&& \
+	echo #undef FILE_cnt&& \
+	echo #undef FILE_base&& \
+	echo #undef FILE_bufsiz&& \
+	echo #define FILE_ptr(fp) PERLIO_FILE_ptr(fp)&& \
+	echo #define FILE_cnt(fp) PERLIO_FILE_cnt(fp)&& \
+	echo #define FILE_base(fp) PERLIO_FILE_base(fp)&& \
+	echo #define FILE_bufsiz(fp) (PERLIO_FILE_cnt(fp) + PERLIO_FILE_ptr(fp) - PERLIO_FILE_base(fp))&& \
+	echo #define I_STDBOOL)>> config.h
+else ifeq ($(CCTYPE),MSVC140FREE)
+	@(echo #undef FILE_ptr&& \
+	echo #undef FILE_cnt&& \
+	echo #undef FILE_base&& \
+	echo #undef FILE_bufsiz&& \
+	echo #define FILE_ptr(fp) PERLIO_FILE_ptr(fp)&& \
+	echo #define FILE_cnt(fp) PERLIO_FILE_cnt(fp)&& \
+	echo #define FILE_base(fp) PERLIO_FILE_base(fp)&& \
+	echo #define FILE_bufsiz(fp) (PERLIO_FILE_cnt(fp) + PERLIO_FILE_ptr(fp) - PERLIO_FILE_base(fp))&& \
+	echo #define I_STDBOOL)>> config.h
+endif
 ifeq ($(USE_LARGE_FILES),define)
 	@(echo #define Off_t $(INT64)&& \
 	echo #define LSEEKSIZE ^8&& \

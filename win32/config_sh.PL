@@ -277,6 +277,13 @@ if ($opt{cc} =~ /\bcl/ and $opt{ccversion} =~ /^(\d+)/) {
     if($ccversion < 13) { #VC6
 	$opt{ar} ='lib';
     }
+    if ($ccversion >= 19) { # VC14
+	$opt{stdio_base} = 'PERLIO_FILE_base(fp)';
+	$opt{stdio_bufsiz} = '(PERLIO_FILE_cnt(fp) + PERLIO_FILE_ptr(fp) - PERLIO_FILE_base(fp))';
+	$opt{stdio_cnt} = 'PERLIO_FILE_cnt(fp)';
+	$opt{stdio_ptr} = 'PERLIO_FILE_ptr(fp)';
+	$opt{i_stdbool} = 'define';
+    }
 }
 #find out which MSVC this ICC is using
 elsif ($opt{cc} =~ /\bicl/) {
@@ -285,6 +292,13 @@ elsif ($opt{cc} =~ /\bicl/) {
     if($num_ver =~ /^(\d+)/ && $1 >= 14) {
 	$opt{sGMTIME_max} = 32535291599;
 	$opt{sLOCALTIME_max} = 32535244799;
+    }
+    if ($num_ver =~ /^(\d+)/ && $1 >= 19) { # VC14
+	$opt{stdio_base} = 'PERLIO_FILE_base(fp)';
+	$opt{stdio_bufsiz} = '(PERLIO_FILE_cnt(fp) + PERLIO_FILE_ptr(fp) - PERLIO_FILE_base(fp))';
+	$opt{stdio_cnt} = 'PERLIO_FILE_cnt(fp)';
+	$opt{stdio_ptr} = 'PERLIO_FILE_ptr(fp)';
+	$opt{i_stdbool} = 'define';
     }
     $opt{ar} ='xilib';
 }
