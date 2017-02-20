@@ -1645,6 +1645,92 @@ S_cx_popgiven(pTHX_ PERL_CONTEXT *cx)
     SvREFCNT_dec(sv);
 }
 
+/* ------------------ util.h ------------------------------------------- */
+
+/*
+=head1 Miscellaneous Functions
+
+=for apidoc foldEQ
+
+Returns true if the leading C<len> bytes of the strings C<s1> and C<s2> are the
+same
+case-insensitively; false otherwise.  Uppercase and lowercase ASCII range bytes
+match themselves and their opposite case counterparts.  Non-cased and non-ASCII
+range bytes match only themselves.
+
+=cut
+*/
+
+PERL_STATIC_INLINE I32
+Perl_foldEQ(const char *s1, const char *s2, I32 len)
+{
+    const U8 *a = (const U8 *)s1;
+    const U8 *b = (const U8 *)s2;
+
+    PERL_ARGS_ASSERT_FOLDEQ;
+
+    assert(len >= 0);
+
+    while (len--) {
+	if (*a != *b && *a != PL_fold[*b])
+	    return 0;
+	a++,b++;
+    }
+    return 1;
+}
+
+I32
+Perl_foldEQ_latin1(const char *s1, const char *s2, I32 len)
+{
+    /* Compare non-utf8 using Unicode (Latin1) semantics.  Does not work on
+     * MICRO_SIGN, LATIN_SMALL_LETTER_SHARP_S, nor
+     * LATIN_SMALL_LETTER_Y_WITH_DIAERESIS, and does not check for these.  Nor
+     * does it check that the strings each have at least 'len' characters */
+
+    const U8 *a = (const U8 *)s1;
+    const U8 *b = (const U8 *)s2;
+
+    PERL_ARGS_ASSERT_FOLDEQ_LATIN1;
+
+    assert(len >= 0);
+
+    while (len--) {
+	if (*a != *b && *a != PL_fold_latin1[*b]) {
+	    return 0;
+	}
+	a++, b++;
+    }
+    return 1;
+}
+
+/*
+=for apidoc foldEQ_locale
+
+Returns true if the leading C<len> bytes of the strings C<s1> and C<s2> are the
+same case-insensitively in the current locale; false otherwise.
+
+=cut
+*/
+
+I32
+Perl_foldEQ_locale(const char *s1, const char *s2, I32 len)
+{
+    dVAR;
+    const U8 *a = (const U8 *)s1;
+    const U8 *b = (const U8 *)s2;
+
+    PERL_ARGS_ASSERT_FOLDEQ_LOCALE;
+
+    assert(len >= 0);
+
+    while (len--) {
+	if (*a != *b && *a != PL_fold_locale[*b])
+	    return 0;
+	a++,b++;
+    }
+    return 1;
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */
