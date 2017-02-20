@@ -1088,11 +1088,14 @@ white space within it.  This is allowed because C<E<sol>xx> is
 automatically turned on within this construct.
 
 All the other escapes accepted by normal bracketed character classes are
-accepted here as well; but unrecognized escapes that generate warnings
-in normal classes are fatal errors here.
+accepted here as well.
 
-All warnings from these class elements are fatal, as well as some
-practices that don't currently warn.  For example you cannot say
+Because this construct compiles under
+L<C<use re 'strict>|re/'strict' mode>,  unrecognized escapes that
+generate warnings in normal classes are fatal errors here, as well as
+all other warnings from these class elements, as well as some
+practices that don't currently warn outside C<re 'strict'>.  For example
+you cannot say
 
  /(?[ [ \xF ] ])/     # Syntax error!
 
