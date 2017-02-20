@@ -417,6 +417,13 @@ undone when the pattern matching backtracked over the code block.
 Using C<substr()> to modify a magic variable could access freed memory
 in some cases.  [perl #129340]
 
+=item *
+
+Perl 5.25.9 was fixed so that under C<use utf8>, the entire Perl program
+is checked that the UTF-8 is wellformed.  It turns out that several edge
+cases were missed, and are now fixed.  [perl #126310] was the original
+ticket.
+
 =back
 
 =head1 Known Problems
