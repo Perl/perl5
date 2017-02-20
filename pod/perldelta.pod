@@ -412,6 +412,11 @@ Occasionally C<local()>s in a code block within a patterns weren't being
 undone when the pattern matching backtracked over the code block.
 [perl #126697]
 
+=item *
+
+Using C<substr()> to modify a magic variable could access freed memory
+in some cases.  [perl #129340]
+
 =back
 
 =head1 Known Problems
