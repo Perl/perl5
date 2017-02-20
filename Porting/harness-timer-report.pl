@@ -43,6 +43,7 @@ $ME [--scale=[sum|max]]
     [--min=[[cpu|wall|ratio|self|kids]=value,...]]
     [--max=[[cpu|wall|ratio|self|kids]=value,...]]
     [--order]
+    [--help|--usage]
     [logfile]
 
 The --order includes the original test order as the last column.
@@ -60,7 +61,9 @@ usage()
 	'min=s' => \$Opt{min},
 	'max=s' => \$Opt{max},
 	'order' => \$Opt{order},
+	'help|usage' => \$Opt{help},
     );
+usage() if $Opt{help};
 
 my %SHOW;
 if (defined $Opt{show}) {
