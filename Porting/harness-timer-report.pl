@@ -43,9 +43,10 @@ $ME [--scale=[sum|max]]
     [--min=[[cpu|wall|ratio|self|kids]=value,...]]
     [--max=[[cpu|wall|ratio|self|kids]=value,...]]
     [--order]
-    logfile
+    [logfile]
 
 The --order includes the original test order as the last column.
+The logfile default is STDIN.
 __EOF__
 }
 
@@ -97,9 +98,22 @@ use List::Util qw[max];
 my ($sa, $sb, $sc, $sd, $se);
 my ($ma, $mb, $mc, $md, $me);
 
+my $logfn;
+my $logfh;
+if (@ARGV == 1) {
+    $logfn = $ARGV[0];
+    open($logfh, "<", $logfn) or die "$ME: Failed to open logfn: $logfn\n";
+} elsif (@ARGV == 0) {
+    $logfn = "-";
+    $logfh = *STDIN;
+} else {
+    die "$ME: Unexpected logfile arguments: @ARGV\n";
+}
+
 my $order = 0;
 my @t;
-while (<>) {
+
+while (<$logfh>) {
     # t/re/pat ....................................................... ok     2876 ms  2660 ms   210 ms
     if (m{(.+)\s+\.+\s+ok\s+(\d+)\s+ms\s+(\d+)\s+ms\s+(\d+)\s+ms$}) {
 	my ($test, $wall, $self, $kids) = ($1, $2, $3, $4);
@@ -123,7 +137,7 @@ while (<>) {
     }
 }
 
-die "$ME: No input found\n" unless @t;
+die "$ME: No input detected in '$logfn'\n" unless @t;
 
 # Compute the sum for the ratio only after the loop.
 $se = $sd / $sa;
