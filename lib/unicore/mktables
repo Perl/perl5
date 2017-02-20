@@ -18835,30 +18835,55 @@ EOF_CODE
                              ? "\nsub TODO_FAILING_BREAKS { 1 }\n"
                              : "\nsub TODO_FAILING_BREAKS { 0 }\n";
 
-
-    push @output,
-            (map {"Test_GCB('$_');\n"} @backslash_X_tests),
-            (map {"Test_LB('$_');\n"} @LB_tests),
-            (map {"Test_SB('$_');\n"} @SB_tests),
-            (map {"Test_WB('$_');\n"} @WB_tests);
-
     @output= map {
         map s/^/    /mgr,
         map "$_;\n",
         split /;\n/, $_
     } @output;
 
+    # Cause there to be 'if' statements to only execute a portion of this
+    # long-running test each time, so that we can have a bunch of .t's running
+    # in parallel
+    my $chunks = 10     # Number of test files
+               - 1      # For GCB & SB
+               - 1      # For WB
+               - 4;     # LB split into this many files
     my @output_chunked;
     my $chunk_count=0;
-    my $chunk_size= int(@output/10)+1;
+    my $chunk_size= int(@output / $chunks) + 1;
     while (@output) {
         $chunk_count++;
         my @chunk= splice @output, 0, $chunk_size;
         push @output_chunked,
-            "if (!\$::TESTCHUNK or \$::TESTCHUNK == $chunk_count){\n",
-            @chunk,
+            "if (!\$::TESTCHUNK or \$::TESTCHUNK == $chunk_count) {\n",
+                @chunk,
             "}\n";
     }
+
+    $chunk_count++;
+    push @output_chunked,
+        "if (!\$::TESTCHUNK or \$::TESTCHUNK == $chunk_count) {\n",
+            (map {"    Test_GCB('$_');\n"} @backslash_X_tests),
+            (map {"    Test_SB('$_');\n"} @SB_tests),
+        "}\n";
+
+
+    $chunk_size= int(@LB_tests / 4) + 1;
+    @LB_tests = map {"    Test_LB('$_');\n"} @LB_tests;
+    while (@LB_tests) {
+        $chunk_count++;
+        my @chunk= splice @LB_tests, 0, $chunk_size;
+        push @output_chunked,
+            "if (!\$::TESTCHUNK or \$::TESTCHUNK == $chunk_count) {\n",
+                @chunk,
+            "}\n";
+    }
+
+    $chunk_count++;
+    push @output_chunked,
+        "if (!\$::TESTCHUNK or \$::TESTCHUNK == $chunk_count) {\n",
+            (map {"    Test_WB('$_');\n"} @WB_tests),
+        "}\n";
 
     &write($t_path,
            0,           # Not utf8;
