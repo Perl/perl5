@@ -114,27 +114,38 @@ my $order = 0;
 my @t;
 
 while (<$logfh>) {
+    my ($test, $wall, $self, $kids);
+    # Output of "env HARNESS_TIMER=1 make test":
     # t/re/pat ....................................................... ok     2876 ms  2660 ms   210 ms
-    if (m{(.+)\s+\.+\s+ok\s+(\d+)\s+ms\s+(\d+)\s+ms\s+(\d+)\s+ms$}) {
-	my ($test, $wall, $self, $kids) = ($1, $2, $3, $4);
-	next unless $wall > 0;
-	# Milliseconds to seconds.
-	$wall /= 1000;
-	$self /= 1000;
-	$kids /= 1000;
-	my $cpu = $self + $kids;
-	my $ratio = $cpu / $wall;
-	push @t, [ $test, $wall, $self, $kids, $cpu, $ratio, $order++ ];
-	$sa += $wall;
-	$sb += $self;
-	$sc += $kids;
-	$sd += $cpu;
-	$ma = max($wall,  $ma // $wall);
-	$mb = max($self,  $mb // $self);
-	$mc = max($kids,  $mc // $kids);
-	$md = max($cpu,   $md // $cpu);
-	$me = max($ratio, $md // $ratio);
+    if (m{^#\s+(\S+)\s+\.+\s+ok\s+(\d+)\s+ms\s+(\d+)\s+ms\s+(\d+)\s+ms$}) {
+	($test, $wall, $self, $kids) = ($1, $2, $3, $4);
     }
+    # Output of "env HARNESS_TIMER=1 make test_harness":
+    # [08:26:11] base/cond.t ........................................................ ok        2 ms ( 0.00 usr  0.00 sys +  0.00 cusr  0.00 csys =  0.00 CPU)
+    if (m{^\[.+?\]+\s+(\S+)\s+\.+\s+ok\s+(\d+)\s+ms\s+\(\s*(\d+\.\d+)\s+usr\s+\s+(\d+\.\d+)\s+sys\s+\+\s+(\d+\.\d+)\s+cusr\s+(\d+\.\d+)\s+csys\s+=\s+(\d+\.\d+)\s+CPU\)}) {
+        $test = $1;
+        $wall = $2;
+        $self = $3 + $4;
+        $kids = $5 + $6;
+        $test =~ s{^\.\./}{};  # "../lib/foo" -> "../lib/foo"
+    }
+    next unless defined $test && defined $wall && $wall > 0;
+    # Milliseconds to seconds.
+    $wall /= 1000;
+    $self /= 1000;
+    $kids /= 1000;
+    my $cpu = $self + $kids;
+    my $ratio = $cpu / $wall;
+    push @t, [ $test, $wall, $self, $kids, $cpu, $ratio, $order++ ];
+    $sa += $wall;
+    $sb += $self;
+    $sc += $kids;
+    $sd += $cpu;
+    $ma = max($wall,  $ma // $wall);
+    $mb = max($self,  $mb // $self);
+    $mc = max($kids,  $mc // $kids);
+    $md = max($cpu,   $md // $cpu);
+    $me = max($ratio, $md // $ratio);
 }
 
 die "$ME: No input detected in '$logfn'\n" unless @t;
