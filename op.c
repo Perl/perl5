@@ -4642,7 +4642,7 @@ S_gen_constant_list(pTHX_ OP *o)
     old_next = o->op_next;
     o->op_next = 0;
     op_was_null = o->op_type == OP_NULL;
-    if (op_was_null)
+    if (op_was_null) /* b3698342565fb462291fba4b432cfcd05b6eb4e1 */
 	o->op_type = OP_CUSTOM;
     CALL_PEEP(curop);
     if (op_was_null)
