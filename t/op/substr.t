@@ -22,7 +22,7 @@ $SIG{__WARN__} = sub {
      }
 };
 
-plan(390);
+plan(391);
 
 run_tests() unless caller;
 
@@ -877,3 +877,6 @@ is($destroyed, 1, 'Timely scalar destruction with lvalue substr');
 
     is($result_3363, "best", "ref-to-substr retains lvalue-ness under recursion [perl #3363]");
 }
+
+# failed with ASAN
+fresh_perl_is('$0 = "/usr/bin/perl"; substr($0, 0, 0, $0)', '', {}, "(perl #129340) substr() with source in target");

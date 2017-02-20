@@ -6328,7 +6328,7 @@ C<SvPV_force_flags> that applies to C<bigstr>.
 */
 
 void
-Perl_sv_insert_flags(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN len, const char *const little, const STRLEN littlelen, const U32 flags)
+Perl_sv_insert_flags(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN len, const char *little, const STRLEN littlelen, const U32 flags)
 {
     char *big;
     char *mid;
@@ -6341,6 +6341,16 @@ Perl_sv_insert_flags(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN l
 
     SvPV_force_flags(bigstr, curlen, flags);
     (void)SvPOK_only_UTF8(bigstr);
+
+    if (little >= SvPVX(bigstr) &&
+        little < SvPVX(bigstr) + (SvLEN(bigstr) ? SvLEN(bigstr) : SvCUR(bigstr))) {
+        /* little is a pointer to within bigstr, since we can reallocate bigstr,
+           or little...little+littlelen might overlap offset...offset+len we make a copy
+        */
+        little = savepvn(little, littlelen);
+        SAVEFREEPV(little);
+    }
+
     if (offset + len > curlen) {
 	SvGROW(bigstr, offset+len+1);
 	Zero(SvPVX(bigstr)+curlen, offset+len-curlen, char);

@@ -3113,7 +3113,7 @@ PERL_CALLCONV void	Perl_sv_insert(pTHX_ SV *const bigstr, const STRLEN offset, c
 #define PERL_ARGS_ASSERT_SV_INSERT	\
 	assert(bigstr); assert(little)
 #endif
-PERL_CALLCONV void	Perl_sv_insert_flags(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN len, const char *const little, const STRLEN littlelen, const U32 flags);
+PERL_CALLCONV void	Perl_sv_insert_flags(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN len, const char *little, const STRLEN littlelen, const U32 flags);
 #define PERL_ARGS_ASSERT_SV_INSERT_FLAGS	\
 	assert(bigstr); assert(little)
 PERL_CALLCONV int	Perl_sv_isa(pTHX_ SV* sv, const char *const name);
