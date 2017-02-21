@@ -5296,6 +5296,7 @@ t/comp/our.t			Tests for our declaration
 t/comp/package.t		See if packages work
 t/comp/package_block.t		See if package block syntax works
 t/comp/parser.t			See if the parser works in edge cases
+t/comp/parser_run.t			See if parser works in additional edge case
 t/comp/proto.t			See if function prototypes work
 t/comp/redef.t			See if we get correct warnings on redefined subs
 t/comp/require.t		See if require works
