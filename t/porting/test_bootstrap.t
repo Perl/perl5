@@ -16,7 +16,7 @@ plan('no_plan');
 
 open my $fh, '<', '../MANIFEST' or die "Can't open MANIFEST: $!";
 
-# Three tests in t/comp need to use require or use to get their job done:
+# Some tests in t/comp need to use require or use to get their job done:
 my %exceptions = (
     hints => "require './test.pl'",
     parser => 'use DieDieDie',
