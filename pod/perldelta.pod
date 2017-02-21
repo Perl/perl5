@@ -338,7 +338,10 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+C< $-{$name} > would leak an C<AV> on each access if the regular
+expression had no named captures.  The same applies to access to any
+hash tied with L<Tie::Hash::NamedCapture> and C<< all => 1 >>. [perl
+#130822]
 
 =back
 
