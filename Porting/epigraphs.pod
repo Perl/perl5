@@ -17,6 +17,13 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.25.10 - Erich Fried, 1968
+
+L<Announced on 2017-02-20 by Renee Bäcker|https://www.nntp.perl.org/group/perl.perl5.porters/2017/02/msg243173.html>
+
+  He who wants the world to remain as it is
+  doesn't want it to remain.
+
 =head2 v5.25.9 - A. A. Milne, "Winnie-the-Pooh", 1926
 
 L<Announced on 2017-01-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2017/01/msg242405.html>
