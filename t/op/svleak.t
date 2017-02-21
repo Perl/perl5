@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 140;
+plan tests => 141;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -582,4 +582,14 @@ EOF
         eval { /$r$c/ }
     }
     ::leak(2, 0, \&codeblocks, q{leaking embedded qr codeblocks});
+}
+
+{
+    # Perl_reg_named_buff_fetch() leaks an AV when called with an RE
+    # with no named captures
+    sub named {
+        "x" =~ /x/;
+        re::regname("foo", 1);
+    }
+    ::leak(2, 0, \&named, "Perl_reg_named_buff_fetch() on no-name RE");
 }
