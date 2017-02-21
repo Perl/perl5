@@ -1679,7 +1679,7 @@ Perl_foldEQ(const char *s1, const char *s2, I32 len)
     return 1;
 }
 
-I32
+PERL_STATIC_INLINE I32
 Perl_foldEQ_latin1(const char *s1, const char *s2, I32 len)
 {
     /* Compare non-utf8 using Unicode (Latin1) semantics.  Does not work on
@@ -1712,7 +1712,7 @@ same case-insensitively in the current locale; false otherwise.
 =cut
 */
 
-I32
+PERL_STATIC_INLINE I32
 Perl_foldEQ_locale(const char *s1, const char *s2, I32 len)
 {
     dVAR;
