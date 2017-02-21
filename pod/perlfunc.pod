@@ -1807,20 +1807,30 @@ X<do>
 Uses the value of EXPR as a filename and executes the contents of the
 file as a Perl script.
 
-    do 'stat.pl';
+    do './stat.pl';
 
 is largely like
 
     eval `cat stat.pl`;
 
-except that it's more concise, runs no external processes, keeps track of
-the current filename for error messages, searches the
-L<C<@INC>|perlvar/@INC> directories, and updates L<C<%INC>|perlvar/%INC>
-if the file is found.  See L<perlvar/@INC> and L<perlvar/%INC> for these
-variables.  It also differs in that code evaluated with C<do FILE>
-cannot see lexicals in the enclosing scope; C<eval STRING> does.  It's
-the same, however, in that it does reparse the file every time you call
-it, so you probably don't want to do this inside a loop.
+except that it's more concise, runs no external processes, and keeps
+track of the current filename for error messages. It also differs in that
+code evaluated with C<do FILE> cannot see lexicals in the enclosing
+scope; C<eval STRING> does.  It's the same, however, in that it does
+reparse the file every time you call it, so you probably don't want
+to do this inside a loop.
+
+Using C<do> with no path, like
+
+    do 'stat.pl';
+
+will search the L<C<@INC>|perlvar/@INC> directories, and update
+L<C<%INC>|perlvar/%INC> if the file is found.  See L<perlvar/@INC>
+and L<perlvar/%INC> for these variables. In particular, note that
+whilst historically L<C<@INC>|perlvar/@INC> contained '.' (the
+current directory) making these two cases equivalent, that is no
+longer necessarily the case, as there is now a compile-time option
+to disable this behaviour.
 
 If L<C<do>|/do EXPR> can read the file but cannot compile it, it
 returns L<C<undef>|/undef EXPR> and sets an error message in
