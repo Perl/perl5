@@ -503,9 +503,10 @@ initially consists of the arguments to any B<-I> command-line
 switches, followed by the default Perl library, probably
 F</usr/local/lib/perl>, followed by ".", to represent the current
 directory.  ("." will not be appended if taint checks are enabled,
-either by C<-T> or by C<-t>.)  If you need to modify this at runtime,
-you should use the C<use lib> pragma to get the machine-dependent
-library properly loaded also:
+either by C<-T> or by C<-t>, or if configured not to do so by the
+C<-Ddefault_inc_excludes_dot> compile time option.)  If you need to
+modify this at runtime, you should use the C<use lib> pragma to get
+the machine-dependent library properly loaded also:
 
     use lib '/mypath/libdir/';
     use SomeMod;
