@@ -402,13 +402,27 @@ sub _pessimise_walk {
 
 	# pessimisations end here
 
-	if (class($op) eq 'PMOP'
-	    && ref($op->pmreplroot)
-	    && ${$op->pmreplroot}
-	    && $op->pmreplroot->isa( 'B::OP' ))
-	{
-	    $self-> _pessimise_walk($op->pmreplroot);
-	}
+	if (class($op) eq 'PMOP') {
+	    if (ref($op->pmreplroot)
+                && ${$op->pmreplroot}
+                && $op->pmreplroot->isa( 'B::OP' ))
+            {
+                $self-> _pessimise_walk($op->pmreplroot);
+            }
+
+            # pessimise any /(?{...})/ code blocks
+            my ($re, $cv);
+            my $code_list = $op->code_list;
+            if ($$code_list) {
+                $self->_pessimise_walk($code_list);
+            }
+            elsif (${$re = $op->pmregexp} && ${$cv = $re->qr_anoncv}) {
+                $code_list = $cv->ROOT      # leavesub
+                               ->first      #   qr
+                               ->code_list; #     list
+                $self->_pessimise_walk($code_list);
+            }
+        }
 
 	if ($op->flags & OPf_KIDS) {
 	    $self-> _pessimise_walk($op->first);
