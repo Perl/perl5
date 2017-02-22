@@ -63,7 +63,7 @@ while (<DATA>) {
 	    new B::Deparse split /,/, $meta{options}
 	: $deparse;
 
-    my $coderef = eval "$meta{context};\n" . <<'EOC' . "sub {$input\n}";
+    my $code = "$meta{context};\n" . <<'EOC' . "sub {$input\n}";
 # Tell B::Deparse about our ambient pragmas
 my ($hint_bits, $warning_bits, $hinthash);
 BEGIN {
@@ -75,10 +75,14 @@ $deparse->ambient_pragmas (
     '%^H'        => $hinthash,
 );
 EOC
+    my $coderef = eval $code;
 
     local $::TODO = $meta{todo};
     if ($@) {
-	is($@, "", "compilation of $desc");
+	is($@, "", "compilation of $desc")
+            or diag "=============================================\n"
+                  . "CODE:\n--------\n$code\n--------\n"
+                  . "=============================================\n";
     }
     else {
 	my $deparsed = $deparse->coderef2text( $coderef );
