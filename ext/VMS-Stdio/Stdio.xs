@@ -15,7 +15,7 @@
 static bool
 constant(char *name, IV *pval)
 {
-    if (strNEs(name, "O_")) return FALSE;
+    if (strnNE(name, "O_", 2)) return FALSE;
 
     if (strEQ(name, "O_APPEND"))
 #ifdef O_APPEND
@@ -88,10 +88,10 @@ newFH(PerlIO *fp, char type) {
      * symbol tables.  This code (through io = ...) is really
      * equivalent to gv_fetchpv("VMS::Stdio::__FH__",TRUE,SVt_PVIO),
      * with a little less overhead, and good exercise for me. :-) */
-    stashp = (GV **)hv_fetchs(PL_defstash,"VMS::",TRUE);
+    stashp = (GV **)hv_fetch(PL_defstash,"VMS::",5,TRUE);
     if (!stashp || *stashp == (GV *)&PL_sv_undef) return NULL;
     if (!(stash = GvHV(*stashp))) stash = GvHV(*stashp) = newHV();
-    stashp = (GV **)hv_fetchs(GvHV(*stashp),"Stdio::",TRUE);
+    stashp = (GV **)hv_fetch(GvHV(*stashp),"Stdio::",7,TRUE);
     if (!stashp || *stashp == (GV *)&PL_sv_undef) return NULL;
     if (!(stash = GvHV(*stashp))) stash = GvHV(*stashp) = newHV();
 
