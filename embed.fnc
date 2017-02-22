@@ -1881,7 +1881,7 @@ p	|void	|write_to_stderr|NN SV* msv
 : Used in op.c
 p	|int	|yyerror	|NN const char *const s
 p	|void	|yyquit
-p	|void	|abort_execution|NN const char * const msg|NN const char * const name
+pr	|void	|abort_execution|NN const char * const msg|NN const char * const name
 p	|int	|yyerror_pv	|NN const char *const s|U32 flags
 p	|int	|yyerror_pvn	|NULLOK const char *const s|STRLEN len|U32 flags
 : Used in perly.y, and by Data::Alias
