@@ -8,7 +8,7 @@ BEGIN {
 
 plan tests => 13;
 
-my $Perl = which_perl();
+my $Perl = which_perl_shell();
 
 my $warning;
 local $SIG{__WARN__} = sub { $warning = join "\n", @_; };

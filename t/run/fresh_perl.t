@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 
-my $Perl = which_perl();
+my $Perl = which_perl_shell();
 
 $|=1;
 
@@ -41,6 +41,10 @@ foreach my $prog (@prgs) {
 
     my($prog,$expected) = split(/\nEXPECT\n/, $raw_prog);
     $prog .= "\n";
+
+    # this might break new tests, but there shouldn't be any new tests...
+    $prog =~ s(\./perl\b)($Perl)g;
+
     $expected = '' unless defined $expected;
 
     if ($prog =~ /^\# SKIP: (.+)/m) {

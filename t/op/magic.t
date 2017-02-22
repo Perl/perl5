@@ -56,12 +56,7 @@ $Is_Dos      = $^O eq 'dos';
 $Is_os2      = $^O eq 'os2';
 $Is_Cygwin   = $^O eq 'cygwin';
 
-$PERL =
-   ($Is_NetWare ? 'perl'   :
-    $Is_VMS     ? $^X      :
-    $Is_MSWin32 ? '.\perl' :
-                  './perl');
-
+$PERL = which_perl_shell();
 
 sub env_is {
     my ($key, $val, $desc) = @_;

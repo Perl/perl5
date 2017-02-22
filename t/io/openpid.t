@@ -25,7 +25,7 @@ $| = 1;
 $SIG{PIPE} = 'IGNORE';
 $SIG{HUP} = 'IGNORE' if $^O eq 'interix';
 
-my $perl = which_perl();
+my $perl = which_perl_shell();
 $perl .= qq[ "-I../lib"];
 
 #

@@ -28,8 +28,13 @@ SKIP: {
     skip "Can't set ulimit -u on this system: $probe"
 	unless $probe eq 'good';
 
+    my $perl = which_perl();
+    my $env = "";
+    if ($^O eq "darwin") {
+        $env = "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH} ";
+    }
     my $out = qx{
-        $shell -c 'ulimit -u 1; exec $^X -e "
+        $shell -c 'ulimit -u 1; ${env}exec $perl -e "
             print((() = fork) == 1 ? q[ok] : q[not ok])
         "'
     };
@@ -253,10 +258,10 @@ $| = 1;
 $\ = "\n";
 my $getenv;
 if ($^O eq 'MSWin32' || $^O eq 'NetWare') {
-    $getenv = qq[$^X -e "print \$ENV{TST}"];
+    $getenv = qq[$ShPerl -e "print \$ENV{TST}"];
 }
 else {
-    $getenv = qq[$^X -e 'print \$ENV{TST}'];
+    $getenv = qq[$ShPerl -e 'print \$ENV{TST}'];
 }
 $ENV{TST} = 'foo';
 if (fork) {
@@ -477,13 +482,13 @@ child: called as [main::f(foo,bar)]
 waitpid() returned ok
 ########
 # Windows 2000: https://rt.cpan.org/Ticket/Display.html?id=66016#txn-908976
-system $^X,  "-e", "if (\$pid=fork){sleep 1;kill(9, \$pid)} else {sleep 5}";
+system $Perl,  "-e", "if (\$pid=fork){sleep 1;kill(9, \$pid)} else {sleep 5}";
 print $?>>8, "\n";
 EXPECT
 0
 ########
 # Windows 7: https://rt.cpan.org/Ticket/Display.html?id=66016#txn-908976
-system $^X,  "-e", "if (\$pid=fork){kill(9, \$pid)} else {sleep 5}";
+system $Perl,  "-e", "if (\$pid=fork){kill(9, \$pid)} else {sleep 5}";
 print $?>>8, "\n";
 EXPECT
 0

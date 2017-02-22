@@ -60,14 +60,16 @@ if ($^O eq 'VMS') {
 my $tempfile = tempfile();
 open STDERR, '>', $tempfile or die "Can't open temp error file $tempfile:  $!";
 
+my $ShPerl = which_perl_shell();
+
 foreach my $test (@tests) {
     my($bang, $query, $code) = @$test;
     $code ||= 'die;';
     if ($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS') {
-        system(qq{$^X -e "\$! = $bang; \$? = $query; $code"});
+        system(qq{$ShPerl -e "\$! = $bang; \$? = $query; $code"});
     }
     else {
-        system(qq{$^X -e '\$! = $bang; \$? = $query; $code'});
+        system(qq{$ShPerl -e '\$! = $bang; \$? = $query; $code'});
     }
     my $exit = $?;
 

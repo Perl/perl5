@@ -710,12 +710,13 @@ sub _create_runperl { # Create the string to qx in runperl().
 	$args{stdin} =~ s/\n/\\n/g;
 	$args{stdin} =~ s/\r/\\r/g;
 
+	my $shell_perl = which_perl_shell();
 	if ($is_mswin || $is_netware || $is_vms) {
-	    $runperl = qq{$Perl -e "print qq(} .
+	    $runperl = qq{$shell_perl -e "print qq(} .
 		$args{stdin} . q{)" | } . $runperl;
 	}
 	else {
-	    $runperl = qq{$Perl -e 'print qq(} .
+	    $runperl = qq{$shell_perl -e 'print qq(} .
 		$args{stdin} . q{)' | } . $runperl;
 	}
     } elsif (exists $args{stdin}) {
@@ -859,6 +860,25 @@ sub which_perl {
 	$ENV{PERLEXE} = $Perl;
     }
     return $Perl;
+}
+
+# A perl executable name suitable for use when run through the shell.
+# Needed because modern darwin system shells drop DYLD_LIBRARY_PATH
+sub which_perl_shell {
+    my $perl = which_perl();
+    if ($perl =~ m/\s/) {
+        $perl = qq{"$perl"};
+    }
+    if ($^O eq 'darwin') {
+	# OS X 10.10 drops DYLD_LIBRARY_PATH when inherited by system
+	# processes, including the shell, make sure the child perl
+	# still sees it
+	if (eval { require Config; 1 } && (my $ldlibpthname = $Config::Config{ldlibpthname})) {
+	    $perl="$ldlibpthname=$ENV{PWD}/.. $perl";
+	}
+    }
+
+    return $perl;
 }
 
 sub unlink_all {
@@ -1276,6 +1296,10 @@ sub run_multiple_progs {
               or die "Can't dup STDOUT->STDERR: $!;";
         }
 	};
+	if ($prog =~ m/\$(?:Sh)?Perl\b/) {
+	    print $fh "my \$Perl = q\0", which_perl(), "\0;\n";
+	    print $fh "my \$ShPerl = q\0", which_perl_shell(), "\0;\n";
+	}
 	print $fh "\n#line 1\n";  # So the line numbers don't get messed up.
 	print $fh $prog,"\n";
 	close $fh or die "Cannot close $tmpfile: $!";

@@ -13,7 +13,7 @@ if ( !$Config{d_alarm} ) {
 }
 
 plan tests => 5;
-my $Perl = which_perl();
+my $Perl = which_perl_shell();
 
 my ($start_time, $end_time);
 

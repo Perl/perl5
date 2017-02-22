@@ -55,6 +55,13 @@ my $Invoke_Perl = $Is_VMS      ? 'MCR Sys$Disk:[]Perl.exe' :
                                  './perl'               ;
 my @MoreEnv = qw/IFS CDPATH ENV BASH_ENV/;
 
+if ($^O eq "darwin") {
+    # all the tests here invoke perl through a shell, and the system shell
+    # on darwin doesn't inherit DYLD_LIBRARY_PATH...
+    my ($lib_path) = ($ENV{DYLD_LIBRARY_PATH} =~ /(.*)/);
+    $Invoke_Perl = "DYLD_LIBRARY_PATH=$lib_path $Invoke_Perl";
+}
+
 if ($Is_VMS) {
     my (%old, $x);
     for $x ('DCL$PATH', @MoreEnv) {

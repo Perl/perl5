@@ -12,7 +12,7 @@ use Config;
 
 plan tests => 156;
 
-my $Perl = which_perl();
+my $Perl = which_perl_shell();
 
 my $afile = tempfile();
 {

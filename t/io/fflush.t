@@ -27,7 +27,7 @@ skip_all('fflush(NULL) or equivalent not available')
 
 plan(tests => 7);
 
-my $runperl = $^X =~ m/\s/ ? qq{"$^X"} : $^X;
+my $runperl = which_perl_shell();
 $runperl .= qq{ "-I../lib"};
 
 sub file_eq {

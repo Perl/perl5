@@ -38,7 +38,8 @@ my $Is_Win32 = $^O eq 'MSWin32';
 
 plan(tests => 25);
 
-my $Perl = which_perl();
+my $ListPerl = which_perl();
+my $Perl = which_perl_shell();
 
 my $exit;
 SKIP: {
@@ -59,7 +60,7 @@ is( $exit, 0, '  exited 0' );
 # On Unix its the opposite.
 my $quote = $Is_VMS || $Is_Win32 ? '"' : '';
 $tnum = curr_test();
-$exit = system $Perl, '-le', 
+$exit = system $ListPerl, '-le', 
                "${quote}print q{ok $tnum - system(PROG, LIST)}${quote}";
 next_test();
 is( $exit, 0, '  exited 0' );
@@ -157,5 +158,5 @@ TODO: {
 }
 
 my $test = curr_test();
-exec $Perl, '-le', qq{${quote}print 'ok $test - exec PROG, LIST'${quote}};
+exec $ListPerl, '-le', qq{${quote}print 'ok $test - exec PROG, LIST'${quote}};
 fail("This should never be reached if the exec() worked");

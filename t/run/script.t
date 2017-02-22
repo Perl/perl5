@@ -7,7 +7,7 @@ BEGIN {
     plan(3);
 }
 
-my $Perl = which_perl();
+my $Perl = which_perl_shell();
 
 my $filename = tempfile();
 

@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 
-my $Perl = which_perl();
+my $Perl = which_perl_shell();
 
 my $data = <<'EOD';
 x

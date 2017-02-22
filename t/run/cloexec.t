@@ -55,7 +55,7 @@ sub make_tmp_file {
     close  FHTMP             or die "close '$fname': $!";
 }
 
-my $Perl = which_perl();
+my $Perl = which_perl_shell();
 my $quote = "'";
 
 my $tmperr             = tempfile();
