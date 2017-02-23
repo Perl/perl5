@@ -303,6 +303,7 @@ sub changes_between {
     5.025007 => '2016-11-20',
     5.025008 => '2016-12-20',
     5.022003 => '2017-01-14',
+    5.025009 => '????-??-??',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -13684,6 +13685,16 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'bigint'                => '0.39_01',
             'bignum'                => '0.39_01',
             'bigrat'                => '0.39_01',
+        },
+        removed => {
+        }
+    },
+    5.025009 => {
+        delta_from => 5.025008,
+        changed => {
+            'Module::CoreList'      => '5.20170120',
+            'Module::CoreList::TieHashDelta'=> '5.20170120',
+            'Module::CoreList::Utils'=> '5.20170120',
         },
         removed => {
         }
