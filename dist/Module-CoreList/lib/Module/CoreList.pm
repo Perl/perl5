@@ -13694,6 +13694,8 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     5.025009 => {
         delta_from => 5.025008,
         changed => {
+            'B::Op_private'         => '5.025009',
+            'Config'                => '5.025009',
             'Module::CoreList'      => '5.20170120',
             'Module::CoreList::TieHashDelta'=> '5.20170120',
             'Module::CoreList::Utils'=> '5.20170120',
@@ -14419,6 +14421,13 @@ for my $version (sort { $a <=> $b } keys %delta) {
     },
     5.024001 => {
         delta_from => 5.024000,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.025009 => {
+        delta_from => 5.025008,
         changed => {
         },
         removed => {
