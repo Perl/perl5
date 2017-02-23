@@ -25,8 +25,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Security Fixes</h3>
 
-<commit votes="sprout arc xsawyerx" id="ba0a4150f6f1604df236035adf6df18bd43de88e" ticket="" desc="Fix checks for tainted dir in $ENV{PATH}"/>
-
 </div>
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
@@ -40,9 +38,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 <commit votes="sprout" id="a6128716d2cc20147851e0a37768376647bd3242" ticket="129196" desc="Regression test for RT #129196"/>
 
 <commit votes="" id="" ticket="123878" desc=""/>
-
-Note: the following is a non-trivial backport to maint-5.22 of 109ac342a6bc5a3a67c3b52341607100cedafdf7, in branch tonyc/maint-5.22-129038-locale-match
-<commit votes="tonyc davem arc" id="5747c35638c5183ddf9e4b7f3949aa0f7414661c" ticket="129038" desc="Assertion Failure: *Perl_pp_subst *pp_hot.c:3203)"/>
 
 </div>
 

@@ -47,8 +47,6 @@ The same criteria apply to code in dual-life modules as to core code.)
 
 <div><h3>Security Fixes</h3>
 
-<commit votes="sprout xsawyerx arc" id="ba0a4150f6f1604df236035adf6df18bd43de88e" ticket="" desc="Fix checks for tainted dir in $ENV{PATH}"/>
-
 </div>
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
@@ -67,8 +65,6 @@ This one needs the version in ext/POSIX/lib/POSIX.pm bumped to 1.65_01:
 
 There doesn't seem to be a blead commit for this ticket, so nothing to backport. -arc
 <commit votes="" id="" ticket="123878" desc="OPEN: Infinite recursion (+segfault) on die() after goto-ing out of __DIE__ handler"/>
-
-<commit votes="tonyc davem arc" id="109ac342a6bc5a3a67c3b52341607100cedafdf7" ticket="129038" desc="Assertion Failure: *Perl_pp_subst *pp_hot.c:3203)"/>
 
 </div>
 
