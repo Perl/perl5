@@ -102,6 +102,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	die_at_end "$plain_func: s flag is mutually exclusive from the i and p plags"
 					    if $flags =~ /s/ && $flags =~ /[ip]/;
 
+	my $static_inline = 0;
 	if ($flags =~ /([si])/) {
 	    my $type;
 	    if ($never_returns) {
@@ -112,6 +113,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	    }
 	    $retval = "$type $retval";
 	    die_at_end "Don't declare static function '$plain_func' pure" if $flags =~ /P/;
+	    $static_inline = $type eq 'PERL_STATIC_INLINE';
 	}
 	else {
 	    if ($never_returns) {
@@ -124,6 +126,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	$func = full_name($plain_func, $flags);
 	$ret = "";
 	$ret .= "#ifndef NO_MATHOMS\n" if $binarycompat;
+	$ret .= "#ifndef PERL_NO_INLINE_FUNCTIONS\n" if $static_inline;
 	$ret .= "$retval\t$func(";
 	if ( $has_context ) {
 	    $ret .= @args ? "pTHX_ " : "pTHX";
@@ -216,6 +219,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	    $ret .= "\n#define PERL_ARGS_ASSERT_\U$plain_func\E\t\\\n\t"
 		. join '; ', map "assert($_)", @names_of_nn;
 	}
+	$ret .= "\n#endif" if $static_inline;
 	$ret .= "\n#endif" if $binarycompat;
 	$ret .= @attrs ? "\n\n" : "\n";
 
