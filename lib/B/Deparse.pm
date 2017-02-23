@@ -628,6 +628,9 @@ sub begin_is_use {
     my $req_op = $lineseq->first->sibling;
     return if $req_op->name ne "require";
 
+    # maybe it's C<require expr> rather than C<require 'foo'>
+    return if ($req_op->first->name ne 'const');
+
     my $module;
     if ($req_op->first->private & OPpCONST_BARE) {
 	# Actually it should always be a bareword

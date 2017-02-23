@@ -90,10 +90,7 @@ __DEPARSE_FAILURES__
 ../dist/Data-Dumper/t/dumper.t
 ../dist/Exporter/t/Exporter.t
 ../dist/Filter-Simple/t/data.t
-../dist/IO/t/io_file_export.t
-../dist/IO/t/io_multihomed.t
 ../dist/IO/t/io_sel.t
-../dist/IO/t/io_udp.t
 ../dist/Locale-Maketext/t/01_about_verbose.t
 ../dist/Locale-Maketext/t/10_make.t
 ../dist/Locale-Maketext/t/20_get.t
@@ -125,10 +122,7 @@ __DEPARSE_FAILURES__
 ../dist/bignum/t/scope_i.t
 ../dist/bignum/t/scope_r.t
 ../dist/constant/t/constant.t
-../dist/threads/t/err.t
 ../dist/threads/t/exit.t
-../dist/threads/t/kill2.t
-../dist/threads/t/libc.t
 ../dist/threads/t/thread.t
 ../ext/B/t/b.t
 ../ext/B/t/optree_constants.t
