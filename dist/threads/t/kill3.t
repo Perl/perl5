@@ -11,6 +11,8 @@ BEGIN {
 }
 
 use ExtUtils::testlib;
+use File::Path ();
+use File::Spec;
 use Cwd;
 my $cwd = cwd();
 
@@ -35,8 +37,9 @@ BEGIN {
 {
     $SIG{'KILL'} = undef;
     chdir '/tmp';
-    mkdir "toberead$$";
-    chdir "toberead$$";
+    my $dir = File::Spec->catdir( '/tmp', "toberead$$" );
+    mkdir $dir;
+    chdir $dir;
     for ('a'..'e') {
         open my $THING, ">$_";
         close $THING or die "$_: $!";
@@ -69,13 +72,15 @@ BEGIN {
     }
     print($@ ? 'not ok' : 'ok');
 EOI
+    File::Path::rmtree($dir);
 }
 
 {
     $SIG{'KILL'} = undef;
     chdir '/tmp';
-    mkdir "shouldberead$$";
-    chdir "shouldberead$$";
+    my $dir = File::Spec->catdir( '/tmp', "shouldberead$$" );
+    mkdir $dir;
+    chdir $dir;
     for ('a'..'e') {
         open my $THING, ">$_";
         close $THING or die "$_: $!";
@@ -108,6 +113,7 @@ EOI
     }
     print($@ ? 'not ok' : 'ok');
 EOI
+    File::Path::rmtree($dir);
 }
 
 exit(0);
