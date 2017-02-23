@@ -1236,6 +1236,13 @@ my %delta = (
             'pstruct'               => 1,
         }
     },
+    5.025010 => {
+        delta_from => 5.025009,
+        changed => {
+        },
+        removed => {
+        }
+    },
 );
 
 for my $version (sort { $a <=> $b } keys %delta) {
