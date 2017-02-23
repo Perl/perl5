@@ -4825,7 +4825,23 @@ sub re_unback {
     my($str) = @_;
 
     # the insane complexity here is due to the behaviour of "\c\"
-    $str =~ s/(^|[^\\]|\\c\\)(?<!\\c)\\(\\\\)*(?=[[:^print:]])/$1$2/g;
+    $str =~ s/
+                # these two lines ensure that the backslash we're about to
+                # remove isn't preceeded by something which makes it part
+                # of a \c
+
+                (^ | [^\\] | \\c\\)             # $1
+                (?<!\\c)
+
+                # the backslash to remove
+                \\
+
+                # keep pairs of backslashes
+                (\\\\)*                         # $2
+
+                # only remove if the thing following is a control char
+                (?=[[:^print:]])
+            /$1$2/xg;
     return $str;
 }
 
