@@ -891,6 +891,9 @@ PERL_CALLCONV char*	Perl_delimcpy(char* to, const char* toend, const char* from,
 #define PERL_ARGS_ASSERT_DELIMCPY	\
 	assert(to); assert(toend); assert(from); assert(fromend); assert(retlen)
 
+PERL_CALLCONV char*	Perl_delimcpy_no_escape(char* to, const char* toend, const char* from, const char* fromend, int delim, I32* retlen);
+#define PERL_ARGS_ASSERT_DELIMCPY_NO_ESCAPE	\
+	assert(to); assert(toend); assert(from); assert(fromend); assert(retlen)
 PERL_CALLCONV void	Perl_despatch_signals(pTHX);
 PERL_CALLCONV_NO_RET OP*	Perl_die(pTHX_ const char* pat, ...)
 			__attribute__noreturn__
