@@ -438,6 +438,8 @@ sub _pessimise_walk {
 sub _pessimise_walk_exe {
     my ($self, $startop, $visited) = @_;
 
+    no warnings 'recursion';
+
     return unless $$startop;
     return if $visited->{$$startop};
     my ($op, $prevop);
