@@ -2295,8 +2295,8 @@ always parses its argument (or L<C<$_>|perlvar/$_> if EXPR is omitted)
 as a string of independent bytes.
 
 If called when S<C<use utf8>> is in effect, the string will be assumed
-to be encoded in UTF-8, and C<evalbytes> will make a temporary
-downgraded to non-UTF-8 copy to work from.  If this is not possible
+to be encoded in UTF-8, and C<evalbytes> will make a temporary copy to
+work from, downgraded to non-UTF-8.  If this is not possible
 (because one or more characters in it require UTF-8), the C<evalbytes>
 will fail with the error stored in C<$@>.
 
