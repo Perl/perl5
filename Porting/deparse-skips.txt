@@ -125,7 +125,6 @@ uni/universal.t
 ../cpan/Archive-Tar/t/03_file.t         # constant sub ref: FOO->()
 ../cpan/CGI/t/utf8.t
 ../cpan/ExtUtils-MakeMaker/t/xs.t
-../cpan/File-Path/t/taint.t
 ../cpan/Module-Build/t/manifypods_with_utf8.t
 ../cpan/podlators/t/basic.t
 ../cpan/Scalar-List-Utils/t/proto.t
