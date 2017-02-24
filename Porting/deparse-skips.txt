@@ -122,6 +122,7 @@ uni/universal.t
 ../cpan/autodie/t/utime.t
 ../cpan/autodie/t/version_tag.t
 ../cpan/AutoLoader/t/01AutoLoader.t
+../cpan/Archive-Tar/t/03_file.t         # constant sub ref: FOO->()
 ../cpan/CGI/t/utf8.t
 ../cpan/ExtUtils-MakeMaker/t/xs.t
 ../cpan/File-Path/t/taint.t
