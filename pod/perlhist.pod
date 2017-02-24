@@ -33,7 +33,7 @@ Matt S Trout, David Golden, Florian Ragwitz, Tatsuhiko Miyagawa,
 Chris C<BinGOs> Williams, Zefram, Ævar Arnfjörð Bjarmason, Stevan
 Little, Dave Rolsky, Max Maischein, Abigail, Jesse Luehrs, Tony Cook,
 Dominic Hargreaves, Aaron Crane, Aristotle Pagaltzis, Matthew Horsfall,
-Peter Martini, Sawyer X, and Chad 'Exodist' Granum.
+Peter Martini, Sawyer X, Chad 'Exodist' Granum, and Renee Bäcker.
 
 =head2 PUMPKIN?
 
@@ -608,6 +608,7 @@ the strings?).
  Chad      5.25.7       2016-Nov-20
  Sawyer X  5.25.8       2016-Dec-20
  Abigail   5.25.9       2017-Jan-20
+ Renee     5.25.10      2017-Feb-20
 
 =head2 SELECTED RELEASE SIZES
 
