@@ -2627,3 +2627,25 @@ my $r2 = qr/$a(?{ my($x, $y) = (); })/;
 /a\ b/x;
 /a\	b/;
 /a\	b/x;
+####
+# my attributes
+my $s1 :foo(f1, f2) bar(b1, b2);
+my @a1 :foo(f1, f2) bar(b1, b2);
+my %h1 :foo(f1, f2) bar(b1, b2);
+my($s2, @a2, %h2) :foo(f1, f2) bar(b1, b2);
+####
+# my class attributes
+package Foo::Bar;
+my Foo::Bar $s1 :foo(f1, f2) bar(b1, b2);
+my Foo::Bar @a1 :foo(f1, f2) bar(b1, b2);
+my Foo::Bar %h1 :foo(f1, f2) bar(b1, b2);
+my Foo::Bar ($s2, @a2, %h2) :foo(f1, f2) bar(b1, b2);
+package main;
+my Foo::Bar $s3 :foo(f1, f2) bar(b1, b2);
+my Foo::Bar @a3 :foo(f1, f2) bar(b1, b2);
+my Foo::Bar %h3 :foo(f1, f2) bar(b1, b2);
+my Foo::Bar ($s4, @a4, %h4) :foo(f1, f2) bar(b1, b2);
+####
+# avoid false positives in my $x :attribute
+'attributes'->import('main', \my $x1, 'foo(bar)'), my $y1;
+'attributes'->import('Fooo', \my $x2, 'foo(bar)'), my $y2;

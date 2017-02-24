@@ -3535,9 +3535,167 @@ BEGIN {
     delete @uses_intro{qw( lvref lvrefslice lvavref entersub )};
 }
 
+
+# Look for a my attribute declaration in a list or ex-list. Returns undef
+# if not found, 'my($x, @a) :Foo(bar)' etc otherwise.
+#
+# There are three basic tree structs that are expected:
+#
+# my $x :foo;
+#      <1> ex-list vK/LVINTRO ->c
+#         <0> ex-pushmark v ->3
+#         <1> entersub[t2] vKRS*/TARG ->b
+#                ....
+#         <0> padsv[$x:64,65] vM/LVINTRO ->c
+#
+# my @a :foo;
+# my %h :foo;
+#
+#      <1> ex-list vK ->c
+#         <0> ex-pushmark v ->3
+#         <0> padav[@a:64,65] vM/LVINTRO ->4
+#         <1> entersub[t2] vKRS*/TARG ->c
+#            ....
+#
+# my ($x,@a,%h) :foo;
+#
+#      <;> nextstate(main 64 -e:1) v:{ ->3
+#      <@> list vKP ->w
+#         <0> pushmark vM/LVINTRO ->4
+#         <0> padsv[$x:64,65] vM/LVINTRO ->5
+#         <0> padav[@a:64,65] vM/LVINTRO ->6
+#         <0> padhv[%h:64,65] vM/LVINTRO ->7
+#         <1> entersub[t4] vKRS*/TARG ->f
+#            ....
+#         <1> entersub[t5] vKRS*/TARG ->n
+#            ....
+#         <1> entersub[t6] vKRS*/TARG ->v
+#           ....
+# where the entersub in all cases looks like
+#        <1> entersub[t2] vKRS*/TARG ->c
+#           <0> pushmark s ->5
+#           <$> const[PV "attributes"] sM ->6
+#           <$> const[PV "main"] sM ->7
+#           <1> srefgen sKM/1 ->9
+#              <1> ex-list lKRM ->8
+#                 <0> padsv[@a:64,65] sRM ->8
+#           <$> const[PV "foo"] sM ->a
+#           <.> method_named[PV "import"] ->b
+
+sub maybe_my_attr {
+    my ($self, $op, $cx) = @_;
+
+    my $kid = $op->first->sibling; # skip pushmark
+    return if class($kid) eq 'NULL';
+
+    my $lop;
+    my $type;
+
+    # Extract out all the pad ops and entersub ops into
+    # @padops and @entersubops. Return if anything else seen.
+    # Also determine what class (if any) all the pad vars belong to
+    my $class;
+    my (@padops, @entersubops);
+    for ($lop = $kid; !null($lop); $lop = $lop->sibling) {
+	my $lopname = $lop->name;
+	my $loppriv = $lop->private;
+        if ($lopname =~ /^pad[sah]v$/) {
+            return unless $loppriv & OPpLVAL_INTRO;
+            return if     $loppriv & OPpPAD_STATE;
+
+            my $padname = $self->padname_sv($lop->targ);
+            my $thisclass = ($padname->FLAGS & SVpad_TYPED)
+                                ? $padname->SvSTASH->NAME : 'main';
+
+            # all pad vars must be in the same class
+            $class //= $thisclass;
+            return unless $thisclass eq $class;
+
+            push @padops, $lop;
+        }
+        elsif ($lopname eq 'entersub') {
+            push @entersubops, $lop;
+        }
+        else {
+            return;
+        }
+    }
+
+    return unless @padops && @padops == @entersubops;
+
+    # there should be a balance: each padop has a corresponding
+    # 'attributes'->import() method call, in the same order.
+
+    my @varnames;
+    my $attr_text;
+
+    for my $i (0..$#padops) {
+        my $padop = $padops[$i];
+        my $esop  = $entersubops[$i];
+
+        push @varnames, $self->padname($padop->targ);
+
+        return unless ($esop->flags & OPf_KIDS);
+
+        my $kid = $esop->first;
+        return unless $kid->type == OP_PUSHMARK;
+
+        $kid = $kid->sibling;
+        return unless $$kid && $kid->type == OP_CONST;
+	return unless $self->const_sv($kid)->PV eq 'attributes';
+
+        $kid = $kid->sibling;
+        return unless $$kid && $kid->type == OP_CONST; # __PACKAGE__
+
+        $kid = $kid->sibling;
+        return unless  $$kid
+                    && $kid->name eq "srefgen"
+                    && ($kid->flags & OPf_KIDS)
+                    && ($kid->first->flags & OPf_KIDS)
+                    && $kid->first->first->name =~ /^pad[sah]v$/
+                    && $kid->first->first->targ == $padop->targ;
+
+        $kid = $kid->sibling;
+        my @attr;
+        while ($$kid) {
+            last if ($kid->type != OP_CONST);
+            push @attr, $self->const_sv($kid)->PV;
+            $kid = $kid->sibling;
+        }
+        return unless @attr;
+        my $thisattr = ":" . join(' ', @attr);
+        $attr_text //= $thisattr;
+        # all import calls must have the same list of attributes
+        return unless $attr_text eq $thisattr;
+
+        return unless $kid->name eq 'method_named';
+	return unless $self->meth_sv($kid)->PV eq 'import';
+
+        $kid = $kid->sibling;
+        return if $$kid;
+    }
+
+    my $res = 'my';
+    $res .= " $class " if $class ne 'main';
+    $res .=
+            (@varnames > 1)
+            ? "(" . join(', ', @varnames) . ')'
+            : " $varnames[0]";
+
+    return "$res $attr_text";
+}
+
+
 sub pp_list {
     my $self = shift;
     my($op, $cx) = @_;
+
+    {
+        # might be my ($s,@a,%h) :Foo(bar);
+        my $my_attr = maybe_my_attr($self, $op, $cx);
+        return $my_attr if defined $my_attr;
+    }
+
     my($expr, @exprs);
     my $kid = $op->first->sibling; # skip pushmark
     return '' if class($kid) eq 'NULL';
@@ -3831,6 +3989,13 @@ sub _op_is_or_was {
 
 sub pp_null {
     my($self, $op, $cx) = @_;
+
+    # might be 'my $s :Foo(bar);'
+    if ($op->targ == OP_LIST) {
+        my $my_attr = maybe_my_attr($self, $op, $cx);
+        return $my_attr if defined $my_attr;
+    }
+
     if (class($op) eq "OP") {
 	# old value is lost
 	return $self->{'ex_const'} if $op->targ == OP_CONST;

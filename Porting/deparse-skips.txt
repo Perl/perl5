@@ -104,7 +104,6 @@ __DEPARSE_FAILURES__
 ../dist/PathTools/t/cwd.t
 ../dist/Storable/t/blessed.t
 ../dist/Storable/t/croak.t
-../dist/Thread-Queue/t/08_nothreads.t
 ../dist/bignum/t/big_e_pi.t
 ../dist/bignum/t/bigexp.t
 ../dist/bignum/t/bigint.t
@@ -122,8 +121,6 @@ __DEPARSE_FAILURES__
 ../dist/bignum/t/scope_i.t
 ../dist/bignum/t/scope_r.t
 ../dist/constant/t/constant.t
-../dist/threads/t/exit.t
-../dist/threads/t/thread.t
 ../ext/B/t/b.t
 ../ext/B/t/optree_constants.t
 ../ext/B/t/optree_samples.t
@@ -151,10 +148,8 @@ comp/parser.t             # crazy #line directives ==> shell syntax errors
 mro/isarev.t
 mro/isarev_utf8.t
 op/attrhand.t             # Custom attrs ignored; also AH provides none
-op/attrs.t                # [perl #70205] my attrs
 op/caller.t
 op/each.t                 # utf8ness of deparsed strings
-op/getpid.t               # [perl #70205] my attrs
 op/goto.t
 op/gv.t                   # glob copy constants
 op/index.t
