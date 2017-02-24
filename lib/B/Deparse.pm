@@ -574,7 +574,17 @@ sub next_todo {
                 #  makes use of a lexical var that's not in scope.
                 #  So strip it out.
                 return $pragmata
-                            if $use_dec =~ /^use \S+ \(@\{\$args\[0\];\}\);/;
+                        if $use_dec =~
+                            m/
+                                \A
+                                use \s \S+ \s \(\@\{
+                                (
+                                    \s*\#line\ \d+\ \".*"\s*
+                                )?
+                                \$args\[0\];\}\);
+                                \n
+                                \Z
+                            /x;
 
 		$use_dec =~ s/^(use|no)\b/$self->keyword($1)/e;
 	    }

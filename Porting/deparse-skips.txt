@@ -32,7 +32,6 @@
 __DEPARSE_FAILURES__
 
 ../cpan/Scalar-List-Utils/t/proto.t
-../cpan/Term-ANSIColor/t/taint/basic.t
 ../cpan/autodie/t/internal.t
 ../cpan/AutoLoader/t/01AutoLoader.t
 ../cpan/CGI/t/utf8.t
@@ -48,7 +47,6 @@ __DEPARSE_FAILURES__
 ../cpan/Test-Simple/t/plan_bad.t
 ../cpan/Test-Simple/t/subtest/line_numbers.t
 ../cpan/Test-Simple/t/subtest/predicate.t
-../cpan/autodie/t/00-load.t
 ../cpan/autodie/t/autodie.t
 ../cpan/autodie/t/blog_hints.t
 ../cpan/autodie/t/caller.t
@@ -91,14 +89,6 @@ __DEPARSE_FAILURES__
 ../dist/Exporter/t/Exporter.t
 ../dist/Filter-Simple/t/data.t
 ../dist/IO/t/io_sel.t
-../dist/Locale-Maketext/t/01_about_verbose.t
-../dist/Locale-Maketext/t/10_make.t
-../dist/Locale-Maketext/t/20_get.t
-../dist/Locale-Maketext/t/40_super.t
-../dist/Locale-Maketext/t/50_super.t
-../dist/Locale-Maketext/t/60_super.t
-../dist/Locale-Maketext/t/70_fail_auto.t
-../dist/Locale-Maketext/t/91_backslash.t
 ../dist/Math-BigInt/t/const_mbf.t
 ../dist/Math-BigInt/t/constant.t
 ../dist/PathTools/t/cwd.t
@@ -126,8 +116,6 @@ __DEPARSE_FAILURES__
 ../ext/B/t/optree_samples.t
 ../ext/B/t/xref.t
 ../ext/Devel-Peek/t/Peek.t
-../ext/File-Glob/t/taint.t
-../ext/Hash-Util/t/Util.t
 ../ext/IPC-Open3/t/IPC-Open2.t
 ../ext/IPC-Open3/t/IPC-Open3.t
 ../ext/XS-APItest/t/autoload.t
@@ -136,9 +124,7 @@ __DEPARSE_FAILURES__
 ../ext/XS-APItest/t/cleanup.t
 ../ext/XS-APItest/t/fetch_pad_names.t
 ../ext/XS-APItest/t/svpeek.t
-../lib/DB.t
 ../lib/English.t
-../lib/File/Basename.t
 ../lib/charnames.t
 ../lib/overload.t
 base/lex.t                # checks regexp stringification
