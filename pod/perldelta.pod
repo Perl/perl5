@@ -358,7 +358,8 @@ platform specific bugs also go here.
 
 =item *
 
-XXX
+Fixed a crash with C<s///l> where it thought it was dealing with UTF-8
+when it wasn't. [perl #129038]
 
 =back
 
