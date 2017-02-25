@@ -182,6 +182,7 @@ aux c2ph h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perldelta		Perl changes since previous version
     perl5241delta	Perl changes in version 5.24.1
     perl5240delta	Perl changes in version 5.24.0
+    perl5223delta	Perl changes in version 5.22.3
     perl5222delta	Perl changes in version 5.22.2
     perl5221delta	Perl changes in version 5.22.1
     perl5220delta	Perl changes in version 5.22.0
