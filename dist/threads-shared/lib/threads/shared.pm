@@ -7,7 +7,7 @@ use warnings;
 
 use Scalar::Util qw(reftype refaddr blessed);
 
-our $VERSION = '1.54'; # Please update the pod, too.
+our $VERSION = '1.55'; # Please update the pod, too.
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -195,7 +195,7 @@ threads::shared - Perl extension for sharing data structures between threads
 
 =head1 VERSION
 
-This document describes threads::shared version 1.54
+This document describes threads::shared version 1.55
 
 =head1 SYNOPSIS
 
@@ -570,16 +570,18 @@ not propagate the blessing to the shared reference:
 Therefore, you should bless objects before sharing them.
 
 It is often not wise to share an object unless the class itself has been
-written to support sharing.  For example, an object's destructor may get
-called multiple times, once for each thread's scope exit.  Another danger is
-that the contents of hash-based objects will be lost due to the above
-mentioned limitation.  See F<examples/class.pl> (in the CPAN distribution of
-this module) for how to create a class that supports object sharing.
+written to support sharing.  For example, a shared object's destructor may
+get called multiple times, once for each thread's scope exit, or may not
+get called at all if it is embedded inside another shared object.  Another
+issue is that the contents of hash-based objects will be lost due to the
+above mentioned limitation.  See F<examples/class.pl> (in the CPAN
+distribution of this module) for how to create a class that supports object
+sharing.
 
 Destructors may not be called on objects if those objects still exist at
 global destruction time.  If the destructors must be called, make sure
 there are no circular references and that nothing is referencing the
-objects, before the program ends.
+objects before the program ends.
 
 Does not support C<splice> on arrays.  Does not support explicitly changing
 array lengths via $#array -- use C<push> and C<pop> instead.
