@@ -35,6 +35,9 @@ base/lex.t                # checks regexp stringification
 comp/final_line_num.t     # tests syntax error after BEGIN block
 comp/fold.t               # mutability of folded constants
 comp/parser.t             # crazy #line directives ==> shell syntax errors
+mro/basic_01_c3_utf8.t
+mro/basic_01_dfs_utf8.t
+mro/complex_c3_utf8.t
 mro/isarev.t
 mro/isarev_utf8.t
 op/attrhand.t             # Custom attrs ignored; also AH provides none
@@ -42,11 +45,13 @@ op/caller.t
 op/each.t                 # utf8ness of deparsed strings
 op/goto.t
 op/gv.t                   # glob copy constants
+op/hexfp.t
 op/index.t
 op/join.t                 # mutability of folded constants
 op/length.t               # utf8ness of deparsed strings
 op/lexsub.t
 op/local.t
+op/lvref.t
 op/not.t
 op/overload_integer.t
 op/override.t
@@ -88,7 +93,11 @@ uni/select.t
 uni/stash.t
 uni/tie.t
 uni/universal.t
+uni/variables.t
+../cpan/Archive-Tar/t/03_file.t         # constant sub ref: FOO->()
 ../cpan/autodie/t/autodie.t
+../cpan/autodie/t/basic_exceptions.t
+../cpan/autodie/t/binmode.t
 ../cpan/autodie/t/blog_hints.t
 ../cpan/autodie/t/caller.t
 ../cpan/autodie/t/chmod.t
@@ -102,6 +111,7 @@ uni/universal.t
 ../cpan/autodie/t/exceptions.t
 ../cpan/autodie/t/exec.t
 ../cpan/autodie/t/filehandles.t
+../cpan/autodie/t/fileno.t
 ../cpan/autodie/t/hints_insist.t
 ../cpan/autodie/t/hints_pod_examples.t
 ../cpan/autodie/t/hints_provider_does.t
@@ -111,25 +121,31 @@ uni/universal.t
 ../cpan/autodie/t/internal.t
 ../cpan/autodie/t/kill.t
 ../cpan/autodie/t/lethal.t
+../cpan/autodie/t/mkdir.t
 ../cpan/autodie/t/open.t
+../cpan/autodie/t/read.t
 ../cpan/autodie/t/recv.t
 ../cpan/autodie/t/repeat.t
 ../cpan/autodie/t/scope_leak.t
 ../cpan/autodie/t/sysopen.t
+../cpan/autodie/t/truncate.t
+../cpan/autodie/t/unlink.t
 ../cpan/autodie/t/user-context.t
 ../cpan/autodie/t/usersub.t
 ../cpan/autodie/t/utf8_open.t
 ../cpan/autodie/t/utime.t
 ../cpan/autodie/t/version_tag.t
 ../cpan/AutoLoader/t/01AutoLoader.t
-../cpan/Archive-Tar/t/03_file.t         # constant sub ref: FOO->()
 ../cpan/bignum/t/big_e_pi.t
 ../cpan/bignum/t/bigexp.t
 ../cpan/bignum/t/bigint.t
 ../cpan/bignum/t/bignum.t
 ../cpan/bignum/t/bigrat.t
 ../cpan/bignum/t/bii_e_pi.t
+../cpan/bignum/t/biinfnan.t
 ../cpan/bignum/t/bir_e_pi.t
+../cpan/bignum/t/bninfnan.t
+../cpan/bignum/t/brinfnan.t
 ../cpan/bignum/t/in_effect.t
 ../cpan/bignum/t/option_a.t
 ../cpan/bignum/t/option_l.t
@@ -141,7 +157,11 @@ uni/universal.t
 ../cpan/bignum/t/scope_r.t
 ../cpan/Math-BigInt/t/constant.t
 ../cpan/Math-BigInt/t/const_mbf.t
+../cpan/Module-Metadata/t/metadata.t
+../cpan/Scalar-List-Utils/t/subname.t
+../cpan/Scalar-List-Utils/t/uniq.t
 ../cpan/Socket/t/sockaddr.t
+../cpan/Term-Cap/test.pl
 ../cpan/Test-Simple/t/Legacy/Builder/carp.t
 ../cpan/Test-Simple/t/Legacy/fail-more.t
 ../cpan/Test-Simple/t/Legacy/is_deeply_fail.t
@@ -149,6 +169,8 @@ uni/universal.t
 ../cpan/Test-Simple/t/Legacy/plan.t
 ../cpan/Test-Simple/t/Legacy/subtest/line_numbers.t
 ../cpan/Test-Simple/t/Legacy/subtest/predicate.t
+../cpan/Test-Simple/t/regression/684-nested_todo_diag.t
+../cpan/Test-Simple/t/Test2/behavior/run_subtest_inherit.t
 ../dist/Attribute-Handlers/t/constants.t
 ../dist/Attribute-Handlers/t/data_convert.t
 ../dist/Attribute-Handlers/t/linerep.t
@@ -156,12 +178,14 @@ uni/universal.t
 ../dist/Carp/t/Carp.t
 ../dist/constant/t/constant.t
 ../dist/Data-Dumper/t/dumper.t
+../dist/Data-Dumper/t/trailing_comma.t
 ../dist/Exporter/t/Exporter.t
 ../dist/Filter-Simple/t/data.t
 ../dist/IO/t/io_sel.t
 ../dist/PathTools/t/cwd.t
 ../dist/Storable/t/blessed.t
 ../dist/Storable/t/croak.t
+../dist/threads/t/blocks.t
 ../ext/B/t/b.t
 ../ext/B/t/optree_constants.t
 ../ext/B/t/optree_samples.t
@@ -175,9 +199,13 @@ uni/universal.t
 ../ext/XS-APItest/t/cleanup.t
 ../ext/XS-APItest/t/fetch_pad_names.t
 ../ext/XS-APItest/t/svpeek.t
+../ext/XS-APItest/t/synthetic_scope.t
+../lib/Benchmark.t
 ../lib/charnames.t
+../lib/dumpvar.t
 ../lib/English.t
 ../lib/overload.t
+
 
 __DEPARSE_SKIPS__
 
