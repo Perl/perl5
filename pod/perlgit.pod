@@ -481,6 +481,13 @@ the "first commit where the bug is solved".
 C<git help bisect> has much more information on how you can tweak your
 binary searches.
 
+Following bisection you may wish to configure, build and test perl at
+commits identified by the bisection process.  Sometimes, particularly
+with older perls, C<make> may fail during this process.  In this case
+you may be able to patch the source code at the older commit point.  To
+do so, please follow the suggestions provided in
+L<perlhack/Building perl at older commits>.
+
 =head2 Topic branches and rewriting history
 
 Individual committers should create topic branches under
