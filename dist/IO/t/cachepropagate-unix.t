@@ -24,8 +24,12 @@ my $socketpath = catfile(tempdir( CLEANUP => 1 ), 'testsock');
 # https://rt.cpan.org/Ticket/Display.html?id=116819
 
 my $name = eval { pack_sockaddr_un($socketpath) };
-defined $name && (unpack_sockaddr_un($name))[0] eq $socketpath
-  or plan skip_all => "socketpath too long for sockaddr_un";
+if (defined $name) {
+    my ($packed_name) = eval { unpack_sockaddr_un($name) };
+    if (!defined $packed_name || $packed_name ne $socketpath) {
+        plan skip_all => "socketpath too long for sockaddr_un";
+    }
+}
 
 plan tests => 15;
 
