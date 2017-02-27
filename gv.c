@@ -1496,7 +1496,14 @@ S_gv_stashsvpvn_cached(pTHX_ SV *namesv, const char *name, U32 namelen, I32 flag
         (flags & SVf_UTF8) ? HVhek_UTF8 : 0, 0, NULL, 0
     );
 
-    if (he) return INT2PTR(HV*,SvIVX(HeVAL(he)));
+    if (he) {
+        SV *sv = HeVAL(he);
+        HV *hv;
+        assert(SvIOK(sv));
+        hv = INT2PTR(HV*, SvIVX(sv));
+        assert(SvTYPE(hv) == SVt_PVHV);
+        return hv;
+    }
     else if (flags & GV_CACHE_ONLY) return NULL;
 
     if (namesv) {
