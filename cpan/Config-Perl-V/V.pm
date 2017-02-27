@@ -8,8 +8,8 @@ use warnings;
 use Config;
 use Exporter;
 use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
-$VERSION     = "0.27";
-@ISA         = ("Exporter");
+$VERSION     = "0.28";
+@ISA         = qw( Exporter );
 @EXPORT_OK   = qw( plv2hash summary myconfig signature );
 %EXPORT_TAGS = (
     all => [ @EXPORT_OK  ],
@@ -161,7 +161,7 @@ my @config_vars = qw(
     useithreads usemultiplicity
     useperlio d_sfio uselargefiles usesocks
     use64bitint use64bitall uselongdouble
-    usemymalloc bincompat5005
+    usemymalloc default_inc_excludes_dot bincompat5005
 
     cc ccflags
     optimize
@@ -190,8 +190,7 @@ my %empty_build = (
     patches => [],
     );
 
-sub _make_derived
-{
+sub _make_derived {
     my $conf = shift;
 
     for ( [ lseektype		=> "Off_t"	],
@@ -230,11 +229,12 @@ sub _make_derived
 	$conf->{config}{git_describe} ||= $conf->{config}{perl_patchlevel};
 	}
 
+    $conf->{config}{$_} ||= "undef" for grep m/^(?:use|def)/ => @config_vars;
+
     $conf;
     } # _make_derived
 
-sub plv2hash
-{
+sub plv2hash {
     my %config;
 
     my $pv = join "\n" => @_;
@@ -308,8 +308,7 @@ sub plv2hash
 	});
     } # plv2hash
 
-sub summary
-{
+sub summary {
     my $conf = shift || myconfig ();
     ref $conf eq "HASH" &&
 	exists $conf->{config} && exists $conf->{build} or return;
@@ -321,14 +320,14 @@ sub summary
 	    d_longdbl d_longlong use64bitall use64bitint useithreads
 	    uselongdouble usemultiplicity usemymalloc useperlio useshrplib 
 	    doublesize intsize ivsize nvsize longdblsize longlongsize lseeksize
+	    default_inc_excludes_dot
 	    );
     $info{$_}++ for grep { $conf->{build}{options}{$_} } keys %{$conf->{build}{options}};
 
     return \%info;
     } # summary
 
-sub signature
-{
+sub signature {
     eval { require Digest::MD5 };
     $@ and return "00000000000000000000000000000000";
 
@@ -339,8 +338,7 @@ sub signature
 	} sort keys %$conf);
     } # signature
 
-sub myconfig
-{
+sub myconfig {
     my $args = shift;
     my %args = ref $args eq "HASH"  ? %$args :
                ref $args eq "ARRAY" ? @$args : ();

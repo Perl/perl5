@@ -5,7 +5,7 @@ use warnings;
 
 BEGIN {
     use Test::More;
-    my $tests = 117;
+    my $tests = 125;
     unless ($ENV{PERL_CORE}) {
 	require Test::NoWarnings;
 	Test::NoWarnings->import ();
@@ -15,7 +15,7 @@ BEGIN {
     plan tests => $tests;
     }
 
-use Config::Perl::V;
+use Config::Perl::V qw( summary );
 
 ok (my $conf = Config::Perl::V::plv2hash (<DATA>), "Read perl -v block");
 ok (exists $conf->{$_}, "Has $_ entry") for qw( build environment config inc );
@@ -64,8 +64,15 @@ my %check = (
     osvers          => "4.5.2-1-default",
     use64bitall     => "define",
     use64bitint     => "define",
+    usemymalloc     => "n",
+    default_inc_excludes_dot
+		    => "undef",
     );
 is ($conf->{config}{$_}, $check{$_}, "reconstructed \$Config{$_}") for sort keys %check;
+
+ok (my $info = summary ($conf), "A summary");
+ok (exists $info->{$_}, "Summary has $_") for qw( cc config_args usemymalloc default_inc_excludes_dot );
+is ($info->{default_inc_excludes_dot}, "undef", "This build has . in INC");
 
 __END__
 Summary of my perl5 (revision 5 version 24 subversion 0) configuration:
