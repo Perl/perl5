@@ -385,6 +385,7 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
 	case SVt_PVIO:
             Perl_croak(aTHX_ "Cannot convert a reference to %s to typeglob",
 		       sv_reftype(has_constant, 0));
+            NOT_REACHED; /* NOTREACHED */
             break;
 
 	default: NOOP;
