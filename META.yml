@@ -91,6 +91,7 @@ no_index:
     - dist/IO/t/io_sock.t
     - dist/IO/t/io_taint.t
     - dist/IO/t/io_tell.t
+    - dist/IO/t/io_tell_encoding.t
     - dist/IO/t/io_udp.t
     - dist/IO/t/io_unix.t
     - dist/IO/t/io_utf8.t
