@@ -4518,7 +4518,7 @@ PERLIO_FUNCS_DECL(PerlIO_pending) = {
  * It only matters for read operations.
  *
  * The flag PERLIO_F_CRLFSAWCR is used to allow "permissive" CRLF, for
- * e.g. reading LF (unix) delimited files on Win32, the issue being to 
+ * e.g. reading LF (unix) delimited files on Win32, the issue being to
  * prevent _unread() from translating back indiscriminately '\n' as
  * a CR LF pair in that case (this is an issue because _unread() may
  * be used quite a lot if there is an encoding(xxx) layer upstream).
@@ -4585,7 +4585,7 @@ PerlIOCrlf_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
     PerlIOCrlf * const c = PerlIOSelf(f, PerlIOCrlf);
     if (!(PerlIOBase(f)->flags & PERLIO_F_CRLF) || !(PerlIOBase(f)->flags & PERLIO_F_CRLFSAWCR))
-	return PerlIOBuf_unread(aTHX_ f, vbuf, count);
+        return PerlIOBuf_unread(aTHX_ f, vbuf, count);
     if (c->nl) {	/* XXXX Shouldn't it be done only if b->ptr > c->nl? */
 	*(c->nl) = NATIVE_0xd;
 	c->nl = NULL;

@@ -1,7 +1,7 @@
 #!./perl
-# Test permissive read of LF-delimited files on Win32 with encoding 
+# Test permissive read of LF-delimited files on Win32 with encoding
 # layers (see #120797).
-# This file should contain only ASCII and be stored LF-delimited to 
+# This file should contain only ASCII and be stored LF-delimited to
 # exhibit the potential problems.
 my @encodings;
 
@@ -29,20 +29,20 @@ sub test {
     $$actualref = join ":", q{}, PerlIO::get_layers($io);
     my $cnt = 0;
     while (defined (my $line = $io->getline)) {
-	$line eq $lines[$cnt]
-	    or return "line $cnt, expected '$lines[$cnt]', got '$line'";
-	if ($tell) {
-	    () = tell $io;
-	}
-	++$cnt;
+        $line eq $lines[$cnt]
+            or return "line $cnt, expected '$lines[$cnt]', got '$line'";
+        if ($tell) {
+            () = tell $io;
+        }
+        ++$cnt;
     }
     return "OK";
 }
 
 for my $tell (1, 0) {
     for my $encoding (@encodings) {
-    	my $actual;
-	ok(test($encoding, $tell, \$actual), "OK", "encoding = $encoding, actual = $actual, tell = $tell");
+        my $actual;
+        ok(test($encoding, $tell, \$actual), "OK", "encoding = $encoding, actual = $actual, tell = $tell");
     }
 }
 #a0a1a2a3a4a5a6a7a8a9
