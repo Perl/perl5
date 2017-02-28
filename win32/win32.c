@@ -968,8 +968,8 @@ win32_readdir(DIR *dirp)
 		 * new name and its null terminator */
 		while (newsize > dirp->size) {
 		    long curpos = dirp->curr - dirp->start;
+		    Renew(dirp->start, dirp->size * 2, char);
 		    dirp->size *= 2;
-		    Renew(dirp->start, dirp->size, char);
 		    dirp->curr = dirp->start + curpos;
 		}
 		strcpy(dirp->start + endpos, buffer);
