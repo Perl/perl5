@@ -71,7 +71,7 @@ Thanks to (in chronological order):
     Jarkko Hietaniemi <jhi@iki.fi> (AGAIN, as perl 5.7.0 Pumpkin!)
     Todd Rinaldo <toddr@cpanel.net> and JD Lightsey <jd@cpanel.net>
       for optional disabling tie and bless for increased security.
-    Reini Urban <rurban@cpanel.net> for the 3.0x >2G support and rewrite
+    Reini Urban <rurban@cpan.org> for the 3.0x >2G support and rewrite
     JD Lightsey <jd@cpanel.net>
 
 for their contributions.

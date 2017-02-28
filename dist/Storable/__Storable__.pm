@@ -1246,7 +1246,7 @@ Thank you to (in chronological order):
 	Dominic Dunlop <domo@computer.org>
 	Erik Haugan <erik@solbors.no>
 	Benjamin A. Holzman <ben.holzman@grantstreet.com>
-	Reini Urban <rurban@cpanel.net>
+	Reini Urban <rurban@cpan.org>
 	Todd Rinaldo <toddr@cpanel.net>
 	Aaron Crane <arc@cpan.org>
 
