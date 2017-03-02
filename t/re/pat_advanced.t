@@ -945,10 +945,7 @@ sub run_tests {
                     'Empty string charname produces NOTHING node';
         like "\N{LONG-STR}", qr/^\N{LONG-STR}$/, 'Verify that long string works';
         like "\N{LONG-STR}", qr/^\N{LONG-STR}$/i, 'Verify under folding that long string works';
-        {
-        no warnings 'deprecated';
-        like "\xc4", qr/\N{}\xe4/i, 'Empty \N{} should change /d to /u';
-        }
+        like "\xc4", qr/\N{EMPTY-STR}\xe4/i, 'Empty \N{} should change /d to /u';
 
         eval '/(?[[\N{EMPTY-STR}]])/';
         like $@, qr/Zero length \\N\{\}/, 'Verify zero-length return from \N{} correctly fails';
@@ -2404,16 +2401,16 @@ EOF
         utf8::downgrade($string);
         utf8::downgrade($folded_string);
 
+        use Cname;
         like($string, qr/$string/i, "LATIN SMALL SHARP S matches itself under /id");
         unlike($folded_string, qr/$string/i, "LATIN SMALL SHARP S doesn't match 'ss' under /di");
-        no warnings 'deprecated';
-        like($folded_string, qr/\N{}$string/i, "\\N{} earlier than LATIN SMALL SHARP S transforms /di into /ui, matches 'ss'");
-        like($folded_string, qr/$string\N{}/i, "\\N{} after LATIN SMALL SHARP S transforms /di into /ui, matches 'ss'");
+        like($folded_string, qr/\N{EMPTY-STR}$string/i, "\\N{} earlier than LATIN SMALL SHARP S transforms /di into /ui, matches 'ss'");
+        like($folded_string, qr/$string\N{EMPTY-STR}/i, "\\N{} after LATIN SMALL SHARP S transforms /di into /ui, matches 'ss'");
     }
 
     {   # [perl #126606 crashed the interpreter
-        no warnings 'deprecated';
-        like("sS", qr/\N{}Ss|/i, '\N{} with empty branch alternation works');
+        use Cname;
+        like("sS", qr/\N{EMPTY-STR}Ss|/i, '\N{} with empty branch alternation works');
     }
 
     { # Regexp:Grammars was broken:
