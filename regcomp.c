@@ -12386,10 +12386,9 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
         return TRUE;
     }
 
-    if (!(endbrace == RExC_parse		/* nothing between the {} */
-              || (endbrace - RExC_parse >= 2	/* U+ (bad hex is checked... */
-                  && strnEQ(RExC_parse, "U+", 2)))) /* ... below for a better
-                                                       error msg) */
+    /* If we haven't got something that begins with 'U+', then it didn't get lexed. */
+    if (   endbrace - RExC_parse < 2
+        || strnNE(RExC_parse, "U+", 2))
     {
 	RExC_parse = endbrace;	/* position msg's '<--HERE' */
 	vFAIL("\\N{NAME} must be resolved by the lexer");
