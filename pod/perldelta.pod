@@ -55,6 +55,10 @@ allowed.  This has been deprecated since perl 5.000.
 These have been no-ops and deprecated since perl 5.12 and 5.10,
 respectively.
 
+=head2 C<\N{}> with nothing between the braces is now illegal.
+
+This has been deprecated since Perl 5.24.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

@@ -2588,8 +2588,9 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
     PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME;
 
     if (!SvCUR(res)) {
-        deprecate_fatal_in("5.28", "Unknown charname '' is deprecated");
-        return res;
+        /* diag_listed_as: Unknown charname '%s' */
+        yyerror("Unknown charname ''");
+        return NULL;
     }
 
     res = new_constant( NULL, 0, "charnames", res, NULL, backslash_ptr,

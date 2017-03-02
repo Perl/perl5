@@ -2280,13 +2280,6 @@ EOF
         "afoot" =~ eval "qr/$qr/";
         is "$1" || $@, "foo", 'multichar \N{...} stringified and retoked';
     }
-    {   # empty \N{...} tripping roundly
-        no warnings 'deprecated';
-        BEGIN { $^H{charnames} = sub { "" } }
-        my $qr = qr$(a\N{foo}t)$;
-        "at" =~ eval "qr/$qr/";
-        is "$1" || $@, "at", 'empty \N{...} stringified and retoked';
-    }
 
     is (scalar split(/\b{sb}/, "Don't think twice.  It's all right."),
         2, '\b{wb} splits sentences correctly');
