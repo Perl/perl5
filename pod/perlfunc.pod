@@ -5765,7 +5765,7 @@ returning the filehandle value instead, in which case the LIST may not be
 omitted:
 
     print { $files[$i] } "stuff\n";
-    print { $OK ? STDOUT : STDERR } "stuff\n";
+    print { $OK ? *STDOUT : *STDERR } "stuff\n";
 
 Printing to a closed pipe or socket will generate a SIGPIPE signal.  See
 L<perlipc> for more on signal handling.
