@@ -12017,7 +12017,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
 
     RExC_parse++;	/* Skip past the '{' */
 
-    if (! (endbrace = strchr(RExC_parse, '}'))) { /* no trailing brace */
+    endbrace = strchr(RExC_parse, '}');
+    if (! endbrace) { /* no trailing brace */
         vFAIL2("Missing right brace on \\%c{}", 'N');
     }
     else if(!(endbrace == RExC_parse		/* nothing between the {} */
