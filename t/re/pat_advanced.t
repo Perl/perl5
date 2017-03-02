@@ -945,6 +945,10 @@ sub run_tests {
                     'Empty string charname produces NOTHING node';
         like "\N{LONG-STR}", qr/^\N{LONG-STR}$/, 'Verify that long string works';
         like "\N{LONG-STR}", qr/^\N{LONG-STR}$/i, 'Verify under folding that long string works';
+        {
+        no warnings 'deprecated';
+        like "\xc4", qr/\N{}\xe4/i, 'Empty \N{} should change /d to /u';
+        }
 
         eval '/(?[[\N{EMPTY-STR}]])/';
         like $@, qr/Zero length \\N\{\}/, 'Verify zero-length return from \N{} correctly fails';
@@ -2405,6 +2409,11 @@ EOF
         no warnings 'deprecated';
         like($folded_string, qr/\N{}$string/i, "\\N{} earlier than LATIN SMALL SHARP S transforms /di into /ui, matches 'ss'");
         like($folded_string, qr/$string\N{}/i, "\\N{} after LATIN SMALL SHARP S transforms /di into /ui, matches 'ss'");
+    }
+
+    {   # [perl #126606 crashed the interpreter
+        no warnings 'deprecated';
+        like("sS", qr/\N{}Ss|/i, '\N{} with empty branch alternation works');
     }
 
     { # Regexp:Grammars was broken:

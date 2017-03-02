@@ -1443,7 +1443,6 @@ foo(\h)bar	foo\tbar	y	$1	\t
 /\N{U+41}\x{c1}/i	a\x{e1}	y	$&	a\x{e1}
 /[\N{U+41}\x{c1}]/i	\x{e1}	y	$&	\x{e1}
 '\N{U+41}'	A	y	$&	A		# Even for single quoted patterns
-/\N{}\xe4/i	\xc4	y	$&	\xc4		# Empty \N{} should change /d to /u
 
 [\s][\S]	\x{a0}\x{a0}	n	-	-	# Unicode complements should not match same character
 

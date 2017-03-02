@@ -23,7 +23,7 @@ BEGIN {
     skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
     skip_all_without_unicode_tables();
 
-plan tests => 837;  # Update this when adding/deleting tests.
+plan tests => 836;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1812,11 +1812,6 @@ EOP
             ok($AE !~ $re, '/[\xE6\s]/i doesn\'t match \xC6 when not in UTF-8');
             utf8::upgrade $AE;
             ok($AE =~ $re, '/[\xE6\s]/i matches \xC6 when in UTF-8');
-        }
-
-        {   # [perl #126606 crashed the interpreter
-            no warnings 'deprecated';
-            like("sS", qr/\N{}Ss|/i, "\N{} with empty branch alternation works");
         }
 
         {
