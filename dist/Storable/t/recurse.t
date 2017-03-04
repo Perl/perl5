@@ -20,7 +20,7 @@ use Storable qw(freeze thaw dclone);
 
 $Storable::flags = Storable::FLAGS_COMPAT;
 
-use Test::More tests => 37;
+use Test::More tests => 38;
 
 package OBJ_REAL;
 
@@ -328,9 +328,17 @@ is($refcount_ok, 1);
     pass "can nest 550 hash refs";
 }
 {
+    my (@t);
+    push @t, [{}] for 1..5000;
+    #diag 'trying simple array[5000] stack overflow, no recursion';
+    dclone \@t;
+    is $@, '', 'No simple array[5000] stack overflow #257';
+}
+{
     eval {
         my $t;
         $t = [$t] for 1..10000;
+        diag 'trying catching recursive aref stack overflow';
         dclone $t;
     };
     like $@, qr/Max\. recursion depth with nested structures exceeded/,
@@ -346,6 +354,7 @@ else {
         my $t;
         # 5.000 will cause appveyor 64bit windows to fail earlier
         $t = {1=>$t} for 1..5000;
+        diag 'trying catching recursive href stack overflow';
         dclone $t;
     };
     like $@, qr/Max\. recursion depth with nested structures exceeded/,
