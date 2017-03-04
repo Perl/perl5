@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 163;
+plan tests => 172;
 
 $FS = ':';
 
@@ -478,6 +478,24 @@ is($cnt, scalar(@ary));
     }
     is join(" ", @seq), "1:foo 3:foo 1:foo 3:foo 1:foo",
         qq{split(\$cond ? qr/ / : " ", "$exp") behaves as expected over repeated similar patterns};
+}
+
+SKIP: {
+    # RT #130907: unicode_strings feature doesn't work with split ' '
+
+    my ($sp) = grep /\s/u, map chr, reverse 128 .. 255 # prefer \xA0 over \x85
+        or skip 'no unicode whitespace found in high-8-bit range', 9;
+
+    for (["$sp$sp. /", "leading unicode whitespace"],
+         [".$sp$sp/",  "unicode whitespace separator"],
+         [". /$sp$sp", "trailing unicode whitespace"]) {
+        my ($str, $desc) = @$_;
+        use feature "unicode_strings";
+        my @got = split " ", $str;
+        is @got, 2, "whitespace split: $desc: field count";
+        is $got[0], '.', "whitespace split: $desc: field 0";
+        is $got[1], '/', "whitespace split: $desc: field 1";
+    }
 }
 
 {

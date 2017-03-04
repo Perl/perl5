@@ -375,6 +375,15 @@ function of that name already exists could result in a NULL pointer
 being supplied where an SV was expected, crashing perl.  [perl
 #131597]
 
+=item *
+
+C<split ' '> now correctly handles the argument being split when in the
+scope of the L<< C<unicode_strings>|feature/"The 'unicode_strings' feature"
+>> feature. Previously, when a string using the single-byte internal
+representation contained characters that are whitespace by Unicode rules but
+not by ASCII rules, it treated those characters as part of fields rather
+than as field separators.  [perl #130907]
+
 =back
 
 =head1 Known Problems

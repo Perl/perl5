@@ -7623,6 +7623,14 @@ special case was restricted to the use of a plain S<C<" ">> as the
 pattern argument to split; in Perl 5.18.0 and later this special case is
 triggered by any expression which evaluates to the simple string S<C<" ">>.
 
+As of Perl 5.28, this special-cased whitespace splitting works as expected in
+the scope of L<< S<C<"use feature 'unicode_strings">>|feature/The
+'unicode_strings' feature >>. In previous versions, and outside the scope of
+that feature, it exhibits L<perlunicode/The "Unicode Bug">: characters that are
+whitespace according to Unicode rules but not according to ASCII rules can be
+treated as part of fields rather than as field separators, depending on the
+string's internal encoding.
+
 If omitted, PATTERN defaults to a single space, S<C<" ">>, triggering
 the previously described I<awk> emulation.
 
