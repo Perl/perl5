@@ -362,16 +362,20 @@ typedef struct stcxt {
     SV *(**retrieve_vtbl)(pTHX_ struct stcxt *, const char *);	/* retrieve dispatch table */
     SV *prev;			/* contexts chained backwards in real recursion */
     SV *my_sv;			/* the blessed scalar who's SvPVX() I am */
+    SV *recur_sv;               /* check only one recursive SV */
     int in_retrieve_overloaded; /* performance hack for retrieving overloaded objects */
     int flags;			/* controls whether to bless or tie objects */
-    U16 av_depth;        	/* avoid stack overflows RT #97526 */
-    U16 hv_depth;        	/* avoid stack overflows RT #97526 */
+    U16 recur_depth;        	/* avoid stack overflows RT #97526 */
 } stcxt_t;
 
 /* Note: We dont count nested scalars. This will have to count all refs
    without any recursion detection. */
 /* JSON::XS has 512 */
-#define MAX_DEPTH   3000
+#if PTRSIZE == 8
+# define MAX_DEPTH   2000
+#else
+# define MAX_DEPTH   1200
+#endif
 #define MAX_DEPTH_ERROR "Max. recursion depth with nested structures exceeded"
 
 static int storable_free(pTHX_ SV *sv, MAGIC* mg);
@@ -1430,8 +1434,8 @@ static void reset_context(stcxt_t *cxt)
 {
     cxt->entry = 0;
     cxt->s_dirty = 0;
-    cxt->av_depth = 0;
-    cxt->hv_depth = 0;
+    cxt->recur_sv = NULL;
+    cxt->recur_depth = 0;
     cxt->optype &= ~(ST_STORE|ST_RETRIEVE);	/* Leave ST_CLONE alone */
 }
 
@@ -2123,6 +2127,7 @@ static int known_class(pTHX_
  */
 static int store_ref(pTHX_ stcxt_t *cxt, SV *sv)
 {
+    int retval;
     int is_weak = 0;
     TRACEME(("store_ref (0x%" UVxf ")", PTR2UV(sv)));
 
@@ -2148,10 +2153,21 @@ static int store_ref(pTHX_ stcxt_t *cxt, SV *sv)
     } else
         PUTMARK(is_weak ? SX_WEAKREF : SX_REF);
 
-    /*if (cxt->entry && ++cxt->ref_cnt > MAX_REF_CNT) {
-        CROAK(("Max. recursion depth with nested refs exceeded"));
-    }*/
-    return store(aTHX_ cxt, sv);
+    TRACEME(("recur_depth %u, recur_sv (0x%" UVxf ")", cxt->recur_depth,
+             PTR2UV(cxt->recur_sv)));
+    if (cxt->entry && cxt->recur_sv == sv) {
+        if (++cxt->recur_depth > MAX_DEPTH) {
+            CROAK((MAX_DEPTH_ERROR));
+        }
+    }
+    cxt->recur_sv = sv;
+
+    retval = store(aTHX_ cxt, sv);
+    if (cxt->entry && cxt->recur_sv == sv && cxt->recur_depth > 0) {
+        TRACEME(("recur_depth --%u", cxt->recur_depth));
+        --cxt->recur_depth;
+    }
+    return retval;
 }
 
 /*
@@ -2424,9 +2440,14 @@ static int store_array(pTHX_ stcxt_t *cxt, AV *av)
         TRACEME(("size = %d", (int)l));
     }
 
-    if (cxt->entry && ++cxt->av_depth > MAX_DEPTH) {
-        CROAK((MAX_DEPTH_ERROR));
+    TRACEME(("recur_depth %u, recur_sv (0x%" UVxf ")", cxt->recur_depth,
+             PTR2UV(cxt->recur_sv)));
+    if (cxt->entry && cxt->recur_sv == (SV*)av) {
+        if (++cxt->recur_depth > MAX_DEPTH) {
+            CROAK((MAX_DEPTH_ERROR));
+        }
     }
+    cxt->recur_sv = (SV*)av;
 
     /*
      * Now store each item recursively.
@@ -2457,7 +2478,10 @@ static int store_array(pTHX_ stcxt_t *cxt, AV *av)
             return ret;
     }
 
-    if (cxt->entry) --cxt->av_depth;
+    if (cxt->entry && cxt->recur_sv == (SV*)av && cxt->recur_depth > 0) {
+        TRACEME(("recur_depth --%u", cxt->recur_depth));
+        --cxt->recur_depth;
+    }
     TRACEME(("ok (array)"));
 
     return 0;
@@ -2570,9 +2594,14 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
         TRACEME(("size = %d, used = %d", (int)l, (int)HvUSEDKEYS(hv)));
     }
 
-    if (cxt->entry && ++cxt->av_depth > MAX_DEPTH) {
-        CROAK((MAX_DEPTH_ERROR));
+    TRACEME(("recur_depth %u, recur_sv (0x%" UVxf ")", cxt->recur_depth,
+             PTR2UV(cxt->recur_sv)));
+    if (cxt->entry && cxt->recur_sv == (SV*)hv) {
+        if (++cxt->recur_depth > (MAX_DEPTH >> 1)) {
+            CROAK((MAX_DEPTH_ERROR));
+        }
     }
+    cxt->recur_sv = (SV*)hv;
 
     /*
      * Save possible iteration state via each() on that table.
@@ -2852,7 +2881,10 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
     TRACEME(("ok (hash 0x%" UVxf ")", PTR2UV(hv)));
 
  out:
-    if (cxt->entry) --cxt->hv_depth;
+    if (cxt->entry && cxt->recur_sv == (SV*)hv && cxt->recur_depth > 0) {
+        TRACEME(("recur_depth --%u", cxt->recur_depth));
+        --cxt->recur_depth;
+    }
     HvRITER_set(hv, riter);		/* Restore hash iterator state */
     HvEITER_set(hv, eiter);
 
@@ -2971,9 +3003,15 @@ static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags)
     }
     TRACEME(("size = %" UVuf ", used = %" UVuf, len, (UV)HvUSEDKEYS(hv)));
 
-    if (cxt->entry && ++cxt->hv_depth > MAX_DEPTH) {
-        CROAK((MAX_DEPTH_ERROR));
+    TRACEME(("recur_depth %u, recur_sv (0x%" UVxf ")", cxt->recur_depth,
+             PTR2UV(cxt->recur_sv)));
+    if (cxt->entry && cxt->recur_sv == (SV*)hv) {
+        if (++cxt->recur_depth > (MAX_DEPTH >> 1)) {
+            CROAK((MAX_DEPTH_ERROR));
+        }
     }
+    cxt->recur_sv = (SV*)hv;
+
     array = HvARRAY(hv);
     for (i = 0; i <= (Size_t)HvMAX(hv); i++) {
         HE* entry = array[i];
@@ -2985,7 +3023,10 @@ static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags)
                 return ret;
         }
     }
-    if (cxt->entry) --cxt->hv_depth;
+    if (cxt->entry && cxt->recur_sv == (SV*)hv && cxt->recur_depth > 0) {
+        TRACEME(("recur_depth --%u", cxt->recur_depth));
+        --cxt->recur_depth;
+    }
     assert(ix == len);
     return ret;
 }
@@ -5078,7 +5119,6 @@ static SV *retrieve_tied_array(pTHX_ stcxt_t *cxt, const char *cname)
         return (SV *) 0;		/* Failed */
 
     sv_upgrade(tv, SVt_PVAV);
-    AvREAL_off((AV *)tv);
     sv_magic(tv, sv, 'P', (char *)NULL, 0);
     SvREFCNT_dec(sv);			/* Undo refcnt inc from sv_magic() */
 
