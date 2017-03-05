@@ -9553,10 +9553,11 @@ extend the string with sufficiently many zero bytes.   It is an error
 to try to write off the beginning of the string (i.e., negative OFFSET).
 
 If the string happens to be encoded as UTF-8 internally (and thus has
-the UTF8 flag set), this is ignored by L<C<vec>|/vec EXPR,OFFSET,BITS>,
-and it operates on the
-internal byte string, not the conceptual character string, even if you
-only have characters with values less than 256.
+the UTF8 flag set), L<C<vec>|/vec EXPR,OFFSET,BITS> tries to convert it
+to use a one-byte-per-character internal representation. However, if the
+string contains characters with values of 256 or higher, that conversion
+will fail. In that situation, C<vec> will operate on the underlying buffer
+regardless, in its internal UTF-8 representation.
 
 Strings created with L<C<vec>|/vec EXPR,OFFSET,BITS> can also be
 manipulated with the logical
