@@ -1,15 +1,42 @@
-Tue Jan 31 02:55:30 2017 +0100 Reini Urban <rurban@cpan.org>
+Sun Mar 5 13:36:47 2017 +0100 Reini Urban <rurban@cpan.org>
+    Version 3.05_07
+
+        * Fixed a podchecker issue
+
+Sun Mar 5 11:42:04 2017 +0100 Reini Urban <rurban@cpan.org>
+    Version 3.05_06
+
+        * Fixed wrong recursion depth error with large arrays containing
+        another array.
+	L<[cperl #257]|https://github.com/perl11/cperl/issues/257>
+
+Thu Feb 2 12:40:44 2017 +0100 Reini Urban <rurban@cpanel.net>
+    Version 3.05_05
+
+        * Add leak tests for [cpan #97316], [perl #121928]
+        * Limit the max recursion depth to 1200 on 32bit systems.
+        We have no max_depth option yet, as in JSON::XS.
+
+Thu Feb 2 11:59:21 2017 +0100 Reini Urban <rurban@cpanel.net>
+    Version 3.05_04
+
+        * Fix retrieve_tied_array which fails since 5.16
+        [cpan #84705]
+        * Improve t/blessed.t in the creation of sv_yes/sv_no
+        with threaded perls.
+
+Tue Jan 31 02:55:30 2017 +0100 Reini Urban <rurban@cpanel.net>
     Version 3.05_03
 
         * Tune t/recurse.t stack-overflow limit more.
 
-Mon Jan 30 19:50:29 2017 +0100 Reini Urban <rurban@cpan.org>
+Mon Jan 30 19:50:29 2017 +0100 Reini Urban <rurban@cpanel.net>
     Version 3.05_02
 
         * Tune t/recurse.t stack-overflow limit. Small 64bit systems overflow
         even with depth 3000, where 32bit are ok.
 
-Mon Jan 30 15:13:38 2017 +0100 Reini Urban <rurban@cpan.org>
+Mon Jan 30 15:13:38 2017 +0100 Reini Urban <rurban@cpanel.net>
     Version 3.05_01
 
         * Protect against stack overflows with nested arrays and hashes
@@ -18,7 +45,7 @@ Mon Jan 30 15:13:38 2017 +0100 Reini Urban <rurban@cpan.org>
         typical stack limit of 8k.
 
 
-Sun Jan 29 11:36:43 2017 +0100 Reini Urban <rurban@cpan.org>
+Sun Jan 29 11:36:43 2017 +0100 Reini Urban <rurban@cpanel.net>
     Version 3.05
 
         * Protect against classname len overflow on the stack
@@ -33,7 +60,7 @@ Sun Jan 29 11:36:43 2017 +0100 Reini Urban <rurban@cpan.org>
         * Fix the few remaining 2-arg open calls.
         * Portability and backport fixes back to 5.6.2
 
-Sat Jan 7 09:01:29 2017 +0100 Reini Urban <rurban@cpan.org>
+Sat Jan 7 09:01:29 2017 +0100 Reini Urban <rurban@cpanel.net>
     Version 3.04c
 
         * fix printf types and warnings, esp. for 32bit use64bitint
@@ -44,19 +71,19 @@ Tue Jul 26 11:49:33 2016 +1000 Tony Cook <tony@develop-help.com>
 
         * remove . from @INC when loading optional modules
 
-Sun Nov 20 18:06:45 2016 +0100 Reini Urban <rurban@cpan.org>
+Sun Nov 20 18:06:45 2016 +0100 Reini Urban <rurban@cpanel.net>
     Version 3.02c
 
         * Fix -Wc++11-compat warnings, fix -Wchar-subscripts
 
-Fri Sep 16 01:32:59 2016 +0200 Reini Urban <rurban@cpan.org>
+Fri Sep 16 01:32:59 2016 +0200 Reini Urban <rurban@cpanel.net>
     Version 3.01c
 
         * Added warn_security("Movable-Type CVE-2015-1592 Storable metasploit attack")
           when detecting the third destructive metasploit vector,
           thawing bless \"mt-config.cgi", "CGITempFile".
 
-Thu Mar 31 17:10:27 2016 +0200 Reini Urban <rurban@cpan.org>
+Thu Mar 31 17:10:27 2016 +0200 Reini Urban <rurban@cpanel.net>
     Version 3.00c
 
         * Added support for u64 strings, arrays and hashes >2G

@@ -646,6 +646,19 @@ all values unlocked.  To make Storable C<croak()> instead, set
 C<$Storable::downgrade_restricted> to a C<FALSE> value.  To restore
 the default set it back to some C<TRUE> value.
 
+=item huge objects
+
+On 64bit systems some data structures may exceed the 2G (i.e. I32_MAX)
+limit. On 32bit systems also strings between I32 and U32 (2G-4G).
+Since Storable 3.00 (not in perl5 core) we are able to store and
+retrieve these objects, even if perl5 itself is not able to handle
+them.  These are strings longer then 4G, arrays with more then 2G
+elements and hashes with more then 2G elements. cperl forbids hashes
+with more than 2G elements, but this fail in cperl then. perl5 itself
+at least until 5.26 allows it, but cannot iterate over them.
+Note that creating those objects might cause out of memory
+exceptions by the operating system before perl has a chance to abort.
+
 =item files from future versions of Storable
 
 Earlier versions of Storable would immediately croak if they encountered
@@ -842,6 +855,14 @@ to handle the serialization string?
 There are a few things you need to know, however:
 
 =over 4
+
+=item *
+
+Since Storable 3.05 we added a hard recursion limit for references,
+arrays and hashes to a maximal depth of 1200-2000, otherwise we might
+fall into a stack-overflow.  On JSON::XS this limit is 512 btw.  With
+references not immediately referencing each other there's no such
+limit yet, so you might fall into such a stack-overflow.
 
 =item *
 
@@ -1072,10 +1093,12 @@ With the default setting of $Storable::flags = 6, creating or destroying
 random objects, even renamed objects can be controlled by an attacker.
 See CVE-2015-1592 and its metasploit module.
 
-If your application requires accepting data from untrusted sources, you
-are best off with a less powerful and more-likely safe serialization format
-and implementation. If your data is sufficiently simple, JSON is the best
-choice and offers maximum interoperability.
+If your application requires accepting data from untrusted sources,
+you are best off with a less powerful and more-likely safe
+serialization format and implementation. If your data is sufficiently
+simple, Cpanel::JSON::XS, Data::MessagePack or Serial are the best
+choices and offers maximum interoperability, but note that Serial is
+unsafe by default.
 
 =head1 WARNING
 
@@ -1145,34 +1168,6 @@ problems when storing large unsigned integers that had never been converted
 to string or floating point.  In other words values that had been generated
 by integer operations such as logic ops and then not used in any string or
 arithmetic context before storing.
-
-=head2 Large data on 64-bit platforms
-
-Storable's current data format is incapable of representing lengths greater
-than fit into a signed 32-bit integer, or about 2 GB. In practice, this
-means that, even with the latest Perl and a 64-bit machine with plenty of
-memory, you cannot store, retrieve, or clone any of the following:
-
-=over 4
-
-=item *
-
-A string containing 2**31 or more bytes (including as an element of an array, or
-a key or value in a hash)
-
-=item *
-
-An array with 2**31 or more elements
-
-=item *
-
-A hash with 2**31 or more keys
-
-=back
-
-Attempting to do so will yield an exception.
-
-This may be fixed in the future.
 
 =head2 64 bit data in perl 5.6.0 and 5.6.1
 
@@ -1264,13 +1259,14 @@ Murray Nesbitt made Storable thread-safe.  Marc Lehmann added overloading
 and references to tied items support.  Benjamin Holzman added a performance
 improvement for overloaded classes; thanks to Grant Street Group for footing
 the bill.
+Reini Urban took over maintainance from p5p, and added security fixes
+and huge object support.
 
 =head1 AUTHOR
 
 Storable was written by Raphael Manfredi
 F<E<lt>Raphael_Manfredi@pobox.comE<gt>>
-Maintenance is now done by the perl5-porters
-F<E<lt>perl5-porters@perl.orgE<gt>>
+Maintenance is now done by cperl L<http://perl11.org/cperl>
 
 Please e-mail us with problems, bug fixes, comments and complaints,
 although if you have compliments you should send them to Raphael.
