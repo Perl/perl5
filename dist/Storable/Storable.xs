@@ -4,6 +4,7 @@
  *
  *  Copyright (c) 1995-2000, Raphael Manfredi
  *  Copyright (c) 2016, 2017 cPanel Inc
+ *  Copyright (c) 2017 Reini Urban
  *
  *  You may redistribute only under the same terms as Perl 5, as specified
  *  in the README file that comes with the distribution.
