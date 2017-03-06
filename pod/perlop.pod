@@ -1749,7 +1749,7 @@ Options (specified by the following modifiers) are:
     p	When matching preserve a copy of the matched string so
         that ${^PREMATCH}, ${^MATCH}, ${^POSTMATCH} will be
         defined (ignored starting in v5.20) as these are always
-        defined starting in that relese
+        defined starting in that release
     o	Compile pattern only once.
     a   ASCII-restrict: Use ASCII for \d, \s, \w; specifying two
         a's further restricts things to that that no ASCII
