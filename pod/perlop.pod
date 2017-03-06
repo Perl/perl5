@@ -1751,9 +1751,10 @@ Options (specified by the following modifiers) are:
         defined (ignored starting in v5.20) as these are always
         defined starting in that release
     o	Compile pattern only once.
-    a   ASCII-restrict: Use ASCII for \d, \s, \w; specifying two
-        a's further restricts things to that that no ASCII
-        character will match a non-ASCII one under /i.
+    a   ASCII-restrict: Use ASCII for \d, \s, \w and [[:posix:]]
+        character classes; specifying two a's adds the further
+        restriction that no ASCII character will match a
+        non-ASCII one under /i.
     l   Use the current run-time locale's rules.
     u   Use Unicode rules.
     d   Use Unicode or native charset, as in 5.12 and earlier.
