@@ -1079,6 +1079,8 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
     U8 * adjusted_s0 = (U8 *) s0;
     U8 * adjusted_send = NULL;  /* (Initialized to silence compilers' wrong
                                    warning) */
+    U8 temp_char_buf[UTF8_MAXBYTES + 1]; /* Used to avoid a Newx in this
+                                            routine; see [perl #130921] */
     UV uv_so_far = 0;   /* (Initialized to silence compilers' wrong warning) */
 
     PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_ERROR;
@@ -1245,10 +1247,7 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
                                      I8_TO_NATIVE_UTF8(UTF_CONTINUATION_MARK));
             }
 
-            Newx(adjusted_s0, OFFUNISKIP(min_uv) + 1, U8);
-            SAVEFREEPV((U8 *) adjusted_s0);    /* Needed because we may not get
-                                                  to free it ourselves if
-                                                  warnings are made fatal */
+            adjusted_s0 = temp_char_buf;
             adjusted_send = uvoffuni_to_utf8_flags(adjusted_s0, min_uv, 0);
         }
     }
