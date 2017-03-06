@@ -7585,6 +7585,10 @@ If PATTERN is C</^/>, then it is treated as if it used the
 L<multiline modifier|perlreref/OPERATORS> (C</^/m>), since it
 isn't much use otherwise.
 
+C<E<sol>m> and any of the other pattern modifiers valid for C<qr>
+(summarized in L<perlop/qrE<sol>STRINGE<sol>msixpodualn>) may be
+specified explicitly.
+
 As another special case,
 L<C<split>|/split E<sol>PATTERNE<sol>,EXPR,LIMIT> emulates the default
 behavior of the
