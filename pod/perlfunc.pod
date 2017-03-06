@@ -2147,7 +2147,7 @@ behavior.
 
 Any S<C<use utf8>> or S<C<no utf8>> declarations within the string have
 no effect, and source filters are forbidden.  (C<unicode_strings>,
-however, can appear within the string.  See also the
+however, can appear within the string.)  See also the
 L<C<evalbytes>|/evalbytes EXPR> operator, which works properly with
 source filters.
 
