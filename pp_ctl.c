@@ -3695,7 +3695,7 @@ S_require_version(pTHX_ SV *sv)
  * the second form */
 
 static OP *
-S_require_file(pTHX_ SV *const sv)
+S_require_file(pTHX_ SV *sv)
 {
     dVAR; dSP;
 
@@ -4104,9 +4104,28 @@ S_require_file(pTHX_ SV *const sv)
 	    }
 	    DIE(aTHX_ "Can't locate %s", name);
 	}
+        else {
+#ifdef DEFAULT_INC_EXCLUDES_DOT
+            Stat_t st;
+            PerlIO *io = NULL;
+            dSAVE_ERRNO;
+            /* the complication is to match the logic from doopen_pm() so we don't treat do "sda1" as
+               a previously successful "do".
+            */
+            bool do_warn = namesv && ckWARN_d(WARN_DEPRECATED)
+                && PerlLIO_stat(name, &st) == 0 && !S_ISDIR(st.st_mode) && !S_ISBLK(st.st_mode)
+                && (io = PerlIO_openn(aTHX_ ":", PERL_SCRIPT_MODE, -1, 0, 0, NULL, 1, &sv)) != NULL;
+            if (io)
+                PerlIO_close(io);
 
-	CLEAR_ERRSV();
-	RETPUSHUNDEF;
+            RESTORE_ERRNO;
+            if (do_warn) {
+                Perl_warner(aTHX_ packWARN(WARN_DEPRECATED), "do \"%s\" failed, '.' is no longer in @INC", name);
+            }
+#endif
+            CLEAR_ERRSV();
+            RETPUSHUNDEF;
+        }
     }
     else
 	SETERRNO(0, SS_NORMAL);
