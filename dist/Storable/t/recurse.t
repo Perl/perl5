@@ -5,11 +5,11 @@
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
 #  
+use Config;
 
 sub BEGIN {
     unshift @INC, 't';
     unshift @INC, 't/compat' if $] < 5.006002;
-    require Config; import Config;
     if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
         print "1..0 # Skip: Storable was not built\n";
         exit 0;
@@ -314,18 +314,24 @@ thaw freeze(Foo3->new);
 is($refcount_ok, 1);
 
 # Check stack overflows [cpan #97526]
-# JSON::XS limits this to 512. Small 64bit systems fail with 3000.
+# JSON::XS limits this to 512.
+# Small 64bit systems fail with 1200 (c++ debugging), with gcc 3000.
+# Optimized 64bit allows up to 33.000 recursion depth.
+# with asan the limit is 255 though.
+sub MAX_DEPTH () { Storable::stack_depth() }
+sub MAX_DEPTH_HASH () { Storable::stack_depth_hash() }
+sub OVERFLOW () { 35000 }
 {
     my $t;
-    $t = [$t] for 1..550;
+    $t = [$t] for 1 .. MAX_DEPTH;
     dclone $t;
-    pass "can nest 550 array refs";
+    pass "can nest ".MAX_DEPTH." array refs";
 }
 {
     my $t;
-    $t = {1=>$t} for 1..550;
+    $t = {1=>$t} for 1 .. MAX_DEPTH_HASH-10;
     dclone $t;
-    pass "can nest 550 hash refs";
+    pass "can nest ".(MAX_DEPTH_HASH)." hash refs";
 }
 {
     my (@t);
@@ -334,29 +340,35 @@ is($refcount_ok, 1);
     dclone \@t;
     is $@, '', 'No simple array[5000] stack overflow #257';
 }
-{
+
+if ($] < 5.015) {
+    ok(1, "skip overflow check <=5.14");
+} else {
     eval {
         my $t;
-        $t = [$t] for 1..10000;
+        $t = [$t] for 1 .. OVERFLOW;
         diag 'trying catching recursive aref stack overflow';
         dclone $t;
     };
     like $@, qr/Max\. recursion depth with nested structures exceeded/,
-      'Caught aref stack overflow';
+      'Caught aref stack overflow '.OVERFLOW;
 }
 
 if ($ENV{APPVEYOR} and length(pack "p", "") >= 8) {
     # TODO: need to repro this fail on a small machine.
     ok(1, "skip dclone of big hash");
 }
+elsif ($] < 5.015) {
+    ok(1, "skip overflow check <=5.14");
+}
 else {
     eval {
         my $t;
-        # 5.000 will cause appveyor 64bit windows to fail earlier
-        $t = {1=>$t} for 1..5000;
+        # 35.000 will cause appveyor 64bit windows to fail earlier
+        $t = {1=>$t} for 1 .. OVERFLOW;
         diag 'trying catching recursive href stack overflow';
         dclone $t;
     };
     like $@, qr/Max\. recursion depth with nested structures exceeded/,
-      'Caught href stack overflow';
+      'Caught href stack overflow '.OVERFLOW;
 }

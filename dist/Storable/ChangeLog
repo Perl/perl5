@@ -1,3 +1,9 @@
+Wed Mar  8 21:03:43 CET 2017 Reini Urban <rurban@cpan.org>
+    Version 3.05_08
+
+        * finetune the max stack limit, for C++, DEBUGGING and 32bit.
+        * fix t/blessed.t for cperl5.22
+
 Sun Mar 5 13:36:47 2017 +0100 Reini Urban <rurban@cpan.org>
     Version 3.05_07
 

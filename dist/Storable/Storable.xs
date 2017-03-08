@@ -372,10 +372,52 @@ typedef struct stcxt {
 /* Note: We dont count nested scalars. This will have to count all refs
    without any recursion detection. */
 /* JSON::XS has 512 */
-#if PTRSIZE == 8
-# define MAX_DEPTH   2000
+#ifdef DEBUGGING
+# define MAX_DEPTH_FACTOR 1
 #else
-# define MAX_DEPTH   1200
+# if PERL_VERSION > 14
+#  define MAX_DEPTH_FACTOR 20
+# elif PERL_VERSION > 12
+#  define MAX_DEPTH_FACTOR 15
+# else
+#  define MAX_DEPTH_FACTOR 1
+# endif
+#endif
+/* 64: c++ dbg: 1200   DEBUGGING + DEBUG_LEAKING_SCALAR non-threaded
+       c   dbg: 3000
+       c -O3:   34500
+       gcc-4.8: 27000
+   32: c -O3:   32600
+       c   dbg: 1425
+   threading:   29000/23000
+ */
+#if PTRSIZE == 8
+# ifdef __cplusplus
+#  define _MAX_DEPTH   (1200 * MAX_DEPTH_FACTOR)
+# else
+#  define _MAX_DEPTH   (1350 * MAX_DEPTH_FACTOR)
+# endif
+#else
+# ifdef __cplusplus
+#  define _MAX_DEPTH   (750 * MAX_DEPTH_FACTOR)
+# else
+#  define _MAX_DEPTH   (1400 * MAX_DEPTH_FACTOR)
+# endif
+#endif
+#if PERL_VERSION > 14
+#  define MAX_DEPTH   _MAX_DEPTH
+#  define MAX_DEPTH_HASH (MAX_DEPTH >> 1)
+#else
+# ifdef DEBUGGING
+#  define MAX_DEPTH   (_MAX_DEPTH - 200)
+# else
+#  define MAX_DEPTH   (_MAX_DEPTH - 4000)
+# endif
+# define MAX_DEPTH_HASH (MAX_DEPTH >> 1)
+#endif
+#if defined(__has_feature) && __has_feature(address_sanitizer)
+# undef MAX_DEPTH
+# define MAX_DEPTH 254
 #endif
 #define MAX_DEPTH_ERROR "Max. recursion depth with nested structures exceeded"
 
@@ -2598,7 +2640,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
     TRACEME(("recur_depth %u, recur_sv (0x%" UVxf ")", cxt->recur_depth,
              PTR2UV(cxt->recur_sv)));
     if (cxt->entry && cxt->recur_sv == (SV*)hv) {
-        if (++cxt->recur_depth > (MAX_DEPTH >> 1)) {
+        if (++cxt->recur_depth > MAX_DEPTH_HASH) {
             CROAK((MAX_DEPTH_ERROR));
         }
     }
@@ -3007,7 +3049,7 @@ static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags)
     TRACEME(("recur_depth %u, recur_sv (0x%" UVxf ")", cxt->recur_depth,
              PTR2UV(cxt->recur_sv)));
     if (cxt->entry && cxt->recur_sv == (SV*)hv) {
-        if (++cxt->recur_depth > (MAX_DEPTH >> 1)) {
+        if (++cxt->recur_depth > MAX_DEPTH_HASH) {
             CROAK((MAX_DEPTH_ERROR));
         }
     }
@@ -7316,3 +7358,17 @@ PPCODE:
     }
     ST(0) = boolSV(result);
     XSRETURN(1);
+
+IV
+stack_depth()
+CODE:
+    RETVAL = MAX_DEPTH;
+OUTPUT:
+    RETVAL
+
+IV
+stack_depth_hash()
+CODE:
+    RETVAL = MAX_DEPTH_HASH;
+OUTPUT:
+    RETVAL
