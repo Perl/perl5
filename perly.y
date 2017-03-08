@@ -117,6 +117,7 @@
 grammar	:	GRAMPROG
 			{
 			  parser->expect = XSTATE;
+                          $<ival>$ = 0;
 			}
 		remember stmtseq
 			{
@@ -127,6 +128,7 @@ grammar	:	GRAMPROG
 	|	GRAMEXPR
 			{
 			  parser->expect = XTERM;
+                          $<ival>$ = 0;
 			}
 		optexpr
 			{
@@ -136,6 +138,7 @@ grammar	:	GRAMPROG
 	|	GRAMBLOCK
 			{
 			  parser->expect = XBLOCK;
+                          $<ival>$ = 0;
 			}
 		block
 			{
@@ -148,6 +151,7 @@ grammar	:	GRAMPROG
 	|	GRAMBARESTMT
 			{
 			  parser->expect = XSTATE;
+                          $<ival>$ = 0;
 			}
 		barestmt
 			{
@@ -160,6 +164,7 @@ grammar	:	GRAMPROG
 	|	GRAMFULLSTMT
 			{
 			  parser->expect = XSTATE;
+                          $<ival>$ = 0;
 			}
 		fullstmt
 			{
@@ -172,6 +177,7 @@ grammar	:	GRAMPROG
 	|	GRAMSTMTSEQ
 			{
 			  parser->expect = XSTATE;
+                          $<ival>$ = 0;
 			}
 		stmtseq
 			{
