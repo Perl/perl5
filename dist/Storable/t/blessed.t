@@ -72,8 +72,8 @@ package main;
 
 # Still less than 256 bytes, so long classname logic not fully exercised
 #   Identifier too long - 5.004
-#   parser.h: char	tokenbuf[256]: cperl => 1024
-my $m = $Config{usecperl} ? 56 : 14;
+#   parser.h: char	tokenbuf[256]: cperl5.24 => 1024
+my $m = ($Config{usecperl} and $] >= 5.024) ? 56 : 14;
 my $longname = "LONG_NAME_" . ('xxxxxxxxxxxxx::' x $m) . "final";
 
 eval <<EOC;
@@ -92,7 +92,6 @@ is($@, '');
 
 # Construct a pool of objects
 my @pool;
-
 for (my $i = 0; $i < 10; $i++) {
     push(@pool, SHORT_NAME->make);
     push(@pool, SHORT_NAME_WITH_HOOK->make);
@@ -261,7 +260,7 @@ is(ref $t, 'STRESS_THE_STACK');
 my $file = "storable-testfile.$$";
 die "Temporary file '$file' already exists" if -e $file;
 
-#END { while (-f $file) {unlink $file or die "Can't unlink '$file': $!" }}
+END { while (-f $file) {unlink $file or die "Can't unlink '$file': $!" }}
 
 $STRESS_THE_STACK::freeze_count = 0;
 $STRESS_THE_STACK::thaw_count = 0;
