@@ -488,7 +488,7 @@ XS(XS_Cygwin_mount_flags)
 
     pathname = SvPV_nolen(ST(0));
 
-    if (!strcmp(pathname, "/cygdrive")) {
+    if (strEQ(pathname, "/cygdrive")) {
 	char user[PATH_MAX];
 	char system[PATH_MAX];
 	char user_flags[PATH_MAX];
@@ -511,7 +511,7 @@ XS(XS_Cygwin_mount_flags)
 	int found = 0;
 	setmntent (0, 0);
 	while ((mnt = getmntent (0))) {
-	    if (!strcmp(pathname, mnt->mnt_dir)) {
+	    if (strEQ(pathname, mnt->mnt_dir)) {
 		strcpy(flags, mnt->mnt_type);
 		if (strlen(mnt->mnt_opts) > 0) {
 		    strcat(flags, ",");
@@ -536,12 +536,12 @@ XS(XS_Cygwin_mount_flags)
 			     user_flags, system_flags);
 
 	    if (strlen(user) > 0) {
-		if (strcmp(user,pathname)) {
+		if (strNE(user,pathname)) {
 		    sprintf(flags, "%s,cygdrive,%s", user_flags, user);
 		    found++;
 		}
 	    } else {
-		if (strcmp(user,pathname)) {
+		if (strNE(user,pathname)) {
 		    sprintf(flags, "%s,cygdrive,%s", system_flags, system);
 		    found++;
 		}

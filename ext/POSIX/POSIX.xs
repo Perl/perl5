@@ -1791,7 +1791,7 @@ fix_win32_tzenv(void)
         perl_tz_env = "";
     if (crt_tz_env == NULL)
         crt_tz_env = "";
-    if (strcmp(perl_tz_env, crt_tz_env) != 0) {
+    if (strNE(perl_tz_env, crt_tz_env)) {
         newenv = (char*)malloc((strlen(perl_tz_env) + 4) * sizeof(char));
         if (newenv != NULL) {
             sprintf(newenv, "TZ=%s", perl_tz_env);

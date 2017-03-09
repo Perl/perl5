@@ -293,7 +293,7 @@ is_unix_filespec(const char *path)
 
 	    /* If the user wants UNIX files, "." needs to be treated as in UNIX */
 	    if (decc_filename_unix_report || decc_filename_unix_only) {
-	    if (strcmp(path,".") == 0)
+	    if (strEQ(path,".")
 		ret_val = 1;
 	    }
 	}
@@ -844,10 +844,10 @@ S_remove_ppf_prefix(const char *lnm, char *eqv, unsigned short int eqvlen)
 {
     if (*((int *)lnm) == *((int *)"SYS$")                    &&
         eqvlen >= 4 && eqv[0] == 0x1b && eqv[1] == 0x00      &&
-        ( (lnm[4] == 'O' && !strcmp(lnm,"SYS$OUTPUT"))  ||
-          (lnm[4] == 'I' && !strcmp(lnm,"SYS$INPUT"))   ||
-          (lnm[4] == 'E' && !strcmp(lnm,"SYS$ERROR"))   ||
-          (lnm[4] == 'C' && !strcmp(lnm,"SYS$COMMAND")) )  ) {
+        ( (lnm[4] == 'O' && strEQ(lnm,"SYS$OUTPUT"))  ||
+          (lnm[4] == 'I' && strEQ(lnm,"SYS$INPUT"))   ||
+          (lnm[4] == 'E' && strEQ(lnm,"SYS$ERROR"))   ||
+          (lnm[4] == 'C' && strEQ(lnm,"SYS$COMMAND")) )  ) {
 
         memmove(eqv, eqv+4, eqvlen-4);
         eqvlen -= 4;
@@ -1637,7 +1637,7 @@ Perl_my_setenv(pTHX_ const char *lnm, const char *eqv)
         char uplnm[8];
         int i;
         for (i = 0; lnm[i]; i++) uplnm[i] = toUPPER_A(lnm[i]);
-        if (!strcmp(uplnm,"DEFAULT")) {
+        if (strEQ(uplnm,"DEFAULT")) {
           if (eqv && *eqv) my_chdir(eqv);
           return;
         }
@@ -3720,7 +3720,7 @@ store_pipelocs(pTHX)
 
         if (SvROK(dirsv)) continue;
         dir = SvPVx(dirsv,n_a);
-        if (strcmp(dir,".") == 0) continue;
+        if (strEQ(dir,".")) continue;
         if ((tounixpath_utf8(dir, unixdir, NULL)) == NULL)
             continue;
 
@@ -6047,11 +6047,11 @@ int_fileify_dirspec(const char *dir, char *buf, int *utf8_fl)
      *    ... do_fileify_dirspec("myroot",buf,1) ...
      * does something useful.
      */
-    if (dirlen >= 2 && !strcmp(trndir+dirlen-2,".]")) {
+    if (dirlen >= 2 && strEQ(trndir+dirlen-2,".]")) {
       trndir[--dirlen] = '\0';
       trndir[dirlen-1] = ']';
     }
-    if (dirlen >= 2 && !strcmp(trndir+dirlen-2,".>")) {
+    if (dirlen >= 2 && strEQ(trndir+dirlen-2,".>")) {
       trndir[--dirlen] = '\0';
       trndir[dirlen-1] = '>';
     }
@@ -6139,7 +6139,7 @@ int_fileify_dirspec(const char *dir, char *buf, int *utf8_fl)
         } while ((cp1 = strstr(cp1,"/.")) != NULL);
         lastdir = strrchr(trndir,'/');
       }
-      else if (dirlen >= 7 && !strcmp(&trndir[dirlen-7],"/000000")) {
+      else if (dirlen >= 7 && strEQ(&trndir[dirlen-7],"/000000")) {
 	char * ret_chr;
         /* Ditto for specs that end in an MFD -- let the VMS code
          * figure out whether it's a real device or a rooted logical. */
@@ -6697,7 +6697,7 @@ int_pathify_dirspec(const char *dir, char *buf)
         trnlen = strlen(trndir);
 
         /* Trap simple rooted lnms, and return lnm:[000000] */
-        if (!strcmp(trndir+trnlen-2,".]")) {
+        if (strEQ(trndir+trnlen-2,".]")) {
             my_strlcpy(buf, dir, VMS_MAXRSS);
             strcat(buf, ":[000000]");
             PerlMem_free(trndir);
@@ -7816,7 +7816,6 @@ posix_to_vmsspec_hardway(char *vmspath, int vmspath_len, const char *unixpath,
 		   &vs_len);
 
 	    while (sts == 0) {
-	    int cmp;
 
 		/* A logical name must be a directory  or the full
 		   specification.  It is only a full specification if
@@ -7864,8 +7863,7 @@ posix_to_vmsspec_hardway(char *vmspath, int vmspath_len, const char *unixpath,
 
 		    /* This should not be there, but nothing is perfect */
 		    if (r_len > 9) {
-			cmp = strcmp(&r_spec[1], "000000.");
-			if (cmp == 0) {
+			if (strEQ(&r_spec[1], "000000.")) {
 			    r_spec += 7;
 			    r_spec[7] = '[';
 			    r_len -= 7;
@@ -7886,8 +7884,7 @@ posix_to_vmsspec_hardway(char *vmspath, int vmspath_len, const char *unixpath,
 		    d_spec[0] = '[';
 		    d_spec[d_len - 1] = ']';
 		    if (d_len > 9) {
-			cmp = strcmp(&d_spec[1], "000000.");
-			if (cmp == 0) {
+			if (strEQ(&d_spec[1], "000000.")) {
 			    d_spec += 7;
 			    d_spec[7] = '[';
 			    d_len -= 7;
@@ -8025,10 +8022,8 @@ posix_to_vmsspec_hardway(char *vmspath, int vmspath_len, const char *unixpath,
 	  dir_start = 1;
 	  dir_dot = 1;
 	  if (vmslen > 7) {
-	  int cmp;
 	    rptr = vmsptr - 7;
-	    cmp = strcmp(rptr,"000000.");
-	    if (cmp == 0) {
+	    if (strEQ(rptr,"000000.")) {
 	      vmslen -= 7;
 	      vmsptr -= 7;
 	      vmsptr[1] = '\0';
@@ -8570,13 +8565,13 @@ int_tovmsspec(const char *path, char *rslt, int dir_flag, int * utf8_flag)
 
      /* DECC special handling */
     if (!islnm) {
-      if (strcmp(rslt,"bin") == 0) {
+      if (strEQ(rslt,"bin")) {
 	strcpy(rslt,"sys$system");
 	cp1 = rslt + 10;
 	*cp1 = 0;
 	islnm = simple_trnlnm(rslt,trndev,VMS_MAXRSS-1);
       }
-      else if (strcmp(rslt,"tmp") == 0) {
+      else if (strEQ(rslt,"tmp")) {
 	strcpy(rslt,"sys$scratch");
 	cp1 = rslt + 11;
 	*cp1 = 0;
@@ -8590,7 +8585,7 @@ int_tovmsspec(const char *path, char *rslt, int dir_flag, int * utf8_flag)
         while (*(cp2+1) == '/') cp2++;  /* Skip multiple /s */
 	islnm = simple_trnlnm(rslt,trndev,VMS_MAXRSS-1);
       }
-      else if (strcmp(rslt,"dev") == 0) {
+      else if (strEQ(rslt,"dev")) {
 	if (strncmp(cp2,"/null", 5) == 0) {
 	  if ((cp2[5] == 0) || (cp2[5] == '/')) {
 	    strcpy(rslt,"NLA0");
@@ -9184,7 +9179,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
      * subprocess, so we satisfy that desire.
      */
     ap = argv[argc-1];
-    if (0 == strcmp("&", ap))
+    if (strEQ(ap, "&"))
        exit(background_process(aTHX_ --argc, argv));
     if (*ap && '&' == ap[strlen(ap)-1])
 	{
@@ -9197,7 +9192,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
      */
     for (j = 0; j < argc; ++j)
 	{
-	if (0 == strcmp("<", argv[j]))
+	if (strEQ(argv[j], "<"))
 	    {
 	    if (j+1 >= argc)
 		{
@@ -9212,7 +9207,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 	    in = 1 + ap;
 	    continue;
 	    }
-	if (0 == strcmp(">", ap))
+	if (strEQ(ap, ">"))
 	    {
 	    if (j+1 >= argc)
 		{
@@ -9263,7 +9258,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 		}
 	    continue;
 	    }
-	if (0 == strcmp("|", argv[j]))
+	if (strEQ(argv[j], "|"))
 	    {
 	    if (j+1 >= argc)
 		{
@@ -9349,7 +9344,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 	if (out != NULL) vmssetuserlnm("SYS$OUTPUT", out);
 
     if (err != NULL) {
-        if (strcmp(err,"&1") == 0) {
+        if (strEQ(err, "&1")) {
             dup2(fileno(stdout), fileno(stderr));
             vmssetuserlnm("SYS$ERROR", "SYS$OUTPUT");
         } else {

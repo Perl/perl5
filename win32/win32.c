@@ -1832,7 +1832,7 @@ win32_getenv(const char *name)
 		char *end = strchr(cur,'=');
 		if (end && end != cur) {
 		    *end = '\0';
-		    if (!strcmp(cur,name)) {
+		    if (strEQ(cur,name)) {
 			curitem = sv_2mortal(newSVpv(end+1,0));
 			*end = '=';
 			break;

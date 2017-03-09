@@ -3340,13 +3340,13 @@ test_coplabel()
         cop = &PL_compiling;
         Perl_cop_store_label(aTHX_ cop, "foo", 3, 0);
         label = Perl_cop_fetch_label(aTHX_ cop, &len, &utf8);
-        if (strcmp(label,"foo")) croak("fail # cop_fetch_label label");
+        if (strNE(label,"foo")) croak("fail # cop_fetch_label label");
         if (len != 3) croak("fail # cop_fetch_label len");
         if (utf8) croak("fail # cop_fetch_label utf8");
         /* SMALL GERMAN UMLAUT A */
         Perl_cop_store_label(aTHX_ cop, "fo\xc3\xa4", 4, SVf_UTF8);
         label = Perl_cop_fetch_label(aTHX_ cop, &len, &utf8);
-        if (strcmp(label,"fo\xc3\xa4")) croak("fail # cop_fetch_label label");
+        if (strNE(label,"fo\xc3\xa4")) croak("fail # cop_fetch_label label");
         if (len != 4) croak("fail # cop_fetch_label len");
         if (!utf8) croak("fail # cop_fetch_label utf8");
 
@@ -3477,7 +3477,7 @@ test_op_list()
 #define iv_op(iv) newSVOP(OP_CONST, 0, newSViv(iv))
 #define check_op(o, expect) \
     do { \
-	if (strcmp(test_op_list_describe(o), (expect))) \
+	if (strNE(test_op_list_describe(o), (expect))) \
 	    croak("fail %s %s", test_op_list_describe(o), (expect)); \
     } while(0)
 	a = op_append_elem(OP_LIST, NULL, NULL);
