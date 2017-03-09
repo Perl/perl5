@@ -1490,10 +1490,11 @@ int ZEXPORT inflateUndermine(
 
     if (strm == Z_NULL || strm->state == Z_NULL) return Z_STREAM_ERROR;
     state = (struct inflate_state FAR *)strm->state;
-    state->sane = !subvert;
 #ifdef INFLATE_ALLOW_INVALID_DISTANCE_TOOFAR_ARRR
+    state->sane = !subvert;
     return Z_OK;
 #else
+    (void)subvert;
     state->sane = 1;
     return Z_DATA_ERROR;
 #endif
@@ -1504,7 +1505,11 @@ long ZEXPORT inflateMark(
 {
     struct inflate_state FAR *state;
 
-    if (strm == Z_NULL || strm->state == Z_NULL) return -1L << 16;
+    /* Change to return statement below is taken from 
+           https://github.com/madler/zlib/commit/2edb94a3025d288dc251bc6cbb2c02e60fbd7438 
+     */
+    if (strm == Z_NULL || strm->state == Z_NULL)
+        return -(1L << 16);
     state = (struct inflate_state FAR *)strm->state;
     return ((long)(state->back) << 16) +
         (state->mode == COPY ? state->length :

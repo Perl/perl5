@@ -27,7 +27,7 @@ BEGIN
         $count = 232 ;
     }
     elsif ($] >= 5.006) {
-        $count = 317 ;
+        $count = 320 ;
     }
     else {
         $count = 275 ;
@@ -559,6 +559,13 @@ SKIP:
     is $x->get_Level(),    Z_BEST_SPEED;
     is $x->get_Strategy(), Z_HUFFMAN_ONLY;
      
+    # change both Level & Strategy again without any calls to deflate 
+    $status = $x->deflateParams(-Level => Z_DEFAULT_COMPRESSION, -Strategy => Z_DEFAULT_STRATEGY, -Bufsize => 1234) ;
+    cmp_ok $status, '==', Z_OK ;
+    
+    is $x->get_Level(),    Z_DEFAULT_COMPRESSION;
+    is $x->get_Strategy(), Z_DEFAULT_STRATEGY;
+     
     $status = $x->deflate($goodbye, $Answer) ;
     cmp_ok $status, '==', Z_OK ;
     $input .= $goodbye;
@@ -568,7 +575,7 @@ SKIP:
     cmp_ok $status, '==', Z_OK ;
     
     is $x->get_Level(),    Z_NO_COMPRESSION;
-    is $x->get_Strategy(), Z_HUFFMAN_ONLY;
+    is $x->get_Strategy(), Z_DEFAULT_STRATEGY;
      
     $status = $x->deflate($goodbye, $Answer) ;
     cmp_ok $status, '==', Z_OK ;
