@@ -1171,11 +1171,11 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 			if (buf[1] == '!')
 			    s = buf + 2;
 		    } else if (buf[0] == 'e') {
-			if (strEQs(buf, "extproc")
+			if (strBEGINs(buf, "extproc")
 			    && isSPACE(buf[7]))
 			    s = buf + 8;
 		    } else if (buf[0] == 'E') {
-			if (strEQs(buf, "EXTPROC")
+			if (strBEGINs(buf, "EXTPROC")
 			    && isSPACE(buf[7]))
 			    s = buf + 8;
 		    }
@@ -1372,7 +1372,7 @@ do_spawn3(pTHX_ char *cmd, int execf, int flag)
     while (*cmd && isSPACE(*cmd))
 	cmd++;
 
-    if (strEQs(cmd,"/bin/sh") && isSPACE(cmd[7])) {
+    if (strBEGINs(cmd,"/bin/sh") && isSPACE(cmd[7])) {
 	STRLEN l = strlen(PL_sh_path);
 	
 	Newx(news, strlen(cmd) - 7 + l + 1, char);
@@ -1387,7 +1387,7 @@ do_spawn3(pTHX_ char *cmd, int execf, int flag)
     if (*cmd == '.' && isSPACE(cmd[1]))
 	goto doshell;
 
-    if (strEQs(cmd,"exec") && isSPACE(cmd[4]))
+    if (strBEGINs(cmd,"exec") && isSPACE(cmd[4]))
 	goto doshell;
 
     for (s = cmd; *s && isALPHA(*s); s++) ;	/* catch VAR=val gizmo */

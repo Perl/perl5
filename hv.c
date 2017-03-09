@@ -1279,7 +1279,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 			 sv_2mortal((SV *)gv)
 			);
 		}
-		else if (klen == 3 && strEQs(key, "ISA") && GvAV(gv)) {
+		else if (klen == 3 && strBEGINs(key, "ISA") && GvAV(gv)) {
                     AV *isa = GvAV(gv);
                     MAGIC *mg = mg_find((SV*)isa, PERL_MAGIC_isa);
 

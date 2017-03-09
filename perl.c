@@ -3845,7 +3845,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 	/* if find_script() returns, it returns a malloc()-ed value */
 	scriptname = PL_origfilename = find_script(scriptname, dosearch, NULL, 1);
 
-	if (strEQs(scriptname, "/dev/fd/")
+	if (strBEGINs(scriptname, "/dev/fd/")
             && isDIGIT(scriptname[8])
             && grok_atoUV(scriptname + 8, &uv, &s)
             && uv <= PERL_INT_MAX
@@ -4028,7 +4028,7 @@ S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
     if (*s++ == '-') {
 	while (isDIGIT(s2[-1]) || s2[-1] == '-' || s2[-1] == '.'
 	       || s2[-1] == '_') s2--;
-	if (strEQs(s2-4,"perl"))
+	if (strBEGINs(s2-4,"perl"))
 	    while ((s = moreswitches(s)))
 		;
     }

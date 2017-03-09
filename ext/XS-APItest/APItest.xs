@@ -1161,84 +1161,84 @@ static int THX_keyword_active(pTHX_ SV *hintkey_sv)
 static int my_keyword_plugin(pTHX_
     char *keyword_ptr, STRLEN keyword_len, OP **op_ptr)
 {
-    if(keyword_len == 3 && strEQs(keyword_ptr, "rpn") &&
+    if(keyword_len == 3 && strBEGINs(keyword_ptr, "rpn") &&
 		    keyword_active(hintkey_rpn_sv)) {
 	*op_ptr = parse_keyword_rpn();
 	return KEYWORD_PLUGIN_EXPR;
-    } else if(keyword_len == 7 && strEQs(keyword_ptr, "calcrpn") &&
+    } else if(keyword_len == 7 && strBEGINs(keyword_ptr, "calcrpn") &&
 		    keyword_active(hintkey_calcrpn_sv)) {
 	*op_ptr = parse_keyword_calcrpn();
 	return KEYWORD_PLUGIN_STMT;
-    } else if(keyword_len == 9 && strEQs(keyword_ptr, "stufftest") &&
+    } else if(keyword_len == 9 && strBEGINs(keyword_ptr, "stufftest") &&
 		    keyword_active(hintkey_stufftest_sv)) {
 	*op_ptr = parse_keyword_stufftest();
 	return KEYWORD_PLUGIN_STMT;
     } else if(keyword_len == 12 &&
-		    strEQs(keyword_ptr, "swaptwostmts") &&
+		    strBEGINs(keyword_ptr, "swaptwostmts") &&
 		    keyword_active(hintkey_swaptwostmts_sv)) {
 	*op_ptr = parse_keyword_swaptwostmts();
 	return KEYWORD_PLUGIN_STMT;
-    } else if(keyword_len == 8 && strEQs(keyword_ptr, "looprest") &&
+    } else if(keyword_len == 8 && strBEGINs(keyword_ptr, "looprest") &&
 		    keyword_active(hintkey_looprest_sv)) {
 	*op_ptr = parse_keyword_looprest();
 	return KEYWORD_PLUGIN_STMT;
-    } else if(keyword_len == 14 && strEQs(keyword_ptr, "scopelessblock") &&
+    } else if(keyword_len == 14 && strBEGINs(keyword_ptr, "scopelessblock") &&
 		    keyword_active(hintkey_scopelessblock_sv)) {
 	*op_ptr = parse_keyword_scopelessblock();
 	return KEYWORD_PLUGIN_STMT;
-    } else if(keyword_len == 10 && strEQs(keyword_ptr, "stmtasexpr") &&
+    } else if(keyword_len == 10 && strBEGINs(keyword_ptr, "stmtasexpr") &&
 		    keyword_active(hintkey_stmtasexpr_sv)) {
 	*op_ptr = parse_keyword_stmtasexpr();
 	return KEYWORD_PLUGIN_EXPR;
-    } else if(keyword_len == 11 && strEQs(keyword_ptr, "stmtsasexpr") &&
+    } else if(keyword_len == 11 && strBEGINs(keyword_ptr, "stmtsasexpr") &&
 		    keyword_active(hintkey_stmtsasexpr_sv)) {
 	*op_ptr = parse_keyword_stmtsasexpr();
 	return KEYWORD_PLUGIN_EXPR;
-    } else if(keyword_len == 9 && strEQs(keyword_ptr, "loopblock") &&
+    } else if(keyword_len == 9 && strBEGINs(keyword_ptr, "loopblock") &&
 		    keyword_active(hintkey_loopblock_sv)) {
 	*op_ptr = parse_keyword_loopblock();
 	return KEYWORD_PLUGIN_STMT;
-    } else if(keyword_len == 11 && strEQs(keyword_ptr, "blockasexpr") &&
+    } else if(keyword_len == 11 && strBEGINs(keyword_ptr, "blockasexpr") &&
 		    keyword_active(hintkey_blockasexpr_sv)) {
 	*op_ptr = parse_keyword_blockasexpr();
 	return KEYWORD_PLUGIN_EXPR;
-    } else if(keyword_len == 9 && strEQs(keyword_ptr, "swaplabel") &&
+    } else if(keyword_len == 9 && strBEGINs(keyword_ptr, "swaplabel") &&
 		    keyword_active(hintkey_swaplabel_sv)) {
 	*op_ptr = parse_keyword_swaplabel();
 	return KEYWORD_PLUGIN_STMT;
-    } else if(keyword_len == 10 && strEQs(keyword_ptr, "labelconst") &&
+    } else if(keyword_len == 10 && strBEGINs(keyword_ptr, "labelconst") &&
 		    keyword_active(hintkey_labelconst_sv)) {
 	*op_ptr = parse_keyword_labelconst();
 	return KEYWORD_PLUGIN_EXPR;
-    } else if(keyword_len == 13 && strEQs(keyword_ptr, "arrayfullexpr") &&
+    } else if(keyword_len == 13 && strBEGINs(keyword_ptr, "arrayfullexpr") &&
 		    keyword_active(hintkey_arrayfullexpr_sv)) {
 	*op_ptr = parse_keyword_arrayfullexpr();
 	return KEYWORD_PLUGIN_EXPR;
-    } else if(keyword_len == 13 && strEQs(keyword_ptr, "arraylistexpr") &&
+    } else if(keyword_len == 13 && strBEGINs(keyword_ptr, "arraylistexpr") &&
 		    keyword_active(hintkey_arraylistexpr_sv)) {
 	*op_ptr = parse_keyword_arraylistexpr();
 	return KEYWORD_PLUGIN_EXPR;
-    } else if(keyword_len == 13 && strEQs(keyword_ptr, "arraytermexpr") &&
+    } else if(keyword_len == 13 && strBEGINs(keyword_ptr, "arraytermexpr") &&
 		    keyword_active(hintkey_arraytermexpr_sv)) {
 	*op_ptr = parse_keyword_arraytermexpr();
 	return KEYWORD_PLUGIN_EXPR;
-    } else if(keyword_len == 14 && strEQs(keyword_ptr, "arrayarithexpr") &&
+    } else if(keyword_len == 14 && strBEGINs(keyword_ptr, "arrayarithexpr") &&
 		    keyword_active(hintkey_arrayarithexpr_sv)) {
 	*op_ptr = parse_keyword_arrayarithexpr();
 	return KEYWORD_PLUGIN_EXPR;
-    } else if(keyword_len == 14 && strEQs(keyword_ptr, "arrayexprflags") &&
+    } else if(keyword_len == 14 && strBEGINs(keyword_ptr, "arrayexprflags") &&
 		    keyword_active(hintkey_arrayexprflags_sv)) {
 	*op_ptr = parse_keyword_arrayexprflags();
 	return KEYWORD_PLUGIN_EXPR;
-    } else if(keyword_len == 5 && strEQs(keyword_ptr, "DEFSV") &&
+    } else if(keyword_len == 5 && strBEGINs(keyword_ptr, "DEFSV") &&
 		    keyword_active(hintkey_DEFSV_sv)) {
 	*op_ptr = parse_keyword_DEFSV();
 	return KEYWORD_PLUGIN_EXPR;
-    } else if(keyword_len == 9 && strEQs(keyword_ptr, "with_vars") &&
+    } else if(keyword_len == 9 && strBEGINs(keyword_ptr, "with_vars") &&
 		    keyword_active(hintkey_with_vars_sv)) {
 	*op_ptr = parse_keyword_with_vars();
 	return KEYWORD_PLUGIN_STMT;
-    } else if(keyword_len == 15 && strEQs(keyword_ptr, "join_with_space") &&
+    } else if(keyword_len == 15 && strBEGINs(keyword_ptr, "join_with_space") &&
 		    keyword_active(hintkey_join_with_space_sv)) {
 	*op_ptr = parse_join_with_space();
 	return KEYWORD_PLUGIN_EXPR;
