@@ -22,6 +22,7 @@ our @EXPORT_OK = qw(
 	lock_store lock_nstore lock_retrieve
         file_magic read_magic
 	BLESS_OK TIE_OK FLAGS_COMPAT
+        stack_depth stack_depth_hash
 );
 
 our ($canonical, $forgive_me);
@@ -646,6 +647,9 @@ all values unlocked.  To make Storable C<croak()> instead, set
 C<$Storable::downgrade_restricted> to a C<FALSE> value.  To restore
 the default set it back to some C<TRUE> value.
 
+The cperl PERL_PERTURB_KEYS_TOP hash strategy has a known problem with
+restricted hashes.
+
 =item huge objects
 
 On 64bit systems some data structures may exceed the 2G (i.e. I32_MAX)
@@ -685,16 +689,23 @@ relevant feature.
 
 =head1 ERROR REPORTING
 
-Storable uses the "exception" paradigm, in that it does not try to workaround
-failures: if something bad happens, an exception is generated from the
-caller's perspective (see L<Carp> and C<croak()>).  Use eval {} to trap
-those exceptions.
+Storable uses the "exception" paradigm, in that it does not try to
+workaround failures: if something bad happens, an exception is
+generated from the caller's perspective (see L<Carp> and C<croak()>).
+Use eval {} to trap those exceptions.
 
 When Storable croaks, it tries to report the error via the C<logcroak()>
 routine from the C<Log::Agent> package, if it is available.
 
 Normal errors are reported by having store() or retrieve() return C<undef>.
 Such errors are usually I/O errors (or truncated stream errors at retrieval).
+
+When Storable throws the "Max. recursion depth with nested structures
+exceeded" error we are already out of stack space. Unfortunately on
+some earlier perl versions cleaning up a recursive data structure
+recurses into the free calls, which will lead to stack overflows in
+the cleanup. This data structure is not properly cleaned up then, it
+will only be destroyed during global destruction.
 
 =head1 WIZARDS ONLY
 
@@ -858,11 +869,11 @@ There are a few things you need to know, however:
 
 =item *
 
-Since Storable 3.05 we added a hard recursion limit for references,
-arrays and hashes to a maximal depth of 1200-2000, otherwise we might
+Since Storable 3.05 we probe for the stack recursion limit for references,
+arrays and hashes to a maximal depth of ~1200-35000, otherwise we might
 fall into a stack-overflow.  On JSON::XS this limit is 512 btw.  With
 references not immediately referencing each other there's no such
-limit yet, so you might fall into such a stack-overflow.
+limit yet, so you might fall into such a stack-overflow segfault.
 
 =item *
 
@@ -877,6 +888,12 @@ the list of object [A, C] where both object A and C refer to the SAME object
 B, and if there is a serializing hook in A that says freeze(B), then when
 deserializing, we'll get [A', C'] where A' refers to B', but C' refers to D,
 a deep clone of B'.  The topology was not preserved.
+
+=item *
+
+The maximal stack recursion limit for your system is returned by
+C<stack_depth()> and C<stack_depth_hash()>. The hash limit is usually
+half the size of the array and ref limit, as the Perl hash API is not optimal.
 
 =back
 
@@ -1082,14 +1099,14 @@ in the value of a hash key that is overridden by another key/value
 pair in the same hash, thus causing immediate destructor execution.
 
 To disable blessing objects while thawing/retrieving remove the flag
-BLESS_OK = 2 from C<$Storable::flags> or set the 2nd argument for
+C<BLESS_OK> = 2 from C<$Storable::flags> or set the 2nd argument for
 thaw/retrieve to 0.
 
-To disable tieing data while thawing/retrieving remove the flag TIE_OK
+To disable tieing data while thawing/retrieving remove the flag C<TIE_OK>
 = 4 from C<$Storable::flags> or set the 2nd argument for thaw/retrieve
 to 0.
 
-With the default setting of $Storable::flags = 6, creating or destroying
+With the default setting of C<$Storable::flags> = 6, creating or destroying
 random objects, even renamed objects can be controlled by an attacker.
 See CVE-2015-1592 and its metasploit module.
 

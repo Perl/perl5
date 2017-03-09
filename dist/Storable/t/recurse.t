@@ -341,25 +341,18 @@ sub OVERFLOW () { 35000 }
     is $@, '', 'No simple array[5000] stack overflow #257';
 }
 
-if ($] < 5.015) {
-    ok(1, "skip overflow check <=5.14");
-} else {
-    eval {
-        my $t;
-        $t = [$t] for 1 .. OVERFLOW;
-        diag 'trying catching recursive aref stack overflow';
-        dclone $t;
-    };
-    like $@, qr/Max\. recursion depth with nested structures exceeded/,
+eval {
+    my $t;
+    $t = [$t] for 1 .. OVERFLOW;
+    diag 'trying catching recursive aref stack overflow';
+    dclone $t;
+};
+like $@, qr/Max\. recursion depth with nested structures exceeded/,
       'Caught aref stack overflow '.OVERFLOW;
-}
 
 if ($ENV{APPVEYOR} and length(pack "p", "") >= 8) {
     # TODO: need to repro this fail on a small machine.
     ok(1, "skip dclone of big hash");
-}
-elsif ($] < 5.015) {
-    ok(1, "skip overflow check <=5.14");
 }
 else {
     eval {
