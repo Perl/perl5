@@ -1,3 +1,10 @@
+Thu Mar 9 19:20:19 2017 +0100 Reini Urban <rurban@cpan.org>
+    Version 3.05_09
+
+        * compute the stacksizes, improve cleanup within croak
+        from stack exhaustion.
+        * added stack_depth and stack_depth_hash getters.
+
 Wed Mar  8 21:03:43 CET 2017 Reini Urban <rurban@cpan.org>
     Version 3.05_08
 

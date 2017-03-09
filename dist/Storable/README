@@ -48,7 +48,10 @@ To compile this extension, run:
 There is an embedded POD manual page in Storable.pm.
 
 Storable was written by Raphael Manfredi <Raphael_Manfredi@pobox.com>
-Maintenance is now done by cperl, https://github.com/perl11/cperl
+Maintenance is now done by cperl, https://github.com/rurban/Storable/
+Note that p5p still ships an old broken version, without stack overflow
+protection and large object support. As long as you don't store overlarge
+objects, they are compatible.
 
 Please e-mail us with problems, bug fixes, comments and complaints,
 although if you have complements you should send them to Raphael.
@@ -71,7 +74,7 @@ Thanks to (in chronological order):
     Jarkko Hietaniemi <jhi@iki.fi> (AGAIN, as perl 5.7.0 Pumpkin!)
     Todd Rinaldo <toddr@cpanel.net> and JD Lightsey <jd@cpanel.net>
       for optional disabling tie and bless for increased security.
-    Reini Urban <rurban@cpan.org> for the 3.0x >2G support and rewrite
+    Reini Urban <rurban@cpanel.net> for the 3.0x >2G support and rewrite
     JD Lightsey <jd@cpanel.net>
 
 for their contributions.

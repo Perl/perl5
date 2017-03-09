@@ -122,7 +122,7 @@ BEGIN {
 # ext/PerlIO/t/encoding compile
 # ext/POSIX/t/posix 6
 # ext/Socket/Socket 8
-# ext/Storable/t/croak compile
+# dist/Storable/t/croak compile
 # lib/Attribute/Handlers/t/multi compile
 # lib/bignum/ several
 # lib/charnames 35

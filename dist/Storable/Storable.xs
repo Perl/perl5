@@ -372,52 +372,26 @@ typedef struct stcxt {
 /* Note: We dont count nested scalars. This will have to count all refs
    without any recursion detection. */
 /* JSON::XS has 512 */
-#ifdef DEBUGGING
-# define MAX_DEPTH_FACTOR 1
+/* sizes computed with stacksize. use some reserve for the croak cleanup. */
+#include "stacksize.h"
+#ifdef WIN32
+# define STACK_RESERVE 32
 #else
+# define STACK_RESERVE 8
+#endif
+#ifdef PST_STACK_MAX_DEPTH
 # if PERL_VERSION > 14
-#  define MAX_DEPTH_FACTOR 20
-# elif PERL_VERSION > 12
-#  define MAX_DEPTH_FACTOR 15
+#  define MAX_DEPTH       (PST_STACK_MAX_DEPTH - STACK_RESERVE)
+#  define MAX_DEPTH_HASH  (PST_STACK_MAX_DEPTH_HASH - STACK_RESERVE)
 # else
-#  define MAX_DEPTH_FACTOR 1
-# endif
-#endif
-/* 64: c++ dbg: 1200   DEBUGGING + DEBUG_LEAKING_SCALAR non-threaded
-       c   dbg: 3000
-       c -O3:   34500
-       gcc-4.8: 27000
-   32: c -O3:   32600
-       c   dbg: 1425
-   threading:   29000/23000
- */
-#if PTRSIZE == 8
-# ifdef __cplusplus
-#  define _MAX_DEPTH   (1200 * MAX_DEPTH_FACTOR)
-# else
-#  define _MAX_DEPTH   (1350 * MAX_DEPTH_FACTOR)
+/* within the exception we need another stack depth to recursively cleanup the hash */
+#  define MAX_DEPTH       ((PST_STACK_MAX_DEPTH >> 1) - STACK_RESERVE)
+#  define MAX_DEPTH_HASH  ((PST_STACK_MAX_DEPTH_HASH >> 1) - (STACK_RESERVE*2))
 # endif
 #else
-# ifdef __cplusplus
-#  define _MAX_DEPTH   (750 * MAX_DEPTH_FACTOR)
-# else
-#  define _MAX_DEPTH   (1400 * MAX_DEPTH_FACTOR)
-# endif
-#endif
-#if PERL_VERSION > 14
-#  define MAX_DEPTH   _MAX_DEPTH
-#  define MAX_DEPTH_HASH (MAX_DEPTH >> 1)
-#else
-# ifdef DEBUGGING
-#  define MAX_DEPTH   (_MAX_DEPTH - 200)
-# else
-#  define MAX_DEPTH   (_MAX_DEPTH - 4000)
-# endif
-# define MAX_DEPTH_HASH (MAX_DEPTH >> 1)
-#endif
-#if defined(__has_feature) && __has_feature(address_sanitizer)
-# undef MAX_DEPTH
-# define MAX_DEPTH 254
+/* uninitialized: enforces a stack overflow SEGV */
+# define MAX_DEPTH        65000
+# define MAX_DEPTH_HASH   35000
 #endif
 #define MAX_DEPTH_ERROR "Max. recursion depth with nested structures exceeded"
 
@@ -1031,7 +1005,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
         ASSERT(sizeof(x) == 8, ("W64LEN writing a U64"));               \
         if (cxt->netorder) {                                            \
             union u64_t { U32 a; U32 b; } y;                            \
-            y.b = htonl(x & 0xffffffff);                                \
+            y.b = htonl(x & 0xffffffffUL);                                \
             y.a = htonl(x >> 32);                                       \
             if (!cxt->fio)                                              \
                 MBUF_PUTLONG(y);                                        \
@@ -2116,6 +2090,71 @@ static AV *array_call(pTHX_
     return av;
 }
 
+#if PERL_VERSION < 15
+static void
+cleanup_recursive_av(pTHX_ AV* av) {
+    SSize_t i = AvFILLp(av);
+    SV** arr = AvARRAY(av);
+    if (SvMAGICAL(av)) return;
+    while (i >= 0) {
+        if (arr[i]) {
+#if PERL_VERSION < 14
+            arr[i] = NULL;
+#else
+            SvREFCNT_dec(arr[i]);
+#endif
+        }
+        i--;
+    }
+}
+
+#ifndef SvREFCNT_IMMORTAL
+#ifdef DEBUGGING
+   /* exercise the immortal resurrection code in sv_free2() */
+#  define SvREFCNT_IMMORTAL 1000
+#else
+#  define SvREFCNT_IMMORTAL ((~(U32)0)/2)
+#endif
+#endif
+
+static void
+cleanup_recursive_hv(pTHX_ HV* hv) {
+    long int i = HvTOTALKEYS(hv);
+    HE** arr = HvARRAY(hv);
+    if (SvMAGICAL(hv)) return;
+    while (i >= 0) {
+        if (arr[i]) {
+            SvREFCNT(HeVAL(arr[i])) = SvREFCNT_IMMORTAL;
+            arr[i] = NULL; /* let it leak. too dangerous to clean it up here */
+        }
+        i--;
+    }
+#if PERL_VERSION < 8
+    ((XPVHV*)SvANY(hv))->xhv_array = NULL;
+#else
+    HvARRAY(hv) = NULL;
+#endif
+    HvTOTALKEYS(hv) = 0;
+}
+static void
+cleanup_recursive_rv(pTHX_ SV* sv) {
+    if (sv && SvROK(sv))
+        SvREFCNT_dec(SvRV(sv));
+}
+static void
+cleanup_recursive_data(pTHX_ SV* sv) {
+    if (SvTYPE(sv) == SVt_PVAV) {
+        cleanup_recursive_av(aTHX_ (AV*)sv);
+    }
+    else if (SvTYPE(sv) == SVt_PVHV) {
+        cleanup_recursive_hv(aTHX_ (HV*)sv);
+    }
+    else {
+        cleanup_recursive_rv(aTHX_ sv);
+    }
+}
+#endif
+
 /*
  * known_class
  *
@@ -2200,6 +2239,9 @@ static int store_ref(pTHX_ stcxt_t *cxt, SV *sv)
              PTR2UV(cxt->recur_sv)));
     if (cxt->entry && cxt->recur_sv == sv) {
         if (++cxt->recur_depth > MAX_DEPTH) {
+#if PERL_VERSION < 15
+            cleanup_recursive_data(aTHX_ (SV*)sv);
+#endif
             CROAK((MAX_DEPTH_ERROR));
         }
     }
@@ -2487,6 +2529,10 @@ static int store_array(pTHX_ stcxt_t *cxt, AV *av)
              PTR2UV(cxt->recur_sv)));
     if (cxt->entry && cxt->recur_sv == (SV*)av) {
         if (++cxt->recur_depth > MAX_DEPTH) {
+            /* with <= 5.14 it recurses in the cleanup also, needing 2x stack size */
+#if PERL_VERSION < 15
+            cleanup_recursive_data(aTHX_ (SV*)av);
+#endif
             CROAK((MAX_DEPTH_ERROR));
         }
     }
@@ -2641,6 +2687,9 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
              PTR2UV(cxt->recur_sv)));
     if (cxt->entry && cxt->recur_sv == (SV*)hv) {
         if (++cxt->recur_depth > MAX_DEPTH_HASH) {
+#if PERL_VERSION < 15
+            cleanup_recursive_data(aTHX_ (SV*)hv);
+#endif
             CROAK((MAX_DEPTH_ERROR));
         }
     }
@@ -3050,6 +3099,9 @@ static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags)
              PTR2UV(cxt->recur_sv)));
     if (cxt->entry && cxt->recur_sv == (SV*)hv) {
         if (++cxt->recur_depth > MAX_DEPTH_HASH) {
+#if PERL_VERSION < 15
+            cleanup_recursive_data(aTHX_ (SV*)hv);
+#endif
             CROAK((MAX_DEPTH_ERROR));
         }
     }
@@ -7358,6 +7410,8 @@ PPCODE:
     }
     ST(0) = boolSV(result);
     XSRETURN(1);
+
+# so far readonly. we rather probe at install to be safe.
 
 IV
 stack_depth()
