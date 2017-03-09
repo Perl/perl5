@@ -1013,7 +1013,7 @@ See also L</ceil>, L</floor>, L</trunc>.
 
 Owing to an oversight, this is not currently exported by default, or as part of
 the C<:math_h_c99> export tag; importing it must therefore be done by explicit
-name. This will be changed in Perl 5.26.
+name.
 
 =item C<malloc>
 
