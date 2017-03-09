@@ -15,7 +15,7 @@
 static bool
 constant(char *name, IV *pval)
 {
-    if (strnNE(name, "O_", 2)) return FALSE;
+    if (! strBEGINs(name, "O_")) return FALSE;
 
     if (strEQ(name, "O_APPEND"))
 #ifdef O_APPEND

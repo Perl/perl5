@@ -2346,8 +2346,7 @@ CODE:
     SP -= retcnt;
     errsv = ERRSV;
     errstr = SvPV_nolen(errsv);
-    if(strnEQ(errstr, "Undefined subroutine &main:: called at",
-              sizeof("Undefined subroutine &main:: called at") - 1)) {
+    if(strBEGINs(errstr, "Undefined subroutine &main:: called at")) {
         PUSHMARK(SP);
         retcnt = call_sv((SV*)i_sub, 0); /* call again to increase counter */
         SPAGAIN;
@@ -2359,8 +2358,7 @@ CODE:
     SP -= retcnt;
     errsv = ERRSV;
     errstr = SvPV_nolen(errsv);
-    if(strnEQ(errstr, "Can't use an undefined value as a subroutine reference at",
-              sizeof("Can't use an undefined value as a subroutine reference at") - 1)) {
+    if(strBEGINs(errstr, "Can't use an undefined value as a subroutine reference at")) {
         PUSHMARK(SP);
         retcnt = call_sv((SV*)i_sub, 0); /* call again to increase counter */
         SPAGAIN;
@@ -2372,8 +2370,7 @@ CODE:
     SP -= retcnt;
     errsv = ERRSV;
     errstr = SvPV_nolen(errsv);
-    if(strnEQ(errstr, "Not a CODE reference at",
-              sizeof("Not a CODE reference at") - 1)) {
+    if(strBEGINs(errstr, "Not a CODE reference at")) {
         PUSHMARK(SP);
         retcnt = call_sv((SV*)i_sub, 0); /* call again to increase counter */
         SPAGAIN;

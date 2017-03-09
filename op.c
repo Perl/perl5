@@ -11831,7 +11831,7 @@ Perl_ck_method(pTHX_ OP *o)
     }
 
     /* $proto->MyClass::method() and $proto->MyClass::SUPER::method() */
-    if (nsplit >= 9 && strnEQ(method+nsplit-9, "::SUPER::", 9)) {
+    if (nsplit >= 9 && strBEGINs(method+nsplit-9, "::SUPER::")) {
         rclass = newSVpvn_share(method, utf8*(nsplit-9), 0);
         new_op = newMETHOP_named(OP_METHOD_REDIR_SUPER, 0, methsv);
     } else {

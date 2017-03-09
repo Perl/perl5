@@ -3921,9 +3921,9 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 #endif
 	rsfp = PerlIO_open(scriptname,PERL_SCRIPT_MODE);
 #ifdef FAKE_BIT_BUCKET
-	if (memEQ(scriptname, FAKE_BIT_BUCKET_PREFIX,
-		  sizeof(FAKE_BIT_BUCKET_PREFIX) - 1)
-	    && strlen(scriptname) == sizeof(tmpname) - 1) {
+        if (   strBEGINs(scriptname, FAKE_BIT_BUCKET_PREFIX)
+	    && strlen(scriptname) == sizeof(tmpname) - 1)
+        {
 	    unlink(scriptname);
 	}
 	scriptname = BIT_BUCKET;
