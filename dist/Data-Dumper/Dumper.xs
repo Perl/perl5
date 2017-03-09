@@ -54,6 +54,12 @@
 #  define SvPVCLEAR(sv) sv_setpvs((sv), "")
 #endif
 
+#ifndef memBEGINs
+#  define memBEGINs(s1, l, s2)                                              \
+            (   (l) >= sizeof(s2) - 1                                       \
+             && memEQ(s1, "" s2 "", sizeof(s2)-1))
+#endif
+
 /* This struct contains almost all the user's desired configuration, and it
  * is treated as constant by the recursive function. This arrangement has
  * the advantage of needing less memory than passing all of them on the
@@ -1298,7 +1304,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	else if (realtype == SVt_PVGV) {/* GLOBs can end up with scribbly names */
 	    c = SvPV(val, i);
 	    if(i) ++c, --i;			/* just get the name */
-	    if (i >= 6 && strncmp(c, "main::", 6) == 0) {
+	    if (memBEGINs(c, i, "main::")) {
 		c += 4;
 #if PERL_VERSION < 7
 		if (i == 6 || (i == 7 && c[6] == '\0'))
