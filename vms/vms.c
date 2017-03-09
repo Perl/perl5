@@ -919,7 +919,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
           for (i = 0; environ[i]; i++) { 
             if ((eq = strchr(environ[i],'=')) && 
                 lnmdsc.dsc$w_length == (eq - environ[i]) &&
-                !strncmp(environ[i],lnm,eq - environ[i])) {
+                strnEQ(environ[i],lnm,eq - environ[i])) {
               eq++;
               for (eqvlen = 0; eq[eqvlen]; eqvlen++) eqv[eqvlen] = eq[eqvlen];
               if (!eqvlen) continue;
@@ -1505,7 +1505,7 @@ Perl_vmssetenv(pTHX_ const char *lnm, const char *eqv, struct dsc$descriptor_s *
           for (i = 0; environ[i]; i++) { /* If it's an environ elt, reset */
             if ((cp1 = strchr(environ[i],'=')) && 
                 lnmdsc.dsc$w_length == (cp1 - environ[i]) &&
-                !strncmp(environ[i],lnm,cp1 - environ[i])) {
+                strnEQ(environ[i],lnm,cp1 - environ[i])) {
               unsetenv(lnm);
               return 0;
             }
@@ -6332,7 +6332,7 @@ int_fileify_dirspec(const char *dir, char *buf, int *utf8_fl)
       if (rms_is_nam_fnb(dirnam, NAM$M_EXP_TYPE)) {  /* Was type specified? */
         /* Yep; check version while we're at it, if it's there. */
         cmplen = rms_is_nam_fnb(dirnam, NAM$M_EXP_VER) ? 6 : 4;
-        if (strncmp(rms_nam_typel(dirnam), ".DIR;1", cmplen)) { 
+        if (strnNE(rms_nam_typel(dirnam), ".DIR;1", cmplen)) {
           /* Something other than .DIR[;1].  Bzzt. */
 	  sts = rms_free_search_context(&dirfab);
 	  PerlMem_free(esa);
@@ -7652,15 +7652,13 @@ slash_dev_special_to_vms(const char *unixptr, char *vmspath, int vmspath_len)
 {
     char * nextslash;
     int len;
-    int cmp;
 
     unixptr += 4;
     nextslash = strchr(unixptr, '/');
     len = strlen(unixptr);
     if (nextslash != NULL)
 	len = nextslash - unixptr;
-    cmp = strncmp("null", unixptr, 5);
-    if (cmp == 0) {
+    if (strEQ(unixptr, "null")) {
 	if (vmspath_len >= 6) {
 	    strcpy(vmspath, "_NLA0:");
 	    return SS$_NORMAL;
@@ -8068,22 +8066,18 @@ posix_to_vmsspec_hardway(char *vmspath, int vmspath_len, const char *unixpath,
       }
       else {
       int trnend;
-      int cmp;
 
 	/* now we have foo:bar or foo:[000000]bar to decide from */
 	islnm = vmstrnenv(vmspath, esa, 0, fildev, 0);
 
         if (!islnm && !decc_posix_compliant_pathnames) {
-
-	    cmp = strncmp("bin", vmspath, 4);
-	    if (cmp == 0) {
+	    if (strEQ(vmspath, "bin")) {
 	        /* bin => SYS$SYSTEM: */
 		islnm = vmstrnenv("SYS$SYSTEM:", esa, 0, fildev, 0);
 	    }
 	    else {
 	        /* tmp => SYS$SCRATCH: */
-	        cmp = strncmp("tmp", vmspath, 4);
-		if (cmp == 0) {
+		if (strEQ(vmspath, "tmp")) {
 		    islnm = vmstrnenv("SYS$SCRATCH:", esa, 0, fildev, 0);
 		}
 	    }
@@ -10756,12 +10750,13 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
 	     shebang_len = 2;
 #ifdef ALTERNATE_SHEBANG
 	  else {
-	    shebang_len = strlen(ALTERNATE_SHEBANG);
-	    if (strncmp(b, ALTERNATE_SHEBANG, shebang_len) == 0) {
+	    if (strEQ(b, ALTERNATE_SHEBANG)) {
 	      char * perlstr;
 		perlstr = strstr("perl",b);
 		if (perlstr == NULL)
 		  shebang_len = 0;
+                else
+                  shebang_len = strlen(ALTERNATE_SHEBANG);
 	    }
 	    else
 	      shebang_len = 0;

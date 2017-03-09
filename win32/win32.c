@@ -348,8 +348,8 @@ get_emd_part(SV **prev_pathp, STRLEN *const len, char *trailing_path, ...)
 	if (!ptr || stricmp(ptr+1, strip) != 0) {
 	    /* ... but not if component matches m|5\.$patchlevel.*| */
 	    if (!ptr || !(*strip == '5' && *(ptr+1) == '5'
-			  && strncmp(strip, base, baselen) == 0
-			  && strncmp(ptr+1, base, baselen) == 0))
+			  && strnEQ(strip, base, baselen)
+			  && strnEQ(ptr+1, base, baselen)))
 	    {
 		*optr = '/';
 		ptr = optr;
