@@ -135,9 +135,9 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
             }
             if (next_token[0] == '\0')
                 continue;
-            else if (strcmp(next_token, ".") == 0)
+            else if (strEQ(next_token, "."))
                 continue;
-            else if (strcmp(next_token, "..") == 0) {
+            else if (strEQ(next_token, "..")) {
                 /*
                  * Strip the last path component except when we have
                  * single "/"

@@ -1,5 +1,8 @@
 Revision history for Perl distribution PathTools.
 
+3.70
+- Change strcmp into the easier to read strEQ
+
 3.69
 - avoid loading modules repeatedly at runtime
 - replace 'use vars' by 'our'
