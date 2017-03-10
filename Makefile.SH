@@ -189,11 +189,12 @@ dynamic_list=' '
 dynamic_ext_re="lib/auto/re/re.$dlext"
 extra_dep='
 ext/Pod-Functions/pm_to_blib: cpan/Pod-Simple/pm_to_blib cpan/Pod-Escapes/pm_to_blib pod/perlfunc.pod
+cpan/IO-Compress/pm_to_blib: dist/lib/pm_to_blib
 '
 for f in $dynamic_ext; do
     : the dependency named here will never exist
       base=`echo "$f" | sed 's/.*\///'`
-    this_target="lib/auto/$f/$base.$dlext"  
+    this_target="lib/auto/$f/$base.$dlext"
     dynamic_list="$dynamic_list $this_target"
 
     : Parallel makes reveal that we have some interdependencies

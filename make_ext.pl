@@ -204,10 +204,11 @@ elsif (IS_VMS) {
 {
     # Cwd needs to be built before Encode recurses into subdirectories.
     # Pod::Simple needs to be built before Pod::Functions
+    # lib needs to be built before IO-Compress
     # This seems to be the simplest way to ensure this ordering:
     my (@first, @other);
     foreach (@extspec) {
-	if ($_ eq 'Cwd' || $_ eq 'Pod/Simple') {
+	if ($_ eq 'Cwd' || $_ eq 'Pod/Simple' || $_ eq 'lib') {
 	    push @first, $_;
 	} else {
 	    push @other, $_;
