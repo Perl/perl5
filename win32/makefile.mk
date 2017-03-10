@@ -1542,11 +1542,19 @@ Extensions_realclean :
 # be running in parallel like UNIDATAFILES, this target a placeholder for the
 # future
 .IF "$(BUILD_STATIC)"=="define"
-rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE) $(PERLEXESTATIC)
+rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE) PostExt $(PERLEXESTATIC)
 .ELSE
-rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE)
+rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE) PostExt
 .ENDIF
 	$(NOOP)
+
+PostExt: rebuild_storable
+
+rebuild_storable: $(PERLEXE)
+	set PERL_CORE=1 && \
+	    $(PERLEXE) -I..\lib -I. ..\dist\Storable\stacksize
+	cd ..\dist\Storable && $(MAKE) PERL_CORE=1
+	cd ..\..\win32
 
 #-------------------------------------------------------------------------------
 
