@@ -939,7 +939,8 @@ CFG_VARS	=					\
 #
 
 all : .\config.h ..\git_version.h $(GLOBEXE) $(CONFIGPM) \
-	$(UNIDATAFILES) MakePPPort $(PERLEXE) Extensions_nonxs Extensions $(PERLSTATIC)
+	$(UNIDATAFILES) MakePPPort $(PERLEXE) Extensions_nonxs Extensions PostExt \
+	$(PERLSTATIC)
 	@echo	Everything is up to date. '$(MAKE_BARE) test' to run test suite.
 
 regnodes : ..\regnodes.h
@@ -1223,6 +1224,15 @@ Extensions_clean:
 
 Extensions_realclean: 
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --all --target=realclean
+
+PostExt: rebuild_storable
+
+rebuild_storable: $(PERLEXE)
+	@set PERL_CORE=1
+	$(PERLEXE) -I..\lib -I. ..\dist\Storable\stacksize
+	cd ..\dist\Storable
+	$(MAKE) PERL_CORE=1
+	cd ..\..\win32
 
 #-------------------------------------------------------------------------------
 

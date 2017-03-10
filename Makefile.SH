@@ -1090,7 +1090,7 @@ esac
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
-.PHONY: preplibrary
+.PHONY: preplibrary rebuild_storable
 preplibrary: $(MINIPERL_EXE) $(CONFIGPM) $(PREPLIBRARY_LIBPERL)
 
 $(CONFIGPM_FROM_CONFIG_SH): $(CONFIGPOD)
@@ -1106,10 +1106,14 @@ uni.data: $(MINIPERL_EXE) $(CONFIGPM) lib/unicore/mktables $(nonxs_ext)
 #	can in this makefile to decide if needs to run or not
 #	touch uni.data
 
+rebuild_storable: $(PERL_EXE)
+	PERL_CORE=1 $(RUN_PERL) dist/Storable/stacksize
+	$(MAKE) -C dist/Storable PERL_CORE=1
+
 # $(PERL_EXE) and ext because pod_lib.pl needs Digest::MD5
 # But also this ensures that all extensions are built before we try to scan
 # them, which picks up Devel::PPPort's documentation.
-pod/perltoc.pod: $(perltoc_pod_prereqs)  $(PERL_EXE) $(ext) pod/buildtoc
+pod/perltoc.pod: $(perltoc_pod_prereqs) $(PERL_EXE) $(ext) pod/buildtoc
 	$(RUN_PERL) -f pod/buildtoc -q
 
 pod/perlapi.pod: pod/perlintern.pod
@@ -1133,7 +1137,7 @@ extra.pods: $(MINIPERL_EXE)
 	    echo "pod/perl"$$nx".pod" >> extra.pods ; \
 	done
 
-extras.make: $(PERL_EXE)
+extras.make: $(PERL_EXE) rebuild_storable
 	-@test ! -s extras.lst || PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) -MCPAN -e '@ARGV&&make(@ARGV)' `cat extras.lst`
 
 extras.test: $(PERL_EXE)
