@@ -83,6 +83,7 @@ my %skip;
 @skip{
     'cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/BFD.pm', # just a test module
     'cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/XS.pm',  # just a test module
+    'cpan/IO-Compress/lib/File/GlobMapper.pm', # upstream needs to supply $VERSION
     'cpan/Math-BigInt/t/Math/BigFloat/Subclass.pm', # just a test module
     'cpan/Math-BigInt/t/Math/BigInt/BareCalc.pm',   # just a test module
     'cpan/Math-BigInt/t/Math/BigInt/Scalar.pm',     # just a test module

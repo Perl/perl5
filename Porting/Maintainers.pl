@@ -612,7 +612,7 @@ use File::Glob qw(:case);
     },
 
     'IO-Compress' => {
-        'DISTRIBUTION' => 'PMQS/IO-Compress-2.069.tar.gz',
+        'DISTRIBUTION' => 'PMQS/IO-Compress-2.074.tar.gz',
         'FILES'        => q[cpan/IO-Compress],
         'EXCLUDED'     => [
             qr{^examples/},
@@ -620,37 +620,6 @@ use File::Glob qw(:case);
             't/010examples-bzip2.t',
             't/010examples-zlib.t',
             't/cz-05examples.t',
-        ],
-        'CUSTOMIZED'   => [
-            # CVE-2016-1238
-            qw(
-               bin/zipdetails lib/Compress/Zlib.pm
-               lib/IO/Compress/Adapter/Bzip2.pm
-               lib/IO/Compress/Adapter/Deflate.pm
-               lib/IO/Compress/Adapter/Identity.pm
-               lib/IO/Compress/Base.pm
-               lib/IO/Compress/Base/Common.pm
-               lib/IO/Compress/Bzip2.pm
-               lib/IO/Compress/Deflate.pm
-               lib/IO/Compress/Gzip.pm
-               lib/IO/Compress/Gzip/Constants.pm
-               lib/IO/Compress/RawDeflate.pm
-               lib/IO/Compress/Zip.pm
-               lib/IO/Compress/Zip/Constants.pm
-               lib/IO/Compress/Zlib/Constants.pm
-               lib/IO/Compress/Zlib/Extra.pm
-               lib/IO/Uncompress/Adapter/Bunzip2.pm
-               lib/IO/Uncompress/Adapter/Identity.pm
-               lib/IO/Uncompress/Adapter/Inflate.pm
-               lib/IO/Uncompress/AnyInflate.pm
-               lib/IO/Uncompress/AnyUncompress.pm
-               lib/IO/Uncompress/Base.pm
-               lib/IO/Uncompress/Bunzip2.pm
-               lib/IO/Uncompress/Gunzip.pm
-               lib/IO/Uncompress/Inflate.pm
-               lib/IO/Uncompress/RawInflate.pm
-               lib/IO/Uncompress/Unzip.pm
-            )
         ],
     },
 
