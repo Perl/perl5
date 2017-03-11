@@ -660,7 +660,7 @@ sub stack_trace() {
 # common to both releases, and you can see the changes caused just by the
 # underlying release semantic changes.  For versions earlier than 3.2, you
 # must copy a version of DAge.txt into the directory.
-my $string_compare_versions = DEBUG && 0; #  e.g., "2.1";
+my $string_compare_versions = DEBUG && ""; #  e.g., "2.1";
 my $compare_versions = DEBUG
                        && $string_compare_versions
                        && pack "C*", split /\./, $string_compare_versions;
@@ -1529,7 +1529,7 @@ sub populate_char_info ($) {
 
     $viacode[$i] = $perl_charname->value_of($i) || "";
     $age[$i] = (defined $age)
-               ? (($age->value_of($i) =~ / ^ \d \. \d $ /x)
+               ? (($age->value_of($i) =~ / ^ \d+ \. \d+ $ /x)
                   ? $age->value_of($i)
                   : "")
                : "";
@@ -5324,6 +5324,14 @@ use parent '-norequire', '_Range_List_Base';
         return $self->_add_delete('+', @_);
     }
 
+    sub replace_map {
+        # Replace a range
+
+        my $self = shift;
+
+        return $self->_add_delete('+', @_, Replace => $UNCONDITIONALLY);
+    }
+
     sub add_duplicate {
         # Adds entry to a range list which can duplicate an existing entry
 
@@ -7733,6 +7741,7 @@ END
     # Accessors for the underlying list that should fail if locked.
     for my $sub (qw(
                     add_duplicate
+                    replace_map
                 ))
     {
         no strict "refs";
@@ -9367,6 +9376,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                     range_count
                     ranges
                     range_size_1
+                    replace_map
                     reset_each_range
                     set_comment
                     set_default_map
@@ -13898,8 +13908,10 @@ sub handle_compare_versions () {
     # since the first compare version.
     my $delta = Range_List->new();
     foreach my $table ($age->tables) {
+        use version;
         next if $table == $age->table('Unassigned');
-        next if $table->name le $string_compare_versions;
+        next if version->parse($table->name)
+             le version->parse($string_compare_versions);
         $delta += $table;
     }
     if ($delta->is_empty) {
@@ -13922,6 +13934,9 @@ sub handle_compare_versions () {
         next if     $this_block == $no_block
                 ||  ! ($this_block & $Assigned)->is_empty;
         $this_block->set_fate($SUPPRESSED, $after_first_version);
+        foreach my $range ($this_block->ranges) {
+            $block->replace_map($range->start, $range->end, 'No_Block')
+        }
         $no_block += $this_block;
     }
 
