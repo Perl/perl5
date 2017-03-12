@@ -1107,7 +1107,7 @@ uni.data: $(MINIPERL_EXE) $(CONFIGPM) lib/unicore/mktables $(nonxs_ext)
 #	touch uni.data
 
 rebuild_storable: $(PERL_EXE)
-	PERL_CORE=1 $(RUN_PERL) dist/Storable/stacksize
+	$(RUN_PERL) dist/Storable/stacksize --core
 	$(MAKE) -C dist/Storable PERL_CORE=1
 
 # $(PERL_EXE) and ext because pod_lib.pl needs Digest::MD5

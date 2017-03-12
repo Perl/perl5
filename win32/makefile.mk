@@ -1551,10 +1551,8 @@ rebasePE : Extensions $(PERLDLL) Extensions_normalize $(PERLEXE) PostExt
 PostExt: rebuild_storable
 
 rebuild_storable: $(PERLEXE)
-	set PERL_CORE=1 && \
-	    $(PERLEXE) -I..\lib -I. ..\dist\Storable\stacksize
+	$(PERLEXE) -I..\lib -I. ..\dist\Storable\stacksize --core
 	cd ..\dist\Storable && $(MAKE) PERL_CORE=1
-	cd ..\..\win32
 
 #-------------------------------------------------------------------------------
 
