@@ -2,11 +2,15 @@
 # binary search maximum stack depth for arrays and hashes
 # and store it in stacksize.h
 
+use Config;
+use Cwd;
+
 my $f;
 my $fn = "stacksize.h";
 my ($bad1, $bad2) = (45000, 25000);
 sub QUIET () {
-    (defined $ENV{MAKEFLAGS} and $ENV{MAKEFLAGS} =~ /\b(s|silent|quiet)\b/)
+    (defined $ENV{MAKEFLAGS} and $ENV{MAKEFLAGS} =~ /\b(s|silent|quiet)\b/
+     and !defined($ENV{TRAVIS}))
       ? 1 : 0
 }
 sub PARALLEL () {
@@ -26,12 +30,27 @@ if (is_miniperl()) {
     print "skip miniperl\n" unless QUIET;
     exit;
 }
+if (@ARGV and $ARGV[0] eq '--core') {
+    $ENV{PERL_CORE} = 1;
+}
+my $PERL = $^X;
 if ($ENV{PERL_CORE}) {
+    my $path;
+    my $ldlib = $Config{ldlibpthname};
+    if ($ldlib) {
+        $path = getcwd();
+    }
     if (-d 'dist/Storable') {
         chdir 'dist/Storable';
+        $PERL = "../../$PERL" unless $PERL =~ m|^/|;
     }
     if ($^O eq 'MSWin32' and -d '../dist/Storable') {
-        chdir '../dist/Storable';
+        chdir '..\dist\Storable';
+        $PERL = "..\\..\\$PERL" unless $PERL =~ /^[A-Za-z]:\\/;
+    }
+    $PERL = "\"$PERL\"" if $PERL =~ / /;
+    if ($ldlib) {
+        $PERL = "$ldlib=$path $PERL";
     }
 }
 
@@ -65,18 +84,27 @@ if (PARALLEL) {
     print "parallel build race - wait for linker ...\n" unless QUIET;
     sleep(2.0);
 }
-my $probe ="\"$^X\" $mblib -e\"require Storable or die; Storable::dclone([]) or die;\"";
-if (system($probe) != 0) {
-    print "Storable not yet usable\n" unless QUIET;
-    exit;
+for my $i (0..1) {
+    my $probe ="$PERL $mblib -e\"require Storable or die; Storable::dclone([]) or die;\"";
+    if (system($probe) != 0) {
+        print "Storable not yet usable: $probe\n" unless QUIET;
+        unless ($i) { # XXX race?
+            require Config;
+            system($Config::Config{make});
+        } else {
+            exit;
+        }
+    } else {
+        last;
+    }
 }
 
 sub cmd {
     my $i = shift;
     die unless $i;
     ($^O eq 'MSWin32')
-      ? "\"$^X\" $mblib -MStorable=dclone -e\"my \$t; $try for 1..$i;dclone(\$t);\""
-      : "\"$^X\" $mblib -MStorable=dclone -e'my \$t; $try for 1..$i;dclone(\$t);'"
+      ? "$PERL $mblib -MStorable=dclone -e\"my \$t; $try for 1..$i;dclone(\$t);\""
+      : "$PERL $mblib -MStorable=dclone -e'my \$t; $try for 1..$i;dclone(\$t);'"
 }
 # try more
 sub good {
