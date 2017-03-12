@@ -108,6 +108,12 @@ USE_LARGE_FILES	*= define
 #USE_LONG_DOUBLE *=define
 
 #
+# Comment this out if you want the legacy default behavior of including '.' at
+# the end of @INC.
+#
+DEFAULT_INC_EXCLUDES_DOT *= define
+
+#
 # Uncomment this if you want to disable looking up values from
 # HKEY_CURRENT_USER\Software\Perl and HKEY_LOCAL_MACHINE\Software\Perl in
 # the Registry.
@@ -304,6 +310,7 @@ USE_IMP_SYS	*= undef
 USE_LARGE_FILES	*= undef
 USE_64_BIT_INT	*= undef
 USE_LONG_DOUBLE	*= undef
+DEFAULT_INC_EXCLUDES_DOT *= undef
 USE_NO_REGISTRY	*= undef
 
 
@@ -1096,6 +1103,7 @@ CFG_VARS	=					\
 		uselongdouble=$(USE_LONG_DOUBLE)	~	\
 		uselargefiles=$(USE_LARGE_FILES)	~	\
 		usesitecustomize=$(USE_SITECUST)	~	\
+		default_inc_excludes_dot=$(DEFAULT_INC_EXCLUDES_DOT)	~	\
 		LINK_FLAGS=$(LINK_FLAGS)	~	\
 		optimize=$(OPTIMIZE)	~	\
 		ARCHPREFIX=$(ARCHPREFIX)	~	\

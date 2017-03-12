@@ -37,6 +37,12 @@ CCLIBDIR	= $(CCHOME)\lib
 CECOPY     = cecopy
 
 #
+# comment this out if you want the legacy default behavior of including '.' at
+# the end of @INC.
+#
+DEFAULT_INC_EXCLUDES_DOT = define
+
+#
 # set this if you wish to use perl's malloc
 # This will make perl run few times faster
 # WARNING: Turning this on/off WILL break binary compatibility with extensions
@@ -438,6 +444,10 @@ CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 PERL_MALLOC	= undef
 !ENDIF
 
+!IF "$(DEFAULT_INC_EXCLUDES_DOT)" == ""
+DEFAULT_INC_EXCLUDES_DOT = undef
+!ENDIF
+
 !IF "$(USE_MULTI)" == ""
 USE_MULTI	= undef
 !ENDIF
@@ -754,6 +764,7 @@ CFG_VARS = \
  "usemultiplicity=$(USE_MULTI)" \
  "use64bitint=undef" \
  "uselargefiles=undef" \
+ "default_inc_excludes_dot=$(DEFAULT_INC_EXCLUDES_DOT)" \
  "LINK_FLAGS=$(LDLIBPATH) $(LINK_FLAGS) $(SUBSYS)" \
  "optimize=$(OPTIMIZE)" \
  "WIN64=$(WIN64)"

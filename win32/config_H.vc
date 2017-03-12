@@ -4300,6 +4300,12 @@
  */
 /*#define HAS_WRITEV		/ **/
 
+/* DEFAULT_INC_EXCLUDES_DOT:
+ *	This symbol, if defined, removes the legacy default behavior of
+ *	including '.' at the end of @INC.
+ */
+/*#define DEFAULT_INC_EXCLUDES_DOT	/ **/
+
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
  *	some sort is available.
