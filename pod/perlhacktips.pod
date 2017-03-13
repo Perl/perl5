@@ -1429,7 +1429,8 @@ documentation for more information.  Also, spawned threads do the
 equivalent of setting this variable to the value 1.)
 
 If, at the end of a run you get the message I<N scalars leaked>, you
-can recompile with C<-DDEBUG_LEAKING_SCALARS>, which will cause the
+can recompile with C<-DDEBUG_LEAKING_SCALARS>,
+(C<Configure -Accflags=-DDEBUG_LEAKING_SCALARS>), which will cause the
 addresses of all those leaked SVs to be dumped along with details as to
 where each SV was originally allocated.  This information is also
 displayed by Devel::Peek.  Note that the extra details recorded with
