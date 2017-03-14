@@ -501,7 +501,7 @@ X<-F>
 
 specifies the pattern to split on for B<-a>. The pattern may be
 surrounded by C<//>, C<"">, or C<''>, otherwise it will be put in single
-quotes. You can't use literal whitespace in the pattern.
+quotes. You can't use literal whitespace or NUL characters in the pattern.
 
 B<-F> implicitly sets both B<-a> and B<-n>.
 
