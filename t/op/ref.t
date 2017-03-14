@@ -8,7 +8,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(236);
+plan(237);
 
 # Test this first before we extend the stack with other operations.
 # This caused an asan failure due to a bad write past the end of the stack.
@@ -818,6 +818,24 @@ for ("4eounthouonth") {
     my $aref = \123;
     is \$$aref, $aref,
 	'[perl #109746] referential identity of \literal under threads+mad'
+}
+
+# RT#130861: heap-use-after-free in pp_rv2sv, from asan fuzzing
+SKIP: {
+    skip_if_miniperl("no dynamic loading on miniperl, so can't load arybase", 1);
+    # this value is critical - its just enough so that the stack gets
+    # grown which loading/calling arybase
+    my $n = 125;
+
+    my $code = <<'EOF';
+$ary = '[';
+my @a = map $$ary, 1..NNN;
+print "@a\n";
+EOF
+    $code =~ s/NNN/$n/g;
+    my @exp = ("0") x $n;
+    fresh_perl_is($code, "@exp", { stderr => 1 },
+                    'rt#130861: heap uaf in pp_rv2sv');
 }
 
 # Bit of a hack to make test.pl happy. There are 3 more tests after it leaves.
