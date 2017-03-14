@@ -403,6 +403,7 @@ PP(pp_rv2sv)
 	else if (PL_op->op_private & OPpDEREF)
 	    sv = vivify_ref(sv, PL_op->op_private & OPpDEREF);
     }
+    SPAGAIN; /* in case chasing soft refs reallocated the stack */
     SETs(sv);
     RETURN;
 }
