@@ -91,6 +91,7 @@ for my $i (0..1) {
         unless ($i) { # XXX race?
             require Config;
             system($Config::Config{make});
+            # and try again
         } else {
             exit;
         }

@@ -1,3 +1,8 @@
+Tue Mar 14 09:52:20 2017 +0100 Reini Urban <rurban@cpan.org>
+    Version 3.05_10
+
+        * CORE-only improvements to stacksize
+
 Thu Mar 9 19:20:19 2017 +0100 Reini Urban <rurban@cpan.org>
     Version 3.05_09
 
