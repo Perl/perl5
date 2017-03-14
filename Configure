@@ -20638,15 +20638,15 @@ a shared directory. This can lead to executing unexpected code.
 EOM
 
 # When changing to exclude by default:
-#case "$default_inc_excludes_dot" in
-#    $undef|false|[nN]*) dflt="n" ;;
-#    *)                  dflt="y" ;;
-#esac
-# For now:
 case "$default_inc_excludes_dot" in
-    $define|true|[yY]*) dflt="y" ;;
-    *)                  dflt="n" ;;
+    $undef|false|[nN]*) dflt="n" ;;
+    *)                  dflt="y" ;;
 esac
+# To turn exclude off by default:
+#case "$default_inc_excludes_dot" in
+#    $define|true|[yY]*) dflt="y" ;;
+#    *)                  dflt="n" ;;
+#esac
 
 rp='Exclude '.' from @INC by default? '
 . ./myread
