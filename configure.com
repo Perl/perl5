@@ -927,7 +927,7 @@ $   config_symbols1 ="|installprivlib|installscript|installsitearch|installsitel
 $   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitebin|sitelib|sitelib_stem|sitelibexp|usecxx|use64bitall|use64bitint|"
 $   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|uselongdouble|usemultiplicity|usemymalloc|usedebugging_perl|"
 $   config_symbols4 ="|usesecurelog|usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|usesitecustomize|"
-$   config_symbols5 ="|buildmake|builder|usethreadupcalls|usekernelthreads|useshortenedsymbols|useversionedarchname"
+$   config_symbols5 ="|buildmake|builder|usethreadupcalls|usekernelthreads|useshortenedsymbols|useversionedarchname|default_inc_excludes_dot"
 $!  
 $   open/read CONFIG 'config_sh'
 $   rd_conf_loop:
@@ -3018,6 +3018,27 @@ $ IF F$TYPE(pager) .EQS. "STRING" THEN dflt = pager
 $ rp="What pager is used on your system? [''dflt'] "
 $ GOSUB myread
 $ pager = ans
+$!
+$ bool_dflt = "y"
+$ IF F$TYPE(default_inc_excludes_dot) .NES. ""
+$ THEN
+$   IF .not. default_inc_excludes_dot .or. default_inc_excludes_dot .eqs. "undef" THEN bool_dflt = "n"
+$ ENDIF
+$ echo ""
+$ echo "Historically Perl has provided a final fallback of the current working"
+$ echo "directory '.' when searching for a library. This, however, can lead to"
+$ echo "problems when a Perl program which loads optional modules is called from"
+$ echo "a shared directory. This can lead to executing unexpected code."
+$ echo ""
+$ rp = "Exclude '.' from @INC by default? [''bool_dflt'] "
+$ GOSUB myread
+$ default_inc_excludes_dot = ans
+$ IF default_inc_excludes_dot
+$ THEN
+$   default_inc_excludes_dot = "define"
+$ ELSE
+$   default_inc_excludes_dot = "undef"
+$ ENDIF
 $!
 $! update makefile here
 $! echo4 "Updating makefile..."
@@ -6449,7 +6470,7 @@ $ WC "db_version_minor='" + "'"
 $ WC "db_version_patch='" + "'"
 $ WC "dbgprefix='" + dbgprefix + "'"
 $ WC "devtype='" + devtype + "'"
-$ WC "default_inc_excludes_dot='undef'"
+$ WC "default_inc_excludes_dot='" + default_inc_excludes_dot + "'"
 $ WC "direntrytype='struct dirent'"
 $ WC "dlext='" + dlext + "'"
 $ WC "dlobj='" + dlobj + "'"
