@@ -52,6 +52,7 @@ EOT
     $head = <<EOT;
 	\@rem = '--*-Perl-*--
 	\@echo off
+	set errorlevel=
 	if "%OS%" == "Windows_NT" goto WinNT
 	perl $OPT{'o'}
 	goto endofperl
