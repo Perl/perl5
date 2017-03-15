@@ -1831,8 +1831,8 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
 	    AvARRAY(av) = ary;
 	}
 	if (AvMAX(av) < 1) {
-	    AvMAX(av) = 1;
 	    Renew(ary,2,SV*);
+	    AvMAX(av) = 1;
 	    AvARRAY(av) = ary;
 	    AvALLOC(av) = ary;
 	}

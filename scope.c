@@ -90,11 +90,12 @@ I32
 Perl_cxinc(pTHX)
 {
     const IV old_max = cxstack_max;
-    cxstack_max = GROW(cxstack_max);
-    Renew(cxstack, cxstack_max + 1, PERL_CONTEXT);
+    const IV new_max = GROW(cxstack_max);
+    Renew(cxstack, new_max + 1, PERL_CONTEXT);
+    cxstack_max = new_max;
     /* Without any kind of initialising deep enough recursion
      * will end up reading uninitialised PERL_CONTEXTs. */
-    PoisonNew(cxstack + old_max + 1, cxstack_max - old_max, PERL_CONTEXT);
+    PoisonNew(cxstack + old_max + 1, new_max - old_max, PERL_CONTEXT);
     return cxstack_ix + 1;
 }
 
@@ -102,11 +103,12 @@ void
 Perl_push_scope(pTHX)
 {
     if (UNLIKELY(PL_scopestack_ix == PL_scopestack_max)) {
-	PL_scopestack_max = GROW(PL_scopestack_max);
-	Renew(PL_scopestack, PL_scopestack_max, I32);
+        const IV new_max = GROW(PL_scopestack_max);
+	Renew(PL_scopestack, new_max, I32);
 #ifdef DEBUGGING
-	Renew(PL_scopestack_name, PL_scopestack_max, const char*);
+	Renew(PL_scopestack_name, new_max, const char*);
 #endif
+	PL_scopestack_max = new_max;
     }
 #ifdef DEBUGGING
     PL_scopestack_name[PL_scopestack_ix] = "unknown";
@@ -140,23 +142,26 @@ Perl_markstack_grow(pTHX)
 void
 Perl_savestack_grow(pTHX)
 {
+    IV new_max;
 #ifdef STRESS_REALLOC
-    PL_savestack_max += SS_MAXPUSH;
+    new_max = PL_savestack_max + SS_MAXPUSH;
 #else
-    PL_savestack_max = GROW(PL_savestack_max);
+    new_max = GROW(PL_savestack_max);
 #endif
     /* Note that we allocate SS_MAXPUSH slots higher than ss_max
      * so that SS_ADD_END(), SSGROW() etc can do a simper check */
-    Renew(PL_savestack, PL_savestack_max + SS_MAXPUSH, ANY);
+    Renew(PL_savestack, new_max + SS_MAXPUSH, ANY);
+    PL_savestack_max = new_max;
 }
 
 void
 Perl_savestack_grow_cnt(pTHX_ I32 need)
 {
-    PL_savestack_max = PL_savestack_ix + need;
+    const IV new_max = PL_savestack_ix + need;
     /* Note that we allocate SS_MAXPUSH slots higher than ss_max
      * so that SS_ADD_END(), SSGROW() etc can do a simper check */
-    Renew(PL_savestack, PL_savestack_max + SS_MAXPUSH, ANY);
+    Renew(PL_savestack, new_max + SS_MAXPUSH, ANY);
+    PL_savestack_max = new_max;
 }
 
 #undef GROW
@@ -186,8 +191,8 @@ Perl_tmps_grow_p(pTHX_ SSize_t ix)
     if (ix - PL_tmps_max < 128)
 	extend_to += (PL_tmps_max < 512) ? 128 : 512;
 #endif
+    Renew(PL_tmps_stack, extend_to + 1, SV*);
     PL_tmps_max = extend_to + 1;
-    Renew(PL_tmps_stack, PL_tmps_max, SV*);
     return ix;
 }
 

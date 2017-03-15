@@ -547,11 +547,12 @@ PerlIO_list_push(pTHX_ PerlIO_list_t *list, PerlIO_funcs *funcs, SV *arg)
     PERL_UNUSED_CONTEXT;
 
     if (list->cur >= list->len) {
-	list->len += 8;
+        const IV new_len = list->len + 8;
 	if (list->array)
-	    Renew(list->array, list->len, PerlIO_pair_t);
+	    Renew(list->array, new_len, PerlIO_pair_t);
 	else
-	    Newx(list->array, list->len, PerlIO_pair_t);
+	    Newx(list->array, new_len, PerlIO_pair_t);
+	list->len = new_len;
     }
     p = &(list->array[list->cur++]);
     p->funcs = funcs;

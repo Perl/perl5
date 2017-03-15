@@ -2355,8 +2355,9 @@ is the recommended Unicode-aware way of saying
 
 #define TRIE_LIST_PUSH(state,fid,ns) STMT_START {               \
     if ( TRIE_LIST_CUR( state ) >=TRIE_LIST_LEN( state ) ) {    \
-	U32 ging = TRIE_LIST_LEN( state ) *= 2;                 \
+	U32 ging = TRIE_LIST_LEN( state ) * 2;                  \
 	Renew( trie->states[ state ].trans.list, ging, reg_trie_trans_le ); \
+        TRIE_LIST_LEN( state ) = ging;                          \
     }                                                           \
     TRIE_LIST_ITEM( state, TRIE_LIST_CUR( state ) ).forid = fid;     \
     TRIE_LIST_ITEM( state, TRIE_LIST_CUR( state ) ).newstate = ns;   \
@@ -6416,10 +6417,11 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
                  * different closure than last time */
                 *recompile_p = 1;
                 if (pRExC_state->code_blocks) {
-                    pRExC_state->code_blocks->count += ri->code_blocks->count;
+                    int new_count = pRExC_state->code_blocks->count
+                            + ri->code_blocks->count;
                     Renew(pRExC_state->code_blocks->cb,
-                            pRExC_state->code_blocks->count,
-                            struct reg_code_block);
+                            new_count, struct reg_code_block);
+                    pRExC_state->code_blocks->count = new_count;
                 }
                 else
                     pRExC_state->code_blocks = S_alloc_code_blocks(aTHX_

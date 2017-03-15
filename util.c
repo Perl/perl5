@@ -5352,9 +5352,11 @@ Perl_my_cxt_init(pTHX_ int *index, size_t size)
     /* make sure the array is big enough */
     if (PL_my_cxt_size <= *index) {
 	if (PL_my_cxt_size) {
-	    while (PL_my_cxt_size <= *index)
-		PL_my_cxt_size *= 2;
-	    Renew(PL_my_cxt_list, PL_my_cxt_size, void *);
+            IV new_size = PL_my_cxt_size;
+	    while (new_size <= *index)
+		new_size *= 2;
+	    Renew(PL_my_cxt_list, new_size, void *);
+            PL_my_cxt_size = new_size;
 	}
 	else {
 	    PL_my_cxt_size = 16;
@@ -5415,10 +5417,12 @@ Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
 	int old_size = PL_my_cxt_size;
 	int i;
 	if (PL_my_cxt_size) {
-	    while (PL_my_cxt_size <= index)
-		PL_my_cxt_size *= 2;
-	    Renew(PL_my_cxt_list, PL_my_cxt_size, void *);
-	    Renew(PL_my_cxt_keys, PL_my_cxt_size, const char *);
+            IV new_size = PL_my_cxt_size;
+	    while (new_size <= index)
+		new_size *= 2;
+	    Renew(PL_my_cxt_list, new_size, void *);
+	    Renew(PL_my_cxt_keys, new_size, const char *);
+            PL_my_cxt_size = new_size;
 	}
 	else {
 	    PL_my_cxt_size = 16;

@@ -4134,8 +4134,8 @@ PP(pp_entersub)
             items = SP - MARK;
 	    if (UNLIKELY(items - 1 > AvMAX(av))) {
                 SV **ary = AvALLOC(av);
-                AvMAX(av) = items - 1;
                 Renew(ary, items, SV*);
+                AvMAX(av) = items - 1;
                 AvALLOC(av) = ary;
                 AvARRAY(av) = ary;
             }
