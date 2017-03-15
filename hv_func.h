@@ -12,13 +12,17 @@
 #ifndef PERL_SEEN_HV_FUNC_H /* compile once */
 #define PERL_SEEN_HV_FUNC_H
 
+#if IVSZIE == 8
+#define CAN64BITHASH
+#endif
+
 #if !( 0 \
         || defined(PERL_HASH_FUNC_SIPHASH) \
         || defined(PERL_HASH_FUNC_SIPHASH13) \
         || defined(PERL_HASH_FUNC_HYBRID_OAATHU_SIPHASH13) \
         || defined(PERL_HASH_FUNC_ONE_AT_A_TIME_HARD) \
     )
-#if IVSIZE == 8
+#ifdef CAN64BITHASH
 #define PERL_HASH_FUNC_HYBRID_OAATHU_SIPHASH13
 #else
 #define PERL_HASH_FUNC_ONE_AT_A_TIME_HARD
@@ -114,7 +118,7 @@
   #define UNALIGNED_SAFE
 #endif
 
-#ifdef HAS_QUAD
+#ifdef CAN64BITHASH
 #ifndef U64TYPE
 /* This probably isn't going to work, but failing with a compiler error due to
    lack of uint64_t is no worse than failing right now with an #error.  */
@@ -126,13 +130,13 @@
 #if defined(_MSC_VER)
   #include <stdlib.h>  /* Microsoft put _rotl declaration in here */
   #define ROTL32(x,r)  _rotl(x,r)
-  #ifdef HAS_QUAD
+  #ifdef CAN64BITHASH
     #define ROTL64(x,r)  _rotl64(x,r)
   #endif
 #else
   /* gcc recognises this code and generates a rotate instruction for CPUs with one */
   #define ROTL32(x,r)  (((U32)x << r) | ((U32)x >> (32 - r)))
-  #ifdef HAS_QUAD
+  #ifdef CAN64BITHASH
     #define ROTL64(x,r)  (((U64)x << r) | ((U64)x >> (64 - r)))
   #endif
 #endif
@@ -158,7 +162,7 @@
  * It is 64 bit only.
  */
 
-#ifdef HAS_QUAD
+#ifdef CAN64BITHASH
 
 #define U8TO64_LE(p) \
   (((U64)((p)[0])      ) | \
@@ -251,7 +255,7 @@ PERL_SIPHASH_FNC(
     ,SIPROUND;SIPROUND;SIPROUND;SIPROUND;
 )
 
-#endif /* defined(HAS_QUAD) */
+#endif /* defined(CAN64BITHASH) */
 
 /* - ONE_AT_A_TIME_HARD is the 5.17+ recommend ONE_AT_A_TIME variant */
 
@@ -295,7 +299,7 @@ S_perl_hash_one_at_a_time_hard(const unsigned char * const seed, const unsigned 
     return (hash + (hash << 15));
 }
 
-#ifdef HAS_QUAD
+#ifdef CAN64BITHASH
 
 /* Hybrid hash function
  *
@@ -395,7 +399,7 @@ S_perl_hash_oaathu_siphash_1_3(const unsigned char * const seed, const unsigned 
     }
     return S_perl_hash_siphash_1_3(seed+8, str, len);
 }
-#endif /* defined(HAS_QUAD) */
+#endif /* defined(CAN64BITHASH) */
 
 
 #endif /*compile once*/
