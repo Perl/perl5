@@ -744,7 +744,7 @@ Perl_do_sprintf(pTHX_ SV *sv, I32 len, SV **sarg)
 
 /* currently converts input to bytes if possible, but doesn't sweat failure */
 UV
-Perl_do_vecget(pTHX_ SV *sv, SSize_t offset, int size)
+Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
 {
     STRLEN srclen, len, uoffset, bitoffs = 0;
     const I32 svpv_flags = ((PL_op->op_flags & OPf_MOD || LVRET)
@@ -759,8 +759,6 @@ Perl_do_vecget(pTHX_ SV *sv, SSize_t offset, int size)
     
     PERL_ARGS_ASSERT_DO_VECGET;
 
-    if (offset < 0)
-	return 0;
     if (size < 1 || (size & (size-1))) /* size < 1 or not a power of two */
 	Perl_croak(aTHX_ "Illegal number of bits in vec");
 
@@ -926,8 +924,6 @@ Perl_do_vecset(pTHX_ SV *sv)
     (void)SvPOK_only(targ);
     lval = SvUV(sv);
     offset = LvTARGOFF(sv);
-    if (offset < 0)
-	Perl_croak(aTHX_ "Negative offset to vec in lvalue context");
     size = LvTARGLEN(sv);
     if (size < 1 || (size & (size-1))) /* size < 1 or not a power of two */
 	Perl_croak(aTHX_ "Illegal number of bits in vec");
