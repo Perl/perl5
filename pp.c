@@ -5249,6 +5249,9 @@ PP(pp_splice)
 				    sp - mark);
     }
 
+    if (SvREADONLY(ary))
+        Perl_croak_no_modify();
+
     SP++;
 
     if (++MARK < SP) {

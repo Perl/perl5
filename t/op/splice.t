@@ -98,4 +98,14 @@ $#a++;
 is sprintf("%s", splice @a, 0, 1, undef), "",
   'splice handles nonexistent elems when array len stays the same';
 
+# RT#131000
+{
+    local $@;
+    my @readonly_array = 10..11;
+    Internals::SvREADONLY(@readonly_array, 1);
+    eval { splice @readonly_array, 1, 0, () };
+    like $@, qr/^Modification of a read-only value/,
+        "croak when splicing into readonly array";
+}
+
 done_testing;
