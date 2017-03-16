@@ -8,7 +8,7 @@ BEGIN {
 
 use Config;
 
-plan( tests => 43 );
+plan(tests => 74);
 
 
 is(vec($foo,0,1), 0);
@@ -185,5 +185,41 @@ like($@, qr/^Modification of a read-only value attempted at /,
         is($x, 0, "RT 130915: size_max*2 rval");
         eval { vec($s, $sm2, 8) = 1 };
         like($@, qr/^Out of memory!/, "RT 130915: size_max*2 lval");
+    }
+
+    # (offset * num-bytes) could overflow
+
+    for my $power (1..3) {
+        my $bytes = (1 << $power);
+        my $biglog2 = $Config{sizesize} * 8 - $power;
+        for my $i (0..1) {
+            my $offset = (1 << $biglog2) - $i;
+            $x = vec($s, $offset, $bytes*8);
+            is($x, 0, "large offset: bytes=$bytes biglog2=$biglog2 i=$i: rval");
+            eval { vec($s, $offset, $bytes*8) = 1; };
+            like($@, qr/^Out of memory!/,
+                      "large offset: bytes=$bytes biglog2=$biglog2 i=$i: rval");
+        }
+    }
+}
+
+# Test multi-byte gets partially beyond the end of the string.
+# It's supposed to pretend there is a stream of \0's following the string.
+
+{
+    my $s = "\x01\x02\x03\x04\x05\x06\x07";
+    my $s0 = $s . ("\0" x 8);
+
+    for my $bytes (1, 2, 4, 8) {
+        for my $offset (0..$bytes) {
+            if ($Config{ivsize} < $bytes) {
+                pass("skipping multi-byte bytes=$bytes offset=$offset");
+                next;
+            }
+            no warnings 'portable';
+            is (vec($s,  8 - $offset, $bytes*8),
+                vec($s0, 8 - $offset, $bytes*8),
+                "multi-byte bytes=$bytes offset=$offset");
+        }
     }
 }
