@@ -12,7 +12,7 @@ use File::Spec::Functions qw(catfile catdir splitdir);
 use vars qw($VERSION @Pagers $Bindir $Pod2man
   $Temp_Files_Created $Temp_File_Lifetime
 );
-$VERSION = '3.27';
+$VERSION = '3.28';
 
 #..........................................................................
 
@@ -851,8 +851,11 @@ sub grand_search_init {
                    =~ s/\.P(?:[ML]|OD)\z//;
             }
             else {
-                print STDERR "No " .
+              print STDERR "No " .
                     ($self->opt_m ? "module" : "documentation") . " found for \"$_\".\n";
+              if ( /^https/ ) {
+                print STDERR "You may need an SSL library (such as IO::Socket::SSL) for that URL.\n";
+              }
             }
             next;
         }
@@ -1697,7 +1700,7 @@ sub pagers_guessing {
         unshift @pagers, "$ENV{PERLDOC_PAGER} <" if $ENV{PERLDOC_PAGER};
     }
 
-    $self->aside("Pagers: ", @pagers);
+    $self->aside("Pagers: ", (join ", ", @pagers));
 
     return;
 }
@@ -1934,11 +1937,11 @@ sub page {  # apply a pager to the output file
 	    } elsif($self->is_amigaos) { 
                 last if system($pager, $output) == 0;
             } else {
-                # fix visible escape codes in ToTerm output
-                # https://bugs.debian.org/758689
-                local $ENV{LESS} = defined $ENV{LESS} ? "$ENV{LESS} -R" : "-R";
-		# On FreeBSD, the default pager is more.
-                local $ENV{MORE} = defined $ENV{MORE} ? "$ENV{MORE} -R" : "-R";
+                my $formatter = $self->{'formatter_class'};
+                if ( $formatter->can('pager_configuration') ) {
+                  $self->aside("About to call $formatter" . "->pager_configuration(\"$pager\")\n");
+                  $formatter->pager_configuration($pager, $self);
+                }
                 last if system("$pager \"$output\"") == 0;
             }
         }
