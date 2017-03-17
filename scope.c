@@ -788,7 +788,7 @@ Perl_save_alloc(pTHX_ I32 size, I32 pad)
 }
 
 
-static U8 arg_counts[] = {
+static const U8 arg_counts[] = {
     0, /* SAVEt_ALLOC              */
     0, /* SAVEt_CLEARPADRANGE      */
     0, /* SAVEt_CLEARSV            */
