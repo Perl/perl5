@@ -4391,8 +4391,6 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
     return sv;
 }
 
-extern char PL_isa_DOES[];
-
 PERL_STATIC_INLINE HV *
 S_opmethod_stash(pTHX_ SV* meth)
 {
