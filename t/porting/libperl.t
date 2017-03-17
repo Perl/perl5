@@ -359,8 +359,19 @@ if ($GSP) {
     ok(! exists $symbols{data}{data} ||
             # clang with ASAN seems to add this symbol to every object file:
             !grep($_ ne '__unnamed_1', keys %{$symbols{data}{data}}),
-        "has no data data symbols");
-    ok(! exists $symbols{data}{common}, "has no data common symbols");
+        "has no data data symbols")
+        or do {
+            my $bad = "DATA entries (there are supposed to be none):\n";
+            $bad .= "  data sym: $_\n" for sort keys %{$symbols{data}{data}};
+            diag($bad);
+        };
+
+    ok(! exists $symbols{data}{common}, "has no data common symbols")
+        or do {
+            my $bad = "COMMON entries (there are supposed to be none):\n";
+            $bad .= "  common sym: $_\n" for sort keys %{$symbols{data}{common}};
+            diag($bad);
+        };
 
     # -DPERL_GLOBAL_STRUCT_PRIVATE should NOT have
     # the extra text symbol for accessing the vars
