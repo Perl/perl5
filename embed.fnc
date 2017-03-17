@@ -491,7 +491,7 @@ pR	|Off_t	|do_tell	|NN GV* gv
 : Defined in doop.c, used only in pp.c
 p	|I32	|do_trans	|NN SV* sv
 : Used in my.c and pp.c
-p	|UV	|do_vecget	|NN SV* sv|SSize_t offset|int size
+p	|UV	|do_vecget	|NN SV* sv|STRLEN offset|int size
 : Defined in doop.c, used only in mg.c (with /* XXX slurp this routine */)
 p	|void	|do_vecset	|NN SV* sv
 : Defined in doop.c, used only in pp.c

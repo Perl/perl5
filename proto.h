@@ -806,7 +806,7 @@ PERL_CALLCONV Off_t	Perl_do_tell(pTHX_ GV* gv)
 PERL_CALLCONV I32	Perl_do_trans(pTHX_ SV* sv);
 #define PERL_ARGS_ASSERT_DO_TRANS	\
 	assert(sv)
-PERL_CALLCONV UV	Perl_do_vecget(pTHX_ SV* sv, SSize_t offset, int size);
+PERL_CALLCONV UV	Perl_do_vecget(pTHX_ SV* sv, STRLEN offset, int size);
 #define PERL_ARGS_ASSERT_DO_VECGET	\
 	assert(sv)
 PERL_CALLCONV void	Perl_do_vecset(pTHX_ SV* sv);
