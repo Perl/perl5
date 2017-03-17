@@ -4799,6 +4799,12 @@ EXTCONST U8 PL_subversion
 EXTCONST char PL_uuemap[65]
   INIT("`!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_");
 
+/* a special string address whose value is "isa", but which perl knows
+ * to treat as if it were really "DOES" when printing the method name in
+ *  the "Can't call method '%s'" error message */
+EXTCONST char PL_isa_DOES[]
+  INIT("isa");
+
 #ifdef DOINIT
 EXTCONST char PL_uudmap[256] =
 #  ifdef PERL_MICRO

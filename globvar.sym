@@ -19,6 +19,7 @@ PL_hexdigit
 PL_inf
 PL_interp_size
 PL_interp_size_5_18_0
+PL_isa_DOES
 PL_keyword_plugin
 PL_latin1_lc
 PL_magic_data
