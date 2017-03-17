@@ -930,7 +930,7 @@ const struct flag_to_name op_flags_names[] = {
 
 
 /* indexed by enum OPclass */
-const char * op_class_names[] = {
+const char * const op_class_names[] = {
     "NULL",
     "OP",
     "UNOP",
