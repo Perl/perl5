@@ -19,6 +19,7 @@ Code freezes (which happen in the 5.25.X series)
   2017-01-20  5.25.9          User-visible changes to correctly
                               functioning programs freeze
   2017-02-20  5.25.10         Full code freeze
+  2017-03-20  5.25.11         Full code freeze
   2017-04-20  5.26.0          Stable release!
 
 =head2 Perl 5.24
@@ -62,6 +63,7 @@ you should reset the version numbers to the next blead series.
   2016-12-20  5.25.8 ✓        Sawyer X
   2017-01-20  5.25.9 ✓        Abigail
   2017-02-20  5.25.10 ✓       Renée Bäcker
+  2017-03-20  5.25.11         Sawyer X
 
 (RC0 for 5.26.0 will be released once we think that all the blockers have been
 addressed.  This typically means some time in April or May.)
