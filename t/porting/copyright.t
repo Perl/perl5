@@ -18,7 +18,9 @@ working on older releases. It should be run before making a new release.
 
 =cut
 
-
+BEGIN {
+    unshift @INC, '.' if -f 'TestInit.pm';
+}
 use TestInit;
 use strict;
 use Config;
