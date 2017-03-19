@@ -482,6 +482,15 @@ if (@de_exec && @delete) {
     @de_exec = grep {!$delete {$_}} @de_exec;
 }
 
+#
+# Mustn't change the +x bit on files that are whitelisted
+#
+if (@de_exec) {
+    my %permitted = map +(tr/\n//dr => 1), grep !/^#/,
+        do { local @ARGV = '../Porting/exec-bit.txt'; <> };
+    @de_exec = grep !$permitted{"cpan/$pkg_dir/$_"}, @de_exec;
+}
+
 say "unlink $pkg_dir/$_" for @delete;
 say "git add $pkg_dir/$_" for @commit;
 say "git rm -f $pkg_dir/$_" for @gone;
