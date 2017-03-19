@@ -1066,7 +1066,7 @@ use File::Glob qw(:case);
     },
 
     'Test::Harness' => {
-        'DISTRIBUTION' => 'LEONT/Test-Harness-3.36.tar.gz',
+        'DISTRIBUTION' => 'LEONT/Test-Harness-3.38.tar.gz',
         'FILES'        => q[cpan/Test-Harness],
         'EXCLUDED'     => [
             qr{^examples/},
@@ -1078,54 +1078,6 @@ use File::Glob qw(:case);
                 t/000-load.t
                 t/lib/if.pm
                 ),
-        ],
-        'CUSTOMIZED'   => [
-            # CVE-2016-1238
-            qw(
-               bin/prove lib/App/Prove.pm lib/App/Prove/State.pm
-               lib/App/Prove/State/Result.pm
-               lib/App/Prove/State/Result/Test.pm
-               lib/TAP/Base.pm lib/TAP/Formatter/Base.pm
-               lib/TAP/Formatter/Color.pm
-               lib/TAP/Formatter/Console.pm
-               lib/TAP/Formatter/Console/ParallelSession.pm
-               lib/TAP/Formatter/Console/Session.pm
-               lib/TAP/Formatter/File.pm
-               lib/TAP/Formatter/File/Session.pm
-               lib/TAP/Formatter/Session.pm lib/TAP/Harness.pm
-               lib/TAP/Harness/Env.pm lib/TAP/Object.pm
-               lib/TAP/Parser.pm lib/TAP/Parser/Aggregator.pm
-               lib/TAP/Parser/Grammar.pm
-               lib/TAP/Parser/Iterator.pm
-               lib/TAP/Parser/Iterator/Array.pm
-               lib/TAP/Parser/Iterator/Process.pm
-               lib/TAP/Parser/Iterator/Stream.pm
-               lib/TAP/Parser/IteratorFactory.pm
-               lib/TAP/Parser/Multiplexer.pm
-               lib/TAP/Parser/Result.pm
-               lib/TAP/Parser/Result/Bailout.pm
-               lib/TAP/Parser/Result/Comment.pm
-               lib/TAP/Parser/Result/Plan.pm
-               lib/TAP/Parser/Result/Pragma.pm
-               lib/TAP/Parser/Result/Test.pm
-               lib/TAP/Parser/Result/Unknown.pm
-               lib/TAP/Parser/Result/Version.pm
-               lib/TAP/Parser/Result/YAML.pm
-               lib/TAP/Parser/ResultFactory.pm
-               lib/TAP/Parser/Scheduler.pm
-               lib/TAP/Parser/Scheduler/Job.pm
-               lib/TAP/Parser/Scheduler/Spinner.pm
-               lib/TAP/Parser/Source.pm
-               lib/TAP/Parser/SourceHandler.pm
-               lib/TAP/Parser/SourceHandler/Executable.pm
-               lib/TAP/Parser/SourceHandler/File.pm
-               lib/TAP/Parser/SourceHandler/Handle.pm
-               lib/TAP/Parser/SourceHandler/Perl.pm
-               lib/TAP/Parser/SourceHandler/RawTAP.pm
-               lib/TAP/Parser/YAMLish/Reader.pm
-               lib/TAP/Parser/YAMLish/Writer.pm
-               lib/Test/Harness.pm
-            )
         ],
     },
 
