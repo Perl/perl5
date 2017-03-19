@@ -158,7 +158,7 @@ our %Modules;
 
 use autodie;
 
-require "Porting/Maintainers.pl";
+require "./Porting/Maintainers.pl";
 
 my $MAKE_LOG = 'make.log';
 
