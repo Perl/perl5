@@ -17,6 +17,16 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.25.11 - Daniel Kahneman, Thinking, Fast and Slow
+
+  Subjective confidence in a judgment is not a reasoned evaluation of
+  the probability that this judgment is correct. Confidence is a
+  feeling, which reflects the coherence of the information and the
+  cognitive ease of processing it. It is wise to take admissions of
+  uncertainty seriously, but declarations of high confidence mainly
+  tell you that an individual has constructed a coherent story in his
+  mind, not necessarily that the story is true.
+
 =head2 v5.25.10 - Erich Fried, 1968
 
 L<Announced on 2017-02-20 by Renee Bäcker|https://www.nntp.perl.org/group/perl.perl5.porters/2017/02/msg243173.html>
