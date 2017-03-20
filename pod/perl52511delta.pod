@@ -1,0 +1,201 @@
+=encoding utf8
+
+=head1 NAME
+
+perl52511delta - what is new for perl v5.25.11
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.25.10 release and the 5.25.11
+release.
+
+If you are upgrading from an earlier release such as 5.25.9, first read
+L<perl52510delta>, which describes differences between 5.25.9 and 5.25.10.
+
+=head1 Notice
+
+This release includes two important updates:
+
+=over 4
+
+=item * Turning on the removal of C<.> in C<@INC>
+
+=item * Providing a warning when C<do> is used on a file in C<.>
+
+=back
+
+=head1 Security
+
+=head2 Remove current dir (C<.>) from C<@INC>
+
+For security reasons, C<@INC> no longer contains the default directory
+(C<.>).
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.070 to 2.074.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.070 to 2.074.
+
+=item *
+
+L<Config::Perl::V> has been upgraded from version 0.27 to 0.28.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.33 to 3.34.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.33 to 3.34.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.66 to 3.67.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20170220 to 5.20170320.
+
+=item *
+
+L<Pod::Perldoc> has been upgraded from version 3.27 to 3.28.
+
+=item *
+
+L<Test::Harness> has been upgraded from version 3.36_01 to 3.38.
+
+=item *
+
+L<threads> has been upgraded from version 2.13 to 2.15.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.54 to 1.55.
+
+=item *
+
+L<VMS::Stdio> has been upgraded from version 2.42 to 2.41.
+
+=back
+
+=head1 Diagnostics
+
+=head2 New Diagnostics
+
+=head3 New Warnings
+
+=over 4
+
+=item *
+
+Since C<.> is removed from C<@INC>, C<do> will now trigger a warning
+recommending on fixing the C<do> statement.
+
+L<do "%s" failed, '.' is no longer in @INC|perldiag/"do "%s" failed, '.' is no longer in @INC">
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+C<DEFAULT_INC_EXCLUDES_DOT> has been turned on as default.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+C< $-{$name} > would leak an C<AV> on each access if the regular
+expression had no named captures.  The same applies to access to any
+hash tied with L<Tie::Hash::NamedCapture> and C<< all =E<gt> 1 >>. [perl
+#130822]
+
+=back
+
+=head1 Obituary
+
+It is with great sadness we note that Kip Hampton passed away. Probably
+best known as the author of the Perl & XML column on XML.com, he was a
+core contributor to AxKit, ab XML server platform that became an Apache
+Foundation project. He was a frequent speaker in the early days at
+OSCON, and most recently at YAPC::NA in Madison. He was frequently on
+irc.perl.org as `ubu`, generally in the #axkit-dahut community, the
+group responsible for YAPC::NA Asheville in 2011.
+
+Kip and his constant contributions to the community will be greatly missed.
+
+=head1 Acknowledgements
+
+
+Perl 5.25.11 represents approximately 4 weeks of development since Perl 5.25.10
+and contains approximately 4,900 lines of changes across 240 files from 21
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 2,200 lines of changes to 170 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.25.11:
+
+Aaron Crane, Andy Lester, Chris 'BinGOs' Williams, Craig A. Berry, Dave Cross,
+David Golden, David Mitchell, Dominic Hargreaves, H.Merijn Brand, Hugo van der
+Sanden, James E Keenan, Jarkko Hietaniemi, Jerry D. Hedden, Karl Williamson,
+Leon Timmermans, Matthew Horsfall, Renee Baecker, Sawyer X, Shlomi Fish, Steve
+Hay, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
