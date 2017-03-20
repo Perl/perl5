@@ -3756,7 +3756,11 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 #  define ASSUME(x) assert(x)
 #endif
 
-#define NOT_REACHED ASSUME(0)
+#if defined(__sun)      /* ASSUME() generates warnings on Solaris */
+#  define NOT_REACHED
+#else
+#  define NOT_REACHED ASSUME(0)
+#endif
 
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define
