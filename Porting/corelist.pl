@@ -21,8 +21,8 @@ use IPC::Cmd 'can_run';
 use HTTP::Tiny;
 use IO::Uncompress::Gunzip;
 
-my $corelist_file = 'dist/Module-CoreList/lib/Module/CoreList.pm';
-my $utils_file = 'dist/Module-CoreList/lib/Module/CoreList/Utils.pm';
+my $corelist_file = './dist/Module-CoreList/lib/Module/CoreList.pm';
+my $utils_file = './dist/Module-CoreList/lib/Module/CoreList/Utils.pm';
 
 my %lines;
 my %module_to_file;
