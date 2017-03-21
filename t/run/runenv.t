@@ -22,6 +22,7 @@ my $FAILURE_CODE = 119;
 delete $ENV{PERLLIB};
 delete $ENV{PERL5LIB};
 delete $ENV{PERL5OPT};
+delete $ENV{PERL_USE_UNSAFE_INC};
 
 
 # Run perl with specified environment and arguments, return (STDOUT, STDERR)
@@ -33,6 +34,7 @@ sub runperl_and_capture {
   delete $ENV{PERLLIB};
   delete $ENV{PERL5LIB};
   delete $ENV{PERL5OPT};
+  delete $ENV{PERL_USE_UNSAFE_INC};
   my $pid = fork;
   return (0, "Couldn't fork: $!") unless defined $pid;   # failure
   if ($pid) {                   # parent
