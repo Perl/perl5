@@ -24,6 +24,7 @@ static const char* const svclassnames[] = {
     "B::NULL",
     "B::IV",
     "B::NV",
+    "B::SHPV",
     "B::PV",
     "B::INVLIST",
     "B::PVIV",
@@ -1481,6 +1482,7 @@ IVX(sv)
 	char *ptr;
 	SV *ret;
     PPCODE:
+	/* XXX handle B::SHPV::CUR, LEN */
 	ptr = (ix & 0xFFFF) + (char *)SvANY(sv);
 	switch ((U8)(ix >> 16)) {
 	case (U8)(sv_SVp >> 16):
@@ -1584,6 +1586,7 @@ REGEX(sv)
 		PUSHi(PTR2IV(sv));
 	}
 
+# XXX need B::SHPV?
 MODULE = B	PACKAGE = B::PV
 
 void

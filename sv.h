@@ -25,6 +25,7 @@ The types are:
     SVt_IV
     SVt_NV
     SVt_RV
+    SVt_SHPV
     SVt_PV
     SVt_PVIV
     SVt_PVNV
@@ -135,7 +136,8 @@ typedef enum {
 	SVt_IV,		/* 1 */
 	SVt_NV,		/* 2 */
 	/* RV was here, before it was merged with IV.  */
-	SVt_PV,		/* 3 */
+	SVt_SHPV,	/* 3 short PV */
+	SVt_PV,		/* 3 XXX renumber these */
 	SVt_INVLIST,	/* 4, implemented as a PV */
 	SVt_PVIV,	/* 5 */
 	SVt_PVNV,	/* 6 */
@@ -160,7 +162,7 @@ typedef enum {
  * The bits that match 0xf0 are CURRENTLY UNUSED, except that 0xFF means a
  * freed SV.  The bits above that are for flags, like SVf_IOK */
 
-#define SVt_MASK 0xf	/* smallest bitmask that covers all types */
+#define SVt_MASK 0x1f	/* smallest bitmask that covers all types */
 
 #ifndef PERL_CORE
 /* Fast Boyer Moore tables are now stored in magic attached to PVMGs */

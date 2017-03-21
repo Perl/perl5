@@ -880,7 +880,7 @@ struct body_details {
     U8 body_size;	/* Size to allocate  */
     U8 copy;		/* Size of structure to copy (may be shorter)  */
     U8 offset;		/* Size of unalloced ghost fields to first alloced field*/
-    PERL_BITFIELD8 type : 4;        /* We have space for a sanity check. */
+    PERL_BITFIELD8 type : 5;        /* We have space for a sanity check. */
     PERL_BITFIELD8 cant_upgrade : 1;/* Cannot upgrade this type */
     PERL_BITFIELD8 zero_nv : 1;     /* zero the NV when upgrading from this */
     PERL_BITFIELD8 arena : 1;       /* Allocated from an arena */
@@ -947,6 +947,14 @@ static const struct body_details bodies_by_type[] = {
       STRUCT_OFFSET(XPVNV, xnv_u),
       SVt_NV, FALSE, HADNV, HASARENA, FIT_ARENA(0, sizeof(NV)) },
 #endif
+
+    /* SHPVs are in the head, so the allocation size is 0.  */
+    { 0,
+      0,
+      0,
+      SVt_SHPV, FALSE, NONV, NOARENA /* SHPVs don't need an arena  */,
+      0
+    },
 
     { sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur),
       copy_length(XPV, xpv_len) - STRUCT_OFFSET(XPV, xpv_cur),
