@@ -1379,6 +1379,15 @@ a boolean variable. Setting this to C<"1"> is not the right way to
 your shell before starting Perl).  See the description of the B<-C>
 switch for more information.
 
+=item PERL_USE_UNSAFE_INC
+X<PERL_USE_UNSAFE_INC>
+
+If perl has been configured to not have the current directory in
+L<C<@INC>|perlvar/@INC> by default, this variable can be set to C<"1">
+to reinstate it.  It's primarily intended for use while building and
+testing modules that have not been updated to deal with "." not being in
+C<@INC> and should not be set in the environment for day-to-day use.
+
 =item SYS$LOGIN (specific to the VMS port)
 X<SYS$LOGIN>
 
