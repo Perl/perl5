@@ -1233,13 +1233,13 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	    len = lensave;
 	    if (rightlen > len) {
                 if (dc == rc)
-                    SvCUR(sv) = rightlen;
+                    SvCUR_set(sv, rightlen);
                 else
                     sv_catpvn_nomg(sv, rsave + len, rightlen - len);
             }
             else if (leftlen > len) {
                 if (dc == lc)
-                    SvCUR(sv) = leftlen;
+                    SvCUR_set(sv, leftlen);
                 else
                     sv_catpvn_nomg(sv, lsave + len, leftlen - len);
             }

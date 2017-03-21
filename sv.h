@@ -193,9 +193,11 @@ typedef struct hek HEK;
 
 /* start with 2 sv-head building blocks */
 #define _SV_HEAD(ptrtype) \
-    ptrtype	sv_any;		/* pointer to body */	\
     U32		sv_refcnt;	/* how many references to us */	\
-    U32		sv_flags	/* what we are */
+    U32		sv_flags;	/* what we are */               \
+    _SV_HEAD_UNION;             /* minimal payload */           \
+    ptrtype	sv_any;		/* pointer to body */	        \
+    _SV_HEAD_DEBUG              /* any extra debugging fields */
 
 #if NVSIZE <= IVSIZE
 #  define _NV_BODYLESS_UNION NV svu_nv;
@@ -216,7 +218,6 @@ typedef struct hek HEK;
 	GP*	svu_gp;			\
 	PerlIO *svu_fp;			\
     }	sv_u				\
-    _SV_HEAD_DEBUG
 
 #ifdef DEBUG_LEAKING_SCALARS
 #define _SV_HEAD_DEBUG ;\
@@ -232,37 +233,30 @@ typedef struct hek HEK;
 
 struct STRUCT_SV {		/* struct sv { */
     _SV_HEAD(void*);
-    _SV_HEAD_UNION;
 };
 
 struct gv {
     _SV_HEAD(XPVGV*);		/* pointer to xpvgv body */
-    _SV_HEAD_UNION;
 };
 
 struct cv {
     _SV_HEAD(XPVCV*);		/* pointer to xpvcv body */
-    _SV_HEAD_UNION;
 };
 
 struct av {
     _SV_HEAD(XPVAV*);		/* pointer to xpvav body */
-    _SV_HEAD_UNION;
 };
 
 struct hv {
     _SV_HEAD(XPVHV*);		/* pointer to xpvhv body */
-    _SV_HEAD_UNION;
 };
 
 struct io {
     _SV_HEAD(XPVIO*);		/* pointer to xpvio body */
-    _SV_HEAD_UNION;
 };
 
 struct p5rx {
     _SV_HEAD(struct regexp*);	/* pointer to regexp body */
-    _SV_HEAD_UNION;
 };
 
 #undef _SV_HEAD
@@ -1146,6 +1140,46 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 
 #define SvRVx(sv) SvRV(sv)
 
+/* macros for treating the sv_any and sv_u fields of an SV head as a small
+ * string buffer */
+/* XXX redo all these properly sometime - espcially address the
+ * idempotency of the arg in all the nested exapansions */
+
+/*XXX this a guess at the combined size of the sv_any and sv_u fields;
+ * will crash and burn on non-64 bit systems. for 32 and 32/64 bit
+ * systems need to give more thought to the alignment of the two fields
+ * into a single string buffer, esp as as_any may be 4 bytes and  sv_u 8
+ * bytes */
+#define SvSHPV_size (sizeof(UV) * 2 -1)
+#define SvSHPV_PVX(shpv_sv)  ((char *)(&((shpv_sv)->sv_u.svu_pv)))
+#define SvSHPV_cur(shpv_sv)  (((U8*)(SvSHPV_PVX(shpv_sv)))[SvSHPV_size])
+
+#define _SvCUR_base(sv_cur_base) (SvTYPE(sv_cur_base) == SVt_SHPV \
+                        ? SvSHPV_cur(sv_cur_base): (((XPV*) SvANY(sv_cur_base))->xpv_cur))
+#define _SvLEN_base(sv_len_base) (SvTYPE(sv_len_base) == SVt_SHPV \
+                        ? SvSHPV_size : ((XPV*) SvANY(sv_len_base))->xpv_len)
+#define _SvPVX_base(sv_pvx_base) (SvTYPE(sv_pvx_base) == SVt_SHPV \
+                        ? SvSHPV_PVX(sv_pvx_base) \
+                        : ((sv_pvx_base)->sv_u.svu_pv))
+#define _SvEND_base(sv_end_base) (SvTYPE(sv_end_base) == SVt_SHPV \
+                        ? (SvSHPV_PVX(sv_end_base) + _SvCUR(sv_end_base)) \
+                        : ((sv_end_base)->sv_u.svu_pv + ((XPV*)SvANY(sv_end_base))->xpv_cur))
+
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+/* XXX not sure if the (SV *const) casts are correct */
+#  define _SvCUR(_sv_cur) (({ SV *const _sv_cur_var = (SV *const)(_sv_cur); _SvCUR_base(_sv_cur_var); }))
+#  define _SvLEN(_sv_len) (({ SV *const _sv_len_var = (SV *const)(_sv_len); _SvLEN_base(_sv_len_var); }))
+#  define _SvPVX(_sv_pvx) (({ SV *const _sv_pvx_var = (SV *const)(_sv_pvx); _SvPVX_base(_sv_pvx_var); }))
+#  define _SvEND(_sv_end) (({ SV *const _sv_end_var = (SV *const)(_sv_end); _SvEND_base(_sv_end_var); }))
+#else
+    /* XXX these probably aren't right yet - multiple layers of macro may
+     * try to claim PL_Sv? */
+#  define _SvCUR(_sv_cur) (PL_Sv = (_sv_cur), _SvCUR_base(PL_Sv))
+#  define _SvLEN(_sv_len) (PL_Sv = (_sv_len), _SvLEN_base(PL_Sv))
+#  define _SvPVX(_sv_pvx) (PL_Sv = (_sv_pvx), _SvPVX_base(PL_Sv))
+#  define _SvEND(_sv_end) (PL_Sv = (_sv_end), _SvEND_base(PL_Sv))
+#endif
+
 #ifdef PERL_DEBUG_COW
 /* Need -0.0 for SvNVX to preserve IEEE FP "negative zero" because
    +0.0 + -0.0 => +0.0 but -0.0 + -0.0 => -0.0 */
@@ -1156,38 +1190,38 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #  define SvRV_const(sv) (0 + (sv)->sv_u.svu_rv)
 /* Don't test the core XS code yet.  */
 #  if defined (PERL_CORE) && PERL_DEBUG_COW > 1
-#    define SvPVX(sv) (0 + (assert_(!SvREADONLY(sv)) (sv)->sv_u.svu_pv))
+#    define SvPVX(sv) (0 + (assert_(!SvREADONLY(sv)) (_SvPVX(sv)))
 #  else
-#  define SvPVX(sv) SvPVX_mutable(sv)
+#  define SvPVX(sv) (_SvPVX(sv))
 #  endif
-#  define SvCUR(sv) (0 + ((XPV*) SvANY(sv))->xpv_cur)
-#  define SvLEN(sv) (0 + ((XPV*) SvANY(sv))->xpv_len)
-#  define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
+#  define SvCUR(sv) (0 + _SvCUR(sv))
+#  define SvLEN(sv) (0 + _SvLEN(sv))
+#  define SvEND(sv) (_SvEND(sv))
 
 #  define SvMAGIC(sv)	(0 + *(assert_(SvTYPE(sv) >= SVt_PVMG) &((XPVMG*)  SvANY(sv))->xmg_u.xmg_magic))
 #  define SvSTASH(sv)	(0 + *(assert_(SvTYPE(sv) >= SVt_PVMG) &((XPVMG*)  SvANY(sv))->xmg_stash))
 #else
-#  define SvLEN(sv) ((XPV*) SvANY(sv))->xpv_len
-#  define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
+#  define SvLEN(sv) (_SvLEN(sv))
+#  define SvEND(sv) (_SvEND(sv))
 
 #  if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 /* These get expanded inside other macros that already use a variable _sv  */
 #    define SvPVX(sv)							\
-	(*({ SV *const _svpvx = MUTABLE_SV(sv);				\
+	(({ SV *const _svpvx = MUTABLE_SV(sv);				\
 	    assert(PL_valid_types_PVX[SvTYPE(_svpvx) & SVt_MASK]);	\
 	    assert(!isGV_with_GP(_svpvx));				\
 	    assert(!(SvTYPE(_svpvx) == SVt_PVIO				\
 		     && !(IoFLAGS(_svpvx) & IOf_FAKE_DIRP)));		\
-	    &((_svpvx)->sv_u.svu_pv);					\
+	    (_SvPVX(_svpvx));					\
 	 }))
 #    define SvCUR(sv)							\
-	(*({ const SV *const _svcur = (const SV *)(sv);			\
+	(({ const SV *const _svcur = (const SV *)(sv);			\
 	    assert(PL_valid_types_PVX[SvTYPE(_svcur) & SVt_MASK]	\
 		|| SvTYPE(_svcur) == SVt_REGEXP);			\
 	    assert(!isGV_with_GP(_svcur));				\
 	    assert(!(SvTYPE(_svcur) == SVt_PVIO				\
 		     && !(IoFLAGS(_svcur) & IOf_FAKE_DIRP)));		\
-	    &(((XPV*) MUTABLE_PTR(SvANY(_svcur)))->xpv_cur);		\
+	    (_SvCUR(_svcur));		\
 	 }))
 #    define SvIVX(sv)							\
 	(*({ const SV *const _svivx = (const SV *)(sv);			\
@@ -1234,8 +1268,8 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 	    &(((XPVMG*) MUTABLE_PTR(SvANY(_svstash)))->xmg_stash);	\
 	  }))
 #  else
-#    define SvPVX(sv) ((sv)->sv_u.svu_pv)
-#    define SvCUR(sv) ((XPV*) SvANY(sv))->xpv_cur
+#    define SvPVX(sv) (_SvPVX(sv))
+#    define SvCUR(sv) (_SvCUR(sv))
 #    define SvIVX(sv) ((XPVIV*) SvANY(sv))->xiv_iv
 #    define SvUVX(sv) ((XPVUV*) SvANY(sv))->xuv_uv
 #    define SvNVX(sv) ((XPVNV*) SvANY(sv))->xnv_u.xnv_nv
@@ -1249,13 +1283,13 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #ifndef PERL_POISON
 /* Given that these two are new, there can't be any existing code using them
  *  as LVALUEs  */
-#  define SvPVX_mutable(sv)	(0 + (sv)->sv_u.svu_pv)
-#  define SvPVX_const(sv)	((const char*)(0 + (sv)->sv_u.svu_pv))
+#  define SvPVX_mutable(sv)	(0 + _SvPVX(sv))
+#  define SvPVX_const(sv)	((const char*)(0 + _SvPVX(sv)))
 #else
 /* Except for the poison code, which uses & to scribble over the pointer after
    free() is called.  */
-#  define SvPVX_mutable(sv)	((sv)->sv_u.svu_pv)
-#  define SvPVX_const(sv)	((const char*)((sv)->sv_u.svu_pv))
+#  define SvPVX_mutable(sv)	(_SvPVX(sv))
+#  define SvPVX_const(sv)	((const char*)(_SvPVX(sv)))
 #endif
 
 #define SvIVXx(sv) SvIVX(sv)
@@ -1290,6 +1324,7 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 	STMT_START { \
 		assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]);	\
 		assert(!isGV_with_GP(sv));		\
+		assert(SvTYPE(sv) != SVt_SHPV);		\
 		assert(!(SvTYPE(sv) == SVt_PVIO		\
 		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
 		((sv)->sv_u.svu_pv = (val)); } STMT_END
@@ -1318,16 +1353,23 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 		assert(!isGV_with_GP(sv));		\
 		assert(!(SvTYPE(sv) == SVt_PVIO		\
 		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
-		(((XPV*)  SvANY(sv))->xpv_cur = (val)); } STMT_END
+                if (SvTYPE(sv) == SVt_SHPV) {           \
+                    assert((UV)(val) < SvSHPV_size);    \
+                    SvSHPV_cur(sv) = (U8)(val);         \
+                }                                       \
+                else                                    \
+                    (((XPV*)  SvANY(sv))->xpv_cur = (val));\
+        } STMT_END
 #define SvLEN_set(sv, val) \
 	STMT_START { \
 		assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]);	\
+		assert(SvTYPE(sv) != SVt_SHPV);	\
 		assert(!isGV_with_GP(sv));	\
 		assert(!(SvTYPE(sv) == SVt_PVIO		\
 		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
 		(((XPV*)  SvANY(sv))->xpv_len = (val)); } STMT_END
 #define SvEND_set(sv, val) \
-	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
+	STMT_START { assert(SvTYPE(sv) >= SVt_SHPV); \
 		SvCUR_set(sv, (val) - SvPVX(sv)); } STMT_END
 
 #define SvPV_renew(sv,n) \
@@ -1344,6 +1386,7 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 
 #define SvPV_free(sv)							\
     STMT_START {							\
+                if (SvTYPE(sv) != SVt_SHPV) {                           \
 		     assert(SvTYPE(sv) >= SVt_PV);			\
 		     if (SvLEN(sv)) {					\
 			 assert(!SvROK(sv));				\
@@ -1355,7 +1398,8 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 			 }						\
 			 Safefree(SvPVX(sv));				\
 		     }							\
-		 } STMT_END
+                }                                                       \
+             } STMT_END
 
 #ifdef PERL_CORE
 /* Code that crops up in three places to take a scalar and ready it to hold

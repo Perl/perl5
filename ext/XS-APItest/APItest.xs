@@ -1333,7 +1333,7 @@ my_ck_rv2cv(pTHX_ OP *o)
     {
 	SvGROW(ref, SvCUR(ref)+2);
 	*SvEND(ref) = '_';
-	SvCUR(ref)++;
+	SvCUR_set(ref, SvCUR(ref)+1);
 	*SvEND(ref) = '\0';
     }
     return old_ck_rv2cv(aTHX_ o);

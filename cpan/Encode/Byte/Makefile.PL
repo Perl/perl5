@@ -125,7 +125,8 @@ Encode_XSEncoding(pTHX_ encode_t *enc)
  constness, in the hope that perl won't mess with it. */
  assert(SvTYPE(iv) >= SVt_PV); assert(SvLEN(iv) == 0);
  SvFLAGS(iv) |= SVp_POK;
- SvPVX(iv) = (char*) enc->name[0];
+ /* XXX encapulation violation */
+ iv->sv_u.svu_pv = (char*) enc->name[0];
  PUSHMARK(sp);
  XPUSHs(sv);
  while (enc->name[i])
