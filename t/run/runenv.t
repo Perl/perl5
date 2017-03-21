@@ -12,7 +12,7 @@ BEGIN {
     skip_all_without_config('d_fork');
 }
 
-plan tests => 104;
+plan tests => 106;
 
 my $STDOUT = tempfile();
 my $STDERR = tempfile();
@@ -301,12 +301,21 @@ is ($err, '', 'No errors when determining @INC');
 my @default_inc = split /\n/, $out;
 
 SKIP: {
-  skip_if_miniperl("under miniperl", 1);
+  skip_if_miniperl("under miniperl", 3);
 if ($Config{default_inc_excludes_dot}) {
     ok !(grep { $_ eq '.' } @default_inc), '. is not in @INC';
+    ($out, $err) = runperl_and_capture({ PERL_USE_UNSAFE_INC => 1 }, [@dump_inc]);
+
+    is ($err, '', 'No errors when determining unsafe @INC');
+
+    my @unsafe_inc = split /\n/, $out;
+
+    ok (eq_array([@unsafe_inc], [@default_inc, '.']), '. last in unsafe @INC')
+        or diag 'Unsafe @INC is: ', @unsafe_inc;
 }
 else {
     is ($default_inc[-1], '.', '. is last in @INC');
+    skip('Not testing unsafe @INC when it includes . by default', 2);
 }
 }
 
