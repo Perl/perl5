@@ -163,7 +163,9 @@ if (@ARGV) {
 		s,\\,/,g; # canonicalize path
 	    };
 	    # Treat every file matching lib/*.t as a "directory"
-	    m!\A(\.\./lib/[^/]+\.t\z|.*[/])! or die "'$_'";
+	    m! \A ( \.\. / (?: lib | ext/XS-APItest/t )
+                         / [^/]+ \.t \z | .* [/] ) !x
+                or die "'$_'";
 	    push @{$dir{$1}}, $_;
 	    $total_time{$1} += $times{$_} || 0;
 	}
