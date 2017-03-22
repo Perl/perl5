@@ -298,11 +298,14 @@ is ($err, '', 'No errors when determining @INC');
 
 my @default_inc = split /\n/, $out;
 
+SKIP: {
+  skip_if_miniperl("under miniperl", 1);
 if ($Config{default_inc_excludes_dot}) {
     ok !(grep { $_ eq '.' } @default_inc), '. is not in @INC';
 }
 else {
     is ($default_inc[-1], '.', '. is last in @INC');
+}
 }
 
 my $sep = $Config{path_sep};
