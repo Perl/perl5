@@ -1062,7 +1062,6 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 
     len = leftlen < rightlen ? leftlen : rightlen;
     lensave = len;
-    SvCUR_set(sv, len);
     (void)SvPOK_only(sv);
     if ((left_utf || right_utf) && (sv == left || sv == right)) {
 	needlen = optype == OP_BIT_AND ? len : leftlen + rightlen;
@@ -1072,7 +1071,6 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	dc = SvPV_force_nomg_nolen(sv);
 	if (SvLEN(sv) < len + 1) {
 	    dc = SvGROW(sv, len + 1);
-	    (void)memzero(dc + SvCUR(sv), len - SvCUR(sv) + 1);
 	}
 	if (optype != OP_BIT_AND && (left_utf || right_utf))
 	    dc = SvGROW(sv, leftlen + rightlen + 1);
@@ -1084,6 +1082,9 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	sv_usepvn_flags(sv, dc, needlen, SV_HAS_TRAILING_NUL);
 	dc = SvPVX(sv);		/* sv_usepvn() calls Renew() */
     }
+
+    SvCUR_set(sv, len);
+
     if (left_utf || right_utf) {
 	char *dcorig = dc;
 	char *dcsave = NULL;
