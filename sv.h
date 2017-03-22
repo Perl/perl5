@@ -1406,13 +1406,17 @@ object type. Exposed to perl code via Internals::SvREADONLY().
    a reference */
 #  define prepare_SV_for_RV(sv)						\
     STMT_START {							\
-		    if (SvTYPE(sv) < SVt_PV && SvTYPE(sv) != SVt_IV)	\
-			sv_upgrade(sv, SVt_IV);				\
-		    else if (SvTYPE(sv) >= SVt_PV) {			\
+		    if (SvTYPE(sv) >= SVt_PV) {                         \
 			SvPV_free(sv);					\
 			SvLEN_set(sv, 0);				\
                         SvCUR_set(sv, 0);				\
-		    }							\
+                    }                                                   \
+		    else if (SvTYPE(sv) == SVt_NV)                      \
+                        sv_upgrade(sv, SVt_IV);                         \
+		    else {                                              \
+                        SvFLAGS(sv) = SVt_IV;                           \
+                        SET_SVANY_FOR_BODYLESS_IV(sv);                  \
+                    }                                                   \
 		 } STMT_END
 #endif
 
@@ -1786,6 +1790,8 @@ Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
 #define SvPVutf8x_force(sv, lp) sv_pvutf8n_force(sv, &lp)
 #define SvPVbytex_force(sv, lp) sv_pvbyten_force(sv, &lp)
 
+/* XXX this probably needs to be an inline fn */
+
 #define SvTRUE(sv)        (LIKELY(sv) && (UNLIKELY(SvGMAGICAL(sv)) ? sv_2bool(sv) : SvTRUE_common(sv, sv_2bool_nomg(sv))))
 #define SvTRUE_nomg(sv)   (LIKELY(sv) && (                                SvTRUE_common(sv, sv_2bool_nomg(sv))))
 #define SvTRUE_NN(sv)              (UNLIKELY(SvGMAGICAL(sv)) ? sv_2bool(sv) : SvTRUE_common(sv, sv_2bool_nomg(sv)))
@@ -1835,14 +1841,17 @@ Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
 #endif /* __GNU__ */
 
 #define SvPVXtrue(sv)	(					\
-    ((XPV*)SvANY((sv))) 					\
-     && (							\
-	((XPV*)SvANY((sv)))->xpv_cur > 1			\
-	|| (							\
-	    ((XPV*)SvANY((sv)))->xpv_cur			\
-	    && *(sv)->sv_u.svu_pv != '0'				\
-	)							\
-    )								\
+    SvTYPE(sv) == SVt_SHPV                                      \
+    ?   (SvSHPV_cur(sv) > 1                                     \
+         || (SvSHPV_cur(sv) && SvSHPV_PVX(sv)[0] != '0'))       \
+    :   ((XPV*)SvANY((sv))) 					\
+         && (							\
+            ((XPV*)SvANY((sv)))->xpv_cur > 1			\
+            || (						\
+                ((XPV*)SvANY((sv)))->xpv_cur			\
+                && *(sv)->sv_u.svu_pv != '0'			\
+            )							\
+        )							\
 )
 
 #define SvIsCOW(sv)		(SvFLAGS(sv) & SVf_IsCOW)
@@ -1914,8 +1923,9 @@ Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
 #   define SvCANCOW(sv)					    \
 	(SvIsCOW(sv)					     \
 	 ? SvLEN(sv) ? CowREFCNT(sv) != SV_COW_REFCNT_MAX : 1 \
-	 : (SvFLAGS(sv) & CAN_COW_MASK) == CAN_COW_FLAGS       \
-			    && SvCUR(sv)+1 < SvLEN(sv))
+	 : (SvTYPE(sv) != SVt_SHPV)                            \
+                && (SvFLAGS(sv) & CAN_COW_MASK) == CAN_COW_FLAGS\
+                && SvCUR(sv)+1 < SvLEN(sv))
    /* Note: To allow 256 COW "copies", a refcnt of 0 means 1. */
 #   define CowREFCNT(sv)	(*(U8 *)(SvPVX(sv)+SvLEN(sv)-1))
 #   define SV_COW_REFCNT_MAX	((1 << sizeof(U8)*8) - 1)
@@ -2334,11 +2344,11 @@ Evaluates C<sv> more than once.  Sets C<len> to 0 if C<SvOOK(sv)> is false.
 
 #ifdef PERL_CORE
 #  define SET_SVANY_FOR_BODYLESS_IV(sv) \
-	SvANY(sv) =   (XPVIV*)((char*)&(sv->sv_u.svu_iv) \
+	SvANY(sv) =   (XPVIV*)((char*)&((sv)->sv_u.svu_iv) \
                     - STRUCT_OFFSET(XPVIV, xiv_iv))
 
 #  define SET_SVANY_FOR_BODYLESS_NV(sv) \
-	SvANY(sv) =   (XPVNV*)((char*)&(sv->sv_u.svu_nv) \
+	SvANY(sv) =   (XPVNV*)((char*)&((sv)->sv_u.svu_nv) \
                     - STRUCT_OFFSET(XPVNV, xnv_u.xnv_nv))
 #endif
 

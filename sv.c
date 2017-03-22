@@ -1299,6 +1299,10 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 	STATIC_ASSERT_STMT(SVt_IV < SVt_PV);
 	STATIC_ASSERT_STMT(SVt_NV < SVt_PV);
 	break;
+    case SVt_SHPV:
+	if (SvROK(sv))
+	    referent = SvRV(sv);
+        break;
     case SVt_PVIV:
 	break;
     case SVt_PVNV:
@@ -1426,7 +1430,6 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 	} else {
 	    new_body = new_NOARENAZ(new_type_details);
 	}
-	SvANY(sv) = new_body;
 
 	if (old_type_details->copy) {
 	    /* There is now the potential for an upgrade from something without
@@ -1441,10 +1444,35 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 		length -= difference;
 	    }
 	    assert (length >= 0);
-		
+
 	    Copy((char *)old_body + offset, (char *)new_body + offset, length,
 		 char);
 	}
+        else if (old_type == SVt_SHPV) {
+            /* move the string from the SV head into a real body and
+             * PVX buffer */
+            if (SvFLAGS(sv) & (SVf_POK|SVp_POK)) {
+                char *s;
+                STRLEN len;
+                STRLEN cur = SvSHPV_cur(sv);
+                if (cur) {
+
+                    len = cur + 1; /* XXX add any growth factor??? */
+                    s = (char*)safemalloc(len);
+                    Move(SvSHPV_PVX(sv), s, cur, char);
+                    s[cur] = '\0';
+                }
+                else {
+                    len = 0;
+                    s = NULL;
+                }
+                ((XPV*)new_body)->xpv_cur = cur;
+                ((XPV*)new_body)->xpv_len = len;
+                sv->sv_u.svu_pv = s;
+            }
+        }
+
+	SvANY(sv) = new_body;
 
 #ifndef NV_ZERO_IS_ALLBITS_ZERO
 	/* If NV 0.0 is stores as all bits 0 then Zero() already creates a
@@ -1472,9 +1500,10 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 	}
 	if (UNLIKELY(new_type == SVt_REGEXP))
 	    sv->sv_u.svu_rx = (regexp *)new_body;
-	else if (old_type < SVt_PV) {
-	    /* referent will be NULL unless the old type was SVt_IV emulating
-	       SVt_RV */
+	else if (old_type < SVt_SHPV) {
+            /* we are either setting a null PVX or a ref;
+             * when referent is NULL, we rely on svu_pv being in the same
+             * union as svu_rv */
 	    sv->sv_u.svu_rv = referent;
 	}
 	break;
@@ -1555,6 +1584,33 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
     if (SvROK(sv))
 	sv_unref(sv);
     if (SvTYPE(sv) < SVt_PV) {
+        if (SvTYPE(sv) == SVt_SHPV) {
+            STRLEN cur;
+            char buf[SvSHPV_size+1];
+
+            /* XXX should we do any newlen adjusting in this branch like
+             * we do below for normal PVs? */
+            assert(!SvOOK(sv)); /* XXX should this be supported? */
+            if (newlen <= SvSHPV_size)
+                return SvSHPV_PVX(sv);
+            cur = SvSHPV_cur(sv);
+            if (cur) {
+                /* trick sv_upgrade into not copying the buffer;
+                 * otherwise we end up growing it twice, once in
+                 * sv_upgrade (to cur+1), then here (to newlen) */
+                SvSHPV_cur(sv) = 0;
+                /* XXX use StructCopy() instead ??? */
+                Move(SvSHPV_PVX(sv), buf, SvSHPV_size+1, char);
+            }
+            sv_upgrade(sv, SVt_PV);
+	    s = (char*)safemalloc(newlen);
+	    if (cur) {
+                Move(buf, s, cur, char);
+                SvCUR_set(sv, cur);
+            }
+            goto set_s;
+        }
+
 	sv_upgrade(sv, SVt_PV);
 	s = SvPVX_mutable(sv);
     }
@@ -1611,6 +1667,8 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
                 Move(SvPVX_const(sv), s, SvCUR(sv), char);
 	    }
 	}
+
+      set_s:
 	SvPV_set(sv, s);
 #ifdef PERL_UNWARANTED_CHUMMINESS_WITH_MALLOC
 	/* Do this here, do it once, do it right, and then we will never get
@@ -4422,6 +4480,24 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	}
 	goto undef_sstr;
 
+    case SVt_SHPV:
+        sflags = SvFLAGS(sstr);
+	if ((sflags & (SVf_POK|SVp_POK))) {
+            if (dtype < SVt_PV) {
+                /* copy a short string as a short string */
+                assert(!SvROK(dstr));
+                /* XXX keep any other flags??? */
+                SvFLAGS(dstr) = (SVt_SHPV | (sflags & (SVf_POK|SVp_POK|SVf_UTF8)));
+                /* XXX use StructCopy() instead ??? */
+                Move(SvSHPV_PVX(sstr),SvSHPV_PVX(dstr), SvSHPV_size+1, char);
+                return;
+            }
+        }
+        else
+            /* XXX can SVt_SHPV ever be used as RV, IV, NV ??? */
+            assert(!SvOK(sstr));
+	break;
+
     case SVt_PV:
 	if (dtype < SVt_PV)
 	    sv_upgrade(dstr, SVt_PV);
@@ -4669,7 +4745,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	         (!(flags & SV_NOSTEAL)) &&
 					/* and we're allowed to steal temps */
                  SvREFCNT(sstr) == 1 &&   /* and no other references to it? */
-                 len)             /* and really is a string */
+                 len &&           /* and really is a string */
+                 SvTYPE(sstr) != SVt_SHPV)
 	{	/* Passes the swipe test.  */
 	    if (SvPVX_const(dstr))	/* we know that dtype >= SVt_PV */
 		SvPV_free(dstr);
@@ -4702,6 +4779,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 		 sflags & SVf_IsCOW
 	      && !(SvFLAGS(dstr) & SVf_BREAK)
 #endif
+                && SvTYPE(sstr) != SVt_SHPV
             ) {
             /* Either it's a shared hash key, or it's suitable for
                copy-on-write.  */
@@ -4963,6 +5041,19 @@ Perl_sv_setpv_bufsize(pTHX_ SV *const sv, const STRLEN cur, const STRLEN len)
     PERL_ARGS_ASSERT_SV_SETPV_BUFSIZE;
 
     SV_CHECK_THINKFIRST_COW_DROP(sv);
+
+    /* can it fit in a SVt_SHPV? */
+    if (len < SvSHPV_size && SvTYPE(sv) <= SVt_SHPV && !TAINT_get) {
+        assert(!SvROK(sv));
+        /* XXX should utf8 flag be preserved??? */
+        SvFLAGS(sv) = (SVt_SHPV | SVf_POK|SVp_POK);
+        if (SvTYPE(sv) != SVt_SHPV)
+            SvUPGRADE(sv, SVt_SHPV);
+        pv = SvSHPV_PVX(sv);
+        pv[len] = '\0';
+        SvSHPV_cur(sv) = cur;
+        return pv;
+    }
     SvUPGRADE(sv, SVt_PV);
     pv = SvGROW(sv, len + 1);
     SvCUR_set(sv, cur);
@@ -5006,6 +5097,19 @@ Perl_sv_setpvn(pTHX_ SV *const sv, const char *const ptr, const STRLEN len)
 	    Perl_croak(aTHX_ "panic: sv_setpvn called with negative strlen %"
 		       IVdf, iv);
     }
+
+    /* can it fit in a SVt_SHPV? */
+    if (len < SvSHPV_size && SvTYPE(sv) <= SVt_SHPV && !TAINT_get) {
+        assert(!SvROK(sv));
+        /* XXX should utf8 flag be preserved??? */
+        SvFLAGS(sv) = (SVt_SHPV | SVf_POK|SVp_POK);
+        dptr = SvSHPV_PVX(sv);
+        Move(ptr, dptr, len, char);
+        dptr[len] = '\0';
+        SvSHPV_cur(sv) = len;
+        return;
+    }
+
     SvUPGRADE(sv, SVt_PV);
 
     dptr = SvGROW(sv, len + 1);
@@ -5057,6 +5161,12 @@ Perl_sv_setpv(pTHX_ SV *const sv, const char *const ptr)
 	return;
     }
     len = strlen(ptr);
+    /* XXX inline this rather than calling setpvn? */
+    if (SvTYPE(sv) == SVt_SHPV) {
+        sv_setpvn(sv, ptr, len);
+        return;
+    }
+
     SvUPGRADE(sv, SVt_PV);
 
     SvGROW(sv, len + 1);
@@ -5430,7 +5540,17 @@ Perl_sv_chop(pTHX_ SV *const sv, const char *const ptr)
     SvPOK_only_UTF8(sv);
 
     if (!SvOOK(sv)) {
-	if (!SvLEN(sv)) { /* make copy of shared string */
+        if (SvTYPE(sv) == SVt_SHPV) {
+            /* no OOK hack; just shift the buffer */
+	    char *pvx = SvSHPV_PVX(sv);
+	    const STRLEN cur = SvSHPV_cur(sv);
+	    Move(ptr, pvx, cur, char);
+            pvx[cur] = '\0';
+            SvSHPV_cur(sv) = cur - delta;
+            /* XXX we're skipping all the sentinel stuff below */
+            return;
+        }
+	else if (!SvLEN(sv)) { /* make copy of shared string */
 	    const char *pvx = SvPVX_const(sv);
 	    const STRLEN len = SvCUR(sv);
 	    SvGROW(sv, len + 1);

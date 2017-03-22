@@ -1655,7 +1655,9 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 
     d = Perl_newSVpvf(aTHX_
 		   "(0x%" UVxf ") at 0x%" UVxf "\n%*s  REFCNT = %" IVdf "\n%*s  FLAGS = (",
-		   PTR2UV(SvANY(sv)), PTR2UV(sv),
+                   /* XXXX even better, print () rather than (0x0) ??? */
+		   type == SVt_SHPV ? 0 : PTR2UV(SvANY(sv)),
+                   PTR2UV(sv),
 		   (int)(PL_dumpindent*level), "", (IV)SvREFCNT(sv),
 		   (int)(PL_dumpindent*level), "");
 
@@ -1783,7 +1785,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    do_sv_dump(level+1, file, SvRV(sv), nest+1, maxnest, dumpops, pvlim);
     }
 
-    if (type < SVt_PV) {
+    if (type < SVt_SHPV) {
 	SvREFCNT_dec_NN(d);
 	return;
     }
