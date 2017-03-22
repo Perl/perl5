@@ -145,7 +145,7 @@ if (@ARGV) {
 	push @seq, $next;
 
 	my @last;
-	push @last,  sort { lc $a cmp lc $b }
+	push @last,
 	    _tests_from_manifest($Config{extensions}, $Config{known_extensions});
 	my %times;
 	if ($state) {
@@ -174,7 +174,7 @@ if (@ARGV) {
 	# sequentially.
 	push @seq, { par => [ map { s!/$!/*!; { seq => $_ } } sort {
 	    # Directories, ordered by total time descending then name ascending
-	    $total_time{$b} <=> $total_time{$a} || $a cmp $b
+	    $total_time{$b} <=> $total_time{$a} || lc $a cmp lc $b
 	} keys %dir ] };
 
 	$rules = { seq => \@seq };
