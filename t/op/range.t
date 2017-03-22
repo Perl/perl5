@@ -421,7 +421,9 @@ is( $s, 'bcde bcde','modifiable alpha counting loop counter' );
 # generating an extreme range triggered a croak, which if caught,
 # left the temps stack small but with a very large PL_tmps_max
 
-fresh_perl_like(<<'EOF', qr/\Aok 1 ok 2\Z/, {}, "RT #130841");
+SKIP: {
+    skip 'mem wrap check disabled' unless $Config{usemallocwrap};
+    fresh_perl_like(<<'EOF', qr/\Aok 1 ok 2\Z/, {}, "RT #130841");
 my $max_iv = (~0 >> 1);
 eval {
     my @range = 1..($max_iv - 1);
@@ -446,4 +448,4 @@ else {
     print " unexpected sum: [$sum]; expected: [$exp]";
 }
 EOF
-
+}
