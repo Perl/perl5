@@ -5207,8 +5207,10 @@ regexp.h			Public declarations for the above
 regnodes.h			Description of nodes of RE engine
 run.c				The interpreter loop
 runtests.SH			A script that generates runtests
+sbox32_hash.h			SBox hash code (32 Bit SBOX based hash function)
 scope.c				Scope entry and exit code
 scope.h				Scope entry and exit header
+stadtx_hash.h			StadtX hash code (64 Bit fast hash function)
 sv.c				Scalar value code
 sv.h				Scalar value header
 symbian/bld.inf			Symbian sample app build config
@@ -6027,3 +6029,4 @@ win32/wince.h			WinCE port
 win32/wincesck.c		WinCE port
 write_buildcustomize.pl		Generate lib/buildcustomize.pl
 XSUB.h				Include file for extension subroutines
+zaphod32_hash.h			Zaphod32 hash code (32 bit fast hash function)
