@@ -366,58 +366,79 @@ symbols during configure. An example might be:
 B<Unless stated otherwise these options are considered experimental or
 insecure and are not recommended for production use.>
 
-Perl 5.18 includes support for multiple hash functions, and changed
-the default (to ONE_AT_A_TIME_HARD), you can choose a different
-algorithm by defining one of the following symbols. Note that as of
-Perl 5.18 we can only recommend use of the default or SIPHASH. All
-the others are known to have security issues and are for research
-purposes only.
+Since Perl 5.18 we have included support for multiple hash functions,
+although from time to time we change which functions we support,
+and which function is default (currently SBOX+STADTX on 64 bit builds
+and SBOX+ZAPHOD32 for 32 bit builds). You can choose a different
+algorithm by defining one of the following symbols during configure.
+Note that there security implications of which hash function you choose
+to use. The functions are listed roughly by how secure they are believed
+to be, with the one believed to be most secure at release time being PERL_HASH_FUNC_SIPHASH.
 
     PERL_HASH_FUNC_SIPHASH
-    PERL_HASH_FUNC_SDBM
-    PERL_HASH_FUNC_DJB2
-    PERL_HASH_FUNC_SUPERFAST
-    PERL_HASH_FUNC_MURMUR3
-    PERL_HASH_FUNC_ONE_AT_A_TIME
-    PERL_HASH_FUNC_ONE_AT_A_TIME_HARD
-    PERL_HASH_FUNC_ONE_AT_A_TIME_OLD
+    PERL_HASH_FUNC_SIPHASH13
+    PERL_HASH_FUNC_ZAPHOD32
+    PERL_HASH_FUNC_STADTX
 
-Perl 5.18 randomizes the order returned by keys(), values(), and each(),
-and allows controlling this behavior by using of the PERL_PERTURB_KEYS
-option. You can disable this option entirely with the define:
+In addition, these, (or custom hash functions), may be "fronted" by the
+SBOX32 hash function for keys under a chosen size. This hash function is
+special in that it has proven theoretical security properties, and is very
+fast to hash, but which by nature is restricted to a maximum key length,
+and which has rather expensive setup costs (relatively speaking), both in
+terms of performance and more importantly in terms of memory. SBOX32
+requires 1k of storage per character it can hash, and it must populate that
+storage with 256 32-bit random values as well. In practice the RNG we use
+for seeding the SBOX32 storage is very efficient and populating the table
+required for hashing even fairly long keys is negligble as we only do it
+during startup. By default we build with SBOX32 enabled, but you change that
+by setting
+
+   PERL_HASH_USE_SBOX32_ALSO
+
+to zero in configure. By default Perl will use SBOX32 to hash strings 24 bytes
+or shorter, you can change this length by setting
+
+    SBOX32_MAX_LEN
+
+to the desired length, with the maximum length being 256.
+
+As of Perl 5.18 the order returned by keys(), values(), and each() is
+non-deterministic and distinct per hash, and the insert order for
+colliding keys is randomized as well, and perl allows for controlling this
+by the PERL_PERTURB_KEYS environment setting. You can disable this behavior
+entirely with the define
 
     PERL_PERTURB_KEYS_DISABLED
 
-You can disable the environment variable checks and specify the type of
-key traversal randomization to be used by defining one of these:
+You can disable the environment variable checks and compile time specify
+the type of key traversal randomization to be used by defining one of these:
 
     PERL_PERTURB_KEYS_RANDOM
     PERL_PERTURB_KEYS_DETERMINISTIC
 
-In Perl 5.18 the seed used for the hash function is randomly selected
-at process start which can be overridden by specifying a seed by setting
+Since Perl 5.18 the seed used for the hash function is randomly selected
+at process start, which can be overridden by specifying a seed by setting
 the PERL_HASH_SEED environment variable.
 
-You can change this behavior by building perl with the
-
-   USE_HASH_SEED_EXPLICIT
-
-define, in which case one has to explicitly set the PERL_HASH_SEED
-environment variable to enable the security feature or by adding
+You can change this behavior so that your perl is built with a hard coded
+seed with the define
 
     NO_HASH_SEED
 
-to the compilation flags to completely disable the randomisation feature.
-Note these modes are poorly tested, insecure and not recommended.
+Note that if you do this you should modify the code in hv_func.h to specify
+your own key. In the future this define may be renamed and replaced with one
+that requires you to specify the key to use.
 
-B<Perl has never guaranteed any ordering of the hash keys>, and the
+B<NOTE WELL: Perl has never guaranteed any ordering of the hash keys>, and the
 ordering has already changed several times during the lifetime of Perl
 5.  Also, the ordering of hash keys has always been, and continues to
-be, affected by the insertion order.  Note that because of this
-randomisation for example the Data::Dumper results will be different
-between different runs of Perl, since Data::Dumper by default dumps
-hashes "unordered".  The use of the Data::Dumper C<Sortkeys> option is
-recommended.
+be, affected by the insertion order regardless of whether you build with
+or without the randomization features.  Note that because of this
+and especially with randomization that the key order of a hash is *undefined*
+and that things like Data::Dumper, for example, may produce different output
+between different runs of Perl, since Data::Dumper serializes the key in the
+native order for the hash.  The use of the Data::Dumper C<Sortkeys> option is
+recommended if you are comparing dumps between different invocations of perl.
 
 See L<perlrun/PERL_HASH_SEED> and L<perlrun/PERL_PERTURB_KEYS> for
 details on the environment variables, and L<perlsec/Algorithmic
