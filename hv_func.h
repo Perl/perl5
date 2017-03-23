@@ -73,7 +73,7 @@
 #endif
 
 
-#if PERL_HASH_USE_SBOX32_ALSO == 1
+#if PERL_HASH_USE_SBOX32_ALSO == 0
 # define _PERL_HASH_FUNC                        __PERL_HASH_FUNC
 # define _PERL_HASH_SEED_BYTES                  __PERL_HASH_SEED_BYTES
 # define _PERL_HASH_STATE_BYTES                 __PERL_HASH_STATE_BYTES
