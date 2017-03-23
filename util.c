@@ -729,6 +729,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     if (len == 0)		/* TAIL might be on a zero-length string. */
 	return;
     SvUPGRADE(sv, SVt_PVMG);
+    s = (U8*)SvPVX(sv); /* upgrade may have realloced it */
     SvIOK_off(sv);
     SvNOK_off(sv);
 
