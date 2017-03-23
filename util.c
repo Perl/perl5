@@ -4632,7 +4632,6 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
     env_pv= PerlEnv_getenv("PERL_HASH_SEED");
 
     if ( env_pv )
-#  ifndef USE_HASH_SEED_EXPLICIT
     {
         /* ignore leading spaces */
         while (isSPACE(*env_pv))
@@ -4667,8 +4666,7 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
         /* should we warn about insufficient hex? */
     }
     else
-#  endif
-#endif
+#endif /* NO_PERL_HASH_ENV */
     {
         (void)seedDrand01((Rand_seed_t)seed());
 

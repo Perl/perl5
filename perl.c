@@ -317,13 +317,13 @@ perl_construct(pTHXx)
          * a suitable seed yourself and define PERL_HASH_SEED to a well chosen
          * string. See hv_func.h for details.
          */
-#if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT)
+#if defined(USE_HASH_SEED)
         /* get the hash seed from the environment or from an RNG */
         Perl_get_hash_seed(aTHX_ PL_hash_seed);
-#else /*if !(defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT)) */
+#else
         /* they want a hard coded seed, check that it is long enough */
         assert( strlen(PERL_HASH_SEED) >= PERL_HASH_SEED_BYTES );
-#endif /* #if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT) */
+#endif
 
         /* now we use the chosen seed to initialize the state -
          * in some configurations this may be a relatively speaking
@@ -1564,7 +1564,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 #ifndef MULTIPLICITY
     PERL_UNUSED_ARG(my_perl);
 #endif
-#if (defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT) || defined(USE_HASH_SEED_DEBUG)) && !defined(NO_PERL_HASH_SEED_DEBUG)
+#if (defined(USE_HASH_SEED) || defined(USE_HASH_SEED_DEBUG)) && !defined(NO_PERL_HASH_SEED_DEBUG)
     {
         const char * const s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG");
 
@@ -1583,7 +1583,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
             PerlIO_printf(Perl_debug_log, "\n");
         }
     }
-#endif /* #if (defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT) ... */
+#endif /* #if (defined(USE_HASH_SEED) ... */
 
 #ifdef __amigaos4__
     {
@@ -1869,9 +1869,6 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef USE_FAST_STDIO
 			     " USE_FAST_STDIO"
 #  endif	       
-#  ifdef USE_HASH_SEED_EXPLICIT
-			     " USE_HASH_SEED_EXPLICIT"
-#  endif
 #  ifdef USE_LOCALE
 			     " USE_LOCALE"
 #  endif
