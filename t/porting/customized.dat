@@ -80,5 +80,4 @@ Test::Harness cpan/Test-Harness/lib/TAP/Parser/YAMLish/Writer.pm bf1fbfff9720330
 Test::Harness cpan/Test-Harness/lib/Test/Harness.pm da2d76ba673372da129060c9d0adb8cf0d91f9f7
 Test::Simple cpan/Test-Simple/t/Test2/modules/IPC/Driver/Files.t 59648b5745fda06177d81c2c21f55b09f6e129bb
 autodie cpan/autodie/t/mkdir.t 9e70d2282a3cc7d76a78bf8144fccba20fb37dac
-base dist/base/lib/base.pm 9575442273694d41c8e86cb1d86fa1935a07c8a8
 version cpan/version/lib/version.pm a032a751524bdd07a93c945d2a1703abe7ad8ef0
