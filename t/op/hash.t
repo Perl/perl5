@@ -179,7 +179,6 @@ sub torture_hash {
 
     # Each time this will get emptied then repopulated. If the fill isn't reset
     # when the hash is emptied, the used count will likely exceed the array
-    use Devel::Peek;
     %$h3 = %$h2;
     is(join(",", sort keys %$h3),join(",",sort keys %$h2),"$desc (+$count copy) has same keys");
     my (undef, $total3) = validate_hash("$desc (+$count copy)", $h3);
