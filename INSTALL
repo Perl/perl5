@@ -740,6 +740,16 @@ present, at run time.  Of course, you can still search other @INC
 directories ahead of those in APPLLIB_EXP by using any of the standard
 run-time methods: $PERLLIB, $PERL5LIB, -I, use lib, etc.
 
+=item default_inc_excludes_dot
+
+Since version 5.26.0, default perl builds no longer includes C<'.'> as the
+last element of @INC. The old behaviour can restored using 
+
+	Configure -Ddefault_inc_excludes_dot=n
+
+Note that this is likely to make programs run under such a perl
+interpreter less secure.
+
 =item usesitecustomize
 
 Run-time customization of @INC can be enabled with:
