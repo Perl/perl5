@@ -1509,10 +1509,11 @@ PP(pp_leavewrite)
 	if (IoFLAGS(io) & IOf_DIDTOP) {	/* Oh dear.  It still doesn't fit. */
 	    I32 lines = IoLINES_LEFT(io);
 	    const char *s = SvPVX_const(PL_formtarget);
+            const char *e = SvEND(PL_formtarget);
 	    if (lines <= 0)		/* Yow, header didn't even fit!!! */
 		goto forget_top;
 	    while (lines-- > 0) {
-		s = strchr(s, '\n');
+		s = (char *) memchr(s, '\n', e - s);
 		if (!s)
 		    break;
 		s++;
