@@ -9672,7 +9672,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 
 	PL_compcv = 0;
 	if (name && block) {
-	    const char *s = strrchr(name, ':');
+	    const char *s = (char *) memrchr(name, ':', namlen);
 	    s = s ? s+1 : name;
 	    if (strEQ(s, "BEGIN")) {
 		if (PL_in_eval & EVAL_KEEPERR)
@@ -11804,7 +11804,9 @@ Perl_ck_method(pTHX_ OP *o)
     sv = kSVOP->op_sv;
 
     /* replace ' with :: */
-    while ((compatptr = strchr(SvPVX(sv), '\''))) {
+    while ((compatptr = (char *) memchr(SvPVX(sv), '\'',
+                                        SvEND(sv) - SvPVX(sv) )))
+    {
         *compatptr = ':';
         sv_insert(sv, compatptr - SvPVX_const(sv), 0, ":", 1);
     }
@@ -12798,7 +12800,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 		switch (*proto++) {
 		    case '[':
 			if (contextclass++ == 0) {
-			    e = strchr(proto, ']');
+			    e = (char *) memchr(proto, ']', proto_end - proto);
 			    if (!e || e == proto)
 				goto oops;
 			}
