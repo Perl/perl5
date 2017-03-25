@@ -5075,7 +5075,7 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
          * size based on worst possible case, which is each line in the input
          * creates 2 elements in the inversion list: 1) the beginning of a
          * range in the list; 2) the beginning of a range not in the list.  */
-        while ((loc = (strchr(loc, '\n'))) != NULL) {
+        while ((loc = (char *) memchr(loc, '\n', lend - (U8 *) loc)) != NULL) {
             elements += 2;
             loc++;
         }
