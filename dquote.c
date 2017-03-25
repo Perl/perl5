@@ -96,15 +96,10 @@ Perl_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
 		 * ourselves */
 	        | PERL_SCAN_SILENT_ILLDIGIT;
 
-#ifdef DEBUGGING
-    char *start = *s - 1;
-    assert(*start == '\\');
-#endif
-
     PERL_ARGS_ASSERT_GROK_BSLASH_O;
 
-
-    assert(**s == 'o');
+    assert(*(*s - 1) == '\\');
+    assert(* *s       == 'o');
     (*s)++;
 
     if (**s != '{') {
@@ -201,14 +196,12 @@ Perl_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
     char* e;
     STRLEN numbers_len;
     I32 flags = PERL_SCAN_DISALLOW_PREFIX;
-#ifdef DEBUGGING
-    char *start = *s - 1;
-    assert(*start == '\\');
-#endif
+
 
     PERL_ARGS_ASSERT_GROK_BSLASH_X;
 
-    assert(**s == 'x');
+    assert(*(*s - 1) == '\\');
+    assert(* *s      == 'x');
     (*s)++;
 
     if (strict || ! output_warning) {
