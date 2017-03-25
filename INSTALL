@@ -745,7 +745,7 @@ run-time methods: $PERLLIB, $PERL5LIB, -I, use lib, etc.
 Since version 5.26.0, default perl builds no longer includes C<'.'> as the
 last element of @INC. The old behaviour can restored using 
 
-	Configure -Ddefault_inc_excludes_dot=n
+	Configure -Udefault_inc_excludes_dot
 
 Note that this is likely to make programs run under such a perl
 interpreter less secure.
