@@ -5294,9 +5294,10 @@ Perl_yylex(pTHX)
 		    sv_catpvs(PL_linestr,"chomp;");
 		if (PL_minus_a) {
 		    if (PL_minus_F) {
-			if ((*PL_splitstr == '/' || *PL_splitstr == '\''
-			     || *PL_splitstr == '"')
-			      && strchr(PL_splitstr + 1, *PL_splitstr))
+                        if (   (   *PL_splitstr == '/'
+                                || *PL_splitstr == '\''
+                                || *PL_splitstr == '"')
+                            && strchr(PL_splitstr + 1, *PL_splitstr))
 			    Perl_sv_catpvf(aTHX_ PL_linestr, "our @F=split(%s);", PL_splitstr);
 			else {
 			    /* "q\0${splitstr}\0" is legal perl. Yes, even NUL
@@ -5346,10 +5347,10 @@ Perl_yylex(pTHX)
 	    /* If it looks like the start of a BOM or raw UTF-16,
 	     * check if it in fact is. */
 	    if (bof && PL_rsfp
-                && (*s == 0
+                && (   *s == 0
                     || *(U8*)s == BOM_UTF8_FIRST_BYTE
-                        || *(U8*)s >= 0xFE
-                        || s[1] == 0))
+                    || *(U8*)s >= 0xFE
+                    || s[1] == 0))
             {
 		Off_t offset = (IV)PerlIO_tell(PL_rsfp);
 		bof = (offset == (Off_t)SvCUR(PL_linestr));
@@ -6428,8 +6429,9 @@ Perl_yylex(pTHX)
                 && isALPHA(tmp)
                 && (s == PL_linestart+1 || s[-2] == '\n') )
             {
-                if ((PL_in_eval && !PL_rsfp && !PL_parser->filtered)
-                    || PL_lex_state != LEX_NORMAL) {
+                if (   (PL_in_eval && !PL_rsfp && !PL_parser->filtered)
+                    || PL_lex_state != LEX_NORMAL)
+                {
                     d = PL_bufend;
                     while (s < d) {
                         if (*s++ == '\n') {
@@ -6686,28 +6688,28 @@ Perl_yylex(pTHX)
 		    PL_tokenbuf[0] = '%';
 		    if (strEQ(PL_tokenbuf+1, "SIG")  && ckWARN(WARN_SYNTAX)
 			&& (t = strchr(s, '}')) && (t = strchr(t, '=')))
-			{
-			    char tmpbuf[sizeof PL_tokenbuf];
-			    do {
-				t++;
-			    } while (isSPACE(*t));
-		            if (isIDFIRST_lazy_if_safe(t, PL_bufend, UTF)) {
-				STRLEN len;
-				t = scan_word(t, tmpbuf, sizeof tmpbuf, TRUE,
-					      &len);
-				while (isSPACE(*t))
-				    t++;
-                                if (  *t == ';'
-                                    && get_cvn_flags(tmpbuf, len, UTF
-                                                                  ? SVf_UTF8
-                                                                  : 0))
-                                {
-				    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-					"You need to quote \"%" UTF8f "\"",
-					 UTF8fARG(UTF, len, tmpbuf));
-                                }
-			    }
-			}
+                    {
+                        char tmpbuf[sizeof PL_tokenbuf];
+                        do {
+                            t++;
+                        } while (isSPACE(*t));
+                        if (isIDFIRST_lazy_if_safe(t, PL_bufend, UTF)) {
+                            STRLEN len;
+                            t = scan_word(t, tmpbuf, sizeof tmpbuf, TRUE,
+                                            &len);
+                            while (isSPACE(*t))
+                                t++;
+                            if (  *t == ';'
+                                && get_cvn_flags(tmpbuf, len, UTF
+                                                                ? SVf_UTF8
+                                                                : 0))
+                            {
+                                Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+                                    "You need to quote \"%" UTF8f "\"",
+                                        UTF8fARG(UTF, len, tmpbuf));
+                            }
+                        }
+                    }
 		}
 	    }
 
@@ -9920,9 +9922,7 @@ S_scan_heredoc(pTHX_ char *s)
 	if (! isWORDCHAR_lazy_if_safe(s, PL_bufend, UTF))
 	    Perl_croak(aTHX_ "Use of bare << to mean <<\"\" is forbidden");
 	peek = s;
-        while (
-               isWORDCHAR_lazy_if_safe(peek, PL_bufend, UTF))
-        {
+        while (isWORDCHAR_lazy_if_safe(peek, PL_bufend, UTF)) {
 	    peek += UTF ? UTF8SKIP(peek) : 1;
 	}
 	len = (peek - s >= e - d) ? (e - d) : (peek - s);
