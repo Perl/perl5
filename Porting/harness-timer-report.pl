@@ -2,7 +2,9 @@
 #
 # harness-timer-report.pl
 #
-# - read in the HARNESS_TIMER=1 output of "make test"
+# - read in the time-annotated outputs of
+#   "env HARNESS_TIMER=1 make test" or
+#   "make test_harness"
 # - convert the milliseconds to seconds
 # - compute a couple of derived values
 #   - cpu: the sum of 'self' and 'kids'
