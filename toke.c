@@ -563,7 +563,7 @@ S_missingterm(pTHX_ char *s, const STRLEN len)
     bool uni = FALSE;
     SV *sv;
     if (s) {
-	char * const nl = strrchr(s,'\n');
+	char * const nl = (char *) memrchr(s, '\n', len);
 	if (nl)
 	    *nl = '\0';
 	uni = UTF;
@@ -585,7 +585,7 @@ S_missingterm(pTHX_ char *s, const STRLEN len)
 	}
 	s = tmpbuf;
     }
-    q = strchr(s,'"') ? '\'' : '"';
+    q = memrchr(s, '"', len) ? '\'' : '"';
     sv = sv_2mortal(newSVpv(s,0));
     if (uni)
 	SvUTF8_on(sv);
@@ -1767,7 +1767,7 @@ S_incline(pTHX_ const char *s, const char *end)
 	return;
     while (SPACE_OR_TAB(*s))
 	s++;
-    if (*s == '"' && (t = strchr(s+1, '"'))) {
+    if (*s == '"' && (t = (char *) memchr(s+1, '"', end - s))) {
 	s++;
 	e = t + 1;
     }
@@ -1921,7 +1921,6 @@ STATIC void
 S_check_uni(pTHX)
 {
     const char *s;
-    const char *t;
 
     if (PL_oldoldbufptr != PL_last_uni)
 	return;
@@ -1930,7 +1929,7 @@ S_check_uni(pTHX)
     s = PL_last_uni;
     while (isWORDCHAR_lazy_if_safe(s, PL_bufend, UTF) || *s == '-')
 	s += UTF ? UTF8SKIP(s) : 1;
-    if ((t = strchr(s, '(')) && t < PL_bufptr)
+    if (memchr(s, '(', PL_bufptr - s))
 	return;
 
     Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
@@ -3665,7 +3664,7 @@ S_scan_const(pTHX_ char *start)
 		s++;
 
 		/* If there is no matching '}', it is an error. */
-		if (! (e = strchr(s, '}'))) {
+		if (! (e = (char *) memchr(s, '}', send - s))) {
 		    if (! PL_lex_inpat) {
 			yyerror("Missing right brace on \\N{}");
 		    } else {
@@ -4179,7 +4178,7 @@ S_intuit_more(pTHX_ char *s, char *e)
         /* this is terrifying, and it works */
 	int weight;
 	char seen[256];
-	const char * const send = strchr(s,']');
+	const char * const send = (char *) memchr(s, ']', e - s);
 	unsigned char un_char, last_un_char;
 	char tmpbuf[sizeof PL_tokenbuf * 4];
 
@@ -5307,7 +5306,11 @@ Perl_yylex(pTHX)
                                 || *PL_splitstr == '\''
                                 || *PL_splitstr == '"')
                             && strchr(PL_splitstr + 1, *PL_splitstr))
+                        {
+                            /* strchr is ok, because -F pattern can't contain
+                             * embeddded NULs */
 			    Perl_sv_catpvf(aTHX_ PL_linestr, "our @F=split(%s);", PL_splitstr);
+                        }
 			else {
 			    /* "q\0${splitstr}\0" is legal perl. Yes, even NUL
 			       bytes can be used as quoting characters.  :-) */
@@ -6443,8 +6446,9 @@ Perl_yylex(pTHX)
                     while (s < d) {
                         if (*s++ == '\n') {
                             incline(s, PL_bufend);
-                            if (strBEGINs(s,"=cut")) {
-                                s = strchr(s,'\n');
+                            if (memBEGINs(s, (STRLEN) (PL_bufend - s), "=cut"))
+                            {
+                                s = (char *) memchr(s,'\n', d - s);
                                 if (s)
                                     s++;
                                 else
@@ -6521,7 +6525,7 @@ Perl_yylex(pTHX)
 	OPERATOR('!');
     case '<':
 	if (PL_expect != XOPERATOR) {
-	    if (s[1] != '<' && !strchr(s,'>'))
+	    if (s[1] != '<' && !memchr(s,'>', PL_bufend - s))
 		check_uni();
 	    if (s[1] == '<' && s[2] != '>') {
                 if (   (s == PL_linestart || s[-1] == '\n')
@@ -6699,8 +6703,10 @@ Perl_yylex(pTHX)
 		else if (*s == '{') {
 		    char *t;
 		    PL_tokenbuf[0] = '%';
-		    if (strEQ(PL_tokenbuf+1, "SIG")  && ckWARN(WARN_SYNTAX)
-			&& (t = strchr(s, '}')) && (t = strchr(t, '=')))
+                    if (    strEQ(PL_tokenbuf+1, "SIG")
+                        && ckWARN(WARN_SYNTAX)
+                        && (t = (char *) memchr(s, '}', PL_bufend - s))
+                        && (t = (char *) memchr(t, '=', PL_bufend - t)))
                     {
                         char tmpbuf[sizeof PL_tokenbuf];
                         do {
@@ -9957,7 +9963,7 @@ S_scan_heredoc(pTHX_ char *s)
     len = d - PL_tokenbuf;
 
 #ifndef PERL_STRICT_CR
-    d = strchr(s, '\r');
+    d = (char *) memchr(s, '\r', PL_bufend - s);
     if (d) {
 	char * const olds = s;
 	s = d;
@@ -10326,7 +10332,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 
     PERL_ARGS_ASSERT_SCAN_INPUTSYMBOL;
 
-    end = strchr(s, '\n');
+    end = (char *) memchr(s, '\n', PL_bufend - s);
     if (!end)
 	end = PL_bufend;
     if (s[1] == '<' && s[2] == '>' && s[3] == '>') {
