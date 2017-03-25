@@ -1762,6 +1762,29 @@ Perl_foldEQ_locale(const char *s1, const char *s2, I32 len)
     return 1;
 }
 
+#if ! defined (HAS_MEMRCHR) && (defined(PERL_CORE) || defined(PERL_EXT))
+
+PERL_STATIC_INLINE void *
+S_my_memrchr(const char * s, const char c, const STRLEN len)
+{
+    /* memrchr(), since many platforms lack it */
+
+    const char * t = s + len - 1;
+
+    PERL_ARGS_ASSERT_MY_MEMRCHR;
+
+    while (t >= s) {
+        if (*t == c) {
+            return (void *) t;
+        }
+        t--;
+    }
+
+    return NULL;
+}
+
+#endif
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

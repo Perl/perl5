@@ -4825,12 +4825,9 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 		libpath = SvPVX(libdir);
 		libpath_len = SvCUR(libdir);
 
-		/* This would work more efficiently with memrchr, but as it's
-		   only a GNU extension we'd need to probe for it and
-		   implement our own. Not hard, but maybe not worth it?  */
-
 		prefix = SvPVX(prefix_sv);
-		lastslash = strrchr(prefix, '/');
+		lastslash = (char *) my_memrchr(prefix, '/',
+                             SvEND(prefix_sv) - prefix);
 
 		/* First time in with the *lastslash = '\0' we just wipe off
 		   the trailing /perl from (say) /usr/foo/bin/perl
@@ -4839,7 +4836,10 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 		    SV *tempsv;
 		    while ((*lastslash = '\0'), /* Do that, come what may.  */
                            (libpath_len >= 3 && _memEQs(libpath, "../")
-			    && (lastslash = strrchr(prefix, '/')))) {
+			    && (lastslash =
+                                  (char *) my_memrchr(prefix, '/',
+                                                   SvEND(prefix_sv) - prefix))))
+                    {
 			if (lastslash[1] == '\0'
 			    || (lastslash[1] == '.'
 				&& (lastslash[2] == '/' /* ends "/."  */

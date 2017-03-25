@@ -1497,6 +1497,14 @@ EXTERN_C char *crypt(const char *, const char *);
 #  define my_strlcat    Perl_my_strlcat
 #endif
 
+#if defined(PERL_CORE) || defined(PERL_EXT)
+#  ifdef HAS_MEMRCHR
+#    define my_memrchr	memrchr
+#  else
+#    define my_memrchr	S_my_memrchr
+#  endif
+#endif
+
 #ifdef HAS_STRLCPY
 #  define my_strlcpy	strlcpy
 #else
