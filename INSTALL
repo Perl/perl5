@@ -361,7 +361,7 @@ disabling them via environment variables.
 You can override various aspects of this feature by defining various
 symbols during configure. An example might be:
 
-    Configure -Accflags=-DPERL_HASH_FUNC_SIPHASH
+    sh Configure -Accflags=-DPERL_HASH_FUNC_SIPHASH
 
 B<Unless stated otherwise these options are considered experimental or
 insecure and are not recommended for production use.>
@@ -721,7 +721,7 @@ version-specific subdirectories) for add-on modules and extensions.
 For example, if you have a bundle of perl libraries from a previous
 installation, perhaps in a strange place:
 
-	Configure -Dotherlibdirs=/usr/lib/perl5/site_perl/5.8.1
+	sh Configure -Dotherlibdirs=/usr/lib/perl5/site_perl/5.8.1
 
 =item APPLLIB_EXP
 
@@ -745,7 +745,7 @@ run-time methods: $PERLLIB, $PERL5LIB, -I, use lib, etc.
 Since version 5.26.0, default perl builds no longer includes C<'.'> as the
 last element of @INC. The old behaviour can restored using 
 
-	Configure -Udefault_inc_excludes_dot
+	sh Configure -Udefault_inc_excludes_dot
 
 Note that this is likely to make programs run under such a perl
 interpreter less secure.
@@ -1694,7 +1694,7 @@ error, as the header file is broken. There are two ways to deal with this
 
  1. Disable the use of ODBM_FILE
 
-    Configure ... -Dnoextensions=ODBM_File
+    sh Configure ... -Dnoextensions=ODBM_File
 
  2. Fix the header file, somewhat like this:
 
