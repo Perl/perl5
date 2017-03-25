@@ -1689,7 +1689,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     const char * const lang       = savepv(PerlEnv_getenv("LANG"));
     bool setlocale_failure = FALSE;
     unsigned int i;
-    char *p;
 
     /* A later getenv() could zap this, so only use here */
     const char * const bad_lang_use_once = PerlEnv_getenv("PERL_BADLANG");
@@ -1970,13 +1969,24 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #if defined(USE_ENVIRON_ARRAY)
                 {
                     char **e;
+
+                    /* Look through the environment for any variables of the
+                     * form qr/ ^ LC_ [A-Z]+ = /x, except LC_ALL which was
+                     * already handled above.  These are assumed to be locale
+                     * settings.  Output them and their values. */
                     for (e = environ; *e; e++) {
+                        const STRLEN prefix_len = sizeof("LC_") - 1;
+                        STRLEN uppers_len;
+
                         if (     strBEGINs(*e, "LC_")
                             && ! strBEGINs(*e, "LC_ALL=")
-                            && (p = strchr(*e, '=')))
+                            && (uppers_len = strspn(*e + prefix_len,
+                                             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+                            && ((*e)[prefix_len + uppers_len] == '='))
                         {
                             PerlIO_printf(Perl_error_log, "\t%.*s = \"%s\",\n",
-                                            (int)(p - *e), *e, p + 1);
+                                (int) (prefix_len + uppers_len), *e,
+                                *e + prefix_len + uppers_len + 1);
                         }
                     }
                 }
