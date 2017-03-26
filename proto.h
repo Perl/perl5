@@ -4848,7 +4848,7 @@ STATIC void	S_destroy_matcher(pTHX_ PMOP* matcher);
 #define PERL_ARGS_ASSERT_DESTROY_MATCHER	\
 	assert(matcher)
 STATIC OP*	S_do_smartmatch(pTHX_ HV* seen_this, HV* seen_other, const bool copied);
-STATIC OP*	S_docatch(pTHX_ OP *o)
+STATIC OP*	S_docatch(pTHX_ Perl_ppaddr_t firstpp)
 			__attribute__warn_unused_result__;
 
 STATIC bool	S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV* hh);

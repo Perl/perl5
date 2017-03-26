@@ -2207,7 +2207,7 @@ snR	|char *	|my_bytes_to_utf8|NN const U8 *start|STRLEN len|NN char *dest \
 #endif
 
 #if defined(PERL_IN_PP_CTL_C)
-sR	|OP*	|docatch	|NULLOK OP *o
+sR	|OP*	|docatch	|Perl_ppaddr_t firstpp
 sR	|OP*	|dofindlabel	|NN OP *o|NN const char *label|STRLEN len \
                                 |U32 flags|NN OP **opstack|NN OP **oplimit
 s	|MAGIC *|doparseform	|NN SV *sv
