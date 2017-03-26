@@ -154,6 +154,7 @@ void zaphod32_seed_state (
     ZAPHOD32_SCRAMBLE32(state[0],0x9fade23b);
     ZAPHOD32_SCRAMBLE32(state[1],0xaa6f908d);
     ZAPHOD32_SCRAMBLE32(state[2],0xcdf6b72d);
+
     /* now that we have scrambled we do some mixing to avalanche the
      * state bits to gether */
     ZAPHOD32_MIX(state[0],state[1],state[2],"ZAPHOD32 SEED-STATE A 1/4");
@@ -165,12 +166,13 @@ void zaphod32_seed_state (
     ZAPHOD32_SCRAMBLE32(state[0],0xc95d22a9);
     ZAPHOD32_SCRAMBLE32(state[1],0x8497242b);
     ZAPHOD32_SCRAMBLE32(state[2],0x9c5cc4e9);
-    /* and one final mix */
-    ZAPHOD32_MIX(state[0],state[1],state[2],"ZAPHOD32 SEED-STATE 3/3");
-    ZAPHOD32_MIX(state[0],state[1],state[2],"ZAPHOD32 SEED-STATE 3/3");
-    ZAPHOD32_MIX(state[0],state[1],state[2],"ZAPHOD32 SEED-STATE 3/3");
-    ZAPHOD32_MIX(state[0],state[1],state[2],"ZAPHOD32 SEED-STATE 3/3");
-    ZAPHOD32_MIX(state[0],state[1],state[2],"ZAPHOD32 SEED-STATE 3/3");
+
+    /* and a thorough final mix */
+    ZAPHOD32_MIX(state[0],state[1],state[2],"ZAPHOD32 SEED-STATE B 1/5");
+    ZAPHOD32_MIX(state[0],state[1],state[2],"ZAPHOD32 SEED-STATE B 2/5");
+    ZAPHOD32_MIX(state[0],state[1],state[2],"ZAPHOD32 SEED-STATE B 3/5");
+    ZAPHOD32_MIX(state[0],state[1],state[2],"ZAPHOD32 SEED-STATE B 4/5");
+    ZAPHOD32_MIX(state[0],state[1],state[2],"ZAPHOD32 SEED-STATE B 5/5");
 
 }
 
@@ -277,7 +279,7 @@ ZAPHOD32_STATIC_INLINE U32 zaphod32_hash(
     const U8 *key,
     const STRLEN key_len
 ) {
-    U32 state[1796];
+    U32 state[3];
     zaphod32_seed_state(seed_ch,(U8*)state);
     return zaphod32_hash_with_state((U8*)state,key,key_len);
 }
