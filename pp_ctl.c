@@ -34,7 +34,8 @@
 #define PERL_IN_PP_CTL_C
 #include "perl.h"
 
-#define DOCATCH(o) ((CATCH_GET == TRUE) ? docatch(o) : (o))
+#define RUN_PP_CATCHABLY(thispp) \
+    STMT_START { if (CATCH_GET) return docatch(thispp); } STMT_END
 
 #define dopoptosub(plop)	dopoptosub_at(cxstack, (plop))
 
@@ -3159,23 +3160,18 @@ establish a local jmpenv to handle exception traps.
 =cut
 */
 STATIC OP *
-S_docatch(pTHX_ OP *o)
+S_docatch(pTHX_ Perl_ppaddr_t firstpp)
 {
     int ret;
     OP * const oldop = PL_op;
     dJMPENV;
 
-#ifdef DEBUGGING
     assert(CATCH_GET == TRUE);
-#endif
-    PL_op = o;
 
     JMPENV_PUSH(ret);
     switch (ret) {
     case 0:
-	assert(cxstack_ix >= 0);
-	assert(CxTYPE(CX_CUR()) == CXt_EVAL);
-        CX_CUR()->blk_eval.cur_top_env = PL_top_env;
+	PL_op = firstpp(aTHX);
  redo_body:
 	CALLRUNOPS(aTHX);
 	break;
@@ -4227,6 +4223,7 @@ S_require_file(pTHX_ SV *sv)
     }
 
     /* switch to eval mode */
+    assert(!CATCH_GET);
     cx = cx_pushblock(CXt_EVAL, gimme, SP, old_savestack_ix);
     cx_pusheval(cx, PL_op->op_next, newSVpv(name, 0));
 
@@ -4236,7 +4233,7 @@ S_require_file(pTHX_ SV *sv)
     PUTBACK;
 
     if (doeval_compile(gimme, NULL, PL_curcop->cop_seq, NULL))
-	op = DOCATCH(PL_eval_start);
+	op = PL_eval_start;
     else
 	op = PL_op->op_next;
 
@@ -4250,13 +4247,17 @@ S_require_file(pTHX_ SV *sv)
 
 PP(pp_require)
 {
-    dSP;
-    SV *sv = POPs;
-    SvGETMAGIC(sv);
-    PUTBACK;
-    return ((SvNIOKp(sv) || SvVOK(sv)) && PL_op->op_type != OP_DOFILE)
-        ? S_require_version(aTHX_ sv)
-        : S_require_file(aTHX_ sv);
+    RUN_PP_CATCHABLY(Perl_pp_require);
+
+    {
+	dSP;
+	SV *sv = POPs;
+	SvGETMAGIC(sv);
+	PUTBACK;
+	return ((SvNIOKp(sv) || SvVOK(sv)) && PL_op->op_type != OP_DOFILE)
+	    ? S_require_version(aTHX_ sv)
+	    : S_require_file(aTHX_ sv);
+    }
 }
 
 
@@ -4277,17 +4278,27 @@ PP(pp_entereval)
     dSP;
     PERL_CONTEXT *cx;
     SV *sv;
-    const U8 gimme = GIMME_V;
-    const U32 was = PL_breakable_sub_gen;
+    U8 gimme;
+    U32 was;
     char tbuf[TYPE_DIGITS(long) + 12];
-    bool saved_delete = FALSE;
-    char *tmpbuf = tbuf;
+    bool saved_delete;
+    char *tmpbuf;
     STRLEN len;
     CV* runcv;
-    U32 seq, lex_flags = 0;
-    HV *saved_hh = NULL;
-    const bool bytes = PL_op->op_private & OPpEVAL_BYTES;
+    U32 seq, lex_flags;
+    HV *saved_hh;
+    bool bytes;
     I32 old_savestack_ix;
+
+    RUN_PP_CATCHABLY(Perl_pp_entereval);
+
+    gimme = GIMME_V;
+    was = PL_breakable_sub_gen;
+    saved_delete = FALSE;
+    tmpbuf = tbuf;
+    lex_flags = 0;
+    saved_hh = NULL;
+    bytes = PL_op->op_private & OPpEVAL_BYTES;
 
     if (PL_op->op_private & OPpEVAL_HAS_HH) {
 	saved_hh = MUTABLE_HV(SvREFCNT_inc(POPs));
@@ -4356,6 +4367,7 @@ PP(pp_entereval)
      * to do the dirty work for us */
     runcv = find_runcv(&seq);
 
+    assert(!CATCH_GET);
     cx = cx_pushblock((CXt_EVAL|CXp_REAL), gimme, SP, old_savestack_ix);
     cx_pusheval(cx, PL_op->op_next, NULL);
 
@@ -4385,7 +4397,7 @@ PP(pp_entereval)
 	    char *const safestr = savepvn(tmpbuf, len);
 	    SAVEDELETE(PL_defstash, safestr, len);
 	}
-	return DOCATCH(PL_eval_start);
+	return PL_eval_start;
     } else {
 	/* We have already left the scope set up earlier thanks to the LEAVE
 	   in doeval_compile().  */
@@ -4496,8 +4508,11 @@ Perl_create_eval_scope(pTHX_ OP *retop, U32 flags)
     
 PP(pp_entertry)
 {
+    RUN_PP_CATCHABLY(Perl_pp_entertry);
+
+    assert(!CATCH_GET);
     create_eval_scope(cLOGOP->op_other->op_next, 0);
-    return DOCATCH(PL_op->op_next);
+    return PL_op->op_next;
 }
 
 

@@ -5522,6 +5522,7 @@ t/op/blocks.t			See if BEGIN and friends work
 t/op/bop.t			See if bitops work
 t/op/caller.pl			Tests shared between caller.t and XS op.t
 t/op/caller.t			See if caller() works
+t/op/catch.t			See if catching exception works
 t/op/chars.t			See if character escapes work
 t/op/chdir.t			See if chdir works
 t/op/chop.t			See if chop works
