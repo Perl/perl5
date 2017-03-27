@@ -417,7 +417,7 @@ sub DEFINE {
 }
 
 sub init {
-    my $hints = File::Spec->catfile("hints", "$^O.pl");
+    my $hints = File::Spec->catfile(".", "hints", "$^O.pl");
     if (-f $hints) {
 	print "Using hints $hints...\n";
 	local $self;

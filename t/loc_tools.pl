@@ -342,9 +342,9 @@ sub find_locales ($;$) {
         # Locales whose name differs if the utf8 bit is on are stored in these two
         # files with appropriate encodings.
         if ($^H & 0x08 || (${^OPEN} || "") =~ /:utf8/) {
-            @Data = do "lib/locale/utf8";
+            @Data = do "./lib/locale/utf8";
         } else {
-            @Data = do "lib/locale/latin1";
+            @Data = do "./lib/locale/latin1";
         }
 
         # The rest of the locales are in this file.
