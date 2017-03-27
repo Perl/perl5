@@ -82,7 +82,7 @@ dl_static_linked(char *filename)
         return 0;
 
     /* change all the '\\' to '/' */
-    strcpy(szBuffer, filename);
+    my_strlcpy(szBuffer, filename, sizeof(szBuffer));
     for(ptr = szBuffer; ptr = strchr(ptr, '\\'); ++ptr)
 	*ptr = '/';
 
