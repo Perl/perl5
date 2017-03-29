@@ -3960,7 +3960,8 @@ static int store_other(pTHX_ stcxt_t *cxt, SV *sv)
                    PTR2UV(sv), (char) 0);
 
     len = strlen(buf);
-    STORE_SCALAR(buf, len);
+    if (len < 80)
+        STORE_SCALAR(buf, len);
     TRACEME(("ok (dummy \"%s\", length = %" IVdf ")", buf, (IV) len));
 
     return 0;
