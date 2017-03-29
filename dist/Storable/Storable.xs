@@ -7402,7 +7402,7 @@ ALIAS:
     is_retrieving = ST_RETRIEVE
 PREINIT:
     bool result;
-PPCODE:
+CODE:
     if (ix) {
         dSTCXT;
         assert(cxt);
@@ -7411,7 +7411,6 @@ PPCODE:
         result = !!last_op_in_netorder(aTHX);
     }
     ST(0) = boolSV(result);
-    XSRETURN(1);
 
 # so far readonly. we rather probe at install to be safe.
 
