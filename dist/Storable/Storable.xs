@@ -566,6 +566,8 @@ static stcxt_t *Context_ptr = NULL;
 #define KBUFCHK(x)							\
     STMT_START {							\
         if (x >= ksiz) {                                                \
+            if (x >= I32_MAX)                                           \
+                CROAK(("Too large size > I32_MAX"));                    \
             TRACEME(("** extending kbuf to %d bytes (had %d)",          \
                      (int)(x+1), (int)ksiz));                           \
             Renew(kbuf, x+1, char);                                     \
@@ -5863,8 +5865,7 @@ static SV *retrieve_svundef_elem(pTHX_ stcxt_t *cxt, const char *cname)
  */
 static SV *retrieve_array(pTHX_ stcxt_t *cxt, const char *cname)
 {
-    I32 len;
-    I32 i;
+    I32 len, i;
     AV *av;
     SV *sv;
     HV *stash;
