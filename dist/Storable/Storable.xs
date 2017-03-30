@@ -5574,8 +5574,10 @@ static SV *retrieve_lvstring(pTHX_ stcxt_t *cxt, const char *cname)
     SAFEPVREAD(s, len, s);
 
     sv = retrieve(aTHX_ cxt, cname);
-    if (!sv)
+    if (!sv) {
+        Safefree(s);
         return (SV *) 0;		/* Failed */
+    }
     sv_magic(sv,NULL,PERL_MAGIC_vstring,s,len);
     /* 5.10.0 and earlier seem to need this */
     SvRMAGICAL_on(sv);
