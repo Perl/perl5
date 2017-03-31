@@ -2098,7 +2098,7 @@ subroutine or package before the current location.  You can use an empty
 (D deprecated, misc) You used the obsolescent C<dump()> built-in function,
 without fully qualifying it as C<CORE::dump()>. Maybe it's a typo.
 
-Use of a unqualified C<dump()> was deprecated in Perl 5.30, and this
+Use of a unqualified C<dump()> was deprecated in Perl 5.8.0, and this
 will not be available in Perl 5.30.
 
 See L<perlfunc/dump>.
