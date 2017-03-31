@@ -3477,41 +3477,29 @@ PP(pp_vec)
     SV * const src = POPs;
     const I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
     SV * ret;
-    UV   retuv = 0;
-    STRLEN offset;
+    UV   retuv;
+    STRLEN offset = 0;
+    char errflags = 0;
 
     /* extract a STRLEN-ranged integer value from offsetsv into offset,
-     * or die trying */
+     * or flag that its out of range */
     {
         IV iv = SvIV(offsetsv);
 
         /* avoid a large UV being wrapped to a negative value */
-        if (SvIOK_UV(offsetsv) && SvUVX(offsetsv) > (UV)IV_MAX) {
-            if (!lvalue)
-                goto return_val; /* out of range: return 0 */
-            Perl_croak_nocontext("Out of memory!");
-        }
-
-        if (iv < 0) {
-            if (!lvalue)
-                goto return_val; /* out of range: return 0 */
-            Perl_croak_nocontext("Negative offset to vec in lvalue context");
-        }
-
+        if (SvIOK_UV(offsetsv) && SvUVX(offsetsv) > (UV)IV_MAX)
+            errflags = 4; /* out of range */
+        else if (iv < 0)
+            errflags = (1|4); /* negative offset, out of range */
 #if PTRSIZE < IVSIZE
-        if (iv > Size_t_MAX) {
-            if (!lvalue)
-                goto return_val; /* out of range: return 0 */
-            Perl_croak_nocontext("Out of memory!");
-        }
+        else if (iv > Size_t_MAX)
+            errflags = 4; /* out of range */
 #endif
-
-        offset = (STRLEN)iv;
+        else
+            offset = (STRLEN)iv;
     }
 
-    retuv = do_vecget(src, offset, size);
-
-  return_val:
+    retuv = errflags ? 0 : do_vecget(src, offset, size);
 
     if (lvalue) {			/* it's an lvalue! */
 	ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
@@ -3520,13 +3508,13 @@ PP(pp_vec)
 	LvTARG(ret) = SvREFCNT_inc_simple(src);
 	LvTARGOFF(ret) = offset;
 	LvTARGLEN(ret) = size;
+	LvFLAGS(ret)   = errflags;
     }
     else {
 	dTARGET;
 	SvTAINTED_off(TARG);		/* decontaminate */
 	ret = TARG;
     }
-
 
     sv_setuv(ret, retuv);
     if (!lvalue)

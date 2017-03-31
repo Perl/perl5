@@ -541,7 +541,8 @@ struct xpvlv {
     SV*		xlv_targ;
     char	xlv_type;	/* k=keys .=pos x=substr v=vec /=join/re
 				 * y=alem/helem/iter t=tie T=tied HE */
-    char	xlv_flags;	/* 1 = negative offset  2 = negative len */
+    char	xlv_flags;	/* 1 = negative offset  2 = negative len
+                                   4 = out of range (vec) */
 };
 
 #define xlv_targoff xlv_targoff_u.xlvu_targoff

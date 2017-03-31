@@ -913,8 +913,18 @@ Perl_do_vecset(pTHX_ SV *sv)
     STRLEN targlen;
     STRLEN len;
     SV * const targ = LvTARG(sv);
+    char errflags = LvFLAGS(sv);
 
     PERL_ARGS_ASSERT_DO_VECSET;
+
+    /* some out-of-range errors have been deferred if/until the LV is
+     * actually written to: f(vec($s,-1,8)) is not always fatal */
+    if (errflags) {
+        assert(!(errflags & ~(1|4)));
+        if (errflags & 1)
+            Perl_croak_nocontext("Negative offset to vec in lvalue context");
+        Perl_croak_nocontext("Out of memory!");
+    }
 
     if (!targ)
 	return;

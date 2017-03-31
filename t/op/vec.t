@@ -8,7 +8,7 @@ BEGIN {
 
 use Config;
 
-plan(tests => 74);
+plan(tests => 78);
 
 
 is(vec($foo,0,1), 0);
@@ -222,4 +222,22 @@ like($@, qr/^Modification of a read-only value attempted at /,
                 "multi-byte bytes=$bytes offset=$offset");
         }
     }
+}
+
+# RT #131083 maybe-lvalue out of range should only croak if assigned to
+
+{
+    sub  RT131083 { if ($_[0]) { $_[1] = 1; } $_[1]; }
+    my $s = "abc";
+    my $off = -1;
+    my $v = RT131083(0, vec($s, $off, 8));
+    is($v, 0, "RT131083 rval -1");
+    $v = eval { RT131083(1, vec($s, $off, 8)); };
+    like($@, qr/Negative offset to vec in lvalue context/, "RT131083 lval -1");
+
+    $off = ~0;
+    my $v = RT131083(0, vec($s, $off, 8));
+    is($v, 0, "RT131083 rval ~0");
+    $v = eval { RT131083(1, vec($s, $off, 8)); };
+    like($@, qr/Out of memory!/, "RT131083 lval ~0");
 }
