@@ -4120,7 +4120,10 @@ S_require_file(pTHX_ SV *sv)
 
             RESTORE_ERRNO;
             if (do_warn) {
-                Perl_warner(aTHX_ packWARN(WARN_DEPRECATED), "do \"%s\" failed, '.' is no longer in @INC", name);
+                Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+                "do \"%s\" failed, '.' is no longer in @INC; "
+                "did you mean do \"./%s\"?",
+                name, name);
             }
 #endif
             CLEAR_ERRSV();

@@ -97,10 +97,11 @@ L<VMS::Stdio> has been upgraded from version 2.42 to 2.41.
 
 =item *
 
-Since C<.> is removed from C<@INC>, C<do> will now trigger a warning
-recommending on fixing the C<do> statement.
+Since C<.> is now removed from C<@INC> by default, C<do> will now trigger
+a warning recommending to fix the C<do> statement:
 
-L<do "%s" failed, '.' is no longer in @INC|perldiag/"do "%s" failed, '.' is no longer in @INC">
+L<do "%s" failed, '.' is no longer in @INC|perldiag/"do "%s" failed, '.'
+is no longer in @INC; did you mean do "./%s"?>
 
 =back
 

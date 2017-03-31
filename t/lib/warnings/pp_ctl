@@ -263,4 +263,4 @@ do "dounknown";
 do "./dounknown";
 unlink "dounknown";
 EXPECT
-do "dounknown" failed, '.' is no longer in @INC at - line 3.
+do "dounknown" failed, '.' is no longer in @INC; did you mean do "./dounknown" at - line 3.

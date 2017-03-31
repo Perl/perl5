@@ -1829,8 +1829,11 @@ L<C<%INC>|perlvar/%INC> if the file is found.  See L<perlvar/@INC>
 and L<perlvar/%INC> for these variables. In particular, note that
 whilst historically L<C<@INC>|perlvar/@INC> contained '.' (the
 current directory) making these two cases equivalent, that is no
-longer necessarily the case, as there is now a compile-time option
-to disable this behaviour.
+longer necessarily the case, as '.' is not included in C<@INC> by default
+in perl versions 5.26.0 onwards. Instead, perl will now warn:
+
+    do "stat.pl" failed, '.' is no longer in @INC;
+    did you mean do "./stat.pl"?
 
 If L<C<do>|/do EXPR> can read the file but cannot compile it, it
 returns L<C<undef>|/undef EXPR> and sets an error message in

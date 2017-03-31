@@ -2061,13 +2061,13 @@ define a C<$VERSION>.
 (F) You cannot put a repeat count of any kind right after the '/' code.
 See L<perlfunc/pack>.
 
-=item do "%s" failed, '.' is no longer in @INC
+=item do "%s" failed, '.' is no longer in @INC; did you mean do "./%s"?
 
 (W deprecated) Previously C< do "somefile"; > would search the current
-directory for the specified file.  Since F<.> has been removed from
-C<@INC> by default this is no longer true.  To search the current
-directory (and only the current directory) you can write C< do
-"./somefile"; >.
+directory for the specified file.  Since perl v5.26.0, F<.> has been
+removed from C<@INC> by default, so this is no longer true.  To search the
+current directory (and only the current directory) you can write
+C< do "./somefile"; >.
 
 =item Don't know how to get file name
 
