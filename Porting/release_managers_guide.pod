@@ -985,10 +985,10 @@ your own tarball testing, below.
 
 Check that basic configuration and tests work on each test machine:
 
-    $ ./Configure -des && make all test
+    $ ./Configure -des && make all minitest test
 
     # Or for a development release:
-    $ ./Configure -Dusedevel -des && make all test
+    $ ./Configure -Dusedevel -des && make all minitest test
 
 =head4 Run the test harness and install
 
