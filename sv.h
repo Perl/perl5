@@ -1402,6 +1402,10 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #define LvTARGLEN(sv)	((XPVLV*)  SvANY(sv))->xlv_targlen
 #define LvFLAGS(sv)	((XPVLV*)  SvANY(sv))->xlv_flags
 
+#define LVf_NEG_OFF      0x1
+#define LVf_NEG_LEN      0x2
+#define LVf_OUT_OF_RANGE 0x4
+
 #define IoIFP(sv)	(sv)->sv_u.svu_fp
 #define IoOFP(sv)	((XPVIO*)  SvANY(sv))->xio_ofp
 #define IoDIRP(sv)	((XPVIO*)  SvANY(sv))->xio_dirp

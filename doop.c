@@ -927,8 +927,8 @@ Perl_do_vecset(pTHX_ SV *sv)
     /* some out-of-range errors have been deferred if/until the LV is
      * actually written to: f(vec($s,-1,8)) is not always fatal */
     if (errflags) {
-        assert(!(errflags & ~(1|4)));
-        if (errflags & 1)
+        assert(!(errflags & ~(LVf_NEG_OFF|LVf_OUT_OF_RANGE)));
+        if (errflags & LVf_NEG_OFF)
             Perl_croak_nocontext("Negative offset to vec in lvalue context");
         Perl_croak_nocontext("Out of memory!");
     }

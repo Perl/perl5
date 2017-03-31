@@ -2197,8 +2197,8 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
     const char * const tmps = SvPV_const(lsv,len);
     STRLEN offs = LvTARGOFF(sv);
     STRLEN rem = LvTARGLEN(sv);
-    const bool negoff = LvFLAGS(sv) & 1;
-    const bool negrem = LvFLAGS(sv) & 2;
+    const bool negoff = LvFLAGS(sv) & LVf_NEG_OFF;
+    const bool negrem = LvFLAGS(sv) & LVf_NEG_LEN;
 
     PERL_ARGS_ASSERT_MAGIC_GETSUBSTR;
     PERL_UNUSED_ARG(mg);
@@ -2229,8 +2229,8 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
     SV * const lsv = LvTARG(sv);
     STRLEN lvoff = LvTARGOFF(sv);
     STRLEN lvlen = LvTARGLEN(sv);
-    const bool negoff = LvFLAGS(sv) & 1;
-    const bool neglen = LvFLAGS(sv) & 2;
+    const bool negoff = LvFLAGS(sv) & LVf_NEG_OFF;
+    const bool neglen = LvFLAGS(sv) & LVf_NEG_LEN;
 
     PERL_ARGS_ASSERT_MAGIC_SETSUBSTR;
     PERL_UNUSED_ARG(mg);
@@ -2311,7 +2311,7 @@ Perl_magic_getvec(pTHX_ SV *sv, MAGIC *mg)
     PERL_UNUSED_ARG(mg);
 
     /* non-zero errflags implies deferred out-of-range condition */
-    assert(!(errflags & ~(1|4)));
+    assert(!(errflags & ~(LVf_NEG_OFF|LVf_OUT_OF_RANGE)));
     sv_setuv(sv, errflags ? 0 : do_vecget(lsv, LvTARGOFF(sv), LvTARGLEN(sv)));
 
     return 0;

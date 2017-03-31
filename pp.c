@@ -3377,11 +3377,11 @@ PP(pp_substr)
 	LvTARGOFF(ret) =
 	    pos1_is_uv || pos1_iv >= 0
 		? (STRLEN)(UV)pos1_iv
-		: (LvFLAGS(ret) |= 1, (STRLEN)(UV)-pos1_iv);
+		: (LvFLAGS(ret) |= LVf_NEG_OFF, (STRLEN)(UV)-pos1_iv);
 	LvTARGLEN(ret) =
 	    len_is_uv || len_iv > 0
 		? (STRLEN)(UV)len_iv
-		: (LvFLAGS(ret) |= 2, (STRLEN)(UV)-len_iv);
+		: (LvFLAGS(ret) |= LVf_NEG_LEN, (STRLEN)(UV)-len_iv);
 
 	PUSHs(ret);    /* avoid SvSETMAGIC here */
 	RETURN;
@@ -3488,12 +3488,12 @@ PP(pp_vec)
 
         /* avoid a large UV being wrapped to a negative value */
         if (SvIOK_UV(offsetsv) && SvUVX(offsetsv) > (UV)IV_MAX)
-            errflags = 4; /* out of range */
+            errflags = LVf_OUT_OF_RANGE;
         else if (iv < 0)
-            errflags = (1|4); /* negative offset, out of range */
+            errflags = (LVf_NEG_OFF|LVf_OUT_OF_RANGE);
 #if PTRSIZE < IVSIZE
         else if (iv > Size_t_MAX)
-            errflags = 4; /* out of range */
+            errflags = LVf_OUT_OF_RANGE;
 #endif
         else
             offset = (STRLEN)iv;
