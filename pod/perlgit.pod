@@ -918,11 +918,11 @@ general testing and development. Dromedary syncs the git tree from
 camel every few minutes, you should not push there. Both machines also
 have a full CPAN mirror in F</srv/CPAN>, please use this. To share files
 with the general public, dromedary serves your F<~/public_html/> as
-C<http://users.perl5.git.perl.org/~yourlogin/>
+C<L<http://users.perl5.git.perl.org/~yourlogin/>>
 
 These hosts have fairly strict firewalls to the outside. Outgoing, only
 rsync, ssh and git are allowed. For http and ftp, you can use
-http://webproxy:3128 as proxy. Incoming, the firewall tries to detect
+L<http://webproxy:3128> as proxy. Incoming, the firewall tries to detect
 attacks and blocks IP addresses with suspicious activity. This
 sometimes (but very rarely) has false positives and you might get
 blocked. The quickest way to get unblocked is to notify the admins.

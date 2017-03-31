@@ -1049,7 +1049,7 @@ diddle with the flags (see above).
 
 =head2 Coverity
 
-Coverity (http://www.coverity.com/) is a product similar to lint and as
+Coverity (L<http://www.coverity.com/>) is a product similar to lint and as
 a testbed for their product they periodically check several open source
 projects, and they give out accounts to open source developers to the
 defect databases.
@@ -1072,8 +1072,8 @@ cut-and-pasted code changes, all the other spots should probably be
 changed, too.  Therefore such code should probably be turned into a
 subroutine or a macro.
 
-cpd (http://pmd.sourceforge.net/cpd.html) is part of the pmd project
-(http://pmd.sourceforge.net/).  pmd was originally written for static
+cpd (L<http://pmd.sourceforge.net/cpd.html>) is part of the pmd project
+(L<http://pmd.sourceforge.net/>).  pmd was originally written for static
 analysis of Java code, but later the cpd part of it was extended to
 parse also C and C++.
 

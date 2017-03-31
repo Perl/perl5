@@ -2495,7 +2495,8 @@ at each matching starting point like so:
 
 Any number of C<(*PRUNE)> assertions may be used in a pattern.
 
-See also C<< (?>pattern) >> and possessive quantifiers for other ways to
+See also C<<< L<< /(?>pattern) >> >>> and possessive quantifiers for
+other ways to
 control backtracking. In some cases, the use of C<(*PRUNE)> can be
 replaced with a C<< (?>pattern) >> with no functional difference; however,
 C<(*PRUNE)> can be used to handle cases that cannot be expressed using a

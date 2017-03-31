@@ -161,7 +161,7 @@ you:
 
 If the B<ExtUtils::Embed> module isn't part of your Perl distribution,
 you can retrieve it from
-http://www.perl.com/perl/CPAN/modules/by-module/ExtUtils/
+L<http://www.perl.com/perl/CPAN/modules/by-module/ExtUtils/>
 (If this documentation came from your Perl distribution, then you're
 running 5.004 or better and you already have it.)
 
@@ -1137,7 +1137,7 @@ Christiansen, Guy Decoux, Hallvard Furuseth, Dov Grobgeld, and Ilya
 Zakharevich.
 
 Doug MacEachern has an article on embedding in Volume 1, Issue 4 of
-The Perl Journal ( http://www.tpj.com/ ).  Doug is also the developer of the
+The Perl Journal ( L<http://www.tpj.com/> ).  Doug is also the developer of the
 most widely-used Perl embedding: the mod_perl system
 (perl.apache.org), which embeds Perl in the Apache web server.
 Oracle, Binary Evolution, ActiveState, and Ben Sugars's nsapi_perl

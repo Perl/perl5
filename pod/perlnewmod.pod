@@ -234,7 +234,7 @@ file.
 =item Get a CPAN user ID
 
 Every developer publishing modules on CPAN needs a CPAN ID.  Visit
-C<http://pause.perl.org/>, select "Request PAUSE Account", and wait for
+C<L<http://pause.perl.org/>>, select "Request PAUSE Account", and wait for
 your request to be approved by the PAUSE administrators.
 
 =item C<perl Makefile.PL; make test; make distcheck; make dist>
@@ -276,5 +276,5 @@ Updated by Kirrily "Skud" Robert, C<skud@cpan.org>
 L<perlmod>, L<perlmodlib>, L<perlmodinstall>, L<h2xs>, L<strict>,
 L<Carp>, L<Exporter>, L<perlpod>, L<Test::Simple>, L<Test::More>
 L<ExtUtils::MakeMaker>, L<Module::Build>, L<Module::Starter>
-L<http://www.cpan.org/>, Ken Williams's tutorial on building your own
+L<http://www.cpan.org/>, Ken Williams' tutorial on building your own
 module at L<http://mathforum.org/~ken/perl_modules.html>

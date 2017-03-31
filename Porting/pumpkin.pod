@@ -24,7 +24,7 @@ and all the various auxiliary files that are part of the distribution.
 
 The Comprehensive Perl Archive Network (or CPAN) is the place to go.
 There are many mirrors, but the easiest thing to use is probably
-http://www.cpan.org/README.html , which automatically points you to a
+L<http://www.cpan.org/README.html> , which automatically points you to a
 mirror site "close" to you.
 
 =head2 Perl5-porters mailing list
@@ -1124,7 +1124,7 @@ and the full tar file, e.g. F<perl5.004_08.tar.gz>.
 
 If you want your patch to appear in the F<src/5.0/unsupported>
 directory on CPAN, send e-mail to the CPAN master librarian.  (Check
-out http://www.cpan.org/CPAN.html ).
+out L<http://www.cpan.org/CPAN.html> ).
 
 =head1 Help Save the World
 

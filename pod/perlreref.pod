@@ -393,7 +393,7 @@ for details on regexes and internationalisation.
 =item *
 
 I<Mastering Regular Expressions> by Jeffrey Friedl
-(F<http://oreilly.com/catalog/9780596528126/>) for a thorough grounding and
+(L<http://oreilly.com/catalog/9780596528126/>) for a thorough grounding and
 reference on the topic.
 
 =back

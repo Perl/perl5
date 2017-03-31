@@ -17,7 +17,9 @@ access(2)
 Algorithm::C3
 Algorithm::Permute
 AnyEvent
+Apache::DProf
 Apache::MP3
+Apache::SmallProf
 Archive::Extract
 Array::Base
 atan2(3)
@@ -78,6 +80,7 @@ DBI
 DBIx::Profile
 dbm(3)
 dbm_open(3)
+Devel::Apache::Profiler
 Devel::CallParser
 Devel::Callsite
 Devel::Cover
@@ -85,6 +88,7 @@ Devel::DProf
 Devel::DTrace::Provider
 Devel::InnerPackage
 Devel::NYTProf
+Devel::NYTProf::Apache
 Devel::PPPort
 Devel::SawAmpersand
 Devel::Spy

@@ -217,8 +217,8 @@ are platform-dependent.
 =head2 Symbolic Unary Operators
 X<unary operator> X<operator, unary>
 
-Unary C<"!"> performs logical negation, that is, "not".  See also C<not> for a lower
-precedence version of this.
+Unary C<"!"> performs logical negation, that is, "not".  See also
+L<C<not>|/Logical Not> for a lower precedence version of this.
 X<!>
 
 Unary C<"-"> performs arithmetic negation if the operand is numeric,

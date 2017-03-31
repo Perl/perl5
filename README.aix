@@ -428,7 +428,7 @@ fill in its choices
 Follow the messages ... and you're done.
 
 If you like a more web-like approach, a good start point can be
-http://www14.software.ibm.com/webapp/download/downloadaz.jsp and click
+L<http://www14.software.ibm.com/webapp/download/downloadaz.jsp> and click
 "C for AIX", and follow the instructions.
 
 =head2 The usenm option

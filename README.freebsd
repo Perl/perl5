@@ -17,7 +17,7 @@ When perl is configured to use ithreads, it will use re-entrant library calls
 in preference to non-re-entrant versions.  There is a bug in FreeBSD's
 C<readdir_r> function in versions 4.5 and earlier that can cause a SEGV when
 reading large directories. A patch for FreeBSD libc is available
-(see http://www.freebsd.org/cgi/query-pr.cgi?pr=misc/30631 )
+(see L<http://www.freebsd.org/cgi/query-pr.cgi?pr=misc/30631> )
 which has been integrated into FreeBSD 4.6.
 
 =head2 C<$^X> doesn't always contain a full path in FreeBSD
