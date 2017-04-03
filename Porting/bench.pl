@@ -504,7 +504,11 @@ sub filter_tests {
 sub read_tests_file {
     my ($file) = @_;
 
-    my $ta = do $file;
+    my $ta;
+    {
+        local @INC = ('.');
+        $ta = do $file;
+    }
     unless ($ta) {
         die "Error: can't parse '$file': $@\n" if $@;
         die "Error: can't read '$file': $!\n";
