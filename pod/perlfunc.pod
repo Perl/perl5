@@ -1805,11 +1805,15 @@ See L<perlsyn> for alternative strategies.
 X<do>
 
 Uses the value of EXPR as a filename and executes the contents of the
-file as a Perl script.
+file as a Perl script:
 
-    do './stat.pl';
+    do './stat.pl';    # file located relative to the current dir
+    do '/foo/stat.pl'; # file located at the specified absolute path
 
-is largely like
+    do 'stat.pl';      # file searched for within @INC
+    do 'foo/stat.pl';  # file searched for within @INC
+
+C<do './stat.pl'> is largely like
 
     eval `cat stat.pl`;
 
