@@ -14,6 +14,7 @@ BEGIN {
 }
 
 use Test::More tests => 43;
+BEGIN { push @INC, '.' }
 use t::Watchdog;
 
 my @atime;

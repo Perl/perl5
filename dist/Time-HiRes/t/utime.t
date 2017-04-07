@@ -48,6 +48,7 @@ BEGIN {
 }
 
 use Test::More tests => 18;
+BEGIN { push @INC, '.' }
 use t::Watchdog;
 use File::Temp qw( tempfile );
 
