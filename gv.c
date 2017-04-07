@@ -421,7 +421,7 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
 	/* Not actually a constant.  Just a regular sub.  */
 	CV * const cv = (CV *)has_constant;
 	GvCV_set(gv,cv);
-	if (CvSTASH(cv) == stash && (
+	if (CvNAMED(cv) && CvSTASH(cv) == stash && (
 	       CvNAME_HEK(cv) == GvNAME_HEK(gv)
 	    || (  HEK_LEN(CvNAME_HEK(cv)) == HEK_LEN(GvNAME_HEK(gv))
 	       && HEK_FLAGS(CvNAME_HEK(cv)) != HEK_FLAGS(GvNAME_HEK(gv))
