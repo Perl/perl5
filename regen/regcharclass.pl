@@ -13,7 +13,7 @@ $|=1 if DEBUG;
 
 require './regen/regen_lib.pl';
 require './regen/charset_translations.pl';
-require "regen/regcharclass_multi_char_folds.pl";
+require "./regen/regcharclass_multi_char_folds.pl";
 
 =head1 NAME
 

@@ -9,6 +9,7 @@ BEGIN {
 }
 
 use Test::More tests => 3;
+BEGIN { push @INC, '.' }
 use t::Watchdog;
 
 eval { Time::HiRes::nanosleep(-5) };

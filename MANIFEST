@@ -4189,6 +4189,7 @@ ext/Win32CORE/Win32CORE.c	Win32CORE extension
 ext/Win32CORE/Win32CORE.pm	Win32CORE extension (stubs for Win32 CORE subs)
 ext/XS-APItest/APItest.pm	XS::APItest extension
 ext/XS-APItest/APItest.xs	XS::APItest extension
+ext/XS-APItest/APItest_BS	autogenerate APItest.bs
 ext/XS-APItest/core.c		Test API functions when PERL_CORE is defined
 ext/XS-APItest/core_or_not.inc	Code common to core.c and notcore.c
 ext/XS-APItest/exception.c	XS::APItest extension
@@ -4203,6 +4204,7 @@ ext/XS-APItest/t/Block.pm	Helper for ./blockhooks.t
 ext/XS-APItest/t/blockasexpr.t	test recursive descent block parsing
 ext/XS-APItest/t/blockhooks.t	XS::APItest: tests for PL_blockhooks
 ext/XS-APItest/t/blockhooks-csc.t	XS::APItest: more tests for PL_blockhooks
+ext/XS-APItest/t/bootstrap.t	XS::APItest: test APItest.bs
 ext/XS-APItest/t/call.t		Test calling perl from C
 ext/XS-APItest/t/call_checker.t	test call checker plugin API
 ext/XS-APItest/t/caller.t	XS::APItest: tests for caller_cx
