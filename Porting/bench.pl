@@ -1421,8 +1421,10 @@ EOF
         },
     );
 
-    for ('t', '.') {
-        last if require "$_/test.pl";
+    for ('./t', '.') {
+        my $t = "$_/test.pl";
+        next unless  -f $t;
+        require $t;
     }
     plan(@tests / 3 * keys %VALID_FIELDS);
 

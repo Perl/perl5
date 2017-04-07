@@ -19,7 +19,7 @@ my $caller = (caller)[1];
 die "Can't figure out which test to run from filename '$caller'"
     unless $caller =~ m!((?:op|re)/[-_a-z0-9A-Z]+)_thr\.t\z!;
 
-my $file = "$1.t";
+my $file = "./$1.t";
 
 $::running_as_thread = "running tests in a new thread";
 require $file;

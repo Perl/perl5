@@ -14,7 +14,7 @@ $| = 1;
 
 # Get command line options
 use Getopt::Long;
-require "Porting/manifest_lib.pl";
+require "./Porting/manifest_lib.pl";
 my $outfile;
 my $check_only = 0;
 my $quiet = 0;
