@@ -1187,6 +1187,10 @@ package GV_DOWNGRADE {
     ::like "$GV_DOWNGRADE::{FOO}", qr/SCALAR/, "gv_downgrade: post";
 }
 
+# [perl #131085] This used to crash; no ok() necessary.
+$::{"A131085"} = sub {}; \&{"A131085"};
+
+
 __END__
 Perl
 Rules
