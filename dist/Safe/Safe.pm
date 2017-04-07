@@ -717,8 +717,8 @@ called from a compartment but not compiled within it.
 =head2 rdo (FILENAME)
 
 This evaluates the contents of file FILENAME inside the compartment.
-It uses the same rules a perl's build-in C<do> to locate the file,
-poossiblly using C<@INC>.
+It uses the same rules as perl's built-in C<do> to locate the file,
+poossibly using C<@INC>.
 
 See above documentation on the B<reval> method for further details.
 
