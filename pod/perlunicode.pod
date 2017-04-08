@@ -208,7 +208,8 @@ Semantics".
 
 Before Unicode, when a character was a byte was a character,
 Perl knew only about the 128 characters defined by ASCII, code points 0
-through 127 (except for under S<C<use locale>>).  That left the code
+through 127 (except for under L<S<C<use locale>>|perllocale>).  That
+left the code
 points 128 to 255 as unassigned, and available for whatever use a
 program might want.  The only semantics they have is their ordinal
 numbers, and that they are members of none of the non-negative character
