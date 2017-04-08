@@ -73,14 +73,16 @@ recognition of that (in string or regular expression literals, or in
 identifier names).  B<This is the only time when an explicit S<C<use
 utf8>> is needed.>  (See L<utf8>).
 
-=item C<BOM>-marked scripts and L<UTF-16|/Unicode Encodings> scripts autodetected
+If a Perl script begins with the bytes that form the UTF-8 encoding of
+the Unicode BYTE ORDER MARK (C<BOM>, see L</Unicode Encodings>), those
+bytes are completely ignored.
+
+=item L<UTF-16|/Unicode Encodings> scripts autodetected
 
 If a Perl script begins with the Unicode C<BOM> (UTF-16LE,
-UTF16-BE, or UTF-8), or if the script looks like non-C<BOM>-marked
+UTF16-BE), or if the script looks like non-C<BOM>-marked
 UTF-16 of either endianness, Perl will correctly read in the script as
-the appropriate Unicode encoding.  (C<BOM>-less UTF-8 cannot be
-effectively recognized or differentiated from ISO 8859-1 or other
-eight-bit encodings.)
+the appropriate Unicode encoding.
 
 =back
 
@@ -162,7 +164,7 @@ contain characters that have ordinal values larger than 255.
 
 If you use a Unicode editor to edit your program, Unicode characters may
 occur directly within the literal strings in UTF-8 encoding, or UTF-16.
-(The former requires a C<BOM> or C<use utf8>, the latter requires a C<BOM>.)
+(The former requires a C<use utf8>, the latter may require a C<BOM>.)
 
 L<perluniintro/Creating Unicode> gives other ways to place non-ASCII
 characters in your strings.
