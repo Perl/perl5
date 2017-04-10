@@ -1807,11 +1807,14 @@ X<do>
 Uses the value of EXPR as a filename and executes the contents of the
 file as a Perl script:
 
-    do './stat.pl';    # file located relative to the current dir
-    do '/foo/stat.pl'; # file located at the specified absolute path
+    # load the exact specified file (./ and ../ special-cased)
+    do '/foo/stat.pl';
+    do './stat.pl';
+    do '../foo/stat.pl';
 
-    do 'stat.pl';      # file searched for within @INC
-    do 'foo/stat.pl';  # file searched for within @INC
+    # search for the named file within @INC
+    do 'stat.pl';
+    do 'foo/stat.pl';
 
 C<do './stat.pl'> is largely like
 
@@ -1824,9 +1827,9 @@ scope; C<eval STRING> does.  It's the same, however, in that it does
 reparse the file every time you call it, so you probably don't want
 to do this inside a loop.
 
-Using C<do> with no path, like
+Using C<do> with a relative path (except for F<./> and F<../>), like
 
-    do 'stat.pl';
+    do 'foo/stat.pl';
 
 will search the L<C<@INC>|perlvar/@INC> directories, and update
 L<C<%INC>|perlvar/%INC> if the file is found.  See L<perlvar/@INC>
@@ -1855,7 +1858,8 @@ if there's a problem.
 You might like to use L<C<do>|/do EXPR> to read in a program
 configuration file.  Manual error checking can be done this way:
 
-    # read in config files: system first, then user
+    # Read in config files: system first, then user.
+    # Beware of using relative pathnames here.
     for $file ("/share/prog/defaults.rc",
                "$ENV{HOME}/.someprogrc")
     {
