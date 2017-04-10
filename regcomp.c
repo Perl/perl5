@@ -13387,8 +13387,28 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		     * literal string, or when it's the first thing after
 		     * something like "\b" */
 		    if (len || (p > RExC_start && isALPHA_A(*(p -1)))) {
-                        RExC_parse = p + 1;
-			vFAIL("Unescaped left brace in regex is illegal here");
+
+                        /* GNU Autoconf is depended on by a lot of code, and
+                         * can't seem to release a new version that avoids the
+                         * deprecation now made fatal.  (A commit to do so has
+                         * been in its repository since early 2013; only one
+                         * pattern is affected.)  As a work-around, don't
+                         * fatalize this if the pattern being compiled is the
+                         * precise one that trips up Autoconf.  See [perl
+                         * #130497] for more details. */
+                        if (memNEs(RExC_start, RExC_end - RExC_start,
+                                   "\\${[^\\}]*}"))
+                        {
+                            RExC_parse = p + 1;
+                            vFAIL("Unescaped left brace in regex is "
+                                  "illegal here");
+                        }
+                        if (PASS2) {
+                            ckWARNregdep(p + 1,
+                                        "Unescaped left brace in regex is "
+                                        "deprecated here (and will be fatal "
+                                        "in Perl 5.30), passed through");
+                        }
 		    }
 		    goto normal_default;
                 case '}':
