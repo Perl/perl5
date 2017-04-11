@@ -692,6 +692,7 @@ jpeacock\100messagesystems.com          john.peacock\100havurah-software.org
 +                                       jpeacock\100jpeacock-hp.doesntexist.org
 +                                       jpeacock\100cpan.org
 +                                       jpeacock\100rowman.com
+james.schneider\100db.com               jschneid\100netilla.com
 jpl.jpl\100gmail.com                    jpl\100research.att.com
 jql\100accessone.com                    jql\100jql.accessone.com
 jsm28\100hermes.cam.ac.uk               jsm28\100cam.ac.uk
