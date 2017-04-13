@@ -4096,7 +4096,7 @@ S_require_file(pTHX_ SV *sv)
 		DIE(aTHX_ "Can't locate %s:   %s: %s",
 		    name, tryname, Strerror(saved_errno));
 	    } else {
-	        if (namesv) {			/* did we lookup @INC? */
+	        if (path_searchable) {		/* did we lookup @INC? */
 		    AV * const ar = GvAVn(PL_incgv);
 		    SSize_t i;
 		    SV *const msg = newSVpvs_flags("", SVs_TEMP);

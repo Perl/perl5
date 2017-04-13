@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan(tests => 27);
+plan(tests => 28);
 
 my $nonfile = tempfile();
 
@@ -168,3 +168,12 @@ like $@, qr/^Missing or undefined argument to require /;
 
 eval { do "" };
 like $@, qr/^Missing or undefined argument to do /;
+
+# non-searchable pathnames shouldn't mention @INC in the error
+
+my $nonsearch = "./no_such_file.pm";
+
+eval "require \"$nonsearch\"";
+
+like $@, qr/^Can't locate \Q$nonsearch\E at/,
+        "correct error message for require $nonsearch";
