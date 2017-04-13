@@ -2063,7 +2063,7 @@ See L<perlfunc/pack>.
 
 =item do "%s" failed, '.' is no longer in @INC; did you mean do "./%s"?
 
-(W deprecated) Previously C< do "somefile"; > would search the current
+(D deprecated) Previously C< do "somefile"; > would search the current
 directory for the specified file.  Since perl v5.26.0, F<.> has been
 removed from C<@INC> by default, so this is no longer true.  To search the
 current directory (and only the current directory) you can write
