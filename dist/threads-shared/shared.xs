@@ -1104,8 +1104,9 @@ sharedsv_array_mg_CLEAR(pTHX_ SV *sv, MAGIC *mg)
                 if (!sv) continue;
                 if ( (SvOBJECT(sv) || (SvROK(sv) && (sv = SvRV(sv))))
                   && SvREFCNT(sv) == 1 ) {
-                    SV *tmp = Perl_sv_newmortal(caller_perl);
+                    SV *tmp;
                     PERL_SET_CONTEXT((aTHX = caller_perl));
+                    tmp = sv_newmortal();
                     sv_upgrade(tmp, SVt_RV);
                     get_RV(tmp, sv);
                     PERL_SET_CONTEXT((aTHX = PL_sharedsv_space));
@@ -1384,8 +1385,9 @@ STORESIZE(SV *obj,IV count)
                 if (   (SvOBJECT(sv) || (SvROK(sv) && (sv = SvRV(sv))))
                     && SvREFCNT(sv) == 1 )
                 {
-                    SV *tmp = Perl_sv_newmortal(caller_perl);
+                    SV *tmp;
                     PERL_SET_CONTEXT((aTHX = caller_perl));
+                    tmp = sv_newmortal();
                     sv_upgrade(tmp, SVt_RV);
                     get_RV(tmp, sv);
                     PERL_SET_CONTEXT((aTHX = PL_sharedsv_space));
