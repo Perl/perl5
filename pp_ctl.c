@@ -4101,22 +4101,52 @@ S_require_file(pTHX_ SV *sv)
 		    SSize_t i;
 		    SV *const msg = newSVpvs_flags("", SVs_TEMP);
 		    SV *const inc = newSVpvs_flags("", SVs_TEMP);
+                    const char *e = name + len - 3; /* possible .pm */
 		    for (i = 0; i <= AvFILL(ar); i++) {
 			sv_catpvs(inc, " ");
 			sv_catsv(inc, *av_fetch(ar, i, TRUE));
 		    }
-		    if (len >= 4 && memEQ(name + len - 3, ".pm", 4)) {
-			const char *c, *e = name + len - 3;
-			sv_catpv(msg, " (you may need to install the ");
-			for (c = name; c < e; c++) {
-			    if (*c == '/') {
-				sv_catpvs(msg, "::");
-			    }
-			    else {
-				sv_catpvn(msg, c, 1);
-			    }
-			}
-			sv_catpv(msg, " module)");
+		    if (e > name && _memEQs(e, ".pm")) {
+			const char *c;
+                        bool utf8 = cBOOL(SvUTF8(sv));
+
+                        /* if the filename, when converted from "Foo/Bar.pm"
+                         * form back to Foo::Bar form, makes a valid
+                         * package name (i.e. parseable by C<require
+                         * Foo::Bar>), then emit a hint.
+                         *
+                         * this loop is modelled after the one in
+                         S_parse_ident */
+			c = name;
+                        while (c < e) {
+                            if (utf8 && isIDFIRST_utf8_safe(c, e)) {
+                                c += UTF8SKIP(c);
+                                while (c < e && isIDCONT_utf8_safe(
+                                            (const U8*) c, (const U8*) e))
+                                    c += UTF8SKIP(c);
+                            }
+                            else if (isWORDCHAR_A(*c)) {
+                                while (c < e && isWORDCHAR_A(*c))
+                                    c++;
+                            }
+			    else if (*c == '/')
+                                c++;
+                            else
+                                break;
+                        }
+
+                        if (c == e && isIDFIRST_lazy_if_safe(name, e, utf8)) {
+                            sv_catpv(msg, " (you may need to install the ");
+                            for (c = name; c < e; c++) {
+                                if (*c == '/') {
+                                    sv_catpvs(msg, "::");
+                                }
+                                else {
+                                    sv_catpvn(msg, c, 1);
+                                }
+                            }
+                            sv_catpv(msg, " module)");
+                        }
 		    }
 		    else if (len >= 2 && memEQ(name + len - 2, ".h", 3)) {
 			sv_catpv(msg, " (change .h to .ph maybe?) (did you run h2ph?)");
