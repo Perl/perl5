@@ -21,6 +21,10 @@
  * dieing stuff, plus wrappers for malloc code.
  */
 
+#ifndef PERL_UTIL_H_
+#define PERL_UTIL_H_
+
+
 #include "EXTERN.h"
 #define PERL_IN_UTIL_C
 #include "perl.h"
@@ -6677,6 +6681,8 @@ Perl_dtrace_probe_phase(pTHX_ enum perl_phase phase)
 }
 
 #endif
+
+#endif /* PERL_UTIL_H_ */
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
