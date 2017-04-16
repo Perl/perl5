@@ -8,7 +8,7 @@ use CPAN::Module;
 use vars qw(
             $VERSION
 );
-$VERSION = "5.5002";
+$VERSION = "5.5003";
 
 sub look {
     my $self = shift;
@@ -21,6 +21,11 @@ sub undelay {
     delete $self->{later};
     for my $c ( $self->contains ) {
         my $obj = CPAN::Shell->expandany($c) or next;
+        if ($obj->id eq $self->id){
+            my $id = $obj->id;
+            $CPAN::Frontend->mywarn("$id seems to contain itself, skipping\n");
+            next;
+        }
         $obj->undelay;
     }
 }
