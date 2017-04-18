@@ -37,12 +37,12 @@ my $PERL = $^X;
 if ($ENV{PERL_CORE}) {
     my $path;
     my $ldlib = $Config{ldlibpthname};
-    if ($ldlib) {
-        $path = getcwd();
-    }
     if (-d 'dist/Storable') {
         chdir 'dist/Storable';
         $PERL = "../../$PERL" unless $PERL =~ m|^/|;
+    }
+    if ($ldlib) {
+        $path = getcwd()."/../..";
     }
     if ($^O eq 'MSWin32' and -d '../dist/Storable') {
         chdir '..\dist\Storable';
