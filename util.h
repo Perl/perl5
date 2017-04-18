@@ -8,6 +8,10 @@
  *
  */
 
+#ifndef PERL_UTIL_H_
+#define PERL_UTIL_H_
+
+
 #ifdef VMS
 #  define PERL_FILE_IS_ABSOLUTE(f) \
 	(*(f) == '/'							\
@@ -235,6 +239,8 @@ means arg not present, 1 is empty string/null byte */
 #   define ninstr(big, bigend, little, lend)                                \
             ((char *) memmem(big, bigend - big, little, lend - little))
 #endif
+
+#endif /* PERL_UTIL_H_ */
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
