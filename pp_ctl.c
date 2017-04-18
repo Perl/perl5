@@ -3506,6 +3506,9 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
     return TRUE;
 }
 
+/* Return NULL if the file doesn't exist or isn't a file;
+ * else return PerlIO_openn().
+ */
 
 STATIC PerlIO *
 S_check_type_and_open(pTHX_ SV *name)
@@ -3566,6 +3569,11 @@ S_check_type_and_open(pTHX_ SV *name)
     return retio;
 }
 
+/* doopen_pm(): return the equivalent of PerlIO_openn() on the given name,
+ * but first check for bad names (\0) and non-files.
+ * Also if the filename ends in .pm and unless PERL_DISABLE_PMC,
+ * try loading Foo.pmc first.
+ */
 #ifndef PERL_DISABLE_PMC
 STATIC PerlIO *
 S_doopen_pm(pTHX_ SV *name)
@@ -3599,8 +3607,8 @@ S_doopen_pm(pTHX_ SV *name)
 #  define doopen_pm(name) check_type_and_open(name)
 #endif /* !PERL_DISABLE_PMC */
 
-/* require doesn't search for absolute names, or when the name is
-   explicitly relative the current directory */
+/* require doesn't search in @INC for absolute names, or when the name is
+   explicitly relative the current directory: i.e. ./, ../ */
 PERL_STATIC_INLINE bool
 S_path_is_searchable(const char *name)
 {
@@ -3708,8 +3716,10 @@ S_require_file(pTHX_ SV *sv)
     int vms_unixname = 0;
     char *unixdir;
 #endif
+    /* tryname is the actual pathname (with @INC prefix) which was loaded.
+     * It's stored as a value in %INC, and used for error messages */
     const char *tryname = NULL;
-    SV *namesv = NULL;
+    SV *namesv = NULL; /* SV equivalent of tryname */
     const U8 gimme = GIMME_V;
     int filter_has_file = 0;
     PerlIO *tryrsfp = NULL;
@@ -3780,14 +3790,20 @@ S_require_file(pTHX_ SV *sv)
 			    "Compilation failed in require", unixname);
 	}
 
+        /*XXX OPf_KIDS should always be true? -dapm 4/2017 */
         if (PL_op->op_flags & OPf_KIDS) {
             SVOP * const kid = (SVOP*)cUNOP->op_first;
 
             if (kid->op_type == OP_CONST && (kid->op_private & OPpCONST_BARE)) {
-                /* require foo (or use foo) with a bareword.
-                   Perl_load_module fakes up the identical optree, but its
-                   arguments aren't restricted by the parser to real barewords.
-                */
+                /* Make sure that a bareword module name (e.g. ::Foo::Bar)
+                 * doesn't map to a naughty pathname like /Foo/Bar.pm.
+                 * Note that the parser will normally detect such errors
+                 * at compile time before we reach here, but
+                 * Perl_load_module() can fake up an identical optree
+                 * without going near the parser, and being able to put
+                 * anything as the bareword. So we include a duplicate set
+                 * of checks here at runtime.
+                 */
                 const STRLEN package_len = len - 3;
                 const char slashdot[2] = {'/', '.'};
 #ifdef DOSISH
@@ -3823,13 +3839,22 @@ S_require_file(pTHX_ SV *sv)
 
     PERL_DTRACE_PROBE_FILE_LOADING(unixname);
 
-    /* prepare to compile file */
+    /* Try to locate and open a file, possibly using @INC  */
 
+    /* with "/foo/bar.pm", "./foo.pm" and "../foo/bar.pm", try to load
+     * the file directly rather than via @INC ... */
     if (!path_searchable) {
 	/* At this point, name is SvPVX(sv)  */
 	tryname = name;
 	tryrsfp = doopen_pm(sv);
     }
+
+    /* ... but if we fail, still search @INC for code references;
+     * these are applied even on on-searchable paths (except
+     * if we got EACESS).
+     *
+     * For searchable paths, just search @INC normally
+     */
     if (!tryrsfp && !(errno == EACCES && !path_searchable)) {
 	AV * const ar = GvAVn(PL_incgv);
 	SSize_t i;
@@ -3972,8 +3997,9 @@ S_require_file(pTHX_ SV *sv)
 			filter_sub = NULL;
 		    }
 		}
-		else {
-		  if (path_searchable) {
+		else if (path_searchable) {
+                    /* match against a plain @INC element (non-searchable
+                     * paths are only matched against refs in @INC) */
 		    const char *dir;
 		    STRLEN dirlen;
 
@@ -4053,41 +4079,74 @@ S_require_file(pTHX_ SV *sv)
                          */
                         break;
                     }
-		  }
 		}
 	    }
 	}
     }
+
+    /* at this point we've ether opened a file (tryrsfp) or set errno */
+
     saved_errno = errno; /* sv_2mortal can realloc things */
     sv_2mortal(namesv);
     if (!tryrsfp) {
+        /* we failed; croak if require() or return undef if do() */
 	if (op_is_require) {
 	    if(saved_errno == EMFILE || saved_errno == EACCES) {
 		/* diag_listed_as: Can't locate %s */
 		DIE(aTHX_ "Can't locate %s:   %s: %s",
 		    name, tryname, Strerror(saved_errno));
 	    } else {
-	        if (namesv) {			/* did we lookup @INC? */
+	        if (path_searchable) {		/* did we lookup @INC? */
 		    AV * const ar = GvAVn(PL_incgv);
 		    SSize_t i;
 		    SV *const msg = newSVpvs_flags("", SVs_TEMP);
 		    SV *const inc = newSVpvs_flags("", SVs_TEMP);
+                    const char *e = name + len - 3; /* possible .pm */
 		    for (i = 0; i <= AvFILL(ar); i++) {
 			sv_catpvs(inc, " ");
 			sv_catsv(inc, *av_fetch(ar, i, TRUE));
 		    }
-		    if (len >= 4 && memEQ(name + len - 3, ".pm", 4)) {
-			const char *c, *e = name + len - 3;
-			sv_catpv(msg, " (you may need to install the ");
-			for (c = name; c < e; c++) {
-			    if (*c == '/') {
-				sv_catpvs(msg, "::");
-			    }
-			    else {
-				sv_catpvn(msg, c, 1);
-			    }
-			}
-			sv_catpv(msg, " module)");
+		    if (e > name && _memEQs(e, ".pm")) {
+			const char *c;
+                        bool utf8 = cBOOL(SvUTF8(sv));
+
+                        /* if the filename, when converted from "Foo/Bar.pm"
+                         * form back to Foo::Bar form, makes a valid
+                         * package name (i.e. parseable by C<require
+                         * Foo::Bar>), then emit a hint.
+                         *
+                         * this loop is modelled after the one in
+                         S_parse_ident */
+			c = name;
+                        while (c < e) {
+                            if (utf8 && isIDFIRST_utf8_safe(c, e)) {
+                                c += UTF8SKIP(c);
+                                while (c < e && isIDCONT_utf8_safe(
+                                            (const U8*) c, (const U8*) e))
+                                    c += UTF8SKIP(c);
+                            }
+                            else if (isWORDCHAR_A(*c)) {
+                                while (c < e && isWORDCHAR_A(*c))
+                                    c++;
+                            }
+			    else if (*c == '/')
+                                c++;
+                            else
+                                break;
+                        }
+
+                        if (c == e && isIDFIRST_lazy_if_safe(name, e, utf8)) {
+                            sv_catpv(msg, " (you may need to install the ");
+                            for (c = name; c < e; c++) {
+                                if (*c == '/') {
+                                    sv_catpvs(msg, "::");
+                                }
+                                else {
+                                    sv_catpvn(msg, c, 1);
+                                }
+                            }
+                            sv_catpv(msg, " module)");
+                        }
 		    }
 		    else if (len >= 2 && memEQ(name + len - 2, ".h", 3)) {
 			sv_catpv(msg, " (change .h to .ph maybe?) (did you run h2ph?)");
@@ -4109,8 +4168,8 @@ S_require_file(pTHX_ SV *sv)
             Stat_t st;
             PerlIO *io = NULL;
             dSAVE_ERRNO;
-            /* the complication is to match the logic from doopen_pm() so we don't treat do "sda1" as
-               a previously successful "do".
+            /* the complication is to match the logic from doopen_pm() so
+             * we don't treat do "sda1" as a previously successful "do".
             */
             bool do_warn = namesv && ckWARN_d(WARN_DEPRECATED)
                 && PerlLIO_stat(name, &st) == 0 && !S_ISDIR(st.st_mode) && !S_ISBLK(st.st_mode)
@@ -4133,7 +4192,7 @@ S_require_file(pTHX_ SV *sv)
     else
 	SETERRNO(0, SS_NORMAL);
 
-    /* Assume success here to prevent recursive requirement. */
+    /* Update %INC. Assume success here to prevent recursive requirement. */
     /* name is never assigned to again, so len is still strlen(name)  */
     /* Check whether a hook in @INC has already filled %INC */
     if (!hook_sv) {
@@ -4145,6 +4204,8 @@ S_require_file(pTHX_ SV *sv)
 	    (void)hv_store(GvHVn(PL_incgv),
 			   unixname, unixlen, SvREFCNT_inc_simple(hook_sv), 0 );
     }
+
+    /* Now parse the file */
 
     old_savestack_ix = PL_savestack_ix;
     SAVECOPFILE_FREE(&PL_compiling);

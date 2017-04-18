@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan(tests => 27);
+plan(tests => 54);
 
 my $nonfile = tempfile();
 
@@ -25,10 +25,104 @@ for my $file ($nonfile, ' ') {
 	"correct error message for require '$file'";
 }
 
-eval "require $nonfile";
+# Check that the "(you may need to install..) hint is included in the
+# error message where (and only where) appropriate.
+#
+# Basically the hint should be issued for any filename where converting
+# back from Foo/Bar.pm to Foo::Bar gives you a legal bare word which could
+# follow "require" in source code.
 
-like $@, qr/^Can't locate $nonfile\.pm in \@INC \(you may need to install the $nonfile module\) \(\@INC contains: @INC\) at/,
-        "correct error message for require $nonfile";
+{
+
+    # may be any letter of an identifier
+    my $I = "\x{393}";  # "\N{GREEK CAPITAL LETTER GAMMA}"
+    # Continuation char: may only be 2nd+ letter of an identifier
+    my $C = "\x{387}";  # "\N{GREEK ANO TELEIA}"
+
+    for my $test_data (
+        # thing to require        pathname in err mesg     err includes hint?
+        [ "No::Such::Module1",          "No/Such/Module1.pm",       1 ],
+        [ "'No/Such/Module1.pm'",       "No/Such/Module1.pm",       1 ],
+        [ "_No::Such::Module1",         "_No/Such/Module1.pm",      1 ],
+        [ "'_No/Such/Module1.pm'",      "_No/Such/Module1.pm",      1 ],
+        [ "'No/Such./Module.pm'",       "No/Such./Module.pm",       0 ],
+        [ "No::1Such::Module",          "No/1Such/Module.pm",       1 ],
+        [ "'No/1Such/Module.pm'",       "No/1Such/Module.pm",       1 ],
+        [ "1No::Such::Module",           undef,                     0 ],
+        [ "'1No/Such/Module.pm'",       "1No/Such/Module.pm",       0 ],
+
+        # utf8 variants
+        [ "No::Such${I}::Module1",      "No/Such${I}/Module1.pm",   1 ],
+        [ "'No/Such${I}/Module1.pm'",   "No/Such${I}/Module1.pm",   1 ],
+        [ "_No::Such${I}::Module1",     "_No/Such${I}/Module1.pm",  1 ],
+        [ "'_No/Such${I}/Module1.pm'",  "_No/Such${I}/Module1.pm",  1 ],
+        [ "'No/Such${I}./Module.pm'",   "No/Such${I}./Module.pm",   0 ],
+        [ "No::1Such${I}::Module",      "No/1Such${I}/Module.pm",   1 ],
+        [ "'No/1Such${I}/Module.pm'",   "No/1Such${I}/Module.pm",   1 ],
+        [ "1No::Such${I}::Module",       undef,                     0 ],
+        [ "'1No/Such${I}/Module.pm'",   "1No/Such${I}/Module.pm",   0 ],
+
+        # utf8 with continuation char in 1st position
+        [ "No::${C}Such::Module1",      undef,                      0 ],
+        [ "'No/${C}Such/Module1.pm'",   "No/${C}Such/Module1.pm",   0 ],
+        [ "_No::${C}Such::Module1",     undef,                      0 ],
+        [ "'_No/${C}Such/Module1.pm'",  "_No/${C}Such/Module1.pm",  0 ],
+        [ "'No/${C}Such./Module.pm'",   "No/${C}Such./Module.pm",   0 ],
+        [ "No::${C}1Such::Module",      undef,                      0 ],
+        [ "'No/${C}1Such/Module.pm'",   "No/${C}1Such/Module.pm",   0 ],
+        [ "1No::${C}Such::Module",      undef,                      0 ],
+        [ "'1No/${C}Such/Module.pm'",   "1No/${C}Such/Module.pm",   0 ],
+
+    ) {
+        my ($require_arg, $err_path, $has_hint) = @$test_data;
+
+        my $exp;
+        if (defined $err_path) {
+            $exp = "Can't locate $err_path in \@INC";
+            if ($has_hint) {
+                my $hint = $err_path;
+                $hint =~ s{/}{::}g;
+                $hint =~ s/\.pm$//;
+                $exp .= " (you may need to install the $hint module)";
+            }
+            $exp .= " (\@INC contains: @INC) at";
+        }
+        else {
+            # undef implies a require which doesn't compile,
+            # rather than one which triggers a run-time error.
+            # We'll set exp to a suitable value later;
+            $exp = "";
+        }
+
+        my $err;
+        {
+            no warnings qw(syntax utf8);
+            if ($require_arg =~ /[^\x00-\xff]/) {
+                eval "require $require_arg";
+                $err = $@;
+                utf8::decode($err);
+            }
+            else {
+                eval "require $require_arg";
+                $err = $@;
+            }
+        }
+
+        for ($err, $exp, $require_arg) {
+            s/([^\x00-\xff])/sprintf"\\x{%x}",ord($1)/ge;
+        }
+        if (length $exp) {
+            $exp = qr/^\Q$exp\E/;
+        }
+        else {
+            $exp = qr/syntax error at|Unrecognized character/;
+        }
+        like $err, $exp,
+                "err for require $require_arg";
+    }
+}
+
+
 
 eval "require ::$nonfile";
 
@@ -168,3 +262,12 @@ like $@, qr/^Missing or undefined argument to require /;
 
 eval { do "" };
 like $@, qr/^Missing or undefined argument to do /;
+
+# non-searchable pathnames shouldn't mention @INC in the error
+
+my $nonsearch = "./no_such_file.pm";
+
+eval "require \"$nonsearch\"";
+
+like $@, qr/^Can't locate \Q$nonsearch\E at/,
+        "correct error message for require $nonsearch";
