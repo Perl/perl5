@@ -1,3 +1,20 @@
+Wed Apr 19 09:11:07 2017 +0200 Reini Urban <rurban@cpan.org>
+    Version 3.05_12
+
+        * enhance stack reserve from 8 to 16
+        * fix LD_LIBRARY_PATH usage for CORE
+        * fixed some coverity warnings and leaks
+        * added a release make target
+
+Wed Mar 29 21:04:28 2017 +0200 Reini Urban <rurban@cpan.org>
+    Version 3.05_11
+
+        * croak on sizes read > I32_MAX
+        * simplify last_op_in_netorder
+        * protect from empty retrieve_vstring
+        * protect store_other error buf, potential static
+        buffer overflow.
+
 Tue Mar 14 09:52:20 2017 +0100 Reini Urban <rurban@cpan.org>
     Version 3.05_10
 
