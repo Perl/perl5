@@ -377,7 +377,8 @@ typedef struct stcxt {
 #ifdef WIN32
 # define STACK_RESERVE 32
 #else
-# define STACK_RESERVE 8
+/* 8 should be enough, but some systems, esp. 32bit, need more */
+# define STACK_RESERVE 16
 #endif
 #ifdef PST_STACK_MAX_DEPTH
 # if PERL_VERSION > 14
