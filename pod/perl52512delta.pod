@@ -1,0 +1,140 @@
+=encoding utf8
+
+=head1 NAME
+
+perl52512delta - what is new for perl v5.25.12
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.25.11 release and the 5.25.12
+release.
+
+If you are upgrading from an earlier release such as 5.25.10, first read
+L<perl52511delta>, which describes differences between 5.25.10 and 5.25.11.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<base> has been upgraded from version 2.24 to 2.25.
+
+=item *
+
+L<CPAN> has been upgraded from version 2.17 to 2.18.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.41 to 1.42.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20170320 to
+5.20170420.
+
+=item *
+
+L<Safe> has been upgraded from version 2.39 to 2.40.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.55 to 1.56.
+
+=item *
+
+L<XSLoader> has been upgraded from version 0.26 to 0.27.
+
+=back
+
+=head1 Diagnostics
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+Since C<.> is now removed from C<@INC> by default, C<do> will now trigger
+a warning recommending to fix the C<do> statement:
+
+L<do "%s" failed, '.' is no longer in @INC|perldiag/do "%s" failed, '.' is no longer in @INC; did you mean do ".E<sol>%s"?>
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+When a C<require> fails, we now do not provide C<@INC> when the C<require>
+is for a file instead of a module.
+
+=item *
+
+When C<@INC> is not scanned for a C<require> call, we no longer display
+C<@INC> to avoid confusion.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.25.12 represents approximately 4 weeks of development since Perl 5.25.11
+and contains approximately 1,700 lines of changes across 150 files from 8
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 700 lines of changes to 73 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.25.12:
+
+Chris 'BinGOs' Williams, Dagfinn Ilmari Mannsåker, David Mitchell, James E
+Keenan, Jarkko Hietaniemi, Karl Williamson, Pali, Sawyer X.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://rt.perl.org/> .  There may also be information at
+L<http://www.perl.org/> , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a publicly archived mailing list, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
