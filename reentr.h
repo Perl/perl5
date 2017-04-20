@@ -12,8 +12,8 @@
  * Any changes made here will be lost!
  */
 
-#ifndef REENTR_H
-#define REENTR_H
+#ifndef PERL_REENTR_H_
+#define PERL_REENTR_H_
 
 /* If compiling for a threaded perl, we will macro-wrap the system/library
  * interfaces (e.g. getpwent()) which have threaded versions

@@ -1364,7 +1364,7 @@ WARNING: These macros are for internal Perl core use only, and may be
 changed or removed without notice.
 EOF
     );
-    print $out_fh "\n#ifndef H_REGCHARCLASS   /* Guard against nested #includes */\n#define H_REGCHARCLASS 1\n";
+    print $out_fh "\n#ifndef PERL_REGCHARCLASS_H_ /* Guard against nested #includes */\n#define PERL_REGCHARCLASS_H_\n";
 
     my ( $op, $title, @txt, @types, %mods );
     my $doit= sub ($) {
@@ -1452,7 +1452,7 @@ EOF
         print $out_fh get_conditional_compile_line_end();
     }
 
-    print $out_fh "\n#endif /* H_REGCHARCLASS */\n";
+    print $out_fh "\n#endif /* PERL_REGCHARCLASS_H_ */\n";
 
     if($path eq '-') {
 	print $out_fh "/* ex: set ro: */\n";

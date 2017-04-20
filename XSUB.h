@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef _INC_PERL_XSUB_H
-#define _INC_PERL_XSUB_H 1
+#ifndef PERL_XSUB_H_
+#define PERL_XSUB_H_ 1
 
 /* first, some documentation for xsubpp-generated items */
 
@@ -703,7 +703,7 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #  endif  /* NO_XSLOCKS */
 #endif  /* PERL_IMPLICIT_SYS && !PERL_CORE */
 
-#endif /* _INC_PERL_XSUB_H */		/* include guard */
+#endif /* PERL_XSUB_H_ */		/* include guard */
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

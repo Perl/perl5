@@ -5,8 +5,8 @@
  */
 
 
-#ifndef H_UNICODE_CONSTANTS   /* Guard against nested #includes */
-#define H_UNICODE_CONSTANTS   1
+#ifndef PERL_UNICODE_CONSTANTS_H_   /* Guard against nested #includes */
+#define PERL_UNICODE_CONSTANTS_H_   1
 
 /* This file contains #defines for the version of Unicode being used and
  * various Unicode code points.  The values the code point macros expand to
@@ -182,6 +182,6 @@ bytes.
 /* The highest code point that has any type of case change */
 #define HIGHEST_CASE_CHANGING_CP_FOR_USE_ONLY_BY_UTF8_DOT_C  0x1E943
 
-#endif /* H_UNICODE_CONSTANTS */
+#endif /* PERL_UNICODE_CONSTANTS_H_ */
 
 /* ex: set ro: */

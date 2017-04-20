@@ -14,8 +14,8 @@
  *
  */
 
-#ifndef H_UTF8      /* Guard against recursive inclusion */
-#define H_UTF8 1
+#ifndef PERL_UTF8_H_      /* Guard against recursive inclusion */
+#define PERL_UTF8_H_ 1
 
 /* Use UTF-8 as the default script encoding?
  * Turning this on will break scripts having non-UTF-8 binary
@@ -1169,7 +1169,7 @@ L</is_utf8_string_loclen_flags> to check entire strings.
  * retained solely for backwards compatibility */
 #define IS_UTF8_CHAR(p, n)      (isUTF8_CHAR(p, (p) + (n)) == n)
 
-#endif /* H_UTF8 */
+#endif /* PERL_UTF8_H_ */
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

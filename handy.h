@@ -11,8 +11,8 @@
 /* IMPORTANT NOTE: Everything whose name begins with an underscore is for
  * internal core Perl use only. */
 
-#ifndef HANDY_H /* Guard against nested #inclusion */
-#define HANDY_H
+#ifndef PERL_HANDY_H_ /* Guard against nested #inclusion */
+#define PERL_HANDY_H_
 
 #if !defined(__STDC__)
 #ifdef NULL
@@ -2521,7 +2521,7 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 
 #endif
 
-#endif  /* HANDY_H */
+#endif  /* PERL_HANDY_H_ */
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
