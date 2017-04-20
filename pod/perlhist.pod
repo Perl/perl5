@@ -610,6 +610,7 @@ the strings?).
  Abigail   5.25.9       2017-Jan-20
  Renee     5.25.10      2017-Feb-20
  Sawyer X  5.25.11      2017-Feb-20
+ Sawyer X  5.25.12      2017-Mar-20
 
 =head2 SELECTED RELEASE SIZES
 
