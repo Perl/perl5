@@ -14,46 +14,38 @@ L<perl52511delta>, which describes differences between 5.25.10 and 5.25.11.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<base> has been upgraded from version 2.24 to 2.25.
+
+=item *
+
+L<CPAN> has been upgraded from version 2.17 to 2.18.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.41 to 1.42.
 
 =item *
 
 L<Module::CoreList> has been upgraded from version 5.20170320 to
 5.20170420.
 
-=back
+=item *
 
-=head2 Removed Modules and Pragmata
-
-=over 4
+L<Safe> has been upgraded from version 2.39 to 2.40.
 
 =item *
 
-XXX
+L<threads::shared> has been upgraded from version 1.55 to 1.56.
+
+=item *
+
+L<XSLoader> has been upgraded from version 0.26 to 0.27.
 
 =back
 
@@ -70,7 +62,7 @@ XXX
 Since C<.> is now removed from C<@INC> by default, C<do> will now trigger
 a warning recommending to fix the C<do> statement:
 
-L<do "%s" failed, '.' is no longer in @INC|perldiag/do "%s" failed, '.' is no longer in @INC; did you mean do "./%s"?>
+L<do "%s" failed, '.' is no longer in @INC|perldiag/do "%s" failed, '.' is no longer in @INC; did you mean do ".E<sol>%s"?>
 
 =back
 
@@ -93,11 +85,11 @@ C<@INC> to avoid confusion.
 =head1 Acknowledgements
 
 Perl 5.25.12 represents approximately 4 weeks of development since Perl 5.25.11
-and contains approximately 1,900 lines of changes across 150 files from 8
+and contains approximately 1,700 lines of changes across 150 files from 8
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
-approximately 690 lines of changes to 73 .pm, .t, .c and .h files.
+approximately 700 lines of changes to 73 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its third decade thanks to a vibrant community
 of users and developers. The following people are known to have contributed the
