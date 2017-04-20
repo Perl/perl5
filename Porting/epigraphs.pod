@@ -17,6 +17,18 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.25.12 - Kurt Vonnegut, Slaughterhouse-Five
+
+L<Announced on 2017-04-20 by Sawyer X|>
+
+  I have told my sons that they are not under any circumstances to take
+  part in massacres, and that the news of massacres of enemies is not
+  to fill them with satisfaction or glee.
+
+  I have also told them not to work for companies which make massacre
+  machinery, and to express contempt for people who think we need
+  machinery like that.
+
 =head2 v5.25.11 - Daniel Kahneman, Thinking, Fast and Slow
 
 L<Announced on 2017-03-20 by Sawyer X|http://www.nntp.perl.org/group/perl.perl5.porters/2017/03/msg243624.html>
