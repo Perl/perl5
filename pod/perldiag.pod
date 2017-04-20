@@ -2061,7 +2061,7 @@ define a C<$VERSION>.
 (F) You cannot put a repeat count of any kind right after the '/' code.
 See L<perlfunc/pack>.
 
-=item do "%s" failed, '.' is no longer in @INC; did you mean do ".E<sol>%s"?
+=item do "%s" failed, '.' is no longer in @INC; did you mean do "./%s"?
 
 (D deprecated) Previously C< do "somefile"; > would search the current
 directory for the specified file.  Since perl v5.26.0, F<.> has been
