@@ -2036,8 +2036,6 @@ Here is the output (split into several lines):
 =item C<m?I<PATTERN>?msixpodualngc>
 X<?> X<operator, match-once>
 
-=item C<?I<PATTERN>?msixpodualngc>
-
 This is just like the C<m/I<PATTERN>/> search, except that it matches
 only once between calls to the C<reset()> operator.  This is a useful
 optimization when you want to see only the first occurrence of
@@ -2914,7 +2912,7 @@ I<sed> hackers who haven't picked up the saner idiom yet.  A warning
 is emitted if the S<C<use warnings>> pragma or the B<-w> command-line flag
 (that is, the C<$^W> variable) was set.
 
-=item C<RE> in C<?RE?>, C</RE/>, C<m/RE/>, C<s/RE/foo/>,
+=item C<RE> in C<m?RE?>, C</RE/>, C<m/RE/>, C<s/RE/foo/>,
 
 Processing of C<\Q>, C<\U>, C<\u>, C<\L>, C<\l>, C<\F>, C<\E>,
 and interpolation happens (almost) as with C<qq//> constructs.
@@ -2957,7 +2955,7 @@ finish the regular expression, C<\/> will be stripped to C</> on
 the previous step, and C<\\/> will be left as is.  Because C</> is
 equivalent to C<\/> inside a regular expression, this does not
 matter unless the delimiter happens to be character special to the
-RE engine, such as in C<s*foo*bar*>, C<m[foo]>, or C<?foo?>; or an
+RE engine, such as in C<s*foo*bar*>, C<m[foo]>, or C<m?foo?>; or an
 alphanumeric char, as in:
 
   m m ^ a \s* b mmx;

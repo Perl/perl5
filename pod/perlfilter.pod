@@ -564,9 +564,7 @@ and thus is does not work inside a string eval, the presence of
 regexes with embedded newlines that are specified with raw C</.../>
 delimiters and don't have a modifier C</x> are indistinguishable from
 code chunks beginning with the division operator C</>. As a workaround
-you must use C<m/.../> or C<m?...?> for such patterns. Also, the presence of
-regexes specified with raw C<?...?> delimiters may cause mysterious
-errors. The workaround is to use C<m?...?> instead.  See
+you must use C<m/.../> or C<m?...?> for such patterns.  See
 L<http://search.cpan.org/perldoc?Switch#LIMITATIONS>
 
 Currently the content of the C<__DATA__> block is not filtered.

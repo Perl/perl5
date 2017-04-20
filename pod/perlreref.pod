@@ -60,7 +60,7 @@ with two additions:
 'e' may be specified multiple times. 'replacement' is interpreted
 as a double quoted string unless a single-quote (C<'>) is the delimiter.
 
-C<?pattern?> is like C<m/pattern/> but matches only once. No alternate
+C<m?pattern?> is like C<m/pattern/> but matches only once. No alternate
 delimiters can be used.  Must be reset with reset().
 
 =head2 SYNTAX
@@ -308,7 +308,7 @@ Captured groups are numbered according to their I<opening> paren.
 
    pos         Return or set current match position
    quotemeta   Quote metacharacters
-   reset       Reset ?pattern? status
+   reset       Reset m?pattern? status
    study       Analyze string for optimizing matching
 
    split       Use a regex to split a string into parts
