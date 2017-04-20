@@ -2313,7 +2313,7 @@ PERL_CALLCONV SV*	Perl_newSVpvf(pTHX_ const char *const pat, ...)
 #define PERL_ARGS_ASSERT_NEWSVPVF	\
 	assert(pat)
 
-PERL_CALLCONV SV*	Perl_newSVpvn(pTHX_ const char *const s, const STRLEN len)
+PERL_CALLCONV SV*	Perl_newSVpvn(pTHX_ const char *const buffer, const STRLEN len)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV SV*	Perl_newSVpvn_flags(pTHX_ const char *const s, const STRLEN len, const U32 flags)

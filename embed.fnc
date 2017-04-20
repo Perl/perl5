@@ -1138,7 +1138,7 @@ ApdR	|SV*	|newSViv	|const IV i
 ApdR	|SV*	|newSVuv	|const UV u
 ApdR	|SV*	|newSVnv	|const NV n
 ApdR	|SV*	|newSVpv	|NULLOK const char *const s|const STRLEN len
-ApdR	|SV*	|newSVpvn	|NULLOK const char *const s|const STRLEN len
+ApdR	|SV*	|newSVpvn	|NULLOK const char *const buffer|const STRLEN len
 ApdR	|SV*	|newSVpvn_flags	|NULLOK const char *const s|const STRLEN len|const U32 flags
 ApdR	|SV*	|newSVhek	|NULLOK const HEK *const hek
 ApdR	|SV*	|newSVpvn_share	|NULLOK const char* s|I32 len|U32 hash
