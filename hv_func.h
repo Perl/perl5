@@ -133,7 +133,7 @@ U32 S_perl_hash_with_seed(const U8 * const seed, const U8 * const str, const STR
  * initialze whatever state it might need later in hashing. */
 
 #ifndef PERL_HASH_SEED
-#   if defined(USE_HASH_SEED)
+#   if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT)
 #       define PERL_HASH_SEED PL_hash_seed
 #   else
        /* this is a 512 bit seed, which should be more than enough for the
@@ -268,6 +268,9 @@ PERL_SIPHASH_FNC(
     ,SIPROUND;SIPROUND;SIPROUND;SIPROUND;
 )
 #endif /* defined(CAN64BITHASH) */
+
+
+
 
 
 #endif /*compile once*/
