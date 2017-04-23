@@ -34,11 +34,7 @@ holds the key and hash value.
 #define PERL_HASH_INTERNAL_ACCESS
 #include "perl.h"
 
-/* we split when we collide and we have a load factor over 0.667.
- * NOTE if you change this formula so we split earlier than previously
- * you MUST change the logic in hv_ksplit()
- */
-#define DO_HSPLIT(xhv) ( ((xhv)->xhv_keys + ((xhv)->xhv_keys >> 1))  > (xhv)->xhv_max )
+#define DO_HSPLIT(xhv) ((xhv)->xhv_keys > (xhv)->xhv_max) /* HvTOTALKEYS(hv) > HvMAX(hv) */
 #define HV_FILL_THRESHOLD 31
 
 static const char S_strtab_error[]
@@ -347,7 +343,6 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     HE **oentry;
     SV *sv;
     bool is_utf8;
-    bool in_collision;
     int masked_flags;
     const int return_svp = action & HV_FETCH_JUST_SV;
     HEK *keysv_hek = NULL;
@@ -840,7 +835,6 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
      * making it harder to see if there is a collision. We also
      * reset the iterator randomizer if there is one.
      */
-    in_collision = *oentry != NULL;
     if ( *oentry && PL_HASH_RAND_BITS_ENABLED) {
         PL_hash_rand_bits++;
         PL_hash_rand_bits= ROTL_UV(PL_hash_rand_bits,1);
@@ -883,7 +877,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	HvHASKFLAGS_on(hv);
 
     xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
-    if ( in_collision && DO_HSPLIT(xhv) ) {
+    if ( DO_HSPLIT(xhv) ) {
         const STRLEN oldsize = xhv->xhv_max + 1;
         const U32 items = (U32)HvPLACEHOLDERS_get(hv);
 
@@ -1456,42 +1450,29 @@ void
 Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 {
     XPVHV* xhv = (XPVHV*)SvANY(hv);
-    const I32 oldsize = (I32) xhv->xhv_max+1;       /* HvMAX(hv)+1 */
+    const I32 oldsize = (I32) xhv->xhv_max+1; /* HvMAX(hv)+1 (sick) */
     I32 newsize;
-    I32 wantsize;
-    I32 trysize;
     char *a;
 
     PERL_ARGS_ASSERT_HV_KSPLIT;
 
-    wantsize = (I32) newmax;                            /* possible truncation here */
-    if (wantsize != newmax)
+    newsize = (I32) newmax;			/* possible truncation here */
+    if (newsize != newmax || newmax <= oldsize)
 	return;
-
-    wantsize= wantsize + (wantsize >> 1);           /* wantsize *= 1.5 */
-    if (wantsize < newmax)                          /* overflow detection */
-        return;
-
-    newsize = oldsize;
-    while (wantsize > newsize) {
-        trysize = newsize << 1;
-        if (trysize > newsize) {
-            newsize = trysize;
-        } else {
-            /* we overflowed */
-            return;
-        }
+    while ((newsize & (1 + ~newsize)) != newsize) {
+	newsize &= ~(newsize & (1 + ~newsize));	/* get proper power of 2 */
     }
-
-    if (newsize <= oldsize)
-        return;                                            /* overflow detection */
+    if (newsize < newmax)
+	newsize *= 2;
+    if (newsize < newmax)
+	return;					/* overflow detection */
 
     a = (char *) HvARRAY(hv);
     if (a) {
         hsplit(hv, oldsize, newsize);
     } else {
         Newxz(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
-        xhv->xhv_max = newsize - 1;
+        xhv->xhv_max = --newsize;
         HvARRAY(hv) = (HE **) a;
     }
 }
