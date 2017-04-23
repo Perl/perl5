@@ -172,6 +172,8 @@ void zaphod32_seed_state (
     ZAPHOD32_MIX(state[0],state[1],state[2],"ZAPHOD32 SEED-STATE 3/3");
     ZAPHOD32_MIX(state[0],state[1],state[2],"ZAPHOD32 SEED-STATE 3/3");
 
+    /* so now state contains 4 + ( 7 * 256 ) == 1796 U32's, which is 57472 bits */
+    
 }
 
 ZAPHOD32_STATIC_INLINE
