@@ -10,7 +10,7 @@ if ($] >= 5.015) {
 
 use vars qw(@ISA $VERSION $CLASS $STRICT $LAX *declare *qv);
 
-$VERSION = 0.9917;
+$VERSION = 0.9918;
 $CLASS = 'version';
 
 # avoid using Exporter
@@ -18,7 +18,11 @@ require version::regex;
 *version::is_lax = \&version::regex::is_lax;
 *version::is_strict = \&version::regex::is_strict;
 *LAX = \$version::regex::LAX;
+*LAX_DECIMAL_VERSION = \$version::regex::LAX_DECIMAL_VERSION;
+*LAX_DOTTED_DECIMAL_VERSION = \$version::regex::LAX_DOTTED_DECIMAL_VERSION;
 *STRICT = \$version::regex::STRICT;
+*STRICT_DECIMAL_VERSION = \$version::regex::STRICT_DECIMAL_VERSION;
+*STRICT_DOTTED_DECIMAL_VERSION = \$version::regex::STRICT_DOTTED_DECIMAL_VERSION;
 
 sub import {
     no strict 'refs';

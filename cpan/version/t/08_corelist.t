@@ -5,7 +5,7 @@
 #########################
 
 use Test::More tests => 3;
-use_ok("version", 0.9917);
+use_ok("version", 0.9918);
 
 # do strict lax tests in a sub to isolate a package to test importing
 SKIP: {

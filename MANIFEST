@@ -3150,6 +3150,7 @@ cpan/version/t/07locale.t		Tests for version objects
 cpan/version/t/08_corelist.t		Tests for version objects
 cpan/version/t/09_list_util.t		Tests for version objects
 cpan/version/t/10_lyon.t		Tests for version objects
+cpan/version/t/11_taint.t		Tests for version objects
 cpan/version/t/coretests.pm		Tests for version objects
 cpan/Win32/longpath.inc			Win32 extension long path support
 cpan/Win32/Makefile.PL			Win32 extension makefile writer

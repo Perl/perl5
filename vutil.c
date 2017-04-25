@@ -968,7 +968,11 @@ Perl_vstringify(pTHX_ SV *vs)
     if (svp) {
 	SV *pv;
 	pv = *svp;
-	if ( SvPOK(pv) )
+	if ( SvPOK(pv)
+#if PERL_VERSION_LT(5,17,2)
+	    || SvPOKp(pv)
+#endif
+	)
 	    return newSVsv(pv);
 	else
 	    return &PL_sv_undef;

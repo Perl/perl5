@@ -2,9 +2,13 @@ package version::regex;
 
 use strict;
 
-use vars qw($VERSION $CLASS $STRICT $LAX);
+use vars qw(
+    $VERSION $CLASS $STRICT $LAX
+    $STRICT_DECIMAL_VERSION $STRICT_DOTTED_DECIMAL_VERSION
+    $LAX_DECIMAL_VERSION $LAX_DOTTED_DECIMAL_VERSION
+);
 
-$VERSION = 0.9917;
+$VERSION = 0.9918;
 
 #--------------------------------------------------------------------------#
 # Version regexp components
@@ -57,13 +61,13 @@ my $LAX_ALPHA_PART = qr/_[0-9]+/;
 
 # Strict decimal version number.
 
-my $STRICT_DECIMAL_VERSION =
+$STRICT_DECIMAL_VERSION =
     qr/ $STRICT_INTEGER_PART $FRACTION_PART? /x;
 
 # Strict dotted-decimal version number.  Must have both leading "v" and
 # at least three parts, to avoid confusion with decimal syntax.
 
-my $STRICT_DOTTED_DECIMAL_VERSION =
+$STRICT_DOTTED_DECIMAL_VERSION =
     qr/ v $STRICT_INTEGER_PART $STRICT_DOTTED_DECIMAL_PART{2,} /x;
 
 # Complete strict version number syntax -- should generally be used
@@ -80,7 +84,7 @@ $STRICT =
 # allowing an alpha suffix or allowing a leading or trailing
 # decimal-point
 
-my $LAX_DECIMAL_VERSION =
+$LAX_DECIMAL_VERSION =
     qr/ $LAX_INTEGER_PART (?: $FRACTION_PART | \. )? $LAX_ALPHA_PART?
 	|
 	$FRACTION_PART $LAX_ALPHA_PART?
@@ -92,7 +96,7 @@ my $LAX_DECIMAL_VERSION =
 # enough, without the leading "v", Perl takes .1.2 to mean v0.1.2,
 # so when there is no "v", the leading part is optional
 
-my $LAX_DOTTED_DECIMAL_VERSION =
+$LAX_DOTTED_DECIMAL_VERSION =
     qr/
 	v $LAX_INTEGER_PART (?: $LAX_DOTTED_DECIMAL_PART+ $LAX_ALPHA_PART? )?
 	|
