@@ -3614,7 +3614,7 @@ S_doopen_pm(pTHX_ SV *name)
     if (!IS_SAFE_PATHNAME(p, namelen, "require"))
         return NULL;
 
-    if (namelen > 3 && memEQs(p + namelen - 3, 3, ".pm")) {
+    if (memENDPs(p, namelen, ".pm")) {
 	SV *const pmcsv = sv_newmortal();
 	PerlIO * pmcio;
 
@@ -4133,12 +4133,12 @@ S_require_file(pTHX_ SV *sv)
 		    SSize_t i;
 		    SV *const msg = newSVpvs_flags("", SVs_TEMP);
 		    SV *const inc = newSVpvs_flags("", SVs_TEMP);
-                    const char *e = name + len - 3; /* possible .pm */
 		    for (i = 0; i <= AvFILL(ar); i++) {
 			sv_catpvs(inc, " ");
 			sv_catsv(inc, *av_fetch(ar, i, TRUE));
 		    }
-		    if (e > name && _memEQs(e, ".pm")) {
+		    if (memENDPs(name, len, ".pm")) {
+                        const char *e = name + len - (sizeof(".pm") - 1);
 			const char *c;
                         bool utf8 = cBOOL(SvUTF8(sv));
 
