@@ -2488,7 +2488,7 @@ Perl_gv_fullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain)
 
     if (hv && (name = HvNAME(hv))) {
       const STRLEN len = HvNAMELEN(hv);
-      if (keepmain || strnNE(name, "main", len)) {
+      if (keepmain || ! memBEGINs(name, len, "main")) {
 	sv_catpvn_flags(sv,name,len,HvNAMEUTF8(hv)?SV_CATUTF8:SV_CATBYTES);
 	sv_catpvs(sv,"::");
       }

@@ -4807,7 +4807,7 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	 */
 	    const char *libpath = SvPVX(libdir);
 	    STRLEN libpath_len = SvCUR(libdir);
-	    if (libpath_len >= 4 && memEQ (libpath, ".../", 4)) {
+	    if (memBEGINs(libpath, libpath_len, ".../")) {
 		/* Game on!  */
 		SV * const caret_X = get_sv("\030", 0);
 		/* Going to use the SV just as a scratch buffer holding a C
@@ -4843,7 +4843,7 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 		if (lastslash) {
 		    SV *tempsv;
 		    while ((*lastslash = '\0'), /* Do that, come what may.  */
-                           (libpath_len >= 3 && _memEQs(libpath, "../")
+                           (   memBEGINs(libpath, libpath_len, "../")
 			    && (lastslash =
                                   (char *) my_memrchr(prefix, '/',
                                                    SvEND(prefix_sv) - prefix))))
