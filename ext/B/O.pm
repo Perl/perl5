@@ -2,8 +2,7 @@ package O;
 
 our $VERSION = '1.02';
 
-use B qw(minus_c save_BEGINs);
-use Carp;
+use B qw();
 
 sub import {
     my ($class, @options) = @_;
@@ -21,8 +20,8 @@ sub import {
     my $backend = shift (@options);
     eval q[
 	BEGIN {
-	    minus_c;
-	    save_BEGINs;
+	    B::minus_c;
+	    B::save_BEGINs;
 	}
 
 	CHECK {
@@ -51,7 +50,7 @@ sub import {
 	}
     ];
     if ($@) {
-        croak "Loading compiler backend 'B::$backend' failed: $@";
+        die "Loading compiler backend 'B::$backend' failed: $@";
     }
 }
 
