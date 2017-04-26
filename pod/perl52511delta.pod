@@ -131,7 +131,7 @@ hash tied with L<Tie::Hash::NamedCapture> and C<< all =E<gt> 1 >>. [perl
 
 It is with great sadness we note that Kip Hampton passed away. Probably
 best known as the author of the Perl & XML column on XML.com, he was a
-core contributor to AxKit, ab XML server platform that became an Apache
+core contributor to AxKit, an XML server platform that became an Apache
 Foundation project. He was a frequent speaker in the early days at
 OSCON, and most recently at YAPC::NA in Madison. He was frequently on
 irc.perl.org as `ubu`, generally in the #axkit-dahut community, the
