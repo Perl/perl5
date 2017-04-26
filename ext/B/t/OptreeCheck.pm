@@ -781,8 +781,9 @@ sub reduceDiffs {
         my $exp = shift @want;
         my $line = shift @got;
         # remove matches, and report
-        unless ($got =~ s/($rex\n)//msg) {
+        unless ($got =~ s/^($rex\n)//ms) {
             _diag("got:\t\t'$line'\nwant:\t $rex\n");
+            last;
         }
     }
     _diag("remainder:\n$got");
