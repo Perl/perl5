@@ -3453,11 +3453,25 @@ PP(pp_subst)
 	    {
 		SvPV_free(TARG);
 	    }
-	    SvPV_set(TARG, SvPVX(dstr));
-	    SvCUR_set(TARG, SvCUR(dstr));
-	    SvLEN_set(TARG, SvLEN(dstr));
+
+            /* transfer dstr's string buffer to targ */
+#ifdef PERL_COPY_ON_WRITE3
+            if (SvSHORTPV(dstr)) {
+                /* convert TARG to SHORTPV */
+                SvSHORTPV_SET_PV(TARG);
+                SvSHORTPV_on(TARG);
+                SvSHORTPV_COPY(SvPVX_const(dstr), SvPVX_const(TARG));
+                SvCUR_set(TARG, SvCUR(dstr));
+            }
+            else
+#endif
+            {
+                SvPV_set(TARG, SvPVX(dstr));
+                SvCUR_set(TARG, SvCUR(dstr));
+                SvLEN_set(TARG, SvLEN(dstr));
+                SvPV_set(dstr, NULL);
+            }
 	    SvFLAGS(TARG) |= SvUTF8(dstr);
-	    SvPV_set(dstr, NULL);
 
 	    SPAGAIN;
 	    mPUSHi(iters);

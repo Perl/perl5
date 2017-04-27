@@ -366,7 +366,7 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
 {
     const U32 old_type = SvTYPE(gv);
     const bool doproto = old_type > SVt_NULL;
-    char * const proto = (doproto && SvPOK(gv))
+    char * proto = (doproto && SvPOK(gv))
 	? ((void)(SvIsCOW(gv) && (sv_force_normal((SV *)gv), 0)), SvPVX(gv))
 	: NULL;
     const STRLEN protolen = proto ? SvCUR(gv) : 0;
@@ -399,6 +399,21 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
 	    SvCUR_set(gv, 0);
 	sv_upgrade(MUTABLE_SV(gv), SVt_PVGV);
     }
+
+#ifdef PERL_COPY_ON_WRITE3
+    if (SvSHORTPV(gv)) {
+        if (proto) {
+            /* After the upgrade to GV, PVX points to the old PV body
+             * containing the proto. Copy the proto before freeing the
+             * old body */
+            proto = (char*)safemalloc(protolen + 1);
+            Copy(SvPVX_const(gv), proto, protolen + 1, char);
+        }
+        SvPV_free((SV*)gv);
+        SvPOK_off(gv);
+    }
+    else
+#endif
     if (SvLEN(gv)) {
 	if (proto) {
 	    SvPV_set(gv, NULL);
@@ -1262,7 +1277,11 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
 	    sv_setsv_nomg((SV *)cv, tmpsv);
 	    SvTEMP_off(tmpsv);
 	    SvREFCNT_dec_NN(tmpsv);
-	    SvLEN(cv) = SvCUR(cv) + 1;
+            if (SvSHORTPV(cv))
+                /* SHORTPVs have a fixed len which can't be set. Force it
+                 * to be a non-short PV by growing it beyond its max size */
+                sv_grow((SV*)cv, SvSHORTPV_BUFSIZE + 1);
+            SvLEN_set(cv, SvCUR(cv) + 1);
 	    SvCUR(cv) = ulen;
 	}
 	else {

@@ -1543,6 +1543,7 @@ poMX	|void	|sv_free2	|NN SV *const sv|const U32 refcnt
 pd	|void	|sv_free_arenas
 Apd	|char*	|sv_gets	|NN SV *const sv|NN PerlIO *const fp|I32 append
 Apd	|char*	|sv_grow	|NN SV *const sv|STRLEN newlen
+Xop	|void   |sv_shortpv_free_any_old_body|NN SV *const sv
 Apd	|void	|sv_inc		|NULLOK SV *const sv
 Apd	|void	|sv_inc_nomg	|NULLOK SV *const sv
 Apmdb	|void	|sv_insert	|NN SV *const bigstr|const STRLEN offset \

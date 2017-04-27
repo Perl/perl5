@@ -2741,10 +2741,41 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
                             bool utf8_target)
 {
     struct regexp *const prog = ReANY(rx);
+    SSize_t strlen = strend - strbeg;
 
     if (flags & REXEC_COPY_STR) {
+#ifdef PERL_COPY_ON_WRITE3
+        /* the "- 1" is for the \0 */
+        if (!SvIsCOW(sv) && strlen <= (SSize_t)(SvSHORTPV_BUFSIZE - 1)) {
+            SV *copy = prog->saved_copy;
+
+            RX_MATCH_COPY_FREE(rx);
+
+            /* convert copy to, or a create, an SvSHORTPV */
+            if (copy) {
+                if (!SvSHORTPV(copy) && SvPVX_const(copy))
+                    SvPV_free(copy);
+                SvFLAGS(copy) |= (SVf_POK|SVp_POK|SVf_SHORTPV);
+            }
+            else {
+                copy = newSV_type(SVt_PV);
+                SvFLAGS(copy) = (SVf_POK|SVp_POK|SVf_SHORTPV|SVt_PV);
+                prog->saved_copy = copy;
+            }
+            SvSHORTPV_SET_PV(copy);
+
+            if (SvSHORTPV(sv) && SvPVX_const(sv) == strbeg)
+                SvSHORTPV_COPY(SvPVX_const(sv), SvPVX_const(copy));
+            else
+                Copy(strbeg, SvPVX_const(copy), strlen, char);
+            SvCUR_set(copy, strlen);
+            (SvPVX_mutable(copy))[strlen] = '\0';
+            goto common_savedcopy;
+        }
+        else
+#endif
 #ifdef PERL_ANY_COW
-        if (SvCANCOW(sv)) {
+        if (!SvSHORTPV(sv) && SvCANCOW(sv)) {
             DEBUG_C(Perl_re_printf( aTHX_
                               "Copy on write: regexp capture, type %d\n",
                                     (int) SvTYPE(sv)));
@@ -2769,16 +2800,19 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
                 RX_MATCH_COPY_FREE(rx);
                 prog->saved_copy = sv_setsv_cow(prog->saved_copy, sv);
             }
+#ifdef PERL_COPY_ON_WRITE3
+          common_savedcopy:
+#endif
             prog->subbeg = (char *)SvPVX_const(prog->saved_copy);
             assert (SvPOKp(prog->saved_copy));
-            prog->sublen  = strend - strbeg;
+            prog->sublen  = strlen;
             prog->suboffset = 0;
             prog->subcoffset = 0;
         } else
 #endif
         {
             SSize_t min = 0;
-            SSize_t max = strend - strbeg;
+            SSize_t max = strlen;
             SSize_t sublen;
 
             if (    (flags & REXEC_COPY_SKIP_POST)
@@ -2799,7 +2833,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
                     max = (PL_sawampersand & SAWAMPERSAND_LEFT)
                             ? prog->offs[0].start
                             : 0;
-                assert(max >= 0 && max <= strend - strbeg);
+                assert(max >= 0 && max <= strlen);
             }
 
             if (    (flags & REXEC_COPY_SKIP_PRE)
@@ -2826,7 +2860,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
 
             }
 
-            assert(min >= 0 && min <= max && min <= strend - strbeg);
+            assert(min >= 0 && min <= max && min <= strlen);
             sublen = max - min;
 
             if (RX_MATCH_COPIED(rx)) {
@@ -2842,6 +2876,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
             prog->sublen = sublen;
             RX_MATCH_COPIED_on(rx);
         }
+
         prog->subcoffset = prog->suboffset;
         if (prog->suboffset && utf8_target) {
             /* Convert byte offset to chars.
@@ -2871,7 +2906,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
         prog->subbeg = strbeg;
         prog->suboffset = 0;
         prog->subcoffset = 0;
-        prog->sublen = strend - strbeg;
+        prog->sublen = strlen;
     }
 }
 

@@ -7209,7 +7209,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         assert(sizeof(STD_PAT_MODS) <= 8);
 
         Newx(p, wraplen + 1, char); /* +1 for the ending NUL */
-	r->xpv_len_u.xpvlenu_pv = p;
+	r->xpv_bufu.xpv_bufu_nonbuf.xpv_len_u.xpvlenu_pv = p;
 	if (RExC_utf8)
 	    SvFLAGS(rx) |= SVf_UTF8;
         *p++='('; *p++='?';
@@ -19410,7 +19410,7 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
     } else {
         CALLREGFREE_PVT(rx); /* free the private data */
         SvREFCNT_dec(RXp_PAREN_NAMES(r));
-	Safefree(r->xpv_len_u.xpvlenu_pv);
+	Safefree(r->xpv_bufu.xpv_bufu_nonbuf.xpv_len_u.xpvlenu_pv);
     }
     if (r->substrs) {
         SvREFCNT_dec(r->anchored_substr);

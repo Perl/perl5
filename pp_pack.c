@@ -2029,16 +2029,7 @@ marked_upgrade(pTHX_ SV *sv, tempsym_t *sym_ptr) {
 	group->strbeg = marks[group->level] - to_start;
     Safefree(marks);
 
-    if (SvOOK(sv)) {
-	if (SvIVX(sv)) {
-	    SvLEN_set(sv, SvLEN(sv) + SvIVX(sv));
-	    from_start -= SvIVX(sv);
-	    SvIV_set(sv, 0);
-	}
-	SvFLAGS(sv) &= ~SVf_OOK;
-    }
-    if (SvLEN(sv) != 0)
-	Safefree(from_start);
+    SvPV_free(sv);
     SvPV_set(sv, to_start);
     SvCUR_set(sv, to_ptr - to_start);
     SvLEN_set(sv, len);

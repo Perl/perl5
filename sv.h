@@ -456,6 +456,8 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 #define SVpav_REAL	0x40000000  /* free old entries */
 /* PVHV */
 #define SVphv_LAZYDEL	0x40000000  /* entry in xhv_eiter must be deleted */
+/* for POK strings */
+#define SVf_SHORTPV	0x40000000  /* string is stored in XPV body */
 
 /* IV, PVIV, PVNV, PVMG, PVGV and (I assume) PVLV  */
 #define SVf_IVisUV	0x80000000  /* use XPVUV instead of XPVIV */
@@ -467,16 +469,40 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 #define SVprv_WEAKREF   0x80000000  /* Weak reference */
 /* pad name vars only */
 
+/* the len+other part of an XPV */
+struct xpv_nonbuf {
+    union {
+        STRLEN	xpvlenu_len; /* allocated size */
+        char *	xpvlenu_pv;  /* regexp string */
+    } xpv_len_u;
+#ifdef PERL_COPY_ON_WRITE3
+    void* xpv_bufu_unused;   /* XXX reserved for future use */
+#endif
+};                                              \
+
 #define _XPV_HEAD							\
     HV*		xmg_stash;	/* class package */			\
     union _xmgu	xmg_u;							\
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */    \
+    /* either (len + other), or a small buffer for SVf_SHORTPV */       \
     union {								\
-	STRLEN	xpvlenu_len; 	/* allocated size */			\
-	char *	xpvlenu_pv;	/* regexp string */			\
-    } xpv_len_u	
+        struct xpv_nonbuf  xpv_bufu_nonbuf;                             \
+        char xpv_bufu_buf[1];        /* Unwarranted chumminess */       \
+    } xpv_bufu;
 
-#define xpv_len	xpv_len_u.xpvlenu_len
+#define xpv_len	xpv_bufu.xpv_bufu_nonbuf.xpv_len_u.xpvlenu_len
+
+#define SvSHORTPV_BUFSIZE      (sizeof(struct xpv_nonbuf))
+#define SvSHORTPV_BODY_FROM_PV(pv) \
+	((XPV*)(pv - STRUCT_OFFSET(XPV, xpv_bufu.xpv_bufu_buf)))
+#define SvSHORTPV_PV_FROM_BODY(xpv) \
+	((char*)xpv + STRUCT_OFFSET(XPV, xpv_bufu.xpv_bufu_buf))
+
+#define SvSHORTPV_SET_PV(sv) \
+    ((sv)->sv_u.svu_pv = SvSHORTPV_PV_FROM_BODY(SvANY(sv)))
+
+#define SvSHORTPV_COPY(src_xpv, dst_xpv) \
+        StructCopy(src_xpv, dst_xpv, struct xpv_nonbuf)
 
 union _xnvu {
     NV	    xnv_nv;		/* numeric value, if any */
@@ -1069,6 +1095,21 @@ C<sv_force_normal> does nothing.
 # define SvPADMY_on(sv)		SvPADTMP_off(sv)
 #endif
 
+#ifdef PERL_COPY_ON_WRITE3
+#  define SvSHORTPV(sv)         (SvFLAGS(sv) &   SVf_SHORTPV)
+#  define SvSHORTPV_on(sv)      (SvFLAGS(sv) |=  SVf_SHORTPV)
+#  define SvSHORTPV_off(sv)     (SvFLAGS(sv) &= ~SVf_SHORTPV)
+/* this checks the flag only on SV types for which it is valid */
+#  define SvSHORTPV_TRUELY(sv)  (   SvSHORTPV(sv)            \
+                                && (SvTYPE(sv) != SVt_PVAV)  \
+                                && (SvTYPE(sv) != SVt_PVHV))
+#else
+#  define SvSHORTPV(sv)         0
+#  define SvSHORTPV_TRUELY(sv)  0
+#  define SvSHORTPV_on(sv)      NOOP
+#  define SvSHORTPV_off(sv)     NOOP
+#endif
+
 #define SvPADTMP(sv)		(SvFLAGS(sv) & (SVs_PADTMP))
 #define SvPADSTALE(sv)		(SvFLAGS(sv) & (SVs_PADSTALE))
 
@@ -1160,13 +1201,11 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #  define SvPVX(sv) SvPVX_mutable(sv)
 #  endif
 #  define SvCUR(sv) (0 + ((XPV*) SvANY(sv))->xpv_cur)
-#  define SvLEN(sv) (0 + ((XPV*) SvANY(sv))->xpv_len)
 #  define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
 
 #  define SvMAGIC(sv)	(0 + *(assert_(SvTYPE(sv) >= SVt_PVMG) &((XPVMG*)  SvANY(sv))->xmg_u.xmg_magic))
 #  define SvSTASH(sv)	(0 + *(assert_(SvTYPE(sv) >= SVt_PVMG) &((XPVMG*)  SvANY(sv))->xmg_stash))
 #else
-#  define SvLEN(sv) ((XPV*) SvANY(sv))->xpv_len
 #  define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
 
 #  if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
@@ -1245,6 +1284,9 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #  endif
 #endif
 
+#define SvLEN(sv) (SvSHORTPV(sv) ? SvSHORTPV_BUFSIZE \
+                                 : ((XPV*) SvANY(sv))->xpv_len)
+
 #ifndef PERL_POISON
 /* Given that these two are new, there can't be any existing code using them
  *  as LVALUEs  */
@@ -1288,6 +1330,7 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #define SvPV_set(sv, val) \
 	STMT_START { \
 		assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]);	\
+		assert(!SvSHORTPV(sv));	\
 		assert(!isGV_with_GP(sv));		\
 		assert(!(SvTYPE(sv) == SVt_PVIO		\
 		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
@@ -1321,6 +1364,7 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #define SvLEN_set(sv, val) \
 	STMT_START { \
 		assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]);	\
+		assert(!SvSHORTPV(sv));	\
 		assert(!isGV_with_GP(sv));	\
 		assert(!(SvTYPE(sv) == SVt_PVIO		\
 		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
@@ -1330,21 +1374,34 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 		SvCUR_set(sv, (val) - SvPVX(sv)); } STMT_END
 
 #define SvPV_renew(sv,n) \
-	STMT_START { SvLEN_set(sv, n); \
+	STMT_START {                                                    \
+                if (SvSHORTPV(sv)) {                                    \
+                    /* force it to be a non-shortpv */                  \
+                    dTHX;                                               \
+                    sv_grow(sv, n > SvSHORTPV_BUFSIZE + 1               \
+                                    ? n : SvSHORTPV_BUFSIZE + 1);       \
+                }                                                       \
+                SvLEN_set(sv, n);                                       \
 		SvPV_set((sv), (MEM_WRAP_CHECK_(n,char)			\
 				(char*)saferealloc((Malloc_t)SvPVX(sv), \
 						   (MEM_SIZE)((n)))));  \
 		 } STMT_END
 
-#define SvPV_shrink_to_cur(sv) STMT_START { \
-		   const STRLEN _lEnGtH = SvCUR(sv) + 1; \
-		   SvPV_renew(sv, _lEnGtH); \
-		 } STMT_END
+#define SvPV_shrink_to_cur(sv) \
+                if (!SvSHORTPV(sv)) {                        \
+                       const STRLEN _lEnGtH = SvCUR(sv) + 1; \
+                       SvPV_renew(sv, _lEnGtH); \
+		 }
 
 #define SvPV_free(sv)							\
     STMT_START {							\
 		     assert(SvTYPE(sv) >= SVt_PV);			\
-		     if (SvLEN(sv)) {					\
+                    if (SvSHORTPV(sv)) {                                \
+                        assert(!SvIsCOW(sv));                           \
+                        Perl_sv_shortpv_free_any_old_body(aTHX_ sv);    \
+                        SvSHORTPV_off(sv);                              \
+                    }                                                   \
+                    else if (SvLEN(sv)) {			        \
 			 assert(!SvROK(sv));				\
 			 if(UNLIKELY(SvOOK(sv))) {			\
 			     STRLEN zok; 				\
@@ -1889,7 +1946,7 @@ Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
    /* Note: To allow 256 COW "copies", a refcnt of 0 means 1. */
 #   define CowREFCNT(sv)	(*(U8 *)(SvPVX(sv)+SvLEN(sv)-1))
 #   define SV_COW_REFCNT_MAX	((1 << sizeof(U8)*8) - 1)
-#   define CAN_COW_MASK	(SVf_POK|SVf_ROK|SVp_POK|SVf_FAKE| \
+#   define CAN_COW_MASK	(SVf_POK|SVf_ROK|SVp_POK|SVf_FAKE|SVf_SHORTPV| \
 			 SVf_OOK|SVf_BREAK|SVf_READONLY|SVf_PROTECT)
 #endif
 

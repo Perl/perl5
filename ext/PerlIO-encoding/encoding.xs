@@ -307,9 +307,11 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 		goto end_of_file;
 	    }
 	}
-	if (SvCUR(e->dataSV)) {
+	if (SvCUR(e->dataSV) || SvSHORTPV(e->dataSV)) {
 	    /* something left over from last time - create a normal
-	       SV with new data appended
+	       SV with new data appended. Or it's a (possibly empty)
+               short PV, in which case avoid the branch below that
+               directly manipulates SvPVX.
 	     */
 	    if (use + SvCUR(e->dataSV) > e->base.bufsiz) {
 		if (e->flags & NEEDS_LINES) {

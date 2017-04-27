@@ -3377,6 +3377,9 @@ PERL_CALLCONV void	Perl_sv_setuv(pTHX_ SV *const sv, const UV num);
 PERL_CALLCONV void	Perl_sv_setuv_mg(pTHX_ SV *const sv, const UV u);
 #define PERL_ARGS_ASSERT_SV_SETUV_MG	\
 	assert(sv)
+PERL_CALLCONV void	Perl_sv_shortpv_free_any_old_body(pTHX_ SV *const sv);
+#define PERL_ARGS_ASSERT_SV_SHORTPV_FREE_ANY_OLD_BODY	\
+	assert(sv)
 #ifndef NO_MATHOMS
 PERL_CALLCONV void	Perl_sv_taint(pTHX_ SV* sv);
 #define PERL_ARGS_ASSERT_SV_TAINT	\

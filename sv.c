@@ -949,7 +949,7 @@ static const struct body_details bodies_by_type[] = {
 #endif
 
     { sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur),
-      copy_length(XPV, xpv_len) - STRUCT_OFFSET(XPV, xpv_cur),
+      copy_length(XPV, xpv_bufu) - STRUCT_OFFSET(XPV, xpv_cur),
       + STRUCT_OFFSET(XPV, xpv_cur),
       SVt_PV, FALSE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur)) },
@@ -1478,6 +1478,21 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
     /* if this is zero, this is a body-less SVt_NULL, SVt_IV/SVt_RV,
        and sometimes SVt_NV */
     if (old_type_details->body_size) {
+        /* If the PVX is stored in the old body, keep the old body around
+         * (pointed to by SvPVX) with the buffer, so code doesn't see
+         * the buffer address change when the SV is upgraded.
+         * We store the old body type in the old cur field.
+         * The old body will be freed when we free the SV.
+         *
+         * NB the SVf_SHORTPV flag bit has a different meaning for AVs and
+         * HVs, but they're unlikely to have [AH]vARRAY stored in the body
+         */
+        if (   SvSHORTPV(sv)
+            && SvSHORTPV_BODY_FROM_PV(sv->sv_u.svu_pv) == old_body)
+        {
+            ((XPV*)old_body)->xpv_cur = (STRLEN)old_type;
+        }
+        else {
 #ifdef PURIFY
 	safefree(old_body);
 #else
@@ -1488,6 +1503,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 	del_body((void*)((char*)old_body + old_type_details->offset),
 		 &PL_body_roots[old_type]);
 #endif
+        }
     }
 }
 
@@ -1524,6 +1540,34 @@ Perl_sv_backoff(SV *const sv)
     Move(s, SvPVX(sv), SvCUR(sv)+1, char);
     return;
 }
+
+
+#ifdef PERL_COPY_ON_WRITE3
+
+/* After an upgrade an SvSHORTPV, the SV may have it's PVX pointing to
+ * the old body. If so return it to the appropriate body arena.
+ */
+/* XXX this should really be PERL_STATIC_INLINE, but bodies_by_type isn't
+ * global (yet) */
+void
+Perl_sv_shortpv_free_any_old_body(pTHX_ SV *const sv)
+{
+    void* old_body;
+
+    PERL_ARGS_ASSERT_SV_SHORTPV_FREE_ANY_OLD_BODY;
+    assert(SvSHORTPV(sv));
+    assert(SvPVX_const(sv));
+    old_body = SvSHORTPV_BODY_FROM_PV(SvPVX_mutable(sv));
+    if (SvANY(sv) != old_body) {
+        const svtype old_type = (svtype)(((XPV*)old_body)->xpv_cur);
+        del_body(
+            (void*)(
+              (char*)old_body + bodies_by_type[old_type].offset),
+            &PL_body_roots[old_type]);
+    }
+}
+#endif
+
 
 /*
 =for apidoc sv_grow
@@ -1562,6 +1606,23 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
 	s = SvPVX_mutable(sv);
     }
 
+#ifdef PERL_COPY_ON_WRITE3
+    /* try to use a SHORTPV where possible */
+    if (newlen <= SvSHORTPV_BUFSIZE) {
+        if (SvSHORTPV(sv))
+            /* XXX should sv_grow ever be called in this case?
+             * if not, turn into an assert? */
+            return s; /* already set up */
+        if (!s && SvTYPE(sv) != SVt_INVLIST) {
+            /* XXX if already got a buffer, is it worth freeing it
+             * and converting to SHORTPV rather than reallocing? */
+            SvSHORTPV_on(sv);
+            SvSHORTPV_SET_PV(sv);
+            return SvPVX_mutable(sv);
+        }
+    }
+#endif
+
 #ifdef PERL_COPY_ON_WRITE
     /* the new COW scheme uses SvPVX(sv)[SvLEN(sv)-1] (if spare)
      * to store the COW count. So in general, allocate one more byte than
@@ -1594,6 +1655,24 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
                 newlen = rounded;
         }
 #endif
+
+#ifdef PERL_COPY_ON_WRITE3
+        if (SvSHORTPV(sv)) {
+            /* too long for SHORTPV, convert to a real PV */
+            char *buf = SvPVX_mutable(sv);
+	    s = (char*)safemalloc(newlen);
+            /* SvCUR() may not be valid at this point, so copy the whole
+             * buffer, */
+            assert(newlen >= SvSHORTPV_BUFSIZE);
+            Copy(buf, s, SvSHORTPV_BUFSIZE, char);
+            Perl_sv_shortpv_free_any_old_body(aTHX_ sv);
+            SvSHORTPV_off(sv);
+            SvPV_set(sv, s);
+            SvLEN_set(sv, newlen);
+            return s;
+        }
+#endif
+
 	if (SvLEN(sv) && s) {
 	    s = (char*)saferealloc(s, newlen);
 	}
@@ -1603,6 +1682,7 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
                 Move(SvPVX_const(sv), s, SvCUR(sv), char);
 	    }
 	}
+
 	SvPV_set(sv, s);
 #ifdef PERL_UNWARANTED_CHUMMINESS_WITH_MALLOC
 	/* Do this here, do it once, do it right, and then we will never get
@@ -4645,6 +4725,27 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	   and doing it now facilitates the COW check.  */
 	(void)SvPOK_only(dstr);
 
+#ifdef PERL_COPY_ON_WRITE3
+        if (SvSHORTPV(sstr) && (SvSHORTPV(dstr) || !SvPVX_const(dstr))) {
+            /* for short strings, if possible just make the dest a short
+             * string and copy the buffer.
+             * XXX would it be cost-effective to free the buffer if dstr
+             * has one? i.e. skip the !SvPVX_const test above.
+             */
+            if (!SvSHORTPV(dstr)) {
+                /* convert dstr to SHORTPV */
+                assert(!SvPVX_const(dstr));
+                SvSHORTPV_SET_PV(dstr);
+                SvSHORTPV_on(dstr);
+            }
+            SvSHORTPV_COPY(SvPVX_const(sstr), SvPVX_const(dstr));
+	    SvCUR_set(dstr, cur);
+            /* should we have inherited the \0 from sstr??? */
+	    *SvEND(dstr) = '\0';
+        }
+        else
+#endif
+
 	if (
                  (              /* Either ... */
 				/* slated for free anyway (and not COW)? */
@@ -4657,6 +4758,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
                      && CHECK_COWBUF_THRESHOLD(cur,len)
                     )
                  ) &&
+                 !(sflags & SVf_SHORTPV) &&
                  !(sflags & SVf_OOK) &&   /* and not involved in OOK hack? */
 	         (!(flags & SV_NOSTEAL)) &&
 					/* and we're allowed to steal temps */
@@ -4694,6 +4796,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 		 sflags & SVf_IsCOW
 	      && !(SvFLAGS(dstr) & SVf_BREAK)
 #endif
+              && !(sflags & SVf_SHORTPV)
             ) {
             /* Either it's a shared hash key, or it's suitable for
                copy-on-write.  */
@@ -4887,6 +4990,10 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
     if (dstr) {
 	if (SvTHINKFIRST(dstr))
 	    sv_force_normal_flags(dstr, SV_COW_DROP_PV);
+	else if (SvSHORTPV(dstr)) {
+            SvSHORTPV_off(dstr);
+            SvPV_set(dstr, NULL);
+        }
 	else if (SvPVX_const(dstr))
 	    Safefree(SvPVX_mutable(dstr));
     }
@@ -5423,6 +5530,18 @@ Perl_sv_chop(pTHX_ SV *const sv, const char *const ptr)
     SvPOK_only_UTF8(sv);
 
     if (!SvOOK(sv)) {
+#ifdef PERL_COPY_ON_WRITE3
+        if (SvSHORTPV(sv)) {
+            /* for short strings, just shift the buffer rather than
+             * doing the OOK hack */
+	    const STRLEN len = SvCUR(sv) - delta;
+            if (len > 0)
+                Move(ptr, SvPVX_mutable(sv), len, char);
+            SvCUR_set(sv, len);
+	    *SvEND(sv) = '\0';
+            return;
+        }
+#endif
 	if (!SvLEN(sv)) { /* make copy of shared string */
 	    const char *pvx = SvPVX_const(sv);
 	    const STRLEN len = SvCUR(sv);
@@ -6746,6 +6865,10 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 			next_sv = target;
 		}
 	    }
+#ifdef PERL_COPY_ON_WRITE3
+	    else if (SvSHORTPV(sv))
+                Perl_sv_shortpv_free_any_old_body(aTHX_ sv);
+#endif
 #ifdef PERL_ANY_COW
 	    else if (SvPVX_const(sv)
 		     && !(SvTYPE(sv) == SVt_PVIO
@@ -13710,6 +13833,18 @@ Perl_rvpv_dup(pTHX_ SV *const dstr, const SV *const sstr, CLONE_PARAMS *const pa
 	else
 	    SvRV_set(dstr, sv_dup_inc(SvRV_const(sstr), param));
     }
+#ifdef PERL_COPY_ON_WRITE3
+    else if (SvSHORTPV(sstr)) {
+        SvSHORTPV_SET_PV(dstr);
+        /* usually the string is in the body, so will already have been
+         * copied when the body was copied, except... */
+        if (SvANY(sstr) != SvSHORTPV_BODY_FROM_PV(SvPVX_mutable(sstr))) {
+            /* ... sstr had SvPVX pointing to an old body containing the
+             * buffer, so need to copy the string */
+            SvSHORTPV_COPY(SvPVX_const(sstr), SvPVX_const(dstr));
+        }
+    }
+#endif
     else if (SvPVX_const(sstr)) {
 	/* Has something there */
 	if (SvLEN(sstr)) {

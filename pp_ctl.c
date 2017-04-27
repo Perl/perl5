@@ -247,13 +247,28 @@ PP(pp_substcont)
 	    else {
 		SV_CHECK_THINKFIRST_COW_DROP(targ);
 		if (isGV(targ)) Perl_croak_no_modify();
-		SvPV_free(targ);
-		SvPV_set(targ, SvPVX(dstr));
-		SvCUR_set(targ, SvCUR(dstr));
-		SvLEN_set(targ, SvLEN(dstr));
+
+                /* transfer dstr's string buffer to targ */
+                SvPV_free(targ);
+#ifdef PERL_COPY_ON_WRITE3
+                if (SvSHORTPV(dstr)) {
+                    /* convert targ to SHORTPV */
+                    SvSHORTPV_SET_PV(targ);
+                    SvSHORTPV_on(targ);
+                    SvSHORTPV_COPY(SvPVX_const(dstr), SvPVX_const(targ));
+                    SvCUR_set(targ, SvCUR(dstr));
+                }
+                else
+#endif
+                {
+                    SvPV_set(targ, SvPVX(dstr));
+                    SvCUR_set(targ, SvCUR(dstr));
+                    SvLEN_set(targ, SvLEN(dstr));
+                    SvPV_set(dstr, NULL);
+                }
+
 		if (DO_UTF8(dstr))
 		    SvUTF8_on(targ);
-		SvPV_set(dstr, NULL);
 
 		PL_tainted = 0;
 		mPUSHi(saviters - 1);

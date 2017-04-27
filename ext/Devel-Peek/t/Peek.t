@@ -17,6 +17,7 @@ use Test::More;
 
 use Devel::Peek;
 
+our $COW3 = ($Config{ccflags} =~ /PERL_COPY_ON_WRITE3\b/);
 our $DEBUG = 0;
 open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
 
@@ -92,8 +93,20 @@ sub do_test {
 		if $Config{ccflags} =~
 			/-DPERL_(?:OLD_COPY_ON_WRITE|NO_COW)\b/
 			    || $] < 5.019003;
+
+            if ($COW3) {
+                #warn "XXX pat=[$pattern]\n" if ($pattern =~ /COW_REFCNT/);
+                $pattern =~ s/(\bIsCOW\b)/($1|SHORTPV)/mg;
+                $pattern =~ s/(\bPOK,)/$1(SHORTPV,)?/mg;
+                $pattern =~ s/^(\s+COW_REFCNT = .*\n)/($1)\?/mg;
+                $pattern =~ s/^(\s+LEN = \\d\+\n?)/($1)\?/mg;
+            }
+
 	    print $pattern, "\n" if $DEBUG;
 	    my ($dump, $dump2) = split m/\*\*\*\*\*\n/, scalar <IN>;
+
+
+
 	    print $dump, "\n"    if $DEBUG;
 	    like( $dump, qr/\A$pattern\Z/ms, $_[0])
 	      or note("line " . (caller)[2]);
@@ -186,10 +199,11 @@ do_test('floating point value',
        $d,
        $] < 5.019003
         || $Config{ccflags} =~ /-DPERL_(?:NO_COW|OLD_COPY_ON_WRITE)\b/
+        || $COW3
        ?
 'SV = PVNV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(NOK,pNOK\\)
+  FLAGS = \\(NOK,(SHORTPV,)?pNOK\\)
   IV = \d+
   NV = 789\\.(?:1(?:000+\d+)?|0999+\d+)
   PV = $ADDR "789"\\\0
@@ -344,6 +358,7 @@ do_test('reference to named subroutine without prototype',
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$pattern"
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$do_eval"
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$sub"
+      \\d+\\. $ADDR<\\d+> FAKE "\\$COW3" flags=0x0 index=0
       \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG" flags=0x0 index=0
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump"
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump2"
@@ -604,7 +619,7 @@ if (${^TAINT}) {
           $ENV{PATH}=@ARGV,  # scalar(@ARGV) is a handy known tainted value
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(GMG,SMG,RMG(?:,POK)?(?:,pIOK)?,pPOK\\)
+  FLAGS = \\(GMG,SMG,RMG(?:,POK)?(?:,SHORTPV)?(?:,pIOK)?,pPOK\\)
   IV = 0
   NV = 0
   PV = $ADDR "0"\\\0
