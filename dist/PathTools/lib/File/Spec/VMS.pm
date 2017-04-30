@@ -1,13 +1,10 @@
 package File::Spec::VMS;
 
 use strict;
-use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '3.68';
-$VERSION =~ tr/_//d;
-
-@ISA = qw(File::Spec::Unix);
+our $VERSION = '3.68';
+our @ISA = qw(File::Spec::Unix);
 
 use File::Basename;
 use VMS::Filespec;
