@@ -2,9 +2,7 @@ use 5.008;
 package base;
 
 use strict 'vars';
-use vars qw($VERSION);
-$VERSION = '2.26';
-$VERSION =~ tr/_//d;
+our $VERSION = '2.26';
 
 # simplest way to avoid indexing of the package: no package statement
 sub base::__inc::unhook { @INC = grep !(ref eq 'CODE' && $_ == $_[0]), @INC }

@@ -1,11 +1,9 @@
 package File::Spec::Unix;
 
 use strict;
-use vars qw($VERSION);
 
-$VERSION = '3.68';
+our $VERSION = '3.68';
 my $xs_version = $VERSION;
-$VERSION =~ tr/_//d;
 
 #dont try to load XSLoader and DynaLoader only to ultimately fail on miniperl
 if(!defined &canonpath && defined &DynaLoader::boot_DynaLoader) {
