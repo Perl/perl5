@@ -5382,8 +5382,9 @@ pointer to somewhere inside the string buffer.  C<ptr> becomes the first
 character of the adjusted string.  Uses the C<OOK> hack.  On return, only
 C<SvPOK(sv)> and C<SvPOKp(sv)> among the C<OK> flags will be true.
 
-Beware: after this function returns, C<ptr> and SvPVX_const(sv) may no longer
-refer to the same chunk of data.
+Beware: this function may reallocate the SV's string buffer or choose
+to chop by shifting data, in which case C<ptr> and/or the original
+C<SvPVX_const(sv)> may no longer point to valid data.
 
 The unfortunate similarity of this function's name to that of Perl's C<chop>
 operator is strictly coincidental.  This function works from the left;
@@ -6400,18 +6401,18 @@ Perl_sv_insert_flags(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN l
 	*mid = '\0';
 	SvCUR_set(bigstr, mid - big);
     }
-    else if ((i = mid - big)) {	/* faster from front */
+    /* faster from front */
+    else if ((i = mid - big)) {
 	midend -= littlelen;
-	mid = midend;
 	Move(big, midend - i, i, char);
-	sv_chop(bigstr,midend-i);
 	if (littlelen)
-	    Move(little, mid, littlelen,char);
+	    Move(little, midend, littlelen, char);
+	sv_chop(bigstr, midend-i);
     }
     else if (littlelen) {
 	midend -= littlelen;
-	sv_chop(bigstr,midend);
 	Move(little,midend,littlelen,char);
+	sv_chop(bigstr,midend);
     }
     else {
 	sv_chop(bigstr,midend);

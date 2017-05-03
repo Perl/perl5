@@ -3315,9 +3315,9 @@ PP(pp_subst)
 		d -= clen;
                 if (i > 0)
                     Move(s, d - i, i, char);
-		sv_chop(TARG, d-i);
 		if (clen)
 		    Copy(c, d, clen, char);
+		sv_chop(TARG, d-i);
 	    }
 	    SPAGAIN;
 	    PUSHs(&PL_sv_yes);
