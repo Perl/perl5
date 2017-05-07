@@ -1016,12 +1016,13 @@ S_ithread_create(
     MUTEX_UNLOCK(&my_pool->create_destruct_mutex);
     return (thread);
 
-#if defined(__clang__) || defined(__clang)
+#if defined(CLANG_DIAG_IGNORE)
     CLANG_DIAG_IGNORE(-Wthread-safety);
     /* warning: mutex 'thread->mutex' is not held on every path through here [-Wthread-safety-analysis] */
 #endif
 }
-#if defined(__clang__) || defined(__clang)
+/* perl.h defines CLANG_DIAG_* but only in 5.24+ */
+#if defined(CLANG_DIAG_RESTORE)
 CLANG_DIAG_RESTORE
 #endif
 
