@@ -656,14 +656,15 @@ Perl_sharedsv_cond_timedwait(perl_cond *cond, perl_mutex *mut, double abs)
     abs -= (NV)ts.tv_sec;
     ts.tv_nsec = (long)(abs * 1000000000.0);
 
-#if defined(__clang__) || defined(__clang)
+#if defined(CLANG_DIAG_IGNORE)
     CLANG_DIAG_IGNORE(-Wthread-safety);
     /* warning: calling function 'pthread_cond_timedwait' requires holding mutex 'mut' exclusively [-Wthread-safety-analysis] */
 #endif
 
     switch (pthread_cond_timedwait(cond, mut, &ts)) {
 
-#if defined(__clang__) || defined(__clang)
+/* perl.h defines CLANG_DIAG_* but only in 5.24+ */
+#if defined(CLANG_DIAG_RESTORE)
 CLANG_DIAG_RESTORE;
 #endif
 
