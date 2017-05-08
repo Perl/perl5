@@ -563,8 +563,12 @@ glob0(const Char *pattern, glob_t *pglob)
 			break;
 		case BG_STAR:
 			pglob->gl_flags |= GLOB_MAGCHAR;
-			/* collapse adjacent stars to one,
-			 * to avoid exponential behavior
+                        /* Collapse adjacent stars to one.
+                         * This is required to ensure that a pattern like
+                         * "a**" matches a name like "a", as without this
+                         * check when the first star matched everything it would
+                         * cause the second star to return a match fail.
+                         * As long ** is folded here this does not happen.
 			 */
 			if (bufnext == patbuf || bufnext[-1] != M_ALL)
 				*bufnext++ = M_ALL;
@@ -909,15 +913,20 @@ globextend(const Char *path, glob_t *pglob, size_t *limitp)
 
 
 /*
- * pattern matching function for filenames.  Each occurrence of the *
- * pattern causes a recursion level.
+ * pattern matching function for filenames using state machine to avoid
+ * recursion. We maintain a "nextp" and "nextn" to allow us to backtrack
+ * without additional callframes, and to do cleanly prune the backtracking
+ * state when multiple '*' (start) matches are included in the patter.
  *
- * Note, this function differs from the original as per the discussion
- * here: https://research.swtch.com/glob
+ * Thanks to Russ Cox for the improved state machine logic to avoid quadratic
+ * matching on failure.
  *
- * Basically we removed the recursion and made it use the algorithm
- * from Russ Cox to not go quadratic on cases like a file called ("a" x 100) . "x"
- * matched against a pattern like "a*a*a*a*a*a*a*y".
+ * https://research.swtch.com/glob
+ *
+ * An example would be a pattern
+ *  ("a*" x 100) . "y"
+ * against a file name like
+ *  ("a" x 100) . "x"
  *
  */
 static int
