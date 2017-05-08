@@ -916,7 +916,7 @@ globextend(const Char *path, glob_t *pglob, size_t *limitp)
  * pattern matching function for filenames using state machine to avoid
  * recursion. We maintain a "nextp" and "nextn" to allow us to backtrack
  * without additional callframes, and to do cleanly prune the backtracking
- * state when multiple '*' (start) matches are included in the patter.
+ * state when multiple '*' (start) matches are included in the pattern.
  *
  * Thanks to Russ Cox for the improved state machine logic to avoid quadratic
  * matching on failure.
