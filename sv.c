@@ -12448,7 +12448,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     need = BIT_DIGITS(i);
                 } /* if i < 0, the number of digits is hard to predict. */
 	    }
-	    need += has_precis ? precis : 6; /* known default */
+
+            {
+                STRLEN pr = has_precis ? precis : 6; /* known default */
+                if (need >= ((STRLEN)~0) - pr)
+                    croak_memory_wrap();
+                need += pr;
+            }
 
 	    if (need < width)
 		need = width;
@@ -12519,10 +12525,12 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 #endif /* HAS_LDBL_SPRINTF_BUG */
 
-	    need += 20; /* fudge factor */
+            if (need >= ((STRLEN)~0) - 40)
+                croak_memory_wrap();
+	    need += 40; /* fudge factor */
 	    if (PL_efloatsize < need) {
 		Safefree(PL_efloatbuf);
-		PL_efloatsize = need + 20; /* more fudge */
+		PL_efloatsize = need;
 		Newx(PL_efloatbuf, PL_efloatsize, char);
 		PL_efloatbuf[0] = '\0';
 	    }
