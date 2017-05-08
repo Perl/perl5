@@ -95,7 +95,6 @@ my %code_points = (
     0xD7FF     => (isASCII) ? "\xed\x9f\xbf" : I8_to_native("\xf1\xb5\xbf\xbf"),
     0xD800     => (isASCII) ? "\xed\xa0\x80" : I8_to_native("\xf1\xb6\xa0\xa0"),
     0xDC00     => (isASCII) ? "\xed\xb0\x80" : I8_to_native("\xf1\xb7\xa0\xa0"),
-    0xDFFF     => (isASCII) ? "\xee\x80\x80" : I8_to_native("\xf1\xb8\xa0\xa0"),
     0xDFFF     => (isASCII) ? "\xed\xbf\xbf" : I8_to_native("\xf1\xb7\xbf\xbf"),
     0xE000     => (isASCII) ? "\xee\x80\x80" : I8_to_native("\xf1\xb8\xa0\xa0"),
 
