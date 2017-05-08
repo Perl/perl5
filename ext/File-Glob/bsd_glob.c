@@ -950,13 +950,19 @@ match(Char *name, Char *pat, Char *patend, int nocase)
 	                nextp = pat - 1;
 			break;
 		case M_ONE:
+                        /* since * matches leftmost-shortest first   *
+                         * if we encounter the EOS then backtracking *
+                         * will not help, so we can exit early here. */
 			if (*name++ == BG_EOS)
-				goto fail;
+                                return 0;
 			break;
 		case M_SET:
 			ok = 0;
+                        /* since * matches leftmost-shortest first   *
+                         * if we encounter the EOS then backtracking *
+                         * will not help, so we can exit early here. */
 			if ((k = *name++) == BG_EOS)
-				goto fail;
+                                return 0;
 			if ((negate_range = ((*pat & M_MASK) == M_NOT)) != BG_EOS)
 				++pat;
 			while (((c = *pat++) & M_MASK) != M_END)
