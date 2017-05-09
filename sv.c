@@ -11628,7 +11628,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #endif
         NV nv;
 	STRLEN have;
-	STRLEN need;
+	STRLEN float_need; /* what PL_efloatsize needs to become */
 	STRLEN gap;
 	const char *dotstr = ".";
 	STRLEN dotstrlen = 1;
@@ -12407,7 +12407,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 NV_TO_FV(nv, fv);
             }
 
-	    need = 0;
+	    float_need = 0;
 	    /* frexp() (or frexpl) has some unspecified behaviour for
              * nan/inf/-inf, so let's avoid calling that on non-finites. */
 	    if (isALPHA_FOLD_NE(c, 'e') && FV_ISFINITE(fv)) {
@@ -12425,7 +12425,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                      * exponent.  Secondly, for the reasonably common
                      * long doubles case, the "80-bit extended", two
                      * or six bytes of the NV are unused. */
-                    need +=
+                    float_need +=
                         (fv < 0) ? 1 : 0 + /* possible unary minus */
                         2 + /* "0x" */
                         1 + /* the very unlikely carry */
@@ -12444,30 +12444,30 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                      * See the definition of DOUBLEDOUBLE_MAXBITS.
                      *
                      * Need 2 hexdigits for each byte. */
-                    need += (DOUBLEDOUBLE_MAXBITS/8 + 1) * 2;
+                    float_need += (DOUBLEDOUBLE_MAXBITS/8 + 1) * 2;
                     /* the size for the exponent already added */
 #endif
 #ifdef USE_LOCALE_NUMERIC
                         STORE_LC_NUMERIC_SET_TO_NEEDED();
                         if (PL_numeric_radix_sv && IN_LC(LC_NUMERIC))
-                            need += SvLEN(PL_numeric_radix_sv);
+                            float_need += SvLEN(PL_numeric_radix_sv);
                         RESTORE_LC_NUMERIC();
 #endif
                 }
                 else if (i > 0) {
-                    need = BIT_DIGITS(i);
+                    float_need = BIT_DIGITS(i);
                 } /* if i < 0, the number of digits is hard to predict. */
 	    }
 
             {
                 STRLEN pr = has_precis ? precis : 6; /* known default */
-                if (need >= ((STRLEN)~0) - pr)
+                if (float_need >= ((STRLEN)~0) - pr)
                     croak_memory_wrap();
-                need += pr;
+                float_need += pr;
             }
 
-	    if (need < width)
-		need = width;
+	    if (float_need < width)
+		float_need = width;
 
 #ifdef HAS_LDBL_SPRINTF_BUG
 	    /* This is to try to fix a bug with irix/nonstop-ux/powerux and
@@ -12501,7 +12501,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	    if ((intsize == 'q') && (c == 'f') &&
 		((fv < MY_DBL_MAX_BUG) && (fv > -MY_DBL_MAX_BUG)) &&
-		(need < DBL_DIG)) {
+		(float_need < DBL_DIG)) {
 		/* it's going to be short enough that
 		 * long double precision is not needed */
 
@@ -12535,12 +12535,12 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 #endif /* HAS_LDBL_SPRINTF_BUG */
 
-            if (need >= ((STRLEN)~0) - 40)
+            if (float_need >= ((STRLEN)~0) - 40)
                 croak_memory_wrap();
-	    need += 40; /* fudge factor */
-	    if (PL_efloatsize < need) {
+	    float_need += 40; /* fudge factor */
+	    if (PL_efloatsize < float_need) {
 		Safefree(PL_efloatbuf);
-		PL_efloatsize = need;
+		PL_efloatsize = float_need;
 		Newx(PL_efloatbuf, PL_efloatsize, char);
 		PL_efloatbuf[0] = '\0';
 	    }
@@ -13047,12 +13047,15 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	if (have < zeros)
 	    croak_memory_wrap();
 
-	need = (have > width ? have : width);
-	gap = need - have;
+        {
+            STRLEN need = (have > width ? have : width);
+            gap = need - have;
 
-	if (need >= (((STRLEN)~0) - SvCUR(sv) - dotstrlen - 1))
-	    croak_memory_wrap();
-	SvGROW(sv, SvCUR(sv) + need + dotstrlen + 1);
+            if (need >= (((STRLEN)~0) - SvCUR(sv) - dotstrlen - 1))
+                croak_memory_wrap();
+            SvGROW(sv, SvCUR(sv) + need + dotstrlen + 1);
+        }
+
 	p = SvEND(sv);
 	if (esignlen && fill == '0') {
 	    int i;
