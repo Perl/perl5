@@ -13040,23 +13040,43 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	}
 
 
-        /* append esignbuf, filler, zeroes, eptr and dotstr to sv */
+        /* append esignbuf, filler, zeros, eptr and dotstr to sv */
 
         {
             STRLEN need, have, gap;
 
             /* signed value that's wrapped? */
             assert(elen  <= ((~(STRLEN)0) >> 1));
-            have = esignlen + zeros + elen;
-            if (have < zeros)
+
+            /* Most of these length vars can range to any value if
+             * supplied with a hostile format and/or args. So check every
+             * addition for possible overflow. In reality some of these
+             * values are interdependent so these checks are slightly
+             * redundant. But its easier to be certain this way.
+             */
+
+            have = elen;
+
+            if (have >= (((STRLEN)~0) - zeros))
                 croak_memory_wrap();
+            have += zeros;
+
+            if (have >= (((STRLEN)~0) - esignlen))
+                croak_memory_wrap();
+            have += esignlen;
 
             need = (have > width ? have : width);
             gap = need - have;
 
-            if (need >= (((STRLEN)~0) - SvCUR(sv) - dotstrlen - 1))
+            if (need >= (((STRLEN)~0) - dotstrlen))
                 croak_memory_wrap();
-            SvGROW(sv, SvCUR(sv) + need + dotstrlen + 1);
+            need += dotstrlen;
+
+            if (need >= (((STRLEN)~0) - (SvCUR(sv) + 1)))
+                croak_memory_wrap();
+            need += (SvCUR(sv) + 1);
+
+            SvGROW(sv, need);
 
             p = SvEND(sv);
             if (esignlen && fill == '0') {
