@@ -914,4 +914,30 @@ SKIP: {
     is(sprintf("%a", eval '0x1p-16494'), '0x1p-16494'); # underflow
 }
 
+# check all calls to croak_memory_wrap()
+# RT #131260
+
+{
+    my $s = 8 * $Config{sizesize};
+    my $i = 1;
+    my $max;
+    while ($s--) { $max |= $i; $i <<= 1; }
+    my $max40 = $max - 40; # see the magic fudge factor in sv_vcatpvfn_flags()
+
+    my @tests = (
+                  # format, arg
+                  ["%.${max}a",        1.1 ],
+                  ["%.${max40}a",      1.1 ],
+                  ["%.${max}i",          1 ],
+                  ["%.${max}i",         -1 ],
+    );
+
+    for my $test (@tests) {
+        my ($fmt, $arg) = @$test;
+        eval { my $s = sprintf $fmt, $arg; };
+        like("$@", qr/panic: memory wrap/, qq{memory wrap: "$fmt", "$arg"});
+    }
+}
+
+
 done_testing();
