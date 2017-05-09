@@ -11627,7 +11627,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #  define FV_ISFINITE(x) Perl_isfinite((NV)(x))
 #endif
         NV nv;
-	STRLEN have;
 	STRLEN float_need; /* what PL_efloatsize needs to become */
 	STRLEN gap;
 	const char *dotstr = ".";
@@ -13041,14 +13040,17 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    }
 	}
 
-        /* signed value that's wrapped? */
-        assert(elen  <= ((~(STRLEN)0) >> 1));
-	have = esignlen + zeros + elen;
-	if (have < zeros)
-	    croak_memory_wrap();
 
         {
-            STRLEN need = (have > width ? have : width);
+            STRLEN need, have;
+
+            /* signed value that's wrapped? */
+            assert(elen  <= ((~(STRLEN)0) >> 1));
+            have = esignlen + zeros + elen;
+            if (have < zeros)
+                croak_memory_wrap();
+
+            need = (have > width ? have : width);
             gap = need - have;
 
             if (need >= (((STRLEN)~0) - SvCUR(sv) - dotstrlen - 1))
