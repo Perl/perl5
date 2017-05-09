@@ -13058,48 +13058,49 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             SvGROW(sv, SvCUR(sv) + need + dotstrlen + 1);
         }
 
-	p = SvEND(sv);
-	if (esignlen && fill == '0') {
-	    int i;
-	    for (i = 0; i < (int)esignlen; i++)
-		*p++ = esignbuf[i];
-	}
-	if (gap && !left) {
-	    memset(p, fill, gap);
-	    p += gap;
-	}
-	if (esignlen && fill != '0') {
-	    int i;
-	    for (i = 0; i < (int)esignlen; i++)
-		*p++ = esignbuf[i];
-	}
-	if (zeros) {
-	    int i;
-	    for (i = zeros; i; i--)
-		*p++ = '0';
-	}
-	if (elen) {
-	    Copy(eptr, p, elen, char);
-	    p += elen;
-	}
-	if (gap && left) {
-	    memset(p, ' ', gap);
-	    p += gap;
-	}
-	if (vectorize) {
-	    if (veclen) {
-		Copy(dotstr, p, dotstrlen, char);
-		p += dotstrlen;
-	    }
-	    else
-		vectorize = FALSE;		/* done iterating over vecstr */
-	}
-	if (is_utf8)
-	    has_utf8 = TRUE;
-	if (has_utf8)
-	    SvUTF8_on(sv);
-	*p = '\0';
-	SvCUR_set(sv, p - SvPVX_const(sv));
+            p = SvEND(sv);
+            if (esignlen && fill == '0') {
+                int i;
+                for (i = 0; i < (int)esignlen; i++)
+                    *p++ = esignbuf[i];
+            }
+            if (gap && !left) {
+                memset(p, fill, gap);
+                p += gap;
+            }
+            if (esignlen && fill != '0') {
+                int i;
+                for (i = 0; i < (int)esignlen; i++)
+                    *p++ = esignbuf[i];
+            }
+            if (zeros) {
+                int i;
+                for (i = zeros; i; i--)
+                    *p++ = '0';
+            }
+            if (elen) {
+                Copy(eptr, p, elen, char);
+                p += elen;
+            }
+            if (gap && left) {
+                memset(p, ' ', gap);
+                p += gap;
+            }
+            if (vectorize) {
+                if (veclen) {
+                    Copy(dotstr, p, dotstrlen, char);
+                    p += dotstrlen;
+                }
+                else
+                    vectorize = FALSE;	/* done iterating over vecstr */
+            }
+            if (is_utf8)
+                has_utf8 = TRUE;
+            if (has_utf8)
+                SvUTF8_on(sv);
+            *p = '\0';
+            SvCUR_set(sv, p - SvPVX_const(sv));
+
 	if (vectorize) {
 	    esignlen = 0;
 	    goto vector;
