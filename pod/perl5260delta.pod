@@ -1577,6 +1577,169 @@ source tree. [perl #124050]
 
 =back
 
+=head1 Platform Support
+
+=head2 New Platforms
+
+=over 4
+
+=item NetBSD/VAX
+
+Perl now compiles under NetBSD on VAX machines.  However, it's not
+possible for that platform to implement floating-point infinities and
+NaNs compatibly with most modern systems, which implement the IEEE-754
+floating point standard.  The hexadecimal floating point (C<0x...p[+-]n>
+literals, C<printf %a>) is not implemented, either.
+The C<make test> passes 98% of tests.
+
+=over 4
+
+=item *
+
+Test fixes and minor updates.
+
+=item *
+
+Account for lack of C<inf>, C<nan>, and C<-0.0> support.
+
+=back
+
+=back
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Darwin
+
+don't treat -Dprefix=/usr as special, instead require an extra option
+-Ddarwin_distribution to produce the same results.
+
+=item POSIX
+
+Finish removing POSIX deprecated functions.
+
+=item OS X
+
+OS X El Capitan doesn't implement the clock_gettime() or clock_getres() APIs,
+emulate them as necessary.
+
+=item macOS
+
+Deprecated syscall(2) on macOS 10.12.
+
+=item EBCDIC
+
+Several tests have been updated to work (or be skipped) on EBCDIC platforms.
+
+=item HP-UX
+
+L<Net::Ping> UDP test is skipped on HP-UX.
+
+=item Hurd
+
+The hints for Hurd have been improved enabling malloc wrap and reporting the
+GNU libc used (previously it was an empty string when reported).
+
+=item VAX
+
+VAX floating point formats are now supported.
+
+=item VMS
+
+=over 4
+
+=item *
+
+The path separator for the C<PERL5LIB> and C<PERLLIB> environment entries is
+now a colon (C<:>) when running under a Unix shell. There is no change when
+running under DCL (it's still C<|>).
+
+=item *
+
+Remove some VMS-specific hacks from C<showlex.t>. These were added 15 years
+ago, and are no longer necessary for any VMS version now supported.
+
+=item *
+
+Move _pDEPTH and _aDEPTH after config.h otherwise DEBUGGING may not be defined
+yet.
+
+=item *
+
+VAXC has not been a possibility for a good long while, and the versions of the
+DEC/Compaq/HP/VSI C compiler that report themselves as "DEC" in a listing file
+are 15 years or more out-of-date and can be safely desupported.
+
+=back
+
+=item Windows
+
+=over 4
+
+=item *
+
+Support for compiling perl on Windows using Microsoft Visual Studio 2015
+(containing Visual C++ 14.0) has been added.
+
+This version of VC++ includes a completely rewritten C run-time library, some
+of the changes in which mean that work done to resolve a socket close() bug in
+perl #120091 and perl #118059 is not workable in its current state with this
+version of VC++.  Therefore, we have effectively reverted that bug fix for
+VS2015 onwards on the basis that being able to build with VS2015 onwards is
+more important than keeping the bug fix.  We may revisit this in the future to
+attempt to fix the bug again in a way that is compatible with VS2015.
+
+These changes do not affect compilation with GCC or with Visual Studio versions
+up to and including VS2013, i.e. the bug fix is retained (unchanged) for those
+compilers.
+
+Note that you may experience compatibility problems if you mix a perl built
+with GCC or VS E<lt>= VS2013 with XS modules built with VS2015, or if you mix a
+perl built with VS2015 with XS modules built with GCC or VS E<lt>= VS2013.
+Some incompatibility may arise because of the bug fix that has been reverted
+for VS2015 builds of perl, but there may well be incompatibility anyway because
+of the rewritten CRT in VS2015 (e.g. see discussion at
+http://stackoverflow.com/questions/30412951).
+
+=back
+
+=item Win32
+
+=over 4
+
+=item *
+
+Tweaks for Win32 VC vs GCC detection makefile code. This fixes issue that CCHOME
+depends on CCTYPE, which in auto detect mode is set after CCHOME, so CCHOME uses
+the uninit CCTYPE var. Also fix else vs .ELSE in makefile.mk
+
+=item *
+
+fp definitions have been updated.
+
+=back
+
+=item VMS And Win32
+
+Fix some breakage, add 'undef' value for default_inc_excludes_dot in build
+scripts.
+
+=item Linux
+
+Drop support for Linux a.out Linux has used ELF for over twenty years.
+
+=item OpenBSD 6
+
+OpenBSD 6 still does not support returning pid, gid or uid with SA_SIGINFO.
+Make sure this is accounted for.
+
+=item FreeBSD
+
+t/uni/overload.t: Skip hanging test on FreeBSD.
+
+=back
+
 =head1 Internal Changes
 
 =over 4
@@ -1765,169 +1928,6 @@ Change C<hv_fetch(…, "…", …, …)> to C<hv_fetchs(…, "…", …)>
 
 The dual-life dists all use Devel::PPPort, so they can use this function even
 though it was only added in 5.10.
-
-=back
-
-=head1 Platform Support
-
-=head2 New Platforms
-
-=over 4
-
-=item NetBSD/VAX
-
-Perl now compiles under NetBSD on VAX machines.  However, it's not
-possible for that platform to implement floating-point infinities and
-NaNs compatibly with most modern systems, which implement the IEEE-754
-floating point standard.  The hexadecimal floating point (C<0x...p[+-]n>
-literals, C<printf %a>) is not implemented, either.
-The C<make test> passes 98% of tests.
-
-=over 4
-
-=item *
-
-Test fixes and minor updates.
-
-=item *
-
-Account for lack of C<inf>, C<nan>, and C<-0.0> support.
-
-=back
-
-=back
-
-=head2 Platform-Specific Notes
-
-=over 4
-
-=item Darwin
-
-don't treat -Dprefix=/usr as special, instead require an extra option
--Ddarwin_distribution to produce the same results.
-
-=item POSIX
-
-Finish removing POSIX deprecated functions.
-
-=item OS X
-
-OS X El Capitan doesn't implement the clock_gettime() or clock_getres() APIs,
-emulate them as necessary.
-
-=item macOS
-
-Deprecated syscall(2) on macOS 10.12.
-
-=item EBCDIC
-
-Several tests have been updated to work (or be skipped) on EBCDIC platforms.
-
-=item HP-UX
-
-L<Net::Ping> UDP test is skipped on HP-UX.
-
-=item Hurd
-
-The hints for Hurd have been improved enabling malloc wrap and reporting the
-GNU libc used (previously it was an empty string when reported).
-
-=item VAX
-
-VAX floating point formats are now supported.
-
-=item VMS
-
-=over 4
-
-=item *
-
-The path separator for the C<PERL5LIB> and C<PERLLIB> environment entries is
-now a colon (C<:>) when running under a Unix shell. There is no change when
-running under DCL (it's still C<|>).
-
-=item *
-
-Remove some VMS-specific hacks from C<showlex.t>. These were added 15 years
-ago, and are no longer necessary for any VMS version now supported.
-
-=item *
-
-Move _pDEPTH and _aDEPTH after config.h otherwise DEBUGGING may not be defined
-yet.
-
-=item *
-
-VAXC has not been a possibility for a good long while, and the versions of the
-DEC/Compaq/HP/VSI C compiler that report themselves as "DEC" in a listing file
-are 15 years or more out-of-date and can be safely desupported.
-
-=back
-
-=item Windows
-
-=over 4
-
-=item *
-
-Support for compiling perl on Windows using Microsoft Visual Studio 2015
-(containing Visual C++ 14.0) has been added.
-
-This version of VC++ includes a completely rewritten C run-time library, some
-of the changes in which mean that work done to resolve a socket close() bug in
-perl #120091 and perl #118059 is not workable in its current state with this
-version of VC++.  Therefore, we have effectively reverted that bug fix for
-VS2015 onwards on the basis that being able to build with VS2015 onwards is
-more important than keeping the bug fix.  We may revisit this in the future to
-attempt to fix the bug again in a way that is compatible with VS2015.
-
-These changes do not affect compilation with GCC or with Visual Studio versions
-up to and including VS2013, i.e. the bug fix is retained (unchanged) for those
-compilers.
-
-Note that you may experience compatibility problems if you mix a perl built
-with GCC or VS E<lt>= VS2013 with XS modules built with VS2015, or if you mix a
-perl built with VS2015 with XS modules built with GCC or VS E<lt>= VS2013.
-Some incompatibility may arise because of the bug fix that has been reverted
-for VS2015 builds of perl, but there may well be incompatibility anyway because
-of the rewritten CRT in VS2015 (e.g. see discussion at
-http://stackoverflow.com/questions/30412951).
-
-=back
-
-=item Win32
-
-=over 4
-
-=item *
-
-Tweaks for Win32 VC vs GCC detection makefile code. This fixes issue that CCHOME
-depends on CCTYPE, which in auto detect mode is set after CCHOME, so CCHOME uses
-the uninit CCTYPE var. Also fix else vs .ELSE in makefile.mk
-
-=item *
-
-fp definitions have been updated.
-
-=back
-
-=item VMS And Win32
-
-Fix some breakage, add 'undef' value for default_inc_excludes_dot in build
-scripts.
-
-=item Linux
-
-Drop support for Linux a.out Linux has used ELF for over twenty years.
-
-=item OpenBSD 6
-
-OpenBSD 6 still does not support returning pid, gid or uid with SA_SIGINFO.
-Make sure this is accounted for.
-
-=item FreeBSD
-
-t/uni/overload.t: Skip hanging test on FreeBSD.
 
 =back
 
