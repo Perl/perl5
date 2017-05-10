@@ -1248,7 +1248,13 @@ Perl_utf8n_to_uvchr_error(pTHX_ const U8 *s,
     {
         possible_problems |= UTF8_GOT_LONG;
 
-        if (UNLIKELY(possible_problems & UTF8_GOT_TOO_SHORT)) {
+        if (   UNLIKELY(   possible_problems & UTF8_GOT_TOO_SHORT)
+                          /* The calculation in the 'true' branch of this 'if'
+                           * below won't work if overflows, and isn't needed
+                           * anyway.  Further below we handle all overflow
+                           * cases */
+            &&   LIKELY(! (possible_problems & UTF8_GOT_OVERFLOW)))
+        {
             UV min_uv = uv_so_far;
             STRLEN i;
 
