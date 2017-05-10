@@ -11444,6 +11444,12 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
     } STMT_END
 
 void
+
+
+/* This function assumes that pat has the same utf8-ness as sv.
+ * It's the caller's responsibility to ensure that this is so.
+ */
+
 Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
                        va_list *const args, SV **const svargs, const I32 svmax, bool *const maybe_tainted,
                        const U32 flags)
@@ -13003,19 +13009,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		Perl_warner(aTHX_ packWARN(WARN_PRINTF), "%" SVf, SVfARG(msg)); /* yes, this is reentrant */
 	    }
 
-	    /* output mangled stuff ... */
-	    if (c == '\0')
-		--q;
-	    eptr = p;
-	    elen = q - p;
-
-	    /* ... right here, because formatting flags should not apply */
-	    SvGROW(sv, SvCUR(sv) + elen + 1);
-	    p = SvEND(sv);
-	    Copy(eptr, p, elen, char);
-	    p += elen;
-	    *p = '\0';
-	    SvCUR_set(sv, p - SvPVX_const(sv));
+	    /* mangled format: output the '%', then continue from the
+             * character following that */
+            sv_catpvn_nomg(sv, p, 1);
+            q = p + 1;
 	    svix = osvix;
 	    continue;	/* not "break" */
 	}

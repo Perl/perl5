@@ -689,7 +689,7 @@ __END__
 >%*2$1d<	>[12, 3]<	>%*2$1d INVALID REDUNDANT<
 >%0v2.2d<	>''<	><
 >%vc,%d<	>[63, 64, 65]<	>%vc,63 INVALID REDUNDANT<
->%v%,%d<	>[63, 64, 65]<	>%v%,63 INVALID REDUNDANT<
+>%v%,%d<	>[63, 64, 65]<	>%v%,63 INVALID INVALID REDUNDANT<
 >%vd,%d<	>["\x1", 2, 3]<	>1,2 REDUNDANT<
 >%vf,%d<	>[1, 2, 3]<	>%vf,1 INVALID REDUNDANT<
 >%vF,%d<	>[1, 2, 3]<	>%vF,1 INVALID REDUNDANT<

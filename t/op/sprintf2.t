@@ -939,5 +939,29 @@ SKIP: {
     }
 }
 
+{
+    # handle utf8 correctly when skipping invalid format
+    my $w_red   = 0;
+    my $w_inv   = 0;
+    my $w_other = 0;
+    local $SIG{__WARN__} = sub {
+        if ($_[0] =~ /^Invalid conversion/) {
+            $w_inv++;
+        }
+        elsif ($_[0] =~ /^Redundant argument/) {
+            $w_red++;
+        }
+        else {
+            $w_other++;
+        }
+    };
+
+    use warnings;
+    my $s = sprintf "%s%\xc4\x80%s", "\x{102}", "\xc4\x83";
+    is($s, "\x{102}%\xc4\x80\xc4\x83", "utf8 for invalid format");
+    is($w_inv,   1, "utf8 for invalid format: invalid warnings");
+    is($w_red,   0, "utf8 for invalid format: redundant warnings");
+    is($w_other, 0, "utf8 for invalid format: other warnings");
+}
 
 done_testing();
