@@ -393,7 +393,7 @@ was deprecated in Perl 5.24, and will be fatal in Perl 5.28.
 
 =head3 In XS code, use of C<to_utf8_case()>
 
-This function is being removed; instead convert to call
+This function has been removed as of Perl 5.28; instead convert to call
 the appropriate one of:
 L<C<toFOLD_utf8_safe>|perlapi/toFOLD_utf8_safe>.
 L<C<toLOWER_utf8_safe>|perlapi/toLOWER_utf8_safe>,

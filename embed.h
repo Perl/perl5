@@ -729,7 +729,6 @@
 #define to_uni_title_lc(a)	Perl_to_uni_title_lc(aTHX_ a)
 #define to_uni_upper(a,b,c)	Perl_to_uni_upper(aTHX_ a,b,c)
 #define to_uni_upper_lc(a)	Perl_to_uni_upper_lc(aTHX_ a)
-#define to_utf8_case(a,b,c,d,e,f)	Perl_to_utf8_case(aTHX_ a,b,c,d,e,f)
 #define unpack_str(a,b,c,d,e,f,g,h)	Perl_unpack_str(aTHX_ a,b,c,d,e,f,g,h)
 #define unpackstring(a,b,c,d,e)	Perl_unpackstring(aTHX_ a,b,c,d,e)
 #define unsharepvn(a,b,c)	Perl_unsharepvn(aTHX_ a,b,c)

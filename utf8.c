@@ -2744,62 +2744,6 @@ Perl__is_utf8_mark(pTHX_ const U8 *p)
     return is_utf8_common(p, &PL_utf8_mark, "IsM", NULL);
 }
 
-/*
-=for apidoc to_utf8_case
-
-Instead use the appropriate one of L</toUPPER_utf8_safe>,
-L</toTITLE_utf8_safe>,
-L</toLOWER_utf8_safe>,
-or L</toFOLD_utf8_safe>.
-
-This function will be removed in Perl v5.28.
-
-C<p> contains the pointer to the UTF-8 string encoding
-the character that is being converted.  This routine assumes that the character
-at C<p> is well-formed.
-
-C<ustrp> is a pointer to the character buffer to put the
-conversion result to.  C<lenp> is a pointer to the length
-of the result.
-
-C<swashp> is a pointer to the swash to use.
-
-Both the special and normal mappings are stored in F<lib/unicore/To/Foo.pl>,
-and loaded by C<SWASHNEW>, using F<lib/utf8_heavy.pl>.  C<special> (usually,
-but not always, a multicharacter mapping), is tried first.
-
-C<special> is a string, normally C<NULL> or C<"">.  C<NULL> means to not use
-any special mappings; C<""> means to use the special mappings.  Values other
-than these two are treated as the name of the hash containing the special
-mappings, like C<"utf8::ToSpecLower">.
-
-C<normal> is a string like C<"ToLower"> which means the swash
-C<%utf8::ToLower>.
-
-Code points above the platform's C<IV_MAX> will raise a deprecation warning,
-unless those are turned off.
-
-=cut */
-
-UV
-Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
-			SV **swashp, const char *normal, const char *special)
-{
-    STRLEN len_cp;
-    UV cp;
-    const U8 * e = p + UTF8SKIP(p);
-
-    PERL_ARGS_ASSERT_TO_UTF8_CASE;
-
-    cp = utf8n_to_uvchr(p, e - p, &len_cp, UTF8_CHECK_ONLY);
-    if (len_cp == (STRLEN) -1) {
-        _force_out_malformed_utf8_message(p, e,
-                                   _UTF8_NO_CONFIDENCE_IN_CURLEN, 1 /* Die */ );
-    }
-
-    return _to_utf8_case(cp, p, ustrp, lenp, swashp, normal, special);
-}
-
     /* change namve uv1 to 'from' */
 STATIC UV
 S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp,

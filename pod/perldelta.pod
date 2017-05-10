@@ -356,6 +356,11 @@ well.
 
 The C<PL_statbuf> interpreter variable has been removed.
 
+=item *
+
+The deprecated function C<to_utf8_case()>, accessible from XS code, has
+been removed.
+
 =back
 
 =head1 Selected Bug Fixes
