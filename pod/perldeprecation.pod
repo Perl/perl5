@@ -203,6 +203,53 @@ their use won't raise this warning.
 In Perl 5.30, delimiters which are unassigned code points, or which
 are non-standalone graphemes will be fatal.
 
+=head3 In XS code, use of various macros dealing with UTF-8.
+
+These macros will require an extra parameter in Perl 5.30:
+C<isALPHANUMERIC_utf8>,
+C<isASCII_utf8>,
+C<isBLANK_utf8>,
+C<isCNTRL_utf8>,
+C<isDIGIT_utf8>,
+C<isIDFIRST_utf8>,
+C<isPSXSPC_utf8>,
+C<isSPACE_utf8>,
+C<isVERTWS_utf8>,
+C<isWORDCHAR_utf8>,
+C<isXDIGIT_utf8>,
+C<isALPHANUMERIC_LC_utf8>,
+C<isALPHA_LC_utf8>,
+C<isASCII_LC_utf8>,
+C<isBLANK_LC_utf8>,
+C<isCNTRL_LC_utf8>,
+C<isDIGIT_LC_utf8>,
+C<isGRAPH_LC_utf8>,
+C<isIDCONT_LC_utf8>,
+C<isIDFIRST_LC_utf8>,
+C<isLOWER_LC_utf8>,
+C<isPRINT_LC_utf8>,
+C<isPSXSPC_LC_utf8>,
+C<isPUNCT_LC_utf8>,
+C<isSPACE_LC_utf8>,
+C<isUPPER_LC_utf8>,
+C<isWORDCHAR_LC_utf8>,
+C<isXDIGIT_LC_utf8>,
+C<toFOLD_utf8>,
+C<toLOWER_utf8>,
+C<toTITLE_utf8>,
+and
+C<toUPPER_utf8>.
+
+There is now a macro that corresponds to each one of these, simply by
+appending C<_safe> to the name.  It takes the extra parameter.
+For example, C<isDIGIT_utf8_safe> corresponds to C<isDIGIT_utf8>, but
+takes the extra parameter, and its use doesn't generate a deprecation
+warning.  All are documented in L<perlapi/Character case changing> and
+L<perlapi/Character classification>.
+
+You can change to use these versions at any time, or, if you can live
+with the deprecation messages, wait until 5.30 and add the parameter to
+the existing calls, without changing the names.
 
 =head2 Perl 5.28
 
@@ -347,6 +394,15 @@ their operands as strings of bytes. As such, values above 0xFF
 are nonsensical. Using such code points with these operators
 was deprecated in Perl 5.24, and will be fatal in Perl 5.28.
 
+=head3 In XS code, use of C<to_utf8_case()>
+
+This function is being removed; instead convert to call
+the appropriate one of:
+L<C<toFOLD_utf8_safe>|perlapi/toFOLD_utf8_safe>.
+L<C<toLOWER_utf8_safe>|perlapi/toLOWER_utf8_safe>,
+L<C<toTITLE_utf8_safe>|perlapi/toTITLE_utf8_safe>,
+or
+L<C<toUPPER_utf8_safe>|perlapi/toUPPER_utf8_safe>.
 
 =head2 Perl 5.26
 
