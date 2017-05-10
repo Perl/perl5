@@ -947,6 +947,13 @@ Document @ISA. Was documented other places, not not in perlvar.
 
 =item *
 
+Since C<.> is now removed from C<@INC> by default, C<do> will now trigger
+a warning recommending to fix the C<do> statement:
+
+L<do "%s" failed, '.' is no longer in @INC|perldiag/do "%s" failed, '.' is no longer in @INC; did you mean do ".E<sol>%s"?>
+
+=item *
+
 Using the empty pattern (which re-executes the last successfully-matched
 pattern) inside a code block in another regex, as in C</(?{ s!!new! })/>, has
 always previously yielded a segfault. It now produces an error: L<Use of the
@@ -1061,6 +1068,16 @@ the C<encoding> pragma, is no longer supported as of Perl 5.26.0.
 =head2 Changes to Existing Diagnostics
 
 =over 4
+
+=item *
+
+When a C<require> fails, we now do not provide C<@INC> when the C<require>
+is for a file instead of a module.
+
+=item *
+
+When C<@INC> is not scanned for a C<require> call, we no longer display
+C<@INC> to avoid confusion.
 
 =item *
 
