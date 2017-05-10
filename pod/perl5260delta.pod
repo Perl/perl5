@@ -212,6 +212,11 @@ has been deprecated to do so since Perl v5.22.
 
 =head1 Security
 
+=head2 Remove current dir (C<.>) from C<@INC>
+
+For security reasons, C<@INC> no longer contains the default directory
+(C<.>).
+
 =head2 "Escaped" colons and relative paths in PATH
 
 On Unix systems, Perl treats any relative paths in the PATH environment
@@ -1019,6 +1024,13 @@ L<Bareword in require must not start with a double-colon: "%s"|perldiag/"Barewor
 
 =item *
 
+Since C<.> is removed from C<@INC>, C<do> will now trigger a warning
+recommending on fixing the C<do> statement.
+
+L<do "%s" failed, '.' is no longer in @INC|perldiag/"do "%s" failed, '.' is no longer in @INC">
+
+=item *
+
 L<Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl v5.30|perldiag/"Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl v5.30">
 
 See L</Deprecations>
@@ -1315,6 +1327,10 @@ tests for perlbug. [perl #128020]
 =head1 Configuration and Compilation
 
 =over 4
+
+=item *
+
+C<DEFAULT_INC_EXCLUDES_DOT> has been turned on as default.
 
 =item *
 
@@ -1901,6 +1917,13 @@ t/uni/overload.t: Skip hanging test on FreeBSD.
 =head1 Selected Bug Fixes
 
 =over 4
+
+=item *
+
+C< $-{$name} > would leak an C<AV> on each access if the regular
+expression had no named captures.  The same applies to access to any
+hash tied with L<Tie::Hash::NamedCapture> and C<< all =E<gt> 1 >>. [perl
+#130822]
 
 =item *
 
@@ -2524,6 +2547,17 @@ Jon Portnoy (AVENJ), a prolific Perl author and admired Gentoo community
 member, has passed away on August 10, 2016. He will be remembered and
 missed by all those with which he came in contact and enriched with his
 intellect, wit, and spirit.
+
+It is with great sadness we also note Kip Hampton's passing.. Probably
+best known as the author of the Perl & XML column on XML.com, he was a
+core contributor to AxKit, an XML server platform that became an Apache
+Foundation project. He was a frequent speaker in the early days at
+OSCON, and most recently at YAPC::NA in Madison. He was frequently on
+irc.perl.org as `ubu`, generally in the #axkit-dahut community, the
+group responsible for YAPC::NA Asheville in 2011.
+
+Kip and his constant contributions to the community will be greatly
+missed.
 
 =head1 Acknowledgements
 
