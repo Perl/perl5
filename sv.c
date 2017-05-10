@@ -12694,7 +12694,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     if (has_precis) {
                         U8* ve = (subnormal ? vlnz + 1 : vend);
                         SSize_t vn = ve - v0;
-                        if ((SSize_t)(precis + 1) < vn) {
+                        assert(vn >= 1);
+                        if (precis < (Size_t)(vn - 1)) {
                             bool overflow = FALSE;
                             if (v0[precis + 1] < 0x8) {
                                 /* Round down, nothing to do. */
