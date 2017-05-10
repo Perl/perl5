@@ -177,6 +177,12 @@ C<(keys @_) = ...>, which are also errors.  [perl #128187]
 
 =item *
 
+The rather slow implementation for the experimental subroutine signatures
+feature has been made much faster; it is now comparable in speed with the
+old-style C<my ($a, $b, @c) = @_>.
+
+=item *
+
 Bareword constant strings are now permitted to take part in constant
 folding. They were originally exempted from constant folding in August 1999,
 during the development of Perl 5.6, to ensure that C<use strict "subs">
@@ -236,6 +242,16 @@ L<C<@INC>|perlvar/@INC>.
 =head1 Documentation
 
 =head2 Changes to Existing Documentation
+
+=head3 L<perlcall>
+
+=over 4
+
+=item *
+
+Removed redundant C<dSP> from an example.
+
+=back
 
 =head3 L<perlcommunity>
 
@@ -571,6 +587,13 @@ tests for perlbug. [perl #128020]
 
 =item *
 
+A probe for C<gai_strerror> was added to F<Configure> that checks if the
+the gai_strerror() routine is available and can be used to
+translate error codes returned by getaddrinfo() into human
+readable strings.
+
+=item *
+
 F<Configure> now aborts if both "-Duselongdouble" and "-Dusequadmath" are
 requested.
 L<[perl #126203]|https://rt.perl.org/Public/Bug/Display.html?id=126203>
@@ -660,6 +683,12 @@ source tree. [perl #124050]
 
 =item *
 
+Three new ops, C<OP_ARGELEM>, C<OP_ARGDEFELEM> and C<OP_ARGCHECK> have
+been added. These are intended principally to implement the individual
+elements of a subroutine signature, plus any overall checking required.
+
+=item *
+
 Perl no longer panics when switching into some locales on machines with
 buggy C<strxfrm()> implementations in their libc. [perl #121734]
 
@@ -681,6 +710,11 @@ build option does.
 
 =over 4
 
+=item Hurd
+
+The hints for Hurd have been improved enabling malloc wrap and reporting the
+GNU libc used (previously it was an empty string when reported).
+
 =item VAX
 
 VAX floating point formats are now supported.
@@ -690,6 +724,100 @@ VAX floating point formats are now supported.
 =head1 Selected Bug Fixes
 
 =over 4
+
+=item *
+
+Problems with in-place array sorts: code like C<@a = sort { ... } @a>,
+where the source and destination of the sort are the same plain array, are
+optimised to do less copying around. Two side-effects of this optimisation
+were that the contents of C<@a> as visible to to sort routine were
+partially sorted, and under some circumstances accessing C<@a> during the
+sort could crash the interpreter. Both these issues have been fixed, and
+Sort functions see the original value of C<@a>.
+
+=item *
+
+Non-ASCII string delimiters are now reported correctly in error messages
+for unterminated strings.  [perl #128701]
+
+=item *
+
+C<pack("p", ...)> used to emit its warning ("Attempt to pack pointer to
+temporary value") erroneously in some cases, but has been fixed.
+
+=item *
+
+C<@DB::args> is now exempt from "used once" warnings.  The warnings only
+occurred under B<-w>, because F<warnings.pm> itself uses C<@DB::args>
+multiple times.
+
+=item *
+
+The use of built-in arrays or hash slices in a double-quoted string no
+longer issues a warning ("Possible unintended interpolation...") if the
+variable has not been mentioned before.  This affected code like
+C<qq|@DB::args|> and C<qq|@SIG{'CHLD', 'HUP'}|>.  (The special variables
+C<@-> and C<@+> were already exempt from the warning.)
+
+=item *
+
+C<gethostent> and similar functions now perform a null check internally, to
+avoid crashing with torsocks.  This was a regression from 5.22.  [perl
+#128740]
+
+=item *
+
+C<defined *{'!'}>, C<defined *{'['}>, and C<defined *{'-'}> no longer leak
+memory if the typeglob in question has never been accessed before.
+
+=item *
+
+In 5.25.4 fchown() was changed not to accept negative one as an argument
+because in some platforms that is an error.  However, in some other platforms
+that is an acceptable argument.  This change has been reverted [perl #128967].
+
+=item *
+
+Mentioning the same constant twice in a row (which is a syntax error) no
+longer fails an assertion under debugging builds.  This was a regression
+from 5.20.  [perl #126482]
+
+=item *
+
+Many issues relating to C<printf "%a"> of hexadecimal floating point
+were fixed.  In addition, the "subnormals" (formerly known as "denormals")
+floating point anumbers are now supported both with the plain IEEE 754
+floating point numbers (64-bit or 128-bit) and the x86 80-bit
+"extended precision".  Note that subnormal hexadecimal floating
+point literals will give a warning about "exponent underflow".
+[perl #128843, #128889, #128890, #128893, #128909, #128919]
+
+=item *
+
+A regression in 5.24 with C<tr/\N{U+...}/foo/> when the code point was between
+128 and 255 has been fixed. [perl #128734].
+
+=item *
+
+A regression from the previous development release, 5.23.3, where
+compiling a regular expression could crash the interpreter has been
+fixed. [perl #128686].
+
+=item *
+
+Use of a string delimiter whose code point is above 2**31 now works
+correctly on platforms that allow this.  Previously, certain characters,
+due to truncation, would be confused with other delimiter characters
+with special meaning (such as C<?> in C<m?...?>), resulting
+in inconsistent behaviour.  Note that this is non-portable,
+and is based on Perl's extension to UTF-8, and is probably not
+displayable nor enterable by any editor. [perl #128738]
+
+=item *
+
+C<@{x> followed by a newline where C<x> represents a control or non-ASCII
+character no longer produces a garbled syntax error message or a crash.
+[perl #128951]
 
 =item *
 
