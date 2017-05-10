@@ -12736,7 +12736,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                                      * way to the front, we need to
                                      * insert 0x1 in front, and adjust
                                      * the exponent. */
-                                    Move(v0, v0 + 1, vn, char);
+                                    Move(v0, v0 + 1, vn - 1, char);
                                     *v0 = 0x1;
                                     exponent += 4;
                                 }
