@@ -120,6 +120,15 @@ has been deprecated to do so since Perl v5.22.
 
 =head1 Security
 
+=head2 "Escaped" colons and relative paths in PATH
+
+On Unix systems, Perl treats any relative paths in the PATH environment
+variable as tainted when starting a new process.  Previously, it was
+allowing a backslash to escape a colon (unlike the OS), consequently
+allowing relative paths to be considered safe if the PATH was set to
+something like C</\:.>.  The check has been fixed to treat C<.> as tainted
+in that example.
+
 =head2 C<-Di> switch is now required for PerlIO debugging output
 
 Previously PerlIO debugging output would be sent to the file specified
@@ -218,6 +227,13 @@ that effect and then does nothing.
 
 =item *
 
+L<Filter::Simple> has been upgraded from version 0.92 to 0.93.
+
+It no longer treats C<no MyFilter> immediately following C<use MyFilter> as
+end-of-file.  [perl #107726]
+
+=item *
+
 L<POSIX> has been upgraded from version 1.65 to 1.69. This remedies several
 defects in making its symbols exportable. [perl #127821]
 The C<POSIX::tmpnam()> interface has been removed,
@@ -225,6 +241,12 @@ see L</"POSIX::tmpnam() has been removed">.
 Trying to import POSIX subs that have no real implementations
 (like C<POSIX::atend()>) now fails at import time, instead of
 waiting until runtime.
+
+=item *
+
+L<Thread::Semaphore> has been upgraded from 2.12 to 2.13.
+
+Added the C<down_timed> method.
 
 =item *
 
@@ -307,6 +329,17 @@ L<[perl #128607]|https://rt.perl.org/Public/Bug/Display.html?id=128607>
 =item *
 
 Removed obsolete documentation of L<C<study()>|perlfunc/study>.
+
+=back
+
+=head3 L<perlinterp>
+
+=over 4
+
+=item *
+
+L<perlinterp> has been expanded to give a more detailed example of how to
+hunt around in the parser for how a given operator is handled.
 
 =back
 
@@ -662,6 +695,12 @@ The build process no longer emits an extra blank line before building each
 
 =item *
 
+F<t/re/regexp_nonull.t> has been added to test that the regular expression
+engine can handle scalars that do not have a null byte just past the end of
+the string.
+
+=item *
+
 A new test script, F<t/op/decl-refs.t>, has been added to test the new feature,
 "Declaring a reference to a variable".
 
@@ -680,6 +719,19 @@ source tree. [perl #124050]
 =head1 Internal Changes
 
 =over 4
+
+=item *
+
+Several macros and functions have been added to the public API for
+dealing with Unicode and UTF-8-encoded strings.  See
+L<perlapi/Unicode Support>.
+
+=item *
+
+Use C<my_strlcat()> in C<locale.c>. While C<strcat()> is safe in this context,
+some compilers were optimizing this to C<strcpy()> causing a porting test to
+fail that looks for unsafe code. Rather than fighting this, we just use
+C<my_strlcat()> instead.
 
 =item *
 
@@ -719,11 +771,136 @@ GNU libc used (previously it was an empty string when reported).
 
 VAX floating point formats are now supported.
 
+=item VMS
+
+=over 4
+
+=item *
+
+The path separator for the C<PERL5LIB> and C<PERLLIB> environment entries is
+now a colon (C<:>) when running under a Unix shell. There is no change when
+running under DCL (it's still C<|>).
+
+=item *
+
+Remove some VMS-specific hacks from C<showlex.t>. These were added 15 years
+ago, and are no longer necessary for any VMS version now supported.
+
+=back
+
+=item Win32
+
+=over 4
+
+=item *
+
+Tweaks for Win32 VC vs GCC detection makefile code. This fixes issue that CCHOME
+depends on CCTYPE, which in auto detect mode is set after CCHOME, so CCHOME uses
+the uninit CCTYPE var. Also fix else vs .ELSE in makefile.mk
+
+=back
+
 =back
 
 =head1 Selected Bug Fixes
 
 =over 4
+
+=item *
+
+Invalid assignments to a reference constructor (e.g., C<\eval=time>) could
+sometimes crash in addition to giving a syntax error.  [perl #125679]
+
+=item *
+
+The parser could sometimes crash if a bareword came after C<evalbytes>.
+[perl #129196]
+
+=item *
+
+Autoloading via a method call would warn erroneously ("Use of inherited
+AUTOLOAD for non-method") if there was a stub present in the package into
+which the invocant had been blessed.  The warning is no longer emitted in
+such circumstances.  [perl #47047]
+
+=item *
+
+A sub containing with a "forward" declaration with the same name (e.g.,
+C<sub c { sub c; }>) could sometimes crash or loop infinitely.  [perl
+#129090]
+
+=item *
+
+The use of C<splice> on arrays with nonexistent elements could cause other
+operators to crash.  [perl #129164]
+
+=item *
+
+Fixed case where C<re_untuit_start> will overshoot the length of a utf8
+string. [perl #129012]
+
+=item *
+
+Handle C<CXt_SUBST> better in C<Perl_deb_stack_all>, previously it wasn't
+checking that the I<current> C<cx> is the right type, and instead was always
+checking the base C<cx> (effectively a noop). [perl #129029]
+
+=item *
+
+Fixed two possible use-after-free bugs in C<Perl_yylex>. C<Perl_yylex>
+maintains up to two pointers into the parser buffer, one of which can
+become stale under the right conditions. [perl #129069]
+
+=item *
+
+Fixed a crash with C<s///l> where it thought it was dealing with UTF-8
+when it wasn't. [perl #129038]
+
+=item *
+
+Fixed place where regex was not setting the syntax error correctly.
+[perl #129122]
+
+=item *
+
+The C<&.> operator (and the C<&> operator, when it treats its arguments as
+strings) were failing to append a trailing null byte if at least one string
+was marked as utf8 internally.  Many code paths (system calls, regexp
+compilation) still expect there to be a null byte in the string buffer
+just past the end of the logical string.  An assertion failure was the
+result.  [perl #129287]
+
+=item *
+
+Check C<pack_sockaddr_un()>'s return value because C<pack_sockaddr_un()>
+silently truncates the supplied path if it won't fit into the C<sun_path>
+member of C<sockaddr_un>. This may change in the future, but for now
+check the path in theC<sockaddr> matches the desired path, and skip if
+it doesn't. [perl #128095]
+
+=item *
+
+Make sure C<PL_oldoldbufptr> is preserved in C<scan_heredoc()>. In some
+cases this is used in building error messages. [perl #128988]
+
+=item *
+
+Check for null PL_curcop in IN_LC() [perl #129106]
+
+=item *
+
+Fixed the parser error handling for an 'C<:attr(foo>' that does not have
+an ending 'C<)>'.
+
+=item *
+
+Fix C<Perl_delimcpy()> to handle a backslash as last char, this
+actually fixed two bugs, [perl #129064] and [perl #129176].
+
+=item *
+
+[perl #129267] rework gv_fetchmethod_pvn_flags separator parsing to
+prevent possible string overrun with invalid len in gv.c
 
 =item *
 
@@ -1006,6 +1183,13 @@ Fixed issues with recursive regexes.  The behavior was fixed in Perl 5.24.0.
 L<[perl #126182]|https://rt.perl.org/Public/Bug/Display.html?id=126182>
 
 =back
+
+=head1 Obituary
+
+Jon Portnoy (AVENJ), a prolific Perl author and admired Gentoo community
+member, has passed away on August 10, 2016. He will be remembered and
+missed by all those with which he came in contact and enriched with his
+intellect, wit, and spirit.
 
 =head1 Acknowledgements
 
