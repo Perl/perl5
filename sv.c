@@ -11531,7 +11531,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	/* XXX: Why do this `svix < svmax` test? Couldn't we just
 	   format the first argument and WARN_REDUNDANT if svmax > 1?
 	   Munged by Nicholas Clark in v5.13.0-209-g95ea86d */
-	if (pp - pat == (int)patlen - 1 && svix < svmax) {
+	if (pp + 1 == pat + patlen && svix < svmax) {
 	    const NV nv = SvNV(*svargs);
             if (LIKELY(!Perl_isinfnan(nv))) {
                 if (*pp == 'g') {
