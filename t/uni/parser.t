@@ -9,7 +9,7 @@ BEGIN {
     skip_all_without_unicode_tables();
 }
 
-plan (tests => 55);
+plan (tests => 56);
 
 use utf8;
 use open qw( :utf8 :std );
@@ -232,6 +232,13 @@ like( $@, qr/Bad name after Ｆｏｏ'/, 'Bad name after Ｆｏｏ\'' );
 }
 
 SKIP: {   # [perl #128738]
+    {
+        # This caused a memory fault
+        no warnings "utf8";
+        no warnings 'deprecated'; # This is above IV_MAX on 32 bit machines
+        is ("abc", eval qq[qq\x{8000_0000}abc\x{8000_0000}]);
+    }
+
     use Config;
     if ($Config{uvsize} < 8) {
         skip("test is only valid on 64-bit ints", 2);
