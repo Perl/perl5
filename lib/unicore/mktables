@@ -1140,17 +1140,16 @@ my $MAX_UNICODE_CODEPOINT_STRING = ($v_version ge v2.0.0)
 my $MAX_UNICODE_CODEPOINT = hex $MAX_UNICODE_CODEPOINT_STRING;
 my $MAX_UNICODE_CODEPOINTS = $MAX_UNICODE_CODEPOINT + 1;
 
-# We work with above-Unicode code points, up to UV_MAX.   But when you get
-# that high, above IV_MAX, some operations don't work, and you can easily get
-# overflow.  Therefore for internal use, we use a much smaller number,
-# translating it to UV_MAX only for output.  The exact number is immaterial
-# (all Unicode code points are treated exactly the same), but the algorithm
-# requires it to be at least 2 * $MAX_UNICODE_CODEPOINTS + 1;
+# We work with above-Unicode code points, up to IV_MAX, but we may want to use
+# sentinels above that number.  Therefore for internal use, we use a much
+# smaller number, translating it to IV_MAX only for output.  The exact number
+# is immaterial (all Unicode code points are treated exactly the same), but
+# the algorithm requires it to be at least 2 * $MAX_UNICODE_CODEPOINTS + 1;
 my $MAX_WORKING_CODEPOINTS= $MAX_UNICODE_CODEPOINT * 8;
 my $MAX_WORKING_CODEPOINT = $MAX_WORKING_CODEPOINTS - 1;
 my $MAX_WORKING_CODEPOINT_STRING = sprintf("%X", $MAX_WORKING_CODEPOINT);
 
-my $MAX_PLATFORM_CODEPOINT = ~0;
+my $MAX_PLATFORM_CODEPOINT = ~0 >> 1;
 
 # Matches legal code point.  4-6 hex numbers, If there are 6, the first
 # two must be 10; if there are 5, the first must not be a 0.  Written this way
