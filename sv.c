@@ -12955,35 +12955,35 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	case 'n':
             {
-            int i;
-	    if (vectorize)
-		goto unknown;
-	    i = SvCUR(sv) - origlen;
-	    if (args) {
-		switch (intsize) {
-		case 'c':	*(va_arg(*args, char*)) = i; break;
-		case 'h':	*(va_arg(*args, short*)) = i; break;
-		default:	*(va_arg(*args, int*)) = i; break;
-		case 'l':	*(va_arg(*args, long*)) = i; break;
-		case 'V':	*(va_arg(*args, IV*)) = i; break;
-		case 'z':	*(va_arg(*args, SSize_t*)) = i; break;
+                int i;
+                if (vectorize)
+                    goto unknown;
+                i = SvCUR(sv) - origlen;
+                if (args) {
+                    switch (intsize) {
+                    case 'c':  *(va_arg(*args, char*))      = i; break;
+                    case 'h':  *(va_arg(*args, short*))     = i; break;
+                    default:   *(va_arg(*args, int*))       = i; break;
+                    case 'l':  *(va_arg(*args, long*))      = i; break;
+                    case 'V':  *(va_arg(*args, IV*))        = i; break;
+                    case 'z':  *(va_arg(*args, SSize_t*))   = i; break;
 #ifdef HAS_PTRDIFF_T
-		case 't':	*(va_arg(*args, ptrdiff_t*)) = i; break;
+                    case 't':  *(va_arg(*args, ptrdiff_t*)) = i; break;
 #endif
 #ifdef I_STDINT
-		case 'j':	*(va_arg(*args, intmax_t*)) = i; break;
+                    case 'j':  *(va_arg(*args, intmax_t*))  = i; break;
 #endif
-		case 'q':
+                    case 'q':
 #if IVSIZE >= 8
-				*(va_arg(*args, Quad_t*)) = i; break;
+                               *(va_arg(*args, Quad_t*))    = i; break;
 #else
-				goto unknown;
+                               goto unknown;
 #endif
-		}
-	    }
-	    else
-		sv_setuv_mg(argsv, has_utf8 ? (UV)sv_len_utf8(sv) : (UV)i);
-            goto donevalidconversion;
+                    }
+                }
+                else
+                    sv_setuv_mg(argsv, has_utf8 ? (UV)sv_len_utf8(sv) : (UV)i);
+                goto donevalidconversion;
             }
 
 	    /* UNKNOWN */
