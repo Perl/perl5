@@ -2866,7 +2866,7 @@ missed.
 =head1 Acknowledgements
 
 Perl 5.26.0 represents approximately 12 months of development since Perl 5.24.0
-and contains approximately 370,000 lines of changes across 2,600 files from 85
+and contains approximately 370,000 lines of changes across 2,600 files from 86
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
@@ -2880,20 +2880,20 @@ Aaron Crane, Abigail, Ævar Arnfjörð Bjarmason, Alex Vandiver, Andreas
 König, Andreas Voegele, Andrew Fresh, Andy Lester, Aristotle Pagaltzis, Chad
 Granum, Chase Whitener, Chris 'BinGOs' Williams, Chris Lamb, Christian Hansen,
 Christian Millour, Colin Newell, Craig A. Berry, Dagfinn Ilmari Mannsåker, Dan
-Collins, Daniel Dragan, Dave Cross, Dave Rolsky, David Golden, David Mitchell,
-Dominic Hargreaves, Doug Bell, E. Choroba, Ed Avis, Father Chrysostomos,
-François Perrad, Hauke D, H.Merijn Brand, Hugo van der Sanden, Ivan Pozdeev,
-James E Keenan, James Raspass, Jarkko Hietaniemi, Jerry D. Hedden, Jim Cromie,
-J. Nick Koston, John Lightsey, Karen Etheridge, Karl Williamson, Leon
-Timmermans, Lukas Mai, Matthew Horsfall, Maxwell Carey, Misty De Meo, Neil
-Bowers, Nicholas Clark, Nicolas R., Niko Tyni, Pali, Paul Marquess, Peter
-Avalos, Petr Písař, Pino Toscano, Rafael Garcia-Suarez, Reini Urban, Renee
-Baecker, Ricardo Signes, Richard Levitte, Rick Delaney, Salvador Fandiño,
-Samuel Thibault, Sawyer X, Sébastien Aperghis-Tramoni, Sergey Aleynikov,
-Shlomi Fish, Smylers, Stefan Seifert, Steffen Müller, Stevan Little, Steve
-Hay, Steven Humphrey, Sullivan Beck, Theo Buehler, Thomas Sibley, Todd Rinaldo,
-Tomasz Konojacki, Tony Cook, Unicode Consortium, Yaroslav Kuzmin, Yves Orton,
-Zefram.
+Collins, Daniel Dragan, Dave Cross, Dave Rolsky, David Golden, David H.
+Gutteridge, David Mitchell, Dominic Hargreaves, Doug Bell, E. Choroba, Ed Avis,
+Father Chrysostomos, François Perrad, Hauke D, H.Merijn Brand, Hugo van der
+Sanden, Ivan Pozdeev, James E Keenan, James Raspass, Jarkko Hietaniemi, Jerry
+D. Hedden, Jim Cromie, J. Nick Koston, John Lightsey, Karen Etheridge, Karl
+Williamson, Leon Timmermans, Lukas Mai, Matthew Horsfall, Maxwell Carey, Misty
+De Meo, Neil Bowers, Nicholas Clark, Nicolas R., Niko Tyni, Pali, Paul
+Marquess, Peter Avalos, Petr Písař, Pino Toscano, Rafael Garcia-Suarez, Reini
+Urban, Renee Baecker, Ricardo Signes, Richard Levitte, Rick Delaney, Salvador
+Fandiño, Samuel Thibault, Sawyer X, Sébastien Aperghis-Tramoni, Sergey
+Aleynikov, Shlomi Fish, Smylers, Stefan Seifert, Steffen Müller, Stevan
+Little, Steve Hay, Steven Humphrey, Sullivan Beck, Theo Buehler, Thomas Sibley,
+Todd Rinaldo, Tomasz Konojacki, Tony Cook, Unicode Consortium, Yaroslav Kuzmin,
+Yves Orton, Zefram.
 
 The list above is almost certainly incomplete as it is automatically generated
 from version control history. In particular, it does not include the names of
