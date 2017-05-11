@@ -936,9 +936,8 @@ L<do "%s" failed, '.' is no longer in @INC|perldiag/do "%s" failed, '.' is no lo
 
 Using the empty pattern (which re-executes the last successfully-matched
 pattern) inside a code block in another regex, as in C</(?{ s!!new! })/>, has
-always previously yielded a segfault. It now produces an error: L<Use of the
-empty pattern inside of a regex code block is forbidden|perldiag/"Use of the
-empty pattern inside of a regex code block is forbidden">.
+always previously yielded a segfault. It now produces an error:
+L<Infinite recursion in regex|perldiag/"Infinite recursion in regex">.
 
 =item *
 
@@ -980,7 +979,7 @@ Perl yourself.  The #! line at the top of your file could look like:
 
 =item *
 
-L<Unescaped left brace in regex is deprecated here, passed through in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>|perldiag/"Unescaped left brace in regex is deprecated here, passed through in regex; marked by S<<-- HERE> in m/%s/">
+L<Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>|perldiag/"Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through in regex; marked by S<<-- HERE> in m/%s/">
 
 Unescaped left braces are already illegal in some contexts in regular
 expression patterns, but, due to an oversight, no deprecation warning
@@ -1011,14 +1010,7 @@ L<Bareword in require must not start with a double-colon: "%s"|perldiag/"Barewor
 
 =item *
 
-Since C<.> is removed from C<@INC>, C<do> will now trigger a warning
-recommending on fixing the C<do> statement.
-
-L<do "%s" failed, '.' is no longer in @INC|perldiag/"do "%s" failed, '.' is no longer in @INC">
-
-=item *
-
-L<Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl v5.30|perldiag/"Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl v5.30">
+L<Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl 5.30|perldiag/"Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl 5.30">
 
 See L</Deprecations>
 
@@ -1038,7 +1030,7 @@ which may change or be removed in a future Perl version:
 
 =item *
 
-L<C<${^ENCODING}> is no longer supported|perldiag/"${^ENCODING} is no longer supported">
+L<C<${^ENCODING}> is no longer supported. Its use will be fatal in Perl 5.28|perldiag/"${^ENCODING} is no longer supported. Its use will be fatal in Perl 5.28">
 
 (D deprecated) The special variable C<${^ENCODING}>, formerly used to implement
 the C<encoding> pragma, is no longer supported as of Perl 5.26.0.
