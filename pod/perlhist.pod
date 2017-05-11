@@ -609,8 +609,10 @@ the strings?).
  Sawyer X  5.25.8       2016-Dec-20
  Abigail   5.25.9       2017-Jan-20
  Renee     5.25.10      2017-Feb-20
- Sawyer X  5.25.11      2017-Feb-20
- Sawyer X  5.25.12      2017-Mar-20
+ Sawyer X  5.25.11      2017-Mar-20
+ Sawyer X  5.25.12      2017-Apr-20
+
+ Sawyer X  5.26.0-RC1   2017-May-11     The 5.26 maintenance track
 
 =head2 SELECTED RELEASE SIZES
 
