@@ -151,7 +151,7 @@ reference
 The hash and array functions in the C<CORE> namespace--C<keys>, C<each>,
 C<values>, C<push>, C<pop>, C<shift>, C<unshift> and C<splice>--, can now
 be called with ampersand syntax (C<&CORE::keys(\%hash>) and via reference
-(C<< my $k = \&CORE::keys; $k->(\%hash) >>).  Previously they could only be
+(C<< my $k = \&CORE::keys; $k-E<gt>(\%hash) >>).  Previously they could only be
 used when inlined.
 
 =head2 POSIX::tmpnam() has been removed
@@ -1273,7 +1273,7 @@ the feature:
 
 L<Version control conflict marker|perldiag/"Version control conflict marker">
 
-(F) The parser found a line starting with C<E<lt><<<<<<>,
+(F) The parser found a line starting with C<E<lt>E<lt>E<lt>E<lt>E<lt>E<lt>E<lt>>,
 C<E<gt>E<gt>E<gt>E<gt>E<gt>E<gt>E<gt>>, or C<=======>. These may be left by a
 version control system to mark conflicts after a failed merge operation.
 
@@ -1299,7 +1299,7 @@ Perl yourself.  The #! line at the top of your file could look like:
 
 =item *
 
-L<Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>|perldiag/"Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through in regex; marked by S<<-- HERE> in m/%s/">
+L<Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through in regex; marked by S<E<lt>-- HERE> in mE<sol>%sE<sol>|perldiag/"Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through in regex; marked by S<<-- HERE> in m/%s/">
 
 Unescaped left braces are already illegal in some contexts in regular
 expression patterns, but, due to an oversight, no deprecation warning
@@ -1491,7 +1491,7 @@ tied/magical code.
 
 =item *
 
-L<Unescaped left brace in regex is illegal here in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>|perldiag/"Unescaped left brace in regex is illegal here in regex; marked by S<<-- HERE> in m/%s/">
+L<Unescaped left brace in regex is illegal here in regex; marked by S<E<lt>-- HERE> in mE<sol>%sE<sol>|perldiag/"Unescaped left brace in regex is illegal here in regex; marked by S<<-- HERE> in m/%s/">
 
 The word "here" has been added to the message that was raised in
 v5.25.1.  This is to indicate that there are contexts in which unescaped
@@ -2659,7 +2659,7 @@ L<[perl #128618]|https://rt.perl.org/Public/Bug/Display.html?id=128618>
 =item *
 
 Some regular expression parsing glitches could lead to assertion failures with
-regular expressions such as C</(?<=/> and C</(?<!/>.  This has now been fixed.
+regular expressions such as C</(?E<lt>=/> and C</(?E<lt>!/>.  This has now been fixed.
 L<[perl #128170]|https://rt.perl.org/Public/Bug/Display.html?id=128170>
 
 =item *
