@@ -11597,7 +11597,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	const U8 *vecstr = NULL;
 	STRLEN veclen = 0;
 	char c = 0;
-	int i;
 	unsigned base = 0;
 	IV iv = 0;
 	UV uv = 0;
@@ -11844,6 +11843,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	}
 
 	if (asterisk) {
+            int i;
 	    if (args)
 		i = va_arg(*args, int);
 	    else
@@ -11859,6 +11859,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	if (*q == '.') {
 	    q++;
 	    if (*q == '*') {
+                int i;
 		q++;
                 if ( (epix = expect_number(&q)) ) {
                     if (*q++ == '$') {
@@ -12415,7 +12416,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    /* frexp() (or frexpl) has some unspecified behaviour for
              * nan/inf/-inf, so let's avoid calling that on non-finites. */
 	    if (isALPHA_FOLD_NE(c, 'e') && FV_ISFINITE(fv)) {
-                i = PERL_INT_MIN;
+                int i = PERL_INT_MIN;
                 (void)Perl_frexp((NV)fv, &i);
                 if (i == PERL_INT_MIN)
                     Perl_die(aTHX_ "panic: frexp: %" FV_GF, fv);
@@ -12953,6 +12954,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    /* SPECIAL */
 
 	case 'n':
+            {
+            int i;
 	    if (vectorize)
 		goto unknown;
 	    i = SvCUR(sv) - origlen;
@@ -12981,6 +12984,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    else
 		sv_setuv_mg(argsv, has_utf8 ? (UV)sv_len_utf8(sv) : (UV)i);
             goto donevalidconversion;
+            }
 
 	    /* UNKNOWN */
 
