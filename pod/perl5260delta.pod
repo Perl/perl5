@@ -72,36 +72,22 @@ C<.> missing from @INC, Perl now supports the environment variable
 PERL_USE_UNSAFE_INC=1 which makes Perl behave as it previously did, returning
 C<.> to @INC in all child processes.
 
-WARNING: PERL_USE_UNSAFE_INC has been provided during the perl 5.25 development
-cycle and is not guaranteed to function in perl 5.26.
+WARNING: C<PERL_USE_UNSAFE_INC> has been provided during the perl 5.25
+development cycle and is not guaranteed to function in perl 5.26.
 
 =head2 create a safer utf8_hop() called utf8_hop_safe()
 
 Unlike utf8_hop(), utf8_hop_safe() won't navigate before the beginning or after
 the end of the supplied buffer.
 
-=head2 Fix taint handling in list assignment
-
-commit v5.25.6-79-gb09ed99 reworked list assignment, and
-accidentally broke taint handling at the same time.
-
 =head2 @{^CAPTURE}, %{^CAPTURE}, and %{^CAPTURE_ALL}
 
-@{^CAPTURE} exposes the capture buffers of the last match as an array. So $1 is
-${^CAPTURE}[0].
+C<@{^CAPTURE}> exposes the capture buffers of the last match as an
+array. So C<$1> is C<${^CAPTURE}[0]>.
 
-%{^CAPTURE} is the equivalent to %+ (ie named captures)
+C<%{^CAPTURE}> is the equivalent to C<%+> (ie named captures)
 
-%{^CAPTURE_ALL} is the equivalent to %- (ie all named captures).
-
-=head2 op.c: silence compiler warning in fold_constants()
-
-    op.c: In function ‘S_fold_constants’:
-    op.c:4374:28: warning: argument ‘o’ might be clobbered by ‘longjmp’ or ‘vfork’ [-Wclobbered]
-     S_fold_constants(pTHX_ OP *o)
-                                ^
-
-This warning has been silenced.
+C<%{^CAPTURE_ALL}> is the equivalent to C<%-> (ie all named captures).
 
 =head2 Unicode 9.0 is now supported
 
@@ -198,12 +184,6 @@ names on ASCII platforms, but have been deprecated there since Perl
 v5.20.  This affects things like C<$I<\cT>>, where I<\cT> is a literal
 control (such as a C<NAK> or C<NEGATIVE ACKNOWLEDGE> character) in the
 source code.
-
-=head2 C<qr//xx> is no longer permissible
-
-Using more than one C</x> regular expression pattern modifier on a
-single pattern is now forbidden.  This is to allow a future enhancement
-to the language.  This usage has been deprecated since v5.22.
 
 =head2 C<NBSP> is no longer permissible in C<\N{...}>
 
@@ -335,7 +315,7 @@ especially when the RHS is empty.
 
 =item *
 
-Reduce the number of odd special cases for the SvSCREAM flag.
+Reduce the number of odd special cases for the C<SvSCREAM> flag.
 
 =item *
 
@@ -347,7 +327,7 @@ Enhancements in Regex concat COW implementation.
 
 =item *
 
-Speed up AV and HV clearing/undeffing.
+Speed up C<AV> and C<HV> clearing/undeffing.
 
 =item *
 
@@ -604,7 +584,7 @@ L<Time::HiRes> has been upgraded from version 1.9739 to 1.9740_03.
 It now builds on systems with C++11 compilers (such as G++ 6 and Clang++
 3.9).
 
-Now uses clockid_t.
+Now uses C<clockid_t>.
 
 =item *
 
@@ -658,7 +638,7 @@ style as other deprecation messages.
 
 "\c%c" is more clearly written simply as "%s".
 
-It was decided to undeprecate the use of "\c%c", see L<http://www.nntp.perl.org/group/perl.perl5.porters/2017/02/msg242944.html>
+It was decided to undeprecate the use of C<\c%c>, see L<http://www.nntp.perl.org/group/perl.perl5.porters/2017/02/msg242944.html>
 
 =item *
 
@@ -688,7 +668,7 @@ signature changed> above.
 =item *
 
 Use of single character variables, with the variable name a non printable
-character in the range \x80-\xFF is no longer allowed. Update the docs to
+character in the range C<\x80>-C<\xFF> is no longer allowed. Update the docs to
 reflect this.
 
 =back
@@ -752,7 +732,7 @@ Removed obsolete documentation of L<C<study()>|perlfunc/study>.
 
 =item *
 
-add pTHX_ to magic method examples.
+Add C<pTHX_> to magic method examples.
 
 =back
 
@@ -783,7 +763,7 @@ hunt around in the parser for how a given operator is handled.
 
 =item *
 
-Document NUL collation handling.
+Document C<NUL> collation handling.
 
 =item *
 
@@ -850,7 +830,7 @@ Tidy the document.
 
 =item *
 
-Mention Moo more.
+Mention C<Moo> more.
 
 =back
 
@@ -933,7 +913,7 @@ been removed> above.
 
 =item *
 
-Document @ISA. Was documented other places, not not in perlvar.
+Document C<@ISA>. Was documented other places, not not in L<perlvar>.
 
 =back
 
@@ -1086,11 +1066,6 @@ Attribute "locked" is deprecated, and will disappear in Perl 5.28
 =item *
 
 Attribute "unique" is deprecated, and will disappear in Perl 5.28
-
-=item *
-
-"\c%c" is more clearly written simply as "%s". This will be a fatal error
-in Perl 5.28
 
 =item *
 
@@ -1662,8 +1637,8 @@ ago, and are no longer necessary for any VMS version now supported.
 
 =item *
 
-Move _pDEPTH and _aDEPTH after config.h otherwise DEBUGGING may not be defined
-yet.
+Move C<_pDEPTH> and C<_aDEPTH> after F<config.h> otherwise DEBUGGING
+may not be defined yet.
 
 =item *
 
