@@ -50,7 +50,6 @@ POD = perl.pod	\
 	perl52510delta.pod	\
 	perl52511delta.pod	\
 	perl52512delta.pod	\
-	perl5260delta.pod	\
 	perl5251delta.pod	\
 	perl5252delta.pod	\
 	perl5253delta.pod	\
@@ -60,6 +59,7 @@ POD = perl.pod	\
 	perl5257delta.pod	\
 	perl5258delta.pod	\
 	perl5259delta.pod	\
+	perl5260delta.pod	\
 	perl561delta.pod	\
 	perl56delta.pod	\
 	perl581delta.pod	\
@@ -72,8 +72,8 @@ POD = perl.pod	\
 	perl588delta.pod	\
 	perl589delta.pod	\
 	perl58delta.pod	\
-	perlapi.pod	\
 	perlapio.pod	\
+	perlapi.pod	\
 	perlartistic.pod	\
 	perlbook.pod	\
 	perlboot.pod	\
@@ -114,17 +114,17 @@ POD = perl.pod	\
 	perllexwarn.pod	\
 	perllocale.pod	\
 	perllol.pod	\
-	perlmod.pod	\
 	perlmodinstall.pod	\
 	perlmodlib.pod	\
+	perlmod.pod	\
 	perlmodstyle.pod	\
 	perlmroapi.pod	\
 	perlnewmod.pod	\
 	perlnumber.pod	\
 	perlobj.pod	\
 	perlootut.pod	\
-	perlop.pod	\
 	perlopentut.pod	\
+	perlop.pod	\
 	perlpacktut.pod	\
 	perlperf.pod	\
 	perlpod.pod	\
@@ -133,13 +133,13 @@ POD = perl.pod	\
 	perlpolicy.pod	\
 	perlport.pod	\
 	perlpragma.pod	\
-	perlre.pod	\
 	perlreapi.pod	\
 	perlrebackslash.pod	\
 	perlrecharclass.pod	\
 	perlref.pod	\
 	perlreftut.pod	\
 	perlreguts.pod	\
+	perlre.pod	\
 	perlrepository.pod	\
 	perlrequick.pod	\
 	perlreref.pod	\
@@ -205,7 +205,6 @@ MAN = perl.man	\
 	perl52510delta.man	\
 	perl52511delta.man	\
 	perl52512delta.man	\
-	perl5260delta.man	\
 	perl5251delta.man	\
 	perl5252delta.man	\
 	perl5253delta.man	\
@@ -215,6 +214,7 @@ MAN = perl.man	\
 	perl5257delta.man	\
 	perl5258delta.man	\
 	perl5259delta.man	\
+	perl5260delta.man	\
 	perl561delta.man	\
 	perl56delta.man	\
 	perl581delta.man	\
@@ -269,17 +269,17 @@ MAN = perl.man	\
 	perllexwarn.man	\
 	perllocale.man	\
 	perllol.man	\
-	perlmod.man	\
 	perlmodinstall.man	\
 	perlmodlib.man	\
+	perlmod.man	\
 	perlmodstyle.man	\
 	perlmroapi.man	\
 	perlnewmod.man	\
 	perlnumber.man	\
 	perlobj.man	\
 	perlootut.man	\
-	perlop.man	\
 	perlopentut.man	\
+	perlop.man	\
 	perlpacktut.man	\
 	perlperf.man	\
 	perlpod.man	\
@@ -288,13 +288,13 @@ MAN = perl.man	\
 	perlpolicy.man	\
 	perlport.man	\
 	perlpragma.man	\
-	perlre.man	\
 	perlreapi.man	\
 	perlrebackslash.man	\
 	perlrecharclass.man	\
 	perlref.man	\
 	perlreftut.man	\
 	perlreguts.man	\
+	perlre.man	\
 	perlrepository.man	\
 	perlrequick.man	\
 	perlreref.man	\
@@ -321,7 +321,6 @@ MAN = perl.man	\
 	perlutil.man	\
 	perlvar.man	\
 	perlvms.man
-
 HTML = perl.html	\
 	perl5004delta.html	\
 	perl5005delta.html	\
@@ -515,7 +514,6 @@ TEX = perl.tex	\
 	perl52510delta.tex	\
 	perl52511delta.tex	\
 	perl52512delta.tex	\
-	perl5260delta.tex	\
 	perl5251delta.tex	\
 	perl5252delta.tex	\
 	perl5253delta.tex	\
@@ -525,6 +523,7 @@ TEX = perl.tex	\
 	perl5257delta.tex	\
 	perl5258delta.tex	\
 	perl5259delta.tex	\
+	perl5260delta.tex	\
 	perl561delta.tex	\
 	perl56delta.tex	\
 	perl581delta.tex	\
@@ -537,8 +536,8 @@ TEX = perl.tex	\
 	perl588delta.tex	\
 	perl589delta.tex	\
 	perl58delta.tex	\
-	perlapi.tex	\
 	perlapio.tex	\
+	perlapi.tex	\
 	perlartistic.tex	\
 	perlbook.tex	\
 	perlboot.tex	\
@@ -579,26 +578,25 @@ TEX = perl.tex	\
 	perllexwarn.tex	\
 	perllocale.tex	\
 	perllol.tex	\
-	perlmod.tex	\
 	perlmodinstall.tex	\
 	perlmodlib.tex	\
 	perlmodstyle.tex	\
+	perlmod.tex	\
 	perlmroapi.tex	\
 	perlnewmod.tex	\
 	perlnumber.tex	\
 	perlobj.tex	\
 	perlootut.tex	\
-	perlop.tex	\
 	perlopentut.tex	\
+	perlop.tex	\
 	perlpacktut.tex	\
 	perlperf.tex	\
-	perlpod.tex	\
 	perlpodspec.tex	\
 	perlpodstyle.tex	\
+	perlpod.tex	\
 	perlpolicy.tex	\
 	perlport.tex	\
 	perlpragma.tex	\
-	perlre.tex	\
 	perlreapi.tex	\
 	perlrebackslash.tex	\
 	perlrecharclass.tex	\
@@ -608,6 +606,7 @@ TEX = perl.tex	\
 	perlrepository.tex	\
 	perlrequick.tex	\
 	perlreref.tex	\
+	perlre.tex	\
 	perlretut.tex	\
 	perlrun.tex	\
 	perlsec.tex	\
