@@ -56,6 +56,11 @@
 #   define NETDB_R_OBSOLETE
 #endif
 
+#if defined(__GLIBC__) && (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 24))
+#   undef HAS_READDIR_R
+#   undef HAS_READDIR64_R
+#endif
+
 /*
  * As of OpenBSD 3.7, reentrant functions are now working, they just are
  * incompatible with everyone else.  To make OpenBSD happy, we have to
