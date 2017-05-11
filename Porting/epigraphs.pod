@@ -17,6 +17,15 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.26.0-RC1 - Thomas Paine, Common Sense
+
+L<Announced on 2017-05-11 by Sawyer X|http://www.nntp.perl.org/group/perl.perl5.porters/2017/05/msg244337.html>
+
+  A long habit of not thinking a thing WRONG, gives it a superficial
+  appearance of being RIGHT, and raises at first a formidable outcry in
+  defense of custom. But the tumult soon subsides. Time makes more
+  converts than reason.
+
 =head2 v5.25.12 - Kurt Vonnegut, Slaughterhouse-Five
 
 L<Announced on 2017-04-20 by Sawyer X|http://www.nntp.perl.org/group/perl.perl5.porters/2017/04/msg244146.html>
