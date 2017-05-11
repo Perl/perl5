@@ -374,16 +374,36 @@ this matches the behaviour for non-bareword constants.
 
 =item *
 
-L<attributes> has been upgraded from version 0.28 to 0.29.
+L<Archive::Tar> has been upgraded from version 2.04 to 2.24.
+
+=item *
+
+L<arybase> has been upgraded from version 0.11 to 0.12.
+
+=item *
+
+L<attributes> has been upgraded from version 0.27 to 0.29.
 
 The deprecation message for the C<:unique> and C<:locked> attributes
 now mention they will disappear in Perl 5.28.
 
 =item *
 
-L<B::Concise> has been upgraded from version 0.998 to 0.999.
+L<B> has been upgraded from version 1.62 to 1.68.
+
+=item *
+
+L<B::Concise> has been upgraded from version 0.996 to 0.999.
 
 Its output is now more descriptive for C<op_private> flags.
+
+=item *
+
+L<B::Debug> has been upgraded from version 1.23 to 1.24.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.37 to 1.40.
 
 =item *
 
@@ -393,11 +413,59 @@ It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
 
 =item *
 
-L<Data::Dumper> has been upgraded from version 2.162 to 2.167.
+L<base> has been upgraded from version 2.23 to 2.25.
+
+=item *
+
+L<bignum> has been upgraded from version 0.42 to 0.47.
+
+=item *
+
+L<Carp> has been upgraded from version 1.40 to 1.42.
+
+=item *
+
+L<charnames> has been upgraded from version 1.43 to 1.44.
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.069 to 2.074.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.069 to 2.074.
+
+=item *
+
+L<Config::Perl::V> has been upgraded from version 0.25 to 0.28.
+
+=item *
+
+L<CPAN> has been upgraded from version 2.11 to 2.18.
+
+=item *
+
+L<CPAN::Meta> has been upgraded from version 2.150005 to 2.150010.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.160 to 2.167.
 
 The XS implementation now supports Deparse.
 
 This fixes a stack management bug. [perl #130487].
+
+=item *
+
+L<DB_File> has been upgraded from version 1.835 to 1.840.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.23 to 1.26.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.32 to 3.35.
 
 =item *
 
@@ -407,13 +475,33 @@ It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
 
 =item *
 
-L<diagnostics> has been upgraded from version 1.35 to 1.36.
+L<diagnostics> has been upgraded from version 1.34 to 1.36.
 
 It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
 
 =item *
 
-L<encoding> has been upgraded from version 2.17 to 2.17_01.
+L<Digest> has been upgraded from version 1.17 to 1.17_01.
+
+=item *
+
+L<Digest::MD5> has been upgraded from version 2.54 to 2.55.
+
+=item *
+
+L<Digest::SHA> has been upgraded from version 5.95 to 5.96.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.38 to 1.42.
+
+=item *
+
+L<Encode> has been upgraded from version 2.80 to 2.88.
+
+=item *
+
+L<encoding> has been upgraded from version 2.17 to 2.19.
 
 This module's default mode is no longer supported as of Perl 5.25.3.  It now
 dies when imported, unless the C<Filter> option is being used.
@@ -427,7 +515,7 @@ that effect and then does nothing.
 
 =item *
 
-L<Errno> has been upgraded from version 1.26 to 1.27.
+L<Errno> has been upgraded from version 1.25 to 1.28.
 
 Document that using C<%!> loads Errno for you.
 
@@ -441,15 +529,47 @@ It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
 
 =item *
 
-L<feature> has been upgraded from version 1.45 to 1.46.
+L<ExtUtils::MakeMaker> has been upgraded from version 7.10_01 to 7.24.
+
+=item *
+
+L<ExtUtils::Miniperl> has been upgraded from version 1.05 to 1.06.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.31 to 3.34.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.31 to 3.34.
+
+=item *
+
+L<feature> has been upgraded from version 1.42 to 1.47.
 
 Fixes the Unicode Bug in the range operator.
 
 =item *
 
-L<File::Glob> has been upgraded from version 1.27 to 1.28.
+L<File::Copy> has been upgraded from version 2.31 to 2.32.
+
+=item *
+
+L<File::Fetch> has been upgraded from version 0.48 to 0.52.
+
+=item *
+
+L<File::Glob> has been upgraded from version 1.26 to 1.28.
 
 Issue a deprecation message for C<File::Glob::glob()>.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.63 to 3.67.
+
+=item *
+
+L<FileHandle> has been upgraded from version 2.02 to 2.03.
 
 =item *
 
@@ -460,15 +580,51 @@ end-of-file.  [perl #107726]
 
 =item *
 
-L<HTTP::Tiny> has been upgraded from version 0.064 to 0.070.
+L<Getopt::Long> has been upgraded from version 2.48 to 2.49.
+
+=item *
+
+L<Getopt::Std> has been upgraded from version 1.11 to 1.12.
+
+=item *
+
+L<Hash::Util> has been upgraded from version 0.19 to 0.22.
+
+=item *
+
+L<HTTP::Tiny> has been upgraded from version 0.056 to 0.070.
 
 Internal 599-series errors now include the redirect history.
 
 =item *
 
-L<I18N::LangTags> has been upgraded from version 0.41 to 0.42.
+L<I18N::LangTags> has been upgraded from version 0.40 to 0.42.
 
 It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
+=item *
+
+L<IO> has been upgraded from version 1.36 to 1.38.
+
+=item *
+
+L<IO-Compress> has been upgraded from version 2.069 to 2.074.
+
+=item *
+
+L<IO::Socket::IP> has been upgraded from version 0.37 to 0.38.
+
+=item *
+
+L<IPC::Cmd> has been upgraded from version 0.92 to 0.96.
+
+=item *
+
+L<IPC::SysV> has been upgraded from version 2.06_01 to 2.07.
+
+=item *
+
+L<JSON::PP> has been upgraded from version 2.27300 to 2.27400_02.
 
 =item *
 
@@ -478,13 +634,61 @@ It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
 
 =item *
 
-L<Math::BigInt> has been upgraded from version 1.999726(_01) to 1.999727.
+L<List::Util> has been upgraded from version 1.42_02 to 1.46_02.
+
+=item *
+
+L<Locale::Codes> has been upgraded from version 3.37 to 3.42.
+
+=item *
+
+L<Locale::Maketext> has been upgraded from version 1.26 to 1.28.
+
+=item *
+
+L<Locale::Maketext::Simple> has been upgraded from version 0.21 to 0.21_01.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999715 to 1.999806.
 
 There have also been some core customizations.
 
 =item *
 
-L<Net::Ping> has been upgraded from version 2.44 to 2.55.
+L<Math::BigInt::FastCalc> has been upgraded from version 0.40 to 0.5005.
+
+=item *
+
+L<Math::BigRat> has been upgraded from version 0.260802 to 0.2611.
+
+=item *
+
+L<Math::Complex> has been upgraded from version 1.59 to 1.5901.
+
+=item *
+
+L<Memoize> has been upgraded from version 1.03 to 1.03_01.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20170420 to 5.20170520.
+
+=item *
+
+L<Module::Load::Conditional> has been upgraded from version 0.64 to 0.68.
+
+=item *
+
+L<Module::Metadata> has been upgraded from version 1.000031 to 1.000033.
+
+=item *
+
+L<mro> has been upgraded from version 1.18 to 1.20.
+
+=item *
+
+L<Net::Ping> has been upgraded from version 2.43 to 2.55.
 
 IPv6 addresses and C<AF_INET6> sockets are now supported, along with several
 other enhancements.
@@ -494,6 +698,18 @@ Remove sudo from 500_ping_icmp.t.
 Avoid stderr noise in tests
 
 Check for echo in new Net::Ping tests.
+
+=item *
+
+L<NEXT> has been upgraded from version 0.65 to 0.67.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.34 to 1.39.
+
+=item *
+
+L<open> has been upgraded from version 1.10 to 1.11.
 
 =item *
 
@@ -509,13 +725,61 @@ Its compilation speed has been improved slightly.
 
 =item *
 
+L<parent> has been upgraded from version 0.234 to 0.236.
+
+=item *
+
 L<perl5db.pl> has been upgraded from version 1.50 to 1.51.
 
 Ignore F</dev/tty> on non-Unix systems. [perl #113960]
 
 =item *
 
-L<POSIX> has been upgraded from version 1.65 to 1.69. This remedies several
+L<Perl::OSType> has been upgraded from version 1.009 to 1.010.
+
+=item *
+
+L<perlfaq> has been upgraded from version 5.021010 to 5.021011.
+
+=item *
+
+L<PerlIO> has been upgraded from version 1.09 to 1.10.
+
+=item *
+
+L<PerlIO::encoding> has been upgraded from version 0.24 to 0.25.
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.24 to 0.26.
+
+=item *
+
+L<Pod::Checker> has been upgraded from version 1.60 to 1.73.
+
+=item *
+
+L<Pod::Functions> has been upgraded from version 1.10 to 1.11.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.22 to 1.2202.
+
+=item *
+
+L<Pod::Perldoc> has been upgraded from version 3.25_02 to 3.28.
+
+=item *
+
+L<Pod::Simple> has been upgraded from version 3.32 to 3.35.
+
+=item *
+
+L<Pod::Usage> has been upgraded from version 1.68 to 1.69.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.65 to 1.76. This remedies several
 defects in making its symbols exportable. [perl #127821]
 The C<POSIX::tmpnam()> interface has been removed,
 see L</"POSIX::tmpnam() has been removed">.
@@ -525,7 +789,7 @@ waiting until runtime.
 
 =item *
 
-L<re> has been upgraded from version 0.33 to 0.34
+L<re> has been upgraded from version 0.32 to 0.34
 
 This adds support for the new L<C<E<47>xx>|perlre/E<sol>x and E<sol>xx>
 regular expression pattern modifier, and a change to the L<S<C<use re
@@ -541,9 +805,29 @@ which the S<C<re 'strict'>> mode is intended to minimize.
 
 =item *
 
-L<Storable> has been upgraded from version 2.59 to 2.61.
+L<Safe> has been upgraded from version 2.39 to 2.40.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.42_02 to 1.46_02.
+
+=item *
+
+L<Storable> has been upgraded from version 2.56 to 2.62.
 
 Fixes [perl #130098].
+
+=item *
+
+L<Symbol> has been upgraded from version 1.07 to 1.08.
+
+=item *
+
+L<Sys::Syslog> has been upgraded from version 0.33 to 0.35.
+
+=item *
+
+L<Term::ANSIColor> has been upgraded from version 4.04 to 4.06.
 
 =item *
 
@@ -553,9 +837,21 @@ It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
 
 =item *
 
-L<Test> has been upgraded from version 1.29 to 1.30.
+L<Test> has been upgraded from version 1.28 to 1.30.
 
 It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
+
+=item *
+
+L<Test::Harness> has been upgraded from version 3.36 to 3.38.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.001014 to 1.302073.
+
+=item *
+
+L<Thread::Queue> has been upgraded from version 3.09 to 3.12.
 
 =item *
 
@@ -565,7 +861,7 @@ Added the C<down_timed> method.
 
 =item *
 
-L<threads> has been upgraded from version 2.07 to 2.12.
+L<threads> has been upgraded from version 2.07 to 2.15.
 
 Compatibility with 5.8 has been restored.
 
@@ -573,13 +869,17 @@ Fixes [perl #130469].
 
 =item *
 
-L<threads::shared> has been upgraded from version 1.52 to 1.54.
+L<threads::shared> has been upgraded from version 1.51 to 1.56.
 
 This fixes [cpan #119529], [perl #130457]
 
 =item *
 
-L<Time::HiRes> has been upgraded from version 1.9739 to 1.9740_03.
+L<Tie::Hash::NamedCapture> has been upgraded from version 0.09 to 0.10.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9733 to 1.9741.
 
 It now builds on systems with C++11 compilers (such as G++ 6 and Clang++
 3.9).
@@ -588,19 +888,39 @@ Now uses C<clockid_t>.
 
 =item *
 
-L<Unicode::UCD> has been upgraded from version 0.67 to 0.68.
+L<Time::Local> has been upgraded from version 1.2300 to 1.25.
+
+=item *
+
+L<Unicode::Collate> has been upgraded from version 1.14 to 1.19.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.64 to 0.68.
 
 It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
 
 =item *
 
-L<VMS::DCLsym> has been upgraded from version 1.07 to 1.08.
+L<version> has been upgraded from version 0.9916 to 0.9917.
+
+=item *
+
+L<VMS::DCLsym> has been upgraded from version 1.06 to 1.08.
 
 It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
 
 =item *
 
-L<XSLoader> has been upgraded from version 0.21 to 0.26.
+L<warnings> has been upgraded from version 1.36 to 1.37.
+
+=item *
+
+L<XS::Typemap> has been upgraded from version 0.14 to 0.15.
+
+=item *
+
+L<XSLoader> has been upgraded from version 0.21 to 0.27.
 
 Fixed a security hole in which binary files could be loaded from a path
 outside of L<C<@INC>|perlvar/@INC>.
@@ -2545,9 +2865,47 @@ missed.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.26.0 represents approximately 12 months of development since Perl 5.24.0
+and contains approximately 370,000 lines of changes across 2,600 files from 85
+authors.
 
-  perl Porting/acknowledgements.pl v5.24.0..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 230,000 lines of changes to 1,800 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.24.1:
+
+Aaron Crane, Abigail, Ævar Arnfjörð Bjarmason, Alex Vandiver, Andreas
+König, Andreas Voegele, Andrew Fresh, Andy Lester, Aristotle Pagaltzis, Chad
+Granum, Chase Whitener, Chris 'BinGOs' Williams, Chris Lamb, Christian Hansen,
+Christian Millour, Colin Newell, Craig A. Berry, Dagfinn Ilmari Mannsåker, Dan
+Collins, Daniel Dragan, Dave Cross, Dave Rolsky, David Golden, David Mitchell,
+Dominic Hargreaves, Doug Bell, E. Choroba, Ed Avis, Father Chrysostomos,
+François Perrad, Hauke D, H.Merijn Brand, Hugo van der Sanden, Ivan Pozdeev,
+James E Keenan, James Raspass, Jarkko Hietaniemi, Jerry D. Hedden, Jim Cromie,
+J. Nick Koston, John Lightsey, Karen Etheridge, Karl Williamson, Leon
+Timmermans, Lukas Mai, Matthew Horsfall, Maxwell Carey, Misty De Meo, Neil
+Bowers, Nicholas Clark, Nicolas R., Niko Tyni, Pali, Paul Marquess, Peter
+Avalos, Petr Písař, Pino Toscano, Rafael Garcia-Suarez, Reini Urban, Renee
+Baecker, Ricardo Signes, Richard Levitte, Rick Delaney, Salvador Fandiño,
+Samuel Thibault, Sawyer X, Sébastien Aperghis-Tramoni, Sergey Aleynikov,
+Shlomi Fish, Smylers, Stefan Seifert, Steffen Müller, Stevan Little, Steve
+Hay, Steven Humphrey, Sullivan Beck, Theo Buehler, Thomas Sibley, Todd Rinaldo,
+Tomasz Konojacki, Tony Cook, Unicode Consortium, Yaroslav Kuzmin, Yves Orton,
+Zefram.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
