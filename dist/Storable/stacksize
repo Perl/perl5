@@ -49,7 +49,7 @@ if ($ENV{PERL_CORE}) {
         $PERL = "..\\..\\$PERL" unless $PERL =~ /^[A-Za-z]:\\/;
     }
     $PERL = "\"$PERL\"" if $PERL =~ / /;
-    if ($ldlib) {
+    if ($ldlib and $ldlib ne 'PATH') {
         $PERL = "$ldlib=$path $PERL";
     }
 }
@@ -89,8 +89,7 @@ for my $i (0..1) {
     if (system($probe) != 0) {
         print "Storable not yet usable: $probe\n" unless QUIET;
         unless ($i) { # XXX race?
-            require Config;
-            system($Config::Config{make});
+            system($Config{make});
             # and try again
         } else {
             exit;
