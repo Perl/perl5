@@ -2604,7 +2604,7 @@ S_warn_on_first_deprecated_use(pTHX_ const char * const name,
 
 bool
 Perl__is_utf8_FOO(pTHX_       U8   classnum,
-                        const U8   *p,
+                        const U8   * const p,
                         const char * const name,
                         const char * const alternative,
                         const bool use_utf8,
