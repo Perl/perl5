@@ -1962,13 +1962,20 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
 /*
 =for apidoc bytes_from_utf8
 
-Converts a string C<s> of length C<len> from UTF-8 into native byte encoding.
-Unlike L</utf8_to_bytes> but like L</bytes_to_utf8>, returns a pointer to
-the newly-created string, and updates C<len> to contain the new
-length.  Returns the original string if no conversion occurs, C<len>
-is unchanged.  Do nothing if C<is_utf8> points to 0.  Sets C<is_utf8> to
-0 if C<s> is converted or consisted entirely of characters that are invariant
-in UTF-8 (i.e., US-ASCII on non-EBCDIC machines).
+Converts a potentially UTF-8 encoded string C<s> of length C<len> into native
+byte encoding.  On input, the boolean C<*is_utf8> gives whether or not C<s> is
+actually encoded in UTF-8.
+
+Unlike L</utf8_to_bytes> but like L</bytes_to_utf8>, this is non-destructive of
+the input string.
+
+Do nothing if C<*is_utf8> is 0, or if there are code points in the string
+not expressible in native byte encoding.  In these cases, C<*is_utf8> and
+C<*len> are unchanged, and the return value is the original C<s>.
+
+Otherwise, C<*is_utf8> is set to 0, and the return value is a pointer to a
+newly created string containing a downgraded copy of C<s>, and whose length is
+returned in C<*len>, updated.
 
 =cut
 */
