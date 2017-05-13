@@ -332,7 +332,22 @@ Enhancements in Regex concat COW implementation.
 
 =item *
 
-Speed up C<AV> and C<HV> clearing/undeffing.
+Clearing hashes and arrays has been made slightly faster. Now code
+like this is around 5% faster:
+
+    my @a;
+    for my $i (1..3_000_000) {
+        @a = (1,2,3);
+        @a = ();
+    }
+
+and this code around 3% faster:
+
+    my %h;
+    for my $i (1..3_000_000) {
+        %h = qw(a 1 b 2);
+        %h = ();
+    }
 
 =item *
 
