@@ -72,9 +72,6 @@ C<.> missing from @INC, Perl now supports the environment variable
 PERL_USE_UNSAFE_INC=1 which makes Perl behave as it previously did, returning
 C<.> to @INC in all child processes.
 
-WARNING: C<PERL_USE_UNSAFE_INC> has been provided during the perl 5.25
-development cycle and is not guaranteed to function in perl 5.26.
-
 =head2 create a safer utf8_hop() called utf8_hop_safe()
 
 Unlike utf8_hop(), utf8_hop_safe() won't navigate before the beginning or after
