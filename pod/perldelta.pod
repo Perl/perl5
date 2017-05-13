@@ -117,7 +117,7 @@ It is intended mainly for use in assignments to references.  For example:
     use experimental 'refaliasing', 'declared_refs';
     my \$a = \$b;
 
-See L<perlref/Assigning to References> for slightly more detail.
+See L<perlref/Assigning to References> for more details.
 
 =head2 Perl can now do default collation in UTF-8 locales on platforms
 that support it
