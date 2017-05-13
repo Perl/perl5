@@ -925,8 +925,8 @@ Mnemonic: like \digits.
 =item @{^CAPTURE}
 X<@{^CAPTURE}> X<@^CAPTURE>
 
-An array which contains the capture buffers, if any, of the last
-successful pattern match, not counting patterns matched
+An array which exposes the contents of the capture buffers, if any, of
+the last successful pattern match, not counting patterns matched
 in nested blocks that have been exited already.
 
 Note that the 0 index of @{^CAPTURE} is equivalent to $1, the 1 index
@@ -939,6 +939,9 @@ is equivalent to $2, etc.
 should output "f-o-a-l".
 
 See also L</$I<digits>>, L</%{^CAPTURE}> and L</%{^CAPTURE_ALL}>.
+
+Note that unlike most other regex magic variables there is no single
+letter equivalent to C<@{^CAPTURE}>.
 
 This variable was added in 5.25.7
 

@@ -75,11 +75,19 @@ C<.> to @INC in all child processes.
 =head2 @{^CAPTURE}, %{^CAPTURE}, and %{^CAPTURE_ALL}
 
 C<@{^CAPTURE}> exposes the capture buffers of the last match as an
-array. So C<$1> is C<${^CAPTURE}[0]>.
+array. So C<$1> is C<${^CAPTURE}[0]>. This is a more efficient equivalent
+to code like C<substr($matched_string,$-[0],$+[0]-$-[0])>, and you don't
+have to keep track of the C<$matched_string> either. This variable has no
+single character equivalent. Note like the other regex magic variables
+the contents of this variable is dynamic, if you wish to store it beyond
+the lifetime of the match you must copy it to another array.
 
-C<%{^CAPTURE}> is the equivalent to C<%+> (ie named captures)
+C<%{^CAPTURE}> is the equivalent to C<%+> (ie named captures). Other than
+being more self documenting there is no difference between the two forms.
 
 C<%{^CAPTURE_ALL}> is the equivalent to C<%-> (ie all named captures).
+Other than being more self documenting there is no difference between the
+two forms.
 
 =head2 Unicode 9.0 is now supported
 
