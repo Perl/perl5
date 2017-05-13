@@ -1499,8 +1499,9 @@ depend: makedepend $(DTRACE_H) $(generated_headers)
 	test_prep_reonly test_tty test-tty test_notty test-notty \
 	test_harness test_harness_notty minitest test-reonly _test
 
+# The _test target is there just for Test::Smoke, which does a make test_prep
+# always before invoking this target, thus preventing checking again
 _test:
-	echo >&2 The _test target is deprecated. Please upgrade your smoker
 	$(RUN_TESTS) choose
 
 # Cannot delegate rebuilding of t/perl to make
