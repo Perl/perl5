@@ -67,7 +67,7 @@ prints "Hello there\n" with no leading whitespace.
 Perl now provides a way to build perl without C<.> in @INC by default. If you
 want this feature, you can build with -Ddefault_inc_excludes_dot
 
-Because the testing / make process for perl modules do not function well with
+Because the testing / make process for perl modules does not function well with
 C<.> missing from @INC, Perl now supports the environment variable
 PERL_USE_UNSAFE_INC=1 which makes Perl behave as it previously did, returning
 C<.> to @INC in all child processes.
