@@ -72,9 +72,9 @@ foreach ([0, '', '', 'empty'],
 # are adjacent to problematic code points, so we want to make sure they aren't
 # considered problematic.
 my %code_points = (
-    0x0100     => (isASCII) ? "\xc4\x80" : I8_to_native("\xc8\xa0"),
-    0x0400 - 1 => (isASCII) ? "\xcf\xbf" : I8_to_native("\xdf\xbf"),
-    0x0400     => (isASCII) ? "\xd0\x80" : I8_to_native("\xe1\xa0\xa0"),
+    0x0100     => (isASCII) ? "\xc4\x80"     : I8_to_native("\xc8\xa0"),
+    0x0400 - 1 => (isASCII) ? "\xcf\xbf"     : I8_to_native("\xdf\xbf"),
+    0x0400     => (isASCII) ? "\xd0\x80"     : I8_to_native("\xe1\xa0\xa0"),
     0x0800 - 1 => (isASCII) ? "\xdf\xbf"     : I8_to_native("\xe1\xbf\xbf"),
     0x0800     => (isASCII) ? "\xe0\xa0\x80" : I8_to_native("\xe2\xa0\xa0"),
     0x4000 - 1 => (isASCII) ? "\xe3\xbf\xbf" : I8_to_native("\xef\xbf\xbf"),
@@ -98,7 +98,7 @@ my %code_points = (
     0xDFFF     => (isASCII) ? "\xed\xbf\xbf" : I8_to_native("\xf1\xb7\xbf\xbf"),
     0xE000     => (isASCII) ? "\xee\x80\x80" : I8_to_native("\xf1\xb8\xa0\xa0"),
 
-    # Include the 32 contiguous non characters, and surrounding code points
+    # Include the 32 contiguous non characters, and adjacent code points
     0xFDCF     => (isASCII) ? "\xef\xb7\x8f" : I8_to_native("\xf1\xbf\xae\xaf"),
     0xFDD0     => (isASCII) ? "\xef\xb7\x90" : I8_to_native("\xf1\xbf\xae\xb0"),
     0xFDD1     => (isASCII) ? "\xef\xb7\x91" : I8_to_native("\xf1\xbf\xae\xb1"),
@@ -880,7 +880,7 @@ for my $restriction (sort keys %restriction_types) {
         # We test both "is_utf8_string_foo" and "is_fixed_width_buf" functions
         foreach my $operand ('string', 'fixed_width_buf') {
 
-            # Currently, the only fixed_width_buf functions have the '_flags'
+            # Currently, only fixed_width_buf functions have the '_flags'
             # suffix.
             next if $operand eq 'fixed_width_buf' && $use_flags eq "";
 
@@ -895,7 +895,7 @@ for my $restriction (sort keys %restriction_types) {
                 #      continuation character to the valid string
                 #   c) input created by appending a partial character.  This
                 #      is valid in the 'fixed_width' functions, but invalid in
-                #   the 'string' ones
+                #      the 'string' ones
                 #   d) invalid input created by calling a function that is
                 #      expecting a restricted form of the input using the string
                 #      that's valid when unrestricted
