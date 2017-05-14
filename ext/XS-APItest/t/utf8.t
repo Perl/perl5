@@ -473,11 +473,6 @@ local $SIG{__WARN__} = sub { push @warnings, @_ };
 
 my %restriction_types;
 
-$restriction_types{""}{'valid_strings'} = "";
-$restriction_types{"c9strict"}{'valid_strings'} = "";
-$restriction_types{"strict"}{'valid_strings'} = "";
-$restriction_types{"fits_in_31_bits"}{'valid_strings'} = "";
-
 # This set of tests looks for basic sanity, and lastly tests various routines
 # for the given code point.  If the earlier tests for that code point fail,
 # the later ones probably will too.  Malformations are tested in later
