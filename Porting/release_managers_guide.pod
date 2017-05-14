@@ -16,13 +16,7 @@ document that starts with a checklist for your release.
 This script is run as:
 
     perl Porting/make-rmg-checklist \
-        --type [BLEAD-POINT or MAINT or ...] > /tmp/rmg.pod
-
-You can also pass the C<--html> flag to generate an HTML document instead of
-POD.
-
-    perl Porting/make-rmg-checklist --html \
-        --type [BLEAD-POINT or MAINT or ...] > /tmp/rmg.html
+        --version [5.x.y-RC#] > /tmp/rmg.pod
 
 =head1 SYNOPSIS
 
