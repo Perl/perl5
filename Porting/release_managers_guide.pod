@@ -1413,7 +1413,7 @@ Thanks for releasing perl!
 
 =head2 Building a release - the day after
 
-=for checklist skip BLEAD-FINAL, MAINT, RC
+=for checklist skip BLEAD-FINAL MAINT RC
 
 =head3 update Module::CoreList
 
