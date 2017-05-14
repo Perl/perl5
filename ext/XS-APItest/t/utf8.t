@@ -945,41 +945,22 @@ for my $restriction (sort keys %restriction_types) {
                             }
                         }
                         else {
-                            $test_name_suffix
-                                        = " if contains forbidden code points";
-                            if ($this_error_type eq "c9strict") {
-                                $bytes = $restriction_types{""}{'valid_strings'};
-                                $expected_offset
-                                 = $restriction_types{"c9strict"}
-                                                     {'first_invalid_offset'};
-                                $expected_count
-                                  = $restriction_types{"c9strict"}
-                                                      {'first_invalid_count'};
-                            }
-                            elsif ($this_error_type eq "strict") {
-                                $bytes = $restriction_types{""}{'valid_strings'};
-                                $expected_offset
-                                  = $restriction_types{"strict"}
-                                                      {'first_invalid_offset'};
-                                $expected_count
-                                  = $restriction_types{"strict"}
-                                                      {'first_invalid_count'};
 
-                            }
-                            elsif ($this_error_type eq "fits_in_31_bits") {
-                                $bytes = $restriction_types{""}{'valid_strings'};
-                                $expected_offset
-                                  = $restriction_types{"fits_in_31_bits"}
-                                                      {'first_invalid_offset'};
-                                $expected_count
-                                    = $restriction_types{"fits_in_31_bits"}
-                                                        {'first_invalid_count'};
-                            }
-                            else {
+                            if (! exists $restriction_types{$this_error_type}) {
                                 fail("Internal test error: Unknown error type "
                                 . "'$this_error_type'");
                                 next;
                             }
+                            $test_name_suffix
+                                        = " if contains forbidden code points";
+
+                            $bytes = $restriction_types{""}{'valid_strings'};
+                            $expected_offset
+                                 = $restriction_types{$this_error_type}
+                                                     {'first_invalid_offset'};
+                            $expected_count
+                                  = $restriction_types{$this_error_type }
+                                                      {'first_invalid_count'};
                         }
                     }
 
