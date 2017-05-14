@@ -939,6 +939,12 @@ for my $restriction (sort keys %restriction_types) {
                                         = 0 if $operand eq "fixed_width_buf";
                             }
                         }
+                        elsif (! exists $restriction_types
+                                    {$this_error_type}{'first_invalid_count'})
+                        {
+                            # If no errors were found, this is entirely valid.
+                            $this_error_type = 0;
+                        }
                         else {
 
                             if (! exists $restriction_types{$this_error_type}) {
