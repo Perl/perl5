@@ -11596,6 +11596,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	unsigned base = 0;
 	IV iv = 0;
 	UV uv = 0;
+        bool is_simple = TRUE; /* no fancy qualifiers */
 	/* We need a long double target in case HAS_LONG_DOUBLE,
          * even without USE_LONG_DOUBLE, so that we can printf with
          * long double formats, even without NV being long double.
@@ -12408,6 +12409,17 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 NV_TO_FV(nv, fv);
             }
 
+            /* special-case "%.0f" */
+            is_simple = ( !(width || left || plus || alt)
+                        && fill != '0'
+                        && has_precis
+                        && intsize != 'q');
+
+            if (is_simple && c == 'f' && !precis && !Perl_isinfnan(nv)) {
+                if ((eptr = F0convert(nv, ebuf + sizeof ebuf, &elen)))
+                    break;
+            }
+
 	    float_need = 0;
 	    /* frexp() (or frexpl) has some unspecified behaviour for
              * nan/inf/-inf, so let's avoid calling that on non-finites. */
@@ -12550,10 +12562,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		PL_efloatbuf[0] = '\0';
 	    }
 
-            /* special-case "%.0f" and "%.<number>g" */
-	    if ( !(width || left || plus || alt) && fill != '0'
-		 && has_precis && intsize != 'q'	/* Shortcuts */
-                 && LIKELY(!Perl_isinfnan((NV)fv)) ) {
+            /* special-case "%.<number>g" */
+            if (is_simple && LIKELY(!Perl_isinfnan((NV)fv)) ) {
 		/* See earlier comment about buggy Gconvert when digits,
 		   aka precis is 0  */
 		if ( c == 'g' && precis ) {
@@ -12564,10 +12574,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 			elen = strlen(PL_efloatbuf);
 			goto float_converted;
 		    }
-		} else if ( c == 'f' && !precis ) {
-		    if ((eptr = F0convert(nv, ebuf + sizeof ebuf, &elen)))
-			break;
-		}
+                }
 	    }
 
             if (UNLIKELY(hexfp)) {
