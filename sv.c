@@ -11541,7 +11541,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     if (digits && digits < sizeof(ebuf) - NV_DIG - 10) {
                         /* 0, point, slack */
                         STORE_LC_NUMERIC_SET_TO_NEEDED();
-                        SNPRINTF_G(nv, ebuf, size, digits);
+                        SNPRINTF_G(nv, ebuf, sizeof(ebuf), digits);
                         sv_catpv_nomg(sv, ebuf);
                         if (*ebuf)	/* May return an empty string for digits==0 */
                             return;
