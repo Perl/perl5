@@ -11580,12 +11580,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	bool is_utf8 = FALSE;  /* is this item utf8?   */
         bool used_explicit_ix = FALSE;
         bool arg_missing = FALSE;
-#ifdef HAS_LDBL_SPRINTF_BUG
-	/* This is to try to fix a bug with irix/nonstop-ux/powerux and
-	   with sfio - Allen <allens@cpan.org> */
-	bool fix_ldbl_sprintf_bug = FALSE;
-#endif
-
 	char esignbuf[4];
 	U8 utf8buf[UTF8_MAXBYTES+1];
 	STRLEN esignlen = 0;
@@ -12506,7 +12500,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	    if ((intsize == 'q') && (c == 'f') &&
 		((fv < MY_DBL_MAX_BUG) && (fv > -MY_DBL_MAX_BUG)) &&
-		(float_need < DBL_DIG)) {
+		(float_need < DBL_DIG))
+            {
+                bool fix_ldbl_sprintf_bug = FALSE;
+
 		/* it's going to be short enough that
 		 * long double precision is not needed */
 
@@ -12525,6 +12522,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 			fix_ldbl_sprintf_bug = TRUE;
 		    }
 		}
+
 		if (fix_ldbl_sprintf_bug == TRUE) {
 		    double temp;
 
