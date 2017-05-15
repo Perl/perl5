@@ -3147,8 +3147,8 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
                     STORE_LC_NUMERIC_SET_TO_NEEDED();
 
                     local_radix = PL_numeric_local && PL_numeric_radix_sv;
-                    if (local_radix && SvLEN(PL_numeric_radix_sv) > 1) {
-                        size += SvLEN(PL_numeric_radix_sv) - 1;
+                    if (local_radix && SvCUR(PL_numeric_radix_sv) > 1) {
+                        size += SvCUR(PL_numeric_radix_sv) - 1;
                         s = SvGROW_mutable(sv, size);
                     }
 
@@ -12455,7 +12455,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #ifdef USE_LOCALE_NUMERIC
                         STORE_LC_NUMERIC_SET_TO_NEEDED();
                         if (PL_numeric_radix_sv && IN_LC(LC_NUMERIC))
-                            float_need += SvLEN(PL_numeric_radix_sv);
+                            float_need += SvCUR(PL_numeric_radix_sv);
                         RESTORE_LC_NUMERIC();
 #endif
                 }
