@@ -11000,6 +11000,12 @@ S_expect_number(pTHX_ char **const pattern)
     return var;
 }
 
+/* Implement a fast "%.0f": given a pointer to the end of a buffer (caller
+ * ensures it's big enough), back fill it with the rounded integer part of
+ * nv. Returns ptr to start of string, and sets *len to its length.
+ * Returns NULL if not convertible.
+ */
+
 STATIC char *
 S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
 {
@@ -11008,11 +11014,7 @@ S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
 
     PERL_ARGS_ASSERT_F0CONVERT;
 
-    if (UNLIKELY(Perl_isinfnan(nv))) {
-        STRLEN n = S_infnan_2pv(nv, endbuf - *len, *len, 0);
-        *len = n;
-        return endbuf - n;
-    }
+    assert(!Perl_isinfnan(nv));
     if (neg)
 	nv = -nv;
     if (nv < UV_MAX) {
@@ -11518,7 +11520,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     }
 
 #if !defined(USE_LONG_DOUBLE) && !defined(USE_QUADMATH)
-    /* special-case "%.<number>[gf]" */
+    /* special-case "%.0f" and "%.<number>g" */
     if ( !args && patlen <= 5 && pat[0] == '%' && pat[1] == '.'
 	 && (pat[patlen-1] == 'g' || pat[patlen-1] == 'f') ) {
 	unsigned digits = 0;
@@ -12548,6 +12550,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		PL_efloatbuf[0] = '\0';
 	    }
 
+            /* special-case "%.0f" and "%.<number>g" */
 	    if ( !(width || left || plus || alt) && fill != '0'
 		 && has_precis && intsize != 'q'	/* Shortcuts */
                  && LIKELY(!Perl_isinfnan((NV)fv)) ) {
