@@ -13,9 +13,6 @@ BEGIN {
 
 $|=1;
 
-no warnings 'deprecated'; # Some of the below are above IV_MAX on 32 bit
-                          # machines, and that is tested elsewhere
-
 use XS::APItest;
 
 my $pound_sign = chr utf8::unicode_to_native(163);
@@ -383,16 +380,18 @@ my %code_points = (
     0x80000000 - 1 =>
     (isASCII) ?    "\xfd\xbf\xbf\xbf\xbf\xbf"
     : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa1\xbf\xbf\xbf\xbf\xbf\xbf"),
-    0x80000000     =>
-    (isASCII) ?    "\xfe\x82\x80\x80\x80\x80\x80"
-    : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0"),
-    0xFFFFFFFF     =>
-    (isASCII) ?    "\xfe\x83\xbf\xbf\xbf\xbf\xbf"
-    : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa3\xbf\xbf\xbf\xbf\xbf\xbf"),
 );
 
 if ($::is64bit) {
     no warnings qw(overflow portable);
+    $code_points{0x80000000}
+    = (isASCII)
+    ?              "\xfe\x82\x80\x80\x80\x80\x80"
+    : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa2\xa0\xa0\xa0\xa0\xa0\xa0");
+    $code_points{0xFFFFFFFF}
+    = (isASCII)
+    ?              "\xfe\x83\xbf\xbf\xbf\xbf\xbf"
+    : I8_to_native("\xff\xa0\xa0\xa0\xa0\xa0\xa0\xa3\xbf\xbf\xbf\xbf\xbf\xbf");
     $code_points{0x100000000}
      = (isASCII)
      ?              "\xfe\x84\x80\x80\x80\x80\x80"
@@ -409,10 +408,13 @@ if ($::is64bit) {
      = (isASCII)
      ?              "\xff\x80\x87\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
      : I8_to_native("\xff\xa7\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf");
-    $code_points{0xFFFFFFFFFFFFFFFF}
-     = (isASCII)
-     ?              "\xff\x80\x8f\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
-     : I8_to_native("\xff\xaf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf");
+
+    # This is used when UV_MAX is the upper limit of acceptable code points
+    # $code_points{0xFFFFFFFFFFFFFFFF}
+    # = (isASCII)
+    # ?              "\xff\x80\x8f\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
+    # : I8_to_native("\xff\xaf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf");
+
     if (isASCII) {  # These could falsely show as overlongs in a naive
                     # implementation
         $code_points{0x40000000000}
