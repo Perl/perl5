@@ -11597,6 +11597,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	IV iv = 0;
 	UV uv = 0;
         bool is_simple = TRUE; /* no fancy qualifiers */
+        STRLEN radix_len;  /* SvCUR(PL_numeric_radix_sv) */
+
 	/* We need a long double target in case HAS_LONG_DOUBLE,
          * even without USE_LONG_DOUBLE, so that we can printf with
          * long double formats, even without NV being long double.
@@ -12420,7 +12422,25 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     break;
             }
 
-	    float_need = 0;
+            /*determine the radix point len, e.g. length(".") in "1.2" */
+            radix_len  = 1; /* assume '.' */
+#ifdef USE_LOCALE_NUMERIC
+            /* note that we may either explicitly use PL_numeric_radix_sv
+             * below, or implicitly, via an snprintf() variant.
+             * Note also things like ps_AF.utf8 which has
+             * "\N{ARABIC DECIMAL SEPARATOR} as a radix point */
+            STORE_LC_NUMERIC_SET_TO_NEEDED();
+            if (PL_numeric_radix_sv && IN_LC(LC_NUMERIC)) {
+                radix_len  = SvCUR(PL_numeric_radix_sv);
+                /* note that this will convert the output to utf8 even if
+                 * if the radix point didn't get output */
+                is_utf8 = SvUTF8(PL_numeric_radix_sv);
+            }
+            RESTORE_LC_NUMERIC();
+#endif
+            /* most basic: space for "Inf"/"Nan" and \0, plus the "." */
+	    float_need = 4 + radix_len;
+
 	    /* frexp() (or frexpl) has some unspecified behaviour for
              * nan/inf/-inf, so let's avoid calling that on non-finites. */
 	    if (isALPHA_FOLD_NE(c, 'e') && FV_ISFINITE(fv)) {
@@ -12459,12 +12479,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                      * Need 2 hexdigits for each byte. */
                     float_need += (DOUBLEDOUBLE_MAXBITS/8 + 1) * 2;
                     /* the size for the exponent already added */
-#endif
-#ifdef USE_LOCALE_NUMERIC
-                        STORE_LC_NUMERIC_SET_TO_NEEDED();
-                        if (PL_numeric_radix_sv && IN_LC(LC_NUMERIC))
-                            float_need += SvCUR(PL_numeric_radix_sv);
-                        RESTORE_LC_NUMERIC();
 #endif
                 }
                 else if (i > 0) {
@@ -12947,15 +12961,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    eptr = PL_efloatbuf;
             assert((IV)elen > 0); /* here zero elen is bad */
 
-#ifdef USE_LOCALE_NUMERIC
-            /* If the decimal point character in the string is UTF-8, make the
-             * output utf8 */
-            if (PL_numeric_radix_sv && SvUTF8(PL_numeric_radix_sv)
-                && instr(eptr, SvPVX_const(PL_numeric_radix_sv)))
-            {
-                is_utf8 = TRUE;
-            }
-#endif
 
 	    break;
 
