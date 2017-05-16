@@ -528,4 +528,38 @@ cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
     }
 }
 
+# Size qualifiers shouldn't affect printing Inf/Nan
+#
+# Prior to the commit which introduced these tests and the fix,
+# the code path taken when int-ish formats saw an Inf/Nan was to
+# jump to the floating-point handler, but then that would
+# warn about (valid) qualifiers.
+
+{
+    my @w;
+    local $SIG{__WARN__} = sub { push @w, $_[0] };
+
+    for my $format (qw(B b c D d i O o p U u X x)) {
+        # skip unportable: j
+        for my $size (qw(hh h l q L ll t z)) {
+            for my $num ($NInf, $PInf, $NaN) {
+                @w = ();
+                my $res = eval { sprintf "%${size}${format}", $num; };
+                my $desc = "sprintf(\"%${size}${format}\", $num)";
+                if ($format eq 'c') {
+                    like($@, qr/Cannot printf $num with 'c'/, "$desc: like");
+                }
+                else {
+                    is($res, $num, "$desc: equality");
+                }
+
+                is (@w, 0, "$desc: warnings")
+                    or do {
+                        diag("got warning: [$_]") for map { chomp; $_} @w;
+                    };
+            }
+        }
+    }
+}
+
 done_testing();

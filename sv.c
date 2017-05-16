@@ -11639,7 +11639,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	I32 epix = 0; /* explicit precision index */
 	I32 evix = 0; /* explicit vector index */
 	bool asterisk = FALSE;
-        bool infnan = FALSE;
 
 	/* echo everything up to the next format specification */
 	for (q = p; q < patend && *q != '%'; ++q) ;
@@ -12014,25 +12013,24 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    }
 	}
 
-        if (argsv && strchr("BbcDdiOopuUXx",*q)) {
+	c = *q++; /* c now holds the conversion type */
+
+        if (argsv && strchr("BbcDdiOopuUXx", c)) {
             /* XXX va_arg(*args) case? need peek, use va_copy? */
             SvGETMAGIC(argsv);
             if (UNLIKELY(SvAMAGIC(argsv)))
                 argsv = sv_2num(argsv);
-            infnan = UNLIKELY(isinfnansv(argsv));
+            if (UNLIKELY(isinfnansv(argsv)))
+                goto handle_infnan_argsv;
         }
 
-	switch (c = *q++) {
+	switch (c) {
 
 	    /* STRINGS */
 
 	case 'c':
 	    if (vectorize)
 		goto unknown;
-            if (infnan)
-                Perl_croak(aTHX_ "Cannot printf %" NVgf " with '%c'",
-                           /* no va_arg() case */
-                           SvNV_nomg(argsv), (int)c);
 	    uv = (args) ? va_arg(*args, int) : SvIV_nomg(argsv);
 	    if ((uv > 255 ||
 		 (!UVCHR_IS_INVARIANT(uv) && SvUTF8(sv)))
@@ -12089,9 +12087,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    /* INTEGERS */
 
 	case 'p':
-            if (infnan) {
-                goto floating_point;
-            }
 	    if (alt || vectorize)
 		goto unknown;
 	    uv = PTR2UV(args ? va_arg(*args, void*) : argsv);
@@ -12107,9 +12102,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    /* FALLTHROUGH */
 	case 'd':
 	case 'i':
-            if (infnan) {
-                goto floating_point;
-            }
 	    if (vectorize) {
 		STRLEN ulen;
 		if (!veclen)
@@ -12211,9 +12203,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    base = 16;
 
 	uns_integer:
-            if (infnan) {
-                goto floating_point;
-            }
 	    if (vectorize) {
 		STRLEN ulen;
 	vector:
@@ -12330,8 +12319,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	    /* FLOATING POINT */
 
-        floating_point:
-
 	case 'F':
 	    c = 'f';		/* maybe %F isn't supported here */
 	    /* FALLTHROUGH */
@@ -12406,12 +12393,20 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             }
             else
             {
-                if (!infnan) SvGETMAGIC(argsv);
+                SvGETMAGIC(argsv);
+                /* we jump here if an int-ish format encountered an
+                 * infinite/Nan argsv. After setting nv/fv, it falls
+                 * into the isinfnan block which follows */
+              handle_infnan_argsv:
                 nv = SvNV_nomg(argsv);
                 NV_TO_FV(nv, fv);
             }
 
             if (Perl_isinfnan(nv)) {
+                if (c == 'c')
+                    Perl_croak(aTHX_ "Cannot printf %" NVgf " with '%c'",
+                           SvNV_nomg(argsv), (int)c);
+
                 elen = S_infnan_2pv(nv, ebuf, sizeof(ebuf), plus);
                 assert(elen);
                 eptr = ebuf;
