@@ -64,13 +64,25 @@ prints "Hello there\n" with no leading whitespace.
 
 =head2 '.' and @INC
 
-Perl now provides a way to build perl without C<.> in @INC by default. If you
-want this feature, you can build with -Ddefault_inc_excludes_dot
+Since time immemorial Perl has, as a last resort, loaded libraries
+from the current directory. For security reasons this is no longer the
+case, the C<@INC> variable no longer contains C<.> as its last element
+by default.
 
-Because the testing / make process for perl modules does not function well with
-C<.> missing from @INC, Perl now supports the environment variable
-PERL_USE_UNSAFE_INC=1 which makes Perl behave as it previously did, returning
-C<.> to @INC in all child processes.
+If you want to disable this behavior at compile-time build perl with
+C<-Udefault_inc_excludes_dot> (C<-Ddefault_inc_excludes_dot> being the
+default now).
+
+If you'd like to add C<.> back to C<@INC> at runtime set
+C<PERL_USE_UNSAFE_INC=1> in the environment before starting
+perl. Setting it to 1 restores C<.> in the C<@INC> when perl otherwise
+lacks it.
+
+Various toolchain modules will set C<PERL_USE_UNSAFE_INC=1>
+themselves. E.g. L<Test::Harness> sets it since loading modules from a
+relative path is a common idiom in test code. If you find that you
+have C<.> in C<@INC> on a perl built with default settings it's likely
+that your code is being invoked by a toolchain module of some sort.
 
 =head2 @{^CAPTURE}, %{^CAPTURE}, and %{^CAPTURE_ALL}
 
@@ -200,7 +212,8 @@ the end of the supplied buffer.
 =head2 Remove current dir (C<.>) from C<@INC>
 
 For security reasons, C<@INC> no longer contains the default directory
-(C<.>).
+(C<.>). See L<the Core Enhancements section/"'.' and @INC"> for
+details.
 
 =head2 "Escaped" colons and relative paths in PATH
 
@@ -1654,7 +1667,7 @@ tests for perlbug. [perl #128020]
 
 =item *
 
-C<DEFAULT_INC_EXCLUDES_DOT> has been turned on as default.
+C<-Ddefault_inc_excludes_dot> has been turned on as default.
 
 =item *
 
