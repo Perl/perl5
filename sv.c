@@ -12411,13 +12411,23 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 NV_TO_FV(nv, fv);
             }
 
+            if (Perl_isinfnan(nv)) {
+                elen = S_infnan_2pv(nv, ebuf, sizeof(ebuf), plus);
+                assert(elen);
+                eptr = ebuf;
+                zeros     = 0;
+                esignlen  = 0;
+                dotstrlen = 0;
+                break;
+            }
+
             /* special-case "%.0f" */
             is_simple = ( !(width || left || plus || alt)
                         && fill != '0'
                         && has_precis
                         && intsize != 'q');
 
-            if (is_simple && c == 'f' && !precis && !Perl_isinfnan(nv)) {
+            if (is_simple && c == 'f' && !precis) {
                 if ((eptr = F0convert(nv, ebuf + sizeof ebuf, &elen)))
                     break;
             }
@@ -12438,18 +12448,15 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             }
             RESTORE_LC_NUMERIC();
 #endif
-            /* most basic: space for "Inf"/"Nan" and \0, plus the "." */
-	    float_need = 4 + radix_len;
+	    float_need = radix_len;
 
 	    /* frexp() (or frexpl) has some unspecified behaviour for
-             * nan/inf/-inf, so let's avoid calling that on non-finites. */
-	    if (isALPHA_FOLD_NE(c, 'e') && FV_ISFINITE(fv)) {
+             * nan/inf/-inf, so lucky we've already handled them above */
+	    if (isALPHA_FOLD_NE(c, 'e')) {
                 int i = PERL_INT_MIN;
                 (void)Perl_frexp((NV)fv, &i);
                 if (i == PERL_INT_MIN)
                     Perl_die(aTHX_ "panic: frexp: %" FV_GF, fv);
-                /* Do not set hexfp earlier since we want to printf
-                 * Inf/NaN for Inf/NaN, not their hexfp. */
                 hexfp = isALPHA_FOLD_EQ(c, 'a');
                 if (UNLIKELY(hexfp)) {
                     /* This seriously overshoots in most cases, but
@@ -12577,7 +12584,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    }
 
             /* special-case "%.<number>g" */
-            if (is_simple && LIKELY(!Perl_isinfnan((NV)fv)) ) {
+            if (is_simple) {
 		/* See earlier comment about buggy Gconvert when digits,
 		   aka precis is 0  */
 		if ( c == 'g' && precis ) {
@@ -12861,27 +12868,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 }
             }
             else {
-                elen = S_infnan_2pv(nv, PL_efloatbuf, PL_efloatsize, plus);
-                if (elen) {
-                    /* Not affecting infnan output: precision, alt, fill. */
-                    if (elen < width) {
-                        STRLEN gap = (STRLEN)(width - elen);
-                        if (left) {
-                            /* Pack the back with spaces. */
-                            memset(PL_efloatbuf + elen, ' ', gap);
-                        } else {
-                            /* Move it to the right. */
-                            Move(PL_efloatbuf, PL_efloatbuf + gap,
-                                 elen, char);
-                            /* Pad the front with spaces. */
-                            memset(PL_efloatbuf, ' ', gap);
-                        }
-                        elen = width;
-                    }
-                }
-            }
-
-            if (elen == 0) {
                 char *ptr = ebuf + sizeof ebuf;
                 *--ptr = '\0';
                 *--ptr = c;
