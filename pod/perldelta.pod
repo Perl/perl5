@@ -9,6 +9,24 @@ perldelta - what is new for perl v5.26.0
 This document describes the differences between the 5.24.0 release and the
 5.26.0 release.
 
+=head1 Notice
+
+This release includes two updates with widespread effects:
+
+=over 4
+
+=item * C<.> no longer in C<@INC>
+
+The current modules, and for the execution of scripts. See the section
+L<<Removal of the current directory C<.> from @INC>> for the full details.
+
+=item * C<do> may now warn
+
+C<do> now gives a mandatory warning when it fails to load a file which it
+would have loaded had C<.> been in C<@INC>.
+
+=back
+
 =head1 Core Enhancements
 
 =head2 New regular expression modifier C</xx>
@@ -83,6 +101,11 @@ themselves. E.g. L<Test::Harness> sets it since loading modules from a
 relative path is a common idiom in test code. If you find that you
 have C<.> in C<@INC> on a perl built with default settings it's likely
 that your code is being invoked by a toolchain module of some sort.
+
+=head2 create a safer utf8_hop() called utf8_hop_safe()
+
+Unlike utf8_hop(), utf8_hop_safe() won't navigate before the beginning or after
+the end of the supplied buffer.
 
 =head2 @{^CAPTURE}, %{^CAPTURE}, and %{^CAPTURE_ALL}
 
@@ -209,11 +232,179 @@ the end of the supplied buffer.
 
 =head1 Security
 
-=head2 Remove current dir (C<.>) from C<@INC>
+=head2 Removal of the current directory (C<.>) from C<@INC>
 
-For security reasons, C<@INC> no longer contains the default directory
-(C<.>). See L</'.' and @INC> in the L</Core Enhancements> section for
-details.
+The perl binary includes a default set of paths in C<@INC>. Historically
+it has also included the current directory (C<.>) as the final entry,
+unless run with taint mode enabled (C<perl -T>). While convenient, this has
+security implications: for example, where a script attempts to load an
+optional module when its current directory is untrusted (such as F</tmp>),
+it could load and execute code from under that directory.
+
+Starting with v5.26.0, C<.> is always removed by default, not just under
+tainting. This has major implications for installing modules and executing
+scripts.
+
+The following new features have been added to help ameliorate these
+issues.
+
+=over
+
+=item * C<Configure -Udefault_inc_excludes_dot>
+
+There is a new C<Configure> option, C<default_inc_excludes_dot> (enabled
+by default) which builds a perl executable without C<.>; unsetting this
+option using C<-U> reverts perl to the old behaviour. This may fix your
+path issues but will reintroduce all the security concerns, so don't
+build a perl executable like this unless you're I<really> confident that
+such issues are not a concern in your environment.
+
+=item * C<$PERL_USE_UNSAFE_INC>
+
+There is a new environment variable recognised by the perl interpreter.
+If this variable has the value C<1> when the perl interpreter starts up,
+then C<.> will be automatically appended to C<@INC> (except under tainting).
+
+This allows you restore the old perl interpreter behaviour on a
+case-by-case basis. But note that this intended to be a temporary crutch,
+and this feature will likely be removed in some future perl version.
+It is currently set by the C<cpan> utility and C<Test::Harness> to
+ease installation of CPAN modules which have not been updated handle the
+lack of dot. Once again, don't use this unless you are sure that this
+will not reintroduce any security concerns.
+
+=item * A new mandatory warning issued by C<do>.
+
+While it is well-known that C<use> and C<require> use C<@INC> to search
+for the file to load, many people don't realise that C<do "file"> also
+searches C<@INC> if the file is a relative path. With the removal of C<.>,
+a simple C<do "file.pl"> will fail to read in and execute C<file.pl> from
+the current directory. Since this is commonly expected behaviour, a new
+mandatory warning is now issued whenever C<do> fails to load a file which
+it otherwise would have found if dot had been in C<@INC>.
+
+=back
+
+Here are some things script and module authors may need to do to make
+their software work in the new regime.
+
+=over
+
+=item * Script authors
+
+If the issue is within your own code (rather than within included
+modules), then you have two main options. Firstly, if you are confident
+that your script will only be run within a trusted directory (under which
+you expect to find trusted files and modules), then add C<.> back into the
+path; e.g.:
+
+    BEGIN {
+        my $dir = "/some/trusted/directory";
+        chdir $dir or die "Can't chdir to $dir: $!\n";
+        # safe now
+        push @INC, '.';
+    }
+    use "Foo::Bar"; # may load /some/trusted/directory/Foo/Bar.pm
+    do "config.pl"; # may load /some/trusted/directory/config.pl
+
+On the other hand, if your script is intended to be run from within
+untrusted directories (such as F</tmp>), then your script suddenly failing
+to load files may be indicative of a security issue. You most likely want
+to replace any relative paths with full paths; for example,
+
+    do ".foo_config.pl"
+
+might become
+
+    do "$ENV{HOME}/.foo_config.pl"
+
+If you are absolutely certain that you want your script to load and
+execute a file from the current directory, then use a C<./> prefix; for
+example:
+
+    do "./.foo_config.pl"
+
+=item * Installing and using CPAN modules
+
+If you install a CPAN module using an automatic tool like C<cpan>, then
+this tool will itself set the C<PERL_USE_UNSAFE_INC> environment variable
+while building and testing the module, which may be sufficient to install
+a distribution which hasn't been updated to be dot-aware.  If you want to
+install such a module manually, then you'll need to replace the
+traditional invocation:
+
+    perl Makefile.PL && make && make test && make install
+
+with something like
+
+    (export PERL_USE_UNSAFE_INC=1; \
+     perl Makefile.PL && make && make test && make install)
+
+Note that this only helps build and install an unfixed module. It's
+possible for the tests to pass (since they were run under
+C<PERL_USE_UNSAFE_INC=1>), but for the module itself to fail to perform
+correctly in production. In this case you may have to temporarily modify
+your script until such time as fixed version of the module is released.
+For example:
+
+    use Foo::Bar;
+    {
+        local @INC = (@INC, '.');
+        # assuming read_config() needs '.' in @INC
+        $config = Foo::Bar->read_config();
+    }
+
+This is only rarely expected to be necessary. Again, if doing this,
+assess the resultant risks first.
+
+=item * Module Authors
+
+If you maintain a CPAN distribution, it may need updating to run in
+a dotless environment. Although C<cpan> and other such tools will
+currently set the C<PERL_USE_UNSAFE_INC> during module build, this is
+temporary workaround for the set of modules which rely on C<.> being in
+C<@INC> for installation and testing, and this may mask deeper issues. It
+could result in a module which passes tests and installs, but which
+fails at run time.
+
+During build, test and install, it will normally be the case that any perl
+processes will be executing directly within the root directory of the
+untarred distribution, or a known subdirectory of that, such as F<t/>. It
+may well be that F<Makefile.PL> or F<t/foo.t> will attempt to include
+local modules and configuration files using their direct relative
+filenames, which will now fail.
+
+However, as described above, automatic tools like F<cpan> will (for now)
+set the C<PERL_USE_UNSAFE_INC> environment variable, which introduces
+dot during build.
+
+This makes it likely that your existing build and test code will work, but
+this may mask issues with your code which only manifest when used after
+install. It is prudent to try and run your build process with that
+variable explicitly disabled:
+    (export PERL_USE_UNSAFE_INC=0; \
+     perl Makefile.PL && make && make test && make install)
+
+This is more likely to show up any potential problems with your module's
+build process, or even with the module itself. Fixing such issues will
+ensure both that your module can again be installed manually, and that
+it will still build once the C<PERL_USE_UNSAFE_INC> crutch goes away.
+
+When fixing issues in tests due to the removal of dot from C<@INC>,
+reinsertion of dot into C<@INC> should be performed with caution, for this
+too may suppress real errors in your runtime code. You are encouraged
+wherever possible to apply the aforementioned approaches with explicit
+absolute/relative paths, or relocate your needed files into a subdirectory
+and insert that subdirectory into C<@INC> instead.
+
+If your runtime code has problems under the dotless C<@INC>, then the comments
+above on how to fix for script authors will mostly apply here too. Bear in
+mind though that it is considered bad form for a module to globally add dot to
+C<@INC>, since it introduces both a security risk and hides issues of
+accidentally requiring dot in C<@INC>, as explained above.
+
+=back
+>>>>>>> Add more extensive information about @INC changes into perldelta (RT#131304)
 
 =head2 "Escaped" colons and relative paths in PATH
 
@@ -1388,6 +1579,14 @@ L<C<${^ENCODING}> is no longer supported. Its use will be fatal in Perl 5.28|per
 (D deprecated) The special variable C<${^ENCODING}>, formerly used to implement
 the C<encoding> pragma, is no longer supported as of Perl 5.26.0.
 
+=item *
+
+Since C<.> is now removed from C<@INC> by default, C<do> will now trigger
+a warning recommending to fix the C<do> statement:
+
+L<do "%s" failed, '.' is no longer in @INC|perldiag/do "%s" failed, '.' is no
+longer in @INC; did you mean do ".\/%s"?>
+
 =back
 
 =head2 Changes to Existing Diagnostics
@@ -1667,7 +1866,7 @@ tests for perlbug. [perl #128020]
 
 =item *
 
-C<-Ddefault_inc_excludes_dot> has been turned on as default.
+C<-Ddefault_inc_excludes_dot> has been turned on by default.
 
 =item *
 
