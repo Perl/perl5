@@ -212,7 +212,7 @@ the end of the supplied buffer.
 =head2 Remove current dir (C<.>) from C<@INC>
 
 For security reasons, C<@INC> no longer contains the default directory
-(C<.>). See L<the Core Enhancements section/"'.' and @INC"> for
+(C<.>). See L</'.' and @INC> in the L</Core Enhancements> section for
 details.
 
 =head2 "Escaped" colons and relative paths in PATH
