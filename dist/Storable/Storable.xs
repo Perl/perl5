@@ -375,16 +375,14 @@ typedef struct stcxt {
 /* sizes computed with stacksize. use some reserve for the croak cleanup. */
 #include "stacksize.h"
 /* esp. cygwin64 cannot 32, cygwin32 can */
-#if defined(__CYGWIN__) && (PTRSIZE == 8)
-# define STACK_RESERVE 128
-#elif defined(WIN32)
+#if defined(WIN32)
 # define STACK_RESERVE 32
 #else
 /* 8 should be enough, but some systems, esp. 32bit, need more */
 # define STACK_RESERVE 16
 #endif
 #ifdef PST_STACK_MAX_DEPTH
-# if PERL_VERSION > 14
+# if (PERL_VERSION > 14) && !(defined(__CYGWIN__) && (PTRSIZE == 8))
 #  define MAX_DEPTH       (PST_STACK_MAX_DEPTH - STACK_RESERVE)
 #  define MAX_DEPTH_HASH  (PST_STACK_MAX_DEPTH_HASH - STACK_RESERVE)
 # else
