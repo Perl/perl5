@@ -404,7 +404,6 @@ C<@INC>, since it introduces both a security risk and hides issues of
 accidentally requiring dot in C<@INC>, as explained above.
 
 =back
->>>>>>> Add more extensive information about @INC changes into perldelta (RT#131304)
 
 =head2 "Escaped" colons and relative paths in PATH
 
