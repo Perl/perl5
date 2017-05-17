@@ -2777,12 +2777,6 @@ memory if the typeglob in question has never been accessed before.
 
 =item *
 
-In 5.25.4 fchown() was changed not to accept negative one as an argument
-because in some platforms that is an error.  However, in some other platforms
-that is an acceptable argument.  This change has been reverted [perl #128967].
-
-=item *
-
 Mentioning the same constant twice in a row (which is a syntax error) no
 longer fails an assertion under debugging builds.  This was a regression
 from 5.20.  [perl #126482]
