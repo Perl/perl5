@@ -843,9 +843,13 @@ L<http://www.cl.cam.ac.uk/~mgk25/unicode.html>
 
 How Does Unicode Work With Traditional Locales?
 
-If your locale is a UTF-8 locale, starting in Perl v5.20, Perl works
-well for all categories except C<LC_COLLATE> dealing with sorting and
-the C<cmp> operator.
+If your locale is a UTF-8 locale, starting in Perl v5.26, Perl works
+well for all categories; before this, starting with Perl v5.20, it works
+for all categories but C<LC_COLLATE>, which deals with
+sorting and the C<cmp> operator.  But note that the standard
+C<L<Unicode::Collate>> and C<L<Unicode::Collate::Locale>> modules offer
+much more powerful solutions to collation issues, and work on earlier
+releases.
 
 For other locales, starting in Perl 5.16, you can specify
 
