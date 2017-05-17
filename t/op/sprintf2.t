@@ -922,12 +922,10 @@ SKIP: {
     my $i = 1;
     my $max;
     while ($s--) { $max |= $i; $i <<= 1; }
-    my $max40 = $max - 40; # see the magic fudge factor in sv_vcatpvfn_flags()
 
     my @tests = (
                   # format, arg
                   ["%.${max}a",        1.1 ],
-                  ["%.${max40}a",      1.1 ],
                   ["%.${max}i",          1 ],
                   ["%.${max}i",         -1 ],
     );

@@ -12427,7 +12427,45 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     break;
             }
 
-            /*determine the radix point len, e.g. length(".") in "1.2" */
+            /* Determine the buffer size needed for the various
+             * floating-point formats.
+             *
+             * The basic possibilities are:
+             *
+             *               <---P--->
+             *    %f 1111111.123456789
+             *    %e       1.111111123e+06
+             *    %a     0x1.0f4471f9bp+20
+             *    %g        1111111.12
+             *    %g        1.11111112e+15
+             *
+             * where P is the value of the precision in the format, or 6
+             * if not specified. Note the two possible output formats of
+             * %g; in both cases the number of significant digits is <=
+             * precision.
+             *
+             * For most of the format types the maximum buffer size needed
+             * is precision, plus: any leading 1 or 0x1, the radix
+             * point, and an exponent.  The difficult one is %f: for a
+             * large positive exponent it can have many leading digits,
+             * which needs to be calculated specially. Also %a is slightly
+             * different in that in the absence of a specified precision,
+             * it uses as many digits as necessary to distinguish
+             * different values.
+             *
+             * First, here are the constant bits. For ease of calculation
+             * we over-estimate the needed buffer size, for example by
+             * assuming all formats have an exponent and a leading 0x1.
+             */
+
+            float_need =     1  /* possible unary minus */
+                          +  4  /* "0x1" plus very unlikely carry */
+                          +  2  /* "e-", "p+" etc */
+                          +  6  /* exponent: up to 16383 (quad fp) */
+                          +  1; /* \0 */
+
+
+            /* determine the radix point len, e.g. length(".") in "1.2" */
             radix_len  = 1; /* assume '.' */
 #ifdef USE_LOCALE_NUMERIC
             /* note that we may either explicitly use PL_numeric_radix_sv
@@ -12443,49 +12481,61 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             }
             RESTORE_LC_NUMERIC();
 #endif
-	    float_need = radix_len;
+            /* this can't wrap unless PL_numeric_radix_sv is a string
+             * consuming virtually all the 32-bit or 64-bit address space
+             */
+	    float_need += radix_len;
 
-	    /* frexp() (or frexpl) has some unspecified behaviour for
-             * nan/inf/-inf, so lucky we've already handled them above */
-	    if (isALPHA_FOLD_NE(c, 'e')) {
+	    if (isALPHA_FOLD_EQ(c, 'f')) {
+                /* Determine how many digits before the radix point
+                 * might be emitted.  frexp() (or frexpl) has some
+                 * unspecified behaviour for nan/inf/-inf, so lucky we've
+                 * already handled them above */
+                STRLEN digits;
                 int i = PERL_INT_MIN;
                 (void)Perl_frexp((NV)fv, &i);
                 if (i == PERL_INT_MIN)
                     Perl_die(aTHX_ "panic: frexp: %" FV_GF, fv);
-                hexfp = isALPHA_FOLD_EQ(c, 'a');
-                if (UNLIKELY(hexfp)) {
-                    /* This seriously overshoots in most cases, but
-                     * better the undershooting.  Firstly, all bytes
+
+                if (i > 0) {
+                    digits = BIT_DIGITS(i);
+                    if (float_need >= ((STRLEN)~0) - digits)
+                        croak_memory_wrap();
+                    float_need += digits;
+                }
+            }
+            else if (UNLIKELY(isALPHA_FOLD_EQ(c, 'a'))) {
+                hexfp = TRUE;
+                if (!has_precis) {
+                    /* %a in the absence of precision may print as many
+                     * digits as needed to represent the entire mantissa
+                     * bit pattern.
+                     * This estimate seriously overshoots in most cases,
+                     * but better the undershooting.  Firstly, all bytes
                      * of the NV are not mantissa, some of them are
                      * exponent.  Secondly, for the reasonably common
                      * long doubles case, the "80-bit extended", two
-                     * or six bytes of the NV are unused. */
-                    float_need +=
-                        (fv < 0) ? 1 : 0 + /* possible unary minus */
-                        2 + /* "0x" */
-                        1 + /* the very unlikely carry */
-                        1 + /* "1" */
-                        1 + /* "." */
-                        2 * NVSIZE + /* 2 hexdigits for each byte */
-                        2 + /* "p+" */
-                        6 + /* exponent: sign, plus up to 16383 (quad fp) */
-                        1;   /* \0 */
+                     * or six bytes of the NV are unused. Also, we'll
+                     * still pick up an extra +6 from the default
+                     * precision calculation below. */
+                    STRLEN digits =
 #ifdef LONGDOUBLE_DOUBLEDOUBLE
-                    /* However, for the "double double", we need more.
-                     * Since each double has their own exponent, the
-                     * doubles may float (haha) rather far from each
-                     * other, and the number of required bits is much
-                     * larger, up to total of DOUBLEDOUBLE_MAXBITS bits.
-                     * See the definition of DOUBLEDOUBLE_MAXBITS.
-                     *
-                     * Need 2 hexdigits for each byte. */
-                    float_need += (DOUBLEDOUBLE_MAXBITS/8 + 1) * 2;
-                    /* the size for the exponent already added */
+                        /* For the "double double", we need more.
+                         * Since each double has their own exponent, the
+                         * doubles may float (haha) rather far from each
+                         * other, and the number of required bits is much
+                         * larger, up to total of DOUBLEDOUBLE_MAXBITS bits.
+                         * See the definition of DOUBLEDOUBLE_MAXBITS.
+                         *
+                         * Need 2 hexdigits for each byte. */
+                        (DOUBLEDOUBLE_MAXBITS/8 + 1) * 2;
+#else
+                        NVSIZE * 2; /* 2 hexdigits for each byte */
 #endif
+                    if (float_need >= ((STRLEN)~0) - digits)
+                        croak_memory_wrap();
+                    float_need += digits;
                 }
-                else if (i > 0) {
-                    float_need = BIT_DIGITS(i);
-                } /* if i < 0, the number of digits is hard to predict. */
 	    }
 
             {
@@ -12568,9 +12618,18 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 #endif /* HAS_LDBL_SPRINTF_BUG */
 
-            if (float_need >= ((STRLEN)~0) - 40)
+/* We should have correctly calculated (or indeed over-estimated) the
+ * buffer size, but you never know what strange floating-point systems
+ * there are out there. So for production use, add a little extra overhead.
+ * Under debugging don't, as it means we more more likely to quickly spot
+ * issues during development.
+ */
+#ifndef DEBUGGING
+            if (float_need >= ((STRLEN)~0) - 20)
                 croak_memory_wrap();
-	    float_need += 40; /* fudge factor */
+	    float_need += 20; /* safety fudge factor */
+#endif
+
 	    if (PL_efloatsize < float_need) {
 		Safefree(PL_efloatbuf);
 		PL_efloatsize = float_need;
