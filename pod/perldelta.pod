@@ -18,7 +18,7 @@ This release includes two updates with widespread effects:
 =item * C<.> no longer in C<@INC>
 
 The current modules, and for the execution of scripts. See the section
-L<<Removal of the current directory C<.> from @INC>> for the full details.
+L<< Removal of the current directory (C<.>) from C<@INC> >> for the full details.
 
 =item * C<do> may now warn
 
