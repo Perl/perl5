@@ -2512,13 +2512,6 @@ in some cases.  [perl #129340]
 
 =item *
 
-Perl 5.25.9 was fixed so that under C<use utf8>, the entire Perl program
-is checked that the UTF-8 is wellformed.  It turns out that several edge
-cases were missed, and are now fixed.  [perl #126310] was the original
-ticket.
-
-=item *
-
 Under C<use utf8>, the entire Perl program is now checked that the UTF-8
 is wellformed.  This resolves [perl #126310].
 
