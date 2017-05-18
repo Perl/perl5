@@ -11915,11 +11915,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	unsigned base = 0;
 	IV iv = 0;
 	UV uv = 0;
-        bool is_simple = TRUE; /* no fancy qualifiers */
-        STRLEN radix_len;  /* SvCUR(PL_numeric_radix_sv) */
-        vcatpvfn_long_double_t fv;
-        NV nv;
-	STRLEN float_need; /* what PL_efloatsize needs to become */
 	const char *dotstr = ".";
 	STRLEN dotstrlen = 1;
 	I32 efix = 0; /* explicit format parameter index */
@@ -12614,6 +12609,15 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	case 'f':
 	case 'g': case 'G':
 	case 'a': case 'A':
+
+        {
+            bool   is_simple;  /* no fancy qualifiers */
+            STRLEN radix_len;  /* SvCUR(PL_numeric_radix_sv) */
+            STRLEN float_need; /* what PL_efloatsize needs to become */
+
+            vcatpvfn_long_double_t fv;
+            NV                     nv;
+
 	    if (vectorize)
 		goto unknown;
 
@@ -12957,6 +12961,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 
 	    break;
+        }
 
 	    /* SPECIAL */
 
