@@ -224,7 +224,7 @@ path issues but will reintroduce all the security concerns, so don't
 build a perl executable like this unless you're I<really> confident that
 such issues are not a concern in your environment.
 
-=item * C<$PERL_USE_UNSAFE_INC>
+=item * C<PERL_USE_UNSAFE_INC>
 
 There is a new environment variable recognised by the perl interpreter.
 If this variable has the value C<1> when the perl interpreter starts up,
