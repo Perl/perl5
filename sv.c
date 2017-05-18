@@ -12967,10 +12967,45 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	float_converted:
 	    eptr = PL_efloatbuf;
-            assert((IV)elen > 0); /* here zero elen is bad */
 
+            /* Since floating-point formats do their own formatting and
+             * padding, we skip the main block of code at the end of this
+             * loop which handles appending eptr to sv, and do our own
+             * stripped-down version */
 
-	    break;
+            assert(!zeros);
+            assert(!esignlen);
+            assert(!vectorize);
+            assert(elen);
+            assert(elen >= width);
+
+            /* floating-point formats only get is_utf8 if the radix point
+             * is utf8. All other characters in the string are < 128
+             * and so can be safely appended to both a non-utf8 and utf8
+             * string as-is.
+             */
+            if (is_utf8 && !has_utf8) {
+                sv_utf8_upgrade(sv);
+                has_utf8 = TRUE;
+            }
+
+            {
+                /* unrolled Perl_sv_catpvn */
+                STRLEN need = elen + SvCUR(sv) + 1;
+                char *end;
+                /* can't wrap as both elen and SvCUR() are allocated in
+                 * memory and together can't consume all the address space
+                 */
+                assert(need > elen);
+                SvGROW(sv, need);
+                end = SvEND(sv);
+                Copy(eptr, end, elen, char);
+                end += elen;
+                *end = '\0';
+                SvCUR_set(sv, need - 1);
+            }
+
+            goto donevalidconversion;
         }
 
 	    /* SPECIAL */
