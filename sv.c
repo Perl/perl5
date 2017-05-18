@@ -11036,29 +11036,6 @@ S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
 }
 
 
-/*
-=for apidoc sv_vcatpvfn
-
-=for apidoc sv_vcatpvfn_flags
-
-Processes its arguments like C<vsprintf> and appends the formatted output
-to an SV.  Uses an array of SVs if the C-style variable argument list is
-missing (C<NULL>). Argument reordering (using format specifiers like C<%2$d>
-or C<%*2$d>) is supported only when using an array of SVs; using a C-style
-C<va_list> argument list with a format string that uses argument reordering
-will yield an exception.
-
-When running with taint checks enabled, indicates via
-C<maybe_tainted> if results are untrustworthy (often due to the use of
-locales).
-
-If called as C<sv_vcatpvfn> or flags has the C<SV_GMAGIC> bit set, calls get magic.
-
-Usually used via one of its frontends C<sv_vcatpvf> and C<sv_vcatpvf_mg>.
-
-=cut
-*/
-
 #define VECTORIZE_ARGS	vecsv = va_arg(*args, SV*);\
 			vecstr = (U8*)SvPV_const(vecsv,veclen);\
 			vec_utf8 = DO_UTF8(vecsv);
@@ -11767,9 +11744,32 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
 void
 
 
-/* This function assumes that pat has the same utf8-ness as sv.
- * It's the caller's responsibility to ensure that this is so.
- */
+/*
+=for apidoc sv_vcatpvfn
+
+=for apidoc sv_vcatpvfn_flags
+
+Processes its arguments like C<vsprintf> and appends the formatted output
+to an SV.  Uses an array of SVs if the C-style variable argument list is
+missing (C<NULL>). Argument reordering (using format specifiers like C<%2$d>
+or C<%*2$d>) is supported only when using an array of SVs; using a C-style
+C<va_list> argument list with a format string that uses argument reordering
+will yield an exception.
+
+When running with taint checks enabled, indicates via
+C<maybe_tainted> if results are untrustworthy (often due to the use of
+locales).
+
+If called as C<sv_vcatpvfn> or flags has the C<SV_GMAGIC> bit set, calls get magic.
+
+It assumes that pat has the same utf8-ness as sv.  It's the caller's
+responsibility to ensure that this is so.
+
+Usually used via one of its frontends C<sv_vcatpvf> and C<sv_vcatpvf_mg>.
+
+=cut
+*/
+
 
 Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
                        va_list *const args, SV **const svargs, const I32 svmax, bool *const maybe_tainted,
