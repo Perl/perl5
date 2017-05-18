@@ -163,42 +163,6 @@ be called with ampersand syntax (C<&CORE::keys(\%hash>) and via reference
 (C<< my $k = \&CORE::keys; $k-E<gt>(\%hash) >>).  Previously they could only be
 used when inlined.
 
-=head2 POSIX::tmpnam() has been removed
-
-The fundamentally unsafe C<tmpnam()> interface was deprecated in
-Perl 5.22.0 and has now been removed.  In its place you can use
-for example the L<File::Temp> interfaces.
-
-=head2 require ::Foo::Bar is now illegal.
-
-Formerly, C<require ::Foo::Bar> would try to read F</Foo/Bar.pm>. Now any
-bareword require which starts with a double colon dies instead.
-
-=head2 Unescaped literal C<"{"> characters in regular expression
-patterns are no longer permissible
-
-You have to now say something like C<"\{"> or C<"[{]"> to specify to
-match a LEFT CURLY BRACKET.  This will allow future extensions to the
-language.  This restriction is not enforced, nor are there current plans
-to enforce it, if the C<"{"> is the first character in the pattern.
-
-These have been deprecated since v5.16, with a deprecation message
-displayed starting in v5.22.
-
-=head2 Literal control character variable names are no longer permissible
-
-A variable name may no longer contain a literal control character under
-any circumstances.  These previously were allowed in single-character
-names on ASCII platforms, but have been deprecated there since Perl
-v5.20.  This affects things like C<$I<\cT>>, where I<\cT> is a literal
-control (such as a C<NAK> or C<NEGATIVE ACKNOWLEDGE> character) in the
-source code.
-
-=head2 C<NBSP> is no longer permissible in C<\N{...}>
-
-The name of a character may no longer contain non-breaking spaces.  It
-has been deprecated to do so since Perl v5.22.
-
 =head2 create a safer utf8_hop() called utf8_hop_safe()
 
 Unlike utf8_hop(), utf8_hop_safe() won't navigate before the beginning or after
@@ -431,12 +395,26 @@ C<stderr> as for any other C<-D> switch.
 
 =head1 Incompatible Changes
 
-=head2 C<${^ENCODING}> has been removed
+=head2 Unescaped literal C<"{"> characters in regular expression
+patterns are no longer permissible
 
-Consequently, the L<encoding> pragma's default mode is no longer supported.  If
-you still need to write your source code in encodings other than UTF-8, use a
-source filter such as L<Filter::Encoding> on CPAN or L<encoding>'s C<Filter>
-option.
+You have to now say something like C<"\{"> or C<"[{]"> to specify to
+match a LEFT CURLY BRACKET; otherwise it is a fatal pattern compilation
+error.  This change will allow future extensions to the language.
+
+These have been deprecated since v5.16, with a deprecation message
+raised for some uses starting in v5.22.  Unfortunately, the code added
+to raise the message had bugs, and did not catch all the relevant uses
+of literal C<"{">.  So, some uses failed to be warned about.  Therefore,
+enforcement of this ban for these uses is deferred until Perl 5.30, and
+a deprecation message is now raised for them.
+
+Some uses of literal C<"{"> occur in contexts where we do not foresee
+the meaning be anything but the literal, such as the very first
+character in the pattern.  To avoid forcing needless code changes, this
+restriction is not enforced, nor are there current plans to enforce it,
+in those areas.  But is always correct to escape C<"{">, and the simple
+rule to remember is to do so.
 
 =head2 C<scalar(%hash)> return signature changed
 
@@ -460,6 +438,38 @@ to in list context.
 
 This makes the lvalue sub case consistent with C<(keys %hash) = ...> and
 C<(keys @_) = ...>, which are also errors.  [perl #128187]
+
+=head2 C<${^ENCODING}> has been removed
+
+Consequently, the L<encoding> pragma's default mode is no longer supported.  If
+you still need to write your source code in encodings other than UTF-8, use a
+source filter such as L<Filter::Encoding> on CPAN or L<encoding>'s C<Filter>
+option.
+
+=head2 POSIX::tmpnam() has been removed
+
+The fundamentally unsafe C<tmpnam()> interface was deprecated in
+Perl 5.22.0 and has now been removed.  In its place you can use,
+for example, the L<File::Temp> interfaces.
+
+=head2 require ::Foo::Bar is now illegal.
+
+Formerly, C<require ::Foo::Bar> would try to read F</Foo/Bar.pm>. Now any
+bareword require which starts with a double colon dies instead.
+
+=head2 Literal control character variable names are no longer permissible
+
+A variable name may no longer contain a literal control character under
+any circumstances.  These previously were allowed in single-character
+names on ASCII platforms, but have been deprecated there since Perl
+5.20.  This affects things like C<$I<\cT>>, where I<\cT> is a literal
+control (such as a C<NAK> or C<NEGATIVE ACKNOWLEDGE> character) in the
+source code.
+
+=head2 C<NBSP> is no longer permissible in C<\N{...}>
+
+The name of a character may no longer contain non-breaking spaces.  It
+has been deprecated to do so since Perl v5.22.
 
 =head1 Deprecations
 
