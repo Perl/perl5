@@ -11074,6 +11074,34 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
     sv_vcatpvfn_flags(sv, pat, patlen, args, svargs, svmax, maybe_tainted, SV_GMAGIC|SV_SMAGIC);
 }
 
+
+/* For the vcatpvfn code, we need a long double target in case
+ * HAS_LONG_DOUBLE, even without USE_LONG_DOUBLE, so that we can printf
+ * with long double formats, even without NV being long double.  But we
+ * call the target 'fv' instead of 'nv', since most of the time it is not
+ * (most compilers these days recognize "long double", even if only as a
+ * synonym for "double").
+*/
+#if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE > DOUBLESIZE && \
+	defined(PERL_PRIgldbl) && !defined(USE_QUADMATH)
+#  define VCATPVFN_FV_GF PERL_PRIgldbl
+#  if defined(__VMS) && defined(__ia64) && defined(__IEEE_FLOAT)
+       /* Work around breakage in OTS$CVT_FLOAT_T_X */
+#    define VCATPVFN_NV_TO_FV(nv,fv)                    \
+            STMT_START {                                \
+                double _dv = nv;                        \
+                fv = Perl_isnan(_dv) ? LDBL_QNAN : _dv; \
+            } STMT_END
+#  else
+#    define VCATPVFN_NV_TO_FV(nv,fv) (fv)=(nv)
+#  endif
+   typedef long double vcatpvfn_long_double_t;
+#else
+#  define VCATPVFN_FV_GF NVgf
+#  define VCATPVFN_NV_TO_FV(nv,fv) (fv)=(nv)
+   typedef NV vcatpvfn_long_double_t;
+#endif
+
 #ifdef LONGDOUBLE_DOUBLEDOUBLE
 /* The first double can be as large as 2**1023, or '1' x '0' x 1023.
  * The second double can be as small as 2**-1074, or '0' x 1073 . '1'.
@@ -11598,38 +11626,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	UV uv = 0;
         bool is_simple = TRUE; /* no fancy qualifiers */
         STRLEN radix_len;  /* SvCUR(PL_numeric_radix_sv) */
-
-	/* We need a long double target in case HAS_LONG_DOUBLE,
-         * even without USE_LONG_DOUBLE, so that we can printf with
-         * long double formats, even without NV being long double.
-         * But we call the target 'fv' instead of 'nv', since most of
-         * the time it is not (most compilers these days recognize
-         * "long double", even if only as a synonym for "double").
-	*/
-#if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE > DOUBLESIZE && \
-	defined(PERL_PRIgldbl) && !defined(USE_QUADMATH)
-	long double fv;
-#  ifdef Perl_isfinitel
-#    define FV_ISFINITE(x) Perl_isfinitel(x)
-#  endif
-#  define FV_GF PERL_PRIgldbl
-#    if defined(__VMS) && defined(__ia64) && defined(__IEEE_FLOAT)
-       /* Work around breakage in OTS$CVT_FLOAT_T_X */
-#      define NV_TO_FV(nv,fv) STMT_START {                   \
-                                           double _dv = nv;  \
-                                           fv = Perl_isnan(_dv) ? LDBL_QNAN : _dv; \
-                              } STMT_END
-#    else
-#      define NV_TO_FV(nv,fv) (fv)=(nv)
-#    endif
-#else
-	NV fv;
-#  define FV_GF NVgf
-#  define NV_TO_FV(nv,fv) (fv)=(nv)
-#endif
-#ifndef FV_ISFINITE
-#  define FV_ISFINITE(x) Perl_isfinite((NV)(x))
-#endif
+        vcatpvfn_long_double_t fv;
         NV nv;
 	STRLEN float_need; /* what PL_efloatsize needs to become */
 	const char *dotstr = ".";
@@ -12384,7 +12381,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     nv = fv;
                 } else {
                     nv = va_arg(*args, double);
-                    NV_TO_FV(nv, fv);
+                    VCATPVFN_NV_TO_FV(nv, fv);
                 }
 #else
                 nv = va_arg(*args, double);
@@ -12399,7 +12396,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                  * into the isinfnan block which follows */
               handle_infnan_argsv:
                 nv = SvNV_nomg(argsv);
-                NV_TO_FV(nv, fv);
+                VCATPVFN_NV_TO_FV(nv, fv);
             }
 
             if (Perl_isinfnan(nv)) {
@@ -12495,7 +12492,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 int i = PERL_INT_MIN;
                 (void)Perl_frexp((NV)fv, &i);
                 if (i == PERL_INT_MIN)
-                    Perl_die(aTHX_ "panic: frexp: %" FV_GF, fv);
+                    Perl_die(aTHX_ "panic: frexp: %" VCATPVFN_FV_GF, fv);
 
                 if (i > 0) {
                     digits = BIT_DIGITS(i);
