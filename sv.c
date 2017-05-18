@@ -12618,7 +12618,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	case 'a': case 'A':
 
         {
-            bool   is_simple;  /* no fancy qualifiers */
+            bool   can_be_special; /* candidate for special-case-handling */
             STRLEN radix_len;  /* SvCUR(PL_numeric_radix_sv) */
             STRLEN float_need; /* what PL_efloatsize needs to become */
 
@@ -12715,13 +12715,14 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 break;
             }
 
-            /* special-case "%.0f" */
-            is_simple = ( !(width || left || plus || alt)
-                        && fill != '0'
-                        && has_precis
-                        && intsize != 'q');
+            /* a candidate for special-casing: %.0f and %.NNNg */
+            can_be_special = ( !(width || left || plus || alt)
+                              && fill != '0'
+                              && has_precis
+                              && intsize != 'q');
 
-            if (is_simple && c == 'f' && !precis) {
+            /* special-case "%.0f" */
+            if (can_be_special && c == 'f' && !precis) {
                 if ((eptr = F0convert(nv, ebuf + sizeof ebuf, &elen)))
                     break;
             }
@@ -12867,7 +12868,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    }
 
             /* special-case "%.<number>g" */
-            if (is_simple) {
+            if (can_be_special) {
 		/* See earlier comment about buggy Gconvert when digits,
 		   aka precis is 0  */
 		if ( c == 'g' && precis ) {
