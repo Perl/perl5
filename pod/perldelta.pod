@@ -101,12 +101,6 @@ themselves. E.g. L<Test::Harness> sets it since loading modules from a
 relative path is a common idiom in test code. If you find that you
 have C<.> in C<@INC> on a perl built with default settings it's likely
 that your code is being invoked by a toolchain module of some sort.
-
-=head2 create a safer utf8_hop() called utf8_hop_safe()
-
-Unlike utf8_hop(), utf8_hop_safe() won't navigate before the beginning or after
-the end of the supplied buffer.
-
 =head2 @{^CAPTURE}, %{^CAPTURE}, and %{^CAPTURE_ALL}
 
 C<@{^CAPTURE}> exposes the capture buffers of the last match as an
