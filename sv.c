@@ -11885,43 +11885,50 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
     patend = (char*)pat + patlen;
     for (p = (char*)pat; p < patend; p = q) {
-	bool alt = FALSE;
-	bool left = FALSE;
-	bool vectorize = FALSE;
-	bool vectorarg = FALSE;
-	bool vec_utf8 = FALSE;
-	char fill = ' ';
-	char plus = 0;
-	char intsize = 0;
-	STRLEN width = 0;
-	STRLEN zeros = 0;
-	bool has_precis = FALSE;
-	STRLEN precis = 0;
-	const I32 osvix = svix;
-	bool is_utf8 = FALSE;  /* is this item utf8?   */
-        bool used_explicit_ix = FALSE;
-        bool arg_missing = FALSE;
-	char esignbuf[4];
-	U8 utf8buf[UTF8_MAXBYTES+1];
-	STRLEN esignlen = 0;
 
-	const char *eptr = NULL;
-	const char *fmtstart;
-	STRLEN elen = 0;
-	SV *vecsv = NULL;
-	const U8 *vecstr = NULL;
-	STRLEN veclen = 0;
-	char c = 0;
-	unsigned base = 0;
-	IV iv = 0;
-	UV uv = 0;
-	const char *dotstr = ".";
-	STRLEN dotstrlen = 1;
-	I32 efix = 0; /* explicit format parameter index */
-	I32 ewix = 0; /* explicit width index */
-	I32 epix = 0; /* explicit precision index */
-	I32 evix = 0; /* explicit vector index */
-	bool asterisk = FALSE;
+	char intsize     = 0;         /* size qualifier in "%hi..." etc */
+	bool alt         = FALSE;     /* has      "%#..."    */
+	bool left        = FALSE;     /* has      "%-..."    */
+	char fill        = ' ';       /* has      "%0..."    */
+	char plus        = 0;         /* has      "%+..."    */
+	STRLEN width     = 0;         /* value of "%NNN..."  */
+	bool has_precis  = FALSE;     /* has      "%.NNN..." */
+	STRLEN precis    = 0;         /* value of "%.NNN..." */
+	bool asterisk    = FALSE;     /* has      "%*..."    */
+        bool used_explicit_ix = FALSE;/* has      "%$n..."   */
+	unsigned base    = 0;         /* base to print in, e.g. 8 for %o */
+	UV uv            = 0;         /* the value to print of int-ish args */
+	IV iv            = 0;         /* ditto for signed types */
+
+	bool vectorize   = FALSE;     /* has      "%v..."    */
+	bool vectorarg   = FALSE;     /* has      "%*v..."   */
+	SV *vecsv        = NULL;      /* the cur arg for %v  */
+	bool vec_utf8    = FALSE;     /* SvUTF8(vecsv)       */
+	const U8 *vecstr = NULL;      /* SvPVX(vecsv)        */
+	STRLEN veclen    = 0;         /* SvCUR(vecsv)        */
+	const char *dotstr = ".";     /* separator string for %v */
+	STRLEN dotstrlen = 1;         /* length of separator string for %v */
+
+	I32 efix         = 0;         /* explicit format parameter index */
+	I32 ewix         = 0;         /* explicit width index */
+	I32 epix         = 0;         /* explicit precision index */
+	I32 evix         = 0;         /* explicit vector index */
+	const I32 osvix  = svix;      /* original index in case of bad fmt */
+
+	bool is_utf8     = FALSE;     /* is this item utf8?   */
+        bool arg_missing = FALSE;     /* give "Missing argument" warning */
+	char esignbuf[4];             /* holds sign prefix, e.g. "-0x" */
+	STRLEN esignlen  = 0;         /* length of e.g. "-0x" */
+	STRLEN zeros     = 0;         /* how many '0' to prepend */
+
+	const char *eptr = NULL;      /* the address of the element string */
+	STRLEN elen      = 0;         /* the length  of the element string */
+
+	const char *fmtstart;         /* start of current format (the '%') */
+	char c           = 0;         /* current character read from format */
+
+	U8 utf8buf[UTF8_MAXBYTES+1];  /* temp buf for %c */
+
 
 	/* echo everything up to the next format specification */
 	for (q = p; q < patend && *q != '%'; ++q) ;
