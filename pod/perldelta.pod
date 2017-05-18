@@ -106,12 +106,13 @@ necessarily support Unicode 9.0.  L<Unicode::Normalize> does work on 9.0.
 =head2 Use of C<\p{I<script>}> uses the improved Script_Extensions property
 
 Unicode 6.0 introduced an improved form of the Script (C<sc>) property, and
-called it Script_Extensions (C<scx>).  As of now, Perl uses this improved
-version when a property is specified as just C<\p{I<script>}>.  The meaning of
-compound forms, like C<\p{sc=I<script>}> are unchanged.  This should make
-programs be more accurate when determining if a character is used in a given
-script, but there is a slight chance of breakage for programs that very
-specifically needed the old behavior.  See L<perlunicode/Scripts>.
+called it Script_Extensions (C<scx>).  Perl now uses this improved
+version when a property is specified as just C<\p{I<script>}>.  This
+should make programs be more accurate when determining if a character is
+used in a given script, but there is a slight chance of breakage for
+programs that very specifically needed the old behavior.  The meaning of
+compound forms, like C<\p{sc=I<script>}> are unchanged.  See
+L<perlunicode/Scripts>.
 
 =head2 Declaring a reference to a variable
 
