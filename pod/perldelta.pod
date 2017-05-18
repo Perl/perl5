@@ -3101,7 +3101,7 @@ approximately 230,000 lines of changes to 1,800 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its third decade thanks to a vibrant community
 of users and developers. The following people are known to have contributed the
-improvements that became Perl 5.24.1:
+improvements that became Perl 5.26.0:
 
 Aaron Crane, Abigail, Ævar Arnfjörð Bjarmason, Alex Vandiver, Andreas
 König, Andreas Voegele, Andrew Fresh, Andy Lester, Aristotle Pagaltzis, Chad
