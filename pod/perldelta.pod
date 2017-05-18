@@ -11,7 +11,7 @@ This document describes the differences between the 5.24.0 release and the
 
 =head1 Notice
 
-This release includes two updates with widespread effects:
+This release includes three updates with widespread effects:
 
 =over 4
 
@@ -24,6 +24,11 @@ L<< Removal of the current directory (C<.>) from C<@INC> >> for the full details
 
 C<do> now gives a mandatory warning when it fails to load a file which it
 would have loaded had C<.> been in C<@INC>.
+
+=item * In regular expression patterns, a literal left brace C<"{">
+should be escaped
+
+See L</Unescaped literal C<"{"> characters in regular expression patterns are no longer permissible>.
 
 =back
 
