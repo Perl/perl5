@@ -11151,7 +11151,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 #  define HEXTRACT_MIX_ENDIAN
 #endif
 
-/* S_hextract() is a helper for Perl_sv_vcatpvfn_flags, for extracting
+/* S_hextract() is a helper for S_format_hexfp, for extracting
  * the hexadecimal values (for %a/%A).  The nv is the NV where the value
  * are being extracted from (either directly from the long double in-memory
  * presentation, or from the uquad computed via frexp+ldexp).  frexp also
@@ -11461,6 +11461,297 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
     }
     return v;
 }
+
+
+/* S_format_hexfp(): helper function for Perl_sv_vcatpvfn_flags().
+ *
+ * Processes the %a/%A hexadecimal floating-point format, since the
+ * built-in snprintf()s which are used for most of the f/p formats, don't
+ * universally handle %a/%A.
+ * Populates buf of length bufsize, and returns the length of the created
+ * string.
+ * The rest of the args have the same meaning as the local vars of the
+ * same name within Perl_sv_vcatpvfn_flags().
+ */
+
+static STRLEN
+S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
+                    const NV nv, const vcatpvfn_long_double_t fv,
+                    bool has_precis, STRLEN precis, STRLEN width,
+                    bool alt, char plus, bool left, char fill)
+{
+    /* Hexadecimal floating point. */
+    char* p = buf;
+    U8 vhex[VHEX_SIZE];
+    U8* v = vhex; /* working pointer to vhex */
+    U8* vend; /* pointer to one beyond last digit of vhex */
+    U8* vfnz = NULL; /* first non-zero */
+    U8* vlnz = NULL; /* last non-zero */
+    U8* v0 = NULL; /* first output */
+    const bool lower = (c == 'a');
+    /* At output the values of vhex (up to vend) will
+     * be mapped through the xdig to get the actual
+     * human-readable xdigits. */
+    const char* xdig = PL_hexdigit;
+    int zerotail = 0; /* how many extra zeros to append */
+    int exponent = 0; /* exponent of the floating point input */
+    bool hexradix = FALSE; /* should we output the radix */
+    bool subnormal = FALSE; /* IEEE 754 subnormal/denormal */
+    bool negative = FALSE;
+    STRLEN elen;
+    DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+
+    /* XXX: NaN, Inf -- though they are printed as "NaN" and "Inf".
+     *
+     * For example with denormals, (assuming the vanilla
+     * 64-bit double): the exponent is zero. 1xp-1074 is
+     * the smallest denormal and the smallest double, it
+     * could be output also as 0x0.0000000000001p-1022 to
+     * match its internal structure. */
+
+    vend = S_hextract(aTHX_ nv, &exponent, &subnormal, vhex, NULL);
+    S_hextract(aTHX_ nv, &exponent, &subnormal, vhex, vend);
+
+#if NVSIZE > DOUBLESIZE
+#  ifdef HEXTRACT_HAS_IMPLICIT_BIT
+    /* In this case there is an implicit bit,
+     * and therefore the exponent is shifted by one. */
+    exponent--;
+#  else
+#    ifdef NV_X86_80_BIT
+    if (subnormal) {
+        /* The subnormals of the x86-80 have a base exponent of -16382,
+         * (while the physical exponent bits are zero) but the frexp()
+         * returned the scientific-style floating exponent.  We want
+         * to map the last one as:
+         * -16831..-16384 -> -16382 (the last normal is 0x1p-16382)
+         * -16835..-16388 -> -16384
+         * since we want to keep the first hexdigit
+         * as one of the [8421]. */
+        exponent = -4 * ( (exponent + 1) / -4) - 2;
+    } else {
+        exponent -= 4;
+    }
+#    endif
+    /* TBD: other non-implicit-bit platforms than the x86-80. */
+#  endif
+#endif
+
+    negative = fv < 0 || Perl_signbit(nv);
+    if (negative)
+        *p++ = '-';
+    else if (plus)
+        *p++ = plus;
+    *p++ = '0';
+    if (lower) {
+        *p++ = 'x';
+    }
+    else {
+        *p++ = 'X';
+        xdig += 16; /* Use uppercase hex. */
+    }
+
+    /* Find the first non-zero xdigit. */
+    for (v = vhex; v < vend; v++) {
+        if (*v) {
+            vfnz = v;
+            break;
+        }
+    }
+
+    if (vfnz) {
+        /* Find the last non-zero xdigit. */
+        for (v = vend - 1; v >= vhex; v--) {
+            if (*v) {
+                vlnz = v;
+                break;
+            }
+        }
+
+#if NVSIZE == DOUBLESIZE
+        if (fv != 0.0)
+            exponent--;
+#endif
+
+        if (subnormal) {
+#ifndef NV_X86_80_BIT
+          if (vfnz[0] > 1) {
+            /* IEEE 754 subnormals (but not the x86 80-bit):
+             * we want "normalize" the subnormal,
+             * so we need to right shift the hex nybbles
+             * so that the output of the subnormal starts
+             * from the first true bit.  (Another, equally
+             * valid, policy would be to dump the subnormal
+             * nybbles as-is, to display the "physical" layout.) */
+            int i, n;
+            U8 *vshr;
+            /* Find the ceil(log2(v[0])) of
+             * the top non-zero nybble. */
+            for (i = vfnz[0], n = 0; i > 1; i >>= 1, n++) { }
+            assert(n < 4);
+            vlnz[1] = 0;
+            for (vshr = vlnz; vshr >= vfnz; vshr--) {
+              vshr[1] |= (vshr[0] & (0xF >> (4 - n))) << (4 - n);
+              vshr[0] >>= n;
+            }
+            if (vlnz[1]) {
+              vlnz++;
+            }
+          }
+#endif
+          v0 = vfnz;
+        } else {
+          v0 = vhex;
+        }
+
+        if (has_precis) {
+            U8* ve = (subnormal ? vlnz + 1 : vend);
+            SSize_t vn = ve - v0;
+            assert(vn >= 1);
+            if (precis < (Size_t)(vn - 1)) {
+                bool overflow = FALSE;
+                if (v0[precis + 1] < 0x8) {
+                    /* Round down, nothing to do. */
+                } else if (v0[precis + 1] > 0x8) {
+                    /* Round up. */
+                    v0[precis]++;
+                    overflow = v0[precis] > 0xF;
+                    v0[precis] &= 0xF;
+                } else { /* v0[precis] == 0x8 */
+                    /* Half-point: round towards the one
+                     * with the even least-significant digit:
+                     * 08 -> 0  88 -> 8
+                     * 18 -> 2  98 -> a
+                     * 28 -> 2  a8 -> a
+                     * 38 -> 4  b8 -> c
+                     * 48 -> 4  c8 -> c
+                     * 58 -> 6  d8 -> e
+                     * 68 -> 6  e8 -> e
+                     * 78 -> 8  f8 -> 10 */
+                    if ((v0[precis] & 0x1)) {
+                        v0[precis]++;
+                    }
+                    overflow = v0[precis] > 0xF;
+                    v0[precis] &= 0xF;
+                }
+
+                if (overflow) {
+                    for (v = v0 + precis - 1; v >= v0; v--) {
+                        (*v)++;
+                        overflow = *v > 0xF;
+                        (*v) &= 0xF;
+                        if (!overflow) {
+                            break;
+                        }
+                    }
+                    if (v == v0 - 1 && overflow) {
+                        /* If the overflow goes all the
+                         * way to the front, we need to
+                         * insert 0x1 in front, and adjust
+                         * the exponent. */
+                        Move(v0, v0 + 1, vn - 1, char);
+                        *v0 = 0x1;
+                        exponent += 4;
+                    }
+                }
+
+                /* The new effective "last non zero". */
+                vlnz = v0 + precis;
+            }
+            else {
+                zerotail =
+                  subnormal ? precis - vn + 1 :
+                  precis - (vlnz - vhex);
+            }
+        }
+
+        v = v0;
+        *p++ = xdig[*v++];
+
+        /* If there are non-zero xdigits, the radix
+         * is output after the first one. */
+        if (vfnz < vlnz) {
+          hexradix = TRUE;
+        }
+    }
+    else {
+        *p++ = '0';
+        exponent = 0;
+        zerotail = precis;
+    }
+
+    /* The radix is always output if precis, or if alt. */
+    if (precis > 0 || alt) {
+      hexradix = TRUE;
+    }
+
+    if (hexradix) {
+#ifndef USE_LOCALE_NUMERIC
+            *p++ = '.';
+#else
+            STORE_LC_NUMERIC_SET_TO_NEEDED();
+            if (PL_numeric_radix_sv && IN_LC(LC_NUMERIC)) {
+                STRLEN n;
+                const char* r = SvPV(PL_numeric_radix_sv, n);
+                Copy(r, p, n, char);
+                p += n;
+            }
+            else {
+                *p++ = '.';
+            }
+            RESTORE_LC_NUMERIC();
+#endif
+    }
+
+    if (vlnz) {
+        while (v <= vlnz)
+            *p++ = xdig[*v++];
+    }
+
+    if (zerotail > 0) {
+      while (zerotail--) {
+        *p++ = '0';
+      }
+    }
+
+    elen = p - buf;
+    elen += my_snprintf(p, bufsize - elen,
+                        "%c%+d", lower ? 'p' : 'P',
+                        exponent);
+
+    if (elen < width) {
+        STRLEN gap = (STRLEN)(width - elen);
+        if (left) {
+            /* Pad the back with spaces. */
+            memset(buf + elen, ' ', gap);
+        }
+        else if (fill == '0') {
+            /* Insert the zeros after the "0x" and the
+             * the potential sign, but before the digits,
+             * otherwise we end up with "0000xH.HHH...",
+             * when we want "0x000H.HHH..."  */
+            STRLEN nzero = gap;
+            char* zerox = buf + 2;
+            STRLEN nmove = elen - 2;
+            if (negative || plus) {
+                zerox++;
+                nmove--;
+            }
+            Move(zerox, zerox + nzero, nmove, char);
+            memset(zerox, fill, nzero);
+        }
+        else {
+            /* Move it to the right. */
+            Move(buf, buf + gap,
+                 elen, char);
+            /* Pad the front with spaces. */
+            memset(buf, ' ', gap);
+        }
+        elen = width;
+    }
+    return elen;
+}
+
 
 /* Helper for sv_vcatpvfn_flags().  */
 #define FETCH_VCATPVFN_ARGUMENT(var, in_range, expr)   \
@@ -12580,273 +12871,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    }
 
             if (UNLIKELY(hexfp)) {
-                /* Hexadecimal floating point. */
-                char* p = PL_efloatbuf;
-                U8 vhex[VHEX_SIZE];
-                U8* v = vhex; /* working pointer to vhex */
-                U8* vend; /* pointer to one beyond last digit of vhex */
-                U8* vfnz = NULL; /* first non-zero */
-                U8* vlnz = NULL; /* last non-zero */
-                U8* v0 = NULL; /* first output */
-                const bool lower = (c == 'a');
-                /* At output the values of vhex (up to vend) will
-                 * be mapped through the xdig to get the actual
-                 * human-readable xdigits. */
-                const char* xdig = PL_hexdigit;
-                int zerotail = 0; /* how many extra zeros to append */
-                int exponent = 0; /* exponent of the floating point input */
-                bool hexradix = FALSE; /* should we output the radix */
-                bool subnormal = FALSE; /* IEEE 754 subnormal/denormal */
-                bool negative = FALSE;
-
-                /* XXX: NaN, Inf -- though they are printed as "NaN" and "Inf".
-                 *
-                 * For example with denormals, (assuming the vanilla
-                 * 64-bit double): the exponent is zero. 1xp-1074 is
-                 * the smallest denormal and the smallest double, it
-                 * could be output also as 0x0.0000000000001p-1022 to
-                 * match its internal structure. */
-
-                vend = S_hextract(aTHX_ nv, &exponent, &subnormal, vhex, NULL);
-                S_hextract(aTHX_ nv, &exponent, &subnormal, vhex, vend);
-
-#if NVSIZE > DOUBLESIZE
-#  ifdef HEXTRACT_HAS_IMPLICIT_BIT
-                /* In this case there is an implicit bit,
-                 * and therefore the exponent is shifted by one. */
-                exponent--;
-#  else
-#   ifdef NV_X86_80_BIT
-                if (subnormal) {
-                    /* The subnormals of the x86-80 have a base exponent of -16382,
-                     * (while the physical exponent bits are zero) but the frexp()
-                     * returned the scientific-style floating exponent.  We want
-                     * to map the last one as:
-                     * -16831..-16384 -> -16382 (the last normal is 0x1p-16382)
-                     * -16835..-16388 -> -16384
-                     * since we want to keep the first hexdigit
-                     * as one of the [8421]. */
-                    exponent = -4 * ( (exponent + 1) / -4) - 2;
-                } else {
-                    exponent -= 4;
-                }
-#   endif
-                /* TBD: other non-implicit-bit platforms than the x86-80. */
-#  endif
-#endif
-
-                negative = fv < 0 || Perl_signbit(nv);
-                if (negative)
-                    *p++ = '-';
-                else if (plus)
-                    *p++ = plus;
-                *p++ = '0';
-                if (lower) {
-                    *p++ = 'x';
-                }
-                else {
-                    *p++ = 'X';
-                    xdig += 16; /* Use uppercase hex. */
-                }
-
-                /* Find the first non-zero xdigit. */
-                for (v = vhex; v < vend; v++) {
-                    if (*v) {
-                        vfnz = v;
-                        break;
-                    }
-                }
-
-                if (vfnz) {
-                    /* Find the last non-zero xdigit. */
-                    for (v = vend - 1; v >= vhex; v--) {
-                        if (*v) {
-                            vlnz = v;
-                            break;
-                        }
-                    }
-
-#if NVSIZE == DOUBLESIZE
-                    if (fv != 0.0)
-                        exponent--;
-#endif
-
-                    if (subnormal) {
-#ifndef NV_X86_80_BIT
-                      if (vfnz[0] > 1) {
-                        /* IEEE 754 subnormals (but not the x86 80-bit):
-                         * we want "normalize" the subnormal,
-			 * so we need to right shift the hex nybbles
-                         * so that the output of the subnormal starts
-                         * from the first true bit.  (Another, equally
-			 * valid, policy would be to dump the subnormal
-			 * nybbles as-is, to display the "physical" layout.) */
-                        int i, n;
-                        U8 *vshr;
-                        /* Find the ceil(log2(v[0])) of
-                         * the top non-zero nybble. */
-                        for (i = vfnz[0], n = 0; i > 1; i >>= 1, n++) { }
-                        assert(n < 4);
-                        vlnz[1] = 0;
-                        for (vshr = vlnz; vshr >= vfnz; vshr--) {
-                          vshr[1] |= (vshr[0] & (0xF >> (4 - n))) << (4 - n);
-                          vshr[0] >>= n;
-                        }
-                        if (vlnz[1]) {
-                          vlnz++;
-                        }
-                      }
-#endif
-                      v0 = vfnz;
-                    } else {
-                      v0 = vhex;
-                    }
-
-                    if (has_precis) {
-                        U8* ve = (subnormal ? vlnz + 1 : vend);
-                        SSize_t vn = ve - v0;
-                        assert(vn >= 1);
-                        if (precis < (Size_t)(vn - 1)) {
-                            bool overflow = FALSE;
-                            if (v0[precis + 1] < 0x8) {
-                                /* Round down, nothing to do. */
-                            } else if (v0[precis + 1] > 0x8) {
-                                /* Round up. */
-                                v0[precis]++;
-                                overflow = v0[precis] > 0xF;
-                                v0[precis] &= 0xF;
-                            } else { /* v0[precis] == 0x8 */
-                                /* Half-point: round towards the one
-                                 * with the even least-significant digit:
-                                 * 08 -> 0  88 -> 8
-                                 * 18 -> 2  98 -> a
-                                 * 28 -> 2  a8 -> a
-                                 * 38 -> 4  b8 -> c
-                                 * 48 -> 4  c8 -> c
-                                 * 58 -> 6  d8 -> e
-                                 * 68 -> 6  e8 -> e
-                                 * 78 -> 8  f8 -> 10 */
-                                if ((v0[precis] & 0x1)) {
-                                    v0[precis]++;
-                                }
-                                overflow = v0[precis] > 0xF;
-                                v0[precis] &= 0xF;
-                            }
-
-                            if (overflow) {
-                                for (v = v0 + precis - 1; v >= v0; v--) {
-                                    (*v)++;
-                                    overflow = *v > 0xF;
-                                    (*v) &= 0xF;
-                                    if (!overflow) {
-                                        break;
-                                    }
-                                }
-                                if (v == v0 - 1 && overflow) {
-                                    /* If the overflow goes all the
-                                     * way to the front, we need to
-                                     * insert 0x1 in front, and adjust
-                                     * the exponent. */
-                                    Move(v0, v0 + 1, vn - 1, char);
-                                    *v0 = 0x1;
-                                    exponent += 4;
-                                }
-                            }
-
-                            /* The new effective "last non zero". */
-                            vlnz = v0 + precis;
-                        }
-                        else {
-                            zerotail =
-                              subnormal ? precis - vn + 1 :
-                              precis - (vlnz - vhex);
-                        }
-                    }
-
-                    v = v0;
-                    *p++ = xdig[*v++];
-
-                    /* If there are non-zero xdigits, the radix
-                     * is output after the first one. */
-                    if (vfnz < vlnz) {
-                      hexradix = TRUE;
-                    }
-                }
-                else {
-                    *p++ = '0';
-                    exponent = 0;
-                    zerotail = precis;
-                }
-
-                /* The radix is always output if precis, or if alt. */
-                if (precis > 0 || alt) {
-                  hexradix = TRUE;
-                }
-
-                if (hexradix) {
-#ifndef USE_LOCALE_NUMERIC
-                        *p++ = '.';
-#else
-                        STORE_LC_NUMERIC_SET_TO_NEEDED();
-                        if (PL_numeric_radix_sv && IN_LC(LC_NUMERIC)) {
-                            STRLEN n;
-                            const char* r = SvPV(PL_numeric_radix_sv, n);
-                            Copy(r, p, n, char);
-                            p += n;
-                        }
-                        else {
-                            *p++ = '.';
-                        }
-                        RESTORE_LC_NUMERIC();
-#endif
-                }
-
-                if (vlnz) {
-                    while (v <= vlnz)
-                        *p++ = xdig[*v++];
-                }
-
-                if (zerotail > 0) {
-                  while (zerotail--) {
-                    *p++ = '0';
-                  }
-                }
-
-                elen = p - PL_efloatbuf;
-                elen += my_snprintf(p, PL_efloatsize - elen,
-                                    "%c%+d", lower ? 'p' : 'P',
-                                    exponent);
-
-                if (elen < width) {
-                    STRLEN gap = (STRLEN)(width - elen);
-                    if (left) {
-                        /* Pad the back with spaces. */
-                        memset(PL_efloatbuf + elen, ' ', gap);
-                    }
-                    else if (fill == '0') {
-                        /* Insert the zeros after the "0x" and the
-                         * the potential sign, but before the digits,
-                         * otherwise we end up with "0000xH.HHH...",
-                         * when we want "0x000H.HHH..."  */
-                        STRLEN nzero = gap;
-                        char* zerox = PL_efloatbuf + 2;
-                        STRLEN nmove = elen - 2;
-                        if (negative || plus) {
-                            zerox++;
-                            nmove--;
-                        }
-                        Move(zerox, zerox + nzero, nmove, char);
-                        memset(zerox, fill, nzero);
-                    }
-                    else {
-                        /* Move it to the right. */
-                        Move(PL_efloatbuf, PL_efloatbuf + gap,
-                             elen, char);
-                        /* Pad the front with spaces. */
-                        memset(PL_efloatbuf, ' ', gap);
-                    }
-                    elen = width;
-                }
+                elen = S_format_hexfp(aTHX_ PL_efloatbuf, PL_efloatsize, c,
+                                nv, fv, has_precis, precis, width,
+                                alt, plus, left, fill);
             }
             else {
                 char *ptr = ebuf + sizeof ebuf;
