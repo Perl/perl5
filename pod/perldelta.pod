@@ -737,14 +737,14 @@ L<Encode> has been upgraded from version 2.80 to 2.88.
 
 L<encoding> has been upgraded from version 2.17 to 2.19.
 
-This module's default mode is no longer supported as of Perl 5.25.3.  It now
+This module's default mode is no longer supported.  It now
 dies when imported, unless the C<Filter> option is being used.
 
 =item *
 
 L<encoding::warnings> has been upgraded from version 0.12 to 0.13.
 
-This module is no longer supported as of Perl 5.25.3.  It emits a warning to
+This module is no longer supported.  It emits a warning to
 that effect and then does nothing.
 
 =item *
@@ -3069,8 +3069,7 @@ GitHub|https://github.com/apache/mod_perl/commit/82827132efd3c2e25cc413c85af61bb
 
 =item *
 
-Parsing bad POSIX charclasses no longer leaks memory.  This was fixed in Perl
-5.25.2
+Parsing bad POSIX charclasses no longer leaks memory.
 L<[perl #128313]|https://rt.perl.org/Public/Bug/Display.html?id=128313>
 
 =item *
