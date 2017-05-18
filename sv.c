@@ -11856,8 +11856,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             if (LIKELY(!Perl_isinfnan(nv))) {
                 if (*pp == 'g') {
                     /* Add check for digits != 0 because it seems that some
-                       gconverts are buggy in this case, and we don't yet have
-                       a Configure test for this.  */
+                       Gconvert's are buggy in this case, and we don't yet
+                       have a Configure test for this.  */
                     if (digits && digits < sizeof(ebuf) - NV_DIG - 10) {
                         /* 0, point, slack */
                         STORE_LC_NUMERIC_SET_TO_NEEDED();
