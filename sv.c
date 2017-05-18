@@ -11790,7 +11790,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
      * Plus 32: Playing safe. */
     char ebuf[IV_DIG * 4 + NV_DIG + 32];
     bool no_redundant_warning = FALSE; /* did we use any explicit format parameter index? */
-    bool hexfp = FALSE; /* hexadecimal floating point? */
 
     DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
 
@@ -12621,6 +12620,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             bool   can_be_special; /* candidate for special-case-handling */
             STRLEN radix_len;  /* SvCUR(PL_numeric_radix_sv) */
             STRLEN float_need; /* what PL_efloatsize needs to become */
+            bool hexfp;        /* hexadecimal floating point? */
 
             vcatpvfn_long_double_t fv;
             NV                     nv;
@@ -12785,6 +12785,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
              * consuming virtually all the 32-bit or 64-bit address space
              */
 	    float_need += radix_len;
+
+            hexfp = FALSE;
 
 	    if (isALPHA_FOLD_EQ(c, 'f')) {
                 /* Determine how many digits before the radix point
