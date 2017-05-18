@@ -11927,8 +11927,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	const char *fmtstart;         /* start of current format (the '%') */
 	char c           = 0;         /* current character read from format */
 
-	U8 utf8buf[UTF8_MAXBYTES+1];  /* temp buf for %c */
-
 
 	/* echo everything up to the next format specification */
 	for (q = p; q < patend && *q != '%'; ++q) ;
@@ -12324,9 +12322,11 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    uv = (args) ? va_arg(*args, int) : SvIV_nomg(argsv);
 	    if ((uv > 255 ||
 		 (!UVCHR_IS_INVARIANT(uv) && SvUTF8(sv)))
-		&& !IN_BYTES) {
-		eptr = (char*)utf8buf;
-		elen = uvchr_to_utf8((U8*)eptr, uv) - utf8buf;
+		&& !IN_BYTES)
+            {
+                assert(sizeof(ebuf) >= UTF8_MAXBYTES + 1);
+		eptr = ebuf;
+		elen = uvchr_to_utf8((U8*)eptr, uv) - (U8*)ebuf;
 		is_utf8 = TRUE;
 	    }
 	    else {
