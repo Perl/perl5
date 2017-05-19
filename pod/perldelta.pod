@@ -206,7 +206,7 @@ security implications: for example, where a script attempts to load an
 optional module when its current directory is untrusted (such as F</tmp>),
 it could load and execute code from under that directory.
 
-Starting with v5.26.0, C<.> is always removed by default, not just under
+Starting with v5.26, C<.> is always removed by default, not just under
 tainting.  This has major implications for installing modules and executing
 scripts.
 
@@ -454,7 +454,7 @@ option.
 =head2 POSIX::tmpnam() has been removed
 
 The fundamentally unsafe C<tmpnam()> interface was deprecated in
-Perl 5.22.0 and has now been removed.  In its place you can use,
+Perl 5.22 and has now been removed.  In its place you can use,
 for example, the L<File::Temp> interfaces.
 
 =head2 require ::Foo::Bar is now illegal.
@@ -474,7 +474,7 @@ source code.
 =head2 C<NBSP> is no longer permissible in C<\N{...}>
 
 The name of a character may no longer contain non-breaking spaces.  It
-has been deprecated to do so since Perl v5.22.
+has been deprecated to do so since Perl 5.22.
 
 =head1 Deprecations
 
@@ -1587,7 +1587,7 @@ which may change or be removed in a future Perl version:
 L<C<${^ENCODING}> is no longer supported. Its use will be fatal in Perl 5.28|perldiag/"${^ENCODING} is no longer supported. Its use will be fatal in Perl 5.28">
 
 (D deprecated) The special variable C<${^ENCODING}>, formerly used to implement
-the C<encoding> pragma, is no longer supported as of Perl 5.26.0.
+the C<encoding> pragma, is no longer supported as of Perl 5.26.
 
 =item *
 
@@ -1755,7 +1755,7 @@ array". [perl #127976]
 =item *
 
 C<undef *_; shift> or C<undef *_; pop> inside a subroutine, with no
-argument to C<shift> or C<pop>, began crashing in Perl 5.14.0, but has now
+argument to C<shift> or C<pop>, began crashing in Perl 5.14, but has now
 been fixed.
 
 =item *
@@ -1772,7 +1772,7 @@ do, but merely produce a syntax error. [perl #128171]
 =item *
 
 C<do> or C<require> with a reference or typeglob which, when stringified,
-contains a null character started crashing in Perl 5.20.0, but has now been
+contains a null character started crashing in Perl 5.20, but has now been
 fixed. [perl #128182]
 
 =back
@@ -2301,7 +2301,7 @@ L<perlapi/Character classification>.
 =item *
 
 Calling macros like C<isALPHA_utf8> on malformed UTF-8 have issued a
-deprecation warning since Perl v5.18.  They now die.
+deprecation warning since Perl 5.18.  They now die.
 Similarly, macros like C<toLOWER_utf8> on malformed UTF-8 now die.
 
 =item *
@@ -2438,7 +2438,7 @@ buggy C<strxfrm()> implementations in their libc. [perl #121734]
 Perl is now built with the C<PERL_OP_PARENT> compiler define enabled by
 default.  To disable it, use the C<PERL_NO_OP_PARENT> compiler define.
 This flag alters how the C<op_sibling> field is used in C<OP> structures,
-and has been available optionally since perl 5.22.0.
+and has been available optionally since perl 5.22.
 
 See L<perl5220delta/"Internal Changes"> for more details of what this
 build option does.
@@ -2495,7 +2495,7 @@ confuse any surrounding expression.  [perl #130705]
 
 =item *
 
-Since 5.24.0 in some obscure cases, a regex which included code blocks
+Since 5.24 in some obscure cases, a regex which included code blocks
 from multiple sources (I<e.g.>, via embedded via qr// objects) could end up
 with the wrong current pad and crash or give weird results. [perl #129881]
 
@@ -3028,7 +3028,7 @@ advice if needed.  Below is a subset of these modules:
 
 =item * L<Coro>
 
-L<Coro> and perl v5.22.0 were already incompatible due to a change in the perl,
+L<Coro> and perl 5.22 were already incompatible due to a change in the perl,
 and the reworking on the perl context stack creates a further incompatibility.
 perl5-porters has L<discussed the issue on the mailing
 list|http://www.nntp.perl.org/group/perl.perl5.porters/2016/05/msg236174.html>.
@@ -3045,12 +3045,12 @@ list|http://www.nntp.perl.org/group/perl.perl5.porters/2016/05/msg236174.html>.
 
 =item *
 
-The module L<lexical::underscore> no longer works on perl v5.24.0, because perl
+The module L<lexical::underscore> no longer works on Perl 5.24, because perl
 no longer has a lexical C<$_>!
 
 =item *
 
-C<mod_perl> has been patched for compatibility for v5.22.0 and later but no
+C<mod_perl> has been patched for compatibility for v5.22 and later but no
 release has been made.  The relevant patch (and other changes) can be found in
 their source code repository, L<mirrored at
 GitHub|https://github.com/apache/mod_perl/commit/82827132efd3c2e25cc413c85af61bb63375da6e>.
@@ -3068,7 +3068,7 @@ L<[perl #128313]|https://rt.perl.org/Public/Bug/Display.html?id=128313>
 
 =item *
 
-Fixed issues with recursive regexes.  The behavior was fixed in Perl 5.24.0.
+Fixed issues with recursive regexes.  The behavior was fixed in Perl 5.24.
 L<[perl #126182]|https://rt.perl.org/Public/Bug/Display.html?id=126182>
 
 =back
