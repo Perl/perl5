@@ -309,7 +309,7 @@ Note that this only helps build and install an unfixed module.  It's
 possible for the tests to pass (since they were run under
 C<PERL_USE_UNSAFE_INC=1>), but for the module itself to fail to perform
 correctly in production.  In this case you may have to temporarily modify
-your script until such time as fixed version of the module is released.
+your script until such time as a fixed version of the module is released.
 For example:
 
     use Foo::Bar;
@@ -326,7 +326,7 @@ assess the resultant risks first.
 
 If you maintain a CPAN distribution, it may need updating to run in
 a dotless environment.  Although C<cpan> and other such tools will
-currently set the C<PERL_USE_UNSAFE_INC> during module build, this is
+currently set the C<PERL_USE_UNSAFE_INC> during module build, this is a
 temporary workaround for the set of modules which rely on C<.> being in
 C<@INC> for installation and testing, and this may mask deeper issues.  It
 could result in a module which passes tests and installs, but which
@@ -347,6 +347,7 @@ This makes it likely that your existing build and test code will work, but
 this may mask issues with your code which only manifest when used after
 install.  It is prudent to try and run your build process with that
 variable explicitly disabled:
+
     (export PERL_USE_UNSAFE_INC=0; \
      perl Makefile.PL && make && make test && make install)
 
@@ -359,8 +360,8 @@ When fixing issues in tests due to the removal of dot from C<@INC>,
 reinsertion of dot into C<@INC> should be performed with caution, for this
 too may suppress real errors in your runtime code.  You are encouraged
 wherever possible to apply the aforementioned approaches with explicit
-absolute/relative paths, or relocate your needed files into a subdirectory
-and insert that subdirectory into C<@INC> instead.
+absolute/relative paths, or to relocate your needed files into a
+subdirectory and insert that subdirectory into C<@INC> instead.
 
 If your runtime code has problems under the dotless C<@INC>, then the comments
 above on how to fix for script authors will mostly apply here too.  Bear in
@@ -427,9 +428,10 @@ The value returned for C<scalar(%hash)> will no longer show information about
 the buckets allocated in the hash.  It will simply return the count of used
 keys.  It is thus equivalent to C<0+keys(%hash)>.
 
-A form of backwards compatibility is provided via C<Hash::Util::bucket_ratio()>
-which provides the same behavior as C<scalar(%hash)> provided prior to Perl
-5.25.
+A form of backwards compatibility is provided via
+L<C<Hash::Util::bucket_ratio()>|Hash::Util/bucket_ratio> which provides
+the same behavior as
+C<scalar(%hash)> provided in Perl 5.24 and earlier.
 
 =head2 C<keys> returned from an lvalue subroutine
 
@@ -482,7 +484,7 @@ has been deprecated to do so since Perl 5.22.
 
 In order for Perl to eventually allow string delimiters to be Unicode
 grapheme clusters (which look like a single character, but may be
-a sequence of several ones), we have to stop allowing a single char
+a sequence of several ones), we have to stop allowing a single character
 delimiter that isn't a grapheme by itself.  These are unlikely to exist
 in actual code, as they would typically display as attached to the
 character in front of them.
@@ -619,7 +621,7 @@ L<arybase> has been upgraded from version 0.11 to 0.12.
 L<attributes> has been upgraded from version 0.27 to 0.29.
 
 The deprecation message for the C<:unique> and C<:locked> attributes
-now mention they will disappear in Perl 5.28.
+now mention that they will disappear in Perl 5.28.
 
 =item *
 
@@ -931,7 +933,7 @@ Remove sudo from 500_ping_icmp.t.
 
 Avoid stderr noise in tests
 
-Check for echo in new Net::Ping tests.
+Check for echo in new L<Net::Ping> tests.
 
 =item *
 
@@ -1394,7 +1396,7 @@ Mention C<Moo> more.
 
 =item *
 
-Clarify behavior single quote regexps.
+Clarify behavior of single quote regexps.
 
 =back
 
@@ -1586,7 +1588,7 @@ which may change or be removed in a future Perl version:
 
 L<C<${^ENCODING}> is no longer supported. Its use will be fatal in Perl 5.28|perldiag/"${^ENCODING} is no longer supported. Its use will be fatal in Perl 5.28">
 
-(D deprecated) The special variable C<${^ENCODING}>, formerly used to implement
+The special variable C<${^ENCODING}>, formerly used to implement
 the C<encoding> pragma, is no longer supported as of Perl 5.26.
 
 =item *
@@ -1830,7 +1832,7 @@ Tidy file, rename some symbols.
 
 =item *
 
-Replace obscure character range with \w.
+Replace obscure character range with C<\w>.
 
 =back
 
