@@ -17,7 +17,7 @@ This release includes three updates with widespread effects:
 
 =item * C<.> no longer in C<@INC>
 
-The current modules, and for the execution of scripts. See the section
+The current modules, and for the execution of scripts.  See the section
 L<< Removal of the current directory (C<.>) from C<@INC> >> for the full details.
 
 =item * C<do> may now warn
@@ -49,8 +49,8 @@ We have switched to a hybrid hash function to better balance
 performance for short and long keys.
 
 For short keys, 16 bytes and under, we use an optimised variant of
-One At A Time Hard, and for longer keys we use Siphash 1-3. For very
-long keys this is a big improvement in performance. For shorter keys
+One At A Time Hard, and for longer keys we use Siphash 1-3.  For very
+long keys this is a big improvement in performance.  For shorter keys
 there is a modest improvement.
 
 =head2 Indented Here-documents
@@ -88,14 +88,14 @@ prints "Hello there\n" with no leading whitespace.
 =head2 @{^CAPTURE}, %{^CAPTURE}, and %{^CAPTURE_ALL}
 
 C<@{^CAPTURE}> exposes the capture buffers of the last match as an
-array. So C<$1> is C<${^CAPTURE}[0]>. This is a more efficient equivalent
+array.  So C<$1> is C<${^CAPTURE}[0]>.  This is a more efficient equivalent
 to code like C<substr($matched_string,$-[0],$+[0]-$-[0])>, and you don't
-have to keep track of the C<$matched_string> either. This variable has no
-single character equivalent. Note, like the other regex magic variables
+have to keep track of the C<$matched_string> either.  This variable has no
+single character equivalent.  Note, like the other regex magic variables
 the contents of this variable is dynamic, if you wish to store it beyond
 the lifetime of the match you must copy it to another array.
 
-C<%{^CAPTURE}> is the equivalent to C<%+> (I<i.e.>, named captures). Other than
+C<%{^CAPTURE}> is the equivalent to C<%+> (I<i.e.>, named captures).  Other than
 being more self documenting there is no difference between the two forms.
 
 C<%{^CAPTURE_ALL}> is the equivalent to C<%-> (I<i.e.>, all named captures).
@@ -153,9 +153,9 @@ L<perllocale/Collation of strings containing embedded C<NUL> characters>.
 
 =head2 Lexical subroutines are no longer experimental
 
-Using the C<lexical_subs> feature introduced in v5.18 no longer emits a warning. Existing
+Using the C<lexical_subs> feature introduced in v5.18 no longer emits a warning.  Existing
 code that disables the C<experimental::lexical_subs> warning category
-that the feature previously used will continue to work. The
+that the feature previously used will continue to work.  The
 C<lexical_subs> feature has no effect; all Perl code can use lexical
 subroutines, regardless of what feature declarations are in scope.
 
@@ -178,7 +178,7 @@ the end of the supplied buffer.
 =head2 '.' and @INC
 
 Since time immemorial Perl has, as a last resort, loaded libraries
-from the current directory. For security reasons this is no longer the
+from the current directory.  For security reasons this is no longer the
 case.  This is controlled by the C<@INC> variable, and it no longer
 defaults to containing C<.> as its last element.
 
@@ -188,26 +188,26 @@ default now).
 
 If you'd like to add C<.> back to C<@INC> at runtime set
 C<PERL_USE_UNSAFE_INC=1> in the environment before starting
-perl. Setting it to 1 restores C<.> in the C<@INC> when perl otherwise
+perl.  Setting it to 1 restores C<.> in the C<@INC> when perl otherwise
 lacks it.
 
 Various toolchain modules will set C<PERL_USE_UNSAFE_INC=1>
 themselves.  For example, L<Test::Harness> sets it, since loading modules from a
-relative path is a common idiom in test code. If you find that you
+relative path is a common idiom in test code.  If you find that you
 have C<.> in C<@INC> on a perl built with default settings it's likely
 that your code is being invoked by a toolchain module of some sort.
 
 =head2 Removal of the current directory (C<.>) from C<@INC>
 
-The perl binary includes a default set of paths in C<@INC>. Historically
+The perl binary includes a default set of paths in C<@INC>.  Historically
 it has also included the current directory (C<.>) as the final entry,
-unless run with taint mode enabled (C<perl -T>). While convenient, this has
+unless run with taint mode enabled (C<perl -T>).  While convenient, this has
 security implications: for example, where a script attempts to load an
 optional module when its current directory is untrusted (such as F</tmp>),
 it could load and execute code from under that directory.
 
 Starting with v5.26.0, C<.> is always removed by default, not just under
-tainting. This has major implications for installing modules and executing
+tainting.  This has major implications for installing modules and executing
 scripts.
 
 The following new features have been added to help ameliorate these
@@ -219,7 +219,7 @@ issues.
 
 There is a new C<Configure> option, C<default_inc_excludes_dot> (enabled
 by default) which builds a perl executable without C<.>; unsetting this
-option using C<-U> reverts perl to the old behaviour. This may fix your
+option using C<-U> reverts perl to the old behaviour.  This may fix your
 path issues but will reintroduce all the security concerns, so don't
 build a perl executable like this unless you're I<really> confident that
 such issues are not a concern in your environment.
@@ -231,20 +231,20 @@ If this variable has the value C<1> when the perl interpreter starts up,
 then C<.> will be automatically appended to C<@INC> (except under tainting).
 
 This allows you restore the old perl interpreter behaviour on a
-case-by-case basis. But note that this is intended to be a temporary crutch,
+case-by-case basis.  But note that this is intended to be a temporary crutch,
 and this feature will likely be removed in some future perl version.
 It is currently set by the C<cpan> utility and C<Test::Harness> to
 ease installation of CPAN modules which have not been updated to handle the
-lack of dot. Once again, don't use this unless you are sure that this
+lack of dot.  Once again, don't use this unless you are sure that this
 will not reintroduce any security concerns.
 
 =item * A new mandatory warning issued by C<do>.
 
 While it is well-known that C<use> and C<require> use C<@INC> to search
 for the file to load, many people don't realise that C<do "file"> also
-searches C<@INC> if the file is a relative path. With the removal of C<.>,
+searches C<@INC> if the file is a relative path.  With the removal of C<.>,
 a simple C<do "file.pl"> will fail to read in and execute C<file.pl> from
-the current directory. Since this is commonly expected behaviour, a new
+the current directory.  Since this is commonly expected behaviour, a new
 mandatory warning is now issued whenever C<do> fails to load a file which
 it otherwise would have found if dot had been in C<@INC>.
 
@@ -258,7 +258,7 @@ their software work in the new regime.
 =item * Script authors
 
 If the issue is within your own code (rather than within included
-modules), then you have two main options. Firstly, if you are confident
+modules), then you have two main options.  Firstly, if you are confident
 that your script will only be run within a trusted directory (under which
 you expect to find trusted files and modules), then add C<.> back into the
 path; I<e.g.>:
@@ -274,7 +274,7 @@ path; I<e.g.>:
 
 On the other hand, if your script is intended to be run from within
 untrusted directories (such as F</tmp>), then your script suddenly failing
-to load files may be indicative of a security issue. You most likely want
+to load files may be indicative of a security issue.  You most likely want
 to replace any relative paths with full paths; for example,
 
     do ".foo_config.pl"
@@ -305,10 +305,10 @@ with something like
     (export PERL_USE_UNSAFE_INC=1; \
      perl Makefile.PL && make && make test && make install)
 
-Note that this only helps build and install an unfixed module. It's
+Note that this only helps build and install an unfixed module.  It's
 possible for the tests to pass (since they were run under
 C<PERL_USE_UNSAFE_INC=1>), but for the module itself to fail to perform
-correctly in production. In this case you may have to temporarily modify
+correctly in production.  In this case you may have to temporarily modify
 your script until such time as fixed version of the module is released.
 For example:
 
@@ -319,22 +319,22 @@ For example:
         $config = Foo::Bar->read_config();
     }
 
-This is only rarely expected to be necessary. Again, if doing this,
+This is only rarely expected to be necessary.  Again, if doing this,
 assess the resultant risks first.
 
 =item * Module Authors
 
 If you maintain a CPAN distribution, it may need updating to run in
-a dotless environment. Although C<cpan> and other such tools will
+a dotless environment.  Although C<cpan> and other such tools will
 currently set the C<PERL_USE_UNSAFE_INC> during module build, this is
 temporary workaround for the set of modules which rely on C<.> being in
-C<@INC> for installation and testing, and this may mask deeper issues. It
+C<@INC> for installation and testing, and this may mask deeper issues.  It
 could result in a module which passes tests and installs, but which
 fails at run time.
 
 During build, test and install, it will normally be the case that any perl
 processes will be executing directly within the root directory of the
-untarred distribution, or a known subdirectory of that, such as F<t/>. It
+untarred distribution, or a known subdirectory of that, such as F<t/>.  It
 may well be that F<Makefile.PL> or F<t/foo.t> will attempt to include
 local modules and configuration files using their direct relative
 filenames, which will now fail.
@@ -345,25 +345,25 @@ dot during build.
 
 This makes it likely that your existing build and test code will work, but
 this may mask issues with your code which only manifest when used after
-install. It is prudent to try and run your build process with that
+install.  It is prudent to try and run your build process with that
 variable explicitly disabled:
     (export PERL_USE_UNSAFE_INC=0; \
      perl Makefile.PL && make && make test && make install)
 
 This is more likely to show up any potential problems with your module's
-build process, or even with the module itself. Fixing such issues will
+build process, or even with the module itself.  Fixing such issues will
 ensure both that your module can again be installed manually, and that
 it will still build once the C<PERL_USE_UNSAFE_INC> crutch goes away.
 
 When fixing issues in tests due to the removal of dot from C<@INC>,
 reinsertion of dot into C<@INC> should be performed with caution, for this
-too may suppress real errors in your runtime code. You are encouraged
+too may suppress real errors in your runtime code.  You are encouraged
 wherever possible to apply the aforementioned approaches with explicit
 absolute/relative paths, or relocate your needed files into a subdirectory
 and insert that subdirectory into C<@INC> instead.
 
 If your runtime code has problems under the dotless C<@INC>, then the comments
-above on how to fix for script authors will mostly apply here too. Bear in
+above on how to fix for script authors will mostly apply here too.  Bear in
 mind though that it is considered bad form for a module to globally add dot to
 C<@INC>, since it introduces both a security risk and hides issues of
 accidentally requiring dot in C<@INC>, as explained above.
@@ -459,7 +459,7 @@ for example, the L<File::Temp> interfaces.
 
 =head2 require ::Foo::Bar is now illegal.
 
-Formerly, C<require ::Foo::Bar> would try to read F</Foo/Bar.pm>. Now any
+Formerly, C<require ::Foo::Bar> would try to read F</Foo/Bar.pm>.  Now any
 bareword require which starts with a double colon dies instead.
 
 =head2 Literal control character variable names are no longer permissible
@@ -506,7 +506,7 @@ Several other ops may now also be faster in boolean context.
 
 =item * New Faster Hash Function on 64 bit builds
 
-We use a different hash function for short and long keys. This should
+We use a different hash function for short and long keys.  This should
 improve performance and security, especially for long keys.
 
 =item * readline is faster
@@ -546,7 +546,7 @@ Enhancements in Regex concat COW implementation.
 
 =item *
 
-Clearing hashes and arrays has been made slightly faster. Now code
+Clearing hashes and arrays has been made slightly faster.  Now code
 like this is around 5% faster:
 
     my @a;
@@ -574,8 +574,8 @@ Converting a single-digit string to a number is now substantially faster.
 =item *
 
 The internal op implementing the C<split> builtin has been simplified and
-sped up. Firstly, it no longer requires a subsidiary internal C<pushre> op
-to do its work. Secondly, code of the form C<my @x = split(...)> is now
+sped up.  Firstly, it no longer requires a subsidiary internal C<pushre> op
+to do its work.  Secondly, code of the form C<my @x = split(...)> is now
 optimised in the same way as C<@x = split(...)>, and is therefore a few
 percent faster.
 
@@ -588,9 +588,9 @@ old-style C<my ($a, $b, @c) = @_>.
 =item *
 
 Bareword constant strings are now permitted to take part in constant
-folding. They were originally exempted from constant folding in August 1999,
+folding.  They were originally exempted from constant folding in August 1999,
 during the development of Perl 5.6, to ensure that C<use strict "subs">
-would still apply to bareword constants. That has now been accomplished a
+would still apply to bareword constants.  That has now been accomplished a
 different way, so barewords, like other constants, now gain the performance
 benefits of constant folding.
 
@@ -1013,7 +1013,7 @@ L<Pod::Usage> has been upgraded from version 1.68 to 1.69.
 
 =item *
 
-L<POSIX> has been upgraded from version 1.65 to 1.76. This remedies several
+L<POSIX> has been upgraded from version 1.65 to 1.76.  This remedies several
 defects in making its symbols exportable. [perl #127821]
 The C<POSIX::tmpnam()> interface has been removed,
 see L</"POSIX::tmpnam() has been removed">.
@@ -1170,7 +1170,7 @@ It now uses 3-arg C<open()> instead of 2-arg C<open()>. [perl #130122]
 =head3 L<perldeprecation>
 
 This file documents all upcoming deprecations, and some of the deprecations
-which already have been removed. The purpose of this documentation is
+which already have been removed.  The purpose of this documentation is
 two-fold: document what will disappear, and by which version, and serve
 as a guide for people dealing with code which has features that no longer
 work after an upgrade of their perl.
@@ -1222,7 +1222,7 @@ signature changed> above.
 =item *
 
 Use of single character variables, with the variable name a non printable
-character in the range C<\x80>-C<\xFF> is no longer allowed. Update the docs to
+character in the range C<\x80>-C<\xFF> is no longer allowed.  Update the docs to
 reflect this.
 
 =back
@@ -1265,7 +1265,7 @@ Documented new feature: See L</Declaring a reference to a variable> above.
 
 =item *
 
-Defined on aggregates is no longer allowed. Perlfunc was still reporting it as
+Defined on aggregates is no longer allowed.  Perlfunc was still reporting it as
 deprecated, and that it will be deleted in the future.
 
 =item *
@@ -1467,7 +1467,7 @@ been removed> above.
 
 =item *
 
-Document C<@ISA>. Was documented other places, not not in L<perlvar>.
+Document C<@ISA>.  Was documented other places, not not in L<perlvar>.
 
 =back
 
@@ -1490,7 +1490,7 @@ L<do "%s" failed, '.' is no longer in @INC|perldiag/do "%s" failed, '.' is no lo
 
 Using the empty pattern (which re-executes the last successfully-matched
 pattern) inside a code block in another regex, as in C</(?{ s!!new! })/>, has
-always previously yielded a segfault. It now produces an error:
+always previously yielded a segfault.  It now produces an error:
 L<Infinite recursion in regex|perldiag/"Infinite recursion in regex">.
 
 =item *
@@ -1508,7 +1508,7 @@ the feature:
 L<Version control conflict marker|perldiag/"Version control conflict marker">
 
 (F) The parser found a line starting with C<E<lt>E<lt>E<lt>E<lt>E<lt>E<lt>E<lt>>,
-C<E<gt>E<gt>E<gt>E<gt>E<gt>E<gt>E<gt>>, or C<=======>. These may be left by a
+C<E<gt>E<gt>E<gt>E<gt>E<gt>E<gt>E<gt>>, or C<=======>.  These may be left by a
 version control system to mark conflicts after a failed merge operation.
 
 =item *
@@ -1864,7 +1864,7 @@ Long lines in the message body are now wrapped at 900 characters, to stay
 well within the 1000-character limit imposed by SMTP mail transfer agents.
 This is particularly likely to be important for the list of arguments to
 C<Configure>, which can readily exceed the limit if, for example, it names
-several non-default installation paths. This change also adds the first unit
+several non-default installation paths.  This change also adds the first unit
 tests for perlbug. [perl #128020]
 
 =back
@@ -1932,8 +1932,8 @@ and C<Inf> to make builds more reproducible. [perl #130133]
 
 Since 5.18 for testing purposes we have included support for
 building perl with a variety of non-standard, and non-recommended
-hash functions. Since we do not recommend the use of these functions
-we have removed them and their corresponding build options. Specifically
+hash functions.  Since we do not recommend the use of these functions
+we have removed them and their corresponding build options.  Specifically
 this includes the following build options:
 
     PERL_HASH_FUNC_SDBM
@@ -1958,7 +1958,7 @@ Reduce verbosity of "make install.man"
 
 Previously, two progress messages were emitted for each manpage: one by
 installman itself, and one by the function in install_lib.pl that it calls to
-actually install the file. Disabling the second of those in each case saves
+actually install the file.  Disabling the second of those in each case saves
 over 750 lines of unhelpful output.
 
 =item *
@@ -2036,15 +2036,15 @@ non-zero integer.  This allows C<make test> to pass on such a build.
 
 When building with GCC 6 and link-time optimization (the C<-flto> option to
 C<gcc>), C<Configure> was treating all probed symbols as present on the
-system, regardless of whether they actually exist. This has been fixed.
+system, regardless of whether they actually exist.  This has been fixed.
 [perl #128131]
 
 =item *
 
 The F<t/test.pl> library is used for internal testing of Perl itself, and
-also copied by several CPAN modules. Some of those modules must work on
+also copied by several CPAN modules.  Some of those modules must work on
 older versions of Perl, so F<t/test.pl> must in turn avoid newer Perl
-features. Compatibility with Perl 5.8 was inadvertently removed some time
+features.  Compatibility with Perl 5.8 was inadvertently removed some time
 ago; it has now been restored. [perl #128052]
 
 =item *
@@ -2070,7 +2070,7 @@ Tests for locales were erroneously using locales incompatible with Perl.
 
 Some parts of the test suite that try to exhaustively test edge cases in the
 regex implementation have been restricted to running for a maximum of five
-minutes. On slow systems they could otherwise take several hours, without
+minutes.  On slow systems they could otherwise take several hours, without
 significantly improving our understanding of the correctness of the code
 under test.
 
@@ -2180,12 +2180,12 @@ VAX floating point formats are now supported.
 =item *
 
 The path separator for the C<PERL5LIB> and C<PERLLIB> environment entries is
-now a colon (C<:>) when running under a Unix shell. There is no change when
+now a colon (C<:>) when running under a Unix shell.  There is no change when
 running under DCL (it's still C<|>).
 
 =item *
 
-Remove some VMS-specific hacks from C<showlex.t>. These were added 15 years
+Remove some VMS-specific hacks from C<showlex.t>.  These were added 15 years
 ago, and are no longer necessary for any VMS version now supported.
 
 =item *
@@ -2238,9 +2238,9 @@ http://stackoverflow.com/questions/30412951).
 
 =item *
 
-Tweaks for Win32 VC vs GCC detection makefile code. This fixes issue that CCHOME
+Tweaks for Win32 VC vs GCC detection makefile code.  This fixes issue that CCHOME
 depends on CCTYPE, which in auto detect mode is set after CCHOME, so CCHOME uses
-the uninit CCTYPE var. Also fix else vs .ELSE in makefile.mk
+the uninit CCTYPE var.  Also fix else vs .ELSE in makefile.mk
 
 =item *
 
@@ -2274,9 +2274,9 @@ t/uni/overload.t: Skip hanging test on FreeBSD.
 
 =item *
 
-The C<op_class()> API function has been added. This is like the existing
+The C<op_class()> API function has been added.  This is like the existing
 C<OP_CLASS()> macro, but can more accurately determine what struct an op
-has been allocated as. For example C<OP_CLASS()> might return
+has been allocated as.  For example C<OP_CLASS()> might return
 C<OA_BASEOP_OR_UNOP> indicating that ops of this type are usually
 allocated as an C<OP> or C<UNOP>; while C<op_class()> will return
 C<OPclass_BASEOP> or C<OPclass_UNOP> as appropriate.
@@ -2387,16 +2387,16 @@ like Perl-space C<$x = ''>, but with several optimisations.
 All parts of the internals now agree that the C<sassign> op is a C<BINOP>;
 previously it was listed as a C<BASEOP> in F<regen/opcodes>, which meant
 that several parts of the internals had to be special-cased to accommodate
-it. This oddity's original motivation was to handle code like C<$x ||= 1>;
+it.  This oddity's original motivation was to handle code like C<$x ||= 1>;
 that is now handled in a simpler way.
 
 =item *
 
 Several new internal C macros have been added that take a string literal as
 arguments, alongside existing routines that take the equivalent value as two
-arguments, a character pointer and a length. The advantage of this is that
+arguments, a character pointer and a length.  The advantage of this is that
 the length of the string is calculated automatically, rather than having to
-be done manually. These routines are now used where appropriate across the
+be done manually.  These routines are now used where appropriate across the
 entire codebase.
 
 =item *
@@ -2417,15 +2417,15 @@ L<perlapi/Unicode Support>.
 
 =item *
 
-Use C<my_strlcat()> in C<locale.c>. While C<strcat()> is safe in this context,
+Use C<my_strlcat()> in C<locale.c>.  While C<strcat()> is safe in this context,
 some compilers were optimizing this to C<strcpy()> causing a porting test to
-fail that looks for unsafe code. Rather than fighting this, we just use
+fail that looks for unsafe code.  Rather than fighting this, we just use
 C<my_strlcat()> instead.
 
 =item *
 
 Three new ops, C<OP_ARGELEM>, C<OP_ARGDEFELEM> and C<OP_ARGCHECK> have
-been added. These are intended principally to implement the individual
+been added.  These are intended principally to implement the individual
 elements of a subroutine signature, plus any overall checking required.
 
 =item *
@@ -2436,7 +2436,7 @@ buggy C<strxfrm()> implementations in their libc. [perl #121734]
 =item *
 
 Perl is now built with the C<PERL_OP_PARENT> compiler define enabled by
-default. To disable it, use the C<PERL_NO_OP_PARENT> compiler define.
+default.  To disable it, use the C<PERL_NO_OP_PARENT> compiler define.
 This flag alters how the C<op_sibling> field is used in C<OP> structures,
 and has been available optionally since perl 5.22.0.
 
@@ -2519,7 +2519,7 @@ is wellformed.  This resolves [perl #126310].
 
 The range operator C<..> on strings now handles its arguments correctly when in
 the scope of the L<< C<unicode_strings>|feature/"The 'unicode_strings' feature" >>
-feature. The previous behaviour was sufficiently unexpected that we believe no
+feature.  The previous behaviour was sufficiently unexpected that we believe no
 correct program could have made use of it.
 
 =item *
@@ -2604,7 +2604,7 @@ we may have heap buffer overflow. [perl #129377].
 
 Properly recognize mathematical digit ranges starting at U+1D7E.
 C<use re 'strict'> is supposed to warn if you use a range whose start
-and end digit aren't from the same group of 10. It didn't do that
+and end digit aren't from the same group of 10.  It didn't do that
 for five groups of mathematical digits starting at U+1D7E.
 
 =item *
@@ -2621,7 +2621,7 @@ target string that also used UTF-8 has been fixed. [perl #129350]
 =item *
 
 Previously, a shebang line like C<#!perl -i u> could be erroneously
-interpreted as requesting the C<-u> option. This has been fixed. [perl
+interpreted as requesting the C<-u> option.  This has been fixed. [perl
 #129336]
 
 =item *
@@ -2635,7 +2635,7 @@ match.  [perl #129897]
 =item *
 
 Certain regexes making use of the experimental C<regex_sets> feature could
-trigger an assertion failure. This has been fixed. [perl #129322]
+trigger an assertion failure.  This has been fixed. [perl #129322]
 
 =item *
 
@@ -2679,7 +2679,7 @@ checking the base C<cx> (effectively a noop). [perl #129029]
 
 =item *
 
-Fixed two possible use-after-free bugs in C<Perl_yylex>. C<Perl_yylex>
+Fixed two possible use-after-free bugs in C<Perl_yylex>.  C<Perl_yylex>
 maintains up to two pointers into the parser buffer, one of which can
 become stale under the right conditions. [perl #129069]
 
@@ -2706,13 +2706,13 @@ result.  [perl #129287]
 
 Check C<pack_sockaddr_un()>'s return value because C<pack_sockaddr_un()>
 silently truncates the supplied path if it won't fit into the C<sun_path>
-member of C<sockaddr_un>. This may change in the future, but for now
+member of C<sockaddr_un>.  This may change in the future, but for now
 check the path in theC<sockaddr> matches the desired path, and skip if
 it doesn't. [perl #128095]
 
 =item *
 
-Make sure C<PL_oldoldbufptr> is preserved in C<scan_heredoc()>. In some
+Make sure C<PL_oldoldbufptr> is preserved in C<scan_heredoc()>.  In some
 cases this is used in building error messages. [perl #128988]
 
 =item *
@@ -2738,10 +2738,10 @@ prevent possible string overrun with invalid len in gv.c
 
 Problems with in-place array sorts: code like C<@a = sort { ... } @a>,
 where the source and destination of the sort are the same plain array, are
-optimised to do less copying around. Two side-effects of this optimisation
+optimised to do less copying around.  Two side-effects of this optimisation
 were that the contents of C<@a> as visible to to sort routine were
 partially sorted, and under some circumstances accessing C<@a> during the
-sort could crash the interpreter. Both these issues have been fixed, and
+sort could crash the interpreter.  Both these issues have been fixed, and
 Sort functions see the original value of C<@a>.
 
 =item *
@@ -2927,12 +2927,12 @@ List assignment now gives a compile-time error, too.  [perl #128260]
 =item *
 
 Expressions containing an C<&&> or C<||> operator (or their synonyms C<and>
-and C<or>) were being compiled incorrectly in some cases. If the left-hand
+and C<or>) were being compiled incorrectly in some cases.  If the left-hand
 side consisted of either a negated bareword constant or a negated C<do {}>
 block containing a constant expression, and the right-hand side consisted of
 a negated non-foldable expression, one of the negations was effectively
-ignored. The same was true of C<if> and C<unless> statement modifiers,
-though with the left-hand and right-hand sides swapped. This long-standing
+ignored.  The same was true of C<if> and C<unless> statement modifiers,
+though with the left-hand and right-hand sides swapped.  This long-standing
 bug has now been fixed. [perl #127952]
 
 =item *
@@ -2967,8 +2967,8 @@ C<"\N{NAME} must be resolved by the lexer">.
 List assignment in list context where the LHS contained aggregates and
 where there were not enough RHS elements, used to skip scalar lvalues.
 Previously, C<(($a,$b,@c,$d) = (1))> in list context returned C<($a)>; now
-it returns C<($a,$b,$d)>. C<(($a,$b,$c) = (1))> is unchanged: it still
-returns C<($a,$b,$c)>. This can be seen in the following:
+it returns C<($a,$b,$d)>.  C<(($a,$b,$c) = (1))> is unchanged: it still
+returns C<($a,$b,$c)>.  This can be seen in the following:
 
     sub inc { $_++ for @_ }
     inc(($a,$b,@c,$d) = (10))
@@ -2982,7 +2982,7 @@ now they are C<(11,1,1)>.
 
 The basic problem is that code like this: /(?{ s!!! })/ can trigger infinite
 recursion on the C stack (not the normal perl stack) when the last successful
-pattern in scope is itself. Since the C stack overflows this manifests as an
+pattern in scope is itself.  Since the C stack overflows this manifests as an
 untrappable error/segfault, which then kills perl.
 
 We avoid the segfault by simply forbidding the use of the empty pattern when it
@@ -3076,15 +3076,15 @@ L<[perl #126182]|https://rt.perl.org/Public/Bug/Display.html?id=126182>
 =head1 Obituary
 
 Jon Portnoy (AVENJ), a prolific Perl author and admired Gentoo community
-member, has passed away on August 10, 2016. He will be remembered and
+member, has passed away on August 10, 2016.  He will be remembered and
 missed by all those with which he came in contact and enriched with his
 intellect, wit, and spirit.
 
-It is with great sadness we also note Kip Hampton's passing.. Probably
+It is with great sadness we also note Kip Hampton's passing..  Probably
 best known as the author of the Perl & XML column on XML.com, he was a
 core contributor to AxKit, an XML server platform that became an Apache
-Foundation project. He was a frequent speaker in the early days at
-OSCON, and most recently at YAPC::NA in Madison. He was frequently on
+Foundation project.  He was a frequent speaker in the early days at
+OSCON, and most recently at YAPC::NA in Madison.  He was frequently on
 irc.perl.org as `ubu`, generally in the #axkit-dahut community, the
 group responsible for YAPC::NA Asheville in 2011.
 
@@ -3101,7 +3101,7 @@ Excluding auto-generated files, documentation and release tools, there were
 approximately 230,000 lines of changes to 1,800 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its third decade thanks to a vibrant community
-of users and developers. The following people are known to have contributed the
+of users and developers.  The following people are known to have contributed the
 improvements that became Perl 5.26.0:
 
 Aaron Crane, Abigail, Ævar Arnfjörð Bjarmason, Alex Vandiver, Andreas
@@ -3124,12 +3124,12 @@ Todd Rinaldo, Tomasz Konojacki, Tony Cook, Unicode Consortium, Yaroslav Kuzmin,
 Yves Orton, Zefram.
 
 The list above is almost certainly incomplete as it is automatically generated
-from version control history. In particular, it does not include the names of
+from version control history.  In particular, it does not include the names of
 the (very much appreciated) contributors who reported issues to the Perl bug
 tracker.
 
 Many of the changes included in this version originated in the CPAN modules
-included in Perl's core. We're grateful to the entire CPAN community for
+included in Perl's core.  We're grateful to the entire CPAN community for
 helping Perl to flourish.
 
 For a more complete list of all of Perl's historical contributors, please see
