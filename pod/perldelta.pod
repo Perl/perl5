@@ -1412,6 +1412,10 @@ Clarify behavior of single quote regexps.
 
 =item *
 
+The first part was extensively rewritten to incorporate various basic
+points, that in earlier versions were mentioned in sort of an appendix
+on Version 8 regular expressions.
+
 Several minor enhancements to the documentation.
 
 =back
