@@ -72,7 +72,7 @@ These syntaxes are all supported:
 The '~' modifier will strip, from each line in the here-doc, the
 same whitespace that appears before the delimiter.
 
-Newlines will be copied as is, and lines that don't include the
+Newlines will be copied as-is, and lines that don't include the
 proper beginning whitespace will cause perl to croak.
 
 For example:
@@ -91,14 +91,14 @@ C<@{^CAPTURE}> exposes the capture buffers of the last match as an
 array. So C<$1> is C<${^CAPTURE}[0]>. This is a more efficient equivalent
 to code like C<substr($matched_string,$-[0],$+[0]-$-[0])>, and you don't
 have to keep track of the C<$matched_string> either. This variable has no
-single character equivalent. Note like the other regex magic variables
+single character equivalent. Note, like the other regex magic variables
 the contents of this variable is dynamic, if you wish to store it beyond
 the lifetime of the match you must copy it to another array.
 
-C<%{^CAPTURE}> is the equivalent to C<%+> (ie named captures). Other than
+C<%{^CAPTURE}> is the equivalent to C<%+> (I<i.e.>, named captures). Other than
 being more self documenting there is no difference between the two forms.
 
-C<%{^CAPTURE_ALL}> is the equivalent to C<%-> (ie all named captures).
+C<%{^CAPTURE_ALL}> is the equivalent to C<%-> (I<i.e.>, all named captures).
 Other than being more self documenting there is no difference between the
 two forms.
 
@@ -146,7 +146,7 @@ L<perllocale/Category C<LC_COLLATE>: Collation: Text Comparisons and Sorting>.
 =head2 Better locale collation of strings containing embedded C<NUL>
 characters
 
-In locales that have multi-level character weights, these are now
+In locales that have multi-level character weights, C<NUL>s are now
 ignored at the higher priority ones.  There are still some gotchas in
 some strings, though.  See
 L<perllocale/Collation of strings containing embedded C<NUL> characters>.
@@ -192,7 +192,7 @@ perl. Setting it to 1 restores C<.> in the C<@INC> when perl otherwise
 lacks it.
 
 Various toolchain modules will set C<PERL_USE_UNSAFE_INC=1>
-themselves. E.g. L<Test::Harness> sets it since loading modules from a
+themselves.  For example, L<Test::Harness> sets it, since loading modules from a
 relative path is a common idiom in test code. If you find that you
 have C<.> in C<@INC> on a perl built with default settings it's likely
 that your code is being invoked by a toolchain module of some sort.
@@ -231,10 +231,10 @@ If this variable has the value C<1> when the perl interpreter starts up,
 then C<.> will be automatically appended to C<@INC> (except under tainting).
 
 This allows you restore the old perl interpreter behaviour on a
-case-by-case basis. But note that this intended to be a temporary crutch,
+case-by-case basis. But note that this is intended to be a temporary crutch,
 and this feature will likely be removed in some future perl version.
 It is currently set by the C<cpan> utility and C<Test::Harness> to
-ease installation of CPAN modules which have not been updated handle the
+ease installation of CPAN modules which have not been updated to handle the
 lack of dot. Once again, don't use this unless you are sure that this
 will not reintroduce any security concerns.
 
@@ -261,7 +261,7 @@ If the issue is within your own code (rather than within included
 modules), then you have two main options. Firstly, if you are confident
 that your script will only be run within a trusted directory (under which
 you expect to find trusted files and modules), then add C<.> back into the
-path; e.g.:
+path; I<e.g.>:
 
     BEGIN {
         my $dir = "/some/trusted/directory";
@@ -493,7 +493,7 @@ character in front of them.
 
 =item *
 
-A hash in boolean context is now sometimes faster, e.g.
+A hash in boolean context is now sometimes faster, I<e.g.>
 
     if (!%h) { ... }
 
@@ -525,7 +525,7 @@ C<$ref1 = $ref2> has been optimized.
 
 =item *
 
-Array and hash assignment are now faster, e.g.
+Array and hash assignment are now faster, I<e.g.>
 
     (..., @a) = (...);
     (..., %h) = (...);
@@ -2219,7 +2219,7 @@ more important than keeping the bug fix.  We may revisit this in the future to
 attempt to fix the bug again in a way that is compatible with VS2015.
 
 These changes do not affect compilation with GCC or with Visual Studio versions
-up to and including VS2013, i.e. the bug fix is retained (unchanged) for those
+up to and including VS2013, I<i.e.>, the bug fix is retained (unchanged) for those
 compilers.
 
 Note that you may experience compatibility problems if you mix a perl built
@@ -2227,7 +2227,7 @@ with GCC or VS E<lt>= VS2013 with XS modules built with VS2015, or if you mix a
 perl built with VS2015 with XS modules built with GCC or VS E<lt>= VS2013.
 Some incompatibility may arise because of the bug fix that has been reverted
 for VS2015 builds of perl, but there may well be incompatibility anyway because
-of the rewritten CRT in VS2015 (e.g. see discussion at
+of the rewritten CRT in VS2015 (I<e.g.>, see discussion at
 http://stackoverflow.com/questions/30412951).
 
 =back
@@ -2496,7 +2496,7 @@ confuse any surrounding expression.  [perl #130705]
 =item *
 
 Since 5.24.0 in some obscure cases, a regex which included code blocks
-from multiple sources (e.g. via embedded via qr// objects) could end up
+from multiple sources (I<e.g.>, via embedded via qr// objects) could end up
 with the wrong current pad and crash or give weird results. [perl #129881]
 
 =item *
@@ -2609,7 +2609,7 @@ for five groups of mathematical digits starting at U+1D7E.
 
 =item *
 
-A sub containing a "forward" declaration with the same name (e.g.,
+A sub containing a "forward" declaration with the same name (I<e.g.>,
 C<sub c { sub c; }>) could sometimes crash or loop infinitely.  [perl
 #129090]
 
@@ -2639,7 +2639,7 @@ trigger an assertion failure. This has been fixed. [perl #129322]
 
 =item *
 
-Invalid assignments to a reference constructor (e.g., C<\eval=time>) could
+Invalid assignments to a reference constructor (I<e.g.>, C<\eval=time>) could
 sometimes crash in addition to giving a syntax error.  [perl #125679]
 
 =item *
@@ -2656,7 +2656,8 @@ such circumstances.  [perl #47047]
 
 =item *
 
-A sub containing with a "forward" declaration with the same name (e.g.,
+A sub containing with a "forward" declaration with the same name
+(I<e.g.>,
 C<sub c { sub c; }>) could sometimes crash or loop infinitely.  [perl
 #129090]
 
@@ -2841,7 +2842,7 @@ L<[perl #128508]|https://rt.perl.org/Public/Bug/Display.html?id=128508>
 
 =item *
 
-Vivifying a subroutine stub in a deleted stash (e.g., C<delete $My::{"Foo::"};
+Vivifying a subroutine stub in a deleted stash (I<e.g.>, C<delete $My::{"Foo::"};
 \&My::Foo::foo>) no longer crashes.  It had begun crashing in Perl 5.18.
 L<[perl #128532]|https://rt.perl.org/Public/Bug/Display.html?id=128532>
 
@@ -2870,7 +2871,7 @@ L<[perl #128257]|https://rt.perl.org/Public/Bug/Display.html?id=128257>
 =item *
 
 Fixed an assertion triggered by some code that handles deprecated behavior in
-formats, e.g. in cases like this:
+formats, I<e.g.>, in cases like this:
 
     format STDOUT =
     @
