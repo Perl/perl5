@@ -12622,7 +12622,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	case 'a': case 'A':
 
         {
-            bool   can_be_special; /* candidate for special-case-handling */
             STRLEN radix_len;  /* SvCUR(PL_numeric_radix_sv) */
             STRLEN float_need; /* what PL_efloatsize needs to become */
             bool hexfp;        /* hexadecimal floating point? */
@@ -12720,17 +12719,16 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 break;
             }
 
-            /* a candidate for special-casing: %.0f and %.NNNg */
-            can_be_special = ( !(width || left || plus || alt)
-                              && fill != '0'
-                              && has_precis
-                              && intsize != 'q');
-
             /* special-case "%.0f" */
-            if (can_be_special && c == 'f' && !precis) {
-                if ((eptr = F0convert(nv, ebuf + sizeof ebuf, &elen)))
-                    goto float_concat_no_utf8;
-            }
+            if (   c == 'f'
+                && !precis
+                && has_precis
+                && !(width || left || plus || alt)
+                && fill != '0'
+                && intsize != 'q'
+                && ((eptr = F0convert(nv, ebuf + sizeof ebuf, &elen)))
+            )
+                goto float_concat_no_utf8;
 
             /* Determine the buffer size needed for the various
              * floating-point formats.
@@ -12844,6 +12842,26 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     float_need += digits;
                 }
 	    }
+            /* special-case "%.<number>g" if it will fit in ebuf */
+            else if (c == 'g'
+                && precis   /* See earlier comment about buggy Gconvert
+                               when digits, aka precis, is 0  */
+                && has_precis
+                /* check, in manner not involving wrapping, that it will
+                 * fit in ebuf  */
+                && float_need < sizeof(ebuf)
+                && sizeof(ebuf) - float_need > precis
+                && !(width || left || plus || alt)
+                && fill != '0'
+                && intsize != 'q'
+            ) {
+                STORE_LC_NUMERIC_SET_TO_NEEDED();
+                SNPRINTF_G(fv, ebuf, sizeof(ebuf), precis);
+                elen = strlen(ebuf);
+                eptr = ebuf;
+                goto float_concat;
+	    }
+
 
             {
                 STRLEN pr = has_precis ? precis : 6; /* known default */
@@ -12872,21 +12890,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		PL_efloatsize = float_need;
 		Newx(PL_efloatbuf, PL_efloatsize, char);
 		PL_efloatbuf[0] = '\0';
-	    }
-
-            /* special-case "%.<number>g" */
-            if (can_be_special) {
-		/* See earlier comment about buggy Gconvert when digits,
-		   aka precis is 0  */
-		if ( c == 'g' && precis ) {
-                    STORE_LC_NUMERIC_SET_TO_NEEDED();
-                    SNPRINTF_G(fv, PL_efloatbuf, PL_efloatsize, precis);
-		    /* May return an empty string for digits==0 */
-		    if (*PL_efloatbuf) {
-			elen = strlen(PL_efloatbuf);
-			goto float_concat;
-		    }
-                }
 	    }
 
             if (UNLIKELY(hexfp)) {
@@ -12970,8 +12973,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 GCC_DIAG_RESTORE;
 	    }
 
-	  float_concat:
 	    eptr = PL_efloatbuf;
+
+	  float_concat:
 
             /* Since floating-point formats do their own formatting and
              * padding, we skip the main block of code at the end of this
