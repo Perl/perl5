@@ -410,17 +410,23 @@ error.  This change will allow future extensions to the language.
 
 These have been deprecated since v5.16, with a deprecation message
 raised for some uses starting in v5.22.  Unfortunately, the code added
-to raise the message had bugs, and did not catch all the relevant uses
-of literal C<"{">.  So, some uses failed to be warned about.  Therefore,
-enforcement of this ban for these uses is deferred until Perl 5.30, and
-a deprecation message is now raised for them.
+to raise the message was buggy, and failed to warn in some cases where
+it should have.  Therefore, enforcement of this ban for these cases is
+deferred until Perl 5.30, but the code has been fixed to raise a
+default-on deprecation message for them in the meantime.
 
 Some uses of literal C<"{"> occur in contexts where we do not foresee
-the meaning be anything but the literal, such as the very first
-character in the pattern.  To avoid forcing needless code changes, this
-restriction is not enforced, nor are there current plans to enforce it,
-in those areas.  But is always correct to escape C<"{">, and the simple
-rule to remember is to do so.
+the meaning ever being anything but the literal, such as the very first
+character in the pattern, or after a C<"|"> meaning alternation.  Thus
+
+ qr/{fee|{fie/
+
+matches either of the strings C<{fee> or C<{fie>.  To avoid forcing
+unnecessary code changes, these uses do not need to be escaped, and no
+warning is raised about them, and there are no current plans to change this.
+
+But it is always correct to escape C<"{">, and the simple rule to
+remember is to always do so.
 
 =head2 C<scalar(%hash)> return signature changed
 
@@ -1535,12 +1541,11 @@ Perl yourself.  The #! line at the top of your file could look like:
 
 =item *
 
-L<Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through in regex; marked by S<E<lt>-- HERE> in mE<sol>%sE<sol>|perldiag/"Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through in regex; marked by S<<-- HERE> in m/%s/">
+L<Unescaped left brace in regex is illegal here|perldiag/Unescaped left brace in regex is illegal here in regex; marked by S<E<lt>-- HERE> in m/%s/>
 
-Unescaped left braces are already illegal in some contexts in regular
-expression patterns, but, due to an oversight, no deprecation warning
-was raised in other contexts where they are intended to become illegal.
-This warning is now raised in these contexts.
+Unescaped left braces are now illegal in some contexts in regular expression
+patterns.  In other contexts, they are still just deprecated; they will
+be illegal in Perl 5.30.
 
 =item *
 
@@ -1731,14 +1736,6 @@ code point.
 Executing C<undef $x> where C<$x> is tied or magical no longer incorrectly
 blames the variable for an uninitialized-value warning encountered by the
 tied/magical code.
-
-=item *
-
-L<Unescaped left brace in regex is illegal here in regex; marked by S<E<lt>-- HERE> in mE<sol>%sE<sol>|perldiag/"Unescaped left brace in regex is illegal here in regex; marked by S<<-- HERE> in m/%s/">
-
-The word "here" has been added to the message that was raised in
-v5.25.1.  This is to indicate that there are contexts in which unescaped
-left braces are not (yet) illegal.
 
 =item *
 
