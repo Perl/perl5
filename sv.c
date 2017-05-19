@@ -11802,6 +11802,11 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     /* no matter what, this is a string now */
     (void)SvPV_force_nomg(sv, origlen);
 
+    /* the code that scans for flags etc following a % relies on
+     * a '\0' being present to avoid falling off the end. Ideally that
+     * should be fixed */
+    assert(pat[patlen] == '\0');
+
     /* special-case "", "%s", and "%-p" (SVf - see below) */
     if (patlen == 0) {
 	if (svmax && ckWARN(WARN_REDUNDANT))
@@ -12724,7 +12729,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             /* special-case "%.0f" */
             if (can_be_special && c == 'f' && !precis) {
                 if ((eptr = F0convert(nv, ebuf + sizeof ebuf, &elen)))
-                    break;
+                    goto float_concat_no_utf8;
             }
 
             /* Determine the buffer size needed for the various
@@ -12879,7 +12884,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		    /* May return an empty string for digits==0 */
 		    if (*PL_efloatbuf) {
 			elen = strlen(PL_efloatbuf);
-			goto float_converted;
+			goto float_concat;
 		    }
                 }
 	    }
@@ -12965,19 +12970,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 GCC_DIAG_RESTORE;
 	    }
 
-	float_converted:
+	  float_concat:
 	    eptr = PL_efloatbuf;
 
             /* Since floating-point formats do their own formatting and
              * padding, we skip the main block of code at the end of this
              * loop which handles appending eptr to sv, and do our own
              * stripped-down version */
-
-            assert(!zeros);
-            assert(!esignlen);
-            assert(!vectorize);
-            assert(elen);
-            assert(elen >= width);
 
             /* floating-point formats only get is_utf8 if the radix point
              * is utf8. All other characters in the string are < 128
@@ -12988,6 +12987,15 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 sv_utf8_upgrade(sv);
                 has_utf8 = TRUE;
             }
+
+	  float_concat_no_utf8:
+
+            assert(!zeros);
+            assert(!esignlen);
+            assert(!vectorize);
+            assert(elen);
+            assert(elen >= width);
+
 
             {
                 /* unrolled Perl_sv_catpvn */
