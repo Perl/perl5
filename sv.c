@@ -11449,6 +11449,8 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
  * string.
  * The rest of the args have the same meaning as the local vars of the
  * same name within Perl_sv_vcatpvfn_flags().
+ *
+ * It assumes the caller has already done STORE_LC_NUMERIC_SET_TO_NEEDED();
  */
 
 static STRLEN
@@ -11476,7 +11478,6 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
     bool subnormal = FALSE; /* IEEE 754 subnormal/denormal */
     bool negative = FALSE;
     STRLEN elen;
-    DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
 
     /* XXX: NaN, Inf -- though they are printed as "NaN" and "Inf".
      *
@@ -11666,7 +11667,6 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
 #ifndef USE_LOCALE_NUMERIC
             *p++ = '.';
 #else
-            STORE_LC_NUMERIC_SET_TO_NEEDED();
             if (PL_numeric_radix_sv && IN_LC(LC_NUMERIC)) {
                 STRLEN n;
                 const char* r = SvPV(PL_numeric_radix_sv, n);
@@ -11676,7 +11676,6 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
             else {
                 *p++ = '.';
             }
-            RESTORE_LC_NUMERIC();
 #endif
     }
 
@@ -11790,8 +11789,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
      * Plus 32: Playing safe. */
     char ebuf[IV_DIG * 4 + NV_DIG + 32];
     bool no_redundant_warning = FALSE; /* did we use any explicit format parameter index? */
-
+#ifdef USE_LOCALE_NUMERIC
     DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+    bool lc_numeric_set = FALSE; /* called STORE_LC_NUMERIC_SET_TO_NEEDED? */
+#endif
 
     PERL_ARGS_ASSERT_SV_VCATPVFN_FLAGS;
     PERL_UNUSED_ARG(maybe_tainted);
@@ -12750,14 +12751,21 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
              * below, or implicitly, via an snprintf() variant.
              * Note also things like ps_AF.utf8 which has
              * "\N{ARABIC DECIMAL SEPARATOR} as a radix point */
-            STORE_LC_NUMERIC_SET_TO_NEEDED();
+            if (!lc_numeric_set) {
+                /* only set once and reuse in-locale value on subsequent
+                 * iterations.
+                 * XXX what happens if we die in an eval?
+                 */
+                STORE_LC_NUMERIC_SET_TO_NEEDED();
+                lc_numeric_set = TRUE;
+            }
+
             if (PL_numeric_radix_sv && IN_LC(LC_NUMERIC)) {
                 radix_len  = SvCUR(PL_numeric_radix_sv);
                 /* note that this will convert the output to utf8 even if
                  * if the radix point didn't get output */
                 is_utf8 = SvUTF8(PL_numeric_radix_sv);
             }
-            RESTORE_LC_NUMERIC();
 #endif
             /* this can't wrap unless PL_numeric_radix_sv is a string
              * consuming virtually all the 32-bit or 64-bit address space
@@ -12830,7 +12838,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 && fill != '0'
                 && intsize != 'q'
             ) {
-                STORE_LC_NUMERIC_SET_TO_NEEDED();
                 SNPRINTF_G(fv, ebuf, sizeof(ebuf), precis);
                 elen = strlen(ebuf);
                 eptr = ebuf;
@@ -12917,8 +12924,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		/* No taint.  Otherwise we are in the strange situation
 		 * where printf() taints but print($float) doesn't.
 		 * --jhi */
-
-                STORE_LC_NUMERIC_SET_TO_NEEDED();
 
                 /* hopefully the above makes ptr a very constrained format
                  * that is safe to use, even though it's not literal */
