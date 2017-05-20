@@ -11843,42 +11843,20 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     }
 
 #if !defined(USE_LONG_DOUBLE) && !defined(USE_QUADMATH)
-    /* special-case "%.0f" and "%.<number>g" */
-    if ( !args && patlen <= 5 && pat[0] == '%' && pat[1] == '.'
-	 && (pat[patlen-1] == 'g' || pat[patlen-1] == 'f') ) {
-	unsigned digits = 0;
-	const char *pp;
+    /* special-case "%.0f" */
+    if (    !args
+         && patlen == 4
+         && pat[0] == '%' && pat[1] == '.' && pat[2] == '0' && pat[3] == 'f'
+         && svmax > 0)
+    {
+        const NV nv = SvNV(*svargs);
+        if (LIKELY(!Perl_isinfnan(nv))) {
+            STRLEN l;
+            char *p;
 
-	pp = pat + 2;
-	while (*pp >= '0' && *pp <= '9')
-	    digits = 10 * digits + (*pp++ - '0');
-
-	/* XXX: Why do this `svix < svmax` test? Couldn't we just
-	   format the first argument and WARN_REDUNDANT if svmax > 1?
-	   Munged by Nicholas Clark in v5.13.0-209-g95ea86d */
-	if (pp + 1 == pat + patlen && svix < svmax) {
-	    const NV nv = SvNV(*svargs);
-            if (LIKELY(!Perl_isinfnan(nv))) {
-                if (*pp == 'g') {
-                    /* Add check for digits != 0 because it seems that some
-                       Gconvert's are buggy in this case, and we don't yet
-                       have a Configure test for this.  */
-                    if (digits && digits < sizeof(ebuf) - NV_DIG - 10) {
-                        /* 0, point, slack */
-                        STORE_LC_NUMERIC_SET_TO_NEEDED();
-                        SNPRINTF_G(nv, ebuf, sizeof(ebuf), digits);
-                        sv_catpv_nomg(sv, ebuf);
-                        if (*ebuf)	/* May return an empty string for digits==0 */
-                            return;
-                    }
-                } else if (!digits) {
-                    STRLEN l;
-
-                    if ((p = F0convert(nv, ebuf + sizeof ebuf, &l))) {
-                        sv_catpvn_nomg(sv, p, l);
-                        return;
-                    }
-                }
+            if ((p = F0convert(nv, ebuf + sizeof ebuf, &l))) {
+                sv_catpvn_nomg(sv, p, l);
+                return;
             }
 	}
     }
