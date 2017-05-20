@@ -962,4 +962,14 @@ SKIP: {
     is($w_other, 0, "utf8 for invalid format: other warnings");
 }
 
+# it used to upgrade the result to utf8 if the 1st arg happened to be utf8
+
+{
+    my $precis = "9";
+    utf8::upgrade($precis);
+    my $s = sprintf "%.*f\n", $precis, 1.1;
+    ok(!utf8::is_utf8($s), "first arg not special utf8-wise");
+}
+
+
 done_testing();

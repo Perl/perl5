@@ -11862,9 +11862,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     }
 #endif /* !USE_LONG_DOUBLE */
 
-    if (!args && svix < svmax && DO_UTF8(*svargs))
-	has_utf8 = TRUE;
-
     patend = (char*)pat + patlen;
     for (p = (char*)pat; p < patend; p = q) {
 
