@@ -1940,17 +1940,6 @@ discovered.
 (F) You said something like "use Module 42" but in the Module file
 there are neither package declarations nor a C<$VERSION>.
 
-=item delete argument is index/value array slice, use array slice
-
-(F) You used index/value array slice syntax (C<%array[...]>) as
-the argument to C<delete>.  You probably meant C<@array[...]> with
-an @ symbol instead.
-
-=item delete argument is key/value hash slice, use hash slice
-
-(F) You used key/value hash slice syntax (C<%hash{...}>) as the argument to
-C<delete>.  You probably meant C<@hash{...}> with an @ symbol instead.
-
 =item delete argument is not a HASH or ARRAY element or slice
 
 (F) The argument to C<delete> must be either a hash or array element,
@@ -1963,6 +1952,11 @@ or a hash or array slice, such as:
 
     @foo[$bar, $baz, $xyzzy]
     @{$ref->[12]}{"susie", "queue"}
+
+or a hash key/value or array index/value slice, such as:
+
+    %foo[$bar, $baz, $xyzzy]
+    %{$ref->[12]}{"susie", "queue"}
 
 =item Delimiter for here document is too long
 

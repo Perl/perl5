@@ -8,7 +8,7 @@ BEGIN {
 
 # use strict;
 
-plan tests => 40;
+plan tests => 39;
 
 # simple use cases
 {
@@ -116,13 +116,6 @@ plan tests => 40;
         eval 'local %h{qw(a b)}';
         like $@, qr{^Can't modify key/value hash slice in local at},
             'local dies';
-    }
-    # no delete
-    {
-        local $@;
-        eval 'delete %h{qw(a b)}';
-        like $@, qr{^delete argument is key/value hash slice, use hash slice},
-            'delete dies';
     }
     # no assign
     {

@@ -4985,20 +4985,33 @@ PP(pp_delete)
     gimme = GIMME_V;
     discard = (gimme == G_VOID) ? G_DISCARD : 0;
 
-    if (PL_op->op_private & OPpSLICE) {
+    if (PL_op->op_private & (OPpSLICE|OPpKVSLICE)) {
 	dMARK; dORIGMARK;
 	HV * const hv = MUTABLE_HV(POPs);
 	const U32 hvtype = SvTYPE(hv);
+        int skip = 0;
+        if (PL_op->op_private & OPpKVSLICE) {
+            SSize_t items = SP - MARK;
+
+            MEXTEND(SP,items);
+            while (items > 1) {
+                *(MARK+items*2-1) = *(MARK+items);
+                items--;
+            }
+            items = SP - MARK;
+            SP += items;
+            skip = 1;
+        }
 	if (hvtype == SVt_PVHV) {			/* hash element */
-	    while (++MARK <= SP) {
-		SV * const sv = hv_delete_ent(hv, *MARK, discard, 0);
+            while ((MARK += (1+skip)) <= SP) {
+                SV * const sv = hv_delete_ent(hv, *(MARK-skip), discard, 0);
 		*MARK = sv ? sv : &PL_sv_undef;
 	    }
 	}
 	else if (hvtype == SVt_PVAV) {                  /* array element */
             if (PL_op->op_flags & OPf_SPECIAL) {
-                while (++MARK <= SP) {
-                    SV * const sv = av_delete(MUTABLE_AV(hv), SvIV(*MARK), discard);
+                while ((MARK += (1+skip)) <= SP) {
+                    SV * const sv = av_delete(MUTABLE_AV(hv), SvIV(*(MARK-skip)), discard);
                     *MARK = sv ? sv : &PL_sv_undef;
                 }
             }

@@ -644,9 +644,11 @@ addbits('list', 6 => qw(OPpLIST_GUESSED GUESSED));
 
 
 
-# Operating on a list of keys
-addbits('delete', 6 => qw(OPpSLICE SLICE));
-# also 7 => OPpLVAL_INTRO, already defined above
+addbits('delete',
+    5 => qw(OPpKVSLICE KVSLICE), # Operating on a list of key/value pairs
+    6 => qw(OPpSLICE   SLICE  ), # Operating on a list of keys
+   #7 => OPpLVAL_INTRO, already defined above
+);
 
 
 
