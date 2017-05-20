@@ -2152,7 +2152,7 @@ Finish removing POSIX deprecated functions.
 
 =item OS X
 
-OS X El Capitan doesn't implement the clock_gettime() or clock_getres() APIs,
+OS X El Capitan doesn't implement the clock_gettime() or clock_getres() APIs;
 emulate them as necessary.
 
 =item macOS
@@ -2174,7 +2174,7 @@ GNU libc used (previously it was an empty string when reported).
 
 =item VAX
 
-VAX floating point formats are now supported.
+VAX floating point formats are now supported on NetBSD.
 
 =item VMS
 
@@ -2188,19 +2188,9 @@ running under DCL (it's still C<|>).
 
 =item *
 
-Remove some VMS-specific hacks from C<showlex.t>.  These were added 15 years
-ago, and are no longer necessary for any VMS version now supported.
-
-=item *
-
-Move C<_pDEPTH> and C<_aDEPTH> after F<config.h> otherwise DEBUGGING
-may not be defined yet.
-
-=item *
-
-VAXC has not been a possibility for a good long while, and the versions of the
-DEC/Compaq/HP/VSI C compiler that report themselves as "DEC" in a listing file
-are 15 years or more out-of-date and can be safely desupported.
+C<configure.com> now recognizes the VSI-branded C compiler and no longer
+recognizes the "DEC"-branded C compiler (as there hasn't been such a thing for
+15 or more years).
 
 =back
 
@@ -2250,11 +2240,6 @@ the uninit CCTYPE var.  Also fix else vs .ELSE in makefile.mk
 fp definitions have been updated.
 
 =back
-
-=item VMS And Win32
-
-Fix some breakage, add 'undef' value for default_inc_excludes_dot in build
-scripts.
 
 =item Linux
 
