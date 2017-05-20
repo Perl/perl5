@@ -11667,9 +11667,10 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
 #ifndef USE_LOCALE_NUMERIC
             *p++ = '.';
 #else
-            if (PL_numeric_radix_sv && IN_LC(LC_NUMERIC)) {
+            if (PL_numeric_radix_sv) {
                 STRLEN n;
                 const char* r = SvPV(PL_numeric_radix_sv, n);
+                assert(IN_LC(LC_NUMERIC));
                 Copy(r, p, n, char);
                 p += n;
             }
@@ -12760,7 +12761,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 lc_numeric_set = TRUE;
             }
 
-            if (PL_numeric_radix_sv && IN_LC(LC_NUMERIC)) {
+            if (PL_numeric_radix_sv) {
+                assert(IN_LC(LC_NUMERIC));
                 radix_len  = SvCUR(PL_numeric_radix_sv);
                 /* note that this will convert the output to utf8 even if
                  * if the radix point didn't get output */
