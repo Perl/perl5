@@ -473,6 +473,15 @@ delimiter that isn't a grapheme by itself.  These are unlikely to exist
 in actual code, as they would typically display as attached to the
 character in front of them.
 
+=head1 Removed Deprecations
+
+The C<\cI<X>> construct is intended to be a way to specify non-printable
+characters.  Previously it was deprecated to use it for a printable one,
+which is better written as simply itself, perhaps preceded by a
+backslash for non-word characters.  Now this raises a warning, but not a
+deprecation.  See
+L<http://www.nntp.perl.org/group/perl.perl5.porters/2017/02/msg242944.html>.
+
 =head1 Performance Enhancements
 
 =over 4
