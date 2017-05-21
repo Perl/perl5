@@ -1172,87 +1172,12 @@ work after an upgrade of their perl.
 
 =head2 Changes to Existing Documentation
 
-=head3 L<perlcall>
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, send email to
+L<mailto:perlbug@perl.org>.
 
-=over 4
-
-=item *
-
-Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl 5.30
-
-This was changed to drop a leading C<v> in C<v5.30>, so it uses the same
-style as other deprecation messages.
-
-=item *
-
-"\c%c" is more clearly written simply as "%s".
-
-It was decided to undeprecate the use of C<\c%c>, see L<http://www.nntp.perl.org/group/perl.perl5.porters/2017/02/msg242944.html>
-
-=item *
-
-Removed redundant C<dSP> from an example.
-
-=back
-
-=head3 L<perlcommunity>
-
-=over 4
-
-=item *
-
-All references to Usenet have been removed.
-
-=back
-
-=head3 L<perldata>
-
-=over 4
-
-=item *
-
-Updated documentation of C<scalar(%hash)>.  See L</scalar(%hash) return
-signature changed> above.
-
-=item *
-
-Use of single character variables, with the variable name a non printable
-character in the range C<\x80>-C<\xFF> is no longer allowed.  Update the docs to
-reflect this.
-
-=back
-
-=head3 L<perldelta>
-
-=over 4
-
-=item *
-
-All references to Usenet have been removed.
-
-=back
-
-=head3 L<perldiag>
-
-=over 4
-
-=item *
-
-Deprecations are to be marked with a D.
-C<"%s() is deprecated on :utf8 handles"> use a deprecation message, and as
-such, such be marked C<"(D deprecated)"> and not C<"(W deprecated)">.
-
-=back
-
-=head3 L<perlexperiment>
-
-=over 4
-
-=item *
-
-Documented new feature: See L</Declaring a reference to a variable> above.
-
-=back
+Additionally all references to Usenet have been removed, and the
+following selected changes have been made:
 
 =head3 L<perlfunc>
 
@@ -1260,18 +1185,41 @@ Documented new feature: See L</Declaring a reference to a variable> above.
 
 =item *
 
-Defined on aggregates is no longer allowed.  Perlfunc was still reporting it as
-deprecated, and that it will be deleted in the future.
+Removed obsolete text about L<C<defined()>|perlfunc/defined>
+on aggregates that should have been deleted earlier, when the feature
+was removed.
+
+=item *
+
+Corrected documentation of L<C<eval()>|perlfunc/eval>,
+and L<C<evalbytes()>|perlfunc/evalbytes>.
 
 =item *
 
 Clarified documentation of L<C<seek()>|perlfunc/seek>,
-L<C<tell()>|perlfunc/tell> and L<C<sysseek()>|perlfunc/sysseek>.
+L<C<tell()>|perlfunc/tell> and L<C<sysseek()>|perlfunc/sysseek>
+regarding that positions are in bytes vs. characters.
 L<[perl #128607]|https://rt.perl.org/Public/Bug/Display.html?id=128607>
 
 =item *
 
-Removed obsolete documentation of L<C<study()>|perlfunc/study>.
+Clarified documentation of L<C<sort()>|perlfunc/sort LIST> concerning
+the variables C<$a> and C<$b>.
+
+=item *
+
+In L<C<split()>|perlfunc/split> added a caution about its use in Perls
+before 5.11, and noted that certain pattern modifiers are legal in it.
+
+=item *
+
+Removed obsolete documentation of L<C<study()>|perlfunc/study>, noting
+that it is now a no-op.
+
+=item *
+
+Noted that L<C<vec()>|perlfunc/vec> doesn't work well when the string
+contains characters whose code points are above 255.
 
 =back
 
@@ -1281,7 +1229,8 @@ Removed obsolete documentation of L<C<study()>|perlfunc/study>.
 
 =item *
 
-Add C<pTHX_> to magic method examples.
+Added advice on
+L<formatted printing of operands of C<Size_t> and C<SSize_t>|perlguts/Formatted Printing of Size_t and SSize_t>
 
 =back
 
@@ -1291,7 +1240,23 @@ Add C<pTHX_> to magic method examples.
 
 =item *
 
-Document Tab VS Space.
+Clariy indentation rules, and note that we are migrating away from using
+tabs to indent, replacing them with sequences of SPACE characters.
+
+=back
+
+=head3 L<perlhacktips>
+
+=over 4
+
+=item *
+
+Give another reason to use C<cBOOL> to cast an expression to boolean.
+
+=item *
+
+Note that there are macros C<TRUE> and C<FALSE> available to express
+boolean values.
 
 =back
 
@@ -1310,14 +1275,8 @@ hunt around in the parser for how a given operator is handled.
 
 =over 4
 
-=item *
-
-Document C<NUL> collation handling.
-
-=item *
-
-Some locales aren't compatible with Perl.  Note the potential bad
-consequences of using them.
+Some locales aren't compatible with Perl.  Note that these can cause
+core dumps.
 
 =back
 
@@ -1327,7 +1286,7 @@ consequences of using them.
 
 =item *
 
-All references to Usenet have been removed.
+Various clarifications have been added.
 
 =back
 
@@ -1337,21 +1296,7 @@ All references to Usenet have been removed.
 
 =item *
 
-Updated the mirror list.
-
-=item *
-
-All references to Usenet have been removed.
-
-=back
-
-=head3 L<perlnewmod>
-
-=over 4
-
-=item *
-
-All references to Usenet have been removed.
+Updated the site mirror list.
 
 =back
 
@@ -1372,10 +1317,6 @@ Do not discourage manual @ISA.
 =head3 L<perlootut>
 
 =over 4
-
-=item *
-
-Tidy the document.
 
 =item *
 
@@ -1403,38 +1344,24 @@ The first part was extensively rewritten to incorporate various basic
 points, that in earlier versions were mentioned in sort of an appendix
 on Version 8 regular expressions.
 
-Several minor enhancements to the documentation.
+Note that it is common to have the C</x> modifier and forget that this
+means that C<"#"> has to be escaped.
 
 =back
 
-=head3 L<perlsec>
+=head3 L<perlretut>
 
 =over 4
 
 =item *
 
-Fixed link to Crosby paper on hash complexity attack.
-
-=back
-
-=head3 L<perlref>
-
-=over 4
+Add introductory material
 
 =item *
 
-Documented new feature: See L</Declaring a reference to a variable> above.
-
-=back
-
-=head3 L<perltie>
-
-=over 4
-
-=item *
-
-Updated documentation of C<scalar(%hash)>.  See L</scalar(%hash) return
-signature changed> above.
+Note that a metacharacter occurring in a context where it can't mean
+that, silently loses its meta-ness and matches literally.
+L<C<use re 'strict'>|re/'strict' mode> can catch some of these.
 
 =back
 
@@ -1444,9 +1371,7 @@ signature changed> above.
 
 =item *
 
-Documented change to C<\p{I<script>}> to now use the improved Script_Extensions
-property.  See L</Use of \p{script} uses the improved Script_Extensions
-property> above.
+Corrected the text about Unicode BYTE ORDER MARK handling.
 
 =item *
 
@@ -1458,11 +1383,6 @@ regular expressions, and Perl compatibility with what it says.
 =head3 L<perlvar>
 
 =over 4
-
-=item *
-
-Removed obsolete documentation of C<${^ENCODING}>.  See L</${^ENCODING} has
-been removed> above.
 
 =item *
 
