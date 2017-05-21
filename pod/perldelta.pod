@@ -168,7 +168,7 @@ be called with ampersand syntax (C<&CORE::keys(\%hash>) and via reference
 (C<< my $k = \&CORE::keys; $k-E<gt>(\%hash) >>).  Previously they could only be
 used when inlined.
 
-=head2 create a safer utf8_hop() called utf8_hop_safe()
+=head2 for XS code, create a safer utf8_hop() called utf8_hop_safe()
 
 Unlike utf8_hop(), utf8_hop_safe() won't navigate before the beginning or after
 the end of the supplied buffer.
