@@ -3040,7 +3040,7 @@ L<http://www.perl.org/> , the Perl Home Page.
 If you believe you have an unreported bug, please run the L<perlbug> program
 included with your release.  Be sure to trim your bug down to a tiny but
 sufficient test case.  Your bug report, along with the output of C<perl -V>,
-will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+will be sent off to C<perlbug@perl.org> to be analysed by the Perl porting team.
 
 If the bug you are reporting has security implications which make it
 inappropriate to send to a publicly archived mailing list, then see
