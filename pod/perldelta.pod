@@ -2151,7 +2151,7 @@ perl built with VS2015 with XS modules built with GCC or VS E<lt>= VS2013.
 Some incompatibility may arise because of the bug fix that has been reverted
 for VS2015 builds of perl, but there may well be incompatibility anyway because
 of the rewritten CRT in VS2015 (I<e.g.>, see discussion at
-L<http://stackoverflow.com/questions/30412951)>.
+L<http://stackoverflow.com/questions/30412951>).
 
 =back
 
