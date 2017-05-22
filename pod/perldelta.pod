@@ -1783,7 +1783,7 @@ C<-Ddefault_inc_excludes_dot> has been turned on by default.
 
 =item *
 
-The C<dtrace> build process has further changes:
+The C<dtrace> build process has further changes [perl #130108]:
 
 =over
 
@@ -1812,8 +1812,6 @@ functions, while they don't on FreeBSD, which causes C<dtrace -G> to
 fail.
 
 =back
-
-[perl #130108]
 
 =item *
 
