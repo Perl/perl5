@@ -472,13 +472,16 @@ delimiter that isn't a grapheme by itself.  These are unlikely to exist
 in actual code, as they would typically display as attached to the
 character in front of them.
 
-=head1 Removed Deprecations
+=head2 C<\cI<X>> that maps to a printable is no longer deprecated
 
-The C<\cI<X>> construct is intended to be a way to specify non-printable
-characters.  Previously it was deprecated to use it for a printable one,
-which is better written as simply itself, perhaps preceded by a
-backslash for non-word characters.  Now this raises a warning, but not a
-deprecation.  See
+This means we have no plans to remove this feature.  It still raises a
+warning, but only if syntax warnings are enabled.  The feature was
+originally intended to be a way to express non-printable characters that
+don't have a mnemonic (C<\t> and C<\n> are mnemonics for two
+non-printable characters, but most non-printables don't have a
+mnemonic.)  But the feature can be used to specify a few printable
+characters, though those are more clearly expressed as the printable
+itself.  See
 L<http://www.nntp.perl.org/group/perl.perl5.porters/2017/02/msg242944.html>.
 
 =head1 Performance Enhancements
