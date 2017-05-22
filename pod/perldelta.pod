@@ -359,7 +359,8 @@ in that example.
 
 =head2 C<-Di> switch is now required for PerlIO debugging output
 
-Previously PerlIO debugging output would be sent to the file specified
+This is used for debugging of code within PerlIO to avoid recursive
+calls.  Previously this output would be sent to the file specified
 by the C<PERLIO_DEBUG> environment variable if perl wasn't running
 setuid and the C<-T> or C<-t> switches hadn't been parsed yet.
 
@@ -372,7 +373,7 @@ output.  By default this is written to C<stderr>, but can optionally
 be redirected to a file by setting the C<PERLIO_DEBUG> environment
 variable.
 
-If perl is running setuid or the C<-T> switch has supplied
+If perl is running setuid or the C<-T> switch was supplied,
 C<PERLIO_DEBUG> is ignored and the debugging output is sent to
 C<stderr> as for any other C<-D> switch.
 
