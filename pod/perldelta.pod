@@ -93,14 +93,14 @@ C<@{^CAPTURE}> exposes the capture buffers of the last match as an
 array.  So C<$1> is C<${^CAPTURE}[0]>.  This is a more efficient equivalent
 to code like C<substr($matched_string,$-[0],$+[0]-$-[0])>, and you don't
 have to keep track of the C<$matched_string> either.  This variable has no
-single character equivalent.  Note, like the other regex magic variables
-the contents of this variable is dynamic, if you wish to store it beyond
+single character equivalent.  Note that, like the other regex magic variables,
+the contents of this variable is dynamic; if you wish to store it beyond
 the lifetime of the match you must copy it to another array.
 
-C<%{^CAPTURE}> is the equivalent to C<%+> (I<i.e.>, named captures).  Other than
+C<%{^CAPTURE}> is equivalent to C<%+> (I<i.e.>, named captures).  Other than
 being more self documenting there is no difference between the two forms.
 
-C<%{^CAPTURE_ALL}> is the equivalent to C<%-> (I<i.e.>, all named captures).
+C<%{^CAPTURE_ALL}> is equivalent to C<%-> (I<i.e.>, all named captures).
 Other than being more self documenting there is no difference between the
 two forms.
 
@@ -156,8 +156,8 @@ L<perllocale/Collation of strings containing embedded C<NUL> characters>.
 =head2 C<CORE> subroutines for hash and array functions callable via
 reference
 
-The hash and array functions in the C<CORE> namespace--C<keys>, C<each>,
-C<values>, C<push>, C<pop>, C<shift>, C<unshift> and C<splice>--, can now
+The hash and array functions in the C<CORE> namespace (C<keys>, C<each>,
+C<values>, C<push>, C<pop>, C<shift>, C<unshift> and C<splice>) can now
 be called with ampersand syntax (C<&CORE::keys(\%hash>) and via reference
 (C<< my $k = \&CORE::keys; $k-E<gt>(\%hash) >>).  Previously they could only be
 used when inlined.
@@ -348,7 +348,7 @@ accidentally requiring dot in C<@INC>, as explained above.
 
 =back
 
-=head2 "Escaped" colons and relative paths in PATH
+=head2 Escaped colons and relative paths in PATH
 
 On Unix systems, Perl treats any relative paths in the PATH environment
 variable as tainted when starting a new process.  Previously, it was
@@ -1702,7 +1702,7 @@ Removed spurious executable bit.
 
 =item *
 
-Account for possibility of DOS file endings.
+Account for the possibility of DOS file endings.
 
 =back
 
@@ -1832,7 +1832,7 @@ and C<Inf> to make builds more reproducible. [perl #130133]
 
 =item *
 
-Since v5.18 for testing purposes we have included support for
+Since v5.18 for testing purposes, we have included support for
 building perl with a variety of non-standard, and non-recommended
 hash functions.  Since we do not recommend the use of these functions
 we have removed them and their corresponding build options.  Specifically
@@ -2194,7 +2194,8 @@ like Perl-space C<$x = ''>, but with several optimisations.
 =item *
 
 Several new macros and functions for dealing with Unicode and
-UTF-8-encoded strings have been added to the API, as well some changes in
+UTF-8-encoded strings have been added to the API, as well as some
+changes in
 functionality of existing functions (see L<perlapi/Unicode Support> for
 more details):
 
@@ -2287,9 +2288,9 @@ flag to allow the overflow malformation.  This malformation is when the
 UTF-8 may be syntactically valid, but the code point it represents is
 not capable of being represented in the word length on the platform.
 What "allowed" means in this case is that the function doesn't return an
-error, and advances the parse pointer to beyond the UTF-8 in question,
-but it returns the Unicode REPLACEMENT CHARACTER as the value of the
-code point (since the real value is not representable).
+error, and it advances the parse pointer to beyond the UTF-8 in
+question, but it returns the Unicode REPLACEMENT CHARACTER as the value
+of the code point (since the real value is not representable).
 
 C<utf8n_to_uvchr> has been changed to not
 abandon searching for other malformations when the first one is
@@ -2300,7 +2301,7 @@ instead of just one.
 
 C<valid_utf8_to_uvchr()> has been added to the API (although it was
 present in core earlier). Like C<utf8_to_uvchr_buf()>, but assumes that
-the next character is well-formed.
+the next character is well-formed.  Use with caution.
 
 =item *
 
@@ -2455,7 +2456,7 @@ in some cases.  [perl #129340]
 =item *
 
 Under C<use utf8>, the entire Perl program is now checked that the UTF-8
-is wellformed.  This resolves [perl #126310].
+is wellformed.  [perl #126310].
 
 =item *
 
@@ -2508,9 +2509,9 @@ could be triggered by C<chop(@x =~ tr/1/1/)>. [perl #130198].
 
 =item *
 
-Fixed a comment skipping error under C</x>; it could stop skipping a
-byte early, which could be in the middle of a UTF-8 character.
-[perl #130495].
+Fixed a comment skipping error in patterns under C</x>; it could stop
+skipping a byte early, which could be in the middle of a UTF-8
+character.  [perl #130495].
 
 =item *
 
@@ -2526,7 +2527,7 @@ DragonFly BSD now has support for C<setproctitle()>. [perl #130068].
 
 =item *
 
-Fix an assertion error which could be triggered when lookahead string
+Fix an assertion error which could be triggered when a lookahead string
 in patterns exceeded a minimum length. [perl #130522].
 
 =item *
@@ -2544,7 +2545,6 @@ we may have heap buffer overflow. [perl #129377].
 
 =item *
 
-Properly recognize mathematical digit ranges starting at U+1D7E.
 C<use re 'strict'> is supposed to warn if you use a range whose start
 and end digit aren't from the same group of 10.  It didn't do that
 for five groups of mathematical digits starting at U+1D7E.
@@ -2557,7 +2557,7 @@ C<sub c { sub c; }>) could sometimes crash or loop infinitely.  [perl
 
 =item *
 
-A crash in executing a regex with a floating UTF-8 substring against a
+A crash in executing a regex with a non-anchored UTF-8 substring against a
 target string that also used UTF-8 has been fixed. [perl #129350]
 
 =item *
@@ -2731,7 +2731,7 @@ from v5.20.  [perl #126482]
 
 Many issues relating to C<printf "%a"> of hexadecimal floating point
 were fixed.  In addition, the "subnormals" (formerly known as "denormals")
-floating point anumbers are now supported both with the plain IEEE 754
+floating point numbers are now supported both with the plain IEEE 754
 floating point numbers (64-bit or 128-bit) and the x86 80-bit
 "extended precision".  Note that subnormal hexadecimal floating
 point literals will give a warning about "exponent underflow".
@@ -2792,7 +2792,7 @@ L<[perl #128597]|https://rt.perl.org/Public/Bug/Display.html?id=128597>
 =item *
 
 Code that looks for a variable name associated with an uninitialized value
-could cause an assertion in cases where magic is involved, such as
+could cause an assertion failure in cases where magic is involved, such as
 C<$ISA[0][0]>.  This has now been fixed.
 L<[perl #128253]|https://rt.perl.org/Public/Bug/Display.html?id=128253>
 
@@ -2954,7 +2954,8 @@ Make C<chdir> allocate the stack it needs. [perl 129130]
 =item *
 
 Some modules have been broken by the L<context stack rework|/Internal Changes>.
-These modules were relying on non-guaranteed implementation details in perl.
+These modules were relying on non-guaranteed implementation details in
+the perl interpreter.
 Their maintainers have been informed, and should contact perl5-porters for
 advice if needed.  Below is a subset of these modules:
 
@@ -2964,7 +2965,8 @@ advice if needed.  Below is a subset of these modules:
 
 =item * L<Coro>
 
-L<Coro> and Perl 5.22 were already incompatible due to a change in the perl,
+L<Coro> and Perl 5.22 were already incompatible due to a change in the perl
+interpreter,
 and the reworking on the perl context stack creates a further incompatibility.
 perl5-porters has L<discussed the issue on the mailing
 list|http://www.nntp.perl.org/group/perl.perl5.porters/2016/05/msg236174.html>.
