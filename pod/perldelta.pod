@@ -2357,17 +2357,14 @@ enhanced.
 
 =item *
 
-The meanings of some internal SV flags have been changed
-
-OPpRUNTIME, SVpbm_VALID, SVpbm_TAIL, SvTAIL_on, SvTAIL_off, SVrepl_EVAL,
-SvEVALED
+Several obscure SV flags have been eliminated, sometimes along with the
+macros which manipulate them: C<SVpbm_VALID>, C<SVpbm_TAIL>, C<SvTAIL_on>,
+C<SvTAIL_off>, C<SVrepl_EVAL>, C<SvEVALED>
 
 =item *
 
-Change C<hv_fetch(…, "…", …, …)> to C<hv_fetchs(…, "…", …)>
-
-The dual-life dists all use Devel::PPPort, so they can use this function even
-though it was only added in 5.10.
+An OP op_private flag has been eliminated: C<OPpRUNTIME>. This used to
+often get set on C<PMOP>s, but had become meaningless over time.
 
 =back
 
