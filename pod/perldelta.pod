@@ -1336,6 +1336,8 @@ The first part was extensively rewritten to incorporate various basic
 points, that in earlier versions were mentioned in sort of an appendix
 on Version 8 regular expressions.
 
+=item *
+
 Note that it is common to have the C</x> modifier and forget that this
 means that C<"#"> has to be escaped.
 
