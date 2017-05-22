@@ -2280,20 +2280,6 @@ that is now handled in a simpler way.
 
 =item *
 
-Several new internal C macros have been added that take a string literal as
-arguments, alongside existing routines that take the equivalent value as two
-arguments, a character pointer and a length.  The advantage of this is that
-the length of the string is calculated automatically, rather than having to
-be done manually.  These routines are now used where appropriate across the
-entire codebase.
-
-=item *
-
-The code in F<gv.c> that determines whether a variable has a special meaning
-to Perl has been simplified.
-
-=item *
-
 The C<DEBUGGING>-mode output for regex compilation and execution has been
 enhanced.
 
@@ -2302,13 +2288,6 @@ enhanced.
 Several macros and functions have been added to the public API for
 dealing with Unicode and UTF-8-encoded strings.  See
 L<perlapi/Unicode Support>.
-
-=item *
-
-Use C<my_strlcat()> in C<locale.c>.  While C<strcat()> is safe in this context,
-some compilers were optimizing this to C<strcpy()> causing a porting test to
-fail that looks for unsafe code.  Rather than fighting this, we just use
-C<my_strlcat()> instead.
 
 =item *
 
