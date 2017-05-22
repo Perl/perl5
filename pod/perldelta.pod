@@ -2889,9 +2889,7 @@ Handle C<SvIMMORTALs> in LHS of list assign. [perl #129991]
 
 =item *
 
-[perl #130010] a5540cf breaks texinfo
-
-This involved user-defined Unicode properties.
+Assertion failure with user-defined Unicode-like properties. [perl #130010]
 
 =item *
 
