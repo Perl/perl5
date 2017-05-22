@@ -1188,7 +1188,7 @@ and L<C<evalbytes()>|perlfunc/evalbytes>.
 
 Clarified documentation of L<C<seek()>|perlfunc/seek>,
 L<C<tell()>|perlfunc/tell> and L<C<sysseek()>|perlfunc/sysseek>
-regarding that positions are in bytes vs. characters.
+emphasizing that positions are in bytes and not characters.
 L<[perl #128607]|https://rt.perl.org/Public/Bug/Display.html?id=128607>
 
 =item *
