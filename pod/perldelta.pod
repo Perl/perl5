@@ -2221,9 +2221,9 @@ L<perlapi/Character classification>.
 
 =item *
 
-Calling macros like C<isALPHA_utf8> on malformed UTF-8 have issued a
-deprecation warning since Perl 5.18.  They now die.
-Similarly, macros like C<toLOWER_utf8> on malformed UTF-8 now die.
+Macros like C<isALPHA_utf8> and C<toLOWER_utf8> now die if they detect
+that their input UTF-8 is malformed.  A deprecation warning had been
+issued since Perl 5.18.
 
 =item *
 
