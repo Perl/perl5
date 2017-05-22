@@ -2658,7 +2658,8 @@ cases this is used in building error messages. [perl #128988]
 
 =item *
 
-Check for null PL_curcop in IN_LC() [perl #129106]
+Fix segfault when run with C<-DC> options on DEBUGGING builds.
+[perl #129106]
 
 =item *
 
