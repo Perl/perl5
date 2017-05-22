@@ -9487,24 +9487,27 @@ S_invlist_clear(pTHX_ SV* invlist)    /* Empty the inversion list */
 #endif /* ifndef PERL_IN_XSUB_RE */
 
 PERL_STATIC_INLINE bool
-S_invlist_is_iterating(SV* const invlist)
+S_invlist_is_iterating(const SV* const invlist)
 {
     PERL_ARGS_ASSERT_INVLIST_IS_ITERATING;
 
-    return *(get_invlist_iter_addr(invlist)) < (STRLEN) UV_MAX;
+    /* get_invlist_iter_addr()'s sv is non-const only because it returns a
+     * value that can be used to modify the invlist, it doesn't modify the
+     * invlist itself */
+    return *(get_invlist_iter_addr((SV*)invlist)) < (STRLEN) UV_MAX;
 }
 
 #ifndef PERL_IN_XSUB_RE
 
 PERL_STATIC_INLINE UV
-S_invlist_max(SV* const invlist)
+S_invlist_max(const SV* const invlist)
 {
     /* Returns the maximum number of elements storable in the inversion list's
      * array, without having to realloc() */
 
     PERL_ARGS_ASSERT_INVLIST_MAX;
 
-    assert(is_invlist(invlist));
+    assert(is_invlist((SV *) invlist));
 
     /* Assumes worst case, in which the 0 element is not counted in the
      * inversion list, so subtracts 1 for that */

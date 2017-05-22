@@ -4462,7 +4462,7 @@ PERL_STATIC_INLINE void	S_invlist_clear(pTHX_ SV* invlist);
 	assert(invlist)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE UV	S_invlist_max(SV* const invlist)
+PERL_STATIC_INLINE UV	S_invlist_max(const SV* const invlist)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_INVLIST_MAX	\
 	assert(invlist)
@@ -5908,7 +5908,7 @@ PERL_STATIC_INLINE SV*	S_invlist_contents(pTHX_ SV* const invlist, const bool tr
 #endif
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	S_invlist_is_iterating(SV* const invlist)
+PERL_STATIC_INLINE bool	S_invlist_is_iterating(const SV* const invlist)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_INVLIST_IS_ITERATING	\
 	assert(invlist)
