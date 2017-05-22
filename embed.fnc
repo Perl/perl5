@@ -2021,7 +2021,7 @@ EXpRT	|const char * const *|get_prop_values|const int table_index
 EXpR	|SV *	|get_prop_definition|const int table_index
 EXpRT	|const char *|get_deprecated_property_msg|const Size_t warning_offset
 #if defined(PERL_IN_REGCOMP_C)
-EiRT	|bool	|invlist_is_iterating|NN SV* const invlist
+EiRT	|bool	|invlist_is_iterating|NN const SV* const invlist
 EiR	|SV*	|invlist_contents|NN SV* const invlist		    \
 				 |const bool traditional_style
 EixRT	|UV	|invlist_lowest|NN SV* const invlist
@@ -2267,7 +2267,7 @@ ESR	|bool	|regtail_study	|NN RExC_state_t *pRExC_state \
 #  endif
 #  ifndef PERL_EXT_RE_BUILD
 EiRT	|UV*	|_invlist_array_init	|NN SV* const invlist|const bool will_have_0
-EiRT	|UV	|invlist_max	|NN SV* const invlist
+EiRT	|UV	|invlist_max	|NN const SV* const invlist
 EiRT	|IV*	|get_invlist_previous_index_addr|NN SV* invlist
 EiT	|void	|invlist_set_previous_index|NN SV* const invlist|const IV index
 EiRT	|IV	|invlist_previous_index|NN SV* const invlist
