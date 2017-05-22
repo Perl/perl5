@@ -2004,8 +2004,8 @@ the string.
 
 =item *
 
-A new test script, F<t/op/decl-refs.t>, has been added to test the new feature,
-"Declaring a reference to a variable".
+A new test script, F<t/op/decl-refs.t>, has been added to test the new feature
+L</Declaring a reference to a variable>.
 
 =item *
 
@@ -2148,7 +2148,7 @@ perl built with VS2015 with XS modules built with GCC or VS E<lt>= VS2013.
 Some incompatibility may arise because of the bug fix that has been reverted
 for VS2015 builds of perl, but there may well be incompatibility anyway because
 of the rewritten CRT in VS2015 (I<e.g.>, see discussion at
-http://stackoverflow.com/questions/30412951).
+L<http://stackoverflow.com/questions/30412951)>.
 
 =back
 
@@ -2189,13 +2189,15 @@ F<t/uni/overload.t>: Skip hanging test on FreeBSD.
 
 =item *
 
-A new API function C<sv_setvpv_bufsize()> allows simultaneously setting the
+A new API function L<C<sv_setpv_bufsize()>|perlapi/sv_setpv_bufsize>
+allows simultaneously setting the
 length and allocated size of the buffer in an C<SV>, growing the buffer if
 necessary.
 
 =item *
 
-A new API macro C<SvPVCLEAR()> sets its C<SV> argument to an empty string,
+A new API macro L<C<SvPVCLEAR()>|perlapi/SvPVCLEAR> sets its C<SV>
+argument to an empty string,
 like Perl-space C<$x = ''>, but with several optimisations.
 
 =item *
@@ -2210,18 +2212,19 @@ more details):
 
 =item *
 
-New versions of macros like C<isALPHA_utf8> and C<toLOWER_utf8>  have
-been added, each with the
-suffix C<_safe>, like C<isSPACE_utf8_safe>.  These take an extra
-parameter, giving an upper limit of how far into the string it is safe
-to read.  Using the old versions could cause attempts to read beyond the
-end of the input buffer if the UTF-8 is not well-formed, and their use
-now raises a deprecation warning.  Details are at
-L<perlapi/Character classification>.
+New versions of the API macros like C<isALPHA_utf8> and C<toLOWER_utf8>
+have been added, each with the suffix C<_safe>, like
+L<C<isSPACE_utf8_safe>|perlapi/isSPACE>.  These take an extra
+parameter, giving an upper
+limit of how far into the string it is safe to read.  Using the old
+versions could cause attempts to read beyond the end of the input buffer
+if the UTF-8 is not well-formed, and their use now raises a deprecation
+warning.  Details are at L<perlapi/Character classification>.
 
 =item *
 
-Macros like C<isALPHA_utf8> and C<toLOWER_utf8> now die if they detect
+Macros like L<C<isALPHA_utf8>|perlapi/isALPHA> and
+L<C<toLOWER_utf8>|perlapi/toLOWER_utf8> now die if they detect
 that their input UTF-8 is malformed.  A deprecation warning had been
 issued since Perl 5.18.
 
@@ -2305,7 +2308,8 @@ multiple diagnostics, instead of just one.
 
 =item *
 
-C<valid_utf8_to_uvchr()> has been added to the API (although it was
+L<C<valid_utf8_to_uvchr()>|perlapi/valid_utf8_to_uvchr> has been added
+to the API (although it was
 present in core earlier). Like C<utf8_to_uvchr_buf()>, but assumes that
 the next character is well-formed.  Use with caution.
 
@@ -2320,13 +2324,15 @@ your own analysis.
 
 =item *
 
-There is now a safer version of utf8_hop(), called utf8_hop_safe().
+There is now a safer version of utf8_hop(), called
+L<C<utf8_hop_safe()>|perlapi/utf8_hop_safe>.
 Unlike utf8_hop(), utf8_hop_safe() won't navigate before the beginning or
 after the end of the supplied buffer.
 
 =item *
 
-Two new functions, C<utf8_hop_forward()> and C<utf8_hop_back()> are
+Two new functions, L<C<utf8_hop_forward()>|perlapi/utf8_hop_forward> and
+L<C<utf8_hop_back()>|perlapi/utf8_hop_back> are
 similar to C<utf8_hop_safe()> but are for when you know which direction
 you wish to travel.
 
@@ -2357,7 +2363,8 @@ elements of a subroutine signature, plus any overall checking required.
 
 =item *
 
-The C<op_class()> API function has been added.  This is like the existing
+The L<C<op_class()>|perlapi/op_class> API function has been added.  This
+is like the existing
 C<OP_CLASS()> macro, but can more accurately determine what struct an op
 has been allocated as.  For example C<OP_CLASS()> might return
 C<OA_BASEOP_OR_UNOP> indicating that ops of this type are usually
@@ -2374,7 +2381,8 @@ that is now handled in a simpler way.
 
 =item *
 
-The output format of the C<op_dump()> function (as used by C<perl -Dx>)
+The output format of the L<C<op_dump()>|perlapi/op_dump> function (as
+used by C<perl -Dx>)
 has changed: it now displays an "ASCII-art" tree structure, and shows more
 low-level details about each op, such as its address and class.
 
@@ -2498,7 +2506,8 @@ correctly with 64-bit integers, and non-long doubles. [perl #130335]
 
 =item *
 
-Fix issues with C</(?{ ... E<lt>E<lt>EOF })/> that broke Method-Signatures. [perl #130398]
+Fix issues with C</(?{ ... E<lt>E<lt>EOF })/> that broke
+L<Method::Signatures>. [perl #130398]
 
 =item *
 
