@@ -1198,8 +1198,8 @@ the variables C<$a> and C<$b>.
 
 =item *
 
-In L<C<split()>|perlfunc/split> added a caution about its use in Perls
-before v5.11, and noted that certain pattern modifiers are legal in it.
+In L<C<split()>|perlfunc/split> noted that certain pattern modifiers are
+legal, and added a caution about its use in Perls before v5.11,
 
 =item *
 
