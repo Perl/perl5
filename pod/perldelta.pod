@@ -2502,10 +2502,6 @@ Fix issues with C</(?{ ... E<lt>E<lt>EOF })/> that broke Method-Signatures. [per
 
 =item *
 
-Fix a macro which caused syntax error on an EBCDIC build.
-
-=item *
-
 Prevent tests from getting hung up on 'NonStop' option. [perl #130445]
 
 =item *
