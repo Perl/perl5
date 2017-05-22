@@ -2167,6 +2167,15 @@ like Perl-space C<$x = ''>, but with several optimisations.
 
 =item *
 
+Several new macros and functions for dealing with Unicode and
+UTF-8-encoded strings have been added to the API, as well some changes in
+functionality of existing functions (see L<perlapi/Unicode Support> for
+more details):
+
+=over
+
+=item *
+
 New versions of macros like C<isALPHA_utf8> and C<toLOWER_utf8>  have
 been added, each with the
 suffix C<_safe>, like C<isSPACE_utf8_safe>.  These take an extra
@@ -2184,23 +2193,70 @@ Similarly, macros like C<toLOWER_utf8> on malformed UTF-8 now die.
 
 =item *
 
-Calling the functions C<utf8n_to_uvchr> and its derivatives, while
-passing a string length of 0 is now asserted against in DEBUGGING
-builds, and otherwise returns the Unicode REPLACEMENT CHARACTER.   If
-you have nothing to decode, you shouldn't call the decode function.
+Several new macros for analysing the validity of utf8 sequences. These
+are:
+
+C<L<perlapi/UTF8_GOT_ABOVE_31_BIT>>
+C<L<perlapi/UTF8_GOT_CONTINUATION>>
+C<L<perlapi/UTF8_GOT_EMPTY>>
+C<L<perlapi/UTF8_GOT_LONG>>
+C<L<perlapi/UTF8_GOT_NONCHAR>>
+C<L<perlapi/UTF8_GOT_NON_CONTINUATION>>
+C<L<perlapi/UTF8_GOT_OVERFLOW>>
+C<L<perlapi/UTF8_GOT_SHORT>>
+C<L<perlapi/UTF8_GOT_SUPER>>
+C<L<perlapi/UTF8_GOT_SURROGATE>>
+C<L<perlapi/UTF8_IS_INVARIANT>>
+C<L<perlapi/UTF8_IS_NONCHAR>>
+C<L<perlapi/UTF8_IS_SUPER>>
+C<L<perlapi/UTF8_IS_SURROGATE>>
+C<L<perlapi/UVCHR_IS_INVARIANT>>
+C<L<perlapi/isUTF8_CHAR_flags>>
+C<L<perlapi/isSTRICT_UTF8_CHAR>>
+C<L<perlapi/isC9_STRICT_UTF8_CHAR>>
 
 =item *
 
-The functions C<utf8n_to_uvchr> and its derivatives now return the
-Unicode REPLACEMENT CHARACTER if called with UTF-8 that has the overlong
-malformation, and that malformation is allowed by the input parameters.
-This malformation is where the UTF-8 looks valid syntactically, but
-there is a shorter sequence that yields the same code point.  This has
-been forbidden since Unicode version 3.1.
+Functions that are all extensions of the C<is_utf8_string_*()> functions,
+that apply various restrictions to the UTF-8 recognized as valid:
+
+C<L<perlapi/is_strict_utf8_string>>,
+C<L<perlapi/is_strict_utf8_string_loc>>,
+C<L<perlapi/is_strict_utf8_string_loclen>>,
+
+C<L<perlapi/is_c9strict_utf8_string>>,
+C<L<perlapi/is_c9strict_utf8_string_loc>>,
+C<L<perlapi/is_c9strict_utf8_string_loclen>>,
+
+C<L<perlapi/is_utf8_string_flags>>,
+C<L<perlapi/is_utf8_string_loc_flags>>,
+C<L<perlapi/is_utf8_string_loclen_flags>>,
+
+C<L<perlapi/is_utf8_fixed_width_buf_flags>>,
+C<L<perlapi/is_utf8_fixed_width_buf_loc_flags>>,
+C<L<perlapi/is_utf8_fixed_width_buf_loclen_flags>>.
+
+C<L<perlapi/is_utf8_invariant_string>>.
+C<L<perlapi/is_utf8_valid_partial_char>>.
+C<L<perlapi/is_utf8_valid_partial_char_flags>>.
 
 =item *
 
-The functions C<utf8n_to_uvchr> and its derivatives now accept an input
+The  functions C<L<perlapi/utf8n_to_uvchr>> and its derivatives have had
+several changes of behaviour.
+
+Calling them, while passing a string length of 0 is now asserted against
+in DEBUGGING builds, and otherwise returns the Unicode REPLACEMENT
+CHARACTER.   If you have nothing to decode, you shouldn't call the decode
+function.
+
+They now return the Unicode REPLACEMENT CHARACTER if called with UTF-8
+that has the overlong malformation, and that malformation is allowed by
+the input parameters.  This malformation is where the UTF-8 looks valid
+syntactically, but there is a shorter sequence that yields the same code
+point.  This has been forbidden since Unicode version 3.1.
+
+They now accept an input
 flag to allow the overflow malformation.  This malformation is when the
 UTF-8 may be syntactically valid, but the code point it represents is
 not capable of being represented in the word length on the platform.
@@ -2209,12 +2265,16 @@ error, and advances the parse pointer to beyond the UTF-8 in question,
 but it returns the Unicode REPLACEMENT CHARACTER as the value of the
 code point (since the real value is not representable).
 
-=item *
-
-The function C<L<perlapi/utf8n_to_uvchr>> has been changed to not
+C<utf8n_to_uvchr> has been changed to not
 abandon searching for other malformations when the first one is
 encountered.  A call to it thus can generate multiple diagnostics,
 instead of just one.
+
+=item *
+
+C<valid_utf8_to_uvchr()> has been added to the API (although it was
+present in core earlier). Like C<utf8_to_uvchr_buf()>, but assumes that
+the next character is well-formed.
 
 =item *
 
@@ -2226,34 +2286,24 @@ your own analysis.
 
 =item *
 
-Several new functions for handling Unicode have been added to the API:
-C<L<perlapi/is_strict_utf8_string>>,
-C<L<perlapi/is_c9strict_utf8_string>>,
-C<L<perlapi/is_utf8_string_flags>>,
-C<L<perlapi/is_strict_utf8_string_loc>>,
-C<L<perlapi/is_strict_utf8_string_loclen>>,
-C<L<perlapi/is_c9strict_utf8_string_loc>>,
-C<L<perlapi/is_c9strict_utf8_string_loclen>>,
-C<L<perlapi/is_utf8_string_loc_flags>>,
-C<L<perlapi/is_utf8_string_loclen_flags>>,
-C<L<perlapi/is_utf8_fixed_width_buf_flags>>,
-C<L<perlapi/is_utf8_fixed_width_buf_loc_flags>>,
-C<L<perlapi/is_utf8_fixed_width_buf_loclen_flags>>.
-
-These functions are all extensions of the C<is_utf8_string_*()> functions,
-that apply various restrictions to the UTF-8 recognized as valid.
-
-=item *
-
-Several macros and functions have been added to the public API for
-dealing with Unicode and UTF-8-encoded strings.  See
-L<perlapi/Unicode Support>.
-
-=item *
-
 There is now a safer version of utf8_hop(), called utf8_hop_safe().
 Unlike utf8_hop(), utf8_hop_safe() won't navigate before the beginning or
 after the end of the supplied buffer.
+
+=item *
+
+Two new functions, C<utf8_hop_forward()> and C<utf8_hop_back()> are
+similar to C<utf8_hop_safe()> but are for when you know which direction
+you wish to travel.
+
+=item *
+
+Two new macros which return useful utf8 byte sequences:
+
+C<L<perlapi/BOM_UTF8>>
+C<L<perlapi/REPLACEMENT_CHARACTER_UTF8>>
+
+=back
 
 =item *
 
