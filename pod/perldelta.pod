@@ -1230,8 +1230,9 @@ L<formatted printing of operands of C<Size_t> and C<SSize_t>|perlguts/Formatted 
 
 =item *
 
-Clariy indentation rules, and note that we are migrating away from using
-tabs to indent, replacing them with sequences of SPACE characters.
+Clarify what editor tab stop rules to use, and note that we are
+migrating away from using tabs, replacing them with sequences of SPACE
+characters.
 
 =back
 
