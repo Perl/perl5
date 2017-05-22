@@ -1323,7 +1323,13 @@ Mention C<Moo> more.
 
 =item *
 
-Clarify behavior of single quote regexps.
+Note that white space must be used for quoting operators if the
+delimiter is a word character (I<i.e.>, matches C<\w>).
+
+=item *
+
+Clarify that in regular expression patterns delimited by single quotes,
+no variable interpolation is done.
 
 =back
 
