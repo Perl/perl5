@@ -2156,18 +2156,14 @@ t/uni/overload.t: Skip hanging test on FreeBSD.
 
 =item *
 
-The C<op_class()> API function has been added.  This is like the existing
-C<OP_CLASS()> macro, but can more accurately determine what struct an op
-has been allocated as.  For example C<OP_CLASS()> might return
-C<OA_BASEOP_OR_UNOP> indicating that ops of this type are usually
-allocated as an C<OP> or C<UNOP>; while C<op_class()> will return
-C<OPclass_BASEOP> or C<OPclass_UNOP> as appropriate.
+A new API function C<sv_setvpv_bufsize()> allows simultaneously setting the
+length and allocated size of the buffer in an C<SV>, growing the buffer if
+necessary.
 
 =item *
 
-The output format of the C<op_dump()> function (as used by C<perl -Dx>)
-has changed: it now displays an "ASCII-art" tree structure, and shows more
-low-level details about each op, such as its address and class.
+A new API macro C<SvPVCLEAR()> sets its C<SV> argument to an empty string,
+like Perl-space C<$x = ''>, but with several optimisations.
 
 =item *
 
@@ -2215,18 +2211,6 @@ code point (since the real value is not representable).
 
 =item *
 
-There is now a safer version of utf8_hop(), called utf8_hop_safe().
-Unlike utf8_hop(), utf8_hop_safe() won't navigate before the beginning or
-after the end of the supplied buffer.
-
-=item *
-
-The C<PADOFFSET> type has changed from being unsigned to signed, and
-several pad-related variables such as C<PL_padix> have changed from being
-of type C<I32> to type C<PADOFFSET>.
-
-=item *
-
 The function C<L<perlapi/utf8n_to_uvchr>> has been changed to not
 abandon searching for other malformations when the first one is
 encountered.  A call to it thus can generate multiple diagnostics,
@@ -2261,14 +2245,40 @@ that apply various restrictions to the UTF-8 recognized as valid.
 
 =item *
 
-A new API function C<sv_setvpv_bufsize()> allows simultaneously setting the
-length and allocated size of the buffer in an C<SV>, growing the buffer if
-necessary.
+Several macros and functions have been added to the public API for
+dealing with Unicode and UTF-8-encoded strings.  See
+L<perlapi/Unicode Support>.
 
 =item *
 
-A new API macro C<SvPVCLEAR()> sets its C<SV> argument to an empty string,
-like Perl-space C<$x = ''>, but with several optimisations.
+There is now a safer version of utf8_hop(), called utf8_hop_safe().
+Unlike utf8_hop(), utf8_hop_safe() won't navigate before the beginning or
+after the end of the supplied buffer.
+
+=item *
+
+Perl is now built with the C<PERL_OP_PARENT> compiler define enabled by
+default.  To disable it, use the C<PERL_NO_OP_PARENT> compiler define.
+This flag alters how the C<op_sibling> field is used in C<OP> structures,
+and has been available optionally since perl 5.22.
+
+See L<perl5220delta/"Internal Changes"> for more details of what this
+build option does.
+
+=item *
+
+Three new ops, C<OP_ARGELEM>, C<OP_ARGDEFELEM> and C<OP_ARGCHECK> have
+been added.  These are intended principally to implement the individual
+elements of a subroutine signature, plus any overall checking required.
+
+=item *
+
+The C<op_class()> API function has been added.  This is like the existing
+C<OP_CLASS()> macro, but can more accurately determine what struct an op
+has been allocated as.  For example C<OP_CLASS()> might return
+C<OA_BASEOP_OR_UNOP> indicating that ops of this type are usually
+allocated as an C<OP> or C<UNOP>; while C<op_class()> will return
+C<OPclass_BASEOP> or C<OPclass_UNOP> as appropriate.
 
 =item *
 
@@ -2280,30 +2290,20 @@ that is now handled in a simpler way.
 
 =item *
 
+The output format of the C<op_dump()> function (as used by C<perl -Dx>)
+has changed: it now displays an "ASCII-art" tree structure, and shows more
+low-level details about each op, such as its address and class.
+
+=item *
+
+The C<PADOFFSET> type has changed from being unsigned to signed, and
+several pad-related variables such as C<PL_padix> have changed from being
+of type C<I32> to type C<PADOFFSET>.
+
+=item *
+
 The C<DEBUGGING>-mode output for regex compilation and execution has been
 enhanced.
-
-=item *
-
-Several macros and functions have been added to the public API for
-dealing with Unicode and UTF-8-encoded strings.  See
-L<perlapi/Unicode Support>.
-
-=item *
-
-Three new ops, C<OP_ARGELEM>, C<OP_ARGDEFELEM> and C<OP_ARGCHECK> have
-been added.  These are intended principally to implement the individual
-elements of a subroutine signature, plus any overall checking required.
-
-=item *
-
-Perl is now built with the C<PERL_OP_PARENT> compiler define enabled by
-default.  To disable it, use the C<PERL_NO_OP_PARENT> compiler define.
-This flag alters how the C<op_sibling> field is used in C<OP> structures,
-and has been available optionally since perl 5.22.
-
-See L<perl5220delta/"Internal Changes"> for more details of what this
-build option does.
 
 =item *
 
