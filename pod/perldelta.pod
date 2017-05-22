@@ -2297,11 +2297,6 @@ elements of a subroutine signature, plus any overall checking required.
 
 =item *
 
-Perl no longer panics when switching into some locales on machines with
-buggy C<strxfrm()> implementations in their libc. [perl #121734]
-
-=item *
-
 Perl is now built with the C<PERL_OP_PARENT> compiler define enabled by
 default.  To disable it, use the C<PERL_NO_OP_PARENT> compiler define.
 This flag alters how the C<op_sibling> field is used in C<OP> structures,
@@ -2329,6 +2324,11 @@ though it was only added in 5.10.
 =head1 Selected Bug Fixes
 
 =over 4
+
+=item *
+
+Perl no longer panics when switching into some locales on machines with
+buggy C<strxfrm()> implementations in their libc. [perl #121734]
 
 =item *
 
