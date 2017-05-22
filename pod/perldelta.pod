@@ -15,9 +15,9 @@ This release includes three updates with widespread effects:
 
 =over 4
 
-=item * C<.> no longer in C<@INC>
+=item * C<"."> no longer in C<@INC>
 
-For security reasons, the current directory (C<.>) is no longer included
+For security reasons, the current directory (C<".">) is no longer included
 by default at the end of the module search path (C<@INC>). This may have
 widespread implications for the building, testing and installing of
 modules, and for the execution of scripts.  See the section
@@ -27,7 +27,7 @@ for the full details.
 =item * C<do> may now warn
 
 C<do> now gives a deprecation warning when it fails to load a file which
-it would have loaded had C<.> been in C<@INC>.
+it would have loaded had C<"."> been in C<@INC>.
 
 =item * In regular expression patterns, a literal left brace C<"{">
 should be escaped
@@ -48,7 +48,7 @@ subroutines, regardless of what feature declarations are in scope.
 
 =head2 Indented Here-documents
 
-This adds a new modifier '~' to here-docs that tells the parser
+This adds a new modifier C<"~"> to here-docs that tells the parser
 that it should look for /^\s*$DELIM\n/ as the closing delimiter.
 
 These syntaxes are all supported:
@@ -62,7 +62,7 @@ These syntaxes are all supported:
     <<~ "EOF";
     <<~ `EOF`;
 
-The '~' modifier will strip, from each line in the here-doc, the
+The C<"~"> modifier will strip, from each line in the here-doc, the
 same whitespace that appears before the delimiter.
 
 Newlines will be copied as-is, and lines that don't include the
@@ -80,7 +80,7 @@ prints "Hello there\n" with no leading whitespace.
 
 =head2 New regular expression modifier C</xx>
 
-Specifying two C<x> characters to modify a regular expression pattern
+Specifying two C<"x"> characters to modify a regular expression pattern
 does everything that a single one does, but additionally TAB and SPACE
 characters within a bracketed character class are generally ignored and
 can be added to improve readability, like
@@ -174,16 +174,16 @@ there is a modest improvement.
 
 =head1 Security
 
-=head2 Removal of the current directory (C<.>) from C<@INC>
+=head2 Removal of the current directory (C<".">) from C<@INC>
 
 The perl binary includes a default set of paths in C<@INC>.  Historically
-it has also included the current directory (C<.>) as the final entry,
+it has also included the current directory (C<".">) as the final entry,
 unless run with taint mode enabled (C<perl -T>).  While convenient, this has
 security implications: for example, where a script attempts to load an
 optional module when its current directory is untrusted (such as F</tmp>),
 it could load and execute code from under that directory.
 
-Starting with v5.26, C<.> is always removed by default, not just under
+Starting with v5.26, C<"."> is always removed by default, not just under
 tainting.  This has major implications for installing modules and executing
 scripts.
 
@@ -195,7 +195,7 @@ issues.
 =item * C<Configure -Udefault_inc_excludes_dot>
 
 There is a new C<Configure> option, C<default_inc_excludes_dot> (enabled
-by default) which builds a perl executable without C<.>; unsetting this
+by default) which builds a perl executable without C<".">; unsetting this
 option using C<-U> reverts perl to the old behaviour.  This may fix your
 path issues but will reintroduce all the security concerns, so don't
 build a perl executable like this unless you're I<really> confident that
@@ -204,8 +204,8 @@ such issues are not a concern in your environment.
 =item * C<PERL_USE_UNSAFE_INC>
 
 There is a new environment variable recognised by the perl interpreter.
-If this variable has the value C<1> when the perl interpreter starts up,
-then C<.> will be automatically appended to C<@INC> (except under tainting).
+If this variable has the value 1 when the perl interpreter starts up,
+then C<"."> will be automatically appended to C<@INC> (except under tainting).
 
 This allows you restore the old perl interpreter behaviour on a
 case-by-case basis.  But note that this is intended to be a temporary crutch,
@@ -219,7 +219,7 @@ will not reintroduce any security concerns.
 
 While it is well-known that C<use> and C<require> use C<@INC> to search
 for the file to load, many people don't realise that C<do "file"> also
-searches C<@INC> if the file is a relative path.  With the removal of C<.>,
+searches C<@INC> if the file is a relative path.  With the removal of C<".">,
 a simple C<do "file.pl"> will fail to read in and execute C<file.pl> from
 the current directory.  Since this is commonly expected behaviour, a new
 mandatory warning is now issued whenever C<do> fails to load a file which
@@ -237,7 +237,7 @@ their software work in the new regime.
 If the issue is within your own code (rather than within included
 modules), then you have two main options.  Firstly, if you are confident
 that your script will only be run within a trusted directory (under which
-you expect to find trusted files and modules), then add C<.> back into the
+you expect to find trusted files and modules), then add C<"."> back into the
 path; I<e.g.>:
 
     BEGIN {
@@ -304,7 +304,7 @@ assess the resultant risks first.
 If you maintain a CPAN distribution, it may need updating to run in
 a dotless environment.  Although C<cpan> and other such tools will
 currently set the C<PERL_USE_UNSAFE_INC> during module build, this is a
-temporary workaround for the set of modules which rely on C<.> being in
+temporary workaround for the set of modules which rely on C<"."> being in
 C<@INC> for installation and testing, and this may mask deeper issues.  It
 could result in a module which passes tests and installs, but which
 fails at run time.
@@ -1014,9 +1014,9 @@ This adds support for the new L<C<E<47>xx>|perlre/E<sol>x and E<sol>xx>
 regular expression pattern modifier, and a change to the L<S<C<use re
 'strict'>>|re/'strict' mode> experimental feature.  When S<C<re
 'strict'>> is enabled, a warning now will be generated for all
-unescaped uses of the two characters C<}> and C<]> in regular
+unescaped uses of the two characters C<"}"> and C<"]"> in regular
 expression patterns (outside bracketed character classes) that are taken
-literally.  This brings them more in line with the C<)> character which
+literally.  This brings them more in line with the C<")"> character which
 is always a metacharacter unless escaped.  Being a metacharacter only
 sometimes, depending on action at a distance, can lead to silently
 having the pattern mean something quite different than was intended,
@@ -1390,7 +1390,7 @@ Document C<@ISA>.  Was documented other places, not not in L<perlvar>.
 
 =item *
 
-Since C<.> is now removed from C<@INC> by default, C<do> will now trigger
+Since C<"."> is now removed from C<@INC> by default, C<do> will now trigger
 a warning recommending to fix the C<do> statement:
 
 L<do "%s" failed, '.' is no longer in @INC|perldiag/do "%s" failed, '.' is no longer in @INC; did you mean do ".E<sol>%s"?>
@@ -1499,7 +1499,7 @@ the C<encoding> pragma, is no longer supported as of Perl 5.26.
 
 =item *
 
-Since C<.> is now removed from C<@INC> by default, C<do> will now trigger
+Since C<"."> is now removed from C<@INC> by default, C<do> will now trigger
 a warning recommending to fix the C<do> statement:
 
 L<do "%s" failed, '.' is no longer in @INC|perldiag/do "%s" failed, '.' is no longer in @INC; did you mean do ".E<sol>%s"?>
@@ -2080,8 +2080,8 @@ VAX floating point formats are now supported on NetBSD.
 =item *
 
 The path separator for the C<PERL5LIB> and C<PERLLIB> environment entries is
-now a colon (C<:>) when running under a Unix shell.  There is no change when
-running under DCL (it's still C<|>).
+now a colon (C<":">) when running under a Unix shell.  There is no change when
+running under DCL (it's still C<"|">).
 
 =item *
 
@@ -2434,7 +2434,7 @@ is wellformed.  This resolves [perl #126310].
 
 =item *
 
-The range operator C<..> on strings now handles its arguments correctly when in
+The range operator C<".."> on strings now handles its arguments correctly when in
 the scope of the L<< C<unicode_strings>|feature/"The 'unicode_strings' feature" >>
 feature.  The previous behaviour was sufficiently unexpected that we believe no
 correct program could have made use of it.
@@ -2448,7 +2448,7 @@ the stack.  [perl #130262]
 
 =item *
 
-Using a large code point with the C<W> pack template character with
+Using a large code point with the C<"W"> pack template character with
 the current output position aligned at just the right point could
 cause a write a single zero byte immediately beyond the end of an
 allocated buffer.  [perl #129149]
@@ -2506,7 +2506,7 @@ in patterns exceeded a minimum length. [perl #130522].
 
 =item *
 
-Only warn once per literal about a misplaced C<_>. [perl #70878].
+Only warn once per literal about a misplaced C<"_">. [perl #70878].
 
 =item *
 
@@ -2612,7 +2612,7 @@ Fixed place where regex was not setting the syntax error correctly.
 
 =item *
 
-The C<&.> operator (and the C<&> operator, when it treats its arguments as
+The C<&.> operator (and the C<"&"> operator, when it treats its arguments as
 strings) were failing to append a trailing null byte if at least one string
 was marked as utf8 internally.  Many code paths (system calls, regexp
 compilation) still expect there to be a null byte in the string buffer
@@ -2639,7 +2639,7 @@ Check for null PL_curcop in IN_LC() [perl #129106]
 =item *
 
 Fixed the parser error handling for an 'C<:attr(foo>' that does not have
-an ending 'C<)>'.
+an ending 'C<")">'.
 
 =item *
 
@@ -2722,14 +2722,14 @@ A regression in 5.24 with C<tr/\N{U+...}/foo/> when the code point was between
 Use of a string delimiter whose code point is above 2**31 now works
 correctly on platforms that allow this.  Previously, certain characters,
 due to truncation, would be confused with other delimiter characters
-with special meaning (such as C<?> in C<m?...?>), resulting
+with special meaning (such as C<"?"> in C<m?...?>), resulting
 in inconsistent behaviour.  Note that this is non-portable,
 and is based on Perl's extension to UTF-8, and is probably not
 displayable nor enterable by any editor. [perl #128738]
 
 =item *
 
-C<@{x> followed by a newline where C<x> represents a control or non-ASCII
+C<@{x> followed by a newline where C<"x"> represents a control or non-ASCII
 character no longer produces a garbled syntax error message or a crash.
 [perl #128951]
 
