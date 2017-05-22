@@ -172,11 +172,6 @@ be called with ampersand syntax (C<&CORE::keys(\%hash>) and via reference
 (C<< my $k = \&CORE::keys; $k-E<gt>(\%hash) >>).  Previously they could only be
 used when inlined.
 
-=head2 for XS code, create a safer utf8_hop() called utf8_hop_safe()
-
-Unlike utf8_hop(), utf8_hop_safe() won't navigate before the beginning or after
-the end of the supplied buffer.
-
 =head1 Security
 
 =head2 Removal of the current directory (C<.>) from C<@INC>
@@ -2220,6 +2215,12 @@ code point (since the real value is not representable).
 
 =item *
 
+There is now a safer version of utf8_hop(), called utf8_hop_safe().
+Unlike utf8_hop(), utf8_hop_safe() won't navigate before the beginning or
+after the end of the supplied buffer.
+
+=item *
+
 The C<PADOFFSET> type has changed from being unsigned to signed, and
 several pad-related variables such as C<PL_padix> have changed from being
 of type C<I32> to type C<PADOFFSET>.
@@ -2686,12 +2687,6 @@ point literals will give a warning about "exponent underflow".
 
 A regression in 5.24 with C<tr/\N{U+...}/foo/> when the code point was between
 128 and 255 has been fixed. [perl #128734].
-
-=item *
-
-A regression from the previous development release, 5.23.3, where
-compiling a regular expression could crash the interpreter has been
-fixed. [perl #128686].
 
 =item *
 
