@@ -38,24 +38,13 @@ See L</Unescaped literal C<"{"> characters in regular expression patterns are no
 
 =head1 Core Enhancements
 
-=head2 New regular expression modifier C</xx>
+=head2 Lexical subroutines are no longer experimental
 
-Specifying two C<x> characters to modify a regular expression pattern
-does everything that a single one does, but additionally TAB and SPACE
-characters within a bracketed character class are generally ignored and
-can be added to improve readability, like
-S<C</[ ^ A-Z d-f p-x ]/xx>>.  Details are at
-L<perlre/E<sol>x and E<sol>xx>.
-
-=head2 New Hash Function For 64-bit Builds
-
-We have switched to a hybrid hash function to better balance
-performance for short and long keys.
-
-For short keys, 16 bytes and under, we use an optimised variant of
-One At A Time Hard, and for longer keys we use Siphash 1-3.  For very
-long keys this is a big improvement in performance.  For shorter keys
-there is a modest improvement.
+Using the C<lexical_subs> feature introduced in v5.18 no longer emits a warning.  Existing
+code that disables the C<experimental::lexical_subs> warning category
+that the feature previously used will continue to work.  The
+C<lexical_subs> feature has no effect; all Perl code can use lexical
+subroutines, regardless of what feature declarations are in scope.
 
 =head2 Indented Here-documents
 
@@ -89,6 +78,15 @@ For example:
 
 prints "Hello there\n" with no leading whitespace.
 
+=head2 New regular expression modifier C</xx>
+
+Specifying two C<x> characters to modify a regular expression pattern
+does everything that a single one does, but additionally TAB and SPACE
+characters within a bracketed character class are generally ignored and
+can be added to improve readability, like
+S<C</[ ^ A-Z d-f p-x ]/xx>>.  Details are at
+L<perlre/E<sol>x and E<sol>xx>.
+
 =head2 @{^CAPTURE}, %{^CAPTURE}, and %{^CAPTURE_ALL}
 
 C<@{^CAPTURE}> exposes the capture buffers of the last match as an
@@ -106,6 +104,20 @@ C<%{^CAPTURE_ALL}> is the equivalent to C<%-> (I<i.e.>, all named captures).
 Other than being more self documenting there is no difference between the
 two forms.
 
+=head2 Declaring a reference to a variable
+
+As an experimental feature, Perl now allows the referencing operator to come
+after L<C<my()>|perlfunc/my>, L<C<state()>|perlfunc/state>,
+L<C<our()>|perlfunc/our>, or L<C<local()>|perlfunc/local>.  This syntax must
+be enabled with C<use feature 'declared_refs'>.  It is experimental, and will
+warn by default unless C<no warnings 'experimental::refaliasing'> is in effect.
+It is intended mainly for use in assignments to references.  For example:
+
+    use experimental 'refaliasing', 'declared_refs';
+    my \$a = \$b;
+
+See L<perlref/Assigning to References> for more details.
+
 =head2 Unicode 9.0 is now supported
 
 A list of changes is at L<http://www.unicode.org/versions/Unicode9.0.0/>.
@@ -122,20 +134,6 @@ used in a given script, but there is a slight chance of breakage for
 programs that very specifically needed the old behavior.  The meaning of
 compound forms, like C<\p{sc=I<script>}> are unchanged.  See
 L<perlunicode/Scripts>.
-
-=head2 Declaring a reference to a variable
-
-As an experimental feature, Perl now allows the referencing operator to come
-after L<C<my()>|perlfunc/my>, L<C<state()>|perlfunc/state>,
-L<C<our()>|perlfunc/our>, or L<C<local()>|perlfunc/local>.  This syntax must
-be enabled with C<use feature 'declared_refs'>.  It is experimental, and will
-warn by default unless C<no warnings 'experimental::refaliasing'> is in effect.
-It is intended mainly for use in assignments to references.  For example:
-
-    use experimental 'refaliasing', 'declared_refs';
-    my \$a = \$b;
-
-See L<perlref/Assigning to References> for more details.
 
 =head2 Perl can now do default collation in UTF-8 locales on platforms
 that support it
@@ -155,14 +153,6 @@ ignored at the higher priority ones.  There are still some gotchas in
 some strings, though.  See
 L<perllocale/Collation of strings containing embedded C<NUL> characters>.
 
-=head2 Lexical subroutines are no longer experimental
-
-Using the C<lexical_subs> feature introduced in v5.18 no longer emits a warning.  Existing
-code that disables the C<experimental::lexical_subs> warning category
-that the feature previously used will continue to work.  The
-C<lexical_subs> feature has no effect; all Perl code can use lexical
-subroutines, regardless of what feature declarations are in scope.
-
 =head2 C<CORE> subroutines for hash and array functions callable via
 reference
 
@@ -171,6 +161,16 @@ C<values>, C<push>, C<pop>, C<shift>, C<unshift> and C<splice>--, can now
 be called with ampersand syntax (C<&CORE::keys(\%hash>) and via reference
 (C<< my $k = \&CORE::keys; $k-E<gt>(\%hash) >>).  Previously they could only be
 used when inlined.
+
+=head2 New Hash Function For 64-bit Builds
+
+We have switched to a hybrid hash function to better balance
+performance for short and long keys.
+
+For short keys, 16 bytes and under, we use an optimised variant of
+One At A Time Hard, and for longer keys we use Siphash 1-3.  For very
+long keys this is a big improvement in performance.  For shorter keys
+there is a modest improvement.
 
 =head1 Security
 
