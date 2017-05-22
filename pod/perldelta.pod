@@ -26,8 +26,8 @@ for the full details.
 
 =item * C<do> may now warn
 
-C<do> now gives a mandatory warning when it fails to load a file which it
-would have loaded had C<.> been in C<@INC>.
+C<do> now gives a deprecation warning when it fails to load a file which
+it would have loaded had C<.> been in C<@INC>.
 
 =item * In regular expression patterns, a literal left brace C<"{">
 should be escaped
@@ -496,12 +496,8 @@ A hash in boolean context is now sometimes faster, I<e.g.>
 
     if (!%h) { ... }
 
-This was already special-cased, but some cases were missed, and even the
-ones which weren't have been improved.
-
-=item *
-
-Several other ops may now also be faster in boolean context.
+This was already special-cased, but some cases were missed (such as
+C<grep %$_, @AoH>, and even the ones which weren't have been improved.
 
 =item * New Faster Hash Function on 64 bit builds
 
@@ -545,26 +541,18 @@ Enhancements in Regex concat COW implementation.
 
 =item *
 
-Clearing hashes and arrays has been made slightly faster.  Now code
-like this is around 5% faster:
+Better optimise array and hash assignment: where an array or hash appears
+in the LHS of a list assignment, such as C<(..., @a) = (...);>, it's
+likely to be considerably faster, especially if it involves emptying the
+array/hash. For example this code runs about 1/3 faster compared to
+5.24.0:
 
     my @a;
-    for my $i (1..3_000_000) {
+    for my $i (1..10_000_000) {
         @a = (1,2,3);
         @a = ();
     }
 
-and this code around 3% faster:
-
-    my %h;
-    for my $i (1..3_000_000) {
-        %h = qw(a 1 b 2);
-        %h = ();
-    }
-
-=item *
-
-Better optimise array and hash assignment
 
 =item *
 
