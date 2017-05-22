@@ -2914,15 +2914,11 @@ now they are C<(11,1,1)>.
 
 =item *
 
-[perl 129903]
-
-The basic problem is that code like this: C</(?{ s!!! })/> can trigger infinite
-recursion on the C stack (not the normal perl stack) when the last successful
-pattern in scope is itself.  Since the C stack overflows this manifests as an
-untrappable error/segfault, which then kills perl.
-
-We avoid the segfault by simply forbidding the use of the empty pattern when it
-would resolve to the currently executing pattern.
+Code like this: C</(?{ s!!! })/> can trigger infinite recursion on the C
+stack (not the normal perl stack) when the last successful pattern in
+scope is itself.  We avoid the segfault by simply forbidding the use of
+the empty pattern when it would resolve to the currently executing
+pattern.  [perl 129903]
 
 =item *
 
