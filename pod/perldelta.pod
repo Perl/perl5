@@ -1164,7 +1164,7 @@ work after an upgrade of their perl.
 
 We have attempted to update the documentation to reflect the changes
 listed in this document.  If you find any we have missed, send email to
-L<mailto:perlbug@perl.org>.
+L<perlbug@perl.org|mailto:perlbug@perl.org>.
 
 Additionally all references to Usenet have been removed, and the
 following selected changes have been made:
@@ -2220,54 +2220,54 @@ Similarly, macros like C<toLOWER_utf8> on malformed UTF-8 now die.
 Several new macros for analysing the validity of utf8 sequences. These
 are:
 
-C<L<perlapi/UTF8_GOT_ABOVE_31_BIT>>
-C<L<perlapi/UTF8_GOT_CONTINUATION>>
-C<L<perlapi/UTF8_GOT_EMPTY>>
-C<L<perlapi/UTF8_GOT_LONG>>
-C<L<perlapi/UTF8_GOT_NONCHAR>>
-C<L<perlapi/UTF8_GOT_NON_CONTINUATION>>
-C<L<perlapi/UTF8_GOT_OVERFLOW>>
-C<L<perlapi/UTF8_GOT_SHORT>>
-C<L<perlapi/UTF8_GOT_SUPER>>
-C<L<perlapi/UTF8_GOT_SURROGATE>>
-C<L<perlapi/UTF8_IS_INVARIANT>>
-C<L<perlapi/UTF8_IS_NONCHAR>>
-C<L<perlapi/UTF8_IS_SUPER>>
-C<L<perlapi/UTF8_IS_SURROGATE>>
-C<L<perlapi/UVCHR_IS_INVARIANT>>
-C<L<perlapi/isUTF8_CHAR_flags>>
-C<L<perlapi/isSTRICT_UTF8_CHAR>>
-C<L<perlapi/isC9_STRICT_UTF8_CHAR>>
+L<C<UTF8_GOT_ABOVE_31_BIT>|perlapi/UTF8_GOT_ABOVE_31_BIT>
+L<C<UTF8_GOT_CONTINUATION>|perlapi/UTF8_GOT_CONTINUATION>
+L<C<UTF8_GOT_EMPTY>|perlapi/UTF8_GOT_EMPTY>
+L<C<UTF8_GOT_LONG>|perlapi/UTF8_GOT_LONG>
+L<C<UTF8_GOT_NONCHAR>|perlapi/UTF8_GOT_NONCHAR>
+L<C<UTF8_GOT_NON_CONTINUATION>|perlapi/UTF8_GOT_NON_CONTINUATION>
+L<C<UTF8_GOT_OVERFLOW>|perlapi/UTF8_GOT_OVERFLOW>
+L<C<UTF8_GOT_SHORT>|perlapi/UTF8_GOT_SHORT>
+L<C<UTF8_GOT_SUPER>|perlapi/UTF8_GOT_SUPER>
+L<C<UTF8_GOT_SURROGATE>|perlapi/UTF8_GOT_SURROGATE>
+L<C<UTF8_IS_INVARIANT>|perlapi/UTF8_IS_INVARIANT>
+L<C<UTF8_IS_NONCHAR>|perlapi/UTF8_IS_NONCHAR>
+L<C<UTF8_IS_SUPER>|perlapi/UTF8_IS_SUPER>
+L<C<UTF8_IS_SURROGATE>|perlapi/UTF8_IS_SURROGATE>
+L<C<UVCHR_IS_INVARIANT>|perlapi/UVCHR_IS_INVARIANT>
+L<C<isUTF8_CHAR_flags>|perlapi/isUTF8_CHAR_flags>
+L<C<isSTRICT_UTF8_CHAR>|perlapi/isSTRICT_UTF8_CHAR>
+L<C<isC9_STRICT_UTF8_CHAR>|perlapi/isC9_STRICT_UTF8_CHAR>
 
 =item *
 
 Functions that are all extensions of the C<is_utf8_string_*()> functions,
 that apply various restrictions to the UTF-8 recognized as valid:
 
-C<L<perlapi/is_strict_utf8_string>>,
-C<L<perlapi/is_strict_utf8_string_loc>>,
-C<L<perlapi/is_strict_utf8_string_loclen>>,
+L<C<is_strict_utf8_string>|perlapi/is_strict_utf8_string>,
+L<C<is_strict_utf8_string_loc>|perlapi/is_strict_utf8_string_loc>,
+L<C<is_strict_utf8_string_loclen>|perlapi/is_strict_utf8_string_loclen>,
 
-C<L<perlapi/is_c9strict_utf8_string>>,
-C<L<perlapi/is_c9strict_utf8_string_loc>>,
-C<L<perlapi/is_c9strict_utf8_string_loclen>>,
+L<C<is_c9strict_utf8_string>|perlapi/is_c9strict_utf8_string>,
+L<C<is_c9strict_utf8_string_loc>|perlapi/is_c9strict_utf8_string_loc>,
+L<C<is_c9strict_utf8_string_loclen>|perlapi/is_c9strict_utf8_string_loclen>,
 
-C<L<perlapi/is_utf8_string_flags>>,
-C<L<perlapi/is_utf8_string_loc_flags>>,
-C<L<perlapi/is_utf8_string_loclen_flags>>,
+L<C<is_utf8_string_flags>|perlapi/is_utf8_string_flags>,
+L<C<is_utf8_string_loc_flags>|perlapi/is_utf8_string_loc_flags>,
+L<C<is_utf8_string_loclen_flags>|perlapi/is_utf8_string_loclen_flags>,
 
-C<L<perlapi/is_utf8_fixed_width_buf_flags>>,
-C<L<perlapi/is_utf8_fixed_width_buf_loc_flags>>,
-C<L<perlapi/is_utf8_fixed_width_buf_loclen_flags>>.
+L<C<is_utf8_fixed_width_buf_flags>|perlapi/is_utf8_fixed_width_buf_flags>,
+L<C<is_utf8_fixed_width_buf_loc_flags>|perlapi/is_utf8_fixed_width_buf_loc_flags>,
+L<C<is_utf8_fixed_width_buf_loclen_flags>|perlapi/is_utf8_fixed_width_buf_loclen_flags>.
 
-C<L<perlapi/is_utf8_invariant_string>>.
-C<L<perlapi/is_utf8_valid_partial_char>>.
-C<L<perlapi/is_utf8_valid_partial_char_flags>>.
+L<C<is_utf8_invariant_string>|perlapi/is_utf8_invariant_string>.
+L<C<is_utf8_valid_partial_char>|perlapi/is_utf8_valid_partial_char>.
+L<C<is_utf8_valid_partial_char_flags>|perlapi/is_utf8_valid_partial_char_flags>.
 
 =item *
 
-The  functions C<L<perlapi/utf8n_to_uvchr>> and its derivatives have had
-several changes of behaviour.
+The  functions L<C<utf8n_to_uvchr>|perlapi/utf8n_to_uvchr> and its
+derivatives have had several changes of behaviour.
 
 Calling them, while passing a string length of 0 is now asserted against
 in DEBUGGING builds, and otherwise returns the Unicode REPLACEMENT
@@ -2302,7 +2302,8 @@ the next character is well-formed.
 
 =item *
 
-A new function, C<L<perlapi/utf8n_to_uvchr_error>>, has been added for
+A new function, L<C<utf8n_to_uvchr_error>|perlapi/utf8n_to_uvchr_error>,
+has been added for
 use by modules that need to know the details of UTF-8 malformations
 beyond pass/fail.  Previously, the only ways to know why a sequence was
 ill-formed was to capture and parse the generated diagnostics, or to do
@@ -2324,8 +2325,8 @@ you wish to travel.
 
 Two new macros which return useful utf8 byte sequences:
 
-C<L<perlapi/BOM_UTF8>>
-C<L<perlapi/REPLACEMENT_CHARACTER_UTF8>>
+L<C<BOM_UTF8>|perlapi/BOM_UTF8>
+L<C<REPLACEMENT_CHARACTER_UTF8>|perlapi/REPLACEMENT_CHARACTER_UTF8>
 
 =back
 
