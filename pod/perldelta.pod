@@ -406,6 +406,8 @@ warning is raised about them, and there are no current plans to change this.
 But it is always correct to escape C<"{">, and the simple rule to
 remember is to always do so.
 
+See L<Unescaped left brace in regex is illegal here|perldiag/Unescaped left brace in regex is illegal here in regex; marked by S<E<lt>-- HERE> in mE<sol>%sE<sol>>.
+
 =head2 C<scalar(%hash)> return signature changed
 
 The value returned for C<scalar(%hash)> will no longer show information about
