@@ -21,7 +21,7 @@ For security reasons, the current directory (C<".">) is no longer included
 by default at the end of the module search path (C<@INC>). This may have
 widespread implications for the building, testing and installing of
 modules, and for the execution of scripts.  See the section
-L<< Removal of the current directory (C<.>) from C<@INC> >>
+L<< Removal of the current directory (C<".">) from C<@INC> >>
 for the full details.
 
 =item * C<do> may now warn
