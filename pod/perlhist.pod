@@ -613,6 +613,7 @@ the strings?).
  Sawyer X  5.25.12      2017-Apr-20
 
  Sawyer X  5.26.0-RC1   2017-May-11     The 5.26 maintenance track
+ Sawyer X  5.26.0-RC2   2017-May-22
 
 =head2 SELECTED RELEASE SIZES
 
