@@ -1265,6 +1265,8 @@ hunt around in the parser for how a given operator is handled.
 
 =over 4
 
+=item *
+
 Some locales aren't compatible with Perl.  Note that these can cause
 core dumps.
 
@@ -1442,7 +1444,7 @@ Perl yourself.  The #! line at the top of your file could look like:
 
 =item *
 
-L<Unescaped left brace in regex is illegal here|perldiag/Unescaped left brace in regex is illegal here in regex; marked by S<E<lt>-- HERE> in m/%s/>
+L<Unescaped left brace in regex is illegal here|perldiag/Unescaped left brace in regex is illegal here in regex; marked by S<E<lt>-- HERE> in mE<sol>%sE<sol>>
 
 Unescaped left braces are now illegal in some contexts in regular expression
 patterns.  In other contexts, they are still just deprecated; they will
