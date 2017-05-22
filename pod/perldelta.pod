@@ -2926,24 +2926,24 @@ would resolve to the currently executing pattern.
 
 =item *
 
-[perl 128997] Avoid reading beyond the end of the line buffer when there's a
-short UTF-8 character at the end.
+Avoid reading beyond the end of the line buffer when there's a
+short UTF-8 character at the end.  [perl 128997]
 
 =item *
 
-[perl 129950] fix firstchar bitmap under utf8 with prefix optimisation.
+Fix firstchar bitmap under utf8 with prefix optimisation. [perl 129950]
 
 =item *
 
-[perl 129954] F<Carp/t/arg_string.t>: be liberal in f/p formats.
+Make F<Carp/t/arg_string.t>: be liberal in C<f>/C<p> formats. [perl 129954]
 
 =item *
 
-[perl 129928] make C<do "a\0b"> fail silently instead of throwing.
+Make C<do "a\0b"> fail silently instead of throwing an error. [perl 129928]
 
 =item *
 
-[perl 129130] make C<chdir> allocate the stack it needs.
+Make C<chdir> allocate the stack it needs. [perl 129130]
 
 =back
 
