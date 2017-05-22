@@ -354,7 +354,7 @@ On Unix systems, Perl treats any relative paths in the PATH environment
 variable as tainted when starting a new process.  Previously, it was
 allowing a backslash to escape a colon (unlike the OS), consequently
 allowing relative paths to be considered safe if the PATH was set to
-something like C</\:.>.  The check has been fixed to treat C<.> as tainted
+something like C</\:.>.  The check has been fixed to treat C<"."> as tainted
 in that example.
 
 =head2 C<-Di> switch is now required for PerlIO debugging output
