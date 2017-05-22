@@ -2299,10 +2299,9 @@ error, and it advances the parse pointer to beyond the UTF-8 in
 question, but it returns the Unicode REPLACEMENT CHARACTER as the value
 of the code point (since the real value is not representable).
 
-C<utf8n_to_uvchr> has been changed to not
-abandon searching for other malformations when the first one is
-encountered.  A call to it thus can generate multiple diagnostics,
-instead of just one.
+They no longer abandon searching for other malformations when the first
+one is encountered.  A call to one of these functions thus can generate
+multiple diagnostics, instead of just one.
 
 =item *
 
