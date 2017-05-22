@@ -1276,7 +1276,7 @@ core dumps.
 
 =back
 
-=head3 L<perlmodinstall>
+=head3 L<perlmod>
 
 =over 4
 
