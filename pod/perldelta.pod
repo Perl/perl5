@@ -49,7 +49,7 @@ subroutines, regardless of what feature declarations are in scope.
 =head2 Indented Here-documents
 
 This adds a new modifier C<"~"> to here-docs that tells the parser
-that it should look for /^\s*$DELIM\n/ as the closing delimiter.
+that it should look for C</^\s*$DELIM\n/> as the closing delimiter.
 
 These syntaxes are all supported:
 
@@ -87,7 +87,7 @@ can be added to improve readability, like
 S<C</[ ^ A-Z d-f p-x ]/xx>>.  Details are at
 L<perlre/E<sol>x and E<sol>xx>.
 
-=head2 @{^CAPTURE}, %{^CAPTURE}, and %{^CAPTURE_ALL}
+=head2 C<@{^CAPTURE}>, C<%{^CAPTURE}>, and C<%{^CAPTURE_ALL}>
 
 C<@{^CAPTURE}> exposes the capture buffers of the last match as an
 array.  So C<$1> is C<${^CAPTURE}[0]>.  This is a more efficient equivalent
@@ -436,7 +436,7 @@ you still need to write your source code in encodings other than UTF-8, use a
 source filter such as L<Filter::Encoding> on CPAN or L<encoding>'s C<Filter>
 option.
 
-=head2 POSIX::tmpnam() has been removed
+=head2 C<POSIX::tmpnam()> has been removed
 
 The fundamentally unsafe C<tmpnam()> interface was deprecated in
 Perl 5.22 and has now been removed.  In its place you can use,
@@ -510,7 +510,7 @@ searches for the next newline character.
 
 =item *
 
-Reduce cost of SvVALID().
+Reduce cost of C<SvVALID()>.
 
 =item *
 
@@ -531,7 +531,7 @@ Reduce the number of odd special cases for the C<SvSCREAM> flag.
 
 =item *
 
-Avoid sv_catpvn() in do_vop() when unneeded.
+Avoid C<sv_catpvn()> in C<do_vop()> when unneeded.
 
 =item *
 
@@ -1302,7 +1302,7 @@ Added a section on calling methods using their fully qualified names.
 
 =item *
 
-Do not discourage manual @ISA.
+Do not discourage manual C<@ISA>.
 
 =back
 
@@ -1537,12 +1537,12 @@ deprecated. This will not be allowed in Perl 5.32
 
 =item *
 
-Deprecated use of my() in false conditional. This will be a fatal error
+Deprecated use of C<my()> in false conditional. This will be a fatal error
 in Perl 5.30
 
 =item *
 
-dump() better written as CORE::dump(). dump() will no longer be available
+C<dump()> better written as C<CORE::dump()>. C<dump()> will no longer be available
 in Perl 5.30
 
 =item *
@@ -1577,7 +1577,7 @@ error in Perl 5.28
 
 =item *
 
-Setting $/ to a reference to %s as a form of slurp is deprecated,
+Setting C<$/> to a reference to %s as a form of slurp is deprecated,
 treating as undef. This will be fatal in Perl 5.28
 
 =item *
@@ -1615,18 +1615,18 @@ is deprecated. This will be a fatal error in Perl 5.28
 
 =item *
 
-Improve error for missing tie() package/method. This brings the error messages
+Improve error for missing C<tie()> package/method. This brings the error messages
 in line with the ones used for normal method calls, despite not using
 call_method().
 
 =item *
 
-Make the sysread()/syswrite/() etc :utf8 handle warnings default. These
-warnings were under 'deprecated' previously.
+Make the C<sysread()>/C<syswrite()> I<etc.>, C<:utf8> handle warnings
+XXX default. These warnings were under 'deprecated' previously.
 
 =item *
 
-'do' errors now refer to 'do' (not 'require').
+C<do> errors now refer to C<do> (not C<require>).
 
 =item *
 
@@ -1815,13 +1815,13 @@ fail.
 
 =item *
 
-You can now disable perl's use of the PERL_HASH_SEED and
-PERL_PERTURB_KEYS environment variables by configuring perl with
+You can now disable perl's use of the C<PERL_HASH_SEED> and
+C<PERL_PERTURB_KEYS> environment variables by configuring perl with
 C<-Accflags=NO_PERL_HASH_ENV>.
 
 =item *
 
-You can now disable perl's use of the PERL_HASH_SEED_DEBUG environment
+You can now disable perl's use of the C<PERL_HASH_SEED_DEBUG> environment
 variable by configuring perl with
 C<-Accflags=-DNO_PERL_HASH_SEED_DEBUG>.
 
@@ -1852,11 +1852,11 @@ this includes the following build options:
 Remove "Warning: perl appears in your path"
 
 This install warning is more or less obsolete, since most platforms already
-*will* have a /usr/bin/perl or similar provided by the OS.
+B<will> have a F</usr/bin/perl> or similar provided by the OS.
 
 =item *
 
-Reduce verbosity of "make install.man"
+Reduce verbosity of C<make install.man>
 
 Previously, two progress messages were emitted for each manpage: one by
 installman itself, and one by the function in install_lib.pl that it calls to
@@ -1865,7 +1865,7 @@ over 750 lines of unhelpful output.
 
 =item *
 
-Cleanup for clang -Weverything support. [perl 129961]
+Cleanup for C<clang -Weverything> support. [perl 129961]
 
 =item *
 
@@ -1888,25 +1888,26 @@ bit-rotted.
 =item *
 
 A probe for C<gai_strerror> was added to F<Configure> that checks if the
-the gai_strerror() routine is available and can be used to
-translate error codes returned by getaddrinfo() into human
+the C<gai_strerror()> routine is available and can be used to
+translate error codes returned by C<getaddrinfo()> into human
 readable strings.
 
 =item *
 
-F<Configure> now aborts if both "-Duselongdouble" and "-Dusequadmath" are
+F<Configure> now aborts if both C<-Duselongdouble> and C<-Dusequadmath> are
 requested.
 L<[perl #126203]|https://rt.perl.org/Public/Bug/Display.html?id=126203>
 
 =item *
 
-Fixed a bug in which F<Configure> could append "-quadmath" to the archname even
+Fixed a bug in which F<Configure> could append C<-quadmath> to the archname even
 if it was already present.
 L<[perl #128538]|https://rt.perl.org/Public/Bug/Display.html?id=128538>
 
 =item *
 
-Clang builds with "-DPERL_GLOBAL_STRUCT" or "-DPERL_GLOBAL_STRUCT_PRIVATE" have
+Clang builds with C<-DPERL_GLOBAL_STRUCT> or
+C<-DPERL_GLOBAL_STRUCT_PRIVATE> have
 been fixed (by disabling Thread Safety Analysis for these configurations).
 
 =item *
@@ -2061,8 +2062,8 @@ Account for lack of C<inf>, C<nan>, and C<-0.0> support.
 
 =item Darwin
 
-don't treat -Dprefix=/usr as special, instead require an extra option
--Ddarwin_distribution to produce the same results.
+don't treat C<-Dprefix=/usr> as special, instead require an extra option
+C<-Ddarwin_distribution> to produce the same results.
 
 =item POSIX
 
@@ -2070,12 +2071,12 @@ Finish removing POSIX deprecated functions.
 
 =item OS X
 
-OS X El Capitan doesn't implement the clock_gettime() or clock_getres() APIs;
-emulate them as necessary.
+OS X El Capitan doesn't implement the C<clock_gettime()> or
+C<clock_getres()> APIs; emulate them as necessary.
 
 =item macOS
 
-Deprecated syscall(2) on macOS 10.12.
+Deprecated C<syscall(2)> on macOS 10.12.
 
 =item EBCDIC
 
@@ -2122,7 +2123,8 @@ Support for compiling perl on Windows using Microsoft Visual Studio 2015
 (containing Visual C++ 14.0) has been added.
 
 This version of VC++ includes a completely rewritten C run-time library, some
-of the changes in which mean that work done to resolve a socket close() bug in
+of the changes in which mean that work done to resolve a socket
+C<close()> bug in
 perl #120091 and perl #118059 is not workable in its current state with this
 version of VC++.  Therefore, we have effectively reverted that bug fix for
 VS2015 onwards on the basis that being able to build with VS2015 onwards is
@@ -2170,7 +2172,7 @@ Make sure this is accounted for.
 
 =item FreeBSD
 
-t/uni/overload.t: Skip hanging test on FreeBSD.
+F<t/uni/overload.t>: Skip hanging test on FreeBSD.
 
 =back
 
@@ -2241,7 +2243,7 @@ L<C<isC9_STRICT_UTF8_CHAR>|perlapi/isC9_STRICT_UTF8_CHAR>
 
 =item *
 
-Functions that are all extensions of the C<is_utf8_string_*()> functions,
+Functions that are all extensions of the C<is_utf8_string_I<*>()> functions,
 that apply various restrictions to the UTF-8 recognized as valid:
 
 L<C<is_strict_utf8_string>|perlapi/is_strict_utf8_string>,
@@ -2423,19 +2425,20 @@ pointers to the old buffer.  [perl #129190]
 
 =item *
 
-Supplying a glob as the format argument to L<perlfunc/formline> would
+Supplying a glob as the format argument to
+L<C<formline>|perlfunc/formline> would
 cause an assertion failure.  [perl #130722]
 
 =item *
 
 Code like C< $value1 =~ qr/.../ ~~ $value2 > would have the match
-converted into a qr// operator, leaving extra elements on the stack to
+converted into a C<qr//> operator, leaving extra elements on the stack to
 confuse any surrounding expression.  [perl #130705]
 
 =item *
 
 Since v5.24 in some obscure cases, a regex which included code blocks
-from multiple sources (I<e.g.>, via embedded via qr// objects) could end up
+from multiple sources (I<e.g.>, via embedded via C<qr//> objects) could end up
 with the wrong current pad and crash or give weird results. [perl #129881]
 
 =item *
@@ -2463,7 +2466,7 @@ correct program could have made use of it.
 
 =item *
 
-The S<split> operator did not ensure enough space was allocated for
+The C<split> operator did not ensure enough space was allocated for
 its return value in scalar context.  It could then write a single
 pointer immediately beyond the end of the memory block allocated for
 the stack.  [perl #130262]
@@ -2488,7 +2491,7 @@ correctly with 64-bit integers, and non-long doubles. [perl #130335]
 
 =item *
 
-Fix issues with /(?{ ... E<lt>E<lt>EOF })/ that broke Method-Signatures. [perl #130398]
+Fix issues with C</(?{ ... E<lt>E<lt>EOF })/> that broke Method-Signatures. [perl #130398]
 
 =item *
 
@@ -2519,7 +2522,7 @@ Fix assertion failure for C<{}-E<gt>$x> when C<$x> isn't defined. [perl #130496]
 
 =item *
 
-DragonFly BSD now has support for setproctitle(). [perl #130068].
+DragonFly BSD now has support for C<setproctitle()>. [perl #130068].
 
 =item *
 
@@ -2567,7 +2570,7 @@ interpreted as requesting the C<-u> option.  This has been fixed. [perl
 
 The regex engine was previously producing incorrect results in some rare
 situations when backtracking past a trie that matches only one thing; this
-showed up as capture buffers (C<$1>, C<$2>, etc) erroneously containing data
+showed up as capture buffers (C<$1>, C<$2>, I<etc.>) erroneously containing data
 from regex execution paths that weren't actually executed for the final
 match.  [perl #129897]
 
@@ -2670,8 +2673,8 @@ actually fixed two bugs, [perl #129064] and [perl #129176].
 
 =item *
 
-[perl #129267] rework gv_fetchmethod_pvn_flags separator parsing to
-prevent possible string overrun with invalid len in gv.c
+[perl #129267] rework C<gv_fetchmethod_pvn_flags> separator parsing to
+prevent possible string overrun with invalid len in F<gv.c>
 
 =item *
 
@@ -2842,7 +2845,7 @@ crash if the left-hand side was an array or hash.  [perl #128204]
 =item *
 
 C<require> followed by a single colon (as in C<foo() ? require : ...> is
-now parsed correctly as C<require> with implicit $_, rather than
+now parsed correctly as C<require> with implicit C<$_>, rather than
 C<require "">.  [perl #128307]
 
 =item *
@@ -2880,7 +2883,7 @@ longer causes crashes. [perl #128086]
 
 =item *
 
-Handle SvIMMORTALs in LHS of list assign. [perl #129991]
+Handle C<SvIMMORTALs> in LHS of list assign. [perl #129991]
 
 =item *
 
@@ -2913,7 +2916,7 @@ now they are C<(11,1,1)>.
 
 [perl 129903]
 
-The basic problem is that code like this: /(?{ s!!! })/ can trigger infinite
+The basic problem is that code like this: C</(?{ s!!! })/> can trigger infinite
 recursion on the C stack (not the normal perl stack) when the last successful
 pattern in scope is itself.  Since the C stack overflows this manifests as an
 untrappable error/segfault, which then kills perl.
@@ -2932,15 +2935,15 @@ short UTF-8 character at the end.
 
 =item *
 
-[perl 129954] Carp/t/arg_string.t: be liberal in f/p formats.
+[perl 129954] F<Carp/t/arg_string.t>: be liberal in f/p formats.
 
 =item *
 
-[perl 129928] make do "a\0b" fail silently instead of throwing.
+[perl 129928] make C<do "a\0b"> fail silently instead of throwing.
 
 =item *
 
-[perl 129130] make chdir allocate the stack it needs.
+[perl 129130] make C<chdir> allocate the stack it needs.
 
 =back
 
