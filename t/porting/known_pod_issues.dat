@@ -182,6 +182,7 @@ Math::Random::MT::Perl
 Math::Random::Secure
 Math::TrulyRandom
 md5sum(1)
+Method::Signatures
 mmap(2)
 Module::Build
 Module::CPANTS::Analyse
