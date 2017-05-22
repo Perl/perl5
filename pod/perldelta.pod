@@ -543,7 +543,7 @@ Better optimise array and hash assignment: where an array or hash appears
 in the LHS of a list assignment, such as C<(..., @a) = (...);>, it's
 likely to be considerably faster, especially if it involves emptying the
 array/hash. For example this code runs about 1/3 faster compared to
-5.24.0:
+Perl 5.24.0:
 
     my @a;
     for my $i (1..10_000_000) {
@@ -1199,7 +1199,7 @@ the variables C<$a> and C<$b>.
 =item *
 
 In L<C<split()>|perlfunc/split> added a caution about its use in Perls
-before 5.11, and noted that certain pattern modifiers are legal in it.
+before v5.11, and noted that certain pattern modifiers are legal in it.
 
 =item *
 
@@ -1832,7 +1832,7 @@ and C<Inf> to make builds more reproducible. [perl #130133]
 
 =item *
 
-Since 5.18 for testing purposes we have included support for
+Since v5.18 for testing purposes we have included support for
 building perl with a variety of non-standard, and non-recommended
 hash functions.  Since we do not recommend the use of these functions
 we have removed them and their corresponding build options.  Specifically
@@ -2433,7 +2433,7 @@ confuse any surrounding expression.  [perl #130705]
 
 =item *
 
-Since 5.24 in some obscure cases, a regex which included code blocks
+Since v5.24 in some obscure cases, a regex which included code blocks
 from multiple sources (I<e.g.>, via embedded via qr// objects) could end up
 with the wrong current pad and crash or give weird results. [perl #129881]
 
@@ -2709,7 +2709,7 @@ C<@-> and C<@+> were already exempt from the warning.)
 =item *
 
 C<gethostent> and similar functions now perform a null check internally, to
-avoid crashing with torsocks.  This was a regression from 5.22.  [perl
+avoid crashing with torsocks.  This was a regression from v5.22.  [perl
 #128740]
 
 =item *
@@ -2721,7 +2721,7 @@ memory if the typeglob in question has never been accessed before.
 
 Mentioning the same constant twice in a row (which is a syntax error) no
 longer fails an assertion under debugging builds.  This was a regression
-from 5.20.  [perl #126482]
+from v5.20.  [perl #126482]
 
 =item *
 
@@ -2735,7 +2735,7 @@ point literals will give a warning about "exponent underflow".
 
 =item *
 
-A regression in 5.24 with C<tr/\N{U+...}/foo/> when the code point was between
+A regression in v5.24 with C<tr/\N{U+...}/foo/> when the code point was between
 128 and 255 has been fixed. [perl #128734].
 
 =item *
@@ -2960,7 +2960,7 @@ advice if needed.  Below is a subset of these modules:
 
 =item * L<Coro>
 
-L<Coro> and perl 5.22 were already incompatible due to a change in the perl,
+L<Coro> and Perl 5.22 were already incompatible due to a change in the perl,
 and the reworking on the perl context stack creates a further incompatibility.
 perl5-porters has L<discussed the issue on the mailing
 list|http://www.nntp.perl.org/group/perl.perl5.porters/2016/05/msg236174.html>.
