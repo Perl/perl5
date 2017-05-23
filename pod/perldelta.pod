@@ -1562,12 +1562,6 @@ C<@INC> to avoid confusion.
 
 =item *
 
-Details as to the exact problem have been added to the diagnostics that
-occur when malformed UTF-8 is encountered when trying to convert to a
-code point.
-
-=item *
-
 L<Attribute "locked" is deprecated, and will disappear in Perl 5.28
 |perldiag/Attribute "locked" is deprecated, and will disappear in Perl 5.28>
 
@@ -1623,6 +1617,14 @@ warnings should be.
 
 L<C<$*> is no longer supported. Its use will be fatal in Perl 5.30
 |perldiag/C<$*> is no longer supported. Its use will be fatal in Perl 5.30>
+
+=item *
+
+L<Malformed UTF-8 character%s
+|perldiag/Malformed UTF-8 character%s>
+
+Details as to the exact problem have been added at the end of this
+message
 
 =item *
 
