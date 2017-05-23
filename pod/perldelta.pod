@@ -1542,96 +1542,105 @@ code point.
 
 =item *
 
-Attribute "locked" is deprecated, and will disappear in Perl 5.28
+L<Attribute "locked" is deprecated, and will disappear in Perl 5.28
+|perldiag/Attribute "locked" is deprecated, and will disappear in Perl 5.28>
 
 =item *
 
-Attribute "unique" is deprecated, and will disappear in Perl 5.28
+L<Attribute "unique" is deprecated, and will disappear in Perl 5.28
+|perldiag/Attribute "unique" is deprecated, and will disappear in Perl 5.28>
 
 =item *
 
-Constants from lexical variables potentially modified elsewhere are
-deprecated. This will not be allowed in Perl 5.32
+L<Constants from lexical variables potentially modified elsewhere are deprecated. This will not be allowed in Perl 5.32
+|perldiag/Constants from lexical variables potentially modified elsewhere are deprecated. This will not be allowed in Perl 5.32>
 
 =item *
 
-Deprecated use of C<my()> in false conditional. This will be a fatal error
-in Perl 5.30
+L<Deprecated use of C<my()> in false conditional. This will be a fatal error in Perl 5.30
+|perldiag/Deprecated use of C<my()> in false conditional. This will be a fatal error in Perl 5.30>
 
 =item *
 
-C<dump()> better written as C<CORE::dump()>. C<dump()> will no longer be available
-in Perl 5.30
+L<C<dump()> better written as C<CORE::dump()>. C<dump()> will no longer be available in Perl 5.30
+|perldiag/C<dump()> better written as C<CORE::dump()>. C<dump()> will no longer be available in Perl 5.30>
 
 =item *
 
-C<${^ENCODING}> is no longer supported. Its use will be fatal in Perl 5.28
+L<C<${^ENCODING}> is no longer supported. Its use will be fatal in Perl 5.28
+|perldiag/C<${^ENCODING}> is no longer supported. Its use will be fatal in Perl 5.28>
 
 =item *
 
-Experimental %s on scalar is now forbidden
+L<Experimental %s on scalar is now forbidden This message now is followed by more helpful text. [perl #127976]
+|perldiag/Experimental %s on scalar is now forbidden>.
 This message now is followed by more helpful text. [perl #127976]
 
 =item *
 
-C<File::Glob::glob()> will disappear in perl 5.30. Use C<File::Glob::bsd_glob()>
-instead.
+L<C<File::Glob::glob()> will disappear in perl 5.30. Use C<File::Glob::bsd_glob()> instead.
+|perldiag/C<File::Glob::glob()> will disappear in perl 5.30. Use C<File::Glob::bsd_glob()> instead.>
 
 =item *
 
-%s() is deprecated on C<:utf8> handles. This will be a fatal error in Perl 5.30
+L<%s() is deprecated on C<:utf8> handles. This will be a fatal error in Perl 5.30
+|perldiag/%s() is deprecated on C<:utf8> handles. This will be a fatal error in Perl 5.30>.
 "%s" is one of C<sysread>, C<recv>, C<syswrite>, or C<send>.
 
 =item *
 
-C<$*> is no longer supported. Its use will be fatal in Perl 5.30
+L<C<$*> is no longer supported. Its use will be fatal in Perl 5.30
+|perldiag/C<$*> is no longer supported. Its use will be fatal in Perl 5.30>
 
 =item *
 
-Opening dirhandle %s also as a file. This will be a fatal error in Perl 5.28
+L<Opening dirhandle %s also as a file. This will be a fatal error in Perl 5.28
+|perldiag/Opening dirhandle %s also as a file. This will be a fatal error in Perl 5.28>
 
 =item *
 
-Opening filehandle %s also as a directory. This will be a fatal
-error in Perl 5.28
+L<Opening filehandle %s also as a directory. This will be a fatal error in Perl 5.28
+|perldiag/Opening filehandle %s also as a directory. This will be a fatal error in Perl 5.28>
 
 =item *
 
-Setting C<$/> to a reference to %s as a form of slurp is deprecated,
-treating as undef. This will be fatal in Perl 5.28
+L<Setting C<$/> to a reference to %s as a form of slurp is deprecated, treating as undef. This will be fatal in Perl 5.28
+|perldiag/Setting C<$/> to a reference to %s as a form of slurp is deprecated, treating as undef. This will be fatal in Perl 5.28>
 
 =item *
 
-Unescaped left brace in regex is deprecated here (and will be fatal
-in Perl 5.30), passed through in regex; marked by S<< E<lt>-- HERE >> in m/%s/
+L<Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through in regex; marked by S<< E<lt>-- HERE >> in mE<sol>%sE<sol>
+|perldiag/Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through in regex; marked by S<< E<lt>-- HERE >> in m/%s/>
 
 =item *
 
-Unknown charname '' is deprecated. Its use will be fatal in Perl 5.28
+L<Unknown charname '' is deprecated. Its use will be fatal in Perl 5.28
+|perldiag/Unknown charname '' is deprecated. Its use will be fatal in Perl 5.28>
 
 =item *
 
-Use of bare E<lt>E<lt> to mean E<lt>E<lt>"" is deprecated. Its use will be fatal in Perl 5.28
+L<Use of bare E<lt>E<lt> to mean E<lt>E<lt>"" is deprecated. Its use will be fatal in Perl 5.28
+|perldiag/Use of bare E<lt>E<lt> to mean E<lt>E<lt>"" is deprecated. Its use will be fatal in Perl 5.28>
 
 =item *
 
-Use of code point 0x%s is deprecated; the permissible max is 0x%s.
-This will be fatal in Perl 5.28
+L<Use of code point 0x%s is deprecated; the permissible max is 0x%s.  This will be fatal in Perl 5.28
+|perldiag/Use of code point 0x%s is deprecated; the permissible max is 0x%s.  This will be fatal in Perl 5.28>
 
 =item *
 
-Use of comma-less variable list is deprecated. Its use will be fatal
-in Perl 5.28
+L<Use of comma-less variable list is deprecated. Its use will be fatal in Perl 5.28
+|perldiag/Use of comma-less variable list is deprecated. Its use will be fatal in Perl 5.28>
 
 =item *
 
-Use of inherited C<AUTOLOAD> for non-method %s() is deprecated. This
-will be fatal in Perl 5.28
+L<Use of inherited C<AUTOLOAD> for non-method %s() is deprecated. This will be fatal in Perl 5.28
+|perldiag/Use of inherited C<AUTOLOAD> for non-method %s() is deprecated. This will be fatal in Perl 5.28>
 
 =item *
 
-Use of strings with code points over 0xFF as arguments to %s operator
-is deprecated. This will be a fatal error in Perl 5.28
+L<Use of strings with code points over 0xFF as arguments to %s operator is deprecated. This will be a fatal error in Perl 5.28
+|perldiag/Use of strings with code points over 0xFF as arguments to %s operator is deprecated. This will be a fatal error in Perl 5.28>
 
 =back
 
