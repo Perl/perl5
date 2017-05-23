@@ -2503,8 +2503,10 @@ L<[perl #129125]|https://rt.perl.org/Public/Bug/Display.html?id=129125>
 
 =item *
 
-Fix a problem with sort's build-in compare, where it would not sort
-correctly with 64-bit integers, and non-long doubles.
+The L<sort()|perlfunc/sort> operator's built-in numeric comparison
+function didn't handle large integers that weren't exactly
+representable by a double.  This now uses the same code used to
+implement the C<< <=> >> operator.
 L<[perl #130335]|https://rt.perl.org/Public/Bug/Display.html?id=130335>
 
 =item *
