@@ -1602,6 +1602,7 @@ L<C<${^ENCODING}> is no longer supported. Its use will be fatal in Perl 5.28
 L<Experimental %s on scalar is now forbidden This message now is followed by more helpful text.
 L<[perl #127976]|https://rt.perl.org/Public/Bug/Display.html?id=127976>
 |perldiag/Experimental %s on scalar is now forbidden>.
+
 This message now is followed by more helpful text.
 L<[perl #127976]|https://rt.perl.org/Public/Bug/Display.html?id=127976>
 
@@ -1614,8 +1615,8 @@ L<C<File::Glob::glob()> will disappear in perl 5.30. Use C<File::Glob::bsd_glob(
 
 L<%s() is deprecated on C<:utf8> handles. This will be a fatal error in Perl 5.30
 |perldiag/%s() is deprecated on C<:utf8> handles. This will be a fatal error in Perl 5.30>.
-"%s" is one of C<sysread>, C<recv>, C<syswrite>, or C<send>.
 
+"%s" is one of C<sysread>, C<recv>, C<syswrite>, or C<send>.
 This warning is now enabled by default, as all C<deprecated> category
 warnings should be.
 
