@@ -1614,6 +1614,9 @@ L<%s() is deprecated on C<:utf8> handles. This will be a fatal error in Perl 5.3
 |perldiag/%s() is deprecated on C<:utf8> handles. This will be a fatal error in Perl 5.30>.
 "%s" is one of C<sysread>, C<recv>, C<syswrite>, or C<send>.
 
+This warning is now enabled by default, as all C<deprecated> category
+warnings should be.
+
 =item *
 
 L<C<$*> is no longer supported. Its use will be fatal in Perl 5.30
