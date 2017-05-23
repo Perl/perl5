@@ -1433,6 +1433,11 @@ Document C<@ISA>.  Was documented other places, not not in L<perlvar>.
 
 =item *
 
+L<A signature parameter must start with C<'$'>, C<'@'> or C<'%'>
+|perldiag/A signature parameter must start with C<'$'>, C<'@'> or C<'%'>>
+
+=item *
+
 L<Bareword in require contains "%s"|perldiag/"Bareword in require contains "%s"">
 
 =item *
@@ -1481,11 +1486,46 @@ See L</Declaring a reference to a variable>.
 
 =item *
 
+L<Illegal character following sigil in a subroutine signature
+|perldiag/Illegal character following sigil in a subroutine signature>
+
+=item *
+
+L<Indentation on line %d of here-doc doesn't match delimiter
+|perldiag/Indentation on line %d of here-doc doesn't match delimiter>
+
+=item *
+
 L<Infinite recursion in regex|perldiag/"Infinite recursion in regex">.
 
 Using the empty pattern (which re-executes the last successfully-matched
 pattern) inside a code block in another regex, as in C</(?{ s!!new! })/>, has
 always previously yielded a segfault.  It now produces this error.
+
+=item *
+
+L<Malformed UTF-8 string in "%s"
+|perldiag/Malformed UTF-8 string in "%s">
+
+=item *
+
+L<Multiple slurpy parameters not allowed
+|perldiag/Multiple slurpy parameters not allowed>
+
+=item *
+
+L<C<'#'> not allowed immediately following a sigil in a subroutine signature
+|perldiag/C<'#'> not allowed immediately following a sigil in a subroutine signature>
+
+=item *
+
+L<panic: unknown OA_*: %x
+|perldiag/panic: unknown OA_*: %x>
+
+=item *
+
+L<The %s function is unimplemented
+|perldiag/The %s function is unimplemented>
 
 =item *
 
@@ -1508,6 +1548,11 @@ version control system to mark conflicts after a failed merge operation.
 =head3 New Warnings
 
 =over 4
+
+=item *
+
+L<Can't determine class of operator %s, assuming C<BASEOP>
+|perldiag/Can't determine class of operator %s, assuming C<BASEOP>>
 
 =item *
 
@@ -1537,6 +1582,11 @@ L<C<${^ENCODING}> is no longer supported. Its use will be fatal in Perl 5.28|per
 
 The special variable C<${^ENCODING}>, formerly used to implement
 the C<encoding> pragma, is no longer supported as of Perl 5.26.
+
+=item *
+
+L<Unescaped literal '%c' in regex; marked by <-- HERE in mE<sol>%sE<sol>
+|perldiag/Unescaped literal '%c' in regex; marked by <-- HERE in mE<sol>%sE<sol>>
 
 =item *
 
@@ -1617,6 +1667,11 @@ warnings should be.
 
 L<C<$*> is no longer supported. Its use will be fatal in Perl 5.30
 |perldiag/C<$*> is no longer supported. Its use will be fatal in Perl 5.30>
+
+=item *
+
+L<C<$#> is no longer supported. Its use will be fatal in Perl 5.30
+|perldiag/C<$#> is no longer supported. Its use will be fatal in Perl 5.30>
 
 =item *
 
