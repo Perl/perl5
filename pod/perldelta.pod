@@ -254,17 +254,17 @@ untrusted directories (such as F</tmp>), then your script suddenly failing
 to load files may be indicative of a security issue.  You most likely want
 to replace any relative paths with full paths; for example,
 
-    do ".foo_config.pl"
+    do "foo_config.pl"
 
 might become
 
-    do "$ENV{HOME}/.foo_config.pl"
+    do "$ENV{HOME}/foo_config.pl"
 
 If you are absolutely certain that you want your script to load and
 execute a file from the current directory, then use a C<./> prefix; for
 example:
 
-    do "./.foo_config.pl"
+    do "./foo_config.pl"
 
 =item * Installing and using CPAN modules
 
