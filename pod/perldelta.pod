@@ -1832,7 +1832,7 @@ over 750 lines of unhelpful output.
 
 =item *
 
-Cleanup for C<clang -Weverything> support. [perl 129961]
+Cleanup for C<clang -Weverything> support. [perl #129961]
 
 =item *
 
@@ -2881,28 +2881,28 @@ Code like this: C</(?{ s!!! })/> can trigger infinite recursion on the C
 stack (not the normal perl stack) when the last successful pattern in
 scope is itself.  We avoid the segfault by simply forbidding the use of
 the empty pattern when it would resolve to the currently executing
-pattern.  [perl 129903]
+pattern.  [perl #129903]
 
 =item *
 
 Avoid reading beyond the end of the line buffer when there's a
-short UTF-8 character at the end.  [perl 128997]
+short UTF-8 character at the end.  [perl #128997]
 
 =item *
 
-Fix firstchar bitmap under utf8 with prefix optimisation. [perl 129950]
+Fix firstchar bitmap under utf8 with prefix optimisation. [perl #129950]
 
 =item *
 
-Make F<Carp/t/arg_string.t>: be liberal in C<f>/C<p> formats. [perl 129954]
+Make F<Carp/t/arg_string.t>: be liberal in C<f>/C<p> formats. [perl #129954]
 
 =item *
 
-Make C<do "a\0b"> fail silently instead of throwing an error. [perl 129928]
+Make C<do "a\0b"> fail silently instead of throwing an error. [perl #129928]
 
 =item *
 
-Make C<chdir> allocate the stack it needs. [perl 129130]
+Make C<chdir> allocate the stack it needs. [perl #129130]
 
 =item *
 
