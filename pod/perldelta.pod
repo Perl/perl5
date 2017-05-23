@@ -1426,6 +1426,8 @@ the feature:
     no warnings "experimental::declared_refs";
     use feature "declared_refs";
 
+See L</Declaring a reference to a variable>.
+
 =item *
 
 L<Version control conflict marker|perldiag/"Version control conflict marker">
@@ -1503,6 +1505,8 @@ which may change or be removed in a future Perl version:
     no warnings "experimental::declared_refs";
     use feature "declared_refs";
     $fooref = my \$foo;
+
+See L</Declaring a reference to a variable>.
 
 =item *
 
