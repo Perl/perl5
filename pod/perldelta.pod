@@ -1511,12 +1511,6 @@ version control system to mark conflicts after a failed merge operation.
 
 =item *
 
-L<Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl 5.30|perldiag/"Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl 5.30">
-
-See L</Deprecations>
-
-=item *
-
 L<Declaring references is experimental|perldiag/"Declaring references is experimental">
 
 (S experimental::declared_refs) This warning is emitted if you use a reference
@@ -1533,6 +1527,12 @@ See L</Declaring a reference to a variable>.
 
 =item *
 
+L<do "%s" failed, '.' is no longer in @INC|perldiag/do "%s" failed, '.' is no longer in @INC; did you mean do ".E<sol>%s"?>
+
+Since C<"."> is now removed from C<@INC> by default, C<do> will now trigger a warning recommending to fix the C<do> statement.
+
+=item *
+
 L<C<${^ENCODING}> is no longer supported. Its use will be fatal in Perl 5.28|perldiag/"${^ENCODING} is no longer supported. Its use will be fatal in Perl 5.28">
 
 The special variable C<${^ENCODING}>, formerly used to implement
@@ -1540,10 +1540,9 @@ the C<encoding> pragma, is no longer supported as of Perl 5.26.
 
 =item *
 
-Since C<"."> is now removed from C<@INC> by default, C<do> will now trigger
-a warning recommending to fix the C<do> statement:
+L<Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl 5.30|perldiag/"Use of unassigned code point or non-standalone grapheme for a delimiter will be a fatal error starting in Perl 5.30">
 
-L<do "%s" failed, '.' is no longer in @INC|perldiag/do "%s" failed, '.' is no longer in @INC; did you mean do ".E<sol>%s"?>
+See L</Deprecations>
 
 =back
 
