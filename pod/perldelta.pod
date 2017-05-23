@@ -1629,55 +1629,9 @@ is deprecated. This will be a fatal error in Perl 5.28
 
 =item *
 
-Improve error for missing C<tie()> package/method. This brings the error messages
-in line with the ones used for normal method calls, despite not using
-call_method().
-
-=item *
-
-C<do> errors now refer to C<do> (not C<require>).
-
-=item *
-
 Details as to the exact problem have been added to the diagnostics that
 occur when malformed UTF-8 is encountered when trying to convert to a
 code point.
-
-=item *
-
-Executing C<undef $x> where C<$x> is tied or magical no longer incorrectly
-blames the variable for an uninitialized-value warning encountered by the
-tied/magical code.
-
-=item *
-
-Code like C<$x = $x . "a"> was incorrectly failing to yield a
-L<use of uninitialized value|perldiag/"Use of uninitialized value%s">
-warning when C<$x> was a lexical variable with an undefined value. That has
-now been fixed. [perl #127877]
-
-=item *
-
-C<undef *_; shift> or C<undef *_; pop> inside a subroutine, with no
-argument to C<shift> or C<pop>, began crashing in Perl 5.14, but has now
-been fixed.
-
-=item *
-
-C<< "string$scalar-E<gt>$*" >> now correctly prefers concat overloading to
-string overloading if C<< $scalar-E<gt>$* >> returns an overloaded object,
-bringing it into consistency with C<$$scalar>.
-
-=item *
-
-C<< /@0{0*-E<gt>@*/*0 >> and similar contortions used to crash, but no longer
-do, but merely produce a syntax error. [perl #128171]
-
-=item *
-
-C<do> or C<require> with a reference or typeglob which, when stringified,
-contains a null character started crashing in Perl 5.20, but has now been
-fixed. [perl #128182]
 
 =back
 
@@ -2936,6 +2890,52 @@ Make C<do "a\0b"> fail silently instead of throwing an error. [perl 129928]
 =item *
 
 Make C<chdir> allocate the stack it needs. [perl 129130]
+
+=item *
+
+C<do> errors now refer to C<do> (not C<require>).
+
+=item *
+
+Executing C<undef $x> where C<$x> is tied or magical no longer incorrectly
+blames the variable for an uninitialized-value warning encountered by the
+tied/magical code.
+
+=item *
+
+Code like C<$x = $x . "a"> was incorrectly failing to yield a
+L<use of uninitialized value|perldiag/"Use of uninitialized value%s">
+warning when C<$x> was a lexical variable with an undefined value. That has
+now been fixed. [perl #127877]
+
+=item *
+
+C<undef *_; shift> or C<undef *_; pop> inside a subroutine, with no
+argument to C<shift> or C<pop>, began crashing in Perl 5.14, but has now
+been fixed.
+
+=item *
+
+C<< "string$scalar-E<gt>$*" >> now correctly prefers concat overloading to
+string overloading if C<< $scalar-E<gt>$* >> returns an overloaded object,
+bringing it into consistency with C<$$scalar>.
+
+=item *
+
+C<< /@0{0*-E<gt>@*/*0 >> and similar contortions used to crash, but no longer
+do, but merely produce a syntax error. [perl #128171]
+
+=item *
+
+C<do> or C<require> with a reference or typeglob which, when stringified,
+contains a null character started crashing in Perl 5.20, but has now been
+fixed. [perl #128182]
+
+=item *
+
+Improve error for missing C<tie()> package/method. This brings the error messages
+in line with the ones used for normal method calls, despite not using
+call_method().
 
 =back
 
