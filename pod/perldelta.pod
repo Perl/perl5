@@ -434,9 +434,11 @@ This makes the lvalue sub case consistent with C<(keys %hash) = ...> and
 C<(keys @_) = ...>, which are also errors.
 L<[perl #128187]|https://rt.perl.org/Public/Bug/Display.html?id=128187>
 
-=head2 C<${^ENCODING}> has been removed
+=head2 The C<${^ENCODING}> facility has been removed
 
-Consequently, the L<encoding> pragma's default mode is no longer supported.  If
+The special behaviour associated with assigning a value to this variable
+has been removed.  As a consequence, the L<encoding> pragma's default mode
+is no longer supported.  If
 you still need to write your source code in encodings other than UTF-8, use a
 source filter such as L<Filter::Encoding> on CPAN or L<encoding>'s C<Filter>
 option.
@@ -1452,7 +1454,7 @@ L<Indentation on line %d of here-doc doesn't match delimiter
 
 =item *
 
-L<Infinite recursion in regex|perldiag/"Infinite recursion in regex">.
+L<Infinite recursion via empty pattern|perldiag/"Infinite recursion via empty pattern">.
 
 Using the empty pattern (which re-executes the last successfully-matched
 pattern) inside a code block in another regex, as in C</(?{ s!!new! })/>, has
@@ -1477,11 +1479,6 @@ L<C<'#'> not allowed immediately following a sigil in a subroutine signature
 
 L<panic: unknown OA_*: %x
 |perldiag/panic: unknown OA_*: %x>
-
-=item *
-
-L<The %s function is unimplemented
-|perldiag/The %s function is unimplemented>
 
 =item *
 
@@ -1534,10 +1531,8 @@ Since C<"."> is now removed from C<@INC> by default, C<do> will now trigger a wa
 
 =item *
 
-L<C<${^ENCODING}> is no longer supported. Its use will be fatal in Perl 5.28|perldiag/"${^ENCODING} is no longer supported. Its use will be fatal in Perl 5.28">
-
-The special variable C<${^ENCODING}>, formerly used to implement
-the C<encoding> pragma, is no longer supported as of Perl 5.26.
+L<C<File::Glob::glob()> will disappear in perl 5.30. Use C<File::Glob::bsd_glob()> instead.
+|perldiag/C<File::Glob::glob()> will disappear in perl 5.30. Use C<File::Glob::bsd_glob()> instead.>
 
 =item *
 
@@ -1571,51 +1566,79 @@ C<@INC> to avoid confusion.
 L<Attribute "locked" is deprecated, and will disappear in Perl 5.28
 |perldiag/Attribute "locked" is deprecated, and will disappear in Perl 5.28>
 
+This existing warning has had the I<and will disappear> text added in this
+release.
+
 =item *
 
 L<Attribute "unique" is deprecated, and will disappear in Perl 5.28
 |perldiag/Attribute "unique" is deprecated, and will disappear in Perl 5.28>
+
+This existing warning has had the I<and will disappear> text added in this
+release.
+
+=item *
+
+Calling POSIX::%s() is deprecated
+
+This warning has been removed, as the deprecated functions have been
+removed from POSIX.
 
 =item *
 
 L<Constants from lexical variables potentially modified elsewhere are deprecated. This will not be allowed in Perl 5.32
 |perldiag/Constants from lexical variables potentially modified elsewhere are deprecated. This will not be allowed in Perl 5.32>
 
+This existing warning has had the I<this will not be allowed> text added
+in this release.
+
 =item *
 
 L<Deprecated use of C<my()> in false conditional. This will be a fatal error in Perl 5.30
 |perldiag/Deprecated use of C<my()> in false conditional. This will be a fatal error in Perl 5.30>
+
+This existing warning has had the I<this will be a fatal error> text added
+in this release.
 
 =item *
 
 L<C<dump()> better written as C<CORE::dump()>. C<dump()> will no longer be available in Perl 5.30
 |perldiag/C<dump()> better written as C<CORE::dump()>. C<dump()> will no longer be available in Perl 5.30>
 
-=item *
-
-L<C<${^ENCODING}> is no longer supported. Its use will be fatal in Perl 5.28
-|perldiag/C<${^ENCODING}> is no longer supported. Its use will be fatal in Perl 5.28>
+This existing warning has had the I<no longer be available> text added in
+this release.
 
 =item *
 
-L<Experimental %s on scalar is now forbidden This message now is followed by more helpful text.
-L<[perl #127976]|https://rt.perl.org/Public/Bug/Display.html?id=127976>
-|perldiag/Experimental %s on scalar is now forbidden>.
+L<Experimental %s on scalar is now forbidden
+|perldiag/Experimental %s on scalar is now forbidden>
 
-This message now is followed by more helpful text.
+This message is now followed by more helpful text.
 L<[perl #127976]|https://rt.perl.org/Public/Bug/Display.html?id=127976>
 
 =item *
 
-L<C<File::Glob::glob()> will disappear in perl 5.30. Use C<File::Glob::bsd_glob()> instead.
-|perldiag/C<File::Glob::glob()> will disappear in perl 5.30. Use C<File::Glob::bsd_glob()> instead.>
+Experimental "%s" subs not enabled
+
+This warning was been removed, as lexical subs are no longer experimental.
+
+=item *
+
+Having more than one /%c regexp modifier is deprecated
+
+This deprecation warning has been removed, since C</xx> now has a new
+meaning.
 
 =item *
 
 L<%s() is deprecated on C<:utf8> handles. This will be a fatal error in Perl 5.30
 |perldiag/%s() is deprecated on C<:utf8> handles. This will be a fatal error in Perl 5.30>.
 
-"%s" is one of C<sysread>, C<recv>, C<syswrite>, or C<send>.
+where "%s" is one of C<sysread>, C<recv>, C<syswrite>, or C<send>.
+
+This existing warning has had the I<this will be a fatal error> text added
+in this release.
+
 This warning is now enabled by default, as all C<deprecated> category
 warnings should be.
 
@@ -1624,10 +1647,16 @@ warnings should be.
 L<C<$*> is no longer supported. Its use will be fatal in Perl 5.30
 |perldiag/C<$*> is no longer supported. Its use will be fatal in Perl 5.30>
 
+This existing warning has had the I<its use will be fatal> text added in
+this release.
+
 =item *
 
 L<C<$#> is no longer supported. Its use will be fatal in Perl 5.30
 |perldiag/C<$#> is no longer supported. Its use will be fatal in Perl 5.30>
+
+This existing warning has had the I<its use will be fatal> text added in
+this release.
 
 =item *
 
@@ -1639,53 +1668,138 @@ message
 
 =item *
 
+L<Missing or undefined argument to %s
+|perldiag/Missing or undefined argument to %s>
+
+This warning used to warn about C<require>, even if it was actually C<do>
+which being executed. It now gets the operation name right.
+
+=item *
+
+NO-BREAK SPACE in a charnames alias definition is deprecated
+
+This warning has been removed as the behavior is now an error.
+
+=item *
+
 L<Opening dirhandle %s also as a file. This will be a fatal error in Perl 5.28
 |perldiag/Opening dirhandle %s also as a file. This will be a fatal error in Perl 5.28>
+
+This existing warning has had the I<this will be a fatal error> text added
+in this release.
 
 =item *
 
 L<Opening filehandle %s also as a directory. This will be a fatal error in Perl 5.28
 |perldiag/Opening filehandle %s also as a directory. This will be a fatal error in Perl 5.28>
 
+This existing warning has had the I<this will be a fatal error> text added
+in this release.
+
+=item *
+
+panic: ck_split, type=%u
+
+panic: pp_split, pm=%p, s=%p
+
+These panic errors have been removed.
+
+=item *
+
+Passing malformed UTF-8 to "%s" is deprecated
+
+This warning has been changed to the fatal
+L<Malformed UTF-8 string in "%s"
+|perldiag/Malformed UTF-8 string in "%s">
+
 =item *
 
 L<Setting C<$/> to a reference to %s as a form of slurp is deprecated, treating as undef. This will be fatal in Perl 5.28
 |perldiag/Setting C<$/> to a reference to %s as a form of slurp is deprecated, treating as undef. This will be fatal in Perl 5.28>
+
+This existing warning has had the I<this will be fatal> text added in
+this release.
+
+=item *
+
+L<C<${^ENCODING}> is no longer supported. Its use will be fatal in Perl 5.28|perldiag/"${^ENCODING} is no longer supported. Its use will be fatal in Perl 5.28">
+
+This warning used to be: "Setting C<${^ENCODING}> is deprecated".
+
+The special action of the variable C<${^ENCODING}> was formerly used to
+implement the C<encoding> pragma. As of Perl 5.26, rather than being
+deprecated, assigning to this variable now has no effect except to issue
+the warning.
+
+=item *
+
+L<Too few arguments for subroutine '%s'
+|perldiag/Too few arguments for subroutine '%s'>
+
+This warning now includes the name of the offending subroutine.
+
+=item *
+
+L<Too many arguments for subroutine '%s'
+|perldiag/Too many arguments for subroutine '%s'>
+
+This warning now includes the name of the offending subroutine.
 
 =item *
 
 L<Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through in regex; marked by S<< E<lt>-- HERE >> in mE<sol>%sE<sol>
 |perldiag/Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through in regex; marked by S<< E<lt>-- HERE >> in m/%s/>
 
+This existing warning has had the I<here (and will be fatal...)> text
+added in this release.
+
 =item *
 
 L<Unknown charname '' is deprecated. Its use will be fatal in Perl 5.28
 |perldiag/Unknown charname '' is deprecated. Its use will be fatal in Perl 5.28>
+
+This existing warning has had the I<its use will be fatal> text added in
+this release.
 
 =item *
 
 L<Use of bare E<lt>E<lt> to mean E<lt>E<lt>"" is deprecated. Its use will be fatal in Perl 5.28
 |perldiag/Use of bare E<lt>E<lt> to mean E<lt>E<lt>"" is deprecated. Its use will be fatal in Perl 5.28>
 
+This existing warning has had the I<its use will be fatal> text added in
+this release.
+
 =item *
 
 L<Use of code point 0x%s is deprecated; the permissible max is 0x%s.  This will be fatal in Perl 5.28
 |perldiag/Use of code point 0x%s is deprecated; the permissible max is 0x%s.  This will be fatal in Perl 5.28>
+
+This existing warning has had the I<this will be fatal> text added in
+this release.
 
 =item *
 
 L<Use of comma-less variable list is deprecated. Its use will be fatal in Perl 5.28
 |perldiag/Use of comma-less variable list is deprecated. Its use will be fatal in Perl 5.28>
 
+This existing warning has had the I<its use will be fatal> text added in
+this release.
+
 =item *
 
 L<Use of inherited C<AUTOLOAD> for non-method %s() is deprecated. This will be fatal in Perl 5.28
 |perldiag/Use of inherited C<AUTOLOAD> for non-method %s() is deprecated. This will be fatal in Perl 5.28>
 
+This existing warning has had the I<this will be fatal> text added in
+this release.
+
 =item *
 
 L<Use of strings with code points over 0xFF as arguments to %s operator is deprecated. This will be a fatal error in Perl 5.28
 |perldiag/Use of strings with code points over 0xFF as arguments to %s operator is deprecated. This will be a fatal error in Perl 5.28>
+
+This existing warning has had the I<this will be a fatal error> text added in
+this release.
 
 =back
 
