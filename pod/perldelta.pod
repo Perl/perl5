@@ -1576,10 +1576,6 @@ $* is no longer supported. Its use will be fatal in Perl 5.30
 
 =item *
 
-$* is no longer supported. Its use will be fatal in Perl 5.30
-
-=item *
-
 Opening dirhandle %s also as a file. This will be a fatal error in Perl 5.28
 
 =item *
