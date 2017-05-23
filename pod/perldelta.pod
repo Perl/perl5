@@ -1536,6 +1536,12 @@ C<@INC> to avoid confusion.
 
 =item *
 
+Details as to the exact problem have been added to the diagnostics that
+occur when malformed UTF-8 is encountered when trying to convert to a
+code point.
+
+=item *
+
 Attribute "locked" is deprecated, and will disappear in Perl 5.28
 
 =item *
@@ -1626,12 +1632,6 @@ will be fatal in Perl 5.28
 
 Use of strings with code points over 0xFF as arguments to %s operator
 is deprecated. This will be a fatal error in Perl 5.28
-
-=item *
-
-Details as to the exact problem have been added to the diagnostics that
-occur when malformed UTF-8 is encountered when trying to convert to a
-code point.
 
 =back
 
