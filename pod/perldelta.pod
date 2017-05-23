@@ -837,6 +837,14 @@ L<[perl #130122]|https://rt.perl.org/Public/Bug/Display.html?id=130122>
 
 L<IO> has been upgraded from version 1.36 to 1.38.
 
+The F<t/cachepropagate-unix.t> test now checks C<pack_sockaddr_un()>'s
+return value because C<pack_sockaddr_un()> silently truncates the
+supplied path if it won't fit into the C<sun_path> member of
+C<sockaddr_un>.  This may change in the future, but for now check the
+path in theC<sockaddr> matches the desired path, and skip if it
+doesn't.
+L<[perl #128095]|https://rt.perl.org/Public/Bug/Display.html?id=128095>
+
 =item *
 
 IO-Compress has been upgraded from version 2.069 to 2.074.
@@ -2677,15 +2685,6 @@ compilation) still expect there to be a null byte in the string buffer
 just past the end of the logical string.  An assertion failure was the
 result.
 L<[perl #129287]|https://rt.perl.org/Public/Bug/Display.html?id=129287>
-
-=item *
-
-Check C<pack_sockaddr_un()>'s return value because C<pack_sockaddr_un()>
-silently truncates the supplied path if it won't fit into the C<sun_path>
-member of C<sockaddr_un>.  This may change in the future, but for now
-check the path in theC<sockaddr> matches the desired path, and skip if
-it doesn't.
-L<[perl #128095]|https://rt.perl.org/Public/Bug/Display.html?id=128095>
 
 =item *
 
