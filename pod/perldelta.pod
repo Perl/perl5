@@ -1563,6 +1563,11 @@ C<${^ENCODING}> is no longer supported. Its use will be fatal in Perl 5.28
 
 =item *
 
+Experimental %s on scalar is now forbidden
+This message now is followed by more helpful text. [perl #127976]
+
+=item *
+
 C<File::Glob::glob()> will disappear in perl 5.30. Use C<File::Glob::bsd_glob()>
 instead.
 
@@ -1650,13 +1655,6 @@ Code like C<$x = $x . "a"> was incorrectly failing to yield a
 L<use of uninitialized value|perldiag/"Use of uninitialized value%s">
 warning when C<$x> was a lexical variable with an undefined value. That has
 now been fixed. [perl #127877]
-
-=item *
-
-When the error "Experimental push on scalar is now forbidden" is raised for
-the hash functions C<keys>, C<each>, and C<values>, it is now followed by
-the more helpful message, "Type of arg 1 to whatever must be hash or
-array". [perl #127976]
 
 =item *
 
