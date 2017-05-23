@@ -1439,8 +1439,8 @@ version control system to mark conflicts after a failed merge operation.
 L<%s: command not found|perldiag/"%s: command not found">
 
 (A) You've accidentally run your script through B<bash> or another shell
-instead of Perl.  Check the #! line, or manually feed your script into
-Perl yourself.  The #! line at the top of your file could look like:
+instead of Perl.  Check the C<#!> line, or manually feed your script into
+Perl yourself.  The C<#!> line at the top of your file could look like:
 
   #!/usr/bin/perl
 
@@ -1449,8 +1449,8 @@ Perl yourself.  The #! line at the top of your file could look like:
 L<%s: command not found: %s|perldiag/"%s: command not found: %s">
 
 (A) You've accidentally run your script through B<zsh> or another shell
-instead of Perl.  Check the #! line, or manually feed your script into
-Perl yourself.  The #! line at the top of your file could look like:
+instead of Perl.  Check the C<#!> line, or manually feed your script into
+Perl yourself.  The C<#!> line at the top of your file could look like:
 
   #!/usr/bin/perl
 
@@ -1559,20 +1559,20 @@ in Perl 5.30
 
 =item *
 
-${^ENCODING} is no longer supported. Its use will be fatal in Perl 5.28
+C<${^ENCODING}> is no longer supported. Its use will be fatal in Perl 5.28
 
 =item *
 
-File::Glob::glob() will disappear in perl 5.30. Use File::Glob::bsd_glob()
+C<File::Glob::glob()> will disappear in perl 5.30. Use C<File::Glob::bsd_glob()>
 instead.
 
 =item *
 
-%s() is deprecated on :utf8 handles. This will be a fatal error in Perl 5.30
+%s() is deprecated on C<:utf8> handles. This will be a fatal error in Perl 5.30
 
 =item *
 
-$* is no longer supported. Its use will be fatal in Perl 5.30
+C<$*> is no longer supported. Its use will be fatal in Perl 5.30
 
 =item *
 
@@ -1613,7 +1613,7 @@ in Perl 5.28
 
 =item *
 
-Use of inherited AUTOLOAD for non-method %s() is deprecated. This
+Use of inherited C<AUTOLOAD> for non-method %s() is deprecated. This
 will be fatal in Perl 5.28
 
 =item *
