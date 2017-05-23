@@ -1682,6 +1682,13 @@ This warning has been removed as the behavior is now an error.
 
 =item *
 
+L<Odd nameE<sol>value argument for subroutine '%s'
+|perldiag/"Odd nameE<sol>value argument for subroutine '%s'">
+
+This warning now includes the name of the offending subroutine.
+
+=item *
+
 L<Opening dirhandle %s also as a file. This will be a fatal error in Perl 5.28
 |perldiag/Opening dirhandle %s also as a file. This will be a fatal error in Perl 5.28>
 
