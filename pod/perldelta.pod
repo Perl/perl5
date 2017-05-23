@@ -1569,6 +1569,7 @@ instead.
 =item *
 
 %s() is deprecated on C<:utf8> handles. This will be a fatal error in Perl 5.30
+"%s" is one of C<sysread>, C<recv>, C<syswrite>, or C<send>.
 
 =item *
 
@@ -1626,11 +1627,6 @@ is deprecated. This will be a fatal error in Perl 5.28
 Improve error for missing C<tie()> package/method. This brings the error messages
 in line with the ones used for normal method calls, despite not using
 call_method().
-
-=item *
-
-Make the C<sysread()>/C<syswrite()> I<etc.>, C<:utf8> handle warnings
-XXX default. These warnings were under 'deprecated' previously.
 
 =item *
 
