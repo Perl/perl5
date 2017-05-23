@@ -1433,37 +1433,19 @@ Document C<@ISA>.  Was documented other places, not not in L<perlvar>.
 
 =item *
 
-Since C<"."> is now removed from C<@INC> by default, C<do> will now trigger
-a warning recommending to fix the C<do> statement:
-
-L<do "%s" failed, '.' is no longer in @INC|perldiag/do "%s" failed, '.' is no longer in @INC; did you mean do ".E<sol>%s"?>
+L<Bareword in require contains "%s"|perldiag/"Bareword in require contains "%s"">
 
 =item *
 
-Using the empty pattern (which re-executes the last successfully-matched
-pattern) inside a code block in another regex, as in C</(?{ s!!new! })/>, has
-always previously yielded a segfault.  It now produces an error:
-L<Infinite recursion in regex|perldiag/"Infinite recursion in regex">.
+L<Bareword in require maps to empty filename|perldiag/"Bareword in require maps to empty filename">
 
 =item *
 
-L<The experimental declared_refs feature is not enabled|perldiag/"The experimental declared_refs feature is not enabled">
-
-(F) To declare references to variables, as in C<my \%x>, you must first enable
-the feature:
-
-    no warnings "experimental::declared_refs";
-    use feature "declared_refs";
-
-See L</Declaring a reference to a variable>.
+L<Bareword in require maps to disallowed filename "%s"|perldiag/"Bareword in require maps to disallowed filename "%s"">
 
 =item *
 
-L<Version control conflict marker|perldiag/"Version control conflict marker">
-
-(F) The parser found a line starting with C<E<lt>E<lt>E<lt>E<lt>E<lt>E<lt>E<lt>>,
-C<E<gt>E<gt>E<gt>E<gt>E<gt>E<gt>E<gt>>, or C<=======>.  These may be left by a
-version control system to mark conflicts after a failed merge operation.
+L<Bareword in require must not start with a double-colon: "%s"|perldiag/"Bareword in require must not start with a double-colon: "%s"">
 
 =item *
 
@@ -1487,6 +1469,26 @@ Perl yourself.  The C<#!> line at the top of your file could look like:
 
 =item *
 
+L<The experimental declared_refs feature is not enabled|perldiag/"The experimental declared_refs feature is not enabled">
+
+(F) To declare references to variables, as in C<my \%x>, you must first enable
+the feature:
+
+    no warnings "experimental::declared_refs";
+    use feature "declared_refs";
+
+See L</Declaring a reference to a variable>.
+
+=item *
+
+L<Infinite recursion in regex|perldiag/"Infinite recursion in regex">.
+
+Using the empty pattern (which re-executes the last successfully-matched
+pattern) inside a code block in another regex, as in C</(?{ s!!new! })/>, has
+always previously yielded a segfault.  It now produces this error.
+
+=item *
+
 L<Unescaped left brace in regex is illegal here|perldiag/Unescaped left brace in regex is illegal here in regex; marked by S<E<lt>-- HERE> in mE<sol>%sE<sol>>
 
 Unescaped left braces are now illegal in some contexts in regular expression
@@ -1495,19 +1497,11 @@ be illegal in Perl 5.30.
 
 =item *
 
-L<Bareword in require contains "%s"|perldiag/"Bareword in require contains "%s"">
+L<Version control conflict marker|perldiag/"Version control conflict marker">
 
-=item *
-
-L<Bareword in require maps to empty filename|perldiag/"Bareword in require maps to empty filename">
-
-=item *
-
-L<Bareword in require maps to disallowed filename "%s"|perldiag/"Bareword in require maps to disallowed filename "%s"">
-
-=item *
-
-L<Bareword in require must not start with a double-colon: "%s"|perldiag/"Bareword in require must not start with a double-colon: "%s"">
+(F) The parser found a line starting with C<E<lt>E<lt>E<lt>E<lt>E<lt>E<lt>E<lt>>,
+C<E<gt>E<gt>E<gt>E<gt>E<gt>E<gt>E<gt>>, or C<=======>.  These may be left by a
+version control system to mark conflicts after a failed merge operation.
 
 =back
 
