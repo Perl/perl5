@@ -1536,7 +1536,7 @@ L<C<File::Glob::glob()> will disappear in perl 5.30. Use C<File::Glob::bsd_glob(
 
 =item *
 
-L<Unescaped literal '%c' in regex; marked by <-- HERE in mE<sol>%sE<sol>
+L<Unescaped literal '%c' in regex; marked by E<lt>-- HERE in mE<sol>%sE<sol>
 |perldiag/Unescaped literal '%c' in regex; marked by <-- HERE in mE<sol>%sE<sol>>
 
 =item *
@@ -1721,8 +1721,8 @@ L<Malformed UTF-8 string in "%s"
 
 =item *
 
-L<Setting C<$/> to a reference to %s as a form of slurp is deprecated, treating as undef. This will be fatal in Perl 5.28
-|perldiag/Setting C<$/> to a reference to %s as a form of slurp is deprecated, treating as undef. This will be fatal in Perl 5.28>
+L<Setting C<< $E<sol> >> to a reference to %s as a form of slurp is deprecated, treating as undef. This will be fatal in Perl 5.28
+|perldiag/Setting C<< $E<sol> >> to a reference to %s as a form of slurp is deprecated, treating as undef. This will be fatal in Perl 5.28>
 
 This existing warning has had the I<this will be fatal> text added in
 this release.
@@ -1755,7 +1755,7 @@ This warning now includes the name of the offending subroutine.
 =item *
 
 L<Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through in regex; marked by S<< E<lt>-- HERE >> in mE<sol>%sE<sol>
-|perldiag/Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through in regex; marked by S<< E<lt>-- HERE >> in m/%s/>
+|perldiag/Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through in regex; marked by S<< E<lt>-- HERE >> in mE<sol>%sE<sol>>
 
 This existing warning has had the I<here (and will be fatal...)> text
 added in this release.
@@ -2654,7 +2654,7 @@ L<[perl #129125]|https://rt.perl.org/Public/Bug/Display.html?id=129125>
 The L<sort()|perlfunc/sort> operator's built-in numeric comparison
 function didn't handle large integers that weren't exactly
 representable by a double.  This now uses the same code used to
-implement the C<< <=> >> operator.
+implement the C<< E<lt>=E<gt> >> operator.
 L<[perl #130335]|https://rt.perl.org/Public/Bug/Display.html?id=130335>
 
 =item *
