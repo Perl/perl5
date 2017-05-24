@@ -3204,54 +3204,6 @@ calls.
 
 =back
 
-=head1 Known Problems
-
-=over 4
-
-=item *
-
-Some modules have been broken by the L<context stack rework|/Internal Changes>.
-These modules were relying on non-guaranteed implementation details in
-the perl interpreter.
-Their maintainers have been informed, and should contact perl5-porters for
-advice if needed.  Below is a subset of these modules:
-
-=over 4
-
-=item * L<Algorithm::Permute>
-
-=item * L<Coro>
-
-L<Coro> and Perl 5.22 were already incompatible due to a change in the perl
-interpreter,
-and the reworking on the perl context stack creates a further incompatibility.
-perl5-porters has L<discussed the issue on the mailing
-list|http://www.nntp.perl.org/group/perl.perl5.porters/2016/05/msg236174.html>.
-
-=item * L<Data::Alias>
-
-=item * L<RPerl>
-
-=item * L<Scope::Upper>
-
-=item * L<TryCatch>
-
-=back
-
-=item *
-
-The module L<lexical::underscore> no longer works on Perl 5.24, because perl
-no longer has a lexical C<$_>!
-
-=item *
-
-C<mod_perl> has been patched for compatibility for v5.22 and later but no
-release has been made.  The relevant patch (and other changes) can be found in
-their source code repository, L<mirrored at
-GitHub|https://github.com/apache/mod_perl/commit/82827132efd3c2e25cc413c85af61bb63375da6e>.
-
-=back
-
 =head1 Errata From Previous Releases
 
 =over 4
