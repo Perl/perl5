@@ -56,7 +56,7 @@ The seven routines are:
     SV*  newSVpvf(const char*, ...);
     SV*  newSVsv(SV*);
 
-C<STRLEN> is an integer type (Size_t, usually defined as size_t in
+C<STRLEN> is an integer type (C<Size_t>, usually defined as C<size_t> in
 F<config.h>) guaranteed to be large enough to represent the size of
 any string that perl can handle.
 
@@ -2675,7 +2675,7 @@ whatever the compiler has.
 If you are printing addresses of pointers, use UVxf combined
 with PTR2UV(), do not use %lx or %p.
 
-=head2 Formatted Printing of Size_t and SSize_t
+=head2 Formatted Printing of C<Size_t> and C<SSize_t>
 
 The most general way to do this is to cast them to a UV or IV, and
 print as in the
