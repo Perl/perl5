@@ -22,8 +22,8 @@ $Carp::Internal{ (__PACKAGE__) } = 1;
 # The official names with their code points are stored in a table in
 # lib/unicore/Name.pl which is read in as a large string (almost 3/4 Mb in
 # Unicode 6.0).  Each code point/name combination is separated by a \n in the
-# string.  (Some of the CJK and the Hangul syllable names are determined
-# instead algorithmically via subroutines stored instead in
+# string.  (Some of the CJK and the Hangul syllable names are instead
+# determined algorithmically via subroutines stored instead in
 # lib/unicore/Name.pm).  Because of the large size of this table, it isn't
 # converted into hashes for faster lookup.
 #
