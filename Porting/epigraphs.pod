@@ -19,6 +19,8 @@ Consult your favorite dictionary for details.
 
 =head2 v5.26.0-RC2 - Richard Condon, The Manchurian Candidate
 
+L<Announced on 2017-05-23 by Sawyer X|http://www.nntp.perl.org/group/perl.perl5.porters/2017/05/msg244511.html>
+
   Amateur psychiatric prognosis can be fascinating when there is
   absolutely nothing else to do.
 
