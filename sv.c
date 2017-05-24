@@ -13035,8 +13035,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #endif
                     }
                 }
-                else
+                else {
+                    if (arg_missing)
+                        Perl_croak_nocontext(
+                            "Missing argument for %%n in %s",
+                                PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
                     sv_setuv_mg(argsv, has_utf8 ? (UV)sv_len_utf8(sv) : (UV)i);
+                }
                 goto donevalidconversion;
             }
 

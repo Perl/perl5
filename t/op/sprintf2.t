@@ -295,14 +295,6 @@ for my $i (1, 3, 5, 10) {
        "width & precision interplay with utf8 strings, length=$i");
 }
 
-# Used to mangle PL_sv_undef
-fresh_perl_like(
-    'print sprintf "xxx%n\n"; print undef',
-    qr/Modification of a read-only value attempted at\b/,
-    { switches => [ '-w' ] },
-    q(%n should not be able to modify read-only constants),
-);
-
 # check overflows
 for (int(~0/2+1), ~0, "9999999999999999999") {
     is(eval {sprintf "%${_}d", 0}, undef, "no sprintf result expected %${_}d");
@@ -971,5 +963,12 @@ SKIP: {
     ok(!utf8::is_utf8($s), "first arg not special utf8-wise");
 }
 
+# sprintf("%n") used to croak "Modification of a read-only value"
+# as it tried to set &PL_sv_no
+
+{
+    eval { my $s = sprintf("%n"); };
+    like $@, qr/Missing argument for %n in sprintf/, "%n";
+}
 
 done_testing();

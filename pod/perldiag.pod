@@ -3527,6 +3527,11 @@ ended earlier on the current line.
 (W syntax) An underscore (underbar) in a numeric constant did not
 separate two digits.
 
+=item Missing argument for %n in %s
+
+(F) A C<%n> was used in a format string with no corresponding argument for
+perl to write the current string length to.
+
 =item Missing argument in %s
 
 (W missing) You called a function with fewer arguments than other
