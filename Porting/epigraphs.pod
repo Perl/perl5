@@ -17,6 +17,11 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.26.0-RC2 - Richard Condon, The Manchurian Candidate
+
+  Amateur psychiatric prognosis can be fascinating when there is
+  absolutely nothing else to do.
+
 =head2 v5.26.0-RC1 - Thomas Paine, Common Sense
 
 L<Announced on 2017-05-11 by Sawyer X|http://www.nntp.perl.org/group/perl.perl5.porters/2017/05/msg244337.html>
