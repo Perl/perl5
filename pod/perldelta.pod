@@ -3202,16 +3202,16 @@ Improve the error message for a missing C<tie()> package/method. This
 brings the error messages in line with the ones used for normal method
 calls.
 
+=item *
+
+Parsing bad POSIX charclasses no longer leaks memory.
+L<[perl #128313]|https://rt.perl.org/Public/Bug/Display.html?id=128313>
+
 =back
 
 =head1 Errata From Previous Releases
 
 =over 4
-
-=item *
-
-Parsing bad POSIX charclasses no longer leaks memory.
-L<[perl #128313]|https://rt.perl.org/Public/Bug/Display.html?id=128313>
 
 =item *
 
