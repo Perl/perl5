@@ -13009,6 +13009,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 int i;
                 if (vectorize)
                     goto unknown;
+                /* XXX if sv was originally non-utf8 with a char in the
+                 * range 0x80-0xff, then if it got upgraded, we should
+                 * calculate char len rather than byte len here */
                 i = SvCUR(sv) - origlen;
                 if (args) {
                     switch (intsize) {
