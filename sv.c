@@ -11935,62 +11935,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     [%bcdefginopsuxDFOUX] format (mandatory)
 */
 
-	if (args) {
-/*  
-	As of perl5.9.3, printf format checking is on by default.
-	Internally, perl uses %p formats to provide an escape to
-	some extended formatting.  This block deals with those
-	extensions: if it does not match, (char*)q is reset and
-	the normal format processing code is used.
-
-	Currently defined extensions are:
-		%p		include pointer address (standard)	
-		%-p	(SVf)	include an SV (previously %_)
-		%-<num>p	include an SV with precision <num>	
-		%2p		include a HEK
-		%3p		include a HEK with precision of 256
-		%4p		char* preceded by utf8 flag and length
-		%<num>p		(where num is 1 or > 4) reserved for future
-				extensions
-
-	Robin Barker 2005-07-14 (but modified since)
-
-		%1p	(VDf)	removed.  RMB 2007-10-19
-*/
- 	    char* r = q; 
-	    bool sv = FALSE;	
-	    STRLEN n = 0;
-	    if (*q == '-')
-		sv = *q++;
-	    n = expect_number(&q);
-	    if (*q++ == 'p') {
-		if (sv) {			/* SVf */
-		    if (n) {
-			precis = n;
-			has_precis = TRUE;
-		    }
-		    argsv = MUTABLE_SV(va_arg(*args, void*));
-		    eptr = SvPV_const(argsv, elen);
-		    if (DO_UTF8(argsv))
-			is_utf8 = TRUE;
-		    goto string;
-		}
-		else if (n==2 || n==3) {	/* HEKf */
-		    HEK * const hek = va_arg(*args, HEK *);
-		    eptr = HEK_KEY(hek);
-		    elen = HEK_LEN(hek);
-		    if (HEK_UTF8(hek)) is_utf8 = TRUE;
-		    if (n==3) precis = 256, has_precis = TRUE;
-		    goto string;
-		}
-		else if (n) {
-		    Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
-				     "internal %%<num>p might conflict with future printf extensions");
-		}
-	    }
-	    q = r; 
-	}
-
 	if ( (width = expect_number(&q)) ) {
 	    if (*q == '$') {
                 if (args)
@@ -12345,6 +12289,77 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	case 'p':
 	    if (alt || vectorize)
 		goto unknown;
+
+            /* %p extensions:
+             *
+             * "%...p" is normally treated like "%...x", except that the
+             * number to print is the SV's address (or a pointer address
+             * for C-ish sprintf).
+             *
+             * However, the C-ish sprintf variant allows a few special
+             * extensions. These are currently:
+             *
+             * %-p       (SVf)  Like %s, but gets the string from an SV*
+             *                  arg rather than a char* arg.
+             *                  (This was previously %_).
+             *
+             * %-<num>p         Ditto but like %.<num>s (i.e. num is max width)
+             *
+             * %2p       (HEKf) Like %s, but using the key string in a HEK
+             *
+             * %3p       (HEKf256) Ditto but like %.256s
+             *
+             * %d%lu%4p  (UTF8f) A utf8 string. Consumes 3 args:
+             *                       (cBOOL(utf8), len, string_buf).
+             *                   It's handled by the "case 'd'" branch
+             *                   rather than here.
+             *
+             * %<num>p   where num is 1 or > 4: reserved for future
+             *           extensions. Warns, but then is treated as a
+             *           general %p (print hex address) format.
+             */
+
+            if (   args
+                && !intsize
+                && fill == ' '
+                && !plus
+                && !has_precis
+                && !asterisk
+                && !used_explicit_ix
+            ) {
+                if (left) {			/* %-p (SVf), %-NNNp */
+                    if (width) {
+                        precis = width;
+                        has_precis = TRUE;
+                    }
+                    argsv = MUTABLE_SV(va_arg(*args, void*));
+                    eptr = SvPV_const(argsv, elen);
+                    if (DO_UTF8(argsv))
+                        is_utf8 = TRUE;
+                    width = 0;
+                    goto string;
+                }
+                else if (width == 2 || width == 3) {	/* HEKf, HEKf256 */
+                    HEK * const hek = va_arg(*args, HEK *);
+                    eptr = HEK_KEY(hek);
+                    elen = HEK_LEN(hek);
+                    if (HEK_UTF8(hek))
+                        is_utf8 = TRUE;
+                    if (width == 3) {
+                        precis = 256;
+                        has_precis = TRUE;
+                    }
+                    width = 0;
+                    goto string;
+                }
+                else if (width) {
+                    Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
+                         "internal %%<num>p might conflict with future printf extensions");
+                }
+            }
+
+            /* treat as normal %...p */
+
 	    uv = PTR2UV(args ? va_arg(*args, void*) : argsv);
 	    base = 16;
 	    goto integer;
