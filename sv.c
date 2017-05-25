@@ -11962,21 +11962,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    STRLEN n = 0;
 	    if (*q == '-')
 		sv = *q++;
-	    else if (strnEQ(q, UTF8f, sizeof(UTF8f)-1)) { /* UTF8f */
-		/* The argument has already gone through cBOOL, so the cast
-		   is safe. */
-		is_utf8 = (bool)va_arg(*args, int);
-		elen = va_arg(*args, UV);
-                /* if utf8 length is larger than 0x7ffff..., then it might
-                 * have been a signed value that wrapped */
-                if (elen  > ((~(STRLEN)0) >> 1)) {
-                    assert(0); /* in DEBUGGING build we want to crash */
-                    elen= 0; /* otherwise we want to treat this as an empty string */
-                }
-		eptr = va_arg(*args, char *);
-		q += sizeof(UTF8f)-1;
-		goto string;
-	    }
 	    n = expect_number(&q);
 	    if (*q++ == 'p') {
 		if (sv) {			/* SVf */
@@ -12370,9 +12355,40 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #else
 	    intsize = 'l';
 #endif
-	    /* FALLTHROUGH */
+            goto do_i;
+
 	case 'd':
+            /* probably just a plain %d, but it might be the start of the
+             * special UTF8f format, which usually looks something like
+             * "%d%lu%4p" (the lu may vary by platform)
+             */
+            assert((UTF8f)[0] == 'd');
+            assert((UTF8f)[1] == '%');
+
+	     if (   args              /* UTF8f only valid for C-ish sprintf */
+                 && q == fmtstart + 1 /* plain %d, not %....d */
+                 && patend >= fmtstart + sizeof(UTF8f) - 1 /* long enough */
+                 && *q == '%'
+                 && strnEQ(q + 1, UTF8f + 2, sizeof(UTF8f) - 3))
+            {
+		/* The argument has already gone through cBOOL, so the cast
+		   is safe. */
+		is_utf8 = (bool)va_arg(*args, int);
+		elen = va_arg(*args, UV);
+                /* if utf8 length is larger than 0x7ffff..., then it might
+                 * have been a signed value that wrapped */
+                if (elen  > ((~(STRLEN)0) >> 1)) {
+                    assert(0); /* in DEBUGGING build we want to crash */
+                    elen = 0; /* otherwise we want to treat this as an empty string */
+                }
+		eptr = va_arg(*args, char *);
+		q += sizeof(UTF8f) - 2;
+		goto string;
+	    }
+
+	    /* FALLTHROUGH */
 	case 'i':
+          do_i:
 	    if (vectorize) {
 		STRLEN ulen;
 		if (!veclen)
