@@ -3284,8 +3284,7 @@ the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
-If you find what you think is a bug, you might check the articles recently
-posted to the comp.lang.perl.misc newsgroup and the perl bug database at
+If you find what you think is a bug, you might check the perl bug database at
 L<https://rt.perl.org/> .  There may also be information at
 L<http://www.perl.org/> , the Perl Home Page.
 
