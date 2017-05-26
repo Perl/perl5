@@ -11875,7 +11875,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	STRLEN width     = 0;         /* value of "%NNN..."  */
 	bool has_precis  = FALSE;     /* has      "%.NNN..." */
 	STRLEN precis    = 0;         /* value of "%.NNN..." */
-	bool asterisk    = FALSE;     /* has      "%*..."    */
         bool used_explicit_ix = FALSE;/* has      "%$n..."   */
 	int base         = 0;         /* base to print in, e.g. 8 for %o */
 	UV uv            = 0;         /* the value to print of int-ish args */
@@ -12048,7 +12047,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		    SvIVx(svargs[ewix ? ewix-1 : svix++]) : 0;
 	    left |= (i < 0);
 	    width = (i < 0) ? -i : i;
-	    asterisk = TRUE;
         }
 	else if (*q == 'v') {
 	    q++;
@@ -12314,7 +12312,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 && !fill
                 && !plus
                 && !has_precis
-                && !asterisk
+                    /* not %*p or %*1$p - any width was explicit */
+                && q[-2] != '*'
+                && q[-2] != '$'
                 && !used_explicit_ix
             ) {
                 if (left) {			/* %-p (SVf), %-NNNp */
