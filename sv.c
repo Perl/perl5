@@ -12229,26 +12229,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	    /* STRINGS */
 
-	case 'c':
-	    if (vectorize)
-		goto unknown;
-	    uv = (args) ? va_arg(*args, int) : SvIV_nomg(argsv);
-	    if ((uv > 255 ||
-		 (!UVCHR_IS_INVARIANT(uv) && SvUTF8(sv)))
-		&& !IN_BYTES)
-            {
-                assert(sizeof(ebuf) >= UTF8_MAXBYTES + 1);
-		eptr = ebuf;
-		elen = uvchr_to_utf8((U8*)eptr, uv) - (U8*)ebuf;
-		is_utf8 = TRUE;
-	    }
-	    else {
-		c = (char)uv;
-		eptr = &c;
-		elen = 1;
-	    }
-	    goto string;
-
 	case 's':
 	    if (vectorize)
 		goto unknown;
@@ -12366,6 +12346,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    uv = PTR2UV(args ? va_arg(*args, void*) : argsv);
 	    base = 16;
 	    goto integer;
+
+	case 'c':
+	    if (vectorize)
+		goto unknown;
+	    uv = (args) ? va_arg(*args, int) : SvIV_nomg(argsv);
+            base = 1; /* special value that indicates we're doing a 'c' */
+            goto integer;
 
 	case 'D':
 #ifdef IV_IS_QUAD
@@ -12599,6 +12586,28 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 			esignbuf[esignlen++] = c;
 		    }
 		    break;
+
+		case 1:
+                    /* special-case: base 1 indicates a 'c' format:
+                     * we use the common code for extracting a uv,
+                     * but handle that value differently here than
+                     * all the other int types */
+                    if ((uv > 255 ||
+                         (!UVCHR_IS_INVARIANT(uv) && SvUTF8(sv)))
+                        && !IN_BYTES)
+                    {
+                        assert(sizeof(ebuf) >= UTF8_MAXBYTES + 1);
+                        eptr = ebuf;
+                        elen = uvchr_to_utf8((U8*)eptr, uv) - (U8*)ebuf;
+                        is_utf8 = TRUE;
+                    }
+                    else {
+                        c = (char)uv;
+                        eptr = &c;
+                        elen = 1;
+                    }
+                    goto string;
+
 		default:		/* it had better be ten or less */
 		    do {
 			dig = uv % base;
