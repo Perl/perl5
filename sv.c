@@ -12101,41 +12101,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    }
 	}
 
-	if (vectorize) {
-	    if (args) {
-                vecsv = va_arg(*args, SV*);
-                vecstr = (U8*)SvPV_const(vecsv,veclen);
-                vec_utf8 = DO_UTF8(vecsv);
-	    }
-	    else if (efix ? (efix > 0 && efix <= svmax) : svix < svmax) {
-		vecsv = svargs[efix ? efix-1 : svix++];
-		vecstr = (U8*)SvPV_const(vecsv,veclen);
-		vec_utf8 = DO_UTF8(vecsv);
-
-		/* if this is a version object, we need to convert
-		 * back into v-string notation and then let the
-		 * vectorize happen normally
-		 */
-		if (sv_isobject(vecsv) && sv_derived_from(vecsv, "version")) {
-		    if ( hv_existss(MUTABLE_HV(SvRV(vecsv)), "alpha") ) {
-			Perl_ck_warner_d(aTHX_ packWARN(WARN_PRINTF),
-			"vector argument not supported with alpha versions");
-			goto vdblank;
-		    }
-		    vecsv = sv_newmortal();
-		    scan_vstring((char *)vecstr, (char *)vecstr + veclen,
-				 vecsv);
-		    vecstr = (U8*)SvPV_const(vecsv, veclen);
-		    vec_utf8 = DO_UTF8(vecsv);
-		}
-	    }
-	    else {
-	      vdblank:
-		vecstr = (U8*)"";
-		veclen = 0;
-	    }
-	}
-
 	/* SIZE */
 
 	switch (*q) {
@@ -12213,6 +12178,41 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		goto unknown;
 	    }
 	    goto string;
+	}
+
+	if (vectorize) {
+	    if (args) {
+                vecsv = va_arg(*args, SV*);
+                vecstr = (U8*)SvPV_const(vecsv,veclen);
+                vec_utf8 = DO_UTF8(vecsv);
+	    }
+	    else if (efix ? (efix > 0 && efix <= svmax) : svix < svmax) {
+		vecsv = svargs[efix ? efix-1 : svix++];
+		vecstr = (U8*)SvPV_const(vecsv,veclen);
+		vec_utf8 = DO_UTF8(vecsv);
+
+		/* if this is a version object, we need to convert
+		 * back into v-string notation and then let the
+		 * vectorize happen normally
+		 */
+		if (sv_isobject(vecsv) && sv_derived_from(vecsv, "version")) {
+		    if ( hv_existss(MUTABLE_HV(SvRV(vecsv)), "alpha") ) {
+			Perl_ck_warner_d(aTHX_ packWARN(WARN_PRINTF),
+			"vector argument not supported with alpha versions");
+			goto vdblank;
+		    }
+		    vecsv = sv_newmortal();
+		    scan_vstring((char *)vecstr, (char *)vecstr + veclen,
+				 vecsv);
+		    vecstr = (U8*)SvPV_const(vecsv, veclen);
+		    vec_utf8 = DO_UTF8(vecsv);
+		}
+	    }
+	    else {
+	      vdblank:
+		vecstr = (U8*)"";
+		veclen = 0;
+	    }
 	}
 
 	if (!vectorize && !args) {
