@@ -12216,15 +12216,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	c = *q++; /* c now holds the conversion type */
 
-        if (argsv && strchr("BbcDdiOouUXx", c)) {
-            /* XXX va_arg(*args) case? need peek, use va_copy? */
-            SvGETMAGIC(argsv);
-            if (UNLIKELY(SvAMAGIC(argsv)))
-                argsv = sv_2num(argsv);
-            if (UNLIKELY(isinfnansv(argsv)))
-                goto handle_infnan_argsv;
-        }
-
 	switch (c) {
 
 	    /* STRINGS */
@@ -12350,9 +12341,20 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	case 'c':
 	    if (vectorize)
 		goto unknown;
-	    uv = (args) ? va_arg(*args, int) : SvIV_nomg(argsv);
+            /* Ignore any size specifiers, since they're not documented as
+             * being allowed for %c (ideally we should warn on e.g. '%hc').
+             * Setting a default intsize, along with a positive
+             * (which signals unsigned) base, causes, for C-ish use, the
+             * va_arg to be interpreted as as unsigned int, when it's
+             * actually signed, which will convert -ve values to high +ve
+             * values. Note that unlike the libc %c, values > 255 will
+             * convert to high unicode points rather than being truncated
+             * to 8 bits. For perlish use, it will do SvUV(argsv), which
+             * will again convert -ve args to high -ve values.
+             */
+            intsize = 0;
             base = 1; /* special value that indicates we're doing a 'c' */
-            goto do_integer;
+            goto get_int_arg_val;
 
 	case 'D':
 #ifdef IV_IS_QUAD
@@ -12453,6 +12455,17 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		veclen -= ulen;
 	    }
 	    else {
+                /* test arg for inf/nan. This can trigger an unwanted
+                 * 'str' overload, so manually force 'num' overload first
+                 * if necessary */
+                if (argsv) {
+                    SvGETMAGIC(argsv);
+                    if (UNLIKELY(SvAMAGIC(argsv)))
+                        argsv = sv_2num(argsv);
+                    if (UNLIKELY(isinfnansv(argsv)))
+                        goto handle_infnan_argsv;
+                }
+
                 if (base < 0) {
                     /* signed int type */
                     base = -base;
