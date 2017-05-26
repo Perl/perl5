@@ -11036,10 +11036,6 @@ S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
 }
 
 
-#define VECTORIZE_ARGS	vecsv = va_arg(*args, SV*);\
-			vecstr = (U8*)SvPV_const(vecsv,veclen);\
-			vec_utf8 = DO_UTF8(vecsv);
-
 /* XXX maybe_tainted is never assigned to, so the doc above is lying. */
 
 void
@@ -12107,7 +12103,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	if (vectorize) {
 	    if (args) {
-		VECTORIZE_ARGS
+                vecsv = va_arg(*args, SV*);
+                vecstr = (U8*)SvPV_const(vecsv,veclen);
+                vec_utf8 = DO_UTF8(vecsv);
 	    }
 	    else if (efix ? (efix > 0 && efix <= svmax) : svix < svmax) {
 		vecsv = svargs[efix ? efix-1 : svix++];
