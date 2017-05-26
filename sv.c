@@ -11892,7 +11892,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	I32 efix         = 0;         /* explicit format parameter index */
 	I32 ewix         = 0;         /* explicit width index */
 	I32 epix         = 0;         /* explicit precision index */
-	I32 evix         = 0;         /* explicit vector index */
 	const I32 osvix  = svix;      /* original index in case of bad fmt */
 
 	bool is_utf8     = FALSE;     /* is this item utf8?   */
@@ -11980,6 +11979,22 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    break;
 	}
 
+      /* at this point we can expect one of:
+       *
+       *  123  an explicit width
+       *  *    width taken from next arg
+       *  *12$ width taken from 12th arg
+       *       or no width
+       *
+       * But any width specification may be preceded by a v, in one of its
+       * forms:
+       *        v
+       *        *v
+       *        *12$v
+       * So an asterisk may be either a width specifier or a vector
+       * separator arg specifier, and we don't know which initially
+       */
+
       tryasterisk:
 	if (*q == '*') {
 	    q++;
@@ -11999,15 +12014,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    if (vectorize)
 		goto unknown;
 	    if (asterisk) { /* *v, *NNN$v */
-		evix = ewix;
-		ewix = 0;
-		asterisk = FALSE;
                 /* vectorizing, but not with the default "." */
+		asterisk = FALSE;
                 if (args)
                     vecsv = va_arg(*args, SV*);
-                else if (evix) {
+                else if (ewix) {
                     FETCH_VCATPVFN_ARGUMENT(
-                        vecsv, evix > 0 && evix <= svmax, svargs[evix-1]);
+                        vecsv, ewix > 0 && ewix <= svmax, svargs[ewix-1]);
                 } else {
                     FETCH_VCATPVFN_ARGUMENT(
                         vecsv, svix < svmax, svargs[svix++]);
@@ -12023,6 +12036,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     dotstr = SvPV_const(vecsv, dotstrlen);
                     is_utf8 = TRUE;
                 }
+		ewix = 0;
 	    }
 	    vectorize = TRUE;
 	    goto tryasterisk;
