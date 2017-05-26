@@ -971,4 +971,10 @@ SKIP: {
     like $@, qr/Missing argument for %n in sprintf/, "%n";
 }
 
+# %p of an Inf or Nan address should still print its address, not
+# 'Inf' etc.
+
+like sprintf("%p", 0+'Inf'), qr/^[0-9a-f]+$/, "%p and Inf";
+like sprintf("%p", 0+'NaN'), qr/^[0-9a-f]+$/, "%p and NaN";
+
 done_testing();

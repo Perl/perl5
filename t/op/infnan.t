@@ -38,7 +38,7 @@ my @NaN = ("NAN", "nan", "qnan", "SNAN", "NanQ", "NANS",
            "1.#QNAN", "+1#SNAN", "-1.#NAN", "1#IND", "1.#IND00",
            "NAN(123)");
 
-my @printf_fmt = qw(e f g a d u o i b x p);
+my @printf_fmt = qw(e f g a d u o i b x);
 my @packi_fmt = qw(c C s S l L i I n N v V j J w W U);
 my @packf_fmt = qw(f d F);
 my @packs_fmt = qw(a4 A4 Z5 b20 B20 h10 H10 u);
@@ -539,7 +539,7 @@ cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
     my @w;
     local $SIG{__WARN__} = sub { push @w, $_[0] };
 
-    for my $format (qw(B b c D d i O o p U u X x)) {
+    for my $format (qw(B b c D d i O o U u X x)) {
         # skip unportable: j
         for my $size (qw(hh h l q L ll t z)) {
             for my $num ($NInf, $PInf, $NaN) {

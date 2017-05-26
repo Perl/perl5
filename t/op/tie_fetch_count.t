@@ -9,7 +9,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan (tests => 345);
+plan (tests => 343);
 
 use strict;
 use warnings;
@@ -295,7 +295,7 @@ pos$var = 0             ; check_count 'lvalue pos $utf8';
 $dummy=sprintf"%1s",$var; check_count 'sprintf "%1s", $utf8';
 $dummy=sprintf"%.1s",$var; check_count 'sprintf "%.1s", $utf8';
 
-my @fmt = qw(B b c D d i O o p u U X x);
+my @fmt = qw(B b c D d i O o u U X x);
 
 tie $var, "main", 23;
 for (@fmt) {
