@@ -12003,6 +12003,27 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		evix = ewix;
 		ewix = 0;
 		asterisk = FALSE;
+                /* vectorizing, but not with the default "." */
+                if (args)
+                    vecsv = va_arg(*args, SV*);
+                else if (evix) {
+                    FETCH_VCATPVFN_ARGUMENT(
+                        vecsv, evix > 0 && evix <= svmax, svargs[evix-1]);
+                } else {
+                    FETCH_VCATPVFN_ARGUMENT(
+                        vecsv, svix < svmax, svargs[svix++]);
+                }
+                dotstr = SvPV_const(vecsv, dotstrlen);
+                /* Keep the DO_UTF8 test *after* the SvPV call, else things go
+                   bad with tied or overloaded values that return UTF8.  */
+                if (DO_UTF8(vecsv))
+                    is_utf8 = TRUE;
+                else if (has_utf8) {
+                    vecsv = sv_mortalcopy(vecsv);
+                    sv_utf8_upgrade(vecsv);
+                    dotstr = SvPV_const(vecsv, dotstrlen);
+                    is_utf8 = TRUE;
+                }
 	    }
 	    vectorize = TRUE;
 	    goto tryasterisk;
@@ -12017,29 +12038,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    width = expect_number(&q);
 	}
 
-	if (vectorize && vectorarg) {
-	    /* vectorizing, but not with the default "." */
-	    if (args)
-		vecsv = va_arg(*args, SV*);
-	    else if (evix) {
-                FETCH_VCATPVFN_ARGUMENT(
-                    vecsv, evix > 0 && evix <= svmax, svargs[evix-1]);
-	    } else {
-                FETCH_VCATPVFN_ARGUMENT(
-                    vecsv, svix < svmax, svargs[svix++]);
-	    }
-	    dotstr = SvPV_const(vecsv, dotstrlen);
-	    /* Keep the DO_UTF8 test *after* the SvPV call, else things go
-	       bad with tied or overloaded values that return UTF8.  */
-	    if (DO_UTF8(vecsv))
-		is_utf8 = TRUE;
-	    else if (has_utf8) {
-		vecsv = sv_mortalcopy(vecsv);
-		sv_utf8_upgrade(vecsv);
-		dotstr = SvPV_const(vecsv, dotstrlen);
-		is_utf8 = TRUE;
-	    }		    
-	}
 
 	if (asterisk) {
             int i;
