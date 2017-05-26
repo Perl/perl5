@@ -11877,7 +11877,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	STRLEN precis    = 0;         /* value of "%.NNN..." */
 	bool asterisk    = FALSE;     /* has      "%*..."    */
         bool used_explicit_ix = FALSE;/* has      "%$n..."   */
-	unsigned base    = 0;         /* base to print in, e.g. 8 for %o */
+	int base         = 0;         /* base to print in, e.g. 8 for %o */
 	UV uv            = 0;         /* the value to print of int-ish args */
 	IV iv            = 0;         /* ditto for signed types */
 
@@ -12345,14 +12345,14 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	    uv = PTR2UV(args ? va_arg(*args, void*) : argsv);
 	    base = 16;
-	    goto integer;
+	    goto do_integer;
 
 	case 'c':
 	    if (vectorize)
 		goto unknown;
 	    uv = (args) ? va_arg(*args, int) : SvIV_nomg(argsv);
             base = 1; /* special value that indicates we're doing a 'c' */
-            goto integer;
+            goto do_integer;
 
 	case 'D':
 #ifdef IV_IS_QUAD
@@ -12360,7 +12360,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #else
 	    intsize = 'l';
 #endif
-            goto do_i;
+            base = -10;
+            goto get_int_arg_val;
 
 	case 'd':
             /* probably just a plain %d, but it might be the start of the
@@ -12393,75 +12394,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	    /* FALLTHROUGH */
 	case 'i':
-          do_i:
-	    if (vectorize) {
-		STRLEN ulen;
-		if (!veclen)
-                    goto donevalidconversion;
-		if (vec_utf8)
-		    uv = utf8n_to_uvchr(vecstr, veclen, &ulen,
-					UTF8_ALLOW_ANYUV);
-		else {
-		    uv = *vecstr;
-		    ulen = 1;
-		}
-		vecstr += ulen;
-		veclen -= ulen;
-		if (plus)
-		     esignbuf[esignlen++] = plus;
-	    }
-	    else if (args) {
-		switch (intsize) {
-		case 'c':	iv = (char)va_arg(*args, int); break;
-		case 'h':	iv = (short)va_arg(*args, int); break;
-		case 'l':	iv = va_arg(*args, long); break;
-		case 'V':	iv = va_arg(*args, IV); break;
-		case 'z':	iv = va_arg(*args, SSize_t); break;
-#ifdef HAS_PTRDIFF_T
-		case 't':	iv = va_arg(*args, ptrdiff_t); break;
-#endif
-		default:	iv = va_arg(*args, int); break;
-#ifdef I_STDINT
-		case 'j':	iv = va_arg(*args, intmax_t); break;
-#endif
-		case 'q':
-#if IVSIZE >= 8
-				iv = va_arg(*args, Quad_t); break;
-#else
-				goto unknown;
-#endif
-		}
-	    }
-	    else {
-		IV tiv = SvIV_nomg(argsv); /* work around GCC bug #13488 */
-		switch (intsize) {
-		case 'c':	iv = (char)tiv; break;
-		case 'h':	iv = (short)tiv; break;
-		case 'l':	iv = (long)tiv; break;
-		case 'V':
-		default:	iv = tiv; break;
-		case 'q':
-#if IVSIZE >= 8
-				iv = (Quad_t)tiv; break;
-#else
-				goto unknown;
-#endif
-		}
-	    }
-	    if ( !vectorize )	/* we already set uv above */
-	    {
-		if (iv >= 0) {
-		    uv = iv;
-		    if (plus)
-			esignbuf[esignlen++] = plus;
-		}
-		else {
-		    uv = (iv == IV_MIN) ? (UV)iv : (UV)(-iv);
-		    esignbuf[esignlen++] = '-';
-		}
-	    }
-	    base = 10;
-	    goto integer;
+            base = -10;
+            goto get_int_arg_val;
 
 	case 'U':
 #ifdef IV_IS_QUAD
@@ -12472,12 +12406,12 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    /* FALLTHROUGH */
 	case 'u':
 	    base = 10;
-	    goto uns_integer;
+	    goto get_int_arg_val;
 
 	case 'B':
 	case 'b':
 	    base = 2;
-	    goto uns_integer;
+	    goto get_int_arg_val;
 
 	case 'O':
 #ifdef IV_IS_QUAD
@@ -12488,16 +12422,24 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    /* FALLTHROUGH */
 	case 'o':
 	    base = 8;
-	    goto uns_integer;
+	    goto get_int_arg_val;
 
 	case 'X':
 	case 'x':
 	    base = 16;
 
-	uns_integer:
+          get_int_arg_val:
+
 	    if (vectorize) {
 		STRLEN ulen;
-	vector:
+
+                if (base < 0) {
+                    base = -base;
+                    if (plus)
+                         esignbuf[esignlen++] = plus;
+                }
+
+	      vector:
 		if (!veclen)
                     goto donevalidconversion;
 		if (vec_utf8)
@@ -12510,46 +12452,108 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		vecstr += ulen;
 		veclen -= ulen;
 	    }
-	    else if (args) {
-		switch (intsize) {
-		case 'c':  uv = (unsigned char)va_arg(*args, unsigned); break;
-		case 'h':  uv = (unsigned short)va_arg(*args, unsigned); break;
-		case 'l':  uv = va_arg(*args, unsigned long); break;
-		case 'V':  uv = va_arg(*args, UV); break;
-		case 'z':  uv = va_arg(*args, Size_t); break;
+	    else {
+                if (base < 0) {
+                    /* signed int type */
+                    base = -base;
+                    if (args) {
+                        switch (intsize) {
+                        case 'c':  iv = (char)va_arg(*args, int);  break;
+                        case 'h':  iv = (short)va_arg(*args, int); break;
+                        case 'l':  iv = va_arg(*args, long);       break;
+                        case 'V':  iv = va_arg(*args, IV);         break;
+                        case 'z':  iv = va_arg(*args, SSize_t);    break;
 #ifdef HAS_PTRDIFF_T
-	        case 't':  uv = va_arg(*args, ptrdiff_t); break; /* will sign extend, but there is no uptrdiff_t, so oh well */
+                        case 't':  iv = va_arg(*args, ptrdiff_t);  break;
+#endif
+                        default:   iv = va_arg(*args, int);        break;
+#ifdef I_STDINT
+                        case 'j':  iv = va_arg(*args, intmax_t);   break;
+#endif
+                        case 'q':
+#if IVSIZE >= 8
+                                   iv = va_arg(*args, Quad_t);     break;
+#else
+                                   goto unknown;
+#endif
+                        }
+                    }
+                    else {
+                        IV tiv = SvIV_nomg(argsv); /* work around GCC bug #13488 */
+                        switch (intsize) {
+                        case 'c':  iv = (char)tiv;   break;
+                        case 'h':  iv = (short)tiv;  break;
+                        case 'l':  iv = (long)tiv;   break;
+                        case 'V':
+                        default:   iv = tiv;         break;
+                        case 'q':
+#if IVSIZE >= 8
+                                   iv = (Quad_t)tiv; break;
+#else
+                                   goto unknown;
+#endif
+                        }
+                    }
+
+                    /* now convert iv to uv */
+                    if (iv >= 0) {
+                        uv = iv;
+                        if (plus)
+                            esignbuf[esignlen++] = plus;
+                    }
+                    else {
+                        uv = (iv == IV_MIN) ? (UV)iv : (UV)(-iv);
+                        esignbuf[esignlen++] = '-';
+                    }
+                }
+                else {
+                    /* unsigned int type */
+                    if (args) {
+                        switch (intsize) {
+                        case 'c': uv = (unsigned char)va_arg(*args, unsigned);
+                                  break;
+                        case 'h': uv = (unsigned short)va_arg(*args, unsigned);
+                                  break;
+                        case 'l': uv = va_arg(*args, unsigned long); break;
+                        case 'V': uv = va_arg(*args, UV);            break;
+                        case 'z': uv = va_arg(*args, Size_t);        break;
+#ifdef HAS_PTRDIFF_T
+                                  /* will sign extend, but there is no
+                                   * uptrdiff_t, so oh well */
+                        case 't': uv = va_arg(*args, ptrdiff_t);     break;
 #endif
 #ifdef I_STDINT
-		case 'j':  uv = va_arg(*args, uintmax_t); break;
+                        case 'j': uv = va_arg(*args, uintmax_t);     break;
 #endif
-		default:   uv = va_arg(*args, unsigned); break;
-		case 'q':
+                        default:  uv = va_arg(*args, unsigned);      break;
+                        case 'q':
 #if IVSIZE >= 8
-			   uv = va_arg(*args, Uquad_t); break;
+                                  uv = va_arg(*args, Uquad_t);       break;
 #else
-			   goto unknown;
+                                  goto unknown;
 #endif
-		}
-	    }
-	    else {
-		UV tuv = SvUV_nomg(argsv); /* work around GCC bug #13488 */
-		switch (intsize) {
-		case 'c':	uv = (unsigned char)tuv; break;
-		case 'h':	uv = (unsigned short)tuv; break;
-		case 'l':	uv = (unsigned long)tuv; break;
-		case 'V':
-		default:	uv = tuv; break;
-		case 'q':
+                        }
+                    }
+                    else {
+                        UV tuv = SvUV_nomg(argsv); /* work around GCC bug #13488 */
+                        switch (intsize) {
+                        case 'c': uv = (unsigned char)tuv;  break;
+                        case 'h': uv = (unsigned short)tuv; break;
+                        case 'l': uv = (unsigned long)tuv;  break;
+                        case 'V':
+                        default:  uv = tuv;                 break;
+                        case 'q':
 #if IVSIZE >= 8
-				uv = (Uquad_t)tuv; break;
+                                  uv = (Uquad_t)tuv;        break;
 #else
-				goto unknown;
+                                  goto unknown;
 #endif
-		}
-	    }
+                        }
+                    }
+                }
+            }
 
-	integer:
+	do_integer:
 	    {
 		char *ptr = ebuf + sizeof ebuf;
 		bool tempalt = uv ? alt : FALSE; /* Vectors can't change alt */
