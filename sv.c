@@ -12214,8 +12214,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		veclen = 0;
 	    }
 	}
-
-	if (!vectorize && !args) {
+        else if (!args) {
 	    if (efix) {
 		const I32 i = efix-1;
                 FETCH_VCATPVFN_ARGUMENT(argsv, i >= 0 && i < svmax, svargs[i]);
