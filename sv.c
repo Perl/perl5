@@ -11882,7 +11882,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	IV iv            = 0;         /* ditto for signed types */
 
 	bool vectorize   = FALSE;     /* has      "%v..."    */
-	bool vectorarg   = FALSE;     /* has      "%*v..."   */
 	SV *vecsv        = NULL;      /* the cur arg for %v  */
 	bool vec_utf8    = FALSE;     /* SvUTF8(vecsv)       */
 	const U8 *vecstr = NULL;      /* SvPVX(vecsv)        */
@@ -11999,7 +11998,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    q++;
 	    if (vectorize)
 		goto unknown;
-	    if ((vectorarg = asterisk)) {
+	    if (asterisk) { /* *v, *NNN$v */
 		evix = ewix;
 		ewix = 0;
 		asterisk = FALSE;
@@ -12029,16 +12028,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    goto tryasterisk;
 	}
 
-	if (!asterisk)
-	{
-	    if(*q == '0') {
-		fill = TRUE;
-                q++;
-            }
-	    width = expect_number(&q);
-	}
-
-
 	if (asterisk) {
             int i;
 	    if (args)
@@ -12049,6 +12038,14 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    left |= (i < 0);
 	    width = (i < 0) ? -i : i;
 	}
+	else {
+	    if(*q == '0') {
+		fill = TRUE;
+                q++;
+            }
+	    width = expect_number(&q);
+	}
+
       gotwidth:
 
 	/* PRECISION */
