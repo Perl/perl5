@@ -11881,8 +11881,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	bool vec_utf8    = FALSE;     /* SvUTF8(vecsv)       */
 	const U8 *vecstr = NULL;      /* SvPVX(vecsv)        */
 	STRLEN veclen    = 0;         /* SvCUR(vecsv)        */
-	const char *dotstr = ".";     /* separator string for %v */
-	STRLEN dotstrlen = 1;         /* length of separator string for %v */
+	const char *dotstr = NULL;    /* separator string for %v */
+	STRLEN dotstrlen;             /* length of separator string for %v */
 
 	I32 efix         = 0;         /* explicit format parameter index */
 	I32 epix         = 0;         /* explicit precision index */
@@ -12048,6 +12048,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    if (vectorize)
 		goto unknown;
 	    vectorize = TRUE;
+            dotstr = ".";
+            dotstrlen = 1;
             goto tryasterisk;
 
         }
@@ -13200,10 +13202,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             need = (have > width ? have : width);
             gap = need - have;
 
-            if (need >= (((STRLEN)~0) - dotstrlen))
-                croak_memory_wrap();
-            need += dotstrlen;
-
             if (need >= (((STRLEN)~0) - (SvCUR(sv) + 1)))
                 croak_memory_wrap();
             need += (SvCUR(sv) + 1);
@@ -13238,14 +13236,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 memset(p, ' ', gap);
                 p += gap;
             }
-            if (vectorize) {
-                if (veclen) {
-                    Copy(dotstr, p, dotstrlen, char);
-                    p += dotstrlen;
-                }
-                else
-                    vectorize = FALSE;	/* done iterating over vecstr */
-            }
             if (is_utf8)
                 has_utf8 = TRUE;
             if (has_utf8)
@@ -13254,9 +13244,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             SvCUR_set(sv, p - SvPVX_const(sv));
         }
 
-	if (vectorize) {
-	    esignlen = 0;
-	    goto vector;
+	if (vectorize && veclen) {
+            /* we append the vector separator separately since %v isn't
+             * very common: don't slow down the general case by adding
+             * dotstrlen to need etc */
+            sv_catpvn_nomg(sv, dotstr, dotstrlen);
+            esignlen = 0;
+            goto vector; /* do next iteration */
 	}
 
       donevalidconversion:
