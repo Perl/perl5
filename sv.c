@@ -11997,6 +11997,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
       tryasterisk:
 	if (*q == '*') {
+            int i;
 	    q++;
 	    if ( (ewix = expect_number(&q)) ) {
 		if (*q++ == '$') {
@@ -12007,15 +12008,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 } else
 		    goto unknown;
             }
-	    asterisk = TRUE;
-	}
-	if (*q == 'v') {
-	    q++;
-	    if (vectorize)
-		goto unknown;
-	    if (asterisk) { /* *v, *NNN$v */
-                /* vectorizing, but not with the default "." */
-		asterisk = FALSE;
+
+            if (*q == 'v') {
+                /* The asterisk was for  *v, *NNN$v: vectorizing, but not
+                 * with the default "." */
+                q++;
+                if (vectorize)
+                    goto unknown;
                 if (args)
                     vecsv = va_arg(*args, SV*);
                 else if (ewix) {
@@ -12037,13 +12036,11 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     is_utf8 = TRUE;
                 }
 		ewix = 0;
-	    }
-	    vectorize = TRUE;
-	    goto tryasterisk;
-	}
+                vectorize = TRUE;
+                goto tryasterisk;
+            }
 
-	if (asterisk) {
-            int i;
+            /* the asterisk specified a width */
 	    if (args)
 		i = va_arg(*args, int);
 	    else
@@ -12051,8 +12048,18 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		    SvIVx(svargs[ewix ? ewix-1 : svix++]) : 0;
 	    left |= (i < 0);
 	    width = (i < 0) ? -i : i;
-	}
+	    asterisk = TRUE;
+        }
+	else if (*q == 'v') {
+	    q++;
+	    if (vectorize)
+		goto unknown;
+	    vectorize = TRUE;
+            goto tryasterisk;
+
+        }
 	else {
+        /* explicit width? */
 	    if(*q == '0') {
 		fill = TRUE;
                 q++;
