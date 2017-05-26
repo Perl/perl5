@@ -45,34 +45,30 @@ sub nonportable_regex ($) {
 # be allowed/warned on.
 my @tests = (
      # ($testname, $bytes, $warn_flags, $disallow_flags, $expected_error_flags,
-     #  $category, $allowed_uv, $needed_to_discern_len, $message )
+     #  $category, $allowed_uv, $needed_to_discern_len )
     [ "lowest surrogate",
         (isASCII) ? "\xed\xa0\x80" : I8_to_native("\xf1\xb6\xa0\xa0"),
         $::UTF8_WARN_SURROGATE, $::UTF8_DISALLOW_SURROGATE, $::UTF8_GOT_SURROGATE,
         'surrogate', 0xD800,
         2,
-        qr/surrogate/
     ],
     [ "a middle surrogate",
         (isASCII) ? "\xed\xa4\x8d" : I8_to_native("\xf1\xb6\xa8\xad"),
         $::UTF8_WARN_SURROGATE, $::UTF8_DISALLOW_SURROGATE, $::UTF8_GOT_SURROGATE,
         'surrogate', 0xD90D,
         2,
-        qr/surrogate/
     ],
     [ "highest surrogate",
         (isASCII) ? "\xed\xbf\xbf" : I8_to_native("\xf1\xb7\xbf\xbf"),
         $::UTF8_WARN_SURROGATE, $::UTF8_DISALLOW_SURROGATE, $::UTF8_GOT_SURROGATE,
         'surrogate', 0xDFFF,
         2,
-        qr/surrogate/
     ],
     [ "first non_unicode",
         (isASCII) ? "\xf4\x90\x80\x80" : I8_to_native("\xf9\xa2\xa0\xa0\xa0"),
         $::UTF8_WARN_SUPER, $::UTF8_DISALLOW_SUPER, $::UTF8_GOT_SUPER,
         'non_unicode', 0x110000,
         2,
-        qr/(not Unicode|for a non-Unicode code point).* may not be portable/
     ],
     [ "non_unicode whose first byte tells that",
         (isASCII) ? "\xf5\x80\x80\x80" : I8_to_native("\xfa\xa0\xa0\xa0\xa0"),
@@ -80,266 +76,228 @@ my @tests = (
         'non_unicode',
         (isASCII) ? 0x140000 : 0x200000,
         1,
-        qr/(not Unicode|for a non-Unicode code point).* may not be portable/
     ],
     [ "first of 32 consecutive non-character code points",
         (isASCII) ? "\xef\xb7\x90" : I8_to_native("\xf1\xbf\xae\xb0"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0xFDD0,
         (isASCII) ? 3 : 4,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "a mid non-character code point of the 32 consecutive ones",
         (isASCII) ? "\xef\xb7\xa0" : I8_to_native("\xf1\xbf\xaf\xa0"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0xFDE0,
         (isASCII) ? 3 : 4,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "final of 32 consecutive non-character code points",
         (isASCII) ? "\xef\xb7\xaf" : I8_to_native("\xf1\xbf\xaf\xaf"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0xFDEF,
         (isASCII) ? 3 : 4,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+FFFE",
         (isASCII) ? "\xef\xbf\xbe" : I8_to_native("\xf1\xbf\xbf\xbe"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0xFFFE,
         (isASCII) ? 3 : 4,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+FFFF",
         (isASCII) ? "\xef\xbf\xbf" : I8_to_native("\xf1\xbf\xbf\xbf"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0xFFFF,
         (isASCII) ? 3 : 4,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+1FFFE",
         (isASCII) ? "\xf0\x9f\xbf\xbe" : I8_to_native("\xf3\xbf\xbf\xbe"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x1FFFE,
         4,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+1FFFF",
         (isASCII) ? "\xf0\x9f\xbf\xbf" : I8_to_native("\xf3\xbf\xbf\xbf"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x1FFFF,
         4,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+2FFFE",
         (isASCII) ? "\xf0\xaf\xbf\xbe" : I8_to_native("\xf5\xbf\xbf\xbe"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x2FFFE,
         4,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+2FFFF",
         (isASCII) ? "\xf0\xaf\xbf\xbf" : I8_to_native("\xf5\xbf\xbf\xbf"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x2FFFF,
         4,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+3FFFE",
         (isASCII) ? "\xf0\xbf\xbf\xbe" : I8_to_native("\xf7\xbf\xbf\xbe"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x3FFFE,
         4,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+3FFFF",
         (isASCII) ? "\xf0\xbf\xbf\xbf" : I8_to_native("\xf7\xbf\xbf\xbf"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x3FFFF,
         4,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+4FFFE",
         (isASCII) ? "\xf1\x8f\xbf\xbe" : I8_to_native("\xf8\xa9\xbf\xbf\xbe"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x4FFFE,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+4FFFF",
         (isASCII) ? "\xf1\x8f\xbf\xbf" : I8_to_native("\xf8\xa9\xbf\xbf\xbf"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x4FFFF,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+5FFFE",
         (isASCII) ? "\xf1\x9f\xbf\xbe" : I8_to_native("\xf8\xab\xbf\xbf\xbe"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x5FFFE,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+5FFFF",
         (isASCII) ? "\xf1\x9f\xbf\xbf" : I8_to_native("\xf8\xab\xbf\xbf\xbf"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x5FFFF,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+6FFFE",
         (isASCII) ? "\xf1\xaf\xbf\xbe" : I8_to_native("\xf8\xad\xbf\xbf\xbe"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x6FFFE,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+6FFFF",
         (isASCII) ? "\xf1\xaf\xbf\xbf" : I8_to_native("\xf8\xad\xbf\xbf\xbf"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x6FFFF,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+7FFFE",
         (isASCII) ? "\xf1\xbf\xbf\xbe" : I8_to_native("\xf8\xaf\xbf\xbf\xbe"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x7FFFE,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+7FFFF",
         (isASCII) ? "\xf1\xbf\xbf\xbf" : I8_to_native("\xf8\xaf\xbf\xbf\xbf"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x7FFFF,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+8FFFE",
         (isASCII) ? "\xf2\x8f\xbf\xbe" : I8_to_native("\xf8\xb1\xbf\xbf\xbe"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x8FFFE,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+8FFFF",
         (isASCII) ? "\xf2\x8f\xbf\xbf" : I8_to_native("\xf8\xb1\xbf\xbf\xbf"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x8FFFF,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+9FFFE",
         (isASCII) ? "\xf2\x9f\xbf\xbe" : I8_to_native("\xf8\xb3\xbf\xbf\xbe"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x9FFFE,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+9FFFF",
         (isASCII) ? "\xf2\x9f\xbf\xbf" : I8_to_native("\xf8\xb3\xbf\xbf\xbf"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x9FFFF,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+AFFFE",
         (isASCII) ? "\xf2\xaf\xbf\xbe" : I8_to_native("\xf8\xb5\xbf\xbf\xbe"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0xAFFFE,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+AFFFF",
         (isASCII) ? "\xf2\xaf\xbf\xbf" : I8_to_native("\xf8\xb5\xbf\xbf\xbf"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0xAFFFF,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+BFFFE",
         (isASCII) ? "\xf2\xbf\xbf\xbe" : I8_to_native("\xf8\xb7\xbf\xbf\xbe"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0xBFFFE,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+BFFFF",
         (isASCII) ? "\xf2\xbf\xbf\xbf" : I8_to_native("\xf8\xb7\xbf\xbf\xbf"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0xBFFFF,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+CFFFE",
         (isASCII) ? "\xf3\x8f\xbf\xbe" : I8_to_native("\xf8\xb9\xbf\xbf\xbe"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0xCFFFE,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+CFFFF",
         (isASCII) ? "\xf3\x8f\xbf\xbf" : I8_to_native("\xf8\xb9\xbf\xbf\xbf"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0xCFFFF,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+DFFFE",
         (isASCII) ? "\xf3\x9f\xbf\xbe" : I8_to_native("\xf8\xbb\xbf\xbf\xbe"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0xDFFFE,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+DFFFF",
         (isASCII) ? "\xf3\x9f\xbf\xbf" : I8_to_native("\xf8\xbb\xbf\xbf\xbf"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0xDFFFF,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+EFFFE",
         (isASCII) ? "\xf3\xaf\xbf\xbe" : I8_to_native("\xf8\xbd\xbf\xbf\xbe"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0xEFFFE,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+EFFFF",
         (isASCII) ? "\xf3\xaf\xbf\xbf" : I8_to_native("\xf8\xbd\xbf\xbf\xbf"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0xEFFFF,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+FFFFE",
         (isASCII) ? "\xf3\xbf\xbf\xbe" : I8_to_native("\xf8\xbf\xbf\xbf\xbe"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0xFFFFE,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+FFFFF",
         (isASCII) ? "\xf3\xbf\xbf\xbf" : I8_to_native("\xf8\xbf\xbf\xbf\xbf"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0xFFFFF,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+10FFFE",
         (isASCII) ? "\xf4\x8f\xbf\xbe" : I8_to_native("\xf9\xa1\xbf\xbf\xbe"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x10FFFE,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "non-character code point U+10FFFF",
         (isASCII) ? "\xf4\x8f\xbf\xbf" : I8_to_native("\xf9\xa1\xbf\xbf\xbf"),
         $::UTF8_WARN_NONCHAR, $::UTF8_DISALLOW_NONCHAR, $::UTF8_GOT_NONCHAR,
         'nonchar', 0x10FFFF,
         (isASCII) ? 4 : 5,
-        qr/Unicode non-character.*is not recommended for open interchange/
     ],
     [ "requires at least 32 bits",
         (isASCII)
@@ -352,7 +310,6 @@ my @tests = (
         $::UTF8_GOT_ABOVE_31_BIT,
         'utf8', 0x80000000,
         (isASCII) ? 1 : 8,
-        nonportable_regex(0x80000000)
     ],
     [ "highest 32 bit code point",
         (isASCII)
@@ -363,7 +320,6 @@ my @tests = (
         $::UTF8_GOT_ABOVE_31_BIT,
         'utf8', 0xFFFFFFFF,
         (isASCII) ? 1 : 8,
-        nonportable_regex(0xffffffff)
     ],
     [ "requires at least 32 bits, and use SUPER-type flags, instead of"
     . " ABOVE_31_BIT",
@@ -374,7 +330,6 @@ my @tests = (
         $::UTF8_WARN_SUPER, $::UTF8_DISALLOW_SUPER, $::UTF8_GOT_SUPER,
         'utf8', 0x80000000,
         1,
-        nonportable_regex(0x80000000)
     ],
     [ "overflow with warnings/disallow for more than 31 bits",
         # This tests the interaction of WARN_ABOVE_31_BIT/DISALLOW_ABOVE_31_BIT
@@ -399,7 +354,6 @@ my @tests = (
         $::UTF8_GOT_ABOVE_31_BIT,
         'utf8', -1,
         (isASCII || $::is64bit) ? 2 : 8,
-        qr/overflows/
     ],
 );
 
@@ -413,7 +367,6 @@ if (! $::is64bit) {
                 $::UTF8_GOT_ABOVE_31_BIT,
                 'utf8', -1,
                 1,
-                qr/and( is)? not portable/
             ];
     }
 }
@@ -429,7 +382,6 @@ else {
             $::UTF8_GOT_ABOVE_31_BIT,
             'utf8', 0x1000000000,
             (isASCII) ? 1 : 7,
-            qr/and( is)? not portable/
         ];
     if (! isASCII) {
         push @tests,   # These could falsely show wrongly in a naive
@@ -441,7 +393,6 @@ else {
                 $::UTF8_GOT_ABOVE_31_BIT,
                 'utf8', 0x800000000,
                 7,
-                nonportable_regex(0x80000000)
             ],
             [ "requires at least 32 bits",
                 I8_to_native(
@@ -450,7 +401,6 @@ else {
                 $::UTF8_GOT_ABOVE_31_BIT,
                 'utf8', 0x10000000000,
                 6,
-                nonportable_regex(0x10000000000)
             ],
             [ "requires at least 32 bits",
                 I8_to_native(
@@ -459,7 +409,6 @@ else {
                 $::UTF8_GOT_ABOVE_31_BIT,
                 'utf8', 0x200000000000,
                 5,
-                nonportable_regex(0x20000000000)
             ],
             [ "requires at least 32 bits",
                 I8_to_native(
@@ -468,7 +417,6 @@ else {
                 $::UTF8_GOT_ABOVE_31_BIT,
                 'utf8', 0x4000000000000,
                 4,
-                nonportable_regex(0x4000000000000)
             ],
             [ "requires at least 32 bits",
                 I8_to_native(
@@ -477,7 +425,6 @@ else {
                 $::UTF8_GOT_ABOVE_31_BIT,
                 'utf8', 0x80000000000000,
                 3,
-                nonportable_regex(0x80000000000000)
             ],
             [ "requires at least 32 bits",
                 I8_to_native(
@@ -486,7 +433,6 @@ else {
                 $::UTF8_GOT_ABOVE_31_BIT,
                 'utf8', 0x1000000000000000,
                 2,
-                nonportable_regex(0x1000000000000000)
             ];
     }
 }
@@ -501,11 +447,33 @@ foreach my $test (@tests) {
     next if $test_count % $num_test_files != $::TEST_CHUNK;
 
     my ($testname, $bytes, $warn_flags, $disallow_flags, $expected_error_flags,
-        $category, $allowed_uv, $needed_to_discern_len, $message
+        $category, $allowed_uv, $needed_to_discern_len
        ) = @$test;
 
     my $length = length $bytes;
     my $will_overflow = $allowed_uv < 0;
+
+    my $message;
+    if ($allowed_uv > 0x7FFFFFFF) {
+        $message = nonportable_regex($allowed_uv);
+    }
+    elsif ($allowed_uv > 0x10FFFF) {
+        $message = qr/(not Unicode|for a non-Unicode code point).* may not be portable/;
+    }
+    elsif ($allowed_uv >= 0xD800 && $allowed_uv <= 0xDFFF) {
+        $message = qr/surrogate/;
+    }
+    elsif (   ($allowed_uv >= 0xFDD0 && $allowed_uv <= 0xFDEF)
+           || ($allowed_uv & 0xFFFE) == 0xFFFE)
+    {
+        $message = qr/Unicode non-character.*is not recommended for open interchange/;
+    }
+    elsif ($will_overflow) {
+        $message = qr/overflows/;
+    }
+    else {
+        die "Can't figure out what type of warning to test for $testname"
+    }
 
     {
         use warnings;
