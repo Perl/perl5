@@ -2064,7 +2064,7 @@ syntax error.  If you encounter this construct in older code, you can just add
 C<m>.
 
 =item C<s/I<PATTERN>/I<REPLACEMENT>/msixpodualngcer>
-X<substitute> X<substitution> X<replace> X<regexp, replace>
+X<s> X<substitute> X<substitution> X<replace> X<regexp, replace>
 X<regexp, substitute> X</m> X</s> X</i> X</x> X</p> X</o> X</g> X</c> X</e> X</r>
 
 Searches a string for a pattern, and if found, replaces that pattern
