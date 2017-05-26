@@ -11889,7 +11889,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	STRLEN dotstrlen = 1;         /* length of separator string for %v */
 
 	I32 efix         = 0;         /* explicit format parameter index */
-	I32 ewix         = 0;         /* explicit width index */
 	I32 epix         = 0;         /* explicit precision index */
 	const I32 osvix  = svix;      /* original index in case of bad fmt */
 
@@ -11997,8 +11996,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
       tryasterisk:
 	if (*q == '*') {
             int i;
+            I32 ix; /* explicit width/vector separator index */
 	    q++;
-	    if ( (ewix = expect_number(&q)) ) {
+	    if ( (ix = expect_number(&q)) ) {
 		if (*q++ == '$') {
                     if (args)
                         Perl_croak_nocontext(
@@ -12016,9 +12016,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     goto unknown;
                 if (args)
                     vecsv = va_arg(*args, SV*);
-                else if (ewix) {
+                else if (ix) {
                     FETCH_VCATPVFN_ARGUMENT(
-                        vecsv, ewix > 0 && ewix <= svmax, svargs[ewix-1]);
+                        vecsv, ix > 0 && ix <= svmax, svargs[ix-1]);
                 } else {
                     FETCH_VCATPVFN_ARGUMENT(
                         vecsv, svix < svmax, svargs[svix++]);
@@ -12034,7 +12034,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     dotstr = SvPV_const(vecsv, dotstrlen);
                     is_utf8 = TRUE;
                 }
-		ewix = 0;
                 vectorize = TRUE;
                 goto tryasterisk;
             }
@@ -12043,8 +12042,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    if (args)
 		i = va_arg(*args, int);
 	    else
-		i = (ewix ? ewix <= svmax : svix < svmax) ?
-		    SvIVx(svargs[ewix ? ewix-1 : svix++]) : 0;
+		i = (ix ? ix <= svmax : svix < svmax) ?
+		    SvIVx(svargs[ix ? ix-1 : svix++]) : 0;
 	    left |= (i < 0);
 	    width = (i < 0) ? -i : i;
         }
