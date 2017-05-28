@@ -10978,17 +10978,23 @@ S_warn_vcatpvfn_missing_argument(pTHX) {
 }
 
 
+/* Returns true if c is in the range '1'..'9'
+ * Written with the cast so it only needs one conditional test
+ */
+#define IS_1_TO_9(c) ((U8)(c - '1') <= 8)
+
+/* read in and return a number. Updates *pattern to point to the char
+ * following the number. Expects the first char to 1..9.
+ */
+
 STATIC I32
 S_expect_number(pTHX_ char **const pattern)
 {
-    I32 var = 0;
+    I32 var;
 
     PERL_ARGS_ASSERT_EXPECT_NUMBER;
 
-    switch (**pattern) {
-    case '1': case '2': case '3':
-    case '4': case '5': case '6':
-    case '7': case '8': case '9':
+    assert(IS_1_TO_9(**pattern));
 	var = *(*pattern)++ - '0';
 	while (isDIGIT(**pattern)) {
 	    const I32 tmp = var * 10 + (*(*pattern)++ - '0');
@@ -10996,7 +11002,6 @@ S_expect_number(pTHX_ char **const pattern)
 		Perl_croak(aTHX_ "Integer overflow in format string for %s", (PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn"));
 	    var = tmp;
 	}
-    }
     return var;
 }
 
@@ -11927,13 +11932,15 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     [%bcdefginopsuxDFOUX] format (mandatory)
 */
 
-	if ( (width = expect_number(&q)) ) {
+	if (IS_1_TO_9(*q)) {
+            width = expect_number(&q);
 	    if (*q == '$') {
                 if (args)
                     Perl_croak_nocontext(
                         "Cannot yet reorder sv_catpvfn() arguments from va_list");
 		++q;
 		efix = width;
+                width = 0;
                 used_explicit_ix = TRUE;
 	    } else {
 		goto gotwidth;
@@ -11994,7 +12001,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             int i;
             I32 ix; /* explicit width/vector separator index */
 	    q++;
-	    if ( (ix = expect_number(&q)) ) {
+	    if (IS_1_TO_9(*q)) {
+                ix = expect_number(&q);
 		if (*q++ == '$') {
                     if (args)
                         Perl_croak_nocontext(
@@ -12003,6 +12011,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 } else
 		    goto unknown;
             }
+            else
+                ix = 0;
 
             if (*q == 'v') {
                 /* The asterisk was for  *v, *NNN$v: vectorizing, but not
@@ -12059,7 +12069,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		fill = TRUE;
                 q++;
             }
-	    width = expect_number(&q);
+            if (IS_1_TO_9(*q))
+                width = expect_number(&q);
 	}
 
       gotwidth:
@@ -12071,7 +12082,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    if (*q == '*') {
                 int i;
 		q++;
-                if ( (epix = expect_number(&q)) ) {
+                if (IS_1_TO_9(*q)) {
+                    epix = expect_number(&q);
                     if (*q++ == '$') {
                         if (args)
                             Perl_croak_nocontext(
