@@ -2222,17 +2222,23 @@ Account for lack of C<inf>, C<nan>, and C<-0.0> support.
 
 =item Darwin
 
+=over 4
+
+=item *
+
 Don't treat C<-Dprefix=/usr> as special: instead require an extra option
 C<-Ddarwin_distribution> to produce the same results.
 
-=item OS X
+=item *
 
 OS X El Capitan doesn't implement the C<clock_gettime()> or
 C<clock_getres()> APIs; emulate them as necessary.
 
-=item macOS
+=item *
 
 Deprecated C<syscall(2)> on macOS 10.12.
+
+=back
 
 =item EBCDIC
 
@@ -2298,12 +2304,6 @@ Some incompatibility may arise because of the bug fix that has been reverted
 for VS2015 builds of perl, but there may well be incompatibility anyway because
 of the rewritten CRT in VS2015 (I<e.g.>, see discussion at
 L<http://stackoverflow.com/questions/30412951>).
-
-=back
-
-=item Win32
-
-=over 4
 
 =item *
 
