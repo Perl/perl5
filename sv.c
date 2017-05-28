@@ -11903,7 +11903,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	STRLEN elen      = 0;         /* the length  of the element string */
 
 	const char *fmtstart;         /* start of current format (the '%') */
-	char c           = 0;         /* current character read from format */
+	char c;                       /* the actual format ('d', s' etc) */
 
 
 	/* echo everything up to the next format specification */
@@ -12633,7 +12633,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		    } while (uv >>= 1);
 		    if (tempalt) {
 			esignbuf[esignlen++] = '0';
-			esignbuf[esignlen++] = c;
+			esignbuf[esignlen++] = c; /* 'b' or 'B' */
 		    }
 		    break;
 
@@ -12652,8 +12652,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         is_utf8 = TRUE;
                     }
                     else {
-                        c = (char)uv;
-                        eptr = &c;
+                        eptr = ebuf;
+                        ebuf[0] = (char)uv;
                         elen = 1;
                     }
                     goto string;
