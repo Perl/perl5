@@ -396,6 +396,15 @@ inappropriate to send to a publicly archived mailing list, then see
 L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
 for details of how to report the issue.
 
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
 =head1 SEE ALSO
 
 The F<Changes> file for an explanation of how to view exhaustive details on
