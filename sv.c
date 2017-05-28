@@ -11881,7 +11881,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
         bool used_explicit_ix = FALSE;/* has      "%$n..."   */
 	int base         = 0;         /* base to print in, e.g. 8 for %o */
 	UV uv            = 0;         /* the value to print of int-ish args */
-	IV iv            = 0;         /* ditto for signed types */
 
 	bool vectorize   = FALSE;     /* has      "%v..."    */
 	SV *vecsv        = NULL;      /* the cur arg for %v  */
@@ -12501,6 +12500,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
                 if (base < 0) {
                     /* signed int type */
+                    IV iv;
                     base = -base;
                     if (args) {
                         switch (intsize) {
