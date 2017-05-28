@@ -3209,6 +3209,20 @@ L<[perl #128313]|https://rt.perl.org/Public/Bug/Display.html?id=128313>
 
 =back
 
+=head1 Known Problems
+
+=over 4
+
+=item *
+
+G++ 6 handles subnormal (denormal) floating point values differently
+than gcc 6 or g++ 5 resulting in "flush-to-zero". The end result is
+that if you specify very small values using the hexadecimal floating
+point format, like C<0x1.fffffffffffffp-1022>, they become zeros.
+L<[perl #131388]|https://rt.perl.org/Ticket/Display.html?id=131388>
+
+=back 
+
 =head1 Errata From Previous Releases
 
 =over 4
