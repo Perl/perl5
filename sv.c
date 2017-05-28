@@ -11892,7 +11892,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	STRLEN dotstrlen;             /* length of separator string for %v */
 
 	I32 efix         = 0;         /* explicit format parameter index */
-	I32 epix         = 0;         /* explicit precision index */
 	const I32 osvix  = svix;      /* original index in case of bad fmt */
 
 	bool is_utf8     = FALSE;     /* is this item utf8?   */
@@ -12083,9 +12082,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    q++;
 	    if (*q == '*') {
                 int i;
+                I32 ix; /* explicit precision index */
 		q++;
                 if (IS_1_TO_9(*q)) {
-                    epix = expect_number(&q);
+                    ix = expect_number(&q);
                     if (*q++ == '$') {
                         if (args)
                             Perl_croak_nocontext(
@@ -12094,13 +12094,16 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     } else
                         goto unknown;
                 }
+                else
+                    ix = 0;
+
 		if (args)
                     i = va_arg(*args, int);
 		else {
                     SV *precsv;
-                    if (epix)
+                    if (ix)
                         FETCH_VCATPVFN_ARGUMENT(
-                            precsv, epix > 0 && epix <= svmax, svargs[epix-1]);
+                            precsv, ix > 0 && ix <= svmax, svargs[ix-1]);
                     else
                         FETCH_VCATPVFN_ARGUMENT(
                             precsv, svix < svmax, svargs[svix++]);
