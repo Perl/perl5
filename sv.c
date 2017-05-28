@@ -10995,13 +10995,15 @@ S_expect_number(pTHX_ char **const pattern)
     PERL_ARGS_ASSERT_EXPECT_NUMBER;
 
     assert(IS_1_TO_9(**pattern));
-	var = *(*pattern)++ - '0';
-	while (isDIGIT(**pattern)) {
-	    const I32 tmp = var * 10 + (*(*pattern)++ - '0');
-	    if (tmp < var)
-		Perl_croak(aTHX_ "Integer overflow in format string for %s", (PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn"));
-	    var = tmp;
-	}
+
+    var = *(*pattern)++ - '0';
+    while (isDIGIT(**pattern)) {
+        const I32 tmp = var * 10 + (*(*pattern)++ - '0');
+        if (tmp < var)
+            Perl_croak(aTHX_ "Integer overflow in format string for %s",
+                            (PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn"));
+        var = tmp;
+    }
     return var;
 }
 
