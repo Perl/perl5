@@ -12204,17 +12204,12 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             if (!strchr("BbDdiOouUXx", c))
 		goto unknown;
 
-	    if (args) {
+	    if (args)
                 vecsv = va_arg(*args, SV*);
-                vecstr = (U8*)SvPV_const(vecsv,veclen);
-                vec_utf8 = DO_UTF8(vecsv);
-	    }
 	    else {
                 efix = efix ? efix - 1 : svix++;
-                if (efix < svmax) {
-		vecsv = svargs[efix];
-		vecstr = (U8*)SvPV_const(vecsv,veclen);
-		vec_utf8 = DO_UTF8(vecsv);
+                vecsv = efix < svmax ? svargs[efix] : &PL_sv_no;
+            }
 
 		/* if this is a version object, we need to convert
 		 * back into v-string notation and then let the
@@ -12224,21 +12219,17 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		    if ( hv_existss(MUTABLE_HV(SvRV(vecsv)), "alpha") ) {
 			Perl_ck_warner_d(aTHX_ packWARN(WARN_PRINTF),
 			"vector argument not supported with alpha versions");
-			goto vdblank;
+                        vecsv = &PL_sv_no;
 		    }
+                    else {
+                    vecstr = (U8*)SvPV_const(vecsv,veclen);
 		    vecsv = sv_newmortal();
 		    scan_vstring((char *)vecstr, (char *)vecstr + veclen,
 				 vecsv);
-		    vecstr = (U8*)SvPV_const(vecsv, veclen);
-		    vec_utf8 = DO_UTF8(vecsv);
+                    }
 		}
-	    }
-	    else {
-	      vdblank:
-		vecstr = (U8*)"";
-		veclen = 0;
-	    }
-            }
+            vecstr = (U8*)SvPV_const(vecsv, veclen);
+            vec_utf8 = DO_UTF8(vecsv);
 	}
         else if (!args) {
             efix = efix ? efix - 1 : svix++;
