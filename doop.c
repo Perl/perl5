@@ -717,13 +717,14 @@ Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
 }
 
 void
-Perl_do_sprintf(pTHX_ SV *sv, I32 len, SV **sarg)
+Perl_do_sprintf(pTHX_ SV *sv, SSize_t len, SV **sarg)
 {
     STRLEN patlen;
     const char * const pat = SvPV_const(*sarg, patlen);
     bool do_taint = FALSE;
 
     PERL_ARGS_ASSERT_DO_SPRINTF;
+    assert(len >= 1);
 
     if (SvTAINTED(*sarg))
 	TAINT_PROPER(
@@ -736,7 +737,7 @@ Perl_do_sprintf(pTHX_ SV *sv, I32 len, SV **sarg)
     SvUTF8_off(sv);
     if (DO_UTF8(*sarg))
         SvUTF8_on(sv);
-    sv_vsetpvfn(sv, pat, patlen, NULL, sarg + 1, len - 1, &do_taint);
+    sv_vsetpvfn(sv, pat, patlen, NULL, sarg + 1, (Size_t)(len - 1), &do_taint);
     SvSETMAGIC(sv);
     if (do_taint)
 	SvTAINTED_on(sv);

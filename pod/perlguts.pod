@@ -79,7 +79,7 @@ To change the value of an I<already-existing> SV, there are eight routines:
     void  sv_setpvn(SV*, const char*, STRLEN)
     void  sv_setpvf(SV*, const char*, ...);
     void  sv_vsetpvfn(SV*, const char*, STRLEN, va_list *,
-                                                    SV **, I32, bool *);
+                                        SV **, Size_t, bool *);
     void  sv_setsv(SV*, SV*);
 
 Notice that you can choose to specify the length of the string to be
