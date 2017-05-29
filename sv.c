@@ -12039,7 +12039,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		i = va_arg(*args, int);
 	    else {
                 ix = ix ? ix - 1 : svix++;
-		i = (ix < svmax) ? SvIVx(svargs[ix]) : 0;
+		i = (ix < svmax) ? SvIVx(svargs[ix]) : (arg_missing = TRUE, 0);
             }
 	    left |= (i < 0);
 	    width = (i < 0) ? -i : i;

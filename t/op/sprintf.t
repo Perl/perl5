@@ -765,3 +765,6 @@ e>%*v.*X<	>[':', 3, '012']<	>0F0:0F1:0F2<	>perl #83194: vector flag + custom sep
 a>%vd<	>"version"<	>118.101.114.115.105.111.110<	>perl #102586: vector flag + "version"<
 e>%vd<   >"version"<    >165.133.153.162.137.150.149<   >perl #102586: vector flag + "version"<
 >%3$*4$v*2$.*1$x<  >[3, 4, "\x11\x22\x33", "/"]< > 011/ 022/ 033< >four reordered args<
+>%*%<	>[]<	>% MISSING<
+>%*1$%<	>[]<	>% MISSING<
+>%*2$d<	>123<	>123 MISSING<
