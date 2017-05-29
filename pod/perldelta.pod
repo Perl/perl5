@@ -98,10 +98,10 @@ the contents of this variable is dynamic; if you wish to store it beyond
 the lifetime of the match you must copy it to another array.
 
 C<%{^CAPTURE}> is equivalent to C<%+> (I<i.e.>, named captures).  Other than
-being more self documenting there is no difference between the two forms.
+being more self-documenting there is no difference between the two forms.
 
 C<%{^CAPTURE_ALL}> is equivalent to C<%-> (I<i.e.>, all named captures).
-Other than being more self documenting there is no difference between the
+Other than being more self-documenting there is no difference between the
 two forms.
 
 =head2 Declaring a reference to a variable
@@ -129,7 +129,7 @@ necessarily support Unicode 9.0.  L<Unicode::Normalize> does work on 9.0.
 Unicode 6.0 introduced an improved form of the Script (C<sc>) property, and
 called it Script_Extensions (C<scx>).  Perl now uses this improved
 version when a property is specified as just C<\p{I<script>}>.  This
-should make programs be more accurate when determining if a character is
+should make programs more accurate when determining if a character is
 used in a given script, but there is a slight chance of breakage for
 programs that very specifically needed the old behavior.  The meaning of
 compound forms, like C<\p{sc=I<script>}> are unchanged.  See
@@ -223,7 +223,7 @@ searches C<@INC> if the file is a relative path.  With the removal of C<".">,
 a simple C<do "file.pl"> will fail to read in and execute C<file.pl> from
 the current directory.  Since this is commonly expected behaviour, a new
 deprecation warning is now issued whenever C<do> fails to load a file which
-it otherwise would have found if dot had been in C<@INC>.
+it otherwise would have found if a dot had been in C<@INC>.
 
 =back
 
@@ -285,8 +285,8 @@ with something like
 Note that this only helps build and install an unfixed module.  It's
 possible for the tests to pass (since they were run under
 C<PERL_USE_UNSAFE_INC=1>), but for the module itself to fail to perform
-correctly in production.  In this case you may have to temporarily modify
-your script until such time as a fixed version of the module is released.
+correctly in production.  In this case, you may have to temporarily modify
+your script until a fixed version of the module is released.
 For example:
 
     use Foo::Bar;
@@ -309,7 +309,7 @@ C<@INC> for installation and testing, and this may mask deeper issues.  It
 could result in a module which passes tests and installs, but which
 fails at run time.
 
-During build, test and install, it will normally be the case that any perl
+During build, test, and install, it will normally be the case that any perl
 processes will be executing directly within the root directory of the
 untarred distribution, or a known subdirectory of that, such as F<t/>.  It
 may well be that F<Makefile.PL> or F<t/foo.t> will attempt to include
@@ -318,7 +318,7 @@ filenames, which will now fail.
 
 However, as described above, automatic tools like F<cpan> will (for now)
 set the C<PERL_USE_UNSAFE_INC> environment variable, which introduces
-dot during build.
+dot during a build.
 
 This makes it likely that your existing build and test code will work, but
 this may mask issues with your code which only manifest when used after
@@ -342,7 +342,7 @@ subdirectory and insert that subdirectory into C<@INC> instead.
 
 If your runtime code has problems under the dotless C<@INC>, then the comments
 above on how to fix for script authors will mostly apply here too.  Bear in
-mind though that it is considered bad form for a module to globally add dot to
+mind though that it is considered bad form for a module to globally add a dot to
 C<@INC>, since it introduces both a security risk and hides issues of
 accidentally requiring dot in C<@INC>, as explained above.
 
@@ -384,12 +384,12 @@ C<stderr> as for any other C<-D> switch.
 patterns are no longer permissible
 
 You have to now say something like C<"\{"> or C<"[{]"> to specify to
-match a LEFT CURLY BRACKET; otherwise it is a fatal pattern compilation
+match a LEFT CURLY BRACKET; otherwise, it is a fatal pattern compilation
 error.  This change will allow future extensions to the language.
 
 These have been deprecated since v5.16, with a deprecation message
 raised for some uses starting in v5.22.  Unfortunately, the code added
-to raise the message was buggy, and failed to warn in some cases where
+to raise the message was buggy and failed to warn in some cases where
 it should have.  Therefore, enforcement of this ban for these cases is
 deferred until Perl 5.30, but the code has been fixed to raise a
 default-on deprecation message for them in the meantime.
@@ -415,7 +415,7 @@ The value returned for C<scalar(%hash)> will no longer show information about
 the buckets allocated in the hash.  It will simply return the count of used
 keys.  It is thus equivalent to C<0+keys(%hash)>.
 
-A form of backwards compatibility is provided via
+A form of backward compatibility is provided via
 L<C<Hash::Util::bucket_ratio()>|Hash::Util/bucket_ratio> which provides
 the same behavior as
 C<scalar(%hash)> provided in Perl 5.24 and earlier.
@@ -446,7 +446,7 @@ option.
 =head2 C<POSIX::tmpnam()> has been removed
 
 The fundamentally unsafe C<tmpnam()> interface was deprecated in
-Perl 5.22 and has now been removed.  In its place you can use,
+Perl 5.22 and has now been removed.  In its place, you can use,
 for example, the L<File::Temp> interfaces.
 
 =head2 require ::Foo::Bar is now illegal.
@@ -472,7 +472,7 @@ has been deprecated to do so since Perl 5.22.
 
 =head2 String delimiters that aren't stand-alone graphemes are now deprecated
 
-In order for Perl to eventually allow string delimiters to be Unicode
+For Perl to eventually allow string delimiters to be Unicode
 grapheme clusters (which look like a single character, but may be
 a sequence of several ones), we have to stop allowing a single character
 delimiter that isn't a grapheme by itself.  These are unlikely to exist
@@ -523,15 +523,15 @@ optimized in some cases.
 =item *
 
 Remove some exceptions to creating Copy-on-Write strings. The string
-buffer growth algorithm has been altered slightly so that you're less
-likely to encounter a string which which can't be COWed.
+buffer growth algorithm has been slightly altered so that you're less
+likely to encounter a string which can't be COWed.
 
 =item *
 
 Better optimise array and hash assignment: where an array or hash appears
 in the LHS of a list assignment, such as C<(..., @a) = (...);>, it's
 likely to be considerably faster, especially if it involves emptying the
-array/hash. For example this code runs about a third faster compared to
+array/hash. For example, this code runs about a third faster compared to
 Perl 5.24.0:
 
     my @a;
@@ -1024,7 +1024,7 @@ unescaped uses of the two characters C<"}"> and C<"]"> in regular
 expression patterns (outside bracketed character classes) that are taken
 literally.  This brings them more in line with the C<")"> character which
 is always a metacharacter unless escaped.  Being a metacharacter only
-sometimes, depending on action at a distance, can lead to silently
+sometimes, depending on an action at a distance, can lead to silently
 having the pattern mean something quite different than was intended,
 which the S<C<re 'strict'>> mode is intended to minimize.
 
@@ -2112,7 +2112,7 @@ The build process no longer emits an extra blank line before building each
 =head1 Testing
 
 Tests were added and changed to reflect the other additions and changes
-in this release.  In addition, these substantive changes were made:
+in this release.  Furthermore, these substantive changes were made:
 
 =over 4
 
@@ -2134,7 +2134,7 @@ minutes.  On slow systems they could otherwise take several hours, without
 significantly improving our understanding of the correctness of the code
 under test.
 
-In addition, some of those test cases have been split into more files, to
+Also, some of those test cases have been split into more files, to
 allow them to be run in parallel on suitable systems.
 
 =item *
@@ -2197,7 +2197,7 @@ L<[perl #130445]|https://rt.perl.org/Public/Bug/Display.html?id=130445>
 
 Perl now compiles under NetBSD on VAX machines.  However, it's not
 possible for that platform to implement floating-point infinities and
-NaNs compatibly with most modern systems, which implement the IEEE-754
+NaNs compatible with most modern systems, which implement the IEEE-754
 floating point standard.  The hexadecimal floating point (C<0x...p[+-]n>
 literals, C<printf %a>) is not implemented, either.
 The C<make test> passes 98% of tests.
@@ -2307,7 +2307,7 @@ L<http://stackoverflow.com/questions/30412951>).
 
 =item *
 
-It now automatically detects GCC versus Visual C, and sets the VC version
+It now automatically detects GCC versus Visual C and sets the VC version
 number on Win32.
 
 =back
@@ -2320,7 +2320,7 @@ over twenty years.
 =item OpenBSD 6
 
 OpenBSD 6 still does not support returning C<pid>, C<gid> or C<uid> with
-C<SA_SIGINFO>.  Make sure this is accounted for.
+C<SA_SIGINFO>.  Make sure to account for it.
 
 =item FreeBSD
 
@@ -2341,8 +2341,8 @@ L<[perl #130068]|https://rt.perl.org/Public/Bug/Display.html?id=130068>.
 
 A new API function L<C<sv_setpv_bufsize()>|perlapi/sv_setpv_bufsize>
 allows simultaneously setting the
-length and allocated size of the buffer in an C<SV>, growing the buffer if
-necessary.
+length and the allocated size of the buffer in an C<SV>, growing the
+buffer if necessary.
 
 =item *
 
@@ -2354,7 +2354,7 @@ like Perl-space C<$x = ''>, but with several optimisations.
 
 Several new macros and functions for dealing with Unicode and
 UTF-8-encoded strings have been added to the API, as well as some
-changes in
+changes in the
 functionality of existing functions (see L<perlapi/Unicode Support> for
 more details):
 
@@ -2433,12 +2433,12 @@ The  functions L<C<utf8n_to_uvchr>|perlapi/utf8n_to_uvchr> and its
 derivatives have had several changes of behaviour.
 
 Calling them, while passing a string length of 0 is now asserted against
-in DEBUGGING builds, and otherwise returns the Unicode REPLACEMENT
+in DEBUGGING builds, and otherwise, returns the Unicode REPLACEMENT
 CHARACTER.   If you have nothing to decode, you shouldn't call the decode
 function.
 
 They now return the Unicode REPLACEMENT CHARACTER if called with UTF-8
-that has the overlong malformation, and that malformation is allowed by
+that has the overlong malformation and that malformation is allowed by
 the input parameters.  This malformation is where the UTF-8 looks valid
 syntactically, but there is a shorter sequence that yields the same code
 point.  This has been forbidden since Unicode version 3.1.
@@ -2447,7 +2447,7 @@ They now accept an input
 flag to allow the overflow malformation.  This malformation is when the
 UTF-8 may be syntactically valid, but the code point it represents is
 not capable of being represented in the word length on the platform.
-What "allowed" means in this case is that the function doesn't return an
+What "allowed" means, in this case, is that the function doesn't return an
 error, and it advances the parse pointer to beyond the UTF-8 in
 question, but it returns the Unicode REPLACEMENT CHARACTER as the value
 of the code point (since the real value is not representable).
@@ -2469,7 +2469,7 @@ A new function, L<C<utf8n_to_uvchr_error>|perlapi/utf8n_to_uvchr_error>,
 has been added for
 use by modules that need to know the details of UTF-8 malformations
 beyond pass/fail.  Previously, the only ways to know why a sequence was
-ill-formed was to capture and parse the generated diagnostics, or to do
+ill-formed was to capture and parse the generated diagnostics or to do
 your own analysis.
 
 =item *
