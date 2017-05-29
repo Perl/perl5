@@ -12027,12 +12027,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     goto unknown;
                 if (args)
                     vecsv = va_arg(*args, SV*);
-                else if (ix) {
-                    FETCH_VCATPVFN_ARGUMENT(
-                        vecsv, ix > 0 && ix <= (STRLEN)svmax, svargs[ix-1]);
-                } else {
-                    FETCH_VCATPVFN_ARGUMENT(
-                        vecsv, svix < svmax, svargs[svix++]);
+                else {
+                    ix = ix ? ix - 1 : svix++;
+                    FETCH_VCATPVFN_ARGUMENT(vecsv, ix < svmax, svargs[ix]);
                 }
                 dotstr = SvPV_const(vecsv, dotstrlen);
                 /* Keep the DO_UTF8 test *after* the SvPV call, else things go
@@ -12052,9 +12049,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             /* the asterisk specified a width */
 	    if (args)
 		i = va_arg(*args, int);
-	    else
-		i = (ix ? ix <= (STRLEN)svmax : svix < svmax) ?
-		    SvIVx(svargs[ix ? ix-1 : (STRLEN)(svix++)]) : 0;
+	    else {
+                ix = ix ? ix - 1 : svix++;
+		i = (ix < svmax) ? SvIVx(svargs[ix]) : 0;
+            }
 	    left |= (i < 0);
 	    width = (i < 0) ? -i : i;
         }
@@ -12105,12 +12103,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     i = va_arg(*args, int);
 		else {
                     SV *precsv;
-                    if (ix)
-                        FETCH_VCATPVFN_ARGUMENT(
-                            precsv, ix > 0 && ix <= (STRLEN)svmax, svargs[ix-1]);
-                    else
-                        FETCH_VCATPVFN_ARGUMENT(
-                            precsv, svix < svmax, svargs[svix++]);
+                    ix = ix ? ix - 1 : svix++;
+                    FETCH_VCATPVFN_ARGUMENT(precsv, ix < svmax, svargs[ix]);
                     i = precsv == &PL_sv_no ? 0 : SvIVx(precsv);
                 }
 		precis = i;
@@ -12215,8 +12209,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 vecstr = (U8*)SvPV_const(vecsv,veclen);
                 vec_utf8 = DO_UTF8(vecsv);
 	    }
-	    else if (efix ? efix <= svmax : svix < svmax) {
-		vecsv = svargs[efix ? efix-1 : svix++];
+	    else {
+                efix = efix ? efix - 1 : svix++;
+                if (efix < svmax) {
+		vecsv = svargs[efix];
 		vecstr = (U8*)SvPV_const(vecsv,veclen);
 		vec_utf8 = DO_UTF8(vecsv);
 
@@ -12242,13 +12238,11 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		vecstr = (U8*)"";
 		veclen = 0;
 	    }
+            }
 	}
         else if (!args) {
-	    if (efix) {
-                FETCH_VCATPVFN_ARGUMENT(argsv, efix <= svmax, svargs[efix - 1]);
-	    } else {
-                FETCH_VCATPVFN_ARGUMENT(argsv, svix < svmax, svargs[svix++]);
-	    }
+            efix = efix ? efix - 1 : svix++;
+            FETCH_VCATPVFN_ARGUMENT(argsv, efix < svmax, svargs[efix]);
 	}
 
 	switch (c) {
