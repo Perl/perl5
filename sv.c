@@ -11738,20 +11738,6 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
 }
 
 
-/* Helper for sv_vcatpvfn_flags().  */
-#define FETCH_VCATPVFN_ARGUMENT(var, in_range, expr)   \
-    STMT_START {                                       \
-        if (in_range)                                  \
-            (var) = (expr);                            \
-        else {                                         \
-            (var) = &PL_sv_no; /* [perl #71000] */     \
-            arg_missing = TRUE;                        \
-        }                                              \
-    } STMT_END
-
-void
-
-
 /*
 =for apidoc sv_vcatpvfn
 
@@ -11779,6 +11765,7 @@ Usually used via one of its frontends C<sv_vcatpvf> and C<sv_vcatpvf_mg>.
 */
 
 
+void
 Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
                        va_list *const args, SV **const svargs, const Size_t svmax, bool *const maybe_tainted,
                        const U32 flags)
@@ -12029,7 +12016,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     vecsv = va_arg(*args, SV*);
                 else {
                     ix = ix ? ix - 1 : svix++;
-                    FETCH_VCATPVFN_ARGUMENT(vecsv, ix < svmax, svargs[ix]);
+                    vecsv = ix < svmax ? svargs[ix]
+                                       : (arg_missing = TRUE, &PL_sv_no);
                 }
                 dotstr = SvPV_const(vecsv, dotstrlen);
                 /* Keep the DO_UTF8 test *after* the SvPV call, else things go
@@ -12104,7 +12092,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		else {
                     SV *precsv;
                     ix = ix ? ix - 1 : svix++;
-                    FETCH_VCATPVFN_ARGUMENT(precsv, ix < svmax, svargs[ix]);
+                    precsv = ix < svmax ? svargs[ix]
+                                        : (arg_missing = TRUE, &PL_sv_no);
                     i = precsv == &PL_sv_no ? 0 : SvIVx(precsv);
                 }
 		precis = i;
@@ -12233,7 +12222,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	}
         else if (!args) {
             efix = efix ? efix - 1 : svix++;
-            FETCH_VCATPVFN_ARGUMENT(argsv, efix < svmax, svargs[efix]);
+            argsv = efix < svmax ? svargs[efix]
+                                 : (arg_missing = TRUE, &PL_sv_no);
 	}
 
 	switch (c) {
