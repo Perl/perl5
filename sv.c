@@ -10983,14 +10983,19 @@ S_warn_vcatpvfn_missing_argument(pTHX) {
  */
 #define IS_1_TO_9(c) ((U8)(c - '1') <= 8)
 
-/* read in and return a number. Updates *pattern to point to the char
+/* Read in and return a number. Updates *pattern to point to the char
  * following the number. Expects the first char to 1..9.
+ * Croaks if the number exceeds 1/4 of the maximum value of STRLEN.
+ * This is a belt-and-braces safety measure to complement any
+ * overflow/wrap checks done in the main body of sv_vcatpvfn_flags.
+ * It means that e.g. on a 32-bit system the width/precision can't be more
+ * than 1G, which seems reasonable.
  */
 
-STATIC I32
+STATIC STRLEN
 S_expect_number(pTHX_ char **const pattern)
 {
-    I32 var;
+    STRLEN var;
 
     PERL_ARGS_ASSERT_EXPECT_NUMBER;
 
@@ -10998,11 +11003,11 @@ S_expect_number(pTHX_ char **const pattern)
 
     var = *(*pattern)++ - '0';
     while (isDIGIT(**pattern)) {
-        const I32 tmp = var * 10 + (*(*pattern)++ - '0');
-        if (tmp < var)
+        /* if var * 10 + 9 would exceed 1/4 max strlen, croak */
+        if (var > ((((STRLEN)~0) / 4 - 9) / 10))
             Perl_croak(aTHX_ "Integer overflow in format string for %s",
                             (PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn"));
-        var = tmp;
+        var = var * 10 + (*(*pattern)++ - '0');
     }
     return var;
 }
@@ -11800,6 +11805,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
     PERL_ARGS_ASSERT_SV_VCATPVFN_FLAGS;
     PERL_UNUSED_ARG(maybe_tainted);
+    ASSUME(svmax >= 0); /* so we can cast it to unsigned below */
 
     if (flags & SV_GMAGIC)
         SvGETMAGIC(sv);
@@ -11999,7 +12005,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
       tryasterisk:
 	if (*q == '*') {
             int i;
-            I32 ix; /* explicit width/vector separator index */
+            STRLEN ix; /* explicit width/vector separator index */
 	    q++;
 	    if (IS_1_TO_9(*q)) {
                 ix = expect_number(&q);
@@ -12024,7 +12030,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     vecsv = va_arg(*args, SV*);
                 else if (ix) {
                     FETCH_VCATPVFN_ARGUMENT(
-                        vecsv, ix > 0 && ix <= svmax, svargs[ix-1]);
+                        vecsv, ix > 0 && ix <= (STRLEN)svmax, svargs[ix-1]);
                 } else {
                     FETCH_VCATPVFN_ARGUMENT(
                         vecsv, svix < svmax, svargs[svix++]);
@@ -12048,8 +12054,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    if (args)
 		i = va_arg(*args, int);
 	    else
-		i = (ix ? ix <= svmax : svix < svmax) ?
-		    SvIVx(svargs[ix ? ix-1 : svix++]) : 0;
+		i = (ix ? ix <= (STRLEN)svmax : svix < svmax) ?
+		    SvIVx(svargs[ix ? ix-1 : (STRLEN)(svix++)]) : 0;
 	    left |= (i < 0);
 	    width = (i < 0) ? -i : i;
         }
@@ -12081,7 +12087,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    q++;
 	    if (*q == '*') {
                 int i;
-                I32 ix; /* explicit precision index */
+                STRLEN ix; /* explicit precision index */
 		q++;
                 if (IS_1_TO_9(*q)) {
                     ix = expect_number(&q);
@@ -12102,7 +12108,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     SV *precsv;
                     if (ix)
                         FETCH_VCATPVFN_ARGUMENT(
-                            precsv, ix > 0 && ix <= svmax, svargs[ix-1]);
+                            precsv, ix > 0 && ix <= (STRLEN)svmax, svargs[ix-1]);
                     else
                         FETCH_VCATPVFN_ARGUMENT(
                             precsv, svix < svmax, svargs[svix++]);

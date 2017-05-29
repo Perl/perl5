@@ -315,10 +315,16 @@ for (int(~0/2+1), ~0, "9999999999999999999") {
 	}
     };
 
-    my $fmt = join('', map("%$_\$s%" . ((1 << 31)-$_) . '$s', 1..20));
-    my $result = sprintf $fmt, qw(a b c d);
-    is($result, "abcd", "only four valid values in $fmt");
-    is($warn, 36, "expected warnings");
+    for my $i (1..20) {
+        my @args = qw(a b c d);
+        my $result = sprintf "%$i\$s", @args;
+        is $result, $args[$i-1]//"", "%NNN\$s where NNN=$i";
+        my $j = ~$i;
+        $result = eval { sprintf "%$j\$s", @args; };
+        like $@, qr/Integer overflow/ , "%NNN\$s where NNN=~$i";
+    }
+
+    is($warn, 16, "expected warnings");
     is($bad,   0, "unexpected warnings");
 }
 
