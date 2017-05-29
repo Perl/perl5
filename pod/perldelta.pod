@@ -246,6 +246,7 @@ path; I<e.g.>:
         # safe now
         push @INC, '.';
     }
+
     use "Foo::Bar"; # may load /some/trusted/directory/Foo/Bar.pm
     do "config.pl"; # may load /some/trusted/directory/config.pl
 
@@ -350,7 +351,7 @@ accidentally requiring dot in C<@INC>, as explained above.
 
 =head2 Escaped colons and relative paths in PATH
 
-On Unix systems, Perl treats any relative paths in the PATH environment
+On Unix systems, Perl treats any relative paths in the C<PATH> environment
 variable as tainted when starting a new process.  Previously, it was
 allowing a backslash to escape a colon (unlike the OS), consequently
 allowing relative paths to be considered safe if the PATH was set to
@@ -1172,7 +1173,7 @@ We have attempted to update the documentation to reflect the changes
 listed in this document.  If you find any we have missed, send email to
 L<perlbug@perl.org|mailto:perlbug@perl.org>.
 
-Additionally all references to Usenet have been removed, and the
+Additionally, all references to Usenet have been removed, and the
 following selected changes have been made:
 
 =head3 L<perlfunc>
@@ -1205,7 +1206,7 @@ the variables C<$a> and C<$b>.
 =item *
 
 In L<C<split()>|perlfunc/split> noted that certain pattern modifiers are
-legal, and added a caution about its use in Perls before v5.11,
+legal, and added a caution about its use in Perls before v5.11.
 
 =item *
 
@@ -1252,7 +1253,7 @@ Give another reason to use C<cBOOL> to cast an expression to boolean.
 
 =item *
 
-Note that there are macros C<TRUE> and C<FALSE> available to express
+Note that the macros C<TRUE> and C<FALSE> are available to express
 boolean values.
 
 =back
@@ -1362,7 +1363,7 @@ means that C<"#"> has to be escaped.
 
 =item *
 
-Add introductory material
+Add introductory material.
 
 =item *
 
@@ -1393,7 +1394,7 @@ regular expressions, and Perl compatibility with what it says.
 
 =item *
 
-Document C<@ISA>.  Was documented other places, not not in L<perlvar>.
+Document C<@ISA>.  It was documented in other places, but not in L<perlvar>.
 
 =back
 
@@ -1859,7 +1860,7 @@ Account for the possibility of DOS file endings.
 
 =item *
 
-Many improvements
+Many improvements.
 
 =back
 
@@ -1889,7 +1890,7 @@ Replace obscure character range with C<\w>.
 
 =item *
 
-try to be more helpful when tests fail.
+Try to be more helpful when tests fail.
 
 =back
 
@@ -1941,7 +1942,7 @@ built within a FreeBSD jail.
 
 =item *
 
-On systems that build a F<dtrace> object file (FreeBSD, Solaris and
+On systems that build a F<dtrace> object file (FreeBSD, Solaris, and
 SystemTap's dtrace emulation), copy the input objects to a separate
 directory and process them there, and use those objects in the link,
 since C<dtrace -G> also modifies these objects.
@@ -1982,7 +1983,7 @@ L<[perl #130133]|https://rt.perl.org/Public/Bug/Display.html?id=130133>
 
 Since v5.18, for testing purposes we have included support for
 building perl with a variety of non-standard, and non-recommended
-hash functions.  Since we do not recommend the use of these functions
+hash functions.  Since we do not recommend the use of these functions,
 we have removed them and their corresponding build options.  Specifically
 this includes the following build options:
 
@@ -2007,7 +2008,7 @@ B<will> have a F</usr/bin/perl> or similar provided by the OS.
 Reduce verbosity of C<make install.man>
 
 Previously, two progress messages were emitted for each manpage: one by
-installman itself, and one by the function in install_lib.pl that it calls to
+installman itself, and one by the function in F<install_lib.pl> that it calls to
 actually install the file.  Disabling the second of those in each case saves
 over 750 lines of unhelpful output.
 
@@ -2133,9 +2134,6 @@ regex implementation have been restricted to running for a maximum of five
 minutes.  On slow systems they could otherwise take several hours, without
 significantly improving our understanding of the correctness of the code
 under test.
-
-Also, some of those test cases have been split into more files, to
-allow them to be run in parallel on suitable systems.
 
 =item *
 
@@ -2319,7 +2317,7 @@ over twenty years.
 
 =item OpenBSD 6
 
-OpenBSD 6 still does not support returning C<pid>, C<gid> or C<uid> with
+OpenBSD 6 still does not support returning C<pid>, C<gid>, or C<uid> with
 C<SA_SIGINFO>.  Make sure to account for it.
 
 =item FreeBSD
@@ -2429,7 +2427,7 @@ L<C<is_utf8_valid_partial_char_flags>|perlapi/is_utf8_valid_partial_char_flags>.
 
 =item *
 
-The  functions L<C<utf8n_to_uvchr>|perlapi/utf8n_to_uvchr> and its
+The functions L<C<utf8n_to_uvchr>|perlapi/utf8n_to_uvchr> and its
 derivatives have had several changes of behaviour.
 
 Calling them, while passing a string length of 0 is now asserted against
@@ -2491,6 +2489,7 @@ you wish to travel.
 Two new macros which return useful utf8 byte sequences:
 
 L<C<BOM_UTF8>|perlapi/BOM_UTF8>
+
 L<C<REPLACEMENT_CHARACTER_UTF8>|perlapi/REPLACEMENT_CHARACTER_UTF8>
 
 =back
@@ -2507,7 +2506,7 @@ build option does.
 
 =item *
 
-Three new ops, C<OP_ARGELEM>, C<OP_ARGDEFELEM> and C<OP_ARGCHECK> have
+Three new ops, C<OP_ARGELEM>, C<OP_ARGDEFELEM>, and C<OP_ARGCHECK> have
 been added.  These are intended principally to implement the individual
 elements of a subroutine signature, plus any overall checking required.
 
@@ -2516,9 +2515,9 @@ elements of a subroutine signature, plus any overall checking required.
 The C<OP_PUSHRE> op has been eliminated and the C<OP_SPLIT> op has been
 changed from class C<LISTOP> to C<PMOP>.
 
-Formerly the first child of a split would be a pushre, which would have the
-split's regex attached to it. Now the regex is attached directly to the
-split op, and the pushre has been eliminated.
+Formerly the first child of a split would be a C<pushre>, which would have the
+C<split>'s regex attached to it. Now the regex is attached directly to the
+C<split> op, and the C<pushre> has been eliminated.
 
 =item *
 
@@ -3246,7 +3245,7 @@ best known as the author of the Perl & XML column on XML.com, he was a
 core contributor to AxKit, an XML server platform that became an Apache
 Foundation project.  He was a frequent speaker in the early days at
 OSCON, and most recently at YAPC::NA in Madison.  He was frequently on
-irc.perl.org as `ubu`, generally in the #axkit-dahut community, the
+irc.perl.org as ubu, generally in the #axkit-dahut community, the
 group responsible for YAPC::NA Asheville in 2011.
 
 Kip and his constant contributions to the community will be greatly
