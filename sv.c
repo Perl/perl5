@@ -11875,10 +11875,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	UV uv            = 0;         /* the value to print of int-ish args */
 
 	bool vectorize   = FALSE;     /* has      "%v..."    */
-	SV *vecsv        = NULL;      /* the cur arg for %v  */
-	bool vec_utf8    = FALSE;     /* SvUTF8(vecsv)       */
-	const U8 *vecstr = NULL;      /* SvPVX(vecsv)        */
-	STRLEN veclen    = 0;         /* SvCUR(vecsv)        */
+	bool vec_utf8    = FALSE;     /* SvUTF8(vec arg)     */
+	const U8 *vecstr = NULL;      /* SvPVX(vec arg)      */
+	STRLEN veclen    = 0;         /* SvCUR(vec arg)      */
 	const char *dotstr = NULL;    /* separator string for %v */
 	STRLEN dotstrlen;             /* length of separator string for %v */
 
@@ -12007,6 +12006,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 ix = 0;
 
             if (*q == 'v') {
+                SV *vecsv;
                 /* The asterisk was for  *v, *NNN$v: vectorizing, but not
                  * with the default "." */
                 q++;
@@ -12187,45 +12187,18 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    goto string;
 	}
 
-        /* get next arg */
+	if (vectorize && !strchr("BbDdiOouUXx", c))
+            goto unknown;
 
-	if (vectorize) {
-            if (!strchr("BbDdiOouUXx", c))
-		goto unknown;
+        /* get next arg (individual branches do their own va_arg()
+         * handling for the args case) */
 
-	    if (args)
-                vecsv = va_arg(*args, SV*);
-	    else {
-                efix = efix ? efix - 1 : svix++;
-                vecsv = efix < svmax ? svargs[efix]
-                                     : (arg_missing = TRUE, &PL_sv_no);
-            }
-
-            /* if this is a version object, we need to convert
-             * back into v-string notation and then let the
-             * vectorize happen normally
-             */
-            if (sv_isobject(vecsv) && sv_derived_from(vecsv, "version")) {
-                if ( hv_existss(MUTABLE_HV(SvRV(vecsv)), "alpha") ) {
-                    Perl_ck_warner_d(aTHX_ packWARN(WARN_PRINTF),
-                    "vector argument not supported with alpha versions");
-                    vecsv = &PL_sv_no;
-                }
-                else {
-                    vecstr = (U8*)SvPV_const(vecsv,veclen);
-                    vecsv = sv_newmortal();
-                    scan_vstring((char *)vecstr, (char *)vecstr + veclen,
-                                 vecsv);
-                }
-            }
-            vecstr = (U8*)SvPV_const(vecsv, veclen);
-            vec_utf8 = DO_UTF8(vecsv);
-	}
-        else if (!args) {
+        if (!args) {
             efix = efix ? efix - 1 : svix++;
             argsv = efix < svmax ? svargs[efix]
                                  : (arg_missing = TRUE, &PL_sv_no);
 	}
+
 
 	switch (c) {
 
@@ -12443,12 +12416,37 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	    if (vectorize) {
 		STRLEN ulen;
+                SV *vecsv;
 
                 if (base < 0) {
                     base = -base;
                     if (plus)
                          esignbuf[esignlen++] = plus;
                 }
+
+                /* initialise the vector string to iterate over */
+
+                vecsv = args ? va_arg(*args, SV*) : argsv;
+
+                /* if this is a version object, we need to convert
+                 * back into v-string notation and then let the
+                 * vectorize happen normally
+                 */
+                if (sv_isobject(vecsv) && sv_derived_from(vecsv, "version")) {
+                    if ( hv_existss(MUTABLE_HV(SvRV(vecsv)), "alpha") ) {
+                        Perl_ck_warner_d(aTHX_ packWARN(WARN_PRINTF),
+                        "vector argument not supported with alpha versions");
+                        vecsv = &PL_sv_no;
+                    }
+                    else {
+                        vecstr = (U8*)SvPV_const(vecsv,veclen);
+                        vecsv = sv_newmortal();
+                        scan_vstring((char *)vecstr, (char *)vecstr + veclen,
+                                     vecsv);
+                    }
+                }
+                vecstr = (U8*)SvPV_const(vecsv, veclen);
+                vec_utf8 = DO_UTF8(vecsv);
 
               /* This is the re-entry point for when we're iterating
                * over the individual characters of a vector arg */
