@@ -468,7 +468,9 @@ for (int(~0/2+1), ~0, "9999999999999999999") {
     foreach my $ord (0 .. 255) {
 	my $bad = 0;
 	local $SIG{__WARN__} = sub {
-	    if ($_[0] !~ /^Invalid conversion in sprintf/) {
+	    if (  $_[0] !~ /^Invalid conversion in sprintf/
+               && $_[0] !~ /^Missing argument in sprintf/ )
+            {
 		warn $_[0];
 		$bad++;
 	    }

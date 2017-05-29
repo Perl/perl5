@@ -12197,7 +12197,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 vecsv = va_arg(*args, SV*);
 	    else {
                 efix = efix ? efix - 1 : svix++;
-                vecsv = efix < svmax ? svargs[efix] : &PL_sv_no;
+                vecsv = efix < svmax ? svargs[efix]
+                                     : (arg_missing = TRUE, &PL_sv_no);
             }
 
             /* if this is a version object, we need to convert

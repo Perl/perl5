@@ -746,7 +746,7 @@ __END__
 >%#b<		>0<	>0<
 >%#o<		>0<	>0<
 >%#x<		>0<	>0<
->%1073741819$v2d<	>''<	><
+>%1073741819$v2d<	>''<	> MISSING<
 >%*1073741819$v2d<	>''<	> MISSING<
 >%.3X<		>[11]<			>00B<		>perl #83194: hex, zero-padded to 3 places<
 >%.*X<		>[3, 11]<		>00B<		>perl #83194: dynamic precision<
@@ -768,3 +768,4 @@ e>%vd<   >"version"<    >165.133.153.162.137.150.149<   >perl #102586: vector fl
 >%*%<	>[]<	>% MISSING<
 >%*1$%<	>[]<	>% MISSING<
 >%*2$d<	>123<	>123 MISSING<
+>%2$vd<>123<	> MISSING<
