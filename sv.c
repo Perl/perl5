@@ -10978,6 +10978,63 @@ S_warn_vcatpvfn_missing_argument(pTHX) {
 }
 
 
+static void
+S_croak_overflow()
+{
+    dTHX;
+    Perl_croak(aTHX_ "Integer overflow in format string for %s",
+                    (PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn"));
+}
+
+
+/* Given an int i from the next arg (if args is true) or an sv from an arg
+ * (if args is false), try to extract a STRLEN-ranged value from the arg,
+ * with overflow checking.
+ * Sets *neg to true if the value was negative (untouched otherwise.
+ * Returns the absolute value.
+ * As an extra margin of safety, it croaks if the returned value would
+ * exceed the maximum value of a STRLEN / 4.
+ */
+
+static STRLEN
+S_sprintf_arg_num_val(pTHX_ va_list *const args, int i, SV *sv, bool *neg)
+{
+    IV iv;
+
+    if (args) {
+        iv = i;
+        goto do_iv;
+    }
+
+    if (!sv)
+        return 0;
+
+    SvGETMAGIC(sv);
+
+    if (UNLIKELY(SvIsUV(sv))) {
+        UV uv = SvUV_nomg(sv);
+        if (uv > IV_MAX)
+            S_croak_overflow();
+        iv = uv;
+    }
+    else {
+        iv = SvIV_nomg(sv);
+      do_iv:
+        if (iv < 0) {
+            if (iv < -IV_MAX)
+                S_croak_overflow();
+            iv = -iv;
+            *neg = TRUE;
+        }
+    }
+
+    if (iv > (IV)(((STRLEN)~0) / 4))
+        S_croak_overflow();
+
+    return (STRLEN)iv;
+}
+
+
 /* Returns true if c is in the range '1'..'9'
  * Written with the cast so it only needs one conditional test
  */
@@ -11005,8 +11062,7 @@ S_expect_number(pTHX_ char **const pattern)
     while (isDIGIT(**pattern)) {
         /* if var * 10 + 9 would exceed 1/4 max strlen, croak */
         if (var > ((((STRLEN)~0) / 4 - 9) / 10))
-            Perl_croak(aTHX_ "Integer overflow in format string for %s",
-                            (PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn"));
+            S_croak_overflow();
         var = var * 10 + (*(*pattern)++ - '0');
     }
     return var;
@@ -11989,7 +12045,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
       tryasterisk:
 	if (*q == '*') {
-            int i;
             STRLEN ix; /* explicit width/vector separator index */
 	    q++;
 	    if (IS_1_TO_9(*q)) {
@@ -12035,14 +12090,18 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             }
 
             /* the asterisk specified a width */
-	    if (args)
-		i = va_arg(*args, int);
-	    else {
-                ix = ix ? ix - 1 : svix++;
-		i = (ix < svmax) ? SvIVx(svargs[ix]) : (arg_missing = TRUE, 0);
+            {
+                int i;
+                SV *sv;
+                if (args)
+                    i = va_arg(*args, int);
+                else {
+                    ix = ix ? ix - 1 : svix++;
+                    sv = (ix < svmax) ? svargs[ix]
+                                      : (arg_missing = TRUE, (SV*)NULL);
+                }
+                width = S_sprintf_arg_num_val(aTHX_ args, i, sv, &left);
             }
-	    left |= (i < 0);
-	    width = (i < 0) ? -i : i;
         }
 	else if (*q == 'v') {
 	    q++;
@@ -12071,7 +12130,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	if (*q == '.') {
 	    q++;
 	    if (*q == '*') {
-                int i;
                 STRLEN ix; /* explicit precision index */
 		q++;
                 if (IS_1_TO_9(*q)) {
@@ -12087,17 +12145,21 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 else
                     ix = 0;
 
-		if (args)
-                    i = va_arg(*args, int);
-		else {
-                    SV *precsv;
-                    ix = ix ? ix - 1 : svix++;
-                    precsv = ix < svmax ? svargs[ix]
-                                        : (arg_missing = TRUE, &PL_sv_no);
-                    i = precsv == &PL_sv_no ? 0 : SvIVx(precsv);
+                {
+                    int i;
+                    SV *sv;
+                    bool neg = FALSE;
+
+                    if (args)
+                        i = va_arg(*args, int);
+                    else {
+                        ix = ix ? ix - 1 : svix++;
+                        sv = (ix < svmax) ? svargs[ix]
+                                          : (arg_missing = TRUE, (SV*)NULL);
+                    }
+                    precis = S_sprintf_arg_num_val(aTHX_ args, i, sv, &neg);
+                    has_precis = !neg;
                 }
-		precis = i;
-		has_precis = !(i < 0);
 	    }
 	    else {
 		precis = 0;

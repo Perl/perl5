@@ -985,4 +985,42 @@ SKIP: {
 like sprintf("%p", 0+'Inf'), qr/^[0-9a-f]+$/, "%p and Inf";
 like sprintf("%p", 0+'NaN'), qr/^[0-9a-f]+$/, "%p and NaN";
 
+# when the width or precision is specified by an argument, handle overflows
+
+{
+    for my $i (
+               (~0     ) - 0, # UV_MAX
+               (~0     ) - 1,
+               (~0     ) - 2,
+
+               (~0 >> 1) + 2,
+               (~0 >> 1) + 1,
+               (~0 >> 1) - 0, # IV_MAX
+               (~0 >> 1) - 1,
+               (~0 >> 1) - 2,
+
+               (~0 >> 2) + 2,
+               (~0 >> 2) + 1,
+
+               -1 - (~0 >> 1),# -(IV_MAX+1)
+                0 - (~0 >> 1),
+                1 - (~0 >> 1),
+
+               -2 - (~0 >> 2),
+               -1 - (~0 >> 2),
+            )
+    {
+        my $hex = sprintf "0x%x", $i;
+        eval { my $s = sprintf '%*s', $i, "abc"; };
+        like $@, qr/Integer overflow/, "overflow: %*s $hex, $i";
+        eval { my $s = sprintf '%*2$s', "abc", $i; };
+        like $@, qr/Integer overflow/, 'overflow: %*2$s';
+        eval { my $s = sprintf '%.*s', $i, "abc"; };
+        like $@, qr/Integer overflow/, 'overflow: %.*s';
+        eval { my $s = sprintf '%.*2$s', "abc", $i; };
+        like $@, qr/Integer overflow/, 'overflow: %.*2$s';
+    }
+}
+
+
 done_testing();
