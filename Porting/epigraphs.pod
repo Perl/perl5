@@ -17,6 +17,16 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.26.0 - Nine Simone, Ain't Got No / I Got Life
+
+Announced on 2017-05-30 by Sawyer X
+
+  I've got the life
+  And I'm gonna keep it
+  I've got the life
+  And nobody's gonna take it away
+  I've got the life
+
 =head2 v5.26.0-RC2 - Richard Condon, The Manchurian Candidate
 
 L<Announced on 2017-05-23 by Sawyer X|http://www.nntp.perl.org/group/perl.perl5.porters/2017/05/msg244511.html>
