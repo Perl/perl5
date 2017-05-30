@@ -13268,8 +13268,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
             p = SvEND(sv);
             if (esignlen && fill) {
-                int i;
-                for (i = 0; i < (int)esignlen; i++)
+                STRLEN i;
+                for (i = 0; i < esignlen; i++)
                     *p++ = esignbuf[i];
             }
             if (gap && !left) {
@@ -13277,12 +13277,12 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 p += gap;
             }
             if (esignlen && !fill) {
-                int i;
-                for (i = 0; i < (int)esignlen; i++)
+                STRLEN i;
+                for (i = 0; i < esignlen; i++)
                     *p++ = esignbuf[i];
             }
             if (zeros) {
-                int i;
+                STRLEN i;
                 for (i = zeros; i; i--)
                     *p++ = '0';
             }
