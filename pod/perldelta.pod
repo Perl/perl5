@@ -882,7 +882,7 @@ L<Memoize> has been upgraded from version 1.03 to 1.03_01.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20170420 to 5.20170520.
+L<Module::CoreList> has been upgraded from version 5.20170420 to 5.20170530.
 
 =item *
 
