@@ -12091,8 +12091,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
             /* the asterisk specified a width */
             {
-                int i;
-                SV *sv;
+                int i = 0;
+                SV *sv = NULL;
                 if (args)
                     i = va_arg(*args, int);
                 else {
@@ -12146,8 +12146,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     ix = 0;
 
                 {
-                    int i;
-                    SV *sv;
+                    int i = 0;
+                    SV *sv = NULL;
                     bool neg = FALSE;
 
                     if (args)
