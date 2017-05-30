@@ -11,17 +11,19 @@ release schedules for the next, current and previous stable versions
 of Perl.  Dates with two or more question marks will only be releases if
 deemed necessary by the Pumpking.
 
+=head2 Perl 5.28
+
+Code freezes (which happen in the 5.27.X series)
+
+  2017-12-20  5.27.8          Contentious changes freeze
+  2018-01-20  5.27.9          User-visible changes to correctly
+                              functioning programs freeze
+  2018-02-20  5.27.10         Full code freeze
+  2018-04-20  5.28.0          Stable release!
+
 =head2 Perl 5.26
 
-Code freezes (which happen in the 5.25.X series)
-
-  2016-12-20  5.25.8          Contentious changes freeze
-  2017-01-20  5.25.9          User-visible changes to correctly
-                              functioning programs freeze
-  2017-02-20  5.25.10         Full code freeze
-  2017-03-20  5.25.11         Full code freeze
-  2017-04-20  5.25.12         Full code freeze
-  2017-05-20  5.26.0          Stable release!
+  2017-05-30  5.26.0 ✓        Sawyer X
 
 =head2 Perl 5.24
 
