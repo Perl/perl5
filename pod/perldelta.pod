@@ -582,6 +582,10 @@ this matches the behaviour for non-bareword constants.
 
 =item *
 
+IO::Compress has been upgraded from version 2.069 to 2.074.
+
+=item *
+
 L<Archive::Tar> has been upgraded from version 2.04 to 2.24.
 
 =item *
@@ -816,10 +820,6 @@ L<[perl #130122]|https://rt.perl.org/Public/Bug/Display.html?id=130122>
 =item *
 
 L<IO> has been upgraded from version 1.36 to 1.38.
-
-=item *
-
-IO::Compress has been upgraded from version 2.069 to 2.074.
 
 =item *
 
