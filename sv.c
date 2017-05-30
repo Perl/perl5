@@ -13133,14 +13133,16 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	case 'n':
             {
-                int i;
+                STRLEN len;
                 /* XXX ideally we should warn if any flags etc have been
                  * set, e.g. "%-4.5n" */
                 /* XXX if sv was originally non-utf8 with a char in the
                  * range 0x80-0xff, then if it got upgraded, we should
                  * calculate char len rather than byte len here */
-                i = SvCUR(sv) - origlen;
+                len = SvCUR(sv) - origlen;
                 if (args) {
+                    int i = (len > PERL_INT_MAX) ? PERL_INT_MAX : (int)len;
+
                     switch (intsize) {
                     case 'c':  *(va_arg(*args, char*))      = i; break;
                     case 'h':  *(va_arg(*args, short*))     = i; break;
@@ -13167,7 +13169,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         Perl_croak_nocontext(
                             "Missing argument for %%n in %s",
                                 PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
-                    sv_setuv_mg(argsv, has_utf8 ? (UV)sv_len_utf8(sv) : (UV)i);
+                    sv_setuv_mg(argsv, has_utf8 ? (UV)sv_len_utf8(sv) : (UV)len);
                 }
                 goto donevalidconversion;
             }
