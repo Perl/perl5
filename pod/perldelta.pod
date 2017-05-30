@@ -3253,8 +3253,8 @@ missed.
 
 =head1 Acknowledgements
 
-Perl 5.26.0 represents approximately 12 months of development since Perl 5.24.0
-and contains approximately 370,000 lines of changes across 2,600 files from 86
+Perl 5.26.0 represents approximately 13 months of development since Perl 5.24.0
+and contains approximately 360,000 lines of changes across 2,600 files from 86
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
