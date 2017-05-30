@@ -12162,9 +12162,16 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 }
 	    }
 	    else {
-		precis = 0;
-		while (isDIGIT(*q))
-		    precis = precis * 10 + (*q++ - '0');
+                /* although it doesn't seem documented, this code has long
+                 * behaved so that:
+                 *   no digits following the '.' is treated like '.0'
+                 *   the number may be preceded by any number of zeroes,
+                 *      e.g. "%.0001f", which is the same as "%.1f"
+                 * so I've kept that behaviour. DAPM May 2017
+                 */
+                while (*q == '0')
+                    q++;
+                precis = IS_1_TO_9(*q) ? expect_number(&q) : 0;
 		has_precis = TRUE;
 	    }
 	}

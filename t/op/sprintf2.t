@@ -916,6 +916,8 @@ SKIP: {
 
 # check all calls to croak_memory_wrap()
 # RT #131260
+# (these now fail earlier with "Integer overflow" rather than
+# "memory wrap" - DAPM)
 
 {
     my $s = 8 * $Config{sizesize};
@@ -933,7 +935,8 @@ SKIP: {
     for my $test (@tests) {
         my ($fmt, $arg) = @$test;
         eval { my $s = sprintf $fmt, $arg; };
-        like("$@", qr/panic: memory wrap/, qq{memory wrap: "$fmt", "$arg"});
+        like("$@", qr/Integer overflow in format string/,
+                    qq{Integer overflow: "$fmt", "$arg"});
     }
 }
 
@@ -986,6 +989,7 @@ like sprintf("%p", 0+'Inf'), qr/^[0-9a-f]+$/, "%p and Inf";
 like sprintf("%p", 0+'NaN'), qr/^[0-9a-f]+$/, "%p and NaN";
 
 # when the width or precision is specified by an argument, handle overflows
+# ditto for literal precisions.
 
 {
     for my $i (
@@ -1013,12 +1017,20 @@ like sprintf("%p", 0+'NaN'), qr/^[0-9a-f]+$/, "%p and NaN";
         my $hex = sprintf "0x%x", $i;
         eval { my $s = sprintf '%*s', $i, "abc"; };
         like $@, qr/Integer overflow/, "overflow: %*s $hex, $i";
+
         eval { my $s = sprintf '%*2$s', "abc", $i; };
         like $@, qr/Integer overflow/, 'overflow: %*2$s';
+
         eval { my $s = sprintf '%.*s', $i, "abc"; };
         like $@, qr/Integer overflow/, 'overflow: %.*s';
+
         eval { my $s = sprintf '%.*2$s', "abc", $i; };
         like $@, qr/Integer overflow/, 'overflow: %.*2$s';
+
+        next if $i < 0;
+
+        eval { my $s = sprintf "%.${i}f", 1.234 };
+        like $@, qr/Integer overflow/, 'overflow: %.NNNf';
     }
 }
 
