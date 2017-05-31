@@ -5,7 +5,7 @@ use warnings;
 use vars qw[$VERSION %utilities];
 use Module::CoreList;
 
-$VERSION = '5.20170530';
+$VERSION = '5.20170531';
 
 sub utilities {
     my $perl = shift;
