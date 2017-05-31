@@ -17,6 +17,20 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+Announced on 2017-05-31 by Sawyer X
+
+  People who have theories as to how one should live tend to forget the
+  limitations of nature. If your way of life involves constant
+  restraint of impulse for the sake of some one supreme aim that you
+  have set yourself, it is likely that the aim will become increasingly
+  distasteful because of the efforts that it demands; impulse, denied
+  its normal outlets, will find others, probably in spite; pleasure, if
+  you allow yourself any at all, will be dissociated from the main
+  current of your life, and will become Bacchic and frivolous. Such
+  pleasure brings no happiness, but only a deeper despair.
+
+    -- Bertrand Russell, The Road to Happiness
+
 =head2 v5.26.0 - Nine Simone, Ain't Got No / I Got Life
 
 Announced on 2017-05-30 by Sawyer X
