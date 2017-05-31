@@ -12931,8 +12931,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
                 if (i > 0) {
                     digits = BIT_DIGITS(i);
-                    if (float_need >= ((STRLEN)~0) - digits)
-                        croak_memory_wrap();
+                    /* this can't overflow. 'digits' will only be a few
+                     * thousand even for the largest floating-point types.
+                     * And up until now float_need is just some small
+                     * constants plus radix_len, which can't be in
+                     * overflow territory unless the radix SV is consuming
+                     * over 1/2 the address space */
+                    assert(float_need < ((STRLEN)~0) - digits);
                     float_need += digits;
                 }
             }
@@ -12964,8 +12969,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #else
                         NVSIZE * 2; /* 2 hexdigits for each byte */
 #endif
-                    if (float_need >= ((STRLEN)~0) - digits)
-                        croak_memory_wrap();
+                    /* see "this can't overflow" comment above */
+                    assert(float_need < ((STRLEN)~0) - digits);
                     float_need += digits;
                 }
 	    }
