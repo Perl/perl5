@@ -59,6 +59,23 @@ respectively.
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
 
+=head2 Some uses of unescaped C<"{"> are no longer fatal
+
+Perl 5.26.0 fatalized some uses of an unescaped left brace, but an
+exception was made at the last minute, specifically crafted to be a
+minimal change to allow GNU Autoconf to work.  This code is heavily
+depended upon, and continues to use the deprecated usage.  Its use of an
+unescaped left brace is one where we have no intention of repurposing
+C<"{"> to be something other than itself.
+
+That exception is now generalized to include various other such cases
+where the C<"{"> will not be repurposed.  This is to get real experience
+with this more complicated change now, in case we need to issue a dot
+release if we find other things like Autoconf that are important to work
+around.
+
+Note that these uses continue to raise a deprecation message.
+
 =head2 Module removals
 
 XXX Remove this section if inapplicable.

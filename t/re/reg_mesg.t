@@ -289,8 +289,6 @@ my @death =
  '/\w{/' => 'Unescaped left brace in regex is illegal here {#} m/\w{{#}/',
  '/\q{/' => 'Unescaped left brace in regex is illegal here {#} m/\q{{#}/',
  '/\A{/' => 'Unescaped left brace in regex is illegal here {#} m/\A{{#}/',
- '/:{4,a}/' => 'Unescaped left brace in regex is illegal here {#} m/:{{#}4,a}/',
- '/xa{3\,4}y/' => 'Unescaped left brace in regex is illegal here {#} m/xa{{#}3\,4}y/',
  '/abc/xix' => "",
  '/(?xmsixp:abc)/' => "",
  '/(?xmsixp)abc/' => "",
@@ -377,6 +375,12 @@ my @death_only_under_strict = (
                                      => 'False [] range "[:digit:]-" {#} m/[[:digit:]-{#}[:alpha:]]\x{100}/',
     '/[a\zb]\x{100}/' => 'Unrecognized escape \z in character class passed through {#} m/[a\z{#}b]\x{100}/',
                       => 'Unrecognized escape \z in character class {#} m/[a\z{#}b]\x{100}/',
+    'default_on/:{4,a}/'     => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/:{{#}4,a}/',
+                             => 'Unescaped left brace in regex is illegal here {#} m/:{{#}4,a}/',
+    'default_on/xa{3\,4}y/'  => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/xa{{#}3\,4}y/',
+                             => 'Unescaped left brace in regex is illegal here {#} m/xa{{#}3\,4}y/',
+  'default_on/\\${[^\\}]*}/' => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/\\${{#}[^\\}]*}/',
+                             => 'Unescaped left brace in regex is illegal here {#} m/\\${{#}[^\\}]*}/',
 );
 
 # These need the character 'ネ' as a marker for mark_as_utf8()
@@ -657,7 +661,6 @@ my @deprecated = (
  '/.{/'         => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/.{{#}/',
  '/[x]{/'       => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/[x]{{#}/',
  '/\p{Latin}{/' => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/\p{Latin}{{#}/',
- '/\\${[^\\}]*}/' => 'Unescaped left brace in regex is deprecated here (and will be fatal in Perl 5.30), passed through {#} m/\\${{#}[^\\}]*}/',
 );
 
 for my $strict ("", "use re 'strict';") {

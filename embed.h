@@ -1042,6 +1042,7 @@
 #define is_ssc_worth_it		S_is_ssc_worth_it
 #define join_exact(a,b,c,d,e,f,g)	S_join_exact(aTHX_ a,b,c,d,e,f,g)
 #define make_trie(a,b,c,d,e,f,g,h)	S_make_trie(aTHX_ a,b,c,d,e,f,g,h)
+#define new_regcurly		S_new_regcurly
 #define nextchar(a)		S_nextchar(aTHX_ a)
 #define output_or_return_posix_warnings(a,b,c)	S_output_or_return_posix_warnings(aTHX_ a,b,c)
 #define parse_lparen_question_flags(a)	S_parse_lparen_question_flags(aTHX_ a)

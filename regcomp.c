@@ -12398,6 +12398,52 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
     }
 }
 
+STATIC bool
+S_new_regcurly(const char *s, const char *e)
+{
+    /* This is a temporary function designed to match the most lenient form of
+     * a {m,n} quantifier we ever envision, with either number omitted, and
+     * spaces anywhere between/before/after them.
+     *
+     * If this function fails, then the string it matches is very unlikely to
+     * ever be considered a valid quantifier, so we can allow the '{' that
+     * begins it to be considered as a literal */
+
+    bool has_min = FALSE;
+    bool has_max = FALSE;
+
+    PERL_ARGS_ASSERT_NEW_REGCURLY;
+
+    if (s >= e || *s++ != '{')
+	return FALSE;
+
+    while (s < e && isSPACE(*s)) {
+        s++;
+    }
+    while (s < e && isDIGIT(*s)) {
+        has_min = TRUE;
+        s++;
+    }
+    while (s < e && isSPACE(*s)) {
+        s++;
+    }
+
+    if (*s == ',') {
+	s++;
+        while (s < e && isSPACE(*s)) {
+            s++;
+        }
+        while (s < e && isDIGIT(*s)) {
+            has_max = TRUE;
+            s++;
+        }
+        while (s < e && isSPACE(*s)) {
+            s++;
+        }
+    }
+
+    return s < e && *s == '}' && (has_min || has_max);
+}
 
 /* Parse backref decimal value, unless it's too big to sensibly be a backref,
  * in which case return I32_MAX (rather than possibly 32-bit wrapping) */
@@ -12832,6 +12878,12 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             /* FALLTHROUGH */
 
           finish_meta_pat:
+            if (   UCHARAT(RExC_parse + 1) == '{'
+                && UNLIKELY(! new_regcurly(RExC_parse + 1, RExC_end)))
+            {
+                RExC_parse += 2;
+                vFAIL("Unescaped left brace in regex is illegal here");
+            }
 	    nextchar(pRExC_state);
             Set_Node_Length(ret, 2); /* MJD */
 	    break;
@@ -13381,22 +13433,25 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		    } /* End of switch on '\' */
 		    break;
 		case '{':
-		    /* Currently we don't care if the lbrace is at the start
-		     * of a construct.  This catches it in the middle of a
-		     * literal string, or when it's the first thing after
-		     * something like "\b" */
-		    if (len || (p > RExC_start && isALPHA_A(*(p -1)))) {
+                    /* Currently we allow an lbrace at the start of a construct
+                     * without raising a warning.  This is because we think we
+                     * will never want such a brace to be meant to be other
+                     * than taken literally. */
+		    if (len || (p > RExC_start && isALPHA_A(*(p - 1)))) {
 
-                        /* GNU Autoconf is depended on by a lot of code, and
-                         * can't seem to release a new version that avoids the
-                         * deprecation now made fatal.  (A commit to do so has
-                         * been in its repository since early 2013; only one
-                         * pattern is affected.)  As a work-around, don't
-                         * fatalize this if the pattern being compiled is the
-                         * precise one that trips up Autoconf.  See [perl
-                         * #130497] for more details. */
-                        if (memNEs(RExC_start, RExC_end - RExC_start,
-                                   "\\${[^\\}]*}"))
+                        /* But, we raise a fatal warning otherwise, as the
+                         * deprecation cycle has come and gone.  Except that it
+                         * turns out that some heavily-relied on upstream
+                         * software, notably GNU Autoconf, have failed to fix
+                         * their uses.  For these, don't make it fatal unless
+                         * we anticipate using the '{' for something else.
+                         * This happens after any alpha, and for a looser {m,n}
+                         * quantifier specification */
+                        if (      RExC_strict
+                            || (  p > parse_start + 1
+                                && isALPHA_A(*(p - 1))
+                                && *(p - 2) == '\\')
+                            || new_regcurly(p, RExC_end))
                         {
                             RExC_parse = p + 1;
                             vFAIL("Unescaped left brace in regex is "
