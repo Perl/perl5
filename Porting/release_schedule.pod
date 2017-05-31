@@ -53,21 +53,19 @@ When shipping a release, you should include the schedule for (at least)
 the next four releases. If a stable version of Perl is released,
 you should reset the version numbers to the next blead series.
 
-=head2 Perl 5.25
+=head2 Perl 5.27
 
-  2016-04-08  5.25.0 ✓        Ricardo Signes
-  2016-05-20  5.25.1 ✓        Sawyer X
-  2016-06-20  5.25.2 ✓        Matthew Horsfall
-  2016-07-20  5.25.3 ✓        Steve Hay
-  2016-08-20  5.25.4 ✓        BinGOs
-  2016-09-20  5.25.5 ✓        Stevan Little
-  2016-10-20  5.25.6 ✓        Aaron Crane
-  2016-11-20  5.25.7 ✓        Chad Granum
-  2016-12-20  5.25.8 ✓        Sawyer X
-  2017-01-20  5.25.9 ✓        Abigail
-  2017-02-20  5.25.10 ✓       Renée Bäcker
-  2017-03-20  5.25.11 ✓       Sawyer X
-  2017-04-20  5.25.12 ✓       Sawyer X
+  2017-05-31  5.27.0 ✓        Sawyer X
+  2017-06-20  5.27.1          ?
+  2017-07-20  5.27.2          ?
+  2017-08-20  5.27.3          ?
+  2017-09-20  5.27.4          ?
+  2017-10-20  5.27.5          ?
+  2017-11-20  5.27.6          ?
+  2017-12-20  5.27.7          ?
+  2018-01-20  5.27.8          ?
+  2018-02-20  5.27.9          ?
+  2018-03-20  5.27.10         ?
 
 (RC0 for 5.26.0 will be released once we think that all the blockers have been
 addressed.  This typically means some time in April or May.)
