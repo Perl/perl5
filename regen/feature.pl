@@ -62,6 +62,8 @@ my %feature_bundle = (
 		    evalbytes current_sub fc postderef_qq)],
     "5.25"   =>	[qw(say state switch unicode_strings unicode_eval
 		    evalbytes current_sub fc postderef_qq)],
+    "5.27"   =>	[qw(say state switch unicode_strings unicode_eval
+		    evalbytes current_sub fc postderef_qq)],
 );
 
 my @noops = qw( postderef lexical_subs );
@@ -367,7 +369,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.47';
+our $VERSION = '1.48';
 
 FEATURES
 
