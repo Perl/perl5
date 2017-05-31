@@ -16,15 +16,6 @@ their inception, versions, etc. There's a lot of speculation here.
 
 =over 8
 
-=item C<our> can now have an experimental optional attribute C<unique>
-
-Introduced in Perl 5.8.0
-
-Deprecated in Perl 5.10.0
-
-The ticket for this feature is
-L<[perl #119313]|https://rt.perl.org/rt3/Ticket/Display.html?id=119313>.
-
 =item Smart match (C<~~>)
 
 Introduced in Perl 5.10.0
@@ -328,6 +319,14 @@ Superseded by L</Postfix dereference syntax>.
 Introduced in Perl 5.14.0
 
 Removed in Perl 5.24.0
+
+=item C<our> can have an experimental optional attribute C<unique>
+
+Introduced in Perl 5.8.0
+
+Deprecated in Perl 5.10.0
+
+Removed in Perl 5.28.0
 
 =back
 

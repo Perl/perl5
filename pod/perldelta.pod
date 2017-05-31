@@ -50,6 +50,11 @@ XXX For a release on a stable branch, this section aspires to be:
 Omitting the commas between variables passed to formats is no longer
 allowed.  This has been deprecated since perl 5.000.
 
+=head2 The C<:locked> and C<:unique> attributes have been removed
+
+These have been no-ops and deprecated since perl 5.12 and 5.10,
+respectively.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
