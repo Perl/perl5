@@ -33,7 +33,7 @@ Announced on 2017-05-31 by Sawyer X
 
 =head2 v5.26.0 - Nine Simone, Ain't Got No / I Got Life
 
-Announced on 2017-05-30 by Sawyer X
+L<Announced on 2017-05-30 by Sawyer X|http://www.nntp.perl.org/group/perl.perl5.porters/2017/05/msg244573.html>
 
   I've got the life
   And I'm gonna keep it
