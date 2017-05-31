@@ -13446,10 +13446,10 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                  * this character again next time through, when it will be the
                  * only thing in its new node */
 
-                if ((next_is_quantifier = (   LIKELY(p < RExC_end)
-                                           && UNLIKELY(ISMULT2(p))))
-                    && LIKELY(len))
-		{
+                next_is_quantifier =    LIKELY(p < RExC_end)
+                                     && UNLIKELY(ISMULT2(p));
+
+                if (next_is_quantifier && LIKELY(len)) {
                     p = oldp;
                     goto loopdone;
                 }
