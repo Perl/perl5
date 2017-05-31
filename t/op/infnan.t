@@ -540,8 +540,8 @@ cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
     local $SIG{__WARN__} = sub { push @w, $_[0] };
 
     for my $format (qw(B b c D d i O o U u X x)) {
-        # skip unportable: j
-        for my $size (qw(hh h l q L ll t z)) {
+        # skip unportable: j L q
+        for my $size (qw(hh h l ll t z)) {
             for my $num ($NInf, $PInf, $NaN) {
                 @w = ();
                 my $res = eval { sprintf "%${size}${format}", $num; };
