@@ -14110,14 +14110,14 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         }
     },
     5.027000 => {
-        delta_from => 5.026000,
+        delta_from => 5.026,
         changed => {
             'B::Op_private'         => '5.027000',
             'Config'                => '5.027',
-            'feature'               => '1.48',
             'Module::CoreList'      => '5.20170531',
             'Module::CoreList::TieHashDelta'=> '5.20170531',
             'Module::CoreList::Utils'=> '5.20170531',
+            'feature'               => '1.48',
         },
         removed => {
         }
@@ -14882,7 +14882,7 @@ sub is_core
         }
     },
     5.027000 => {
-        delta_from => 5.026000,
+        delta_from => 5.026,
         changed => {
         },
         removed => {
@@ -15697,7 +15697,7 @@ sub is_core
     'Test2::Event::Encoding'=> 'http://github.com/Test-More/test-more/issues',
     'Test2::Event::Exception'=> 'http://github.com/Test-More/test-more/issues',
     'Test2::Event::Generic' => 'http://github.com/Test-More/test-more/issues',
-    'Test2::Event::Info'    => 'http://github.com/Test-More/test-more/issues',
+    'Test2::Event::Info'    => undef,
     'Test2::Event::Note'    => 'http://github.com/Test-More/test-more/issues',
     'Test2::Event::Ok'      => 'http://github.com/Test-More/test-more/issues',
     'Test2::Event::Plan'    => 'http://github.com/Test-More/test-more/issues',
