@@ -11536,7 +11536,7 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
      * be mapped through the xdig to get the actual
      * human-readable xdigits. */
     const char* xdig = PL_hexdigit;
-    int zerotail = 0; /* how many extra zeros to append */
+    STRLEN zerotail = 0; /* how many extra zeros to append */
     int exponent = 0; /* exponent of the floating point input */
     bool hexradix = FALSE; /* should we output the radix */
     bool subnormal = FALSE; /* IEEE 754 subnormal/denormal */
