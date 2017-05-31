@@ -616,6 +616,8 @@ the strings?).
  Sawyer X  5.26.0-RC2   2017-May-23
  Sawyer X  5.26.0       2017-May-30
 
+ Sawyer X  5.27.0       2017-May-31     The 5.27 development track
+
 =head2 SELECTED RELEASE SIZES
 
 For example the notation "core: 212  29" in the release 1.000 means that
