@@ -12871,12 +12871,19 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
              * First, here are the constant bits. For ease of calculation
              * we over-estimate the needed buffer size, for example by
              * assuming all formats have an exponent and a leading 0x1.
+             *
+             * Also for production use, add a little extra overhead for
+             * safety's sake.  Under debugging don't, as it means we're more
+             * more likely to quickly spot issues during development.
              */
 
             float_need =     1  /* possible unary minus */
                           +  4  /* "0x1" plus very unlikely carry */
                           +  2  /* "e-", "p+" etc */
                           +  6  /* exponent: up to 16383 (quad fp) */
+#ifndef DEBUGGING
+                          + 20  /* safety net */
+#endif
                           +  1; /* \0 */
 
 
@@ -12991,18 +12998,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	    if (float_need < width)
 		float_need = width;
-
-/* We should have correctly calculated (or indeed over-estimated) the
- * buffer size, but you never know what strange floating-point systems
- * there are out there. So for production use, add a little extra overhead.
- * Under debugging don't, as it means we more more likely to quickly spot
- * issues during development.
- */
-#ifndef DEBUGGING
-            if (float_need >= ((STRLEN)~0) - 20)
-                croak_memory_wrap();
-	    float_need += 20; /* safety fudge factor */
-#endif
 
 	    if (PL_efloatsize < float_need) {
 		Safefree(PL_efloatbuf);
