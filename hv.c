@@ -1955,7 +1955,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 {
     XPVHV* xhv;
     bool save;
-    SSize_t orig_ix;
+    SSize_t orig_ix = PL_tmps_ix; /* silence compiler warning about unitialized vars */
 
     if (!hv)
 	return;
