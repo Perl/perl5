@@ -5598,6 +5598,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 if (scan->flags == EXACTL || scan->flags == EXACTFLU8) {
                     _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
                     if (utf8_target
+                        && nextchr >= 0 /* guard against negative EOS value in nextchr */
                         && UTF8_IS_ABOVE_LATIN1(nextchr)
                         && scan->flags == EXACTL)
                     {
