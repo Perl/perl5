@@ -11938,7 +11938,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	STRLEN width     = 0;         /* value of "%NNN..."  */
 	bool has_precis  = FALSE;     /* has      "%.NNN..." */
 	STRLEN precis    = 0;         /* value of "%.NNN..." */
-        bool used_explicit_ix = FALSE;/* has      "%$n..."   */
+        bool used_explicit_ix = FALSE;/* has      "%n$..."   */
 	int base         = 0;         /* base to print in, e.g. 8 for %o */
 	UV uv            = 0;         /* the value to print of int-ish args */
 
