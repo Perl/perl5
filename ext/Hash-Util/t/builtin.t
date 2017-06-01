@@ -26,13 +26,15 @@ is(used_buckets(%hash), 1, "hash should have one used buckets");
 
 $hash{$_}= $_ for 2..7;
 
-like(bucket_ratio(%hash), qr!/8!, "hash has expected number of buckets in bucket_ratio");
-is(num_buckets(%hash), 8, "hash should have eight buckets");
+like(bucket_ratio(%hash), qr!/(?:8|16)!, "hash has expected number of buckets in bucket_ratio");
+my $num= num_buckets(%hash);
+ok(($num == 8 || $num == 16), "hash should have 8 or 16 buckets");
 cmp_ok(used_buckets(%hash), "<", 8, "hash should have one used buckets");
 
 $hash{8}= 8;
-like(bucket_ratio(%hash), qr!/16!, "hash has expected number of buckets in bucket_ratio");
-is(num_buckets(%hash), 16, "hash should have sixteen buckets");
+like(bucket_ratio(%hash), qr!/(?:8|16)!, "hash has expected number of buckets in bucket_ratio");
+$num= num_buckets(%hash);
+ok(($num == 8 || $num == 16), "hash should have 8 or 16 buckets");
 cmp_ok(used_buckets(%hash), "<=", 8, "hash should have at most 8 used buckets");
 
 
