@@ -50,6 +50,12 @@ changes to the variable that it closes over, add an explicit C<return>:
 
 This usage has been deprecated, and will no longer be allowed in Perl 5.32.
 
+=head2 Use of strings with code points over 0xFF as arguments to C<vec>
+
+C<vec> views its string argument as a sequence of bits.  A string
+containing a code point over 0xFF is nonsensical.  This usage is
+deprecated in Perl 5.28, and will be removed in Perl 5.32.
+
 =head2 Perl 5.30
 
 =head3 C<< $* >> is no longer supported
