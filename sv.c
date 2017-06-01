@@ -13259,18 +13259,11 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             /* signed value that's wrapped? */
             assert(elen  <= ((~(STRLEN)0) >> 1));
 
-            /* Most of these length vars can range to any value if
-             * supplied with a hostile format and/or args. So check every
-             * addition for possible overflow. In reality some of these
-             * values are interdependent so these checks are slightly
-             * redundant. But its easier to be certain this way.
-             */
-
-            have = elen;
-
-            if (have >= (((STRLEN)~0) - zeros))
-                croak_memory_wrap();
-            have += zeros;
+            /* if zeros is non-zero, then it represents filler between
+             * elen and precis. So adding elen and zeros together will
+             * always be <= precis, and the addition can never wrap */
+            assert(!zeros || (precis > elen && precis - elen == zeros));
+            have = elen + zeros;
 
             if (have >= (((STRLEN)~0) - esignlen))
                 croak_memory_wrap();
