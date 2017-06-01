@@ -35,7 +35,7 @@ __END__
 
 =head1 NAME
 
-Thread - Manipulate threads in Perl (for old code only)
+Thread - Manipulate threads in Perl (for ancient code only)
 
 =head1 DEPRECATED
 
@@ -51,9 +51,8 @@ different, and anything to do with data sharing has to be thought differently.
 With I<ithreads>, you must explicitly C<share()> variables between the
 threads.
 
-You are strongly encouraged to migrate any existing threaded code to the new
-model (i.e., use the C<threads> and C<threads::shared> modules) as soon as
-possible.
+The interface to the new threading model is L<threads>; please read that
+document for discussion of the merits and disadvantages of threads in perl.
 
 =head1 HISTORY
 
