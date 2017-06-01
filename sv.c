@@ -12749,7 +12749,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	case 'a': case 'A':
 
         {
-            STRLEN radix_len;  /* SvCUR(PL_numeric_radix_sv) */
             STRLEN float_need; /* what PL_efloatsize needs to become */
             bool hexfp;        /* hexadecimal floating point? */
 
@@ -12885,12 +12884,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
              * assuming all formats have an exponent and a leading 0x1.
              *
              * Also for production use, add a little extra overhead for
-             * safety's sake.  Under debugging don't, as it means we're more
+             * safety's sake. Under debugging don't, as it means we're
              * more likely to quickly spot issues during development.
              */
 
             float_need =     1  /* possible unary minus */
                           +  4  /* "0x1" plus very unlikely carry */
+                          +  1  /* default radix point '.' */
                           +  2  /* "e-", "p+" etc */
                           +  6  /* exponent: up to 16383 (quad fp) */
 #ifndef DEBUGGING
@@ -12900,7 +12900,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 
             /* determine the radix point len, e.g. length(".") in "1.2" */
-            radix_len  = 1; /* assume '.' */
 #ifdef USE_LOCALE_NUMERIC
             /* note that we may either explicitly use PL_numeric_radix_sv
              * below, or implicitly, via an snprintf() variant.
@@ -12917,16 +12916,16 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
             if (PL_numeric_radix_sv) {
                 assert(IN_LC(LC_NUMERIC));
-                radix_len  = SvCUR(PL_numeric_radix_sv);
+                /* this can't wrap unless PL_numeric_radix_sv is a string
+                 * consuming virtually all the 32-bit or 64-bit address
+                 * space
+                 */
+                float_need += (SvCUR(PL_numeric_radix_sv) - 1);
                 /* note that this will convert the output to utf8 even if
                  * if the radix point didn't get output */
                 is_utf8 = SvUTF8(PL_numeric_radix_sv);
             }
 #endif
-            /* this can't wrap unless PL_numeric_radix_sv is a string
-             * consuming virtually all the 32-bit or 64-bit address space
-             */
-	    float_need += radix_len;
 
             hexfp = FALSE;
 
@@ -12946,7 +12945,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     /* this can't overflow. 'digits' will only be a few
                      * thousand even for the largest floating-point types.
                      * And up until now float_need is just some small
-                     * constants plus radix_len, which can't be in
+                     * constants plus radix len, which can't be in
                      * overflow territory unless the radix SV is consuming
                      * over 1/2 the address space */
                     assert(float_need < ((STRLEN)~0) - digits);
