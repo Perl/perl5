@@ -12851,7 +12851,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 && intsize != 'q'
                 && ((eptr = F0convert(nv, ebuf + sizeof ebuf, &elen)))
             )
-                goto float_concat_no_utf8;
+                goto float_concat;
 
             /* Determine the buffer size needed for the various
              * floating-point formats.
@@ -12921,9 +12921,18 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                  * space
                  */
                 float_need += (SvCUR(PL_numeric_radix_sv) - 1);
-                /* note that this will convert the output to utf8 even if
-                 * if the radix point didn't get output */
-                is_utf8 = SvUTF8(PL_numeric_radix_sv);
+
+                /* floating-point formats only get utf8 if the radix point
+                 * is utf8. All other characters in the string are < 128
+                 * and so can be safely appended to both a non-utf8 and utf8
+                 * string as-is.
+                 * Note that this will convert the output to utf8 even if
+                 * the radix point didn't get output.
+                 */
+                if (SvUTF8(PL_numeric_radix_sv) && !has_utf8) {
+                    sv_utf8_upgrade(sv);
+                    has_utf8 = TRUE;
+                }
             }
 #endif
 
@@ -13109,18 +13118,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
              * padding, we skip the main block of code at the end of this
              * loop which handles appending eptr to sv, and do our own
              * stripped-down version */
-
-            /* floating-point formats only get is_utf8 if the radix point
-             * is utf8. All other characters in the string are < 128
-             * and so can be safely appended to both a non-utf8 and utf8
-             * string as-is.
-             */
-            if (is_utf8 && !has_utf8) {
-                sv_utf8_upgrade(sv);
-                has_utf8 = TRUE;
-            }
-
-	  float_concat_no_utf8:
 
             assert(!zeros);
             assert(!esignlen);
