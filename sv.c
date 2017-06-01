@@ -13016,6 +13016,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
             {
                 STRLEN pr = has_precis ? precis : 6; /* known default */
+                /* this probably can't wrap, since precis is limited
+                 * to 1/4 address space size, but better safe than sorry
+                 */
                 if (float_need >= ((STRLEN)~0) - pr)
                     croak_memory_wrap();
                 float_need += pr;
