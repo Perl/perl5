@@ -3,7 +3,7 @@ Locale::Codes::Currency_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'harvest_data' is run.
-#    Generated on: Tue Nov 29 15:43:48 EST 2016
+#    Generated on: Tue May 30 10:31:25 EDT 2017
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.42';
+$VERSION='3.52';
 
 $Locale::Codes::Data{'currency'}{'id'} = '0177';
 
@@ -1355,10 +1355,6 @@ $Locale::Codes::Data{'currency'}{'code2id'} = {
          q(0017),
          q(0),
          ],
-      q(BYR) => [
-         q(0017),
-         q(0),
-         ],
       q(BZD) => [
          q(0018),
          q(0),
@@ -2617,10 +2613,6 @@ $Locale::Codes::Data{'currency'}{'code2id'} = {
          q(0006),
          q(0),
          ],
-      q(974) => [
-         q(0017),
-         q(0),
-         ],
       q(975) => [
          q(0030),
          q(0),
@@ -2694,7 +2686,7 @@ $Locale::Codes::Data{'currency'}{'id2code'} = {
       q(0014) => q(BHD),
       q(0015) => q(BDT),
       q(0016) => q(BBD),
-      q(0017) => q(BYR),
+      q(0017) => q(BYN),
       q(0018) => q(BZD),
       q(0019) => q(XOF),
       q(0020) => q(BMD),
@@ -2872,7 +2864,7 @@ $Locale::Codes::Data{'currency'}{'id2code'} = {
       q(0014) => q(048),
       q(0015) => q(050),
       q(0016) => q(052),
-      q(0017) => q(974),
+      q(0017) => q(933),
       q(0018) => q(084),
       q(0019) => q(952),
       q(0020) => q(060),

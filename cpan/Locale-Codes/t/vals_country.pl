@@ -1,12 +1,12 @@
 #!/usr/bin/perl
-# Copyright (c) 2016-2016 Sullivan Beck. All rights reserved.
+# Copyright (c) 2016-2017 Sullivan Beck. All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
 use warnings;
 use strict;
 
-$::tests = $::generic_tests;
+$::tests = '';
 
 $::tests = "
 ##################
@@ -209,7 +209,7 @@ jp
 alpha-2
 not_retired
 other_arg
-   _undef_
+   Japan
 
 2name
 jp
@@ -407,92 +407,92 @@ retired
    _undef_
 
 ##################
-# country_code2code
+# countrycode2code
 
-_code2code
+code2code
 bo
 alpha-2
 alpha-2
    bo
 
-_code2code
+code2code
 bo
 alpha-3
 alpha-3
    _undef_
 
-_code2code
+code2code
 zz
 alpha-2
 alpha-3
    _undef_
 
-_code2code
+code2code
 zz
 alpha-3
 alpha-3
    _undef_
 
-_code2code
+code2code
 zz
 alpha-2
 0
    _undef_
 
-_code2code
+code2code
 bo
 alpha-2
 0
    _undef_
 
-_code2code
+code2code
 _blank_
 0
 0
    _undef_
 
-_code2code
+code2code
 BO
 alpha-2
 alpha-3
    bol
 
-_code2code
+code2code
 bol
 alpha-3
 alpha-2
    bo
 
-_code2code
+code2code
 zwe
 alpha-3
 alpha-2
    zw
 
-_code2code
+code2code
 858
 numeric
 alpha-3
    ury
 
-_code2code
+code2code
 858
 numeric
 alpha-3
    ury
 
-_code2code
+code2code
 tr
 alpha-2
 numeric
    792
 
-_code2code
+code2code
 tr
 alpha-2
-   _undef_
+   tr
 
-_code2code
+code2code
    _undef_
 
 ###################################
@@ -676,7 +676,7 @@ zz1
 alpha-3
    NameA2
 
-_code2code
+code2code
 z1
 alpha-2
 alpha-3
@@ -724,7 +724,7 @@ zz2
 alpha-3
    NameB2
 
-_code2code
+code2code
 z2
 alpha-2
 alpha-3
@@ -778,7 +778,7 @@ zz
    0
 
 ###################################
-# Test rename_code
+# Test replace_code
 
 2name
 zz
@@ -792,17 +792,17 @@ ar
 Argentina
    ar
 
-rename_code
+replace_code
 ar
 us
    0
 
-rename_code
+replace_code
 ar
 zz
    1
 
-rename_code
+replace_code
 us
 ar
    0
@@ -819,7 +819,7 @@ ar
 Argentina
    zz
 
-rename_code
+replace_code
 zz
 ar
    1
@@ -836,13 +836,13 @@ ar
 Argentina
    ar
 
-rename_code
+replace_code
 ar
 z2
 foo
    0
 
-rename_code
+replace_code
 ar
 z2
 alpha-3
@@ -953,8 +953,6 @@ delete_code_alias
 bm
 foo
    0
-
-$::generic_tests
 ";
 
 1;

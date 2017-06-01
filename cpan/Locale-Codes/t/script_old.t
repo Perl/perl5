@@ -4,35 +4,15 @@ use warnings;
 use strict;
 require 5.002;
 
-my($runtests,$dir,$tdir);
-$::type          = '';
-$::module        = '';
-$::tests         = '';
-
-$::type   = 'script';
-$::module = 'Locale::Script';
-
-$runtests=shift(@ARGV);
-if ( -f "t/testfunc.pl" ) {
-  require "t/testfunc.pl";
-  require "t/vals.pl";
-  require "t/vals_script.pl";
-  $dir="./lib";
-  $tdir="t";
-} elsif ( -f "testfunc.pl" ) {
-  require "testfunc.pl";
-  require "vals.pl";
-  require "vals_script.pl";
-  $dir="../lib";
-  $tdir=".";
+if ( -f "t/do_tests.pl" ) {
+   require "./t/do_tests.pl";
+} elsif (-f "do_tests.pl") {
+   require "./do_tests.pl";
 } else {
-  die "ERROR: cannot find testfunc.pl\n";
+  die "ERROR: cannot find do_tests.pl\n";
 }
 
-unshift(@INC,$dir);
-
-print "script (old)...\n";
-test_Func(\&test,$::tests,$runtests);
+do_tests('script','old');
 
 1;
 # Local Variables:

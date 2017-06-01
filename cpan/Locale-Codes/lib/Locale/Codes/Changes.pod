@@ -22,13 +22,80 @@ September, December). I will also check on request, so if a code
 changes that you use, feel free to contact me.  Any time there are new
 codes, I will add them to the module and release a new version.
 
-=head1 VERSION 3.46  (planned 2017-12-01; sbeck)
+=head1 VERSION 3.54  (planned 2017-12-01; sbeck)
 
-=head1 VERSION 3.45  (planned 2017-09-01; sbeck)
+=head1 VERSION 3.53  (planned 2017-09-01; sbeck)
 
-=head1 VERSION 3.44  (planned 2017-06-01; sbeck)
+=head1 VERSION 3.52  (2017-06-01; sbeck)
 
-=head1 VERSION 3.43  (planned 2017-03-01; sbeck)
+NEW CODE(s)
+
+=head1 VERSION 3.51  (2017-04-10; sbeck)
+
+NEW CODE(s)
+
+=over 4
+
+=item Tests no longer require (.) in INC
+
+As of perl 5.25.11, (.) is being removed from INC.  I had to adjust the
+tests accordingly.
+
+=back
+
+=head1 VERSION 3.50  (2017-03-01; sbeck)
+
+NEW CODE(s)
+
+=over 4
+
+=item B<(*) Rewrote as OO module>
+
+The core module (Locale::Codes) is now an OO module that can be used
+directly.  All of the other modules (Locale::Codes::TYPE) are still
+the older functional interfaces and remain unchanged.
+
+=item B<Added some constants>
+
+Historically, the constant names used to identify the codesets have been
+named inconsistently.  The original constants for codesets are:
+
+   Type      Constants
+
+   country   LOCALE_CODE_*
+   currency  LOCALE_CURR_*
+   language  LOCALE_LANG_*
+
+   script    LOCALE_SCRIPT_*
+   langfam   LOCALE_LANGFAM_*
+   langvar   LOCALE_LANGVAR_*
+   langext   LOCALE_LANGEXT_*
+
+For consistencies sake, I have added some new codes (which are otherwise
+identical to the irregularly named codes):
+
+   country   LOCALE_COUNTRY_*
+   currency  LOCALE_CURRENCY_*
+   language  LOCALE_LANGUAGE_*
+
+Going forward, all constants will include the full name of the code type.
+
+=item Non-OO modules are now generated
+
+All non-OO modules are now automatically generated.  This will make it easier
+to keep them 100% consistent as well as making it easier to add new types
+of code sets.
+
+All of the documentation for them is also generated except for the description
+of the code sets.  That has been moved into the Locale::Codes::Types document.
+
+=item Fixed a bug where constants were not exported
+
+Some of the constants for some of the newer code sets were not exported properly.
+This was fixed when I started generating the non-OO modules, but was reported
+(after I had already fixed it in development) as RT 119741 .
+
+=back
 
 =head1 VERSION 3.42  (2016-11-30; sbeck)
 
@@ -359,8 +426,7 @@ Added Language Extension codes (langext) and Language Variation codes
 
 Added language codes from ISO 639-5
 
-Added language/script codes from the IANA language subtag
-registry
+Added language/script codes from the IANA language subtag registry
 
 =item B<Bug fixes>
 
@@ -824,7 +890,7 @@ Currently maintained by Sullivan Beck (sbeck@cpan.org).
 =head1 COPYRIGHT
 
    Copyright (c) 2001-2010 Neil Bowers
-   Copyright (c) 2010-2016 Sullivan Beck
+   Copyright (c) 2010-2017 Sullivan Beck
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

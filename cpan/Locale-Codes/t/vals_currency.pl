@@ -1,15 +1,14 @@
 #!/usr/bin/perl
-# Copyright (c) 2016-2016 Sullivan Beck. All rights reserved.
+# Copyright (c) 2016-2017 Sullivan Beck. All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
 use warnings;
 use strict;
 
-$::tests = $::generic_tests;
+$::tests = '';
 
 $::tests = "
-
 
 2code
 Canadian Dollar
@@ -35,7 +34,7 @@ Zimbabwe Dollar
 KHR
    Riel
 
-_code2code
+code2code
 BZD
 alpha
 num
@@ -56,10 +55,6 @@ bnd
 2name
 bob
    Boliviano
-
-2name
-byr
-   Belarusian Ruble
 
 2name
 chf
@@ -117,7 +112,6 @@ all_names
    ADB Unit of Account
    Afghani
 
-$::generic_tests
 ";
 
 1;

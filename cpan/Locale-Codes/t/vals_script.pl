@@ -1,13 +1,12 @@
 #!/usr/bin/perl
-# Copyright (c) 2016-2016 Sullivan Beck. All rights reserved.
+# Copyright (c) 2016-2017 Sullivan Beck. All rights reserved.
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
 use warnings;
 use strict;
 
-$::tests = $::generic_tests;
-
+$::tests = '';
 $::tests = "
 
 2code
@@ -32,7 +31,7 @@ phnx
 num
    Phoenician
 
-_code2code
+code2code
 Phnx
 alpha
 num
@@ -50,8 +49,6 @@ all_names
    Adlam
    Afaka
 
-
-$::generic_tests
 ";
 
 1;

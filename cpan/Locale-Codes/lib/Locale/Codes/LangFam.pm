@@ -1,95 +1,92 @@
 package Locale::Codes::LangFam;
-# Copyright (c) 2011-2016 Sullivan Beck
+# Copyright (C) 2001      Canon Research Centre Europe (CRE).
+# Copyright (C) 2002-2009 Neil Bowers
+# Copyright (c) 2010-2017 Sullivan Beck
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
-use strict;
-require 5.006;
-use warnings;
+# This file was automatically generated.  Any changes to this file will
+# be lost the next time 'gen_mods' is run.
+#    Generated on: Tue May 30 10:31:45 EDT 2017
 
-require Exporter;
-use Carp;
+use strict;
+use warnings;
+require 5.006;
+use Exporter qw(import);
+
+our($VERSION,@EXPORT);
+$VERSION   = '3.52';
+
+################################################################################
 use Locale::Codes;
 use Locale::Codes::Constants;
-use Locale::Codes::LangFam_Codes;
-use Locale::Codes::LangFam_Retired;
 
-#=======================================================================
-#       Public Global Variables
-#=======================================================================
-
-our($VERSION,@ISA,@EXPORT,@EXPORT_OK);
-
-$VERSION='3.42';
-@ISA       = qw(Exporter);
-@EXPORT    = qw(code2langfam
+@EXPORT    = qw(
+                code2langfam
                 langfam2code
                 all_langfam_codes
                 all_langfam_names
                 langfam_code2code
-                LOCALE_LANGFAM_ALPHA
                );
+push(@EXPORT,@Locale::Codes::Constants::CONSTANTS_LANGFAM);
+
+our $obj = new Locale::Codes('langfam');
+
+sub _show_errors {
+   my($val) = @_;
+   $obj->show_errors($val);
+}
 
 sub code2langfam {
-   return Locale::Codes::_code2name('langfam',@_);
+   return $obj->code2name(@_);
 }
 
 sub langfam2code {
-   return Locale::Codes::_name2code('langfam',@_);
+   return $obj->name2code(@_);
 }
 
 sub langfam_code2code {
-   return Locale::Codes::_code2code('langfam',@_);
+   return $obj->code2code(@_);
 }
 
 sub all_langfam_codes {
-   return Locale::Codes::_all_codes('langfam',@_);
+   return $obj->all_codes(@_);
 }
 
 sub all_langfam_names {
-   return Locale::Codes::_all_names('langfam',@_);
+   return $obj->all_names(@_);
 }
 
 sub rename_langfam {
-   return Locale::Codes::_rename('langfam',@_);
+   return $obj->rename_code(@_);
 }
 
 sub add_langfam {
-   return Locale::Codes::_add_code('langfam',@_);
+   return $obj->add_code(@_);
 }
 
 sub delete_langfam {
-   return Locale::Codes::_delete_code('langfam',@_);
+   return $obj->delete_code(@_);
 }
 
 sub add_langfam_alias {
-   return Locale::Codes::_add_alias('langfam',@_);
+   return $obj->add_alias(@_);
 }
 
 sub delete_langfam_alias {
-   return Locale::Codes::_delete_alias('langfam',@_);
+   return $obj->delete_alias(@_);
 }
 
 sub rename_langfam_code {
-   return Locale::Codes::_rename_code('langfam',@_);
+   return $obj->replace_code(@_);
 }
 
 sub add_langfam_code_alias {
-   return Locale::Codes::_add_code_alias('langfam',@_);
+   return $obj->add_code_alias(@_);
 }
 
 sub delete_langfam_code_alias {
-   return Locale::Codes::_delete_code_alias('langfam',@_);
+   return $obj->delete_code_alias(@_);
 }
 
 1;
-# Local Variables:
-# mode: cperl
-# indent-tabs-mode: nil
-# cperl-indent-level: 3
-# cperl-continued-statement-offset: 2
-# cperl-continued-brace-offset: 0
-# cperl-brace-offset: 0
-# cperl-brace-imaginary-offset: 0
-# cperl-label-offset: 0
-# End:
