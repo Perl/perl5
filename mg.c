@@ -2915,7 +2915,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '/':
         {
-            SV *tmpsv = sv;
             if (SvROK(sv)) {
                 SV *referent = SvRV(sv);
                 const char *reftype = sv_reftype(referent, 0);
@@ -2929,11 +2928,9 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
                 if (reftype[0] == 'S' || reftype[0] == 'L') {
                     IV val = SvIV(referent);
                     if (val <= 0) {
-                        tmpsv = &PL_sv_undef;
-                        Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-                            "Setting $/ to a reference to %s as a form of slurp is deprecated, treating as undef. This will be fatal in Perl 5.28",
-                            SvIV(SvRV(sv)) < 0 ? "a negative integer" : "zero"
-                        );
+                        sv_setsv(sv, PL_rs);
+                        Perl_croak(aTHX_ "Setting $/ to a reference to %s is forbidden",
+                                         val < 0 ? "a negative integer" : "zero");
                     }
                 } else {
                     sv_setsv(sv, PL_rs);
@@ -2943,7 +2940,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
                 }
             }
             SvREFCNT_dec(PL_rs);
-            PL_rs = newSVsv(tmpsv);
+            PL_rs = newSVsv(sv);
         }
 	break;
     case '\\':

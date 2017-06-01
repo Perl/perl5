@@ -74,6 +74,11 @@ to the same symbol (glob or scalar) has been deprecated since Perl 5.10.
 
 Use of a bare terminator has been deprecated since Perl 5.000.
 
+=head2 Setting $/ to a reference to a non-positive integer no longer allowed
+
+This used to work like setting it to C<undef>, but has been deprecated
+since Perl 5.20.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
