@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 533;  # Update this when adding/deleting tests.
+plan tests => 497;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -744,19 +744,6 @@ sub run_tests {
 		    {
 			use re 'eval';
 			ok($ss =~ /^$cc/, fmt("code         $u->[2]", $ss, $cc));
-		    }
-
-                    SKIP:
-		    {
-                        skip("Encode not working on EBCDIC", 1) unless defined $enc;
-			# Poor man's "use encoding 'ascii'".
-			# This causes a different code path in S_const_str()
-			# to be used
-			no warnings 'deprecated';
-			local ${^ENCODING} = $enc;
-			use warnings 'deprecated';
-			use re 'eval';
-			ok($ss =~ /^$cc/, fmt("encode       $u->[2]", $ss, $cc));
 		    }
 		}
 	    }

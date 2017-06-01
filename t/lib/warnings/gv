@@ -9,8 +9,6 @@
 	$a = ${"#"} ;
  	$a = ${"*"} ;
 
-     ${^ENCODING} is no longer supported.
-
      Name "main::a" used only once: possible typo
 
   Mandatory Warnings ALL TODO
@@ -96,10 +94,8 @@ $* is no longer supported. Its use will be fatal in Perl 5.30 at - line 3.
 # gv.c
 $a = ${^ENCODING};
 $a = ${^E_NCODING};
-${^ENCODING} = 1;
 ${^E_NCODING} = 1; # We pretend this variable never existed.
 EXPECT
-${^ENCODING} is no longer supported. Its use will be fatal in Perl 5.28 at - line 4.
 ########
 # gv.c
 use warnings 'syntax' ;

@@ -2727,13 +2727,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #  endif
 #endif
 	}
-	else {
-            if (strEQ(mg->mg_ptr + 1, "NCODING") && SvOK(sv))
-                        if (PL_localizing != 2) {
-                            deprecate_fatal_in("5.28",
-                               "${^ENCODING} is no longer supported");
-                        }
-        }
+	else if (strEQ(mg->mg_ptr + 1, "NCODING") && SvOK(sv))
+            Perl_croak(aTHX_ "${^ENCODING} is no longer supported");
 	break;
     case '\006':	/* ^F */
 	PL_maxsysfd = SvIV(sv);

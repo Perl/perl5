@@ -96,6 +96,10 @@ bitwise string operators
 
 Code points over 0xFF do not make sense for bitwise operators.
 
+=head2 Setting C<${^ENCODING}> to a defined value is now illegal
+
+This has been deprecated since Perl 5.22 and a no-op since Perl 5.26.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

@@ -1990,6 +1990,7 @@ undefines the variable during the scope of execution of the including
 function.
 
 This variable was added in Perl 5.8.2 and removed in 5.26.0.
+Setting it to anything other than C<undef> was made fatal in Perl 5.28.0.
 
 =item ${^GLOBAL_PHASE}
 X<${^GLOBAL_PHASE}>
