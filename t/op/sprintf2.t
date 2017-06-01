@@ -559,7 +559,6 @@ for my $t (@tests) {
     } else {
       is($sprintf_got, $fmt, "quad unsupported: $fmt -> $fmt");
       like($w, qr/Invalid conversion in sprintf: "$fmt"/, "got warning about invalid conversion from fmt : $fmt");
-      like($w, qr/Redundant argument in sprintf/, "got warning about redundant argument in sprintf from fmt : $fmt");
     }
   }
 }
