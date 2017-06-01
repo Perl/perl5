@@ -2914,7 +2914,7 @@ PERL_CALLCONV void	Perl_set_numeric_standard(pTHX);
 PERL_CALLCONV void	Perl_setdefout(pTHX_ GV* gv);
 #define PERL_ARGS_ASSERT_SETDEFOUT	\
 	assert(gv)
-PERL_CALLCONV HEK*	Perl_share_hek(pTHX_ const char* str, I32 len, U32 hash);
+PERL_CALLCONV HEK*	Perl_share_hek(pTHX_ const char* str, SSize_t len, U32 hash);
 #define PERL_ARGS_ASSERT_SHARE_HEK	\
 	assert(str)
 PERL_CALLCONV void	Perl_sortsv(pTHX_ SV** array, size_t num_elts, SVCOMPARE_t cmp);
@@ -4570,7 +4570,7 @@ STATIC HEK*	S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
 #define PERL_ARGS_ASSERT_SAVE_HEK_FLAGS	\
 	assert(str)
 
-STATIC HEK*	S_share_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
+STATIC HEK*	S_share_hek_flags(pTHX_ const char *str, STRLEN len, U32 hash, int flags)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SHARE_HEK_FLAGS	\
 	assert(str)

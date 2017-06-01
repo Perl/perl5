@@ -93,10 +93,12 @@
     sbox32_seed_state96(seed + __PERL_HASH_SEED_BYTES , state + __PERL_HASH_STATE_BYTES);   \
 } STMT_END
 
-#define _PERL_HASH_WITH_STATE(state,str,len)                                                \
-    ((len <= SBOX32_MAX_LEN)                                                                \
-        ? sbox32_hash_with_state((state + __PERL_HASH_STATE_BYTES),(U8*)(str),(len))        \
-        : __PERL_HASH_WITH_STATE((state),(str),(len)))
+#define _PERL_HASH_WITH_STATE(state,str,len)                                            \
+    (LIKELY(len <= SBOX32_MAX_LEN)                                                      \
+        ? sbox32_hash_with_state((state + __PERL_HASH_STATE_BYTES),(U8*)(str),(len))    \
+        : UNLIKELY(len > (STRLEN) I32_MAX)                                              \
+          ? Perl_croak_nocontext("Sorry, hash keys must be smaller than 2**31 bytes")   \
+          : __PERL_HASH_WITH_STATE((state),(str),(len)))
 
 #endif
 

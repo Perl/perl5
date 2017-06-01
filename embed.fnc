@@ -1444,7 +1444,7 @@ AMpd	|OP*	|op_scope	|NULLOK OP* o
 : Only used by perl.c/miniperl.c, but defined in caretx.c
 px	|void	|set_caret_X
 Apd	|void	|setdefout	|NN GV* gv
-Ap	|HEK*	|share_hek	|NN const char* str|I32 len|U32 hash
+Ap	|HEK*	|share_hek	|NN const char* str|SSize_t len|U32 hash
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 : Used in perl.c
 np	|Signal_t |sighandler	|int sig|NULLOK siginfo_t *info|NULLOK void *uap
@@ -2072,7 +2072,7 @@ sR	|HE*	|new_he
 sanR	|HEK*	|save_hek_flags	|NN const char *str|I32 len|U32 hash|int flags
 sn	|void	|hv_magic_check	|NN HV *hv|NN bool *needs_copy|NN bool *needs_store
 s	|void	|unshare_hek_or_pvn|NULLOK const HEK* hek|NULLOK const char* str|I32 len|U32 hash
-sR	|HEK*	|share_hek_flags|NN const char *str|I32 len|U32 hash|int flags
+sR	|HEK*	|share_hek_flags|NN const char *str|STRLEN len|U32 hash|int flags
 rs	|void	|hv_notallowed	|int flags|NN const char *key|I32 klen|NN const char *msg
 in	|U32|ptr_hash|PTRV u
 s	|struct xpvhv_aux*|hv_auxinit|NN HV *hv

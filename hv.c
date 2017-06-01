@@ -2966,7 +2966,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
  * len and hash must both be valid for str.
  */
 HEK *
-Perl_share_hek(pTHX_ const char *str, I32 len, U32 hash)
+Perl_share_hek(pTHX_ const char *str, SSize_t len, U32 hash)
 {
     bool is_utf8 = FALSE;
     int flags = 0;
@@ -2998,7 +2998,7 @@ Perl_share_hek(pTHX_ const char *str, I32 len, U32 hash)
 }
 
 STATIC HEK *
-S_share_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
+S_share_hek_flags(pTHX_ const char *str, STRLEN len, U32 hash, int flags)
 {
     HE *entry;
     const int flags_masked = flags & HVhek_MASK;
@@ -3006,6 +3006,10 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
     XPVHV * const xhv = (XPVHV*)SvANY(PL_strtab);
 
     PERL_ARGS_ASSERT_SHARE_HEK_FLAGS;
+
+    if (UNLIKELY(len > (STRLEN) I32_MAX)) {
+        Perl_croak_nocontext("Sorry, hash keys must be smaller than 2**31 bytes");
+    }
 
     /* what follows is the moral equivalent of:
 
@@ -3021,7 +3025,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
     for (;entry; entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
-	if (HeKLEN(entry) != len)
+	if (HeKLEN(entry) != (SSize_t) len)
 	    continue;
 	if (HeKEY(entry) != str && memNE(HeKEY(entry),str,len))	/* is this it? */
 	    continue;
