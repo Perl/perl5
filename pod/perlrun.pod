@@ -268,7 +268,7 @@ is equivalent to
 
 An alternate delimiter may be specified using B<-F>.
 
-B<-a> implicitly sets B<-n>.
+Starting with Perl version 5.20 B<-a> implicitly sets B<-n>.
 
 =item B<-C [I<number/list>]>
 X<-C>
