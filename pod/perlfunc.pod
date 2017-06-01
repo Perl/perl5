@@ -9571,8 +9571,9 @@ If the string happens to be encoded as UTF-8 internally (and thus has
 the UTF8 flag set), L<C<vec>|/vec EXPR,OFFSET,BITS> tries to convert it
 to use a one-byte-per-character internal representation. However, if the
 string contains characters with values of 256 or higher, that conversion
-will fail. In that situation, C<vec> will operate on the underlying buffer
-regardless, in its internal UTF-8 representation.
+will fail, and a deprecation message will be raised.  In that situation,
+C<vec> will operate on the underlying buffer regardless, in its internal
+UTF-8 representation.  In Perl 5.32, this will be a fatal error.
 
 Strings created with L<C<vec>|/vec EXPR,OFFSET,BITS> can also be
 manipulated with the logical

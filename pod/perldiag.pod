@@ -7098,6 +7098,14 @@ bytes, and values beyond 0xFF are nonsensical in this context.
 
 Such usage will be a fatal error in Perl 5.28.
 
+=item Use of strings with code points over 0xFF as arguments to C<vec>
+is deprecated. This will be a fatal error in Perl 5.32
+
+(D deprecated) You tried to use L<C<vec>|perlfunc/vec EXPR,OFFSET,BITS>
+on a string containing a code point over 0xFF, which is nonsensical here.
+
+Such usage will be a fatal error in Perl 5.32.
+
 =item Use of tainted arguments in %s is deprecated
 
 (W taint, deprecated) You have supplied C<system()> or C<exec()> with multiple

@@ -63,6 +63,13 @@ This has been deprecated since Perl 5.24.
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
 
+=head2 Use of L<C<vec>|perlfunc/vec EXPR,OFFSET,BITS> on strings with code
+points above 0xFF is deprecated.
+
+Use of these is nonsensical, as C<vec> is a bit-oriented operation,
+which operates on the underlying UTF-8 representation these strings must
+be in, and will likely give unexpected results.
+
 =head2 Some uses of unescaped C<"{"> are no longer fatal
 
 Perl 5.26.0 fatalized some uses of an unescaped left brace, but an

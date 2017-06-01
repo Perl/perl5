@@ -35,3 +35,11 @@ Use of strings with code points over 0xFF as arguments to bitwise xor (^) operat
 Use of strings with code points over 0xFF as arguments to bitwise and (&) operator is deprecated. This will be a fatal error in Perl 5.28 at - line 7.
 Use of strings with code points over 0xFF as arguments to bitwise or (|) operator is deprecated. This will be a fatal error in Perl 5.28 at - line 8.
 Use of strings with code points over 0xFF as arguments to bitwise xor (^) operator is deprecated. This will be a fatal error in Perl 5.28 at - line 9.
+########
+# NAME vec with above ff code points is deprecated
+my $foo = "\x{100}" . "\xff\xfe";
+eval { vec($foo, 1, 8) };
+no warnings 'deprecated';
+eval { vec($foo, 1, 8) };
+EXPECT
+Use of strings with code points over 0xFF as arguments to vec is deprecated. This will be a fatal error in Perl 5.32 at - line 2.

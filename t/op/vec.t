@@ -64,6 +64,8 @@ $foo = "\x{100}" . "\xff\xfe";
 $x = substr $foo, 1;
 is(vec($x, 0, 8), 255);
 $@ = undef;
+{
+    no warnings 'deprecated';
 eval { vec($foo, 1, 8) };
 ok(! $@);
 $@ = undef;
@@ -74,6 +76,7 @@ if ($::IS_EBCDIC) {
 }
 else {
     is($foo, "\xc4\x0d\xc3\xbf\xc3\xbe");
+}
 }
 $foo = "\x{100}" . "\xff\xfe";
 $x = substr $foo, 1;
