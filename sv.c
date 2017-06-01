@@ -11872,60 +11872,60 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
      * should be fixed */
     assert(pat[patlen] == '\0');
 
-    /* special-case "", "%s", and "%-p" (SVf - see below) */
-    if (patlen == 0) {
-	if (svmax && ckWARN(WARN_REDUNDANT))
-	    Perl_warner(aTHX_ packWARN(WARN_REDUNDANT), "Redundant argument in %s",
-			PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
-	return;
-    }
-    if (patlen == 2 && pat[0] == '%' && pat[1] == 's') {
-	if (svmax > 1 && ckWARN(WARN_REDUNDANT))
-	    Perl_warner(aTHX_ packWARN(WARN_REDUNDANT), "Redundant argument in %s",
-			PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
 
-	if (args) {
-	    const char * const s = va_arg(*args, char*);
-	    sv_catpv_nomg(sv, s ? s : nullstr);
-	}
-	else if (svix < svmax) {
-	    /* we want get magic on the source but not the target. sv_catsv can't do that, though */
-	    SvGETMAGIC(*svargs);
-	    sv_catsv_nomg(sv, *svargs);
-	}
-	else
-	    S_warn_vcatpvfn_missing_argument(aTHX);
-	return;
-    }
-    if (args && patlen == 3 && pat[0] == '%' &&
-		pat[1] == '-' && pat[2] == 'p') {
-	if (svmax > 1 && ckWARN(WARN_REDUNDANT))
-	    Perl_warner(aTHX_ packWARN(WARN_REDUNDANT), "Redundant argument in %s",
-			PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
-	argsv = MUTABLE_SV(va_arg(*args, void*));
-	sv_catsv_nomg(sv, argsv);
-	return;
-    }
+    /* Special-case "", "%s", "%-p" (SVf - see below) and "%.0f".
+     * In each case, if there isn't the correct number of args, instead
+     * fall through to the main code to handle the issuing of any
+     * warnings etc.
+     */
 
-#if !defined(USE_LONG_DOUBLE) && !defined(USE_QUADMATH)
-    /* special-case "%.0f" */
-    if (    !args
-         && patlen == 4
-         && pat[0] == '%' && pat[1] == '.' && pat[2] == '0' && pat[3] == 'f'
-         && svmax > 0)
-    {
-        const NV nv = SvNV(*svargs);
-        if (LIKELY(!Perl_isinfnan(nv))) {
-            STRLEN l;
-            char *p;
+    if (patlen == 0 && (args || svmax == 0))
+	return;
 
-            if ((p = F0convert(nv, ebuf + sizeof ebuf, &l))) {
-                sv_catpvn_nomg(sv, p, l);
+    if (patlen <= 4 && pat[0] == '%' && (args || svmax == 1)) {
+
+        /* "%s" */
+        if (patlen == 2 && pat[1] == 's') {
+            if (args) {
+                const char * const s = va_arg(*args, char*);
+                sv_catpv_nomg(sv, s ? s : nullstr);
+            }
+            else {
+                /* we want get magic on the source but not the target.
+                 * sv_catsv can't do that, though */
+                SvGETMAGIC(*svargs);
+                sv_catsv_nomg(sv, *svargs);
+            }
+            return;
+        }
+
+        /* "%-p" */
+        if (args) {
+            if (patlen == 3  && pat[1] == '-' && pat[2] == 'p') {
+                SV *asv = MUTABLE_SV(va_arg(*args, void*));
+                sv_catsv_nomg(sv, asv);
                 return;
             }
-	}
-    }
+        }
+#if !defined(USE_LONG_DOUBLE) && !defined(USE_QUADMATH)
+        /* special-case "%.0f" */
+        else if (   patlen == 4
+                 && pat[1] == '.' && pat[2] == '0' && pat[3] == 'f')
+        {
+            const NV nv = SvNV(*svargs);
+            if (LIKELY(!Perl_isinfnan(nv))) {
+                STRLEN l;
+                char *p;
+
+                if ((p = F0convert(nv, ebuf + sizeof ebuf, &l))) {
+                    sv_catpvn_nomg(sv, p, l);
+                    return;
+                }
+            }
+        }
 #endif /* !USE_LONG_DOUBLE */
+    }
+
 
     patend = (char*)pat + patlen;
     for (p = (char*)pat; p < patend; p = q) {
