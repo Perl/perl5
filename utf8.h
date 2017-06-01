@@ -540,9 +540,10 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
                                        & UTF_CONTINUATION_MASK))
 
 /* This works in the face of malformed UTF-8. */
-#define UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, e) (UTF8_IS_DOWNGRADEABLE_START(*s) \
-                                               && ( (e) - (s) > 1)             \
-                                               && UTF8_IS_CONTINUATION(*((s)+1)))
+#define UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, e)                                 \
+                                       (   UTF8_IS_DOWNGRADEABLE_START(*(s))  \
+                                        && ( (e) - (s) > 1)                   \
+                                        && UTF8_IS_CONTINUATION(*((s)+1)))
 
 /* Number of bytes a code point occupies in UTF-8. */
 #define NATIVE_SKIP(uv) UVCHR_SKIP(uv)
