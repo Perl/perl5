@@ -254,8 +254,9 @@ will think you have specified a hex number to B<-0>.)
 X<-a> X<autosplit>
 
 turns on autosplit mode when used with a B<-n> or B<-p>.  An implicit
-split command to the @F array is done as the first thing inside the
-implicit while loop produced by the B<-n> or B<-p>.
+split command, creating and populating the special array @F, is done as
+the first operation inside the implicit while loop produced by the B<-n>
+or B<-p>.
 
     perl -ane 'print pop(@F), "\n";'
 
