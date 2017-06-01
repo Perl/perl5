@@ -1188,7 +1188,9 @@ package GV_DOWNGRADE {
 }
 
 # [perl #131085] This used to crash; no ok() necessary.
+{ no warnings;
 $::{"A131085"} = sub {}; \&{"A131085"};
+}
 
 
 __END__
