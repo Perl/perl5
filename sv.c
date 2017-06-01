@@ -11292,7 +11292,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
         const U8* nvp = (const U8*)(&nv);
 	HEXTRACT_GET_SUBNORMAL(nv);
         HEXTRACT_IMPLICIT_BIT(nv);
-#   undef HEXTRACT_HAS_TOP_NYBBLE
+#    undef HEXTRACT_HAS_TOP_NYBBLE
         HEXTRACT_BYTES_LE(13, 0);
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
         /* Used in e.g. Solaris Sparc and HP-UX PA-RISC, e.g. -0.1L:
@@ -11302,7 +11302,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
         const U8* nvp = (const U8*)(&nv);
 	HEXTRACT_GET_SUBNORMAL(nv);
         HEXTRACT_IMPLICIT_BIT(nv);
-#   undef HEXTRACT_HAS_TOP_NYBBLE
+#    undef HEXTRACT_HAS_TOP_NYBBLE
         HEXTRACT_BYTES_BE(2, 15);
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN
         /* x86 80-bit "extended precision", 64 bits of mantissa / fraction /
@@ -11402,9 +11402,10 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
 #    define HEXTRACT_FALLBACK
 #  endif
 #endif /* #if defined(USE_LONG_DOUBLE) && (NVSIZE > DOUBLESIZE) #else */
-#  ifdef HEXTRACT_FALLBACK
+
+#ifdef HEXTRACT_FALLBACK
 	HEXTRACT_GET_SUBNORMAL(nv);
-#    undef HEXTRACT_HAS_TOP_NYBBLE /* Meaningless, but consistent. */
+#  undef HEXTRACT_HAS_TOP_NYBBLE /* Meaningless, but consistent. */
         /* The fallback is used for the double-double format, and
          * for unknown long double formats, and for unknown double
          * formats, or in general unknown NV formats. */
@@ -11485,7 +11486,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
                     v++;
             }
         }
-#  endif
+#endif
     }
     /* Croak for various reasons: if the output pointer escaped the
      * output buffer, if the extraction index escaped the extraction
