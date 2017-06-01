@@ -43,7 +43,7 @@ should also read the L<perlsyn>, L<perlop>, and L<perlsub> documents.
 =head1 OBJECT-ORIENTED FUNDAMENTALS
 
 Most object systems share a number of common concepts. You've probably
-heard terms like "class", "object, "method", and "attribute" before.
+heard terms like "class", "object", "method", and "attribute" before.
 Understanding the concepts will make it much easier to read and write
 object-oriented code. If you're already familiar with these terms, you
 should still skim this section, since it explains each concept in terms
