@@ -111,7 +111,7 @@ U32 S_perl_hash_with_seed(const U8 * const seed, const U8 * const str, const STR
 }
 
 #define PERL_HASH_WITH_SEED(seed,hash,str,len) \
-    (hash) = S_perl_hash_with_seed(seed,str,len)
+    (hash) = S_perl_hash_with_seed((const U8 *) seed, (const U8 *) str,len)
 #define PERL_HASH_WITH_STATE(state,hash,str,len) \
     (hash) = _PERL_HASH_WITH_STATE((state),(U8*)(str),(len))
 #define PERL_HASH_SEED_STATE(seed,state) _PERL_HASH_SEED_STATE(seed,state)
