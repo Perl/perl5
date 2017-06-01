@@ -11274,6 +11274,9 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
 #endif
 
     const U8* vmaxend = vhex + HEXTRACTSIZE;
+
+    assert(HEXTRACTSIZE <= VHEX_SIZE);
+
     PERL_UNUSED_VAR(ix); /* might happen */
     (void)Perl_frexp(PERL_ABS(nv), exponent);
     *subnormal = FALSE;
@@ -11516,6 +11519,8 @@ S_hextract(pTHX_ const NV nv, int* exponent, bool *subnormal,
  * same name within Perl_sv_vcatpvfn_flags().
  *
  * It assumes the caller has already done STORE_LC_NUMERIC_SET_TO_NEEDED();
+ *
+ * It requires the caller to make buf large enough.
  */
 
 static STRLEN
@@ -11757,6 +11762,12 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
     }
 
     elen = p - buf;
+
+    /* sanity checks */
+    if (elen >= bufsize || width >= bufsize)
+        /* diag_listed_as: Hexadecimal float: internal error (%s) */
+        Perl_croak(aTHX_ "Hexadecimal float: internal error (overflow)");
+
     elen += my_snprintf(p, bufsize - elen,
                         "%c%+d", lower ? 'p' : 'P',
                         exponent);
