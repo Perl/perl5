@@ -13256,6 +13256,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
         {
             STRLEN need, have, gap;
             STRLEN i;
+            char *s;
 
             /* signed value that's wrapped? */
             assert(elen  <= ((~(STRLEN)0) >> 1));
@@ -13279,40 +13280,40 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
             SvGROW(sv, need);
 
-            p = SvEND(sv);
+            s = SvEND(sv);
 
             if (left) {
                 for (i = 0; i < esignlen; i++)
-                    *p++ = esignbuf[i];
+                    *s++ = esignbuf[i];
                 for (i = zeros; i; i--)
-                    *p++ = '0';
-                Copy(eptr, p, elen, char);
-                p += elen;
+                    *s++ = '0';
+                Copy(eptr, s, elen, char);
+                s += elen;
                 for (i = gap; i; i--)
-                    *p++ = ' ';
+                    *s++ = ' ';
             }
             else {
                 if (fill) {
                     for (i = 0; i < esignlen; i++)
-                        *p++ = esignbuf[i];
+                        *s++ = esignbuf[i];
                     assert(!zeros);
                     zeros = gap;
                 }
                 else {
                     for (i = gap; i; i--)
-                        *p++ = ' ';
+                        *s++ = ' ';
                     for (i = 0; i < esignlen; i++)
-                        *p++ = esignbuf[i];
+                        *s++ = esignbuf[i];
                 }
 
                 for (i = zeros; i; i--)
-                    *p++ = '0';
-                Copy(eptr, p, elen, char);
-                p += elen;
+                    *s++ = '0';
+                Copy(eptr, s, elen, char);
+                s += elen;
             }
 
-            *p = '\0';
-            SvCUR_set(sv, p - SvPVX_const(sv));
+            *s = '\0';
+            SvCUR_set(sv, s - SvPVX_const(sv));
 
             if (is_utf8)
                 has_utf8 = TRUE;
