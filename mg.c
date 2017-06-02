@@ -638,7 +638,7 @@ Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
     if (PL_curpm) {
         REGEXP * const rx = PM_GETRE(PL_curpm);
 	if (rx) {
-            UV uv= (UV)mg->mg_obj;
+            UV uv = (UV)mg->mg_obj;
             if (uv == '+') {          /* @+ */
 		/* return the number possible */
 		return RX_NPARENS(rx);
@@ -674,7 +674,7 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
     if (PL_curpm) {
         REGEXP * const rx = PM_GETRE(PL_curpm);
 	if (rx) {
-            const UV uv= (UV)mg->mg_obj;
+            const UV uv = (UV)mg->mg_obj;
             /* @{^CAPTURE} does not contain $&, so we need to increment by 1 */
             const I32 paren = mg->mg_len
                             + (uv == '\003' ? 1 : 0);
@@ -2915,10 +2915,10 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '/':
         {
-            SV *tmpsv= sv;
+            SV *tmpsv = sv;
             if (SvROK(sv)) {
-                SV *referent= SvRV(sv);
-                const char *reftype= sv_reftype(referent, 0);
+                SV *referent = SvRV(sv);
+                const char *reftype = sv_reftype(referent, 0);
                 /* XXX: dodgy type check: This leaves me feeling dirty, but
                  * the alternative is to copy pretty much the entire
                  * sv_reftype() into this routine, or to do a full string
@@ -2927,9 +2927,9 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
                  * without reviewing the corresponding comment in
                  * sv_reftype(). - Yves */
                 if (reftype[0] == 'S' || reftype[0] == 'L') {
-                    IV val= SvIV(referent);
+                    IV val = SvIV(referent);
                     if (val <= 0) {
-                        tmpsv= &PL_sv_undef;
+                        tmpsv = &PL_sv_undef;
                         Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
                             "Setting $/ to a reference to %s as a form of slurp is deprecated, treating as undef. This will be fatal in Perl 5.28",
                             SvIV(SvRV(sv)) < 0 ? "a negative integer" : "zero"
@@ -2937,7 +2937,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
                     }
                 } else {
                     sv_setsv(sv, PL_rs);
-              /* diag_listed_as: Setting $/ to %s reference is forbidden */
+                    /* diag_listed_as: Setting $/ to %s reference is forbidden */
                     Perl_croak(aTHX_ "Setting $/ to a%s %s reference is forbidden",
                                       *reftype == 'A' ? "n" : "", reftype);
                 }
