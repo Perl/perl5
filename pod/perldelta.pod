@@ -39,7 +39,35 @@ XXX Any security-related notices go here.  In particular, any security
 vulnerabilities closed should be noted here rather than in the
 L</Selected Bug Fixes> section.
 
-[ List each security issue as a =head2 entry ]
+=head2 Default Hash Function Change
+
+Perl 5.27.0 retires various older hash functions which are not viewed as
+sufficiently secure for use in Perl. We now support four general purpose
+hash functions, Siphash (2-4 and 1-3 variants), and  Zaphod32, and StadtX
+hash. In addition we support SBOX32 (a form of tabular hashing) for hashing
+short  strings, in conjunction with any of the other hash functions provided.
+
+By default Perl is configured to support SBOX hashing of strings up to 24
+characters, in conjunction with StadtX hashing on 64 bit builds, and
+Zaphod32 hashing for 32 bit builds.
+
+You may control these settings with the following options to Configure:
+
+    -DPERL_HASH_FUNC_SIPHASH
+    -DPERL_HASH_FUNC_SIPHASH13
+    -DPERL_HASH_FUNC_STADTX
+    -DPERL_HASH_FUNC_ZAPHOD32
+
+To disable SBOX hashing you can use
+
+    -DPERL_HASH_USE_SBOX32_ALSO=0
+
+And to set the maximum length to use SBOX32 hashing on with:
+
+    -DSBOX32_MAX_LEN=16
+
+The maximum length allowed is 256. There probably isn't much point
+in setting it higher than the default.
 
 =head1 Incompatible Changes
 
