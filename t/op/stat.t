@@ -25,7 +25,7 @@ if ($^O eq 'MSWin32') {
     ${^WIN32_SLOPPY_STAT} = 0;
 }
 
-plan tests => 118;
+plan tests => 108;
 
 my $Perl = which_perl();
 
@@ -561,20 +561,7 @@ SKIP: {
     ok(stat(DIR), "stat() on dirhandle works"); 
     ok(-d -r _ , "chained -x's on dirhandle"); 
     ok(-d DIR, "-d on a dirhandle works");
-
-    # And now for the ambiguous bareword case
-    {
-	no warnings 'deprecated';
-	ok(open(DIR, "TEST"), 'Can open "TEST" dir')
-	    || diag "Can't open 'TEST':  $!";
-    }
-    my $size = (stat(DIR))[7];
-    ok(defined $size, "stat() on bareword works");
-    is($size, -s "TEST", "size returned by stat of bareword is for the file");
-    ok(-f _, "ambiguous bareword uses file handle, not dir handle");
-    ok(-f DIR);
     closedir DIR or die $!;
-    close DIR or die $!;
 }
 
 {
@@ -594,21 +581,7 @@ SKIP: {
         ok(stat(*DIR{IO}), "stat() on *DIR{IO} works");
 	ok(-d _ , "The special file handle _ is set correctly"); 
         ok(-d -r *DIR{IO} , "chained -x's on *DIR{IO}");
-
-	# And now for the ambiguous bareword case
-	{
-	    no warnings 'deprecated';
-	    ok(open(DIR, "TEST"), 'Can open "TEST" dir')
-		|| diag "Can't open 'TEST':  $!";
-	}
-	my $size = (stat(*DIR{IO}))[7];
-	ok(defined $size, "stat() on *THINGY{IO} works");
-	is($size, -s "TEST",
-	   "size returned by stat of *THINGY{IO} is for the file");
-	ok(-f _, "ambiguous *THINGY{IO} uses file handle, not dir handle");
-	ok(-f *DIR{IO});
 	closedir DIR or die $!;
-	close DIR or die $!;
     }
 }
 

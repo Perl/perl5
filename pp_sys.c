@@ -629,8 +629,7 @@ PP(pp_open)
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
 
 	if (IoDIRP(io))
-	    Perl_ck_warner_d(aTHX_ packWARN2(WARN_IO, WARN_DEPRECATED),
-			     "Opening dirhandle %" HEKf " also as a file. This will be a fatal error in Perl 5.28",
+	    Perl_croak(aTHX_ "Cannot open %" HEKf " as a filehandle: it is already open as a dirhandle",
 			     HEKfARG(GvENAME_HEK(gv)));
 
 	mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
@@ -4021,9 +4020,8 @@ PP(pp_open_dir)
     IO * const io = GvIOn(gv);
 
     if ((IoIFP(io) || IoOFP(io)))
-	Perl_ck_warner_d(aTHX_ packWARN2(WARN_IO, WARN_DEPRECATED),
-			 "Opening filehandle %" HEKf " also as a directory. This will be a fatal error in Perl 5.28",
-			     HEKfARG(GvENAME_HEK(gv)) );
+	Perl_croak(aTHX_ "Cannot open %" HEKf " as a dirhandle: it is already open as a filehandle",
+			 HEKfARG(GvENAME_HEK(gv)));
     if (IoDIRP(io))
 	PerlDir_close(IoDIRP(io));
     if (!(IoDIRP(io) = PerlDir_open(dirname)))

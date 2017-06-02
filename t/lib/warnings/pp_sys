@@ -761,65 +761,6 @@ chdir() on closed filehandle BAR at - line 21.
 chdir() on unopened filehandle $dh at - line 22.
 chdir() on closed filehandle $fh at - line 23.
 ########
-# pp_sys.c [pp_open]
-use warnings;
-opendir FOO, ".";
-opendir my $foo, ".";
-open FOO, "../harness";
-open $foo, "../harness";
-no warnings qw(io deprecated);
-open FOO, "../harness";
-open $foo, "../harness";
-EXPECT
-Opening dirhandle FOO also as a file. This will be a fatal error in Perl 5.28 at - line 5.
-Opening dirhandle $foo also as a file. This will be a fatal error in Perl 5.28 at - line 6.
-########
-
-# pp_sys.c [pp_open]
-use utf8;
-use open qw( :utf8 :std );
-use warnings;
-opendir ＦＯＯ, ".";
-opendir $ｆｏｏ, ".";
-open ＦＯＯ, "../harness";
-open $ｆｏｏ, "../harness";
-no warnings qw(io deprecated);
-open ＦＯＯ, "../harness";
-open $ｆｏｏ, "../harness";
-EXPECT
-Opening dirhandle ＦＯＯ also as a file. This will be a fatal error in Perl 5.28 at - line 8.
-Opening dirhandle $ｆｏｏ also as a file. This will be a fatal error in Perl 5.28 at - line 9.
-########
-# pp_sys.c [pp_open_dir]
-use warnings;
-open FOO, "../harness";
-open my $foo, "../harness";
-opendir FOO, ".";
-opendir $foo, ".";
-no warnings qw(io deprecated);
-opendir FOO, ".";
-opendir $foo, ".";
-EXPECT
-Opening filehandle FOO also as a directory. This will be a fatal error in Perl 5.28 at - line 5.
-Opening filehandle $foo also as a directory. This will be a fatal error in Perl 5.28 at - line 6.
-########
-
-# pp_sys.c [pp_open_dir]
-use utf8;
-use open qw( :utf8 :std );
-use warnings;
-use warnings;
-open ＦＯＯ, "../harness";
-open $ｆｏｏ, "../harness";
-opendir ＦＯＯ, ".";
-opendir $ｆｏｏ, ".";
-no warnings qw(io deprecated);
-opendir ＦＯＯ, ".";
-opendir $ｆｏｏ, ".";
-EXPECT
-Opening filehandle ＦＯＯ also as a directory. This will be a fatal error in Perl 5.28 at - line 9.
-Opening filehandle $ｆｏｏ also as a directory. This will be a fatal error in Perl 5.28 at - line 10.
-########
 # pp_sys.c [pp_*dir]
 use Config ;
 BEGIN {

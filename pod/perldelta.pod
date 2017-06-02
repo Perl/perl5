@@ -65,6 +65,11 @@ respectively.
 
 This has been deprecated since Perl 5.24.
 
+=head2 Opening the same symbol as both a file and directory handle is no longer allowed
+
+Using open() and opendir() to associate both a filehandle and a dirhandle
+to the same symbol (glob or scalar) has been deprecated since Perl 5.10.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
