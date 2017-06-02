@@ -27,6 +27,12 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 L<C<delete>|perlfunc/delete EXPR> on key/value slices
+
+L<C<delete>|perlfunc/delete EXPR> can now be used on key/value slices,
+returning the keys along with the deleted values.
+L<[perl #131328]|https://rt.perl.org/Ticket/Display.html?id=131328>
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
