@@ -182,6 +182,10 @@ foreach my $pm_file (sort keys %module_diffs) {
     my $orig_pm_content = get_file_from_git($pm_file, $tag_to_compare);
     my $orig_pm_version = eval {MM->parse_version(\$orig_pm_content)};
     ++$count;
+    my $is_dev_perl_can_skip=
+        ($orig_pm_content =~ /This file is built by/
+            && ($orig_pm_version eq $]) && $]=~/5\.(\d\d[13579])/)
+        ? " (generated on a dev perl)" : "";
 
     if (!defined $orig_pm_version || $orig_pm_version eq 'undef') { # sigh
         print "ok $count - SKIP Can't parse \$VERSION in $pm_file\n"
@@ -197,9 +201,10 @@ foreach my $pm_file (sort keys %module_diffs) {
 	    foreach (sort @{$module_diffs{$pm_file}}) {
 		print "# $_" for `$diff_cmd $q$_$q`;
 	    }
-	    if (exists $skip_versions{$pm_file}
-		and grep $pm_version eq $_, @{$skip_versions{$pm_file}}) {
-		print "ok $count - SKIP $pm_file version $pm_version\n";
+            if ($is_dev_perl_can_skip or (
+                exists $skip_versions{$pm_file}
+                and grep $pm_version eq $_, @{$skip_versions{$pm_file}})) {
+		print "ok $count - SKIP $pm_file version $pm_version$is_dev_perl_can_skip\n";
 	    } else {
 		my $nok = "not ok $count - $pm_file version $pm_version\n";
 		print $nok;
@@ -207,7 +212,7 @@ foreach my $pm_file (sort keys %module_diffs) {
 	    }
 	} else {
 	    push @diff, @{$module_diffs{$pm_file}};
-	    print "$pm_file version $pm_version\n";
+            print "$pm_file version $pm_version$is_dev_perl_can_skip\n";
 	}
     }
 }
