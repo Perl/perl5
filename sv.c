@@ -10964,6 +10964,29 @@ Perl_sv_vsetpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 }
 
 
+/* simplified inline Perl_sv_catpvn_nomg() when you know the SV's SvPOK */
+
+PERL_STATIC_INLINE void
+S_sv_catpvn_simple(pTHX_ SV *const sv, const char* const buf, const STRLEN len)
+{
+    STRLEN const need = len + SvCUR(sv) + 1;
+    char *end;
+
+    /* can't wrap as both len and SvCUR() are allocated in
+     * memory and together can't consume all the address space
+     */
+    assert(need > len);
+
+    assert(SvPOK(sv));
+    SvGROW(sv, need);
+    end = SvEND(sv);
+    Copy(buf, end, len, char);
+    end += len;
+    *end = '\0';
+    SvCUR_set(sv, need - 1);
+}
+
+
 /*
  * Warn of missing argument to sprintf. The value used in place of such
  * arguments should be &PL_sv_no; an undefined value would yield
@@ -11970,7 +11993,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    if (has_utf8 && !pat_utf8)
 		sv_catpvn_nomg_utf8_upgrade(sv, fmtstart, q - fmtstart, nsv);
 	    else
-		sv_catpvn_nomg(sv, fmtstart, q - fmtstart);
+                S_sv_catpvn_simple(aTHX_ sv, fmtstart, q - fmtstart);
 	}
 	if (q++ >= patend)
 	    break;
@@ -13131,22 +13154,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             assert(elen);
             assert(elen >= width);
 
-
-            {
-                /* unrolled Perl_sv_catpvn */
-                STRLEN need = elen + SvCUR(sv) + 1;
-                char *end;
-                /* can't wrap as both elen and SvCUR() are allocated in
-                 * memory and together can't consume all the address space
-                 */
-                assert(need > elen);
-                SvGROW(sv, need);
-                end = SvEND(sv);
-                Copy(eptr, end, elen, char);
-                end += elen;
-                *end = '\0';
-                SvCUR_set(sv, need - 1);
-            }
+            S_sv_catpvn_simple(aTHX_ sv, eptr, elen);
 
             goto donevalidconversion;
         }
