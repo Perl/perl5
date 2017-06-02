@@ -1040,6 +1040,11 @@ Bootstrap the CPAN client on the clean install:
 
 =head4 Install the Inline module with CPAN and test it
 
+If you're using C<local::lib>, you should reset your environment before
+performing these actions:
+
+    $ unset PERL5LIB PERL_MB_OPT PERL_LOCAL_LIB_ROOT PERL_MM_OPT
+
 Try installing a popular CPAN module that's reasonably complex and that
 has dependencies; for example:
 
