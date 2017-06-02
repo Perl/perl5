@@ -12581,7 +12581,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         }
                     }
                     else {
-                        IV tiv = SvIV_nomg(argsv); /* work around GCC bug #13488 */
+                        /* assign to tiv then cast to iv to work around
+                         * 2003 GCC cast bug (gnu.org bugzilla #13488) */
+                        IV tiv = SvIV_nomg(argsv);
                         switch (intsize) {
                         case 'c':  iv = (char)tiv;   break;
                         case 'h':  iv = (short)tiv;  break;
@@ -12637,7 +12639,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         }
                     }
                     else {
-                        UV tuv = SvUV_nomg(argsv); /* work around GCC bug #13488 */
+                        /* assign to tiv then cast to iv to work around
+                         * 2003 GCC cast bug (gnu.org bugzilla #13488) */
+                        UV tuv = SvUV_nomg(argsv);
                         switch (intsize) {
                         case 'c': uv = (unsigned char)tuv;  break;
                         case 'h': uv = (unsigned short)tuv; break;
