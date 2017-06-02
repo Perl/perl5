@@ -70,6 +70,10 @@ This has been deprecated since Perl 5.24.
 Using open() and opendir() to associate both a filehandle and a dirhandle
 to the same symbol (glob or scalar) has been deprecated since Perl 5.10.
 
+=head2 Use of bare C<< << >> to mean C<< <<"" >> is no longer allowed
+
+Use of a bare terminator has been deprecated since Perl 5.000.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

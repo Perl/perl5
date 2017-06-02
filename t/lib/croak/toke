@@ -371,3 +371,20 @@ tr/\o-0//;
 EXPECT
 Missing braces on \o{} at - line 2, within string
 Execution of - aborted due to compilation errors.
+########
+# NAME bare <<
+$a = <<;
+
+EXPECT
+Use of bare << to mean <<"" is forbidden at - line 1.
+########
+# NAME bare <<~
+$a = <<~;
+EXPECT
+Use of bare << to mean <<"" is forbidden at - line 1.
+########
+# NAME bare <<~
+$a = <<~ ;
+
+EXPECT
+Use of bare << to mean <<"" is forbidden at - line 1.

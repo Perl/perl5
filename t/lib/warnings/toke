@@ -124,24 +124,6 @@ toke.c	AOK
 
 __END__
 # toke.c
-$a = <<;
-
-no warnings 'deprecated' ;
-$a = <<;
-
-EXPECT
-Use of bare << to mean <<"" is deprecated. Its use will be fatal in Perl 5.28 at - line 2.
-########
-# toke.c
-$a = <<~;
-
-$a = <<~ ;
-
-EXPECT
-Use of bare << to mean <<"" is deprecated. Its use will be fatal in Perl 5.28 at - line 2.
-Use of bare << to mean <<"" is deprecated. Its use will be fatal in Perl 5.28 at - line 4.
-########
-# toke.c
 $a =~ m/$foo/eq;
 $a =~ s/$foo/fool/seq;
 

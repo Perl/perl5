@@ -33,13 +33,13 @@ HEREDOC
     );
 
     fresh_perl_is(
-        "print <<;\n$string\n",
+        qq(print <<"";\n$string\n),
         $string,
         { switches => ['-X'] },
         "blank-terminated heredoc at EOF"
     );
     fresh_perl_is(
-        "print <<\n$string\n",
+        qq(print <<""\n$string\n),
         $string,
         { switches => ['-X'] },
         "blank-terminated heredoc at EOF and no semicolon"
@@ -75,7 +75,7 @@ HEREDOC
     # that building with ASAN will reveal the bug and any related regressions.
     for (1..31) {
         fresh_perl_like(
-            "print <<;\n" . "x" x $_,
+            qq(print <<"";\n) . "x" x $_,
             qr/find string terminator/,
             { switches => ['-X'] },
             "empty string terminator still needs a newline (length $_)"
@@ -100,16 +100,16 @@ HEREDOC
 
     # also read freed memory, but got an invalid oldoldbufptr in a different way
     fresh_perl_like(
-        qq(<<\n\$          \n),
+        qq(<<""\n\$          \n),
         # valgrind and asan reports an error between these two lines
-        qr/^Use of bare << to mean <<"" is deprecated\. Its use will be fatal in Perl 5\.28 at - line 1\.\s+Final \$/,
+        qr/^Final \$/,
         {},
         "don't use an invalid oldoldbufptr (some more)"
     );
 
     # [perl #125540] this asserted or crashed
     fresh_perl_like(
-	q(map d$#<<<<),
+	q(map d$#<<<<""),
 	qr/Can't find string terminator "" anywhere before EOF at - line 1\./,
 	{},
 	"Don't assert parsing a here-doc if we hit EOF early"
