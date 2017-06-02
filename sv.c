@@ -12658,7 +12658,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	do_integer:
 	    {
 		char *ptr = ebuf + sizeof ebuf;
-		bool tempalt = uv ? alt : FALSE; /* Vectors can't change alt */
                 unsigned dig;
 		zeros = 0;
 
@@ -12669,7 +12668,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 			dig = uv & 15;
 			*--ptr = p[dig];
 		    } while (uv >>= 4);
-		    if (tempalt) {
+		    if (alt && *ptr != '0') {
 			esignbuf[esignlen++] = '0';
 			esignbuf[esignlen++] = c;  /* 'x' or 'X' */
 		    }
@@ -12687,7 +12686,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 			dig = uv & 1;
 			*--ptr = '0' + dig;
 		    } while (uv >>= 1);
-		    if (tempalt) {
+		    if (alt && *ptr != '0') {
 			esignbuf[esignlen++] = '0';
 			esignbuf[esignlen++] = c; /* 'b' or 'B' */
 		    }
