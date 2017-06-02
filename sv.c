@@ -12568,7 +12568,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                * over the individual characters of a vector arg */
 	      vector:
 		if (!veclen)
-                    goto donevalidconversion;
+                    goto done_valid_conversion;
 		if (vec_utf8)
 		    uv = utf8n_to_uvchr(vecstr, veclen, &ulen,
 					UTF8_ALLOW_ANYUV);
@@ -13171,7 +13171,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
             S_sv_catpvn_simple(aTHX_ sv, eptr, elen);
 
-            goto donevalidconversion;
+            goto done_valid_conversion;
         }
 
 	    /* SPECIAL */
@@ -13216,7 +13216,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                                 PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
                     sv_setuv_mg(argsv, has_utf8 ? (UV)sv_len_utf8(sv) : (UV)len);
                 }
-                goto donevalidconversion;
+                goto done_valid_conversion;
             }
 
 	    /* UNKNOWN */
@@ -13359,7 +13359,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             goto vector; /* do next iteration */
 	}
 
-      donevalidconversion:
+      done_valid_conversion:
 
         if (arg_missing)
             S_warn_vcatpvfn_missing_argument(aTHX);
