@@ -11050,7 +11050,7 @@ S_sprintf_arg_num_val(pTHX_ va_list *const args, int i, SV *sv, bool *neg)
  */
 
 STATIC STRLEN
-S_expect_number(pTHX_ char **const pattern)
+S_expect_number(pTHX_ const char **const pattern)
 {
     STRLEN var;
 
@@ -11838,8 +11838,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                        va_list *const args, SV **const svargs, const Size_t svmax, bool *const maybe_tainted,
                        const U32 flags)
 {
-    char *p;
-    char *q;
+    const char *fmtstart; /* character following the current '%' */
+    const char *q;        /* current position within format */
     const char *patend;
     STRLEN origlen;
     Size_t svix = 0;
@@ -11928,8 +11928,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 
     patend = (char*)pat + patlen;
-    for (p = (char*)pat; p < patend; p = q) {
-
+    for (fmtstart = pat; fmtstart < patend; fmtstart = q) {
 	char intsize     = 0;         /* size qualifier in "%hi..." etc */
 	bool alt         = FALSE;     /* has      "%#..."    */
 	bool left        = FALSE;     /* has      "%-..."    */
@@ -11960,23 +11959,23 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	const char *eptr = NULL;      /* the address of the element string */
 	STRLEN elen      = 0;         /* the length  of the element string */
 
-	const char *fmtstart;         /* start of current format (the '%') */
 	char c;                       /* the actual format ('d', s' etc) */
 
 
 	/* echo everything up to the next format specification */
-	for (q = p; q < patend && *q != '%'; ++q) ;
-	if (q > p) {
+	for (q = fmtstart; q < patend && *q != '%'; ++q)
+            {};
+
+	if (q > fmtstart) {
 	    if (has_utf8 && !pat_utf8)
-		sv_catpvn_nomg_utf8_upgrade(sv, p, q - p, nsv);
+		sv_catpvn_nomg_utf8_upgrade(sv, fmtstart, q - fmtstart, nsv);
 	    else
-		sv_catpvn_nomg(sv, p, q - p);
-	    p = q;
+		sv_catpvn_nomg(sv, fmtstart, q - fmtstart);
 	}
 	if (q++ >= patend)
 	    break;
 
-	fmtstart = q;
+	fmtstart = q; /* fmtstart is char following the '%' */
 
 /*
     We allow format specification elements in this order:
@@ -12667,7 +12666,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 		switch (base) {
 		case 16:
-		    p = (char *)((c == 'X') ? PL_hexdigit + 16 : PL_hexdigit);
+                    {
+		    const char * const p =
+                        (c == 'X') ? PL_hexdigit + 16 : PL_hexdigit;
 		    do {
 			dig = uv & 15;
 			*--ptr = p[dig];
@@ -12677,6 +12678,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 			esignbuf[esignlen++] = c;  /* 'x' or 'X' */
 		    }
 		    break;
+                    }
 		case 8:
 		    do {
 			dig = uv & 7;
@@ -13225,8 +13227,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	    /* mangled format: output the '%', then continue from the
              * character following that */
-            sv_catpvn_nomg(sv, p, 1);
-            q = p + 1;
+            sv_catpvn_nomg(sv, fmtstart-1, 1);
+            q = fmtstart;
 	    svix = osvix;
             /* Any "redundant arg" warning from now onwards will probably
              * just be misleading, so don't bother. */
